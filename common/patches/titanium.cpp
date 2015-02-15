@@ -922,24 +922,46 @@ namespace Titanium
 		OUT(endurance);
 		OUT(aapoints_spent);
 		OUT(aapoints);
+
 		//	OUT(unknown06160[4]);
-		for (r = 0; r < consts::BANDOLIERS_SIZE; r++) {
+
+		// Copy bandoliers where server and client indexes converge
+		for (r = 0; r < EmuConstants::BANDOLIERS_SIZE && r < consts::BANDOLIERS_SIZE; ++r) {
 			OUT_str(bandoliers[r].Name);
-			uint32 k;
-			for (k = 0; k < consts::BANDOLIER_ITEM_COUNT; k++) {
+			for (uint32 k = 0; k < consts::BANDOLIER_ITEM_COUNT; ++k) { // Will need adjusting if 'server != client' is ever true
 				OUT(bandoliers[r].Items[k].ID);
 				OUT(bandoliers[r].Items[k].Icon);
 				OUT_str(bandoliers[r].Items[k].Name);
 			}
 		}
+		// Nullify bandoliers where server and client indexes diverge, with a client bias
+		for (r = EmuConstants::BANDOLIERS_SIZE; r < consts::BANDOLIERS_SIZE; ++r) {
+			eq->bandoliers[r].Name[0] = '\0';
+			for (uint32 k = 0; k < consts::BANDOLIER_ITEM_COUNT; ++k) { // Will need adjusting if 'server != client' is ever true
+				eq->bandoliers[r].Items[k].ID = 0;
+				eq->bandoliers[r].Items[k].Icon = 0;
+				eq->bandoliers[r].Items[k].Name[0] = '\0';
+			}
+		}
+
 		//	OUT(unknown07444[5120]);
-		for (r = 0; r < consts::POTION_BELT_ITEM_COUNT; r++) {
+
+		// Copy potion belt where server and client indexes converge
+		for (r = 0; r < EmuConstants::POTION_BELT_ITEM_COUNT && r < consts::POTION_BELT_ITEM_COUNT; ++r) {
 			OUT(potionbelt.Items[r].ID);
 			OUT(potionbelt.Items[r].Icon);
 			OUT_str(potionbelt.Items[r].Name);
 		}
+		// Nullify potion belt where server and client indexes diverge, with a client bias
+		for (r = EmuConstants::POTION_BELT_ITEM_COUNT; r < consts::POTION_BELT_ITEM_COUNT; ++r) {
+			eq->potionbelt.Items[r].ID = 0;
+			eq->potionbelt.Items[r].Icon = 0;
+			eq->potionbelt.Items[r].Name[0] = '\0';
+		}
+
 		//	OUT(unknown12852[8]);
 		//	OUT(unknown12864[76]);
+
 		OUT_str(name);
 		OUT_str(last_name);
 		OUT(guild_id);

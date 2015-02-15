@@ -2288,32 +2288,25 @@ namespace RoF
 
 		outapp->WriteUInt32(consts::BANDOLIERS_SIZE);
 
-		for (uint32 r = 0; r < EmuConstants::BANDOLIERS_SIZE; r++)
-		{
+		// Copy bandoliers where server and client indexes converge
+		for (uint32 r = 0; r < EmuConstants::BANDOLIERS_SIZE && r < consts::BANDOLIERS_SIZE; ++r) {
 			outapp->WriteString(emu->bandoliers[r].Name);
-
-			for (uint32 j = 0; j < EmuConstants::BANDOLIER_ITEM_COUNT; ++j)
-			{
+			for (uint32 j = 0; j < consts::BANDOLIER_ITEM_COUNT; ++j) { // Will need adjusting if 'server != client' is ever true
 				outapp->WriteString(emu->bandoliers[r].Items[j].Name);
 				outapp->WriteUInt32(emu->bandoliers[r].Items[j].ID);
-				if (emu->bandoliers[r].Items[j].Icon)
-				{
+				if (emu->bandoliers[r].Items[j].Icon) {
 					outapp->WriteSInt32(emu->bandoliers[r].Items[j].Icon);
 				}
-				else
-				{
+				else {
 					// If no icon, it must send -1 or Treasure Chest Icon (836) is displayed
 					outapp->WriteSInt32(-1);
 				}
 			}
 		}
-
-		for (uint32 r = 0; r < consts::BANDOLIERS_SIZE - EmuConstants::BANDOLIERS_SIZE; r++)
-		{
+		// Nullify bandoliers where server and client indexes diverge, with a client bias
+		for (uint32 r = EmuConstants::BANDOLIERS_SIZE; r < consts::BANDOLIERS_SIZE; ++r) {
 			outapp->WriteString("");
-
-			for (uint32 j = 0; j < EmuConstants::BANDOLIER_ITEM_COUNT; ++j)
-			{
+			for (uint32 j = 0; j < consts::BANDOLIER_ITEM_COUNT; ++j) { // Will need adjusting if 'server != client' is ever true
 				outapp->WriteString("");
 				outapp->WriteUInt32(0);
 				outapp->WriteSInt32(-1);
@@ -2322,22 +2315,20 @@ namespace RoF
 
 		outapp->WriteUInt32(consts::POTION_BELT_ITEM_COUNT);
 
-		for (uint32 r = 0; r < EmuConstants::POTION_BELT_ITEM_COUNT; r++)
-		{
+		// Copy potion belt where server and client indexes converge
+		for (uint32 r = 0; r < EmuConstants::POTION_BELT_ITEM_COUNT && r < consts::POTION_BELT_ITEM_COUNT; ++r) {
 			outapp->WriteString(emu->potionbelt.Items[r].Name);
 			outapp->WriteUInt32(emu->potionbelt.Items[r].ID);
-			if (emu->potionbelt.Items[r].Icon)
-			{
+			if (emu->potionbelt.Items[r].Icon) {
 				outapp->WriteSInt32(emu->potionbelt.Items[r].Icon);
 			}
-			else
-			{
+			else {
+				// If no icon, it must send -1 or Treasure Chest Icon (836) is displayed
 				outapp->WriteSInt32(-1);
 			}
 		}
-
-		for (uint32 r = 0; r < consts::POTION_BELT_ITEM_COUNT - EmuConstants::POTION_BELT_ITEM_COUNT; r++)
-		{
+		// Nullify potion belt where server and client indexes diverge, with a client bias
+		for (uint32 r = EmuConstants::POTION_BELT_ITEM_COUNT; r < consts::POTION_BELT_ITEM_COUNT; ++r) {
 			outapp->WriteString("");
 			outapp->WriteUInt32(0);
 			outapp->WriteSInt32(-1);

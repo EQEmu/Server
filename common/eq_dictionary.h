@@ -142,11 +142,11 @@ public:
 	static const uint16 ITEM_CONTAINER_SIZE = Titanium::consts::ITEM_CONTAINER_SIZE;
 
 	// BANDOLIERS_SIZE sets maximum limit..active limit will need to be handled by the appropriate AA or spell (or item?)
-	static const size_t BANDOLIERS_SIZE = Titanium::consts::BANDOLIERS_SIZE;			// number of bandolier instances
-	static const size_t BANDOLIER_ITEM_COUNT = Titanium::consts::BANDOLIER_ITEM_COUNT;	// number of equipment slots in bandolier instance
+	static const size_t BANDOLIERS_SIZE = RoF2::consts::BANDOLIERS_SIZE;			// number of bandolier instances
+	static const size_t BANDOLIER_ITEM_COUNT = RoF2::consts::BANDOLIER_ITEM_COUNT;	// number of equipment slots in bandolier instance
 
 	// POTION_BELT_SIZE sets maximum limit..active limit will need to be handled by the appropriate AA or spell (or item?)
-	static const size_t POTION_BELT_ITEM_COUNT = Titanium::consts::POTION_BELT_ITEM_COUNT;
+	static const size_t POTION_BELT_ITEM_COUNT = RoF2::consts::POTION_BELT_ITEM_COUNT;
 
 	static const size_t TEXT_LINK_BODY_LENGTH = RoF2::consts::TEXT_LINK_BODY_LENGTH;
 };
@@ -186,11 +186,6 @@ public:
 
 	// player profile
 	static bool CoinHasWeight(ClientVersion clientVersion);
-
-	static uint32 BandoliersCount(ClientVersion clientVersion);
-	static uint32 BandolierSize(ClientVersion clientVersion);
-
-	static uint32 PotionBeltSize(ClientVersion clientVersion);
 };
 
 #endif /* EQ_DICTIONARY_H */

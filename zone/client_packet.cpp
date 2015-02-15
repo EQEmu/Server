@@ -3171,7 +3171,6 @@ void Client::Handle_OP_AutoFire(const EQApplicationPacket *app)
 
 void Client::Handle_OP_Bandolier(const EQApplicationPacket *app)
 {
-
 	// Although there are three different structs for OP_Bandolier, they are all the same size.
 	//
 	if (app->size != sizeof(BandolierCreate_Struct)) {
@@ -3195,7 +3194,7 @@ void Client::Handle_OP_Bandolier(const EQApplicationPacket *app)
 		SetBandolier(app);
 		break;
 	default:
-		Log.Out(Logs::General, Logs::None, "Uknown Bandolier action %i", bs->Action);
+		Log.Out(Logs::General, Logs::None, "Unknown Bandolier action %i", bs->Action);
 		break;
 	}
 }
@@ -10452,7 +10451,7 @@ void Client::Handle_OP_PotionBelt(const EQApplicationPacket *app)
 	else {
 		m_pp.potionbelt.Items[mptbs->SlotNumber].ID = 0;
 		m_pp.potionbelt.Items[mptbs->SlotNumber].Icon = 0;
-		strncpy(m_pp.potionbelt.Items[mptbs->SlotNumber].Name, "\0", 1);
+		m_pp.potionbelt.Items[mptbs->SlotNumber].Name[0] = '\0';
 	}
 }
 

@@ -6,6 +6,7 @@ demonstar55: (RoF2) Send the bard focus effects, note custom servers will need t
 
 == 02/14/2015 ==
 Trevius: (RoF2) Bazaar is now partially functional.  RoF2 clients can start/end trader mode and other clients can purchase from them.  No other functionality yet.
+Uleat: Implemented higher bandolier and potion belt counts for clients that support it..you will still need to activate them through the proper aa's, etc...
 
 == 02/12/2015 ==
 Akkadius: Implement zone based gravity, required SQL DB change
