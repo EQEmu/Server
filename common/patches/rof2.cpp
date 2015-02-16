@@ -5554,10 +5554,10 @@ namespace RoF2
 		RoF2::structs::WornEffectStruct ibes;
 		memset(&ibes, 0, sizeof(RoF2::structs::WornEffectStruct));
 
-		ibes.effect = 0xffffffff;
-		ibes.level2 = 0;
-		ibes.type = 0;
-		ibes.level = 0;
+		ibes.effect = item->Bard.Effect;
+		ibes.level2 = item->Bard.Level2;
+		ibes.type = item->Bard.Type;
+		ibes.level = item->Bard.Level;
 		//ibes.unknown6 = 0xffffffff;
 
 		ss.write((const char*)&ibes, sizeof(RoF2::structs::WornEffectStruct));
