@@ -3,6 +3,7 @@
 
 E(OP_SendMembershipDetails)
 E(OP_TraderShop)
+E(OP_TraderDelItem)
 
 // incoming packets that require a DECODE translation:
 // Begin RoF2 Decodes

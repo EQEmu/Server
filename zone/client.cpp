@@ -165,6 +165,7 @@ Client::Client(EQStreamInterface* ieqs)
 	Trader=false;
 	Buyer = false;
 	CustomerID = 0;
+	TraderID = 0;
 	TrackingID = 0;
 	WID = 0;
 	account_id = 0;

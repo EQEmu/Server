@@ -266,10 +266,11 @@ public:
 	void SendBazaarResults(uint32 trader_id,uint32 class_,uint32 race,uint32 stat,uint32 slot,uint32 type,char name[64],uint32 minprice,uint32 maxprice);
 	void SendTraderItem(uint32 item_id,uint16 quantity);
 	uint16 FindTraderItem(int32 SerialNumber,uint16 Quantity);
+	uint32 FindTraderItemSerialNumber(int32 ItemID);
 	ItemInst* FindTraderItemBySerialNumber(int32 SerialNumber);
 	void FindAndNukeTraderItem(int32 item_id,uint16 quantity,Client* customer,uint16 traderslot);
-	void NukeTraderItem(uint16 slot,int16 charges,uint16 quantity,Client* customer,uint16 traderslot, int uniqueid);
-	void ReturnTraderReq(const EQApplicationPacket* app,int16 traderitemcharges);
+	void NukeTraderItem(uint16 slot, int16 charges, uint16 quantity, Client* customer, uint16 traderslot, int32 uniqueid, int32 itemid = 0);
+	void ReturnTraderReq(const EQApplicationPacket* app,int16 traderitemcharges, uint32 itemid = 0);
 	void TradeRequestFailed(const EQApplicationPacket* app);
 	void BuyTraderItem(TraderBuy_Struct* tbs,Client* trader,const EQApplicationPacket* app);
 	void TraderUpdate(uint16 slot_id,uint32 trader_id);
@@ -1388,6 +1389,7 @@ private:
 	uint16 BoatID;
 	uint16 TrackingID;
 	uint16 CustomerID;
+	uint16 TraderID;
 	uint32 account_creation;
 	uint8 firstlogon;
 	uint32 mercid; // current merc

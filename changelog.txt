@@ -1,5 +1,8 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 02/16/2015 ==
+Trevius: (RoF2) Bazaar Trading (Buying/Selling) is now fully functional.  Bazaar (/bazaar) search is not yet functional.
+
 == 02/14/2015 ==
 Trevius: (RoF2) Bazaar is now partially functional.  RoF2 clients can start/end trader mode and other clients can purchase from them.  No other functionality yet.
 

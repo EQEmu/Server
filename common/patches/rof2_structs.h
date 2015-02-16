@@ -3224,6 +3224,26 @@ struct TraderStatus_Struct {
 };
 
 struct TraderBuy_Struct {
+	/*000*/ uint32	Action;
+	/*004*/	uint32	Unknown004;
+	/*008*/ uint32	Unknown008;
+	/*012*/	uint32	Unknown012;
+	/*016*/ uint32	TraderID;
+	/*020*/ char	BuyerName[64];
+	/*084*/ char	SellerName[64];
+	/*148*/ char	Unknown148[32];
+	/*180*/ char	ItemName[64];
+	/*244*/ char	SerialNumber[16];
+	/*260*/ uint32	Unknown076;
+	/*264*/ uint32	ItemID;
+	/*268*/ uint32	Price;
+	/*272*/ uint32	AlreadySold;
+	/*276*/ uint32	Unknown276;
+	/*280*/ uint32	Quantity;
+	/*284*/
+};
+
+struct TraderBuy_Struct_OLD {
 /*000*/ uint32   Action;
 /*004*/	uint32	Unknown004;
 /*008*/ uint32   Price;
@@ -3253,19 +3273,12 @@ struct MoneyUpdate_Struct{
 	int32 copper;
 };
 
-//struct MoneyUpdate_Struct
-//{
-//*0000*/ uint32 spawn_id;            // ***Placeholder
-//*0004*/ uint32 cointype;           // Coin Type
-//*0008*/ uint32 amount;             // Amount
-//*0012*/
-//};
-
-
 struct TraderDelItem_Struct{
-	uint32 slotid;
-	uint32 quantity;
-	uint32 unknown;
+	/*000*/ uint32 Unknown000;
+	/*004*/ uint32 TraderID;
+	/*008*/ char   SerialNumber[16];
+	/*024*/ uint32 Unknown012;
+	/*028*/
 };
 
 struct TraderClick_Struct{

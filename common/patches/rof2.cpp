@@ -3578,14 +3578,13 @@ namespace RoF2
 			// Live actually has 200 items now, but 80 is the most our internal struct supports
 			for (uint32 i = 0; i < 200; i++)
 			{
-				//strncpy(eq->items[i].SerialNumber, "0000000000000000", sizeof(eq->items[i].SerialNumber));
-				//snprintf(eq->items[i].SerialNumber, sizeof(eq->items[i].SerialNumber), "%016d", emu->SerialNumber[i]);
-				snprintf(eq->items[i].SerialNumber, sizeof(eq->items[i].SerialNumber), "%016d", 0);
 				eq->items[i].Unknown18 = 0;
 				if (i < 80) {
+					snprintf(eq->items[i].SerialNumber, sizeof(eq->items[i].SerialNumber), "%016d", emu->SerialNumber[i]);
 					eq->ItemCost[i] = emu->ItemCost[i];
 				}
 				else {
+					snprintf(eq->items[i].SerialNumber, sizeof(eq->items[i].SerialNumber), "%016d", 0);
 					eq->ItemCost[i] = 0;
 				}
 			}
@@ -3637,16 +3636,59 @@ namespace RoF2
 		FINISH_ENCODE();
 	}
 
-	ENCODE(OP_TraderShop)
+	ENCODE(OP_TraderDelItem)
 	{
-		ENCODE_LENGTH_EXACT(TraderClick_Struct);
-		SETUP_DIRECT_ENCODE(TraderClick_Struct, structs::TraderClick_Struct);
+		ENCODE_LENGTH_EXACT(TraderDelItem_Struct);
+		SETUP_DIRECT_ENCODE(TraderDelItem_Struct, structs::TraderDelItem_Struct);
 
-		//eq->Code = emu->Unknown004;
 		OUT(TraderID);
-		OUT(Approval);
+		snprintf(eq->SerialNumber, sizeof(eq->SerialNumber), "%016d", emu->ItemID);
+		Log.Out(Logs::Detail, Logs::Trading, "ENCODE(OP_TraderDelItem): TraderID %d, SerialNumber: %d", emu->TraderID, emu->ItemID);
 
 		FINISH_ENCODE();
+	}
+
+	ENCODE(OP_TraderShop)
+	{
+		uint32 psize = (*p)->size;
+		if (psize == sizeof(TraderClick_Struct))
+		{
+			ENCODE_LENGTH_EXACT(TraderClick_Struct);
+			SETUP_DIRECT_ENCODE(TraderClick_Struct, structs::TraderClick_Struct);
+
+			eq->Code = 28; // Seen on Live
+			OUT(TraderID);
+			OUT(Approval);
+
+			FINISH_ENCODE();
+		}
+		else if (psize == sizeof(TraderBuy_Struct))
+		{
+			ENCODE_LENGTH_EXACT(TraderBuy_Struct);
+			SETUP_DIRECT_ENCODE(TraderBuy_Struct, structs::TraderBuy_Struct);
+
+			OUT(Action);
+			OUT(TraderID);
+
+			//memcpy(eq->BuyerName, emu->BuyerName, sizeof(eq->BuyerName));
+			//memcpy(eq->SellerName, emu->SellerName, sizeof(eq->SellerName));
+
+			memcpy(eq->ItemName, emu->ItemName, sizeof(eq->ItemName));
+			OUT(ItemID);
+			OUT(AlreadySold);
+			OUT(Price);
+			OUT(Quantity);
+			snprintf(eq->SerialNumber, sizeof(eq->SerialNumber), "%016d", emu->ItemID);
+
+			Log.Out(Logs::Detail, Logs::Trading, "ENCODE(OP_TraderShop): Buy Action %d, Price %d, Trader %d, ItemID %d, Quantity %d, ItemName, %s",
+				eq->Action, eq->Price, eq->TraderID, eq->ItemID, eq->Quantity, emu->ItemName);
+
+			FINISH_ENCODE();
+		}
+		else
+		{
+			Log.Out(Logs::Detail, Logs::Trading, "ENCODE(OP_TraderShop): Encode Size Unknown (%d)", psize);
+		}
 	}
 
 	ENCODE(OP_TributeInfo)
@@ -4961,19 +5003,38 @@ namespace RoF2
 		{
 			DECODE_LENGTH_EXACT(structs::TraderClick_Struct);
 			SETUP_DIRECT_DECODE(TraderClick_Struct, structs::TraderClick_Struct);
-			//MEMSET_IN(TraderClick_Struct);
 
-			//emu->Unknown004 = eq->Code;
 			IN(TraderID);
 			IN(Approval);
 
-			Log.Out(Logs::Detail, Logs::Trading, "DECODE(OP_TraderShop): Decoded packet size (%d) to size (%d)", sizeof(structs::TraderClick_Struct), sizeof(TraderClick_Struct));
+			FINISH_DIRECT_DECODE();
+		}
+		else if (psize == sizeof(structs::TraderBuy_Struct))
+		{
+
+			DECODE_LENGTH_EXACT(structs::TraderBuy_Struct);
+			SETUP_DIRECT_DECODE(TraderBuy_Struct, structs::TraderBuy_Struct);
+
+			IN(Action);
+			IN(Price);
+			IN(TraderID);
+			memcpy(emu->ItemName, eq->ItemName, sizeof(emu->ItemName));
+			IN(ItemID);
+			IN(Quantity);
+			Log.Out(Logs::Detail, Logs::Trading, "DECODE(OP_TraderShop): (Unknowns) Unknown004 %d, Unknown008 %d, Unknown012 %d, Unknown076 %d, Unknown276 %d",
+				eq->Unknown004, eq->Unknown008, eq->Unknown012, eq->Unknown076, eq->Unknown276);
+			Log.Out(Logs::Detail, Logs::Trading, "DECODE(OP_TraderShop): Buy Action %d, Price %d, Trader %d, ItemID %d, Quantity %d, ItemName, %s", 
+				eq->Action, eq->Price, eq->TraderID, eq->ItemID, eq->Quantity, eq->ItemName);
 
 			FINISH_DIRECT_DECODE();
 		}
+		else if (psize == 4)
+		{
+			Log.Out(Logs::Detail, Logs::Trading, "DECODE(OP_TraderShop): Forwarding packet as-is with size 4");
+		}
 		else
 		{
-			Log.Out(Logs::Detail, Logs::Trading, "DECODE(OP_TraderShop): Decode Size Mismatch (%d), expected (%d)", psize, sizeof(structs::TraderClick_Struct));
+			Log.Out(Logs::Detail, Logs::Trading, "DECODE(OP_TraderShop): Decode Size Unknown (%d)", psize);
 		}
 	}
 
