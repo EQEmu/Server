@@ -4,7 +4,7 @@
 
 #include "lua_ptr.h"
 
-class Inventory;
+class InventoryOld;
 class Lua_ItemInst;
 class Lua_Item;
 
@@ -14,16 +14,16 @@ namespace luabind {
 
 luabind::scope lua_register_inventory();
 
-class Lua_Inventory : public Lua_Ptr<Inventory>
+class Lua_Inventory : public Lua_Ptr<InventoryOld>
 {
-	typedef Inventory NativeType;
+	typedef InventoryOld NativeType;
 public:
 	Lua_Inventory() : Lua_Ptr(nullptr) { }
-	Lua_Inventory(Inventory *d) : Lua_Ptr(d) { }
+	Lua_Inventory(InventoryOld *d) : Lua_Ptr(d) { }
 	virtual ~Lua_Inventory() { }
 
-	operator Inventory*() {
-		return reinterpret_cast<Inventory*>(GetLuaPtrData());
+	operator InventoryOld*() {
+		return reinterpret_cast<InventoryOld*>(GetLuaPtrData());
 	}
 
 	Lua_ItemInst GetItem(int slot_id);

@@ -104,9 +104,9 @@ protected:
 };
 
 // ########################################
-// Class: Inventory
+// Class: InventoryOld
 //	Character inventory
-class Inventory
+class InventoryOld
 {
 	friend class ItemInst;
 public:
@@ -114,8 +114,8 @@ public:
 	// Public Methods
 	///////////////////////////////
 
-	Inventory() { m_version = ClientVersion::Unknown; m_versionset = false; }
-	~Inventory();
+	InventoryOld() { m_version = ClientVersion::Unknown; m_versionset = false; }
+	~InventoryOld();
 
 	// Inventory v2 creep
 	bool SetInventoryVersion(ClientVersion version) {
@@ -425,7 +425,7 @@ protected:
 	std::map<uint8, ItemInst*>::const_iterator _cbegin() { return m_contents.cbegin(); }
 	std::map<uint8, ItemInst*>::const_iterator _cend() { return m_contents.cend(); }
 
-	friend class Inventory;
+	friend class InventoryOld;
 
 
 	void _PutItem(uint8 index, ItemInst* inst) { m_contents[index] = inst; }

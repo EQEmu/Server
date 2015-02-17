@@ -579,7 +579,7 @@ private:
 	bool _petChooser;
 	uint8 _petChooserID;
 	bool berserk;
-	Inventory m_inv;
+	InventoryOld m_inv;
 	double _lastTotalPlayTime;
 	time_t _startTotalPlayTime;
 	Mob* _previousTarget;
@@ -651,7 +651,7 @@ private:
 	void SetBotID(uint32 botID);
 
 	// Private "Inventory" Methods
-	void GetBotItems(std::string* errorMessage, Inventory &inv);
+	void GetBotItems(std::string* errorMessage, InventoryOld &inv);
 	void BotRemoveEquipItem(int slot);
 	void BotAddEquipItem(int slot, uint32 id);
 	uint32 GetBotItemBySlot(uint32 slotID);

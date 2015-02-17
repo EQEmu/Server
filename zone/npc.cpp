@@ -473,7 +473,7 @@ void NPC::CheckMinMaxLevel(Mob *them)
 
 		if(themlevel < (*cur)->min_level || themlevel > (*cur)->max_level)
 		{
-			material = Inventory::CalcMaterialFromSlot((*cur)->equip_slot);
+			material = InventoryOld::CalcMaterialFromSlot((*cur)->equip_slot);
 			if (material != _MaterialInvalid)
 				SendWearChange(material);
 
@@ -1285,7 +1285,7 @@ int32 NPC::GetEquipmentMaterial(uint8 material_slot) const
 	if (material_slot >= _MaterialCount)
 		return 0;
 
-	int16 invslot = Inventory::CalcSlotFromMaterial(material_slot);
+	int16 invslot = InventoryOld::CalcSlotFromMaterial(material_slot);
 	if (invslot == INVALID_INDEX)
 		return 0;
 

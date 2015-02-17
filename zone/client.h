@@ -333,8 +333,8 @@ public:
 	inline uint8 GetAnon() const { return m_pp.anon; }
 	inline PlayerProfile_Struct& GetPP() { return m_pp; }
 	inline ExtendedProfile_Struct& GetEPP() { return m_epp; }
-	inline Inventory& GetInv() { return m_inv; }
-	inline const Inventory& GetInv() const { return m_inv; }
+	inline InventoryOld& GetInv() { return m_inv; }
+	inline const InventoryOld& GetInv() const { return m_inv; }
 	inline PetInfo* GetPetInfo(uint16 pet) { return (pet==1)?&m_suspendedminion:&m_petinfo; }
 	inline InspectMessage_Struct& GetInspectMessage() { return m_inspect_message; }
 	inline const InspectMessage_Struct& GetInspectMessage() const { return m_inspect_message; }
@@ -1405,7 +1405,7 @@ private:
 
 	PlayerProfile_Struct m_pp;
 	ExtendedProfile_Struct m_epp;
-	Inventory m_inv;
+	InventoryOld m_inv;
 	Object* m_tradeskill_object;
 	PetInfo m_petinfo; // current pet data, used while loading from and saving to DB
 	PetInfo m_suspendedminion; // pet data for our suspended minion.

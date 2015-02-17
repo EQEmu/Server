@@ -2969,7 +2969,7 @@ void Client::Handle_OP_AugmentItem(const EQApplicationPacket *app)
 		{
 			ItemInst *tobe_auged = nullptr, *auged_with = nullptr;
 			int8 slot = -1;
-			Inventory& user_inv = GetInv();
+			InventoryOld& user_inv = GetInv();
 
 			uint16 slot_id = in_augment->container_slot;
 			uint16 aug_slot_id = in_augment->augment_slot;
@@ -3039,7 +3039,7 @@ void Client::Handle_OP_AugmentItem(const EQApplicationPacket *app)
 		{
 			ItemInst *tobe_auged = nullptr, *auged_with = nullptr;
 			int8 slot = -1;
-			Inventory& user_inv = GetInv();
+			InventoryOld& user_inv = GetInv();
 
 			uint16 slot_id = in_augment->container_slot;
 			uint16 aug_slot_id = in_augment->augment_slot; //it's actually solvent slot

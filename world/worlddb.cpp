@@ -34,7 +34,7 @@ extern std::vector<RaceClassCombos> character_create_race_class_combos;
 
 // the current stuff is at the bottom of this function
 void WorldDatabase::GetCharSelectInfo(uint32 account_id, CharacterSelect_Struct* cs, uint32 ClientVersion) {
-	Inventory *inv;
+	InventoryOld *inv;
 	uint8 has_home = 0;
 	uint8 has_bind = 0;
 
@@ -167,7 +167,7 @@ void WorldDatabase::GetCharSelectInfo(uint32 account_id, CharacterSelect_Struct*
 		}
 
 		/* Load Inventory */
-		inv = new Inventory;
+		inv = new InventoryOld;
 		if (GetInventory(account_id, cs->name[char_num], inv))
 		{
 			const Item_Struct* item = nullptr;
@@ -176,7 +176,7 @@ void WorldDatabase::GetCharSelectInfo(uint32 account_id, CharacterSelect_Struct*
 
 			for (uint32 matslot = 0; matslot < _MaterialCount; matslot++)
 			{
-				invslot = Inventory::CalcSlotFromMaterial(matslot);
+				invslot = InventoryOld::CalcSlotFromMaterial(matslot);
 				if (invslot == INVALID_INDEX) { continue; }
 
 				inst = inv->GetItem(invslot);

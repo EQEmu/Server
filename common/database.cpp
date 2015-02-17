@@ -677,7 +677,7 @@ bool Database::SaveCharacterCreate(uint32 character_id, uint32 account_id, Playe
 }
 
 /* This only for new Character creation storing */
-bool Database::StoreCharacter(uint32 account_id, PlayerProfile_Struct* pp, Inventory* inv) {
+bool Database::StoreCharacter(uint32 account_id, PlayerProfile_Struct* pp, InventoryOld* inv) {
 	uint32 charid = 0; 
 	char zone[50]; 
 	float x, y, z; 

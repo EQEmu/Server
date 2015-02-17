@@ -36,7 +36,7 @@
 //atoi is not uint32 or uint32 safe!!!!
 #define atoul(str) strtoul(str, nullptr, 10)
 
-class Inventory;
+class InventoryOld;
 class MySQLRequestResult;
 class Client;
 
@@ -102,7 +102,7 @@ public:
 	bool	SaveCharacterCreate(uint32 character_id, uint32 account_id, PlayerProfile_Struct* pp);
 	bool	SetHackerFlag(const char* accountname, const char* charactername, const char* hacked);
 	bool	SetMQDetectionFlag(const char* accountname, const char* charactername, const char* hacked, const char* zone);
-	bool	StoreCharacter(uint32 account_id, PlayerProfile_Struct* pp, Inventory* inv);
+	bool	StoreCharacter(uint32 account_id, PlayerProfile_Struct* pp, InventoryOld* inv);
 	bool	UpdateName(const char* oldname, const char* newname);
 
 	/* General Information Queries */

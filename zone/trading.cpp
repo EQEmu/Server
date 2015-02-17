@@ -174,7 +174,7 @@ void Trade::SendItemData(const ItemInst* inst, int16 dest_slot_id)
 		with->SendItemPacket(dest_slot_id - EmuConstants::TRADE_BEGIN, inst, ItemPacketTradeView);
 		if (inst->GetItem()->ItemClass == 1) {
 			for (uint16 i = SUB_BEGIN; i < EmuConstants::ITEM_CONTAINER_SIZE; i++) {
-				uint16 bagslot_id = Inventory::CalcSlotId(dest_slot_id, i);
+				uint16 bagslot_id = InventoryOld::CalcSlotId(dest_slot_id, i);
 				const ItemInst* bagitem = trader->GetInv().GetItem(bagslot_id);
 				if (bagitem) {
 					with->SendItemPacket(bagslot_id - EmuConstants::TRADE_BEGIN, bagitem, ItemPacketTradeView);
@@ -317,7 +317,7 @@ void Trade::DumpTrade()
 					if (inst) {
 						Log.Out(Logs::Detail, Logs::Trading, "\tBagItem %i (Charges=%i, Slot=%i)",
 							inst->GetItem()->ID, inst->GetCharges(),
-							Inventory::CalcSlotId(i, j));
+							InventoryOld::CalcSlotId(i, j));
 					}
 				}
 			}
@@ -368,7 +368,7 @@ void Client::ResetTrade() {
 					break;
 
 				if (partial_inst->GetID() != inst->GetID()) {
-					Log.Out(Logs::Detail, Logs::None, "[CLIENT] Client::ResetTrade() - an incompatible location reference was returned by Inventory::FindFreeSlotForTradeItem()");
+					Log.Out(Logs::Detail, Logs::None, "[CLIENT] Client::ResetTrade() - an incompatible location reference was returned by InventoryOld::FindFreeSlotForTradeItem()");
 
 					break;
 				}
@@ -530,9 +530,9 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 											detail = new QSTradeItems_Struct;
 
 											detail->from_id = this->character_id;
-											detail->from_slot = Inventory::CalcSlotId(trade_slot, sub_slot);
+											detail->from_slot = InventoryOld::CalcSlotId(trade_slot, sub_slot);
 											detail->to_id = other->CharacterID();
-											detail->to_slot = Inventory::CalcSlotId(free_slot, sub_slot);
+											detail->to_slot = InventoryOld::CalcSlotId(free_slot, sub_slot);
 											detail->item_id = bag_inst->GetID();
 											detail->charges = (!bag_inst->IsStackable() ? 1 : bag_inst->GetCharges());
 											detail->aug_1 = bag_inst->GetAugmentItemID(1);
@@ -588,7 +588,7 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 							break;
 
 						if (partial_inst->GetID() != inst->GetID()) {
-							Log.Out(Logs::Detail, Logs::Trading, "[CLIENT] Client::ResetTrade() - an incompatible location reference was returned by Inventory::FindFreeSlotForTradeItem()");
+							Log.Out(Logs::Detail, Logs::Trading, "[CLIENT] Client::ResetTrade() - an incompatible location reference was returned by InventoryOld::FindFreeSlotForTradeItem()");
 							break;
 						}
 
@@ -849,7 +849,7 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 
 								strcpy(detail->action_type, "HANDIN");
 
-								detail->char_slot = Inventory::CalcSlotId(trade_slot, sub_slot);
+								detail->char_slot = InventoryOld::CalcSlotId(trade_slot, sub_slot);
 								detail->item_id = trade_baginst->GetID();
 								detail->charges = (!trade_inst->IsStackable() ? 1 : trade_inst->GetCharges());
 								detail->aug_1 = trade_baginst->GetAugmentItemID(1);
@@ -1237,7 +1237,7 @@ uint32 Client::FindTraderItemSerialNumber(int32 ItemID) {
 		if (item && item->GetItem()->ID == 17899){ //Traders Satchel
 			for (int x = SUB_BEGIN; x < EmuConstants::ITEM_CONTAINER_SIZE; x++) {
 				// we already have the parent bag and a contents iterator..why not just iterate the bag!??
-				SlotID = Inventory::CalcSlotId(i, x);
+				SlotID = InventoryOld::CalcSlotId(i, x);
 				item = this->GetInv().GetItem(SlotID);
 				if (item) {
 					if (item->GetID() == ItemID)
@@ -1260,7 +1260,7 @@ ItemInst* Client::FindTraderItemBySerialNumber(int32 SerialNumber){
 		if(item && item->GetItem()->ID == 17899){ //Traders Satchel
 			for(int x = SUB_BEGIN; x < EmuConstants::ITEM_CONTAINER_SIZE; x++) {
 				// we already have the parent bag and a contents iterator..why not just iterate the bag!??
-				SlotID = Inventory::CalcSlotId(i, x);
+				SlotID = InventoryOld::CalcSlotId(i, x);
 				item = this->GetInv().GetItem(SlotID);
 				if(item) {
 					if(item->GetSerialNumber() == SerialNumber)
@@ -1290,7 +1290,7 @@ GetItems_Struct* Client::GetTraderItems(){
 		item = this->GetInv().GetItem(i);
 		if(item && item->GetItem()->ID == 17899){ //Traders Satchel
 			for(int x = SUB_BEGIN; x < EmuConstants::ITEM_CONTAINER_SIZE; x++) {
-				SlotID = Inventory::CalcSlotId(i, x);
+				SlotID = InventoryOld::CalcSlotId(i, x);
 
 				item = this->GetInv().GetItem(SlotID);
 
@@ -1314,7 +1314,7 @@ uint16 Client::FindTraderItem(int32 SerialNumber, uint16 Quantity){
 		item = this->GetInv().GetItem(i);
 		if(item && item->GetItem()->ID == 17899){ //Traders Satchel
 			for(int x = SUB_BEGIN; x < EmuConstants::ITEM_CONTAINER_SIZE; x++){
-				SlotID = Inventory::CalcSlotId(i, x);
+				SlotID = InventoryOld::CalcSlotId(i, x);
 
 				item = this->GetInv().GetItem(SlotID);
 

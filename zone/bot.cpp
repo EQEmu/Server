@@ -4138,7 +4138,7 @@ void Bot::Spawn(Client* botCharacterOwner, std::string* errorMessage) {
 		for(int i = EmuConstants::EQUIPMENT_BEGIN; i <= EmuConstants::EQUIPMENT_END; ++i) {
 			itemID = GetBotItemBySlot(i);
 			if(itemID != 0) {
-				materialFromSlot = Inventory::CalcMaterialFromSlot(i);
+				materialFromSlot = InventoryOld::CalcMaterialFromSlot(i);
 				if(materialFromSlot != 0xFF)
 					this->SendWearChange(materialFromSlot);
 			}
@@ -4191,7 +4191,7 @@ void Bot::RemoveBotItemBySlot(uint32 slotID, std::string *errorMessage) {
 }
 
 // Retrieves all the inventory records from the database for this bot.
-void Bot::GetBotItems(std::string* errorMessage, Inventory &inv) {
+void Bot::GetBotItems(std::string* errorMessage, InventoryOld &inv) {
 
 	if(this->GetBotID() == 0)
         return;
@@ -5081,7 +5081,7 @@ ItemInst* Bot::GetBotItem(uint32 slotID) {
 // Adds the specified item it bot to the NPC equipment array and to the bot inventory collection.
 void Bot::BotAddEquipItem(int slot, uint32 id) {
 	if(slot > 0 && id > 0) {
-		uint8 materialFromSlot = Inventory::CalcMaterialFromSlot(slot);
+		uint8 materialFromSlot = InventoryOld::CalcMaterialFromSlot(slot);
 
 		if(materialFromSlot != _MaterialInvalid) {
 			equipment[slot] = id; // npc has more than just material slots. Valid material should mean valid inventory index
@@ -5097,7 +5097,7 @@ void Bot::BotAddEquipItem(int slot, uint32 id) {
 // Erases the specified item from bot the NPC equipment array and from the bot inventory collection.
 void Bot::BotRemoveEquipItem(int slot) {
 	if(slot > 0) {
-		uint8 materialFromSlot = Inventory::CalcMaterialFromSlot(slot);
+		uint8 materialFromSlot = InventoryOld::CalcMaterialFromSlot(slot);
 
 		if(materialFromSlot != _MaterialInvalid) {
 			equipment[slot] = 0; // npc has more than just material slots. Valid material should mean valid inventory index
@@ -5669,7 +5669,7 @@ void Bot::PerformTradeWithClient(int16 beginSlotID, int16 endSlotID, Client* cli
 			bool UpdateClient = false;
 			bool already_returned = false;
 
-			Inventory& clientInventory = client->GetInv();
+			InventoryOld& clientInventory = client->GetInv();
 			const ItemInst* inst = clientInventory[i];
 			if(inst) {
 				items[i] = inst->GetItem()->ID;
@@ -11281,7 +11281,7 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 			if(!results.Success())
                 return;
 
-			uint8 slotmaterial = Inventory::CalcMaterialFromSlot(setslot);
+			uint8 slotmaterial = InventoryOld::CalcMaterialFromSlot(setslot);
             c->GetTarget()->CastToBot()->SendWearChange(slotmaterial);
 		}
 		else {
@@ -15974,7 +15974,7 @@ uint32 Bot::GetEquipmentColor(uint8 material_slot) const
 	uint32 botid = this->GetBotID();
 
 	//Translate code slot # to DB slot #
-	slotid = Inventory::CalcSlotFromMaterial(material_slot);
+	slotid = InventoryOld::CalcSlotFromMaterial(material_slot);
 	if (slotid == INVALID_INDEX)
 		return 0;
 

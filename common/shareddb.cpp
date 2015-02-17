@@ -208,10 +208,10 @@ bool SharedDatabase::UpdateInventorySlot(uint32 char_id, const ItemInst* inst, i
 	auto results = QueryDatabase(query);
 
     // Save bag contents, if slot supports bag contents
-	if (inst->IsType(ItemClassContainer) && Inventory::SupportsContainers(slot_id))
+	if (inst->IsType(ItemClassContainer) && InventoryOld::SupportsContainers(slot_id))
 		for (uint8 idx = SUB_BEGIN; idx < EmuConstants::ITEM_CONTAINER_SIZE; idx++) {
 			const ItemInst* baginst = inst->GetItem(idx);
-			SaveInventory(char_id, baginst, Inventory::CalcSlotId(slot_id, idx));
+			SaveInventory(char_id, baginst, InventoryOld::CalcSlotId(slot_id, idx));
 		}
 
     if (!results.Success()) {
@@ -252,10 +252,10 @@ bool SharedDatabase::UpdateSharedBankSlot(uint32 char_id, const ItemInst* inst, 
     auto results = QueryDatabase(query);
 
     // Save bag contents, if slot supports bag contents
-	if (inst->IsType(ItemClassContainer) && Inventory::SupportsContainers(slot_id)) {
+	if (inst->IsType(ItemClassContainer) && InventoryOld::SupportsContainers(slot_id)) {
 		for (uint8 idx = SUB_BEGIN; idx < EmuConstants::ITEM_CONTAINER_SIZE; idx++) {
 			const ItemInst* baginst = inst->GetItem(idx);
-			SaveInventory(char_id, baginst, Inventory::CalcSlotId(slot_id, idx));
+			SaveInventory(char_id, baginst, InventoryOld::CalcSlotId(slot_id, idx));
 		}
 	}
 
@@ -276,10 +276,10 @@ bool SharedDatabase::DeleteInventorySlot(uint32 char_id, int16 slot_id) {
     }
 
     // Delete bag slots, if need be
-    if (!Inventory::SupportsContainers(slot_id))
+    if (!InventoryOld::SupportsContainers(slot_id))
         return true;
 
-    int16 base_slot_id = Inventory::CalcSlotId(slot_id, SUB_BEGIN);
+    int16 base_slot_id = InventoryOld::CalcSlotId(slot_id, SUB_BEGIN);
     query = StringFormat("DELETE FROM inventory WHERE charid = %i AND slotid >= %i AND slotid < %i",
                         char_id, base_slot_id, (base_slot_id+10));
     results = QueryDatabase(query);
@@ -302,10 +302,10 @@ bool SharedDatabase::DeleteSharedBankSlot(uint32 char_id, int16 slot_id) {
     }
 
 	// Delete bag slots, if need be
-	if (!Inventory::SupportsContainers(slot_id))
+	if (!InventoryOld::SupportsContainers(slot_id))
         return true;
 
-    int16 base_slot_id = Inventory::CalcSlotId(slot_id, SUB_BEGIN);
+    int16 base_slot_id = InventoryOld::CalcSlotId(slot_id, SUB_BEGIN);
     query = StringFormat("DELETE FROM sharedbank WHERE acctid = %i "
                         "AND slotid >= %i AND slotid < %i",
                         account_id, base_slot_id, (base_slot_id+10));
@@ -345,7 +345,7 @@ bool SharedDatabase::SetSharedPlatinum(uint32 account_id, int32 amount_to_add) {
 	return true;
 }
 
-bool SharedDatabase::SetStartingItems(PlayerProfile_Struct* pp, Inventory* inv, uint32 si_race, uint32 si_class, uint32 si_deity, uint32 si_current_zone, char* si_name, int admin_level) {
+bool SharedDatabase::SetStartingItems(PlayerProfile_Struct* pp, InventoryOld* inv, uint32 si_race, uint32 si_class, uint32 si_deity, uint32 si_current_zone, char* si_name, int admin_level) {
 
 	const Item_Struct* myitem;
 
@@ -382,7 +382,7 @@ bool SharedDatabase::SetStartingItems(PlayerProfile_Struct* pp, Inventory* inv, 
 
 
 // Retrieve shared bank inventory based on either account or character
-bool SharedDatabase::GetSharedBank(uint32 id, Inventory *inv, bool is_charid)
+bool SharedDatabase::GetSharedBank(uint32 id, InventoryOld *inv, bool is_charid)
 {
 	std::string query;
 
@@ -482,7 +482,7 @@ bool SharedDatabase::GetSharedBank(uint32 id, Inventory *inv, bool is_charid)
 }
 
 // Overloaded: Retrieve character inventory based on character id
-bool SharedDatabase::GetInventory(uint32 char_id, Inventory *inv)
+bool SharedDatabase::GetInventory(uint32 char_id, InventoryOld *inv)
 {
 	// Retrieve character inventory
 	std::string query =
@@ -625,7 +625,7 @@ bool SharedDatabase::GetInventory(uint32 char_id, Inventory *inv)
 }
 
 // Overloaded: Retrieve character inventory based on account_id and character name
-bool SharedDatabase::GetInventory(uint32 account_id, char *name, Inventory *inv)
+bool SharedDatabase::GetInventory(uint32 account_id, char *name, InventoryOld *inv)
 {
 	// Retrieve character inventory
 	std::string query =

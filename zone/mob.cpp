@@ -2547,7 +2547,7 @@ uint32 NPC::GetEquipment(uint8 material_slot) const
 {
 	if(material_slot > 8)
 		return 0;
-	int16 invslot = Inventory::CalcSlotFromMaterial(material_slot);
+	int16 invslot = InventoryOld::CalcSlotFromMaterial(material_slot);
 	if (invslot == INVALID_INDEX)
 		return 0;
 	return equipment[invslot];
@@ -2645,7 +2645,7 @@ int32 Mob::GetEquipmentMaterial(uint8 material_slot) const
 		{
 			if (this->IsClient())
 			{
-				int16 invslot = Inventory::CalcSlotFromMaterial(material_slot);
+				int16 invslot = InventoryOld::CalcSlotFromMaterial(material_slot);
 				if (invslot == INVALID_INDEX)
 				{
 					return 0;
@@ -2690,7 +2690,7 @@ int32 Mob::GetHerosForgeModel(uint8 material_slot) const
 		uint32 ornamentationAugtype = RuleI(Character, OrnamentationAugmentType);
 		const Item_Struct *item;
 		item = database.GetItem(GetEquipment(material_slot));
-		int16 invslot = Inventory::CalcSlotFromMaterial(material_slot);
+		int16 invslot = InventoryOld::CalcSlotFromMaterial(material_slot);
 		
 		if (item != 0 && invslot != INVALID_INDEX)
 		{

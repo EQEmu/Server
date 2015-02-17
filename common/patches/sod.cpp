@@ -3913,7 +3913,7 @@ namespace SoD
 
 				/*
 				// TEST CODE: <watch>
-				SubSlotNumber = Inventory::CalcSlotID(slot_id_in, x);
+				SubSlotNumber = InventoryOld::CalcSlotID(slot_id_in, x);
 				*/
 
 				SubSerializations[x] = SerializeItem(subitem, SubSlotNumber, &SubLengths[x], depth + 1);

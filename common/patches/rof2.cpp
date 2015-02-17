@@ -5194,7 +5194,7 @@ namespace RoF2
 			ss.write(tmp, strlen(tmp));
 			ss.write((const char*)&null_term, sizeof(uint8));
 			ornaIcon = inst->GetOrnamentationIcon();
-			heroModel = inst->GetOrnamentHeroModel(Inventory::CalcMaterialFromSlot(slot_id_in));
+			heroModel = inst->GetOrnamentHeroModel(InventoryOld::CalcMaterialFromSlot(slot_id_in));
 		}
 		else
 		{
@@ -5650,7 +5650,7 @@ namespace RoF2
 
 				/*
 				// TEST CODE: <watch>
-				SubSlotNumber = Inventory::CalcSlotID(slot_id_in, x);
+				SubSlotNumber = InventoryOld::CalcSlotID(slot_id_in, x);
 				*/
 
 				SubSerializations[x] = SerializeItem(subitem, SubSlotNumber, &SubLengths[x], depth + 1, packet_type);

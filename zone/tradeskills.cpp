@@ -55,7 +55,7 @@ void Object::HandleAugmentation(Client* user, const AugmentItem_Struct* in_augme
 	else
 	{
 		// Check to see if they have an inventory container type 53 that is used for this.
-		Inventory& user_inv = user->GetInv();
+		InventoryOld& user_inv = user->GetInv();
 		ItemInst* inst = nullptr;
 
 		inst = user_inv.GetItem(in_augment->container_slot);
@@ -218,7 +218,7 @@ void Object::HandleAugmentation(Client* user, const AugmentItem_Struct* in_augme
 				const ItemInst* inst = container->GetItem(i);
 				if (inst)
 				{
-					user->DeleteItemInInventory(Inventory::CalcSlotId(in_augment->container_slot,i),0,true);
+					user->DeleteItemInInventory(InventoryOld::CalcSlotId(in_augment->container_slot,i),0,true);
 				}
 			}
 			// Explicitly mark container as cleared.
@@ -247,7 +247,7 @@ void Object::HandleCombine(Client* user, const NewCombine_Struct* in_combine, Ob
 		return;
 	}
 
-	Inventory& user_inv = user->GetInv();
+	InventoryOld& user_inv = user->GetInv();
 	PlayerProfile_Struct& user_pp = user->GetPP();
 	ItemInst* container = nullptr;
 	ItemInst* inst = nullptr;
@@ -286,7 +286,7 @@ void Object::HandleCombine(Client* user, const NewCombine_Struct* in_combine, Ob
 		bool AllowAll = RuleB(Inventory, AllowAnyWeaponTransformation);
 		if (inst && ItemInst::CanTransform(inst->GetItem(), container->GetItem(), AllowAll)) {
 			const Item_Struct* new_weapon = inst->GetItem();
-			user->DeleteItemInInventory(Inventory::CalcSlotId(in_combine->container_slot, 0), 0, true);
+			user->DeleteItemInInventory(InventoryOld::CalcSlotId(in_combine->container_slot, 0), 0, true);
 			container->Clear();
 			user->SummonItem(new_weapon->ID, inst->GetCharges(), inst->GetAugmentItemID(0), inst->GetAugmentItemID(1), inst->GetAugmentItemID(2), inst->GetAugmentItemID(3), inst->GetAugmentItemID(4), inst->GetAugmentItemID(5), inst->IsAttuned(), MainCursor, container->GetItem()->Icon, atoi(container->GetItem()->IDFile + 2));
 			user->Message_StringID(4, TRANSFORM_COMPLETE, inst->GetItem()->Name);
@@ -306,7 +306,7 @@ void Object::HandleCombine(Client* user, const NewCombine_Struct* in_combine, Ob
 		const ItemInst* inst = container->GetItem(0);
 		if (inst && inst->GetOrnamentationIcon() && inst->GetOrnamentationIcon()) {
 			const Item_Struct* new_weapon = inst->GetItem();
-			user->DeleteItemInInventory(Inventory::CalcSlotId(in_combine->container_slot, 0), 0, true);
+			user->DeleteItemInInventory(InventoryOld::CalcSlotId(in_combine->container_slot, 0), 0, true);
 			container->Clear();
 			user->SummonItem(new_weapon->ID, inst->GetCharges(), inst->GetAugmentItemID(0), inst->GetAugmentItemID(1), inst->GetAugmentItemID(2), inst->GetAugmentItemID(3), inst->GetAugmentItemID(4), inst->GetAugmentItemID(5), inst->IsAttuned(), MainCursor, 0, 0);
 			user->Message_StringID(4, TRANSFORM_COMPLETE, inst->GetItem()->Name);
@@ -395,7 +395,7 @@ void Object::HandleCombine(Client* user, const NewCombine_Struct* in_combine, Ob
 		for (uint8 i = MAIN_BEGIN; i < EmuConstants::MAP_WORLD_SIZE; i++) {
 			const ItemInst* inst = container->GetItem(i);
 			if (inst) {
-				user->DeleteItemInInventory(Inventory::CalcSlotId(in_combine->container_slot,i),0,true);
+				user->DeleteItemInInventory(InventoryOld::CalcSlotId(in_combine->container_slot,i),0,true);
 			}
 		}
 		container->Clear();
@@ -492,7 +492,7 @@ void Object::HandleAutoCombine(Client* user, const RecipeAutoCombine_Struct* rac
 	memset(counts, 0, sizeof(counts));
 
 	//search for all the items in their inventory
-	Inventory& user_inv = user->GetInv();
+	InventoryOld& user_inv = user->GetInv();
 	uint8 count = 0;
 	uint8 needcount = 0;
 

@@ -5022,7 +5022,7 @@ void Merc::UpdateMercAppearance() {
 	for(int i = EmuConstants::EQUIPMENT_BEGIN; i <= EmuConstants::EQUIPMENT_END; ++i) {
 		itemID = equipment[i];
 		if(itemID != NO_ITEM) {
-			materialFromSlot = Inventory::CalcMaterialFromSlot(i);
+			materialFromSlot = InventoryOld::CalcMaterialFromSlot(i);
 			if(materialFromSlot != _MaterialInvalid)
 				this->SendWearChange(materialFromSlot);
 		}

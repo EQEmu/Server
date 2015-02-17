@@ -2705,7 +2705,7 @@ void Client::SetMaterial(int16 in_slot, uint32 item_id) {
 	const Item_Struct* item = database.GetItem(item_id);
 	if (item && (item->ItemClass==ItemClassCommon))
 	{
-		uint8 matslot = Inventory::CalcMaterialFromSlot(in_slot);
+		uint8 matslot = InventoryOld::CalcMaterialFromSlot(in_slot);
 		if (matslot != _MaterialInvalid)
 		{
 			m_pp.item_material[matslot] = GetEquipmentMaterial(matslot);
@@ -3047,7 +3047,7 @@ void Client::SetTint(int16 in_slot, uint32 color) {
 // Still need to reconcile bracer01 versus bracer02
 void Client::SetTint(int16 in_slot, Color_Struct& color) {
 
-	uint8 matslot = Inventory::CalcMaterialFromSlot(in_slot);
+	uint8 matslot = InventoryOld::CalcMaterialFromSlot(in_slot);
 	if (matslot != _MaterialInvalid)
 	{
 		m_pp.item_tint[matslot].color = color.color;

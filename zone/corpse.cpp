@@ -409,7 +409,7 @@ void Corpse::MoveItemToCorpse(Client *client, ItemInst *inst, int16 equipSlot, s
 		if (equipSlot < EmuConstants::GENERAL_BEGIN || equipSlot > MainCursor) { break; }
 
 		for (auto sub_index = SUB_BEGIN; sub_index < EmuConstants::ITEM_CONTAINER_SIZE; ++sub_index) {
-			int16 real_bag_slot = Inventory::CalcSlotId(equipSlot, sub_index);
+			int16 real_bag_slot = InventoryOld::CalcSlotId(equipSlot, sub_index);
 			auto bag_inst = client->GetInv().GetItem(real_bag_slot);
 			if (bag_inst == nullptr) { continue; }
 
@@ -683,8 +683,8 @@ ServerLootItem_Struct* Corpse::GetItem(uint16 lootslot, ServerLootItem_Struct** 
 		}
 	}
 
-	if (sitem && bag_item_data && Inventory::SupportsContainers(sitem->equip_slot)) {
-		int16 bagstart = Inventory::CalcSlotId(sitem->equip_slot, SUB_BEGIN);
+	if (sitem && bag_item_data && InventoryOld::SupportsContainers(sitem->equip_slot)) {
+		int16 bagstart = InventoryOld::CalcSlotId(sitem->equip_slot, SUB_BEGIN);
 
 		cur = itemlist.begin();
 		end = itemlist.end();
@@ -738,7 +738,7 @@ void Corpse::RemoveItem(ServerLootItem_Struct* item_data)
 		is_corpse_changed = true;
 		itemlist.erase(iter);
 
-		uint8 material = Inventory::CalcMaterialFromSlot(sitem->equip_slot); // autos to unsigned char
+		uint8 material = InventoryOld::CalcMaterialFromSlot(sitem->equip_slot); // autos to unsigned char
 		if (material != _MaterialInvalid)
 			SendWearChange(material);
 
@@ -1397,7 +1397,7 @@ uint32 Corpse::GetEquipment(uint8 material_slot) const {
 		return NO_ITEM;
 	}
 
-	invslot = Inventory::CalcSlotFromMaterial(material_slot);
+	invslot = InventoryOld::CalcSlotFromMaterial(material_slot);
 	if(invslot == INVALID_INDEX) // GetWornItem() should be returning a NO_ITEM for any invalid index...
 		return NO_ITEM;
 

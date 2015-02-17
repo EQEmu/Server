@@ -164,7 +164,7 @@ int Lua_Inventory::GetSlotByItemInst(Lua_ItemInst inst) {
 }
 
 luabind::scope lua_register_inventory() {
-	return luabind::class_<Lua_Inventory>("Inventory")
+	return luabind::class_<Lua_Inventory>("InventoryOld")
 		.def(luabind::constructor<>())
 		.def("GetItem", (Lua_ItemInst(Lua_Inventory::*)(int))&Lua_Inventory::GetItem)
 		.def("GetItem", (Lua_ItemInst(Lua_Inventory::*)(int,int))&Lua_Inventory::GetItem)
