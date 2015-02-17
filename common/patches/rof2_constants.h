@@ -103,7 +103,7 @@ namespace RoF2 {
 	}
 
 	namespace consts {
-		static const size_t CHARACTER_CREATION_LIMIT = 10;
+		static const size_t CHARACTER_CREATION_LIMIT = 12;
 
 		static const uint16	MAP_POSSESSIONS_SIZE = slots::_MainCount;
 		static const uint16 MAP_BANK_SIZE = 24;

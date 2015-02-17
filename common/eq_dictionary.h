@@ -49,7 +49,6 @@ public:
 	// database
 	static const ClientVersion CHARACTER_CREATION_CLIENT = ClientVersion::RoF2; // adjust according to starting item placement and target client
 
-	// This value should be at least 8 or Titanium will have issues (tested at 6)
 	static const size_t CHARACTER_CREATION_LIMIT = RoF2::consts::CHARACTER_CREATION_LIMIT;
 
 	// inventory

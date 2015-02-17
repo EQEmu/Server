@@ -158,32 +158,46 @@ struct CharSelectEquip
 	Color_Struct Color;
 };
 
+struct CharacterSelectEntry_Struct
+{
+	char Name[64];
+	uint8 Class;
+	uint32 Race;
+	uint8 Level;
+	uint8 ShroudClass;
+	uint32 ShroudRace;
+	uint16 Zone;
+	uint16 Instance;
+	uint8 Gender;
+	uint8 Face;
+	CharSelectEquip	Equip[9];
+	uint8 Unknown15;			// Seen FF
+	uint8 Unknown19;			// Seen FF
+	uint32 DrakkinTattoo;
+	uint32 DrakkinDetails;
+	uint32 Deity;
+	uint32 PrimaryIDFile;
+	uint32 SecondaryIDFile;
+	uint8 HairColor;
+	uint8 BeardColor;
+	uint8 EyeColor1;
+	uint8 EyeColor2;
+	uint8 HairStyle;
+	uint8 Beard;
+	uint8 Enabled;
+	uint8 Tutorial;				// Seen 1 for new char or 0 for existing
+	uint32 DrakkinHeritage;
+	uint8 Unknown1;				// Seen 0
+	uint8 GoHome;				// Seen 0 for new char and 1 for existing
+	uint32 LastLogin;
+	uint8 Unknown2;				// Seen 0
+};
+
 struct CharacterSelect_Struct
 {
-	uint32 Race[10];				// Characters Race
-	uint8 BeardColor[10];			// Characters beard Color
-	uint8 HairStyle[10];			// Characters hair style
-	CharSelectEquip Equip[10][9];
-	uint32 Secondary[10];			// Characters secondary IDFile number
-	uint32 DrakkinHeritage[10];		// added for SoF
-	uint32 DrakkinTattoo[10];			// added for SoF
-	uint32 DrakkinDetails[10];		// added for SoF
-	uint32 Deity[10];				// Characters Deity
-	uint8 GoHome[10];				// 1=Go Home available, 0=not
-	uint8 Tutorial[10];				// 1=Tutorial available, 0=not
-	uint8 Beard[10];				// Characters Beard Type
-	uint8 Unknown902[10];			// 10x ff
-	uint32 Primary[10];				// Characters primary IDFile number
-	uint8 HairColor[10];			// Characters Hair Color
-	uint8 Unknown0962[2];			// 2x 00
-	uint32 Zone[10];				// Characters Current Zone
-	uint8 Class_[10];				// Characters Classes
-	uint8 Face[10];					// Characters Face Type
-	char Name[10][64];				// Characters Names
-	uint8 Gender[10];				// Characters Gender
-	uint8 EyeColor1[10];			// Characters Eye Color
-	uint8 EyeColor2[10];			// Characters Eye 2 Color
-	uint8 Level[10];				// Characters Levels
+	uint32 CharCount;	//number of chars in this packet
+	uint32 TotalChars;	//total number of chars allowed?
+	CharacterSelectEntry_Struct Entries[0];
 };
 
 /*

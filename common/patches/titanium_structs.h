@@ -122,7 +122,7 @@ struct CharacterSelect_Struct
 /*0400*/	uint8 BeardColor[10];			// Characters beard Color
 /*0410*/	uint8 HairStyle[10];			// Characters hair style
 /*0420*/	uint32 Equip[10][9];			// 0=helm, 1=chest, 2=arm, 3=bracer, 4=hand, 5=leg, 6=boot, 7=melee1, 8=melee2  (Might not be)
-/*0780*/	uint32 Secondary[10];			// Characters secondary IDFile number
+/*0780*/	uint32 SecondaryIDFile[10];		// Characters secondary IDFile number
 /*0820*/	uint8 Unknown820[10];			// 10x ff
 /*0830*/	uint8 Unknown830[2];			// 2x 00
 /*0832*/	uint32 Deity[10];				// Characters Deity
@@ -130,11 +130,11 @@ struct CharacterSelect_Struct
 /*0882*/	uint8 Tutorial[10];				// 1=Tutorial available, 0=not
 /*0892*/	uint8 Beard[10];				// Characters Beard Type
 /*0902*/	uint8 Unknown902[10];			// 10x ff
-/*0912*/	uint32 Primary[10];				// Characters primary IDFile number
+/*0912*/	uint32 PrimaryIDFile[10];		// Characters primary IDFile number
 /*0952*/	uint8 HairColor[10];			// Characters Hair Color
 /*0962*/	uint8 Unknown0962[2];			// 2x 00
 /*0964*/	uint32 Zone[10];				// Characters Current Zone
-/*1004*/	uint8 Class_[10];				// Characters Classes
+/*1004*/	uint8 Class[10];				// Characters Classes
 /*1014*/	uint8 Face[10];					// Characters Face Type
 /*1024*/	char Name[10][64];				// Characters Names
 /*1664*/	uint8 Gender[10];				// Characters Gender

@@ -2981,85 +2981,99 @@ namespace RoF2
 
 	ENCODE(OP_SendCharInfo)
 	{
-		ENCODE_LENGTH_EXACT(CharacterSelect_Struct);
+		ENCODE_LENGTH_ATLEAST(CharacterSelect_Struct);
 		SETUP_VAR_ENCODE(CharacterSelect_Struct);
 
-		//EQApplicationPacket *packet = *p;
-		//const CharacterSelect_Struct *emu = (CharacterSelect_Struct *) packet->pBuffer;
+		// Zero-character count shunt
+		if (emu->CharCount == 0) {
+			ALLOC_VAR_ENCODE(structs::CharacterSelect_Struct, sizeof(structs::CharacterSelect_Struct));
+			eq->CharCount = emu->CharCount;
 
-		int char_count;
-		int namelen = 0;
-		for (char_count = 0; char_count < 10; char_count++) {
-			if (emu->Name[char_count][0] == '\0')
-				break;
-			if (strcmp(emu->Name[char_count], "<none>") == 0)
-				break;
-			namelen += strlen(emu->Name[char_count]);
+			FINISH_ENCODE();
+			return;
 		}
 
-		int total_length = sizeof(structs::CharacterSelect_Struct)
-			+ char_count * sizeof(structs::CharacterSelectEntry_Struct)
-			+ namelen;
+		unsigned char *emu_ptr = __emu_buffer;
+		emu_ptr += sizeof(CharacterSelect_Struct);
+		CharacterSelectEntry_Struct *emu_cse = (CharacterSelectEntry_Struct *)nullptr;
+
+		size_t names_length = 0;
+		size_t character_count = 0;
+		for (; character_count < emu->CharCount && character_count < consts::CHARACTER_CREATION_LIMIT; ++character_count) {
+			emu_cse = (CharacterSelectEntry_Struct *)emu_ptr;
+			names_length += strlen(emu_cse->Name);
+			emu_ptr += sizeof(CharacterSelectEntry_Struct);
+		}
+
+		size_t total_length = sizeof(structs::CharacterSelect_Struct)
+			+ character_count * sizeof(structs::CharacterSelectEntry_Struct)
+			+ names_length;
 
 		ALLOC_VAR_ENCODE(structs::CharacterSelect_Struct, total_length);
+		structs::CharacterSelectEntry_Struct *eq_cse = (structs::CharacterSelectEntry_Struct *)nullptr;
 
-		//unsigned char *eq_buffer = new unsigned char[total_length];
-		//structs::CharacterSelect_Struct *eq_head = (structs::CharacterSelect_Struct *) eq_buffer;
+		eq->CharCount = character_count;
+		//eq->TotalChars = emu->TotalChars;
 
-		eq->CharCount = char_count;
-		//eq->total_chars = 10;
+		//if (eq->TotalChars > consts::CHARACTER_CREATION_LIMIT)
+		//	eq->TotalChars = consts::CHARACTER_CREATION_LIMIT;
 
-		unsigned char *bufptr = (unsigned char *)eq->Entries;
-		int r;
-		for (r = 0; r < char_count; r++) {
-			{	//pre-name section...
-				structs::CharacterSelectEntry_Struct *eq2 = (structs::CharacterSelectEntry_Struct *) bufptr;
-				memcpy(eq2->Name, emu->Name[r], strlen(emu->Name[r]) + 1);
+		emu_ptr = __emu_buffer;
+		emu_ptr += sizeof(CharacterSelect_Struct);
+
+		unsigned char *eq_ptr = __packet->pBuffer;
+		eq_ptr += sizeof(structs::CharacterSelect_Struct);
+
+		for (int counter = 0; counter < character_count; ++counter) {
+			emu_cse = (CharacterSelectEntry_Struct *)emu_ptr;
+			eq_cse = (structs::CharacterSelectEntry_Struct *)eq_ptr;
+
+			strcpy(eq_cse->Name, emu_cse->Name);
+			eq_ptr += strlen(eq_cse->Name);
+			eq_cse = (structs::CharacterSelectEntry_Struct *)eq_ptr;
+
+			eq_cse->Class = emu_cse->Class;
+			eq_cse->Race = emu_cse->Race;
+			eq_cse->Level = emu_cse->Level;
+			eq_cse->ShroudClass = emu_cse->ShroudClass;
+			eq_cse->ShroudRace = emu_cse->ShroudRace;
+			eq_cse->Zone = emu_cse->Zone;
+			eq_cse->Instance = emu_cse->Instance;
+			eq_cse->Gender = emu_cse->Gender;
+			eq_cse->Face = emu_cse->Face;
+
+			for (int equip_index = 0; equip_index < _MaterialCount; equip_index++) {
+				eq_cse->Equip[equip_index].Material = emu_cse->Equip[equip_index].Material;
+				eq_cse->Equip[equip_index].Unknown1 = emu_cse->Equip[equip_index].Unknown1;
+				eq_cse->Equip[equip_index].EliteMaterial = emu_cse->Equip[equip_index].EliteMaterial;
+				eq_cse->Equip[equip_index].HeroForgeModel = emu_cse->Equip[equip_index].HeroForgeModel;
+				eq_cse->Equip[equip_index].Material2 = emu_cse->Equip[equip_index].Material2;
+				eq_cse->Equip[equip_index].Color.Color = emu_cse->Equip[equip_index].Color.Color;
 			}
-			//adjust for name.
-			bufptr += strlen(emu->Name[r]);
-			{	//post-name section...
-				structs::CharacterSelectEntry_Struct *eq2 = (structs::CharacterSelectEntry_Struct *) bufptr;
-				eq2->Class_ = emu->Class_[r];
-				eq2->Race = emu->Race[r];
-				eq2->Level = emu->Level[r];
-				eq2->Class_2 = emu->Class_[r];
-				eq2->Race2 = emu->Race[r];
-				eq2->Zone = emu->Zone[r];
-				eq2->Instance = 0;
-				eq2->Gender = emu->Gender[r];
-				eq2->Face = emu->Face[r];
-				int k;
-				for (k = 0; k < _MaterialCount; k++) {
-					eq2->Equip[k].Material = emu->Equip[r][k].Material;
-					eq2->Equip[k].Unknown1 = emu->Equip[r][k].Unknown1;
-					eq2->Equip[k].EliteMaterial = emu->Equip[r][k].EliteMaterial;
-					eq2->Equip[k].HeroForgeModel = emu->Equip[r][k].HeroForgeModel;
-					eq2->Equip[k].Material2 = emu->Equip[r][k].Material2;
-					eq2->Equip[k].Color.Color = emu->Equip[r][k].Color.Color;
-				}
-				eq2->Unknown15 = 0xFF;
-				eq2->Unknown19 = 0xFF;
-				eq2->DrakkinTattoo = emu->DrakkinTattoo[r];
-				eq2->DrakkinDetails = emu->DrakkinDetails[r];
-				eq2->Deity = emu->Deity[r];
-				eq2->Primary = emu->Primary[r];
-				eq2->Secondary = emu->Secondary[r];
-				eq2->HairColor = emu->HairColor[r];
-				eq2->BeardColor = emu->BeardColor[r];
-				eq2->EyeColor1 = emu->EyeColor1[r];
-				eq2->EyeColor2 = emu->EyeColor2[r];
-				eq2->HairStyle = emu->HairStyle[r];
-				eq2->Beard = emu->Beard[r];
-				eq2->CharEnabled = 1;
-				eq2->Tutorial = emu->Tutorial[r];
-				eq2->DrakkinHeritage = emu->DrakkinHeritage[r];
-				eq2->Unknown1 = 0;
-				eq2->GoHome = emu->GoHome[r];
-				eq2->LastLogin = 1212696584;
-				eq2->Unknown2 = 0;
-			}
-			bufptr += sizeof(structs::CharacterSelectEntry_Struct);
+
+			eq_cse->Unknown15 = emu_cse->Unknown15;
+			eq_cse->Unknown19 = emu_cse->Unknown19;
+			eq_cse->DrakkinTattoo = emu_cse->DrakkinTattoo;
+			eq_cse->DrakkinDetails = emu_cse->DrakkinDetails;
+			eq_cse->Deity = emu_cse->Deity;
+			eq_cse->PrimaryIDFile = emu_cse->PrimaryIDFile;
+			eq_cse->SecondaryIDFile = emu_cse->SecondaryIDFile;
+			eq_cse->HairColor = emu_cse->HairColor;
+			eq_cse->BeardColor = emu_cse->BeardColor;
+			eq_cse->EyeColor1 = emu_cse->EyeColor1;
+			eq_cse->EyeColor2 = emu_cse->EyeColor2;
+			eq_cse->HairStyle = emu_cse->HairStyle;
+			eq_cse->Beard = emu_cse->Beard;
+			eq_cse->Enabled = emu_cse->Enabled;
+			eq_cse->Tutorial = emu_cse->Tutorial;
+			eq_cse->DrakkinHeritage = emu_cse->DrakkinHeritage;
+			eq_cse->Unknown1 = emu_cse->Unknown1;
+			eq_cse->GoHome = emu_cse->GoHome;
+			eq_cse->LastLogin = emu_cse->LastLogin;
+			eq_cse->Unknown2 = emu_cse->Unknown2;
+
+			emu_ptr += sizeof(CharacterSelectEntry_Struct);
+			eq_ptr += sizeof(structs::CharacterSelectEntry_Struct);
 		}
 
 		FINISH_ENCODE();

@@ -1155,39 +1155,96 @@ namespace Titanium
 
 	ENCODE(OP_SendCharInfo)
 	{
-		ENCODE_LENGTH_EXACT(CharacterSelect_Struct);
+		ENCODE_LENGTH_ATLEAST(CharacterSelect_Struct);
 		SETUP_DIRECT_ENCODE(CharacterSelect_Struct, structs::CharacterSelect_Struct);
 
-		int r;
-		for (r = 0; r < 10; r++) {
-			OUT(Zone[r]);
-			OUT(EyeColor1[r]);
-			OUT(EyeColor2[r]);
-			OUT(HairStyle[r]);
-			OUT(Primary[r]);
-			if (emu->Race[r] > 473)
-				eq->Race[r] = 1;
-			else
-				eq->Race[r] = emu->Race[r];
-			OUT(Class_[r]);
-			OUT_str(Name[r]);
-			OUT(Gender[r]);
-			OUT(Level[r]);
-			OUT(Secondary[r]);
-			OUT(Face[r]);
-			OUT(Beard[r]);
-			int k;
-			for (k = 0; k < 9; k++) {
-				eq->Equip[r][k] = emu->Equip[r][k].Material;
-				eq->CS_Colors[r][k].Color = emu->Equip[r][k].Color.Color;
+		unsigned char *emu_ptr = __emu_buffer;
+		emu_ptr += sizeof(CharacterSelect_Struct);
+		CharacterSelectEntry_Struct *emu_cse = (CharacterSelectEntry_Struct *)nullptr;
+
+		for (size_t index = 0; index < 10; ++index) {
+			memset(eq->Name[index], 0, 64);
+		}
+
+		// Non character-indexed packet fields
+		eq->Unknown830[0] = 0;
+		eq->Unknown830[1] = 0;
+		eq->Unknown0962[0] = 0;
+		eq->Unknown0962[1] = 0;
+
+		size_t char_index = 0;
+		for (; char_index < emu->CharCount && char_index < 8; ++char_index) {
+			emu_cse = (CharacterSelectEntry_Struct *)emu_ptr;
+
+			eq->Race[char_index] = emu_cse->Race;
+			if (eq->Race[char_index] > 473)
+				eq->Race[char_index] = 1;
+
+			for (int index = 0; index < _MaterialCount; ++index) {
+				eq->CS_Colors[char_index][index].Color = emu_cse->Equip[index].Color.Color;
 			}
-			OUT(HairColor[r]);
-			OUT(GoHome[r]);
-			OUT(Tutorial[r]);
-			OUT(Deity[r]);
-			OUT(BeardColor[r]);
-			eq->Unknown820[r] = 0xFF;
-			eq->Unknown902[r] = 0xFF;
+
+			eq->BeardColor[char_index] = emu_cse->BeardColor;
+			eq->HairStyle[char_index] = emu_cse->HairStyle;
+
+			for (int index = 0; index < _MaterialCount; ++index) {
+				eq->Equip[char_index][index] = emu_cse->Equip[index].Material;
+			}
+
+			eq->SecondaryIDFile[char_index] = emu_cse->SecondaryIDFile;
+			eq->Unknown820[char_index] = 0xFF;
+			eq->Deity[char_index] = emu_cse->Deity;
+			eq->GoHome[char_index] = emu_cse->GoHome;
+			eq->Tutorial[char_index] = emu_cse->Tutorial;
+			eq->Beard[char_index] = emu_cse->Beard;
+			eq->Unknown902[char_index] = 0xFF;
+			eq->PrimaryIDFile[char_index] = emu_cse->PrimaryIDFile;
+			eq->HairColor[char_index] = emu_cse->HairColor;
+			eq->Zone[char_index] = emu_cse->Zone;
+			eq->Class[char_index] = emu_cse->Class;
+			eq->Face[char_index] = emu_cse->Face;
+
+			memcpy(eq->Name[char_index], emu_cse->Name, 64);
+
+			eq->Gender[char_index] = emu_cse->Gender;
+			eq->EyeColor1[char_index] = emu_cse->EyeColor1;
+			eq->EyeColor2[char_index] = emu_cse->EyeColor2;
+			eq->Level[char_index] = emu_cse->Level;
+
+			emu_ptr += sizeof(CharacterSelectEntry_Struct);
+		}
+
+		for (; char_index < 10; ++char_index) {
+			eq->Race[char_index] = 0;
+
+			for (int index = 0; index < _MaterialCount; ++index) {
+				eq->CS_Colors[char_index][index].Color = 0;
+			}
+
+			eq->BeardColor[char_index] = 0;
+			eq->HairStyle[char_index] = 0;
+
+			for (int index = 0; index < _MaterialCount; ++index) {
+				eq->Equip[char_index][index] = 0;
+			}
+
+			eq->SecondaryIDFile[char_index] = 0;
+			eq->Unknown820[char_index] = 0xFF;
+			eq->Deity[char_index] = 0;
+			eq->GoHome[char_index] = 0;
+			eq->Tutorial[char_index] = 0;
+			eq->Beard[char_index] = 0;
+			eq->Unknown902[char_index] = 0xFF;
+			eq->PrimaryIDFile[char_index] = 0;
+			eq->HairColor[char_index] = 0;
+			eq->Zone[char_index] = 0;
+			eq->Class[char_index] = 0;
+			eq->Face[char_index] = 0;
+			//eq->Name[char_index][0] = '\0';	// Cleared above
+			eq->Gender[char_index] = 0;
+			eq->EyeColor1[char_index] = 0;
+			eq->EyeColor2[char_index] = 0;
+			eq->Level[char_index] = 0;
 		}
 
 		FINISH_ENCODE();
