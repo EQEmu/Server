@@ -1,5 +1,16 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 02/17/2015 ==
+Uleat: Implemented per-client character creation limiting. Caps are unknown atm..so, don't get over-zealous!
+Notes:
+	- Titanium is hard-coded to min/max of 8 in both the server and client translator code (client doesn't support variations in available character count)
+	- SoF thru RoF2 have had their max characters raised to 12 from 10
+	- Changing the number of characters per account is accomplished by:
+		1) Setting consts::CHARACTER_CREATION_LIMIT to the desired count in the client's constants file in ../common/patches/
+		2) Ensuring that eq_dictionary's EmuConstants::CHARACTER_CREATION_LIMIT is equal-greater than the client's new value..referencing is good
+		3) Recompiling the server code
+	- A rules-based qualifier may be added at some point
+
 == 02/16/2015 ==
 Trevius: (RoF2) Bazaar Trading (Buying/Selling) is now fully functional.  Bazaar (/bazaar) search is not yet functional.
 demonstar55: (RoF2) Send the bard focus effects, note custom servers will need to fix their items, server side we still use the old system, but RoF2 wasn't showing anything with not sending focus, so send them
