@@ -730,7 +730,7 @@ bool Client::HandleEnterWorldPacket(const EQApplicationPacket *app) {
 			"`id`,                      "
 			"name,                      "
 			"`level`,                   "
-			"last_login,                "
+			"last_login                 "
 			"FROM                       "
 			"character_data             "
 			"WHERE `account_id` = %i ORDER BY `name` LIMIT %u", GetAccountID(), character_limit);
