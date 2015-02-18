@@ -348,8 +348,16 @@ void WorldDatabase::SetTitaniumDefaultStartZone(PlayerProfile_Struct* in_pp, Cha
 	{
 		case 0:
 		{
+			if (in_cc->deity == 203) // Cazie erudites go to paineel
+			{
+			in_pp->zone_id = 75;	// paineel
+			in_pp->binds[0].zoneId = 75;	// paineel
+			}
+			else
+			{
 			in_pp->zone_id = 24;	// erudnext
 			in_pp->binds[0].zoneId = 38;	// tox
+			}
 			break;
 		}
 		case 1:

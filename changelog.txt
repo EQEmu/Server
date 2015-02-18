@@ -1,5 +1,8 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 02/18/2015 ==
+Noudess: Starting erudites that were supposed to start in paineel were landing
+in erudin on Titanium.  Fixed to be paineel.
 == 02/09/2015 ==
 Noudess: Placing an aug tagged as magical onto a non-magical weapon now allows
 the resulting weapon to hit creatures requiring magical creatures.  Seems like
