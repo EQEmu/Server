@@ -1542,13 +1542,13 @@ namespace SoD
 		OUT(beard);
 		//	OUT(unknown00178[10]);
 		for (r = 0; r < 9; r++) {
-			eq->equipment[r].material = emu->item_material[r];
-			eq->equipment[r].unknown1 = 0;
-			eq->equipment[r].elitematerial = 0;
+			eq->equipment[r].Material = emu->item_material[r];
+			eq->equipment[r].Unknown1 = 0;
+			eq->equipment[r].EliteMaterial = 0;
 			//eq->colors[r].color = emu->colors[r].color;
 		}
 		for (r = 0; r < 7; r++) {
-			OUT(item_tint[r].color);
+			OUT(item_tint[r].Color);
 		}
 		//	OUT(unknown00224[48]);
 		//NOTE: new client supports 300 AAs, our internal rep/PP
@@ -1606,26 +1606,46 @@ namespace SoD
 		OUT(endurance);
 		OUT(aapoints_spent);
 		OUT(aapoints);
+
 		//	OUT(unknown06160[4]);
-		//NOTE: new client supports 20 bandoliers, our internal rep
-		//only supports 4..
-		for (r = 0; r < 4; r++) {
-			OUT_str(bandoliers[r].name);
-			uint32 k;
-			for (k = 0; k < structs::MAX_PLAYER_BANDOLIER_ITEMS; k++) {
-				OUT(bandoliers[r].items[k].item_id);
-				OUT(bandoliers[r].items[k].icon);
-				OUT_str(bandoliers[r].items[k].item_name);
+
+		// Copy bandoliers where server and client indexes converge
+		for (r = 0; r < EmuConstants::BANDOLIERS_SIZE && r < consts::BANDOLIERS_SIZE; ++r) {
+			OUT_str(bandoliers[r].Name);
+			for (uint32 k = 0; k < consts::BANDOLIER_ITEM_COUNT; ++k) { // Will need adjusting if 'server != client' is ever true
+				OUT(bandoliers[r].Items[k].ID);
+				OUT(bandoliers[r].Items[k].Icon);
+				OUT_str(bandoliers[r].Items[k].Name);
 			}
 		}
-		//	OUT(unknown07444[5120]);
-		for (r = 0; r < structs::MAX_POTIONS_IN_BELT; r++) {
-			OUT(potionbelt.items[r].item_id);
-			OUT(potionbelt.items[r].icon);
-			OUT_str(potionbelt.items[r].item_name);
+		// Nullify bandoliers where server and client indexes diverge, with a client bias
+		for (r = EmuConstants::BANDOLIERS_SIZE; r < consts::BANDOLIERS_SIZE; ++r) {
+			eq->bandoliers[r].Name[0] = '\0';
+			for (uint32 k = 0; k < consts::BANDOLIER_ITEM_COUNT; ++k) { // Will need adjusting if 'server != client' is ever true
+				eq->bandoliers[r].Items[k].ID = 0;
+				eq->bandoliers[r].Items[k].Icon = 0;
+				eq->bandoliers[r].Items[k].Name[0] = '\0';
+			}
 		}
+
+		//	OUT(unknown07444[5120]);
+
+		// Copy potion belt where server and client indexes converge
+		for (r = 0; r < EmuConstants::POTION_BELT_ITEM_COUNT && r < consts::POTION_BELT_ITEM_COUNT; ++r) {
+			OUT(potionbelt.Items[r].ID);
+			OUT(potionbelt.Items[r].Icon);
+			OUT_str(potionbelt.Items[r].Name);
+		}
+		// Nullify potion belt where server and client indexes diverge, with a client bias
+		for (r = EmuConstants::POTION_BELT_ITEM_COUNT; r < consts::POTION_BELT_ITEM_COUNT; ++r) {
+			eq->potionbelt.Items[r].ID = 0;
+			eq->potionbelt.Items[r].Icon = 0;
+			eq->potionbelt.Items[r].Name[0] = '\0';
+		}
+
 		//	OUT(unknown12852[8]);
 		//	OUT(unknown12864[76]);
+
 		OUT_str(name);
 		OUT_str(last_name);
 		OUT(guild_id);
@@ -1891,76 +1911,95 @@ namespace SoD
 
 	ENCODE(OP_SendCharInfo)
 	{
-		ENCODE_LENGTH_EXACT(CharacterSelect_Struct);
+		ENCODE_LENGTH_ATLEAST(CharacterSelect_Struct);
 		SETUP_VAR_ENCODE(CharacterSelect_Struct);
 
-		//EQApplicationPacket *packet = *p;
-		//const CharacterSelect_Struct *emu = (CharacterSelect_Struct *) packet->pBuffer;
+		// Zero-character count shunt
+		if (emu->CharCount == 0) {
+			ALLOC_VAR_ENCODE(structs::CharacterSelect_Struct, sizeof(structs::CharacterSelect_Struct));
+			eq->CharCount = emu->CharCount;
+			eq->TotalChars = eq->TotalChars;
 
-		int char_count;
-		int namelen = 0;
-		for (char_count = 0; char_count < 10; char_count++) {
-			if (emu->name[char_count][0] == '\0')
-				break;
-			if (strcmp(emu->name[char_count], "<none>") == 0)
-				break;
-			namelen += strlen(emu->name[char_count]);
+			if (eq->TotalChars > consts::CHARACTER_CREATION_LIMIT)
+				eq->TotalChars = consts::CHARACTER_CREATION_LIMIT;
+
+			FINISH_ENCODE();
+			return;
 		}
 
-		int total_length = sizeof(structs::CharacterSelect_Struct)
-			+ char_count * sizeof(structs::CharacterSelectEntry_Struct)
-			+ namelen;
+		unsigned char *emu_ptr = __emu_buffer;
+		emu_ptr += sizeof(CharacterSelect_Struct);
+		CharacterSelectEntry_Struct *emu_cse = (CharacterSelectEntry_Struct *)nullptr;
+
+		size_t names_length = 0;
+		size_t character_count = 0;
+		for (; character_count < emu->CharCount && character_count < consts::CHARACTER_CREATION_LIMIT; ++character_count) {
+			emu_cse = (CharacterSelectEntry_Struct *)emu_ptr;
+			names_length += strlen(emu_cse->Name);
+			emu_ptr += sizeof(CharacterSelectEntry_Struct);
+		}
+
+		size_t total_length = sizeof(structs::CharacterSelect_Struct)
+			+ character_count * sizeof(structs::CharacterSelectEntry_Struct)
+			+ names_length;
 
 		ALLOC_VAR_ENCODE(structs::CharacterSelect_Struct, total_length);
+		structs::CharacterSelectEntry_Struct *eq_cse = (structs::CharacterSelectEntry_Struct *)nullptr;
 
-		//unsigned char *eq_buffer = new unsigned char[total_length];
-		//structs::CharacterSelect_Struct *eq_head = (structs::CharacterSelect_Struct *) eq_buffer;
+		eq->CharCount = character_count;
+		eq->TotalChars = emu->TotalChars;
 
-		eq->char_count = char_count;
-		eq->total_chars = 10;
+		if (eq->TotalChars > consts::CHARACTER_CREATION_LIMIT)
+			eq->TotalChars = consts::CHARACTER_CREATION_LIMIT;
 
-		unsigned char *bufptr = (unsigned char *)eq->entries;
-		int r;
-		for (r = 0; r < char_count; r++) {
-			{	//pre-name section...
-				structs::CharacterSelectEntry_Struct *eq2 = (structs::CharacterSelectEntry_Struct *) bufptr;
-				eq2->level = emu->level[r];
-				eq2->hairstyle = emu->hairstyle[r];
-				eq2->gender = emu->gender[r];
-				memcpy(eq2->name, emu->name[r], strlen(emu->name[r]) + 1);
+		emu_ptr = __emu_buffer;
+		emu_ptr += sizeof(CharacterSelect_Struct);
+
+		unsigned char *eq_ptr = __packet->pBuffer;
+		eq_ptr += sizeof(structs::CharacterSelect_Struct);
+
+		for (int counter = 0; counter < character_count; ++counter) {
+			emu_cse = (CharacterSelectEntry_Struct *)emu_ptr;
+			eq_cse = (structs::CharacterSelectEntry_Struct *)eq_ptr;
+
+			eq_cse->Level = emu_cse->Level;
+			eq_cse->HairStyle = emu_cse->HairStyle;
+			eq_cse->Gender = emu_cse->Gender;
+
+			strcpy(eq_cse->Name, emu_cse->Name);
+			eq_ptr += strlen(eq_cse->Name);
+			eq_cse = (structs::CharacterSelectEntry_Struct *)eq_ptr;
+
+			eq_cse->Beard = emu_cse->Beard;
+			eq_cse->HairColor = emu_cse->HairColor;
+			eq_cse->Face = emu_cse->Face;
+
+			for (int equip_index = 0; equip_index < _MaterialCount; equip_index++) {
+				eq_cse->Equip[equip_index].Material = emu_cse->Equip[equip_index].Material;
+				eq_cse->Equip[equip_index].Unknown1 = emu_cse->Equip[equip_index].Unknown1;
+				eq_cse->Equip[equip_index].EliteMaterial = emu_cse->Equip[equip_index].EliteMaterial;
+				eq_cse->Equip[equip_index].Color.Color = emu_cse->Equip[equip_index].Color.Color;
 			}
-			//adjust for name.
-			bufptr += strlen(emu->name[r]);
-			{	//post-name section...
-				structs::CharacterSelectEntry_Struct *eq2 = (structs::CharacterSelectEntry_Struct *) bufptr;
-				eq2->beard = emu->beard[r];
-				eq2->haircolor = emu->haircolor[r];
-				eq2->face = emu->face[r];
-				int k;
-				for (k = 0; k < _MaterialCount; k++) {
-					eq2->equip[k].material = emu->equip[r][k].material;
-					eq2->equip[k].unknown1 = emu->equip[r][k].unknown1;
-					eq2->equip[k].elitematerial = emu->equip[r][k].elitematerial;
-					eq2->equip[k].color.color = emu->equip[r][k].color.color;
-				}
-				eq2->primary = emu->primary[r];
-				eq2->secondary = emu->secondary[r];
-				eq2->tutorial = emu->tutorial[r]; // was u15
-				eq2->u15 = 0xff;
-				eq2->deity = emu->deity[r];
-				eq2->zone = emu->zone[r];
-				eq2->u19 = 0xFF;
-				eq2->race = emu->race[r];
-				eq2->gohome = emu->gohome[r];
-				eq2->class_ = emu->class_[r];
-				eq2->eyecolor1 = emu->eyecolor1[r];
-				eq2->beardcolor = emu->beardcolor[r];
-				eq2->eyecolor2 = emu->eyecolor2[r];
-				eq2->drakkin_heritage = emu->drakkin_heritage[r];
-				eq2->drakkin_tattoo = emu->drakkin_tattoo[r];
-				eq2->drakkin_details = emu->drakkin_details[r];
-			}
-			bufptr += sizeof(structs::CharacterSelectEntry_Struct);
+
+			eq_cse->PrimaryIDFile = emu_cse->PrimaryIDFile;
+			eq_cse->SecondaryIDFile = emu_cse->SecondaryIDFile;
+			eq_cse->Tutorial = emu_cse->Tutorial;
+			eq_cse->Unknown15 = emu_cse->Unknown15;
+			eq_cse->Deity = emu_cse->Deity;
+			eq_cse->Zone = emu_cse->Zone;
+			eq_cse->Unknown19 = emu_cse->Unknown19;
+			eq_cse->Race = emu_cse->Race;
+			eq_cse->GoHome = emu_cse->GoHome;
+			eq_cse->Class = emu_cse->Class;
+			eq_cse->EyeColor1 = emu_cse->EyeColor1;
+			eq_cse->BeardColor = emu_cse->BeardColor;
+			eq_cse->EyeColor2 = emu_cse->EyeColor2;
+			eq_cse->DrakkinHeritage = emu_cse->DrakkinHeritage;
+			eq_cse->DrakkinTattoo = emu_cse->DrakkinTattoo;
+			eq_cse->DrakkinDetails = emu_cse->DrakkinDetails;
+
+			emu_ptr += sizeof(CharacterSelectEntry_Struct);
+			eq_ptr += sizeof(structs::CharacterSelectEntry_Struct);
 		}
 
 		FINISH_ENCODE();
@@ -2355,7 +2394,7 @@ namespace SoD
 		OUT(material);
 		OUT(unknown06);
 		OUT(elite_material);
-		OUT(color.color);
+		OUT(color.Color);
 		OUT(wear_slot_id);
 
 		FINISH_ENCODE();
@@ -2723,7 +2762,7 @@ namespace SoD
 				for (k = 0; k < 9; ++k)
 				{
 					{
-						VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->colors[k].color);
+						VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->colors[k].Color);
 					}
 				}
 			}
@@ -2733,11 +2772,11 @@ namespace SoD
 				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);
 				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);
 
-				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->equipment[MaterialPrimary].material);
+				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->equipment[MaterialPrimary].Material);
 				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);
 				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);
 
-				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->equipment[MaterialSecondary].material);
+				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->equipment[MaterialSecondary].Material);
 				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);
 				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);
 			}
@@ -2748,9 +2787,9 @@ namespace SoD
 				structs::EquipStruct *Equipment = (structs::EquipStruct *)Buffer;
 
 				for (k = 0; k < 9; k++) {
-					Equipment[k].material = emu->equipment[k].material;
-					Equipment[k].unknown1 = emu->equipment[k].unknown1;
-					Equipment[k].elitematerial = emu->equipment[k].elitematerial;
+					Equipment[k].Material = emu->equipment[k].Material;
+					Equipment[k].Unknown1 = emu->equipment[k].Unknown1;
+					Equipment[k].EliteMaterial = emu->equipment[k].EliteMaterial;
 				}
 
 				Buffer += (sizeof(structs::EquipStruct) * 9);
@@ -3465,7 +3504,7 @@ namespace SoD
 		IN(material);
 		IN(unknown06);
 		IN(elite_material);
-		IN(color.color);
+		IN(color.Color);
 		IN(wear_slot_id);
 		emu->hero_forge_model = 0;
 		emu->unknown18 = 0;

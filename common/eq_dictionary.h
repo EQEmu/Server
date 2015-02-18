@@ -1,7 +1,7 @@
 /*
 EQEMu:  Everquest Server Emulator
 
-Copyright (C) 2001-2014 EQEMu Development Team (http://eqemulator.net)
+Copyright (C) 2001-2015 EQEMu Development Team (http://eqemulator.net)
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -42,11 +42,14 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 //using namespace RoF2::maps;	// server inventory maps enumeration (code and database sync'd to reference)
 //using namespace RoF::slots;	// server possessions slots enumeration (code and database sync'd to reference)
 
-class EmuConstants {
+class EmuConstants
+{
 	// an immutable value is required to initialize arrays, etc... use this class as a repository for those
 public:
 	// database
 	static const ClientVersion CHARACTER_CREATION_CLIENT = ClientVersion::RoF2; // adjust according to starting item placement and target client
+
+	static const size_t CHARACTER_CREATION_LIMIT = RoF2::consts::CHARACTER_CREATION_LIMIT;
 
 	// inventory
 	static uint16 InventoryMapSize(int16 indexMap);
@@ -140,23 +143,18 @@ public:
 	static const uint16 ITEM_COMMON_SIZE = RoF::consts::ITEM_COMMON_SIZE;
 	static const uint16 ITEM_CONTAINER_SIZE = Titanium::consts::ITEM_CONTAINER_SIZE;
 
-	// player profile
-	//static const uint32 CLASS_BITMASK = 0;	// needs value
-	//static const uint32 RACE_BITMASK = 0;	// needs value
+	// BANDOLIERS_SIZE sets maximum limit..active limit will need to be handled by the appropriate AA or spell (or item?)
+	static const size_t BANDOLIERS_SIZE = RoF2::consts::BANDOLIERS_SIZE;			// number of bandolier instances
+	static const size_t BANDOLIER_ITEM_COUNT = RoF2::consts::BANDOLIER_ITEM_COUNT;	// number of equipment slots in bandolier instance
 
-	// BANDOLIERS_COUNT sets maximum limit..active limit will need to be handled by the appropriate AA
-	static const uint32 BANDOLIERS_COUNT = Titanium::consts::BANDOLIERS_COUNT;	// count = number of bandolier instances
-	static const uint32 BANDOLIER_SIZE = Titanium::consts::BANDOLIER_SIZE;		// size = number of equipment slots in bandolier instance
-	static const uint32 POTION_BELT_SIZE = Titanium::consts::POTION_BELT_SIZE;
+	// POTION_BELT_SIZE sets maximum limit..active limit will need to be handled by the appropriate AA or spell (or item?)
+	static const size_t POTION_BELT_ITEM_COUNT = RoF2::consts::POTION_BELT_ITEM_COUNT;
 
-	static const size_t TEXT_LINK_BODY_LENGTH = 56;
-
-	// legacy-related functions
-	//static int ServerToPerlSlot(int slot);	// encode
-	//static int PerlToServerSlot(int slot);	// decode
+	static const size_t TEXT_LINK_BODY_LENGTH = RoF2::consts::TEXT_LINK_BODY_LENGTH;
 };
 
-class EQLimits {
+class EQLimits
+{
 	// values should default to a non-beneficial value..unless value conflicts with intended operation
 	//
 	// EmuConstants may be used as references..but, not every reference needs to be in EmuConstants (i.e., AllowsEmptyBagInBag(), CoinHasWeight(), etc...)
@@ -174,6 +172,9 @@ public:
 	static bool IsValidMobClientVersion(ClientVersion clientVersion);
 	static ClientVersion ValidateMobClientVersion(ClientVersion clientVersion);
 
+	// database
+	static size_t CharacterCreationLimit(ClientVersion clientVersion);
+
 	// inventory
 	static uint16 InventoryMapSize(int16 indexMap, ClientVersion clientVersion);
 	static uint64 PossessionsBitmask(ClientVersion clientVersion);
@@ -190,11 +191,6 @@ public:
 
 	// player profile
 	static bool CoinHasWeight(ClientVersion clientVersion);
-
-	static uint32 BandoliersCount(ClientVersion clientVersion);
-	static uint32 BandolierSize(ClientVersion clientVersion);
-
-	static uint32 PotionBeltSize(ClientVersion clientVersion);
 };
 
 #endif /* EQ_DICTIONARY_H */

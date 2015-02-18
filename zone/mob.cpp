@@ -961,10 +961,10 @@ void Mob::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho)
 		// Only Player Races Wear Armor
 		if (Mob::IsPlayerRace(race) || i > 6)
 		{
-			ns->spawn.equipment[i].material = GetEquipmentMaterial(i);
-			ns->spawn.equipment[i].elitematerial = IsEliteMaterialItem(i);
-			ns->spawn.equipment[i].heroforgemodel = GetHerosForgeModel(i);
-			ns->spawn.colors[i].color = GetEquipmentColor(i);
+			ns->spawn.equipment[i].Material = GetEquipmentMaterial(i);
+			ns->spawn.equipment[i].EliteMaterial = IsEliteMaterialItem(i);
+			ns->spawn.equipment[i].HeroForgeModel = GetHerosForgeModel(i);
+			ns->spawn.colors[i].Color = GetEquipmentColor(i);
 		}
 	}
 
@@ -2562,7 +2562,7 @@ void Mob::SendWearChange(uint8 material_slot)
 	wc->material = GetEquipmentMaterial(material_slot);
 	wc->elite_material = IsEliteMaterialItem(material_slot);
 	wc->hero_forge_model = GetHerosForgeModel(material_slot);
-	wc->color.color = GetEquipmentColor(material_slot);
+	wc->color.Color = GetEquipmentColor(material_slot);
 	wc->wear_slot_id = material_slot;
 
 	entity_list.QueueClients(this, outapp);
@@ -2577,9 +2577,9 @@ void Mob::SendTextureWC(uint8 slot, uint16 texture, uint32 hero_forge_model, uin
 	wc->spawn_id = this->GetID();
 	wc->material = texture;
 	if (this->IsClient())
-		wc->color.color = GetEquipmentColor(slot);
+		wc->color.Color = GetEquipmentColor(slot);
 	else
-		wc->color.color = this->GetArmorTint(slot);
+		wc->color.Color = this->GetArmorTint(slot);
 	wc->wear_slot_id = slot;
 
 	wc->unknown06 = unknown06;
@@ -2607,7 +2607,7 @@ void Mob::SetSlotTint(uint8 material_slot, uint8 red_tint, uint8 green_tint, uin
 	wc->spawn_id = this->GetID();
 	wc->material = GetEquipmentMaterial(material_slot);
 	wc->hero_forge_model = GetHerosForgeModel(material_slot);
-	wc->color.color = color;
+	wc->color.Color = color;
 	wc->wear_slot_id = material_slot;
 
 	entity_list.QueueClients(this, outapp);
@@ -2624,7 +2624,7 @@ void Mob::WearChange(uint8 material_slot, uint16 texture, uint32 color, uint32 h
 	wc->spawn_id = this->GetID();
 	wc->material = texture;
 	wc->hero_forge_model = hero_forge_model;
-	wc->color.color = color;
+	wc->color.Color = color;
 	wc->wear_slot_id = material_slot;
 
 	entity_list.QueueClients(this, outapp);

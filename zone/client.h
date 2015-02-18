@@ -1022,7 +1022,7 @@ public:
 	inline int CompletedTasksInSet(int TaskSet) { return (taskstate ? taskstate->CompletedTasksInSet(TaskSet) :0); }
 
 	inline const ClientVersion GetClientVersion() const { return m_ClientVersion; }
-	inline const uint32 GetClientVersionBit() const { return ClientVersionBit; }
+	inline const uint32 GetClientVersionBit() const { return m_ClientVersionBit; }
 	inline void SetClientVersion(ClientVersion in) { m_ClientVersion = in; }
 
 	/** Adventure Stuff **/
@@ -1140,7 +1140,7 @@ public:
 	void HandleLFGuildResponse(ServerPacket *pack);
 	void SendLFGuildStatus();
 	void SendGuildLFGuildStatus();
-	inline bool XTargettingAvailable() const { return ((ClientVersionBit & BIT_UFAndLater) && RuleB(Character, EnableXTargetting)); }
+	inline bool XTargettingAvailable() const { return ((m_ClientVersionBit & BIT_UFAndLater) && RuleB(Character, EnableXTargetting)); }
 	inline uint8 GetMaxXTargets() const { return MaxXTargets; }
 	void SetMaxXTargets(uint8 NewMax);
 	bool IsXTarget(const Mob *m) const;
@@ -1517,7 +1517,7 @@ private:
 	uint32 AttemptedMessages;
 
 	ClientVersion m_ClientVersion;
-	uint32 ClientVersionBit;
+	uint32 m_ClientVersionBit;
 
 	int XPRate;
 

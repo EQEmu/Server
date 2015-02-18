@@ -103,53 +103,53 @@ struct AdventureInfo {
 */
 struct Color_Struct
 {
-	union
-	{
-		struct
-		{
-			uint8	blue;
-			uint8	green;
-			uint8	red;
-			uint8	use_tint;	// if there's a tint this is FF
-		} rgb;
-		uint32 color;
+	union {
+		struct {
+			uint8 blue;
+			uint8 Green;
+			uint8 Red;
+			uint8 UseTint;	// if there's a tint this is FF
+		} RGB;
+		uint32 Color;
 	};
 };
 
-struct CharSelectEquip {
-	uint32 material;
-	uint32 unknown1;
-	uint32 elitematerial;
-	Color_Struct color;
+struct CharSelectEquip
+{
+	uint32 Material;
+	uint32 Unknown1;
+	uint32 EliteMaterial;
+	Color_Struct Color;
 };
 
-struct CharacterSelectEntry_Struct {
-/*0000*/	uint8 level;				//
-/*0000*/	uint8 hairstyle;			//
-/*0002*/	uint8 gender;				//
-/*0003*/	char name[1];				//variable length, edi+0
-/*0000*/	uint8 beard;				//
-/*0001*/	uint8 haircolor;			//
-/*0000*/	uint8 face;					//
-/*0000*/	CharSelectEquip	equip[9];
-/*0000*/	uint32 primary;				//
-/*0000*/	uint32 secondary;			//
-/*0000*/	uint8 u15;					// 0xff
-/*0000*/	uint32 deity;				//
-/*0000*/	uint16 zone;				//
-/*0000*/	uint16 instance;
-/*0000*/	uint8 gohome;				//
-/*0000*/	uint8 u19;					// 0xff
-/*0000*/	uint32 race;				//
-/*0000*/	uint8 tutorial;				//
-/*0000*/	uint8 class_;				//
-/*0000*/	uint8 eyecolor1;			//
-/*0000*/	uint8 beardcolor;			//
-/*0000*/	uint8 eyecolor2;			//
-/*0000*/	uint32 drakkin_heritage;	// Drakkin Heritage
-/*0000*/	uint32 drakkin_tattoo;		// Drakkin Tattoo
-/*0000*/	uint32 drakkin_details;		// Drakkin Details (Facial Spikes)
-/*0000*/	uint8 unknown;				// New field to Underfoot
+struct CharacterSelectEntry_Struct
+{
+/*0000*/	uint8 Level;				//
+/*0000*/	uint8 HairStyle;			//
+/*0002*/	uint8 Gender;				//
+/*0003*/	char Name[1];				// variable length, edi+0
+/*0000*/	uint8 Beard;				//
+/*0001*/	uint8 HairColor;			//
+/*0000*/	uint8 Face;					//
+/*0000*/	CharSelectEquip	Equip[9];
+/*0000*/	uint32 PrimaryIDFile;		//
+/*0000*/	uint32 SecondaryIDFile;		//
+/*0000*/	uint8 Unknown15;			// 0xff
+/*0000*/	uint32 Deity;				//
+/*0000*/	uint16 Zone;				//
+/*0000*/	uint16 Instance;
+/*0000*/	uint8 GoHome;				//
+/*0000*/	uint8 Unknown19;			// 0xff
+/*0000*/	uint32 Race;				//
+/*0000*/	uint8 Tutorial;				//
+/*0000*/	uint8 Class;				//
+/*0000*/	uint8 EyeColor1;			//
+/*0000*/	uint8 BeardColor;			//
+/*0000*/	uint8 EyeColor2;			//
+/*0000*/	uint32 DrakkinHeritage;		// Drakkin Heritage
+/*0000*/	uint32 DrakkinTattoo;		// Drakkin Tattoo
+/*0000*/	uint32 DrakkinDetails;		// Drakkin Details (Facial Spikes)
+/*0000*/	uint8 Unknown;				// New field to Underfoot
 
 };
 
@@ -157,20 +157,22 @@ struct CharacterSelectEntry_Struct {
 ** Character Selection Struct
 **
 */
-struct CharacterSelect_Struct {
-/*0000*/	uint32	char_count;		//number of chars in this packet
-/*0004*/	uint32	total_chars;	//total number of chars allowed?
-/*0008*/	CharacterSelectEntry_Struct entries[0];
+struct CharacterSelect_Struct
+{
+/*0000*/	uint32 CharCount;	//number of chars in this packet
+/*0004*/	uint32 TotalChars;	//total number of chars allowed?
+/*0008*/	CharacterSelectEntry_Struct Entries[0];
 };
 
 /*
 * Visible equiptment.
 * Size: 12 Octets
 */
-struct EquipStruct {
-/*00*/ uint32 material;
-/*04*/ uint32 unknown1;
-/*08*/ uint32 elitematerial;
+struct EquipStruct
+{
+/*00*/ uint32 Material;
+/*04*/ uint32 Unknown1;
+/*08*/ uint32 EliteMaterial;
 /*12*/
 };
 
@@ -722,9 +724,6 @@ struct Disciplines_Struct {
 };
 
 static const uint32 MAX_PLAYER_TRIBUTES = 5;
-static const uint32 MAX_PLAYER_BANDOLIER = 20;
-static const uint32 MAX_PLAYER_BANDOLIER_ITEMS = 4;
-static const uint32 MAX_POTIONS_IN_BELT = 5;
 static const uint32 TRIBUTE_NONE = 0xFFFFFFFF;
 
 struct Tribute_Struct {
@@ -732,26 +731,42 @@ struct Tribute_Struct {
 	uint32 tier;
 };
 
-//len = 72
-struct BandolierItem_Struct {
-	uint32 item_id;
-	uint32 icon;
-	char item_name[64];
-};
-
-//len = 320
-enum { //bandolier item positions
-	bandolierMainHand = 0,
-	bandolierOffHand,
+// Bandolier item positions
+enum
+{
+	bandolierPrimary = 0,
+	bandolierSecondary,
 	bandolierRange,
 	bandolierAmmo
 };
-struct Bandolier_Struct {
-	char name[32];
-	BandolierItem_Struct items[MAX_PLAYER_BANDOLIER_ITEMS];
+
+//len = 72
+struct BandolierItem_Struct
+{
+	uint32 ID;
+	uint32 Icon;
+	char Name[64];
 };
-struct PotionBelt_Struct {
-	BandolierItem_Struct items[MAX_POTIONS_IN_BELT];
+
+//len = 320
+struct Bandolier_Struct
+{
+	char Name[32];
+	BandolierItem_Struct Items[consts::BANDOLIER_ITEM_COUNT];
+};
+
+//len = 72
+struct PotionBeltItem_Struct
+{
+	uint32 ID;
+	uint32 Icon;
+	char Name[64];
+};
+
+//len = 288
+struct PotionBelt_Struct
+{
+	PotionBeltItem_Struct Items[consts::POTION_BELT_ITEM_COUNT];
 };
 
 static const uint32 MAX_GROUP_LEADERSHIP_AA_ARRAY = 16;
@@ -974,7 +989,7 @@ struct PlayerProfile_Struct
 /*11236*/ uint32  aapoints_spent;		// Number of spent AA points
 /*11240*/ uint32  aapoints;				// Unspent AA points
 /*11244*/ uint8 unknown11244[4];
-/*11248*/ Bandolier_Struct bandoliers[MAX_PLAYER_BANDOLIER]; // [6400] bandolier contents
+/*11248*/ Bandolier_Struct bandoliers[consts::BANDOLIERS_SIZE]; // [6400] bandolier contents
 /*17648*/ PotionBelt_Struct  potionbelt;	// [360] potion belt 72 extra octets by adding 1 more belt slot
 /*18008*/ uint8 unknown18008[8];
 /*18016*/ uint32 available_slots;
@@ -3758,30 +3773,35 @@ struct DynamicWall_Struct {
 /*80*/
 };
 
-enum {	//bandolier actions
-	BandolierCreate = 0,
-	BandolierRemove = 1,
-	BandolierSet = 2
+// Bandolier actions
+enum
+{
+	bandolierCreate = 0,
+	bandolierRemove,
+	bandolierSet
 };
 
-struct BandolierCreate_Struct {
-/*00*/	uint32	action;	//0 for create
-/*04*/	uint8	number;
-/*05*/	char	name[32];
-/*37*/	uint16	unknown37;	//seen 0x93FD
-/*39*/	uint8	unknown39;	//0
+struct BandolierCreate_Struct
+{
+	/*00*/	uint32 Action;		//0 for create
+	/*04*/	uint8 Number;
+	/*05*/	char Name[32];
+	/*37*/	uint16 Unknown37;	//seen 0x93FD
+	/*39*/	uint8 Unknown39;	//0
 };
 
-struct BandolierDelete_Struct {
-/*00*/	uint32	action;
-/*04*/	uint8	number;
-/*05*/	uint8	unknown05[35];
+struct BandolierDelete_Struct
+{
+	/*00*/	uint32 Action;
+	/*04*/	uint8 Number;
+	/*05*/	uint8 Unknown05[35];
 };
 
-struct BandolierSet_Struct {
-/*00*/	uint32	action;
-/*04*/	uint8	number;
-/*05*/	uint8	unknown05[35];
+struct BandolierSet_Struct
+{
+	/*00*/	uint32 Action;
+	/*04*/	uint8 Number;
+	/*05*/	uint8 Unknown05[35];
 };
 
 // Not 100% sure on this struct. Live as of 1/1/11 is different than UF. Seems to work 'OK'
