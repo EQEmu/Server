@@ -3742,7 +3742,7 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob* spelltar, bool reflect, bool use_r
 		return false;
 	}
 
-	if (IsValidSpell(spells[spell_id].RecourseLink))
+	if (IsValidSpell(spells[spell_id].RecourseLink) && spells[spell_id].RecourseLink != spell_id)
 		SpellFinished(spells[spell_id].RecourseLink, this, 10, 0, -1, spells[spells[spell_id].RecourseLink].ResistDiff);
 
 	if (IsDetrimentalSpell(spell_id)) {
