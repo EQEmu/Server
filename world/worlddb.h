@@ -20,6 +20,7 @@
 
 #include "../common/shareddb.h"
 #include "../common/zone_numbers.h"
+#include "../common/eq_packet.h"
 
 struct PlayerProfile_Struct;
 struct CharCreate_Struct;
@@ -29,7 +30,7 @@ struct CharacterSelect_Struct;
 class WorldDatabase : public SharedDatabase {
 public:
 	bool GetStartZone(PlayerProfile_Struct* in_pp, CharCreate_Struct* in_cc, bool isTitanium);
-	void GetCharSelectInfo(uint32 account_id, CharacterSelect_Struct*, uint32 ClientVersion);
+	void GetCharSelectInfo(uint32 accountID, EQApplicationPacket **outApp, uint32 clientVersionBit);
 	int MoveCharacterToBind(int CharID, uint8 bindnum = 0);
 
 	void GetLauncherList(std::vector<std::string> &result);

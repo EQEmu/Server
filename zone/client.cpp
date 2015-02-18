@@ -250,7 +250,7 @@ Client::Client(EQStreamInterface* ieqs)
 	AttemptedMessages = 0;
 	TotalKarma = 0;
 	m_ClientVersion = ClientVersion::Unknown;
-	ClientVersionBit = 0;
+	m_ClientVersionBit = 0;
 	AggroCount = 0;
 	RestRegenHP = 0;
 	RestRegenMana = 0;
@@ -3039,7 +3039,7 @@ void Client::Tell_StringID(uint32 string_id, const char *who, const char *messag
 
 void Client::SetTint(int16 in_slot, uint32 color) {
 	Color_Struct new_color;
-	new_color.color = color;
+	new_color.Color = color;
 	SetTint(in_slot, new_color);
 	database.SaveCharacterMaterialColor(this->CharacterID(), in_slot, color);
 }
@@ -3050,8 +3050,8 @@ void Client::SetTint(int16 in_slot, Color_Struct& color) {
 	uint8 matslot = Inventory::CalcMaterialFromSlot(in_slot);
 	if (matslot != _MaterialInvalid)
 	{
-		m_pp.item_tint[matslot].color = color.color;
-		database.SaveCharacterMaterialColor(this->CharacterID(), in_slot, color.color);
+		m_pp.item_tint[matslot].Color = color.Color;
+		database.SaveCharacterMaterialColor(this->CharacterID(), in_slot, color.Color);
 	}
 
 }
@@ -7468,7 +7468,7 @@ void Client::SendClearMercInfo()
 
 void Client::DuplicateLoreMessage(uint32 ItemID)
 {
-	if(!(ClientVersionBit & BIT_RoFAndLater))
+	if (!(m_ClientVersionBit & BIT_RoFAndLater))
 	{
 		Message_StringID(0, PICK_LORE);
 		return;

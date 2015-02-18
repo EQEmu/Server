@@ -33,20 +33,20 @@ extern std::vector<RaceClassCombos> character_create_race_class_combos;
 
 
 // the current stuff is at the bottom of this function
-void WorldDatabase::GetCharSelectInfo(uint32 account_id, CharacterSelect_Struct* cs, uint32 ClientVersion) {
-	Inventory *inv;
-	uint8 has_home = 0;
-	uint8 has_bind = 0;
+void WorldDatabase::GetCharSelectInfo(uint32 accountID, EQApplicationPacket **outApp, uint32 clientVersionBit)
+{
+	/* Set Character Creation Limit */
+	ClientVersion client_version = ClientVersionFromBit(clientVersionBit);
+	size_t character_limit = EQLimits::CharacterCreationLimit(client_version);
+	
+	// Validate against absolute server max
+	if (character_limit > EmuConstants::CHARACTER_CREATION_LIMIT)
+		character_limit = EmuConstants::CHARACTER_CREATION_LIMIT;
 
-	/* Initialize Variables */
-	for (int i=0; i<10; i++) {
-		strcpy(cs->name[i], "<none>");
-		cs->zone[i] = 0;
-		cs->level[i] = 0;
-		cs->tutorial[i] = 0;
-		cs->gohome[i] = 0;
-	}
-
+	// Force Titanium clients to use '8'
+	if (client_version == ClientVersion::Titanium)
+		character_limit = 8;
+	
 	/* Get Character Info */
 	std::string cquery = StringFormat(
 		"SELECT                     "
@@ -72,52 +72,93 @@ void WorldDatabase::GetCharSelectInfo(uint32 account_id, CharacterSelect_Struct*
 		"zone_id		            "  // 19
 		"FROM                       "
 		"character_data             "
-		"WHERE `account_id` = %i ORDER BY `name` LIMIT 10   ", account_id);
-	auto results = database.QueryDatabase(cquery); int char_num = 0;
+		"WHERE `account_id` = %i ORDER BY `name` LIMIT %u", accountID, character_limit);
+	auto results = database.QueryDatabase(cquery);
+
+	size_t character_count = results.RowCount();
+	if (character_count == 0) {
+		*outApp = new EQApplicationPacket(OP_SendCharInfo, sizeof(CharacterSelect_Struct));
+		CharacterSelect_Struct *cs = (CharacterSelect_Struct *)(*outApp)->pBuffer;
+		cs->CharCount = 0;
+		cs->TotalChars = character_limit;
+		return;
+	}
+
+	size_t packet_size = sizeof(CharacterSelect_Struct) + (sizeof(CharacterSelectEntry_Struct) * character_count);
+	*outApp = new EQApplicationPacket(OP_SendCharInfo, packet_size);
+
+	unsigned char *buff_ptr = (*outApp)->pBuffer;
+	CharacterSelect_Struct *cs = (CharacterSelect_Struct *)buff_ptr;
+
+	cs->CharCount = character_count;
+	cs->TotalChars = character_limit;
+
+	buff_ptr += sizeof(CharacterSelect_Struct);
 	for (auto row = results.begin(); row != results.end(); ++row) {
+		CharacterSelectEntry_Struct *cse = (CharacterSelectEntry_Struct *)buff_ptr;
 		PlayerProfile_Struct pp;
+		Inventory inv;
+		uint32 character_id = (uint32)atoi(row[0]);
+		uint8 has_home = 0;
+		uint8 has_bind = 0;
+
 		memset(&pp, 0, sizeof(PlayerProfile_Struct));
+		
+		/* Fill CharacterSelectEntry_Struct */
+		strcpy(cse->Name, row[1]);
+		cse->Class = (uint8)atoi(row[4]);
+		cse->Race = (uint32)atoi(row[3]);
+		cse->Level = (uint8)atoi(row[5]);
+		cse->ShroudClass = cse->Class;
+		cse->ShroudRace = cse->Race;
+		cse->Zone = (uint16)atoi(row[19]);
+		cse->Instance = 0;
+		cse->Gender = (uint8)atoi(row[2]);
+		cse->Face = (uint8)atoi(row[15]);
+		cse->Equip[0] = { 0 };							// Processed below
+		cse->Unknown15 = 0xFF;
+		cse->Unknown19 = 0xFF;
+		cse->DrakkinTattoo = (uint32)atoi(row[17]);
+		cse->DrakkinDetails = (uint32)atoi(row[18]);
+		cse->Deity = (uint32)atoi(row[6]);
+		cse->PrimaryIDFile = 0;							// Processed Below
+		cse->SecondaryIDFile = 0;						// Processed Below
+		cse->HairColor = (uint8)atoi(row[9]);
+		cse->BeardColor = (uint8)atoi(row[10]);
+		cse->EyeColor1 = (uint8)atoi(row[11]);
+		cse->EyeColor2 = (uint8)atoi(row[12]);
+		cse->HairStyle = (uint8)atoi(row[13]);
+		cse->Beard = (uint8)atoi(row[14]);
+		cse->Enabled = 1;
+		cse->Tutorial = 0;								// Processed Below
+		cse->DrakkinHeritage = (uint32)atoi(row[16]);
+		cse->Unknown1 = 0;
+		cse->GoHome = 0;								// Processed Below
+		cse->LastLogin = (uint32)atoi(row[7]);			// RoF2 value: 1212696584
+		cse->Unknown2 = 0;
+		/* Fill End */
 
-		uint32 character_id = atoi(row[0]);
-		strcpy(cs->name[char_num], row[1]);
-		uint8 lvl = atoi(row[5]);
-		cs->level[char_num] = lvl;
-		cs->class_[char_num] = atoi(row[4]);
-		cs->race[char_num] = atoi(row[3]);
-		cs->gender[char_num] = atoi(row[2]);
-		cs->deity[char_num] = atoi(row[6]);
-		cs->zone[char_num] = atoi(row[19]);
-		cs->face[char_num] = atoi(row[15]);
-		cs->haircolor[char_num] = atoi(row[9]);
-		cs->beardcolor[char_num] = atoi(row[10]);
-		cs->eyecolor2[char_num] = atoi(row[12]);
-		cs->eyecolor1[char_num] = atoi(row[11]);
-		cs->hairstyle[char_num] = atoi(row[13]);
-		cs->beard[char_num] = atoi(row[14]);
-		cs->drakkin_heritage[char_num] = atoi(row[16]);
-		cs->drakkin_tattoo[char_num] = atoi(row[17]);
-		cs->drakkin_details[char_num] = atoi(row[18]);
-
-		if (RuleB(World, EnableTutorialButton) && (lvl <= RuleI(World, MaxLevelForTutorial)))
-			cs->tutorial[char_num] = 1;
+		if (RuleB(World, EnableTutorialButton) && (cse->Level <= RuleI(World, MaxLevelForTutorial))) {
+			cse->Tutorial = 1;
+		}
 
 		if (RuleB(World, EnableReturnHomeButton)) {
 			int now = time(nullptr);
 			if ((now - atoi(row[7])) >= RuleI(World, MinOfflineTimeToReturnHome))
-				cs->gohome[char_num] = 1;
+				cse->GoHome = 1;
 		}
 
 		/* Set Bind Point Data for any character that may possibly be missing it for any reason */
 		cquery = StringFormat("SELECT `zone_id`, `instance_id`, `x`, `y`, `z`, `heading`, `is_home` FROM `character_bind`  WHERE `id` = %i LIMIT 2", character_id);
-		auto results_bind = database.QueryDatabase(cquery); has_home = 0; has_bind = 0;
+		auto results_bind = database.QueryDatabase(cquery);
 		for (auto row_b = results_bind.begin(); row_b != results_bind.end(); ++row_b) {
 			if (row_b[6] && atoi(row_b[6]) == 1){ has_home = 1; }
 			if (row_b[6] && atoi(row_b[6]) == 0){ has_bind = 1; }
 		}
 
-		if (has_home == 0 || has_bind == 0){
+		if (has_home == 0 || has_bind == 0) {
 			cquery = StringFormat("SELECT `zone_id`, `bind_id`, `x`, `y`, `z` FROM `start_zones` WHERE `player_class` = %i AND `player_deity` = %i AND `player_race` = %i",
-				cs->class_[char_num], cs->deity[char_num], cs->race[char_num]);
+				cse->Class, cse->Deity, cse->Race);
 			auto results_bind = database.QueryDatabase(cquery);
 			for (auto row_d = results_bind.begin(); row_d != results_bind.end(); ++row_d) {
 				/* If a bind_id is specified, make them start there */
@@ -133,118 +174,96 @@ void WorldDatabase::GetCharSelectInfo(uint32 account_id, CharacterSelect_Struct*
 					float z = atof(row_d[4]);
 					if (x == 0 && y == 0 && z == 0){ GetSafePoints(pp.binds[4].zoneId, 0, &x, &y, &z); }
 					pp.binds[4].x = x; pp.binds[4].y = y; pp.binds[4].z = z;
-
 				}
 			}
 			pp.binds[0] = pp.binds[4];
 			/* If no home bind set, set it */
-			if (has_home == 0){
+			if (has_home == 0) {
 				std::string query = StringFormat("REPLACE INTO `character_bind` (id, zone_id, instance_id, x, y, z, heading, is_home)"
 					" VALUES (%u, %u, %u, %f, %f, %f, %f, %i)",
 					character_id, pp.binds[4].zoneId, 0, pp.binds[4].x, pp.binds[4].y, pp.binds[4].z, pp.binds[4].heading, 1);
-				auto results_bset = QueryDatabase(query); 
+				auto results_bset = QueryDatabase(query);
 			}
 			/* If no regular bind set, set it */
-			if (has_bind == 0){
+			if (has_bind == 0) {
 				std::string query = StringFormat("REPLACE INTO `character_bind` (id, zone_id, instance_id, x, y, z, heading, is_home)"
 					" VALUES (%u, %u, %u, %f, %f, %f, %f, %i)",
 					character_id, pp.binds[0].zoneId, 0, pp.binds[0].x, pp.binds[0].y, pp.binds[0].z, pp.binds[0].heading, 0);
-				auto results_bset = QueryDatabase(query); 
+				auto results_bset = QueryDatabase(query);
 			}
 		}
 		/* Bind End */
 
-		/* Load Character Material Data for Char Select */
-		cquery = StringFormat("SELECT slot, red, green, blue, use_tint, color FROM `character_material` WHERE `id` = %u", character_id);
-		auto results_b = database.QueryDatabase(cquery); uint8 slot = 0;
-		for (auto row_b = results_b.begin(); row_b != results_b.end(); ++row_b)
-		{
-			slot = atoi(row_b[0]);
-			pp.item_tint[slot].rgb.red = atoi(row_b[1]);
-			pp.item_tint[slot].rgb.green = atoi(row_b[2]);
-			pp.item_tint[slot].rgb.blue = atoi(row_b[3]);
-			pp.item_tint[slot].rgb.use_tint = atoi(row_b[4]);
-		}
-
 		/* Load Inventory */
-		inv = new Inventory;
-		if (GetInventory(account_id, cs->name[char_num], inv))
-		{
+		// If we ensure that the material data is updated appropriately, we can do away with inventory loads
+		if (GetInventory(accountID, cse->Name, &inv)) {
 			const Item_Struct* item = nullptr;
 			const ItemInst* inst = nullptr;
 			int16 invslot = 0;
 
-			for (uint32 matslot = 0; matslot < _MaterialCount; matslot++)
-			{
+			for (uint32 matslot = 0; matslot < _MaterialCount; matslot++) {
 				invslot = Inventory::CalcSlotFromMaterial(matslot);
 				if (invslot == INVALID_INDEX) { continue; }
-
-				inst = inv->GetItem(invslot);
+				inst = inv.GetItem(invslot);
 				if (inst == nullptr) { continue; }
-
 				item = inst->GetItem();
 				if (item == nullptr) { continue; }
 
-				if (matslot > 6)
-				{
+				if (matslot > 6) {
 					uint32 idfile = 0;
 					// Weapon Models 
-					if (inst->GetOrnamentationIDFile() != 0)
-					{
+					if (inst->GetOrnamentationIDFile() != 0) {
 						idfile = inst->GetOrnamentationIDFile();
-						cs->equip[char_num][matslot].material = idfile;
+						cse->Equip[matslot].Material = idfile;
 					}
-					else
-					{
-						if (strlen(item->IDFile) > 2)
-						{
+					else {
+						if (strlen(item->IDFile) > 2) {
 							idfile = atoi(&item->IDFile[2]);
-							cs->equip[char_num][matslot].material = idfile;
+							cse->Equip[matslot].Material = idfile;
 						}
 					}
-					if (matslot == MaterialPrimary)
-					{
-						cs->primary[char_num] = idfile;
+					if (matslot == MaterialPrimary) {
+						cse->PrimaryIDFile = idfile;
 					}
-					else
-					{
-						cs->secondary[char_num] = idfile;
+					else {
+						cse->SecondaryIDFile = idfile;
 					}
 				}
-				else
-				{
+				else {
 					uint32 color = 0;
-					if (pp.item_tint[matslot].rgb.use_tint)
-					{
-						color = pp.item_tint[matslot].color;
+					if (pp.item_tint[matslot].RGB.UseTint) {
+						color = pp.item_tint[matslot].Color;
 					}
-					else
-					{
+					else {
 						color = inst->GetColor();
 					}
 
 					// Armor Materials/Models
-					cs->equip[char_num][matslot].material = item->Material;
-					cs->equip[char_num][matslot].elitematerial = item->EliteMaterial;
-					cs->equip[char_num][matslot].heroforgemodel = inst->GetOrnamentHeroModel(matslot);
-					cs->equip[char_num][matslot].color.color = color;
+					cse->Equip[matslot].Material = item->Material;
+					cse->Equip[matslot].EliteMaterial = item->EliteMaterial;
+					cse->Equip[matslot].HeroForgeModel = inst->GetOrnamentHeroModel(matslot);
+					cse->Equip[matslot].Color.Color = color;
 				}
 			}
 		}
-		else
-		{
-			printf("Error loading inventory for %s\n", cs->name[char_num]);
+		else {
+			printf("Error loading inventory for %s\n", cse->Name);
+		}
+		/* Load Inventory End */
+
+		/* Load Character Material Data for Char Select */
+		cquery = StringFormat("SELECT slot, red, green, blue, use_tint, color FROM `character_material` WHERE `id` = %u", character_id);
+		auto results_b = database.QueryDatabase(cquery); uint8 slot = 0;
+		for (auto row_b = results_b.begin(); row_b != results_b.end(); ++row_b) {
+			slot = atoi(row_b[0]);
+			pp.item_tint[slot].RGB.Red = atoi(row_b[1]);
+			pp.item_tint[slot].RGB.Green = atoi(row_b[2]);
+			pp.item_tint[slot].RGB.Blue = atoi(row_b[3]);
+			pp.item_tint[slot].RGB.UseTint = atoi(row_b[4]);
 		}
 
-		safe_delete(inv);
-
-		if (++char_num > 10)
-		{
-			break;
-		}
+		buff_ptr += sizeof(CharacterSelectEntry_Struct);
 	}
-
-	return;
 }
 
 int WorldDatabase::MoveCharacterToBind(int CharID, uint8 bindnum) {

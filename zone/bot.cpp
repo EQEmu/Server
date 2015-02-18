@@ -4395,24 +4395,24 @@ void Bot::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho) {
 				item = inst->GetItem();
 				if (item != 0)
 				{
-					ns->spawn.equipment[i].material = item->Material;
-					ns->spawn.equipment[i].elitematerial = item->EliteMaterial;
-					ns->spawn.equipment[i].heroforgemodel = item->HerosForgeModel;
+					ns->spawn.equipment[i].Material = item->Material;
+					ns->spawn.equipment[i].EliteMaterial = item->EliteMaterial;
+					ns->spawn.equipment[i].HeroForgeModel = item->HerosForgeModel;
 					if (armor_tint[i])
 					{
-						ns->spawn.colors[i].color = armor_tint[i];
+						ns->spawn.colors[i].Color = armor_tint[i];
 
 					}
 					else
 					{
-						ns->spawn.colors[i].color = item->Color;
+						ns->spawn.colors[i].Color = item->Color;
 					}
 				}
 				else
 				{
 					if (armor_tint[i])
 					{
-						ns->spawn.colors[i].color = armor_tint[i];
+						ns->spawn.colors[i].Color = armor_tint[i];
 					}
 				}
 			}
@@ -4426,9 +4426,9 @@ void Bot::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho) {
 			{
 				if(strlen(item->IDFile) > 2)
 				{
-					ns->spawn.equipment[MaterialPrimary].material = atoi(&item->IDFile[2]);
+					ns->spawn.equipment[MaterialPrimary].Material = atoi(&item->IDFile[2]);
 				}
-				ns->spawn.colors[MaterialPrimary].color = GetEquipmentColor(MaterialPrimary);
+				ns->spawn.colors[MaterialPrimary].Color = GetEquipmentColor(MaterialPrimary);
 			}
 		}
 
@@ -4440,9 +4440,9 @@ void Bot::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho) {
 			{
 				if(strlen(item->IDFile) > 2)
 				{
-					ns->spawn.equipment[MaterialSecondary].material = atoi(&item->IDFile[2]);
+					ns->spawn.equipment[MaterialSecondary].Material = atoi(&item->IDFile[2]);
 				}
-				ns->spawn.colors[MaterialSecondary].color = GetEquipmentColor(MaterialSecondary);
+				ns->spawn.colors[MaterialSecondary].Color = GetEquipmentColor(MaterialSecondary);
 			}
 		}
 	}
@@ -5061,7 +5061,7 @@ void Bot::SendBotArcheryWearChange(uint8 material_slot, uint32 material, uint32 
 
 	wc->spawn_id = GetID();
 	wc->material = material;
-	wc->color.color = color;
+	wc->color.Color = color;
 	wc->wear_slot_id = material_slot;
 
 	entity_list.QueueClients(this, outapp);
