@@ -966,12 +966,12 @@ void Client::BulkSendInventoryItems()
 #endif*/
 
 void Client::BulkSendMerchantInventory(int merchant_id, int npcid) {
-	const Item_Struct* handyitem = nullptr;
+	const ItemData* handyitem = nullptr;
 	uint32 numItemSlots = 80; //The max number of items passed in the transaction.
 	if (ClientVersionBit & BIT_RoFAndLater) { // RoF+ can send 200 items
 		numItemSlots = 200;
 	}
-	const Item_Struct *item;
+	const ItemData *item;
 	std::list<MerchantList> merlist = zone->merchanttable[merchant_id];
 	std::list<MerchantList>::const_iterator itr;
 	Mob* merch = entity_list.GetMobByNpcTypeID(npcid);
@@ -1229,7 +1229,7 @@ void Client::OPMemorizeSpell(const EQApplicationPacket* app)
 
 			if(inst && inst->IsType(ItemClassCommon))
 			{
-				const Item_Struct* item = inst->GetItem();
+				const ItemData* item = inst->GetItem();
 
 				if(item && item->Scroll.Effect == (int32)(memspell->spell_id))
 				{

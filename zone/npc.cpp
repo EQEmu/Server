@@ -27,7 +27,7 @@
 #include "../common/clientversions.h"
 #include "../common/features.h"
 #include "../common/item.h"
-#include "../common/item_struct.h"
+#include "../common/item_data.h"
 #include "../common/linked_list.h"
 #include "../common/servertalk.h"
 
@@ -509,7 +509,7 @@ void NPC::QueryLoot(Client* to)
 
 	int x = 0;
 	for(ItemList::iterator cur = itemlist.begin(); cur != itemlist.end(); ++cur, ++x) {
-		const Item_Struct* item = database.GetItem((*cur)->item_id);
+		const ItemData* item = database.GetItem((*cur)->item_id);
 		if (item == nullptr) {
 			Log.Out(Logs::General, Logs::Error, "Database error, invalid item");
 			continue;
@@ -1375,7 +1375,7 @@ void NPC::PickPocket(Client* thief) {
 		end = itemlist.end();
 		for(; cur != end && x < 49; ++cur) {
 			ServerLootItem_Struct* citem = *cur;
-			const Item_Struct* item = database.GetItem(citem->item_id);
+			const ItemData* item = database.GetItem(citem->item_id);
 			if (item)
 			{
 				inst = database.CreateItem(item, citem->charges);
@@ -1401,7 +1401,7 @@ void NPC::PickPocket(Client* thief) {
 			inst = database.CreateItem(steal_items[random], charges[random]);
 			if (inst)
 			{
-				const Item_Struct* item = inst->GetItem();
+				const ItemData* item = inst->GetItem();
 				if (item)
 				{
 					if (/*item->StealSkill || */steal_skill >= stealchance)

@@ -55,7 +55,7 @@ bool Mob::AttackAnimation(SkillUseTypes &skillinuse, int Hand, const ItemInst* w
 	// Determine animation
 	int type = 0;
 	if (weapon && weapon->IsType(ItemClassCommon)) {
-		const Item_Struct* item = weapon->GetItem();
+		const ItemData* item = weapon->GetItem();
 
 		Log.Out(Logs::Detail, Logs::Attack, "Weapon skill : %i", item->ItemType);
 
@@ -806,9 +806,9 @@ int32 Client::GetMeleeMitDmg(Mob *attacker, int32 damage, int32 minhit,
 //Returns the weapon damage against the input mob
 //if we cannot hit the mob with the current weapon we will get a value less than or equal to zero
 //Else we know we can hit.
-//GetWeaponDamage(mob*, const Item_Struct*) is intended to be used for mobs or any other situation where we do not have a client inventory item
+//GetWeaponDamage(mob*, const ItemData*) is intended to be used for mobs or any other situation where we do not have a client inventory item
 //GetWeaponDamage(mob*, const ItemInst*) is intended to be used for situations where we have a client inventory item
-int Mob::GetWeaponDamage(Mob *against, const Item_Struct *weapon_item) {
+int Mob::GetWeaponDamage(Mob *against, const ItemData *weapon_item) {
 	int dmg = 0;
 	int banedmg = 0;
 
@@ -924,7 +924,7 @@ int Mob::GetWeaponDamage(Mob *against, const ItemInst *weapon_item, uint32 *hate
 
 	//check for items being illegally attained
 	if(weapon_item){
-		const Item_Struct *mWeaponItem = weapon_item->GetItem();
+		const ItemData *mWeaponItem = weapon_item->GetItem();
 		if(mWeaponItem){
 			if(mWeaponItem->ReqLevel > GetLevel()){
 				return 0;
@@ -1246,7 +1246,7 @@ bool Client::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, b
 			// Damage bonuses apply only to hits from the main hand (Hand == MainPrimary) by characters level 28 and above
 			// who belong to a melee class. If we're here, then all of these conditions apply.
 
-			ucDamageBonus = GetWeaponDamageBonus( weapon ? weapon->GetItem() : (const Item_Struct*) nullptr );
+			ucDamageBonus = GetWeaponDamageBonus( weapon ? weapon->GetItem() : (const ItemData*) nullptr );
 
 			min_hit += (int) ucDamageBonus;
 			max_hit += (int) ucDamageBonus;
@@ -1257,7 +1257,7 @@ bool Client::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, b
 		if (Hand == MainSecondary) {
 			if (aabonuses.SecondaryDmgInc || itembonuses.SecondaryDmgInc || spellbonuses.SecondaryDmgInc){
 
-				ucDamageBonus = GetWeaponDamageBonus( weapon ? weapon->GetItem() : (const Item_Struct*) nullptr );
+				ucDamageBonus = GetWeaponDamageBonus( weapon ? weapon->GetItem() : (const ItemData*) nullptr );
 
 				min_hit += (int) ucDamageBonus;
 				max_hit += (int) ucDamageBonus;
@@ -1739,7 +1739,7 @@ bool NPC::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool
 	}
 
 	//figure out what weapon they are using, if any
-	const Item_Struct* weapon = nullptr;
+	const ItemData* weapon = nullptr;
 	if (Hand == MainPrimary && equipment[MainPrimary] > 0)
 		weapon = database.GetItem(equipment[MainPrimary]);
 	else if (equipment[MainSecondary])
@@ -2642,7 +2642,7 @@ void Mob::DamageShield(Mob* attacker, bool spell_ds) {
 	}
 }
 
-uint8 Mob::GetWeaponDamageBonus( const Item_Struct *Weapon )
+uint8 Mob::GetWeaponDamageBonus( const ItemData *Weapon )
 {
 	// This function calculates and returns the damage bonus for the weapon identified by the parameter "Weapon".
 	// Modified 9/21/2008 by Cantus
@@ -3946,12 +3946,12 @@ void Mob::TryWeaponProc(const ItemInst* weapon_g, Mob *on, uint16 hand) {
 	}
 
 	if(!weapon_g) {
-		TrySpellProc(nullptr, (const Item_Struct*)nullptr, on);
+		TrySpellProc(nullptr, (const ItemData*)nullptr, on);
 		return;
 	}
 
 	if(!weapon_g->IsType(ItemClassCommon)) {
-		TrySpellProc(nullptr, (const Item_Struct*)nullptr, on);
+		TrySpellProc(nullptr, (const ItemData*)nullptr, on);
 		return;
 	}
 
@@ -3964,7 +3964,7 @@ void Mob::TryWeaponProc(const ItemInst* weapon_g, Mob *on, uint16 hand) {
 	return;
 }
 
-void Mob::TryWeaponProc(const ItemInst *inst, const Item_Struct *weapon, Mob *on, uint16 hand)
+void Mob::TryWeaponProc(const ItemInst *inst, const ItemData *weapon, Mob *on, uint16 hand)
 {
 
 	if (!weapon)
@@ -4017,7 +4017,7 @@ void Mob::TryWeaponProc(const ItemInst *inst, const Item_Struct *weapon, Mob *on
 			const ItemInst *aug_i = inst->GetAugment(r);
 			if (!aug_i) // no aug, try next slot!
 				continue;
-			const Item_Struct *aug = aug_i->GetItem();
+			const ItemData *aug = aug_i->GetItem();
 			if (!aug)
 				continue;
 
@@ -4047,7 +4047,7 @@ void Mob::TryWeaponProc(const ItemInst *inst, const Item_Struct *weapon, Mob *on
 	return;
 }
 
-void Mob::TrySpellProc(const ItemInst *inst, const Item_Struct *weapon, Mob *on, uint16 hand)
+void Mob::TrySpellProc(const ItemInst *inst, const ItemData *weapon, Mob *on, uint16 hand)
 {
 	float ProcBonus = static_cast<float>(spellbonuses.SpellProcChance +
 			itembonuses.SpellProcChance + aabonuses.SpellProcChance);
@@ -4859,7 +4859,7 @@ void Client::SetAttackTimer()
 	attack_timer.SetAtTrigger(4000, true);
 
 	Timer *TimerToUse = nullptr;
-	const Item_Struct *PrimaryWeapon = nullptr;
+	const ItemData *PrimaryWeapon = nullptr;
 
 	for (int i = MainRange; i <= MainSecondary; i++) {
 		//pick a timer
@@ -4872,7 +4872,7 @@ void Client::SetAttackTimer()
 		else	//invalid slot (hands will always hit this)
 			continue;
 
-		const Item_Struct *ItemToUse = nullptr;
+		const ItemData *ItemToUse = nullptr;
 
 		//find our item
 		ItemInst *ci = GetInv().GetItem(i);

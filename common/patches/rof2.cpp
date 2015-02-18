@@ -5136,7 +5136,7 @@ namespace RoF2
 
 		std::stringstream ss(std::stringstream::in | std::stringstream::out | std::stringstream::binary);
 
-		const Item_Struct *item = inst->GetUnscaledItem();
+		const ItemData *item = inst->GetUnscaledItem();
 		//Log.LogDebugType(Logs::General, Logs::Netcode, "[ERROR] Serialize called for: %s", item->Name);
 
 		RoF2::structs::ItemSerializationHeader hdr;

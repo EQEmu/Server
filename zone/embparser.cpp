@@ -864,7 +864,7 @@ void PerlembParser::GetQuestPackageName(bool &isPlayerQuest, bool &isGlobalPlaye
 	}
 	else if(isItemQuest) {
 		// need a valid ItemInst pointer check here..unsure how to cancel this process -U
-		const Item_Struct* item = iteminst->GetItem();
+		const ItemData* item = iteminst->GetItem();
 		package_name = "qst_item_";
 		package_name += itoa(item->ID);
 	}

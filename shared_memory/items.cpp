@@ -22,7 +22,7 @@
 #include "../common/ipc_mutex.h"
 #include "../common/memory_mapped_file.h"
 #include "../common/eqemu_exception.h"
-#include "../common/item_struct.h"
+#include "../common/item_data.h"
 
 void LoadItems(SharedDatabase *database) {
 	EQEmu::IPCMutex mutex("items");
@@ -35,7 +35,7 @@ void LoadItems(SharedDatabase *database) {
 		EQ_EXCEPT("Shared Memory", "Unable to get any items from the database.");
 	}
 
-	uint32 size = static_cast<uint32>(EQEmu::FixedMemoryHashSet<Item_Struct>::estimated_size(items, max_item));
+	uint32 size = static_cast<uint32>(EQEmu::FixedMemoryHashSet<ItemData>::estimated_size(items, max_item));
 	EQEmu::MemoryMappedFile mmf("shared/items", size);
 	mmf.ZeroFile();
 

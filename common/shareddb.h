@@ -20,7 +20,7 @@ struct BaseDataStruct;
 struct InspectMessage_Struct;
 struct PlayerProfile_Struct;
 struct SPDat_Spell_Struct;
-struct Item_Struct;
+struct ItemData;
 struct NPCFactionList;
 struct LootTable_Struct;
 struct LootDrop_Struct;
@@ -82,8 +82,8 @@ class SharedDatabase : public Database
 		    Item Methods
 		*/
 		ItemInst* CreateItem(uint32 item_id, int16 charges = 0, uint32 aug1 = 0, uint32 aug2 = 0, uint32 aug3 = 0, uint32 aug4 = 0, uint32 aug5 = 0, uint32 aug6 = 0, uint8 attuned = 0);
-		ItemInst* CreateItem(const Item_Struct* item, int16 charges = 0, uint32 aug1 = 0, uint32 aug2 = 0, uint32 aug3 = 0, uint32 aug4 = 0, uint32 aug5 = 0, uint32 aug6 = 0, uint8 attuned = 0);
-		ItemInst* CreateBaseItem(const Item_Struct* item, int16 charges = 0);
+		ItemInst* CreateItem(const ItemData* item, int16 charges = 0, uint32 aug1 = 0, uint32 aug2 = 0, uint32 aug3 = 0, uint32 aug4 = 0, uint32 aug5 = 0, uint32 aug6 = 0, uint8 attuned = 0);
+		ItemInst* CreateBaseItem(const ItemData* item, int16 charges = 0);
 
 		/*
 		    Shared Memory crap
@@ -93,8 +93,8 @@ class SharedDatabase : public Database
 		void GetItemsCount(int32 &item_count, uint32 &max_id);
 		void LoadItems(void *data, uint32 size, int32 items, uint32 max_item_id);
 		bool LoadItems();
-		const Item_Struct* IterateItems(uint32* id);
-		const Item_Struct* GetItem(uint32 id);
+		const ItemData* IterateItems(uint32* id);
+		const ItemData* GetItem(uint32 id);
 		const EvolveInfo* GetEvolveInfo(uint32 loregroup);
 
 		//faction lists
@@ -130,7 +130,7 @@ class SharedDatabase : public Database
 
 		EQEmu::MemoryMappedFile *skill_caps_mmf;
 		EQEmu::MemoryMappedFile *items_mmf;
-		EQEmu::FixedMemoryHashSet<Item_Struct> *items_hash;
+		EQEmu::FixedMemoryHashSet<ItemData> *items_hash;
 		EQEmu::MemoryMappedFile *faction_mmf;
 		EQEmu::FixedMemoryHashSet<NPCFactionList> *faction_hash;
 		EQEmu::MemoryMappedFile *loot_table_mmf;

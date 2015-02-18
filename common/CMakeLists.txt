@@ -30,8 +30,10 @@ SET(common_sources
 	faction.cpp
 	guild_base.cpp
 	guilds.cpp
+	inventory.cpp
 	ipc_mutex.cpp
 	item.cpp
+	item_instance.cpp
 	md5.cpp
 	memory_mapped_file.cpp
 	misc.cpp
@@ -135,10 +137,12 @@ SET(common_headers
 	global_define.h
 	guild_base.h
 	guilds.h
+	inventory.h
 	ipc_mutex.h
 	item.h
+	item_data.h
 	item_fieldlist.h
-	item_struct.h
+	item_instance.h
 	languages.h
 	linked_list.h
 	loottable.h

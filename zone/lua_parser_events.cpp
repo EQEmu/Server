@@ -297,7 +297,7 @@ void handle_player_timer(QuestInterface *parse, lua_State* L, Client* client, st
 
 void handle_player_discover_item(QuestInterface *parse, lua_State* L, Client* client, std::string data, uint32 extra_data,
 								 std::vector<EQEmu::Any> *extra_pointers) {
-	const Item_Struct *item = database.GetItem(extra_data);
+	const ItemData *item = database.GetItem(extra_data);
 	if(item) {
 		Lua_Item l_item(item);
 		luabind::adl::object l_item_o = luabind::adl::object(L, l_item);

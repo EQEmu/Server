@@ -151,7 +151,7 @@ void Client::CalcItemBonuses(StatBonuses* newbon) {
 		AddItemBonuses(inst, newbon);
 
 		//These are given special flags due to how often they are checked for various spell effects.
-		const Item_Struct *item = inst->GetItem();
+		const ItemData *item = inst->GetItem();
 		if (i == MainSecondary && (item && item->ItemType == ItemTypeShield))
 			SetShieldEquiped(true);
 		else if (i == MainPrimary && (item && item->ItemType == ItemType2HBlunt))
@@ -206,7 +206,7 @@ void Client::AddItemBonuses(const ItemInst *inst, StatBonuses* newbon, bool isAu
 		return;
 	}
 
-	const Item_Struct *item = inst->GetItem();
+	const ItemData *item = inst->GetItem();
 
 	if(!isTribute && !inst->IsEquipable(GetBaseRace(),GetClass()))
 	{
@@ -570,7 +570,7 @@ void Client::AdditiveWornBonuses(const ItemInst *inst, StatBonuses* newbon, bool
 	if(inst->GetAugmentType()==0 && isAug == true)
 		return;
 
-	const Item_Struct *item = inst->GetItem();
+	const ItemData *item = inst->GetItem();
 
 	if(!inst->IsEquipable(GetBaseRace(),GetClass()))
 		return;
@@ -602,7 +602,7 @@ void Client::CalcEdibleBonuses(StatBonuses* newbon) {
 			break;
 		const ItemInst* inst = GetInv().GetItem(i);
 		if (inst && inst->GetItem() && inst->IsType(ItemClassCommon)) {
-			const Item_Struct *item=inst->GetItem();
+			const ItemData *item=inst->GetItem();
 			if (item->ItemType == ItemTypeFood && !food)
 				food = true;
 			else if (item->ItemType == ItemTypeDrink && !drink)
@@ -618,7 +618,7 @@ void Client::CalcEdibleBonuses(StatBonuses* newbon) {
 			break;
 		const ItemInst* inst = GetInv().GetItem(i);
 		if (inst && inst->GetItem() && inst->IsType(ItemClassCommon)) {
-			const Item_Struct *item=inst->GetItem();
+			const ItemData *item=inst->GetItem();
 			if (item->ItemType == ItemTypeFood && !food)
 				food = true;
 			else if (item->ItemType == ItemTypeDrink && !drink)
@@ -3053,7 +3053,7 @@ void NPC::CalcItemBonuses(StatBonuses *newbon)
 	if(newbon){
 
 		for(int i = 0; i < EmuConstants::EQUIPMENT_SIZE; i++){
-			const Item_Struct *cur = database.GetItem(equipment[i]);
+			const ItemData *cur = database.GetItem(equipment[i]);
 			if(cur){
 				//basic stats
 				newbon->AC += cur->AC;

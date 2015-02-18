@@ -247,8 +247,8 @@ uint32 Bot::GetBotArcheryRange()
 	if (!range_inst || !ammo_inst)
 		return 0;
 
-	const Item_Struct *range_item = range_inst->GetItem();
-	const Item_Struct *ammo_item = ammo_inst->GetItem();
+	const ItemData *range_item = range_inst->GetItem();
+	const ItemData *ammo_item = ammo_inst->GetItem();
 
 	// no item struct for whatever reason
 	if (!range_item || !ammo_item)
@@ -2991,12 +2991,12 @@ void Bot::BotRangedAttack(Mob* other) {
 	}
 
 	ItemInst* rangedItem = GetBotItem(MainRange);
-	const Item_Struct* RangeWeapon = 0;
+	const ItemData* RangeWeapon = 0;
 	if(rangedItem)
 		RangeWeapon = rangedItem->GetItem();
 
 	ItemInst* ammoItem = GetBotItem(MainAmmo);
-	const Item_Struct* Ammo = 0;
+	const ItemData* Ammo = 0;
 	if(ammoItem)
 		Ammo = ammoItem->GetItem();
 
@@ -3120,7 +3120,7 @@ void Bot::DoMeleeSkillAttackDmg(Mob* other, uint16 weapon_damage, SkillUseTypes 
 
 		if(GetLevel() >= 28 && IsWarriorClass() )
 		{
-			int ucDamageBonus = GetWeaponDamageBonus((const Item_Struct*) nullptr );
+			int ucDamageBonus = GetWeaponDamageBonus((const ItemData*) nullptr );
 
 			min_hit += (int) ucDamageBonus;
 			max_hit += (int) ucDamageBonus;
@@ -3165,7 +3165,7 @@ void Bot::DoMeleeSkillAttackDmg(Mob* other, uint16 weapon_damage, SkillUseTypes 
 
 	if(skillinuse == SkillBash){
 		const ItemInst* inst = GetBotItem(MainSecondary);
-		const Item_Struct* botweapon = 0;
+		const ItemData* botweapon = 0;
 		if(inst)
 			botweapon = inst->GetItem();
 		if(botweapon) {
@@ -3230,7 +3230,7 @@ void Bot::ApplySpecialAttackMod(SkillUseTypes skill, int32 &dmg, int32 &mindmg) 
 
 	if (item_slot >= EmuConstants::EQUIPMENT_BEGIN){
 		const ItemInst* inst = GetBotItem(item_slot);
-		const Item_Struct* botweapon = 0;
+		const ItemData* botweapon = 0;
 		if(inst)
 			botweapon = inst->GetItem();
 		if(botweapon)
@@ -3645,7 +3645,7 @@ void Bot::AI_Process() {
 				//now off hand
 				if(GetTarget() && attack_dw_timer.Check() && CanThisClassDualWield()) {
 					const ItemInst* instweapon = GetBotItem(MainSecondary);
-					const Item_Struct* weapon = 0;
+					const ItemData* weapon = 0;
 					//can only dual wield without a weapon if you're a monk
 					if(instweapon || (botClass == MONK)) {
 						if(instweapon)
@@ -4381,7 +4381,7 @@ void Bot::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho) {
 		ns->spawn.helm = helmtexture; //0xFF;
 		ns->spawn.equip_chest2 = texture; //0xFF;
 
-		const Item_Struct* item = 0;
+		const ItemData* item = 0;
 		const ItemInst* inst = 0;
 
 		uint32 spawnedbotid = 0;
@@ -5682,7 +5682,7 @@ void Bot::PerformTradeWithClient(int16 beginSlotID, int16 endSlotID, Client* cli
 			//EQoffline: will give the items to the bots and change the bot stats
 			if(inst && (GetBotOwner() == client->CastToMob()) && !IsEngaged()) {
 				std::string TempErrorMessage;
-				const Item_Struct* mWeaponItem = inst->GetItem();
+				const ItemData* mWeaponItem = inst->GetItem();
 				bool failedLoreCheck = false;
 				for (int m = AUG_BEGIN; m  <EmuConstants::ITEM_COMMON_SIZE; ++m) {
 					ItemInst *itm = inst->GetAugment(m);
@@ -5855,7 +5855,7 @@ void Bot::PerformTradeWithClient(int16 beginSlotID, int16 endSlotID, Client* cli
 			}
 		}
 
-		const Item_Struct* item2 = 0;
+		const ItemData* item2 = 0;
 		for(int y=beginSlotID; y<=endSlotID; ++y) {
 			item2 = database.GetItem(items[y]);
 			if(item2) {
@@ -6156,7 +6156,7 @@ bool Bot::Attack(Mob* other, int Hand, bool FromRiposte, bool IsStrikethrough, b
 			// Damage bonuses apply only to hits from the main hand (Hand == MainPrimary) by characters level 28 and above
 			// who belong to a melee class. If we're here, then all of these conditions apply.
 
-			ucDamageBonus = GetWeaponDamageBonus( weapon ? weapon->GetItem() : (const Item_Struct*) nullptr );
+			ucDamageBonus = GetWeaponDamageBonus( weapon ? weapon->GetItem() : (const ItemData*) nullptr );
 
 			min_hit += (int) ucDamageBonus;
 			max_hit += (int) ucDamageBonus;
@@ -6167,7 +6167,7 @@ bool Bot::Attack(Mob* other, int Hand, bool FromRiposte, bool IsStrikethrough, b
 		if (Hand==MainSecondary) {
 			if (aabonuses.SecondaryDmgInc || itembonuses.SecondaryDmgInc || spellbonuses.SecondaryDmgInc){
 
-				ucDamageBonus = GetWeaponDamageBonus( weapon ? weapon->GetItem() : (const Item_Struct*) nullptr );
+				ucDamageBonus = GetWeaponDamageBonus( weapon ? weapon->GetItem() : (const ItemData*) nullptr );
 
 				min_hit += (int) ucDamageBonus;
 				max_hit += (int) ucDamageBonus;
@@ -6755,8 +6755,8 @@ int32 Bot::GetBotFocusEffect(BotfocusType bottype, uint16 spell_id) {
 	//Check if item focus effect exists for the client.
 	if (itembonuses.FocusEffects[bottype]){
 
-		const Item_Struct* TempItem = 0;
-		const Item_Struct* UsedItem = 0;
+		const ItemData* TempItem = 0;
+		const ItemData* UsedItem = 0;
 		const ItemInst* TempInst = 0;
 		uint16 UsedFocusID = 0;
 		int32 Total = 0;
@@ -6804,7 +6804,7 @@ int32 Bot::GetBotFocusEffect(BotfocusType bottype, uint16 spell_id) {
 				aug = ins->GetAugment(y);
 				if(aug)
 				{
-					const Item_Struct* TempItemAug = aug->GetItem();
+					const ItemData* TempItemAug = aug->GetItem();
 					if (TempItemAug && TempItemAug->Focus.Effect > 0 && TempItemAug->Focus.Effect != SPELL_UNKNOWN) {
 						if(rand_effectiveness) {
 							focus_max = CalcBotFocusEffect(bottype, TempItemAug->Focus.Effect, spell_id, true);
@@ -7686,7 +7686,7 @@ void Bot::DoSpecialAttackDamage(Mob *who, SkillUseTypes skill, int32 max_damage,
 
 	if(skill == SkillBash) {
 		const ItemInst* inst = GetBotItem(MainSecondary);
-		const Item_Struct* botweapon = 0;
+		const ItemData* botweapon = 0;
 		if(inst)
 			botweapon = inst->GetItem();
 		if(botweapon) {
@@ -7757,7 +7757,7 @@ void Bot::TryBackstab(Mob *other, int ReuseTime) {
 	bool bCanFrontalBS = false;
 
 	const ItemInst* inst = GetBotItem(MainPrimary);
-	const Item_Struct* botpiercer = nullptr;
+	const ItemData* botpiercer = nullptr;
 	if(inst)
 		botpiercer = inst->GetItem();
 	if(!botpiercer || (botpiercer->ItemType != ItemType1HPiercing)) {
@@ -8396,7 +8396,7 @@ void Bot::EquipBot(std::string* errorMessage) {
 	GetBotItems(errorMessage, m_inv);
 
 	const ItemInst* inst = 0;
-	const Item_Struct* item = 0;
+	const ItemData* item = 0;
 	for(int i = EmuConstants::EQUIPMENT_BEGIN; i <= EmuConstants::EQUIPMENT_END; ++i) {
 		inst = GetBotItem(i);
 		if(inst) {
@@ -8596,7 +8596,7 @@ void Bot::SetAttackTimer() {
 	attack_timer.SetAtTrigger(4000, true);
 
 	Timer* TimerToUse = nullptr;
-	const Item_Struct* PrimaryWeapon = nullptr;
+	const ItemData* PrimaryWeapon = nullptr;
 
 	for (int i = MainRange; i <= MainSecondary; i++) {
 		//pick a timer
@@ -8609,7 +8609,7 @@ void Bot::SetAttackTimer() {
 		else	//invalid slot (hands will always hit this)
 			continue;
 
-		const Item_Struct* ItemToUse = nullptr;
+		const ItemData* ItemToUse = nullptr;
 		ItemInst* ci = GetBotItem(i);
 		if (ci)
 			ItemToUse = ci->GetItem();
@@ -10818,7 +10818,7 @@ void Bot::ProcessBotInspectionRequest(Bot* inspectedBot, Client* client) {
 		insr->TargetID = inspectedBot->GetNPCTypeID();
 		insr->playerid = inspectedBot->GetID();
 
-		const Item_Struct* item = 0;
+		const ItemData* item = 0;
 		const ItemInst* inst = 0;
 
 		// Modded to display power source items (will only show up on SoF+ client inspect windows though.)
@@ -10871,7 +10871,7 @@ void Bot::ProcessBotInspectionRequest(Bot* inspectedBot, Client* client) {
 void Bot::CalcItemBonuses()
 {
 	memset(&itembonuses, 0, sizeof(StatBonuses));
-	const Item_Struct* itemtmp = 0;
+	const ItemData* itemtmp = 0;
 
 	for (int i = EmuConstants::EQUIPMENT_BEGIN; i <= EmuConstants::EQUIPMENT_END; ++i) {
 		const ItemInst* item = GetBotItem(i);
@@ -11111,7 +11111,7 @@ void Bot::CalcBotStats(bool showtext) {
 	}
 }
 
-bool Bot::CheckLoreConflict(const Item_Struct* item) {
+bool Bot::CheckLoreConflict(const ItemData* item) {
 	if (!item)
 		return false;
 	if (!(item->LoreFlag))
@@ -11723,7 +11723,7 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 					"Left Finger", "Right Finger", "Chest", "Legs", "Feet", "Waist", "Ammo" };
 				
 				const ItemInst* inst = nullptr;
-				const Item_Struct* item = nullptr;
+				const ItemData* item = nullptr;
 				bool is2Hweapon = false;
 				
 				std::string item_link;
@@ -11793,7 +11793,7 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 										"Left Wrist", "Right Wrist", "Range", "Hands", "Primary Hand", "Secondary Hand",
 										"Left Finger", "Right Finger", "Chest", "Legs", "Feet", "Waist", "Ammo" };
 
-			const Item_Struct* itm = nullptr;
+			const ItemData* itm = nullptr;
 			const ItemInst* itminst = c->GetTarget()->CastToBot()->GetBotItem(slotId);
 			if(itminst)
 				itm = itminst->GetItem();
@@ -16015,7 +16015,7 @@ int Bot::GetRawACNoShield(int &shield_ac)
 
 uint32 Bot::CalcCurrentWeight() {
 
-	const Item_Struct* TempItem = 0;
+	const ItemData* TempItem = 0;
 	ItemInst* inst;
 	uint32 Total = 0;
 

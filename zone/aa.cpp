@@ -879,7 +879,7 @@ void Mob::WakeTheDead(uint16 spell_id, Mob *target, uint32 duration)
 		uint32 sitem = 0;
 		sitem = CorpseToUse->GetWornItem(x);
 		if(sitem){
-			const Item_Struct * itm = database.GetItem(sitem);
+			const ItemData * itm = database.GetItem(sitem);
 			npca->AddLootDrop(itm, &npca->itemlist, 1, 1, 127, true, true);
 		}
 	}

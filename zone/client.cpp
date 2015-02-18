@@ -2508,7 +2508,7 @@ void Client::SetFeigned(bool in_feigned) {
 	feigned=in_feigned;
  }
 
-void Client::LogMerchant(Client* player, Mob* merchant, uint32 quantity, uint32 price, const Item_Struct* item, bool buying)
+void Client::LogMerchant(Client* player, Mob* merchant, uint32 quantity, uint32 price, const ItemData* item, bool buying)
 {
 	if(!player || !merchant || !item)
 		return;
@@ -2702,7 +2702,7 @@ bool Client::BindWound(Mob* bindmob, bool start, bool fail){
 }
 
 void Client::SetMaterial(int16 in_slot, uint32 item_id) {
-	const Item_Struct* item = database.GetItem(item_id);
+	const ItemData* item = database.GetItem(item_id);
 	if (item && (item->ItemClass==ItemClassCommon))
 	{
 		uint8 matslot = InventoryOld::CalcMaterialFromSlot(in_slot);
@@ -3748,7 +3748,7 @@ void Client::SendOPTranslocateConfirm(Mob *Caster, uint16 SpellID) {
 
 	return;
 }
-void Client::SendPickPocketResponse(Mob *from, uint32 amt, int type, const Item_Struct* item){
+void Client::SendPickPocketResponse(Mob *from, uint32 amt, int type, const ItemData* item){
 		EQApplicationPacket* outapp = new EQApplicationPacket(OP_PickPocket, sizeof(sPickPocket_Struct));
 		sPickPocket_Struct* pick_out = (sPickPocket_Struct*) outapp->pBuffer;
 		pick_out->coin = amt;
@@ -3920,7 +3920,7 @@ bool Client::KeyRingCheck(uint32 item_id)
 void Client::KeyRingList()
 {
 	Message(4,"Keys on Keyring:");
-	const Item_Struct *item = 0;
+	const ItemData *item = 0;
 	for(std::list<uint32>::iterator iter = keyring.begin();
 		iter != keyring.end();
 		++iter)
@@ -5691,7 +5691,7 @@ void Client::ProcessInspectRequest(Client* requestee, Client* requester) {
 		insr->TargetID = requester->GetID();
 		insr->playerid = requestee->GetID();
 
-		const Item_Struct* item = nullptr;
+		const ItemData* item = nullptr;
 		const ItemInst* inst = nullptr;
 		int ornamentationAugtype = RuleI(Character, OrnamentationAugmentType);
 		for(int16 L = 0; L <= 20; L++) {
@@ -5703,7 +5703,7 @@ void Client::ProcessInspectRequest(Client* requestee, Client* requester) {
 					strcpy(insr->itemnames[L], item->Name);
 					if (inst && inst->GetOrnamentationAug(ornamentationAugtype))
 					{
-						const Item_Struct *aug_item = inst->GetOrnamentationAug(ornamentationAugtype)->GetItem();
+						const ItemData *aug_item = inst->GetOrnamentationAug(ornamentationAugtype)->GetItem();
 						insr->itemicons[L] = aug_item->Icon;
 					}
 					else if (inst && inst->GetOrnamentationIcon())
@@ -6882,7 +6882,7 @@ void Client::SendAltCurrencies() {
 		uint32 i = 0;
 		std::list<AltCurrencyDefinition_Struct>::iterator iter = zone->AlternateCurrencies.begin();
 		while(iter != zone->AlternateCurrencies.end()) {
-			const Item_Struct* item = database.GetItem((*iter).item_id);
+			const ItemData* item = database.GetItem((*iter).item_id);
 			altc->entries[i].currency_number = (*iter).id;
 			altc->entries[i].unknown00 = 1;
 			altc->entries[i].currency_number2 = (*iter).id;
@@ -7474,7 +7474,7 @@ void Client::DuplicateLoreMessage(uint32 ItemID)
 		return;
 	}
 
-	const Item_Struct *item = database.GetItem(ItemID);
+	const ItemData *item = database.GetItem(ItemID);
 
 	if(!item)
 		return;
@@ -8217,7 +8217,7 @@ void Client::SetConsumption(int32 in_hunger, int32 in_thirst)
 	safe_delete(outapp);
 }
 
-void Client::Consume(const Item_Struct *item, uint8 type, int16 slot, bool auto_consume)
+void Client::Consume(const ItemData *item, uint8 type, int16 slot, bool auto_consume)
 {
    if(!item) { return; }
 
@@ -8421,7 +8421,7 @@ void Client::TextLink::generate_body()
 
 	memset(&m_LinkBodyStruct, 0, sizeof(TextLinkBody_Struct));
 	
-	const Item_Struct* item_data = nullptr;
+	const ItemData* item_data = nullptr;
 
 	switch (m_LinkType) {
 	case linkBlank:
@@ -8501,7 +8501,7 @@ void Client::TextLink::generate_text()
 		return;
 	}
 
-	const Item_Struct* item_data = nullptr;
+	const ItemData* item_data = nullptr;
 
 	switch (m_LinkType) {
 	case linkBlank:

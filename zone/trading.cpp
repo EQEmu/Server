@@ -885,7 +885,7 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 				continue;
 			}
 
-			const Item_Struct* item = inst->GetItem();
+			const ItemData* item = inst->GetItem();
 			if(item && quest_npc == false) {
 				// if it was not a NO DROP or Attuned item (or if a GM is trading), let the NPC have it
 				if(GetGM() || (item->NoDrop != 0 && inst->IsAttuned() == false)) {
@@ -894,7 +894,7 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 						for(int16 bslot = SUB_BEGIN; bslot < item->BagSlots; bslot++) {
 							const ItemInst* baginst = inst->GetItem(bslot);
 							if (baginst) {
-								const Item_Struct* bagitem = baginst->GetItem();
+								const ItemData* bagitem = baginst->GetItem();
 								if (bagitem && (GetGM() || (bagitem->NoDrop != 0 && baginst->IsAttuned() == false))) {
 									tradingWith->CastToNPC()->AddLootDrop(bagitem, &tradingWith->CastToNPC()->itemlist,
 										baginst->GetCharges(), 1, 127, true, true);
@@ -1158,7 +1158,7 @@ void Client::SendTraderItem(uint32 ItemID, uint16 Quantity) {
 	std::string Packet;
 	int16 FreeSlotID=0;
 
-	const Item_Struct* item = database.GetItem(ItemID);
+	const ItemData* item = database.GetItem(ItemID);
 
 	if(!item){
 		Log.Out(Logs::Detail, Logs::Trading, "Bogus item deleted in Client::SendTraderItem!\n");
@@ -1192,7 +1192,7 @@ void Client::SendSingleTraderItem(uint32 CharID, int SerialNumber) {
 }
 
 void Client::BulkSendTraderInventory(uint32 char_id) {
-	const Item_Struct *item;
+	const ItemData *item;
 
 	TraderCharges_Struct* TraderItems = database.LoadTraderItemWithCharges(char_id);
 
@@ -2021,7 +2021,7 @@ static void UpdateTraderCustomerItemsAdded(uint32 CustomerID, TraderCharges_Stru
 
 	if(!Customer) return;
 
-	const Item_Struct *item = database.GetItem(ItemID);
+	const ItemData *item = database.GetItem(ItemID);
 
 	if(!item) return;
 
@@ -2065,7 +2065,7 @@ static void UpdateTraderCustomerPriceChanged(uint32 CustomerID, TraderCharges_St
 
 	if(!Customer) return;
 
-	const Item_Struct *item = database.GetItem(ItemID);
+	const ItemData *item = database.GetItem(ItemID);
 
 	if(!item) return;
 
@@ -2224,7 +2224,7 @@ void Client::HandleTraderPriceUpdate(const EQApplicationPacket *app) {
 		}
 
 
-		const Item_Struct *item = 0;
+		const ItemData *item = 0;
 
 		if(IDOfItemToAdd)
 			item = database.GetItem(IDOfItemToAdd);
@@ -2390,7 +2390,7 @@ void Client::SendBuyerResults(char* searchString, uint32 searchID) {
 
 		char *buf = (char *)outapp->pBuffer;
 
-		const Item_Struct* item = database.GetItem(itemID);
+		const ItemData* item = database.GetItem(itemID);
 
 		if(!item)
             continue;
@@ -2482,7 +2482,7 @@ void Client::ShowBuyLines(const EQApplicationPacket *app) {
 
 		char *Buf = (char *)outapp->pBuffer;
 
-		const Item_Struct* item = database.GetItem(ItemID);
+		const ItemData* item = database.GetItem(ItemID);
 
 		if(!item)
             continue;
@@ -2524,7 +2524,7 @@ void Client::SellToBuyer(const EQApplicationPacket *app) {
 	/*uint32	BuyerID2	=*/ VARSTRUCT_SKIP_TYPE(uint32, Buf);	//unused
 	/*uint32	Unknown3	=*/ VARSTRUCT_SKIP_TYPE(uint32, Buf);	//unused
 
-	const Item_Struct *item = database.GetItem(ItemID);
+	const ItemData *item = database.GetItem(ItemID);
 
 	if(!item || !Quantity || !Price || !QtyBuyerWants) return;
 
@@ -2915,7 +2915,7 @@ void Client::UpdateBuyLine(const EQApplicationPacket *app) {
 	/*uint32 UnknownZ		=*/ VARSTRUCT_SKIP_TYPE(uint32, Buf);	//unused
 	uint32 ItemCount	= VARSTRUCT_DECODE_TYPE(uint32, Buf);
 
-	const Item_Struct *item = database.GetItem(ItemID);
+	const ItemData *item = database.GetItem(ItemID);
 
 	if(!item) return;
 
@@ -2979,7 +2979,7 @@ void Client::BuyerItemSearch(const EQApplicationPacket *app) {
 
 	BuyerItemSearchResults_Struct* bisr = (BuyerItemSearchResults_Struct*)outapp->pBuffer;
 
-	const Item_Struct* item = 0;
+	const ItemData* item = 0;
 
 	int Count=0;
 

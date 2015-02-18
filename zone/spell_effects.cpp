@@ -1143,7 +1143,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 
 			case SE_SummonItem:
 			{
-				const Item_Struct *item = database.GetItem(spell.base[i]);
+				const ItemData *item = database.GetItem(spell.base[i]);
 #ifdef SPELL_EFFECT_SPAM
 				const char *itemname = item ? item->Name : "*Unknown Item*";
 				snprintf(effect_desc, _EDLEN, "Summon Item: %s (id %d)", itemname, spell.base[i]);
@@ -1179,7 +1179,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 			}
 			case SE_SummonItemIntoBag:
 			{
-				const Item_Struct *item = database.GetItem(spell.base[i]);
+				const ItemData *item = database.GetItem(spell.base[i]);
 #ifdef SPELL_EFFECT_SPAM
 				const char *itemname = item ? item->Name : "*Unknown Item*";
 				snprintf(effect_desc, _EDLEN, "Summon Item In Bag: %s (id %d)", itemname, spell.base[i]);
@@ -5191,7 +5191,7 @@ int16 Client::GetSympatheticFocusEffect(focusType type, uint16 spell_id) {
 	//item focus
 	if (itembonuses.FocusEffects[type]){
 
-		const Item_Struct* TempItem = 0;
+		const ItemData* TempItem = 0;
 
 		for(int x = EmuConstants::EQUIPMENT_BEGIN; x <= EmuConstants::EQUIPMENT_END; x++)
 		{
@@ -5222,7 +5222,7 @@ int16 Client::GetSympatheticFocusEffect(focusType type, uint16 spell_id) {
 				aug = ins->GetAugment(y);
 				if(aug)
 				{
-					const Item_Struct* TempItemAug = aug->GetItem();
+					const ItemData* TempItemAug = aug->GetItem();
 					if (TempItemAug && TempItemAug->Focus.Effect > 0 && IsValidSpell(TempItemAug->Focus.Effect)) {
 						proc_spellid = CalcFocusEffect(type, TempItemAug->Focus.Effect, spell_id);
 						if (IsValidSpell(proc_spellid)){
@@ -5317,8 +5317,8 @@ int16 Client::GetFocusEffect(focusType type, uint16 spell_id) {
 	//Check if item focus effect exists for the client.
 	if (itembonuses.FocusEffects[type]){
 
-		const Item_Struct* TempItem = 0;
-		const Item_Struct* UsedItem = 0;
+		const ItemData* TempItem = 0;
+		const ItemData* UsedItem = 0;
 		uint16 UsedFocusID = 0;
 		int16 Total = 0;
 		int16 focus_max = 0;
@@ -5365,7 +5365,7 @@ int16 Client::GetFocusEffect(focusType type, uint16 spell_id) {
 				aug = ins->GetAugment(y);
 				if(aug)
 				{
-					const Item_Struct* TempItemAug = aug->GetItem();
+					const ItemData* TempItemAug = aug->GetItem();
 					if (TempItemAug && TempItemAug->Focus.Effect > 0 && TempItemAug->Focus.Effect != SPELL_UNKNOWN) {
 						if(rand_effectiveness) {
 							focus_max = CalcFocusEffect(type, TempItemAug->Focus.Effect, spell_id, true);
@@ -5548,8 +5548,8 @@ int16 NPC::GetFocusEffect(focusType type, uint16 spell_id) {
 
 	if (RuleB(Spells, NPC_UseFocusFromItems) && itembonuses.FocusEffects[type]){
 
-		const Item_Struct* TempItem = 0;
-		const Item_Struct* UsedItem = 0;
+		const ItemData* TempItem = 0;
+		const ItemData* UsedItem = 0;
 		uint16 UsedFocusID = 0;
 		int16 Total = 0;
 		int16 focus_max = 0;
@@ -5557,7 +5557,7 @@ int16 NPC::GetFocusEffect(focusType type, uint16 spell_id) {
 
 		//item focus
 		for(int i = 0; i < EmuConstants::EQUIPMENT_SIZE; i++){
-			const Item_Struct *cur = database.GetItem(equipment[i]);
+			const ItemData *cur = database.GetItem(equipment[i]);
 	
 			if(!cur)
 				continue;

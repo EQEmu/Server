@@ -9,7 +9,7 @@ class ItemInst;
 class Spawn2;
 struct Consider_Struct;
 struct DBTradeskillRecipe_Struct;
-struct Item_Struct;
+struct ItemData;
 
 extern EntityList entity_list;
 extern Zone* zone;
@@ -26,7 +26,7 @@ void Zone::mod_repop() { return; }
 void NPC::mod_prespawn(Spawn2 *sp) { return; }
 
 //Base damage from NPC::Attack
-int NPC::mod_npc_damage(int damage, SkillUseTypes skillinuse, int hand, const Item_Struct* weapon, Mob* other) { return(damage); }
+int NPC::mod_npc_damage(int damage, SkillUseTypes skillinuse, int hand, const ItemData* weapon, Mob* other) { return(damage); }
 
 //Mob c has been given credit for a kill.  This is called after the regular EVENT_KILLED_MERIT event.
 void NPC::mod_npc_killed_merit(Mob* c) { return; }
@@ -104,8 +104,8 @@ int32 Client::mod_client_xp(int32 in_xp, NPC *npc) { return(in_xp); }
 uint32 Client::mod_client_xp_for_level(uint32 xp, uint16 check_level) { return(xp); }
 
 //Food and drink values as computed by consume requests.  Return < 0 to abort the request.
-int Client::mod_food_value(const Item_Struct *item, int change) { return(change); }
-int Client::mod_drink_value(const Item_Struct *item, int change) { return(change); }
+int Client::mod_food_value(const ItemData *item, int change) { return(change); }
+int Client::mod_drink_value(const ItemData *item, int change) { return(change); }
 
 //effect_vallue - Spell effect value as calculated by default formulas.  You will want to ignore effects that don't lend themselves to scaling - pet ID's, gate coords, etc.
 int Mob::mod_effect_value(int effect_value, uint16 spell_id, int effect_type, Mob* caster) { return(effect_value); }

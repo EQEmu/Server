@@ -2206,7 +2206,7 @@ bool Mob::CanThisClassDualWield(void) const {
 
 		// 2HS, 2HB, or 2HP
 		if(pinst && pinst->IsWeapon()) {
-			const Item_Struct* item = pinst->GetItem();
+			const ItemData* item = pinst->GetItem();
 
 			if((item->ItemType == ItemType2HBlunt) || (item->ItemType == ItemType2HSlash) || (item->ItemType == ItemType2HPiercing))
 				return false;
@@ -2635,7 +2635,7 @@ int32 Mob::GetEquipmentMaterial(uint8 material_slot) const
 {
 	uint32 equipmaterial = 0;
 	int32 ornamentationAugtype = RuleI(Character, OrnamentationAugmentType);
-	const Item_Struct *item;
+	const ItemData *item;
 	item = database.GetItem(GetEquipment(material_slot));
 
 	if (item != 0)
@@ -2688,7 +2688,7 @@ int32 Mob::GetHerosForgeModel(uint8 material_slot) const
 	if (material_slot >= 0 && material_slot < MaterialPrimary)
 	{
 		uint32 ornamentationAugtype = RuleI(Character, OrnamentationAugmentType);
-		const Item_Struct *item;
+		const ItemData *item;
 		item = database.GetItem(GetEquipment(material_slot));
 		int16 invslot = InventoryOld::CalcSlotFromMaterial(material_slot);
 		
@@ -2742,7 +2742,7 @@ int32 Mob::GetHerosForgeModel(uint8 material_slot) const
 
 uint32 Mob::GetEquipmentColor(uint8 material_slot) const
 {
-	const Item_Struct *item;
+	const ItemData *item;
 
 	if (armor_tint[material_slot])
 	{
@@ -2758,7 +2758,7 @@ uint32 Mob::GetEquipmentColor(uint8 material_slot) const
 
 uint32 Mob::IsEliteMaterialItem(uint8 material_slot) const
 {
-	const Item_Struct *item;
+	const ItemData *item;
 
 	item = database.GetItem(GetEquipment(material_slot));
 	if(item != 0)
@@ -3669,7 +3669,7 @@ int32 Mob::GetItemStat(uint32 itemid, const char *identifier)
 	if (!inst)
 		return 0;
 
-	const Item_Struct* item = inst->GetItem();
+	const ItemData* item = inst->GetItem();
 	if (!item)
 		return 0;
 
@@ -5367,7 +5367,7 @@ int32 Mob::GetSpellStat(uint32 spell_id, const char *identifier, uint8 slot)
 
 bool Mob::CanClassEquipItem(uint32 item_id)
 {
-	const Item_Struct* itm = nullptr;
+	const ItemData* itm = nullptr;
 	itm = database.GetItem(item_id);
 
 	if (!itm)

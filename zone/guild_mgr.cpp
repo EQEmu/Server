@@ -692,7 +692,7 @@ void GuildBankManager::SendGuildBank(Client *c)
 	{
 		if((*Iterator)->Items.DepositArea[i].ItemID > 0)
 		{
-			const Item_Struct *Item = database.GetItem((*Iterator)->Items.DepositArea[i].ItemID);
+			const ItemData *Item = database.GetItem((*Iterator)->Items.DepositArea[i].ItemID);
 
 			if(!Item)
 				continue;
@@ -728,7 +728,7 @@ void GuildBankManager::SendGuildBank(Client *c)
 	{
 		if((*Iterator)->Items.MainArea[i].ItemID > 0)
 		{
-			const Item_Struct *Item = database.GetItem((*Iterator)->Items.MainArea[i].ItemID);
+			const ItemData *Item = database.GetItem((*Iterator)->Items.MainArea[i].ItemID);
 
 			if(!Item)
 				continue;
@@ -859,7 +859,7 @@ bool GuildBankManager::AddItem(uint32 GuildID, uint8 Area, uint32 ItemID, int32 
 		return false;
 	}
 
-	const Item_Struct *Item = database.GetItem(ItemID);
+	const ItemData *Item = database.GetItem(ItemID);
 
 	GuildBankItemUpdate_Struct gbius;
 
@@ -925,7 +925,7 @@ int GuildBankManager::Promote(uint32 guildID, int slotID)
 
 	(*iter)->Items.DepositArea[slotID].ItemID = 0;
 
-	const Item_Struct *Item = database.GetItem((*iter)->Items.MainArea[mainSlot].ItemID);
+	const ItemData *Item = database.GetItem((*iter)->Items.MainArea[mainSlot].ItemID);
 
 	GuildBankItemUpdate_Struct gbius;
 
@@ -981,7 +981,7 @@ void GuildBankManager::SetPermissions(uint32 guildID, uint16 slotID, uint32 perm
 	else
 		(*iter)->Items.MainArea[slotID].WhoFor[0] = '\0';
 
-	const Item_Struct *Item = database.GetItem((*iter)->Items.MainArea[slotID].ItemID);
+	const ItemData *Item = database.GetItem((*iter)->Items.MainArea[slotID].ItemID);
 
 	GuildBankItemUpdate_Struct gbius;
 
@@ -1112,7 +1112,7 @@ bool GuildBankManager::DeleteItem(uint32 guildID, uint16 area, uint16 slotID, ui
 
 	bool deleted = true;
 
-	const Item_Struct *Item = database.GetItem(BankArea[slotID].ItemID);
+	const ItemData *Item = database.GetItem(BankArea[slotID].ItemID);
 
 	if(!Item->Stackable || (quantity >= BankArea[slotID].Quantity)) {
         std::string query = StringFormat("DELETE FROM `guild_bank` WHERE `guildid` = %i "
@@ -1173,7 +1173,7 @@ bool GuildBankManager::MergeStacks(uint32 GuildID, uint16 SlotID)
 	if(BankArea[SlotID].ItemID == 0)
 		return false;
 
-	const Item_Struct *Item = database.GetItem(BankArea[SlotID].ItemID);
+	const ItemData *Item = database.GetItem(BankArea[SlotID].ItemID);
 
 	if(!Item->Stackable)
 		return false;
@@ -1271,7 +1271,7 @@ bool GuildBankManager::SplitStack(uint32 GuildID, uint16 SlotID, uint32 Quantity
 	if(BankArea[SlotID].Quantity <= Quantity || Quantity == 0)
 		return false;
 
-	const Item_Struct *Item = database.GetItem(BankArea[SlotID].ItemID);
+	const ItemData *Item = database.GetItem(BankArea[SlotID].ItemID);
 
 	if(!Item->Stackable)
 		return false;

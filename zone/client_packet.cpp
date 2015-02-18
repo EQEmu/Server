@@ -1914,7 +1914,7 @@ void Client::Handle_OP_AdventureMerchantPurchase(const EQApplicationPacket *app)
 
 	merchantid = tmp->CastToNPC()->MerchantType;
 
-	const Item_Struct* item = nullptr;
+	const ItemData* item = nullptr;
 	bool found = false;
 	std::list<MerchantList> merlist = zone->merchanttable[merchantid];
 	std::list<MerchantList>::const_iterator itr;
@@ -2090,7 +2090,7 @@ void Client::Handle_OP_AdventureMerchantRequest(const EQApplicationPacket *app)
 	merchantid = tmp->CastToNPC()->MerchantType;
 	tmp->CastToNPC()->FaceTarget(this->CastToMob());
 
-	const Item_Struct *item = 0;
+	const ItemData *item = 0;
 	std::list<MerchantList> merlist = zone->merchanttable[merchantid];
 	std::list<MerchantList>::const_iterator itr;
 	for (itr = merlist.begin(); itr != merlist.end() && count<255; ++itr){
@@ -2189,7 +2189,7 @@ void Client::Handle_OP_AdventureMerchantSell(const EQApplicationPacket *app)
 		return;
 	}
 
-	const Item_Struct* item = database.GetItem(itemid);
+	const ItemData* item = database.GetItem(itemid);
 	ItemInst* inst = GetInv().GetItem(ams_in->slot);
 	if (!item || !inst){
 		Message(13, "You seemed to have misplaced that item...");
@@ -2464,7 +2464,7 @@ void Client::Handle_OP_AltCurrencyMerchantRequest(const EQApplicationPacket *app
 		ss << alt_cur_id << "|1|" << alt_cur_id;
 		uint32 count = 0;
 		uint32 merchant_id = tar->MerchantType;
-		const Item_Struct *item = nullptr;
+		const ItemData *item = nullptr;
 
 		std::list<MerchantList> merlist = zone->merchanttable[merchant_id];
 		std::list<MerchantList>::const_iterator itr;
@@ -2524,7 +2524,7 @@ void Client::Handle_OP_AltCurrencyPurchase(const EQApplicationPacket *app)
 			return;
 		}
 
-		const Item_Struct* item = nullptr;
+		const ItemData* item = nullptr;
 		uint32 cost = 0;
 		uint32 current_currency = GetAlternateCurrencyValue(alt_cur_id);
 		uint32 merchant_id = tar->MerchantType;
@@ -2670,7 +2670,7 @@ void Client::Handle_OP_AltCurrencySell(const EQApplicationPacket *app)
 			return;
 		}
 
-		const Item_Struct* item = nullptr;
+		const ItemData* item = nullptr;
 		uint32 cost = 0;
 		uint32 current_currency = GetAlternateCurrencyValue(alt_cur_id);
 		uint32 merchant_id = tar->MerchantType;
@@ -2763,7 +2763,7 @@ void Client::Handle_OP_AltCurrencySellSelection(const EQApplicationPacket *app)
 			return;
 		}
 
-		const Item_Struct* item = nullptr;
+		const ItemData* item = nullptr;
 		uint32 cost = 0;
 		uint32 current_currency = GetAlternateCurrencyValue(alt_cur_id);
 		uint32 merchant_id = tar->MerchantType;
@@ -2938,7 +2938,7 @@ void Client::Handle_OP_AugmentInfo(const EQApplicationPacket *app)
 	}
 
 	AugmentInfo_Struct* AugInfo = (AugmentInfo_Struct*)app->pBuffer;
-	const Item_Struct * item = database.GetItem(AugInfo->itemid);
+	const ItemData * item = database.GetItem(AugInfo->itemid);
 
 	if (item) {
 		strn0cpy(AugInfo->augment_info, item->Name, 64);
@@ -3378,7 +3378,7 @@ void Client::Handle_OP_Barter(const EQApplicationPacket *app)
 	{
 		BarterItemSearchLinkRequest_Struct* bislr = (BarterItemSearchLinkRequest_Struct*)app->pBuffer;
 
-		const Item_Struct* item = database.GetItem(bislr->ItemID);
+		const ItemData* item = database.GetItem(bislr->ItemID);
 
 		if (!item)
 			Message(13, "Error: This item does not exist!");
@@ -3411,7 +3411,7 @@ void Client::Handle_OP_Barter(const EQApplicationPacket *app)
 	{
 		BuyerItemSearchLinkRequest_Struct* bislr = (BuyerItemSearchLinkRequest_Struct*)app->pBuffer;
 
-		const Item_Struct* item = database.GetItem(bislr->ItemID);
+		const ItemData* item = database.GetItem(bislr->ItemID);
 
 		if (!item)
 			Message(13, "Error: This item does not exist!");
@@ -3450,7 +3450,7 @@ void Client::Handle_OP_BazaarInspect(const EQApplicationPacket *app)
 
 	BazaarInspect_Struct* bis = (BazaarInspect_Struct*)app->pBuffer;
 
-	const Item_Struct* item = database.GetItem(bis->ItemID);
+	const ItemData* item = database.GetItem(bis->ItemID);
 
 	if (!item) {
 		Message(13, "Error: This item does not exist!");
@@ -3905,7 +3905,7 @@ void Client::Handle_OP_CastSpell(const EQApplicationPacket *app)
 			//bool cancast = true;
 			if (inst && inst->IsType(ItemClassCommon))
 			{
-				const Item_Struct* item = inst->GetItem();
+				const ItemData* item = inst->GetItem();
 				if (item->Click.Effect != (uint32)castspell->spell_id)
 				{
 					database.SetMQDetectionFlag(account_name, name, "OP_CastSpell with item, tried to cast a different spell.", zone->GetShortName());
@@ -4746,7 +4746,7 @@ void Client::Handle_OP_Consume(const EQApplicationPacket *app)
 		return;
 	}
 
-	const Item_Struct* eat_item = myitem->GetItem();
+	const ItemData* eat_item = myitem->GetItem();
 	if (pcs->type == 0x01) {
 		Consume(eat_item, ItemTypeFood, pcs->slot, (pcs->auto_consumed == 0xffffffff));
 	}
@@ -6826,7 +6826,7 @@ void Client::Handle_OP_GuildBank(const EQApplicationPacket *app)
 			return;
 		}
 
-		const Item_Struct* CursorItem = CursorItemInst->GetItem();
+		const ItemData* CursorItem = CursorItemInst->GetItem();
 
 		if (!CursorItem->NoDrop || CursorItemInst->IsAttuned())
 		{
@@ -7895,7 +7895,7 @@ void Client::Handle_OP_InspectAnswer(const EQApplicationPacket *app)
 	EQApplicationPacket* outapp = app->Copy();
 	InspectResponse_Struct* insr = (InspectResponse_Struct*)outapp->pBuffer;
 	Mob* tmp = entity_list.GetMob(insr->TargetID);
-	const Item_Struct* item = nullptr;
+	const ItemData* item = nullptr;
 
 	int ornamentationAugtype = RuleI(Character, OrnamentationAugmentType);
 	for (int16 L = EmuConstants::EQUIPMENT_BEGIN; L <= MainWaist; L++) {
@@ -7905,7 +7905,7 @@ void Client::Handle_OP_InspectAnswer(const EQApplicationPacket *app)
 		if (item) {
 			strcpy(insr->itemnames[L], item->Name);
 			if (inst && inst->GetOrnamentationAug(ornamentationAugtype)) {
-				const Item_Struct *aug_item = inst->GetOrnamentationAug(ornamentationAugtype)->GetItem();
+				const ItemData *aug_item = inst->GetOrnamentationAug(ornamentationAugtype)->GetItem();
 				insr->itemicons[L] = aug_item->Icon;
 			}
 			else if (inst->GetOrnamentationIcon()) {
@@ -8003,7 +8003,7 @@ void Client::Handle_OP_ItemLinkClick(const EQApplicationPacket *app)
 
 	//todo: verify ivrs->link_hash based on a rule, in case we don't care about people being able to sniff data from the item DB
 
-	const Item_Struct* item = database.GetItem(ivrs->item_id);
+	const ItemData* item = database.GetItem(ivrs->item_id);
 	if (!item) {
 		if (ivrs->item_id > 500000)
 		{
@@ -8113,7 +8113,7 @@ void Client::Handle_OP_ItemName(const EQApplicationPacket *app)
 		return;
 	}
 	ItemNamePacket_Struct *p = (ItemNamePacket_Struct*)app->pBuffer;
-	const Item_Struct *item = 0;
+	const ItemData *item = 0;
 	if ((item = database.GetItem(p->item_id)) != nullptr) {
 		EQApplicationPacket* outapp = new EQApplicationPacket(OP_ItemName, sizeof(ItemNamePacket_Struct));
 		p = (ItemNamePacket_Struct*)outapp->pBuffer;
@@ -8129,7 +8129,7 @@ void Client::Handle_OP_ItemPreview(const EQApplicationPacket *app)
 	VERIFY_PACKET_LENGTH(OP_ItemPreview, app, ItemPreview_Struct);
 	ItemPreview_Struct *ips = (ItemPreview_Struct *)app->pBuffer;
 
-	const Item_Struct* item = database.GetItem(ips->itemid);
+	const ItemData* item = database.GetItem(ips->itemid);
 
 	if (item) {
 		EQApplicationPacket* outapp = new EQApplicationPacket(OP_ItemPreview, strlen(item->Name) + strlen(item->Lore) + strlen(item->IDFile) + 898);
@@ -8345,7 +8345,7 @@ void Client::Handle_OP_ItemVerifyRequest(const EQApplicationPacket *app)
 		return;
 	}
 
-	const Item_Struct* item = inst->GetItem();
+	const ItemData* item = inst->GetItem();
 	if (!item) {
 		Message(0, "Error: item not found in inventory slot #%i", slot_id);
 		DeleteItemInInventory(slot_id, 0, true);
@@ -8393,13 +8393,13 @@ void Client::Handle_OP_ItemVerifyRequest(const EQApplicationPacket *app)
 		int r;
 		bool tryaug = false;
 		ItemInst* clickaug = 0;
-		Item_Struct* augitem = 0;
+		ItemData* augitem = 0;
 
 		for (r = 0; r < EmuConstants::ITEM_COMMON_SIZE; r++) {
 			const ItemInst* aug_i = inst->GetAugment(r);
 			if (!aug_i)
 				continue;
-			const Item_Struct* aug = aug_i->GetItem();
+			const ItemData* aug = aug_i->GetItem();
 			if (!aug)
 				continue;
 
@@ -8407,7 +8407,7 @@ void Client::Handle_OP_ItemVerifyRequest(const EQApplicationPacket *app)
 			{
 				tryaug = true;
 				clickaug = (ItemInst*)aug_i;
-				augitem = (Item_Struct*)aug;
+				augitem = (ItemData*)aug;
 				spell_id = aug->Click.Effect;
 				break;
 			}
@@ -10440,7 +10440,7 @@ void Client::Handle_OP_PotionBelt(const EQApplicationPacket *app)
 	}
 
 	if (mptbs->Action == 0) {
-		const Item_Struct *BaseItem = database.GetItem(mptbs->ItemID);
+		const ItemData *BaseItem = database.GetItem(mptbs->ItemID);
 		if (BaseItem) {
 			m_pp.potionbelt.items[mptbs->SlotNumber].item_id = BaseItem->ID;
 			m_pp.potionbelt.items[mptbs->SlotNumber].icon = BaseItem->Icon;
@@ -11896,7 +11896,7 @@ void Client::Handle_OP_Shielding(const EQApplicationPacket *app)
 		return;
 	if (inst)
 	{
-		const Item_Struct* shield = inst->GetItem();
+		const ItemData* shield = inst->GetItem();
 		if (shield && shield->ItemType == ItemTypeShield)
 		{
 			for (int x = 0; x < 2; x++)
@@ -12004,7 +12004,7 @@ void Client::Handle_OP_ShopPlayerBuy(const EQApplicationPacket *app)
 			break;
 		}
 	}
-	const Item_Struct* item = nullptr;
+	const ItemData* item = nullptr;
 	uint32 prevcharges = 0;
 	if (item_id == 0) { //check to see if its on the temporary table
 		std::list<TempMerchantList> tmp_merlist = zone->tmpmerchanttable[tmp->GetNPCTypeID()];
@@ -12241,7 +12241,7 @@ void Client::Handle_OP_ShopPlayerSell(const EQApplicationPacket *app)
 	uint32 itemid = GetItemIDAt(mp->itemslot);
 	if (itemid == 0)
 		return;
-	const Item_Struct* item = database.GetItem(itemid);
+	const ItemData* item = database.GetItem(itemid);
 	ItemInst* inst = GetInv().GetItem(mp->itemslot);
 	if (!item || !inst){
 		Message(13, "You seemed to have misplaced that item..");
@@ -13338,7 +13338,7 @@ void Client::Handle_OP_Trader(const EQApplicationPacket *app)
 					TradeItemsValid = false;
 					break;
 				}
-				const Item_Struct *Item = database.GetItem(gis->Items[i]);
+				const ItemData *Item = database.GetItem(gis->Items[i]);
 
 				if (!Item) {
 					Message(13, "Unexpected error. Unable to start trader mode");

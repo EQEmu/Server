@@ -170,7 +170,7 @@ void WorldDatabase::GetCharSelectInfo(uint32 account_id, CharacterSelect_Struct*
 		inv = new InventoryOld;
 		if (GetInventory(account_id, cs->name[char_num], inv))
 		{
-			const Item_Struct* item = nullptr;
+			const ItemData* item = nullptr;
 			const ItemInst* inst = nullptr;
 			int16 invslot = 0;
 

@@ -16,8 +16,8 @@
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 04111-1307 USA
 */
 
-#ifndef ITEM_STRUCT_H
-#define ITEM_STRUCT_H
+#ifndef COMMON_ITEM_DATA_H
+#define COMMON_ITEM_DATA_H
 
 /*
  * Note: (Doodman)
@@ -35,7 +35,7 @@
  *
  * Note #3: (Doodman)
  *	Please take care when adding new found data fields to add them
- *	to the appropriate structure. Item_Struct has elements that are
+ *	to the appropriate structure. ItemData has elements that are
  *	global to all types of items only.
  *
  * Note #4: (Doodman)
@@ -46,7 +46,7 @@
 #include "eq_dictionary.h"
 
 /*
-** Child struct of Item_Struct:
+** Child struct of ItemData:
 **	Effect data: Click, Proc, Focus, Worn, Scroll
 **
 */
@@ -72,7 +72,7 @@ struct InternalSerializedItem_Struct {
 // use EmuConstants::ITEM_COMMON_SIZE
 //#define MAX_AUGMENT_SLOTS 5
 
-struct Item_Struct {
+struct ItemData {
 	bool IsEquipable(uint16 Race, uint16 Class) const;
 	// Non packet based fields
 	uint8	MinStatus;
@@ -99,17 +99,10 @@ struct Item_Struct {
 	uint32	Favor;			// Individual favor
 	uint32	GuildFavor;		// Guild favor
 	uint32	PointType;
-
-	//uint32	Unk117;
-	//uint32	Unk118;
-	//uint32	Unk121;
-	//uint32	Unk124;
-
 	uint8	BagType;		// 0:Small Bag, 1:Large Bag, 2:Quiver, 3:Belt Pouch ... there are 50 types
-	uint8	BagSlots;		// Number of slots: can only be 2, 4, 6, 8, or 10
+	uint8	BagSlots;		// Number of slots
 	uint8	BagSize;		// 0:TINY, 1:SMALL, 2:MEDIUM, 3:LARGE, 4:GIANT
 	uint8	BagWR;			// 0->100
-
 	bool	BenefitFlag;
 	bool	Tradeskills;	// Is this a tradeskill item?
 	int8	CR;				// Save vs Cold
@@ -128,7 +121,6 @@ struct Item_Struct {
 	int32	Mana;			// Mana
 	int32	AC;				// AC
 	uint32	Deity;			// Bitmask of Deities that can equip this item
-	//uint32	Unk033
 	int32	SkillModValue;	// % Mod to skill specified in SkillModType
 	uint32	SkillModType;	// Type of skill for SkillModValue to apply to
 	uint32	BaneDmgRace;	// Bane Damage Race
@@ -150,13 +142,11 @@ struct Item_Struct {
 	uint32	Color;			// RR GG BB 00 <-- as it appears in pc
 	uint32	Classes;		// Bitfield of classes that can equip item (1 << class#)
 	uint32	Races;			// Bitfield of races that can equip item (1 << race#)
-	//uint32	Unk054;
 	int16	MaxCharges;		// Maximum charges items can hold: -1 if not a chargeable item
 	uint8	ItemType;		// Item Type/Skill (itemClass* from above)
 	uint8	Material;		// Item material type
 	uint32	HerosForgeModel;// Hero's Forge Armor Model Type (2-13?)
 	float	SellRate;		// Sell rate
-	//uint32	Unk059;
 	union {
 		uint32 Fulfilment;	// Food fulfilment (How long it lasts)
 		int16 CastTime;		// Cast Time for clicky effects, in milliseconds
@@ -211,7 +201,6 @@ struct Item_Struct {
 	int16	StackSize;
 	uint8	PotionBeltSlots;
 	ItemEffect_Struct Click, Proc, Worn, Focus, Scroll, Bard;
-
 	uint8	Book;			// 0=Not book, 1=Book
 	uint32	BookType;
 	char	Filename[33];	// Filename for book data
@@ -240,11 +229,11 @@ struct Item_Struct {
 	uint32 ScriptFileID;
 	uint16 ExpendableArrow;
 	uint32 Clairvoyance;
-	char	ClickName[65];
-	char	ProcName[65];
-	char	WornName[65];
-	char	FocusName[65];
-	char	ScrollName[65];
+	char ClickName[65];
+	char ProcName[65];
+	char WornName[65];
+	char FocusName[65];
+	char ScrollName[65];
 
 };
 

@@ -971,7 +971,7 @@ void Corpse::MakeLootRequestPackets(Client* client, const EQApplicationPacket* a
 		safe_delete(outapp);
 		if(Loot_Request_Type == 5) {
 			int pkitem = GetPlayerKillItem();
-			const Item_Struct* item = database.GetItem(pkitem);
+			const ItemData* item = database.GetItem(pkitem);
 			ItemInst* inst = database.CreateItem(item, item->MaxCharges);
 			if(inst) {
 				if (item->RecastDelay)
@@ -986,7 +986,7 @@ void Corpse::MakeLootRequestPackets(Client* client, const EQApplicationPacket* a
 		}
 
 		int i = 0;
-		const Item_Struct* item = 0;
+		const ItemData* item = 0;
 		ItemList::iterator cur,end;
 		cur = itemlist.begin();
 		end = itemlist.end();
@@ -1101,7 +1101,7 @@ void Corpse::LootItem(Client* client, const EQApplicationPacket* app) {
 		being_looted_by = 0xFFFFFFFF;
 		return;
 	}
-	const Item_Struct* item = 0;
+	const ItemData* item = 0;
 	ItemInst *inst = 0;
 	ServerLootItem_Struct* item_data = nullptr, *bag_item_data[10];
 
@@ -1296,7 +1296,7 @@ void Corpse::QueryLoot(Client* to) {
 			else
 				x < corpselootlimit ? sitem->lootslot = x : sitem->lootslot = 0xFFFF;
 
-			const Item_Struct* item = database.GetItem(sitem->item_id);
+			const ItemData* item = database.GetItem(sitem->item_id);
 
 			if (item)
 				to->Message((sitem->lootslot == 0xFFFF), "LootSlot: %i (EquipSlot: %i) Item: %s (%d), Count: %i", static_cast<int16>(sitem->lootslot), sitem->equip_slot, item->Name, item->ID, sitem->charges);
@@ -1310,7 +1310,7 @@ void Corpse::QueryLoot(Client* to) {
 		}
 		else {
 			sitem->lootslot=y;
-			const Item_Struct* item = database.GetItem(sitem->item_id);
+			const ItemData* item = database.GetItem(sitem->item_id);
 
 			if (item)
 				to->Message(0, "LootSlot: %i Item: %s (%d), Count: %i", sitem->lootslot, item->Name, item->ID, sitem->charges);
@@ -1405,7 +1405,7 @@ uint32 Corpse::GetEquipment(uint8 material_slot) const {
 }
 
 uint32 Corpse::GetEquipmentColor(uint8 material_slot) const {
-	const Item_Struct *item;
+	const ItemData *item;
 
 	if(material_slot > EmuConstants::MATERIAL_END) {
 		return 0;

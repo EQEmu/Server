@@ -8,7 +8,7 @@ class Corpse;
 class Group;
 class Mob;
 class Raid;
-struct Item_Struct;
+struct ItemData;
 struct MercTemplate;
 struct NPCType;
 struct NewSpawn_Struct;
@@ -278,7 +278,7 @@ public:
 
 protected:
 	void CalcItemBonuses(StatBonuses* newbon);
-	void AddItemBonuses(const Item_Struct *item, StatBonuses* newbon);
+	void AddItemBonuses(const ItemData *item, StatBonuses* newbon);
 	int CalcRecommendedLevelBonus(uint8 level, uint8 reclevel, int basestat);
 
 	int16 GetFocusEffect(focusType type, uint16 spell_id);

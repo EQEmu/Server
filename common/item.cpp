@@ -368,7 +368,7 @@ ItemInst* InventoryOld::PopItem(int16 slot_id)
 	return p;
 }
 
-bool InventoryOld::HasSpaceForItem(const Item_Struct *ItemToTry, int16 Quantity) {
+bool InventoryOld::HasSpaceForItem(const ItemData *ItemToTry, int16 Quantity) {
 
 	if (ItemToTry->Stackable) {
 
@@ -901,7 +901,7 @@ uint8 InventoryOld::CalcMaterialFromSlot(int16 equipslot)
 	}
 }
 
-bool InventoryOld::CanItemFitInContainer(const Item_Struct *ItemToTry, const Item_Struct *Container) {
+bool InventoryOld::CanItemFitInContainer(const ItemData *ItemToTry, const ItemData *Container) {
 
 	if (!ItemToTry || !Container)
 		return false;
@@ -1429,7 +1429,7 @@ int16 InventoryOld::_HasItemByLoreGroup(ItemInstQueue& iqueue, uint32 loregroup)
 //
 // class ItemInst
 //
-ItemInst::ItemInst(const Item_Struct* item, int16 charges) {
+ItemInst::ItemInst(const ItemData* item, int16 charges) {
 	m_use_type = ItemInstNormal;
 	m_item = item;
 	m_charges = charges;
@@ -1539,7 +1539,7 @@ ItemInst::ItemInst(const ItemInst& copy)
 	m_evolveLvl = copy.m_evolveLvl;
 	m_activated = copy.m_activated;
 	if (copy.m_scaledItem)
-		m_scaledItem = new Item_Struct(*copy.m_scaledItem);
+		m_scaledItem = new ItemData(*copy.m_scaledItem);
 	else
 		m_scaledItem = nullptr;
 
@@ -1758,7 +1758,7 @@ void ItemInst::ClearByFlags(byFlagSetting is_nodrop, byFlagSetting is_norent)
 			continue;
 		}
 
-		const Item_Struct* item = inst->GetItem();
+		const ItemData* item = inst->GetItem();
 		if (item == nullptr) {
 			cur = m_contents.erase(cur);
 			continue;
@@ -1899,7 +1899,7 @@ bool ItemInst::UpdateOrnamentationInfo() {
 	int32 ornamentationAugtype = RuleI(Character, OrnamentationAugmentType);
 	if (GetOrnamentationAug(ornamentationAugtype))
 	{
-		const Item_Struct* ornamentItem;
+		const ItemData* ornamentItem;
 		ornamentItem = GetOrnamentationAug(ornamentationAugtype)->GetItem();
 		if (ornamentItem != nullptr)
 		{
@@ -1926,7 +1926,7 @@ bool ItemInst::UpdateOrnamentationInfo() {
 	return ornamentSet;
 }
 
-bool ItemInst::CanTransform(const Item_Struct *ItemToTry, const Item_Struct *Container, bool AllowAll) {
+bool ItemInst::CanTransform(const ItemData *ItemToTry, const ItemData *Container, bool AllowAll) {
 	if (!ItemToTry || !Container) return false;
 
 	if (ItemToTry->ItemType == ItemTypeArrow || strnlen(Container->CharmFile, 30) == 0)
@@ -2060,7 +2060,7 @@ bool ItemInst::IsAmmo() const
 
 }
 
-const Item_Struct* ItemInst::GetItem() const
+const ItemData* ItemInst::GetItem() const
 {
 	if (!m_item)
 		return nullptr;
@@ -2071,7 +2071,7 @@ const Item_Struct* ItemInst::GetItem() const
 	return m_item;
 }
 
-const Item_Struct* ItemInst::GetUnscaledItem() const
+const ItemData* ItemInst::GetUnscaledItem() const
 {
 	// No operator calls and defaults to nullptr
 	return m_item;
@@ -2179,10 +2179,10 @@ void ItemInst::ScaleItem() {
 		return;
 
 	if (m_scaledItem) {
-		memcpy(m_scaledItem, m_item, sizeof(Item_Struct));
+		memcpy(m_scaledItem, m_item, sizeof(ItemData));
 	}
 	else {
-		m_scaledItem = new Item_Struct(*m_item);
+		m_scaledItem = new ItemData(*m_item);
 	}
 
 	float Mult = (float)(GetExp()) / 10000;	// scaling is determined by exp, with 10,000 being full stats
@@ -2326,9 +2326,9 @@ EvolveInfo::~EvolveInfo() {
 
 
 //
-// struct Item_Struct
+// struct ItemData
 //
-bool Item_Struct::IsEquipable(uint16 Race, uint16 Class_) const
+bool ItemData::IsEquipable(uint16 Race, uint16 Class_) const
 {
 	bool IsRace = false;
 	bool IsClass = false;

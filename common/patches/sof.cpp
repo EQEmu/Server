@@ -2839,7 +2839,7 @@ namespace SoF
 
 		std::stringstream ss(std::stringstream::in | std::stringstream::out | std::stringstream::binary);
 
-		const Item_Struct *item = inst->GetUnscaledItem();
+		const ItemData *item = inst->GetUnscaledItem();
 		//Log.LogDebugType(Logs::General, Logs::Netcode, "[ERROR] Serialize called for: %s", item->Name);
 		SoF::structs::ItemSerializationHeader hdr;
 		hdr.stacksize = stackable ? charges : 1;

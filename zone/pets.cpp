@@ -407,7 +407,7 @@ void Mob::MakePoweredPet(uint16 spell_id, const char* pettype, int16 petpower,
 	// like the special back items some focused pets may receive.
 	uint32 petinv[EmuConstants::EQUIPMENT_SIZE];
 	memset(petinv, 0, sizeof(petinv));
-	const Item_Struct *item = 0;
+	const ItemData *item = 0;
 
 	if (database.GetBasePetItems(record.equipmentset, petinv)) {
 		for (int i = 0; i<EmuConstants::EQUIPMENT_SIZE; i++)
@@ -634,7 +634,7 @@ void NPC::SetPetState(SpellBuff_Struct *pet_buffs, uint32 *items) {
 		if(items[i] == 0)
 			continue;
 
-		const Item_Struct* item2 = database.GetItem(items[i]);
+		const ItemData* item2 = database.GetItem(items[i]);
 		if (item2 && item2->NoDrop != 0) {
 			//dont bother saving item charges for now, NPCs never use them
 			//and nobody should be able to get them off the corpse..?

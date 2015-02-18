@@ -347,7 +347,7 @@ bool SharedDatabase::SetSharedPlatinum(uint32 account_id, int32 amount_to_add) {
 
 bool SharedDatabase::SetStartingItems(PlayerProfile_Struct* pp, InventoryOld* inv, uint32 si_race, uint32 si_class, uint32 si_deity, uint32 si_current_zone, char* si_name, int admin_level) {
 
-	const Item_Struct* myitem;
+	const ItemData* myitem;
 
     std::string query = StringFormat("SELECT itemid, item_charges, slot FROM starting_items "
                                     "WHERE (race = %i or race = 0) AND (class = %i or class = 0) AND "
@@ -419,7 +419,7 @@ bool SharedDatabase::GetSharedBank(uint32 id, InventoryOld *inv, bool is_charid)
 		aug[4] = (uint32)atoi(row[7]);
 		aug[5] = (uint32)atoi(row[8]);
 
-		const Item_Struct *item = GetItem(item_id);
+		const ItemData *item = GetItem(item_id);
 
 		if (!item) {
 			Log.Out(Logs::General, Logs::Error,
@@ -521,7 +521,7 @@ bool SharedDatabase::GetInventory(uint32 char_id, InventoryOld *inv)
 		uint32 ornament_idfile = (uint32)atoul(row[13]);
 		uint32 ornament_hero_model = (uint32)atoul(row[14]);
 
-		const Item_Struct *item = GetItem(item_id);
+		const ItemData *item = GetItem(item_id);
 
 		if (!item) {
 			Log.Out(Logs::General, Logs::Error,
@@ -662,7 +662,7 @@ bool SharedDatabase::GetInventory(uint32 account_id, char *name, InventoryOld *i
 		uint32 ornament_idfile = (uint32)atoul(row[13]);
 		uint32 ornament_hero_model = (uint32)atoul(row[14]);
 
-		const Item_Struct *item = GetItem(item_id);
+		const ItemData *item = GetItem(item_id);
 		int16 put_slot_id = INVALID_INDEX;
 		if (!item)
 			continue;
@@ -806,12 +806,12 @@ bool SharedDatabase::LoadItems() {
 		if(items == -1) {
 			EQ_EXCEPT("SharedDatabase", "Database returned no result");
 		}
-		uint32 size = static_cast<uint32>(EQEmu::FixedMemoryHashSet<Item_Struct>::estimated_size(items, max_item));
+		uint32 size = static_cast<uint32>(EQEmu::FixedMemoryHashSet<ItemData>::estimated_size(items, max_item));
 		if(items_mmf->Size() != size) {
 			EQ_EXCEPT("SharedDatabase", "Couldn't load items because items_mmf->Size() != size");
 		}
 
-		items_hash = new EQEmu::FixedMemoryHashSet<Item_Struct>(reinterpret_cast<uint8*>(items_mmf->Get()), size);
+		items_hash = new EQEmu::FixedMemoryHashSet<ItemData>(reinterpret_cast<uint8*>(items_mmf->Get()), size);
 		mutex.Unlock();
 	} catch(std::exception& ex) {
 		Log.Out(Logs::General, Logs::Error, "Error Loading Items: %s", ex.what());
@@ -822,7 +822,7 @@ bool SharedDatabase::LoadItems() {
 }
 
 void SharedDatabase::LoadItems(void *data, uint32 size, int32 items, uint32 max_item_id) {
-	EQEmu::FixedMemoryHashSet<Item_Struct> hash(reinterpret_cast<uint8*>(data), size, items, max_item_id);
+	EQEmu::FixedMemoryHashSet<ItemData> hash(reinterpret_cast<uint8*>(data), size, items, max_item_id);
 
 	char ndbuffer[4];
 	bool disableNoRent = false;
@@ -850,7 +850,7 @@ void SharedDatabase::LoadItems(void *data, uint32 size, int32 items, uint32 max_
 		}
 	}
 
-    Item_Struct item;
+    ItemData item;
 
 	const std::string query = "SELECT source,"
 #define F(x) "`"#x"`,"
@@ -863,7 +863,7 @@ void SharedDatabase::LoadItems(void *data, uint32 size, int32 items, uint32 max_
     }
 
     for(auto row = results.begin(); row != results.end(); ++row) {
-        memset(&item, 0, sizeof(Item_Struct));
+        memset(&item, 0, sizeof(ItemData));
 
         item.ItemClass = (uint8)atoi(row[ItemField::itemclass]);
         strcpy(item.Name,row[ItemField::name]);
@@ -1078,7 +1078,7 @@ void SharedDatabase::LoadItems(void *data, uint32 size, int32 items, uint32 max_
 
 }
 
-const Item_Struct* SharedDatabase::GetItem(uint32 id) {
+const ItemData* SharedDatabase::GetItem(uint32 id) {
 	if (id == 0)
 	{
 		return nullptr;
@@ -1097,7 +1097,7 @@ const Item_Struct* SharedDatabase::GetItem(uint32 id) {
 	return nullptr;
 }
 
-const Item_Struct* SharedDatabase::IterateItems(uint32* id) {
+const ItemData* SharedDatabase::IterateItems(uint32* id) {
 	if(!items_hash || !id) {
 		return nullptr;
 	}
@@ -1255,7 +1255,7 @@ bool SharedDatabase::LoadNPCFactionLists() {
 // Create appropriate ItemInst class
 ItemInst* SharedDatabase::CreateItem(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2, uint32 aug3, uint32 aug4, uint32 aug5, uint32 aug6, uint8 attuned)
 {
-	const Item_Struct* item = nullptr;
+	const ItemData* item = nullptr;
 	ItemInst* inst = nullptr;
 
 	item = GetItem(item_id);
@@ -1282,7 +1282,7 @@ ItemInst* SharedDatabase::CreateItem(uint32 item_id, int16 charges, uint32 aug1,
 
 
 // Create appropriate ItemInst class
-ItemInst* SharedDatabase::CreateItem(const Item_Struct* item, int16 charges, uint32 aug1, uint32 aug2, uint32 aug3, uint32 aug4, uint32 aug5, uint32 aug6, uint8 attuned)
+ItemInst* SharedDatabase::CreateItem(const ItemData* item, int16 charges, uint32 aug1, uint32 aug2, uint32 aug3, uint32 aug4, uint32 aug5, uint32 aug6, uint8 attuned)
 {
 	ItemInst* inst = nullptr;
 	if (item) {
@@ -1306,7 +1306,7 @@ ItemInst* SharedDatabase::CreateItem(const Item_Struct* item, int16 charges, uin
 	return inst;
 }
 
-ItemInst* SharedDatabase::CreateBaseItem(const Item_Struct* item, int16 charges) {
+ItemInst* SharedDatabase::CreateBaseItem(const ItemData* item, int16 charges) {
 	ItemInst* inst = nullptr;
 	if (item) {
 		// if maxcharges is -1 that means it is an unlimited use item.

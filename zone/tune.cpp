@@ -630,7 +630,7 @@ int32 Client::GetMeleeDamage(Mob* other, bool GetMinDamage)
 
 		if( Hand == MainPrimary && GetLevel() >= 28 && IsWarriorClass() )
 		{
-			ucDamageBonus = GetWeaponDamageBonus( weapon ? weapon->GetItem() : (const Item_Struct*) nullptr );
+			ucDamageBonus = GetWeaponDamageBonus( weapon ? weapon->GetItem() : (const ItemData*) nullptr );
 
 			min_hit += (int) ucDamageBonus;
 			max_hit += (int) ucDamageBonus;

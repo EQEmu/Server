@@ -629,7 +629,7 @@ ItemInst* ZoneDatabase::LoadSingleTraderItem(uint32 CharID, int SerialNumber) {
 	int Charges = atoi(row[3]);
 	int Cost = atoi(row[4]);
 
-    const Item_Struct *item = database.GetItem(ItemID);
+    const ItemData *item = database.GetItem(ItemID);
 
 	if(!item) {
 		Log.Out(Logs::Detail, Logs::Trading, "Unable to create item\n");
@@ -684,7 +684,7 @@ void ZoneDatabase::UpdateTraderItemPrice(int CharID, uint32 ItemID, uint32 Charg
 
 	Log.Out(Logs::Detail, Logs::Trading, "ZoneDatabase::UpdateTraderPrice(%i, %i, %i, %i)", CharID, ItemID, Charges, NewPrice);
 
-	const Item_Struct *item = database.GetItem(ItemID);
+	const ItemData *item = database.GetItem(ItemID);
 
 	if(!item)
 		return;
@@ -1225,7 +1225,7 @@ bool ZoneDatabase::LoadCharacterPotions(uint32 character_id, PlayerProfile_Struc
 	for (auto row = results.begin(); row != results.end(); ++row) {
 		i = atoi(row[0]); /* Potion belt slot number */
 		uint32 item_id = atoi(row[1]);
-		const Item_Struct *item = database.GetItem(item_id);
+		const ItemData *item = database.GetItem(item_id);
 
 		if(!item)
 			continue;

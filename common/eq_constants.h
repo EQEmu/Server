@@ -259,7 +259,7 @@ enum AugmentationRestrictionTypes : uint8 {
 /*
 **	Container use types
 **
-**	This correlates to world 'object.type' (object.h/Object.cpp) as well as Item_Struct.BagType
+**	This correlates to world 'object.type' (object.h/Object.cpp) as well as ItemData.BagType
 **
 **	(ref: database, web forums and eqstr_us.txt)
 */

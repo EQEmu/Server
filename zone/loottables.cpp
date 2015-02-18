@@ -119,7 +119,7 @@ void ZoneDatabase::AddLootDropToNPC(NPC* npc,uint32 lootdrop_id, ItemList* iteml
 			int charges = lds->Entries[i].multiplier;
 			for(int j = 0; j < charges; ++j) {
 				if(zone->random.Real(0.0, 100.0) <= lds->Entries[i].chance) {
-					const Item_Struct* dbitem = GetItem(lds->Entries[i].item_id);
+					const ItemData* dbitem = GetItem(lds->Entries[i].item_id);
 					npc->AddLootDrop(dbitem, itemlist, lds->Entries[i].item_charges, lds->Entries[i].minlevel, 
 									lds->Entries[i].maxlevel, lds->Entries[i].equip_item > 0 ? true : false, false);
 				}
@@ -139,7 +139,7 @@ void ZoneDatabase::AddLootDropToNPC(NPC* npc,uint32 lootdrop_id, ItemList* iteml
 	float roll_t = 0.0f;
 	bool active_item_list = false;
 	for(uint32 i = 0; i < lds->NumEntries; ++i) {
-		const Item_Struct* db_item = GetItem(lds->Entries[i].item_id);
+		const ItemData* db_item = GetItem(lds->Entries[i].item_id);
 		if(db_item) {
 			roll_t += lds->Entries[i].chance;
 			active_item_list = true;
@@ -157,7 +157,7 @@ void ZoneDatabase::AddLootDropToNPC(NPC* npc,uint32 lootdrop_id, ItemList* iteml
 	for(int i = 0; i < item_count; ++i) {
 		float roll = (float)zone->random.Real(0.0, roll_t);
 		for(uint32 j = 0; j < lds->NumEntries; ++j) {
-			const Item_Struct* db_item = GetItem(lds->Entries[j].item_id);
+			const ItemData* db_item = GetItem(lds->Entries[j].item_id);
 			if(db_item) {
 				if(roll < lds->Entries[j].chance) {
 					npc->AddLootDrop(db_item, itemlist, lds->Entries[j].item_charges, lds->Entries[j].minlevel,
@@ -191,7 +191,7 @@ void ZoneDatabase::AddLootDropToNPC(NPC* npc,uint32 lootdrop_id, ItemList* iteml
 }
 
 //if itemlist is null, just send wear changes
-void NPC::AddLootDrop(const Item_Struct *item2, ItemList* itemlist, int16 charges, uint8 minlevel, uint8 maxlevel, bool equipit, bool wearchange) {
+void NPC::AddLootDrop(const ItemData *item2, ItemList* itemlist, int16 charges, uint8 minlevel, uint8 maxlevel, bool equipit, bool wearchange) {
 	if(item2 == nullptr)
 		return;
 
@@ -228,7 +228,7 @@ void NPC::AddLootDrop(const Item_Struct *item2, ItemList* itemlist, int16 charge
 	if (equipit) {
 		uint8 eslot = 0xFF;
 		char newid[20];
-		const Item_Struct* compitem = nullptr;
+		const ItemData* compitem = nullptr;
 		bool found = false; // track if we found an empty slot we fit into
 		int32 foundslot = -1; // for multi-slot items
 
@@ -380,14 +380,14 @@ void NPC::AddLootDrop(const Item_Struct *item2, ItemList* itemlist, int16 charge
 		SendAppearancePacket(AT_Light, GetActiveLightValue());
 }
 
-void NPC::AddItem(const Item_Struct* item, uint16 charges, bool equipitem) {
+void NPC::AddItem(const ItemData* item, uint16 charges, bool equipitem) {
 	//slot isnt needed, its determined from the item.
 	AddLootDrop(item, &itemlist, charges, 1, 127, equipitem, equipitem);
 }
 
 void NPC::AddItem(uint32 itemid, uint16 charges, bool equipitem) {
 	//slot isnt needed, its determined from the item.
-	const Item_Struct * i = database.GetItem(itemid);
+	const ItemData * i = database.GetItem(itemid);
 	if(i == nullptr)
 		return;
 	AddLootDrop(i, &itemlist, charges, 1, 127, equipitem, equipitem);

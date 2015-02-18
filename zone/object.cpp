@@ -138,7 +138,7 @@ Object::Object(Client* client, const ItemInst* inst)
 
 	// Set object name
 	if (inst) {
-		const Item_Struct* item = inst->GetItem();
+		const ItemData* item = inst->GetItem();
 		if (item && item->IDFile) {
 			if (strlen(item->IDFile) == 0) {
 				strcpy(m_data.object_name, DEFAULT_OBJECT_NAME);
@@ -194,7 +194,7 @@ Object::Object(const ItemInst *inst, float x, float y, float z, float heading, u
 
 	// Set object name
 	if (inst) {
-		const Item_Struct* item = inst->GetItem();
+		const ItemData* item = inst->GetItem();
 		if (item && item->IDFile) {
 			if (strlen(item->IDFile) == 0) {
 				strcpy(m_data.object_name, DEFAULT_OBJECT_NAME);
@@ -860,7 +860,7 @@ uint32 Object::GetItemID()
 		return 0;
 	}
 
-	const Item_Struct* item = this->m_inst->GetItem();
+	const ItemData* item = this->m_inst->GetItem();
 
 	if (item == 0)
 	{

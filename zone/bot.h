@@ -330,7 +330,7 @@ public:
 	void BotTradeSwapItem(Client* client, int16 lootSlot, const ItemInst* inst, const ItemInst* inst_swap, uint32 equipableSlots, std::string* errorMessage, bool swap = true);
 	void BotTradeAddItem(uint32 id, const ItemInst* inst, int16 charges, uint32 equipableSlots, uint16 lootSlot, std::string* errorMessage, bool addToDb = true);
 	void EquipBot(std::string* errorMessage);
-	bool CheckLoreConflict(const Item_Struct* item);
+	bool CheckLoreConflict(const ItemData* item);
 	uint32 GetEquipmentColor(uint8 material_slot) const;
 	virtual void UpdateEquipLightValue() { equip_light = m_inv.FindHighestLightValue(); }
 

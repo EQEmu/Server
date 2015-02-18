@@ -119,7 +119,7 @@ void Mob::DoSpecialAttackDamage(Mob *who, SkillUseTypes skill, int32 max_damage,
 				{
 					hate += item->GetItem()->AC;
 				}
-				const Item_Struct *itm = item->GetItem();
+				const ItemData *itm = item->GetItem();
 				hate = hate * (100 + GetFuriousBash(itm->Focus.Effect)) / 100;
 			}
 		}
@@ -474,7 +474,7 @@ int Mob::MonkSpecialAttack(Mob* other, uint8 unchecked_type)
 		}
 	}
 	else{
-		if(GetWeaponDamage(other, (const Item_Struct*)nullptr) <= 0){
+		if(GetWeaponDamage(other, (const ItemData*)nullptr) <= 0){
 			ndamage = -5;
 		}
 	}
@@ -705,8 +705,8 @@ void Client::RangedAttack(Mob* other, bool CanDoubleAttack) {
 		return;
 	}
 
-	const Item_Struct* RangeItem = RangeWeapon->GetItem();
-	const Item_Struct* AmmoItem = Ammo->GetItem();
+	const ItemData* RangeItem = RangeWeapon->GetItem();
+	const ItemData* AmmoItem = Ammo->GetItem();
 
 	if(RangeItem->ItemType != ItemTypeBow) {
 		Log.Out(Logs::Detail, Logs::Combat, "Ranged attack canceled. Ranged item is not a bow. type %d.", RangeItem->ItemType);
@@ -730,7 +730,7 @@ void Client::RangedAttack(Mob* other, bool CanDoubleAttack) {
 			const ItemInst *pi = m_inv[r];
 			if(pi == nullptr || !pi->IsType(ItemClassContainer))
 				continue;
-			const Item_Struct* bagitem = pi->GetItem();
+			const ItemData* bagitem = pi->GetItem();
 			if(!bagitem || bagitem->BagType != BagTypeQuiver)
 				continue;
 
@@ -809,7 +809,7 @@ void Client::RangedAttack(Mob* other, bool CanDoubleAttack) {
 }
 
 void Mob::DoArcheryAttackDmg(Mob* other,  const ItemInst* RangeWeapon, const ItemInst* Ammo, uint16 weapon_damage, int16 chance_mod, int16 focus, int ReuseTime, 
-							uint32 range_id, uint32 ammo_id, const Item_Struct *AmmoItem, int AmmoSlot, float speed) {
+							uint32 range_id, uint32 ammo_id, const ItemData *AmmoItem, int AmmoSlot, float speed) {
 	
 	if ((other == nullptr || 
 		((IsClient() && CastToClient()->dead) || 
@@ -824,7 +824,7 @@ void Mob::DoArcheryAttackDmg(Mob* other,  const ItemInst* RangeWeapon, const Ite
 
 	const ItemInst* _RangeWeapon = nullptr;
 	const ItemInst* _Ammo = nullptr;
-	const Item_Struct* ammo_lost = nullptr;
+	const ItemData* ammo_lost = nullptr;
 
 	/*
 	If LaunchProjectile is false this function will do archery damage on target,
@@ -1017,7 +1017,7 @@ void Mob::DoArcheryAttackDmg(Mob* other,  const ItemInst* RangeWeapon, const Ite
 	}
 }
 
-bool Mob::TryProjectileAttack(Mob* other, const Item_Struct *item, SkillUseTypes skillInUse, uint16 weapon_dmg, const ItemInst* RangeWeapon, const ItemInst* Ammo, int AmmoSlot, float speed){
+bool Mob::TryProjectileAttack(Mob* other, const ItemData *item, SkillUseTypes skillInUse, uint16 weapon_dmg, const ItemInst* RangeWeapon, const ItemInst* Ammo, int AmmoSlot, float speed){
 
 	if (!other)
 		return false;
@@ -1322,7 +1322,7 @@ void NPC::DoRangedAttackDmg(Mob* other, bool Launch, int16 damage_mod, int16 cha
 
 	//try proc on hits and misses
 	if(other && !other->HasDied())
-		TrySpellProc(nullptr, (const Item_Struct*)nullptr, other, MainRange);
+		TrySpellProc(nullptr, (const ItemData*)nullptr, other, MainRange);
 
 	if (HasSkillProcs() && other && !other->HasDied())
 		TrySkillProc(other, skillInUse, 0, false, MainRange);
@@ -1376,7 +1376,7 @@ void Client::ThrowingAttack(Mob* other, bool CanDoubleAttack) { //old was 51
 		return;
 	}
 
-	const Item_Struct* item = RangeWeapon->GetItem();
+	const ItemData* item = RangeWeapon->GetItem();
 	if(item->ItemType != ItemTypeLargeThrowing && item->ItemType != ItemTypeSmallThrowing) {
 		Log.Out(Logs::Detail, Logs::Combat, "Ranged attack canceled. Ranged item %d is not a throwing weapon. type %d.", item->ItemType);
 		Message(0, "Error: Rangeweapon: GetItem(%i)==0, you have nothing useful to throw!", GetItemIDAt(MainRange));
@@ -1437,7 +1437,7 @@ void Client::ThrowingAttack(Mob* other, bool CanDoubleAttack) { //old was 51
 	CommonBreakInvisible();
 }
 
-void Mob::DoThrowingAttackDmg(Mob* other, const ItemInst* RangeWeapon, const Item_Struct* AmmoItem, uint16 weapon_damage, int16 chance_mod,int16 focus, int ReuseTime, uint32 range_id, int AmmoSlot, float speed)
+void Mob::DoThrowingAttackDmg(Mob* other, const ItemInst* RangeWeapon, const ItemData* AmmoItem, uint16 weapon_damage, int16 chance_mod,int16 focus, int ReuseTime, uint32 range_id, int AmmoSlot, float speed)
 {
 	if ((other == nullptr || 
 		((IsClient() && CastToClient()->dead) || 
@@ -1451,7 +1451,7 @@ void Mob::DoThrowingAttackDmg(Mob* other, const ItemInst* RangeWeapon, const Ite
 	}
 
 	const ItemInst* _RangeWeapon = nullptr;
-	const Item_Struct* ammo_lost = nullptr;
+	const ItemData* ammo_lost = nullptr;
 
 	/*
 	If LaunchProjectile is false this function will do archery damage on target,
@@ -1575,7 +1575,7 @@ void Mob::DoThrowingAttackDmg(Mob* other, const ItemInst* RangeWeapon, const Ite
 	}
 }
 
-void Mob::SendItemAnimation(Mob *to, const Item_Struct *item, SkillUseTypes skillInUse, float velocity) {
+void Mob::SendItemAnimation(Mob *to, const ItemData *item, SkillUseTypes skillInUse, float velocity) {
 	EQApplicationPacket *outapp = new EQApplicationPacket(OP_SomeItemPacketMaybe, sizeof(Arrow_Struct));
 	Arrow_Struct *as = (Arrow_Struct *) outapp->pBuffer;
 	as->type = 1;
@@ -1625,7 +1625,7 @@ void Mob::ProjectileAnimation(Mob* to, int item_id, bool IsArrow, float speed, f
 	if (!to)
 		return;
 
-	const Item_Struct* item = nullptr;
+	const ItemData* item = nullptr;
 	uint8 item_type = 0;
 
 	if(!item_id) {
@@ -1766,7 +1766,7 @@ void NPC::DoClassAttacks(Mob *target) {
 					DoAnim(animKick);
 					int32 dmg = 0;
 
-					if(GetWeaponDamage(target, (const Item_Struct*)nullptr) <= 0){
+					if(GetWeaponDamage(target, (const ItemData*)nullptr) <= 0){
 						dmg = -5;
 					}
 					else{
@@ -1787,7 +1787,7 @@ void NPC::DoClassAttacks(Mob *target) {
 					DoAnim(animTailRake);
 					int32 dmg = 0;
 
-					if(GetWeaponDamage(target, (const Item_Struct*)nullptr) <= 0){
+					if(GetWeaponDamage(target, (const ItemData*)nullptr) <= 0){
 						dmg = -5;
 					}
 					else{
@@ -1840,7 +1840,7 @@ void NPC::DoClassAttacks(Mob *target) {
 				DoAnim(animKick);
 				int32 dmg = 0;
 
-				if(GetWeaponDamage(target, (const Item_Struct*)nullptr) <= 0){
+				if(GetWeaponDamage(target, (const ItemData*)nullptr) <= 0){
 					dmg = -5;
 				}
 				else{
@@ -1865,7 +1865,7 @@ void NPC::DoClassAttacks(Mob *target) {
 				DoAnim(animTailRake);
 				int32 dmg = 0;
 
-				if(GetWeaponDamage(target, (const Item_Struct*)nullptr) <= 0){
+				if(GetWeaponDamage(target, (const ItemData*)nullptr) <= 0){
 					dmg = -5;
 				}
 				else{
@@ -2377,7 +2377,7 @@ void Mob::DoMeleeSkillAttackDmg(Mob* other, uint16 weapon_damage, SkillUseTypes 
 		int32 max_hit = (2 * weapon_damage*GetDamageTable(skillinuse)) / 100;
 
 		if(GetLevel() >= 28 && IsWarriorClass() ) {
-			int ucDamageBonus = GetWeaponDamageBonus((const Item_Struct*) nullptr ); 
+			int ucDamageBonus = GetWeaponDamageBonus((const ItemData*) nullptr ); 
 			min_hit += (int) ucDamageBonus;
 			max_hit += (int) ucDamageBonus;
 			hate += ucDamageBonus;
@@ -2390,7 +2390,7 @@ void Mob::DoMeleeSkillAttackDmg(Mob* other, uint16 weapon_damage, SkillUseTypes 
 					if(item->GetItem()->ItemType == ItemTypeShield)	{
 						hate += item->GetItem()->AC;
 					}
-					const Item_Struct *itm = item->GetItem();
+					const ItemData *itm = item->GetItem();
 					hate = hate * (100 + GetFuriousBash(itm->Focus.Effect)) / 100;
 				}
 			}

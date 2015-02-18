@@ -1989,7 +1989,7 @@ namespace Titanium
 		int16 slot_id = ServerToTitaniumSlot(slot_id_in);
 		uint32 merchant_slot = inst->GetMerchantSlot();
 		int16 charges = inst->GetCharges();
-		const Item_Struct *item = inst->GetUnscaledItem();
+		const ItemData *item = inst->GetUnscaledItem();
 		int i;
 		uint32 sub_length;
 

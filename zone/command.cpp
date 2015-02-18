@@ -2553,7 +2553,7 @@ void command_peekinv(Client *c, const Seperator *sep)
 	Client* targetClient = c->GetTarget()->CastToClient();
 	const ItemInst* inst_main = nullptr;
 	const ItemInst* inst_sub = nullptr;
-	const Item_Struct* item_data = nullptr;
+	const ItemData* item_data = nullptr;
 	std::string item_link;
 	Client::TextLink linker;
 	linker.SetLinkType(linker.linkItemInst);
@@ -5413,7 +5413,7 @@ void command_summonitem(Client *c, const Seperator *sep)
 	else {
 		uint32 itemid = atoi(sep->arg[1]);
 		int16 item_status = 0;
-		const Item_Struct* item = database.GetItem(itemid);
+		const ItemData* item = database.GetItem(itemid);
 		if(item) {
 			item_status = static_cast<int16>(item->MinStatus);
 		}
@@ -5452,7 +5452,7 @@ void command_giveitem(Client *c, const Seperator *sep)
 		Client *t = c->GetTarget()->CastToClient();
 		uint32 itemid = atoi(sep->arg[1]);
 		int16 item_status = 0;
-		const Item_Struct* item = database.GetItem(itemid);
+		const ItemData* item = database.GetItem(itemid);
 		if(item) {
 			item_status = static_cast<int16>(item->MinStatus);
 		}
@@ -5505,7 +5505,7 @@ void command_itemsearch(Client *c, const Seperator *sep)
 	{
 		const char *search_criteria=sep->argplus[1];
 
-		const Item_Struct* item = nullptr;
+		const ItemData* item = nullptr;
 		std::string item_link;
 		Client::TextLink linker;
 		linker.SetLinkType(linker.linkItemData);
@@ -10179,7 +10179,7 @@ void command_zopp(Client *c, const Seperator *sep)
 		uint32 itemid = atoi(sep->arg[3]);
 		int16 charges = sep->argnum == 4 ? atoi(sep->arg[4]) : 1; // defaults to 1 charge if not specified
 
-		const Item_Struct* FakeItem = database.GetItem(itemid);
+		const ItemData* FakeItem = database.GetItem(itemid);
 
 		if (!FakeItem) {
 			c->Message(13, "Error: Item [%u] is not a valid item id.",  itemid);
@@ -10187,7 +10187,7 @@ void command_zopp(Client *c, const Seperator *sep)
 		}
 
 		int16 item_status = 0;
-		const Item_Struct* item = database.GetItem(itemid);
+		const ItemData* item = database.GetItem(itemid);
 		if(item) {
 			item_status = static_cast<int16>(item->MinStatus);
 		}

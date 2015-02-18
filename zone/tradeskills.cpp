@@ -61,7 +61,7 @@ void Object::HandleAugmentation(Client* user, const AugmentItem_Struct* in_augme
 		inst = user_inv.GetItem(in_augment->container_slot);
 		if (inst)
 		{
-			const Item_Struct* item = inst->GetItem();
+			const ItemData* item = inst->GetItem();
 			if (item && inst->IsType(ItemClassContainer) && item->BagType == 53)
 			{
 				// We have found an appropriate inventory augmentation sealer
@@ -267,7 +267,7 @@ void Object::HandleCombine(Client* user, const NewCombine_Struct* in_combine, Ob
 	else {
 		inst = user_inv.GetItem(in_combine->container_slot);
 		if (inst) {
-			const Item_Struct* item = inst->GetItem();
+			const ItemData* item = inst->GetItem();
 			if (item && inst->IsType(ItemClassContainer)) {
 				c_type = item->BagType;
 				some_id = item->ID;
@@ -285,7 +285,7 @@ void Object::HandleCombine(Client* user, const NewCombine_Struct* in_combine, Ob
 		const ItemInst* inst = container->GetItem(0);
 		bool AllowAll = RuleB(Inventory, AllowAnyWeaponTransformation);
 		if (inst && ItemInst::CanTransform(inst->GetItem(), container->GetItem(), AllowAll)) {
-			const Item_Struct* new_weapon = inst->GetItem();
+			const ItemData* new_weapon = inst->GetItem();
 			user->DeleteItemInInventory(InventoryOld::CalcSlotId(in_combine->container_slot, 0), 0, true);
 			container->Clear();
 			user->SummonItem(new_weapon->ID, inst->GetCharges(), inst->GetAugmentItemID(0), inst->GetAugmentItemID(1), inst->GetAugmentItemID(2), inst->GetAugmentItemID(3), inst->GetAugmentItemID(4), inst->GetAugmentItemID(5), inst->IsAttuned(), MainCursor, container->GetItem()->Icon, atoi(container->GetItem()->IDFile + 2));
@@ -305,7 +305,7 @@ void Object::HandleCombine(Client* user, const NewCombine_Struct* in_combine, Ob
 	if (container->GetItem() && container->GetItem()->BagType == BagTypeDetransformationmold) {
 		const ItemInst* inst = container->GetItem(0);
 		if (inst && inst->GetOrnamentationIcon() && inst->GetOrnamentationIcon()) {
-			const Item_Struct* new_weapon = inst->GetItem();
+			const ItemData* new_weapon = inst->GetItem();
 			user->DeleteItemInInventory(InventoryOld::CalcSlotId(in_combine->container_slot, 0), 0, true);
 			container->Clear();
 			user->SummonItem(new_weapon->ID, inst->GetCharges(), inst->GetAugmentItemID(0), inst->GetAugmentItemID(1), inst->GetAugmentItemID(2), inst->GetAugmentItemID(3), inst->GetAugmentItemID(4), inst->GetAugmentItemID(5), inst->IsAttuned(), MainCursor, 0, 0);
@@ -529,7 +529,7 @@ void Object::HandleAutoCombine(Client* user, const RecipeAutoCombine_Struct* rac
 
 		for(std::list<int>::iterator it = MissingItems.begin(); it != MissingItems.end(); ++it)
 		{
-			const Item_Struct* item = database.GetItem(*it);
+			const ItemData* item = database.GetItem(*it);
 
 			if(item)
 				user->Message_StringID(MT_Skills, TRADESKILL_MISSING_ITEM, item->Name);
@@ -953,7 +953,7 @@ bool Client::TradeskillExecute(DBTradeskillRecipe_Struct *spec) {
 			break;
 		}
 	}
-	const Item_Struct* item = nullptr;
+	const ItemData* item = nullptr;
 
 	if (spec->tradeskill == SkillBlacksmithing) {
 		switch(GetAA(aaBlacksmithingMastery)) {
@@ -1202,7 +1202,7 @@ bool ZoneDatabase::GetTradeRecipe(const ItemInst* container, uint8 c_type, uint3
 		if (!inst)
             continue;
 
-        const Item_Struct* item = GetItem(inst->GetItem()->ID);
+        const ItemData* item = GetItem(inst->GetItem()->ID);
         if (!item)
             continue;
 
@@ -1331,7 +1331,7 @@ bool ZoneDatabase::GetTradeRecipe(const ItemInst* container, uint8 c_type, uint3
             if(!inst)
                 continue;
 
-            const Item_Struct* item = GetItem(inst->GetItem()->ID);
+            const ItemData* item = GetItem(inst->GetItem()->ID);
             if (!item)
                 continue;
 

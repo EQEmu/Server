@@ -3760,7 +3760,7 @@ namespace UF
 
 		std::stringstream ss(std::stringstream::in | std::stringstream::out | std::stringstream::binary);
 
-		const Item_Struct *item = inst->GetUnscaledItem();
+		const ItemData *item = inst->GetUnscaledItem();
 		//Log.LogDebugType(Logs::General, Logs::Netcode, "[ERROR] Serialize called for: %s", item->Name);
 		UF::structs::ItemSerializationHeader hdr;
 		hdr.stacksize = stackable ? charges : 1;
@@ -3798,7 +3798,7 @@ namespace UF
 		//ORNAMENT IDFILE / ICON -
 		uint16 ornaIcon = 0;
 		if (inst->GetOrnamentationAug(ornamentationAugtype)) {
-			const Item_Struct *aug_weap = inst->GetOrnamentationAug(ornamentationAugtype)->GetItem();
+			const ItemData *aug_weap = inst->GetOrnamentationAug(ornamentationAugtype)->GetItem();
 			ss.write(aug_weap->IDFile, strlen(aug_weap->IDFile));
 			ss.write((const char*)&null_term, sizeof(uint8));
 			ornaIcon = aug_weap->Icon;
