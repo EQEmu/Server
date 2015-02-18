@@ -282,14 +282,14 @@ Mob *HateList::GetEntWithMostHateOnList(Mob *center)
 		return nullptr;
 
 	Mob* top_hate = nullptr;
-	int32 hate = -1;
+	uint32 hate = 0;
 
 	if (center == nullptr)
 		return nullptr;
 
 	if (RuleB(Aggro, SmartAggroList)){
 		Mob* top_client_type_in_range = nullptr;
-		int32 hate_client_type_in_range = -1;
+		uint32 hate_client_type_in_range = 0;
 		int skipped_count = 0;
 
 		auto iterator = list.begin();
@@ -337,7 +337,7 @@ Mob *HateList::GetEntWithMostHateOnList(Mob *center)
 				continue;
 			}
 
-			int32 current_hate = cur->stored_hate_amount;
+			uint32 current_hate = cur->stored_hate_amount;
 
 			if (cur->entity_on_hatelist->IsClient()){
 
@@ -459,13 +459,13 @@ Mob *HateList::GetEntWithMostHateOnList(Mob *center)
 
 Mob *HateList::GetEntWithMostHateOnList(){
 	Mob* top = nullptr;
-	int32 hate = -1;
+	uint32 hate = 0;
 
 	auto iterator = list.begin();
 	while (iterator != list.end())
 	{
 		struct_HateList *cur = (*iterator);
-		if (cur->entity_on_hatelist != nullptr && (cur->stored_hate_amount > hate))
+		if (cur && cur->entity_on_hatelist != nullptr && (cur->stored_hate_amount > hate))
 		{
 			top = cur->entity_on_hatelist;
 			hate = cur->stored_hate_amount;
