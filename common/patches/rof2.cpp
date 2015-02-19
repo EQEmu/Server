@@ -3667,6 +3667,23 @@ namespace RoF2
 
 			FINISH_ENCODE();
 		}
+		else if (psize == sizeof(BazaarWelcome_Struct))
+		{
+			ENCODE_LENGTH_EXACT(BazaarWelcome_Struct);
+			SETUP_DIRECT_ENCODE(BazaarWelcome_Struct, structs::BazaarWelcome_Struct);
+
+			eq->Code = emu->Beginning.Action;
+			eq->EntityID = emu->Unknown012;
+			OUT(Traders);
+			OUT(Items);
+			eq->Traders2 = emu->Traders;
+			eq->Items2 = emu->Items;
+
+			Log.Out(Logs::Detail, Logs::Trading, "ENCODE(OP_TraderShop): BazaarWelcome_Struct Code %d, Traders %d, Items %d",
+				eq->Code, eq->Traders, eq->Items);
+
+			FINISH_ENCODE();
+		}
 		else if (psize == sizeof(TraderBuy_Struct))
 		{
 			ENCODE_LENGTH_EXACT(TraderBuy_Struct);
@@ -5009,8 +5026,25 @@ namespace RoF2
 			DECODE_LENGTH_EXACT(structs::TraderClick_Struct);
 			SETUP_DIRECT_DECODE(TraderClick_Struct, structs::TraderClick_Struct);
 
+			IN(Code);
 			IN(TraderID);
 			IN(Approval);
+			Log.Out(Logs::Detail, Logs::Trading, "DECODE(OP_TraderShop): TraderClick_Struct Code %d, TraderID %d, Approval %d",
+				eq->Code, eq->TraderID, eq->Approval);
+
+			FINISH_DIRECT_DECODE();
+		}
+		else if (psize == sizeof(structs::BazaarWelcome_Struct))
+		{
+			// Don't think this size gets used in RoF+ - Leaving for now...
+			DECODE_LENGTH_EXACT(structs::BazaarWelcome_Struct);
+			SETUP_DIRECT_DECODE(BazaarWelcome_Struct, structs::BazaarWelcome_Struct);
+
+			emu->Beginning.Action = eq->Code;
+			IN(Traders);
+			IN(Items);
+			Log.Out(Logs::Detail, Logs::Trading, "DECODE(OP_TraderShop): BazaarWelcome_Struct Code %d, Traders %d, Items %d",
+				eq->Code, eq->Traders, eq->Items);
 
 			FINISH_DIRECT_DECODE();
 		}
@@ -5026,9 +5060,9 @@ namespace RoF2
 			memcpy(emu->ItemName, eq->ItemName, sizeof(emu->ItemName));
 			IN(ItemID);
 			IN(Quantity);
-			Log.Out(Logs::Detail, Logs::Trading, "DECODE(OP_TraderShop): (Unknowns) Unknown004 %d, Unknown008 %d, Unknown012 %d, Unknown076 %d, Unknown276 %d",
+			Log.Out(Logs::Detail, Logs::Trading, "DECODE(OP_TraderShop): TraderBuy_Struct (Unknowns) Unknown004 %d, Unknown008 %d, Unknown012 %d, Unknown076 %d, Unknown276 %d",
 				eq->Unknown004, eq->Unknown008, eq->Unknown012, eq->Unknown076, eq->Unknown276);
-			Log.Out(Logs::Detail, Logs::Trading, "DECODE(OP_TraderShop): Buy Action %d, Price %d, Trader %d, ItemID %d, Quantity %d, ItemName, %s", 
+			Log.Out(Logs::Detail, Logs::Trading, "DECODE(OP_TraderShop): TraderBuy_Struct Buy Action %d, Price %d, Trader %d, ItemID %d, Quantity %d, ItemName, %s", 
 				eq->Action, eq->Price, eq->TraderID, eq->ItemID, eq->Quantity, eq->ItemName);
 
 			FINISH_DIRECT_DECODE();

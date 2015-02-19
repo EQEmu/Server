@@ -1,5 +1,8 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 02/18/2015 ==
+Trevius: Fix for potential recursive loops if using RemoveFromHateList() within EVENT_HATE_LIST.
+
 == 02/17/2015 ==
 Uleat: Implemented per-client character creation limiting. Caps are unknown atm..so, don't get over-zealous!
 Notes:

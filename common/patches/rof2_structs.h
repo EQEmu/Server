@@ -2940,10 +2940,12 @@ struct BazaarWindowStart_Struct {
 
 
 struct BazaarWelcome_Struct {
-	BazaarWindowStart_Struct Beginning;
-	uint32  Traders;
-	uint32  Items;
-	uint8   Unknown012[8];
+	uint32 Code;
+	uint32 EntityID;
+	uint32 Traders;
+	uint32 Items;
+	uint32 Traders2;
+	uint32 Items2;
 };
 
 struct BazaarSearch_Struct {

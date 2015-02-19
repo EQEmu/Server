@@ -2776,7 +2776,8 @@ struct BazaarWelcome_Struct {
 	BazaarWindowStart_Struct Beginning;
 	uint32	Traders;
 	uint32	Items;
-	uint8	Unknown012[8];
+	uint32	Unknown012;
+	uint32	Unknown016;
 };
 
 struct BazaarSearch_Struct {
@@ -3207,7 +3208,7 @@ struct TraderDelItem_Struct{
 
 struct TraderClick_Struct{
 /*000*/	uint32 TraderID;
-/*004*/	uint32 Unknown004;
+/*004*/	uint32 Code;
 /*008*/	uint32 Unknown008;
 /*012*/	uint32 Approval;
 /*016*/
