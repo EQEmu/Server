@@ -27,6 +27,7 @@
 #include "dbcore.h"
 #include "linked_list.h"
 #include "eq_packet_structs.h"
+#include "inventory.h"
 
 #include <cmath>
 #include <string>

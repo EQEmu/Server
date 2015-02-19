@@ -19,12 +19,34 @@
 #ifndef COMMON_ITEM_INSTANCE_H
 #define COMMON_ITEM_INSTANCE_H
 
+#include "item_data.h"
+#include <string>
+#include <memory>
+#include <map>
+
 namespace EQEmu
 {
 	class ItemInstance
 	{
 	public:
+		ItemInstance();
+		ItemInstance(const ItemData* idata);
+		ItemInstance(const ItemData* idata, int16 charges);
+		~ItemInstance();
+
+		std::shared_ptr<ItemInstance> GetItem(int index);
 	private:
+		const ItemData *base_item_;
+		ItemData *modified_item_;
+		int16 charges_;
+		uint32 color_;
+		bool attuned_;
+		std::string custom_data_;
+		uint32 ornament_idfile_;
+		uint32 ornament_icon_;
+		uint32 ornament_hero_model_;
+		uint64 tracking_id_;
+		std::map<int, std::shared_ptr<ItemInstance>> contents_;
 	};
 
 } // EQEmu

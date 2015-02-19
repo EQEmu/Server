@@ -18,3 +18,21 @@
 
 #include "inventory.h"
 
+EQEmu::Inventory::Inventory() {
+}
+
+EQEmu::Inventory::~Inventory() {
+}
+
+std::shared_ptr<EQEmu::ItemInstance> EQEmu::Inventory::GetItem(InventoryType type, int16 slot) {
+	auto area = items_.find(type);
+
+	if(area != items_.end()) {
+		auto item = area->second.find(slot);
+		if(item != area->second.end()) {
+			return item->second;
+		}
+	}
+
+	return std::shared_ptr<EQEmu::ItemInstance>(nullptr);
+}

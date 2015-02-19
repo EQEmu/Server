@@ -151,74 +151,77 @@ bool SharedDatabase::VerifyInventory(uint32 account_id, int16 slot_id, const Ite
 
 bool SharedDatabase::SaveInventory(uint32 char_id, const ItemInst* inst, int16 slot_id) {
 
-	// If we never save tribute slots..how are we to ever benefit from them!!? The client
-	// object is destroyed upon zoning - including its inventory object..and if tributes
-	// don't exist in the database, then they will never be loaded when the new client
-	// object is created in the new zone object... Something to consider... -U
+	return true;
+	//// If we never save tribute slots..how are we to ever benefit from them!!? The client
+	//// object is destroyed upon zoning - including its inventory object..and if tributes
+	//// don't exist in the database, then they will never be loaded when the new client
+	//// object is created in the new zone object... Something to consider... -U
+	////
+	//// (we could add them to the 'NoRent' checks and dispose of after 30 minutes offline)
 	//
-	// (we could add them to the 'NoRent' checks and dispose of after 30 minutes offline)
-
-	//never save tribute slots:
-	if(slot_id >= EmuConstants::TRIBUTE_BEGIN && slot_id <= EmuConstants::TRIBUTE_END)
-		return true;
-
-	if (slot_id >= EmuConstants::SHARED_BANK_BEGIN && slot_id <= EmuConstants::SHARED_BANK_BAGS_END) {
-        // Shared bank inventory
-		if (!inst)
-            return DeleteSharedBankSlot(char_id, slot_id);
-		else
-            return UpdateSharedBankSlot(char_id, inst, slot_id);
-	}
-	else if (!inst) { // All other inventory
-		return DeleteInventorySlot(char_id, slot_id);
-	}
-
-    return UpdateInventorySlot(char_id, inst, slot_id);
+	////never save tribute slots:
+	//if(slot_id >= EmuConstants::TRIBUTE_BEGIN && slot_id <= EmuConstants::TRIBUTE_END)
+	//	return true;
+	//
+	//if (slot_id >= EmuConstants::SHARED_BANK_BEGIN && slot_id <= EmuConstants::SHARED_BANK_BAGS_END) {
+    //    // Shared bank inventory
+	//	if (!inst)
+    //        return DeleteSharedBankSlot(char_id, slot_id);
+	//	else
+    //        return UpdateSharedBankSlot(char_id, inst, slot_id);
+	//}
+	//else if (!inst) { // All other inventory
+	//	return DeleteInventorySlot(char_id, slot_id);
+	//}
+	//
+    //return UpdateInventorySlot(char_id, inst, slot_id);
 }
 
 bool SharedDatabase::UpdateInventorySlot(uint32 char_id, const ItemInst* inst, int16 slot_id) {
-	// need to check 'inst' argument for valid pointer
-
-	uint32 augslot[EmuConstants::ITEM_COMMON_SIZE] = { NO_ITEM, NO_ITEM, NO_ITEM, NO_ITEM, NO_ITEM, NO_ITEM };
-	if (inst->IsType(ItemClassCommon)) {
-		for (int i = AUG_BEGIN; i < EmuConstants::ITEM_COMMON_SIZE; i++) {
-			ItemInst *auginst = inst->GetItem(i);
-			augslot[i] = (auginst && auginst->GetItem()) ? auginst->GetItem()->ID : NO_ITEM;
-		}
-	}
-
-    uint16 charges = 0;
-	if(inst->GetCharges() >= 0)
-		charges = inst->GetCharges();
-	else
-		charges = 0x7FFF;
-
-	// Update/Insert item
-    std::string query = StringFormat("REPLACE INTO inventory "
-                                    "(charid, slotid, itemid, charges, instnodrop, custom_data, color, "
-                                    "augslot1, augslot2, augslot3, augslot4, augslot5, augslot6, ornamenticon, ornamentidfile, ornament_hero_model) "
-                                    "VALUES( %lu, %lu, %lu, %lu, %lu, '%s', %lu, "
-                                    "%lu, %lu, %lu, %lu, %lu, %lu, %lu, %lu, %lu)",
-                                    (unsigned long)char_id, (unsigned long)slot_id, (unsigned long)inst->GetItem()->ID,
-                                    (unsigned long)charges, (unsigned long)(inst->IsAttuned()? 1: 0),
-                                    inst->GetCustomDataString().c_str(), (unsigned long)inst->GetColor(),
-                                    (unsigned long)augslot[0], (unsigned long)augslot[1], (unsigned long)augslot[2],
-									(unsigned long)augslot[3], (unsigned long)augslot[4], (unsigned long)augslot[5], (unsigned long)inst->GetOrnamentationIcon(),
-									(unsigned long)inst->GetOrnamentationIDFile(), (unsigned long)inst->GetOrnamentHeroModel());
-	auto results = QueryDatabase(query);
-
-    // Save bag contents, if slot supports bag contents
-	if (inst->IsType(ItemClassContainer) && InventoryOld::SupportsContainers(slot_id))
-		for (uint8 idx = SUB_BEGIN; idx < EmuConstants::ITEM_CONTAINER_SIZE; idx++) {
-			const ItemInst* baginst = inst->GetItem(idx);
-			SaveInventory(char_id, baginst, InventoryOld::CalcSlotId(slot_id, idx));
-		}
-
-    if (!results.Success()) {
-        return false;
-    }
-
 	return true;
+
+	// need to check 'inst' argument for valid pointer
+	//
+	//uint32 augslot[EmuConstants::ITEM_COMMON_SIZE] = { NO_ITEM, NO_ITEM, NO_ITEM, NO_ITEM, NO_ITEM, NO_ITEM };
+	//if (inst->IsType(ItemClassCommon)) {
+	//	for (int i = AUG_BEGIN; i < EmuConstants::ITEM_COMMON_SIZE; i++) {
+	//		ItemInst *auginst = inst->GetItem(i);
+	//		augslot[i] = (auginst && auginst->GetItem()) ? auginst->GetItem()->ID : NO_ITEM;
+	//	}
+	//}
+	//
+    //uint16 charges = 0;
+	//if(inst->GetCharges() >= 0)
+	//	charges = inst->GetCharges();
+	//else
+	//	charges = 0x7FFF;
+	//
+	//// Update/Insert item
+    //std::string query = StringFormat("REPLACE INTO inventory "
+    //                                "(charid, slotid, itemid, charges, instnodrop, custom_data, color, "
+    //                                "augslot1, augslot2, augslot3, augslot4, augslot5, augslot6, ornamenticon, ornamentidfile, ornament_hero_model) "
+    //                                "VALUES( %lu, %lu, %lu, %lu, %lu, '%s', %lu, "
+    //                                "%lu, %lu, %lu, %lu, %lu, %lu, %lu, %lu, %lu)",
+    //                                (unsigned long)char_id, (unsigned long)slot_id, (unsigned long)inst->GetItem()->ID,
+    //                                (unsigned long)charges, (unsigned long)(inst->IsAttuned()? 1: 0),
+    //                                inst->GetCustomDataString().c_str(), (unsigned long)inst->GetColor(),
+    //                                (unsigned long)augslot[0], (unsigned long)augslot[1], (unsigned long)augslot[2],
+	//								(unsigned long)augslot[3], (unsigned long)augslot[4], (unsigned long)augslot[5], (unsigned long)inst->GetOrnamentationIcon(),
+	//								(unsigned long)inst->GetOrnamentationIDFile(), (unsigned long)inst->GetOrnamentHeroModel());
+	//auto results = QueryDatabase(query);
+	//
+    //// Save bag contents, if slot supports bag contents
+	//if (inst->IsType(ItemClassContainer) && InventoryOld::SupportsContainers(slot_id))
+	//	for (uint8 idx = SUB_BEGIN; idx < EmuConstants::ITEM_CONTAINER_SIZE; idx++) {
+	//		const ItemInst* baginst = inst->GetItem(idx);
+	//		SaveInventory(char_id, baginst, InventoryOld::CalcSlotId(slot_id, idx));
+	//	}
+	//
+    //if (!results.Success()) {
+    //    return false;
+    //}
+	//
+	//return true;
 }
 
 bool SharedDatabase::UpdateSharedBankSlot(uint32 char_id, const ItemInst* inst, int16 slot_id) {
@@ -482,146 +485,147 @@ bool SharedDatabase::GetSharedBank(uint32 id, InventoryOld *inv, bool is_charid)
 }
 
 // Overloaded: Retrieve character inventory based on character id
-bool SharedDatabase::GetInventory(uint32 char_id, InventoryOld *inv)
+bool SharedDatabase::GetInventory(uint32 char_id, EQEmu::Inventory *inv)
 {
-	// Retrieve character inventory
-	std::string query =
-	    StringFormat("SELECT slotid, itemid, charges, color, augslot1, augslot2, augslot3, augslot4, augslot5, "
-			 "augslot6, instnodrop, custom_data, ornamenticon, ornamentidfile, ornament_hero_model FROM "
-			 "inventory WHERE charid = %i ORDER BY slotid",
-			 char_id);
-	auto results = QueryDatabase(query);
-	if (!results.Success()) {
-		Log.Out(Logs::General, Logs::Error, "If you got an error related to the 'instnodrop' field, run the "
-						    "following SQL Queries:\nalter table inventory add instnodrop "
-						    "tinyint(1) unsigned default 0 not null;\n");
-		return false;
-	}
-
-	auto timestamps = GetItemRecastTimestamps(char_id);
-
-	for (auto row = results.begin(); row != results.end(); ++row) {
-		int16 slot_id = atoi(row[0]);
-		uint32 item_id = atoi(row[1]);
-		uint16 charges = atoi(row[2]);
-		uint32 color = atoul(row[3]);
-
-		uint32 aug[EmuConstants::ITEM_COMMON_SIZE];
-
-		aug[0] = (uint32)atoul(row[4]);
-		aug[1] = (uint32)atoul(row[5]);
-		aug[2] = (uint32)atoul(row[6]);
-		aug[3] = (uint32)atoul(row[7]);
-		aug[4] = (uint32)atoul(row[8]);
-		aug[5] = (uint32)atoul(row[9]);
-
-		bool instnodrop = (row[10] && (uint16)atoi(row[10])) ? true : false;
-
-		uint32 ornament_icon = (uint32)atoul(row[12]);
-		uint32 ornament_idfile = (uint32)atoul(row[13]);
-		uint32 ornament_hero_model = (uint32)atoul(row[14]);
-
-		const ItemData *item = GetItem(item_id);
-
-		if (!item) {
-			Log.Out(Logs::General, Logs::Error,
-				"Warning: charid %i has an invalid item_id %i in inventory slot %i", char_id, item_id,
-				slot_id);
-			continue;
-		}
-
-		int16 put_slot_id = INVALID_INDEX;
-
-		ItemInst *inst = CreateBaseItem(item, charges);
-
-		if (inst == nullptr)
-			continue;
-
-		if (row[11]) {
-			std::string data_str(row[11]);
-			std::string idAsString;
-			std::string value;
-			bool use_id = true;
-
-			for (int i = 0; i < data_str.length(); ++i) {
-				if (data_str[i] == '^') {
-					if (!use_id) {
-						inst->SetCustomData(idAsString, value);
-						idAsString.clear();
-						value.clear();
-					}
-
-					use_id = !use_id;
-					continue;
-				}
-
-				char v = data_str[i];
-				if (use_id)
-					idAsString.push_back(v);
-				else
-					value.push_back(v);
-			}
-		}
-
-		inst->SetOrnamentIcon(ornament_icon);
-		inst->SetOrnamentationIDFile(ornament_idfile);
-		inst->SetOrnamentHeroModel(ornament_hero_model);
-
-		if (instnodrop ||
-		    (((slot_id >= EmuConstants::EQUIPMENT_BEGIN && slot_id <= EmuConstants::EQUIPMENT_END) ||
-		      slot_id == MainPowerSource) &&
-		     inst->GetItem()->Attuneable))
-			inst->SetAttuned(true);
-
-		if (color > 0)
-			inst->SetColor(color);
-
-		if (charges == 0x7FFF)
-			inst->SetCharges(-1);
-		else if (charges == 0 &&
-			 inst->IsStackable()) // Stackable items need a minimum charge of 1 remain moveable.
-			inst->SetCharges(1);
-		else
-			inst->SetCharges(charges);
-
-		if (item->RecastDelay) {
-			if (timestamps.count(item->RecastType))
-				inst->SetRecastTimestamp(timestamps.at(item->RecastType));
-			else
-				inst->SetRecastTimestamp(0);
-		}
-
-		if (item->ItemClass == ItemClassCommon) {
-			for (int i = AUG_BEGIN; i < EmuConstants::ITEM_COMMON_SIZE; i++) {
-				if (aug[i])
-					inst->PutAugment(this, i, aug[i]);
-			}
-		}
-
-		if (slot_id >= 8000 && slot_id <= 8999) {
-			put_slot_id = inv->PushCursor(*inst);
-		} else if (slot_id >= 3111 && slot_id <= 3179) {
-			// Admins: please report any occurrences of this error
-			Log.Out(Logs::General, Logs::Error, "Warning: Defunct location for item in inventory: "
-							    "charid=%i, item_id=%i, slot_id=%i .. pushing to cursor...",
-				char_id, item_id, slot_id);
-			put_slot_id = inv->PushCursor(*inst);
-		} else {
-			put_slot_id = inv->PutItem(slot_id, *inst);
-		}
-
-		safe_delete(inst);
-
-		// Save ptr to item in inventory
-		if (put_slot_id == INVALID_INDEX) {
-			Log.Out(Logs::General, Logs::Error,
-				"Warning: Invalid slot_id for item in inventory: charid=%i, item_id=%i, slot_id=%i",
-				char_id, item_id, slot_id);
-		}
-	}
-
-	// Retrieve shared inventory
-	return GetSharedBank(char_id, inv, true);
+	return false;
+	//// Retrieve character inventory
+	//std::string query =
+	//    StringFormat("SELECT slotid, itemid, charges, color, augslot1, augslot2, augslot3, augslot4, augslot5, "
+	//		 "augslot6, instnodrop, custom_data, ornamenticon, ornamentidfile, ornament_hero_model FROM "
+	//		 "inventory WHERE charid = %i ORDER BY slotid",
+	//		 char_id);
+	//auto results = QueryDatabase(query);
+	//if (!results.Success()) {
+	//	Log.Out(Logs::General, Logs::Error, "If you got an error related to the 'instnodrop' field, run the "
+	//					    "following SQL Queries:\nalter table inventory add instnodrop "
+	//					    "tinyint(1) unsigned default 0 not null;\n");
+	//	return false;
+	//}
+	//
+	//auto timestamps = GetItemRecastTimestamps(char_id);
+	//
+	//for (auto row = results.begin(); row != results.end(); ++row) {
+	//	int16 slot_id = atoi(row[0]);
+	//	uint32 item_id = atoi(row[1]);
+	//	uint16 charges = atoi(row[2]);
+	//	uint32 color = atoul(row[3]);
+	//
+	//	uint32 aug[EmuConstants::ITEM_COMMON_SIZE];
+	//
+	//	aug[0] = (uint32)atoul(row[4]);
+	//	aug[1] = (uint32)atoul(row[5]);
+	//	aug[2] = (uint32)atoul(row[6]);
+	//	aug[3] = (uint32)atoul(row[7]);
+	//	aug[4] = (uint32)atoul(row[8]);
+	//	aug[5] = (uint32)atoul(row[9]);
+	//
+	//	bool instnodrop = (row[10] && (uint16)atoi(row[10])) ? true : false;
+	//
+	//	uint32 ornament_icon = (uint32)atoul(row[12]);
+	//	uint32 ornament_idfile = (uint32)atoul(row[13]);
+	//	uint32 ornament_hero_model = (uint32)atoul(row[14]);
+	//
+	//	const ItemData *item = GetItem(item_id);
+	//
+	//	if (!item) {
+	//		Log.Out(Logs::General, Logs::Error,
+	//			"Warning: charid %i has an invalid item_id %i in inventory slot %i", char_id, item_id,
+	//			slot_id);
+	//		continue;
+	//	}
+	//
+	//	int16 put_slot_id = INVALID_INDEX;
+	//
+	//	ItemInst *inst = CreateBaseItem(item, charges);
+	//
+	//	if (inst == nullptr)
+	//		continue;
+	//
+	//	if (row[11]) {
+	//		std::string data_str(row[11]);
+	//		std::string idAsString;
+	//		std::string value;
+	//		bool use_id = true;
+	//
+	//		for (int i = 0; i < data_str.length(); ++i) {
+	//			if (data_str[i] == '^') {
+	//				if (!use_id) {
+	//					inst->SetCustomData(idAsString, value);
+	//					idAsString.clear();
+	//					value.clear();
+	//				}
+	//
+	//				use_id = !use_id;
+	//				continue;
+	//			}
+	//
+	//			char v = data_str[i];
+	//			if (use_id)
+	//				idAsString.push_back(v);
+	//			else
+	//				value.push_back(v);
+	//		}
+	//	}
+	//
+	//	inst->SetOrnamentIcon(ornament_icon);
+	//	inst->SetOrnamentationIDFile(ornament_idfile);
+	//	inst->SetOrnamentHeroModel(ornament_hero_model);
+	//
+	//	if (instnodrop ||
+	//	    (((slot_id >= EmuConstants::EQUIPMENT_BEGIN && slot_id <= EmuConstants::EQUIPMENT_END) ||
+	//	      slot_id == MainPowerSource) &&
+	//	     inst->GetItem()->Attuneable))
+	//		inst->SetAttuned(true);
+	//
+	//	if (color > 0)
+	//		inst->SetColor(color);
+	//
+	//	if (charges == 0x7FFF)
+	//		inst->SetCharges(-1);
+	//	else if (charges == 0 &&
+	//		 inst->IsStackable()) // Stackable items need a minimum charge of 1 remain moveable.
+	//		inst->SetCharges(1);
+	//	else
+	//		inst->SetCharges(charges);
+	//
+	//	if (item->RecastDelay) {
+	//		if (timestamps.count(item->RecastType))
+	//			inst->SetRecastTimestamp(timestamps.at(item->RecastType));
+	//		else
+	//			inst->SetRecastTimestamp(0);
+	//	}
+	//
+	//	if (item->ItemClass == ItemClassCommon) {
+	//		for (int i = AUG_BEGIN; i < EmuConstants::ITEM_COMMON_SIZE; i++) {
+	//			if (aug[i])
+	//				inst->PutAugment(this, i, aug[i]);
+	//		}
+	//	}
+	//
+	//	if (slot_id >= 8000 && slot_id <= 8999) {
+	//		put_slot_id = inv->PushCursor(*inst);
+	//	} else if (slot_id >= 3111 && slot_id <= 3179) {
+	//		// Admins: please report any occurrences of this error
+	//		Log.Out(Logs::General, Logs::Error, "Warning: Defunct location for item in inventory: "
+	//						    "charid=%i, item_id=%i, slot_id=%i .. pushing to cursor...",
+	//			char_id, item_id, slot_id);
+	//		put_slot_id = inv->PushCursor(*inst);
+	//	} else {
+	//		put_slot_id = inv->PutItem(slot_id, *inst);
+	//	}
+	//
+	//	safe_delete(inst);
+	//
+	//	// Save ptr to item in inventory
+	//	if (put_slot_id == INVALID_INDEX) {
+	//		Log.Out(Logs::General, Logs::Error,
+	//			"Warning: Invalid slot_id for item in inventory: charid=%i, item_id=%i, slot_id=%i",
+	//			char_id, item_id, slot_id);
+	//	}
+	//}
+	//
+	//// Retrieve shared inventory
+	//return GetSharedBank(char_id, inv, true);
 }
 
 // Overloaded: Retrieve character inventory based on account_id and character name

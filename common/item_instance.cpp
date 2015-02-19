@@ -17,3 +17,54 @@
 */
 
 #include "item_instance.h"
+#include "data_verification.h"
+
+EQEmu::ItemInstance::ItemInstance() {
+	base_item_ = nullptr;
+	modified_item_ = nullptr;
+	charges_ = -1;
+	color_ = 0;
+	attuned_ = false;
+	ornament_idfile_ = 0;
+	ornament_icon_ = 0;
+	ornament_hero_model_ = 0;
+	tracking_id_ = 0;
+}
+
+EQEmu::ItemInstance::ItemInstance(const ItemData* idata) {
+	base_item_ = idata;
+	modified_item_ = nullptr;
+	charges_ = -1;
+	color_ = 0;
+	attuned_ = false;
+	ornament_idfile_ = 0;
+	ornament_icon_ = 0;
+	ornament_hero_model_ = 0;
+	tracking_id_ = 0;
+}
+
+EQEmu::ItemInstance::ItemInstance(const ItemData* idata, int16 charges) {
+	base_item_ = idata;
+	modified_item_ = nullptr;
+	charges_ = charges;
+	color_ = 0;
+	attuned_ = false;
+	ornament_idfile_ = 0;
+	ornament_icon_ = 0;
+	ornament_hero_model_ = 0;
+	tracking_id_ = 0;
+}
+
+EQEmu::ItemInstance::~ItemInstance() {
+}
+
+std::shared_ptr<EQEmu::ItemInstance> EQEmu::ItemInstance::GetItem(int index) {
+	if(EQEmu::ValueWithin(index, 0, 200)) {
+		auto iter = contents_.find(index);
+		if(iter != contents_.end()) {
+			return iter->second;
+		}
+	}
+
+	return std::shared_ptr<EQEmu::ItemInstance>(nullptr);
+}
