@@ -13793,41 +13793,32 @@ void Client::Handle_OP_TributeUpdate(const EQApplicationPacket *app)
 
 void Client::Handle_OP_VetClaimRequest(const EQApplicationPacket *app)
 {
-	if (app->size < sizeof(VeteranClaimRequest))
-	{
-		Log.Out(Logs::General, Logs::None, "OP_VetClaimRequest size lower than expected: got %u expected at least %u", app->size, sizeof(VeteranClaimRequest));
+	if (app->size < sizeof(VeteranClaim)) {
+		Log.Out(Logs::General, Logs::None,
+			"OP_VetClaimRequest size lower than expected: got %u expected at least %u", app->size,
+			sizeof(VeteranClaim));
 		DumpPacket(app);
 		return;
 	}
 
-	VeteranClaimRequest *vcr = (VeteranClaimRequest*)app->pBuffer;
+	VeteranClaim *vcr = (VeteranClaim *)app->pBuffer;
 
-	if (vcr->claim_id == 0xFFFFFFFF) //request update packet
-	{
+	if (vcr->claim_id == 0xFFFFFFFF) { // request update packet
 		SendRewards();
+		return;
 	}
-	else //try to claim something!
-	{
-		if (!TryReward(vcr->claim_id))
-		{
-			Message(13, "Your claim has been rejected.");
-			EQApplicationPacket *vetapp = new EQApplicationPacket(OP_VetClaimReply, sizeof(VeteranClaimReply));
-			VeteranClaimReply * cr = (VeteranClaimReply*)vetapp->pBuffer;
-			strcpy(cr->name, GetName());
-			cr->claim_id = vcr->claim_id;
-			cr->reject_field = -1;
-			FastQueuePacket(&vetapp);
-		}
-		else
-		{
-			EQApplicationPacket *vetapp = new EQApplicationPacket(OP_VetClaimReply, sizeof(VeteranClaimReply));
-			VeteranClaimReply * cr = (VeteranClaimReply*)vetapp->pBuffer;
-			strcpy(cr->name, GetName());
-			cr->claim_id = vcr->claim_id;
-			cr->reject_field = 0;
-			FastQueuePacket(&vetapp);
-		}
-	}
+	// try to claim something!
+	EQApplicationPacket *vetapp = new EQApplicationPacket(OP_VetClaimReply, sizeof(VeteranClaim));
+	VeteranClaim *cr = (VeteranClaim *)vetapp->pBuffer;
+	strcpy(cr->name, GetName());
+	cr->claim_id = vcr->claim_id;
+
+	if (!TryReward(vcr->claim_id))
+		cr->action = 1;
+	else
+		cr->action = 0;
+
+	FastQueuePacket(&vetapp);
 }
 
 void Client::Handle_OP_VoiceMacroIn(const EQApplicationPacket *app)

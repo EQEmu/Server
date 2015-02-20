@@ -4553,19 +4553,12 @@ struct InternalVeteranReward
 /*012*/	InternalVeteranRewardItem items[8];
 };
 
-struct VeteranClaimReply
+struct VeteranClaim
 {
-/*000*/	char name[64];
-/*064*/	uint32 claim_id;
-/*068*/	uint32 reject_field;
-/*072*/	uint32 unknown072;
-};
-
-struct VeteranClaimRequest
-{
-/*000*/	char name_data[64]; //name + other data
+/*000*/	char name[64]; //name + other data
 /*064*/	uint32 claim_id;
 /*068*/	uint32 unknown068;
+/*072*/	uint32 action;
 };
 
 struct GMSearchCorpse_Struct

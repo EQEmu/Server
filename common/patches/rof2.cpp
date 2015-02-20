@@ -15,6 +15,8 @@
 
 #include <iostream>
 #include <sstream>
+#include <numeric>
+#include <cassert>
 
 namespace RoF2
 {
@@ -3749,37 +3751,71 @@ namespace RoF2
 		FINISH_ENCODE();
 	}
 
+	ENCODE(OP_VetClaimReply)
+	{
+		ENCODE_LENGTH_EXACT(VeteranClaim);
+		SETUP_DIRECT_ENCODE(VeteranClaim, structs::VeteranClaim);
+
+		memcpy(eq->name, emu->name, sizeof(emu->name));
+		OUT(claim_id);
+		OUT(action);
+
+		FINISH_ENCODE();
+	}
+
 	ENCODE(OP_VetRewardsAvaliable)
 	{
 		EQApplicationPacket *inapp = *p;
-		unsigned char * __emu_buffer = inapp->pBuffer;
+		auto __emu_buffer = inapp->pBuffer;
 
 		uint32 count = ((*p)->Size() / sizeof(InternalVeteranReward));
-		*p = nullptr;
 
-		EQApplicationPacket *outapp_create = new EQApplicationPacket(OP_VetRewardsAvaliable, (sizeof(structs::VeteranReward)*count));
-		uchar *old_data = __emu_buffer;
-		uchar *data = outapp_create->pBuffer;
-		for (unsigned int i = 0; i < count; ++i)
-		{
-			structs::VeteranReward *vr = (structs::VeteranReward*)data;
-			InternalVeteranReward *ivr = (InternalVeteranReward*)old_data;
+		// calculate size of names, note the packet DOES NOT have null termed c-strings
+		std::vector<uint32> name_lengths;
+		for (int i = 0; i < count; ++i) {
+			InternalVeteranReward *ivr = (InternalVeteranReward *)__emu_buffer;
 
-			vr->claim_count = ivr->claim_count;
-			vr->claim_id = ivr->claim_id;
-			vr->number_available = ivr->number_available;
-			for (int x = 0; x < 8; ++x)
-			{
-				vr->items[x].item_id = ivr->items[x].item_id;
-				strncpy(vr->items[x].item_name, ivr->items[x].item_name, sizeof(vr->items[x].item_name));
-				vr->items[x].charges = ivr->items[x].charges;
+			for (int i = 0; i < ivr->claim_count; i++) {
+				uint32 length = strnlen(ivr->items[i].item_name, 63);
+				if (length)
+					name_lengths.push_back(length);
 			}
 
-			old_data += sizeof(InternalVeteranReward);
-			data += sizeof(structs::VeteranReward);
+			__emu_buffer += sizeof(InternalVeteranReward);
 		}
 
-		dest->FastQueuePacket(&outapp_create);
+		uint32 packet_size = std::accumulate(name_lengths.begin(), name_lengths.end(), 0) +
+				     sizeof(structs::VeteranReward) + (sizeof(structs::VeteranRewardEntry) * count) +
+				     // size of name_lengths is the same as item count
+				     (sizeof(structs::VeteranRewardItem) * name_lengths.size());
+
+		// build packet now!
+		auto outapp = new EQApplicationPacket(OP_VetRewardsAvaliable, packet_size);
+		__emu_buffer = inapp->pBuffer;
+
+		outapp->WriteUInt32(count);
+		auto name_itr = name_lengths.begin();
+		for (int i = 0; i < count; i++) {
+			InternalVeteranReward *ivr = (InternalVeteranReward *)__emu_buffer;
+
+			outapp->WriteUInt32(ivr->claim_id);
+			outapp->WriteUInt32(ivr->number_available);
+			outapp->WriteUInt32(ivr->claim_count);
+			outapp->WriteUInt8(1); // enabled
+
+			for (int j = 0; j < ivr->claim_count; j++) {
+				assert(name_itr != name_lengths.end()); // the way it's written, it should never happen, so just assert
+				outapp->WriteUInt32(*name_itr);
+				outapp->WriteData(ivr->items[j].item_name, *name_itr);
+				outapp->WriteUInt32(ivr->items[j].item_id);
+				outapp->WriteUInt32(ivr->items[j].charges);
+				++name_itr;
+			}
+
+			__emu_buffer += sizeof(InternalVeteranReward);
+		}
+
+		dest->FastQueuePacket(&outapp);
 		delete inapp;
 	}
 
@@ -5118,6 +5154,16 @@ namespace RoF2
 		IN(gmlookup);
 		IN(guildid);
 		IN(type);
+
+		FINISH_DIRECT_DECODE();
+	}
+
+	DECODE(OP_VetClaimRequest)
+	{
+		DECODE_LENGTH_EXACT(structs::VeteranClaim);
+		SETUP_DIRECT_DECODE(VeteranClaim, structs::VeteranClaim);
+
+		IN(claim_id);
 
 		FINISH_DIRECT_DECODE();
 	}

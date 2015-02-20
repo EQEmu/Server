@@ -5362,35 +5362,35 @@ void Client::SendRewards()
 	FastQueuePacket(&vetapp);
 }
 
-bool Client::TryReward(uint32 claim_id) {
-	//Make sure we have an open spot
-	//Make sure we have it in our acct and count > 0
-	//Make sure the entry was found
-	//If we meet all the criteria:
-	//Decrement our count by 1 if it > 1 delete if it == 1
-	//Create our item in bag if necessary at the free inv slot
-	//save
+bool Client::TryReward(uint32 claim_id)
+{
+	// Make sure we have an open spot
+	// Make sure we have it in our acct and count > 0
+	// Make sure the entry was found
+	// If we meet all the criteria:
+	// Decrement our count by 1 if it > 1 delete if it == 1
+	// Create our item in bag if necessary at the free inv slot
+	// save
 	uint32 free_slot = 0xFFFFFFFF;
 
-	for(int i = EmuConstants::GENERAL_BEGIN; i <= EmuConstants::GENERAL_END; ++i) {
+	for (int i = EmuConstants::GENERAL_BEGIN; i <= EmuConstants::GENERAL_END; ++i) {
 		ItemInst *item = GetInv().GetItem(i);
-		if(!item) {
+		if (!item) {
 			free_slot = i;
 			break;
 		}
 	}
 
-	if(free_slot == 0xFFFFFFFF)
+	if (free_slot == 0xFFFFFFFF)
 		return false;
 
 	char errbuf[MYSQL_ERRMSG_SIZE];
 	std::string query = StringFormat("SELECT amount FROM account_rewards "
-									"WHERE account_id = %i AND reward_id = %i",
-									AccountID(), claim_id);
+					 "WHERE account_id = %i AND reward_id = %i",
+					 AccountID(), claim_id);
 	auto results = database.QueryDatabase(query);
-	if (!results.Success()) {
+	if (!results.Success())
 		return false;
-	}
 
 	if (results.RowCount() == 0)
 		return false;
@@ -5398,52 +5398,49 @@ bool Client::TryReward(uint32 claim_id) {
 	auto row = results.begin();
 
 	uint32 amt = atoi(row[0]);
-	if(amt == 0)
+	if (amt == 0)
 		return false;
 
-	std::list<InternalVeteranReward>::iterator iter = zone->VeteranRewards.begin();
-	for (; iter != zone->VeteranRewards.end(); ++row)
-		if((*iter).claim_id == claim_id)
-			break;
+	auto iter = std::find_if(zone->VeteranRewards.begin(), zone->VeteranRewards.end(),
+			[claim_id](const InternalVeteranReward &a) { return a.claim_id == claim_id; });
 
-	if(iter == zone->VeteranRewards.end())
+	if (iter == zone->VeteranRewards.end())
 		return false;
 
-	if(amt == 1) {
+	if (amt == 1) {
 		query = StringFormat("DELETE FROM account_rewards "
-							"WHERE account_id = %i AND reward_id = %i",
-							AccountID(), claim_id);
+				     "WHERE account_id = %i AND reward_id = %i",
+				     AccountID(), claim_id);
 		auto results = database.QueryDatabase(query);
-	}
-	else {
+	} else {
 		query = StringFormat("UPDATE account_rewards SET amount = (amount-1) "
-							"WHERE account_id = %i AND reward_id = %i",
-							AccountID(), claim_id);
+				     "WHERE account_id = %i AND reward_id = %i",
+				     AccountID(), claim_id);
 		auto results = database.QueryDatabase(query);
 	}
 
-	InternalVeteranReward ivr = (*iter);
+	auto &ivr = (*iter);
 	ItemInst *claim = database.CreateItem(ivr.items[0].item_id, ivr.items[0].charges);
-	if(!claim) {
+	if (!claim) {
 		Save();
 		return true;
 	}
 
 	bool lore_conflict = CheckLoreConflict(claim->GetItem());
 
-	for(int y = 1; y < 8; y++)
-		if(ivr.items[y].item_id && claim->GetItem()->ItemClass == 1) {
+	for (int y = 1; y < 8; y++)
+		if (ivr.items[y].item_id && claim->GetItem()->ItemClass == 1) {
 			ItemInst *item_temp = database.CreateItem(ivr.items[y].item_id, ivr.items[y].charges);
-			if(item_temp) {
-				if(CheckLoreConflict(item_temp->GetItem())) {
+			if (item_temp) {
+				if (CheckLoreConflict(item_temp->GetItem())) {
 					lore_conflict = true;
 					DuplicateLoreMessage(ivr.items[y].item_id);
 				}
-				claim->PutItem(y-1, *item_temp);
+				claim->PutItem(y - 1, *item_temp);
 			}
 		}
 
-	if(lore_conflict) {
+	if (lore_conflict) {
 		safe_delete(claim);
 		return true;
 	}
