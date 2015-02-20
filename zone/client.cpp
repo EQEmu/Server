@@ -5437,6 +5437,7 @@ bool Client::TryReward(uint32 claim_id)
 					DuplicateLoreMessage(ivr.items[y].item_id);
 				}
 				claim->PutItem(y - 1, *item_temp);
+				safe_delete(item_temp);
 			}
 		}
 
