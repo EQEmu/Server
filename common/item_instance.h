@@ -26,6 +26,7 @@
 
 namespace EQEmu
 {
+	class ItemContainer;
 	class ItemInstance
 	{
 	public:
@@ -35,6 +36,7 @@ namespace EQEmu
 		~ItemInstance();
 
 		std::shared_ptr<ItemInstance> GetItem(int index);
+		void SetContainer(ItemContainer *parent) { parent_ = parent; }
 	private:
 		const ItemData *base_item_;
 		ItemData *modified_item_;
@@ -46,7 +48,9 @@ namespace EQEmu
 		uint32 ornament_icon_;
 		uint32 ornament_hero_model_;
 		uint64 tracking_id_;
+
 		std::map<int, std::shared_ptr<ItemInstance>> contents_;
+		ItemContainer *parent_;
 	};
 
 } // EQEmu

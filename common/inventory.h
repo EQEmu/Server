@@ -19,16 +19,15 @@
 #ifndef COMMON_INVENTORY_H
 #define COMMON_INVENTORY_H
 
-#include "item_instance.h"
-#include <map>
-#include <memory>
-#include <tuple>
+#include "item_container.h"
+
+#include <string>
 
 namespace EQEmu
 {
-	enum InventoryType : int16
+	enum InventoryType : int
 	{
-		InvTypePersonal,
+		InvTypePersonal = 0,
 		InvTypeBank,
 		InvTypeSharedBank,
 		InvTypeTrade,
@@ -45,10 +44,8 @@ namespace EQEmu
 		Inventory();
 		~Inventory();
 
-		std::shared_ptr<ItemInstance> GetItem(InventoryType type, int16 slot);
-
 	private:
-		std::map<int16, std::map<int16, std::shared_ptr<ItemInstance>>> items_;
+		std::map<int, ItemContainer> containers_;
 	};
 
 } // EQEmu

@@ -16,10 +16,9 @@
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 
-#include "inventory.h"
+#ifndef COMMON_INVENTORY_DATABASE_CONTROLLER_H
+#define COMMON_INVENTORY_DATABASE_CONTROLLER_H
 
-EQEmu::Inventory::Inventory() {
-}
 
-EQEmu::Inventory::~Inventory() {
-}
+
+#endif
