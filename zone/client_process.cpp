@@ -1894,7 +1894,7 @@ void Client::DoHPRegen() {
 }
 
 void Client::DoManaRegen() {
-	if (GetMana() >= max_mana)
+	if (GetMana() >= max_mana && spellbonuses.ManaRegen >= 0)
 		return;
 
 	SetMana(GetMana() + CalcManaRegen() + RestRegenMana);
