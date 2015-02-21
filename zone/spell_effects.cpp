@@ -1171,7 +1171,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 							c->SendItemPacket(MainCursor, SummonedItem, ItemPacketSummonItem);
 							safe_delete(SummonedItem);
 						}
-						SummonedItem = database.CreateItem(spell.base[i], charges);
+						SummonedItem = database.CreateItemOld(spell.base[i], charges);
 					}
 				}
 
@@ -1208,7 +1208,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 						if (charges < 1)
 							charges = 1;
 
-						ItemInst *SubItem = database.CreateItem(spell.base[i], charges);
+						ItemInst *SubItem = database.CreateItemOld(spell.base[i], charges);
 						if (SubItem != nullptr) {
 							SummonedItem->PutItem(slot, *SubItem);
 							safe_delete(SubItem);

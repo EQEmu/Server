@@ -4219,7 +4219,7 @@ void Bot::GetBotItems(std::string* errorMessage, InventoryOld &inv) {
         aug[4] = (uint32)atoul(row[8]);
         bool instnodrop	= (row[9] && (uint16)atoi(row[9])) ? true : false;
 
-        ItemInst* inst = database.CreateItem(item_id, charges, aug[0], aug[1], aug[2], aug[3], aug[4]);
+        ItemInst* inst = database.CreateItemOld(item_id, charges, aug[0], aug[1], aug[2], aug[3], aug[4]);
         if (!inst) {
             Log.Out(Logs::General, Logs::Error, "Warning: botid %i has an invalid item_id %i in inventory slot %i", this->GetBotID(), item_id, slot_id);
             continue;

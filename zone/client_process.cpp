@@ -962,7 +962,7 @@ void Client::BulkSendMerchantInventory(int merchant_id, int npcid) {
 			int charges = 1;
 			if (item->ItemClass == ItemClassCommon)
 				charges = item->MaxCharges;
-			ItemInst* inst = database.CreateItem(item, charges);
+			ItemInst* inst = database.CreateItemOld(item, charges);
 			if (inst) {
 				if (RuleB(Merchant, UsePriceMod)) {
 					inst->SetPrice((item->Price * (RuleR(Merchant, SellCostMod)) * item->SellRate * Client::CalcPriceMod(merch, false)));
@@ -1003,7 +1003,7 @@ void Client::BulkSendMerchantInventory(int merchant_id, int npcid) {
 			//	charges=ml.charges;
 			//else
 			charges = item->MaxCharges;
-			ItemInst* inst = database.CreateItem(item, charges);
+			ItemInst* inst = database.CreateItemOld(item, charges);
 			if (inst) {
 				if (RuleB(Merchant, UsePriceMod)) {
 					inst->SetPrice((item->Price * (RuleR(Merchant, SellCostMod)) * item->SellRate * Client::CalcPriceMod(merch, false)));

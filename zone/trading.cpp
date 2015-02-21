@@ -1165,7 +1165,7 @@ void Client::SendTraderItem(uint32 ItemID, uint16 Quantity) {
 		return;
 	}
 
-	ItemInst* inst = database.CreateItem(item, Quantity);
+	ItemInst* inst = database.CreateItemOld(item, Quantity);
 
 	if (inst)
 	{
@@ -1204,7 +1204,7 @@ void Client::BulkSendTraderInventory(uint32 char_id) {
 			item=database.GetItem(TraderItems->ItemID[i]);
 
 		if (item && (item->NoDrop!=0)) {
-			ItemInst* inst = database.CreateItem(item);
+			ItemInst* inst = database.CreateItemOld(item);
 			if (inst) {
 				inst->SetSerialNumber(TraderItems->SerialNumber[i]);
 				if(TraderItems->Charges[i] > 0)
@@ -2025,7 +2025,7 @@ static void UpdateTraderCustomerItemsAdded(uint32 CustomerID, TraderCharges_Stru
 
 	if(!item) return;
 
-	ItemInst* inst = database.CreateItem(item);
+	ItemInst* inst = database.CreateItemOld(item);
 
 	if(!inst) return;
 
@@ -2106,7 +2106,7 @@ static void UpdateTraderCustomerPriceChanged(uint32 CustomerID, TraderCharges_St
 
 	Log.Out(Logs::Detail, Logs::Trading, "Sending price updates to customer %s", Customer->GetName());
 
-	ItemInst* inst = database.CreateItem(item);
+	ItemInst* inst = database.CreateItemOld(item);
 
 	if(!inst) return;
 

@@ -2056,7 +2056,7 @@ void Client::Handle_OP_AdventureMerchantPurchase(const EQApplicationPacket *app)
 	if (item->MaxCharges != 0)
 		charges = item->MaxCharges;
 
-	ItemInst *inst = database.CreateItem(item, charges);
+	ItemInst *inst = database.CreateItemOld(item, charges);
 	if (!AutoPutLootInInventory(*inst, true, true))
 	{
 		PutLootInInventory(MainCursor, *inst);
@@ -2579,7 +2579,7 @@ void Client::Handle_OP_AltCurrencyPurchase(const EQApplicationPacket *app)
 		if (item->MaxCharges != 0)
 			charges = item->MaxCharges;
 
-		ItemInst *inst = database.CreateItem(item, charges);
+		ItemInst *inst = database.CreateItemOld(item, charges);
 		if (!AutoPutLootInInventory(*inst, true, true))
 		{
 			PutLootInInventory(MainCursor, *inst);
@@ -3383,7 +3383,7 @@ void Client::Handle_OP_Barter(const EQApplicationPacket *app)
 			Message(13, "Error: This item does not exist!");
 		else
 		{
-			ItemInst* inst = database.CreateItem(item);
+			ItemInst* inst = database.CreateItemOld(item);
 			if (inst)
 			{
 				SendItemPacket(0, inst, ItemPacketViewLink);
@@ -3416,7 +3416,7 @@ void Client::Handle_OP_Barter(const EQApplicationPacket *app)
 			Message(13, "Error: This item does not exist!");
 		else
 		{
-			ItemInst* inst = database.CreateItem(item);
+			ItemInst* inst = database.CreateItemOld(item);
 			if (inst)
 			{
 				SendItemPacket(0, inst, ItemPacketViewLink);
@@ -3456,7 +3456,7 @@ void Client::Handle_OP_BazaarInspect(const EQApplicationPacket *app)
 		return;
 	}
 
-	ItemInst* inst = database.CreateItem(item);
+	ItemInst* inst = database.CreateItemOld(item);
 
 	if (inst) {
 		SendItemPacket(0, inst, ItemPacketViewLink);
@@ -8081,7 +8081,7 @@ void Client::Handle_OP_ItemLinkClick(const EQApplicationPacket *app)
 
 	}
 
-	ItemInst* inst = database.CreateItem(item, item->MaxCharges, ivrs->augments[0], ivrs->augments[1], ivrs->augments[2], ivrs->augments[3], ivrs->augments[4], ivrs->augments[5]);
+	ItemInst* inst = database.CreateItemOld(item, item->MaxCharges, ivrs->augments[0], ivrs->augments[1], ivrs->augments[2], ivrs->augments[3], ivrs->augments[4], ivrs->augments[5]);
 	if (inst) {
 		SendItemPacket(0, inst, ItemPacketViewLink);
 		safe_delete(inst);
@@ -8096,7 +8096,7 @@ void Client::Handle_OP_ItemLinkResponse(const EQApplicationPacket *app)
 		return;
 	}
 	LDONItemViewRequest_Struct* item = (LDONItemViewRequest_Struct*)app->pBuffer;
-	ItemInst* inst = database.CreateItem(item->item_id);
+	ItemInst* inst = database.CreateItemOld(item->item_id);
 	if (inst) {
 		SendItemPacket(0, inst, ItemPacketViewLink);
 		safe_delete(inst);
@@ -12064,7 +12064,7 @@ void Client::Handle_OP_ShopPlayerBuy(const EQApplicationPacket *app)
 	else
 		charges = item->MaxCharges;
 
-	ItemInst* inst = database.CreateItem(item, charges);
+	ItemInst* inst = database.CreateItemOld(item, charges);
 
 	int SinglePrice = 0;
 	if (RuleB(Merchant, UsePriceMod))

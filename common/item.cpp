@@ -1994,7 +1994,7 @@ void ItemInst::PutAugment(SharedDatabase *db, uint8 slot, uint32 item_id)
 	if (item_id == NO_ITEM) { return; }
 	if (db == nullptr) { return; /* TODO: add log message for nullptr */ }
 
-	const ItemInst* aug = db->CreateItem(item_id);
+	const ItemInst* aug = db->CreateItemOld(item_id);
 	if (aug) {
 		PutAugment(slot, *aug);
 		safe_delete(aug);

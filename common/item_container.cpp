@@ -9,12 +9,18 @@ struct EQEmu::ItemContainer::impl
 
 EQEmu::ItemContainer::ItemContainer()
 {
-	impl_ = new impl;
+	impl_ = new impl();
 }
 
 EQEmu::ItemContainer::~ItemContainer()
 {
-	delete impl_;
+	if(impl_)
+		delete impl_;
+}
+
+EQEmu::ItemContainer::ItemContainer(ItemContainer &&other) {
+	impl_ = other.impl_;
+	other.impl_ = nullptr;
 }
 
 std::shared_ptr<EQEmu::ItemInstance> EQEmu::ItemContainer::Get(int slot_id) {

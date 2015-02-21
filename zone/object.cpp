@@ -876,7 +876,7 @@ void Object::SetItemID(uint32 itemid)
 
 	if (itemid)
 	{
-		this->m_inst = database.CreateItem(itemid);
+		this->m_inst = database.CreateItemOld(itemid);
 	}
 }
 

@@ -495,7 +495,7 @@ void ZoneDatabase::LoadWorldContainer(uint32 parentid, ItemInst* container)
         aug[4] = (uint32)atoi(row[7]);
 		aug[5] = (uint32)atoi(row[8]);
 
-        ItemInst* inst = database.CreateItem(item_id, charges);
+        ItemInst* inst = database.CreateItemOld(item_id, charges);
         if (inst && inst->GetItem()->ItemClass == ItemClassCommon) {
             for(int i = AUG_BEGIN; i < EmuConstants::ITEM_COMMON_SIZE; i++)
                 if (aug[i])
@@ -640,7 +640,7 @@ ItemInst* ZoneDatabase::LoadSingleTraderItem(uint32 CharID, int SerialNumber) {
     if (item->NoDrop == 0)
         return nullptr;
 
-    ItemInst* inst = database.CreateItem(item);
+    ItemInst* inst = database.CreateItemOld(item);
 	if(!inst) {
 		Log.Out(Logs::Detail, Logs::Trading, "Unable to create item instance\n");
 		fflush(stdout);

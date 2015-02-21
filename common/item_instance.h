@@ -33,8 +33,8 @@ namespace EQEmu
 		~ItemInstance();
 
 		const ItemData *GetItem();
-		std::shared_ptr<ItemInstance> GetItem(int index);
-		bool PutItem(int index, std::shared_ptr<ItemInstance> inst);
+		std::shared_ptr<ItemInstance> Get(int index);
+		bool Put(int index, std::shared_ptr<ItemInstance> inst);
 	private:
 		struct impl;
 		impl *impl_;

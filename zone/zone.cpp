@@ -257,7 +257,7 @@ bool Zone::LoadZoneObjects() {
         }
         else {
             // Groundspawn object
-            inst = database.CreateItem(itemid);
+            inst = database.CreateItemOld(itemid);
         }
 
         //Father Nitwit's fix... not perfect...
@@ -295,7 +295,7 @@ bool Zone::LoadGroundSpawns() {
 	for(gsindex=0;gsindex<50;gsindex++){
 		if(groundspawn.spawn[gsindex].item>0 && groundspawn.spawn[gsindex].item<500000){
 			ItemInst* inst = nullptr;
-			inst = database.CreateItem(groundspawn.spawn[gsindex].item);
+			inst = database.CreateItemOld(groundspawn.spawn[gsindex].item);
 			gsnumber=groundspawn.spawn[gsindex].max_allowed;
 			ix=0;
 			if(inst){

@@ -139,34 +139,41 @@ public:
 
 	void InitInventory()
 	{
-		std::shared_ptr<EQEmu::ItemInstance> bag(new EQEmu::ItemInstance(&container));
-		bag->PutItem(0, std::shared_ptr<EQEmu::ItemInstance>(new EQEmu::ItemInstance(&armor)));
-		bag->PutItem(1, std::shared_ptr<EQEmu::ItemInstance>(new EQEmu::ItemInstance(&augment)));
-		bag->PutItem(7, std::shared_ptr<EQEmu::ItemInstance>(new EQEmu::ItemInstance(&stackable, 45)));
-		inv.Put(0, 23, bag); //23 first inv slot
+		std::shared_ptr<EQEmu::ItemInstance> m_bag(new EQEmu::ItemInstance(&container));
+		std::shared_ptr<EQEmu::ItemInstance> m_armor(new EQEmu::ItemInstance(&armor));
+		std::shared_ptr<EQEmu::ItemInstance> m_augment(new EQEmu::ItemInstance(&augment));
+		std::shared_ptr<EQEmu::ItemInstance> m_stackable(new EQEmu::ItemInstance(&stackable, 45));
+		inv.Put(EQEmu::InventorySlot(0, 23), m_bag);
+		inv.Put(EQEmu::InventorySlot(0, 23, 0), m_armor);
+		inv.Put(EQEmu::InventorySlot(0, 23, 1), m_augment);
+		inv.Put(EQEmu::InventorySlot(0, 23, 7), m_stackable);
 	}
 
 	void InventoryVerifyInitialItemsTest()
 	{
-		auto m_bag = inv.Get(0, 23);
+		auto m_bag = inv.Get(EQEmu::InventorySlot(0, 23));
 		TEST_ASSERT(m_bag);
 		TEST_ASSERT(m_bag->GetItem());
 		TEST_ASSERT(m_bag->GetItem()->ID == 1000);
-
-		auto m_armor = m_bag->GetItem(0);
+		
+		auto m_armor = m_bag->Get(0);
 		TEST_ASSERT(m_armor);
 		TEST_ASSERT(m_armor->GetItem());
 		TEST_ASSERT(m_armor->GetItem()->ID == 1001);
-
-		auto m_augment = m_bag->GetItem(1);
+		
+		auto m_augment = m_bag->Get(1);
 		TEST_ASSERT(m_augment);
 		TEST_ASSERT(m_augment->GetItem());
 		TEST_ASSERT(m_augment->GetItem()->ID == 1002);
-
-		auto m_stackable = m_bag->GetItem(7);
+		
+		auto m_stackable = m_bag->Get(7);
 		TEST_ASSERT(m_stackable);
 		TEST_ASSERT(m_stackable->GetItem());
 		TEST_ASSERT(m_stackable->GetItem()->ID == 1003);
+	}
+
+	void InventorySwapItemsTest()
+	{
 	}
 
 	private:

@@ -33,36 +33,62 @@ EQEmu::Inventory::~Inventory() {
 	delete impl_;
 }
 
-std::shared_ptr<EQEmu::ItemInstance> EQEmu::Inventory::Get(int container_id, int slot_id) {
-	auto iter = impl_->containers_.find(container_id);
+std::shared_ptr<EQEmu::ItemInstance> EQEmu::Inventory::Get(const InventorySlot &slot) {
+	auto iter = impl_->containers_.find(slot.type_);
 	if(iter != impl_->containers_.end()) {
-		return iter->second.Get(slot_id);
-	}
-
-	return std::shared_ptr<ItemInstance>(nullptr);
-}
-
-std::shared_ptr<EQEmu::ItemInstance> EQEmu::Inventory::Get(int container_id, int slot_id, int bag_idx) {
-	auto iter = impl_->containers_.find(container_id);
-	if(iter != impl_->containers_.end()) {
-		auto item = iter->second.Get(slot_id);
+		auto item = iter->second.Get(slot.slot_);
 		if(item) {
-			return item->GetItem(bag_idx);
+			if(slot.bag_index_ > -1) {
+				auto sub_item = item->Get(slot.bag_index_);
+				if(sub_item) {
+					if(slot.aug_index_ > -1) {
+						return sub_item->Get(slot.aug_index_);
+					} else {
+						return sub_item;
+					}
+				}
+			} else {
+				return item;
+			}
 		}
 	}
 
 	return std::shared_ptr<ItemInstance>(nullptr);
 }
 
-bool EQEmu::Inventory::Put(int container_id, int slot_id, std::shared_ptr<ItemInstance> inst) {
-	if(impl_->containers_.count(container_id) == 0) {
-		auto &container = impl_->containers_[container_id];
-		return container.Put(slot_id, inst);
-	} else {
-		ItemContainer container;
-		bool v = container.Put(slot_id, inst);
-		impl_->containers_[container_id] = container;
-
-		return v;
+bool EQEmu::Inventory::Put(const InventorySlot &slot, std::shared_ptr<ItemInstance> inst) {
+	if(impl_->containers_.count(slot.type_) == 0) {
+		impl_->containers_.insert(std::pair<int, ItemContainer>(slot.type_, ItemContainer()));
 	}
+
+	auto &container = impl_->containers_[slot.type_];
+	if(slot.bag_index_ > -1) {
+		auto item = container.Get(slot.slot_);
+		if(!item)
+			return false;
+
+		if(slot.aug_index_ > -1) {
+			auto bag_item = item->Get(slot.bag_index_);
+			if(!bag_item) {
+				return false;
+			}
+			
+			return bag_item->Put(slot.aug_index_, inst);
+		} else {
+			return item->Put(slot.bag_index_, inst);
+		}
+	} else {
+		if(slot.aug_index_ > -1) {
+			auto item = container.Get(slot.slot_);
+			if(!item)
+				return false;
+
+			return item->Put(slot.aug_index_, inst);
+		}
+
+		return container.Put(slot.slot_, inst);
+	}
+
+
+	return false;
 }

@@ -81,7 +81,7 @@ const ItemData *EQEmu::ItemInstance::GetItem() {
 	return impl_->modified_item_ ? impl_->modified_item_ : impl_->base_item_;
 }
 
-std::shared_ptr<EQEmu::ItemInstance> EQEmu::ItemInstance::GetItem(int index) {
+std::shared_ptr<EQEmu::ItemInstance> EQEmu::ItemInstance::Get(int index) {
 	if(EQEmu::ValueWithin(index, 0, 255)) {
 		return impl_->contents_.Get(index);
 	}
@@ -89,7 +89,7 @@ std::shared_ptr<EQEmu::ItemInstance> EQEmu::ItemInstance::GetItem(int index) {
 	return std::shared_ptr<EQEmu::ItemInstance>(nullptr);
 }
 
-bool EQEmu::ItemInstance::PutItem(int index, std::shared_ptr<ItemInstance> inst) {
+bool EQEmu::ItemInstance::Put(int index, std::shared_ptr<ItemInstance> inst) {
 	if(!inst || !inst->GetItem()) {
 		return false;
 	}

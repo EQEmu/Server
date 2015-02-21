@@ -371,7 +371,7 @@ bool SharedDatabase::SetStartingItems(PlayerProfile_Struct* pp, InventoryOld* in
 		if(!myitem)
 			continue;
 
-		ItemInst* myinst = CreateBaseItem(myitem, charges);
+		ItemInst* myinst = CreateBaseItemOld(myitem, charges);
 
 		if(slot < 0)
 			slot = inv->FindFreeSlot(0, 0);
@@ -433,7 +433,7 @@ bool SharedDatabase::GetSharedBank(uint32 id, InventoryOld *inv, bool is_charid)
 
 		int16 put_slot_id = INVALID_INDEX;
 
-		ItemInst *inst = CreateBaseItem(item, charges);
+		ItemInst *inst = CreateBaseItemOld(item, charges);
 		if (inst && item->ItemClass == ItemClassCommon) {
 			for (int i = AUG_BEGIN; i < EmuConstants::ITEM_COMMON_SIZE; i++) {
 				if (aug[i])
@@ -536,7 +536,7 @@ bool SharedDatabase::GetInventory(uint32 char_id, EQEmu::Inventory *inv)
 	//
 	//	int16 put_slot_id = INVALID_INDEX;
 	//
-	//	ItemInst *inst = CreateBaseItem(item, charges);
+	//	ItemInst *inst = CreateBaseItemOld(item, charges);
 	//
 	//	if (inst == nullptr)
 	//		continue;
@@ -671,7 +671,7 @@ bool SharedDatabase::GetInventory(uint32 account_id, char *name, InventoryOld *i
 		if (!item)
 			continue;
 
-		ItemInst *inst = CreateBaseItem(item, charges);
+		ItemInst *inst = CreateBaseItemOld(item, charges);
 
 		if (inst == nullptr)
 			continue;
@@ -1257,14 +1257,14 @@ bool SharedDatabase::LoadNPCFactionLists() {
 }
 
 // Create appropriate ItemInst class
-ItemInst* SharedDatabase::CreateItem(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2, uint32 aug3, uint32 aug4, uint32 aug5, uint32 aug6, uint8 attuned)
+ItemInst* SharedDatabase::CreateItemOld(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2, uint32 aug3, uint32 aug4, uint32 aug5, uint32 aug6, uint8 attuned)
 {
 	const ItemData* item = nullptr;
 	ItemInst* inst = nullptr;
 
 	item = GetItem(item_id);
 	if (item) {
-		inst = CreateBaseItem(item, charges);
+		inst = CreateBaseItemOld(item, charges);
 
 		if (inst == nullptr) {
 			Log.Out(Logs::General, Logs::Error, "Error: valid item data returned a null reference for ItemInst creation in SharedDatabase::CreateItem()");
@@ -1286,14 +1286,14 @@ ItemInst* SharedDatabase::CreateItem(uint32 item_id, int16 charges, uint32 aug1,
 
 
 // Create appropriate ItemInst class
-ItemInst* SharedDatabase::CreateItem(const ItemData* item, int16 charges, uint32 aug1, uint32 aug2, uint32 aug3, uint32 aug4, uint32 aug5, uint32 aug6, uint8 attuned)
+ItemInst* SharedDatabase::CreateItemOld(const ItemData* item, int16 charges, uint32 aug1, uint32 aug2, uint32 aug3, uint32 aug4, uint32 aug5, uint32 aug6, uint8 attuned)
 {
 	ItemInst* inst = nullptr;
 	if (item) {
-		inst = CreateBaseItem(item, charges);
+		inst = CreateBaseItemOld(item, charges);
 
 		if (inst == nullptr) {
-			Log.Out(Logs::General, Logs::Error, "Error: valid item data returned a null reference for ItemInst creation in SharedDatabase::CreateItem()");
+			Log.Out(Logs::General, Logs::Error, "Error: valid item data returned a null reference for ItemInst creation in SharedDatabase::CreateItemOld()");
 			Log.Out(Logs::General, Logs::Error, "Item Data = ID: %u, Name: %s, Charges: %i", item->ID, item->Name, charges);
 			return nullptr;
 		}
@@ -1310,7 +1310,7 @@ ItemInst* SharedDatabase::CreateItem(const ItemData* item, int16 charges, uint32
 	return inst;
 }
 
-ItemInst* SharedDatabase::CreateBaseItem(const ItemData* item, int16 charges) {
+ItemInst* SharedDatabase::CreateBaseItemOld(const ItemData* item, int16 charges) {
 	ItemInst* inst = nullptr;
 	if (item) {
 		// if maxcharges is -1 that means it is an unlimited use item.
@@ -1324,7 +1324,7 @@ ItemInst* SharedDatabase::CreateBaseItem(const ItemData* item, int16 charges) {
 		inst = new ItemInst(item, charges);
 
 		if (inst == nullptr) {
-			Log.Out(Logs::General, Logs::Error, "Error: valid item data returned a null reference for ItemInst creation in SharedDatabase::CreateBaseItem()");
+			Log.Out(Logs::General, Logs::Error, "Error: valid item data returned a null reference for ItemInst creation in SharedDatabase::CreateBaseItemOld()");
 			Log.Out(Logs::General, Logs::Error, "Item Data = ID: %u, Name: %s, Charges: %i", item->ID, item->Name, charges);
 			return nullptr;
 		}
@@ -1334,6 +1334,23 @@ ItemInst* SharedDatabase::CreateBaseItem(const ItemData* item, int16 charges) {
 		}
 	}
 	return inst;
+}
+
+std::shared_ptr<EQEmu::ItemInstance> SharedDatabase::CreateItem(uint32 item_id, int16 charges) {
+	const ItemData* item = GetItem(item_id);
+	if(item) {
+		if(charges == 0 && item->MaxCharges == -1) {
+			charges = 1;
+		}
+
+		if(charges <= 0 && item->Stackable) {
+			charges = 1;
+		}
+
+		return std::shared_ptr<EQEmu::ItemInstance>(new EQEmu::ItemInstance(item, charges));
+	}
+
+	return std::shared_ptr<EQEmu::ItemInstance>(nullptr);
 }
 
 int32 SharedDatabase::DeleteStalePlayerCorpses() {

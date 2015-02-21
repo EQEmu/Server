@@ -972,7 +972,7 @@ void Corpse::MakeLootRequestPackets(Client* client, const EQApplicationPacket* a
 		if(Loot_Request_Type == 5) {
 			int pkitem = GetPlayerKillItem();
 			const ItemData* item = database.GetItem(pkitem);
-			ItemInst* inst = database.CreateItem(item, item->MaxCharges);
+			ItemInst* inst = database.CreateItemOld(item, item->MaxCharges);
 			if(inst) {
 				if (item->RecastDelay)
 					inst->SetRecastTimestamp(timestamps.count(item->RecastType) ? timestamps.at(item->RecastType) : 0);
@@ -1005,7 +1005,7 @@ void Corpse::MakeLootRequestPackets(Client* client, const EQApplicationPacket* a
 				if(i < corpselootlimit) {
 					item = database.GetItem(item_data->item_id);
 					if(client && item) {
-						ItemInst* inst = database.CreateItem(item, item_data->charges, item_data->aug_1, item_data->aug_2, item_data->aug_3, item_data->aug_4, item_data->aug_5, item_data->aug_6, item_data->attuned);
+						ItemInst* inst = database.CreateItemOld(item, item_data->charges, item_data->aug_1, item_data->aug_2, item_data->aug_3, item_data->aug_4, item_data->aug_5, item_data->aug_6, item_data->attuned);
 						if(inst) {
 							if (item->RecastDelay)
 								inst->SetRecastTimestamp(timestamps.count(item->RecastType) ? timestamps.at(item->RecastType) : 0);
@@ -1122,10 +1122,10 @@ void Corpse::LootItem(Client* client, const EQApplicationPacket* app) {
 
 	if (item != 0) {
 		if (item_data){ 
-			inst = database.CreateItem(item, item_data ? item_data->charges : 0, item_data->aug_1, item_data->aug_2, item_data->aug_3, item_data->aug_4, item_data->aug_5, item_data->aug_6, item_data->attuned);
+			inst = database.CreateItemOld(item, item_data ? item_data->charges : 0, item_data->aug_1, item_data->aug_2, item_data->aug_3, item_data->aug_4, item_data->aug_5, item_data->aug_6, item_data->attuned);
 		}
 		else {
-			inst = database.CreateItem(item);
+			inst = database.CreateItemOld(item);
 		}
 	}
 

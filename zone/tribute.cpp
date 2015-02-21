@@ -161,7 +161,7 @@ void Client::DoTributeUpdate() {
 			uint32 item_id = tier.tribute_item_id;
 
 			//summon the item for them
-			const ItemInst* inst = database.CreateItem(item_id, 1);
+			const ItemInst* inst = database.CreateItemOld(item_id, 1);
 			if(inst == nullptr)
 				continue;
 

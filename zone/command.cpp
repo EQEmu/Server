@@ -10201,7 +10201,7 @@ void command_zopp(Client *c, const Seperator *sep)
 			c->Message(0, "Processing request..results may cause unpredictable behavior.");
 		}
 
-		ItemInst* FakeItemInst = database.CreateItem(FakeItem, charges);
+		ItemInst* FakeItemInst = database.CreateItemOld(FakeItem, charges);
 		c->SendItemPacket(slotid, FakeItemInst, packettype);
 		c->Message(0, "Sending zephyr op packet to client - [%s] %s (%u) with %i %s to slot %i.", 
 			   packettype == ItemPacketTrade ? "Trade" : "Summon",  FakeItem->Name, itemid, charges,

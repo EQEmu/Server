@@ -528,7 +528,7 @@ bool Client::SummonItem(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2,
 
 	// in any other situation just use charges as passed
 
-	ItemInst* inst = database.CreateItem(item, charges);
+	ItemInst* inst = database.CreateItemOld(item, charges);
 
 	if(inst == nullptr) {
 		Message(13, "An unknown server error has occurred and your item was not created.");
@@ -900,7 +900,7 @@ void Client::PutLootInInventory(int16 slot_id, const ItemInst &inst, ServerLootI
 		for(int i = SUB_BEGIN; i < EmuConstants::ITEM_CONTAINER_SIZE; i++) {
 			if(bag_item_data[i] == nullptr)
 				continue;
-			const ItemInst *bagitem = database.CreateItem(bag_item_data[i]->item_id, bag_item_data[i]->charges, bag_item_data[i]->aug_1, bag_item_data[i]->aug_2, bag_item_data[i]->aug_3, bag_item_data[i]->aug_4, bag_item_data[i]->aug_5, bag_item_data[i]->aug_6, bag_item_data[i]->attuned);
+			const ItemInst *bagitem = database.CreateItemOld(bag_item_data[i]->item_id, bag_item_data[i]->charges, bag_item_data[i]->aug_1, bag_item_data[i]->aug_2, bag_item_data[i]->aug_3, bag_item_data[i]->aug_4, bag_item_data[i]->aug_5, bag_item_data[i]->aug_6, bag_item_data[i]->attuned);
 			interior_slot = InventoryOld::CalcSlotId(slot_id, i);
 			Log.Out(Logs::Detail, Logs::Inventory, "Putting bag loot item %s (%d) into slot %d (bag slot %d)", inst.GetItem()->Name, inst.GetItem()->ID, interior_slot, i);
 			PutLootInInventory(interior_slot, *bagitem);
@@ -1707,7 +1707,7 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 				// Split into two
 				src_inst->SetCharges(src_inst->GetCharges() - move_in->number_in_stack);
 				Log.Out(Logs::Detail, Logs::Inventory, "Split stack of %s (%d) from slot %d to %d with stack size %d. Src keeps %d.", src_inst->GetItem()->Name, src_inst->GetItem()->ID, src_slot_id, dst_slot_id, move_in->number_in_stack, src_inst->GetCharges());
-				ItemInst* inst = database.CreateItem(src_inst->GetItem(), move_in->number_in_stack);
+				ItemInst* inst = database.CreateItemOld(src_inst->GetItem(), move_in->number_in_stack);
 				m_inv.PutItem(dst_slot_id, *inst);
 				safe_delete(inst);
 			}
@@ -1802,7 +1802,7 @@ void Client::SwapItemResync(MoveItem_Struct* move_slots) {
 		if (IsValidSlot(resync_slot) && resync_slot != INVALID_INDEX) {
 			// This prevents the client from crashing when closing any 'phantom' bags -U
 			const ItemData* token_struct = database.GetItem(22292); // 'Copper Coin'
-			ItemInst* token_inst = database.CreateItem(token_struct, 1);
+			ItemInst* token_inst = database.CreateItemOld(token_struct, 1);
 
 			SendItemPacket(resync_slot, token_inst, ItemPacketTrade);
 
@@ -1827,7 +1827,7 @@ void Client::SwapItemResync(MoveItem_Struct* move_slots) {
 		if (IsValidSlot(resync_slot) && resync_slot != INVALID_INDEX) {
 			if(m_inv[resync_slot]) {
 				const ItemData* token_struct = database.GetItem(22292); // 'Copper Coin'
-				ItemInst* token_inst = database.CreateItem(token_struct, 1);
+				ItemInst* token_inst = database.CreateItemOld(token_struct, 1);
 
 				SendItemPacket(resync_slot, token_inst, ItemPacketTrade);
 				SendItemPacket(resync_slot, m_inv[resync_slot], ItemPacketTrade);
@@ -1844,7 +1844,7 @@ void Client::SwapItemResync(MoveItem_Struct* move_slots) {
 		int16 resync_slot = (InventoryOld::CalcSlotId(move_slots->to_slot) == INVALID_INDEX) ? move_slots->to_slot : InventoryOld::CalcSlotId(move_slots->to_slot);
 		if (IsValidSlot(resync_slot) && resync_slot != INVALID_INDEX) {
 			const ItemData* token_struct = database.GetItem(22292); // 'Copper Coin'
-			ItemInst* token_inst = database.CreateItem(token_struct, 1);
+			ItemInst* token_inst = database.CreateItemOld(token_struct, 1);
 
 			SendItemPacket(resync_slot, token_inst, ItemPacketTrade);
 
@@ -1869,7 +1869,7 @@ void Client::SwapItemResync(MoveItem_Struct* move_slots) {
 		if (IsValidSlot(resync_slot) && resync_slot != INVALID_INDEX) {
 			if(m_inv[resync_slot]) {
 				const ItemData* token_struct = database.GetItem(22292); // 'Copper Coin'
-				ItemInst* token_inst = database.CreateItem(token_struct, 1);
+				ItemInst* token_inst = database.CreateItemOld(token_struct, 1);
 
 				SendItemPacket(resync_slot, token_inst, ItemPacketTrade);
 				SendItemPacket(resync_slot, m_inv[resync_slot], ItemPacketTrade);

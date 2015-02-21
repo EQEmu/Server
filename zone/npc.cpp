@@ -1378,7 +1378,7 @@ void NPC::PickPocket(Client* thief) {
 			const ItemData* item = database.GetItem(citem->item_id);
 			if (item)
 			{
-				inst = database.CreateItem(item, citem->charges);
+				inst = database.CreateItemOld(item, citem->charges);
 				bool is_arrow = (item->ItemType == ItemTypeArrow) ? true : false;
 				int slot_id = thief->GetInv().FindFreeSlot(false, true, inst->GetItem()->Size, is_arrow);
 				if (/*!Equipped(item->ID) &&*/
@@ -1398,7 +1398,7 @@ void NPC::PickPocket(Client* thief) {
 		if (x > 0)
 		{
 			int random = zone->random.Int(0, x-1);
-			inst = database.CreateItem(steal_items[random], charges[random]);
+			inst = database.CreateItemOld(steal_items[random], charges[random]);
 			if (inst)
 			{
 				const ItemData* item = inst->GetItem();

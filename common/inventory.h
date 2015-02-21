@@ -23,6 +23,21 @@
 
 namespace EQEmu
 {
+	struct InventorySlot
+	{
+		InventorySlot(int type, int slot) 
+			: type_(type), slot_(slot), bag_index_(-1), aug_index_(-1) { }
+		InventorySlot(int type, int slot, int bag_index) 
+			: type_(type), slot_(slot), bag_index_(bag_index), aug_index_(-1) { }
+		InventorySlot(int type, int slot, int bag_index, int aug_index) 
+			: type_(type), slot_(slot), bag_index_(bag_index), aug_index_(aug_index) { }
+
+		int type_;
+		int slot_;
+		int bag_index_;
+		int aug_index_;
+	};
+
 	enum InventoryType : int
 	{
 		InvTypePersonal = 0,
@@ -42,9 +57,9 @@ namespace EQEmu
 		Inventory();
 		~Inventory();
 
-		std::shared_ptr<ItemInstance> Get(int container_id, int slot_id);
-		std::shared_ptr<ItemInstance> Get(int container_id, int slot_id, int bag_idx);
-		bool Put(int container_id, int slot_id, std::shared_ptr<ItemInstance> inst);
+		std::shared_ptr<ItemInstance> Get(const InventorySlot &slot);
+		bool Put(const InventorySlot &slot, std::shared_ptr<ItemInstance> inst);
+		bool Swap(const InventorySlot &src, const InventorySlot &dest); 
 	private:
 		struct impl;
 		impl *impl_;

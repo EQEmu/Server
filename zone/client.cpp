@@ -5423,7 +5423,7 @@ bool Client::TryReward(uint32 claim_id) {
 	}
 
 	InternalVeteranReward ivr = (*iter);
-	ItemInst *claim = database.CreateItem(ivr.items[0].item_id, ivr.items[0].charges);
+	ItemInst *claim = database.CreateItemOld(ivr.items[0].item_id, ivr.items[0].charges);
 	if(!claim) {
 		Save();
 		return true;
@@ -5433,7 +5433,7 @@ bool Client::TryReward(uint32 claim_id) {
 
 	for(int y = 1; y < 8; y++)
 		if(ivr.items[y].item_id && claim->GetItem()->ItemClass == 1) {
-			ItemInst *item_temp = database.CreateItem(ivr.items[y].item_id, ivr.items[y].charges);
+			ItemInst *item_temp = database.CreateItemOld(ivr.items[y].item_id, ivr.items[y].charges);
 			if(item_temp) {
 				if(CheckLoreConflict(item_temp->GetItem())) {
 					lore_conflict = true;

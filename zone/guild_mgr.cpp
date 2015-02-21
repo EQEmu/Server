@@ -1021,7 +1021,7 @@ ItemInst* GuildBankManager::GetItem(uint32 GuildID, uint16 Area, uint16 SlotID, 
 		if((SlotID > (GUILD_BANK_DEPOSIT_AREA_SIZE - 1)))
 			return nullptr;
 
-		inst = database.CreateItem((*Iterator)->Items.DepositArea[SlotID].ItemID);
+		inst = database.CreateItemOld((*Iterator)->Items.DepositArea[SlotID].ItemID);
 
 		if(!inst)
 			return nullptr;
@@ -1034,7 +1034,7 @@ ItemInst* GuildBankManager::GetItem(uint32 GuildID, uint16 Area, uint16 SlotID, 
 		if((SlotID > (GUILD_BANK_MAIN_AREA_SIZE - 1)))
 			return nullptr;
 
-		inst = database.CreateItem((*Iterator)->Items.MainArea[SlotID].ItemID);
+		inst = database.CreateItemOld((*Iterator)->Items.MainArea[SlotID].ItemID);
 
 		if(!inst)
 			return nullptr;

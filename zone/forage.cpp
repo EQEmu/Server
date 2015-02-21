@@ -298,7 +298,7 @@ void Client::GoFish()
 		const ItemData* food_item = database.GetItem(food_id);
 
 		Message_StringID(MT_Skills, FISHING_SUCCESS);
-		ItemInst* inst = database.CreateItem(food_item, 1);
+		ItemInst* inst = database.CreateItemOld(food_item, 1);
 		if(inst != nullptr) {
 			if(CheckLoreConflict(inst->GetItem()))
 			{
@@ -414,7 +414,7 @@ void Client::ForageItem(bool guarantee) {
 				}
 
 		Message_StringID(MT_Skills, stringid);
-		ItemInst* inst = database.CreateItem(food_item, 1);
+		ItemInst* inst = database.CreateItemOld(food_item, 1);
 		if(inst != nullptr) {
 			// check to make sure it isn't a foraged lore item
 			if(CheckLoreConflict(inst->GetItem()))
