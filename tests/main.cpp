@@ -29,6 +29,7 @@
 #include "string_util_test.h"
 #include "data_verification_test.h"
 #include "skills_util_test.h"
+#include "inventory_test.h"
 
 int main() {
 	try {
@@ -44,7 +45,8 @@ int main() {
 		tests.add(new StringUtilTest());
 		tests.add(new DataVerificationTest());
 		tests.add(new SkillsUtilsTest());
-		tests.run(*output, true);
+		tests.add(new InventoryTest());
+		tests.run(*output, false);
 	} catch(...) {
 		return -1;
 	}

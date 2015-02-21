@@ -21,8 +21,6 @@
 
 #include "item_container.h"
 
-#include <string>
-
 namespace EQEmu
 {
 	enum InventoryType : int
@@ -44,8 +42,12 @@ namespace EQEmu
 		Inventory();
 		~Inventory();
 
+		std::shared_ptr<ItemInstance> Get(int container_id, int slot_id);
+		std::shared_ptr<ItemInstance> Get(int container_id, int slot_id, int bag_idx);
+		bool Put(int container_id, int slot_id, std::shared_ptr<ItemInstance> inst);
 	private:
-		std::map<int, ItemContainer> containers_;
+		struct impl;
+		impl *impl_;
 	};
 
 } // EQEmu

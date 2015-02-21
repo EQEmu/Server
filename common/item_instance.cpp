@@ -18,53 +18,111 @@
 
 #include "item_instance.h"
 #include "data_verification.h"
+#include "item_container.h"
+
+struct EQEmu::ItemInstance::impl {
+	const ItemData *base_item_;
+	ItemData *modified_item_;
+	int16 charges_;
+	uint32 color_;
+	bool attuned_;
+	std::string custom_data_;
+	uint32 ornament_idfile_;
+	uint32 ornament_icon_;
+	uint32 ornament_hero_model_;
+	uint64 tracking_id_;
+	ItemContainer contents_;
+};
 
 EQEmu::ItemInstance::ItemInstance() {
-	base_item_ = nullptr;
-	modified_item_ = nullptr;
-	charges_ = -1;
-	color_ = 0;
-	attuned_ = false;
-	ornament_idfile_ = 0;
-	ornament_icon_ = 0;
-	ornament_hero_model_ = 0;
-	tracking_id_ = 0;
+	impl_ = new impl;
+	impl_->base_item_ = nullptr;
+	impl_->modified_item_ = nullptr;
+	impl_->charges_ = -1;
+	impl_->color_ = 0;
+	impl_->attuned_ = false;
+	impl_->ornament_idfile_ = 0;
+	impl_->ornament_icon_ = 0;
+	impl_->ornament_hero_model_ = 0;
+	impl_->tracking_id_ = 0;
 }
 
 EQEmu::ItemInstance::ItemInstance(const ItemData* idata) {
-	base_item_ = idata;
-	modified_item_ = nullptr;
-	charges_ = -1;
-	color_ = 0;
-	attuned_ = false;
-	ornament_idfile_ = 0;
-	ornament_icon_ = 0;
-	ornament_hero_model_ = 0;
-	tracking_id_ = 0;
+	impl_ = new impl;
+	impl_->base_item_ = idata;
+	impl_->modified_item_ = nullptr;
+	impl_->charges_ = -1;
+	impl_->color_ = 0;
+	impl_->attuned_ = false;
+	impl_->ornament_idfile_ = 0;
+	impl_->ornament_icon_ = 0;
+	impl_->ornament_hero_model_ = 0;
+	impl_->tracking_id_ = 0;
 }
 
 EQEmu::ItemInstance::ItemInstance(const ItemData* idata, int16 charges) {
-	base_item_ = idata;
-	modified_item_ = nullptr;
-	charges_ = charges;
-	color_ = 0;
-	attuned_ = false;
-	ornament_idfile_ = 0;
-	ornament_icon_ = 0;
-	ornament_hero_model_ = 0;
-	tracking_id_ = 0;
+	impl_ = new impl;
+	impl_->base_item_ = idata;
+	impl_->modified_item_ = nullptr;
+	impl_->charges_ = charges;
+	impl_->color_ = 0;
+	impl_->attuned_ = false;
+	impl_->ornament_idfile_ = 0;
+	impl_->ornament_icon_ = 0;
+	impl_->ornament_hero_model_ = 0;
+	impl_->tracking_id_ = 0;
 }
 
 EQEmu::ItemInstance::~ItemInstance() {
+	delete impl_;
+}
+
+const ItemData *EQEmu::ItemInstance::GetItem() {
+	return impl_->modified_item_ ? impl_->modified_item_ : impl_->base_item_;
 }
 
 std::shared_ptr<EQEmu::ItemInstance> EQEmu::ItemInstance::GetItem(int index) {
-	if(EQEmu::ValueWithin(index, 0, 200)) {
-		auto iter = contents_.find(index);
-		if(iter != contents_.end()) {
-			return iter->second;
-		}
+	if(EQEmu::ValueWithin(index, 0, 255)) {
+		return impl_->contents_.Get(index);
+	}
+	
+	return std::shared_ptr<EQEmu::ItemInstance>(nullptr);
+}
+
+bool EQEmu::ItemInstance::PutItem(int index, std::shared_ptr<ItemInstance> inst) {
+	if(!inst || !inst->GetItem()) {
+		return false;
 	}
 
-	return std::shared_ptr<EQEmu::ItemInstance>(nullptr);
+	if(!impl_->base_item_) {
+		return false;
+	}
+
+	auto *item = impl_->base_item_;
+	if(item->ItemClass == ItemClassContainer) { // Bag
+		if(!EQEmu::ValueWithin(index, 0, (int)item->BagSlots)) {
+			return false;
+		}
+
+		return impl_->contents_.Put(index, inst);
+	}
+	else if(item->ItemClass == ItemClassCommon) { // Augment
+		if(!EQEmu::ValueWithin(index, 0, (int)EmuConstants::ITEM_COMMON_SIZE)) {
+			return false;
+		}
+
+		if(!item->AugSlotVisible[index]) {
+			return false;
+		}
+
+		auto *aug_item = inst->GetItem();
+		int aug_type = aug_item->AugType;
+		if(aug_type == -1 || (1 << (item->AugSlotType[index] - 1)) & aug_type) {
+			return impl_->contents_.Put(index, inst);
+		}
+		
+		return false;
+	}
+
+	return false;
 }

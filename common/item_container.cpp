@@ -33,7 +33,7 @@ bool EQEmu::ItemContainer::Put(int slot_id, std::shared_ptr<ItemInstance> inst) 
 	auto iter = impl_->items.find(slot_id);
 	if(iter == impl_->items.end()) {
 		impl_->items[slot_id] = inst;
-		//trigger put in slot_id
+		//trigger insert in slot_id
 		return true;
 	}
 
