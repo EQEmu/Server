@@ -5448,6 +5448,7 @@ bool Client::TryReward(uint32 claim_id)
 
 	PutItemInInventory(free_slot, *claim);
 	SendItemPacket(free_slot, claim, ItemPacketTrade);
+	safe_delete(claim);
 
 	Save();
 	return true;
