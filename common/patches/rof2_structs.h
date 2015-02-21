@@ -4739,13 +4739,13 @@ struct VeteranRewardEntry
 /*004*/	uint32 avaliable_count;
 /*008*/	uint32 claim_count;
 /*012*/	char enabled;
-/*013*/	VeteranRewardItem items[0];
+/*013*/	//VeteranRewardItem items[0];
 };
 
 struct VeteranReward
 {
 /*000*/	uint32 claim_count;
-/*004*/	VeteranRewardEntry entries[0];
+/*004*/	//VeteranRewardEntry entries[0];
 };
 
 struct VeteranClaim
