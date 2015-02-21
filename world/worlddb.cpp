@@ -115,7 +115,16 @@ void WorldDatabase::GetCharSelectInfo(uint32 accountID, EQApplicationPacket **ou
 		cse->Instance = 0;
 		cse->Gender = (uint8)atoi(row[2]);
 		cse->Face = (uint8)atoi(row[15]);
-		cse->Equip[0] = { 0 };							// Processed below
+
+		for (uint32 matslot = 0; matslot < _MaterialCount; matslot++) {	// Processed below
+			cse->Equip[matslot].Material = 0;
+			cse->Equip[matslot].Unknown1 = 0;
+			cse->Equip[matslot].EliteMaterial = 0;
+			cse->Equip[matslot].HeroForgeModel = 0;
+			cse->Equip[matslot].Material2 = 0;
+			cse->Equip[matslot].Color.Color = 0;
+		}						
+
 		cse->Unknown15 = 0xFF;
 		cse->Unknown19 = 0xFF;
 		cse->DrakkinTattoo = (uint32)atoi(row[17]);
