@@ -23,7 +23,7 @@ EQEmu::ItemContainer::ItemContainer(ItemContainer &&other) {
 	other.impl_ = nullptr;
 }
 
-std::shared_ptr<EQEmu::ItemInstance> EQEmu::ItemContainer::Get(int slot_id) {
+std::shared_ptr<EQEmu::ItemInstance> EQEmu::ItemContainer::Get(const int slot_id) {
 	auto iter = impl_->items.find(slot_id);
 	if(iter != impl_->items.end()) {
 		return iter->second;
@@ -32,7 +32,7 @@ std::shared_ptr<EQEmu::ItemInstance> EQEmu::ItemContainer::Get(int slot_id) {
 	return std::shared_ptr<EQEmu::ItemInstance>(nullptr);
 }
 
-bool EQEmu::ItemContainer::Put(int slot_id, std::shared_ptr<ItemInstance> inst) {
+bool EQEmu::ItemContainer::Put(const int slot_id, std::shared_ptr<ItemInstance> inst) {
 	if(!inst)
 		return false;
 
@@ -46,7 +46,7 @@ bool EQEmu::ItemContainer::Put(int slot_id, std::shared_ptr<ItemInstance> inst) 
 	return false;
 }
 
-bool EQEmu::ItemContainer::Delete(int slot_id) {
+bool EQEmu::ItemContainer::Delete(const int slot_id) {
 	auto iter = impl_->items.find(slot_id);
 	if(iter == impl_->items.end()) {
 		return false;

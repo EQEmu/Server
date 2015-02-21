@@ -29,12 +29,22 @@ namespace EQEmu
 	public:
 		ItemInstance();
 		ItemInstance(const ItemData* idata);
-		ItemInstance(const ItemData* idata, int16 charges);
+		ItemInstance(const ItemData* idata, const int16 charges);
 		~ItemInstance();
 
 		const ItemData *GetItem();
-		std::shared_ptr<ItemInstance> Get(int index);
-		bool Put(int index, std::shared_ptr<ItemInstance> inst);
+		std::shared_ptr<ItemInstance> Get(const int index);
+		bool Put(const int index, std::shared_ptr<ItemInstance> inst);
+
+		void SetCharges(const int16 charges);
+		void SetColor(const uint32 color);
+		void SetAttuned(const bool attuned);
+		void SetCustomData(const std::string &custom_data);
+		void SetOrnamentIDFile(const uint32 ornament_idfile);
+		void SetOrnamentIcon(const uint32 ornament_icon);
+		void SetOrnamentHeroModel(const uint32 ornament_hero_model);
+		void SetTrackingID(const uint64 tracking_id);
+		void SetRecastTimestamp(const uint32 recast_timestamp);
 	private:
 		struct impl;
 		impl *impl_;

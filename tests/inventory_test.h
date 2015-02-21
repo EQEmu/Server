@@ -38,6 +38,7 @@ public:
 	~InventoryTest() {
 	}
 
+private:	
 	void InitContainer() {
 		memset(&container, 0, sizeof(container));
 		strcpy(container.Name, "Backpack");
@@ -174,14 +175,35 @@ public:
 
 	void InventorySwapItemsTest()
 	{
+		auto swap_result = inv.Swap(EQEmu::InventorySlot(0, 23), EQEmu::InventorySlot(0, 24));
+		TEST_ASSERT(swap_result == true);
+
+		auto m_bag = inv.Get(EQEmu::InventorySlot(0, 24));
+		TEST_ASSERT(m_bag);
+		TEST_ASSERT(m_bag->GetItem());
+		TEST_ASSERT(m_bag->GetItem()->ID == 1000);
+
+		auto m_armor = m_bag->Get(0);
+		TEST_ASSERT(m_armor);
+		TEST_ASSERT(m_armor->GetItem());
+		TEST_ASSERT(m_armor->GetItem()->ID == 1001);
+
+		auto m_augment = m_bag->Get(1);
+		TEST_ASSERT(m_augment);
+		TEST_ASSERT(m_augment->GetItem());
+		TEST_ASSERT(m_augment->GetItem()->ID == 1002);
+
+		auto m_stackable = m_bag->Get(7);
+		TEST_ASSERT(m_stackable);
+		TEST_ASSERT(m_stackable->GetItem());
+		TEST_ASSERT(m_stackable->GetItem()->ID == 1003);
 	}
 
-	private:
-		EQEmu::Inventory inv;
-		ItemData container;
-		ItemData armor;
-		ItemData augment;
-		ItemData stackable;
+	EQEmu::Inventory inv;
+	ItemData container;
+	ItemData armor;
+	ItemData augment;
+	ItemData stackable;
 };
 
 #endif

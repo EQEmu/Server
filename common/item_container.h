@@ -31,9 +31,9 @@ namespace EQEmu
 		~ItemContainer();
 		ItemContainer(ItemContainer &&other);
 
-		std::shared_ptr<ItemInstance> Get(int slot_id);
-		bool Put(int slot_id, std::shared_ptr<ItemInstance> inst);
-		bool Delete(int slot_id);
+		std::shared_ptr<ItemInstance> Get(const int slot_id);
+		bool Put(const int slot_id, std::shared_ptr<ItemInstance> inst);
+		bool Delete(const int slot_id);
 	private:
 		ItemContainer(const ItemContainer &other);
 		ItemContainer& operator=(const ItemContainer &other);

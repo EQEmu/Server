@@ -92,3 +92,7 @@ bool EQEmu::Inventory::Put(const InventorySlot &slot, std::shared_ptr<ItemInstan
 
 	return false;
 }
+
+bool EQEmu::Inventory::Swap(const InventorySlot &src, const InventorySlot &dest) {
+	return false;
+}

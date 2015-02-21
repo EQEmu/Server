@@ -487,145 +487,63 @@ bool SharedDatabase::GetSharedBank(uint32 id, InventoryOld *inv, bool is_charid)
 // Overloaded: Retrieve character inventory based on character id
 bool SharedDatabase::GetInventory(uint32 char_id, EQEmu::Inventory *inv)
 {
-	return false;
-	//// Retrieve character inventory
-	//std::string query =
-	//    StringFormat("SELECT slotid, itemid, charges, color, augslot1, augslot2, augslot3, augslot4, augslot5, "
-	//		 "augslot6, instnodrop, custom_data, ornamenticon, ornamentidfile, ornament_hero_model FROM "
-	//		 "inventory WHERE charid = %i ORDER BY slotid",
-	//		 char_id);
-	//auto results = QueryDatabase(query);
-	//if (!results.Success()) {
-	//	Log.Out(Logs::General, Logs::Error, "If you got an error related to the 'instnodrop' field, run the "
-	//					    "following SQL Queries:\nalter table inventory add instnodrop "
-	//					    "tinyint(1) unsigned default 0 not null;\n");
-	//	return false;
-	//}
-	//
-	//auto timestamps = GetItemRecastTimestamps(char_id);
-	//
-	//for (auto row = results.begin(); row != results.end(); ++row) {
-	//	int16 slot_id = atoi(row[0]);
-	//	uint32 item_id = atoi(row[1]);
-	//	uint16 charges = atoi(row[2]);
-	//	uint32 color = atoul(row[3]);
-	//
-	//	uint32 aug[EmuConstants::ITEM_COMMON_SIZE];
-	//
-	//	aug[0] = (uint32)atoul(row[4]);
-	//	aug[1] = (uint32)atoul(row[5]);
-	//	aug[2] = (uint32)atoul(row[6]);
-	//	aug[3] = (uint32)atoul(row[7]);
-	//	aug[4] = (uint32)atoul(row[8]);
-	//	aug[5] = (uint32)atoul(row[9]);
-	//
-	//	bool instnodrop = (row[10] && (uint16)atoi(row[10])) ? true : false;
-	//
-	//	uint32 ornament_icon = (uint32)atoul(row[12]);
-	//	uint32 ornament_idfile = (uint32)atoul(row[13]);
-	//	uint32 ornament_hero_model = (uint32)atoul(row[14]);
-	//
-	//	const ItemData *item = GetItem(item_id);
-	//
-	//	if (!item) {
-	//		Log.Out(Logs::General, Logs::Error,
-	//			"Warning: charid %i has an invalid item_id %i in inventory slot %i", char_id, item_id,
-	//			slot_id);
-	//		continue;
-	//	}
-	//
-	//	int16 put_slot_id = INVALID_INDEX;
-	//
-	//	ItemInst *inst = CreateBaseItemOld(item, charges);
-	//
-	//	if (inst == nullptr)
-	//		continue;
-	//
-	//	if (row[11]) {
-	//		std::string data_str(row[11]);
-	//		std::string idAsString;
-	//		std::string value;
-	//		bool use_id = true;
-	//
-	//		for (int i = 0; i < data_str.length(); ++i) {
-	//			if (data_str[i] == '^') {
-	//				if (!use_id) {
-	//					inst->SetCustomData(idAsString, value);
-	//					idAsString.clear();
-	//					value.clear();
-	//				}
-	//
-	//				use_id = !use_id;
-	//				continue;
-	//			}
-	//
-	//			char v = data_str[i];
-	//			if (use_id)
-	//				idAsString.push_back(v);
-	//			else
-	//				value.push_back(v);
-	//		}
-	//	}
-	//
-	//	inst->SetOrnamentIcon(ornament_icon);
-	//	inst->SetOrnamentationIDFile(ornament_idfile);
-	//	inst->SetOrnamentHeroModel(ornament_hero_model);
-	//
-	//	if (instnodrop ||
-	//	    (((slot_id >= EmuConstants::EQUIPMENT_BEGIN && slot_id <= EmuConstants::EQUIPMENT_END) ||
-	//	      slot_id == MainPowerSource) &&
-	//	     inst->GetItem()->Attuneable))
-	//		inst->SetAttuned(true);
-	//
-	//	if (color > 0)
-	//		inst->SetColor(color);
-	//
-	//	if (charges == 0x7FFF)
-	//		inst->SetCharges(-1);
-	//	else if (charges == 0 &&
-	//		 inst->IsStackable()) // Stackable items need a minimum charge of 1 remain moveable.
-	//		inst->SetCharges(1);
-	//	else
-	//		inst->SetCharges(charges);
-	//
-	//	if (item->RecastDelay) {
-	//		if (timestamps.count(item->RecastType))
-	//			inst->SetRecastTimestamp(timestamps.at(item->RecastType));
-	//		else
-	//			inst->SetRecastTimestamp(0);
-	//	}
-	//
-	//	if (item->ItemClass == ItemClassCommon) {
-	//		for (int i = AUG_BEGIN; i < EmuConstants::ITEM_COMMON_SIZE; i++) {
-	//			if (aug[i])
-	//				inst->PutAugment(this, i, aug[i]);
-	//		}
-	//	}
-	//
-	//	if (slot_id >= 8000 && slot_id <= 8999) {
-	//		put_slot_id = inv->PushCursor(*inst);
-	//	} else if (slot_id >= 3111 && slot_id <= 3179) {
-	//		// Admins: please report any occurrences of this error
-	//		Log.Out(Logs::General, Logs::Error, "Warning: Defunct location for item in inventory: "
-	//						    "charid=%i, item_id=%i, slot_id=%i .. pushing to cursor...",
-	//			char_id, item_id, slot_id);
-	//		put_slot_id = inv->PushCursor(*inst);
-	//	} else {
-	//		put_slot_id = inv->PutItem(slot_id, *inst);
-	//	}
-	//
-	//	safe_delete(inst);
-	//
-	//	// Save ptr to item in inventory
-	//	if (put_slot_id == INVALID_INDEX) {
-	//		Log.Out(Logs::General, Logs::Error,
-	//			"Warning: Invalid slot_id for item in inventory: charid=%i, item_id=%i, slot_id=%i",
-	//			char_id, item_id, slot_id);
-	//	}
-	//}
-	//
-	//// Retrieve shared inventory
-	//return GetSharedBank(char_id, inv, true);
+	std::string query = StringFormat("SELECT type, slot, bag_index, aug_index, item_id, charges, color, attuned, "
+									 "custom_data, ornament_icon, ornament_idfile, ornament_hero_model, tracking_id "
+									 "FROM character_inventory WHERE id=%u ORDER BY type, slot, bag_index, aug_index", 
+									 char_id);
+
+	auto results = QueryDatabase(query);
+
+	if (!results.Success()) {
+		Log.Out(Logs::General, Logs::Error, "Error with query in SharedDatabase::GetInventory, could not get inventory"
+				" for character %u", char_id);
+		return false;
+	}
+
+	auto timestamps = GetItemRecastTimestamps(char_id);
+	for(auto row : results) {
+		int type = atoi(row[0]);
+		int slot = atoi(row[1]);
+		int bag_index = atoi(row[2]);
+		int aug_index = atoi(row[3]);
+		int item_id = atoi(row[4]);
+		int charges = atoi(row[5]);
+
+		auto inst = CreateItem(item_id, charges);
+		if(inst) {
+			uint32 color = (uint32)std::stoul(row[6]);
+			int attuned = atoi(row[7]);
+			uint32 ornament_icon = (uint32)std::stoul(row[9]);
+			uint32 ornament_idfile = (uint32)std::stoul(row[10]);
+			uint32 ornament_hero_model = (uint32)std::stoul(row[11]);
+			uint64 tracking_id = (uint64)std::stoull(row[12]);
+
+			inst->SetColor(color);
+			inst->SetAttuned(attuned ? true : false);
+			inst->SetCustomData(row[8]);
+			inst->SetOrnamentIcon(ornament_icon);
+			inst->SetOrnamentIDFile(ornament_idfile);
+			inst->SetOrnamentHeroModel(ornament_hero_model);
+			inst->SetTrackingID(tracking_id);
+
+			auto *item = inst->GetItem();
+			if(item->RecastDelay) {
+				if(timestamps.count(item->RecastType)) {
+					inst->SetRecastTimestamp(timestamps.at(item->RecastType));
+				}
+			}
+
+			if(!inv->Put(EQEmu::InventorySlot(type, slot, bag_index, aug_index), inst)) {
+				Log.Out(Logs::General, Logs::Error, "Error putting item %u into (%d, %d, %d, %d) for char %u.", 
+						item_id, type, slot, bag_index, aug_index, char_id);
+			}
+		} else {
+			Log.Out(Logs::General, Logs::Error, "Error putting item %u into (%d, %d, %d, %d) for char %u. Item does not exist.",
+					item_id, type, slot, bag_index, aug_index, char_id);
+		}
+	}
+
+	return true;
 }
 
 // Overloaded: Retrieve character inventory based on account_id and character name

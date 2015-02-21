@@ -31,6 +31,7 @@ struct EQEmu::ItemInstance::impl {
 	uint32 ornament_icon_;
 	uint32 ornament_hero_model_;
 	uint64 tracking_id_;
+	uint32 recast_timestamp_;
 	ItemContainer contents_;
 };
 
@@ -44,6 +45,7 @@ EQEmu::ItemInstance::ItemInstance() {
 	impl_->ornament_idfile_ = 0;
 	impl_->ornament_icon_ = 0;
 	impl_->ornament_hero_model_ = 0;
+	impl_->recast_timestamp_ = 0;
 	impl_->tracking_id_ = 0;
 }
 
@@ -57,6 +59,7 @@ EQEmu::ItemInstance::ItemInstance(const ItemData* idata) {
 	impl_->ornament_idfile_ = 0;
 	impl_->ornament_icon_ = 0;
 	impl_->ornament_hero_model_ = 0;
+	impl_->recast_timestamp_ = 0;
 	impl_->tracking_id_ = 0;
 }
 
@@ -70,6 +73,7 @@ EQEmu::ItemInstance::ItemInstance(const ItemData* idata, int16 charges) {
 	impl_->ornament_idfile_ = 0;
 	impl_->ornament_icon_ = 0;
 	impl_->ornament_hero_model_ = 0;
+	impl_->recast_timestamp_ = 0;
 	impl_->tracking_id_ = 0;
 }
 
@@ -81,7 +85,7 @@ const ItemData *EQEmu::ItemInstance::GetItem() {
 	return impl_->modified_item_ ? impl_->modified_item_ : impl_->base_item_;
 }
 
-std::shared_ptr<EQEmu::ItemInstance> EQEmu::ItemInstance::Get(int index) {
+std::shared_ptr<EQEmu::ItemInstance> EQEmu::ItemInstance::Get(const int index) {
 	if(EQEmu::ValueWithin(index, 0, 255)) {
 		return impl_->contents_.Get(index);
 	}
@@ -89,7 +93,7 @@ std::shared_ptr<EQEmu::ItemInstance> EQEmu::ItemInstance::Get(int index) {
 	return std::shared_ptr<EQEmu::ItemInstance>(nullptr);
 }
 
-bool EQEmu::ItemInstance::Put(int index, std::shared_ptr<ItemInstance> inst) {
+bool EQEmu::ItemInstance::Put(const int index, std::shared_ptr<ItemInstance> inst) {
 	if(!inst || !inst->GetItem()) {
 		return false;
 	}
@@ -125,4 +129,41 @@ bool EQEmu::ItemInstance::Put(int index, std::shared_ptr<ItemInstance> inst) {
 	}
 
 	return false;
+}
+
+void EQEmu::ItemInstance::SetCharges(const int16 charges) {
+	impl_->charges_ = charges;
+}
+
+void EQEmu::ItemInstance::SetColor(const uint32 color) {
+	impl_->color_ = color;
+}
+
+void EQEmu::ItemInstance::SetAttuned(const bool attuned) {
+	impl_->attuned_ = attuned;
+}
+
+void EQEmu::ItemInstance::SetCustomData(const std::string &custom_data) {
+	//We need to actually set the custom data stuff based on this string
+	impl_->custom_data_ = custom_data;
+}
+
+void EQEmu::ItemInstance::SetOrnamentIDFile(const uint32 ornament_idfile) {
+	impl_->ornament_idfile_ = ornament_idfile;
+}
+
+void EQEmu::ItemInstance::SetOrnamentIcon(const uint32 ornament_icon) {
+	impl_->ornament_icon_ = ornament_icon;
+}
+
+void EQEmu::ItemInstance::SetOrnamentHeroModel(const uint32 ornament_hero_model) {
+	impl_->ornament_hero_model_ = ornament_hero_model;
+}
+
+void EQEmu::ItemInstance::SetTrackingID(const uint64 tracking_id) {
+	impl_->tracking_id_ = tracking_id;
+}
+
+void EQEmu::ItemInstance::SetRecastTimestamp(const uint32 recast_timestamp) {
+	impl_->recast_timestamp_ = recast_timestamp;
 }
