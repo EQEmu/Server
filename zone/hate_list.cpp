@@ -219,16 +219,16 @@ bool HateList::RemoveEntFromHateList(Mob *in_entity)
 	{
 		if ((*iterator)->entity_on_hatelist == in_entity)
 		{
-			if (in_entity)
-				parse->EventNPC(EVENT_HATE_LIST, hate_owner->CastToNPC(), in_entity, "0", 0);
 			is_found = true;
-
 
 			if (in_entity && in_entity->IsClient())
 				in_entity->CastToClient()->DecrementAggroCount();
 
 			delete (*iterator);
 			iterator = list.erase(iterator);
+
+			if (in_entity)
+				parse->EventNPC(EVENT_HATE_LIST, hate_owner->CastToNPC(), in_entity, "0", 0);
 
 		}
 		else

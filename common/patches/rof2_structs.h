@@ -2940,10 +2940,12 @@ struct BazaarWindowStart_Struct {
 
 
 struct BazaarWelcome_Struct {
-	BazaarWindowStart_Struct Beginning;
-	uint32  Traders;
-	uint32  Items;
-	uint8   Unknown012[8];
+	uint32 Code;
+	uint32 EntityID;
+	uint32 Traders;
+	uint32 Items;
+	uint32 Traders2;
+	uint32 Items2;
 };
 
 struct BazaarSearch_Struct {
@@ -4725,17 +4727,33 @@ struct AugmentInfo_Struct
 
 struct VeteranRewardItem
 {
-/*000*/	uint32 item_id;
-/*004*/	uint32 charges;
-/*008*/	char item_name[64];
+/*000*/	uint32 name_length;
+/*004*/	//char item_name[0]; // THIS IS NOT NULL TERMED
+/*???*/	uint32 item_id;
+/*???*/	uint32 charges;
+};
+
+struct VeteranRewardEntry
+{
+/*000*/	uint32 claim_id; // guessed
+/*004*/	uint32 avaliable_count;
+/*008*/	uint32 claim_count;
+/*012*/	char enabled;
+/*013*/	//VeteranRewardItem items[0];
 };
 
 struct VeteranReward
 {
-/*000*/	uint32 claim_id;
-/*004*/	uint32 number_available;
-/*008*/	uint32 claim_count;
-/*012*/	VeteranRewardItem items[8];
+/*000*/	uint32 claim_count;
+/*004*/	//VeteranRewardEntry entries[0];
+};
+
+struct VeteranClaim
+{
+/*000*/	char name[68]; //name + other data
+/*068*/	uint32 claim_id;
+/*072*/	uint32 unknown072;
+/*076*/	uint32 action;
 };
 
 struct ExpeditionEntryHeader_Struct

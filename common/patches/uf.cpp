@@ -2201,7 +2201,7 @@ namespace UF
 		if (emu->CharCount == 0) {
 			ALLOC_VAR_ENCODE(structs::CharacterSelect_Struct, sizeof(structs::CharacterSelect_Struct));
 			eq->CharCount = emu->CharCount;
-			eq->TotalChars = eq->TotalChars;
+			eq->TotalChars = emu->TotalChars;
 
 			if (eq->TotalChars > consts::CHARACTER_CREATION_LIMIT)
 				eq->TotalChars = consts::CHARACTER_CREATION_LIMIT;

@@ -2776,7 +2776,8 @@ struct BazaarWelcome_Struct {
 	BazaarWindowStart_Struct Beginning;
 	uint32	Traders;
 	uint32	Items;
-	uint8	Unknown012[8];
+	uint32	Unknown012;
+	uint32	Unknown016;
 };
 
 struct BazaarSearch_Struct {
@@ -3207,7 +3208,7 @@ struct TraderDelItem_Struct{
 
 struct TraderClick_Struct{
 /*000*/	uint32 TraderID;
-/*004*/	uint32 Unknown004;
+/*004*/	uint32 Code;
 /*008*/	uint32 Unknown008;
 /*012*/	uint32 Approval;
 /*016*/
@@ -4552,19 +4553,12 @@ struct InternalVeteranReward
 /*012*/	InternalVeteranRewardItem items[8];
 };
 
-struct VeteranClaimReply
+struct VeteranClaim
 {
-/*000*/	char name[64];
-/*064*/	uint32 claim_id;
-/*068*/	uint32 reject_field;
-/*072*/	uint32 unknown072;
-};
-
-struct VeteranClaimRequest
-{
-/*000*/	char name_data[64]; //name + other data
+/*000*/	char name[64]; //name + other data
 /*064*/	uint32 claim_id;
 /*068*/	uint32 unknown068;
+/*072*/	uint32 action;
 };
 
 struct GMSearchCorpse_Struct

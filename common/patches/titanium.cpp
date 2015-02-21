@@ -1192,12 +1192,12 @@ namespace Titanium
 			}
 
 			eq->SecondaryIDFile[char_index] = emu_cse->SecondaryIDFile;
-			eq->Unknown820[char_index] = 0xFF;
+			eq->Unknown820[char_index] = (uint8)0xFF;
 			eq->Deity[char_index] = emu_cse->Deity;
 			eq->GoHome[char_index] = emu_cse->GoHome;
 			eq->Tutorial[char_index] = emu_cse->Tutorial;
 			eq->Beard[char_index] = emu_cse->Beard;
-			eq->Unknown902[char_index] = 0xFF;
+			eq->Unknown902[char_index] = (uint8)0xFF;
 			eq->PrimaryIDFile[char_index] = emu_cse->PrimaryIDFile;
 			eq->HairColor[char_index] = emu_cse->HairColor;
 			eq->Zone[char_index] = emu_cse->Zone;
@@ -1229,18 +1229,20 @@ namespace Titanium
 			}
 
 			eq->SecondaryIDFile[char_index] = 0;
-			eq->Unknown820[char_index] = 0xFF;
+			eq->Unknown820[char_index] = (uint8)0xFF;
 			eq->Deity[char_index] = 0;
 			eq->GoHome[char_index] = 0;
 			eq->Tutorial[char_index] = 0;
 			eq->Beard[char_index] = 0;
-			eq->Unknown902[char_index] = 0xFF;
+			eq->Unknown902[char_index] = (uint8)0xFF;
 			eq->PrimaryIDFile[char_index] = 0;
 			eq->HairColor[char_index] = 0;
 			eq->Zone[char_index] = 0;
 			eq->Class[char_index] = 0;
 			eq->Face[char_index] = 0;
-			//eq->Name[char_index][0] = '\0';	// Cleared above
+
+			strncpy(eq->Name[char_index], "<none>", 6);
+
 			eq->Gender[char_index] = 0;
 			eq->EyeColor1[char_index] = 0;
 			eq->EyeColor2[char_index] = 0;

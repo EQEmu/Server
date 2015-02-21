@@ -1231,20 +1231,25 @@ bool ZoneDatabase::LoadCharacterTribute(uint32 character_id, PlayerProfile_Struc
 	return true;
 }
 
-bool ZoneDatabase::LoadCharacterPotions(uint32 character_id, PlayerProfile_Struct* pp)
+bool ZoneDatabase::LoadCharacterPotions(uint32 character_id, PlayerProfile_Struct *pp)
 {
-	std::string query = StringFormat("SELECT `potion_id`, `item_id`, `icon` FROM `character_potionbelt` WHERE `id` = %u LIMIT %u",
-		character_id, EmuConstants::POTION_BELT_ITEM_COUNT);
-	auto results = database.QueryDatabase(query); int i = 0;
-	for (i = 0; i < EmuConstants::POTION_BELT_ITEM_COUNT; i++){
+	std::string query =
+	    StringFormat("SELECT `potion_id`, `item_id`, `icon` FROM `character_potionbelt` WHERE `id` = %u LIMIT %u",
+			 character_id, EmuConstants::POTION_BELT_ITEM_COUNT);
+	auto results = database.QueryDatabase(query);
+	int i = 0;
+	for (i = 0; i < EmuConstants::POTION_BELT_ITEM_COUNT; i++) {
 		pp->potionbelt.Items[i].Icon = 0;
 		pp->potionbelt.Items[i].ID = 0;
 		pp->potionbelt.Items[i].Name[0] = '\0';
 	}
 
 	for (auto row = results.begin(); row != results.end(); ++row) {
+		i = atoi(row[0]);
 		const ItemData *item_data = database.GetItem(atoi(row[1]));
-		if (item_data == nullptr) { continue; }
+		if (!item_data)
+			continue;
+
 		pp->potionbelt.Items[i].ID = item_data->ID;
 		pp->potionbelt.Items[i].Icon = atoi(row[2]);
 		strncpy(pp->potionbelt.Items[i].Name, item_data->Name, 64);

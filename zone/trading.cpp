@@ -1558,18 +1558,7 @@ void Client::BuyTraderItem(TraderBuy_Struct* tbs, Client* Trader, const EQApplic
 		return;
 	}
 
-	EQApplicationPacket* outapp = nullptr;
-
-	if (Trader->GetClientVersion() >= ClientVersion::RoF)
-	{
-		//outapp = new EQApplicationPacket(OP_TraderShop, sizeof(TraderBuy_Struct));
-	}
-	else
-	{
-		//outapp = new EQApplicationPacket(OP_Trader, sizeof(TraderBuy_Struct));
-	}
-
-	outapp = new EQApplicationPacket(OP_Trader, sizeof(TraderBuy_Struct));
+	EQApplicationPacket* outapp = new EQApplicationPacket(OP_Trader, sizeof(TraderBuy_Struct));
 
 	TraderBuy_Struct* outtbs = (TraderBuy_Struct*)outapp->pBuffer;
 
@@ -1701,7 +1690,15 @@ void Client::SendBazaarWelcome()
 	if (results.Success() && results.RowCount() == 1){
 		auto row = results.begin();
 
-		EQApplicationPacket* outapp = new EQApplicationPacket(OP_BazaarSearch, sizeof(BazaarWelcome_Struct));
+		EQApplicationPacket* outapp = nullptr;
+		if (GetClientVersion() >= ClientVersion::RoF)
+		{
+			outapp = new EQApplicationPacket(OP_TraderShop, sizeof(BazaarWelcome_Struct));
+		}
+		else
+		{
+			outapp = new EQApplicationPacket(OP_BazaarSearch, sizeof(BazaarWelcome_Struct));
+		}
 
 		memset(outapp->pBuffer,0,outapp->size);
 
@@ -1711,6 +1708,11 @@ void Client::SendBazaarWelcome()
 
 		bws->Traders = atoi(row[0]);
 		bws->Items = atoi(row[1]);
+
+		if (GetClientVersion() >= ClientVersion::RoF)
+		{
+			bws->Unknown012 = GetID();
+		}
 
 		QueuePacket(outapp);
 

@@ -917,6 +917,7 @@ int Mob::GetWeaponDamage(Mob *against, const ItemInst *weapon_item, uint32 *hate
 {
 	int dmg = 0;
 	int banedmg = 0;
+	int x = 0;
 
 	if(!against || against->GetInvul() || against->GetSpecialAbility(IMMUNE_MELEE)){
 		return 0;
@@ -945,10 +946,20 @@ int Mob::GetWeaponDamage(Mob *against, const ItemInst *weapon_item, uint32 *hate
 			bool MagicWeapon = false;
 			if(weapon_item->GetItem() && weapon_item->GetItem()->Magic)
 				MagicWeapon = true;
-			else {
+			else 
 				if(spellbonuses.MagicWeapon || itembonuses.MagicWeapon)
 					MagicWeapon = true;
-			}
+				else 
+					// An augment on the weapon that is marked magic makes
+					// the item magical.
+					for(x = 0; MagicWeapon == false && x < EmuConstants::ITEM_COMMON_SIZE; x++)
+					{
+						if(weapon_item->GetAugment(x) && weapon_item->GetAugment(x)->GetItem())
+						{
+							if (weapon_item->GetAugment(x)->GetItem()->Magic)
+								MagicWeapon = true;
+						}
+					}
 
 			if(MagicWeapon) {
 
