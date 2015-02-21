@@ -4719,7 +4719,7 @@ struct AugmentInfo_Struct
 struct VeteranRewardItem
 {
 /*000*/	uint32 name_length;
-/*004*/	char item_name[0]; // THIS IS NOT NULL TERMED
+/*004*/	//char item_name[0]; // THIS IS NOT NULL TERMED
 /*???*/	uint32 item_id;
 /*???*/	uint32 charges;
 };
