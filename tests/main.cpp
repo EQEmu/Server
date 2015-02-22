@@ -30,6 +30,7 @@
 #include "data_verification_test.h"
 #include "skills_util_test.h"
 #include "inventory_test.h"
+#include "memory_buffer_test.h"
 
 int main() {
 	try {
@@ -46,6 +47,7 @@ int main() {
 		tests.add(new DataVerificationTest());
 		tests.add(new SkillsUtilsTest());
 		tests.add(new InventoryTest());
+		tests.add(new MemoryBufferTest());
 		tests.run(*output, false);
 	} catch(...) {
 		return -1;
