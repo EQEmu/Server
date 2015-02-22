@@ -2343,7 +2343,7 @@ XS(XS_NPC_AddRangedProc) {
 		if(THIS == NULL)
 			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
 
-		THIS->AddDefensiveProc(spell_id,chance);
+		THIS->AddRangedProc(spell_id,chance);
 	}
 	XSRETURN_EMPTY;
 }
@@ -2368,7 +2368,7 @@ XS(XS_NPC_AddDefensiveProc) {
 		if(THIS == NULL)
 			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
 
-		THIS->AddProcToWeapon(spell_id, true, chance);
+		THIS->AddDefensiveProc(spell_id,chance);
 	}
 	XSRETURN_EMPTY;
 }

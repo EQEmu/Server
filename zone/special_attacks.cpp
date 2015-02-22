@@ -1186,7 +1186,6 @@ float Mob::GetRangeDistTargetSizeMod(Mob* other)
 
 void NPC::RangedAttack(Mob* other)
 {
-
 	if (!other)
 		return;
 	//make sure the attack and ranged timers are up
@@ -1306,7 +1305,7 @@ void NPC::DoRangedAttackDmg(Mob* other, bool Launch, int16 damage_mod, int16 cha
 			
 		if (TotalDmg > 0)
 			CommonOutgoingHitSuccess(other, TotalDmg, skillInUse);
-		else
+		else if (TotalDmg < -4)
 			TotalDmg = -5;
 
 		if (TotalDmg > 0)
