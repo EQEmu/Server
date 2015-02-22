@@ -1,5 +1,8 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 02/21/2015 ==
+Noudess: Starting erudites that were supposed to start in paineel were landing in erudin on Titanium. Fixed to be paineel.
+
 == 02/20/2015 ==
 demonstar55: Implement claims for RoF/RoF2 (should no longer crash the client!)
 	- fixed bugs related to claims for the rest of the clients (woo infinite loops)

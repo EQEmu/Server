@@ -277,7 +277,8 @@ void WorldDatabase::GetCharSelectInfo(uint32 accountID, EQApplicationPacket **ou
 	}
 }
 
-int WorldDatabase::MoveCharacterToBind(int CharID, uint8 bindnum) {
+int WorldDatabase::MoveCharacterToBind(int CharID, uint8 bindnum)
+{
 	/*  if an invalid bind point is specified, use the primary bind */
 	if (bindnum > 4)
 	{
@@ -360,6 +361,7 @@ bool WorldDatabase::GetStartZone(PlayerProfile_Struct* in_pp, CharCreate_Struct*
 
 	return true;
 }
+
 void WorldDatabase::SetSoFDefaultStartZone(PlayerProfile_Struct* in_pp, CharCreate_Struct* in_cc){
 	if (in_cc->start_zone == RuleI(World, TutorialZoneID)) {
 		in_pp->zone_id = in_cc->start_zone;
@@ -378,8 +380,16 @@ void WorldDatabase::SetTitaniumDefaultStartZone(PlayerProfile_Struct* in_pp, Cha
 	{
 		case 0:
 		{
-			in_pp->zone_id = 24;	// erudnext
-			in_pp->binds[0].zoneId = 38;	// tox
+			if (in_cc->deity == 203) // Cazic-Thule Erudites go to Paineel
+			{
+				in_pp->zone_id = 75; // paineel
+				in_pp->binds[0].zoneId = 75;
+			}
+			else
+			{
+				in_pp->zone_id = 24;	// erudnext
+				in_pp->binds[0].zoneId = 38;	// tox
+			}
 			break;
 		}
 		case 1:
@@ -462,6 +472,7 @@ void WorldDatabase::SetTitaniumDefaultStartZone(PlayerProfile_Struct* in_pp, Cha
 		}
 	}
 }
+
 void WorldDatabase::GetLauncherList(std::vector<std::string> &rl) {
 	rl.clear();
 
@@ -477,8 +488,8 @@ void WorldDatabase::GetLauncherList(std::vector<std::string> &rl) {
 
 }
 
-void WorldDatabase::SetMailKey(int CharID, int IPAddress, int MailKey) {
-
+void WorldDatabase::SetMailKey(int CharID, int IPAddress, int MailKey)
+{
 	char MailKeyString[17];
 
 	if(RuleB(Chat, EnableMailKeyIPVerification) == true)
@@ -512,7 +523,8 @@ bool WorldDatabase::GetCharacterLevel(const char *name, int &level)
     return true;
 }
 
-bool WorldDatabase::LoadCharacterCreateAllocations() {
+bool WorldDatabase::LoadCharacterCreateAllocations()
+{
 	character_create_allocations.clear();
 
 	std::string query = "SELECT * FROM char_create_point_allocations ORDER BY id";
@@ -544,7 +556,8 @@ bool WorldDatabase::LoadCharacterCreateAllocations() {
 	return true;
 }
 
-bool WorldDatabase::LoadCharacterCreateCombos() {
+bool WorldDatabase::LoadCharacterCreateCombos()
+{
 	character_create_race_class_combos.clear();
 
 	std::string query = "SELECT * FROM char_create_combinations ORDER BY race, class, deity, start_zone";
@@ -566,4 +579,3 @@ bool WorldDatabase::LoadCharacterCreateCombos() {
 
 	return true;
 }
-
