@@ -1431,10 +1431,6 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	if (m_pp.ldon_points_tak < 0 || m_pp.ldon_points_tak > 2000000000){ m_pp.ldon_points_tak = 0; }
 	if (m_pp.ldon_points_available < 0 || m_pp.ldon_points_available > 2000000000){ m_pp.ldon_points_available = 0; }
 
-	/* Set Swimming Skill 100 by default if under 100 */
-	if (GetSkill(SkillSwimming) < 100)
-		SetSkill(SkillSwimming, 100);
-
 	/* Initialize AA's : Move to function eventually */
 	for (uint32 a = 0; a < MAX_PP_AA_ARRAY; a++){ aa[a] = &m_pp.aa_array[a]; }
 	query = StringFormat(
