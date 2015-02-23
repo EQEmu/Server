@@ -13,6 +13,7 @@
 #include "rof2_structs.h"
 #include "../rulesys.h"
 #include "../memory_buffer.h"
+#include "../item_instance.h"
 
 #include <iostream>
 #include <sstream>
@@ -26,7 +27,7 @@ namespace RoF2
 	static Strategy struct_strategy;
 
 	char* SerializeItem(const ItemInst *inst, int16 slot_id, uint32 *length, uint8 depth, ItemPacketType packet_type);
-
+	void SerializeItem(EQEmu::MemoryBuffer &packet_data, EQEmu::ItemInstance *inst, int container_id, int slot_id, int bag_id, int aug_id);
 	// server to client inventory location converters
 	static inline structs::ItemSlotStruct ServerToRoF2Slot(uint32 serverSlot, ItemPacketType PacketType = ItemPacketInvalid);
 	static inline structs::MainInvItemSlotStruct ServerToRoF2MainInvSlot(uint32 serverSlot);
@@ -612,14 +613,23 @@ namespace RoF2
 			return;
 		}
 
-		//SerializedItemInstance_Struct *sis = (SerializedItemInstance_Struct*)in->pBuffer;
-		//EQEmu::MemoryBuffer packet_data;
-		//packet_data.Write<uint32>(entries);
-		//
-		//for(size_t i = 0; i < entries; ++i) {
+		SerializedItemInstance_Struct *sis = (SerializedItemInstance_Struct*)in->pBuffer;
+		EQEmu::MemoryBuffer packet_data;
+		packet_data.Write<uint32>(entries);
+		
+		for(size_t i = 0; i < entries; ++i) {
+			EQEmu::ItemInstance *inst = (EQEmu::ItemInstance*)sis[i].inst;
+
+			if(!inst) {
+				continue;
+			}
+
+			//SerializeItem(packet_data, inst, sis[i].container_id, sis[i].slot_id, -1, -1, ItemPacketCharInventory);
 		//	//SerializeItem((const EQEmu::ItemInstance*)
 		//	//char* Serialized = SerializeItem((const ItemInst*)eq->inst, eq->slot_id, &Length, 0, ItemPacketCharInventory);
-		//}
+		}
+
+		delete in;
 
 		//if (in->size == 0) {
 		//

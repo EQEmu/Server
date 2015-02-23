@@ -263,40 +263,42 @@ namespace Titanium
 		EQApplicationPacket *in = *p;
 		*p = nullptr;
 
-		//store away the emu struct
-		unsigned char *__emu_buffer = in->pBuffer;
+		delete in;
 
-		int itemcount = in->size / sizeof(InternalSerializedItem_Struct);
-		if (itemcount == 0 || (in->size % sizeof(InternalSerializedItem_Struct)) != 0) {
-			Log.Out(Logs::General, Logs::Netcode, "[STRUCTS] Wrong size on outbound %s: Got %d, expected multiple of %d", opcodes->EmuToName(in->GetOpcode()), in->size, sizeof(InternalSerializedItem_Struct));
-			delete in;
-			return;
-		}
-		InternalSerializedItem_Struct *eq = (InternalSerializedItem_Struct *)in->pBuffer;
-
-		//do the transform...
-		int r;
-		std::string serial_string;
-		for (r = 0; r < itemcount; r++, eq++) {
-			uint32 length;
-			char *serialized = SerializeItem((const ItemInst*)eq->inst, eq->slot_id, &length, 0);
-			if (serialized) {
-				serial_string.append(serialized, length + 1);
-				safe_delete_array(serialized);
-			}
-			else {
-				Log.Out(Logs::General, Logs::Netcode, "[STRUCTS] Serialization failed on item slot %d during OP_CharInventory.  Item skipped.", eq->slot_id);
-			}
-
-		}
-
-		in->size = serial_string.length();
-		in->pBuffer = new unsigned char[in->size];
-		memcpy(in->pBuffer, serial_string.c_str(), serial_string.length());
-
-		delete[] __emu_buffer;
-
-		dest->FastQueuePacket(&in, ack_req);
+		////store away the emu struct
+		//unsigned char *__emu_buffer = in->pBuffer;
+		//
+		//int itemcount = in->size / sizeof(InternalSerializedItem_Struct);
+		//if (itemcount == 0 || (in->size % sizeof(InternalSerializedItem_Struct)) != 0) {
+		//	Log.Out(Logs::General, Logs::Netcode, "[STRUCTS] Wrong size on outbound %s: Got %d, expected multiple of %d", opcodes->EmuToName(in->GetOpcode()), in->size, sizeof(InternalSerializedItem_Struct));
+		//	delete in;
+		//	return;
+		//}
+		//InternalSerializedItem_Struct *eq = (InternalSerializedItem_Struct *)in->pBuffer;
+		//
+		////do the transform...
+		//int r;
+		//std::string serial_string;
+		//for (r = 0; r < itemcount; r++, eq++) {
+		//	uint32 length;
+		//	char *serialized = SerializeItem((const ItemInst*)eq->inst, eq->slot_id, &length, 0);
+		//	if (serialized) {
+		//		serial_string.append(serialized, length + 1);
+		//		safe_delete_array(serialized);
+		//	}
+		//	else {
+		//		Log.Out(Logs::General, Logs::Netcode, "[STRUCTS] Serialization failed on item slot %d during OP_CharInventory.  Item skipped.", eq->slot_id);
+		//	}
+		//
+		//}
+		//
+		//in->size = serial_string.length();
+		//in->pBuffer = new unsigned char[in->size];
+		//memcpy(in->pBuffer, serial_string.c_str(), serial_string.length());
+		//
+		//delete[] __emu_buffer;
+		//
+		//dest->FastQueuePacket(&in, ack_req);
 	}
 
 	ENCODE(OP_DeleteCharge) { ENCODE_FORWARD(OP_MoveItem); }

@@ -820,8 +820,9 @@ void Client::BulkSendInventoryItems() {
 		return;
 	}
 	
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_CharInventory, items.Size());
-	memcpy(outapp->pBuffer, items, items.Size());
+	EQApplicationPacket outapp(OP_CharInventory, items.Size());
+	memcpy(outapp.pBuffer, items, items.Size());
+	QueuePacket(&outapp);
 
 
 	//int16 slot_id = 0;
