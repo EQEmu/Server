@@ -2409,6 +2409,55 @@ XS(XS_NPC_AddDefensiveProc) {
 	XSRETURN_EMPTY;
 }
 
+XS(XS_NPC_ChangeLastName); /* prototype to pass -Wmissing-prototypes */
+XS(XS_NPC_ChangeLastName)
+{
+	dXSARGS;
+	if (items < 1 || items > 2)
+		Perl_croak(aTHX_ "Usage: Mob::ChangeLastName(THIS, name)");
+	{
+		NPC *		THIS;
+		char *		name = nullptr;
+
+		if (sv_derived_from(ST(0), "NPC")) {
+			IV tmp = SvIV((SV*)SvRV(ST(0)));
+			THIS = INT2PTR(NPC *,tmp);
+		}
+		else
+			Perl_croak(aTHX_ "THIS is not of type NPC");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
+
+		if (items > 1)	{	name = (char *)SvPV_nolen(ST(1));	}
+
+		THIS->ChangeLastName(name);
+	}
+	XSRETURN_EMPTY;
+}
+
+XS(XS_NPC_ClearLastName); /* prototype to pass -Wmissing-prototypes */
+XS(XS_NPC_ClearLastName)
+{
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: Mob::ClearLastName(THIS)");
+	{
+		NPC *		THIS;
+
+		if (sv_derived_from(ST(0), "NPC")) {
+			IV tmp = SvIV((SV*)SvRV(ST(0)));
+			THIS = INT2PTR(NPC *,tmp);
+		}
+		else
+			Perl_croak(aTHX_ "THIS is not of type NPC");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
+
+		THIS->ClearLastName();
+	}
+	XSRETURN_EMPTY;
+}
+
 #ifdef __cplusplus
 extern "C"
 #endif
@@ -2517,6 +2566,8 @@ XS(boot_NPC)
 		newXSproto(strcpy(buf, "AddMeleeProc"), XS_NPC_AddMeleeProc, file, "$$$");
 		newXSproto(strcpy(buf, "AddRangedProc"), XS_NPC_AddRangedProc, file, "$$$");
 		newXSproto(strcpy(buf, "AddDefensiveProc"), XS_NPC_AddDefensiveProc, file, "$$$");
+		newXSproto(strcpy(buf, "ChangeLastName"), XS_NPC_ChangeLastName, file, "$:$");
+		newXSproto(strcpy(buf, "ClearLastName"), XS_NPC_ClearLastName, file, "$");
 	XSRETURN_YES;
 }
 

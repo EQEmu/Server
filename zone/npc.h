@@ -361,6 +361,9 @@ public:
 	const bool IsUnderwaterOnly() const { return NPCTypedata->underwater; }
 	const char* GetRawNPCTypeName() const { return NPCTypedata->name; }
 
+	void ChangeLastName(const char* in_lastname);
+	void ClearLastName();
+
 	bool GetDepop() { return p_depop; }
 
 	void NPCSlotTexture(uint8 slot, uint16 texture);	// Sets new material values for slots
