@@ -741,9 +741,12 @@ bool Client::HandleEnterWorldPacket(const EQApplicationPacket *app) {
 			bool home_enabled = false;
 			for (auto row = tgh_results.begin(); row != tgh_results.end(); ++row) {
 				if (strcasecmp(row[1], char_name) == 0) {
-					if (RuleB(World, EnableTutorialButton) && ((uint8)atoi(row[2]) <= RuleI(World, MaxLevelForTutorial))) {
-						home_enabled = true;
-						break;
+					if (RuleB(World, EnableReturnHomeButton)) {
+						int now = time(nullptr);
+						if ((now - atoi(row[3])) >= RuleI(World, MinOfflineTimeToReturnHome)) {
+							home_enabled = true;
+							break;
+						}
 					}
 				}
 			}
@@ -764,12 +767,9 @@ bool Client::HandleEnterWorldPacket(const EQApplicationPacket *app) {
 			bool tutorial_enabled = false;
 			for (auto row = tgh_results.begin(); row != tgh_results.end(); ++row) {
 				if (strcasecmp(row[1], char_name) == 0) {
-					if (RuleB(World, EnableReturnHomeButton)) {
-						int now = time(nullptr);
-						if ((now - atoi(row[3])) >= RuleI(World, MinOfflineTimeToReturnHome)) {
-							tutorial_enabled = true;
-							break;
-						}
+					if (RuleB(World, EnableTutorialButton) && ((uint8)atoi(row[2]) <= RuleI(World, MaxLevelForTutorial))) {
+						tutorial_enabled = true;
+						break;
 					}
 				}
 			}
