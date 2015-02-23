@@ -138,23 +138,23 @@ void WorldDatabase::GetCharSelectInfo(uint32 accountID, EQApplicationPacket **ou
 		cse->EyeColor2 = (uint8)atoi(row[12]);
 		cse->HairStyle = (uint8)atoi(row[13]);
 		cse->Beard = (uint8)atoi(row[14]);
-		cse->Enabled = 1;
+		cse->GoHome = 0;								// Processed Below
 		cse->Tutorial = 0;								// Processed Below
 		cse->DrakkinHeritage = (uint32)atoi(row[16]);
 		cse->Unknown1 = 0;
-		cse->GoHome = 0;								// Processed Below
+		cse->Enabled = 1;
 		cse->LastLogin = (uint32)atoi(row[7]);			// RoF2 value: 1212696584
 		cse->Unknown2 = 0;
 		/* Fill End */
-
-		if (RuleB(World, EnableTutorialButton) && (cse->Level <= RuleI(World, MaxLevelForTutorial))) {
-			cse->Tutorial = 1;
-		}
 
 		if (RuleB(World, EnableReturnHomeButton)) {
 			int now = time(nullptr);
 			if ((now - atoi(row[7])) >= RuleI(World, MinOfflineTimeToReturnHome))
 				cse->GoHome = 1;
+		}
+
+		if (RuleB(World, EnableTutorialButton) && (cse->Level <= RuleI(World, MaxLevelForTutorial))) {
+			cse->Tutorial = 1;
 		}
 
 		/* Set Bind Point Data for any character that may possibly be missing it for any reason */

@@ -189,11 +189,11 @@ struct CharacterSelectEntry_Struct
 /*0000*/	uint8 EyeColor2;
 /*0000*/	uint8 HairStyle;
 /*0000*/	uint8 Beard;
-/*0000*/	uint8 Enabled;
+/*0000*/	uint8 GoHome;				// Seen 0 for new char and 1 for existing
 /*0000*/	uint8 Tutorial;				// Seen 1 for new char or 0 for existing
 /*0000*/	uint32 DrakkinHeritage;
 /*0000*/	uint8 Unknown1;				// Seen 0
-/*0000*/	uint8 GoHome;				// Seen 0 for new char and 1 for existing
+/*0000*/	uint8 Enabled;				// Swapped position with 'GoHome' 02/23/2015 -U
 /*0000*/	uint32 LastLogin;
 /*0000*/	uint8 Unknown2;				// Seen 0
 };

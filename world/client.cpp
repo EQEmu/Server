@@ -720,6 +720,7 @@ bool Client::HandleEnterWorldPacket(const EQApplicationPacket *app) {
 	}
 
 	// This can probably be moved outside and have another method return requested info (don't forget to remove the #include "../common/shareddb.h" above)
+	// (This is a literal translation of the original process..I don't see why it can't be changed to a single-target query over account iteration -U)
 	if (!pZoning) {
 		size_t character_limit = EQLimits::CharacterCreationLimit(eqs->GetClientVersion());
 		if (character_limit > EmuConstants::CHARACTER_CREATION_LIMIT) { character_limit = EmuConstants::CHARACTER_CREATION_LIMIT; }

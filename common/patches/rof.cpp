@@ -2982,11 +2982,11 @@ namespace RoF
 			eq_cse->EyeColor2 = emu_cse->EyeColor2;
 			eq_cse->HairStyle = emu_cse->HairStyle;
 			eq_cse->Beard = emu_cse->Beard;
-			eq_cse->Enabled = emu_cse->Enabled;
+			eq_cse->GoHome = emu_cse->GoHome;
 			eq_cse->Tutorial = emu_cse->Tutorial;
 			eq_cse->DrakkinHeritage = emu_cse->DrakkinHeritage;
 			eq_cse->Unknown1 = emu_cse->Unknown1;
-			eq_cse->GoHome = emu_cse->GoHome;
+			eq_cse->Enabled = emu_cse->Enabled;
 			eq_cse->LastLogin = emu_cse->LastLogin;
 			eq_cse->Unknown2 = emu_cse->Unknown2;
 			
