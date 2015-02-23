@@ -795,6 +795,42 @@ XS(XS_NPC_IsOnHatelist)
 	XSRETURN(1);
 }
 
+XS(XS_NPC_RemoveFromHateList); /* prototype to pass -Wmissing-prototypes */
+XS(XS_NPC_RemoveFromHateList)
+{
+	dXSARGS;
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: NPC::RemoveFromHateList(THIS, ent)");
+	{
+		NPC *		THIS;
+		Mob*		ent;
+
+		if (sv_derived_from(ST(0), "NPC")) {
+			IV tmp = SvIV((SV*)SvRV(ST(0)));
+			THIS = INT2PTR(NPC *,tmp);
+		}
+		else
+			Perl_croak(aTHX_ "THIS is not of type NPC");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
+
+		if (sv_derived_from(ST(1), "Mob")) {
+			IV tmp = SvIV((SV*)SvRV(ST(1)));
+			ent = INT2PTR(Mob *,tmp);
+		}
+		else
+			Perl_croak(aTHX_ "ent  is not of type Mob");
+		if(ent == nullptr)
+			Perl_croak(aTHX_ "ent  is nullptr, avoiding crash.");
+
+		THIS->RemoveFromHateList(ent);
+
+	}
+	XSRETURN_EMPTY;
+}
+
+
+
 XS(XS_NPC_SetNPCFactionID); /* prototype to pass -Wmissing-prototypes */
 XS(XS_NPC_SetNPCFactionID)
 {
@@ -2420,6 +2456,7 @@ XS(boot_NPC)
 		newXSproto(strcpy(buf, "GetPrimaryFaction"), XS_NPC_GetPrimaryFaction, file, "$");
 		newXSproto(strcpy(buf, "GetNPCHate"), XS_NPC_GetNPCHate, file, "$$");
 		newXSproto(strcpy(buf, "IsOnHatelist"), XS_NPC_IsOnHatelist, file, "$$");
+		newXSproto(strcpy(buf, "RemoveFromHateList"), XS_NPC_RemoveFromHateList, file, "$$");
 		newXSproto(strcpy(buf, "SetNPCFactionID"), XS_NPC_SetNPCFactionID, file, "$$");
 		newXSproto(strcpy(buf, "GetMaxDMG"), XS_NPC_GetMaxDMG, file, "$");
 		newXSproto(strcpy(buf, "GetMinDMG"), XS_NPC_GetMinDMG, file, "$");
