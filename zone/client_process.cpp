@@ -815,6 +815,15 @@ void Client::OnDisconnect(bool hard_disconnect) {
 }
 
 void Client::BulkSendInventoryItems() {
+	EQEmu::MemoryBuffer items;
+	if(!m_inventory.Serialize(items)) {
+		return;
+	}
+	
+	EQApplicationPacket* outapp = new EQApplicationPacket(OP_CharInventory, items.Size());
+	memcpy(outapp->pBuffer, items, items.Size());
+
+
 	//int16 slot_id = 0;
 	//
 	//// LINKDEAD TRADE ITEMS

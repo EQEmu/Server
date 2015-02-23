@@ -61,7 +61,7 @@ namespace EQEmu
 		bool Put(const InventorySlot &slot, std::shared_ptr<ItemInstance> inst);
 		bool Swap(const InventorySlot &src, const InventorySlot &dest);
 
-		void Serialize();
+		bool Serialize(MemoryBuffer &buf);
 	private:
 		struct impl;
 		impl *impl_;

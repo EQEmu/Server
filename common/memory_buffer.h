@@ -35,6 +35,8 @@ namespace EQEmu
 		MemoryBuffer(MemoryBuffer &&other);
 		MemoryBuffer& operator=(const MemoryBuffer &other);
 		MemoryBuffer& operator=(MemoryBuffer &&other);
+		MemoryBuffer& operator+=(const MemoryBuffer &rhs);
+		friend MemoryBuffer operator+(MemoryBuffer lhs, const MemoryBuffer& rhs) { return lhs += rhs; }
 		~MemoryBuffer();
 		
 		uchar& operator[](size_t pos);
@@ -78,27 +80,18 @@ namespace EQEmu
 			return temp;
 		}
 
-		template<>
-		void Write<std::string>(std::string val) {
+		void Write(const std::string &val) {
 			Write(val.c_str(), val.length());
 			Write((uint8)0);
 		}
 
-		template<>
-		void Write<const std::string&>(const std::string &val) {
-			Write(val.c_str(), val.length());
-			Write((uint8)0);
-		}
-
-		template<>
-		void Write<const char*>(const char *val) {
+		void Write(const char *val) {
 			size_t len = strlen(val);
 			Write(val, len);
 			Write((uint8)0);
 		}
 
-		template<>
-		std::string Read<std::string>() {
+		std::string ReadString() {
 			std::string ret;
 			size_t len = strlen((const char*)&buffer_[read_pos_]);
 			ret.resize(len);

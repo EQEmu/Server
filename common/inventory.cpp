@@ -89,10 +89,25 @@ bool EQEmu::Inventory::Put(const InventorySlot &slot, std::shared_ptr<ItemInstan
 		return container.Put(slot.slot_, inst);
 	}
 
-
 	return false;
 }
 
 bool EQEmu::Inventory::Swap(const InventorySlot &src, const InventorySlot &dest) {
 	return false;
+}
+
+bool EQEmu::Inventory::Serialize(MemoryBuffer &buf) {
+	buf.SetWritePosition(0);
+	buf.SetReadPosition(0);
+	buf.Resize(0);
+
+	bool value = false;
+	for(auto &iter : impl_->containers_) {
+		bool v = iter.second.Serialize(buf, iter.first);
+		if(v && !value) {
+			value = true;
+		}
+	}
+
+	return value;
 }

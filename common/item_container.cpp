@@ -56,3 +56,17 @@ bool EQEmu::ItemContainer::Delete(const int slot_id) {
 		return true;
 	}
 }
+
+bool EQEmu::ItemContainer::Serialize(MemoryBuffer &buf, int container_number) {
+	if(impl_->items.size() == 0) {
+		return false;
+	}
+
+	for(auto &iter : impl_->items) {
+		buf.Write<int32>(container_number);
+		buf.Write<int32>(iter.first);
+		buf.Write<void*>(iter.second.get());
+	}
+
+	return true;
+}

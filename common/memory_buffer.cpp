@@ -76,6 +76,25 @@ EQEmu::MemoryBuffer& EQEmu::MemoryBuffer::operator=(MemoryBuffer &&other) {
 	return *this;
 }
 
+EQEmu::MemoryBuffer& EQEmu::MemoryBuffer::operator+=(const MemoryBuffer &rhs) {
+	if(!rhs.buffer_) {
+		return *this;
+	}
+
+	if(buffer_) {
+		size_t old_size = size_;
+		Resize(size_ + rhs.size_);
+		memcpy(&buffer_[old_size], rhs.buffer_, rhs.size_);
+	} else {
+		buffer_ = new uchar[rhs.capacity_];
+		memcpy(buffer_, rhs.buffer_, rhs.capacity_);
+		size_ = rhs.size_;
+		capacity_ = rhs.capacity_;
+	}
+
+	return *this;
+}
+
 EQEmu::MemoryBuffer::~MemoryBuffer() { Clear(); }
 
 uchar& EQEmu::MemoryBuffer::operator[](size_t pos) {
@@ -112,7 +131,7 @@ size_t EQEmu::MemoryBuffer::Capacity() const {
 
 void EQEmu::MemoryBuffer::Resize(size_t sz) {
 	if(!buffer_) {
-		size_t new_size = sz + 32;
+		size_t new_size = sz + 64;
 		buffer_ = new uchar[new_size];
 		capacity_ = new_size;
 		size_ = sz;
@@ -143,6 +162,8 @@ void EQEmu::MemoryBuffer::Clear() {
 	
 	size_ = 0;
 	capacity_ = 0;
+	write_pos_ = 0;
+	read_pos_ = 0;
 }
 
 void EQEmu::MemoryBuffer::Zero() {

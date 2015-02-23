@@ -12,6 +12,7 @@
 #include "../item.h"
 #include "rof2_structs.h"
 #include "../rulesys.h"
+#include "../memory_buffer.h"
 
 #include <iostream>
 #include <sstream>
@@ -598,71 +599,90 @@ namespace RoF2
 	{
 		//consume the packet
 		EQApplicationPacket *in = *p;
-
 		*p = nullptr;
 
-		if (in->size == 0) {
+		in->SetReadPosition(0);
+		size_t entry_size = sizeof(int32) * 2 + sizeof(void*);
+		size_t entries = in->size / entry_size;
 
-			in->size = 4;
-			in->pBuffer = new uchar[in->size];
-
-			*((uint32 *)in->pBuffer) = 0;
-
-			dest->FastQueuePacket(&in, ack_req);
-			return;
-		}
-
-		//store away the emu struct
-		unsigned char *__emu_buffer = in->pBuffer;
-
-		int ItemCount = in->size / sizeof(InternalSerializedItem_Struct);
-
-		if (ItemCount == 0 || (in->size % sizeof(InternalSerializedItem_Struct)) != 0) {
-
+		if(entries == 0 || in->size % entry_size != 0) {
 			Log.Out(Logs::General, Logs::Netcode, "[STRUCTS] Wrong size on outbound %s: Got %d, expected multiple of %d",
-				opcodes->EmuToName(in->GetOpcode()), in->size, sizeof(InternalSerializedItem_Struct));
-
+					opcodes->EmuToName(in->GetOpcode()), in->size, entry_size);
 			delete in;
-
 			return;
 		}
 
-		InternalSerializedItem_Struct *eq = (InternalSerializedItem_Struct *)in->pBuffer;
+		//SerializedItemInstance_Struct *sis = (SerializedItemInstance_Struct*)in->pBuffer;
+		//EQEmu::MemoryBuffer packet_data;
+		//packet_data.Write<uint32>(entries);
+		//
+		//for(size_t i = 0; i < entries; ++i) {
+		//	//SerializeItem((const EQEmu::ItemInstance*)
+		//	//char* Serialized = SerializeItem((const ItemInst*)eq->inst, eq->slot_id, &Length, 0, ItemPacketCharInventory);
+		//}
 
-		in->pBuffer = new uchar[4];
-		*(uint32 *)in->pBuffer = ItemCount;
-		in->size = 4;
-
-		for (int r = 0; r < ItemCount; r++, eq++) {
-
-			uint32 Length = 0;
-
-			char* Serialized = SerializeItem((const ItemInst*)eq->inst, eq->slot_id, &Length, 0, ItemPacketCharInventory);
-
-			if (Serialized) {
-
-				uchar *OldBuffer = in->pBuffer;
-				in->pBuffer = new uchar[in->size + Length];
-				memcpy(in->pBuffer, OldBuffer, in->size);
-
-				safe_delete_array(OldBuffer);
-
-				memcpy(in->pBuffer + in->size, Serialized, Length);
-				in->size += Length;
-
-				safe_delete_array(Serialized);
-			}
-			else {
-				Log.Out(Logs::General, Logs::Netcode, "[ERROR] Serialization failed on item slot %d during OP_CharInventory.  Item skipped.", eq->slot_id);
-			}
-		}
-
-		delete[] __emu_buffer;
-
-		//Log.LogDebugType(Logs::General, Logs::Netcode, "[ERROR] Sending inventory to client");
-		//Log.Hex(Logs::Netcode, in->pBuffer, in->size);
-
-		dest->FastQueuePacket(&in, ack_req);
+		//if (in->size == 0) {
+		//
+		//	in->size = 4;
+		//	in->pBuffer = new uchar[in->size];
+		//
+		//	*((uint32 *)in->pBuffer) = 0;
+		//
+		//	dest->FastQueuePacket(&in, ack_req);
+		//	return;
+		//}
+		//
+		////store away the emu struct
+		//unsigned char *__emu_buffer = in->pBuffer;
+		//
+		//int ItemCount = in->size / sizeof(InternalSerializedItem_Struct);
+		//
+		//if (ItemCount == 0 || (in->size % sizeof(InternalSerializedItem_Struct)) != 0) {
+		//
+		//	Log.Out(Logs::General, Logs::Netcode, "[STRUCTS] Wrong size on outbound %s: Got %d, expected multiple of %d",
+		//		opcodes->EmuToName(in->GetOpcode()), in->size, sizeof(InternalSerializedItem_Struct));
+		//
+		//	delete in;
+		//
+		//	return;
+		//}
+		//
+		//InternalSerializedItem_Struct *eq = (InternalSerializedItem_Struct *)in->pBuffer;
+		//
+		//in->pBuffer = new uchar[4];
+		//*(uint32 *)in->pBuffer = ItemCount;
+		//in->size = 4;
+		//
+		//for (int r = 0; r < ItemCount; r++, eq++) {
+		//
+		//	uint32 Length = 0;
+		//
+		//	char* Serialized = SerializeItem((const ItemInst*)eq->inst, eq->slot_id, &Length, 0, ItemPacketCharInventory);
+		//
+		//	if (Serialized) {
+		//
+		//		uchar *OldBuffer = in->pBuffer;
+		//		in->pBuffer = new uchar[in->size + Length];
+		//		memcpy(in->pBuffer, OldBuffer, in->size);
+		//
+		//		safe_delete_array(OldBuffer);
+		//
+		//		memcpy(in->pBuffer + in->size, Serialized, Length);
+		//		in->size += Length;
+		//
+		//		safe_delete_array(Serialized);
+		//	}
+		//	else {
+		//		Log.Out(Logs::General, Logs::Netcode, "[ERROR] Serialization failed on item slot %d during OP_CharInventory.  Item skipped.", eq->slot_id);
+		//	}
+		//}
+		//
+		//delete[] __emu_buffer;
+		//
+		////Log.LogDebugType(Logs::General, Logs::Netcode, "[ERROR] Sending inventory to client");
+		////Log.Hex(Logs::Netcode, in->pBuffer, in->size);
+		//
+		//dest->FastQueuePacket(&in, ack_req);
 	}
 
 	ENCODE(OP_ClickObjectAction)

@@ -69,6 +69,12 @@ struct InternalSerializedItem_Struct {
 	const void * inst;
 };
 
+struct SerializedItemInstance_Struct {
+	int32 container_id;
+	int32 slot_id;
+	void *inst;
+};
+
 // use EmuConstants::ITEM_COMMON_SIZE
 //#define MAX_AUGMENT_SLOTS 5
 

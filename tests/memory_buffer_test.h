@@ -35,6 +35,7 @@ public:
 		TEST_ADD(MemoryBufferTest::MoveTest);
 		TEST_ADD(MemoryBufferTest::ZeroTest);
 		TEST_ADD(MemoryBufferTest::ClearTest);
+		TEST_ADD(MemoryBufferTest::AddTest)
 	}
 
 	~MemoryBufferTest() {
@@ -93,8 +94,8 @@ private:
 		uint16 b = mb.Read<uint16>();
 		uint32 c = mb.Read<uint32>();
 		uint64 d = mb.Read<uint64>();
-		std::string s1 = mb.Read<std::string>();
-		std::string s2 = mb.Read<std::string>();
+		std::string s1 = mb.ReadString();
+		std::string s2 = mb.ReadString();
 		
 		TEST_ASSERT(a == 0);
 		TEST_ASSERT(b == 5);
@@ -502,6 +503,83 @@ private:
 		TEST_ASSERT(!mb);
 		uchar *data = (uchar*)mb;
 		TEST_ASSERT(data == nullptr);
+	}
+
+	void AddTest()
+	{
+		EQEmu::MemoryBuffer mb2;
+		EQEmu::MemoryBuffer mb3;
+		
+		mb2 += mb3;
+
+		TEST_ASSERT(!mb2);
+		TEST_ASSERT(mb2.Size() == 0);
+		
+		mb2.Write("test1");
+		mb2.Write("test2");
+
+		mb2 += mb3;
+		TEST_ASSERT(mb2);
+		TEST_ASSERT(mb2.Size() == 12);
+
+		uchar *data = (uchar*)mb2;
+		TEST_ASSERT(data != nullptr);
+		TEST_ASSERT(data[0] == 't');
+		TEST_ASSERT(data[1] == 'e');
+		TEST_ASSERT(data[2] == 's');
+		TEST_ASSERT(data[3] == 't');
+		TEST_ASSERT(data[4] == '1');
+		TEST_ASSERT(data[5] == 0);
+		TEST_ASSERT(data[6] == 't');
+		TEST_ASSERT(data[7] == 'e');
+		TEST_ASSERT(data[8] == 's');
+		TEST_ASSERT(data[9] == 't');
+		TEST_ASSERT(data[10] == '2');
+		TEST_ASSERT(data[11] == 0);
+
+		mb3 += mb2;
+		TEST_ASSERT(mb3);
+		TEST_ASSERT(mb3.Size() == 12);
+
+		data = (uchar*)mb3;
+		TEST_ASSERT(data != nullptr);
+		TEST_ASSERT(data[0] == 't');
+		TEST_ASSERT(data[1] == 'e');
+		TEST_ASSERT(data[2] == 's');
+		TEST_ASSERT(data[3] == 't');
+		TEST_ASSERT(data[4] == '1');
+		TEST_ASSERT(data[5] == 0);
+		TEST_ASSERT(data[6] == 't');
+		TEST_ASSERT(data[7] == 'e');
+		TEST_ASSERT(data[8] == 's');
+		TEST_ASSERT(data[9] == 't');
+		TEST_ASSERT(data[10] == '2');
+		TEST_ASSERT(data[11] == 0);
+
+		mb2.Clear();
+		mb3.Clear();
+
+		mb2.Write("test1");
+		mb3.Write("test2");
+
+		mb2 += mb3;
+		TEST_ASSERT(mb2);
+		TEST_ASSERT(mb2.Size() == 12);
+
+		data = (uchar*)mb2;
+		TEST_ASSERT(data != nullptr);
+		TEST_ASSERT(data[0] == 't');
+		TEST_ASSERT(data[1] == 'e');
+		TEST_ASSERT(data[2] == 's');
+		TEST_ASSERT(data[3] == 't');
+		TEST_ASSERT(data[4] == '1');
+		TEST_ASSERT(data[5] == 0);
+		TEST_ASSERT(data[6] == 't');
+		TEST_ASSERT(data[7] == 'e');
+		TEST_ASSERT(data[8] == 's');
+		TEST_ASSERT(data[9] == 't');
+		TEST_ASSERT(data[10] == '2');
+		TEST_ASSERT(data[11] == 0);
 	}
 
 	EQEmu::MemoryBuffer mb;

@@ -20,6 +20,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #define COMMON_ITEM_CONTAINER_H
 
 #include "item_instance.h"
+#include "memory_buffer.h"
 #include <memory>
 
 namespace EQEmu
@@ -34,6 +35,8 @@ namespace EQEmu
 		std::shared_ptr<ItemInstance> Get(const int slot_id);
 		bool Put(const int slot_id, std::shared_ptr<ItemInstance> inst);
 		bool Delete(const int slot_id);
+
+		bool Serialize(MemoryBuffer &buf, int container_number);
 	private:
 		ItemContainer(const ItemContainer &other);
 		ItemContainer& operator=(const ItemContainer &other);
