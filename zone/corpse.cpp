@@ -113,15 +113,15 @@ Corpse* Corpse::LoadCharacterCorpseEntity(uint32 in_dbid, uint32 in_charid, std:
 		pc->Lock();
 
 	/* Load Item Tints */
-	pc->item_tint[0].color = pcs->item_tint[0].color;
-	pc->item_tint[1].color = pcs->item_tint[1].color;
-	pc->item_tint[2].color = pcs->item_tint[2].color;
-	pc->item_tint[3].color = pcs->item_tint[3].color;
-	pc->item_tint[4].color = pcs->item_tint[4].color;
-	pc->item_tint[5].color = pcs->item_tint[5].color;
-	pc->item_tint[6].color = pcs->item_tint[6].color;
-	pc->item_tint[7].color = pcs->item_tint[7].color;
-	pc->item_tint[8].color = pcs->item_tint[8].color;
+	pc->item_tint[0].Color = pcs->item_tint[0].Color;
+	pc->item_tint[1].Color = pcs->item_tint[1].Color;
+	pc->item_tint[2].Color = pcs->item_tint[2].Color;
+	pc->item_tint[3].Color = pcs->item_tint[3].Color;
+	pc->item_tint[4].Color = pcs->item_tint[4].Color;
+	pc->item_tint[5].Color = pcs->item_tint[5].Color;
+	pc->item_tint[6].Color = pcs->item_tint[6].Color;
+	pc->item_tint[7].Color = pcs->item_tint[7].Color;
+	pc->item_tint[8].Color = pcs->item_tint[8].Color;
 
 	/* Load Physical Appearance */
 	pc->haircolor = pcs->haircolor;
@@ -361,8 +361,8 @@ Corpse::Corpse(Client* client, int32 in_rezexp) : Mob (
 			database.QueryDatabase(ss.str().c_str());
 		}
 
-		auto start = client->GetInv().cursor_begin();
-		auto finish = client->GetInv().cursor_end();
+		auto start = client->GetInv().cursor_cbegin();
+		auto finish = client->GetInv().cursor_cend();
 		database.SaveCursor(client->CharacterID(), start, finish);
 
 		client->CalcBonuses();
@@ -1271,11 +1271,7 @@ void Corpse::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho) {
 	Mob::FillSpawnStruct(ns, ForWho);
 
 	ns->spawn.max_hp = 120;
-
-	if (IsPlayerCorpse())
-		ns->spawn.NPC = 3;
-	else
-		ns->spawn.NPC = 2;
+	ns->spawn.NPC = 2;
 
 	UpdateActiveLightValue();
 	ns->spawn.light = active_light;
@@ -1417,8 +1413,8 @@ uint32 Corpse::GetEquipmentColor(uint8 material_slot) const {
 
 	item = database.GetItem(GetEquipment(material_slot));
 	if(item != NO_ITEM) {
-		return item_tint[material_slot].rgb.use_tint ?
-			item_tint[material_slot].color :
+		return item_tint[material_slot].RGB.UseTint ?
+			item_tint[material_slot].Color :
 			item->Color;
 	}
 

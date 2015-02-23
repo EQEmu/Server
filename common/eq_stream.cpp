@@ -23,6 +23,7 @@
 #include "op_codes.h"
 #include "crc16.h"
 #include "platform.h"
+#include "string_util.h"
 
 #include <string>
 #include <iomanip>
@@ -555,8 +556,20 @@ void EQStream::FastQueuePacket(EQApplicationPacket **p, bool ack_req)
 
 void EQStream::SendPacket(uint16 opcode, EQApplicationPacket *p)
 {
-	uint32 chunksize,used;
+	uint32 chunksize, used;
 	uint32 length;
+
+	if (Log.log_settings[Logs::Server_Client_Packet].is_category_enabled == 1){
+		if (p->GetOpcode() != OP_SpecialMesg){
+			Log.Out(Logs::General, Logs::Server_Client_Packet, "[%s - 0x%04x] [Size: %u]", OpcodeManager::EmuToName(p->GetOpcode()), p->GetOpcode(), p->Size());
+		}
+	}
+
+	if (Log.log_settings[Logs::Server_Client_Packet_With_Dump].is_category_enabled == 1){
+		if (p->GetOpcode() != OP_SpecialMesg){
+			Log.Out(Logs::General, Logs::Server_Client_Packet_With_Dump, "[%s - 0x%04x] [Size: %u] %s", OpcodeManager::EmuToName(p->GetOpcode()), p->GetOpcode(), p->Size(), DumpPacketToString(p).c_str());
+		}
+	}
 
 	// Convert the EQApplicationPacket to 1 or more EQProtocolPackets
 	if (p->size>(MaxLen-8)) { // proto-op(2), seq(2), app-op(2) ... data ... crc(2)
@@ -951,14 +964,12 @@ EQRawApplicationPacket *p=nullptr;
 	}
 	MInboundQueue.unlock();
 
-	//resolve the opcode if we can.
-	if(p) {
-		if(OpMgr != nullptr && *OpMgr != nullptr) {
+	if (p) {
+		if (OpMgr != nullptr && *OpMgr != nullptr) {
 			EmuOpcode emu_op = (*OpMgr)->EQToEmu(p->opcode);
 			if (emu_op == OP_Unknown) {
-				Log.Out(Logs::General, Logs::Netcode, "[ERROR] Unable to convert EQ opcode 0x%.4x to an Application opcode.", p->opcode);
-			}
-
+				// Log.Out(Logs::General, Logs::Client_Server_Packet_Unhandled, "Unknown :: [%s - 0x%04x] [Size: %u] %s", OpcodeManager::EmuToName(p->GetOpcode()), p->opcode, p->Size(), DumpPacketToString(p).c_str());
+			} 
 			p->SetOpcode(emu_op);
 		}
 	}

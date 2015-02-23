@@ -1,12 +1,89 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 02/21/2015 ==
+Noudess: Starting erudites that were supposed to start in paineel were landing in erudin on Titanium. Fixed to be paineel.
+
+== 02/20/2015 ==
+demonstar55: Implement claims for RoF/RoF2 (should no longer crash the client!)
+	- fixed bugs related to claims for the rest of the clients (woo infinite loops)
+
 == 02/18/2015 ==
-Noudess: Starting erudites that were supposed to start in paineel were landing
-in erudin on Titanium.  Fixed to be paineel.
+Trevius: Fix for potential recursive loops if using RemoveFromHateList() within EVENT_HATE_LIST.
+
+== 02/17/2015 ==
+Uleat: Implemented per-client character creation limiting. Caps are unknown atm..so, don't get over-zealous!
+Notes:
+	- Titanium is hard-coded to min/max of 8 in both the server and client translator code (client doesn't support variations in available character count)
+	- SoF thru RoF2 have had their max characters raised to 12 from 10
+	- Changing the number of characters per account is accomplished by:
+		1) Setting consts::CHARACTER_CREATION_LIMIT to the desired count in the client's constants file in ../common/patches/
+		2) Ensuring that eq_dictionary's EmuConstants::CHARACTER_CREATION_LIMIT is equal-greater than the client's new value..referencing is good
+		3) Recompiling the server code
+	- A rules-based qualifier may be added at some point
+
+== 02/16/2015 ==
+Trevius: (RoF2) Bazaar Trading (Buying/Selling) is now fully functional.  Bazaar (/bazaar) search is not yet functional.
+demonstar55: (RoF2) Send the bard focus effects, note custom servers will need to fix their items, server side we still use the old system, but RoF2 wasn't showing anything with not sending focus, so send them
+
+== 02/14/2015 ==
+Trevius: (RoF2) Bazaar is now partially functional.  RoF2 clients can start/end trader mode and other clients can purchase from them.  No other functionality yet.
+Uleat: Implemented higher bandolier and potion belt counts for clients that support it..you will still need to activate them through the proper aa's, etc...
+
+== 02/12/2015 ==
+Akkadius: Implement zone based gravity, required SQL DB change
+	- To test `zone` table `gravity` values, change the value and use #zheader <zoneshortname> to test
+
+== 02/11/2015 ==
+Trevius: (RoF+) Bandolier no longer displays a Treasure Chest Icon when no Bandoliers are set.
+
 == 02/09/2015 ==
-Noudess: Placing an aug tagged as magical onto a non-magical weapon now allows
-the resulting weapon to hit creatures requiring magical creatures.  Seems like
-the correct thing, as the weapon is marked as magical.
+Trevius: (RoF+) Setting Alt flag on characters in the Guild Management Window is now saved and functional for filtering.
+Trevius: (RoF+) Guild Invites between RoF+ and previous Clients is now functional.
+
+== 02/08/2015 ==
+Kayen: Implemented npc specialability (44) COUNTER_AVOID_DAMAGE which when applied to the ATTACKING NPC will make their attacks more difficult to be avoided by riposte/dodge/parry/block.
+Parama0: Negative modifer value that affects ALL avoid damage types dodge/parry/riposte/block) chance on defender. Ie (44,50 = 50 pct reduction to ALL)
+Parama1: Negative modifer value that affects RIPOSTE chance on defender. Ie (44,1,0,50 = 50 pct reduction to riposte chance)
+Parama2: Negative modifer value that affects PARRY chance on defender.  Ie (44,1,0,0,50 = 50 pct reduction to parry chance)
+Parama3: Negative modifer value that affects BLOCK chance on defender.  Ie (44,1,0,0,0,50 = 50 pct reduction to block chance)
+Parama4: Negative modifer value that affects DODGE chance on defender.  e (44,1,0,0,0,0,50 = 50 pct reduction to dodge chance)
+Example of usage: Player has Improved Dodge V (+50 pct dodge chance), you want to negate this bonus you would set 44,1,0,0,0,0,50 on your NPC.
+
+== 02/07/2015 ==
+Akkadius: Reduced #repop time dramatically by taking down hundreds of individual SELECT/DELETE/INSERT queries in routines and bringing it down to very few
+	See: https://www.youtube.com/watch?v=9kSFbyTBuAk
+
+== 02/06/2015 ==
+Uleat: Updated returns for Inventory and ItemInst const iterators. (const == const)
+Uleat: Replaced 'iter_inst' and 'iter_contents' typedefs with their stl definitions
+Uleat: Removed 'limbo' from the 'HasItem' series of checks - including lore checks. The client excludes this range and it causes issues when performing item searches - dupe lore checks were added to account for this.
+Uleat: Updated command #iteminfo to show light source information and a few other things
+
+== 02/05/2015 ==
+Trevius: Fixed Environmental Damage for RoF2. 
+
+== 02/03/2015 ==
+Trevius: Crashfix for TempName() when numbers are passed at the end of the name.
+Uleat: Tweaking of item type exclusions to alleviate strobing conditions with light sources
+
+== 02/02/2015 ==
+Akkadius: Implement Packet logs with dumps
+	- Category: 41: Packet: Server -> Client With Dump
+	- Category: 42: Packet: Server -> Client With Dump
+	See: http://wiki.eqemulator.org/p?Logging_System_Overhaul#packet-logging-levels
+
+== 02/01/2015 ==
+demonstar55: Add quest debugging to lua
+	eq.debug("Test debug level implicit 1")
+	eq.debug("Test debug level explicit 1", 1)
+	eq.debug("Test debug level explicit 2", 2)
+	eq.debug("Test debug level explicit 3", 3)
+Akkadius: Add Packet Logging Categories
+	- 5 - Packet: Client -> Server - Logs::Client_Server_Packet
+	- 39 - Packet: Server -> Client - Logs::Server_Client_Packet
+	- 40 - Packet: Client -> Server Unhandled - Logs::Client_Server_Packet_Unhandled
+	See: http://wiki.eqemulator.org/p?Logging_System_Overhaul#packet-logging
+	
 == 01/31/2015 ==
 Trevius: Fixed FindGroundZ() and GetGroundZ() to once again utilize the X and Y arguments that are passed to them.
 

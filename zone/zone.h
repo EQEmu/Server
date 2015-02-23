@@ -23,6 +23,7 @@
 #include "../common/rulesys.h"
 #include "../common/types.h"
 #include "../common/random.h"
+#include "../common/string_util.h"
 #include "qglobals.h"
 #include "spawn2.h"
 #include "spawngroup.h"
@@ -66,16 +67,6 @@ struct item_tick_struct {
     int16        bagslot;
     std::string qglobal;
 };
-
-// static uint32 gmsay_log_message_colors[EQEmuLogSys::MaxLogID] = {
-// 	15, // "Status", - Yellow
-// 	15,	// "Normal", - Yellow
-// 	3,	// "Error", - Red
-// 	14,	// "Debug", - Light Green
-// 	4,	// "Quest", 
-// 	5,	// "Command", 
-// 	3	// "Crash" 
-// };
 
 class Client;
 class Map;
@@ -266,7 +257,25 @@ public:
 	// random object that provides random values for the zone
 	EQEmu::Random random;
 
-	static void GMSayHookCallBackProcess(uint16 log_category, const std::string& message){ entity_list.MessageStatus(0, 80, Log.GetGMSayColorFromCategory(log_category), "%s", message.c_str()); }
+	static void GMSayHookCallBackProcess(uint16 log_category, std::string message){
+		/* Cut messages down to 4000 max to prevent client crash */
+		if (!message.empty())
+			message = message.substr(0, 4000);
+
+		/* Replace Occurrences of % or MessageStatus will crash */
+		find_replace(message, std::string("%"), std::string("."));
+
+		if (message.find("\n") != std::string::npos){
+			auto message_split = SplitString(message, '\n');
+			entity_list.MessageStatus(0, 80, Log.GetGMSayColorFromCategory(log_category), "%s", message_split[0].c_str());
+			for (size_t iter = 1; iter < message_split.size(); ++iter) {
+				entity_list.MessageStatus(0, 80, Log.GetGMSayColorFromCategory(log_category), "--- %s", message_split[iter].c_str());
+			}
+		}
+		else{
+			entity_list.MessageStatus(0, 80, Log.GetGMSayColorFromCategory(log_category), "%s", message.c_str());
+		}
+	}
 
 	//MODDING HOOKS
 	void mod_init();

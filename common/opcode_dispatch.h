@@ -180,7 +180,7 @@ IN(OP_GMLastName, GMLastName_Struct);
 IN(OP_GMToggle, GMToggle_Struct);
 IN(OP_LFGCommand, LFG_Struct);
 IN(OP_GMGoto, GMSummon_Struct);
-IN(OP_TraderShop, TraderClick_Struct);
+INv(OP_TraderShop, TraderClick_Struct);
 IN(OP_ShopRequest, Merchant_Click_Struct);
 IN(OP_Bazaar, BazaarSearch_Struct);
 //alt:IN(OP_Bazaar, BazaarWelcome_Struct);		//alternate structure for OP_Bazaar
@@ -399,7 +399,7 @@ OUT(OP_Weather, Weather_Struct);
 OUT(OP_ZoneChange, ZoneChange_Struct);
 OUT(OP_ZoneInUnknown, ZoneInUnknown_Struct);
 
-//this is the set of opcodes which are allready listed
+//this is the set of opcodes which are already listed
 //in the IN section above, but are also sent OUT
 #ifdef DISJOINT_DIRECTIONS
 OUTz(OP_ClientReady);		//follows OP_SetServerFilter
@@ -449,7 +449,7 @@ OUT(OP_Trader, TraderBuy_Struct);	//3 possible lengths
 //alt:OUT(OP_Trader, Trader_ShowItems_Struct);
 //alt:OUT(OP_Trader, Trader_Struct);
 OUT(OP_TraderBuy, TraderBuy_Struct);
-OUT(OP_TraderShop, TraderClick_Struct);
+OUTv(OP_TraderShop, TraderClick_Struct);
 OUT(OP_WearChange, WearChange_Struct);
 OUT(OP_ZoneEntry, ServerZoneEntry_Struct);
 #endif

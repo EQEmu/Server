@@ -735,6 +735,7 @@ void Zone::LoadZoneDoors(const char* zone, int16 version)
 	for(r = 0; r < count; r++, d++) {
 		Doors* newdoor = new Doors(d);
 		entity_list.AddDoor(newdoor);
+		Log.Out(Logs::Detail, Logs::Doors, "Door Add to Entity List, index: %u db id: %u, door_id %u", r, dlist[r].db_id, dlist[r].door_id);
 	}
 	delete[] dlist;
 }
@@ -930,6 +931,9 @@ bool Zone::Init(bool iStaticZone) {
 	{
 		Log.Out(Logs::General, Logs::Error, "Loading World Objects failed. continuing.");
 	}
+
+	Log.Out(Logs::General, Logs::Status, "Flushing old respawn timers...");
+	database.QueryDatabase("DELETE FROM `respawn_times` WHERE (`start` + `duration`) < UNIX_TIMESTAMP(NOW())");
 
 	//load up the zone's doors (prints inside)
 	zone->LoadZoneDoors(zone->GetShortName(), zone->GetInstanceVersion());
@@ -1423,14 +1427,12 @@ bool Zone::Depop(bool StartSpawnTimer) {
 	std::map<uint32,NPCType *>::iterator itr;
 	entity_list.Depop(StartSpawnTimer);
 
-#ifdef DEPOP_INVALIDATES_NPC_TYPES_CACHE
-	// Refresh npctable, getting current info from database.
-	while(npctable.size()) {
-		itr=npctable.begin();
+	/* Refresh npctable (cache), getting current info from database. */
+	while(npctable.size()) { 
+		itr = npctable.begin();
 		delete itr->second;
 		npctable.erase(itr);
 	}
-#endif
 
 	return true;
 }
@@ -2162,7 +2164,7 @@ void Zone::DoAdventureActions()
 	{
 		if(ds->assa_count >= RuleI(Adventure, NumberKillsForBossSpawn))
 		{
-			const NPCType* tmp = database.GetNPCType(ds->data_id);
+			const NPCType* tmp = database.LoadNPCTypesData(ds->data_id);
 			if(tmp)
 			{
 				NPC* npc = new NPC(tmp, nullptr, glm::vec4(ds->assa_x, ds->assa_y, ds->assa_z, ds->assa_h), FlyMode3);

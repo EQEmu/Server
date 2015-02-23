@@ -141,6 +141,10 @@ Client::Client(EQStreamInterface* ieqs)
 	merc_timer(RuleI(Mercs, UpkeepIntervalMS)),
 	ItemTickTimer(10000),
 	ItemQuestTimer(500),
+	anon_toggle_timer(250),
+	afk_toggle_timer(250),
+	helm_toggle_timer(250),
+	light_update_timer(600),
 	m_Proximity(FLT_MAX, FLT_MAX, FLT_MAX), //arbitrary large number
 	m_ZoneSummonLocation(-2.0f,-2.0f,-2.0f),
 	m_AutoAttackPosition(0.0f, 0.0f, 0.0f, 0.0f),
@@ -161,6 +165,7 @@ Client::Client(EQStreamInterface* ieqs)
 	Trader=false;
 	Buyer = false;
 	CustomerID = 0;
+	TraderID = 0;
 	TrackingID = 0;
 	WID = 0;
 	account_id = 0;
@@ -245,7 +250,7 @@ Client::Client(EQStreamInterface* ieqs)
 	AttemptedMessages = 0;
 	TotalKarma = 0;
 	m_ClientVersion = ClientVersion::Unknown;
-	ClientVersionBit = 0;
+	m_ClientVersionBit = 0;
 	AggroCount = 0;
 	RestRegenHP = 0;
 	RestRegenMana = 0;
@@ -407,6 +412,69 @@ Client::~Client() {
 	safe_delete(eqs);
 
 	UninitializeBuffSlots();
+}
+
+void Client::SendZoneInPackets()
+{
+	//////////////////////////////////////////////////////
+	// Spawn Appearance Packet
+	EQApplicationPacket* outapp = new EQApplicationPacket(OP_SpawnAppearance, sizeof(SpawnAppearance_Struct));
+	SpawnAppearance_Struct* sa = (SpawnAppearance_Struct*)outapp->pBuffer;
+	sa->type = AT_SpawnID;			// Is 0x10 used to set the player id?
+	sa->parameter = GetID();	// Four bytes for this parameter...
+	outapp->priority = 6;
+	QueuePacket(outapp);
+	safe_delete(outapp);
+
+	// Inform the world about the client
+	outapp = new EQApplicationPacket();
+
+	CreateSpawnPacket(outapp);
+	outapp->priority = 6;
+	if (!GetHideMe()) entity_list.QueueClients(this, outapp, true);
+	safe_delete(outapp);
+	if (GetPVP())	//force a PVP update until we fix the spawn struct
+		SendAppearancePacket(AT_PVP, GetPVP(), true, false);
+
+	//Send AA Exp packet:
+	if (GetLevel() >= 51)
+		SendAAStats();
+
+	// Send exp packets
+	outapp = new EQApplicationPacket(OP_ExpUpdate, sizeof(ExpUpdate_Struct));
+	ExpUpdate_Struct* eu = (ExpUpdate_Struct*)outapp->pBuffer;
+	uint32 tmpxp1 = GetEXPForLevel(GetLevel() + 1);
+	uint32 tmpxp2 = GetEXPForLevel(GetLevel());
+
+	// Crash bug fix... Divide by zero when tmpxp1 and 2 equalled each other, most likely the error case from GetEXPForLevel() (invalid class, etc)
+	if (tmpxp1 != tmpxp2 && tmpxp1 != 0xFFFFFFFF && tmpxp2 != 0xFFFFFFFF) {
+		float tmpxp = (float)((float)m_pp.exp - tmpxp2) / ((float)tmpxp1 - tmpxp2);
+		eu->exp = (uint32)(330.0f * tmpxp);
+		outapp->priority = 6;
+		QueuePacket(outapp);
+	}
+	safe_delete(outapp);
+
+	SendAATimers();
+
+	outapp = new EQApplicationPacket(OP_RaidUpdate, sizeof(ZoneInSendName_Struct));
+	ZoneInSendName_Struct* zonesendname = (ZoneInSendName_Struct*)outapp->pBuffer;
+	strcpy(zonesendname->name, m_pp.name);
+	strcpy(zonesendname->name2, m_pp.name);
+	zonesendname->unknown0 = 0x0A;
+	QueuePacket(outapp);
+	safe_delete(outapp);
+
+	if (IsInAGuild()) {
+		SendGuildMembers();
+		SendGuildURL();
+		SendGuildChannel();
+		SendGuildLFGuildStatus();
+	}
+	SendLFGuildStatus();
+
+	//No idea why live sends this if even were not in a guild
+	SendGuildMOTD();
 }
 
 void Client::SendLogoutPackets() {
@@ -2471,11 +2539,13 @@ void Client::LogMerchant(Client* player, Mob* merchant, uint32 quantity, uint32 
 
 bool Client::BindWound(Mob* bindmob, bool start, bool fail){
 	EQApplicationPacket* outapp = 0;
-	if(!fail) {
+	if(!fail) 
+	{
 		outapp = new EQApplicationPacket(OP_Bind_Wound, sizeof(BindWound_Struct));
 		BindWound_Struct* bind_out = (BindWound_Struct*) outapp->pBuffer;
 		// Start bind
-		if(!bindwound_timer.Enabled()) {
+		if(!bindwound_timer.Enabled()) 
+		{
 			//make sure we actually have a bandage... and consume it.
 			int16 bslot = m_inv.HasItemByUse(ItemTypeBandage, 1, invWhereWorn|invWherePersonal);
 			if (bslot == INVALID_INDEX) {
@@ -2521,7 +2591,9 @@ bool Client::BindWound(Mob* bindmob, bool start, bool fail){
 					; // Binding self
 				}
 			}
-		} else {
+		} 
+		else if (bindwound_timer.Check()) // Did the timer finish?
+		{ 
 		// finish bind
 			// disable complete timer
 			bindwound_timer.Disable();
@@ -2967,7 +3039,7 @@ void Client::Tell_StringID(uint32 string_id, const char *who, const char *messag
 
 void Client::SetTint(int16 in_slot, uint32 color) {
 	Color_Struct new_color;
-	new_color.color = color;
+	new_color.Color = color;
 	SetTint(in_slot, new_color);
 	database.SaveCharacterMaterialColor(this->CharacterID(), in_slot, color);
 }
@@ -2978,8 +3050,8 @@ void Client::SetTint(int16 in_slot, Color_Struct& color) {
 	uint8 matslot = Inventory::CalcMaterialFromSlot(in_slot);
 	if (matslot != _MaterialInvalid)
 	{
-		m_pp.item_tint[matslot].color = color.color;
-		database.SaveCharacterMaterialColor(this->CharacterID(), in_slot, color.color);
+		m_pp.item_tint[matslot].Color = color.Color;
+		database.SaveCharacterMaterialColor(this->CharacterID(), in_slot, color.Color);
 	}
 
 }
@@ -5290,35 +5362,35 @@ void Client::SendRewards()
 	FastQueuePacket(&vetapp);
 }
 
-bool Client::TryReward(uint32 claim_id) {
-	//Make sure we have an open spot
-	//Make sure we have it in our acct and count > 0
-	//Make sure the entry was found
-	//If we meet all the criteria:
-	//Decrement our count by 1 if it > 1 delete if it == 1
-	//Create our item in bag if necessary at the free inv slot
-	//save
+bool Client::TryReward(uint32 claim_id)
+{
+	// Make sure we have an open spot
+	// Make sure we have it in our acct and count > 0
+	// Make sure the entry was found
+	// If we meet all the criteria:
+	// Decrement our count by 1 if it > 1 delete if it == 1
+	// Create our item in bag if necessary at the free inv slot
+	// save
 	uint32 free_slot = 0xFFFFFFFF;
 
-	for(int i = EmuConstants::GENERAL_BEGIN; i <= EmuConstants::GENERAL_END; ++i) {
+	for (int i = EmuConstants::GENERAL_BEGIN; i <= EmuConstants::GENERAL_END; ++i) {
 		ItemInst *item = GetInv().GetItem(i);
-		if(!item) {
+		if (!item) {
 			free_slot = i;
 			break;
 		}
 	}
 
-	if(free_slot == 0xFFFFFFFF)
+	if (free_slot == 0xFFFFFFFF)
 		return false;
 
 	char errbuf[MYSQL_ERRMSG_SIZE];
 	std::string query = StringFormat("SELECT amount FROM account_rewards "
-									"WHERE account_id = %i AND reward_id = %i",
-									AccountID(), claim_id);
+					 "WHERE account_id = %i AND reward_id = %i",
+					 AccountID(), claim_id);
 	auto results = database.QueryDatabase(query);
-	if (!results.Success()) {
+	if (!results.Success())
 		return false;
-	}
 
 	if (results.RowCount() == 0)
 		return false;
@@ -5326,58 +5398,57 @@ bool Client::TryReward(uint32 claim_id) {
 	auto row = results.begin();
 
 	uint32 amt = atoi(row[0]);
-	if(amt == 0)
+	if (amt == 0)
 		return false;
 
-	std::list<InternalVeteranReward>::iterator iter = zone->VeteranRewards.begin();
-	for (; iter != zone->VeteranRewards.end(); ++row)
-		if((*iter).claim_id == claim_id)
-			break;
+	auto iter = std::find_if(zone->VeteranRewards.begin(), zone->VeteranRewards.end(),
+			[claim_id](const InternalVeteranReward &a) { return a.claim_id == claim_id; });
 
-	if(iter == zone->VeteranRewards.end())
+	if (iter == zone->VeteranRewards.end())
 		return false;
 
-	if(amt == 1) {
+	if (amt == 1) {
 		query = StringFormat("DELETE FROM account_rewards "
-							"WHERE account_id = %i AND reward_id = %i",
-							AccountID(), claim_id);
+				     "WHERE account_id = %i AND reward_id = %i",
+				     AccountID(), claim_id);
 		auto results = database.QueryDatabase(query);
-	}
-	else {
+	} else {
 		query = StringFormat("UPDATE account_rewards SET amount = (amount-1) "
-							"WHERE account_id = %i AND reward_id = %i",
-							AccountID(), claim_id);
+				     "WHERE account_id = %i AND reward_id = %i",
+				     AccountID(), claim_id);
 		auto results = database.QueryDatabase(query);
 	}
 
-	InternalVeteranReward ivr = (*iter);
+	auto &ivr = (*iter);
 	ItemInst *claim = database.CreateItem(ivr.items[0].item_id, ivr.items[0].charges);
-	if(!claim) {
+	if (!claim) {
 		Save();
 		return true;
 	}
 
 	bool lore_conflict = CheckLoreConflict(claim->GetItem());
 
-	for(int y = 1; y < 8; y++)
-		if(ivr.items[y].item_id && claim->GetItem()->ItemClass == 1) {
+	for (int y = 1; y < 8; y++)
+		if (ivr.items[y].item_id && claim->GetItem()->ItemClass == 1) {
 			ItemInst *item_temp = database.CreateItem(ivr.items[y].item_id, ivr.items[y].charges);
-			if(item_temp) {
-				if(CheckLoreConflict(item_temp->GetItem())) {
+			if (item_temp) {
+				if (CheckLoreConflict(item_temp->GetItem())) {
 					lore_conflict = true;
 					DuplicateLoreMessage(ivr.items[y].item_id);
 				}
-				claim->PutItem(y-1, *item_temp);
+				claim->PutItem(y - 1, *item_temp);
+				safe_delete(item_temp);
 			}
 		}
 
-	if(lore_conflict) {
+	if (lore_conflict) {
 		safe_delete(claim);
 		return true;
 	}
 
 	PutItemInInventory(free_slot, *claim);
 	SendItemPacket(free_slot, claim, ItemPacketTrade);
+	safe_delete(claim);
 
 	Save();
 	return true;
@@ -6173,7 +6244,7 @@ void Client::Doppelganger(uint16 spell_id, Mob *target, const char *name_overrid
 
 	NPCType *made_npc = nullptr;
 
-	const NPCType *npc_type = database.GetNPCType(pet.npc_id);
+	const NPCType *npc_type = database.LoadNPCTypesData(pet.npc_id);
 	if(npc_type == nullptr) {
 		Log.Out(Logs::General, Logs::Error, "Unknown npc type for doppelganger spell id: %d", spell_id);
 		Message(0,"Unable to find pet!");
@@ -7396,7 +7467,7 @@ void Client::SendClearMercInfo()
 
 void Client::DuplicateLoreMessage(uint32 ItemID)
 {
-	if(!(ClientVersionBit & BIT_RoFAndLater))
+	if (!(m_ClientVersionBit & BIT_RoFAndLater))
 	{
 		Message_StringID(0, PICK_LORE);
 		return;

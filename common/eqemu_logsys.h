@@ -78,6 +78,10 @@ namespace Logs {
 		MySQLQuery,
 		Mercenaries,
 		QuestDebug,
+		Server_Client_Packet,
+		Client_Server_Packet_Unhandled,
+		Server_Client_Packet_With_Dump,
+		Client_Server_Packet_With_Dump,
 		MaxCategoryID	/* Don't Remove this*/
 	};
 
@@ -88,7 +92,7 @@ namespace Logs {
 		"AI",
 		"Aggro",
 		"Attack",
-		"Client Server Packet",
+		"Packet :: Client -> Server",
 		"Combat",
 		"Commands",
 		"Crash",
@@ -121,7 +125,11 @@ namespace Logs {
 		"MySQL Error",
 		"MySQL Query",
 		"Mercenaries",
-		"Quest Debug"
+		"Quest Debug",
+		"Packet :: Server -> Client",
+		"Packet :: Client -> Server Unhandled",
+		"Packet :: Server -> Client (Dump)",
+		"Packet :: Client -> Server (Dump)",
 	};
 }
 
@@ -160,6 +168,7 @@ public:
 		uint8 log_to_file;
 		uint8 log_to_console;
 		uint8 log_to_gmsay;
+		uint8 is_category_enabled; /* When any log output in a category > 0, set this to 1 as (Enabled) */
 	};
 
 	/* Internally used memory reference for all log settings per category.

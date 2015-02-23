@@ -136,7 +136,8 @@ enum {
 	ALLOW_TO_TANK = 41,
 	IGNORE_ROOT_AGGRO_RULES = 42,
 	CASTING_RESIST_DIFF = 43,
-	MAX_SPECIAL_ATTACK = 44
+	COUNTER_AVOID_DAMAGE = 44,
+	MAX_SPECIAL_ATTACK = 45
 };
 
 typedef enum {	//fear states
@@ -350,7 +351,8 @@ struct StatBonuses {
 	int32	CharmBreakChance;					// chance to break charm
 	int32	SongRange;							// increases range of beneficial bard songs
 	uint32	HPToManaConvert;					// Uses HP to cast spells at specific conversion
-	uint32	FocusEffects[HIGHEST_FOCUS+1];		// Stores the focus effectid for each focustype you have.
+	uint8	FocusEffects[HIGHEST_FOCUS+1];		// Stores the focus effectid for each focustype you have.
+	int16	FocusEffectsWorn[HIGHEST_FOCUS+1];	// Optional to allow focus effects to be applied additively from worn slot
 	bool	NegateEffects;						// Check if you contain a buff with negate effect. (only spellbonuses)
 	int32	SkillDamageAmount2[HIGHEST_SKILL+2];	// Adds skill specific damage
 	uint32	NegateAttacks[3];					// 0 = bool HasEffect 1 = Buff Slot 2 = Max damage absorbed per hit
@@ -505,7 +507,7 @@ typedef enum {
 	petOther,
 	petCharmed,
 	petNPCFollow,
-	petHatelist			//remain active as long something is on the hatelist. Don't listen to any commands
+	petTargetLock			//remain active as long something is on the hatelist. Don't listen to any commands
 } PetType;
 
 typedef enum {

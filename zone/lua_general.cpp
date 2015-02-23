@@ -17,6 +17,7 @@
 #include "questmgr.h"
 #include "qglobals.h"
 #include "../common/timer.h"
+#include "../common/eqemu_logsys.h"
 
 struct Events { };
 struct Factions { };
@@ -1221,7 +1222,6 @@ std::string lua_get_encounter() {
 	return quest_manager.GetEncounter();
 }
 
-
 void lua_map_opcodes() {
 	MapOpcodes();
 }
@@ -1247,6 +1247,17 @@ double lua_clock() {
 	gettimeofday(&read_time, nullptr);
 	uint32 t = read_time.tv_sec * 1000 + read_time.tv_usec / 1000;
 	return static_cast<double>(t) / 1000.0;
+}
+
+void lua_debug(std::string message) {
+	Log.Out(Logs::General, Logs::QuestDebug, message);
+}
+
+void lua_debug(std::string message, int level) {
+	if (level < Logs::General || level > Logs::Detail)
+		return;
+
+	Log.Out(static_cast<Logs::DebugLevel>(level), Logs::QuestDebug, message);
 }
 
 #define LuaCreateNPCParse(name, c_type, default_value) do { \
@@ -1582,7 +1593,9 @@ luabind::scope lua_register_general() {
 		luabind::def("disable_recipe", &lua_disable_recipe),
 		luabind::def("clear_npctype_cache", &lua_clear_npctype_cache),
 		luabind::def("clock", &lua_clock),
-		luabind::def("create_npc", &lua_create_npc)
+		luabind::def("create_npc", &lua_create_npc),
+		luabind::def("debug", (void(*)(std::string))&lua_debug),
+		luabind::def("debug", (void(*)(std::string, int))&lua_debug)
 	];
 }
 

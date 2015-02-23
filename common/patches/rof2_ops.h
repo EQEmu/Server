@@ -2,9 +2,13 @@
 // Begin RoF2 Encodes
 
 E(OP_SendMembershipDetails)
+E(OP_TraderShop)
+E(OP_TraderDelItem)
 
 // incoming packets that require a DECODE translation:
 // Begin RoF2 Decodes
+
+D(OP_TraderShop)
 
 // End RoF2 Encodes/Decodes
 
@@ -107,6 +111,7 @@ E(OP_Trader)
 E(OP_TraderBuy)
 E(OP_TributeInfo)
 E(OP_TributeItem)
+E(OP_VetClaimReply)
 E(OP_VetRewardsAvaliable)
 E(OP_WearChange)
 E(OP_WhoAllResponse)
@@ -170,6 +175,7 @@ D(OP_Trader)
 D(OP_TraderBuy)
 D(OP_TradeSkillCombine)
 D(OP_TributeItem)
+D(OP_VetClaimRequest)
 D(OP_WhoAllRequest)
 D(OP_ZoneChange)
 D(OP_ZoneEntry)

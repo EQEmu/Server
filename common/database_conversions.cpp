@@ -157,18 +157,29 @@ namespace Convert {
 		/*84*/ uint32 Points;
 		/*88*/
 	} PVPStatsEntry_Struct;
+
+	static const size_t BANDOLIERS_SIZE = 4;
+	static const size_t BANDOLIER_ITEM_COUNT = 4;
 	struct BandolierItem_Struct {
-		uint32 item_id;
-		uint32 icon;
-		char item_name[64];
+		uint32 ID;
+		uint32 Icon;
+		char Name[64];
 	};
 	struct Bandolier_Struct {
-		char name[32];
-		Convert::BandolierItem_Struct items[EmuConstants::BANDOLIER_SIZE];
+		char Name[32];
+		Convert::BandolierItem_Struct Items[Convert::BANDOLIER_ITEM_COUNT];
+	};
+
+	static const size_t POTION_BELT_ITEM_COUNT = 4;
+	struct PotionBeltItem_Struct {
+		uint32 ID;
+		uint32 Icon;
+		char Name[64];
 	};
 	struct PotionBelt_Struct {
-		Convert::BandolierItem_Struct items[EmuConstants::POTION_BELT_SIZE];
+		Convert::PotionBeltItem_Struct Items[Convert::POTION_BELT_ITEM_COUNT];
 	};
+
 	struct SuspendedMinion_Struct
 	{
 		/*000*/	uint16 SpellID;
@@ -346,7 +357,7 @@ namespace Convert {
 		/*12800*/	uint32							expAA;
 		/*12804*/	uint32							aapoints;			//avaliable, unspent
 		/*12808*/	uint8							unknown12844[36];
-		/*12844*/	Convert::Bandolier_Struct		bandoliers[EmuConstants::BANDOLIERS_COUNT];
+		/*12844*/	Convert::Bandolier_Struct		bandoliers[Convert::BANDOLIERS_SIZE];
 		/*14124*/	uint8							unknown14160[4506];
 		/*18630*/	Convert::SuspendedMinion_Struct	SuspendedMinion; // No longer in use
 		/*19240*/	uint32							timeentitledonaccount;
@@ -1430,15 +1441,15 @@ bool Database::CheckDatabaseConvertPPDeblob(){
 				if (rquery != ""){ results = QueryDatabase(rquery); }
 				/* Run Bandolier Convert */
 				first_entry = 0; rquery = "";
-				for (i = 0; i < EmuConstants::BANDOLIERS_COUNT; i++){
-					if (strlen(pp->bandoliers[i].name) < 32) {
-						for (int si = 0; si < EmuConstants::BANDOLIER_SIZE; si++){
-							if (pp->bandoliers[i].items[si].item_id > 0){
+				for (i = 0; i < Convert::BANDOLIERS_SIZE; i++){
+					if (strlen(pp->bandoliers[i].Name) < 32) {
+						for (int si = 0; si < Convert::BANDOLIER_ITEM_COUNT; si++){
+							if (pp->bandoliers[i].Items[si].ID > 0){
 								if (first_entry != 1) {
-									rquery = StringFormat("REPLACE INTO `character_bandolier` (id, bandolier_id, bandolier_slot, item_id, icon, bandolier_name) VALUES (%i, %u, %i, %u, %u, '%s')", character_id, i, si, pp->bandoliers[i].items[si].item_id, pp->bandoliers[i].items[si].icon, pp->bandoliers[i].name);
+									rquery = StringFormat("REPLACE INTO `character_bandolier` (id, bandolier_id, bandolier_slot, item_id, icon, bandolier_name) VALUES (%i, %u, %i, %u, %u, '%s')", character_id, i, si, pp->bandoliers[i].Items[si].ID, pp->bandoliers[i].Items[si].Icon, pp->bandoliers[i].Name);
 									first_entry = 1;
 								}
-								rquery = rquery + StringFormat(", (%i, %u, %i, %u, %u, '%s')", character_id, i, si, pp->bandoliers[i].items[si].item_id, pp->bandoliers[i].items[si].icon, pp->bandoliers[i].name);
+								rquery = rquery + StringFormat(", (%i, %u, %i, %u, %u, '%s')", character_id, i, si, pp->bandoliers[i].Items[si].ID, pp->bandoliers[i].Items[si].Icon, pp->bandoliers[i].Name);
 							}
 						}
 					}
@@ -1446,13 +1457,13 @@ bool Database::CheckDatabaseConvertPPDeblob(){
 				if (rquery != ""){ results = QueryDatabase(rquery); }
 				/* Run Potion Belt Convert */
 				first_entry = 0; rquery = "";
-				for (i = 0; i < EmuConstants::POTION_BELT_SIZE; i++){
-					if (pp->potionbelt.items[i].item_id > 0){
+				for (i = 0; i < Convert::POTION_BELT_ITEM_COUNT; i++){
+					if (pp->potionbelt.Items[i].ID > 0){
 						if (first_entry != 1){
-							rquery = StringFormat("REPLACE INTO `character_potionbelt` (id, potion_id, item_id, icon) VALUES (%i, %u, %u, %u)", character_id, i, pp->potionbelt.items[i].item_id, pp->potionbelt.items[i].icon);
+							rquery = StringFormat("REPLACE INTO `character_potionbelt` (id, potion_id, item_id, icon) VALUES (%i, %u, %u, %u)", character_id, i, pp->potionbelt.Items[i].ID, pp->potionbelt.Items[i].Icon);
 							first_entry = 1;
 						}
-						rquery = rquery + StringFormat(", (%i, %u, %u, %u)", character_id, i, pp->potionbelt.items[i].item_id, pp->potionbelt.items[i].icon);
+						rquery = rquery + StringFormat(", (%i, %u, %u, %u)", character_id, i, pp->potionbelt.Items[i].ID, pp->potionbelt.Items[i].Icon);
 
 					}
 				}

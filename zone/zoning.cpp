@@ -587,10 +587,14 @@ void Client::ZonePC(uint32 zoneID, uint32 instance_id, float x, float y, float z
 
 			// If we are SoF and later and are respawning from hover, we want the real zone ID, else zero to use the old hack.
 			//
-			if((GetClientVersionBit() & BIT_SoFAndLater) && (!RuleB(Character, RespawnFromHover) || !IsHoveringForRespawn()))
-				gmg->bind_zone_id = 0;
-			else
+			if(zone->GetZoneID() == zoneID) {
+				if((GetClientVersionBit() & BIT_SoFAndLater) && (!RuleB(Character, RespawnFromHover) || !IsHoveringForRespawn()))
+					gmg->bind_zone_id = 0;
+				else
+					gmg->bind_zone_id = zoneID;
+			} else {
 				gmg->bind_zone_id = zoneID;
+			}
 
 			gmg->x = x;
 			gmg->y = y;

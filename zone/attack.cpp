@@ -362,13 +362,40 @@ bool Mob::AvoidDamage(Mob* other, int32 &damage, bool CanRiposte)
 
 	//garunteed hit
 	bool ghit = false;
-	if((attacker->spellbonuses.MeleeSkillCheck + attacker->itembonuses.MeleeSkillCheck) > 500)
+	if((attacker->aabonuses.MeleeSkillCheck + attacker->spellbonuses.MeleeSkillCheck + attacker->itembonuses.MeleeSkillCheck) > 500)
 		ghit = true;
+
+	bool InFront = false;
+
+	if (attacker->InFrontMob(this, attacker->GetX(), attacker->GetY()))
+		InFront = true;
+
+	/*
+	This special ability adds a negative modifer to the defenders riposte/block/parry/chance
+	therefore reducing the defenders chance to successfully avoid the melee attack. At present
+	time this is the only way to fine tune counter these mods on players. This may
+	ultimately end up being more useful as fields in npc_types.
+	*/
+
+	int counter_all = 0;
+	int counter_riposte = 0;
+	int counter_block = 0;
+	int counter_parry = 0;
+	int counter_dodge = 0;
+
+	if (attacker->GetSpecialAbility(COUNTER_AVOID_DAMAGE)){
+		
+		counter_all = attacker->GetSpecialAbilityParam(COUNTER_AVOID_DAMAGE, 0);
+		counter_riposte = attacker->GetSpecialAbilityParam(COUNTER_AVOID_DAMAGE,1);
+		counter_block = attacker->GetSpecialAbilityParam(COUNTER_AVOID_DAMAGE, 2);
+		counter_parry = attacker->GetSpecialAbilityParam(COUNTER_AVOID_DAMAGE, 3);
+		counter_dodge = attacker->GetSpecialAbilityParam(COUNTER_AVOID_DAMAGE, 4);
+	}
 
 	//////////////////////////////////////////////////////////
 	// make enrage same as riposte
 	/////////////////////////////////////////////////////////
-	if (IsEnraged() && other->InFrontMob(this, other->GetX(), other->GetY())) {
+	if (IsEnraged() && InFront) {
 		damage = -3;
 		Log.Out(Logs::Detail, Logs::Combat, "I am enraged, riposting frontal attack.");
 	}
@@ -377,9 +404,10 @@ bool Mob::AvoidDamage(Mob* other, int32 &damage, bool CanRiposte)
 	// riposte
 	/////////////////////////////////////////////////////////
 	float riposte_chance = 0.0f;
-	if (CanRiposte && damage > 0 && CanThisClassRiposte() && other->InFrontMob(this, other->GetX(), other->GetY()))
+	if (CanRiposte && damage > 0 && CanThisClassRiposte() && InFront)
 	{
-		riposte_chance = (100.0f + (float)defender->aabonuses.RiposteChance + (float)defender->spellbonuses.RiposteChance + (float)defender->itembonuses.RiposteChance) / 100.0f;
+		riposte_chance = (100.0f + static_cast<float>(aabonuses.RiposteChance + spellbonuses.RiposteChance + 
+			itembonuses.RiposteChance - counter_riposte - counter_all)) / 100.0f;
 		skill = GetSkill(SkillRiposte);
 		if (IsClient()) {
 			CastToClient()->CheckIncreaseSkill(SkillRiposte, other, -10);
@@ -398,28 +426,19 @@ bool Mob::AvoidDamage(Mob* other, int32 &damage, bool CanRiposte)
 	///////////////////////////////////////////////////////
 
 	bool bBlockFromRear = false;
-	bool bShieldBlockFromRear = false;
 
-	if (this->IsClient()) {
-		int aaChance = 0;
+	// a successful roll on this does not mean a successful block is forthcoming. only that a chance to block
+	// from a direction other than the rear is granted.
 
-		// a successful roll on this does not mean a successful block is forthcoming. only that a chance to block
-		// from a direction other than the rear is granted.
+	int BlockBehindChance = aabonuses.BlockBehind + spellbonuses.BlockBehind + itembonuses.BlockBehind;
 
-		//Live AA - HightenedAwareness
-		int BlockBehindChance = aabonuses.BlockBehind + spellbonuses.BlockBehind + itembonuses.BlockBehind;
-
-		if (BlockBehindChance && zone->random.Roll(BlockBehindChance)) {
-			bBlockFromRear = true;
-
-			if (spellbonuses.BlockBehind || itembonuses.BlockBehind)
-				bShieldBlockFromRear = true; //This bonus should allow a chance to Shield Block from behind.
-		}
-	}
+	if (BlockBehindChance && zone->random.Roll(BlockBehindChance))
+		bBlockFromRear = true;
 
 	float block_chance = 0.0f;
-	if (damage > 0 && CanThisClassBlock() && (other->InFrontMob(this, other->GetX(), other->GetY()) || bBlockFromRear)) {
-		block_chance = (100.0f + (float)spellbonuses.IncreaseBlockChance + (float)itembonuses.IncreaseBlockChance) / 100.0f;
+	if (damage > 0 && CanThisClassBlock() && (InFront || bBlockFromRear)) {
+		block_chance = (100.0f + static_cast<float>(aabonuses.IncreaseBlockChance + spellbonuses.IncreaseBlockChance + 
+			itembonuses.IncreaseBlockChance - counter_block - counter_all)) / 100.0f;
 		skill = CastToClient()->GetSkill(SkillBlock);
 		if (IsClient()) {
 			CastToClient()->CheckIncreaseSkill(SkillBlock, other, -10);
@@ -435,32 +454,20 @@ bool Mob::AvoidDamage(Mob* other, int32 &damage, bool CanRiposte)
 		RollTable[1] = RollTable[0];
 	}
 
-	if(damage > 0 && HasShieldEquiped()	&& (aabonuses.ShieldBlock || spellbonuses.ShieldBlock || itembonuses.ShieldBlock)
-		&& (other->InFrontMob(this, other->GetX(), other->GetY()) || bShieldBlockFromRear)) {
+	//Try Shield Block OR TwoHandBluntBlockCheck
+	if(damage > 0 && HasShieldEquiped()	&& (aabonuses.ShieldBlock || spellbonuses.ShieldBlock || itembonuses.ShieldBlock) && (InFront || bBlockFromRear)) 
+		RollTable[1] += static_cast<float>(aabonuses.ShieldBlock + spellbonuses.ShieldBlock + itembonuses.ShieldBlock - counter_block - counter_all);
 
-		float bonusShieldBlock = 0.0f;
-		bonusShieldBlock = static_cast<float>(aabonuses.ShieldBlock + spellbonuses.ShieldBlock + itembonuses.ShieldBlock);
-		RollTable[1] += bonusShieldBlock;
-	}
-
-	if(IsClient() && damage > 0 && (aabonuses.TwoHandBluntBlock || spellbonuses.TwoHandBluntBlock || itembonuses.TwoHandBluntBlock)
-		&& (other->InFrontMob(this, other->GetX(), other->GetY()) || bShieldBlockFromRear)) {
-		if(CastToClient()->m_inv.GetItem(MainPrimary)) {
-			float bonusStaffBlock = 0.0f;
-			if (CastToClient()->m_inv.GetItem(MainPrimary)->GetItem()->ItemType == ItemType2HBlunt){
-				bonusStaffBlock = static_cast<float>(aabonuses.TwoHandBluntBlock + spellbonuses.TwoHandBluntBlock + itembonuses.TwoHandBluntBlock);
-				RollTable[1] += bonusStaffBlock;
-			}
-		}
-	}
-
+	else if(damage > 0 && HasTwoHandBluntEquiped() && (aabonuses.TwoHandBluntBlock || spellbonuses.TwoHandBluntBlock || itembonuses.TwoHandBluntBlock)	&&  (InFront || bBlockFromRear)) 
+		RollTable[1] += static_cast<float>(aabonuses.TwoHandBluntBlock + spellbonuses.TwoHandBluntBlock + itembonuses.TwoHandBluntBlock - counter_block - counter_all);
+	
 	//////////////////////////////////////////////////////
 	// parry
 	//////////////////////////////////////////////////////
 	float parry_chance = 0.0f;
-	if (damage > 0 && CanThisClassParry() && other->InFrontMob(this, other->GetX(), other->GetY()))
-	{
-		parry_chance = (100.0f + (float)defender->spellbonuses.ParryChance + (float)defender->itembonuses.ParryChance) / 100.0f;
+	if (damage > 0 && CanThisClassParry() && InFront){
+		parry_chance = (100.0f + static_cast<float>(aabonuses.ParryChance + itembonuses.ParryChance + 
+			itembonuses.ParryChance - counter_parry - counter_all)) / 100.0f;
 		skill = CastToClient()->GetSkill(SkillParry);
 		if (IsClient()) {
 			CastToClient()->CheckIncreaseSkill(SkillParry, other, -10);
@@ -481,9 +488,11 @@ bool Mob::AvoidDamage(Mob* other, int32 &damage, bool CanRiposte)
 	// dodge
 	////////////////////////////////////////////////////////
 	float dodge_chance = 0.0f;
-	if (damage > 0 && CanThisClassDodge() && other->InFrontMob(this, other->GetX(), other->GetY()))
-	{
-		dodge_chance = (100.0f + (float)defender->spellbonuses.DodgeChance + (float)defender->itembonuses.DodgeChance) / 100.0f;
+	if (damage > 0 && CanThisClassDodge() && InFront){
+
+		dodge_chance = (100.0f + static_cast<float>(aabonuses.DodgeChance + spellbonuses.DodgeChance + 
+			itembonuses.DodgeChance - counter_dodge - counter_all)) / 100.0f;
+
 		skill = CastToClient()->GetSkill(SkillDodge);
 		if (IsClient()) {
 			CastToClient()->CheckIncreaseSkill(SkillDodge, other, -10);
@@ -1595,10 +1604,12 @@ bool Client::Death(Mob* killerMob, int32 damage, uint16 spell, SkillUseTypes att
 
 		//this generates a lot of 'updates' to the client that the client does not need
 		BuffFadeNonPersistDeath();
-		if((GetClientVersionBit() & BIT_SoFAndLater) && RuleB(Character, RespawnFromHover))
-			UnmemSpellAll(true);
-		else
-			UnmemSpellAll(false);
+		if (RuleB(Character, UnmemSpellsOnDeath)) {
+			if((GetClientVersionBit() & BIT_SoFAndLater) && RuleB(Character, RespawnFromHover))
+				UnmemSpellAll(true);
+			else
+				UnmemSpellAll(false);
+		}
 
 		if((RuleB(Character, LeaveCorpses) && GetLevel() >= RuleI(Character, DeathItemLossLevel)) || RuleB(Character, LeaveNakedCorpses))
 		{
@@ -2404,8 +2415,8 @@ bool NPC::Death(Mob* killerMob, int32 damage, uint16 spell, SkillUseTypes attack
 
 void Mob::AddToHateList(Mob* other, uint32 hate /*= 0*/, int32 damage /*= 0*/, bool iYellForHelp /*= true*/, bool bFrenzy /*= false*/, bool iBuffTic /*= false*/)
 {
-
-	assert(other != nullptr);
+	if(!other)
+		return;
 
 	if (other == this)
 		return;
@@ -3530,6 +3541,10 @@ void Mob::CommonDamage(Mob* attacker, int32 &damage, const uint16 spell_id, cons
 			Log.Out(Logs::Detail, Logs::Combat, "Melee Damage reduced to %d", damage);
 			damage = ReduceAllDamage(damage);
 			TryTriggerThreshHold(damage, SE_TriggerMeleeThreshold, attacker);
+
+			if (skill_used)
+				CheckNumHitsRemaining(NumHit::IncomingHitSuccess);
+
 		} else {
 			int32 origdmg = damage;
 			damage = AffectMagicalDamage(damage, spell_id, iBuffTic, attacker);
@@ -3544,9 +3559,6 @@ void Mob::CommonDamage(Mob* attacker, int32 &damage, const uint16 spell_id, cons
 			damage = ReduceAllDamage(damage);
 			TryTriggerThreshHold(damage, SE_TriggerSpellThreshold, attacker);
 		}
-
-		if (skill_used)
-			CheckNumHitsRemaining(NumHit::IncomingHitSuccess);
 
 		if(IsClient() && CastToClient()->sneaking){
 			CastToClient()->sneaking = false;

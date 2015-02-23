@@ -170,6 +170,7 @@ Mob::Mob(const char* in_name,
 	findable	= false;
 	trackable	= true;
 	has_shieldequiped = false;
+	has_twohandbluntequiped = false;
 	has_numhits = false;
 	has_MGB = false;
 	has_ProjectIllusion = false;
@@ -300,6 +301,7 @@ Mob::Mob(const char* in_name,
 	focused = false;
 	_IsTempPet = false;
 	pet_owner_client = false;
+	pet_targetlock_id = 0;
 
 	attacked_count = 0;
 	mezzed = false;
@@ -959,10 +961,10 @@ void Mob::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho)
 		// Only Player Races Wear Armor
 		if (Mob::IsPlayerRace(race) || i > 6)
 		{
-			ns->spawn.equipment[i].material = GetEquipmentMaterial(i);
-			ns->spawn.equipment[i].elitematerial = IsEliteMaterialItem(i);
-			ns->spawn.equipment[i].heroforgemodel = GetHerosForgeModel(i);
-			ns->spawn.colors[i].color = GetEquipmentColor(i);
+			ns->spawn.equipment[i].Material = GetEquipmentMaterial(i);
+			ns->spawn.equipment[i].EliteMaterial = IsEliteMaterialItem(i);
+			ns->spawn.equipment[i].HeroForgeModel = GetHerosForgeModel(i);
+			ns->spawn.colors[i].Color = GetEquipmentColor(i);
 		}
 	}
 
@@ -1981,9 +1983,10 @@ void Mob::TempName(const char *newname)
 		strn0cpy(temp_name, GetCleanName(), 64);
 	}
 
+	// Remove Numbers before making name unique
+	EntityList::RemoveNumbers(temp_name);
 	// Make the new name unique and set it
-	strn0cpy(temp_name, entity_list.MakeNameUnique(temp_name), 64);
-
+	entity_list.MakeNameUnique(temp_name);
 
 	// Send the new name to all clients
 	EQApplicationPacket* outapp = new EQApplicationPacket(OP_MobRename, sizeof(MobRename_Struct));
@@ -2559,7 +2562,7 @@ void Mob::SendWearChange(uint8 material_slot)
 	wc->material = GetEquipmentMaterial(material_slot);
 	wc->elite_material = IsEliteMaterialItem(material_slot);
 	wc->hero_forge_model = GetHerosForgeModel(material_slot);
-	wc->color.color = GetEquipmentColor(material_slot);
+	wc->color.Color = GetEquipmentColor(material_slot);
 	wc->wear_slot_id = material_slot;
 
 	entity_list.QueueClients(this, outapp);
@@ -2574,9 +2577,9 @@ void Mob::SendTextureWC(uint8 slot, uint16 texture, uint32 hero_forge_model, uin
 	wc->spawn_id = this->GetID();
 	wc->material = texture;
 	if (this->IsClient())
-		wc->color.color = GetEquipmentColor(slot);
+		wc->color.Color = GetEquipmentColor(slot);
 	else
-		wc->color.color = this->GetArmorTint(slot);
+		wc->color.Color = this->GetArmorTint(slot);
 	wc->wear_slot_id = slot;
 
 	wc->unknown06 = unknown06;
@@ -2604,7 +2607,7 @@ void Mob::SetSlotTint(uint8 material_slot, uint8 red_tint, uint8 green_tint, uin
 	wc->spawn_id = this->GetID();
 	wc->material = GetEquipmentMaterial(material_slot);
 	wc->hero_forge_model = GetHerosForgeModel(material_slot);
-	wc->color.color = color;
+	wc->color.Color = color;
 	wc->wear_slot_id = material_slot;
 
 	entity_list.QueueClients(this, outapp);
@@ -2621,7 +2624,7 @@ void Mob::WearChange(uint8 material_slot, uint16 texture, uint32 color, uint32 h
 	wc->spawn_id = this->GetID();
 	wc->material = texture;
 	wc->hero_forge_model = hero_forge_model;
-	wc->color.color = color;
+	wc->color.Color = color;
 	wc->wear_slot_id = material_slot;
 
 	entity_list.QueueClients(this, outapp);
@@ -5360,5 +5363,28 @@ int32 Mob::GetSpellStat(uint32 spell_id, const char *identifier, uint8 slot)
 	else if (id == "DamageShieldType") {return spells[spell_id].DamageShieldType; }
 	
 	return stat;
+}
+
+bool Mob::CanClassEquipItem(uint32 item_id)
+{
+	const Item_Struct* itm = nullptr;
+	itm = database.GetItem(item_id);
+
+	if (!itm)
+		return false;
+
+	if(itm->Classes == 65535 )
+		return true;
+
+	if (GetClass() > 16)
+		return false;
+
+	int bitmask = 1;
+	bitmask = bitmask << (GetClass() - 1);
+	
+	if(!(itm->Classes & bitmask))
+		return false;
+	else
+		return true;
 }
 

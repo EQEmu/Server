@@ -239,7 +239,8 @@ bool Client::Process() {
 		if(IsAIControlled())
 			AI_Process();
 
-		if (bindwound_timer.Check() && bindwound_target != 0) {
+		// Don't reset the bindwound timer so we can check it in BindWound as well.
+		if (bindwound_timer.Check(false) && bindwound_target != 0) {
 			BindWound(bindwound_target, false);
 		}
 
@@ -257,6 +258,13 @@ bool Client::Process() {
 			if(qglobal_purge_timer.Check())
 			{
 				qGlobals->PurgeExpiredGlobals();
+			}
+		}
+
+		if(light_update_timer.Check()) {
+			UpdateEquipLightValue();
+			if(UpdateActiveLightValue()) {
+				SendAppearancePacket(AT_Light, GetActiveLightValue());
 			}
 		}
 
@@ -960,7 +968,7 @@ void Client::BulkSendInventoryItems()
 void Client::BulkSendMerchantInventory(int merchant_id, int npcid) {
 	const Item_Struct* handyitem = nullptr;
 	uint32 numItemSlots = 80; //The max number of items passed in the transaction.
-	if (ClientVersionBit & BIT_RoFAndLater) { // RoF+ can send 200 items
+	if (m_ClientVersionBit & BIT_RoFAndLater) { // RoF+ can send 200 items
 		numItemSlots = 200;
 	}
 	const Item_Struct *item;
@@ -1886,7 +1894,7 @@ void Client::DoHPRegen() {
 }
 
 void Client::DoManaRegen() {
-	if (GetMana() >= max_mana)
+	if (GetMana() >= max_mana && spellbonuses.ManaRegen >= 0)
 		return;
 
 	SetMana(GetMana() + CalcManaRegen() + RestRegenMana);

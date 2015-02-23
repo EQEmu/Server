@@ -102,6 +102,7 @@ RULE_INT ( Character, BaseInstrumentSoftCap, 36) // Softcap for instrument mods,
 RULE_INT ( Character, BaseRunSpeedCap, 158) // Base Run Speed Cap, on live it's 158% which will give you a runspeed of 1.580 hard capped to 225.
 RULE_INT ( Character, OrnamentationAugmentType, 20) //Ornamentation Augment Type
 RULE_REAL(Character, EnvironmentDamageMulipliter, 1)
+RULE_BOOL(Character, UnmemSpellsOnDeath, true)
 RULE_CATEGORY_END()
 
 RULE_CATEGORY( Mercs )
@@ -299,7 +300,7 @@ RULE_INT ( Spells, MaxCastTimeReduction, 50) //Max percent your spell cast time 
 RULE_INT ( Spells, RootBreakFromSpells, 55) //Chance for root to break when cast on.
 RULE_INT ( Spells, DeathSaveCharismaMod, 3) //Determines how much charisma effects chance of death save firing.
 RULE_INT ( Spells, DivineInterventionHeal, 8000) //Divine intervention heal amount.
-RULE_BOOL ( Spells, AdditiveBonusValues, false) //Allow certain bonuses to be calculated by adding together the value from each item, instead of taking the highest value. (ie Add together all Cleave Effects)
+RULE_INT ( Spells, AdditiveBonusWornType, 0) //Calc worn bonuses to add together (instead of taking highest) if set to THIS worn type. (2=Will covert live items automatically)
 RULE_BOOL ( Spells, UseCHAScribeHack, false) //ScribeSpells and TrainDiscs quest functions will ignore entries where field 12 is CHA.  What's the best way to do this?
 RULE_BOOL ( Spells, BuffLevelRestrictions, true) //Buffs will not land on low level toons like live
 RULE_INT ( Spells, RootBreakCheckChance, 70) //Determines chance for a root break check to occur each buff tick.
@@ -328,6 +329,7 @@ RULE_BOOL ( Spells, Jun182014HundredHandsRevamp, false) // this should be true f
 RULE_BOOL ( Spells, SwarmPetTargetLock, false) // Use old method of swarm pets target locking till target dies then despawning.
 RULE_BOOL ( Spells, NPC_UseFocusFromSpells, true) // Allow npcs to use most spell derived focus effects.
 RULE_BOOL ( Spells, NPC_UseFocusFromItems, false) // Allow npcs to use most item derived focus effects.
+RULE_BOOL ( Spells, UseAdditiveFocusFromWornSlot, false) // Allows an additive focus effect to be calculated from worn slot.
 RULE_CATEGORY_END()
 
 RULE_CATEGORY( Combat )
