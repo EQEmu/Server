@@ -1707,14 +1707,14 @@ namespace RoF
 
 	ENCODE(OP_MoveItem)
 	{
-		ENCODE_LENGTH_EXACT(MoveItem_Struct);
-		SETUP_DIRECT_ENCODE(MoveItem_Struct, structs::MoveItem_Struct);
-
-		eq->from_slot = ServerToRoFSlot(emu->from_slot);
-		eq->to_slot = ServerToRoFSlot(emu->to_slot);
-		OUT(number_in_stack);
-
-		FINISH_ENCODE();
+		//ENCODE_LENGTH_EXACT(MoveItem_Struct);
+		//SETUP_DIRECT_ENCODE(MoveItem_Struct, structs::MoveItem_Struct);
+		//
+		//eq->from_slot = ServerToRoFSlot(emu->from_slot);
+		//eq->to_slot = ServerToRoFSlot(emu->to_slot);
+		//OUT(number_in_stack);
+		//
+		//FINISH_ENCODE();
 	}
 
 	ENCODE(OP_NewSpawn) { ENCODE_FORWARD(OP_ZoneSpawns); }
@@ -4684,16 +4684,16 @@ namespace RoF
 
 	DECODE(OP_MoveItem)
 	{
-		DECODE_LENGTH_EXACT(structs::MoveItem_Struct);
-		SETUP_DIRECT_DECODE(MoveItem_Struct, structs::MoveItem_Struct);
-
-		//Log.LogDebugType(Logs::General, Logs::Netcode, "[ERROR] Moved item from %u to %u", eq->from_slot.MainSlot, eq->to_slot.MainSlot);
-		Log.Out(Logs::General, Logs::Netcode, "[RoF] MoveItem SlotType from %i to %i, MainSlot from %i to %i, SubSlot from %i to %i, AugSlot from %i to %i, Unknown01 from %i to %i, Number %u", eq->from_slot.SlotType, eq->to_slot.SlotType, eq->from_slot.MainSlot, eq->to_slot.MainSlot, eq->from_slot.SubSlot, eq->to_slot.SubSlot, eq->from_slot.AugSlot, eq->to_slot.AugSlot, eq->from_slot.Unknown01, eq->to_slot.Unknown01, eq->number_in_stack);
-		emu->from_slot = RoFToServerSlot(eq->from_slot);
-		emu->to_slot = RoFToServerSlot(eq->to_slot);
-		IN(number_in_stack);
-
-		FINISH_DIRECT_DECODE();
+		//DECODE_LENGTH_EXACT(structs::MoveItem_Struct);
+		//SETUP_DIRECT_DECODE(MoveItem_Struct, structs::MoveItem_Struct);
+		//
+		////Log.LogDebugType(Logs::General, Logs::Netcode, "[ERROR] Moved item from %u to %u", eq->from_slot.MainSlot, eq->to_slot.MainSlot);
+		//Log.Out(Logs::General, Logs::Netcode, "[RoF] MoveItem SlotType from %i to %i, MainSlot from %i to %i, SubSlot from %i to %i, AugSlot from %i to %i, Unknown01 from %i to %i, Number %u", eq->from_slot.SlotType, eq->to_slot.SlotType, eq->from_slot.MainSlot, eq->to_slot.MainSlot, eq->from_slot.SubSlot, eq->to_slot.SubSlot, eq->from_slot.AugSlot, eq->to_slot.AugSlot, eq->from_slot.Unknown01, eq->to_slot.Unknown01, eq->number_in_stack);
+		//emu->from_slot = RoFToServerSlot(eq->from_slot);
+		//emu->to_slot = RoFToServerSlot(eq->to_slot);
+		//IN(number_in_stack);
+		//
+		//FINISH_DIRECT_DECODE();
 	}
 
 	DECODE(OP_PetCommands)

@@ -33,6 +33,7 @@ public:
 		TEST_ADD(MemoryBufferTest::CopyTest);
 		TEST_ADD(MemoryBufferTest::AssignTest);
 		TEST_ADD(MemoryBufferTest::MoveTest);
+		TEST_ADD(MemoryBufferTest::SelfTest);
 		TEST_ADD(MemoryBufferTest::ZeroTest);
 		TEST_ADD(MemoryBufferTest::ClearTest);
 		TEST_ADD(MemoryBufferTest::AddTest)
@@ -447,6 +448,22 @@ private:
 		TEST_ASSERT(data[24] == 't');
 		TEST_ASSERT(data[25] == '2');
 		TEST_ASSERT(data[26] == 0);
+	}
+
+	void SelfTest()
+	{
+		EQEmu::MemoryBuffer mb2(mb);
+		void *addr = (void*)mb2;
+
+		mb2 = mb2;
+		void *addr2 = (void*)mb2;
+
+		TEST_ASSERT(addr != addr2);
+
+		mb2 = std::move(mb2);
+		addr2 = (void*)mb2;
+
+		TEST_ASSERT(addr2 != nullptr);
 	}
 
 	void ZeroTest()

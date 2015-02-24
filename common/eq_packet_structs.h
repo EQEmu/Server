@@ -1556,12 +1556,25 @@ struct DeleteItem_Struct {
 /*0012*/
 };
 
-struct MoveItem_Struct
+struct MoveItemOld_Struct
 {
 /*0000*/ uint32 from_slot;
 /*0004*/ uint32 to_slot;
 /*0008*/ uint32 number_in_stack;
 /*0012*/
+};
+
+struct MoveItem_Struct
+{
+	int16 from_type;
+	int16 from_slot;
+	int16 from_bag_slot;
+	int16 from_aug_slot;
+	int16 to_type;
+	int16 to_slot;
+	int16 to_bag_slot;
+	int16 to_aug_slot;
+	uint32 number_in_stack;
 };
 
 // both MoveItem_Struct/DeleteItem_Struct server structures will be changing to a structure-based slot format..this will

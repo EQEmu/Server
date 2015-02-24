@@ -1265,14 +1265,14 @@ namespace SoD
 
 	ENCODE(OP_MoveItem)
 	{
-		ENCODE_LENGTH_EXACT(MoveItem_Struct);
-		SETUP_DIRECT_ENCODE(MoveItem_Struct, structs::MoveItem_Struct);
-
-		eq->from_slot = ServerToSoDSlot(emu->from_slot);
-		eq->to_slot = ServerToSoDSlot(emu->to_slot);
-		OUT(number_in_stack);
-
-		FINISH_ENCODE();
+		//ENCODE_LENGTH_EXACT(MoveItem_Struct);
+		//SETUP_DIRECT_ENCODE(MoveItem_Struct, structs::MoveItem_Struct);
+		//
+		//eq->from_slot = ServerToSoDSlot(emu->from_slot);
+		//eq->to_slot = ServerToSoDSlot(emu->to_slot);
+		//OUT(number_in_stack);
+		//
+		//FINISH_ENCODE();
 	}
 
 	ENCODE(OP_NewSpawn) { ENCODE_FORWARD(OP_ZoneSpawns); }
@@ -3260,16 +3260,16 @@ namespace SoD
 
 	DECODE(OP_MoveItem)
 	{
-		DECODE_LENGTH_EXACT(structs::MoveItem_Struct);
-		SETUP_DIRECT_DECODE(MoveItem_Struct, structs::MoveItem_Struct);
-
-		Log.Out(Logs::General, Logs::Netcode, "[SoD] Moved item from %u to %u", eq->from_slot, eq->to_slot);
-
-		emu->from_slot = SoDToServerSlot(eq->from_slot);
-		emu->to_slot = SoDToServerSlot(eq->to_slot);
-		IN(number_in_stack);
-
-		FINISH_DIRECT_DECODE();
+		//DECODE_LENGTH_EXACT(structs::MoveItem_Struct);
+		//SETUP_DIRECT_DECODE(MoveItem_Struct, structs::MoveItem_Struct);
+		//
+		//Log.Out(Logs::General, Logs::Netcode, "[SoD] Moved item from %u to %u", eq->from_slot, eq->to_slot);
+		//
+		//emu->from_slot = SoDToServerSlot(eq->from_slot);
+		//emu->to_slot = SoDToServerSlot(eq->to_slot);
+		//IN(number_in_stack);
+		//
+		//FINISH_DIRECT_DECODE();
 	}
 
 	DECODE(OP_PetCommands)

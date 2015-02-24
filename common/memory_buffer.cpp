@@ -32,20 +32,30 @@ EQEmu::MemoryBuffer::MemoryBuffer(const MemoryBuffer &other) {
 }
 
 EQEmu::MemoryBuffer::MemoryBuffer(MemoryBuffer &&other) {
-	buffer_ = other.buffer_;
-	size_ = other.size_;
-	capacity_ = other.capacity_;
-	write_pos_ = other.write_pos_;
-	read_pos_ = other.read_pos_;
+	uchar *tbuf = other.buffer_;
+	size_t tsz = other.size_;
+	size_t tcapacity = other.capacity_;
+	size_t twrite_pos = other.write_pos_;
+	size_t tread_pos = other.read_pos_;
 
 	other.buffer_ = nullptr;
 	other.size_ = 0;
 	other.capacity_ = 0;
 	other.read_pos_ = 0;
 	other.write_pos_ = 0;
+
+	buffer_ = tbuf;
+	size_ = tsz;
+	capacity_ = tcapacity;
+	write_pos_ = twrite_pos;
+	read_pos_ = tread_pos;
 }
 
 EQEmu::MemoryBuffer& EQEmu::MemoryBuffer::operator=(const MemoryBuffer &other) {
+	if(buffer_) {
+		delete[] buffer_;
+	}
+
 	if(other.capacity_) {
 		buffer_ = new uchar[other.capacity_];
 		memcpy(buffer_, other.buffer_, other.capacity_);
@@ -62,17 +72,23 @@ EQEmu::MemoryBuffer& EQEmu::MemoryBuffer::operator=(const MemoryBuffer &other) {
 }
 
 EQEmu::MemoryBuffer& EQEmu::MemoryBuffer::operator=(MemoryBuffer &&other) {
-	buffer_ = other.buffer_;
-	size_ = other.size_;
-	capacity_ = other.capacity_;
-	write_pos_ = other.write_pos_;
-	read_pos_ = other.read_pos_;
+	uchar *tbuf = other.buffer_;
+	size_t tsz = other.size_;
+	size_t tcapacity = other.capacity_;
+	size_t twrite_pos = other.write_pos_;
+	size_t tread_pos = other.read_pos_;
 
 	other.buffer_ = nullptr;
 	other.size_ = 0;
 	other.capacity_ = 0;
 	other.read_pos_ = 0;
 	other.write_pos_ = 0;
+
+	buffer_ = tbuf;
+	size_ = tsz;
+	capacity_ = tcapacity;
+	write_pos_ = twrite_pos;
+	read_pos_ = tread_pos;
 	return *this;
 }
 

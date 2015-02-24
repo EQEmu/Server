@@ -9586,68 +9586,77 @@ void Client::Handle_OP_MoveItem(const EQApplicationPacket *app)
 	{
 		return;
 	}
-
+	
 	if (app->size != sizeof(MoveItem_Struct)) {
 		Log.Out(Logs::General, Logs::Error, "Wrong size: OP_MoveItem, size=%i, expected %i", app->size, sizeof(MoveItem_Struct));
 		return;
 	}
-
+	
 	MoveItem_Struct* mi = (MoveItem_Struct*)app->pBuffer;
-	if (spellend_timer.Enabled() && casting_spell_id && !IsBardSong(casting_spell_id))
-	{
-		if (mi->from_slot != mi->to_slot && (mi->from_slot <= EmuConstants::GENERAL_END || mi->from_slot > 39) && IsValidSlot(mi->from_slot) && IsValidSlot(mi->to_slot))
-		{
-			char *detect = nullptr;
-			const ItemInst *itm_from = GetInv().GetItem(mi->from_slot);
-			const ItemInst *itm_to = GetInv().GetItem(mi->to_slot);
-			MakeAnyLenString(&detect, "Player issued a move item from %u(item id %u) to %u(item id %u) while casting %u.",
-				mi->from_slot,
-				itm_from ? itm_from->GetID() : 0,
-				mi->to_slot,
-				itm_to ? itm_to->GetID() : 0,
-				casting_spell_id);
-			database.SetMQDetectionFlag(AccountName(), GetName(), detect, zone->GetShortName());
-			safe_delete_array(detect);
-			Kick(); // Kick client to prevent client and server from getting out-of-sync inventory slots
-			return;
-		}
-	}
+	auto res = m_inventory.Swap(EQEmu::InventorySlot(mi->from_type, mi->from_slot, mi->from_bag_slot, mi->from_aug_slot),
+					 EQEmu::InventorySlot(mi->to_type, mi->to_slot, mi->to_bag_slot, mi->to_aug_slot),
+					 mi->number_in_stack);
 
-	// Illegal bagslot usage checks. Currently, user only receives a message if this check is triggered.
-	bool mi_hack = false;
+	//printf("%i %i %i %i --> %i %i %i %i (%u)\n", 
+	//	   mi->from_type, mi->from_slot, mi->from_bag_slot, mi->from_aug_slot,
+	//	   mi->to_type, mi->to_slot, mi->to_bag_slot, mi->to_aug_slot,
+	//	   mi->number_in_stack);
 
-	if (mi->from_slot >= EmuConstants::GENERAL_BAGS_BEGIN && mi->from_slot <= EmuConstants::CURSOR_BAG_END) {
-		if (mi->from_slot >= EmuConstants::CURSOR_BAG_BEGIN) { mi_hack = true; }
-		else {
-			int16 from_parent = m_inv.CalcSlotId(mi->from_slot);
-			if (!m_inv[from_parent]) { mi_hack = true; }
-			else if (!m_inv[from_parent]->IsType(ItemClassContainer)) { mi_hack = true; }
-			else if (m_inv.CalcBagIdx(mi->from_slot) >= m_inv[from_parent]->GetItem()->BagSlots) { mi_hack = true; }
-		}
-	}
-
-	if (mi->to_slot >= EmuConstants::GENERAL_BAGS_BEGIN && mi->to_slot <= EmuConstants::CURSOR_BAG_END) {
-		if (mi->to_slot >= EmuConstants::CURSOR_BAG_BEGIN) { mi_hack = true; }
-		else {
-			int16 to_parent = m_inv.CalcSlotId(mi->to_slot);
-			if (!m_inv[to_parent]) { mi_hack = true; }
-			else if (!m_inv[to_parent]->IsType(ItemClassContainer)) { mi_hack = true; }
-			else if (m_inv.CalcBagIdx(mi->to_slot) >= m_inv[to_parent]->GetItem()->BagSlots) { mi_hack = true; }
-		}
-	}
-
-	if (mi_hack) { Message(15, "Caution: Illegal use of inaccessible bag slots!"); }
-
-	if (!SwapItem(mi) && IsValidSlot(mi->from_slot) && IsValidSlot(mi->to_slot)) {
-		SwapItemResync(mi);
-
-		bool error = false;
-		InterrogateInventory(this, false, true, false, error, false);
-		if (error)
-			InterrogateInventory(this, true, false, true, error);
-	}
-
-	return;
+	//if (spellend_timer.Enabled() && casting_spell_id && !IsBardSong(casting_spell_id))
+	//{
+	//	if (mi->from_slot != mi->to_slot && (mi->from_slot <= EmuConstants::GENERAL_END || mi->from_slot > 39) && IsValidSlot(mi->from_slot) && IsValidSlot(mi->to_slot))
+	//	{
+	//		char *detect = nullptr;
+	//		const ItemInst *itm_from = GetInv().GetItem(mi->from_slot);
+	//		const ItemInst *itm_to = GetInv().GetItem(mi->to_slot);
+	//		MakeAnyLenString(&detect, "Player issued a move item from %u(item id %u) to %u(item id %u) while casting %u.",
+	//			mi->from_slot,
+	//			itm_from ? itm_from->GetID() : 0,
+	//			mi->to_slot,
+	//			itm_to ? itm_to->GetID() : 0,
+	//			casting_spell_id);
+	//		database.SetMQDetectionFlag(AccountName(), GetName(), detect, zone->GetShortName());
+	//		safe_delete_array(detect);
+	//		Kick(); // Kick client to prevent client and server from getting out-of-sync inventory slots
+	//		return;
+	//	}
+	//}
+	//
+	//// Illegal bagslot usage checks. Currently, user only receives a message if this check is triggered.
+	//bool mi_hack = false;
+	//
+	//if (mi->from_slot >= EmuConstants::GENERAL_BAGS_BEGIN && mi->from_slot <= EmuConstants::CURSOR_BAG_END) {
+	//	if (mi->from_slot >= EmuConstants::CURSOR_BAG_BEGIN) { mi_hack = true; }
+	//	else {
+	//		int16 from_parent = m_inv.CalcSlotId(mi->from_slot);
+	//		if (!m_inv[from_parent]) { mi_hack = true; }
+	//		else if (!m_inv[from_parent]->IsType(ItemClassContainer)) { mi_hack = true; }
+	//		else if (m_inv.CalcBagIdx(mi->from_slot) >= m_inv[from_parent]->GetItem()->BagSlots) { mi_hack = true; }
+	//	}
+	//}
+	//
+	//if (mi->to_slot >= EmuConstants::GENERAL_BAGS_BEGIN && mi->to_slot <= EmuConstants::CURSOR_BAG_END) {
+	//	if (mi->to_slot >= EmuConstants::CURSOR_BAG_BEGIN) { mi_hack = true; }
+	//	else {
+	//		int16 to_parent = m_inv.CalcSlotId(mi->to_slot);
+	//		if (!m_inv[to_parent]) { mi_hack = true; }
+	//		else if (!m_inv[to_parent]->IsType(ItemClassContainer)) { mi_hack = true; }
+	//		else if (m_inv.CalcBagIdx(mi->to_slot) >= m_inv[to_parent]->GetItem()->BagSlots) { mi_hack = true; }
+	//	}
+	//}
+	//
+	//if (mi_hack) { Message(15, "Caution: Illegal use of inaccessible bag slots!"); }
+	//
+	//if (!SwapItem(mi) && IsValidSlot(mi->from_slot) && IsValidSlot(mi->to_slot)) {
+	//	SwapItemResync(mi);
+	//
+	//	bool error = false;
+	//	InterrogateInventory(this, false, true, false, error, false);
+	//	if (error)
+	//		InterrogateInventory(this, true, false, true, error);
+	//}
+	//
+	//return;
 }
 
 void Client::Handle_OP_OpenContainer(const EQApplicationPacket *app)

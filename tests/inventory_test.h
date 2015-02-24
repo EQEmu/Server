@@ -175,7 +175,7 @@ private:
 
 	void InventorySwapItemsTest()
 	{
-		auto swap_result = inv.Swap(EQEmu::InventorySlot(0, 23), EQEmu::InventorySlot(0, 24));
+		auto swap_result = inv.Swap(EQEmu::InventorySlot(0, 23), EQEmu::InventorySlot(0, 24), 0);
 		TEST_ASSERT(swap_result == true);
 
 		auto m_bag = inv.Get(EQEmu::InventorySlot(0, 24));

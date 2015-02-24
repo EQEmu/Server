@@ -192,12 +192,54 @@ void EQEmu::ItemInstance::SetCustomData(const std::string &custom_data) {
 	impl_->custom_data_ = custom_data;
 }
 
+uint32 EQEmu::ItemInstance::GetOrnamentIDFile() {
+	return impl_->ornament_idfile_;
+}
+
+uint32 EQEmu::ItemInstance::GetOrnamentIDFile() const {
+	return impl_->ornament_idfile_;
+}
+
 void EQEmu::ItemInstance::SetOrnamentIDFile(const uint32 ornament_idfile) {
 	impl_->ornament_idfile_ = ornament_idfile;
 }
 
+uint32 EQEmu::ItemInstance::GetOrnamentIcon() {
+	return impl_->ornament_icon_;
+}
+
+uint32 EQEmu::ItemInstance::GetOrnamentIcon() const {
+	return impl_->ornament_icon_;
+}
+
 void EQEmu::ItemInstance::SetOrnamentIcon(const uint32 ornament_icon) {
 	impl_->ornament_icon_ = ornament_icon;
+}
+
+uint32 EQEmu::ItemInstance::GetOrnamentHeroModel(int material_slot) {
+	uint32 hero_model = 0;
+	if(impl_->ornament_hero_model_ > 0)
+	{
+		hero_model = impl_->ornament_hero_model_;
+		if(material_slot >= 0)
+		{
+			hero_model = (impl_->ornament_hero_model_ * 100) + material_slot;
+		}
+	}
+	return hero_model;
+}
+
+uint32 EQEmu::ItemInstance::GetOrnamentHeroModel(int material_slot) const {
+	uint32 hero_model = 0;
+	if(impl_->ornament_hero_model_ > 0)
+	{
+		hero_model = impl_->ornament_hero_model_;
+		if(material_slot >= 0)
+		{
+			hero_model = (impl_->ornament_hero_model_ * 100) + material_slot;
+		}
+	}
+	return hero_model;
 }
 
 void EQEmu::ItemInstance::SetOrnamentHeroModel(const uint32 ornament_hero_model) {

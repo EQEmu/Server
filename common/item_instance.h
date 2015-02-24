@@ -53,8 +53,17 @@ namespace EQEmu
 		void SetAttuned(const bool attuned);
 
 		void SetCustomData(const std::string &custom_data);
+
+		uint32 GetOrnamentIDFile();
+		uint32 GetOrnamentIDFile() const;
 		void SetOrnamentIDFile(const uint32 ornament_idfile);
+
+		uint32 GetOrnamentIcon();
+		uint32 GetOrnamentIcon() const;
 		void SetOrnamentIcon(const uint32 ornament_icon);
+
+		uint32 GetOrnamentHeroModel(int material_slot);
+		uint32 GetOrnamentHeroModel(int material_slot) const;
 		void SetOrnamentHeroModel(const uint32 ornament_hero_model);
 
 		const char* GetTrackingID();

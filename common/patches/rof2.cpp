@@ -13,7 +13,7 @@
 #include "rof2_structs.h"
 #include "../rulesys.h"
 #include "../memory_buffer.h"
-#include "../item_instance.h"
+#include "../inventory.h"
 
 #include <iostream>
 #include <sstream>
@@ -26,7 +26,6 @@ namespace RoF2
 	static OpcodeManager *opcodes = nullptr;
 	static Strategy struct_strategy;
 
-	char* SerializeItem(const ItemInst *inst, int16 slot_id, uint32 *length, uint8 depth, ItemPacketType packet_type);
 	void SerializeItem(EQEmu::MemoryBuffer &packet_data, EQEmu::ItemInstance *inst, int container_id, int slot_id, int bag_id, int aug_id);
 
 	// server to client inventory location converters
@@ -1749,9 +1748,15 @@ namespace RoF2
 		ENCODE_LENGTH_EXACT(MoveItem_Struct);
 		SETUP_DIRECT_ENCODE(MoveItem_Struct, structs::MoveItem_Struct);
 
-		eq->from_slot = ServerToRoF2Slot(emu->from_slot);
-		eq->to_slot = ServerToRoF2Slot(emu->to_slot);
-		OUT(number_in_stack);
+		eq->from_slot.SlotType = emu->from_type;
+		eq->from_slot.MainSlot = emu->from_slot;
+		eq->from_slot.SubSlot = emu->from_bag_slot;
+		eq->from_slot.AugSlot = emu->from_aug_slot;
+		eq->to_slot.SlotType = emu->to_type;
+		eq->to_slot.MainSlot = emu->to_slot;
+		eq->to_slot.SubSlot = emu->to_bag_slot;
+		eq->to_slot.AugSlot = emu->to_aug_slot;
+		eq->number_in_stack = emu->number_in_stack;
 
 		FINISH_ENCODE();
 	}
@@ -4804,11 +4809,16 @@ namespace RoF2
 		DECODE_LENGTH_EXACT(structs::MoveItem_Struct);
 		SETUP_DIRECT_DECODE(MoveItem_Struct, structs::MoveItem_Struct);
 
-		Log.Out(Logs::General, Logs::Netcode, "[RoF2] MoveItem SlotType from %i to %i, MainSlot from %i to %i, SubSlot from %i to %i, AugSlot from %i to %i, Unknown01 from %i to %i, Number %u", eq->from_slot.SlotType, eq->to_slot.SlotType, eq->from_slot.MainSlot, eq->to_slot.MainSlot, eq->from_slot.SubSlot, eq->to_slot.SubSlot, eq->from_slot.AugSlot, eq->to_slot.AugSlot, eq->from_slot.Unknown01, eq->to_slot.Unknown01, eq->number_in_stack);
-		emu->from_slot = RoF2ToServerSlot(eq->from_slot);
-		emu->to_slot = RoF2ToServerSlot(eq->to_slot);
-		IN(number_in_stack);
-
+		emu->from_type = eq->from_slot.SlotType;
+		emu->from_slot = eq->from_slot.MainSlot;
+		emu->from_bag_slot = eq->from_slot.SubSlot;
+		emu->from_aug_slot = eq->from_slot.AugSlot;
+		emu->to_type = eq->to_slot.SlotType;
+		emu->to_slot = eq->to_slot.MainSlot;
+		emu->to_bag_slot = eq->to_slot.SubSlot;
+		emu->to_aug_slot = eq->to_slot.AugSlot;
+		emu->number_in_stack = eq->number_in_stack;
+		
 		FINISH_DIRECT_DECODE();
 	}
 
@@ -5183,560 +5193,560 @@ namespace RoF2
 		return NextItemInstSerialNumber;
 	}
 
-	char* SerializeItem(const ItemInst *inst, int16 slot_id_in, uint32 *length, uint8 depth, ItemPacketType packet_type)
-	{
-		int ornamentationAugtype = RuleI(Character, OrnamentationAugmentType);
-		uint8 null_term = 0;
-		bool stackable = inst->IsStackable();
-		uint32 merchant_slot = inst->GetMerchantSlot();
-		uint32 charges = inst->GetCharges();
-		if (!stackable && charges > 254)
-			charges = 0xFFFFFFFF;
-
-		std::stringstream ss(std::stringstream::in | std::stringstream::out | std::stringstream::binary);
-
-		const ItemData *item = inst->GetUnscaledItem();
-		//Log.LogDebugType(Logs::General, Logs::Netcode, "[ERROR] Serialize called for: %s", item->Name);
-
-		RoF2::structs::ItemSerializationHeader hdr;
-
-		//sprintf(hdr.unknown000, "06e0002Y1W00");
-
-		snprintf(hdr.tracking_id, sizeof(hdr.tracking_id), "%016d", item->ID);
-
-		hdr.stacksize = stackable ? charges : 1;
-		hdr.unknown004 = 0;
-
-		structs::ItemSlotStruct slot_id = ServerToRoF2Slot(slot_id_in, packet_type);
-
-		hdr.slot_type = (merchant_slot == 0) ? slot_id.SlotType : 9; // 9 is merchant 20 is reclaim items?
-		hdr.main_slot = (merchant_slot == 0) ? slot_id.MainSlot : merchant_slot;
-		hdr.sub_slot = (merchant_slot == 0) ? slot_id.SubSlot : 0xffff;
-		hdr.aug_slot = (merchant_slot == 0) ? slot_id.AugSlot : 0xffff;
-		hdr.price = inst->GetPrice();
-		hdr.merchant_slot = (merchant_slot == 0) ? 1 : inst->GetMerchantCount();
-		hdr.scaled_value = inst->IsScaling() ? inst->GetExp() / 100 : 0;
-		hdr.instance_id = (merchant_slot == 0) ? inst->GetSerialNumber() : merchant_slot;
-		hdr.unknown028 = 0;
-		hdr.last_cast_time = inst->GetRecastTimestamp();
-		hdr.charges = (stackable ? (item->MaxCharges ? 1 : 0) : charges);
-		hdr.inst_nodrop = inst->IsAttuned() ? 1 : 0;
-		hdr.unknown044 = 0;
-		hdr.unknown048 = 0;
-		hdr.unknown052 = 0;
-		hdr.isEvolving = item->EvolvingLevel > 0 ? 1 : 0;
-		ss.write((const char*)&hdr, sizeof(RoF2::structs::ItemSerializationHeader));
-
-		if (item->EvolvingLevel > 0) {
-			RoF2::structs::EvolvingItem evotop;
-			evotop.unknown001 = 0;
-			evotop.unknown002 = 0;
-			evotop.unknown003 = 0;
-			evotop.unknown004 = 0;
-			evotop.evoLevel = item->EvolvingLevel;
-			evotop.progress = 95.512;
-			evotop.Activated = 1;
-			evotop.evomaxlevel = 7;
-			ss.write((const char*)&evotop, sizeof(RoF2::structs::EvolvingItem));
-		}
-		//ORNAMENT IDFILE / ICON
-		uint32 ornaIcon = 0;
-		uint32 heroModel = 0;
-
-		if (inst->GetOrnamentationIDFile() && inst->GetOrnamentationIcon())
-		{
-			char tmp[30]; memset(tmp, 0x0, 30); sprintf(tmp, "IT%d", inst->GetOrnamentationIDFile());
-			//Mainhand
-			ss.write(tmp, strlen(tmp));
-			ss.write((const char*)&null_term, sizeof(uint8));
-			//Offhand
-			ss.write(tmp, strlen(tmp));
-			ss.write((const char*)&null_term, sizeof(uint8));
-			ornaIcon = inst->GetOrnamentationIcon();
-			heroModel = inst->GetOrnamentHeroModel(InventoryOld::CalcMaterialFromSlot(slot_id_in));
-		}
-		else
-		{
-			ss.write((const char*)&null_term, sizeof(uint8)); // no main hand Ornamentation
-			ss.write((const char*)&null_term, sizeof(uint8)); // no off hand Ornamentation
-		}
-
-		RoF2::structs::ItemSerializationHeaderFinish hdrf;
-		hdrf.ornamentIcon = ornaIcon;
-		hdrf.unknowna1 = 0xffffffff;
-		hdrf.ornamentHeroModel = heroModel;
-		hdrf.unknown063 = 0;
-		hdrf.Copied = 0;
-		hdrf.unknowna4 = 0xffffffff;
-		hdrf.unknowna5 = 0;
-		hdrf.ItemClass = item->ItemClass;
-
-		ss.write((const char*)&hdrf, sizeof(RoF2::structs::ItemSerializationHeaderFinish));
-
-		if (strlen(item->Name) > 0)
-		{
-			ss.write(item->Name, strlen(item->Name));
-			ss.write((const char*)&null_term, sizeof(uint8));
-		}
-		else
-		{
-			ss.write((const char*)&null_term, sizeof(uint8));
-		}
-
-		if (strlen(item->Lore) > 0)
-		{
-			ss.write(item->Lore, strlen(item->Lore));
-			ss.write((const char*)&null_term, sizeof(uint8));
-		}
-		else
-		{
-			ss.write((const char*)&null_term, sizeof(uint8));
-		}
-
-		if (strlen(item->IDFile) > 0)
-		{
-			ss.write(item->IDFile, strlen(item->IDFile));
-			ss.write((const char*)&null_term, sizeof(uint8));
-		}
-		else
-		{
-			ss.write((const char*)&null_term, sizeof(uint8));
-		}
-
-		ss.write((const char*)&null_term, sizeof(uint8));
-		//Log.LogDebugType(Logs::General, Logs::Netcode, "[ERROR] ItemBody struct is %i bytes", sizeof(RoF2::structs::ItemBodyStruct));
-		RoF2::structs::ItemBodyStruct ibs;
-		memset(&ibs, 0, sizeof(RoF2::structs::ItemBodyStruct));
-
-		ibs.id = item->ID;
-		ibs.weight = item->Weight;
-		ibs.norent = item->NoRent;
-		ibs.nodrop = item->NoDrop;
-		ibs.attune = item->Attuneable;
-		ibs.size = item->Size;
-		ibs.slots = SwapBits21and22(item->Slots);
-		ibs.price = item->Price;
-		ibs.icon = item->Icon;
-		ibs.unknown1 = 1;
-		ibs.unknown2 = 1;
-		ibs.BenefitFlag = item->BenefitFlag;
-		ibs.tradeskills = item->Tradeskills;
-		ibs.CR = item->CR;
-		ibs.DR = item->DR;
-		ibs.PR = item->PR;
-		ibs.MR = item->MR;
-		ibs.FR = item->FR;
-		ibs.SVCorruption = item->SVCorruption;
-		ibs.AStr = item->AStr;
-		ibs.ASta = item->ASta;
-		ibs.AAgi = item->AAgi;
-		ibs.ADex = item->ADex;
-		ibs.ACha = item->ACha;
-		ibs.AInt = item->AInt;
-		ibs.AWis = item->AWis;
-
-		ibs.HP = item->HP;
-		ibs.Mana = item->Mana;
-		ibs.Endur = item->Endur;
-		ibs.AC = item->AC;
-		ibs.regen = item->Regen;
-		ibs.mana_regen = item->ManaRegen;
-		ibs.end_regen = item->EnduranceRegen;
-		ibs.Classes = item->Classes;
-		ibs.Races = item->Races;
-		ibs.Deity = item->Deity;
-		ibs.SkillModValue = item->SkillModValue;
-		ibs.SkillModMax = 0xffffffff;
-		ibs.SkillModType = (int8)(item->SkillModType);
-		ibs.SkillModExtra = 0;
-		ibs.BaneDmgRace = item->BaneDmgRace;
-		ibs.BaneDmgBody = item->BaneDmgBody;
-		ibs.BaneDmgRaceAmt = item->BaneDmgRaceAmt;
-		ibs.BaneDmgAmt = item->BaneDmgAmt;
-		ibs.Magic = item->Magic;
-		ibs.CastTime_ = item->CastTime_;
-		ibs.ReqLevel = item->ReqLevel;
-		if (item->ReqLevel > 100)
-			ibs.ReqLevel = 100;
-		ibs.RecLevel = item->RecLevel;
-		if (item->RecLevel > 100)
-			ibs.RecLevel = 100;
-		ibs.RecSkill = item->RecSkill;
-		ibs.BardType = item->BardType;
-		ibs.BardValue = item->BardValue;
-		ibs.Light = item->Light;
-		ibs.Delay = item->Delay;
-		ibs.ElemDmgType = item->ElemDmgType;
-		ibs.ElemDmgAmt = item->ElemDmgAmt;
-		ibs.Range = item->Range;
-		ibs.Damage = item->Damage;
-		ibs.Color = item->Color;
-		ibs.Prestige = 0;
-		ibs.ItemType = item->ItemType;
-		ibs.Material = item->Material;
-		ibs.MaterialUnknown1 = 0;
-		ibs.EliteMaterial = item->EliteMaterial;
-		ibs.HerosForgeModel = item->HerosForgeModel;
-		ibs.MaterialUnknown2 = 0;
-		ibs.SellRate = item->SellRate;
-		ibs.CombatEffects = item->CombatEffects;
-		ibs.Shielding = item->Shielding;
-		ibs.StunResist = item->StunResist;
-		ibs.StrikeThrough = item->StrikeThrough;
-		ibs.ExtraDmgSkill = item->ExtraDmgSkill;
-		ibs.ExtraDmgAmt = item->ExtraDmgAmt;
-		ibs.SpellShield = item->SpellShield;
-		ibs.Avoidance = item->Avoidance;
-		ibs.Accuracy = item->Accuracy;
-		ibs.CharmFileID = item->CharmFileID;
-		ibs.FactionAmt1 = item->FactionAmt1;
-		ibs.FactionMod1 = item->FactionMod1;
-		ibs.FactionAmt2 = item->FactionAmt2;
-		ibs.FactionMod2 = item->FactionMod2;
-		ibs.FactionAmt3 = item->FactionAmt3;
-		ibs.FactionMod3 = item->FactionMod3;
-		ibs.FactionAmt4 = item->FactionAmt4;
-		ibs.FactionMod4 = item->FactionMod4;
-
-		ss.write((const char*)&ibs, sizeof(RoF2::structs::ItemBodyStruct));
-
-		//charm text
-		if (strlen(item->CharmFile) > 0)
-		{
-			ss.write((const char*)item->CharmFile, strlen(item->CharmFile));
-			ss.write((const char*)&null_term, sizeof(uint8));
-		}
-		else
-		{
-			ss.write((const char*)&null_term, sizeof(uint8));
-		}
-
-		//Log.LogDebugType(Logs::General, Logs::Netcode, "[ERROR] ItemBody secondary struct is %i bytes", sizeof(RoF2::structs::ItemSecondaryBodyStruct));
-		RoF2::structs::ItemSecondaryBodyStruct isbs;
-		memset(&isbs, 0, sizeof(RoF2::structs::ItemSecondaryBodyStruct));
-
-		isbs.augtype = item->AugType;
-		isbs.augrestrict2 = -1;
-		isbs.augrestrict = item->AugRestrict;
-
-		for (int x = AUG_BEGIN; x < consts::ITEM_COMMON_SIZE; x++)
-		{
-			isbs.augslots[x].type = item->AugSlotType[x];
-			isbs.augslots[x].visible = item->AugSlotVisible[x];
-			isbs.augslots[x].unknown = item->AugSlotUnk2[x];
-		}
-
-		isbs.ldonpoint_type = item->PointType;
-		isbs.ldontheme = item->LDoNTheme;
-		isbs.ldonprice = item->LDoNPrice;
-		isbs.ldonsellbackrate = item->LDoNSellBackRate;
-		isbs.ldonsold = item->LDoNSold;
-
-		isbs.bagtype = item->BagType;
-		isbs.bagslots = item->BagSlots;
-		isbs.bagsize = item->BagSize;
-		isbs.wreduction = item->BagWR;
-
-		isbs.book = item->Book;
-		isbs.booktype = item->BookType;
-
-		ss.write((const char*)&isbs, sizeof(RoF2::structs::ItemSecondaryBodyStruct));
-
-		if (strlen(item->Filename) > 0)
-		{
-			ss.write((const char*)item->Filename, strlen(item->Filename));
-			ss.write((const char*)&null_term, sizeof(uint8));
-		}
-		else
-		{
-			ss.write((const char*)&null_term, sizeof(uint8));
-		}
-
-		//Log.LogDebugType(Logs::General, Logs::Netcode, "[ERROR] ItemBody tertiary struct is %i bytes", sizeof(RoF2::structs::ItemTertiaryBodyStruct));
-		RoF2::structs::ItemTertiaryBodyStruct itbs;
-		memset(&itbs, 0, sizeof(RoF2::structs::ItemTertiaryBodyStruct));
-
-		itbs.loregroup = item->LoreGroup;
-		itbs.artifact = item->ArtifactFlag;
-		itbs.summonedflag = item->SummonedFlag;
-		itbs.favor = item->Favor;
-		itbs.fvnodrop = item->FVNoDrop;
-		itbs.dotshield = item->DotShielding;
-		itbs.atk = item->Attack;
-		itbs.haste = item->Haste;
-		itbs.damage_shield = item->DamageShield;
-		itbs.guildfavor = item->GuildFavor;
-		itbs.augdistil = item->AugDistiller;
-		itbs.unknown3 = 0xffffffff;
-		itbs.unknown4 = 0;
-		itbs.no_pet = item->NoPet;
-		itbs.unknown5 = 0;
-
-		itbs.potion_belt_enabled = item->PotionBelt;
-		itbs.potion_belt_slots = item->PotionBeltSlots;
-		itbs.stacksize = stackable ? item->StackSize : 0;
-		itbs.no_transfer = item->NoTransfer;
-		itbs.expendablearrow = item->ExpendableArrow;
-
-		itbs.unknown8 = 0;
-		itbs.unknown9 = 0;
-		itbs.unknown10 = 0;
-		itbs.unknown11 = 0;
-		itbs.unknown12 = 0;
-		itbs.unknown13 = 0;
-		itbs.unknown14 = 0;
-
-		ss.write((const char*)&itbs, sizeof(RoF2::structs::ItemTertiaryBodyStruct));
-
-		// Effect Structures Broken down to allow variable length strings for effect names
-		int32 effect_unknown = 0;
-
-		//Log.LogDebugType(Logs::General, Logs::Netcode, "[ERROR] ItemBody Click effect struct is %i bytes", sizeof(RoF2::structs::ClickEffectStruct));
-		RoF2::structs::ClickEffectStruct ices;
-		memset(&ices, 0, sizeof(RoF2::structs::ClickEffectStruct));
-
-		ices.effect = item->Click.Effect;
-		ices.level2 = item->Click.Level2;
-		ices.type = item->Click.Type;
-		ices.level = item->Click.Level;
-		ices.max_charges = item->MaxCharges;
-		ices.cast_time = item->CastTime;
-		ices.recast = item->RecastDelay;
-		ices.recast_type = item->RecastType;
-
-		ss.write((const char*)&ices, sizeof(RoF2::structs::ClickEffectStruct));
-
-		if (strlen(item->ClickName) > 0)
-		{
-			ss.write((const char*)item->ClickName, strlen(item->ClickName));
-			ss.write((const char*)&null_term, sizeof(uint8));
-		}
-		else
-		{
-			ss.write((const char*)&null_term, sizeof(uint8));
-		}
-
-		ss.write((const char*)&effect_unknown, sizeof(int32));	// clickunk7
-
-		//Log.LogDebugType(Logs::General, Logs::Netcode, "[ERROR] ItemBody proc effect struct is %i bytes", sizeof(RoF2::structs::ProcEffectStruct));
-		RoF2::structs::ProcEffectStruct ipes;
-		memset(&ipes, 0, sizeof(RoF2::structs::ProcEffectStruct));
-
-		ipes.effect = item->Proc.Effect;
-		ipes.level2 = item->Proc.Level2;
-		ipes.type = item->Proc.Type;
-		ipes.level = item->Proc.Level;
-		ipes.procrate = item->ProcRate;
-
-		ss.write((const char*)&ipes, sizeof(RoF2::structs::ProcEffectStruct));
-
-		if (strlen(item->ProcName) > 0)
-		{
-			ss.write((const char*)item->ProcName, strlen(item->ProcName));
-			ss.write((const char*)&null_term, sizeof(uint8));
-		}
-		else
-		{
-			ss.write((const char*)&null_term, sizeof(uint8));
-		}
-
-		ss.write((const char*)&effect_unknown, sizeof(int32));	// unknown5
-
-		//Log.LogDebugType(Logs::General, Logs::Netcode, "[ERROR] ItemBody worn effect struct is %i bytes", sizeof(RoF2::structs::WornEffectStruct));
-		RoF2::structs::WornEffectStruct iwes;
-		memset(&iwes, 0, sizeof(RoF2::structs::WornEffectStruct));
-
-		iwes.effect = item->Worn.Effect;
-		iwes.level2 = item->Worn.Level2;
-		iwes.type = item->Worn.Type;
-		iwes.level = item->Worn.Level;
-
-		ss.write((const char*)&iwes, sizeof(RoF2::structs::WornEffectStruct));
-
-		if (strlen(item->WornName) > 0)
-		{
-			ss.write((const char*)item->WornName, strlen(item->WornName));
-			ss.write((const char*)&null_term, sizeof(uint8));
-		}
-		else
-		{
-			ss.write((const char*)&null_term, sizeof(uint8));
-		}
-
-		ss.write((const char*)&effect_unknown, sizeof(int32));	// unknown6
-
-		RoF2::structs::WornEffectStruct ifes;
-		memset(&ifes, 0, sizeof(RoF2::structs::WornEffectStruct));
-
-		ifes.effect = item->Focus.Effect;
-		ifes.level2 = item->Focus.Level2;
-		ifes.type = item->Focus.Type;
-		ifes.level = item->Focus.Level;
-
-		ss.write((const char*)&ifes, sizeof(RoF2::structs::WornEffectStruct));
-
-		if (strlen(item->FocusName) > 0)
-		{
-			ss.write((const char*)item->FocusName, strlen(item->FocusName));
-			ss.write((const char*)&null_term, sizeof(uint8));
-		}
-		else
-		{
-			ss.write((const char*)&null_term, sizeof(uint8));
-		}
-
-		ss.write((const char*)&effect_unknown, sizeof(int32));	// unknown6
-
-		RoF2::structs::WornEffectStruct ises;
-		memset(&ises, 0, sizeof(RoF2::structs::WornEffectStruct));
-
-		ises.effect = item->Scroll.Effect;
-		ises.level2 = item->Scroll.Level2;
-		ises.type = item->Scroll.Type;
-		ises.level = item->Scroll.Level;
-
-		ss.write((const char*)&ises, sizeof(RoF2::structs::WornEffectStruct));
-
-		if (strlen(item->ScrollName) > 0)
-		{
-			ss.write((const char*)item->ScrollName, strlen(item->ScrollName));
-			ss.write((const char*)&null_term, sizeof(uint8));
-		}
-		else
-		{
-			ss.write((const char*)&null_term, sizeof(uint8));
-		}
-
-		ss.write((const char*)&effect_unknown, sizeof(int32));	// unknown6
-
-		// Bard Effect?
-		RoF2::structs::WornEffectStruct ibes;
-		memset(&ibes, 0, sizeof(RoF2::structs::WornEffectStruct));
-
-		ibes.effect = item->Bard.Effect;
-		ibes.level2 = item->Bard.Level2;
-		ibes.type = item->Bard.Type;
-		ibes.level = item->Bard.Level;
-		//ibes.unknown6 = 0xffffffff;
-
-		ss.write((const char*)&ibes, sizeof(RoF2::structs::WornEffectStruct));
-
-		/*
-		if(strlen(item->BardName) > 0)
-		{
-		ss.write((const char*)item->BardName, strlen(item->BardName));
-		ss.write((const char*)&null_term, sizeof(uint8));
-		}
-		else */
-		ss.write((const char*)&null_term, sizeof(uint8));
-
-		ss.write((const char*)&effect_unknown, sizeof(int32));	// unknown6
-		// End of Effects
-
-		//Log.LogDebugType(Logs::General, Logs::Netcode, "[ERROR] ItemBody Quaternary effect struct is %i bytes", sizeof(RoF2::structs::ItemQuaternaryBodyStruct));
-		RoF2::structs::ItemQuaternaryBodyStruct iqbs;
-		memset(&iqbs, 0, sizeof(RoF2::structs::ItemQuaternaryBodyStruct));
-
-		iqbs.scriptfileid = item->ScriptFileID;
-		iqbs.quest_item = item->QuestItemFlag;
-		iqbs.Power = 0;
-		iqbs.Purity = item->Purity;
-		iqbs.unknown16 = 0;
-		iqbs.BackstabDmg = item->BackstabDmg;
-		iqbs.DSMitigation = item->DSMitigation;
-		iqbs.HeroicStr = item->HeroicStr;
-		iqbs.HeroicInt = item->HeroicInt;
-		iqbs.HeroicWis = item->HeroicWis;
-		iqbs.HeroicAgi = item->HeroicAgi;
-		iqbs.HeroicDex = item->HeroicDex;
-		iqbs.HeroicSta = item->HeroicSta;
-		iqbs.HeroicCha = item->HeroicCha;
-		iqbs.HeroicMR = item->HeroicMR;
-		iqbs.HeroicFR = item->HeroicFR;
-		iqbs.HeroicCR = item->HeroicCR;
-		iqbs.HeroicDR = item->HeroicDR;
-		iqbs.HeroicPR = item->HeroicPR;
-		iqbs.HeroicSVCorrup = item->HeroicSVCorrup;
-		iqbs.HealAmt = item->HealAmt;
-		iqbs.SpellDmg = item->SpellDmg;
-		iqbs.clairvoyance = item->Clairvoyance;
-
-		//unknown18;	//Power Source Capacity or evolve filename?
-		//evolve_string; // Some String, but being evolution related is just a guess
-
-		iqbs.Heirloom = 0;
-		iqbs.Placeable = 0;
-
-		iqbs.unknown28 = -1;
-		iqbs.unknown30 = -1;
-
-		iqbs.NoZone = 0;
-		iqbs.NoGround = 0;
-		iqbs.unknown37a = 0;	// (guessed position) New to RoF2
-		iqbs.unknown38 = 0;
-
-		iqbs.unknown39 = 1;
-
-		iqbs.subitem_count = 0;
-
-		char *SubSerializations[10]; // <watch>
-
-		uint32 SubLengths[10];
-
-		for (int x = SUB_BEGIN; x < EmuConstants::ITEM_CONTAINER_SIZE; ++x) {
-
-			SubSerializations[x] = nullptr;
-
-			const ItemInst* subitem = ((const ItemInst*)inst)->GetItem(x);
-
-			if (subitem) {
-
-				int SubSlotNumber;
-
-				iqbs.subitem_count++;
-
-				if (slot_id_in >= EmuConstants::GENERAL_BEGIN && slot_id_in <= EmuConstants::GENERAL_END) // (< 30) - no cursor?
-					//SubSlotNumber = (((slot_id_in + 3) * 10) + x + 1);
-					SubSlotNumber = (((slot_id_in + 3) * EmuConstants::ITEM_CONTAINER_SIZE) + x + 1);
-				else if (slot_id_in >= EmuConstants::BANK_BEGIN && slot_id_in <= EmuConstants::BANK_END)
-					//SubSlotNumber = (((slot_id_in - 2000) * 10) + 2030 + x + 1);
-					SubSlotNumber = (((slot_id_in - EmuConstants::BANK_BEGIN) * EmuConstants::ITEM_CONTAINER_SIZE) + EmuConstants::BANK_BAGS_BEGIN + x);
-				else if (slot_id_in >= EmuConstants::SHARED_BANK_BEGIN && slot_id_in <= EmuConstants::SHARED_BANK_END)
-					//SubSlotNumber = (((slot_id_in - 2500) * 10) + 2530 + x + 1);
-					SubSlotNumber = (((slot_id_in - EmuConstants::SHARED_BANK_BEGIN) * EmuConstants::ITEM_CONTAINER_SIZE) + EmuConstants::SHARED_BANK_BAGS_BEGIN + x);
-				else
-					SubSlotNumber = slot_id_in; // ???????
-
-				/*
-				// TEST CODE: <watch>
-				SubSlotNumber = InventoryOld::CalcSlotID(slot_id_in, x);
-				*/
-
-				SubSerializations[x] = SerializeItem(subitem, SubSlotNumber, &SubLengths[x], depth + 1, packet_type);
-			}
-		}
-
-		ss.write((const char*)&iqbs, sizeof(RoF2::structs::ItemQuaternaryBodyStruct));
-
-		for (int x = SUB_BEGIN; x < EmuConstants::ITEM_CONTAINER_SIZE; ++x) {
-
-			if (SubSerializations[x]) {
-
-				ss.write((const char*)&x, sizeof(uint32));
-
-				ss.write(SubSerializations[x], SubLengths[x]);
-
-				safe_delete_array(SubSerializations[x]);
-			}
-		}
-
-		char* item_serial = new char[ss.tellp()];
-		memset(item_serial, 0, ss.tellp());
-		memcpy(item_serial, ss.str().c_str(), ss.tellp());
-
-		*length = ss.tellp();
-		return item_serial;
-	}
+	//char* SerializeItem(const ItemInst *inst, int16 slot_id_in, uint32 *length, uint8 depth, ItemPacketType packet_type)
+	//{
+	//	int ornamentationAugtype = RuleI(Character, OrnamentationAugmentType);
+	//	uint8 null_term = 0;
+	//	bool stackable = inst->IsStackable();
+	//	uint32 merchant_slot = inst->GetMerchantSlot();
+	//	uint32 charges = inst->GetCharges();
+	//	if (!stackable && charges > 254)
+	//		charges = 0xFFFFFFFF;
+	//
+	//	std::stringstream ss(std::stringstream::in | std::stringstream::out | std::stringstream::binary);
+	//
+	//	const ItemData *item = inst->GetUnscaledItem();
+	//	//Log.LogDebugType(Logs::General, Logs::Netcode, "[ERROR] Serialize called for: %s", item->Name);
+	//
+	//	RoF2::structs::ItemSerializationHeader hdr;
+	//
+	//	//sprintf(hdr.unknown000, "06e0002Y1W00");
+	//
+	//	snprintf(hdr.tracking_id, sizeof(hdr.tracking_id), "%016d", item->ID);
+	//
+	//	hdr.stacksize = stackable ? charges : 1;
+	//	hdr.unknown004 = 0;
+	//
+	//	structs::ItemSlotStruct slot_id = ServerToRoF2Slot(slot_id_in, packet_type);
+	//
+	//	hdr.slot_type = (merchant_slot == 0) ? slot_id.SlotType : 9; // 9 is merchant 20 is reclaim items?
+	//	hdr.main_slot = (merchant_slot == 0) ? slot_id.MainSlot : merchant_slot;
+	//	hdr.sub_slot = (merchant_slot == 0) ? slot_id.SubSlot : 0xffff;
+	//	hdr.aug_slot = (merchant_slot == 0) ? slot_id.AugSlot : 0xffff;
+	//	hdr.price = inst->GetPrice();
+	//	hdr.merchant_slot = (merchant_slot == 0) ? 1 : inst->GetMerchantCount();
+	//	hdr.scaled_value = inst->IsScaling() ? inst->GetExp() / 100 : 0;
+	//	hdr.instance_id = (merchant_slot == 0) ? inst->GetSerialNumber() : merchant_slot;
+	//	hdr.unknown028 = 0;
+	//	hdr.last_cast_time = inst->GetRecastTimestamp();
+	//	hdr.charges = (stackable ? (item->MaxCharges ? 1 : 0) : charges);
+	//	hdr.inst_nodrop = inst->IsAttuned() ? 1 : 0;
+	//	hdr.unknown044 = 0;
+	//	hdr.unknown048 = 0;
+	//	hdr.unknown052 = 0;
+	//	hdr.isEvolving = item->EvolvingLevel > 0 ? 1 : 0;
+	//	ss.write((const char*)&hdr, sizeof(RoF2::structs::ItemSerializationHeader));
+	//
+	//	if (item->EvolvingLevel > 0) {
+	//		RoF2::structs::EvolvingItem evotop;
+	//		evotop.unknown001 = 0;
+	//		evotop.unknown002 = 0;
+	//		evotop.unknown003 = 0;
+	//		evotop.unknown004 = 0;
+	//		evotop.evoLevel = item->EvolvingLevel;
+	//		evotop.progress = 95.512;
+	//		evotop.Activated = 1;
+	//		evotop.evomaxlevel = 7;
+	//		ss.write((const char*)&evotop, sizeof(RoF2::structs::EvolvingItem));
+	//	}
+	//	//ORNAMENT IDFILE / ICON
+	//	uint32 ornaIcon = 0;
+	//	uint32 heroModel = 0;
+	//
+	//	if (inst->GetOrnamentationIDFile() && inst->GetOrnamentationIcon())
+	//	{
+	//		char tmp[30]; memset(tmp, 0x0, 30); sprintf(tmp, "IT%d", inst->GetOrnamentationIDFile());
+	//		//Mainhand
+	//		ss.write(tmp, strlen(tmp));
+	//		ss.write((const char*)&null_term, sizeof(uint8));
+	//		//Offhand
+	//		ss.write(tmp, strlen(tmp));
+	//		ss.write((const char*)&null_term, sizeof(uint8));
+	//		ornaIcon = inst->GetOrnamentationIcon();
+	//		heroModel = inst->GetOrnamentHeroModel(InventoryOld::CalcMaterialFromSlot(slot_id_in));
+	//	}
+	//	else
+	//	{
+	//		ss.write((const char*)&null_term, sizeof(uint8)); // no main hand Ornamentation
+	//		ss.write((const char*)&null_term, sizeof(uint8)); // no off hand Ornamentation
+	//	}
+	//
+	//	RoF2::structs::ItemSerializationHeaderFinish hdrf;
+	//	hdrf.ornamentIcon = ornaIcon;
+	//	hdrf.unknowna1 = 0xffffffff;
+	//	hdrf.ornamentHeroModel = heroModel;
+	//	hdrf.unknown063 = 0;
+	//	hdrf.Copied = 0;
+	//	hdrf.unknowna4 = 0xffffffff;
+	//	hdrf.unknowna5 = 0;
+	//	hdrf.ItemClass = item->ItemClass;
+	//
+	//	ss.write((const char*)&hdrf, sizeof(RoF2::structs::ItemSerializationHeaderFinish));
+	//
+	//	if (strlen(item->Name) > 0)
+	//	{
+	//		ss.write(item->Name, strlen(item->Name));
+	//		ss.write((const char*)&null_term, sizeof(uint8));
+	//	}
+	//	else
+	//	{
+	//		ss.write((const char*)&null_term, sizeof(uint8));
+	//	}
+	//
+	//	if (strlen(item->Lore) > 0)
+	//	{
+	//		ss.write(item->Lore, strlen(item->Lore));
+	//		ss.write((const char*)&null_term, sizeof(uint8));
+	//	}
+	//	else
+	//	{
+	//		ss.write((const char*)&null_term, sizeof(uint8));
+	//	}
+	//
+	//	if (strlen(item->IDFile) > 0)
+	//	{
+	//		ss.write(item->IDFile, strlen(item->IDFile));
+	//		ss.write((const char*)&null_term, sizeof(uint8));
+	//	}
+	//	else
+	//	{
+	//		ss.write((const char*)&null_term, sizeof(uint8));
+	//	}
+	//
+	//	ss.write((const char*)&null_term, sizeof(uint8));
+	//	//Log.LogDebugType(Logs::General, Logs::Netcode, "[ERROR] ItemBody struct is %i bytes", sizeof(RoF2::structs::ItemBodyStruct));
+	//	RoF2::structs::ItemBodyStruct ibs;
+	//	memset(&ibs, 0, sizeof(RoF2::structs::ItemBodyStruct));
+	//
+	//	ibs.id = item->ID;
+	//	ibs.weight = item->Weight;
+	//	ibs.norent = item->NoRent;
+	//	ibs.nodrop = item->NoDrop;
+	//	ibs.attune = item->Attuneable;
+	//	ibs.size = item->Size;
+	//	ibs.slots = SwapBits21and22(item->Slots);
+	//	ibs.price = item->Price;
+	//	ibs.icon = item->Icon;
+	//	ibs.unknown1 = 1;
+	//	ibs.unknown2 = 1;
+	//	ibs.BenefitFlag = item->BenefitFlag;
+	//	ibs.tradeskills = item->Tradeskills;
+	//	ibs.CR = item->CR;
+	//	ibs.DR = item->DR;
+	//	ibs.PR = item->PR;
+	//	ibs.MR = item->MR;
+	//	ibs.FR = item->FR;
+	//	ibs.SVCorruption = item->SVCorruption;
+	//	ibs.AStr = item->AStr;
+	//	ibs.ASta = item->ASta;
+	//	ibs.AAgi = item->AAgi;
+	//	ibs.ADex = item->ADex;
+	//	ibs.ACha = item->ACha;
+	//	ibs.AInt = item->AInt;
+	//	ibs.AWis = item->AWis;
+	//
+	//	ibs.HP = item->HP;
+	//	ibs.Mana = item->Mana;
+	//	ibs.Endur = item->Endur;
+	//	ibs.AC = item->AC;
+	//	ibs.regen = item->Regen;
+	//	ibs.mana_regen = item->ManaRegen;
+	//	ibs.end_regen = item->EnduranceRegen;
+	//	ibs.Classes = item->Classes;
+	//	ibs.Races = item->Races;
+	//	ibs.Deity = item->Deity;
+	//	ibs.SkillModValue = item->SkillModValue;
+	//	ibs.SkillModMax = 0xffffffff;
+	//	ibs.SkillModType = (int8)(item->SkillModType);
+	//	ibs.SkillModExtra = 0;
+	//	ibs.BaneDmgRace = item->BaneDmgRace;
+	//	ibs.BaneDmgBody = item->BaneDmgBody;
+	//	ibs.BaneDmgRaceAmt = item->BaneDmgRaceAmt;
+	//	ibs.BaneDmgAmt = item->BaneDmgAmt;
+	//	ibs.Magic = item->Magic;
+	//	ibs.CastTime_ = item->CastTime_;
+	//	ibs.ReqLevel = item->ReqLevel;
+	//	if (item->ReqLevel > 100)
+	//		ibs.ReqLevel = 100;
+	//	ibs.RecLevel = item->RecLevel;
+	//	if (item->RecLevel > 100)
+	//		ibs.RecLevel = 100;
+	//	ibs.RecSkill = item->RecSkill;
+	//	ibs.BardType = item->BardType;
+	//	ibs.BardValue = item->BardValue;
+	//	ibs.Light = item->Light;
+	//	ibs.Delay = item->Delay;
+	//	ibs.ElemDmgType = item->ElemDmgType;
+	//	ibs.ElemDmgAmt = item->ElemDmgAmt;
+	//	ibs.Range = item->Range;
+	//	ibs.Damage = item->Damage;
+	//	ibs.Color = item->Color;
+	//	ibs.Prestige = 0;
+	//	ibs.ItemType = item->ItemType;
+	//	ibs.Material = item->Material;
+	//	ibs.MaterialUnknown1 = 0;
+	//	ibs.EliteMaterial = item->EliteMaterial;
+	//	ibs.HerosForgeModel = item->HerosForgeModel;
+	//	ibs.MaterialUnknown2 = 0;
+	//	ibs.SellRate = item->SellRate;
+	//	ibs.CombatEffects = item->CombatEffects;
+	//	ibs.Shielding = item->Shielding;
+	//	ibs.StunResist = item->StunResist;
+	//	ibs.StrikeThrough = item->StrikeThrough;
+	//	ibs.ExtraDmgSkill = item->ExtraDmgSkill;
+	//	ibs.ExtraDmgAmt = item->ExtraDmgAmt;
+	//	ibs.SpellShield = item->SpellShield;
+	//	ibs.Avoidance = item->Avoidance;
+	//	ibs.Accuracy = item->Accuracy;
+	//	ibs.CharmFileID = item->CharmFileID;
+	//	ibs.FactionAmt1 = item->FactionAmt1;
+	//	ibs.FactionMod1 = item->FactionMod1;
+	//	ibs.FactionAmt2 = item->FactionAmt2;
+	//	ibs.FactionMod2 = item->FactionMod2;
+	//	ibs.FactionAmt3 = item->FactionAmt3;
+	//	ibs.FactionMod3 = item->FactionMod3;
+	//	ibs.FactionAmt4 = item->FactionAmt4;
+	//	ibs.FactionMod4 = item->FactionMod4;
+	//
+	//	ss.write((const char*)&ibs, sizeof(RoF2::structs::ItemBodyStruct));
+	//
+	//	//charm text
+	//	if (strlen(item->CharmFile) > 0)
+	//	{
+	//		ss.write((const char*)item->CharmFile, strlen(item->CharmFile));
+	//		ss.write((const char*)&null_term, sizeof(uint8));
+	//	}
+	//	else
+	//	{
+	//		ss.write((const char*)&null_term, sizeof(uint8));
+	//	}
+	//
+	//	//Log.LogDebugType(Logs::General, Logs::Netcode, "[ERROR] ItemBody secondary struct is %i bytes", sizeof(RoF2::structs::ItemSecondaryBodyStruct));
+	//	RoF2::structs::ItemSecondaryBodyStruct isbs;
+	//	memset(&isbs, 0, sizeof(RoF2::structs::ItemSecondaryBodyStruct));
+	//
+	//	isbs.augtype = item->AugType;
+	//	isbs.augrestrict2 = -1;
+	//	isbs.augrestrict = item->AugRestrict;
+	//
+	//	for (int x = AUG_BEGIN; x < consts::ITEM_COMMON_SIZE; x++)
+	//	{
+	//		isbs.augslots[x].type = item->AugSlotType[x];
+	//		isbs.augslots[x].visible = item->AugSlotVisible[x];
+	//		isbs.augslots[x].unknown = item->AugSlotUnk2[x];
+	//	}
+	//
+	//	isbs.ldonpoint_type = item->PointType;
+	//	isbs.ldontheme = item->LDoNTheme;
+	//	isbs.ldonprice = item->LDoNPrice;
+	//	isbs.ldonsellbackrate = item->LDoNSellBackRate;
+	//	isbs.ldonsold = item->LDoNSold;
+	//
+	//	isbs.bagtype = item->BagType;
+	//	isbs.bagslots = item->BagSlots;
+	//	isbs.bagsize = item->BagSize;
+	//	isbs.wreduction = item->BagWR;
+	//
+	//	isbs.book = item->Book;
+	//	isbs.booktype = item->BookType;
+	//
+	//	ss.write((const char*)&isbs, sizeof(RoF2::structs::ItemSecondaryBodyStruct));
+	//
+	//	if (strlen(item->Filename) > 0)
+	//	{
+	//		ss.write((const char*)item->Filename, strlen(item->Filename));
+	//		ss.write((const char*)&null_term, sizeof(uint8));
+	//	}
+	//	else
+	//	{
+	//		ss.write((const char*)&null_term, sizeof(uint8));
+	//	}
+	//
+	//	//Log.LogDebugType(Logs::General, Logs::Netcode, "[ERROR] ItemBody tertiary struct is %i bytes", sizeof(RoF2::structs::ItemTertiaryBodyStruct));
+	//	RoF2::structs::ItemTertiaryBodyStruct itbs;
+	//	memset(&itbs, 0, sizeof(RoF2::structs::ItemTertiaryBodyStruct));
+	//
+	//	itbs.loregroup = item->LoreGroup;
+	//	itbs.artifact = item->ArtifactFlag;
+	//	itbs.summonedflag = item->SummonedFlag;
+	//	itbs.favor = item->Favor;
+	//	itbs.fvnodrop = item->FVNoDrop;
+	//	itbs.dotshield = item->DotShielding;
+	//	itbs.atk = item->Attack;
+	//	itbs.haste = item->Haste;
+	//	itbs.damage_shield = item->DamageShield;
+	//	itbs.guildfavor = item->GuildFavor;
+	//	itbs.augdistil = item->AugDistiller;
+	//	itbs.unknown3 = 0xffffffff;
+	//	itbs.unknown4 = 0;
+	//	itbs.no_pet = item->NoPet;
+	//	itbs.unknown5 = 0;
+	//
+	//	itbs.potion_belt_enabled = item->PotionBelt;
+	//	itbs.potion_belt_slots = item->PotionBeltSlots;
+	//	itbs.stacksize = stackable ? item->StackSize : 0;
+	//	itbs.no_transfer = item->NoTransfer;
+	//	itbs.expendablearrow = item->ExpendableArrow;
+	//
+	//	itbs.unknown8 = 0;
+	//	itbs.unknown9 = 0;
+	//	itbs.unknown10 = 0;
+	//	itbs.unknown11 = 0;
+	//	itbs.unknown12 = 0;
+	//	itbs.unknown13 = 0;
+	//	itbs.unknown14 = 0;
+	//
+	//	ss.write((const char*)&itbs, sizeof(RoF2::structs::ItemTertiaryBodyStruct));
+	//
+	//	// Effect Structures Broken down to allow variable length strings for effect names
+	//	int32 effect_unknown = 0;
+	//
+	//	//Log.LogDebugType(Logs::General, Logs::Netcode, "[ERROR] ItemBody Click effect struct is %i bytes", sizeof(RoF2::structs::ClickEffectStruct));
+	//	RoF2::structs::ClickEffectStruct ices;
+	//	memset(&ices, 0, sizeof(RoF2::structs::ClickEffectStruct));
+	//
+	//	ices.effect = item->Click.Effect;
+	//	ices.level2 = item->Click.Level2;
+	//	ices.type = item->Click.Type;
+	//	ices.level = item->Click.Level;
+	//	ices.max_charges = item->MaxCharges;
+	//	ices.cast_time = item->CastTime;
+	//	ices.recast = item->RecastDelay;
+	//	ices.recast_type = item->RecastType;
+	//
+	//	ss.write((const char*)&ices, sizeof(RoF2::structs::ClickEffectStruct));
+	//
+	//	if (strlen(item->ClickName) > 0)
+	//	{
+	//		ss.write((const char*)item->ClickName, strlen(item->ClickName));
+	//		ss.write((const char*)&null_term, sizeof(uint8));
+	//	}
+	//	else
+	//	{
+	//		ss.write((const char*)&null_term, sizeof(uint8));
+	//	}
+	//
+	//	ss.write((const char*)&effect_unknown, sizeof(int32));	// clickunk7
+	//
+	//	//Log.LogDebugType(Logs::General, Logs::Netcode, "[ERROR] ItemBody proc effect struct is %i bytes", sizeof(RoF2::structs::ProcEffectStruct));
+	//	RoF2::structs::ProcEffectStruct ipes;
+	//	memset(&ipes, 0, sizeof(RoF2::structs::ProcEffectStruct));
+	//
+	//	ipes.effect = item->Proc.Effect;
+	//	ipes.level2 = item->Proc.Level2;
+	//	ipes.type = item->Proc.Type;
+	//	ipes.level = item->Proc.Level;
+	//	ipes.procrate = item->ProcRate;
+	//
+	//	ss.write((const char*)&ipes, sizeof(RoF2::structs::ProcEffectStruct));
+	//
+	//	if (strlen(item->ProcName) > 0)
+	//	{
+	//		ss.write((const char*)item->ProcName, strlen(item->ProcName));
+	//		ss.write((const char*)&null_term, sizeof(uint8));
+	//	}
+	//	else
+	//	{
+	//		ss.write((const char*)&null_term, sizeof(uint8));
+	//	}
+	//
+	//	ss.write((const char*)&effect_unknown, sizeof(int32));	// unknown5
+	//
+	//	//Log.LogDebugType(Logs::General, Logs::Netcode, "[ERROR] ItemBody worn effect struct is %i bytes", sizeof(RoF2::structs::WornEffectStruct));
+	//	RoF2::structs::WornEffectStruct iwes;
+	//	memset(&iwes, 0, sizeof(RoF2::structs::WornEffectStruct));
+	//
+	//	iwes.effect = item->Worn.Effect;
+	//	iwes.level2 = item->Worn.Level2;
+	//	iwes.type = item->Worn.Type;
+	//	iwes.level = item->Worn.Level;
+	//
+	//	ss.write((const char*)&iwes, sizeof(RoF2::structs::WornEffectStruct));
+	//
+	//	if (strlen(item->WornName) > 0)
+	//	{
+	//		ss.write((const char*)item->WornName, strlen(item->WornName));
+	//		ss.write((const char*)&null_term, sizeof(uint8));
+	//	}
+	//	else
+	//	{
+	//		ss.write((const char*)&null_term, sizeof(uint8));
+	//	}
+	//
+	//	ss.write((const char*)&effect_unknown, sizeof(int32));	// unknown6
+	//
+	//	RoF2::structs::WornEffectStruct ifes;
+	//	memset(&ifes, 0, sizeof(RoF2::structs::WornEffectStruct));
+	//
+	//	ifes.effect = item->Focus.Effect;
+	//	ifes.level2 = item->Focus.Level2;
+	//	ifes.type = item->Focus.Type;
+	//	ifes.level = item->Focus.Level;
+	//
+	//	ss.write((const char*)&ifes, sizeof(RoF2::structs::WornEffectStruct));
+	//
+	//	if (strlen(item->FocusName) > 0)
+	//	{
+	//		ss.write((const char*)item->FocusName, strlen(item->FocusName));
+	//		ss.write((const char*)&null_term, sizeof(uint8));
+	//	}
+	//	else
+	//	{
+	//		ss.write((const char*)&null_term, sizeof(uint8));
+	//	}
+	//
+	//	ss.write((const char*)&effect_unknown, sizeof(int32));	// unknown6
+	//
+	//	RoF2::structs::WornEffectStruct ises;
+	//	memset(&ises, 0, sizeof(RoF2::structs::WornEffectStruct));
+	//
+	//	ises.effect = item->Scroll.Effect;
+	//	ises.level2 = item->Scroll.Level2;
+	//	ises.type = item->Scroll.Type;
+	//	ises.level = item->Scroll.Level;
+	//
+	//	ss.write((const char*)&ises, sizeof(RoF2::structs::WornEffectStruct));
+	//
+	//	if (strlen(item->ScrollName) > 0)
+	//	{
+	//		ss.write((const char*)item->ScrollName, strlen(item->ScrollName));
+	//		ss.write((const char*)&null_term, sizeof(uint8));
+	//	}
+	//	else
+	//	{
+	//		ss.write((const char*)&null_term, sizeof(uint8));
+	//	}
+	//
+	//	ss.write((const char*)&effect_unknown, sizeof(int32));	// unknown6
+	//
+	//	// Bard Effect?
+	//	RoF2::structs::WornEffectStruct ibes;
+	//	memset(&ibes, 0, sizeof(RoF2::structs::WornEffectStruct));
+	//
+	//	ibes.effect = item->Bard.Effect;
+	//	ibes.level2 = item->Bard.Level2;
+	//	ibes.type = item->Bard.Type;
+	//	ibes.level = item->Bard.Level;
+	//	//ibes.unknown6 = 0xffffffff;
+	//
+	//	ss.write((const char*)&ibes, sizeof(RoF2::structs::WornEffectStruct));
+	//
+	//	/*
+	//	if(strlen(item->BardName) > 0)
+	//	{
+	//	ss.write((const char*)item->BardName, strlen(item->BardName));
+	//	ss.write((const char*)&null_term, sizeof(uint8));
+	//	}
+	//	else */
+	//	ss.write((const char*)&null_term, sizeof(uint8));
+	//
+	//	ss.write((const char*)&effect_unknown, sizeof(int32));	// unknown6
+	//	// End of Effects
+	//
+	//	//Log.LogDebugType(Logs::General, Logs::Netcode, "[ERROR] ItemBody Quaternary effect struct is %i bytes", sizeof(RoF2::structs::ItemQuaternaryBodyStruct));
+	//	RoF2::structs::ItemQuaternaryBodyStruct iqbs;
+	//	memset(&iqbs, 0, sizeof(RoF2::structs::ItemQuaternaryBodyStruct));
+	//
+	//	iqbs.scriptfileid = item->ScriptFileID;
+	//	iqbs.quest_item = item->QuestItemFlag;
+	//	iqbs.Power = 0;
+	//	iqbs.Purity = item->Purity;
+	//	iqbs.unknown16 = 0;
+	//	iqbs.BackstabDmg = item->BackstabDmg;
+	//	iqbs.DSMitigation = item->DSMitigation;
+	//	iqbs.HeroicStr = item->HeroicStr;
+	//	iqbs.HeroicInt = item->HeroicInt;
+	//	iqbs.HeroicWis = item->HeroicWis;
+	//	iqbs.HeroicAgi = item->HeroicAgi;
+	//	iqbs.HeroicDex = item->HeroicDex;
+	//	iqbs.HeroicSta = item->HeroicSta;
+	//	iqbs.HeroicCha = item->HeroicCha;
+	//	iqbs.HeroicMR = item->HeroicMR;
+	//	iqbs.HeroicFR = item->HeroicFR;
+	//	iqbs.HeroicCR = item->HeroicCR;
+	//	iqbs.HeroicDR = item->HeroicDR;
+	//	iqbs.HeroicPR = item->HeroicPR;
+	//	iqbs.HeroicSVCorrup = item->HeroicSVCorrup;
+	//	iqbs.HealAmt = item->HealAmt;
+	//	iqbs.SpellDmg = item->SpellDmg;
+	//	iqbs.clairvoyance = item->Clairvoyance;
+	//
+	//	//unknown18;	//Power Source Capacity or evolve filename?
+	//	//evolve_string; // Some String, but being evolution related is just a guess
+	//
+	//	iqbs.Heirloom = 0;
+	//	iqbs.Placeable = 0;
+	//
+	//	iqbs.unknown28 = -1;
+	//	iqbs.unknown30 = -1;
+	//
+	//	iqbs.NoZone = 0;
+	//	iqbs.NoGround = 0;
+	//	iqbs.unknown37a = 0;	// (guessed position) New to RoF2
+	//	iqbs.unknown38 = 0;
+	//
+	//	iqbs.unknown39 = 1;
+	//
+	//	iqbs.subitem_count = 0;
+	//
+	//	char *SubSerializations[10]; // <watch>
+	//
+	//	uint32 SubLengths[10];
+	//
+	//	for (int x = SUB_BEGIN; x < EmuConstants::ITEM_CONTAINER_SIZE; ++x) {
+	//
+	//		SubSerializations[x] = nullptr;
+	//
+	//		const ItemInst* subitem = ((const ItemInst*)inst)->GetItem(x);
+	//
+	//		if (subitem) {
+	//
+	//			int SubSlotNumber;
+	//
+	//			iqbs.subitem_count++;
+	//
+	//			if (slot_id_in >= EmuConstants::GENERAL_BEGIN && slot_id_in <= EmuConstants::GENERAL_END) // (< 30) - no cursor?
+	//				//SubSlotNumber = (((slot_id_in + 3) * 10) + x + 1);
+	//				SubSlotNumber = (((slot_id_in + 3) * EmuConstants::ITEM_CONTAINER_SIZE) + x + 1);
+	//			else if (slot_id_in >= EmuConstants::BANK_BEGIN && slot_id_in <= EmuConstants::BANK_END)
+	//				//SubSlotNumber = (((slot_id_in - 2000) * 10) + 2030 + x + 1);
+	//				SubSlotNumber = (((slot_id_in - EmuConstants::BANK_BEGIN) * EmuConstants::ITEM_CONTAINER_SIZE) + EmuConstants::BANK_BAGS_BEGIN + x);
+	//			else if (slot_id_in >= EmuConstants::SHARED_BANK_BEGIN && slot_id_in <= EmuConstants::SHARED_BANK_END)
+	//				//SubSlotNumber = (((slot_id_in - 2500) * 10) + 2530 + x + 1);
+	//				SubSlotNumber = (((slot_id_in - EmuConstants::SHARED_BANK_BEGIN) * EmuConstants::ITEM_CONTAINER_SIZE) + EmuConstants::SHARED_BANK_BAGS_BEGIN + x);
+	//			else
+	//				SubSlotNumber = slot_id_in; // ???????
+	//
+	//			/*
+	//			// TEST CODE: <watch>
+	//			SubSlotNumber = InventoryOld::CalcSlotID(slot_id_in, x);
+	//			*/
+	//
+	//			SubSerializations[x] = SerializeItem(subitem, SubSlotNumber, &SubLengths[x], depth + 1, packet_type);
+	//		}
+	//	}
+	//
+	//	ss.write((const char*)&iqbs, sizeof(RoF2::structs::ItemQuaternaryBodyStruct));
+	//
+	//	for (int x = SUB_BEGIN; x < EmuConstants::ITEM_CONTAINER_SIZE; ++x) {
+	//
+	//		if (SubSerializations[x]) {
+	//
+	//			ss.write((const char*)&x, sizeof(uint32));
+	//
+	//			ss.write(SubSerializations[x], SubLengths[x]);
+	//
+	//			safe_delete_array(SubSerializations[x]);
+	//		}
+	//	}
+	//
+	//	char* item_serial = new char[ss.tellp()];
+	//	memset(item_serial, 0, ss.tellp());
+	//	memcpy(item_serial, ss.str().c_str(), ss.tellp());
+	//
+	//	*length = ss.tellp();
+	//	return item_serial;
+	//}
 
 	void SerializeItem(EQEmu::MemoryBuffer &packet_data, EQEmu::ItemInstance *inst, int container_id, int slot_id, int bag_id, int aug_id) {
 		int ornamentation_augtype = RuleI(Character, OrnamentationAugmentType);
@@ -5790,23 +5800,24 @@ namespace RoF2
 		uint32 orn_icon = 0;
 		uint32 hero_model = 0;
 
-		//if(inst->GetOrnamentationIDFile() && inst->GetOrnamentationIcon())
-		//{
-		//	char tmp[30]; memset(tmp, 0x0, 30); sprintf(tmp, "IT%d", inst->GetOrnamentationIDFile());
-		//	//Mainhand
-		//	packet_data.Write(tmp, strlen(tmp));
-		//	packet_data.Write((const char*)&null_term, sizeof(uint8));
-		//	//Offhand
-		//	ss.write(tmp, strlen(tmp));
-		//	ss.write((const char*)&null_term, sizeof(uint8));
-		//	orn_icon = inst->GetOrnamentationIcon();
-		//	hero_model = inst->GetOrnamentHeroModel(InventoryOld::CalcMaterialFromSlot(slot_id_in));
-		//}
-		//else
-		//{
-		packet_data.Write((const char*)&null_term, sizeof(uint8)); // no main hand Ornamentation
-		packet_data.Write((const char*)&null_term, sizeof(uint8)); // no off hand Ornamentation
-		//}
+		if(inst->GetOrnamentIDFile() && inst->GetOrnamentIcon())
+		{
+			char tmp[30] = { 0 };
+			sprintf(tmp, "IT%d", inst->GetOrnamentIDFile());
+			//Mainhand
+			packet_data.Write(tmp, strlen(tmp));
+			packet_data.Write((const char*)&null_term, sizeof(uint8));
+			//Offhand
+			packet_data.Write(tmp, strlen(tmp));
+			packet_data.Write((const char*)&null_term, sizeof(uint8));
+			orn_icon = inst->GetOrnamentIcon();
+			hero_model = inst->GetOrnamentHeroModel(EQEmu::Inventory::CalcMaterialFromSlot(EQEmu::InventorySlot(container_id, slot_id)));
+		}
+		else
+		{
+			packet_data.Write((const char*)&null_term, sizeof(uint8)); // no main hand Ornamentation
+			packet_data.Write((const char*)&null_term, sizeof(uint8)); // no off hand Ornamentation
+		}
 
 		RoF2::structs::ItemSerializationHeaderFinish hdrf;
 		hdrf.ornamentIcon = orn_icon;
@@ -5958,7 +5969,6 @@ namespace RoF2
 			packet_data.Write((const char*)&null_term, sizeof(uint8));
 		}
 
-		//Log.LogDebugType(Logs::General, Logs::Netcode, "[ERROR] ItemBody secondary struct is %i bytes", sizeof(RoF2::structs::ItemSecondaryBodyStruct));
 		RoF2::structs::ItemSecondaryBodyStruct isbs;
 		memset(&isbs, 0, sizeof(RoF2::structs::ItemSecondaryBodyStruct));
 
@@ -5999,7 +6009,6 @@ namespace RoF2
 			packet_data.Write((const char*)&null_term, sizeof(uint8));
 		}
 
-		//Log.LogDebugType(Logs::General, Logs::Netcode, "[ERROR] ItemBody tertiary struct is %i bytes", sizeof(RoF2::structs::ItemTertiaryBodyStruct));
 		RoF2::structs::ItemTertiaryBodyStruct itbs;
 		memset(&itbs, 0, sizeof(RoF2::structs::ItemTertiaryBodyStruct));
 
@@ -6038,7 +6047,6 @@ namespace RoF2
 		// Effect Structures Broken down to allow variable length strings for effect names
 		int32 effect_unknown = 0;
 
-		//Log.LogDebugType(Logs::General, Logs::Netcode, "[ERROR] ItemBody Click effect struct is %i bytes", sizeof(RoF2::structs::ClickEffectStruct));
 		RoF2::structs::ClickEffectStruct ices;
 		memset(&ices, 0, sizeof(RoF2::structs::ClickEffectStruct));
 
@@ -6065,7 +6073,6 @@ namespace RoF2
 
 		packet_data.Write((const char*)&effect_unknown, sizeof(int32));	// clickunk7
 
-		//Log.LogDebugType(Logs::General, Logs::Netcode, "[ERROR] ItemBody proc effect struct is %i bytes", sizeof(RoF2::structs::ProcEffectStruct));
 		RoF2::structs::ProcEffectStruct ipes;
 		memset(&ipes, 0, sizeof(RoF2::structs::ProcEffectStruct));
 
@@ -6089,7 +6096,6 @@ namespace RoF2
 
 		packet_data.Write((const char*)&effect_unknown, sizeof(int32));	// unknown5
 
-		//Log.LogDebugType(Logs::General, Logs::Netcode, "[ERROR] ItemBody worn effect struct is %i bytes", sizeof(RoF2::structs::WornEffectStruct));
 		RoF2::structs::WornEffectStruct iwes;
 		memset(&iwes, 0, sizeof(RoF2::structs::WornEffectStruct));
 
@@ -6173,7 +6179,6 @@ namespace RoF2
 		packet_data.Write((const char*)&effect_unknown, sizeof(int32));	// unknown6
 		// End of Effects
 
-		//Log.LogDebugType(Logs::General, Logs::Netcode, "[ERROR] ItemBody Quaternary effect struct is %i bytes", sizeof(RoF2::structs::ItemQuaternaryBodyStruct));
 		RoF2::structs::ItemQuaternaryBodyStruct iqbs;
 		memset(&iqbs, 0, sizeof(RoF2::structs::ItemQuaternaryBodyStruct));
 

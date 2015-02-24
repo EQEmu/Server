@@ -51,6 +51,44 @@ namespace EQEmu
 		InvTypeGuildTribute
 	};
 
+	enum PersonaInventorylSlot : int
+	{
+		PersonalSlotCharm = 0,
+		PersonalSlotEar1,
+		PersonalSlotHead,
+		PersonalSlotFace,
+		PersonalSlotEar2,
+		PersonalSlotNeck,
+		PersonalSlotShoulders,
+		PersonalSlotArms,
+		PersonalSlotBack,
+		PersonalSlotWrist1,
+		PersonalSlotWrist2,
+		PersonalSlotRange,
+		PersonalSlotHands,
+		PersonalSlotPrimary,
+		PersonalSlotSecondary,
+		PersonalSlotFinger1,
+		PersonalSlotFinger2,
+		PersonalSlotChest,
+		PersonalSlotLegs,
+		PersonalSlotFeet,
+		PersonalSlotWaist,
+		PersonalSlotPowerSource,
+		PersonalSlotAmmo,
+		PersonalSlotGeneral1,
+		PersonalSlotGeneral2,
+		PersonalSlotGeneral3,
+		PersonalSlotGeneral4,
+		PersonalSlotGeneral5,
+		PersonalSlotGeneral6,
+		PersonalSlotGeneral7,
+		PersonalSlotGeneral8,
+		PersonalSlotGeneral9,
+		PersonalSlotGeneral10,
+		PersonalSlotCursor
+	};
+
 	class Inventory
 	{
 	public:
@@ -59,8 +97,11 @@ namespace EQEmu
 
 		std::shared_ptr<ItemInstance> Get(const InventorySlot &slot);
 		bool Put(const InventorySlot &slot, std::shared_ptr<ItemInstance> inst);
-		bool Swap(const InventorySlot &src, const InventorySlot &dest);
+		bool Swap(const InventorySlot &src, const InventorySlot &dest, int charges);
 
+		//utility
+		static int CalcMaterialFromSlot(const InventorySlot &slot);
+		static InventorySlot CalcSlotFromMaterial(int material);
 		bool Serialize(MemoryBuffer &buf);
 	private:
 		struct impl;

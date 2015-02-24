@@ -716,122 +716,122 @@ void Client::SendCursorBuffer()
 
 // Remove item from inventory
 void Client::DeleteItemInInventory(int16 slot_id, int8 quantity, bool client_update, bool update_db) {
-	#if (EQDEBUG >= 5)
-		Log.Out(Logs::General, Logs::None, "DeleteItemInInventory(%i, %i, %s)", slot_id, quantity, (client_update) ? "true":"false");
-	#endif
-
-	// Added 'IsSlotValid(slot_id)' check to both segments of client packet processing.
-	// - cursor queue slots were slipping through and crashing client
-	if(!m_inv[slot_id]) {
-		// Make sure the client deletes anything in this slot to match the server.
-		if(client_update && IsValidSlot(slot_id)) {
-			EQApplicationPacket* outapp;
-			outapp = new EQApplicationPacket(OP_DeleteItem, sizeof(DeleteItem_Struct));
-			DeleteItem_Struct* delitem	= (DeleteItem_Struct*)outapp->pBuffer;
-			delitem->from_slot			= slot_id;
-			delitem->to_slot			= 0xFFFFFFFF;
-			delitem->number_in_stack	= 0xFFFFFFFF;
-			QueuePacket(outapp);
-			safe_delete(outapp);
-		}
-		return;
-	}
-
-	// start QS code
-	if(RuleB(QueryServ, PlayerLogDeletes)) {
-		uint16 delete_count = 0;
-
-		if(m_inv[slot_id]) { delete_count += m_inv.GetItem(slot_id)->GetTotalItemCount(); }
-
-		ServerPacket* qspack = new ServerPacket(ServerOP_QSPlayerLogDeletes, sizeof(QSPlayerLogDelete_Struct) + (sizeof(QSDeleteItems_Struct) * delete_count));
-		QSPlayerLogDelete_Struct* qsaudit = (QSPlayerLogDelete_Struct*)qspack->pBuffer;
-		uint16 parent_offset = 0;
-
-		qsaudit->char_id	= character_id;
-		qsaudit->stack_size = quantity;
-		qsaudit->char_count = delete_count;
-
-		qsaudit->items[parent_offset].char_slot = slot_id;
-		qsaudit->items[parent_offset].item_id	= m_inv[slot_id]->GetID();
-		qsaudit->items[parent_offset].charges	= m_inv[slot_id]->GetCharges();
-		qsaudit->items[parent_offset].aug_1		= m_inv[slot_id]->GetAugmentItemID(1);
-		qsaudit->items[parent_offset].aug_2		= m_inv[slot_id]->GetAugmentItemID(2);
-		qsaudit->items[parent_offset].aug_3		= m_inv[slot_id]->GetAugmentItemID(3);
-		qsaudit->items[parent_offset].aug_4		= m_inv[slot_id]->GetAugmentItemID(4);
-		qsaudit->items[parent_offset].aug_5		= m_inv[slot_id]->GetAugmentItemID(5);
-
-		if(m_inv[slot_id]->IsType(ItemClassContainer)) {
-			for(uint8 bag_idx = SUB_BEGIN; bag_idx < m_inv[slot_id]->GetItem()->BagSlots; bag_idx++) {
-				ItemInst* bagitem = m_inv[slot_id]->GetItem(bag_idx);
-
-				if(bagitem) {
-					int16 bagslot_id = InventoryOld::CalcSlotId(slot_id, bag_idx);
-
-					qsaudit->items[++parent_offset].char_slot	= bagslot_id;
-					qsaudit->items[parent_offset].item_id		= bagitem->GetID();
-					qsaudit->items[parent_offset].charges		= bagitem->GetCharges();
-					qsaudit->items[parent_offset].aug_1			= bagitem->GetAugmentItemID(1);
-					qsaudit->items[parent_offset].aug_2			= bagitem->GetAugmentItemID(2);
-					qsaudit->items[parent_offset].aug_3			= bagitem->GetAugmentItemID(3);
-					qsaudit->items[parent_offset].aug_4			= bagitem->GetAugmentItemID(4);
-					qsaudit->items[parent_offset].aug_5			= bagitem->GetAugmentItemID(5);
-				}
-			}
-		}
-
-		qspack->Deflate();
-		if(worldserver.Connected()) { worldserver.SendPacket(qspack); }
-		safe_delete(qspack);
-	}
-	// end QS code
-
-	bool isDeleted = m_inv.DeleteItem(slot_id, quantity);
-
-	const ItemInst* inst = nullptr;
-	if (slot_id == MainCursor) {
-		auto s = m_inv.cursor_cbegin(), e = m_inv.cursor_cend();
-		if(update_db)
-			database.SaveCursor(character_id, s, e);
-	}
-	else {
-		// Save change to database
-		inst = m_inv[slot_id];
-		if(update_db)
-			database.SaveInventory(character_id, inst, slot_id);
-	}
-
-	if(client_update && IsValidSlot(slot_id)) {
-		EQApplicationPacket* outapp = nullptr;
-		if(inst) {
-			if (!inst->IsStackable() && !isDeleted) {
-				// Non stackable item with charges = Item with clicky spell effect ? Delete a charge.
-				outapp = new EQApplicationPacket(OP_DeleteCharge, sizeof(MoveItem_Struct));
-			}
-			else {
-				// Stackable, arrows, etc ? Delete one from the stack
-				outapp = new EQApplicationPacket(OP_DeleteItem, sizeof(MoveItem_Struct));
-			}
-
-			DeleteItem_Struct* delitem	= (DeleteItem_Struct*)outapp->pBuffer;
-			delitem->from_slot			= slot_id;
-			delitem->to_slot			= 0xFFFFFFFF;
-			delitem->number_in_stack	= 0xFFFFFFFF;
-
-			for(int loop=0;loop<quantity;loop++)
-				QueuePacket(outapp);
-			safe_delete(outapp);
-		}
-		else {
-			outapp = new EQApplicationPacket(OP_MoveItem, sizeof(MoveItem_Struct));
-			MoveItem_Struct* delitem	= (MoveItem_Struct*)outapp->pBuffer;
-			delitem->from_slot			= slot_id;
-			delitem->to_slot			= 0xFFFFFFFF;
-			delitem->number_in_stack	= 0xFFFFFFFF;
-
-			QueuePacket(outapp);
-			safe_delete(outapp);
-		}
-	}
+//	#if (EQDEBUG >= 5)
+//		Log.Out(Logs::General, Logs::None, "DeleteItemInInventory(%i, %i, %s)", slot_id, quantity, (client_update) ? "true":"false");
+//	#endif
+//
+//	// Added 'IsSlotValid(slot_id)' check to both segments of client packet processing.
+//	// - cursor queue slots were slipping through and crashing client
+//	if(!m_inv[slot_id]) {
+//		// Make sure the client deletes anything in this slot to match the server.
+//		if(client_update && IsValidSlot(slot_id)) {
+//			EQApplicationPacket* outapp;
+//			outapp = new EQApplicationPacket(OP_DeleteItem, sizeof(DeleteItem_Struct));
+//			DeleteItem_Struct* delitem	= (DeleteItem_Struct*)outapp->pBuffer;
+//			delitem->from_slot			= slot_id;
+//			delitem->to_slot			= 0xFFFFFFFF;
+//			delitem->number_in_stack	= 0xFFFFFFFF;
+//			QueuePacket(outapp);
+//			safe_delete(outapp);
+//		}
+//		return;
+//	}
+//
+//	// start QS code
+//	if(RuleB(QueryServ, PlayerLogDeletes)) {
+//		uint16 delete_count = 0;
+//
+//		if(m_inv[slot_id]) { delete_count += m_inv.GetItem(slot_id)->GetTotalItemCount(); }
+//
+//		ServerPacket* qspack = new ServerPacket(ServerOP_QSPlayerLogDeletes, sizeof(QSPlayerLogDelete_Struct) + (sizeof(QSDeleteItems_Struct) * delete_count));
+//		QSPlayerLogDelete_Struct* qsaudit = (QSPlayerLogDelete_Struct*)qspack->pBuffer;
+//		uint16 parent_offset = 0;
+//
+//		qsaudit->char_id	= character_id;
+//		qsaudit->stack_size = quantity;
+//		qsaudit->char_count = delete_count;
+//
+//		qsaudit->items[parent_offset].char_slot = slot_id;
+//		qsaudit->items[parent_offset].item_id	= m_inv[slot_id]->GetID();
+//		qsaudit->items[parent_offset].charges	= m_inv[slot_id]->GetCharges();
+//		qsaudit->items[parent_offset].aug_1		= m_inv[slot_id]->GetAugmentItemID(1);
+//		qsaudit->items[parent_offset].aug_2		= m_inv[slot_id]->GetAugmentItemID(2);
+//		qsaudit->items[parent_offset].aug_3		= m_inv[slot_id]->GetAugmentItemID(3);
+//		qsaudit->items[parent_offset].aug_4		= m_inv[slot_id]->GetAugmentItemID(4);
+//		qsaudit->items[parent_offset].aug_5		= m_inv[slot_id]->GetAugmentItemID(5);
+//
+//		if(m_inv[slot_id]->IsType(ItemClassContainer)) {
+//			for(uint8 bag_idx = SUB_BEGIN; bag_idx < m_inv[slot_id]->GetItem()->BagSlots; bag_idx++) {
+//				ItemInst* bagitem = m_inv[slot_id]->GetItem(bag_idx);
+//
+//				if(bagitem) {
+//					int16 bagslot_id = InventoryOld::CalcSlotId(slot_id, bag_idx);
+//
+//					qsaudit->items[++parent_offset].char_slot	= bagslot_id;
+//					qsaudit->items[parent_offset].item_id		= bagitem->GetID();
+//					qsaudit->items[parent_offset].charges		= bagitem->GetCharges();
+//					qsaudit->items[parent_offset].aug_1			= bagitem->GetAugmentItemID(1);
+//					qsaudit->items[parent_offset].aug_2			= bagitem->GetAugmentItemID(2);
+//					qsaudit->items[parent_offset].aug_3			= bagitem->GetAugmentItemID(3);
+//					qsaudit->items[parent_offset].aug_4			= bagitem->GetAugmentItemID(4);
+//					qsaudit->items[parent_offset].aug_5			= bagitem->GetAugmentItemID(5);
+//				}
+//			}
+//		}
+//
+//		qspack->Deflate();
+//		if(worldserver.Connected()) { worldserver.SendPacket(qspack); }
+//		safe_delete(qspack);
+//	}
+//	// end QS code
+//
+//	bool isDeleted = m_inv.DeleteItem(slot_id, quantity);
+//
+//	const ItemInst* inst = nullptr;
+//	if (slot_id == MainCursor) {
+//		auto s = m_inv.cursor_cbegin(), e = m_inv.cursor_cend();
+//		if(update_db)
+//			database.SaveCursor(character_id, s, e);
+//	}
+//	else {
+//		// Save change to database
+//		inst = m_inv[slot_id];
+//		if(update_db)
+//			database.SaveInventory(character_id, inst, slot_id);
+//	}
+//
+//	if(client_update && IsValidSlot(slot_id)) {
+//		EQApplicationPacket* outapp = nullptr;
+//		if(inst) {
+//			if (!inst->IsStackable() && !isDeleted) {
+//				// Non stackable item with charges = Item with clicky spell effect ? Delete a charge.
+//				outapp = new EQApplicationPacket(OP_DeleteCharge, sizeof(MoveItem_Struct));
+//			}
+//			else {
+//				// Stackable, arrows, etc ? Delete one from the stack
+//				outapp = new EQApplicationPacket(OP_DeleteItem, sizeof(MoveItem_Struct));
+//			}
+//
+//			DeleteItem_Struct* delitem	= (DeleteItem_Struct*)outapp->pBuffer;
+//			delitem->from_slot			= slot_id;
+//			delitem->to_slot			= 0xFFFFFFFF;
+//			delitem->number_in_stack	= 0xFFFFFFFF;
+//
+//			for(int loop=0;loop<quantity;loop++)
+//				QueuePacket(outapp);
+//			safe_delete(outapp);
+//		}
+//		else {
+//			outapp = new EQApplicationPacket(OP_MoveItem, sizeof(MoveItem_Struct));
+//			MoveItem_Struct* delitem	= (MoveItem_Struct*)outapp->pBuffer;
+//			delitem->from_slot			= slot_id;
+//			delitem->to_slot			= 0xFFFFFFFF;
+//			delitem->number_in_stack	= 0xFFFFFFFF;
+//
+//			QueuePacket(outapp);
+//			safe_delete(outapp);
+//		}
+//	}
 }
 
 bool Client::PushItemOnCursor(const ItemInst& inst, bool client_update)
@@ -1315,7 +1315,7 @@ bool Client::IsBankSlot(uint32 slot)
 
 // Moves items around both internally and in the database
 // In the future, this can be optimized by pushing all changes through one database REPLACE call
-bool Client::SwapItem(MoveItem_Struct* move_in) {
+bool Client::SwapItem(MoveItemOld_Struct* move_in) {
 
 	uint32 src_slot_check = move_in->from_slot;
 	uint32 dst_slot_check = move_in->to_slot;
@@ -1788,7 +1788,7 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 	return true;
 }
 
-void Client::SwapItemResync(MoveItem_Struct* move_slots) {
+void Client::SwapItemResync(MoveItemOld_Struct* move_slots) {
 	// wow..this thing created a helluva memory leak...
 	// with any luck..this won't be needed in the future
 
@@ -1883,7 +1883,7 @@ void Client::SwapItemResync(MoveItem_Struct* move_slots) {
 	}
 }
 
-void Client::QSSwapItemAuditor(MoveItem_Struct* move_in, bool postaction_call) {
+void Client::QSSwapItemAuditor(MoveItemOld_Struct* move_in, bool postaction_call) {
 	int16 from_slot_id = static_cast<int16>(move_in->from_slot);
 	int16 to_slot_id	= static_cast<int16>(move_in->to_slot);
 	int16 move_amount	= static_cast<int16>(move_in->number_in_stack);

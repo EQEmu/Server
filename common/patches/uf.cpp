@@ -1504,14 +1504,14 @@ namespace UF
 
 	ENCODE(OP_MoveItem)
 	{
-		ENCODE_LENGTH_EXACT(MoveItem_Struct);
-		SETUP_DIRECT_ENCODE(MoveItem_Struct, structs::MoveItem_Struct);
-
-		eq->from_slot = ServerToUFSlot(emu->from_slot);
-		eq->to_slot = ServerToUFSlot(emu->to_slot);
-		OUT(number_in_stack);
-
-		FINISH_ENCODE();
+		//ENCODE_LENGTH_EXACT(MoveItem_Struct);
+		//SETUP_DIRECT_ENCODE(MoveItem_Struct, structs::MoveItem_Struct);
+		//
+		//eq->from_slot = ServerToUFSlot(emu->from_slot);
+		//eq->to_slot = ServerToUFSlot(emu->to_slot);
+		//OUT(number_in_stack);
+		//
+		//FINISH_ENCODE();
 	}
 
 	ENCODE(OP_NewSpawn) { ENCODE_FORWARD(OP_ZoneSpawns); }
@@ -3582,16 +3582,16 @@ namespace UF
 
 	DECODE(OP_MoveItem)
 	{
-		DECODE_LENGTH_EXACT(structs::MoveItem_Struct);
-		SETUP_DIRECT_DECODE(MoveItem_Struct, structs::MoveItem_Struct);
-
-		Log.Out(Logs::General, Logs::Netcode, "[UF] Moved item from %u to %u", eq->from_slot, eq->to_slot);
-
-		emu->from_slot = UFToServerSlot(eq->from_slot);
-		emu->to_slot = UFToServerSlot(eq->to_slot);
-		IN(number_in_stack);
-
-		FINISH_DIRECT_DECODE();
+		//DECODE_LENGTH_EXACT(structs::MoveItem_Struct);
+		//SETUP_DIRECT_DECODE(MoveItem_Struct, structs::MoveItem_Struct);
+		//
+		//Log.Out(Logs::General, Logs::Netcode, "[UF] Moved item from %u to %u", eq->from_slot, eq->to_slot);
+		//
+		//emu->from_slot = UFToServerSlot(eq->from_slot);
+		//emu->to_slot = UFToServerSlot(eq->to_slot);
+		//IN(number_in_stack);
+		//
+		//FINISH_DIRECT_DECODE();
 	}
 
 	DECODE(OP_PetCommands)

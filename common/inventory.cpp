@@ -61,6 +61,8 @@ bool EQEmu::Inventory::Put(const InventorySlot &slot, std::shared_ptr<ItemInstan
 		impl_->containers_.insert(std::pair<int, ItemContainer>(slot.type_, ItemContainer()));
 	}
 
+	//Verify item can be put into the slot requested
+
 	auto &container = impl_->containers_[slot.type_];
 	if(slot.bag_index_ > -1) {
 		auto item = container.Get(slot.slot_);
@@ -92,8 +94,62 @@ bool EQEmu::Inventory::Put(const InventorySlot &slot, std::shared_ptr<ItemInstan
 	return false;
 }
 
-bool EQEmu::Inventory::Swap(const InventorySlot &src, const InventorySlot &dest) {
+bool EQEmu::Inventory::Swap(const InventorySlot &src, const InventorySlot &dest, int charges) {
 	return false;
+}
+
+int EQEmu::Inventory::CalcMaterialFromSlot(const InventorySlot &slot) {
+	if(slot.type_ != 0)
+		return _MaterialInvalid;
+
+	switch(slot.slot_) {
+	case PersonalSlotHead:
+		return MaterialHead;
+	case PersonalSlotChest:
+		return MaterialChest;
+	case PersonalSlotArms:
+		return MaterialArms;
+	case PersonalSlotWrist1:
+		return MaterialWrist;
+	case PersonalSlotHands:
+		return MaterialHands;
+	case PersonalSlotLegs:
+		return MaterialLegs;
+	case PersonalSlotFeet:
+		return MaterialFeet;
+	case PersonalSlotPrimary:
+		return MaterialPrimary;
+	case PersonalSlotSecondary:
+		return MaterialSecondary;
+	default:
+		return _MaterialInvalid;
+	}
+}
+
+EQEmu::InventorySlot EQEmu::Inventory::CalcSlotFromMaterial(int material) {
+	switch(material)
+	{
+	case MaterialHead:
+		return EQEmu::InventorySlot(InvTypePersonal, PersonalSlotHead);
+	case MaterialChest:
+		return EQEmu::InventorySlot(InvTypePersonal, PersonalSlotChest);
+	case MaterialArms:
+		return EQEmu::InventorySlot(InvTypePersonal, PersonalSlotArms);
+	case MaterialWrist:
+		return EQEmu::InventorySlot(InvTypePersonal, PersonalSlotWrist1);
+	case MaterialHands:
+		return EQEmu::InventorySlot(InvTypePersonal, PersonalSlotHands);
+	case MaterialLegs:
+		return EQEmu::InventorySlot(InvTypePersonal, PersonalSlotLegs);
+	case MaterialFeet:
+		return EQEmu::InventorySlot(InvTypePersonal, PersonalSlotFeet);
+	case MaterialPrimary:
+		return EQEmu::InventorySlot(InvTypePersonal, PersonalSlotPrimary);
+	case MaterialSecondary:
+		return EQEmu::InventorySlot(InvTypePersonal, PersonalSlotSecondary);
+	default:
+		return EQEmu::InventorySlot(-1, -1);
+	}
 }
 
 bool EQEmu::Inventory::Serialize(MemoryBuffer &buf) {
