@@ -52,6 +52,10 @@ EQEmu::MemoryBuffer::MemoryBuffer(MemoryBuffer &&other) {
 }
 
 EQEmu::MemoryBuffer& EQEmu::MemoryBuffer::operator=(const MemoryBuffer &other) {
+	if(this == &other) {
+		return *this;
+	}
+
 	if(buffer_) {
 		delete[] buffer_;
 	}

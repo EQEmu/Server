@@ -458,7 +458,7 @@ private:
 		mb2 = mb2;
 		void *addr2 = (void*)mb2;
 
-		TEST_ASSERT(addr != addr2);
+		TEST_ASSERT(addr == addr2);
 
 		mb2 = std::move(mb2);
 		addr2 = (void*)mb2;
