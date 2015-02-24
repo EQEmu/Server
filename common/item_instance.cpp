@@ -30,8 +30,12 @@ struct EQEmu::ItemInstance::impl {
 	uint32 ornament_idfile_;
 	uint32 ornament_icon_;
 	uint32 ornament_hero_model_;
-	uint64 tracking_id_;
+	char tracking_id_[17];
+	uint32 serial_id_;
 	uint32 recast_timestamp_;
+	uint32 merchant_slot_;
+	uint32 merchant_count_;
+	uint32 price_;
 	ItemContainer contents_;
 };
 
@@ -45,8 +49,12 @@ EQEmu::ItemInstance::ItemInstance() {
 	impl_->ornament_idfile_ = 0;
 	impl_->ornament_icon_ = 0;
 	impl_->ornament_hero_model_ = 0;
+	impl_->serial_id_ = 0;
 	impl_->recast_timestamp_ = 0;
-	impl_->tracking_id_ = 0;
+	impl_->merchant_slot_ = 0;
+	impl_->merchant_count_ = 0;
+	impl_->price_ = 0;
+	memset(impl_->tracking_id_, 0, 17);
 }
 
 EQEmu::ItemInstance::ItemInstance(const ItemData* idata) {
@@ -59,8 +67,12 @@ EQEmu::ItemInstance::ItemInstance(const ItemData* idata) {
 	impl_->ornament_idfile_ = 0;
 	impl_->ornament_icon_ = 0;
 	impl_->ornament_hero_model_ = 0;
+	impl_->serial_id_ = 0;
 	impl_->recast_timestamp_ = 0;
-	impl_->tracking_id_ = 0;
+	impl_->merchant_slot_ = 0;
+	impl_->merchant_count_ = 0;
+	impl_->price_ = 0;
+	memset(impl_->tracking_id_, 0, 17);
 }
 
 EQEmu::ItemInstance::ItemInstance(const ItemData* idata, int16 charges) {
@@ -74,7 +86,11 @@ EQEmu::ItemInstance::ItemInstance(const ItemData* idata, int16 charges) {
 	impl_->ornament_icon_ = 0;
 	impl_->ornament_hero_model_ = 0;
 	impl_->recast_timestamp_ = 0;
-	impl_->tracking_id_ = 0;
+	impl_->serial_id_ = 0;
+	impl_->merchant_slot_ = 0;
+	impl_->merchant_count_ = 0;
+	impl_->price_ = 0;
+	memset(impl_->tracking_id_, 0, 17);
 }
 
 EQEmu::ItemInstance::~ItemInstance() {
@@ -83,6 +99,10 @@ EQEmu::ItemInstance::~ItemInstance() {
 
 const ItemData *EQEmu::ItemInstance::GetItem() {
 	return impl_->modified_item_ ? impl_->modified_item_ : impl_->base_item_;
+}
+
+const ItemData *EQEmu::ItemInstance::GetBaseItem() {
+	return impl_->base_item_;
 }
 
 std::shared_ptr<EQEmu::ItemInstance> EQEmu::ItemInstance::Get(const int index) {
@@ -131,12 +151,36 @@ bool EQEmu::ItemInstance::Put(const int index, std::shared_ptr<ItemInstance> ins
 	return false;
 }
 
+uint32 EQEmu::ItemInstance::GetSubItemCount() {
+	return impl_->contents_.Size();
+}
+
+uint32 EQEmu::ItemInstance::GetSubItemCount() const {
+	return impl_->contents_.Size();
+}
+
+int16 EQEmu::ItemInstance::GetCharges() {
+	return impl_->charges_;
+}
+
+int16 EQEmu::ItemInstance::GetCharges() const {
+	return impl_->charges_;
+}
+
 void EQEmu::ItemInstance::SetCharges(const int16 charges) {
 	impl_->charges_ = charges;
 }
 
 void EQEmu::ItemInstance::SetColor(const uint32 color) {
 	impl_->color_ = color;
+}
+
+bool EQEmu::ItemInstance::GetAttuned() {
+	return impl_->attuned_;
+}
+
+bool EQEmu::ItemInstance::GetAttuned() const {
+	return impl_->attuned_;
 }
 
 void EQEmu::ItemInstance::SetAttuned(const bool attuned) {
@@ -160,10 +204,87 @@ void EQEmu::ItemInstance::SetOrnamentHeroModel(const uint32 ornament_hero_model)
 	impl_->ornament_hero_model_ = ornament_hero_model;
 }
 
-void EQEmu::ItemInstance::SetTrackingID(const uint64 tracking_id) {
-	impl_->tracking_id_ = tracking_id;
+const char* EQEmu::ItemInstance::GetTrackingID() {
+	return impl_->tracking_id_;
+}
+
+const char* EQEmu::ItemInstance::GetTrackingID() const {
+	return impl_->tracking_id_;
+}
+
+void EQEmu::ItemInstance::SetTrackingID(const char *tracking_id) {
+	size_t len = strlen(tracking_id);
+	if(len > 16) {
+		return;
+	}
+
+	strncpy(impl_->tracking_id_, tracking_id, 16);
+}
+
+uint32 EQEmu::ItemInstance::GetRecastTimestamp() {
+	return impl_->recast_timestamp_;
+}
+
+uint32 EQEmu::ItemInstance::GetRecastTimestamp() const {
+	return impl_->recast_timestamp_;
 }
 
 void EQEmu::ItemInstance::SetRecastTimestamp(const uint32 recast_timestamp) {
 	impl_->recast_timestamp_ = recast_timestamp;
+}
+
+uint32 EQEmu::ItemInstance::GetMerchantSlot() {
+	return impl_->merchant_slot_;
+}
+
+uint32 EQEmu::ItemInstance::GetMerchantSlot() const {
+	return impl_->merchant_slot_;
+}
+
+void EQEmu::ItemInstance::SetMerchantSlot(uint32 slot) {
+	impl_->merchant_slot_ = slot;
+}
+
+uint32 EQEmu::ItemInstance::GetMerchantCount() {
+	return impl_->merchant_count_;
+}
+
+uint32 EQEmu::ItemInstance::GetMerchantCount() const {
+	return impl_->merchant_count_;
+}
+
+void EQEmu::ItemInstance::SetMerchantCount(const uint32 cnt) {
+	impl_->merchant_count_ = cnt;
+}
+
+uint32 EQEmu::ItemInstance::GetPrice() {
+	return impl_->price_;
+}
+
+uint32 EQEmu::ItemInstance::GetPrice() const {
+	return impl_->price_;
+}
+
+void EQEmu::ItemInstance::SetPrice(const uint32 p) {
+	impl_->price_ = p;
+}
+
+uint32 EQEmu::ItemInstance::GetSerialNumber() {
+	return impl_->serial_id_;
+}
+
+uint32 EQEmu::ItemInstance::GetSerialNumber() const {
+	return impl_->serial_id_;
+}
+
+void EQEmu::ItemInstance::SetSerialNumber(const uint32 sn) {
+	impl_->serial_id_ = sn;
+}
+
+bool EQEmu::ItemInstance::IsStackable() {
+	return impl_->base_item_->Stackable;
+}
+
+bool EQEmu::ItemInstance::IsStackable() const {
+	return impl_->base_item_->Stackable;
 }

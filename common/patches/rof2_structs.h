@@ -4407,7 +4407,7 @@ struct RoF2SlotStruct
 
 struct ItemSerializationHeader
 {
-/*000*/	char unknown000[17];	// New for HoT. Looks like a string.
+/*000*/	char tracking_id[17];	// New for HoT. Looks like a string.
 /*017*/	uint32 stacksize;
 /*021*/	uint32 unknown004;
 /*025*/	uint8  slot_type;	// 0 = normal, 1 = bank, 2 = shared bank, 9 = merchant, 20 = ?

@@ -15,6 +15,14 @@
 #include "shareddb.h"
 #include "string_util.h"
 
+uint32 ItemInstanceSerial = 1;
+static inline uint32 GetNextItemInstanceSerial() {
+	ItemInstanceSerial++;
+	return ItemInstanceSerial;
+}
+
+
+
 SharedDatabase::SharedDatabase()
 : Database(), skill_caps_mmf(nullptr), items_mmf(nullptr), items_hash(nullptr), faction_mmf(nullptr), faction_hash(nullptr),
 	loot_table_mmf(nullptr), loot_table_hash(nullptr), loot_drop_mmf(nullptr), loot_drop_hash(nullptr), base_data_mmf(nullptr)
@@ -516,7 +524,6 @@ bool SharedDatabase::GetInventory(uint32 char_id, EQEmu::Inventory *inv)
 			uint32 ornament_icon = (uint32)std::stoul(row[9]);
 			uint32 ornament_idfile = (uint32)std::stoul(row[10]);
 			uint32 ornament_hero_model = (uint32)std::stoul(row[11]);
-			uint64 tracking_id = (uint64)std::stoull(row[12]);
 
 			inst->SetColor(color);
 			inst->SetAttuned(attuned ? true : false);
@@ -524,7 +531,7 @@ bool SharedDatabase::GetInventory(uint32 char_id, EQEmu::Inventory *inv)
 			inst->SetOrnamentIcon(ornament_icon);
 			inst->SetOrnamentIDFile(ornament_idfile);
 			inst->SetOrnamentHeroModel(ornament_hero_model);
-			inst->SetTrackingID(tracking_id);
+			inst->SetTrackingID(row[12]);
 
 			auto *item = inst->GetItem();
 			if(item->RecastDelay) {
@@ -1265,7 +1272,9 @@ std::shared_ptr<EQEmu::ItemInstance> SharedDatabase::CreateItem(uint32 item_id, 
 			charges = 1;
 		}
 
-		return std::shared_ptr<EQEmu::ItemInstance>(new EQEmu::ItemInstance(item, charges));
+		std::shared_ptr<EQEmu::ItemInstance> inst = std::shared_ptr<EQEmu::ItemInstance>(new EQEmu::ItemInstance(item, charges));
+		inst->SetSerialNumber(GetNextItemInstanceSerial());
+		return inst;
 	}
 
 	return std::shared_ptr<EQEmu::ItemInstance>(nullptr);

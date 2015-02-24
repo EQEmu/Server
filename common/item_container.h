@@ -35,6 +35,8 @@ namespace EQEmu
 		std::shared_ptr<ItemInstance> Get(const int slot_id);
 		bool Put(const int slot_id, std::shared_ptr<ItemInstance> inst);
 		bool Delete(const int slot_id);
+		uint32 Size();
+		uint32 Size() const;
 
 		bool Serialize(MemoryBuffer &buf, int container_number);
 	private:

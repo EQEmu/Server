@@ -46,6 +46,14 @@ bool EQEmu::ItemContainer::Put(const int slot_id, std::shared_ptr<ItemInstance> 
 	return false;
 }
 
+uint32 EQEmu::ItemContainer::Size() {
+	return impl_->items.size();
+}
+
+uint32 EQEmu::ItemContainer::Size() const {
+	return impl_->items.size();
+}
+
 bool EQEmu::ItemContainer::Delete(const int slot_id) {
 	auto iter = impl_->items.find(slot_id);
 	if(iter == impl_->items.end()) {
