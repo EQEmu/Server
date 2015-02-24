@@ -134,6 +134,8 @@ RULE_BOOL ( Skills, UseLimitTradeskillSearchSkillDiff, true )
 RULE_INT ( Skills, MaxTradeskillSearchSkillDiff, 50 )
 RULE_INT ( Skills, MaxTrainSpecializations, 50 )	// Max level a GM trainer will train casting specializations
 RULE_INT ( Skills, SwimmingStartValue, 100 )
+RULE_BOOL ( Skills, TrainSenseHeading, false )
+RULE_INT ( Skills, SenseHeadingStartValue, 200 )
 RULE_CATEGORY_END()
 
 RULE_CATEGORY( Pets )

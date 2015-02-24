@@ -1429,13 +1429,9 @@ bool Client::OPCharCreate(char *name, CharCreate_Struct *cc)
 	SetRaceStartingSkills(&pp);
 	SetClassStartingSkills(&pp);
 	SetClassLanguages(&pp);
-	pp.skills[SkillSenseHeading] = 200;
 
-	// Allow server to force swimming training from a configured level
-	std::string value;
-	bool userule;
-	userule=RuleManager::Instance()->GetRule("Skills:SwimmingStartValue", value);
-	pp.skills[SkillSwimming] = (userule) ?  atoi(value.c_str()) : 100;
+	pp.skills[SkillSwimming] = RuleI(Skills, SwimmingStartValue);
+	pp.skills[SkillSenseHeading] = RuleI(Skills, SenseHeadingStartValue);
 
 //	strcpy(pp.servername, WorldConfig::get()->ShortName.c_str());
 

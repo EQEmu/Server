@@ -1,10 +1,12 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
 == 02/23/2015 ==
-Noudess: Allow for a rule to set starting swimming value.
-If the rule does not exist, it uses the old hard coded overrides.  I moved
-the swimming override to char create instead of setting it every time a char
-enters a zone.
+Noudess: Allow for a rule to set starting swimming && SenseHeading value.
+I moved the swimming override to char create instead of setting it 
+every time a char enters a zone.
+
+Also added rules to not ignore, but rather forrce sense heading packets to be
+used to train it instead of maxing it out like before.
 
 == 02/21/2015 ==
 Noudess: Starting erudites that were supposed to start in paineel were landing in erudin on Titanium. Fixed to be paineel.
