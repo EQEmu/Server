@@ -3985,8 +3985,8 @@ namespace RoF2
 			PacketSize += strlen(emu->name);
 			PacketSize += strlen(emu->lastName);
 
-			emu->title[0] = 0;
-			emu->suffix[0] = 0;
+			emu->title[31] = 0;
+			emu->suffix[31] = 0;
 
 			if (strlen(emu->title))
 				PacketSize += strlen(emu->title) + 1;
