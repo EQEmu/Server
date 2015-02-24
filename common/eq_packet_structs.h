@@ -158,6 +158,7 @@ struct CharSelectEquip
 	Color_Struct Color;
 };
 
+// RoF2-based hybrid struct
 struct CharacterSelectEntry_Struct
 {
 	char Name[64];
@@ -184,11 +185,11 @@ struct CharacterSelectEntry_Struct
 	uint8 EyeColor2;
 	uint8 HairStyle;
 	uint8 Beard;
-	uint8 Enabled;
+	uint8 GoHome;				// Seen 0 for new char and 1 for existing
 	uint8 Tutorial;				// Seen 1 for new char or 0 for existing
 	uint32 DrakkinHeritage;
 	uint8 Unknown1;				// Seen 0
-	uint8 GoHome;				// Seen 0 for new char and 1 for existing
+	uint8 Enabled;				// Originally labeled as 'CharEnabled' - unknown purpose and setting -U
 	uint32 LastLogin;
 	uint8 Unknown2;				// Seen 0
 };

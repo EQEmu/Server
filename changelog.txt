@@ -8,6 +8,8 @@ every time a char enters a zone.
 Also added rules to not ignore, but rather forrce sense heading packets to be
 used to train it instead of maxing it out like before.
 
+Uleat: Fix for RoF+ clients showing active 'Return Home' button when action is not available (swapped 'GoHome' and 'Enabled' fields in RoF-era CharacterSelectEntry structs)
+
 == 02/21/2015 ==
 Noudess: Starting erudites that were supposed to start in paineel were landing in erudin on Titanium. Fixed to be paineel.
 
