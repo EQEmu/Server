@@ -55,7 +55,7 @@ enum ItemClassTypes
 **
 **	(ref: database and eqstr_us.txt)
 **
-**	(Looking at a recent database, it's possible that some of the item values may be off [10-27-2013] -U)
+**	(Looking at a recent database, it's possible that some of the item values may be off [10-27-2013])
 */
 enum ItemUseTypes : uint8
 {

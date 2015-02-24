@@ -2305,7 +2305,7 @@ struct BookRequest_Struct {
 **
 */
 struct Object_Struct {
-/*00*/	uint32	linked_list_addr[2];// <Zaphod> They are, get this, prev and next, ala linked list
+/*00*/	uint32	linked_list_addr[2];// They are, get this, prev and next, ala linked list
 /*08*/	uint32	unknown008;			// Something related to the linked list?
 /*12*/	uint32	drop_id;			// Unique object id for zone
 /*16*/	uint16	zone_id;			// Redudant, but: Zone the object appears in
@@ -2325,8 +2325,8 @@ struct Object_Struct {
 /*100*/	uint32	spawn_id;			// Spawn Id of client interacting with object
 /*104*/
 };
-//<Zaphod> 01 = generic drop, 02 = armor, 19 = weapon
-//[13:40] <Zaphod> and 0xff seems to be indicative of the tradeskill/openable items that end up returning the old style item type in the OP_OpenObject
+//01 = generic drop, 02 = armor, 19 = weapon
+//[13:40] and 0xff seems to be indicative of the tradeskill/openable items that end up returning the old style item type in the OP_OpenObject
 
 /*
 ** Click Object Struct

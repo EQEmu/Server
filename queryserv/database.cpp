@@ -306,7 +306,7 @@ void Database::LogPlayerMove(QSPlayerLogMove_Struct* QS, uint32 items) {
 }
 
 void Database::LogMerchantTransaction(QSMerchantLogTransaction_Struct* QS, uint32 items) {
-	/* Merchant transactions are from the perspective of the merchant, not the player -U */
+	/* Merchant transactions are from the perspective of the merchant, not the player */
 	std::string query = StringFormat("INSERT INTO `qs_merchant_transaction_record` SET `time` = NOW(), "
                                     "`zone_id` = '%i', `merchant_id` = '%i', `merchant_pp` = '%i', "
                                     "`merchant_gp` = '%i', `merchant_sp` = '%i', `merchant_cp` = '%i', "

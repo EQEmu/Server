@@ -189,7 +189,7 @@ struct CharacterSelectEntry_Struct
 	uint8 Tutorial;				// Seen 1 for new char or 0 for existing
 	uint32 DrakkinHeritage;
 	uint8 Unknown1;				// Seen 0
-	uint8 Enabled;				// Originally labeled as 'CharEnabled' - unknown purpose and setting -U
+	uint8 Enabled;				// Originally labeled as 'CharEnabled' - unknown purpose and setting
 	uint32 LastLogin;
 	uint8 Unknown2;				// Seen 0
 };
@@ -1265,7 +1265,7 @@ struct ZoneChange_Struct {
 
 // Whatever you send to the client in RequestClientZoneChange_Struct.type, the client will send back
 // to the server in ZoneChange_Struct.zone_reason. My guess is this is a memo field of sorts.
-// WildcardX 27 January 2008
+// 27 January 2008
 
 struct RequestClientZoneChange_Struct {
 /*00*/	uint16	zone_id;
@@ -2421,11 +2421,11 @@ struct InspectResponse_Struct {
 /*004*/	uint32 playerid;
 /*008*/	char itemnames[23][64];
 /*1480*/uint32 itemicons[23];
-/*1572*/char text[288];	// Max number of chars in Inspect Window appears to be 254 // Msg struct property is 256 (254 + '\0' is my guess) -U
+/*1572*/char text[288];	// Max number of chars in Inspect Window appears to be 254 // Msg struct property is 256 (254 + '\0' is my guess)
 /*1860*/
 };
 
-//OP_InspectMessageUpdate - Size: 256 (SoF+ clients after self-inspect window is closed) -U
+//OP_InspectMessageUpdate - Size: 256 (SoF+ clients after self-inspect window is closed)
 struct InspectMessage_Struct {
 /*000*/ char text[256];
 /*256*/
@@ -2534,7 +2534,7 @@ struct BookRequest_Struct {
 **
 */
 struct Object_Struct {
-/*00*/	uint32	linked_list_addr[2];// <Zaphod> They are, get this, prev and next, ala linked list
+/*00*/	uint32	linked_list_addr[2];// They are, get this, prev and next, ala linked list
 /*08*/	uint16	unknown008;			//
 /*10*/	uint16	unknown010;			//
 /*12*/	uint32	drop_id;			// Unique object id for zone
@@ -2553,8 +2553,8 @@ struct Object_Struct {
 /*88*/	uint32	spawn_id;			// Spawn Id of client interacting with object
 /*92*/
 };
-//<Zaphod> 01 = generic drop, 02 = armor, 19 = weapon
-//[13:40] <Zaphod> and 0xff seems to be indicative of the tradeskill/openable items that end up returning the old style item type in the OP_OpenObject
+// 01 = generic drop, 02 = armor, 19 = weapon
+//[13:40] and 0xff seems to be indicative of the tradeskill/openable items that end up returning the old style item type in the OP_OpenObject
 
 /*
 ** Click Object Struct
@@ -2611,7 +2611,7 @@ struct CloseContainer_Struct {
 */
 struct Door_Struct
 {
-/*0000*/ char	name[32];		// Filename of Door // Was 10char long before... added the 6 in the next unknown to it: Daeken M. BlackBlade //changed both to 32: Trevius
+/*0000*/ char	name[32];		// Filename of Door // Was 10char long before... added the 6 in the next unknown to it //changed both to 32
 /*0032*/ float	yPos;			// y loc
 /*0036*/ float	xPos;			// x loc
 /*0040*/ float	zPos;			// z loc

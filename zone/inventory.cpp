@@ -1067,12 +1067,12 @@ bool MakeItemLink(char* &ret_link, const Item_Struct *item, uint32 aug0, uint32 
 	// Currently, enabling them causes misalignments in what the client expects. I haven't looked
 	// into it further to determine the cause..but, the function is setup to accept the parameters.
 	// Note: some links appear with '00000' in front of the name..so, it's likely we need to send
-	// some additional information when certain parameters are true -U
+	// some additional information when certain parameters are true
 	//switch (GetClientVersion()) {
 	switch (0) {
 	case EQClientRoF2:
 		// This operator contains 14 parameter masks..but, only 13 parameter values.
-		// Even so, the client link appears ok... Need to figure out the discrepancy -U
+		// Even so, the client link appears ok... Need to figure out the discrepancy
 		MakeAnyLenString(&ret_link, "%1X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%1X" "%1X" "%04X" "%1X" "%05X" "%08X",
 			0,
 			item->ID,
@@ -1793,14 +1793,14 @@ void Client::SwapItemResync(MoveItem_Struct* move_slots) {
 	// with any luck..this won't be needed in the future
 
 	// resync the 'from' and 'to' slots on an as-needed basis
-	// Not as effective as the full process, but less intrusive to gameplay -U
+	// Not as effective as the full process, but less intrusive to gameplay
 	Log.Out(Logs::Detail, Logs::Inventory, "Inventory desyncronization. (charname: %s, source: %i, destination: %i)", GetName(), move_slots->from_slot, move_slots->to_slot);
 	Message(15, "Inventory Desyncronization detected: Resending slot data...");
 
 	if((move_slots->from_slot >= EmuConstants::EQUIPMENT_BEGIN && move_slots->from_slot <= EmuConstants::CURSOR_BAG_END) || move_slots->from_slot == MainPowerSource) {
 		int16 resync_slot = (Inventory::CalcSlotId(move_slots->from_slot) == INVALID_INDEX) ? move_slots->from_slot : Inventory::CalcSlotId(move_slots->from_slot);
 		if (IsValidSlot(resync_slot) && resync_slot != INVALID_INDEX) {
-			// This prevents the client from crashing when closing any 'phantom' bags -U
+			// This prevents the client from crashing when closing any 'phantom' bags
 			const Item_Struct* token_struct = database.GetItem(22292); // 'Copper Coin'
 			ItemInst* token_inst = database.CreateItem(token_struct, 1);
 
@@ -2297,7 +2297,7 @@ void Client::RemoveDuplicateLore(bool client_update)
 		safe_delete(inst);
 	}
 
-	// Shared Bank and Shared Bank Containers are not checked due to their allowing duplicate lore items -U
+	// Shared Bank and Shared Bank Containers are not checked due to their allowing duplicate lore items
 
 	if (!m_inv.CursorEmpty()) {
 		std::list<ItemInst*> local_1;
@@ -2367,7 +2367,7 @@ void Client::MoveSlotNotAllowed(bool client_update)
 		safe_delete(inst);
 	}
 
-	// No need to check inventory, cursor, bank or shared bank since they allow max item size and containers -U
+	// No need to check inventory, cursor, bank or shared bank since they allow max item size and containers
 	// Code can be added to check item size vs. container size, but it is left to attrition for now.
 }
 

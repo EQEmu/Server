@@ -1070,7 +1070,7 @@ namespace Titanium
 
 	ENCODE(OP_ReadBook)
 	{
-		// no apparent slot translation needed -U
+		// no apparent slot translation needed
 		EQApplicationPacket *in = *p;
 		*p = nullptr;
 
@@ -1949,7 +1949,7 @@ namespace Titanium
 
 	DECODE(OP_ReadBook)
 	{
-		// no apparent slot translation needed -U
+		// no apparent slot translation needed
 		DECODE_LENGTH_ATLEAST(structs::BookRequest_Struct);
 		SETUP_DIRECT_DECODE(BookRequest_Struct, structs::BookRequest_Struct);
 

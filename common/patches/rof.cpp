@@ -4925,7 +4925,7 @@ namespace RoF
 			slot_id = legacy::SLOT_TRADESKILL;	// 1000
 		}
 		emu->container_slot = slot_id;
-		emu->guildtribute_slot = RoFToServerSlot(eq->guildtribute_slot); // this should only return INVALID_INDEX until implemented -U
+		emu->guildtribute_slot = RoFToServerSlot(eq->guildtribute_slot); // this should only return INVALID_INDEX until implemented
 
 		FINISH_DIRECT_DECODE();
 	}

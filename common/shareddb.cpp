@@ -154,7 +154,7 @@ bool SharedDatabase::SaveInventory(uint32 char_id, const ItemInst* inst, int16 s
 	// If we never save tribute slots..how are we to ever benefit from them!!? The client
 	// object is destroyed upon zoning - including its inventory object..and if tributes
 	// don't exist in the database, then they will never be loaded when the new client
-	// object is created in the new zone object... Something to consider... -U
+	// object is created in the new zone object... Something to consider...
 	//
 	// (we could add them to the 'NoRent' checks and dispose of after 30 minutes offline)
 

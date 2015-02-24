@@ -3899,7 +3899,7 @@ void Client::Handle_OP_CastSpell(const EQApplicationPacket *app)
 		}
 		else if (m_inv.SupportsClickCasting(castspell->inventoryslot) || (castspell->slot == POTION_BELT_SPELL_SLOT) || (castspell->slot == TARGET_RING_SPELL_SLOT))	// sanity check
 		{
-			// packet field types will be reviewed as packet transistions occur -U
+			// packet field types will be reviewed as packet transistions occur
 			const ItemInst* inst = m_inv[castspell->inventoryslot]; //slot values are int16, need to check packet on this field
 			//bool cancast = true;
 			if (inst && inst->IsType(ItemClassCommon))
