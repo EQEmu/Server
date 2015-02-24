@@ -6220,6 +6220,8 @@ void Client::DragCorpses()
 				!corpse->CastToCorpse()->Summon(this, false, false)) {
 			Message_StringID(MT_DefaultText, CORPSEDRAG_STOP);
 			It = DraggedCorpses.erase(It);
+			if (It == DraggedCorpses.end())
+				break;
 		}
 	}
 }
