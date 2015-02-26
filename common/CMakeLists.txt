@@ -31,10 +31,11 @@ SET(common_sources
 	guild_base.cpp
 	guilds.cpp
 	inventory.cpp
-	inventory_database_controller.cpp
 	ipc_mutex.cpp
 	item.cpp
 	item_container.cpp
+	item_container_default_serialization.cpp
+	item_container_personal_serialization.cpp
 	item_instance.cpp
 	md5.cpp
 	memory_buffer.cpp
@@ -141,10 +142,12 @@ SET(common_headers
 	guild_base.h
 	guilds.h
 	inventory.h
-	inventory_database_controller.h
 	ipc_mutex.h
 	item.h
 	item_container.h
+	item_container_default_serialization.h
+	item_container_personal_serialization.h
+	item_container_serialization_strategy.h
 	item_data.h
 	item_fieldlist.h
 	item_instance.h

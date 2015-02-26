@@ -24,6 +24,7 @@
 
 namespace EQEmu
 {
+	class ItemContainer;
 	class ItemInstance
 	{
 	public:
@@ -38,8 +39,6 @@ namespace EQEmu
 		//Container
 		std::shared_ptr<ItemInstance> Get(const int index);
 		bool Put(const int index, std::shared_ptr<ItemInstance> inst);
-		uint32 GetSubItemCount();
-		uint32 GetSubItemCount() const;
 
 		//Persistent State
 		int16 GetCharges();
@@ -95,6 +94,10 @@ namespace EQEmu
 		//Basic Stats
 		bool IsStackable();
 		bool IsStackable() const;
+
+		//Internal state
+		//Used for low level operations such as encode/decode
+		ItemContainer *GetContainer();
 	private:
 		struct impl;
 		impl *impl_;

@@ -151,14 +151,6 @@ bool EQEmu::ItemInstance::Put(const int index, std::shared_ptr<ItemInstance> ins
 	return false;
 }
 
-uint32 EQEmu::ItemInstance::GetSubItemCount() {
-	return impl_->contents_.Size();
-}
-
-uint32 EQEmu::ItemInstance::GetSubItemCount() const {
-	return impl_->contents_.Size();
-}
-
 int16 EQEmu::ItemInstance::GetCharges() {
 	return impl_->charges_;
 }
@@ -329,4 +321,8 @@ bool EQEmu::ItemInstance::IsStackable() {
 
 bool EQEmu::ItemInstance::IsStackable() const {
 	return impl_->base_item_->Stackable;
+}
+
+EQEmu::ItemContainer *EQEmu::ItemInstance::GetContainer() {
+	return &(impl_->contents_);
 }

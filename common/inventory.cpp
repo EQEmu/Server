@@ -18,6 +18,7 @@
 
 #include "inventory.h"
 #include "data_verification.h"
+#include "item_container_personal_serialization.h"
 #include <map>
 
 struct EQEmu::Inventory::impl
@@ -58,7 +59,11 @@ std::shared_ptr<EQEmu::ItemInstance> EQEmu::Inventory::Get(const InventorySlot &
 
 bool EQEmu::Inventory::Put(const InventorySlot &slot, std::shared_ptr<ItemInstance> inst) {
 	if(impl_->containers_.count(slot.type_) == 0) {
-		impl_->containers_.insert(std::pair<int, ItemContainer>(slot.type_, ItemContainer()));
+		if(slot.type_ == 0) {
+			impl_->containers_.insert(std::pair<int, ItemContainer>(slot.type_, ItemContainer(new ItemContainerPersonalSerialization())));
+		} else {
+			impl_->containers_.insert(std::pair<int, ItemContainer>(slot.type_, ItemContainer()));
+		}
 	}
 
 	//Verify item can be put into the slot requested

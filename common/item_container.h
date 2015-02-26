@@ -20,17 +20,24 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #define COMMON_ITEM_CONTAINER_H
 
 #include "item_instance.h"
+#include "item_container_serialization_strategy.h"
 #include "memory_buffer.h"
 #include <memory>
+#include <map>
 
 namespace EQEmu
 {
+	class ItemContainerSerializationStrategy;
 	class ItemContainer
 	{
 	public:
+		typedef std::map<int, std::shared_ptr<ItemInstance>>::const_iterator ItemContainerIter;
+
 		ItemContainer();
+		ItemContainer(ItemContainerSerializationStrategy *strategy);
 		~ItemContainer();
 		ItemContainer(ItemContainer &&other);
+		ItemContainer& operator=(ItemContainer &&other);
 
 		std::shared_ptr<ItemInstance> Get(const int slot_id);
 		bool Put(const int slot_id, std::shared_ptr<ItemInstance> inst);
@@ -38,13 +45,17 @@ namespace EQEmu
 		uint32 Size();
 		uint32 Size() const;
 
+		//Low level interface for encode/decode
 		bool Serialize(MemoryBuffer &buf, int container_number);
+		ItemContainerIter Begin();
+		ItemContainerIter End();
+	protected:
+		struct impl;
+		impl *impl_;
+
 	private:
 		ItemContainer(const ItemContainer &other);
 		ItemContainer& operator=(const ItemContainer &other);
-
-		struct impl;
-		impl *impl_;
 	};
 } // EQEmu
 
