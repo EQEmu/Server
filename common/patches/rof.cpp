@@ -2983,11 +2983,11 @@ namespace RoF
 			eq_cse->EyeColor2 = emu_cse->EyeColor2;
 			eq_cse->HairStyle = emu_cse->HairStyle;
 			eq_cse->Beard = emu_cse->Beard;
-			eq_cse->Enabled = emu_cse->Enabled;
+			eq_cse->GoHome = emu_cse->GoHome;
 			eq_cse->Tutorial = emu_cse->Tutorial;
 			eq_cse->DrakkinHeritage = emu_cse->DrakkinHeritage;
 			eq_cse->Unknown1 = emu_cse->Unknown1;
-			eq_cse->GoHome = emu_cse->GoHome;
+			eq_cse->Enabled = emu_cse->Enabled;
 			eq_cse->LastLogin = emu_cse->LastLogin;
 			eq_cse->Unknown2 = emu_cse->Unknown2;
 			
@@ -3845,8 +3845,8 @@ namespace RoF
 			PacketSize += strlen(emu->name);
 			PacketSize += strlen(emu->lastName);
 
-			emu->title[0] = 0;
-			emu->suffix[0] = 0;
+			emu->title[31] = 0;
+			emu->suffix[31] = 0;
 
 			if (strlen(emu->title))
 				PacketSize += strlen(emu->title) + 1;
@@ -4926,7 +4926,7 @@ namespace RoF
 			slot_id = legacy::SLOT_TRADESKILL;	// 1000
 		}
 		emu->container_slot = slot_id;
-		emu->guildtribute_slot = RoFToServerSlot(eq->guildtribute_slot); // this should only return INVALID_INDEX until implemented -U
+		emu->guildtribute_slot = RoFToServerSlot(eq->guildtribute_slot); // this should only return INVALID_INDEX until implemented
 
 		FINISH_DIRECT_DECODE();
 	}

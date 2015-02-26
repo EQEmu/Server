@@ -340,7 +340,7 @@ Corpse::Corpse(Client* client, int32 in_rezexp) : Mob (
 
 		database.TransactionBegin();
 
-		// I have an untested process that avoids this snarl up when all possessions inventory is removed..but this isn't broke -U
+		// I have an untested process that avoids this snarl up when all possessions inventory is removed..but this isn't broke
 		if (!removed_list.empty()) {
 			std::stringstream ss("");
 			ss << "DELETE FROM inventory WHERE charid=" << client->CharacterID();

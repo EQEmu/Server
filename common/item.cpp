@@ -660,7 +660,7 @@ int16 InventoryOld::FindFreeSlotForTradeItem(const ItemInst* inst) {
 	// Do not arbitrarily use this function..it is designed for use with Client::ResetTrade() and Client::FinishTrade().
 	// If you have a need, use it..but, understand it is not a compatible replacement for InventoryOld::FindFreeSlot().
 	//
-	// I'll probably implement a bitmask in the new inventory system to avoid having to adjust stack bias -U
+	// I'll probably implement a bitmask in the new inventory system to avoid having to adjust stack bias
 
 	if (!inst || !inst->GetID())
 		return INVALID_INDEX;
@@ -1232,7 +1232,7 @@ int16 InventoryOld::_HasItem(ItemInstQueue& iqueue, uint32 item_id, uint8 quanti
 	// found, it is presented as being available on the cursor. In cases of a parity check, this
 	// is sufficient. However, in cases where referential criteria is considered, this can lead
 	// to unintended results. Funtionality should be observed when referencing the return value
-	// of this query -U
+	// of this query
 	
 	uint8 quantity_found = 0;
 
@@ -2148,7 +2148,7 @@ ItemInst* ItemInst::Clone() const
 }
 
 bool ItemInst::IsSlotAllowed(int16 slot_id) const {
-	// 'SupportsContainers' and 'slot_id > 21' previously saw the reassigned PowerSource slot (9999 to 22) as valid -U
+	// 'SupportsContainers' and 'slot_id > 21' previously saw the reassigned PowerSource slot (9999 to 22) as valid
 	if (!m_item) { return false; }
 	else if (InventoryOld::SupportsContainers(slot_id)) { return true; }
 	else if (m_item->Slots & (1 << slot_id)) { return true; }

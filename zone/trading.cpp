@@ -108,7 +108,7 @@ void Trade::AddEntity(uint16 trade_slot_id, uint32 stack_size) {
 	ItemInst* inst2 = client->GetInv().GetItem(trade_slot_id);
 
 	// it looks like the original code attempted to allow stacking...
-	// (it just didn't handle partial stack move actions -U)
+	// (it just didn't handle partial stack move actions)
 	if (stack_size > 0) {
 		if (!inst->IsStackable() || !inst2 || !inst2->GetItem() || (inst->GetID() != inst2->GetID()) || (stack_size > inst->GetCharges())) {
 			client->Kick();
@@ -800,7 +800,7 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 		// QS code
 		if(RuleB(QueryServ, PlayerLogTrades) && event_entry && event_details) {
 			// Currently provides only basic functionality. Calling method will also
-			// need to be modified before item returns and rewards can be logged. -U
+			// need to be modified before item returns and rewards can be logged.
 			qs_audit = (QSPlayerLogHandin_Struct*)event_entry;
 			qs_log = true;
 
@@ -819,7 +819,7 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 			qs_audit->npc_count = 0;
 		}
 
-		if(qs_log) { // This can be incorporated below when revisions are made -U
+		if(qs_log) { // This can be incorporated below when revisions are made
 			for (int16 trade_slot = EmuConstants::TRADE_BEGIN; trade_slot <= EmuConstants::TRADE_NPC_END; ++trade_slot) {
 				const ItemInst* trade_inst = m_inv[trade_slot];
 

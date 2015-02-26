@@ -189,11 +189,11 @@ struct CharacterSelectEntry_Struct
 /*0000*/	uint8 EyeColor2;
 /*0000*/	uint8 HairStyle;
 /*0000*/	uint8 Beard;
-/*0000*/	uint8 Enabled;
+/*0000*/	uint8 GoHome;				// Seen 0 for new char and 1 for existing
 /*0000*/	uint8 Tutorial;				// Seen 1 for new char or 0 for existing
 /*0000*/	uint32 DrakkinHeritage;
 /*0000*/	uint8 Unknown1;				// Seen 0
-/*0000*/	uint8 GoHome;				// Seen 0 for new char and 1 for existing
+/*0000*/	uint8 Enabled;				// Swapped position with 'GoHome' 02/23/2015
 /*0000*/	uint32 LastLogin;
 /*0000*/	uint8 Unknown2;				// Seen 0
 };
@@ -3617,7 +3617,7 @@ struct Split_Struct
 */
 struct NewCombine_Struct {
 /*00*/	ItemSlotStruct container_slot;
-/*12*/	ItemSlotStruct guildtribute_slot;	// Slot type is 8? (MapGuildTribute = 8 -U)
+/*12*/	ItemSlotStruct guildtribute_slot;	// Slot type is 8? (MapGuildTribute = 8)
 /*24*/
 };
 
@@ -4554,7 +4554,7 @@ struct ItemSecondaryBodyStruct
 	uint32 augtype;
 	// swapped augrestrict and augdistiller positions
 	// (this swap does show the proper augment restrictions in Item Information window now)
-	// unsure what the purpose of augdistiller is at this time -U 3/17/2014
+	// unsure what the purpose of augdistiller is at this time 3/17/2014
 	uint32 augdistiller;	// New to December 10th 2012 client - NEW
 	uint32 augrestrict;
 	AugSlotStruct augslots[6];

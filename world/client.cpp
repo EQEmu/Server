@@ -720,6 +720,7 @@ bool Client::HandleEnterWorldPacket(const EQApplicationPacket *app) {
 	}
 
 	// This can probably be moved outside and have another method return requested info (don't forget to remove the #include "../common/shareddb.h" above)
+	// (This is a literal translation of the original process..I don't see why it can't be changed to a single-target query over account iteration)
 	if (!pZoning) {
 		size_t character_limit = EQLimits::CharacterCreationLimit(eqs->GetClientVersion());
 		if (character_limit > EmuConstants::CHARACTER_CREATION_LIMIT) { character_limit = EmuConstants::CHARACTER_CREATION_LIMIT; }
@@ -741,9 +742,12 @@ bool Client::HandleEnterWorldPacket(const EQApplicationPacket *app) {
 			bool home_enabled = false;
 			for (auto row = tgh_results.begin(); row != tgh_results.end(); ++row) {
 				if (strcasecmp(row[1], char_name) == 0) {
-					if (RuleB(World, EnableTutorialButton) && ((uint8)atoi(row[2]) <= RuleI(World, MaxLevelForTutorial))) {
-						home_enabled = true;
-						break;
+					if (RuleB(World, EnableReturnHomeButton)) {
+						int now = time(nullptr);
+						if ((now - atoi(row[3])) >= RuleI(World, MinOfflineTimeToReturnHome)) {
+							home_enabled = true;
+							break;
+						}
 					}
 				}
 			}
@@ -764,12 +768,9 @@ bool Client::HandleEnterWorldPacket(const EQApplicationPacket *app) {
 			bool tutorial_enabled = false;
 			for (auto row = tgh_results.begin(); row != tgh_results.end(); ++row) {
 				if (strcasecmp(row[1], char_name) == 0) {
-					if (RuleB(World, EnableReturnHomeButton)) {
-						int now = time(nullptr);
-						if ((now - atoi(row[3])) >= RuleI(World, MinOfflineTimeToReturnHome)) {
-							tutorial_enabled = true;
-							break;
-						}
+					if (RuleB(World, EnableTutorialButton) && ((uint8)atoi(row[2]) <= RuleI(World, MaxLevelForTutorial))) {
+						tutorial_enabled = true;
+						break;
 					}
 				}
 			}

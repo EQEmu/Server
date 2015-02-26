@@ -2394,6 +2394,29 @@ void NPC::DoQuestPause(Mob *other) {
 
 }
 
+void NPC::ChangeLastName(const char* in_lastname) 
+{
+
+	EQApplicationPacket* outapp = new EQApplicationPacket(OP_GMLastName, sizeof(GMLastName_Struct));
+	GMLastName_Struct* gmn = (GMLastName_Struct*)outapp->pBuffer;
+	strcpy(gmn->name, GetName());
+	strcpy(gmn->gmname, GetName());
+	strcpy(gmn->lastname, in_lastname);
+	gmn->unknown[0]=1;
+	gmn->unknown[1]=1;
+	gmn->unknown[2]=1;
+	gmn->unknown[3]=1;
+	entity_list.QueueClients(this, outapp, false);
+	safe_delete(outapp);
+}
+
+void NPC::ClearLastName()
+{
+	std::string WT;
+	WT = '\0'; //Clear Last Name
+	ChangeLastName( WT.c_str());
+}
+
 void NPC::DepopSwarmPets()
 {
 	if (GetSwarmInfo()) {

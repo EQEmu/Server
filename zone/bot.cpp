@@ -4132,7 +4132,7 @@ void Bot::Spawn(Client* botCharacterOwner, std::string* errorMessage) {
 		this->SendPosition();
 
 		// there is something askew with spawn struct appearance fields...
-		// I re-enabled this until I can sort it out -U
+		// I re-enabled this until I can sort it out
 		uint32 itemID = 0;
 		uint8 materialFromSlot = 0xFF;
 		for(int i = EmuConstants::EQUIPMENT_BEGIN; i <= EmuConstants::EQUIPMENT_END; ++i) {
@@ -10823,7 +10823,7 @@ void Bot::ProcessBotInspectionRequest(Bot* inspectedBot, Client* client) {
 
 		// Modded to display power source items (will only show up on SoF+ client inspect windows though.)
 		// I don't think bots are currently coded to use them..but, you'll have to use '#bot inventory list'
-		// to see them on a Titanium client when/if they are activated. -U
+		// to see them on a Titanium client when/if they are activated.
 		for(int16 L = EmuConstants::EQUIPMENT_BEGIN; L <= MainWaist; L++) {
 			inst = inspectedBot->GetBotItem(L);
 

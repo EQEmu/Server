@@ -1308,7 +1308,7 @@ void PerlembParser::ExportEventVariables(std::string &package_name, QuestEventID
 
 		case EVENT_SCALE_CALC:
 		case EVENT_ITEM_ENTER_ZONE: {
-			// need a valid ItemInst pointer check here..unsure how to cancel this process -U
+			// need a valid ItemInst pointer check here..unsure how to cancel this process
 			ExportVar(package_name.c_str(), "itemid", objid);
 			ExportVar(package_name.c_str(), "itemname", iteminst->GetItem()->Name);
 			break;
@@ -1316,7 +1316,7 @@ void PerlembParser::ExportEventVariables(std::string &package_name, QuestEventID
 
 		case EVENT_ITEM_CLICK_CAST:
 		case EVENT_ITEM_CLICK: {
-			// need a valid ItemInst pointer check here..unsure how to cancel this process -U
+			// need a valid ItemInst pointer check here..unsure how to cancel this process
 			ExportVar(package_name.c_str(), "itemid", objid);
 			ExportVar(package_name.c_str(), "itemname", iteminst->GetItem()->Name);
 			ExportVar(package_name.c_str(), "slotid", extradata);
