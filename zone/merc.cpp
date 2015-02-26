@@ -1201,8 +1201,8 @@ void Merc::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho) {
 		ns->spawn.NPC = 1;                                      // 0=player,1=npc,2=pc corpse,3=npc corpse
 		ns->spawn.IsMercenary = 1;
 
-		UpdateActiveLightValue();
-		ns->spawn.light = active_light;
+		UpdateActiveLight();
+		ns->spawn.light = m_Light.Type.Active;
 
 		/*
 		// Wear Slots are not setup for Mercs yet
@@ -5028,34 +5028,51 @@ void Merc::UpdateMercAppearance() {
 		}
 	}
 
-	if (UpdateActiveLightValue())
-		SendAppearancePacket(AT_Light, GetActiveLightValue());
+	if (UpdateActiveLight())
+		SendAppearancePacket(AT_Light, GetActiveLightType());
 }
 
-void Merc::UpdateEquipLightValue()
+void Merc::UpdateEquipmentLight()
 {
-	equip_light = NOT_USED;
+	m_Light.Type.Equipment = 0;
+	m_Light.Level.Equipment = 0;
 
 	for (int index = MAIN_BEGIN; index < EmuConstants::EQUIPMENT_SIZE; ++index) {
-		if (equipment[index] == NOT_USED) { continue; }
+		if (index == MainAmmo) { continue; }
+
 		auto item = database.GetItem(equipment[index]);
 		if (item == nullptr) { continue; }
-		if (item->Light & 0xF0) { continue; }
-		if (item->Light > equip_light) { equip_light = item->Light; }
+
+		if (m_Light.IsLevelGreater(item->Light, m_Light.Type.Equipment)) {
+			m_Light.Type.Equipment = item->Light;
+			m_Light.Level.Equipment = m_Light.TypeToLevel(m_Light.Type.Equipment);
+		}
 	}
 
 	for (auto iter = itemlist.begin(); iter != itemlist.end(); ++iter) {
 		auto item = database.GetItem((*iter)->item_id);
 		if (item == nullptr) { continue; }
-		if (item->ItemType != ItemTypeMisc && item->ItemType != ItemTypeLight) { continue; }
-		if (item->Light & 0xF0) { continue; }
-		if (item->Light > equip_light) { equip_light = item->Light; }
+
+		switch (item->Light) {
+		case lightTypeCandle:
+		case lightTypeTorch:
+		case lightTypeSmallLantern:
+		case lightTypeLargeLantern:
+			continue;
+		default:
+			break;
+		}
+
+		if (m_Light.IsLevelGreater(item->Light, m_Light.Type.Equipment)) {
+			m_Light.Type.Equipment = item->Light;
+			m_Light.Level.Equipment = m_Light.TypeToLevel(m_Light.Type.Equipment);
+		}
 	}
 }
 
 void Merc::AddItem(uint8 slot, uint32 item_id) {
 	equipment[slot] = item_id;
-	UpdateEquipLightValue();
+	UpdateEquipmentLight();
 }
 
 bool Merc::Spawn(Client *owner) {

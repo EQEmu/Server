@@ -332,7 +332,7 @@ public:
 	void EquipBot(std::string* errorMessage);
 	bool CheckLoreConflict(const Item_Struct* item);
 	uint32 GetEquipmentColor(uint8 material_slot) const;
-	virtual void UpdateEquipLightValue() { equip_light = m_inv.FindHighestLightValue(); }
+	virtual void UpdateEquipmentLight() { m_Light.Type.Equipment = m_inv.FindBrightestLightType(); m_Light.Level.Equipment = m_Light.TypeToLevel(m_Light.Type.Equipment); }
 
 	// Static Class Methods
 	static void SaveBotGroup(Group* botGroup, std::string botGroupName, std::string* errorMessage);

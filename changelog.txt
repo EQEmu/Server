@@ -1,5 +1,8 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 02/26/2015 ==
+Uleat: Updated light source criteria to (hopefully) match what the client uses (still needs tweaking)
+
 == 02/23/2015 ==
 Uleat: Fix for RoF+ clients showing active 'Return Home' button when action is not available (swapped 'GoHome' and 'Enabled' fields in RoF-era CharacterSelectEntry structs)
 

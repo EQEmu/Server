@@ -308,9 +308,6 @@ Client::Client(EQStreamInterface* ieqs)
 
 	interrogateinv_flag = false;
 
-	active_light = innate_light;
-	spell_light = equip_light = NOT_USED;
-
 	AI_Init();
 }
 
@@ -1869,9 +1866,9 @@ void Client::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho)
 	ns->spawn.runspeed		= (gmspeed == 0) ? runspeed : 3.125f;
 	ns->spawn.showhelm = m_pp.showhelm ? 1 : 0;
 
-	UpdateEquipLightValue();
-	UpdateActiveLightValue();
-	ns->spawn.light = active_light;
+	UpdateEquipmentLight();
+	UpdateActiveLight();
+	ns->spawn.light = m_Light.Type.Active;
 }
 
 bool Client::GMHideMe(Client* client) {

@@ -204,7 +204,7 @@ public:
 
 	int GetSlotByItemInst(ItemInst *inst);
 
-	uint8 FindHighestLightValue();
+	uint8 FindBrightestLightType();
 
 	void dumpEntireInventory();
 	void dumpWornItems();
@@ -470,6 +470,42 @@ public:
 	EvolveInfo();
 	EvolveInfo(uint32 first, uint8 max, bool allkills, uint32 L2, uint32 L3, uint32 L4, uint32 L5, uint32 L6, uint32 L7, uint32 L8, uint32 L9, uint32 L10);
 	~EvolveInfo();
+};
+
+struct LightProfile_Struct
+{
+	/*
+	Current criteria (light types):
+	Equipment:	{ 0 .. 15 }
+	General:	{ 0 .. 15 } =/= { 1, 2, 4, 6 }
+
+	Notes:
+	- MainAmmo is not considered when determining light sources
+	- No 'Sub' or 'Aug' items are recognized as light sources
+	- Extinguishable light types { Candle, Torch, SmallLantern, LargeLantern } are not considered for general (carried) light sources
+	- Client calls '__debugbreak' for type values > 127
+	- If values > 0x0F are valid, then assignment limiters will need to be removed
+	- MainCursor 'appears' to be a valid light source update slot..but, have not experienced updates during debug sessions
+	*/
+
+	static uint8 TypeToLevel(uint8 lightType);
+	static bool IsLevelGreater(uint8 leftType, uint8 rightType);
+
+	// Light types (classifications)
+	struct {
+		uint8 Innate;		// Defined by db field `npc_types`.`light` - where appropriate
+		uint8 Equipment;	// Item_Struct::light value of worn/carried equipment
+		uint8 Spell;		// Set value of any light-producing spell (can be modded to mimic equip_light behavior)
+		uint8 Active;		// Highest value of all light sources
+	} Type;
+
+	// Light levels (intensities) - used to determine which light source should be active
+	struct {
+		uint8 Innate;
+		uint8 Equipment;
+		uint8 Spell;
+		uint8 Active;
+	} Level;
 };
 
 #endif // #define __ITEM_H

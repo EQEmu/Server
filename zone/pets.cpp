@@ -417,7 +417,7 @@ void Mob::MakePoweredPet(uint16 spell_id, const char* pettype, int16 petpower,
 			}
 	}
 
-	npc->UpdateEquipLightValue();
+	npc->UpdateEquipmentLight();
 
 	// finally, override size if one was provided
 	if (in_size > 0.0f)
