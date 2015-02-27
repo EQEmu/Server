@@ -3550,17 +3550,14 @@ int16 Mob::GetSkillDmgTaken(const SkillUseTypes skill_used)
 {
 	int skilldmg_mod = 0;
 
-	int16 MeleeVuln = spellbonuses.MeleeVulnerability + itembonuses.MeleeVulnerability + aabonuses.MeleeVulnerability;
-
 	// All skill dmg mod + Skill specific
 	skilldmg_mod += itembonuses.SkillDmgTaken[HIGHEST_SKILL+1] + spellbonuses.SkillDmgTaken[HIGHEST_SKILL+1] +
 					itembonuses.SkillDmgTaken[skill_used] + spellbonuses.SkillDmgTaken[skill_used];
+	
 
-	//Innate SetSkillDamgeTaken(skill,value)
-	if ((SkillDmgTaken_Mod[skill_used]) || (SkillDmgTaken_Mod[HIGHEST_SKILL+1]))
-		skilldmg_mod += SkillDmgTaken_Mod[skill_used] + SkillDmgTaken_Mod[HIGHEST_SKILL+1];
+	skilldmg_mod += SkillDmgTaken_Mod[skill_used] + SkillDmgTaken_Mod[HIGHEST_SKILL+1];
 
-	skilldmg_mod += MeleeVuln;
+	skilldmg_mod += spellbonuses.MeleeVulnerability + itembonuses.MeleeVulnerability + aabonuses.MeleeVulnerability;
 
 	if(skilldmg_mod < -100)
 		skilldmg_mod = -100;
@@ -4643,21 +4640,20 @@ void Mob::SetBodyType(bodyType new_body, bool overwrite_orig) {
 
 void Mob::ModSkillDmgTaken(SkillUseTypes skill_num, int value)
 {
-	if (skill_num <= HIGHEST_SKILL)
-		SkillDmgTaken_Mod[skill_num] = value;
-
-
-	else if (skill_num == 255 || skill_num == -1)
+	if (skill_num == ALL_SKILLS)
 		SkillDmgTaken_Mod[HIGHEST_SKILL+1] = value;
+
+	else if (skill_num >= 0 && skill_num <= HIGHEST_SKILL)
+		SkillDmgTaken_Mod[skill_num] = value;
 }
 
 int16 Mob::GetModSkillDmgTaken(const SkillUseTypes skill_num)
 {
-	if (skill_num <= HIGHEST_SKILL)
-		return SkillDmgTaken_Mod[skill_num];
-
-	else if (skill_num == 255 || skill_num == -1)
+	if (skill_num == ALL_SKILLS)
 		return SkillDmgTaken_Mod[HIGHEST_SKILL+1];
+
+	else if (skill_num >= 0 && skill_num <= HIGHEST_SKILL)
+		return SkillDmgTaken_Mod[skill_num];
 
 	return 0;
 }
