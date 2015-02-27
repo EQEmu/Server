@@ -3116,50 +3116,14 @@ bool Client::SwapItem(const EQEmu::InventorySlot &src, const EQEmu::InventorySlo
 	auto i_src = m_inventory.Get(src);
 	auto i_dest = m_inventory.Get(dest);
 
-	if(dest.IsEquipment() && !CanEquipItem(i_dest, dest)) {
+	if(dest.IsEquipment() && !m_inventory.CanEquip(i_dest, dest)) {
 		return false;
 	}
 	
 	printf("Equip check passes %s -> %s\n", src.ToString().c_str(), dest.ToString().c_str());
-
+	
 	bool res = m_inventory.Swap(src, dest, number_in_stack);
 
 	return true;
 }
 
-bool Client::CanEquipItem(std::shared_ptr<EQEmu::ItemInstance> inst, const EQEmu::InventorySlot &slot) {
-	if(!inst) {
-		return false;
-	}
-
-	if(slot.Type() != 0) {
-		return false;
-	}
-
-	if(!EQEmu::ValueWithin(slot.Slot(), EQEmu::PersonalSlotCharm, EQEmu::PersonalSlotAmmo)) {
-		return false;
-	}
-
-	auto item = inst->GetItem();
-	//check slot
-
-	int use_slot = -1;
-	if(slot.Slot() == EQEmu::PersonalSlotPowerSource) {
-		use_slot = EQEmu::PersonalSlotAmmo;
-	}
-	else if(slot.Slot() == EQEmu::PersonalSlotAmmo) {
-		use_slot = EQEmu::PersonalSlotPowerSource;
-	} else {
-		use_slot = slot.Slot();
-	}
-
-	if(!(item->Slots & (1 << use_slot))) {
-		return false;
-	}
-
-	if(!item->IsEquipable(GetBaseRace(), GetBaseClass())) {
-		return false;
-	}
-
-	return true;
-}

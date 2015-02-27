@@ -22,7 +22,7 @@ SET(tests_headers
 
 ADD_EXECUTABLE(tests ${tests_sources} ${tests_headers})
 
-TARGET_LINK_LIBRARIES(tests common cppunit)
+TARGET_LINK_LIBRARIES(tests common cppunit debug ${MySQL_LIBRARY_DEBUG} optimized ${MySQL_LIBRARY_RELEASE})
 
 INSTALL(TARGETS tests RUNTIME DESTINATION ${CMAKE_INSTALL_PREFIX})
 

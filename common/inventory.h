@@ -120,7 +120,7 @@ namespace EQEmu
 	class Inventory
 	{
 	public:
-		Inventory();
+		Inventory(int race, int class_);
 		~Inventory();
 
 		std::shared_ptr<ItemInstance> Get(const InventorySlot &slot);
@@ -130,6 +130,7 @@ namespace EQEmu
 		//utility
 		static int CalcMaterialFromSlot(const InventorySlot &slot);
 		static InventorySlot CalcSlotFromMaterial(int material);
+		bool CanEquip(std::shared_ptr<EQEmu::ItemInstance> inst, const EQEmu::InventorySlot &slot);
 		bool Serialize(MemoryBuffer &buf);
 	private:
 		struct impl;

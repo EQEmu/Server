@@ -20,6 +20,7 @@
 #include <iostream>
 #include <fstream>
 #include <memory>
+#include "../common/eqemu_logsys.h"
 #include "memory_mapped_file_test.h"
 #include "ipc_mutex_test.h"
 #include "fixed_memory_test.h"
@@ -31,6 +32,8 @@
 #include "skills_util_test.h"
 #include "inventory_test.h"
 #include "memory_buffer_test.h"
+
+EQEmuLogSys Log;
 
 int main() {
 	try {

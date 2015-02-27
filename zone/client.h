@@ -825,7 +825,6 @@ public:
 
 	//New Inventory
 	bool SwapItem(const EQEmu::InventorySlot &src, const EQEmu::InventorySlot &dest, int number_in_stack);
-	bool CanEquipItem(std::shared_ptr<EQEmu::ItemInstance> inst, const EQEmu::InventorySlot &slot);
 
 	//
 	// class Client::TextLink

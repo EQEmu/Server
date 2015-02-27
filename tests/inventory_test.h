@@ -26,13 +26,14 @@
 class InventoryTest : public Test::Suite {
 	typedef void(InventoryTest::*TestFunction)(void);
 public:
-	InventoryTest() {
+	InventoryTest() : inv(1, 1) {
 		InitContainer();
 		InitArmor();
 		InitAugment();
 		InitStackable();
 		InitInventory();
 		TEST_ADD(InventoryTest::InventoryVerifyInitialItemsTest);
+		TEST_ADD(InventoryTest::InventoryCanEquipTest);
 	}
 
 	~InventoryTest() {
@@ -144,15 +145,15 @@ private:
 		std::shared_ptr<EQEmu::ItemInstance> m_armor(new EQEmu::ItemInstance(&armor));
 		std::shared_ptr<EQEmu::ItemInstance> m_augment(new EQEmu::ItemInstance(&augment));
 		std::shared_ptr<EQEmu::ItemInstance> m_stackable(new EQEmu::ItemInstance(&stackable, 45));
-		inv.Put(EQEmu::InventorySlot(0, 23), m_bag);
-		inv.Put(EQEmu::InventorySlot(0, 23, 0), m_armor);
-		inv.Put(EQEmu::InventorySlot(0, 23, 1), m_augment);
-		inv.Put(EQEmu::InventorySlot(0, 23, 7), m_stackable);
+		inv.Put(EQEmu::InventorySlot(EQEmu::InvTypePersonal, EQEmu::PersonalSlotGeneral1), m_bag);
+		inv.Put(EQEmu::InventorySlot(EQEmu::InvTypePersonal, EQEmu::PersonalSlotGeneral1, 0), m_armor);
+		inv.Put(EQEmu::InventorySlot(EQEmu::InvTypePersonal, EQEmu::PersonalSlotGeneral1, 1), m_augment);
+		inv.Put(EQEmu::InventorySlot(EQEmu::InvTypePersonal, EQEmu::PersonalSlotGeneral1, 7), m_stackable);
 	}
 
 	void InventoryVerifyInitialItemsTest()
 	{
-		auto m_bag = inv.Get(EQEmu::InventorySlot(0, 23));
+		auto m_bag = inv.Get(EQEmu::InventorySlot(EQEmu::InvTypePersonal, EQEmu::PersonalSlotGeneral1));
 		TEST_ASSERT(m_bag);
 		TEST_ASSERT(m_bag->GetItem());
 		TEST_ASSERT(m_bag->GetItem()->ID == 1000);
@@ -173,12 +174,41 @@ private:
 		TEST_ASSERT(m_stackable->GetItem()->ID == 1003);
 	}
 
+	void InventoryCanEquipTest() {
+		auto m_bag = inv.Get(EQEmu::InventorySlot(EQEmu::InvTypePersonal, EQEmu::PersonalSlotGeneral1));
+		TEST_ASSERT(m_bag);
+		TEST_ASSERT(m_bag->GetItem());
+		TEST_ASSERT(m_bag->GetItem()->ID == 1000);
+
+		auto m_armor = m_bag->Get(0);
+		TEST_ASSERT(m_armor);
+		TEST_ASSERT(m_armor->GetItem());
+		TEST_ASSERT(m_armor->GetItem()->ID == 1001);
+
+		auto can_equip = inv.CanEquip(m_armor, EQEmu::InventorySlot(EQEmu::InvTypePersonal, EQEmu::PersonalSlotChest));
+		TEST_ASSERT(can_equip);
+
+		can_equip = inv.CanEquip(m_armor, EQEmu::InventorySlot(EQEmu::InvTypePersonal, EQEmu::PersonalSlotWaist));
+		TEST_ASSERT(!can_equip);
+
+		armor.Classes -= 1;
+		can_equip = inv.CanEquip(m_armor, EQEmu::InventorySlot(EQEmu::InvTypePersonal, EQEmu::PersonalSlotChest));
+		TEST_ASSERT(!can_equip);
+		armor.Classes += 1;
+
+		armor.Races -= 1;
+		can_equip = inv.CanEquip(m_armor, EQEmu::InventorySlot(EQEmu::InvTypePersonal, EQEmu::PersonalSlotChest));
+		TEST_ASSERT(!can_equip);
+		armor.Races += 1;
+	}
+
 	void InventorySwapItemsTest()
 	{
-		auto swap_result = inv.Swap(EQEmu::InventorySlot(0, 23), EQEmu::InventorySlot(0, 24), 0);
+		auto swap_result = inv.Swap(EQEmu::InventorySlot(EQEmu::InvTypePersonal, EQEmu::PersonalSlotGeneral1),
+									EQEmu::InventorySlot(EQEmu::InvTypePersonal, EQEmu::PersonalSlotGeneral2), 0);
 		TEST_ASSERT(swap_result == true);
 
-		auto m_bag = inv.Get(EQEmu::InventorySlot(0, 24));
+		auto m_bag = inv.Get(EQEmu::InventorySlot(EQEmu::InvTypePersonal, EQEmu::PersonalSlotGeneral2));
 		TEST_ASSERT(m_bag);
 		TEST_ASSERT(m_bag->GetItem());
 		TEST_ASSERT(m_bag->GetItem()->ID == 1000);

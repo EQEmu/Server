@@ -98,10 +98,14 @@ const std::string EQEmu::InventorySlot::ToString() const {
 struct EQEmu::Inventory::impl
 {
 	std::map<int, ItemContainer> containers_;
+	int race_;
+	int class_;
 };
 
-EQEmu::Inventory::Inventory() {
+EQEmu::Inventory::Inventory(int race, int class_) {
 	impl_ = new impl;
+	impl_->race_ = race;
+	impl_->class_ = class_;
 }
 
 EQEmu::Inventory::~Inventory() {
@@ -229,6 +233,44 @@ EQEmu::InventorySlot EQEmu::Inventory::CalcSlotFromMaterial(int material) {
 	default:
 		return EQEmu::InventorySlot(-1, -1);
 	}
+}
+
+bool EQEmu::Inventory::CanEquip(std::shared_ptr<EQEmu::ItemInstance> inst, const EQEmu::InventorySlot &slot) {
+	if(!inst) {
+		return false;
+	}
+	
+	if(slot.Type() != 0) {
+		return false;
+	}
+	
+	if(!EQEmu::ValueWithin(slot.Slot(), EQEmu::PersonalSlotCharm, EQEmu::PersonalSlotAmmo)) {
+		return false;
+	}
+	
+	auto item = inst->GetItem();
+	//check slot
+	
+	int use_slot = -1;
+	if(slot.Slot() == EQEmu::PersonalSlotPowerSource) {
+		use_slot = EQEmu::PersonalSlotAmmo;
+	}
+	else if(slot.Slot() == EQEmu::PersonalSlotAmmo) {
+		use_slot = EQEmu::PersonalSlotPowerSource;
+	}
+	else {
+		use_slot = slot.Slot();
+	}
+	
+	if(!(item->Slots & (1 << use_slot))) {
+		return false;
+	}
+	
+	if(!item->IsEquipable(impl_->race_, impl_->class_)) {
+		return false;
+	}
+
+	return true;
 }
 
 bool EQEmu::Inventory::Serialize(MemoryBuffer &buf) {
