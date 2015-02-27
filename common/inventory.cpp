@@ -19,7 +19,81 @@
 #include "inventory.h"
 #include "data_verification.h"
 #include "item_container_personal_serialization.h"
+#include "string_util.h"
 #include <map>
+
+bool EQEmu::InventorySlot::IsValid() const {
+	if(type_ == InvTypePersonal && EQEmu::ValueWithin(slot_, PersonalSlotCharm, PersonalSlotCursor)) {
+		return true;
+	}
+
+	if(type_ == InvTypeBank && EQEmu::ValueWithin(slot_, 0, 23)) {
+		return true;
+	}
+
+	if(type_ == InvTypeSharedBank && EQEmu::ValueWithin(slot_, 0, 1)) {
+		return true;
+	}
+
+	if(type_ == InvTypeTribute && EQEmu::ValueWithin(slot_, 0, 4)) {
+		return true;
+	}
+
+	if(type_ == InvTypeTrade && EQEmu::ValueWithin(slot_, 0, 7)) {
+		return true;
+	}
+
+	if(type_ == InvTypeWorld && EQEmu::ValueWithin(slot_, 0, 255)) {
+		return true;
+	}
+
+
+	return false;
+}
+
+bool EQEmu::InventorySlot::IsBank() const {
+	if(type_ == InvTypeBank && EQEmu::ValueWithin(slot_, 0, 23)) {
+		return true;
+	}
+
+	if(type_ == InvTypeSharedBank && EQEmu::ValueWithin(slot_, 0, 1)) {
+		return true;
+	}
+
+	return false;
+}
+
+bool EQEmu::InventorySlot::IsCursor() const {
+	if(type_ == InvTypePersonal && slot_ == PersonalSlotCursor) {
+		return true;
+	}
+
+	if(type_ == InvTypeCursorBuffer) {
+		return true;
+	}
+
+	return false;
+}
+
+bool EQEmu::InventorySlot::IsEquipment() const {
+	if(type_ == InvTypePersonal && EQEmu::ValueWithin(slot_, PersonalSlotCharm, PersonalSlotAmmo)) {
+		return true;
+	}
+
+	return false;
+}
+
+bool EQEmu::InventorySlot::IsGeneral() const {
+	if(type_ == InvTypePersonal && EQEmu::ValueWithin(slot_, PersonalSlotGeneral1, PersonalSlotGeneral10)) {
+		return true;
+	}
+
+	return false;
+}
+
+const std::string EQEmu::InventorySlot::ToString() const {
+	return StringFormat("(%i, %i, %i, %i)", type_, slot_, bag_index_, aug_index_);
+}
 
 struct EQEmu::Inventory::impl
 {
@@ -35,15 +109,15 @@ EQEmu::Inventory::~Inventory() {
 }
 
 std::shared_ptr<EQEmu::ItemInstance> EQEmu::Inventory::Get(const InventorySlot &slot) {
-	auto iter = impl_->containers_.find(slot.type_);
+	auto iter = impl_->containers_.find(slot.Type());
 	if(iter != impl_->containers_.end()) {
-		auto item = iter->second.Get(slot.slot_);
+		auto item = iter->second.Get(slot.Slot());
 		if(item) {
-			if(slot.bag_index_ > -1) {
-				auto sub_item = item->Get(slot.bag_index_);
+			if(slot.BagIndex() > -1) {
+				auto sub_item = item->Get(slot.BagIndex());
 				if(sub_item) {
-					if(slot.aug_index_ > -1) {
-						return sub_item->Get(slot.aug_index_);
+					if(slot.AugIndex() > -1) {
+						return sub_item->Get(slot.AugIndex());
 					} else {
 						return sub_item;
 					}
@@ -58,42 +132,42 @@ std::shared_ptr<EQEmu::ItemInstance> EQEmu::Inventory::Get(const InventorySlot &
 }
 
 bool EQEmu::Inventory::Put(const InventorySlot &slot, std::shared_ptr<ItemInstance> inst) {
-	if(impl_->containers_.count(slot.type_) == 0) {
-		if(slot.type_ == 0) {
-			impl_->containers_.insert(std::pair<int, ItemContainer>(slot.type_, ItemContainer(new ItemContainerPersonalSerialization())));
+	if(impl_->containers_.count(slot.Type()) == 0) {
+		if(slot.Type() == 0) {
+			impl_->containers_.insert(std::pair<int, ItemContainer>(slot.Type(), ItemContainer(new ItemContainerPersonalSerialization())));
 		} else {
-			impl_->containers_.insert(std::pair<int, ItemContainer>(slot.type_, ItemContainer()));
+			impl_->containers_.insert(std::pair<int, ItemContainer>(slot.Type(), ItemContainer()));
 		}
 	}
 
 	//Verify item can be put into the slot requested
 
-	auto &container = impl_->containers_[slot.type_];
-	if(slot.bag_index_ > -1) {
-		auto item = container.Get(slot.slot_);
+	auto &container = impl_->containers_[slot.Type()];
+	if(slot.BagIndex() > -1) {
+		auto item = container.Get(slot.Slot());
 		if(!item)
 			return false;
 
-		if(slot.aug_index_ > -1) {
-			auto bag_item = item->Get(slot.bag_index_);
+		if(slot.AugIndex() > -1) {
+			auto bag_item = item->Get(slot.BagIndex());
 			if(!bag_item) {
 				return false;
 			}
 			
-			return bag_item->Put(slot.aug_index_, inst);
+			return bag_item->Put(slot.AugIndex(), inst);
 		} else {
-			return item->Put(slot.bag_index_, inst);
+			return item->Put(slot.BagIndex(), inst);
 		}
 	} else {
-		if(slot.aug_index_ > -1) {
-			auto item = container.Get(slot.slot_);
+		if(slot.AugIndex() > -1) {
+			auto item = container.Get(slot.Slot());
 			if(!item)
 				return false;
 
-			return item->Put(slot.aug_index_, inst);
+			return item->Put(slot.AugIndex(), inst);
 		}
 
-		return container.Put(slot.slot_, inst);
+		return container.Put(slot.Slot(), inst);
 	}
 
 	return false;
@@ -104,10 +178,10 @@ bool EQEmu::Inventory::Swap(const InventorySlot &src, const InventorySlot &dest,
 }
 
 int EQEmu::Inventory::CalcMaterialFromSlot(const InventorySlot &slot) {
-	if(slot.type_ != 0)
+	if(slot.Type() != 0)
 		return _MaterialInvalid;
 
-	switch(slot.slot_) {
+	switch(slot.Slot()) {
 	case PersonalSlotHead:
 		return MaterialHead;
 	case PersonalSlotChest:

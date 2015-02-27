@@ -18,8 +18,8 @@
 
 #include "../common/global_define.h"
 #include "../common/eqemu_logsys.h"
-
 #include "../common/string_util.h"
+#include "../common/data_verification.h"
 #include "quest_parser_collection.h"
 #include "worldserver.h"
 #include "zonedb.h"
@@ -191,7 +191,7 @@ bool Client::CheckLoreConflict(const ItemData* item)
 }
 
 bool Client::SummonItem(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2, uint32 aug3, uint32 aug4, uint32 aug5, uint32 aug6, bool attuned, uint16 to_slot, uint32 ornament_icon, uint32 ornament_idfile, uint32 ornament_hero_model) {
-	this->EVENT_ITEM_ScriptStopReturn();
+	ItemScriptStopReturn();
 
 	// TODO: update calling methods and script apis to handle a failure return
 
@@ -3091,4 +3091,75 @@ std::string InventoryOld::GetCustomItemData(int16 slot_id, std::string identifie
 		return inst->GetCustomData(identifier);
 	}
 	return "";
+}
+
+//New Inventory
+bool Client::SwapItem(const EQEmu::InventorySlot &src, const EQEmu::InventorySlot &dest, int number_in_stack) {
+
+	if (spellend_timer.Enabled() && casting_spell_id && !IsBardSong(casting_spell_id))
+	{
+		if(src != dest && !src.IsCursor() && src.IsValid() && dest.IsValid()) {
+			auto i_src = m_inventory.Get(src);
+			auto i_dest = m_inventory.Get(dest);
+			std::string detect = StringFormat("Player issued a move item from %s (item id %u) to %s (item id %u) while casting %u.",
+											  src.ToString().c_str(), 
+											  i_src ? i_src->GetItem()->ID : 0, 
+											  dest.ToString().c_str(), 
+											  i_dest ? i_dest->GetItem()->ID : 0, 
+											  casting_spell_id);
+			database.SetMQDetectionFlag(AccountName(), GetName(), detect.c_str(), zone->GetShortName());
+			Kick();
+			return false;
+		}
+	}
+
+	auto i_src = m_inventory.Get(src);
+	auto i_dest = m_inventory.Get(dest);
+
+	if(dest.IsEquipment() && !CanEquipItem(i_dest, dest)) {
+		return false;
+	}
+	
+	printf("Equip check passes %s -> %s\n", src.ToString().c_str(), dest.ToString().c_str());
+
+	bool res = m_inventory.Swap(src, dest, number_in_stack);
+
+	return true;
+}
+
+bool Client::CanEquipItem(std::shared_ptr<EQEmu::ItemInstance> inst, const EQEmu::InventorySlot &slot) {
+	if(!inst) {
+		return false;
+	}
+
+	if(slot.Type() != 0) {
+		return false;
+	}
+
+	if(!EQEmu::ValueWithin(slot.Slot(), EQEmu::PersonalSlotCharm, EQEmu::PersonalSlotAmmo)) {
+		return false;
+	}
+
+	auto item = inst->GetItem();
+	//check slot
+
+	int use_slot = -1;
+	if(slot.Slot() == EQEmu::PersonalSlotPowerSource) {
+		use_slot = EQEmu::PersonalSlotAmmo;
+	}
+	else if(slot.Slot() == EQEmu::PersonalSlotAmmo) {
+		use_slot = EQEmu::PersonalSlotPowerSource;
+	} else {
+		use_slot = slot.Slot();
+	}
+
+	if(!(item->Slots & (1 << use_slot))) {
+		return false;
+	}
+
+	if(!item->IsEquipable(GetBaseRace(), GetBaseClass())) {
+		return false;
+	}
+
+	return true;
 }

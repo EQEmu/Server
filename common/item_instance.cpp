@@ -124,14 +124,14 @@ bool EQEmu::ItemInstance::Put(const int index, std::shared_ptr<ItemInstance> ins
 
 	auto *item = impl_->base_item_;
 	if(item->ItemClass == ItemClassContainer) { // Bag
-		if(!EQEmu::ValueWithin(index, 0, (int)item->BagSlots)) {
+		if(!EQEmu::ValueWithin(index, 0, item->BagSlots)) {
 			return false;
 		}
 
 		return impl_->contents_.Put(index, inst);
 	}
 	else if(item->ItemClass == ItemClassCommon) { // Augment
-		if(!EQEmu::ValueWithin(index, 0, (int)EmuConstants::ITEM_COMMON_SIZE)) {
+		if(!EQEmu::ValueWithin(index, 0, EmuConstants::ITEM_COMMON_SIZE)) {
 			return false;
 		}
 

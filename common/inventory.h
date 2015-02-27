@@ -20,24 +20,10 @@
 #define COMMON_INVENTORY_H
 
 #include "item_container.h"
+#include <string>
 
 namespace EQEmu
 {
-	struct InventorySlot
-	{
-		InventorySlot(int type, int slot) 
-			: type_(type), slot_(slot), bag_index_(-1), aug_index_(-1) { }
-		InventorySlot(int type, int slot, int bag_index) 
-			: type_(type), slot_(slot), bag_index_(bag_index), aug_index_(-1) { }
-		InventorySlot(int type, int slot, int bag_index, int aug_index) 
-			: type_(type), slot_(slot), bag_index_(bag_index), aug_index_(aug_index) { }
-
-		int type_;
-		int slot_;
-		int bag_index_;
-		int aug_index_;
-	};
-
 	enum InventoryType : int
 	{
 		InvTypePersonal = 0,
@@ -88,6 +74,48 @@ namespace EQEmu
 		PersonalSlotGeneral10,
 		PersonalSlotCursor
 	};
+
+	class InventorySlot
+	{
+	public:
+		InventorySlot() : type_(-1), slot_(-1), bag_index_(-1), aug_index_(-1) { }
+		InventorySlot(int type, int slot) 
+			: type_(type), slot_(slot), bag_index_(-1), aug_index_(-1) { }
+		InventorySlot(int type, int slot, int bag_index) 
+			: type_(type), slot_(slot), bag_index_(bag_index), aug_index_(-1) { }
+		InventorySlot(int type, int slot, int bag_index, int aug_index) 
+			: type_(type), slot_(slot), bag_index_(bag_index), aug_index_(aug_index) { }
+
+		bool IsValid() const;
+		bool IsBank() const;
+		bool IsCursor() const;
+		bool IsEquipment() const;
+		bool IsGeneral() const;
+
+		const std::string ToString() const;
+
+		inline int Type() { return type_; }
+		inline int Type() const { return type_; }
+		inline int Slot() { return slot_; }
+		inline int Slot() const { return slot_; }
+		inline int BagIndex() { return bag_index_; }
+		inline int BagIndex() const { return bag_index_; }
+		inline int AugIndex() { return aug_index_; }
+		inline int AugIndex() const { return aug_index_; }
+
+	private:
+		int type_;
+		int slot_;
+		int bag_index_;
+		int aug_index_;
+	};
+
+	inline bool operator==(const InventorySlot &lhs, const InventorySlot &rhs) { 
+		return lhs.Type() == rhs.Type() && 
+			lhs.Slot() == rhs.Slot() && 
+			lhs.BagIndex() == rhs.BagIndex() &&
+			lhs.AugIndex() == rhs.AugIndex(); }
+	inline bool operator!=(const InventorySlot &lhs, const InventorySlot &rhs) { return !(lhs == rhs); }
 
 	class Inventory
 	{

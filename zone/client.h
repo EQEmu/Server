@@ -800,7 +800,7 @@ public:
 	int32 acmod();
 
 	// Item methods
-	void EVENT_ITEM_ScriptStopReturn();
+	void ItemScriptStopReturn();
 	uint32 NukeItem(uint32 itemnum, uint8 where_to_check =
 			(invWhereWorn | invWherePersonal | invWhereBank | invWhereSharedBank | invWhereTrading | invWhereCursor));
 	void SetTint(int16 slot_id, uint32 color);
@@ -822,6 +822,10 @@ public:
 	void SetStats(uint8 type,int16 set_val);
 	void IncStats(uint8 type,int16 increase_val);
 	void DropItem(int16 slot_id);
+
+	//New Inventory
+	bool SwapItem(const EQEmu::InventorySlot &src, const EQEmu::InventorySlot &dest, int number_in_stack);
+	bool CanEquipItem(std::shared_ptr<EQEmu::ItemInstance> inst, const EQEmu::InventorySlot &slot);
 
 	//
 	// class Client::TextLink

@@ -61,7 +61,7 @@ static uint32 MaxBankedRaidLeadershipPoints(int Level)
 
 void Client::AddEXP(uint32 in_add_exp, uint8 conlevel, bool resexp) {
 
-	this->EVENT_ITEM_ScriptStopReturn();
+	ItemScriptStopReturn();
 
 	uint32 add_exp = in_add_exp;
 
