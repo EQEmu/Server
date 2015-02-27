@@ -1010,6 +1010,7 @@ uint8 Inventory::FindBrightestLightType()
 			brightest_light_type = item->Light;
 	}
 
+	uint8 general_light_type = 0;
 	for (auto iter = m_inv.begin(); iter != m_inv.end(); ++iter) {
 		if (iter->first < EmuConstants::GENERAL_BEGIN || iter->first > EmuConstants::GENERAL_END) { continue; }
 
@@ -1028,9 +1029,12 @@ uint8 Inventory::FindBrightestLightType()
 			break;
 		}
 
-		if (LightProfile_Struct::IsLevelGreater(item->Light, brightest_light_type))
-			brightest_light_type = item->Light;
+		if (LightProfile_Struct::TypeToLevel(item->Light))
+			general_light_type = item->Light;
 	}
+
+	if (LightProfile_Struct::IsLevelGreater(general_light_type, brightest_light_type))
+		brightest_light_type = general_light_type;
 
 	return brightest_light_type;
 }

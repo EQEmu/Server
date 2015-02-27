@@ -486,6 +486,8 @@ struct LightProfile_Struct
 	- Client calls '__debugbreak' for type values > 127
 	- If values > 0x0F are valid, then assignment limiters will need to be removed
 	- MainCursor 'appears' to be a valid light source update slot..but, have not experienced updates during debug sessions
+	- "Fire Beetle Eyes" are still causing issues in general slots (no item movement sound effect)
+	- Wearable equipment types still register as valid light sources when in general slots (needs exemption criteria)
 	*/
 
 	static uint8 TypeToLevel(uint8 lightType);

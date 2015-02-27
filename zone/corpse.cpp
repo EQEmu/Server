@@ -1430,12 +1430,11 @@ void Corpse::UpdateEquipmentLight()
 		auto item = database.GetItem((*iter)->item_id);
 		if (item == nullptr) { continue; }
 		
-		if (m_Light.IsLevelGreater(item->Light, m_Light.Type.Equipment)) {
+		if (m_Light.IsLevelGreater(item->Light, m_Light.Type.Equipment))
 			m_Light.Type.Equipment = item->Light;
-			m_Light.Level.Equipment = m_Light.TypeToLevel(m_Light.Type.Equipment);
-		}
 	}
 	
+	uint8 general_light_type = 0;
 	for (auto iter = itemlist.begin(); iter != itemlist.end(); ++iter) {
 		if ((*iter)->equip_slot < EmuConstants::GENERAL_BEGIN || (*iter)->equip_slot > EmuConstants::GENERAL_END) { continue; }
 		
@@ -1452,11 +1451,14 @@ void Corpse::UpdateEquipmentLight()
 			break;
 		}
 
-		if (m_Light.IsLevelGreater(item->Light, m_Light.Type.Equipment)) {
-			m_Light.Type.Equipment = item->Light;
-			m_Light.Level.Equipment = m_Light.TypeToLevel(m_Light.Type.Equipment);
-		}
+		if (m_Light.TypeToLevel(item->Light))
+			general_light_type = item->Light;
 	}
+
+	if (m_Light.IsLevelGreater(general_light_type, m_Light.Type.Equipment))
+		m_Light.Type.Equipment = general_light_type;
+
+	m_Light.Level.Equipment = m_Light.TypeToLevel(m_Light.Type.Equipment);
 }
 
 void Corpse::AddLooter(Mob* who) {
