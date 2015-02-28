@@ -5054,15 +5054,8 @@ void Merc::UpdateEquipmentLight()
 		auto item = database.GetItem((*iter)->item_id);
 		if (item == nullptr) { continue; }
 
-		switch (item->Light) {
-		case lightTypeCandle:
-		case lightTypeTorch:
-		case lightTypeSmallLantern:
-		case lightTypeLargeLantern:
-			continue;
-		default:
-			break;
-		}
+		if (item->ItemClass != ItemClassCommon) { continue; }
+		if (item->Light < 9 || item->Light > 13) { continue; }
 
 		if (m_Light.TypeToLevel(item->Light))
 			general_light_type = item->Light;

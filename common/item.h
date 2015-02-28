@@ -477,17 +477,18 @@ struct LightProfile_Struct
 	/*
 	Current criteria (light types):
 	Equipment:	{ 0 .. 15 }
-	General:	{ 0 .. 15 } =/= { 1, 2, 4, 6 }
+	General:	{ 9 .. 13 }
 
 	Notes:
+	- Initial character load and item movement updates use different light source update behaviors
+	-- Server procedure matches the item movement behavior since most updates occur post-character load
 	- MainAmmo is not considered when determining light sources
 	- No 'Sub' or 'Aug' items are recognized as light sources
-	- Extinguishable light types { Candle, Torch, SmallLantern, LargeLantern } are not considered for general (carried) light sources
-	- Client calls '__debugbreak' for type values > 127
+	- Light types '< 9' and '> 13' are not considered for general (carried) light sources
 	- If values > 0x0F are valid, then assignment limiters will need to be removed
 	- MainCursor 'appears' to be a valid light source update slot..but, have not experienced updates during debug sessions
-	- "Fire Beetle Eyes" are still causing issues in general slots (no item movement sound effect)
-	- Wearable equipment types still register as valid light sources when in general slots (needs exemption criteria)
+	- All clients have a bug regarding stackable items (light and sound updates are not processed when picking up an item)
+	-- The timer-based update cancels out the invalid light source
 	*/
 
 	static uint8 TypeToLevel(uint8 lightType);

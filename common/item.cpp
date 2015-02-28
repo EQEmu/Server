@@ -1019,15 +1019,8 @@ uint8 Inventory::FindBrightestLightType()
 		auto item = inst->GetItem();
 		if (item == nullptr) { continue; }
 
-		switch (item->Light) {
-		case lightTypeCandle:
-		case lightTypeTorch:
-		case lightTypeSmallLantern:
-		case lightTypeLargeLantern:
-			continue;
-		default:
-			break;
-		}
+		if (item->ItemClass != ItemClassCommon) { continue; }
+		if (item->Light < 9 || item->Light > 13) { continue; }
 
 		if (LightProfile_Struct::TypeToLevel(item->Light))
 			general_light_type = item->Light;
