@@ -125,7 +125,7 @@ class Corpse : public Mob {
 	uint32		GetEquipmentColor(uint8 material_slot) const;
 	inline int	GetRezExp() { return rez_experience; }
 
-	virtual void UpdateEquipLightValue();
+	virtual void UpdateEquipmentLight();
 
 protected:
 	void MoveItemToCorpse(Client *client, ItemInst *inst, int16 equipSlot, std::list<uint32> &removedList);

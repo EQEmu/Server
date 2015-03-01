@@ -656,14 +656,17 @@ public:
 	bool IsDestructibleObject() { return destructibleobject; }
 	void SetDestructibleObject(bool in) { destructibleobject = in; }
 
-	inline uint8 GetInnateLightValue() { return innate_light; }
-	inline uint8 GetEquipLightValue() { return equip_light; }
-	inline uint8 GetSpellLightValue() { return spell_light; }
-	virtual void UpdateEquipLightValue() { equip_light = NOT_USED; }
-	inline void SetSpellLightValue(uint8 light_value) { spell_light = (light_value & 0x0F); }
+	inline uint8 GetInnateLightType() { return m_Light.Type.Innate; }
+	inline uint8 GetEquipmentLightType() { return m_Light.Type.Equipment; }
+	inline uint8 GetSpellLightType() { return m_Light.Type.Spell; }
 
-	inline uint8 GetActiveLightValue() { return active_light; }
-	bool UpdateActiveLightValue(); // returns true if change, false if no change
+	virtual void UpdateEquipmentLight() { m_Light.Type.Equipment = 0; m_Light.Level.Equipment = 0; }
+	inline void SetSpellLightType(uint8 lightType) { m_Light.Type.Spell = (lightType & 0x0F); m_Light.Level.Spell = m_Light.TypeToLevel(m_Light.Type.Spell); }
+
+	inline uint8 GetActiveLightType() { return m_Light.Type.Active; }
+	bool UpdateActiveLight(); // returns true if change, false if no change
+
+	LightProfile_Struct* GetLightProfile() { return &m_Light; }
 
 	Mob* GetPet();
 	void SetPet(Mob* newpet);
@@ -1078,10 +1081,7 @@ protected:
 
 	glm::vec4 m_Delta;
 
-	uint8 innate_light;	// defined by db field `npc_types`.`light` - where appropriate
-	uint8 equip_light;	// highest value of equipped/carried light-producing items
-	uint8 spell_light;	// set value of any light-producing spell (can be modded to mimic equip_light behavior)
-	uint8 active_light;	// highest value of all light sources
+	LightProfile_Struct m_Light;
 
 	float fixedZ;
 	EmuAppearance _appearance;

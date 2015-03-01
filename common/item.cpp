@@ -993,34 +993,43 @@ int InventoryOld::GetSlotByItemInst(ItemInst *inst) {
 	return INVALID_INDEX;
 }
 
-uint8 InventoryOld::FindHighestLightValue()
+uint8 Inventory::FindBrightestLightType()
 {
-	uint8 light_value = NOT_USED;
+	uint8 brightest_light_type = 0;
 
-	// NOTE: The client does not recognize augment light sources, applied or otherwise, and should not be parsed
 	for (auto iter = m_worn.begin(); iter != m_worn.end(); ++iter) {
 		if ((iter->first < EmuConstants::EQUIPMENT_BEGIN || iter->first > EmuConstants::EQUIPMENT_END) && iter->first != MainPowerSource) { continue; }
+		if (iter->first == MainAmmo) { continue; }
+
 		auto inst = iter->second;
 		if (inst == nullptr) { continue; }
 		auto item = inst->GetItem();
 		if (item == nullptr) { continue; }
-		if (item->Light & 0xF0) { continue; }
-		if (item->Light > light_value) { light_value = item->Light; }
+
+		if (LightProfile_Struct::IsLevelGreater(item->Light, brightest_light_type))
+			brightest_light_type = item->Light;
 	}
 
+	uint8 general_light_type = 0;
 	for (auto iter = m_inv.begin(); iter != m_inv.end(); ++iter) {
 		if (iter->first < EmuConstants::GENERAL_BEGIN || iter->first > EmuConstants::GENERAL_END) { continue; }
+
 		auto inst = iter->second;
 		if (inst == nullptr) { continue; }
 		auto item = inst->GetItem();
 		if (item == nullptr) { continue; }
-		// 'Gloomingdeep lantern' is ItemTypeArmor in the database..there may be others instances and/or types that need to be handled
-		if (item->ItemType != ItemTypeMisc && item->ItemType != ItemTypeLight && item->ItemType != ItemTypeArmor) { continue; }
-		if (item->Light & 0xF0) { continue; }
-		if (item->Light > light_value) { light_value = item->Light; }
+
+		if (item->ItemClass != ItemClassCommon) { continue; }
+		if (item->Light < 9 || item->Light > 13) { continue; }
+
+		if (LightProfile_Struct::TypeToLevel(item->Light))
+			general_light_type = item->Light;
 	}
 
-	return light_value;
+	if (LightProfile_Struct::IsLevelGreater(general_light_type, brightest_light_type))
+		brightest_light_type = general_light_type;
+
+	return brightest_light_type;
 }
 
 void InventoryOld::dumpEntireInventory() {
@@ -2360,4 +2369,67 @@ bool ItemData::IsEquipable(uint16 Race, uint16 Class_) const
 	}
 
 	return (IsRace && IsClass);
+}
+
+//
+// struct LightProfile_Struct
+//
+uint8 LightProfile_Struct::TypeToLevel(uint8 lightType)
+{
+	switch (lightType) {
+	case lightTypeGlobeOfStars:
+		return lightLevelBrilliant;		// 10
+	case lightTypeFlamelessLantern:
+	case lightTypeGreaterLightstone:
+		return lightLevelLargeMagic;	// 9
+	case lightTypeLargeLantern:
+		return lightLevelLargeLantern;	// 8
+	case lightTypeSteinOfMoggok:
+	case lightTypeLightstone:
+		return lightLevelMagicLantern;	// 7
+	case lightTypeSmallLantern:
+		return lightLevelSmallLantern;	// 6
+	case lightTypeColdlight:
+	case lightTypeUnknown2:
+		return lightLevelBlueLight;		// 5
+	case lightTypeFireBeetleEye:
+	case lightTypeUnknown1:
+		return lightLevelRedLight;		// 4
+	case lightTypeTinyGlowingSkull:
+	case lightTypeLightGlobe:
+		return lightLevelSmallMagic;	// 3
+	case lightTypeTorch:
+		return lightLevelTorch;			// 2
+	case lightLevelCandle:
+		return lightLevelCandle;		// 1
+	default:
+		return lightLevelUnlit;			// 0
+	}
+}
+
+bool LightProfile_Struct::IsLevelGreater(uint8 leftType, uint8 rightType)
+{
+	static const uint8 light_levels[LIGHT_TYPES_COUNT] = {
+		lightLevelUnlit,			/* lightTypeNone */
+		lightLevelCandle,			/* lightTypeCandle */
+		lightLevelTorch,			/* lightTypeTorch */
+		lightLevelSmallMagic,		/* lightTypeTinyGlowingSkull */
+		lightLevelSmallLantern,		/* lightTypeSmallLantern */
+		lightLevelMagicLantern,		/* lightTypeSteinOfMoggok */
+		lightLevelLargeLantern,		/* lightTypeLargeLantern */
+		lightLevelLargeMagic,		/* lightTypeFlamelessLantern */
+		lightLevelBrilliant,		/* lightTypeGlobeOfStars */
+		lightLevelSmallMagic,		/* lightTypeLightGlobe */
+		lightLevelMagicLantern,		/* lightTypeLightstone */
+		lightLevelLargeMagic,		/* lightTypeGreaterLightstone */
+		lightLevelRedLight,			/* lightTypeFireBeetleEye */
+		lightLevelBlueLight,		/* lightTypeColdlight */
+		lightLevelRedLight,			/* lightTypeUnknown1 */
+		lightLevelBlueLight			/* lightTypeUnknown2 */
+	};
+
+	if (leftType >= LIGHT_TYPES_COUNT) { leftType = lightTypeNone; }
+	if (rightType >= LIGHT_TYPES_COUNT) { rightType = lightTypeNone; }
+
+	return (light_levels[leftType] > light_levels[rightType]);
 }

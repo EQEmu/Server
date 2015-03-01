@@ -701,7 +701,7 @@ void Client::ApplyAABonuses(uint32 aaid, uint32 slots, StatBonuses* newbon)
 		{
 			//Note: AA effects that use accuracy are skill limited, while spell effect is not.
 			case SE_Accuracy:
-				if ((base2 == -1) && (newbon->Accuracy[HIGHEST_SKILL+1] < base1))
+				if ((base2 == ALL_SKILLS) && (newbon->Accuracy[HIGHEST_SKILL+1] < base1))
 					newbon->Accuracy[HIGHEST_SKILL+1] = base1;
 				else if (newbon->Accuracy[base2] < base1)
 					newbon->Accuracy[base2] += base1;
@@ -1043,7 +1043,7 @@ void Client::ApplyAABonuses(uint32 aaid, uint32 slots, StatBonuses* newbon)
 
 			case SE_HitChance:
 			{
-				if(base2 == -1)
+				if(base2 == ALL_SKILLS)
 					newbon->HitChanceEffect[HIGHEST_SKILL+1] += base1;
 				else
 					newbon->HitChanceEffect[base2] += base1;
@@ -1099,7 +1099,7 @@ void Client::ApplyAABonuses(uint32 aaid, uint32 slots, StatBonuses* newbon)
 
 			case SE_CriticalHitChance:
 			{
-				if(base2 == -1)
+				if(base2 == ALL_SKILLS)
 					newbon->CriticalHitChance[HIGHEST_SKILL+1] += base1;
 				else
 					newbon->CriticalHitChance[base2] += base1;
@@ -1109,7 +1109,7 @@ void Client::ApplyAABonuses(uint32 aaid, uint32 slots, StatBonuses* newbon)
 			case SE_CriticalDamageMob:
 			{
 				// base1 = effect value, base2 = skill restrictions(-1 for all)
-				if(base2 == -1)
+				if(base2 == ALL_SKILLS)
 					newbon->CritDmgMob[HIGHEST_SKILL+1] += base1;
 				else
 					newbon->CritDmgMob[base2] += base1;
@@ -1137,7 +1137,7 @@ void Client::ApplyAABonuses(uint32 aaid, uint32 slots, StatBonuses* newbon)
 
 			case SE_SkillDamageAmount:
 			{
-				if(base2 == -1)
+				if(base2 == ALL_SKILLS)
 					newbon->SkillDamageAmount[HIGHEST_SKILL+1] += base1;
 				else
 					newbon->SkillDamageAmount[base2] += base1;
@@ -1154,7 +1154,7 @@ void Client::ApplyAABonuses(uint32 aaid, uint32 slots, StatBonuses* newbon)
 
 			case SE_DamageModifier:
 			{
-				if(base2 == -1)
+				if(base2 == ALL_SKILLS)
 					newbon->DamageModifier[HIGHEST_SKILL+1] += base1;
 				else
 					newbon->DamageModifier[base2] += base1;
@@ -1163,7 +1163,7 @@ void Client::ApplyAABonuses(uint32 aaid, uint32 slots, StatBonuses* newbon)
 
 			case SE_DamageModifier2:
 			{
-				if(base2 == -1)
+				if(base2 == ALL_SKILLS)
 					newbon->DamageModifier2[HIGHEST_SKILL+1] += base1;
 				else
 					newbon->DamageModifier2[base2] += base1;
@@ -1873,7 +1873,7 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 			case SE_CriticalHitChance:
 			{
 				if (AdditiveWornBonus) {
-					if(base2 == -1)
+					if(base2 == ALL_SKILLS)
 						new_bonus->CriticalHitChance[HIGHEST_SKILL+1] += effect_value;
 					else
 						new_bonus->CriticalHitChance[base2] += effect_value;
@@ -1881,16 +1881,16 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 
 				else if(effect_value < 0) {
 
-					if(base2 == -1 && new_bonus->CriticalHitChance[HIGHEST_SKILL+1] > effect_value)
+					if(base2 == ALL_SKILLS && new_bonus->CriticalHitChance[HIGHEST_SKILL+1] > effect_value)
 						new_bonus->CriticalHitChance[HIGHEST_SKILL+1] = effect_value;
-					else if(base2 != -1 && new_bonus->CriticalHitChance[base2] > effect_value)
+					else if(base2 != ALL_SKILLS && new_bonus->CriticalHitChance[base2] > effect_value)
 						new_bonus->CriticalHitChance[base2] = effect_value;
 				}
 
 
-				else if(base2 == -1 && new_bonus->CriticalHitChance[HIGHEST_SKILL+1] < effect_value)
+				else if(base2 == ALL_SKILLS && new_bonus->CriticalHitChance[HIGHEST_SKILL+1] < effect_value)
 						new_bonus->CriticalHitChance[HIGHEST_SKILL+1] = effect_value;
-				else if(base2 != -1 && new_bonus->CriticalHitChance[base2] < effect_value)
+				else if(base2 != ALL_SKILLS && new_bonus->CriticalHitChance[base2] < effect_value)
 						new_bonus->CriticalHitChance[base2] = effect_value;
 
 				break;
@@ -2068,7 +2068,7 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 			{
 				if(new_bonus->MeleeSkillCheck < effect_value) {
 					new_bonus->MeleeSkillCheck = effect_value;
-					new_bonus->MeleeSkillCheckSkill = base2==-1?255:base2;
+					new_bonus->MeleeSkillCheckSkill = base2==ALL_SKILLS?255:base2;
 				}
 				break;
 			}
@@ -2077,13 +2077,13 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 			{
 
 				if (AdditiveWornBonus){
-					if(base2 == -1)
+					if(base2 == ALL_SKILLS)
 						new_bonus->HitChanceEffect[HIGHEST_SKILL+1] += effect_value;
 					else
 						new_bonus->HitChanceEffect[base2] += effect_value;
 				}
 
-				else if(base2 == -1){
+				else if(base2 == ALL_SKILLS){
 
 					if ((effect_value < 0) && (new_bonus->HitChanceEffect[HIGHEST_SKILL+1] > effect_value))
 						new_bonus->HitChanceEffect[HIGHEST_SKILL+1] = effect_value;
@@ -2109,7 +2109,7 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 
 			case SE_DamageModifier:
 			{
-				if(base2 == -1)
+				if(base2 == ALL_SKILLS)
 					new_bonus->DamageModifier[HIGHEST_SKILL+1] += effect_value;
 				else
 					new_bonus->DamageModifier[base2] += effect_value;
@@ -2118,7 +2118,7 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 
 			case SE_DamageModifier2:
 			{
-				if(base2 == -1)
+				if(base2 == ALL_SKILLS)
 					new_bonus->DamageModifier2[HIGHEST_SKILL+1] += effect_value;
 				else
 					new_bonus->DamageModifier2[base2] += effect_value;
@@ -2127,7 +2127,7 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 
 			case SE_MinDamageModifier:
 			{
-				if(base2 == -1)
+				if(base2 == ALL_SKILLS)
 					new_bonus->MinDamageModifier[HIGHEST_SKILL+1] += effect_value;
 				else
 					new_bonus->MinDamageModifier[base2] += effect_value;
@@ -2225,14 +2225,14 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 			{
 				//When using npc_spells_effects if MAX value set, use stackable quest based modifier.
 				if (IsAISpellEffect && max){
-					if(base2 == -1)
+					if(base2 == ALL_SKILLS)
 						SkillDmgTaken_Mod[HIGHEST_SKILL+1] = effect_value;
 					else
 						SkillDmgTaken_Mod[base2] = effect_value;
 				}
 				else {
 
-					if(base2 == -1)
+					if(base2 == ALL_SKILLS)
 						new_bonus->SkillDmgTaken[HIGHEST_SKILL+1] += effect_value;
 					else
 						new_bonus->SkillDmgTaken[base2] += effect_value;
@@ -2341,7 +2341,7 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 
 			case SE_CriticalDamageMob:
 			{
-				if(base2 == -1)
+				if(base2 == ALL_SKILLS)
 					new_bonus->CritDmgMob[HIGHEST_SKILL+1] += effect_value;
 				else
 					new_bonus->CritDmgMob[base2] += effect_value;
@@ -2357,7 +2357,7 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 
 			case SE_SkillDamageAmount:
 			{
-				if(base2 == -1)
+				if(base2 == ALL_SKILLS)
 					new_bonus->SkillDamageAmount[HIGHEST_SKILL+1] += effect_value;
 				else
 					new_bonus->SkillDamageAmount[base2] += effect_value;
@@ -2462,7 +2462,7 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* ne
 
 			case SE_SkillDamageAmount2:
 			{
-				if(base2 == -1)
+				if(base2 == ALL_SKILLS)
 					new_bonus->SkillDamageAmount2[HIGHEST_SKILL+1] += effect_value;
 				else
 					new_bonus->SkillDamageAmount2[base2] += effect_value;

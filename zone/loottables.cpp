@@ -184,7 +184,7 @@ void ZoneDatabase::AddLootDropToNPC(NPC* npc,uint32 lootdrop_id, ItemList* iteml
 		}
 	} // We either ran out of items or reached our limit.
 
-	npc->UpdateEquipLightValue();
+	npc->UpdateEquipmentLight();
 	// no wearchange associated with this function..so, this should not be needed
 	//if (npc->UpdateActiveLightValue())
 	//	npc->SendAppearancePacket(AT_Light, npc->GetActiveLightValue());
@@ -375,9 +375,9 @@ void NPC::AddLootDrop(const ItemData *item2, ItemList* itemlist, int16 charges, 
 		safe_delete(outapp);
 	}
 
-	UpdateEquipLightValue();
-	if (UpdateActiveLightValue())
-		SendAppearancePacket(AT_Light, GetActiveLightValue());
+	UpdateEquipmentLight();
+	if (UpdateActiveLight())
+		SendAppearancePacket(AT_Light, GetActiveLightType());
 }
 
 void NPC::AddItem(const ItemData* item, uint16 charges, bool equipitem) {

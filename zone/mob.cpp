@@ -150,9 +150,13 @@ Mob::Mob(const char* in_name,
 	if (runspeed < 0 || runspeed > 20)
 		runspeed = 1.25f;
 
-	active_light = innate_light = in_light;
-	spell_light = equip_light = NOT_USED;
-
+	m_Light.Type.Innate = in_light;
+	m_Light.Level.Innate = m_Light.TypeToLevel(m_Light.Type.Innate);
+	m_Light.Level.Equipment = m_Light.Type.Equipment = 0;
+	m_Light.Level.Spell = m_Light.Type.Spell = 0;
+	m_Light.Type.Active = m_Light.Type.Innate;
+	m_Light.Level.Active = m_Light.Level.Innate;
+	
 	texture		= in_texture;
 	helmtexture	= in_helmtexture;
 	haircolor	= in_haircolor;
@@ -904,8 +908,8 @@ void Mob::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho)
 	ns->spawn.animation	= 0;
 	ns->spawn.findable	= findable?1:0;
 
-	UpdateActiveLightValue();
-	ns->spawn.light		= active_light;
+	UpdateActiveLight();
+	ns->spawn.light		= m_Light.Type.Active;
 
 	ns->spawn.showhelm = (helmtexture && helmtexture != 0xFF) ? 1 : 0;
 
@@ -2033,37 +2037,20 @@ void Mob::SetAppearance(EmuAppearance app, bool iIgnoreSelf) {
 	}
 }
 
-bool Mob::UpdateActiveLightValue()
+bool Mob::UpdateActiveLight()
 {
-	/*	This is old information...
-		0 - "None"
-		1 - "Candle"
-		2 - "Torch"
-		3 - "Tiny Glowing Skull"
-		4 - "Small Lantern"
-		5 - "Stein of Moggok"
-		6 - "Large Lantern"
-		7 - "Flameless Lantern"
-		8 - "Globe of Stars"
-		9 - "Light Globe"
-		10 - "Lightstone"
-		11 - "Greater Lightstone"
-		12 - "Fire Beatle Eye"
-		13 - "Coldlight"
-		14 - "Unknown"
-		15 - "Unknown"
-	*/
-	
-	uint8 old_light = (active_light & 0x0F);
-	active_light = (innate_light & 0x0F);
+	uint8 old_light_level = m_Light.Level.Active;
 
-	if (equip_light > active_light) { active_light = equip_light; } // limiter in property handler
-	if (spell_light > active_light) { active_light = spell_light; } // limiter in property handler
+	m_Light.Type.Active = 0;
+	m_Light.Level.Active = 0;
 
-	if (active_light != old_light)
-		return true;
+	if (m_Light.IsLevelGreater((m_Light.Type.Innate & 0x0F), m_Light.Type.Active)) { m_Light.Type.Active = m_Light.Type.Innate; }
+	if (m_Light.Level.Equipment > m_Light.Level.Active) { m_Light.Type.Active = m_Light.Type.Equipment; } // limiter in property handler
+	if (m_Light.Level.Spell > m_Light.Level.Active) { m_Light.Type.Active = m_Light.Type.Spell; } // limiter in property handler
 
-	return false;
+	m_Light.Level.Active = m_Light.TypeToLevel(m_Light.Type.Active);
+
+	return (m_Light.Level.Active != old_light_level);
 }
 
 void Mob::ChangeSize(float in_size = 0, bool bNoRestriction) {
@@ -3564,17 +3551,14 @@ int16 Mob::GetSkillDmgTaken(const SkillUseTypes skill_used)
 {
 	int skilldmg_mod = 0;
 
-	int16 MeleeVuln = spellbonuses.MeleeVulnerability + itembonuses.MeleeVulnerability + aabonuses.MeleeVulnerability;
-
 	// All skill dmg mod + Skill specific
 	skilldmg_mod += itembonuses.SkillDmgTaken[HIGHEST_SKILL+1] + spellbonuses.SkillDmgTaken[HIGHEST_SKILL+1] +
 					itembonuses.SkillDmgTaken[skill_used] + spellbonuses.SkillDmgTaken[skill_used];
+	
 
-	//Innate SetSkillDamgeTaken(skill,value)
-	if ((SkillDmgTaken_Mod[skill_used]) || (SkillDmgTaken_Mod[HIGHEST_SKILL+1]))
-		skilldmg_mod += SkillDmgTaken_Mod[skill_used] + SkillDmgTaken_Mod[HIGHEST_SKILL+1];
+	skilldmg_mod += SkillDmgTaken_Mod[skill_used] + SkillDmgTaken_Mod[HIGHEST_SKILL+1];
 
-	skilldmg_mod += MeleeVuln;
+	skilldmg_mod += spellbonuses.MeleeVulnerability + itembonuses.MeleeVulnerability + aabonuses.MeleeVulnerability;
 
 	if(skilldmg_mod < -100)
 		skilldmg_mod = -100;
@@ -4657,21 +4641,20 @@ void Mob::SetBodyType(bodyType new_body, bool overwrite_orig) {
 
 void Mob::ModSkillDmgTaken(SkillUseTypes skill_num, int value)
 {
-	if (skill_num <= HIGHEST_SKILL)
-		SkillDmgTaken_Mod[skill_num] = value;
-
-
-	else if (skill_num == 255 || skill_num == -1)
+	if (skill_num == ALL_SKILLS)
 		SkillDmgTaken_Mod[HIGHEST_SKILL+1] = value;
+
+	else if (skill_num >= 0 && skill_num <= HIGHEST_SKILL)
+		SkillDmgTaken_Mod[skill_num] = value;
 }
 
 int16 Mob::GetModSkillDmgTaken(const SkillUseTypes skill_num)
 {
-	if (skill_num <= HIGHEST_SKILL)
-		return SkillDmgTaken_Mod[skill_num];
-
-	else if (skill_num == 255 || skill_num == -1)
+	if (skill_num == ALL_SKILLS)
 		return SkillDmgTaken_Mod[HIGHEST_SKILL+1];
+
+	else if (skill_num >= 0 && skill_num <= HIGHEST_SKILL)
+		return SkillDmgTaken_Mod[skill_num];
 
 	return 0;
 }
@@ -5388,4 +5371,3 @@ bool Mob::CanClassEquipItem(uint32 item_id)
 	else
 		return true;
 }
-

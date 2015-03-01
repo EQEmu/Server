@@ -1,5 +1,12 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 02/26/2015 ==
+Uleat: Updated light source criteria to (hopefully) match what the client uses (still needs tweaking)
+Uleat: Changed 'general' light source checks to accept the last valid light source (client behavior)
+Notes:
+	- "Fire Beetle Eyes" are still causing issues in general slots (no item movement sound effect)
+	- Wearable equipment types still register as valid light sources when in general slots (needs exemption criteria)
+
 == 02/23/2015 ==
 Uleat: Fix for RoF+ clients showing active 'Return Home' button when action is not available (swapped 'GoHome' and 'Enabled' fields in RoF-era CharacterSelectEntry structs)
 

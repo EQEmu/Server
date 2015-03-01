@@ -262,9 +262,10 @@ bool Client::Process() {
 		}
 
 		if(light_update_timer.Check()) {
-			UpdateEquipLightValue();
-			if(UpdateActiveLightValue()) {
-				SendAppearancePacket(AT_Light, GetActiveLightValue());
+			
+			UpdateEquipmentLight();
+			if(UpdateActiveLight()) {
+				SendAppearancePacket(AT_Light, GetActiveLightType());
 			}
 		}
 
