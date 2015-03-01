@@ -51,6 +51,10 @@ bool EQEmu::InventorySlot::IsValid() const {
 	return false;
 }
 
+bool EQEmu::InventorySlot::IsDelete() const {
+	return type_ == -1 && slot_ == -1 && bag_index_ == -1 && aug_index_ == -1;
+}
+
 bool EQEmu::InventorySlot::IsBank() const {
 	if(type_ == InvTypeBank && EQEmu::ValueWithin(slot_, 0, 23)) {
 		return true;
@@ -91,6 +95,24 @@ bool EQEmu::InventorySlot::IsGeneral() const {
 	return false;
 }
 
+bool EQEmu::InventorySlot::IsWeapon() const {
+	if(type_ == InvTypePersonal && 
+	   (EQEmu::ValueWithin(slot_, PersonalSlotPrimary, PersonalSlotSecondary) || slot_ == PersonalSlotRange))
+	{
+		return true;
+	}
+
+	return false;
+}
+
+bool EQEmu::InventorySlot::IsTrade() const {
+	if(type_ == InvTypeTrade) {
+		return true;
+	}
+
+	return false;
+}
+
 const std::string EQEmu::InventorySlot::ToString() const {
 	return StringFormat("(%i, %i, %i, %i)", type_, slot_, bag_index_, aug_index_);
 }
@@ -100,12 +122,14 @@ struct EQEmu::Inventory::impl
 	std::map<int, ItemContainer> containers_;
 	int race_;
 	int class_;
+	int deity_;
 };
 
-EQEmu::Inventory::Inventory(int race, int class_) {
+EQEmu::Inventory::Inventory(int race, int class_, int deity) {
 	impl_ = new impl;
 	impl_->race_ = race;
 	impl_->class_ = class_;
+	impl_->deity_ = deity;
 }
 
 EQEmu::Inventory::~Inventory() {
@@ -178,7 +202,45 @@ bool EQEmu::Inventory::Put(const InventorySlot &slot, std::shared_ptr<ItemInstan
 }
 
 bool EQEmu::Inventory::Swap(const InventorySlot &src, const InventorySlot &dest, int charges) {
-	return false;
+	printf("%s -> %s (%i)\n", src.IsCursor() ? "Cursor" : src.ToString().c_str(), dest.IsCursor() ? "Cursor" : dest.ToString().c_str(), charges);
+
+	if(src == dest) {
+		return true;
+	}
+
+	if(dest.IsDelete()) {
+		//return Delete(src);
+		return false;
+	}
+
+	if(!src.IsValid() || !dest.IsValid()) {
+		return false;
+	}
+
+	auto i_src = Get(src);
+	auto i_dest = Get(dest);
+
+	if(dest.IsEquipment() && !CanEquip(i_dest, dest)) {
+		return false;
+	}
+
+	if(!i_src) {
+		return false;
+	}
+
+	//Check this -> trade no drop
+	if(dest.IsTrade() && i_src->IsNoDrop()) {
+		return false;
+	}
+
+	if(i_src->IsStackable()) {
+		//charges == 0 -> Move entire stack from src to dest
+		//charges > 0 -> Move charges number of charges from src to dest (may require creating a new item
+	} else {
+		return _swap(src, dest);
+	}
+
+	return true;
 }
 
 int EQEmu::Inventory::CalcMaterialFromSlot(const InventorySlot &slot) {
@@ -287,4 +349,37 @@ bool EQEmu::Inventory::Serialize(MemoryBuffer &buf) {
 	}
 
 	return value;
+}
+
+bool EQEmu::Inventory::_swap(const InventorySlot &src, const InventorySlot &dest) {
+	auto src_i = Get(src);
+	auto dest_i = Get(dest);
+
+	if(src_i) {
+		if(!_destroy(src)) {
+			return false;
+		}
+	}
+
+	if(dest_i) {
+		if(!_destroy(dest)) {
+			return false;
+		}
+
+		if(!Put(src, dest_i)) {
+			return false;
+		}
+	}
+
+	if(src_i) {
+		if(!Put(dest, src_i)) {
+			return false;
+		}
+	}
+
+	return true;
+}
+
+bool EQEmu::Inventory::_destroy(const InventorySlot &slot) {
+	return Put(slot, std::shared_ptr<EQEmu::ItemInstance>(nullptr));
 }

@@ -26,7 +26,7 @@
 class InventoryTest : public Test::Suite {
 	typedef void(InventoryTest::*TestFunction)(void);
 public:
-	InventoryTest() : inv(1, 1) {
+	InventoryTest() : inv(1, 1, 1) {
 		InitContainer();
 		InitArmor();
 		InitAugment();
@@ -34,6 +34,10 @@ public:
 		InitInventory();
 		TEST_ADD(InventoryTest::InventoryVerifyInitialItemsTest);
 		TEST_ADD(InventoryTest::InventoryCanEquipTest);
+		TEST_ADD(InventoryTest::InventorySwapGeneral1ToCursor);
+		TEST_ADD(InventoryTest::InventorySwapCursorToGeneral2);
+		TEST_ADD(InventoryTest::InventorySplitStackToCursor);
+		TEST_ADD(InventoryTest::InventoryStackCombine);
 	}
 
 	~InventoryTest() {
@@ -144,7 +148,7 @@ private:
 		std::shared_ptr<EQEmu::ItemInstance> m_bag(new EQEmu::ItemInstance(&container));
 		std::shared_ptr<EQEmu::ItemInstance> m_armor(new EQEmu::ItemInstance(&armor));
 		std::shared_ptr<EQEmu::ItemInstance> m_augment(new EQEmu::ItemInstance(&augment));
-		std::shared_ptr<EQEmu::ItemInstance> m_stackable(new EQEmu::ItemInstance(&stackable, 45));
+		std::shared_ptr<EQEmu::ItemInstance> m_stackable(new EQEmu::ItemInstance(&stackable, 100));
 		inv.Put(EQEmu::InventorySlot(EQEmu::InvTypePersonal, EQEmu::PersonalSlotGeneral1), m_bag);
 		inv.Put(EQEmu::InventorySlot(EQEmu::InvTypePersonal, EQEmu::PersonalSlotGeneral1, 0), m_armor);
 		inv.Put(EQEmu::InventorySlot(EQEmu::InvTypePersonal, EQEmu::PersonalSlotGeneral1, 1), m_augment);
@@ -202,10 +206,37 @@ private:
 		armor.Races += 1;
 	}
 
-	void InventorySwapItemsTest()
-	{
+	void InventorySwapGeneral1ToCursor() {
 		auto swap_result = inv.Swap(EQEmu::InventorySlot(EQEmu::InvTypePersonal, EQEmu::PersonalSlotGeneral1),
+									EQEmu::InventorySlot(EQEmu::InvTypePersonal, EQEmu::PersonalSlotCursor), 0);
+
+		TEST_ASSERT(swap_result == true);
+
+		auto m_bag = inv.Get(EQEmu::InventorySlot(EQEmu::InvTypePersonal, EQEmu::PersonalSlotCursor));
+		TEST_ASSERT(m_bag);
+		TEST_ASSERT(m_bag->GetItem());
+		TEST_ASSERT(m_bag->GetItem()->ID == 1000);
+
+		auto m_armor = m_bag->Get(0);
+		TEST_ASSERT(m_armor);
+		TEST_ASSERT(m_armor->GetItem());
+		TEST_ASSERT(m_armor->GetItem()->ID == 1001);
+
+		auto m_augment = m_bag->Get(1);
+		TEST_ASSERT(m_augment);
+		TEST_ASSERT(m_augment->GetItem());
+		TEST_ASSERT(m_augment->GetItem()->ID == 1002);
+
+		auto m_stackable = m_bag->Get(7);
+		TEST_ASSERT(m_stackable);
+		TEST_ASSERT(m_stackable->GetItem());
+		TEST_ASSERT(m_stackable->GetItem()->ID == 1003);
+	}
+
+	void InventorySwapCursorToGeneral2() {
+		auto swap_result = inv.Swap(EQEmu::InventorySlot(EQEmu::InvTypePersonal, EQEmu::PersonalSlotCursor),
 									EQEmu::InventorySlot(EQEmu::InvTypePersonal, EQEmu::PersonalSlotGeneral2), 0);
+
 		TEST_ASSERT(swap_result == true);
 
 		auto m_bag = inv.Get(EQEmu::InventorySlot(EQEmu::InvTypePersonal, EQEmu::PersonalSlotGeneral2));
@@ -227,6 +258,37 @@ private:
 		TEST_ASSERT(m_stackable);
 		TEST_ASSERT(m_stackable->GetItem());
 		TEST_ASSERT(m_stackable->GetItem()->ID == 1003);
+	}
+
+	void InventorySplitStackToCursor() {
+		auto swap_result = inv.Swap(EQEmu::InventorySlot(EQEmu::InvTypePersonal, EQEmu::PersonalSlotGeneral1, 7),
+									EQEmu::InventorySlot(EQEmu::InvTypePersonal, EQEmu::PersonalSlotCursor), 10);
+
+		TEST_ASSERT(swap_result == true);
+
+		auto m_stackable_cursor = inv.Get(EQEmu::InventorySlot(EQEmu::InvTypePersonal, EQEmu::PersonalSlotCursor));
+		auto m_stackable = inv.Get(EQEmu::InventorySlot(EQEmu::InvTypePersonal, EQEmu::PersonalSlotGeneral1, 7));
+
+		TEST_ASSERT(m_stackable_cursor);
+		TEST_ASSERT(m_stackable);
+
+		TEST_ASSERT(m_stackable_cursor->GetCharges() == 10);
+		TEST_ASSERT(m_stackable->GetCharges() == 90);
+	}
+
+	void InventoryStackCombine() {
+		auto swap_result = inv.Swap(EQEmu::InventorySlot(EQEmu::InvTypePersonal, EQEmu::PersonalSlotCursor),
+									EQEmu::InventorySlot(EQEmu::InvTypePersonal, EQEmu::PersonalSlotGeneral1, 7), 0);
+
+		TEST_ASSERT(swap_result == true);
+
+		auto m_cursor = inv.Get(EQEmu::InventorySlot(EQEmu::InvTypePersonal, EQEmu::PersonalSlotCursor));
+		auto m_stackable = inv.Get(EQEmu::InventorySlot(EQEmu::InvTypePersonal, EQEmu::PersonalSlotGeneral1, 7));
+
+		TEST_ASSERT(!m_cursor);
+		TEST_ASSERT(m_stackable);
+
+		TEST_ASSERT(m_stackable->GetCharges() == 100);
 	}
 
 	EQEmu::Inventory inv;

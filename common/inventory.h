@@ -87,10 +87,13 @@ namespace EQEmu
 			: type_(type), slot_(slot), bag_index_(bag_index), aug_index_(aug_index) { }
 
 		bool IsValid() const;
+		bool IsDelete() const;
 		bool IsBank() const;
 		bool IsCursor() const;
 		bool IsEquipment() const;
 		bool IsGeneral() const;
+		bool IsWeapon() const;
+		bool IsTrade() const;
 
 		const std::string ToString() const;
 
@@ -120,7 +123,7 @@ namespace EQEmu
 	class Inventory
 	{
 	public:
-		Inventory(int race, int class_);
+		Inventory(int race, int class_, int deity);
 		~Inventory();
 
 		std::shared_ptr<ItemInstance> Get(const InventorySlot &slot);
@@ -133,6 +136,9 @@ namespace EQEmu
 		bool CanEquip(std::shared_ptr<EQEmu::ItemInstance> inst, const EQEmu::InventorySlot &slot);
 		bool Serialize(MemoryBuffer &buf);
 	private:
+		bool _swap(const InventorySlot &src, const InventorySlot &dest);
+		bool _destroy(const InventorySlot &slot);
+
 		struct impl;
 		impl *impl_;
 	};

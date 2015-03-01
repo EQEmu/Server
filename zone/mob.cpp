@@ -103,7 +103,7 @@ Mob::Mob(const char* in_name,
 		m_TargetV(glm::vec3()),
 		flee_timer(FLEE_CHECK_TIMER),
 		m_Position(position),
-		m_inventory(in_race, in_class)
+		m_inventory(in_race, in_class, in_deity)
 {
 	targeted = 0;
 	tar_ndx=0;

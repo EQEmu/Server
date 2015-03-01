@@ -105,6 +105,10 @@ const ItemData *EQEmu::ItemInstance::GetBaseItem() {
 	return impl_->base_item_;
 }
 
+const ItemData *EQEmu::ItemInstance::GetBaseItem() const {
+	return impl_->base_item_;
+}
+
 std::shared_ptr<EQEmu::ItemInstance> EQEmu::ItemInstance::Get(const int index) {
 	if(EQEmu::ValueWithin(index, 0, 255)) {
 		return impl_->contents_.Get(index);
@@ -139,9 +143,13 @@ bool EQEmu::ItemInstance::Put(const int index, std::shared_ptr<ItemInstance> ins
 			return false;
 		}
 
-		auto *aug_item = inst->GetItem();
-		int aug_type = aug_item->AugType;
-		if(aug_type == -1 || (1 << (item->AugSlotType[index] - 1)) & aug_type) {
+		if(inst) {
+			auto *aug_item = inst->GetItem();
+			int aug_type = aug_item->AugType;
+			if(aug_type == -1 || (1 << (item->AugSlotType[index] - 1)) & aug_type) {
+				return impl_->contents_.Put(index, inst);
+			}
+		} else {
 			return impl_->contents_.Put(index, inst);
 		}
 		
@@ -321,6 +329,14 @@ bool EQEmu::ItemInstance::IsStackable() {
 
 bool EQEmu::ItemInstance::IsStackable() const {
 	return impl_->base_item_->Stackable;
+}
+
+bool EQEmu::ItemInstance::IsNoDrop() {
+	return GetAttuned() || GetBaseItem()->NoDrop == 0;
+}
+
+bool EQEmu::ItemInstance::IsNoDrop() const {
+	return GetAttuned() || GetBaseItem()->NoDrop == 0;
 }
 
 EQEmu::ItemContainer *EQEmu::ItemInstance::GetContainer() {

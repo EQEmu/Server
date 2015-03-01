@@ -35,6 +35,7 @@ namespace EQEmu
 
 		const ItemData *GetItem();
 		const ItemData *GetBaseItem();
+		const ItemData *GetBaseItem() const;
 
 		//Container
 		std::shared_ptr<ItemInstance> Get(const int index);
@@ -94,6 +95,9 @@ namespace EQEmu
 		//Basic Stats
 		bool IsStackable();
 		bool IsStackable() const;
+
+		bool IsNoDrop();
+		bool IsNoDrop() const;
 
 		//Internal state
 		//Used for low level operations such as encode/decode

@@ -51,13 +51,15 @@ std::shared_ptr<EQEmu::ItemInstance> EQEmu::ItemContainer::Get(const int slot_id
 }
 
 bool EQEmu::ItemContainer::Put(const int slot_id, std::shared_ptr<ItemInstance> inst) {
-	if(!inst)
-		return false;
-
-	auto iter = impl_->items_.find(slot_id);
-	if(iter == impl_->items_.end()) {
-		impl_->items_[slot_id] = inst;
+	if(!inst) {
+		impl_->items_.erase(slot_id);
 		return true;
+	} else {
+		auto iter = impl_->items_.find(slot_id);
+		if(iter == impl_->items_.end()) {
+			impl_->items_[slot_id] = inst;
+			return true;
+		}
 	}
 
 	return false;

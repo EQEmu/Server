@@ -3113,17 +3113,42 @@ bool Client::SwapItem(const EQEmu::InventorySlot &src, const EQEmu::InventorySlo
 		}
 	}
 
-	auto i_src = m_inventory.Get(src);
-	auto i_dest = m_inventory.Get(dest);
-
-	if(dest.IsEquipment() && !m_inventory.CanEquip(i_dest, dest)) {
-		return false;
+	bool recalc_weapon_speed = false;
+	if(src.IsWeapon() || dest.IsWeapon()) {
+		recalc_weapon_speed = true;
 	}
-	
-	printf("Equip check passes %s -> %s\n", src.ToString().c_str(), dest.ToString().c_str());
-	
+
+	if(src.IsBank() || dest.IsBank()) {
+		uint32 distance = 0;
+		NPC *banker = entity_list.GetClosestBanker(this, distance);
+		if(!banker || distance > USE_NPC_RANGE2)
+		{
+			std::string hacked = StringFormat("Player tried to make use of a banker(items) but %s is "
+											  "non-existant or too far away (%u units).",
+											  banker ? banker->GetName() : "UNKNOWN NPC", 
+											  distance);
+			database.SetMQDetectionFlag(AccountName(), GetName(), hacked.c_str(), zone->GetShortName());
+			Kick();
+			return false;
+		}
+	}
+
 	bool res = m_inventory.Swap(src, dest, number_in_stack);
 
-	return true;
+	if(res) {
+		printf("Swap success\n");
+	} else {
+		printf("Swap failure!\n");
+	}
+
+	if(auto_attack && res && recalc_weapon_speed) {
+		SetAttackTimer();
+	}
+
+	if(res) {
+		CalcBonuses();
+	}
+
+	return res;
 }
 
