@@ -2639,7 +2639,7 @@ XS(boot_NPC)
 		newXSproto(strcpy(buf, "AddRangedProc"), XS_NPC_AddRangedProc, file, "$$$");
 		newXSproto(strcpy(buf, "AddDefensiveProc"), XS_NPC_AddDefensiveProc, file, "$$$");
 		newXSproto(strcpy(buf, "RemoveMeleeProc"), XS_NPC_RemoveMeleeProc, file, "$$");
-		newXSproto(strcpy(buf, "RemoveDefensiveProc"), XS_NPC_RemoveDefensiveProc, file, "$$");
+		newXSproto(strcpy(buf, "RemoveRangedProc"), XS_NPC_RemoveRangedProc, file, "$$");
 		newXSproto(strcpy(buf, "RemoveDefensiveProc"), XS_NPC_RemoveDefensiveProc, file, "$$");
 		newXSproto(strcpy(buf, "ChangeLastName"), XS_NPC_ChangeLastName, file, "$:$");
 		newXSproto(strcpy(buf, "ClearLastName"), XS_NPC_ClearLastName, file, "$");
