@@ -15,14 +15,6 @@
 #include "shareddb.h"
 #include "string_util.h"
 
-uint32 ItemInstanceSerial = 1;
-static inline uint32 GetNextItemInstanceSerial() {
-	ItemInstanceSerial++;
-	return ItemInstanceSerial;
-}
-
-
-
 SharedDatabase::SharedDatabase()
 : Database(), skill_caps_mmf(nullptr), items_mmf(nullptr), items_hash(nullptr), faction_mmf(nullptr), faction_hash(nullptr),
 	loot_table_mmf(nullptr), loot_table_hash(nullptr), loot_drop_mmf(nullptr), loot_drop_hash(nullptr), base_data_mmf(nullptr)
@@ -1273,7 +1265,8 @@ std::shared_ptr<EQEmu::ItemInstance> SharedDatabase::CreateItem(uint32 item_id, 
 		}
 
 		std::shared_ptr<EQEmu::ItemInstance> inst = std::shared_ptr<EQEmu::ItemInstance>(new EQEmu::ItemInstance(item, charges));
-		inst->SetSerialNumber(GetNextItemInstanceSerial());
+		inst->SetSerialNumber(EQEmu::GetNextItemInstanceSerial());
+		//Set Tracking here
 		return inst;
 	}
 

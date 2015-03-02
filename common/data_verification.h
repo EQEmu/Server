@@ -23,19 +23,19 @@
 namespace EQEmu
 {
 
-template <typename T>
-T Clamp(const T& value, const T& lower, const T& upper) {
-	return std::max(lower, std::min(value, upper));
+template <typename T, typename U, typename V>
+T Clamp(const T& value, const U& lower, const V& upper) {
+	return std::max(static_cast<T>(lower), std::min(value, static_cast<T>(upper)));
 }
 
-template <typename T>
-T ClampLower(const T& value, const T& lower) {
-	return std::max(lower, value);
+template <typename T, typename U>
+T ClampLower(const T& value, const U& lower) {
+	return std::max(static_cast<T>(lower), value);
 }
 
-template <typename T>
-T ClampUpper(const T& value, const T& upper) {
-	return std::min(value, upper);
+template <typename T, typename U>
+T ClampUpper(const T& value, const U& upper) {
+	return std::min(value, static_cast<T>(upper));
 }
 
 template <typename T, typename U, typename V>

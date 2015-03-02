@@ -3133,12 +3133,14 @@ bool Client::SwapItem(const EQEmu::InventorySlot &src, const EQEmu::InventorySlo
 		}
 	}
 
+	Message(0, "%s -> %s (%i)\n", src.IsCursor() ? "Cursor" : src.ToString().c_str(), dest.IsCursor() ? "Cursor" : dest.ToString().c_str(), number_in_stack);
+
 	bool res = m_inventory.Swap(src, dest, number_in_stack);
 
 	if(res) {
-		printf("Swap success\n");
+		Message(0, "Swap success\n");
 	} else {
-		printf("Swap failure!\n");
+		Message(0, "Swap failure!\n");
 	}
 
 	if(auto_attack && res && recalc_weapon_speed) {

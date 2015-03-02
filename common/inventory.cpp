@@ -136,6 +136,18 @@ EQEmu::Inventory::~Inventory() {
 	delete impl_;
 }
 
+void EQEmu::Inventory::SetRace(int race) {
+	impl_->race_ = race;
+}
+
+void EQEmu::Inventory::SetClass(int class_) {
+	impl_->class_ = class_;
+}
+
+void EQEmu::Inventory::SetDeity(int deity) {
+	impl_->deity_ = deity;
+}
+
 std::shared_ptr<EQEmu::ItemInstance> EQEmu::Inventory::Get(const InventorySlot &slot) {
 	auto iter = impl_->containers_.find(slot.Type());
 	if(iter != impl_->containers_.end()) {
@@ -202,15 +214,12 @@ bool EQEmu::Inventory::Put(const InventorySlot &slot, std::shared_ptr<ItemInstan
 }
 
 bool EQEmu::Inventory::Swap(const InventorySlot &src, const InventorySlot &dest, int charges) {
-	printf("%s -> %s (%i)\n", src.IsCursor() ? "Cursor" : src.ToString().c_str(), dest.IsCursor() ? "Cursor" : dest.ToString().c_str(), charges);
-
 	if(src == dest) {
 		return true;
 	}
 
 	if(dest.IsDelete()) {
-		//return Delete(src);
-		return false;
+		return _destroy(src);
 	}
 
 	if(!src.IsValid() || !dest.IsValid()) {
@@ -220,11 +229,11 @@ bool EQEmu::Inventory::Swap(const InventorySlot &src, const InventorySlot &dest,
 	auto i_src = Get(src);
 	auto i_dest = Get(dest);
 
-	if(dest.IsEquipment() && !CanEquip(i_dest, dest)) {
+	if(!i_src) {
 		return false;
 	}
 
-	if(!i_src) {
+	if(dest.IsEquipment() && !CanEquip(i_src, dest)) {
 		return false;
 	}
 
@@ -234,8 +243,56 @@ bool EQEmu::Inventory::Swap(const InventorySlot &src, const InventorySlot &dest,
 	}
 
 	if(i_src->IsStackable()) {
-		//charges == 0 -> Move entire stack from src to dest
-		//charges > 0 -> Move charges number of charges from src to dest (may require creating a new item
+		//move # charges from src to dest
+
+		//0 means *all* the charges
+		if(charges == 0) {
+			charges = i_src->GetCharges();
+		}
+
+		//src needs to have that many charges
+		if(i_src->GetCharges() < charges) {
+			return false;
+		}
+
+		//if dest exists it needs to not only be the same item id but also be able to hold enough charges
+		if(i_dest) {
+			uint32 src_id = i_src->GetBaseItem()->ID;
+			uint32 dest_id = i_dest->GetBaseItem()->ID;
+			if(src_id != dest_id) {
+				return false;
+			}
+
+			int charges_avail = i_dest->GetBaseItem()->StackSize - i_dest->GetCharges();
+			if(charges_avail < charges) {
+				return false;
+			}
+
+			if(i_src->GetCharges() == charges) {
+				if(!_destroy(src)) {
+					return false;
+				}
+			} else {
+				i_src->SetCharges(i_src->GetCharges() - charges);
+			}
+
+			i_dest->SetCharges(i_dest->GetCharges() + charges);
+			return true;
+		} else {
+			//if dest does not exist and src charges > # charges then we need to create a new item with # charges in dest
+			//if dest does not exist and src charges == # charges then we need to swap src to dest
+			if(i_src->GetCharges() > charges) {
+				auto split = i_src->Split(charges);
+				if(!split) {
+					return false;
+				}
+
+				Put(dest, split);
+				return true;
+			} else {
+				return _swap(src, dest);
+			}
+		}
 	} else {
 		return _swap(src, dest);
 	}

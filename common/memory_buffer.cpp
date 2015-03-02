@@ -162,7 +162,7 @@ void EQEmu::MemoryBuffer::Resize(size_t sz) {
 	if(sz > capacity_) {
 		size_t new_size = sz + 32;
 		uchar *temp = new uchar[new_size];
-		memcpy(temp, buffer_, new_size);
+		memcpy(temp, buffer_, capacity_);
 		delete[] buffer_;
 		buffer_ = temp;
 		

@@ -993,7 +993,7 @@ int InventoryOld::GetSlotByItemInst(ItemInst *inst) {
 	return INVALID_INDEX;
 }
 
-uint8 Inventory::FindBrightestLightType()
+uint8 InventoryOld::FindBrightestLightType()
 {
 	uint8 brightest_light_type = 0;
 

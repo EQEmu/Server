@@ -126,6 +126,10 @@ namespace EQEmu
 		Inventory(int race, int class_, int deity);
 		~Inventory();
 
+		void SetRace(int race);
+		void SetClass(int class_);
+		void SetDeity(int deity);
+
 		std::shared_ptr<ItemInstance> Get(const InventorySlot &slot);
 		bool Put(const InventorySlot &slot, std::shared_ptr<ItemInstance> inst);
 		bool Swap(const InventorySlot &src, const InventorySlot &dest, int charges);

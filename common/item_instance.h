@@ -24,11 +24,12 @@
 
 namespace EQEmu
 {
+	uint32 GetNextItemInstanceSerial();
+
 	class ItemContainer;
 	class ItemInstance
 	{
 	public:
-		ItemInstance();
 		ItemInstance(const ItemData* idata);
 		ItemInstance(const ItemData* idata, const int16 charges);
 		~ItemInstance();
@@ -36,6 +37,8 @@ namespace EQEmu
 		const ItemData *GetItem();
 		const ItemData *GetBaseItem();
 		const ItemData *GetBaseItem() const;
+
+		std::shared_ptr<ItemInstance> Split(int charges);
 
 		//Container
 		std::shared_ptr<ItemInstance> Get(const int index);

@@ -20,6 +20,12 @@
 #include "data_verification.h"
 #include "item_container.h"
 
+uint32 ItemInstanceSerial = 1;
+uint32 EQEmu::GetNextItemInstanceSerial() {
+	ItemInstanceSerial++;
+	return ItemInstanceSerial;
+}
+
 struct EQEmu::ItemInstance::impl {
 	const ItemData *base_item_;
 	ItemData *modified_item_;
@@ -38,24 +44,6 @@ struct EQEmu::ItemInstance::impl {
 	uint32 price_;
 	ItemContainer contents_;
 };
-
-EQEmu::ItemInstance::ItemInstance() {
-	impl_ = new impl;
-	impl_->base_item_ = nullptr;
-	impl_->modified_item_ = nullptr;
-	impl_->charges_ = -1;
-	impl_->color_ = 0;
-	impl_->attuned_ = false;
-	impl_->ornament_idfile_ = 0;
-	impl_->ornament_icon_ = 0;
-	impl_->ornament_hero_model_ = 0;
-	impl_->serial_id_ = 0;
-	impl_->recast_timestamp_ = 0;
-	impl_->merchant_slot_ = 0;
-	impl_->merchant_count_ = 0;
-	impl_->price_ = 0;
-	memset(impl_->tracking_id_, 0, 17);
-}
 
 EQEmu::ItemInstance::ItemInstance(const ItemData* idata) {
 	impl_ = new impl;
@@ -97,6 +85,39 @@ EQEmu::ItemInstance::~ItemInstance() {
 	delete impl_;
 }
 
+
+std::shared_ptr<EQEmu::ItemInstance> EQEmu::ItemInstance::Split(int charges) {
+	if(!IsStackable()) {
+		//Can't split non stackable items!
+		return std::shared_ptr<EQEmu::ItemInstance>(nullptr);
+	}
+
+	if(charges >= GetCharges()) {
+		return std::shared_ptr<EQEmu::ItemInstance>(nullptr);
+	}
+
+	if(impl_->contents_.Size() > 0) {
+		return std::shared_ptr<EQEmu::ItemInstance>(nullptr);
+	}
+
+	std::shared_ptr<EQEmu::ItemInstance> split = std::shared_ptr<EQEmu::ItemInstance>(new EQEmu::ItemInstance(impl_->base_item_, charges));
+	split->SetSerialNumber(EQEmu::GetNextItemInstanceSerial());
+	//Set Tracking here
+	split->impl_->attuned_ = impl_->attuned_;
+	split->impl_->custom_data_ = impl_->custom_data_;
+	split->impl_->recast_timestamp_ = impl_->recast_timestamp_;
+	split->impl_->price_ = impl_->price_;
+	split->impl_->color_ = impl_->color_;
+	split->impl_->merchant_count_ = impl_->merchant_count_;
+	split->impl_->merchant_slot_ = impl_->merchant_slot_;
+	split->impl_->ornament_hero_model_ = impl_->ornament_hero_model_;
+	split->impl_->ornament_icon_ = impl_->ornament_icon_;
+	split->impl_->ornament_idfile_ = impl_->ornament_idfile_;
+
+	SetCharges(GetCharges() - charges);
+	return split;
+}
+
 const ItemData *EQEmu::ItemInstance::GetItem() {
 	return impl_->modified_item_ ? impl_->modified_item_ : impl_->base_item_;
 }
@@ -118,10 +139,6 @@ std::shared_ptr<EQEmu::ItemInstance> EQEmu::ItemInstance::Get(const int index) {
 }
 
 bool EQEmu::ItemInstance::Put(const int index, std::shared_ptr<ItemInstance> inst) {
-	if(!inst || !inst->GetItem()) {
-		return false;
-	}
-
 	if(!impl_->base_item_) {
 		return false;
 	}
@@ -342,3 +359,4 @@ bool EQEmu::ItemInstance::IsNoDrop() const {
 EQEmu::ItemContainer *EQEmu::ItemInstance::GetContainer() {
 	return &(impl_->contents_);
 }
+
