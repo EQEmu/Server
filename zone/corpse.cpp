@@ -1217,9 +1217,9 @@ void Corpse::LootItem(Client* client, const EQApplicationPacket* app) {
 	linker.SetLinkType(linker.linkItemInst);
 	linker.SetItemInst(inst);
 
-		auto item_link = linker.GenerateLink();
+	auto item_link = linker.GenerateLink();
 
-		client->Message_StringID(MT_LootMessages, LOOTED_MESSAGE, item_link.c_str());
+	client->Message_StringID(MT_LootMessages, LOOTED_MESSAGE, item_link.c_str());
 
 	if (!IsPlayerCorpse()) {
 			Group *g = client->GetGroup();

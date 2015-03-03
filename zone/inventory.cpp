@@ -882,28 +882,64 @@ bool Client::PutItemInInventory(int16 slot_id, const ItemInst& inst, bool client
 void Client::PutLootInInventory(int16 slot_id, const ItemInst &inst, ServerLootItem_Struct** bag_item_data)
 {
 	Log.Out(Logs::Detail, Logs::Inventory, "Putting loot item %s (%d) into slot %d", inst.GetItem()->Name, inst.GetItem()->ID, slot_id);
-	m_inv.PutItem(slot_id, inst);
 
-	SendLootItemInPacket(&inst, slot_id);
+	bool cursor_empty = m_inv.CursorEmpty();
 
 	if (slot_id == MainCursor) {
+		m_inv.PushCursor(inst);
 		auto s = m_inv.cursor_cbegin(), e = m_inv.cursor_cend();
 		database.SaveCursor(this->CharacterID(), s, e);
 	}
 	else {
+		m_inv.PutItem(slot_id, inst);
 		database.SaveInventory(this->CharacterID(), &inst, slot_id);
 	}
 
-	if(bag_item_data) { // bag contents
-		int16 interior_slot;
-		// our bag went into slot_id, now let's pack the contents in
-		for(int i = SUB_BEGIN; i < EmuConstants::ITEM_CONTAINER_SIZE; i++) {
-			if(bag_item_data[i] == nullptr)
+	// Subordinate items in cursor buffer must be sent via ItemPacketSummonItem or we just overwrite the visible cursor and desync the client
+	if (slot_id == MainCursor && !cursor_empty) {
+		// RoF+ currently has a specialized cursor handler
+		if (GetClientVersion() < ClientVersion::RoF)
+			SendItemPacket(slot_id, &inst, ItemPacketSummonItem);
+	}
+	else {
+		SendLootItemInPacket(&inst, slot_id);
+	}
+	
+	if (bag_item_data) {
+		for (int index = 0; index < EmuConstants::ITEM_CONTAINER_SIZE; ++index) {
+			if (bag_item_data[index] == nullptr)
 				continue;
-			const ItemInst *bagitem = database.CreateItem(bag_item_data[i]->item_id, bag_item_data[i]->charges, bag_item_data[i]->aug_1, bag_item_data[i]->aug_2, bag_item_data[i]->aug_3, bag_item_data[i]->aug_4, bag_item_data[i]->aug_5, bag_item_data[i]->aug_6, bag_item_data[i]->attuned);
-			interior_slot = Inventory::CalcSlotId(slot_id, i);
-			Log.Out(Logs::Detail, Logs::Inventory, "Putting bag loot item %s (%d) into slot %d (bag slot %d)", inst.GetItem()->Name, inst.GetItem()->ID, interior_slot, i);
-			PutLootInInventory(interior_slot, *bagitem);
+
+			const ItemInst *bagitem = database.CreateItem(
+				bag_item_data[index]->item_id,
+				bag_item_data[index]->charges,
+				bag_item_data[index]->aug_1,
+				bag_item_data[index]->aug_2,
+				bag_item_data[index]->aug_3,
+				bag_item_data[index]->aug_4,
+				bag_item_data[index]->aug_5,
+				bag_item_data[index]->aug_6,
+				bag_item_data[index]->attuned
+				);
+
+			// Dump bag contents to cursor in the event that owning bag is not the first cursor item
+			// (This assumes that the data passed is correctly associated..no safety checks are implemented)
+			if (slot_id == MainCursor && !cursor_empty) {
+				Log.Out(Logs::Detail, Logs::Inventory,
+					"Putting bag loot item %s (%d) into slot %d (non-empty cursor override)",
+					inst.GetItem()->Name, inst.GetItem()->ID, MainCursor);
+
+				PutLootInInventory(MainCursor, *bagitem);
+			}
+			else {
+				auto bag_slot = Inventory::CalcSlotId(slot_id, index);
+
+				Log.Out(Logs::Detail, Logs::Inventory,
+					"Putting bag loot item %s (%d) into slot %d (bag slot %d)",
+					inst.GetItem()->Name, inst.GetItem()->ID, bag_slot, index);
+
+				PutLootInInventory(bag_slot, *bagitem);
+			}
 			safe_delete(bagitem);
 		}
 	}
