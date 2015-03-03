@@ -360,3 +360,6 @@ EQEmu::ItemContainer *EQEmu::ItemInstance::GetContainer() {
 	return &(impl_->contents_);
 }
 
+void EQEmu::ItemInstance::Interrogate(int level) {
+	impl_->contents_.Interrogate(level);
+}

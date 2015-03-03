@@ -98,3 +98,15 @@ EQEmu::ItemContainer::ItemContainerIter EQEmu::ItemContainer::Begin() {
 EQEmu::ItemContainer::ItemContainerIter EQEmu::ItemContainer::End() {
 	return impl_->items_.end();
 }
+
+void EQEmu::ItemContainer::Interrogate(int level) {
+	char buffer[16] = { 0 };
+	for(int i = 0; i < level; ++i) {
+		buffer[i] = '\t';
+	}
+
+	for(auto &iter : impl_->items_) {
+		printf("%s%u: (%u)%s (%u)\n", buffer, iter.first, iter.second->GetBaseItem()->ID, iter.second->GetBaseItem()->Name, iter.second->GetCharges());
+		iter.second->Interrogate(level + 1);
+	}
+}

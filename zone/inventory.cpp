@@ -3139,8 +3139,11 @@ bool Client::SwapItem(const EQEmu::InventorySlot &src, const EQEmu::InventorySlo
 
 	if(res) {
 		Message(0, "Swap success\n");
+		m_inventory.Interrogate();
 	} else {
 		Message(0, "Swap failure!\n");
+		//should kick the player here...
+
 	}
 
 	if(auto_attack && res && recalc_weapon_speed) {

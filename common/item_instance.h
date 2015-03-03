@@ -105,6 +105,8 @@ namespace EQEmu
 		//Internal state
 		//Used for low level operations such as encode/decode
 		ItemContainer *GetContainer();
+
+		void Interrogate(int level);
 	private:
 		struct impl;
 		impl *impl_;

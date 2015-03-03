@@ -49,6 +49,9 @@ namespace EQEmu
 		bool Serialize(MemoryBuffer &buf, int container_number);
 		ItemContainerIter Begin();
 		ItemContainerIter End();
+
+		//testing
+		void Interrogate(int level);
 	protected:
 		struct impl;
 		impl *impl_;

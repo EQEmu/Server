@@ -142,6 +142,8 @@ SET(common_headers
 	guild_base.h
 	guilds.h
 	inventory.h
+	inventory_data_model.h
+	inventory_null_data_model.h
 	ipc_mutex.h
 	item.h
 	item_container.h

@@ -17,8 +17,9 @@
 */
 
 #include "inventory.h"
-#include "data_verification.h"
+#include "inventory_null_data_model.h"
 #include "item_container_personal_serialization.h"
+#include "data_verification.h"
 #include "string_util.h"
 #include <map>
 
@@ -123,6 +124,7 @@ struct EQEmu::Inventory::impl
 	int race_;
 	int class_;
 	int deity_;
+	std::unique_ptr<InventoryDataModel> data_model_;
 };
 
 EQEmu::Inventory::Inventory(int race, int class_, int deity) {
@@ -130,6 +132,7 @@ EQEmu::Inventory::Inventory(int race, int class_, int deity) {
 	impl_->race_ = race;
 	impl_->class_ = class_;
 	impl_->deity_ = deity;
+	impl_->data_model_ = std::unique_ptr<InventoryDataModel>(new InventoryNullDataModel());
 }
 
 EQEmu::Inventory::~Inventory() {
@@ -146,6 +149,10 @@ void EQEmu::Inventory::SetClass(int class_) {
 
 void EQEmu::Inventory::SetDeity(int deity) {
 	impl_->deity_ = deity;
+}
+
+void EQEmu::Inventory::SetDataMode(InventoryDataModel *dm) {
+	impl_->data_model_ = std::unique_ptr<InventoryDataModel>(dm);
 }
 
 std::shared_ptr<EQEmu::ItemInstance> EQEmu::Inventory::Get(const InventorySlot &slot) {
@@ -218,10 +225,6 @@ bool EQEmu::Inventory::Swap(const InventorySlot &src, const InventorySlot &dest,
 		return true;
 	}
 
-	if(dest.IsDelete()) {
-		return _destroy(src);
-	}
-
 	if(!src.IsValid() || !dest.IsValid()) {
 		return false;
 	}
@@ -242,6 +245,18 @@ bool EQEmu::Inventory::Swap(const InventorySlot &src, const InventorySlot &dest,
 		return false;
 	}
 
+	impl_->data_model_->Begin();
+	if(dest.IsDelete()) {
+		bool v = _destroy(src);
+		if(v) {
+			impl_->data_model_->Commit();
+		} else {
+			impl_->data_model_->Rollback();
+		}
+
+		return v;
+	}
+
 	if(i_src->IsStackable()) {
 		//move # charges from src to dest
 
@@ -252,31 +267,46 @@ bool EQEmu::Inventory::Swap(const InventorySlot &src, const InventorySlot &dest,
 
 		//src needs to have that many charges
 		if(i_src->GetCharges() < charges) {
+			impl_->data_model_->Rollback();
 			return false;
 		}
 
-		//if dest exists it needs to not only be the same item id but also be able to hold enough charges
+		//if dest exists it needs to not only be the same item id but also be able to hold enough charges to combine
+		//we can also swap if src id != dest id
 		if(i_dest) {
 			uint32 src_id = i_src->GetBaseItem()->ID;
 			uint32 dest_id = i_dest->GetBaseItem()->ID;
 			if(src_id != dest_id) {
-				return false;
+				bool v = _swap(src, dest);
+				if(v) {
+					impl_->data_model_->Commit();
+				}
+				else {
+					impl_->data_model_->Rollback();
+				}
+
+				return v;
 			}
 
 			int charges_avail = i_dest->GetBaseItem()->StackSize - i_dest->GetCharges();
 			if(charges_avail < charges) {
+				impl_->data_model_->Rollback();
 				return false;
 			}
 
 			if(i_src->GetCharges() == charges) {
 				if(!_destroy(src)) {
+					impl_->data_model_->Rollback();
 					return false;
 				}
 			} else {
 				i_src->SetCharges(i_src->GetCharges() - charges);
+				impl_->data_model_->Insert(src, i_src);
 			}
 
 			i_dest->SetCharges(i_dest->GetCharges() + charges);
+			impl_->data_model_->Insert(dest, i_dest);
+			impl_->data_model_->Commit();
 			return true;
 		} else {
 			//if dest does not exist and src charges > # charges then we need to create a new item with # charges in dest
@@ -284,19 +314,39 @@ bool EQEmu::Inventory::Swap(const InventorySlot &src, const InventorySlot &dest,
 			if(i_src->GetCharges() > charges) {
 				auto split = i_src->Split(charges);
 				if(!split) {
+					impl_->data_model_->Rollback();
 					return false;
 				}
 
 				Put(dest, split);
+				impl_->data_model_->Insert(src, i_src);
+				impl_->data_model_->Insert(dest, split);
+				impl_->data_model_->Commit();
 				return true;
 			} else {
-				return _swap(src, dest);
+				bool v = _swap(src, dest);
+				if(v) {
+					impl_->data_model_->Commit();
+				} else {
+					impl_->data_model_->Rollback();
+				}
+
+				return v;
 			}
 		}
 	} else {
-		return _swap(src, dest);
+		bool v = _swap(src, dest);
+		if(v) {
+			impl_->data_model_->Commit();
+		}
+		else {
+			impl_->data_model_->Rollback();
+		}
+
+		return v;
 	}
 
+	impl_->data_model_->Commit();
 	return true;
 }
 
@@ -408,6 +458,16 @@ bool EQEmu::Inventory::Serialize(MemoryBuffer &buf) {
 	return value;
 }
 
+void EQEmu::Inventory::Interrogate() {
+	printf("Inventory:\n");
+	printf("Class: %u, Race: %u, Deity: %u\n", impl_->class_, impl_->race_, impl_->deity_);
+	for(auto &iter : impl_->containers_) {
+		printf("Container: %u\n", iter.first);
+		iter.second.Interrogate(1);
+	}
+	printf("\n");
+}
+
 bool EQEmu::Inventory::_swap(const InventorySlot &src, const InventorySlot &dest) {
 	auto src_i = Get(src);
 	auto dest_i = Get(dest);
@@ -423,12 +483,14 @@ bool EQEmu::Inventory::_swap(const InventorySlot &src, const InventorySlot &dest
 			return false;
 		}
 
+		impl_->data_model_->Insert(src, dest_i);
 		if(!Put(src, dest_i)) {
 			return false;
 		}
 	}
 
 	if(src_i) {
+		impl_->data_model_->Insert(dest, src_i);
 		if(!Put(dest, src_i)) {
 			return false;
 		}
@@ -438,5 +500,7 @@ bool EQEmu::Inventory::_swap(const InventorySlot &src, const InventorySlot &dest
 }
 
 bool EQEmu::Inventory::_destroy(const InventorySlot &slot) {
-	return Put(slot, std::shared_ptr<EQEmu::ItemInstance>(nullptr));
+	bool v = Put(slot, std::shared_ptr<EQEmu::ItemInstance>(nullptr));
+	impl_->data_model_->Delete(slot);
+	return v;
 }

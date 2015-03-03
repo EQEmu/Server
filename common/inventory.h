@@ -120,6 +120,7 @@ namespace EQEmu
 			lhs.AugIndex() == rhs.AugIndex(); }
 	inline bool operator!=(const InventorySlot &lhs, const InventorySlot &rhs) { return !(lhs == rhs); }
 
+	class InventoryDataModel;
 	class Inventory
 	{
 	public:
@@ -129,6 +130,7 @@ namespace EQEmu
 		void SetRace(int race);
 		void SetClass(int class_);
 		void SetDeity(int deity);
+		void SetDataMode(InventoryDataModel *dm);
 
 		std::shared_ptr<ItemInstance> Get(const InventorySlot &slot);
 		bool Put(const InventorySlot &slot, std::shared_ptr<ItemInstance> inst);
@@ -139,6 +141,9 @@ namespace EQEmu
 		static InventorySlot CalcSlotFromMaterial(int material);
 		bool CanEquip(std::shared_ptr<EQEmu::ItemInstance> inst, const EQEmu::InventorySlot &slot);
 		bool Serialize(MemoryBuffer &buf);
+
+		//testing
+		void Interrogate();
 	private:
 		bool _swap(const InventorySlot &src, const InventorySlot &dest);
 		bool _destroy(const InventorySlot &slot);
