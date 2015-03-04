@@ -1,5 +1,8 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 03/04/2015 ==
+Akkadius: Fix Spell Book Deletion
+
 == 03/03/2015 ==
 Uleat: Fix for 'Invalid Slot ID' messages. Bag slot count is now enforced during database saves to eliminate existing 'hidden' duplicated items..sorry MQ2 users...
 Uleat: Fix for Item loss during corpse looting and possible item loss when purchasing items from LDoN or Adventure merchants. (cursor-related)
