@@ -332,7 +332,13 @@ void MapOpcodes()
 	ConnectedOpcodes[OP_Save] = &Client::Handle_OP_Save;
 	ConnectedOpcodes[OP_SaveOnZoneReq] = &Client::Handle_OP_SaveOnZoneReq;
 	ConnectedOpcodes[OP_SelectTribute] = &Client::Handle_OP_SelectTribute;
-	ConnectedOpcodes[OP_SenseHeading] = &Client::Handle_OP_Ignore;
+
+	// Use or Ignore sense heading based on rule.
+	bool train=RuleB(Skills, TrainSenseHeading);
+
+	ConnectedOpcodes[OP_SenseHeading] = 
+		(train) ? &Client::Handle_OP_SenseHeading : &Client::Handle_OP_Ignore;
+
 	ConnectedOpcodes[OP_SenseTraps] = &Client::Handle_OP_SenseTraps;
 	ConnectedOpcodes[OP_SetGuildMOTD] = &Client::Handle_OP_SetGuildMOTD;
 	ConnectedOpcodes[OP_SetRunMode] = &Client::Handle_OP_SetRunMode;
@@ -1430,10 +1436,6 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	if (m_pp.ldon_points_ruj < 0 || m_pp.ldon_points_ruj > 2000000000){ m_pp.ldon_points_ruj = 0; }
 	if (m_pp.ldon_points_tak < 0 || m_pp.ldon_points_tak > 2000000000){ m_pp.ldon_points_tak = 0; }
 	if (m_pp.ldon_points_available < 0 || m_pp.ldon_points_available > 2000000000){ m_pp.ldon_points_available = 0; }
-
-	/* Set Swimming Skill 100 by default if under 100 */
-	if (GetSkill(SkillSwimming) < 100)
-		SetSkill(SkillSwimming, 100);
 
 	/* Initialize AA's : Move to function eventually */
 	for (uint32 a = 0; a < MAX_PP_AA_ARRAY; a++){ aa[a] = &m_pp.aa_array[a]; }
@@ -11650,6 +11652,27 @@ void Client::Handle_OP_SelectTribute(const EQApplicationPacket *app)
 		SelectTributeReq_Struct *t = (SelectTributeReq_Struct *)app->pBuffer;
 		SendTributeDetails(t->client_id, t->tribute_id);
 	}
+	return;
+}
+
+void Client::Handle_OP_SenseHeading(const EQApplicationPacket *app)
+{
+	if (!HasSkill(SkillSenseHeading))
+		return;
+
+	int chancemod=0;
+
+	// The client seems to limit sense heading packets based on skill
+	// level.  So if we're really low, we don't hit this routine very often.
+	// I think it's the GUI deciding when to skill you up.
+	// So, I'm adding a mod here which is larger at lower levels so
+	// very low levels get a much better chance to skill up when the GUI
+	// eventually sends a message.
+	if (GetLevel() <= 8)
+		chancemod += (9-level) * 10;
+	
+	CheckIncreaseSkill(SkillSenseHeading, nullptr, chancemod);
+
 	return;
 }
 

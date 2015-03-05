@@ -1430,7 +1430,10 @@ bool Client::OPCharCreate(char *name, CharCreate_Struct *cc)
 	SetRaceStartingSkills(&pp);
 	SetClassStartingSkills(&pp);
 	SetClassLanguages(&pp);
-	pp.skills[SkillSenseHeading] = 200;
+
+	pp.skills[SkillSwimming] = RuleI(Skills, SwimmingStartValue);
+	pp.skills[SkillSenseHeading] = RuleI(Skills, SenseHeadingStartValue);
+
 //	strcpy(pp.servername, WorldConfig::get()->ShortName.c_str());
 
 

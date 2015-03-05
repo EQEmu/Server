@@ -18,6 +18,13 @@ Notes:
 	- Wearable equipment types still register as valid light sources when in general slots (needs exemption criteria)
 
 == 02/23/2015 ==
+Noudess: Allow for a rule to set starting swimming && SenseHeading value.
+I moved the swimming override to char create instead of setting it 
+every time a char enters a zone.
+
+Also added rules to not ignore, but rather forrce sense heading packets to be
+used to train it instead of maxing it out like before.
+
 Uleat: Fix for RoF+ clients showing active 'Return Home' button when action is not available (swapped 'GoHome' and 'Enabled' fields in RoF-era CharacterSelectEntry structs)
 
 == 02/21/2015 ==
