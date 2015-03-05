@@ -151,7 +151,7 @@ void EQEmu::Inventory::SetDeity(int deity) {
 	impl_->deity_ = deity;
 }
 
-void EQEmu::Inventory::SetDataMode(InventoryDataModel *dm) {
+void EQEmu::Inventory::SetDataModel(InventoryDataModel *dm) {
 	impl_->data_model_ = std::unique_ptr<InventoryDataModel>(dm);
 }
 
@@ -234,6 +234,12 @@ bool EQEmu::Inventory::Swap(const InventorySlot &src, const InventorySlot &dest,
 
 	if(!i_src) {
 		return false;
+	}
+
+	if(i_src->GetBaseItem()->ItemClass == ItemClassContainer && dest.BagIndex() > -1) {
+		if(i_src->GetContainer()->Size() > 0) {
+			return false;
+		}
 	}
 
 	if(dest.IsEquipment() && !CanEquip(i_src, dest)) {

@@ -30,10 +30,10 @@ namespace EQEmu
 		virtual ~InventoryDataModel() { }
 		
 		virtual void Begin() = 0;
-		virtual void Commit() = 0;
+		virtual bool Commit() = 0;
 		virtual void Rollback() = 0;
-		virtual bool Insert(const InventorySlot &slot, std::shared_ptr<ItemInstance> inst) = 0;
-		virtual bool Delete(const InventorySlot &slot) = 0;
+		virtual void Insert(const InventorySlot &slot, std::shared_ptr<ItemInstance> inst) = 0;
+		virtual void Delete(const InventorySlot &slot) = 0;
 	};
 } // EQEmu
 

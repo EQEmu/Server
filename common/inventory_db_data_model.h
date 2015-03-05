@@ -16,24 +16,29 @@
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 
-#ifndef COMMON_INVENTORY_NULL_DATA_MODEL_H
-#define COMMON_INVENTORY_NULL_DATA_MODEL_H
+#ifndef COMMON_INVENTORY_DB_DATA_MODEL_H
+#define COMMON_INVENTORY_DB_DATA_MODEL_H
 
 #include "inventory_data_model.h"
 
+class SharedDatabase;
+
 namespace EQEmu
 {
-	class InventoryNullDataModel : public InventoryDataModel
+	class InventoryDatabaseDataModel : public InventoryDataModel
 	{
 	public:
-		InventoryNullDataModel() { }
-		virtual ~InventoryNullDataModel() { }
+		InventoryDatabaseDataModel(SharedDatabase *db, uint32 char_id);
+		virtual ~InventoryDatabaseDataModel();
 		
-		virtual void Begin() { printf("NDM: Begin\n"); }
-		virtual bool Commit() { printf("NDM: Commit\n"); return true; }
-		virtual void Rollback() { printf("NDM: Rollback\n"); }
-		virtual void Insert(const InventorySlot &slot, std::shared_ptr<ItemInstance> inst) { printf("NDM: Insert %s %s\n", slot.ToString().c_str(), inst ? inst->GetBaseItem()->Name : "Null" ); }
-		virtual void Delete(const InventorySlot &slot) { printf("NDM: Delete %s\n", slot.ToString().c_str()); }
+		virtual void Begin();
+		virtual bool Commit();
+		virtual void Rollback();
+		virtual void Insert(const InventorySlot &slot, std::shared_ptr<ItemInstance> inst);
+		virtual void Delete(const InventorySlot &slot);
+	private:
+		struct impl;
+		impl *impl_;
 	};
 } // EQEmu
 

@@ -188,6 +188,14 @@ void EQEmu::ItemInstance::SetCharges(const int16 charges) {
 	impl_->charges_ = charges;
 }
 
+uint32 EQEmu::ItemInstance::GetColor() {
+	return impl_->color_;
+}
+
+uint32 EQEmu::ItemInstance::GetColor() const {
+	return impl_->color_;
+}
+
 void EQEmu::ItemInstance::SetColor(const uint32 color) {
 	impl_->color_ = color;
 }
@@ -202,6 +210,14 @@ bool EQEmu::ItemInstance::GetAttuned() const {
 
 void EQEmu::ItemInstance::SetAttuned(const bool attuned) {
 	impl_->attuned_ = attuned;
+}
+
+std::string EQEmu::ItemInstance::GetCustomData() {
+	return impl_->custom_data_;
+}
+
+std::string EQEmu::ItemInstance::GetCustomData() const {
+	return impl_->custom_data_;
 }
 
 void EQEmu::ItemInstance::SetCustomData(const std::string &custom_data) {
@@ -231,6 +247,14 @@ uint32 EQEmu::ItemInstance::GetOrnamentIcon() const {
 
 void EQEmu::ItemInstance::SetOrnamentIcon(const uint32 ornament_icon) {
 	impl_->ornament_icon_ = ornament_icon;
+}
+
+uint32 EQEmu::ItemInstance::GetOrnamentHeroModel() {
+	return impl_->ornament_hero_model_;
+}
+
+uint32 EQEmu::ItemInstance::GetOrnamentHeroModel() const {
+	return impl_->ornament_hero_model_;
 }
 
 uint32 EQEmu::ItemInstance::GetOrnamentHeroModel(int material_slot) {

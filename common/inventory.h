@@ -130,7 +130,7 @@ namespace EQEmu
 		void SetRace(int race);
 		void SetClass(int class_);
 		void SetDeity(int deity);
-		void SetDataMode(InventoryDataModel *dm);
+		void SetDataModel(InventoryDataModel *dm);
 
 		std::shared_ptr<ItemInstance> Get(const InventorySlot &slot);
 		bool Put(const InventorySlot &slot, std::shared_ptr<ItemInstance> inst);

@@ -31,6 +31,7 @@ SET(common_sources
 	guild_base.cpp
 	guilds.cpp
 	inventory.cpp
+	inventory_db_data_model.cpp
 	ipc_mutex.cpp
 	item.cpp
 	item_container.cpp
@@ -143,6 +144,7 @@ SET(common_headers
 	guilds.h
 	inventory.h
 	inventory_data_model.h
+	inventory_db_data_model.h
 	inventory_null_data_model.h
 	ipc_mutex.h
 	item.h

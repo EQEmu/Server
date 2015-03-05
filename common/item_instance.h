@@ -49,12 +49,16 @@ namespace EQEmu
 		int16 GetCharges() const;
 		void SetCharges(const int16 charges);
 
+		uint32 GetColor();
+		uint32 GetColor() const;
 		void SetColor(const uint32 color);
 
 		bool GetAttuned();
 		bool GetAttuned() const;
 		void SetAttuned(const bool attuned);
 
+		std::string GetCustomData();
+		std::string GetCustomData() const;
 		void SetCustomData(const std::string &custom_data);
 
 		uint32 GetOrnamentIDFile();
@@ -65,6 +69,8 @@ namespace EQEmu
 		uint32 GetOrnamentIcon() const;
 		void SetOrnamentIcon(const uint32 ornament_icon);
 
+		uint32 GetOrnamentHeroModel();
+		uint32 GetOrnamentHeroModel() const;
 		uint32 GetOrnamentHeroModel(int material_slot);
 		uint32 GetOrnamentHeroModel(int material_slot) const;
 		void SetOrnamentHeroModel(const uint32 ornament_hero_model);

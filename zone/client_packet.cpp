@@ -47,6 +47,7 @@
 #include "../common/spdat.h"
 #include "../common/string_util.h"
 #include "../common/zone_numbers.h"
+#include "../common/inventory_db_data_model.h"
 #include "event_codes.h"
 #include "guild_mgr.h"
 #include "merc.h"
@@ -1289,6 +1290,7 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	m_inventory.SetRace(GetBaseRace());
 	m_inventory.SetClass(GetBaseClass());
 	m_inventory.SetDeity(GetDeity());
+	m_inventory.SetDataModel(new EQEmu::InventoryDatabaseDataModel(&database, CharacterID()));
 	loaditems = database.GetInventory(cid, &m_inventory); /* Load Character Inventory */
 
 	/* Load AdventureStats */
