@@ -153,8 +153,22 @@ void EQEmu::InventoryDatabaseDataModel::Insert(const InventorySlot &slot, std::s
 				DataEvent evt;
 				evt.evt = DB_Insert;
 				evt.inst = iter->second;
-				evt.slot = InventorySlot(slot.Type(), slot.Slot(), -1, iter->first);
+				evt.slot = InventorySlot(slot.Type(), slot.Slot(), iter->first, -1);
 				impl_->events_.push_back(evt);
+
+				//do augments here
+				if(evt.inst->GetBaseItem()->ItemClass == ItemClassCommon) {
+					auto inst_container = evt.inst->GetContainer();
+					auto inst_iter = inst_container->Begin();
+					while(inst_iter != inst_container->End()) {
+						DataEvent evt;
+						evt.evt = DB_Insert;
+						evt.inst = inst_iter->second;
+						evt.slot = InventorySlot(slot.Type(), slot.Slot(), iter->first, inst_iter->first);
+						impl_->events_.push_back(evt);
+						++inst_iter;
+					}
+				}
 
 				++iter;
 			}
@@ -166,14 +180,15 @@ void EQEmu::InventoryDatabaseDataModel::Insert(const InventorySlot &slot, std::s
 				DataEvent evt;
 				evt.evt = DB_Insert;
 				evt.inst = iter->second;
-				evt.slot = InventorySlot(slot.Type(), slot.Slot(), iter->first);
+				evt.slot = InventorySlot(slot.Type(), slot.Slot(), -1, iter->first);
 				impl_->events_.push_back(evt);
 
 				++iter;
 			}
 		}
 	}
-	else if(inst->GetBaseItem()->ItemClass == ItemClassCommon) {
+	else if(slot.AugIndex() < 0 && inst->GetBaseItem()->ItemClass == ItemClassCommon) {
+		//bag item that can have augs
 		//if common put all augment contents in
 		auto container = inst->GetContainer();
 		auto iter = container->Begin();
@@ -181,9 +196,9 @@ void EQEmu::InventoryDatabaseDataModel::Insert(const InventorySlot &slot, std::s
 			DataEvent evt;
 			evt.evt = DB_Insert;
 			evt.inst = iter->second;
-			evt.slot = InventorySlot(slot.Type(), slot.Slot(), iter->first, slot.BagIndex());
+			evt.slot = InventorySlot(slot.Type(), slot.Slot(), slot.BagIndex(), iter->first);
 			impl_->events_.push_back(evt);
-
+		
 			++iter;
 		}
 	}

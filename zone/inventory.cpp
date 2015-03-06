@@ -2427,52 +2427,74 @@ uint32 Client::GetEquipmentColor(uint8 material_slot) const
 // Send an item packet (including all subitems of the item)
 void Client::SendItemPacket(int16 slot_id, const ItemInst* inst, ItemPacketType packet_type)
 {
-	if (!inst)
+//	if (!inst)
+//		return;
+//
+//	// Serialize item into |-delimited string
+//	std::string packet = inst->Serialize(slot_id);
+//
+//	EmuOpcode opcode = OP_Unknown;
+//	EQApplicationPacket* outapp = nullptr;
+//	ItemPacket_Struct* itempacket = nullptr;
+//
+//	// Construct packet
+//	opcode = (packet_type==ItemPacketViewLink) ? OP_ItemLinkResponse : OP_ItemPacket;
+//	outapp = new EQApplicationPacket(opcode, packet.length()+sizeof(ItemPacket_Struct));
+//	itempacket = (ItemPacket_Struct*)outapp->pBuffer;
+//	memcpy(itempacket->SerializedItem, packet.c_str(), packet.length());
+//	itempacket->PacketType = packet_type;
+//
+//#if EQDEBUG >= 9
+//		DumpPacket(outapp);
+//#endif
+//	FastQueuePacket(&outapp);
+}
+
+void Client::SendItemPacket(const EQEmu::InventorySlot &slot, std::shared_ptr<EQEmu::ItemInstance> inst, ItemPacketType packet_type) {
+	if(!inst) {
 		return;
+	}
 
-	// Serialize item into |-delimited string
-	std::string packet = inst->Serialize(slot_id);
-
+	EQEmu::MemoryBuffer item;
 	EmuOpcode opcode = OP_Unknown;
-	EQApplicationPacket* outapp = nullptr;
-	ItemPacket_Struct* itempacket = nullptr;
+	opcode = (packet_type == ItemPacketViewLink) ? OP_ItemLinkResponse : OP_ItemPacket;
 
-	// Construct packet
-	opcode = (packet_type==ItemPacketViewLink) ? OP_ItemLinkResponse : OP_ItemPacket;
-	outapp = new EQApplicationPacket(opcode, packet.length()+sizeof(ItemPacket_Struct));
-	itempacket = (ItemPacket_Struct*)outapp->pBuffer;
-	memcpy(itempacket->SerializedItem, packet.c_str(), packet.length());
-	itempacket->PacketType = packet_type;
-
-#if EQDEBUG >= 9
-		DumpPacket(outapp);
-#endif
-	FastQueuePacket(&outapp);
+	item.Write<int32>((int32)packet_type);
+	item.Write<int32>(slot.Type());
+	item.Write<int32>(slot.Slot());
+	item.Write<int32>(slot.BagIndex());
+	item.Write<int32>(slot.AugIndex());
+	item.Write<void*>(inst.get());
+	
+	EQApplicationPacket outapp(opcode, item.Size());
+	memcpy(outapp.pBuffer, item, item.Size());
+	QueuePacket(&outapp);
 }
 
 EQApplicationPacket* Client::ReturnItemPacket(int16 slot_id, const ItemInst* inst, ItemPacketType packet_type)
 {
-	if (!inst)
-		return nullptr;
-
-	// Serialize item into |-delimited string
-	std::string packet = inst->Serialize(slot_id);
-
-	EmuOpcode opcode = OP_Unknown;
-	EQApplicationPacket* outapp = nullptr;
-	BulkItemPacket_Struct* itempacket = nullptr;
-
-	// Construct packet
-	opcode = OP_ItemPacket;
-	outapp = new EQApplicationPacket(opcode, packet.length()+1);
-	itempacket = (BulkItemPacket_Struct*)outapp->pBuffer;
-	memcpy(itempacket->SerializedItem, packet.c_str(), packet.length());
-
-#if EQDEBUG >= 9
-		DumpPacket(outapp);
-#endif
-
-	return outapp;
+	return nullptr;
+//	if (!inst)
+//		return nullptr;
+//
+//	// Serialize item into |-delimited string
+//	std::string packet = inst->Serialize(slot_id);
+//
+//	EmuOpcode opcode = OP_Unknown;
+//	EQApplicationPacket* outapp = nullptr;
+//	BulkItemPacket_Struct* itempacket = nullptr;
+//
+//	// Construct packet
+//	opcode = OP_ItemPacket;
+//	outapp = new EQApplicationPacket(opcode, packet.length()+1);
+//	itempacket = (BulkItemPacket_Struct*)outapp->pBuffer;
+//	memcpy(itempacket->SerializedItem, packet.c_str(), packet.length());
+//
+//#if EQDEBUG >= 9
+//		DumpPacket(outapp);
+//#endif
+//
+//	return outapp;
 }
 
 static int16 BandolierSlotToWeaponSlot(int BandolierSlot)
@@ -3143,7 +3165,16 @@ bool Client::SwapItem(const EQEmu::InventorySlot &src, const EQEmu::InventorySlo
 	} else {
 		Message(0, "Swap failure!\n");
 		//should kick the player here...
+	}
 
+	EQEmu::InventorySlot cursor(EQEmu::InvTypePersonal, EQEmu::PersonalSlotCursor);
+	if(!m_inventory.Get(cursor)) {
+		if(m_inventory.PopFromCursorBuffer()) {
+			auto c_inst = m_inventory.Get(cursor);
+			if(c_inst) {
+				SendItemPacket(EQEmu::InventorySlot(EQEmu::InvTypePersonal, EQEmu::PersonalSlotCursor), c_inst, ItemPacketSummonItem);
+			}
+		}
 	}
 
 	if(auto_attack && res && recalc_weapon_speed) {
@@ -3157,3 +3188,90 @@ bool Client::SwapItem(const EQEmu::InventorySlot &src, const EQEmu::InventorySlo
 	return res;
 }
 
+bool Client::SummonItem(uint32 item_id,
+						int16 charges,
+						const EQEmu::InventorySlot &slot,
+						uint32 aug1,
+						uint32 aug2,
+						uint32 aug3,
+						uint32 aug4,
+						uint32 aug5,
+						uint32 aug6,
+						bool attuned,
+						uint32 ornament_icon,
+						uint32 ornament_idfile,
+						uint32 ornament_hero_model)
+{
+	std::shared_ptr<EQEmu::ItemInstance> inst = database.CreateItem(item_id, charges);
+	if(!inst)
+		return false;
+	
+	if(inst->GetBaseItem()->ItemClass == ItemClassCommon) {
+		if(aug1) {
+			std::shared_ptr<EQEmu::ItemInstance> aug = database.CreateItem(aug1);
+			if(!aug)
+				return false;
+
+			if(!inst->Put(0, aug)) {
+				return false;
+			}
+		}
+
+		if(aug2) {
+			std::shared_ptr<EQEmu::ItemInstance> aug = database.CreateItem(aug2);
+			if(!aug)
+				return false;
+
+			if(!inst->Put(1, aug)) {
+				return false;
+			}
+		}
+
+		if(aug3) {
+			std::shared_ptr<EQEmu::ItemInstance> aug = database.CreateItem(aug3);
+			if(!aug)
+				return false;
+
+			if(!inst->Put(2, aug)) {
+				return false;
+			}
+		}
+
+		if(aug4) {
+			std::shared_ptr<EQEmu::ItemInstance> aug = database.CreateItem(aug4);
+			if(!aug)
+				return false;
+
+			if(!inst->Put(3, aug)) {
+				return false;
+			}
+		}
+
+		if(aug5) {
+			std::shared_ptr<EQEmu::ItemInstance> aug = database.CreateItem(aug5);
+			if(!aug)
+				return false;
+
+			if(!inst->Put(4, aug)) {
+				return false;
+			}
+		}
+
+		if(aug6) {
+			std::shared_ptr<EQEmu::ItemInstance> aug = database.CreateItem(aug6);
+			if(!aug)
+				return false;
+
+			if(!inst->Put(5, aug)) {
+				return false;
+			}
+		}
+	}
+
+	auto res = m_inventory.Summon(slot, inst);
+	if(res) {
+		SendItemPacket(slot, inst, ItemPacketSummonItem);
+	}
+
+	return res;
+}

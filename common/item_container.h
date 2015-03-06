@@ -42,6 +42,11 @@ namespace EQEmu
 		std::shared_ptr<ItemInstance> Get(const int slot_id);
 		bool Put(const int slot_id, std::shared_ptr<ItemInstance> inst);
 		bool Delete(const int slot_id);
+
+		//Utility
+		bool HasItem(uint32 item_id);
+		bool HasItemByLoreGroup(uint32 loregroup);
+
 		uint32 Size();
 		uint32 Size() const;
 

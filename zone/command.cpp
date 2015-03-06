@@ -5418,24 +5418,25 @@ void command_summonitem(Client *c, const Seperator *sep)
 			item_status = static_cast<int16>(item->MinStatus);
 		}
 
+		EQEmu::InventorySlot cursor(EQEmu::InvTypePersonal, EQEmu::PersonalSlotCursor);
 		if (item_status > c->Admin())
 			c->Message(13, "Error: Insufficient status to summon this item.");
 		else if (sep->argnum==2 && sep->IsNumber(2))
-			c->SummonItem(itemid, atoi(sep->arg[2]));
+			c->SummonItem(itemid, atoi(sep->arg[2]), cursor);
 		else if (sep->argnum==3)
-			c->SummonItem(itemid, atoi(sep->arg[2]), atoi(sep->arg[3]));
+			c->SummonItem(itemid, atoi(sep->arg[2]), cursor, atoi(sep->arg[3]));
 		else if (sep->argnum==4)
-			c->SummonItem(itemid, atoi(sep->arg[2]), atoi(sep->arg[3]), atoi(sep->arg[4]));
+			c->SummonItem(itemid, atoi(sep->arg[2]), cursor, atoi(sep->arg[3]), atoi(sep->arg[4]));
 		else if (sep->argnum==5)
-			c->SummonItem(itemid, atoi(sep->arg[2]), atoi(sep->arg[3]), atoi(sep->arg[4]), atoi(sep->arg[5]));
+			c->SummonItem(itemid, atoi(sep->arg[2]), cursor, atoi(sep->arg[3]), atoi(sep->arg[4]), atoi(sep->arg[5]));
 		else if (sep->argnum==6)
-			c->SummonItem(itemid, atoi(sep->arg[2]), atoi(sep->arg[3]), atoi(sep->arg[4]), atoi(sep->arg[5]), atoi(sep->arg[6]));
+			c->SummonItem(itemid, atoi(sep->arg[2]), cursor, atoi(sep->arg[3]), atoi(sep->arg[4]), atoi(sep->arg[5]), atoi(sep->arg[6]));
 		else if (sep->argnum==7)
-			c->SummonItem(itemid, atoi(sep->arg[2]), atoi(sep->arg[3]), atoi(sep->arg[4]), atoi(sep->arg[5]), atoi(sep->arg[6]), atoi(sep->arg[7]));
+			c->SummonItem(itemid, atoi(sep->arg[2]), cursor, atoi(sep->arg[3]), atoi(sep->arg[4]), atoi(sep->arg[5]), atoi(sep->arg[6]), atoi(sep->arg[7]));
 		else if (sep->argnum==8)
-			c->SummonItem(itemid, atoi(sep->arg[2]), atoi(sep->arg[3]), atoi(sep->arg[4]), atoi(sep->arg[5]), atoi(sep->arg[6]), atoi(sep->arg[7]), atoi(sep->arg[8]));
+			c->SummonItem(itemid, atoi(sep->arg[2]), cursor, atoi(sep->arg[3]), atoi(sep->arg[4]), atoi(sep->arg[5]), atoi(sep->arg[6]), atoi(sep->arg[7]), atoi(sep->arg[8]));
 		else {
-			c->SummonItem(itemid);
+			c->SummonItem(itemid, -1, cursor);
 		}
 	}
 }

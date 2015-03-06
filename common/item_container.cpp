@@ -65,6 +65,29 @@ bool EQEmu::ItemContainer::Put(const int slot_id, std::shared_ptr<ItemInstance> 
 	return false;
 }
 
+bool EQEmu::ItemContainer::HasItem(uint32 item_id) {
+	for(auto &item : impl_->items_) {
+		if(item.second->GetBaseItem()->ID == item_id) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
+bool EQEmu::ItemContainer::HasItemByLoreGroup(uint32 loregroup) {
+	if(loregroup == 0xFFFFFFFF)
+		return false;
+
+	for(auto &item : impl_->items_) {
+		if(item.second->GetBaseItem()->LoreGroup == loregroup) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
 uint32 EQEmu::ItemContainer::Size() {
 	return (uint32)impl_->items_.size();
 }

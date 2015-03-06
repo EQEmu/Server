@@ -135,11 +135,15 @@ namespace EQEmu
 		std::shared_ptr<ItemInstance> Get(const InventorySlot &slot);
 		bool Put(const InventorySlot &slot, std::shared_ptr<ItemInstance> inst);
 		bool Swap(const InventorySlot &src, const InventorySlot &dest, int charges);
+		bool Summon(const InventorySlot &slot, std::shared_ptr<ItemInstance> inst);
+		bool PushToCursorBuffer(std::shared_ptr<ItemInstance> inst);
+		bool PopFromCursorBuffer();
 
 		//utility
 		static int CalcMaterialFromSlot(const InventorySlot &slot);
 		static InventorySlot CalcSlotFromMaterial(int material);
 		bool CanEquip(std::shared_ptr<EQEmu::ItemInstance> inst, const EQEmu::InventorySlot &slot);
+		bool CheckLoreConflict(const ItemData *item);
 		bool Serialize(MemoryBuffer &buf);
 
 		//testing

@@ -818,13 +818,28 @@ public:
 	void QSSwapItemAuditor(MoveItemOld_Struct* move_in, bool postaction_call = false);
 	void PutLootInInventory(int16 slot_id, const ItemInst &inst, ServerLootItem_Struct** bag_item_data = 0);
 	bool AutoPutLootInInventory(ItemInst& inst, bool try_worn = false, bool try_cursor = true, ServerLootItem_Struct** bag_item_data = 0);
-	bool SummonItem(uint32 item_id, int16 charges = -1, uint32 aug1 = 0, uint32 aug2 = 0, uint32 aug3 = 0, uint32 aug4 = 0, uint32 aug5 = 0, uint32 aug6 = 0, bool attuned = false, uint16 to_slot = MainCursor, uint32 ornament_icon = 0, uint32 ornament_idfile = 0, uint32 ornament_hero_model = 0);
+	bool SummonItem(uint32 item_id, int16 charges = -1,
+					uint32 aug1 = 0, uint32 aug2 = 0, uint32 aug3 = 0, uint32 aug4 = 0, uint32 aug5 = 0, uint32 aug6 = 0, bool attuned = false, 
+					uint16 to_slot = MainCursor, uint32 ornament_icon = 0, uint32 ornament_idfile = 0, uint32 ornament_hero_model = 0);
 	void SetStats(uint8 type,int16 set_val);
 	void IncStats(uint8 type,int16 increase_val);
 	void DropItem(int16 slot_id);
 
 	//New Inventory
 	bool SwapItem(const EQEmu::InventorySlot &src, const EQEmu::InventorySlot &dest, int number_in_stack);
+	bool SummonItem(uint32 item_id, 
+					int16 charges, 
+					const EQEmu::InventorySlot &slot,
+					uint32 aug1 = 0,
+					uint32 aug2 = 0,
+					uint32 aug3 = 0,
+					uint32 aug4 = 0,
+					uint32 aug5 = 0,
+					uint32 aug6 = 0,
+					bool attuned  = false,
+					uint32 ornament_icon = 0, 
+					uint32 ornament_idfile = 0, 
+					uint32 ornament_hero_model = 0);
 
 	//
 	// class Client::TextLink
@@ -880,6 +895,9 @@ public:
 	void SendItemPacket(int16 slot_id, const ItemInst* inst, ItemPacketType packet_type);
 	bool IsValidSlot(uint32 slot);
 	bool IsBankSlot(uint32 slot);
+
+	//inv2
+	void SendItemPacket(const EQEmu::InventorySlot &slot, std::shared_ptr<EQEmu::ItemInstance> inst, ItemPacketType packet_type);
 
 	inline bool IsTrader() const { return(Trader); }
 	inline bool IsBuyer() const { return(Buyer); }

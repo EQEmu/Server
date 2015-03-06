@@ -10,6 +10,8 @@ bool EQEmu::ItemContainerPersonalSerialization::Serialize(MemoryBuffer &buf, con
 		if(iter.first < 33) {
 			buf.Write<int32>(container_number);
 			buf.Write<int32>(iter.first);
+			buf.Write<int32>(-1);
+			buf.Write<int32>(-1);
 			buf.Write<void*>(iter.second.get());
 			ret = true;
 		}

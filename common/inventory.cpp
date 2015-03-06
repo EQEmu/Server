@@ -22,6 +22,7 @@
 #include "data_verification.h"
 #include "string_util.h"
 #include <map>
+#include <queue>
 
 bool EQEmu::InventorySlot::IsValid() const {
 	if(type_ == InvTypePersonal && EQEmu::ValueWithin(slot_, PersonalSlotCharm, PersonalSlotCursor)) {
@@ -225,7 +226,28 @@ bool EQEmu::Inventory::Swap(const InventorySlot &src, const InventorySlot &dest,
 		return true;
 	}
 
-	if(!src.IsValid() || !dest.IsValid()) {
+	if(!src.IsValid()) {
+		return false;
+	}
+
+	if(src.Type() == InvTypeCursorBuffer || dest.Type() == InvTypeCursorBuffer) {
+		return true;
+	}
+
+	if(dest.IsDelete()) {
+		impl_->data_model_->Begin();
+		bool v = _destroy(src);
+		if(v) {
+			impl_->data_model_->Commit();
+		}
+		else {
+			impl_->data_model_->Rollback();
+		}
+
+		return v;
+	}
+
+	if(!dest.IsValid()) {
 		return false;
 	}
 
@@ -252,17 +274,6 @@ bool EQEmu::Inventory::Swap(const InventorySlot &src, const InventorySlot &dest,
 	}
 
 	impl_->data_model_->Begin();
-	if(dest.IsDelete()) {
-		bool v = _destroy(src);
-		if(v) {
-			impl_->data_model_->Commit();
-		} else {
-			impl_->data_model_->Rollback();
-		}
-
-		return v;
-	}
-
 	if(i_src->IsStackable()) {
 		//move # charges from src to dest
 
@@ -356,6 +367,109 @@ bool EQEmu::Inventory::Swap(const InventorySlot &src, const InventorySlot &dest,
 	return true;
 }
 
+bool EQEmu::Inventory::Summon(const InventorySlot &slot, std::shared_ptr<ItemInstance> inst) {
+	if(!inst)
+		return false;
+
+	if(CheckLoreConflict(inst->GetBaseItem())) {
+		return false;
+	}
+
+	auto cur = Get(slot);
+	if(cur) {
+		if(slot.IsCursor()) {
+			PushToCursorBuffer(inst);
+		}
+
+		return false;
+	}
+
+	impl_->data_model_->Begin();
+	bool v = Put(slot, inst);
+	if(v) {
+		impl_->data_model_->Insert(slot, inst);
+		impl_->data_model_->Commit();
+	} else {
+		impl_->data_model_->Rollback();
+	}
+
+	return v;
+}
+
+bool EQEmu::Inventory::PushToCursorBuffer(std::shared_ptr<ItemInstance> inst) {
+	if(impl_->containers_.count(InvTypeCursorBuffer) == 0) {
+		impl_->containers_.insert(std::pair<int, ItemContainer>(InvTypeCursorBuffer, ItemContainer()));
+	}
+
+	int32 top = 0;
+	auto &container = impl_->containers_[InvTypeCursorBuffer];
+	auto iter = container.Begin();
+	while(iter != container.End()) {
+		top = iter->first;
+		++iter;
+	}
+
+	InventorySlot slot(InvTypeCursorBuffer, top + 1);
+	impl_->data_model_->Begin();
+	bool v = Put(slot, inst);
+	if(v) {
+		impl_->data_model_->Insert(slot, inst);
+		impl_->data_model_->Commit();
+	}
+	else {
+		impl_->data_model_->Rollback();
+	}
+
+	return v;
+}
+
+bool EQEmu::Inventory::PopFromCursorBuffer() {
+	InventorySlot cursor(InvTypePersonal, PersonalSlotCursor);
+	auto inst = Get(cursor);
+	if(inst) {
+		return false;
+	}
+
+	if(impl_->containers_.count(InvTypeCursorBuffer) == 0) {
+		return false;
+	}
+
+	int32 top = 0;
+	auto &container = impl_->containers_[InvTypeCursorBuffer];
+	auto iter = container.Begin();
+	while(iter != container.End()) {
+		top = iter->first;
+		++iter;
+	}
+
+	InventorySlot slot(InvTypeCursorBuffer, top);
+	inst = Get(slot);
+
+	if(inst) {
+		impl_->data_model_->Begin();
+
+		bool v = _destroy(slot);
+		impl_->data_model_->Delete(slot);
+
+		if(!v) {
+			impl_->data_model_->Rollback();
+			return false;
+		}
+
+		v = Put(cursor, inst);
+		impl_->data_model_->Insert(cursor, inst);
+		if(!v) {
+			impl_->data_model_->Rollback();
+			return false;
+		}
+
+		impl_->data_model_->Commit();
+		return true;
+	}
+
+	return false;
+}
+
 int EQEmu::Inventory::CalcMaterialFromSlot(const InventorySlot &slot) {
 	if(slot.Type() != 0)
 		return _MaterialInvalid;
@@ -441,17 +555,59 @@ bool EQEmu::Inventory::CanEquip(std::shared_ptr<EQEmu::ItemInstance> inst, const
 		return false;
 	}
 	
+	//todo: check deity
 	if(!item->IsEquipable(impl_->race_, impl_->class_)) {
 		return false;
 	}
 
+	//Checking augments
+	auto iter = inst->GetContainer()->Begin();
+	auto end = inst->GetContainer()->End();
+	while(iter != end) {
+		if(!CanEquip(iter->second, InventorySlot(slot.Type(), slot.Slot(), slot.BagIndex(), iter->first))) {
+			return false;
+		}
+		++iter;
+	}
+
 	return true;
+}
+
+bool EQEmu::Inventory::CheckLoreConflict(const ItemData *item) {
+	if(!item)
+		return false;
+
+	if(!item->LoreFlag)
+		return false;
+
+	if(item->LoreGroup == 0)
+		return false;
+
+	if(item->LoreGroup == 0xFFFFFFFF) {
+		//look everywhere except shared bank
+		for(auto &container : impl_->containers_) {
+			if(container.first != InvTypeSharedBank && container.second.HasItem(item->ID)) {
+				return true;
+			}
+		}
+	}
+	else {
+		//look everywhere except shared bank
+		for(auto &container : impl_->containers_) {
+			if(container.first != InvTypeSharedBank && container.second.HasItemByLoreGroup(item->LoreGroup)) {
+				return true;
+			}
+		}
+	}
+
+	return false;
 }
 
 bool EQEmu::Inventory::Serialize(MemoryBuffer &buf) {
 	buf.SetWritePosition(0);
 	buf.SetReadPosition(0);
 	buf.Resize(0);
+	buf.Write<int32>(105);
 
 	bool value = false;
 	for(auto &iter : impl_->containers_) {

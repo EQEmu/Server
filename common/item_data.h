@@ -72,6 +72,8 @@ struct InternalSerializedItem_Struct {
 struct SerializedItemInstance_Struct {
 	int32 container_id;
 	int32 slot_id;
+	int32 bag_id;
+	int32 aug_id;
 	void *inst;
 };
 

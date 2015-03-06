@@ -602,18 +602,18 @@ namespace RoF2
 		EQApplicationPacket *in = *p;
 		*p = nullptr;
 
-		size_t entry_size = sizeof(int32) * 2 + sizeof(void*);
-		size_t entries = in->size / entry_size;
+		size_t entry_size = sizeof(SerializedItemInstance_Struct);
+		size_t entries = (in->size - sizeof(int32)) / entry_size;
 
-		if(entries == 0 || in->size % entry_size != 0) {
+		if(entries == 0 || (in->size - sizeof(int32)) % entry_size != 0) {
 			Log.Out(Logs::General, Logs::Netcode, "[STRUCTS] Wrong size on outbound %s: Got %d, expected multiple of %d",
-					opcodes->EmuToName(in->GetOpcode()), in->size, entry_size);
+					opcodes->EmuToName(in->GetOpcode()), (in->size - sizeof(int32)), entry_size);
 			delete in;
 			return;
 		}
 
 		unsigned char *__emu_buffer = in->pBuffer;
-		SerializedItemInstance_Struct *sis = (SerializedItemInstance_Struct*)__emu_buffer;
+		SerializedItemInstance_Struct *sis = (SerializedItemInstance_Struct*)(__emu_buffer + sizeof(int32));
 		EQEmu::MemoryBuffer packet_data;
 		packet_data.Write<uint32>(entries);
 		
@@ -1490,33 +1490,41 @@ namespace RoF2
 
 	ENCODE(OP_ItemPacket)
 	{
-		delete *p;
+		EQApplicationPacket *in = *p;
+		*p = nullptr;
 
-		////consume the packet
-		//EQApplicationPacket *in = *p;
-		//*p = nullptr;
-		//
-		//unsigned char *__emu_buffer = in->pBuffer;
-		//ItemPacket_Struct *old_item_pkt = (ItemPacket_Struct *)__emu_buffer;
-		//InternalSerializedItem_Struct *int_struct = (InternalSerializedItem_Struct *)(old_item_pkt->SerializedItem);
-		//
-		//uint32 length;
-		//char *serialized = SerializeItem((ItemInst *)int_struct->inst, int_struct->slot_id, &length, 0, old_item_pkt->PacketType);
-		//
-		//if (!serialized) {
-		//	Log.Out(Logs::General, Logs::Netcode, "[STRUCTS] Serialization failed on item slot %d.", int_struct->slot_id);
-		//	delete in;
-		//	return;
-		//}
-		//in->size = length + 4;
-		//in->pBuffer = new unsigned char[in->size];
-		//ItemPacket_Struct *new_item_pkt = (ItemPacket_Struct *)in->pBuffer;
-		//new_item_pkt->PacketType = old_item_pkt->PacketType;
-		//memcpy(new_item_pkt->SerializedItem, serialized, length);
-		//
-		//delete[] __emu_buffer;
-		//safe_delete_array(serialized);
-		//dest->FastQueuePacket(&in, ack_req);
+		size_t entry_size = sizeof(SerializedItemInstance_Struct);
+		size_t entries = (in->size - sizeof(int32)) / entry_size;
+
+		if(entries == 0 || entries > 1 || (in->size - sizeof(int32)) % entry_size != 0) {
+			Log.Out(Logs::General, Logs::Netcode, "[STRUCTS] Wrong size on outbound %s: Got %d, expected multiple of %d",
+					opcodes->EmuToName(in->GetOpcode()), (in->size - sizeof(int32)), entry_size);
+			delete in;
+			return;
+		}
+
+		unsigned char *__emu_buffer = in->pBuffer;
+
+		int32 *packet_type = (int32*)(__emu_buffer);
+		SerializedItemInstance_Struct *sis = (SerializedItemInstance_Struct*)(__emu_buffer + sizeof(int32));
+		EQEmu::MemoryBuffer packet_data;
+		packet_data.Write<int32>(*packet_type);
+
+		EQEmu::ItemInstance *inst = (EQEmu::ItemInstance*)sis->inst;
+		if(!inst) {
+			delete in;
+			return;
+		}
+
+		SerializeItem(packet_data, inst, sis->container_id, sis->slot_id, sis->bag_id, sis->slot_id);
+
+		in->pBuffer = new uchar[packet_data.Size()];
+		in->size = packet_data.Size();
+		memcpy(in->pBuffer, packet_data, in->size);
+
+
+		delete[] __emu_buffer;
+		dest->FastQueuePacket(&in, ack_req);
 	}
 
 	ENCODE(OP_ItemVerifyReply)

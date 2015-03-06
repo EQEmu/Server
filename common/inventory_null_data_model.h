@@ -29,11 +29,11 @@ namespace EQEmu
 		InventoryNullDataModel() { }
 		virtual ~InventoryNullDataModel() { }
 		
-		virtual void Begin() { printf("NDM: Begin\n"); }
-		virtual bool Commit() { printf("NDM: Commit\n"); return true; }
-		virtual void Rollback() { printf("NDM: Rollback\n"); }
-		virtual void Insert(const InventorySlot &slot, std::shared_ptr<ItemInstance> inst) { printf("NDM: Insert %s %s\n", slot.ToString().c_str(), inst ? inst->GetBaseItem()->Name : "Null" ); }
-		virtual void Delete(const InventorySlot &slot) { printf("NDM: Delete %s\n", slot.ToString().c_str()); }
+		virtual void Begin() { }
+		virtual bool Commit() { return true; }
+		virtual void Rollback() { }
+		virtual void Insert(const InventorySlot &slot, std::shared_ptr<ItemInstance> inst) { }
+		virtual void Delete(const InventorySlot &slot) { }
 	};
 } // EQEmu
 
