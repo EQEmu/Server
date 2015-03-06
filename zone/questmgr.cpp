@@ -189,7 +189,7 @@ void QuestManager::summonitem(uint32 itemid, int16 charges) {
 	QuestManagerCurrentQuestVars();
 	if(!initiator)
 		return;
-	initiator->SummonItem(itemid, charges);
+	initiator->SummonItem(itemid, charges, 0);
 }
 
 void QuestManager::write(const char *file, const char *str) {

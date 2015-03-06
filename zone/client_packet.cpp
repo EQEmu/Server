@@ -2628,7 +2628,7 @@ void Client::Handle_OP_AltCurrencyReclaim(const EQApplicationPacket *app)
 
 		/* If you input more than you have currency wise, just give the max of the currency you currently have */
 		if (reclaim->count > max_currency) {
-			SummonItem(item_id, max_currency);
+			SummonItem(item_id, max_currency, 0);
 			SetAlternateCurrencyValue(reclaim->currency_id, 0);
 		}
 		else {
@@ -4889,14 +4889,14 @@ void Client::Handle_OP_CrystalCreate(const EQApplicationPacket *app)
 
 	if (cr->type == 5) {
 		if (cr->amount > GetEbonCrystals()) {
-			SummonItem(RuleI(Zone, EbonCrystalItemID), GetEbonCrystals());
+			SummonItem(RuleI(Zone, EbonCrystalItemID), GetEbonCrystals(), 0);
 			m_pp.currentEbonCrystals = 0;
 			m_pp.careerEbonCrystals = 0;
 			SaveCurrency();
 			SendCrystalCounts();
 		}
 		else {
-			SummonItem(RuleI(Zone, EbonCrystalItemID), cr->amount);
+			SummonItem(RuleI(Zone, EbonCrystalItemID), cr->amount, 0);
 			m_pp.currentEbonCrystals -= cr->amount;
 			m_pp.careerEbonCrystals -= cr->amount;
 			SaveCurrency();
@@ -4905,14 +4905,14 @@ void Client::Handle_OP_CrystalCreate(const EQApplicationPacket *app)
 	}
 	else if (cr->type == 4) {
 		if (cr->amount > GetRadiantCrystals()) {
-			SummonItem(RuleI(Zone, RadiantCrystalItemID), GetRadiantCrystals());
+			SummonItem(RuleI(Zone, RadiantCrystalItemID), GetRadiantCrystals(), 0);
 			m_pp.currentRadCrystals = 0;
 			m_pp.careerRadCrystals = 0;
 			SaveCurrency();
 			SendCrystalCounts();
 		}
 		else {
-			SummonItem(RuleI(Zone, RadiantCrystalItemID), cr->amount);
+			SummonItem(RuleI(Zone, RadiantCrystalItemID), cr->amount, 0);
 			m_pp.currentRadCrystals -= cr->amount;
 			m_pp.careerRadCrystals -= cr->amount;
 			SaveCurrency();
@@ -12177,7 +12177,6 @@ void Client::Handle_OP_ShopPlayerSell(const EQApplicationPacket *app)
 			sizeof(Merchant_Purchase_Struct), app->size);
 		return;
 	}
-	RDTSC_Timer t1(true);
 	Merchant_Purchase_Struct* mp = (Merchant_Purchase_Struct*)app->pBuffer;
 
 	Mob* vendor = entity_list.GetMob(mp->npcid);
@@ -12206,7 +12205,6 @@ void Client::Handle_OP_ShopPlayerSell(const EQApplicationPacket *app)
 	}
 
 	if (!item->NoDrop) {
-		//Message(13,"%s tells you, 'LOL NOPE'", vendor->GetName());
 		return;
 	}
 
@@ -12319,10 +12317,7 @@ void Client::Handle_OP_ShopPlayerSell(const EQApplicationPacket *app)
 	QueuePacket(outapp);
 	safe_delete(outapp);
 	SendMoneyUpdate();
-	t1.start();
 	Save(1);
-	t1.stop();
-	std::cout << "Save took: " << t1.getDuration() << std::endl;
 	return;
 }
 

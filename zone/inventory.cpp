@@ -1649,7 +1649,7 @@ bool Client::SwapItem(MoveItemOld_Struct* move_in) {
 		} else {
 			if(RuleB(QueryServ, PlayerLogMoves)) { QSSwapItemAuditor(move_in); } // QS Audit
 
-			SummonItem(src_inst->GetID(), src_inst->GetCharges());
+			SummonItem(src_inst->GetID(), src_inst->GetCharges(), 0);
 			DeleteItemInInventory(MainCursor);
 
 			return true;

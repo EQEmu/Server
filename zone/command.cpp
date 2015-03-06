@@ -5419,24 +5419,31 @@ void command_summonitem(Client *c, const Seperator *sep)
 		}
 
 		EQEmu::InventorySlot cursor(EQEmu::InvTypePersonal, EQEmu::PersonalSlotCursor);
-		if (item_status > c->Admin())
+		bool v = false;
+		if (item_status > c->Admin()) {
 			c->Message(13, "Error: Insufficient status to summon this item.");
+			return;
+		}
 		else if (sep->argnum==2 && sep->IsNumber(2))
-			c->SummonItem(itemid, atoi(sep->arg[2]), cursor);
+			v = c->SummonItem(itemid, atoi(sep->arg[2]), cursor);
 		else if (sep->argnum==3)
-			c->SummonItem(itemid, atoi(sep->arg[2]), cursor, atoi(sep->arg[3]));
+			v = c->SummonItem(itemid, atoi(sep->arg[2]), cursor, atoi(sep->arg[3]));
 		else if (sep->argnum==4)
-			c->SummonItem(itemid, atoi(sep->arg[2]), cursor, atoi(sep->arg[3]), atoi(sep->arg[4]));
+			v = c->SummonItem(itemid, atoi(sep->arg[2]), cursor, atoi(sep->arg[3]), atoi(sep->arg[4]));
 		else if (sep->argnum==5)
-			c->SummonItem(itemid, atoi(sep->arg[2]), cursor, atoi(sep->arg[3]), atoi(sep->arg[4]), atoi(sep->arg[5]));
+			v = c->SummonItem(itemid, atoi(sep->arg[2]), cursor, atoi(sep->arg[3]), atoi(sep->arg[4]), atoi(sep->arg[5]));
 		else if (sep->argnum==6)
-			c->SummonItem(itemid, atoi(sep->arg[2]), cursor, atoi(sep->arg[3]), atoi(sep->arg[4]), atoi(sep->arg[5]), atoi(sep->arg[6]));
+			v = c->SummonItem(itemid, atoi(sep->arg[2]), cursor, atoi(sep->arg[3]), atoi(sep->arg[4]), atoi(sep->arg[5]), atoi(sep->arg[6]));
 		else if (sep->argnum==7)
-			c->SummonItem(itemid, atoi(sep->arg[2]), cursor, atoi(sep->arg[3]), atoi(sep->arg[4]), atoi(sep->arg[5]), atoi(sep->arg[6]), atoi(sep->arg[7]));
+			v = c->SummonItem(itemid, atoi(sep->arg[2]), cursor, atoi(sep->arg[3]), atoi(sep->arg[4]), atoi(sep->arg[5]), atoi(sep->arg[6]), atoi(sep->arg[7]));
 		else if (sep->argnum==8)
-			c->SummonItem(itemid, atoi(sep->arg[2]), cursor, atoi(sep->arg[3]), atoi(sep->arg[4]), atoi(sep->arg[5]), atoi(sep->arg[6]), atoi(sep->arg[7]), atoi(sep->arg[8]));
+			v = c->SummonItem(itemid, atoi(sep->arg[2]), cursor, atoi(sep->arg[3]), atoi(sep->arg[4]), atoi(sep->arg[5]), atoi(sep->arg[6]), atoi(sep->arg[7]), atoi(sep->arg[8]));
 		else {
-			c->SummonItem(itemid, -1, cursor);
+			v = c->SummonItem(itemid, -1, cursor);
+		}
+
+		if(!v) {
+			c->Message(13, "Error: unable to summon item.");
 		}
 	}
 }
@@ -5458,24 +5465,32 @@ void command_giveitem(Client *c, const Seperator *sep)
 			item_status = static_cast<int16>(item->MinStatus);
 		}
 
-		if (item_status > c->Admin())
+		EQEmu::InventorySlot cursor(EQEmu::InvTypePersonal, EQEmu::PersonalSlotCursor);
+		bool v = false;
+		if (item_status > c->Admin()) {
 			c->Message(13, "Error: Insufficient status to summon this item.");
+			return;
+		}
 		else if (sep->argnum==2 && sep->IsNumber(2))
-			t->SummonItem(itemid, atoi(sep->arg[2]));
+			v = t->SummonItem(itemid, atoi(sep->arg[2]), cursor);
 		else if (sep->argnum==3)
-			t->SummonItem(itemid, atoi(sep->arg[2]), atoi(sep->arg[3]));
+			v = t->SummonItem(itemid, atoi(sep->arg[2]), cursor, atoi(sep->arg[3]));
 		else if (sep->argnum==4)
-			t->SummonItem(itemid, atoi(sep->arg[2]), atoi(sep->arg[3]), atoi(sep->arg[4]));
+			v = t->SummonItem(itemid, atoi(sep->arg[2]), cursor, atoi(sep->arg[3]), atoi(sep->arg[4]));
 		else if (sep->argnum==5)
-			t->SummonItem(itemid, atoi(sep->arg[2]), atoi(sep->arg[3]), atoi(sep->arg[4]), atoi(sep->arg[5]));
+			v = t->SummonItem(itemid, atoi(sep->arg[2]), cursor, atoi(sep->arg[3]), atoi(sep->arg[4]), atoi(sep->arg[5]));
 		else if (sep->argnum==6)
-			t->SummonItem(itemid, atoi(sep->arg[2]), atoi(sep->arg[3]), atoi(sep->arg[4]), atoi(sep->arg[5]), atoi(sep->arg[6]));
+			v = t->SummonItem(itemid, atoi(sep->arg[2]), cursor, atoi(sep->arg[3]), atoi(sep->arg[4]), atoi(sep->arg[5]), atoi(sep->arg[6]));
 		else if (sep->argnum==7)
-			t->SummonItem(itemid, atoi(sep->arg[2]), atoi(sep->arg[3]), atoi(sep->arg[4]), atoi(sep->arg[5]), atoi(sep->arg[6]), atoi(sep->arg[7]));
+			v = t->SummonItem(itemid, atoi(sep->arg[2]), cursor, atoi(sep->arg[3]), atoi(sep->arg[4]), atoi(sep->arg[5]), atoi(sep->arg[6]), atoi(sep->arg[7]));
 		else if (sep->argnum == 7)
-			t->SummonItem(itemid, atoi(sep->arg[2]), atoi(sep->arg[3]), atoi(sep->arg[4]), atoi(sep->arg[5]), atoi(sep->arg[6]), atoi(sep->arg[7]), atoi(sep->arg[8]));
+			v = t->SummonItem(itemid, atoi(sep->arg[2]), cursor, atoi(sep->arg[3]), atoi(sep->arg[4]), atoi(sep->arg[5]), atoi(sep->arg[6]), atoi(sep->arg[7]), atoi(sep->arg[8]));
 		else {
-			t->SummonItem(itemid);
+			v = t->SummonItem(itemid, -1, cursor);
+		}
+
+		if(!v) {
+			c->Message(13, "Error: Unable to summon item on target.");
 		}
 	}
 }

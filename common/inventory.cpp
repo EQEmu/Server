@@ -22,7 +22,6 @@
 #include "data_verification.h"
 #include "string_util.h"
 #include <map>
-#include <queue>
 
 bool EQEmu::InventorySlot::IsValid() const {
 	if(type_ == InvTypePersonal && EQEmu::ValueWithin(slot_, PersonalSlotCharm, PersonalSlotCursor)) {

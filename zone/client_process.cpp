@@ -873,7 +873,7 @@ void Client::BulkSendMerchantInventory(int merchant_id, int npcid) {
 			int charges = 1;
 			if (item->ItemClass == ItemClassCommon)
 				charges = item->MaxCharges;
-			ItemInst* inst = database.CreateItemOld(item, charges);
+			auto inst = database.CreateItem(item->ID, charges, false);
 			if (inst) {
 				if (RuleB(Merchant, UsePriceMod)) {
 					inst->SetPrice((item->Price * (RuleR(Merchant, SellCostMod)) * item->SellRate * Client::CalcPriceMod(merch, false)));
@@ -887,8 +887,7 @@ void Client::BulkSendMerchantInventory(int merchant_id, int npcid) {
 				else
 					inst->SetCharges(1);
 
-				SendItemPacket(ml.slot - 1, inst, ItemPacketMerchant);
-				safe_delete(inst);
+				SendItemPacket(EQEmu::InventorySlot(EQEmu::InvTypePersonal, ml.slot - 1), inst, ItemPacketMerchant);
 			}
 		}
 		// Account for merchant lists with gaps.

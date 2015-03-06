@@ -85,7 +85,7 @@ class SharedDatabase : public Database
 		ItemInst* CreateItemOld(uint32 item_id, int16 charges = 0, uint32 aug1 = 0, uint32 aug2 = 0, uint32 aug3 = 0, uint32 aug4 = 0, uint32 aug5 = 0, uint32 aug6 = 0, uint8 attuned = 0);
 		ItemInst* CreateItemOld(const ItemData* item, int16 charges = 0, uint32 aug1 = 0, uint32 aug2 = 0, uint32 aug3 = 0, uint32 aug4 = 0, uint32 aug5 = 0, uint32 aug6 = 0, uint8 attuned = 0);
 		ItemInst* CreateBaseItemOld(const ItemData* item, int16 charges = 0);
-		std::shared_ptr<EQEmu::ItemInstance> CreateItem(uint32 item_id, int16 charges = 0);
+		std::shared_ptr<EQEmu::ItemInstance> CreateItem(uint32 item_id, int16 charges = 0, bool unique = true);
 
 		/*
 		    Shared Memory crap

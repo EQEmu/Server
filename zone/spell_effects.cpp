@@ -619,7 +619,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 								strstr(transI->GetItem()->Name, "parts") ||
 								strstr(transI->GetItem()->Name, "Parts")){
 								CastToClient()->DeleteItemInInventory(MainCursor, fcharges, true);
-								CastToClient()->SummonItem(13073, fcharges);
+								CastToClient()->SummonItem(13073, fcharges, 0);
 							}
 							else{
 								Message(13, "You can only transmute flesh to bone.");

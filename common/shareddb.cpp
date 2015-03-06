@@ -1253,7 +1253,7 @@ ItemInst* SharedDatabase::CreateBaseItemOld(const ItemData* item, int16 charges)
 	return inst;
 }
 
-std::shared_ptr<EQEmu::ItemInstance> SharedDatabase::CreateItem(uint32 item_id, int16 charges) {
+std::shared_ptr<EQEmu::ItemInstance> SharedDatabase::CreateItem(uint32 item_id, int16 charges, bool unique) {
 	const ItemData* item = GetItem(item_id);
 	if(item) {
 		if(charges == 0 && item->MaxCharges == -1) {
@@ -1265,8 +1265,10 @@ std::shared_ptr<EQEmu::ItemInstance> SharedDatabase::CreateItem(uint32 item_id, 
 		}
 
 		std::shared_ptr<EQEmu::ItemInstance> inst = std::shared_ptr<EQEmu::ItemInstance>(new EQEmu::ItemInstance(item, charges));
-		inst->SetSerialNumber(EQEmu::GetNextItemInstanceSerial());
-		//Set Tracking here
+		if(unique) {
+			inst->SetSerialNumber(EQEmu::GetNextItemInstanceSerial());
+			//Set Tracking here
+		}
 		return inst;
 	}
 

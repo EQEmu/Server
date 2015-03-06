@@ -672,7 +672,7 @@ void Lua_Client::SummonItem(uint32 item_id) {
 
 void Lua_Client::SummonItem(uint32 item_id, int charges) {
 	Lua_Safe_Call_Void();
-	self->SummonItem(item_id, charges);
+	self->SummonItem(item_id, charges, 0);
 }
 
 void Lua_Client::SummonItem(uint32 item_id, int charges, uint32 aug1) {

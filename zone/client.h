@@ -829,7 +829,7 @@ public:
 	bool SwapItem(const EQEmu::InventorySlot &src, const EQEmu::InventorySlot &dest, int number_in_stack);
 	bool SummonItem(uint32 item_id, 
 					int16 charges, 
-					const EQEmu::InventorySlot &slot,
+					const EQEmu::InventorySlot &slot = EQEmu::InventorySlot(EQEmu::InvTypePersonal, EQEmu::PersonalSlotCursor),
 					uint32 aug1 = 0,
 					uint32 aug2 = 0,
 					uint32 aug3 = 0,
