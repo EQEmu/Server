@@ -329,6 +329,8 @@
 9073|2015_01_31_character_item_recast.sql|SHOW TABLES LIKE 'character_item_recast'|empty|
 9074|2015_02_01_logsys_packet_logs.sql|SELECT * FROM `logsys_categories` WHERE `log_category_description` LIKE 'Packet: Server -> Client'|empty|
 9075|2015_02_02_logsys_packet_logs_with_dump.sql|SELECT * FROM `logsys_categories` WHERE `log_category_description` LIKE 'Packet: Server -> Client With Dump'|empty|
+9076|2015_02_04_average_coin.sql|SHOW COLUMNS FROM `loottable` WHERE Field = 'avgcoin'|contains|smallint
+9077|2015_02_12_zone_gravity.sql|SHOW COLUMNS FROM `zone` LIKE 'gravity'|empty|
 
 # Upgrade conditions:
 # 	This won't be needed after this system is implemented, but it is used database that are not 

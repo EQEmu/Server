@@ -15,6 +15,8 @@
 
 #include <iostream>
 #include <sstream>
+#include <numeric>
+#include <cassert>
 
 namespace RoF2
 {
@@ -104,7 +106,7 @@ namespace RoF2
 	{
 		//all opcodes default to passthrough.
 #include "ss_register.h"
-#include "rof_ops.h"
+#include "rof2_ops.h"
 	}
 
 	std::string Strategy::Describe() const
@@ -2118,7 +2120,7 @@ namespace RoF2
 
 		for (int r = 0; r < 7; r++)
 		{
-			outapp->WriteUInt32(emu->item_tint[r].color);
+			outapp->WriteUInt32(emu->item_tint[r].Color);
 		}
 		// Write zeroes for extra two tint values
 		outapp->WriteUInt32(0);
@@ -2128,7 +2130,7 @@ namespace RoF2
 
 		for (int r = 0; r < 7; r++)
 		{
-			outapp->WriteUInt32(emu->item_tint[r].color);
+			outapp->WriteUInt32(emu->item_tint[r].Color);
 		}
 		// Write zeroes for extra two tint values
 		outapp->WriteUInt32(0);
@@ -2360,46 +2362,52 @@ namespace RoF2
 		outapp->WriteUInt8(0);				// Unknown
 		outapp->WriteUInt8(0);				// Unknown
 
-		outapp->WriteUInt32(structs::MAX_PLAYER_BANDOLIER);
+		outapp->WriteUInt32(consts::BANDOLIERS_SIZE);
 
-		for (uint32 r = 0; r < EmuConstants::BANDOLIERS_COUNT; r++)
-		{
-			outapp->WriteString(emu->bandoliers[r].name);
-
-			for (uint32 j = 0; j < EmuConstants::BANDOLIER_SIZE; ++j)
-			{
-				outapp->WriteString(emu->bandoliers[r].items[j].item_name);
-				outapp->WriteUInt32(emu->bandoliers[r].items[j].item_id);
-				outapp->WriteUInt32(emu->bandoliers[r].items[j].icon);
-			}
-		}
-
-		for (uint32 r = 0; r < structs::MAX_PLAYER_BANDOLIER - EmuConstants::BANDOLIERS_COUNT; r++)
-		{
-			outapp->WriteString("");
-
-			for (uint32 j = 0; j < EmuConstants::BANDOLIER_SIZE; ++j)
-			{
-				outapp->WriteString("");
-				outapp->WriteUInt32(0);
-				outapp->WriteUInt32(0);
-			}
-		}
-
-		outapp->WriteUInt32(structs::MAX_POTIONS_IN_BELT);
-
-		for (uint32 r = 0; r < EmuConstants::POTION_BELT_SIZE; r++)
-		{
-			outapp->WriteString(emu->potionbelt.items[r].item_name);
-			outapp->WriteUInt32(emu->potionbelt.items[r].item_id);
-			outapp->WriteUInt32(emu->potionbelt.items[r].icon);
-		}
-
-		for (uint32 r = 0; r < structs::MAX_POTIONS_IN_BELT - EmuConstants::POTION_BELT_SIZE; r++)
-		{
+		// Copy bandoliers where server and client indexes converge
+		for (uint32 r = 0; r < EmuConstants::BANDOLIERS_SIZE && r < consts::BANDOLIERS_SIZE; ++r) {
+			outapp->WriteString(emu->bandoliers[r].Name);
+			for (uint32 j = 0; j < consts::BANDOLIER_ITEM_COUNT; ++j) { // Will need adjusting if 'server != client' is ever true
+				outapp->WriteString(emu->bandoliers[r].Items[j].Name);
+				outapp->WriteUInt32(emu->bandoliers[r].Items[j].ID);
+				if (emu->bandoliers[r].Items[j].Icon) {
+					outapp->WriteSInt32(emu->bandoliers[r].Items[j].Icon);
+ 				}
+				else {
+ 					// If no icon, it must send -1 or Treasure Chest Icon (836) is displayed
+ 					outapp->WriteSInt32(-1);
+ 				}
+ 			}
+ 		}
+		// Nullify bandoliers where server and client indexes diverge, with a client bias
+		for (uint32 r = EmuConstants::BANDOLIERS_SIZE; r < consts::BANDOLIERS_SIZE; ++r) {
+ 			outapp->WriteString("");
+			for (uint32 j = 0; j < consts::BANDOLIER_ITEM_COUNT; ++j) { // Will need adjusting if 'server != client' is ever true
+ 				outapp->WriteString("");
+ 				outapp->WriteUInt32(0);
+ 				outapp->WriteSInt32(-1);
+ 			}
+ 		}
+ 
+		outapp->WriteUInt32(consts::POTION_BELT_ITEM_COUNT);
+ 
+		// Copy potion belt where server and client indexes converge
+		for (uint32 r = 0; r < EmuConstants::POTION_BELT_ITEM_COUNT && r < consts::POTION_BELT_ITEM_COUNT; ++r) {
+			outapp->WriteString(emu->potionbelt.Items[r].Name);
+			outapp->WriteUInt32(emu->potionbelt.Items[r].ID);
+			if (emu->potionbelt.Items[r].Icon) {
+				outapp->WriteSInt32(emu->potionbelt.Items[r].Icon);
+ 			}
+			else {
+				// If no icon, it must send -1 or Treasure Chest Icon (836) is displayed
+ 				outapp->WriteSInt32(-1);
+ 			}
+ 		}
+		// Nullify potion belt where server and client indexes diverge, with a client bias
+		for (uint32 r = EmuConstants::POTION_BELT_ITEM_COUNT; r < consts::POTION_BELT_ITEM_COUNT; ++r) {
 			outapp->WriteString("");
 			outapp->WriteUInt32(0);
-			outapp->WriteUInt32(0);
+			outapp->WriteSInt32(-1);
 		}
 
 		outapp->WriteSInt32(-1);	// Unknown;
@@ -2493,7 +2501,7 @@ namespace RoF2
 		outapp->WriteUInt32(emu->silver_bank);
 		outapp->WriteUInt32(emu->copper_bank);
 
-		outapp->WriteUInt32(0);				// Unknown
+		outapp->WriteUInt32(emu->platinum_shared);
 		outapp->WriteUInt32(0);				// Unknown
 		outapp->WriteUInt32(0);				// Unknown
 		outapp->WriteUInt32(0);				// Unknown
@@ -2975,85 +2983,99 @@ namespace RoF2
 
 	ENCODE(OP_SendCharInfo)
 	{
-		ENCODE_LENGTH_EXACT(CharacterSelect_Struct);
+		ENCODE_LENGTH_ATLEAST(CharacterSelect_Struct);
 		SETUP_VAR_ENCODE(CharacterSelect_Struct);
 
-		//EQApplicationPacket *packet = *p;
-		//const CharacterSelect_Struct *emu = (CharacterSelect_Struct *) packet->pBuffer;
+		// Zero-character count shunt
+		if (emu->CharCount == 0) {
+			ALLOC_VAR_ENCODE(structs::CharacterSelect_Struct, sizeof(structs::CharacterSelect_Struct));
+			eq->CharCount = emu->CharCount;
 
-		int char_count;
-		int namelen = 0;
-		for (char_count = 0; char_count < 10; char_count++) {
-			if (emu->name[char_count][0] == '\0')
-				break;
-			if (strcmp(emu->name[char_count], "<none>") == 0)
-				break;
-			namelen += strlen(emu->name[char_count]);
+			FINISH_ENCODE();
+			return;
 		}
 
-		int total_length = sizeof(structs::CharacterSelect_Struct)
-			+ char_count * sizeof(structs::CharacterSelectEntry_Struct)
-			+ namelen;
+		unsigned char *emu_ptr = __emu_buffer;
+		emu_ptr += sizeof(CharacterSelect_Struct);
+		CharacterSelectEntry_Struct *emu_cse = (CharacterSelectEntry_Struct *)nullptr;
+
+		size_t names_length = 0;
+		size_t character_count = 0;
+		for (; character_count < emu->CharCount && character_count < consts::CHARACTER_CREATION_LIMIT; ++character_count) {
+			emu_cse = (CharacterSelectEntry_Struct *)emu_ptr;
+			names_length += strlen(emu_cse->Name);
+			emu_ptr += sizeof(CharacterSelectEntry_Struct);
+		}
+
+		size_t total_length = sizeof(structs::CharacterSelect_Struct)
+			+ character_count * sizeof(structs::CharacterSelectEntry_Struct)
+			+ names_length;
 
 		ALLOC_VAR_ENCODE(structs::CharacterSelect_Struct, total_length);
+		structs::CharacterSelectEntry_Struct *eq_cse = (structs::CharacterSelectEntry_Struct *)nullptr;
 
-		//unsigned char *eq_buffer = new unsigned char[total_length];
-		//structs::CharacterSelect_Struct *eq_head = (structs::CharacterSelect_Struct *) eq_buffer;
+		eq->CharCount = character_count;
+		//eq->TotalChars = emu->TotalChars;
 
-		eq->char_count = char_count;
-		//eq->total_chars = 10;
+		//if (eq->TotalChars > consts::CHARACTER_CREATION_LIMIT)
+		//	eq->TotalChars = consts::CHARACTER_CREATION_LIMIT;
 
-		unsigned char *bufptr = (unsigned char *)eq->entries;
-		int r;
-		for (r = 0; r < char_count; r++) {
-			{	//pre-name section...
-				structs::CharacterSelectEntry_Struct *eq2 = (structs::CharacterSelectEntry_Struct *) bufptr;
-				memcpy(eq2->name, emu->name[r], strlen(emu->name[r]) + 1);
+		emu_ptr = __emu_buffer;
+		emu_ptr += sizeof(CharacterSelect_Struct);
+
+		unsigned char *eq_ptr = __packet->pBuffer;
+		eq_ptr += sizeof(structs::CharacterSelect_Struct);
+
+		for (int counter = 0; counter < character_count; ++counter) {
+			emu_cse = (CharacterSelectEntry_Struct *)emu_ptr;
+			eq_cse = (structs::CharacterSelectEntry_Struct *)eq_ptr;
+
+			strcpy(eq_cse->Name, emu_cse->Name);
+			eq_ptr += strlen(eq_cse->Name);
+			eq_cse = (structs::CharacterSelectEntry_Struct *)eq_ptr;
+
+			eq_cse->Class = emu_cse->Class;
+			eq_cse->Race = emu_cse->Race;
+			eq_cse->Level = emu_cse->Level;
+			eq_cse->ShroudClass = emu_cse->ShroudClass;
+			eq_cse->ShroudRace = emu_cse->ShroudRace;
+			eq_cse->Zone = emu_cse->Zone;
+			eq_cse->Instance = emu_cse->Instance;
+			eq_cse->Gender = emu_cse->Gender;
+			eq_cse->Face = emu_cse->Face;
+
+			for (int equip_index = 0; equip_index < _MaterialCount; equip_index++) {
+				eq_cse->Equip[equip_index].Material = emu_cse->Equip[equip_index].Material;
+				eq_cse->Equip[equip_index].Unknown1 = emu_cse->Equip[equip_index].Unknown1;
+				eq_cse->Equip[equip_index].EliteMaterial = emu_cse->Equip[equip_index].EliteMaterial;
+				eq_cse->Equip[equip_index].HeroForgeModel = emu_cse->Equip[equip_index].HeroForgeModel;
+				eq_cse->Equip[equip_index].Material2 = emu_cse->Equip[equip_index].Material2;
+				eq_cse->Equip[equip_index].Color.Color = emu_cse->Equip[equip_index].Color.Color;
 			}
-			//adjust for name.
-			bufptr += strlen(emu->name[r]);
-			{	//post-name section...
-				structs::CharacterSelectEntry_Struct *eq2 = (structs::CharacterSelectEntry_Struct *) bufptr;
-				eq2->class_ = emu->class_[r];
-				eq2->race = emu->race[r];
-				eq2->level = emu->level[r];
-				eq2->class_2 = emu->class_[r];
-				eq2->race2 = emu->race[r];
-				eq2->zone = emu->zone[r];
-				eq2->instance = 0;
-				eq2->gender = emu->gender[r];
-				eq2->face = emu->face[r];
-				int k;
-				for (k = 0; k < _MaterialCount; k++) {
-					eq2->equip[k].material = emu->equip[r][k].material;
-					eq2->equip[k].unknown1 = emu->equip[r][k].unknown1;
-					eq2->equip[k].elitematerial = emu->equip[r][k].elitematerial;
-					eq2->equip[k].heroforgemodel = emu->equip[r][k].heroforgemodel;
-					eq2->equip[k].material2 = emu->equip[r][k].material2;
-					eq2->equip[k].color.color = emu->equip[r][k].color.color;
-				}
-				eq2->u15 = 0xff;
-				eq2->u19 = 0xFF;
-				eq2->drakkin_tattoo = emu->drakkin_tattoo[r];
-				eq2->drakkin_details = emu->drakkin_details[r];
-				eq2->deity = emu->deity[r];
-				eq2->primary = emu->primary[r];
-				eq2->secondary = emu->secondary[r];
-				eq2->haircolor = emu->haircolor[r];
-				eq2->beardcolor = emu->beardcolor[r];
-				eq2->eyecolor1 = emu->eyecolor1[r];
-				eq2->eyecolor2 = emu->eyecolor2[r];
-				eq2->hairstyle = emu->hairstyle[r];
-				eq2->beard = emu->beard[r];
-				eq2->char_enabled = 1;
-				eq2->tutorial = emu->tutorial[r];
-				eq2->drakkin_heritage = emu->drakkin_heritage[r];
-				eq2->unknown1 = 0;
-				eq2->gohome = emu->gohome[r];
-				eq2->LastLogin = 1212696584;
-				eq2->unknown2 = 0;
-			}
-			bufptr += sizeof(structs::CharacterSelectEntry_Struct);
+
+			eq_cse->Unknown15 = emu_cse->Unknown15;
+			eq_cse->Unknown19 = emu_cse->Unknown19;
+			eq_cse->DrakkinTattoo = emu_cse->DrakkinTattoo;
+			eq_cse->DrakkinDetails = emu_cse->DrakkinDetails;
+			eq_cse->Deity = emu_cse->Deity;
+			eq_cse->PrimaryIDFile = emu_cse->PrimaryIDFile;
+			eq_cse->SecondaryIDFile = emu_cse->SecondaryIDFile;
+			eq_cse->HairColor = emu_cse->HairColor;
+			eq_cse->BeardColor = emu_cse->BeardColor;
+			eq_cse->EyeColor1 = emu_cse->EyeColor1;
+			eq_cse->EyeColor2 = emu_cse->EyeColor2;
+			eq_cse->HairStyle = emu_cse->HairStyle;
+			eq_cse->Beard = emu_cse->Beard;
+			eq_cse->GoHome = emu_cse->GoHome;
+			eq_cse->Tutorial = emu_cse->Tutorial;
+			eq_cse->DrakkinHeritage = emu_cse->DrakkinHeritage;
+			eq_cse->Unknown1 = emu_cse->Unknown1;
+			eq_cse->Enabled = emu_cse->Enabled;
+			eq_cse->LastLogin = emu_cse->LastLogin;
+			eq_cse->Unknown2 = emu_cse->Unknown2;
+
+			emu_ptr += sizeof(CharacterSelectEntry_Struct);
+			eq_ptr += sizeof(structs::CharacterSelectEntry_Struct);
 		}
 
 		FINISH_ENCODE();
@@ -3563,12 +3585,13 @@ namespace RoF2
 			// Live actually has 200 items now, but 80 is the most our internal struct supports
 			for (uint32 i = 0; i < 200; i++)
 			{
-				strncpy(eq->items[i].SerialNumber, "0000000000000000", sizeof(eq->items[i].SerialNumber));
 				eq->items[i].Unknown18 = 0;
 				if (i < 80) {
+					snprintf(eq->items[i].SerialNumber, sizeof(eq->items[i].SerialNumber), "%016d", emu->SerialNumber[i]);
 					eq->ItemCost[i] = emu->ItemCost[i];
 				}
 				else {
+					snprintf(eq->items[i].SerialNumber, sizeof(eq->items[i].SerialNumber), "%016d", 0);
 					eq->ItemCost[i] = 0;
 				}
 			}
@@ -3581,10 +3604,11 @@ namespace RoF2
 			SETUP_DIRECT_ENCODE(Trader_ShowItems_Struct, structs::Trader_ShowItems_Struct);
 
 			eq->Code = emu->Code;
-			strncpy(eq->SerialNumber, "0000000000000000", sizeof(eq->SerialNumber));
+			//strncpy(eq->SerialNumber, "0000000000000000", sizeof(eq->SerialNumber));
+			//snprintf(eq->SerialNumber, sizeof(eq->SerialNumber), "%016d", 0);
 			eq->TraderID = emu->TraderID;
-			eq->Stacksize = 0;
-			eq->Price = 0;
+			//eq->Stacksize = 0;
+			//eq->Price = 0;
 
 			FINISH_ENCODE();
 		}
@@ -3617,6 +3641,78 @@ namespace RoF2
 		OUT(AlreadySold);
 
 		FINISH_ENCODE();
+	}
+
+	ENCODE(OP_TraderDelItem)
+	{
+		ENCODE_LENGTH_EXACT(TraderDelItem_Struct);
+		SETUP_DIRECT_ENCODE(TraderDelItem_Struct, structs::TraderDelItem_Struct);
+
+		OUT(TraderID);
+		snprintf(eq->SerialNumber, sizeof(eq->SerialNumber), "%016d", emu->ItemID);
+		Log.Out(Logs::Detail, Logs::Trading, "ENCODE(OP_TraderDelItem): TraderID %d, SerialNumber: %d", emu->TraderID, emu->ItemID);
+
+		FINISH_ENCODE();
+	}
+
+	ENCODE(OP_TraderShop)
+	{
+		uint32 psize = (*p)->size;
+		if (psize == sizeof(TraderClick_Struct))
+		{
+			ENCODE_LENGTH_EXACT(TraderClick_Struct);
+			SETUP_DIRECT_ENCODE(TraderClick_Struct, structs::TraderClick_Struct);
+
+			eq->Code = 28; // Seen on Live
+			OUT(TraderID);
+			OUT(Approval);
+
+			FINISH_ENCODE();
+		}
+		else if (psize == sizeof(BazaarWelcome_Struct))
+		{
+			ENCODE_LENGTH_EXACT(BazaarWelcome_Struct);
+			SETUP_DIRECT_ENCODE(BazaarWelcome_Struct, structs::BazaarWelcome_Struct);
+
+			eq->Code = emu->Beginning.Action;
+			eq->EntityID = emu->Unknown012;
+			OUT(Traders);
+			OUT(Items);
+			eq->Traders2 = emu->Traders;
+			eq->Items2 = emu->Items;
+
+			Log.Out(Logs::Detail, Logs::Trading, "ENCODE(OP_TraderShop): BazaarWelcome_Struct Code %d, Traders %d, Items %d",
+				eq->Code, eq->Traders, eq->Items);
+
+			FINISH_ENCODE();
+		}
+		else if (psize == sizeof(TraderBuy_Struct))
+		{
+			ENCODE_LENGTH_EXACT(TraderBuy_Struct);
+			SETUP_DIRECT_ENCODE(TraderBuy_Struct, structs::TraderBuy_Struct);
+
+			OUT(Action);
+			OUT(TraderID);
+
+			//memcpy(eq->BuyerName, emu->BuyerName, sizeof(eq->BuyerName));
+			//memcpy(eq->SellerName, emu->SellerName, sizeof(eq->SellerName));
+
+			memcpy(eq->ItemName, emu->ItemName, sizeof(eq->ItemName));
+			OUT(ItemID);
+			OUT(AlreadySold);
+			OUT(Price);
+			OUT(Quantity);
+			snprintf(eq->SerialNumber, sizeof(eq->SerialNumber), "%016d", emu->ItemID);
+
+			Log.Out(Logs::Detail, Logs::Trading, "ENCODE(OP_TraderShop): Buy Action %d, Price %d, Trader %d, ItemID %d, Quantity %d, ItemName, %s",
+				eq->Action, eq->Price, eq->TraderID, eq->ItemID, eq->Quantity, emu->ItemName);
+
+			FINISH_ENCODE();
+		}
+		else
+		{
+			Log.Out(Logs::Detail, Logs::Trading, "ENCODE(OP_TraderShop): Encode Size Unknown (%d)", psize);
+		}
 	}
 
 	ENCODE(OP_TributeInfo)
@@ -3655,37 +3751,71 @@ namespace RoF2
 		FINISH_ENCODE();
 	}
 
+	ENCODE(OP_VetClaimReply)
+	{
+		ENCODE_LENGTH_EXACT(VeteranClaim);
+		SETUP_DIRECT_ENCODE(VeteranClaim, structs::VeteranClaim);
+
+		memcpy(eq->name, emu->name, sizeof(emu->name));
+		OUT(claim_id);
+		OUT(action);
+
+		FINISH_ENCODE();
+	}
+
 	ENCODE(OP_VetRewardsAvaliable)
 	{
 		EQApplicationPacket *inapp = *p;
-		unsigned char * __emu_buffer = inapp->pBuffer;
+		auto __emu_buffer = inapp->pBuffer;
 
 		uint32 count = ((*p)->Size() / sizeof(InternalVeteranReward));
-		*p = nullptr;
 
-		EQApplicationPacket *outapp_create = new EQApplicationPacket(OP_VetRewardsAvaliable, (sizeof(structs::VeteranReward)*count));
-		uchar *old_data = __emu_buffer;
-		uchar *data = outapp_create->pBuffer;
-		for (unsigned int i = 0; i < count; ++i)
-		{
-			structs::VeteranReward *vr = (structs::VeteranReward*)data;
-			InternalVeteranReward *ivr = (InternalVeteranReward*)old_data;
+		// calculate size of names, note the packet DOES NOT have null termed c-strings
+		std::vector<uint32> name_lengths;
+		for (int i = 0; i < count; ++i) {
+			InternalVeteranReward *ivr = (InternalVeteranReward *)__emu_buffer;
 
-			vr->claim_count = ivr->claim_count;
-			vr->claim_id = ivr->claim_id;
-			vr->number_available = ivr->number_available;
-			for (int x = 0; x < 8; ++x)
-			{
-				vr->items[x].item_id = ivr->items[x].item_id;
-				strncpy(vr->items[x].item_name, ivr->items[x].item_name, sizeof(vr->items[x].item_name));
-				vr->items[x].charges = ivr->items[x].charges;
+			for (int i = 0; i < ivr->claim_count; i++) {
+				uint32 length = strnlen(ivr->items[i].item_name, 63);
+				if (length)
+					name_lengths.push_back(length);
 			}
 
-			old_data += sizeof(InternalVeteranReward);
-			data += sizeof(structs::VeteranReward);
+			__emu_buffer += sizeof(InternalVeteranReward);
 		}
 
-		dest->FastQueuePacket(&outapp_create);
+		uint32 packet_size = std::accumulate(name_lengths.begin(), name_lengths.end(), 0) +
+				     sizeof(structs::VeteranReward) + (sizeof(structs::VeteranRewardEntry) * count) +
+				     // size of name_lengths is the same as item count
+				     (sizeof(structs::VeteranRewardItem) * name_lengths.size());
+
+		// build packet now!
+		auto outapp = new EQApplicationPacket(OP_VetRewardsAvaliable, packet_size);
+		__emu_buffer = inapp->pBuffer;
+
+		outapp->WriteUInt32(count);
+		auto name_itr = name_lengths.begin();
+		for (int i = 0; i < count; i++) {
+			InternalVeteranReward *ivr = (InternalVeteranReward *)__emu_buffer;
+
+			outapp->WriteUInt32(ivr->claim_id);
+			outapp->WriteUInt32(ivr->number_available);
+			outapp->WriteUInt32(ivr->claim_count);
+			outapp->WriteUInt8(1); // enabled
+
+			for (int j = 0; j < ivr->claim_count; j++) {
+				assert(name_itr != name_lengths.end()); // the way it's written, it should never happen, so just assert
+				outapp->WriteUInt32(*name_itr);
+				outapp->WriteData(ivr->items[j].item_name, *name_itr);
+				outapp->WriteUInt32(ivr->items[j].item_id);
+				outapp->WriteUInt32(ivr->items[j].charges);
+				++name_itr;
+			}
+
+			__emu_buffer += sizeof(InternalVeteranReward);
+		}
+
+		dest->FastQueuePacket(&outapp);
 		delete inapp;
 	}
 
@@ -3700,7 +3830,7 @@ namespace RoF2
 		OUT(elite_material);
 		OUT(hero_forge_model);
 		OUT(unknown18);
-		OUT(color.color);
+		OUT(color.Color);
 		OUT(wear_slot_id);
 
 		FINISH_ENCODE();
@@ -3791,42 +3921,23 @@ namespace RoF2
 	
 	ENCODE(OP_ZonePlayerToBind)
 	{
-		ENCODE_LENGTH_ATLEAST(ZonePlayerToBind_Struct);
+		SETUP_VAR_ENCODE(ZonePlayerToBind_Struct);
+		ALLOC_LEN_ENCODE(sizeof(structs::ZonePlayerToBind_Struct) + strlen(emu->zone_name));
 
-		ZonePlayerToBind_Struct *zps = (ZonePlayerToBind_Struct*)(*p)->pBuffer;
+		__packet->SetWritePosition(0);
+		__packet->WriteUInt16(emu->bind_zone_id);
+		__packet->WriteUInt16(emu->bind_instance_id);
+		__packet->WriteFloat(emu->x);
+		__packet->WriteFloat(emu->y);
+		__packet->WriteFloat(emu->z);
+		__packet->WriteFloat(emu->heading);
+		__packet->WriteString(emu->zone_name);
+		__packet->WriteUInt8(1); // save items
+		__packet->WriteUInt32(0); // hp
+		__packet->WriteUInt32(0); // mana
+		__packet->WriteUInt32(0); // endurance
 
-		std::stringstream ss(std::stringstream::in | std::stringstream::out | std::stringstream::binary);
-
-		unsigned char *buffer1 = new unsigned char[sizeof(structs::ZonePlayerToBindHeader_Struct) + strlen(zps->zone_name)];
-		structs::ZonePlayerToBindHeader_Struct *zph = (structs::ZonePlayerToBindHeader_Struct*)buffer1;
-		unsigned char *buffer2 = new unsigned char[sizeof(structs::ZonePlayerToBindFooter_Struct)];
-		structs::ZonePlayerToBindFooter_Struct *zpf = (structs::ZonePlayerToBindFooter_Struct*)buffer2;
-
-		zph->x = zps->x;
-		zph->y = zps->y;
-		zph->z = zps->z;
-		zph->heading = zps->heading;
-		zph->bind_zone_id = 0;
-		zph->bind_instance_id = zps->bind_instance_id;
-		strncpy(zph->zone_name, zps->zone_name, sizeof(zph->zone_name));
-
-		zpf->unknown021 = 1;
-		zpf->unknown022 = 0;
-		zpf->unknown023 = 0;
-		zpf->unknown024 = 0;
-
-		ss.write((const char*)buffer1, (sizeof(structs::ZonePlayerToBindHeader_Struct) + strlen(zps->zone_name)));
-		ss.write((const char*)buffer2, sizeof(structs::ZonePlayerToBindFooter_Struct));
-
-		delete[] buffer1;
-		delete[] buffer2;
-		delete[](*p)->pBuffer;
-
-		(*p)->pBuffer = new unsigned char[ss.str().size()];
-		(*p)->size = ss.str().size();
-
-		memcpy((*p)->pBuffer, ss.str().c_str(), ss.str().size());
-		dest->FastQueuePacket(&(*p));
+		FINISH_ENCODE();
 	}
 
 	ENCODE(OP_ZoneServerInfo)
@@ -3874,8 +3985,8 @@ namespace RoF2
 			PacketSize += strlen(emu->name);
 			PacketSize += strlen(emu->lastName);
 
-			emu->title[0] = 0;
-			emu->suffix[0] = 0;
+			emu->title[31] = 0;
+			emu->suffix[31] = 0;
 
 			if (strlen(emu->title))
 				PacketSize += strlen(emu->title) + 1;
@@ -4034,18 +4145,18 @@ namespace RoF2
 				for (k = 0; k < 9; ++k)
 				{
 					{
-						VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->colors[k].color);
+						VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->colors[k].Color);
 					}
 				}
 
 				structs::EquipStruct *Equipment = (structs::EquipStruct *)Buffer;
 
 				for (k = 0; k < 9; k++) {
-					Equipment[k].material = emu->equipment[k].material;
-					Equipment[k].unknown1 = emu->equipment[k].unknown1;
-					Equipment[k].elitematerial = emu->equipment[k].elitematerial;
-					Equipment[k].heroforgemodel = emu->equipment[k].heroforgemodel;
-					Equipment[k].material2 = emu->equipment[k].material2;
+					Equipment[k].Material = emu->equipment[k].Material;
+					Equipment[k].Unknown1 = emu->equipment[k].Unknown1;
+					Equipment[k].EliteMaterial = emu->equipment[k].EliteMaterial;
+					Equipment[k].HeroForgeModel = emu->equipment[k].HeroForgeModel;
+					Equipment[k].Material2 = emu->equipment[k].Material2;
 				}
 
 				Buffer += (sizeof(structs::EquipStruct) * 9);
@@ -4058,13 +4169,13 @@ namespace RoF2
 				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);
 				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);
 
-				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->equipment[MaterialPrimary].material);
+				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->equipment[MaterialPrimary].Material);
 				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);
 				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);
 				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);
 				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);
 
-				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->equipment[MaterialSecondary].material);
+				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->equipment[MaterialSecondary].Material);
 				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);
 				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);
 				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);
@@ -4200,7 +4311,6 @@ namespace RoF2
 			return;
 
 		SETUP_DIRECT_DECODE(NewBazaarInspect_Struct, structs::NewBazaarInspect_Struct);
-		MEMSET_IN(structs::NewBazaarInspect_Struct);
 
 		IN(Beginning.Action);
 		memcpy(emu->Name, eq->Name, sizeof(emu->Name));
@@ -4897,7 +5007,6 @@ namespace RoF2
 		{
 			DECODE_LENGTH_EXACT(structs::ClickTrader_Struct);
 			SETUP_DIRECT_DECODE(ClickTrader_Struct, structs::ClickTrader_Struct);
-			MEMSET_IN(ClickTrader_Struct);
 
 			emu->Code = eq->Code;
 			// Live actually has 200 items now, but 80 is the most our internal struct supports
@@ -4913,7 +5022,6 @@ namespace RoF2
 		{
 			DECODE_LENGTH_EXACT(structs::Trader_ShowItems_Struct);
 			SETUP_DIRECT_DECODE(Trader_ShowItems_Struct, structs::Trader_ShowItems_Struct);
-			MEMSET_IN(Trader_ShowItems_Struct);
 
 			emu->Code = eq->Code;
 			emu->TraderID = eq->TraderID;
@@ -4924,9 +5032,8 @@ namespace RoF2
 		{
 			DECODE_LENGTH_EXACT(structs::TraderStatus_Struct);
 			SETUP_DIRECT_DECODE(TraderStatus_Struct, structs::TraderStatus_Struct);
-			MEMSET_IN(TraderStatus_Struct);
 
-			emu->Code = eq->Code;
+			emu->Code = eq->Code;	// 11 = Start Trader, 2 = End Trader, 22 = ? - Guessing
 
 			FINISH_DIRECT_DECODE();
 		}
@@ -4936,7 +5043,6 @@ namespace RoF2
 	{
 		DECODE_LENGTH_EXACT(structs::TraderBuy_Struct);
 		SETUP_DIRECT_DECODE(TraderBuy_Struct, structs::TraderBuy_Struct);
-		MEMSET_IN(TraderBuy_Struct);
 
 		IN(Action);
 		IN(Price);
@@ -4946,6 +5052,65 @@ namespace RoF2
 		IN(Quantity);
 
 		FINISH_DIRECT_DECODE();
+	}
+
+	DECODE(OP_TraderShop)
+	{
+		uint32 psize = __packet->size;
+		if (psize == sizeof(structs::TraderClick_Struct))
+		{
+			DECODE_LENGTH_EXACT(structs::TraderClick_Struct);
+			SETUP_DIRECT_DECODE(TraderClick_Struct, structs::TraderClick_Struct);
+
+			IN(Code);
+			IN(TraderID);
+			IN(Approval);
+			Log.Out(Logs::Detail, Logs::Trading, "DECODE(OP_TraderShop): TraderClick_Struct Code %d, TraderID %d, Approval %d",
+				eq->Code, eq->TraderID, eq->Approval);
+
+			FINISH_DIRECT_DECODE();
+		}
+		else if (psize == sizeof(structs::BazaarWelcome_Struct))
+		{
+			// Don't think this size gets used in RoF+ - Leaving for now...
+			DECODE_LENGTH_EXACT(structs::BazaarWelcome_Struct);
+			SETUP_DIRECT_DECODE(BazaarWelcome_Struct, structs::BazaarWelcome_Struct);
+
+			emu->Beginning.Action = eq->Code;
+			IN(Traders);
+			IN(Items);
+			Log.Out(Logs::Detail, Logs::Trading, "DECODE(OP_TraderShop): BazaarWelcome_Struct Code %d, Traders %d, Items %d",
+				eq->Code, eq->Traders, eq->Items);
+
+			FINISH_DIRECT_DECODE();
+		}
+		else if (psize == sizeof(structs::TraderBuy_Struct))
+		{
+
+			DECODE_LENGTH_EXACT(structs::TraderBuy_Struct);
+			SETUP_DIRECT_DECODE(TraderBuy_Struct, structs::TraderBuy_Struct);
+
+			IN(Action);
+			IN(Price);
+			IN(TraderID);
+			memcpy(emu->ItemName, eq->ItemName, sizeof(emu->ItemName));
+			IN(ItemID);
+			IN(Quantity);
+			Log.Out(Logs::Detail, Logs::Trading, "DECODE(OP_TraderShop): TraderBuy_Struct (Unknowns) Unknown004 %d, Unknown008 %d, Unknown012 %d, Unknown076 %d, Unknown276 %d",
+				eq->Unknown004, eq->Unknown008, eq->Unknown012, eq->Unknown076, eq->Unknown276);
+			Log.Out(Logs::Detail, Logs::Trading, "DECODE(OP_TraderShop): TraderBuy_Struct Buy Action %d, Price %d, Trader %d, ItemID %d, Quantity %d, ItemName, %s", 
+				eq->Action, eq->Price, eq->TraderID, eq->ItemID, eq->Quantity, eq->ItemName);
+
+			FINISH_DIRECT_DECODE();
+		}
+		else if (psize == 4)
+		{
+			Log.Out(Logs::Detail, Logs::Trading, "DECODE(OP_TraderShop): Forwarding packet as-is with size 4");
+		}
+		else
+		{
+			Log.Out(Logs::Detail, Logs::Trading, "DECODE(OP_TraderShop): Decode Size Unknown (%d)", psize);
+		}
 	}
 
 	DECODE(OP_TradeSkillCombine)
@@ -4958,7 +5123,7 @@ namespace RoF2
 			slot_id = legacy::SLOT_TRADESKILL;	// 1000
 		}
 		emu->container_slot = slot_id;
-		emu->guildtribute_slot = RoF2ToServerSlot(eq->guildtribute_slot); // this should only return INVALID_INDEX until implemented -U
+		emu->guildtribute_slot = RoF2ToServerSlot(eq->guildtribute_slot); // this should only return INVALID_INDEX until implemented
 
 		FINISH_DIRECT_DECODE();
 	}
@@ -4989,6 +5154,16 @@ namespace RoF2
 		IN(gmlookup);
 		IN(guildid);
 		IN(type);
+
+		FINISH_DIRECT_DECODE();
+	}
+
+	DECODE(OP_VetClaimRequest)
+	{
+		DECODE_LENGTH_EXACT(structs::VeteranClaim);
+		SETUP_DIRECT_DECODE(VeteranClaim, structs::VeteranClaim);
+
+		IN(claim_id);
 
 		FINISH_DIRECT_DECODE();
 	}
@@ -5053,7 +5228,7 @@ namespace RoF2
 
 		//sprintf(hdr.unknown000, "06e0002Y1W00");
 
-		snprintf(hdr.unknown000, sizeof(hdr.unknown000), "%012d", item->ID);
+		snprintf(hdr.unknown000, sizeof(hdr.unknown000), "%016d", item->ID);
 
 		hdr.stacksize = stackable ? charges : 1;
 		hdr.unknown004 = 0;
@@ -5464,10 +5639,10 @@ namespace RoF2
 		RoF2::structs::WornEffectStruct ibes;
 		memset(&ibes, 0, sizeof(RoF2::structs::WornEffectStruct));
 
-		ibes.effect = 0xffffffff;
-		ibes.level2 = 0;
-		ibes.type = 0;
-		ibes.level = 0;
+		ibes.effect = item->Bard.Effect;
+		ibes.level2 = item->Bard.Level2;
+		ibes.type = item->Bard.Type;
+		ibes.level = item->Bard.Level;
 		//ibes.unknown6 = 0xffffffff;
 
 		ss.write((const char*)&ibes, sizeof(RoF2::structs::WornEffectStruct));

@@ -183,7 +183,7 @@ bool Spawn2::Process() {
 		}
 
 		//try to find our NPC type.
-		const NPCType* tmp = database.GetNPCType(npcid);
+		const NPCType* tmp = database.LoadNPCTypesData(npcid);
 		if (tmp == nullptr) {
 			Log.Out(Logs::Detail, Logs::Spawns, "Spawn2 %d: Spawn group %d yeilded an invalid NPC type %d", spawn2_id, spawngroup_id_, npcid);
 			Reset();	//try again later
@@ -213,9 +213,6 @@ bool Spawn2::Process() {
 
 		if(IsDespawned)
 			return true;
-
-		if(spawn2_id)
-			database.UpdateSpawn2Timeleft(spawn2_id, zone->GetInstanceID(), 0);
 
 		currentnpcid = npcid;
 		NPC* npc = new NPC(tmp, this, glm::vec4(x, y, z, heading), FlyMode3);
@@ -348,7 +345,7 @@ void Spawn2::DeathReset(bool realdeath)
 	//if we have a valid spawn id
 	if(spawn2_id)
 	{
-		database.UpdateSpawn2Timeleft(spawn2_id, zone->GetInstanceID(), (cur/1000));
+		database.UpdateRespawnTime(spawn2_id, zone->GetInstanceID(), (cur/1000));
 		Log.Out(Logs::Detail, Logs::Spawns, "Spawn2 %d: Spawn reset by death, repop in %d ms", spawn2_id, timer.GetRemainingTime());
 		//store it to database too
 	}
@@ -356,28 +353,95 @@ void Spawn2::DeathReset(bool realdeath)
 
 bool ZoneDatabase::PopulateZoneSpawnList(uint32 zoneid, LinkedList<Spawn2*> &spawn2_list, int16 version, uint32 repopdelay) {
 
+	std::unordered_map<uint32, uint32> spawn_times;
+
+	timeval tv;
+	gettimeofday(&tv, nullptr);
+
+	/* Bulk Load NPC Types Data into the cache */
+	database.LoadNPCTypesData(0, true);
+
+	std::string spawn_query = StringFormat(
+		"SELECT "
+		"respawn_times.id, "
+		"respawn_times.`start`, "
+		"respawn_times.duration "
+		"FROM "
+		"respawn_times "
+		"WHERE instance_id = %u",
+		zone->GetInstanceID()
+	);
+	auto results = QueryDatabase(spawn_query);
+	for (auto row = results.begin(); row != results.end(); ++row) {
+		uint32 start_duration = atoi(row[1]) > 0 ? atoi(row[1]) : 0;
+		uint32 end_duration = atoi(row[2]) > 0 ? atoi(row[2]) : 0;
+
+		/* Our current time was expired */
+		if ((start_duration + end_duration) <= tv.tv_sec) {
+			spawn_times[atoi(row[0])] = 0;
+		}
+		/* We still have time left on this timer */
+		else {
+			spawn_times[atoi(row[0])] = ((start_duration + end_duration) - tv.tv_sec) * 1000;
+		}
+	}
+
 	const char *zone_name = database.GetZoneName(zoneid);
-    std::string query = StringFormat("SELECT id, spawngroupID, x, y, z, heading, "
-                                    "respawntime, variance, pathgrid, _condition, "
-                                    "cond_value, enabled, animation FROM spawn2 "
-                                    "WHERE zone = '%s' AND version = %u",
-                                    zone_name, version);
-    auto results = QueryDatabase(query);
-    if (!results.Success()) {
+	std::string query = StringFormat(
+		"SELECT "
+		"id, "
+		"spawngroupID, "
+		"x, "
+		"y, "
+		"z, "
+		"heading, "
+		"respawntime, "
+		"variance, "
+		"pathgrid, "
+		"_condition, "
+		"cond_value, "
+		"enabled, "
+		"animation "
+		"FROM "
+		"spawn2 "
+		"WHERE zone = '%s' AND version = %u",
+		zone_name,
+		version
+	);
+	results = QueryDatabase(query);
+
+	if (!results.Success()) {
 		return false;
-    }
+	}
 
-    for (auto row = results.begin(); row != results.end(); ++row) {
-        Spawn2* newSpawn = 0;
+	for (auto row = results.begin(); row != results.end(); ++row) {
 
-        bool perl_enabled = atoi(row[11]) == 1? true: false;
-        uint32 spawnLeft = (GetSpawnTimeLeft(atoi(row[0]), zone->GetInstanceID()) * 1000);
-        newSpawn = new Spawn2(atoi(row[0]), atoi(row[1]), atof(row[2]), atof(row[3]), atof(row[4]),
-                                atof(row[5]), atoi(row[6]), atoi(row[7]), spawnLeft, atoi(row[8]),
-                                atoi(row[9]), atoi(row[10]), perl_enabled, (EmuAppearance)atoi(row[12]));
+		uint32 spawn_time_left = 0; 
+		Spawn2* new_spawn = 0; 
+		bool perl_enabled = atoi(row[11]) == 1 ? true : false;
 
-        spawn2_list.Insert(newSpawn);
-    }
+		if (spawn_times.count(atoi(row[0])) != 0)
+			spawn_time_left = spawn_times[atoi(row[0])];
+
+		new_spawn = new Spawn2(							   // 
+			atoi(row[0]), 								   // uint32 in_spawn2_id
+			atoi(row[1]), 								   // uint32 spawngroup_id
+			atof(row[2]), 								   // float in_x
+			atof(row[3]), 								   // float in_y
+			atof(row[4]),								   // float in_z
+			atof(row[5]), 								   // float in_heading
+			atoi(row[6]), 								   // uint32 respawn
+			atoi(row[7]), 								   // uint32 variance
+			spawn_time_left,							   // uint32 timeleft
+			atoi(row[8]),								   // uint32 grid
+			atoi(row[9]), 								   // uint16 in_cond_id
+			atoi(row[10]), 								   // int16 in_min_value
+			perl_enabled, 								   // bool in_enabled
+			(EmuAppearance)atoi(row[12])				   // EmuAppearance anim
+		);
+
+		spawn2_list.Insert(new_spawn);
+	}
 
 	return true;
 }
@@ -426,8 +490,6 @@ bool ZoneDatabase::CreateSpawn2(Client *client, uint32 spawngroup, const char* z
 
     if (results.RowsAffected() != 1)
         return false;
-
-    if(client)
 
     return true;
 }

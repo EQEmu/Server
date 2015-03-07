@@ -28,7 +28,7 @@
 		set to nullptr and 0 respectively since they aren't used when adding
 		an alias. The function pointers being equal is makes it an alias.
 		The access level you set with command_add is only a default if
-		the command isn't listed in the addon.ini file.
+		the command isn't listed in the commands db table.
 
 */
 
@@ -2461,7 +2461,7 @@ void command_npctypespawn(Client *c, const Seperator *sep)
 {
 	if (sep->IsNumber(1)) {
 		const NPCType* tmp = 0;
-		if ((tmp = database.GetNPCType(atoi(sep->arg[1])))) {
+		if ((tmp = database.LoadNPCTypesData(atoi(sep->arg[1])))) {
 			//tmp->fixedZ = 1;
 			NPC* npc = new NPC(tmp, 0, c->GetPosition(), FlyMode3);
 			if (npc && sep->IsNumber(2))
@@ -2618,7 +2618,7 @@ void command_peekinv(Client *c, const Seperator *sep)
 		}
 		else {
 			int cursorDepth = 0;
-			for (auto it = targetClient->GetInv().cursor_begin(); (it != targetClient->GetInv().cursor_end()); ++it, ++cursorDepth) {
+			for (auto it = targetClient->GetInv().cursor_cbegin(); (it != targetClient->GetInv().cursor_cend()); ++it, ++cursorDepth) {
 				inst_main = *it;
 				item_data = (inst_main == nullptr) ? nullptr : inst_main->GetItem();
 				linker.SetItemInst(inst_main);
@@ -2923,7 +2923,7 @@ void command_viewnpctype(Client *c, const Seperator *sep)
 	else
 	{
 		uint32 npctypeid=atoi(sep->arg[1]);
-		const NPCType* npct = database.GetNPCType(npctypeid);
+		const NPCType* npct = database.LoadNPCTypesData(npctypeid);
 		if (npct) {
 			c->Message(0, " NPCType Info, ");
 			c->Message(0, "  NPCTypeID: %u",  npct->npc_id);
@@ -4284,31 +4284,49 @@ void command_goto(Client *c, const Seperator *sep)
 
 void command_iteminfo(Client *c, const Seperator *sep)
 {
-	const ItemInst* inst = c->GetInv()[MainCursor];
-
-	if (!inst)
-		c->Message(13, "Error: You need an item on your cursor for this command");
-	else {
-		const Item_Struct* item = inst->GetItem();
-		c->Message(0, "ID: %i Name: %s",  item->ID, item->Name);
-		c->Message(0, "  Lore: %s  ND: %i  NS: %i  Type: %i",  (item->LoreFlag) ? "true":"false",  item->NoDrop, item->NoRent, item->ItemClass);
-		c->Message(0, "  IDF: %s  Size: %i  Weight: %i  icon_id: %i  Price: %i",  item->IDFile, item->Size, item->Weight, item->Icon, item->Price);
-		if (c->Admin() >= 200)
-			c->Message(0, "MinStatus: %i",  item->MinStatus);
-		if (item->ItemClass==ItemClassBook)
-			c->Message(0, "  This item is a Book: %s",  item->Filename);
-		else if (item->ItemClass==ItemClassContainer)
-			c->Message(0, "  This item is a container with %i slots",  item->BagSlots);
-		else {
-			c->Message(0, "  equipableSlots: %u equipable Classes: %u",  item->Slots, item->Classes);
-			c->Message(0, "  Magic: %i  SpellID: %i  Proc Level: %i DBCharges: %i  CurCharges: %i",  item->Magic, item->Click.Effect, item->Click.Level, item->MaxCharges, inst->GetCharges());
-			c->Message(0, "  EffectType: 0x%02x  CastTime: %.2f",  (uint8) item->Click.Type, (double) item->CastTime/1000);
-			c->Message(0, "  Material: 0x%02x  Color: 0x%08x  Skill: %i",  item->Material, item->Color, item->ItemType);
-			c->Message(0, " Required level: %i Required skill: %i Recommended level:%i",  item->ReqLevel, item->RecSkill, item->RecLevel);
-			c->Message(0, " Skill mod: %i percent: %i",  item->SkillModType, item->SkillModValue);
-			c->Message(0, " BaneRace: %i BaneBody: %i BaneDMG: %i",  item->BaneDmgRace, item->BaneDmgBody, item->BaneDmgAmt);
-		}
+	auto inst = c->GetInv()[MainCursor];
+	if (!inst) { c->Message(13, "Error: You need an item on your cursor for this command"); }
+	auto item = inst->GetItem();
+	if (!item) {
+		Log.Out(Logs::General, Logs::Inventory, "(%s) Command #iteminfo processed an item with no data pointer");
+		c->Message(13, "Error: This item has no data reference");
 	}
+
+	Client::TextLink linker;
+	linker.SetLinkType(linker.linkItemInst);
+	linker.SetItemInst(inst);
+
+	auto item_link = linker.GenerateLink();
+
+	c->Message(0, "*** Item Info for [%s] ***", item_link.c_str());
+	c->Message(0, ">> ID: %u, ItemUseType: %u, ItemClassType: %u", item->ID, item->ItemType, item->ItemClass);
+	c->Message(0, ">> IDFile: '%s', IconID: %u", item->IDFile, item->Icon);
+	c->Message(0, ">> Size: %u, Weight: %u, Price: %u, LDoNPrice: %u", item->Size, item->Weight, item->Price, item->LDoNPrice);
+	c->Message(0, ">> Material: 0x%02X, Color: 0x%08X, Tint: 0x%08X, Light: 0x%02X", item->Material, item->Color, inst->GetColor(), item->Light);
+	c->Message(0, ">> IsLore: %s, LoreGroup: %u, Lore: '%s'", (item->LoreFlag ? "TRUE" : "FALSE"), item->LoreGroup, item->Lore);
+	c->Message(0, ">> NoDrop: %u, NoRent: %u, NoPet: %u, NoTransfer: %u, FVNoDrop: %u",
+		item->NoDrop, item->NoRent, (uint8)item->NoPet, (uint8)item->NoTransfer, item->FVNoDrop);
+
+	if (item->ItemClass == ItemClassBook) {
+		c->Message(0, "*** This item is a Book (filename:'%s') ***", item->Filename);
+	}
+	else if (item->ItemClass == ItemClassContainer) {
+		c->Message(0, "*** This item is a Container (%u slots) ***", item->BagSlots);
+	}
+	else {
+		c->Message(0, "*** This item is Common ***");
+		c->Message(0, ">> Classes: %u, Races: %u, Slots: %u", item->Classes, item->Races, item->Slots);
+		c->Message(0, ">> ReqSkill: %u, ReqLevel: %u, RecLevel: %u", item->RecSkill, item->ReqLevel, item->RecLevel);
+		c->Message(0, ">> SkillModType: %u, SkillModValue: %i", item->SkillModType, item->SkillModValue);
+		c->Message(0, ">> BaneRaceType: %u, BaneRaceDamage: %u, BaneBodyType: %u, BaneBodyDamage: %i",
+			item->BaneDmgRace, item->BaneDmgRaceAmt, item->BaneDmgBody, item->BaneDmgAmt);
+		c->Message(0, ">> Magic: %s, SpellID: %i, ProcLevel: %u, Charges: %u, MaxCharges: %u",
+			(item->Magic ? "TRUE" : "FALSE"), item->Click.Effect, item->Click.Level, inst->GetCharges(), item->MaxCharges);
+		c->Message(0, ">> EffectType: 0x%02X, CastTime: %.2f", (uint8)item->Click.Type, ((double)item->CastTime / 1000));
+	}
+
+	if (c->Admin() >= 200)
+		c->Message(0, ">> MinStatus: %u", item->MinStatus);
 }
 
 void command_uptime(Client *c, const Seperator *sep)
@@ -6669,7 +6687,7 @@ void command_qglobal(Client *c, const Seperator *sep) {
 	}
 
 	if(!strcasecmp(sep->arg[1], "view")) {
-		const NPCType *type = database.GetNPCType(target->GetNPCTypeID());
+		const NPCType *type = database.LoadNPCTypesData(target->GetNPCTypeID());
 		if(!type)
 			c->Message(15, "Invalid NPC type.");
 		else if(type->qglobal)
@@ -7002,7 +7020,7 @@ void Client::Undye() {
 			database.SaveInventory(CharacterID(), inst, slot2);
 		}
 
-		m_pp.item_tint[cur_slot].color = 0;
+		m_pp.item_tint[cur_slot].Color = 0;
 		SendWearChange(cur_slot);
 	}
 

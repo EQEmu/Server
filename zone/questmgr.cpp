@@ -203,7 +203,7 @@ void QuestManager::write(const char *file, const char *str) {
 
 Mob* QuestManager::spawn2(int npc_type, int grid, int unused, const glm::vec4& position) {
 	const NPCType* tmp = 0;
-	if (tmp = database.GetNPCType(npc_type))
+	if (tmp = database.LoadNPCTypesData(npc_type))
 	{
 		NPC* npc = new NPC(tmp, nullptr, position, FlyMode3);
 		npc->AddLootTable();
@@ -225,7 +225,7 @@ Mob* QuestManager::unique_spawn(int npc_type, int grid, int unused, const glm::v
 	}
 
 	const NPCType* tmp = 0;
-	if (tmp = database.GetNPCType(npc_type))
+	if (tmp = database.LoadNPCTypesData(npc_type))
 	{
 		NPC* npc = new NPC(tmp, nullptr, position, FlyMode3);
 		npc->AddLootTable();
@@ -275,7 +275,7 @@ Mob* QuestManager::spawn_from_spawn2(uint32 spawn2_id)
 			return nullptr;
 		}
 
-		const NPCType* tmp = database.GetNPCType(npcid);
+		const NPCType* tmp = database.LoadNPCTypesData(npcid);
 		if(!tmp)
 		{
 			return nullptr;
@@ -297,7 +297,7 @@ Mob* QuestManager::spawn_from_spawn2(uint32 spawn2_id)
 			}
 		}
 
-		database.UpdateSpawn2Timeleft(spawn2_id, zone->GetInstanceID(), 0);
+		database.UpdateRespawnTime(spawn2_id, zone->GetInstanceID(), 0);
 		found_spawn->SetCurrentNPCID(npcid);
 
         auto position = glm::vec4(found_spawn->GetX(), found_spawn->GetY(), found_spawn->GetZ(), found_spawn->GetHeading());
@@ -1574,7 +1574,7 @@ void QuestManager::respawn(int npcTypeID, int grid) {
 	quests_running_.push(e);
 
 	const NPCType* npcType = nullptr;
-	if ((npcType = database.GetNPCType(npcTypeID)))
+	if ((npcType = database.LoadNPCTypesData(npcTypeID)))
 	{
 		owner = new NPC(npcType, nullptr, owner->GetPosition(), FlyMode3);
 		owner->CastToNPC()->AddLootTable();
@@ -2388,7 +2388,7 @@ void QuestManager::UpdateSpawnTimer(uint32 id, uint32 newTime)
 {
 	bool found = false;
 
-	database.UpdateSpawn2Timeleft(id, 0, (newTime/1000));
+	database.UpdateRespawnTime(id, 0, (newTime/1000));
 	LinkedListIterator<Spawn2*> iterator(zone->spawn2_list);
 	iterator.Reset();
 	while (iterator.MoreElements())

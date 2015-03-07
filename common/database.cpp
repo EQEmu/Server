@@ -1984,7 +1984,7 @@ void Database::GetRaidLeadershipInfo(uint32 rid, char *maintank,
 
 void Database::SetRaidGroupLeaderInfo(uint32 gid, uint32 rid)
 {
-	std::string query = StringFormat("UPDATE raid_leaders SET leadershipaa = '', WHERE gid = %lu AND rid = %lu",
+	std::string query = StringFormat("UPDATE raid_leaders SET leadershipaa = '' WHERE gid = %lu AND rid = %lu",
 			(unsigned long)gid, (unsigned long)rid);
 	auto results = QueryDatabase(query);
 

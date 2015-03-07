@@ -76,6 +76,24 @@ int GetSpellColumns(SharedDatabase *db) {
 	return results.RowCount();
 }
 
+bool IsStringField(int i) {
+	switch(i)
+	{
+	case 1:
+	case 2:
+	case 3:
+	case 4:
+	case 5:
+	case 6:
+	case 7:
+	case 8:
+		return true;
+		break;
+	default:
+		return false;
+	}
+}
+
 void ImportSpells(SharedDatabase *db) {
 	Log.Out(Logs::General, Logs::Status, "Importing Spells...");
 	FILE *f = fopen("import/spells_us.txt", "r");
@@ -113,7 +131,12 @@ void ImportSpells(SharedDatabase *db) {
 					sql += "'";
 				}
 
-				sql += split[i];
+				if(split[i].compare("") == 0 && !IsStringField(i)) {
+					sql += "0";
+				}
+				else {
+					sql += split[i];
+				}
 				sql += "'";
 			}
 
@@ -128,7 +151,12 @@ void ImportSpells(SharedDatabase *db) {
 					sql += "'";
 				}
 
-				sql += split[i];
+				if(split[i].compare("") == 0 && !IsStringField(i)) {
+					sql += "0";
+				} else {
+					sql += split[i];
+				}
+
 				sql += "'";
 			}
 

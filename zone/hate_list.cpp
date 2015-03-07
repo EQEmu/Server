@@ -219,16 +219,16 @@ bool HateList::RemoveEntFromHateList(Mob *in_entity)
 	{
 		if ((*iterator)->entity_on_hatelist == in_entity)
 		{
-			if (in_entity)
-				parse->EventNPC(EVENT_HATE_LIST, hate_owner->CastToNPC(), in_entity, "0", 0);
 			is_found = true;
-
 
 			if (in_entity && in_entity->IsClient())
 				in_entity->CastToClient()->DecrementAggroCount();
 
 			delete (*iterator);
 			iterator = list.erase(iterator);
+
+			if (in_entity)
+				parse->EventNPC(EVENT_HATE_LIST, hate_owner->CastToNPC(), in_entity, "0", 0);
 
 		}
 		else
@@ -282,14 +282,14 @@ Mob *HateList::GetEntWithMostHateOnList(Mob *center)
 		return nullptr;
 
 	Mob* top_hate = nullptr;
-	int32 hate = -1;
+	int64 hate = -1;
 
 	if (center == nullptr)
 		return nullptr;
 
 	if (RuleB(Aggro, SmartAggroList)){
 		Mob* top_client_type_in_range = nullptr;
-		int32 hate_client_type_in_range = -1;
+		int64 hate_client_type_in_range = -1;
 		int skipped_count = 0;
 
 		auto iterator = list.begin();
@@ -337,7 +337,7 @@ Mob *HateList::GetEntWithMostHateOnList(Mob *center)
 				continue;
 			}
 
-			int32 current_hate = cur->stored_hate_amount;
+			int64 current_hate = cur->stored_hate_amount;
 
 			if (cur->entity_on_hatelist->IsClient()){
 
@@ -459,13 +459,13 @@ Mob *HateList::GetEntWithMostHateOnList(Mob *center)
 
 Mob *HateList::GetEntWithMostHateOnList(){
 	Mob* top = nullptr;
-	int32 hate = -1;
+	int64 hate = -1;
 
 	auto iterator = list.begin();
 	while (iterator != list.end())
 	{
 		struct_HateList *cur = (*iterator);
-		if (cur->entity_on_hatelist != nullptr && (cur->stored_hate_amount > hate))
+		if (cur && cur->entity_on_hatelist != nullptr && (cur->stored_hate_amount > hate))
 		{
 			top = cur->entity_on_hatelist;
 			hate = cur->stored_hate_amount;

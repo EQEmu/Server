@@ -33,9 +33,6 @@ class EvolveInfo;			// Stores information about an evolving item family
 #include <list>
 #include <map>
 
-// Helper typedefs
-typedef std::map<int16, ItemInst*>::const_iterator			iter_inst;
-typedef std::map<uint8, ItemInst*>::const_iterator			iter_contents;
 
 namespace ItemField
 {
@@ -86,8 +83,8 @@ public:
 	// Public Methods
 	/////////////////////////
 
-	inline std::list<ItemInst*>::const_iterator begin() { return m_list.begin(); }
-	inline std::list<ItemInst*>::const_iterator end() { return m_list.end(); }
+	inline std::list<ItemInst*>::const_iterator cbegin() { return m_list.cbegin(); }
+	inline std::list<ItemInst*>::const_iterator cend() { return m_list.cend(); }
 
 	inline int size() { return static_cast<int>(m_list.size()); } // TODO: change to size_t
 	inline bool empty() { return m_list.empty(); }
@@ -140,8 +137,8 @@ public:
 	ItemInst* GetItem(int16 slot_id) const;
 	ItemInst* GetItem(int16 slot_id, uint8 bagidx) const;
 
-	inline std::list<ItemInst*>::const_iterator cursor_begin() { return m_cursor.begin(); }
-	inline std::list<ItemInst*>::const_iterator cursor_end() { return m_cursor.end(); }
+	inline std::list<ItemInst*>::const_iterator cursor_cbegin() { return m_cursor.cbegin(); }
+	inline std::list<ItemInst*>::const_iterator cursor_cend() { return m_cursor.cend(); }
 
 	inline int CursorSize() { return m_cursor.size(); }
 	inline bool CursorEmpty() { return m_cursor.empty(); }
@@ -207,7 +204,7 @@ public:
 
 	int GetSlotByItemInst(ItemInst *inst);
 
-	uint8 FindHighestLightValue();
+	uint8 FindBrightestLightType();
 
 	void dumpEntireInventory();
 	void dumpWornItems();
@@ -227,7 +224,7 @@ protected:
 
 	int GetSlotByItemInstCollection(const std::map<int16, ItemInst*> &collection, ItemInst *inst);
 	void dumpItemCollection(const std::map<int16, ItemInst*> &collection);
-	void dumpBagContents(ItemInst *inst, iter_inst *it);
+	void dumpBagContents(ItemInst *inst, std::map<int16, ItemInst*>::const_iterator *it);
 
 	// Retrieves item within an inventory bucket
 	ItemInst* _GetItem(const std::map<int16, ItemInst*>& bucket, int16 slot_id) const;
@@ -425,8 +422,8 @@ protected:
 	//////////////////////////
 	// Protected Members
 	//////////////////////////
-	iter_contents _begin()		{ return m_contents.begin(); }
-	iter_contents _end()		{ return m_contents.end(); }
+	std::map<uint8, ItemInst*>::const_iterator _cbegin() { return m_contents.cbegin(); }
+	std::map<uint8, ItemInst*>::const_iterator _cend() { return m_contents.cend(); }
 
 	friend class Inventory;
 
@@ -473,6 +470,45 @@ public:
 	EvolveInfo();
 	EvolveInfo(uint32 first, uint8 max, bool allkills, uint32 L2, uint32 L3, uint32 L4, uint32 L5, uint32 L6, uint32 L7, uint32 L8, uint32 L9, uint32 L10);
 	~EvolveInfo();
+};
+
+struct LightProfile_Struct
+{
+	/*
+	Current criteria (light types):
+	Equipment:	{ 0 .. 15 }
+	General:	{ 9 .. 13 }
+
+	Notes:
+	- Initial character load and item movement updates use different light source update behaviors
+	-- Server procedure matches the item movement behavior since most updates occur post-character load
+	- MainAmmo is not considered when determining light sources
+	- No 'Sub' or 'Aug' items are recognized as light sources
+	- Light types '< 9' and '> 13' are not considered for general (carried) light sources
+	- If values > 0x0F are valid, then assignment limiters will need to be removed
+	- MainCursor 'appears' to be a valid light source update slot..but, have not experienced updates during debug sessions
+	- All clients have a bug regarding stackable items (light and sound updates are not processed when picking up an item)
+	-- The timer-based update cancels out the invalid light source
+	*/
+
+	static uint8 TypeToLevel(uint8 lightType);
+	static bool IsLevelGreater(uint8 leftType, uint8 rightType);
+
+	// Light types (classifications)
+	struct {
+		uint8 Innate;		// Defined by db field `npc_types`.`light` - where appropriate
+		uint8 Equipment;	// Item_Struct::light value of worn/carried equipment
+		uint8 Spell;		// Set value of any light-producing spell (can be modded to mimic equip_light behavior)
+		uint8 Active;		// Highest value of all light sources
+	} Type;
+
+	// Light levels (intensities) - used to determine which light source should be active
+	struct {
+		uint8 Innate;
+		uint8 Equipment;
+		uint8 Spell;
+		uint8 Active;
+	} Level;
 };
 
 #endif // #define __ITEM_H

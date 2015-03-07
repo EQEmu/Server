@@ -97,11 +97,6 @@ static const uint32 MAX_PLAYER_TRIBUTES = 5;
 static const uint32 MAX_TRIBUTE_TIERS = 10;
 static const uint32 TRIBUTE_NONE = 0xFFFFFFFF;
 
-static const uint32 MAX_PLAYER_BANDOLIER = 20;
-static const uint32 MAX_PLAYER_BANDOLIER_ITEMS = 4;
-
-static const uint32 MAX_POTIONS_IN_BELT = 5;
-
 static const uint32 MAX_GROUP_LEADERSHIP_AA_ARRAY = 16;
 static const uint32 MAX_RAID_LEADERSHIP_AA_ARRAY = 16;
 static const uint32 MAX_LEADERSHIP_AA_ARRAY = (MAX_GROUP_LEADERSHIP_AA_ARRAY+MAX_RAID_LEADERSHIP_AA_ARRAY);
@@ -114,7 +109,7 @@ static const uint32 MAX_PP_SPELLBOOK	= 720;	// was 480
 static const uint32 MAX_PP_MEMSPELL		= 16;	// was 12
 static const uint32 MAX_PP_SKILL		= PACKET_SKILL_ARRAY_SIZE;	// 100 - actual skills buffer size
 static const uint32 MAX_PP_AA_ARRAY		= 300;
-static const uint32 MAX_PP_DISCIPLINES	= 200;	// was 100
+static const uint32 MAX_PP_DISCIPLINES	= 300;	// was 200
 static const uint32 MAX_GROUP_MEMBERS	= 6;
 static const uint32 MAX_RECAST_TYPES	= 20;
 
@@ -147,83 +142,86 @@ struct AdventureInfo {
 */
 struct Color_Struct
 {
-	union
-	{
-		struct
-		{
-			uint8	blue;
-			uint8	green;
-			uint8	red;
-			uint8	use_tint;	// if there's a tint this is FF
-		} rgb;
-		uint32 color;
+	union {
+		struct {
+			uint8 Blue;
+			uint8 Green;
+			uint8 Red;
+			uint8 UseTint;	// if there's a tint this is FF
+		} RGB;
+		uint32 Color;
 	};
 };
 
-/*
-* Visible equiptment.
-* Size: 20 Octets
-*/
-struct EquipStruct {
-	/*00*/ uint32 material;
-	/*04*/ uint32 unknown1;
-	/*08*/ uint32 elitematerial;
-	/*12*/ uint32 heroforgemodel;
-	/*16*/ uint32 material2;	// Same as material?
-	/*20*/
+struct CharSelectEquip
+{
+	uint32 Material;
+	uint32 Unknown1;
+	uint32 EliteMaterial;
+	uint32 HeroForgeModel;
+	uint32 Material2;
+	Color_Struct Color;
 };
 
-struct CharSelectEquip {
-	uint32 material;
-	uint32 unknown1;
-	uint32 elitematerial;
-	uint32 heroforgemodel;
-	uint32 material2;
-	Color_Struct color;
-};
-
-struct CharacterSelectEntry_Struct {
-/*0000*/	char name[1];			// Name null terminated
-/*0000*/	uint8 class_;
-/*0000*/	uint32 race;
-/*0000*/	uint8 level;
-/*0000*/	uint8 class_2;
-/*0000*/	uint32 race2;
-/*0000*/	uint16 zone;
-/*0000*/	uint16 instance;
-/*0000*/	uint8 gender;
-/*0000*/	uint8 face;
-/*0000*/	CharSelectEquip	equip[9];
-/*0000*/	uint8 u15;				// Seen FF
-/*0000*/	uint8 u19;				// Seen FF
-/*0000*/	uint32 drakkin_tattoo;
-/*0000*/	uint32 drakkin_details;
-/*0000*/	uint32 deity;
-/*0000*/	uint32 primary;
-/*0000*/	uint32 secondary;
-/*0000*/	uint8 haircolor;
-/*0000*/	uint8 beardcolor;
-/*0000*/	uint8 eyecolor1;
-/*0000*/	uint8 eyecolor2;
-/*0000*/	uint8 hairstyle;
-/*0000*/	uint8 beard;
-/*0000*/	uint8 char_enabled;
-/*0000*/	uint8 tutorial;			// Seen 1 for new char or 0 for existing
-/*0000*/	uint32 drakkin_heritage;
-/*0000*/	uint8 unknown1;			// Seen 0
-/*0000*/	uint8 gohome;			// Seen 0 for new char and 1 for existing
+struct CharacterSelectEntry_Struct
+{
+/*0000*/	char Name[1];				// Name null terminated
+/*0000*/	uint8 Class;
+/*0000*/	uint32 Race;
+/*0000*/	uint8 Level;
+/*0000*/	uint8 ShroudClass;
+/*0000*/	uint32 ShroudRace;
+/*0000*/	uint16 Zone;
+/*0000*/	uint16 Instance;
+/*0000*/	uint8 Gender;
+/*0000*/	uint8 Face;
+/*0000*/	CharSelectEquip	Equip[9];
+/*0000*/	uint8 Unknown15;			// Seen FF
+/*0000*/	uint8 Unknown19;			// Seen FF
+/*0000*/	uint32 DrakkinTattoo;
+/*0000*/	uint32 DrakkinDetails;
+/*0000*/	uint32 Deity;
+/*0000*/	uint32 PrimaryIDFile;
+/*0000*/	uint32 SecondaryIDFile;
+/*0000*/	uint8 HairColor;
+/*0000*/	uint8 BeardColor;
+/*0000*/	uint8 EyeColor1;
+/*0000*/	uint8 EyeColor2;
+/*0000*/	uint8 HairStyle;
+/*0000*/	uint8 Beard;
+/*0000*/	uint8 GoHome;				// Seen 0 for new char and 1 for existing
+/*0000*/	uint8 Tutorial;				// Seen 1 for new char or 0 for existing
+/*0000*/	uint32 DrakkinHeritage;
+/*0000*/	uint8 Unknown1;				// Seen 0
+/*0000*/	uint8 Enabled;				// Swapped position with 'GoHome' 02/23/2015
 /*0000*/	uint32 LastLogin;
-/*0000*/	uint8 unknown2;			// Seen 0
+/*0000*/	uint8 Unknown2;				// Seen 0
 };
 
 /*
 ** Character Selection Struct
 **
 */
-struct CharacterSelect_Struct {
-/*000*/	uint32	char_count;		//number of chars in this packet
-/*004*/	CharacterSelectEntry_Struct entries[0];
+struct CharacterSelect_Struct
+{
+/*000*/	uint32 CharCount;	//number of chars in this packet
+/*004*/	CharacterSelectEntry_Struct Entries[0];
 };
+
+/*
+* Visible equiptment.
+* Size: 20 Octets
+*/
+struct EquipStruct
+{
+	/*00*/ uint32 Material;
+	/*04*/ uint32 Unknown1;
+	/*08*/ uint32 EliteMaterial;
+	/*12*/ uint32 HeroForgeModel;
+	/*16*/ uint32 Material2;	// Same as material?
+	/*20*/
+};
+
 
 struct Membership_Entry_Struct
 {
@@ -896,38 +894,66 @@ struct Tribute_Struct {
 	uint32 tier;
 };
 
-struct BandolierItem_Struct {
-	char item_name[1];	// Variable Length
-	uint32 item_id;
-	uint32 icon;
-};
-
-//len = 72
-struct BandolierItem_Struct_Old {
-	uint32 item_id;
-	uint32 icon;
-	char item_name[64];
-};
-
-//len = 320
-enum { //bandolier item positions
-	bandolierMainHand = 0,
-	bandolierOffHand,
+// Bandolier item positions
+enum
+{
+	bandolierPrimary = 0,
+	bandolierSecondary,
 	bandolierRange,
 	bandolierAmmo
 };
-struct Bandolier_Struct {
-	char name[1];	// Variable Length
-	BandolierItem_Struct items[MAX_PLAYER_BANDOLIER_ITEMS];
+
+struct BandolierItem_Struct
+{
+	char Name[1];	// Variable Length
+	uint32 ID;
+	uint32 Icon;
 };
 
-struct Bandolier_Struct_Old {
-	char name[32];
-	BandolierItem_Struct items[MAX_PLAYER_BANDOLIER_ITEMS];
+//len = 72
+struct BandolierItem_Struct_Old
+{
+	uint32 ID;
+	uint32 Icon;
+	char Name[64];
 };
 
-struct PotionBelt_Struct {
-	BandolierItem_Struct items[MAX_POTIONS_IN_BELT];
+//len = 320
+struct Bandolier_Struct
+{
+	char Name[1];	// Variable Length
+	BandolierItem_Struct Items[consts::BANDOLIER_ITEM_COUNT];
+};
+
+struct Bandolier_Struct_Old
+{
+	char Name[32];
+	BandolierItem_Struct Items[consts::BANDOLIER_ITEM_COUNT];
+};
+
+struct PotionBeltItem_Struct
+{
+	char Name[1];	// Variable Length
+	uint32 ID;
+	uint32 Icon;
+};
+
+//len = 72
+struct PotionBeltItem_Struct_Old
+{
+	uint32 ID;
+	uint32 Icon;
+	char Name[64];
+};
+
+struct PotionBelt_Struct
+{
+	PotionBeltItem_Struct Items[consts::POTION_BELT_ITEM_COUNT];
+};
+
+struct PotionBelt_Struct_Old
+{
+	PotionBeltItem_Struct_Old Items[consts::POTION_BELT_ITEM_COUNT];
 };
 
 struct GroupLeadershipAA_Struct {
@@ -1137,7 +1163,7 @@ union
 /*12949*/ uint32 aapoints;				// Unspent AA points - Seen 1
 /*12953*/ uint16 unknown_rof20;			//
 /*12955*/ uint32 bandolier_count;		// Seen 20
-/*12959*/ Bandolier_Struct bandoliers[MAX_PLAYER_BANDOLIER]; // [20] 740 bytes (Variable Name Sizes) - bandolier contents
+/*12959*/ Bandolier_Struct bandoliers[consts::BANDOLIERS_SIZE]; // [20] 740 bytes (Variable Name Sizes) - bandolier contents
 /*13699*/ uint32 potionbelt_count;		// Seen 5
 /*13703*/ PotionBelt_Struct potionbelt;	// [5] 45 bytes potion belt - (Variable Name Sizes)
 /*13748*/ int32 unknown_rof21;			// Seen -1
@@ -2865,7 +2891,7 @@ struct SetRunMode_Struct {
 };
 
 // EnvDamage is EnvDamage2 without a few bytes at the end.
-// Size: 37 bytes
+// Size: 39 bytes
 struct EnvDamage2_Struct {
 /*0000*/	uint32 id;
 /*0004*/	uint16 unknown4;
@@ -2877,7 +2903,8 @@ struct EnvDamage2_Struct {
 /*0031*/	uint16 unknown31;	// New to Underfoot - Seen 66
 /*0033*/	uint16 constant;		// Always FFFF
 /*0035*/	uint16 unknown35;
-/*0037*/
+/*0037*/	uint16 unknown37;
+/*0039*/
 };
 
 //Bazaar Stuff
@@ -2913,10 +2940,12 @@ struct BazaarWindowStart_Struct {
 
 
 struct BazaarWelcome_Struct {
-	BazaarWindowStart_Struct Beginning;
-	uint32  Traders;
-	uint32  Items;
-	uint8   Unknown012[8];
+	uint32 Code;
+	uint32 EntityID;
+	uint32 Traders;
+	uint32 Items;
+	uint32 Traders2;
+	uint32 Items2;
 };
 
 struct BazaarSearch_Struct {
@@ -3199,6 +3228,13 @@ struct BecomeTrader_Struct {
 };
 
 struct Trader_ShowItems_Struct {
+	/*000*/	uint32 Code;
+	/*004*/	uint16 TraderID;
+	/*008*/	uint32 Unknown08;
+	/*012*/
+};
+
+struct Trader_ShowItems_Struct_WIP {
 /*000*/	uint32 Code;
 /*004*/	char   SerialNumber[17];
 /*021*/	uint8  Unknown21;
@@ -3216,6 +3252,26 @@ struct TraderStatus_Struct {
 };
 
 struct TraderBuy_Struct {
+	/*000*/ uint32	Action;
+	/*004*/	uint32	Unknown004;
+	/*008*/ uint32	Unknown008;
+	/*012*/	uint32	Unknown012;
+	/*016*/ uint32	TraderID;
+	/*020*/ char	BuyerName[64];
+	/*084*/ char	SellerName[64];
+	/*148*/ char	Unknown148[32];
+	/*180*/ char	ItemName[64];
+	/*244*/ char	SerialNumber[16];
+	/*260*/ uint32	Unknown076;
+	/*264*/ uint32	ItemID;
+	/*268*/ uint32	Price;
+	/*272*/ uint32	AlreadySold;
+	/*276*/ uint32	Unknown276;
+	/*280*/ uint32	Quantity;
+	/*284*/
+};
+
+struct TraderBuy_Struct_OLD {
 /*000*/ uint32   Action;
 /*004*/	uint32	Unknown004;
 /*008*/ uint32   Price;
@@ -3245,25 +3301,19 @@ struct MoneyUpdate_Struct{
 	int32 copper;
 };
 
-//struct MoneyUpdate_Struct
-//{
-//*0000*/ uint32 spawn_id;            // ***Placeholder
-//*0004*/ uint32 cointype;           // Coin Type
-//*0008*/ uint32 amount;             // Amount
-//*0012*/
-//};
-
-
 struct TraderDelItem_Struct{
-	uint32 slotid;
-	uint32 quantity;
-	uint32 unknown;
+	/*000*/ uint32 Unknown000;
+	/*004*/ uint32 TraderID;
+	/*008*/ char   SerialNumber[16];
+	/*024*/ uint32 Unknown012;
+	/*028*/
 };
 
 struct TraderClick_Struct{
-	uint32 traderid;
-	uint32 unknown4[2];
-	uint32 approval;
+	/*000*/	uint32 Code;
+	/*004*/	uint32 TraderID;
+	/*008*/	uint32 Approval;
+	/*012*/	
 };
 
 struct FormattedMessage_Struct{
@@ -3566,7 +3616,7 @@ struct Split_Struct
 */
 struct NewCombine_Struct {
 /*00*/	ItemSlotStruct container_slot;
-/*12*/	ItemSlotStruct guildtribute_slot;	// Slot type is 8? (MapGuildTribute = 8 -U)
+/*12*/	ItemSlotStruct guildtribute_slot;	// Slot type is 8? (MapGuildTribute = 8)
 /*24*/
 };
 
@@ -4087,30 +4137,35 @@ struct DynamicWall_Struct {
 /*80*/
 };
 
-enum {	//bandolier actions
-	BandolierCreate = 0,
-	BandolierRemove = 1,
-	BandolierSet = 2
+// Bandolier actions
+enum
+{
+	bandolierCreate = 0,
+	bandolierRemove,
+	bandolierSet
 };
 
-struct BandolierCreate_Struct {
-/*00*/	uint32	action;	//0 for create
-/*04*/	uint8	number;
-/*05*/	char	name[32];
-/*37*/	uint16	unknown37;	//seen 0x93FD
-/*39*/	uint8	unknown39;	//0
+struct BandolierCreate_Struct
+{
+	/*00*/	uint32 Action;		//0 for create
+	/*04*/	uint8 Number;
+	/*05*/	char Name[32];
+	/*37*/	uint16 Unknown37;	//seen 0x93FD
+	/*39*/	uint8 Unknown39;	//0
 };
 
-struct BandolierDelete_Struct {
-/*00*/	uint32	action;
-/*04*/	uint8	number;
-/*05*/	uint8	unknown05[35];
+struct BandolierDelete_Struct
+{
+	/*00*/	uint32 Action;
+	/*04*/	uint8 Number;
+	/*05*/	uint8 Unknown05[35];
 };
 
-struct BandolierSet_Struct {
-/*00*/	uint32	action;
-/*04*/	uint8	number;
-/*05*/	uint8	unknown05[35];
+struct BandolierSet_Struct
+{
+	/*00*/	uint32 Action;
+	/*04*/	uint8 Number;
+	/*05*/	uint8 Unknown05[35];
 };
 
 struct Arrow_Struct {
@@ -4352,7 +4407,7 @@ struct RoF2SlotStruct
 
 struct ItemSerializationHeader
 {
-/*000*/	char unknown000[13];	// New for HoT. Looks like a string.
+/*000*/	char unknown000[17];	// New for HoT. Looks like a string.
 /*017*/	uint32 stacksize;
 /*021*/	uint32 unknown004;
 /*025*/	uint8  slot_type;	// 0 = normal, 1 = bank, 2 = shared bank, 9 = merchant, 20 = ?
@@ -4497,7 +4552,7 @@ struct ItemSecondaryBodyStruct
 	uint32 augtype;
 	// swapped augrestrict and augdistiller positions
 	// (this swap does show the proper augment restrictions in Item Information window now)
-	// unsure what the purpose of augdistiller is at this time -U 3/17/2014
+	// unsure what the purpose of augdistiller is at this time 3/17/2014
 	int32 augrestrict2;	// New to December 10th 2012 client - Hidden Aug Restriction
 	uint32 augrestrict;
 	AugSlotStruct augslots[6];
@@ -4672,17 +4727,33 @@ struct AugmentInfo_Struct
 
 struct VeteranRewardItem
 {
-/*000*/	uint32 item_id;
-/*004*/	uint32 charges;
-/*008*/	char item_name[64];
+/*000*/	uint32 name_length;
+/*004*/	//char item_name[0]; // THIS IS NOT NULL TERMED
+/*???*/	uint32 item_id;
+/*???*/	uint32 charges;
+};
+
+struct VeteranRewardEntry
+{
+/*000*/	uint32 claim_id; // guessed
+/*004*/	uint32 avaliable_count;
+/*008*/	uint32 claim_count;
+/*012*/	char enabled;
+/*013*/	//VeteranRewardItem items[0];
 };
 
 struct VeteranReward
 {
-/*000*/	uint32 claim_id;
-/*004*/	uint32 number_available;
-/*008*/	uint32 claim_count;
-/*012*/	VeteranRewardItem items[8];
+/*000*/	uint32 claim_count;
+/*004*/	//VeteranRewardEntry entries[0];
+};
+
+struct VeteranClaim
+{
+/*000*/	char name[68]; //name + other data
+/*068*/	uint32 claim_id;
+/*072*/	uint32 unknown072;
+/*076*/	uint32 action;
 };
 
 struct ExpeditionEntryHeader_Struct

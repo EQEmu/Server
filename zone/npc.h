@@ -187,7 +187,7 @@ public:
 	void	QueryLoot(Client* to);
 	uint32	CountLoot();
 	inline uint32	GetLoottableID()	const { return loottable_id; }
-	virtual void UpdateEquipLightValue();
+	virtual void UpdateEquipmentLight();
 
 	inline uint32	GetCopper()		const { return copper; }
 	inline uint32	GetSilver()		const { return silver; }
@@ -253,7 +253,7 @@ public:
 
 	uint32	GetMaxDMG() const {return max_dmg;}
 	uint32	GetMinDMG() const {return min_dmg;}
-	int16	GetSlowMitigation() const {return slow_mitigation;}
+	float GetSlowMitigation() const { return slow_mitigation; }
 	float	GetAttackSpeed() const {return attack_speed;}
 	uint8	GetAttackDelay() const {return attack_delay;}
 	bool	IsAnimal() const { return(bodytype == BT_Animal); }
@@ -360,6 +360,9 @@ public:
 
 	const bool IsUnderwaterOnly() const { return NPCTypedata->underwater; }
 	const char* GetRawNPCTypeName() const { return NPCTypedata->name; }
+
+	void ChangeLastName(const char* in_lastname);
+	void ClearLastName();
 
 	bool GetDepop() { return p_depop; }
 

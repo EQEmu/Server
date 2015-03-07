@@ -151,28 +151,31 @@ bool SharedDatabase::VerifyInventory(uint32 account_id, int16 slot_id, const Ite
 
 bool SharedDatabase::SaveInventory(uint32 char_id, const ItemInst* inst, int16 slot_id) {
 
-	// If we never save tribute slots..how are we to ever benefit from them!!? The client
-	// object is destroyed upon zoning - including its inventory object..and if tributes
-	// don't exist in the database, then they will never be loaded when the new client
-	// object is created in the new zone object... Something to consider... -U
-	//
-	// (we could add them to the 'NoRent' checks and dispose of after 30 minutes offline)
-
 	//never save tribute slots:
 	if(slot_id >= EmuConstants::TRIBUTE_BEGIN && slot_id <= EmuConstants::TRIBUTE_END)
 		return true;
 
 	if (slot_id >= EmuConstants::SHARED_BANK_BEGIN && slot_id <= EmuConstants::SHARED_BANK_BAGS_END) {
         // Shared bank inventory
-		if (!inst)
-            return DeleteSharedBankSlot(char_id, slot_id);
-		else
-            return UpdateSharedBankSlot(char_id, inst, slot_id);
+		if (!inst) {
+			return DeleteSharedBankSlot(char_id, slot_id);
+		}
+		else {
+			// Needed to clear out bag slots that 'REPLACE' in UpdateSharedBankSlot does not overwrite..otherwise, duplication occurs
+			// (This requires that parent then child items be sent..which should be how they are currently passed)
+			if (Inventory::SupportsContainers(slot_id))
+				DeleteSharedBankSlot(char_id, slot_id);
+			return UpdateSharedBankSlot(char_id, inst, slot_id);
+		}
 	}
 	else if (!inst) { // All other inventory
 		return DeleteInventorySlot(char_id, slot_id);
 	}
 
+	// Needed to clear out bag slots that 'REPLACE' in UpdateInventorySlot does not overwrite..otherwise, duplication occurs
+	// (This requires that parent then child items be sent..which should be how they are currently passed)
+	if (Inventory::SupportsContainers(slot_id))
+		DeleteInventorySlot(char_id, slot_id);
     return UpdateInventorySlot(char_id, inst, slot_id);
 }
 
@@ -209,7 +212,9 @@ bool SharedDatabase::UpdateInventorySlot(uint32 char_id, const ItemInst* inst, i
 
     // Save bag contents, if slot supports bag contents
 	if (inst->IsType(ItemClassContainer) && Inventory::SupportsContainers(slot_id))
-		for (uint8 idx = SUB_BEGIN; idx < EmuConstants::ITEM_CONTAINER_SIZE; idx++) {
+		// Limiting to bag slot count will get rid of 'hidden' duplicated items and 'Invalid Slot ID'
+		// messages through attrition (and the modded code in SaveInventory)
+		for (uint8 idx = SUB_BEGIN; idx < inst->GetItem()->BagSlots && idx < EmuConstants::ITEM_CONTAINER_SIZE; idx++) {
 			const ItemInst* baginst = inst->GetItem(idx);
 			SaveInventory(char_id, baginst, Inventory::CalcSlotId(slot_id, idx));
 		}
@@ -253,7 +258,9 @@ bool SharedDatabase::UpdateSharedBankSlot(uint32 char_id, const ItemInst* inst, 
 
     // Save bag contents, if slot supports bag contents
 	if (inst->IsType(ItemClassContainer) && Inventory::SupportsContainers(slot_id)) {
-		for (uint8 idx = SUB_BEGIN; idx < EmuConstants::ITEM_CONTAINER_SIZE; idx++) {
+		// Limiting to bag slot count will get rid of 'hidden' duplicated items and 'Invalid Slot ID'
+		// messages through attrition (and the modded code in SaveInventory)
+		for (uint8 idx = SUB_BEGIN; idx < inst->GetItem()->BagSlots && idx < EmuConstants::ITEM_CONTAINER_SIZE; idx++) {
 			const ItemInst* baginst = inst->GetItem(idx);
 			SaveInventory(char_id, baginst, Inventory::CalcSlotId(slot_id, idx));
 		}
@@ -1158,7 +1165,7 @@ void SharedDatabase::GetFactionListInfo(uint32 &list_count, uint32 &max_lists) {
     auto row = results.begin();
 
     list_count = static_cast<uint32>(atoul(row[0]));
-    max_lists = static_cast<uint32>(atoul(row[1]));
+    max_lists = static_cast<uint32>(atoul(row[1] ? row[1] : "0"));
 }
 
 const NPCFactionList* SharedDatabase::GetNPCFactionEntry(uint32 id) {
@@ -1235,9 +1242,6 @@ bool SharedDatabase::LoadNPCFactionLists() {
 		uint32 list_count = 0;
 		uint32 max_lists = 0;
 		GetFactionListInfo(list_count, max_lists);
-		if(list_count == 0) {
-			EQ_EXCEPT("SharedDatabase", "Database returned no result");
-		}
 		uint32 size = static_cast<uint32>(EQEmu::FixedMemoryHashSet<NPCFactionList>::estimated_size(
 			list_count, max_lists));
 
@@ -1837,7 +1841,7 @@ void SharedDatabase::GetLootTableInfo(uint32 &loot_table_count, uint32 &max_loot
 	auto row = results.begin();
 
     loot_table_count = static_cast<uint32>(atoul(row[0]));
-	max_loot_table = static_cast<uint32>(atoul(row[1]));
+	max_loot_table = static_cast<uint32>(atoul(row[1] ? row[1] : "0"));
 	loot_table_entries = static_cast<uint32>(atoul(row[2]));
 }
 
@@ -1858,7 +1862,7 @@ void SharedDatabase::GetLootDropInfo(uint32 &loot_drop_count, uint32 &max_loot_d
     auto row =results.begin();
 
     loot_drop_count = static_cast<uint32>(atoul(row[0]));
-	max_loot_drop = static_cast<uint32>(atoul(row[1]));
+	max_loot_drop = static_cast<uint32>(atoul(row[1] ? row[1] : "0"));
 	loot_drop_entries = static_cast<uint32>(atoul(row[2]));
 }
 

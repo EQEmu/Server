@@ -2872,7 +2872,16 @@ int ClientTaskState::GetTaskActivityDoneCountFromTaskID(int TaskID, int Activity
 			break;
 		}
 	}
-	return ActiveTasks[ActiveTaskIndex].Activity[ActivityID].DoneCount;
+
+	if (ActiveTaskIndex == -1)
+		return 0;
+
+	if (ActiveTasks[ActiveTaskIndex].Activity[ActivityID].DoneCount){
+		return ActiveTasks[ActiveTaskIndex].Activity[ActivityID].DoneCount;
+	}
+	else{
+		return 0;
+	}
 }
 
 int ClientTaskState::GetTaskStartTime(int index) {

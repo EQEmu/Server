@@ -22,6 +22,53 @@
 #include "types.h"
 
 /*
+** Light Types
+**
+*/
+enum LightTypes
+{
+	lightTypeNone = 0,
+	lightTypeCandle,
+	lightTypeTorch,
+	lightTypeTinyGlowingSkull,
+	lightTypeSmallLantern,
+	lightTypeSteinOfMoggok,
+	lightTypeLargeLantern,
+	lightTypeFlamelessLantern,
+	lightTypeGlobeOfStars,
+	lightTypeLightGlobe,
+	lightTypeLightstone,
+	lightTypeGreaterLightstone,
+	lightTypeFireBeetleEye,
+	lightTypeColdlight,
+	lightTypeUnknown1,
+	lightTypeUnknown2
+};
+
+#define LIGHT_TYPES_COUNT 16
+
+/*
+** Light Levels
+**
+*/
+enum LightLevels
+{
+	lightLevelUnlit = 0,
+	lightLevelCandle,
+	lightLevelTorch,
+	lightLevelSmallMagic,
+	lightLevelRedLight,
+	lightLevelBlueLight,
+	lightLevelSmallLantern,
+	lightLevelMagicLantern,
+	lightLevelLargeLantern,
+	lightLevelLargeMagic,
+	lightLevelBrilliant
+};
+
+#define LIGHT_LEVELS_COUNT 11
+
+/*
 **	Item attributes
 **
 **	(There are no grepwin hits other than these declarations... Do they have a use?)
@@ -55,7 +102,7 @@ enum ItemClassTypes
 **
 **	(ref: database and eqstr_us.txt)
 **
-**	(Looking at a recent database, it's possible that some of the item values may be off [10-27-2013] -U)
+**	(Looking at a recent database, it's possible that some of the item values may be off [10-27-2013])
 */
 enum ItemUseTypes : uint8
 {

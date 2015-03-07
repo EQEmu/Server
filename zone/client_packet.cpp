@@ -335,7 +335,13 @@ void MapOpcodes()
 	ConnectedOpcodes[OP_Save] = &Client::Handle_OP_Save;
 	ConnectedOpcodes[OP_SaveOnZoneReq] = &Client::Handle_OP_SaveOnZoneReq;
 	ConnectedOpcodes[OP_SelectTribute] = &Client::Handle_OP_SelectTribute;
-	ConnectedOpcodes[OP_SenseHeading] = &Client::Handle_OP_Ignore;
+
+	// Use or Ignore sense heading based on rule.
+	bool train=RuleB(Skills, TrainSenseHeading);
+
+	ConnectedOpcodes[OP_SenseHeading] = 
+		(train) ? &Client::Handle_OP_SenseHeading : &Client::Handle_OP_Ignore;
+
 	ConnectedOpcodes[OP_SenseTraps] = &Client::Handle_OP_SenseTraps;
 	ConnectedOpcodes[OP_SetGuildMOTD] = &Client::Handle_OP_SetGuildMOTD;
 	ConnectedOpcodes[OP_SetRunMode] = &Client::Handle_OP_SetRunMode;
@@ -728,8 +734,8 @@ void Client::CompleteConnect()
 		SendWearChange(x);
 	}
 	// added due to wear change above
-	UpdateActiveLightValue();
-	SendAppearancePacket(AT_Light, GetActiveLightValue());
+	UpdateActiveLight();
+	SendAppearancePacket(AT_Light, GetActiveLightType());
 
 	Mob *pet = GetPet();
 	if (pet != nullptr) {
@@ -737,8 +743,8 @@ void Client::CompleteConnect()
 			pet->SendWearChange(x);
 		}
 		// added due to wear change above
-		pet->UpdateActiveLightValue();
-		pet->SendAppearancePacket(AT_Light, pet->GetActiveLightValue());
+		pet->UpdateActiveLight();
+		pet->SendAppearancePacket(AT_Light, pet->GetActiveLightType());
 	}
 
 	entity_list.SendTraders(this);
@@ -1092,76 +1098,15 @@ void Client::Handle_Connect_OP_SendAATable(const EQApplicationPacket *app)
 
 void Client::Handle_Connect_OP_SendExpZonein(const EQApplicationPacket *app)
 {
-	//////////////////////////////////////////////////////
-	// Spawn Appearance Packet
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_SpawnAppearance, sizeof(SpawnAppearance_Struct));
-	SpawnAppearance_Struct* sa = (SpawnAppearance_Struct*)outapp->pBuffer;
-	sa->type = AT_SpawnID;			// Is 0x10 used to set the player id?
-	sa->parameter = GetID();	// Four bytes for this parameter...
-	outapp->priority = 6;
+	EQApplicationPacket* outapp = new EQApplicationPacket(OP_SendExpZonein, 0);
 	QueuePacket(outapp);
 	safe_delete(outapp);
 
-	// Inform the world about the client
-	outapp = new EQApplicationPacket();
-
-	CreateSpawnPacket(outapp);
-	outapp->priority = 6;
-	if (!GetHideMe()) entity_list.QueueClients(this, outapp, true);
-	safe_delete(outapp);
-	if (GetPVP())	//force a PVP update until we fix the spawn struct
-		SendAppearancePacket(AT_PVP, GetPVP(), true, false);
-
-	//Send AA Exp packet:
-	if (GetLevel() >= 51)
-		SendAAStats();
-
-	// Send exp packets
-	outapp = new EQApplicationPacket(OP_ExpUpdate, sizeof(ExpUpdate_Struct));
-	ExpUpdate_Struct* eu = (ExpUpdate_Struct*)outapp->pBuffer;
-	uint32 tmpxp1 = GetEXPForLevel(GetLevel() + 1);
-	uint32 tmpxp2 = GetEXPForLevel(GetLevel());
-
-	// Crash bug fix... Divide by zero when tmpxp1 and 2 equalled each other, most likely the error case from GetEXPForLevel() (invalid class, etc)
-	if (tmpxp1 != tmpxp2 && tmpxp1 != 0xFFFFFFFF && tmpxp2 != 0xFFFFFFFF) {
-		float tmpxp = (float)((float)m_pp.exp - tmpxp2) / ((float)tmpxp1 - tmpxp2);
-		eu->exp = (uint32)(330.0f * tmpxp);
-		outapp->priority = 6;
-		QueuePacket(outapp);
+	// SoF+ Gets Zone-In packets after sending OP_WorldObjectsSent
+	if (GetClientVersion() < ClientVersion::SoF)
+	{
+		SendZoneInPackets();
 	}
-	safe_delete(outapp);
-
-	SendAATimers();
-
-	outapp = new EQApplicationPacket(OP_SendExpZonein, 0);
-	QueuePacket(outapp);
-	safe_delete(outapp);
-
-	outapp = new EQApplicationPacket(OP_RaidUpdate, sizeof(ZoneInSendName_Struct));
-	ZoneInSendName_Struct* zonesendname = (ZoneInSendName_Struct*)outapp->pBuffer;
-	strcpy(zonesendname->name, m_pp.name);
-	strcpy(zonesendname->name2, m_pp.name);
-	zonesendname->unknown0 = 0x0A;
-	QueuePacket(outapp);
-	safe_delete(outapp);
-
-	/* this is actually the guild MOTD
-	outapp = new EQApplicationPacket(OP_ZoneInSendName2, sizeof(ZoneInSendName_Struct2));
-	ZoneInSendName_Struct2* zonesendname2=(ZoneInSendName_Struct2*)outapp->pBuffer;
-	strcpy(zonesendname2->name,m_pp.name);
-	QueuePacket(outapp);
-	safe_delete(outapp);*/
-
-	if (IsInAGuild()) {
-		SendGuildMembers();
-		SendGuildURL();
-		SendGuildChannel();
-		SendGuildLFGuildStatus();
-	}
-	SendLFGuildStatus();
-
-	//No idea why live sends this if even were not in a guild
-	SendGuildMOTD();
 
 	return;
 }
@@ -1219,72 +1164,13 @@ void Client::Handle_Connect_OP_WearChange(const EQApplicationPacket *app)
 
 void Client::Handle_Connect_OP_WorldObjectsSent(const EQApplicationPacket *app)
 {
-	//This is a copy of SendExpZonein created for SoF+ due to packet order change
-
-	//////////////////////////////////////////////////////
-	// Spawn Appearance Packet
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_SpawnAppearance, sizeof(SpawnAppearance_Struct));
-	SpawnAppearance_Struct* sa = (SpawnAppearance_Struct*)outapp->pBuffer;
-	sa->type = AT_SpawnID;			// Is 0x10 used to set the player id?
-	sa->parameter = GetID();	// Four bytes for this parameter...
-	outapp->priority = 6;
+	// New for SoF+
+	EQApplicationPacket* outapp = new EQApplicationPacket(OP_WorldObjectsSent, 0);
 	QueuePacket(outapp);
 	safe_delete(outapp);
 
-	// Inform the world about the client
-	outapp = new EQApplicationPacket();
-
-	CreateSpawnPacket(outapp);
-	outapp->priority = 6;
-	if (!GetHideMe()) entity_list.QueueClients(this, outapp, true);
-	safe_delete(outapp);
-	if (GetPVP())	//force a PVP update until we fix the spawn struct
-		SendAppearancePacket(AT_PVP, GetPVP(), true, false);
-
-	//Send AA Exp packet:
-	if (GetLevel() >= 51)
-		SendAAStats();
-
-	// Send exp packets
-	outapp = new EQApplicationPacket(OP_ExpUpdate, sizeof(ExpUpdate_Struct));
-	ExpUpdate_Struct* eu = (ExpUpdate_Struct*)outapp->pBuffer;
-	uint32 tmpxp1 = GetEXPForLevel(GetLevel() + 1);
-	uint32 tmpxp2 = GetEXPForLevel(GetLevel());
-
-	// Crash bug fix... Divide by zero when tmpxp1 and 2 equalled each other, most likely the error case from GetEXPForLevel() (invalid class, etc)
-	if (tmpxp1 != tmpxp2 && tmpxp1 != 0xFFFFFFFF && tmpxp2 != 0xFFFFFFFF) {
-		float tmpxp = (float)((float)m_pp.exp - tmpxp2) / ((float)tmpxp1 - tmpxp2);
-		eu->exp = (uint32)(330.0f * tmpxp);
-		outapp->priority = 6;
-		QueuePacket(outapp);
-	}
-	safe_delete(outapp);
-
-	SendAATimers();
-
-	// New for Secrets of Faydwer - Used in Place of OP_SendExpZonein
-	outapp = new EQApplicationPacket(OP_WorldObjectsSent, 0);
-	QueuePacket(outapp);
-	safe_delete(outapp);
-
-	outapp = new EQApplicationPacket(OP_RaidUpdate, sizeof(ZoneInSendName_Struct));
-	ZoneInSendName_Struct* zonesendname = (ZoneInSendName_Struct*)outapp->pBuffer;
-	strcpy(zonesendname->name, m_pp.name);
-	strcpy(zonesendname->name2, m_pp.name);
-	zonesendname->unknown0 = 0x0A;
-	QueuePacket(outapp);
-	safe_delete(outapp);
-
-	if (IsInAGuild()) {
-		SendGuildMembers();
-		SendGuildURL();
-		SendGuildChannel();
-		SendGuildLFGuildStatus();
-	}
-	SendLFGuildStatus();
-
-	//No idea why live sends this if even were not in a guild
-	SendGuildMOTD();
+	// Packet order changed for SoF+, so below is sent here instead of OP_SendExpLogin
+	SendZoneInPackets();
 
 	if (RuleB(Mercs, AllowMercs))
 	{
@@ -1314,8 +1200,7 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	conn_state = ReceivedZoneEntry;
 
 	SetClientVersion(Connection()->GetClientVersion());
-	if (m_ClientVersion != ClientVersion::Unknown)
-		ClientVersionBit = 1 << (static_cast<unsigned int>(m_ClientVersion) - 1);
+	m_ClientVersionBit = ClientBitFromVersion(Connection()->GetClientVersion());
 
 	bool siv = m_inv.SetInventoryVersion(m_ClientVersion);
 	Log.Out(Logs::General, Logs::None, "%s inventory version to %s(%i)", (siv ? "Succeeded in setting" : "Failed to set"), ClientVersionName(m_ClientVersion), m_ClientVersion);
@@ -1430,9 +1315,9 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	/* Set item material tint */
 	for (int i = EmuConstants::MATERIAL_BEGIN; i <= EmuConstants::MATERIAL_END; i++)
 	{
-		if (m_pp.item_tint[i].rgb.use_tint == 1 || m_pp.item_tint[i].rgb.use_tint == 255)
+		if (m_pp.item_tint[i].RGB.UseTint == 1 || m_pp.item_tint[i].RGB.UseTint == 255)
 		{
-				m_pp.item_tint[i].rgb.use_tint = 0xFF;
+				m_pp.item_tint[i].RGB.UseTint = 0xFF;
 		}
 	}
 
@@ -1554,10 +1439,6 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	if (m_pp.ldon_points_ruj < 0 || m_pp.ldon_points_ruj > 2000000000){ m_pp.ldon_points_ruj = 0; }
 	if (m_pp.ldon_points_tak < 0 || m_pp.ldon_points_tak > 2000000000){ m_pp.ldon_points_tak = 0; }
 	if (m_pp.ldon_points_available < 0 || m_pp.ldon_points_available > 2000000000){ m_pp.ldon_points_available = 0; }
-
-	/* Set Swimming Skill 100 by default if under 100 */
-	if (GetSkill(SkillSwimming) < 100)
-		SetSkill(SkillSwimming, 100);
 
 	/* Initialize AA's : Move to function eventually */
 	for (uint32 a = 0; a < MAX_PP_AA_ARRAY; a++){ aa[a] = &m_pp.aa_array[a]; }
@@ -1841,9 +1722,9 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	if (loaditems) { /* Dont load if a length error occurs */
 		BulkSendInventoryItems();
 		/* Send stuff on the cursor which isnt sent in bulk */
-		for (auto iter = m_inv.cursor_begin(); iter != m_inv.cursor_end(); ++iter) {
+		for (auto iter = m_inv.cursor_cbegin(); iter != m_inv.cursor_cend(); ++iter) {
 			/* First item cursor is sent in bulk inventory packet */
-			if (iter == m_inv.cursor_begin())
+			if (iter == m_inv.cursor_cbegin())
 				continue;
 			const ItemInst *inst = *iter;
 			SendItemPacket(MainCursor, inst, ItemPacketSummonItem);
@@ -1859,7 +1740,7 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 		safe_delete(outapp);
 	}
 
-	if (ClientVersionBit & BIT_UFAndLater) {
+	if (m_ClientVersionBit & BIT_UFAndLater) {
 		outapp = new EQApplicationPacket(OP_XTargetResponse, 8);
 		outapp->WriteUInt32(GetMaxXTargets());
 		outapp->WriteUInt32(0);
@@ -3309,7 +3190,6 @@ void Client::Handle_OP_AutoFire(const EQApplicationPacket *app)
 
 void Client::Handle_OP_Bandolier(const EQApplicationPacket *app)
 {
-
 	// Although there are three different structs for OP_Bandolier, they are all the same size.
 	//
 	if (app->size != sizeof(BandolierCreate_Struct)) {
@@ -3321,19 +3201,20 @@ void Client::Handle_OP_Bandolier(const EQApplicationPacket *app)
 
 	BandolierCreate_Struct *bs = (BandolierCreate_Struct*)app->pBuffer;
 
-	switch (bs->action) {
-	case BandolierCreate:
+	switch (bs->Action)
+	{
+	case bandolierCreate:
 		CreateBandolier(app);
 		break;
-	case BandolierRemove:
+	case bandolierRemove:
 		RemoveBandolier(app);
 		break;
-	case BandolierSet:
+	case bandolierSet:
 		SetBandolier(app);
 		break;
 	default:
-		Log.Out(Logs::General, Logs::None, "Uknown Bandolier action %i", bs->action);
-
+		Log.Out(Logs::General, Logs::None, "Unknown Bandolier action %i", bs->Action);
+		break;
 	}
 }
 
@@ -4038,7 +3919,7 @@ void Client::Handle_OP_CastSpell(const EQApplicationPacket *app)
 		}
 		else if (m_inv.SupportsClickCasting(castspell->inventoryslot) || (castspell->slot == POTION_BELT_SPELL_SLOT) || (castspell->slot == TARGET_RING_SPELL_SLOT))	// sanity check
 		{
-			// packet field types will be reviewed as packet transistions occur -U
+			// packet field types will be reviewed as packet transistions occur
 			const ItemInst* inst = m_inv[castspell->inventoryslot]; //slot values are int16, need to check packet on this field
 			//bool cancast = true;
 			if (inst && inst->IsType(ItemClassCommon))
@@ -5230,6 +5111,7 @@ void Client::Handle_OP_DeleteSpell(const EQApplicationPacket *app)
 
 	if (m_pp.spell_book[dss->spell_slot] != SPELLBOOK_UNKNOWN) {
 		m_pp.spell_book[dss->spell_slot] = SPELLBOOK_UNKNOWN;
+		database.DeleteCharacterSpell(this->CharacterID(), m_pp.spell_book[dss->spell_slot], dss->spell_slot);
 		dss->success = 1;
 	}
 	else
@@ -5547,7 +5429,7 @@ void Client::Handle_OP_EnvDamage(const EQApplicationPacket *app)
 	if (damage < 0)
 		damage = 31337;
 
-	if (admin >= minStatusToAvoidFalling && GetGM()){
+	if (admin >= minStatusToAvoidFalling && GetGM()) {
 		Message(13, "Your GM status protects you from %i points of type %i environmental damage.", ed->damage, ed->dmgtype);
 		SetHP(GetHP() - 1);//needed or else the client wont acknowledge
 		return;
@@ -5557,11 +5439,11 @@ void Client::Handle_OP_EnvDamage(const EQApplicationPacket *app)
 		SetHP(GetHP() - 1);//needed or else the client wont acknowledge
 		return;
 	}
-
-	else if (zone->GetZoneID() == 183 || zone->GetZoneID() == 184){
+	else if (zone->GetZoneID() == 183 || zone->GetZoneID() == 184) {
+		// Hard coded tutorial and load zones for no fall damage
 		return;
 	}
-	else{
+	else {
 		SetHP(GetHP() - (damage * RuleR(Character, EnvironmentDamageMulipliter)));
 
 		/* EVENT_ENVIRONMENTAL_DAMAGE */
@@ -7391,6 +7273,16 @@ void Client::Handle_OP_GuildInvite(const EQApplicationPacket *app)
 				if (gc->guildeqid == 0)
 					gc->guildeqid = GuildID();
 
+				// Convert Membership Level between RoF and previous clients.
+				if (client->GetClientVersion() < ClientVersion::RoF && GetClientVersion() >= ClientVersion::RoF)
+				{
+					gc->officer = 0;
+				}
+				if (client->GetClientVersion() >= ClientVersion::RoF && GetClientVersion() < ClientVersion::RoF)
+				{
+					gc->officer = 8;
+				}
+
 				Log.Out(Logs::Detail, Logs::Guilds, "Sending OP_GuildInvite for invite to %s, length %d", client->GetName(), app->size);
 				client->SetPendingGuildInvitation(true);
 				client->QueuePacket(app);
@@ -7425,6 +7317,8 @@ void Client::Handle_OP_GuildInviteAccept(const EQApplicationPacket *app)
 
 	GuildInviteAccept_Struct* gj = (GuildInviteAccept_Struct*)app->pBuffer;
 
+	uint32 guildrank = gj->response;
+
 	if (GetClientVersion() >= ClientVersion::RoF)
 	{
 		if (gj->response > 9)
@@ -7453,9 +7347,25 @@ void Client::Handle_OP_GuildInviteAccept(const EQApplicationPacket *app)
 		Log.Out(Logs::Detail, Logs::Guilds, "Guild Invite Accept: guild %d, response %d, inviter %s, person %s",
 			gj->guildeqid, gj->response, gj->inviter, gj->newmember);
 
+		//ok, the invite is also used for changing rank as well.
+		Mob* inviter = entity_list.GetMob(gj->inviter);
+
+		if (inviter && inviter->IsClient())
+		{
+			Client* client = inviter->CastToClient();
+			// Convert Membership Level between RoF and previous clients.
+			if (client->GetClientVersion() < ClientVersion::RoF && GetClientVersion() >= ClientVersion::RoF)
+			{
+				guildrank = 0;
+			}
+			if (client->GetClientVersion() >= ClientVersion::RoF && GetClientVersion() < ClientVersion::RoF)
+			{
+				guildrank = 8;
+			}
+		}
 		//we dont really care a lot about what this packet means, as long as
 		//it has been authorized with the guild manager
-		if (!guild_mgr.VerifyAndClearInvite(CharacterID(), gj->guildeqid, gj->response)) {
+		if (!guild_mgr.VerifyAndClearInvite(CharacterID(), gj->guildeqid, guildrank)) {
 			worldserver.SendEmoteMessage(gj->inviter, 0, 0, "%s has sent an invalid response to your invite!", GetName());
 			Message(13, "Invalid invite response packet!");
 			return;
@@ -7483,7 +7393,7 @@ void Client::Handle_OP_GuildInviteAccept(const EQApplicationPacket *app)
 
 			//change guild and rank
 
-			uint32 guildrank = gj->response;
+			guildrank = gj->response;
 
 			if (GetClientVersion() >= ClientVersion::RoF)
 			{
@@ -9893,6 +9803,9 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 		return;
 	}
 
+	if (mypet->GetPetType() == petTargetLock && (pet->command != PET_HEALTHREPORT && pet->command != PET_GETLOST))
+		return;
+
 	if (mypet->GetPetType() == petAnimation && (pet->command != PET_HEALTHREPORT && pet->command != PET_GETLOST) && !GetAA(aaAnimationEmpathy))
 		return;
 
@@ -10562,16 +10475,16 @@ void Client::Handle_OP_PotionBelt(const EQApplicationPacket *app)
 	if (mptbs->Action == 0) {
 		const Item_Struct *BaseItem = database.GetItem(mptbs->ItemID);
 		if (BaseItem) {
-			m_pp.potionbelt.items[mptbs->SlotNumber].item_id = BaseItem->ID;
-			m_pp.potionbelt.items[mptbs->SlotNumber].icon = BaseItem->Icon;
-			strn0cpy(m_pp.potionbelt.items[mptbs->SlotNumber].item_name, BaseItem->Name, sizeof(BaseItem->Name));
-			database.SaveCharacterPotionBelt(this->CharacterID(), mptbs->SlotNumber, m_pp.potionbelt.items[mptbs->SlotNumber].item_id, m_pp.potionbelt.items[mptbs->SlotNumber].icon);
+			m_pp.potionbelt.Items[mptbs->SlotNumber].ID = BaseItem->ID;
+			m_pp.potionbelt.Items[mptbs->SlotNumber].Icon = BaseItem->Icon;
+			strn0cpy(m_pp.potionbelt.Items[mptbs->SlotNumber].Name, BaseItem->Name, sizeof(BaseItem->Name));
+			database.SaveCharacterPotionBelt(this->CharacterID(), mptbs->SlotNumber, m_pp.potionbelt.Items[mptbs->SlotNumber].ID, m_pp.potionbelt.Items[mptbs->SlotNumber].Icon);
 		}
 	}
 	else {
-		m_pp.potionbelt.items[mptbs->SlotNumber].item_id = 0;
-		m_pp.potionbelt.items[mptbs->SlotNumber].icon = 0;
-		strncpy(m_pp.potionbelt.items[mptbs->SlotNumber].item_name, "\0", 1);
+		m_pp.potionbelt.Items[mptbs->SlotNumber].ID = 0;
+		m_pp.potionbelt.Items[mptbs->SlotNumber].Icon = 0;
+		m_pp.potionbelt.Items[mptbs->SlotNumber].Name[0] = '\0';
 	}
 }
 
@@ -11773,6 +11686,27 @@ void Client::Handle_OP_SelectTribute(const EQApplicationPacket *app)
 	return;
 }
 
+void Client::Handle_OP_SenseHeading(const EQApplicationPacket *app)
+{
+	if (!HasSkill(SkillSenseHeading))
+		return;
+
+	int chancemod=0;
+
+	// The client seems to limit sense heading packets based on skill
+	// level.  So if we're really low, we don't hit this routine very often.
+	// I think it's the GUI deciding when to skill you up.
+	// So, I'm adding a mod here which is larger at lower levels so
+	// very low levels get a much better chance to skill up when the GUI
+	// eventually sends a message.
+	if (GetLevel() <= 8)
+		chancemod += (9-level) * 10;
+	
+	CheckIncreaseSkill(SkillSenseHeading, nullptr, chancemod);
+
+	return;
+}
+
 void Client::Handle_OP_SenseTraps(const EQApplicationPacket *app)
 {
 	if (!HasSkill(SkillSenseTraps))
@@ -12072,12 +12006,6 @@ void Client::Handle_OP_ShopEnd(const EQApplicationPacket *app)
 {
 	EQApplicationPacket empty(OP_ShopEndConfirm);
 	QueuePacket(&empty);
-	//EQApplicationPacket* outapp = new EQApplicationPacket(OP_ShopEndConfirm, 2);
-	//outapp->pBuffer[0] = 0x0a;
-	//outapp->pBuffer[1] = 0x66;
-	//QueuePacket(outapp);
-	//safe_delete(outapp);
-	//Save();
 	return;
 }
 
@@ -12173,6 +12101,10 @@ void Client::Handle_OP_ShopPlayerBuy(const EQApplicationPacket *app)
 			mp->quantity = prevcharges;
 	}
 
+	// Item's stackable, but the quantity they want to buy exceeds the max stackable quantity.
+	if (item->Stackable && mp->quantity > item->StackSize)
+		mp->quantity = item->StackSize;
+
 	EQApplicationPacket* outapp = new EQApplicationPacket(OP_ShopPlayerBuy, sizeof(Merchant_Sell_Struct));
 	Merchant_Sell_Struct* mpo = (Merchant_Sell_Struct*)outapp->pBuffer;
 	mpo->quantity = mp->quantity;
@@ -12199,6 +12131,7 @@ void Client::Handle_OP_ShopPlayerBuy(const EQApplicationPacket *app)
 		mpo->price = SinglePrice;
 	else
 		mpo->price = SinglePrice * mp->quantity;
+
 	if (mpo->price < 0)
 	{
 		safe_delete(outapp);
@@ -12668,6 +12601,7 @@ void Client::Handle_OP_SpawnAppearance(const EQApplicationPacket *app)
 	else if (sa->type == AT_Anim) {
 		if (IsAIControlled())
 			return;
+
 		if (sa->parameter == ANIM_STAND) {
 			SetAppearance(eaStanding);
 			playeraction = 0;
@@ -12701,15 +12635,6 @@ void Client::Handle_OP_SpawnAppearance(const EQApplicationPacket *app)
 			SetFeigned(false);
 		}
 
-		// This is from old code
-		// I have no clue what it's for
-		/*
-		else if (sa->parameter == 0x05) {
-		// Illusion
-		std::cout << "Illusion packet recv'd:" << std::endl;
-		DumpPacket(app);
-		}
-		*/
 		else {
 			std::cerr << "Client " << name << " unknown apperance " << (int)sa->parameter << std::endl;
 			return;
@@ -12718,6 +12643,10 @@ void Client::Handle_OP_SpawnAppearance(const EQApplicationPacket *app)
 		entity_list.QueueClients(this, app, true);
 	}
 	else if (sa->type == AT_Anon) {
+		if(!anon_toggle_timer.Check()) {
+			return;
+		}
+
 		// For Anon/Roleplay
 		if (sa->parameter == 1) { // Anon
 			m_pp.anon = 1;
@@ -12739,13 +12668,18 @@ void Client::Handle_OP_SpawnAppearance(const EQApplicationPacket *app)
 		return;
 	}
 	else if (sa->type == AT_AFK) {
-		this->AFK = (sa->parameter == 1);
-		entity_list.QueueClients(this, app, true);
+		if(afk_toggle_timer.Check()) {
+			AFK = (sa->parameter == 1);
+			entity_list.QueueClients(this, app, true);
+		}
 	}
 	else if (sa->type == AT_Split) {
 		m_pp.autosplit = (sa->parameter == 1);
 	}
 	else if (sa->type == AT_Sneak) {
+		if(sneaking == 0)
+			return;
+
 		if (sa->parameter != 0)
 		{
 			if (!HasSkill(SkillSneak))
@@ -12757,7 +12691,7 @@ void Client::Handle_OP_SpawnAppearance(const EQApplicationPacket *app)
 			}
 			return;
 		}
-		this->sneaking = 0;
+		sneaking = 0;
 		entity_list.QueueClients(this, app, true);
 	}
 	else if (sa->type == AT_Size)
@@ -12769,7 +12703,7 @@ void Client::Handle_OP_SpawnAppearance(const EQApplicationPacket *app)
 	}
 	else if (sa->type == AT_Light)	// client emitting light (lightstone, shiny shield)
 	{
-		entity_list.QueueClients(this, app, false);
+		//don't do anything with this
 	}
 	else if (sa->type == AT_Levitate)
 	{
@@ -12778,8 +12712,10 @@ void Client::Handle_OP_SpawnAppearance(const EQApplicationPacket *app)
 	}
 	else if (sa->type == AT_ShowHelm)
 	{
-		m_pp.showhelm = (sa->parameter == 1);
-		entity_list.QueueClients(this, app, true);
+		if(helm_toggle_timer.Check()) {
+			m_pp.showhelm = (sa->parameter == 1);
+			entity_list.QueueClients(this, app, true);
+		}
 	}
 	else {
 		std::cout << "Unknown SpawnAppearance type: 0x" << std::hex << std::setw(4) << std::setfill('0') << sa->type << std::dec
@@ -13390,7 +13326,7 @@ void Client::Handle_OP_Trader(const EQApplicationPacket *app)
 
 	/*
 	if (GetClientVersion() >= EQClientRoF)
-	max_items = 200;
+		max_items = 200;
 	*/
 
 	//Show Items
@@ -13402,20 +13338,25 @@ void Client::Handle_OP_Trader(const EQApplicationPacket *app)
 		{
 		case BazaarTrader_EndTraderMode: {
 			Trader_EndTrader();
+			Log.Out(Logs::Detail, Logs::Trading, "Client::Handle_OP_Trader: End Trader Session");
 			break;
 		}
 		case BazaarTrader_EndTransaction: {
 
 			Client* c = entity_list.GetClientByID(sis->TraderID);
 			if (c)
+			{
 				c->WithCustomer(0);
+				Log.Out(Logs::Detail, Logs::Trading, "Client::Handle_OP_Trader: End Transaction");
+			}
 			else
-				Log.Out(Logs::Detail, Logs::Trading, "Client::Handle_OP_TraderBuy: Null Client Pointer");
+				Log.Out(Logs::Detail, Logs::Trading, "Client::Handle_OP_Trader: Null Client Pointer");
 
 			break;
 		}
 		case BazaarTrader_ShowItems: {
 			Trader_ShowItems();
+			Log.Out(Logs::Detail, Logs::Trading, "Client::Handle_OP_Trader: Show Trader Items");
 			break;
 		}
 		default: {
@@ -13438,6 +13379,7 @@ void Client::Handle_OP_Trader(const EQApplicationPacket *app)
 		{
 			GetItems_Struct* gis = GetTraderItems();
 
+			Log.Out(Logs::Detail, Logs::Trading, "Client::Handle_OP_Trader: Start Trader Mode");
 			// Verify there are no NODROP or items with a zero price
 			bool TradeItemsValid = true;
 
@@ -13484,7 +13426,8 @@ void Client::Handle_OP_Trader(const EQApplicationPacket *app)
 			safe_delete(gis);
 
 			this->Trader_StartTrader();
-
+			
+			// This refreshes the Trader window to display the End Trader button
 			if (GetClientVersion() >= ClientVersion::RoF)
 			{
 				EQApplicationPacket* outapp = new EQApplicationPacket(OP_Trader, sizeof(TraderStatus_Struct));
@@ -13494,15 +13437,6 @@ void Client::Handle_OP_Trader(const EQApplicationPacket *app)
 				safe_delete(outapp);
 			}
 		}
-		else if (app->size == sizeof(TraderStatus_Struct))
-		{
-			TraderStatus_Struct* tss = (TraderStatus_Struct*)app->pBuffer;
-
-			if (tss->Code == BazaarTrader_ShowItems)
-			{
-				Trader_ShowItems();
-			}
-		}
 		else {
 			Log.Out(Logs::Detail, Logs::Trading, "Client::Handle_OP_Trader: Unknown TraderStruct code of: %i\n",
 				ints->Code);
@@ -13510,9 +13444,35 @@ void Client::Handle_OP_Trader(const EQApplicationPacket *app)
 			Log.Out(Logs::General, Logs::Error, "Unknown TraderStruct code of: %i\n", ints->Code);
 		}
 	}
+	else if (app->size == sizeof(TraderStatus_Struct))
+	{
+		TraderStatus_Struct* tss = (TraderStatus_Struct*)app->pBuffer;
 
+		Log.Out(Logs::Detail, Logs::Trading, "Client::Handle_OP_Trader: Trader Status Code: %d", tss->Code);
+
+		switch (tss->Code)
+		{
+		case BazaarTrader_EndTraderMode: {
+			Trader_EndTrader();
+			Log.Out(Logs::Detail, Logs::Trading, "Client::Handle_OP_Trader: End Trader Session");
+			break;
+		}
+		case BazaarTrader_ShowItems: {
+			Trader_ShowItems();
+			Log.Out(Logs::Detail, Logs::Trading, "Client::Handle_OP_Trader: Show Trader Items");
+			break;
+		}
+		default: {
+			Log.Out(Logs::Detail, Logs::Trading, "Unhandled action code in OP_Trader ShowItems_Struct");
+			break;
+		}
+		}
+
+
+	}
 	else if (app->size == sizeof(TraderPriceUpdate_Struct))
 	{
+		Log.Out(Logs::Detail, Logs::Trading, "Client::Handle_OP_Trader: Trader Price Update");
 		HandleTraderPriceUpdate(app);
 	}
 	else {
@@ -13531,23 +13491,22 @@ void Client::Handle_OP_TraderBuy(const EQApplicationPacket *app)
 	//
 	// Client has elected to buy an item from a Trader
 	//
+	if (app->size != sizeof(TraderBuy_Struct)) {
+		Log.Out(Logs::General, Logs::Error, "Wrong size: OP_TraderBuy, size=%i, expected %i", app->size, sizeof(TraderBuy_Struct));
+		return;
+	}
 
-	if (app->size == sizeof(TraderBuy_Struct)){
+	TraderBuy_Struct* tbs = (TraderBuy_Struct*)app->pBuffer;
 
-		TraderBuy_Struct* tbs = (TraderBuy_Struct*)app->pBuffer;
-
-		if (Client* Trader = entity_list.GetClientByID(tbs->TraderID)){
-
-			BuyTraderItem(tbs, Trader, app);
-		}
-		else {
-			Log.Out(Logs::Detail, Logs::Trading, "Client::Handle_OP_TraderBuy: Null Client Pointer");
-		}
+	if (Client* Trader = entity_list.GetClientByID(tbs->TraderID)){
+		BuyTraderItem(tbs, Trader, app);
+		Log.Out(Logs::Detail, Logs::Trading, "Client::Handle_OP_TraderBuy: Buy Trader Item ");
 	}
 	else {
-		Log.Out(Logs::Detail, Logs::Trading, "Client::Handle_OP_TraderBuy: Struct size mismatch");
-
+		Log.Out(Logs::Detail, Logs::Trading, "Client::Handle_OP_TraderBuy: Null Client Pointer");
 	}
+
+
 	return;
 }
 
@@ -13609,51 +13568,124 @@ void Client::Handle_OP_TradeRequestAck(const EQApplicationPacket *app)
 void Client::Handle_OP_TraderShop(const EQApplicationPacket *app)
 {
 	// Bazaar Trader:
-	//
-	// This is when a potential purchaser right clicks on this client who is in Trader mode to
-	// browse their goods.
-	//
 
-	TraderClick_Struct* tcs = (TraderClick_Struct*)app->pBuffer;
+	if (app->size == sizeof(TraderClick_Struct))
+	{
+		
+		TraderClick_Struct* tcs = (TraderClick_Struct*)app->pBuffer;
 
-	if (app->size != sizeof(TraderClick_Struct)) {
+		Log.Out(Logs::Detail, Logs::Trading, "Handle_OP_TraderShop: TraderClick_Struct TraderID %d, Code %d, Unknown008 %d, Approval %d",
+			tcs->TraderID, tcs->Code, tcs->Unknown008, tcs->Approval);
 
-		Log.Out(Logs::Detail, Logs::Trading, "Client::Handle_OP_TraderShop: Returning due to struct size mismatch");
+		if (tcs->Code == BazaarWelcome)
+		{
+			Log.Out(Logs::Detail, Logs::Trading, "Client::Handle_OP_TraderShop: Sent Bazaar Welcome Info");
+			SendBazaarWelcome();
+		}
+		else
+		{
+			// This is when a potential purchaser right clicks on this client who is in Trader mode to
+			// browse their goods.
+			EQApplicationPacket* outapp = new EQApplicationPacket(OP_TraderShop, sizeof(TraderClick_Struct));
 
-		return;
+			TraderClick_Struct* outtcs = (TraderClick_Struct*)outapp->pBuffer;
+
+			Client* Trader = entity_list.GetClientByID(tcs->TraderID);
+
+			if (Trader)
+			{
+				outtcs->Approval = Trader->WithCustomer(GetID());
+				Log.Out(Logs::Detail, Logs::Trading, "Client::Handle_OP_TraderShop: Shop Request (%s) to (%s) with Approval: %d", GetCleanName(), Trader->GetCleanName(), outtcs->Approval);
+			}
+			else {
+				Log.Out(Logs::Detail, Logs::Trading, "Client::Handle_OP_TraderShop: entity_list.GetClientByID(tcs->traderid)"
+					" returned a nullptr pointer");
+				return;
+			}
+
+			outtcs->TraderID = tcs->TraderID;
+
+			outtcs->Unknown008 = 0x3f800000;
+
+			QueuePacket(outapp);
+
+
+			if (outtcs->Approval) {
+				this->BulkSendTraderInventory(Trader->CharacterID());
+				Trader->Trader_CustomerBrowsing(this);
+				TraderID = tcs->TraderID;
+				Log.Out(Logs::Detail, Logs::Trading, "Client::Handle_OP_TraderShop: Trader Inventory Sent");
+			}
+			else
+			{
+				Message_StringID(clientMessageYellow, TRADER_BUSY);
+				Log.Out(Logs::Detail, Logs::Trading, "Client::Handle_OP_TraderShop: Trader Busy");
+			}
+
+			safe_delete(outapp);
+			return;
+		}
+
 	}
-
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_TraderShop, sizeof(TraderClick_Struct));
-
-	TraderClick_Struct* outtcs = (TraderClick_Struct*)outapp->pBuffer;
-
-	Client* Customer = entity_list.GetClientByID(tcs->TraderID);
-
-	if (Customer)
-		outtcs->Approval = Customer->WithCustomer(GetID());
-	else {
-		Log.Out(Logs::Detail, Logs::Trading, "Client::Handle_OP_TraderShop: entity_list.GetClientByID(tcs->traderid)"
-			" returned a nullptr pointer");
-		return;
+	else if (app->size == sizeof(BazaarWelcome_Struct))
+	{
+		// RoF+
+		// Client requested Bazaar Welcome Info (Trader and Item Total Counts)
+		SendBazaarWelcome();
+		Log.Out(Logs::Detail, Logs::Trading, "Client::Handle_OP_TraderShop: Sent Bazaar Welcome Info");
 	}
+	else if (app->size == sizeof(TraderBuy_Struct))
+	{
+		// RoF+
+		// Customer has purchased an item from the Trader
 
-	outtcs->TraderID = tcs->TraderID;
+		TraderBuy_Struct* tbs = (TraderBuy_Struct*)app->pBuffer;
 
-	outtcs->Unknown008 = 0x3f800000;
+		if (Client* Trader = entity_list.GetClientByID(tbs->TraderID))
+		{
+			BuyTraderItem(tbs, Trader, app);
+			Log.Out(Logs::Detail, Logs::Trading, "Handle_OP_TraderShop: Buy Action %d, Price %d, Trader %d, ItemID %d, Quantity %d, ItemName, %s",
+				tbs->Action, tbs->Price, tbs->TraderID, tbs->ItemID, tbs->Quantity, tbs->ItemName);
+		}
+		else
+		{
+			Log.Out(Logs::Detail, Logs::Trading, "OP_TraderShop: Null Client Pointer");
+		}
+	}
+	else if (app->size == 4)
+	{
+		// RoF+
+		// Customer has closed the trade window
+		uint32 Command = *((uint32 *)app->pBuffer);
 
-	QueuePacket(outapp);
-
-
-	if (outtcs->Approval) {
-		this->BulkSendTraderInventory(Customer->CharacterID());
-		Customer->Trader_CustomerBrowsing(this);
+		if (Command == 4)
+		{
+			Client* c = entity_list.GetClientByID(TraderID);
+			TraderID = 0;
+			if (c)
+			{
+				c->WithCustomer(0);
+				Log.Out(Logs::Detail, Logs::Trading, "Client::Handle_OP_Trader: End Transaction - Code %d", Command);
+			}
+			else
+			{
+				Log.Out(Logs::Detail, Logs::Trading, "Client::Handle_OP_Trader: Null Client Pointer for Trader - Code %d", Command);
+			}
+			EQApplicationPacket empty(OP_ShopEndConfirm);
+			QueuePacket(&empty);
+		}
+		else
+		{
+			Log.Out(Logs::Detail, Logs::Trading, "Client::Handle_OP_Trader: Unhandled Code %d", Command);
+		}
 	}
 	else
-		Message_StringID(clientMessageYellow, TRADER_BUSY);
-
-	safe_delete(outapp);
-
-	return;
+	{
+		Log.Out(Logs::Detail, Logs::Trading, "Unknown size for OP_TraderShop: %i\n", app->size);
+		Log.Out(Logs::General, Logs::Error, "Unknown size for OP_TraderShop: %i\n", app->size);
+		DumpPacket(app);
+		return;
+	}
 }
 
 void Client::Handle_OP_TradeSkillCombine(const EQApplicationPacket *app)
@@ -13816,41 +13848,32 @@ void Client::Handle_OP_TributeUpdate(const EQApplicationPacket *app)
 
 void Client::Handle_OP_VetClaimRequest(const EQApplicationPacket *app)
 {
-	if (app->size < sizeof(VeteranClaimRequest))
-	{
-		Log.Out(Logs::General, Logs::None, "OP_VetClaimRequest size lower than expected: got %u expected at least %u", app->size, sizeof(VeteranClaimRequest));
+	if (app->size < sizeof(VeteranClaim)) {
+		Log.Out(Logs::General, Logs::None,
+			"OP_VetClaimRequest size lower than expected: got %u expected at least %u", app->size,
+			sizeof(VeteranClaim));
 		DumpPacket(app);
 		return;
 	}
 
-	VeteranClaimRequest *vcr = (VeteranClaimRequest*)app->pBuffer;
+	VeteranClaim *vcr = (VeteranClaim *)app->pBuffer;
 
-	if (vcr->claim_id == 0xFFFFFFFF) //request update packet
-	{
+	if (vcr->claim_id == 0xFFFFFFFF) { // request update packet
 		SendRewards();
+		return;
 	}
-	else //try to claim something!
-	{
-		if (!TryReward(vcr->claim_id))
-		{
-			Message(13, "Your claim has been rejected.");
-			EQApplicationPacket *vetapp = new EQApplicationPacket(OP_VetClaimReply, sizeof(VeteranClaimReply));
-			VeteranClaimReply * cr = (VeteranClaimReply*)vetapp->pBuffer;
-			strcpy(cr->name, GetName());
-			cr->claim_id = vcr->claim_id;
-			cr->reject_field = -1;
-			FastQueuePacket(&vetapp);
-		}
-		else
-		{
-			EQApplicationPacket *vetapp = new EQApplicationPacket(OP_VetClaimReply, sizeof(VeteranClaimReply));
-			VeteranClaimReply * cr = (VeteranClaimReply*)vetapp->pBuffer;
-			strcpy(cr->name, GetName());
-			cr->claim_id = vcr->claim_id;
-			cr->reject_field = 0;
-			FastQueuePacket(&vetapp);
-		}
-	}
+	// try to claim something!
+	EQApplicationPacket *vetapp = new EQApplicationPacket(OP_VetClaimReply, sizeof(VeteranClaim));
+	VeteranClaim *cr = (VeteranClaim *)vetapp->pBuffer;
+	strcpy(cr->name, GetName());
+	cr->claim_id = vcr->claim_id;
+
+	if (!TryReward(vcr->claim_id))
+		cr->action = 1;
+	else
+		cr->action = 0;
+
+	FastQueuePacket(&vetapp);
 }
 
 void Client::Handle_OP_VoiceMacroIn(const EQApplicationPacket *app)

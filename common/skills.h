@@ -171,6 +171,8 @@ enum SkillUseTypes
 
 // temporary until it can be sorted out...
 #define HIGHEST_SKILL	SkillFrenzy
+// Spell Effects use this value to determine if an effect applies to all skills.
+#define ALL_SKILLS	-1
 
 // server profile does not reflect this yet..so, prefixed with 'PACKET_'
 #define PACKET_SKILL_ARRAY_SIZE 100

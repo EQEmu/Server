@@ -266,10 +266,11 @@ public:
 	void SendBazaarResults(uint32 trader_id,uint32 class_,uint32 race,uint32 stat,uint32 slot,uint32 type,char name[64],uint32 minprice,uint32 maxprice);
 	void SendTraderItem(uint32 item_id,uint16 quantity);
 	uint16 FindTraderItem(int32 SerialNumber,uint16 Quantity);
+	uint32 FindTraderItemSerialNumber(int32 ItemID);
 	ItemInst* FindTraderItemBySerialNumber(int32 SerialNumber);
 	void FindAndNukeTraderItem(int32 item_id,uint16 quantity,Client* customer,uint16 traderslot);
-	void NukeTraderItem(uint16 slot,int16 charges,uint16 quantity,Client* customer,uint16 traderslot, int uniqueid);
-	void ReturnTraderReq(const EQApplicationPacket* app,int16 traderitemcharges);
+	void NukeTraderItem(uint16 slot, int16 charges, uint16 quantity, Client* customer, uint16 traderslot, int32 uniqueid, int32 itemid = 0);
+	void ReturnTraderReq(const EQApplicationPacket* app,int16 traderitemcharges, uint32 itemid = 0);
 	void TradeRequestFailed(const EQApplicationPacket* app);
 	void BuyTraderItem(TraderBuy_Struct* tbs,Client* trader,const EQApplicationPacket* app);
 	void TraderUpdate(uint16 slot_id,uint32 trader_id);
@@ -730,7 +731,7 @@ public:
 #endif
 	uint32 GetEquipment(uint8 material_slot) const; // returns item id
 	uint32 GetEquipmentColor(uint8 material_slot) const;
-	virtual void UpdateEquipLightValue() { equip_light = m_inv.FindHighestLightValue(); }
+	virtual void UpdateEquipmentLight() { m_Light.Type.Equipment = m_inv.FindBrightestLightType(); m_Light.Level.Equipment = m_Light.TypeToLevel(m_Light.Type.Equipment); }
 
 	inline bool AutoSplitEnabled() { return m_pp.autosplit != 0; }
 
@@ -1021,7 +1022,7 @@ public:
 	inline int CompletedTasksInSet(int TaskSet) { return (taskstate ? taskstate->CompletedTasksInSet(TaskSet) :0); }
 
 	inline const ClientVersion GetClientVersion() const { return m_ClientVersion; }
-	inline const uint32 GetClientVersionBit() const { return ClientVersionBit; }
+	inline const uint32 GetClientVersionBit() const { return m_ClientVersionBit; }
 	inline void SetClientVersion(ClientVersion in) { m_ClientVersion = in; }
 
 	/** Adventure Stuff **/
@@ -1139,7 +1140,7 @@ public:
 	void HandleLFGuildResponse(ServerPacket *pack);
 	void SendLFGuildStatus();
 	void SendGuildLFGuildStatus();
-	inline bool XTargettingAvailable() const { return ((ClientVersionBit & BIT_UFAndLater) && RuleB(Character, EnableXTargetting)); }
+	inline bool XTargettingAvailable() const { return ((m_ClientVersionBit & BIT_UFAndLater) && RuleB(Character, EnableXTargetting)); }
 	inline uint8 GetMaxXTargets() const { return MaxXTargets; }
 	void SetMaxXTargets(uint8 NewMax);
 	bool IsXTarget(const Mob *m) const;
@@ -1257,10 +1258,12 @@ protected:
 	friend class Mob;
 	void CalcItemBonuses(StatBonuses* newbon);
 	void AddItemBonuses(const ItemInst *inst, StatBonuses* newbon, bool isAug = false, bool isTribute = false);
+	void AdditiveWornBonuses(const ItemInst *inst, StatBonuses* newbon, bool isAug = false);
 	int CalcRecommendedLevelBonus(uint8 level, uint8 reclevel, int basestat);
 	void CalcEdibleBonuses(StatBonuses* newbon);
 	void CalcAABonuses(StatBonuses* newbon);
 	void ApplyAABonuses(uint32 aaid, uint32 slots, StatBonuses* newbon);
+	void ProcessItemCaps();
 	void MakeBuffFadePacket(uint16 spell_id, int slot_id, bool send_message = true);
 	bool client_data_loaded;
 
@@ -1314,6 +1317,7 @@ private:
 	int32 GetACMit();
 	int32 GetACAvoid();
 	int32 CalcATK();
+	int32 CalcItemATKCap();
 	int32 CalcHaste();
 
 	int32 CalcAlcoholPhysicalEffect();
@@ -1387,6 +1391,7 @@ private:
 	uint16 BoatID;
 	uint16 TrackingID;
 	uint16 CustomerID;
+	uint16 TraderID;
 	uint32 account_creation;
 	uint8 firstlogon;
 	uint32 mercid; // current merc
@@ -1414,6 +1419,7 @@ private:
 
 	bool CanBeInZone();
 	void SendLogoutPackets();
+	void SendZoneInPackets();
 	bool AddPacket(const EQApplicationPacket *, bool);
 	bool AddPacket(EQApplicationPacket**, bool);
 	bool SendAllPackets();
@@ -1464,6 +1470,10 @@ private:
 	Timer TrackingTimer;
 	Timer RespawnFromHoverTimer;
 	Timer merc_timer;
+	Timer anon_toggle_timer;
+	Timer afk_toggle_timer;
+	Timer helm_toggle_timer;
+	Timer light_update_timer;
 
     glm::vec3 m_Proximity;
 
@@ -1509,7 +1519,7 @@ private:
 	uint32 AttemptedMessages;
 
 	ClientVersion m_ClientVersion;
-	uint32 ClientVersionBit;
+	uint32 m_ClientVersionBit;
 
 	int XPRate;
 

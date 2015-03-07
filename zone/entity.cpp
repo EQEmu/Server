@@ -2767,7 +2767,7 @@ void EntityList::WriteEntityIDs()
 
 BulkZoneSpawnPacket::BulkZoneSpawnPacket(Client *iSendTo, uint32 iMaxSpawnsPerPacket)
 {
-	data = 0;
+	data = nullptr;
 	pSendTo = iSendTo;
 	pMaxSpawnsPerPacket = iMaxSpawnsPerPacket;
 }
@@ -2775,7 +2775,7 @@ BulkZoneSpawnPacket::BulkZoneSpawnPacket(Client *iSendTo, uint32 iMaxSpawnsPerPa
 BulkZoneSpawnPacket::~BulkZoneSpawnPacket()
 {
 	SendBuffer();
-	safe_delete_array(data)
+	safe_delete_array(data);
 }
 
 bool BulkZoneSpawnPacket::AddSpawn(NewSpawn_Struct *ns)
@@ -2794,7 +2794,8 @@ bool BulkZoneSpawnPacket::AddSpawn(NewSpawn_Struct *ns)
 	return false;
 }
 
-void BulkZoneSpawnPacket::SendBuffer() {
+void BulkZoneSpawnPacket::SendBuffer()
+{
 	if (!data)
 		return;
 

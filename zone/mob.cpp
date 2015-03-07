@@ -149,9 +149,13 @@ Mob::Mob(const char* in_name,
 	if (runspeed < 0 || runspeed > 20)
 		runspeed = 1.25f;
 
-	active_light = innate_light = in_light;
-	spell_light = equip_light = NOT_USED;
-
+	m_Light.Type.Innate = in_light;
+	m_Light.Level.Innate = m_Light.TypeToLevel(m_Light.Type.Innate);
+	m_Light.Level.Equipment = m_Light.Type.Equipment = 0;
+	m_Light.Level.Spell = m_Light.Type.Spell = 0;
+	m_Light.Type.Active = m_Light.Type.Innate;
+	m_Light.Level.Active = m_Light.Level.Innate;
+	
 	texture		= in_texture;
 	helmtexture	= in_helmtexture;
 	haircolor	= in_haircolor;
@@ -170,6 +174,7 @@ Mob::Mob(const char* in_name,
 	findable	= false;
 	trackable	= true;
 	has_shieldequiped = false;
+	has_twohandbluntequiped = false;
 	has_numhits = false;
 	has_MGB = false;
 	has_ProjectIllusion = false;
@@ -300,6 +305,7 @@ Mob::Mob(const char* in_name,
 	focused = false;
 	_IsTempPet = false;
 	pet_owner_client = false;
+	pet_targetlock_id = 0;
 
 	attacked_count = 0;
 	mezzed = false;
@@ -901,8 +907,8 @@ void Mob::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho)
 	ns->spawn.animation	= 0;
 	ns->spawn.findable	= findable?1:0;
 
-	UpdateActiveLightValue();
-	ns->spawn.light		= active_light;
+	UpdateActiveLight();
+	ns->spawn.light		= m_Light.Type.Active;
 
 	ns->spawn.showhelm = (helmtexture && helmtexture != 0xFF) ? 1 : 0;
 
@@ -959,10 +965,10 @@ void Mob::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho)
 		// Only Player Races Wear Armor
 		if (Mob::IsPlayerRace(race) || i > 6)
 		{
-			ns->spawn.equipment[i].material = GetEquipmentMaterial(i);
-			ns->spawn.equipment[i].elitematerial = IsEliteMaterialItem(i);
-			ns->spawn.equipment[i].heroforgemodel = GetHerosForgeModel(i);
-			ns->spawn.colors[i].color = GetEquipmentColor(i);
+			ns->spawn.equipment[i].Material = GetEquipmentMaterial(i);
+			ns->spawn.equipment[i].EliteMaterial = IsEliteMaterialItem(i);
+			ns->spawn.equipment[i].HeroForgeModel = GetHerosForgeModel(i);
+			ns->spawn.colors[i].Color = GetEquipmentColor(i);
 		}
 	}
 
@@ -1999,9 +2005,10 @@ void Mob::TempName(const char *newname)
 		strn0cpy(temp_name, GetCleanName(), 64);
 	}
 
+	// Remove Numbers before making name unique
+	EntityList::RemoveNumbers(temp_name);
 	// Make the new name unique and set it
-	strn0cpy(temp_name, entity_list.MakeNameUnique(temp_name), 64);
-
+	entity_list.MakeNameUnique(temp_name);
 
 	// Send the new name to all clients
 	EQApplicationPacket* outapp = new EQApplicationPacket(OP_MobRename, sizeof(MobRename_Struct));
@@ -2047,37 +2054,20 @@ void Mob::SetAppearance(EmuAppearance app, bool iIgnoreSelf) {
 	}
 }
 
-bool Mob::UpdateActiveLightValue()
+bool Mob::UpdateActiveLight()
 {
-	/*	This is old information...
-		0 - "None"
-		1 - "Candle"
-		2 - "Torch"
-		3 - "Tiny Glowing Skull"
-		4 - "Small Lantern"
-		5 - "Stein of Moggok"
-		6 - "Large Lantern"
-		7 - "Flameless Lantern"
-		8 - "Globe of Stars"
-		9 - "Light Globe"
-		10 - "Lightstone"
-		11 - "Greater Lightstone"
-		12 - "Fire Beatle Eye"
-		13 - "Coldlight"
-		14 - "Unknown"
-		15 - "Unknown"
-	*/
-	
-	uint8 old_light = (active_light & 0x0F);
-	active_light = (innate_light & 0x0F);
+	uint8 old_light_level = m_Light.Level.Active;
 
-	if (equip_light > active_light) { active_light = equip_light; } // limiter in property handler
-	if (spell_light > active_light) { active_light = spell_light; } // limiter in property handler
+	m_Light.Type.Active = 0;
+	m_Light.Level.Active = 0;
 
-	if (active_light != old_light)
-		return true;
+	if (m_Light.IsLevelGreater((m_Light.Type.Innate & 0x0F), m_Light.Type.Active)) { m_Light.Type.Active = m_Light.Type.Innate; }
+	if (m_Light.Level.Equipment > m_Light.Level.Active) { m_Light.Type.Active = m_Light.Type.Equipment; } // limiter in property handler
+	if (m_Light.Level.Spell > m_Light.Level.Active) { m_Light.Type.Active = m_Light.Type.Spell; } // limiter in property handler
 
-	return false;
+	m_Light.Level.Active = m_Light.TypeToLevel(m_Light.Type.Active);
+
+	return (m_Light.Level.Active != old_light_level);
 }
 
 void Mob::ChangeSize(float in_size = 0, bool bNoRestriction) {
@@ -2577,7 +2567,7 @@ void Mob::SendWearChange(uint8 material_slot)
 	wc->material = GetEquipmentMaterial(material_slot);
 	wc->elite_material = IsEliteMaterialItem(material_slot);
 	wc->hero_forge_model = GetHerosForgeModel(material_slot);
-	wc->color.color = GetEquipmentColor(material_slot);
+	wc->color.Color = GetEquipmentColor(material_slot);
 	wc->wear_slot_id = material_slot;
 
 	entity_list.QueueClients(this, outapp);
@@ -2592,9 +2582,9 @@ void Mob::SendTextureWC(uint8 slot, uint16 texture, uint32 hero_forge_model, uin
 	wc->spawn_id = this->GetID();
 	wc->material = texture;
 	if (this->IsClient())
-		wc->color.color = GetEquipmentColor(slot);
+		wc->color.Color = GetEquipmentColor(slot);
 	else
-		wc->color.color = this->GetArmorTint(slot);
+		wc->color.Color = this->GetArmorTint(slot);
 	wc->wear_slot_id = slot;
 
 	wc->unknown06 = unknown06;
@@ -2622,7 +2612,7 @@ void Mob::SetSlotTint(uint8 material_slot, uint8 red_tint, uint8 green_tint, uin
 	wc->spawn_id = this->GetID();
 	wc->material = GetEquipmentMaterial(material_slot);
 	wc->hero_forge_model = GetHerosForgeModel(material_slot);
-	wc->color.color = color;
+	wc->color.Color = color;
 	wc->wear_slot_id = material_slot;
 
 	entity_list.QueueClients(this, outapp);
@@ -2639,7 +2629,7 @@ void Mob::WearChange(uint8 material_slot, uint16 texture, uint32 color, uint32 h
 	wc->spawn_id = this->GetID();
 	wc->material = texture;
 	wc->hero_forge_model = hero_forge_model;
-	wc->color.color = color;
+	wc->color.Color = color;
 	wc->wear_slot_id = material_slot;
 
 	entity_list.QueueClients(this, outapp);
@@ -3578,17 +3568,14 @@ int16 Mob::GetSkillDmgTaken(const SkillUseTypes skill_used)
 {
 	int skilldmg_mod = 0;
 
-	int16 MeleeVuln = spellbonuses.MeleeVulnerability + itembonuses.MeleeVulnerability + aabonuses.MeleeVulnerability;
-
 	// All skill dmg mod + Skill specific
 	skilldmg_mod += itembonuses.SkillDmgTaken[HIGHEST_SKILL+1] + spellbonuses.SkillDmgTaken[HIGHEST_SKILL+1] +
 					itembonuses.SkillDmgTaken[skill_used] + spellbonuses.SkillDmgTaken[skill_used];
+	
 
-	//Innate SetSkillDamgeTaken(skill,value)
-	if ((SkillDmgTaken_Mod[skill_used]) || (SkillDmgTaken_Mod[HIGHEST_SKILL+1]))
-		skilldmg_mod += SkillDmgTaken_Mod[skill_used] + SkillDmgTaken_Mod[HIGHEST_SKILL+1];
+	skilldmg_mod += SkillDmgTaken_Mod[skill_used] + SkillDmgTaken_Mod[HIGHEST_SKILL+1];
 
-	skilldmg_mod += MeleeVuln;
+	skilldmg_mod += spellbonuses.MeleeVulnerability + itembonuses.MeleeVulnerability + aabonuses.MeleeVulnerability;
 
 	if(skilldmg_mod < -100)
 		skilldmg_mod = -100;
@@ -4671,21 +4658,20 @@ void Mob::SetBodyType(bodyType new_body, bool overwrite_orig) {
 
 void Mob::ModSkillDmgTaken(SkillUseTypes skill_num, int value)
 {
-	if (skill_num <= HIGHEST_SKILL)
-		SkillDmgTaken_Mod[skill_num] = value;
-
-
-	else if (skill_num == 255 || skill_num == -1)
+	if (skill_num == ALL_SKILLS)
 		SkillDmgTaken_Mod[HIGHEST_SKILL+1] = value;
+
+	else if (skill_num >= 0 && skill_num <= HIGHEST_SKILL)
+		SkillDmgTaken_Mod[skill_num] = value;
 }
 
 int16 Mob::GetModSkillDmgTaken(const SkillUseTypes skill_num)
 {
-	if (skill_num <= HIGHEST_SKILL)
-		return SkillDmgTaken_Mod[skill_num];
-
-	else if (skill_num == 255 || skill_num == -1)
+	if (skill_num == ALL_SKILLS)
 		return SkillDmgTaken_Mod[HIGHEST_SKILL+1];
+
+	else if (skill_num >= 0 && skill_num <= HIGHEST_SKILL)
+		return SkillDmgTaken_Mod[skill_num];
 
 	return 0;
 }
@@ -5380,3 +5366,25 @@ int32 Mob::GetSpellStat(uint32 spell_id, const char *identifier, uint8 slot)
 	return stat;
 }
 
+bool Mob::CanClassEquipItem(uint32 item_id)
+{
+	const Item_Struct* itm = nullptr;
+	itm = database.GetItem(item_id);
+
+	if (!itm)
+		return false;
+
+	if(itm->Classes == 65535 )
+		return true;
+
+	if (GetClass() > 16)
+		return false;
+
+	int bitmask = 1;
+	bitmask = bitmask << (GetClass() - 1);
+	
+	if(!(itm->Classes & bitmask))
+		return false;
+	else
+		return true;
+}

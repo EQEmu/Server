@@ -177,16 +177,16 @@ uint32 Client::NukeItem(uint32 itemnum, uint8 where_to_check) {
 }
 
 
-bool Client::CheckLoreConflict(const Item_Struct* item) {
-	if (!item)
-		return false;
-	if (!(item->LoreFlag))
-		return false;
+bool Client::CheckLoreConflict(const Item_Struct* item)
+{
+	if (!item) { return false; }
+	if (!item->LoreFlag) { return false; }
+	if (item->LoreGroup == 0) { return false; }
 
-	if (item->LoreGroup == -1)	// Standard lore items; look everywhere except the shared bank, return the result
+	if (item->LoreGroup == 0xFFFFFFFF) // Standard lore items; look everywhere except the shared bank, return the result
 		return (m_inv.HasItem(item->ID, 0, ~invWhereSharedBank) != INVALID_INDEX);
 
-	//If the item has a lore group, we check for other items with the same group and return the result
+	// If the item has a lore group, we check for other items with the same group and return the result
 	return (m_inv.HasItemByLoreGroup(item->LoreGroup, ~invWhereSharedBank) != INVALID_INDEX);
 }
 
@@ -619,7 +619,7 @@ void Client::DropItem(int16 slot_id)
 	// Save client inventory change to database
 	if (slot_id == MainCursor) {
 		SendCursorBuffer();
-		auto s = m_inv.cursor_begin(), e = m_inv.cursor_end();
+		auto s = m_inv.cursor_cbegin(), e = m_inv.cursor_cend();
 		database.SaveCursor(CharacterID(), s, e);
 	} else {
 		database.SaveInventory(CharacterID(), nullptr, slot_id);
@@ -680,20 +680,37 @@ int32 Client::GetAugmentIDAt(int16 slot_id, uint8 augslot) {
 	return INVALID_ID;
 }
 
-void Client::SendCursorBuffer() {
+void Client::SendCursorBuffer()
+{
 	// Temporary work-around for the RoF+ Client Buffer
 	// Instead of dealing with client moving items in cursor buffer,
 	// we can just send the next item in the cursor buffer to the cursor.
-	if (GetClientVersion() >= ClientVersion::RoF)
-	{
-		if (!GetInv().CursorEmpty())
-		{
-			const ItemInst* inst = GetInv().GetCursorItem();
-			if (inst)
-			{
-				SendItemPacket(MainCursor, inst, ItemPacketSummonItem);
-			}
-		}
+	if (GetClientVersion() < ClientVersion::RoF) { return; }
+	if (GetInv().CursorEmpty()) { return; }
+
+	auto test_inst = GetInv().GetCursorItem();
+	if (test_inst == nullptr) { return; }
+	auto test_item = test_inst->GetItem();
+	if (test_item == nullptr) { return; }
+
+	bool lore_pass = true;
+	if (test_item->LoreGroup == 0xFFFFFFFF) {
+		lore_pass = (m_inv.HasItem(test_item->ID, 0, ~(invWhereSharedBank | invWhereCursor)) == INVALID_INDEX);
+	}
+	else if (test_item->LoreGroup != 0) {
+		lore_pass = (m_inv.HasItemByLoreGroup(test_item->LoreGroup, ~(invWhereSharedBank | invWhereCursor)) == INVALID_INDEX);
+	}
+
+	if (!lore_pass) {
+		Log.Out(Logs::General, Logs::Inventory, "(%s) Duplicate lore items are not allowed - destroying item %s(id:%u) on cursor",
+			GetName(), test_item->Name, test_item->ID);
+		Message_StringID(MT_LootMessages, 290);
+		parse->EventItem(EVENT_DESTROY_ITEM, this, test_inst, nullptr, "", 0);
+		DeleteItemInInventory(MainCursor);
+		SendCursorBuffer();
+	}
+	else {
+		SendItemPacket(MainCursor, test_inst, ItemPacketSummonItem);
 	}
 }
 
@@ -772,7 +789,7 @@ void Client::DeleteItemInInventory(int16 slot_id, int8 quantity, bool client_upd
 
 	const ItemInst* inst = nullptr;
 	if (slot_id == MainCursor) {
-		auto s = m_inv.cursor_begin(), e = m_inv.cursor_end();
+		auto s = m_inv.cursor_cbegin(), e = m_inv.cursor_cend();
 		if(update_db)
 			database.SaveCursor(character_id, s, e);
 	}
@@ -826,7 +843,7 @@ bool Client::PushItemOnCursor(const ItemInst& inst, bool client_update)
 		SendItemPacket(MainCursor, &inst, ItemPacketSummonItem);
 	}
 
-	auto s = m_inv.cursor_begin(), e = m_inv.cursor_end();
+	auto s = m_inv.cursor_cbegin(), e = m_inv.cursor_cend();
 	return database.SaveCursor(CharacterID(), s, e);
 }
 
@@ -851,7 +868,7 @@ bool Client::PutItemInInventory(int16 slot_id, const ItemInst& inst, bool client
 	}
 		
 	if (slot_id == MainCursor) {
-		auto s = m_inv.cursor_begin(), e = m_inv.cursor_end();
+		auto s = m_inv.cursor_cbegin(), e = m_inv.cursor_cend();
 		return database.SaveCursor(this->CharacterID(), s, e);
 	}
 	else {
@@ -865,28 +882,64 @@ bool Client::PutItemInInventory(int16 slot_id, const ItemInst& inst, bool client
 void Client::PutLootInInventory(int16 slot_id, const ItemInst &inst, ServerLootItem_Struct** bag_item_data)
 {
 	Log.Out(Logs::Detail, Logs::Inventory, "Putting loot item %s (%d) into slot %d", inst.GetItem()->Name, inst.GetItem()->ID, slot_id);
-	m_inv.PutItem(slot_id, inst);
 
-	SendLootItemInPacket(&inst, slot_id);
+	bool cursor_empty = m_inv.CursorEmpty();
 
 	if (slot_id == MainCursor) {
-		auto s = m_inv.cursor_begin(), e = m_inv.cursor_end();
+		m_inv.PushCursor(inst);
+		auto s = m_inv.cursor_cbegin(), e = m_inv.cursor_cend();
 		database.SaveCursor(this->CharacterID(), s, e);
 	}
 	else {
+		m_inv.PutItem(slot_id, inst);
 		database.SaveInventory(this->CharacterID(), &inst, slot_id);
 	}
 
-	if(bag_item_data) { // bag contents
-		int16 interior_slot;
-		// our bag went into slot_id, now let's pack the contents in
-		for(int i = SUB_BEGIN; i < EmuConstants::ITEM_CONTAINER_SIZE; i++) {
-			if(bag_item_data[i] == nullptr)
+	// Subordinate items in cursor buffer must be sent via ItemPacketSummonItem or we just overwrite the visible cursor and desync the client
+	if (slot_id == MainCursor && !cursor_empty) {
+		// RoF+ currently has a specialized cursor handler
+		if (GetClientVersion() < ClientVersion::RoF)
+			SendItemPacket(slot_id, &inst, ItemPacketSummonItem);
+	}
+	else {
+		SendLootItemInPacket(&inst, slot_id);
+	}
+	
+	if (bag_item_data) {
+		for (int index = 0; index < EmuConstants::ITEM_CONTAINER_SIZE; ++index) {
+			if (bag_item_data[index] == nullptr)
 				continue;
-			const ItemInst *bagitem = database.CreateItem(bag_item_data[i]->item_id, bag_item_data[i]->charges, bag_item_data[i]->aug_1, bag_item_data[i]->aug_2, bag_item_data[i]->aug_3, bag_item_data[i]->aug_4, bag_item_data[i]->aug_5, bag_item_data[i]->aug_6, bag_item_data[i]->attuned);
-			interior_slot = Inventory::CalcSlotId(slot_id, i);
-			Log.Out(Logs::Detail, Logs::Inventory, "Putting bag loot item %s (%d) into slot %d (bag slot %d)", inst.GetItem()->Name, inst.GetItem()->ID, interior_slot, i);
-			PutLootInInventory(interior_slot, *bagitem);
+
+			const ItemInst *bagitem = database.CreateItem(
+				bag_item_data[index]->item_id,
+				bag_item_data[index]->charges,
+				bag_item_data[index]->aug_1,
+				bag_item_data[index]->aug_2,
+				bag_item_data[index]->aug_3,
+				bag_item_data[index]->aug_4,
+				bag_item_data[index]->aug_5,
+				bag_item_data[index]->aug_6,
+				bag_item_data[index]->attuned
+				);
+
+			// Dump bag contents to cursor in the event that owning bag is not the first cursor item
+			// (This assumes that the data passed is correctly associated..no safety checks are implemented)
+			if (slot_id == MainCursor && !cursor_empty) {
+				Log.Out(Logs::Detail, Logs::Inventory,
+					"Putting bag loot item %s (%d) into slot %d (non-empty cursor override)",
+					inst.GetItem()->Name, inst.GetItem()->ID, MainCursor);
+
+				PutLootInInventory(MainCursor, *bagitem);
+			}
+			else {
+				auto bag_slot = Inventory::CalcSlotId(slot_id, index);
+
+				Log.Out(Logs::Detail, Logs::Inventory,
+					"Putting bag loot item %s (%d) into slot %d (bag slot %d)",
+					inst.GetItem()->Name, inst.GetItem()->ID, bag_slot, index);
+
+				PutLootInInventory(bag_slot, *bagitem);
+			}
 			safe_delete(bagitem);
 		}
 	}
@@ -1009,7 +1062,7 @@ void Client::MoveItemCharges(ItemInst &from, int16 to_slot, uint8 type)
 		from.SetCharges(from.GetCharges() - charges_to_move);
 		SendLootItemInPacket(tmp_inst, to_slot);
 		if (to_slot == MainCursor) {
-			auto s = m_inv.cursor_begin(), e = m_inv.cursor_end();
+			auto s = m_inv.cursor_cbegin(), e = m_inv.cursor_cend();
 			database.SaveCursor(this->CharacterID(), s, e);
 		}
 		else {
@@ -1050,12 +1103,12 @@ bool MakeItemLink(char* &ret_link, const Item_Struct *item, uint32 aug0, uint32 
 	// Currently, enabling them causes misalignments in what the client expects. I haven't looked
 	// into it further to determine the cause..but, the function is setup to accept the parameters.
 	// Note: some links appear with '00000' in front of the name..so, it's likely we need to send
-	// some additional information when certain parameters are true -U
+	// some additional information when certain parameters are true
 	//switch (GetClientVersion()) {
 	switch (0) {
 	case EQClientRoF2:
 		// This operator contains 14 parameter masks..but, only 13 parameter values.
-		// Even so, the client link appears ok... Need to figure out the discrepancy -U
+		// Even so, the client link appears ok... Need to figure out the discrepancy
 		MakeAnyLenString(&ret_link, "%1X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%1X" "%1X" "%04X" "%1X" "%05X" "%08X",
 			0,
 			item->ID,
@@ -1320,10 +1373,33 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 		return false;
 	}
 
-	// This could be expounded upon at some point to let the server know that
-	// the client has moved a buffered cursor item onto the active cursor -U
 	if (move_in->from_slot == move_in->to_slot) { // Item summon, no further processing needed
 		if(RuleB(QueryServ, PlayerLogMoves)) { QSSwapItemAuditor(move_in); } // QS Audit
+		if (GetClientVersion() >= ClientVersion::RoF) { return true; } // Can't do RoF+
+
+		if (move_in->to_slot == MainCursor) {
+			auto test_inst = m_inv.GetItem(MainCursor);
+			if (test_inst == nullptr) { return true; }
+			auto test_item = test_inst->GetItem();
+			if (test_item == nullptr) { return true; }
+			if (!test_item->LoreFlag) { return true; }
+
+			bool lore_pass = true;
+			if (test_item->LoreGroup == 0xFFFFFFFF) {
+				lore_pass = (m_inv.HasItem(test_item->ID, 0, ~(invWhereSharedBank | invWhereCursor)) == INVALID_INDEX);
+			}
+			else if (test_item->LoreGroup != 0) {
+				lore_pass = (m_inv.HasItemByLoreGroup(test_item->LoreGroup, ~(invWhereSharedBank | invWhereCursor)) == INVALID_INDEX);
+			}
+
+			if (!lore_pass) {
+				Log.Out(Logs::General, Logs::Inventory, "(%s) Duplicate lore items are not allowed - destroying item %s(id:%u) on cursor",
+					GetName(), test_item->Name, test_item->ID);
+				Message_StringID(MT_LootMessages, 290);
+				parse->EventItem(EVENT_DESTROY_ITEM, this, test_inst, nullptr, "", 0);
+				DeleteItemInInventory(MainCursor, 0, true);
+			}
+		}
 		return true;
 	}
 
@@ -1567,7 +1643,7 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 				{
 					SendCursorBuffer();
 				}
-				auto s = m_inv.cursor_begin(), e = m_inv.cursor_end();
+				auto s = m_inv.cursor_cbegin(), e = m_inv.cursor_cend();
 				database.SaveCursor(character_id, s, e);
 			}
 			else
@@ -1726,7 +1802,7 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 		{
 			SendCursorBuffer();
 		}
-		auto s = m_inv.cursor_begin(), e = m_inv.cursor_end();
+		auto s = m_inv.cursor_cbegin(), e = m_inv.cursor_cend();
 		database.SaveCursor(character_id, s, e);
 	}
 	else {
@@ -1734,7 +1810,7 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 	}
 
 	if (dst_slot_id == MainCursor) {
-		auto s = m_inv.cursor_begin(), e = m_inv.cursor_end();
+		auto s = m_inv.cursor_cbegin(), e = m_inv.cursor_cend();
 		database.SaveCursor(character_id, s, e);
 	}
 	else {
@@ -1753,14 +1829,14 @@ void Client::SwapItemResync(MoveItem_Struct* move_slots) {
 	// with any luck..this won't be needed in the future
 
 	// resync the 'from' and 'to' slots on an as-needed basis
-	// Not as effective as the full process, but less intrusive to gameplay -U
+	// Not as effective as the full process, but less intrusive to gameplay
 	Log.Out(Logs::Detail, Logs::Inventory, "Inventory desyncronization. (charname: %s, source: %i, destination: %i)", GetName(), move_slots->from_slot, move_slots->to_slot);
 	Message(15, "Inventory Desyncronization detected: Resending slot data...");
 
 	if((move_slots->from_slot >= EmuConstants::EQUIPMENT_BEGIN && move_slots->from_slot <= EmuConstants::CURSOR_BAG_END) || move_slots->from_slot == MainPowerSource) {
 		int16 resync_slot = (Inventory::CalcSlotId(move_slots->from_slot) == INVALID_INDEX) ? move_slots->from_slot : Inventory::CalcSlotId(move_slots->from_slot);
 		if (IsValidSlot(resync_slot) && resync_slot != INVALID_INDEX) {
-			// This prevents the client from crashing when closing any 'phantom' bags -U
+			// This prevents the client from crashing when closing any 'phantom' bags
 			const Item_Struct* token_struct = database.GetItem(22292); // 'Copper Coin'
 			ItemInst* token_inst = database.CreateItem(token_struct, 1);
 
@@ -1944,9 +2020,9 @@ void Client::QSSwapItemAuditor(MoveItem_Struct* move_in, bool postaction_call) {
 void Client::DyeArmor(DyeStruct* dye){
 	int16 slot=0;
 	for (int i = EmuConstants::MATERIAL_BEGIN; i <= EmuConstants::MATERIAL_TINT_END; i++) {
-		if (m_pp.item_tint[i].rgb.blue != dye->dye[i].rgb.blue ||
-			m_pp.item_tint[i].rgb.red != dye->dye[i].rgb.red ||
-			m_pp.item_tint[i].rgb.green != dye->dye[i].rgb.green
+		if (m_pp.item_tint[i].RGB.Blue != dye->dye[i].RGB.Blue ||
+			m_pp.item_tint[i].RGB.Red != dye->dye[i].RGB.Red ||
+			m_pp.item_tint[i].RGB.Green != dye->dye[i].RGB.Green
 			) {
 			slot = m_inv.HasItem(32557, 1, invWherePersonal);
 			if (slot != INVALID_INDEX){
@@ -1954,18 +2030,18 @@ void Client::DyeArmor(DyeStruct* dye){
 				uint8 slot2=SlotConvert(i);
 				ItemInst* inst = this->m_inv.GetItem(slot2);
 				if(inst){
-					uint32 armor_color = ((uint32)dye->dye[i].rgb.red << 16) | ((uint32)dye->dye[i].rgb.green << 8) | ((uint32)dye->dye[i].rgb.blue);
+					uint32 armor_color = ((uint32)dye->dye[i].RGB.Red << 16) | ((uint32)dye->dye[i].RGB.Green << 8) | ((uint32)dye->dye[i].RGB.Blue);
 					inst->SetColor(armor_color); 
 					database.SaveCharacterMaterialColor(this->CharacterID(), i, armor_color);
 					database.SaveInventory(CharacterID(),inst,slot2);
-					if(dye->dye[i].rgb.use_tint)
-						m_pp.item_tint[i].rgb.use_tint = 0xFF;
+					if(dye->dye[i].RGB.UseTint)
+						m_pp.item_tint[i].RGB.UseTint = 0xFF;
 					else
-						m_pp.item_tint[i].rgb.use_tint=0x00;
+						m_pp.item_tint[i].RGB.UseTint=0x00;
 				}
-				m_pp.item_tint[i].rgb.blue=dye->dye[i].rgb.blue;
-				m_pp.item_tint[i].rgb.red=dye->dye[i].rgb.red;
-				m_pp.item_tint[i].rgb.green=dye->dye[i].rgb.green;
+				m_pp.item_tint[i].RGB.Blue=dye->dye[i].RGB.Blue;
+				m_pp.item_tint[i].RGB.Red=dye->dye[i].RGB.Red;
+				m_pp.item_tint[i].RGB.Green=dye->dye[i].RGB.Green;
 				SendWearChange(i);
 			}
 			else{
@@ -2170,7 +2246,7 @@ void Client::RemoveNoRent(bool client_update)
 		}
 		local.clear();
 
-		auto s = m_inv.cursor_begin(), e = m_inv.cursor_end();
+		auto s = m_inv.cursor_cbegin(), e = m_inv.cursor_cend();
 		database.SaveCursor(this->CharacterID(), s, e);
 	}
 }
@@ -2257,7 +2333,7 @@ void Client::RemoveDuplicateLore(bool client_update)
 		safe_delete(inst);
 	}
 
-	// Shared Bank and Shared Bank Containers are not checked due to their allowing duplicate lore items -U
+	// Shared Bank and Shared Bank Containers are not checked due to their allowing duplicate lore items
 
 	if (!m_inv.CursorEmpty()) {
 		std::list<ItemInst*> local_1;
@@ -2298,7 +2374,7 @@ void Client::RemoveDuplicateLore(bool client_update)
 		}
 		local_2.clear();
 
-		auto s = m_inv.cursor_begin(), e = m_inv.cursor_end();
+		auto s = m_inv.cursor_cbegin(), e = m_inv.cursor_cend();
 		database.SaveCursor(this->CharacterID(), s, e);
 	}
 }
@@ -2327,7 +2403,7 @@ void Client::MoveSlotNotAllowed(bool client_update)
 		safe_delete(inst);
 	}
 
-	// No need to check inventory, cursor, bank or shared bank since they allow max item size and containers -U
+	// No need to check inventory, cursor, bank or shared bank since they allow max item size and containers
 	// Code can be added to check item size vs. container size, but it is left to attrition for now.
 }
 
@@ -2380,7 +2456,7 @@ uint32 Client::GetEquipmentColor(uint8 material_slot) const
 
 	const Item_Struct *item = database.GetItem(GetEquipment(material_slot));
 	if(item != nullptr)
-		return ((m_pp.item_tint[material_slot].rgb.use_tint) ? m_pp.item_tint[material_slot].color : item->Color);
+		return ((m_pp.item_tint[material_slot].RGB.UseTint) ? m_pp.item_tint[material_slot].Color : item->Color);
 
 	return 0;
 }
@@ -2436,97 +2512,99 @@ EQApplicationPacket* Client::ReturnItemPacket(int16 slot_id, const ItemInst* ins
 	return outapp;
 }
 
-static int16 BandolierSlotToWeaponSlot(int BandolierSlot) {
-
-	switch(BandolierSlot) {
-		case bandolierMainHand:
-			return MainPrimary;
-		case bandolierOffHand:
-			return MainSecondary;
-		case bandolierRange:
-			return MainRange;
-		default:
-			return MainAmmo;
+static int16 BandolierSlotToWeaponSlot(int BandolierSlot)
+{
+	switch (BandolierSlot)
+	{
+	case bandolierPrimary:
+		return MainPrimary;
+	case bandolierSecondary:
+		return MainSecondary;
+	case bandolierRange:
+		return MainRange;
+	default:
+		return MainAmmo;
 	}
 }
 
-void Client::CreateBandolier(const EQApplicationPacket *app) {
-
+void Client::CreateBandolier(const EQApplicationPacket *app)
+{
 	// Store bandolier set with the number and name passed by the client, along with the items that are currently
 	// in the players weapon slots.
 
 	BandolierCreate_Struct *bs = (BandolierCreate_Struct*)app->pBuffer;
 
-	Log.Out(Logs::Detail, Logs::Inventory, "Char: %s Creating Bandolier Set %i, Set Name: %s", GetName(), bs->number, bs->name);
-	strcpy(m_pp.bandoliers[bs->number].name, bs->name);
+	Log.Out(Logs::Detail, Logs::Inventory, "Char: %s Creating Bandolier Set %i, Set Name: %s", GetName(), bs->Number, bs->Name);
+	strcpy(m_pp.bandoliers[bs->Number].Name, bs->Name);
 
 	const ItemInst* InvItem = nullptr; 
 	const Item_Struct *BaseItem = nullptr; 
-	int16 WeaponSlot;
+	int16 WeaponSlot = 0;
 
-	for(int BandolierSlot = bandolierMainHand; BandolierSlot <= bandolierAmmo; BandolierSlot++) {
+	for(int BandolierSlot = bandolierPrimary; BandolierSlot <= bandolierAmmo; BandolierSlot++) {
 		WeaponSlot = BandolierSlotToWeaponSlot(BandolierSlot);
 		InvItem = GetInv()[WeaponSlot];
 		if(InvItem) {
 			BaseItem = InvItem->GetItem();
 			Log.Out(Logs::Detail, Logs::Inventory, "Char: %s adding item %s to slot %i", GetName(),BaseItem->Name, WeaponSlot);
-			m_pp.bandoliers[bs->number].items[BandolierSlot].item_id = BaseItem->ID;
-			m_pp.bandoliers[bs->number].items[BandolierSlot].icon = BaseItem->Icon;
-			database.SaveCharacterBandolier(this->CharacterID(), bs->number, BandolierSlot, m_pp.bandoliers[bs->number].items[BandolierSlot].item_id, m_pp.bandoliers[bs->number].items[BandolierSlot].icon, bs->name);
+			m_pp.bandoliers[bs->Number].Items[BandolierSlot].ID = BaseItem->ID;
+			m_pp.bandoliers[bs->Number].Items[BandolierSlot].Icon = BaseItem->Icon;
+			database.SaveCharacterBandolier(this->CharacterID(), bs->Number, BandolierSlot, m_pp.bandoliers[bs->Number].Items[BandolierSlot].ID, m_pp.bandoliers[bs->Number].Items[BandolierSlot].Icon, bs->Name);
 		}
 		else {
 			Log.Out(Logs::Detail, Logs::Inventory, "Char: %s no item in slot %i", GetName(), WeaponSlot);
-			m_pp.bandoliers[bs->number].items[BandolierSlot].item_id = 0;
-			m_pp.bandoliers[bs->number].items[BandolierSlot].icon = 0;
+			m_pp.bandoliers[bs->Number].Items[BandolierSlot].ID = 0;
+			m_pp.bandoliers[bs->Number].Items[BandolierSlot].Icon = 0;
 		}
 	}
 }
 
-void Client::RemoveBandolier(const EQApplicationPacket *app) {
+void Client::RemoveBandolier(const EQApplicationPacket *app)
+{
 	BandolierDelete_Struct *bds = (BandolierDelete_Struct*)app->pBuffer;
-	Log.Out(Logs::Detail, Logs::Inventory, "Char: %s removing set", GetName(), bds->number);
-	memset(m_pp.bandoliers[bds->number].name, 0, 32);
-	for(int i = bandolierMainHand; i <= bandolierAmmo; i++) {
-		m_pp.bandoliers[bds->number].items[i].item_id = 0;
-		m_pp.bandoliers[bds->number].items[i].icon = 0; 
+	Log.Out(Logs::Detail, Logs::Inventory, "Char: %s removing set", GetName(), bds->Number);
+	memset(m_pp.bandoliers[bds->Number].Name, 0, 32);
+	for(int i = bandolierPrimary; i <= bandolierAmmo; i++) {
+		m_pp.bandoliers[bds->Number].Items[i].ID = 0;
+		m_pp.bandoliers[bds->Number].Items[i].Icon = 0; 
 	}
-	database.DeleteCharacterBandolier(this->CharacterID(), bds->number);
+	database.DeleteCharacterBandolier(this->CharacterID(), bds->Number);
 }
 
-void Client::SetBandolier(const EQApplicationPacket *app) {
-
+void Client::SetBandolier(const EQApplicationPacket *app)
+{
 	// Swap the weapons in the given bandolier set into the character's weapon slots and return
 	// any items currently in the weapon slots to inventory.
 
 	BandolierSet_Struct *bss = (BandolierSet_Struct*)app->pBuffer;
-	Log.Out(Logs::Detail, Logs::Inventory, "Char: %s activating set %i", GetName(), bss->number);
-	int16 slot;
-	int16 WeaponSlot;
+	Log.Out(Logs::Detail, Logs::Inventory, "Char: %s activating set %i", GetName(), bss->Number);
+	int16 slot = 0;
+	int16 WeaponSlot = 0;
 	ItemInst *BandolierItems[4]; // Temporary holding area for the weapons we pull out of their inventory
 
 	// First we pull the items for this bandolier set out of their inventory, this makes space to put the
 	// currently equipped items back.
-	for(int BandolierSlot = bandolierMainHand; BandolierSlot <= bandolierAmmo; BandolierSlot++) {
+	for(int BandolierSlot = bandolierPrimary; BandolierSlot <= bandolierAmmo; BandolierSlot++) {
 		// If this bandolier set has an item in this position
-		if(m_pp.bandoliers[bss->number].items[BandolierSlot].item_id) {
+		if(m_pp.bandoliers[bss->Number].Items[BandolierSlot].ID) {
 			WeaponSlot = BandolierSlotToWeaponSlot(BandolierSlot);
 
 			// Check if the player has the item specified in the bandolier set on them.
 			//
-			slot = m_inv.HasItem(m_pp.bandoliers[bss->number].items[BandolierSlot].item_id, 1,
+			slot = m_inv.HasItem(m_pp.bandoliers[bss->Number].Items[BandolierSlot].ID, 1,
 							invWhereWorn|invWherePersonal);
 
 			// removed 'invWhereCursor' argument from above and implemented slots 30, 331-340 checks here
 			if (slot == INVALID_INDEX) {
 				if (m_inv.GetItem(MainCursor)) {
-					if (m_inv.GetItem(MainCursor)->GetItem()->ID == m_pp.bandoliers[bss->number].items[BandolierSlot].item_id &&
+					if (m_inv.GetItem(MainCursor)->GetItem()->ID == m_pp.bandoliers[bss->Number].Items[BandolierSlot].ID &&
 						m_inv.GetItem(MainCursor)->GetCharges() >= 1) { // '> 0' the same, but this matches Inventory::_HasItem conditional check
 						slot = MainCursor;
 					}
 					else if (m_inv.GetItem(MainCursor)->GetItem()->ItemClass == 1) {
 						for(int16 CursorBagSlot = EmuConstants::CURSOR_BAG_BEGIN; CursorBagSlot <= EmuConstants::CURSOR_BAG_END; CursorBagSlot++) {
 							if (m_inv.GetItem(CursorBagSlot)) {
-								if (m_inv.GetItem(CursorBagSlot)->GetItem()->ID == m_pp.bandoliers[bss->number].items[BandolierSlot].item_id &&
+								if (m_inv.GetItem(CursorBagSlot)->GetItem()->ID == m_pp.bandoliers[bss->Number].Items[BandolierSlot].ID &&
 									m_inv.GetItem(CursorBagSlot)->GetCharges() >= 1) { // ditto
 										slot = CursorBagSlot;
 										break;
@@ -2590,14 +2668,14 @@ void Client::SetBandolier(const EQApplicationPacket *app) {
 	// Now we move the required weapons into the character weapon slots, and return any items we are replacing
 	// back to inventory.
 	//
-	for(int BandolierSlot = bandolierMainHand; BandolierSlot <= bandolierAmmo; BandolierSlot++) {
+	for(int BandolierSlot = bandolierPrimary; BandolierSlot <= bandolierAmmo; BandolierSlot++) {
 
 		// Find the inventory slot corresponding to this bandolier slot
 
 		WeaponSlot = BandolierSlotToWeaponSlot(BandolierSlot);
 
 		// if there is an item in this Bandolier slot ?
-		if(m_pp.bandoliers[bss->number].items[BandolierSlot].item_id) {
+		if(m_pp.bandoliers[bss->Number].Items[BandolierSlot].ID) {
 			// if the player has this item in their inventory, and it is not already where it needs to be
 			if(BandolierItems[BandolierSlot]) {
 				// Pull the item that we are going to replace
@@ -2826,9 +2904,9 @@ bool Client::InterrogateInventory(Client* requester, bool log, bool silent, bool
 	}
 
 	int limbo = 0;
-	for (auto cursor_itr = m_inv.cursor_begin(); cursor_itr != m_inv.cursor_end(); ++cursor_itr, ++limbo) {
+	for (auto cursor_itr = m_inv.cursor_cbegin(); cursor_itr != m_inv.cursor_cend(); ++cursor_itr, ++limbo) {
 		// m_inv.cursor_begin() is referenced as MainCursor in MapPossessions above
-		if (cursor_itr == m_inv.cursor_begin())
+		if (cursor_itr == m_inv.cursor_cbegin())
 			continue;
 
 		instmap[8000 + limbo] = *cursor_itr;

@@ -97,7 +97,7 @@ Bot::Bot(NPCType npcTypeData, Client* botOwner) : NPC(&npcTypeData, nullptr, glm
 
 	strcpy(this->name, this->GetCleanName());
 
-	active_light = spell_light = equip_light = innate_light = NOT_USED;
+	memset(&m_Light, 0, sizeof(LightProfile_Struct));
 }
 
 // This constructor is used when the bot is loaded out of the database
@@ -213,8 +213,6 @@ Bot::Bot(uint32 botID, uint32 botOwnerCharacterID, uint32 botSpellsID, double to
 	if(cur_mana > max_mana)
 		cur_mana = max_mana;
 	cur_end = max_end;
-
-	active_light = spell_light = equip_light = innate_light = NOT_USED;
 }
 
 Bot::~Bot() {
@@ -4121,8 +4119,8 @@ void Bot::Spawn(Client* botCharacterOwner, std::string* errorMessage) {
 		// Level the bot to the same level as the bot owner
 		//this->SetLevel(botCharacterOwner->GetLevel());
 
-		UpdateEquipLightValue();
-		UpdateActiveLightValue();
+		UpdateEquipmentLight();
+		UpdateActiveLight();
 
 		entity_list.AddBot(this, true, true);
 
@@ -4132,7 +4130,7 @@ void Bot::Spawn(Client* botCharacterOwner, std::string* errorMessage) {
 		this->SendPosition();
 
 		// there is something askew with spawn struct appearance fields...
-		// I re-enabled this until I can sort it out -U
+		// I re-enabled this until I can sort it out
 		uint32 itemID = 0;
 		uint8 materialFromSlot = 0xFF;
 		for(int i = EmuConstants::EQUIPMENT_BEGIN; i <= EmuConstants::EQUIPMENT_END; ++i) {
@@ -4187,7 +4185,7 @@ void Bot::RemoveBotItemBySlot(uint32 slotID, std::string *errorMessage) {
         *errorMessage = std::string(results.ErrorMessage());
 
     m_inv.DeleteItem(slotID);
-	UpdateEquipLightValue();
+	UpdateEquipmentLight();
 }
 
 // Retrieves all the inventory records from the database for this bot.
@@ -4249,7 +4247,7 @@ void Bot::GetBotItems(std::string* errorMessage, Inventory &inv) {
 
     }
 
-	UpdateEquipLightValue();
+	UpdateEquipmentLight();
 }
 
 // Returns the inventory record for this bot from the database for the specified equipment slot.
@@ -4375,8 +4373,8 @@ void Bot::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho) {
 		ns->spawn.size = 0;
 		ns->spawn.NPC = 0;					// 0=player,1=npc,2=pc corpse,3=npc corpse
 
-		UpdateActiveLightValue();
-		ns->spawn.light = active_light;
+		UpdateActiveLight();
+		ns->spawn.light = m_Light.Type.Active;
 
 		ns->spawn.helm = helmtexture; //0xFF;
 		ns->spawn.equip_chest2 = texture; //0xFF;
@@ -4395,24 +4393,24 @@ void Bot::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho) {
 				item = inst->GetItem();
 				if (item != 0)
 				{
-					ns->spawn.equipment[i].material = item->Material;
-					ns->spawn.equipment[i].elitematerial = item->EliteMaterial;
-					ns->spawn.equipment[i].heroforgemodel = item->HerosForgeModel;
+					ns->spawn.equipment[i].Material = item->Material;
+					ns->spawn.equipment[i].EliteMaterial = item->EliteMaterial;
+					ns->spawn.equipment[i].HeroForgeModel = item->HerosForgeModel;
 					if (armor_tint[i])
 					{
-						ns->spawn.colors[i].color = armor_tint[i];
+						ns->spawn.colors[i].Color = armor_tint[i];
 
 					}
 					else
 					{
-						ns->spawn.colors[i].color = item->Color;
+						ns->spawn.colors[i].Color = item->Color;
 					}
 				}
 				else
 				{
 					if (armor_tint[i])
 					{
-						ns->spawn.colors[i].color = armor_tint[i];
+						ns->spawn.colors[i].Color = armor_tint[i];
 					}
 				}
 			}
@@ -4426,9 +4424,9 @@ void Bot::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho) {
 			{
 				if(strlen(item->IDFile) > 2)
 				{
-					ns->spawn.equipment[MaterialPrimary].material = atoi(&item->IDFile[2]);
+					ns->spawn.equipment[MaterialPrimary].Material = atoi(&item->IDFile[2]);
 				}
-				ns->spawn.colors[MaterialPrimary].color = GetEquipmentColor(MaterialPrimary);
+				ns->spawn.colors[MaterialPrimary].Color = GetEquipmentColor(MaterialPrimary);
 			}
 		}
 
@@ -4440,9 +4438,9 @@ void Bot::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho) {
 			{
 				if(strlen(item->IDFile) > 2)
 				{
-					ns->spawn.equipment[MaterialSecondary].material = atoi(&item->IDFile[2]);
+					ns->spawn.equipment[MaterialSecondary].Material = atoi(&item->IDFile[2]);
 				}
-				ns->spawn.colors[MaterialSecondary].color = GetEquipmentColor(MaterialSecondary);
+				ns->spawn.colors[MaterialSecondary].Color = GetEquipmentColor(MaterialSecondary);
 			}
 		}
 	}
@@ -5061,7 +5059,7 @@ void Bot::SendBotArcheryWearChange(uint8 material_slot, uint32 material, uint32 
 
 	wc->spawn_id = GetID();
 	wc->material = material;
-	wc->color.color = color;
+	wc->color.Color = color;
 	wc->wear_slot_id = material_slot;
 
 	entity_list.QueueClients(this, outapp);
@@ -5088,9 +5086,9 @@ void Bot::BotAddEquipItem(int slot, uint32 id) {
 			SendWearChange(materialFromSlot);
 		}
 
-		UpdateEquipLightValue();
-		if (UpdateActiveLightValue())
-			SendAppearancePacket(AT_Light, GetActiveLightValue());
+		UpdateEquipmentLight();
+		if (UpdateActiveLight())
+			SendAppearancePacket(AT_Light, GetActiveLightType());
 	}
 }
 
@@ -5106,9 +5104,9 @@ void Bot::BotRemoveEquipItem(int slot) {
 				SendWearChange(MaterialArms);
 		}
 
-		UpdateEquipLightValue();
-		if (UpdateActiveLightValue())
-			SendAppearancePacket(AT_Light, GetActiveLightValue());
+		UpdateEquipmentLight();
+		if (UpdateActiveLight())
+			SendAppearancePacket(AT_Light, GetActiveLightType());
 	}
 }
 
@@ -8407,7 +8405,7 @@ void Bot::EquipBot(std::string* errorMessage) {
 		}
 	}
 
-	UpdateEquipLightValue();
+	UpdateEquipmentLight();
 }
 
 //// This method is meant to be called by zone or client methods to clean up objects when a client camps, goes LD, zones out or something like that.
@@ -10823,7 +10821,7 @@ void Bot::ProcessBotInspectionRequest(Bot* inspectedBot, Client* client) {
 
 		// Modded to display power source items (will only show up on SoF+ client inspect windows though.)
 		// I don't think bots are currently coded to use them..but, you'll have to use '#bot inventory list'
-		// to see them on a Titanium client when/if they are activated. -U
+		// to see them on a Titanium client when/if they are activated.
 		for(int16 L = EmuConstants::EQUIPMENT_BEGIN; L <= MainWaist; L++) {
 			inst = inspectedBot->GetBotItem(L);
 
@@ -10959,7 +10957,7 @@ void Bot::CalcItemBonuses()
 						}
 					}
 					if ((itemtmp->Worn.Effect != 0) && (itemtmp->Worn.Type == ET_WornEffect)) { // latent effects
-						ApplySpellsBonuses(itemtmp->Worn.Effect, itemtmp->Worn.Level, &itembonuses);
+						ApplySpellsBonuses(itemtmp->Worn.Effect, itemtmp->Worn.Level, &itembonuses,0,itemtmp->Worn.Type);
 					}
 				}
 			}
@@ -11043,7 +11041,7 @@ void Bot::CalcItemBonuses()
 				}
 			}
 			if ((itemtmp->Worn.Effect != 0) && (itemtmp->Worn.Type == ET_WornEffect)) { // latent effects
-				ApplySpellsBonuses(itemtmp->Worn.Effect, itemtmp->Worn.Level, &itembonuses);
+				ApplySpellsBonuses(itemtmp->Worn.Effect, itemtmp->Worn.Level, &itembonuses,0,itemtmp->Worn.Type);
 			}
 		}
 	}

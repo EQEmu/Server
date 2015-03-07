@@ -41,6 +41,11 @@
 	memset(__packet->pBuffer, 0, len); \
 	eq_struct *eq = (eq_struct *) __packet->pBuffer; \
 
+#define ALLOC_LEN_ENCODE(len) \
+	__packet->pBuffer = new unsigned char[len]; \
+	__packet->size = len; \
+	memset(__packet->pBuffer, 0, len); \
+
 //a shorter assignment for direct mode
 #undef OUT
 #define OUT(x) eq->x = emu->x;
@@ -124,14 +129,14 @@
 //check length of packet before decoding. Call before setup.
 #define DECODE_LENGTH_EXACT(struct_) \
 	if(__packet->size != sizeof(struct_)) { \
-		__packet->SetOpcode(OP_Unknown); /* invalidate the packet */ \
 		Log.Out(Logs::Detail, Logs::Netcode, "Wrong size on incoming %s (" #struct_ "): Got %d, expected %d", opcodes->EmuToName(__packet->GetOpcode()), __packet->size, sizeof(struct_)); \
+		__packet->SetOpcode(OP_Unknown); /* invalidate the packet */ \
 		return; \
 	}
 #define DECODE_LENGTH_ATLEAST(struct_) \
 	if(__packet->size < sizeof(struct_)) { \
-		__packet->SetOpcode(OP_Unknown); /* invalidate the packet */ \
 		Log.Out(Logs::Detail, Logs::Netcode, "Wrong size on incoming %s (" #struct_ "): Got %d, expected at least %d", opcodes->EmuToName(__packet->GetOpcode()), __packet->size, sizeof(struct_)); \
+		__packet->SetOpcode(OP_Unknown); /* invalidate the packet */ \
 		return; \
 	}
 
