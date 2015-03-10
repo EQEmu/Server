@@ -1,5 +1,24 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 03/10/2015 ==
+Buff Duration Formula 11.  I noticed this was giving incorect results for 
+a bunch of low level spells.  11 was setting the duration to max duration.
+This seemed to match Zam for a bunch of low level spells, but does not match
+what the client thinks.  I asked in channels and demonstar indicated a formula
+of (level +3) * 30 was what the GUI has been using since 2003.  I changes the
+code to match this and all the low level spells I was seeing wrong were all
+fixed.
+
+Changed the code that updates buff duration once after a cast for focus effects
+to send an arbitrary latge value for the effect field.  Previosuly level was
+sent and it caused very odd behaviour on some spells like lesser shielding
+where it would actually adjust max HP when the packet arrived at the GUI.  I
+tried to figure out what the effect field should be by trying various values,
+diff levels to se if it was effective level, effect desc num to see if that
+was expected, etc.  Found no meaningful value that didnt have side effects. By
+sending this large value all my side effects went away, but the diration updated
+correctly.
+
 == 03/04/2015 ==
 Akkadius: Fix Spell Book Deletion
 
