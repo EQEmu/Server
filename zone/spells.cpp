@@ -2672,7 +2672,8 @@ int CalcBuffDuration_formula(int level, int formula, int duration)
 			return i < duration ? (i < 1 ? 1 : i) : duration;
 
 		case 11:
-			return duration;
+			// Change to match client.
+			return std::min((level+3) * 30,duration);
 
 		case 12:
 			return duration;
@@ -5247,6 +5248,7 @@ void Mob::_StopSong()
 void Client::SendBuffDurationPacket(Buffs_Struct &buff)
 {
 	EQApplicationPacket* outapp;
+	
 	outapp = new EQApplicationPacket(OP_Buff, sizeof(SpellBuffFade_Struct));
 	SpellBuffFade_Struct* sbf = (SpellBuffFade_Struct*) outapp->pBuffer;
 
@@ -5254,7 +5256,9 @@ void Client::SendBuffDurationPacket(Buffs_Struct &buff)
 	sbf->slot = 2;
 	sbf->spellid = buff.spellid;
 	sbf->slotid = 0;
-	sbf->effect = buff.casterlevel > 0 ? buff.casterlevel : GetLevel();
+	sbf->effect = 255;
+//	sbf->effect = spells[buff.spellid].effectdescnum;
+//	sbf->effect = buff.casterlevel > 0 ? buff.casterlevel : GetLevel();
 	sbf->level = buff.casterlevel > 0 ? buff.casterlevel : GetLevel();
 	sbf->bufffade = 0;
 	sbf->duration = buff.ticsremaining;
