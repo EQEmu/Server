@@ -14,7 +14,7 @@ if($Config{osname}=~/linux/i){ $OS = "Linux"; }
 if($Config{osname}=~/Win|MS/i){ $OS = "Windows"; }
 
 #::: If current version is less than what world is reporting, then download a new one...
-$current_version = 2;
+$current_version = 3;
 
 if($ARGV[0] eq "V"){
 	if($ARGV[1] > $current_version){ 
@@ -160,6 +160,7 @@ sub ShowMenuPrompt {
         3 => \&Run_Database_Check,
         4 => \&AA_Fetch,
         5 => \&OpCodes_Fetch,
+        6 => \&MapFiles_Fetch,
         0 => \&Exit,
     );
 
@@ -215,6 +216,7 @@ Database Management Menu (Please Select):
 	3) $option[3]
 	4) AAs - Get Latest AA's from PEQ (This deletes AA's already in the database)
 	5) OPCodes - Download latest opcodes from repository
+	6) Maps - Download latest map and water files
 	0) Exit
 	
 EO_MENU
@@ -325,7 +327,7 @@ sub OpCodes_Fetch{
 		3 => ["Titanium", "https://raw.githubusercontent.com/EQEmu/Server/master/utils/patches/patch_Titanium.conf"],
 		4 => ["Secrets of Faydwer", "https://raw.githubusercontent.com/EQEmu/Server/master/utils/patches/patch_SoF.conf"],
 		5 => ["Seeds of Destruction", "https://raw.githubusercontent.com/EQEmu/Server/master/utils/patches/patch_SoD.conf"],
-		6 => ["Underfoot", "https://raw.githubusercontent.com/EQEmu/Server/master/utils/patches/patch_UF.conf"],
+		6 => ["Underfoot", "https://raw.githubusercontent.com/EQEmu/Server/master/utils/patches/patch_Underfoot.conf"],
 		7 => ["Rain of Fear", "https://raw.githubusercontent.com/EQEmu/Server/master/utils/patches/patch_RoF.conf"],
 		8 => ["Rain of Fear 2", "https://raw.githubusercontent.com/EQEmu/Server/master/utils/patches/patch_RoF2.conf"],
 	);
@@ -344,6 +346,26 @@ sub OpCodes_Fetch{
 		$loop++;
 	}
 	print "\nDone...\n\n";
+}
+
+sub MapFiles_Fetch{
+	print "\n --- Fetching Latest Maps --- \n";
+	GetRemoteFile("https://raw.githubusercontent.com/Akkadius/EQEmuMaps/master/!eqemu_maps_manifest.txt", "db_update/eqemu_maps_manifest.txt");
+	#::: Get Data from manifest
+	open (FILE, "db_update/eqemu_maps_manifest.txt");
+	$i = 0;
+	while (<FILE>) { 
+		chomp;
+		$o = $_;
+		$maps_manifest[$i] = $o;
+		$i++;
+	}
+	#::: Download
+	for($m = 0; $m <= $i; $m++){
+		GetRemoteFile("https://raw.githubusercontent.com/Akkadius/EQEmuMaps/master/" .  $maps_manifest[$m], "maps/" . $maps_manifest[$m]);
+	}
+	
+	print "\n --- Done Fetching Latest Maps --- \n";
 }
 
 #::: Responsible for Database Upgrade Routines

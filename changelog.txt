@@ -1,5 +1,8 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 03/10/2015 ==
+Akkadius: [eqemu_update.pl] Add Option 6) Download Latest map and water files
+
 == 03/04/2015 ==
 Akkadius: Fix Spell Book Deletion
 
