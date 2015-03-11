@@ -107,8 +107,12 @@ Client::Client(EQStreamInterface* ieqs)
 	0,
 	0,	// qglobal
 	0,	// maxlevel
-	0	// scalerate
-
+	0,	// scalerate
+	0,
+	0,
+	0,
+	0,
+	0
 	),
 	//these must be listed in the order they appear in client.h
 	position_timer(250),
