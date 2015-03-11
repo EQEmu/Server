@@ -14,7 +14,7 @@ if($Config{osname}=~/linux/i){ $OS = "Linux"; }
 if($Config{osname}=~/Win|MS/i){ $OS = "Windows"; }
 
 #::: If current version is less than what world is reporting, then download a new one...
-$current_version = 3;
+$current_version = 2;
 
 if($ARGV[0] eq "V"){
 	if($ARGV[1] > $current_version){ 
@@ -362,7 +362,10 @@ sub MapFiles_Fetch{
 	}
 	#::: Download
 	for($m = 0; $m <= $i; $m++){
-		GetRemoteFile("https://raw.githubusercontent.com/Akkadius/EQEmuMaps/master/" .  $maps_manifest[$m], "maps/" . $maps_manifest[$m]);
+		print "'" . $maps_manifest[$m] . "'\n";
+		if($maps_manifest[$m] ne ""){
+			GetRemoteFile("https://raw.githubusercontent.com/Akkadius/EQEmuMaps/master/" .  $maps_manifest[$m], "maps/" . $maps_manifest[$m]);
+		}
 	}
 	
 	print "\n --- Done Fetching Latest Maps --- \n";
