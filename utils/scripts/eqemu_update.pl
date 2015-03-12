@@ -22,7 +22,7 @@ if($Config{osname}=~/linux/i){ $OS = "Linux"; }
 if($Config{osname}=~/Win|MS/i){ $OS = "Windows"; }
 
 #::: If current version is less than what world is reporting, then download a new one...
-$current_version = 7;
+$current_version = 6;
 
 if($ARGV[0] eq "V"){
 	if($ARGV[1] > $current_version){ 
@@ -46,8 +46,11 @@ no warnings;
 
 ($sec, $min, $hour, $mday, $mon, $year, $wday, $yday, $isdst) = localtime();
 
+#::: Cleanup staged folder...
+rmtree("updates_staged/");
+
 my $confile = "eqemu_config.xml"; #default
-open(F, "<$confile") or die "Unable to open config: $confile\n";
+open(F, "<$confile");
 my $indb = 0;
 while(<F>) {
 	s/\r//g;
@@ -107,12 +110,12 @@ if($path eq ""){
 mkdir('db_update'); 
 
 #::: Check if db_version table exists... 
-if(trim(GetMySQLResult("SHOW COLUMNS FROM db_version LIKE 'Revision'")) ne ""){
+if(trim(GetMySQLResult("SHOW COLUMNS FROM db_version LIKE 'Revision'")) ne "" && $db){
 	print GetMySQLResult("DROP TABLE db_version");
 	print "Old db_version table present, dropping...\n\n";
 }
 
-if(GetMySQLResult("SHOW TABLES LIKE 'db_version'") eq ""){
+if(GetMySQLResult("SHOW TABLES LIKE 'db_version'") eq "" && $db){
 	print GetMySQLResult("
 		CREATE TABLE db_version (
 		  version int(11) DEFAULT '0'
@@ -133,23 +136,23 @@ if($bin_db_ver == $local_db_ver && $ARGV[0] eq "ran_from_start"){
 	exit; 
 }
 else{ 
-	print $console_output; 
+	print $console_output if $db; 
 }
 
+if($db){
+	print "	Binary Database Version: (" . $bin_db_ver . ")\n";
+	print "	Local Database Version: (" . $local_db_ver . ")\n\n";
 
-print "	Binary Database Version: (" . $bin_db_ver . ")\n";
-print "	Local Database Version: (" . $local_db_ver . ")\n\n";
+	#::: If World ran this script, and our version is up to date, continue...
+	if($bin_db_ver <= $local_db_ver && $ARGV[0] eq "ran_from_world"){  
+		print "	Database up to Date: Continuing World Bootup...\n";
+		print "============================================================\n";
+		exit; 
+	}
 
-#::: If World ran this script, and our version is up to date, continue...
-if($bin_db_ver <= $local_db_ver && $ARGV[0] eq "ran_from_world"){  
-	print "	Database up to Date: Continuing World Bootup...\n";
-	print "============================================================\n";
-	exit; 
+	print "Retrieving latest database manifest...\n";
+	GetRemoteFile("https://raw.githubusercontent.com/EQEmu/Server/master/utils/sql/db_update_manifest.txt", "db_update/db_update_manifest.txt");
 }
-
-print "Retrieving latest database manifest...\n";
-GetRemoteFile("https://raw.githubusercontent.com/EQEmu/Server/master/utils/sql/db_update_manifest.txt", "db_update/db_update_manifest.txt");
-# GetRemoteFile("https://dl.dropboxusercontent.com/u/50023467/dl/db_update_manifest.txt", "db_update/db_update_manifest.txt");
 
 if($local_db_ver < $bin_db_ver && $ARGV[0] eq "ran_from_world"){
 	print "You have missing database updates, type 1 or 2 to backup your database before running them as recommended...\n\n";
@@ -217,6 +220,7 @@ sub ShowMenuPrompt {
 }
 
 sub MenuOptions {
+
 	if(@total_updates){ 
 		$option[3] = "Run pending REQUIRED updates... (" . scalar (@total_updates) . ")";
 	}
@@ -225,7 +229,7 @@ sub MenuOptions {
 	}
 
 return <<EO_MENU;
-Database Management Menu (Please Select):
+EQEmu Update Utility Menu:
 	1) Backup Database - (Saves to Backups folder)
 	2) Backup Database Compressed - (Saves to Backups folder)
 	3) $option[3]
@@ -237,6 +241,8 @@ Database Management Menu (Please Select):
 	9) LUA Modules - Download latest LUA Modules (Required for Lua)
 	20) Force update this script (Redownload)
 	0) Exit
+	
+	Enter numbered option and press enter...	
 	
 EO_MENU
 }
@@ -270,6 +276,7 @@ sub Exit{ }
 #::: Returns Tab Delimited MySQL Result from Command Line
 sub GetMySQLResult{
 	my $run_query = $_[0];
+	if(!$db){ return; }
 	if($OS eq "Windows"){ return `"$path" --host $host --user $user --password="$pass" $db -N -B -e "$run_query"`; }
 	if($OS eq "Linux"){ 
 		$run_query =~s/`//g;
@@ -279,6 +286,7 @@ sub GetMySQLResult{
 
 sub GetMySQLResultFromFile{
 	my $update_file = $_[0];
+	if(!$db){ return; }
 	if($OS eq "Windows"){ return `"$path" --host $host --user $user --password="$pass" --force $db < $update_file`;  }
 	if($OS eq "Linux"){ return `"$path" --host $host --user $user --password="$pass" --force $db < $update_file`;  }
 }
@@ -363,6 +371,11 @@ sub trim {
 
 #::: Fetch Latest PEQ AA's
 sub AA_Fetch{
+	if(!$db){
+		print "No database present, check your eqemu_config.xml for proper MySQL/MariaDB configuration...\n";
+		return;
+	}
+
 	print "Pulling down PEQ AA Tables...\n";
 	GetRemoteFile("https://raw.githubusercontent.com/EQEmu/Server/master/utils/sql/peq_aa_tables.sql", "db_update/peq_aa_tables.sql");
 	print "\n\nInstalling AA Tables...\n";
@@ -460,13 +473,13 @@ sub MapFiles_Fetch{
 }
 
 sub QuestFiles_Fetch{
-	print "\n --- Fetching Latest Quests --- \n";
-	
-	GetRemoteFile("https://github.com/EQEmu/Quests-Plugins/archive/master.zip", "updates_staged/Quests-Plugins-master.zip", 1);
-	
-	print "\nFetched latest quests...\n";
-	mkdir('updates_staged');
-	UnZip('updates_staged/Quests-Plugins-master.zip', 'updates_staged/');
+	if (!-e "updates_staged/Quests-Plugins-master/quests/") {
+		print "\n --- Fetching Latest Quests --- \n";
+		GetRemoteFile("https://github.com/EQEmu/Quests-Plugins/archive/master.zip", "updates_staged/Quests-Plugins-master.zip", 1);
+		print "\nFetched latest quests...\n";
+		mkdir('updates_staged');
+		UnZip('updates_staged/Quests-Plugins-master.zip', 'updates_staged/');
+	}
 	
 	$fc = 0;
 	use File::Find;
@@ -512,22 +525,18 @@ sub QuestFiles_Fetch{
 		}
 	}
 	
-	#::: Cleanup staged folder...
-	rmtree("updates_staged/");
-	
 	if($fc == 0){
 		print "\nNo Quest Updates found... \n\n";
 	}
 }
 
 sub LUA_Modules_Fetch{
-	print "\n --- Fetching Latest LUA Modules --- \n";
-	
-	GetRemoteFile("https://github.com/EQEmu/Quests-Plugins/archive/master.zip", "updates_staged/Quests-Plugins-master.zip", 1);
-	
-	print "\nFetched latest LUA Modules...\n";
-	
-	UnZip('updates_staged/Quests-Plugins-master.zip', 'updates_staged/');
+	if (!-e "updates_staged/Quests-Plugins-master/quests/lua_modules/") {
+		print "\n --- Fetching Latest LUA Modules --- \n";
+		GetRemoteFile("https://github.com/EQEmu/Quests-Plugins/archive/master.zip", "updates_staged/Quests-Plugins-master.zip", 1);
+		print "\nFetched latest LUA Modules...\n";
+		UnZip('updates_staged/Quests-Plugins-master.zip', 'updates_staged/');
+	}
 	
 	$fc = 0;
 	use File::Find;
@@ -572,22 +581,18 @@ sub LUA_Modules_Fetch{
 		}
 	}
 	
-	#::: Cleanup staged folder...
-	rmtree("updates_staged/");
-	
 	if($fc == 0){
 		print "\nNo LUA Modules Updates found... \n\n";
 	}	
 }
 
 sub Plugins_Fetch{
-	print "\n --- Fetching Latest Plugins --- \n";
-	
-	GetRemoteFile("https://github.com/EQEmu/Quests-Plugins/archive/master.zip", "updates_staged/Quests-Plugins-master.zip", 1);
-	
-	print "\nFetched latest plugins...\n";
-	
-	UnZip('updates_staged/Quests-Plugins-master.zip', 'updates_staged/');
+	if (!-e "updates_staged/Quests-Plugins-master/plugins/") {
+		print "\n --- Fetching Latest Plugins --- \n";
+		GetRemoteFile("https://github.com/EQEmu/Quests-Plugins/archive/master.zip", "updates_staged/Quests-Plugins-master.zip", 1);
+		print "\nFetched latest plugins...\n";
+		UnZip('updates_staged/Quests-Plugins-master.zip', 'updates_staged/');
+	}
 	
 	$fc = 0;
 	use File::Find;
@@ -631,10 +636,7 @@ sub Plugins_Fetch{
 			}
 		}
 	}
-	
-	#::: Cleanup staged folder...
-	rmtree("updates_staged/");
-	
+
 	if($fc == 0){
 		print "\nNo Plugin Updates found... \n\n";
 	}	
@@ -686,6 +688,12 @@ sub AreFileSizesDifferent{
 
 #::: Responsible for Database Upgrade Routines
 sub Run_Database_Check{ 
+
+	if(!$db){
+		print "No database present, check your eqemu_config.xml for proper MySQL/MariaDB configuration...\n";
+		return;
+	}
+
 	#::: Run 2 - Running pending updates...
 	if(defined(@total_updates)){
 		@total_updates = sort @total_updates;
