@@ -509,7 +509,7 @@ sub QuestFiles_Fetch{
 				
 					print $diff . "\n";
 					print "\nFile Different :: '" . $dest_file . "'\n";
-					print "\nDo you wish to update this Quest? '" . $dest_file . "' [Yes (Enter) - No (N)] - A backup will be found in '" . $backup_dest . "'\n";
+					print "\nDo you wish to update this Quest? '" . $dest_file . "' [Yes (Enter) - No (N)] \nA backup will be found in '" . $backup_dest . "'\n";
 					my $input = <STDIN>;
 					if($input=~/N/i){}
 					else{
@@ -565,7 +565,7 @@ sub LUA_Modules_Fetch{
 					$backup_dest = "updates_backups/" . $time_stamp . "/" . $dest_file;
 					print $diff . "\n";
 					print "\nFile Different :: '" . $dest_file . "'\n";
-					print "\nDo you wish to update this LUA Module? '" . $dest_file . "' [Yes (Enter) - No (N)] - A backup will be found in '" . $backup_dest . "'\n";
+					print "\nDo you wish to update this LUA Module? '" . $dest_file . "' [Yes (Enter) - No (N)] \nA backup will be found in '" . $backup_dest . "'\n";
 					my $input = <STDIN>;
 					if($input=~/N/i){}
 					else{
@@ -621,7 +621,7 @@ sub Plugins_Fetch{
 					$backup_dest = "updates_backups/" . $time_stamp . "/" . $dest_file;
 					print $diff . "\n";
 					print "\nFile Different :: '" . $dest_file . "'\n";
-					print "\nDo you wish to update this Plugin? '" . $dest_file . "' [Yes (Enter) - No (N)] - A backup will be found in '" . $backup_dest . "'\n";
+					print "\nDo you wish to update this Plugin? '" . $dest_file . "' [Yes (Enter) - No (N)] \nA backup will be found in '" . $backup_dest . "'\n";
 					my $input = <STDIN>;
 					if($input=~/N/i){}
 					else{
