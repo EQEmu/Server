@@ -22,7 +22,7 @@ if($Config{osname}=~/linux/i){ $OS = "Linux"; }
 if($Config{osname}=~/Win|MS/i){ $OS = "Windows"; }
 
 #::: If current version is less than what world is reporting, then download a new one...
-$current_version = 6;
+$current_version = 7;
 
 if($ARGV[0] eq "V"){
 	if($ARGV[1] > $current_version){ 
@@ -177,6 +177,7 @@ sub ShowMenuPrompt {
         6 => \&MapFiles_Fetch,
         7 => \&Plugins_Fetch,
         8 => \&QuestFiles_Fetch,
+        9 => \&LUA_Modules_Fetch,
         20 => \&UpdateSelf,
         0 => \&Exit,
     );
@@ -233,6 +234,7 @@ Database Management Menu (Please Select):
 	6) Maps - Download latest map and water files
 	7) Plugins - Download latest Perl plugins
 	8) Quests - Download latest PEQ quests and stage updates
+	9) LUA Modules - Download latest LUA Modules (Required for Lua)
 	20) Force update this script (Redownload)
 	0) Exit
 	
@@ -485,6 +487,7 @@ sub QuestFiles_Fetch{
 			if (!-e $dest_file) {
 				CopyFile($staged_file, $dest_file);
 				print "Installing :: '" . $dest_file . "'\n";
+				$fc++;
 			}
 			else{
 				$diff = Diff($dest_file, $staged_file);
@@ -517,6 +520,66 @@ sub QuestFiles_Fetch{
 	}
 }
 
+sub LUA_Modules_Fetch{
+	print "\n --- Fetching Latest LUA Modules --- \n";
+	
+	GetRemoteFile("https://github.com/EQEmu/Quests-Plugins/archive/master.zip", "updates_staged/Quests-Plugins-master.zip", 1);
+	
+	print "\nFetched latest LUA Modules...\n";
+	
+	UnZip('updates_staged/Quests-Plugins-master.zip', 'updates_staged/');
+	
+	$fc = 0;
+	use File::Find;
+	use File::Compare;
+	
+	my @files;
+	my $start_dir = "updates_staged/Quests-Plugins-master/quests/lua_modules/";
+	find( 
+		sub { push @files, $File::Find::name unless -d; }, 
+		$start_dir
+	);
+	for my $file (@files) {
+		if($file=~/\.pl|\.lua|\.ext/i){
+			$staged_file = $file;
+			$dest_file = $file;
+			$dest_file =~s/updates_staged\/Quests-Plugins-master\/quests\///g;
+			
+			if (!-e $dest_file) {
+				CopyFile($staged_file, $dest_file);
+				print "Installing :: '" . $dest_file . "'\n";
+				$fc++;
+			}
+			else{
+				$diff = Diff($dest_file, $staged_file);
+				if($diff ne ""){
+					$backup_dest = "updates_backups/" . $time_stamp . "/" . $dest_file;
+					print $diff . "\n";
+					print "\nFile Different :: '" . $dest_file . "'\n";
+					print "\nDo you wish to update this LUA Module? '" . $dest_file . "' [Yes (Enter) - No (N)] - A backup will be found in '" . $backup_dest . "'\n";
+					my $input = <STDIN>;
+					if($input=~/N/i){}
+					else{
+						#::: Make a backup
+						CopyFile($dest_file, $backup_dest);
+						#::: Copy staged to running
+						copy($staged_file, $dest_file);
+						print "Installing :: '" . $dest_file . "'\n\n";
+					}
+					$fc++;
+				}
+			}
+		}
+	}
+	
+	#::: Cleanup staged folder...
+	rmtree("updates_staged/");
+	
+	if($fc == 0){
+		print "\nNo LUA Modules Updates found... \n\n";
+	}	
+}
+
 sub Plugins_Fetch{
 	print "\n --- Fetching Latest Plugins --- \n";
 	
@@ -545,6 +608,7 @@ sub Plugins_Fetch{
 			if (!-e $dest_file) {
 				CopyFile($staged_file, $dest_file);
 				print "Installing :: '" . $dest_file . "'\n";
+				$fc++;
 			}
 			else{
 				$diff = Diff($dest_file, $staged_file);
