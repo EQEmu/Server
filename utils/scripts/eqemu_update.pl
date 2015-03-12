@@ -164,6 +164,10 @@ else{
 	ShowMenuPrompt();
 }
 
+sub UpdateSelf{
+	GetRemoteFile("https://raw.githubusercontent.com/EQEmu/Server/master/utils/scripts/eqemu_update.pl", "eqemu_update.pl");
+	die "Rerun eqemu_update.pl";
+}
 
 sub ShowMenuPrompt {
     my %dispatch = (
@@ -175,6 +179,7 @@ sub ShowMenuPrompt {
         6 => \&MapFiles_Fetch,
         7 => \&Plugins_Fetch,
         8 => \&QuestFiles_Fetch,
+        20 => \&UpdateSelf,
         0 => \&Exit,
     );
 
@@ -230,6 +235,7 @@ Database Management Menu (Please Select):
 	6) Maps - Download latest map and water files
 	7) Plugins - Download latest Perl plugins
 	8) Quests - Download latest PEQ quests and stage updates
+	20) Force update this script (Redownload)
 	0) Exit
 	
 EO_MENU
