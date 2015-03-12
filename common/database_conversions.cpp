@@ -494,7 +494,7 @@ bool Database::CheckDatabaseConversions() {
 	/* Check for a new version of this script, the arg passed
 	would have to be higher than the copy they have downloaded
 	locally and they will re fetch */
-	system("perl eqemu_update.pl V 5"); 
+	system("perl eqemu_update.pl V 6"); 
 
 	/* Run Automatic Database Upgrade Script */
 	system("perl eqemu_update.pl ran_from_world");

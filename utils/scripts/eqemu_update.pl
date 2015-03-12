@@ -15,8 +15,6 @@ use File::Path;
 use File::Find;
 use URI::Escape;
 
-use Archive::Zip qw( :ERROR_CODES :CONSTANTS );
-
 $time_stamp = strftime('%m-%d-%Y', gmtime());
 
 $console_output .= "	Operating System is: $Config{osname}\n";
@@ -24,7 +22,7 @@ if($Config{osname}=~/linux/i){ $OS = "Linux"; }
 if($Config{osname}=~/Win|MS/i){ $OS = "Windows"; }
 
 #::: If current version is less than what world is reporting, then download a new one...
-$current_version = 5;
+$current_version = 6;
 
 if($ARGV[0] eq "V"){
 	if($ARGV[1] > $current_version){ 
@@ -465,17 +463,13 @@ sub QuestFiles_Fetch{
 	GetRemoteFile("https://github.com/EQEmu/Quests-Plugins/archive/master.zip", "updates_staged/Quests-Plugins-master.zip", 1);
 	
 	print "\nFetched latest quests...\n";
-	my $zip = Archive::Zip->new();
-	unless ( $zip->read( 'updates_staged\Quests-Plugins-master.zip' ) == AZ_OK ) {
-		die 'read error';
-	}
-	print "Extracting...\n";
-	$zip->extractTree('', 'updates_staged/');
+	mkdir('updates_staged');
+	UnZip('updates_staged/Quests-Plugins-master.zip', 'updates_staged/');
 	
 	$fc = 0;
 	use File::Find;
 	use File::Compare;
-	use Text::Diff;
+	
 	my @files;
 	my $start_dir = "updates_staged/Quests-Plugins-master/quests/";
 	find( 
@@ -493,7 +487,7 @@ sub QuestFiles_Fetch{
 				print "Installing :: '" . $dest_file . "'\n";
 			}
 			else{
-				$diff = diff($dest_file, $staged_file, { STYLE => "Unified" });
+				$diff = Diff($dest_file, $staged_file);
 				if($diff ne ""){
 					$backup_dest = "updates_backups/" . $time_stamp . "/" . $dest_file;
 				
@@ -529,17 +523,13 @@ sub Plugins_Fetch{
 	GetRemoteFile("https://github.com/EQEmu/Quests-Plugins/archive/master.zip", "updates_staged/Quests-Plugins-master.zip", 1);
 	
 	print "\nFetched latest plugins...\n";
-	my $zip = Archive::Zip->new();
-	unless ( $zip->read( 'updates_staged\Quests-Plugins-master.zip' ) == AZ_OK ) {
-		die 'read error';
-	}
-	print "Extracting...\n";
-	$zip->extractTree('', 'updates_staged/');
+	
+	UnZip('updates_staged/Quests-Plugins-master.zip', 'updates_staged/');
 	
 	$fc = 0;
 	use File::Find;
 	use File::Compare;
-	use Text::Diff;
+	
 	my @files;
 	my $start_dir = "updates_staged/Quests-Plugins-master/plugins/";
 	find( 
@@ -557,10 +547,9 @@ sub Plugins_Fetch{
 				print "Installing :: '" . $dest_file . "'\n";
 			}
 			else{
-				$diff = diff($dest_file, $staged_file, { STYLE => "Unified" });
+				$diff = Diff($dest_file, $staged_file);
 				if($diff ne ""){
 					$backup_dest = "updates_backups/" . $time_stamp . "/" . $dest_file;
-				
 					print $diff . "\n";
 					print "\nFile Different :: '" . $dest_file . "'\n";
 					print "\nDo you wish to update this Plugin? '" . $dest_file . "' [Yes (Enter) - No (N)] - A backup will be found in '" . $backup_dest . "'\n";
@@ -585,6 +574,38 @@ sub Plugins_Fetch{
 	if($fc == 0){
 		print "\nNo Plugin Updates found... \n\n";
 	}	
+}
+
+sub Diff{
+	$file_1 = $_[0];
+	$file_2 = $_[1];
+	if($OS eq "Windows"){
+		eval "use Text::Diff";
+		$diff = diff($file_1, $file_2, { STYLE => "Unified" });
+		return $diff;
+	}
+	if($OS eq "Linux"){
+		# print 'diff -u "$file_1" "$file_2"' . "\n";
+		return `diff -u "$file_1" "$file_2"`;
+	}
+}
+
+sub UnZip{
+	$archive_to_unzip = $_[0];
+	$dest_folder = $_[1];
+	
+	if($OS eq "Windows"){ 
+		eval "use Archive::Zip qw( :ERROR_CODES :CONSTANTS )";
+		my $zip = Archive::Zip->new();
+		unless ( $zip->read($archive_to_unzip) == AZ_OK ) {
+			die 'read error';
+		}
+		print "Extracting...\n";
+		$zip->extractTree('', $dest_folder);
+	}
+	if($OS eq "Linux"){
+		print `unzip -o "$archive_to_unzip" -d "$dest_folder"`;
+	}
 }
 
 sub AreFileSizesDifferent{
