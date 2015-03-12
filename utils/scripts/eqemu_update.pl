@@ -9,12 +9,22 @@
 $menu_displayed = 0;
 
 use Config;
+use File::Copy qw(copy);
+use POSIX qw(strftime);
+use File::Path;
+use File::Find;
+use URI::Escape;
+
+use Archive::Zip qw( :ERROR_CODES :CONSTANTS );
+
+$time_stamp = strftime('%m-%d-%Y', gmtime());
+
 $console_output .= "	Operating System is: $Config{osname}\n";
 if($Config{osname}=~/linux/i){ $OS = "Linux"; }
 if($Config{osname}=~/Win|MS/i){ $OS = "Windows"; }
 
 #::: If current version is less than what world is reporting, then download a new one...
-$current_version = 2;
+$current_version = 5;
 
 if($ARGV[0] eq "V"){
 	if($ARGV[1] > $current_version){ 
@@ -35,6 +45,8 @@ $perl_version =~s/v//g;
 print "Perl Version is " . $perl_version . "\n";
 if($perl_version > 5.12){ no warnings 'uninitialized';  }
 no warnings;
+
+($sec, $min, $hour, $mday, $mon, $year, $wday, $yday, $isdst) = localtime();
 
 my $confile = "eqemu_config.xml"; #default
 open(F, "<$confile") or die "Unable to open config: $confile\n";
@@ -161,6 +173,8 @@ sub ShowMenuPrompt {
         4 => \&AA_Fetch,
         5 => \&OpCodes_Fetch,
         6 => \&MapFiles_Fetch,
+        7 => \&Plugins_Fetch,
+        8 => \&QuestFiles_Fetch,
         0 => \&Exit,
     );
 
@@ -203,20 +217,19 @@ sub MenuOptions {
 		$option[3] = "Run pending REQUIRED updates... (" . scalar (@total_updates) . ")";
 	}
 	else{
-		$option[3] = "Check for pending REQUIRED Database updates 
-		Stages updates for automatic upgrade...";
+		$option[3] = "Check and stage pending REQUIRED Database updates";
 	}
 
 return <<EO_MENU;
 Database Management Menu (Please Select):
-	1) Backup Database - (Saves to Backups folder) 
-		Ideal to perform before performing updates
+	1) Backup Database - (Saves to Backups folder)
 	2) Backup Database Compressed - (Saves to Backups folder)
-		Ideal to perform before performing updates
 	3) $option[3]
-	4) AAs - Get Latest AA's from PEQ (This deletes AA's already in the database)
-	5) OPCodes - Download latest opcodes from repository
+	4) AAs - Download Latest AA's from PEQ (This overwrites existing data)
+	5) OPCodes - Download latest opcodes
 	6) Maps - Download latest map and water files
+	7) Plugins - Download latest Perl plugins
+	8) Quests - Download latest PEQ quests and stage updates
 	0) Exit
 	
 EO_MENU
@@ -269,34 +282,67 @@ sub GetMySQLResultFromFile{
 sub GetRemoteFile{
 	my $URL = $_[0];
 	my $Dest_File = $_[1];
+	my $content_type = $_[2];
+	
+	#::: Build file path of the destination file so that we may check for the folder's existence and make it if necessary
+	if($Dest_File=~/\//i){
+		my @dir_path = split('/', $Dest_File);
+		$build_path = "";
+		$di = 0;
+		while($dir_path[$di]){
+			$build_path .= $dir_path[$di] . "/";	
+			#::: If path does not exist, create the directory...
+			if (!-d $build_path) {
+				mkdir($build_path);
+			}
+			if(!$dir_path[$di + 2] && $dir_path[$di + 1]){
+				# print $actual_path . "\n";
+				$actual_path = $build_path;
+				last;
+			}
+			$di++;
+		}
+	}
 	
 	if($OS eq "Windows"){ 
-		require LWP::UserAgent; 
-		my $ua = LWP::UserAgent->new;
-		$ua->timeout(10);
-		$ua->env_proxy; 
-		my $response = $ua->get($URL);
-
-		if ($response->is_success){
-			open (FILE, '> ' . $Dest_File . '');
-			print FILE $response->decoded_content;
-			close (FILE); 
-			print "	URL:	" . $URL . "\n";
-			print "	Saved:	" . $Dest_File . " \n";
+		#::: For non-text type requests...
+		if($content_type == 1){
+			use LWP::Simple qw(getstore);
+			if(!getstore($URL, $Dest_File)){
+				print "Error, no connection or failed request...\n\n";
+			}
+			else{
+				print " o URL: (" . $URL . ")\n";
+				print " o Saved: (" . $Dest_File . ") \n";
+			}
 		}
-		else {
-			print "Error, no connection to the internet...\n\n";
-			die $response->status_line;
+		else{
+			require LWP::UserAgent; 
+			my $ua = LWP::UserAgent->new;
+			$ua->timeout(10);
+			$ua->env_proxy; 
+			my $response = $ua->get($URL);
+
+			if ($response->is_success){
+				open (FILE, '> ' . $Dest_File . '');
+				print FILE $response->decoded_content;
+				close (FILE); 
+				print " o URL: (" . $URL . ")\n";
+				print " o Saved: (" . $Dest_File . ") \n";
+			}
+			else {
+				print "Error, no connection or failed request...\n\n";
+			}
 		}
 	}
 	if($OS eq "Linux"){ 
 		#::: wget -O db_update/db_update_manifest.txt https://raw.githubusercontent.com/EQEmu/Server/master/utils/sql/db_update_manifest.txt
 		$wget = `wget --no-check-certificate --quiet -O $Dest_File $URL`;
-		print "	URL:	" . $URL . "\n";
-		print "	Saved:	" . $Dest_File . " \n";
+		print " o URL: (" . $URL . ")\n";
+		print " o Saved: (" . $Dest_File . ") \n";
 		if($wget=~/unable to resolve/i){
-			print "Error, no connection to the internet...\n\n";
-			die;
+			print "Error, no connection or failed request...\n\n";
+			#die;
 		}
 	}
 }
@@ -343,32 +389,208 @@ sub OpCodes_Fetch{
 		
 		print "\nDownloading (" . $opcodes{$loop}[0] . ") File: '" . $file_name . "'...\n\n"; 
 		GetRemoteFile($opcodes{$loop}[1], $file_name);
-		$loop++;
+		$loop++; 
 	}
 	print "\nDone...\n\n";
 }
 
+sub CopyFile{
+	$l_source_file = $_[0];
+	$l_dest_file = $_[1];
+	if($l_dest_file=~/\//i){
+		my @dir_path = split('/', $l_dest_file);
+		$build_path = "";
+		$di = 0;
+		while($dir_path[$di]){
+			$build_path .= $dir_path[$di] . "/";	
+			#::: If path does not exist, create the directory...
+			if (!-d $build_path) {
+				mkdir($build_path);
+			}
+			if(!$dir_path[$di + 2] && $dir_path[$di + 1]){
+				# print $actual_path . "\n";
+				$actual_path = $build_path;
+				last;
+			}
+			$di++;
+		}
+	}
+	copy $l_source_file, $l_dest_file;
+}
+
 sub MapFiles_Fetch{
 	print "\n --- Fetching Latest Maps --- \n";
-	GetRemoteFile("https://raw.githubusercontent.com/Akkadius/EQEmuMaps/master/!eqemu_maps_manifest.txt", "db_update/eqemu_maps_manifest.txt");
+	
+	GetRemoteFile("https://raw.githubusercontent.com/Akkadius/EQEmuMaps/master/!eqemu_maps_manifest.txt", "updates_staged/eqemu_maps_manifest.txt");
+	
 	#::: Get Data from manifest
-	open (FILE, "db_update/eqemu_maps_manifest.txt");
+	open (FILE, "updates_staged/eqemu_maps_manifest.txt");
 	$i = 0;
-	while (<FILE>) { 
+	while (<FILE>){
 		chomp;
 		$o = $_;
-		$maps_manifest[$i] = $o;
-		$i++;
-	}
-	#::: Download
-	for($m = 0; $m <= $i; $m++){
-		print "'" . $maps_manifest[$m] . "'\n";
-		if($maps_manifest[$m] ne ""){
-			GetRemoteFile("https://raw.githubusercontent.com/Akkadius/EQEmuMaps/master/" .  $maps_manifest[$m], "maps/" . $maps_manifest[$m]);
+		@manifest_map_data = split(',', $o);
+		if($manifest_map_data[0] ne ""){
+			$maps_manifest[$i] = [$manifest_map_data[0], $manifest_map_data[1]];
+			$i++;
 		}
 	}
 	
-	print "\n --- Done Fetching Latest Maps --- \n";
+	#::: Download  
+	$fc = 0;
+	for($m = 0; $m <= $i; $m++){
+		my $file_existing = $maps_manifest[$m][0];
+		my $file_existing_size = (stat $file_existing)[7];
+		if($file_existing_size != $maps_manifest[$m][1]){
+			print "Updating: '" . $maps_manifest[$m][0] . "'\n";
+			GetRemoteFile("https://raw.githubusercontent.com/Akkadius/EQEmuMaps/master/" .  $maps_manifest[$m][0], $maps_manifest[$m][0], 1);
+			$fc++;
+		}
+	}
+	
+	if($fc == 0){
+		print "\nNo Map Updates found... \n\n";
+	}
+}
+
+sub QuestFiles_Fetch{
+	print "\n --- Fetching Latest Quests --- \n";
+	
+	GetRemoteFile("https://github.com/EQEmu/Quests-Plugins/archive/master.zip", "updates_staged/Quests-Plugins-master.zip", 1);
+	
+	print "\nFetched latest quests...\n";
+	my $zip = Archive::Zip->new();
+	unless ( $zip->read( 'updates_staged\Quests-Plugins-master.zip' ) == AZ_OK ) {
+		die 'read error';
+	}
+	print "Extracting...\n";
+	$zip->extractTree('', 'updates_staged/');
+	
+	$fc = 0;
+	use File::Find;
+	use File::Compare;
+	use Text::Diff;
+	my @files;
+	my $start_dir = "updates_staged/Quests-Plugins-master/quests/";
+	find( 
+		sub { push @files, $File::Find::name unless -d; }, 
+		$start_dir
+	);
+	for my $file (@files) {
+		if($file=~/\.pl|\.lua|\.ext/i){
+			$staged_file = $file;
+			$dest_file = $file;
+			$dest_file =~s/updates_staged\/Quests-Plugins-master\///g;
+			
+			if (!-e $dest_file) {
+				CopyFile($staged_file, $dest_file);
+				print "Installing :: '" . $dest_file . "'\n";
+			}
+			else{
+				$diff = diff($dest_file, $staged_file, { STYLE => "Unified" });
+				if($diff ne ""){
+					$backup_dest = "updates_backups/" . $time_stamp . "/" . $dest_file;
+				
+					print $diff . "\n";
+					print "\nFile Different :: '" . $dest_file . "'\n";
+					print "\nDo you wish to update this Quest? '" . $dest_file . "' [Yes (Enter) - No (N)] - A backup will be found in '" . $backup_dest . "'\n";
+					my $input = <STDIN>;
+					if($input=~/N/i){}
+					else{
+						#::: Make a backup
+						CopyFile($dest_file, $backup_dest);
+						#::: Copy staged to running
+						copy($staged_file, $dest_file);
+						print "Installing :: '" . $dest_file . "'\n\n";
+					}
+					$fc++;
+				}
+			}
+		}
+	}
+	
+	#::: Cleanup staged folder...
+	rmtree("updates_staged/");
+	
+	if($fc == 0){
+		print "\nNo Quest Updates found... \n\n";
+	}
+}
+
+sub Plugins_Fetch{
+	print "\n --- Fetching Latest Plugins --- \n";
+	
+	GetRemoteFile("https://github.com/EQEmu/Quests-Plugins/archive/master.zip", "updates_staged/Quests-Plugins-master.zip", 1);
+	
+	print "\nFetched latest plugins...\n";
+	my $zip = Archive::Zip->new();
+	unless ( $zip->read( 'updates_staged\Quests-Plugins-master.zip' ) == AZ_OK ) {
+		die 'read error';
+	}
+	print "Extracting...\n";
+	$zip->extractTree('', 'updates_staged/');
+	
+	$fc = 0;
+	use File::Find;
+	use File::Compare;
+	use Text::Diff;
+	my @files;
+	my $start_dir = "updates_staged/Quests-Plugins-master/plugins/";
+	find( 
+		sub { push @files, $File::Find::name unless -d; }, 
+		$start_dir
+	);
+	for my $file (@files) {
+		if($file=~/\.pl|\.lua|\.ext/i){
+			$staged_file = $file;
+			$dest_file = $file;
+			$dest_file =~s/updates_staged\/Quests-Plugins-master\///g;
+			
+			if (!-e $dest_file) {
+				CopyFile($staged_file, $dest_file);
+				print "Installing :: '" . $dest_file . "'\n";
+			}
+			else{
+				$diff = diff($dest_file, $staged_file, { STYLE => "Unified" });
+				if($diff ne ""){
+					$backup_dest = "updates_backups/" . $time_stamp . "/" . $dest_file;
+				
+					print $diff . "\n";
+					print "\nFile Different :: '" . $dest_file . "'\n";
+					print "\nDo you wish to update this Plugin? '" . $dest_file . "' [Yes (Enter) - No (N)] - A backup will be found in '" . $backup_dest . "'\n";
+					my $input = <STDIN>;
+					if($input=~/N/i){}
+					else{
+						#::: Make a backup
+						CopyFile($dest_file, $backup_dest);
+						#::: Copy staged to running
+						copy($staged_file, $dest_file);
+						print "Installing :: '" . $dest_file . "'\n\n";
+					}
+					$fc++;
+				}
+			}
+		}
+	}
+	
+	#::: Cleanup staged folder...
+	rmtree("updates_staged/");
+	
+	if($fc == 0){
+		print "\nNo Plugin Updates found... \n\n";
+	}	
+}
+
+sub AreFileSizesDifferent{
+	$file_1 = $_[0];
+	$file_2 = $_[1];
+	my $file_1 = (stat $file_1)[7];
+	my $file_2 = (stat $file_2)[7];
+	# print $file_1 . " :: " . $file_2 . "\n";
+	if($file_1 != $file_2){
+		return 1;
+	}
+	return;
 }
 
 #::: Responsible for Database Upgrade Routines

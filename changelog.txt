@@ -1,5 +1,10 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 03/11/2015 ==
+Akkadius: [eqemu_update.pl] Add Option 7) Plugins - Download latest Perl plugins
+Akkadius: [eqemu_update.pl] Add Option 8) Quests - Download latest PEQ quests and stage updates
+Akkadius: [eqemu_update.pl] Set version 5 of script
+
 == 03/10/2015 ==
 Akkadius: [eqemu_update.pl] Add Option 6) Download Latest map and water files
 
