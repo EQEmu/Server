@@ -333,7 +333,13 @@ void MapOpcodes()
 	ConnectedOpcodes[OP_Save] = &Client::Handle_OP_Save;
 	ConnectedOpcodes[OP_SaveOnZoneReq] = &Client::Handle_OP_SaveOnZoneReq;
 	ConnectedOpcodes[OP_SelectTribute] = &Client::Handle_OP_SelectTribute;
-	ConnectedOpcodes[OP_SenseHeading] = &Client::Handle_OP_Ignore;
+
+	// Use or Ignore sense heading based on rule.
+	bool train=RuleB(Skills, TrainSenseHeading);
+
+	ConnectedOpcodes[OP_SenseHeading] = 
+		(train) ? &Client::Handle_OP_SenseHeading : &Client::Handle_OP_Ignore;
+
 	ConnectedOpcodes[OP_SenseTraps] = &Client::Handle_OP_SenseTraps;
 	ConnectedOpcodes[OP_SetGuildMOTD] = &Client::Handle_OP_SetGuildMOTD;
 	ConnectedOpcodes[OP_SetRunMode] = &Client::Handle_OP_SetRunMode;
@@ -1436,10 +1442,6 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	if (m_pp.ldon_points_ruj < 0 || m_pp.ldon_points_ruj > 2000000000){ m_pp.ldon_points_ruj = 0; }
 	if (m_pp.ldon_points_tak < 0 || m_pp.ldon_points_tak > 2000000000){ m_pp.ldon_points_tak = 0; }
 	if (m_pp.ldon_points_available < 0 || m_pp.ldon_points_available > 2000000000){ m_pp.ldon_points_available = 0; }
-
-	/* Set Swimming Skill 100 by default if under 100 */
-	if (GetSkill(SkillSwimming) < 100)
-		SetSkill(SkillSwimming, 100);
 
 	/* Initialize AA's : Move to function eventually */
 	for (uint32 a = 0; a < MAX_PP_AA_ARRAY; a++){ aa[a] = &m_pp.aa_array[a]; }
@@ -5081,6 +5083,7 @@ void Client::Handle_OP_DeleteSpell(const EQApplicationPacket *app)
 
 	if (m_pp.spell_book[dss->spell_slot] != SPELLBOOK_UNKNOWN) {
 		m_pp.spell_book[dss->spell_slot] = SPELLBOOK_UNKNOWN;
+		database.DeleteCharacterSpell(this->CharacterID(), m_pp.spell_book[dss->spell_slot], dss->spell_slot);
 		dss->success = 1;
 	}
 	else
@@ -11605,6 +11608,27 @@ void Client::Handle_OP_SelectTribute(const EQApplicationPacket *app)
 	return;
 }
 
+void Client::Handle_OP_SenseHeading(const EQApplicationPacket *app)
+{
+	if (!HasSkill(SkillSenseHeading))
+		return;
+
+	int chancemod=0;
+
+	// The client seems to limit sense heading packets based on skill
+	// level.  So if we're really low, we don't hit this routine very often.
+	// I think it's the GUI deciding when to skill you up.
+	// So, I'm adding a mod here which is larger at lower levels so
+	// very low levels get a much better chance to skill up when the GUI
+	// eventually sends a message.
+	if (GetLevel() <= 8)
+		chancemod += (9-level) * 10;
+	
+	CheckIncreaseSkill(SkillSenseHeading, nullptr, chancemod);
+
+	return;
+}
+
 void Client::Handle_OP_SenseTraps(const EQApplicationPacket *app)
 {
 	if (!HasSkill(SkillSenseTraps))
@@ -11914,19 +11938,13 @@ void Client::Handle_OP_ShopPlayerBuy(const EQApplicationPacket *app)
 			sizeof(Merchant_Sell_Struct), app->size);
 		return;
 	}
-	RDTSC_Timer t1;
-	t1.start();
 	Merchant_Sell_Struct* mp = (Merchant_Sell_Struct*)app->pBuffer;
-#if EQDEBUG >= 5
-	Log.Out(Logs::General, Logs::None, "%s, purchase item..", GetName());
-	DumpPacket(app);
-#endif
 
 	int merchantid;
 	bool tmpmer_used = false;
 	Mob* tmp = entity_list.GetMob(mp->npcid);
 
-	if (tmp == 0 || !tmp->IsNPC() || tmp->GetClass() != MERCHANT)
+	if (!tmp || !tmp->IsNPC() || tmp->GetClass() != MERCHANT)
 		return;
 
 	if (mp->quantity < 1) return;
@@ -11986,7 +12004,7 @@ void Client::Handle_OP_ShopPlayerBuy(const EQApplicationPacket *app)
 		safe_delete(delitempacket);
 		return;
 	}
-	if (CheckLoreConflict(item))
+	if (m_inventory.CheckLoreConflict(item))
 	{
 		Message(15, "You can only have one of a lore item.");
 		return;
@@ -12017,7 +12035,7 @@ void Client::Handle_OP_ShopPlayerBuy(const EQApplicationPacket *app)
 	else
 		charges = item->MaxCharges;
 
-	ItemInst* inst = database.CreateItemOld(item, charges);
+	auto inst = database.CreateItem(item->ID, charges);
 
 	int SinglePrice = 0;
 	if (RuleB(Merchant, UsePriceMod))
@@ -12033,7 +12051,6 @@ void Client::Handle_OP_ShopPlayerBuy(const EQApplicationPacket *app)
 	if (mpo->price < 0)
 	{
 		safe_delete(outapp);
-		safe_delete(inst);
 		return;
 	}
 
@@ -12049,126 +12066,119 @@ void Client::Handle_OP_ShopPlayerBuy(const EQApplicationPacket *app)
 		database.SetMQDetectionFlag(AccountName(), GetName(), hacker_str, zone->GetShortName());
 		safe_delete_array(hacker_str);
 		safe_delete(outapp);
-		safe_delete(inst);
 		return;
 	}
 
 	bool stacked = TryStacking(inst);
-	if (!stacked)
-		freeslotid = m_inv.FindFreeSlot(false, true, item->Size);
-
-	// shouldn't we be reimbursing if these two fail?
-
-	//make sure we are not completely full...
-	if (freeslotid == MainCursor) {
-		if (m_inv.GetItem(MainCursor) != nullptr) {
-			Message(13, "You do not have room for any more items.");
-			safe_delete(outapp);
-			safe_delete(inst);
-			return;
-		}
-	}
-
-	if (!stacked && freeslotid == INVALID_INDEX)
-	{
-		Message(13, "You do not have room for any more items.");
-		safe_delete(outapp);
-		safe_delete(inst);
-		return;
-	}
-
-	std::string packet;
-	if (!stacked && inst) {
-		PutItemInInventory(freeslotid, *inst);
-		SendItemPacket(freeslotid, inst, ItemPacketTrade);
-	}
-	else if (!stacked){
-		Log.Out(Logs::General, Logs::Error, "OP_ShopPlayerBuy: item->ItemClass Unknown! Type: %i", item->ItemClass);
-	}
-	QueuePacket(outapp);
-	if (inst && tmpmer_used){
-		int32 new_charges = prevcharges - mp->quantity;
-		zone->SaveTempItem(merchantid, tmp->GetNPCTypeID(), item_id, new_charges);
-		if (new_charges <= 0){
-			EQApplicationPacket* delitempacket = new EQApplicationPacket(OP_ShopDelItem, sizeof(Merchant_DelItem_Struct));
-			Merchant_DelItem_Struct* delitem = (Merchant_DelItem_Struct*)delitempacket->pBuffer;
-			delitem->itemslot = mp->itemslot;
-			delitem->npcid = mp->npcid;
-			delitem->playerid = mp->playerid;
-			delitempacket->priority = 6;
-			entity_list.QueueClients(tmp, delitempacket); //que for anyone that could be using the merchant so they see the update
-			safe_delete(delitempacket);
-		}
-		else {
-			// Update the charges/quantity in the merchant window
-			inst->SetCharges(new_charges);
-			inst->SetPrice(SinglePrice);
-			inst->SetMerchantSlot(mp->itemslot);
-			inst->SetMerchantCount(new_charges);
-
-			SendItemPacket(mp->itemslot, inst, ItemPacketMerchant);
-		}
-	}
-	safe_delete(inst);
-	safe_delete(outapp);
-
-	// start QS code
-	// stacking purchases not supported at this time - entire process will need some work to catch them properly
-	if (RuleB(QueryServ, PlayerLogMerchantTransactions)) {
-		ServerPacket* qspack = new ServerPacket(ServerOP_QSPlayerLogMerchantTransactions, sizeof(QSMerchantLogTransaction_Struct)+sizeof(QSTransactionItems_Struct));
-		QSMerchantLogTransaction_Struct* qsaudit = (QSMerchantLogTransaction_Struct*)qspack->pBuffer;
-
-		qsaudit->zone_id = zone->GetZoneID();
-		qsaudit->merchant_id = tmp->CastToNPC()->MerchantType;
-		qsaudit->merchant_money.platinum = 0;
-		qsaudit->merchant_money.gold = 0;
-		qsaudit->merchant_money.silver = 0;
-		qsaudit->merchant_money.copper = 0;
-		qsaudit->merchant_count = 1;
-		qsaudit->char_id = character_id;
-		qsaudit->char_money.platinum = (mpo->price / 1000);
-		qsaudit->char_money.gold = (mpo->price / 100) % 10;
-		qsaudit->char_money.silver = (mpo->price / 10) % 10;
-		qsaudit->char_money.copper = mpo->price % 10;
-		qsaudit->char_count = 0;
-
-		qsaudit->items[0].char_slot = freeslotid == INVALID_INDEX ? 0 : freeslotid;
-		qsaudit->items[0].item_id = item->ID;
-		qsaudit->items[0].charges = mpo->quantity;
-
-		if (freeslotid == INVALID_INDEX) {
-			qsaudit->items[0].aug_1 = 0;
-			qsaudit->items[0].aug_2 = 0;
-			qsaudit->items[0].aug_3 = 0;
-			qsaudit->items[0].aug_4 = 0;
-			qsaudit->items[0].aug_5 = 0;
-		}
-		else {
-			qsaudit->items[0].aug_1 = m_inv[freeslotid]->GetAugmentItemID(0);
-			qsaudit->items[0].aug_2 = m_inv[freeslotid]->GetAugmentItemID(1);
-			qsaudit->items[0].aug_3 = m_inv[freeslotid]->GetAugmentItemID(2);
-			qsaudit->items[0].aug_4 = m_inv[freeslotid]->GetAugmentItemID(3);
-			qsaudit->items[0].aug_5 = m_inv[freeslotid]->GetAugmentItemID(4);
-		}
-
-		qspack->Deflate();
-		if (worldserver.Connected()) { worldserver.SendPacket(qspack); }
-		safe_delete(qspack);
-	}
-	// end QS code
-
-	if (RuleB(EventLog, RecordBuyFromMerchant))
-		LogMerchant(this, tmp, mpo->quantity, mpo->price, item, true);
-
-	if ((RuleB(Character, EnableDiscoveredItems)))
-	{
-		if (!GetGM() && !IsDiscovered(item_id))
-			DiscoverItem(item_id);
-	}
-
-	t1.stop();
-	std::cout << "At 1: " << t1.getDuration() << std::endl;
-	return;
+	//if (!stacked)
+	//	freeslotid = m_inv.FindFreeSlot(false, true, item->Size);
+	//
+	//// shouldn't we be reimbursing if these two fail?
+	//
+	////make sure we are not completely full...
+	//if (freeslotid == MainCursor) {
+	//	if (m_inv.GetItem(MainCursor) != nullptr) {
+	//		Message(13, "You do not have room for any more items.");
+	//		safe_delete(outapp);
+	//		return;
+	//	}
+	//}
+	//
+	//if (!stacked && freeslotid == INVALID_INDEX)
+	//{
+	//	Message(13, "You do not have room for any more items.");
+	//	safe_delete(outapp);
+	//	return;
+	//}
+	//
+	//std::string packet;
+	//if (!stacked && inst) {
+	//	PutItemInInventory(freeslotid, *inst);
+	//	SendItemPacket(freeslotid, inst, ItemPacketTrade);
+	//}
+	//else if (!stacked){
+	//	Log.Out(Logs::General, Logs::Error, "OP_ShopPlayerBuy: item->ItemClass Unknown! Type: %i", item->ItemClass);
+	//}
+	//QueuePacket(outapp);
+	//if (inst && tmpmer_used){
+	//	int32 new_charges = prevcharges - mp->quantity;
+	//	zone->SaveTempItem(merchantid, tmp->GetNPCTypeID(), item_id, new_charges);
+	//	if (new_charges <= 0){
+	//		EQApplicationPacket* delitempacket = new EQApplicationPacket(OP_ShopDelItem, sizeof(Merchant_DelItem_Struct));
+	//		Merchant_DelItem_Struct* delitem = (Merchant_DelItem_Struct*)delitempacket->pBuffer;
+	//		delitem->itemslot = mp->itemslot;
+	//		delitem->npcid = mp->npcid;
+	//		delitem->playerid = mp->playerid;
+	//		delitempacket->priority = 6;
+	//		entity_list.QueueClients(tmp, delitempacket); //que for anyone that could be using the merchant so they see the update
+	//		safe_delete(delitempacket);
+	//	}
+	//	else {
+	//		// Update the charges/quantity in the merchant window
+	//		inst->SetCharges(new_charges);
+	//		inst->SetPrice(SinglePrice);
+	//		inst->SetMerchantSlot(mp->itemslot);
+	//		inst->SetMerchantCount(new_charges);
+	//
+	//		SendItemPacket(mp->itemslot, inst, ItemPacketMerchant);
+	//	}
+	//}
+	//safe_delete(inst);
+	//safe_delete(outapp);
+	//
+	//// start QS code
+	//// stacking purchases not supported at this time - entire process will need some work to catch them properly
+	//if (RuleB(QueryServ, PlayerLogMerchantTransactions)) {
+	//	ServerPacket* qspack = new ServerPacket(ServerOP_QSPlayerLogMerchantTransactions, sizeof(QSMerchantLogTransaction_Struct)+sizeof(QSTransactionItems_Struct));
+	//	QSMerchantLogTransaction_Struct* qsaudit = (QSMerchantLogTransaction_Struct*)qspack->pBuffer;
+	//
+	//	qsaudit->zone_id = zone->GetZoneID();
+	//	qsaudit->merchant_id = tmp->CastToNPC()->MerchantType;
+	//	qsaudit->merchant_money.platinum = 0;
+	//	qsaudit->merchant_money.gold = 0;
+	//	qsaudit->merchant_money.silver = 0;
+	//	qsaudit->merchant_money.copper = 0;
+	//	qsaudit->merchant_count = 1;
+	//	qsaudit->char_id = character_id;
+	//	qsaudit->char_money.platinum = (mpo->price / 1000);
+	//	qsaudit->char_money.gold = (mpo->price / 100) % 10;
+	//	qsaudit->char_money.silver = (mpo->price / 10) % 10;
+	//	qsaudit->char_money.copper = mpo->price % 10;
+	//	qsaudit->char_count = 0;
+	//
+	//	qsaudit->items[0].char_slot = freeslotid == INVALID_INDEX ? 0 : freeslotid;
+	//	qsaudit->items[0].item_id = item->ID;
+	//	qsaudit->items[0].charges = mpo->quantity;
+	//
+	//	if (freeslotid == INVALID_INDEX) {
+	//		qsaudit->items[0].aug_1 = 0;
+	//		qsaudit->items[0].aug_2 = 0;
+	//		qsaudit->items[0].aug_3 = 0;
+	//		qsaudit->items[0].aug_4 = 0;
+	//		qsaudit->items[0].aug_5 = 0;
+	//	}
+	//	else {
+	//		qsaudit->items[0].aug_1 = m_inv[freeslotid]->GetAugmentItemID(0);
+	//		qsaudit->items[0].aug_2 = m_inv[freeslotid]->GetAugmentItemID(1);
+	//		qsaudit->items[0].aug_3 = m_inv[freeslotid]->GetAugmentItemID(2);
+	//		qsaudit->items[0].aug_4 = m_inv[freeslotid]->GetAugmentItemID(3);
+	//		qsaudit->items[0].aug_5 = m_inv[freeslotid]->GetAugmentItemID(4);
+	//	}
+	//
+	//	qspack->Deflate();
+	//	if (worldserver.Connected()) { worldserver.SendPacket(qspack); }
+	//	safe_delete(qspack);
+	//}
+	//// end QS code
+	//
+	//if (RuleB(EventLog, RecordBuyFromMerchant))
+	//	LogMerchant(this, tmp, mpo->quantity, mpo->price, item, true);
+	//
+	//if ((RuleB(Character, EnableDiscoveredItems)))
+	//{
+	//	if (!GetGM() && !IsDiscovered(item_id))
+	//		DiscoverItem(item_id);
+	//}
 }
 void Client::Handle_OP_ShopPlayerSell(const EQApplicationPacket *app)
 {

@@ -3062,13 +3062,13 @@ namespace RoF
 	{
 		ENCODE_LENGTH_EXACT(Merchant_Sell_Struct);
 		SETUP_DIRECT_ENCODE(Merchant_Sell_Struct, structs::Merchant_Sell_Struct);
-
+		
 		OUT(npcid);
 		OUT(playerid);
 		OUT(itemslot);
 		OUT(quantity);
 		OUT(price);
-
+		
 		FINISH_ENCODE();
 	}
 
@@ -4821,13 +4821,13 @@ namespace RoF
 	{
 		DECODE_LENGTH_EXACT(structs::Merchant_Sell_Struct);
 		SETUP_DIRECT_DECODE(Merchant_Sell_Struct, structs::Merchant_Sell_Struct);
-
+		
 		IN(npcid);
 		IN(playerid);
 		IN(itemslot);
 		IN(quantity);
 		IN(price);
-
+		
 		FINISH_DIRECT_DECODE();
 	}
 

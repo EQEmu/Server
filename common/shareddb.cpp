@@ -256,7 +256,9 @@ bool SharedDatabase::UpdateSharedBankSlot(uint32 char_id, const ItemInst* inst, 
 
     // Save bag contents, if slot supports bag contents
 	if (inst->IsType(ItemClassContainer) && InventoryOld::SupportsContainers(slot_id)) {
-		for (uint8 idx = SUB_BEGIN; idx < EmuConstants::ITEM_CONTAINER_SIZE; idx++) {
+		// Limiting to bag slot count will get rid of 'hidden' duplicated items and 'Invalid Slot ID'
+		// messages through attrition (and the modded code in SaveInventory)
+		for (uint8 idx = SUB_BEGIN; idx < inst->GetItem()->BagSlots && idx < EmuConstants::ITEM_CONTAINER_SIZE; idx++) {
 			const ItemInst* baginst = inst->GetItem(idx);
 			SaveInventory(char_id, baginst, InventoryOld::CalcSlotId(slot_id, idx));
 		}

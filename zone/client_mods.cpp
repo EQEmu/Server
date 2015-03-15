@@ -2148,6 +2148,12 @@ int32 Client::CalcEnduranceRegenCap()
 	return (cap * RuleI(Character, EnduranceRegenMultiplier) / 100);
 }
 
+int32 Client::CalcItemATKCap()
+{
+	int cap = RuleI(Character, ItemATKCap) + itembonuses.ItemATKCap + spellbonuses.ItemATKCap + aabonuses.ItemATKCap;
+	return cap;
+}
+
 int Client::GetRawACNoShield(int &shield_ac) const
 {
 	int ac = itembonuses.AC + spellbonuses.AC + aabonuses.AC;

@@ -366,6 +366,43 @@ bool EQEmu::Inventory::Swap(const InventorySlot &src, const InventorySlot &dest,
 	return true;
 }
 
+bool EQEmu::Inventory::TryStacking(std::shared_ptr<EQEmu::ItemInstance> inst, const InventorySlot &slot) {
+	auto target_inst = Get(slot);
+	
+	if(!inst || !target_inst ||
+	   !inst->IsStackable() || !target_inst->IsStackable()) 
+	{
+		return false;
+	}
+	
+	if(inst->GetBaseItem()->ID != target_inst->GetBaseItem()->ID) {
+		return false;
+	}
+	
+	int stack_avail = target_inst->GetBaseItem()->StackSize - target_inst->GetCharges();
+	
+	if(stack_avail <= 0) {
+		return false;
+	}
+	
+	impl_->data_model_->Begin();
+	if(inst->GetCharges() <= stack_avail) {
+		inst->SetCharges(0);
+		target_inst->SetCharges(target_inst->GetCharges() + inst->GetCharges());
+		impl_->data_model_->Delete(slot);
+		impl_->data_model_->Insert(slot, target_inst);
+	} else {
+		inst->SetCharges(inst->GetCharges() - stack_avail);
+		target_inst->SetCharges(target_inst->GetCharges() + stack_avail);
+		impl_->data_model_->Delete(slot);
+		impl_->data_model_->Insert(slot, target_inst);
+	}
+
+	impl_->data_model_->Commit();
+
+	return true;
+}
+
 bool EQEmu::Inventory::Summon(const InventorySlot &slot, std::shared_ptr<ItemInstance> inst) {
 	if(!inst)
 		return false;

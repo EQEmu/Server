@@ -245,6 +245,8 @@ public:
 	virtual bool IsClient() const { return true; }
 	void CompleteConnect();
 	bool TryStacking(ItemInst* item, uint8 type = ItemPacketTrade, bool try_worn = true, bool try_cursor = true);
+	bool TryStacking(std::shared_ptr<EQEmu::ItemInstance> item, uint8 type = ItemPacketTrade, bool try_worn = true, bool try_cursor = true);
+	bool TryStacking(std::shared_ptr<EQEmu::ItemInstance> item, const EQEmu::InventorySlot &slot, uint8 type = ItemPacketTrade);
 	void SendTraderPacket(Client* trader, uint32 Unknown72 = 51);
 	void SendBuyerPacket(Client* Buyer);
 	GetItems_Struct* GetTraderItems();
@@ -1284,6 +1286,7 @@ protected:
 	void CalcEdibleBonuses(StatBonuses* newbon);
 	void CalcAABonuses(StatBonuses* newbon);
 	void ApplyAABonuses(uint32 aaid, uint32 slots, StatBonuses* newbon);
+	void ProcessItemCaps();
 	void MakeBuffFadePacket(uint16 spell_id, int slot_id, bool send_message = true);
 	bool client_data_loaded;
 
@@ -1337,6 +1340,7 @@ private:
 	int32 GetACMit();
 	int32 GetACAvoid();
 	int32 CalcATK();
+	int32 CalcItemATKCap();
 	int32 CalcHaste();
 
 	int32 CalcAlcoholPhysicalEffect();

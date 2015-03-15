@@ -2409,6 +2409,78 @@ XS(XS_NPC_AddDefensiveProc) {
 	XSRETURN_EMPTY;
 }
 
+XS(XS_NPC_RemoveMeleeProc);
+XS(XS_NPC_RemoveMeleeProc) {
+	dXSARGS;
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: NPC::RemoveMeleeProc(THIS,spellid)");
+	{
+		NPC * THIS;
+		int	spell_id = (int)SvIV(ST(1));
+		dXSTARG;
+
+		if (sv_derived_from(ST(0), "NPC")) {
+			IV tmp = SvIV((SV*)SvRV(ST(0)));
+			THIS = INT2PTR(NPC *,tmp);
+		}
+		else
+			Perl_croak(aTHX_ "THIS is not of type NPC");
+		if(THIS == NULL)
+			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+
+		THIS->RemoveProcFromWeapon(spell_id, false);
+	}
+	XSRETURN_EMPTY;
+}
+
+XS(XS_NPC_RemoveRangedProc);
+XS(XS_NPC_RemoveRangedProc) {
+	dXSARGS;
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: NPC::RemoveRangedProc(THIS,spellid)");
+	{
+		NPC * THIS;
+		int	spell_id = (int)SvIV(ST(1));
+		dXSTARG;
+
+		if (sv_derived_from(ST(0), "NPC")) {
+			IV tmp = SvIV((SV*)SvRV(ST(0)));
+			THIS = INT2PTR(NPC *,tmp);
+		}
+		else
+			Perl_croak(aTHX_ "THIS is not of type NPC");
+		if(THIS == NULL)
+			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+
+		THIS->RemoveRangedProc(spell_id, false);
+	}
+	XSRETURN_EMPTY;
+}
+
+XS(XS_NPC_RemoveDefensiveProc);
+XS(XS_NPC_RemoveDefensiveProc) {
+	dXSARGS;
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: NPC::RemoveDefensiveProc(THIS,spellid)");
+	{
+		NPC * THIS;
+		int	spell_id = (int)SvIV(ST(1));
+		dXSTARG;
+
+		if (sv_derived_from(ST(0), "NPC")) {
+			IV tmp = SvIV((SV*)SvRV(ST(0)));
+			THIS = INT2PTR(NPC *,tmp);
+		}
+		else
+			Perl_croak(aTHX_ "THIS is not of type NPC");
+		if(THIS == NULL)
+			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+
+		THIS->RemoveDefensiveProc(spell_id, false);
+	}
+	XSRETURN_EMPTY;
+}
+
 XS(XS_NPC_ChangeLastName); /* prototype to pass -Wmissing-prototypes */
 XS(XS_NPC_ChangeLastName)
 {
@@ -2566,6 +2638,9 @@ XS(boot_NPC)
 		newXSproto(strcpy(buf, "AddMeleeProc"), XS_NPC_AddMeleeProc, file, "$$$");
 		newXSproto(strcpy(buf, "AddRangedProc"), XS_NPC_AddRangedProc, file, "$$$");
 		newXSproto(strcpy(buf, "AddDefensiveProc"), XS_NPC_AddDefensiveProc, file, "$$$");
+		newXSproto(strcpy(buf, "RemoveMeleeProc"), XS_NPC_RemoveMeleeProc, file, "$$");
+		newXSproto(strcpy(buf, "RemoveRangedProc"), XS_NPC_RemoveRangedProc, file, "$$");
+		newXSproto(strcpy(buf, "RemoveDefensiveProc"), XS_NPC_RemoveDefensiveProc, file, "$$");
 		newXSproto(strcpy(buf, "ChangeLastName"), XS_NPC_ChangeLastName, file, "$:$");
 		newXSproto(strcpy(buf, "ClearLastName"), XS_NPC_ClearLastName, file, "$");
 	XSRETURN_YES;

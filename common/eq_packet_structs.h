@@ -126,6 +126,14 @@ struct LDoNTrapTemplate
 
 // All clients translate the character select information to some degree
 
+struct Inventory_Slot_Struct
+{
+	int16 type;
+	int16 slot;
+	int16 bag;
+	int16 aug;
+};
+
 struct Color_Struct
 {
 	union {
@@ -1969,13 +1977,11 @@ Unknowns:
 
 
 struct Merchant_Sell_Struct {
-/*000*/	uint32	npcid;			// Merchant NPC's entity id
-/*004*/	uint32	playerid;		// Player's entity id
-/*008*/	uint32	itemslot;
-		uint32	unknown12;
-/*016*/	uint8	quantity;		// Already sold
-/*017*/ uint8	Unknown016[3];
-/*020*/ uint32	price;
+	uint32 npcid;
+	uint32 playerid;
+	uint32 itemslot;
+	int32 quantity;
+	uint32 price;
 };
 struct Merchant_Purchase_Struct {
 /*000*/	uint32	npcid;			// Merchant NPC's entity id

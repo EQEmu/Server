@@ -1,5 +1,15 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 03/04/2015 ==
+Akkadius: Fix Spell Book Deletion
+
+== 03/03/2015 ==
+Uleat: Fix for 'Invalid Slot ID' messages. Bag slot count is now enforced during database saves to eliminate existing 'hidden' duplicated items..sorry MQ2 users...
+Uleat: Fix for Item loss during corpse looting and possible item loss when purchasing items from LDoN or Adventure merchants. (cursor-related)
+
+== 02/27/2015 ==
+Uleat: Final 'tweak' for light sources until a valid issue arises. Wearable equipment now matches client behavior. Stackable light sources are bugged in the client..but, the current timer update implementation alleviates this condition.
+
 == 02/26/2015 ==
 Uleat: Updated light source criteria to (hopefully) match what the client uses (still needs tweaking)
 Uleat: Changed 'general' light source checks to accept the last valid light source (client behavior)
@@ -8,6 +18,13 @@ Notes:
 	- Wearable equipment types still register as valid light sources when in general slots (needs exemption criteria)
 
 == 02/23/2015 ==
+Noudess: Allow for a rule to set starting swimming && SenseHeading value.
+I moved the swimming override to char create instead of setting it 
+every time a char enters a zone.
+
+Also added rules to not ignore, but rather forrce sense heading packets to be
+used to train it instead of maxing it out like before.
+
 Uleat: Fix for RoF+ clients showing active 'Return Home' button when action is not available (swapped 'GoHome' and 'Enabled' fields in RoF-era CharacterSelectEntry structs)
 
 == 02/21/2015 ==

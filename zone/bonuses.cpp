@@ -81,6 +81,8 @@ void Client::CalcBonuses()
 	CalcAABonuses(&aabonuses);	//we're not quite ready for this
 	Log.Out(Logs::Detail, Logs::AA, "Finished calculating AA Bonuses for %s.", this->GetCleanName());
 
+	ProcessItemCaps(); // caps that depend on spell/aa bonuses
+
 	RecalcWeight();
 
 	CalcAC();
@@ -183,16 +185,24 @@ void Client::CalcItemBonuses(StatBonuses* newbon) {
 			AdditiveWornBonuses(inst, newbon);
 		}
 	}
+}
 
-	// Caps
-	if(newbon->HPRegen > CalcHPRegenCap())
-		newbon->HPRegen = CalcHPRegenCap();
+// These item stat caps depend on spells/AAs so we process them after those are processed
+void Client::ProcessItemCaps()
+{
+	itembonuses.HPRegen = std::min(itembonuses.HPRegen, CalcHPRegenCap());
+	itembonuses.ManaRegen = std::min(itembonuses.ManaRegen, CalcManaRegenCap());
+	itembonuses.EnduranceRegen = std::min(itembonuses.EnduranceRegen, CalcEnduranceRegenCap());
 
-	if(newbon->ManaRegen > CalcManaRegenCap())
-		newbon->ManaRegen = CalcManaRegenCap();
+	// The Sleeper Tomb Avatar proc counts towards item ATK
+	// The client uses a 100 here, so using a 100 here the client and server will agree
+	// For example, if you set the effect to be 200 it will get 100 item ATK and 100 spell ATK
+	if (IsValidSpell(2434) && FindBuff(2434)) {
+		itembonuses.ATK += 100;
+		spellbonuses.ATK -= 100;
+	}
 
-	if(newbon->EnduranceRegen > CalcEnduranceRegenCap())
-		newbon->EnduranceRegen = CalcEnduranceRegenCap();
+	itembonuses.ATK = std::min(itembonuses.ATK, CalcItemATKCap());
 }
 
 void Client::AddItemBonuses(const ItemInst *inst, StatBonuses* newbon, bool isAug, bool isTribute) {
@@ -225,6 +235,7 @@ void Client::AddItemBonuses(const ItemInst *inst, StatBonuses* newbon, bool isAu
 		newbon->HP += item->HP;
 		newbon->Mana += item->Mana;
 		newbon->Endurance += item->Endur;
+		newbon->ATK += item->Attack;
 		newbon->STR += (item->AStr + item->HeroicStr);
 		newbon->STA += (item->ASta + item->HeroicSta);
 		newbon->DEX += (item->ADex + item->HeroicDex);
@@ -278,6 +289,7 @@ void Client::AddItemBonuses(const ItemInst *inst, StatBonuses* newbon, bool isAu
 		newbon->HP += CalcRecommendedLevelBonus( lvl, reclvl, item->HP );
 		newbon->Mana += CalcRecommendedLevelBonus( lvl, reclvl, item->Mana );
 		newbon->Endurance += CalcRecommendedLevelBonus( lvl, reclvl, item->Endur );
+		newbon->ATK += CalcRecommendedLevelBonus( lvl, reclvl, item->Attack );
 		newbon->STR += CalcRecommendedLevelBonus( lvl, reclvl, (item->AStr + item->HeroicStr) );
 		newbon->STA += CalcRecommendedLevelBonus( lvl, reclvl, (item->ASta + item->HeroicSta) );
 		newbon->DEX += CalcRecommendedLevelBonus( lvl, reclvl, (item->ADex + item->HeroicDex) );
@@ -335,16 +347,6 @@ void Client::AddItemBonuses(const ItemInst *inst, StatBonuses* newbon, bool isAu
 	if(item->EnduranceRegen > 0)
 		newbon->EnduranceRegen += item->EnduranceRegen;
 
-	if(item->Attack > 0) {
-
-		int cap = RuleI(Character, ItemATKCap);
-		cap += itembonuses.ItemATKCap + spellbonuses.ItemATKCap + aabonuses.ItemATKCap;
-
-		if((newbon->ATK + item->Attack) > cap)
-			newbon->ATK = RuleI(Character, ItemATKCap);
-		else
-			newbon->ATK += item->Attack;
-	}
 	if(item->DamageShield > 0) {
 		if((newbon->DamageShield + item->DamageShield) > RuleI(Character, ItemDamageShieldCap))
 			newbon->DamageShield = RuleI(Character, ItemDamageShieldCap);
