@@ -249,6 +249,7 @@ public:
 	bool EnableRecipe(uint32 recipe_id);
 	bool DisableRecipe(uint32 recipe_id);
 	void ClearNPCTypeCache(int npctype_id);
+	void ReloadZoneStaticData();
 
 	Client *GetInitiator() const;
 	NPC *GetNPC() const;

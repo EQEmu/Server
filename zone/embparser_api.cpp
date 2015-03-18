@@ -3429,6 +3429,16 @@ XS(XS__clear_npctype_cache)
 	XSRETURN_EMPTY;
 }
 
+XS(XS__reloadzonestaticdata);
+XS(XS__reloadzonestaticdata)
+{
+	dXSARGS;
+
+	quest_manager.ReloadZoneStaticData();
+
+	XSRETURN_EMPTY;
+}
+
 XS(XS__qs_send_query);
 XS(XS__qs_send_query)
 {
@@ -3686,6 +3696,7 @@ EXTERN_C XS(boot_quest)
 		newXS(strcpy(buf, "qs_send_query"), XS__qs_send_query, file); 
 		newXS(strcpy(buf, "rain"), XS__rain, file);
 		newXS(strcpy(buf, "rebind"), XS__rebind, file);
+		newXS(strcpy(buf, "reloadzonestaticdata"), XS__reloadzonestaticdata, file);
 		newXS(strcpy(buf, "removetitle"), XS__removetitle, file);
 		newXS(strcpy(buf, "repopzone"), XS__repopzone, file);
 		newXS(strcpy(buf, "resettaskactivity"), XS__resettaskactivity, file);

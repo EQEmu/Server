@@ -2927,6 +2927,13 @@ void QuestManager::ClearNPCTypeCache(int npctype_id) {
 	}
 }
 
+void QuestManager::ReloadZoneStaticData()
+{
+	if (zone) {
+		zone->ReloadStaticData();
+	}
+}
+
 Client *QuestManager::GetInitiator() const {
 	if(!quests_running_.empty()) {
 		running_quest e = quests_running_.top();
