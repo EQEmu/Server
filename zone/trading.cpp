@@ -1583,6 +1583,8 @@ void Client::BuyTraderItem(TraderBuy_Struct* tbs, Client* Trader, const EQApplic
 		return;
 	}
 
+	tbs->Price = BuyItem->GetPrice();
+
 	Log.Out(Logs::Detail, Logs::Trading, "Buyitem: Name: %s, IsStackable: %i, Requested Quantity: %i, Charges on Item %i",
 					BuyItem->GetItem()->Name, BuyItem->IsStackable(), tbs->Quantity, BuyItem->GetCharges());
 	// If the item is not stackable, then we can only be buying one of them.

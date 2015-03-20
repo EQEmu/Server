@@ -2604,7 +2604,7 @@ void Client::Handle_OP_AltCurrencyReclaim(const EQApplicationPacket *app)
 		++iter;
 	}
 
-	if (item_id == 0) {
+	if (item_id == 0 || reclaim->count == 0) {
 		return;
 	}
 
