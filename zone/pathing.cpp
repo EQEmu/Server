@@ -1478,6 +1478,11 @@ int32 PathManager::AddNode(float x, float y, float z, float best_z, int32 reques
 	{
 		for(uint32 i = 0; i < Head.PathNodeCount; ++i)
 		{
+			if(PathNodes[i].id - new_id > 1) {
+				new_id = PathNodes[i].id - 1;
+				break;
+			}
+
 			if(PathNodes[i].id > new_id)
 				new_id = PathNodes[i].id;
 		}
