@@ -1063,6 +1063,8 @@ protected:
 	void PrintRoute();
 
 	virtual float GetSympatheticProcChances(uint16 spell_id, int16 ProcRateMod, int32 ItemProcRate = 0);
+	int16 GetSympatheticSpellProcRate(uint16 spell_id);
+	uint16 GetSympatheticSpellProcID(uint16 spell_id);
 
 	enum {MAX_PROCS = 4};
 	tProc PermaProcs[MAX_PROCS];
