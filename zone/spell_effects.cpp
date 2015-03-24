@@ -5177,7 +5177,7 @@ int16 Mob::CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, boo
 	return(value*lvlModifier/100);
 }
 
-int16 Client::GetSympatheticFocusEffect(focusType type, uint16 spell_id) {
+uint16 Client::GetSympatheticFocusEffect(focusType type, uint16 spell_id) {
 
 	if (IsBardSong(spell_id))
 		return 0;
@@ -5253,7 +5253,7 @@ int16 Client::GetSympatheticFocusEffect(focusType type, uint16 spell_id) {
 
 			if (IsValidSpell(proc_spellid)){
 
-				ProcChance = GetSympatheticProcChances(spell_id, spells[focusspellid].base[0]);
+				ProcChance = GetSympatheticProcChances(spell_id, GetSympatheticSpellProcRate(spell_id));
 				if(zone->random.Roll(ProcChance))
  					SympatheticProcList.push_back(proc_spellid);
 			}
@@ -5928,6 +5928,26 @@ float Mob::GetSympatheticProcChances(uint16 spell_id, int16 ProcRateMod, int32 I
 
  	return ProcChance;
  }
+
+int16 Mob::GetSympatheticSpellProcRate(uint16 spell_id)
+{
+	for (int i = 0; i < EFFECT_COUNT; i++){
+		if (spells[spell_id].effectid[i] == SE_SympatheticProc)
+			return spells[spell_id].base[i];
+	}
+
+	return 0;
+}
+
+uint16 Mob::GetSympatheticSpellProcID(uint16 spell_id)
+{
+	for (int i = 0; i < EFFECT_COUNT; i++){
+		if (spells[spell_id].effectid[i] == SE_SympatheticProc)
+			return spells[spell_id].base2[i];
+	}
+
+	return 0;
+}
 
 bool Mob::DoHPToManaCovert(uint16 mana_cost)
 {
