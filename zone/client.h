@@ -1268,7 +1268,7 @@ protected:
 	bool client_data_loaded;
 
 	int16 GetFocusEffect(focusType type, uint16 spell_id);
-	int16 GetSympatheticFocusEffect(focusType type, uint16 spell_id);
+	uint16 GetSympatheticFocusEffect(focusType type, uint16 spell_id);
 
 	Mob* bind_sight_target;
 
