@@ -5177,13 +5177,12 @@ int16 Mob::CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, boo
 	return(value*lvlModifier/100);
 }
 
-int16 Client::GetSympatheticFocusEffect(focusType type, uint16 spell_id) {
+uint16 Client::GetSympatheticFocusEffect(focusType type, uint16 spell_id) {
 
 	if (IsBardSong(spell_id))
 		return 0;
 
 	uint16 proc_spellid = 0;
-	uint8 MAX_SYMPATHETIC = 10;
 	float ProcChance = 0.0f;
 
 	std::vector<int> SympatheticProcList;
@@ -5195,7 +5194,7 @@ int16 Client::GetSympatheticFocusEffect(focusType type, uint16 spell_id) {
 
 		for(int x = EmuConstants::EQUIPMENT_BEGIN; x <= EmuConstants::EQUIPMENT_END; x++)
 		{
-			if (SympatheticProcList.size() > MAX_SYMPATHETIC)
+			if (SympatheticProcList.size() > MAX_SYMPATHETIC_PROCS)
 				continue;
 
 			TempItem = nullptr;
@@ -5215,7 +5214,7 @@ int16 Client::GetSympatheticFocusEffect(focusType type, uint16 spell_id) {
 
 			for (int y = AUG_BEGIN; y < EmuConstants::ITEM_COMMON_SIZE; ++y)
 			{
-				if (SympatheticProcList.size() > MAX_SYMPATHETIC)
+				if (SympatheticProcList.size() > MAX_SYMPATHETIC_PROCS)
 					continue;
 
 				ItemInst *aug = nullptr;
@@ -5243,18 +5242,18 @@ int16 Client::GetSympatheticFocusEffect(focusType type, uint16 spell_id) {
 		int buff_max = GetMaxTotalSlots();
 		for (buff_slot = 0; buff_slot < buff_max; buff_slot++) {
 
-			if (SympatheticProcList.size() > MAX_SYMPATHETIC)
+			if (SympatheticProcList.size() > MAX_SYMPATHETIC_PROCS)
 				continue;
 
 			focusspellid = buffs[buff_slot].spellid;
-			if (IsValidSpell(focusspellid))
+			if (!IsValidSpell(focusspellid))
 				continue;
 
 				proc_spellid = CalcFocusEffect(type, focusspellid, spell_id);
 
 			if (IsValidSpell(proc_spellid)){
 
-				ProcChance = GetSympatheticProcChances(spell_id, spells[focusspellid].base[0]);
+				ProcChance = GetSympatheticProcChances(spell_id, GetSympatheticSpellProcRate(spell_id));
 				if(zone->random.Roll(ProcChance))
  					SympatheticProcList.push_back(proc_spellid);
 			}
@@ -5275,7 +5274,7 @@ int16 Client::GetSympatheticFocusEffect(focusType type, uint16 spell_id) {
 			if (aa_AA < 1 || aa_value < 1)
 				continue;
 
-			if (SympatheticProcList.size() > MAX_SYMPATHETIC)
+			if (SympatheticProcList.size() > MAX_SYMPATHETIC_PROCS)
 				continue;
 
 			proc_spellid = CalcAAFocus(type, aa_AA, spell_id);
@@ -5929,6 +5928,26 @@ float Mob::GetSympatheticProcChances(uint16 spell_id, int16 ProcRateMod, int32 I
 
  	return ProcChance;
  }
+
+int16 Mob::GetSympatheticSpellProcRate(uint16 spell_id)
+{
+	for (int i = 0; i < EFFECT_COUNT; i++){
+		if (spells[spell_id].effectid[i] == SE_SympatheticProc)
+			return spells[spell_id].base[i];
+	}
+
+	return 0;
+}
+
+uint16 Mob::GetSympatheticSpellProcID(uint16 spell_id)
+{
+	for (int i = 0; i < EFFECT_COUNT; i++){
+		if (spells[spell_id].effectid[i] == SE_SympatheticProc)
+			return spells[spell_id].base2[i];
+	}
+
+	return 0;
+}
 
 bool Mob::DoHPToManaCovert(uint16 mana_cost)
 {

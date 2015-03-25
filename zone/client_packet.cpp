@@ -2607,7 +2607,7 @@ void Client::Handle_OP_AltCurrencyReclaim(const EQApplicationPacket *app)
 		++iter;
 	}
 
-	if (item_id == 0) {
+	if (item_id == 0 || reclaim->count == 0) {
 		return;
 	}
 
@@ -13319,6 +13319,10 @@ void Client::Handle_OP_Trader(const EQApplicationPacket *app)
 				if (database.GetItem(gis->Items[i])) {
 					database.SaveTraderItem(this->CharacterID(), gis->Items[i], gis->SerialNumber[i],
 						gis->Charges[i], ints->ItemCost[i], i);
+
+					auto inst = FindTraderItemBySerialNumber(gis->SerialNumber[i]);
+					if(inst)
+						inst->SetPrice(ints->ItemCost[i]);
 				}
 				else {
 					//return; //sony doesnt memset so assume done on first bad item

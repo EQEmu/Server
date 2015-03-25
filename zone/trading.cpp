@@ -1583,6 +1583,8 @@ void Client::BuyTraderItem(TraderBuy_Struct* tbs, Client* Trader, const EQApplic
 		return;
 	}
 
+	tbs->Price = BuyItem->GetPrice();
+
 	Log.Out(Logs::Detail, Logs::Trading, "Buyitem: Name: %s, IsStackable: %i, Requested Quantity: %i, Charges on Item %i",
 					BuyItem->GetItem()->Name, BuyItem->IsStackable(), tbs->Quantity, BuyItem->GetCharges());
 	// If the item is not stackable, then we can only be buying one of them.
@@ -1650,7 +1652,12 @@ void Client::BuyTraderItem(TraderBuy_Struct* tbs, Client* Trader, const EQApplic
 		outtbs->Price = TotalCost;
 	}
 
-	this->TakeMoneyFromPP(TotalCost);
+	if(!TakeMoneyFromPP(TotalCost)) {
+		database.SetHackerFlag(account_name, name, "Attempted to buy something in bazaar but did not have enough money.");
+		TradeRequestFailed(app);
+		safe_delete(outapp);
+		return;
+	}
 
 	Log.Out(Logs::Detail, Logs::Trading, "Customer Paid: %d in Copper", TotalCost);
 

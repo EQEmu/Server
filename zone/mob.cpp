@@ -3616,36 +3616,41 @@ bool Mob::TryFadeEffect(int slot)
 
 void Mob::TrySympatheticProc(Mob *target, uint32 spell_id)
 {
-	if(target == nullptr || !IsValidSpell(spell_id))
+	if(target == nullptr || !IsValidSpell(spell_id) || !IsClient())
 		return;
 
-	int focus_spell = CastToClient()->GetSympatheticFocusEffect(focusSympatheticProc,spell_id);
+	uint16 focus_spell = CastToClient()->GetSympatheticFocusEffect(focusSympatheticProc,spell_id);
 
-		if(IsValidSpell(focus_spell)){
-			int focus_trigger = spells[focus_spell].base2[0];
-			// For beneficial spells, if the triggered spell is also beneficial then proc it on the target
-			// if the triggered spell is detrimental, then it will trigger on the caster(ie cursed items)
-			if(IsBeneficialSpell(spell_id))
-			{
-				if(IsBeneficialSpell(focus_trigger))
-					SpellFinished(focus_trigger, target);
+	if(!IsValidSpell(focus_spell))
+		return;
 
-				else
-					SpellFinished(focus_trigger, this, 10, 0, -1, spells[focus_trigger].ResistDiff);
-			}
-			// For detrimental spells, if the triggered spell is beneficial, then it will land on the caster
-			// if the triggered spell is also detrimental, then it will land on the target
-			else
-			{
-				if(IsBeneficialSpell(focus_trigger))
-					SpellFinished(focus_trigger, this);
+	uint16 focus_trigger = GetSympatheticSpellProcID(focus_spell);
 
-				else
-					SpellFinished(focus_trigger, target, 10, 0, -1, spells[focus_trigger].ResistDiff);
-			}
+	if(!IsValidSpell(focus_trigger))
+		return;
 
-			CheckNumHitsRemaining(NumHit::MatchingSpells, -1, focus_spell);
-		}
+	// For beneficial spells, if the triggered spell is also beneficial then proc it on the target
+	// if the triggered spell is detrimental, then it will trigger on the caster(ie cursed items)
+	if(IsBeneficialSpell(spell_id))
+	{
+		if(IsBeneficialSpell(focus_trigger))
+			SpellFinished(focus_trigger, target);
+
+		else
+			SpellFinished(focus_trigger, this, 10, 0, -1, spells[focus_trigger].ResistDiff);
+	}
+	// For detrimental spells, if the triggered spell is beneficial, then it will land on the caster
+	// if the triggered spell is also detrimental, then it will land on the target
+	else
+	{
+		if(IsBeneficialSpell(focus_trigger))
+			SpellFinished(focus_trigger, this);
+
+		else
+			SpellFinished(focus_trigger, target, 10, 0, -1, spells[focus_trigger].ResistDiff);
+	}
+
+	CheckNumHitsRemaining(NumHit::MatchingSpells, -1, focus_spell);
 }
 
 int32 Mob::GetItemStat(uint32 itemid, const char *identifier)

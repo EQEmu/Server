@@ -1839,7 +1839,7 @@ void NPC::PetOnSpawn(NewSpawn_Struct* ns)
 		if(swarmOwner->IsClient())
 		{
 			SetPetOwnerClient(true); //Simple flag to determine if pet belongs to a client
-			SetAllowBeneficial(1);//Allow temp pets to receive buffs and heals if owner is client.
+			SetAllowBeneficial(true);//Allow temp pets to receive buffs and heals if owner is client.
 			//This will allow CLIENT swarm pets NOT to be targeted with F8.
 			ns->spawn.targetable_with_hotkey = 0;
 			no_target_hotkey = 1;
@@ -2257,8 +2257,6 @@ bool NPC::CanTalk()
 	393,394,395,396,397,398,0,400,402,0,0,0,0,406,0,408,0,0,411,0,413,0,0,0,417,
 	0,0,420,0,0,0,0,425,0,0,0,0,0,0,0,433,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 	0,0,0,0,0,458,0,0,0,0,0,0,0,0,467,0,0,470,0,0,473};
-
-	int talk_check = TalkRace[GetRace() - 1];
 
 	if (TalkRace[GetRace() - 1] > 0)
 		return true;

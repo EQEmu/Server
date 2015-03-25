@@ -2151,7 +2151,7 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, uint16 slot, uint16 
 				// it can affect up to 7 people if the targeted group is not our own
 				
 				// Allow pets who cast group spells to affect the group.
-				if (spell_target->IsPetOwnerClient()){
+				if (spell_target->IsPetOwnerClient() && IsPetOwnerClient()){
 					Mob* owner =  spell_target->GetOwner();
 
 					if (owner)
