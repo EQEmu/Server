@@ -848,24 +848,41 @@ bool Client::TradeskillExecute(DBTradeskillRecipe_Struct *spec) {
 	// Some tradeskills are more eqal then others. ;-)
 	// If you want to customize the stage1 success rate do it here.
 	// Remember: skillup_modifier is (float). Lower is better
-	switch(spec->tradeskill) {
-	case SkillFletching:
-	case SkillAlchemy:
-	case SkillJewelryMaking:
-	case SkillPottery:
-		skillup_modifier = 4;
-		break;
-	case SkillBaking:
-	case SkillBrewing:
-		skillup_modifier = 3;
-		break;
-	case SkillResearch:
-		skillup_modifier = 1;
-		break;
-	default:
-		skillup_modifier = 2;
-		break;
-	}
+        switch(spec->tradeskill) {
+        case SkillFletching:
+                skillup_modifier = RuleI(Character, TradeskillUpFletching);
+                break;
+        case SkillAlchemy:
+                skillup_modifier = RuleI(Character, TradeskillUpAlchemy);
+                break;
+        case SkillJewelryMaking:
+                skillup_modifier = RuleI(Character, TradeskillUpJewelcrafting);
+                break;
+        case SkillPottery:
+                skillup_modifier = RuleI(Character, TradeskillUpPottery);
+                break;
+        case SkillBaking:
+                skillup_modifier = RuleI(Character, TradeskillUpBaking);
+                break;
+        case SkillBrewing:
+                skillup_modifier = RuleI(Character, TradeskillUpBrewing);
+                break;
+        case SkillBlacksmithing:
+                skillup_modifier = RuleI(Character, TradeskillUpBlacksmithing);
+                break;
+        case SkillResearch:
+                skillup_modifier = RuleI(Character, TradeskillUpResearch);
+                break;
+        case SkillMakePoison:
+                skillup_modifier = RuleI(Character, TradeskillUpMakePoison);
+                break;
+        case SkillTinkering:
+                skillup_modifier = RuleI(Character, TradeskillUpTinkering);
+                break;
+        default:
+                skillup_modifier = 2;
+                break;
+        }
 
 	// Some tradeskills take the higher of one additional stat beside INT and WIS
 	// to determine the skillup rate. Additionally these tradeskills do not have an

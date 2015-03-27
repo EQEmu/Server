@@ -103,6 +103,16 @@ RULE_INT ( Character, BaseRunSpeedCap, 158) // Base Run Speed Cap, on live it's 
 RULE_INT ( Character, OrnamentationAugmentType, 20) //Ornamentation Augment Type
 RULE_REAL(Character, EnvironmentDamageMulipliter, 1)
 RULE_BOOL(Character, UnmemSpellsOnDeath, true)
+RULE_INT ( Character, TradeskillUpAlchemy, 2 ) // Alchemy skillup rate adjust. Lower is faster.
+RULE_INT ( Character, TradeskillUpBaking, 2 ) // Baking skillup rate adjust. Lower is faster.
+RULE_INT ( Character, TradeskillUpBlacksmithing, 2 ) // Blacksmithing skillup rate adjust. Lower is faster.
+RULE_INT ( Character, TradeskillUpBrewing, 3 ) // Brewing skillup rate adjust. Lower is faster.
+RULE_INT ( Character, TradeskillUpFletching, 2 ) // Fletching skillup rate adjust. Lower is faster.
+RULE_INT ( Character, TradeskillUpJewelcrafting, 2 ) // Jewelcrafting skillup rate adjust. Lower is faster.
+RULE_INT ( Character, TradeskillUpMakePoison, 2 ) // Make Poison skillup rate adjust. Lower is faster.
+RULE_INT ( Character, TradeskillUpPottery, 4 ) // Pottery skillup rate adjust. Lower is faster.
+RULE_INT ( Character, TradeskillUpResearch, 1 ) // Research skillup rate adjust. Lower is faster.
+RULE_INT ( Character, TradeskillUpTinkering, 2 ) // Tinkering skillup rate adjust. Lower is faster.
 RULE_CATEGORY_END()
 
 RULE_CATEGORY( Mercs )
