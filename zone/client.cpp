@@ -7763,7 +7763,8 @@ void Client::MerchantRejectMessage(Mob *merchant, int primaryfaction)
 	if (primaryfaction > 0) {
 		if (database.GetFactionData(&fmod, GetClass(), GetRace(), GetDeity(), primaryfaction)) {
 			tmpFactionValue = GetCharacterFactionLevel(primaryfaction);
-			lowestvalue = std::min(tmpFactionValue, std::min(fmod.class_mod, fmod.race_mod));
+			lowestvalue = std::min(std::min(tmpFactionValue, fmod.deity_mod),
+						  std::min(fmod.class_mod, fmod.race_mod));
 		}
 	}
 	// If no primary faction or biggest influence is your faction hit
@@ -7811,6 +7812,11 @@ void Client::MerchantRejectMessage(Mob *merchant, int primaryfaction)
 		}
 	} else if (lowestvalue == fmod.class_mod) {
 		merchant->Say_StringID(zone->random.Int(WONT_SELL_CLASS1, WONT_SELL_CLASS5), itoa(GetClass()));
+	} else {
+		// Must be deity - these two sound the best for that.
+		// Can't use a message with a field, GUI wants class/race names.
+		// for those message IDs.  These are straight text.
+		merchant->Say_StringID(zone->random.Int(WONT_SELL_DEEDS1, WONT_SELL_DEEDS2));
 	}
 	return;
 }
