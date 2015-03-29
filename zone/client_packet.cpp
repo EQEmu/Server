@@ -2625,7 +2625,7 @@ void Client::Handle_OP_AltCurrencyReclaim(const EQApplicationPacket *app)
 	else {
 		uint32 max_currency = GetAlternateCurrencyValue(reclaim->currency_id);
 		
-		if(max_currency == 0)
+		if(max_currency == 0 || reclaim->count == 0)
 			return;
 
 		/* If you input more than you have currency wise, just give the max of the currency you currently have */
