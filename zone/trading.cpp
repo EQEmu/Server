@@ -1626,23 +1626,10 @@ void Client::BuyTraderItem(TraderBuy_Struct* tbs, Client* Trader, const EQApplic
 		return;
 	}
 
-	ReturnTraderReq(app, outtbs->Quantity, ItemID);
-
-	outtbs->TraderID = this->GetID();
-	outtbs->Action = BazaarBuyItem;
-	strn0cpy(outtbs->ItemName, BuyItem->GetItem()->Name, 64);
-
-	int TraderSlot = 0;
-
-	if(BuyItem->IsStackable())
-		SendTraderItem(BuyItem->GetItem()->ID, outtbs->Quantity);
-	else
-		SendTraderItem(BuyItem->GetItem()->ID, BuyItem->GetCharges());
-
 	// This cannot overflow assuming MAX_TRANSACTION_VALUE, checked above, is the default of 2000000000
 	uint32 TotalCost = tbs->Price * outtbs->Quantity;
 
-	if (Trader->GetClientVersion() >= ClientVersion::RoF)
+	if(Trader->GetClientVersion() >= ClientVersion::RoF)
 	{
 		// RoF+ uses individual item price where older clients use total price
 		outtbs->Price = tbs->Price;
@@ -1672,6 +1659,19 @@ void Client::BuyTraderItem(TraderBuy_Struct* tbs, Client* Trader, const EQApplic
 	Trader->AddMoneyToPP(copper, silver, gold, platinum, true);
 
 	Log.Out(Logs::Detail, Logs::Trading, "Trader Received: %d Platinum, %d Gold, %d Silver, %d Copper", platinum, gold, silver, copper);
+
+	ReturnTraderReq(app, outtbs->Quantity, ItemID);
+
+	outtbs->TraderID = this->GetID();
+	outtbs->Action = BazaarBuyItem;
+	strn0cpy(outtbs->ItemName, BuyItem->GetItem()->Name, 64);
+
+	int TraderSlot = 0;
+
+	if(BuyItem->IsStackable())
+		SendTraderItem(BuyItem->GetItem()->ID, outtbs->Quantity);
+	else
+		SendTraderItem(BuyItem->GetItem()->ID, BuyItem->GetCharges());
 
 	TraderSlot = Trader->FindTraderItem(tbs->ItemID, outtbs->Quantity);
 
