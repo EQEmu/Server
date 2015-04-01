@@ -1,5 +1,9 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 03/29/2015 ==
+Secrets: Identified the Target Ring fields for RoF/RoF2.
+Secrets: Added a perl accessor for the last target ring position received from the client. Usage: $client->GetTargetRingX(), $client->GetTargetRingY(), $client->GetTargetRingZ()
+
 == 03/12/2015 ==
 Akkadius: [eqemu_update.pl V7] Add Option 9) LUA Modules - Download latest LUA Modules (Required for Lua)
 

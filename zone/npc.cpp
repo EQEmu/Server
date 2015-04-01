@@ -103,7 +103,12 @@ NPC::NPC(const NPCType* d, Spawn2* in_respawn, const glm::vec4& position, int if
 		d->mana_regen,
 		d->qglobal,
 		d->maxlevel,
-		d->scalerate ),
+		d->scalerate,
+		d->armtexture,
+		d->bracertexture,
+		d->handtexture,
+		d->legtexture,
+		d->feettexture),
 	attacked_timer(CombatEventTimer_expire),
 	swarm_timer(100),
 	classattack_timer(1000),
@@ -1308,6 +1313,16 @@ int32 NPC::GetEquipmentMaterial(uint8 material_slot) const
 			return helmtexture;
 		case MaterialChest:
 			return texture;
+		case MaterialArms:
+			return armtexture;
+		case MaterialWrist:
+			return bracertexture;
+		case MaterialHands:
+			return handtexture;
+		case MaterialLegs:
+			return legtexture;
+		case MaterialFeet:
+			return feettexture;
 		case MaterialPrimary:
 			return d_melee_texture1;
 		case MaterialSecondary:

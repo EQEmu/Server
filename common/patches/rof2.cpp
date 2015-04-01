@@ -4380,6 +4380,9 @@ namespace RoF2
 		emu->inventoryslot = RoF2ToServerSlot(eq->inventoryslot);
 		//IN(inventoryslot);
 		IN(target_id);
+		IN(y_pos);
+		IN(x_pos);
+		IN(z_pos);
 
 		FINISH_DIRECT_DECODE();
 	}

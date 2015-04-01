@@ -5253,7 +5253,7 @@ uint16 Client::GetSympatheticFocusEffect(focusType type, uint16 spell_id) {
 
 			if (IsValidSpell(proc_spellid)){
 
-				ProcChance = GetSympatheticProcChances(spell_id, GetSympatheticSpellProcRate(spell_id));
+				ProcChance = GetSympatheticProcChances(spell_id, GetSympatheticSpellProcRate(proc_spellid));
 				if(zone->random.Roll(ProcChance))
  					SympatheticProcList.push_back(proc_spellid);
 			}

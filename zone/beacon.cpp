@@ -54,7 +54,7 @@ Beacon::Beacon(Mob *at_mob, int lifetime)
 :Mob
 (
 	nullptr, nullptr, 0, 0, 0, INVISIBLE_MAN, 0, BT_NoTarget, 0, 0, 0, 0, 0, at_mob->GetPosition(), 0, 0, 0,
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 ),
 		remove_timer(lifetime),
 		spell_timer(0)

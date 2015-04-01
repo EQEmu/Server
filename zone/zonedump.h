@@ -127,6 +127,11 @@ struct NPCType
 	bool	no_target_hotkey;
 	bool	raid_target;
 	uint8 	probability;
+	uint8	armtexture;
+	uint8	bracertexture;
+	uint8	handtexture;
+	uint8	legtexture;
+	uint8	feettexture;
 };
 
 namespace player_lootitem {
