@@ -2540,7 +2540,7 @@ uint32 NPC::GetEquipment(uint8 material_slot) const
 	return equipment[invslot];
 }
 
-void Mob::SendWearChange(uint8 material_slot)
+void Mob::SendWearChange(uint8 material_slot, Client *one_client)
 {
 	EQApplicationPacket* outapp = new EQApplicationPacket(OP_WearChange, sizeof(WearChange_Struct));
 	WearChange_Struct* wc = (WearChange_Struct*)outapp->pBuffer;
@@ -2552,7 +2552,15 @@ void Mob::SendWearChange(uint8 material_slot)
 	wc->color.Color = GetEquipmentColor(material_slot);
 	wc->wear_slot_id = material_slot;
 
-	entity_list.QueueClients(this, outapp);
+	if (!one_client)
+	{
+		entity_list.QueueClients(this, outapp);
+	}
+	else
+	{
+		one_client->QueuePacket(outapp, false, Client::CLIENT_CONNECTED);
+	}	
+
 	safe_delete(outapp);
 }
 

@@ -1149,19 +1149,50 @@ void EntityList::SendZoneSpawnsBulk(Client *client)
 	NewSpawn_Struct ns;
 	Mob *spawn;
 	uint32 maxspawns = 100;
+	EQApplicationPacket *app;
 
 	if (maxspawns > mob_list.size())
 		maxspawns = mob_list.size();
 	BulkZoneSpawnPacket *bzsp = new BulkZoneSpawnPacket(client, maxspawns);
+
+	int32 race=-1;
 	for (auto it = mob_list.begin(); it != mob_list.end(); ++it) {
 		spawn = it->second;
 		if (spawn && spawn->InZone()) {
 			if (spawn->IsClient() && (spawn->CastToClient()->GMHideMe(client) ||
 					spawn->CastToClient()->IsHoveringForRespawn()))
 				continue;
-			memset(&ns, 0, sizeof(NewSpawn_Struct));
-			spawn->FillSpawnStruct(&ns, client);
-			bzsp->AddSpawn(&ns);
+
+			race = spawn->GetRace();
+
+			// Illusion races on PCs don't work as a mass spawn
+			// But they will work as an add_spawn AFTER CLIENT_CONNECTED.
+			if (spawn->IsClient() && (race == MINOR_ILL_OBJ || race == TREE)) {
+				app = new EQApplicationPacket;
+				spawn->CreateSpawnPacket(app);
+				client->QueuePacket(app, true, Client::CLIENT_CONNECTED);
+				safe_delete(app);
+			}
+			else {
+				memset(&ns, 0, sizeof(NewSpawn_Struct));
+				spawn->FillSpawnStruct(&ns, client);
+				bzsp->AddSpawn(&ns);
+			}
+
+			// On NPCs wearing gear from loottable or previously traded
+			// to them, mass spawn does not properly update the visual look.
+			// (Bulk packet sends the same info - client just doesn't use it.
+			//  except on primary/secondary - tested on multiple client types)
+			// Do that using a Wear Change now.
+			if (!spawn->IsClient()) {
+				const Item_Struct *item;
+				for (int i=0; i< 7 ; ++i) {
+					item=database.GetItem(spawn->GetEquipment(i));
+					if (item != 0) {
+					spawn->SendWearChange(i,client);
+					}
+				}
+			}
 		}
 	}
 	safe_delete(bzsp);
