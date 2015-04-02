@@ -618,6 +618,7 @@ void EntityList::AddNPC(NPC *npc, bool SendSpawnPacket, bool dontqueue)
 			EQApplicationPacket *app = new EQApplicationPacket;
 			npc->CreateSpawnPacket(app, npc);
 			QueueClients(npc, app);
+			npc->SendArmorAppearance();
 			safe_delete(app);
 		} else {
 			NewSpawn_Struct *ns = new NewSpawn_Struct;
@@ -726,10 +727,16 @@ void EntityList::CheckSpawnQueue()
 		EQApplicationPacket *outapp = 0;
 
 		iterator.Reset();
+		NewSpawn_Struct	*ns;
+
 		while(iterator.MoreElements()) {
 			outapp = new EQApplicationPacket;
-			Mob::CreateSpawnPacket(outapp, iterator.GetData());
+			ns = iterator.GetData();
+			Mob::CreateSpawnPacket(outapp, ns);
 			QueueClients(0, outapp);
+			auto it = npc_list.find(ns->spawn.spawnId);
+			NPC *pnpc = it->second;
+			pnpc->SendArmorAppearance();
 			safe_delete(outapp);
 			iterator.RemoveCurrent();
 		}
@@ -1179,20 +1186,9 @@ void EntityList::SendZoneSpawnsBulk(Client *client)
 				bzsp->AddSpawn(&ns);
 			}
 
-			// On NPCs wearing gear from loottable or previously traded
-			// to them, mass spawn does not properly update the visual look.
-			// (Bulk packet sends the same info - client just doesn't use it.
-			//  except on primary/secondary - tested on multiple client types)
-			// Do that using a Wear Change now.
-			if (!spawn->IsClient()) {
-				const Item_Struct *item;
-				for (int i=0; i< 7 ; ++i) {
-					item=database.GetItem(spawn->GetEquipment(i));
-					if (item != 0) {
-					spawn->SendWearChange(i,client);
-					}
-				}
-			}
+			// Despite being sent in the OP_ZoneSpawns packet, the client
+			// does not display worn armor correctly so display it.
+			spawn->SendArmorAppearance(client);
 		}
 	}
 	safe_delete(bzsp);

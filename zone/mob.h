@@ -171,6 +171,7 @@ public:
 	void SendAppearanceEffect(uint32 parm1, uint32 parm2, uint32 parm3, uint32 parm4, uint32 parm5,
 		Client *specific_target=nullptr);
 	void SendTargetable(bool on, Client *specific_target = nullptr);
+	virtual void SendArmorAppearance(Client *one_client = nullptr);
 	virtual void SendWearChange(uint8 material_slot, Client *one_client = nullptr);
 	virtual void SendTextureWC(uint8 slot, uint16 texture, uint32 hero_forge_model = 0, uint32 elite_material = 0,
 		uint32 unknown06 = 0, uint32 unknown18 = 0);

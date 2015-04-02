@@ -2552,6 +2552,34 @@ uint32 NPC::GetEquipment(uint8 material_slot) const
 	return equipment[invslot];
 }
 
+void Mob::SendArmorAppearance(Client *one_client)
+{
+	// one_client of 0 means sent to all clients
+	//
+	// Despite the fact that OP_NewSpawn and OP_ZoneSpawns include the
+	// armor being worn and its mats, the client doesn't update the display
+	// on arrival of these packets reliably.
+	//
+	// Send Wear changes if mob is a PC race and item is an armor slot.
+	// The other packets work for primary/secondary.
+
+	if (IsPlayerRace(race))
+	{
+		if (!IsClient())
+		{
+			const Item_Struct *item;
+			for (int i=0; i< 7 ; ++i) 
+			{
+				item=database.GetItem(GetEquipment(i));
+				if (item != 0) 
+				{
+					SendWearChange(i,one_client);
+				}
+			}
+		}
+	}
+}
+
 void Mob::SendWearChange(uint8 material_slot, Client *one_client)
 {
 	EQApplicationPacket* outapp = new EQApplicationPacket(OP_WearChange, sizeof(WearChange_Struct));
