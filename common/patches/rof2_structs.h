@@ -4189,9 +4189,11 @@ struct Arrow_Struct {
 /*068*/	uint8	unknown068;
 /*069*/	uint8	unknown069;
 /*070*/	uint8	unknown070;
-/*071*/	uint8	item_type;
-/*072*/	uint8	skill;
-/*073*/	uint8	unknown073[16];
+/*071*/	uint8	unknown071;
+/*072*/	uint8	unknown072;
+/*073*/	uint8	skill;
+/*074*/	uint8	item_type;
+/*075*/	uint8	unknown075[14];
 /*089*/	char	model_name[27];
 /*116*/
 };
