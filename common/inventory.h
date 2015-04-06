@@ -37,7 +37,7 @@ namespace EQEmu
 		InvTypeGuildTribute
 	};
 
-	enum PersonaInventorylSlot : int
+	enum PersonaInventorySlot : int
 	{
 		PersonalSlotCharm = 0,
 		PersonalSlotEar1,
@@ -139,8 +139,8 @@ namespace EQEmu
 		bool Summon(const InventorySlot &slot, std::shared_ptr<ItemInstance> inst);
 		bool PushToCursorBuffer(std::shared_ptr<ItemInstance> inst);
 		bool PopFromCursorBuffer();
-		bool PutStackInInventory(std::shared_ptr<ItemInstance> inst, bool try_worn, bool try_cursor);
 		InventorySlot PutItemInInventory(std::shared_ptr<ItemInstance> inst, bool try_worn, bool try_cursor);
+		InventorySlot FindFreeSlot(bool for_bag, bool try_cursor, int min_size = 0, bool is_arrow = false);
 
 		//utility
 		static int CalcMaterialFromSlot(const InventorySlot &slot);

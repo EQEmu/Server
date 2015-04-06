@@ -12028,7 +12028,7 @@ void Client::Handle_OP_ShopPlayerBuy(const EQApplicationPacket *app)
 	mpo->npcid = mp->npcid;
 	mpo->itemslot = mp->itemslot;
 
-	int16 freeslotid = INVALID_INDEX;
+	EQEmu::InventorySlot free_slot;
 	int16 charges = 0;
 	if (item->Stackable || item->MaxCharges > 1)
 		charges = mp->quantity;
@@ -12070,115 +12070,69 @@ void Client::Handle_OP_ShopPlayerBuy(const EQApplicationPacket *app)
 	}
 
 	bool stacked = TryStacking(inst);
-	//if (!stacked)
-	//	freeslotid = m_inv.FindFreeSlot(false, true, item->Size);
-	//
-	//// shouldn't we be reimbursing if these two fail?
-	//
-	////make sure we are not completely full...
-	//if (freeslotid == MainCursor) {
-	//	if (m_inv.GetItem(MainCursor) != nullptr) {
-	//		Message(13, "You do not have room for any more items.");
-	//		safe_delete(outapp);
-	//		return;
-	//	}
-	//}
-	//
-	//if (!stacked && freeslotid == INVALID_INDEX)
-	//{
-	//	Message(13, "You do not have room for any more items.");
-	//	safe_delete(outapp);
-	//	return;
-	//}
-	//
-	//std::string packet;
-	//if (!stacked && inst) {
-	//	PutItemInInventory(freeslotid, *inst);
-	//	SendItemPacket(freeslotid, inst, ItemPacketTrade);
-	//}
-	//else if (!stacked){
-	//	Log.Out(Logs::General, Logs::Error, "OP_ShopPlayerBuy: item->ItemClass Unknown! Type: %i", item->ItemClass);
-	//}
-	//QueuePacket(outapp);
-	//if (inst && tmpmer_used){
-	//	int32 new_charges = prevcharges - mp->quantity;
-	//	zone->SaveTempItem(merchantid, tmp->GetNPCTypeID(), item_id, new_charges);
-	//	if (new_charges <= 0){
-	//		EQApplicationPacket* delitempacket = new EQApplicationPacket(OP_ShopDelItem, sizeof(Merchant_DelItem_Struct));
-	//		Merchant_DelItem_Struct* delitem = (Merchant_DelItem_Struct*)delitempacket->pBuffer;
-	//		delitem->itemslot = mp->itemslot;
-	//		delitem->npcid = mp->npcid;
-	//		delitem->playerid = mp->playerid;
-	//		delitempacket->priority = 6;
-	//		entity_list.QueueClients(tmp, delitempacket); //que for anyone that could be using the merchant so they see the update
-	//		safe_delete(delitempacket);
-	//	}
-	//	else {
-	//		// Update the charges/quantity in the merchant window
-	//		inst->SetCharges(new_charges);
-	//		inst->SetPrice(SinglePrice);
-	//		inst->SetMerchantSlot(mp->itemslot);
-	//		inst->SetMerchantCount(new_charges);
-	//
-	//		SendItemPacket(mp->itemslot, inst, ItemPacketMerchant);
-	//	}
-	//}
-	//safe_delete(inst);
-	//safe_delete(outapp);
-	//
-	//// start QS code
-	//// stacking purchases not supported at this time - entire process will need some work to catch them properly
-	//if (RuleB(QueryServ, PlayerLogMerchantTransactions)) {
-	//	ServerPacket* qspack = new ServerPacket(ServerOP_QSPlayerLogMerchantTransactions, sizeof(QSMerchantLogTransaction_Struct)+sizeof(QSTransactionItems_Struct));
-	//	QSMerchantLogTransaction_Struct* qsaudit = (QSMerchantLogTransaction_Struct*)qspack->pBuffer;
-	//
-	//	qsaudit->zone_id = zone->GetZoneID();
-	//	qsaudit->merchant_id = tmp->CastToNPC()->MerchantType;
-	//	qsaudit->merchant_money.platinum = 0;
-	//	qsaudit->merchant_money.gold = 0;
-	//	qsaudit->merchant_money.silver = 0;
-	//	qsaudit->merchant_money.copper = 0;
-	//	qsaudit->merchant_count = 1;
-	//	qsaudit->char_id = character_id;
-	//	qsaudit->char_money.platinum = (mpo->price / 1000);
-	//	qsaudit->char_money.gold = (mpo->price / 100) % 10;
-	//	qsaudit->char_money.silver = (mpo->price / 10) % 10;
-	//	qsaudit->char_money.copper = mpo->price % 10;
-	//	qsaudit->char_count = 0;
-	//
-	//	qsaudit->items[0].char_slot = freeslotid == INVALID_INDEX ? 0 : freeslotid;
-	//	qsaudit->items[0].item_id = item->ID;
-	//	qsaudit->items[0].charges = mpo->quantity;
-	//
-	//	if (freeslotid == INVALID_INDEX) {
-	//		qsaudit->items[0].aug_1 = 0;
-	//		qsaudit->items[0].aug_2 = 0;
-	//		qsaudit->items[0].aug_3 = 0;
-	//		qsaudit->items[0].aug_4 = 0;
-	//		qsaudit->items[0].aug_5 = 0;
-	//	}
-	//	else {
-	//		qsaudit->items[0].aug_1 = m_inv[freeslotid]->GetAugmentItemID(0);
-	//		qsaudit->items[0].aug_2 = m_inv[freeslotid]->GetAugmentItemID(1);
-	//		qsaudit->items[0].aug_3 = m_inv[freeslotid]->GetAugmentItemID(2);
-	//		qsaudit->items[0].aug_4 = m_inv[freeslotid]->GetAugmentItemID(3);
-	//		qsaudit->items[0].aug_5 = m_inv[freeslotid]->GetAugmentItemID(4);
-	//	}
-	//
-	//	qspack->Deflate();
-	//	if (worldserver.Connected()) { worldserver.SendPacket(qspack); }
-	//	safe_delete(qspack);
-	//}
-	//// end QS code
-	//
-	//if (RuleB(EventLog, RecordBuyFromMerchant))
-	//	LogMerchant(this, tmp, mpo->quantity, mpo->price, item, true);
-	//
-	//if ((RuleB(Character, EnableDiscoveredItems)))
-	//{
-	//	if (!GetGM() && !IsDiscovered(item_id))
-	//		DiscoverItem(item_id);
-	//}
+	if(!stacked) {
+		free_slot = m_inventory.FindFreeSlot(false, true, item->Size);
+	}
+
+	if(free_slot.IsCursor()) {
+		if(m_inventory.Get(EQEmu::InventorySlot(EQEmu::InvTypePersonal, EQEmu::PersonalSlotCursor))) {
+			Message(13, "You do not have room for any more items.");
+			safe_delete(outapp);
+			return;
+		}
+	}
+
+	if(!stacked && !free_slot.IsValid())
+	{
+		Message(13, "You do not have room for any more items.");
+		safe_delete(outapp);
+		return;
+	}
+	
+	std::string packet;
+	if(!stacked && inst) {
+		//PutItemInInventory(free_slot, inst);
+		SendItemPacket(free_slot, inst, ItemPacketTrade);
+	}
+	else if (!stacked){
+		Log.Out(Logs::General, Logs::Error, "OP_ShopPlayerBuy: item->ItemClass Unknown! Type: %i", item->ItemClass);
+	}
+	
+	QueuePacket(outapp);
+	if (inst && tmpmer_used){
+		int32 new_charges = prevcharges - mp->quantity;
+		zone->SaveTempItem(merchantid, tmp->GetNPCTypeID(), item_id, new_charges);
+		if (new_charges <= 0){
+			EQApplicationPacket* delitempacket = new EQApplicationPacket(OP_ShopDelItem, sizeof(Merchant_DelItem_Struct));
+			Merchant_DelItem_Struct* delitem = (Merchant_DelItem_Struct*)delitempacket->pBuffer;
+			delitem->itemslot = mp->itemslot;
+			delitem->npcid = mp->npcid;
+			delitem->playerid = mp->playerid;
+			delitempacket->priority = 6;
+			entity_list.QueueClients(tmp, delitempacket); //que for anyone that could be using the merchant so they see the update
+			safe_delete(delitempacket);
+		}
+		else {
+			// Update the charges/quantity in the merchant window
+			inst->SetCharges(new_charges);
+			inst->SetPrice(SinglePrice);
+			inst->SetMerchantSlot(mp->itemslot);
+			inst->SetMerchantCount(new_charges);
+	
+			//SendItemPacket(mp->itemslot, inst, ItemPacketMerchant);
+		}
+	}
+	safe_delete(outapp);
+
+	
+	if (RuleB(EventLog, RecordBuyFromMerchant))
+		LogMerchant(this, tmp, mpo->quantity, mpo->price, item, true);
+	
+	if ((RuleB(Character, EnableDiscoveredItems)))
+	{
+		if (!GetGM() && !IsDiscovered(item_id))
+			DiscoverItem(item_id);
+	}
 }
 void Client::Handle_OP_ShopPlayerSell(const EQApplicationPacket *app)
 {

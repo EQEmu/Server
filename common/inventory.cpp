@@ -506,6 +506,50 @@ bool EQEmu::Inventory::PopFromCursorBuffer() {
 	return false;
 }
 
+EQEmu::InventorySlot EQEmu::Inventory::PutItemInInventory(std::shared_ptr<ItemInstance> inst, bool try_worn, bool try_cursor) {
+	return EQEmu::InventorySlot();
+}
+
+EQEmu::InventorySlot EQEmu::Inventory::FindFreeSlot(bool for_bag, bool try_cursor, int min_size, bool is_arrow) {
+	//check basic inventory
+	for(int i = EQEmu::PersonalSlotGeneral1; i < EQEmu::PersonalSlotGeneral10; ++i) {
+		EQEmu::InventorySlot slot(EQEmu::InvTypePersonal, i);
+		if(!Get(slot)) {
+			return slot;
+		}
+	}
+	
+	if (!for_bag) {
+		for(int i = EQEmu::PersonalSlotGeneral1; i < EQEmu::PersonalSlotGeneral10; ++i) {
+			EQEmu::InventorySlot slot(EQEmu::InvTypePersonal, i);
+			auto inst = Get(slot);
+
+			if(inst && inst->GetBaseItem()->ItemClass == ItemClassContainer && inst->GetBaseItem()->BagSize >= min_size)
+			{
+				if(inst->GetBaseItem()->BagType == BagTypeQuiver && !is_arrow)
+				{
+					continue;
+				}
+
+				int slots = inst->GetBaseItem()->BagSlots;
+				for(int b_i = 0; b_i < slots; ++b_i) {
+					EQEmu::InventorySlot bag_slot(EQEmu::InvTypePersonal, i, b_i);
+
+					if(!Get(bag_slot)) {
+						return bag_slot;
+					}
+				}
+			}
+		}
+	}
+
+	if(try_cursor) {
+		EQEmu::InventorySlot slot(EQEmu::InvTypePersonal, EQEmu::PersonalSlotCursor);
+	}
+
+	return EQEmu::InventorySlot();
+}
+
 int EQEmu::Inventory::CalcMaterialFromSlot(const InventorySlot &slot) {
 	if(slot.Type() != 0)
 		return _MaterialInvalid;
