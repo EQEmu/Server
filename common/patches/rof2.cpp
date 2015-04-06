@@ -293,8 +293,8 @@ namespace RoF2
 		SETUP_DIRECT_ENCODE(Animation_Struct, structs::Animation_Struct);
 
 		OUT(spawnid);
-		OUT(value);
 		OUT(action);
+		OUT(speed);
 
 		FINISH_ENCODE();
 	}

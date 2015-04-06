@@ -2831,9 +2831,12 @@ void Client::Handle_OP_Animation(const EQApplicationPacket *app)
 	Animation_Struct *s = (Animation_Struct *)app->pBuffer;
 
 	//might verify spawn ID, but it wouldent affect anything
-
-	DoAnim(s->action, s->value);
-
+	if (GetClientVersion() >= ClientVersion::RoF) {
+		DoAnim(s->speed, s->action); //This was backwards so we gotta make up for it here
+	} else {
+		DoAnim(s->action, s->speed);
+	}
+	
 	return;
 }
 

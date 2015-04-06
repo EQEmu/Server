@@ -1314,12 +1314,12 @@ void Mob::DoAnim(const int animnum, int type, bool ackreq, eqFilterType filter) 
 	Animation_Struct* anim = (Animation_Struct*)outapp->pBuffer;
 	anim->spawnid = GetID();
 	if(type == 0){
-		anim->action = 10;
-		anim->value=animnum;
+		anim->action = animnum;
+		anim->speed = 10;
 	}
 	else{
 		anim->action = animnum;
-		anim->value=type;
+		anim->speed = type;
 	}
 	entity_list.QueueCloseClients(this, outapp, false, 200, 0, ackreq, filter);
 	safe_delete(outapp);

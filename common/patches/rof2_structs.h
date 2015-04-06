@@ -1418,8 +1418,8 @@ struct RequestClientZoneChange_Struct {
 
 struct Animation_Struct {
 /*00*/	uint16 spawnid;
-/*02*/	uint8 value;
-/*03*/	uint8 action;
+/*02*/	uint8 action;
+/*03*/	uint8 speed;
 /*04*/
 };
 
