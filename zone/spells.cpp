@@ -2672,7 +2672,7 @@ int CalcBuffDuration_formula(int level, int formula, int duration)
 			return i < duration ? (i < 1 ? 1 : i) : duration;
 
 		case 11:
-			return duration;
+			return std::min((level + 3) * 30, duration);
 
 		case 12:
 			return duration;
@@ -5254,7 +5254,7 @@ void Client::SendBuffDurationPacket(Buffs_Struct &buff)
 	sbf->slot = 2;
 	sbf->spellid = buff.spellid;
 	sbf->slotid = 0;
-	sbf->effect = buff.casterlevel > 0 ? buff.casterlevel : GetLevel();
+	sbf->effect = 255;
 	sbf->level = buff.casterlevel > 0 ? buff.casterlevel : GetLevel();
 	sbf->bufffade = 0;
 	sbf->duration = buff.ticsremaining;

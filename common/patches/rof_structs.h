@@ -647,7 +647,10 @@ struct CastSpell_Struct
 /*04*/	uint32	spell_id;
 /*08*/	ItemSlotStruct inventoryslot;  // slot for clicky item, Seen unknown of 131 = normal cast
 /*20*/	uint32	target_id;
-/*24*/	uint32	cs_unknown[5];
+/*24*/	uint32	cs_unknown[2];
+/*32*/	float	y_pos;
+/*36*/	float	x_pos;
+/*40*/	float	z_pos;
 /*44*/
 };
 
@@ -1445,8 +1448,8 @@ struct RequestClientZoneChange_Struct {
 
 struct Animation_Struct {
 /*00*/	uint16 spawnid;
-/*02*/	uint8 value;
-/*03*/	uint8 action;
+/*02*/	uint8 action;
+/*03*/	uint8 speed;
 /*04*/
 };
 

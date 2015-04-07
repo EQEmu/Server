@@ -384,7 +384,7 @@ bool Mob::AvoidDamage(Mob* other, int32 &damage, bool CanRiposte)
 	int counter_dodge = 0;
 
 	if (attacker->GetSpecialAbility(COUNTER_AVOID_DAMAGE)){
-		
+
 		counter_all = attacker->GetSpecialAbilityParam(COUNTER_AVOID_DAMAGE, 0);
 		counter_riposte = attacker->GetSpecialAbilityParam(COUNTER_AVOID_DAMAGE,1);
 		counter_block = attacker->GetSpecialAbilityParam(COUNTER_AVOID_DAMAGE, 2);
@@ -406,7 +406,7 @@ bool Mob::AvoidDamage(Mob* other, int32 &damage, bool CanRiposte)
 	float riposte_chance = 0.0f;
 	if (CanRiposte && damage > 0 && CanThisClassRiposte() && InFront)
 	{
-		riposte_chance = (100.0f + static_cast<float>(aabonuses.RiposteChance + spellbonuses.RiposteChance + 
+		riposte_chance = (100.0f + static_cast<float>(aabonuses.RiposteChance + spellbonuses.RiposteChance +
 			itembonuses.RiposteChance - counter_riposte - counter_all)) / 100.0f;
 		skill = GetSkill(SkillRiposte);
 		if (IsClient()) {
@@ -437,7 +437,7 @@ bool Mob::AvoidDamage(Mob* other, int32 &damage, bool CanRiposte)
 
 	float block_chance = 0.0f;
 	if (damage > 0 && CanThisClassBlock() && (InFront || bBlockFromRear)) {
-		block_chance = (100.0f + static_cast<float>(aabonuses.IncreaseBlockChance + spellbonuses.IncreaseBlockChance + 
+		block_chance = (100.0f + static_cast<float>(aabonuses.IncreaseBlockChance + spellbonuses.IncreaseBlockChance +
 			itembonuses.IncreaseBlockChance - counter_block - counter_all)) / 100.0f;
 		skill = CastToClient()->GetSkill(SkillBlock);
 		if (IsClient()) {
@@ -455,18 +455,18 @@ bool Mob::AvoidDamage(Mob* other, int32 &damage, bool CanRiposte)
 	}
 
 	//Try Shield Block OR TwoHandBluntBlockCheck
-	if(damage > 0 && HasShieldEquiped()	&& (aabonuses.ShieldBlock || spellbonuses.ShieldBlock || itembonuses.ShieldBlock) && (InFront || bBlockFromRear)) 
+	if(damage > 0 && HasShieldEquiped()	&& (aabonuses.ShieldBlock || spellbonuses.ShieldBlock || itembonuses.ShieldBlock) && (InFront || bBlockFromRear))
 		RollTable[1] += static_cast<float>(aabonuses.ShieldBlock + spellbonuses.ShieldBlock + itembonuses.ShieldBlock - counter_block - counter_all);
 
-	else if(damage > 0 && HasTwoHandBluntEquiped() && (aabonuses.TwoHandBluntBlock || spellbonuses.TwoHandBluntBlock || itembonuses.TwoHandBluntBlock)	&&  (InFront || bBlockFromRear)) 
+	else if(damage > 0 && HasTwoHandBluntEquiped() && (aabonuses.TwoHandBluntBlock || spellbonuses.TwoHandBluntBlock || itembonuses.TwoHandBluntBlock)	&&  (InFront || bBlockFromRear))
 		RollTable[1] += static_cast<float>(aabonuses.TwoHandBluntBlock + spellbonuses.TwoHandBluntBlock + itembonuses.TwoHandBluntBlock - counter_block - counter_all);
-	
+
 	//////////////////////////////////////////////////////
 	// parry
 	//////////////////////////////////////////////////////
 	float parry_chance = 0.0f;
 	if (damage > 0 && CanThisClassParry() && InFront){
-		parry_chance = (100.0f + static_cast<float>(aabonuses.ParryChance + itembonuses.ParryChance + 
+		parry_chance = (100.0f + static_cast<float>(aabonuses.ParryChance + itembonuses.ParryChance +
 			itembonuses.ParryChance - counter_parry - counter_all)) / 100.0f;
 		skill = CastToClient()->GetSkill(SkillParry);
 		if (IsClient()) {
@@ -490,7 +490,7 @@ bool Mob::AvoidDamage(Mob* other, int32 &damage, bool CanRiposte)
 	float dodge_chance = 0.0f;
 	if (damage > 0 && CanThisClassDodge() && InFront){
 
-		dodge_chance = (100.0f + static_cast<float>(aabonuses.DodgeChance + spellbonuses.DodgeChance + 
+		dodge_chance = (100.0f + static_cast<float>(aabonuses.DodgeChance + spellbonuses.DodgeChance +
 			itembonuses.DodgeChance - counter_dodge - counter_all)) / 100.0f;
 
 		skill = CastToClient()->GetSkill(SkillDodge);
@@ -946,10 +946,10 @@ int Mob::GetWeaponDamage(Mob *against, const ItemInst *weapon_item, uint32 *hate
 			bool MagicWeapon = false;
 			if(weapon_item->GetItem() && weapon_item->GetItem()->Magic)
 				MagicWeapon = true;
-			else 
+			else
 				if(spellbonuses.MagicWeapon || itembonuses.MagicWeapon)
 					MagicWeapon = true;
-				else 
+				else
 					// An augment on the weapon that is marked magic makes
 					// the item magical.
 					for(x = 0; MagicWeapon == false && x < EmuConstants::ITEM_COMMON_SIZE; x++)
@@ -2427,7 +2427,7 @@ void Mob::AddToHateList(Mob* other, uint32 hate /*= 0*/, int32 damage /*= 0*/, b
 
 	bool wasengaged = IsEngaged();
 	Mob* owner = other->GetOwner();
-	Mob* mypet = this->GetPet(); 
+	Mob* mypet = this->GetPet();
 	Mob* myowner = this->GetOwner();
 	Mob* targetmob = this->GetTarget();
 
@@ -3932,7 +3932,7 @@ void Mob::TryDefensiveProc(const ItemInst* weapon, Mob *on, uint16 hand) {
 					float chance = ProcChance * (static_cast<float>(DefensiveProcs[i].chance)/100.0f);
 					if (zone->random.Roll(chance)) {
 						ExecWeaponProc(nullptr, DefensiveProcs[i].spellID, on);
-						CheckNumHitsRemaining(NumHit::DefensiveSpellProcs, 0, 
+						CheckNumHitsRemaining(NumHit::DefensiveSpellProcs, 0,
 											  DefensiveProcs[i].base_spellID);
 					}
 				}
@@ -4108,6 +4108,14 @@ void Mob::TrySpellProc(const ItemInst *inst, const ItemData *weapon, Mob *on, ui
 					Log.Out(Logs::Detail, Logs::Combat,
 							"Spell proc %d procing spell %d (%.2f percent chance)",
 							i, SpellProcs[i].spellID, chance);
+					auto outapp = new EQApplicationPacket(OP_BeginCast,sizeof(BeginCast_Struct));
+					BeginCast_Struct* begincast = (BeginCast_Struct*)outapp->pBuffer;
+					begincast->caster_id = GetID();
+					begincast->spell_id = SpellProcs[i].spellID;
+					begincast->cast_time = 0;
+					outapp->priority = 3;
+					entity_list.QueueCloseClients(this, outapp, false, 200, 0, true);
+					safe_delete(outapp);
 					ExecWeaponProc(nullptr, SpellProcs[i].spellID, on);
 					CheckNumHitsRemaining(NumHit::OffensiveSpellProcs, 0,
 								  SpellProcs[i].base_spellID);

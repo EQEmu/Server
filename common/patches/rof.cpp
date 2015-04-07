@@ -227,8 +227,8 @@ namespace RoF
 		SETUP_DIRECT_ENCODE(Animation_Struct, structs::Animation_Struct);
 
 		OUT(spawnid);
-		OUT(value);
 		OUT(action);
+		OUT(speed);
 
 		FINISH_ENCODE();
 	}
@@ -479,7 +479,7 @@ namespace RoF
 			eq->slot = 13;
 		else
 			OUT(slot);
-		
+
 		OUT(spell_id);
 		eq->inventoryslot = ServerToRoFSlot(emu->inventoryslot);
 		//OUT(inventoryslot);
@@ -703,7 +703,7 @@ namespace RoF
 	{
 		SETUP_VAR_ENCODE(ExpeditionCompass_Struct);
 		ALLOC_VAR_ENCODE(structs::ExpeditionCompass_Struct, sizeof(structs::ExpeditionInfo_Struct) + sizeof(structs::ExpeditionCompassEntry_Struct) * emu->count);
-		
+
 		OUT(count);
 
 		for (uint32 i = 0; i < emu->count; ++i)
@@ -1250,7 +1250,7 @@ namespace RoF
 				switch (emu_e->rank) {
 				case 0: { e->rank = htonl(5); break; }  // GUILD_MEMBER	0
 				case 1: { e->rank = htonl(3); break; }  // GUILD_OFFICER 1
-				case 2: { e->rank = htonl(1); break; }  // GUILD_LEADER	2  
+				case 2: { e->rank = htonl(1); break; }  // GUILD_LEADER	2
 				default: { e->rank = htonl(emu_e->rank); break; } // GUILD_NONE
 				}
 
@@ -2990,7 +2990,7 @@ namespace RoF
 			eq_cse->Enabled = emu_cse->Enabled;
 			eq_cse->LastLogin = emu_cse->LastLogin;
 			eq_cse->Unknown2 = emu_cse->Unknown2;
-			
+
 			emu_ptr += sizeof(CharacterSelectEntry_Struct);
 			eq_ptr += sizeof(structs::CharacterSelectEntry_Struct);
 		}
@@ -3047,7 +3047,7 @@ namespace RoF
 		switch (emu->Rank) {
 		case 0: { eq->Rank = 5; break; }  // GUILD_MEMBER	0
 		case 1: { eq->Rank = 3; break; }  // GUILD_OFFICER	1
-		case 2: { eq->Rank = 1; break; }  // GUILD_LEADER	2 
+		case 2: { eq->Rank = 1; break; }  // GUILD_LEADER	2
 		default: { eq->Rank = emu->Rank; break; }
 		}
 
@@ -3314,7 +3314,7 @@ namespace RoF
 
 		delete[] __emu_buffer;
 		dest->FastQueuePacket(&in, ack_req);
-		
+
 #if 0 // original code
 		EQApplicationPacket *in = *p;
 		*p = nullptr;
@@ -3778,7 +3778,7 @@ namespace RoF
 	}
 
 	ENCODE(OP_ZoneEntry) { ENCODE_FORWARD(OP_ZoneSpawns); }
-	
+
 	ENCODE(OP_ZonePlayerToBind)
 	{
 		SETUP_VAR_ENCODE(ZonePlayerToBind_Struct);
@@ -3969,8 +3969,8 @@ namespace RoF
 				switch (emu->guildrank) {
 				case 0: { VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 5);  break; }  // GUILD_MEMBER	0
 				case 1: { VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 3);  break; }  // GUILD_OFFICER	1
-				case 2: { VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 1);  break; }  // GUILD_LEADER	2 
-				default: { VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->guildrank); break; }  //			
+				case 2: { VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 1);  break; }  // GUILD_LEADER	2
+				default: { VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->guildrank); break; }  //
 				}
 			}
 
@@ -4119,6 +4119,18 @@ namespace RoF
 		FINISH_DIRECT_DECODE();
 	}
 
+	DECODE(OP_Animation)
+	{
+		DECODE_LENGTH_EXACT(structs::Animation_Struct);
+		SETUP_DIRECT_DECODE(Animation_Struct, structs::Animation_Struct);
+
+		IN(spawnid);
+		IN(action);
+		IN(speed);
+
+		FINISH_DIRECT_DECODE();
+	}
+
 	DECODE(OP_ApplyPoison)
 	{
 		DECODE_LENGTH_EXACT(structs::ApplyPoison_Struct);
@@ -4231,11 +4243,15 @@ namespace RoF
 			emu->slot = 10;
 		else
 			IN(slot);
-		
+
 		IN(spell_id);
 		emu->inventoryslot = RoFToServerSlot(eq->inventoryslot);
 		//IN(inventoryslot);
 		IN(target_id);
+
+		IN(y_pos);
+		IN(x_pos);
+		IN(z_pos);
 
 		FINISH_DIRECT_DECODE();
 	}
@@ -5102,7 +5118,7 @@ namespace RoF
 		hdrf.ItemClass = item->ItemClass;
 
 		ss.write((const char*)&hdrf, sizeof(RoF::structs::ItemSerializationHeaderFinish));
-		
+
 		if (strlen(item->Name) > 0)
 		{
 			ss.write(item->Name, strlen(item->Name));

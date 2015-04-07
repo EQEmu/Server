@@ -113,7 +113,12 @@ public:
 		int32		in_mana_regen,
 		uint8		in_qglobal,
 		uint8		in_maxlevel,
-		uint32		in_scalerate
+		uint32		in_scalerate,
+		uint8		in_armtexture,
+		uint8		in_bracertexture,
+		uint8		in_handtexture,
+		uint8		in_legtexture,
+		uint8		in_feettexture
 	);
 	virtual ~Mob();
 
@@ -975,6 +980,12 @@ protected:
 	uint16 entity_id_being_looted; //the id of the entity being looted, 0 if not looting.
 	uint8 texture;
 	uint8 helmtexture;
+	uint8 armtexture;
+	uint8 bracertexture;
+	uint8 handtexture;
+	uint8 legtexture;
+	uint8 feettexture;
+	bool multitexture;
 
 	int AC;
 	int32 ATK;

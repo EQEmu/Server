@@ -6110,6 +6110,84 @@ XS(XS_Client_SendSpellAnim)
 	XSRETURN_EMPTY;
 }
 
+XS(XS_Client_GetTargetRingX); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Client_GetTargetRingX)
+{
+   dXSARGS;
+   if (items != 1)
+       Perl_croak(aTHX_ "Usage: Client::GetTargetRingX(THIS)");
+   {
+       Client *        THIS;
+       float           RETVAL;
+       dXSTARG;
+
+       if (sv_derived_from(ST(0), "Client")) {
+           IV tmp = SvIV((SV*)SvRV(ST(0)));
+           THIS = INT2PTR(Client *,tmp);
+       }
+       else
+           Perl_croak(aTHX_ "THIS is not of type Client");
+       if(THIS == nullptr)
+           Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
+
+		RETVAL = THIS->GetTargetRingX();
+		XSprePUSH; PUSHn((double)RETVAL);
+   }
+   XSRETURN(1);
+}
+
+XS(XS_Client_GetTargetRingY); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Client_GetTargetRingY)
+{
+   dXSARGS;
+   if (items != 1)
+       Perl_croak(aTHX_ "Usage: Client::GetTargetRingY(THIS)");
+   {
+       Client *        THIS;
+       float           RETVAL;
+       dXSTARG;
+
+       if (sv_derived_from(ST(0), "Client")) {
+           IV tmp = SvIV((SV*)SvRV(ST(0)));
+           THIS = INT2PTR(Client *,tmp);
+       }
+       else
+           Perl_croak(aTHX_ "THIS is not of type Client");
+       if(THIS == nullptr)
+           Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
+
+		RETVAL = THIS->GetTargetRingY();
+		XSprePUSH; PUSHn((double)RETVAL);
+   }
+   XSRETURN(1);
+}
+
+XS(XS_Client_GetTargetRingZ); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Client_GetTargetRingZ)
+{
+   dXSARGS;
+   if (items != 1)
+       Perl_croak(aTHX_ "Usage: Client::GetTargetRingZ(THIS)");
+   {
+       Client *        THIS;
+       float           RETVAL;
+       dXSTARG;
+
+       if (sv_derived_from(ST(0), "Client")) {
+           IV tmp = SvIV((SV*)SvRV(ST(0)));
+           THIS = INT2PTR(Client *,tmp);
+       }
+       else
+           Perl_croak(aTHX_ "THIS is not of type Client");
+       if(THIS == nullptr)
+           Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
+
+		RETVAL = THIS->GetTargetRingZ();
+		XSprePUSH; PUSHn((double)RETVAL);
+   }
+   XSRETURN(1);
+}
+
 #ifdef __cplusplus
 extern "C"
 #endif
@@ -6351,6 +6429,9 @@ XS(boot_Client)
 		newXSproto(strcpy(buf, "SendMarqueeMessage"), XS_Client_SendMarqueeMessage, file, "$$$$$$$");
 		newXSproto(strcpy(buf, "SendColoredText"), XS_Client_SendColoredText, file, "$$$");
 		newXSproto(strcpy(buf, "SendSpellAnim"), XS_Client_SendSpellAnim, file, "$$$");
+		newXSproto(strcpy(buf, "GetTargetRingX"), XS_Client_GetTargetRingX, file, "$$");
+		newXSproto(strcpy(buf, "GetTargetRingY"), XS_Client_GetTargetRingY, file, "$$");
+		newXSproto(strcpy(buf, "GetTargetRingZ"), XS_Client_GetTargetRingZ, file, "$$");
 
 		XSRETURN_YES;
 }

@@ -337,7 +337,7 @@ void MapOpcodes()
 	// Use or Ignore sense heading based on rule.
 	bool train=RuleB(Skills, TrainSenseHeading);
 
-	ConnectedOpcodes[OP_SenseHeading] = 
+	ConnectedOpcodes[OP_SenseHeading] =
 		(train) ? &Client::Handle_OP_SenseHeading : &Client::Handle_OP_Ignore;
 
 	ConnectedOpcodes[OP_SenseTraps] = &Client::Handle_OP_SenseTraps;
@@ -413,10 +413,10 @@ int Client::HandlePacket(const EQApplicationPacket *app)
 
 	if (Log.log_settings[Logs::Client_Server_Packet].is_category_enabled == 1)
 		Log.Out(Logs::General, Logs::Client_Server_Packet, "[%s - 0x%04x] [Size: %u]", OpcodeManager::EmuToName(app->GetOpcode()), app->GetOpcode(), app->Size());
-	
+
 	if (Log.log_settings[Logs::Client_Server_Packet_With_Dump].is_category_enabled == 1)
 		Log.Out(Logs::General, Logs::Client_Server_Packet_With_Dump, "[%s - 0x%04x] [Size: %u] %s", OpcodeManager::EmuToName(app->GetOpcode()), app->GetOpcode(), app->Size(), DumpPacketToString(app).c_str());
-	
+
 	EmuOpcode opcode = app->GetOpcode();
 	if (opcode == OP_AckPacket) {
 		return true;
@@ -458,7 +458,7 @@ int Client::HandlePacket(const EQApplicationPacket *app)
 	case CLIENT_CONNECTED: {
 		ClientPacketProc p;
 		p = ConnectedOpcodes[opcode];
-		if(p == nullptr) { 
+		if(p == nullptr) {
 			std::vector<EQEmu::Any> args;
 			args.push_back(const_cast<EQApplicationPacket*>(app));
 			parse->EventPlayer(EVENT_UNHANDLED_OPCODE, this, "", 0, &args);
@@ -2607,7 +2607,7 @@ void Client::Handle_OP_AltCurrencyReclaim(const EQApplicationPacket *app)
 		++iter;
 	}
 
-	if (item_id == 0 || reclaim->count == 0) {
+	if (item_id == 0) {
 		return;
 	}
 
@@ -2627,6 +2627,9 @@ void Client::Handle_OP_AltCurrencyReclaim(const EQApplicationPacket *app)
 	/* Cursor to Item storage */
 	else {
 		uint32 max_currency = GetAlternateCurrencyValue(reclaim->currency_id);
+
+		if(max_currency == 0 || reclaim->count == 0)
+			return;
 
 		/* If you input more than you have currency wise, just give the max of the currency you currently have */
 		if (reclaim->count > max_currency) {
@@ -2831,8 +2834,7 @@ void Client::Handle_OP_Animation(const EQApplicationPacket *app)
 	Animation_Struct *s = (Animation_Struct *)app->pBuffer;
 
 	//might verify spawn ID, but it wouldent affect anything
-
-	DoAnim(s->action, s->value);
+	DoAnim(s->action, s->speed);
 
 	return;
 }
@@ -3015,7 +3017,7 @@ void Client::Handle_OP_AugmentItem(const EQApplicationPacket *app)
 					{
 						DeleteItemInInventory(slot_id, 0, true);
 						DeleteItemInInventory(MainCursor, 0, true);
-						
+
 						if (PutItemInInventory(slot_id, *itemOneToPush, true))
 						{
 							CalcBonuses();
@@ -5421,12 +5423,12 @@ void Client::Handle_OP_EnvDamage(const EQApplicationPacket *app)
 		/* EVENT_ENVIRONMENTAL_DAMAGE */
 		int final_damage = (damage * RuleR(Character, EnvironmentDamageMulipliter));
 		char buf[24];
-		snprintf(buf, 23, "%u %u %i", ed->damage, ed->dmgtype, final_damage); 
+		snprintf(buf, 23, "%u %u %i", ed->damage, ed->dmgtype, final_damage);
 		parse->EventPlayer(EVENT_ENVIRONMENTAL_DAMAGE, this, buf, 0);
 	}
 
 	if (GetHP() <= 0) {
-		mod_client_death_env(); 
+		mod_client_death_env();
 		Death(0, 32000, SPELL_UNKNOWN, SkillHandtoHand);
 	}
 	SendHPUpdate();
@@ -9793,7 +9795,7 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 			Message_StringID(10, CANNOT_WAKE, mypet->GetCleanName(), GetTarget()->GetCleanName());
 			break;
 		}
-		
+
 		if (!mypet->IsAttackAllowed(GetTarget())) {
 			mypet->Say_StringID(NOT_LEGAL_TARGET);
 			break;
@@ -9889,7 +9891,7 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 			}
 		}
 		break;
-	}	
+	}
 	case PET_TAUNT_ON: {
 		if ((mypet->GetPetType() == petAnimation && GetAA(aaAnimationEmpathy) >= 3) || mypet->GetPetType() != petAnimation) {
 			Message_StringID(MT_PetResponse, PET_DO_TAUNT);
@@ -11623,7 +11625,7 @@ void Client::Handle_OP_SenseHeading(const EQApplicationPacket *app)
 	// eventually sends a message.
 	if (GetLevel() <= 8)
 		chancemod += (9-level) * 10;
-	
+
 	CheckIncreaseSkill(SkillSenseHeading, nullptr, chancemod);
 
 	return;
@@ -12200,7 +12202,7 @@ void Client::Handle_OP_ShopPlayerSell(const EQApplicationPacket *app)
 	int freeslot = 0;
 	if (charges > 0 && (freeslot = zone->SaveTempItem(vendor->CastToNPC()->MerchantType, vendor->GetNPCTypeID(), itemid, charges, true)) > 0){
 		ItemInst* inst2 = inst->Clone();
-		
+
 		while (true) {
 			if (inst2 == nullptr)
 				break;
@@ -13285,7 +13287,7 @@ void Client::Handle_OP_Trader(const EQApplicationPacket *app)
 			safe_delete(gis);
 
 			this->Trader_StartTrader();
-			
+
 			// This refreshes the Trader window to display the End Trader button
 			if (GetClientVersion() >= ClientVersion::RoF)
 			{
@@ -13430,7 +13432,7 @@ void Client::Handle_OP_TraderShop(const EQApplicationPacket *app)
 
 	if (app->size == sizeof(TraderClick_Struct))
 	{
-		
+
 		TraderClick_Struct* tcs = (TraderClick_Struct*)app->pBuffer;
 
 		Log.Out(Logs::Detail, Logs::Trading, "Handle_OP_TraderShop: TraderClick_Struct TraderID %d, Code %d, Unknown008 %d, Approval %d",

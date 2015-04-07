@@ -1905,7 +1905,12 @@ const NPCType* ZoneDatabase::LoadNPCTypesData(uint32 npc_type_id, bool bulk_load
 		"npc_types.no_target_hotkey, "
 		"npc_types.raid_target, "
 		"npc_types.attack_delay, "
-		"npc_types.light "
+		"npc_types.light, "
+		"npc_types.armtexture, "
+		"npc_types.bracertexture, "
+		"npc_types.handtexture, "
+		"npc_types.legtexture, "
+		"npc_types.feettexture "
 		"FROM npc_types %s", 
 		where_condition.c_str()
 	);
@@ -2074,6 +2079,12 @@ const NPCType* ZoneDatabase::LoadNPCTypesData(uint32 npc_type_id, bool bulk_load
 		temp_npctype_data->raid_target = atoi(row[89]) == 0 ? false: true;
 		temp_npctype_data->attack_delay = atoi(row[90]);
 		temp_npctype_data->light = (atoi(row[91]) & 0x0F);
+
+		temp_npctype_data->armtexture = atoi(row[92]);
+		temp_npctype_data->bracertexture = atoi(row[93]);
+		temp_npctype_data->handtexture = atoi(row[94]);
+		temp_npctype_data->legtexture = atoi(row[95]);
+		temp_npctype_data->feettexture = atoi(row[96]);
 
 		// If NPC with duplicate NPC id already in table,
 		// free item we attempted to add.

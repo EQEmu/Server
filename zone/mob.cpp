@@ -83,7 +83,12 @@ Mob::Mob(const char* in_name,
 		int32		in_mana_regen,
 		uint8		in_qglobal,
 		uint8		in_maxlevel,
-		uint32		in_scalerate
+		uint32		in_scalerate,
+		uint8		in_armtexture,
+		uint8		in_bracertexture,
+		uint8		in_handtexture,
+		uint8		in_legtexture,
+		uint8		in_feettexture
 		) :
 		attack_timer(2000),
 		attack_dw_timer(2000),
@@ -159,6 +164,13 @@ Mob::Mob(const char* in_name,
 	
 	texture		= in_texture;
 	helmtexture	= in_helmtexture;
+	armtexture = in_armtexture;
+	bracertexture = in_bracertexture;
+	handtexture = in_handtexture;
+	legtexture = in_legtexture;
+	feettexture = in_feettexture;
+	multitexture = (armtexture || bracertexture || handtexture || legtexture || feettexture);
+
 	haircolor	= in_haircolor;
 	beardcolor	= in_beardcolor;
 	eyecolor1	= in_eyecolor1;
@@ -931,7 +943,7 @@ void Mob::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho)
 	ns->spawn.drakkin_heritage = drakkin_heritage;
 	ns->spawn.drakkin_tattoo = drakkin_tattoo;
 	ns->spawn.drakkin_details = drakkin_details;
-	ns->spawn.equip_chest2 = GetHerosForgeModel(1) != 0 ? 0xff : texture;
+	ns->spawn.equip_chest2 = GetHerosForgeModel(1) != 0 || multitexture? 0xff : texture;
 
 //	ns->spawn.invis2 = 0xff;//this used to be labeled beard.. if its not FF it will turn mob invis
 
@@ -1303,12 +1315,12 @@ void Mob::DoAnim(const int animnum, int type, bool ackreq, eqFilterType filter) 
 	Animation_Struct* anim = (Animation_Struct*)outapp->pBuffer;
 	anim->spawnid = GetID();
 	if(type == 0){
-		anim->action = 10;
-		anim->value=animnum;
+		anim->action = animnum;
+		anim->speed = 10;
 	}
 	else{
 		anim->action = animnum;
-		anim->value=type;
+		anim->speed = type;
 	}
 	entity_list.QueueCloseClients(this, outapp, false, 200, 0, ackreq, filter);
 	safe_delete(outapp);
