@@ -4269,6 +4269,18 @@ namespace RoF2
 		FINISH_DIRECT_DECODE();
 	}
 
+	DECODE(OP_Animation)
+	{
+		DECODE_LENGTH_EXACT(structs::Animation_Struct);
+		SETUP_DIRECT_DECODE(Animation_Struct, structs::Animation_Struct);
+
+		IN(spawnid);
+		IN(action);
+		IN(speed);
+
+		FINISH_DIRECT_DECODE();
+	}
+
 	DECODE(OP_ApplyPoison)
 	{
 		DECODE_LENGTH_EXACT(structs::ApplyPoison_Struct);
