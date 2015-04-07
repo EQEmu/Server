@@ -506,10 +506,6 @@ bool EQEmu::Inventory::PopFromCursorBuffer() {
 	return false;
 }
 
-EQEmu::InventorySlot EQEmu::Inventory::PutItemInInventory(std::shared_ptr<ItemInstance> inst, bool try_worn, bool try_cursor) {
-	return EQEmu::InventorySlot();
-}
-
 EQEmu::InventorySlot EQEmu::Inventory::FindFreeSlot(bool for_bag, bool try_cursor, int min_size, bool is_arrow) {
 	//check basic inventory
 	for(int i = EQEmu::PersonalSlotGeneral1; i < EQEmu::PersonalSlotGeneral10; ++i) {

@@ -827,7 +827,8 @@ public:
 	void IncStats(uint8 type,int16 increase_val);
 	void DropItem(int16 slot_id);
 
-	//New Inventory
+	//inv2: New Inventory methods, will probably move these to Mob in a future update as there's 
+	//little reason for them to be in client except for simplicity of implementation atm
 	bool SwapItem(const EQEmu::InventorySlot &src, const EQEmu::InventorySlot &dest, int number_in_stack);
 	bool SummonItem(uint32 item_id, 
 					int16 charges, 
@@ -842,6 +843,7 @@ public:
 					uint32 ornament_icon = 0, 
 					uint32 ornament_idfile = 0, 
 					uint32 ornament_hero_model = 0);
+	bool PutItemInInventory(const EQEmu::InventorySlot &slot, std::shared_ptr<EQEmu::ItemInstance> inst, bool client_update = false);
 
 	//
 	// class Client::TextLink

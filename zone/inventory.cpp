@@ -3353,3 +3353,24 @@ bool Client::SummonItem(uint32 item_id,
 
 	return res;
 }
+
+bool Client::PutItemInInventory(const EQEmu::InventorySlot &slot, std::shared_ptr<EQEmu::ItemInstance> inst, bool client_update) {
+	if(!inst) 
+		return false;
+
+	if(!slot.IsValid()) {
+		return false;
+	}
+
+	Log.Out(Logs::Detail, Logs::Inventory, "Putting item %s (%d) into slot %s", inst->GetBaseItem()->Name, inst->GetBaseItem()->ID, slot.ToString().c_str());
+
+	if(!m_inventory.Summon(slot, inst)) {
+		return false;
+	}
+
+	if(client_update) {
+		SendItemPacket(slot, inst, slot.IsCursor() ? ItemPacketSummonItem : ItemPacketTrade);
+	}
+
+	CalcBonuses();
+}

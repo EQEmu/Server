@@ -12075,11 +12075,9 @@ void Client::Handle_OP_ShopPlayerBuy(const EQApplicationPacket *app)
 	}
 
 	if(free_slot.IsCursor()) {
-		if(m_inventory.Get(EQEmu::InventorySlot(EQEmu::InvTypePersonal, EQEmu::PersonalSlotCursor))) {
-			Message(13, "You do not have room for any more items.");
-			safe_delete(outapp);
-			return;
-		}
+		Message(13, "You do not have room for any more items.");
+		safe_delete(outapp);
+		return;
 	}
 
 	if(!stacked && !free_slot.IsValid())
@@ -12091,7 +12089,7 @@ void Client::Handle_OP_ShopPlayerBuy(const EQApplicationPacket *app)
 	
 	std::string packet;
 	if(!stacked && inst) {
-		//PutItemInInventory(free_slot, inst);
+		PutItemInInventory(free_slot, inst);
 		SendItemPacket(free_slot, inst, ItemPacketTrade);
 	}
 	else if (!stacked){
@@ -12119,7 +12117,7 @@ void Client::Handle_OP_ShopPlayerBuy(const EQApplicationPacket *app)
 			inst->SetMerchantSlot(mp->itemslot);
 			inst->SetMerchantCount(new_charges);
 	
-			//SendItemPacket(mp->itemslot, inst, ItemPacketMerchant);
+			SendItemPacket(EQEmu::InventorySlot(EQEmu::InvTypeMerchant, mp->itemslot), inst, ItemPacketMerchant);
 		}
 	}
 	safe_delete(outapp);
