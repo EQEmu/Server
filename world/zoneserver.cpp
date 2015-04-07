@@ -1318,8 +1318,10 @@ bool ZoneServer::Process() {
 				break;
 			}
 		}
-
-		delete pack;
+		if (pack)
+			delete pack;
+		else
+			Log.Out(Logs::Detail, Logs::World_Server, "Zoneserver process tried to delete pack when pack does not exist.");
 	}
 	return true;
 }
