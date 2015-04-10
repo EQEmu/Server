@@ -82,6 +82,7 @@ Copyright (C) 2001-2002 EQEMu Development Team (http://eqemu.org)
 
 #include <assert.h>
 #include <math.h>
+#include <algorithm>
 
 #ifndef WIN32
 	#include <stdlib.h>
@@ -2149,7 +2150,7 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, uint16 slot, uint16 
 				// caster if they're not using TGB
 				// NOTE: this will always hit the caster, plus the target's group so
 				// it can affect up to 7 people if the targeted group is not our own
-				
+
 				// Allow pets who cast group spells to affect the group.
 				if (spell_target->IsPetOwnerClient() && IsPetOwnerClient()){
 					Mob* owner =  spell_target->GetOwner();
@@ -2157,7 +2158,7 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, uint16 slot, uint16 
 					if (owner)
 						spell_target = owner;
 				}
-					
+
 				if(spell_target->IsGrouped())
 				{
 					Group *target_group = entity_list.GetGroupByMob(spell_target);
@@ -3669,22 +3670,16 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob* spelltar, bool reflect, bool use_r
 					spelltar->Message_StringID(MT_SpellFailure, YOU_RESIST, spells[spell_id].name);
 				}
 
-				if(spelltar->IsAIControlled()){
+				if (spelltar->IsAIControlled()) {
 					int32 aggro = CheckAggroAmount(spell_id);
-					if(aggro > 0) {
-						if(!IsHarmonySpell(spell_id))
-						spelltar->AddToHateList(this, aggro);
-						else
-							if(!spelltar->PassCharismaCheck(this, spell_id))
-								spelltar->AddToHateList(this, aggro);
-					}
-					else{
-						uint32 newhate = spelltar->GetHateAmount(this) + aggro;
-						if (newhate < 1) {
-							spelltar->SetHateAmountOnEnt(this,1);
-						} else {
-							spelltar->SetHateAmountOnEnt(this,newhate);
-						}
+					if (aggro > 0) {
+						if (!IsHarmonySpell(spell_id))
+							spelltar->AddToHateList(this, aggro);
+						else if (!spelltar->PassCharismaCheck(this, spell_id))
+							spelltar->AddToHateList(this, aggro);
+					} else {
+						int newhate = spelltar->GetHateAmount(this) + aggro;
+						spelltar->SetHateAmountOnEnt(this, std::max(1, newhate));
 					}
 				}
 
@@ -4404,7 +4399,7 @@ float Mob::ResistSpell(uint8 resist_type, uint16 spell_id, Mob *caster, bool use
 			level_mod += (2 * level_diff);
 		}
 	}
-	
+
 	if (CharismaCheck)
 	{
 		/*
@@ -5053,7 +5048,7 @@ bool Mob::FindType(uint16 type, bool bOffensive, uint16 threshold) {
 											spells[buffs[i].spellid].base[j],
 											spells[buffs[i].spellid].max[j],
 											buffs[i].casterlevel, buffs[i].spellid);
-						Log.Out(Logs::General, Logs::Normal, 
+						Log.Out(Logs::General, Logs::Normal,
 								"FindType: type = %d; value = %d; threshold = %d",
 								type, value, threshold);
 						if (value < threshold)
