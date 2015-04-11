@@ -3968,7 +3968,7 @@ void Mob::TryWeaponProc(const ItemInst* weapon_g, Mob *on, uint16 hand) {
 	}
 
 	// Innate + aug procs from weapons
-	// TODO: powersource procs
+	// TODO: powersource procs -- powersource procs are on invis augs, so shouldn't need anything extra
 	TryWeaponProc(weapon_g, weapon_g->GetItem(), on, hand);
 	// Procs from Buffs and AA both melee and range
 	TrySpellProc(weapon_g, weapon_g->GetItem(), on, hand);
@@ -4054,7 +4054,7 @@ void Mob::TryWeaponProc(const ItemInst *inst, const Item_Struct *weapon, Mob *on
 			}
 		}
 	}
-	// TODO: Powersource procs
+	// TODO: Powersource procs -- powersource procs are from augs so shouldn't need anything extra
 
 	return;
 }
