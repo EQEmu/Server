@@ -1900,7 +1900,7 @@ bool Zone::IsSpellBlocked(uint32 spell_id, const glm::vec3& location)
 					}
 					case 2:
 					{
-						if (!IsWithinAxisAlignedBox(location, blocked_spells[x].m_Location - blocked_spells[x].m_Difference, blocked_spells[x].m_Location + blocked_spells[x].m_Difference))
+						if (IsWithinAxisAlignedBox(location, blocked_spells[x].m_Location - blocked_spells[x].m_Difference, blocked_spells[x].m_Location + blocked_spells[x].m_Difference))
 							return true;
 						break;
 					}
@@ -1934,7 +1934,7 @@ const char* Zone::GetSpellBlockedMessage(uint32 spell_id, const glm::vec3& locat
 				}
 				case 2:
 				{
-					if(!IsWithinAxisAlignedBox(location, blocked_spells[x].m_Location - blocked_spells[x].m_Difference, blocked_spells[x].m_Location + blocked_spells[x].m_Difference))
+					if(IsWithinAxisAlignedBox(location, blocked_spells[x].m_Location - blocked_spells[x].m_Difference, blocked_spells[x].m_Location + blocked_spells[x].m_Difference))
 						return blocked_spells[x].message;
 					break;
 				}
