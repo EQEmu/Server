@@ -7491,6 +7491,10 @@ void Client::GarbleMessage(char *message, uint8 variance)
 	const char delimiter = 0x12;
 	int delimiter_count = 0;
 
+	// Don't garble # commands
+	if (message[0] == '#')
+		return;
+
 	for (size_t i = 0; i < strlen(message); i++) {
 		// Client expects hex values inside of a text link body
 		if (message[i] == delimiter) {
