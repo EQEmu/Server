@@ -4717,7 +4717,7 @@ namespace RoF
 		SETUP_DIRECT_DECODE(PetCommand_Struct, structs::PetCommand_Struct);
 
 		IN(command);
-		emu->unknown = eq->unknown04;
+		IN(target);
 
 		FINISH_DIRECT_DECODE();
 	}

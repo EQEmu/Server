@@ -1068,7 +1068,7 @@ struct TargetReject_Struct {
 
 struct PetCommand_Struct {
 /*000*/ uint32	command;
-/*004*/ uint32	unknown;
+/*004*/ uint32	target;
 };
 
 /*

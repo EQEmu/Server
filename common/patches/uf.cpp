@@ -2213,7 +2213,7 @@ namespace UF
 			FINISH_ENCODE();
 			return;
 		}
-		
+
 		unsigned char *emu_ptr = __emu_buffer;
 		emu_ptr += sizeof(CharacterSelect_Struct);
 		CharacterSelectEntry_Struct *emu_cse = (CharacterSelectEntry_Struct *)nullptr;
@@ -3599,7 +3599,7 @@ namespace UF
 		SETUP_DIRECT_DECODE(PetCommand_Struct, structs::PetCommand_Struct);
 
 		IN(command);
-		IN(unknown);
+		IN(target);
 
 		FINISH_DIRECT_DECODE();
 	}
@@ -3861,7 +3861,7 @@ namespace UF
 
 		UF::structs::ItemSerializationHeaderFinish hdrf;
 		hdrf.ornamentIcon = ornaIcon;
-		hdrf.unknown060 = 0; //This is Always 0.. or it breaks shit.. 
+		hdrf.unknown060 = 0; //This is Always 0.. or it breaks shit..
 		hdrf.unknown061 = 0; //possibly ornament / special ornament
 		hdrf.isCopied = 0; //Flag for item to be 'Copied'
 		hdrf.ItemClass = item->ItemClass;

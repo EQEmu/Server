@@ -122,7 +122,7 @@ namespace Titanium
 	EAT_ENCODE(OP_GuildMemberLevelUpdate); // added ;
 
 	EAT_ENCODE(OP_ZoneServerReady); // added ;
-	
+
 	ENCODE(OP_Action)
 	{
 		ENCODE_LENGTH_EXACT(Action_Struct);
@@ -326,7 +326,7 @@ namespace Titanium
 	{
 		SETUP_VAR_ENCODE(ExpeditionCompass_Struct);
 		ALLOC_VAR_ENCODE(structs::ExpeditionCompass_Struct, sizeof(structs::ExpeditionInfo_Struct) + sizeof(structs::ExpeditionCompassEntry_Struct) * emu->count);
-		
+
 		OUT(count);
 
 		for (uint32 i = 0; i < emu->count; ++i)
@@ -1308,7 +1308,7 @@ namespace Titanium
 		VARSTRUCT_ENCODE_TYPE(uint8, OutBuffer, emu->unknown12[11]);
 
 		VARSTRUCT_ENCODE_STRING(OutBuffer, new_message.c_str());
-		
+
 		delete[] __emu_buffer;
 		dest->FastQueuePacket(&in, ack_req);
 	}
@@ -1351,7 +1351,7 @@ namespace Titanium
 		InBuffer += strlen(InBuffer) + 1;
 
 		memcpy(OutBuffer, InBuffer, sizeof(TaskDescriptionTrailer_Struct));
-		
+
 		delete[] __emu_buffer;
 		dest->FastQueuePacket(&in, ack_req);
 	}
@@ -1621,7 +1621,7 @@ namespace Titanium
 
 		FINISH_DIRECT_DECODE();
 	}
-	
+
 	DECODE(OP_ApplyPoison)
 	{
 		DECODE_LENGTH_EXACT(structs::ApplyPoison_Struct);
@@ -1942,7 +1942,7 @@ namespace Titanium
 		default:
 			emu->command = eq->command;
 		}
-		OUT(unknown);
+		IN(target);
 
 		FINISH_DIRECT_DECODE();
 	}
@@ -2151,7 +2151,7 @@ namespace Titanium
 
 		return serverSlot; // deprecated
 	}
-	
+
 	static inline int16 ServerToTitaniumCorpseSlot(uint32 serverCorpseSlot)
 	{
 		//int16 TitaniumCorpse;
@@ -2166,7 +2166,7 @@ namespace Titanium
 
 		return titaniumSlot; // deprecated
 	}
-	
+
 	static inline uint32 TitaniumToServerCorpseSlot(int16 titaniumCorpseSlot)
 	{
 		//uint32 ServerCorpse;
