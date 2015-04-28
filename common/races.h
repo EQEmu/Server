@@ -47,6 +47,8 @@
 #define IKSAR			128
 #define VAHSHIR			130
 #define CONTROLLED_BOAT 141
+#define MINOR_ILL_OBJ	142
+#define TREE			143
 #define IKSAR_SKELETON	161
 #define FROGLOK			330
 #define FROGLOK2		74	// Not sure why /who all reports race as 74 for frogloks
