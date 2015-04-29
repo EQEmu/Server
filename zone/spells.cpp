@@ -1165,12 +1165,14 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, uint16 slot,
 			}
 			else if (!bard_song_mode)
 			{
+				int noexpend;
 				for(int t_count = 0; t_count < 4; t_count++) {
 					component = spells[spell_id].components[t_count];
-					if (component == -1)
+					noexpend = spells[spell_id].NoexpendReagent[t_count];
+					if (component == -1 || noexpend == component)
 						continue;
 					component_count = spells[spell_id].component_counts[t_count];
-					Log.Out(Logs::Detail, Logs::Spells, "Spell %d: Consuming %d of spell component item id %d", spell_id, component, component_count);
+					Log.Out(Logs::Detail, Logs::Spells, "Spell %d: Consuming %d of spell component item id %d", spell_id, component_count, component);
 					// Components found, Deleting
 					// now we go looking for and deleting the items one by one
 					for(int s = 0; s < component_count; s++)
