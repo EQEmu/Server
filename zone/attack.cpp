@@ -983,9 +983,11 @@ int Mob::GetWeaponDamage(Mob *against, const ItemInst *weapon_item, uint32 *hate
 		}
 		else{
 			bool MagicGloves=false;
-			ItemInst *gloves=CastToClient()->GetInv().GetItem(MainHands);
-			if (gloves != nullptr) {
-				MagicGloves = gloves->GetItem()->Magic;
+			if (IsClient()) {
+				ItemInst *gloves=CastToClient()->GetInv().GetItem(MainHands);
+				if (gloves != nullptr) {
+					MagicGloves = gloves->GetItem()->Magic;
+				}
 			}
 
 			if((GetClass() == MONK || GetClass() == BEASTLORD)) {
