@@ -1051,11 +1051,11 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 		if(quest_manager.ProximitySayInUse())
 			entity_list.ProcessProximitySay(message, this, language);
 
-		if (GetTarget() != 0 && GetTarget()->IsNPC()) {
+		if (GetTarget() != 0 && GetTarget()->IsNPC() &&
+			!IsInvisible(GetTarget())) {
 			if(!GetTarget()->CastToNPC()->IsEngaged()) {
 				CheckLDoNHail(GetTarget());
 				CheckEmoteHail(GetTarget(), message);
-
 
 				if(DistanceSquaredNoZ(m_Position, GetTarget()->GetPosition()) <= 200) {
 					NPC *tar = GetTarget()->CastToNPC();
