@@ -426,7 +426,9 @@ namespace SoF
 		OUT(type);
 		OUT(spellid);
 		OUT(damage);
-		eq->sequence = emu->sequence;
+		OUT(force)
+		OUT(meleepush_xy);
+		OUT(meleepush_z)
 
 		FINISH_ENCODE();
 	}

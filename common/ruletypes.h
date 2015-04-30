@@ -377,7 +377,7 @@ RULE_REAL ( Combat, HitBonusPerLevel, 1.2) //You gain this % of hit for every le
 RULE_REAL ( Combat, WeaponSkillFalloff, 0.33) //For every weapon skill point that's not maxed you lose this % of hit
 RULE_REAL ( Combat, ArcheryHitPenalty, 0.25) //Archery has a hit penalty to try to help balance it with the plethora of long term +hit modifiers for it
 RULE_REAL ( Combat, AgiHitFactor, 0.01)
-RULE_REAL ( Combat, MinChancetoHit, 5.0) //Minimum % chance to hit with regular melee/ranged 
+RULE_REAL ( Combat, MinChancetoHit, 5.0) //Minimum % chance to hit with regular melee/ranged
 RULE_REAL ( Combat, MaxChancetoHit, 95.0) //Maximum % chance to hit with regular melee/ranged
 RULE_INT ( Combat, MinRangedAttackDist, 25) //Minimum Distance to use Ranged Attacks
 RULE_BOOL ( Combat, ArcheryBonusRequiresStationary, true) //does the 2x archery bonus chance require a stationary npc
@@ -438,6 +438,8 @@ RULE_INT ( Combat, BerserkerFrenzyStart, 35)
 RULE_INT ( Combat, BerserkerFrenzyEnd, 45)
 RULE_BOOL ( Combat, OneProcPerWeapon, true) //If enabled, One proc per weapon per round
 RULE_BOOL ( Combat, ProjectileDmgOnImpact, true) //If enabled, projectiles (ie arrows) will hit on impact, instead of instantly.
+RULE_BOOL ( Combat, MeleePush, true) // enable melee push
+RULE_INT ( Combat, MeleePushChance, 50) // (NPCs) chance the target will be pushed. Made up, 100 actually isn't that bad
 RULE_CATEGORY_END()
 
 RULE_CATEGORY( NPC )
@@ -577,7 +579,7 @@ RULE_INT ( Console, SessionTimeOut, 600000 )	// Amount of time in ms for the con
 RULE_CATEGORY_END()
 
 RULE_CATEGORY( QueryServ )
-RULE_BOOL( QueryServ, PlayerLogChat, false) // Logs Player Chat 
+RULE_BOOL( QueryServ, PlayerLogChat, false) // Logs Player Chat
 RULE_BOOL( QueryServ, PlayerLogTrades, false) // Logs Player Trades
 RULE_BOOL( QueryServ, PlayerLogHandins, false) // Logs Player Handins
 RULE_BOOL( QueryServ, PlayerLogNPCKills, false) // Logs Player NPC Kills
@@ -590,7 +592,7 @@ RULE_BOOL( QueryServ, PlayerLogZone, false) // Logs Player Zone Events
 RULE_BOOL( QueryServ, PlayerLogDeaths, false) // Logs Player Deaths
 RULE_BOOL( QueryServ, PlayerLogConnectDisconnect, false) // Logs Player Connect Disconnect State
 RULE_BOOL( QueryServ, PlayerLogLevels, false) // Logs Player Leveling/Deleveling
-RULE_BOOL( QueryServ, PlayerLogAARate, false) // Logs Player AA Experience Rates 
+RULE_BOOL( QueryServ, PlayerLogAARate, false) // Logs Player AA Experience Rates
 RULE_BOOL( QueryServ, PlayerLogQGlobalUpdate, false) // Logs Player QGlobal Updates
 RULE_BOOL( QueryServ, PlayerLogTaskUpdates, false) // Logs Player Task Updates
 RULE_BOOL( QueryServ, PlayerLogKeyringAddition, false) // Log PLayer Keyring additions

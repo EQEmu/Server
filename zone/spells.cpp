@@ -2563,7 +2563,7 @@ void Mob::BardPulse(uint16 spell_id, Mob *caster) {
 			cd->source = action->source;
 			cd->type = DamageTypeSpell;
 			cd->spellid = action->spell;
-			cd->sequence = action->sequence;
+			cd->meleepush_xy = action->sequence;
 			cd->damage = 0;
 			if(!IsEffectInSpell(spell_id, SE_BindAffinity))
 			{
@@ -3827,7 +3827,7 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob* spelltar, bool reflect, bool use_r
 	cd->source = action->source;
 	cd->type = action->type;
 	cd->spellid = action->spell;
-	cd->sequence = action->sequence;
+	cd->meleepush_xy = action->sequence;
 	cd->damage = 0;
 	if(!IsEffectInSpell(spell_id, SE_BindAffinity))
 	{

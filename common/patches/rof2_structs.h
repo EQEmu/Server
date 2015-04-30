@@ -1484,9 +1484,10 @@ struct CombatDamage_Struct
 /* 04 */	uint8	type;			//slashing, etc.  231 (0xE7) for spells
 /* 05 */	uint32	spellid;
 /* 09 */	int32	damage;
-/* 13 */	float	unknown11;		// cd cc cc 3d
-/* 17 */	float	sequence;		// see above notes in Action_Struct
-/* 21 */	uint8	unknown19[9];	// was [9]
+/* 13 */	float	force;		// cd cc cc 3d
+/* 17 */	float	meleepush_xy;		// see above notes in Action_Struct
+/* 21 */	float	meleepush_z;
+/* 25 */	uint8	unknown25[5];	// was [9]
 /* 30 */
 };
 

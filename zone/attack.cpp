@@ -3708,6 +3708,23 @@ void Mob::CommonDamage(Mob* attacker, int32 &damage, const uint16 spell_id, cons
 		a->type = SkillDamageTypes[skill_used]; // was 0x1c
 		a->damage = damage;
 		a->spellid = spell_id;
+		a->meleepush_xy = attacker->GetHeading() * 2.0f;
+		if (RuleB(Combat, MeleePush) && damage > 0 && !IsRooted() &&
+		    (IsClient() || zone->random.Roll(RuleI(Combat, MeleePushChance)))) {
+			a->force = EQEmu::GetSkillMeleePushForce(skill_used);
+			// update NPC stuff
+			auto new_pos = glm::vec3(m_Position.x + (a->force * std::sin(a->meleepush_xy) + m_Delta.x),
+						   m_Position.y + (a->force * std::cos(a->meleepush_xy) + m_Delta.y), m_Position.z);
+			if (zone->zonemap->CheckLoS(glm::vec3(m_Position), new_pos)) { // If we have LoS on the new loc it should be reachable.
+				if (IsNPC()) {
+					// Is this adequate?
+					Teleport(new_pos);
+					SendPosUpdate();
+				}
+			} else {
+				a->force = 0.0f; // we couldn't move there, so lets not
+			}
+		}
 
 		//Note: if players can become pets, they will not receive damage messages of their own
 		//this was done to simplify the code here (since we can only effectively skip one mob on queue)

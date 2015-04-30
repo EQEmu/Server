@@ -581,7 +581,9 @@ namespace UF
 		OUT(type);
 		OUT(spellid);
 		OUT(damage);
-		eq->sequence = emu->sequence;
+		OUT(force)
+		OUT(meleepush_xy);
+		OUT(meleepush_z)
 
 		FINISH_ENCODE();
 	}
@@ -3356,7 +3358,7 @@ namespace UF
 		IN(type);
 		IN(spellid);
 		IN(damage);
-		emu->sequence = eq->sequence;
+		IN(meleepush_xy);
 
 		FINISH_DIRECT_DECODE();
 	}
