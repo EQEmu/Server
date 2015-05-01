@@ -1479,7 +1479,10 @@ bool Mob::DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_ce
 			{
 				//invalid target
 				Log.Out(Logs::Detail, Logs::Spells, "Spell %d canceled: invalid target of body type %d (undead)", spell_id, mob_body);
-				Message_StringID(13,SPELL_NEED_TAR);
+				if(!spell_target)
+					Message_StringID(13,SPELL_NEED_TAR);
+				else
+					Message_StringID(13,CANNOT_AFFECT_NPC);
 				return false;
 			}
 			CastAction = SingleTarget;
