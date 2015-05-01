@@ -1787,7 +1787,7 @@ bool Mob::IsPlayerRace(uint16 in_race) {
 
 
 uint8 Mob::GetDefaultGender(uint16 in_race, uint8 in_gender) {
-	if (Mob::IsPlayerRace(in_race) || in_race == 15 || in_race == 50 || in_race == 57 || in_race == 70 || in_race == 98 || in_race == 118) {
+	if (Mob::IsPlayerRace(in_race) || in_race == 15 || in_race == 50 || in_race == 57 || in_race == 70 || in_race == 98 || in_race == 118 || in_race == 23) {
 		if (in_gender >= 2) {
 			// Male default for PC Races
 			return 0;
