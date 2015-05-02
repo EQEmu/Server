@@ -254,7 +254,7 @@ bool DatabaseMySQL::CreateWorldRegistration(string long_name, string short_name,
 	length = mysql_real_escape_string(db, escaped_short_name, short_name.substr(0, 100).c_str(), short_name.substr(0, 100).length());
 	escaped_short_name[length+1] = 0;
 	stringstream query(stringstream::in | stringstream::out);
-	query << "SELECT max(ServerID) FROM " << server.options.GetWorldRegistrationTable();
+	query << "SELECT ifnull(max(ServerID),0) FROM " << server.options.GetWorldRegistrationTable();
 
 	if(mysql_query(db, query.str().c_str()) != 0)
 	{
