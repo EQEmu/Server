@@ -5254,8 +5254,31 @@ void Client::SendBuffDurationPacket(Buffs_Struct &buff)
 	sbf->slot = 2;
 	sbf->spellid = buff.spellid;
 	sbf->slotid = 0;
-	sbf->effect = 255;
 	sbf->level = buff.casterlevel > 0 ? buff.casterlevel : GetLevel();
+
+	if (IsEffectInSpell(buff.spellid, SE_TotalHP))
+	{
+		// If any of the lower 6 bits are set, the GUI changes MAX_HP AGAIN.
+		// If its set to 0 the effect is cancelled.  
+		// 128 seems to work (ie: change only duration).
+		sbf->effect = 128;
+	}
+	else if (IsEffectInSpell(buff.spellid, SE_CurrentHP))
+	{
+		// This is mostly a problem when we try and update duration on a
+		// dot or a hp->mana conversion.  Zero cancels the effect, any
+		// other value has the GUI doing that value at the same time server
+		// is doing theirs.  This makes the two match.
+		int index = GetSpellEffectIndex(buff.spellid, SE_CurrentHP);
+		sbf->effect = abs(spells[buff.spellid].base[index]);
+	}
+	else
+	{
+		// Default to what old code did until we find a better fix for
+		// other spell lines.
+		sbf->effect=sbf->level;
+	}
+
 	sbf->bufffade = 0;
 	sbf->duration = buff.ticsremaining;
 	sbf->num_hits = buff.numhits;
