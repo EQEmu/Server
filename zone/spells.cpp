@@ -1165,12 +1165,14 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, uint16 slot,
 			}
 			else if (!bard_song_mode)
 			{
+				int noexpend;
 				for(int t_count = 0; t_count < 4; t_count++) {
 					component = spells[spell_id].components[t_count];
-					if (component == -1)
+					noexpend = spells[spell_id].NoexpendReagent[t_count];
+					if (component == -1 || noexpend == component)
 						continue;
 					component_count = spells[spell_id].component_counts[t_count];
-					Log.Out(Logs::Detail, Logs::Spells, "Spell %d: Consuming %d of spell component item id %d", spell_id, component, component_count);
+					Log.Out(Logs::Detail, Logs::Spells, "Spell %d: Consuming %d of spell component item id %d", spell_id, component_count, component);
 					// Components found, Deleting
 					// now we go looking for and deleting the items one by one
 					for(int s = 0; s < component_count; s++)
@@ -1478,7 +1480,10 @@ bool Mob::DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_ce
 			{
 				//invalid target
 				Log.Out(Logs::Detail, Logs::Spells, "Spell %d canceled: invalid target of body type %d (undead)", spell_id, mob_body);
-				Message_StringID(13,SPELL_NEED_TAR);
+				if(!spell_target)
+					Message_StringID(13,SPELL_NEED_TAR);
+				else
+					Message_StringID(13,CANNOT_AFFECT_NPC);
 				return false;
 			}
 			CastAction = SingleTarget;
@@ -2561,7 +2566,7 @@ void Mob::BardPulse(uint16 spell_id, Mob *caster) {
 			cd->source = action->source;
 			cd->type = DamageTypeSpell;
 			cd->spellid = action->spell;
-			cd->sequence = action->sequence;
+			cd->meleepush_xy = action->sequence;
 			cd->damage = 0;
 			if(!IsEffectInSpell(spell_id, SE_BindAffinity))
 			{
@@ -3825,7 +3830,7 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob* spelltar, bool reflect, bool use_r
 	cd->source = action->source;
 	cd->type = action->type;
 	cd->spellid = action->spell;
-	cd->sequence = action->sequence;
+	cd->meleepush_xy = action->sequence;
 	cd->damage = 0;
 	if(!IsEffectInSpell(spell_id, SE_BindAffinity))
 	{

@@ -1,5 +1,10 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 04/30/2015 ==
+demonstar55: Implement mob and client melee push
+       You can set Combat:MeleePush to false to turn off or change Combat:MeleePushChance to increase the chance an NPC can be pushed
+       PCs are always pushed, need to do more testing to verify.
+
 == 04/22/2015 ==
 Uleat: Probable fix for 'Debug Assertion Failure' in Client::GarbleMessage() when calling the 'isalpha' macro.
 ref: https://connect.microsoft.com/VisualStudio/feedback/details/932876/calling-isdigit-with-a-signed-char-1-results-in-a-assert-failure-in-debug-compiles

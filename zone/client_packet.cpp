@@ -9752,6 +9752,7 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 	char val1[20] = { 0 };
 	PetCommand_Struct* pet = (PetCommand_Struct*)app->pBuffer;
 	Mob* mypet = this->GetPet();
+	Mob *target = entity_list.GetMob(pet->target);
 
 	if (!mypet || pet->command == PET_LEADER)
 	{
@@ -9799,22 +9800,22 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 	switch (PetCommand)
 	{
 	case PET_ATTACK: {
-		if (!GetTarget())
+		if (!target)
 			break;
-		if (GetTarget()->IsMezzed()) {
-			Message_StringID(10, CANNOT_WAKE, mypet->GetCleanName(), GetTarget()->GetCleanName());
+		if (target->IsMezzed()) {
+			Message_StringID(10, CANNOT_WAKE, mypet->GetCleanName(), target->GetCleanName());
 			break;
 		}
 		if (mypet->IsFeared())
 			break; //prevent pet from attacking stuff while feared
 
-		if (!mypet->IsAttackAllowed(GetTarget())) {
+		if (!mypet->IsAttackAllowed(target)) {
 			mypet->Say_StringID(NOT_LEGAL_TARGET);
 			break;
 		}
 
 		if ((mypet->GetPetType() == petAnimation && GetAA(aaAnimationEmpathy) >= 2) || mypet->GetPetType() != petAnimation) {
-			if (GetTarget() != this && DistanceSquaredNoZ(mypet->GetPosition(), GetTarget()->GetPosition()) <= (RuleR(Pets, AttackCommandRange)*RuleR(Pets, AttackCommandRange))) {
+			if (target != this && DistanceSquaredNoZ(mypet->GetPosition(), target->GetPosition()) <= (RuleR(Pets, AttackCommandRange)*RuleR(Pets, AttackCommandRange))) {
 				if (mypet->IsHeld()) {
 					if (!mypet->IsFocused()) {
 						mypet->SetHeld(false); //break the hold and guard if we explicitly tell the pet to attack.
@@ -9822,12 +9823,12 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 							mypet->SetPetOrder(SPO_Follow);
 					}
 					else {
-						mypet->SetTarget(GetTarget());
+						mypet->SetTarget(target);
 					}
 				}
 				zone->AddAggroMob();
-				mypet->AddToHateList(GetTarget(), 1);
-				Message_StringID(MT_PetResponse, PET_ATTACKING, mypet->GetCleanName(), GetTarget()->GetCleanName());
+				mypet->AddToHateList(target, 1);
+				Message_StringID(MT_PetResponse, PET_ATTACKING, mypet->GetCleanName(), target->GetCleanName());
 			}
 		}
 		break;

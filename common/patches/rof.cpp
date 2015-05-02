@@ -658,7 +658,9 @@ namespace RoF
 		OUT(type);
 		OUT(spellid);
 		OUT(damage);
-		eq->sequence = emu->sequence;
+		OUT(force)
+		OUT(meleepush_xy);
+		OUT(meleepush_z)
 
 		FINISH_ENCODE();
 	}
@@ -4389,7 +4391,7 @@ namespace RoF
 		IN(type);
 		IN(spellid);
 		IN(damage);
-		emu->sequence = eq->sequence;
+		IN(meleepush_xy);
 
 		FINISH_DIRECT_DECODE();
 	}
@@ -4717,7 +4719,7 @@ namespace RoF
 		SETUP_DIRECT_DECODE(PetCommand_Struct, structs::PetCommand_Struct);
 
 		IN(command);
-		emu->unknown = eq->unknown04;
+		IN(target);
 
 		FINISH_DIRECT_DECODE();
 	}

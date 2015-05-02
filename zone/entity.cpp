@@ -618,6 +618,7 @@ void EntityList::AddNPC(NPC *npc, bool SendSpawnPacket, bool dontqueue)
 			EQApplicationPacket *app = new EQApplicationPacket;
 			npc->CreateSpawnPacket(app, npc);
 			QueueClients(npc, app);
+			npc->SendArmorAppearance();
 			safe_delete(app);
 		} else {
 			NewSpawn_Struct *ns = new NewSpawn_Struct;
@@ -726,10 +727,16 @@ void EntityList::CheckSpawnQueue()
 		EQApplicationPacket *outapp = 0;
 
 		iterator.Reset();
+		NewSpawn_Struct	*ns;
+
 		while(iterator.MoreElements()) {
 			outapp = new EQApplicationPacket;
-			Mob::CreateSpawnPacket(outapp, iterator.GetData());
+			ns = iterator.GetData();
+			Mob::CreateSpawnPacket(outapp, ns);
 			QueueClients(0, outapp);
+			auto it = npc_list.find(ns->spawn.spawnId);
+			NPC *pnpc = it->second;
+			pnpc->SendArmorAppearance();
 			safe_delete(outapp);
 			iterator.RemoveCurrent();
 		}
@@ -1149,19 +1156,39 @@ void EntityList::SendZoneSpawnsBulk(Client *client)
 	NewSpawn_Struct ns;
 	Mob *spawn;
 	uint32 maxspawns = 100;
+	EQApplicationPacket *app;
 
 	if (maxspawns > mob_list.size())
 		maxspawns = mob_list.size();
 	BulkZoneSpawnPacket *bzsp = new BulkZoneSpawnPacket(client, maxspawns);
+
+	int32 race=-1;
 	for (auto it = mob_list.begin(); it != mob_list.end(); ++it) {
 		spawn = it->second;
 		if (spawn && spawn->InZone()) {
 			if (spawn->IsClient() && (spawn->CastToClient()->GMHideMe(client) ||
 					spawn->CastToClient()->IsHoveringForRespawn()))
 				continue;
-			memset(&ns, 0, sizeof(NewSpawn_Struct));
-			spawn->FillSpawnStruct(&ns, client);
-			bzsp->AddSpawn(&ns);
+
+			race = spawn->GetRace();
+
+			// Illusion races on PCs don't work as a mass spawn
+			// But they will work as an add_spawn AFTER CLIENT_CONNECTED.
+			if (spawn->IsClient() && (race == MINOR_ILL_OBJ || race == TREE)) {
+				app = new EQApplicationPacket;
+				spawn->CreateSpawnPacket(app);
+				client->QueuePacket(app, true, Client::CLIENT_CONNECTED);
+				safe_delete(app);
+			}
+			else {
+				memset(&ns, 0, sizeof(NewSpawn_Struct));
+				spawn->FillSpawnStruct(&ns, client);
+				bzsp->AddSpawn(&ns);
+			}
+
+			// Despite being sent in the OP_ZoneSpawns packet, the client
+			// does not display worn armor correctly so display it.
+			spawn->SendArmorAppearance(client);
 		}
 	}
 	safe_delete(bzsp);

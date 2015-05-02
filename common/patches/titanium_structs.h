@@ -950,7 +950,7 @@ struct TargetReject_Struct {
 
 struct PetCommand_Struct {
 /*000*/ uint32	command;
-/*004*/ uint32	unknown;
+/*004*/ uint32	target;
 };
 
 /*
@@ -1101,9 +1101,9 @@ struct CombatDamage_Struct
 /* 04 */	uint8	type; //slashing, etc.  231 (0xE7) for spells
 /* 05 */	uint16	spellid;
 /* 07 */	uint32	damage;
-/* 11 */	uint32 unknown11;
-/* 15 */	uint32 sequence;	// see above notes in Action_Struct
-/* 19 */	uint32	unknown19;
+/* 11 */	float force;
+/* 15 */	float meleepush_xy;	// see above notes in Action_Struct
+/* 19 */	float meleepush_z;
 /* 23 */
 };
 

@@ -1787,7 +1787,7 @@ bool Mob::IsPlayerRace(uint16 in_race) {
 
 
 uint8 Mob::GetDefaultGender(uint16 in_race, uint8 in_gender) {
-	if (Mob::IsPlayerRace(in_race) || in_race == 15 || in_race == 50 || in_race == 57 || in_race == 70 || in_race == 98 || in_race == 118) {
+	if (Mob::IsPlayerRace(in_race) || in_race == 15 || in_race == 50 || in_race == 57 || in_race == 70 || in_race == 98 || in_race == 118 || in_race == 23) {
 		if (in_gender >= 2) {
 			// Male default for PC Races
 			return 0;
@@ -2552,7 +2552,35 @@ uint32 NPC::GetEquipment(uint8 material_slot) const
 	return equipment[invslot];
 }
 
-void Mob::SendWearChange(uint8 material_slot)
+void Mob::SendArmorAppearance(Client *one_client)
+{
+	// one_client of 0 means sent to all clients
+	//
+	// Despite the fact that OP_NewSpawn and OP_ZoneSpawns include the
+	// armor being worn and its mats, the client doesn't update the display
+	// on arrival of these packets reliably.
+	//
+	// Send Wear changes if mob is a PC race and item is an armor slot.
+	// The other packets work for primary/secondary.
+
+	if (IsPlayerRace(race))
+	{
+		if (!IsClient())
+		{
+			const Item_Struct *item;
+			for (int i=0; i< 7 ; ++i) 
+			{
+				item=database.GetItem(GetEquipment(i));
+				if (item != 0) 
+				{
+					SendWearChange(i,one_client);
+				}
+			}
+		}
+	}
+}
+
+void Mob::SendWearChange(uint8 material_slot, Client *one_client)
 {
 	EQApplicationPacket* outapp = new EQApplicationPacket(OP_WearChange, sizeof(WearChange_Struct));
 	WearChange_Struct* wc = (WearChange_Struct*)outapp->pBuffer;
@@ -2564,7 +2592,15 @@ void Mob::SendWearChange(uint8 material_slot)
 	wc->color.Color = GetEquipmentColor(material_slot);
 	wc->wear_slot_id = material_slot;
 
-	entity_list.QueueClients(this, outapp);
+	if (!one_client)
+	{
+		entity_list.QueueClients(this, outapp);
+	}
+	else
+	{
+		one_client->QueuePacket(outapp, false, Client::CLIENT_CONNECTED);
+	}	
+
 	safe_delete(outapp);
 }
 

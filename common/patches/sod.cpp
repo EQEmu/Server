@@ -446,7 +446,9 @@ namespace SoD
 		OUT(type);
 		OUT(spellid);
 		OUT(damage);
-		eq->sequence = emu->sequence;
+		OUT(force)
+		OUT(meleepush_xy);
+		OUT(meleepush_z)
 
 		FINISH_ENCODE();
 	}
@@ -3349,7 +3351,7 @@ namespace SoD
 		default:
 			emu->command = eq->command;
 		}
-		OUT(unknown);
+		IN(target);
 
 		FINISH_DIRECT_DECODE();
 	}

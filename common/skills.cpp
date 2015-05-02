@@ -55,3 +55,40 @@ bool EQEmu::IsSpecializedSkill(SkillUseTypes skill)
 		return false;
 	}
 }
+
+float EQEmu::GetSkillMeleePushForce(SkillUseTypes skill)
+{
+	// This is the force/magnitude of the push from an attack of this skill type
+	// You can find these numbers in the clients skill struct
+	switch (skill) {
+	case Skill1HBlunt:
+	case Skill1HSlashing:
+	case SkillHandtoHand:
+	case SkillThrowing:
+		return 0.1f;
+	case Skill2HBlunt:
+	case Skill2HSlashing:
+	case SkillEagleStrike:
+	case SkillKick:
+	case SkillTigerClaw:
+	//case Skill2HPiercing:
+		return 0.2f;
+	case SkillArchery:
+		return 0.15f;
+	case SkillBackstab:
+	case SkillBash:
+		return 0.3f;
+	case SkillDragonPunch:
+	case SkillRoundKick:
+		return 0.25f;
+	case SkillFlyingKick:
+		return 0.4f;
+	case Skill1HPiercing:
+	case SkillFrenzy:
+		return 0.05f;
+	case SkillIntimidation:
+		return 2.5f;
+	default:
+		return 0.0f;
+	}
+}
