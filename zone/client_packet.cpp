@@ -4126,7 +4126,7 @@ void Client::Handle_OP_ClickObject(const EQApplicationPacket *app)
 		char buf[10];
 		snprintf(buf, 9, "%u", click_object->drop_id);
 		buf[9] = '\0';
-		parse->EventPlayer(EVENT_CLICK_OBJECT, this, buf, 0, &args);
+		parse->EventPlayer(EVENT_CLICK_OBJECT, this, buf, GetID(), &args);
 	}
 
 	// Observed in RoF after OP_ClickObjectAction:

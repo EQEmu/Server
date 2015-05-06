@@ -1277,6 +1277,7 @@ void PerlembParser::ExportEventVariables(std::string &package_name, QuestEventID
 
 		case EVENT_PLAYER_PICKUP:{
 			ExportVar(package_name.c_str(), "picked_up_id", data);
+			ExportVar(package_name.c_str(), "picked_up_entity_id", extradata);
 			break;		
 		}
 
@@ -1367,6 +1368,7 @@ void PerlembParser::ExportEventVariables(std::string &package_name, QuestEventID
 
 		case EVENT_CLICK_OBJECT: {
 			ExportVar(package_name.c_str(), "objectid", data);
+			ExportVar(package_name.c_str(), "clicker_id", extradata);
 			break;
 		}
 
