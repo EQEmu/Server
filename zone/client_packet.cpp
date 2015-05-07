@@ -381,6 +381,8 @@ void MapOpcodes()
 	ConnectedOpcodes[OP_VetClaimRequest] = &Client::Handle_OP_VetClaimRequest;
 	ConnectedOpcodes[OP_VoiceMacroIn] = &Client::Handle_OP_VoiceMacroIn;
 	ConnectedOpcodes[OP_WearChange] = &Client::Handle_OP_WearChange;
+	ConnectedOpcodes[OP_WeaponEquip2] = &Client::Handle_OP_WeaponEquip2;
+	ConnectedOpcodes[OP_WeaponUnequip2] = &Client::Handle_OP_WeaponUnequip2;
 	ConnectedOpcodes[OP_WhoAllRequest] = &Client::Handle_OP_WhoAllRequest;
 	ConnectedOpcodes[OP_WorldUnknown001] = &Client::Handle_OP_Ignore;
 	ConnectedOpcodes[OP_XTargetAutoAddHaters] = &Client::Handle_OP_XTargetAutoAddHaters;
@@ -13887,6 +13889,28 @@ void Client::Handle_OP_WearChange(const EQApplicationPacket *app)
 	// we could maybe ignore this and just send our own from moveitem
 	entity_list.QueueClients(this, app, true);
 	return;
+}
+
+void Client::Handle_OP_WeaponEquip2(const EQApplicationPacket *app)
+{
+	if (app->size != 8) {
+		std::cout << "Wrong size: OP_WeaponEquip2, size=" << app->size << ", expected " << 8 << std::endl;
+		return;
+	}
+
+	// We should probably save it server side, but for now this works
+	entity_list.QueueClients(this, app, false);
+}
+
+void Client::Handle_OP_WeaponUnequip2(const EQApplicationPacket *app)
+{
+	if (app->size != 8) {
+		std::cout << "Wrong size: OP_WeaponUnequip2, size=" << app->size << ", expected " << 8 << std::endl;
+		return;
+	}
+
+	// We should probably save it server side, but for now this works
+	entity_list.QueueClients(this, app, false);
 }
 
 void Client::Handle_OP_WhoAllRequest(const EQApplicationPacket *app)

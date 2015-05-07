@@ -288,6 +288,8 @@
 	void Handle_OP_VetClaimRequest(const EQApplicationPacket *app);
 	void Handle_OP_VoiceMacroIn(const EQApplicationPacket *app);
 	void Handle_OP_WearChange(const EQApplicationPacket *app);
+	void Handle_OP_WeaponEquip2(const EQApplicationPacket *app);
+	void Handle_OP_WeaponUnequip2(const EQApplicationPacket *app);
 	void Handle_OP_WhoAllRequest(const EQApplicationPacket *app);
 	void Handle_OP_XTargetAutoAddHaters(const EQApplicationPacket *app);
 	void Handle_OP_XTargetRequest(const EQApplicationPacket *app);
