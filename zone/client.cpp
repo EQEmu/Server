@@ -2540,12 +2540,12 @@ void Client::LogMerchant(Client* player, Mob* merchant, uint32 quantity, uint32 
 
 bool Client::BindWound(Mob* bindmob, bool start, bool fail){
 	EQApplicationPacket* outapp = 0;
-	if(!fail) 
+	if(!fail)
 	{
 		outapp = new EQApplicationPacket(OP_Bind_Wound, sizeof(BindWound_Struct));
 		BindWound_Struct* bind_out = (BindWound_Struct*) outapp->pBuffer;
 		// Start bind
-		if(!bindwound_timer.Enabled()) 
+		if(!bindwound_timer.Enabled())
 		{
 			//make sure we actually have a bandage... and consume it.
 			int16 bslot = m_inv.HasItemByUse(ItemTypeBandage, 1, invWhereWorn|invWherePersonal);
@@ -2592,9 +2592,9 @@ bool Client::BindWound(Mob* bindmob, bool start, bool fail){
 					; // Binding self
 				}
 			}
-		} 
+		}
 		else if (bindwound_timer.Check()) // Did the timer finish?
-		{ 
+		{
 		// finish bind
 			// disable complete timer
 			bindwound_timer.Disable();
@@ -5709,8 +5709,8 @@ void Client::ProcessInspectRequest(Client* requestee, Client* requester) {
 					else if (inst && inst->GetOrnamentationIcon())
 					{
 						insr->itemicons[L] = inst->GetOrnamentationIcon();
-					}					
-					else 
+					}
+					else
 					{
 						insr->itemicons[L] = item->Icon;
 					}
@@ -7612,7 +7612,7 @@ void Client::SetFactionLevel(uint32 char_id, uint32 npc_id, uint8 char_class, ui
 		// Find out starting faction for this faction
 		// It needs to be used to adj max and min personal
 		// The range is still the same, 1200-3000(4200), but adjusted for base
-		database.GetFactionData(&fm, GetClass(), GetRace(), GetDeity(), 
+		database.GetFactionData(&fm, GetClass(), GetRace(), GetDeity(),
 			faction_id[i]);
 
 		// Adjust the amount you can go up or down so the resulting range
@@ -7653,7 +7653,7 @@ void Client::SetFactionLevel2(uint32 char_id, int32 faction_id, uint8 char_class
 		// Find out starting faction for this faction
 		// It needs to be used to adj max and min personal
 		// The range is still the same, 1200-3000(4200), but adjusted for base
-		database.GetFactionData(&fm, GetClass(), GetRace(), GetDeity(), 
+		database.GetFactionData(&fm, GetClass(), GetRace(), GetDeity(),
 			faction_id);
 
 		// Adjust the amount you can go up or down so the resulting range
@@ -7839,14 +7839,14 @@ void Client::SendFactionMessage(int32 tmpvalue, int32 faction_id, int32 faction_
 	char name[50];
 	int32 faction_value;
 
-	// If we're dropping from MAX or raising from MIN or repairing, 
+	// If we're dropping from MAX or raising from MIN or repairing,
 	// we should base the message on the new updated value so we don't show
 	// a min MAX message
 	//
 	// If we're changing any other place, we use the value before the
 	// hit.  For example, if we go from 1199 to 1200 which is the MAX
 	// we still want to say faction got better this time around.
-	
+
 	if ( (faction_before_hit >= this_faction_max) ||
 	     (faction_before_hit <= this_faction_min))
 		faction_value = totalvalue;
@@ -8382,10 +8382,10 @@ std::string Client::TextLink::GenerateLink()
 	m_Link.clear();
 	m_LinkBody.clear();
 	m_LinkText.clear();
-	
+
 	generate_body();
 	generate_text();
-	
+
 	if ((m_LinkBody.length() == EmuConstants::TEXT_LINK_BODY_LENGTH) && (m_LinkText.length() > 0)) {
 		m_Link.push_back(0x12);
 		m_Link.append(m_LinkBody);
@@ -8424,7 +8424,7 @@ void Client::TextLink::generate_body()
 {
 	/*
 	Current server mask: EQClientRoF2
-	
+
 	RoF2: "%1X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%1X" "%04X" "%02X" "%05X" "%08X" (56)
 	RoF:  "%1X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%1X" "%04X" "%1X"  "%05X" "%08X" (55)
 	SoF:  "%1X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X"		"%1X" "%04X" "%1X"  "%05X" "%08X" (50)
@@ -8432,7 +8432,7 @@ void Client::TextLink::generate_body()
 	*/
 
 	memset(&m_LinkBodyStruct, 0, sizeof(TextLinkBody_Struct));
-	
+
 	const Item_Struct* item_data = nullptr;
 
 	switch (m_LinkType) {
@@ -8479,7 +8479,7 @@ void Client::TextLink::generate_body()
 	default:
 		break;
 	}
-	
+
 	if (m_ProxyItemID != NOT_USED) {
 		m_LinkBodyStruct.item_id = m_ProxyItemID;
 	}

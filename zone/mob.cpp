@@ -148,6 +148,7 @@ Mob::Mob(const char* in_name,
 	size		= in_size;
 	base_size	= size;
 	runspeed	= in_runspeed;
+	PlayerState	= 0;
 
 
 	// sanity check
@@ -160,7 +161,7 @@ Mob::Mob(const char* in_name,
 	m_Light.Level.Spell = m_Light.Type.Spell = 0;
 	m_Light.Type.Active = m_Light.Type.Innate;
 	m_Light.Level.Active = m_Light.Level.Innate;
-	
+
 	texture		= in_texture;
 	helmtexture	= in_helmtexture;
 	armtexture = in_armtexture;
@@ -739,7 +740,7 @@ void Mob::CreateSpawnPacket(EQApplicationPacket* app, Mob* ForWho) {
 	NewSpawn_Struct* ns = (NewSpawn_Struct*)app->pBuffer;
 	FillSpawnStruct(ns, ForWho);
 
-	if(strlen(ns->spawn.lastName) == 0) 
+	if(strlen(ns->spawn.lastName) == 0)
 	{
 		switch(ns->spawn.class_)
 		{
@@ -915,6 +916,7 @@ void Mob::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho)
 	ns->spawn.class_	= class_;
 	ns->spawn.gender	= gender;
 	ns->spawn.level		= level;
+	ns->spawn.PlayerState	= PlayerState;
 	ns->spawn.deity		= deity;
 	ns->spawn.animation	= 0;
 	ns->spawn.findable	= findable?1:0;
@@ -2566,10 +2568,10 @@ void Mob::SendArmorAppearance(Client *one_client)
 		if (!IsClient())
 		{
 			const Item_Struct *item;
-			for (int i=0; i< 7 ; ++i) 
+			for (int i=0; i< 7 ; ++i)
 			{
 				item=database.GetItem(GetEquipment(i));
-				if (item != 0) 
+				if (item != 0)
 				{
 					SendWearChange(i,one_client);
 				}
@@ -2597,7 +2599,7 @@ void Mob::SendWearChange(uint8 material_slot, Client *one_client)
 	else
 	{
 		one_client->QueuePacket(outapp, false, Client::CLIENT_CONNECTED);
-	}	
+	}
 
 	safe_delete(outapp);
 }
@@ -2724,7 +2726,7 @@ int32 Mob::GetHerosForgeModel(uint8 material_slot) const
 		const Item_Struct *item;
 		item = database.GetItem(GetEquipment(material_slot));
 		int16 invslot = Inventory::CalcSlotFromMaterial(material_slot);
-		
+
 		if (item != 0 && invslot != INVALID_INDEX)
 		{
 			if (IsClient())
@@ -2982,10 +2984,10 @@ uint32 Mob::GetLevelHP(uint8 tlevel)
 }
 
 int32 Mob::GetActSpellCasttime(uint16 spell_id, int32 casttime) {
-	
+
 	int32 cast_reducer = 0;
 	cast_reducer += GetFocusEffect(focusSpellHaste, spell_id);
-		
+
 	if (level >= 60 && casttime > 1000)
 	{
 		casttime = casttime / 2;
@@ -3599,7 +3601,7 @@ int16 Mob::GetSkillDmgTaken(const SkillUseTypes skill_used)
 	// All skill dmg mod + Skill specific
 	skilldmg_mod += itembonuses.SkillDmgTaken[HIGHEST_SKILL+1] + spellbonuses.SkillDmgTaken[HIGHEST_SKILL+1] +
 					itembonuses.SkillDmgTaken[skill_used] + spellbonuses.SkillDmgTaken[skill_used];
-	
+
 
 	skilldmg_mod += SkillDmgTaken_Mod[skill_used] + SkillDmgTaken_Mod[HIGHEST_SKILL+1];
 
@@ -5317,7 +5319,7 @@ int32 Mob::GetSpellStat(uint32 spell_id, const char *identifier, uint8 slot)
 
 	if (slot < 4){
 		if (id == "components") { return spells[spell_id].components[slot];}
-		else if (id == "component_counts") { return spells[spell_id].component_counts[slot];} 
+		else if (id == "component_counts") { return spells[spell_id].component_counts[slot];}
 		else if (id == "NoexpendReagent") {return spells[spell_id].NoexpendReagent[slot];}
 	}
 
@@ -5395,7 +5397,7 @@ int32 Mob::GetSpellStat(uint32 spell_id, const char *identifier, uint8 slot)
 	else if (id == "max_dist") {return static_cast<int32>(spells[spell_id].max_dist); }
 	else if (id == "min_range") {return static_cast<int32>(spells[spell_id].min_range); }
 	else if (id == "DamageShieldType") {return spells[spell_id].DamageShieldType; }
-	
+
 	return stat;
 }
 
@@ -5415,7 +5417,7 @@ bool Mob::CanClassEquipItem(uint32 item_id)
 
 	int bitmask = 1;
 	bitmask = bitmask << (GetClass() - 1);
-	
+
 	if(!(itm->Classes & bitmask))
 		return false;
 	else

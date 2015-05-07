@@ -305,6 +305,8 @@ void MapOpcodes()
 	ConnectedOpcodes[OP_PetitionRefresh] = &Client::Handle_OP_PetitionRefresh;
 	ConnectedOpcodes[OP_PetitionResolve] = &Client::Handle_OP_PetitionResolve;
 	ConnectedOpcodes[OP_PetitionUnCheckout] = &Client::Handle_OP_PetitionUnCheckout;
+	ConnectedOpcodes[OP_PlayerStateAdd] = &Client::Handle_OP_PlayerStateAdd;
+	ConnectedOpcodes[OP_PlayerStateRemove] = &Client::Handle_OP_PlayerStateRemove;
 	ConnectedOpcodes[OP_PickPocket] = &Client::Handle_OP_PickPocket;
 	ConnectedOpcodes[OP_PopupResponse] = &Client::Handle_OP_PopupResponse;
 	ConnectedOpcodes[OP_PotionBelt] = &Client::Handle_OP_PotionBelt;
@@ -381,8 +383,6 @@ void MapOpcodes()
 	ConnectedOpcodes[OP_VetClaimRequest] = &Client::Handle_OP_VetClaimRequest;
 	ConnectedOpcodes[OP_VoiceMacroIn] = &Client::Handle_OP_VoiceMacroIn;
 	ConnectedOpcodes[OP_WearChange] = &Client::Handle_OP_WearChange;
-	ConnectedOpcodes[OP_WeaponEquip2] = &Client::Handle_OP_WeaponEquip2;
-	ConnectedOpcodes[OP_WeaponUnequip2] = &Client::Handle_OP_WeaponUnequip2;
 	ConnectedOpcodes[OP_WhoAllRequest] = &Client::Handle_OP_WhoAllRequest;
 	ConnectedOpcodes[OP_WorldUnknown001] = &Client::Handle_OP_Ignore;
 	ConnectedOpcodes[OP_XTargetAutoAddHaters] = &Client::Handle_OP_XTargetAutoAddHaters;
@@ -10325,6 +10325,32 @@ void Client::Handle_OP_PetitionUnCheckout(const EQApplicationPacket *app)
 	return;
 }
 
+void Client::Handle_OP_PlayerStateAdd(const EQApplicationPacket *app)
+{
+	if (app->size != sizeof(PlayerState_Struct)) {
+		std::cout << "Wrong size: OP_PlayerStateAdd, size=" << app->size << ", expected " << sizeof(PlayerState_Struct) << std::endl;
+		return;
+	}
+
+	PlayerState_Struct *ps = (PlayerState_Struct *)app->pBuffer;
+	AddPlayerState(ps->state);
+
+	entity_list.QueueClients(this, app, false);
+}
+
+void Client::Handle_OP_PlayerStateRemove(const EQApplicationPacket *app)
+{
+	if (app->size != sizeof(PlayerState_Struct)) {
+		std::cout << "Wrong size: OP_PlayerStateRemove, size=" << app->size << ", expected " << sizeof(PlayerState_Struct) << std::endl;
+		return;
+	}
+	PlayerState_Struct *ps = (PlayerState_Struct *)app->pBuffer;
+	RemovePlayerState(ps->state);
+
+	// We should probably save it server side, but for now this works
+	entity_list.QueueClients(this, app, false);
+}
+
 void Client::Handle_OP_PickPocket(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(PickPocket_Struct))
@@ -13889,28 +13915,6 @@ void Client::Handle_OP_WearChange(const EQApplicationPacket *app)
 	// we could maybe ignore this and just send our own from moveitem
 	entity_list.QueueClients(this, app, true);
 	return;
-}
-
-void Client::Handle_OP_WeaponEquip2(const EQApplicationPacket *app)
-{
-	if (app->size != 8) {
-		std::cout << "Wrong size: OP_WeaponEquip2, size=" << app->size << ", expected " << 8 << std::endl;
-		return;
-	}
-
-	// We should probably save it server side, but for now this works
-	entity_list.QueueClients(this, app, false);
-}
-
-void Client::Handle_OP_WeaponUnequip2(const EQApplicationPacket *app)
-{
-	if (app->size != 8) {
-		std::cout << "Wrong size: OP_WeaponUnequip2, size=" << app->size << ", expected " << 8 << std::endl;
-		return;
-	}
-
-	// We should probably save it server side, but for now this works
-	entity_list.QueueClients(this, app, false);
 }
 
 void Client::Handle_OP_WhoAllRequest(const EQApplicationPacket *app)

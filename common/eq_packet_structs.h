@@ -273,7 +273,8 @@ struct Spawn_Struct {
 /*0146*/ uint8	beard;				// Beard style (not totally, sure but maybe!)
 /*0147*/ uint8	unknown0147[4];
 /*0151*/ uint8	level;				// Spawn Level
-/*0152*/ uint8	unknown0259[4];		// ***Placeholder
+// None = 0, Open = 1, WeaponSheathed = 2, Aggressive = 4, ForcedAggressive = 8, InstrumentEquipped = 16, Stunned = 32, PrimaryWeaponEquipped = 64, SecondaryWeaponEquipped = 128
+/*0152*/ uint32 PlayerState;           // Controls animation stuff
 /*0156*/ uint8	beardcolor;			// Beard color
 /*0157*/ char	suffix[32];			// Player's suffix (of Veeshan, etc.)
 /*0189*/ uint32	petOwnerId;			// If this is a pet, the spawn id of owner
@@ -364,6 +365,11 @@ union
 	uint32 DestructibleUnk9;
 	bool targetable_with_hotkey;
 
+};
+
+struct PlayerState_Struct {
+/*00*/	uint32 spawn_id;
+/*04*/	uint32 state;
 };
 
 /*

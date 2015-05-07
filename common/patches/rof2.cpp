@@ -4140,7 +4140,7 @@ namespace RoF2
 			VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->petOwnerId);
 
 			VARSTRUCT_ENCODE_TYPE(uint8, Buffer, 0); // unknown13
-			VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0); // unknown14 - Stance 64 = normal 4 = aggressive 40 = stun/mezzed
+			VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->PlayerState);
 			VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0); // unknown15
 			VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0); // unknown16
 			VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0); // unknown17

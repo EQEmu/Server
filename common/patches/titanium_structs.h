@@ -212,7 +212,7 @@ struct Spawn_Struct {
 /*0146*/ uint8  beardcolor;     // Beard color
 /*0147*/ uint8 unknown0147[4];
 /*0151*/ uint8  level;          // Spawn Level
-/*0152*/ uint8  unknown0259[4]; // ***Placeholder
+/*0152*/ uint32 PlayerState;    // PlayerState controls some animation stuff
 /*0156*/ uint8  beard;          // Beard style
 /*0157*/ char     suffix[32];     // Player's suffix (of Veeshan, etc.)
 /*0189*/ uint32 petOwnerId;     // If this is a pet, the spawn id of owner

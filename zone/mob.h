@@ -1026,6 +1026,11 @@ protected:
 	uint32 follow_dist;
 	bool no_target_hotkey;
 
+	uint32 PlayerState;
+	uint32 GetPlayerState() { return PlayerState; }
+	void AddPlayerState(uint32 new_state) { PlayerState |= new_state; }
+	void RemovePlayerState(uint32 old_state) { PlayerState &= ~old_state; }
+
 	uint8 gender;
 	uint16 race;
 	uint8 base_gender;
