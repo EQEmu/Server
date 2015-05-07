@@ -2040,12 +2040,10 @@ const int32& Mob::SetMana(int32 amount)
 
 
 void Mob::SetAppearance(EmuAppearance app, bool iIgnoreSelf) {
-	if (_appearance != app) {
-		_appearance = app;
-		SendAppearancePacket(AT_Anim, GetAppearanceValue(app), true, iIgnoreSelf);
-		if (this->IsClient() && this->IsAIControlled())
-			SendAppearancePacket(AT_Anim, ANIM_FREEZE, false, false);
-	}
+	_appearance = app;
+	SendAppearancePacket(AT_Anim, GetAppearanceValue(app), true, iIgnoreSelf);
+	if (this->IsClient() && this->IsAIControlled())
+		SendAppearancePacket(AT_Anim, ANIM_FREEZE, false, false);
 }
 
 bool Mob::UpdateActiveLight()

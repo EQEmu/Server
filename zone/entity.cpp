@@ -619,6 +619,7 @@ void EntityList::AddNPC(NPC *npc, bool SendSpawnPacket, bool dontqueue)
 			npc->CreateSpawnPacket(app, npc);
 			QueueClients(npc, app);
 			npc->SendArmorAppearance();
+			npc->SetAppearance(npc->GetGuardPointAnim(),false);
 			safe_delete(app);
 		} else {
 			NewSpawn_Struct *ns = new NewSpawn_Struct;
@@ -737,6 +738,7 @@ void EntityList::CheckSpawnQueue()
 			auto it = npc_list.find(ns->spawn.spawnId);
 			NPC *pnpc = it->second;
 			pnpc->SendArmorAppearance();
+			pnpc->SetAppearance(pnpc->GetGuardPointAnim(),false);
 			safe_delete(outapp);
 			iterator.RemoveCurrent();
 		}
