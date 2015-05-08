@@ -10335,7 +10335,7 @@ void Client::Handle_OP_PlayerStateAdd(const EQApplicationPacket *app)
 	PlayerState_Struct *ps = (PlayerState_Struct *)app->pBuffer;
 	AddPlayerState(ps->state);
 
-	entity_list.QueueClients(this, app, false);
+	entity_list.QueueClients(this, app, true);
 }
 
 void Client::Handle_OP_PlayerStateRemove(const EQApplicationPacket *app)
@@ -10348,7 +10348,7 @@ void Client::Handle_OP_PlayerStateRemove(const EQApplicationPacket *app)
 	RemovePlayerState(ps->state);
 
 	// We should probably save it server side, but for now this works
-	entity_list.QueueClients(this, app, false);
+	entity_list.QueueClients(this, app, true);
 }
 
 void Client::Handle_OP_PickPocket(const EQApplicationPacket *app)
