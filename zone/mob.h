@@ -1026,10 +1026,12 @@ protected:
 	uint32 follow_dist;
 	bool no_target_hotkey;
 
-	uint32 PlayerState;
-	uint32 GetPlayerState() { return PlayerState; }
-	void AddPlayerState(uint32 new_state) { PlayerState |= new_state; }
-	void RemovePlayerState(uint32 old_state) { PlayerState &= ~old_state; }
+	uint32 m_PlayerState;
+	uint32 GetPlayerState() { return m_PlayerState; }
+	void AddPlayerState(uint32 new_state) { m_PlayerState |= new_state; }
+	void RemovePlayerState(uint32 old_state) { m_PlayerState &= ~old_state; }
+	void SendAddPlayerState(PlayerState new_state);
+	void SendRemovePlayerState(PlayerState old_state);
 
 	uint8 gender;
 	uint16 race;

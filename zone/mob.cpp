@@ -148,7 +148,7 @@ Mob::Mob(const char* in_name,
 	size		= in_size;
 	base_size	= size;
 	runspeed	= in_runspeed;
-	PlayerState	= 0;
+	m_PlayerState	= 0;
 
 
 	// sanity check
@@ -916,7 +916,7 @@ void Mob::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho)
 	ns->spawn.class_	= class_;
 	ns->spawn.gender	= gender;
 	ns->spawn.level		= level;
-	ns->spawn.PlayerState	= PlayerState;
+	ns->spawn.PlayerState	= m_PlayerState;
 	ns->spawn.deity		= deity;
 	ns->spawn.animation	= 0;
 	ns->spawn.findable	= findable?1:0;
@@ -5423,3 +5423,30 @@ bool Mob::CanClassEquipItem(uint32 item_id)
 	else
 		return true;
 }
+
+void Mob::SendAddPlayerState(PlayerState new_state)
+{
+	auto app = new EQApplicationPacket(OP_PlayerStateAdd, sizeof(PlayerState_Struct));
+	auto ps = (PlayerState_Struct *)app->pBuffer;
+
+	ps->spawn_id = GetID();
+	ps->state = static_cast<uint32>(new_state);
+
+	AddPlayerState(ps->state);
+	entity_list.QueueClients(nullptr, app);
+	safe_delete(app);
+}
+
+void Mob::SendRemovePlayerState(PlayerState old_state)
+{
+	auto app = new EQApplicationPacket(OP_PlayerStateRemove, sizeof(PlayerState_Struct));
+	auto ps = (PlayerState_Struct *)app->pBuffer;
+
+	ps->spawn_id = GetID();
+	ps->state = static_cast<uint32>(old_state);
+
+	RemovePlayerState(ps->state);
+	entity_list.QueueClients(nullptr, app);
+	safe_delete(app);
+}
+

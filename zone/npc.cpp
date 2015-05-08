@@ -522,7 +522,7 @@ void NPC::QueryLoot(Client* to)
 		linker.SetItemData(item);
 
 		auto item_link = linker.GenerateLink();
-		
+
 		to->Message(0, "%s, ID: %u, Level: (min: %u, max: %u)", item_link.c_str(), item->ID, (*cur)->min_level, (*cur)->max_level);
 	}
 
@@ -569,8 +569,7 @@ bool NPC::Process()
 {
 	if (IsStunned() && stunned_timer.Check())
 	{
-		this->stunned = false;
-		this->stunned_timer.Disable();
+		Mob::UnStun();
 		this->spun_timer.Disable();
 	}
 
@@ -724,7 +723,7 @@ void NPC::UpdateEquipmentLight()
 {
 	m_Light.Type.Equipment = 0;
 	m_Light.Level.Equipment = 0;
-	
+
 	for (int index = MAIN_BEGIN; index < EmuConstants::EQUIPMENT_SIZE; ++index) {
 		if (index == MainAmmo) { continue; }
 
@@ -1933,7 +1932,7 @@ void NPC::ModifyNPCStat(const char *identifier, const char *newValue)
 	else if(id == "special_attacks") { NPCSpecialAttacks(val.c_str(), 0, 1); return; }
 	else if(id == "special_abilities") { ProcessSpecialAbilities(val.c_str()); return; }
 	else if(id == "attack_speed") { attack_speed = (float)atof(val.c_str()); CalcBonuses(); return; }
-	else if(id == "attack_delay") { attack_delay = atoi(val.c_str()); CalcBonuses(); return; }	
+	else if(id == "attack_delay") { attack_delay = atoi(val.c_str()); CalcBonuses(); return; }
 	else if(id == "atk") { ATK = atoi(val.c_str()); return; }
 	else if(id == "accuracy") { accuracy_rating = atoi(val.c_str()); return; }
 	else if(id == "avoidance") { avoidance_rating = atoi(val.c_str()); return; }
@@ -2418,7 +2417,7 @@ void NPC::DoQuestPause(Mob *other) {
 
 }
 
-void NPC::ChangeLastName(const char* in_lastname) 
+void NPC::ChangeLastName(const char* in_lastname)
 {
 
 	EQApplicationPacket* outapp = new EQApplicationPacket(OP_GMLastName, sizeof(GMLastName_Struct));
@@ -2468,9 +2467,9 @@ void NPC::DepopSwarmPets()
 	}
 
 	if (IsPet() && GetPetType() == petTargetLock && GetPetTargetLockID()){
-			
+
 		Mob *targMob = entity_list.GetMob(GetPetTargetLockID());
-			
+
 		if(!targMob || (targMob && targMob->IsCorpse())){
 			Kill();
 			return;

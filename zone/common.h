@@ -173,6 +173,18 @@ enum class NumHit {		  // Numhits type
 	OffensiveSpellProcs = 11  // Offensive buff procs
 };
 
+enum class PlayerState : uint32 {
+	None = 0,
+	Open = 1,
+	WeaponSheathed = 2,
+	Aggressive = 4,
+	ForcedAggressive = 8,
+	InstrumentEquipped = 16,
+	Stunned = 32,
+	PrimaryWeaponEquipped = 64,
+	SecondaryWeaponEquipped = 128
+};
+
 //this is our internal representation of the BUFF struct, can put whatever we want in it
 struct Buffs_Struct {
 	uint16	spellid;
@@ -438,7 +450,7 @@ struct StatBonuses {
 	int32	ShieldEquipHateMod;					// Hate mod when shield equiped.
 	int32	ShieldEquipDmgMod[2];				// Damage mod when shield equiped. 0 = damage modifier 1 = Unknown
 	bool	TriggerOnValueAmount;				// Triggers off various different conditions, bool to check if client has effect.
-	int8	StunBashChance;						// chance to stun with bash.	
+	int8	StunBashChance;						// chance to stun with bash.
 	int8	IncreaseChanceMemwipe;				// increases chance to memory wipe
 	int8	CriticalMend;						// chance critical monk mend
 	int32	ImprovedReclaimEnergy;				// Modifies amount of mana returned from reclaim energy

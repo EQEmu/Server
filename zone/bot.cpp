@@ -2858,10 +2858,7 @@ void Bot::SaveTimers() {
 bool Bot::Process()
 {
 	if(IsStunned() && stunned_timer.Check())
-	{
-		this->stunned = false;
-		this->stunned_timer.Disable();
-	}
+		Mob::UnStun();
 
 	if(!GetBotOwner())
 		return false;
@@ -11719,11 +11716,11 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 				const char* equipped[EmuConstants::EQUIPMENT_SIZE] = {"Charm", "Left Ear", "Head", "Face", "Right Ear", "Neck", "Shoulders", "Arms", "Back",
 					"Left Wrist", "Right Wrist", "Range", "Hands", "Primary Hand", "Secondary Hand",
 					"Left Finger", "Right Finger", "Chest", "Legs", "Feet", "Waist", "Ammo" };
-				
+
 				const ItemInst* inst = nullptr;
 				const Item_Struct* item = nullptr;
 				bool is2Hweapon = false;
-				
+
 				std::string item_link;
 				Client::TextLink linker;
 				linker.SetLinkType(linker.linkItemInst);
@@ -11753,7 +11750,7 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 
 					// I could not find a difference between the criteria positive code and the criteria negative code..
 					// ..so, I deleted the check (old criteria: i = { MainCharm, MainRange, MainPrimary, MainSecondary, MainAmmo })
-					
+
 					linker.SetItemInst(inst);
 
 					item_link = linker.GenerateLink();

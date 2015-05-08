@@ -10347,7 +10347,6 @@ void Client::Handle_OP_PlayerStateRemove(const EQApplicationPacket *app)
 	PlayerState_Struct *ps = (PlayerState_Struct *)app->pBuffer;
 	RemovePlayerState(ps->state);
 
-	// We should probably save it server side, but for now this works
 	entity_list.QueueClients(this, app, true);
 }
 

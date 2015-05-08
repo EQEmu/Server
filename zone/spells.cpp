@@ -4708,7 +4708,7 @@ void Mob::Stun(int duration)
 	{
 		stunned = true;
 		stunned_timer.Start(duration);
-		SendStunAppearance();
+		SendAddPlayerState(PlayerState::Stunned);
 	}
 }
 
@@ -4716,6 +4716,7 @@ void Mob::UnStun() {
 	if(stunned && stunned_timer.Enabled()) {
 		stunned = false;
 		stunned_timer.Disable();
+		SendRemovePlayerState(PlayerState::Stunned);
 	}
 }
 
@@ -5259,7 +5260,7 @@ void Client::SendBuffDurationPacket(Buffs_Struct &buff)
 	if (IsEffectInSpell(buff.spellid, SE_TotalHP))
 	{
 		// If any of the lower 6 bits are set, the GUI changes MAX_HP AGAIN.
-		// If its set to 0 the effect is cancelled.  
+		// If its set to 0 the effect is cancelled.
 		// 128 seems to work (ie: change only duration).
 		sbf->effect = 128;
 	}

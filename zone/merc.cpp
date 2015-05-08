@@ -1236,10 +1236,7 @@ void Merc::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho) {
 bool Merc::Process()
 {
 	if(IsStunned() && stunned_timer.Check())
-	{
-		this->stunned = false;
-		this->stunned_timer.Disable();
-	}
+		Mob::UnStun();
 
 	if (GetDepop())
 	{
