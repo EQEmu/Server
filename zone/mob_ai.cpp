@@ -1084,6 +1084,8 @@ void Mob::AI_Process() {
 
 	if (engaged)
 	{
+		if (!(m_PlayerState & static_cast<uint32>(PlayerState::Aggressive)))
+			SendAddPlayerState(PlayerState::Aggressive);
 		// we are prevented from getting here if we are blind and don't have a target in range
 		// from above, so no extra blind checks needed
 		if ((IsRooted() && !GetSpecialAbility(IGNORE_ROOT_AGGRO_RULES)) || IsBlind())
@@ -1435,6 +1437,8 @@ void Mob::AI_Process() {
 	}
 	else
 	{
+		if (m_PlayerState & static_cast<uint32>(PlayerState::Aggressive))
+			SendRemovePlayerState(PlayerState::Aggressive);
 		if(AIfeignremember_timer->Check()) {
 			// 6/14/06
 			// Improved Feign Death Memory

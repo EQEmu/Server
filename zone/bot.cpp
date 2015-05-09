@@ -3459,6 +3459,9 @@ void Bot::AI_Process() {
 			return;
 		}
 
+		if (!(m_PlayerState & static_cast<uint32>(PlayerState::Aggressive)))
+			SendAddPlayerState(PlayerState::Aggressive);
+
 		bool atCombatRange = false;
 
 		float meleeDistance = GetMaxMeleeRangeToTarget(GetTarget());
@@ -3716,6 +3719,9 @@ void Bot::AI_Process() {
 	else {
 		// Not engaged in combat
 		SetTarget(0);
+
+		if (m_PlayerState & static_cast<uint32>(PlayerState::Aggressive))
+			SendRemovePlayerState(PlayerState::Aggressive);
 
 		if(!IsMoving() && AIthink_timer->Check() && !spellend_timer.Enabled()) {
 			if(GetBotStance() != BotStancePassive) {
