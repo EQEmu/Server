@@ -2642,7 +2642,7 @@ int CalcBuffDuration_formula(int level, int formula, int duration)
 			return i < duration ? (i < 1 ? 1 : i) : duration;
 
 		case 2:
-			i = (int)ceil(duration / 5.0f * 3);
+			i = (int)ceil(level / 5.0f * 3);
 			return i < duration ? (i < 1 ? 1 : i) : duration;
 
 		case 3:
@@ -2681,13 +2681,15 @@ int CalcBuffDuration_formula(int level, int formula, int duration)
 			return std::min((level + 3) * 30, duration);
 
 		case 12:
-			return duration;
-
+		case 13:
+		case 14:
 		case 15:	// Don't know what the real formula for this should be. Used by Skinspikes potion.
 			return duration;
 
-		case 50:	// lucy says this is unlimited?
-			return 72000;	// 5 days
+		case 50:	// Permanent. Cancelled by casting/combat for perm invis, non-lev zones for lev, curing poison/curse counters, etc.
+			return 72000;	// 5 days until better method to make permanent
+
+		//case 51:	// Permanent. Cancelled when out of range of aura. Placeholder until appropriate duration identified.
 
 		case 3600:
 			return duration ? duration : 3600;
