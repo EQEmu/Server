@@ -2154,24 +2154,24 @@ struct Illusion_Struct_Old {
 // OP_Sound - Size: 68
 struct QuestReward_Struct
 {
-/*000*/ uint32	from_mob;	// ID of mob awarding the client
-/*004*/ uint32	unknown004;
-/*008*/ uint32	unknown008;
-/*012*/ uint32	unknown012;
-/*016*/ uint32	unknown016;
-/*020*/ uint32	unknown020;
-/*024*/ uint32	silver;		// Gives silver to the client
-/*028*/ uint32	gold;		// Gives gold to the client
-/*032*/ uint32	platinum;	// Gives platinum to the client
-/*036*/ uint32	unknown036;
-/*040*/ uint32	unknown040;
-/*044*/ uint32	unknown044;
-/*048*/ uint32	unknown048;
-/*052*/ uint32	unknown052;
-/*056*/ uint32	unknown056;
-/*060*/ uint32	unknown060;
-/*064*/ uint32	unknown064;
-/*068*/
+	/*000*/ uint32	mob_id;	// ID of mob awarding the client
+	/*004*/ uint32	target_id;
+	/*008*/ uint32	exp_reward;
+	/*012*/ uint32	faction;
+	/*016*/ int32	faction_mod;
+	/*020*/ uint32	copper;		// Gives copper to the client
+	/*024*/ uint32	silver;		// Gives silver to the client
+	/*028*/ uint32	gold;		// Gives gold to the client
+	/*032*/ uint32	platinum;	// Gives platinum to the client
+	/*036*/ uint32	item_id;
+	/*040*/ uint32	unknown040;
+	/*044*/ uint32	unknown044;
+	/*048*/ uint32	unknown048;
+	/*052*/ uint32	unknown052;
+	/*056*/ uint32	unknown056;
+	/*060*/ uint32	unknown060;
+	/*064*/ uint32	unknown064;
+	/*068*/
 };
 
 // Size: 8
