@@ -1254,6 +1254,7 @@ public:
 	virtual int32 Tune_GetMeleeMitDmg(Mob* GM, Mob *attacker, int32 damage, int32 minhit, float mit_rating, float atk_rating);
 	int32 GetMeleeDamage(Mob* other, bool GetMinDamage = false);
 
+	void QuestReward(Mob* target, uint32 copper = 0, uint32 silver = 0, uint32 gold = 0, uint32 platinum = 0, uint32 itemid = 0, uint32 exp = 0, uint32 factionid = 0, int32 faction = 0);
 protected:
 	friend class Mob;
 	void CalcItemBonuses(StatBonuses* newbon);

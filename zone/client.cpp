@@ -8584,3 +8584,36 @@ bool Client::TextLink::GenerateLinkBody(std::string& textLinkBody, const TextLin
 	if (textLinkBody.length() != EmuConstants::TEXT_LINK_BODY_LENGTH) { return false; }
 	return true;
 }
+
+void Client::QuestReward(Mob* target, uint32 copper, uint32 silver, uint32 gold, uint32 platinum, uint32 itemid, uint32 exp, uint32 factionid, int32 faction) {
+
+	EQApplicationPacket* outapp = new EQApplicationPacket(OP_Sound, sizeof(QuestReward_Struct));
+	memset(outapp->pBuffer, 0, sizeof(outapp->pBuffer));
+	QuestReward_Struct* qr = (QuestReward_Struct*)outapp->pBuffer;
+
+	qr->mob_id = target->GetID();		// Entity ID for the from mob name
+	qr->target_id = GetID();			// The Client ID (this)
+	qr->copper = copper;
+	qr->silver = silver;
+	qr->gold = gold;
+	qr->platinum = platinum;
+	qr->item_id = itemid;
+	qr->exp_reward = exp;
+	qr->faction = factionid;
+	qr->faction_mod = faction;
+
+	if (copper > 0 || silver > 0 || gold > 0 || platinum > 0)
+		AddMoneyToPP(copper, silver, gold, platinum, false);
+
+	if (itemid > 0)
+		SummonItem(itemid, 0, 0, 0, 0, 0, 0, false, MainPowerSource);
+
+	if (exp > 0)
+		AddEXP(exp);
+
+	if (factionid > 0)
+		SetFactionLevel2(CharacterID(), factionid, GetClass(), GetBaseRace(), GetDeity(), faction, 0);
+
+	QueuePacket(outapp, false, Client::CLIENT_CONNECTED);
+	safe_delete(outapp);
+}

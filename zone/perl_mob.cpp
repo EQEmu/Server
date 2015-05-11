@@ -7027,47 +7027,6 @@ XS(XS_Mob_SendAppearanceEffect)
 	XSRETURN_EMPTY;
 }
 
-XS(XS_Mob_QuestReward); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Mob_QuestReward)
-{
-	dXSARGS;
-	if (items < 1 || items > 5)
-		Perl_croak(aTHX_ "Usage: Mob::QuestReward(THIS, client, silver, gold, platinum)");
-	{
-		Mob *		THIS;
-		Client*		client = nullptr;
-		int32		silver = 0;
-		int32		gold = 0;
-		int32		platinum = 0;
-
-		if (sv_derived_from(ST(0), "Mob")) {
-			IV tmp = SvIV((SV*)SvRV(ST(0)));
-			THIS = INT2PTR(Mob *,tmp);
-		}
-		else
-			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
-		if (items > 1)	{
-			if (sv_derived_from(ST(1), "Client")) {
-				IV tmp = SvIV((SV*)SvRV(ST(1)));
-				client = INT2PTR(Client *,tmp);
-			}
-			else
-				Perl_croak(aTHX_ "client is not of type Client");
-			if(client == nullptr)
-				Perl_croak(aTHX_ "client is nullptr, avoiding crash.");
-		}
-		if (items > 2)	{	silver = (int32)SvIV(ST(2));	}
-		if (items > 3)	{	gold = (int32)SvIV(ST(3));		}
-		if (items > 4)	{	platinum = (int32)SvIV(ST(4));	}
-
-		THIS->QuestReward(client, silver, gold, platinum);
-	}
-	XSRETURN_EMPTY;
-}
-
 XS(XS_Mob_SetFlyMode); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_SetFlyMode)
 {
@@ -8660,7 +8619,6 @@ XS(boot_Mob)
 		newXSproto(strcpy(buf, "SendIllusion"), XS_Mob_SendIllusion, file, "$$;$$$$$$$$$$$$");
 		newXSproto(strcpy(buf, "MakeTempPet"), XS_Mob_MakeTempPet, file, "$$;$$$$");
 		newXSproto(strcpy(buf, "TypesTempPet"), XS_Mob_TypesTempPet, file, "$$;$$$$$");
-		newXSproto(strcpy(buf, "QuestReward"), XS_Mob_QuestReward, file, "$$;$$$");
 		newXSproto(strcpy(buf, "CameraEffect"), XS_Mob_CameraEffect, file, "$$;$$$");
 		newXSproto(strcpy(buf, "SpellEffect"), XS_Mob_SpellEffect, file, "$$;$$$$$$");
 		newXSproto(strcpy(buf, "TempName"), XS_Mob_TempName, file, "$:$");

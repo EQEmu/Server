@@ -1910,22 +1910,6 @@ void Mob::SendTargetable(bool on, Client *specific_target) {
 	safe_delete(outapp);
 }
 
-void Mob::QuestReward(Client *c, uint32 silver, uint32 gold, uint32 platinum) {
-
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_Sound, sizeof(QuestReward_Struct));
-	QuestReward_Struct* qr = (QuestReward_Struct*) outapp->pBuffer;
-
-	qr->from_mob = GetID();		// Entity ID for the from mob name
-	qr->silver = silver;
-	qr->gold = gold;
-	qr->platinum = platinum;
-
-	if(c)
-		c->QueuePacket(outapp, false, Client::CLIENT_CONNECTED);
-
-	safe_delete(outapp);
-}
-
 void Mob::CameraEffect(uint32 duration, uint32 intensity, Client *c, bool global) {
 
 
