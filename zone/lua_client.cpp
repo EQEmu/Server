@@ -1290,9 +1290,9 @@ void Lua_Client::QuestReward(Lua_Mob target, uint32 copper, uint32 silver, uint3
 	self->QuestReward(target, copper, silver, gold, platinum, itemid, exp);
 }
 
-void Lua_Client::QuestReward(Lua_Mob target, uint32 copper, uint32 silver, uint32 gold, uint32 platinum, uint32 itemid, uint32 exp, uint32 factionid, int32 faction) {
+void Lua_Client::QuestReward(Lua_Mob target, uint32 copper, uint32 silver, uint32 gold, uint32 platinum, uint32 itemid, uint32 exp, bool faction) {
 	Lua_Safe_Call_Void();
-	self->QuestReward(target, copper, silver, gold, platinum, itemid, exp, factionid, faction);
+	self->QuestReward(target, copper, silver, gold, platinum, itemid, exp, faction);
 }
 
 luabind::scope lua_register_client() {
@@ -1552,7 +1552,7 @@ luabind::scope lua_register_client() {
 		.def("QuestReward", (void(Lua_Client::*)(Lua_Mob, uint32, uint32, uint32, uint32))&Lua_Client::QuestReward)
 		.def("QuestReward", (void(Lua_Client::*)(Lua_Mob, uint32, uint32, uint32, uint32, uint32))&Lua_Client::QuestReward)
 		.def("QuestReward", (void(Lua_Client::*)(Lua_Mob, uint32, uint32, uint32, uint32, uint32, uint32))&Lua_Client::QuestReward)
-		.def("QuestReward", (void(Lua_Client::*)(Lua_Mob, uint32, uint32, uint32, uint32, uint32, uint32, uint32, int32))&Lua_Client::QuestReward);
+		.def("QuestReward", (void(Lua_Client::*)(Lua_Mob, uint32, uint32, uint32, uint32, uint32, uint32, bool))&Lua_Client::QuestReward);
 }
 
 luabind::scope lua_register_inventory_where() {

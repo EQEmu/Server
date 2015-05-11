@@ -7588,7 +7588,7 @@ FACTION_VALUE Client::GetFactionLevel(uint32 char_id, uint32 npc_id, uint32 p_ra
 }
 
 //Sets the characters faction standing with the specified NPC.
-void Client::SetFactionLevel(uint32 char_id, uint32 npc_id, uint8 char_class, uint8 char_race, uint8 char_deity)
+void Client::SetFactionLevel(uint32 char_id, uint32 npc_id, uint8 char_class, uint8 char_race, uint8 char_deity, bool quest)
 {
 	int32 faction_id[MAX_NPC_FACTIONS] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 	int32 npc_value[MAX_NPC_FACTIONS] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
@@ -7614,6 +7614,15 @@ void Client::SetFactionLevel(uint32 char_id, uint32 npc_id, uint8 char_class, ui
 		// The range is still the same, 1200-3000(4200), but adjusted for base
 		database.GetFactionData(&fm, GetClass(), GetRace(), GetDeity(),
 			faction_id[i]);
+
+		if (quest)
+		{
+			//The ole switcheroo
+			if (npc_value[i] > 0)
+				npc_value[i] = -abs(npc_value[i]);
+			else if (npc_value[i] < 0)
+				npc_value[i] = abs(npc_value[i]);
+		}
 
 		// Adjust the amount you can go up or down so the resulting range
 		// is PERSONAL_MAX - PERSONAL_MIN
@@ -8585,7 +8594,7 @@ bool Client::TextLink::GenerateLinkBody(std::string& textLinkBody, const TextLin
 	return true;
 }
 
-void Client::QuestReward(Mob* target, uint32 copper, uint32 silver, uint32 gold, uint32 platinum, uint32 itemid, uint32 exp, uint32 factionid, int32 faction) {
+void Client::QuestReward(Mob* target, uint32 copper, uint32 silver, uint32 gold, uint32 platinum, uint32 itemid, uint32 exp, bool faction) {
 
 	EQApplicationPacket* outapp = new EQApplicationPacket(OP_Sound, sizeof(QuestReward_Struct));
 	memset(outapp->pBuffer, 0, sizeof(outapp->pBuffer));
@@ -8599,8 +8608,6 @@ void Client::QuestReward(Mob* target, uint32 copper, uint32 silver, uint32 gold,
 	qr->platinum = platinum;
 	qr->item_id = itemid;
 	qr->exp_reward = exp;
-	qr->faction = factionid;
-	qr->faction_mod = faction;
 
 	if (copper > 0 || silver > 0 || gold > 0 || platinum > 0)
 		AddMoneyToPP(copper, silver, gold, platinum, false);
@@ -8608,11 +8615,19 @@ void Client::QuestReward(Mob* target, uint32 copper, uint32 silver, uint32 gold,
 	if (itemid > 0)
 		SummonItem(itemid, 0, 0, 0, 0, 0, 0, false, MainPowerSource);
 
+	if (faction)
+	{
+		if (target->IsNPC())
+		{
+			int32 nfl_id = target->CastToNPC()->GetNPCFactionID();
+			SetFactionLevel(CharacterID(), nfl_id, GetBaseClass(), GetBaseRace(), GetDeity(), true);
+			qr->faction = target->CastToNPC()->GetPrimaryFaction();
+			qr->faction_mod = 1; // Too lazy to get real value, not sure if this is even used by client anyhow.
+		}
+	}
+
 	if (exp > 0)
 		AddEXP(exp);
-
-	if (factionid > 0)
-		SetFactionLevel2(CharacterID(), factionid, GetClass(), GetBaseRace(), GetDeity(), faction, 0);
 
 	QueuePacket(outapp, false, Client::CLIENT_CONNECTED);
 	safe_delete(outapp);
