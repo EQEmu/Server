@@ -64,7 +64,7 @@ Map::~Map() {
 
 float Map::FindBestZ(glm::vec3 &start, glm::vec3 *result) const {
 	if (!imp)
-		return false;
+		return BEST_Z_INVALID;
 
 	glm::vec3 tmp;
 	if(!result)
@@ -91,6 +91,41 @@ float Map::FindBestZ(glm::vec3 &start, glm::vec3 *result) const {
 	}
 	
 	return BEST_Z_INVALID;
+}
+
+float Map::FindClosestZ(glm::vec3 &start, glm::vec3 *result) const {
+	// Unlike FindBestZ, this method finds the closest Z value above or below the specified point.
+	//
+	if (!imp)
+		return false;
+	
+	float ClosestZ = BEST_Z_INVALID;
+	
+	glm::vec3 tmp;
+	if (!result)
+		result = &tmp;
+	
+	glm::vec3 from(start.x, start.y, start.z);
+	glm::vec3 to(start.x, start.y, BEST_Z_INVALID);
+	float hit_distance;
+	bool hit = false;
+	
+	// first check is below us
+	hit = imp->rm->raycast((const RmReal*)&from, (const RmReal*)&to, (RmReal*)result, nullptr, &hit_distance);
+	if (hit) {
+		ClosestZ = result->z;
+		
+	}
+	
+	// Find nearest Z above us
+	to.z = -BEST_Z_INVALID;
+	hit = imp->rm->raycast((const RmReal*)&from, (const RmReal*)&to, (RmReal*)result, nullptr, &hit_distance);
+	if (hit) {
+		if (abs(from.z - result->z) < abs(ClosestZ - from.z))
+			return result->z;
+	}
+
+	return ClosestZ;
 }
 
 bool Map::LineIntersectsZone(glm::vec3 start, glm::vec3 end, float step, glm::vec3 *result) const {
