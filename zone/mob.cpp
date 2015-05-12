@@ -1201,6 +1201,7 @@ void Mob::SendPosition()
 	PlayerPositionUpdateServer_Struct* spu = (PlayerPositionUpdateServer_Struct*)app->pBuffer;
 	MakeSpawnUpdateNoDelta(spu);
 	move_tic_count = 0;
+	tar_ndx = 20;
 	entity_list.QueueClients(this, app, true);
 	safe_delete(app);
 }
