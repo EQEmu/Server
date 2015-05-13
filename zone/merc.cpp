@@ -4400,7 +4400,7 @@ void Merc::DoClassAttacks(Mob *target) {
 				if(level >= RuleI(Combat, NPCBashKickLevel)){
 					if(zone->random.Int(0, 100) > 25) //tested on live, warrior mobs both kick and bash, kick about 75% of the time, casting doesn't seem to make a difference.
 					{
-						DoAnim(animKick);
+						DoAnim(Animation::Kick);
 						int32 dmg = 0;
 
 						if(GetWeaponDamage(target, (const Item_Struct*)nullptr) <= 0){
@@ -4422,7 +4422,7 @@ void Merc::DoClassAttacks(Mob *target) {
 					}
 					else
 					{
-						DoAnim(animTailRake);
+						DoAnim(Animation::Slam);
 						int32 dmg = 0;
 
 						if(GetWeaponDamage(target, (const Item_Struct*)nullptr) <= 0){

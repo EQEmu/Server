@@ -4872,6 +4872,8 @@ void command_manaburn(Client *c, const Seperator *sep)
 
 void command_doanim(Client *c, const Seperator *sep)
 {
+	Animation animation = static_cast<Animation>(atoi(sep->arg[1]));
+
 	if (!sep->IsNumber(1))
 		c->Message(0, "Usage: #DoAnim [number]");
 	else
@@ -4879,9 +4881,9 @@ void command_doanim(Client *c, const Seperator *sep)
 			if (c->GetTarget() == 0)
 				c->Message(0, "Error: You need a target.");
 			else
-				c->GetTarget()->DoAnim(atoi(sep->arg[1]),atoi(sep->arg[2]));
+				c->GetTarget()->DoAnim(animation, atoi(sep->arg[2]));
 		else
-			c->DoAnim(atoi(sep->arg[1]),atoi(sep->arg[2]));
+			c->DoAnim(animation, atoi(sep->arg[2]));
 }
 
 void command_randomfeatures(Client *c, const Seperator *sep)

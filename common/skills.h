@@ -107,7 +107,8 @@ enum SkillUseTypes
 /*13922*/	SkillIntimidation,
 /*13869*/	SkillBerserking,
 /*13902*/	SkillTaunt,
-/*05837*/	SkillFrenzy,					// This appears to be the only listed one not grouped with the others
+/*05837*/	SkillFrenzy,	
+/*05520*/	Skill2HPiercing,				// This appears to be the only listed one not grouped with the others
 /*00000*/	_EmuSkillCount					// move to last position of active enumeration labels
 
 // SoF+ specific skills

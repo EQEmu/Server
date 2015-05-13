@@ -492,25 +492,87 @@ typedef struct
 	float speed_mod;
 } tProjatk;
 
-//eventually turn this into a typedef and
-//make DoAnim take it instead of int, to enforce its use.
-enum {	//type arguments to DoAnim
-	animKick				= 1,
-	animPiercing			= 2,	//might be piercing?
-	anim2HSlashing			= 3,
-	anim2HWeapon			= 4,
-	anim1HWeapon			= 5,
-	animDualWield			= 6,
-	animTailRake			= 7,	//slam & Dpunch too
-	animHand2Hand			= 8,
-	animShootBow			= 9,
-	animRoundKick			= 11,
-	animSwarmAttack			= 20,	//dunno about this one..
-	animFlyingKick			= 45,
-	animTigerClaw			= 46,
-	animEagleStrike			= 47,
+typedef enum : uint16 {	//type arguments to DoAnim
+	None,											 // 0 jesus arms
+	Kick,
+	Piercing,	//might be piercing?
+	Slashing2H,
+	Weapon2H,
+	Weapon1H,
+	DualWield,
+	Slam,		//slam & Dpunch too
+	Hand2Hand,
+	ShootBow,
+	Unknown10,	// 10 nothing
+	RoundKick,
+	Unknown12,	// 12 nothing
+	Unknown13,	// 13 nothing
+	Falling,
+	Drowning,
+	FeignDeath,
+	Walk,
+	Slippery,
+	ForwardJump,
+	JumpStright, //20
+	Fall,
+	DuckWalk,
+	LadderUp,
+	Duck,
+	SwimStill, // or burn
+	LookAround,
+	RightOn,
+	Shy,
+	Wave,
+	Rude, //30
+	Yawn,
+	Unknown32,
+	Sit,
+	LeftTurn,
+	RightTurn,
+	Kneel,
+	SwimMove,
+	Unknown38,
+	Unknown39,
+	Unknown40, //40
+	Unknown41,
+	BuffCast,
+	HealCast,
+	DamageCast,
+	FlyingKick,
+	TigerClaw,
+	EagleStrike,
+	Unknown48,
+	HeadMoveback,
+	Pleed, //50
+	Clap,
+	Laugh,
+	Time,
+	LaughAt,
+	Cough,
+	WeirdDance,
+	HeadSideways,
+	Dance,
+	DontKnow,
+	Stuborne, // 60
+	Blow,
+	LaughHard,
+	Point,
+	Shrug,
+	PickMe,
+	Salute,
+	Ouch,
+	FootTap,
+	WaistBow,
+	Unknown71,
+	LookAroundIdle,
+	Unknown73,
+	Mounted,
+	Unknown75,
+	Unknown76,
+	FiddleWeapon,
+	MountedFall
+} Animation;
 
-};
 
 
 typedef enum {
