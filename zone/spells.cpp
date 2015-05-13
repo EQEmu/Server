@@ -1939,6 +1939,12 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, uint16 slot, uint16 
 		}
 	}
 
+	if (IsClient() && CastToClient()->GetGM()){
+		if (zone->IsSpellBlocked(spell_id, glm::vec3(GetPosition()))){
+			Message(15, "GM Cast Blocked Spell: %s (ID %i)", GetSpellName(spell_id), spell_id);
+		}
+	}
+
 	if
 	(
 		this->IsClient() &&
