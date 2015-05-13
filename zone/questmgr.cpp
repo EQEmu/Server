@@ -1144,7 +1144,7 @@ void QuestManager::movegrp(int zoneid, float x, float y, float z) {
 
 void QuestManager::doanim(int anim_id) {
 	QuestManagerCurrentQuestVars();
-	owner->DoAnim(anim_id);
+	owner->DoAnim(static_cast<Animation>(anim_id));
 }
 
 void QuestManager::addskill(int skill_id, int value) {
