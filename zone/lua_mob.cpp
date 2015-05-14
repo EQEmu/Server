@@ -238,22 +238,26 @@ void Lua_Mob::SetHP(int hp) {
 
 void Lua_Mob::DoAnim(int anim_num) {
 	Lua_Safe_Call_Void();
-	self->DoAnim(anim_num);
+	Animation animation = static_cast<Animation>(anim_num);
+	self->DoAnim(animation);
 }
 
 void Lua_Mob::DoAnim(int anim_num, int type) {
 	Lua_Safe_Call_Void();
-	self->DoAnim(anim_num, type);
+	Animation animation = static_cast<Animation>(anim_num);
+	self->DoAnim(animation, type);
 }
 
 void Lua_Mob::DoAnim(int anim_num, int type, bool ackreq) {
 	Lua_Safe_Call_Void();
-	self->DoAnim(anim_num, type, ackreq);
+	Animation animation = static_cast<Animation>(anim_num);
+	self->DoAnim(animation, type, ackreq);
 }
 
 void Lua_Mob::DoAnim(int anim_num, int type, bool ackreq, int filter) {
 	Lua_Safe_Call_Void();
-	self->DoAnim(anim_num, type, ackreq, static_cast<eqFilterType>(filter));
+	Animation animation = static_cast<Animation>(anim_num);
+	self->DoAnim(animation, type, ackreq, static_cast<eqFilterType>(filter));
 }
 
 void Lua_Mob::ChangeSize(double in_size) {

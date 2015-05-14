@@ -53,7 +53,7 @@ extern Zone* zone;
 bool Mob::AttackAnimation(SkillUseTypes &skillinuse, int Hand, const ItemInst* weapon)
 {
 	// Determine animation
-	int type = 0;
+	Animation type = Animation::None;
 	if (weapon && weapon->IsType(ItemClassCommon)) {
 		const Item_Struct* item = weapon->GetItem();
 
@@ -64,49 +64,49 @@ bool Mob::AttackAnimation(SkillUseTypes &skillinuse, int Hand, const ItemInst* w
 			case ItemType1HSlash: // 1H Slashing
 			{
 				skillinuse = Skill1HSlashing;
-				type = anim1HWeapon;
+				type = Animation::Weapon1H;
 				break;
 			}
 			case ItemType2HSlash: // 2H Slashing
 			{
 				skillinuse = Skill2HSlashing;
-				type = anim2HSlashing;
+				type = Animation::Slashing2H;
 				break;
 			}
 			case ItemType1HPiercing: // Piercing
 			{
 				skillinuse = Skill1HPiercing;
-				type = animPiercing;
+				type = Animation::Piercing;
 				break;
 			}
 			case ItemType1HBlunt: // 1H Blunt
 			{
 				skillinuse = Skill1HBlunt;
-				type = anim1HWeapon;
+				type = Animation::Weapon1H;
 				break;
 			}
 			case ItemType2HBlunt: // 2H Blunt
 			{
 				skillinuse = Skill2HBlunt;
-				type = anim2HSlashing; //anim2HWeapon
+				type = Animation::Slashing2H; //anim2HWeapon
 				break;
 			}
 			case ItemType2HPiercing: // 2H Piercing
 			{
 				skillinuse = Skill1HPiercing; // change to Skill2HPiercing once activated
-				type = anim2HWeapon;
+				type = Animation::Weapon2H;
 				break;
 			}
 			case ItemTypeMartial:
 			{
 				skillinuse = SkillHandtoHand;
-				type = animHand2Hand;
+				type = Animation::Hand2Hand;
 				break;
 			}
 			default:
 			{
 				skillinuse = SkillHandtoHand;
-				type = animHand2Hand;
+				type = Animation::Hand2Hand;
 				break;
 			}
 		}// switch
@@ -117,54 +117,54 @@ bool Mob::AttackAnimation(SkillUseTypes &skillinuse, int Hand, const ItemInst* w
 		{
 			case Skill1HSlashing: // 1H Slashing
 			{
-				type = anim1HWeapon;
+				type = Animation::Weapon1H;
 				break;
 			}
 			case Skill2HSlashing: // 2H Slashing
 			{
-				type = anim2HSlashing;
+				type = Animation::Slashing2H;
 				break;
 			}
 			case Skill1HPiercing: // Piercing
 			{
-				type = animPiercing;
+				type = Animation::Piercing;
 				break;
 			}
 			case Skill1HBlunt: // 1H Blunt
 			{
-				type = anim1HWeapon;
+				type = Animation::Weapon1H;
 				break;
 			}
 			case Skill2HBlunt: // 2H Blunt
 			{
-				type = anim2HSlashing; //anim2HWeapon
+				type = Animation::Slashing2H; //anim2HWeapon
 				break;
 			}
 			case 99: // 2H Piercing // change to Skill2HPiercing once activated
 			{
-				type = anim2HWeapon;
+				type = Animation::Weapon2H;
 				break;
 			}
 			case SkillHandtoHand:
 			{
-				type = animHand2Hand;
+				type = Animation::Hand2Hand;
 				break;
 			}
 			default:
 			{
-				type = animHand2Hand;
+				type = Animation::Hand2Hand;
 				break;
 			}
 		}// switch
 	}
 	else {
 		skillinuse = SkillHandtoHand;
-		type = animHand2Hand;
+		type = Animation::Hand2Hand;
 	}
 
 	// If we're attacking with the secondary hand, play the dual wield anim
 	if (Hand == MainSecondary)	// DW anim
-		type = animDualWield;
+		type = Animation::DualWield;
 
 	DoAnim(type);
 	return true;
