@@ -736,9 +736,15 @@ void EntityList::CheckSpawnQueue()
 			Mob::CreateSpawnPacket(outapp, ns);
 			QueueClients(0, outapp);
 			auto it = npc_list.find(ns->spawn.spawnId);
-			NPC *pnpc = it->second;
-			pnpc->SendArmorAppearance();
-			pnpc->SetAppearance(pnpc->GetGuardPointAnim(),false);
+			if (it == npc_list.end()) {
+				// We must of despawned, hope that's the reason!
+				Log.Out(Logs::General, Logs::Error, "Error in EntityList::CheckSpawnQueue: Unable to find NPC for spawnId '%u'", ns->spawn.spawnId);
+			}
+			else {
+				NPC *pnpc = it->second;
+				pnpc->SendArmorAppearance();
+				pnpc->SetAppearance(pnpc->GetGuardPointAnim(), false);
+			}
 			safe_delete(outapp);
 			iterator.RemoveCurrent();
 		}
