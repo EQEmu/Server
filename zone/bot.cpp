@@ -7908,7 +7908,7 @@ void Bot::RogueBackstab(Mob* other, bool min_damage, int ReuseTime)
 	}
 
 	DoSpecialAttackDamage(other, SkillBackstab, ndamage, min_hit, hate, ReuseTime);
-	DoAnim(animPiercing);
+	DoAnim(Animation::Piercing);
 }
 
 void Bot::RogueAssassinate(Mob* other)
@@ -7923,7 +7923,7 @@ void Bot::RogueAssassinate(Mob* other)
 		}
 	}
 
-	DoAnim(animPiercing);	//piercing animation
+	DoAnim(Animation::Piercing);	//piercing animation
 }
 
 void Bot::DoClassAttacks(Mob *target, bool IsRiposte) {
@@ -8072,7 +8072,7 @@ void Bot::DoClassAttacks(Mob *target, bool IsRiposte) {
 	{
 		if (target!=this)
 		{
-			DoAnim(animTailRake);
+			DoAnim(Animation::Slam);
 
 			if(GetWeaponDamage(target, GetBotItem(MainSecondary)) <= 0 &&
 				GetWeaponDamage(target, GetBotItem(MainShoulders)) <= 0){
@@ -8115,7 +8115,7 @@ void Bot::DoClassAttacks(Mob *target, bool IsRiposte) {
 
 		int32 max_dmg = (26 + ((((GetLevel()-6) * 2)*skillmod)/100)) * ((100+RuleI(Combat, FrenzyBonus))/100);
 		int32 min_dmg = 0;
-		DoAnim(anim2HSlashing);
+		DoAnim(Animation::Slashing2H);
 
 		if (GetLevel() < 51)
 			min_dmg = 1;
@@ -8148,7 +8148,7 @@ void Bot::DoClassAttacks(Mob *target, bool IsRiposte) {
 	{
 		if(target!=this)
 		{
-			DoAnim(animKick);
+			DoAnim(Animation::Kick);
 
 			if(GetWeaponDamage(target, GetBotItem(MainFeet)) <= 0){
 				dmg = -5;

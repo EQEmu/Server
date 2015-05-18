@@ -242,7 +242,7 @@ void Client::OPCombatAbility(const EQApplicationPacket *app) {
 		if (GetTarget() != this) {
 
 			CheckIncreaseSkill(SkillBash, GetTarget(), 10);
-			DoAnim(animTailRake);
+			DoAnim(Animation::Slam);
 
 			int32 ht = 0;
 			if(GetWeaponDamage(GetTarget(), GetInv().GetItem(MainSecondary)) <= 0 &&
@@ -280,7 +280,7 @@ void Client::OPCombatAbility(const EQApplicationPacket *app) {
 		int skillmod = 100*GetSkill(SkillFrenzy)/MaxSkill(SkillFrenzy);
 		int32 max_dmg = (26 + ((((GetLevel()-6) * 2)*skillmod)/100)) * ((100+RuleI(Combat, FrenzyBonus))/100);
 		int32 min_dmg = 0;
-		DoAnim(anim2HSlashing);
+		DoAnim(Animation::Slashing2H);
 
 		max_dmg = mod_frenzy_damage(max_dmg);
 
@@ -319,7 +319,7 @@ void Client::OPCombatAbility(const EQApplicationPacket *app) {
 			}
 			if (GetTarget() != this) {
 				CheckIncreaseSkill(SkillKick, GetTarget(), 10);
-				DoAnim(animKick);
+				DoAnim(Animation::Kick);
 
 				int32 ht = 0;
 				if(GetWeaponDamage(GetTarget(), GetInv().GetItem(MainFeet)) <= 0){
@@ -413,7 +413,7 @@ int Mob::MonkSpecialAttack(Mob* other, uint8 unchecked_type)
 			max_dmg = ((GetSTR()+GetSkill(skill_type)) * RuleI(Combat, FlyingKickBonus) / 100) + 35;
 			min_dmg = ((level*8)/10);
 			ApplySpecialAttackMod(skill_type, max_dmg, min_dmg);
-			DoAnim(animFlyingKick);
+			DoAnim(Animation::FlyingKick);
 			reuse = FlyingKickReuseTime;
 			break;
 		}
@@ -422,7 +422,7 @@ int Mob::MonkSpecialAttack(Mob* other, uint8 unchecked_type)
 			max_dmg = ((GetSTR()+GetSkill(skill_type)) * RuleI(Combat, DragonPunchBonus) / 100) + 26;
 			itemslot = MainHands;
 			ApplySpecialAttackMod(skill_type, max_dmg, min_dmg);
-			DoAnim(animTailRake);
+			DoAnim(Animation::Slam);
 			reuse = TailRakeReuseTime;
 			break;
 		}
@@ -432,7 +432,7 @@ int Mob::MonkSpecialAttack(Mob* other, uint8 unchecked_type)
 			max_dmg = ((GetSTR()+GetSkill(skill_type)) * RuleI(Combat, EagleStrikeBonus) / 100) + 19;
 			itemslot = MainHands;
 			ApplySpecialAttackMod(skill_type, max_dmg, min_dmg);
-			DoAnim(animEagleStrike);
+			DoAnim(Animation::EagleStrike);
 			reuse = EagleStrikeReuseTime;
 			break;
 		}
@@ -442,7 +442,7 @@ int Mob::MonkSpecialAttack(Mob* other, uint8 unchecked_type)
 			max_dmg = ((GetSTR()+GetSkill(skill_type)) * RuleI(Combat, TigerClawBonus) / 100) + 12;
 			itemslot = MainHands;
 			ApplySpecialAttackMod(skill_type, max_dmg, min_dmg);
-			DoAnim(animTigerClaw);
+			DoAnim(Animation::TigerClaw);
 			reuse = TigerClawReuseTime;
 			break;
 		}
@@ -451,7 +451,7 @@ int Mob::MonkSpecialAttack(Mob* other, uint8 unchecked_type)
 			skill_type = SkillRoundKick;
 			max_dmg = ((GetSTR()+GetSkill(skill_type)) * RuleI(Combat, RoundKickBonus) / 100) + 10;
 			ApplySpecialAttackMod(skill_type, max_dmg, min_dmg);
-			DoAnim(animRoundKick);
+			DoAnim(Animation::RoundKick);
 			reuse = RoundKickReuseTime;
 			break;
 		}
@@ -459,7 +459,7 @@ int Mob::MonkSpecialAttack(Mob* other, uint8 unchecked_type)
 		case SkillKick:{
 			skill_type = SkillKick;
 			max_dmg = GetKickDamage();
-			DoAnim(animKick);
+			DoAnim(Animation::Kick);
 			reuse = KickReuseTime;
 			break;
 		}
@@ -660,7 +660,7 @@ void Mob::RogueBackstab(Mob* other, bool min_damage, int ReuseTime)
 	}
 
 	DoSpecialAttackDamage(other, SkillBackstab, ndamage, min_hit, hate, ReuseTime, false, false);
-	DoAnim(animPiercing);
+	DoAnim(Animation::Piercing);
 }
 
 // assassinate [No longer used for regular assassinate 6-29-14]
@@ -673,7 +673,7 @@ void Mob::RogueAssassinate(Mob* other)
 	}else{
 		other->Damage(this, -5, SPELL_UNKNOWN, SkillBackstab);
 	}
-	DoAnim(animPiercing);	//piercing animation
+	DoAnim(Animation::Piercing);	//piercing animation
 }
 
 void Client::RangedAttack(Mob* other, bool CanDoubleAttack) {
@@ -1762,7 +1762,7 @@ void NPC::DoClassAttacks(Mob *target) {
 		case WARRIOR: case WARRIORGM:{
 			if(level >= RuleI(Combat, NPCBashKickLevel)){
 				if(zone->random.Roll(75)) { //tested on live, warrior mobs both kick and bash, kick about 75% of the time, casting doesn't seem to make a difference.
-					DoAnim(animKick);
+					DoAnim(Animation::Kick);
 					int32 dmg = 0;
 
 					if(GetWeaponDamage(target, (const Item_Struct*)nullptr) <= 0){
@@ -1783,7 +1783,7 @@ void NPC::DoClassAttacks(Mob *target) {
 					did_attack = true;
 				}
 				else {
-					DoAnim(animTailRake);
+					DoAnim(Animation::Slam);
 					int32 dmg = 0;
 
 					if(GetWeaponDamage(target, (const Item_Struct*)nullptr) <= 0){
@@ -1809,7 +1809,7 @@ void NPC::DoClassAttacks(Mob *target) {
 			int AtkRounds = 3;
 			int32 max_dmg = 26 + ((GetLevel()-6) * 2);
 			int32 min_dmg = 0;
-			DoAnim(anim2HSlashing);
+			DoAnim(Animation::Slashing2H);
 
 			if (GetLevel() < 51)
 				min_dmg = 1;
@@ -1836,7 +1836,7 @@ void NPC::DoClassAttacks(Mob *target) {
 		case BEASTLORD: case BEASTLORDGM: {
 			//kick
 			if(level >= RuleI(Combat, NPCBashKickLevel)){
-				DoAnim(animKick);
+				DoAnim(Animation::Kick);
 				int32 dmg = 0;
 
 				if(GetWeaponDamage(target, (const Item_Struct*)nullptr) <= 0){
@@ -1861,7 +1861,7 @@ void NPC::DoClassAttacks(Mob *target) {
 		case SHADOWKNIGHT: case SHADOWKNIGHTGM:
 		case PALADIN: case PALADINGM:{
 			if(level >= RuleI(Combat, NPCBashKickLevel)){
-				DoAnim(animTailRake);
+				DoAnim(Animation::Slam);
 				int32 dmg = 0;
 
 				if(GetWeaponDamage(target, (const Item_Struct*)nullptr) <= 0){
@@ -1968,7 +1968,7 @@ void Client::DoClassAttacks(Mob *ca_target, uint16 skill, bool IsRiposte)
 
 	if(skill_to_use == SkillBash) {
 		if (ca_target!=this) {
-			DoAnim(animTailRake);
+			DoAnim(Animation::Slam);
 
 			if(GetWeaponDamage(ca_target, GetInv().GetItem(MainSecondary)) <= 0 && GetWeaponDamage(ca_target, GetInv().GetItem(MainShoulders)) <= 0){
 				dmg = -5;
@@ -2003,7 +2003,7 @@ void Client::DoClassAttacks(Mob *ca_target, uint16 skill, bool IsRiposte)
 		int skillmod = 100*GetSkill(SkillFrenzy)/MaxSkill(SkillFrenzy);
 		int32 max_dmg = (26 + ((((GetLevel()-6) * 2)*skillmod)/100)) * ((100+RuleI(Combat, FrenzyBonus))/100);
 		int32 min_dmg = 0;
-		DoAnim(anim2HSlashing);
+		DoAnim(Animation::Slashing2H);
 
 		if (GetLevel() < 51)
 			min_dmg = 1;
@@ -2032,7 +2032,7 @@ void Client::DoClassAttacks(Mob *ca_target, uint16 skill, bool IsRiposte)
 
 	if(skill_to_use == SkillKick){
 		if(ca_target!=this){
-			DoAnim(animKick);
+			DoAnim(Animation::Kick);
 
 			if(GetWeaponDamage(ca_target, GetInv().GetItem(MainFeet)) <= 0){
 				dmg = -5;
