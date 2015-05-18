@@ -1676,8 +1676,7 @@ void NPC::AI_DoMovement() {
 					Log.Out(Logs::Detail, Logs::AI, "We have reached waypoint %d (%.3f,%.3f,%.3f) on grid %d", cur_wp, GetX(), GetY(), GetZ(), GetGrid());
 					if (cur_wp_pause != 0) {
 						SetWaypointPause();
-						if (GetAppearance() != eaStanding)
-							SetAppearance(eaStanding, false);
+						SetAppearance(eaStanding, false);
 						SetMoving(false);
 						if (m_CurrentWayPoint.w >= 0.0) {
 							SetHeading(m_CurrentWayPoint.w);
@@ -1728,8 +1727,7 @@ void NPC::AI_DoMovement() {
 				SetGrid( 0 - GetGrid()); // revert to AI control
 				Log.Out(Logs::Detail, Logs::Pathing, "Quest pathing is finished. Resuming on grid %d", GetGrid());
 
-				if(GetAppearance() != eaStanding)
-					SetAppearance(eaStanding, false);
+				SetAppearance(eaStanding, false);
 
 				CalculateNewWaypoint();
 			}
@@ -1817,8 +1815,7 @@ void NPC::AI_SetupNextWaypoint() {
 			cur_wp = 0;
 		}
 
-		if (GetAppearance() != eaStanding)
-			SetAppearance(eaStanding, false);
+		SetAppearance(eaStanding, false);
 
 		entity_list.OpenDoorsNear(CastToNPC());
 
@@ -1845,10 +1842,7 @@ void Mob::AI_Event_Engaged(Mob* attacker, bool iYellForHelp) {
 	if (!IsAIControlled())
 		return;
 
-	if(GetAppearance() != eaStanding)
-	{
-		SetAppearance(eaStanding);
-	}
+	SetAppearance(eaStanding);
 
 	if (iYellForHelp) {
 		if(IsPet()) {
