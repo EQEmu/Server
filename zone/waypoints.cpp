@@ -712,7 +712,8 @@ bool Mob::MakeNewPositionAndSendUpdate(float x, float y, float z, float speed, b
 		// force an update now
 		move_tic_count = RuleI(Zone, NPCPositonUpdateTicCount);
 		SendPosUpdate();
-		SetAppearance(eaStanding, false);
+		if (GetAppearance() != eaStanding)
+			SetAppearance(eaStanding, false);
 	}
 	pLastChange = Timer::GetCurrentTime();
 
@@ -1050,7 +1051,7 @@ void ZoneDatabase::AssignGrid(Client *client, int grid, int spawn2id) {
 
 	if (!results.Success())
 		return;
-	
+
 	if (results.RowsAffected() != 1) {
 		return;
 	}
