@@ -202,6 +202,7 @@ struct Buffs_Struct {
 	int32	caston_z;
 	int32	ExtraDIChance;
 	int16	RootBreakChance; //Not saved to dbase
+	uint32	instrument_mod;
 	bool	persistant_buff;
 	bool	client; //True if the caster is a client
 	bool	UpdateClient;

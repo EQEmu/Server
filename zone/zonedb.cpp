@@ -196,7 +196,7 @@ bool ZoneDatabase::GetZoneCFG(uint32 zoneid, uint16 instance_id, NewZone_Struct 
 	zone_data->time_type = atoi(row[30]);
 
 	//not in the DB yet:
-	zone_data->gravity = atof(row[56]); 
+	zone_data->gravity = atof(row[56]);
 	Log.Out(Logs::General, Logs::Debug, "Zone Gravity is %f", zone_data->gravity);
 	allow_mercs = true;
 
@@ -248,7 +248,7 @@ void ZoneDatabase::UpdateRespawnTime(uint32 spawn2_id, uint16 instance_id, uint3
 
 	if(time_left == 0) {
         std::string query = StringFormat("DELETE FROM `respawn_times` WHERE `id` = %u AND `instance_id` = %u", spawn2_id, instance_id);
-        QueryDatabase(query); 
+        QueryDatabase(query);
 		return;
 	}
 
@@ -258,14 +258,14 @@ void ZoneDatabase::UpdateRespawnTime(uint32 spawn2_id, uint16 instance_id, uint3
 		"start, "
 		"duration, "
 		"instance_id) "
-		"VALUES " 
+		"VALUES "
 		"(%u, "
 		"%u, "
 		"%u, "
 		"%u)",
-		spawn2_id, 
+		spawn2_id,
 		current_time,
-		time_left, 
+		time_left,
 		instance_id
 	);
     QueryDatabase(query);
@@ -1054,8 +1054,8 @@ bool ZoneDatabase::LoadCharacterLanguages(uint32 character_id, PlayerProfile_Str
 	for (i = 0; i < MAX_PP_LANGUAGE; ++i)
 		pp->languages[i] = 0;
 
-	for (auto row = results.begin(); row != results.end(); ++row) { 
-		i = atoi(row[0]); 
+	for (auto row = results.begin(); row != results.end(); ++row) {
+		i = atoi(row[0]);
 		if (i < MAX_PP_LANGUAGE){
 			pp->languages[i] = atoi(row[1]);
 		}
@@ -1102,14 +1102,14 @@ bool ZoneDatabase::LoadCharacterSkills(uint32 character_id, PlayerProfile_Struct
 		"FROM				"
 		"`character_skills` "
 		"WHERE `id` = %u ORDER BY `skill_id`", character_id);
-	auto results = database.QueryDatabase(query); 
+	auto results = database.QueryDatabase(query);
 	int i = 0;
 	/* Initialize Skill */
 	for (i = 0; i < MAX_PP_SKILL; ++i)
 		pp->skills[i] = 0;
 
-	for (auto row = results.begin(); row != results.end(); ++row) { 
-		i = atoi(row[0]); 
+	for (auto row = results.begin(); row != results.end(); ++row) {
+		i = atoi(row[0]);
 		if (i < MAX_PP_SKILL)
 			pp->skills[i] = atoi(row[1]);
 	}
@@ -1259,7 +1259,7 @@ bool ZoneDatabase::LoadCharacterPotions(uint32 character_id, PlayerProfile_Struc
 
 bool ZoneDatabase::LoadCharacterBindPoint(uint32 character_id, PlayerProfile_Struct* pp){
 	std::string query = StringFormat("SELECT `zone_id`, `instance_id`, `x`, `y`, `z`, `heading`, `is_home` FROM `character_bind` WHERE `id` = %u LIMIT 2", character_id);
-	auto results = database.QueryDatabase(query); 
+	auto results = database.QueryDatabase(query);
 
 	for (auto row = results.begin(); row != results.end(); ++row) {
 
@@ -1705,8 +1705,8 @@ bool ZoneDatabase::SaveCharacterCurrency(uint32 character_id, PlayerProfile_Stru
 		pp->careerRadCrystals,
 		pp->currentEbonCrystals,
 		pp->careerEbonCrystals);
-	auto results = database.QueryDatabase(query); 
-	Log.Out(Logs::General, Logs::None, "Saving Currency for character ID: %i, done", character_id); 
+	auto results = database.QueryDatabase(query);
+	Log.Out(Logs::General, Logs::None, "Saving Currency for character ID: %i, done", character_id);
 	return true;
 }
 
@@ -1802,7 +1802,7 @@ const NPCType* ZoneDatabase::LoadNPCTypesData(uint32 npc_type_id, bool bulk_load
 	std::string where_condition = "";
 
 	if (bulk_load){
-		Log.Out(Logs::General, Logs::Debug, "Performing bulk NPC Types load"); 
+		Log.Out(Logs::General, Logs::Debug, "Performing bulk NPC Types load");
 		where_condition = StringFormat(
 			"INNER JOIN spawnentry ON npc_types.id = spawnentry.npcID "
 			"INNER JOIN spawn2 ON spawnentry.spawngroupID = spawn2.spawngroupID "
@@ -1910,7 +1910,7 @@ const NPCType* ZoneDatabase::LoadNPCTypesData(uint32 npc_type_id, bool bulk_load
 		"npc_types.handtexture, "
 		"npc_types.legtexture, "
 		"npc_types.feettexture "
-		"FROM npc_types %s", 
+		"FROM npc_types %s",
 		where_condition.c_str()
 	);
 
@@ -2369,7 +2369,7 @@ bool ZoneDatabase::LoadCurrentMerc(Client *client) {
 
     if(!results.Success())
 		return false;
-		
+
 	if(results.RowCount() == 0)
 		return false;
 
@@ -2980,45 +2980,48 @@ void ZoneDatabase::SaveBuffs(Client *client) {
 
 		query = StringFormat("INSERT INTO `character_buffs` (character_id, slot_id, spell_id, "
                             "caster_level, caster_name, ticsremaining, counters, numhits, melee_rune, "
-                            "magic_rune, persistent, dot_rune, caston_x, caston_y, caston_z, ExtraDIChance) "
+                            "magic_rune, persistent, dot_rune, caston_x, caston_y, caston_z, ExtraDIChance, "
+							"instrument_mod) "
                             "VALUES('%u', '%u', '%u', '%u', '%s', '%u', '%u', '%u', '%u', '%u', '%u', '%u', "
-                            "'%i', '%i', '%i', '%i')", client->CharacterID(), index, buffs[index].spellid,
+                            "'%i', '%i', '%i', '%i', '%i')", client->CharacterID(), index, buffs[index].spellid,
                             buffs[index].casterlevel, buffs[index].caster_name, buffs[index].ticsremaining,
                             buffs[index].counters, buffs[index].numhits, buffs[index].melee_rune,
                             buffs[index].magic_rune, buffs[index].persistant_buff, buffs[index].dot_rune,
                             buffs[index].caston_x, buffs[index].caston_y, buffs[index].caston_z,
-                            buffs[index].ExtraDIChance);
+                            buffs[index].ExtraDIChance, buffs[index].instrument_mod);
        QueryDatabase(query);
 	}
 }
 
-void ZoneDatabase::LoadBuffs(Client *client) {
+void ZoneDatabase::LoadBuffs(Client *client)
+{
 
 	Buffs_Struct *buffs = client->GetBuffs();
 	uint32 max_slots = client->GetMaxBuffSlots();
 
-	for(int index = 0; index < max_slots; ++index)
+	for (int index = 0; index < max_slots; ++index)
 		buffs[index].spellid = SPELL_UNKNOWN;
 
 	std::string query = StringFormat("SELECT spell_id, slot_id, caster_level, caster_name, ticsremaining, "
-                                    "counters, numhits, melee_rune, magic_rune, persistent, dot_rune, "
-                                    "caston_x, caston_y, caston_z, ExtraDIChance "
-                                    "FROM `character_buffs` WHERE `character_id` = '%u'", client->CharacterID());
-    auto results = QueryDatabase(query);
-    if (!results.Success()) {
+					 "counters, numhits, melee_rune, magic_rune, persistent, dot_rune, "
+					 "caston_x, caston_y, caston_z, ExtraDIChance, instrument_mod "
+					 "FROM `character_buffs` WHERE `character_id` = '%u'",
+					 client->CharacterID());
+	auto results = QueryDatabase(query);
+	if (!results.Success()) {
 		return;
-    }
+	}
 
-    for (auto row = results.begin(); row != results.end(); ++row) {
-        uint32 slot_id = atoul(row[1]);
-		if(slot_id >= client->GetMaxBuffSlots())
+	for (auto row = results.begin(); row != results.end(); ++row) {
+		uint32 slot_id = atoul(row[1]);
+		if (slot_id >= client->GetMaxBuffSlots())
 			continue;
 
-        uint32 spell_id = atoul(row[0]);
-		if(!IsValidSpell(spell_id))
-            continue;
+		uint32 spell_id = atoul(row[0]);
+		if (!IsValidSpell(spell_id))
+			continue;
 
-        Client *caster = entity_list.GetClientByName(row[3]);
+		Client *caster = entity_list.GetClientByName(row[3]);
 		uint32 caster_level = atoi(row[2]);
 		uint32 ticsremaining = atoul(row[4]);
 		uint32 counters = atoul(row[5]);
@@ -3031,53 +3034,54 @@ void ZoneDatabase::LoadBuffs(Client *client) {
 		int32 caston_y = atoul(row[12]);
 		int32 caston_z = atoul(row[13]);
 		int32 ExtraDIChance = atoul(row[14]);
+		uint32 instrument_mod = atoul(row[15]);
 
 		buffs[slot_id].spellid = spell_id;
-        buffs[slot_id].casterlevel = caster_level;
+		buffs[slot_id].casterlevel = caster_level;
 
-        if(caster) {
-            buffs[slot_id].casterid = caster->GetID();
-            strcpy(buffs[slot_id].caster_name, caster->GetName());
-            buffs[slot_id].client = true;
-        } else {
-            buffs[slot_id].casterid = 0;
+		if (caster) {
+			buffs[slot_id].casterid = caster->GetID();
+			strcpy(buffs[slot_id].caster_name, caster->GetName());
+			buffs[slot_id].client = true;
+		} else {
+			buffs[slot_id].casterid = 0;
 			strcpy(buffs[slot_id].caster_name, "");
 			buffs[slot_id].client = false;
-        }
+		}
 
-        buffs[slot_id].ticsremaining = ticsremaining;
+		buffs[slot_id].ticsremaining = ticsremaining;
 		buffs[slot_id].counters = counters;
 		buffs[slot_id].numhits = numhits;
 		buffs[slot_id].melee_rune = melee_rune;
 		buffs[slot_id].magic_rune = magic_rune;
-		buffs[slot_id].persistant_buff = persistent? true: false;
+		buffs[slot_id].persistant_buff = persistent ? true : false;
 		buffs[slot_id].dot_rune = dot_rune;
 		buffs[slot_id].caston_x = caston_x;
-        buffs[slot_id].caston_y = caston_y;
-        buffs[slot_id].caston_z = caston_z;
-        buffs[slot_id].ExtraDIChance = ExtraDIChance;
-        buffs[slot_id].RootBreakChance = 0;
-        buffs[slot_id].UpdateClient = false;
-
-    }
+		buffs[slot_id].caston_y = caston_y;
+		buffs[slot_id].caston_z = caston_z;
+		buffs[slot_id].ExtraDIChance = ExtraDIChance;
+		buffs[slot_id].RootBreakChance = 0;
+		buffs[slot_id].UpdateClient = false;
+		buffs[slot_id].instrument_mod = instrument_mod;
+	}
 
 	max_slots = client->GetMaxBuffSlots();
-	for(int index = 0; index < max_slots; ++index) {
-		if(!IsValidSpell(buffs[index].spellid))
+	for (int index = 0; index < max_slots; ++index) {
+		if (!IsValidSpell(buffs[index].spellid))
 			continue;
 
-		for(int effectIndex = 0; effectIndex < 12; ++effectIndex) {
+		for (int effectIndex = 0; effectIndex < 12; ++effectIndex) {
 
 			if (spells[buffs[index].spellid].effectid[effectIndex] == SE_Charm) {
-                buffs[index].spellid = SPELL_UNKNOWN;
-                break;
-            }
+				buffs[index].spellid = SPELL_UNKNOWN;
+				break;
+			}
 
-            if (spells[buffs[index].spellid].effectid[effectIndex] == SE_Illusion) {
-                if(buffs[index].persistant_buff)
-                    break;
+			if (spells[buffs[index].spellid].effectid[effectIndex] == SE_Illusion) {
+				if (buffs[index].persistant_buff)
+					break;
 
-                buffs[index].spellid = SPELL_UNKNOWN;
+				buffs[index].spellid = SPELL_UNKNOWN;
 				break;
 			}
 		}
@@ -3389,7 +3393,7 @@ bool ZoneDatabase::SetCharacterFactionLevel(uint32 char_id, int32 faction_id, in
 						"ON DUPLICATE KEY UPDATE `current_value`=%i,`temp`=%i",
 						char_id, faction_id, value, temp, value, temp);
     auto results = QueryDatabase(query);
-	
+
 	if (!results.Success())
 		return false;
 	else
@@ -3534,7 +3538,7 @@ uint32 ZoneDatabase::GetCharacterCorpseDecayTimer(uint32 corpse_db_id){
 	auto results = QueryDatabase(query);
 	auto row = results.begin();
 	if (results.Success() && results.RowsAffected() != 0)
-		return atoul(row[0]); 
+		return atoul(row[0]);
 
 	return 0;
 }
@@ -3621,8 +3625,8 @@ uint32 ZoneDatabase::SaveCharacterCorpse(uint32 charid, const char* charname, ui
 		"`wc_6` = %u, "
 		"`wc_7` = %u, "
 		"`wc_8` = %u, "
-		"`wc_9`	= %u ", 
-		EscapeString(charname).c_str(), 
+		"`wc_9`	= %u ",
+		EscapeString(charname).c_str(),
 		zoneid,
 		instanceid,
 		charid,
@@ -3675,21 +3679,21 @@ uint32 ZoneDatabase::SaveCharacterCorpse(uint32 charid, const char* charname, ui
 			corpse_items_query = StringFormat("REPLACE INTO `character_corpse_items` \n"
 				" (corpse_id, equip_slot, item_id, charges, aug_1, aug_2, aug_3, aug_4, aug_5, aug_6, attuned) \n"
 				" VALUES (%u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u) \n",
-				last_insert_id, 
+				last_insert_id,
 				dbpc->items[i].equip_slot,
-				dbpc->items[i].item_id,  
-				dbpc->items[i].charges, 
-				dbpc->items[i].aug_1, 
-				dbpc->items[i].aug_2, 
-				dbpc->items[i].aug_3, 
-				dbpc->items[i].aug_4, 
+				dbpc->items[i].item_id,
+				dbpc->items[i].charges,
+				dbpc->items[i].aug_1,
+				dbpc->items[i].aug_2,
+				dbpc->items[i].aug_3,
+				dbpc->items[i].aug_4,
 				dbpc->items[i].aug_5,
 				dbpc->items[i].aug_6,
 				dbpc->items[i].attuned
 			);
 			first_entry = 1;
 		}
-		else{ 
+		else{
 			corpse_items_query = corpse_items_query + StringFormat(", (%u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u) \n",
 				last_insert_id,
 				dbpc->items[i].equip_slot,

@@ -199,7 +199,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 			continue;
 
 		effect = spell.effectid[i];
-		effect_value = CalcSpellEffectValue(spell_id, i, caster_level, caster ? caster : this);
+		effect_value = CalcSpellEffectValue(spell_id, i, caster_level, buffslot > -1 ? buffs[buffslot].instrument_mod : 10, caster ? caster : this);
 
 		if(spell_id == SPELL_LAY_ON_HANDS && caster && caster->GetAA(aaImprovedLayOnHands))
 			effect_value = GetMaxHP();
@@ -3029,48 +3029,44 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 	return true;
 }
 
-int Mob::CalcSpellEffectValue(uint16 spell_id, int effect_id, int caster_level, Mob *caster, int ticsremaining)
+int Mob::CalcSpellEffectValue(uint16 spell_id, int effect_id, int caster_level, uint32 instrument_mod, Mob *caster,
+			      int ticsremaining)
 {
 	int formula, base, max, effect_value;
 
-	if
-	(
-		!IsValidSpell(spell_id) ||
-		effect_id < 0 ||
-		effect_id >= EFFECT_COUNT
-	)
+	if (!IsValidSpell(spell_id) || effect_id < 0 || effect_id >= EFFECT_COUNT)
 		return 0;
 
 	formula = spells[spell_id].formula[effect_id];
 	base = spells[spell_id].base[effect_id];
 	max = spells[spell_id].max[effect_id];
 
-	if(IsBlankSpellEffect(spell_id, effect_id))
+	if (IsBlankSpellEffect(spell_id, effect_id))
 		return 0;
 
 	effect_value = CalcSpellEffectValue_formula(formula, base, max, caster_level, spell_id, ticsremaining);
 
-	if(caster && IsBardSong(spell_id) &&
-	(spells[spell_id].effectid[effect_id] != SE_AttackSpeed) &&
-	(spells[spell_id].effectid[effect_id] != SE_AttackSpeed2) &&
-	(spells[spell_id].effectid[effect_id] != SE_AttackSpeed3) &&
-	(spells[spell_id].effectid[effect_id] != SE_Lull) &&
-	(spells[spell_id].effectid[effect_id] != SE_ChangeFrenzyRad) &&
-	(spells[spell_id].effectid[effect_id] != SE_Harmony) &&
-	(spells[spell_id].effectid[effect_id] != SE_CurrentMana)&&
-	(spells[spell_id].effectid[effect_id] != SE_ManaRegen_v2))
-	{
+	// this doesn't actually need to be a song to get mods, just the right skill
+	if (EQEmu::IsBardInstrumentSkill(spells[spell_id].skill) &&
+	    spells[spell_id].effectid[effect_id] != SE_AttackSpeed &&
+	    spells[spell_id].effectid[effect_id] != SE_AttackSpeed2 &&
+	    spells[spell_id].effectid[effect_id] != SE_AttackSpeed3 &&
+	    spells[spell_id].effectid[effect_id] != SE_Lull &&
+	    spells[spell_id].effectid[effect_id] != SE_ChangeFrenzyRad &&
+	    spells[spell_id].effectid[effect_id] != SE_Harmony &&
+	    spells[spell_id].effectid[effect_id] != SE_CurrentMana &&
+	    spells[spell_id].effectid[effect_id] != SE_ManaRegen_v2) {
 
 		int oval = effect_value;
-		int mod = caster->GetInstrumentMod(spell_id);
-		mod = ApplySpellEffectiveness(caster, spell_id, mod, true);
+		int mod = ApplySpellEffectiveness(caster, spell_id, instrument_mod, true);
 		effect_value = effect_value * mod / 10;
-		Log.Out(Logs::Detail, Logs::Spells, "Effect value %d altered with bard modifier of %d to yeild %d", oval, mod, effect_value);
+		Log.Out(Logs::Detail, Logs::Spells, "Effect value %d altered with bard modifier of %d to yeild %d",
+			oval, mod, effect_value);
 	}
 
 	effect_value = mod_effect_value(effect_value, spell_id, spells[spell_id].effectid[effect_id], caster);
 
-	return(effect_value);
+	return effect_value;
 }
 
 // generic formula calculations
@@ -3365,7 +3361,7 @@ void Mob::BuffProcess()
 	{
 		if (buffs[buffs_i].spellid != SPELL_UNKNOWN)
 		{
-			DoBuffTic(buffs[buffs_i].spellid, buffs_i, buffs[buffs_i].ticsremaining, buffs[buffs_i].casterlevel, entity_list.GetMob(buffs[buffs_i].casterid));
+			DoBuffTic(buffs[buffs_i], buffs_i, entity_list.GetMob(buffs[buffs_i].casterid));
 			// If the Mob died during DoBuffTic, then the buff we are currently processing will have been removed
 			if(buffs[buffs_i].spellid == SPELL_UNKNOWN)
 				continue;
@@ -3418,333 +3414,308 @@ void Mob::BuffProcess()
 	}
 }
 
-void Mob::DoBuffTic(uint16 spell_id, int slot, uint32 ticsremaining, uint8 caster_level, Mob* caster) {
+void Mob::DoBuffTic(const Buffs_Struct &buff, int slot, Mob *caster)
+{
 	int effect, effect_value;
 
-	if(!IsValidSpell(spell_id))
+	if (!IsValidSpell(buff.spellid))
 		return;
 
-	const SPDat_Spell_Struct &spell = spells[spell_id];
+	const SPDat_Spell_Struct &spell = spells[buff.spellid];
 
-	if (spell_id == SPELL_UNKNOWN)
-		return;
-
-	if(IsNPC())
-	{
+	if (IsNPC()) {
 		std::vector<EQEmu::Any> args;
-		args.push_back(&ticsremaining);
-		args.push_back(&caster_level);
+		args.push_back(&buff.ticsremaining);
+		args.push_back(&buff.casterlevel);
 		args.push_back(&slot);
-		int i = parse->EventSpell(EVENT_SPELL_BUFF_TIC_NPC, CastToNPC(), nullptr, spell_id, caster ? caster->GetID() : 0, &args);
-		if(i != 0) {
+		int i = parse->EventSpell(EVENT_SPELL_BUFF_TIC_NPC, CastToNPC(), nullptr, buff.spellid,
+					  caster ? caster->GetID() : 0, &args);
+		if (i != 0) {
 			return;
 		}
-	}
-	else
-	{
+	} else {
 		std::vector<EQEmu::Any> args;
-		args.push_back(&ticsremaining);
-		args.push_back(&caster_level);
+		args.push_back(&buff.ticsremaining);
+		args.push_back(&buff.casterlevel);
 		args.push_back(&slot);
-		int i = parse->EventSpell(EVENT_SPELL_BUFF_TIC_CLIENT, nullptr, CastToClient(), spell_id, caster ? caster->GetID() : 0, &args);
-		if(i != 0) {
+		int i = parse->EventSpell(EVENT_SPELL_BUFF_TIC_CLIENT, nullptr, CastToClient(), buff.spellid,
+					  caster ? caster->GetID() : 0, &args);
+		if (i != 0) {
 			return;
 		}
 	}
 
 	// Check for non buff spell effects to fade
 	// AE melee effects
-	if(IsClient())
+	if (IsClient())
 		CastToClient()->CheckAAEffect(aaEffectRampage);
 
-	for (int i = 0; i < EFFECT_COUNT; i++)
-	{
-		if(IsBlankSpellEffect(spell_id, i))
+	for (int i = 0; i < EFFECT_COUNT; i++) {
+		if (IsBlankSpellEffect(buff.spellid, i))
 			continue;
 
 		effect = spell.effectid[i];
-		//I copied the calculation into each case which needed it instead of
-		//doing it every time up here, since most buff effects dont need it
+		// I copied the calculation into each case which needed it instead of
+		// doing it every time up here, since most buff effects dont need it
 
-		switch(effect)
-		{
-			case SE_CurrentHP:
-			{
-				effect_value = CalcSpellEffectValue(spell_id, i, caster_level, caster, ticsremaining);
-				//Handle client cast DOTs here.
-				if (caster && effect_value < 0){
+		switch (effect) {
+		case SE_CurrentHP: {
+			effect_value = CalcSpellEffectValue(buff.spellid, i, buff.casterlevel, buff.instrument_mod,
+							    caster, buff.ticsremaining);
+			// Handle client cast DOTs here.
+			if (caster && effect_value < 0) {
 
-					if (IsDetrimentalSpell(spell_id)){
-						if (caster->IsClient()){
-							if (!caster->CastToClient()->GetFeigned())
-								AddToHateList(caster, -effect_value);
-						}
-						else if (!IsClient()) //Allow NPC's to generate hate if casted on other NPC's.
+				if (IsDetrimentalSpell(buff.spellid)) {
+					if (caster->IsClient()) {
+						if (!caster->CastToClient()->GetFeigned())
 							AddToHateList(caster, -effect_value);
-					}
-
-					effect_value = caster->GetActDoTDamage(spell_id, effect_value, this);
-
-					caster->ResourceTap(-effect_value, spell_id);
-					effect_value = -effect_value;
-					Damage(caster, effect_value, spell_id, spell.skill, false, i, true);
-				} else if(effect_value > 0) {
-					// Regen spell...
-					// handled with bonuses
+					} else if (!IsClient()) // Allow NPC's to generate hate if casted on other
+								// NPC's.
+						AddToHateList(caster, -effect_value);
 				}
-				break;
+
+				effect_value = caster->GetActDoTDamage(buff.spellid, effect_value, this);
+
+				caster->ResourceTap(-effect_value, buff.spellid);
+				effect_value = -effect_value;
+				Damage(caster, effect_value, buff.spellid, spell.skill, false, i, true);
+			} else if (effect_value > 0) {
+				// Regen spell...
+				// handled with bonuses
 			}
-			case SE_HealOverTime:
-			{
-				effect_value = CalcSpellEffectValue(spell_id, i, caster_level);
-				if(caster)
-					effect_value = caster->GetActSpellHealing(spell_id, effect_value);
+			break;
+		}
+		case SE_HealOverTime: {
+			effect_value = CalcSpellEffectValue(buff.spellid, i, buff.casterlevel, buff.instrument_mod);
+			if (caster)
+				effect_value = caster->GetActSpellHealing(buff.spellid, effect_value);
 
-				HealDamage(effect_value, caster, spell_id);
-				//healing aggro would go here; removed for now
+			HealDamage(effect_value, caster, buff.spellid);
+			// healing aggro would go here; removed for now
+			break;
+		}
+
+		case SE_CurrentEndurance: {
+			// Handled with bonuses
+			break;
+		}
+
+		case SE_BardAEDot: {
+			effect_value =
+			    CalcSpellEffectValue(buff.spellid, i, buff.casterlevel, buff.instrument_mod, caster);
+
+			if ((!RuleB(Spells, PreNerfBardAEDoT) && IsMoving()) || invulnerable ||
+			    /*effect_value > 0 ||*/ DivineAura())
 				break;
+
+			if (effect_value < 0) {
+				effect_value = -effect_value;
+				if (caster) {
+					if (caster->IsClient() && !caster->CastToClient()->GetFeigned()) {
+						AddToHateList(caster, effect_value);
+					} else if (!caster->IsClient())
+						AddToHateList(caster, effect_value);
+				}
+				Damage(caster, effect_value, buff.spellid, spell.skill, false, i, true);
+			} else if (effect_value > 0) {
+				// healing spell...
+				HealDamage(effect_value, caster);
+				// healing aggro would go here; removed for now
 			}
+			break;
+		}
 
-			case SE_CurrentEndurance: {
-				// Handled with bonuses
-				break;
-			}
-
-			case SE_BardAEDot:
-			{
-				effect_value = CalcSpellEffectValue(spell_id, i, caster_level, caster);
-
-				if ((!RuleB(Spells, PreNerfBardAEDoT) && IsMoving()) || invulnerable || /*effect_value > 0 ||*/ DivineAura())
-					break;
-
-				if(effect_value < 0) {
-					effect_value = -effect_value;
-					if(caster){
-						if(caster->IsClient() && !caster->CastToClient()->GetFeigned()){
+		case SE_Hate: {
+			effect_value = CalcSpellEffectValue(buff.spellid, i, buff.casterlevel, buff.instrument_mod);
+			if (caster) {
+				if (effect_value > 0) {
+					if (caster) {
+						if (caster->IsClient() && !caster->CastToClient()->GetFeigned()) {
 							AddToHateList(caster, effect_value);
-						}
-						else if(!caster->IsClient())
+						} else if (!caster->IsClient())
 							AddToHateList(caster, effect_value);
 					}
-					Damage(caster, effect_value, spell_id, spell.skill, false, i, true);
-				} else if(effect_value > 0) {
-					//healing spell...
-					HealDamage(effect_value, caster);
-					//healing aggro would go here; removed for now
-				}
-				break;
-			}
-
-			case SE_Hate:{
-				effect_value = CalcSpellEffectValue(spell_id, i, caster_level);
-				if(caster){
-					if(effect_value > 0){
-						if(caster){
-							if(caster->IsClient() && !caster->CastToClient()->GetFeigned()){
-								AddToHateList(caster, effect_value);
-							}
-							else if(!caster->IsClient())
-								AddToHateList(caster, effect_value);
-						}
-					}else{
-						int32 newhate = GetHateAmount(caster) + effect_value;
-						if (newhate < 1) {
-							SetHateAmountOnEnt(caster,1);
-						} else {
-							SetHateAmountOnEnt(caster,newhate);
-						}
+				} else {
+					int32 newhate = GetHateAmount(caster) + effect_value;
+					if (newhate < 1) {
+						SetHateAmountOnEnt(caster, 1);
+					} else {
+						SetHateAmountOnEnt(caster, newhate);
 					}
 				}
+			}
+			break;
+		}
+
+		case SE_WipeHateList: {
+			if (IsMezSpell(buff.spellid))
 				break;
+
+			int wipechance = spells[buff.spellid].base[i];
+			int bonus = 0;
+
+			if (caster) {
+				bonus = caster->spellbonuses.IncreaseChanceMemwipe +
+					caster->itembonuses.IncreaseChanceMemwipe +
+					caster->aabonuses.IncreaseChanceMemwipe;
 			}
 
-			case SE_WipeHateList:
-			{
-				if (IsMezSpell(spell_id))
+			wipechance += wipechance * bonus / 100;
+
+			if (zone->random.Roll(wipechance)) {
+				if (IsAIControlled()) {
+					WipeHateList();
+				}
+				Message(13, "Your mind fogs. Who are my friends? Who are my enemies?... it was all so "
+					    "clear a moment ago...");
+			}
+			break;
+		}
+
+		case SE_Charm: {
+			if (!caster || !PassCharismaCheck(caster, buff.spellid)) {
+				BuffFadeByEffect(SE_Charm);
+			}
+
+			break;
+		}
+
+		case SE_Root: {
+			/* Root formula derived from extensive personal live parses - Kayen
+			ROOT has a 70% chance to do a resist check to break.
+			*/
+
+			if (zone->random.Roll(RuleI(Spells, RootBreakCheckChance))) {
+				float resist_check =
+				    ResistSpell(spells[buff.spellid].resisttype, buff.spellid, caster, 0, 0, 0, 0, true);
+
+				if (resist_check == 100)
 					break;
-
-				int wipechance = spells[spell_id].base[i];
-				int bonus = 0;
-
-				if (caster){
-					bonus =	caster->spellbonuses.IncreaseChanceMemwipe +
-							caster->itembonuses.IncreaseChanceMemwipe +
-							caster->aabonuses.IncreaseChanceMemwipe;
-				}
-
-				wipechance += wipechance*bonus/100;
-
-				if(zone->random.Roll(wipechance))
-				{
-					if(IsAIControlled())
-					{
-						WipeHateList();
-					}
-					Message(13, "Your mind fogs. Who are my friends? Who are my enemies?... it was all so clear a moment ago...");
-				}
-				break;
+				else if (!TryFadeEffect(slot))
+					BuffFadeBySlot(slot);
 			}
 
-			case SE_Charm: {
-				if (!caster || !PassCharismaCheck(caster, spell_id)) {
-					BuffFadeByEffect(SE_Charm);
-				}
+			break;
+		}
 
-				break;
-			}
+		case SE_Fear: {
+			if (zone->random.Roll(RuleI(Spells, FearBreakCheckChance))) {
+				float resist_check = ResistSpell(spells[buff.spellid].resisttype, buff.spellid, caster);
 
-			case SE_Root: {
-				/* Root formula derived from extensive personal live parses - Kayen
-				ROOT has a 70% chance to do a resist check to break.
-				*/
-
-				if (zone->random.Roll(RuleI(Spells, RootBreakCheckChance))) {
-					float resist_check = ResistSpell(spells[spell_id].resisttype, spell_id, caster, 0,0,0,0,true);
-
-					if(resist_check == 100)
-						break;
-					else
-						if(!TryFadeEffect(slot))
-							BuffFadeBySlot(slot);
-				}
-
-				break;
-			}
-
-			case SE_Fear:
-			{
-				if (zone->random.Roll(RuleI(Spells, FearBreakCheckChance))) {
-					float resist_check = ResistSpell(spells[spell_id].resisttype, spell_id, caster);
-
-					if(resist_check == 100)
-						break;
-					else
-						if(!TryFadeEffect(slot))
-							BuffFadeBySlot(slot);
-				}
-
-				break;
-			}
-
-			case SE_Hunger: {
-				// this procedure gets called 7 times for every once that the stamina update occurs so we add 1/7 of the subtraction.
-				// It's far from perfect, but works without any unnecessary buff checks to bog down the server.
-				if(IsClient()) {
-					CastToClient()->m_pp.hunger_level += 5;
-					CastToClient()->m_pp.thirst_level += 5;
-				}
-				break;
-			}
-			case SE_Invisibility:
-			case SE_InvisVsAnimals:
-			case SE_InvisVsUndead:
-			{
-				if(ticsremaining > 3)
-				{
-					if(!IsBardSong(spell_id))
-					{
-						double break_chance = 2.0;
-						if(caster)
-						{
-							break_chance -= (2 * (((double)caster->GetSkill(SkillDivination) + ((double)caster->GetLevel() * 3.0)) / 650.0));
-						}
-						else
-						{
-							break_chance -= (2 * (((double)GetSkill(SkillDivination) + ((double)GetLevel() * 3.0)) / 650.0));
-						}
-
-						if(zone->random.Real(0.0, 100.0) < break_chance)
-						{
-							BuffModifyDurationBySpellID(spell_id, 3);
-						}
-					}
-				}
-			}
-			case SE_Invisibility2:
-			case SE_InvisVsUndead2:
-			{
-				if(ticsremaining <= 3 && ticsremaining > 1)
-				{
-					Message_StringID(MT_Spells, INVIS_BEGIN_BREAK);
-				}
-				break;
-			}
-			case SE_InterruptCasting:
-			{
-				if(IsCasting())
-				{
-					if(zone->random.Roll(spells[spell_id].base[i]))
-					{
-						InterruptSpell();
-					}
-				}
-				break;
-			}
-			// These effects always trigger when they fade.
-			case SE_CastOnFadeEffect:
-			case SE_CastOnFadeEffectNPC:
-			case SE_CastOnFadeEffectAlways:
-			{
-				if (ticsremaining == 1)
-				{
-					SpellOnTarget(spells[spell_id].base[i], this);
-				}
-				break;
-			}
-			case SE_LocateCorpse:
-			{
-				// This is handled by the client prior to SoD.
-
-				if(IsClient() && (CastToClient()->GetClientVersionBit() & BIT_SoDAndLater))
-					CastToClient()->LocateCorpse();
-			}
-			case SE_TotalHP:
-			{
-				if (spell.formula[i] > 1000 && spell.formula[i] < 1999)
-				{
-					// These formulas can affect Max HP each tick
-					// Maybe there is a more efficient way to recalculate this for just Max HP each tic...
-					//CalcBonuses();
-					CalcSpellBonuses(&spellbonuses);
-					CalcMaxHP();
-				}
-				break;
-			}
-
-			case SE_DistanceRemoval:
-			{
-				if (spellbonuses.DistanceRemoval){
-
-					int distance =	((int(GetX()) - buffs[slot].caston_x) * (int(GetX()) - buffs[slot].caston_x)) +
-									((int(GetY()) - buffs[slot].caston_y) * (int(GetY()) - buffs[slot].caston_y)) +
-									((int(GetZ()) - buffs[slot].caston_z) * (int(GetZ()) - buffs[slot].caston_z));
-
-					if (distance > (spells[spell_id].base[i] * spells[spell_id].base[i])){
-
-						if(!TryFadeEffect(slot))
-							BuffFadeBySlot(slot , true);
-					}
+				if (resist_check == 100)
 					break;
-				}
+				else if (!TryFadeEffect(slot))
+					BuffFadeBySlot(slot);
 			}
 
-			case SE_AddHateOverTimePct:
-			{
-				if (IsNPC()){
-					uint32 new_hate = CastToNPC()->GetHateAmount(caster) * (100 + spell.base[i]) / 100;
-					if (new_hate <= 0)
-						new_hate = 1;
+			break;
+		}
 
-					CastToNPC()->SetHateAmountOnEnt(caster, new_hate);
+		case SE_Hunger: {
+			// this procedure gets called 7 times for every once that the stamina update occurs so we add
+			// 1/7 of the subtraction.
+			// It's far from perfect, but works without any unnecessary buff checks to bog down the server.
+			if (IsClient()) {
+				CastToClient()->m_pp.hunger_level += 5;
+				CastToClient()->m_pp.thirst_level += 5;
+			}
+			break;
+		}
+		case SE_Invisibility:
+		case SE_InvisVsAnimals:
+		case SE_InvisVsUndead: {
+			if (buff.ticsremaining > 3) {
+				if (!IsBardSong(buff.spellid)) {
+					double break_chance = 2.0;
+					if (caster) {
+						break_chance -= (2 * (((double)caster->GetSkill(SkillDivination) +
+								       ((double)caster->GetLevel() * 3.0)) /
+								      650.0));
+					} else {
+						break_chance -=
+						    (2 *
+						     (((double)GetSkill(SkillDivination) + ((double)GetLevel() * 3.0)) /
+						      650.0));
+					}
+
+					if (zone->random.Real(0.0, 100.0) < break_chance) {
+						BuffModifyDurationBySpellID(buff.spellid, 3);
+					}
+				}
+			}
+		}
+		case SE_Invisibility2:
+		case SE_InvisVsUndead2: {
+			if (buff.ticsremaining <= 3 && buff.ticsremaining > 1) {
+				Message_StringID(MT_Spells, INVIS_BEGIN_BREAK);
+			}
+			break;
+		}
+		case SE_InterruptCasting: {
+			if (IsCasting()) {
+				if (zone->random.Roll(spells[buff.spellid].base[i])) {
+					InterruptSpell();
+				}
+			}
+			break;
+		}
+		// These effects always trigger when they fade.
+		case SE_CastOnFadeEffect:
+		case SE_CastOnFadeEffectNPC:
+		case SE_CastOnFadeEffectAlways: {
+			if (buff.ticsremaining == 1) {
+				SpellOnTarget(spells[buff.spellid].base[i], this);
+			}
+			break;
+		}
+		case SE_LocateCorpse: {
+			// This is handled by the client prior to SoD.
+
+			if (IsClient() && (CastToClient()->GetClientVersionBit() & BIT_SoDAndLater))
+				CastToClient()->LocateCorpse();
+		}
+		case SE_TotalHP: {
+			if (spell.formula[i] > 1000 && spell.formula[i] < 1999) {
+				// These formulas can affect Max HP each tick
+				// Maybe there is a more efficient way to recalculate this for just Max HP each tic...
+				// CalcBonuses();
+				CalcSpellBonuses(&spellbonuses);
+				CalcMaxHP();
+			}
+			break;
+		}
+
+		case SE_DistanceRemoval: {
+			if (spellbonuses.DistanceRemoval) {
+
+				int distance =
+				    ((int(GetX()) - buff.caston_x) * (int(GetX()) - buff.caston_x)) +
+				    ((int(GetY()) - buff.caston_y) * (int(GetY()) - buff.caston_y)) +
+				    ((int(GetZ()) - buff.caston_z) * (int(GetZ()) - buff.caston_z));
+
+				if (distance > (spells[buff.spellid].base[i] * spells[buff.spellid].base[i])) {
+
+					if (!TryFadeEffect(slot))
+						BuffFadeBySlot(slot, true);
 				}
 				break;
 			}
+		}
 
+		case SE_AddHateOverTimePct: {
+			if (IsNPC()) {
+				uint32 new_hate = CastToNPC()->GetHateAmount(caster) * (100 + spell.base[i]) / 100;
+				if (new_hate <= 0)
+					new_hate = 1;
 
-			default:
-			{
-				// do we need to do anyting here?
+				CastToNPC()->SetHateAmountOnEnt(caster, new_hate);
 			}
+			break;
+		}
+
+		default: {
+			// do we need to do anyting here?
+		}
 		}
 	}
 }

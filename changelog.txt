@@ -1,5 +1,9 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 05/20/2015 ==
+demonstar55: Bard instrument mods should be more consistent with live. Zoning will keep instrument mod for long duration buffs (selo's)
+	Still need to have procs/doom effects to inherit the instrument mods from their source buff/whatever
+
 == 05/18/2015 ==
 KLS: Changed how fishing locates water to hopefully be a bit more accurate at the expense of a bit more cpu power per line cast.
 

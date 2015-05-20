@@ -1494,7 +1494,7 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 		for (int i = 0; i < max_slots; i++) {
 			if (buffs[i].spellid != SPELL_UNKNOWN) {
 				m_pp.buffs[i].spellid = buffs[i].spellid;
-				m_pp.buffs[i].bard_modifier = 10;
+				m_pp.buffs[i].bard_modifier = buffs[i].instrument_mod;
 				m_pp.buffs[i].slotid = 2;
 				m_pp.buffs[i].player_id = 0x2211;
 				m_pp.buffs[i].level = buffs[i].casterlevel;

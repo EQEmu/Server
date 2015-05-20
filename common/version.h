@@ -24,13 +24,13 @@
 
 #define CURRENT_VERSION "1.1.3"
 
-/* 
-	Everytime a Database SQL is added to Github, 
+/*
+	Everytime a Database SQL is added to Github,
 		increment CURRENT_BINARY_DATABASE_VERSION number and make sure you update the manifest
-	Manifest: https://github.com/EQEmu/Server/blob/master/utils/sql/db_update_manifest.txt	
+	Manifest: https://github.com/EQEmu/Server/blob/master/utils/sql/db_update_manifest.txt
 */
 
-#define CURRENT_BINARY_DATABASE_VERSION 9077
+#define CURRENT_BINARY_DATABASE_VERSION 9078
 #define COMPILE_DATE	__DATE__
 #define COMPILE_TIME	__TIME__
 #ifndef WIN32

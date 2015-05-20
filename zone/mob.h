@@ -200,7 +200,7 @@ public:
 	bool IsBeneficialAllowed(Mob *target);
 	virtual int GetCasterLevel(uint16 spell_id);
 	void ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* newbon, uint16 casterID = 0,
-		uint8 WornType = 0, uint32 ticsremaining = 0, int buffslot = -1,
+		uint8 WornType = 0, uint32 ticsremaining = 0, int buffslot = -1, int instrument_mod = 10,
 		bool IsAISpellEffect = false, uint16 effect_id = 0, int32 se_base = 0, int32 se_limit = 0, int32 se_max = 0);
 	void NegateSpellsBonuses(uint16 spell_id);
 	virtual float GetActSpellRange(uint16 spell_id, float range, bool IsBard = false);
@@ -253,7 +253,7 @@ public:
 
 	//Buff
 	void BuffProcess();
-	virtual void DoBuffTic(uint16 spell_id, int slot, uint32 ticsremaining, uint8 caster_level, Mob* caster = 0);
+	virtual void DoBuffTic(const Buffs_Struct &buff, int slot, Mob* caster = nullptr);
 	void BuffFadeBySpellID(uint16 spell_id);
 	void BuffFadeByEffect(int effectid, int skipslot = -1);
 	void BuffFadeAll();
@@ -857,7 +857,7 @@ public:
 	virtual uint32 GetAA(uint32 aa_id) const { return(0); }
 
 	uint32 GetInstrumentMod(uint16 spell_id) const;
-	int CalcSpellEffectValue(uint16 spell_id, int effect_id, int caster_level = 1, Mob *caster = nullptr, int ticsremaining = 0);
+	int CalcSpellEffectValue(uint16 spell_id, int effect_id, int caster_level = 1, uint32 instrument_mod = 10, Mob *caster = nullptr, int ticsremaining = 0);
 	int CalcSpellEffectValue_formula(int formula, int base, int max, int caster_level, uint16 spell_id, int ticsremaining = 0);
 	virtual int CheckStackConflict(uint16 spellid1, int caster_level1, uint16 spellid2, int caster_level2, Mob* caster1 = nullptr, Mob* caster2 = nullptr, int buffslot = -1);
 	uint32 GetCastedSpellInvSlot() const { return casting_spell_inventory_slot; }

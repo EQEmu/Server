@@ -92,3 +92,17 @@ float EQEmu::GetSkillMeleePushForce(SkillUseTypes skill)
 		return 0.0f;
 	}
 }
+
+bool EQEmu::IsBardInstrumentSkill(SkillUseTypes skill)
+{
+	switch (skill) {
+	case SkillBrassInstruments:
+	case SkillSinging:
+	case SkillStringedInstruments:
+	case SkillWindInstruments:
+	case SkillPercussionInstruments:
+		return true;
+	default:
+		return false;
+	}
+}

@@ -331,9 +331,10 @@
 9075|2015_02_02_logsys_packet_logs_with_dump.sql|SELECT * FROM `logsys_categories` WHERE `log_category_description` LIKE 'Packet: Server -> Client With Dump'|empty|
 9076|2015_02_04_average_coin.sql|SHOW COLUMNS FROM `loottable` WHERE Field = 'avgcoin'|contains|smallint
 9077|2015_02_12_zone_gravity.sql|SHOW COLUMNS FROM `zone` LIKE 'gravity'|empty|
+9078|2015_05_20_BuffInstrumentMod.sql|SHOW COLUMNS FROM `character_buffs` LIKE `instrument_mod`|empty|
 
 # Upgrade conditions:
-# 	This won't be needed after this system is implemented, but it is used database that are not 
+# 	This won't be needed after this system is implemented, but it is used database that are not
 #	yet using the versioning system to figure out where the database is schema wise to determine
 #	which updates are necessary to run
 #

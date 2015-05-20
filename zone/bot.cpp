@@ -9092,8 +9092,8 @@ bool Bot::SpellEffect(Mob* caster, uint16 spell_id, float partial) {
 	return Result;
 }
 
-void Bot::DoBuffTic(uint16 spell_id, int slot, uint32 ticsremaining, uint8 caster_level, Mob* caster) {
-	Mob::DoBuffTic(spell_id, slot, ticsremaining, caster_level, caster);
+void Bot::DoBuffTic(const Buffs_Struct &buff, int slot, Mob* caster) {
+	Mob::DoBuffTic(buff, slot, caster);
 }
 
 bool Bot::CastSpell(uint16 spell_id, uint16 target_id, uint16 slot, int32 cast_time, int32 mana_cost, uint32* oSpellWillFinish, uint32 item_slot, int16 *resist_adjust) {

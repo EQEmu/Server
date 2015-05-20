@@ -3189,6 +3189,7 @@ int Mob::AddBuff(Mob *caster, uint16 spell_id, int duration, int32 level_overrid
 	buffs[emptyslot].dot_rune = 0;
 	buffs[emptyslot].ExtraDIChance = 0;
 	buffs[emptyslot].RootBreakChance = 0;
+	buffs[emptyslot].instrument_mod = caster ? caster->GetInstrumentMod(spell_id) : 10;
 
 	if (level_override > 0) {
 		buffs[emptyslot].UpdateClient = true;
