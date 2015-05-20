@@ -305,6 +305,8 @@ void MapOpcodes()
 	ConnectedOpcodes[OP_PetitionRefresh] = &Client::Handle_OP_PetitionRefresh;
 	ConnectedOpcodes[OP_PetitionResolve] = &Client::Handle_OP_PetitionResolve;
 	ConnectedOpcodes[OP_PetitionUnCheckout] = &Client::Handle_OP_PetitionUnCheckout;
+	ConnectedOpcodes[OP_PlayerStateAdd] = &Client::Handle_OP_PlayerStateAdd;
+	ConnectedOpcodes[OP_PlayerStateRemove] = &Client::Handle_OP_PlayerStateRemove;
 	ConnectedOpcodes[OP_PickPocket] = &Client::Handle_OP_PickPocket;
 	ConnectedOpcodes[OP_PopupResponse] = &Client::Handle_OP_PopupResponse;
 	ConnectedOpcodes[OP_PotionBelt] = &Client::Handle_OP_PotionBelt;
@@ -4126,7 +4128,7 @@ void Client::Handle_OP_ClickObject(const EQApplicationPacket *app)
 		char buf[10];
 		snprintf(buf, 9, "%u", click_object->drop_id);
 		buf[9] = '\0';
-		parse->EventPlayer(EVENT_CLICK_OBJECT, this, buf, 0, &args);
+		parse->EventPlayer(EVENT_CLICK_OBJECT, this, buf, GetID(), &args);
 	}
 
 	// Observed in RoF after OP_ClickObjectAction:
@@ -10321,6 +10323,31 @@ void Client::Handle_OP_PetitionUnCheckout(const EQApplicationPacket *app)
 		}
 	}
 	return;
+}
+
+void Client::Handle_OP_PlayerStateAdd(const EQApplicationPacket *app)
+{
+	if (app->size != sizeof(PlayerState_Struct)) {
+		std::cout << "Wrong size: OP_PlayerStateAdd, size=" << app->size << ", expected " << sizeof(PlayerState_Struct) << std::endl;
+		return;
+	}
+
+	PlayerState_Struct *ps = (PlayerState_Struct *)app->pBuffer;
+	AddPlayerState(ps->state);
+
+	entity_list.QueueClients(this, app, true);
+}
+
+void Client::Handle_OP_PlayerStateRemove(const EQApplicationPacket *app)
+{
+	if (app->size != sizeof(PlayerState_Struct)) {
+		std::cout << "Wrong size: OP_PlayerStateRemove, size=" << app->size << ", expected " << sizeof(PlayerState_Struct) << std::endl;
+		return;
+	}
+	PlayerState_Struct *ps = (PlayerState_Struct *)app->pBuffer;
+	RemovePlayerState(ps->state);
+
+	entity_list.QueueClients(this, app, true);
 }
 
 void Client::Handle_OP_PickPocket(const EQApplicationPacket *app)

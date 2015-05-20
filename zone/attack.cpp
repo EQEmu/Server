@@ -2144,6 +2144,10 @@ bool NPC::Death(Mob* killerMob, int32 damage, uint16 spell, SkillUseTypes attack
 	if(give_exp && give_exp->IsClient())
 		give_exp_client = give_exp->CastToClient();
 
+	//do faction hits even if we are a merchant, so long as a player killed us
+	if (give_exp_client && !RuleB(NPC, EnableMeritBasedFaction))
+		hate_list.DoFactionHits(GetNPCFactionID());
+
 	bool IsLdonTreasure = (this->GetClass() == LDON_TREASURE);
 	if (give_exp_client && !IsCorpse())
 	{
@@ -2286,10 +2290,6 @@ bool NPC::Death(Mob* killerMob, int32 damage, uint16 spell, SkillUseTypes attack
 			// End QueryServ Logging
 		}
 	}
-
-	//do faction hits even if we are a merchant, so long as a player killed us
-	if(give_exp_client && !RuleB(NPC, EnableMeritBasedFaction))
-		hate_list.DoFactionHits(GetNPCFactionID());
 
 	if (!HasOwner() && !IsMerc() && class_ != MERCHANT && class_ != ADVENTUREMERCHANT && !GetSwarmInfo()
 		&& MerchantType == 0 && killer && (killer->IsClient() || (killer->HasOwner() && killer->GetUltimateOwner()->IsClient()) ||

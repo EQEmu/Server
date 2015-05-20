@@ -668,6 +668,79 @@ void QuestManager::repopzone() {
 	}
 }
 
+void QuestManager::ConnectNodeToNode(int node1, int node2, int teleport, int doorid) {
+	if (!node1 || !node2)
+	{
+		Log.Out(Logs::General, Logs::Quests, "QuestManager::ConnectNodeToNode called without node1 or node2. Probably syntax error in quest file.");
+	}
+	else
+	{
+		if (!teleport)
+		{
+			teleport = 0;
+		}
+		else if (teleport == 1 || teleport == -1)
+		{
+			teleport = -1;
+		}
+
+		if (!doorid)
+		{
+			doorid = 0;
+		}
+
+		if (!zone->pathing)
+		{
+			// if no pathing bits available, make them available.
+			zone->pathing = new PathManager();
+		}
+
+		if (zone->pathing)
+		{
+			zone->pathing->ConnectNodeToNode(node1, node2, teleport, doorid);
+			Log.Out(Logs::Moderate, Logs::Quests, "QuestManager::ConnectNodeToNode connecting node %i to node %i.", node1, node2);
+		}
+	}
+}
+
+void QuestManager::AddNode(float x, float y, float z, float best_z, int32 requested_id)
+{
+	if (!x || !y || !z)
+	{
+		Log.Out(Logs::General, Logs::Quests, "QuestManager::AddNode called without x, y, z. Probably syntax error in quest file.");
+	}
+
+	if (!best_z || best_z == 0)
+	{
+		if (zone->zonemap)
+		{
+			glm::vec3 loc(x, y, z);
+			best_z = zone->zonemap->FindBestZ(loc, nullptr);
+		}
+		else
+		{
+			best_z = z;
+		}
+	}
+
+	if (!requested_id)
+	{
+		requested_id = 0;
+	}
+
+	if (!zone->pathing)
+	{
+		// if no pathing bits available, make them available.
+		zone->pathing = new PathManager();
+	}
+
+	if (zone->pathing)
+	{
+		zone->pathing->AddNode(x, y, z, best_z, requested_id);
+		Log.Out(Logs::Moderate, Logs::Quests, "QuestManager::AddNode adding node at (%i, %i, %i).", x, y, z);
+	}
+}
+
 void QuestManager::settarget(const char *type, int target_id) {
 	QuestManagerCurrentQuestVars();
 	if (!owner || !owner->IsNPC())

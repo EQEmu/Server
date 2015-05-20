@@ -1939,6 +1939,12 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, uint16 slot, uint16 
 		}
 	}
 
+	if (IsClient() && CastToClient()->GetGM()){
+		if (zone->IsSpellBlocked(spell_id, glm::vec3(GetPosition()))){
+			Log.Out(Logs::Detail, Logs::Spells, "GM Cast Blocked Spell: %s (ID %i)", GetSpellName(spell_id), spell_id);
+		}
+	}
+
 	if
 	(
 		this->IsClient() &&
@@ -2642,7 +2648,7 @@ int CalcBuffDuration_formula(int level, int formula, int duration)
 			return i < duration ? (i < 1 ? 1 : i) : duration;
 
 		case 2:
-			i = (int)ceil(duration / 5.0f * 3);
+			i = (int)ceil(level / 5.0f * 3);
 			return i < duration ? (i < 1 ? 1 : i) : duration;
 
 		case 3:
@@ -2681,13 +2687,15 @@ int CalcBuffDuration_formula(int level, int formula, int duration)
 			return std::min((level + 3) * 30, duration);
 
 		case 12:
-			return duration;
-
+		case 13:
+		case 14:
 		case 15:	// Don't know what the real formula for this should be. Used by Skinspikes potion.
 			return duration;
 
-		case 50:	// lucy says this is unlimited?
-			return 72000;	// 5 days
+		case 50:	// Permanent. Cancelled by casting/combat for perm invis, non-lev zones for lev, curing poison/curse counters, etc.
+			return 72000;	// 5 days until better method to make permanent
+
+		//case 51:	// Permanent. Cancelled when out of range of aura. Placeholder until appropriate duration identified.
 
 		case 3600:
 			return duration ? duration : 3600;
@@ -4708,7 +4716,7 @@ void Mob::Stun(int duration)
 	{
 		stunned = true;
 		stunned_timer.Start(duration);
-		SendStunAppearance();
+		SendAddPlayerState(PlayerState::Stunned);
 	}
 }
 
@@ -4716,6 +4724,7 @@ void Mob::UnStun() {
 	if(stunned && stunned_timer.Enabled()) {
 		stunned = false;
 		stunned_timer.Disable();
+		SendRemovePlayerState(PlayerState::Stunned);
 	}
 }
 
@@ -5254,8 +5263,31 @@ void Client::SendBuffDurationPacket(Buffs_Struct &buff)
 	sbf->slot = 2;
 	sbf->spellid = buff.spellid;
 	sbf->slotid = 0;
-	sbf->effect = 255;
 	sbf->level = buff.casterlevel > 0 ? buff.casterlevel : GetLevel();
+
+	if (IsEffectInSpell(buff.spellid, SE_TotalHP))
+	{
+		// If any of the lower 6 bits are set, the GUI changes MAX_HP AGAIN.
+		// If its set to 0 the effect is cancelled.
+		// 128 seems to work (ie: change only duration).
+		sbf->effect = 128;
+	}
+	else if (IsEffectInSpell(buff.spellid, SE_CurrentHP))
+	{
+		// This is mostly a problem when we try and update duration on a
+		// dot or a hp->mana conversion.  Zero cancels the effect, any
+		// other value has the GUI doing that value at the same time server
+		// is doing theirs.  This makes the two match.
+		int index = GetSpellEffectIndex(buff.spellid, SE_CurrentHP);
+		sbf->effect = abs(spells[buff.spellid].base[index]);
+	}
+	else
+	{
+		// Default to what old code did until we find a better fix for
+		// other spell lines.
+		sbf->effect=sbf->level;
+	}
+
 	sbf->bufffade = 0;
 	sbf->duration = buff.ticsremaining;
 	sbf->num_hits = buff.numhits;

@@ -241,7 +241,8 @@ struct Spawn_Struct {
 /*0506*/ uint8  light;				// Spawn's lightsource
 /*0507*/ uint8  unknown0507[4];
 /*0511*/ uint8  level;				// Spawn Level
-/*0512*/ uint8  unknown0512[16];
+/*0512*/ uint32 PlayerState;
+/*0516*/ uint8  unknown0516[12];
 /*0528*/ uint8  lfg;
 /*0529*/ uint8  unknown0529[4];
 /*0533*/ uint8  hairstyle;			// Sets the style of hair

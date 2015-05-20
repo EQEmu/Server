@@ -2088,6 +2088,7 @@ namespace SoF
 			eq->runspeed = emu->runspeed;
 			eq->light = emu->light;
 			eq->level = emu->level;
+			eq->PlayerState = emu->PlayerState;
 			eq->lfg = emu->lfg;
 			eq->hairstyle = emu->hairstyle;
 			eq->haircolor = emu->haircolor;

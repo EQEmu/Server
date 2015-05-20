@@ -278,6 +278,14 @@ public:
 	void SendMarqueeMessage(uint32 type, uint32 priority, uint32 fade_in, uint32 fade_out, uint32 duration, std::string msg);
 	void SendColoredText(uint32 type, std::string msg);
 	void PlayMP3(std::string file);
+	void QuestReward(Lua_Mob target);
+	void QuestReward(Lua_Mob target, uint32 copper);
+	void QuestReward(Lua_Mob target, uint32 copper, uint32 silver);
+	void QuestReward(Lua_Mob target, uint32 copper, uint32 silver, uint32 gold);
+	void QuestReward(Lua_Mob target, uint32 copper, uint32 silver, uint32 gold, uint32 platinum);
+	void QuestReward(Lua_Mob target, uint32 copper, uint32 silver, uint32 gold, uint32 platinum, uint32 itemid);
+	void QuestReward(Lua_Mob target, uint32 copper, uint32 silver, uint32 gold, uint32 platinum, uint32 itemid, uint32 exp);
+	void QuestReward(Lua_Mob target, uint32 copper, uint32 silver, uint32 gold, uint32 platinum, uint32 itemid, uint32 exp, bool faction);
 };
 
 #endif

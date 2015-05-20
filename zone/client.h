@@ -611,7 +611,7 @@ public:
 	void SendFactionMessage(int32 tmpvalue, int32 faction_id, int32 faction_before_hit, int32 totalvalue, uint8 temp,  int32 this_faction_min, int32 this_faction_max);
 
 	void UpdatePersonalFaction(int32 char_id, int32 npc_value, int32 faction_id, int32 *current_value, int32 temp, int32 this_faction_min, int32 this_faction_max);
-	void SetFactionLevel(uint32 char_id, uint32 npc_id, uint8 char_class, uint8 char_race, uint8 char_deity);
+	void SetFactionLevel(uint32 char_id, uint32 npc_id, uint8 char_class, uint8 char_race, uint8 char_deity, bool quest = false);
 	void SetFactionLevel2(uint32 char_id, int32 faction_id, uint8 char_class, uint8 char_race, uint8 char_deity, int32 value, uint8 temp);
 	int32 GetRawItemAC();
 	uint16 GetCombinedAC_TEST();
@@ -1129,6 +1129,7 @@ public:
 	inline bool IsDraggingCorpse() { return (DraggedCorpses.size() > 0); }
 	void DragCorpses();
 	inline void ClearDraggedCorpses() { DraggedCorpses.clear(); }
+	inline void ResetPositionTimer() { position_timer_counter = 0; }
 	void SendAltCurrencies();
 	void SetAlternateCurrencyValue(uint32 currency_id, uint32 new_amount);
 	void AddAlternateCurrencyValue(uint32 currency_id, int32 amount, int8 method = 0);
@@ -1254,6 +1255,7 @@ public:
 	virtual int32 Tune_GetMeleeMitDmg(Mob* GM, Mob *attacker, int32 damage, int32 minhit, float mit_rating, float atk_rating);
 	int32 GetMeleeDamage(Mob* other, bool GetMinDamage = false);
 
+	void QuestReward(Mob* target, uint32 copper = 0, uint32 silver = 0, uint32 gold = 0, uint32 platinum = 0, uint32 itemid = 0, uint32 exp = 0, bool faction = false);
 protected:
 	friend class Mob;
 	void CalcItemBonuses(StatBonuses* newbon);

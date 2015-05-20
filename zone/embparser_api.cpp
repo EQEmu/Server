@@ -1917,6 +1917,52 @@ XS(XS__repopzone)
 	XSRETURN_EMPTY;
 }
 
+XS(XS__ConnectNodeToNode);
+XS(XS__ConnectNodeToNode)
+{
+	dXSARGS;
+	if (items != 4)
+		Perl_croak(aTHX_ "Usage: ConnectNodeToNode(node1, node2, teleport, doorid)");
+
+	int	node1 = (int)SvIV(ST(0));
+	int	node2 = (int)SvIV(ST(1));
+	int	teleport = (int)SvIV(ST(2));
+	int	doorid = (int)SvIV(ST(3));
+
+	quest_manager.ConnectNodeToNode(node1, node2, teleport, doorid);
+
+	XSRETURN_EMPTY;
+}
+
+XS(XS__AddNode);
+XS(XS__AddNode)
+{
+	dXSARGS;
+	//void QuestManager::AddNode(float x, float y, float z, float best_z, int32 requested_id);
+	if (items < 3 || items > 5)
+		Perl_croak(aTHX_ "Usage: AddNode(x, y, z, [best_z], [requested_id])");
+
+	int	x = (int)SvIV(ST(0));
+	int	y = (int)SvIV(ST(1));
+	int	z = (int)SvIV(ST(2));
+	int	best_z = 0;
+	int requested_id = 0;
+
+	if (items == 4)
+	{
+		best_z = (int)SvIV(ST(3));
+	}
+	else if (items == 5)
+	{
+		best_z = (int)SvIV(ST(3));
+		requested_id = (int)SvIV(ST(4));
+	}
+
+	quest_manager.AddNode(x, y, z, best_z, requested_id);
+
+	XSRETURN_EMPTY;
+}
+
 XS(XS__npcrace);
 XS(XS__npcrace)
 {
@@ -3699,6 +3745,8 @@ EXTERN_C XS(boot_quest)
 		newXS(strcpy(buf, "reloadzonestaticdata"), XS__reloadzonestaticdata, file);
 		newXS(strcpy(buf, "removetitle"), XS__removetitle, file);
 		newXS(strcpy(buf, "repopzone"), XS__repopzone, file);
+		newXS(strcpy(buf, "ConnectNodeToNode"), XS__ConnectNodeToNode, file);
+		newXS(strcpy(buf, "AddNode"), XS__AddNode, file);
 		newXS(strcpy(buf, "resettaskactivity"), XS__resettaskactivity, file);
 		newXS(strcpy(buf, "respawn"), XS__respawn, file);
 		newXS(strcpy(buf, "resume"), XS__resume, file);

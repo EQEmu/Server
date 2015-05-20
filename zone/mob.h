@@ -493,7 +493,6 @@ public:
 	inline bool CheckLastLosState() const { return last_los_check; }
 
 	//Quest
-	void QuestReward(Client *c = nullptr, uint32 silver = 0, uint32 gold = 0, uint32 platinum = 0);
 	void CameraEffect(uint32 duration, uint32 intensity, Client *c = nullptr, bool global = false);
 	inline bool GetQglobal() const { return qglobal; }
 
@@ -803,8 +802,7 @@ public:
 	//old fear function
 	//void SetFeared(Mob *caster, uint32 duration, bool flee = false);
 	float GetFearSpeed();
-	bool IsFeared() { return curfp; } // This returns true if the mob is feared or fleeing due to low HP
-	//old fear: inline void StartFleeing() { SetFeared(GetHateTop(), FLEE_RUN_DURATION, true); }
+	bool IsFeared() { return (spellbonuses.IsFeared || flee_mode); } // This returns true if the mob is feared or fleeing due to low HP
 	inline void StartFleeing() { flee_mode = true; CalculateNewFearpoint(); }
 	void ProcessFlee();
 	void CheckFlee();
@@ -1026,6 +1024,13 @@ protected:
 	uint32 follow;
 	uint32 follow_dist;
 	bool no_target_hotkey;
+
+	uint32 m_PlayerState;
+	uint32 GetPlayerState() { return m_PlayerState; }
+	void AddPlayerState(uint32 new_state) { m_PlayerState |= new_state; }
+	void RemovePlayerState(uint32 old_state) { m_PlayerState &= ~old_state; }
+	void SendAddPlayerState(PlayerState new_state);
+	void SendRemovePlayerState(PlayerState old_state);
 
 	uint8 gender;
 	uint16 race;

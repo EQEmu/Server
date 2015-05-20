@@ -1236,10 +1236,7 @@ void Merc::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho) {
 bool Merc::Process()
 {
 	if(IsStunned() && stunned_timer.Check())
-	{
-		this->stunned = false;
-		this->stunned_timer.Disable();
-	}
+		Mob::UnStun();
 
 	if (GetDepop())
 	{
@@ -1471,6 +1468,9 @@ void Merc::AI_Process() {
 			return;
 		}
 
+		if (!(m_PlayerState & static_cast<uint32>(PlayerState::Aggressive)))
+			SendAddPlayerState(PlayerState::Aggressive);
+
 		bool atCombatRange = false;
 
 		float meleeDistance = GetMaxMeleeRangeToTarget(GetTarget());
@@ -1683,6 +1683,9 @@ void Merc::AI_Process() {
 		SetHatedCount(0);
 		confidence_timer.Disable();
 		_check_confidence = false;
+
+		if (m_PlayerState & static_cast<uint32>(PlayerState::Aggressive))
+			SendRemovePlayerState(PlayerState::Aggressive);
 
 		if(!check_target_timer.Enabled())
 			check_target_timer.Start(2000, false);

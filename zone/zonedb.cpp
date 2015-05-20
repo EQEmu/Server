@@ -2183,7 +2183,7 @@ const NPCType* ZoneDatabase::GetMercType(uint32 id, uint16 raceid, uint32 client
 		return nullptr;
 	}
 
-	const NPCType *npc;
+	const NPCType *npc = nullptr;
 
 	// Process each row returned.
 	for (auto row = results.begin(); row != results.end(); ++row) {

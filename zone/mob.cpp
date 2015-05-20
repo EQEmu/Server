@@ -148,6 +148,7 @@ Mob::Mob(const char* in_name,
 	size		= in_size;
 	base_size	= size;
 	runspeed	= in_runspeed;
+	m_PlayerState	= 0;
 
 
 	// sanity check
@@ -160,7 +161,7 @@ Mob::Mob(const char* in_name,
 	m_Light.Level.Spell = m_Light.Type.Spell = 0;
 	m_Light.Type.Active = m_Light.Type.Innate;
 	m_Light.Level.Active = m_Light.Level.Innate;
-	
+
 	texture		= in_texture;
 	helmtexture	= in_helmtexture;
 	armtexture = in_armtexture;
@@ -739,7 +740,7 @@ void Mob::CreateSpawnPacket(EQApplicationPacket* app, Mob* ForWho) {
 	NewSpawn_Struct* ns = (NewSpawn_Struct*)app->pBuffer;
 	FillSpawnStruct(ns, ForWho);
 
-	if(strlen(ns->spawn.lastName) == 0) 
+	if(strlen(ns->spawn.lastName) == 0)
 	{
 		switch(ns->spawn.class_)
 		{
@@ -915,6 +916,7 @@ void Mob::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho)
 	ns->spawn.class_	= class_;
 	ns->spawn.gender	= gender;
 	ns->spawn.level		= level;
+	ns->spawn.PlayerState	= m_PlayerState;
 	ns->spawn.deity		= deity;
 	ns->spawn.animation	= 0;
 	ns->spawn.findable	= findable?1:0;
@@ -1199,6 +1201,7 @@ void Mob::SendPosition()
 	PlayerPositionUpdateServer_Struct* spu = (PlayerPositionUpdateServer_Struct*)app->pBuffer;
 	MakeSpawnUpdateNoDelta(spu);
 	move_tic_count = 0;
+	tar_ndx = 20;
 	entity_list.QueueClients(this, app, true);
 	safe_delete(app);
 }
@@ -1908,22 +1911,6 @@ void Mob::SendTargetable(bool on, Client *specific_target) {
 	safe_delete(outapp);
 }
 
-void Mob::QuestReward(Client *c, uint32 silver, uint32 gold, uint32 platinum) {
-
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_Sound, sizeof(QuestReward_Struct));
-	QuestReward_Struct* qr = (QuestReward_Struct*) outapp->pBuffer;
-
-	qr->from_mob = GetID();		// Entity ID for the from mob name
-	qr->silver = silver;
-	qr->gold = gold;
-	qr->platinum = platinum;
-
-	if(c)
-		c->QueuePacket(outapp, false, Client::CLIENT_CONNECTED);
-
-	safe_delete(outapp);
-}
-
 void Mob::CameraEffect(uint32 duration, uint32 intensity, Client *c, bool global) {
 
 
@@ -2040,12 +2027,12 @@ const int32& Mob::SetMana(int32 amount)
 
 
 void Mob::SetAppearance(EmuAppearance app, bool iIgnoreSelf) {
-	if (_appearance != app) {
-		_appearance = app;
-		SendAppearancePacket(AT_Anim, GetAppearanceValue(app), true, iIgnoreSelf);
-		if (this->IsClient() && this->IsAIControlled())
-			SendAppearancePacket(AT_Anim, ANIM_FREEZE, false, false);
-	}
+	if (_appearance == app)
+		return;
+	_appearance = app;
+	SendAppearancePacket(AT_Anim, GetAppearanceValue(app), true, iIgnoreSelf);
+	if (this->IsClient() && this->IsAIControlled())
+		SendAppearancePacket(AT_Anim, ANIM_FREEZE, false, false);
 }
 
 bool Mob::UpdateActiveLight()
@@ -2568,10 +2555,10 @@ void Mob::SendArmorAppearance(Client *one_client)
 		if (!IsClient())
 		{
 			const Item_Struct *item;
-			for (int i=0; i< 7 ; ++i) 
+			for (int i=0; i< 7 ; ++i)
 			{
 				item=database.GetItem(GetEquipment(i));
-				if (item != 0) 
+				if (item != 0)
 				{
 					SendWearChange(i,one_client);
 				}
@@ -2599,7 +2586,7 @@ void Mob::SendWearChange(uint8 material_slot, Client *one_client)
 	else
 	{
 		one_client->QueuePacket(outapp, false, Client::CLIENT_CONNECTED);
-	}	
+	}
 
 	safe_delete(outapp);
 }
@@ -2726,7 +2713,7 @@ int32 Mob::GetHerosForgeModel(uint8 material_slot) const
 		const Item_Struct *item;
 		item = database.GetItem(GetEquipment(material_slot));
 		int16 invslot = Inventory::CalcSlotFromMaterial(material_slot);
-		
+
 		if (item != 0 && invslot != INVALID_INDEX)
 		{
 			if (IsClient())
@@ -2984,10 +2971,10 @@ uint32 Mob::GetLevelHP(uint8 tlevel)
 }
 
 int32 Mob::GetActSpellCasttime(uint16 spell_id, int32 casttime) {
-	
+
 	int32 cast_reducer = 0;
 	cast_reducer += GetFocusEffect(focusSpellHaste, spell_id);
-		
+
 	if (level >= 60 && casttime > 1000)
 	{
 		casttime = casttime / 2;
@@ -3601,7 +3588,7 @@ int16 Mob::GetSkillDmgTaken(const SkillUseTypes skill_used)
 	// All skill dmg mod + Skill specific
 	skilldmg_mod += itembonuses.SkillDmgTaken[HIGHEST_SKILL+1] + spellbonuses.SkillDmgTaken[HIGHEST_SKILL+1] +
 					itembonuses.SkillDmgTaken[skill_used] + spellbonuses.SkillDmgTaken[skill_used];
-	
+
 
 	skilldmg_mod += SkillDmgTaken_Mod[skill_used] + SkillDmgTaken_Mod[HIGHEST_SKILL+1];
 
@@ -5319,7 +5306,7 @@ int32 Mob::GetSpellStat(uint32 spell_id, const char *identifier, uint8 slot)
 
 	if (slot < 4){
 		if (id == "components") { return spells[spell_id].components[slot];}
-		else if (id == "component_counts") { return spells[spell_id].component_counts[slot];} 
+		else if (id == "component_counts") { return spells[spell_id].component_counts[slot];}
 		else if (id == "NoexpendReagent") {return spells[spell_id].NoexpendReagent[slot];}
 	}
 
@@ -5397,7 +5384,7 @@ int32 Mob::GetSpellStat(uint32 spell_id, const char *identifier, uint8 slot)
 	else if (id == "max_dist") {return static_cast<int32>(spells[spell_id].max_dist); }
 	else if (id == "min_range") {return static_cast<int32>(spells[spell_id].min_range); }
 	else if (id == "DamageShieldType") {return spells[spell_id].DamageShieldType; }
-	
+
 	return stat;
 }
 
@@ -5417,9 +5404,36 @@ bool Mob::CanClassEquipItem(uint32 item_id)
 
 	int bitmask = 1;
 	bitmask = bitmask << (GetClass() - 1);
-	
+
 	if(!(itm->Classes & bitmask))
 		return false;
 	else
 		return true;
 }
+
+void Mob::SendAddPlayerState(PlayerState new_state)
+{
+	auto app = new EQApplicationPacket(OP_PlayerStateAdd, sizeof(PlayerState_Struct));
+	auto ps = (PlayerState_Struct *)app->pBuffer;
+
+	ps->spawn_id = GetID();
+	ps->state = static_cast<uint32>(new_state);
+
+	AddPlayerState(ps->state);
+	entity_list.QueueClients(nullptr, app);
+	safe_delete(app);
+}
+
+void Mob::SendRemovePlayerState(PlayerState old_state)
+{
+	auto app = new EQApplicationPacket(OP_PlayerStateRemove, sizeof(PlayerState_Struct));
+	auto ps = (PlayerState_Struct *)app->pBuffer;
+
+	ps->spawn_id = GetID();
+	ps->state = static_cast<uint32>(old_state);
+
+	RemovePlayerState(ps->state);
+	entity_list.QueueClients(nullptr, app);
+	safe_delete(app);
+}
+

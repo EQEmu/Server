@@ -241,8 +241,8 @@ bool Zone::LoadZoneObjects() {
 		data.object_type = type;
 		data.linked_list_addr[0] = 0;
         data.linked_list_addr[1] = 0;
-        data.unknown008	= (uint32)atoi(row[11]);
-        data.unknown010	= (uint32)atoi(row[12]);
+        data.size	= (uint32)atoi(row[11]);
+		data.solidtype	= (uint32)atoi(row[12]);
         data.unknown020	= (uint32)atoi(row[13]);
         data.unknown024	= (uint32)atoi(row[14]);
         data.unknown076	= (uint32)atoi(row[15]);

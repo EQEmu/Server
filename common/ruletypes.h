@@ -272,7 +272,8 @@ RULE_BOOL ( Watermap, CheckForWaterWhenMoving, false)		// Checks if a mob has mo
 RULE_BOOL ( Watermap, CheckForWaterOnSendTo, false)		// Checks if a mob has moved into/out of water on SendTo
 RULE_BOOL ( Watermap, CheckForWaterWhenFishing, false)		// Only lets a player fish near water (if a water map exists for the zone)
 RULE_REAL ( Watermap, FishingRodLength, 30)			// How far in front of player water must be for fishing to work
-RULE_REAL ( Watermap, FishingLineLength, 40)			// If water is more than this far below the player, it is considered too far to fish
+RULE_REAL ( Watermap, FishingLineLength, 100)		// If water is more than this far below the player, it is considered too far to fish
+RULE_REAL ( Watermap, FishingLineStepSize, 1)		// Basic step size for fishing calc, too small and it will eat cpu, too large and it will miss potential water
 RULE_CATEGORY_END()
 
 RULE_CATEGORY( Spells )

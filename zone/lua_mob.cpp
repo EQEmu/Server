@@ -1590,26 +1590,6 @@ void Lua_Mob::SendIllusionPacket(luabind::adl::object illusion) {
 		beard, aa_title, drakkin_heritage, drakkin_tattoo, drakkin_details, size);
 }
 
-void Lua_Mob::QuestReward(Lua_Client c) {
-	Lua_Safe_Call_Void();
-	self->QuestReward(c);
-}
-
-void Lua_Mob::QuestReward(Lua_Client c, uint32 silver) {
-	Lua_Safe_Call_Void();
-	self->QuestReward(c, silver);
-}
-
-void Lua_Mob::QuestReward(Lua_Client c, uint32 silver, uint32 gold) {
-	Lua_Safe_Call_Void();
-	self->QuestReward(c, silver, gold);
-}
-
-void Lua_Mob::QuestReward(Lua_Client c, uint32 silver, uint32 gold, uint32 platinum) {
-	Lua_Safe_Call_Void();
-	self->QuestReward(c, silver, gold, platinum);
-}
-
 void Lua_Mob::CameraEffect(uint32 duration, uint32 intensity) {
 	Lua_Safe_Call_Void();
 	self->CameraEffect(duration, intensity);
@@ -2132,10 +2112,6 @@ luabind::scope lua_register_mob() {
 		.def("SetRace", (void(Lua_Mob::*)(int))&Lua_Mob::SetRace)
 		.def("SetGender", (void(Lua_Mob::*)(int))&Lua_Mob::SetGender)
 		.def("SendIllusionPacket", (void(Lua_Mob::*)(luabind::adl::object))&Lua_Mob::SendIllusionPacket)
-		.def("QuestReward", (void(Lua_Mob::*)(Lua_Client))&Lua_Mob::QuestReward)
-		.def("QuestReward", (void(Lua_Mob::*)(Lua_Client,uint32))&Lua_Mob::QuestReward)
-		.def("QuestReward", (void(Lua_Mob::*)(Lua_Client,uint32,uint32))&Lua_Mob::QuestReward)
-		.def("QuestReward", (void(Lua_Mob::*)(Lua_Client,uint32,uint32,uint32))&Lua_Mob::QuestReward)
 		.def("CameraEffect", (void(Lua_Mob::*)(uint32,uint32))&Lua_Mob::CameraEffect)
 		.def("CameraEffect", (void(Lua_Mob::*)(uint32,uint32,Lua_Client))&Lua_Mob::CameraEffect)
 		.def("CameraEffect", (void(Lua_Mob::*)(uint32,uint32,Lua_Client,bool))&Lua_Mob::CameraEffect)

@@ -857,8 +857,8 @@ namespace UF
 		// field to be set to (float)255.0 to appear at all, and also the size field below to be 5, to be the correct size. I think SoD has the same
 		// issue.
 		VARSTRUCT_ENCODE_TYPE(uint32, OutBuffer, 0);
-		VARSTRUCT_ENCODE_TYPE(uint32, OutBuffer, 0);	// Unknown, observed 0
-		VARSTRUCT_ENCODE_TYPE(uint32, OutBuffer, 0);	// This appears to be the size field.
+		VARSTRUCT_ENCODE_TYPE(uint32, OutBuffer, emu->solidtype);	// Unknown, observed 0
+		VARSTRUCT_ENCODE_TYPE(float, OutBuffer, emu->size != 0 && (float)emu->size < 5000.f ? (float)((float)emu->size / 100.0f) : 1.f );	// This appears to be the size field. Hackish logic because some PEQ DB items were corrupt.
 		VARSTRUCT_ENCODE_TYPE(float, OutBuffer, emu->y);
 		VARSTRUCT_ENCODE_TYPE(float, OutBuffer, emu->x);
 		VARSTRUCT_ENCODE_TYPE(float, OutBuffer, emu->z);
@@ -3005,7 +3005,7 @@ namespace UF
 			VARSTRUCT_ENCODE_TYPE(uint8, Buffer, 0); // unknown12
 			VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->petOwnerId);
 			VARSTRUCT_ENCODE_TYPE(uint8, Buffer, 0); // unknown13
-			VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0); // unknown14 - Stance 64 = normal 4 = aggressive 40 = stun/mezzed
+			VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->PlayerState);
 			VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0); // unknown15
 			VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0); // unknown16
 			VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0); // unknown17

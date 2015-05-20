@@ -286,7 +286,7 @@ struct Spawn_Struct
 /*0000*/ uint8  unknown12;
 /*0000*/ uint32 petOwnerId;
 /*0000*/ uint8  unknown13;
-/*0000*/ uint32 unknown14;		// Stance 64 = normal 4 = aggressive 40 = stun/mezzed
+/*0000*/ uint32 PlayerState;		// Stance 64 = normal 4 = aggressive 40 = stun/mezzed
 /*0000*/ uint32 unknown15;
 /*0000*/ uint32 unknown16;
 /*0000*/ uint32 unknown17;

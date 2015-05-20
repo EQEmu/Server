@@ -1549,7 +1549,7 @@ namespace Titanium
 			eq->beardcolor = emu->beardcolor;
 			//		eq->unknown0147[4] = emu->unknown0147[4];
 			eq->level = emu->level;
-			//		eq->unknown0259[4] = emu->unknown0259[4];
+			eq->PlayerState = emu->PlayerState;
 			eq->beard = emu->beard;
 			strcpy(eq->suffix, emu->suffix);
 			eq->petOwnerId = emu->petOwnerId;

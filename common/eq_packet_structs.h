@@ -273,7 +273,8 @@ struct Spawn_Struct {
 /*0146*/ uint8	beard;				// Beard style (not totally, sure but maybe!)
 /*0147*/ uint8	unknown0147[4];
 /*0151*/ uint8	level;				// Spawn Level
-/*0152*/ uint8	unknown0259[4];		// ***Placeholder
+// None = 0, Open = 1, WeaponSheathed = 2, Aggressive = 4, ForcedAggressive = 8, InstrumentEquipped = 16, Stunned = 32, PrimaryWeaponEquipped = 64, SecondaryWeaponEquipped = 128
+/*0152*/ uint32 PlayerState;           // Controls animation stuff
 /*0156*/ uint8	beardcolor;			// Beard color
 /*0157*/ char	suffix[32];			// Player's suffix (of Veeshan, etc.)
 /*0189*/ uint32	petOwnerId;			// If this is a pet, the spawn id of owner
@@ -364,6 +365,11 @@ union
 	uint32 DestructibleUnk9;
 	bool targetable_with_hotkey;
 
+};
+
+struct PlayerState_Struct {
+/*00*/	uint32 spawn_id;
+/*04*/	uint32 state;
 };
 
 /*
@@ -2148,24 +2154,24 @@ struct Illusion_Struct_Old {
 // OP_Sound - Size: 68
 struct QuestReward_Struct
 {
-/*000*/ uint32	from_mob;	// ID of mob awarding the client
-/*004*/ uint32	unknown004;
-/*008*/ uint32	unknown008;
-/*012*/ uint32	unknown012;
-/*016*/ uint32	unknown016;
-/*020*/ uint32	unknown020;
-/*024*/ uint32	silver;		// Gives silver to the client
-/*028*/ uint32	gold;		// Gives gold to the client
-/*032*/ uint32	platinum;	// Gives platinum to the client
-/*036*/ uint32	unknown036;
-/*040*/ uint32	unknown040;
-/*044*/ uint32	unknown044;
-/*048*/ uint32	unknown048;
-/*052*/ uint32	unknown052;
-/*056*/ uint32	unknown056;
-/*060*/ uint32	unknown060;
-/*064*/ uint32	unknown064;
-/*068*/
+	/*000*/ uint32	mob_id;	// ID of mob awarding the client
+	/*004*/ uint32	target_id;
+	/*008*/ uint32	exp_reward;
+	/*012*/ uint32	faction;
+	/*016*/ int32	faction_mod;
+	/*020*/ uint32	copper;		// Gives copper to the client
+	/*024*/ uint32	silver;		// Gives silver to the client
+	/*028*/ uint32	gold;		// Gives gold to the client
+	/*032*/ uint32	platinum;	// Gives platinum to the client
+	/*036*/ uint32	item_id;
+	/*040*/ uint32	unknown040;
+	/*044*/ uint32	unknown044;
+	/*048*/ uint32	unknown048;
+	/*052*/ uint32	unknown052;
+	/*056*/ uint32	unknown056;
+	/*060*/ uint32	unknown060;
+	/*064*/ uint32	unknown064;
+	/*068*/
 };
 
 // Size: 8
@@ -2535,8 +2541,8 @@ struct BookRequest_Struct {
 */
 struct Object_Struct {
 /*00*/	uint32	linked_list_addr[2];// They are, get this, prev and next, ala linked list
-/*08*/	uint16	unknown008;			//
-/*10*/	uint16	unknown010;			//
+/*08*/	uint16	size;				//
+/*10*/	uint16	solidtype;			//
 /*12*/	uint32	drop_id;			// Unique object id for zone
 /*16*/	uint16	zone_id;			// Redudant, but: Zone the object appears in
 /*18*/	uint16	zone_instance;		//

@@ -1,5 +1,11 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 05/18/2015 ==
+KLS: Changed how fishing locates water to hopefully be a bit more accurate at the expense of a bit more cpu power per line cast.
+
+== 05/15/2015 ==
+Uleat: Added check to EntityList::CheckSpawnQueue() to bypass dereference if returned iterator is npc_list.end() - should fix the debug assertion failure crash
+
 == 04/30/2015 ==
 demonstar55: Implement mob and client melee push
        You can set Combat:MeleePush to false to turn off or change Combat:MeleePushChance to increase the chance an NPC can be pushed

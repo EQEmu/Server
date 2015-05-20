@@ -296,10 +296,6 @@ public:
 	void SetRace(int in);
 	void SetGender(int in);
 	void SendIllusionPacket(luabind::adl::object illusion);
-	void QuestReward(Lua_Client c);
-	void QuestReward(Lua_Client c, uint32 silver);
-	void QuestReward(Lua_Client c, uint32 silver, uint32 gold);
-	void QuestReward(Lua_Client c, uint32 silver, uint32 gold, uint32 platinum);
 	void CameraEffect(uint32 duration, uint32 intensity);
 	void CameraEffect(uint32 duration, uint32 intensity, Lua_Client c);
 	void CameraEffect(uint32 duration, uint32 intensity, Lua_Client c, bool global);
