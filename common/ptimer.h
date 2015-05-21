@@ -39,7 +39,8 @@ enum {	//values for pTimerType
 	pTimerDisciplineReuseStart = 14,
 	pTimerDisciplineReuseEnd = 24,
 	pTimerCombatAbility = 25,
-	pTimerBeggingPickPocket = 26,
+	pTimerCombatAbility2 = 26, // RoF2+ Tiger Claw is unlinked from other monk skills, generic in case other classes ever need it
+	pTimerBeggingPickPocket = 27,
 
 	pTimerLayHands = 87,		//these IDs are used by client too
 	pTimerHarmTouch = 89,		//so dont change them
