@@ -2949,8 +2949,9 @@ namespace RoF
 			eq_cse = (structs::CharacterSelectEntry_Struct *)eq_ptr;
 
 			strcpy(eq_cse->Name, emu_cse->Name);
-			eq_ptr += strlen(eq_cse->Name);
+			eq_ptr += strlen(emu_cse->Name);
 			eq_cse = (structs::CharacterSelectEntry_Struct *)eq_ptr;
+			eq_cse->Name[0] = '\0';
 
 			eq_cse->Class = emu_cse->Class;
 			eq_cse->Race = emu_cse->Race;

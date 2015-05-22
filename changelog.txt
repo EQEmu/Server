@@ -1,5 +1,8 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 05/22/2015 ==
+Uleat: Added null-term declaration for character names in ENCODE(OP_CharInfo) - where appropriate
+
 == 05/20/2015 ==
 demonstar55: Bard instrument mods should be more consistent with live. Zoning will keep instrument mod for long duration buffs (selo's)
 	Still need to have procs/doom effects to inherit the instrument mods from their source buff/whatever
