@@ -30,6 +30,7 @@ EQEmuLogSys Log;
 void ImportSpells(SharedDatabase *db);
 void ImportSkillCaps(SharedDatabase *db);
 void ImportBaseData(SharedDatabase *db);
+void ImportDBStrings(SharedDatabase *db);
 
 int main(int argc, char **argv) {
 	RegisterExecutablePlatform(ExePlatformClientImport);
@@ -59,6 +60,7 @@ int main(int argc, char **argv) {
 	ImportSpells(&database);
 	ImportSkillCaps(&database);
 	ImportBaseData(&database);
+	ImportDBStrings(&database);
 
 	Log.CloseFileLogs();
 	
@@ -202,7 +204,6 @@ void ImportSkillCaps(SharedDatabase *db) {
 			continue;
 		}
 
-
 		int class_id, skill_id, level, cap;
 		class_id = atoi(split[0].c_str());
 		skill_id = atoi(split[1].c_str());
@@ -256,6 +257,59 @@ void ImportBaseData(SharedDatabase *db) {
 		sql = StringFormat("INSERT INTO base_data(level, class, hp, mana, end, unk1, unk2, hp_fac, "
 			"mana_fac, end_fac) VALUES(%d, %d, %f, %f, %f, %f, %f, %f, %f, %f)",
 			level, class_id, hp, mana, end, unk1, unk2, hp_fac, mana_fac, end_fac);
+
+		db->QueryDatabase(sql);
+	}
+
+	fclose(f);
+}
+
+void ImportDBStrings(SharedDatabase *db) {
+	Log.Out(Logs::General, Logs::Status, "Importing DB Strings...");
+
+	FILE *f = fopen("import/dbstr_us.txt", "r");
+	if(!f) {
+		Log.Out(Logs::General, Logs::Error, "Unable to open import/dbstr_us.txt to read, skipping.");
+		return;
+	}
+
+	std::string delete_sql = "DELETE FROM db_str";
+	db->QueryDatabase(delete_sql);
+
+	char buffer[2048];
+	bool first = true;
+	while(fgets(buffer, 2048, f)) {
+		if(first) {
+			first = false;
+			continue;
+		}
+
+		for(int i = 0; i < 2048; ++i) {
+			if(buffer[i] == '\n') {
+				buffer[i] = 0;
+				break;
+			}
+		}
+
+		auto split = SplitString(buffer, '^');
+
+		if(split.size() < 2) {
+			continue;
+		}
+
+		std::string sql;
+		int id, type;
+		std::string value;
+		
+		id = atoi(split[0].c_str());
+		type = atoi(split[1].c_str());
+		
+		if(split.size() >= 3) {
+			value = ::EscapeString(split[2]);
+		}
+
+		sql = StringFormat("INSERT INTO db_str(id, type, value) VALUES(%u, %u, '%s')",
+						   id, type, value.c_str());
 
 		db->QueryDatabase(sql);
 	}
