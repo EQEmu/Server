@@ -413,10 +413,6 @@ int32 Client::GetActSpellCost(uint16 spell_id, int32 cost)
 
 int32 Mob::GetActSpellDuration(uint16 spell_id, int32 duration)
 {
-	if ((aabonuses.IllusionPersistence || spellbonuses.IllusionPersistence || itembonuses.IllusionPersistence) &&
-	    IsEffectInSpell(spell_id, SE_Illusion))
-		return 10000; // ~16h
-
 	if (spells[spell_id].not_extendable)
 		return duration;
 

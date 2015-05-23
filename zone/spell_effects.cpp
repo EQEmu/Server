@@ -1441,8 +1441,9 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 				for(int x = EmuConstants::MATERIAL_BEGIN; x <= EmuConstants::MATERIAL_TINT_END; x++)
 					SendWearChange(x);
 
-				if(caster && (caster->spellbonuses.IllusionPersistence ||  caster->aabonuses.IllusionPersistence
-					|| caster->itembonuses.IllusionPersistence))
+				if (caster == this &&
+				    (spellbonuses.IllusionPersistence || aabonuses.IllusionPersistence ||
+				     itembonuses.IllusionPersistence))
 					buffs[buffslot].persistant_buff = 1;
 				else
 					buffs[buffslot].persistant_buff = 0;
