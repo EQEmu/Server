@@ -196,7 +196,6 @@ void ExportBaseData(SharedDatabase *db) {
 
 			fprintf(f, "%s\n", line.c_str());
 		}
-	} else {
 	}
 
 	fclose(f);
@@ -229,8 +228,6 @@ void ExportDBStrings(SharedDatabase *db) {
 
 			fprintf(f, "%s\n", line.c_str());
 		}
-	}
-	else {
 	}
 
 	fclose(f);
