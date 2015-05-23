@@ -3127,16 +3127,16 @@ void ZoneDatabase::SavePetInfo(Client *client)
 			if (query.length() == 0)
 				query = StringFormat("INSERT INTO `character_pet_buffs` "
 						"(`char_id`, `pet`, `slot`, `spell_id`, `caster_level`, "
-						"`ticsremaining`, `counters`) "
-						"VALUES (%u, %u, %u, %u, %u, %d, %d)",
+						"`ticsremaining`, `counters`, `instrument_mod`) "
+						"VALUES (%u, %u, %u, %u, %u, %d, %d, %u)",
 						client->CharacterID(), pet, index, petinfo->Buffs[index].spellid,
 						petinfo->Buffs[index].level, petinfo->Buffs[index].duration,
-						petinfo->Buffs[index].counters);
+						petinfo->Buffs[index].counters, petinfo->Buffs[index].bard_modifier);
 			else
-				query += StringFormat(", (%u, %u, %u, %u, %u, %d, %d)",
+				query += StringFormat(", (%u, %u, %u, %u, %u, %d, %d, %u)",
 						client->CharacterID(), pet, index, petinfo->Buffs[index].spellid,
 						petinfo->Buffs[index].level, petinfo->Buffs[index].duration,
-						petinfo->Buffs[index].counters);
+						petinfo->Buffs[index].counters, petinfo->Buffs[index].bard_modifier);
 		}
 		database.QueryDatabase(query);
 		query.clear();
@@ -3174,7 +3174,8 @@ void ZoneDatabase::UpdateItemRecastTimestamps(uint32 char_id, uint32 recast_type
 	QueryDatabase(query);
 }
 
-void ZoneDatabase::LoadPetInfo(Client *client) {
+void ZoneDatabase::LoadPetInfo(Client *client)
+{
 
 	// Load current pet and suspended pet
 	PetInfo *petinfo = client->GetPetInfo(0);
@@ -3183,17 +3184,18 @@ void ZoneDatabase::LoadPetInfo(Client *client) {
 	memset(petinfo, 0, sizeof(PetInfo));
 	memset(suspended, 0, sizeof(PetInfo));
 
-    std::string query = StringFormat("SELECT `pet`, `petname`, `petpower`, `spell_id`, "
-                                    "`hp`, `mana`, `size` FROM `character_pet_info` "
-                                    "WHERE `char_id` = %u", client->CharacterID());
-    auto results = database.QueryDatabase(query);
-	if(!results.Success()) {
+	std::string query = StringFormat("SELECT `pet`, `petname`, `petpower`, `spell_id`, "
+					 "`hp`, `mana`, `size` FROM `character_pet_info` "
+					 "WHERE `char_id` = %u",
+					 client->CharacterID());
+	auto results = database.QueryDatabase(query);
+	if (!results.Success()) {
 		return;
 	}
 
-    PetInfo *pi;
+	PetInfo *pi;
 	for (auto row = results.begin(); row != results.end(); ++row) {
-        uint16 pet = atoi(row[0]);
+		uint16 pet = atoi(row[0]);
 
 		if (pet == 0)
 			pi = petinfo;
@@ -3202,7 +3204,7 @@ void ZoneDatabase::LoadPetInfo(Client *client) {
 		else
 			continue;
 
-		strncpy(pi->Name,row[1],64);
+		strncpy(pi->Name, row[1], 64);
 		pi->petpower = atoi(row[2]);
 		pi->SpellID = atoi(row[3]);
 		pi->HP = atoul(row[4]);
@@ -3210,56 +3212,60 @@ void ZoneDatabase::LoadPetInfo(Client *client) {
 		pi->size = atof(row[6]);
 	}
 
-    query = StringFormat("SELECT `pet`, `slot`, `spell_id`, `caster_level`, `castername`, "
-                        "`ticsremaining`, `counters` FROM `character_pet_buffs` "
-                        "WHERE `char_id` = %u", client->CharacterID());
-    results = QueryDatabase(query);
-    if (!results.Success()) {
-		return;
-    }
-
-    for (auto row = results.begin(); row != results.end(); ++row) {
-        uint16 pet = atoi(row[0]);
-        if (pet == 0)
-            pi = petinfo;
-        else if (pet == 1)
-            pi = suspended;
-        else
-            continue;
-
-        uint32 slot_id = atoul(row[1]);
-        if(slot_id >= RuleI(Spells, MaxTotalSlotsPET))
-				continue;
-
-        uint32 spell_id = atoul(row[2]);
-        if(!IsValidSpell(spell_id))
-            continue;
-
-        uint32 caster_level = atoi(row[3]);
-        int caster_id = 0;
-        // The castername field is currently unused
-        int32 ticsremaining = atoi(row[5]);
-        uint32 counters = atoul(row[6]);
-
-        pi->Buffs[slot_id].spellid = spell_id;
-        pi->Buffs[slot_id].level = caster_level;
-        pi->Buffs[slot_id].player_id = caster_id;
-        pi->Buffs[slot_id].slotid = 2;	// Always 2 in buffs struct for real buffs
-
-        pi->Buffs[slot_id].duration = ticsremaining;
-        pi->Buffs[slot_id].counters = counters;
-    }
-
-    query = StringFormat("SELECT `pet`, `slot`, `item_id` "
-                        "FROM `character_pet_inventory` "
-                        "WHERE `char_id`=%u",client->CharacterID());
-    results = database.QueryDatabase(query);
-    if (!results.Success()) {
+	query = StringFormat("SELECT `pet`, `slot`, `spell_id`, `caster_level`, `castername`, "
+			     "`ticsremaining`, `counters`, `instrument_mod` FROM `character_pet_buffs` "
+			     "WHERE `char_id` = %u",
+			     client->CharacterID());
+	results = QueryDatabase(query);
+	if (!results.Success()) {
 		return;
 	}
 
-    for(auto row = results.begin(); row != results.end(); ++row) {
-        uint16 pet = atoi(row[0]);
+	for (auto row = results.begin(); row != results.end(); ++row) {
+		uint16 pet = atoi(row[0]);
+		if (pet == 0)
+			pi = petinfo;
+		else if (pet == 1)
+			pi = suspended;
+		else
+			continue;
+
+		uint32 slot_id = atoul(row[1]);
+		if (slot_id >= RuleI(Spells, MaxTotalSlotsPET))
+			continue;
+
+		uint32 spell_id = atoul(row[2]);
+		if (!IsValidSpell(spell_id))
+			continue;
+
+		uint32 caster_level = atoi(row[3]);
+		int caster_id = 0;
+		// The castername field is currently unused
+		int32 ticsremaining = atoi(row[5]);
+		uint32 counters = atoul(row[6]);
+		uint8 bard_mod = atoul(row[7]);
+
+		pi->Buffs[slot_id].spellid = spell_id;
+		pi->Buffs[slot_id].level = caster_level;
+		pi->Buffs[slot_id].player_id = caster_id;
+		pi->Buffs[slot_id].slotid = 2; // Always 2 in buffs struct for real buffs
+
+		pi->Buffs[slot_id].duration = ticsremaining;
+		pi->Buffs[slot_id].counters = counters;
+		pi->Buffs[slot_id].bard_modifier = bard_mod;
+	}
+
+	query = StringFormat("SELECT `pet`, `slot`, `item_id` "
+			     "FROM `character_pet_inventory` "
+			     "WHERE `char_id`=%u",
+			     client->CharacterID());
+	results = database.QueryDatabase(query);
+	if (!results.Success()) {
+		return;
+	}
+
+	for (auto row = results.begin(); row != results.end(); ++row) {
+		uint16 pet = atoi(row[0]);
 		if (pet == 0)
 			pi = petinfo;
 		else if (pet == 1)
@@ -3269,11 +3275,10 @@ void ZoneDatabase::LoadPetInfo(Client *client) {
 
 		int slot = atoi(row[1]);
 		if (slot < EmuConstants::EQUIPMENT_BEGIN || slot > EmuConstants::EQUIPMENT_END)
-            continue;
+			continue;
 
-        pi->Items[slot] = atoul(row[2]);
-    }
-
+		pi->Items[slot] = atoul(row[2]);
+	}
 }
 
 bool ZoneDatabase::GetFactionData(FactionMods* fm, uint32 class_mod, uint32 race_mod, uint32 deity_mod, int32 faction_id) {

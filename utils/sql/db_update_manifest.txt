@@ -333,6 +333,7 @@
 9077|2015_02_12_zone_gravity.sql|SHOW COLUMNS FROM `zone` LIKE 'gravity'|empty|
 9078|2015_05_20_BuffInstrumentMod.sql|SHOW COLUMNS FROM `character_buffs` LIKE 'instrument_mod'|empty|
 9079|2015_05_23_BuffDurations.sql|SHOW COLUMNS FROM `character_buffs` LIKE 'ticsremaining'|contains|unsigned|
+9080|2015_05_23_PetBuffInstrumentMod.sql|SHOW COLUMNS FROM `character_pet_buffs` LIKE 'instrument_mod'|empty|
 
 # Upgrade conditions:
 # 	This won't be needed after this system is implemented, but it is used database that are not
