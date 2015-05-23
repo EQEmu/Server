@@ -1473,7 +1473,7 @@ void Mob::CalcSpellBonuses(StatBonuses* newbon)
 }
 
 void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *new_bonus, uint16 casterId,
-			     uint8 WornType, uint32 ticsremaining, int buffslot, int instrument_mod,
+			     uint8 WornType, int32 ticsremaining, int buffslot, int instrument_mod,
 			     bool IsAISpellEffect, uint16 effect_id, int32 se_base, int32 se_limit, int32 se_max)
 {
 	int i, effect_value, base2, max, effectid;

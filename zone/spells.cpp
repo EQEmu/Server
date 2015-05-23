@@ -2630,80 +2630,75 @@ int Mob::CalcBuffDuration(Mob *caster, Mob *target, uint16 spell_id, int32 caste
 	Log.Out(Logs::Detail, Logs::Spells, "Spell %d: Casting level %d, formula %d, base_duration %d: result %d",
 		spell_id, castlevel, formula, duration, res);
 
-	return(res);
+	return res;
 }
 
 // the generic formula calculations
 int CalcBuffDuration_formula(int level, int formula, int duration)
 {
-	int i;	// temp variable
+	int temp;
 
-	switch(formula)
-	{
-		case 0:	// not a buff
+	switch (formula) {
+	case 1:
+		temp = level > 3 ? level / 2 : 1;
+		break;
+	case 2:
+		temp = level > 3 ? level / 2 + 5 : 6;
+		break;
+	case 3:
+		temp = 30 * level;
+		break;
+	case 4: // only used by 'LowerElement'
+		temp = 50;
+		break;
+	case 5:
+		temp = 2;
+		break;
+	case 6:
+		temp = level / 2 + 2;
+		break;
+	case 7:
+		temp = level;
+		break;
+	case 8:
+		temp = level + 10;
+		break;
+	case 9:
+		temp = 2 * level + 10;
+		break;
+	case 10:
+		temp = 3 * level + 10;
+		break;
+	case 11:
+		temp = 30 * (level + 3);
+		break;
+	case 12:
+		temp = level > 7 ? level / 4 : 1;
+		break;
+	case 13:
+		temp = 4 * level + 10;
+		break;
+	case 14:
+		temp = 5 * (level + 2);
+		break;
+	case 15:
+		temp = 10 * (level + 10);
+		break;
+	case 50: // Permanent. Cancelled by casting/combat for perm invis, non-lev zones for lev, curing poison/curse
+		 // counters, etc.
+		return -1;
+	case 51: // Permanent. Cancelled when out of range of aura.
+		return -4;
+	default:
+		// the client function has another bool parameter that if true returns -2 -- unsure
+		if (formula < 200)
 			return 0;
-
-		case 1:
-			i = (int)ceil(level / 2.0f);
-			return i < duration ? (i < 1 ? 1 : i) : duration;
-
-		case 2:
-			i = (int)ceil(level / 5.0f * 3);
-			return i < duration ? (i < 1 ? 1 : i) : duration;
-
-		case 3:
-			i = level * 30;
-			return i < duration ? (i < 1 ? 1 : i) : duration;
-
-		case 4:	// only used by 'LowerElement'
-			return ((duration != 0) ? duration : 50);
-
-		case 5:
-			i = duration;
-			// 0 value results in a 3 tick spell, else its between 1-3 ticks.
-			return i < 3 ? (i < 1 ? 3 : i) : 3;
-
-		case 6:
-			i = (int)ceil(level / 2.0f);
-			return i < duration ? (i < 1 ? 1 : i) : duration;
-
-		case 7:
-			i = level;
-			return (duration == 0) ? (i < 1 ? 1 : i) : duration;
-
-		case 8:
-			i = level + 10;
-			return i < duration ? (i < 1 ? 1 : i) : duration;
-
-		case 9:
-			i = level * 2 + 10;
-			return i < duration ? (i < 1 ? 1 : i) : duration;
-
-		case 10:
-			i = level * 3 + 10;
-			return i < duration ? (i < 1 ? 1 : i) : duration;
-
-		case 11:
-			return std::min((level + 3) * 30, duration);
-
-		case 12:
-		case 13:
-		case 14:
-		case 15:	// Don't know what the real formula for this should be. Used by Skinspikes potion.
-			return duration;
-
-		case 50:	// Permanent. Cancelled by casting/combat for perm invis, non-lev zones for lev, curing poison/curse counters, etc.
-			return 72000;	// 5 days until better method to make permanent
-
-		//case 51:	// Permanent. Cancelled when out of range of aura. Placeholder until appropriate duration identified.
-
-		case 3600:
-			return duration ? duration : 3600;
-
-		default:
-			Log.Out(Logs::General, Logs::None, "CalcBuffDuration_formula: unknown formula %d", formula);
-			return 0;
+		temp = formula;
+		break;
 	}
+	if (duration && duration < temp)
+		temp = duration;
+	return temp;
 }
 
 // helper function for AddBuff to determine stacking
@@ -3066,7 +3061,7 @@ int Mob::AddBuff(Mob *caster, uint16 spell_id, int duration, int32 level_overrid
 	if (duration == 0) {
 		duration = CalcBuffDuration(caster, this, spell_id);
 
-		if (caster)
+		if (caster && duration > 0) // negatives are perma buffs
 			duration = caster->GetActSpellDuration(spell_id, duration);
 	}
 

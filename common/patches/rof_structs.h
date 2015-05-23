@@ -676,7 +676,7 @@ struct SpellBuff_Struct
 /*005*/	uint32 player_id;			// 'global' ID of the caster, for wearoff messages
 /*009*/ uint32 unknown016;
 /*013*/	uint8 bard_modifier;
-/*014*/	uint32 duration;
+/*014*/	int32 duration;
 /*018*/ uint8 level;
 /*019*/ uint32 spellid;
 /*023*/ uint32 counters;
@@ -692,7 +692,7 @@ struct SpellBuff_Struct_Old
 /*003*/	uint8 effect;				// not real
 /*004*/	float unknown004;			// Seen 1 for no buff
 /*008*/ uint32 spellid;
-/*012*/	uint32 duration;
+/*012*/	int32 duration;
 /*016*/ uint32 unknown016;
 /*020*/	uint32 player_id;			// 'global' ID of the caster, for wearoff messages
 /*024*/ uint32 counters;
@@ -709,7 +709,7 @@ struct SpellBuffFade_Struct_Live {
 /*007*/	uint8 unknown007;
 /*008*/	float unknown008;
 /*012*/	uint32 spellid;
-/*016*/	uint32 duration;
+/*016*/	int32 duration;
 /*020*/ uint32 playerId;	// Global player ID?
 /*024*/	uint32 num_hits;
 /*028*/ uint8 unknown0028[64];
@@ -725,7 +725,7 @@ struct SpellBuffFade_Struct {
 /*006*/	uint8 effect;
 /*007*/	uint8 unknown7;
 /*008*/	uint32 spellid;
-/*012*/	uint32 duration;
+/*012*/	int32 duration;
 /*016*/	uint32 num_hits;
 /*020*/	uint32 unknown020;		// Global player ID?
 /*024*/ uint32 playerId;		// Player id who cast the buff
@@ -2501,7 +2501,7 @@ struct GroupFollow_Struct { // Live Follow Struct
 
 struct InspectBuffs_Struct {
 /*000*/ uint32 spell_id[BUFF_COUNT];
-/*168*/ uint32 tics_remaining[BUFF_COUNT];
+/*168*/ int32 tics_remaining[BUFF_COUNT];
 };
 
 struct LFG_Struct {

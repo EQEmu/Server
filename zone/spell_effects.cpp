@@ -83,7 +83,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 	if(c_override)
 	{
 		int durat = CalcBuffDuration(caster, this, spell_id, caster_level);
-		if(durat > 0)
+		if(durat) // negatives are perma buffs
 		{
 			buffslot = AddBuff(caster, spell_id, durat, caster_level);
 			if(buffslot == -1)	// stacking failure
@@ -3366,7 +3366,7 @@ void Mob::BuffProcess()
 			if(buffs[buffs_i].spellid == SPELL_UNKNOWN)
 				continue;
 
-			if(spells[buffs[buffs_i].spellid].buffdurationformula != DF_Permanent)
+			if(buffs[buffs_i].ticsremaining > 0) // perma buffs will either be -1 or -4
 			{
 				if(!zone->BuffTimersSuspended() || !IsSuspendableSpell(buffs[buffs_i].spellid))
 				{

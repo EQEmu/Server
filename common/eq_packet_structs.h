@@ -553,7 +553,7 @@ struct SpellBuff_Struct
 /*002*/	uint8	bard_modifier;
 /*003*/	uint8	effect;			//not real
 /*004*/	uint32	spellid;
-/*008*/ uint32	duration;
+/*008*/ int32	duration;
 /*012*/	uint32	counters;
 /*016*/	uint32	player_id;	//'global' ID of the caster, for wearoff messages
 /*020*/
@@ -566,7 +566,7 @@ struct SpellBuffFade_Struct {
 /*006*/	uint8 effect;
 /*007*/	uint8 unknown7;
 /*008*/	uint32 spellid;
-/*012*/	uint32 duration;
+/*012*/	int32 duration;
 /*016*/	uint32 num_hits;
 /*020*/	uint32 unknown020;	//prolly global player ID
 /*024*/	uint32 slotid;
@@ -584,14 +584,8 @@ struct BuffRemoveRequest_Struct
 
 struct PetBuff_Struct {
 /*000*/ uint32 petid;
-/*004*/ uint32 spellid[BUFF_COUNT];
-/*104*/ uint32 unknown700;
-/*108*/ uint32 unknown701;
-/*112*/ uint32 unknown702;
-/*116*/ uint32 unknown703;
-/*120*/ uint32 unknown704;
-/*124*/ uint32 ticsremaining[BUFF_COUNT];
-/*224*/ uchar unknown705[20];
+/*004*/ uint32 spellid[BUFF_COUNT+5];
+/*124*/ int32 ticsremaining[BUFF_COUNT+5];
 /*244*/ uint32 buffcount;
 };
 
@@ -4036,7 +4030,7 @@ struct MarkNPC_Struct
 
 struct InspectBuffs_Struct {
 /*000*/ uint32 spell_id[BUFF_COUNT];
-/*100*/ uint32 tics_remaining[BUFF_COUNT];
+/*100*/ int32 tics_remaining[BUFF_COUNT];
 };
 
 struct RaidGeneral_Struct {
@@ -4737,7 +4731,7 @@ struct BuffIconEntry_Struct
 {
 	uint32 buff_slot;
 	uint32 spell_id;
-	uint32 tics_remaining;
+	int32 tics_remaining;
 	uint32 num_hits;
 };
 

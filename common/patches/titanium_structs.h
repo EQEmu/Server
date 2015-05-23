@@ -445,7 +445,7 @@ struct SpellBuff_Struct
 /*002*/	uint8	bard_modifier;
 /*003*/	uint8	effect;			//not real
 /*004*/	uint32	spellid;
-/*008*/ uint32	duration;
+/*008*/ int32	duration;
 /*012*/	uint32	counters;
 /*016*/	uint32	player_id;	//'global' ID of the caster, for wearoff messages
 };
@@ -457,7 +457,7 @@ struct SpellBuffFade_Struct {
 /*006*/	uint8 effect;
 /*007*/	uint8 unknown7;
 /*008*/	uint32 spellid;
-/*012*/	uint32 duration;
+/*012*/	int32 duration;
 /*016*/	uint32 unknown016;
 /*020*/	uint32 unknown020;	//prolly global player ID
 /*024*/	uint32 slotid;

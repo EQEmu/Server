@@ -2504,7 +2504,7 @@ void ZoneDatabase::SaveMercBuffs(Merc *merc) {
                             "TicsRemaining, PoisonCounters, DiseaseCounters, CurseCounters, "
                             "CorruptionCounters, HitCount, MeleeRune, MagicRune, dot_rune, "
                             "caston_x, Persistent, caston_y, caston_z, ExtraDIChance) "
-                            "VALUES (%u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %i, %u, %i, %i, %i);",
+                            "VALUES (%u, %u, %u, %u, %u, %d, %u, %u, %u, %u, %u, %u, %u, %i, %u, %i, %i, %i);",
                             merc->GetMercID(), buffs[buffCount].spellid, buffs[buffCount].casterlevel,
                             spells[buffs[buffCount].spellid].buffdurationformula, buffs[buffCount].ticsremaining,
                             CalculatePoisonCounters(buffs[buffCount].spellid) > 0 ? buffs[buffCount].counters : 0,
@@ -2982,7 +2982,7 @@ void ZoneDatabase::SaveBuffs(Client *client) {
                             "caster_level, caster_name, ticsremaining, counters, numhits, melee_rune, "
                             "magic_rune, persistent, dot_rune, caston_x, caston_y, caston_z, ExtraDIChance, "
 							"instrument_mod) "
-                            "VALUES('%u', '%u', '%u', '%u', '%s', '%u', '%u', '%u', '%u', '%u', '%u', '%u', "
+                            "VALUES('%u', '%u', '%u', '%u', '%s', '%d', '%u', '%u', '%u', '%u', '%u', '%u', "
                             "'%i', '%i', '%i', '%i', '%i')", client->CharacterID(), index, buffs[index].spellid,
                             buffs[index].casterlevel, buffs[index].caster_name, buffs[index].ticsremaining,
                             buffs[index].counters, buffs[index].numhits, buffs[index].melee_rune,
@@ -3023,7 +3023,7 @@ void ZoneDatabase::LoadBuffs(Client *client)
 
 		Client *caster = entity_list.GetClientByName(row[3]);
 		uint32 caster_level = atoi(row[2]);
-		uint32 ticsremaining = atoul(row[4]);
+		int32 ticsremaining = atoi(row[4]);
 		uint32 counters = atoul(row[5]);
 		uint32 numhits = atoul(row[6]);
 		uint32 melee_rune = atoul(row[7]);
@@ -3128,12 +3128,12 @@ void ZoneDatabase::SavePetInfo(Client *client)
 				query = StringFormat("INSERT INTO `character_pet_buffs` "
 						"(`char_id`, `pet`, `slot`, `spell_id`, `caster_level`, "
 						"`ticsremaining`, `counters`) "
-						"VALUES (%u, %u, %u, %u, %u, %u, %d)",
+						"VALUES (%u, %u, %u, %u, %u, %d, %d)",
 						client->CharacterID(), pet, index, petinfo->Buffs[index].spellid,
 						petinfo->Buffs[index].level, petinfo->Buffs[index].duration,
 						petinfo->Buffs[index].counters);
 			else
-				query += StringFormat(", (%u, %u, %u, %u, %u, %u, %d)",
+				query += StringFormat(", (%u, %u, %u, %u, %u, %d, %d)",
 						client->CharacterID(), pet, index, petinfo->Buffs[index].spellid,
 						petinfo->Buffs[index].level, petinfo->Buffs[index].duration,
 						petinfo->Buffs[index].counters);
@@ -3238,7 +3238,7 @@ void ZoneDatabase::LoadPetInfo(Client *client) {
         uint32 caster_level = atoi(row[3]);
         int caster_id = 0;
         // The castername field is currently unused
-        uint32 ticsremaining = atoul(row[5]);
+        int32 ticsremaining = atoi(row[5]);
         uint32 counters = atoul(row[6]);
 
         pi->Buffs[slot_id].spellid = spell_id;
