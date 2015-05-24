@@ -3367,13 +3367,15 @@ void Mob::BuffProcess()
 			if(buffs[buffs_i].spellid == SPELL_UNKNOWN)
 				continue;
 
-			if(buffs[buffs_i].ticsremaining > 0) // perma buffs will either be -1 or -4
-			{
+			// DF_Permanent uses -1 DF_Aura uses -4 but we need to check negatives for some spells for some reason?
+			if (spells[buffs[buffs_i].spellid].buffdurationformula != DF_Permanent &&
+			    spells[buffs[buffs_i].spellid].buffdurationformula != DF_Aura) {
 				if(!zone->BuffTimersSuspended() || !IsSuspendableSpell(buffs[buffs_i].spellid))
 				{
 					--buffs[buffs_i].ticsremaining;
 
 					if (buffs[buffs_i].ticsremaining == 0) {
+						// Why do we need to let these go negative? Client uses negatives for perma buffs
 						if (!IsShortDurationBuff(buffs[buffs_i].spellid) ||
 							IsFearSpell(buffs[buffs_i].spellid) ||
 							IsCharmSpell(buffs[buffs_i].spellid) ||

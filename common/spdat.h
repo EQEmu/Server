@@ -133,7 +133,7 @@ typedef enum {
 /* 42 */	ST_Directional = 0x2a, //ae around this target between two angles
 /* 43 */	ST_GroupClientAndPet = 0x2b,
 /* 44 */	ST_Beam = 0x2c,
-/* 45 */	ST_Ring = 0x2d, 
+/* 45 */	ST_Ring = 0x2d,
 /* 46 */	ST_TargetsTarget = 0x2e, // uses the target of your target
 /* 47 */	ST_PetMaster = 0x2f, // uses the master as target
 /* 48 */	// UNKNOWN
@@ -154,7 +154,7 @@ typedef enum {
 // full listing: https://forums.station.sony.com/eq/index.php?threads/enumerated-spa-list.206288/
 // mirror: http://pastebin.com/MYeQqGwe
 #define SE_CurrentHP					0	// implemented - Heals and nukes, repeates every tic if in a buff
-#define SE_ArmorClass					1	// implemented	
+#define SE_ArmorClass					1	// implemented
 #define SE_ATK							2	// implemented
 #define SE_MovementSpeed				3	// implemented - SoW, SoC, etc
 #define SE_STR							4	// implemented
@@ -197,7 +197,7 @@ typedef enum {
 #define SE_Destroy						41	// implemented - Disintegrate, Banishment of Shadows
 #define SE_ShadowStep					42	// implemented
 #define SE_Berserk						43	// implemented (*not used in any known live spell) Makes client 'Berserk' giving crip blow chance.
-#define SE_Lycanthropy					44	// implemented 
+#define SE_Lycanthropy					44	// implemented
 #define SE_Vampirism					45	// implemented (*not used in any known live spell) Stackable lifetap from melee.
 #define SE_ResistFire					46	// implemented
 #define SE_ResistCold					47	// implemented
@@ -247,7 +247,7 @@ typedef enum {
 #define SE_SummonCorpse					91	// implemented
 #define SE_InstantHate					92	// implemented - add hate
 #define SE_StopRain						93	// implemented - Wake of Karana
-#define SE_NegateIfCombat				94	// implemented 
+#define SE_NegateIfCombat				94	// implemented
 #define SE_Sacrifice					95	// implemented
 #define SE_Silence						96	// implemented
 #define SE_ManaPool						97	// implemented
@@ -299,7 +299,7 @@ typedef enum {
 #define SE_LimitCastTimeMin				143 // implemented
 #define SE_LimitCastTimeMax				144	// implemented (*not used in any known live spell)
 #define SE_Teleport2					145	// implemented - Banishment of the Pantheon
-//#define SE_ElectricityResist			146	// *not implemented (Lightning Rod: 23233) 
+//#define SE_ElectricityResist			146	// *not implemented (Lightning Rod: 23233)
 #define SE_PercentalHeal				147 // implemented
 #define SE_StackingCommand_Block		148 // implemented?
 #define SE_StackingCommand_Overwrite	149 // implemented?
@@ -529,7 +529,7 @@ typedef enum {
 #define SE_CastOnFadeEffectAlways		373 // implemented - Triggers if fades after natural duration OR from rune/numhits fades.
 #define SE_ApplyEffect					374 // implemented
 #define SE_DotCritDmgIncrease			375	// implemented - Increase damage of DoT critical amount
-//#define SE_Fling						376	// *not implemented - used in 2 test spells  (12945 | Movement Test Spell 1) 
+//#define SE_Fling						376	// *not implemented - used in 2 test spells  (12945 | Movement Test Spell 1)
 #define SE_CastOnFadeEffectNPC			377	// implemented - Triggers only if fades after natural duration (On live these are usually players spells that effect an NPC).
 #define SE_SpellEffectResistChance		378	// implemented - Increase chance to resist specific spell effect (base1=value, base2=spell effect id)
 #define SE_ShadowStepDirectional		379 // implemented - handled by client
@@ -560,7 +560,7 @@ typedef enum {
 #define SE_LimitSpellSubclass			404 // *not implemented - Limits to specific types of spells (see CheckSpellCategory) [Categories NOT defined yet]
 #define SE_TwoHandBluntBlock			405 // implemented - chance to block attacks when using two hand blunt weapons (similiar to shield block)
 #define SE_CastonNumHitFade				406 // implemented - casts a spell when a buff fades due to its numhits being depleted
-#define SE_CastonFocusEffect			407 // implemented - casts a spell if focus limits are met (ie triggers when a focus effects is applied) 
+#define SE_CastonFocusEffect			407 // implemented - casts a spell if focus limits are met (ie triggers when a focus effects is applied)
 #define SE_LimitHPPercent				408 // implemented - limited to a certain percent of your hp(ie heals up to 50%)
 #define SE_LimitManaPercent				409 // implemented - limited to a certain percent of your mana
 #define SE_LimitEndPercent				410 // implemented - limited to a certain percent of your end
@@ -576,7 +576,7 @@ typedef enum {
 #define SE_FcLimitUse					420 // implemented - increases numhits count by percent (Note: not used in any known live spells)
 #define SE_FcIncreaseNumHits			421 // implemented[AA] - increases number of hits a buff has till fade. (focus)
 #define SE_LimitUseMin					422 // implemented - limit a focus to require a min amount of numhits value (used with above)
-#define SE_LimitUseType					423 // implemented	- limit a focus to require a certain numhits type 
+#define SE_LimitUseType					423 // implemented	- limit a focus to require a certain numhits type
 #define SE_GravityEffect				424 // implemented - Pulls/pushes you toward/away the mob at a set pace
 //#define SE_Display					425 // *not implemented - Illusion: Flying Dragon(21626)
 //#define SE_IncreaseExtTargetWindow	426 // *not implmented[AA] - increases the capacity of your extended target window
@@ -600,9 +600,9 @@ typedef enum {
 #define SE_ImprovedTaunt				444 // implemented - Locks Aggro On Caster and Decrease other Players Aggro by X% on NPC targets below level Y
 //#define SE_AddMercSlot				445 // *not implemented[AA] - [Hero's Barracks] Allows you to conscript additional mercs.
 #define SE_AStacker						446 // implementet - bufff stacking blocker (26219 | Qirik's Watch)
-#define SE_BStacker						447 // implemented 
+#define SE_BStacker						447 // implemented
 #define SE_CStacker						448 // implemented
-#define SE_DStacker						449 // implemented 
+#define SE_DStacker						449 // implemented
 #define SE_MitigateDotDamage			450 // implemented  DOT spell mitigation rune with max value
 #define SE_MeleeThresholdGuard			451 // implemented  Partial Melee Rune that only is lowered if melee hits are over X amount of damage
 #define SE_SpellThresholdGuard			452 // implemented  Partial Spell Rune that only is lowered if spell hits are over X amount of damage
@@ -618,6 +618,7 @@ typedef enum {
 
 
 #define DF_Permanent			50
+#define DF_Aura				51
 
 // note this struct is historical, we don't actually need it to be
 // aligned to anything, but for maintaining it it is kept in the order that
@@ -733,31 +734,31 @@ struct SPDat_Spell_Struct
 /* 197 */	bool not_extendable;
 /* 198- 199 */
 /* 200 */	bool suspendable; // buff is suspended in suspended buff zones
-/* 201 */	int viral_range; 
+/* 201 */	int viral_range;
 /* 202 */
 /* 203 */	//int songcap; // individual song cap (how live currently does it, not implemented)
 /* 204 */
 /* 205 */	bool no_block;
-/* 206 */   
+/* 206 */
 /* 207 */	int spellgroup;
 /* 208 */	int rank; //increments AA effects with same name
 /* 209 */	int powerful_flag; //  Need more investigation to figure out what to call this, for now we know -1 makes charm spells not break before their duration is complete, it does alot more though
-/* 210 */	// bool DurationFrozen; ??? 
+/* 210 */	// bool DurationFrozen; ???
 /* 211 */	int CastRestriction; //Various restriction categories for spells most seem targetable race related but have also seen others for instance only castable if target hp 20% or lower or only if target out of combat
 /* 212 */	bool AllowRest;
 /* 213 */	bool InCombat; //Allow spell if target is in combat
 /* 214 */   bool OutofCombat; //Allow spell if target is out of combat
 /* 215 - 217 */
-/* 218 */	int aemaxtargets;  //Is used for various AE effects 
+/* 218 */	int aemaxtargets;  //Is used for various AE effects
 /* 219 */	int maxtargets; //Is used for beam and ring spells for target # limits (not implemented)
-/* 220 - 223 */ 
+/* 220 - 223 */
 /* 224 */	bool persistdeath; // buff doesn't get stripped on death
 /* 225 - 226 */
 /* 227 */	float min_dist; //spell power modified by distance from caster (Min Distance)
 /* 228 */	float min_dist_mod;  //spell power modified by distance from caster (Modifier at Min Distance)
 /* 229 */	float max_dist; //spell power modified by distance from caster (Max Distance)
 /* 230 */   float max_dist_mod; //spell power modified by distance from caster (Modifier at Max Distance)
-/* 231 */   float min_range; //Min casting range 
+/* 231 */   float min_range; //Min casting range
 /* 232 - 236 */
 			uint8 DamageShieldType; // This field does not exist in spells_us.txt
 };
