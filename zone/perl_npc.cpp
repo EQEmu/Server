@@ -823,7 +823,7 @@ XS(XS_NPC_RemoveFromHateList)
 		if(ent == nullptr)
 			Perl_croak(aTHX_ "ent  is nullptr, avoiding crash.");
 
-		THIS->CastToMob()->RemoveFromHateList(ent);
+		THIS->RemoveFromHateList(ent);
 
 	}
 	XSRETURN_EMPTY;
