@@ -6188,6 +6188,35 @@ XS(XS_Client_GetTargetRingZ)
    XSRETURN(1);
 }
 
+XS(XS_Client_CalcEXP); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Client_CalcEXP)
+{
+	dXSARGS;
+	if (items < 1 || items > 2)
+		Perl_croak(aTHX_ "Usage: CalcEXP(THIS, uint8 conlevel)");
+	{
+		Client *		THIS;
+		uint8 conlevel = 0xFF;
+		uint32 RETVAL;
+		if(items == 2)
+			conlevel = (uint16)SvUV(ST(1));
+		dXSTARG;
+
+		if (sv_derived_from(ST(0), "Client")) {
+			IV tmp = SvIV((SV*)SvRV(ST(0)));
+			THIS = INT2PTR(Client *,tmp);
+		}
+		else
+			Perl_croak(aTHX_ "THIS is not of type Client");
+		if(THIS == NULL)
+			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+
+		RETVAL = THIS->CalcEXP(conlevel);
+		XSprePUSH; PUSHi((IV)RETVAL);
+	}
+	XSRETURN(1);
+}
+
 XS(XS_Client_QuestReward); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_QuestReward)
 {
@@ -6482,6 +6511,7 @@ XS(boot_Client)
 		newXSproto(strcpy(buf, "GetTargetRingY"), XS_Client_GetTargetRingY, file, "$$");
 		newXSproto(strcpy(buf, "GetTargetRingZ"), XS_Client_GetTargetRingZ, file, "$$");
 		newXSproto(strcpy(buf, "QuestReward"), XS_Client_QuestReward, file, "$$;$$$$$$$");
+		newXSproto(strcpy(buf, "CalcEXP"), XS_Client_CalcEXP, file, "$");
 		XSRETURN_YES;
 }
 

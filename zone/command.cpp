@@ -1484,7 +1484,7 @@ void command_npcstats(Client *c, const Seperator *sep)
 		c->Message(0, "Current HP: %i  Max HP: %i",  c->GetTarget()->GetHP(), c->GetTarget()->GetMaxHP());
 		//c->Message(0, "Weapon Item Number: %s", c->GetTarget()->GetWeapNo());
 		c->Message(0, "Gender: %i  Size: %f  Bodytype: %d",  c->GetTarget()->GetGender(), c->GetTarget()->GetSize(), c->GetTarget()->GetBodyType());
-		c->Message(0, "Runspeed: %f  Walkspeed: %f",  c->GetTarget()->GetRunspeed(), c->GetTarget()->GetWalkspeed());
+		c->Message(0, "Runspeed: %i  Walkspeed: %i",  c->GetTarget()->GetRunspeed(), c->GetTarget()->GetWalkspeed());
 		c->Message(0, "Spawn Group: %i  Grid: %i",  c->GetTarget()->CastToNPC()->GetSp2(), c->GetTarget()->CastToNPC()->GetGrid());
 		c->Message(0, "EmoteID: %i",  c->GetTarget()->CastToNPC()->GetEmoteID());
 		c->GetTarget()->CastToNPC()->QueryLoot(c);

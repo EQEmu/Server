@@ -557,6 +557,7 @@ public:
 	void SendCrystalCounts();
 
 	void AddEXP(uint32 in_add_exp, uint8 conlevel = 0xFF, bool resexp = false);
+	uint32 CalcEXP(uint8 conlevel = 0xFF);
 	void SetEXP(uint32 set_exp, uint32 set_aaxp, bool resexp=false);
 	void AddLevelBasedExp(uint8 exp_percentage, uint8 max_level=0);
 	void SetLeadershipEXP(uint32 group_exp, uint32 raid_exp);
@@ -1129,7 +1130,6 @@ public:
 	inline bool IsDraggingCorpse() { return (DraggedCorpses.size() > 0); }
 	void DragCorpses();
 	inline void ClearDraggedCorpses() { DraggedCorpses.clear(); }
-	inline void ResetPositionTimer() { position_timer_counter = 0; }
 	void SendAltCurrencies();
 	void SetAlternateCurrencyValue(uint32 currency_id, uint32 new_amount);
 	void AddAlternateCurrencyValue(uint32 currency_id, int32 amount, int8 method = 0);

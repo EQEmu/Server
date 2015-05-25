@@ -1460,8 +1460,7 @@ void Merc::AI_Process() {
 
 				if(moved) {
 					moved = false;
-					SendPosition();
-					SetMoving(false);
+					SetCurrentSpeed(0);
 				}
 			}
 
@@ -1497,9 +1496,7 @@ void Merc::AI_Process() {
 				SetRunAnimSpeed(0);
 
 				if(moved) {
-					moved = false;
-					SendPosition();
-					SetMoving(false);
+					SetCurrentSpeed(0);
 				}
 			}
 
@@ -1710,7 +1707,7 @@ void Merc::AI_Process() {
 				if(follow)
 				{
 					float dist = DistanceSquared(m_Position, follow->GetPosition());
-					float speed = GetRunspeed();
+					int speed = GetRunspeed();
 
 					if(dist < GetFollowDistance() + 1000)
 						speed = GetWalkspeed();
@@ -1727,9 +1724,8 @@ void Merc::AI_Process() {
 					{
 						if(moved)
 						{
-							moved=false;
-							SendPosition();
-							SetMoving(false);
+						SetCurrentSpeed(0);
+						moved = false;
 						}
 					}
 				}

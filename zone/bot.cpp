@@ -292,9 +292,7 @@ void Bot::ChangeBotArcherWeapons(bool isArcher) {
 void Bot::Sit() {
 	if(IsMoving()) {
 		moved = false;
-		// SetHeading(CalculateHeadingToTarget(GetTarget()->GetX(), GetTarget()->GetY()));
-		SendPosition();
-		SetMoving(false);
+		SetCurrentSpeed(0);
 		tar_ndx = 0;
 	}
 
@@ -3448,11 +3446,10 @@ void Bot::AI_Process() {
 			if(IsMoving()) {
 				SetHeading(0);
 				SetRunAnimSpeed(0);
+				SetCurrentSpeed(GetRunSpeed());
 
 				if(moved) {
-					moved = false;
-					SendPosition();
-					SetMoving(false);
+					SetCurrentSpeed(0);
 				}
 			}
 
@@ -3495,11 +3492,10 @@ void Bot::AI_Process() {
 			if(IsMoving()) {
 				SetHeading(CalculateHeadingToTarget(GetTarget()->GetX(), GetTarget()->GetY()));
 				SetRunAnimSpeed(0);
-
+				SetCurrentSpeed(0);
 				if(moved) {
 					moved = false;
-					SendPosition();
-					SetMoving(false);
+					SetCurrentSpeed(0);
 				}
 			}
 
@@ -3517,11 +3513,10 @@ void Bot::AI_Process() {
 			if(IsMoving()) {
 				SetHeading(CalculateHeadingToTarget(GetTarget()->GetX(), GetTarget()->GetY()));
 				SetRunAnimSpeed(0);
-
+				SetCurrentSpeed(0);
 				if(moved) {
 					moved = false;
-					SendPosition();
-					SetMoving(false);
+					SetCurrentSpeed(0);
 				}
 			}
 
@@ -3740,7 +3735,7 @@ void Bot::AI_Process() {
 
 				if(follow) {
 					float dist = DistanceSquared(m_Position, follow->GetPosition());
-					float speed = follow->GetRunspeed();
+					int speed = follow->GetRunspeed();
 
 					if(dist < GetFollowDistance() + 1000)
 						speed = follow->GetWalkspeed();
@@ -3757,9 +3752,8 @@ void Bot::AI_Process() {
 					{
 						if(moved)
 						{
-							moved=false;
-							SendPosition();
-							SetMoving(false);
+							moved = false;
+							SetCurrentSpeed(0);
 						}
 					}
 				}
@@ -3987,6 +3981,7 @@ void Bot::PetAIProcess() {
 						botPet->SetHeading(botPet->GetTarget()->GetHeading());
 						if(moved) {
 							moved=false;
+							SetCurrentSpeed(0);
 							botPet->SendPosition();
 							botPet->SetMoving(false);
 						}
@@ -4020,6 +4015,7 @@ void Bot::PetAIProcess() {
 							botPet->SetHeading(botPet->GetTarget()->GetHeading());
 							if(moved) {
 								moved=false;
+								SetCurrentSpeed(0);
 								botPet->SendPosition();
 								botPet->SetMoving(false);
 							}

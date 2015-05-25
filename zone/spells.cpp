@@ -4754,14 +4754,12 @@ void Client::UnStun() {
 
 void NPC::Stun(int duration) {
 	Mob::Stun(duration);
-	SetRunAnimSpeed(0);
-	SendPosition();
+	SetCurrentSpeed(0);
 }
 
 void NPC::UnStun() {
 	Mob::UnStun();
-	SetRunAnimSpeed(static_cast<int8>(GetRunspeed()));
-	SendPosition();
+	SetCurrentSpeed(GetRunspeed());
 }
 
 void Mob::Mesmerize()

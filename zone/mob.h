@@ -364,6 +364,7 @@ public:
 	inline Mob* GetTarget() const { return target; }
 	virtual void SetTarget(Mob* mob);
 	virtual inline float GetHPRatio() const { return max_hp == 0 ? 0 : ((float)cur_hp/max_hp*100); }
+	virtual inline float GetIntHPRatio() const { return max_hp == 0 ? 0 : (cur_hp/max_hp*100); }
 	inline virtual int32 GetAC() const { return AC + itembonuses.AC + spellbonuses.AC; }
 	inline virtual int32 GetATK() const { return ATK + itembonuses.ATK + spellbonuses.ATK; }
 	inline virtual int32 GetATKBonus() const { return itembonuses.ATK + spellbonuses.ATK; }
@@ -441,9 +442,12 @@ public:
 	virtual void SetMoving(bool move) { moving = move; m_Delta = glm::vec4(); }
 	virtual void GoToBind(uint8 bindnum = 0) { }
 	virtual void Gate();
-	float GetWalkspeed() const { return(_GetMovementSpeed(-47)); }
-	float GetRunspeed() const { return(_GetMovementSpeed(0)); }
-	float GetBaseRunspeed() const { return runspeed; }
+	int GetWalkspeed() const { return(_GetWalkSpeed()); }
+	int GetRunspeed() const { return(_GetRunSpeed()); }
+	void SetCurrentSpeed(int in);
+	int GetBaseRunspeed() const { return base_runspeed; }
+	int GetBaseWalkspeed() const { return base_walkspeed; }
+	int GetBaseFearSpeed() const { return base_fearspeed; }
 	float GetMovespeed() const { return IsRunning() ? GetRunspeed() : GetWalkspeed(); }
 	bool IsRunning() const { return m_is_running; }
 	void SetRunning(bool val) { m_is_running = val; }
@@ -801,7 +805,7 @@ public:
 
 	//old fear function
 	//void SetFeared(Mob *caster, uint32 duration, bool flee = false);
-	float GetFearSpeed();
+	int GetFearSpeed() { return _GetFearSpeed(); }
 	bool IsFeared() { return (spellbonuses.IsFeared || flee_mode); } // This returns true if the mob is feared or fleeing due to low HP
 	inline void StartFleeing() { flee_mode = true; CalculateNewFearpoint(); }
 	void ProcessFlee();
@@ -810,8 +814,8 @@ public:
 
 	inline bool			CheckAggro(Mob* other) {return hate_list.IsEntOnHateList(other);}
 	float				CalculateHeadingToTarget(float in_x, float in_y);
-	bool				CalculateNewPosition(float x, float y, float z, float speed, bool checkZ = false);
-	virtual bool		CalculateNewPosition2(float x, float y, float z, float speed, bool checkZ = true);
+	bool				CalculateNewPosition(float x, float y, float z, int speed, bool checkZ = false, bool calcheading = true);
+	virtual bool		CalculateNewPosition2(float x, float y, float z, int speed, bool checkZ = true, bool calcheading = true);
 	float				CalculateDistance(float x, float y, float z);
 	float				GetGroundZ(float new_x, float new_y, float z_offset=0.0);
 	void				SendTo(float new_x, float new_y, float new_z);
@@ -882,6 +886,8 @@ public:
 	Timer *GetSpecialAbilityTimer(int ability);
 	void ClearSpecialAbilities();
 	void ProcessSpecialAbilities(const std::string &str);
+	bool IsMoved() { return moved; }
+	void SetMoved(bool moveflag) { moved = moveflag; }
 
 	Shielders_Struct shielder[MAX_SHIELDERS];
 	Trade* trade;
@@ -951,7 +957,10 @@ protected:
 	void CommonDamage(Mob* other, int32 &damage, const uint16 spell_id, const SkillUseTypes attack_skill, bool &avoidable, const int8 buffslot, const bool iBuffTic);
 	static uint16 GetProcID(uint16 spell_id, uint8 effect_index);
 	float _GetMovementSpeed(int mod) const;
-	virtual bool MakeNewPositionAndSendUpdate(float x, float y, float z, float speed, bool checkZ);
+	int _GetWalkSpeed() const;
+	int _GetRunSpeed() const;
+	int _GetFearSpeed() const;
+	virtual bool MakeNewPositionAndSendUpdate(float x, float y, float z, int speed, bool checkZ);
 
 	virtual bool AI_EngagedCastCheck() { return(false); }
 	virtual bool AI_PursueCastCheck() { return(false); }
@@ -1048,6 +1057,13 @@ protected:
 	float base_size;
 	float size;
 	float runspeed;
+	float walkspeed;
+	float fearspeed;
+	int base_runspeed;
+	int base_walkspeed;
+	int base_fearspeed;
+	int current_speed;
+
 	uint32 pLastChange;
 	bool held;
 	bool nocast;

@@ -4266,7 +4266,7 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app)
 			if((cur_time - m_TimeSinceLastPositionCheck) > 0)
 			{
 				float speed = (m_DistanceSinceLastPositionCheck * 100) / (float)(cur_time - m_TimeSinceLastPositionCheck);
-				float runs = GetRunspeed();
+				int runs = GetRunspeed();
 				if(speed > (runs * RuleR(Zone, MQWarpDetectionDistanceFactor)))
 				{
 					if(!GetGMSpeed() && (runs >= GetBaseRunspeed() || (speed > (GetBaseRunspeed() * RuleR(Zone, MQWarpDetectionDistanceFactor)))))
@@ -4334,7 +4334,7 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app)
 			if((cur_time - m_TimeSinceLastPositionCheck) > 2500)
 			{
 				float speed = (m_DistanceSinceLastPositionCheck * 100) / (float)(cur_time - m_TimeSinceLastPositionCheck);
-				float runs = GetRunspeed();
+				int runs = GetRunspeed();
 				if(speed > (runs * RuleR(Zone, MQWarpDetectionDistanceFactor)))
 				{
 					if(!GetGMSpeed() && (runs >= GetBaseRunspeed() || (speed > (GetBaseRunspeed() * RuleR(Zone, MQWarpDetectionDistanceFactor)))))

@@ -89,7 +89,7 @@ int32 Mob::GetActSpellDamage(uint16 spell_id, int32 value, Mob* target) {
 
 		if (IsClient() && GetClass() == WIZARD)
 			ratio += RuleI(Spells, WizCritRatio); //Default is zero
-
+	
 		if (Critical){
 
 			value = value_BaseEffect*ratio/100;
@@ -138,7 +138,7 @@ int32 Mob::GetActSpellDamage(uint16 spell_id, int32 value, Mob* target) {
 
 	value -= GetFocusEffect(focusFcDamageAmt, spell_id);
 
-	if(itembonuses.SpellDmg && spells[spell_id].classes[(GetClass()%16) - 1] >= GetLevel() - 5)
+	if(itembonuses.SpellDmg)
 		 value -= GetExtraSpellAmt(spell_id, itembonuses.SpellDmg, value);
 
 	if (IsNPC() && CastToNPC()->GetSpellScale())
@@ -172,7 +172,7 @@ int32 Mob::GetActDoTDamage(uint16 spell_id, int32 value, Mob* target) {
 		value += int(value_BaseEffect*GetFocusEffect(focusImprovedDamage, spell_id)/100)*ratio/100;
 		value += int(value_BaseEffect*GetFocusEffect(focusFcDamagePctCrit, spell_id)/100)*ratio/100;
 		value += int(value_BaseEffect*target->GetVulnerability(this, spell_id, 0)/100)*ratio/100;
-		extra_dmg = target->GetFcDamageAmtIncoming(this, spell_id) +
+		extra_dmg = target->GetFcDamageAmtIncoming(this, spell_id) + 
 					int(GetFocusEffect(focusFcDamageAmtCrit, spell_id)*ratio/100) +
 					GetFocusEffect(focusFcDamageAmt, spell_id);
 
@@ -200,6 +200,11 @@ int32 Mob::GetActDoTDamage(uint16 spell_id, int32 value, Mob* target) {
 				extra_dmg /= duration;
 		}
 
+		//Sanctuary Custom: Spelldmg per tick
+		if(itembonuses.SpellDmg)
+		 value -= GetExtraSpellAmt(spell_id, itembonuses.SpellDmg / 6, value); //per tick
+
+
 		value -= extra_dmg;
 	}
 
@@ -211,23 +216,6 @@ int32 Mob::GetActDoTDamage(uint16 spell_id, int32 value, Mob* target) {
 
 int32 Mob::GetExtraSpellAmt(uint16 spell_id, int32 extra_spell_amt, int32 base_spell_dmg)
 {
-	int total_cast_time = 0;
-
-	if (spells[spell_id].recast_time >= spells[spell_id].recovery_time)
-			total_cast_time = spells[spell_id].recast_time + spells[spell_id].cast_time;
-	else
-		total_cast_time = spells[spell_id].recovery_time + spells[spell_id].cast_time;
-
-	if (total_cast_time > 0 && total_cast_time <= 2500)
-		extra_spell_amt = extra_spell_amt*25/100;
-	 else if (total_cast_time > 2500 && total_cast_time < 7000)
-		 extra_spell_amt = extra_spell_amt*(167*((total_cast_time - 1000)/1000)) / 1000;
-	 else
-		 extra_spell_amt = extra_spell_amt * total_cast_time / 7000;
-
-		if(extra_spell_amt*2 < base_spell_dmg)
-			return 0;
-
 		return extra_spell_amt;
 }
 
@@ -270,7 +258,7 @@ int32 Mob::GetActSpellHealing(uint16 spell_id, int32 value, Mob* target) {
 		value += GetFocusEffect(focusFcHealAmt, spell_id);
 		value += target->GetFocusIncoming(focusFcHealAmtIncoming, SE_FcHealAmtIncoming, this, spell_id);
 
-		if(itembonuses.HealAmt && spells[spell_id].classes[(GetClass()%16) - 1] >= GetLevel() - 5)
+		if(itembonuses.HealAmt)
 			value += GetExtraSpellAmt(spell_id, itembonuses.HealAmt, value) * modifier;
 
 		value += value*target->GetHealRate(spell_id, this)/100;
@@ -281,7 +269,7 @@ int32 Mob::GetActSpellHealing(uint16 spell_id, int32 value, Mob* target) {
 		if (Critical) {
 			entity_list.MessageClose_StringID(this, true, 100, MT_SpellCrits,
 					OTHER_CRIT_HEAL, GetName(), itoa(value));
-
+			
 			if (IsClient())
 				Message_StringID(MT_SpellCrits, YOU_CRIT_HEAL, itoa(value));
 		}
@@ -301,6 +289,9 @@ int32 Mob::GetActSpellHealing(uint16 spell_id, int32 value, Mob* target) {
 
 		if(chance && zone->random.Roll(chance))
 			value *= 2;
+
+		if(itembonuses.HealAmt)
+			value += GetExtraSpellAmt(spell_id, itembonuses.HealAmt / 6, value) * modifier;
 	}
 
 	if (IsNPC() && CastToNPC()->GetHealScale())
@@ -421,10 +412,14 @@ int32 Mob::GetActSpellDuration(uint16 spell_id, int32 duration)
 	int tic_inc = 0;
 	tic_inc = GetFocusEffect(focusSpellDurByTic, spell_id);
 
-	// unsure on the exact details, but bard songs that don't cost mana at some point get an extra tick, 60 for now
-	// a level 53 bard reported getting 2 tics
-	if (IsShortDurationBuff(spell_id) && IsBardSong(spell_id) && spells[spell_id].mana == 0 && GetClass() == BARD && GetLevel() > 60)
-		tic_inc++;
+	// Only need this for clients, since the change was for bard songs, I assume we should keep non bard songs getting +1
+	// However if its bard or not and is mez, charm or fear, we need to add 1 so that client is in sync
+	if (IsClient() && !(IsShortDurationBuff(spell_id) && IsBardSong(spell_id)) ||
+			IsFearSpell(spell_id) ||
+			IsCharmSpell(spell_id) ||
+			IsMezSpell(spell_id) ||
+			IsBlindSpell(spell_id))
+		tic_inc += 1;
 
 	return (((duration * increase) / 100) + tic_inc);
 }
@@ -767,7 +762,7 @@ void EntityList::AESpell(Mob *caster, Mob *center, uint16 spell_id, bool affect_
 				caster->SpellOnTarget(spell_id, curmob, false, true, resist_adjust);
 			}
 		} else {
-			if (spells[spell_id].aemaxtargets && iCounter < spells[spell_id].aemaxtargets)
+			if (spells[spell_id].aemaxtargets && iCounter < spells[spell_id].aemaxtargets) 
 				caster->SpellOnTarget(spell_id, curmob, false, true, resist_adjust);
 			if (!spells[spell_id].aemaxtargets)
 				caster->SpellOnTarget(spell_id, curmob, false, true, resist_adjust);
@@ -855,7 +850,7 @@ void EntityList::AEBardPulse(Mob *caster, Mob *center, uint16 spell_id, bool aff
 			if (!center->CheckLosFN(curmob))
 				continue;
 		} else { // check to stop casting beneficial ae buffs (to wit: bard songs) on enemies...
-			// See notes in AESpell() above for more info.
+			// See notes in AESpell() above for more info. 
 			if (caster->IsAttackAllowed(curmob, true))
 				continue;
 			if (caster->CheckAggro(curmob))

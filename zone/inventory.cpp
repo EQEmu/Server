@@ -606,7 +606,7 @@ void Client::DropItem(int16 slot_id)
 	// Take control of item in client inventory
 	ItemInst *inst = m_inv.PopItem(slot_id);
 	if(inst) {
-		int i = parse->EventItem(EVENT_DROP_ITEM, this, inst, nullptr, "", 0);
+		int i = parse->EventItem(EVENT_DROP_ITEM, this, inst, nullptr, "", slot_id);
 		if(i != 0) {
 			safe_delete(inst);
 		}

@@ -335,8 +335,8 @@ void Client::AddItemBonuses(const ItemInst *inst, StatBonuses* newbon, bool isAu
 	}
 
 	//FatherNitwit: New style haste, shields, and regens
-	if(newbon->haste < (int32)item->Haste) {
-		newbon->haste = item->Haste;
+	if((int32)item->Haste > 0) {
+		newbon->haste += item->Haste;
 	}
 	if(item->Regen > 0)
 		newbon->HPRegen += item->Regen;
@@ -390,10 +390,10 @@ void Client::AddItemBonuses(const ItemInst *inst, StatBonuses* newbon, bool isAu
 			newbon->HitChance += item->Accuracy;
 	}
 	if(item->CombatEffects > 0) {
-		if((newbon->ProcChance + item->CombatEffects) > RuleI(Character, ItemCombatEffectsCap))
-			newbon->ProcChance = RuleI(Character, ItemCombatEffectsCap);
+		if((newbon->MeleeDamage + item->CombatEffects) > RuleI(Character, ItemCombatEffectsCap))
+			newbon->MeleeDamage = RuleI(Character, ItemCombatEffectsCap);
 		else
-			newbon->ProcChance += item->CombatEffects;
+			newbon->MeleeDamage += item->CombatEffects;
 	}
 	if(item->DotShielding > 0) {
 		if((newbon->DoTShielding + item->DotShielding) > RuleI(Character, ItemDoTShieldingCap))
@@ -428,7 +428,7 @@ void Client::AddItemBonuses(const ItemInst *inst, StatBonuses* newbon, bool isAu
 			newbon->DSMitigation += item->DSMitigation;
 	}
 	if (item->Worn.Effect > 0 && item->Worn.Type == ET_WornEffect) {// latent effects
-		ApplySpellsBonuses(item->Worn.Effect, item->Worn.Level, newbon, 0, item->Worn.Type);
+		ApplySpellsBonuses(item->Worn.Effect, item->Worn.Level, newbon, 0, item->Worn.Type); 
 	}
 
 	if (item->Focus.Effect>0 && (item->Focus.Type == ET_Focus)) { // focus effects
@@ -559,7 +559,7 @@ void Client::AdditiveWornBonuses(const ItemInst *inst, StatBonuses* newbon, bool
 	/*
 	Powerful Non-live like option allows developers to add worn effects on items that
 	can stack with other worn effects of the same spell effect type, instead of only taking the highest value.
-	Ie Cleave I = 40 pct cleave - So if you equip 3 cleave I items you will have a 120 pct cleave bonus.
+	Ie Cleave I = 40 pct cleave - So if you equip 3 cleave I items you will have a 120 pct cleave bonus. 
 	To enable use RuleI(Spells, AdditiveBonusWornType)
 	Setting value =  2  Will force all live items to automatically be calculated additivily
 	Setting value to anything else will indicate the item 'worntype' that if set to the same, will cause the bonuses to use this calculation
@@ -579,7 +579,7 @@ void Client::AdditiveWornBonuses(const ItemInst *inst, StatBonuses* newbon, bool
 
 	if(GetLevel() < item->ReqLevel)
 		return;
-
+	
 	if (item->Worn.Effect > 0 && item->Worn.Type == RuleI(Spells, AdditiveBonusWornType))
 		ApplySpellsBonuses(item->Worn.Effect, item->Worn.Level, newbon, 0, item->Worn.Type);// Non-live like - Addititive latent effects
 
@@ -691,7 +691,7 @@ void Client::ApplyAABonuses(uint32 aaid, uint32 slots, StatBonuses* newbon)
 			continue;
 
 		Log.Out(Logs::Detail, Logs::AA, "Applying Effect %d from AA %u in slot %d (base1: %d, base2: %d) on %s", effect, aaid, slot, base1, base2, this->GetCleanName());
-
+			
 		uint8 focus = IsFocusEffect(0, 0, true,effect);
 		if (focus)
 		{
@@ -1007,7 +1007,7 @@ void Client::ApplyAABonuses(uint32 aaid, uint32 slots, StatBonuses* newbon)
 			case SE_BlockBehind:
 				newbon->BlockBehind += base1;
 				break;
-
+			
 			case SE_StrikeThrough:
 			case SE_StrikeThrough2:
 				newbon->StrikeThrough += base1;
@@ -1313,7 +1313,7 @@ void Client::ApplyAABonuses(uint32 aaid, uint32 slots, StatBonuses* newbon)
 
 			case SE_Vampirism:
 				newbon->Vampirism += base1;
-				break;
+				break;			
 
 			case SE_FrenziedDevastation:
 				newbon->FrenziedDevastation += base2;
@@ -1416,7 +1416,7 @@ void Client::ApplyAABonuses(uint32 aaid, uint32 slots, StatBonuses* newbon)
 			}
 
 			case SE_SkillProcSuccess:{
-
+				
 				for(int e = 0; e < MAX_SKILL_PROCS; e++)
 				{
 					if(newbon->SkillProcSuccess[e] && newbon->SkillProcSuccess[e] == aaid)
@@ -1449,7 +1449,7 @@ void Mob::CalcSpellBonuses(StatBonuses* newbon)
 	int buff_count = GetMaxTotalSlots();
 	for(i = 0; i < buff_count; i++) {
 		if(buffs[i].spellid != SPELL_UNKNOWN){
-			ApplySpellsBonuses(buffs[i].spellid, buffs[i].casterlevel, newbon, buffs[i].casterid, 0, buffs[i].ticsremaining, i, buffs[i].instrument_mod);
+			ApplySpellsBonuses(buffs[i].spellid, buffs[i].casterlevel, newbon, buffs[i].casterid, 0, buffs[i].ticsremaining,i);
 
 			if (buffs[i].numhits > 0)
 				Numhits(true);
@@ -1472,9 +1472,8 @@ void Mob::CalcSpellBonuses(StatBonuses* newbon)
 	if (GetClass() == BARD) newbon->ManaRegen = 0; // Bards do not get mana regen from spells.
 }
 
-void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *new_bonus, uint16 casterId,
-			     uint8 WornType, int32 ticsremaining, int buffslot, int instrument_mod,
-			     bool IsAISpellEffect, uint16 effect_id, int32 se_base, int32 se_limit, int32 se_max)
+void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* new_bonus, uint16 casterId, uint8 WornType, uint32 ticsremaining, int buffslot,
+							 bool IsAISpellEffect, uint16 effect_id, int32 se_base, int32 se_limit, int32 se_max)
 {
 	int i, effect_value, base2, max, effectid;
 	bool AdditiveWornBonus = false;
@@ -1510,9 +1509,9 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 
 			if (WornType && (RuleI(Spells, AdditiveBonusWornType) == WornType))
 				AdditiveWornBonus = true;
-
+		
 			effectid = spells[spell_id].effectid[i];
-			effect_value = CalcSpellEffectValue(spell_id, i, casterlevel, instrument_mod, caster, ticsremaining);
+			effect_value = CalcSpellEffectValue(spell_id, i, casterlevel, caster, ticsremaining);
 			base2 = spells[spell_id].base2[i];
 			max = spells[spell_id].max[i];
 		}
@@ -1561,49 +1560,100 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 
 			case SE_AttackSpeed:
 			{
-				if ((effect_value - 100) > 0) { // Haste
-					if (new_bonus->haste < 0) break; // Slowed - Don't apply haste
-					if ((effect_value - 100) > new_bonus->haste) {
-						new_bonus->haste = effect_value - 100;
+
+				if (AdditiveWornBonus) {
+					if ((effect_value - 100) > 0) { // Haste
+						if (new_bonus->haste < 0) break; // Slowed - Don't apply haste
+						if ((effect_value - 100) > new_bonus->haste) {
+							new_bonus->haste += effect_value - 100;
+						}
+					}
+					else if ((effect_value - 100) < 0) { // Slow
+						int real_slow_value = (100 - effect_value) * -1;
+						real_slow_value -= ((real_slow_value * GetSlowMitigation()/100));
+						if (real_slow_value < new_bonus->haste)
+							new_bonus->haste += real_slow_value;
 					}
 				}
-				else if ((effect_value - 100) < 0) { // Slow
-					int real_slow_value = (100 - effect_value) * -1;
-					real_slow_value -= ((real_slow_value * GetSlowMitigation()/100));
-					if (real_slow_value < new_bonus->haste)
-						new_bonus->haste = real_slow_value;
+				else
+				{
+					if ((effect_value - 100) > 0) { // Haste
+						if (new_bonus->haste < 0) break; // Slowed - Don't apply haste
+						if ((effect_value - 100) > new_bonus->haste) {
+							new_bonus->haste = effect_value - 100;
+						}
+					}
+					else if ((effect_value - 100) < 0) { // Slow
+						int real_slow_value = (100 - effect_value) * -1;
+						real_slow_value -= ((real_slow_value * GetSlowMitigation()/100));
+						if (real_slow_value < new_bonus->haste)
+							new_bonus->haste = real_slow_value;
+					}
 				}
 				break;
 			}
 
 			case SE_AttackSpeed2:
-			{
-				if ((effect_value - 100) > 0) { // Haste V2 - Stacks with V1 but does not Overcap
-					if (new_bonus->hastetype2 < 0) break; //Slowed - Don't apply haste2
-					if ((effect_value - 100) > new_bonus->hastetype2) {
-						new_bonus->hastetype2 = effect_value - 100;
+			{				
+				if (AdditiveWornBonus) {
+					if ((effect_value - 100) > 0) { // Haste
+						if (new_bonus->hastetype2 < 0) break; // Slowed - Don't apply haste
+						if ((effect_value - 100) > new_bonus->hastetype2) {
+							new_bonus->hastetype2 += effect_value - 100;
+						}
+					}
+					else if ((effect_value - 100) < 0) { // Slow
+						int real_slow_value = (100 - effect_value) * -1;
+						real_slow_value -= ((real_slow_value * GetSlowMitigation()/100));
+						if (real_slow_value < new_bonus->hastetype2)
+							new_bonus->hastetype2 += real_slow_value;
 					}
 				}
-				else if ((effect_value - 100) < 0) { // Slow
-					int real_slow_value = (100 - effect_value) * -1;
-					real_slow_value -= ((real_slow_value * GetSlowMitigation()/100));
-					if (real_slow_value < new_bonus->hastetype2)
-						new_bonus->hastetype2 = real_slow_value;
+				else
+				{
+					if ((effect_value - 100) > 0) { // Haste
+						if (new_bonus->hastetype2 < 0) break; // Slowed - Don't apply haste
+						if ((effect_value - 100) > new_bonus->hastetype2) {
+							new_bonus->hastetype2 = effect_value - 100;
+						}
+					}
+					else if ((effect_value - 100) < 0) { // Slow
+						int real_slow_value = (100 - effect_value) * -1;
+						real_slow_value -= ((real_slow_value * GetSlowMitigation()/100));
+						if (real_slow_value < new_bonus->hastetype2)
+							new_bonus->hastetype2 = real_slow_value;
+					}
 				}
 				break;
 			}
 
 			case SE_AttackSpeed3:
 			{
-				if (effect_value < 0){ //Slow
-					effect_value -= ((effect_value * GetSlowMitigation()/100));
-					if (effect_value < new_bonus->hastetype3)
-						new_bonus->hastetype3 = effect_value;
-				}
+				if (AdditiveWornBonus) {
+					if (effect_value < 0){ //Slow
+						effect_value -= ((effect_value * GetSlowMitigation()/100));
+						if (effect_value < new_bonus->hastetype3)
+							new_bonus->hastetype3 += effect_value;
+					}
 
-				else if (effect_value > 0) { // Haste V3 - Stacks and Overcaps
-					if (effect_value > new_bonus->hastetype3) {
-						new_bonus->hastetype3 = effect_value;
+					else if (effect_value > 0) { // Haste V3 - Stacks and Overcaps
+						if (effect_value > new_bonus->hastetype3) {
+							new_bonus->hastetype3 += effect_value;
+						}
+					}
+				}
+				else
+				{
+					if (effect_value < 0){ //Slow
+						effect_value -= ((effect_value * GetSlowMitigation()/100));
+						if (effect_value < new_bonus->hastetype3)
+							new_bonus->hastetype3 = effect_value;
+					}
+
+					else if (effect_value > 0) { // Haste V3 - Stacks and Overcaps
+						if (effect_value > new_bonus->hastetype3) {
+							new_bonus->hastetype3 = effect_value;
+						}
 					}
 				}
 				break;
@@ -1618,13 +1668,21 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 
 				if (effect_value < 0) //A few spells use negative values(Descriptions all indicate it should be a slow)
 					effect_value = effect_value * -1;
-
-				if (effect_value > 0 && effect_value > new_bonus->inhibitmelee) {
-					effect_value -= ((effect_value * GetSlowMitigation()/100));
-					if (effect_value > new_bonus->inhibitmelee)
-						new_bonus->inhibitmelee = effect_value;
+				if (AdditiveWornBonus) {
+					if (effect_value > 0 && effect_value > new_bonus->inhibitmelee) {
+						effect_value -= ((effect_value * GetSlowMitigation()/100));
+						if (effect_value > new_bonus->inhibitmelee) 
+							new_bonus->inhibitmelee += effect_value;
+					}
 				}
-
+				else
+				{
+					if (effect_value > 0 && effect_value > new_bonus->inhibitmelee) {
+						effect_value -= ((effect_value * GetSlowMitigation()/100));
+						if (effect_value > new_bonus->inhibitmelee) 
+							new_bonus->inhibitmelee = effect_value;
+					}
+				}
 				break;
 			}
 
@@ -1840,7 +1898,7 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 					new_bonus->DamageShieldType = GetDamageShieldType(spell_id, max);
 				else
 					new_bonus->DamageShieldType = GetDamageShieldType(spell_id);
-
+				
 				break;
 			}
 
@@ -2021,7 +2079,7 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 
 			case SE_Vampirism:
 				new_bonus->Vampirism += effect_value;
-				break;
+				break;	
 
 			case SE_AllInstrumentMod:
 			{
@@ -2264,7 +2322,7 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 			case SE_CriticalSpellChance:
 			{
 				new_bonus->CriticalSpellChance += effect_value;
-
+				
 				if (base2 > new_bonus->SpellCritDmgIncNoStack)
 					new_bonus->SpellCritDmgIncNoStack = base2;
 				break;
@@ -2474,7 +2532,7 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 
 			case SE_NegateAttacks:
 			{
-				if (!new_bonus->NegateAttacks[0] ||
+				if (!new_bonus->NegateAttacks[0] || 
 					((new_bonus->NegateAttacks[0] && new_bonus->NegateAttacks[2]) && (new_bonus->NegateAttacks[2] < max))){
 					new_bonus->NegateAttacks[0] = 1;
 					new_bonus->NegateAttacks[1] = buffslot;
@@ -2494,7 +2552,7 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 				break;
 			}
 
-
+			
 			case SE_MeleeThresholdGuard:
 			{
 				if (new_bonus->MeleeThresholdGuard[0] < effect_value){
@@ -2861,17 +2919,17 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 				new_bonus->NegateIfCombat = true;
 				break;
 
-			case SE_Screech:
+			case SE_Screech: 
 				new_bonus->Screech = effect_value;
 				break;
 
 			case SE_AlterNPCLevel:
 
 				if (IsNPC()){
-					if (!new_bonus->AlterNPCLevel
-					|| ((effect_value < 0) && (new_bonus->AlterNPCLevel > effect_value))
+					if (!new_bonus->AlterNPCLevel 
+					|| ((effect_value < 0) && (new_bonus->AlterNPCLevel > effect_value)) 
 					|| ((effect_value > 0) && (new_bonus->AlterNPCLevel < effect_value))) {
-
+	
 						int tmp_lv =  GetOrigLevel() + effect_value;
 						if (tmp_lv < 1)
 							tmp_lv = 1;
@@ -2909,7 +2967,7 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 				new_bonus->BerserkSPA = true;
 				break;
 
-
+				
 			case SE_Metabolism:
 				new_bonus->Metabolism += effect_value;
 				break;
@@ -3010,7 +3068,7 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 			}
 
 			case SE_SkillProc:{
-
+				
 				for(int e = 0; e < MAX_SKILL_PROCS; e++)
 				{
 					if(new_bonus->SkillProc[e] && new_bonus->SkillProc[e] == spell_id)
@@ -3025,7 +3083,7 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 			}
 
 			case SE_SkillProcSuccess:{
-
+				
 				for(int e = 0; e < MAX_SKILL_PROCS; e++)
 				{
 					if(new_bonus->SkillProcSuccess[e] && new_bonus->SkillProcSuccess[e] == spell_id)
@@ -3041,9 +3099,9 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 
 			//Special custom cases for loading effects on to NPC from 'npc_spels_effects' table
 			if (IsAISpellEffect) {
-
+				
 				//Non-Focused Effect to modify incoming spell damage by resist type.
-				case SE_FcSpellVulnerability:
+				case SE_FcSpellVulnerability: 
 					ModVulnerability(base2, effect_value);
 				break;
 			}
@@ -3109,7 +3167,7 @@ void NPC::CalcItemBonuses(StatBonuses *newbon)
 					newbon->HitChance += cur->Accuracy;
 				}
 				if(cur->CombatEffects > 0) {
-					newbon->ProcChance += cur->CombatEffects;
+					newbon->MeleeDamage += cur->CombatEffects;
 				}
 				if (cur->Worn.Effect>0 && (cur->Worn.Type == ET_WornEffect)) { // latent effects
 					ApplySpellsBonuses(cur->Worn.Effect, cur->Worn.Level, newbon, 0, cur->Worn.Type);
@@ -4395,7 +4453,7 @@ void Mob::NegateSpellsBonuses(uint16 spell_id)
 					aabonuses.SlayUndead[0] = effect_value;
 					aabonuses.SlayUndead[1] = effect_value;
 					break;
-
+			
 				case SE_DoubleRangedAttack:
 					spellbonuses.DoubleRangedAttack = effect_value;
 					aabonuses.DoubleRangedAttack = effect_value;
@@ -4415,7 +4473,7 @@ void Mob::NegateSpellsBonuses(uint16 spell_id)
 					aabonuses.ShieldEquipDmgMod[1] = effect_value;
 					itembonuses.ShieldEquipDmgMod[0] = effect_value;
 					itembonuses.ShieldEquipDmgMod[1] = effect_value;
-					break;
+					break; 
 
 				case SE_TriggerMeleeThreshold:
 					spellbonuses.TriggerMeleeThreshold = false;

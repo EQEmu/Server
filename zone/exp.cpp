@@ -59,6 +59,97 @@ static uint32 MaxBankedRaidLeadershipPoints(int Level)
 	return 10;
 }
 
+uint32 Client::CalcEXP(uint8 conlevel) {
+
+	uint32 in_add_exp = EXP_FORMULA;
+
+
+	if((XPRate != 0))
+		in_add_exp = static_cast<uint32>(in_add_exp * (static_cast<float>(XPRate) / 100.0f));
+
+	float totalmod = 1.0;
+	float zemmod = 1.0;
+	//get modifiers
+	if(RuleR(Character, ExpMultiplier) >= 0){
+		totalmod *= RuleR(Character, ExpMultiplier);
+	}
+
+	if(zone->newzone_data.zone_exp_multiplier >= 0){
+		zemmod *= zone->newzone_data.zone_exp_multiplier;
+	}
+
+	if(RuleB(Character,UseRaceClassExpBonuses))
+	{
+		if(GetBaseRace() == HALFLING){
+			totalmod *= 1.05;
+		}
+
+		if(GetClass() == ROGUE || GetClass() == WARRIOR){
+			totalmod *= 1.05;
+		}
+	}
+
+	if(zone->IsHotzone())
+	{
+		totalmod += RuleR(Zone, HotZoneBonus);
+	}
+
+	in_add_exp = uint32(float(in_add_exp) * totalmod * zemmod);
+
+	if(RuleB(Character,UseXPConScaling))
+	{
+		if (conlevel != 0xFF) {
+			switch (conlevel)
+			{
+			case CON_GREEN:
+				in_add_exp = 0;
+				return 0;
+			case CON_LIGHTBLUE:
+				in_add_exp = in_add_exp * RuleI(Character, LightBlueModifier)/100;
+				break;
+			case CON_BLUE:
+				in_add_exp = in_add_exp * RuleI(Character, BlueModifier)/100;
+				break;
+			case CON_WHITE:
+				in_add_exp = in_add_exp * RuleI(Character, WhiteModifier)/100;
+				break;
+			case CON_YELLOW:
+				in_add_exp = in_add_exp * RuleI(Character, YellowModifier)/100;
+				break;
+			case CON_RED:
+				in_add_exp = in_add_exp * RuleI(Character, RedModifier)/100;
+				break;
+			}
+		}
+	}
+
+	float aatotalmod = 1.0;
+	if(zone->newzone_data.zone_exp_multiplier >= 0){
+		aatotalmod *= zone->newzone_data.zone_exp_multiplier;
+	}
+
+
+
+	if(RuleB(Character,UseRaceClassExpBonuses))
+	{
+		if(GetBaseRace() == HALFLING){
+			aatotalmod *= 1.05;
+		}
+
+		if(GetClass() == ROGUE || GetClass() == WARRIOR){
+			aatotalmod *= 1.05;
+		}
+	}
+
+	if(RuleB(Zone, LevelBasedEXPMods)){
+		if(zone->level_exp_mod[GetLevel()].ExpMod){
+			in_add_exp *= zone->level_exp_mod[GetLevel()].ExpMod;
+		}
+	}
+
+	return in_add_exp;
+}
+
 void Client::AddEXP(uint32 in_add_exp, uint8 conlevel, bool resexp) {
 
 	this->EVENT_ITEM_ScriptStopReturn();
@@ -78,7 +169,7 @@ void Client::AddEXP(uint32 in_add_exp, uint8 conlevel, bool resexp) {
 
 		//figure out how much of this goes to AAs
 		add_aaxp = add_exp * m_epp.perAA / 100;
-		//take that ammount away from regular exp
+		//take that amount away from regular exp
 		add_exp -= add_aaxp;
 
 		float totalmod = 1.0;
@@ -247,12 +338,22 @@ void Client::SetEXP(uint32 set_exp, uint32 set_aaxp, bool isrezzexp) {
 		Message(13, "Error in Client::SetEXP. EXP not set.");
 		return; // Must be invalid class/race
 	}
+	uint32 i = 0;
+	uint32 membercount = 0;
+	if(GetGroup())
+	{
+		for (i = 0; i < MAX_GROUP_MEMBERS; i++) {
+			if (GetGroup()->members[i] != nullptr) {
+				membercount++;
+			}
+		}
+	}
 
 	if ((set_exp + set_aaxp) > (m_pp.exp+m_pp.expAA)) {
 		if (isrezzexp)
 			this->Message_StringID(MT_Experience, REZ_REGAIN);
 		else{
-			if(this->IsGrouped())
+			if(membercount > 1)
 				this->Message_StringID(MT_Experience, GAIN_GROUPXP);
 			else if(IsRaidGrouped())
 				Message_StringID(MT_Experience, GAIN_RAIDEXP);
@@ -604,8 +705,8 @@ void Group::SplitExp(uint32 exp, Mob* other) {
 		groupmod = 2.16;
 	else
 		groupmod = 1.0;
-
-	groupexp += (uint32)((float)exp * groupmod * (RuleR(Character, GroupExpMultiplier)));
+	if(membercount > 1 &&  membercount < 6)
+		groupexp += (uint32)((float)exp * groupmod * (RuleR(Character, GroupExpMultiplier)));
 
 	int conlevel = Mob::GetLevelCon(maxlevel, other->GetLevel());
 	if(conlevel == CON_GREEN)

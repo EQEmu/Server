@@ -1561,6 +1561,8 @@ bool ZoneDatabase::EnableRecipe(uint32 recipe_id)
 	if (!results.Success())
 
 	return results.RowsAffected() > 0;
+
+	return false;
 }
 
 bool ZoneDatabase::DisableRecipe(uint32 recipe_id)
@@ -1571,4 +1573,6 @@ bool ZoneDatabase::DisableRecipe(uint32 recipe_id)
 	if (!results.Success())
 
 	return results.RowsAffected() > 0;
+
+	return false;
 }

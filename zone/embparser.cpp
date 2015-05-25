@@ -1321,6 +1321,7 @@ void PerlembParser::ExportEventVariables(std::string &package_name, QuestEventID
 			ExportVar(package_name.c_str(), "itemid", objid);
 			ExportVar(package_name.c_str(), "itemname", iteminst->GetItem()->Name);
 			ExportVar(package_name.c_str(), "slotid", extradata);
+			ExportVar(package_name.c_str(), "spell_id", iteminst->GetItem()->Click.Effect);
 			break;
 		}
 
@@ -1397,6 +1398,14 @@ void PerlembParser::ExportEventVariables(std::string &package_name, QuestEventID
 			ExportVar(package_name.c_str(), "killer_damage", sep.arg[1]);
 			ExportVar(package_name.c_str(), "killer_spell", sep.arg[2]);
 			ExportVar(package_name.c_str(), "killer_skill", sep.arg[3]);
+			break;
+		}
+		case EVENT_DROP_ITEM: {
+			ExportVar(package_name.c_str(), "quantity", iteminst->IsStackable() ? iteminst->GetCharges() : 1);
+			ExportVar(package_name.c_str(), "itemname", iteminst->GetItem()->Name);
+			ExportVar(package_name.c_str(), "itemid", iteminst->GetItem()->ID);
+			ExportVar(package_name.c_str(), "spell_id", iteminst->GetItem()->Click.Effect);
+			ExportVar(package_name.c_str(), "slotid", extradata);
 			break;
 		}
 
