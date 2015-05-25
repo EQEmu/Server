@@ -3375,19 +3375,6 @@ void Mob::BuffProcess()
 					--buffs[buffs_i].ticsremaining;
 
 					if (buffs[buffs_i].ticsremaining == 0) {
-						// Why do we need to let these go negative? Client uses negatives for perma buffs
-						if (!IsShortDurationBuff(buffs[buffs_i].spellid) ||
-							IsFearSpell(buffs[buffs_i].spellid) ||
-							IsCharmSpell(buffs[buffs_i].spellid) ||
-							IsMezSpell(buffs[buffs_i].spellid) ||
-							IsBlindSpell(buffs[buffs_i].spellid))
-						{
-							Log.Out(Logs::Detail, Logs::Spells, "Buff %d in slot %d has expired. Fading.", buffs[buffs_i].spellid, buffs_i);
-							BuffFadeBySlot(buffs_i);
-						}
-					}
-					else if (buffs[buffs_i].ticsremaining < 0)
-					{
 						Log.Out(Logs::Detail, Logs::Spells, "Buff %d in slot %d has expired. Fading.", buffs[buffs_i].spellid, buffs_i);
 						BuffFadeBySlot(buffs_i);
 					}

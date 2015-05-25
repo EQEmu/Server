@@ -421,14 +421,10 @@ int32 Mob::GetActSpellDuration(uint16 spell_id, int32 duration)
 	int tic_inc = 0;
 	tic_inc = GetFocusEffect(focusSpellDurByTic, spell_id);
 
-	// Only need this for clients, since the change was for bard songs, I assume we should keep non bard songs getting +1
-	// However if its bard or not and is mez, charm or fear, we need to add 1 so that client is in sync
-	if (IsClient() && !(IsShortDurationBuff(spell_id) && IsBardSong(spell_id)) ||
-			IsFearSpell(spell_id) ||
-			IsCharmSpell(spell_id) ||
-			IsMezSpell(spell_id) ||
-			IsBlindSpell(spell_id))
-		tic_inc += 1;
+	// unsure on the exact details, but bard songs that don't cost mana at some point get an extra tick, 60 for now
+	// a level 53 bard reported getting 2 tics
+	if (IsShortDurationBuff(spell_id) && IsBardSong(spell_id) && spells[spell_id].mana == 0 && GetClass() == BARD && GetLevel() > 60)
+		tic_inc++;
 
 	return (((duration * increase) / 100) + tic_inc);
 }
