@@ -3446,7 +3446,7 @@ void Bot::AI_Process() {
 			if(IsMoving()) {
 				SetHeading(0);
 				SetRunAnimSpeed(0);
-				SetCurrentSpeed(GetRunSpeed());
+				SetCurrentSpeed(GetRunspeed());
 
 				if(moved) {
 					SetCurrentSpeed(0);
@@ -3512,7 +3512,6 @@ void Bot::AI_Process() {
 		if(atCombatRange) {
 			if(IsMoving()) {
 				SetHeading(CalculateHeadingToTarget(GetTarget()->GetX(), GetTarget()->GetY()));
-				SetRunAnimSpeed(0);
 				SetCurrentSpeed(0);
 				if(moved) {
 					moved = false;
