@@ -1,5 +1,7 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 05/26/2015 ==
+Uleat: Fix for packet size adjustment after initial declaration (issue #418) - should clear up some random client crashes and the inability to progress to charsel screen on affected accounts
 
 == 05/25/2015 ==
 Akkadius: Implemented disjointed zone based time, this can be triggered via quest methods

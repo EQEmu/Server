@@ -571,12 +571,25 @@ void EQStream::SendPacket(uint16 opcode, EQApplicationPacket *p)
 		}
 	}
 
+
+	// The (p->size++) and (length--) modification code inside of the (opcode & 0x00FF == 0) checks are a temporary solution
+	// to a discongruency in packet size due to an alteration of packet size after the initial declaration. This led to client
+	// crashes where the original packet size + protocol bytes mod MaxLen() produced a 0 result.
+	//
+	// These changes are local-only and there may be other calling methods affected by the EQ##Packet::serialize() issue.
+	if ((opcode & 0x00FF) == 0) { // this is final..but, had scope issues during early testing at this point
+		Log.Out(Logs::Detail, Logs::Netcode, _L "Adjusting application packet length for high byte opcode 0x%04X (%d to %d)" __L, opcode, p->size++, p->size);
+	}
+
 	// Convert the EQApplicationPacket to 1 or more EQProtocolPackets
 	if (p->size>(MaxLen-8)) { // proto-op(2), seq(2), app-op(2) ... data ... crc(2)
 		Log.Out(Logs::Detail, Logs::Netcode, _L "Making oversized packet, len %d" __L, p->size);
 
 		unsigned char *tmpbuff=new unsigned char[p->size+3];
 		length=p->serialize(opcode, tmpbuff);
+		if ((opcode & 0x00FF) == 0) { // temp solution until all serialize() calls can be evaluated
+			Log.Out(Logs::Detail, Logs::Netcode, _L "Adjusting protocol packet length for high byte opcode 0x%04X (%d to %d)" __L, opcode, length--, length);
+		}
 
 		EQProtocolPacket *out=new EQProtocolPacket(OP_Fragment,nullptr,MaxLen-4);
 		*(uint32 *)(out->pBuffer+2)=htonl(p->Size());
@@ -601,6 +614,9 @@ void EQStream::SendPacket(uint16 opcode, EQApplicationPacket *p)
 
 		unsigned char *tmpbuff=new unsigned char[p->Size()+3];
 		length=p->serialize(opcode, tmpbuff+2) + 2;
+		if ((opcode & 0x00FF) == 0) { // temp solution until all serialize() calls can be evaluated
+			Log.Out(Logs::Detail, Logs::Netcode, _L "Adjusting protocol packet length for high byte opcode 0x%04X (%d to %d)" __L, opcode, length--, length);
+		}
 
 		EQProtocolPacket *out=new EQProtocolPacket(OP_Packet,tmpbuff,length);
 
