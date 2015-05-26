@@ -386,7 +386,11 @@ void lua_create_guild(const char *name, const char *leader) {
 }
 
 void lua_set_time(int hour, int min) {
-	quest_manager.settime(hour, min);
+	quest_manager.settime(hour, min, true);
+}
+
+void lua_set_time(int hour, int min, bool update_world) {
+	quest_manager.settime(hour, min, update_world);
 }
 
 void lua_signal(int npc_id, int signal_id) {
@@ -979,7 +983,7 @@ int lua_get_zone_weather() {
 
 luabind::adl::object lua_get_zone_time(lua_State *L) {
 	TimeOfDay_Struct eqTime;
-	zone->zone_time.getEQTimeOfDay(time(0), &eqTime);
+	zone->zone_time.GetCurrentEQTimeOfDay(time(0), &eqTime);
 
 	luabind::adl::object ret = luabind::newtable(L);
 	ret["zone_hour"] = eqTime.hour - 1;
@@ -1467,7 +1471,8 @@ luabind::scope lua_register_general() {
 		luabind::def("set_sky", &lua_set_sky),
 		luabind::def("set_guild", &lua_set_guild),
 		luabind::def("create_guild", &lua_create_guild),
-		luabind::def("set_time", &lua_set_time),
+		luabind::def("set_time", (void(*)(int, int))&lua_set_time),
+		luabind::def("set_time", (void(*)(int, int, bool))&lua_set_time),
 		luabind::def("signal", (void(*)(int,int))&lua_signal),
 		luabind::def("signal", (void(*)(int,int,int))&lua_signal),
 		luabind::def("set_global", &lua_set_global),

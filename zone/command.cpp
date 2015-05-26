@@ -1369,7 +1369,7 @@ void command_date(Client *c, const Seperator *sep)
 	else {
 		int h=0, m=0;
 		TimeOfDay_Struct eqTime;
-		zone->zone_time.getEQTimeOfDay( time(0), &eqTime);
+		zone->zone_time.GetCurrentEQTimeOfDay( time(0), &eqTime);
 		if(!sep->IsNumber(4))
 		h=eqTime.hour;
 		else
@@ -1402,7 +1402,7 @@ void command_timezone(Client *c, const Seperator *sep)
 		// Update all clients with new TZ.
 		EQApplicationPacket* outapp = new EQApplicationPacket(OP_TimeOfDay, sizeof(TimeOfDay_Struct));
 		TimeOfDay_Struct* tod = (TimeOfDay_Struct*)outapp->pBuffer;
-		zone->zone_time.getEQTimeOfDay(time(0), tod);
+		zone->zone_time.GetCurrentEQTimeOfDay(time(0), tod);
 		entity_list.QueueClients(c, outapp);
 		safe_delete(outapp);
 	}
@@ -4393,7 +4393,7 @@ void command_time(Client *c, const Seperator *sep)
 	else {
 		c->Message(13, "To set the Time: #time HH [MM]");
 		TimeOfDay_Struct eqTime;
-		zone->zone_time.getEQTimeOfDay( time(0), &eqTime);
+		zone->zone_time.GetCurrentEQTimeOfDay( time(0), &eqTime);
 		sprintf(timeMessage,"%02d:%s%d %s (Timezone: %ih %im)", 
 			((eqTime.hour - 1) % 12) == 0 ? 12 : ((eqTime.hour - 1) % 12),
 			(eqTime.minute < 10) ? "0" : "", 

@@ -126,7 +126,7 @@ public:
 	void setsky(uint8 new_sky);
 	void setguild(uint32 new_guild_id, uint8 new_rank);
 	void CreateGuild(const char *guild_name, const char *leader);
-	void settime(uint8 new_hour, uint8 new_min);
+	void settime(uint8 new_hour, uint8 new_min, bool update_world = true);
 	void itemlink(int item_id);
 	void signal(int npc_id, int wait_ms = 0);
 	void signalwith(int npc_id, int signal_id, int wait_ms = 0);

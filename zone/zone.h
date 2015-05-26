@@ -43,6 +43,7 @@ struct ZonePoint
 	int32 target_zone_instance;
 	uint32 client_version_mask;
 };
+
 struct ZoneClientAuth_Struct {
 	uint32	ip;			// client's IP address
 	uint32	wid;		// client's WorldID#
@@ -85,6 +86,10 @@ public:
 
 	Zone(uint32 in_zoneid, uint32 in_instanceid, const char* in_short_name);
 	~Zone();
+
+	/* When zone has its own version of time */
+	bool is_zone_time_localized;
+
 	bool	Init(bool iStaticZone);
 	bool	LoadZoneCFG(const char* filename, uint16 instance_id, bool DontLoadDefault = false);
 	bool	SaveZoneCFG();
@@ -153,7 +158,7 @@ public:
 	inline bool InstantGrids()			{ return(!initgrids_timer.Enabled()); }
 	void		SetStaticZone(bool sz)	{ staticzone = sz; }
 	inline bool	IsStaticZone()			{ return staticzone; }
-	inline void	GotCurTime(bool time)	{ gottime = time; }
+	inline void	SetZoneHasCurrentTime(bool time)	{ zone_has_current_time = time; }
 
 	void	SpawnConditionChanged(const SpawnCondition &c, int16 old_value);
 
@@ -206,7 +211,7 @@ public:
 	EQTime	zone_time;
 	void	GetTimeSync();
 	void	SetDate(uint16 year, uint8 month, uint8 day, uint8 hour, uint8 minute);
-	void	SetTime(uint8 hour, uint8 minute);
+	void SetTime(uint8 hour, uint8 minute, bool update_world = true);
 
 	void	weatherSend();
 	bool	CanBind() const { return(can_bind); }
@@ -319,7 +324,7 @@ private:
 
 
 	bool	staticzone;
-	bool	gottime;
+	bool	zone_has_current_time;
 
 	uint32 pQueuedMerchantsWorkID;
 	uint32 pQueuedTempMerchantsWorkID;

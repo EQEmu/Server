@@ -425,8 +425,15 @@ int32 Mob::GetActSpellDuration(uint16 spell_id, int32 duration)
 	// a level 53 bard reported getting 2 tics
 	if (IsShortDurationBuff(spell_id) && IsBardSong(spell_id) && spells[spell_id].mana == 0 && GetClass() == BARD && GetLevel() > 60)
 		tic_inc++;
+	float focused = ((duration * increase) / 100.0f) + tic_inc;
+	int ifocused = static_cast<int>(focused);
 
-	return (((duration * increase) / 100) + tic_inc);
+	// 7.6 is rounded to 7, 8.6 is rounded to 9
+	// 6 is 6, etc
+	if (FCMP(focused, ifocused) || ifocused % 2) // equal or odd
+		return ifocused;
+	else // even and not equal round to odd
+		return ifocused + 1;
 }
 
 int32 Client::GetActSpellCasttime(uint16 spell_id, int32 casttime)

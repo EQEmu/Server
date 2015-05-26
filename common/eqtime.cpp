@@ -43,19 +43,19 @@ EQTime::EQTime(TimeOfDay_Struct start_eq, time_t start_real)
 
 EQTime::EQTime()
 {
-	timezone=0;
+	timezone = 0;
 	memset(&eqTime, 0, sizeof(eqTime));
 	//Defaults for time
 	TimeOfDay_Struct start;
-	start.day=1;
-	start.hour=9;
-	start.minute=0;
-	start.month=1;
-	start.year=3100;
+	start.day = 1;
+	start.hour = 9;
+	start.minute = 0;
+	start.month = 1;
+	start.year = 3100;
 	//Set default time zone
-	timezone=0;
+	timezone = 0;
 	//Start EQTimer
-	setEQTimeOfDay(start, time(0));
+	SetCurrentEQTimeOfDay(start, time(0));
 }
 
 EQTime::~EQTime()
@@ -67,10 +67,10 @@ EQTime::~EQTime()
 //Input: Current Time (as a time_t), a pointer to the TimeOfDay_Struct that will be written to.
 //Output: 0=Error, 1=Sucess
 
-int EQTime::getEQTimeOfDay( time_t timeConvert, struct TimeOfDay_Struct *eqTimeOfDay )
+int EQTime::GetCurrentEQTimeOfDay(time_t timeConvert, struct TimeOfDay_Struct *eqTimeOfDay)
 {
 	/* check to see if we have a reference time to go by. */
-	if( eqTime.start_realtime == 0 )
+	if (eqTime.start_realtime == 0)
 		return 0;
 
 	unsigned long diff = timeConvert - eqTime.start_realtime;
@@ -83,7 +83,7 @@ int EQTime::getEQTimeOfDay( time_t timeConvert, struct TimeOfDay_Struct *eqTimeO
 	int32 ntz = timezone;
 
 	/* The minutes range from 0 - 59 */
-	diff += eqTime.start_eqtime.minute + (ntz%60);
+	diff += eqTime.start_eqtime.minute + (ntz % 60);
 	eqTimeOfDay->minute = diff % 60;
 	diff /= 60;
 	ntz /= 60;
@@ -97,24 +97,24 @@ int EQTime::getEQTimeOfDay( time_t timeConvert, struct TimeOfDay_Struct *eqTimeO
 	//
 	// Modify it so that it works from
 	// 0-23 for our calculations
-	diff += ( eqTime.start_eqtime.hour - 1) + (ntz%24);
-	eqTimeOfDay->hour = (diff%24) + 1;
+	diff += (eqTime.start_eqtime.hour - 1) + (ntz % 24);
+	eqTimeOfDay->hour = (diff % 24) + 1;
 	diff /= 24;
 	ntz /= 24;
 
 	// The days range from 1-28
 	// Modify it so that it works from
 	// 0-27 for our calculations
-	diff += ( eqTime.start_eqtime.day - 1 ) + (ntz%28);
-	eqTimeOfDay->day = (diff%28) + 1;
+	diff += (eqTime.start_eqtime.day - 1) + (ntz % 28);
+	eqTimeOfDay->day = (diff % 28) + 1;
 	diff /= 28;
 	ntz /= 28;
 
 	// The months range from 1-12
 	// Modify it so that it works from
 	// 0-11 for our calculations
-	diff += ( eqTime.start_eqtime.month - 1 ) + (ntz%12);
-	eqTimeOfDay->month = (diff%12) + 1;
+	diff += (eqTime.start_eqtime.month - 1) + (ntz % 12);
+	eqTimeOfDay->month = (diff % 12) + 1;
 	diff /= 12;
 	ntz /= 12;
 
@@ -124,12 +124,12 @@ int EQTime::getEQTimeOfDay( time_t timeConvert, struct TimeOfDay_Struct *eqTimeO
 }
 
 //setEQTimeOfDay
-int EQTime::setEQTimeOfDay(TimeOfDay_Struct start_eq, time_t start_real)
+int EQTime::SetCurrentEQTimeOfDay(TimeOfDay_Struct start_eq, time_t start_real)
 {
-	if(start_real==0)
+	if (start_real == 0)
 		return 0;
-	eqTime.start_eqtime=start_eq;
-	eqTime.start_realtime=start_real;
+	eqTime.start_eqtime = start_eq;
+	eqTime.start_realtime = start_real;
 	return 1;
 }
 
@@ -139,7 +139,7 @@ bool EQTime::saveFile(const char *filename)
 {
 	std::ofstream of;
 	of.open(filename);
-	if(!of)
+	if (!of)
 	{
 		Log.Out(Logs::General, Logs::Error, "EQTime::saveFile failed: Unable to open file '%s'", filename);
 		return false;
@@ -200,24 +200,24 @@ bool EQTime::loadFile(const char *filename)
 
 
 bool EQTime::IsTimeBefore(TimeOfDay_Struct *base, TimeOfDay_Struct *test) {
-	if(base->year > test->year)
+	if (base->year > test->year)
 		return(true);
-	if(base->year < test->year)
+	if (base->year < test->year)
 		return(false);
 	//same years
-	if(base->month > test->month)
+	if (base->month > test->month)
 		return(true);
-	if(base->month < test->month)
+	if (base->month < test->month)
 		return(false);
 	//same month
-	if(base->day > test->day)
+	if (base->day > test->day)
 		return(true);
-	if(base->day < test->day)
+	if (base->day < test->day)
 		return(false);
 	//same day
-	if(base->hour > test->hour)
+	if (base->hour > test->hour)
 		return(true);
-	if(base->hour < test->hour)
+	if (base->hour < test->hour)
 		return(false);
 	//same hour...
 	return(base->minute > test->minute);
@@ -230,7 +230,7 @@ void EQTime::AddMinutes(uint32 minutes, TimeOfDay_Struct *to) {
 	//minutes start at 0, everything else starts at 1
 	cur = to->minute;
 	cur += minutes;
-	if(cur < 60) {
+	if (cur < 60) {
 		to->minute = cur;
 		return;
 	}
@@ -238,29 +238,29 @@ void EQTime::AddMinutes(uint32 minutes, TimeOfDay_Struct *to) {
 	//carry hours
 	cur /= 60;
 	cur += to->hour;
-	if(cur <= 24) {
+	if (cur <= 24) {
 		to->hour = cur;
 		return;
 	}
-	to->hour = ((cur-1) % 24) + 1;
+	to->hour = ((cur - 1) % 24) + 1;
 	//carry days
-	cur = (cur-1) / 24;
+	cur = (cur - 1) / 24;
 	cur += to->day;
-	if(cur <= 28) {
+	if (cur <= 28) {
 		to->day = cur;
 		return;
 	}
-	to->day = ((cur-1) % 28) + 1;
+	to->day = ((cur - 1) % 28) + 1;
 	//carry months
-	cur = (cur-1) / 28;
+	cur = (cur - 1) / 28;
 	cur += to->month;
-	if(cur <= 12) {
+	if (cur <= 12) {
 		to->month = cur;
 		return;
 	}
-	to->month = ((cur-1) % 12) + 1;
+	to->month = ((cur - 1) % 12) + 1;
 	//carry years
-	to->year += (cur-1) / 12;
+	to->year += (cur - 1) / 12;
 }
 
 void EQTime::ToString(TimeOfDay_Struct *t, std::string &str) {
@@ -270,4 +270,3 @@ void EQTime::ToString(TimeOfDay_Struct *t, std::string &str) {
 	buf[127] = '\0';
 	str = buf;
 }
-

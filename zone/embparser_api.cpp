@@ -1182,13 +1182,26 @@ XS(XS__settime);
 XS(XS__settime)
 {
 	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: settime(new_hour, new_min)");
+	if (items < 2)
+		Perl_croak(aTHX_ "Usage: settime(new_hour, new_min, [update_world = true])");
 
-	int	new_hour = (int)SvIV(ST(0));
-	int	new_min = (int)SvIV(ST(1));
+	if (items == 2){
+		int	new_hour = (int)SvIV(ST(0));
+		int	new_min = (int)SvIV(ST(1));
+		quest_manager.settime(new_hour, new_min, true);
+	}
+	else if (items == 3){
+		int	new_hour = (int)SvIV(ST(0));
+		int	new_min = (int)SvIV(ST(1));
 
-	quest_manager.settime(new_hour, new_min);
+		int	update_world = (int)SvIV(ST(2));
+		if (update_world == 1){
+			quest_manager.settime(new_hour, new_min, true);
+		}
+		else{
+			quest_manager.settime(new_hour, new_min, false);
+		}
+	}
 
 	XSRETURN_EMPTY;
 }
