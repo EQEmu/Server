@@ -742,32 +742,36 @@ void WorldServer::Process() {
 			break;
 		}
 		case ServerOP_SyncWorldTime: {
-			if(zone!=0) {
+			if (zone != 0 && !zone->is_zone_time_localized) {
 				Log.Out(Logs::Moderate, Logs::Zone_Server, "%s Received Message SyncWorldTime", __FUNCTION__);
-				eqTimeOfDay* newtime = (eqTimeOfDay*) pack->pBuffer;
-				zone->zone_time.setEQTimeOfDay(newtime->start_eqtime, newtime->start_realtime);
+
+				eqTimeOfDay* newtime = (eqTimeOfDay*)pack->pBuffer;
+				zone->zone_time.SetCurrentEQTimeOfDay(newtime->start_eqtime, newtime->start_realtime);
 				EQApplicationPacket* outapp = new EQApplicationPacket(OP_TimeOfDay, sizeof(TimeOfDay_Struct));
-				TimeOfDay_Struct* tod = (TimeOfDay_Struct*)outapp->pBuffer;
-				zone->zone_time.getEQTimeOfDay(time(0), tod);
+				TimeOfDay_Struct* time_of_day = (TimeOfDay_Struct*)outapp->pBuffer;
+				zone->zone_time.GetCurrentEQTimeOfDay(time(0), time_of_day);
 				entity_list.QueueClients(0, outapp, false);
 				safe_delete(outapp);
-				//TEST
-				char timeMessage[255];
-				time_t timeCurrent = time(nullptr);
-				TimeOfDay_Struct eqTime;
-				zone->zone_time.getEQTimeOfDay( timeCurrent, &eqTime);
-				//if ( eqTime.hour >= 0 && eqTime.minute >= 0 )
-				//{
-					sprintf(timeMessage,"EQTime [%02d:%s%d %s]",
-						((eqTime.hour - 1) % 12) == 0 ? 12 : ((eqTime.hour - 1) % 12),
-						(eqTime.minute < 10) ? "0" : "",
-						eqTime.minute,
-						(eqTime.hour >= 13) ? "pm" : "am"
-						);
-					Log.Out(Logs::General, Logs::Zone_Server, "Time Broadcast Packet: %s", timeMessage);
-					zone->GotCurTime(true);
-				//}
-				//Test
+
+				/* Buffer garbage to generate debug message */
+				char time_message[255];
+				time_t current_time = time(nullptr);
+				TimeOfDay_Struct eq_time;
+				zone->zone_time.GetCurrentEQTimeOfDay(current_time, &eq_time);
+
+				sprintf(time_message, "EQTime [%02d:%s%d %s]",
+					((eq_time.hour - 1) % 12) == 0 ? 12 : ((eq_time.hour - 1) % 12),
+					(eq_time.minute < 10) ? "0" : "",
+					eq_time.minute,
+					(eq_time.hour >= 13) ? "pm" : "am"
+				);
+
+				Log.Out(Logs::General, Logs::Zone_Server, "Time Broadcast Packet: %s", time_message);
+				zone->SetZoneHasCurrentTime(true);
+
+			}
+			if (zone->is_zone_time_localized){
+				Log.Out(Logs::General, Logs::Zone_Server, "Received request to sync time from world, but our time is localized currently");
 			}
 			break;
 		}

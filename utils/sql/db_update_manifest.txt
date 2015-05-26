@@ -335,6 +335,7 @@
 9079|2015_05_23_BuffDurations.sql|SHOW COLUMNS FROM `character_buffs` LIKE 'ticsremaining'|contains|unsigned|
 9080|2015_05_23_PetBuffInstrumentMod.sql|SHOW COLUMNS FROM `character_pet_buffs` LIKE 'instrument_mod'|empty|
 9081|2015_05_23_dbstr_us.sql|SHOW TABLES LIKE 'db_str'|empty|
+9082|2015_05_25_npc_types_texture_fields.sql|SHOW COLUMNS FROM `npc_types` LIKE 'armtexture'|empty|
 
 # Upgrade conditions:
 # 	This won't be needed after this system is implemented, but it is used database that are not
