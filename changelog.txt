@@ -5,6 +5,7 @@ EQEMu Changelog (Started on Sept 24, 2003 15:50)
 Akkadius: Implemented disjointed zone based time, this can be triggered via quest methods
 Akkadius: Added parameter to LUA and Perl method settime(hour, minute, [update_world = true])
 	- If update_world is false, the zone will then unsubscribe itself from regular worldserver time synchronizations
+	- Basically this localizes the zones time and keeps it from syncing with world updates
 Akkadius: Added DB ver 9082 with update to add npc_types texture columns if table does not currently have them
 
 == 05/22/2015 ==
