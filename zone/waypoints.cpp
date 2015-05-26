@@ -492,7 +492,7 @@ bool Mob::MakeNewPositionAndSendUpdate(float x, float y, float z, int speed, boo
 	if(GetID()==0)
 		return true;
 
-	if(speed == 0)
+	if(speed <= 0)
 	{
 		SetCurrentSpeed(0);
 		return true;

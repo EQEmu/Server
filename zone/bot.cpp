@@ -373,7 +373,7 @@ NPCType Bot::FillNPCTypeStruct(uint32 botSpellsID, std::string botName, std::str
 	BotNPCType.d_melee_texture2 = 0;
 	BotNPCType.qglobal = false;
 	BotNPCType.attack_speed = 0;
-	BotNPCType.runspeed = 1.25;
+	BotNPCType.runspeed = 0.7f;
 	BotNPCType.bodytype = 1;
 	BotNPCType.findable = 0;
 	BotNPCType.hp_regen = 1;
@@ -410,7 +410,7 @@ NPCType Bot::CreateDefaultNPCTypeStructForBot(std::string botName, std::string b
 	Result.drakkin_details = 0;
 	Result.drakkin_heritage = 0;
 	Result.drakkin_tattoo = 0;
-	Result.runspeed = 1.25;
+	Result.runspeed = 0.7f;
 	Result.bodytype = 1;
 	Result.findable = 0;
 	Result.hp_regen = 1;
@@ -3739,8 +3739,6 @@ void Bot::AI_Process() {
 					if(dist < GetFollowDistance() + 1000)
 						speed = follow->GetWalkspeed();
 
-					SetRunAnimSpeed(0);
-
 					if(dist > GetFollowDistance()) {
 						CalculateNewPosition2(follow->GetX(), follow->GetY(), follow->GetZ(), speed);
 						if(rest_timer.Enabled())
@@ -3832,12 +3830,10 @@ void Bot::PetAIProcess() {
 			botPet->GetAIMovementTimer()->Check();
 
 			if(botPet->IsMoving()) {
-				botPet->SetRunAnimSpeed(0);
 				botPet->SetHeading(botPet->GetTarget()->GetHeading());
 				if(moved) {
 					moved=false;
-					botPet->SendPosition();
-					botPet->SetMoving(false);
+					botPet->SetRunAnimSpeed(0);
 				}
 			}
 
@@ -10542,52 +10538,6 @@ bool Bot::CanHeal() {
 }
 
 bool Bot::CalculateNewPosition2(float x, float y, float z, float speed, bool checkZ) {
-	// 2.5625 is the inverse of 0.3902439. The only difference is in implementation.
-	// NOTE: You can not change just one of the constants below. They are the same number, just expressed inversly of each other.
-	// const float clientOverServerRatio = 2.5625f;
-	const float serverOverClientRatio = 0.3902439f;
-
-	// Use this block if using 2.5625 as the ratio.
-	// const int clientAnimationMovementRateTypeMultiple = 8;
-
-	//	WildcardX: These are valid rates and observations based on painstaking testing of the client response to these values
-	//
-	//
-	//	0 * 8 = 0 : No Movement
-	//	1 * 8 = 8 : Death Walk
-	//	2 * 8 = 16 : Slow Walk
-	//	3 * 8 = 24 : Normal Walk
-	//	4 * 8 = 32 : Jog
-	//	5 * 8 = 40 : Normal Run
-	//	6 * 8 = 48 : Faster Run
-	//	7 * 8 = 56 : Even Faster Run
-	//	8 * 8 = 64 : Fastest Yet Run (Bard Song Speed?)
-	//	9 * 8 = 72 : Faster Fastest Yet Run
-	//	10 * 8 = 80 : .... you get the idea, this is pretty fast
-	//	11 * 8 = 88 : .... warp speed anyone?
-	//	12 * 8 = 96 : .... transwarp drive was invented by gnomes in Norrath
-	//	13 * 8 = 104 : ... who needs warp drives when you can just displace through time and space?
-	//
-	//
-	//	You get the idea here with these... These seem to be "benchmark values" of animation movement and how fast
-	//	the client thinks the Mob is moving so it can make it all look seemless between updates from the server.
-	//	This chart is scalable by the client so you can pass an animation rate of 50 and get a "faster run" but not quite a "even faster run"
-
-	// Convert the Bot movement rate to a value the client understands based on the chart above
-	// Use this block if using 2.5625 as the ratio.
-	// speed *= clientMovementRateTypeMultiple;
-
-
-	// This sets the movement animation rate with the client
-	// Use this block if using 2.5625 as the ratio.
-	// pRunAnimSpeed = speed;
-	pRunAnimSpeed = ((serverOverClientRatio * 10.0f) * speed) * 10.0f;
-
-	// Now convert our "speed" from the value necessary for the client to animate the correct movement type rate to the server side speed
-	// Use this block if using 2.5625 as the ratio.
-	// speed *= serverOverClientRatio;
-	speed = pRunAnimSpeed / serverOverClientRatio;
-
 	return MakeNewPositionAndSendUpdate(x, y, z, speed, checkZ);
 }
 

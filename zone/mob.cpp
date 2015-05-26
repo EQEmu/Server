@@ -599,7 +599,7 @@ int Mob::_GetWalkSpeed() const {
 		speed_mod += (base_run * movemod / 100);
 
 	if(speed_mod < 1)
-		return(1);
+		return(0);
 
 	//runspeed cap.
 	if(IsClient())
@@ -670,7 +670,7 @@ int Mob::_GetRunSpeed() const {
 				// basically stoped
 				if(speed_mod < 1)
 				{
-					return(1);
+					return(0);
 				}
 				// moving slowly
 				if (speed_mod < 8)
@@ -687,7 +687,7 @@ int Mob::_GetRunSpeed() const {
 
 	if(speed_mod < 1)
 	{
-		return(1);
+		return(0);
 	}
 	//runspeed cap.
 	if(IsClient())
@@ -736,7 +736,7 @@ int Mob::_GetFearSpeed() const {
 		{
 			if (hp_ratio < 25)
 			{
-				return (1);
+				return (0);
 			}
 			if (hp_ratio < 50)
 				return (8);
@@ -766,7 +766,7 @@ int Mob::_GetFearSpeed() const {
 		}
 	}
 	if (speed_mod < 1)
-		return (1);
+		return (0);
 	if (speed_mod < 9)
 		return (8);
 	if (speed_mod < 13)
