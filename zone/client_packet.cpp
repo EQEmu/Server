@@ -6362,7 +6362,12 @@ void Client::Handle_OP_GroupDisband(const EQApplicationPacket *app)
 			}
 		}
 	}
+
+	group = GetGroup();
+	if (!group) //We must recheck this here.. incase the final bot disbanded the party..otherwise we crash
+		return;
 #endif
+
 	if (group->GroupCount() < 3)
 	{
 		group->DisbandGroup();

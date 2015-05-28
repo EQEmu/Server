@@ -751,9 +751,13 @@ void Bot::GenerateBaseStats() {
 	this->DR = DiseaseResist;
 	this->PR = PoisonResist;
 	this->CR = ColdResist;
+	this->PhR = 0;
 	this->Corrup = CorruptionResist;
 	SetBotSpellID(BotSpellID);
 	this->size = BotSize;
+	
+	this->pAggroRange = 0;
+	this->pAssistRange = 0;
 }
 
 void Bot::GenerateAppearance() {
@@ -1374,20 +1378,20 @@ int32 Bot::GenerateBaseHitPoints()
 	// Calc Base Hit Points
 	int new_base_hp = 0;
 	uint32 lm = GetClassLevelFactor();
-	uint32 Post255;
-	uint32 NormalSTA = GetSTA();
-
+	int32 Post255;
+	int32 NormalSTA = GetSTA();
+	
 	if(GetOwner() && GetOwner()->CastToClient() && GetOwner()->CastToClient()->GetClientVersion() >= ClientVersion::SoD && RuleB(Character, SoDClientUseSoDHPManaEnd))
 	{
 		float SoDPost255;
-
+    
 		if(((NormalSTA - 255) / 2) > 0)
 			SoDPost255 = ((NormalSTA - 255) / 2);
 		else
 			SoDPost255 = 0;
-
+    
 		int hp_factor = GetClassHPFactor();
-
+    
 		if(level < 41)
 		{
 			new_base_hp = (5 + (GetLevel() * hp_factor / 12) + ((NormalSTA - SoDPost255) * GetLevel() * hp_factor / 3600));
@@ -1415,7 +1419,7 @@ int32 Bot::GenerateBaseHitPoints()
 		new_base_hp = (5)+(GetLevel()*lm/10) + (((NormalSTA-Post255)*GetLevel()*lm/3000)) + ((Post255*1)*lm/6000);
 	}
 	this->base_hp = new_base_hp;
-
+	
 	return new_base_hp;
 }
 
@@ -5913,7 +5917,12 @@ bool Bot::Death(Mob *killerMob, int32 damage, uint16 spell_id, SkillUseTypes att
 							g->members[j] = nullptr;
 						}
 					}
-
+					
+					//Make sure group still exists if it doesnt they were already updated in RemoveBotFromGroup
+					g = GetGroup();
+					if (!g)
+						break;
+					
 					// update the client group
 					EQApplicationPacket* outapp = new EQApplicationPacket(OP_GroupUpdate, sizeof(GroupJoin_Struct));
 					GroupJoin_Struct* gu = (GroupJoin_Struct*)outapp->pBuffer;
@@ -10196,7 +10205,6 @@ int32 Bot::CalcMaxHP() {
 	bot_hp += GenerateBaseHitPoints() + itembonuses.HP;
 
 	nd += aabonuses.MaxHP;	//Natural Durability, Physical Enhancement, Planar Durability
-
 	bot_hp = (float)bot_hp * (float)nd / (float)10000; //this is to fix the HP-above-495k issue
 	bot_hp += spellbonuses.HP + aabonuses.HP;
 
