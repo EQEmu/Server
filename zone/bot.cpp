@@ -2327,30 +2327,22 @@ bool Bot::IsValidName() {
 	return Result;
 }
 
-bool Bot::IsBotNameAvailable(std::string* errorMessage) {
+bool Bot::IsBotNameAvailable(char *botName, std::string* errorMessage) {
+	if (botName == "" || strlen(botName) > 15 || !database.CheckNameFilter(botName) || !database.CheckUsedName(botName)) {
+		return false; //Check if Botname is Empty / Check if Botname larger than 15 char / Valid to Player standards / Not used by a player!
+	}
 
-	if(!this->GetCleanName())
-        return false;
-
-    std::string query = StringFormat("SELECT COUNT(id) FROM vwBotCharacterMobs "
-                                    "WHERE name LIKE '%s'", this->GetCleanName());
-    auto results = database.QueryDatabase(query);
+	std::string query = StringFormat("SELECT id FROM vwBotCharacterMobs WHERE name LIKE '%s'", botName);
+	auto results = database.QueryDatabase(query);
 	if(!results.Success()) {
-        *errorMessage = std::string(results.ErrorMessage());
+		*errorMessage = std::string(results.ErrorMessage());
 		return false;
-    }
-
-	uint32 existingNameCount = 0;
-
-    for (auto row = results.begin(); row != results.end(); ++row) {
-        existingNameCount = atoi(row[0]);
-        break;
-    }
-
-    if(existingNameCount != 0)
+	}
+	if (results.RowCount()) { //Name already in use!
         return false;
-
-	return true;
+	}
+	
+	return true; //We made it with a valid name!
 }
 
 bool Bot::Save() {
@@ -11330,6 +11322,11 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 		if(!strcasecmp(sep->arg[5], "female"))
 			gender = 1;
 
+		if(!IsBotNameAvailable(sep->arg[2],&TempErrorMessage)) {
+			c->Message(0, "The name %s is already being used or is invalid. Please choose a different name.", sep->arg[2]);
+			return;
+		}
+
 		NPCType DefaultNPCTypeStruct = CreateDefaultNPCTypeStructForBot(std::string(sep->arg[2]), std::string(), c->GetLevel(), atoi(sep->arg[4]), atoi(sep->arg[3]), gender);
 		Bot* NewBot = new Bot(DefaultNPCTypeStruct, c);
 
@@ -11341,11 +11338,6 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 
 			if(!NewBot->IsValidName()) {
 				c->Message(0, "%s has invalid characters. You can use only the A-Z, a-z and _ characters in a bot name.", NewBot->GetCleanName());
-				return;
-			}
-
-			if(!NewBot->IsBotNameAvailable(&TempErrorMessage)) {
-				c->Message(0, "The name %s is already being used. Please choose a different name.", NewBot->GetCleanName());
 				return;
 			}
 
