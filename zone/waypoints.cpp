@@ -394,6 +394,7 @@ void NPC::SetWaypointPause()
 
 	if (cur_wp_pause == 0) {
 		AIwalking_timer->Start(100);
+		AIwalking_timer->Trigger();
 	}
 	else
 	{
@@ -519,6 +520,7 @@ bool Mob::MakeNewPositionAndSendUpdate(float x, float y, float z, int speed, boo
 		return true;
 	}
 
+	bool send_update = false;
 	int compare_steps = IsBoat() ? 1 : 20;
 	if(tar_ndx < compare_steps && m_TargetLocation.x==x && m_TargetLocation.y==y) {
 
@@ -709,11 +711,18 @@ bool Mob::MakeNewPositionAndSendUpdate(float x, float y, float z, int speed, boo
 	m_Delta = glm::vec4(m_Position.x - nx, m_Position.y - ny, m_Position.z - nz, 0.0f);
 
 	if (IsClient())
+	{
 		SendPosUpdate(1);
+		CastToClient()->ResetPositionTimer();
+	}
 	else
+	{
+		// force an update now
+		move_tic_count = RuleI(Zone, NPCPositonUpdateTicCount);
 		SendPosUpdate();
+		SetAppearance(eaStanding, false);
+	}
 
-	SetAppearance(eaStanding, false);
 	pLastChange = Timer::GetCurrentTime();
 	return true;
 }
