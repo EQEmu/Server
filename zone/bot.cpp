@@ -5836,10 +5836,10 @@ void Bot::PerformTradeWithClient(int16 beginSlotID, int16 endSlotID, Client* cli
 				}
 			}
 			if(inst) {
+				client->DeleteItemInInventory(i, 0, UpdateClient);
 				if(!botCanWear[i]) {
 					client->PushItemOnCursor(*inst, true);
 				}
-				client->DeleteItemInInventory(i, 0, UpdateClient);
 			}
 		}
 
@@ -9564,8 +9564,9 @@ bool Bot::DoFinishedSpellGroupTarget(uint16 spell_id, Mob* spellTarget, uint16 s
 }
 
 void Bot::CalcBonuses() {
+	memset(&itembonuses, 0, sizeof(StatBonuses));
 	GenerateBaseStats();
-	CalcItemBonuses();
+	CalcItemBonuses(&itembonuses);
 	CalcSpellBonuses(&spellbonuses);
 	GenerateAABonuses(&aabonuses);
 	SetAttackTimer();
@@ -10814,191 +10815,386 @@ void Bot::ProcessBotInspectionRequest(Bot* inspectedBot, Client* client) {
 	}
 }
 
-void Bot::CalcItemBonuses()
+void Bot::CalcItemBonuses(StatBonuses* newbon)
 {
-	memset(&itembonuses, 0, sizeof(StatBonuses));
 	const Item_Struct* itemtmp = 0;
 
 	for (int i = EmuConstants::EQUIPMENT_BEGIN; i <= EmuConstants::EQUIPMENT_END; ++i) {
 		const ItemInst* item = GetBotItem(i);
 		if(item) {
-			for(int j = AUG_BEGIN; j < EmuConstants::ITEM_COMMON_SIZE; ++j) {
-				const ItemInst* aug = item->GetAugment(j);
-				if(aug) {
-					itemtmp = aug->GetItem();
-					if(itemtmp->AC != 0)
-						itembonuses.AC += itemtmp->AC;
-					if(itemtmp->HP != 0)
-						itembonuses.HP += itemtmp->HP;
-					if(itemtmp->Mana != 0)
-						itembonuses.Mana += itemtmp->Mana;
-					if(itemtmp->Endur != 0)
-						itembonuses.Endurance += itemtmp->Endur;
-					if(itemtmp->AStr != 0)
-						itembonuses.STR += itemtmp->AStr;
-					if(itemtmp->ASta != 0)
-						itembonuses.STA += itemtmp->ASta;
-					if(itemtmp->ADex != 0)
-						itembonuses.DEX += itemtmp->ADex;
-					if(itemtmp->AAgi != 0)
-						itembonuses.AGI += itemtmp->AAgi;
-					if(itemtmp->AInt != 0)
-						itembonuses.INT += itemtmp->AInt;
-					if(itemtmp->AWis != 0)
-						itembonuses.WIS += itemtmp->AWis;
-					if(itemtmp->ACha != 0)
-						itembonuses.CHA += itemtmp->ACha;
-					if(itemtmp->MR != 0)
-						itembonuses.MR += itemtmp->MR;
-					if(itemtmp->FR != 0)
-						itembonuses.FR += itemtmp->FR;
-					if(itemtmp->CR != 0)
-						itembonuses.CR += itemtmp->CR;
-					if(itemtmp->PR != 0)
-						itembonuses.PR += itemtmp->PR;
-					if(itemtmp->DR != 0)
-						itembonuses.DR += itemtmp->DR;
-					if(itemtmp->SVCorruption != 0)
-						itembonuses.Corrup += itemtmp->SVCorruption;
-					if(itemtmp->Regen != 0)
-						itembonuses.HPRegen += itemtmp->Regen;
-					if(itemtmp->ManaRegen != 0)
-						itembonuses.ManaRegen += itemtmp->ManaRegen;
-					if(itemtmp->Attack != 0)
-						itembonuses.ATK += itemtmp->Attack;
-					if(itemtmp->DamageShield != 0)
-						itembonuses.DamageShield += itemtmp->DamageShield;
-					if(itemtmp->SpellShield != 0)
-						itembonuses.SpellDamageShield += itemtmp->SpellShield;
-					if(itemtmp->Shielding != 0)
-						itembonuses.MeleeMitigation += itemtmp->Shielding;
-					if(itemtmp->StunResist != 0)
-						itembonuses.StunResist += itemtmp->StunResist;
-					if(itemtmp->StrikeThrough != 0)
-						itembonuses.StrikeThrough += itemtmp->StrikeThrough;
-					if(itemtmp->Avoidance != 0)
-						itembonuses.AvoidMeleeChance += itemtmp->Avoidance;
-					if(itemtmp->Accuracy != 0)
-						itembonuses.HitChance += itemtmp->Accuracy;
-					if(itemtmp->CombatEffects != 0)
-						itembonuses.ProcChance += itemtmp->CombatEffects;
-					if(itemtmp->Haste != 0)
-						if(itembonuses.haste < itemtmp->Haste)
-							itembonuses.haste = itemtmp->Haste;
-					if(GetClass() == BARD && itemtmp->BardValue != 0) {
-						if(itemtmp->BardType == ItemTypeBrassInstrument)
-							itembonuses.brassMod += itemtmp->BardValue;
-						else if(itemtmp->BardType == ItemTypePercussionInstrument)
-							itembonuses.percussionMod += itemtmp->BardValue;
-						else if(itemtmp->BardType == ItemTypeSinging)
-							itembonuses.singingMod += itemtmp->BardValue;
-						else if(itemtmp->BardType == ItemTypeStringedInstrument)
-							itembonuses.stringedMod += itemtmp->BardValue;
-						else if(itemtmp->BardType == ItemTypeWindInstrument)
-							itembonuses.windMod += itemtmp->BardValue;
-						else if(itemtmp->BardType == ItemTypeAllInstrumentTypes) {
-							itembonuses.brassMod += itemtmp->BardValue;
-							itembonuses.percussionMod += itemtmp->BardValue;
-							itembonuses.singingMod += itemtmp->BardValue;
-							itembonuses.stringedMod += itemtmp->BardValue;
-							itembonuses.windMod += itemtmp->BardValue;
-						}
-					}
-					if ((itemtmp->Worn.Effect != 0) && (itemtmp->Worn.Type == ET_WornEffect)) { // latent effects
-						ApplySpellsBonuses(itemtmp->Worn.Effect, itemtmp->Worn.Level, &itembonuses,0,itemtmp->Worn.Type);
-					}
-				}
-			}
-			itemtmp = item->GetItem();
-			if(itemtmp->AC != 0)
-				itembonuses.AC += itemtmp->AC;
-			if(itemtmp->HP != 0)
-				itembonuses.HP += itemtmp->HP;
-			if(itemtmp->Mana != 0)
-				itembonuses.Mana += itemtmp->Mana;
-			if(itemtmp->Endur != 0)
-				itembonuses.Endurance += itemtmp->Endur;
-			if(itemtmp->AStr != 0)
-				itembonuses.STR += itemtmp->AStr;
-			if(itemtmp->ASta != 0)
-				itembonuses.STA += itemtmp->ASta;
-			if(itemtmp->ADex != 0)
-				itembonuses.DEX += itemtmp->ADex;
-			if(itemtmp->AAgi != 0)
-				itembonuses.AGI += itemtmp->AAgi;
-			if(itemtmp->AInt != 0)
-				itembonuses.INT += itemtmp->AInt;
-			if(itemtmp->AWis != 0)
-				itembonuses.WIS += itemtmp->AWis;
-			if(itemtmp->ACha != 0)
-				itembonuses.CHA += itemtmp->ACha;
-			if(itemtmp->MR != 0)
-				itembonuses.MR += itemtmp->MR;
-			if(itemtmp->FR != 0)
-				itembonuses.FR += itemtmp->FR;
-			if(itemtmp->CR != 0)
-				itembonuses.CR += itemtmp->CR;
-			if(itemtmp->PR != 0)
-				itembonuses.PR += itemtmp->PR;
-			if(itemtmp->DR != 0)
-				itembonuses.DR += itemtmp->DR;
-			if(itemtmp->SVCorruption != 0)
-				itembonuses.Corrup += itemtmp->SVCorruption;
-			if(itemtmp->Regen != 0)
-				itembonuses.HPRegen += itemtmp->Regen;
-			if(itemtmp->ManaRegen != 0)
-				itembonuses.ManaRegen += itemtmp->ManaRegen;
-			if(itemtmp->Attack != 0)
-				itembonuses.ATK += itemtmp->Attack;
-			if(itemtmp->DamageShield != 0)
-				itembonuses.DamageShield += itemtmp->DamageShield;
-			if(itemtmp->SpellShield != 0)
-				itembonuses.SpellDamageShield += itemtmp->SpellShield;
-			if(itemtmp->Shielding != 0)
-				itembonuses.MeleeMitigation += itemtmp->Shielding;
-			if(itemtmp->StunResist != 0)
-				itembonuses.StunResist += itemtmp->StunResist;
-			if(itemtmp->StrikeThrough != 0)
-				itembonuses.StrikeThrough += itemtmp->StrikeThrough;
-			if(itemtmp->Avoidance != 0)
-				itembonuses.AvoidMeleeChance += itemtmp->Avoidance;
-			if(itemtmp->Accuracy != 0)
-				itembonuses.HitChance += itemtmp->Accuracy;
-			if(itemtmp->CombatEffects != 0)
-				itembonuses.ProcChance += itemtmp->CombatEffects;
-			if(itemtmp->Haste != 0)
-				if(itembonuses.haste < itemtmp->Haste)
-					itembonuses.haste = itemtmp->Haste;
-			if(GetClass() == BARD && itemtmp->BardValue != 0) {
-				if(itemtmp->BardType == ItemTypeBrassInstrument)
-					itembonuses.brassMod += itemtmp->BardValue;
-				else if(itemtmp->BardType == ItemTypePercussionInstrument)
-					itembonuses.percussionMod += itemtmp->BardValue;
-				else if(itemtmp->BardType == ItemTypeSinging)
-					itembonuses.singingMod += itemtmp->BardValue;
-				else if(itemtmp->BardType == ItemTypeStringedInstrument)
-					itembonuses.stringedMod += itemtmp->BardValue;
-				else if(itemtmp->BardType == ItemTypeWindInstrument)
-					itembonuses.windMod += itemtmp->BardValue;
-				else if(itemtmp->BardType == ItemTypeAllInstrumentTypes) {
-					itembonuses.brassMod += itemtmp->BardValue;
-					itembonuses.percussionMod += itemtmp->BardValue;
-					itembonuses.singingMod += itemtmp->BardValue;
-					itembonuses.stringedMod += itemtmp->BardValue;
-					itembonuses.windMod += itemtmp->BardValue;
-				}
-			}
-			if ((itemtmp->Worn.Effect != 0) && (itemtmp->Worn.Type == ET_WornEffect)) { // latent effects
-				ApplySpellsBonuses(itemtmp->Worn.Effect, itemtmp->Worn.Level, &itembonuses,0,itemtmp->Worn.Type);
-			}
+			AddItemBonuses(item, newbon);
+		}
+	}
+}
+
+void Bot::AddItemBonuses(const ItemInst *inst, StatBonuses* newbon, bool isAug, bool isTribute) {
+	if(!inst || !inst->IsType(ItemClassCommon))
+	{
+		return;
+	}
+
+	if(inst->GetAugmentType()==0 && isAug == true)
+	{
+		return;
+	}
+
+	const Item_Struct *item = inst->GetItem();
+
+	if(!isTribute && !inst->IsEquipable(GetBaseRace(),GetClass()))
+	{
+		if(item->ItemType != ItemTypeFood && item->ItemType != ItemTypeDrink)
+			return;
+	}
+
+	if(GetLevel() < item->ReqLevel)
+	{
+		return;
+	}
+
+	if(GetLevel() >= item->RecLevel)
+	{
+		newbon->AC += item->AC;
+		newbon->HP += item->HP;
+		newbon->Mana += item->Mana;
+		newbon->Endurance += item->Endur;
+		newbon->ATK += item->Attack;
+		newbon->STR += (item->AStr + item->HeroicStr);
+		newbon->STA += (item->ASta + item->HeroicSta);
+		newbon->DEX += (item->ADex + item->HeroicDex);
+		newbon->AGI += (item->AAgi + item->HeroicAgi);
+		newbon->INT += (item->AInt + item->HeroicInt);
+		newbon->WIS += (item->AWis + item->HeroicWis);
+		newbon->CHA += (item->ACha + item->HeroicCha);
+
+		newbon->MR += (item->MR + item->HeroicMR);
+		newbon->FR += (item->FR + item->HeroicFR);
+		newbon->CR += (item->CR + item->HeroicCR);
+		newbon->PR += (item->PR + item->HeroicPR);
+		newbon->DR += (item->DR + item->HeroicDR);
+		newbon->Corrup += (item->SVCorruption + item->HeroicSVCorrup);
+
+		newbon->STRCapMod += item->HeroicStr;
+		newbon->STACapMod += item->HeroicSta;
+		newbon->DEXCapMod += item->HeroicDex;
+		newbon->AGICapMod += item->HeroicAgi;
+		newbon->INTCapMod += item->HeroicInt;
+		newbon->WISCapMod += item->HeroicWis;
+		newbon->CHACapMod += item->HeroicCha;
+		newbon->MRCapMod += item->HeroicMR;
+		newbon->CRCapMod += item->HeroicFR;
+		newbon->FRCapMod += item->HeroicCR;
+		newbon->PRCapMod += item->HeroicPR;
+		newbon->DRCapMod += item->HeroicDR;
+		newbon->CorrupCapMod += item->HeroicSVCorrup;
+
+		newbon->HeroicSTR += item->HeroicStr;
+		newbon->HeroicSTA += item->HeroicSta;
+		newbon->HeroicDEX += item->HeroicDex;
+		newbon->HeroicAGI += item->HeroicAgi;
+		newbon->HeroicINT += item->HeroicInt;
+		newbon->HeroicWIS += item->HeroicWis;
+		newbon->HeroicCHA += item->HeroicCha;
+		newbon->HeroicMR += item->HeroicMR;
+		newbon->HeroicFR += item->HeroicFR;
+		newbon->HeroicCR += item->HeroicCR;
+		newbon->HeroicPR += item->HeroicPR;
+		newbon->HeroicDR += item->HeroicDR;
+		newbon->HeroicCorrup += item->HeroicSVCorrup;
+
+	}
+	else
+	{
+		int lvl = GetLevel();
+		int reclvl = item->RecLevel;
+
+		newbon->AC += CalcRecommendedLevelBonus( lvl, reclvl, item->AC );
+		newbon->HP += CalcRecommendedLevelBonus( lvl, reclvl, item->HP );
+		newbon->Mana += CalcRecommendedLevelBonus( lvl, reclvl, item->Mana );
+		newbon->Endurance += CalcRecommendedLevelBonus( lvl, reclvl, item->Endur );
+		newbon->ATK += CalcRecommendedLevelBonus( lvl, reclvl, item->Attack );
+		newbon->STR += CalcRecommendedLevelBonus( lvl, reclvl, (item->AStr + item->HeroicStr) );
+		newbon->STA += CalcRecommendedLevelBonus( lvl, reclvl, (item->ASta + item->HeroicSta) );
+		newbon->DEX += CalcRecommendedLevelBonus( lvl, reclvl, (item->ADex + item->HeroicDex) );
+		newbon->AGI += CalcRecommendedLevelBonus( lvl, reclvl, (item->AAgi + item->HeroicAgi) );
+		newbon->INT += CalcRecommendedLevelBonus( lvl, reclvl, (item->AInt + item->HeroicInt) );
+		newbon->WIS += CalcRecommendedLevelBonus( lvl, reclvl, (item->AWis + item->HeroicWis) );
+		newbon->CHA += CalcRecommendedLevelBonus( lvl, reclvl, (item->ACha + item->HeroicCha) );
+
+		newbon->MR += CalcRecommendedLevelBonus( lvl, reclvl, (item->MR + item->HeroicMR) );
+		newbon->FR += CalcRecommendedLevelBonus( lvl, reclvl, (item->FR + item->HeroicFR) );
+		newbon->CR += CalcRecommendedLevelBonus( lvl, reclvl, (item->CR + item->HeroicCR) );
+		newbon->PR += CalcRecommendedLevelBonus( lvl, reclvl, (item->PR + item->HeroicPR) );
+		newbon->DR += CalcRecommendedLevelBonus( lvl, reclvl, (item->DR + item->HeroicDR) );
+		newbon->Corrup += CalcRecommendedLevelBonus( lvl, reclvl, (item->SVCorruption + item->HeroicSVCorrup) );
+
+		newbon->STRCapMod += CalcRecommendedLevelBonus( lvl, reclvl, item->HeroicStr );
+		newbon->STACapMod += CalcRecommendedLevelBonus( lvl, reclvl, item->HeroicSta );
+		newbon->DEXCapMod += CalcRecommendedLevelBonus( lvl, reclvl, item->HeroicDex );
+		newbon->AGICapMod += CalcRecommendedLevelBonus( lvl, reclvl, item->HeroicAgi );
+		newbon->INTCapMod += CalcRecommendedLevelBonus( lvl, reclvl, item->HeroicInt );
+		newbon->WISCapMod += CalcRecommendedLevelBonus( lvl, reclvl, item->HeroicWis );
+		newbon->CHACapMod += CalcRecommendedLevelBonus( lvl, reclvl, item->HeroicCha );
+		newbon->MRCapMod += CalcRecommendedLevelBonus( lvl, reclvl, item->HeroicMR );
+		newbon->CRCapMod += CalcRecommendedLevelBonus( lvl, reclvl, item->HeroicFR );
+		newbon->FRCapMod += CalcRecommendedLevelBonus( lvl, reclvl, item->HeroicCR );
+		newbon->PRCapMod += CalcRecommendedLevelBonus( lvl, reclvl, item->HeroicPR );
+		newbon->DRCapMod += CalcRecommendedLevelBonus( lvl, reclvl, item->HeroicDR );
+		newbon->CorrupCapMod += CalcRecommendedLevelBonus( lvl, reclvl, item->HeroicSVCorrup );
+
+		newbon->HeroicSTR += CalcRecommendedLevelBonus( lvl, reclvl, item->HeroicStr );
+		newbon->HeroicSTA += CalcRecommendedLevelBonus( lvl, reclvl, item->HeroicSta );
+		newbon->HeroicDEX += CalcRecommendedLevelBonus( lvl, reclvl, item->HeroicDex );
+		newbon->HeroicAGI += CalcRecommendedLevelBonus( lvl, reclvl, item->HeroicAgi );
+		newbon->HeroicINT += CalcRecommendedLevelBonus( lvl, reclvl, item->HeroicInt );
+		newbon->HeroicWIS += CalcRecommendedLevelBonus( lvl, reclvl, item->HeroicWis );
+		newbon->HeroicCHA += CalcRecommendedLevelBonus( lvl, reclvl, item->HeroicCha );
+		newbon->HeroicMR += CalcRecommendedLevelBonus( lvl, reclvl, item->HeroicMR );
+		newbon->HeroicFR += CalcRecommendedLevelBonus( lvl, reclvl, item->HeroicFR );
+		newbon->HeroicCR += CalcRecommendedLevelBonus( lvl, reclvl, item->HeroicCR );
+		newbon->HeroicPR += CalcRecommendedLevelBonus( lvl, reclvl, item->HeroicPR );
+		newbon->HeroicDR += CalcRecommendedLevelBonus( lvl, reclvl, item->HeroicDR );
+		newbon->HeroicCorrup += CalcRecommendedLevelBonus( lvl, reclvl, item->HeroicSVCorrup );
+	}
+
+	//FatherNitwit: New style haste, shields, and regens
+	if(newbon->haste < (int32)item->Haste) {
+		newbon->haste = item->Haste;
+	}
+	if(item->Regen > 0)
+		newbon->HPRegen += item->Regen;
+
+	if(item->ManaRegen > 0)
+		newbon->ManaRegen += item->ManaRegen;
+
+	if(item->EnduranceRegen > 0)
+		newbon->EnduranceRegen += item->EnduranceRegen;
+
+	if(item->DamageShield > 0) {
+		if((newbon->DamageShield + item->DamageShield) > RuleI(Character, ItemDamageShieldCap))
+			newbon->DamageShield = RuleI(Character, ItemDamageShieldCap);
+		else
+			newbon->DamageShield += item->DamageShield;
+	}
+	if(item->SpellShield > 0) {
+		if((newbon->SpellShield + item->SpellShield) > RuleI(Character, ItemSpellShieldingCap))
+			newbon->SpellShield = RuleI(Character, ItemSpellShieldingCap);
+		else
+			newbon->SpellShield += item->SpellShield;
+	}
+	if(item->Shielding > 0) {
+		if((newbon->MeleeMitigation + item->Shielding) > RuleI(Character, ItemShieldingCap))
+			newbon->MeleeMitigation = RuleI(Character, ItemShieldingCap);
+		else
+			newbon->MeleeMitigation += item->Shielding;
+	}
+	if(item->StunResist > 0) {
+		if((newbon->StunResist + item->StunResist) > RuleI(Character, ItemStunResistCap))
+			newbon->StunResist = RuleI(Character, ItemStunResistCap);
+		else
+			newbon->StunResist += item->StunResist;
+	}
+	if(item->StrikeThrough > 0) {
+		if((newbon->StrikeThrough + item->StrikeThrough) > RuleI(Character, ItemStrikethroughCap))
+			newbon->StrikeThrough = RuleI(Character, ItemStrikethroughCap);
+		else
+			newbon->StrikeThrough += item->StrikeThrough;
+	}
+	if(item->Avoidance > 0) {
+		if((newbon->AvoidMeleeChance + item->Avoidance) > RuleI(Character, ItemAvoidanceCap))
+			newbon->AvoidMeleeChance = RuleI(Character, ItemAvoidanceCap);
+		else
+			newbon->AvoidMeleeChance += item->Avoidance;
+	}
+	if(item->Accuracy > 0) {
+		if((newbon->HitChance + item->Accuracy) > RuleI(Character, ItemAccuracyCap))
+			newbon->HitChance = RuleI(Character, ItemAccuracyCap);
+		else
+			newbon->HitChance += item->Accuracy;
+	}
+	if(item->CombatEffects > 0) {
+		if((newbon->ProcChance + item->CombatEffects) > RuleI(Character, ItemCombatEffectsCap))
+			newbon->ProcChance = RuleI(Character, ItemCombatEffectsCap);
+		else
+			newbon->ProcChance += item->CombatEffects;
+	}
+	if(item->DotShielding > 0) {
+		if((newbon->DoTShielding + item->DotShielding) > RuleI(Character, ItemDoTShieldingCap))
+			newbon->DoTShielding = RuleI(Character, ItemDoTShieldingCap);
+		else
+			newbon->DoTShielding += item->DotShielding;
+	}
+
+	if(item->HealAmt > 0) {
+		if((newbon->HealAmt + item->HealAmt) > RuleI(Character, ItemHealAmtCap))
+			newbon->HealAmt = RuleI(Character, ItemHealAmtCap);
+		else
+			newbon->HealAmt += item->HealAmt;
+	}
+	if(item->SpellDmg > 0) {
+		if((newbon->SpellDmg + item->SpellDmg) > RuleI(Character, ItemSpellDmgCap))
+			newbon->SpellDmg = RuleI(Character, ItemSpellDmgCap);
+		else
+			newbon->SpellDmg += item->SpellDmg;
+	}
+	if(item->Clairvoyance > 0) {
+		if((newbon->Clairvoyance + item->Clairvoyance) > RuleI(Character, ItemClairvoyanceCap))
+			newbon->Clairvoyance = RuleI(Character, ItemClairvoyanceCap);
+		else
+			newbon->Clairvoyance += item->Clairvoyance;
+	}
+
+	if(item->DSMitigation > 0) {
+		if((newbon->DSMitigation + item->DSMitigation) > RuleI(Character, ItemDSMitigationCap))
+			newbon->DSMitigation = RuleI(Character, ItemDSMitigationCap);
+		else
+			newbon->DSMitigation += item->DSMitigation;
+	}
+	if (item->Worn.Effect > 0 && item->Worn.Type == ET_WornEffect) {// latent effects
+		ApplySpellsBonuses(item->Worn.Effect, item->Worn.Level, newbon, 0, item->Worn.Type);
+	}
+
+	if (item->Focus.Effect>0 && (item->Focus.Type == ET_Focus)) { // focus effects
+		ApplySpellsBonuses(item->Focus.Effect, item->Focus.Level, newbon, 0);
+	}
+
+	switch(item->BardType)
+	{
+	case 51: /* All (e.g. Singing Short Sword) */
+		{
+			if(item->BardValue > newbon->singingMod)
+				newbon->singingMod = item->BardValue;
+			if(item->BardValue > newbon->brassMod)
+				newbon->brassMod = item->BardValue;
+			if(item->BardValue > newbon->stringedMod)
+				newbon->stringedMod = item->BardValue;
+			if(item->BardValue > newbon->percussionMod)
+				newbon->percussionMod = item->BardValue;
+			if(item->BardValue > newbon->windMod)
+				newbon->windMod = item->BardValue;
+			break;
+		}
+	case 50: /* Singing */
+		{
+			if(item->BardValue > newbon->singingMod)
+				newbon->singingMod = item->BardValue;
+			break;
+		}
+	case 23: /* Wind */
+		{
+			if(item->BardValue > newbon->windMod)
+				newbon->windMod = item->BardValue;
+			break;
+		}
+	case 24: /* stringed */
+		{
+			if(item->BardValue > newbon->stringedMod)
+				newbon->stringedMod = item->BardValue;
+			break;
+		}
+	case 25: /* brass */
+		{
+			if(item->BardValue > newbon->brassMod)
+				newbon->brassMod = item->BardValue;
+			break;
+		}
+	case 26: /* Percussion */
+		{
+			if(item->BardValue > newbon->percussionMod)
+				newbon->percussionMod = item->BardValue;
+			break;
 		}
 	}
 
-	if(itembonuses.HPRegen > CalcHPRegenCap())
-		itembonuses.HPRegen = CalcHPRegenCap();
+	if (item->SkillModValue != 0 && item->SkillModType <= HIGHEST_SKILL){
+		if ((item->SkillModValue > 0 && newbon->skillmod[item->SkillModType] < item->SkillModValue) ||
+			(item->SkillModValue < 0 && newbon->skillmod[item->SkillModType] > item->SkillModValue))
+		{
+			newbon->skillmod[item->SkillModType] = item->SkillModValue;
+		}
+	}
 
-	if(itembonuses.ManaRegen > CalcManaRegenCap())
-		itembonuses.ManaRegen = CalcManaRegenCap();
+	// Add Item Faction Mods
+	//if (item->FactionMod1)
+	//{
+	//	if (item->FactionAmt1 > 0 && item->FactionAmt1 > GetItemFactionBonus(item->FactionMod1))
+	//	{
+	//		AddItemFactionBonus(item->FactionMod1, item->FactionAmt1);
+	//	}
+	//	else if (item->FactionAmt1 < 0 && item->FactionAmt1 < GetItemFactionBonus(item->FactionMod1))
+	//	{
+	//		AddItemFactionBonus(item->FactionMod1, item->FactionAmt1);
+	//	}
+	//}
+	//if (item->FactionMod2)
+	//{
+	//	if (item->FactionAmt2 > 0 && item->FactionAmt2 > GetItemFactionBonus(item->FactionMod2))
+	//	{
+	//		AddItemFactionBonus(item->FactionMod2, item->FactionAmt2);
+	//	}
+	//	else if (item->FactionAmt2 < 0 && item->FactionAmt2 < GetItemFactionBonus(item->FactionMod2))
+	//	{
+	//		AddItemFactionBonus(item->FactionMod2, item->FactionAmt2);
+	//	}
+	//}
+	//if (item->FactionMod3)
+	//{
+	//	if (item->FactionAmt3 > 0 && item->FactionAmt3 > GetItemFactionBonus(item->FactionMod3))
+	//	{
+	//		AddItemFactionBonus(item->FactionMod3, item->FactionAmt3);
+	//	}
+	//	else if (item->FactionAmt3 < 0 && item->FactionAmt3 < GetItemFactionBonus(item->FactionMod3))
+	//	{
+	//		AddItemFactionBonus(item->FactionMod3, item->FactionAmt3);
+	//	}
+	//}
+	//if (item->FactionMod4)
+	//{
+	//	if (item->FactionAmt4 > 0 && item->FactionAmt4 > GetItemFactionBonus(item->FactionMod4))
+	//	{
+	//		AddItemFactionBonus(item->FactionMod4, item->FactionAmt4);
+	//	}
+	//	else if (item->FactionAmt4 < 0 && item->FactionAmt4 < GetItemFactionBonus(item->FactionMod4))
+	//	{
+	//		AddItemFactionBonus(item->FactionMod4, item->FactionAmt4);
+	//	}
+	//}
+
+	if (item->ExtraDmgSkill != 0 && item->ExtraDmgSkill <= HIGHEST_SKILL) {
+		if((newbon->SkillDamageAmount[item->ExtraDmgSkill] + item->ExtraDmgAmt) > RuleI(Character, ItemExtraDmgCap))
+			newbon->SkillDamageAmount[item->ExtraDmgSkill] = RuleI(Character, ItemExtraDmgCap);
+		else
+			newbon->SkillDamageAmount[item->ExtraDmgSkill] += item->ExtraDmgAmt;
+	}
+
+	if (!isAug)
+	{
+		int i;
+		for (i = 0; i < EmuConstants::ITEM_COMMON_SIZE; i++) {
+			AddItemBonuses(inst->GetAugment(i),newbon,true);
+		}
+	}
+
+}
+
+int Bot::CalcRecommendedLevelBonus(uint8 level, uint8 reclevel, int basestat)
+{
+	if( (reclevel > 0) && (level < reclevel) )
+	{
+		int32 statmod = (level * 10000 / reclevel) * basestat;
+
+		if( statmod < 0 )
+		{
+			statmod -= 5000;
+			return (statmod/10000);
+		}
+		else
+		{
+			statmod += 5000;
+			return (statmod/10000);
+		}
+	}
+
+	return 0;
 }
 
 // This method is intended to call all necessary methods to do all bot stat calculations, including spell buffs, equipment, AA bonsues, etc.
