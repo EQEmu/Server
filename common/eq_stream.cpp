@@ -573,16 +573,18 @@ void EQStream::SendPacket(uint16 opcode, EQApplicationPacket *p)
 
 	// Convert the EQApplicationPacket to 1 or more EQProtocolPackets
 	if (p->size>(MaxLen-8)) { // proto-op(2), seq(2), app-op(2) ... data ... crc(2)
-		Log.Out(Logs::Detail, Logs::Netcode, _L "Making oversized packet, len %d" __L, p->size);
+		Log.Out(Logs::Detail, Logs::Netcode, _L "Making oversized packet, len %d" __L, p->Size());
 
 		unsigned char *tmpbuff=new unsigned char[p->size+3];
 		length=p->serialize(opcode, tmpbuff);
+		if (length != p->Size())
+			Log.Out(Logs::Detail, Logs::Netcode, _L "Packet adjustment, len %d to %d" __L, p->Size(), length);
 
 		EQProtocolPacket *out=new EQProtocolPacket(OP_Fragment,nullptr,MaxLen-4);
-		*(uint32 *)(out->pBuffer+2)=htonl(p->Size());
+		*(uint32 *)(out->pBuffer+2)=htonl(length);
 		used=MaxLen-10;
 		memcpy(out->pBuffer+6,tmpbuff,used);
-		Log.Out(Logs::Detail, Logs::Netcode, _L "First fragment: used %d/%d. Put size %d in the packet" __L, used, p->size, p->Size());
+		Log.Out(Logs::Detail, Logs::Netcode, _L "First fragment: used %d/%d. Payload size %d in the packet" __L, used, length, p->size);
 		SequencedPush(out);
 
 
@@ -593,7 +595,7 @@ void EQStream::SendPacket(uint16 opcode, EQApplicationPacket *p)
 			out->size=chunksize+2;
 			SequencedPush(out);
 			used+=chunksize;
-			Log.Out(Logs::Detail, Logs::Netcode, _L "Subsequent fragment: len %d, used %d/%d." __L, chunksize, used, p->size);
+			Log.Out(Logs::Detail, Logs::Netcode, _L "Subsequent fragment: len %d, used %d/%d." __L, chunksize, used, length);
 		}
 		delete p;
 		delete[] tmpbuff;
