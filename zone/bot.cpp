@@ -10825,6 +10825,16 @@ void Bot::CalcItemBonuses(StatBonuses* newbon)
 			AddItemBonuses(item, newbon);
 		}
 	}
+	
+	// Caps
+	if(newbon->HPRegen > CalcHPRegenCap())
+		newbon->HPRegen = CalcHPRegenCap();
+
+	if(newbon->ManaRegen > CalcManaRegenCap())
+		newbon->ManaRegen = CalcManaRegenCap();
+
+	if(newbon->EnduranceRegen > CalcEnduranceRegenCap())
+		newbon->EnduranceRegen = CalcEnduranceRegenCap();
 }
 
 void Bot::AddItemBonuses(const ItemInst *inst, StatBonuses* newbon, bool isAug, bool isTribute) {
