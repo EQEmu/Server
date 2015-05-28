@@ -3372,7 +3372,7 @@ void Mob::BuffProcess()
 				{
 					--buffs[buffs_i].ticsremaining;
 
-					if (buffs[buffs_i].ticsremaining == 0) {
+					if ((buffs[buffs_i].ticsremaining == 0 && !IsShortDurationBuff(buffs[buffs_i].spellid)) || buffs[buffs_i].ticsremaining < 0) {
 						Log.Out(Logs::Detail, Logs::Spells, "Buff %d in slot %d has expired. Fading.", buffs[buffs_i].spellid, buffs_i);
 						BuffFadeBySlot(buffs_i);
 					}
