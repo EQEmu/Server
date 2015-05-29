@@ -489,6 +489,12 @@ bool Mob::DoCastSpell(uint16 spell_id, uint16 target_id, uint16 slot,
 	safe_delete(outapp);
 	outapp = nullptr;
 
+	if (IsClient() && slot == USE_ITEM_SPELL_SLOT &&item_slot != 0xFFFFFFFF) {
+		auto item = CastToClient()->GetInv().GetItem(item_slot);
+		if (item && item->GetItem())
+			Message_StringID(MT_Spells, BEGINS_TO_GLOW, item->GetItem()->Name);
+	}
+
 	if (!DoCastingChecks()) {
 		InterruptSpell();
 		return false;
