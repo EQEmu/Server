@@ -233,6 +233,8 @@
 #define CORPSE_DECAY_NOW			1227	//This corpse is waiting to expire.
 #define CORPSE_ITEM_LOST			1228	//Your items will no longer stay with you when you respawn on death. You will now need to return to your corpse for your items.
 #define CORPSE_EXP_LOST				1229	//You will now lose experience when you die.
+#define FLICKERS_PALE_LIGHT			1230	//Your %1 flickers with a pale light.
+#define SPARKLES					1236	//Your %1 sparkles.
 #define SURNAME_REJECTED			1374	//Your new surname was rejected. Please try a different name.
 #define DUEL_DECLINE				1383	//%1 has declined your challenge to duel to the death.
 #define DUEL_ACCEPTED				1384	//%1 has already accepted a duel with someone else.
@@ -375,6 +377,7 @@
 #define GROUP_INVITEE_SELF			12270	//12270 You cannot invite yourself.
 #define NOT_IN_CONTROL				12368	//You do not have control of yourself right now.
 #define ALREADY_CASTING				12442	//You are already casting a spell!
+#define SHIMMERS_BRIEFLY			12444	//Your %1 shimmers briefly.
 #define SENSE_CORPSE_NOT_NAME		12446	//You don't sense any corpses of that name.
 #define SENSE_CORPSE_NONE			12447	//You don't sense any corpses.
 #define SCREECH_BUFF_BLOCK			12448	//Your immunity buff protected you from the spell %1!
