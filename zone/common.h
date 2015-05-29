@@ -468,6 +468,7 @@ typedef struct
 	uint16 spellID;
 	uint16 chance;
 	uint16 base_spellID;
+	int level_override;
 } tProc;
 
 struct Shielders_Struct {

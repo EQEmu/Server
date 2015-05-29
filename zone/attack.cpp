@@ -4143,7 +4143,7 @@ void Mob::TrySpellProc(const ItemInst *inst, const Item_Struct *weapon, Mob *on,
 					outapp->priority = 3;
 					entity_list.QueueCloseClients(this, outapp, false, 200, 0, true);
 					safe_delete(outapp);
-					ExecWeaponProc(nullptr, SpellProcs[i].spellID, on);
+					ExecWeaponProc(nullptr, SpellProcs[i].spellID, on, SpellProcs[i].level_override);
 					CheckNumHitsRemaining(NumHit::OffensiveSpellProcs, 0,
 								  SpellProcs[i].base_spellID);
 				} else {

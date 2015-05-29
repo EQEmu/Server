@@ -44,7 +44,7 @@ extern WorldServer worldserver;
 
 // the spell can still fail here, if the buff can't stack
 // in this case false will be returned, true otherwise
-bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
+bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_override)
 {
 	int caster_level, buffslot, effect, effect_value, i;
 	ItemInst *SummonedItem=nullptr;
@@ -59,26 +59,27 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 	const SPDat_Spell_Struct &spell = spells[spell_id];
 
 	bool c_override = false;
-	if(caster && caster->IsClient() && GetCastedSpellInvSlot() > 0)
-	{
-		const ItemInst* inst = caster->CastToClient()->GetInv().GetItem(GetCastedSpellInvSlot());
-		if(inst)
-		{
-			if(inst->GetItem()->Click.Level > 0)
-			{
+	if (caster && caster->IsClient() && GetCastedSpellInvSlot() > 0) {
+		const ItemInst *inst = caster->CastToClient()->GetInv().GetItem(GetCastedSpellInvSlot());
+		if (inst) {
+			if (inst->GetItem()->Click.Level > 0) {
 				caster_level = inst->GetItem()->Click.Level;
 				c_override = true;
-			}
-			else
-			{
+			} else {
 				caster_level = caster ? caster->GetCasterLevel(spell_id) : GetCasterLevel(spell_id);
 			}
-		}
-		else
+		} else if (level_override > 0) {
+			caster_level = level_override;
+			c_override = true;
+		} else {
 			caster_level = caster ? caster->GetCasterLevel(spell_id) : GetCasterLevel(spell_id);
-	}
-	else
+		}
+	} else if (level_override > 0) {
+		caster_level = level_override;
+		c_override = true;
+	} else {
 		caster_level = caster ? caster->GetCasterLevel(spell_id) : GetCasterLevel(spell_id);
+	}
 
 	if(c_override)
 	{
@@ -1786,9 +1787,9 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial)
 #endif
 
 				if(spells[spell_id].base2[i] == 0)
-					AddProcToWeapon(procid, false, 100, spell_id);
+					AddProcToWeapon(procid, false, 100, spell_id, level_override);
 				else
-					AddProcToWeapon(procid, false, spells[spell_id].base2[i]+100, spell_id);
+					AddProcToWeapon(procid, false, spells[spell_id].base2[i]+100, spell_id, level_override);
 				break;
 			}
 

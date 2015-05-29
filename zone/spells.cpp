@@ -1897,7 +1897,7 @@ bool Mob::DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_ce
 // we can't interrupt in this, or anything called from this!
 // if you need to abort the casting, return false
 bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, uint16 slot, uint16 mana_used,
-						uint32 inventory_slot, int16 resist_adjust, bool isproc)
+						uint32 inventory_slot, int16 resist_adjust, bool isproc, int level_override)
 {
 	//EQApplicationPacket *outapp = nullptr;
 	Mob *ae_center = nullptr;
@@ -2060,14 +2060,14 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, uint16 slot, uint16 
 				return(false);
 			}
 			if (isproc) {
-				SpellOnTarget(spell_id, spell_target, false, true, resist_adjust, true);
+				SpellOnTarget(spell_id, spell_target, false, true, resist_adjust, true, level_override);
 			} else {
 				if (spells[spell_id].targettype == ST_TargetOptional){
 					if (!TrySpellProjectile(spell_target, spell_id))
 						return false;
 				}
 
-				else if(!SpellOnTarget(spell_id, spell_target, false, true, resist_adjust, false)) {
+				else if(!SpellOnTarget(spell_id, spell_target, false, true, resist_adjust, false, level_override)) {
 					if(IsBuffSpell(spell_id) && IsBeneficialSpell(spell_id)) {
 						// Prevent mana usage/timers being set for beneficial buffs
 						if(casting_spell_type == 1)
@@ -3292,7 +3292,8 @@ int Mob::CanBuffStack(uint16 spellid, uint8 caster_level, bool iFailIfOverwrite)
 // and if you don't want effects just return false. interrupting here will
 // break stuff
 //
-bool Mob::SpellOnTarget(uint16 spell_id, Mob* spelltar, bool reflect, bool use_resist_adjust, int16 resist_adjust, bool isproc)
+bool Mob::SpellOnTarget(uint16 spell_id, Mob *spelltar, bool reflect, bool use_resist_adjust, int16 resist_adjust,
+			bool isproc, int level_override)
 {
 
 	// well we can't cast a spell on target without a target
@@ -3324,7 +3325,7 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob* spelltar, bool reflect, bool use_r
 	if(!IsValidSpell(spell_id))
 		return false;
 
-	uint16 caster_level = GetCasterLevel(spell_id);
+	uint16 caster_level = level_override > 0 ? level_override : GetCasterLevel(spell_id);
 
 	Log.Out(Logs::Detail, Logs::Spells, "Casting spell %d on %s with effective caster level %d", spell_id, spelltar->GetName(), caster_level);
 
@@ -3739,7 +3740,7 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob* spelltar, bool reflect, bool use_r
 	}
 
 	// cause the effects to the target
-	if(!spelltar->SpellEffect(this, spell_id, spell_effectiveness))
+	if(!spelltar->SpellEffect(this, spell_id, spell_effectiveness, level_override))
 	{
 		// if SpellEffect returned false there's a problem applying the
 		// spell. It's most likely a buff that can't stack.
@@ -5098,7 +5099,7 @@ bool Mob::IsCombatProc(uint16 spell_id) {
 	return false;
 }
 
-bool Mob::AddProcToWeapon(uint16 spell_id, bool bPerma, uint16 iChance, uint16 base_spell_id) {
+bool Mob::AddProcToWeapon(uint16 spell_id, bool bPerma, uint16 iChance, uint16 base_spell_id, int level_override) {
 	if(spell_id == SPELL_UNKNOWN)
 		return(false);
 
@@ -5109,6 +5110,7 @@ bool Mob::AddProcToWeapon(uint16 spell_id, bool bPerma, uint16 iChance, uint16 b
 				PermaProcs[i].spellID = spell_id;
 				PermaProcs[i].chance = iChance;
 				PermaProcs[i].base_spellID = base_spell_id;
+				PermaProcs[i].level_override = level_override;
 				Log.Out(Logs::Detail, Logs::Spells, "Added permanent proc spell %d with chance %d to slot %d", spell_id, iChance, i);
 
 				return true;
@@ -5121,6 +5123,7 @@ bool Mob::AddProcToWeapon(uint16 spell_id, bool bPerma, uint16 iChance, uint16 b
 				SpellProcs[i].spellID = spell_id;
 				SpellProcs[i].chance = iChance;
 				SpellProcs[i].base_spellID = base_spell_id;;
+				SpellProcs[i].level_override = level_override;
 				Log.Out(Logs::Detail, Logs::Spells, "Added spell-granted proc spell %d with chance %d to slot %d", spell_id, iChance, i);
 				return true;
 			}
@@ -5136,6 +5139,7 @@ bool Mob::RemoveProcFromWeapon(uint16 spell_id, bool bAll) {
 			SpellProcs[i].spellID = SPELL_UNKNOWN;
 			SpellProcs[i].chance = 0;
 			SpellProcs[i].base_spellID = SPELL_UNKNOWN;
+			SpellProcs[i].level_override = -1;
 			Log.Out(Logs::Detail, Logs::Spells, "Removed proc %d from slot %d", spell_id, i);
 		}
 	}

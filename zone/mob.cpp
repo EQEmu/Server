@@ -263,15 +263,19 @@ Mob::Mob(const char* in_name,
 		PermaProcs[j].spellID = SPELL_UNKNOWN;
 		PermaProcs[j].chance = 0;
 		PermaProcs[j].base_spellID = SPELL_UNKNOWN;
+		PermaProcs[j].level_override = -1;
 		SpellProcs[j].spellID = SPELL_UNKNOWN;
 		SpellProcs[j].chance = 0;
 		SpellProcs[j].base_spellID = SPELL_UNKNOWN;
+		SpellProcs[j].level_override = -1;
 		DefensiveProcs[j].spellID = SPELL_UNKNOWN;
 		DefensiveProcs[j].chance = 0;
 		DefensiveProcs[j].base_spellID = SPELL_UNKNOWN;
+		DefensiveProcs[j].level_override = -1;
 		RangedProcs[j].spellID = SPELL_UNKNOWN;
 		RangedProcs[j].chance = 0;
 		RangedProcs[j].base_spellID = SPELL_UNKNOWN;
+		RangedProcs[j].level_override = -1;
 	}
 
 	for (i = 0; i < _MaterialCount; i++)
@@ -3160,7 +3164,7 @@ int32 Mob::GetActSpellCasttime(uint16 spell_id, int32 casttime) {
 	return casttime;
 }
 
-void Mob::ExecWeaponProc(const ItemInst *inst, uint16 spell_id, Mob *on) {
+void Mob::ExecWeaponProc(const ItemInst *inst, uint16 spell_id, Mob *on, int level_override) {
 	// Changed proc targets to look up based on the spells goodEffect flag.
 	// This should work for the majority of weapons.
 	if(spell_id == SPELL_UNKNOWN || on->GetSpecialAbility(NO_HARM_FROM_CLIENT)) {
@@ -3199,14 +3203,14 @@ void Mob::ExecWeaponProc(const ItemInst *inst, uint16 spell_id, Mob *on) {
 		twinproc = true;
 
 	if (IsBeneficialSpell(spell_id)) {
-		SpellFinished(spell_id, this, 10, 0, -1, spells[spell_id].ResistDiff, true);
+		SpellFinished(spell_id, this, 10, 0, -1, spells[spell_id].ResistDiff, true, level_override);
 		if(twinproc)
-			SpellOnTarget(spell_id, this, false, false, 0, true);
+			SpellOnTarget(spell_id, this, false, false, 0, true, level_override);
 	}
 	else if(!(on->IsClient() && on->CastToClient()->dead)) { //dont proc on dead clients
-		SpellFinished(spell_id, on, 10, 0, -1, spells[spell_id].ResistDiff, true);
+		SpellFinished(spell_id, on, 10, 0, -1, spells[spell_id].ResistDiff, true, level_override);
 		if(twinproc)
-			SpellOnTarget(spell_id, on, false, false, 0, true);
+			SpellOnTarget(spell_id, on, false, false, 0, true, level_override);
 	}
 	return;
 }
@@ -5605,15 +5609,15 @@ void Mob::SendRemovePlayerState(PlayerState old_state)
 	safe_delete(app);
 }
 
-void Mob::SetCurrentSpeed(int in){ 
+void Mob::SetCurrentSpeed(int in){
 	if (current_speed != in)
-	{ 
-		current_speed = in; 
+	{
+		current_speed = in;
 		tar_ndx = 20;
 		if (in == 0) {
 			SetRunAnimSpeed(0);
 			SetMoving(false);
 			SendPosition();
 		}
-	} 
+	}
 }
