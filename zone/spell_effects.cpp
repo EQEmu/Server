@@ -5416,6 +5416,12 @@ int16 Client::GetFocusEffect(focusType type, uint16 spell_id) {
 			case focusRange:
 				string_id = PULSES_WITH_LIGHT;
 				break;
+			case focusSpellHateMod:
+				string_id = GLOWS_BLUE;
+				break;
+			case focusImprovedHeal:
+				string_id = FEEDS_WITH_POWER;
+				break;
 			default:
 				break;
 			}
