@@ -521,7 +521,8 @@ typedef enum {
 	petOther,
 	petCharmed,
 	petNPCFollow,
-	petTargetLock			//remain active as long something is on the hatelist. Don't listen to any commands
+	petTargetLock,			//remain active as long something is on the hatelist. Don't listen to any commands
+	petNone = 0xFF // not a pet
 } PetType;
 
 typedef enum {

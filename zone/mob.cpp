@@ -338,7 +338,7 @@ Mob::Mob(const char* in_name,
 	pLastChange = 0;
 	SetPetID(0);
 	SetOwnerID(0);
-	typeofpet = petCharmed;		//default to charmed...
+	typeofpet = petNone; // default to not a pet
 	petpower = 0;
 	held = false;
 	nocast = false;
@@ -2296,8 +2296,10 @@ void Mob::SetOwnerID(uint16 NewOwnerID) {
 	if (NewOwnerID == GetID() && NewOwnerID != 0) // ok, no charming yourself now =p
 		return;
 	ownerid = NewOwnerID;
-	if (ownerid == 0 && this->IsNPC() && this->GetPetType() != petCharmed)
-		this->Depop();
+	// if we're setting the owner ID to 0 and they're not either charmed or not-a-pet then
+	// they're a normal pet and should be despawned
+	if (ownerid == 0 && IsNPC() && GetPetType() != petCharmed && GetPetType() != petNone)
+		Depop();
 }
 
 // used in checking for behind (backstab) and checking in front (melee LoS)

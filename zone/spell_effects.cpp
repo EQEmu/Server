@@ -773,6 +773,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 				caster->SetPet(this);
 				SetOwnerID(caster->GetID());
 				SetPetOrder(SPO_Follow);
+				SetPetType(petCharmed);
 
 				if(caster->IsClient()){
 					EQApplicationPacket *app = new EQApplicationPacket(OP_Charm, sizeof(Charm_Struct));
@@ -3915,6 +3916,7 @@ void Mob::BuffFadeBySlot(int slot, bool iRecalcBonuses)
 				SendAppearancePacket(AT_Pet, 0, true, true);
 				Mob* tempmob = GetOwner();
 				SetOwnerID(0);
+				SetPetType(petNone);
 				if(tempmob)
 				{
 					tempmob->SetPet(0);
