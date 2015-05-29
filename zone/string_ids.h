@@ -234,7 +234,14 @@
 #define CORPSE_ITEM_LOST			1228	//Your items will no longer stay with you when you respawn on death. You will now need to return to your corpse for your items.
 #define CORPSE_EXP_LOST				1229	//You will now lose experience when you die.
 #define FLICKERS_PALE_LIGHT			1230	//Your %1 flickers with a pale light.
+#define PULSES_WITH_LIGHT			1231	//Your %1 pulses with light as your vision sharpens.
+#define FEEDS_WITH_POWER			1232	//Your %1 feeds you with power.
+#define POWER_DRAIN_INTO			1233	//You feel your power drain into your %1.
+#define SEEMS_DRAINED				1234	//Your %1 seems drained of power.
+#define ALIVE_WITH_POWER			1235	//Your %1 feels alive with power.
 #define SPARKLES					1236	//Your %1 sparkles.
+#define GROWS_DIM					1237	//Your %1 grows dim.
+#define BEGINS_TO_SHINE				1238	//Your %1 begins to shine.
 #define SURNAME_REJECTED			1374	//Your new surname was rejected. Please try a different name.
 #define DUEL_DECLINE				1383	//%1 has declined your challenge to duel to the death.
 #define DUEL_ACCEPTED				1384	//%1 has already accepted a duel with someone else.

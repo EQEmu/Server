@@ -5396,7 +5396,7 @@ int16 Client::GetFocusEffect(focusType type, uint16 spell_id) {
 
 		if (realTotal != 0 && UsedItem) {
 			// there are a crap ton more of these, I was able to verify these ones though
-			uint32 string_id = BEGINS_TO_GLOW;
+			uint32 string_id = BEGINS_TO_GLOW; // this is really just clicky message ...
 			switch (type) {
 			case focusSpellHaste:
 				string_id = SHIMMERS_BRIEFLY;
@@ -5406,6 +5406,12 @@ int16 Client::GetFocusEffect(focusType type, uint16 spell_id) {
 				break;
 			case focusSpellDuration:
 				string_id = SPARKLES;
+				break;
+			case focusImprovedDamage:
+				string_id = ALIVE_WITH_POWER;
+				break;
+			case focusRange:
+				string_id = PULSES_WITH_LIGHT;
 				break;
 			default:
 				break;
