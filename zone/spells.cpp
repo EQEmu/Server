@@ -370,6 +370,7 @@ bool Mob::DoCastSpell(uint16 spell_id, uint16 target_id, uint16 slot,
 	// and a target wasn't provided, then it's us; unless TGB is on and this
 	// is a TGB compatible spell.
 	if((IsGroupSpell(spell_id) ||
+		spell.targettype == ST_AEClientV1 ||
 		spell.targettype == ST_Self ||
 		spell.targettype == ST_AECaster ||
 		spell.targettype == ST_Ring ||
@@ -393,7 +394,7 @@ bool Mob::DoCastSpell(uint16 spell_id, uint16 target_id, uint16 slot,
 
 	// we checked for spells not requiring targets above
 	if(target_id == 0) {
-		Log.Out(Logs::Detail, Logs::Spells, "Spell Error: no target. spell=%d\n", GetName(), spell_id);
+		Log.Out(Logs::Detail, Logs::Spells, "Spell Error: no target. spell=%d", spell_id);
 		if(IsClient()) {
 			//clients produce messages... npcs should not for this case
 			Message_StringID(13, SPELL_NEED_TAR);
@@ -1618,6 +1619,7 @@ bool Mob::DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_ce
 
 		case ST_AEBard:
 		case ST_AECaster:
+		case ST_AEClientV1:
 		{
 			spell_target = nullptr;
 			ae_center = this;
