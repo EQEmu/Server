@@ -120,7 +120,10 @@ void Mob::DoSpecialAttackDamage(Mob *who, SkillUseTypes skill, int32 max_damage,
 					hate += item->GetItem()->AC;
 				}
 				const Item_Struct *itm = item->GetItem();
-				hate = hate * (100 + GetFuriousBash(itm->Focus.Effect)) / 100;
+				auto fbash = GetFuriousBash(itm->Focus.Effect);
+				hate = hate * (100 + fbash) / 100;
+				if (fbash)
+					Message_StringID(MT_Spells, GLOWS_RED, itm->Name);
 			}
 		}
 	}
