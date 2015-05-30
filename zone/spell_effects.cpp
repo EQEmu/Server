@@ -5399,6 +5399,7 @@ int16 Client::GetFocusEffect(focusType type, uint16 spell_id) {
 
 		if (realTotal != 0 && UsedItem) {
 			// there are a crap ton more of these, I was able to verify these ones though
+			// the RNG effective ones appear to have a different message for failing to focus
 			uint32 string_id = BEGINS_TO_GLOW; // this is really just clicky message ...
 			switch (type) {
 			case focusSpellHaste:
@@ -5421,6 +5422,9 @@ int16 Client::GetFocusEffect(focusType type, uint16 spell_id) {
 				break;
 			case focusImprovedHeal:
 				string_id = FEEDS_WITH_POWER;
+				break;
+			case focusReagentCost:
+				string_id = BEGINS_TO_SHINE;
 				break;
 			default:
 				break;
