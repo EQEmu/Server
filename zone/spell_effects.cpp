@@ -3707,6 +3707,8 @@ void Mob::DoBuffTic(const Buffs_Struct &buff, int slot, Mob *caster)
 			// do we need to do anyting here?
 		}
 		}
+		if (!IsValidSpell(buff.spellid)) // if we faded we're no longer valid!
+			break;
 	}
 }
 
