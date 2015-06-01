@@ -2852,7 +2852,7 @@ namespace RoF
 
 		// Check clientver field to verify this AA should be sent for SoF
 		// clientver 1 is for all clients and 5 is for Live
-		if (emu->clientver <= 5)
+		if (emu->clientver <= 7)
 		{
 			OUT(id);
 			eq->unknown004 = 1;

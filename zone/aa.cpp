@@ -1309,11 +1309,9 @@ void Client::SendAA(uint32 id, int seq) {
 			SendAA_Struct* saa_next = nullptr;
 			saa_next = zone->FindAA(saa->sof_next_id);
 
-			// hard-coding values like this is dangerous and makes adding/updating clients a nightmare...
-			if (saa_next &&
-				(((GetClientVersionBit() == 4) && (saa_next->clientver > 4))
-				|| ((GetClientVersionBit() == 8) && (saa_next->clientver > 5))
-				|| ((GetClientVersionBit() == 16) && (saa_next->clientver > 6)))){
+			// this check should work as long as we continue to just add the clients and just increase
+			// each number ....
+			if (saa_next && static_cast<int>(GetClientVersion()) < saa_next->clientver - 1) {
 				saa->next_id=0xFFFFFFFF;
 			}
 		}
