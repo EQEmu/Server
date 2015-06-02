@@ -4202,6 +4202,39 @@ int32 Mob::GetItemStat(uint32 itemid, const char *identifier)
 	return stat;
 }
 
+std::string Mob::GetGlobal(const char *varname) {
+	int qgCharid = 0;
+	int qgNpcid = 0;
+	
+	if (this->IsNPC())
+		qgNpcid = this->GetNPCTypeID();
+	
+	if (this->IsClient())
+		qgCharid = this->CastToClient()->CharacterID();
+	
+	QGlobalCache *qglobals = nullptr;
+	std::list<QGlobal> globalMap;
+	
+	if (this->IsClient())
+		qglobals = this->CastToClient()->GetQGlobals();
+	
+	if (this->IsNPC())
+		qglobals = this->CastToNPC()->GetQGlobals();
+
+	if(qglobals)
+		QGlobalCache::Combine(globalMap, qglobals->GetBucket(), qgNpcid, qgCharid, zone->GetZoneID());
+	
+	std::list<QGlobal>::iterator iter = globalMap.begin();
+	while(iter != globalMap.end()) {
+		if ((*iter).name.compare(varname) == 0)
+			return (*iter).value;
+
+		++iter;
+	}
+	
+	return "Undefined";
+}
+
 void Mob::SetGlobal(const char *varname, const char *newvalue, int options, const char *duration, Mob *other) {
 
 	int qgZoneid = zone->GetZoneID();
