@@ -710,8 +710,26 @@ void handle_encounter_timer(QuestInterface *parse, lua_State* L, std::string dat
 	lua_setfield(L, -2, "timer");
 }
 
+void handle_encounter_load(QuestInterface *parse, lua_State* L, std::string data, uint32 extra_data,
+									 std::vector<EQEmu::Any> *extra_pointers) {
+	if (extra_pointers) {
+		std::string *str = EQEmu::any_cast<std::string*>(extra_pointers->at(0));
+		lua_pushstring(L, str->c_str());
+		lua_setfield(L, -2, "data");
+	}
+}
+
+void handle_encounter_unload(QuestInterface *parse, lua_State* L, std::string data, uint32 extra_data,
+	std::vector<EQEmu::Any> *extra_pointers) {
+	if (extra_pointers) {
+		std::string *str = EQEmu::any_cast<std::string*>(extra_pointers->at(0));
+		lua_pushstring(L, str->c_str());
+		lua_setfield(L, -2, "data");
+	}
+}
+
 void handle_encounter_null(QuestInterface *parse, lua_State* L, std::string data, uint32 extra_data,
-							std::vector<EQEmu::Any> *extra_pointers) {
+						   std::vector<EQEmu::Any> *extra_pointers) {
 
 }
 

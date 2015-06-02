@@ -132,6 +132,10 @@ void handle_spell_null(QuestInterface *parse, lua_State* L, NPC* npc, Client* cl
 //Encounter
 void handle_encounter_timer(QuestInterface *parse, lua_State* L, std::string data, uint32 extra_data,
 		std::vector<EQEmu::Any> *extra_pointers);
+void handle_encounter_load(QuestInterface *parse, lua_State* L, std::string data, uint32 extra_data,
+	std::vector<EQEmu::Any> *extra_pointers);
+void handle_encounter_unload(QuestInterface *parse, lua_State* L, std::string data, uint32 extra_data,
+	std::vector<EQEmu::Any> *extra_pointers);
 void handle_encounter_null(QuestInterface *parse, lua_State* L, std::string data, uint32 extra_data,
 		std::vector<EQEmu::Any> *extra_pointers);
 

@@ -216,6 +216,8 @@ LuaParser::LuaParser() {
 	SpellArgumentDispatch[EVENT_SPELL_EFFECT_TRANSLOCATE_COMPLETE] = handle_translocate_finish;
 
 	EncounterArgumentDispatch[EVENT_TIMER] = handle_encounter_timer;
+	EncounterArgumentDispatch[EVENT_ENCOUNTER_LOAD] = handle_encounter_load;
+	EncounterArgumentDispatch[EVENT_ENCOUNTER_UNLOAD] = handle_encounter_unload;
 
 	L = nullptr;
 }
