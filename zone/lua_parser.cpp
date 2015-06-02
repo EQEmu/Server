@@ -610,12 +610,6 @@ int LuaParser::_EventEncounter(std::string package_name, QuestEventID evt, std::
 		lua_pushstring(L, encounter_name.c_str());
 		lua_setfield(L, -2, "name");
 
-		/*if(extra_pointers) {
-			std::string *str = EQEmu::any_cast<std::string*>(extra_pointers->at(0));
-			lua_pushstring(L, str->c_str());
-			lua_setfield(L, -2, "data");
-		}*/
-
 		auto arg_function = EncounterArgumentDispatch[evt];
 		arg_function(this, L, data, extra_data, extra_pointers);
 
