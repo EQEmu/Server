@@ -34,6 +34,8 @@ struct lua_registered_event {
 
 extern std::map<std::string, std::list<lua_registered_event>> lua_encounter_events_registered;
 extern std::map<std::string, bool> lua_encounters_loaded;
+extern std::map<std::string, Encounter *> lua_encounters;
+
 extern void MapOpcodes();
 extern void ClearMappedOpcode(EmuOpcode op);
 
@@ -42,19 +44,23 @@ void unregister_event(std::string package_name, std::string name, int evt);
 void load_encounter(std::string name) {
 	if(lua_encounters_loaded.count(name) > 0)
 		return;
-
+	Encounter *enc = new Encounter(name.c_str());
+	entity_list.AddEncounter(enc);
+	lua_encounters[name] = enc;
 	lua_encounters_loaded[name] = true;
-	parse->EventEncounter(EVENT_ENCOUNTER_LOAD, name, 0);
+	parse->EventEncounter(EVENT_ENCOUNTER_LOAD, name, "", 0);
 }
 
 void load_encounter_with_data(std::string name, std::string info_str) {
 	if(lua_encounters_loaded.count(name) > 0)
 		return;
-
+	Encounter *enc = new Encounter(name.c_str());
+	entity_list.AddEncounter(enc);
+	lua_encounters[name] = enc;
 	lua_encounters_loaded[name] = true;
 	std::vector<EQEmu::Any> info_ptrs;
 	info_ptrs.push_back(&info_str);
-	parse->EventEncounter(EVENT_ENCOUNTER_LOAD, name, 0, &info_ptrs);
+	parse->EventEncounter(EVENT_ENCOUNTER_LOAD, name, "", 0, &info_ptrs);
 }
 
 void unload_encounter(std::string name) {
@@ -80,8 +86,10 @@ void unload_encounter(std::string name) {
 		}
 	}
 
+	lua_encounters[name]->Depop();
+	lua_encounters.erase(name);
 	lua_encounters_loaded.erase(name);
-	parse->EventEncounter(EVENT_ENCOUNTER_UNLOAD, name, 0);
+	parse->EventEncounter(EVENT_ENCOUNTER_UNLOAD, name, "", 0);
 }
 
 void unload_encounter_with_data(std::string name, std::string info_str) {
@@ -109,10 +117,12 @@ void unload_encounter_with_data(std::string name, std::string info_str) {
 		}
 	}
 
+	lua_encounters[name]->Depop();
+	lua_encounters.erase(name);
 	lua_encounters_loaded.erase(name);
 	std::vector<EQEmu::Any> info_ptrs;
 	info_ptrs.push_back(&info_str);
-	parse->EventEncounter(EVENT_ENCOUNTER_UNLOAD, name, 0, &info_ptrs);
+	parse->EventEncounter(EVENT_ENCOUNTER_UNLOAD, name, "", 0, &info_ptrs);
 }
 
 void register_event(std::string package_name, std::string name, int evt, luabind::adl::object func) {

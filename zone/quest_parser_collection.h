@@ -21,6 +21,7 @@
 
 #include "../common/types.h"
 
+#include "encounter.h"
 #include "beacon.h"
 #include "client.h"
 #include "corpse.h"
@@ -71,7 +72,7 @@ public:
 		std::vector<EQEmu::Any> *extra_pointers = nullptr);
 	int EventSpell(QuestEventID evt, NPC* npc, Client *client, uint32 spell_id, uint32 extra_data,
 		std::vector<EQEmu::Any> *extra_pointers = nullptr);
-	int EventEncounter(QuestEventID evt, std::string encounter_name, uint32 extra_data,
+	int EventEncounter(QuestEventID evt, std::string encounter_name, std::string data, uint32 extra_data,
 		std::vector<EQEmu::Any> *extra_pointers = nullptr);
 	
 	void GetErrors(std::list<std::string> &err);

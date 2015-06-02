@@ -423,6 +423,7 @@ int main(int argc, char** argv) {
 				entity_list.Process(); 
 				entity_list.MobProcess(); 
 				entity_list.BeaconProcess();
+				entity_list.EncounterProcess();
 
 				if (zone) {
 					if(!zone->Process()) {

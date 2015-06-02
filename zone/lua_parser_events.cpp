@@ -704,4 +704,15 @@ void handle_spell_null(QuestInterface *parse, lua_State* L, NPC* npc, Client* cl
 					   std::vector<EQEmu::Any> *extra_pointers) {
 }
 
+void handle_encounter_timer(QuestInterface *parse, lua_State* L, std::string data, uint32 extra_data,
+							std::vector<EQEmu::Any> *extra_pointers) {
+	lua_pushstring(L, data.c_str());
+	lua_setfield(L, -2, "timer");
+}
+
+void handle_encounter_null(QuestInterface *parse, lua_State* L, std::string data, uint32 extra_data,
+							std::vector<EQEmu::Any> *extra_pointers) {
+
+}
+
 #endif

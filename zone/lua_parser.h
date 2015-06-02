@@ -39,7 +39,7 @@ public:
 		std::vector<EQEmu::Any> *extra_pointers);
 	virtual int EventSpell(QuestEventID evt, NPC* npc, Client *client, uint32 spell_id, uint32 extra_data,
 		std::vector<EQEmu::Any> *extra_pointers);
-	virtual int EventEncounter(QuestEventID evt, std::string encounter_name, uint32 extra_data,
+	virtual int EventEncounter(QuestEventID evt, std::string encounter_name, std::string data, uint32 extra_data,
 		std::vector<EQEmu::Any> *extra_pointers);
 
 	virtual bool HasQuestSub(uint32 npc_id, QuestEventID evt);
@@ -82,7 +82,7 @@ private:
 		uint32 extra_data, std::vector<EQEmu::Any> *extra_pointers, luabind::adl::object *l_func = nullptr);
 	int _EventSpell(std::string package_name, QuestEventID evt, NPC* npc, Client *client, uint32 spell_id, uint32 extra_data,
 		std::vector<EQEmu::Any> *extra_pointers, luabind::adl::object *l_func = nullptr);
-	int _EventEncounter(std::string package_name, QuestEventID evt, std::string encounter_name, uint32 extra_data,
+	int _EventEncounter(std::string package_name, QuestEventID evt, std::string encounter_name, std::string data, uint32 extra_data,
 		std::vector<EQEmu::Any> *extra_pointers);
 
 	void LoadScript(std::string filename, std::string package_name);
@@ -99,6 +99,8 @@ private:
 	PlayerArgumentHandler PlayerArgumentDispatch[_LargestEventID];
 	ItemArgumentHandler ItemArgumentDispatch[_LargestEventID];
 	SpellArgumentHandler SpellArgumentDispatch[_LargestEventID];
+	EncounterArgumentHandler EncounterArgumentDispatch[_LargestEventID];
+
 };
 
 #endif
