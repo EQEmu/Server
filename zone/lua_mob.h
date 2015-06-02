@@ -307,6 +307,7 @@ public:
 		uint32 unk020, bool perm_effect, Lua_Client c);
 	void TempName();
 	void TempName(const char *newname);
+	std::string GetGlobal(const char *varname);
 	void SetGlobal(const char *varname, const char *newvalue, int options, const char *duration);
 	void SetGlobal(const char *varname, const char *newvalue, int options, const char *duration, Lua_Mob other);
 	void TarGlobal(const char *varname, const char *value, const char *duration, int npc_id, int char_id, int zone_id);
