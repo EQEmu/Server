@@ -151,6 +151,7 @@ RULE_CATEGORY_END()
 RULE_CATEGORY( Pets )
 RULE_REAL( Pets, AttackCommandRange, 150 )
 RULE_BOOL( Pets, UnTargetableSwarmPet, false )
+RULE_REAL( Pets, PetPowerLevelCap, 10 ) // Max number of levels your pet can go up with pet power
 RULE_CATEGORY_END()
 
 RULE_CATEGORY( GM )

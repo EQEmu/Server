@@ -60,6 +60,7 @@ enum SpellTypeIndex {
 };
 
 class Bot : public NPC {
+	friend class Mob;
 public:
 	// Class enums
 	enum BotfocusType {	//focus types

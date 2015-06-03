@@ -28,6 +28,10 @@
 #include "pets.h"
 #include "zonedb.h"
 
+#ifdef BOTS
+#include "bot.h"
+#endif
+
 #ifndef WIN32
 #include <stdlib.h>
 #include "../common/unix.h"
@@ -231,6 +235,10 @@ void Mob::MakePoweredPet(uint16 spell_id, const char* pettype, int16 petpower,
 			act_power = CastToClient()->GetFocusEffect(focusPetPower, spell_id);//Client only
 			act_power = CastToClient()->mod_pet_power(act_power, spell_id);
 		}
+#ifdef BOTS
+		else if (this->IsBot())
+			act_power = CastToBot()->GetBotFocusEffect(Bot::BotfocusPetPower, spell_id);
+#endif
 	}
 	else if (petpower > 0)
 		act_power = petpower;
@@ -260,7 +268,11 @@ void Mob::MakePoweredPet(uint16 spell_id, const char* pettype, int16 petpower,
 	memcpy(npc_type, base, sizeof(NPCType));
 
 	// If pet power is set to -1 in the DB, use stat scaling
-	if (this->IsClient() && record.petpower == -1)
+	if ((this->IsClient() 
+#ifdef BOTS
+		|| this->IsBot()
+#endif
+		) && record.petpower == -1)
 	{
 		float scale_power = (float)act_power / 100.0f;
 		if(scale_power > 0)
@@ -268,10 +280,10 @@ void Mob::MakePoweredPet(uint16 spell_id, const char* pettype, int16 petpower,
 			npc_type->max_hp *= (1 + scale_power);
 			npc_type->cur_hp = npc_type->max_hp;
 			npc_type->AC *= (1 + scale_power);
-			npc_type->level += 1 + ((int)act_power / 25); // gains an additional level for every 25 pet power
+			npc_type->level += 1 + ((int)act_power / 25) > npc_type->level + RuleR(Pets, PetPowerLevelCap) ? RuleR(Pets, PetPowerLevelCap) : 1 + ((int)act_power / 25); // gains an additional level for every 25 pet power
 			npc_type->min_dmg = (npc_type->min_dmg * (1 + (scale_power / 2)));
 			npc_type->max_dmg = (npc_type->max_dmg * (1 + (scale_power / 2)));
-			npc_type->size *= (1 + (scale_power / 2));
+			npc_type->size = npc_type->size * (1 + (scale_power / 2)) > npc_type->size * 3 ? npc_type->size * 3 : (1 + (scale_power / 2));
 		}
 		record.petpower = act_power;
 	}
