@@ -6355,9 +6355,8 @@ void Client::Handle_OP_GroupDisband(const EQApplicationPacket *app)
 			}
 			else {
 				Mob* tempMember = entity_list.GetMob(gd->name1); //Name1 is the target you are disbanding
-				if (tempMember) {
-					if (tempMember->IsBot())
-						tempMember->CastToBot()->RemoveBotFromGroup(tempMember->CastToBot(), group);
+				if (tempMember && tempMember->IsBot()) {
+					tempMember->CastToBot()->RemoveBotFromGroup(tempMember->CastToBot(), group);
 					if (LFP)
 					{
 						// If we are looking for players, update to show we are on our own now.
