@@ -758,6 +758,7 @@ void Bot::GenerateBaseStats() {
 	
 	this->pAggroRange = 0;
 	this->pAssistRange = 0;
+	this->raid_target = false;
 }
 
 void Bot::GenerateAppearance() {
@@ -5292,9 +5293,6 @@ bool Bot::RemoveBotFromGroup(Bot* bot, Group* group) {
 
 				if(group->DelMember(bot))
 					database.SetGroupID(bot->GetCleanName(), 0, bot->GetBotID());
-
-				if(group->GroupCount() <= 1 && ZoneLoaded)
-					group->DisbandGroup();
 			}
 			else {
 				for(int i = 0; i < MAX_GROUP_MEMBERS; i++) {
@@ -5896,6 +5894,11 @@ bool Bot::Death(Mob *killerMob, int32 damage, uint16 spell_id, SkillUseTypes att
 
 					// delete from group data
 					RemoveBotFromGroup(this, g);
+					
+					//Make sure group still exists if it doesnt they were already updated in RemoveBotFromGroup
+					g = GetGroup();
+					if (!g)
+						break;
 
 					// if group members exist below this one, move
 					// them all up one slot in the group list
@@ -5909,11 +5912,6 @@ bool Bot::Death(Mob *killerMob, int32 damage, uint16 spell_id, SkillUseTypes att
 							g->members[j] = nullptr;
 						}
 					}
-					
-					//Make sure group still exists if it doesnt they were already updated in RemoveBotFromGroup
-					g = GetGroup();
-					if (!g)
-						break;
 					
 					// update the client group
 					EQApplicationPacket* outapp = new EQApplicationPacket(OP_GroupUpdate, sizeof(GroupJoin_Struct));

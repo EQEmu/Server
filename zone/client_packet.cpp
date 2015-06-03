@@ -6354,10 +6354,16 @@ void Client::Handle_OP_GroupDisband(const EQApplicationPacket *app)
 				Bot::ProcessBotGroupDisband(this, std::string());
 			}
 			else {
-				Mob* tempMember = entity_list.GetMob(gd->name2);
+				Mob* tempMember = entity_list.GetMob(gd->name1); //Name1 is the target you are disbanding
 				if (tempMember) {
 					if (tempMember->IsBot())
-						Bot::ProcessBotGroupDisband(this, std::string(tempMember->GetCleanName()));
+						tempMember->CastToBot()->RemoveBotFromGroup(tempMember->CastToBot(), group);
+					if (LFP)
+					{
+						// If we are looking for players, update to show we are on our own now.
+						UpdateLFP();
+					}
+					return; //No need to continue from here we were removing a bot from party
 				}
 			}
 		}
