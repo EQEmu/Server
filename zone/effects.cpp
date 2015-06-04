@@ -423,7 +423,9 @@ int32 Mob::GetActSpellDuration(uint16 spell_id, int32 duration)
 
 	// unsure on the exact details, but bard songs that don't cost mana at some point get an extra tick, 60 for now
 	// a level 53 bard reported getting 2 tics
-	if (IsShortDurationBuff(spell_id) && IsBardSong(spell_id) && spells[spell_id].mana == 0 && GetClass() == BARD && GetLevel() > 60)
+	// bard DOTs do get this extra tick, but beneficial long bard songs don't? (invul, crescendo)
+	if ((IsShortDurationBuff(spell_id) || IsDetrimentalSpell(spell_id)) && IsBardSong(spell_id) &&
+	    spells[spell_id].mana == 0 && GetClass() == BARD && GetLevel() > 60)
 		tic_inc++;
 	float focused = ((duration * increase) / 100.0f) + tic_inc;
 	int ifocused = static_cast<int>(focused);
