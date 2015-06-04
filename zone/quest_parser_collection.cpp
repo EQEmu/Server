@@ -434,14 +434,14 @@ int QuestParserCollection::EventSpell(QuestEventID evt, NPC* npc, Client *client
 	return 0;
 }
 
-int QuestParserCollection::EventEncounter(QuestEventID evt, std::string encounter_name, uint32 extra_data,
+int QuestParserCollection::EventEncounter(QuestEventID evt, std::string encounter_name, std::string data, uint32 extra_data,
 										  std::vector<EQEmu::Any> *extra_pointers) {
 	auto iter = _encounter_quest_status.find(encounter_name);
 	if(iter != _encounter_quest_status.end()) {
 		//loaded or failed to load
 		if(iter->second != QuestFailedToLoad) {
 			std::map<uint32, QuestInterface*>::iterator qiter = _interfaces.find(iter->second);
-			return qiter->second->EventEncounter(evt, encounter_name, extra_data, extra_pointers);
+			return qiter->second->EventEncounter(evt, encounter_name, data, extra_data, extra_pointers);
 		}
 	} else {
 		std::string filename;
@@ -449,7 +449,7 @@ int QuestParserCollection::EventEncounter(QuestEventID evt, std::string encounte
 		if(qi) {
 			_encounter_quest_status[encounter_name] = qi->GetIdentifier();
 			qi->LoadEncounterScript(filename, encounter_name);
-			return qi->EventEncounter(evt, encounter_name, extra_data, extra_pointers);
+			return qi->EventEncounter(evt, encounter_name, data, extra_data, extra_pointers);
 		} else {
 			_encounter_quest_status[encounter_name] = QuestFailedToLoad;
 		}

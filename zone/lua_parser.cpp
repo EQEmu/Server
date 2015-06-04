@@ -128,6 +128,7 @@ struct lua_registered_event {
 
 std::map<std::string, std::list<lua_registered_event>> lua_encounter_events_registered;
 std::map<std::string, bool> lua_encounters_loaded;
+std::map<std::string, Encounter *> lua_encounters;
 
 LuaParser::LuaParser() {
 	for(int i = 0; i < _LargestEventID; ++i) {
@@ -135,6 +136,7 @@ LuaParser::LuaParser() {
 		PlayerArgumentDispatch[i] = handle_player_null;
 		ItemArgumentDispatch[i] = handle_item_null;
 		SpellArgumentDispatch[i] = handle_spell_null;
+		EncounterArgumentDispatch[i] = handle_encounter_null;
 	}
 
 	NPCArgumentDispatch[EVENT_SAY] = handle_npc_event_say;
@@ -212,6 +214,10 @@ LuaParser::LuaParser() {
 	SpellArgumentDispatch[EVENT_SPELL_BUFF_TIC_CLIENT] = handle_spell_tic;
 	SpellArgumentDispatch[EVENT_SPELL_FADE] = handle_spell_fade;
 	SpellArgumentDispatch[EVENT_SPELL_EFFECT_TRANSLOCATE_COMPLETE] = handle_translocate_finish;
+
+	EncounterArgumentDispatch[EVENT_TIMER] = handle_encounter_timer;
+	EncounterArgumentDispatch[EVENT_ENCOUNTER_LOAD] = handle_encounter_load;
+	EncounterArgumentDispatch[EVENT_ENCOUNTER_UNLOAD] = handle_encounter_unload;
 
 	L = nullptr;
 }
@@ -575,7 +581,7 @@ int LuaParser::_EventSpell(std::string package_name, QuestEventID evt, NPC* npc,
 	return 0;
 }
 
-int LuaParser::EventEncounter(QuestEventID evt, std::string encounter_name, uint32 extra_data, std::vector<EQEmu::Any> *extra_pointers) {
+int LuaParser::EventEncounter(QuestEventID evt, std::string encounter_name, std::string data, uint32 extra_data, std::vector<EQEmu::Any> *extra_pointers) {
 	evt = ConvertLuaEvent(evt);
 	if(evt >= _LargestEventID) {
 		return 0;
@@ -587,10 +593,10 @@ int LuaParser::EventEncounter(QuestEventID evt, std::string encounter_name, uint
 		return 0;
 	}
 	
-	return _EventEncounter(package_name, evt, encounter_name, extra_data, extra_pointers);
+	return _EventEncounter(package_name, evt, encounter_name, data, extra_data, extra_pointers);
 }
 
-int LuaParser::_EventEncounter(std::string package_name, QuestEventID evt, std::string encounter_name, uint32 extra_data,
+int LuaParser::_EventEncounter(std::string package_name, QuestEventID evt, std::string encounter_name, std::string data, uint32 extra_data,
 							   std::vector<EQEmu::Any> *extra_pointers) {
 	const char *sub_name = LuaEvents[evt];
 	
@@ -604,13 +610,11 @@ int LuaParser::_EventEncounter(std::string package_name, QuestEventID evt, std::
 		lua_pushstring(L, encounter_name.c_str());
 		lua_setfield(L, -2, "name");
 
-		if(extra_pointers) {
-			std::string *str = EQEmu::any_cast<std::string*>(extra_pointers->at(0));
-			lua_pushstring(L, str->c_str());
-			lua_setfield(L, -2, "data");
-		}
+		auto arg_function = EncounterArgumentDispatch[evt];
+		arg_function(this, L, data, extra_data, extra_pointers);
 
-		quest_manager.StartQuest(nullptr, nullptr, nullptr, encounter_name);
+		Encounter *enc = lua_encounters[encounter_name];
+		quest_manager.StartQuest(enc, nullptr, nullptr, encounter_name);
 		if(lua_pcall(L, 1, 1, 0)) {
 			std::string error = lua_tostring(L, -1);
 			AddError(error);
@@ -785,6 +789,11 @@ void LuaParser::ReloadQuests() {
 	errors_.clear();
 	lua_encounter_events_registered.clear();
 	lua_encounters_loaded.clear();
+
+	for (auto encounter : lua_encounters) {
+		encounter.second->Depop();
+	}
+	lua_encounters.clear();
 
 	if(L) {
 		lua_close(L);
