@@ -19,6 +19,7 @@
 #include "../common/timer.h"
 #include "../common/eqemu_logsys.h"
 #include "encounter.h"
+#include "lua_encounter.h"
 
 struct Events { };
 struct Factions { };
@@ -294,6 +295,10 @@ void lua_set_timer(const char *timer, int time_ms, Lua_ItemInst inst) {
 
 void lua_set_timer(const char *timer, int time_ms, Lua_Mob mob) {
 	quest_manager.settimerMS(timer, time_ms, mob);
+}
+
+void lua_set_timer(const char *timer, int time_ms, Lua_Encounter enc) {
+	quest_manager.settimerMS(timer, time_ms, enc);
 }
 
 void lua_stop_timer(const char *timer) {
@@ -1457,6 +1462,7 @@ luabind::scope lua_register_general() {
 		luabind::def("set_timer", (void(*)(const char*, int))&lua_set_timer),
 		luabind::def("set_timer", (void(*)(const char*, int, Lua_ItemInst))&lua_set_timer),
 		luabind::def("set_timer", (void(*)(const char*, int, Lua_Mob))&lua_set_timer),
+		luabind::def("set_timer", (void(*)(const char*, int, Lua_Encounter))&lua_set_timer),
 		luabind::def("stop_timer", (void(*)(const char*))&lua_stop_timer),
 		luabind::def("stop_timer", (void(*)(const char*, Lua_ItemInst))&lua_stop_timer),
 		luabind::def("stop_timer", (void(*)(const char*, Lua_Mob))&lua_stop_timer),
