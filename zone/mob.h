@@ -508,7 +508,8 @@ public:
 	static void CreateSpawnPacket(EQApplicationPacket* app, NewSpawn_Struct* ns);
 	virtual void FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho);
 	void CreateHPPacket(EQApplicationPacket* app);
-	void SendHPUpdate();
+	void SendHPUpdate(bool skip_self = false);
+	virtual void ResetHPUpdateTimer() {}; // does nothing
 
 	//Util
 	static uint32 RandomTimer(int min, int max);

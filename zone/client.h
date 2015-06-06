@@ -1257,6 +1257,8 @@ public:
 	int32 GetMeleeDamage(Mob* other, bool GetMinDamage = false);
 
 	void QuestReward(Mob* target, uint32 copper = 0, uint32 silver = 0, uint32 gold = 0, uint32 platinum = 0, uint32 itemid = 0, uint32 exp = 0, bool faction = false);
+
+	void ResetHPUpdateTimer() { hpupdate_timer.Start(); }
 protected:
 	friend class Mob;
 	void CalcItemBonuses(StatBonuses* newbon);

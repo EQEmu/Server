@@ -115,7 +115,7 @@ NPC::NPC(const NPCType* d, Spawn2* in_respawn, const glm::vec4& position, int if
 	knightattack_timer(1000),
 	assist_timer(AIassistcheck_delay),
 	qglobal_purge_timer(30000),
-	sendhpupdate_timer(1000),
+	sendhpupdate_timer(2000),
 	enraged_timer(1000),
 	taunt_timer(TauntReuseTime * 1000),
 	m_SpawnPoint(position),
@@ -650,7 +650,8 @@ bool NPC::Process()
 		}
 	}
 
-	if (sendhpupdate_timer.Check() && (IsTargeted() || (IsPet() && GetOwner() && GetOwner()->IsClient()))) {
+	// we might actually want to reset in this check ... won't until issues arise at least :P
+	if (sendhpupdate_timer.Check(false) && (IsTargeted() || (IsPet() && GetOwner() && GetOwner()->IsClient()))) {
 		if(!IsFullHP || cur_hp<max_hp){
 			SendHPUpdate();
 		}

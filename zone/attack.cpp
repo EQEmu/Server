@@ -3693,7 +3693,7 @@ void Mob::CommonDamage(Mob* attacker, int32 &damage, const uint16 spell_id, cons
 
 		//send an HP update if we are hurt
 		if(GetHP() < GetMaxHP())
-			SendHPUpdate();
+			SendHPUpdate(!iBuffTic); // the OP_Damage actually updates the client in these cases, so we skill them
 	}	//end `if damage was done`
 
 	//send damage packet...

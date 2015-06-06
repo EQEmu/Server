@@ -129,7 +129,9 @@ bool Client::Process() {
 		if(IsTracking() && (GetClientVersion() >= ClientVersion::SoD) && TrackingTimer.Check())
 			DoTracking();
 
-		if(hpupdate_timer.Check())
+		// SendHPUpdate calls hpupdate_timer.Start so it can delay this timer, so lets not reset with the check
+		// since the function will anyways
+		if(hpupdate_timer.Check(false))
 			SendHPUpdate();
 
 		if(mana_timer.Check())
