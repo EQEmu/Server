@@ -705,7 +705,7 @@ void Group::SplitExp(uint32 exp, Mob* other) {
 		groupmod = 2.16;
 	else
 		groupmod = 1.0;
-	if(membercount > 1 &&  membercount < 6)
+	if(membercount > 1 &&  membercount <= 6)
 		groupexp += (uint32)((float)exp * groupmod * (RuleR(Character, GroupExpMultiplier)));
 
 	int conlevel = Mob::GetLevelCon(maxlevel, other->GetLevel());
