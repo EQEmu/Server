@@ -34,6 +34,7 @@
 #include "questmgr.h"
 #include "zone.h"
 #include "lua_parser.h"
+#include "lua_encounter.h"
 
 const char *LuaEvents[_LargestEventID] = {
 	"event_say",
@@ -610,10 +611,11 @@ int LuaParser::_EventEncounter(std::string package_name, QuestEventID evt, std::
 		lua_pushstring(L, encounter_name.c_str());
 		lua_setfield(L, -2, "name");
 
-		auto arg_function = EncounterArgumentDispatch[evt];
-		arg_function(this, L, data, extra_data, extra_pointers);
-
 		Encounter *enc = lua_encounters[encounter_name];
+
+		auto arg_function = EncounterArgumentDispatch[evt];
+		arg_function(this, L, enc, data, extra_data, extra_pointers);
+
 		quest_manager.StartQuest(enc, nullptr, nullptr, encounter_name);
 		if(lua_pcall(L, 1, 1, 0)) {
 			std::string error = lua_tostring(L, -1);
@@ -977,6 +979,7 @@ void LuaParser::MapFunctions(lua_State *L) {
 			lua_register_client_version(),
 			lua_register_appearance(),
 			lua_register_entity(),
+			lua_register_encounter(),
 			lua_register_mob(),
 			lua_register_special_abilities(),
 			lua_register_npc(),
