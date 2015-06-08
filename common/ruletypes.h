@@ -345,6 +345,7 @@ RULE_BOOL ( Spells, SwarmPetTargetLock, false) // Use old method of swarm pets t
 RULE_BOOL ( Spells, NPC_UseFocusFromSpells, true) // Allow npcs to use most spell derived focus effects.
 RULE_BOOL ( Spells, NPC_UseFocusFromItems, false) // Allow npcs to use most item derived focus effects.
 RULE_BOOL ( Spells, UseAdditiveFocusFromWornSlot, false) // Allows an additive focus effect to be calculated from worn slot.
+RULE_BOOL ( Spells, AlwaysSendTargetsBuffs, false) // ignore LAA level if true
 RULE_CATEGORY_END()
 
 RULE_CATEGORY( Combat )

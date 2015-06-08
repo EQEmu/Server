@@ -12897,7 +12897,7 @@ void Client::Handle_OP_TargetCommand(const EQApplicationPacket *app)
 						inspect_buffs = group->GetLeadershipAA(groupAAInspectBuffs);
 				}
 			}
-			if (nt == this || inspect_buffs || (nt->IsClient() && !nt->CastToClient()->GetPVP()) ||
+			if (GetGM() || RuleB(Spells, AlwaysSendTargetsBuffs) || nt == this || inspect_buffs || (nt->IsClient() && !nt->CastToClient()->GetPVP()) ||
 					(nt->IsPet() && nt->GetOwner() && nt->GetOwner()->IsClient() && !nt->GetOwner()->CastToClient()->GetPVP()) ||
 					(nt->IsMerc() && nt->GetOwner() && nt->GetOwner()->IsClient() && !nt->GetOwner()->CastToClient()->GetPVP()))
 				nt->SendBuffsToClient(this);
