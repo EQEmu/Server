@@ -1377,10 +1377,10 @@ void Client::SendAA(uint32 id, int seq) {
 }
 
 void Client::SendAAList(){
-	int total = zone->GetTotalAAs();
-	for(int i=0;i < total;i++){
-		SendAA(0,i);
-	}
+//	int total = zone->GetTotalAAs();
+//	for(int i=0;i < total;i++){
+//		SendAA(0,i);
+//	}
 }
 
 uint32 Client::GetAA(uint32 aa_id) const {
