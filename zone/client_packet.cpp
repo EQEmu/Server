@@ -4457,9 +4457,20 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app)
 
 	// Outgoing client packet
 	float tmpheading = EQ19toFloat(ppu->heading);
+	/* The clients send an update at best every 1.3 seconds
+	 * We want to avoid reflecting these updates to other clients as much as possible
+	 * The client also sends an update every 280 ms while turning, if we prevent
+	 * sending these by checking if the location is the same too aggressively, clients end up spinning
+	 * so keep a count of how many packets are the same within a tolerance and stop when we get there */
 
-	if (!FCMP(ppu->y_pos, m_Position.y) || !FCMP(ppu->x_pos, m_Position.x) || !FCMP(tmpheading, m_Position.w) || ppu->animation != animation)
+	bool pos_same = FCMP(ppu->y_pos, m_Position.y) && FCMP(ppu->x_pos, m_Position.x) && FCMP(tmpheading, m_Position.w) && ppu->animation == animation;
+	if (!pos_same || (pos_same && position_update_same_count < 6))
 	{
+		if (pos_same)
+			position_update_same_count++;
+		else
+			position_update_same_count = 0;
+
 		m_Position.x = ppu->x_pos;
 		m_Position.y = ppu->y_pos;
 		m_Position.z = ppu->z_pos;

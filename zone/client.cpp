@@ -208,6 +208,7 @@ Client::Client(EQStreamInterface* ieqs)
 	npclevel = 0;
 	pQueuedSaveWorkID = 0;
 	position_timer_counter = 0;
+	position_update_same_count = 0;
 	fishing_timer.Disable();
 	shield_timer.Disable();
 	dead_timer.Disable();
