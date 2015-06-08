@@ -1098,8 +1098,8 @@ namespace Titanium
 
 		unsigned int r;
 		for (r = 0; r < structs::MAX_PP_AA_ARRAY; r++) {
-			OUT(aa_list[r].aa_skill);
-			OUT(aa_list[r].aa_value);
+			OUT(aa_list[r].AA);
+			OUT(aa_list[r].value);
 		}
 
 		FINISH_ENCODE();

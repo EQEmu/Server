@@ -2200,7 +2200,7 @@ namespace RoF2
 		{
 			outapp->WriteUInt32(emu->aa_array[r].AA);
 			outapp->WriteUInt32(emu->aa_array[r].value);
-			outapp->WriteUInt32(0);
+			outapp->WriteUInt32(emu->aa_array[r].charges);
 		}
 
 		// Fill the other 60 AAs with zeroes
@@ -2907,9 +2907,9 @@ namespace RoF2
 
 		for (uint32 i = 0; i < MAX_PP_AA_ARRAY; ++i)
 		{
-			eq->aa_list[i].aa_skill = emu->aa_list[i].aa_skill;
-			eq->aa_list[i].aa_value = emu->aa_list[i].aa_value;
-			eq->aa_list[i].unknown08 = emu->aa_list[i].unknown08;
+			eq->aa_list[i].AA = emu->aa_list[i].AA;
+			eq->aa_list[i].value = emu->aa_list[i].value;
+			eq->aa_list[i].charges = emu->aa_list[i].charges;
 		}
 
 		FINISH_ENCODE();
@@ -2957,9 +2957,9 @@ namespace RoF2
 			OUT(cost);
 			OUT(seq);
 			OUT(current_level);
-			eq->unknown037 = 1;	// Introduced during HoT
+			eq->prereq_skill_count = 1;	// min 1
 			OUT(prereq_skill);
-			eq->unknown045 = 1;	// New Mar 21 2012 - Seen 1
+			eq->prereq_minpoints_count = 1;	// min 1
 			OUT(prereq_minpoints);
 			eq->type = emu->sof_type;
 			OUT(spellid);
@@ -2976,6 +2976,7 @@ namespace RoF2
 			eq->aa_expansion = emu->aa_expansion;
 			eq->special_category = emu->special_category;
 			OUT(total_abilities);
+			eq->expendable_charges = emu->special_category == 7 ? 1 : 0; // temp hack, this can actually be any number
 			unsigned int r;
 			for (r = 0; r < emu->total_abilities; r++) {
 				OUT(abilities[r].skill_id);

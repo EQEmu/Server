@@ -1440,12 +1440,14 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	if (m_pp.ldon_points_available < 0 || m_pp.ldon_points_available > 2000000000){ m_pp.ldon_points_available = 0; }
 
 	/* Initialize AA's : Move to function eventually */
-	for (uint32 a = 0; a < MAX_PP_AA_ARRAY; a++){ aa[a] = &m_pp.aa_array[a]; }
+	for (uint32 a = 0; a < MAX_PP_AA_ARRAY; a++)
+		aa[a] = &m_pp.aa_array[a];
 	query = StringFormat(
 		"SELECT								"
 		"slot,							    "
 		"aa_id,								"
-		"aa_value							"
+		"aa_value,							"
+		"charges							"
 		"FROM								"
 		"`character_alternate_abilities`    "
 		"WHERE `id` = %u ORDER BY `slot`", this->CharacterID());
@@ -1454,8 +1456,7 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 		i = atoi(row[0]);
 		m_pp.aa_array[i].AA = atoi(row[1]);
 		m_pp.aa_array[i].value = atoi(row[2]);
-		aa[i]->AA = atoi(row[1]);
-		aa[i]->value = atoi(row[2]);
+		m_pp.aa_array[i].charges = atoi(row[3]);
 	}
 	for (uint32 a = 0; a < MAX_PP_AA_ARRAY; a++){
 		uint32 id = aa[a]->AA;

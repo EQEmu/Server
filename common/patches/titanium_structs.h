@@ -3179,11 +3179,6 @@ struct AA_Action {
 /*12*/	uint32	exp_value;
 };
 
-struct AA_Skills {		//this should be removed and changed to AA_Array
-/*00*/	uint32	aa_skill;
-/*04*/	uint32	aa_value;
-};
-
 struct AAExpUpdate_Struct {
 /*00*/	uint32 unknown00;	//seems to be a value from AA_Action.ability
 /*04*/	uint32 aapoints_unspent;
@@ -3201,11 +3196,11 @@ struct AltAdvStats_Struct {
 };
 
 struct PlayerAA_Struct {
-	AA_Skills aa_list[MAX_PP_AA_ARRAY];
+	AA_Array aa_list[MAX_PP_AA_ARRAY];
 };
 
 struct AATable_Struct {
-	AA_Skills aa_list[MAX_PP_AA_ARRAY];
+	AA_Array aa_list[MAX_PP_AA_ARRAY];
 };
 
 struct Weather_Struct {

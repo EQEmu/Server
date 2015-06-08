@@ -1807,6 +1807,7 @@ namespace UF
 		for (r = 0; r < MAX_PP_AA_ARRAY; r++) {
 			OUT(aa_array[r].AA);
 			OUT(aa_array[r].value);
+			OUT(aa_array[r].charges);
 		}
 		//	OUT(unknown02220[4]);
 		OUT(mana);
@@ -2134,9 +2135,9 @@ namespace UF
 
 		for (uint32 i = 0; i < MAX_PP_AA_ARRAY; ++i)
 		{
-			eq->aa_list[i].aa_skill = emu->aa_list[i].aa_skill;
-			eq->aa_list[i].aa_value = emu->aa_list[i].aa_value;
-			eq->aa_list[i].unknown08 = emu->aa_list[i].unknown08;
+			eq->aa_list[i].AA = emu->aa_list[i].AA;
+			eq->aa_list[i].value = emu->aa_list[i].value;
+			eq->aa_list[i].charges = emu->aa_list[i].charges;
 		}
 
 		FINISH_ENCODE();
@@ -2181,6 +2182,7 @@ namespace UF
 			OUT(cost2);
 			eq->aa_expansion = emu->aa_expansion;
 			eq->special_category = emu->special_category;
+			eq->expendable_charges = emu->special_category == 7 ? 1 : 0; // temp hack, this can actually be any number
 			OUT(total_abilities);
 			unsigned int r;
 			for (r = 0; r < emu->total_abilities; r++) {
