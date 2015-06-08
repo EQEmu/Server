@@ -564,7 +564,7 @@ bool Client::SaveAA(){
 	}
 	auto results = database.QueryDatabase(rquery);
 	/* This is another part of the hack to clean up holes left by expendable AAs */
-	rquery = StringFormat("DELETE FROM `character_alternate_abilities` WHERE `id` = %u AND `slot` >= %d", character_id, highest);
+	rquery = StringFormat("DELETE FROM `character_alternate_abilities` WHERE `id` = %u AND `slot` > %d", character_id, highest);
 	return true;
 }
 
