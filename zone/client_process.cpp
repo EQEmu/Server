@@ -129,7 +129,9 @@ bool Client::Process() {
 		if(IsTracking() && (GetClientVersion() >= ClientVersion::SoD) && TrackingTimer.Check())
 			DoTracking();
 
-		if(hpupdate_timer.Check())
+		// SendHPUpdate calls hpupdate_timer.Start so it can delay this timer, so lets not reset with the check
+		// since the function will anyways
+		if(hpupdate_timer.Check(false))
 			SendHPUpdate();
 
 		if(mana_timer.Check())
@@ -836,7 +838,11 @@ void Client::BulkSendInventoryItems() {
 	}
 
 	bool deletenorent = database.NoRentExpired(GetName());
-	if(deletenorent){ RemoveNoRent(false); } //client was offline for more than 30 minutes, delete no rent items
+	if (deletenorent) { //client was offline for more than 30 minutes, delete no rent items
+		if (RuleB(Inventory, TransformSummonedBags))
+			DisenchantSummonedBags(false);
+		RemoveNoRent(false);
+	}
 
 	RemoveDuplicateLore(false);
 	MoveSlotNotAllowed(false);

@@ -19,6 +19,7 @@
 #include "../common/timer.h"
 #include "../common/eqemu_logsys.h"
 #include "encounter.h"
+#include "lua_encounter.h"
 
 struct Events { };
 struct Factions { };
@@ -296,6 +297,10 @@ void lua_set_timer(const char *timer, int time_ms, Lua_Mob mob) {
 	quest_manager.settimerMS(timer, time_ms, mob);
 }
 
+void lua_set_timer(const char *timer, int time_ms, Lua_Encounter enc) {
+	quest_manager.settimerMS(timer, time_ms, enc);
+}
+
 void lua_stop_timer(const char *timer) {
 	quest_manager.stoptimer(timer);
 }
@@ -308,6 +313,10 @@ void lua_stop_timer(const char *timer, Lua_Mob mob) {
 	quest_manager.stoptimer(timer, mob);
 }
 
+void lua_stop_timer(const char *timer, Lua_Encounter enc) {
+	quest_manager.stoptimer(timer, enc);
+}
+
 void lua_stop_all_timers() {
 	quest_manager.stopalltimers();
 }
@@ -318,6 +327,10 @@ void lua_stop_all_timers(Lua_ItemInst inst) {
 
 void lua_stop_all_timers(Lua_Mob mob) {
 	quest_manager.stopalltimers(mob);
+}
+
+void lua_stop_all_timers(Lua_Encounter enc) {
+	quest_manager.stopalltimers(enc);
 }
 
 void lua_depop() {
@@ -1457,12 +1470,15 @@ luabind::scope lua_register_general() {
 		luabind::def("set_timer", (void(*)(const char*, int))&lua_set_timer),
 		luabind::def("set_timer", (void(*)(const char*, int, Lua_ItemInst))&lua_set_timer),
 		luabind::def("set_timer", (void(*)(const char*, int, Lua_Mob))&lua_set_timer),
+		luabind::def("set_timer", (void(*)(const char*, int, Lua_Encounter))&lua_set_timer),
 		luabind::def("stop_timer", (void(*)(const char*))&lua_stop_timer),
 		luabind::def("stop_timer", (void(*)(const char*, Lua_ItemInst))&lua_stop_timer),
 		luabind::def("stop_timer", (void(*)(const char*, Lua_Mob))&lua_stop_timer),
+		luabind::def("stop_timer", (void(*)(const char*, Lua_Encounter))&lua_stop_timer),
 		luabind::def("stop_all_timers", (void(*)(void))&lua_stop_all_timers),
 		luabind::def("stop_all_timers", (void(*)(Lua_ItemInst))&lua_stop_all_timers),
 		luabind::def("stop_all_timers", (void(*)(Lua_Mob))&lua_stop_all_timers),
+		luabind::def("stop_all_timers", (void(*)(Lua_Encounter))&lua_stop_all_timers),
 		luabind::def("depop", (void(*)(void))&lua_depop),
 		luabind::def("depop", (void(*)(int))&lua_depop),
 		luabind::def("depop_with_timer", (void(*)(void))&lua_depop_with_timer),

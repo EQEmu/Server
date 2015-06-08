@@ -345,6 +345,7 @@ RULE_BOOL ( Spells, SwarmPetTargetLock, false) // Use old method of swarm pets t
 RULE_BOOL ( Spells, NPC_UseFocusFromSpells, true) // Allow npcs to use most spell derived focus effects.
 RULE_BOOL ( Spells, NPC_UseFocusFromItems, false) // Allow npcs to use most item derived focus effects.
 RULE_BOOL ( Spells, UseAdditiveFocusFromWornSlot, false) // Allows an additive focus effect to be calculated from worn slot.
+RULE_BOOL ( Spells, AlwaysSendTargetsBuffs, false) // ignore LAA level if true
 RULE_CATEGORY_END()
 
 RULE_CATEGORY( Combat )
@@ -611,6 +612,7 @@ RULE_BOOL ( Inventory, EnforceAugmentUsability, true) // Forces augmented item u
 RULE_BOOL ( Inventory, EnforceAugmentWear, true) // Forces augment wear slot validation
 RULE_BOOL ( Inventory, DeleteTransformationMold, true) //False if you want mold to last forever
 RULE_BOOL ( Inventory, AllowAnyWeaponTransformation, false) //Weapons can use any weapon transformation
+RULE_BOOL ( Inventory, TransformSummonedBags, false) //Transforms summoned bags into disenchanted ones instead of deleting
 RULE_CATEGORY_END()
 
 RULE_CATEGORY( Client )

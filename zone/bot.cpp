@@ -755,7 +755,7 @@ void Bot::GenerateBaseStats() {
 	this->Corrup = CorruptionResist;
 	SetBotSpellID(BotSpellID);
 	this->size = BotSize;
-	
+
 	this->pAggroRange = 0;
 	this->pAssistRange = 0;
 	this->raid_target = false;
@@ -1381,18 +1381,18 @@ int32 Bot::GenerateBaseHitPoints()
 	uint32 lm = GetClassLevelFactor();
 	int32 Post255;
 	int32 NormalSTA = GetSTA();
-	
+
 	if(GetOwner() && GetOwner()->CastToClient() && GetOwner()->CastToClient()->GetClientVersion() >= ClientVersion::SoD && RuleB(Character, SoDClientUseSoDHPManaEnd))
 	{
 		float SoDPost255;
-    
+
 		if(((NormalSTA - 255) / 2) > 0)
 			SoDPost255 = ((NormalSTA - 255) / 2);
 		else
 			SoDPost255 = 0;
-    
+
 		int hp_factor = GetClassHPFactor();
-    
+
 		if(level < 41)
 		{
 			new_base_hp = (5 + (GetLevel() * hp_factor / 12) + ((NormalSTA - SoDPost255) * GetLevel() * hp_factor / 3600));
@@ -1420,7 +1420,7 @@ int32 Bot::GenerateBaseHitPoints()
 		new_base_hp = (5)+(GetLevel()*lm/10) + (((NormalSTA-Post255)*GetLevel()*lm/3000)) + ((Post255*1)*lm/6000);
 	}
 	this->base_hp = new_base_hp;
-	
+
 	return new_base_hp;
 }
 
@@ -2342,7 +2342,7 @@ bool Bot::IsBotNameAvailable(char *botName, std::string* errorMessage) {
 	if (results.RowCount()) { //Name already in use!
         return false;
 	}
-	
+
 	return true; //We made it with a valid name!
 }
 
@@ -2901,7 +2901,7 @@ bool Bot::Process()
 			SetEndurance(GetEndurance() + CalcEnduranceRegen() + RestRegenEndurance);
 	}
 
-	if (sendhpupdate_timer.Check()) {
+	if (sendhpupdate_timer.Check(false)) {
 		SendHPUpdate();
 
 		if(HasPet())
@@ -5894,7 +5894,7 @@ bool Bot::Death(Mob *killerMob, int32 damage, uint16 spell_id, SkillUseTypes att
 
 					// delete from group data
 					RemoveBotFromGroup(this, g);
-					
+
 					//Make sure group still exists if it doesnt they were already updated in RemoveBotFromGroup
 					g = GetGroup();
 					if (!g)
@@ -5912,7 +5912,7 @@ bool Bot::Death(Mob *killerMob, int32 damage, uint16 spell_id, SkillUseTypes att
 							g->members[j] = nullptr;
 						}
 					}
-					
+
 					// update the client group
 					EQApplicationPacket* outapp = new EQApplicationPacket(OP_GroupUpdate, sizeof(GroupJoin_Struct));
 					GroupJoin_Struct* gu = (GroupJoin_Struct*)outapp->pBuffer;
@@ -10823,7 +10823,7 @@ void Bot::CalcItemBonuses(StatBonuses* newbon)
 			AddItemBonuses(item, newbon);
 		}
 	}
-	
+
 	// Caps
 	if(newbon->HPRegen > CalcHPRegenCap())
 		newbon->HPRegen = CalcHPRegenCap();

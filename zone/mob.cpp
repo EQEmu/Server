@@ -1266,7 +1266,7 @@ void Mob::CreateHPPacket(EQApplicationPacket* app)
 }
 
 // sends hp update of this mob to people who might care
-void Mob::SendHPUpdate()
+void Mob::SendHPUpdate(bool skip_self)
 {
 	EQApplicationPacket hp_app;
 	Group *group;
@@ -1355,8 +1355,7 @@ void Mob::SendHPUpdate()
 	}
 
 	// send to self - we need the actual hps here
-	if(IsClient())
-	{
+	if(IsClient() && !skip_self) {
 		EQApplicationPacket* hp_app2 = new EQApplicationPacket(OP_HPUpdate,sizeof(SpawnHPUpdate_Struct));
 		SpawnHPUpdate_Struct* ds = (SpawnHPUpdate_Struct*)hp_app2->pBuffer;
 		ds->cur_hp = CastToClient()->GetHP() - itembonuses.HP;
@@ -1365,6 +1364,7 @@ void Mob::SendHPUpdate()
 		CastToClient()->QueuePacket(hp_app2);
 		safe_delete(hp_app2);
 	}
+	ResetHPUpdateTimer(); // delay the timer
 }
 
 // this one just warps the mob to the current location
@@ -4205,25 +4205,25 @@ int32 Mob::GetItemStat(uint32 itemid, const char *identifier)
 std::string Mob::GetGlobal(const char *varname) {
 	int qgCharid = 0;
 	int qgNpcid = 0;
-	
+
 	if (this->IsNPC())
 		qgNpcid = this->GetNPCTypeID();
-	
+
 	if (this->IsClient())
 		qgCharid = this->CastToClient()->CharacterID();
-	
+
 	QGlobalCache *qglobals = nullptr;
 	std::list<QGlobal> globalMap;
-	
+
 	if (this->IsClient())
 		qglobals = this->CastToClient()->GetQGlobals();
-	
+
 	if (this->IsNPC())
 		qglobals = this->CastToNPC()->GetQGlobals();
 
 	if(qglobals)
 		QGlobalCache::Combine(globalMap, qglobals->GetBucket(), qgNpcid, qgCharid, zone->GetZoneID());
-	
+
 	std::list<QGlobal>::iterator iter = globalMap.begin();
 	while(iter != globalMap.end()) {
 		if ((*iter).name.compare(varname) == 0)
@@ -4231,7 +4231,7 @@ std::string Mob::GetGlobal(const char *varname) {
 
 		++iter;
 	}
-	
+
 	return "Undefined";
 }
 

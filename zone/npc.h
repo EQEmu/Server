@@ -407,6 +407,7 @@ public:
 	void	SetHeroForgeModel(uint32 model) { herosforgemodel = model; }
 
 	bool IsRaidTarget() const { return raid_target; };
+	void ResetHPUpdateTimer() { sendhpupdate_timer.Start(); }
 
 protected:
 

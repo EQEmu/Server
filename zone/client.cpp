@@ -116,7 +116,7 @@ Client::Client(EQStreamInterface* ieqs)
 	),
 	//these must be listed in the order they appear in client.h
 	position_timer(250),
-	hpupdate_timer(1800),
+	hpupdate_timer(2000),
 	camp_timer(29000),
 	process_timer(100),
 	stamina_timer(40000),

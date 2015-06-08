@@ -78,7 +78,7 @@ Client *Entity::CastToClient()
 	}
 #ifdef _EQDEBUG
 	if (!IsClient()) {
-		Log.Out(Logs::General, Logs::Error, "CastToClient error (not client)"); 
+		Log.Out(Logs::General, Logs::Error, "CastToClient error (not client)");
 		return 0;
 	}
 #endif
@@ -267,7 +267,7 @@ const Beacon* Entity::CastToBeacon() const
 	return static_cast<const Beacon *>(this);
 }
 
-const Encounter* Entity::CastToEncounter() const 
+const Encounter* Entity::CastToEncounter() const
 {
 	return static_cast<const Encounter *>(this);
 }
@@ -564,7 +564,7 @@ void EntityList::AddGroup(Group *group)
 
 	uint32 gid = worldserver.NextGroupID();
 	if (gid == 0) {
-		Log.Out(Logs::General, Logs::Error, 
+		Log.Out(Logs::General, Logs::Error,
 				"Unable to get new group ID from world server. group is going to be broken.");
 		return;
 	}
@@ -593,7 +593,7 @@ void EntityList::AddRaid(Raid *raid)
 
 	uint32 gid = worldserver.NextGroupID();
 	if (gid == 0) {
-		Log.Out(Logs::General, Logs::Error, 
+		Log.Out(Logs::General, Logs::Error,
 				"Unable to get new group ID from world server. group is going to be broken.");
 		return;
 	}
@@ -1427,7 +1427,9 @@ void EntityList::QueueClientsByTarget(Mob *sender, const EQApplicationPacket *ap
 		if (c != sender) {
 			if (Target == sender) {
 				if (inspect_buffs) { // if inspect_buffs is true we're sending a mob's buffs to those with the LAA
-					if (c->IsRaidGrouped()) {
+					if (c->GetGM() || RuleB(Spells, AlwaysSendTargetsBuffs)) {
+						Send = true;
+					} else if (c->IsRaidGrouped()) {
 						Raid *raid = c->GetRaid();
 						if (!raid)
 							continue;
