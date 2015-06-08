@@ -1091,6 +1091,7 @@ void Client::Handle_Connect_OP_SendAAStats(const EQApplicationPacket *app)
 
 void Client::Handle_Connect_OP_SendAATable(const EQApplicationPacket *app)
 {
+	Log.Out(Logs::General, Logs::Error, "SendAAList()");
 	SendAAList();
 	return;
 }
@@ -1152,6 +1153,7 @@ void Client::Handle_Connect_OP_TGB(const EQApplicationPacket *app)
 
 void Client::Handle_Connect_OP_UpdateAA(const EQApplicationPacket *app)
 {
+	Log.Out(Logs::General, Logs::Error, "SendAATable()");
 	SendAATable();
 }
 

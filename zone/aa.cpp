@@ -2070,3 +2070,129 @@ Mob *AA_SwarmPetInfo::GetOwner()
 {
 	return entity_list.GetMobID(owner_id);
 }
+
+//New AA
+void Zone::LoadAlternateAdvancement() {
+	Log.Out(Logs::General, Logs::Status, "Loading Alternate Advancement Data...");
+	if(!database.LoadAlternateAdvancementAbilities(zone->aa_abilities, 
+													zone->aa_ranks)) 
+	{
+		zone->aa_abilities.clear();
+		zone->aa_ranks.clear();
+		Log.Out(Logs::General, Logs::Status, "Failed to load Alternate Advancement Data");
+		return;
+	}
+
+	Log.Out(Logs::General, Logs::Status, "Loaded Alternate Advancement Data");
+}
+
+bool ZoneDatabase::LoadAlternateAdvancementAbilities(std::unordered_map<int, std::unique_ptr<AA::Ability>> &abilities,
+													std::unordered_map<int, std::unique_ptr<AA::Rank>> &ranks) 
+{
+	Log.Out(Logs::General, Logs::Status, "Loading Alternate Advancement Abilities...");
+	abilities.clear();
+	std::string query = "SELECT id, name, expansion, category, classes, expendable, first_rank_id FROM aa_ability";
+	auto results = QueryDatabase(query);
+	if(results.Success()) {
+		for(auto row = results.begin(); row != results.end(); ++row) {
+			AA::Ability *ability = new AA::Ability;
+			int id = atoi(row[0]);
+
+			ability->name = row[1];
+			ability->expansion = atoi(row[2]);
+			ability->category = atoi(row[3]);
+			ability->classes = atoi(row[4]);
+			ability->expendable = atoi(row[5]) != 0 ? true : false;
+			ability->first_rank_id = atoi(row[6]);
+
+			abilities[id] = std::unique_ptr<AA::Ability>(ability);
+		}
+	} else {
+		Log.Out(Logs::General, Logs::Error, "Failed to load Alternate Advancement Abilities");
+		return false;
+	}
+
+	Log.Out(Logs::General, Logs::Status, "Loaded %d Alternate Advancement Abilities", (int)abilities.size());
+
+	Log.Out(Logs::General, Logs::Status, "Loading Alternate Advancement Ability Ranks...");
+	ranks.clear();
+	query = "SELECT id, upper_hotkey_sid, lower_hotkey_sid, title_sid, desc_sid, cost, level_req, spell, spell_type, recast_time, "
+		"prev_id, next_id FROM aa_ranks";
+	results = QueryDatabase(query);
+	if(results.Success()) {
+		for(auto row = results.begin(); row != results.end(); ++row) {
+			AA::Rank *rank = new AA::Rank;
+			int id = atoi(row[0]);
+			rank->upper_hotkey_sid = atoi(row[1]);
+			rank->lower_hotkey_sid = atoi(row[2]);
+			rank->title_sid = atoi(row[3]);
+			rank->desc_sid = atoi(row[4]);
+			rank->cost = atoi(row[5]);
+			rank->level_req = atoi(row[6]);
+			rank->spell = atoi(row[7]);
+			rank->spell_type = atoi(row[8]);
+			rank->recast_time = atoi(row[9]);
+			rank->prev_id = atoi(row[10]);
+			rank->next_id = atoi(row[11]);
+
+			ranks[id] = std::unique_ptr<AA::Rank>(rank);
+		}
+	} else {
+		Log.Out(Logs::General, Logs::Error, "Failed to load Alternate Advancement Ability Ranks");
+		return false;
+	}
+
+	Log.Out(Logs::General, Logs::Status, "Loaded %d Alternate Advancement Ability Ranks", (int)ranks.size());
+
+	Log.Out(Logs::General, Logs::Status, "Loading Alternate Advancement Ability Rank Effects...");
+	query = "SELECT rank_id, slot, effect_id, base1, base2 FROM aa_rank_effects";
+	results = QueryDatabase(query);
+	if(results.Success()) {
+		for(auto row = results.begin(); row != results.end(); ++row) {
+			AA::RankEffect effect;
+			int rank_id = atoi(row[0]);
+			int slot = atoi(row[1]);
+			effect.effect_id = atoi(row[2]);
+			effect.base1 = atoi(row[3]);
+			effect.base2 = atoi(row[4]);
+
+			if(slot < 1 || slot > 12)
+				continue;
+
+			if(ranks.count(rank_id) > 0) {
+				AA::Rank *rank = ranks[rank_id].get();
+				rank->effects[slot] = effect;
+			}
+		}
+	} else {
+		Log.Out(Logs::General, Logs::Error, "Failed to load Alternate Advancement Ability Rank Effects");
+		return false;
+	}
+
+	Log.Out(Logs::General, Logs::Status, "Loaded Alternate Advancement Ability Rank Effects");
+
+	Log.Out(Logs::General, Logs::Status, "Loading Alternate Advancement Ability Rank Prereqs...");
+	query = "SELECT rank_id, aa_id, points FROM aa_rank_prereqs";
+	results = QueryDatabase(query);
+	if(results.Success()) {
+		for(auto row = results.begin(); row != results.end(); ++row) {
+			AA::RankPrereq prereq;
+			int rank_id = atoi(row[0]);
+			prereq.aa_id = atoi(row[1]);
+			prereq.points = atoi(row[1]);
+
+			if(ranks.count(rank_id) > 0) {
+				AA::Rank *rank = ranks[rank_id].get();
+				rank->prereqs.push_back(prereq);
+			}
+		}
+	} else {
+		Log.Out(Logs::General, Logs::Error, "Failed to load Alternate Advancement Ability Rank Prereqs");
+		return false;
+	}
+
+	Log.Out(Logs::General, Logs::Status, "Loaded Alternate Advancement Ability Rank Prereqs");
+
+	return true;
+}
+

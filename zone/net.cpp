@@ -96,7 +96,6 @@ EntityList entity_list;
 WorldServer worldserver;
 uint32 numclients = 0;
 char errorname[32];
-uint16 adverrornum = 0;
 extern Zone* zone;
 EQStreamFactory eqsf(ZoneStream);
 npcDecayTimes_Struct npcCorpseDecayTimes[100];

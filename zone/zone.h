@@ -27,6 +27,7 @@
 #include "qglobals.h"
 #include "spawn2.h"
 #include "spawngroup.h"
+#include "aa_ability.h"
 
 struct ZonePoint
 {
@@ -113,12 +114,17 @@ public:
 
 	inline const uint32& GetMaxClients() { return pMaxClients; }
 
+	//new AA
+	void LoadAlternateAdvancement();
+
+	//old AA
 	void	LoadAAs();
 	int		GetTotalAAs() { return totalAAs; }
 	SendAA_Struct*	GetAABySequence(uint32 seq) { return aas[seq]; }
 	SendAA_Struct*	FindAA(uint32 id);
 	uint8	GetTotalAALevels(uint32 skill_id);
-	void	LoadZoneDoors(const char* zone, int16 version);
+
+		void	LoadZoneDoors(const char* zone, int16 version);
 	bool	LoadZoneObjects();
 	bool	LoadGroundSpawns();
 	void	ReloadStaticData();
@@ -313,6 +319,11 @@ private:
 	int	totalBS;
 	ZoneSpellsBlocked *blocked_spells;
 
+	//new AA
+	std::unordered_map<int, std::unique_ptr<AA::Ability>> aa_abilities;
+	std::unordered_map<int, std::unique_ptr<AA::Rank>> aa_ranks;
+
+	//old AA
 	int		totalAAs;
 	SendAA_Struct **aas;	//array of AA structs
 

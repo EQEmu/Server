@@ -68,7 +68,6 @@ extern bool staticzone;
 extern NetConnection net;
 extern PetitionList petition_list;
 extern QuestParserCollection* parse;
-extern uint16 adverrornum;
 extern uint32 numclients;
 extern WorldServer worldserver;
 extern Zone* zone;
@@ -954,15 +953,14 @@ bool Zone::Init(bool iStaticZone) {
 	zone->LoadNPCEmotes(&NPCEmoteList);
 
 	//Load AA information
-	adverrornum = 500;
 	LoadAAs();
 
+	LoadAlternateAdvancement();
+
 	//Load merchant data
-	adverrornum = 501;
 	zone->GetMerchantDataForZoneLoad();
 
 	//Load temporary merchant data
-	adverrornum = 502;
 	zone->LoadTempMerchantData();
 
 	// Merc data
@@ -974,7 +972,6 @@ bool Zone::Init(bool iStaticZone) {
 	if (RuleB(Zone, LevelBasedEXPMods))
 		zone->LoadLevelEXPMods();
 
-	adverrornum = 503;
 	petition_list.ClearPetitions();
 	petition_list.ReadDatabase();
 

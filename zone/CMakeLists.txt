@@ -125,6 +125,7 @@ SET(zone_sources
 
 SET(zone_headers
 	aa.h
+	aa_ability.h
 	basic_functions.h
 	beacon.h
 	bot.h
