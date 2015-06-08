@@ -1,0 +1,1 @@
+ALTER TABLE character_alternate_abilities ADD COLUMN charges SMALLINT(11) UNSIGNED NOT NULL DEFAULT 0;

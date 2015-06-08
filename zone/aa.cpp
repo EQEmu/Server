@@ -1104,9 +1104,9 @@ void Client::SendAATable() {
 
 	uint32 i;
 	for(i=0;i < MAX_PP_AA_ARRAY;i++){
-		aa2->aa_list[i].aa_skill = aa[i]->AA;
-		aa2->aa_list[i].aa_value = aa[i]->value;
-		aa2->aa_list[i].unknown08 = 0;
+		aa2->aa_list[i].AA = aa[i]->value ? aa[i]->AA : 0; // bit of a hack to prevent expendables punching a hole
+		aa2->aa_list[i].value = aa[i]->value;
+		aa2->aa_list[i].charges = aa[i]->charges;
 	}
 	QueuePacket(outapp);
 	safe_delete(outapp);
@@ -1395,26 +1395,33 @@ uint32 Client::GetAA(uint32 aa_id) const {
 bool Client::SetAA(uint32 aa_id, uint32 new_value) {
 	aa_points[aa_id] = new_value;
 	uint32 cur;
+	auto sendaa = zone->FindAA(aa_id); // this is a bit hacky
+	uint32 charges = sendaa->special_category == 7 && new_value ? 1 : 0;
 	for(cur=0;cur < MAX_PP_AA_ARRAY;cur++){
 		if((aa[cur]->value > 1) && ((aa[cur]->AA - aa[cur]->value + 1)== aa_id)){
 			aa[cur]->value = new_value;
 			if(new_value > 0)
 				aa[cur]->AA++;
-			else
-				aa[cur]->AA = 0;
+			aa[cur]->charges = charges;
 			return true;
 		}
 		else if((aa[cur]->value == 1) && (aa[cur]->AA == aa_id)){
 			aa[cur]->value = new_value;
 			if(new_value > 0)
 				aa[cur]->AA++;
-			else
-				aa[cur]->AA = 0;
+			aa[cur]->charges = charges;
+			return true;
+		}
+		// hack to prevent expendable exploit, we should probably be reshuffling the array to fix the hole
+		else if(aa[cur]->value == 0 && new_value == 1 && aa[cur]->AA == aa_id) {
+			aa[cur]->value = new_value;
+			aa[cur]->charges = charges;
 			return true;
 		}
 		else if(aa[cur]->AA==0){ //end of list
 			aa[cur]->AA = aa_id;
 			aa[cur]->value = new_value;
+			aa[cur]->charges = charges;
 			return true;
 		}
 	}
@@ -1485,8 +1492,10 @@ void Client::ResetAA(){
 	for (i=0; i < MAX_PP_AA_ARRAY; i++) {
 		aa[i]->AA = 0;
 		aa[i]->value = 0;
-		m_pp.aa_array[MAX_PP_AA_ARRAY].AA = 0;
-		m_pp.aa_array[MAX_PP_AA_ARRAY].value = 0;
+		aa[i]->charges = 0;
+		m_pp.aa_array[i].AA = 0;
+		m_pp.aa_array[i].value = 0;
+		m_pp.aa_array[i].charges= 0;
 	}
 
 	std::map<uint32,uint8>::iterator itr;

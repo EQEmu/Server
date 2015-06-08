@@ -279,7 +279,7 @@ public:
 	bool	SaveCharacterBindPoint(uint32 character_id, uint32 zone_id, uint32 instance_id, const glm::vec4& position, uint8 is_home);
 	bool	SaveCharacterCurrency(uint32 character_id, PlayerProfile_Struct* pp);
 	bool	SaveCharacterData(uint32 character_id, uint32 account_id, PlayerProfile_Struct* pp, ExtendedProfile_Struct* m_epp);
-	bool	SaveCharacterAA(uint32 character_id, uint32 aa_id, uint32 current_level);
+	bool	SaveCharacterAA(uint32 character_id, uint32 aa_id, uint32 current_level, uint32 charges);
 	bool	SaveCharacterSpell(uint32 character_id, uint32 spell_id, uint32 slot_id);
 	bool	SaveCharacterMemorizedSpell(uint32 character_id, uint32 spell_id, uint32 slot_id);
 	bool	SaveCharacterMaterialColor(uint32 character_id, uint32 slot_id, uint32 color);

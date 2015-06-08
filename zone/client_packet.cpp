@@ -1442,22 +1442,32 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	if (m_pp.ldon_points_available < 0 || m_pp.ldon_points_available > 2000000000){ m_pp.ldon_points_available = 0; }
 
 	/* Initialize AA's : Move to function eventually */
-	for (uint32 a = 0; a < MAX_PP_AA_ARRAY; a++){ aa[a] = &m_pp.aa_array[a]; }
+	for (uint32 a = 0; a < MAX_PP_AA_ARRAY; a++)
+		aa[a] = &m_pp.aa_array[a];
 	query = StringFormat(
 		"SELECT								"
 		"slot,							    "
 		"aa_id,								"
-		"aa_value							"
+		"aa_value,							"
+		"charges							"
 		"FROM								"
 		"`character_alternate_abilities`    "
 		"WHERE `id` = %u ORDER BY `slot`", this->CharacterID());
 	results = database.QueryDatabase(query); i = 0;
+	int offset = 0; // offset to fix the hole from expendables
 	for (auto row = results.begin(); row != results.end(); ++row) {
-		i = atoi(row[0]);
+		i = atoi(row[0]) - offset;
 		m_pp.aa_array[i].AA = atoi(row[1]);
 		m_pp.aa_array[i].value = atoi(row[2]);
-		aa[i]->AA = atoi(row[1]);
-		aa[i]->value = atoi(row[2]);
+		m_pp.aa_array[i].charges = atoi(row[3]);
+		/* A used expendable could cause there to be a "hole" in the array, this is very bad. Bad things like keeping your expendable after use.
+		   We could do a few things, one of them being reshuffling when the hole is created or defer the fixing until a later point, like during load!
+		   Or just never making a hole in the array and just have hacks every where. Fixing the hole at load really just keeps 1 hack in Client::SendAATable
+		   and keeping this offset that will cause the next AA to be pushed back over the hole. We also need to clean up on save so we don't have multiple
+		   entries for a single AA.
+		*/
+		if (m_pp.aa_array[i].value == 0)
+			offset++;
 	}
 	for (uint32 a = 0; a < MAX_PP_AA_ARRAY; a++){
 		uint32 id = aa[a]->AA;

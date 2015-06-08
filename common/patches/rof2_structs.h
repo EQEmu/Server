@@ -877,7 +877,7 @@ struct AA_Array
 {
 	uint32 AA;
 	uint32 value;
-	uint32 unknown08;	// Looks like AA_Array is now 12 bytes in Live
+	uint32 charges;	// expendable charges
 };
 
 struct Disciplines_Struct {
@@ -4253,9 +4253,9 @@ struct SendAA_Struct {
 /*0025*/	uint32 cost;
 /*0029*/	uint32 seq;
 /*0033*/	uint32 current_level; //1s, MQ2 calls this AARankRequired
-/*0037*/	uint32 unknown037;	// Introduced during HoT
+/*0037*/	uint32 prereq_skill_count;	// mutliple prereqs at least 1, even no prereqs
 /*0041*/	uint32 prereq_skill;		//is < 0, abs() is category #
-/*0045*/	uint32 unknown045;	// New Mar 21 2012 - Seen 1
+/*0045*/	uint32 prereq_minpoints_count;	// mutliple prereqs at least 1, even no prereqs
 /*0049*/	uint32 prereq_minpoints; //min points in the prereq
 /*0053*/	uint32 type;
 /*0057*/	uint32 spellid;
@@ -4268,10 +4268,16 @@ struct SendAA_Struct {
 /*0081*/	uint32 last_id;
 /*0085*/	uint32 next_id;
 /*0089*/	uint32 cost2;
-/*0093*/	uint8 unknown80[7];
+/*0093*/	uint8 unknown93;
+/*0094*/	uint8 grant_only; // VetAAs, progression, etc
+/*0095*/	uint8 unknown95; // 1 for skill cap increase AAs, Mystical Attuning, and RNG attack inc, doesn't seem to matter though
+/*0096*/	uint32 expendable_charges; // max charges of the AA
 /*0100*/	uint32 aa_expansion;
 /*0104*/	uint32 special_category;
-/*0108*/	uint32 unknown0096;
+/*0108*/	uint8 shroud;
+/*0109*/	uint8 unknown109;
+/*0110*/	uint8 layonhands; // 1 for lay on hands -- doesn't seem to matter?
+/*0111*/	uint8 unknown111;
 /*0112*/	uint32 total_abilities;
 /*0116*/	AA_Ability abilities[0];
 };
@@ -4288,12 +4294,6 @@ struct AA_Action {
 /*16*/
 };
 
-struct AA_Skills {		//this should be removed and changed to AA_Array
-/*00*/	uint32	aa_skill;						// Total AAs Spent
-/*04*/  uint32	aa_value;
-/*08*/  uint32	unknown08;
-/*12*/
-};
 
 struct AAExpUpdate_Struct {
 /*00*/	uint32 unknown00;	//seems to be a value from AA_Action.ability
@@ -4313,14 +4313,7 @@ struct AltAdvStats_Struct {
 };
 
 struct PlayerAA_Struct {						// Is this still used?
-	AA_Skills aa_list[MAX_PP_AA_ARRAY];
-};
-
-struct AA_Values {
-/*00*/	uint32	aa_skill;
-/*04*/  uint32	aa_value;
-/*08*/  uint32	unknown08;
-/*12*/
+	AA_Array aa_list[MAX_PP_AA_ARRAY];
 };
 
 struct AATable_Struct {
@@ -4330,7 +4323,7 @@ struct AATable_Struct {
 /*12*/ uint32 aa_spent_archetype;	// Seen 40
 /*16*/ uint32 aa_spent_class;		// Seen 103
 /*20*/ uint32 aa_spent_special;		// Seen 0
-/*24*/ AA_Values aa_list[MAX_PP_AA_ARRAY];
+/*24*/ AA_Array aa_list[MAX_PP_AA_ARRAY];
 };
 
 struct Weather_Struct {

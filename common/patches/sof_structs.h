@@ -645,7 +645,7 @@ struct AA_Array
 {
 	uint32 AA;
 	uint32 value;
-	uint32 unknown08;	// Looks like AA_Array is now 12 bytes in Live
+	uint32 charges;	// expendable charges
 };
 
 
@@ -3683,10 +3683,14 @@ struct SendAA_Struct {
 /*0069*/	uint32 last_id;
 /*0073*/	uint32 next_id;
 /*0077*/	uint32 cost2;
-/*0081*/	uint8 unknown80[7];
+/*0081*/	uint8 unknown81;
+/*0082*/	uint8 grant_only; // VetAAs, progression, etc
+/*0083*/	uint8 unknown83; // 1 for skill cap increase AAs, Mystical Attuning, and RNG attack inc, doesn't seem to matter though
+/*0084*/	uint32 expendable_charges; // max charges of the AA
 /*0088*/	uint32 aa_expansion;
 /*0092*/	uint32 special_category;
-/*0096*/	uint16 unknown0096;
+/*0096*/	uint8 shroud;
+/*0097*/	uint8 unknown97;
 /*0098*/	uint32 total_abilities;
 /*0102*/	AA_Ability abilities[0];
 };
@@ -3700,12 +3704,6 @@ struct AA_Action {
 /*04*/	uint32	ability;
 /*08*/	uint32	unknown08;
 /*12*/	uint32	exp_value;
-};
-
-struct AA_Skills {		//this should be removed and changed to AA_Array
-/*00*/	uint32	aa_skill;						// Total AAs Spent
-/*04*/  uint32	aa_value;
-/*08*/  uint32	unknown08;
 };
 
 struct AAExpUpdate_Struct {
@@ -3725,12 +3723,12 @@ struct AltAdvStats_Struct {
 };
 
 struct PlayerAA_Struct {
-	AA_Skills aa_list[MAX_PP_AA_ARRAY];
+	AA_Array aa_list[MAX_PP_AA_ARRAY];
 };
 
 struct AATable_Struct {
 /*00*/ int32	aa_spent;						// Total AAs Spent
-/*04*/ AA_Skills aa_list[MAX_PP_AA_ARRAY];
+/*04*/ AA_Array aa_list[MAX_PP_AA_ARRAY];
 };
 
 struct Weather_Struct {
