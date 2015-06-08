@@ -549,17 +549,22 @@ bool Client::SaveAA(){
 		}
 	}
 	m_pp.aapoints_spent = spentpoints + m_epp.expended_aa;
+	int highest = 0;
 	for (int a = 0; a < MAX_PP_AA_ARRAY; a++) {
 		if (aa[a]->AA > 0) { // those with value 0 will be cleaned up on next load
 			if (first_entry != 1){
 				rquery = StringFormat("REPLACE INTO `character_alternate_abilities` (id, slot, aa_id, aa_value, charges)"
 					" VALUES (%u, %u, %u, %u, %u)", character_id, a, aa[a]->AA, aa[a]->value, aa[a]->charges);
 				first_entry = 1;
+			} else {
+				rquery = rquery + StringFormat(", (%u, %u, %u, %u, %u)", character_id, a, aa[a]->AA, aa[a]->value, aa[a]->charges);
 			}
-			rquery = rquery + StringFormat(", (%u, %u, %u, %u, %u)", character_id, a, aa[a]->AA, aa[a]->value, aa[a]->charges);
+			highest = a;
 		}
 	}
 	auto results = database.QueryDatabase(rquery);
+	/* This is another part of the hack to clean up holes left by expendable AAs */
+	rquery = StringFormat("DELETE FROM `character_alternate_abilities` WHERE `id` = %u AND `slot` >= %d", character_id, highest);
 	return true;
 }
 

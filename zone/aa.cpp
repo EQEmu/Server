@@ -1104,7 +1104,7 @@ void Client::SendAATable() {
 
 	uint32 i;
 	for(i=0;i < MAX_PP_AA_ARRAY;i++){
-		aa2->aa_list[i].AA = aa[i]->AA;
+		aa2->aa_list[i].AA = aa[i]->value ? aa[i]->AA : 0; // bit of a hack to prevent expendables punching a hole
 		aa2->aa_list[i].value = aa[i]->value;
 		aa2->aa_list[i].charges = aa[i]->charges;
 	}
@@ -1402,8 +1402,6 @@ bool Client::SetAA(uint32 aa_id, uint32 new_value) {
 			aa[cur]->value = new_value;
 			if(new_value > 0)
 				aa[cur]->AA++;
-			else
-				aa[cur]->AA = 0;
 			aa[cur]->charges = charges;
 			return true;
 		}
@@ -1411,8 +1409,12 @@ bool Client::SetAA(uint32 aa_id, uint32 new_value) {
 			aa[cur]->value = new_value;
 			if(new_value > 0)
 				aa[cur]->AA++;
-			else
-				aa[cur]->AA = 0;
+			aa[cur]->charges = charges;
+			return true;
+		}
+		// hack to prevent expendable exploit, we should probably be reshuffling the array to fix the hole
+		else if(aa[cur]->value == 0 && new_value == 1 && aa[cur]->AA == aa_id) {
+			aa[cur]->value = new_value;
 			aa[cur]->charges = charges;
 			return true;
 		}
