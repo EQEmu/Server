@@ -611,6 +611,7 @@ RULE_BOOL ( Inventory, EnforceAugmentUsability, true) // Forces augmented item u
 RULE_BOOL ( Inventory, EnforceAugmentWear, true) // Forces augment wear slot validation
 RULE_BOOL ( Inventory, DeleteTransformationMold, true) //False if you want mold to last forever
 RULE_BOOL ( Inventory, AllowAnyWeaponTransformation, false) //Weapons can use any weapon transformation
+RULE_BOOL ( Inventory, TransformSummonedBags, false) //Transforms summoned bags into disenchanted ones instead of deleting
 RULE_CATEGORY_END()
 
 RULE_CATEGORY( Client )

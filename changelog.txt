@@ -1,5 +1,8 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 06/07/2015 ==
+Uleat: Implemented optional rule for using disenchanted bags. Action triggers at the same point that temporary items are removed.
+Optional SQL: utils/sql/git/optional/2015_06_07_TransformSummonedBagsRule.sql
 
 == 05/25/2015 ==
 Akkadius: Implemented disjointed zone based time, this can be triggered via quest methods
