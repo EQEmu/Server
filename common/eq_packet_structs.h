@@ -4220,7 +4220,7 @@ struct UseAA_Struct {
 };
 
 //new AA stuff
-
+//reference only
 struct AARankInfo_Struct
 {
 	uint32 id;
@@ -4244,6 +4244,7 @@ struct AARankInfo_Struct
 	int32 expansion;
 	int32 category;
 	uint8 expendable;
+	uint8 grant_only;
 	uint32 total_effects;
 	uint32 total_prereqs;
 };

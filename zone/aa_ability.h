@@ -30,14 +30,27 @@
 namespace AA
 {
 
-struct Ability
+class Ability
 {
+public:
+	Ability() { }
+	~Ability() { }
+
+	Rank *GetMaxRank();
+	Rank *GetRankByPointsSpent(int current_level);
+	int GetMaxLevel(bool force_calc = false);
+
 	std::string name;
 	int expansion;
 	int category;
 	int classes;
+	uint32 account_time_required;
+	bool grant_only;
+	int type;
 	bool expendable;
 	int first_rank_id;
+	int max_level;
+	Rank *first;
 };
 
 }

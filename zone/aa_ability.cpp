@@ -16,39 +16,54 @@
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 
-#ifndef EQEMU_ZONE_AA_RANK_H
-#define EQEMU_ZONE_AA_RANK_H
+#include "../common/global_define.h"
+#include "../common/types.h"
+#include "aa_ability.h"
 
-namespace AA
-{
+AA::Rank *AA::Ability::GetMaxRank() {
+	if(!first)
+		return nullptr;
+	
+	Rank *current = first;	
+	while(current->next) {
+		current = current->next;
+	}
 
-class Ability;
-class Rank
-{
-public:
-	Rank() { }
-	~Rank() { }
-
-	int id;
-	int upper_hotkey_sid;
-	int lower_hotkey_sid;
-	int title_sid;
-	int desc_sid;
-	int cost;
-	int level_req;
-	int spell;
-	int spell_type;
-	int recast_time;
-	int prev_id;
-	Rank *prev;
-	int next_id;
-	Rank *next;
-	int total_cost;
-	Ability *base_ability;
-	std::unordered_map<int, RankEffect> effects;
-	std::vector<RankPrereq> prereqs;
-};
-
+	return current;
 }
 
-#endif
+AA::Rank *AA::Ability::GetRankByPointsSpent(int current_level) {
+	if(!first)
+		return nullptr;
+
+	if(current_level == 0) {
+		return GetMaxRank();
+	}
+
+	int i = 1;
+	Rank *current = first;
+	while(current->next) {
+		if(1 == current_level) {
+			break;
+		}
+
+		i++;
+		current = current->next;
+	}
+
+	return current;
+}
+
+int AA::Ability::GetMaxLevel(bool force_calc) {
+	if(!force_calc)
+		return max_level;
+
+	max_level = 0;
+	Rank *current = first;
+	while(current) {
+		max_level++;
+		current = current->next;
+	}
+
+	return max_level;
+}

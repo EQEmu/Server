@@ -759,7 +759,11 @@ public:
 
 	inline PTimerList &GetPTimers() { return(p_timers); }
 
-	//AA Methods
+	//New AA Methods
+	void SendAlternateAdvancement(int aa_id, bool first_login = false);
+	void SendAlternateAdvancementList();
+
+	//old AA Methods
 	void SendAAList();
 	void ResetAA();
 	void SendClearAA();

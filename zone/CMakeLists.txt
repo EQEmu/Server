@@ -2,6 +2,7 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 
 SET(zone_sources
 	aa.cpp
+	aa_ability.cpp
 	aggro.cpp
 	attack.cpp
 	beacon.cpp

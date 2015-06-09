@@ -1097,22 +1097,24 @@ void Client::SendAATimers() {
 }
 
 void Client::SendAATable() {
+	Log.Out(Logs::General, Logs::Status, "SendAATable()");
 	EQApplicationPacket* outapp = new EQApplicationPacket(OP_RespondAA, sizeof(AATable_Struct));
 
 	AATable_Struct* aa2 = (AATable_Struct *)outapp->pBuffer;
-	aa2->aa_spent = GetAAPointsSpent();
-
-	uint32 i;
-	for(i=0;i < MAX_PP_AA_ARRAY;i++){
-		aa2->aa_list[i].AA = aa[i]->value ? aa[i]->AA : 0; // bit of a hack to prevent expendables punching a hole
-		aa2->aa_list[i].value = aa[i]->value;
-		aa2->aa_list[i].charges = aa[i]->charges;
-	}
+	//aa2->aa_spent = GetAAPointsSpent();
+	//
+	//uint32 i;
+	//for(i=0;i < MAX_PP_AA_ARRAY;i++){
+	//	aa2->aa_list[i].AA = aa[i]->value ? aa[i]->AA : 0; // bit of a hack to prevent expendables punching a hole
+	//	aa2->aa_list[i].value = aa[i]->value;
+	//	aa2->aa_list[i].charges = aa[i]->charges;
+	//}
 	QueuePacket(outapp);
 	safe_delete(outapp);
 }
 
 void Client::SendPreviousAA(uint32 id, int seq){
+	Log.Out(Logs::General, Logs::Status, "SendPreviousAA(%u, %i)", id, seq);
 	uint32 value=0;
 	SendAA_Struct* saa2 = nullptr;
 	if(id==0)
@@ -1148,11 +1150,13 @@ void Client::SendPreviousAA(uint32 id, int seq){
 	}
 
 	database.FillAAEffects(saa);
+	Log.Out(Logs::General, Logs::Status, "%s", DumpPacketToString(outapp).c_str());
 	QueuePacket(outapp);
 	safe_delete(outapp);
 }
 
 void Client::SendAA(uint32 id, int seq) {
+	Log.Out(Logs::General, Logs::Status, "SendAA(%u, %i)", id, seq);
 
 	uint32 value=0;
 	SendAA_Struct* saa2 = nullptr;
@@ -1368,6 +1372,7 @@ void Client::SendAA(uint32 id, int seq) {
 	EQApplicationPacket* outapp = new EQApplicationPacket(OP_SendAATable);
 	outapp->size=size;
 	outapp->pBuffer=(uchar*)saa;
+
 	if(id==0 && value && (orig_val < saa->max_level)) //send previous AA only on zone in
 		SendPreviousAA(id, seq);
 
@@ -1377,10 +1382,13 @@ void Client::SendAA(uint32 id, int seq) {
 }
 
 void Client::SendAAList(){
-//	int total = zone->GetTotalAAs();
-//	for(int i=0;i < total;i++){
-//		SendAA(0,i);
-//	}
+	Log.Out(Logs::General, Logs::Status, "SendAAList()");
+	int total = zone->GetTotalAAs();
+
+	total = total > 2 ? 2 : total;
+	for(int i=0;i < total;i++){
+		SendAA(0,i);
+	}
 }
 
 uint32 Client::GetAA(uint32 aa_id) const {
@@ -2080,19 +2088,277 @@ Mob *AA_SwarmPetInfo::GetOwner()
 	return entity_list.GetMobID(owner_id);
 }
 
+void Client::SendAlternateAdvancementList() {
+	for(auto &aa : zone->aa_abilities) {
+		SendAlternateAdvancement(aa.first, true);
+	}
+}
+
 //New AA
+void Client::SendAlternateAdvancement(int aa_id, bool first_login) {
+	if(!zone)
+		return;
+	
+	AA::Ability *ability = zone->GetAlternateAdvancementAbility(aa_id);
+
+	if(!ability)
+		return;
+
+	if(!(ability->classes & (1 << GetClass()))) {
+		return;
+	}
+
+	if(ability->account_time_required) {
+		if((Timer::GetTimeSeconds() - account_creation) < ability->account_time_required)
+		{
+			return;
+		}
+	}
+
+	// Hide Quest/Progression AAs unless player has been granted the first level using $client->IncrementAA(skill_id).
+	if(ability->category == 1 || ability->category == 2) {
+		//if(GetAA(saa2->id) == 0)
+		//	return;
+
+		if(ability->expansion > 0) {
+			AA::Ability *qaa = zone->GetAlternateAdvancementAbility(aa_id + 1);
+			//if(qaa && qaa->expansion == ability->expansion && GetAA(aa_id) > 0) {
+			//	return;
+			//}
+		}
+	}
+
+	// Passive and Active Shroud AAs
+	// For now we skip them
+	if(ability->category == 3 || ability->category == 4) {
+		return;
+	}
+
+	// Check for racial/Drakkin blood line AAs
+	if(ability->category == 8)
+	{
+		uint32 client_race = GetBaseRace();
+	
+		// Drakkin Bloodlines
+		if(ability->expansion > 522)
+		{
+			if(client_race != 522)
+				return;
+	
+			int heritage = this->GetDrakkinHeritage() + 523; // 523 = Drakkin Race(522) + Bloodline
+	
+			if(heritage != ability->expansion)
+				return;
+		}
+		else if(client_race != ability->expansion)
+		{
+			return;
+		}
+	}
+
+	//Send first rank
+	AA::Rank *rank = ability->first;
+	if(!rank)
+		return;
+	
+	//Should move this to another function
+	int size = sizeof(AARankInfo_Struct)+(sizeof(AARankEffect_Struct)* rank->effects.size()) + (sizeof(AARankPrereq_Struct)* rank->prereqs.size());
+	EQApplicationPacket *outapp = new EQApplicationPacket(OP_SendAATable, size);
+	AARankInfo_Struct *aai = (AARankInfo_Struct*)outapp->pBuffer;
+
+	aai->id = rank->id;
+	aai->upper_hotkey_sid = rank->upper_hotkey_sid;
+	aai->lower_hotkey_sid = rank->lower_hotkey_sid;
+	aai->title_sid = rank->title_sid;
+	aai->desc_sid = rank->desc_sid;
+	aai->level_req = rank->level_req;
+	aai->cost = rank->cost;
+	aai->seq = aa_id;
+	aai->current_level = 1;
+	aai->type = ability->type;
+	aai->spell = rank->spell;
+	aai->spell_type = rank->spell_type;
+	aai->spell_refresh = rank->recast_time;
+	aai->classes = ability->classes;
+	aai->max_level = ability->GetMaxLevel();
+	aai->prev_id = rank->prev_id;
+	aai->next_id = rank->next_id;
+	aai->total_cost = rank->total_cost;
+	aai->expansion = ability->expansion;
+	aai->category = ability->category;
+	aai->expendable = ability->expendable;
+	aai->grant_only = ability->grant_only;
+	aai->total_effects = rank->effects.size();
+	aai->total_prereqs = rank->prereqs.size();
+
+	outapp->SetWritePosition(sizeof(AARankInfo_Struct));
+	for(auto effect : rank->effects) {
+		outapp->WriteSInt32(effect.second.effect_id);
+		outapp->WriteSInt32(effect.second.base1);
+		outapp->WriteSInt32(effect.second.base2);
+		outapp->WriteSInt32(effect.first);
+	}
+	
+	for(auto prereq : rank->prereqs) {
+		outapp->WriteSInt32(prereq.aa_id);
+		outapp->WriteSInt32(prereq.points);
+	}
+
+	//if first_login then also send current rank if not maxed
+
+	QueuePacket(outapp);
+	safe_delete(outapp);
+
+	//
+	//if(size == 0)
+	//	return;
+	//
+	//uchar* buffer = new uchar[size];
+	//SendAA_Struct* saa = (SendAA_Struct*)buffer;
+	//memcpy(saa, saa2, size);
+	//
+	//if(saa->spellid == 0)
+	//	saa->spellid = 0xFFFFFFFF;
+	//
+	//value = GetAA(saa->id);
+	//uint32 orig_val = value;
+	//
+	//if(value && saa->id){
+	//
+	//	if(value < saa->max_level){
+	//		saa->id += value;
+	//		saa->next_id = saa->id + 1;
+	//		value++;
+	//	}
+	//
+	//	else if(aa_stack && saa->sof_next_id){
+	//		saa->id += value - 1;
+	//		saa->next_id = saa->sof_next_id;
+	//
+	//		//Prevent removal of previous AA from window if next AA belongs to a higher client version.
+	//		SendAA_Struct* saa_next = nullptr;
+	//		saa_next = zone->FindAA(saa->sof_next_id);
+	//
+	//		// this check should work as long as we continue to just add the clients and just increase
+	//		// each number ....
+	//		if(saa_next && static_cast<int>(GetClientVersion()) < saa_next->clientver - 1) {
+	//			saa->next_id = 0xFFFFFFFF;
+	//		}
+	//	}
+	//
+	//	else{
+	//		saa->id += value - 1;
+	//		saa->next_id = 0xFFFFFFFF;
+	//	}
+	//
+	//	uint32 current_level_mod = 0;
+	//	if(aa_stack)
+	//		current_level_mod = saa->sof_current_level;
+	//
+	//	saa->last_id = saa->id - 1;
+	//	saa->current_level = value + (current_level_mod);
+	//	saa->cost = saa2->cost + (saa2->cost_inc*(value - 1));
+	//	saa->cost2 = 0;
+	//	for(uint32 i = 0; i < value; i++) {
+	//		saa->cost2 += saa2->cost + (saa2->cost_inc * i);
+	//	}
+	//	saa->class_type = saa2->class_type + (saa2->level_inc*(value - 1));
+	//}
+	//
+	//if(aa_stack){
+	//
+	//	if(saa->sof_current_level >= 1 && value == 0)
+	//		saa->current_level = saa->sof_current_level + 1;
+	//
+	//	saa->max_level = saa->sof_max_level;
+	//}
+	//
+	//database.FillAAEffects(saa);
+	//
+	//if(value > 0)
+	//{
+	//	// AA_Action stores the base ID
+	//	const AA_DBAction *caa = &AA_Actions[saa->id - value + 1][value - 1];
+	//
+	//	if(caa && caa->reuse_time > 0)
+	//		saa->spell_refresh = CalcAAReuseTimer(caa);
+	//}
+	//
+	////You can now use the level_inc field in the altadv_vars table to accomplish this, though still needed
+	////for special cases like LOH/HT due to inability to implement correct stacking of AA's that use hotkeys.
+	//std::map<uint32, AALevelCost_Struct>::iterator RequiredLevel = AARequiredLevelAndCost.find(saa->id);
+	//
+	//if(RequiredLevel != AARequiredLevelAndCost.end())
+	//{
+	//	saa->class_type = RequiredLevel->second.Level;
+	//	saa->cost = RequiredLevel->second.Cost;
+	//}
+	//
+	//
+	//EQApplicationPacket* outapp = new EQApplicationPacket(OP_SendAATable);
+	//outapp->size = size;
+	//outapp->pBuffer = (uchar*)saa;
+	//if(id == 0 && value && (orig_val < saa->max_level)) //send previous AA only on zone in
+	//	SendPreviousAA(id, seq);
+	//
+	//QueuePacket(outapp);
+	//safe_delete(outapp);
+	////will outapp delete the buffer for us even though it didnt make it? --- Yes, it should
+}
+
 void Zone::LoadAlternateAdvancement() {
 	Log.Out(Logs::General, Logs::Status, "Loading Alternate Advancement Data...");
-	if(!database.LoadAlternateAdvancementAbilities(zone->aa_abilities, 
-													zone->aa_ranks)) 
+	if(!database.LoadAlternateAdvancementAbilities(aa_abilities, 
+													aa_ranks)) 
 	{
-		zone->aa_abilities.clear();
-		zone->aa_ranks.clear();
+		aa_abilities.clear();
+		aa_ranks.clear();
 		Log.Out(Logs::General, Logs::Status, "Failed to load Alternate Advancement Data");
 		return;
 	}
 
+	Log.Out(Logs::General, Logs::Status, "Processing Alternate Advancement Data...");
+	for(const auto &ability : aa_abilities) {
+		ability.second->first = GetAlternateAdvancementRank(ability.second->first_rank_id);
+
+		//process these ranks
+		AA::Rank *current = ability.second->first;
+		while(current) {
+			current->prev = GetAlternateAdvancementRank(current->prev_id);
+			current->next = GetAlternateAdvancementRank(current->next_id);
+			current->base_ability = ability.second.get();
+
+			if(current->prev) {
+				current->total_cost = current->cost + current->prev->total_cost;
+			} else {
+				current->total_cost = current->cost;
+			}
+
+			current = current->next;
+		}
+
+		ability.second->GetMaxLevel(true);
+	}
+
 	Log.Out(Logs::General, Logs::Status, "Loaded Alternate Advancement Data");
+}
+
+AA::Ability *Zone::GetAlternateAdvancementAbility(int id) {
+	auto iter = aa_abilities.find(id);
+	if(iter != aa_abilities.end()) {
+		return iter->second.get();
+	}
+
+	return nullptr;
+}
+
+AA::Rank *Zone::GetAlternateAdvancementRank(int rank_id) {
+	auto iter = aa_ranks.find(rank_id);
+	if(iter != aa_ranks.end()) {
+		return iter->second.get();
+	}
+
+	return nullptr;
 }
 
 bool ZoneDatabase::LoadAlternateAdvancementAbilities(std::unordered_map<int, std::unique_ptr<AA::Ability>> &abilities,
@@ -2100,19 +2366,22 @@ bool ZoneDatabase::LoadAlternateAdvancementAbilities(std::unordered_map<int, std
 {
 	Log.Out(Logs::General, Logs::Status, "Loading Alternate Advancement Abilities...");
 	abilities.clear();
-	std::string query = "SELECT id, name, expansion, category, classes, expendable, first_rank_id FROM aa_ability";
+	std::string query = "SELECT id, name, expansion, category, classes, type, expendable, account_time_required, grant_only, first_rank_id FROM aa_ability";
 	auto results = QueryDatabase(query);
 	if(results.Success()) {
 		for(auto row = results.begin(); row != results.end(); ++row) {
 			AA::Ability *ability = new AA::Ability;
 			int id = atoi(row[0]);
-
 			ability->name = row[1];
 			ability->expansion = atoi(row[2]);
 			ability->category = atoi(row[3]);
 			ability->classes = atoi(row[4]);
-			ability->expendable = atoi(row[5]) != 0 ? true : false;
-			ability->first_rank_id = atoi(row[6]);
+			ability->type = atoi(row[5]);
+			ability->expendable = atoi(row[6]) != 0 ? true : false;
+			ability->account_time_required = atoul(row[7]);
+			ability->grant_only = atoi(row[8]) != 0 ? true : false;
+			ability->first_rank_id = atoi(row[9]);
+			ability->first = nullptr;
 
 			abilities[id] = std::unique_ptr<AA::Ability>(ability);
 		}
@@ -2132,6 +2401,7 @@ bool ZoneDatabase::LoadAlternateAdvancementAbilities(std::unordered_map<int, std
 		for(auto row = results.begin(); row != results.end(); ++row) {
 			AA::Rank *rank = new AA::Rank;
 			int id = atoi(row[0]);
+			rank->id = id;
 			rank->upper_hotkey_sid = atoi(row[1]);
 			rank->lower_hotkey_sid = atoi(row[2]);
 			rank->title_sid = atoi(row[3]);
@@ -2143,6 +2413,10 @@ bool ZoneDatabase::LoadAlternateAdvancementAbilities(std::unordered_map<int, std
 			rank->recast_time = atoi(row[9]);
 			rank->prev_id = atoi(row[10]);
 			rank->next_id = atoi(row[11]);
+			rank->base_ability = nullptr;
+			rank->total_cost = 0;
+			rank->next = nullptr;
+			rank->prev = nullptr;
 
 			ranks[id] = std::unique_ptr<AA::Rank>(rank);
 		}
@@ -2204,4 +2478,3 @@ bool ZoneDatabase::LoadAlternateAdvancementAbilities(std::unordered_map<int, std
 
 	return true;
 }
-

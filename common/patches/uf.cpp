@@ -1804,11 +1804,11 @@ namespace UF
 		//	OUT(unknown00224[48]);
 		//NOTE: new client supports 300 AAs, our internal rep/PP
 		//only supports 240..
-		for (r = 0; r < MAX_PP_AA_ARRAY; r++) {
-			OUT(aa_array[r].AA);
-			OUT(aa_array[r].value);
-			OUT(aa_array[r].charges);
-		}
+		//for (r = 0; r < MAX_PP_AA_ARRAY; r++) {
+		//	OUT(aa_array[r].AA);
+		//	OUT(aa_array[r].value);
+		//	OUT(aa_array[r].charges);
+		//}
 		//	OUT(unknown02220[4]);
 		OUT(mana);
 		OUT(cur_hp);
@@ -2145,13 +2145,66 @@ namespace UF
 
 	ENCODE(OP_SendAATable)
 	{
+#if 1
+		EQApplicationPacket *inapp = *p;
+		*p = nullptr;
+		AARankInfo_Struct *emu = (AARankInfo_Struct*)inapp->pBuffer;
+
+		EQApplicationPacket *outapp = new EQApplicationPacket(OP_SendAATable, sizeof(structs::SendAA_Struct) + emu->total_effects * sizeof(structs::AA_Ability));
+		structs::SendAA_Struct *eq = (structs::SendAA_Struct*)outapp->pBuffer;
+
+		inapp->SetReadPosition(sizeof(AARankInfo_Struct));
+		outapp->SetWritePosition(sizeof(structs::SendAA_Struct));
+
+		eq->id = emu->id;
+		eq->unknown004 = 1;
+		eq->id = emu->id;
+		eq->hotkey_sid = emu->upper_hotkey_sid;
+		eq->hotkey_sid2 = emu->lower_hotkey_sid;
+		eq->desc_sid = emu->desc_sid;
+		eq->title_sid = emu->title_sid;
+		eq->class_type = emu->level_req;
+		eq->cost = emu->cost;
+		eq->seq = emu->seq;
+		eq->current_level = emu->current_level;
+		eq->type = emu->type;
+		eq->spellid = emu->spell;
+		eq->spell_type = emu->spell_type;
+		eq->spell_refresh = emu->spell_refresh;
+		eq->classes = emu->classes;
+		eq->max_level = emu->max_level;
+		eq->last_id = emu->prev_id;
+		eq->next_id = emu->next_id;
+		eq->cost2 = emu->total_cost;
+		eq->grant_only = emu->grant_only > 0 ? true : false;
+		eq->expendable_charges = emu->expendable ? 1 : 0;
+		eq->aa_expansion = emu->expansion;
+		eq->special_category = emu->category;
+		eq->total_abilities = emu->total_effects;
+		
+		for(auto i = 0; i < eq->total_abilities; ++i) {
+			eq->abilities[i].skill_id = inapp->ReadUInt32();
+			eq->abilities[i].base1 = inapp->ReadUInt32();
+			eq->abilities[i].base2 = inapp->ReadUInt32();
+			eq->abilities[i].slot = inapp->ReadUInt32();
+		}
+
+		if(emu->total_prereqs > 0) {
+			eq->prereq_skill = -(int)inapp->ReadUInt32();
+			eq->prereq_minpoints = inapp->ReadUInt32();
+		}
+
+		Log.Out(Logs::General, Logs::Status, "%s", DumpPacketToString(outapp).c_str());
+		dest->FastQueuePacket(&outapp);
+		delete inapp;
+#else
 		ENCODE_LENGTH_ATLEAST(SendAA_Struct);
 		SETUP_VAR_ENCODE(SendAA_Struct);
 		ALLOC_VAR_ENCODE(structs::SendAA_Struct, sizeof(structs::SendAA_Struct) + emu->total_abilities*sizeof(structs::AA_Ability));
 
 		// Check clientver field to verify this AA should be sent for SoF
 		// clientver 1 is for all clients and 6 is for Underfoot
-		if (emu->clientver <= 6)
+		if(emu->clientver <= 6)
 		{
 			OUT(id);
 			eq->unknown004 = 1;
@@ -2174,7 +2227,7 @@ namespace UF
 			OUT(spell_type);
 			OUT(spell_refresh);
 			OUT(classes);
-			OUT(berserker);
+			//OUT(berserker);
 			//eq->max_level = emu->sof_max_level;
 			OUT(max_level);
 			OUT(last_id);
@@ -2185,7 +2238,7 @@ namespace UF
 			eq->expendable_charges = emu->special_category == 7 ? 1 : 0; // temp hack, this can actually be any number
 			OUT(total_abilities);
 			unsigned int r;
-			for (r = 0; r < emu->total_abilities; r++) {
+			for(r = 0; r < emu->total_abilities; r++) {
 				OUT(abilities[r].skill_id);
 				OUT(abilities[r].base1);
 				OUT(abilities[r].base2);
@@ -2193,7 +2246,9 @@ namespace UF
 			}
 		}
 
+		Log.Out(Logs::General, Logs::Status, "%s", DumpPacketToString(__packet).c_str());
 		FINISH_ENCODE();
+#endif
 	}
 
 	ENCODE(OP_SendCharInfo)

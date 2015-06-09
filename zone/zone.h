@@ -116,6 +116,8 @@ public:
 
 	//new AA
 	void LoadAlternateAdvancement();
+	AA::Ability *GetAlternateAdvancementAbility(int id);
+	AA::Rank *GetAlternateAdvancementRank(int rank_id);
 
 	//old AA
 	void	LoadAAs();
@@ -319,9 +321,12 @@ private:
 	int	totalBS;
 	ZoneSpellsBlocked *blocked_spells;
 
+public:
 	//new AA
 	std::unordered_map<int, std::unique_ptr<AA::Ability>> aa_abilities;
 	std::unordered_map<int, std::unique_ptr<AA::Rank>> aa_ranks;
+
+private:
 
 	//old AA
 	int		totalAAs;
