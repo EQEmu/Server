@@ -2177,7 +2177,7 @@ namespace UF
 		eq->next_id = emu->next_id;
 		eq->cost2 = emu->total_cost;
 		eq->grant_only = emu->grant_only > 0 ? true : false;
-		eq->expendable_charges = emu->expendable ? 1 : 0;
+		eq->expendable_charges = emu->charges ? 1 : 0;
 		eq->aa_expansion = emu->expansion;
 		eq->special_category = emu->category;
 		eq->total_abilities = emu->total_effects;

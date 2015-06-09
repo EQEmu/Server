@@ -33,17 +33,16 @@ AA::Rank *AA::Ability::GetMaxRank() {
 }
 
 AA::Rank *AA::Ability::GetRankByPointsSpent(int current_level) {
+	if(current_level == 0)
+		return nullptr;
+	
 	if(!first)
 		return nullptr;
-
-	if(current_level == 0) {
-		return GetMaxRank();
-	}
 
 	int i = 1;
 	Rank *current = first;
 	while(current->next) {
-		if(1 == current_level) {
+		if(i == current_level) {
 			break;
 		}
 

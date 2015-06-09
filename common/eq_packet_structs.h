@@ -4243,7 +4243,7 @@ struct AARankInfo_Struct
 	int32 total_cost;
 	int32 expansion;
 	int32 category;
-	uint8 expendable;
+	uint8 charges;
 	uint8 grant_only;
 	uint32 total_effects;
 	uint32 total_prereqs;

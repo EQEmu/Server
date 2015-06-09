@@ -37,17 +37,16 @@ public:
 	~Ability() { }
 
 	Rank *GetMaxRank();
+	Rank *GetRankByLevel(int level);
 	Rank *GetRankByPointsSpent(int current_level);
 	int GetMaxLevel(bool force_calc = false);
 
 	std::string name;
-	int expansion;
 	int category;
 	int classes;
-	uint32 account_time_required;
 	bool grant_only;
 	int type;
-	bool expendable;
+	int charges;
 	int first_rank_id;
 	int max_level;
 	Rank *first;

@@ -43,6 +43,8 @@ public:
 	Rank *prev;
 	int next_id;
 	Rank *next;
+	int expansion;
+	uint32 account_time_required;
 	int total_cost;
 	Ability *base_ability;
 	std::unordered_map<int, RankEffect> effects;
