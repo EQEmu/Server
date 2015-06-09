@@ -1810,6 +1810,10 @@ namespace UF
 		//	OUT(aa_array[r].charges);
 		//}
 		//	OUT(unknown02220[4]);
+
+		eq->aa_array[0].AA = 6;
+		eq->aa_array[0].value = 5;
+
 		OUT(mana);
 		OUT(cur_hp);
 		OUT(STR);

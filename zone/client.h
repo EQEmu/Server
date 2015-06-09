@@ -760,7 +760,7 @@ public:
 	inline PTimerList &GetPTimers() { return(p_timers); }
 
 	//New AA Methods
-	void SendAlternateAdvancement(int aa_id, int level);
+	void SendAlternateAdvancementRank(int aa_id, int level);
 	void SendAlternateAdvancementList();
 
 	//old AA Methods

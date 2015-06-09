@@ -674,8 +674,14 @@ void command_incstat(Client* c, const Seperator* sep){
 }
 
 void command_resetaa(Client* c,const Seperator *sep){
-	c->SendAlternateAdvancement(1, 1);
-	c->SendAlternateAdvancement(2, 1);
+
+	//if(sep->IsNumber(1) && atoi(sep->arg[1]) == 1) {
+	//	c->SendAlternateAdvancement(2, 2);
+	//}
+	//else if(sep->IsNumber(1) && atoi(sep->arg[1]) == 2) {
+	//	c->SendAlternateAdvancement(2, 3);
+	//}
+
 	//if(c->GetTarget()!=0 && c->GetTarget()->IsClient()){
 	//	c->GetTarget()->CastToClient()->ResetAA();
 	//	c->Message(13,"Successfully reset %s's AAs", c->GetTarget()->GetName());

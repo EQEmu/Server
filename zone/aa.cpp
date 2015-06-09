@@ -1097,28 +1097,28 @@ void Client::SendAATimers() {
 }
 
 void Client::SendAATable() {
-	Log.Out(Logs::General, Logs::Status, "SendAATable()");
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_RespondAA, sizeof(AATable_Struct));
-
-	AATable_Struct* aa2 = (AATable_Struct *)outapp->pBuffer;
-	aa2->aa_spent = 8;
-	//aa2->aa_list[0].AA = 11;
+	//Log.Out(Logs::General, Logs::Status, "SendAATable()");
+	//EQApplicationPacket* outapp = new EQApplicationPacket(OP_RespondAA, sizeof(AATable_Struct));
+	//
+	//AATable_Struct* aa2 = (AATable_Struct *)outapp->pBuffer;
+	//aa2->aa_spent = 10;
+	//aa2->aa_list[0].AA = 6;
 	//aa2->aa_list[0].value = 4;
 	//aa2->aa_list[0].charges = 0;
-	//aa2->aa_list[1].AA = 202;
+	//aa2->aa_list[1].AA = 11;
 	//aa2->aa_list[1].value = 4;
 	//aa2->aa_list[1].charges = 0;
-
-	//aa2->aa_spent = GetAAPointsSpent();
 	//
-	//uint32 i;
-	//for(i=0;i < MAX_PP_AA_ARRAY;i++){
-	//	aa2->aa_list[i].AA = aa[i]->value ? aa[i]->AA : 0; // bit of a hack to prevent expendables punching a hole
-	//	aa2->aa_list[i].value = aa[i]->value;
-	//	aa2->aa_list[i].charges = aa[i]->charges;
-	//}
-	QueuePacket(outapp);
-	safe_delete(outapp);
+	////aa2->aa_spent = GetAAPointsSpent();
+	////
+	////uint32 i;
+	////for(i=0;i < MAX_PP_AA_ARRAY;i++){
+	////	aa2->aa_list[i].AA = aa[i]->value ? aa[i]->AA : 0; // bit of a hack to prevent expendables punching a hole
+	////	aa2->aa_list[i].value = aa[i]->value;
+	////	aa2->aa_list[i].charges = aa[i]->charges;
+	////}
+	//QueuePacket(outapp);
+	//safe_delete(outapp);
 }
 
 void Client::SendPreviousAA(uint32 id, int seq){
@@ -2101,12 +2101,15 @@ void Client::SendAlternateAdvancementList() {
 	//	SendAlternateAdvancement(aa.first, 5);
 	//}
 
-	SendAlternateAdvancement(1, 4);
-	SendAlternateAdvancement(2, 4);
+	SendAlternateAdvancementRank(1, 5);
+	SendAlternateAdvancementRank(1, 6);
+	SendAlternateAdvancementRank(2, 1);
+	//SendAlternateAdvancement(1, 5);
+	//SendAlternateAdvancement(2, 5);
 }
 
 //New AA
-void Client::SendAlternateAdvancement(int aa_id, int level) {
+void Client::SendAlternateAdvancementRank(int aa_id, int level) {
 	if(!zone)
 		return;
 	
@@ -2119,7 +2122,7 @@ void Client::SendAlternateAdvancement(int aa_id, int level) {
 		return;
 	}
 
-	AA::Rank *rank = ability->GetRankByPointsSpent(level + 1);
+	AA::Rank *rank = ability->GetRankByPointsSpent(level);
 	if(!rank)
 		return;
 
@@ -2129,12 +2132,12 @@ void Client::SendAlternateAdvancement(int aa_id, int level) {
 			return;
 		}
 	}
-
+	
 	// Hide Quest/Progression AAs unless player has been granted the first level using $client->IncrementAA(skill_id).
 	if(ability->category == 1 || ability->category == 2) {
 		//if(GetAA(saa2->id) == 0)
 		//	return;
-
+	
 		if(rank->expansion > 0) {
 			AA::Ability *qaa = zone->GetAlternateAdvancementAbility(aa_id + 1);
 			//if(qaa && qaa->expansion == rank->expansion && GetAA(aa_id) > 0) {
@@ -2142,7 +2145,7 @@ void Client::SendAlternateAdvancement(int aa_id, int level) {
 			//}
 		}
 	}
-
+	
 	// Passive and Active Shroud AAs
 	// For now we skip them
 	if(ability->category == 3 || ability->category == 4) {
@@ -2171,25 +2174,24 @@ void Client::SendAlternateAdvancement(int aa_id, int level) {
 		}
 	}
 	
-	//Should move this to another function
-	int size = sizeof(AARankInfo_Struct)+(sizeof(AARankEffect_Struct)* rank->effects.size()) + (sizeof(AARankPrereq_Struct)* rank->prereqs.size());
+	int size = sizeof(AARankInfo_Struct) + (sizeof(AARankEffect_Struct) * rank->effects.size()) + (sizeof(AARankPrereq_Struct) * rank->prereqs.size());
 	EQApplicationPacket *outapp = new EQApplicationPacket(OP_SendAATable, size);
 	AARankInfo_Struct *aai = (AARankInfo_Struct*)outapp->pBuffer;
 
-	aai->id = ability->GetMaxRank()->id;
+	aai->id = rank->id;
 	aai->upper_hotkey_sid = rank->upper_hotkey_sid;
 	aai->lower_hotkey_sid = rank->lower_hotkey_sid;
 	aai->title_sid = rank->title_sid;
 	aai->desc_sid = rank->desc_sid;
-	aai->level_req = rank->level_req;
 	aai->cost = rank->cost;
 	aai->seq = aa_id;
-	aai->current_level = level + 1;
 	aai->type = ability->type;
 	aai->spell = rank->spell;
 	aai->spell_type = rank->spell_type;
 	aai->spell_refresh = rank->recast_time;
 	aai->classes = ability->classes;
+	aai->level_req = rank->level_req;
+	aai->current_level = level;
 	aai->max_level = ability->GetMaxLevel();
 	aai->prev_id = rank->prev_id;
 	aai->next_id = rank->next_id;
@@ -2208,7 +2210,7 @@ void Client::SendAlternateAdvancement(int aa_id, int level) {
 		outapp->WriteSInt32(effect.second.base2);
 		outapp->WriteSInt32(effect.first);
 	}
-	
+
 	for(auto prereq : rank->prereqs) {
 		outapp->WriteSInt32(prereq.aa_id);
 		outapp->WriteSInt32(prereq.points);
