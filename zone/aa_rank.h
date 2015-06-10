@@ -47,7 +47,7 @@ public:
 	uint32 account_time_required;
 	int total_cost;
 	Ability *base_ability;
-	std::unordered_map<int, RankEffect> effects;
+	std::vector<RankEffect> effects;
 	std::vector<RankPrereq> prereqs;
 };
 

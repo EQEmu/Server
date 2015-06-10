@@ -27,6 +27,7 @@ namespace AA
 
 struct RankEffect
 {
+	int slot;
 	int effect_id;
 	int base1;
 	int base2;

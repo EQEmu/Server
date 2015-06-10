@@ -2120,10 +2120,10 @@ void Client::SendAlternateAdvancementRank(int aa_id, int level) {
 
 	outapp->SetWritePosition(sizeof(AARankInfo_Struct));
 	for(auto effect : rank->effects) {
-		outapp->WriteSInt32(effect.second.effect_id);
-		outapp->WriteSInt32(effect.second.base1);
-		outapp->WriteSInt32(effect.second.base2);
-		outapp->WriteSInt32(effect.first);
+		outapp->WriteSInt32(effect.effect_id);
+		outapp->WriteSInt32(effect.base1);
+		outapp->WriteSInt32(effect.base2);
+		outapp->WriteSInt32(effect.slot);
 	}
 
 	for(auto prereq : rank->prereqs) {
@@ -2361,17 +2361,17 @@ bool ZoneDatabase::LoadAlternateAdvancementAbilities(std::unordered_map<int, std
 		for(auto row = results.begin(); row != results.end(); ++row) {
 			AA::RankEffect effect;
 			int rank_id = atoi(row[0]);
-			int slot = atoi(row[1]);
+			effect.slot = atoi(row[1]);
 			effect.effect_id = atoi(row[2]);
 			effect.base1 = atoi(row[3]);
 			effect.base2 = atoi(row[4]);
 
-			if(slot < 1 || slot > 12)
+			if(effect.slot < 1 || effect.slot > 12)
 				continue;
 
 			if(ranks.count(rank_id) > 0) {
 				AA::Rank *rank = ranks[rank_id].get();
-				rank->effects[slot] = effect;
+				rank->effects.push_back(effect);
 			}
 		}
 	} else {
