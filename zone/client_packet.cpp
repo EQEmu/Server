@@ -1091,7 +1091,7 @@ void Client::Handle_Connect_OP_SendAAStats(const EQApplicationPacket *app)
 
 void Client::Handle_Connect_OP_SendAATable(const EQApplicationPacket *app)
 {
-	SendAlternateAdvancementList();
+	SendAlternateAdvancementTable();
 	return;
 }
 
@@ -1440,58 +1440,60 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	if (m_pp.ldon_points_available < 0 || m_pp.ldon_points_available > 2000000000){ m_pp.ldon_points_available = 0; }
 
 	/* Initialize AA's : Move to function eventually */
-	for (uint32 a = 0; a < MAX_PP_AA_ARRAY; a++)
-		aa[a] = &m_pp.aa_array[a];
-	query = StringFormat(
-		"SELECT								"
-		"slot,							    "
-		"aa_id,								"
-		"aa_value,							"
-		"charges							"
-		"FROM								"
-		"`character_alternate_abilities`    "
-		"WHERE `id` = %u ORDER BY `slot`", this->CharacterID());
-	results = database.QueryDatabase(query); i = 0;
-	int offset = 0; // offset to fix the hole from expendables
-	for (auto row = results.begin(); row != results.end(); ++row) {
-		i = atoi(row[0]) - offset;
-		m_pp.aa_array[i].AA = atoi(row[1]);
-		m_pp.aa_array[i].value = atoi(row[2]);
-		m_pp.aa_array[i].charges = atoi(row[3]);
-		/* A used expendable could cause there to be a "hole" in the array, this is very bad. Bad things like keeping your expendable after use.
-		   We could do a few things, one of them being reshuffling when the hole is created or defer the fixing until a later point, like during load!
-		   Or just never making a hole in the array and just have hacks every where. Fixing the hole at load really just keeps 1 hack in Client::SendAATable
-		   and keeping this offset that will cause the next AA to be pushed back over the hole. We also need to clean up on save so we don't have multiple
-		   entries for a single AA.
-		*/
-		if (m_pp.aa_array[i].value == 0)
-			offset++;
-	}
-	for (uint32 a = 0; a < MAX_PP_AA_ARRAY; a++){
-		uint32 id = aa[a]->AA;
-		//watch for invalid AA IDs
-		if (id == aaNone)
-			continue;
-		if (id >= aaHighestID) {
-			aa[a]->AA = aaNone;
-			aa[a]->value = 0;
-			continue;
-		}
-		if (aa[a]->value == 0) {
-			aa[a]->AA = aaNone;
-			continue;
-		}
-		if (aa[a]->value > HIGHEST_AA_VALUE) {
-			aa[a]->AA = aaNone;
-			aa[a]->value = 0;
-			continue;
-		}
-
-		if (aa[a]->value > 1)	/* hack in some stuff for sony's new AA method (where each level of each aa.has a seperate ID) */
-			aa_points[(id - aa[a]->value + 1)] = aa[a]->value;
-		else
-			aa_points[id] = aa[a]->value;
-	}
+	//aa old
+	//for (uint32 a = 0; a < MAX_PP_AA_ARRAY; a++)
+	//	aa[a] = &m_pp.aa_array[a];
+	//query = StringFormat(
+	//	"SELECT								"
+	//	"slot,							    "
+	//	"aa_id,								"
+	//	"aa_value,							"
+	//	"charges							"
+	//	"FROM								"
+	//	"`character_alternate_abilities`    "
+	//	"WHERE `id` = %u ORDER BY `slot`", this->CharacterID());
+	//results = database.QueryDatabase(query); i = 0;
+	//int offset = 0; // offset to fix the hole from expendables
+	//for (auto row = results.begin(); row != results.end(); ++row) {
+	//	i = atoi(row[0]) - offset;
+	//	m_pp.aa_array[i].AA = atoi(row[1]);
+	//	m_pp.aa_array[i].value = atoi(row[2]);
+	//	m_pp.aa_array[i].charges = atoi(row[3]);
+	//	/* A used expendable could cause there to be a "hole" in the array, this is very bad. Bad things like keeping your expendable after use.
+	//	   We could do a few things, one of them being reshuffling when the hole is created or defer the fixing until a later point, like during load!
+	//	   Or just never making a hole in the array and just have hacks every where. Fixing the hole at load really just keeps 1 hack in Client::SendAATable
+	//	   and keeping this offset that will cause the next AA to be pushed back over the hole. We also need to clean up on save so we don't have multiple
+	//	   entries for a single AA.
+	//	*/
+	//	if (m_pp.aa_array[i].value == 0)
+	//		offset++;
+	//}
+	//for (uint32 a = 0; a < MAX_PP_AA_ARRAY; a++){
+	//	uint32 id = aa[a]->AA;
+	//	//watch for invalid AA IDs
+	//	if (id == aaNone)
+	//		continue;
+	//	if (id >= aaHighestID) {
+	//		aa[a]->AA = aaNone;
+	//		aa[a]->value = 0;
+	//		continue;
+	//	}
+	//	if (aa[a]->value == 0) {
+	//		aa[a]->AA = aaNone;
+	//		continue;
+	//	}
+	//	if (aa[a]->value > HIGHEST_AA_VALUE) {
+	//		aa[a]->AA = aaNone;
+	//		aa[a]->value = 0;
+	//		continue;
+	//	}
+	//
+	//	//aa old
+//	//	if (aa[a]->value > 1)	/* hack in some stuff for sony's new AA method (where each level of each aa.has a seperate ID) */
+//	//		aa_points[(id - aa[a]->value + 1)] = aa[a]->value;
+//	//	else
+//	//		aa_points[id] = aa[a]->value;
+	//}
 
 	if (SPDAT_RECORDS > 0) {
 		for (uint32 z = 0; z<MAX_PP_MEMSPELL; z++) {

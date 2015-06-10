@@ -761,7 +761,7 @@ public:
 
 	//New AA Methods
 	void SendAlternateAdvancementRank(int aa_id, int level);
-	void SendAlternateAdvancementList();
+	void SendAlternateAdvancementTable();
 
 	//old AA Methods
 	void SendAAList();
@@ -787,8 +787,6 @@ public:
 	void DisableAAEffect(aaEffectType type);
 	bool CheckAAEffect(aaEffectType type);
 	void HandleAAAction(aaID activate);
-	uint32 GetAA(uint32 aa_id) const;
-	bool SetAA(uint32 aa_id, uint32 new_value);
 	inline uint32 GetAAPointsSpent() { return m_pp.aapoints_spent; }
 	int16 CalcAAFocusEffect(focusType type, uint16 focus_spell, uint16 spell_id);
 	int16 CalcAAFocus(focusType type, uint32 aa_ID, uint16 spell_id);
@@ -1493,11 +1491,7 @@ private:
 
 	uint32 tribute_master_id;
 
-	FILE *SQL_log;
 	uint32 max_AAXP;
-	uint32 staminacount;
-	AA_Array* aa[MAX_PP_AA_ARRAY]; //this list contains pointers into our player profile
-	std::map<uint32,uint8> aa_points;
 	bool npcflag;
 	uint8 npclevel;
 	bool feigned;

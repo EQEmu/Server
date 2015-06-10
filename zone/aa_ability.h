@@ -41,6 +41,7 @@ public:
 	Rank *GetRankByPointsSpent(int current_level);
 	int GetMaxLevel(bool force_calc = false);
 
+	int id;
 	std::string name;
 	int category;
 	int classes;

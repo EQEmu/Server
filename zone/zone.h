@@ -117,6 +117,7 @@ public:
 	//new AA
 	void LoadAlternateAdvancement();
 	AA::Ability *GetAlternateAdvancementAbility(int id);
+	AA::Ability *GetAlternateAdvancementAbilityByRank(int rank_id);
 	AA::Rank *GetAlternateAdvancementRank(int rank_id);
 
 	//old AA

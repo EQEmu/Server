@@ -23,6 +23,7 @@
 #include "hate_list.h"
 #include "pathing.h"
 #include "position.h"
+#include "aa_ability.h"
 #include <set>
 #include <vector>
 #include <memory>
@@ -860,7 +861,6 @@ public:
 	uint32 GetZoneID() const; //for perl
 	virtual int32 CheckAggroAmount(uint16 spell_id, bool isproc = false);
 	virtual int32 CheckHealAggroAmount(uint16 spell_id, uint32 heal_possible = 0);
-	virtual uint32 GetAA(uint32 aa_id) const { return(0); }
 
 	uint32 GetInstrumentMod(uint16 spell_id) const;
 	int CalcSpellEffectValue(uint16 spell_id, int effect_id, int caster_level = 1, uint32 instrument_mod = 10, Mob *caster = nullptr, int ticsremaining = 0);
@@ -956,6 +956,12 @@ public:
 	void Tune_FindAccuaryByHitChance(Mob* defender, Mob *attacker, float hit_chance, int interval, int max_loop, int avoid_override, int Msg = 0);
 	void Tune_FindAvoidanceByHitChance(Mob* defender, Mob *attacker, float hit_chance, int interval, int max_loop, int acc_override, int Msg = 0);
 
+	//aa new
+	uint32 GetAA(uint32 rank_id) const;
+	bool SetAA(uint32 rank_id, uint32 new_value);
+	bool CanUseAlternateAdvancementRank(AA::Rank *rank);
+	bool CanPurchaseAlternateAdvancementRank(AA::Rank *ran);
+
 protected:
 	void CommonDamage(Mob* other, int32 &damage, const uint16 spell_id, const SkillUseTypes attack_skill, bool &avoidable, const int8 buffslot, const bool iBuffTic);
 	static uint16 GetProcID(uint16 spell_id, uint8 effect_index);
@@ -968,7 +974,6 @@ protected:
 	virtual bool AI_EngagedCastCheck() { return(false); }
 	virtual bool AI_PursueCastCheck() { return(false); }
 	virtual bool AI_IdleCastCheck() { return(false); }
-
 
 	bool IsFullHP;
 	bool moved;
@@ -1310,6 +1315,8 @@ protected:
 	SpecialAbility SpecialAbilities[MAX_SPECIAL_ATTACK];
 	bool bEnraged;
 	bool destructibleobject;
+
+	std::unordered_map<uint32, uint32> aa_ranks;
 
 private:
 	void _StopSong(); //this is not what you think it is

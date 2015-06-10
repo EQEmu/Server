@@ -5231,24 +5231,25 @@ uint16 Client::GetSympatheticFocusEffect(focusType type, uint16 spell_id) {
 		uint32 aa_AA = 0;
 		uint32 aa_value = 0;
 
-		for (int i = 0; i < MAX_PP_AA_ARRAY; i++)
-		{
-			aa_AA = this->aa[i]->AA;
-			aa_value = this->aa[i]->value;
-			if (aa_AA < 1 || aa_value < 1)
-				continue;
-
-			if (SympatheticProcList.size() > MAX_SYMPATHETIC_PROCS)
-				continue;
-
-			proc_spellid = CalcAAFocus(type, aa_AA, spell_id);
-
-			if (IsValidSpell(proc_spellid)){
-				ProcChance = GetSympatheticProcChances(spell_id, GetAABase1(aa_AA, 1));
-				if(zone->random.Roll(ProcChance))
-					SympatheticProcList.push_back(proc_spellid);
-			}
-		}
+		//aa old
+		//for (int i = 0; i < MAX_PP_AA_ARRAY; i++)
+		//{
+		//	aa_AA = this->aa[i]->AA;
+		//	aa_value = this->aa[i]->value;
+		//	if (aa_AA < 1 || aa_value < 1)
+		//		continue;
+		//
+		//	if (SympatheticProcList.size() > MAX_SYMPATHETIC_PROCS)
+		//		continue;
+		//
+		//	proc_spellid = CalcAAFocus(type, aa_AA, spell_id);
+		//
+		//	if (IsValidSpell(proc_spellid)){
+		//		ProcChance = GetSympatheticProcChances(spell_id, GetAABase1(aa_AA, 1));
+		//		if(zone->random.Roll(ProcChance))
+		//			SympatheticProcList.push_back(proc_spellid);
+		//	}
+		//}
 	}
 
 	if (SympatheticProcList.size() > 0)
@@ -5503,21 +5504,22 @@ int16 Client::GetFocusEffect(focusType type, uint16 spell_id) {
 		uint32 aa_AA = 0;
 		uint32 aa_value = 0;
 
-		for (int i = 0; i < MAX_PP_AA_ARRAY; i++)
-		{
-			aa_AA = this->aa[i]->AA;
-			aa_value = this->aa[i]->value;
-			if (aa_AA < 1 || aa_value < 1)
-				continue;
-
-			Total3 = CalcAAFocus(type, aa_AA, spell_id);
-			if (Total3 > 0 && realTotal3 >= 0 && Total3 > realTotal3) {
-				realTotal3 = Total3;
-			}
-			else if (Total3 < 0 && Total3 < realTotal3) {
-				realTotal3 = Total3;
-			}
-		}
+		//aa old
+		//for (int i = 0; i < MAX_PP_AA_ARRAY; i++)
+		//{
+		//	aa_AA = this->aa[i]->AA;
+		//	aa_value = this->aa[i]->value;
+		//	if (aa_AA < 1 || aa_value < 1)
+		//		continue;
+		//
+		//	Total3 = CalcAAFocus(type, aa_AA, spell_id);
+		//	if (Total3 > 0 && realTotal3 >= 0 && Total3 > realTotal3) {
+		//		realTotal3 = Total3;
+		//	}
+		//	else if (Total3 < 0 && Total3 < realTotal3) {
+		//		realTotal3 = Total3;
+		//	}
+		//}
 	}
 
 	if(type == focusReagentCost && IsSummonPetSpell(spell_id) && GetAA(aaElementalPact))

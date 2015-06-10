@@ -1254,37 +1254,37 @@ void Client::SendAA(uint32 id, int seq) {
 	if (RuleB(AA, Stacking) && (GetClientVersionBit() >= 4) && (saa2->hotkey_sid == 4294967295u))
 		aa_stack = true;
 
-	if (aa_stack){
-		uint32 aa_AA = 0;
-		uint32 aa_value = 0;
-		for (int i = 0; i < MAX_PP_AA_ARRAY; i++) {
-			if (aa[i]) {
-				aa_AA = aa[i]->AA;
-				aa_value = aa[i]->value;
-
-				if (aa_AA){
-
-					if (aa_value > 0)
-						aa_AA -= aa_value-1;
-
-					saa_pp = zone->FindAA(aa_AA);
-
-					if (saa_pp){
-
-						if (saa_pp->sof_next_skill == saa2->sof_next_skill){
-
-							if (saa_pp->id == saa2->id)
-								break; //You already have this in the player profile.
-							else if ((saa_pp->sof_current_level < saa2->sof_current_level) && (aa_value < saa_pp->max_level))
-								return; //DISABLE DISPLAY HIGHER - You have not reached max level yet of your current AA.
-							else if ((saa_pp->sof_current_level < saa2->sof_current_level) && (aa_value == saa_pp->max_level) && (saa_pp->sof_next_id == saa2->id))
-								IsBaseLevel = false; //ALLOW DISPLAY HIGHER
-						}
-					}
-				}
-			}
-		}
-	}
+	//if (aa_stack){
+	//	uint32 aa_AA = 0;
+	//	uint32 aa_value = 0;
+	//	for (int i = 0; i < MAX_PP_AA_ARRAY; i++) {
+	//		if (aa[i]) {
+	//			aa_AA = aa[i]->AA;
+	//			aa_value = aa[i]->value;
+	//
+	//			if (aa_AA){
+	//
+	//				if (aa_value > 0)
+	//					aa_AA -= aa_value-1;
+	//
+	//				saa_pp = zone->FindAA(aa_AA);
+	//
+	//				if (saa_pp){
+	//
+	//					if (saa_pp->sof_next_skill == saa2->sof_next_skill){
+	//
+	//						if (saa_pp->id == saa2->id)
+	//							break; //You already have this in the player profile.
+	//						else if ((saa_pp->sof_current_level < saa2->sof_current_level) && (aa_value < saa_pp->max_level))
+	//							return; //DISABLE DISPLAY HIGHER - You have not reached max level yet of your current AA.
+	//						else if ((saa_pp->sof_current_level < saa2->sof_current_level) && (aa_value == saa_pp->max_level) && (saa_pp->sof_next_id == saa2->id))
+	//							IsBaseLevel = false; //ALLOW DISPLAY HIGHER
+	//					}
+	//				}
+	//			}
+	//		}
+	//	}
+	//}
 
 	//Hide higher tiers of multi tiered AA's if the base level is not fully purchased.
 	if (aa_stack && IsBaseLevel && saa2->sof_current_level > 0)
@@ -1399,51 +1399,6 @@ void Client::SendAAList(){
 	}
 }
 
-uint32 Client::GetAA(uint32 aa_id) const {
-	std::map<uint32,uint8>::const_iterator res;
-	res = aa_points.find(aa_id);
-	if(res != aa_points.end()) {
-		return(res->second);
-	}
-	return(0);
-}
-
-bool Client::SetAA(uint32 aa_id, uint32 new_value) {
-	aa_points[aa_id] = new_value;
-	uint32 cur;
-	auto sendaa = zone->FindAA(aa_id); // this is a bit hacky
-	uint32 charges = sendaa->special_category == 7 && new_value ? 1 : 0;
-	for(cur=0;cur < MAX_PP_AA_ARRAY;cur++){
-		if((aa[cur]->value > 1) && ((aa[cur]->AA - aa[cur]->value + 1)== aa_id)){
-			aa[cur]->value = new_value;
-			if(new_value > 0)
-				aa[cur]->AA++;
-			aa[cur]->charges = charges;
-			return true;
-		}
-		else if((aa[cur]->value == 1) && (aa[cur]->AA == aa_id)){
-			aa[cur]->value = new_value;
-			if(new_value > 0)
-				aa[cur]->AA++;
-			aa[cur]->charges = charges;
-			return true;
-		}
-		// hack to prevent expendable exploit, we should probably be reshuffling the array to fix the hole
-		else if(aa[cur]->value == 0 && new_value == 1 && aa[cur]->AA == aa_id) {
-			aa[cur]->value = new_value;
-			aa[cur]->charges = charges;
-			return true;
-		}
-		else if(aa[cur]->AA==0){ //end of list
-			aa[cur]->AA = aa_id;
-			aa[cur]->value = new_value;
-			aa[cur]->charges = charges;
-			return true;
-		}
-	}
-	return false;
-}
-
 SendAA_Struct* Zone::FindAA(uint32 id) {
 	return aas_send[id];
 }
@@ -1503,39 +1458,39 @@ bool ZoneDatabase::LoadAAEffects2() {
 }
 
 void Client::ResetAA(){
-	RefundAA();
-	uint32 i;
-	for (i=0; i < MAX_PP_AA_ARRAY; i++) {
-		aa[i]->AA = 0;
-		aa[i]->value = 0;
-		aa[i]->charges = 0;
-		m_pp.aa_array[i].AA = 0;
-		m_pp.aa_array[i].value = 0;
-		m_pp.aa_array[i].charges= 0;
-	}
-
-	std::map<uint32,uint8>::iterator itr;
-	for(itr = aa_points.begin(); itr != aa_points.end(); ++itr)
-		aa_points[itr->first] = 0;
-
-	for(int i = 0; i < _maxLeaderAA; ++i)
-		m_pp.leader_abilities.ranks[i] = 0;
-
-	m_pp.group_leadership_points = 0;
-	m_pp.raid_leadership_points = 0;
-	m_pp.group_leadership_exp = 0;
-	m_pp.raid_leadership_exp = 0;
-
-	database.DeleteCharacterAAs(this->CharacterID());
-	SaveAA();
-	SendClearAA();
-	SendAAList();
-	SendAATable();
-	SendAAStats();
-	database.DeleteCharacterLeadershipAAs(this->CharacterID());
-	// undefined for these clients
-	if (GetClientVersionBit() & BIT_TitaniumAndEarlier)
-		Kick();
+//	RefundAA();
+//	uint32 i;
+//	for (i=0; i < MAX_PP_AA_ARRAY; i++) {
+//		aa[i]->AA = 0;
+//		aa[i]->value = 0;
+//		aa[i]->charges = 0;
+//		m_pp.aa_array[i].AA = 0;
+//		m_pp.aa_array[i].value = 0;
+//		m_pp.aa_array[i].charges= 0;
+//	}
+//
+//	std::map<uint32,uint8>::iterator itr;
+//	for(itr = aa_points.begin(); itr != aa_points.end(); ++itr)
+//		aa_points[itr->first] = 0;
+//
+//	for(int i = 0; i < _maxLeaderAA; ++i)
+//		m_pp.leader_abilities.ranks[i] = 0;
+//
+//	m_pp.group_leadership_points = 0;
+//	m_pp.raid_leadership_points = 0;
+//	m_pp.group_leadership_exp = 0;
+//	m_pp.raid_leadership_exp = 0;
+//
+//	database.DeleteCharacterAAs(this->CharacterID());
+//	SaveAA();
+//	SendClearAA();
+//	SendAAList();
+//	SendAATable();
+//	SendAAStats();
+//	database.DeleteCharacterLeadershipAAs(this->CharacterID());
+//	// undefined for these clients
+//	if (GetClientVersionBit() & BIT_TitaniumAndEarlier)
+//		Kick();
 }
 
 void Client::SendClearAA()
@@ -2096,19 +2051,23 @@ Mob *AA_SwarmPetInfo::GetOwner()
 	return entity_list.GetMobID(owner_id);
 }
 
-void Client::SendAlternateAdvancementList() {
-	//for(auto &aa : zone->aa_abilities) {
-	//	SendAlternateAdvancement(aa.first, 5);
-	//}
-
-	SendAlternateAdvancementRank(1, 5);
-	SendAlternateAdvancementRank(1, 6);
-	SendAlternateAdvancementRank(2, 1);
-	//SendAlternateAdvancement(1, 5);
-	//SendAlternateAdvancement(2, 5);
+//New AA
+void Client::SendAlternateAdvancementTable() {
+	for(auto &aa : zone->aa_abilities) {
+		auto ranks = GetAA(aa.second->first_rank_id);
+		if(ranks) {
+			if(aa.second->GetMaxLevel() == ranks) {
+				SendAlternateAdvancementRank(aa.first, ranks);
+			} else {
+				SendAlternateAdvancementRank(aa.first, ranks);
+				SendAlternateAdvancementRank(aa.first, ranks + 1);
+			}
+		} else {
+			SendAlternateAdvancementRank(aa.first, 1);
+		}
+	}
 }
 
-//New AA
 void Client::SendAlternateAdvancementRank(int aa_id, int level) {
 	if(!zone)
 		return;
@@ -2126,52 +2085,8 @@ void Client::SendAlternateAdvancementRank(int aa_id, int level) {
 	if(!rank)
 		return;
 
-	if(rank->account_time_required) {
-		if((Timer::GetTimeSeconds() - account_creation) < rank->account_time_required)
-		{
-			return;
-		}
-	}
-	
-	// Hide Quest/Progression AAs unless player has been granted the first level using $client->IncrementAA(skill_id).
-	if(ability->category == 1 || ability->category == 2) {
-		//if(GetAA(saa2->id) == 0)
-		//	return;
-	
-		if(rank->expansion > 0) {
-			AA::Ability *qaa = zone->GetAlternateAdvancementAbility(aa_id + 1);
-			//if(qaa && qaa->expansion == rank->expansion && GetAA(aa_id) > 0) {
-			//	return;
-			//}
-		}
-	}
-	
-	// Passive and Active Shroud AAs
-	// For now we skip them
-	if(ability->category == 3 || ability->category == 4) {
+	if(!CanUseAlternateAdvancementRank(rank)) {
 		return;
-	}
-
-	// Check for racial/Drakkin blood line AAs
-	if(ability->category == 8)
-	{
-		uint32 client_race = GetBaseRace();
-	
-		// Drakkin Bloodlines
-		if(rank->expansion > 522)
-		{
-			if(client_race != 522)
-				return;
-	
-			int heritage = this->GetDrakkinHeritage() + 523; // 523 = Drakkin Race(522) + Bloodline
-	
-			if(heritage != rank->expansion)
-				return;
-		}
-		else if(client_race != rank->expansion)
-		{
-			return;
-		}
 	}
 	
 	int size = sizeof(AARankInfo_Struct) + (sizeof(AARankEffect_Struct) * rank->effects.size()) + (sizeof(AARankPrereq_Struct) * rank->prereqs.size());
@@ -2220,10 +2135,126 @@ void Client::SendAlternateAdvancementRank(int aa_id, int level) {
 	safe_delete(outapp);
 }
 
+AA::Ability *Zone::GetAlternateAdvancementAbility(int id) {
+	auto iter = aa_abilities.find(id);
+	if(iter != aa_abilities.end()) {
+		return iter->second.get();
+	}
+
+	return nullptr;
+}
+
+AA::Ability *Zone::GetAlternateAdvancementAbilityByRank(int rank_id) {
+	AA::Rank *rank = GetAlternateAdvancementRank(rank_id);
+
+	if(!rank)
+		return nullptr;
+
+	return rank->base_ability;
+}
+
+AA::Rank *Zone::GetAlternateAdvancementRank(int rank_id) {
+	auto iter = aa_ranks.find(rank_id);
+	if(iter != aa_ranks.end()) {
+		return iter->second.get();
+	}
+
+	return nullptr;
+}
+
+uint32 Mob::GetAA(uint32 rank_id) const {
+	if(zone) {
+		AA::Ability *ability = zone->GetAlternateAdvancementAbilityByRank(rank_id);
+		if(!ability)
+			return 0;
+
+		auto iter = aa_ranks.find(ability->id);
+		if(iter != aa_ranks.end()) {
+			return iter->second;
+		}
+	}
+	return 0;
+}
+
+bool Mob::SetAA(uint32 rank_id, uint32 new_value) {
+	if(zone) {
+		AA::Ability *ability = zone->GetAlternateAdvancementAbilityByRank(rank_id);
+
+		if(!ability) {
+			return false;
+		}
+
+		if(new_value > ability->GetMaxLevel()) {
+			return false;
+		}
+
+		aa_ranks[ability->id] = new_value;
+	}
+
+	return false;
+}
+
+
+bool Mob::CanUseAlternateAdvancementRank(AA::Rank *rank) {
+	AA::Ability *ability = rank->base_ability;
+
+	if(!ability)
+		return false;
+
+	// Passive and Active Shroud AAs
+	// For now we skip them
+	if(ability->category == 3 || ability->category == 4) {
+		return false;
+	}
+
+	// Check for racial/Drakkin blood line AAs
+	if(ability->category == 8)
+	{
+		uint32 client_race = GetBaseRace();
+
+		// Drakkin Bloodlines
+		if(rank->expansion > 522)
+		{
+			if(client_race != 522)
+				return false;
+
+			int heritage = this->GetDrakkinHeritage() + 523; // 523 = Drakkin Race(522) + Bloodline
+
+			if(heritage != rank->expansion)
+				return false;
+		}
+		else if(client_race != rank->expansion)
+		{
+			return false;
+		}
+	}
+
+	return true;
+}
+
+bool Mob::CanPurchaseAlternateAdvancementRank(AA::Rank *rank) {
+	AA::Ability *ability = rank->base_ability;
+
+	if(!ability)
+		return false;
+	
+	if(!CanUseAlternateAdvancementRank(rank)) {
+		return false;
+	}
+
+	//You can't purchase grant only AAs they can only be assigned
+	if(ability->grant_only) {
+		return false;
+	}
+
+	//check other stuff like price later
+	return true;
+}
+
 void Zone::LoadAlternateAdvancement() {
 	Log.Out(Logs::General, Logs::Status, "Loading Alternate Advancement Data...");
-	if(!database.LoadAlternateAdvancementAbilities(aa_abilities, 
-													aa_ranks)) 
+	if(!database.LoadAlternateAdvancementAbilities(aa_abilities,
+		aa_ranks))
 	{
 		aa_abilities.clear();
 		aa_ranks.clear();
@@ -2244,7 +2275,8 @@ void Zone::LoadAlternateAdvancement() {
 
 			if(current->prev) {
 				current->total_cost = current->cost + current->prev->total_cost;
-			} else {
+			}
+			else {
 				current->total_cost = current->cost;
 			}
 
@@ -2257,24 +2289,6 @@ void Zone::LoadAlternateAdvancement() {
 	Log.Out(Logs::General, Logs::Status, "Loaded Alternate Advancement Data");
 }
 
-AA::Ability *Zone::GetAlternateAdvancementAbility(int id) {
-	auto iter = aa_abilities.find(id);
-	if(iter != aa_abilities.end()) {
-		return iter->second.get();
-	}
-
-	return nullptr;
-}
-
-AA::Rank *Zone::GetAlternateAdvancementRank(int rank_id) {
-	auto iter = aa_ranks.find(rank_id);
-	if(iter != aa_ranks.end()) {
-		return iter->second.get();
-	}
-
-	return nullptr;
-}
-
 bool ZoneDatabase::LoadAlternateAdvancementAbilities(std::unordered_map<int, std::unique_ptr<AA::Ability>> &abilities,
 													std::unordered_map<int, std::unique_ptr<AA::Rank>> &ranks) 
 {
@@ -2285,7 +2299,7 @@ bool ZoneDatabase::LoadAlternateAdvancementAbilities(std::unordered_map<int, std
 	if(results.Success()) {
 		for(auto row = results.begin(); row != results.end(); ++row) {
 			AA::Ability *ability = new AA::Ability;
-			int id = atoi(row[0]);
+			ability->id = atoi(row[0]);
 			ability->name = row[1];
 			ability->category = atoi(row[2]);
 			ability->classes = atoi(row[3]);
@@ -2295,7 +2309,7 @@ bool ZoneDatabase::LoadAlternateAdvancementAbilities(std::unordered_map<int, std
 			ability->first_rank_id = atoi(row[7]);
 			ability->first = nullptr;
 
-			abilities[id] = std::unique_ptr<AA::Ability>(ability);
+			abilities[ability->id] = std::unique_ptr<AA::Ability>(ability);
 		}
 	} else {
 		Log.Out(Logs::General, Logs::Error, "Failed to load Alternate Advancement Abilities");
@@ -2312,8 +2326,7 @@ bool ZoneDatabase::LoadAlternateAdvancementAbilities(std::unordered_map<int, std
 	if(results.Success()) {
 		for(auto row = results.begin(); row != results.end(); ++row) {
 			AA::Rank *rank = new AA::Rank;
-			int id = atoi(row[0]);
-			rank->id = id;
+			rank->id = atoi(row[0]);
 			rank->upper_hotkey_sid = atoi(row[1]);
 			rank->lower_hotkey_sid = atoi(row[2]);
 			rank->title_sid = atoi(row[3]);
@@ -2332,7 +2345,7 @@ bool ZoneDatabase::LoadAlternateAdvancementAbilities(std::unordered_map<int, std
 			rank->next = nullptr;
 			rank->prev = nullptr;
 
-			ranks[id] = std::unique_ptr<AA::Rank>(rank);
+			ranks[rank->id] = std::unique_ptr<AA::Rank>(rank);
 		}
 	} else {
 		Log.Out(Logs::General, Logs::Error, "Failed to load Alternate Advancement Ability Ranks");
