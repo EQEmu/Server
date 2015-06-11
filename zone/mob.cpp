@@ -615,7 +615,7 @@ int Mob::_GetWalkSpeed() const {
 }
 
 int Mob::_GetRunSpeed() const {
-	if (IsRooted() || IsStunned() || IsMezzed())
+	if (IsRooted() || IsStunned() || IsMezzed() || IsPseudoRooted())
 		return 0;
 
 	int aa_mod = 0;
