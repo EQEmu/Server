@@ -1152,7 +1152,7 @@ void Client::Handle_Connect_OP_TGB(const EQApplicationPacket *app)
 
 void Client::Handle_Connect_OP_UpdateAA(const EQApplicationPacket *app)
 {
-	SendAATable();
+	SendAlternateAdvancementPoints();
 }
 
 void Client::Handle_Connect_OP_WearChange(const EQApplicationPacket *app)
@@ -1439,61 +1439,9 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	if (m_pp.ldon_points_tak < 0 || m_pp.ldon_points_tak > 2000000000){ m_pp.ldon_points_tak = 0; }
 	if (m_pp.ldon_points_available < 0 || m_pp.ldon_points_available > 2000000000){ m_pp.ldon_points_available = 0; }
 
-	/* Initialize AA's : Move to function eventually */
-	//aa old
-	//for (uint32 a = 0; a < MAX_PP_AA_ARRAY; a++)
-	//	aa[a] = &m_pp.aa_array[a];
-	//query = StringFormat(
-	//	"SELECT								"
-	//	"slot,							    "
-	//	"aa_id,								"
-	//	"aa_value,							"
-	//	"charges							"
-	//	"FROM								"
-	//	"`character_alternate_abilities`    "
-	//	"WHERE `id` = %u ORDER BY `slot`", this->CharacterID());
-	//results = database.QueryDatabase(query); i = 0;
-	//int offset = 0; // offset to fix the hole from expendables
-	//for (auto row = results.begin(); row != results.end(); ++row) {
-	//	i = atoi(row[0]) - offset;
-	//	m_pp.aa_array[i].AA = atoi(row[1]);
-	//	m_pp.aa_array[i].value = atoi(row[2]);
-	//	m_pp.aa_array[i].charges = atoi(row[3]);
-	//	/* A used expendable could cause there to be a "hole" in the array, this is very bad. Bad things like keeping your expendable after use.
-	//	   We could do a few things, one of them being reshuffling when the hole is created or defer the fixing until a later point, like during load!
-	//	   Or just never making a hole in the array and just have hacks every where. Fixing the hole at load really just keeps 1 hack in Client::SendAATable
-	//	   and keeping this offset that will cause the next AA to be pushed back over the hole. We also need to clean up on save so we don't have multiple
-	//	   entries for a single AA.
-	//	*/
-	//	if (m_pp.aa_array[i].value == 0)
-	//		offset++;
-	//}
-	//for (uint32 a = 0; a < MAX_PP_AA_ARRAY; a++){
-	//	uint32 id = aa[a]->AA;
-	//	//watch for invalid AA IDs
-	//	if (id == aaNone)
-	//		continue;
-	//	if (id >= aaHighestID) {
-	//		aa[a]->AA = aaNone;
-	//		aa[a]->value = 0;
-	//		continue;
-	//	}
-	//	if (aa[a]->value == 0) {
-	//		aa[a]->AA = aaNone;
-	//		continue;
-	//	}
-	//	if (aa[a]->value > HIGHEST_AA_VALUE) {
-	//		aa[a]->AA = aaNone;
-	//		aa[a]->value = 0;
-	//		continue;
-	//	}
-	//
-	//	//aa old
-//	//	if (aa[a]->value > 1)	/* hack in some stuff for sony's new AA method (where each level of each aa.has a seperate ID) */
-//	//		aa_points[(id - aa[a]->value + 1)] = aa[a]->value;
-//	//	else
-//	//		aa_points[id] = aa[a]->value;
-	//}
+	if(!database.LoadAlternateAdvancement(this)) {
+		Log.Out(Logs::General, Logs::Error, "Error loading AA points for %s", GetName());
+	}
 
 	if (SPDAT_RECORDS > 0) {
 		for (uint32 z = 0; z<MAX_PP_MEMSPELL; z++) {
@@ -1618,9 +1566,7 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	if (IsLFP()) { UpdateLFP(); }
 
 	/* Get Expansions from variables table and ship via PP */
-	char val[20] = { 0 };
-	if (database.GetVariable("Expansions", val, 20)){ m_pp.expansions = atoi(val); }
-	else{ m_pp.expansions = 0x3FF; }
+	m_pp.expansions = RuleI(World, ExpansionSettings);
 
 	p_timers.SetCharID(CharacterID());
 	if (!p_timers.Load(&database)) {
@@ -1796,38 +1742,39 @@ void Client::Handle_OP_AAAction(const EQApplicationPacket *app)
 	Log.Out(Logs::Detail, Logs::AA, "Received OP_AAAction");
 
 	if (app->size != sizeof(AA_Action)){
-		printf("Error! OP_AAAction size didnt match!\n");
+		Log.Out(Logs::General, Logs::AA, "Error! OP_AAAction size didnt match!");
 		return;
 	}
 	AA_Action* action = (AA_Action*)app->pBuffer;
 
 	if (action->action == aaActionActivate) {//AA Hotkey
 		Log.Out(Logs::Detail, Logs::AA, "Activating AA %d", action->ability);
-		ActivateAA((aaID)action->ability);
+		//ActivateAlternateAdvancementAbility(action->ability);
 	}
 	else if (action->action == aaActionBuy) {
-		BuyAA(action);
+		PurchaseAlternateAdvancementRank(action->ability);
 	}
 	else if (action->action == aaActionDisableEXP){ //Turn Off AA Exp
 		if (m_epp.perAA > 0)
 			Message_StringID(0, AA_OFF);
+
 		m_epp.perAA = 0;
-		SendAAStats();
+		SendAlternateAdvancementStats();
 	}
 	else if (action->action == aaActionSetEXP) {
 		if (m_epp.perAA == 0)
 			Message_StringID(0, AA_ON);
 		m_epp.perAA = action->exp_value;
-		if (m_epp.perAA<0 || m_epp.perAA>100) m_epp.perAA = 0;	// stop exploit with sanity check
+		if (m_epp.perAA < 0 || m_epp.perAA > 100) 
+			m_epp.perAA = 0;	// stop exploit with sanity check
+
 		// send an update
-		SendAAStats();
-		SendAATable();
+		SendAlternateAdvancementStats();
+		SendAlternateAdvancementTable();
 	}
 	else {
-		printf("Unknown AA action: %u %u 0x%x %d\n", action->action, action->ability, action->unknown08, action->exp_value);
+		Log.Out(Logs::General, Logs::AA, "Unknown AA action : %u %u 0x%x %d", action->action, action->ability, action->unknown08, action->exp_value);
 	}
-
-	return;
 }
 
 void Client::Handle_OP_AcceptNewTask(const EQApplicationPacket *app)

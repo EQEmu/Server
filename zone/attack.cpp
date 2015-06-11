@@ -4659,38 +4659,39 @@ void Mob::TrySkillProc(Mob *on, uint16 skill, uint16 ReuseTime, bool Success, ui
 				proc_spell_id = 0;
 				ProcMod = 0;
 
-				std::map<uint32, std::map<uint32, AA_Ability> >::const_iterator find_iter = aa_effects.find(aaid);
-				if(find_iter == aa_effects.end())
-					break;
+				//old AA
+				//std::map<uint32, std::map<uint32, AA_Ability> >::const_iterator find_iter = aa_effects.find(aaid);
+				//if(find_iter == aa_effects.end())
+				//	break;
 
-				for (std::map<uint32, AA_Ability>::const_iterator iter = aa_effects[aaid].begin(); iter != aa_effects[aaid].end(); ++iter) {
-					effect = iter->second.skill_id;
-					base1 = iter->second.base1;
-					base2 = iter->second.base2;
-					slot = iter->second.slot;
-
-					if (effect == SE_SkillProc || effect == SE_SkillProcSuccess) {
-						proc_spell_id = base1;
-						ProcMod = static_cast<float>(base2);
-					}
-
-					else if (effect == SE_LimitToSkill && base1 <= HIGHEST_SKILL) {
-
-						if (CanProc && base1 == skill && IsValidSpell(proc_spell_id)) {
-							float final_chance = chance * (ProcMod / 100.0f);
-
-							if (zone->random.Roll(final_chance)) {
-								ExecWeaponProc(nullptr, proc_spell_id, on);
-								CanProc = false;
-								break;
-							}
-						}
-					}
-					else {
-						proc_spell_id = 0;
-						ProcMod = 0;
-					}
-				}
+				//for (std::map<uint32, AA_Ability>::const_iterator iter = aa_effects[aaid].begin(); iter != aa_effects[aaid].end(); ++iter) {
+				//	effect = iter->second.skill_id;
+				//	base1 = iter->second.base1;
+				//	base2 = iter->second.base2;
+				//	slot = iter->second.slot;
+				//
+				//	if (effect == SE_SkillProc || effect == SE_SkillProcSuccess) {
+				//		proc_spell_id = base1;
+				//		ProcMod = static_cast<float>(base2);
+				//	}
+				//
+				//	else if (effect == SE_LimitToSkill && base1 <= HIGHEST_SKILL) {
+				//
+				//		if (CanProc && base1 == skill && IsValidSpell(proc_spell_id)) {
+				//			float final_chance = chance * (ProcMod / 100.0f);
+				//
+				//			if (zone->random.Roll(final_chance)) {
+				//				ExecWeaponProc(nullptr, proc_spell_id, on);
+				//				CanProc = false;
+				//				break;
+				//			}
+				//		}
+				//	}
+				//	else {
+				//		proc_spell_id = 0;
+				//		ProcMod = 0;
+				//	}
+				//}
 			}
 		}
 	}

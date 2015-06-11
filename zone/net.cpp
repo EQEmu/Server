@@ -248,9 +248,6 @@ int main(int argc, char** argv) {
 	Log.Out(Logs::General, Logs::Zone_Server, "Loading titles");
 	title_manager.LoadTitles();
 	
-	Log.Out(Logs::General, Logs::Zone_Server, "Loading AA effects");
-	database.LoadAAEffects();
-	
 	Log.Out(Logs::General, Logs::Zone_Server, "Loading tributes");
 	database.LoadTributes();
 	

@@ -43,6 +43,7 @@ public:
 	Rank *prev;
 	int next_id;
 	Rank *next;
+	int current_value;
 	int expansion;
 	uint32 account_time_required;
 	int total_cost;

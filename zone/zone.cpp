@@ -804,8 +804,6 @@ Zone::Zone(uint32 in_zoneid, uint32 in_instanceid, const char* in_short_name)
 	weather_intensity = 0;
 	blocked_spells = nullptr;
 	totalBS = 0;
-	aas = nullptr;
-	totalAAs = 0;
 	zone_has_current_time = false;
 
 	Instance_Shutdown_Timer = nullptr;
@@ -864,16 +862,6 @@ Zone::~Zone() {
 	safe_delete(qGlobals);
 	safe_delete_array(adv_data);
 	safe_delete_array(map_name);
-
-	if(aas != nullptr) {
-		int r;
-		for(r = 0; r < totalAAs; r++) {
-			uchar *data = (uchar *) aas[r];
-			safe_delete_array(data);
-		}
-		safe_delete_array(aas);
-	}
-
 	safe_delete(GuildBanks);
 }
 
@@ -951,9 +939,6 @@ bool Zone::Init(bool iStaticZone) {
 	zone->LoadVeteranRewards();
 	zone->LoadAlternateCurrencies();
 	zone->LoadNPCEmotes(&NPCEmoteList);
-
-	//Load AA information
-	LoadAAs();
 
 	LoadAlternateAdvancement();
 

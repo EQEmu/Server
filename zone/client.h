@@ -762,9 +762,16 @@ public:
 	//New AA Methods
 	void SendAlternateAdvancementRank(int aa_id, int level);
 	void SendAlternateAdvancementTable();
+	void SendAlternateAdvancementStats();
+	void PurchaseAlternateAdvancementRank(int rank_id);
+	void SendAlternateAdvancementPoints();
+
+	void SetAAPoints(uint32 points) { m_pp.aapoints = points; SendAlternateAdvancementStats(); }
+	void AddAAPoints(uint32 points) { m_pp.aapoints += points; SendAlternateAdvancementStats(); }
+	int GetAAPoints() { return m_pp.aapoints; }
+	int GetSpentAA() { return m_pp.aapoints_spent; }
 
 	//old AA Methods
-	void SendAAList();
 	void ResetAA();
 	void SendClearAA();
 	void SendAA(uint32 id, int seq=1);
@@ -776,7 +783,6 @@ public:
 	void SetTitleSuffix(const char *txt);
 	inline uint32 GetMaxAAXP(void) const { return max_AAXP; }
 	inline uint32 GetAAXP() const { return m_pp.expAA; }
-	void SendAAStats();
 	void SendAATable();
 	void SendAATimers();
 	int GetAATimerID(aaID activate);
@@ -790,10 +796,6 @@ public:
 	inline uint32 GetAAPointsSpent() { return m_pp.aapoints_spent; }
 	int16 CalcAAFocusEffect(focusType type, uint16 focus_spell, uint16 spell_id);
 	int16 CalcAAFocus(focusType type, uint32 aa_ID, uint16 spell_id);
-	void SetAAPoints(uint32 points) { m_pp.aapoints = points; SendAAStats(); }
-	void AddAAPoints(uint32 points) { m_pp.aapoints += points; SendAAStats(); }
-	int GetAAPoints() { return m_pp.aapoints; }
-	int GetSpentAA() { return m_pp.aapoints_spent; }
 	void RefundAA();
 	void IncrementAA(int aa_id);
 	int32 GetAAEffectDataBySlot(uint32 aa_ID, uint32 slot_id, bool GetEffect, bool GetBase1, bool GetBase2);

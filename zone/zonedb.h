@@ -343,18 +343,7 @@ public:
 	/* AAs New */
 	bool	LoadAlternateAdvancementAbilities(std::unordered_map<int, std::unique_ptr<AA::Ability>> &abilities,
 											  std::unordered_map<int, std::unique_ptr<AA::Rank>> &ranks);
-
-	/* AAs Old  */
-	bool		LoadAAEffects();
-	bool		LoadAAEffects2();
-	bool		LoadSwarmSpells();
-	SendAA_Struct*GetAASkillVars(uint32 skill_id);
-	uint8		GetTotalAALevels(uint32 skill_id);
-	uint32		GetSizeAA();
-	uint32		CountAAs();
-	void		LoadAAs(SendAA_Struct **load);
-	uint32		CountAAEffects();
-	void		FillAAEffects(SendAA_Struct* aa_struct);
+	bool	LoadAlternateAdvancement(Client *c);
 
 	/* Zone related   */
 	bool		GetZoneCFG(uint32 zoneid, uint16 instance_id, NewZone_Struct *data, bool &can_bind, bool &can_combat, bool &can_levitate, bool &can_castoutdoor, bool &is_city, bool &is_hotzone, bool &allow_mercs, uint8 &zone_type, int &ruleset, char **map_filename);

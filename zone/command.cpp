@@ -5600,8 +5600,8 @@ void command_setaapts(Client *c, const Seperator *sep)
 		t->SetLeadershipEXP(t->GetGroupEXP(), atoi(sep->arg[2])*RAID_EXP_PER_POINT);
 	} else {
 		t->SetEXP(t->GetEXP(),t->GetMaxAAXP()*atoi(sep->arg[2]),false);
-		t->SendAAStats();
-		t->SendAATable();
+		t->SendAlternateAdvancementStats();
+		t->SendAlternateAdvancementTable();
 	}
 }
 
@@ -7684,54 +7684,55 @@ void command_reloadtitles(Client *c, const Seperator *sep)
 
 }
 
+//old aa, probably to be removed
 void command_altactivate(Client *c, const Seperator *sep){
-	if(sep->arg[1][0] == '\0'){
-		c->Message(10, "Invalid argument, usage:");
-		c->Message(10, "#altactivate list - lists the AA ID numbers that are available to you");
-		c->Message(10, "#altactivate time [argument] - returns the time left until you can use the AA with the ID that matches the argument.");
-		c->Message(10, "#altactivate [argument] - activates the AA with the ID that matches the argument.");
-		return;
-	}
-	if(!strcasecmp(sep->arg[1], "help")){
-		c->Message(10, "Usage:");
-		c->Message(10, "#altactivate list - lists the AA ID numbers that are available to you");
-		c->Message(10, "#altactivate time [argument] - returns the time left until you can use the AA with the ID that matches the argument.");
-		c->Message(10, "#altactivate [argument] - activates the AA with the ID that matches the argument.");
-		return;
-	}
-	if(!strcasecmp(sep->arg[1], "list")){
-		c->Message(10, "You have access to the following AA Abilities:");
-		int x, val;
-		SendAA_Struct* saa = nullptr;
-		for(x = 0; x < aaHighestID; x++){
-			if(AA_Actions[x][0].spell_id || AA_Actions[x][0].action){ //if there's an action or spell associated we assume it's a valid
-				val = 0;					//and assume if they don't have a value for the first rank then it isn't valid for any rank
-				saa = nullptr;
-				val = c->GetAA(x);
-				if(val){
-					saa = zone->FindAA(x);
-					c->Message(10, "%d: %s %d",  x, saa->name, val);
-				}
-			}
-		}
-	}
-	else if(!strcasecmp(sep->arg[1], "time")){
-		int ability = atoi(sep->arg[2]);
-		if(c->GetAA(ability)){
-			int remain = c->GetPTimers().GetRemainingTime(pTimerAAStart + ability);
-			if(remain)
-				c->Message(10, "You may use that ability in %d minutes and %d seconds.",  (remain/60), (remain%60));
-			else
-				c->Message(10, "You may use that ability now.");
-		}
-		else{
-			c->Message(10, "You do not have access to that ability.");
-		}
-	}
-	else
-	{
-		c->ActivateAA((aaID) atoi(sep->arg[1]));
-	}
+//	if(sep->arg[1][0] == '\0'){
+//		c->Message(10, "Invalid argument, usage:");
+//		c->Message(10, "#altactivate list - lists the AA ID numbers that are available to you");
+//		c->Message(10, "#altactivate time [argument] - returns the time left until you can use the AA with the ID that matches the argument.");
+//		c->Message(10, "#altactivate [argument] - activates the AA with the ID that matches the argument.");
+//		return;
+//	}
+//	if(!strcasecmp(sep->arg[1], "help")){
+//		c->Message(10, "Usage:");
+//		c->Message(10, "#altactivate list - lists the AA ID numbers that are available to you");
+//		c->Message(10, "#altactivate time [argument] - returns the time left until you can use the AA with the ID that matches the argument.");
+//		c->Message(10, "#altactivate [argument] - activates the AA with the ID that matches the argument.");
+//		return;
+//	}
+//	if(!strcasecmp(sep->arg[1], "list")){
+//		c->Message(10, "You have access to the following AA Abilities:");
+//		int x, val;
+//		SendAA_Struct* saa = nullptr;
+//		for(x = 0; x < aaHighestID; x++){
+//			if(AA_Actions[x][0].spell_id || AA_Actions[x][0].action){ //if there's an action or spell associated we assume it's a valid
+//				val = 0;					//and assume if they don't have a value for the first rank then it isn't valid for any rank
+//				saa = nullptr;
+//				val = c->GetAA(x);
+//				if(val){
+//					saa = zone->FindAA(x);
+//					c->Message(10, "%d: %s %d",  x, saa->name, val);
+//				}
+//			}
+//		}
+//	}
+//	else if(!strcasecmp(sep->arg[1], "time")){
+//		int ability = atoi(sep->arg[2]);
+//		if(c->GetAA(ability)){
+//			int remain = c->GetPTimers().GetRemainingTime(pTimerAAStart + ability);
+//			if(remain)
+//				c->Message(10, "You may use that ability in %d minutes and %d seconds.",  (remain/60), (remain%60));
+//			else
+//				c->Message(10, "You may use that ability now.");
+//		}
+//		else{
+//			c->Message(10, "You do not have access to that ability.");
+//		}
+//	}
+//	else
+//	{
+//		c->ActivateAA((aaID) atoi(sep->arg[1]));
+//	}
 }
 
 void command_traindisc(Client *c, const Seperator *sep)

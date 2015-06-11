@@ -2466,7 +2466,8 @@ namespace RoF2
 		outapp->WriteUInt32(emu->lastlogin);
 		outapp->WriteUInt32(emu->timePlayedMin);
 		outapp->WriteUInt32(emu->timeentitledonaccount);
-		outapp->WriteUInt32(0x0007ffff);		// Expansion bitmask
+		outapp->WriteUInt32(emu->expansions);
+		//outapp->WriteUInt32(0x0007ffff);		// Expansion bitmask
 
 		outapp->WriteUInt32(structs::MAX_PP_LANGUAGE);
 

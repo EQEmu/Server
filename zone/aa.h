@@ -2137,17 +2137,6 @@ struct AALevelCost_Struct
 	uint32 Cost;
 };
 
-//assumes that no activatable aa.has more than 5 ranks
-#define MAX_AA_ACTION_RANKS 20
-extern AA_DBAction AA_Actions[aaHighestID][MAX_AA_ACTION_RANKS];	//[aaid][rank]
-extern std::map<uint16, AA_SwarmPet> AA_SwarmPets;	//key=spell_id
-
-#define AA_Choose3(val, v1, v2, v3) (val==1?v1:(val==2?v2:v3))
-
-extern std::map<uint32,SendAA_Struct*>aas_send;
-extern std::map<uint32, std::map<uint32, AA_Ability> > aa_effects;
-extern std::map<uint32, AALevelCost_Struct> AARequiredLevelAndCost;
-
 enum {	//values of AA_Action.action
 	aaActionActivate = 0,
 	aaActionSetEXP = 1,

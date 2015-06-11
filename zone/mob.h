@@ -958,7 +958,8 @@ public:
 
 	//aa new
 	uint32 GetAA(uint32 rank_id) const;
-	bool SetAA(uint32 rank_id, uint32 new_value);
+	bool SetAA(uint32 rank_id, uint32 new_value, uint32 charges = 0);
+	void ClearAAs() { aa_ranks.clear(); }
 	bool CanUseAlternateAdvancementRank(AA::Rank *rank);
 	bool CanPurchaseAlternateAdvancementRank(AA::Rank *ran);
 
@@ -1316,7 +1317,7 @@ protected:
 	bool bEnraged;
 	bool destructibleobject;
 
-	std::unordered_map<uint32, uint32> aa_ranks;
+	std::unordered_map<uint32, std::pair<uint32, uint32>> aa_ranks;
 
 private:
 	void _StopSong(); //this is not what you think it is

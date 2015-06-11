@@ -448,8 +448,6 @@ public:
 	bool IsBotWISCaster() { return (GetClass() == CLERIC || GetClass() == DRUID || GetClass() == SHAMAN); }
 	bool CanHeal();
 	int GetRawACNoShield(int &shield_ac);
-	void LoadAAs();
-	uint32 GetAA(uint32 aa_id);
 	void ApplyAABonuses(uint32 aaid, uint32 slots, StatBonuses* newbon);
 	bool GetHasBeenSummoned() { return _hasBeenSummoned; }
 	const glm::vec3 GetPreSummonLocation() const { return m_PreSummonLocation; }
