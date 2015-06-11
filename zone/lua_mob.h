@@ -169,7 +169,7 @@ public:
 	bool CastSpell(int spell_id, int target_id, int slot, int cast_time, int mana_cost);
 	bool CastSpell(int spell_id, int target_id, int slot, int cast_time, int mana_cost, int item_slot);
 	bool CastSpell(int spell_id, int target_id, int slot, int cast_time, int mana_cost, int item_slot, int timer, int timer_duration);
-	bool CastSpell(int spell_id, int target_id, int slot, int cast_time, int mana_cost, int item_slot, int timer, int timer_duration, 
+	bool CastSpell(int spell_id, int target_id, int slot, int cast_time, int mana_cost, int item_slot, int timer, int timer_duration,
 		int resist_adjust);
 	bool SpellFinished(int spell_id, Lua_Mob target);
 	bool SpellFinished(int spell_id, Lua_Mob target, int slot);
@@ -352,6 +352,7 @@ public:
 	void BuffFadeBySlot(int slot, bool recalc_bonuses);
 	int CanBuffStack(int spell_id, int caster_level);
 	int CanBuffStack(int spell_id, int caster_level, bool fail_if_overwrite);
+	void SetPseudoRoot(bool in);
 };
 
 #endif

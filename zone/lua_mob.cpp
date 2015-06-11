@@ -1851,6 +1851,10 @@ int Lua_Mob::CanBuffStack(int spell_id, int caster_level, bool fail_if_overwrite
 	return self->CanBuffStack(spell_id, caster_level, fail_if_overwrite);
 }
 
+void Lua_Mob::SetPseudoRoot(bool in) {
+	Lua_Safe_Call_Void();
+	self->SetPseudoRoot(in);
+}
 
 luabind::scope lua_register_mob() {
 	return luabind::class_<Lua_Mob, Lua_Entity>("Mob")
@@ -2168,7 +2172,8 @@ luabind::scope lua_register_mob() {
 		.def("BuffFadeBySlot", (void(Lua_Mob::*)(int))&Lua_Mob::BuffFadeBySlot)
 		.def("BuffFadeBySlot", (void(Lua_Mob::*)(int,bool))&Lua_Mob::BuffFadeBySlot)
 		.def("CanBuffStack", (int(Lua_Mob::*)(int,int))&Lua_Mob::CanBuffStack)
-		.def("CanBuffStack", (int(Lua_Mob::*)(int,int,bool))&Lua_Mob::CanBuffStack);
+		.def("CanBuffStack", (int(Lua_Mob::*)(int,int,bool))&Lua_Mob::CanBuffStack)
+		.def("SetPseudoRoot", (void(Lua_Mob::*)(bool))&Lua_Mob::SetPseudoRoot);
 }
 
 luabind::scope lua_register_special_abilities() {
