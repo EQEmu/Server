@@ -784,9 +784,6 @@ public:
 	void SetTitleSuffix(const char *txt);
 	inline uint32 GetMaxAAXP(void) const { return max_AAXP; }
 	inline uint32 GetAAXP() const { return m_pp.expAA; }
-	void SendAATable();
-	int CalcAAReuseTimer(const AA_DBAction *caa);
-	void ActivateAA(aaID activate);
 	void EnableAAEffect(aaEffectType type, uint32 duration = 0);
 	void DisableAAEffect(aaEffectType type);
 	bool CheckAAEffect(aaEffectType type);

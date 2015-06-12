@@ -167,7 +167,6 @@ int command_init(void) {
 		command_add("aggro", "(range) [-v] - Display aggro information for all mobs 'range' distance from your target. -v is verbose faction info.", 80, command_aggro) ||
 		command_add("aggrozone", "[aggro] - Aggro every mob in the zone with X aggro. Default is 0. Not recommend if you're not invulnerable.", 100, command_aggrozone) ||
 		command_add("ai", "[factionid/spellslist/con/guard/roambox/stop/start] - Modify AI on NPC target", 100, command_ai) ||
-		command_add("altactivate",  "[argument] - activates alternate advancement abilities, use altactivate help for more information",  0, command_altactivate) ||
 		command_add("appearance", "[type] [value] - Send an appearance packet for you or your target", 150, command_appearance) ||
 		command_add("attack", "[targetname] - Make your NPC target attack targetname", 150, command_attack) ||
 		command_add("augmentitem",  "Force augments an item. Must have the augment item window open.",  250, command_augmentitem) ||
@@ -273,7 +272,6 @@ int command_init(void) {
 		command_add("los", nullptr,0, command_checklos) ||
 		command_add("makepet", "[level] [class] [race] [texture] - Make a pet", 50, command_makepet) ||
 		command_add("mana", "- Fill your or your target's mana", 50, command_mana) ||
-		command_add("manaburn", "- Use AA Wizard class skill manaburn on target", 10, command_manaburn) ||
 		command_add("maxskills", "Maxes skills for you.",  200, command_max_all_skills) ||
 		command_add("memspell", "[slotid] [spellid] - Memorize spellid in the specified slot", 50, command_memspell) ||
 		command_add("merchant_close_shop",  "Closes a merchant shop",  100, command_merchantcloseshop) ||
@@ -4848,36 +4846,6 @@ void command_zonestatus(Client *c, const Seperator *sep)
 	}
 }
 
-void command_manaburn(Client *c, const Seperator *sep)
-{
-	Mob* target=c->GetTarget();
-
-	if (c->GetTarget() == 0)
-		c->Message(0, "#Manaburn needs a target.");
-	else {
-		int cur_level=c->GetAA(MANA_BURN);//ManaBurn ID
-		if (DistanceSquared(c->GetPosition(), target->GetPosition()) > 200)
-			c->Message(0,"You are too far away from your target.");
-		else {
-			if(cur_level == 1) {
-				if(c->IsAttackAllowed(target))
-				{
-					c->SetMana(0);
-					int nukedmg=(c->GetMana())*2;
-					if (nukedmg>0)
-					{
-						target->Damage(c, nukedmg, 2751, SkillAbjuration/*hackish*/);
-						c->Message(4,"You unleash an enormous blast of magical energies.");
-					}
-					Log.Out(Logs::General, Logs::Normal, "Manaburn request from %s, damage: %d",  c->GetName(), nukedmg);
-				}
-			}
-			else
-				c->Message(0, "You have not learned this skill.");
-		}
-	}
-}
-
 void command_doanim(Client *c, const Seperator *sep)
 {
 	if (!sep->IsNumber(1))
@@ -7682,57 +7650,6 @@ void command_reloadtitles(Client *c, const Seperator *sep)
 	safe_delete(pack);
 	c->Message(15, "Player Titles Reloaded.");
 
-}
-
-//old aa, probably to be removed
-void command_altactivate(Client *c, const Seperator *sep){
-//	if(sep->arg[1][0] == '\0'){
-//		c->Message(10, "Invalid argument, usage:");
-//		c->Message(10, "#altactivate list - lists the AA ID numbers that are available to you");
-//		c->Message(10, "#altactivate time [argument] - returns the time left until you can use the AA with the ID that matches the argument.");
-//		c->Message(10, "#altactivate [argument] - activates the AA with the ID that matches the argument.");
-//		return;
-//	}
-//	if(!strcasecmp(sep->arg[1], "help")){
-//		c->Message(10, "Usage:");
-//		c->Message(10, "#altactivate list - lists the AA ID numbers that are available to you");
-//		c->Message(10, "#altactivate time [argument] - returns the time left until you can use the AA with the ID that matches the argument.");
-//		c->Message(10, "#altactivate [argument] - activates the AA with the ID that matches the argument.");
-//		return;
-//	}
-//	if(!strcasecmp(sep->arg[1], "list")){
-//		c->Message(10, "You have access to the following AA Abilities:");
-//		int x, val;
-//		SendAA_Struct* saa = nullptr;
-//		for(x = 0; x < aaHighestID; x++){
-//			if(AA_Actions[x][0].spell_id || AA_Actions[x][0].action){ //if there's an action or spell associated we assume it's a valid
-//				val = 0;					//and assume if they don't have a value for the first rank then it isn't valid for any rank
-//				saa = nullptr;
-//				val = c->GetAA(x);
-//				if(val){
-//					saa = zone->FindAA(x);
-//					c->Message(10, "%d: %s %d",  x, saa->name, val);
-//				}
-//			}
-//		}
-//	}
-//	else if(!strcasecmp(sep->arg[1], "time")){
-//		int ability = atoi(sep->arg[2]);
-//		if(c->GetAA(ability)){
-//			int remain = c->GetPTimers().GetRemainingTime(pTimerAAStart + ability);
-//			if(remain)
-//				c->Message(10, "You may use that ability in %d minutes and %d seconds.",  (remain/60), (remain%60));
-//			else
-//				c->Message(10, "You may use that ability now.");
-//		}
-//		else{
-//			c->Message(10, "You do not have access to that ability.");
-//		}
-//	}
-//	else
-//	{
-//		c->ActivateAA((aaID) atoi(sep->arg[1]));
-//	}
 }
 
 void command_traindisc(Client *c, const Seperator *sep)

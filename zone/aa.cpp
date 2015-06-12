@@ -37,428 +37,6 @@ Copyright (C) 2001-2004 EQEMu Development Team (http://eqemulator.net)
 
 extern QueryServ* QServ;
 
-int Client::CalcAAReuseTimer(const AA_DBAction *caa) {
-
-	if(!caa)
-		return 0;
-
-	int ReuseTime = caa->reuse_time;
-
-	if(ReuseTime > 0)
-	{
-		int ReductionPercentage;
-
-		if(caa->redux_aa > 0 && caa->redux_aa < aaHighestID)
-		{
-			ReductionPercentage = GetAA(caa->redux_aa) * caa->redux_rate;
-
-			if(caa->redux_aa2 > 0 && caa->redux_aa2 < aaHighestID)
-				ReductionPercentage += (GetAA(caa->redux_aa2) * caa->redux_rate2);
-
-			ReuseTime = caa->reuse_time * (100 - ReductionPercentage) / 100;
-		}
-
-	}
-	return ReuseTime;
-}
-
-void Client::ActivateAA(aaID activate){
-//	if(activate < 0 || activate >= aaHighestID)
-//		return;
-//	if(IsStunned() || IsFeared() || IsMezzed() || IsSilenced() || IsPet() || IsSitting() || GetFeigned())
-//		return;
-//
-//	int AATimerID = GetAATimerID(activate);
-//
-//	SendAA_Struct* aa2 = nullptr;
-//	aaID aaid = activate;
-//	uint8 activate_val = GetAA(activate);
-//	//this wasn't taking into acct multi tiered act talents before...
-//	if(activate_val == 0){
-//		aa2 = zone->FindAA(activate);
-//		if(!aa2){
-//			int i;
-//			int a;
-//			for(i=1;i<MAX_AA_ACTION_RANKS;i++){
-//				a = activate - i;
-//				if(a <= 0)
-//					break;
-//
-//				aa2 = zone->FindAA(a);
-//				if(aa2 != nullptr)
-//					break;
-//			}
-//		}
-//		if(aa2){
-//			aaid = (aaID) aa2->id;
-//			activate_val = GetAA(aa2->id);
-//		}
-//	}
-//
-//	if (activate_val == 0){
-//		return;
-//	}
-//
-//	if(aa2)
-//	{
-//		if(aa2->account_time_required)
-//		{
-//			if((Timer::GetTimeSeconds() + account_creation) < aa2->account_time_required)
-//			{
-//				return;
-//			}
-//		}
-//	}
-//
-//	if(!p_timers.Expired(&database, AATimerID + pTimerAAStart))
-//	{
-//		uint32 aaremain = p_timers.GetRemainingTime(AATimerID + pTimerAAStart);
-//		uint32 aaremain_hr = aaremain / (60 * 60);
-//		uint32 aaremain_min = (aaremain / 60) % 60;
-//		uint32 aaremain_sec = aaremain % 60;
-//
-//		if(aa2) {
-//			if (aaremain_hr >= 1)	//1 hour or more
-//				Message(13, "You can use the ability %s again in %u hour(s) %u minute(s) %u seconds",
-//				aa2->name, aaremain_hr, aaremain_min, aaremain_sec);
-//			else	//less than an hour
-//				Message(13, "You can use the ability %s again in %u minute(s) %u seconds",
-//				aa2->name, aaremain_min, aaremain_sec);
-//		} else {
-//			if (aaremain_hr >= 1)	//1 hour or more
-//				Message(13, "You can use this ability again in %u hour(s) %u minute(s) %u seconds",
-//				aaremain_hr, aaremain_min, aaremain_sec);
-//			else	//less than an hour
-//				Message(13, "You can use this ability again in %u minute(s) %u seconds",
-//				aaremain_min, aaremain_sec);
-//		}
-//		return;
-//	}
-//
-//	if(activate_val > MAX_AA_ACTION_RANKS)
-//		activate_val = MAX_AA_ACTION_RANKS;
-//	activate_val--;		//to get array index.
-//
-//	//get our current node, now that the indices are well bounded
-//	const AA_DBAction *caa = &AA_Actions[aaid][activate_val];
-//
-//	if((aaid == aaImprovedHarmTouch || aaid == aaLeechTouch) && !p_timers.Expired(&database, pTimerHarmTouch)){
-//		Message(13,"Ability recovery time not yet met.");
-//		return;
-//	}
-//
-//	//everything should be configured out now
-//
-//	uint16 target_id = 0;
-//
-//	//figure out our target
-//	switch(caa->target) {
-//		case aaTargetUser:
-//		case aaTargetGroup:
-//			target_id = GetID();
-//			break;
-//		case aaTargetCurrent:
-//		case aaTargetCurrentGroup:
-//			if(GetTarget() == nullptr) {
-//				Message_StringID(MT_DefaultText, AA_NO_TARGET);	//You must first select a target for this ability!
-//				p_timers.Clear(&database, AATimerID + pTimerAAStart);
-//				return;
-//			}
-//			target_id = GetTarget()->GetID();
-//			break;
-//		case aaTargetPet:
-//			if(GetPet() == nullptr) {
-//				Message(0, "A pet is required for this skill.");
-//				return;
-//			}
-//			target_id = GetPetID();
-//			break;
-//	}
-//
-//	//handle non-spell action
-//	if(caa->action != aaActionNone) {
-//		if(caa->mana_cost > 0) {
-//			if(GetMana() < caa->mana_cost) {
-//				Message_StringID(13, INSUFFICIENT_MANA);
-//				return;
-//			}
-//			SetMana(GetMana() - caa->mana_cost);
-//		}
-//		if(caa->reuse_time > 0)
-//		{
-//			uint32 timer_base = CalcAAReuseTimer(caa);
-//			if(activate == aaImprovedHarmTouch || activate == aaLeechTouch)
-//			{
-//				p_timers.Start(pTimerHarmTouch, HarmTouchReuseTime);
-//			}
-//			p_timers.Start(AATimerID + pTimerAAStart, timer_base);
-//			SendAATimer(AATimerID, 0, 0);
-//		}
-//		HandleAAAction(aaid);
-//	}
-//
-//	//cast the spell, if we have one
-//	if(caa->spell_id > 0 && caa->spell_id < SPDAT_RECORDS) {
-//
-//		if(caa->reuse_time > 0)
-//		{
-//			uint32 timer_base = CalcAAReuseTimer(caa);
-//			SendAATimer(AATimerID, 0, 0);
-//			p_timers.Start(AATimerID + pTimerAAStart, timer_base);
-//			if(activate == aaImprovedHarmTouch || activate == aaLeechTouch)
-//			{
-//				p_timers.Start(pTimerHarmTouch, HarmTouchReuseTime);
-//			}
-//			// Bards can cast instant cast AAs while they are casting another song
-//			if (spells[caa->spell_id].cast_time == 0 && GetClass() == BARD && IsBardSong(casting_spell_id)) {
-//				if(!SpellFinished(caa->spell_id, entity_list.GetMob(target_id), 10, -1, -1, spells[caa->spell_id].ResistDiff, false)) {
-//					//Reset on failed cast
-//					SendAATimer(AATimerID, 0, 0xFFFFFF);
-//					Message_StringID(15,ABILITY_FAILED);
-//					p_timers.Clear(&database, AATimerID + pTimerAAStart);
-//					return;
-//				}
-//			} else {
-//				if (!CastSpell(caa->spell_id, target_id, USE_ITEM_SPELL_SLOT, -1, -1, 0, -1, AATimerID + pTimerAAStart, timer_base, 1)) {
-//					//Reset on failed cast
-//					SendAATimer(AATimerID, 0, 0xFFFFFF);
-//					Message_StringID(15,ABILITY_FAILED);
-//					p_timers.Clear(&database, AATimerID + pTimerAAStart);
-//					return;
-//				}
-//			}
-//		}
-//		else
-//		{
-//			if(!CastSpell(caa->spell_id, target_id))
-//				return;
-//		}
-//	}
-//	// Check if AA is expendable
-//	if (aas_send[activate - activate_val]->special_category == 7) {
-//
-//		// Add the AA cost to the extended profile to track overall total
-//		m_epp.expended_aa += aas_send[activate]->cost;
-//
-//		SetAA(activate, 0);
-//
-//		SaveAA(); /* Save Character AA */
-//		SendAA(activate);
-//		SendAATable();
-//	}
-}
-
-void Client::HandleAAAction(aaID activate) {
-//	if(activate < 0 || activate >= aaHighestID)
-//		return;
-//
-//	uint8 activate_val = GetAA(activate);
-//
-//	if (activate_val == 0)
-//		return;
-//
-//	if(activate_val > MAX_AA_ACTION_RANKS)
-//		activate_val = MAX_AA_ACTION_RANKS;
-//	activate_val--;		//to get array index.
-//
-//	//get our current node, now that the indices are well bounded
-//	const AA_DBAction *caa = &AA_Actions[activate][activate_val];
-//
-//	uint16 timer_id = 0;
-//	uint16 timer_duration = caa->duration;
-//	aaTargetType target = aaTargetUser;
-//
-//	uint16 spell_id = SPELL_UNKNOWN;	//gets cast at the end if not still unknown
-//
-//	switch(caa->action) {
-//		case aaActionAETaunt:
-//			entity_list.AETaunt(this);
-//			break;
-//
-//		case aaActionFlamingArrows:
-//			//toggle it
-//			if(CheckAAEffect(aaEffectFlamingArrows))
-//				EnableAAEffect(aaEffectFlamingArrows);
-//			else
-//				DisableAAEffect(aaEffectFlamingArrows);
-//			break;
-//
-//		case aaActionFrostArrows:
-//			if(CheckAAEffect(aaEffectFrostArrows))
-//				EnableAAEffect(aaEffectFrostArrows);
-//			else
-//				DisableAAEffect(aaEffectFrostArrows);
-//			break;
-//
-//		case aaActionRampage:
-//			EnableAAEffect(aaEffectRampage, 10);
-//			break;
-//
-//		case aaActionSharedHealth:
-//			if(CheckAAEffect(aaEffectSharedHealth))
-//				EnableAAEffect(aaEffectSharedHealth);
-//			else
-//				DisableAAEffect(aaEffectSharedHealth);
-//			break;
-//
-//		case aaActionCelestialRegen: {
-//			//special because spell_id depends on a different AA
-//			switch (GetAA(aaCelestialRenewal)) {
-//				case 1:
-//					spell_id = 3250;
-//					break;
-//				case 2:
-//					spell_id = 3251;
-//					break;
-//				default:
-//					spell_id = 2740;
-//					break;
-//			}
-//			target = aaTargetCurrent;
-//			break;
-//		}
-//
-//		case aaActionDireCharm: {
-//			//special because spell_id depends on class
-//			switch (GetClass())
-//			{
-//				case DRUID:
-//					spell_id = 2760;	//2644?
-//					break;
-//				case NECROMANCER:
-//					spell_id = 2759;	//2643?
-//					break;
-//				case ENCHANTER:
-//					spell_id = 2761;	//2642?
-//					break;
-//			}
-//			target = aaTargetCurrent;
-//			break;
-//		}
-//
-//		case aaActionImprovedFamiliar: {
-//			//Spell IDs might be wrong...
-//			if (GetAA(aaAllegiantFamiliar))
-//				spell_id = 3264;	//1994?
-//			else
-//				spell_id = 2758;	//2155?
-//			break;
-//		}
-//
-//		case aaActionActOfValor:
-//			if(GetTarget() != nullptr) {
-//				int curhp = GetTarget()->GetHP();
-//				target = aaTargetCurrent;
-//				GetTarget()->HealDamage(curhp, this);
-//				Death(this, 0, SPELL_UNKNOWN, SkillHandtoHand);
-//			}
-//			break;
-//
-//		case aaActionSuspendedMinion:
-//			if (GetPet()) {
-//				target = aaTargetPet;
-//				switch (GetAA(aaSuspendedMinion)) {
-//					case 1:
-//						spell_id = 3248;
-//						break;
-//					case 2:
-//						spell_id = 3249;
-//						break;
-//				}
-//				//do we really need to cast a spell?
-//
-//				Message(0,"You call your pet to your side.");
-//				GetPet()->WipeHateList();
-//				GetPet()->GMMove(GetX(),GetY(),GetZ());
-//				if (activate_val > 1)
-//					entity_list.ClearFeignAggro(GetPet());
-//			} else {
-//				Message(0,"You have no pet to call.");
-//			}
-//			break;
-//
-//		case aaActionEscape:
-//			Escape();
-//			break;
-//
-//		// Don't think this code is used any longer for Bestial Alignment as the aa.has a spell_id and no nonspell_action.
-//		case aaActionBeastialAlignment:
-//			switch(GetBaseRace()) {
-//				case BARBARIAN:
-//					spell_id = AA_Choose3(activate_val, 4521, 4522, 4523);
-//					break;
-//				case TROLL:
-//					spell_id = AA_Choose3(activate_val, 4524, 4525, 4526);
-//					break;
-//				case OGRE:
-//					spell_id = AA_Choose3(activate_val, 4527, 4527, 4529);
-//					break;
-//				case IKSAR:
-//					spell_id = AA_Choose3(activate_val, 4530, 4531, 4532);
-//					break;
-//				case VAHSHIR:
-//					spell_id = AA_Choose3(activate_val, 4533, 4534, 4535);
-//					break;
-//			}
-//
-//		case aaActionLeechTouch:
-//			target = aaTargetCurrent;
-//			spell_id = SPELL_HARM_TOUCH2;
-//			EnableAAEffect(aaEffectLeechTouch, 1000);
-//			break;
-//
-//		case aaActionFadingMemories:
-//			// Do nothing since spell effect works correctly, but mana isn't used.
-//			break;
-//
-//		default:
-//			Log.Out(Logs::General, Logs::Error, "Unknown AA nonspell action type %d", caa->action);
-//			return;
-//	}
-//
-//
-//	uint16 target_id = 0;
-//	//figure out our target
-//	switch(target) {
-//		case aaTargetUser:
-//		case aaTargetGroup:
-//			target_id = GetID();
-//			break;
-//		case aaTargetCurrent:
-//		case aaTargetCurrentGroup:
-//			if(GetTarget() == nullptr) {
-//				Message_StringID(MT_DefaultText, AA_NO_TARGET);	//You must first select a target for this ability!
-//				p_timers.Clear(&database, timer_id + pTimerAAEffectStart);
-//				return;
-//			}
-//			target_id = GetTarget()->GetID();
-//			break;
-//		case aaTargetPet:
-//			if(GetPet() == nullptr) {
-//				Message(0, "A pet is required for this skill.");
-//				return;
-//			}
-//			target_id = GetPetID();
-//			break;
-//	}
-//
-//	//cast the spell, if we have one
-//	if(IsValidSpell(spell_id)) {
-//		int aatid = GetAATimerID(activate);
-//		if (!CastSpell(spell_id, target_id, USE_ITEM_SPELL_SLOT, -1, -1, 0, -1, pTimerAAStart + aatid, CalcAAReuseTimer(caa), 1)) {
-//			SendAATimer(aatid, 0, 0xFFFFFF);
-//			Message_StringID(15,ABILITY_FAILED);
-//			p_timers.Clear(&database, pTimerAAStart + aatid);
-//			return;
-//		}
-//	}
-//
-//	//handle the duration timer if we have one.
-//	if(timer_id > 0 && timer_duration > 0) {
-//		p_timers.Start(pTimerAAEffectStart + timer_id, timer_duration);
-//	}
-}
-
 void Mob::TemporaryPets(uint16 spell_id, Mob *targ, const char *name_override, uint32 duration_override, bool followme, bool sticktarg) {
 
 	//It might not be a bad idea to put these into the database, eventually..
@@ -1333,7 +911,7 @@ void Client::SendAlternateAdvancementRank(int aa_id, int level) {
 	aai->max_level = ability->GetMaxLevel(this);
 	aai->prev_id = rank->prev_id;
 
-	if(rank->next && !CanUseAlternateAdvancementRank(rank->next)) {
+	if(rank->next && !CanUseAlternateAdvancementRank(rank->next) || ability->charges > 0) {
 		aai->next_id = -1;
 	} else {
 		aai->next_id = rank->next_id;
@@ -1834,28 +1412,16 @@ bool Mob::CanUseAlternateAdvancementRank(AA::Rank *rank) {
 		return false;
 	}
 
-	// Check for racial/Drakkin blood line AAs
-	//Commented this out for now, will add a drakkin heritage field later
-	//if(ability->category == 8)
-	//{
-	//	uint32 client_race = GetBaseRace();
-	//
-	//	// Drakkin Bloodlines
-	//	if(rank->expansion > 522)
-	//	{
-	//		if(client_race != 522)
-	//			return false;
-	//
-	//		int heritage = this->GetDrakkinHeritage() + 523; // 523 = Drakkin Race(522) + Bloodline
-	//
-	//		if(heritage != rank->expansion)
-	//			return false;
-	//	}
-	//	else if(client_race != rank->expansion)
-	//	{
-	//		return false;
-	//	}
-	//}
+	if(IsClient() && CastToClient()->Admin() < ability->status) {
+		return false;
+	}
+
+	if(GetBaseRace() == 522) {
+		//drakkin_heritage
+		if(!(ability->drakkin_heritage & (1 << GetDrakkinHeritage()))) {
+			return false;
+		}
+	}
 
 	return true;
 }
@@ -1963,7 +1529,7 @@ bool ZoneDatabase::LoadAlternateAdvancementAbilities(std::unordered_map<int, std
 {
 	Log.Out(Logs::General, Logs::Status, "Loading Alternate Advancement Abilities...");
 	abilities.clear();
-	std::string query = "SELECT id, name, category, classes, races, deities, type, charges, grant_only, first_rank_id FROM aa_ability";
+	std::string query = "SELECT id, name, category, classes, races, deities, drakkin_heritage, status, type, charges, grant_only, first_rank_id FROM aa_ability";
 	auto results = QueryDatabase(query);
 	if(results.Success()) {
 		for(auto row = results.begin(); row != results.end(); ++row) {
@@ -1975,10 +1541,12 @@ bool ZoneDatabase::LoadAlternateAdvancementAbilities(std::unordered_map<int, std
 			ability->classes = atoi(row[3]) << 1;
 			ability->races = atoi(row[4]);
 			ability->deities = atoi(row[5]);
-			ability->type = atoi(row[6]);
-			ability->charges = atoi(row[7]);
-			ability->grant_only = atoi(row[8]) != 0 ? true : false;
-			ability->first_rank_id = atoi(row[9]);
+			ability->drakkin_heritage = atoi(row[6]);
+			ability->status = atoi(row[7]);
+			ability->type = atoi(row[8]);
+			ability->charges = atoi(row[9]);
+			ability->grant_only = atoi(row[10]) != 0 ? true : false;
+			ability->first_rank_id = atoi(row[11]);
 			ability->first = nullptr;
 
 			abilities[ability->id] = std::unique_ptr<AA::Ability>(ability);

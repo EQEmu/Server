@@ -49,6 +49,8 @@ public:
 	int classes;
 	int races;
 	int deities;
+	int drakkin_heritage;
+	int status;
 	bool grant_only;
 	int type;
 	int charges;
