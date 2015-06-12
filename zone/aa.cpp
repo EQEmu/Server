@@ -1796,13 +1796,14 @@ void Client::SendAlternateAdvancementPoints() {
 
 	int i = 0;
 	for(auto &aa : zone->aa_abilities) {
-		auto ranks = GetAA(aa.second->first_rank_id);
+		uint32 charges = 0;
+		auto ranks = GetAA(aa.second->first_rank_id, &charges);
 		if(ranks) {
 			AA::Rank *rank = aa.second->GetRankByPointsSpent(ranks);
 			if(rank) {
 				aa2->aa_list[i].AA = rank->id;
 				aa2->aa_list[i].value = ranks;
-				aa2->aa_list[i].charges = 0; // todo send charges
+				aa2->aa_list[i].charges = charges;
 				i++;
 			}
 		}
@@ -1815,6 +1816,65 @@ void Client::SendAlternateAdvancementPoints() {
 }
 
 void Client::PurchaseAlternateAdvancementRank(int rank_id) {
+	AA::Rank *rank = zone->GetAlternateAdvancementRank(rank_id);
+	if(!rank) {
+		return;
+	}
+
+	if(!rank->base_ability) {
+		return;
+	}
+
+	if(!CanPurchaseAlternateAdvancementRank(rank)) {
+		return;
+	}
+	
+	if(rank->base_ability->charges > 0) {
+		SetAA(rank_id, rank->current_value, rank->base_ability->charges);
+	} else {
+		SetAA(rank_id, rank->current_value, 0);
+
+		//if not max then send next aa
+		if(rank->next) {
+			SendAlternateAdvancementRank(rank->base_ability->id, rank->next->current_value);
+		}
+	}
+
+	m_pp.aapoints -= rank->cost;
+	SaveAA();
+
+	SendAlternateAdvancementPoints();
+	SendAlternateAdvancementStats();
+
+	if(rank->prev) {
+		Message_StringID(15, AA_IMPROVE, 
+						 std::to_string(rank->title_sid).c_str(), 
+						 std::to_string(rank->prev->current_value).c_str(), 
+						 std::to_string(rank->cost).c_str(), 
+						 std::to_string(AA_POINTS).c_str());
+
+		//QS stuff broke with new aa, todo: fix later
+		/* QS: Player_Log_AA_Purchases */
+		//		if (RuleB(QueryServ, PlayerLogAAPurchases)){
+		//			std::string event_desc = StringFormat("Ranked AA Purchase :: aa_name:%s aa_id:%i at cost:%i in zoneid:%i instid:%i", aa2->name, aa2->id, real_cost, this->GetZoneID(), this->GetInstanceID());
+		//			QServ->PlayerLogEvent(Player_Log_AA_Purchases, this->CharacterID(), event_desc);
+		//		}
+	} else {
+		Message_StringID(15, AA_GAIN_ABILITY, 
+						 std::to_string(rank->title_sid).c_str(), 
+						 std::to_string(rank->cost).c_str(), 
+						 std::to_string(AA_POINTS).c_str());
+		//QS stuff broke with new aa, todo: fix later
+		/* QS: Player_Log_AA_Purchases */
+		//		if (RuleB(QueryServ, PlayerLogAAPurchases)){
+		//			std::string event_desc = StringFormat("Initial AA Purchase :: aa_name:%s aa_id:%i at cost:%i in zoneid:%i instid:%i", aa2->name, aa2->id, real_cost, this->GetZoneID(), this->GetInstanceID());
+		//			QServ->PlayerLogEvent(Player_Log_AA_Purchases, this->CharacterID(), event_desc);
+		//		}
+	}
+
+	CalcBonuses();
+	if(title_manager.IsNewAATitleAvailable(m_pp.aapoints_spent, GetBaseClass()))
+		NotifyNewTitlesAvailable();
 }
 
 bool ZoneDatabase::LoadAlternateAdvancement(Client *c) {
@@ -1872,7 +1932,7 @@ AA::Rank *Zone::GetAlternateAdvancementRank(int rank_id) {
 	return nullptr;
 }
 
-uint32 Mob::GetAA(uint32 rank_id) const {
+uint32 Mob::GetAA(uint32 rank_id, uint32 *charges) const {
 	if(zone) {
 		AA::Ability *ability = zone->GetAlternateAdvancementAbilityByRank(rank_id);
 		if(!ability)
@@ -1880,6 +1940,9 @@ uint32 Mob::GetAA(uint32 rank_id) const {
 
 		auto iter = aa_ranks.find(ability->id);
 		if(iter != aa_ranks.end()) {
+			if(charges) {
+				*charges = iter->second.second;
+			}
 			return iter->second.first;
 		}
 	}
@@ -1912,10 +1975,6 @@ bool Mob::CanUseAlternateAdvancementRank(AA::Rank *rank) {
 		return false;
 
 	if(!ability->classes & (1 << GetClass())) {
-		return false;
-	}
-
-	if(!(RuleI(World, ExpansionSettings) & (1 << rank->expansion))) {
 		return false;
 	}
 
@@ -1965,14 +2024,50 @@ bool Mob::CanPurchaseAlternateAdvancementRank(AA::Rank *rank) {
 		return false;
 	}
 
-	//check that we have previous rank already
+	if(!(RuleI(World, ExpansionSettings) & (1 << rank->expansion))) {
+		return false;
+	}
+
+	//check level req
+	if(rank->level_req > GetLevel()) {
+		return false;
+	}
+
+	uint32 current_charges = 0;
+	auto points = GetAA(rank->id, &current_charges);
+
+	//check that we are on previous rank already (if exists)
 	if(rank->prev) {
-		//rank->prev->
+		if(points != rank->prev->current_value) {
+			return false;
+		}
+	}
+
+	//if expendable only let us purchase if we have no charges already
+	//not quite sure on how this functions client side atm 
+	//I intend to look into it later to make sure the behavior is right
+	if(ability->charges > 0 && current_charges > 0) {
+		return false;
 	}
 
 	//check prereqs
+	for(auto &prereq : rank->prereqs) {
+		AA::Ability *prereq_ability = zone->GetAlternateAdvancementAbility(prereq.aa_id);
 
-	//check price
+		if(prereq_ability) {
+			auto ranks = GetAA(prereq_ability->first_rank_id);
+			if(ranks < prereq.points) {
+				return false;
+			}
+		}
+	}
+
+	//check price, if client
+	if(IsClient()) {
+		if(rank->cost > CastToClient()->GetAAPoints()) {
+			return false;
+		}
+	}
 
 	return true;
 }

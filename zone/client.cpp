@@ -523,49 +523,43 @@ void Client::ReportConnectingState() {
 	};
 }
 
-bool Client::SaveAA(){
-	//aa old
-	//int first_entry = 0;
-	//std::string rquery;
-	///* Save Player AA */
-	//int spentpoints = 0;
-	//for (int a = 0; a < MAX_PP_AA_ARRAY; a++) {
-	//	uint32 points = aa[a]->value;
-	//	if (points > HIGHEST_AA_VALUE) {
-	//		aa[a]->value = HIGHEST_AA_VALUE;
-	//		points = HIGHEST_AA_VALUE;
-	//	}
-	//	if (points > 0) {
-	//		SendAA_Struct* curAA = zone->FindAA(aa[a]->AA - aa[a]->value + 1);
-	//		if (curAA) {
-	//			for (int rank = 0; rank<points; rank++) {
-	//				std::map<uint32, AALevelCost_Struct>::iterator RequiredLevel = AARequiredLevelAndCost.find(aa[a]->AA - aa[a]->value + 1 + rank);
-	//				if (RequiredLevel != AARequiredLevelAndCost.end()) {
-	//					spentpoints += RequiredLevel->second.Cost;
-	//				}
-	//				else
-	//					spentpoints += (curAA->cost + (curAA->cost_inc * rank));
-	//			}
-	//		}
-	//	}
-	//}
-	//m_pp.aapoints_spent = spentpoints + m_epp.expended_aa;
-	//int highest = 0;
-	//for (int a = 0; a < MAX_PP_AA_ARRAY; a++) {
-	//	if (aa[a]->AA > 0) { // those with value 0 will be cleaned up on next load
-	//		if (first_entry != 1){
-	//			rquery = StringFormat("REPLACE INTO `character_alternate_abilities` (id, slot, aa_id, aa_value, charges)"
-	//				" VALUES (%u, %u, %u, %u, %u)", character_id, a, aa[a]->AA, aa[a]->value, aa[a]->charges);
-	//			first_entry = 1;
-	//		} else {
-	//			rquery = rquery + StringFormat(", (%u, %u, %u, %u, %u)", character_id, a, aa[a]->AA, aa[a]->value, aa[a]->charges);
-	//		}
-	//		highest = a;
-	//	}
-	//}
-	//auto results = database.QueryDatabase(rquery);
-	///* This is another part of the hack to clean up holes left by expendable AAs */
-	//rquery = StringFormat("DELETE FROM `character_alternate_abilities` WHERE `id` = %u AND `slot` > %d", character_id, highest);
+bool Client::SaveAA() {
+	std::string dquery;
+	std::string iquery;
+	int spentpoints = 0;
+	int i = 0;
+	for(auto &rank : aa_ranks) {
+		AA::Ability *ability = zone->GetAlternateAdvancementAbility(rank.first);
+		if(!ability)
+			continue;
+
+		if(rank.second.first > 0) {
+			AA::Rank *r = ability->GetRankByPointsSpent(rank.second.first);
+
+			if(!r)
+				continue;
+
+			spentpoints += r->total_cost;
+
+			if(i == 0) {
+				iquery = StringFormat("INSERT INTO `character_alternate_abilities` (id, slot, aa_id, aa_value, charges)"
+									  " VALUES (%u, %u, %u, %u, %u)", character_id, i, ability->first_rank_id, rank.second.first, rank.second.second);
+			} else {
+				iquery += StringFormat(", (%u, %u, %u, %u, %u)", character_id, i, ability->first_rank_id, rank.second.first, rank.second.second);
+			}
+			i++;
+		}
+	}
+
+	m_pp.aapoints_spent = spentpoints + m_epp.expended_aa;
+
+	dquery = StringFormat("DELETE FROM `character_alternate_abilities` WHERE id=%u", character_id);
+	database.QueryDatabase(dquery);
+
+	if(iquery.length() > 0) {
+		database.QueryDatabase(iquery);
+	}
+
 	return true;
 }
 

@@ -957,7 +957,7 @@ public:
 	void Tune_FindAvoidanceByHitChance(Mob* defender, Mob *attacker, float hit_chance, int interval, int max_loop, int acc_override, int Msg = 0);
 
 	//aa new
-	uint32 GetAA(uint32 rank_id) const;
+	uint32 GetAA(uint32 rank_id, uint32 *charges = nullptr) const;
 	bool SetAA(uint32 rank_id, uint32 new_value, uint32 charges = 0);
 	void ClearAAs() { aa_ranks.clear(); }
 	bool CanUseAlternateAdvancementRank(AA::Rank *rank);
