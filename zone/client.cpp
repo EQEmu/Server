@@ -456,7 +456,7 @@ void Client::SendZoneInPackets()
 	}
 	safe_delete(outapp);
 
-	SendAATimers();
+	SendAlternateAdvancementTimers();
 
 	outapp = new EQApplicationPacket(OP_RaidUpdate, sizeof(ZoneInSendName_Struct));
 	ZoneInSendName_Struct* zonesendname = (ZoneInSendName_Struct*)outapp->pBuffer;

@@ -37,32 +37,6 @@ Copyright (C) 2001-2004 EQEMu Development Team (http://eqemulator.net)
 
 extern QueryServ* QServ;
 
-int Client::GetAATimerID(aaID activate)
-{
-	//SendAA_Struct* aa2 = zone->FindAA(activate);
-	//
-	//if(!aa2)
-	//{
-	//	for(int i = 1;i < MAX_AA_ACTION_RANKS; ++i)
-	//	{
-	//		int a = activate - i;
-	//
-	//		if(a <= 0)
-	//			break;
-	//
-	//		aa2 = zone->FindAA(a);
-	//
-	//		if(aa2 != nullptr)
-	//			break;
-	//	}
-	//}
-	//
-	//if(aa2)
-	//	return aa2->spell_type;
-
-	return 0;
-}
-
 int Client::CalcAAReuseTimer(const AA_DBAction *caa) {
 
 	if(!caa)
@@ -930,39 +904,6 @@ bool Client::CheckAAEffect(aaEffectType type) {
 	return(false);
 }
 
-void Client::SendAATimer(uint32 ability, uint32 begin, uint32 end) {
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_AAAction,sizeof(UseAA_Struct));
-	UseAA_Struct* uaaout = (UseAA_Struct*)outapp->pBuffer;
-	uaaout->ability = ability;
-	uaaout->begin = begin;
-	uaaout->end = end;
-	QueuePacket(outapp);
-	safe_delete(outapp);
-}
-
-//sends all AA timers.
-void Client::SendAATimers() {
-	//we dont use SendAATimer because theres no reason to allocate the EQApplicationPacket every time
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_AAAction,sizeof(UseAA_Struct));
-	UseAA_Struct* uaaout = (UseAA_Struct*)outapp->pBuffer;
-
-	PTimerList::iterator c,e;
-	c = p_timers.begin();
-	e = p_timers.end();
-	for(; c != e; ++c) {
-		PersistentTimer *cur = c->second;
-		if(cur->GetType() < pTimerAAStart || cur->GetType() > pTimerAAEnd)
-			continue;	//not an AA timer
-		//send timer
-		uaaout->begin = cur->GetStartTime();
-		uaaout->end = static_cast<uint32>(time(nullptr));
-		uaaout->ability = cur->GetType() - pTimerAAStart; // uuaaout->ability is really a shared timer number
-		QueuePacket(outapp);
-	}
-
-	safe_delete(outapp);
-}
-
 void Client::ResetAA(){
 //	RefundAA();
 //	uint32 i;
@@ -1457,6 +1398,39 @@ void Client::SendAlternateAdvancementPoints() {
 	safe_delete(outapp);
 }
 
+void Client::SendAlternateAdvancementTimer(int ability, int begin, int end) {
+	EQApplicationPacket* outapp = new EQApplicationPacket(OP_AAAction, sizeof(UseAA_Struct));
+	UseAA_Struct* uaaout = (UseAA_Struct*)outapp->pBuffer;
+	uaaout->ability = ability;
+	uaaout->begin = begin;
+	uaaout->end = end;
+	QueuePacket(outapp);
+	safe_delete(outapp);
+}
+
+//sends all AA timers.
+void Client::SendAlternateAdvancementTimers() {
+	//we dont use SendAATimer because theres no reason to allocate the EQApplicationPacket every time
+	EQApplicationPacket* outapp = new EQApplicationPacket(OP_AAAction, sizeof(UseAA_Struct));
+	UseAA_Struct* uaaout = (UseAA_Struct*)outapp->pBuffer;
+
+	PTimerList::iterator c, e;
+	c = p_timers.begin();
+	e = p_timers.end();
+	for(; c != e; ++c) {
+		PersistentTimer *cur = c->second;
+		if(cur->GetType() < pTimerAAStart || cur->GetType() > pTimerAAEnd)
+			continue;	//not an AA timer
+		//send timer
+		uaaout->begin = cur->GetStartTime();
+		uaaout->end = static_cast<uint32>(time(nullptr));
+		uaaout->ability = cur->GetType() - pTimerAAStart; // uuaaout->ability is really a shared timer number
+		QueuePacket(outapp);
+	}
+
+	safe_delete(outapp);
+}
+
 void Client::PurchaseAlternateAdvancementRank(int rank_id) {
 	AA::Rank *rank = zone->GetAlternateAdvancementRank(rank_id);
 	if(!rank) {
@@ -1495,23 +1469,21 @@ void Client::PurchaseAlternateAdvancementRank(int rank_id) {
 						 std::to_string(rank->cost).c_str(), 
 						 std::to_string(AA_POINTS).c_str());
 
-		//QS stuff broke with new aa, todo: fix later
 		/* QS: Player_Log_AA_Purchases */
-		//		if (RuleB(QueryServ, PlayerLogAAPurchases)){
-		//			std::string event_desc = StringFormat("Ranked AA Purchase :: aa_name:%s aa_id:%i at cost:%i in zoneid:%i instid:%i", aa2->name, aa2->id, real_cost, this->GetZoneID(), this->GetInstanceID());
-		//			QServ->PlayerLogEvent(Player_Log_AA_Purchases, this->CharacterID(), event_desc);
-		//		}
+		if (RuleB(QueryServ, PlayerLogAAPurchases)){
+			std::string event_desc = StringFormat("Ranked AA Purchase :: aa_id:%i at cost:%i in zoneid:%i instid:%i", rank->id, rank->cost, GetZoneID(), GetInstanceID());
+			QServ->PlayerLogEvent(Player_Log_AA_Purchases, CharacterID(), event_desc);
+		}
 	} else {
 		Message_StringID(15, AA_GAIN_ABILITY, 
 						 std::to_string(rank->title_sid).c_str(), 
 						 std::to_string(rank->cost).c_str(), 
 						 std::to_string(AA_POINTS).c_str());
-		//QS stuff broke with new aa, todo: fix later
 		/* QS: Player_Log_AA_Purchases */
-		//		if (RuleB(QueryServ, PlayerLogAAPurchases)){
-		//			std::string event_desc = StringFormat("Initial AA Purchase :: aa_name:%s aa_id:%i at cost:%i in zoneid:%i instid:%i", aa2->name, aa2->id, real_cost, this->GetZoneID(), this->GetInstanceID());
-		//			QServ->PlayerLogEvent(Player_Log_AA_Purchases, this->CharacterID(), event_desc);
-		//		}
+		if (RuleB(QueryServ, PlayerLogAAPurchases)){
+			std::string event_desc = StringFormat("Initial AA Purchase :: aa_id:%i at cost:%i in zoneid:%i instid:%i", rank->id, rank->cost, GetZoneID(), GetInstanceID());
+			QServ->PlayerLogEvent(Player_Log_AA_Purchases, CharacterID(), event_desc);
+		}
 	}
 
 	CalcBonuses();
@@ -1557,27 +1529,130 @@ void Client::IncrementAlternateAdvancementRank(int rank_id) {
 						 std::to_string(rank->cost).c_str(),
 						 std::to_string(AA_POINTS).c_str());
 
-		//QS stuff broke with new aa, todo: fix later
 		/* QS: Player_Log_AA_Purchases */
-		//		if (RuleB(QueryServ, PlayerLogAAPurchases)){
-		//			std::string event_desc = StringFormat("Ranked AA Purchase :: aa_name:%s aa_id:%i at cost:%i in zoneid:%i instid:%i", aa2->name, aa2->id, real_cost, this->GetZoneID(), this->GetInstanceID());
-		//			QServ->PlayerLogEvent(Player_Log_AA_Purchases, this->CharacterID(), event_desc);
-		//		}
+		if (RuleB(QueryServ, PlayerLogAAPurchases)){
+			std::string event_desc = StringFormat("Ranked AA Purchase :: aa_id:%i at cost:%i in zoneid:%i instid:%i", rank->id, rank->cost, GetZoneID(), GetInstanceID());
+			QServ->PlayerLogEvent(Player_Log_AA_Purchases, CharacterID(), event_desc);
+		}
 	}
 	else {
 		Message_StringID(15, AA_GAIN_ABILITY,
 						 std::to_string(rank->title_sid).c_str(),
 						 std::to_string(rank->cost).c_str(),
 						 std::to_string(AA_POINTS).c_str());
-		//QS stuff broke with new aa, todo: fix later
+
 		/* QS: Player_Log_AA_Purchases */
-		//		if (RuleB(QueryServ, PlayerLogAAPurchases)){
-		//			std::string event_desc = StringFormat("Initial AA Purchase :: aa_name:%s aa_id:%i at cost:%i in zoneid:%i instid:%i", aa2->name, aa2->id, real_cost, this->GetZoneID(), this->GetInstanceID());
-		//			QServ->PlayerLogEvent(Player_Log_AA_Purchases, this->CharacterID(), event_desc);
-		//		}
+		if (RuleB(QueryServ, PlayerLogAAPurchases)){
+			std::string event_desc = StringFormat("Initial AA Purchase :: aa_id:%i at cost:%i in zoneid:%i instid:%i", rank->id, rank->cost, GetZoneID(), GetInstanceID());
+			QServ->PlayerLogEvent(Player_Log_AA_Purchases, this->CharacterID(), event_desc);
+		}
 	}
 
 	CalcBonuses();
+}
+
+void Client::ActivateAlternateAdvancementAbility(int rank_id, int target_id) {
+	AA::Rank *rank = zone->GetAlternateAdvancementRank(rank_id);
+	if(!rank) {
+		return;
+	}
+
+	AA::Ability *ability = rank->base_ability;
+	if(!ability) {
+		return;
+	}
+
+	if(!IsValidSpell(rank->spell)) {
+		return;
+	}
+	
+	if(!CanUseAlternateAdvancementRank(rank)) {
+		return;
+	}
+
+	//make sure it's activateable type
+	if(!(ability->type == 3 || ability->type == 4)) {
+		return;
+	}
+
+	//check cooldown
+	if(!p_timers.Expired(&database, rank->spell_type + pTimerAAStart)) {
+		uint32 aaremain = p_timers.GetRemainingTime(rank->spell_type + pTimerAAStart);
+		uint32 aaremain_hr = aaremain / (60 * 60);
+		uint32 aaremain_min = (aaremain / 60) % 60;
+		uint32 aaremain_sec = aaremain % 60;
+
+		if(aaremain_hr >= 1) {
+			Message(13, "You can use this ability again in %u hour(s) %u minute(s) %u seconds",
+			aaremain_hr, aaremain_min, aaremain_sec);
+		}
+		else {
+			Message(13, "You can use this ability again in %u minute(s) %u seconds",
+			aaremain_min, aaremain_sec);
+		}
+
+		return;
+	}
+
+	//calculate cooldown
+	int cooldown = rank->recast_time - GetAlternateAdvancementCooldownReduction(rank);
+	if(cooldown < 0) {
+		cooldown = 0;
+	}
+
+	// Bards can cast instant cast AAs while they are casting another song
+	if(spells[rank->spell].cast_time == 0 && GetClass() == BARD && IsBardSong(casting_spell_id)) {
+		if(!SpellFinished(rank->spell, entity_list.GetMob(target_id), 10, -1, -1, spells[rank->spell].ResistDiff, false)) {
+			//Reset on failed cast
+			SendAlternateAdvancementTimer(rank->spell_type, 0, -1);
+			Message_StringID(15, ABILITY_FAILED);
+			p_timers.Clear(&database, rank->spell_type + pTimerAAStart);
+			return;
+		}
+	} else {
+		if(!CastSpell(rank->spell, target_id, USE_ITEM_SPELL_SLOT, -1, -1, 0, -1, rank->spell_type + pTimerAAStart, cooldown, 1)) {
+			//Reset on failed cast
+			SendAlternateAdvancementTimer(rank->spell_type, 0, -1);
+			Message_StringID(15, ABILITY_FAILED);
+			p_timers.Clear(&database, rank->spell_type + pTimerAAStart);
+			return;
+		}
+	}
+	
+	if(cooldown > 0) {
+		SendAlternateAdvancementTimer(rank->spell_type, 0, 0);
+	}
+}
+
+int Mob::GetAlternateAdvancementCooldownReduction(AA::Rank *rank_in) {
+	if(!rank_in) {
+		return 0;
+	}
+
+	AA::Ability *ability_in = rank_in->base_ability;
+	if(!ability_in) {
+		return 0;
+	}
+
+	for(auto &aa : aa_ranks) {
+		AA::Ability *ability = zone->GetAlternateAdvancementAbility(aa.first);
+		if(!ability) {
+			continue;
+		}
+
+		AA::Rank *rank = ability->GetRankByPointsSpent(aa.second.first);
+		if(!rank) {
+			continue;
+		}
+
+		for(auto &effect : rank->effects) {
+			if(effect.effect_id == SE_HastenedAASkill && effect.base2 == ability_in->id) {
+				return effect.base1;
+			}
+		}
+	}
+
+	return 0;
 }
 
 bool ZoneDatabase::LoadAlternateAdvancement(Client *c) {

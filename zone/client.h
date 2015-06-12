@@ -765,7 +765,10 @@ public:
 	void SendAlternateAdvancementStats();
 	void PurchaseAlternateAdvancementRank(int rank_id);
 	void IncrementAlternateAdvancementRank(int rank_id);
+	void ActivateAlternateAdvancementAbility(int rank_id, int target_id);
 	void SendAlternateAdvancementPoints();
+	void SendAlternateAdvancementTimer(int ability, int begin, int end);
+	void SendAlternateAdvancementTimers();
 
 	void SetAAPoints(uint32 points) { m_pp.aapoints = points; SendAlternateAdvancementStats(); }
 	void AddAAPoints(uint32 points) { m_pp.aapoints += points; SendAlternateAdvancementStats(); }
@@ -782,11 +785,8 @@ public:
 	inline uint32 GetMaxAAXP(void) const { return max_AAXP; }
 	inline uint32 GetAAXP() const { return m_pp.expAA; }
 	void SendAATable();
-	void SendAATimers();
-	int GetAATimerID(aaID activate);
 	int CalcAAReuseTimer(const AA_DBAction *caa);
 	void ActivateAA(aaID activate);
-	void SendAATimer(uint32 ability, uint32 begin, uint32 end);
 	void EnableAAEffect(aaEffectType type, uint32 duration = 0);
 	void DisableAAEffect(aaEffectType type);
 	bool CheckAAEffect(aaEffectType type);

@@ -817,8 +817,8 @@ void Mob::InterruptSpell(uint16 message, uint16 color, uint16 spellid)
 	}
 
 	if(casting_spell_type == 1 && IsClient()) { //Rest AA Timer on failed cast
-		CastToClient()->SendAATimer(casting_spell_timer - pTimerAAStart, 0, 0xFFFFFF);
-		CastToClient()->Message_StringID(15,ABILITY_FAILED);
+		CastToClient()->SendAlternateAdvancementTimer(casting_spell_timer - pTimerAAStart, 0, -1);
+		CastToClient()->Message_StringID(15, ABILITY_FAILED);
 		CastToClient()->GetPTimers().Clear(&database, casting_spell_timer);
 	}
 
@@ -2276,6 +2276,7 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, uint16 slot, uint16 
 	{
 		if(spell_id == casting_spell_id && casting_spell_timer != 0xFFFFFFFF)
 		{
+			//aa new todo: aa expendable charges here
 			CastToClient()->GetPTimers().Start(casting_spell_timer, casting_spell_timer_duration);
 			Log.Out(Logs::Detail, Logs::Spells, "Spell %d: Setting custom reuse timer %d to %d", spell_id, casting_spell_timer, casting_spell_timer_duration);
 		}

@@ -1082,7 +1082,7 @@ void Client::Handle_Connect_OP_ReqNewZone(const EQApplicationPacket *app)
 
 void Client::Handle_Connect_OP_SendAAStats(const EQApplicationPacket *app)
 {
-	SendAATimers();
+	SendAlternateAdvancementTimers();
 	EQApplicationPacket* outapp = new EQApplicationPacket(OP_SendAAStats, 0);
 	QueuePacket(outapp);
 	safe_delete(outapp);
@@ -1749,7 +1749,7 @@ void Client::Handle_OP_AAAction(const EQApplicationPacket *app)
 
 	if (action->action == aaActionActivate) {//AA Hotkey
 		Log.Out(Logs::Detail, Logs::AA, "Activating AA %d", action->ability);
-		//ActivateAlternateAdvancementAbility(action->ability);
+		ActivateAlternateAdvancementAbility(action->ability, action->target_id);
 	}
 	else if (action->action == aaActionBuy) {
 		PurchaseAlternateAdvancementRank(action->ability);
@@ -1773,7 +1773,7 @@ void Client::Handle_OP_AAAction(const EQApplicationPacket *app)
 		SendAlternateAdvancementTable();
 	}
 	else {
-		Log.Out(Logs::General, Logs::AA, "Unknown AA action : %u %u 0x%x %d", action->action, action->ability, action->unknown08, action->exp_value);
+		Log.Out(Logs::General, Logs::AA, "Unknown AA action : %u %u %u %d", action->action, action->ability, action->target_id, action->exp_value);
 	}
 }
 
@@ -3846,8 +3846,6 @@ void Client::Handle_OP_CastSpell(const EQApplicationPacket *app)
 			InterruptSpell();
 			return;
 		}
-
-        m_TargetRing = glm::vec3(castspell->x_pos, castspell->y_pos, castspell->z_pos);
 
 		CastSpell(spell_to_cast, castspell->target_id, castspell->slot);
 	}

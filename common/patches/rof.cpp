@@ -2810,7 +2810,7 @@ namespace RoF
 
 		eq->aa_spent = emu->aa_spent;
 		// These fields may need to be correctly populated at some point
-		eq->aapoints_assigned = 0;
+		eq->aapoints_assigned = emu->aa_spent;
 		eq->aa_spent_general = 0;
 		eq->aa_spent_archetype = 0;
 		eq->aa_spent_class = 0;

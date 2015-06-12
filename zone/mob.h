@@ -962,6 +962,7 @@ public:
 	void ClearAAs() { aa_ranks.clear(); }
 	bool CanUseAlternateAdvancementRank(AA::Rank *rank);
 	bool CanPurchaseAlternateAdvancementRank(AA::Rank *rank, bool check_price);
+	int GetAlternateAdvancementCooldownReduction(AA::Rank *rank_in);
 
 protected:
 	void CommonDamage(Mob* other, int32 &damage, const uint16 spell_id, const SkillUseTypes attack_skill, bool &avoidable, const int8 buffslot, const bool iBuffTic);

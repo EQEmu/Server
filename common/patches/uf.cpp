@@ -2129,7 +2129,7 @@ namespace UF
 		SETUP_DIRECT_ENCODE(AATable_Struct, structs::AATable_Struct);
 
 		eq->aa_spent = emu->aa_spent;
-		eq->aa_assigned = 0;
+		eq->aa_assigned = emu->aa_spent;
 		eq->aa_spent3 = 0;
 		eq->unknown012 = 0;
 		eq->unknown016 = 0;
