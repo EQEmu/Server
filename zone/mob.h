@@ -222,10 +222,12 @@ public:
 	virtual void SpellProcess();
 	virtual bool CastSpell(uint16 spell_id, uint16 target_id, uint16 slot = USE_ITEM_SPELL_SLOT, int32 casttime = -1,
 		int32 mana_cost = -1, uint32* oSpellWillFinish = 0, uint32 item_slot = 0xFFFFFFFF,
-		uint32 timer = 0xFFFFFFFF, uint32 timer_duration = 0, uint32 type = 0, int16 *resist_adjust = nullptr);
+		uint32 timer = 0xFFFFFFFF, uint32 timer_duration = 0, uint32 type = 0, int16 *resist_adjust = nullptr,
+		uint32 aa_id = 0);
 	virtual bool DoCastSpell(uint16 spell_id, uint16 target_id, uint16 slot = 10, int32 casttime = -1,
 		int32 mana_cost = -1, uint32* oSpellWillFinish = 0, uint32 item_slot = 0xFFFFFFFF,
-		uint32 timer = 0xFFFFFFFF, uint32 timer_duration = 0, uint32 type = 0, int16 resist_adjust = 0);
+		uint32 timer = 0xFFFFFFFF, uint32 timer_duration = 0, uint32 type = 0, int16 resist_adjust = 0,
+		uint32 aa_id = 0);
 	void CastedSpellFinished(uint16 spell_id, uint32 target_id, uint16 slot, uint16 mana_used,
 		uint32 inventory_slot = 0xFFFFFFFF, int16 resist_adjust = 0);
 	bool SpellFinished(uint16 spell_id, Mob *target, uint16 slot = 10, uint16 mana_used = 0,
@@ -963,6 +965,7 @@ public:
 	bool CanUseAlternateAdvancementRank(AA::Rank *rank);
 	bool CanPurchaseAlternateAdvancementRank(AA::Rank *rank, bool check_price);
 	int GetAlternateAdvancementCooldownReduction(AA::Rank *rank_in);
+	void ExpendAlternateAdvancementCharge(uint32 aa_id);
 
 protected:
 	void CommonDamage(Mob* other, int32 &damage, const uint16 spell_id, const SkillUseTypes attack_skill, bool &avoidable, const int8 buffslot, const bool iBuffTic);
@@ -1152,6 +1155,7 @@ protected:
 	uint32 casting_spell_timer_duration;
 	uint32 casting_spell_type;
 	int16 casting_spell_resist_adjust;
+	uint32 casting_spell_aa_id;
 	bool casting_spell_checks;
 	uint16 bardsong;
 	uint8 bardsong_slot;

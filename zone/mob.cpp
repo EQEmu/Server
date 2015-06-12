@@ -309,6 +309,7 @@ Mob::Mob(const char* in_name,
 	casting_spell_timer_duration = 0;
 	casting_spell_type = 0;
 	casting_spell_inventory_slot = 0;
+	casting_spell_aa_id = 0;
 	target = 0;
 
 	ActiveProjectileATK = false;

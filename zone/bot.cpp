@@ -9078,7 +9078,8 @@ void Bot::DoBuffTic(const Buffs_Struct &buff, int slot, Mob* caster) {
 	Mob::DoBuffTic(buff, slot, caster);
 }
 
-bool Bot::CastSpell(uint16 spell_id, uint16 target_id, uint16 slot, int32 cast_time, int32 mana_cost, uint32* oSpellWillFinish, uint32 item_slot, int16 *resist_adjust) {
+bool Bot::CastSpell(uint16 spell_id, uint16 target_id, uint16 slot, int32 cast_time, int32 mana_cost, 
+					uint32* oSpellWillFinish, uint32 item_slot, int16 *resist_adjust, uint32 aa_id) {
 	bool Result = false;
 
 	if(zone && !zone->IsSpellBlocked(spell_id, glm::vec3(GetPosition()))) {
@@ -9143,7 +9144,7 @@ bool Bot::CastSpell(uint16 spell_id, uint16 target_id, uint16 slot, int32 cast_t
 			bardsong_timer.Disable();
 		}
 
-		Result = DoCastSpell(spell_id, target_id, slot, cast_time, mana_cost, oSpellWillFinish, item_slot);
+		Result = DoCastSpell(spell_id, target_id, slot, cast_time, mana_cost, oSpellWillFinish, item_slot, aa_id);
 	}
 
 	return Result;
@@ -9305,7 +9306,7 @@ bool Bot::DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_ce
 	return Result;
 }
 
-bool Bot::DoCastSpell(uint16 spell_id, uint16 target_id, uint16 slot, int32 cast_time, int32 mana_cost, uint32* oSpellWillFinish, uint32 item_slot) {
+bool Bot::DoCastSpell(uint16 spell_id, uint16 target_id, uint16 slot, int32 cast_time, int32 mana_cost, uint32* oSpellWillFinish, uint32 item_slot, uint32 aa_id) {
 	bool Result = false;
 
 	if(GetClass() == BARD) {
@@ -9313,7 +9314,7 @@ bool Bot::DoCastSpell(uint16 spell_id, uint16 target_id, uint16 slot, int32 cast
 		cast_time = 0;
 	}
 
-	Result = Mob::DoCastSpell(spell_id, target_id, slot, cast_time, mana_cost, oSpellWillFinish, item_slot);
+	Result = Mob::DoCastSpell(spell_id, target_id, slot, cast_time, mana_cost, oSpellWillFinish, item_slot, aa_id);
 
 	if(oSpellWillFinish) {
 		const SPDat_Spell_Struct &spell = spells[spell_id];

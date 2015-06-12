@@ -146,7 +146,8 @@ void NPC::SpellProcess()
 // to allow procs to work
 bool Mob::CastSpell(uint16 spell_id, uint16 target_id, uint16 slot,
 	int32 cast_time, int32 mana_cost, uint32* oSpellWillFinish, uint32 item_slot,
-	uint32 timer, uint32 timer_duration, uint32 type, int16 *resist_adjust)
+	uint32 timer, uint32 timer_duration, uint32 type, int16 *resist_adjust,
+	uint32 aa_id)
 {
 	Log.Out(Logs::Detail, Logs::Spells, "CastSpell called for spell %s (%d) on entity %d, slot %d, time %d, mana %d, from item slot %d",
 		(IsValidSpell(spell_id))?spells[spell_id].name:"UNKNOWN SPELL", spell_id, target_id, slot, cast_time, mana_cost, (item_slot==0xFFFFFFFF)?999:item_slot);
@@ -318,11 +319,11 @@ bool Mob::CastSpell(uint16 spell_id, uint16 target_id, uint16 slot,
 
 	if(resist_adjust)
 	{
-		return(DoCastSpell(spell_id, target_id, slot, cast_time, mana_cost, oSpellWillFinish, item_slot, timer, timer_duration, type, *resist_adjust));
+		return(DoCastSpell(spell_id, target_id, slot, cast_time, mana_cost, oSpellWillFinish, item_slot, timer, timer_duration, type, *resist_adjust, aa_id));
 	}
 	else
 	{
-		return(DoCastSpell(spell_id, target_id, slot, cast_time, mana_cost, oSpellWillFinish, item_slot, timer, timer_duration, type, spells[spell_id].ResistDiff));
+		return(DoCastSpell(spell_id, target_id, slot, cast_time, mana_cost, oSpellWillFinish, item_slot, timer, timer_duration, type, spells[spell_id].ResistDiff, aa_id));
 	}
 }
 
@@ -337,7 +338,7 @@ bool Mob::CastSpell(uint16 spell_id, uint16 target_id, uint16 slot,
 bool Mob::DoCastSpell(uint16 spell_id, uint16 target_id, uint16 slot,
 					int32 cast_time, int32 mana_cost, uint32* oSpellWillFinish,
 					uint32 item_slot, uint32 timer, uint32 timer_duration, uint32 type,
-					int16 resist_adjust)
+					int16 resist_adjust, uint32 aa_id)
 {
 	Mob* pMob = nullptr;
 	int32 orgcasttime;
@@ -361,6 +362,7 @@ bool Mob::DoCastSpell(uint16 spell_id, uint16 target_id, uint16 slot,
 		casting_spell_timer = timer;
 		casting_spell_timer_duration = timer_duration;
 	}
+	casting_spell_aa_id = aa_id;
 	casting_spell_type = type;
 
 	SaveSpellLoc();
@@ -786,6 +788,7 @@ void Mob::ZeroCastingVars()
 	casting_spell_type = 0;
 	casting_spell_resist_adjust = 0;
 	casting_spell_checks = false;
+	casting_spell_aa_id = 0;
 	delaytimer = false;
 }
 
@@ -2296,6 +2299,10 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, uint16 slot, uint16 
 
 			Log.Out(Logs::Detail, Logs::Spells, "Spell %d: Setting long reuse timer to %d s (orig %d)", spell_id, recast, spells[spell_id].recast_time);
 			CastToClient()->GetPTimers().Start(pTimerSpellStart + spell_id, recast);
+		}
+
+		if(casting_spell_aa_id) {
+			ExpendAlternateAdvancementCharge(casting_spell_aa_id);
 		}
 	}
 

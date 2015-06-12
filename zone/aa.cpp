@@ -1276,7 +1276,8 @@ Mob *AA_SwarmPetInfo::GetOwner()
 //New AA
 void Client::SendAlternateAdvancementTable() {
 	for(auto &aa : zone->aa_abilities) {
-		auto ranks = GetAA(aa.second->first_rank_id);
+		uint32 charges = 0;
+		auto ranks = GetAA(aa.second->first_rank_id, &charges);
 		if(ranks) {
 			if(aa.second->GetMaxLevel() == ranks) {
 				SendAlternateAdvancementRank(aa.first, ranks);
@@ -1446,7 +1447,12 @@ void Client::PurchaseAlternateAdvancementRank(int rank_id) {
 	}
 	
 	if(rank->base_ability->charges > 0) {
-		SetAA(rank_id, rank->current_value, rank->base_ability->charges);
+		uint32 charges = 0;
+		GetAA(rank_id, &charges);
+
+		if(charges == 0) {
+			SetAA(rank_id, rank->current_value, rank->base_ability->charges);
+		}
 	} else {
 		SetAA(rank_id, rank->current_value, 0);
 
@@ -1570,9 +1576,19 @@ void Client::ActivateAlternateAdvancementAbility(int rank_id, int target_id) {
 		return;
 	}
 
-	//make sure it's activateable type
-	if(!(ability->type == 3 || ability->type == 4)) {
+	//make sure it is not a passive
+	if(rank->effects.size() > 0) {
 		return;
+	}
+
+	//if expendable make sure we have charges
+	if(ability->charges > 0) {
+		uint32 charges = 0;
+		GetAA(rank_id, &charges);
+
+		if(charges < 0) {
+			return;
+		}
 	}
 
 	//check cooldown
@@ -1609,8 +1625,9 @@ void Client::ActivateAlternateAdvancementAbility(int rank_id, int target_id) {
 			p_timers.Clear(&database, rank->spell_type + pTimerAAStart);
 			return;
 		}
+		ExpendAlternateAdvancementCharge(ability->id);
 	} else {
-		if(!CastSpell(rank->spell, target_id, USE_ITEM_SPELL_SLOT, -1, -1, 0, -1, rank->spell_type + pTimerAAStart, cooldown, 1)) {
+		if(!CastSpell(rank->spell, target_id, USE_ITEM_SPELL_SLOT, -1, -1, 0, -1, rank->spell_type + pTimerAAStart, cooldown, 1, nullptr, ability->id)) {
 			//Reset on failed cast
 			SendAlternateAdvancementTimer(rank->spell_type, 0, -1);
 			Message_StringID(15, ABILITY_FAILED);
@@ -1653,6 +1670,35 @@ int Mob::GetAlternateAdvancementCooldownReduction(AA::Rank *rank_in) {
 	}
 
 	return 0;
+}
+
+void Mob::ExpendAlternateAdvancementCharge(uint32 aa_id) {
+	for(auto &iter : aa_ranks) {
+		AA::Ability *ability = zone->GetAlternateAdvancementAbility(iter.first);
+		if(ability && aa_id == ability->id) {
+			if(iter.second.second > 0) {
+				iter.second.second -= 1;
+
+				if(iter.second.second == 0) {
+					aa_ranks.erase(iter.first);
+					if(IsClient()) {
+						AA::Rank *r = ability->GetRankByPointsSpent(iter.second.first);
+						if(r) {
+							CastToClient()->GetEPP().expended_aa += r->cost;
+						}
+					}
+				}
+
+				if(IsClient()) {
+					Client *c = CastToClient();
+					c->SaveAA();
+					c->SendAlternateAdvancementPoints();
+				}
+			}
+
+			return;
+		}
+	}
 }
 
 bool ZoneDatabase::LoadAlternateAdvancement(Client *c) {
