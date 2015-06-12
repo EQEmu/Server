@@ -8801,7 +8801,7 @@ void Client::Handle_OP_LFGuild(const EQApplicationPacket *app)
 		pack->WriteUInt32(QSG_LFGuild_UpdatePlayerInfo);
 		pack->WriteUInt32(GetBaseClass());
 		pack->WriteUInt32(GetLevel());
-		pack->WriteUInt32(GetAAPointsSpent());
+		pack->WriteUInt32(GetSpentAA());
 		pack->WriteString(pts->Comment);
 		pack->WriteUInt32(pts->Toggle);
 		pack->WriteUInt32(pts->TimeZone);

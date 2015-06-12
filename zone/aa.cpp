@@ -930,121 +930,6 @@ bool Client::CheckAAEffect(aaEffectType type) {
 	return(false);
 }
 
-void Client::BuyAA(AA_Action* action)
-{
-	//Log.Out(Logs::Detail, Logs::AA, "Starting to buy AA %d", action->ability);
-	//
-	////find the AA information from the database
-	//SendAA_Struct* aa2 = zone->FindAA(action->ability);
-	////if(!aa2) {
-	////	//hunt for a lower level...
-	////	int i;
-	////	int a;
-	////	for(i=1;i<MAX_AA_ACTION_RANKS;i++){
-	////		a = action->ability - i;
-	////		if(a <= 0)
-	////			break;
-	////		Log.Out(Logs::Detail, Logs::AA, "Could not find AA %d, trying potential parent %d", action->ability, a);
-	////		aa2 = zone->FindAA(a);
-	////		if(aa2 != nullptr)
-	////			break;
-	////	}
-	////}
-	//if(aa2 == nullptr)
-	//	return;	//invalid ability...
-	//
-	//if(aa2->special_category == 1 || aa2->special_category == 2)
-	//	return; // Not purchasable progression style AAs
-	//
-	//if(aa2->special_category == 8 && aa2->cost == 0)
-	//	return; // Not purchasable racial AAs(set a cost to make them purchasable)
-	//
-	//uint32 cur_level = GetAA(aa2->id);
-	//if((aa2->id + cur_level) != action->ability) { //got invalid AA
-	//	Log.Out(Logs::Detail, Logs::AA, "Unable to find or match AA %d (found %d + lvl %d)", action->ability, aa2->id, cur_level);
-	//	return;
-	//}
-	//
-	//if(aa2->account_time_required)
-	//{
-	//	if((Timer::GetTimeSeconds() - account_creation) < aa2->account_time_required)
-	//	{
-	//		return;
-	//	}
-	//}
-	//
-	//uint32 real_cost;
-	//uint8 req_level;
-	////std::map<uint32, AALevelCost_Struct>::iterator RequiredLevel = AARequiredLevelAndCost.find(action->ability);
-	////
-	////if(RequiredLevel != AARequiredLevelAndCost.end()) {
-	////	real_cost = RequiredLevel->second.Cost;
-	////	req_level = RequiredLevel->second.Level;
-	////}
-	////else {
-	////	real_cost = aa2->cost + (aa2->cost_inc * cur_level);
-	////	req_level = aa2->class_type + (aa2->level_inc * cur_level);
-	////}
-	//
-	//if (req_level > GetLevel())
-	//	return; //Cheater trying to Buy AA...
-	//
-	//if (m_pp.aapoints >= real_cost && cur_level < aa2->max_level) {
-	//	SetAA(aa2->id, cur_level + 1);
-	//
-	//	Log.Out(Logs::Detail, Logs::AA, "Set AA %d to level %d", aa2->id, cur_level + 1);
-	//
-	//	m_pp.aapoints -= real_cost;
-	//
-	//	/* Do Player Profile rank calculations and set player profile */
-	//	SaveAA();
-	//	/* Save to Database to avoid having to write the whole AA array to the profile, only write changes*/
-	//	// database.SaveCharacterAA(this->CharacterID(), aa2->id, (cur_level + 1));
-	//
-	//	if ((RuleB(AA, Stacking) && (GetClientVersionBit() >= 4) && (aa2->hotkey_sid == 4294967295u))
-	//		&& ((aa2->max_level == (cur_level + 1)) && aa2->sof_next_id)){
-	//		SendAA(aa2->id);
-	//		SendAA(aa2->sof_next_id);
-	//	}
-	//	else
-	//		SendAA(aa2->id);
-	//
-	//	SendAATable();
-	//
-	//	/*
-	//		We are building these messages ourself instead of using the stringID to work around patch discrepencies
-	//			these are AA_GAIN_ABILITY	(410) & AA_IMPROVE (411), respectively, in both Titanium & SoF. not sure about 6.2
-	//	*/
-	//
-	//	/* Initial purchase of an AA ability */
-	//	if (cur_level < 1){
-	//		Message(15, "You have gained the ability \"%s\" at a cost of %d ability %s.", aa2->name, real_cost, (real_cost>1) ? "points" : "point");
-	//
-	//		/* QS: Player_Log_AA_Purchases */
-	//		if (RuleB(QueryServ, PlayerLogAAPurchases)){
-	//			std::string event_desc = StringFormat("Initial AA Purchase :: aa_name:%s aa_id:%i at cost:%i in zoneid:%i instid:%i", aa2->name, aa2->id, real_cost, this->GetZoneID(), this->GetInstanceID());
-	//			QServ->PlayerLogEvent(Player_Log_AA_Purchases, this->CharacterID(), event_desc);
-	//		}
-	//	}
-	//	/* Ranked purchase of an AA ability */
-	//	else{
-	//		Message(15, "You have improved %s %d at a cost of %d ability %s.", aa2->name, cur_level + 1, real_cost, (real_cost > 1) ? "points" : "point");
-	//
-	//		/* QS: Player_Log_AA_Purchases */
-	//		if (RuleB(QueryServ, PlayerLogAAPurchases)){
-	//			std::string event_desc = StringFormat("Ranked AA Purchase :: aa_name:%s aa_id:%i at cost:%i in zoneid:%i instid:%i", aa2->name, aa2->id, real_cost, this->GetZoneID(), this->GetInstanceID());
-	//			QServ->PlayerLogEvent(Player_Log_AA_Purchases, this->CharacterID(), event_desc);
-	//		}
-	//	}
-	//
-	//	//SendAAStats();
-	//
-	//	CalcBonuses();
-	//	if(title_manager.IsNewAATitleAvailable(m_pp.aapoints_spent, GetBaseClass()))
-	//		NotifyNewTitlesAvailable();
-	//}
-}
-
 void Client::SendAATimer(uint32 ability, uint32 begin, uint32 end) {
 	EQApplicationPacket* outapp = new EQApplicationPacket(OP_AAAction,sizeof(UseAA_Struct));
 	UseAA_Struct* uaaout = (UseAA_Struct*)outapp->pBuffer;
@@ -1076,235 +961,6 @@ void Client::SendAATimers() {
 	}
 
 	safe_delete(outapp);
-}
-
-void Client::SendPreviousAA(uint32 id, int seq){
-}
-
-void Client::SendAA(uint32 id, int seq) {
-	//Log.Out(Logs::General, Logs::Status, "SendAA(%u, %i)", id, seq);
-	//
-	//uint32 value=0;
-	//SendAA_Struct* saa2 = nullptr;
-	//SendAA_Struct* qaa = nullptr;
-	//SendAA_Struct* saa_pp = nullptr;
-	//bool IsBaseLevel = true;
-	//bool aa_stack = false;
-	//
-	//if(id==0)
-	//	saa2 = zone->GetAABySequence(seq);
-	//else
-	//	saa2 = zone->FindAA(id);
-	//if(!saa2)
-	//	return;
-	//
-	//uint16 classes = saa2->classes;
-	//if(!(classes & (1 << GetClass())) && (GetClass()!=BERSERKER || saa2->berserker==0)){
-	//	return;
-	//}
-	//
-	//if(saa2->account_time_required)
-	//{
-	//	if((Timer::GetTimeSeconds() - account_creation) < saa2->account_time_required)
-	//	{
-	//		return;
-	//	}
-	//}
-	//
-	//// Hide Quest/Progression AAs unless player has been granted the first level using $client->IncrementAA(skill_id).
-	//if (saa2->special_category == 1 || saa2->special_category == 2 ) {
-	//	if(GetAA(saa2->id) == 0)
-	//		return;
-	//	// For Quest line AA(demiplane AEs) where only 1 is visible at a time, check to make sure only the highest level obtained is shown
-	//	if(saa2->aa_expansion > 0) {
-	//		qaa = zone->FindAA(saa2->id+1);
-	//		if(qaa && (saa2->aa_expansion == qaa->aa_expansion) && GetAA(qaa->id) > 0)
-	//			return;
-	//	}
-	//}
-
-/*	Beginning of Shroud AAs, these categories are for Passive and Active Shroud AAs
-	Eventually with a toggle we could have it show player list or shroud list
-	if (saa2->special_category == 3 || saa2->special_category == 4)
-		return;
-*/
-	// Check for racial/Drakkin blood line AAs
-	//if (saa2->special_category == 8)
-	//{
-	//	uint32 client_race = this->GetBaseRace();
-	//
-	//	// Drakkin Bloodlines
-	//	if (saa2->aa_expansion > 522)
-	//	{
-	//		if (client_race != 522)
-	//			return; // Check for Drakkin Race
-	//
-	//		int heritage = this->GetDrakkinHeritage() + 523; // 523 = Drakkin Race(522) + Bloodline
-	//
-	//		if (heritage != saa2->aa_expansion)
-	//			return;
-	//	}
-	//	// Racial AAs
-	//	else if (client_race != saa2->aa_expansion)
-	//	{
-	//		return;
-	//	}
-	//}
-	//
-	///*
-	//AA stacking on SoF+ clients.
-	//
-	//Note: There were many ways to achieve this effect - The method used proved to be the most straight forward and consistent.
-	//Stacking does not currently work ideally for AA's that use hotkeys, therefore they will be excluded at this time.
-	//
-	//TODO: Problem with aa.hotkeys - When you reach max rank of an AA tier (ie 5/5), it automatically displays the next AA in
-	//the series and you can not transfer the hotkey to the next AA series. To the best of the my ability and through many
-	//different variations of coding I could not find an ideal solution to this issue.
-	//
-	//How stacking works:
-	//Utilizes two new fields: sof_next_id (which is the next id in the series), sof_current_level (ranks the AA's as the current level)
-	//1) If no AA's purchased only display the base levels of each AA series.
-	//2) When you purchase an AA and its rank is maxed it sends the packet for the completed AA, and the packet
-	//for the next aa in the series. The previous tier is removed from your window, and the new AA is displayed.
-	//3) When you zone/buy your player profile will be checked and determine what AA can be displayed base on what you have already.
-	//*/
-	//
-	//if (RuleB(AA, Stacking) && (GetClientVersionBit() >= 4) && (saa2->hotkey_sid == 4294967295u))
-	//	aa_stack = true;
-	//
-	////if (aa_stack){
-	////	uint32 aa_AA = 0;
-	////	uint32 aa_value = 0;
-	////	for (int i = 0; i < MAX_PP_AA_ARRAY; i++) {
-	////		if (aa[i]) {
-	////			aa_AA = aa[i]->AA;
-	////			aa_value = aa[i]->value;
-	////
-	////			if (aa_AA){
-	////
-	////				if (aa_value > 0)
-	////					aa_AA -= aa_value-1;
-	////
-	////				saa_pp = zone->FindAA(aa_AA);
-	////
-	////				if (saa_pp){
-	////
-	////					if (saa_pp->sof_next_skill == saa2->sof_next_skill){
-	////
-	////						if (saa_pp->id == saa2->id)
-	////							break; //You already have this in the player profile.
-	////						else if ((saa_pp->sof_current_level < saa2->sof_current_level) && (aa_value < saa_pp->max_level))
-	////							return; //DISABLE DISPLAY HIGHER - You have not reached max level yet of your current AA.
-	////						else if ((saa_pp->sof_current_level < saa2->sof_current_level) && (aa_value == saa_pp->max_level) && (saa_pp->sof_next_id == saa2->id))
-	////							IsBaseLevel = false; //ALLOW DISPLAY HIGHER
-	////					}
-	////				}
-	////			}
-	////		}
-	////	}
-	////}
-	//
-	////Hide higher tiers of multi tiered AA's if the base level is not fully purchased.
-	//if (aa_stack && IsBaseLevel && saa2->sof_current_level > 0)
-	//	return;
-	//
-	//int size=sizeof(SendAA_Struct)+sizeof(AA_Ability)*saa2->total_abilities;
-	//
-	//if(size == 0)
-	//	return;
-	//
-	//uchar* buffer = new uchar[size];
-	//SendAA_Struct* saa=(SendAA_Struct*)buffer;
-	//memcpy(saa,saa2,size);
-	//
-	//if(saa->spellid==0)
-	//	saa->spellid=0xFFFFFFFF;
-	//
-	//value=GetAA(saa->id);
-	//uint32 orig_val = value;
-	//
-	//if(value && saa->id){
-	//
-	//	if(value < saa->max_level){
-	//		saa->id+=value;
-	//		saa->next_id=saa->id+1;
-	//		value++;
-	//	}
-	//
-	//	else if (aa_stack && saa->sof_next_id){
-	//		saa->id+=value-1;
-	//		saa->next_id=saa->sof_next_id;
-	//
-	//		//Prevent removal of previous AA from window if next AA belongs to a higher client version.
-	//		SendAA_Struct* saa_next = nullptr;
-	//		saa_next = zone->FindAA(saa->sof_next_id);
-	//
-	//		// this check should work as long as we continue to just add the clients and just increase
-	//		// each number ....
-	//		if (saa_next && static_cast<int>(GetClientVersion()) < saa_next->clientver - 1) {
-	//			saa->next_id=0xFFFFFFFF;
-	//		}
-	//	}
-	//
-	//	else{
-	//		saa->id+=value-1;
-	//		saa->next_id=0xFFFFFFFF;
-	//	}
-	//
-	//	uint32 current_level_mod = 0;
-	//	if (aa_stack)
-	//		current_level_mod = saa->sof_current_level;
-	//
-	//	saa->last_id=saa->id-1;
-	//	saa->current_level=value+(current_level_mod);
-	//	saa->cost = saa2->cost + (saa2->cost_inc*(value-1));
-	//	saa->cost2 = 0;
-	//	for(uint32 i = 0; i < value; i++) {
-	//		saa->cost2 += saa2->cost + (saa2->cost_inc * i);
-	//	}
-	//	saa->class_type = saa2->class_type + (saa2->level_inc*(value-1));
-	//}
-	//
-	//if (aa_stack){
-	//
-	//	if (saa->sof_current_level >= 1 && value == 0)
-	//		saa->current_level = saa->sof_current_level+1;
-	//
-	//	saa->max_level = saa->sof_max_level;
-	//}
-	//
-	////database.FillAAEffects(saa);
-	//
-	////if(value > 0)
-	////{
-	////	// AA_Action stores the base ID
-	////	const AA_DBAction *caa = &AA_Actions[saa->id - value + 1][value - 1];
-	////
-	////	if(caa && caa->reuse_time > 0)
-	////		saa->spell_refresh = CalcAAReuseTimer(caa);
-	////}
-	//
-	////You can now use the level_inc field in the altadv_vars table to accomplish this, though still needed
-	////for special cases like LOH/HT due to inability to implement correct stacking of AA's that use hotkeys.
-	////std::map<uint32, AALevelCost_Struct>::iterator RequiredLevel = AARequiredLevelAndCost.find(saa->id);
-	////
-	////if(RequiredLevel != AARequiredLevelAndCost.end())
-	////{
-	////	saa->class_type = RequiredLevel->second.Level;
-	////	saa->cost = RequiredLevel->second.Cost;
-	////}
-	//
-	//
-	//EQApplicationPacket* outapp = new EQApplicationPacket(OP_SendAATable);
-	//outapp->size=size;
-	//outapp->pBuffer=(uchar*)saa;
-	//
-	//if(id==0 && value && (orig_val < saa->max_level)) //send previous AA only on zone in
-	//	SendPreviousAA(id, seq);
-	//
-	//QueuePacket(outapp);
-	//safe_delete(outapp);
-	////will outapp delete the buffer for us even though it didnt make it? --- Yes, it should
 }
 
 void Client::ResetAA(){
@@ -1657,25 +1313,6 @@ void Client::RefundAA() {
 //	}
 }
 
-void Client::IncrementAA(int aa_id) {
-	//SendAA_Struct* aa2 = zone->FindAA(aa_id);
-	//
-	//if(aa2 == nullptr)
-	//	return;
-	//
-	//if(GetAA(aa_id) == aa2->max_level)
-	//	return;
-	//
-	//SetAA(aa_id, GetAA(aa_id) + 1);
-	//
-	//SaveAA();
-	//
-	//SendAA(aa_id);
-	//SendAATable();
-	//SendAAStats();
-	//CalcBonuses();
-}
-
 AA_SwarmPetInfo::AA_SwarmPetInfo()
 {
 	target = 0;
@@ -1753,7 +1390,12 @@ void Client::SendAlternateAdvancementRank(int aa_id, int level) {
 	aai->current_level = level;
 	aai->max_level = ability->GetMaxLevel();
 	aai->prev_id = rank->prev_id;
-	aai->next_id = rank->next_id;
+
+	if(rank->next && !CanUseAlternateAdvancementRank(rank->next)) {
+		aai->next_id = -1;
+	} else {
+		aai->next_id = rank->next_id;
+	}
 	aai->total_cost = rank->total_cost;
 	aai->expansion = rank->expansion;
 	aai->category = ability->category;
@@ -1810,7 +1452,7 @@ void Client::SendAlternateAdvancementPoints() {
 	}
 
 
-	aa2->aa_spent = GetAAPointsSpent();
+	aa2->aa_spent = GetSpentAA();
 	QueuePacket(outapp);
 	safe_delete(outapp);
 }
@@ -1825,7 +1467,7 @@ void Client::PurchaseAlternateAdvancementRank(int rank_id) {
 		return;
 	}
 
-	if(!CanPurchaseAlternateAdvancementRank(rank)) {
+	if(!CanPurchaseAlternateAdvancementRank(rank, true)) {
 		return;
 	}
 	
@@ -1875,6 +1517,67 @@ void Client::PurchaseAlternateAdvancementRank(int rank_id) {
 	CalcBonuses();
 	if(title_manager.IsNewAATitleAvailable(m_pp.aapoints_spent, GetBaseClass()))
 		NotifyNewTitlesAvailable();
+}
+
+void Client::IncrementAlternateAdvancementRank(int rank_id) {
+	AA::Rank *rank = zone->GetAlternateAdvancementRank(rank_id);
+	if(!rank) {
+		return;
+	}
+
+	if(!rank->base_ability) {
+		return;
+	}
+
+	if(!CanPurchaseAlternateAdvancementRank(rank, false)) {
+		return;
+	}
+
+	if(rank->base_ability->charges > 0) {
+		SetAA(rank_id, rank->current_value, rank->base_ability->charges);
+	}
+	else {
+		SetAA(rank_id, rank->current_value, 0);
+
+		//if not max then send next aa
+		if(rank->next) {
+			SendAlternateAdvancementRank(rank->base_ability->id, rank->next->current_value);
+		}
+	}
+
+	SaveAA();
+
+	SendAlternateAdvancementPoints();
+	SendAlternateAdvancementStats();
+
+	if(rank->prev) {
+		Message_StringID(15, AA_IMPROVE,
+						 std::to_string(rank->title_sid).c_str(),
+						 std::to_string(rank->prev->current_value).c_str(),
+						 std::to_string(rank->cost).c_str(),
+						 std::to_string(AA_POINTS).c_str());
+
+		//QS stuff broke with new aa, todo: fix later
+		/* QS: Player_Log_AA_Purchases */
+		//		if (RuleB(QueryServ, PlayerLogAAPurchases)){
+		//			std::string event_desc = StringFormat("Ranked AA Purchase :: aa_name:%s aa_id:%i at cost:%i in zoneid:%i instid:%i", aa2->name, aa2->id, real_cost, this->GetZoneID(), this->GetInstanceID());
+		//			QServ->PlayerLogEvent(Player_Log_AA_Purchases, this->CharacterID(), event_desc);
+		//		}
+	}
+	else {
+		Message_StringID(15, AA_GAIN_ABILITY,
+						 std::to_string(rank->title_sid).c_str(),
+						 std::to_string(rank->cost).c_str(),
+						 std::to_string(AA_POINTS).c_str());
+		//QS stuff broke with new aa, todo: fix later
+		/* QS: Player_Log_AA_Purchases */
+		//		if (RuleB(QueryServ, PlayerLogAAPurchases)){
+		//			std::string event_desc = StringFormat("Initial AA Purchase :: aa_name:%s aa_id:%i at cost:%i in zoneid:%i instid:%i", aa2->name, aa2->id, real_cost, this->GetZoneID(), this->GetInstanceID());
+		//			QServ->PlayerLogEvent(Player_Log_AA_Purchases, this->CharacterID(), event_desc);
+		//		}
+	}
+
+	CalcBonuses();
 }
 
 bool ZoneDatabase::LoadAlternateAdvancement(Client *c) {
@@ -1984,6 +1687,16 @@ bool Mob::CanUseAlternateAdvancementRank(AA::Rank *rank) {
 		return false;
 	}
 
+	//the one titanium hack i will allow
+	//just to make sure we dont crash the client with newer aas
+	//we'll exclude any expendable ones
+	if(IsClient() && CastToClient()->GetClientVersionBit() & BIT_TitaniumAndEarlier) {
+		if(ability->charges > 0) {
+			return false;
+		}
+	}
+
+	//I might add a races behind the scenes field to take care of this
 	// Check for racial/Drakkin blood line AAs
 	if(ability->category == 8)
 	{
@@ -2009,7 +1722,7 @@ bool Mob::CanUseAlternateAdvancementRank(AA::Rank *rank) {
 	return true;
 }
 
-bool Mob::CanPurchaseAlternateAdvancementRank(AA::Rank *rank) {
+bool Mob::CanPurchaseAlternateAdvancementRank(AA::Rank *rank, bool check_price) {
 	AA::Ability *ability = rank->base_ability;
 
 	if(!ability)
@@ -2063,7 +1776,7 @@ bool Mob::CanPurchaseAlternateAdvancementRank(AA::Rank *rank) {
 	}
 
 	//check price, if client
-	if(IsClient()) {
+	if(check_price && IsClient()) {
 		if(rank->cost > CastToClient()->GetAAPoints()) {
 			return false;
 		}

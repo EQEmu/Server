@@ -4916,7 +4916,7 @@ XS(XS_Client_IncrementAA)
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		THIS->IncrementAA(aaskillid);
+		THIS->IncrementAlternateAdvancementRank(aaskillid);
 	}
 	XSRETURN_EMPTY;
 }

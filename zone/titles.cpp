@@ -179,10 +179,10 @@ bool TitleManager::IsClientEligibleForTitle(Client *c, std::vector<TitleEntry>::
 		if((Title->Class >= 0) && (c->GetBaseClass() != Title->Class))
 			return false;
 
-		if((Title->MinAAPoints >= 0) && (c->GetAAPointsSpent() < static_cast<uint32>(Title->MinAAPoints)))
+		if((Title->MinAAPoints >= 0) && (c->GetSpentAA() < static_cast<uint32>(Title->MinAAPoints)))
 			return false;
 
-		if((Title->MaxAAPoints >= 0) && (c->GetAAPointsSpent() > static_cast<uint32>(Title->MaxAAPoints)))
+		if((Title->MaxAAPoints >= 0) && (c->GetSpentAA() > static_cast<uint32>(Title->MaxAAPoints)))
 			return false;
 
 		if(Title->SkillID >= 0)

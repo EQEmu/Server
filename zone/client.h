@@ -764,6 +764,7 @@ public:
 	void SendAlternateAdvancementTable();
 	void SendAlternateAdvancementStats();
 	void PurchaseAlternateAdvancementRank(int rank_id);
+	void IncrementAlternateAdvancementRank(int rank_id);
 	void SendAlternateAdvancementPoints();
 
 	void SetAAPoints(uint32 points) { m_pp.aapoints = points; SendAlternateAdvancementStats(); }
@@ -774,9 +775,6 @@ public:
 	//old AA Methods
 	void ResetAA();
 	void SendClearAA();
-	void SendAA(uint32 id, int seq=1);
-	void SendPreviousAA(uint32 id, int seq=1);
-	void BuyAA(AA_Action* action);
 	//this function is used by some AA stuff
 	void MemorizeSpell(uint32 slot,uint32 spellid,uint32 scribing);
 	void SetAATitle(const char *Title);
@@ -793,11 +791,9 @@ public:
 	void DisableAAEffect(aaEffectType type);
 	bool CheckAAEffect(aaEffectType type);
 	void HandleAAAction(aaID activate);
-	inline uint32 GetAAPointsSpent() { return m_pp.aapoints_spent; }
 	int16 CalcAAFocusEffect(focusType type, uint16 focus_spell, uint16 spell_id);
 	int16 CalcAAFocus(focusType type, uint32 aa_ID, uint16 spell_id);
 	void RefundAA();
-	void IncrementAA(int aa_id);
 	int32 GetAAEffectDataBySlot(uint32 aa_ID, uint32 slot_id, bool GetEffect, bool GetBase1, bool GetBase2);
 	int32 GetAAEffectid(uint32 aa_ID, uint32 slot_id) { return GetAAEffectDataBySlot(aa_ID, slot_id, true, false,false); }
 	int32 GetAABase1(uint32 aa_ID, uint32 slot_id) { return GetAAEffectDataBySlot(aa_ID, slot_id, false, true,false); }
