@@ -27,6 +27,8 @@
 #include "aa_rank_prereqs.h"
 #include "aa_rank.h"
 
+class Mob;
+
 namespace AA
 {
 
@@ -39,17 +41,18 @@ public:
 	Rank *GetMaxRank();
 	Rank *GetRankByLevel(int level);
 	Rank *GetRankByPointsSpent(int current_level);
-	int GetMaxLevel(bool force_calc = false);
+	int GetMaxLevel(Mob *who);
 
 	int id;
 	std::string name;
 	int category;
 	int classes;
+	int races;
+	int deities;
 	bool grant_only;
 	int type;
 	int charges;
 	int first_rank_id;
-	int max_level;
 	Rank *first;
 };
 

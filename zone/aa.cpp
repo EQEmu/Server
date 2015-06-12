@@ -23,7 +23,7 @@ Copyright (C) 2001-2004 EQEMu Development Team (http://eqemulator.net)
 #include "../common/races.h"
 #include "../common/spdat.h"
 #include "../common/string_util.h"
-
+#include "../common/deity.h"
 #include "aa.h"
 #include "client.h"
 #include "corpse.h"
@@ -1279,7 +1279,7 @@ void Client::SendAlternateAdvancementTable() {
 		uint32 charges = 0;
 		auto ranks = GetAA(aa.second->first_rank_id, &charges);
 		if(ranks) {
-			if(aa.second->GetMaxLevel() == ranks) {
+			if(aa.second->GetMaxLevel(this) == ranks) {
 				SendAlternateAdvancementRank(aa.first, ranks);
 			} else {
 				SendAlternateAdvancementRank(aa.first, ranks);
@@ -1330,7 +1330,7 @@ void Client::SendAlternateAdvancementRank(int aa_id, int level) {
 	aai->classes = ability->classes;
 	aai->level_req = rank->level_req;
 	aai->current_level = level;
-	aai->max_level = ability->GetMaxLevel();
+	aai->max_level = ability->GetMaxLevel(this);
 	aai->prev_id = rank->prev_id;
 
 	if(rank->next && !CanUseAlternateAdvancementRank(rank->next)) {
@@ -1450,9 +1450,11 @@ void Client::PurchaseAlternateAdvancementRank(int rank_id) {
 		uint32 charges = 0;
 		GetAA(rank_id, &charges);
 
-		if(charges == 0) {
-			SetAA(rank_id, rank->current_value, rank->base_ability->charges);
+		if(charges > 0) {
+			return;
 		}
+		
+		SetAA(rank_id, rank->current_value, rank->base_ability->charges);
 	} else {
 		SetAA(rank_id, rank->current_value, 0);
 
@@ -1781,7 +1783,7 @@ bool Mob::SetAA(uint32 rank_id, uint32 new_value, uint32 charges) {
 			return false;
 		}
 
-		if(new_value > ability->GetMaxLevel()) {
+		if(new_value > ability->GetMaxLevel(this)) {
 			return false;
 		}
 
@@ -1817,28 +1819,43 @@ bool Mob::CanUseAlternateAdvancementRank(AA::Rank *rank) {
 		}
 	}
 
-	//I might add a races behind the scenes field to take care of this
-	// Check for racial/Drakkin blood line AAs
-	if(ability->category == 8)
-	{
-		uint32 client_race = GetBaseRace();
-
-		// Drakkin Bloodlines
-		if(rank->expansion > 522)
-		{
-			if(client_race != 522)
-				return false;
-
-			int heritage = this->GetDrakkinHeritage() + 523; // 523 = Drakkin Race(522) + Bloodline
-
-			if(heritage != rank->expansion)
-				return false;
-		}
-		else if(client_race != rank->expansion)
-		{
-			return false;
-		}
+	if(!(RuleI(World, ExpansionSettings) & (1 << rank->expansion))) {
+		return false;
 	}
+
+	auto race = GetArrayRace(GetBaseRace());
+	race = race > 16 ? 1 : race;
+	if(!(ability->races & (1 << (race - 1)))) {
+		return false;
+	}
+
+	auto deity = ConvertDeityToBitDeity((DeityTypes)GetDeity());
+	if(!(ability->deities & deity)) {
+		return false;
+	}
+
+	// Check for racial/Drakkin blood line AAs
+	//Commented this out for now, will add a drakkin heritage field later
+	//if(ability->category == 8)
+	//{
+	//	uint32 client_race = GetBaseRace();
+	//
+	//	// Drakkin Bloodlines
+	//	if(rank->expansion > 522)
+	//	{
+	//		if(client_race != 522)
+	//			return false;
+	//
+	//		int heritage = this->GetDrakkinHeritage() + 523; // 523 = Drakkin Race(522) + Bloodline
+	//
+	//		if(heritage != rank->expansion)
+	//			return false;
+	//	}
+	//	else if(client_race != rank->expansion)
+	//	{
+	//		return false;
+	//	}
+	//}
 
 	return true;
 }
@@ -1855,10 +1872,6 @@ bool Mob::CanPurchaseAlternateAdvancementRank(AA::Rank *rank, bool check_price) 
 
 	//You can't purchase grant only AAs they can only be assigned
 	if(ability->grant_only) {
-		return false;
-	}
-
-	if(!(RuleI(World, ExpansionSettings) & (1 << rank->expansion))) {
 		return false;
 	}
 
@@ -1940,8 +1953,6 @@ void Zone::LoadAlternateAdvancement() {
 			i++;
 			current = current->next;
 		}
-
-		ability.second->GetMaxLevel(true);
 	}
 
 	Log.Out(Logs::General, Logs::Status, "Loaded Alternate Advancement Data");
@@ -1952,7 +1963,7 @@ bool ZoneDatabase::LoadAlternateAdvancementAbilities(std::unordered_map<int, std
 {
 	Log.Out(Logs::General, Logs::Status, "Loading Alternate Advancement Abilities...");
 	abilities.clear();
-	std::string query = "SELECT id, name, category, classes, type, charges, grant_only, first_rank_id FROM aa_ability";
+	std::string query = "SELECT id, name, category, classes, races, deities, type, charges, grant_only, first_rank_id FROM aa_ability";
 	auto results = QueryDatabase(query);
 	if(results.Success()) {
 		for(auto row = results.begin(); row != results.end(); ++row) {
@@ -1960,11 +1971,14 @@ bool ZoneDatabase::LoadAlternateAdvancementAbilities(std::unordered_map<int, std
 			ability->id = atoi(row[0]);
 			ability->name = row[1];
 			ability->category = atoi(row[2]);
-			ability->classes = atoi(row[3]);
-			ability->type = atoi(row[4]);
-			ability->charges = atoi(row[5]);
-			ability->grant_only = atoi(row[6]) != 0 ? true : false;
-			ability->first_rank_id = atoi(row[7]);
+			//EQ client has classes left shifted by one bit for some odd reason
+			ability->classes = atoi(row[3]) << 1;
+			ability->races = atoi(row[4]);
+			ability->deities = atoi(row[5]);
+			ability->type = atoi(row[6]);
+			ability->charges = atoi(row[7]);
+			ability->grant_only = atoi(row[8]) != 0 ? true : false;
+			ability->first_rank_id = atoi(row[9]);
 			ability->first = nullptr;
 
 			abilities[ability->id] = std::unique_ptr<AA::Ability>(ability);

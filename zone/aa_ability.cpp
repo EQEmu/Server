@@ -18,6 +18,7 @@
 
 #include "../common/global_define.h"
 #include "../common/types.h"
+#include "masterentity.h"
 #include "aa_ability.h"
 
 AA::Rank *AA::Ability::GetMaxRank() {
@@ -53,16 +54,17 @@ AA::Rank *AA::Ability::GetRankByPointsSpent(int current_level) {
 	return current;
 }
 
-int AA::Ability::GetMaxLevel(bool force_calc) {
-	if(!force_calc)
-		return max_level;
-
-	max_level = 0;
+int AA::Ability::GetMaxLevel(Mob *who) {
+	int max_level = 0;
 	Rank *current = first;
 	while(current) {
+		if(!who->CanUseAlternateAdvancementRank(current)) {
+			return max_level;
+		}
+
 		max_level++;
 		current = current->next;
 	}
-
+	
 	return max_level;
 }
