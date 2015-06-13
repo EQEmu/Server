@@ -789,7 +789,7 @@ public:
 	bool CheckAAEffect(aaEffectType type);
 	void HandleAAAction(aaID activate);
 	int16 CalcAAFocusEffect(focusType type, uint16 focus_spell, uint16 spell_id);
-	int16 CalcAAFocus(focusType type, uint32 aa_ID, uint16 spell_id);
+	int16 CalcAAFocus(focusType type, const AA::Rank &rank, uint16 spell_id);
 	void RefundAA();
 	int32 GetAAEffectDataBySlot(uint32 aa_ID, uint32 slot_id, bool GetEffect, bool GetBase1, bool GetBase2);
 	int32 GetAAEffectid(uint32 aa_ID, uint32 slot_id) { return GetAAEffectDataBySlot(aa_ID, slot_id, true, false,false); }
@@ -1265,7 +1265,7 @@ protected:
 	int CalcRecommendedLevelBonus(uint8 level, uint8 reclevel, int basestat);
 	void CalcEdibleBonuses(StatBonuses* newbon);
 	void CalcAABonuses(StatBonuses* newbon);
-	void ApplyAABonuses(uint32 aaid, uint32 slots, StatBonuses* newbon);
+	void ApplyAABonuses(const AA::Rank &rank, StatBonuses* newbon);
 	void ProcessItemCaps();
 	void MakeBuffFadePacket(uint16 spell_id, int slot_id, bool send_message = true);
 	bool client_data_loaded;

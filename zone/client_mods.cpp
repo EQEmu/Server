@@ -1121,7 +1121,7 @@ int32 Client::CalcMaxMana()
 	switch (GetCasterClass()) {
 		case 'I':
 		case 'W': {
-				max_mana = (CalcBaseMana() + itembonuses.Mana + spellbonuses.Mana + GroupLeadershipAAManaEnhancement());
+				max_mana = (CalcBaseMana() + itembonuses.Mana + spellbonuses.Mana + aabonuses.Mana + GroupLeadershipAAManaEnhancement());
 				break;
 			}
 		case 'N': {
