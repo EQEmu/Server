@@ -816,8 +816,6 @@ void Client::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 				break;
 			}
 			break;
-		case SE_PetDiscipline2:
-			break;
 		case SE_SpellSlotIncrease:
 			break;
 		case SE_MysticalAttune:
@@ -1392,6 +1390,10 @@ void Client::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 			newbon->ATK += base1;
 			break;
 		// to do
+		case SE_PetDiscipline:
+			break;
+		case SE_PetDiscipline2:
+			break;
 		case SE_ReduceTradeskillFail:
 			break;
 		case SE_PotionBeltSlots:
@@ -1404,7 +1406,25 @@ void Client::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 			break;
 		case SE_SecondaryForte:
 			break;
+		case SE_FeignedCastOnChance:
+			break;
+		case SE_ExtendedShielding:
+			break;
+		case SE_ShieldDuration:
+			break;
+		case SE_ReduceApplyPoisonTime:
+			break;
+		case SE_NimbleEvasion:
+			break;
+		case SE_TrapCircumvention:
+			break;
+		case SE_ShroudofStealth:
+			break;
+		case SE_FeignedMinion:
+			break;
 
+		// handled client side
+		case SE_ReduceFallDamage:
 		// not handled here
 		case SE_HastenedAASkill:
 		// not handled here but don't want to clutter debug log -- these may need to be verified to ignore
