@@ -72,6 +72,8 @@ void EQStream::init(bool resetSession) {
 	RateThreshold=RATEBASE/250;
 	DecayRate=DECAYBASE/250;
 	BytesWritten=0;
+	sent_packet_count = 0;
+	received_packet_count = 0;
 	SequencedBase = 0;
 	NextSequencedSend = 0;
 
@@ -464,37 +466,45 @@ void EQStream::ProcessPacket(EQProtocolPacket *p)
 		}
 		break;
 		case OP_SessionStatRequest: {
-			if(p->Size() < sizeof(SessionStats))
+			if(p->Size() < sizeof(ClientSessionStats))
 			{
 				Log.Out(Logs::Detail, Logs::Netcode, _L "Received OP_SessionStatRequest that was of malformed size" __L);
 				break;
 			}
 #ifndef COLLECTOR
-			SessionStats *Stats=(SessionStats *)p->pBuffer;
+			ClientSessionStats *ClientStats=(ClientSessionStats *)p->pBuffer;
 			Log.Out(Logs::Detail, Logs::Netcode, _L "Received Stats: %lu packets received, %lu packets sent, Deltas: local %lu, (%lu <- %lu -> %lu) remote %lu" __L,
-				(unsigned long)ntohl(Stats->packets_received), (unsigned long)ntohl(Stats->packets_sent), (unsigned long)ntohl(Stats->last_local_delta),
-				(unsigned long)ntohl(Stats->low_delta), (unsigned long)ntohl(Stats->average_delta),
-				(unsigned long)ntohl(Stats->high_delta), (unsigned long)ntohl(Stats->last_remote_delta));
-			uint64 x=Stats->packets_received;
-			Stats->packets_received=Stats->packets_sent;
-			Stats->packets_sent=x;
-			NonSequencedPush(new EQProtocolPacket(OP_SessionStatResponse,p->pBuffer,p->size));
-			AdjustRates(ntohl(Stats->average_delta));
+				(unsigned long)ntohl(ClientStats->packets_received), (unsigned long)ntohl(ClientStats->packets_sent), (unsigned long)ntohl(ClientStats->last_local_delta),
+				(unsigned long)ntohl(ClientStats->low_delta), (unsigned long)ntohl(ClientStats->average_delta),
+				(unsigned long)ntohl(ClientStats->high_delta), (unsigned long)ntohl(ClientStats->last_remote_delta));
+			
+			AdjustRates(ntohl(ClientStats->average_delta));
 
 			if(GetExecutablePlatform() == ExePlatformWorld || GetExecutablePlatform() == ExePlatformZone) {
-				if(RETRANSMIT_TIMEOUT_MULT && ntohl(Stats->average_delta)) {
+				if (RETRANSMIT_TIMEOUT_MULT && ntohl(ClientStats->average_delta)) {
 					//recalculate retransmittimeout using the larger of the last rtt or average rtt, which is multiplied by the rule value
-					if((ntohl(Stats->last_local_delta) + ntohl(Stats->last_remote_delta)) > (ntohl(Stats->average_delta) * 2)) {
-						retransmittimeout = (ntohl(Stats->last_local_delta) + ntohl(Stats->last_remote_delta)) 
+					if ((ntohl(ClientStats->last_local_delta) + ntohl(ClientStats->last_remote_delta)) > (ntohl(ClientStats->average_delta) * 2)) {
+						retransmittimeout = (ntohl(ClientStats->last_local_delta) + ntohl(ClientStats->last_remote_delta))
 							* RETRANSMIT_TIMEOUT_MULT;
 					} else {
-						retransmittimeout = ntohl(Stats->average_delta) * 2 * RETRANSMIT_TIMEOUT_MULT;
+						retransmittimeout = ntohl(ClientStats->average_delta) * 2 * RETRANSMIT_TIMEOUT_MULT;
 					}
 					if(retransmittimeout > RETRANSMIT_TIMEOUT_MAX)
 						retransmittimeout = RETRANSMIT_TIMEOUT_MAX;
 					Log.Out(Logs::Detail, Logs::Netcode, _L "Retransmit timeout recalculated to %dms" __L, retransmittimeout);
 				}
 			}
+
+			ServerSessionStats *ServerStats = (ServerSessionStats *)p->pBuffer;
+
+			//ServerStats->RequestID = ClientStats->RequestID; // no change
+			ServerStats->ServerTime = htonl(Timer::GetCurrentTime());
+			ServerStats->packets_sent_echo = ClientStats->packets_sent; // still in htonll format
+			ServerStats->packets_received_echo = ClientStats->packets_received; // still in htonll format
+			ServerStats->packets_sent = htonll(GetPacketsSent());
+			ServerStats->packets_received = htonll(GetPacketsReceived());
+
+			NonSequencedPush(new EQProtocolPacket(OP_SessionStatResponse, p->pBuffer, p->size));
 #endif
 		}
 		break;
@@ -1103,8 +1113,8 @@ EQProtocolPacket *p=nullptr;
 
 void EQStream::Process(const unsigned char *buffer, const uint32 length)
 {
-static unsigned char newbuffer[2048];
-uint32 newlength=0;
+	static unsigned char newbuffer[2048];
+	uint32 newlength=0;
 	if (EQProtocolPacket::ValidateCRC(buffer,length,Key)) {
 		if (compressed) {
 			newlength=EQProtocolPacket::Decompress(buffer,length,newbuffer,2048);
