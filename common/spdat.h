@@ -579,7 +579,7 @@ typedef enum {
 #define SE_LimitUseType					423 // implemented	- limit a focus to require a certain numhits type
 #define SE_GravityEffect				424 // implemented - Pulls/pushes you toward/away the mob at a set pace
 //#define SE_Display					425 // *not implemented - Illusion: Flying Dragon(21626)
-//#define SE_IncreaseExtTargetWindow	426 // *not implmented[AA] - increases the capacity of your extended target window
+#define SE_IncreaseExtTargetWindow		426 // *not implmented[AA] - increases the capacity of your extended target window
 #define SE_SkillProc					427 // implemented - chance to proc when using a skill(ie taunt)
 #define SE_LimitToSkill					428 // implemented - limits what skills will effect a skill proc
 #define SE_SkillProcSuccess				429 // implemented - chance to proc when tje skill in use successfully fires.

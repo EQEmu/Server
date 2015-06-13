@@ -461,6 +461,7 @@ struct StatBonuses {
 	uint8	AssassinateLevel;					// Max Level Assassinate will be effective at.
 	int32	PetMeleeMitigation;					// Add AC to owner's pet.
 	bool	IllusionPersistence;				// Causes illusions not to fade.
+	uint16	extra_xtargets;						// extra xtarget entries
 };
 
 typedef struct

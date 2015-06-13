@@ -113,6 +113,9 @@ void Client::CalcBonuses()
 	rooted = FindType(SE_Root);
 
 	XPRate = 100 + spellbonuses.XPRateMod;
+
+	if (GetMaxXTargets() != 5 + aabonuses.extra_xtargets)
+		SetMaxXTargets(5 + aabonuses.extra_xtargets);
 }
 
 int Client::CalcRecommendedLevelBonus(uint8 level, uint8 reclevel, int basestat)
@@ -1388,6 +1391,9 @@ void Client::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 
 		case SE_ATK:
 			newbon->ATK += base1;
+			break;
+		case SE_IncreaseExtTargetWindow:
+			newbon->extra_xtargets += base1;
 			break;
 		// to do
 		case SE_PetDiscipline:
