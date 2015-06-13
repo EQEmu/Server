@@ -4332,8 +4332,14 @@ int16 Client::CalcAAFocus(focusType type, const AA::Rank &rank, uint16 spell_id)
 					LimitFailure = true;
 			} else {
 				LimitInclude[4] = true;
-				if (IsEffectInSpell(spell_id, base1)) // Include
-					LimitInclude[5] = true;
+				// they use 33 here for all classes ... unsure if the type check is really needed
+				if (base1 == SE_SummonPet && type == focusReagentCost) {
+					if (IsSummonPetSpell(spell_id) || IsSummonSkeletonSpell(spell_id))
+						LimitInclude[5] = true;
+				} else {
+					if (IsEffectInSpell(spell_id, base1)) // Include
+						LimitInclude[5] = true;
+				}
 			}
 			break;
 
@@ -5489,9 +5495,6 @@ int16 Client::GetFocusEffect(focusType type, uint16 spell_id) {
 			}
 		}
 	}
-
-	if(type == focusReagentCost && IsSummonPetSpell(spell_id) && GetAA(aaElementalPact))
-		return 100;
 
 	if(type == focusReagentCost && (IsEffectInSpell(spell_id, SE_SummonItem) || IsSacrificeSpell(spell_id)))
 		return 0;
