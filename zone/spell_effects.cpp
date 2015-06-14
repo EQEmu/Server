@@ -5202,33 +5202,29 @@ uint16 Client::GetSympatheticFocusEffect(focusType type, uint16 spell_id) {
 
 	/*Note: At present, ff designing custom AA to have a sympathetic proc effect, only use one focus
 	effect within the aa_effects data for each AA*[No live AA's use this effect to my knowledge]*/
-	if (aabonuses.FocusEffects[type]){
+	if (aabonuses.FocusEffects[type]) {
+		for (const auto &aa : aa_ranks) {
+			if (SympatheticProcList.size() > MAX_SYMPATHETIC_PROCS)
+				break;
 
-		uint32 aa_AA = 0;
-		uint32 aa_value = 0;
+			auto ability = zone->GetAlternateAdvancementAbility(aa.first);
+			if (!ability)
+				continue;
 
-		//aa old
-		//for (int i = 0; i < MAX_PP_AA_ARRAY; i++)
-		//{
-		//	aa_AA = this->aa[i]->AA;
-		//	aa_value = this->aa[i]->value;
-		//	if (aa_AA < 1 || aa_value < 1)
-		//		continue;
-		//
-		//	if (SympatheticProcList.size() > MAX_SYMPATHETIC_PROCS)
-		//		continue;
-		//
-		//	proc_spellid = CalcAAFocus(type, aa_AA, spell_id);
-		//
-		//	if (IsValidSpell(proc_spellid)){
-		//		ProcChance = GetSympatheticProcChances(spell_id, GetAABase1(aa_AA, 1));
-		//		if(zone->random.Roll(ProcChance))
-		//			SympatheticProcList.push_back(proc_spellid);
-		//	}
-		//}
+			auto rank = ability->GetRankByPointsSpent(aa.second.first);
+			if (!rank || rank->effects.empty())
+				continue;
+
+			proc_spellid = CalcAAFocus(type, *rank, spell_id);
+			if (IsValidSpell(proc_spellid)) {
+				ProcChance = GetSympatheticProcChances(spell_id, rank->effects[0].base1);
+				if (zone->random.Roll(ProcChance))
+					SympatheticProcList.push_back(proc_spellid);
+			}
+		}
 	}
 
-	if (SympatheticProcList.size() > 0)
+	if (!SympatheticProcList.empty())
 	{
 		uint8 random = zone->random.Int(0, SympatheticProcList.size()-1);
 		int FinalSympatheticProc = SympatheticProcList[random];
