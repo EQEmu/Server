@@ -4149,43 +4149,6 @@ void Mob::BuffFadeBySlot(int slot, bool iRecalcBonuses)
 		CalcBonuses();
 }
 
-int32 Client::GetAAEffectDataBySlot(uint32 aa_ID, uint32 slot_id, bool GetEffect, bool GetBase1, bool GetBase2)
-{
-	int32 aa_effects_data[3] = { 0 };
-	uint32 effect = 0;
-	int32 base1 = 0;
-	int32 base2 = 0;
-	uint32 slot = 0;
-
-	//old aa
-	//std::map<uint32, std::map<uint32, AA_Ability> >::const_iterator find_iter = aa_effects.find(aa_ID);
-	//if(find_iter == aa_effects.end())
-	//	return 0;
-	//
-	//for (std::map<uint32, AA_Ability>::const_iterator iter = aa_effects[aa_ID].begin(); iter != aa_effects[aa_ID].end(); ++iter)
-	//{
-	//	effect = iter->second.skill_id;
-	//	base1 = iter->second.base1;
-	//	base2 = iter->second.base2;
-	//	slot = iter->second.slot;
-	//
-	//	if (slot && slot == slot_id) {
-	//
-	//		if (GetEffect)
-	//			return effect;
-	//
-	//		if (GetBase1)
-	//			return base1;
-	//
-	//		if (GetBase2)
-	//			return base2;
-	//	}
-	//}
-
-	return 0;
-}
-
-
 int16 Client::CalcAAFocus(focusType type, const AA::Rank &rank, uint16 spell_id)
 {
 	const SPDat_Spell_Struct &spell = spells[spell_id];
@@ -5207,12 +5170,15 @@ uint16 Client::GetSympatheticFocusEffect(focusType type, uint16 spell_id) {
 			if (SympatheticProcList.size() > MAX_SYMPATHETIC_PROCS)
 				break;
 
-			auto ability = zone->GetAlternateAdvancementAbility(aa.first);
-			if (!ability)
-				continue;
+			auto ability_rank = zone->GetAlternateAdvancementAbilityAndRank(aa.first, aa.second.first);
+			auto ability = ability_rank.first;
+			auto rank = ability_rank.second;
 
-			auto rank = ability->GetRankByPointsSpent(aa.second.first);
-			if (!rank || rank->effects.empty())
+			if(!ability) {
+				continue;
+			}
+
+			if (rank->effects.empty())
 				continue;
 
 			proc_spellid = CalcAAFocus(type, *rank, spell_id);
@@ -5474,12 +5440,15 @@ int16 Client::GetFocusEffect(focusType type, uint16 spell_id) {
 		int16 Total3 = 0;
 
 		for (const auto &aa : aa_ranks) {
-			auto ability = zone->GetAlternateAdvancementAbility(aa.first);
-			if (!ability)
-				continue;
+			auto ability_rank = zone->GetAlternateAdvancementAbilityAndRank(aa.first, aa.second.first);
+			auto ability = ability_rank.first;
+			auto rank = ability_rank.second;
 
-			auto rank = ability->GetRankByPointsSpent(aa.second.first);
-			if (!rank || rank->effects.empty())
+			if(!ability) {
+				continue;
+			}
+
+			if (rank->effects.empty())
 				continue;
 
 			Total3 = CalcAAFocus(type, *rank, spell_id);

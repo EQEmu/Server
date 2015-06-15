@@ -640,14 +640,16 @@ void Client::CalcAABonuses(StatBonuses *newbon)
 	memset(newbon, 0, sizeof(StatBonuses)); // start fresh
 
 	for (const auto &aa : aa_ranks) {
-		auto ability = zone->GetAlternateAdvancementAbility(aa.first);
-		// zone doesn't know about this! bad data some where
-		if (!ability)
-			continue;
+		auto ability_rank = zone->GetAlternateAdvancementAbilityAndRank(aa.first, aa.second.first);
+		auto ability = ability_rank.first;
+		auto rank = ability_rank.second;
 
-		auto rank = ability->GetRankByPointsSpent(aa.second.first);
+		if(!ability) {
+			continue;
+		}
+
 		// bad data or no effects
-		if (!rank || rank->effects.empty())
+		if (rank->effects.empty())
 			continue;
 
 		ApplyAABonuses(*rank, newbon);

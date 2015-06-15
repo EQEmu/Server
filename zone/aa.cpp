@@ -800,17 +800,15 @@ void Client::RefundAA() {
 	int refunded = 0;
 
 	for(auto &rank_value : aa_ranks) {
-		AA::Ability *ability = zone->GetAlternateAdvancementAbility(rank_value.first);
+		auto ability_rank = zone->GetAlternateAdvancementAbilityAndRank(rank_value.first, rank_value.second.first);
+		auto ability = ability_rank.first;
+		auto rank = ability_rank.second;
+
 		if(!ability) {
 			continue;
 		}
 
 		if(ability->charges > 0 && rank_value.second.second < 1) {
-			continue;
-		}
-
-		AA::Rank *rank = ability->GetRankByPointsSpent(rank_value.second.first);
-		if(!rank) {
 			continue;
 		}
 
@@ -864,19 +862,18 @@ void Client::SendAlternateAdvancementTable() {
 void Client::SendAlternateAdvancementRank(int aa_id, int level) {
 	if(!zone)
 		return;
-	
-	AA::Ability *ability = zone->GetAlternateAdvancementAbility(aa_id);
 
-	if(!ability)
+	auto ability_rank = zone->GetAlternateAdvancementAbilityAndRank(aa_id, level);
+	auto ability = ability_rank.first;
+	auto rank = ability_rank.second;
+
+	if(!ability) {
 		return;
+	}
 
 	if(!(ability->classes & (1 << GetClass()))) {
 		return;
 	}
-
-	AA::Rank *rank = ability->GetRankByPointsSpent(level);
-	if(!rank)
-		return;
 
 	if(!CanUseAlternateAdvancementRank(rank)) {
 		return;
@@ -1224,13 +1221,11 @@ int Mob::GetAlternateAdvancementCooldownReduction(AA::Rank *rank_in) {
 	}
 
 	for(auto &aa : aa_ranks) {
-		AA::Ability *ability = zone->GetAlternateAdvancementAbility(aa.first);
-		if(!ability) {
-			continue;
-		}
+		auto ability_rank = zone->GetAlternateAdvancementAbilityAndRank(aa.first, aa.second.first);
+		auto ability = ability_rank.first;
+		auto rank = ability_rank.second;
 
-		AA::Rank *rank = ability->GetRankByPointsSpent(aa.second.first);
-		if(!rank) {
+		if(!ability) {
 			continue;
 		}
 
@@ -1328,6 +1323,21 @@ AA::Rank *Zone::GetAlternateAdvancementRank(int rank_id) {
 	return nullptr;
 }
 
+std::pair<AA::Ability*, AA::Rank*> Zone::GetAlternateAdvancementAbilityAndRank(int id, int points_spent) {
+	AA::Ability *ability = GetAlternateAdvancementAbility(id);
+
+	if(!ability) {
+		return std::make_pair(nullptr, nullptr);
+	}
+
+	AA::Rank *rank = ability->GetRankByPointsSpent(points_spent);
+	if(!rank) {
+		return std::make_pair(nullptr, nullptr);
+	}
+
+	return std::make_pair(ability, rank);
+}
+
 uint32 Mob::GetAA(uint32 rank_id, uint32 *charges) const {
 	if(zone) {
 		AA::Ability *ability = zone->GetAlternateAdvancementAbilityByRank(rank_id);
@@ -1343,6 +1353,23 @@ uint32 Mob::GetAA(uint32 rank_id, uint32 *charges) const {
 		}
 	}
 	return 0;
+}
+
+uint32 Mob::GetAAByAAID(uint32 aa_id, uint32 *charges) const {
+	if(zone) {
+		AA::Ability *ability = zone->GetAlternateAdvancementAbility(aa_id);
+
+		if(!ability)
+			return 0;
+
+		auto iter = aa_ranks.find(ability->id);
+		if(iter != aa_ranks.end()) {
+			if(charges) {
+				*charges = iter->second.second;
+			}
+			return iter->second.first;
+		}
+	}
 }
 
 bool Mob::SetAA(uint32 rank_id, uint32 new_value, uint32 charges) {

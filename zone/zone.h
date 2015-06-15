@@ -119,6 +119,7 @@ public:
 	AA::Ability *GetAlternateAdvancementAbility(int id);
 	AA::Ability *GetAlternateAdvancementAbilityByRank(int rank_id);
 	AA::Rank *GetAlternateAdvancementRank(int rank_id);
+	std::pair<AA::Ability*, AA::Rank*> GetAlternateAdvancementAbilityAndRank(int id, int points_spent);
 
 	void	LoadZoneDoors(const char* zone, int16 version);
 	bool	LoadZoneObjects();

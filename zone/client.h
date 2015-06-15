@@ -774,27 +774,23 @@ public:
 	void AddAAPoints(uint32 points) { m_pp.aapoints += points; SendAlternateAdvancementStats(); }
 	int GetAAPoints() { return m_pp.aapoints; }
 	int GetSpentAA() { return m_pp.aapoints_spent; }
-
-	//old AA Methods
+	
+	//old AA methods that we still use
 	void ResetAA();
+	void RefundAA();
 	void SendClearAA();
-	//this function is used by some AA stuff
-	void MemorizeSpell(uint32 slot,uint32 spellid,uint32 scribing);
-	void SetAATitle(const char *Title);
-	void SetTitleSuffix(const char *txt);
 	inline uint32 GetMaxAAXP(void) const { return max_AAXP; }
 	inline uint32 GetAAXP() const { return m_pp.expAA; }
+	int16 CalcAAFocus(focusType type, const AA::Rank &rank, uint16 spell_id);
+	void SetAATitle(const char *Title);
+	void SetTitleSuffix(const char *txt);
+
+	//old AA Methods that are slated for removal
+	void MemorizeSpell(uint32 slot,uint32 spellid,uint32 scribing);
 	void EnableAAEffect(aaEffectType type, uint32 duration = 0);
 	void DisableAAEffect(aaEffectType type);
 	bool CheckAAEffect(aaEffectType type);
-	void HandleAAAction(aaID activate);
-	int16 CalcAAFocusEffect(focusType type, uint16 focus_spell, uint16 spell_id);
-	int16 CalcAAFocus(focusType type, const AA::Rank &rank, uint16 spell_id);
-	void RefundAA();
-	int32 GetAAEffectDataBySlot(uint32 aa_ID, uint32 slot_id, bool GetEffect, bool GetBase1, bool GetBase2);
-	int32 GetAAEffectid(uint32 aa_ID, uint32 slot_id) { return GetAAEffectDataBySlot(aa_ID, slot_id, true, false,false); }
-	int32 GetAABase1(uint32 aa_ID, uint32 slot_id) { return GetAAEffectDataBySlot(aa_ID, slot_id, false, true,false); }
-	int32 GetAABase2(uint32 aa_ID, uint32 slot_id) { return GetAAEffectDataBySlot(aa_ID, slot_id, false, false,true); }
+
 	int32 acmod();
 
 	// Item methods
