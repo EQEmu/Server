@@ -295,3 +295,4 @@
 	void Handle_OP_XTargetRequest(const EQApplicationPacket *app);
 	void Handle_OP_YellForHelp(const EQApplicationPacket *app);
 	void Handle_OP_ZoneChange(const EQApplicationPacket *app);
+	void Handle_OP_ResetAA(const EQApplicationPacket *app);

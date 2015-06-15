@@ -332,7 +332,7 @@ int command_init(void) {
 		command_add("reloadzonepoints", "- Reload zone points from database", 150, command_reloadzps) ||
 		command_add("reloadzps", nullptr,0, command_reloadzps) ||
 		command_add("repop", "[delay] - Repop the zone with optional delay", 100, command_repop) ||
-		command_add("resetaa", "- Resets a Player's AA in their profile and refunds spent AA's to unspent, disconnects player.", 200, command_resetaa) ||
+		command_add("resetaa", "- Resets a Player's AA in their profile and refunds spent AA's to unspent, may disconnect player.", 200, command_resetaa) ||
 		command_add("revoke", "[charname] [1/0] - Makes charname unable to talk on OOC", 200, command_revoke) ||
 		command_add("rules", "(subcommand) - Manage server rules",  250, command_rules) ||
 		command_add("save", "- Force your player or player corpse target to be saved to the database", 50, command_save) ||
@@ -671,21 +671,13 @@ void command_incstat(Client* c, const Seperator* sep){
 	}
 }
 
-void command_resetaa(Client* c,const Seperator *sep){
-
-	//if(sep->IsNumber(1) && atoi(sep->arg[1]) == 1) {
-	//	c->SendAlternateAdvancement(2, 2);
-	//}
-	//else if(sep->IsNumber(1) && atoi(sep->arg[1]) == 2) {
-	//	c->SendAlternateAdvancement(2, 3);
-	//}
-
-	//if(c->GetTarget()!=0 && c->GetTarget()->IsClient()){
-	//	c->GetTarget()->CastToClient()->ResetAA();
-	//	c->Message(13,"Successfully reset %s's AAs", c->GetTarget()->GetName());
-	//}
-	//else
-	//	c->Message(0,"Usage: Target a client and use #resetaa to reset the AA data in their Profile.");
+void command_resetaa(Client* c,const Seperator *sep) {
+	if(c->GetTarget() && c->GetTarget()->IsClient()){
+		c->GetTarget()->CastToClient()->ResetAA();
+		c->Message(13,"Successfully reset %s's AAs", c->GetTarget()->GetName());
+	}
+	else
+		c->Message(0,"Usage: Target a client and use #resetaa to reset the AA data in their Profile.");
 }
 
 void command_help(Client *c, const Seperator *sep)

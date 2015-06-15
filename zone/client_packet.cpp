@@ -389,6 +389,7 @@ void MapOpcodes()
 	ConnectedOpcodes[OP_XTargetRequest] = &Client::Handle_OP_XTargetRequest;
 	ConnectedOpcodes[OP_YellForHelp] = &Client::Handle_OP_YellForHelp;
 	ConnectedOpcodes[OP_ZoneChange] = &Client::Handle_OP_ZoneChange;
+	ConnectedOpcodes[OP_ResetAA] = &Client::Handle_OP_ResetAA;
 }
 
 void ClearMappedOpcode(EmuOpcode op)
@@ -14163,9 +14164,12 @@ void Client::Handle_OP_YellForHelp(const EQApplicationPacket *app)
 	return;
 }
 
-/*
-void Client::Handle_OP_ZoneChange(const EQApplicationPacket *app)
+void Client::Handle_OP_ResetAA(const EQApplicationPacket *app)
 {
+	if(Admin() >= 50) {
+		Message(0, "Resetting AA points.");
+		ResetAA();
+	}
 	return;
 }
-*/
+

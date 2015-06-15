@@ -482,40 +482,35 @@ bool Client::CheckAAEffect(aaEffectType type) {
 	return(false);
 }
 
-void Client::ResetAA(){
-//	RefundAA();
-//	uint32 i;
-//	for (i=0; i < MAX_PP_AA_ARRAY; i++) {
-//		aa[i]->AA = 0;
-//		aa[i]->value = 0;
-//		aa[i]->charges = 0;
-//		m_pp.aa_array[i].AA = 0;
-//		m_pp.aa_array[i].value = 0;
-//		m_pp.aa_array[i].charges= 0;
-//	}
-//
-//	std::map<uint32,uint8>::iterator itr;
-//	for(itr = aa_points.begin(); itr != aa_points.end(); ++itr)
-//		aa_points[itr->first] = 0;
-//
-//	for(int i = 0; i < _maxLeaderAA; ++i)
-//		m_pp.leader_abilities.ranks[i] = 0;
-//
-//	m_pp.group_leadership_points = 0;
-//	m_pp.raid_leadership_points = 0;
-//	m_pp.group_leadership_exp = 0;
-//	m_pp.raid_leadership_exp = 0;
-//
-//	database.DeleteCharacterAAs(this->CharacterID());
-//	SaveAA();
-//	SendClearAA();
-//	SendAAList();
-//	SendAATable();
-//	SendAAStats();
-//	database.DeleteCharacterLeadershipAAs(this->CharacterID());
-//	// undefined for these clients
-//	if (GetClientVersionBit() & BIT_TitaniumAndEarlier)
-//		Kick();
+void Client::ResetAA() {
+	RefundAA();
+	uint32 i;
+	for (i=0; i < MAX_PP_AA_ARRAY; i++) {
+		m_pp.aa_array[i].AA = 0;
+		m_pp.aa_array[i].value = 0;
+		m_pp.aa_array[i].charges= 0;
+	}
+
+	aa_ranks.clear();
+
+	for(int i = 0; i < _maxLeaderAA; ++i)
+		m_pp.leader_abilities.ranks[i] = 0;
+
+	m_pp.group_leadership_points = 0;
+	m_pp.raid_leadership_points = 0;
+	m_pp.group_leadership_exp = 0;
+	m_pp.raid_leadership_exp = 0;
+
+	database.DeleteCharacterAAs(CharacterID());
+	SaveAA();
+	SendClearAA();
+	SendAlternateAdvancementTable();
+	SendAlternateAdvancementPoints();
+	SendAlternateAdvancementStats();
+	database.DeleteCharacterLeadershipAAs(this->CharacterID());
+	// undefined for these clients
+	if (GetClientVersionBit() & BIT_TitaniumAndEarlier)
+		Kick();
 }
 
 void Client::SendClearAA()
@@ -802,34 +797,31 @@ void Client::DurationRampage(uint32 duration)
 }
 
 void Client::RefundAA() {
-//	int cur = 0;
-//	bool refunded = false;
-//
-//	for(int x = 0; x < aaHighestID; x++) {
-//		cur = GetAA(x);
-//		if(cur > 0){
-//			SendAA_Struct* curaa = zone->FindAA(x);
-//			if(cur){
-//				SetAA(x, 0);
-//				for(int j = 0; j < cur; j++) {
-//					m_pp.aapoints += curaa->cost + (curaa->cost_inc * j);
-//					refunded = true;
-//				}
-//			}
-//			else
-//			{
-//				m_pp.aapoints += cur;
-//				SetAA(x, 0);
-//				refunded = true;
-//			}
-//		}
-//	}
-//
-//	if(refunded) {
-//		SaveAA();
-//		Save();
-//		// Kick();
-//	}
+	int refunded = 0;
+
+	for(auto &rank_value : aa_ranks) {
+		AA::Ability *ability = zone->GetAlternateAdvancementAbility(rank_value.first);
+		if(!ability) {
+			continue;
+		}
+
+		if(ability->charges > 0 && rank_value.second.second < 1) {
+			continue;
+		}
+
+		AA::Rank *rank = ability->GetRankByPointsSpent(rank_value.second.first);
+		if(!rank) {
+			continue;
+		}
+
+		refunded += rank->total_cost;
+	}
+
+	if(refunded > 0) {
+		m_pp.aapoints += refunded;
+		SaveAA();
+		Save();
+	}
 }
 
 AA_SwarmPetInfo::AA_SwarmPetInfo()
