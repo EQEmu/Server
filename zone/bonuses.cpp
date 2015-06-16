@@ -42,6 +42,7 @@
 void Mob::CalcBonuses()
 {
 	CalcSpellBonuses(&spellbonuses);
+	CalcAABonuses(&aabonuses);
 	CalcMaxHP();
 	CalcMaxMana();
 	SetAttackTimer();
@@ -51,9 +52,7 @@ void Mob::CalcBonuses()
 
 void NPC::CalcBonuses()
 {
-	Mob::CalcBonuses();
-	memset(&aabonuses, 0, sizeof(StatBonuses));
-
+	memset(&itembonuses, 0, sizeof(StatBonuses));
 	if(RuleB(NPC, UseItemBonusesForNonPets)){
 		memset(&itembonuses, 0, sizeof(StatBonuses));
 		CalcItemBonuses(&itembonuses);
@@ -74,12 +73,8 @@ void Client::CalcBonuses()
 	memset(&itembonuses, 0, sizeof(StatBonuses));
 	CalcItemBonuses(&itembonuses);
 	CalcEdibleBonuses(&itembonuses);
-
 	CalcSpellBonuses(&spellbonuses);
-
-	Log.Out(Logs::Detail, Logs::AA, "Calculating AA Bonuses for %s.", this->GetCleanName());
-	CalcAABonuses(&aabonuses);	//we're not quite ready for this
-	Log.Out(Logs::Detail, Logs::AA, "Finished calculating AA Bonuses for %s.", this->GetCleanName());
+	CalcAABonuses(&aabonuses);
 
 	ProcessItemCaps(); // caps that depend on spell/aa bonuses
 
@@ -635,7 +630,7 @@ void Client::CalcEdibleBonuses(StatBonuses* newbon) {
 	}
 }
 
-void Client::CalcAABonuses(StatBonuses *newbon)
+void Mob::CalcAABonuses(StatBonuses *newbon)
 {
 	memset(newbon, 0, sizeof(StatBonuses)); // start fresh
 
@@ -659,7 +654,7 @@ void Client::CalcAABonuses(StatBonuses *newbon)
 //A lot of the normal spell functions (IsBlankSpellEffect, etc) are set for just spells (in common/spdat.h).
 //For now, we'll just put them directly into the code and comment with the corresponding normal function
 //Maybe we'll fix it later? :-D
-void Client::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
+void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 {
 	if (rank.effects.empty()) // sanity check. why bother if no slots to fill?
 		return;

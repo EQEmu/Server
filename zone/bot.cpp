@@ -193,7 +193,7 @@ Bot::Bot(uint32 botID, uint32 botOwnerCharacterID, uint32 botSpellsID, double to
 	GenerateBaseStats();
 
 	LoadTimers();
-	//LoadAAs(); old aa, replace this
+	LoadAAs();
 	LoadBuffs();
 
 	CalcBotStats(false);
@@ -1424,668 +1424,41 @@ int32 Bot::GenerateBaseHitPoints()
 	return new_base_hp;
 }
 
-void Bot::GenerateAABonuses(StatBonuses* newbon) {
-	// General AA bonus
-	uint8 botClass = GetClass();
-	uint8 botLevel = GetLevel();
+void Bot::LoadAAs() {
+	int maxAAExpansion = RuleI(Bots, BotAAExpansion); //get expansion to get AAs up to
+	aa_ranks.clear();
 
-	memset(newbon, 0, sizeof(StatBonuses));	//start fresh
-	//old aa
-	//if(botLevel >= 51) {
-	//	//level 51 = 1 AA level
-	//
-	//	int i;
-	//	int totalAAs = database.CountAAs();
-	//	uint32 slots = 0;
-	//	uint32 aa_AA = 0;
-	//	uint32 aa_value = 0;
-	//	for (i = 0; i < totalAAs; i++) {	//iterate through all of the client's AAs
-	//		std::map<uint32, BotAA>::iterator aa = botAAs.find(i);
-	//		if(aa != botAAs.end()) { // make sure aa exists or we'll crash zone
-	//			aa_AA = aa->second.aa_id;	//same as aaid from the aa_effects table
-	//			aa_value = aa->second.total_levels;	//how many points in it
-	//			if (aa_AA > 0 || aa_value > 0) {	//do we have the AA? if 1 of the 2 is set, we can assume we do
-	//				//slots = database.GetTotalAALevels(aa_AA);	//find out how many effects from aa_effects table
-	//				//slots = zone->GetTotalAALevels(aa_AA);	//find out how many effects from aa_effects, which is loaded into memory
-	//				//if (slots > 0)	//and does it have any effects? may be able to put this above, not sure if it runs on each iteration
-	//				//	ApplyAABonuses(aa_AA + aa_value -1, slots, newbon);	//add the bonuses
-	//			}
-	//		}
-	//	}
-	//}
-}
+	int id = 0;
+	int points = 0;
+	auto iter = zone->aa_abilities.begin();
+	while(iter != zone->aa_abilities.end()) {
+		AA::Ability *ability = (*iter).second.get();
 
-//old AA
-//void Bot::LoadAAs() {
-//	int maxAAExpansion = RuleI(Bots, BotAAExpansion); //get expansion to get AAs up to
-//	botAAs.clear();	//start fresh
-//
-//   std::string query;
-//
-//	if(GetClass() == BERSERKER)
-//		query = StringFormat("SELECT skill_id FROM altadv_vars WHERE berserker = 1 AND class_type > 1 AND class_type <= %i AND aa_expansion <= %i ORDER BY skill_id;", GetLevel(), maxAAExpansion);
-//	else
-//		query = StringFormat("SELECT skill_id FROM altadv_vars WHERE ((classes & ( 1 << %i )) >> %i) = 1 AND class_type > 1 AND class_type <= %i AND aa_expansion <= %i ORDER BY skill_id;", GetClass(), GetClass(), GetLevel(), maxAAExpansion);
-//
-//   auto results = database.QueryDatabase(query);
-//
-//	if(!results.Success()) {
-//		Log.Out(Logs::General, Logs::Error, "Error in Bot::LoadAAs()");
-//		return;
-//	}
-//
-//   int totalAAs = database.CountAAs();
-//
-//   for (auto row = results.begin(); row != results.end(); ++row) {
-//       uint32 skill_id = 0;
-//		skill_id = atoi(row[0]);
-//
-//       if(skill_id <= 0 || skill_id >= totalAAs)
-//           continue;
-//
-//       SendAA_Struct *sendAA = zone->FindAA(skill_id);
-//
-//       if(!sendAA)
-//           continue;
-//
-//       for(int i=0; i<sendAA->max_level; i++) {
-//           //Get AA info & add to list
-//           uint32 aaid = sendAA->id + i;
-//           uint8 total_levels = 0;
-//           uint8 req_level;
-//           std::map<uint32, AALevelCost_Struct>::iterator RequiredLevel = AARequiredLevelAndCost.find(aaid);
-//
-//           //Get level required for AA
-//           if(RequiredLevel != AARequiredLevelAndCost.end())
-//               req_level = RequiredLevel->second.Level;
-//           else
-//               req_level = (sendAA->class_type + i * sendAA->level_inc);
-//
-//           if(req_level > GetLevel())
-//               break;
-//
-//           //Bot is high enough level for AA
-//           std::map<uint32, BotAA>::iterator foundAA = botAAs.find(aaid);
-//
-//           // AA is already in list
-//           if(foundAA != botAAs.end())
-//               continue;
-//
-//           if(sendAA->id == aaid) {
-//               BotAA newAA;
-//
-//               newAA.total_levels = 0;
-//               newAA.aa_id = aaid;
-//               newAA.req_level = req_level;
-//               newAA.total_levels += 1;
-//
-//               botAAs[aaid] = newAA;	//add to list
-//           }
-//           else //update master AA record with number of levels a bot has in AA, based on level.
-//               botAAs[sendAA->id].total_levels+=1;
-//       }
-//   }
-//
-//}
+		//skip expendables
+		if(!ability->first || ability->charges > 0) {
+			continue;
+		}
 
-//current with Client::ApplyAABonuses 9/26/12
-void Bot::ApplyAABonuses(uint32 aaid, uint32 slots, StatBonuses* newbon)
-{
-	if(slots == 0)	//sanity check. why bother if no slots to fill?
-		return;
+		id = ability->first->id;
+		points = 0;
 
-	//from AA_Ability struct
-	uint32 effect = 0;
-	int32 base1 = 0;
-	int32 base2 = 0;	//only really used for SE_RaiseStatCap & SE_ReduceSkillTimer in aa_effects table
-	uint32 slot = 0;
+		AA::Rank *current = ability->first;
 
-	//old AA
-	//std::map<uint32, std::map<uint32, AA_Ability> >::const_iterator find_iter = aa_effects.find(aaid);
-	//if(find_iter == aa_effects.end())
-	//{
-	//	return;
-	//}
-	//
-	//for (std::map<uint32, AA_Ability>::const_iterator iter = aa_effects[aaid].begin(); iter != aa_effects[aaid].end(); ++iter) {
-	//	effect = iter->second.skill_id;
-	//	base1 = iter->second.base1;
-	//	base2 = iter->second.base2;
-	//	slot = iter->second.slot;
-	//
-	//	//we default to 0 (SE_CurrentHP) for the effect, so if there aren't any base1/2 values, we'll just skip it
-	//	if (effect == 0 && base1 == 0 && base2 == 0)
-	//		continue;
-	//
-	//	//IsBlankSpellEffect()
-	//	if (effect == SE_Blank || (effect == SE_CHA && base1 == 0) || effect == SE_StackingCommand_Block || effect == SE_StackingCommand_Overwrite)
-	//		continue;
-	//
-	//	Log.Out(Logs::Detail, Logs::AA, "Applying Effect %d from AA %u in slot %d (base1: %d, base2: %d) on %s", effect, aaid, slot, base1, base2, this->GetCleanName());
-	//
-	//	uint8 focus = IsFocusEffect(0, 0, true,effect);
-	//	if (focus)
-	//	{
-	//		newbon->FocusEffects[focus] = effect;
-	//		continue;
-	//	}
-	//
-	//	switch (effect)
-	//	{
-	//		//Note: AA effects that use accuracy are skill limited, while spell effect is not.
-	//		case SE_Accuracy:
-	//			if ((base2 == -1) && (newbon->Accuracy[HIGHEST_SKILL+1] < base1))
-	//				newbon->Accuracy[HIGHEST_SKILL+1] = base1;
-	//			else if (newbon->Accuracy[base2] < base1)
-	//				newbon->Accuracy[base2] += base1;
-	//			break;
-	//		case SE_CurrentHP: //regens
-	//			newbon->HPRegen += base1;
-	//			break;
-	//		case SE_CurrentEndurance:
-	//			newbon->EnduranceRegen += base1;
-	//			break;
-	//		case SE_MovementSpeed:
-	//			newbon->movementspeed += base1;	//should we let these stack?
-	//			/*if (base1 > newbon->movementspeed)	//or should we use a total value?
-	//				newbon->movementspeed = base1;*/
-	//			break;
-	//		case SE_STR:
-	//			newbon->STR += base1;
-	//			break;
-	//		case SE_DEX:
-	//			newbon->DEX += base1;
-	//			break;
-	//		case SE_AGI:
-	//			newbon->AGI += base1;
-	//			break;
-	//		case SE_STA:
-	//			newbon->STA += base1;
-	//			break;
-	//		case SE_INT:
-	//			newbon->INT += base1;
-	//			break;
-	//		case SE_WIS:
-	//			newbon->WIS += base1;
-	//			break;
-	//		case SE_CHA:
-	//			newbon->CHA += base1;
-	//			break;
-	//		case SE_WaterBreathing:
-	//			//handled by client
-	//			break;
-	//		case SE_CurrentMana:
-	//			newbon->ManaRegen += base1;
-	//			break;
-	//		case SE_ItemManaRegenCapIncrease:
-	//			newbon->ItemManaRegenCap += base1;
-	//			break;
-	//		case SE_ResistFire:
-	//			newbon->FR += base1;
-	//			break;
-	//		case SE_ResistCold:
-	//			newbon->CR += base1;
-	//			break;
-	//		case SE_ResistPoison:
-	//			newbon->PR += base1;
-	//			break;
-	//		case SE_ResistDisease:
-	//			newbon->DR += base1;
-	//			break;
-	//		case SE_ResistMagic:
-	//			newbon->MR += base1;
-	//			break;
-	//		case SE_ResistCorruption:
-	//			newbon->Corrup += base1;
-	//			break;
-	//		case SE_IncreaseSpellHaste:
-	//			break;
-	//		case SE_IncreaseRange:
-	//			break;
-	//		case SE_MaxHPChange:
-	//			newbon->MaxHP += base1;
-	//			break;
-	//		case SE_Packrat:
-	//			newbon->Packrat += base1;
-	//			break;
-	//		case SE_TwoHandBash:
-	//			break;
-	//		case SE_SetBreathLevel:
-	//			break;
-	//		case SE_RaiseStatCap:
-	//			switch(base2)
-	//			{
-	//				//are these #define'd somewhere?
-	//				case 0: //str
-	//					newbon->STRCapMod += base1;
-	//					break;
-	//				case 1: //sta
-	//					newbon->STACapMod += base1;
-	//					break;
-	//				case 2: //agi
-	//					newbon->AGICapMod += base1;
-	//					break;
-	//				case 3: //dex
-	//					newbon->DEXCapMod += base1;
-	//					break;
-	//				case 4: //wis
-	//					newbon->WISCapMod += base1;
-	//					break;
-	//				case 5: //int
-	//					newbon->INTCapMod += base1;
-	//					break;
-	//				case 6: //cha
-	//					newbon->CHACapMod += base1;
-	//					break;
-	//				case 7: //mr
-	//					newbon->MRCapMod += base1;
-	//					break;
-	//				case 8: //cr
-	//					newbon->CRCapMod += base1;
-	//					break;
-	//				case 9: //fr
-	//					newbon->FRCapMod += base1;
-	//					break;
-	//				case 10: //pr
-	//					newbon->PRCapMod += base1;
-	//					break;
-	//				case 11: //dr
-	//					newbon->DRCapMod += base1;
-	//					break;
-	//				case 12: //corruption
-	//					newbon->CorrupCapMod += base1;
-	//					break;
-	//			}
-	//			break;
-	//		case SE_PetDiscipline2:
-	//			break;
-	//		case SE_SpellSlotIncrease:
-	//			break;
-	//		case SE_MysticalAttune:
-	//			newbon->BuffSlotIncrease += base1;
-	//			break;
-	//		case SE_TotalHP:
-	//			newbon->HP += base1;
-	//			break;
-	//		case SE_StunResist:
-	//			newbon->StunResist += base1;
-	//			break;
-	//		case SE_SpellCritChance:
-	//			newbon->CriticalSpellChance += base1;
-	//			break;
-	//		case SE_SpellCritDmgIncrease:
-	//			newbon->SpellCritDmgIncrease += base1;
-	//			break;
-	//		case SE_DotCritDmgIncrease:
-	//			newbon->DotCritDmgIncrease += base1;
-	//			break;
-	//		case SE_ResistSpellChance:
-	//			newbon->ResistSpellChance += base1;
-	//			break;
-	//		case SE_CriticalHealChance:
-	//			newbon->CriticalHealChance += base1;
-	//			break;
-	//		case SE_CriticalHealOverTime:
-	//			newbon->CriticalHealOverTime += base1;
-	//			break;
-	//		case SE_CriticalDoTChance:
-	//			newbon->CriticalDoTChance += base1;
-	//			break;
-	//		case SE_ReduceSkillTimer:
-	//			newbon->SkillReuseTime[base2] += base1;
-	//			break;
-	//		case SE_Fearless:
-	//			newbon->Fearless = true;
-	//			break;
-	//		case SE_PersistantCasting:
-	//			newbon->PersistantCasting += base1;
-	//			break;
-	//		case SE_DelayDeath:
-	//			newbon->DelayDeath += base1;
-	//			break;
-	//		case SE_FrontalStunResist:
-	//			newbon->FrontalStunResist += base1;
-	//			break;
-	//		case SE_ImprovedBindWound:
-	//			newbon->BindWound += base1;
-	//			break;
-	//		case SE_MaxBindWound:
-	//			newbon->MaxBindWound += base1;
-	//			break;
-	//		case SE_ExtraAttackChance:
-	//			newbon->ExtraAttackChance += base1;
-	//			break;
-	//		case SE_SeeInvis:
-	//			newbon->SeeInvis = base1;
-	//			break;
-	//		case SE_BaseMovementSpeed:
-	//			newbon->BaseMovementSpeed += base1;
-	//			break;
-	//		case SE_IncreaseRunSpeedCap:
-	//			newbon->IncreaseRunSpeedCap += base1;
-	//			break;
-	//		case SE_ConsumeProjectile:
-	//			newbon->ConsumeProjectile += base1;
-	//			break;
-	//		case SE_ArcheryDamageModifier:
-	//			newbon->ArcheryDamageModifier += base1;
-	//			break;
-	//		case SE_DamageShield:
-	//			newbon->DamageShield += base1;
-	//			break;
-	//		case SE_CharmBreakChance:
-	//			newbon->CharmBreakChance += base1;
-	//			break;
-	//		case SE_OffhandRiposteFail:
-	//			newbon->OffhandRiposteFail += base1;
-	//			break;
-	//		case SE_ItemAttackCapIncrease:
-	//			newbon->ItemATKCap += base1;
-	//			break;
-	//		case SE_GivePetGroupTarget:
-	//			newbon->GivePetGroupTarget = true;
-	//			break;
-	//		case SE_ItemHPRegenCapIncrease:
-	//			newbon->ItemHPRegenCap = +base1;
-	//			break;
-	//		case SE_Ambidexterity:
-	//			newbon->Ambidexterity += base1;
-	//			break;
-	//		case SE_PetMaxHP:
-	//			newbon->PetMaxHP += base1;
-	//			break;
-	//		case SE_AvoidMeleeChance:
-	//			newbon->AvoidMeleeChance += base1;
-	//			break;
-	//		case SE_CombatStability:
-	//			newbon->CombatStability += base1;
-	//			break;
-	//		case SE_PetCriticalHit:
-	//			newbon->PetCriticalHit += base1;
-	//			break;
-	//		case SE_PetAvoidance:
-	//			newbon->PetAvoidance += base1;
-	//			break;
-	//		case SE_ShieldBlock:
-	//			newbon->ShieldBlock += base1;
-	//			break;
-	//		case SE_SecondaryDmgInc:
-	//			newbon->SecondaryDmgInc = true;
-	//			break;
-	//		case SE_ChangeAggro:
-	//			newbon->hatemod += base1;
-	//			break;
-	//		case SE_EndurancePool:
-	//			newbon->Endurance += base1;
-	//			break;
-	//		case SE_ChannelChanceItems:
-	//			newbon->ChannelChanceItems += base1;
-	//			break;
-	//		case SE_ChannelChanceSpells:
-	//			newbon->ChannelChanceSpells += base1;
-	//			break;
-	//		case SE_DoubleSpecialAttack:
-	//			newbon->DoubleSpecialAttack += base1;
-	//			break;
-	//		case SE_TripleBackstab:
-	//			newbon->TripleBackstab += base1;
-	//			break;
-	//		case SE_FrontalBackstabMinDmg:
-	//			newbon->FrontalBackstabMinDmg = true;
-	//			break;
-	//		case SE_FrontalBackstabChance:
-	//			newbon->FrontalBackstabChance += base1;
-	//			break;
-	//		case SE_BlockBehind:
-	//			newbon->BlockBehind += base1;
-	//			break;
-	//		case SE_StrikeThrough2:
-	//			newbon->StrikeThrough += base1;
-	//			break;
-	//		case SE_DoubleAttackChance:
-	//			newbon->DoubleAttackChance += base1;
-	//			break;
-	//		case SE_GiveDoubleAttack:
-	//			newbon->GiveDoubleAttack += base1;
-	//			break;
-	//		case SE_ProcChance:
-	//			newbon->ProcChance += base1;
-	//			break;
-	//		case SE_RiposteChance:
-	//			newbon->RiposteChance += base1;
-	//			break;
-	//		case SE_Flurry:
-	//			newbon->FlurryChance += base1;
-	//			break;
-	//		case SE_PetFlurry:
-	//			newbon->PetFlurry = base1;
-	//			break;
-	//		case SE_BardSongRange:
-	//			newbon->SongRange += base1;
-	//			break;
-	//		case SE_RootBreakChance:
-	//			newbon->RootBreakChance += base1;
-	//			break;
-	//		case SE_UnfailingDivinity:
-	//			newbon->UnfailingDivinity += base1;
-	//			break;
-	//
-	//		case SE_ProcOnKillShot:
-	//			for(int i = 0; i < MAX_SPELL_TRIGGER*3; i+=3)
-	//			{
-	//				if(!newbon->SpellOnKill[i] || ((newbon->SpellOnKill[i] == base2) && (newbon->SpellOnKill[i+1] < base1)))
-	//				{
-	//					//base1 = chance, base2 = SpellID to be triggered, base3 = min npc level
-	//					newbon->SpellOnKill[i] = base2;
-	//					newbon->SpellOnKill[i+1] = base1;
-	//
-	//					if (GetLevel() > 15)
-	//						newbon->SpellOnKill[i+2] = GetLevel() - 15; //AA specifiy "non-trivial"
-	//					else
-	//						newbon->SpellOnKill[i+2] = 0;
-	//
-	//					break;
-	//				}
-	//			}
-	//		break;
-	//
-	//		case SE_SpellOnDeath:
-	//			for(int i = 0; i < MAX_SPELL_TRIGGER*2; i+=2)
-	//			{
-	//				if(!newbon->SpellOnDeath[i])
-	//				{
-	//					// base1 = SpellID to be triggered, base2 = chance to fire
-	//					newbon->SpellOnDeath[i] = base1;
-	//					newbon->SpellOnDeath[i+1] = base2;
-	//					break;
-	//				}
-	//			}
-	//		break;
-	//
-	//		case SE_TriggerOnCast:
-	//
-	//			for(int i = 0; i < MAX_SPELL_TRIGGER; i++)
-	//			{
-	//				if (newbon->SpellTriggers[i] == aaid)
-	//					break;
-	//
-	//				if(!newbon->SpellTriggers[i])
-	//				{
-	//					//Save the 'aaid' of each triggerable effect to an array
-	//					newbon->SpellTriggers[i] = aaid;
-	//					break;
-	//				}
-	//			}
-	//		break;
-	//
-	//		case SE_CriticalHitChance:
-	//		{
-	//			if(base2 == -1)
-	//				newbon->CriticalHitChance[HIGHEST_SKILL+1] += base1;
-	//			else
-	//				newbon->CriticalHitChance[base2] += base1;
-	//		}
-	//		break;
-	//
-	//		case SE_CriticalDamageMob:
-	//		{
-	//			// base1 = effect value, base2 = skill restrictions(-1 for all)
-	//			if(base2 == -1)
-	//				newbon->CritDmgMob[HIGHEST_SKILL+1] += base1;
-	//			else
-	//				newbon->CritDmgMob[base2] += base1;
-	//			break;
-	//		}
-	//
-	//		case SE_CriticalSpellChance:
-	//		{
-	//			newbon->CriticalSpellChance += base1;
-	//
-	//			if (base2 > newbon->SpellCritDmgIncrease)
-	//				newbon->SpellCritDmgIncrease = base2;
-	//
-	//			break;
-	//		}
-	//
-	//		case SE_ResistFearChance:
-	//		{
-	//			if(base1 == 100) // If we reach 100% in a single spell/item then we should be immune to negative fear resist effects until our immunity is over
-	//				newbon->Fearless = true;
-	//
-	//			newbon->ResistFearChance += base1; // these should stack
-	//			break;
-	//		}
-	//
-	//		case SE_SkillDamageAmount:
-	//		{
-	//			if(base2 == -1)
-	//				newbon->SkillDamageAmount[HIGHEST_SKILL+1] += base1;
-	//			else
-	//				newbon->SkillDamageAmount[base2] += base1;
-	//			break;
-	//		}
-	//
-	//		case SE_SpecialAttackKBProc:
-	//		{
-	//			//You can only have one of these per client. [AA Dragon Punch]
-	//			newbon->SpecialAttackKBProc[0] = base1; //Chance base 100 = 25% proc rate
-	//			newbon->SpecialAttackKBProc[1] = base2; //Skill to KB Proc Off
-	//			break;
-	//		}
-	//
-	//		case SE_DamageModifier:
-	//		{
-	//			if(base2 == -1)
-	//				newbon->DamageModifier[HIGHEST_SKILL+1] += base1;
-	//			else
-	//				newbon->DamageModifier[base2] += base1;
-	//			break;
-	//		}
-	//
-	//		case SE_SlayUndead:
-	//		{
-	//			if(newbon->SlayUndead[1] < base1)
-	//				newbon->SlayUndead[0] = base1; // Rate
-	//				newbon->SlayUndead[1] = base2; // Damage Modifier
-	//			break;
-	//		}
-	//
-	//		case SE_GiveDoubleRiposte:
-	//		{
-	//			//0=Regular Riposte 1=Skill Attack Riposte 2=Skill
-	//			if(base2 == 0){
-	//				if(newbon->GiveDoubleRiposte[0] < base1)
-	//					newbon->GiveDoubleRiposte[0] = base1;
-	//			}
-	//			//Only for special attacks.
-	//			else if(base2 > 0 && (newbon->GiveDoubleRiposte[1] < base1)){
-	//				newbon->GiveDoubleRiposte[1] = base1;
-	//				newbon->GiveDoubleRiposte[2] = base2;
-	//			}
-	//
-	//			break;
-	//		}
-	//
-	//		//Kayen: Not sure best way to implement this yet.
-	//		//Physically raises skill cap ie if 55/55 it will raise to 55/60
-	//		case SE_RaiseSkillCap:
-	//		{
-	//			if(newbon->RaiseSkillCap[0] < base1){
-	//				newbon->RaiseSkillCap[0] = base1; //value
-	//				newbon->RaiseSkillCap[1] = base2; //skill
-	//			}
-	//			break;
-	//		}
-	//
-	//		case SE_MasteryofPast:
-	//		{
-	//			if(newbon->MasteryofPast < base1)
-	//				newbon->MasteryofPast = base1;
-	//			break;
-	//		}
-	//
-	//		case SE_CastingLevel2:
-	//		case SE_CastingLevel:
-	//		{
-	//			newbon->effective_casting_level += base1;
-	//			break;
-	//		}
-	//
-	//
-	//		case SE_DivineSave:
-	//		{
-	//			if(newbon->DivineSaveChance[0] < base1)
-	//			{
-	//				newbon->DivineSaveChance[0] = base1;
-	//				newbon->DivineSaveChance[1] = base2;
-	//			}
-	//			break;
-	//		}
-	//
-	//		case SE_SpellEffectResistChance:
-	//		{
-	//			for(int e = 0; e < MAX_RESISTABLE_EFFECTS*2; e+=2)
-	//			{
-	//				if(!newbon->SEResist[e] || ((newbon->SEResist[e] = base2) && (newbon->SEResist[e+1] < base1)) ){
-	//					newbon->SEResist[e] = base2;
-	//					newbon->SEResist[e+1] = base1;
-	//				break;
-	//				}
-	//			}
-	//			break;
-	//		}
-	//
-	//		case SE_MitigateDamageShield:
-	//		{
-	//			if (base1 < 0)
-	//				base1 = base1*(-1);
-	//
-	//			newbon->DSMitigationOffHand += base1;
-	//			break;
-	//		}
-	//
-	//		case SE_FinishingBlow:
-	//		{
-	//
-	//			//base1 = chance, base2 = damage
-	//			if (newbon->FinishingBlow[1] < base2){
-	//				newbon->FinishingBlow[0] = base1;
-	//				newbon->FinishingBlow[1] = base2;
-	//			}
-	//			break;
-	//		}
-	//
-	//		case SE_FinishingBlowLvl:
-	//		{
-	//			//base1 = level, base2 = ??? (Set to 200 in AA data, possible proc rate mod?)
-	//			if (newbon->FinishingBlowLvl[0] < base1){
-	//				newbon->FinishingBlowLvl[0] = base1;
-	//				newbon->FinishingBlowLvl[1] = base2;
-	//			}
-	//			break;
-	//		}
-	//	}
-	//}
+		while(current) {
+			if(!CanUseAlternateAdvancementRank(current)) {
+				current = nullptr;
+			} else {
+				current = current->next;
+				points++;
+			}
+		}
+
+		if(points > 0) {
+			SetAA(id, points);
+		}
+
+		++iter;
+	}
 }
 
 bool Bot::IsValidRaceClassCombo() {
@@ -6298,7 +5671,7 @@ bool Bot::Attack(Mob* other, int Hand, bool FromRiposte, bool IsStrikethrough, b
 		return false;
 }
 
-int32 Bot::CalcBotAAFocus(BotfocusType type, uint32 aa_ID, uint16 spell_id)
+int32 Bot::CalcBotAAFocus(BotfocusType type, uint32 aa_ID, uint32 points, uint16 spell_id)
 {
 	const SPDat_Spell_Struct &spell = spells[spell_id];
 
@@ -6316,401 +5689,401 @@ int32 Bot::CalcBotAAFocus(BotfocusType type, uint32 aa_ID, uint16 spell_id)
 	bool LimitFound = false;
 	int FocusCount = 0;
 
-	//old AA
-	//std::map<uint32, std::map<uint32, AA_Ability> >::const_iterator find_iter = aa_effects.find(aa_ID);
-	//if(find_iter == aa_effects.end())
-	//{
-	//	return 0;
-	//}
-	//
-	//for (std::map<uint32, AA_Ability>::const_iterator iter = aa_effects[aa_ID].begin(); iter != aa_effects[aa_ID].end(); ++iter)
-	//{
-	//	effect = iter->second.skill_id;
-	//	base1 = iter->second.base1;
-	//	base2 = iter->second.base2;
-	//	slot = iter->second.slot;
-	//
-	//	//AA Foci's can contain multiple focus effects within the same AA.
-	//	//To handle this we will not automatically return zero if a limit is found.
-	//	//Instead if limit is found and multiple effects, we will reset the limit check
-	//	//when the next valid focus effect is found.
-	//	if (IsFocusEffect(0, 0, true,effect) || (effect == SE_TriggerOnCast)){
-	//		FocusCount++;
-	//		//If limit found on prior check next, else end loop.
-	//		if (FocusCount > 1){
-	//			if (LimitFound){
-	//				value = 0;
-	//				LimitFound = false;
-	//			}
-	//
-	//			else{
-	//				break;
-	//			}
-	//		}
-	//	}
-	//
-	//
-	//	switch (effect)
-	//	{
-	//		case SE_Blank:
-	//			break;
-	//
-	//		//Handle Focus Limits
-	//		case SE_LimitResist:
-	//			if(base1)
-	//			{
-	//				if(spell.resisttype != base1)
-	//					LimitFound = true;
-	//			}
-	//		break;
-	//		case SE_LimitInstant:
-	//			if(spell.buffduration)
-	//				LimitFound = true;
-	//		break;
-	//		case SE_LimitMaxLevel:
-	//			spell_level = spell.classes[(GetClass()%16) - 1];
-	//			lvldiff = spell_level - base1;
-	//			//every level over cap reduces the effect by base2 percent unless from a clicky when ItemCastsUseFocus is true
-	//			if(lvldiff > 0 && (spell_level <= RuleI(Character, MaxLevel) || RuleB(Character, ItemCastsUseFocus) == false))
-	//			{
-	//				if(base2 > 0)
-	//				{
-	//					lvlModifier -= base2*lvldiff;
-	//					if(lvlModifier < 1)
-	//						LimitFound = true;
-	//				}
-	//				else {
-	//					LimitFound = true;
-	//				}
-	//			}
-	//		break;
-	//		case SE_LimitMinLevel:
-	//			if((spell.classes[(GetClass()%16) - 1]) < base1)
-	//				LimitFound = true;
-	//		break;
-	//		case SE_LimitCastTimeMin:
-	//			if (spell.cast_time < base1)
-	//				LimitFound = true;
-	//		break;
-	//		case SE_LimitSpell:
-	//			// Exclude spell(any but this)
-	//			if(base1 < 0) {
-	//				if (spell_id == (base1*-1))
-	//					LimitFound = true;
-	//			}
-	//			else {
-	//			// Include Spell(only this)
-	//				if (spell_id != base1)
-	//					LimitFound = true;
-	//			}
-	//		break;
-	//		case SE_LimitMinDur:
-	//			if (base1 > CalcBuffDuration_formula(GetLevel(), spell.buffdurationformula, spell.buffduration))
-	//				LimitFound = true;
-	//		break;
-	//		case SE_LimitEffect:
-	//			// Exclude effect(any but this)
-	//			if(base1 < 0) {
-	//				if(IsEffectInSpell(spell_id,(base1*-1)))
-	//					LimitFound = true;
-	//			}
-	//			else {
-	//				// Include effect(only this)
-	//				if(!IsEffectInSpell(spell_id,base1))
-	//					LimitFound = true;
-	//			}
-	//		break;
-	//		case SE_LimitSpellType:
-	//			switch(base1)
-	//			{
-	//				case 0:
-	//					if (!IsDetrimentalSpell(spell_id))
-	//						LimitFound = true;
-	//					break;
-	//				case 1:
-	//					if (!IsBeneficialSpell(spell_id))
-	//						LimitFound = true;
-	//					break;
-	//			}
-	//		break;
-	//
-	//		case SE_LimitManaMin:
-	//			if(spell.mana < base1)
-	//				LimitFound = true;
-	//		break;
-	//
-	//		case SE_LimitTarget:
-	//		// Exclude
-	//		if(base1 < 0){
-	//			if(-base1 == spell.targettype)
-	//				LimitFound = true;
-	//		}
-	//		// Include
-	//		else {
-	//			if(base1 != spell.targettype)
-	//				LimitFound = true;
-	//		}
-	//		break;
-	//
-	//		case SE_LimitCombatSkills:
-	//			// 1 is for disciplines only
-	//			if(base1 == 1 && !IsDiscipline(spell_id))
-	//				LimitFound = true;
-	//			// 0 is spells only
-	//			else if(base1 == 0 && IsDiscipline(spell_id))
-	//				LimitFound = true;
-	//		break;
-	//
-	//		case SE_LimitSpellGroup:
-	//			if(base1 > 0 && base1 != spell.spellgroup)
-	//				LimitFound = true;
-	//			else if(base1 < 0 && base1 == spell.spellgroup)
-	//				LimitFound = true;
-	//		break;
-	//
-	//
-	//		case SE_LimitCastingSkill:
-	//			LimitSpellSkill = true;
-	//			if(base1 == spell.skill)
-	//				SpellSkill_Found = true;
-	//		break;
-	//
-	//		case SE_LimitClass:
-	//		//Do not use this limit more then once per spell. If multiple class, treat value like items would.
-	//		if (!PassLimitClass(base1, GetClass()))
-	//			LimitFound = true;
-	//		break;
-	//
-	//
-	//		//Handle Focus Effects
-	//		case SE_ImprovedDamage:
-	//			if (type == focusImprovedDamage && base1 > value)
-	//				value = base1;
-	//		break;
-	//
-	//		case SE_ImprovedHeal:
-	//			if (type == focusImprovedHeal && base1 > value)
-	//				value = base1;
-	//		break;
-	//
-	//		case SE_ReduceManaCost:
-	//			if (type == focusManaCost )
-	//				value = base1;
-	//		break;
-	//
-	//		case SE_IncreaseSpellHaste:
-	//			if (type == focusSpellHaste && base1 > value)
-	//				value = base1;
-	//			break;
-	//
-	//		case SE_IncreaseSpellDuration:
-	//			if (type == focusSpellDuration && base1 > value)
-	//				value = base1;
-	//			break;
-	//
-	//		case SE_SpellDurationIncByTic:
-	//			if (type == focusSpellDurByTic && base1 > value)
-	//				value = base1;
-	//			break;
-	//
-	//		case SE_SwarmPetDuration:
-	//			if (type == focusSwarmPetDuration && base1 > value)
-	//					value = base1;
-	//			break;
-	//
-	//		case SE_IncreaseRange:
-	//			if (type == focusRange && base1 > value)
-	//				value = base1;
-	//			break;
-	//
-	//		case SE_ReduceReagentCost:
-	//			if (type == focusReagentCost && base1 > value)
-	//				value = base1;
-	//			break;
-	//
-	//		case SE_PetPowerIncrease:
-	//			if (type == focusPetPower && base1 > value)
-	//				value = base1;
-	//			break;
-	//
-	//		case SE_SpellResistReduction:
-	//			if (type == focusResistRate && base1 > value)
-	//				value = base1;
-	//			break;
-	//
-	//		case SE_SpellHateMod:
-	//			if (type == focusSpellHateMod)
-	//			{
-	//				if(value != 0)
-	//				{
-	//					if(value > 0)
-	//					{
-	//						if(base1 > value)
-	//						{
-	//							value = base1;
-	//						}
-	//					}
-	//					else
-	//					{
-	//						if(base1 < value)
-	//						{
-	//							value = base1;
-	//						}
-	//					}
-	//				}
-	//				else
-	//					value = base1;
-	//			}
-	//			break;
-	//
-	//		case SE_ReduceReuseTimer:
-	//		{
-	//			if(type == focusReduceRecastTime)
-	//				value = base1 / 1000;
-	//
-	//			break;
-	//		}
-	//
-	//		case SE_TriggerOnCast:
-	//		{
-	//			if(type == focusTriggerOnCast)
-	//			{
-	//				if(zone->random.Int(0, 100) <= base1){
-	//					value = base2;
-	//				}
-	//
-	//				else{
-	//					value = 0;
-	//					LimitFound = true;
-	//				}
-	//			}
-	//			break;
-	//		}
-	//		case SE_FcSpellVulnerability:
-	//		{
-	//			if(type == focusSpellVulnerability)
-	//			{
-	//				value = base1;
-	//			}
-	//			break;
-	//		}
-	//		case SE_BlockNextSpellFocus:
-	//		{
-	//			if(type == focusBlockNextSpell)
-	//			{
-	//				if(zone->random.Int(1, 100) <= base1)
-	//					value = 1;
-	//			}
-	//			break;
-	//		}
-	//		case SE_FcTwincast:
-	//		{
-	//			if(type == focusTwincast)
-	//			{
-	//				value = base1;
-	//			}
-	//			break;
-	//		}
-	//
-	//		/*
-	//		case SE_SympatheticProc:
-	//		{
-	//			if(type == focusSympatheticProc)
-	//			{
-	//				float ProcChance, ProcBonus;
-	//				int16 ProcRateMod = base1; //Baseline is 100 for most Sympathetic foci
-	//				int32 cast_time = GetActSpellCasttime(spell_id, spells[spell_id].cast_time);
-	//				GetSympatheticProcChances(ProcBonus, ProcChance, cast_time, ProcRateMod);
-	//
-	//				if(zone->random.Real(0, 1) <= ProcChance)
-	//					value = focus_id;
-	//
-	//				else
-	//					value = 0;
-	//			}
-	//			break;
-	//		}
-	//		*/
-	//		case SE_FcDamageAmt:
-	//		{
-	//			if(type == focusFcDamageAmt)
-	//				value = base1;
-	//
-	//			break;
-	//		}
-	//
-	//		case SE_FcDamageAmtCrit:
-	//		{
-	//			if(type == focusFcDamageAmtCrit)
-	//				value = base1;
-	//
-	//			break;
-	//		}
-	//
-	//		case SE_FcDamageAmtIncoming:
-	//		{
-	//			if(type == focusFcDamageAmtIncoming)
-	//				value = base1;
-	//
-	//			break;
-	//		}
-	//
-	//		case SE_FcHealAmtIncoming:
-	//			if(type == focusFcHealAmtIncoming)
-	//				value = base1;
-	//			break;
-	//
-	//		case SE_FcHealPctCritIncoming:
-	//			if (type == focusFcHealPctCritIncoming)
-	//				value = base1;
-	//			break;
-	//
-	//		case SE_FcHealAmtCrit:
-	//			if(type == focusFcHealAmtCrit)
-	//				value = base1;
-	//			break;
-	//
-	//		case  SE_FcHealAmt:
-	//			if(type == focusFcHealAmt)
-	//				value = base1;
-	//			break;
-	//
-	//		case SE_FcHealPctIncoming:
-	//			if(type == focusFcHealPctIncoming)
-	//				value = base1;
-	//			break;
-	//
-	//		case SE_FcBaseEffects:
-	//		{
-	//			if (type == focusFcBaseEffects)
-	//				value = base1;
-	//
-	//			break;
-	//		}
-	//		case SE_FcDamagePctCrit:
-	//		{
-	//			if(type == focusFcDamagePctCrit)
-	//				value = base1;
-	//
-	//			break;
-	//		}
-	//
-	//		case SE_FcIncreaseNumHits:
-	//		{
-	//			if(type == focusIncreaseNumHits)
-	//				value = base1;
-	//
-	//			break;
-	//		}
+	auto ability_rank = zone->GetAlternateAdvancementAbilityAndRank(aa_ID, points);
+	auto ability = ability_rank.first;
+	auto rank = ability_rank.second;
 
-	////Check for spell skill limits.
-	//if ((LimitSpellSkill) && (!SpellSkill_Found))
-	//	return 0;
-	//
-	//	}
-	//}
+	if(!ability) {
+		return 0;
+	}
 
-	if (LimitFound){
+	for(auto &eff : rank->effects) {
+		effect = eff.effect_id;
+		base1 = eff.base1;
+		base2 = eff.base2;
+		slot = eff.slot;
+	
+		//AA Foci's can contain multiple focus effects within the same AA.
+		//To handle this we will not automatically return zero if a limit is found.
+		//Instead if limit is found and multiple effects, we will reset the limit check
+		//when the next valid focus effect is found.
+		if (IsFocusEffect(0, 0, true,effect) || (effect == SE_TriggerOnCast)){
+			FocusCount++;
+			//If limit found on prior check next, else end loop.
+			if (FocusCount > 1){
+				if (LimitFound){
+					value = 0;
+					LimitFound = false;
+				}
+	
+				else{
+					break;
+				}
+			}
+		}
+	
+	
+		switch (effect)
+		{
+			case SE_Blank:
+				break;
+	
+			//Handle Focus Limits
+			case SE_LimitResist:
+				if(base1)
+				{
+					if(spell.resisttype != base1)
+						LimitFound = true;
+				}
+			break;
+			case SE_LimitInstant:
+				if(spell.buffduration)
+					LimitFound = true;
+			break;
+			case SE_LimitMaxLevel:
+				spell_level = spell.classes[(GetClass()%16) - 1];
+				lvldiff = spell_level - base1;
+				//every level over cap reduces the effect by base2 percent unless from a clicky when ItemCastsUseFocus is true
+				if(lvldiff > 0 && (spell_level <= RuleI(Character, MaxLevel) || RuleB(Character, ItemCastsUseFocus) == false))
+				{
+					if(base2 > 0)
+					{
+						lvlModifier -= base2*lvldiff;
+						if(lvlModifier < 1)
+							LimitFound = true;
+					}
+					else {
+						LimitFound = true;
+					}
+				}
+			break;
+			case SE_LimitMinLevel:
+				if((spell.classes[(GetClass()%16) - 1]) < base1)
+					LimitFound = true;
+			break;
+			case SE_LimitCastTimeMin:
+				if (spell.cast_time < base1)
+					LimitFound = true;
+			break;
+			case SE_LimitSpell:
+				// Exclude spell(any but this)
+				if(base1 < 0) {
+					if (spell_id == (base1*-1))
+						LimitFound = true;
+				}
+				else {
+				// Include Spell(only this)
+					if (spell_id != base1)
+						LimitFound = true;
+				}
+			break;
+			case SE_LimitMinDur:
+				if (base1 > CalcBuffDuration_formula(GetLevel(), spell.buffdurationformula, spell.buffduration))
+					LimitFound = true;
+			break;
+			case SE_LimitEffect:
+				// Exclude effect(any but this)
+				if(base1 < 0) {
+					if(IsEffectInSpell(spell_id,(base1*-1)))
+						LimitFound = true;
+				}
+				else {
+					// Include effect(only this)
+					if(!IsEffectInSpell(spell_id,base1))
+						LimitFound = true;
+				}
+			break;
+			case SE_LimitSpellType:
+				switch(base1)
+				{
+					case 0:
+						if (!IsDetrimentalSpell(spell_id))
+							LimitFound = true;
+						break;
+					case 1:
+						if (!IsBeneficialSpell(spell_id))
+							LimitFound = true;
+						break;
+				}
+			break;
+	
+			case SE_LimitManaMin:
+				if(spell.mana < base1)
+					LimitFound = true;
+			break;
+	
+			case SE_LimitTarget:
+			// Exclude
+			if(base1 < 0){
+				if(-base1 == spell.targettype)
+					LimitFound = true;
+			}
+			// Include
+			else {
+				if(base1 != spell.targettype)
+					LimitFound = true;
+			}
+			break;
+	
+			case SE_LimitCombatSkills:
+				// 1 is for disciplines only
+				if(base1 == 1 && !IsDiscipline(spell_id))
+					LimitFound = true;
+				// 0 is spells only
+				else if(base1 == 0 && IsDiscipline(spell_id))
+					LimitFound = true;
+			break;
+	
+			case SE_LimitSpellGroup:
+				if(base1 > 0 && base1 != spell.spellgroup)
+					LimitFound = true;
+				else if(base1 < 0 && base1 == spell.spellgroup)
+					LimitFound = true;
+			break;
+	
+	
+			case SE_LimitCastingSkill:
+				LimitSpellSkill = true;
+				if(base1 == spell.skill)
+					SpellSkill_Found = true;
+			break;
+	
+			case SE_LimitClass:
+			//Do not use this limit more then once per spell. If multiple class, treat value like items would.
+			if (!PassLimitClass(base1, GetClass()))
+				LimitFound = true;
+			break;
+	
+	
+			//Handle Focus Effects
+			case SE_ImprovedDamage:
+				if (type == focusImprovedDamage && base1 > value)
+					value = base1;
+			break;
+	
+			case SE_ImprovedHeal:
+				if (type == focusImprovedHeal && base1 > value)
+					value = base1;
+			break;
+	
+			case SE_ReduceManaCost:
+				if (type == focusManaCost )
+					value = base1;
+			break;
+	
+			case SE_IncreaseSpellHaste:
+				if (type == focusSpellHaste && base1 > value)
+					value = base1;
+				break;
+	
+			case SE_IncreaseSpellDuration:
+				if (type == focusSpellDuration && base1 > value)
+					value = base1;
+				break;
+	
+			case SE_SpellDurationIncByTic:
+				if (type == focusSpellDurByTic && base1 > value)
+					value = base1;
+				break;
+	
+			case SE_SwarmPetDuration:
+				if (type == focusSwarmPetDuration && base1 > value)
+						value = base1;
+				break;
+	
+			case SE_IncreaseRange:
+				if (type == focusRange && base1 > value)
+					value = base1;
+				break;
+	
+			case SE_ReduceReagentCost:
+				if (type == focusReagentCost && base1 > value)
+					value = base1;
+				break;
+	
+			case SE_PetPowerIncrease:
+				if (type == focusPetPower && base1 > value)
+					value = base1;
+				break;
+	
+			case SE_SpellResistReduction:
+				if (type == focusResistRate && base1 > value)
+					value = base1;
+				break;
+	
+			case SE_SpellHateMod:
+				if (type == focusSpellHateMod)
+				{
+					if(value != 0)
+					{
+						if(value > 0)
+						{
+							if(base1 > value)
+							{
+								value = base1;
+							}
+						}
+						else
+						{
+							if(base1 < value)
+							{
+								value = base1;
+							}
+						}
+					}
+					else
+						value = base1;
+				}
+				break;
+	
+			case SE_ReduceReuseTimer:
+			{
+				if(type == focusReduceRecastTime)
+					value = base1 / 1000;
+	
+				break;
+			}
+	
+			case SE_TriggerOnCast:
+			{
+				if(type == focusTriggerOnCast)
+				{
+					if(zone->random.Int(0, 100) <= base1){
+						value = base2;
+					}
+	
+					else{
+						value = 0;
+						LimitFound = true;
+					}
+				}
+				break;
+			}
+			case SE_FcSpellVulnerability:
+			{
+				if(type == focusSpellVulnerability)
+				{
+					value = base1;
+				}
+				break;
+			}
+			case SE_BlockNextSpellFocus:
+			{
+				if(type == focusBlockNextSpell)
+				{
+					if(zone->random.Int(1, 100) <= base1)
+						value = 1;
+				}
+				break;
+			}
+			case SE_FcTwincast:
+			{
+				if(type == focusTwincast)
+				{
+					value = base1;
+				}
+				break;
+			}
+	
+			/*
+			case SE_SympatheticProc:
+			{
+				if(type == focusSympatheticProc)
+				{
+					float ProcChance, ProcBonus;
+					int16 ProcRateMod = base1; //Baseline is 100 for most Sympathetic foci
+					int32 cast_time = GetActSpellCasttime(spell_id, spells[spell_id].cast_time);
+					GetSympatheticProcChances(ProcBonus, ProcChance, cast_time, ProcRateMod);
+	
+					if(zone->random.Real(0, 1) <= ProcChance)
+						value = focus_id;
+	
+					else
+						value = 0;
+				}
+				break;
+			}
+			*/
+			case SE_FcDamageAmt:
+			{
+				if(type == focusFcDamageAmt)
+					value = base1;
+	
+				break;
+			}
+	
+			case SE_FcDamageAmtCrit:
+			{
+				if(type == focusFcDamageAmtCrit)
+					value = base1;
+	
+				break;
+			}
+	
+			case SE_FcDamageAmtIncoming:
+			{
+				if(type == focusFcDamageAmtIncoming)
+					value = base1;
+	
+				break;
+			}
+	
+			case SE_FcHealAmtIncoming:
+				if(type == focusFcHealAmtIncoming)
+					value = base1;
+				break;
+	
+			case SE_FcHealPctCritIncoming:
+				if (type == focusFcHealPctCritIncoming)
+					value = base1;
+				break;
+	
+			case SE_FcHealAmtCrit:
+				if(type == focusFcHealAmtCrit)
+					value = base1;
+				break;
+	
+			case  SE_FcHealAmt:
+				if(type == focusFcHealAmt)
+					value = base1;
+				break;
+	
+			case SE_FcHealPctIncoming:
+				if(type == focusFcHealPctIncoming)
+					value = base1;
+				break;
+	
+			case SE_FcBaseEffects:
+			{
+				if (type == focusFcBaseEffects)
+					value = base1;
+	
+				break;
+			}
+			case SE_FcDamagePctCrit:
+			{
+				if(type == focusFcDamagePctCrit)
+					value = base1;
+	
+				break;
+			}
+	
+			case SE_FcIncreaseNumHits:
+			{
+				if(type == focusIncreaseNumHits)
+					value = base1;
+	
+				break;
+			}
+		}
+
+		//Check for spell skill limits.
+		if ((LimitSpellSkill) && (!SpellSkill_Found)) {
+			return 0;
+		}
+	}
+
+	if (LimitFound) {
 		return 0;
 	}
 
@@ -6875,31 +6248,34 @@ int32 Bot::GetBotFocusEffect(BotfocusType bottype, uint16 spell_id) {
 	}
 
 	// AA Focus
-	if (aabonuses.FocusEffects[bottype]){
-		//old aa
-		//int totalAAs = database.CountAAs();
-		//int32 Total3 = 0;
-		//uint32 slots = 0;
-		//uint32 aa_AA = 0;
-		//uint32 aa_value = 0;
-		//
-		//for (int i = 0; i < totalAAs; i++) {	//iterate through all of the client's AAs
-		//	std::map<uint32, BotAA>::iterator aa = botAAs.find(i);
-		//	if(aa != botAAs.end()) { // make sure aa exists or we'll crash zone
-		//		aa_AA = aa->second.aa_id;	//same as aaid from the aa_effects table
-		//		aa_value = aa->second.total_levels;	//how many points in it
-		//		if (aa_AA < 1 || aa_value < 1)
-		//			continue;
-		//
-		//		Total3 = CalcBotAAFocus(bottype, aa_AA, spell_id);
-		//		if (Total3 > 0 && realTotal3 >= 0 && Total3 > realTotal3) {
-		//			realTotal3 = Total3;
-		//		}
-		//		else if (Total3 < 0 && Total3 < realTotal3) {
-		//			realTotal3 = Total3;
-		//		}
-		//	}
-		//}
+	if (aabonuses.FocusEffects[bottype]) {
+		int32 Total3 = 0;
+		uint32 slots = 0;
+		uint32 aa_AA = 0;
+		uint32 aa_value = 0;
+
+		for(auto &aa : aa_ranks) {
+			auto ability_rank = zone->GetAlternateAdvancementAbilityAndRank(aa.first, aa.second.first);
+			auto ability = ability_rank.first;
+			auto rank = ability_rank.second;
+
+			if(!ability) {
+				continue;
+			}
+
+			aa_AA = ability->id;
+			aa_value = aa.second.first;
+			if (aa_AA < 1 || aa_value < 1)
+				continue;
+			
+			Total3 = CalcBotAAFocus(bottype, aa_AA, aa_value, spell_id);
+			if (Total3 > 0 && realTotal3 >= 0 && Total3 > realTotal3) {
+				realTotal3 = Total3;
+			}
+			else if (Total3 < 0 && Total3 < realTotal3) {
+				realTotal3 = Total3;
+			}
+		}
 	}
 
 	if(bottype == BotfocusReagentCost && IsSummonPetSpell(spell_id) && GetAA(aaElementalPact))
@@ -8931,7 +8307,6 @@ int32 Bot::GetActSpellCost(uint16 spell_id, int32 cost) {
 		break;
 	}
 
-	//aa old
 	bonus += 0.05 * GetAA(aaAdvancedSpellCastingMastery);
 
 	if(SuccessChance <= (SpecializeSkill * 0.3 * bonus))
@@ -9559,7 +8934,7 @@ void Bot::CalcBonuses() {
 	GenerateBaseStats();
 	CalcItemBonuses(&itembonuses);
 	CalcSpellBonuses(&spellbonuses);
-	GenerateAABonuses(&aabonuses);
+	CalcAABonuses(&aabonuses);
 	SetAttackTimer();
 
 	CalcATK();
