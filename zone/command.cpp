@@ -5555,13 +5555,20 @@ void command_setaapts(Client *c, const Seperator *sep)
 	else if(atoi(sep->arg[2]) <= 0 || atoi(sep->arg[2]) > 200)
 		c->Message(0, "You must have a number greater than 0 for points and no more than 200.");
 	else if(!strcasecmp(sep->arg[1], "group")) {
-		t->SetLeadershipEXP(atoi(sep->arg[2])*GROUP_EXP_PER_POINT, t->GetRaidEXP());
+		t->GetPP().group_leadership_points = atoi(sep->arg[2]);
+		t->GetPP().group_leadership_exp = 0;
+		t->Message(MT_Experience, "Setting Group AA points to %u", t->GetPP().group_leadership_points);
+		t->SendLeadershipEXPUpdate();
 	} else if(!strcasecmp(sep->arg[1], "raid")) {
-		t->SetLeadershipEXP(t->GetGroupEXP(), atoi(sep->arg[2])*RAID_EXP_PER_POINT);
+		t->GetPP().raid_leadership_points = atoi(sep->arg[2]);
+		t->GetPP().raid_leadership_exp = 0;
+		t->Message(MT_Experience, "Setting Raid AA points to %u", t->GetPP().raid_leadership_points);
+		t->SendLeadershipEXPUpdate();
 	} else {
-		t->SetEXP(t->GetEXP(),t->GetMaxAAXP()*atoi(sep->arg[2]),false);
+		t->GetPP().aapoints = atoi(sep->arg[2]);
+		t->GetPP().expAA = 0;
+		t->Message(MT_Experience, "Setting personal AA points to %u", t->GetPP().aapoints);
 		t->SendAlternateAdvancementStats();
-		t->SendAlternateAdvancementTable();
 	}
 }
 

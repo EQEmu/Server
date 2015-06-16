@@ -440,48 +440,6 @@ void Mob::WakeTheDead(uint16 spell_id, Mob *target, uint32 duration)
 		target->AddToHateList(this, 1, 0);
 }
 
-//turn on an AA effect
-//duration == 0 means no time limit, used for one-shot deals, etc..
-void Client::EnableAAEffect(aaEffectType type, uint32 duration) {
-	if(type > _maxaaEffectType)
-		return;	//for now, special logic needed.
-	m_epp.aa_effects |= 1 << (type-1);
-
-	if(duration > 0) {
-		p_timers.Start(pTimerAAEffectStart + type, duration);
-	} else {
-		p_timers.Clear(&database, pTimerAAEffectStart + type);
-	}
-}
-
-void Client::DisableAAEffect(aaEffectType type) {
-	if(type > _maxaaEffectType)
-		return;	//for now, special logic needed.
-	uint32 bit = 1 << (type-1);
-	if(m_epp.aa_effects & bit) {
-		m_epp.aa_effects ^= bit;
-	}
-	p_timers.Clear(&database, pTimerAAEffectStart + type);
-}
-
-/*
-By default an AA effect is a one shot deal, unless
-a duration timer is set.
-*/
-bool Client::CheckAAEffect(aaEffectType type) {
-	if(type > _maxaaEffectType)
-		return(false);	//for now, special logic needed.
-	if(m_epp.aa_effects & (1 << (type-1))) {	//is effect enabled?
-		//has our timer expired?
-		if(p_timers.Expired(&database, pTimerAAEffectStart + type)) {
-			DisableAAEffect(type);
-			return(false);
-		}
-		return(true);
-	}
-	return(false);
-}
-
 void Client::ResetAA() {
 	RefundAA();
 	uint32 i;
@@ -788,14 +746,6 @@ void Client::InspectBuffs(Client* Inspector, int Rank)
 	Inspector->FastQueuePacket(&outapp);
 }
 
-void Client::DurationRampage(uint32 duration)
-{
-	if(duration) {
-		m_epp.aa_effects |= 1 << (aaEffectRampage-1);
-		p_timers.Start(pTimerAAEffectStart + aaEffectRampage, duration);
-	}
-}
-
 void Client::RefundAA() {
 	int refunded = 0;
 
@@ -933,7 +883,6 @@ void Client::SendAlternateAdvancementRank(int aa_id, int level) {
 void Client::SendAlternateAdvancementStats() {
 	EQApplicationPacket* outapp = new EQApplicationPacket(OP_AAExpUpdate, sizeof(AltAdvStats_Struct));
 	AltAdvStats_Struct *aps = (AltAdvStats_Struct *)outapp->pBuffer;
-	aps->experience = m_pp.expAA;
 	aps->experience = (uint32)(((float)330.0f * (float)m_pp.expAA) / (float)max_AAXP);
 	aps->unspent = m_pp.aapoints;
 	aps->percentage = m_epp.perAA;

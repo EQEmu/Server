@@ -651,27 +651,28 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 						group_id_caster = (GetRaid()->GetGroup(CastToClient()) == 0xFFFF) ? 0 : (GetRaid()->GetGroup(CastToClient()) + 1);
 					}
 				}
-				if(group_id_caster){
-					Group *g = entity_list.GetGroupByID(group_id_caster);
-					uint32 time = spell.base[i]*10;
-					if(g){
-						for(int gi=0; gi < 6; gi++){
-							if(g->members[gi] && g->members[gi]->IsClient())
-							{
-								g->members[gi]->CastToClient()->EnableAAEffect(aaEffectWarcry , time);
-								if (g->members[gi]->GetID() != caster->GetID())
-									g->members[gi]->Message(13, "You hear the war cry.");
-								else
-									Message(13, "You let loose a fierce war cry.");
-							}
-						}
-					}
-				}
-
-				else{
-					CastToClient()->EnableAAEffect(aaEffectWarcry , time);
-					Message(13, "You let loose a fierce war cry.");
-				}
+				//old aa
+				//if(group_id_caster){
+				//	Group *g = entity_list.GetGroupByID(group_id_caster);
+				//	uint32 time = spell.base[i]*10;
+				//	if(g){
+				//		for(int gi=0; gi < 6; gi++){
+				//			if(g->members[gi] && g->members[gi]->IsClient())
+				//			{
+				//				g->members[gi]->CastToClient()->EnableAAEffect(aaEffectWarcry , time);
+				//				if (g->members[gi]->GetID() != caster->GetID())
+				//					g->members[gi]->Message(13, "You hear the war cry.");
+				//				else
+				//					Message(13, "You let loose a fierce war cry.");
+				//			}
+				//		}
+				//	}
+				//}
+				//
+				//else{
+				//	CastToClient()->EnableAAEffect(aaEffectWarcry , time);
+				//	Message(13, "You let loose a fierce war cry.");
+				//}
 
 				break;
 			}
@@ -2232,12 +2233,14 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 
 			case SE_AEMelee:
 			{
+				//old aa
+
 #ifdef SPELL_EFFECT_SPAM
 				snprintf(effect_desc, _EDLEN, "Duration Rampage");
 #endif
-				if (caster && caster->IsClient()) { // will tidy this up later so that NPCs can duration ramp from spells too
-					CastToClient()->DurationRampage(effect_value*12);
-				}
+				//if (caster && caster->IsClient()) { // will tidy this up later so that NPCs can duration ramp from spells too
+				//	CastToClient()->DurationRampage(effect_value*12);
+				//}
 				break;
 			}
 
@@ -3434,11 +3437,6 @@ void Mob::DoBuffTic(const Buffs_Struct &buff, int slot, Mob *caster)
 			return;
 		}
 	}
-
-	// Check for non buff spell effects to fade
-	// AE melee effects
-	if (IsClient())
-		CastToClient()->CheckAAEffect(aaEffectRampage);
 
 	for (int i = 0; i < EFFECT_COUNT; i++) {
 		if (IsBlankSpellEffect(buff.spellid, i))

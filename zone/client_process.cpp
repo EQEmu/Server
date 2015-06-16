@@ -391,12 +391,13 @@ bool Client::Process() {
 			}
 			else if (auto_attack_target->GetHP() > -10) // -10 so we can watch people bleed in PvP
 			{
-				if(CheckAAEffect(aaEffectRampage))
-				{
-					entity_list.AEAttack(this, 30);
-				} else {
+				//old aa
+				//if(CheckAAEffect(aaEffectRampage))
+				//{
+				//	entity_list.AEAttack(this, 30);
+				//} else {
 					Attack(auto_attack_target, MainPrimary); // Kaiyodo - added attacking hand to arguments
-				}
+				//}
 				ItemInst *wpn = GetInv().GetItem(MainPrimary);
 				TryWeaponProc(wpn, auto_attack_target, MainPrimary);
 
@@ -406,11 +407,11 @@ bool Client::Process() {
 					CheckIncreaseSkill(SkillDoubleAttack, auto_attack_target, -10);
 					if(CheckDoubleAttack()) {
 						//should we allow rampage on double attack?
-						if(CheckAAEffect(aaEffectRampage)) {
-							entity_list.AEAttack(this, 30);
-						} else {
+						//if(CheckAAEffect(aaEffectRampage)) {
+						//	entity_list.AEAttack(this, 30);
+						//} else {
 							Attack(auto_attack_target, MainPrimary, false);
-						}
+						//}
 					}
 
 					//triple attack: rangers, monks, warriors, berserkers over level 60
@@ -499,21 +500,21 @@ bool Client::Process() {
 				float random = zone->random.Real(0, 1);
 				CheckIncreaseSkill(SkillDualWield, auto_attack_target, -10);
 				if (random < DualWieldProbability){ // Max 78% of DW
-					if(CheckAAEffect(aaEffectRampage)) {
-						entity_list.AEAttack(this, 30, MainSecondary);
-					} else {
+					//if(CheckAAEffect(aaEffectRampage)) {
+					//	entity_list.AEAttack(this, 30, MainSecondary);
+					//} else {
 						Attack(auto_attack_target, MainSecondary);	// Single attack with offhand
-					}
+					//}
 					ItemInst *wpn = GetInv().GetItem(MainSecondary);
 					TryWeaponProc(wpn, auto_attack_target, MainSecondary);
 
 					if( CanThisClassDoubleAttack() && CheckDoubleAttack()) {
-						if(CheckAAEffect(aaEffectRampage)) {
-							entity_list.AEAttack(this, 30, MainSecondary);
-						} else {
-							if(auto_attack_target && auto_attack_target->GetHP() > -10)
+						//if(CheckAAEffect(aaEffectRampage)) {
+						//	entity_list.AEAttack(this, 30, MainSecondary);
+						//} else {
+						//	if(auto_attack_target && auto_attack_target->GetHP() > -10)
 								Attack(auto_attack_target, MainSecondary);	// Single attack with offhand
-						}
+						//}
 					}
 				}
 			}

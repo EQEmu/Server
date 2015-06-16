@@ -541,7 +541,6 @@ public:
 
 	bool Flurry();
 	bool Rampage();
-	void DurationRampage(uint32 duration);
 
 	inline uint32 GetEXP() const { return m_pp.exp; }
 
@@ -784,13 +783,7 @@ public:
 	int16 CalcAAFocus(focusType type, const AA::Rank &rank, uint16 spell_id);
 	void SetAATitle(const char *Title);
 	void SetTitleSuffix(const char *txt);
-
-	//old AA Methods that are slated for removal
-	void MemorizeSpell(uint32 slot,uint32 spellid,uint32 scribing);
-	void EnableAAEffect(aaEffectType type, uint32 duration = 0);
-	void DisableAAEffect(aaEffectType type);
-	bool CheckAAEffect(aaEffectType type);
-
+	void MemorizeSpell(uint32 slot, uint32 spellid, uint32 scribing);
 	int32 acmod();
 
 	// Item methods
