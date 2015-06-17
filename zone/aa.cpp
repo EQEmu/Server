@@ -1143,10 +1143,13 @@ void Client::ActivateAlternateAdvancementAbility(int rank_id, int target_id) {
 		SendAlternateAdvancementTimer(rank->spell_type, 0, 0);
 		ExpendAlternateAdvancementCharge(ability->id);
 	} else {
-		if(!CastSpell(rank->spell, target_id, USE_ITEM_SPELL_SLOT, -1, -1, 0, -1, rank->spell_type + pTimerAAStart, cooldown, 1, nullptr, ability->id)) {
+		if(!CastSpell(rank->spell, target_id, USE_ITEM_SPELL_SLOT, -1, -1, 0, -1, rank->spell_type + pTimerAAStart, cooldown, nullptr, rank->id)) {
 			return;
 		}
 	}
+
+	CastToClient()->GetPTimers().Start(rank->spell_type + pTimerAAStart, cooldown);
+	SendAlternateAdvancementTimer(rank->spell_type, 0, 0);
 }
 
 int Mob::GetAlternateAdvancementCooldownReduction(AA::Rank *rank_in) {

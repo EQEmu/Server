@@ -790,7 +790,7 @@ bool Lua_Mob::CastSpell(int spell_id, int target_id, int slot, int cast_time, in
 	int16 res = resist_adjust;
 
 	return self->CastSpell(spell_id, target_id, slot, cast_time, mana_cost, nullptr, static_cast<uint32>(item_slot),
-		static_cast<uint32>(timer), static_cast<uint32>(timer_duration), 0, &res);
+		static_cast<uint32>(timer), static_cast<uint32>(timer_duration), &res);
 }
 
 bool Lua_Mob::SpellFinished(int spell_id, Lua_Mob target) {

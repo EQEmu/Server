@@ -146,7 +146,7 @@ void NPC::SpellProcess()
 // to allow procs to work
 bool Mob::CastSpell(uint16 spell_id, uint16 target_id, uint16 slot,
 	int32 cast_time, int32 mana_cost, uint32* oSpellWillFinish, uint32 item_slot,
-	uint32 timer, uint32 timer_duration, uint32 type, int16 *resist_adjust,
+	uint32 timer, uint32 timer_duration, int16 *resist_adjust,
 	uint32 aa_id)
 {
 	Log.Out(Logs::Detail, Logs::Spells, "CastSpell called for spell %s (%d) on entity %d, slot %d, time %d, mana %d, from item slot %d",
@@ -319,11 +319,11 @@ bool Mob::CastSpell(uint16 spell_id, uint16 target_id, uint16 slot,
 
 	if(resist_adjust)
 	{
-		return(DoCastSpell(spell_id, target_id, slot, cast_time, mana_cost, oSpellWillFinish, item_slot, timer, timer_duration, type, *resist_adjust, aa_id));
+		return(DoCastSpell(spell_id, target_id, slot, cast_time, mana_cost, oSpellWillFinish, item_slot, timer, timer_duration, *resist_adjust, aa_id));
 	}
 	else
 	{
-		return(DoCastSpell(spell_id, target_id, slot, cast_time, mana_cost, oSpellWillFinish, item_slot, timer, timer_duration, type, spells[spell_id].ResistDiff, aa_id));
+		return(DoCastSpell(spell_id, target_id, slot, cast_time, mana_cost, oSpellWillFinish, item_slot, timer, timer_duration, spells[spell_id].ResistDiff, aa_id));
 	}
 }
 
@@ -337,7 +337,7 @@ bool Mob::CastSpell(uint16 spell_id, uint16 target_id, uint16 slot,
 //
 bool Mob::DoCastSpell(uint16 spell_id, uint16 target_id, uint16 slot,
 					int32 cast_time, int32 mana_cost, uint32* oSpellWillFinish,
-					uint32 item_slot, uint32 timer, uint32 timer_duration, uint32 type,
+					uint32 item_slot, uint32 timer, uint32 timer_duration,
 					int16 resist_adjust, uint32 aa_id)
 {
 	Mob* pMob = nullptr;
@@ -363,7 +363,6 @@ bool Mob::DoCastSpell(uint16 spell_id, uint16 target_id, uint16 slot,
 		casting_spell_timer_duration = timer_duration;
 	}
 	casting_spell_aa_id = aa_id;
-	casting_spell_type = type;
 
 	SaveSpellLoc();
 	Log.Out(Logs::Detail, Logs::Spells, "Casting %d Started at (%.3f,%.3f,%.3f)", spell_id, m_SpellLocation.x, m_SpellLocation.y, m_SpellLocation.z);
@@ -785,7 +784,6 @@ void Mob::ZeroCastingVars()
 	casting_spell_inventory_slot = 0;
 	casting_spell_timer = 0;
 	casting_spell_timer_duration = 0;
-	casting_spell_type = 0;
 	casting_spell_resist_adjust = 0;
 	casting_spell_checks = false;
 	casting_spell_aa_id = 0;
@@ -817,6 +815,15 @@ void Mob::InterruptSpell(uint16 message, uint16 color, uint16 spellid)
 
 	if(casting_spell_id && IsNPC()) {
 		CastToNPC()->AI_Event_SpellCastFinished(false, casting_spell_slot);
+	}
+
+	if(casting_spell_aa_id && IsClient()) { //Rest AA Timer on failed cast
+		AA::Rank *rank = zone->GetAlternateAdvancementRank(casting_spell_aa_id);
+		if(rank) {
+			CastToClient()->SendAlternateAdvancementTimer(rank->spell_type, 0, 0x7fffffff);
+			CastToClient()->Message_StringID(15, ABILITY_FAILED);
+			CastToClient()->GetPTimers().Clear(&database, rank->spell_type + pTimerAAStart);
+		}
 	}
 
 	ZeroCastingVars();	// resets all the state keeping stuff
@@ -2075,7 +2082,7 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, uint16 slot, uint16 
 				else if(!SpellOnTarget(spell_id, spell_target, false, true, resist_adjust, false, level_override)) {
 					if(IsBuffSpell(spell_id) && IsBeneficialSpell(spell_id)) {
 						// Prevent mana usage/timers being set for beneficial buffs
-						if(casting_spell_type == 1)
+						if(casting_spell_aa_id)
 							InterruptSpell();
 						return false;
 					}
@@ -2271,14 +2278,18 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, uint16 slot, uint16 
 	//set our reuse timer on long ass reuse_time spells...
 	if(IsClient() && !isproc)
 	{
-		if(spell_id == casting_spell_id && casting_spell_timer != 0xFFFFFFFF)
+		if(casting_spell_aa_id) {
+			AA::Rank *rank = zone->GetAlternateAdvancementRank(casting_spell_aa_id);
+
+			if(rank && rank->base_ability) {
+				ExpendAlternateAdvancementCharge(rank->base_ability->id);
+			}
+		} 
+		else if(spell_id == casting_spell_id && casting_spell_timer != 0xFFFFFFFF)
 		{
 			//aa new todo: aa expendable charges here
 			CastToClient()->GetPTimers().Start(casting_spell_timer, casting_spell_timer_duration);
 			Log.Out(Logs::Detail, Logs::Spells, "Spell %d: Setting custom reuse timer %d to %d", spell_id, casting_spell_timer, casting_spell_timer_duration);
-			if(casting_spell_aa_id) {
-				CastToClient()->SendAlternateAdvancementTimer(casting_spell_timer - pTimerAAStart, 0, 0);
-			}
 		}
 		else if(spells[spell_id].recast_time > 1000 && !spells[spell_id].IsDisciplineBuff) {
 			int recast = spells[spell_id].recast_time/1000;
@@ -2296,10 +2307,6 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, uint16 slot, uint16 
 
 			Log.Out(Logs::Detail, Logs::Spells, "Spell %d: Setting long reuse timer to %d s (orig %d)", spell_id, recast, spells[spell_id].recast_time);
 			CastToClient()->GetPTimers().Start(pTimerSpellStart + spell_id, recast);
-		}
-
-		if(casting_spell_aa_id) {
-			ExpendAlternateAdvancementCharge(casting_spell_aa_id);
 		}
 	}
 
@@ -3758,7 +3765,7 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob *spelltar, bool reflect, bool use_r
 		// if SpellEffect returned false there's a problem applying the
 		// spell. It's most likely a buff that can't stack.
 		Log.Out(Logs::Detail, Logs::Spells, "Spell %d could not apply its effects %s -> %s\n", spell_id, GetName(), spelltar->GetName());
-		if(casting_spell_type != 1) // AA is handled differently
+		if(casting_spell_aa_id)
 			Message_StringID(MT_SpellFailure, SPELL_NO_HOLD);
 		safe_delete(action_packet);
 		return false;
