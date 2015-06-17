@@ -1156,6 +1156,7 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 
 		case SE_DoubleRiposte: {
 			newbon->DoubleRiposte += base1;
+			break;
 		}
 
 		case SE_GiveDoubleRiposte: {

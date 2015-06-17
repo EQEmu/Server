@@ -4412,42 +4412,55 @@ bool Mob::TryFinishingBlow(Mob *defender, SkillUseTypes skillinuse)
 	return false;
 }
 
-void Mob::DoRiposte(Mob* defender) {
+void Mob::DoRiposte(Mob *defender)
+{
 	Log.Out(Logs::Detail, Logs::Combat, "Preforming a riposte");
 
 	if (!defender)
 		return;
 
 	defender->Attack(this, MainPrimary, true);
-	if (HasDied()) return;
+	if (HasDied())
+		return;
 
-	int32 DoubleRipChance = defender->aabonuses.GiveDoubleRiposte[0] +
-							defender->spellbonuses.GiveDoubleRiposte[0] +
-							defender->itembonuses.GiveDoubleRiposte[0];
+	// this effect isn't used on live? See no AAs or spells
+	int32 DoubleRipChance = defender->aabonuses.DoubleRiposte + defender->spellbonuses.DoubleRiposte +
+				defender->itembonuses.DoubleRiposte;
 
-	DoubleRipChance		 =  defender->aabonuses.DoubleRiposte +
-							defender->spellbonuses.DoubleRiposte +
-							defender->itembonuses.DoubleRiposte;
-
-	//Live AA - Double Riposte
-	if(DoubleRipChance && zone->random.Roll(DoubleRipChance)) {
-		Log.Out(Logs::Detail, Logs::Combat, "Preforming a double riposed (%d percent chance)", DoubleRipChance);
+	if (DoubleRipChance && zone->random.Roll(DoubleRipChance)) {
+		Log.Out(Logs::Detail, Logs::Combat,
+			"Preforming a double riposted from SE_DoubleRiposte (%d percent chance)", DoubleRipChance);
 		defender->Attack(this, MainPrimary, true);
-		if (HasDied()) return;
+		if (HasDied())
+			return;
 	}
 
-	//Double Riposte effect, allows for a chance to do RIPOSTE with a skill specfic special attack (ie Return Kick).
-	//Coded narrowly: Limit to one per client. Limit AA only. [1 = Skill Attack Chance, 2 = Skill]
+	DoubleRipChance = defender->aabonuses.GiveDoubleRiposte[0] + defender->spellbonuses.GiveDoubleRiposte[0] +
+			  defender->itembonuses.GiveDoubleRiposte[0];
+
+	// Live AA - Double Riposte
+	if (DoubleRipChance && zone->random.Roll(DoubleRipChance)) {
+		Log.Out(Logs::Detail, Logs::Combat,
+			"Preforming a double riposted from SE_GiveDoubleRiposte base1 == 0 (%d percent chance)",
+			DoubleRipChance);
+		defender->Attack(this, MainPrimary, true);
+		if (HasDied())
+			return;
+	}
+
+	// Double Riposte effect, allows for a chance to do RIPOSTE with a skill specific special attack (ie Return Kick).
+	// Coded narrowly: Limit to one per client. Limit AA only. [1 = Skill Attack Chance, 2 = Skill]
 
 	DoubleRipChance = defender->aabonuses.GiveDoubleRiposte[1];
 
-	if(DoubleRipChance && zone->random.Roll(DoubleRipChance)) {
-	Log.Out(Logs::Detail, Logs::Combat, "Preforming a return SPECIAL ATTACK (%d percent chance)", DoubleRipChance);
+	if (DoubleRipChance && zone->random.Roll(DoubleRipChance)) {
+		Log.Out(Logs::Detail, Logs::Combat, "Preforming a return SPECIAL ATTACK (%d percent chance)",
+			DoubleRipChance);
 
 		if (defender->GetClass() == MONK)
 			defender->MonkSpecialAttack(this, defender->aabonuses.GiveDoubleRiposte[2]);
 		else if (defender->IsClient())
-			defender->CastToClient()->DoClassAttacks(this,defender->aabonuses.GiveDoubleRiposte[2], true);
+			defender->CastToClient()->DoClassAttacks(this, defender->aabonuses.GiveDoubleRiposte[2], true);
 	}
 }
 
@@ -4678,10 +4691,10 @@ void Mob::TrySkillProc(Mob *on, uint16 skill, uint16 ReuseTime, bool Success, ui
 							ProcMod = static_cast<float>(base2);
 						}
 						else if(effect_id == SE_LimitToSkill && base1 <= HIGHEST_SKILL) {
-						
+
 							if (CanProc && base1 == skill && IsValidSpell(proc_spell_id)) {
 								float final_chance = chance * (ProcMod / 100.0f);
-						
+
 								if (zone->random.Roll(final_chance)) {
 									ExecWeaponProc(nullptr, proc_spell_id, on);
 									CanProc = false;
