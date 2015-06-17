@@ -1137,25 +1137,15 @@ void Client::ActivateAlternateAdvancementAbility(int rank_id, int target_id) {
 	// Bards can cast instant cast AAs while they are casting another song
 	if(spells[rank->spell].cast_time == 0 && GetClass() == BARD && IsBardSong(casting_spell_id)) {
 		if(!SpellFinished(rank->spell, entity_list.GetMob(target_id), 10, -1, -1, spells[rank->spell].ResistDiff, false)) {
-			//Reset on failed cast
-			SendAlternateAdvancementTimer(rank->spell_type, 0, -1);
-			Message_StringID(15, ABILITY_FAILED);
-			p_timers.Clear(&database, rank->spell_type + pTimerAAStart);
 			return;
 		}
+		CastToClient()->GetPTimers().Start(rank->spell_type, cooldown);
+		SendAlternateAdvancementTimer(rank->spell_type, 0, 0);
 		ExpendAlternateAdvancementCharge(ability->id);
 	} else {
 		if(!CastSpell(rank->spell, target_id, USE_ITEM_SPELL_SLOT, -1, -1, 0, -1, rank->spell_type + pTimerAAStart, cooldown, 1, nullptr, ability->id)) {
-			//Reset on failed cast
-			SendAlternateAdvancementTimer(rank->spell_type, 0, -1);
-			Message_StringID(15, ABILITY_FAILED);
-			p_timers.Clear(&database, rank->spell_type + pTimerAAStart);
 			return;
 		}
-	}
-	
-	if(cooldown > 0) {
-		SendAlternateAdvancementTimer(rank->spell_type, 0, 0);
 	}
 }
 

@@ -819,12 +819,6 @@ void Mob::InterruptSpell(uint16 message, uint16 color, uint16 spellid)
 		CastToNPC()->AI_Event_SpellCastFinished(false, casting_spell_slot);
 	}
 
-	if(casting_spell_type == 1 && IsClient()) { //Rest AA Timer on failed cast
-		CastToClient()->SendAlternateAdvancementTimer(casting_spell_timer - pTimerAAStart, 0, -1);
-		CastToClient()->Message_StringID(15, ABILITY_FAILED);
-		CastToClient()->GetPTimers().Clear(&database, casting_spell_timer);
-	}
-
 	ZeroCastingVars();	// resets all the state keeping stuff
 
 	Log.Out(Logs::Detail, Logs::Spells, "Spell %d has been interrupted.", spellid);
@@ -2282,6 +2276,9 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, uint16 slot, uint16 
 			//aa new todo: aa expendable charges here
 			CastToClient()->GetPTimers().Start(casting_spell_timer, casting_spell_timer_duration);
 			Log.Out(Logs::Detail, Logs::Spells, "Spell %d: Setting custom reuse timer %d to %d", spell_id, casting_spell_timer, casting_spell_timer_duration);
+			if(casting_spell_aa_id) {
+				CastToClient()->SendAlternateAdvancementTimer(casting_spell_timer - pTimerAAStart, 0, 0);
+			}
 		}
 		else if(spells[spell_id].recast_time > 1000 && !spells[spell_id].IsDisciplineBuff) {
 			int recast = spells[spell_id].recast_time/1000;
