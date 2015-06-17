@@ -1195,6 +1195,26 @@ int Lua_Mob::GetAA(int id) {
 	return self->GetAA(id);
 }
 
+int Lua_Mob::GetAAByAAID(int id) {
+	Lua_Safe_Call_Int();
+	return self->GetAAByAAID(id);
+}
+
+bool Lua_Mob::SetAA(int rank_id, int new_value) {
+	Lua_Safe_Call_Bool();
+	return self->SetAA(rank_id, new_value);
+}
+
+bool Lua_Mob::SetAA(int rank_id, int new_value, int charges) {
+	Lua_Safe_Call_Bool();
+	return self->SetAA(rank_id, new_value, charges);
+}
+
+void Lua_Mob::GrantAlternateAdvancementAbility(int aa_id, int points) {
+	Lua_Safe_Call_Void();
+	self->GrantAlternateAdvancementAbility(aa_id, points);
+}
+
 bool Lua_Mob::DivineAura() {
 	Lua_Safe_Call_Bool();
 	return self->DivineAura();
@@ -2074,6 +2094,10 @@ luabind::scope lua_register_mob() {
 		.def("CheckHealAggroAmount", (int(Lua_Mob::*)(int))&Lua_Mob::CheckHealAggroAmount)
 		.def("CheckHealAggroAmount", (int(Lua_Mob::*)(int,uint32))&Lua_Mob::CheckHealAggroAmount)
 		.def("GetAA", (int(Lua_Mob::*)(int))&Lua_Mob::GetAA)
+		.def("GetAAByAAID", (int(Lua_Mob::*)(int))&Lua_Mob::GetAAByAAID)
+		.def("SetAA", (bool(Lua_Mob::*)(int,int))&Lua_Mob::SetAA)
+		.def("SetAA", (bool(Lua_Mob::*)(int,int,int))&Lua_Mob::SetAA)
+		.def("GrantAlternateAdvancementAbility", (void(Lua_Mob::*)(int, int))&Lua_Mob::GrantAlternateAdvancementAbility)
 		.def("DivineAura", (bool(Lua_Mob::*)(void))&Lua_Mob::DivineAura)
 		.def("SetOOCRegen", (void(Lua_Mob::*)(int))&Lua_Mob::SetOOCRegen)
 		.def("GetEntityVariable", (const char*(Lua_Mob::*)(const char*))&Lua_Mob::GetEntityVariable)

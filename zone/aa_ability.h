@@ -39,7 +39,6 @@ public:
 	~Ability() { }
 
 	Rank *GetMaxRank();
-	Rank *GetRankByLevel(int level);
 	Rank *GetRankByPointsSpent(int current_level);
 	int GetMaxLevel(Mob *who);
 

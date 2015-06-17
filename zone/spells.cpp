@@ -820,8 +820,8 @@ void Mob::InterruptSpell(uint16 message, uint16 color, uint16 spellid)
 	if(casting_spell_aa_id && IsClient()) { //Rest AA Timer on failed cast
 		AA::Rank *rank = zone->GetAlternateAdvancementRank(casting_spell_aa_id);
 		if(rank) {
+			CastToClient()->Message_StringID(MT_SpellFailure, ABILITY_FAILED);
 			CastToClient()->SendAlternateAdvancementTimer(rank->spell_type, 0, 0x7fffffff);
-			CastToClient()->Message_StringID(15, ABILITY_FAILED);
 			CastToClient()->GetPTimers().Clear(&database, rank->spell_type + pTimerAAStart);
 		}
 	}

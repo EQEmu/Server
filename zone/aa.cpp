@@ -1015,6 +1015,7 @@ void Client::PurchaseAlternateAdvancementRank(int rank_id) {
 		NotifyNewTitlesAvailable();
 }
 
+//need to rewrite this
 void Client::IncrementAlternateAdvancementRank(int rank_id) {
 	AA::Rank *rank = zone->GetAlternateAdvancementRank(rank_id);
 	if(!rank) {
@@ -1139,8 +1140,6 @@ void Client::ActivateAlternateAdvancementAbility(int rank_id, int target_id) {
 		if(!SpellFinished(rank->spell, entity_list.GetMob(target_id), 10, -1, -1, spells[rank->spell].ResistDiff, false)) {
 			return;
 		}
-		CastToClient()->GetPTimers().Start(rank->spell_type, cooldown);
-		SendAlternateAdvancementTimer(rank->spell_type, 0, 0);
 		ExpendAlternateAdvancementCharge(ability->id);
 	} else {
 		if(!CastSpell(rank->spell, target_id, USE_ITEM_SPELL_SLOT, -1, -1, 0, -1, rank->spell_type + pTimerAAStart, cooldown, nullptr, rank->id)) {
@@ -1312,6 +1311,8 @@ uint32 Mob::GetAAByAAID(uint32 aa_id, uint32 *charges) const {
 			return iter->second.first;
 		}
 	}
+
+	return 0;
 }
 
 bool Mob::SetAA(uint32 rank_id, uint32 new_value, uint32 charges) {
@@ -1474,7 +1475,12 @@ void Zone::LoadAlternateAdvancement() {
 				current->total_cost = current->cost + current->prev->total_cost;
 			}
 			else {
+				current->prev_id = -1;
 				current->total_cost = current->cost;
+			}
+
+			if(!current->next) {
+				current->next_id = -1;
 			}
 
 			i++;
@@ -1490,7 +1496,8 @@ bool ZoneDatabase::LoadAlternateAdvancementAbilities(std::unordered_map<int, std
 {
 	Log.Out(Logs::General, Logs::Status, "Loading Alternate Advancement Abilities...");
 	abilities.clear();
-	std::string query = "SELECT id, name, category, classes, races, deities, drakkin_heritage, status, type, charges, grant_only, first_rank_id FROM aa_ability";
+	std::string query = "SELECT id, name, category, classes, races, deities, drakkin_heritage, status, type, charges, "
+		"grant_only, first_rank_id FROM aa_ability WHERE enabled = 1";
 	auto results = QueryDatabase(query);
 	if(results.Success()) {
 		for(auto row = results.begin(); row != results.end(); ++row) {
@@ -1522,7 +1529,7 @@ bool ZoneDatabase::LoadAlternateAdvancementAbilities(std::unordered_map<int, std
 	Log.Out(Logs::General, Logs::Status, "Loading Alternate Advancement Ability Ranks...");
 	ranks.clear();
 	query = "SELECT id, upper_hotkey_sid, lower_hotkey_sid, title_sid, desc_sid, cost, level_req, spell, spell_type, recast_time, "
-		"prev_id, next_id, expansion, account_time_required FROM aa_ranks";
+		"prev_id, next_id, expansion FROM aa_ranks";
 	results = QueryDatabase(query);
 	if(results.Success()) {
 		for(auto row = results.begin(); row != results.end(); ++row) {
@@ -1540,7 +1547,6 @@ bool ZoneDatabase::LoadAlternateAdvancementAbilities(std::unordered_map<int, std
 			rank->prev_id = atoi(row[10]);
 			rank->next_id = atoi(row[11]);
 			rank->expansion = atoi(row[12]);
-			rank->account_time_required = atoul(row[13]);
 			rank->base_ability = nullptr;
 			rank->total_cost = 0;
 			rank->next = nullptr;
@@ -1605,4 +1611,43 @@ bool ZoneDatabase::LoadAlternateAdvancementAbilities(std::unordered_map<int, std
 	Log.Out(Logs::General, Logs::Status, "Loaded Alternate Advancement Ability Rank Prereqs");
 
 	return true;
+}
+
+void Mob::GrantAlternateAdvancementAbility(int aa_id, int points) {
+	if(!zone)
+		return;
+
+	auto ability_rank = zone->GetAlternateAdvancementAbilityAndRank(aa_id, points);
+	auto ability = ability_rank.first;
+	auto rank = ability_rank.second;
+
+	if(!ability) {
+		return;
+	}
+
+	if(ability->charges > 0) {
+		return;
+	}
+
+	if(!ability->grant_only) {
+		return;
+	}
+
+	if(!CanUseAlternateAdvancementRank(rank)) {
+		return;
+	}
+
+	SetAA(ability->first_rank_id, rank->current_value, 0);
+
+	if(IsClient()) {
+		Client *c = CastToClient();
+
+		if(rank->next) {
+			c->SendAlternateAdvancementRank(rank->base_ability->id, rank->next->current_value);
+		}
+
+		c->SendAlternateAdvancementPoints();
+		c->SendAlternateAdvancementStats();
+		c->CalcBonuses();
+	}
 }

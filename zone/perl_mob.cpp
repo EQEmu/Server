@@ -6360,12 +6360,12 @@ XS(XS_Mob_GetAA)
 {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Mob::GetAA(THIS, aa_id)");
+		Perl_croak(aTHX_ "Usage: Mob::GetAA(THIS, rank_id)");
 	{
 		Mob *		THIS;
 		uint32		RETVAL;
 		dXSTARG;
-		uint32		aa_id = (uint32)SvUV(ST(1));
+		uint32		rank_id = (uint32)SvUV(ST(1));
 
 		if (sv_derived_from(ST(0), "Mob")) {
 			IV tmp = SvIV((SV*)SvRV(ST(0)));
@@ -6376,10 +6376,91 @@ XS(XS_Mob_GetAA)
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		RETVAL = THIS->GetAA(aa_id);
+		RETVAL = THIS->GetAA(rank_id);
 		XSprePUSH; PUSHu((UV)RETVAL);
 	}
 	XSRETURN(1);
+}
+
+XS(XS_Mob_GetAAByAAID); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Mob_GetAAByAAID)
+{
+	dXSARGS;
+	if(items != 2)
+		Perl_croak(aTHX_ "Usage: Mob::GetAAByAAID(THIS, aa_id)");
+	{
+		Mob *		THIS;
+		uint32		RETVAL;
+		dXSTARG;
+		uint32		aa_id = (uint32)SvUV(ST(1));
+
+		if(sv_derived_from(ST(0), "Mob")) {
+			IV tmp = SvIV((SV*)SvRV(ST(0)));
+			THIS = INT2PTR(Mob *, tmp);
+		}
+		else
+			Perl_croak(aTHX_ "THIS is not of type Mob");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
+
+		RETVAL = THIS->GetAAByAAID(aa_id);
+		XSprePUSH; PUSHu((UV)RETVAL);
+	}
+	XSRETURN(1);
+}
+
+XS(XS_Mob_SetAA); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Mob_SetAA)
+{
+	dXSARGS;
+	if(items < 3 || items > 4)
+		Perl_croak(aTHX_ "Usage: Mob::SetAA(THIS, aa_id, points, [charges])");
+	{
+		Mob *		THIS;
+		bool		RETVAL;
+		int			aa_id = (int)SvIV(ST(1));
+		int			points = (int)SvIV(ST(2));
+		int			charges = (items == 4) ? (int)SvIV(ST(3)) : 0;
+
+		if(sv_derived_from(ST(0), "Mob")) {
+			IV tmp = SvIV((SV*)SvRV(ST(0)));
+			THIS = INT2PTR(Mob *, tmp);
+		}
+		else
+			Perl_croak(aTHX_ "THIS is not of type Mob");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
+
+		RETVAL = THIS->SetAA(aa_id, points, charges);
+		ST(0) = boolSV(RETVAL);
+		sv_2mortal(ST(0));
+	}
+	XSRETURN(1);
+}
+
+XS(XS_Mob_GrantAlternateAdvancementAbility); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Mob_GrantAlternateAdvancementAbility)
+{
+	dXSARGS;
+	if(items != 3)
+		Perl_croak(aTHX_ "Usage: Mob::GrantAlternateAdvancementAbility(THIS, aa_id, points)");
+	{
+		Mob *		THIS;
+		int			aa_id = (int)SvIV(ST(1));
+		int			points = (int)SvIV(ST(2));
+
+		if(sv_derived_from(ST(0), "Mob")) {
+			IV tmp = SvIV((SV*)SvRV(ST(0)));
+			THIS = INT2PTR(Mob *, tmp);
+		}
+		else
+			Perl_croak(aTHX_ "THIS is not of type Mob");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
+
+		THIS->GrantAlternateAdvancementAbility(aa_id, points);
+	}
+	XSRETURN_EMPTY;
 }
 
 XS(XS_Mob_DivineAura); /* prototype to pass -Wmissing-prototypes */
@@ -8625,6 +8706,9 @@ XS(boot_Mob)
 		newXSproto(strcpy(buf, "CheckAggroAmount"), XS_Mob_CheckAggroAmount, file, "$$");
 		newXSproto(strcpy(buf, "CheckHealAggroAmount"), XS_Mob_CheckHealAggroAmount, file, "$$");
 		newXSproto(strcpy(buf, "GetAA"), XS_Mob_GetAA, file, "$$");
+		newXSproto(strcpy(buf, "GetAAByAAID"), XS_Mob_GetAAByAAID, file, "$$");
+		newXSproto(strcpy(buf, "SetAA"), XS_Mob_SetAA, file, "$$$;$");
+		newXSproto(strcpy(buf, "GrantAlternateAdvancementAbility"), XS_Mob_GrantAlternateAdvancementAbility, file, "$$$");
 		newXSproto(strcpy(buf, "DivineAura"), XS_Mob_DivineAura, file, "$");
 		newXSproto(strcpy(buf, "AddFeignMemory"), XS_Mob_AddFeignMemory, file, "$$");
 		newXSproto(strcpy(buf, "RemoveFromFeignMemory"), XS_Mob_RemoveFromFeignMemory, file, "$$");

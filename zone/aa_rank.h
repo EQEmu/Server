@@ -45,7 +45,6 @@ public:
 	Rank *next;
 	int current_value;
 	int expansion;
-	uint32 account_time_required;
 	int total_cost;
 	Ability *base_ability;
 	std::vector<RankEffect> effects;
