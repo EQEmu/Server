@@ -735,8 +735,8 @@ struct SPDat_Spell_Struct
 /* 198- 199 */
 /* 200 */	bool suspendable; // buff is suspended in suspended buff zones
 /* 201 */	int viral_range;
-/* 202 */
-/* 203 */	//int songcap; // individual song cap (how live currently does it, not implemented)
+/* 202 */	int songcap; // individual song cap
+/* 203 */
 /* 204 */
 /* 205 */	bool no_block;
 /* 206 */

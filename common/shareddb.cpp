@@ -1682,6 +1682,7 @@ void SharedDatabase::LoadSpells(void *data, int max_spells) {
 		sp[tempid].not_extendable = atoi(row[197]) != 0;
 		sp[tempid].suspendable = atoi(row[200]) != 0;
 		sp[tempid].viral_range = atoi(row[201]);
+		sp[tempid].songcap = atoi(row[202]);
 		sp[tempid].no_block = atoi(row[205]);
 		sp[tempid].spellgroup=atoi(row[207]);
 		sp[tempid].rank = atoi(row[208]);
@@ -2021,7 +2022,7 @@ const LootDrop_Struct* SharedDatabase::GetLootDrop(uint32 lootdrop_id) {
 
 void SharedDatabase::LoadCharacterInspectMessage(uint32 character_id, InspectMessage_Struct* message) {
 	std::string query = StringFormat("SELECT `inspect_message` FROM `character_inspect_messages` WHERE `id` = %u LIMIT 1", character_id);
-	auto results = QueryDatabase(query); 
+	auto results = QueryDatabase(query);
 	auto row = results.begin();
 	memset(message, '\0', sizeof(InspectMessage_Struct));
 	for (auto row = results.begin(); row != results.end(); ++row) {
@@ -2031,7 +2032,7 @@ void SharedDatabase::LoadCharacterInspectMessage(uint32 character_id, InspectMes
 
 void SharedDatabase::SaveCharacterInspectMessage(uint32 character_id, const InspectMessage_Struct* message) {
 	std::string query = StringFormat("REPLACE INTO `character_inspect_messages` (id, inspect_message) VALUES (%u, '%s')", character_id, EscapeString(message->text).c_str());
-	auto results = QueryDatabase(query); 
+	auto results = QueryDatabase(query);
 }
 
 void SharedDatabase::GetBotInspectMessage(uint32 botid, InspectMessage_Struct* message) {
