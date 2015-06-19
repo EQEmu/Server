@@ -67,6 +67,7 @@ Bot::Bot(NPCType npcTypeData, Client* botOwner) : NPC(&npcTypeData, nullptr, glm
 	SetHealRotationTimer(0);
 	SetNumHealRotationMembers(0);
 	SetBardUseOutOfCombatSongs(GetClass() == BARD);
+	SetShowHelm(true);
 	CalcChanceToCast();
 	rest_timer.Disable();
 
@@ -4126,7 +4127,7 @@ void Bot::Spawn(Client* botCharacterOwner, std::string* errorMessage) {
 		uint8 materialFromSlot = 0xFF;
 		for(int i = EmuConstants::EQUIPMENT_BEGIN; i <= EmuConstants::EQUIPMENT_END; ++i) {
 			itemID = GetBotItemBySlot(i);
-			if(itemID != 0) {
+			if(itemID != 0) {				
 				materialFromSlot = Inventory::CalcMaterialFromSlot(i);
 				if(materialFromSlot != 0xFF)
 					this->SendWearChange(materialFromSlot);
@@ -4359,7 +4360,7 @@ void Bot::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho) {
 		ns->spawn.is_npc = 0;				// 0=no, 1=yes
 		ns->spawn.is_pet = 0;
 		ns->spawn.guildrank = 0;
-		ns->spawn.showhelm = 1;
+		ns->spawn.showhelm = GetShowHelm();
 		ns->spawn.flymode = 0;
 		ns->spawn.size = 0;
 		ns->spawn.NPC = 0;					// 0=player,1=npc,2=pc corpse,3=npc corpse
@@ -4367,7 +4368,7 @@ void Bot::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho) {
 		UpdateActiveLight();
 		ns->spawn.light = m_Light.Type.Active;
 
-		ns->spawn.helm = helmtexture; //0xFF;
+		ns->spawn.helm = (GetShowHelm() ? helmtexture : 0); //0xFF;
 		ns->spawn.equip_chest2 = texture; //0xFF;
 
 		const Item_Struct* item = 0;
@@ -11428,7 +11429,7 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 				if (!results.Success())
 					return;
 
-				for (int i = 0; i < 7; i++) {
+				for (int i = 0; i < 7; i++) {					
 					uint8 slotmaterial = Inventory::CalcMaterialFromSlot((uint8)slots[i]);
 					c->GetTarget()->CastToBot()->SendWearChange(slotmaterial);
 				}
@@ -15614,6 +15615,32 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 		else {
 			c->Message(0, "Usage #bot bardoutofcombat [on|off]");
 		}
+		return;
+	}
+	
+	if(!strcasecmp(sep->arg[1], "showhelm")) {
+		bool showhelm = true;
+		if (sep->arg[2]) {
+			if (!strcasecmp(sep->arg[2], "on"))
+				showhelm = true;
+			else if (!strcasecmp(sep->arg[2], "off"))
+				showhelm = false;
+			else {
+				c->Message(0, "Usage #bot showhelm [on|off]");
+				return;
+			}
+			
+			Mob *target = c->GetTarget();
+			if (target && target->IsBot() && (c == target->GetOwner()->CastToClient())) {
+				Bot* b = target->CastToBot();				
+				if (b) {
+					b->SetShowHelm(showhelm);
+					c->Message(0, "Your bot will %s show their helmet.", (showhelm ? "now" : "no longer"));
+				}
+			}
+		} else
+			c->Message(0, "Usage #bot showhelm [on|off]");
+		
 		return;
 	}
 }
