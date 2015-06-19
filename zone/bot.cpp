@@ -11359,7 +11359,7 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 	// pull
 	if(!strcasecmp(sep->arg[1], "pull")) {
 		Mob *target = c->GetTarget();
-		if(target == nullptr || target == c || target->IsBot() || (target->IsPet() && target->GetOwner()->IsBot()))
+		if(target == nullptr || target == c || target->IsBot() || (target->IsPet() && target->GetOwner() && target->GetOwner()->IsBot()))
 		{
 			c->Message(15, "You must select a monster");
 			return;
@@ -12381,7 +12381,7 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 	if(!strcasecmp(sep->arg[1], "ai") && !strcasecmp(sep->arg[2], "mez"))
 	{
 		Mob *target = c->GetTarget();
-		if(target == nullptr || target == c || target->IsBot() || (target->IsPet() && target->GetOwner()->IsBot()))
+		if(target == nullptr || target == c || target->IsBot() || (target->IsPet() && target->GetOwner() && target->GetOwner()->IsBot()))
 		{
 			c->Message(15, "You must select a monster");
 			return;
@@ -12631,7 +12631,7 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 	{
 		Mob *target = c->GetTarget();
 
-		if(target == nullptr || target->IsClient() || target->IsBot() || target->IsPet() && target->GetOwner()->IsBot())
+		if(target == nullptr || target->IsClient() || target->IsBot() || (target->IsPet() && target->GetOwner() && target->GetOwner()->IsBot()))
 			c->Message(15, "You must select a monster");
 		else {
 			if(c->IsGrouped()) {
@@ -12683,7 +12683,7 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 	if(!strcasecmp(sep->arg[1], "charm"))
 	{
 		Mob *target = c->GetTarget();
-		if(target == nullptr || target->IsClient() || target->IsBot() || (target->IsPet() && target->GetOwner()->IsBot()))
+		if(target == nullptr || target->IsClient() || target->IsBot() || (target->IsPet() && target->GetOwner() && target->GetOwner()->IsBot()))
 		{
 			c->Message(15, "You must select a monster");
 			return;
@@ -12796,7 +12796,7 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 	if(!strcasecmp(sep->arg[1], "Dire") && !strcasecmp(sep->arg[2], "Charm"))
 	{
 		Mob *target = c->GetTarget();
-		if(target == nullptr || target->IsClient() || target->IsBot() || (target->IsPet() && target->GetOwner()->IsBot()))
+		if(target == nullptr || target->IsClient() || target->IsBot() || (target->IsPet() && target->GetOwner() && target->GetOwner()->IsBot()))
 		{
 			c->Message(15, "You must select a monster");
 			return;
