@@ -4249,7 +4249,7 @@ void Mob::TryCriticalHit(Mob *defender, uint16 skill, int32 &damage, ExtraAttack
 	}
 
 #ifdef BOTS
-	if (this->IsPet() && this->GetOwner()->IsBot()) {
+	if (this->IsPet() && this->GetOwner() && this->GetOwner()->IsBot()) {
 		this->TryPetCriticalHit(defender,skill,damage);
 		return;
 	}

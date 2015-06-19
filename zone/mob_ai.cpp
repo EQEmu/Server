@@ -1105,7 +1105,7 @@ void Mob::AI_Process() {
 		}
 
 #ifdef BOTS
-		if (IsPet() && GetOwner()->IsBot() && target == GetOwner())
+		if (IsPet() && GetOwner() && GetOwner()->IsBot() && target == GetOwner())
 		{
 				// this blocks all pet attacks against owner..bot pet test (copied above check)
 				RemoveFromHateList(this);
