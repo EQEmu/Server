@@ -417,7 +417,7 @@ namespace RoF
 			outapp->WriteUInt32(0);			// Duration
 			outapp->WriteUInt32(0);			// ?
 			outapp->WriteUInt8(0);		// Caster name
-			outapp->WriteUInt8(0);		// Terminating byte
+			outapp->WriteUInt8(0);		// Type
 		}
 		FINISH_ENCODE();
 
@@ -454,7 +454,7 @@ namespace RoF
 			__packet->WriteUInt32(emu->entries[i].num_hits); // Unknown
 			__packet->WriteString("");
 		}
-		__packet->WriteUInt8(!emu->all_buffs); // Unknown
+		__packet->WriteUInt8(emu->type); // Unknown
 
 		FINISH_ENCODE();
 	}

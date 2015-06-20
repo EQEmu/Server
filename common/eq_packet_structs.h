@@ -4733,6 +4733,7 @@ struct BuffIcon_Struct
 	uint32 entity_id;
 	uint8  all_buffs;
 	uint16 count;
+	uint8 type; // 0 = self buff window, 1 = self target window, 4 = group, 5 = PC, 7 = NPC
 	BuffIconEntry_Struct entries[0];
 };
 

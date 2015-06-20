@@ -387,7 +387,7 @@ namespace UF
 			__packet->WriteUInt32(emu->entries[i].num_hits);
 			__packet->WriteString("");
 		}
-		__packet->WriteUInt8(!emu->all_buffs);
+		__packet->WriteUInt8(emu->type);
 
 		FINISH_ENCODE();
 		/*

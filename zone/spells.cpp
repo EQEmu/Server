@@ -5396,6 +5396,12 @@ EQApplicationPacket *Mob::MakeBuffsPacket(bool for_target)
 	buff->entity_id = GetID();
 	buff->count = count;
 	buff->all_buffs = 1;
+	// there are more types, the client doesn't seem to really care though. The others are also currently hard to fill in here ...
+	// (see comment in common/eq_packet_structs.h)
+	if (for_target)
+		buff->type = IsClient() ? 5 : 7;
+	else
+		buff->type = 0;
 
 	uint32 index = 0;
 	for(unsigned int i = 0; i < buff_count; ++i)
