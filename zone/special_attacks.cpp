@@ -618,11 +618,11 @@ void Mob::RogueBackstab(Mob* other, bool min_damage, int ReuseTime)
 
 	if(primaryweapondamage > 0){
 		if(level > 25){
-			max_hit = (((2*backstab_dmg) * GetDamageTable(SkillBackstab) / 100) * 10 * GetSkill(SkillBackstab) / 355) + ((level-25)/3) + 1;
+			max_hit = (((((2*backstab_dmg) * GetDamageTable(SkillBackstab) / 100) * 10 * GetSkill(SkillBackstab) / 355) + ((level-25)/3) + 1) * ((100 + RuleI(Combat, BackstabBonus)) / 100));
 			hate = 20 * backstab_dmg * GetSkill(SkillBackstab) / 355;
 		}
 		else{
-			max_hit = (((2*backstab_dmg) * GetDamageTable(SkillBackstab) / 100) * 10 * GetSkill(SkillBackstab) / 355) + 1;;
+			max_hit = (((((2*backstab_dmg) * GetDamageTable(SkillBackstab) / 100) * 10 * GetSkill(SkillBackstab) / 355) + 1) * ((100 + RuleI(Combat, BackstabBonus)) / 100));
 			hate = 20 * backstab_dmg * GetSkill(SkillBackstab) / 355;
 		}
 
