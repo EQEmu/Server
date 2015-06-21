@@ -828,7 +828,7 @@ void Client::SendAlternateAdvancementRank(int aa_id, int level) {
 	if(!CanUseAlternateAdvancementRank(rank)) {
 		return;
 	}
-	
+
 	int size = sizeof(AARankInfo_Struct) + (sizeof(AARankEffect_Struct) * rank->effects.size()) + (sizeof(AARankPrereq_Struct) * rank->prereqs.size());
 	EQApplicationPacket *outapp = new EQApplicationPacket(OP_SendAATable, size);
 	AARankInfo_Struct *aai = (AARankInfo_Struct*)outapp->pBuffer;
@@ -996,7 +996,7 @@ void Client::PurchaseAlternateAdvancementRank(int rank_id) {
 	if(!CanPurchaseAlternateAdvancementRank(rank, true)) {
 		return;
 	}
-	
+
 	if(rank->base_ability->charges > 0) {
 		uint32 charges = 0;
 		GetAA(rank_id, &charges);
@@ -1004,7 +1004,7 @@ void Client::PurchaseAlternateAdvancementRank(int rank_id) {
 		if(charges > 0) {
 			return;
 		}
-		
+
 		SetAA(rank_id, rank->current_value, rank->base_ability->charges);
 	} else {
 		SetAA(rank_id, rank->current_value, 0);
@@ -1022,10 +1022,10 @@ void Client::PurchaseAlternateAdvancementRank(int rank_id) {
 	SendAlternateAdvancementStats();
 
 	if(rank->prev) {
-		Message_StringID(15, AA_IMPROVE, 
-						 std::to_string(rank->title_sid).c_str(), 
-						 std::to_string(rank->prev->current_value).c_str(), 
-						 std::to_string(rank->cost).c_str(), 
+		Message_StringID(15, AA_IMPROVE,
+						 std::to_string(rank->title_sid).c_str(),
+						 std::to_string(rank->prev->current_value).c_str(),
+						 std::to_string(rank->cost).c_str(),
 						 std::to_string(AA_POINTS).c_str());
 
 		/* QS: Player_Log_AA_Purchases */
@@ -1034,9 +1034,9 @@ void Client::PurchaseAlternateAdvancementRank(int rank_id) {
 			QServ->PlayerLogEvent(Player_Log_AA_Purchases, CharacterID(), event_desc);
 		}
 	} else {
-		Message_StringID(15, AA_GAIN_ABILITY, 
-						 std::to_string(rank->title_sid).c_str(), 
-						 std::to_string(rank->cost).c_str(), 
+		Message_StringID(15, AA_GAIN_ABILITY,
+						 std::to_string(rank->title_sid).c_str(),
+						 std::to_string(rank->cost).c_str(),
 						 std::to_string(AA_POINTS).c_str());
 		/* QS: Player_Log_AA_Purchases */
 		if (RuleB(QueryServ, PlayerLogAAPurchases)){
@@ -1125,7 +1125,7 @@ void Client::ActivateAlternateAdvancementAbility(int rank_id, int target_id) {
 	if(!IsValidSpell(rank->spell)) {
 		return;
 	}
-	
+
 	if(!CanUseAlternateAdvancementRank(rank)) {
 		return;
 	}
@@ -1448,7 +1448,7 @@ bool Mob::CanPurchaseAlternateAdvancementRank(AA::Rank *rank, bool check_price) 
 
 	if(!ability)
 		return false;
-	
+
 	if(!CanUseAlternateAdvancementRank(rank)) {
 		return false;
 	}
@@ -1474,7 +1474,7 @@ bool Mob::CanPurchaseAlternateAdvancementRank(AA::Rank *rank, bool check_price) 
 	}
 
 	//if expendable only let us purchase if we have no charges already
-	//not quite sure on how this functions client side atm 
+	//not quite sure on how this functions client side atm
 	//I intend to look into it later to make sure the behavior is right
 	if(ability->charges > 0 && current_charges > 0) {
 		return false;
@@ -1568,7 +1568,7 @@ void Zone::LoadAlternateAdvancement() {
 }
 
 bool ZoneDatabase::LoadAlternateAdvancementAbilities(std::unordered_map<int, std::unique_ptr<AA::Ability>> &abilities,
-													std::unordered_map<int, std::unique_ptr<AA::Rank>> &ranks) 
+													std::unordered_map<int, std::unique_ptr<AA::Rank>> &ranks)
 {
 	Log.Out(Logs::General, Logs::Status, "Loading Alternate Advancement Abilities...");
 	abilities.clear();
@@ -1729,4 +1729,19 @@ void Mob::GrantAlternateAdvancementAbility(int aa_id, int points) {
 		c->SendAlternateAdvancementStats();
 		c->CalcBonuses();
 	}
+}
+
+bool Mob::CheckAATimer(int timer)
+{
+	if (timer >= aaTimerMax)
+		return false;
+	if (aa_timers[timer].Enabled()) {
+		if (aa_timers[timer].Check(false)) {
+			aa_timers[timer].Disable();
+			return false;
+		} else {
+			return true;
+		}
+	}
+	return false;
 }

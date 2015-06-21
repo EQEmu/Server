@@ -226,6 +226,7 @@ public:
 	virtual int32 GetMeleeMitDmg(Mob *attacker, int32 damage, int32 minhit, float mit_rating, float atk_rating);
 	virtual void SetAttackTimer();
 	float GetQuiverHaste();
+	void DoAttackRounds(Mob *target, int hand, bool IsFromSpell = false);
 
 	void AI_Init();
 	void AI_Start(uint32 iMoveDelay = 0);
@@ -774,7 +775,7 @@ public:
 	void AddAAPoints(uint32 points) { m_pp.aapoints += points; SendAlternateAdvancementStats(); }
 	int GetAAPoints() { return m_pp.aapoints; }
 	int GetSpentAA() { return m_pp.aapoints_spent; }
-	
+
 	//old AA methods that we still use
 	void ResetAA();
 	void RefundAA();

@@ -638,42 +638,23 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 				snprintf(effect_desc, _EDLEN, "Group Fear Immunity");
 #endif
 				//Added client messages to give some indication this effect is active.
-				uint32 group_id_caster = 0;
-				uint32 time = spell.base[i]*10;
-				if(caster->IsClient())
-				{
-					if(caster->IsGrouped())
-					{
-						group_id_caster = GetGroup()->GetID();
-					}
-					else if(caster->IsRaidGrouped())
-					{
-						group_id_caster = (GetRaid()->GetGroup(CastToClient()) == 0xFFFF) ? 0 : (GetRaid()->GetGroup(CastToClient()) + 1);
+				// Is there a message generated? Too disgusted by raids.
+				uint32 time = spell.base[i] * 10 * 1000;
+				if (caster->IsClient()) {
+					if (caster->IsGrouped()) {
+						auto group = caster->GetGroup();
+						for (int i = 0; i < 6; ++i)
+							if (group->members[i])
+								group->members[i]->aa_timers[aaTimerWarcry].Start(time);
+					} else if (caster->IsRaidGrouped()) {
+						auto raid = caster->GetRaid();
+						uint32 gid = raid->GetGroup(caster->CastToClient());
+						if (gid < 12)
+							for (int i = 0; i < MAX_RAID_MEMBERS; ++i)
+								if (raid->members[i].member && raid->members[i].GroupNumber == gid)
+									raid->members[i].member->aa_timers[aaTimerWarcry].Start(time);
 					}
 				}
-				//old aa
-				//if(group_id_caster){
-				//	Group *g = entity_list.GetGroupByID(group_id_caster);
-				//	uint32 time = spell.base[i]*10;
-				//	if(g){
-				//		for(int gi=0; gi < 6; gi++){
-				//			if(g->members[gi] && g->members[gi]->IsClient())
-				//			{
-				//				g->members[gi]->CastToClient()->EnableAAEffect(aaEffectWarcry , time);
-				//				if (g->members[gi]->GetID() != caster->GetID())
-				//					g->members[gi]->Message(13, "You hear the war cry.");
-				//				else
-				//					Message(13, "You let loose a fierce war cry.");
-				//			}
-				//		}
-				//	}
-				//}
-				//
-				//else{
-				//	CastToClient()->EnableAAEffect(aaEffectWarcry , time);
-				//	Message(13, "You let loose a fierce war cry.");
-				//}
-
 				break;
 			}
 
@@ -2238,9 +2219,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 #ifdef SPELL_EFFECT_SPAM
 				snprintf(effect_desc, _EDLEN, "Duration Rampage");
 #endif
-				//if (caster && caster->IsClient()) { // will tidy this up later so that NPCs can duration ramp from spells too
-				//	CastToClient()->DurationRampage(effect_value*12);
-				//}
+				aa_timers[aaTimerRampage].Start(effect_value * 10 * 1000); // Live bug, was suppose to be 1 second per value
 				break;
 			}
 
@@ -2969,7 +2948,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 			case SE_FcIncreaseNumHits:
 			case SE_CastonFocusEffect:
 			case SE_FcHealAmtIncoming:
-			case SE_MeleeVulnerability:
+			case SE_LimitManaMax:
 			case SE_DoubleRangedAttack:
 			case SE_ShieldEquipHateMod:
 			case SE_ShieldEquipDmgMod:
@@ -3377,7 +3356,7 @@ void Mob::BuffProcess()
 				{
 					--buffs[buffs_i].ticsremaining;
 
-					if ((buffs[buffs_i].ticsremaining == 0 && !IsShortDurationBuff(buffs[buffs_i].spellid)) || buffs[buffs_i].ticsremaining < 0) {
+					if ((buffs[buffs_i].ticsremaining == 0 && !(IsShortDurationBuff(buffs[buffs_i].spellid) || IsBardSong(buffs[buffs_i].spellid))) || buffs[buffs_i].ticsremaining < 0) {
 						Log.Out(Logs::Detail, Logs::Spells, "Buff %d in slot %d has expired. Fading.", buffs[buffs_i].spellid, buffs_i);
 						BuffFadeBySlot(buffs_i);
 					}
@@ -4322,6 +4301,11 @@ int16 Client::CalcAAFocus(focusType type, const AA::Rank &rank, uint16 spell_id)
 				LimitFailure = true;
 			break;
 
+		case SE_LimitManaMax:
+			if (spell.mana > base1)
+				LimitFailure = true;
+			break;
+
 		case SE_LimitTarget:
 			if (base1 < 0) {
 				if (-base1 == spell.targettype) // Exclude
@@ -4737,6 +4721,11 @@ int16 Mob::CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, boo
 
 		case SE_LimitManaMin:
 			if (spell.mana < focus_spell.base[i])
+				return 0;
+			break;
+
+		case SE_LimitManaMax:
+			if (spell.mana > focus_spell.base[i])
 				return 0;
 			break;
 
@@ -5199,11 +5188,8 @@ uint16 Client::GetSympatheticFocusEffect(focusType type, uint16 spell_id) {
 	return 0;
 }
 
-int16 Client::GetFocusEffect(focusType type, uint16 spell_id) {
-
-	if (IsBardSong(spell_id) && type != focusFcBaseEffects)
-		return 0;
-
+int16 Client::GetFocusEffect(focusType type, uint16 spell_id)
+{
 	int16 realTotal = 0;
 	int16 realTotal2 = 0;
 	int16 realTotal3 = 0;

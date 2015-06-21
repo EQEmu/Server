@@ -2280,7 +2280,7 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, uint16 slot, uint16 
 			if(rank && rank->base_ability) {
 				ExpendAlternateAdvancementCharge(rank->base_ability->id);
 			}
-		} 
+		}
 		else if(spell_id == casting_spell_id && casting_spell_timer != 0xFFFFFFFF)
 		{
 			//aa new todo: aa expendable charges here
@@ -4124,13 +4124,13 @@ bool Mob::IsImmuneToSpell(uint16 spell_id, Mob *caster)
 			}
 			return true;
 		}
-		//else if (IsClient() && CastToClient()->CheckAAEffect(aaEffectWarcry)) //old aa
-		//{
-		//	Message(13, "Your are immune to fear.");
-		//	Log.Out(Logs::Detail, Logs::Spells, "Clients has WarCry effect, immune to fear!");
-		//	caster->Message_StringID(MT_Shout, IMMUNE_FEAR);
-		//	return true;
-		//}
+		else if (CheckAATimer(aaTimerWarcry))
+		{
+			Message(13, "Your are immune to fear.");
+			Log.Out(Logs::Detail, Logs::Spells, "Clients has WarCry effect, immune to fear!");
+			caster->Message_StringID(MT_Shout, IMMUNE_FEAR);
+			return true;
+		}
 	}
 
 	if(IsCharmSpell(spell_id))

@@ -1333,10 +1333,6 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 			newbon->PetMeleeMitigation += base1;
 			break;
 
-		case SE_MeleeVulnerability:
-			newbon->MeleeVulnerability += base1;
-			break;
-
 		case SE_FactionModPct: {
 			if ((base1 < 0) && (newbon->FactionModPct > base1))
 				newbon->FactionModPct = base1;
@@ -3008,10 +3004,6 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 				new_bonus->PetMeleeMitigation += effect_value;
 				break;
 
-			case SE_MeleeVulnerability:
-				new_bonus->MeleeVulnerability += effect_value;
-				break;
-
 			case SE_Sanctuary:
 				new_bonus->Sanctuary = true;
 				break;
@@ -4586,12 +4578,6 @@ void Mob::NegateSpellsBonuses(uint16 spell_id)
 					spellbonuses.FactionModPct = effect_value;
 					itembonuses.FactionModPct = effect_value;
 					aabonuses.FactionModPct = effect_value;
-					break;
-
-				case SE_MeleeVulnerability:
-					spellbonuses.MeleeVulnerability = effect_value;
-					itembonuses.MeleeVulnerability = effect_value;
-					aabonuses.MeleeVulnerability = effect_value;
 					break;
 
 				case SE_IllusionPersistence:
