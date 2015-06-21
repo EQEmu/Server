@@ -2948,7 +2948,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 			case SE_FcIncreaseNumHits:
 			case SE_CastonFocusEffect:
 			case SE_FcHealAmtIncoming:
-			case SE_MeleeVulnerability:
+			case SE_LimitManaMax:
 			case SE_DoubleRangedAttack:
 			case SE_ShieldEquipHateMod:
 			case SE_ShieldEquipDmgMod:
@@ -3356,7 +3356,7 @@ void Mob::BuffProcess()
 				{
 					--buffs[buffs_i].ticsremaining;
 
-					if ((buffs[buffs_i].ticsremaining == 0 && !IsShortDurationBuff(buffs[buffs_i].spellid)) || buffs[buffs_i].ticsremaining < 0) {
+					if ((buffs[buffs_i].ticsremaining == 0 && !(IsShortDurationBuff(buffs[buffs_i].spellid) || IsBardSong(buffs[buffs_i].spellid))) || buffs[buffs_i].ticsremaining < 0) {
 						Log.Out(Logs::Detail, Logs::Spells, "Buff %d in slot %d has expired. Fading.", buffs[buffs_i].spellid, buffs_i);
 						BuffFadeBySlot(buffs_i);
 					}
@@ -4301,6 +4301,11 @@ int16 Client::CalcAAFocus(focusType type, const AA::Rank &rank, uint16 spell_id)
 				LimitFailure = true;
 			break;
 
+		case SE_LimitManaMax:
+			if (spell.mana > base1)
+				LimitFailure = true;
+			break;
+
 		case SE_LimitTarget:
 			if (base1 < 0) {
 				if (-base1 == spell.targettype) // Exclude
@@ -4716,6 +4721,11 @@ int16 Mob::CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, boo
 
 		case SE_LimitManaMin:
 			if (spell.mana < focus_spell.base[i])
+				return 0;
+			break;
+
+		case SE_LimitManaMax:
+			if (spell.mana > focus_spell.base[i])
 				return 0;
 			break;
 
@@ -5178,11 +5188,8 @@ uint16 Client::GetSympatheticFocusEffect(focusType type, uint16 spell_id) {
 	return 0;
 }
 
-int16 Client::GetFocusEffect(focusType type, uint16 spell_id) {
-
-	if (IsBardSong(spell_id) && type != focusFcBaseEffects)
-		return 0;
-
+int16 Client::GetFocusEffect(focusType type, uint16 spell_id)
+{
 	int16 realTotal = 0;
 	int16 realTotal2 = 0;
 	int16 realTotal3 = 0;
