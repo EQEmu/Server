@@ -157,7 +157,7 @@ void ZoneDatabase::AddLootDropToNPC(NPC* npc,uint32 lootdrop_id, ItemList* iteml
 	for(int i = 0; i < mindrop; ++i) {
 		float roll = (float)zone->random.Real(0.0, roll_t_min);
 		for(uint32 j = 0; j < lds->NumEntries; ++j) {
-			const Item_Struct* db_item = GetItem(lds->Entries[j].item_id);
+			const ItemData* db_item = GetItem(lds->Entries[j].item_id);
 			if(db_item) {
 				if(roll < lds->Entries[j].chance) {
 					npc->AddLootDrop(db_item, itemlist, lds->Entries[j].item_charges, lds->Entries[j].minlevel,

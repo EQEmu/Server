@@ -2729,7 +2729,7 @@ void Mob::SendArmorAppearance(Client *one_client)
 	{
 		if (!IsClient())
 		{
-			const Item_Struct *item;
+			const ItemData *item;
 			for (int i=0; i< 7 ; ++i)
 			{
 				item=database.GetItem(GetEquipment(i));

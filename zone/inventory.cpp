@@ -2271,113 +2271,114 @@ static bool CopyBagContents(ItemInst* new_bag, const ItemInst* old_bag)
 
 void Client::DisenchantSummonedBags(bool client_update)
 {
-	for (auto slot_id = EmuConstants::GENERAL_BEGIN; slot_id <= EmuConstants::GENERAL_END; ++slot_id) {
-		auto inst = m_inv[slot_id];
-		if (!inst) { continue; }
-		if (!IsSummonedBagID(inst->GetItem()->ID)) { continue; }
-		if (inst->GetItem()->ItemClass != ItemClassContainer) { continue; }
-		if (inst->GetTotalItemCount() == 1) { continue; }
-
-		auto new_id = GetDisenchantedBagID(inst->GetItem()->BagSlots);
-		if (!new_id) { continue; }
-		auto new_item = database.GetItem(new_id);
-		if (!new_item) { continue; }
-		auto new_inst = database.CreateBaseItem(new_item);
-		if (!new_inst) { continue; }
-
-		if (CopyBagContents(new_inst, inst)) {
-			Log.Out(Logs::General, Logs::Inventory, "Disenchant Summoned Bags: Replacing %s with %s in slot %i", inst->GetItem()->Name, new_inst->GetItem()->Name, slot_id);
-			PutItemInInventory(slot_id, *new_inst, client_update);
-		}
-		safe_delete(new_inst);
-	}
-
-	for (auto slot_id = EmuConstants::BANK_BEGIN; slot_id <= EmuConstants::BANK_END; ++slot_id) {
-		auto inst = m_inv[slot_id];
-		if (!inst) { continue; }
-		if (!IsSummonedBagID(inst->GetItem()->ID)) { continue; }
-		if (inst->GetItem()->ItemClass != ItemClassContainer) { continue; }
-		if (inst->GetTotalItemCount() == 1) { continue; }
-
-		auto new_id = GetDisenchantedBagID(inst->GetItem()->BagSlots);
-		if (!new_id) { continue; }
-		auto new_item = database.GetItem(new_id);
-		if (!new_item) { continue; }
-		auto new_inst = database.CreateBaseItem(new_item);
-		if (!new_inst) { continue; }
-
-		if (CopyBagContents(new_inst, inst)) {
-			Log.Out(Logs::General, Logs::Inventory, "Disenchant Summoned Bags: Replacing %s with %s in slot %i", inst->GetItem()->Name, new_inst->GetItem()->Name, slot_id);
-			PutItemInInventory(slot_id, *new_inst, client_update);
-		}
-		safe_delete(new_inst);
-	}
-
-	for (auto slot_id = EmuConstants::SHARED_BANK_BEGIN; slot_id <= EmuConstants::SHARED_BANK_END; ++slot_id) {
-		auto inst = m_inv[slot_id];
-		if (!inst) { continue; }
-		if (!IsSummonedBagID(inst->GetItem()->ID)) { continue; }
-		if (inst->GetItem()->ItemClass != ItemClassContainer) { continue; }
-		if (inst->GetTotalItemCount() == 1) { continue; }
-
-		auto new_id = GetDisenchantedBagID(inst->GetItem()->BagSlots);
-		if (!new_id) { continue; }
-		auto new_item = database.GetItem(new_id);
-		if (!new_item) { continue; }
-		auto new_inst = database.CreateBaseItem(new_item);
-		if (!new_inst) { continue; }
-		
-		if (CopyBagContents(new_inst, inst)) {
-			Log.Out(Logs::General, Logs::Inventory, "Disenchant Summoned Bags: Replacing %s with %s in slot %i", inst->GetItem()->Name, new_inst->GetItem()->Name, slot_id);
-			PutItemInInventory(slot_id, *new_inst, client_update);
-		}
-		safe_delete(new_inst);
-	}
-
-	while (!m_inv.CursorEmpty()) {
-		auto inst = m_inv[MainCursor];
-		if (!inst) { break; }
-		if (!IsSummonedBagID(inst->GetItem()->ID)) { break; }
-		if (inst->GetItem()->ItemClass != ItemClassContainer) { break; }
-		if (inst->GetTotalItemCount() == 1) { break; }
-
-		auto new_id = GetDisenchantedBagID(inst->GetItem()->BagSlots);
-		if (!new_id) { break; }
-		auto new_item = database.GetItem(new_id);
-		if (!new_item) { break; }
-		auto new_inst = database.CreateBaseItem(new_item);
-		if (!new_inst) { break; }
-
-		if (CopyBagContents(new_inst, inst)) {
-			Log.Out(Logs::General, Logs::Inventory, "Disenchant Summoned Bags: Replacing %s with %s in slot %i", inst->GetItem()->Name, new_inst->GetItem()->Name, MainCursor);
-			std::list<ItemInst*> local;
-			local.push_front(new_inst);
-			m_inv.PopItem(MainCursor);
-			safe_delete(inst);
-
-			while (!m_inv.CursorEmpty()) {
-				auto limbo_inst = m_inv.PopItem(MainCursor);
-				if (limbo_inst == nullptr) { continue; }
-				local.push_back(limbo_inst);
-			}
-
-			for (auto iter = local.begin(); iter != local.end(); ++iter) {
-				auto cur_inst = *iter;
-				if (cur_inst == nullptr) { continue; }
-				m_inv.PushCursor(*cur_inst);
-				safe_delete(cur_inst);
-			}
-			local.clear();
-
-			auto s = m_inv.cursor_cbegin(), e = m_inv.cursor_cend();
-			database.SaveCursor(this->CharacterID(), s, e);
-		}
-		else {
-			safe_delete(new_inst); // deletes disenchanted bag if not used
-		}
-
-		break;
-	}
+	//Inv2 todo: uh fix this
+	//for (auto slot_id = EmuConstants::GENERAL_BEGIN; slot_id <= EmuConstants::GENERAL_END; ++slot_id) {
+	//	auto inst = m_inv[slot_id];
+	//	if (!inst) { continue; }
+	//	if (!IsSummonedBagID(inst->GetItem()->ID)) { continue; }
+	//	if (inst->GetItem()->ItemClass != ItemClassContainer) { continue; }
+	//	if (inst->GetTotalItemCount() == 1) { continue; }
+	//
+	//	auto new_id = GetDisenchantedBagID(inst->GetItem()->BagSlots);
+	//	if (!new_id) { continue; }
+	//	auto new_item = database.GetItem(new_id);
+	//	if (!new_item) { continue; }
+	//	auto new_inst = database.CreateBaseItem(new_item);
+	//	if (!new_inst) { continue; }
+	//
+	//	if (CopyBagContents(new_inst, inst)) {
+	//		Log.Out(Logs::General, Logs::Inventory, "Disenchant Summoned Bags: Replacing %s with %s in slot %i", inst->GetItem()->Name, new_inst->GetItem()->Name, slot_id);
+	//		PutItemInInventory(slot_id, *new_inst, client_update);
+	//	}
+	//	safe_delete(new_inst);
+	//}
+	//
+	//for (auto slot_id = EmuConstants::BANK_BEGIN; slot_id <= EmuConstants::BANK_END; ++slot_id) {
+	//	auto inst = m_inv[slot_id];
+	//	if (!inst) { continue; }
+	//	if (!IsSummonedBagID(inst->GetItem()->ID)) { continue; }
+	//	if (inst->GetItem()->ItemClass != ItemClassContainer) { continue; }
+	//	if (inst->GetTotalItemCount() == 1) { continue; }
+	//
+	//	auto new_id = GetDisenchantedBagID(inst->GetItem()->BagSlots);
+	//	if (!new_id) { continue; }
+	//	auto new_item = database.GetItem(new_id);
+	//	if (!new_item) { continue; }
+	//	auto new_inst = database.CreateBaseItem(new_item);
+	//	if (!new_inst) { continue; }
+	//
+	//	if (CopyBagContents(new_inst, inst)) {
+	//		Log.Out(Logs::General, Logs::Inventory, "Disenchant Summoned Bags: Replacing %s with %s in slot %i", inst->GetItem()->Name, new_inst->GetItem()->Name, slot_id);
+	//		PutItemInInventory(slot_id, *new_inst, client_update);
+	//	}
+	//	safe_delete(new_inst);
+	//}
+	//
+	//for (auto slot_id = EmuConstants::SHARED_BANK_BEGIN; slot_id <= EmuConstants::SHARED_BANK_END; ++slot_id) {
+	//	auto inst = m_inv[slot_id];
+	//	if (!inst) { continue; }
+	//	if (!IsSummonedBagID(inst->GetItem()->ID)) { continue; }
+	//	if (inst->GetItem()->ItemClass != ItemClassContainer) { continue; }
+	//	if (inst->GetTotalItemCount() == 1) { continue; }
+	//
+	//	auto new_id = GetDisenchantedBagID(inst->GetItem()->BagSlots);
+	//	if (!new_id) { continue; }
+	//	auto new_item = database.GetItem(new_id);
+	//	if (!new_item) { continue; }
+	//	auto new_inst = database.CreateBaseItem(new_item);
+	//	if (!new_inst) { continue; }
+	//	
+	//	if (CopyBagContents(new_inst, inst)) {
+	//		Log.Out(Logs::General, Logs::Inventory, "Disenchant Summoned Bags: Replacing %s with %s in slot %i", inst->GetItem()->Name, new_inst->GetItem()->Name, slot_id);
+	//		PutItemInInventory(slot_id, *new_inst, client_update);
+	//	}
+	//	safe_delete(new_inst);
+	//}
+	//
+	//while (!m_inv.CursorEmpty()) {
+	//	auto inst = m_inv[MainCursor];
+	//	if (!inst) { break; }
+	//	if (!IsSummonedBagID(inst->GetItem()->ID)) { break; }
+	//	if (inst->GetItem()->ItemClass != ItemClassContainer) { break; }
+	//	if (inst->GetTotalItemCount() == 1) { break; }
+	//
+	//	auto new_id = GetDisenchantedBagID(inst->GetItem()->BagSlots);
+	//	if (!new_id) { break; }
+	//	auto new_item = database.GetItem(new_id);
+	//	if (!new_item) { break; }
+	//	auto new_inst = database.CreateBaseItem(new_item);
+	//	if (!new_inst) { break; }
+	//
+	//	if (CopyBagContents(new_inst, inst)) {
+	//		Log.Out(Logs::General, Logs::Inventory, "Disenchant Summoned Bags: Replacing %s with %s in slot %i", inst->GetItem()->Name, new_inst->GetItem()->Name, MainCursor);
+	//		std::list<ItemInst*> local;
+	//		local.push_front(new_inst);
+	//		m_inv.PopItem(MainCursor);
+	//		safe_delete(inst);
+	//
+	//		while (!m_inv.CursorEmpty()) {
+	//			auto limbo_inst = m_inv.PopItem(MainCursor);
+	//			if (limbo_inst == nullptr) { continue; }
+	//			local.push_back(limbo_inst);
+	//		}
+	//
+	//		for (auto iter = local.begin(); iter != local.end(); ++iter) {
+	//			auto cur_inst = *iter;
+	//			if (cur_inst == nullptr) { continue; }
+	//			m_inv.PushCursor(*cur_inst);
+	//			safe_delete(cur_inst);
+	//		}
+	//		local.clear();
+	//
+	//		auto s = m_inv.cursor_cbegin(), e = m_inv.cursor_cend();
+	//		database.SaveCursor(this->CharacterID(), s, e);
+	//	}
+	//	else {
+	//		safe_delete(new_inst); // deletes disenchanted bag if not used
+	//	}
+	//
+	//	break;
+	//}
 }
 
 void Client::RemoveNoRent(bool client_update)

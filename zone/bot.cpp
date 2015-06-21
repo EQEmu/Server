@@ -5,6 +5,7 @@
 #include "doors.h"
 #include "quest_parser_collection.h"
 #include "../common/string_util.h"
+#include "../common/item.h"
 
 extern volatile bool ZoneLoaded;
 
@@ -9006,7 +9007,7 @@ void Bot::AddItemBonuses(const ItemInst *inst, StatBonuses* newbon, bool isAug, 
 		return;
 	}
 
-	const Item_Struct *item = inst->GetItem();
+	const ItemData *item = inst->GetItem();
 
 	if(!isTribute && !inst->IsEquipable(GetBaseRace(),GetClass()))
 	{
