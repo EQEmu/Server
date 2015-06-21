@@ -45,7 +45,6 @@ struct Item_Struct;
 #include "../common/item_struct.h"
 #include "../common/clientversions.h"
 
-#include "aa.h"
 #include "common.h"
 #include "merc.h"
 #include "mob.h"
@@ -768,6 +767,8 @@ public:
 	void SendAlternateAdvancementPoints();
 	void SendAlternateAdvancementTimer(int ability, int begin, int end);
 	void SendAlternateAdvancementTimers();
+	void ResetAlternateAdvancementTimer(int ability);
+	void ResetAlternateAdvancementTimers();
 
 	void SetAAPoints(uint32 points) { m_pp.aapoints = points; SendAlternateAdvancementStats(); }
 	void AddAAPoints(uint32 points) { m_pp.aapoints += points; SendAlternateAdvancementStats(); }

@@ -872,8 +872,8 @@ void Client::SendAlternateAdvancementRank(int aa_id, int level) {
 	}
 
 	for(auto &prereq : rank->prereqs) {
-		outapp->WriteSInt32(prereq.aa_id);
-		outapp->WriteSInt32(prereq.points);
+		outapp->WriteSInt32(prereq.first);
+		outapp->WriteSInt32(prereq.second);
 	}
 
 	QueuePacket(outapp);
@@ -943,6 +943,41 @@ void Client::SendAlternateAdvancementTimers() {
 		uaaout->end = static_cast<uint32>(time(nullptr));
 		uaaout->ability = cur->GetType() - pTimerAAStart; // uuaaout->ability is really a shared timer number
 		QueuePacket(outapp);
+	}
+
+	safe_delete(outapp);
+}
+
+void Client::ResetAlternateAdvancementTimer(int ability) {
+	AA::Rank *rank = zone->GetAlternateAdvancementRank(casting_spell_aa_id);
+	if(rank) {
+		SendAlternateAdvancementTimer(rank->spell_type, 0, time(0));
+		p_timers.Clear(&database, rank->spell_type + pTimerAAStart);
+	}
+}
+
+void Client::ResetAlternateAdvancementTimers() {
+	EQApplicationPacket* outapp = new EQApplicationPacket(OP_AAAction, sizeof(UseAA_Struct));
+	UseAA_Struct* uaaout = (UseAA_Struct*)outapp->pBuffer;
+
+	PTimerList::iterator c, e;
+	c = p_timers.begin();
+	e = p_timers.end();
+	std::vector<int> r_timers;
+	for(; c != e; ++c) {
+		PersistentTimer *cur = c->second;
+		if(cur->GetType() < pTimerAAStart || cur->GetType() > pTimerAAEnd)
+			continue;
+		//send timer
+		uaaout->begin = 0;
+		uaaout->end = static_cast<uint32>(time(nullptr));
+		uaaout->ability = cur->GetType() - pTimerAAStart;
+		r_timers.push_back(cur->GetType());
+		QueuePacket(outapp);
+	}
+
+	for(auto &i : r_timers) {
+		p_timers.Clear(&database, i);
 	}
 
 	safe_delete(outapp);
@@ -1212,13 +1247,13 @@ void Mob::ExpendAlternateAdvancementCharge(uint32 aa_id) {
 bool ZoneDatabase::LoadAlternateAdvancement(Client *c) {
 	c->ClearAAs();
 	std::string query = StringFormat(
-		"SELECT								"
-		"aa_id,								"
-		"aa_value,							"
-		"charges							"
-		"FROM								"
-		"`character_alternate_abilities`    "
-		"WHERE `id` = %u ORDER BY `slot`", c->CharacterID());
+		"SELECT "
+		"aa_id, "
+		"aa_value, "
+		"charges "
+		"FROM "
+		"`character_alternate_abilities` "
+		"WHERE `id` = %u", c->CharacterID());
 	MySQLRequestResult results = database.QueryDatabase(query);
 
 	int i = 0;
@@ -1227,11 +1262,25 @@ bool ZoneDatabase::LoadAlternateAdvancement(Client *c) {
 		uint32 value = atoi(row[1]);
 		uint32 charges = atoi(row[2]);
 
-		c->GetPP().aa_array[i].AA = aa;
-		c->GetPP().aa_array[i].value = value;
-		c->GetPP().aa_array[i].charges = charges;
-		c->SetAA(aa, value, charges);
-		i++;
+		auto rank = zone->GetAlternateAdvancementRank(aa);
+		if(!rank) {
+			continue;
+		}
+
+		auto ability = rank->base_ability;
+		if(!ability) {
+			continue;
+		}
+
+		rank = ability->GetRankByPointsSpent(value);
+
+		if(c->CanUseAlternateAdvancementRank(rank)) {
+			c->GetPP().aa_array[i].AA = aa;
+			c->GetPP().aa_array[i].value = value;
+			c->GetPP().aa_array[i].charges = charges;
+			c->SetAA(aa, value, charges);
+			i++;
+		}
 	}
 
 	return true;
@@ -1359,8 +1408,14 @@ bool Mob::CanUseAlternateAdvancementRank(AA::Rank *rank) {
 		}
 	}
 
-	if(!(RuleI(World, ExpansionSettings) & (1 << rank->expansion))) {
-		return false;
+	if(IsClient()) {
+		if(!(CastToClient()->GetPP().expansions & (1 << rank->expansion))) {
+			return false;
+		}
+	} else {
+		if(!(RuleI(World, ExpansionSettings) & (1 << rank->expansion))) {
+			return false;
+		}
 	}
 
 	auto race = GetArrayRace(GetBaseRace());
@@ -1427,11 +1482,11 @@ bool Mob::CanPurchaseAlternateAdvancementRank(AA::Rank *rank, bool check_price) 
 
 	//check prereqs
 	for(auto &prereq : rank->prereqs) {
-		AA::Ability *prereq_ability = zone->GetAlternateAdvancementAbility(prereq.aa_id);
+		AA::Ability *prereq_ability = zone->GetAlternateAdvancementAbility(prereq.first);
 
 		if(prereq_ability) {
 			auto ranks = GetAA(prereq_ability->first_rank_id);
-			if(ranks < prereq.points) {
+			if(ranks < prereq.second) {
 				return false;
 			}
 		}
@@ -1473,6 +1528,24 @@ void Zone::LoadAlternateAdvancement() {
 
 			if(current->prev) {
 				current->total_cost = current->cost + current->prev->total_cost;
+
+				//check prereqs here
+				for(auto &prev_prereq : current->prev->prereqs) {
+				//	//if prev has an aa we dont have set
+				//	//	then set it here too
+				//	//if prev has an aa we have and the count is different
+				//	//	then set to whichever is highest
+				//
+					auto iter = current->prereqs.find(prev_prereq.first);
+					if(iter == current->prereqs.end()) {
+						//not found
+						current->prereqs[prev_prereq.first] = prev_prereq.second;
+					} else {
+						//they already have it too!
+						auto points = std::max(iter->second, prev_prereq.second);
+						current->prereqs[iter->first] = points;
+					}
+				}
 			}
 			else {
 				current->prev_id = -1;
@@ -1593,14 +1666,17 @@ bool ZoneDatabase::LoadAlternateAdvancementAbilities(std::unordered_map<int, std
 	results = QueryDatabase(query);
 	if(results.Success()) {
 		for(auto row = results.begin(); row != results.end(); ++row) {
-			AA::RankPrereq prereq;
 			int rank_id = atoi(row[0]);
-			prereq.aa_id = atoi(row[1]);
-			prereq.points = atoi(row[2]);
+			int aa_id = atoi(row[1]);
+			int points = atoi(row[2]);
+
+			if(aa_id <= 0 || points <= 0) {
+				continue;
+			}
 
 			if(ranks.count(rank_id) > 0) {
 				AA::Rank *rank = ranks[rank_id].get();
-				rank->prereqs.push_back(prereq);
+				rank->prereqs[aa_id] = points;
 			}
 		}
 	} else {

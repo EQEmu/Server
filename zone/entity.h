@@ -398,7 +398,6 @@ public:
 
 	void	SaveAllClientsTaskState();
 	void	ReloadAllClientsTaskState(int TaskID=0);
-
 	uint16	CreateGroundObject(uint32 itemid, const glm::vec4& position, uint32 decay_time = 300000);
 	uint16	CreateGroundObjectFromModel(const char *model, const glm::vec4& position, uint8 type = 0x00, uint32 decay_time = 0);
 	uint16	CreateDoor(const char *model, const glm::vec4& position, uint8 type = 0, uint16 size = 100);
@@ -429,6 +428,7 @@ public:
 	uint16 GetFreeID();
 	void RefreshAutoXTargets(Client *c);
 	void RefreshClientXTargets(Client *c);
+	void SendAlternateAdvancementStats();
 
 protected:
 	friend class Zone;

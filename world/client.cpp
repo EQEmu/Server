@@ -152,7 +152,13 @@ void Client::SendEnterWorld(std::string name)
 void Client::SendExpansionInfo() {
 	auto outapp = new EQApplicationPacket(OP_ExpansionInfo, sizeof(ExpansionInfo_Struct));
 	ExpansionInfo_Struct *eis = (ExpansionInfo_Struct*)outapp->pBuffer;
-	eis->Expansions = (RuleI(World, ExpansionSettings));
+	if(RuleB(World, UseClientBasedExpansionSettings)) {
+		eis->Expansions = ExpansionFromClientVersion(eqs->GetClientVersion());
+		//eis->Expansions = ExpansionFromClientVersion(this->GetCLE.
+	} else {
+		eis->Expansions = (RuleI(World, ExpansionSettings));
+	}
+
 	QueuePacket(outapp);
 	safe_delete(outapp);
 }

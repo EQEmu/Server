@@ -48,7 +48,7 @@ public:
 	int total_cost;
 	Ability *base_ability;
 	std::vector<RankEffect> effects;
-	std::vector<RankPrereq> prereqs;
+	std::map<int, int> prereqs;
 };
 
 }

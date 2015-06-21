@@ -524,7 +524,6 @@ void Client::ReportConnectingState() {
 }
 
 bool Client::SaveAA() {
-	std::string dquery;
 	std::string iquery;
 	int spentpoints = 0;
 	int i = 0;
@@ -546,19 +545,16 @@ bool Client::SaveAA() {
 			spentpoints += r->total_cost;
 
 			if(i == 0) {
-				iquery = StringFormat("INSERT INTO `character_alternate_abilities` (id, slot, aa_id, aa_value, charges)"
-									  " VALUES (%u, %u, %u, %u, %u)", character_id, i, ability->first_rank_id, rank.second.first, rank.second.second);
+				iquery = StringFormat("REPLACE INTO `character_alternate_abilities` (id, aa_id, aa_value, charges)"
+									  " VALUES (%u, %u, %u, %u)", character_id, ability->first_rank_id, rank.second.first, rank.second.second);
 			} else {
-				iquery += StringFormat(", (%u, %u, %u, %u, %u)", character_id, i, ability->first_rank_id, rank.second.first, rank.second.second);
+				iquery += StringFormat(", (%u, %u, %u, %u)", character_id, ability->first_rank_id, rank.second.first, rank.second.second);
 			}
 			i++;
 		}
 	}
 
 	m_pp.aapoints_spent = spentpoints + m_epp.expended_aa;
-
-	dquery = StringFormat("DELETE FROM `character_alternate_abilities` WHERE id=%u", character_id);
-	database.QueryDatabase(dquery);
 
 	if(iquery.length() > 0) {
 		database.QueryDatabase(iquery);

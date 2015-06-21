@@ -184,6 +184,7 @@ RULE_INT(World, MinGMAntiHackStatus, 1) //Minimum GM status to check against Ant
 RULE_INT(World, SoFStartZoneID, -1) //Sets the Starting Zone for SoF Clients separate from Titanium Clients (-1 is disabled)
 RULE_INT(World, TitaniumStartZoneID, -1) //Sets the Starting Zone for Titanium Clients (-1 is disabled). Replaces the old method.
 RULE_INT(World, ExpansionSettings, 16383) // Sets the expansion settings for the server, This is sent on login to world and affects client expansion settings. Defaults to all expansions enabled up to TSS.
+RULE_BOOL(World, UseClientBasedExpansionSettings, true) // if true it will overrule World, ExpansionSettings and set someone's expansion based on the client they're using
 RULE_INT(World, PVPSettings, 0) // Sets the PVP settings for the server, 1 = Rallos Zek RuleSet, 2 = Tallon/Vallon Zek Ruleset, 4 = Sullon Zek Ruleset, 6 = Discord Ruleset, anything above 6 is the Discord Ruleset without the no-drop restrictions removed. TODO: Edit IsAttackAllowed in Zone to accomodate for these rules.
 RULE_BOOL (World, IsGMPetitionWindowEnabled, false)
 RULE_INT (World, FVNoDropFlag, 0) // Sets the Firiona Vie settings on the client. If set to 2, the flag will be set for GMs only, allowing trading of no-drop items.

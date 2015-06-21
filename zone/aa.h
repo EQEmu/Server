@@ -1536,4 +1536,11 @@ public:
 	uint32 owner_id;
 };
 
+enum AATimers
+{
+	aaTimerRampage,
+	aaTimerWarcry,
+	aaTimerMax
+};
+
 #endif

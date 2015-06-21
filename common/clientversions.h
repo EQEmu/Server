@@ -150,4 +150,26 @@ static ClientVersion ClientVersionFromBit(uint32 clientVersionBit)
 	}
 }
 
+static uint32 ExpansionFromClientVersion(ClientVersion clientVersion)
+{
+	switch(clientVersion)
+	{
+	case ClientVersion::Unknown:
+	case ClientVersion::Client62:
+	case ClientVersion::Titanium:
+		return 0x000007FFU;
+	case ClientVersion::SoF:
+		return 0x00007FFFU;
+	case ClientVersion::SoD:
+		return 0x0000FFFFU;
+	case ClientVersion::UF:
+		return 0x0001FFFFU;
+	case ClientVersion::RoF:
+	case ClientVersion::RoF2:
+		return 0x000FFFFFU;
+	default:
+		return 0;
+	}
+}
+
 #endif /* CLIENTVERSIONS_H */

@@ -320,6 +320,7 @@ int command_init(void) {
 		command_add("raidloot", "LEADER|GROUPLEADER|SELECTED|ALL - Sets your raid loot settings if you have permission to do so.", 0, command_raidloot) ||
 		command_add("randomfeatures", "- Temporarily randomizes the Facial Features of your target", 80, command_randomfeatures) ||
 		command_add("refreshgroup", "- Refreshes Group.",  0, command_refreshgroup) ||
+		command_add("reloadaa", "Reloads AA data", 200, command_reloadaa) ||
 		command_add("reloadallrules", "Executes a reload of all rules.", 80, command_reloadallrules) ||
 		command_add("reloademote", "Reloads NPC Emotes", 80, command_reloademote) ||
 		command_add("reloadlevelmods", nullptr,255, command_reloadlevelmods) ||
@@ -333,6 +334,7 @@ int command_init(void) {
 		command_add("reloadzps", nullptr,0, command_reloadzps) ||
 		command_add("repop", "[delay] - Repop the zone with optional delay", 100, command_repop) ||
 		command_add("resetaa", "- Resets a Player's AA in their profile and refunds spent AA's to unspent, may disconnect player.", 200, command_resetaa) ||
+		command_add("resetaa_timer", "Command to reset AA cooldown timers.", 200, command_resetaa_timer) ||
 		command_add("revoke", "[charname] [1/0] - Makes charname unable to talk on OOC", 200, command_revoke) ||
 		command_add("rules", "(subcommand) - Manage server rules",  250, command_rules) ||
 		command_add("save", "- Force your player or player corpse target to be saved to the database", 50, command_save) ||
@@ -10579,4 +10581,36 @@ void command_mysqltest(Client *c, const Seperator *sep)
 		} 
 	}
 	Log.Out(Logs::General, Logs::Debug, "MySQL Test... Took %f seconds", ((float)(std::clock() - t)) / CLOCKS_PER_SEC); 
+}
+
+void command_resetaa_timer(Client *c, const Seperator *sep) {
+	Client *target = nullptr;
+	if(!c->GetTarget() || !c->GetTarget()->IsClient()) {
+		target = c;
+	} else {
+		target = c->GetTarget()->CastToClient();
+	}
+
+	if(sep->IsNumber(1)) 
+	{
+		int timer_id = atoi(sep->arg[1]);
+		c->Message(0, "Reset of timer %i for %s", timer_id, c->GetName());
+		c->ResetAlternateAdvancementTimer(timer_id);
+	}
+	else if(!strcasecmp(sep->arg[1], "all")) 
+	{
+		c->Message(0, "Reset all timers for %s", c->GetName());
+		c->ResetAlternateAdvancementTimers();
+	} 
+	else 
+	{
+		c->Message(0, "usage: #resetaa_timer [all | timer_id]");
+	}
+}
+
+void command_reloadaa(Client *c, const Seperator *sep) {
+	c->Message(0, "Reloading Alternate Advancement Data...");
+	zone->LoadAlternateAdvancement();
+	c->Message(0, "Alternate Advancement Data Reloaded");
+	entity_list.SendAlternateAdvancementStats();
 }

@@ -1440,6 +1440,13 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	if (m_pp.ldon_points_tak < 0 || m_pp.ldon_points_tak > 2000000000){ m_pp.ldon_points_tak = 0; }
 	if (m_pp.ldon_points_available < 0 || m_pp.ldon_points_available > 2000000000){ m_pp.ldon_points_available = 0; }
 
+	if(RuleB(World, UseClientBasedExpansionSettings)) {
+		m_pp.expansions = ExpansionFromClientVersion(GetClientVersion());
+	}
+	else {
+		m_pp.expansions = RuleI(World, ExpansionSettings);
+	}
+
 	if(!database.LoadAlternateAdvancement(this)) {
 		Log.Out(Logs::General, Logs::Error, "Error loading AA points for %s", GetName());
 	}
@@ -1565,9 +1572,6 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 
 	/* Update LFP in case any (or all) of our group disbanded while we were zoning. */
 	if (IsLFP()) { UpdateLFP(); }
-
-	/* Get Expansions from variables table and ship via PP */
-	m_pp.expansions = RuleI(World, ExpansionSettings);
 
 	p_timers.SetCharID(CharacterID());
 	if (!p_timers.Load(&database)) {
