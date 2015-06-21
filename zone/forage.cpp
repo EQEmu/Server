@@ -185,26 +185,35 @@ bool Client::CanFish() {
 
 		rodPosition.x = m_Position.x + RodLength * sin(HeadingDegrees * M_PI/180.0f);
 		rodPosition.y = m_Position.y + RodLength * cos(HeadingDegrees * M_PI/180.0f);
+		rodPosition.z = m_Position.z;
 
-		// Do BestZ to find where the line hanging from the rod intersects the water (if it is water).
-		// and go 1 unit into the water.
-		glm::vec3 dest;
-		dest.x = rodPosition.x;
-		dest.y = rodPosition.y;
-		dest.z = m_Position.z+10;
-
-		rodPosition.z = zone->zonemap->FindBestZ(dest, nullptr) + 4;
-		bool in_lava = zone->watermap->InLava(rodPosition);
-		bool in_water = zone->watermap->InWater(rodPosition) || zone->watermap->InVWater(rodPosition);
-		//Message(0, "Rod is at %4.3f, %4.3f, %4.3f, InWater says %d, InLava says %d", RodX, RodY, RodZ, in_water, in_lava);
-		if (in_lava) {
-			Message_StringID(MT_Skills, FISHING_LAVA);	//Trying to catch a fire elemental or something?
+		float bestz = zone->zonemap->FindBestZ(rodPosition, nullptr);
+		float len = m_Position.z - bestz;
+		if(len > LineLength || len < 0.0f) {
+			Message_StringID(MT_Skills, FISHING_LAND);
 			return false;
 		}
-		if((!in_water) || (m_Position.z-rodPosition.z)>LineLength) {	//Didn't hit the water OR the water is too far below us
-			Message_StringID(MT_Skills, FISHING_LAND);	//Trying to catch land sharks perhaps?
-			return false;
+
+		float step_size = RuleR(Watermap, FishingLineStepSize);
+
+		for(float i = 0.0f; i < len; i += step_size) {
+			glm::vec3 dest(rodPosition.x, rodPosition.y, m_Position.z - i);
+
+			bool in_lava = zone->watermap->InLava(dest);
+			bool in_water = zone->watermap->InWater(dest) || zone->watermap->InVWater(dest);
+
+			if (in_lava) {
+				Message_StringID(MT_Skills, FISHING_LAVA);	//Trying to catch a fire elemental or something?
+				return false;
+			}
+
+			if(in_water) {
+				return true;
+			}
 		}
+
+		Message_StringID(MT_Skills, FISHING_LAND);
+		return false;
 	}
 	return true;
 }

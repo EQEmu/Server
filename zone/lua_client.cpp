@@ -1255,6 +1255,46 @@ void Lua_Client::PlayMP3(std::string file)
 	self->PlayMP3(file.c_str());
 }
 
+void Lua_Client::QuestReward(Lua_Mob target) {
+	Lua_Safe_Call_Void();
+	self->QuestReward(target);
+}
+
+void Lua_Client::QuestReward(Lua_Mob target, uint32 copper) {
+	Lua_Safe_Call_Void();
+	self->QuestReward(target, copper);
+}
+
+void Lua_Client::QuestReward(Lua_Mob target, uint32 copper, uint32 silver) {
+	Lua_Safe_Call_Void();
+	self->QuestReward(target, copper, silver);
+}
+
+void Lua_Client::QuestReward(Lua_Mob target, uint32 copper, uint32 silver, uint32 gold) {
+	Lua_Safe_Call_Void();
+	self->QuestReward(target, copper, silver, gold);
+}
+
+void Lua_Client::QuestReward(Lua_Mob target, uint32 copper, uint32 silver, uint32 gold, uint32 platinum) {
+	Lua_Safe_Call_Void();
+	self->QuestReward(target, copper, silver, gold, platinum);
+}
+
+void Lua_Client::QuestReward(Lua_Mob target, uint32 copper, uint32 silver, uint32 gold, uint32 platinum, uint32 itemid) {
+	Lua_Safe_Call_Void();
+	self->QuestReward(target, copper, silver, gold, platinum, itemid);
+}
+
+void Lua_Client::QuestReward(Lua_Mob target, uint32 copper, uint32 silver, uint32 gold, uint32 platinum, uint32 itemid, uint32 exp) {
+	Lua_Safe_Call_Void();
+	self->QuestReward(target, copper, silver, gold, platinum, itemid, exp);
+}
+
+void Lua_Client::QuestReward(Lua_Mob target, uint32 copper, uint32 silver, uint32 gold, uint32 platinum, uint32 itemid, uint32 exp, bool faction) {
+	Lua_Safe_Call_Void();
+	self->QuestReward(target, copper, silver, gold, platinum, itemid, exp, faction);
+}
+
 luabind::scope lua_register_client() {
 	return luabind::class_<Lua_Client, Lua_Mob>("Client")
 		.def(luabind::constructor<>())
@@ -1504,7 +1544,15 @@ luabind::scope lua_register_client() {
 		.def("SetConsumption", (void(Lua_Client::*)(int, int))&Lua_Client::SetConsumption)
 		.def("SendMarqueeMessage", (void(Lua_Client::*)(uint32, uint32, uint32, uint32, uint32, std::string))&Lua_Client::SendMarqueeMessage)
 		.def("SendColoredText", (void(Lua_Client::*)(uint32, std::string))&Lua_Client::SendColoredText)
-		.def("PlayMP3", (void(Lua_Client::*)(std::string))&Lua_Client::PlayMP3);
+		.def("PlayMP3", (void(Lua_Client::*)(std::string))&Lua_Client::PlayMP3)
+		.def("QuestReward", (void(Lua_Client::*)(Lua_Mob))&Lua_Client::QuestReward)
+		.def("QuestReward", (void(Lua_Client::*)(Lua_Mob, uint32))&Lua_Client::QuestReward)
+		.def("QuestReward", (void(Lua_Client::*)(Lua_Mob, uint32, uint32))&Lua_Client::QuestReward)
+		.def("QuestReward", (void(Lua_Client::*)(Lua_Mob, uint32, uint32, uint32))&Lua_Client::QuestReward)
+		.def("QuestReward", (void(Lua_Client::*)(Lua_Mob, uint32, uint32, uint32, uint32))&Lua_Client::QuestReward)
+		.def("QuestReward", (void(Lua_Client::*)(Lua_Mob, uint32, uint32, uint32, uint32, uint32))&Lua_Client::QuestReward)
+		.def("QuestReward", (void(Lua_Client::*)(Lua_Mob, uint32, uint32, uint32, uint32, uint32, uint32))&Lua_Client::QuestReward)
+		.def("QuestReward", (void(Lua_Client::*)(Lua_Mob, uint32, uint32, uint32, uint32, uint32, uint32, bool))&Lua_Client::QuestReward);
 }
 
 luabind::scope lua_register_inventory_where() {

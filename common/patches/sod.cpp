@@ -447,7 +447,9 @@ namespace SoD
 		OUT(type);
 		OUT(spellid);
 		OUT(damage);
-		eq->sequence = emu->sequence;
+		OUT(force)
+		OUT(meleepush_xy);
+		OUT(meleepush_z)
 
 		FINISH_ENCODE();
 	}
@@ -1557,6 +1559,7 @@ namespace SoD
 		for (r = 0; r < MAX_PP_AA_ARRAY; r++) {
 			OUT(aa_array[r].AA);
 			OUT(aa_array[r].value);
+			OUT(aa_array[r].charges);
 		}
 		//	OUT(unknown02220[4]);
 		OUT(mana);
@@ -1897,6 +1900,7 @@ namespace SoD
 			OUT(cost2);
 			eq->aa_expansion = emu->aa_expansion;
 			eq->special_category = emu->special_category;
+			eq->expendable_charges = emu->special_category == 7 ? 1 : 0; // temp hack, this can actually be any number
 			OUT(total_abilities);
 			unsigned int r;
 			for (r = 0; r < emu->total_abilities; r++) {
@@ -1961,15 +1965,16 @@ namespace SoD
 
 		for (int counter = 0; counter < character_count; ++counter) {
 			emu_cse = (CharacterSelectEntry_Struct *)emu_ptr;
-			eq_cse = (structs::CharacterSelectEntry_Struct *)eq_ptr;
+			eq_cse = (structs::CharacterSelectEntry_Struct *)eq_ptr; // base address
 
 			eq_cse->Level = emu_cse->Level;
 			eq_cse->HairStyle = emu_cse->HairStyle;
 			eq_cse->Gender = emu_cse->Gender;
 
 			strcpy(eq_cse->Name, emu_cse->Name);
-			eq_ptr += strlen(eq_cse->Name);
-			eq_cse = (structs::CharacterSelectEntry_Struct *)eq_ptr;
+			eq_ptr += strlen(emu_cse->Name);
+			eq_cse = (structs::CharacterSelectEntry_Struct *)eq_ptr; // offset address (base + name length offset)
+			eq_cse->Name[0] = '\0'; // (offset)eq_cse->Name[0] = (base)eq_cse->Name[strlen(emu_cse->Name)]
 
 			eq_cse->Beard = emu_cse->Beard;
 			eq_cse->HairColor = emu_cse->HairColor;
@@ -2736,7 +2741,7 @@ namespace SoD
 			VARSTRUCT_ENCODE_TYPE(uint8, Buffer, 0); // unknown12
 			VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->petOwnerId);
 			VARSTRUCT_ENCODE_TYPE(uint8, Buffer, 0); // unknown13
-			VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0); // unknown14 - Stance 64 = normal 4 = aggressive 40 = stun/mezzed
+			VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->PlayerState);
 			VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0); // unknown15
 			VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0); // unknown16
 			VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0); // unknown17
@@ -3350,7 +3355,7 @@ namespace SoD
 		default:
 			emu->command = eq->command;
 		}
-		OUT(unknown);
+		IN(target);
 
 		FINISH_DIRECT_DECODE();
 	}

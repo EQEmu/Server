@@ -1369,7 +1369,7 @@ void command_date(Client *c, const Seperator *sep)
 	else {
 		int h=0, m=0;
 		TimeOfDay_Struct eqTime;
-		zone->zone_time.getEQTimeOfDay( time(0), &eqTime);
+		zone->zone_time.GetCurrentEQTimeOfDay( time(0), &eqTime);
 		if(!sep->IsNumber(4))
 		h=eqTime.hour;
 		else
@@ -1402,7 +1402,7 @@ void command_timezone(Client *c, const Seperator *sep)
 		// Update all clients with new TZ.
 		EQApplicationPacket* outapp = new EQApplicationPacket(OP_TimeOfDay, sizeof(TimeOfDay_Struct));
 		TimeOfDay_Struct* tod = (TimeOfDay_Struct*)outapp->pBuffer;
-		zone->zone_time.getEQTimeOfDay(time(0), tod);
+		zone->zone_time.GetCurrentEQTimeOfDay(time(0), tod);
 		entity_list.QueueClients(c, outapp);
 		safe_delete(outapp);
 	}
@@ -1484,7 +1484,7 @@ void command_npcstats(Client *c, const Seperator *sep)
 		c->Message(0, "Current HP: %i  Max HP: %i",  c->GetTarget()->GetHP(), c->GetTarget()->GetMaxHP());
 		//c->Message(0, "Weapon Item Number: %s", c->GetTarget()->GetWeapNo());
 		c->Message(0, "Gender: %i  Size: %f  Bodytype: %d",  c->GetTarget()->GetGender(), c->GetTarget()->GetSize(), c->GetTarget()->GetBodyType());
-		c->Message(0, "Runspeed: %f  Walkspeed: %f",  c->GetTarget()->GetRunspeed(), c->GetTarget()->GetWalkspeed());
+		c->Message(0, "Runspeed: %i  Walkspeed: %i",  c->GetTarget()->GetRunspeed(), c->GetTarget()->GetWalkspeed());
 		c->Message(0, "Spawn Group: %i  Grid: %i",  c->GetTarget()->CastToNPC()->GetSp2(), c->GetTarget()->CastToNPC()->GetGrid());
 		c->Message(0, "EmoteID: %i",  c->GetTarget()->CastToNPC()->GetEmoteID());
 		c->GetTarget()->CastToNPC()->QueryLoot(c);
@@ -4393,7 +4393,7 @@ void command_time(Client *c, const Seperator *sep)
 	else {
 		c->Message(13, "To set the Time: #time HH [MM]");
 		TimeOfDay_Struct eqTime;
-		zone->zone_time.getEQTimeOfDay( time(0), &eqTime);
+		zone->zone_time.GetCurrentEQTimeOfDay( time(0), &eqTime);
 		sprintf(timeMessage,"%02d:%s%d %s (Timezone: %ih %im)", 
 			((eqTime.hour - 1) % 12) == 0 ? 12 : ((eqTime.hour - 1) % 12),
 			(eqTime.minute < 10) ? "0" : "", 
@@ -8565,20 +8565,20 @@ void command_object(Client *c, const Seperator *sep)
 
 			od.object_type = atoi(row[7]);
 			icon = atoi(row[8]);
-			od.unknown008 = atoi(row[9]);
-			od.unknown010 = atoi(row[10]);
+			od.size = atoi(row[9]);
+			od.solidtype = atoi(row[10]);
 			od.unknown020 = atoi(row[11]);
 
 			switch (od.object_type) {
 			case 0:				// Static Object
 			case staticType:		// Static Object unlocked for changes
-				if (od.unknown008 == 0) // Unknown08 field is optional Size parameter for static objects
-					od.unknown008 = 100; // Static object default Size is 100%
+				if (od.size == 0) // Unknown08 field is optional Size parameter for static objects
+					od.size = 100; // Static object default Size is 100%
 
 				c->Message(0, "- STATIC Object (%s): id %u, x %.1f, y %.1f, z %.1f, h %.1f, model %s, "
 					      "size %u, solidtype %u, incline %u",
 					   (od.object_type == 0) ? "locked" : "unlocked", id, od.x, od.y, od.z,
-					   od.heading, od.object_name, od.unknown008, od.unknown010, od.unknown020);
+					   od.heading, od.object_name, od.size, od.solidtype, od.unknown020);
 				break;
 
 			case OT_DROPPEDITEM: // Ground Spawn
@@ -8636,10 +8636,10 @@ void command_object(Client *c, const Seperator *sep)
 		switch (od.object_type) {
 		case 0: // Static Object
 			if ((sep->argnum - col) > 3) {
-				od.unknown008 = atoi(sep->arg[4 + col]); // Size specified
+				od.size = atoi(sep->arg[4 + col]); // Size specified
 
 				if ((sep->argnum - col) > 4) {
-					od.unknown010 = atoi(sep->arg[5 + col]); // SolidType specified
+					od.solidtype = atoi(sep->arg[5 + col]); // SolidType specified
 
 					if ((sep->argnum - col) > 5)
 						od.unknown020 = atoi(sep->arg[6 + col]); // Incline specified
@@ -8938,16 +8938,16 @@ void command_object(Client *c, const Seperator *sep)
 				return;
 			}
 
-			od.unknown008 = atoi(sep->arg[4]);
+			od.size = atoi(sep->arg[4]);
 			o->SetObjectData(&od);
 
-			if (od.unknown008 == 0) // 0 == unspecified == 100%
-				od.unknown008 = 100;
+			if (od.size == 0) // 0 == unspecified == 100%
+				od.size = 100;
 
 			c->Message(0, "Static Object %u set to %u%% size. Size will take effect when you commit to the "
 				      "database with '#object Save', after which the object will be unchangeable until "
 				      "you unlock it again with '#object Edit' and zone out and back in.",
-				   id, od.unknown008);
+				   id, od.size);
 		} else if (strcmp(sep->arg[3], "solidtype") == 0) {
 
 			if (od.object_type != staticType) {
@@ -8962,13 +8962,13 @@ void command_object(Client *c, const Seperator *sep)
 				return;
 			}
 
-			od.unknown010 = atoi(sep->arg[4]);
+			od.solidtype = atoi(sep->arg[4]);
 			o->SetObjectData(&od);
 
 			c->Message(0, "Static Object %u set to SolidType %u. Change will take effect when you commit "
 				      "to the database with '#object Save'. Support for this property is on a "
 				      "per-model basis, mostly seen in smaller objects such as chests and tables.",
-				   id, od.unknown010);
+					  id, od.solidtype);
 		} else if (strcmp(sep->arg[3], "icon") == 0) {
 
 			if ((od.object_type < 2) || (od.object_type == staticType)) {
@@ -9255,24 +9255,24 @@ void command_object(Client *c, const Seperator *sep)
 					     "unknown08 = %u, unknown10 = %u, unknown20 = %u "
 					     "WHERE ID = %u",
 					     zone->GetZoneID(), zone->GetInstanceVersion(), od.x, od.y, od.z,
-					     od.heading, od.object_name, od.object_type, icon, od.unknown008,
-					     od.unknown010, od.unknown020, id);
+					     od.heading, od.object_name, od.object_type, icon, od.size,
+						 od.solidtype, od.unknown020, id);
 		else if (id == 0)
 			query = StringFormat("INSERT INTO object "
 					     "(zoneid, version, xpos, ypos, zpos, heading, objectname, "
 					     "type, icon, unknown08, unknown10, unknown20) "
 					     "VALUES (%u, %u, %.1f, %.1f, %.1f, %.1f, '%s', %u, %u, %u, %u, %u)",
 					     zone->GetZoneID(), zone->GetInstanceVersion(), od.x, od.y, od.z,
-					     od.heading, od.object_name, od.object_type, icon, od.unknown008,
-					     od.unknown010, od.unknown020);
+					     od.heading, od.object_name, od.object_type, icon, od.size,
+					     od.solidtype, od.unknown020);
 		else
 			query = StringFormat("INSERT INTO object "
 					     "(id, zoneid, version, xpos, ypos, zpos, heading, objectname, "
 					     "type, icon, unknown08, unknown10, unknown20) "
 					     "VALUES (%u, %u, %u, %.1f, %.1f, %.1f, %.1f, '%s', %u, %u, %u, %u, %u)",
 					     id, zone->GetZoneID(), zone->GetInstanceVersion(), od.x, od.y, od.z,
-					     od.heading, od.object_name, od.object_type, icon, od.unknown008,
-					     od.unknown010, od.unknown020);
+					     od.heading, od.object_name, od.object_type, icon, od.size,
+					     od.solidtype, od.unknown020);
 
 		results = database.QueryDatabase(query);
 		if (!results.Success()) {
@@ -9330,12 +9330,12 @@ void command_object(Client *c, const Seperator *sep)
 
 			memcpy(door.dest_zone, "NONE", 5);
 
-			if ((door.size = od.unknown008) == 0) // unknown08 = optional size percentage
+			if ((door.size = od.size) == 0) // unknown08 = optional size percentage
 				door.size = 100;
 
 			switch (
 			    door.opentype =
-				od.unknown010) // unknown10 = optional request_nonsolid (0 or 1 or experimental number)
+				od.solidtype) // unknown10 = optional request_nonsolid (0 or 1 or experimental number)
 			{
 			case 0:
 				door.opentype = 31;
@@ -9592,8 +9592,8 @@ void command_object(Client *c, const Seperator *sep)
 		strn0cpy(od.object_name, row[4], sizeof(od.object_name));
 		od.object_type = atoi(row[5]);
 		icon = atoi(row[6]);
-		od.unknown008 = atoi(row[7]);
-		od.unknown010 = atoi(row[8]);
+		od.size = atoi(row[7]);
+		od.solidtype = atoi(row[8]);
 		od.unknown020 = atoi(row[9]);
 
 		if (od.object_type == 0)

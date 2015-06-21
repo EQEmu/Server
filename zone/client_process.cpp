@@ -129,7 +129,9 @@ bool Client::Process() {
 		if(IsTracking() && (GetClientVersion() >= ClientVersion::SoD) && TrackingTimer.Check())
 			DoTracking();
 
-		if(hpupdate_timer.Check())
+		// SendHPUpdate calls hpupdate_timer.Start so it can delay this timer, so lets not reset with the check
+		// since the function will anyways
+		if(hpupdate_timer.Check(false))
 			SendHPUpdate();
 
 		if(mana_timer.Check())
@@ -197,10 +199,8 @@ bool Client::Process() {
 			instalog = true;
 		}
 
-		if (IsStunned() && stunned_timer.Check()) {
-			this->stunned = false;
-			this->stunned_timer.Disable();
-		}
+		if (IsStunned() && stunned_timer.Check())
+			Mob::UnStun();
 
 		if(!m_CheatDetectMoved)
 		{
@@ -262,7 +262,7 @@ bool Client::Process() {
 		}
 
 		if(light_update_timer.Check()) {
-			
+
 			UpdateEquipmentLight();
 			if(UpdateActiveLight()) {
 				SendAppearancePacket(AT_Light, GetActiveLightType());
@@ -562,7 +562,7 @@ bool Client::Process() {
 		}
 
 		ProjectileAttack();
-					
+
 		if(spellbonuses.GravityEffect == 1) {
 			if(gravity_timer.Check())
 				DoGravityEffect();
@@ -793,7 +793,7 @@ void Client::OnDisconnect(bool hard_disconnect) {
 	Mob *Other = trade->With();
 	if(Other)
 	{
-		Log.Out(Logs::Detail, Logs::Trading, "Client disconnected during a trade. Returning their items."); 
+		Log.Out(Logs::Detail, Logs::Trading, "Client disconnected during a trade. Returning their items.");
 		FinishTrade(this);
 
 		if(Other->IsClient())

@@ -18,6 +18,8 @@
 #include "qglobals.h"
 #include "../common/timer.h"
 #include "../common/eqemu_logsys.h"
+#include "encounter.h"
+#include "lua_encounter.h"
 
 struct Events { };
 struct Factions { };
@@ -34,6 +36,8 @@ struct lua_registered_event {
 
 extern std::map<std::string, std::list<lua_registered_event>> lua_encounter_events_registered;
 extern std::map<std::string, bool> lua_encounters_loaded;
+extern std::map<std::string, Encounter *> lua_encounters;
+
 extern void MapOpcodes();
 extern void ClearMappedOpcode(EmuOpcode op);
 
@@ -42,19 +46,23 @@ void unregister_event(std::string package_name, std::string name, int evt);
 void load_encounter(std::string name) {
 	if(lua_encounters_loaded.count(name) > 0)
 		return;
-
+	Encounter *enc = new Encounter(name.c_str());
+	entity_list.AddEncounter(enc);
+	lua_encounters[name] = enc;
 	lua_encounters_loaded[name] = true;
-	parse->EventEncounter(EVENT_ENCOUNTER_LOAD, name, 0);
+	parse->EventEncounter(EVENT_ENCOUNTER_LOAD, name, "", 0);
 }
 
 void load_encounter_with_data(std::string name, std::string info_str) {
 	if(lua_encounters_loaded.count(name) > 0)
 		return;
-
+	Encounter *enc = new Encounter(name.c_str());
+	entity_list.AddEncounter(enc);
+	lua_encounters[name] = enc;
 	lua_encounters_loaded[name] = true;
 	std::vector<EQEmu::Any> info_ptrs;
 	info_ptrs.push_back(&info_str);
-	parse->EventEncounter(EVENT_ENCOUNTER_LOAD, name, 0, &info_ptrs);
+	parse->EventEncounter(EVENT_ENCOUNTER_LOAD, name, "", 0, &info_ptrs);
 }
 
 void unload_encounter(std::string name) {
@@ -80,8 +88,10 @@ void unload_encounter(std::string name) {
 		}
 	}
 
+	lua_encounters[name]->Depop();
+	lua_encounters.erase(name);
 	lua_encounters_loaded.erase(name);
-	parse->EventEncounter(EVENT_ENCOUNTER_UNLOAD, name, 0);
+	parse->EventEncounter(EVENT_ENCOUNTER_UNLOAD, name, "", 0);
 }
 
 void unload_encounter_with_data(std::string name, std::string info_str) {
@@ -109,10 +119,12 @@ void unload_encounter_with_data(std::string name, std::string info_str) {
 		}
 	}
 
+	lua_encounters[name]->Depop();
+	lua_encounters.erase(name);
 	lua_encounters_loaded.erase(name);
 	std::vector<EQEmu::Any> info_ptrs;
 	info_ptrs.push_back(&info_str);
-	parse->EventEncounter(EVENT_ENCOUNTER_UNLOAD, name, 0, &info_ptrs);
+	parse->EventEncounter(EVENT_ENCOUNTER_UNLOAD, name, "", 0, &info_ptrs);
 }
 
 void register_event(std::string package_name, std::string name, int evt, luabind::adl::object func) {
@@ -285,6 +297,10 @@ void lua_set_timer(const char *timer, int time_ms, Lua_Mob mob) {
 	quest_manager.settimerMS(timer, time_ms, mob);
 }
 
+void lua_set_timer(const char *timer, int time_ms, Lua_Encounter enc) {
+	quest_manager.settimerMS(timer, time_ms, enc);
+}
+
 void lua_stop_timer(const char *timer) {
 	quest_manager.stoptimer(timer);
 }
@@ -297,6 +313,10 @@ void lua_stop_timer(const char *timer, Lua_Mob mob) {
 	quest_manager.stoptimer(timer, mob);
 }
 
+void lua_stop_timer(const char *timer, Lua_Encounter enc) {
+	quest_manager.stoptimer(timer, enc);
+}
+
 void lua_stop_all_timers() {
 	quest_manager.stopalltimers();
 }
@@ -307,6 +327,10 @@ void lua_stop_all_timers(Lua_ItemInst inst) {
 
 void lua_stop_all_timers(Lua_Mob mob) {
 	quest_manager.stopalltimers(mob);
+}
+
+void lua_stop_all_timers(Lua_Encounter enc) {
+	quest_manager.stopalltimers(enc);
 }
 
 void lua_depop() {
@@ -386,7 +410,11 @@ void lua_create_guild(const char *name, const char *leader) {
 }
 
 void lua_set_time(int hour, int min) {
-	quest_manager.settime(hour, min);
+	quest_manager.settime(hour, min, true);
+}
+
+void lua_set_time(int hour, int min, bool update_world) {
+	quest_manager.settime(hour, min, update_world);
 }
 
 void lua_signal(int npc_id, int signal_id) {
@@ -979,7 +1007,7 @@ int lua_get_zone_weather() {
 
 luabind::adl::object lua_get_zone_time(lua_State *L) {
 	TimeOfDay_Struct eqTime;
-	zone->zone_time.getEQTimeOfDay(time(0), &eqTime);
+	zone->zone_time.GetCurrentEQTimeOfDay(time(0), &eqTime);
 
 	luabind::adl::object ret = luabind::newtable(L);
 	ret["zone_hour"] = eqTime.hour - 1;
@@ -1442,12 +1470,15 @@ luabind::scope lua_register_general() {
 		luabind::def("set_timer", (void(*)(const char*, int))&lua_set_timer),
 		luabind::def("set_timer", (void(*)(const char*, int, Lua_ItemInst))&lua_set_timer),
 		luabind::def("set_timer", (void(*)(const char*, int, Lua_Mob))&lua_set_timer),
+		luabind::def("set_timer", (void(*)(const char*, int, Lua_Encounter))&lua_set_timer),
 		luabind::def("stop_timer", (void(*)(const char*))&lua_stop_timer),
 		luabind::def("stop_timer", (void(*)(const char*, Lua_ItemInst))&lua_stop_timer),
 		luabind::def("stop_timer", (void(*)(const char*, Lua_Mob))&lua_stop_timer),
+		luabind::def("stop_timer", (void(*)(const char*, Lua_Encounter))&lua_stop_timer),
 		luabind::def("stop_all_timers", (void(*)(void))&lua_stop_all_timers),
 		luabind::def("stop_all_timers", (void(*)(Lua_ItemInst))&lua_stop_all_timers),
 		luabind::def("stop_all_timers", (void(*)(Lua_Mob))&lua_stop_all_timers),
+		luabind::def("stop_all_timers", (void(*)(Lua_Encounter))&lua_stop_all_timers),
 		luabind::def("depop", (void(*)(void))&lua_depop),
 		luabind::def("depop", (void(*)(int))&lua_depop),
 		luabind::def("depop_with_timer", (void(*)(void))&lua_depop_with_timer),
@@ -1467,7 +1498,8 @@ luabind::scope lua_register_general() {
 		luabind::def("set_sky", &lua_set_sky),
 		luabind::def("set_guild", &lua_set_guild),
 		luabind::def("create_guild", &lua_create_guild),
-		luabind::def("set_time", &lua_set_time),
+		luabind::def("set_time", (void(*)(int, int))&lua_set_time),
+		luabind::def("set_time", (void(*)(int, int, bool))&lua_set_time),
 		luabind::def("signal", (void(*)(int,int))&lua_signal),
 		luabind::def("signal", (void(*)(int,int,int))&lua_signal),
 		luabind::def("set_global", &lua_set_global),

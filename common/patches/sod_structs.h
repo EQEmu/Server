@@ -286,7 +286,7 @@ struct Spawn_Struct
 /*0000*/ uint8  unknown12;
 /*0000*/ uint32 petOwnerId;
 /*0000*/ uint8  unknown13;
-/*0000*/ uint32 unknown14;		// Stance 64 = normal 4 = aggressive 40 = stun/mezzed
+/*0000*/ uint32 PlayerState;		// Stance 64 = normal 4 = aggressive 40 = stun/mezzed
 /*0000*/ uint32 unknown15;
 /*0000*/ uint32 unknown16;
 /*0000*/ uint32 unknown17;
@@ -547,7 +547,7 @@ struct SpellBuff_Struct
 /*002*/	uint8	bard_modifier;
 /*003*/	uint8	effect;			//not real
 /*004*/	uint32	spellid;
-/*008*/ uint32	duration;
+/*008*/ int32	duration;
 /*012*/	uint32   counters;
 /*016*/ uint32  unknown004;    //Might need to be swapped with player_id
 /*020*/ uint32	player_id;	//'global' ID of the caster, for wearoff messages
@@ -564,7 +564,7 @@ struct SpellBuffFade_Struct {
 /*006*/	uint8 effect;
 /*007*/	uint8 unknown7;
 /*008*/	uint32 spellid;
-/*012*/	uint32 duration;
+/*012*/	int32 duration;
 /*016*/	uint32 unknown016;
 /*020*/	uint32 unknown020;	//prolly global player ID
 /*024*/ uint32 playerId;       // Player id who cast the buff
@@ -666,7 +666,7 @@ struct AA_Array
 {
 	uint32 AA;
 	uint32 value;
-	uint32 unknown08;	// Looks like AA_Array is now 12 bytes in Live
+	uint32 charges;	// expendable
 };
 
 
@@ -1091,7 +1091,7 @@ struct TargetReject_Struct {
 
 struct PetCommand_Struct {
 /*000*/ uint32	command;
-/*004*/ uint32	unknown;
+/*004*/ uint32	target;
 };
 
 /*
@@ -1272,9 +1272,10 @@ struct CombatDamage_Struct
 /* 04 */	uint8	type;			//slashing, etc.  231 (0xE7) for spells
 /* 05 */	uint16	spellid;
 /* 07 */	int32	damage;
-/* 11 */	float	unknown11;		// cd cc cc 3d
-/* 15 */	float	sequence;		// see above notes in Action_Struct
-/* 19 */	uint8	unknown19[9];	// was [9]
+/* 11 */	float	force;		// cd cc cc 3d
+/* 15 */	float	meleepush_xy;		// see above notes in Action_Struct
+/* 19 */	float	meleepush_z;
+/* 23 */	uint8	unknown23[5];	// was [9]
 /* 28 */
 };
 
@@ -3818,10 +3819,16 @@ struct SendAA_Struct {
 /*0069*/	uint32 last_id;
 /*0073*/	uint32 next_id;
 /*0077*/	uint32 cost2;
-/*0081*/	uint8 unknown80[7];
+/*0081*/	uint8 unknown81;
+/*0082*/	uint8 grant_only; // VetAAs, progression, etc
+/*0083*/	uint8 unknown83; // 1 for skill cap increase AAs, Mystical Attuning, and RNG attack inc, doesn't seem to matter though
+/*0084*/	uint32 expendable_charges; // max charges of the AA
 /*0088*/	uint32 aa_expansion;
 /*0092*/	uint32 special_category;
-/*0096*/	uint32 unknown0096;
+/*0096*/	uint8 shroud;
+/*0097*/	uint8 unknown97;
+/*0098*/	uint8 layonhands; // 1 for lay on hands -- doesn't seem to matter?
+/*0099*/	uint8 unknown99;
 /*0100*/	uint32 total_abilities;
 /*0104*/	AA_Ability abilities[0];
 };
@@ -3835,12 +3842,6 @@ struct AA_Action {
 /*04*/	uint32	ability;
 /*08*/	uint32	unknown08;
 /*12*/	uint32	exp_value;
-};
-
-struct AA_Skills {		//this should be removed and changed to AA_Array
-/*00*/	uint32	aa_skill;						// Total AAs Spent
-/*04*/  uint32	aa_value;
-/*08*/  uint32	unknown08;
 };
 
 struct AAExpUpdate_Struct {
@@ -3860,12 +3861,12 @@ struct AltAdvStats_Struct {
 };
 
 struct PlayerAA_Struct {						// Is this still used?
-	AA_Skills aa_list[MAX_PP_AA_ARRAY];
+	AA_Array aa_list[MAX_PP_AA_ARRAY];
 };
 
 struct AATable_Struct {
 /*00*/ int32	aa_spent;						// Total AAs Spent
-/*04*/ AA_Skills aa_list[MAX_PP_AA_ARRAY];
+/*04*/ AA_Array aa_list[MAX_PP_AA_ARRAY];
 };
 
 struct Weather_Struct {

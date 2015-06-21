@@ -1236,10 +1236,7 @@ void Merc::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho) {
 bool Merc::Process()
 {
 	if(IsStunned() && stunned_timer.Check())
-	{
-		this->stunned = false;
-		this->stunned_timer.Disable();
-	}
+		Mob::UnStun();
 
 	if (GetDepop())
 	{
@@ -1463,13 +1460,15 @@ void Merc::AI_Process() {
 
 				if(moved) {
 					moved = false;
-					SendPosition();
-					SetMoving(false);
+					SetCurrentSpeed(0);
 				}
 			}
 
 			return;
 		}
+
+		if (!(m_PlayerState & static_cast<uint32>(PlayerState::Aggressive)))
+			SendAddPlayerState(PlayerState::Aggressive);
 
 		bool atCombatRange = false;
 
@@ -1497,9 +1496,7 @@ void Merc::AI_Process() {
 				SetRunAnimSpeed(0);
 
 				if(moved) {
-					moved = false;
-					SendPosition();
-					SetMoving(false);
+					SetCurrentSpeed(0);
 				}
 			}
 
@@ -1684,6 +1681,9 @@ void Merc::AI_Process() {
 		confidence_timer.Disable();
 		_check_confidence = false;
 
+		if (m_PlayerState & static_cast<uint32>(PlayerState::Aggressive))
+			SendRemovePlayerState(PlayerState::Aggressive);
+
 		if(!check_target_timer.Enabled())
 			check_target_timer.Start(2000, false);
 
@@ -1707,7 +1707,7 @@ void Merc::AI_Process() {
 				if(follow)
 				{
 					float dist = DistanceSquared(m_Position, follow->GetPosition());
-					float speed = GetRunspeed();
+					int speed = GetRunspeed();
 
 					if(dist < GetFollowDistance() + 1000)
 						speed = GetWalkspeed();
@@ -1724,9 +1724,8 @@ void Merc::AI_Process() {
 					{
 						if(moved)
 						{
-							moved=false;
-							SendPosition();
-							SetMoving(false);
+						SetCurrentSpeed(0);
+						moved = false;
 						}
 					}
 				}

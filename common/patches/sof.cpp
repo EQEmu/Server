@@ -427,7 +427,9 @@ namespace SoF
 		OUT(type);
 		OUT(spellid);
 		OUT(damage);
-		eq->sequence = emu->sequence;
+		OUT(force)
+		OUT(meleepush_xy);
+		OUT(meleepush_z)
 
 		FINISH_ENCODE();
 	}
@@ -1215,6 +1217,7 @@ namespace SoF
 		for (r = 0; r < MAX_PP_AA_ARRAY; r++) {
 			OUT(aa_array[r].AA);
 			OUT(aa_array[r].value);
+			OUT(aa_array[r].charges);
 		}
 		//	OUT(unknown02220[4]);
 		OUT(mana);
@@ -1556,6 +1559,7 @@ namespace SoF
 			OUT(cost2);
 			eq->aa_expansion = emu->aa_expansion;
 			eq->special_category = emu->special_category;
+			eq->expendable_charges = emu->special_category == 7 ? 1 : 0; // temp hack, this can actually be any number
 			OUT(total_abilities);
 			unsigned int r;
 			for (r = 0; r < emu->total_abilities; r++) {
@@ -1620,15 +1624,16 @@ namespace SoF
 
 		for (int counter = 0; counter < character_count; ++counter) {
 			emu_cse = (CharacterSelectEntry_Struct *)emu_ptr;
-			eq_cse = (structs::CharacterSelectEntry_Struct *)eq_ptr;
+			eq_cse = (structs::CharacterSelectEntry_Struct *)eq_ptr; // base address
 
 			eq_cse->Level = emu_cse->Level;
 			eq_cse->HairStyle = emu_cse->HairStyle;
 			eq_cse->Gender = emu_cse->Gender;
 
 			strcpy(eq_cse->Name, emu_cse->Name);
-			eq_ptr += strlen(eq_cse->Name);
-			eq_cse = (structs::CharacterSelectEntry_Struct *)eq_ptr;
+			eq_ptr += strlen(emu_cse->Name);
+			eq_cse = (structs::CharacterSelectEntry_Struct *)eq_ptr; // offset address (base + name length offset)
+			eq_cse->Name[0] = '\0'; // (offset)eq_cse->Name[0] = (base)eq_cse->Name[strlen(emu_cse->Name)]
 
 			eq_cse->Beard = emu_cse->Beard;
 			eq_cse->HairColor = emu_cse->HairColor;
@@ -2087,6 +2092,7 @@ namespace SoF
 			eq->runspeed = emu->runspeed;
 			eq->light = emu->light;
 			eq->level = emu->level;
+			eq->PlayerState = emu->PlayerState;
 			eq->lfg = emu->lfg;
 			eq->hairstyle = emu->hairstyle;
 			eq->haircolor = emu->haircolor;
@@ -2688,7 +2694,7 @@ namespace SoF
 		default:
 			emu->command = eq->command;
 		}
-		OUT(unknown);
+		IN(target);
 
 		FINISH_DIRECT_DECODE();
 	}

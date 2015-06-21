@@ -58,7 +58,7 @@ void ZoneDatabase::AddLootTableToNPC(NPC* npc,uint32 loottable_id, ItemList* ite
 	if(max_cash > 0 && lts->avgcoin > 0 && EQEmu::ValueWithin(lts->avgcoin, min_cash, max_cash)) {
 		float upper_chance = (float)(lts->avgcoin - min_cash) / (float)(max_cash - min_cash);
 		float avg_cash_roll = (float)zone->random.Real(0.0, 1.0);
-		
+
 		if(avg_cash_roll < upper_chance) {
 			cash = zone->random.Int(lts->avgcoin, max_cash);
 		} else {
@@ -332,6 +332,8 @@ void NPC::AddLootDrop(const ItemData *item2, ItemList* itemlist, int16 charges, 
 				CastToMob()->AddProcToWeapon(item2->Proc.Effect, true);
 
 			eslot = MaterialPrimary;
+			if (item2->Damage > 0)
+				SendAddPlayerState(PlayerState::PrimaryWeaponEquipped);
 		}
 		else if (foundslot == MainSecondary
 			&& (GetOwner() != nullptr || (GetLevel() >= 13 && zone->random.Roll(NPC_DW_CHANCE)) || (item2->Damage==0)) &&
@@ -342,6 +344,8 @@ void NPC::AddLootDrop(const ItemData *item2, ItemList* itemlist, int16 charges, 
 				CastToMob()->AddProcToWeapon(item2->Proc.Effect, true);
 
 			eslot = MaterialSecondary;
+			if (item2->Damage > 0)
+				SendAddPlayerState(PlayerState::SecondaryWeaponEquipped);
 		}
 		else if (foundslot == MainHead) {
 			eslot = MaterialHead;

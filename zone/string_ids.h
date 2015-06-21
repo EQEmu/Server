@@ -231,6 +231,17 @@
 #define MISSED_NOTE_OTHER			1219	//A missed note brings %1's song to a close!
 #define SPELL_LEVEL_REQ				1226	//This spell only works on people who are level %1 and under.
 #define CORPSE_DECAY_NOW			1227	//This corpse is waiting to expire.
+#define CORPSE_ITEM_LOST			1228	//Your items will no longer stay with you when you respawn on death. You will now need to return to your corpse for your items.
+#define CORPSE_EXP_LOST				1229	//You will now lose experience when you die.
+#define FLICKERS_PALE_LIGHT			1230	//Your %1 flickers with a pale light.
+#define PULSES_WITH_LIGHT			1231	//Your %1 pulses with light as your vision sharpens.
+#define FEEDS_WITH_POWER			1232	//Your %1 feeds you with power.
+#define POWER_DRAIN_INTO			1233	//You feel your power drain into your %1.
+#define SEEMS_DRAINED				1234	//Your %1 seems drained of power.
+#define ALIVE_WITH_POWER			1235	//Your %1 feels alive with power.
+#define SPARKLES					1236	//Your %1 sparkles.
+#define GROWS_DIM					1237	//Your %1 grows dim.
+#define BEGINS_TO_SHINE				1238	//Your %1 begins to shine.
 #define SURNAME_REJECTED			1374	//Your new surname was rejected. Please try a different name.
 #define DUEL_DECLINE				1383	//%1 has declined your challenge to duel to the death.
 #define DUEL_ACCEPTED				1384	//%1 has already accepted a duel with someone else.
@@ -339,6 +350,8 @@
 #define YOU_HEAL					9068	//You have healed %1 for %2 points of damage.
 #define YOUR_HIT_DOT				9072	//%1 has taken %2 damage from your %3.
 #define HIT_NON_MELEE				9073	//%1 hit %2 for %3 points of non-melee damage.
+#define GLOWS_BLUE					9074	//Your %1 glows blue.
+#define GLOWS_RED					9075	//Your %1 glows red.
 #define SHAKE_OFF_STUN				9077
 #define STRIKETHROUGH_STRING		9078	//You strike through your opponent's defenses!
 #define SPELL_REFLECT				9082	//%1's spell has been reflected by %2.
@@ -373,6 +386,7 @@
 #define GROUP_INVITEE_SELF			12270	//12270 You cannot invite yourself.
 #define NOT_IN_CONTROL				12368	//You do not have control of yourself right now.
 #define ALREADY_CASTING				12442	//You are already casting a spell!
+#define SHIMMERS_BRIEFLY			12444	//Your %1 shimmers briefly.
 #define SENSE_CORPSE_NOT_NAME		12446	//You don't sense any corpses of that name.
 #define SENSE_CORPSE_NONE			12447	//You don't sense any corpses.
 #define SCREECH_BUFF_BLOCK			12448	//Your immunity buff protected you from the spell %1!

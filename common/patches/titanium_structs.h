@@ -212,7 +212,7 @@ struct Spawn_Struct {
 /*0146*/ uint8  beardcolor;     // Beard color
 /*0147*/ uint8 unknown0147[4];
 /*0151*/ uint8  level;          // Spawn Level
-/*0152*/ uint8  unknown0259[4]; // ***Placeholder
+/*0152*/ uint32 PlayerState;    // PlayerState controls some animation stuff
 /*0156*/ uint8  beard;          // Beard style
 /*0157*/ char     suffix[32];     // Player's suffix (of Veeshan, etc.)
 /*0189*/ uint32 petOwnerId;     // If this is a pet, the spawn id of owner
@@ -445,7 +445,7 @@ struct SpellBuff_Struct
 /*002*/	uint8	bard_modifier;
 /*003*/	uint8	effect;			//not real
 /*004*/	uint32	spellid;
-/*008*/ uint32	duration;
+/*008*/ int32	duration;
 /*012*/	uint32	counters;
 /*016*/	uint32	player_id;	//'global' ID of the caster, for wearoff messages
 };
@@ -457,7 +457,7 @@ struct SpellBuffFade_Struct {
 /*006*/	uint8 effect;
 /*007*/	uint8 unknown7;
 /*008*/	uint32 spellid;
-/*012*/	uint32 duration;
+/*012*/	int32 duration;
 /*016*/	uint32 unknown016;
 /*020*/	uint32 unknown020;	//prolly global player ID
 /*024*/	uint32 slotid;
@@ -950,7 +950,7 @@ struct TargetReject_Struct {
 
 struct PetCommand_Struct {
 /*000*/ uint32	command;
-/*004*/ uint32	unknown;
+/*004*/ uint32	target;
 };
 
 /*
@@ -1101,9 +1101,9 @@ struct CombatDamage_Struct
 /* 04 */	uint8	type; //slashing, etc.  231 (0xE7) for spells
 /* 05 */	uint16	spellid;
 /* 07 */	uint32	damage;
-/* 11 */	uint32 unknown11;
-/* 15 */	uint32 sequence;	// see above notes in Action_Struct
-/* 19 */	uint32	unknown19;
+/* 11 */	float force;
+/* 15 */	float meleepush_xy;	// see above notes in Action_Struct
+/* 19 */	float meleepush_z;
 /* 23 */
 };
 
@@ -3179,11 +3179,6 @@ struct AA_Action {
 /*12*/	uint32	exp_value;
 };
 
-struct AA_Skills {		//this should be removed and changed to AA_Array
-/*00*/	uint32	aa_skill;
-/*04*/	uint32	aa_value;
-};
-
 struct AAExpUpdate_Struct {
 /*00*/	uint32 unknown00;	//seems to be a value from AA_Action.ability
 /*04*/	uint32 aapoints_unspent;
@@ -3201,11 +3196,11 @@ struct AltAdvStats_Struct {
 };
 
 struct PlayerAA_Struct {
-	AA_Skills aa_list[MAX_PP_AA_ARRAY];
+	AA_Array aa_list[MAX_PP_AA_ARRAY];
 };
 
 struct AATable_Struct {
-	AA_Skills aa_list[MAX_PP_AA_ARRAY];
+	AA_Array aa_list[MAX_PP_AA_ARRAY];
 };
 
 struct Weather_Struct {

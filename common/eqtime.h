@@ -21,8 +21,8 @@ public:
 	~EQTime();
 
 	//Get functions
-	int getEQTimeOfDay( TimeOfDay_Struct *eqTimeOfDay ) { return(getEQTimeOfDay(time(nullptr), eqTimeOfDay)); }
-	int getEQTimeOfDay( time_t timeConvert, TimeOfDay_Struct *eqTimeOfDay );
+	int GetCurrentEQTimeOfDay( TimeOfDay_Struct *eqTimeOfDay ) { return(GetCurrentEQTimeOfDay(time(nullptr), eqTimeOfDay)); }
+	int GetCurrentEQTimeOfDay( time_t timeConvert, TimeOfDay_Struct *eqTimeOfDay );
 	TimeOfDay_Struct getStartEQTime() { return eqTime.start_eqtime; }
 	time_t getStartRealTime() { return eqTime.start_realtime; }
 	uint32 getEQTimeZone() { return timezone; }
@@ -30,7 +30,7 @@ public:
 	uint32 getEQTimeZoneMin() { return timezone%60; }
 
 	//Set functions
-	int setEQTimeOfDay(TimeOfDay_Struct start_eq, time_t start_real);
+	int SetCurrentEQTimeOfDay(TimeOfDay_Struct start_eq, time_t start_real);
 	void setEQTimeZone(int32 in_timezone) { timezone=in_timezone; }
 
 	//Time math/logic functions

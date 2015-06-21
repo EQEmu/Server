@@ -84,6 +84,8 @@ void QuestManager::Process() {
 			if(entity_list.IsMobInZone(cur->mob)) {
 				if(cur->mob->IsNPC()) {
 					parse->EventNPC(EVENT_TIMER, cur->mob->CastToNPC(), nullptr, cur->name, 0);
+				} else if (cur->mob->IsEncounter()) {
+					parse->EventEncounter(EVENT_TIMER, cur->mob->CastToEncounter()->GetEncounterName(), cur->name, 0, nullptr);
 				} else {
 					//this is inheriently unsafe if we ever make it so more than npc/client start timers
 					parse->EventPlayer(EVENT_TIMER, cur->mob->CastToClient(), cur->name, 0);
@@ -668,6 +670,79 @@ void QuestManager::repopzone() {
 	}
 }
 
+void QuestManager::ConnectNodeToNode(int node1, int node2, int teleport, int doorid) {
+	if (!node1 || !node2)
+	{
+		Log.Out(Logs::General, Logs::Quests, "QuestManager::ConnectNodeToNode called without node1 or node2. Probably syntax error in quest file.");
+	}
+	else
+	{
+		if (!teleport)
+		{
+			teleport = 0;
+		}
+		else if (teleport == 1 || teleport == -1)
+		{
+			teleport = -1;
+		}
+
+		if (!doorid)
+		{
+			doorid = 0;
+		}
+
+		if (!zone->pathing)
+		{
+			// if no pathing bits available, make them available.
+			zone->pathing = new PathManager();
+		}
+
+		if (zone->pathing)
+		{
+			zone->pathing->ConnectNodeToNode(node1, node2, teleport, doorid);
+			Log.Out(Logs::Moderate, Logs::Quests, "QuestManager::ConnectNodeToNode connecting node %i to node %i.", node1, node2);
+		}
+	}
+}
+
+void QuestManager::AddNode(float x, float y, float z, float best_z, int32 requested_id)
+{
+	if (!x || !y || !z)
+	{
+		Log.Out(Logs::General, Logs::Quests, "QuestManager::AddNode called without x, y, z. Probably syntax error in quest file.");
+	}
+
+	if (!best_z || best_z == 0)
+	{
+		if (zone->zonemap)
+		{
+			glm::vec3 loc(x, y, z);
+			best_z = zone->zonemap->FindBestZ(loc, nullptr);
+		}
+		else
+		{
+			best_z = z;
+		}
+	}
+
+	if (!requested_id)
+	{
+		requested_id = 0;
+	}
+
+	if (!zone->pathing)
+	{
+		// if no pathing bits available, make them available.
+		zone->pathing = new PathManager();
+	}
+
+	if (zone->pathing)
+	{
+		zone->pathing->AddNode(x, y, z, best_z, requested_id);
+		Log.Out(Logs::Moderate, Logs::Quests, "QuestManager::AddNode adding node at (%i, %i, %i).", x, y, z);
+	}
+}
+
 void QuestManager::settarget(const char *type, int target_id) {
 	QuestManagerCurrentQuestVars();
 	if (!owner || !owner->IsNPC())
@@ -1219,9 +1294,10 @@ void QuestManager::CreateGuild(const char *guild_name, const char *leader) {
 			}
 }
 
-void QuestManager::settime(uint8 new_hour, uint8 new_min) {
+void QuestManager::settime(uint8 new_hour, uint8 new_min, bool update_world /*= true*/)
+{
 	if (zone)
-		zone->SetTime(new_hour + 1, new_min);
+		zone->SetTime(new_hour + 1, new_min, update_world);
 }
 
 void QuestManager::itemlink(int item_id) {
@@ -1997,6 +2073,11 @@ bool QuestManager::createBot(const char *name, const char *lastname, uint8 level
 			return false;
 		}
 
+		if(Bot::IsBotNameAvailable((char*)name,&TempErrorMessage)) {
+			initiator->Message(0, "The name %s is already being used or is invalid. Please choose a different name.", (char*)name);
+			return false;
+		}
+
 		NPCType DefaultNPCTypeStruct = Bot::CreateDefaultNPCTypeStructForBot(name, lastname, level, race, botclass, gender);
 		Bot* NewBot = new Bot(DefaultNPCTypeStruct, initiator);
 
@@ -2009,11 +2090,6 @@ bool QuestManager::createBot(const char *name, const char *lastname, uint8 level
 
 			if(!NewBot->IsValidName()) {
 				initiator->Message(0, "%s has invalid characters. You can use only the A-Z, a-z and _ characters in a bot name.", NewBot->GetCleanName());
-				return false;
-			}
-
-			if(!NewBot->IsBotNameAvailable(&TempErrorMessage)) {
-				initiator->Message(0, "The name %s is already being used. Please choose a different name.", NewBot->GetCleanName());
 				return false;
 			}
 

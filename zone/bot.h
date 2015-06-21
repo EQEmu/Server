@@ -60,6 +60,7 @@ enum SpellTypeIndex {
 };
 
 class Bot : public NPC {
+	friend class Mob;
 public:
 	// Class enums
 	enum BotfocusType {	//focus types
@@ -154,7 +155,7 @@ public:
 	// Class Methods
 	bool IsValidRaceClassCombo();
 	bool IsValidName();
-	bool IsBotNameAvailable(std::string* errorMessage);
+	static bool IsBotNameAvailable(char *botName, std::string* errorMessage);
 	bool DeleteBot(std::string* errorMessage);
 	void Spawn(Client* botCharacterOwner, std::string* errorMessage);
 	virtual void SetLevel(uint8 in_level, bool command = false);
@@ -190,7 +191,9 @@ public:
 	bool CanDoSpecialAttack(Mob *other);
 	virtual int32 CheckAggroAmount(uint16 spellid);
 	virtual void CalcBonuses();
-	void CalcItemBonuses();
+	void CalcItemBonuses(StatBonuses* newbon);
+	void AddItemBonuses(const ItemInst *inst, StatBonuses* newbon, bool isAug = false, bool isTribute = false);
+	int CalcRecommendedLevelBonus(uint8 level, uint8 reclevel, int basestat);
 	virtual void MakePet(uint16 spell_id, const char* pettype, const char *petname = nullptr);
 	virtual FACTION_VALUE GetReverseFactionCon(Mob* iOther);
 	inline virtual bool IsPet() { return false; }
@@ -310,7 +313,7 @@ public:
 	virtual int32 GetActSpellDuration(uint16 spell_id, int32 duration);
 	virtual float GetAOERange(uint16 spell_id);
 	virtual bool SpellEffect(Mob* caster, uint16 spell_id, float partial = 100);
-	virtual void DoBuffTic(uint16 spell_id, int slot, uint32 ticsremaining, uint8 caster_level, Mob* caster = 0);
+	virtual void DoBuffTic(const Buffs_Struct &buff, int slot, Mob* caster = nullptr);
 	virtual bool CastSpell(uint16 spell_id, uint16 target_id, uint16 slot = USE_ITEM_SPELL_SLOT, int32 casttime = -1, int32 mana_cost = -1, uint32* oSpellWillFinish = 0, uint32 item_slot = 0xFFFFFFFF, int16 *resist_adjust = nullptr);
 	virtual bool SpellOnTarget(uint16 spell_id, Mob* spelltar);
 	virtual bool IsImmuneToSpell(uint16 spell_id, Mob *caster);
@@ -464,6 +467,7 @@ public:
 	uint32 GetHealRotationNextHealTime() { return _healRotationNextHeal; }
 	uint32 GetHealRotationTimer () { return _healRotationTimer; }
 	bool GetBardUseOutOfCombatSongs() { return _bardUseOutOfCombatSongs;}
+	bool GetShowHelm() { return _showhelm; }
 	inline virtual int32	GetAC()	const { return AC; }
 	inline virtual int32	GetSTR()	const { return STR; }
 	inline virtual int32	GetSTA()	const { return STA; }
@@ -547,6 +551,7 @@ public:
 	void SetHealRotationTimer( uint32 timer ) { _healRotationTimer = timer; }
 	void SetNumHealRotationMembers( uint8 numMembers ) { _numHealRotationMembers = numMembers; }
 	void SetBardUseOutOfCombatSongs(bool useOutOfCombatSongs) { _bardUseOutOfCombatSongs = useOutOfCombatSongs;}
+	void SetShowHelm(bool showhelm) { _showhelm = showhelm; }
 
 	// Class Destructors
 	virtual ~Bot();
@@ -619,6 +624,7 @@ private:
 	std::map<uint32, BotAA> botAAs;
 	InspectMessage_Struct _botInspectMessage;
 	bool _bardUseOutOfCombatSongs;
+	bool _showhelm;
 
 	// Private "base stats" Members
 	int32 _baseMR;

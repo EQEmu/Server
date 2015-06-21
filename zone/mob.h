@@ -172,7 +172,8 @@ public:
 	void SendAppearanceEffect(uint32 parm1, uint32 parm2, uint32 parm3, uint32 parm4, uint32 parm5,
 		Client *specific_target=nullptr);
 	void SendTargetable(bool on, Client *specific_target = nullptr);
-	virtual void SendWearChange(uint8 material_slot);
+	virtual void SendArmorAppearance(Client *one_client = nullptr);
+	virtual void SendWearChange(uint8 material_slot, Client *one_client = nullptr);
 	virtual void SendTextureWC(uint8 slot, uint16 texture, uint32 hero_forge_model = 0, uint32 elite_material = 0,
 		uint32 unknown06 = 0, uint32 unknown18 = 0);
 	virtual void SetSlotTint(uint8 material_slot, uint8 red_tint, uint8 green_tint, uint8 blue_tint);
@@ -200,7 +201,7 @@ public:
 	bool IsBeneficialAllowed(Mob *target);
 	virtual int GetCasterLevel(uint16 spell_id);
 	void ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* newbon, uint16 casterID = 0,
-		uint8 WornType = 0, uint32 ticsremaining = 0, int buffslot = -1,
+		uint8 WornType = 0, int32 ticsremaining = 0, int buffslot = -1, int instrument_mod = 10,
 		bool IsAISpellEffect = false, uint16 effect_id = 0, int32 se_base = 0, int32 se_limit = 0, int32 se_max = 0);
 	void NegateSpellsBonuses(uint16 spell_id);
 	virtual float GetActSpellRange(uint16 spell_id, float range, bool IsBard = false);
@@ -211,7 +212,8 @@ public:
 	virtual int32 GetActSpellDuration(uint16 spell_id, int32 duration);
 	virtual int32 GetActSpellCasttime(uint16 spell_id, int32 casttime);
 	float ResistSpell(uint8 resist_type, uint16 spell_id, Mob *caster, bool use_resist_override = false,
-		int resist_override = 0, bool CharismaCheck = false, bool CharmTick = false, bool IsRoot = false);
+		int resist_override = 0, bool CharismaCheck = false, bool CharmTick = false, bool IsRoot = false,
+		int level_override = -1);
 	int ResistPhysical(int level_diff, uint8 caster_level);
 	uint16 GetSpecializeSkillValue(uint16 spell_id) const;
 	void SendSpellBarDisable();
@@ -227,10 +229,10 @@ public:
 	void CastedSpellFinished(uint16 spell_id, uint32 target_id, uint16 slot, uint16 mana_used,
 		uint32 inventory_slot = 0xFFFFFFFF, int16 resist_adjust = 0);
 	bool SpellFinished(uint16 spell_id, Mob *target, uint16 slot = 10, uint16 mana_used = 0,
-		uint32 inventory_slot = 0xFFFFFFFF, int16 resist_adjust = 0, bool isproc = false);
+		uint32 inventory_slot = 0xFFFFFFFF, int16 resist_adjust = 0, bool isproc = false, int level_override = -1);
 	virtual bool SpellOnTarget(uint16 spell_id, Mob* spelltar, bool reflect = false,
-		bool use_resist_adjust = false, int16 resist_adjust = 0, bool isproc = false);
-	virtual bool SpellEffect(Mob* caster, uint16 spell_id, float partial = 100);
+		bool use_resist_adjust = false, int16 resist_adjust = 0, bool isproc = false, int level_override = -1);
+	virtual bool SpellEffect(Mob* caster, uint16 spell_id, float partial = 100, int level_override = -1);
 	virtual bool DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_center,
 		CastAction_type &CastAction);
 	virtual bool CheckFizzle(uint16 spell_id);
@@ -253,7 +255,7 @@ public:
 
 	//Buff
 	void BuffProcess();
-	virtual void DoBuffTic(uint16 spell_id, int slot, uint32 ticsremaining, uint8 caster_level, Mob* caster = 0);
+	virtual void DoBuffTic(const Buffs_Struct &buff, int slot, Mob* caster = nullptr);
 	void BuffFadeBySpellID(uint16 spell_id);
 	void BuffFadeByEffect(int effectid, int skipslot = -1);
 	void BuffFadeAll();
@@ -364,6 +366,7 @@ public:
 	inline Mob* GetTarget() const { return target; }
 	virtual void SetTarget(Mob* mob);
 	virtual inline float GetHPRatio() const { return max_hp == 0 ? 0 : ((float)cur_hp/max_hp*100); }
+	virtual inline float GetIntHPRatio() const { return max_hp == 0 ? 0 : (cur_hp/max_hp*100); }
 	inline virtual int32 GetAC() const { return AC + itembonuses.AC + spellbonuses.AC; }
 	inline virtual int32 GetATK() const { return ATK + itembonuses.ATK + spellbonuses.ATK; }
 	inline virtual int32 GetATKBonus() const { return itembonuses.ATK + spellbonuses.ATK; }
@@ -441,9 +444,12 @@ public:
 	virtual void SetMoving(bool move) { moving = move; m_Delta = glm::vec4(); }
 	virtual void GoToBind(uint8 bindnum = 0) { }
 	virtual void Gate();
-	float GetWalkspeed() const { return(_GetMovementSpeed(-47)); }
-	float GetRunspeed() const { return(_GetMovementSpeed(0)); }
-	float GetBaseRunspeed() const { return runspeed; }
+	int GetWalkspeed() const { return(_GetWalkSpeed()); }
+	int GetRunspeed() const { return(_GetRunSpeed()); }
+	void SetCurrentSpeed(int in);
+	int GetBaseRunspeed() const { return base_runspeed; }
+	int GetBaseWalkspeed() const { return base_walkspeed; }
+	int GetBaseFearSpeed() const { return base_fearspeed; }
 	float GetMovespeed() const { return IsRunning() ? GetRunspeed() : GetWalkspeed(); }
 	bool IsRunning() const { return m_is_running; }
 	void SetRunning(bool val) { m_is_running = val; }
@@ -493,7 +499,6 @@ public:
 	inline bool CheckLastLosState() const { return last_los_check; }
 
 	//Quest
-	void QuestReward(Client *c = nullptr, uint32 silver = 0, uint32 gold = 0, uint32 platinum = 0);
 	void CameraEffect(uint32 duration, uint32 intensity, Client *c = nullptr, bool global = false);
 	inline bool GetQglobal() const { return qglobal; }
 
@@ -504,7 +509,8 @@ public:
 	static void CreateSpawnPacket(EQApplicationPacket* app, NewSpawn_Struct* ns);
 	virtual void FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho);
 	void CreateHPPacket(EQApplicationPacket* app);
-	void SendHPUpdate();
+	void SendHPUpdate(bool skip_self = false);
+	virtual void ResetHPUpdateTimer() {}; // does nothing
 
 	//Util
 	static uint32 RandomTimer(int min, int max);
@@ -533,7 +539,7 @@ public:
 	bool HasDefensiveProcs() const;
 	bool HasSkillProcs() const;
 	bool HasSkillProcSuccess() const;
-	bool AddProcToWeapon(uint16 spell_id, bool bPerma = false, uint16 iChance = 3, uint16 base_spell_id = SPELL_UNKNOWN);
+	bool AddProcToWeapon(uint16 spell_id, bool bPerma = false, uint16 iChance = 3, uint16 base_spell_id = SPELL_UNKNOWN, int level_override = -1);
 	bool RemoveProcFromWeapon(uint16 spell_id, bool bAll = false);
 	bool HasProcs() const;
 	bool IsCombatProc(uint16 spell_id);
@@ -802,9 +808,8 @@ public:
 
 	//old fear function
 	//void SetFeared(Mob *caster, uint32 duration, bool flee = false);
-	float GetFearSpeed();
-	bool IsFeared() { return curfp; } // This returns true if the mob is feared or fleeing due to low HP
-	//old fear: inline void StartFleeing() { SetFeared(GetHateTop(), FLEE_RUN_DURATION, true); }
+	int GetFearSpeed() { return _GetFearSpeed(); }
+	bool IsFeared() { return (spellbonuses.IsFeared || flee_mode); } // This returns true if the mob is feared or fleeing due to low HP
 	inline void StartFleeing() { flee_mode = true; CalculateNewFearpoint(); }
 	void ProcessFlee();
 	void CheckFlee();
@@ -812,8 +817,8 @@ public:
 
 	inline bool			CheckAggro(Mob* other) {return hate_list.IsEntOnHateList(other);}
 	float				CalculateHeadingToTarget(float in_x, float in_y);
-	bool				CalculateNewPosition(float x, float y, float z, float speed, bool checkZ = false);
-	virtual bool		CalculateNewPosition2(float x, float y, float z, float speed, bool checkZ = true);
+	bool				CalculateNewPosition(float x, float y, float z, int speed, bool checkZ = false, bool calcheading = true);
+	virtual bool		CalculateNewPosition2(float x, float y, float z, int speed, bool checkZ = true, bool calcheading = true);
 	float				CalculateDistance(float x, float y, float z);
 	float				GetGroundZ(float new_x, float new_y, float z_offset=0.0);
 	void				SendTo(float new_x, float new_y, float new_z);
@@ -859,7 +864,7 @@ public:
 	virtual uint32 GetAA(uint32 aa_id) const { return(0); }
 
 	uint32 GetInstrumentMod(uint16 spell_id) const;
-	int CalcSpellEffectValue(uint16 spell_id, int effect_id, int caster_level = 1, Mob *caster = nullptr, int ticsremaining = 0);
+	int CalcSpellEffectValue(uint16 spell_id, int effect_id, int caster_level = 1, uint32 instrument_mod = 10, Mob *caster = nullptr, int ticsremaining = 0);
 	int CalcSpellEffectValue_formula(int formula, int base, int max, int caster_level, uint16 spell_id, int ticsremaining = 0);
 	virtual int CheckStackConflict(uint16 spellid1, int caster_level1, uint16 spellid2, int caster_level2, Mob* caster1 = nullptr, Mob* caster2 = nullptr, int buffslot = -1);
 	uint32 GetCastedSpellInvSlot() const { return casting_spell_inventory_slot; }
@@ -884,6 +889,8 @@ public:
 	Timer *GetSpecialAbilityTimer(int ability);
 	void ClearSpecialAbilities();
 	void ProcessSpecialAbilities(const std::string &str);
+	bool IsMoved() { return moved; }
+	void SetMoved(bool moveflag) { moved = moveflag; }
 
 	Shielders_Struct shielder[MAX_SHIELDERS];
 	Trade* trade;
@@ -906,6 +913,7 @@ public:
 	inline virtual bool IsBlockedBuff(int16 SpellID) { return false; }
 	inline virtual bool IsBlockedPetBuff(int16 SpellID) { return false; }
 
+	std::string GetGlobal(const char *varname);
 	void SetGlobal(const char *varname, const char *newvalue, int options, const char *duration, Mob *other = nullptr);
 	void TarGlobal(const char *varname, const char *value, const char *duration, int npcid, int charid, int zoneid);
 	void DelGlobal(const char *varname);
@@ -956,7 +964,10 @@ protected:
 	void CommonDamage(Mob* other, int32 &damage, const uint16 spell_id, const SkillUseTypes attack_skill, bool &avoidable, const int8 buffslot, const bool iBuffTic);
 	static uint16 GetProcID(uint16 spell_id, uint8 effect_index);
 	float _GetMovementSpeed(int mod) const;
-	virtual bool MakeNewPositionAndSendUpdate(float x, float y, float z, float speed, bool checkZ);
+	int _GetWalkSpeed() const;
+	int _GetRunSpeed() const;
+	int _GetFearSpeed() const;
+	virtual bool MakeNewPositionAndSendUpdate(float x, float y, float z, int speed, bool checkZ);
 
 	virtual bool AI_EngagedCastCheck() { return(false); }
 	virtual bool AI_PursueCastCheck() { return(false); }
@@ -1030,6 +1041,13 @@ protected:
 	uint32 follow_dist;
 	bool no_target_hotkey;
 
+	uint32 m_PlayerState;
+	uint32 GetPlayerState() { return m_PlayerState; }
+	void AddPlayerState(uint32 new_state) { m_PlayerState |= new_state; }
+	void RemovePlayerState(uint32 old_state) { m_PlayerState &= ~old_state; }
+	void SendAddPlayerState(PlayerState new_state);
+	void SendRemovePlayerState(PlayerState old_state);
+
 	uint8 gender;
 	uint16 race;
 	uint8 base_gender;
@@ -1046,6 +1064,13 @@ protected:
 	float base_size;
 	float size;
 	float runspeed;
+	float walkspeed;
+	float fearspeed;
+	int base_runspeed;
+	int base_walkspeed;
+	int base_fearspeed;
+	int current_speed;
+
 	uint32 pLastChange;
 	bool held;
 	bool nocast;
@@ -1059,7 +1084,7 @@ protected:
 	void TryWeaponProc(const ItemInst* inst, const ItemData* weapon, Mob *on, uint16 hand = MainPrimary);
 	void TrySpellProc(const ItemInst* inst, const ItemData* weapon, Mob *on, uint16 hand = MainPrimary);
 	void TryWeaponProc(const ItemInst* weapon, Mob *on, uint16 hand = MainPrimary);
-	void ExecWeaponProc(const ItemInst* weapon, uint16 spell_id, Mob *on);
+	void ExecWeaponProc(const ItemInst* weapon, uint16 spell_id, Mob *on, int level_override = -1);
 	virtual float GetProcChances(float ProcBonus, uint16 hand = MainPrimary);
 	virtual float GetDefensiveProcChances(float &ProcBonus, float &ProcChance, uint16 hand = MainPrimary, Mob *on = nullptr);
 	virtual float GetSpecialProcChances(uint16 hand);

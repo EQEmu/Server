@@ -417,7 +417,7 @@ namespace RoF
 			outapp->WriteUInt32(0);			// Duration
 			outapp->WriteUInt32(0);			// ?
 			outapp->WriteUInt8(0);		// Caster name
-			outapp->WriteUInt8(0);		// Terminating byte
+			outapp->WriteUInt8(0);		// Type
 		}
 		FINISH_ENCODE();
 
@@ -454,7 +454,7 @@ namespace RoF
 			__packet->WriteUInt32(emu->entries[i].num_hits); // Unknown
 			__packet->WriteString("");
 		}
-		__packet->WriteUInt8(!emu->all_buffs); // Unknown
+		__packet->WriteUInt8(emu->type); // Unknown
 
 		FINISH_ENCODE();
 	}
@@ -659,7 +659,9 @@ namespace RoF
 		OUT(type);
 		OUT(spellid);
 		OUT(damage);
-		eq->sequence = emu->sequence;
+		OUT(force)
+		OUT(meleepush_xy);
+		OUT(meleepush_z)
 
 		FINISH_ENCODE();
 	}
@@ -974,8 +976,8 @@ namespace RoF
 		VARSTRUCT_ENCODE_TYPE(uint32, OutBuffer, 0);	// Same for all objects in the zone
 		VARSTRUCT_ENCODE_TYPE(float, OutBuffer, emu->heading);
 		VARSTRUCT_ENCODE_TYPE(float, OutBuffer, 0);	// Normally 0, but seen (float)255.0 as well
-		VARSTRUCT_ENCODE_TYPE(float, OutBuffer, 0);	// Unknown
-		VARSTRUCT_ENCODE_TYPE(float, OutBuffer, 1);	// Need to add emu->size to struct
+		VARSTRUCT_ENCODE_TYPE(uint32, OutBuffer, emu->solidtype);	// Unknown
+		VARSTRUCT_ENCODE_TYPE(float, OutBuffer, emu->size != 0 && (float)emu->size < 5000.f ? (float)((float)emu->size / 100.0f) : 1.f );	// This appears to be the size field. Hackish logic because some PEQ DB items were corrupt.
 		VARSTRUCT_ENCODE_TYPE(float, OutBuffer, emu->y);
 		VARSTRUCT_ENCODE_TYPE(float, OutBuffer, emu->x);
 		VARSTRUCT_ENCODE_TYPE(float, OutBuffer, emu->z);
@@ -2119,7 +2121,7 @@ namespace RoF
 		{
 			outapp->WriteUInt32(emu->aa_array[r].AA);
 			outapp->WriteUInt32(emu->aa_array[r].value);
-			outapp->WriteUInt32(0);
+			outapp->WriteUInt32(emu->aa_array[r].charges);
 		}
 
 		// Fill the other 60 AAs with zeroes
@@ -2817,9 +2819,9 @@ namespace RoF
 
 		for (uint32 i = 0; i < MAX_PP_AA_ARRAY; ++i)
 		{
-			eq->aa_list[i].aa_skill = emu->aa_list[i].aa_skill;
-			eq->aa_list[i].aa_value = emu->aa_list[i].aa_value;
-			eq->aa_list[i].unknown08 = emu->aa_list[i].unknown08;
+			eq->aa_list[i].AA = emu->aa_list[i].AA;
+			eq->aa_list[i].value = emu->aa_list[i].value;
+			eq->aa_list[i].charges = emu->aa_list[i].charges;
 		}
 
 		FINISH_ENCODE();
@@ -2851,7 +2853,7 @@ namespace RoF
 
 		// Check clientver field to verify this AA should be sent for SoF
 		// clientver 1 is for all clients and 5 is for Live
-		if (emu->clientver <= 5)
+		if (emu->clientver <= 7)
 		{
 			OUT(id);
 			eq->unknown004 = 1;
@@ -2867,9 +2869,9 @@ namespace RoF
 			OUT(cost);
 			OUT(seq);
 			OUT(current_level);
-			eq->unknown037 = 1;	// Introduced during HoT
+			eq->prereq_skill_count = 1;	// min 1
 			OUT(prereq_skill);
-			eq->unknown045 = 1;	// New Mar 21 2012 - Seen 1
+			eq->prereq_minpoints_count = 1;	// min 1
 			OUT(prereq_minpoints);
 			eq->type = emu->sof_type;
 			OUT(spellid);
@@ -2885,6 +2887,7 @@ namespace RoF
 			OUT(cost2);
 			eq->aa_expansion = emu->aa_expansion;
 			eq->special_category = emu->special_category;
+			eq->expendable_charges = emu->special_category == 7 ? 1 : 0; // temp hack, this can actually be any number
 			OUT(total_abilities);
 			unsigned int r;
 			for (r = 0; r < emu->total_abilities; r++) {
@@ -2945,11 +2948,12 @@ namespace RoF
 
 		for (int counter = 0; counter < character_count; ++counter) {
 			emu_cse = (CharacterSelectEntry_Struct *)emu_ptr;
-			eq_cse = (structs::CharacterSelectEntry_Struct *)eq_ptr;
+			eq_cse = (structs::CharacterSelectEntry_Struct *)eq_ptr; // base address
 
 			strcpy(eq_cse->Name, emu_cse->Name);
-			eq_ptr += strlen(eq_cse->Name);
-			eq_cse = (structs::CharacterSelectEntry_Struct *)eq_ptr;
+			eq_ptr += strlen(emu_cse->Name);
+			eq_cse = (structs::CharacterSelectEntry_Struct *)eq_ptr; // offset address (base + name length offset)
+			eq_cse->Name[0] = '\0'; // (offset)eq_cse->Name[0] = (base)eq_cse->Name[strlen(emu_cse->Name)]
 
 			eq_cse->Class = emu_cse->Class;
 			eq_cse->Race = emu_cse->Race;
@@ -3989,7 +3993,7 @@ namespace RoF
 			VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->petOwnerId);
 
 			VARSTRUCT_ENCODE_TYPE(uint8, Buffer, 0); // unknown13
-			VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0); // unknown14 - Stance 64 = normal 4 = aggressive 40 = stun/mezzed
+			VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->PlayerState);
 			VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0); // unknown15
 			VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0); // unknown16
 			VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0); // unknown17
@@ -4390,7 +4394,7 @@ namespace RoF
 		IN(type);
 		IN(spellid);
 		IN(damage);
-		emu->sequence = eq->sequence;
+		IN(meleepush_xy);
 
 		FINISH_DIRECT_DECODE();
 	}
@@ -4718,7 +4722,7 @@ namespace RoF
 		SETUP_DIRECT_DECODE(PetCommand_Struct, structs::PetCommand_Struct);
 
 		IN(command);
-		emu->unknown = eq->unknown04;
+		IN(target);
 
 		FINISH_DIRECT_DECODE();
 	}

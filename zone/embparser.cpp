@@ -1072,7 +1072,7 @@ void PerlembParser::ExportZoneVariables(std::string &package_name) {
 		ExportVar(package_name.c_str(), "instanceid", zone->GetInstanceID());
 		ExportVar(package_name.c_str(), "instanceversion", zone->GetInstanceVersion());
 		TimeOfDay_Struct eqTime;
-		zone->zone_time.getEQTimeOfDay( time(0), &eqTime);
+		zone->zone_time.GetCurrentEQTimeOfDay( time(0), &eqTime);
 		ExportVar(package_name.c_str(), "zonehour", eqTime.hour - 1);
 		ExportVar(package_name.c_str(), "zonemin", eqTime.minute);
 		ExportVar(package_name.c_str(), "zonetime", (eqTime.hour - 1) * 100 + eqTime.minute);
@@ -1277,6 +1277,7 @@ void PerlembParser::ExportEventVariables(std::string &package_name, QuestEventID
 
 		case EVENT_PLAYER_PICKUP:{
 			ExportVar(package_name.c_str(), "picked_up_id", data);
+			ExportVar(package_name.c_str(), "picked_up_entity_id", extradata);
 			break;		
 		}
 
@@ -1320,6 +1321,7 @@ void PerlembParser::ExportEventVariables(std::string &package_name, QuestEventID
 			ExportVar(package_name.c_str(), "itemid", objid);
 			ExportVar(package_name.c_str(), "itemname", iteminst->GetItem()->Name);
 			ExportVar(package_name.c_str(), "slotid", extradata);
+			ExportVar(package_name.c_str(), "spell_id", iteminst->GetItem()->Click.Effect);
 			break;
 		}
 
@@ -1367,6 +1369,7 @@ void PerlembParser::ExportEventVariables(std::string &package_name, QuestEventID
 
 		case EVENT_CLICK_OBJECT: {
 			ExportVar(package_name.c_str(), "objectid", data);
+			ExportVar(package_name.c_str(), "clicker_id", extradata);
 			break;
 		}
 
@@ -1395,6 +1398,14 @@ void PerlembParser::ExportEventVariables(std::string &package_name, QuestEventID
 			ExportVar(package_name.c_str(), "killer_damage", sep.arg[1]);
 			ExportVar(package_name.c_str(), "killer_spell", sep.arg[2]);
 			ExportVar(package_name.c_str(), "killer_skill", sep.arg[3]);
+			break;
+		}
+		case EVENT_DROP_ITEM: {
+			ExportVar(package_name.c_str(), "quantity", iteminst->IsStackable() ? iteminst->GetCharges() : 1);
+			ExportVar(package_name.c_str(), "itemname", iteminst->GetItem()->Name);
+			ExportVar(package_name.c_str(), "itemid", iteminst->GetItem()->ID);
+			ExportVar(package_name.c_str(), "spell_id", iteminst->GetItem()->Click.Effect);
+			ExportVar(package_name.c_str(), "slotid", extradata);
 			break;
 		}
 

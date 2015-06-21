@@ -982,14 +982,24 @@ int Mob::GetWeaponDamage(Mob *against, const ItemInst *weapon_item, uint32 *hate
 				return 0;
 		}
 		else{
-			if((GetClass() == MONK || GetClass() == BEASTLORD) && GetLevel() >= 30){
-				dmg = GetMonkHandToHandDamage();
-				if (hate) *hate += dmg;
+			bool MagicGloves=false;
+			if (IsClient()) {
+				ItemInst *gloves=CastToClient()->GetInv().GetItem(MainHands);
+				if (gloves != nullptr) {
+					MagicGloves = gloves->GetItem()->Magic;
+				}
+			}
+
+			if((GetClass() == MONK || GetClass() == BEASTLORD)) {
+				if(MagicGloves || GetLevel() >= 30){
+					dmg = GetMonkHandToHandDamage();
+					if (hate) *hate += dmg;
+				}
 			}
 			else if(GetOwner() && GetLevel() >= RuleI(Combat, PetAttackMagicLevel)){ //pets wouldn't actually use this but...
 				dmg = 1;															//it gives us an idea if we can hit
 			}
-			else if(GetSpecialAbility(SPECATK_MAGICAL)){
+			else if(MagicGloves || GetSpecialAbility(SPECATK_MAGICAL)){
 				dmg = 1;
 			}
 			else
@@ -2134,6 +2144,10 @@ bool NPC::Death(Mob* killerMob, int32 damage, uint16 spell, SkillUseTypes attack
 	if(give_exp && give_exp->IsClient())
 		give_exp_client = give_exp->CastToClient();
 
+	//do faction hits even if we are a merchant, so long as a player killed us
+	if (give_exp_client && !RuleB(NPC, EnableMeritBasedFaction))
+		hate_list.DoFactionHits(GetNPCFactionID());
+
 	bool IsLdonTreasure = (this->GetClass() == LDON_TREASURE);
 	if (give_exp_client && !IsCorpse())
 	{
@@ -2276,10 +2290,6 @@ bool NPC::Death(Mob* killerMob, int32 damage, uint16 spell, SkillUseTypes attack
 			// End QueryServ Logging
 		}
 	}
-
-	//do faction hits even if we are a merchant, so long as a player killed us
-	if(give_exp_client && !RuleB(NPC, EnableMeritBasedFaction))
-		hate_list.DoFactionHits(GetNPCFactionID());
 
 	if (!HasOwner() && !IsMerc() && class_ != MERCHANT && class_ != ADVENTUREMERCHANT && !GetSwarmInfo()
 		&& MerchantType == 0 && killer && (killer->IsClient() || (killer->HasOwner() && killer->GetUltimateOwner()->IsClient()) ||
@@ -3683,7 +3693,7 @@ void Mob::CommonDamage(Mob* attacker, int32 &damage, const uint16 spell_id, cons
 
 		//send an HP update if we are hurt
 		if(GetHP() < GetMaxHP())
-			SendHPUpdate();
+			SendHPUpdate(!iBuffTic); // the OP_Damage actually updates the client in these cases, so we skill them
 	}	//end `if damage was done`
 
 	//send damage packet...
@@ -3700,6 +3710,23 @@ void Mob::CommonDamage(Mob* attacker, int32 &damage, const uint16 spell_id, cons
 		a->type = SkillDamageTypes[skill_used]; // was 0x1c
 		a->damage = damage;
 		a->spellid = spell_id;
+		a->meleepush_xy = attacker->GetHeading() * 2.0f;
+		if (RuleB(Combat, MeleePush) && damage > 0 && !IsRooted() &&
+		    (IsClient() || zone->random.Roll(RuleI(Combat, MeleePushChance)))) {
+			a->force = EQEmu::GetSkillMeleePushForce(skill_used);
+			// update NPC stuff
+			auto new_pos = glm::vec3(m_Position.x + (a->force * std::sin(a->meleepush_xy) + m_Delta.x),
+						   m_Position.y + (a->force * std::cos(a->meleepush_xy) + m_Delta.y), m_Position.z);
+			if (zone->zonemap && zone->zonemap->CheckLoS(glm::vec3(m_Position), new_pos)) { // If we have LoS on the new loc it should be reachable.
+				if (IsNPC()) {
+					// Is this adequate?
+					Teleport(new_pos);
+					SendPosUpdate();
+				}
+			} else {
+				a->force = 0.0f; // we couldn't move there, so lets not
+			}
+		}
 
 		//Note: if players can become pets, they will not receive damage messages of their own
 		//this was done to simplify the code here (since we can only effectively skip one mob on queue)
@@ -3968,7 +3995,7 @@ void Mob::TryWeaponProc(const ItemInst* weapon_g, Mob *on, uint16 hand) {
 	}
 
 	// Innate + aug procs from weapons
-	// TODO: powersource procs
+	// TODO: powersource procs -- powersource procs are on invis augs, so shouldn't need anything extra
 	TryWeaponProc(weapon_g, weapon_g->GetItem(), on, hand);
 	// Procs from Buffs and AA both melee and range
 	TrySpellProc(weapon_g, weapon_g->GetItem(), on, hand);
@@ -4054,7 +4081,7 @@ void Mob::TryWeaponProc(const ItemInst *inst, const ItemData *weapon, Mob *on, u
 			}
 		}
 	}
-	// TODO: Powersource procs
+	// TODO: Powersource procs -- powersource procs are from augs so shouldn't need anything extra
 
 	return;
 }
@@ -4116,7 +4143,7 @@ void Mob::TrySpellProc(const ItemInst *inst, const ItemData *weapon, Mob *on, ui
 					outapp->priority = 3;
 					entity_list.QueueCloseClients(this, outapp, false, 200, 0, true);
 					safe_delete(outapp);
-					ExecWeaponProc(nullptr, SpellProcs[i].spellID, on);
+					ExecWeaponProc(nullptr, SpellProcs[i].spellID, on, SpellProcs[i].level_override);
 					CheckNumHitsRemaining(NumHit::OffensiveSpellProcs, 0,
 								  SpellProcs[i].base_spellID);
 				} else {
@@ -4222,7 +4249,7 @@ void Mob::TryCriticalHit(Mob *defender, uint16 skill, int32 &damage, ExtraAttack
 	}
 
 #ifdef BOTS
-	if (this->IsPet() && this->GetOwner()->IsBot()) {
+	if (this->IsPet() && this->GetOwner() && this->GetOwner()->IsBot()) {
 		this->TryPetCriticalHit(defender,skill,damage);
 		return;
 	}

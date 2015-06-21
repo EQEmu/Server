@@ -71,13 +71,23 @@ struct SessionResponse {
 };
 
 //Deltas are in ms, representing round trip times
-struct SessionStats {
+struct ClientSessionStats {
 /*000*/	uint16 RequestID;
 /*002*/	uint32 last_local_delta;
 /*006*/	uint32 average_delta;
 /*010*/	uint32 low_delta;
 /*014*/	uint32 high_delta;
 /*018*/	uint32 last_remote_delta;
+/*022*/	uint64 packets_sent;
+/*030*/	uint64 packets_received;
+/*038*/
+};
+
+struct ServerSessionStats {
+/*000*/	uint16 RequestID;
+/*002*/	uint32 ServerTime;
+/*006*/	uint64 packets_sent_echo;
+/*014*/	uint64 packets_received_echo;
 /*022*/	uint64 packets_sent;
 /*030*/	uint64 packets_received;
 /*038*/
@@ -157,6 +167,9 @@ class EQStream : public EQStreamInterface {
 		static uint16 MaxWindowSize;
 
 		int32 BytesWritten;
+
+		uint64 sent_packet_count;
+		uint64 received_packet_count;
 
 		Mutex MRate;
 		int32 RateThreshold;
@@ -265,11 +278,13 @@ class EQStream : public EQStreamInterface {
 		void AddBytesSent(uint32 bytes)
 		{
 			bytes_sent += bytes;
+			++sent_packet_count;
 		}
 
 		void AddBytesRecv(uint32 bytes)
 		{
 			bytes_recv += bytes;
+			++received_packet_count;
 		}
 
 		virtual const uint32 GetBytesSent() const { return bytes_sent; }
@@ -287,6 +302,9 @@ class EQStream : public EQStreamInterface {
 				return 0;
 			return bytes_recv / (Timer::GetTimeSeconds() - create_time);
 		}
+
+		const uint64 GetPacketsSent() { return sent_packet_count; }
+		const uint64 GetPacketsReceived() { return received_packet_count; }
 
 		//used for dynamic stream identification
 		class Signature {

@@ -306,6 +306,8 @@ void MapOpcodes()
 	ConnectedOpcodes[OP_PetitionRefresh] = &Client::Handle_OP_PetitionRefresh;
 	ConnectedOpcodes[OP_PetitionResolve] = &Client::Handle_OP_PetitionResolve;
 	ConnectedOpcodes[OP_PetitionUnCheckout] = &Client::Handle_OP_PetitionUnCheckout;
+	ConnectedOpcodes[OP_PlayerStateAdd] = &Client::Handle_OP_PlayerStateAdd;
+	ConnectedOpcodes[OP_PlayerStateRemove] = &Client::Handle_OP_PlayerStateRemove;
 	ConnectedOpcodes[OP_PickPocket] = &Client::Handle_OP_PickPocket;
 	ConnectedOpcodes[OP_PopupResponse] = &Client::Handle_OP_PopupResponse;
 	ConnectedOpcodes[OP_PotionBelt] = &Client::Handle_OP_PotionBelt;
@@ -703,7 +705,7 @@ void Client::CompleteConnect()
 			case SE_AddMeleeProc:
 			case SE_WeaponProc:
 			{
-				AddProcToWeapon(GetProcID(buffs[j1].spellid, x1), false, 100 + spells[buffs[j1].spellid].base2[x1], buffs[j1].spellid);
+				AddProcToWeapon(GetProcID(buffs[j1].spellid, x1), false, 100 + spells[buffs[j1].spellid].base2[x1], buffs[j1].spellid, buffs[j1].casterlevel);
 				break;
 			}
 			case SE_DefensiveProc:
@@ -1444,22 +1446,32 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	if (m_pp.ldon_points_available < 0 || m_pp.ldon_points_available > 2000000000){ m_pp.ldon_points_available = 0; }
 
 	/* Initialize AA's : Move to function eventually */
-	for (uint32 a = 0; a < MAX_PP_AA_ARRAY; a++){ aa[a] = &m_pp.aa_array[a]; }
+	for (uint32 a = 0; a < MAX_PP_AA_ARRAY; a++)
+		aa[a] = &m_pp.aa_array[a];
 	query = StringFormat(
 		"SELECT								"
 		"slot,							    "
 		"aa_id,								"
-		"aa_value							"
+		"aa_value,							"
+		"charges							"
 		"FROM								"
 		"`character_alternate_abilities`    "
 		"WHERE `id` = %u ORDER BY `slot`", this->CharacterID());
 	results = database.QueryDatabase(query); i = 0;
+	int offset = 0; // offset to fix the hole from expendables
 	for (auto row = results.begin(); row != results.end(); ++row) {
-		i = atoi(row[0]);
+		i = atoi(row[0]) - offset;
 		m_pp.aa_array[i].AA = atoi(row[1]);
 		m_pp.aa_array[i].value = atoi(row[2]);
-		aa[i]->AA = atoi(row[1]);
-		aa[i]->value = atoi(row[2]);
+		m_pp.aa_array[i].charges = atoi(row[3]);
+		/* A used expendable could cause there to be a "hole" in the array, this is very bad. Bad things like keeping your expendable after use.
+		   We could do a few things, one of them being reshuffling when the hole is created or defer the fixing until a later point, like during load!
+		   Or just never making a hole in the array and just have hacks every where. Fixing the hole at load really just keeps 1 hack in Client::SendAATable
+		   and keeping this offset that will cause the next AA to be pushed back over the hole. We also need to clean up on save so we don't have multiple
+		   entries for a single AA.
+		*/
+		if (m_pp.aa_array[i].value == 0)
+			offset++;
 	}
 	for (uint32 a = 0; a < MAX_PP_AA_ARRAY; a++){
 		uint32 id = aa[a]->AA;
@@ -1498,7 +1510,7 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 		for (int i = 0; i < max_slots; i++) {
 			if (buffs[i].spellid != SPELL_UNKNOWN) {
 				m_pp.buffs[i].spellid = buffs[i].spellid;
-				m_pp.buffs[i].bard_modifier = 10;
+				m_pp.buffs[i].bard_modifier = buffs[i].instrument_mod;
 				m_pp.buffs[i].slotid = 2;
 				m_pp.buffs[i].player_id = 0x2211;
 				m_pp.buffs[i].level = buffs[i].casterlevel;
@@ -1707,7 +1719,7 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	/* Time of Day packet */
 	outapp = new EQApplicationPacket(OP_TimeOfDay, sizeof(TimeOfDay_Struct));
 	TimeOfDay_Struct* tod = (TimeOfDay_Struct*)outapp->pBuffer;
-	zone->zone_time.getEQTimeOfDay(time(0), tod);
+	zone->zone_time.GetCurrentEQTimeOfDay(time(0), tod);
 	outapp->priority = 6;
 	FastQueuePacket(&outapp);
 
@@ -4129,7 +4141,7 @@ void Client::Handle_OP_ClickObject(const EQApplicationPacket *app)
 		char buf[10];
 		snprintf(buf, 9, "%u", click_object->drop_id);
 		buf[9] = '\0';
-		parse->EventPlayer(EVENT_CLICK_OBJECT, this, buf, 0, &args);
+		parse->EventPlayer(EVENT_CLICK_OBJECT, this, buf, GetID(), &args);
 	}
 
 	// Observed in RoF after OP_ClickObjectAction:
@@ -4267,7 +4279,7 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app)
 			if((cur_time - m_TimeSinceLastPositionCheck) > 0)
 			{
 				float speed = (m_DistanceSinceLastPositionCheck * 100) / (float)(cur_time - m_TimeSinceLastPositionCheck);
-				float runs = GetRunspeed();
+				int runs = GetRunspeed();
 				if(speed > (runs * RuleR(Zone, MQWarpDetectionDistanceFactor)))
 				{
 					if(!GetGMSpeed() && (runs >= GetBaseRunspeed() || (speed > (GetBaseRunspeed() * RuleR(Zone, MQWarpDetectionDistanceFactor)))))
@@ -4335,7 +4347,7 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app)
 			if((cur_time - m_TimeSinceLastPositionCheck) > 2500)
 			{
 				float speed = (m_DistanceSinceLastPositionCheck * 100) / (float)(cur_time - m_TimeSinceLastPositionCheck);
-				float runs = GetRunspeed();
+				int runs = GetRunspeed();
 				if(speed > (runs * RuleR(Zone, MQWarpDetectionDistanceFactor)))
 				{
 					if(!GetGMSpeed() && (runs >= GetBaseRunspeed() || (speed > (GetBaseRunspeed() * RuleR(Zone, MQWarpDetectionDistanceFactor)))))
@@ -4448,9 +4460,20 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app)
 
 	// Outgoing client packet
 	float tmpheading = EQ19toFloat(ppu->heading);
+	/* The clients send an update at best every 1.3 seconds
+	 * We want to avoid reflecting these updates to other clients as much as possible
+	 * The client also sends an update every 280 ms while turning, if we prevent
+	 * sending these by checking if the location is the same too aggressively, clients end up spinning
+	 * so keep a count of how many packets are the same within a tolerance and stop when we get there */
 
-	if (!FCMP(ppu->y_pos, m_Position.y) || !FCMP(ppu->x_pos, m_Position.x) || !FCMP(tmpheading, m_Position.w) || ppu->animation != animation)
+	bool pos_same = FCMP(ppu->y_pos, m_Position.y) && FCMP(ppu->x_pos, m_Position.x) && FCMP(tmpheading, m_Position.w) && ppu->animation == animation;
+	if (!pos_same || (pos_same && position_update_same_count < 6))
 	{
+		if (pos_same)
+			position_update_same_count++;
+		else
+			position_update_same_count = 0;
+
 		m_Position.x = ppu->x_pos;
 		m_Position.y = ppu->y_pos;
 		m_Position.z = ppu->z_pos;
@@ -6355,15 +6378,25 @@ void Client::Handle_OP_GroupDisband(const EQApplicationPacket *app)
 				Bot::ProcessBotGroupDisband(this, std::string());
 			}
 			else {
-				Mob* tempMember = entity_list.GetMob(gd->name2);
-				if (tempMember) {
-					if (tempMember->IsBot())
-						Bot::ProcessBotGroupDisband(this, std::string(tempMember->GetCleanName()));
+				Mob* tempMember = entity_list.GetMob(gd->name1); //Name1 is the target you are disbanding
+				if (tempMember && tempMember->IsBot()) {
+					tempMember->CastToBot()->RemoveBotFromGroup(tempMember->CastToBot(), group);
+					if (LFP)
+					{
+						// If we are looking for players, update to show we are on our own now.
+						UpdateLFP();
+					}
+					return; //No need to continue from here we were removing a bot from party
 				}
 			}
 		}
 	}
+
+	group = GetGroup();
+	if (!group) //We must recheck this here.. incase the final bot disbanded the party..otherwise we crash
+		return;
 #endif
+
 	if (group->GroupCount() < 3)
 	{
 		group->DisbandGroup();
@@ -9705,6 +9738,7 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 	char val1[20] = { 0 };
 	PetCommand_Struct* pet = (PetCommand_Struct*)app->pBuffer;
 	Mob* mypet = this->GetPet();
+	Mob *target = entity_list.GetMob(pet->target);
 
 	if (!mypet || pet->command == PET_LEADER)
 	{
@@ -9752,22 +9786,22 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 	switch (PetCommand)
 	{
 	case PET_ATTACK: {
-		if (!GetTarget())
+		if (!target)
 			break;
-		if (GetTarget()->IsMezzed()) {
-			Message_StringID(10, CANNOT_WAKE, mypet->GetCleanName(), GetTarget()->GetCleanName());
+		if (target->IsMezzed()) {
+			Message_StringID(10, CANNOT_WAKE, mypet->GetCleanName(), target->GetCleanName());
 			break;
 		}
 		if (mypet->IsFeared())
 			break; //prevent pet from attacking stuff while feared
 
-		if (!mypet->IsAttackAllowed(GetTarget())) {
+		if (!mypet->IsAttackAllowed(target)) {
 			mypet->Say_StringID(NOT_LEGAL_TARGET);
 			break;
 		}
 
 		if ((mypet->GetPetType() == petAnimation && GetAA(aaAnimationEmpathy) >= 2) || mypet->GetPetType() != petAnimation) {
-			if (GetTarget() != this && DistanceSquaredNoZ(mypet->GetPosition(), GetTarget()->GetPosition()) <= (RuleR(Pets, AttackCommandRange)*RuleR(Pets, AttackCommandRange))) {
+			if (target != this && DistanceSquaredNoZ(mypet->GetPosition(), target->GetPosition()) <= (RuleR(Pets, AttackCommandRange)*RuleR(Pets, AttackCommandRange))) {
 				if (mypet->IsHeld()) {
 					if (!mypet->IsFocused()) {
 						mypet->SetHeld(false); //break the hold and guard if we explicitly tell the pet to attack.
@@ -9775,12 +9809,12 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 							mypet->SetPetOrder(SPO_Follow);
 					}
 					else {
-						mypet->SetTarget(GetTarget());
+						mypet->SetTarget(target);
 					}
 				}
 				zone->AddAggroMob();
-				mypet->AddToHateList(GetTarget(), 1);
-				Message_StringID(MT_PetResponse, PET_ATTACKING, mypet->GetCleanName(), GetTarget()->GetCleanName());
+				mypet->AddToHateList(target, 1);
+				Message_StringID(MT_PetResponse, PET_ATTACKING, mypet->GetCleanName(), target->GetCleanName());
 			}
 		}
 		break;
@@ -10273,6 +10307,31 @@ void Client::Handle_OP_PetitionUnCheckout(const EQApplicationPacket *app)
 		}
 	}
 	return;
+}
+
+void Client::Handle_OP_PlayerStateAdd(const EQApplicationPacket *app)
+{
+	if (app->size != sizeof(PlayerState_Struct)) {
+		std::cout << "Wrong size: OP_PlayerStateAdd, size=" << app->size << ", expected " << sizeof(PlayerState_Struct) << std::endl;
+		return;
+	}
+
+	PlayerState_Struct *ps = (PlayerState_Struct *)app->pBuffer;
+	AddPlayerState(ps->state);
+
+	entity_list.QueueClients(this, app, true);
+}
+
+void Client::Handle_OP_PlayerStateRemove(const EQApplicationPacket *app)
+{
+	if (app->size != sizeof(PlayerState_Struct)) {
+		std::cout << "Wrong size: OP_PlayerStateRemove, size=" << app->size << ", expected " << sizeof(PlayerState_Struct) << std::endl;
+		return;
+	}
+	PlayerState_Struct *ps = (PlayerState_Struct *)app->pBuffer;
+	RemovePlayerState(ps->state);
+
+	entity_list.QueueClients(this, app, true);
 }
 
 void Client::Handle_OP_PickPocket(const EQApplicationPacket *app)
@@ -12745,7 +12804,7 @@ void Client::Handle_OP_TargetCommand(const EQApplicationPacket *app)
 						inspect_buffs = group->GetLeadershipAA(groupAAInspectBuffs);
 				}
 			}
-			if (nt == this || inspect_buffs || (nt->IsClient() && !nt->CastToClient()->GetPVP()) ||
+			if (GetGM() || RuleB(Spells, AlwaysSendTargetsBuffs) || nt == this || inspect_buffs || (nt->IsClient() && !nt->CastToClient()->GetPVP()) ||
 					(nt->IsPet() && nt->GetOwner() && nt->GetOwner()->IsClient() && !nt->GetOwner()->CastToClient()->GetPVP()) ||
 					(nt->IsMerc() && nt->GetOwner() && nt->GetOwner()->IsClient() && !nt->GetOwner()->CastToClient()->GetPVP()))
 				nt->SendBuffsToClient(this);

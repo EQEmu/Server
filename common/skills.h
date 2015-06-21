@@ -270,6 +270,8 @@ typedef enum {
 namespace EQEmu {
 	bool IsTradeskill(SkillUseTypes skill);
 	bool IsSpecializedSkill(SkillUseTypes skill);
+	float GetSkillMeleePushForce(SkillUseTypes skill);
+	bool IsBardInstrumentSkill(SkillUseTypes skill);
 }
 
 #endif

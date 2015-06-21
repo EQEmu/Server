@@ -218,6 +218,8 @@
 	void Handle_OP_PetitionRefresh(const EQApplicationPacket *app);
 	void Handle_OP_PetitionResolve(const EQApplicationPacket *app);
 	void Handle_OP_PetitionUnCheckout(const EQApplicationPacket *app);
+	void Handle_OP_PlayerStateAdd(const EQApplicationPacket *app);
+	void Handle_OP_PlayerStateRemove(const EQApplicationPacket *app);
 	void Handle_OP_PickPocket(const EQApplicationPacket *app);
 	void Handle_OP_PopupResponse(const EQApplicationPacket *app);
 	void Handle_OP_PotionBelt(const EQApplicationPacket *app);

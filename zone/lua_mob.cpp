@@ -1590,26 +1590,6 @@ void Lua_Mob::SendIllusionPacket(luabind::adl::object illusion) {
 		beard, aa_title, drakkin_heritage, drakkin_tattoo, drakkin_details, size);
 }
 
-void Lua_Mob::QuestReward(Lua_Client c) {
-	Lua_Safe_Call_Void();
-	self->QuestReward(c);
-}
-
-void Lua_Mob::QuestReward(Lua_Client c, uint32 silver) {
-	Lua_Safe_Call_Void();
-	self->QuestReward(c, silver);
-}
-
-void Lua_Mob::QuestReward(Lua_Client c, uint32 silver, uint32 gold) {
-	Lua_Safe_Call_Void();
-	self->QuestReward(c, silver, gold);
-}
-
-void Lua_Mob::QuestReward(Lua_Client c, uint32 silver, uint32 gold, uint32 platinum) {
-	Lua_Safe_Call_Void();
-	self->QuestReward(c, silver, gold, platinum);
-}
-
 void Lua_Mob::CameraEffect(uint32 duration, uint32 intensity) {
 	Lua_Safe_Call_Void();
 	self->CameraEffect(duration, intensity);
@@ -1649,6 +1629,11 @@ void Lua_Mob::TempName() {
 void Lua_Mob::TempName(const char *newname) {
 	Lua_Safe_Call_Void();
 	self->TempName(newname);
+}
+
+std::string Lua_Mob::GetGlobal(const char *varname) {
+	Lua_Safe_Call_String();
+	return self->GetGlobal(varname);
 }
 
 void Lua_Mob::SetGlobal(const char *varname, const char *newvalue, int options, const char *duration) {
@@ -1866,6 +1851,10 @@ int Lua_Mob::CanBuffStack(int spell_id, int caster_level, bool fail_if_overwrite
 	return self->CanBuffStack(spell_id, caster_level, fail_if_overwrite);
 }
 
+void Lua_Mob::SetPseudoRoot(bool in) {
+	Lua_Safe_Call_Void();
+	self->SetPseudoRoot(in);
+}
 
 luabind::scope lua_register_mob() {
 	return luabind::class_<Lua_Mob, Lua_Entity>("Mob")
@@ -2132,10 +2121,6 @@ luabind::scope lua_register_mob() {
 		.def("SetRace", (void(Lua_Mob::*)(int))&Lua_Mob::SetRace)
 		.def("SetGender", (void(Lua_Mob::*)(int))&Lua_Mob::SetGender)
 		.def("SendIllusionPacket", (void(Lua_Mob::*)(luabind::adl::object))&Lua_Mob::SendIllusionPacket)
-		.def("QuestReward", (void(Lua_Mob::*)(Lua_Client))&Lua_Mob::QuestReward)
-		.def("QuestReward", (void(Lua_Mob::*)(Lua_Client,uint32))&Lua_Mob::QuestReward)
-		.def("QuestReward", (void(Lua_Mob::*)(Lua_Client,uint32,uint32))&Lua_Mob::QuestReward)
-		.def("QuestReward", (void(Lua_Mob::*)(Lua_Client,uint32,uint32,uint32))&Lua_Mob::QuestReward)
 		.def("CameraEffect", (void(Lua_Mob::*)(uint32,uint32))&Lua_Mob::CameraEffect)
 		.def("CameraEffect", (void(Lua_Mob::*)(uint32,uint32,Lua_Client))&Lua_Mob::CameraEffect)
 		.def("CameraEffect", (void(Lua_Mob::*)(uint32,uint32,Lua_Client,bool))&Lua_Mob::CameraEffect)
@@ -2144,6 +2129,7 @@ luabind::scope lua_register_mob() {
 		.def("SendSpellEffect", (void(Lua_Mob::*)(uint32,uint32,uint32,bool,uint32,bool,Lua_Client))&Lua_Mob::SendSpellEffect)
 		.def("TempName", (void(Lua_Mob::*)(void))&Lua_Mob::TempName)
 		.def("TempName", (void(Lua_Mob::*)(const char*))&Lua_Mob::TempName)
+		.def("GetGlobal", (std::string(Lua_Mob::*)(const char*))&Lua_Mob::GetGlobal)
 		.def("SetGlobal", (void(Lua_Mob::*)(const char*,const char*,int,const char*))&Lua_Mob::SetGlobal)
 		.def("SetGlobal", (void(Lua_Mob::*)(const char*,const char*,int,const char*,Lua_Mob))&Lua_Mob::SetGlobal)
 		.def("TarGlobal", (void(Lua_Mob::*)(const char*,const char*,const char*,int,int,int))&Lua_Mob::TarGlobal)
@@ -2186,7 +2172,8 @@ luabind::scope lua_register_mob() {
 		.def("BuffFadeBySlot", (void(Lua_Mob::*)(int))&Lua_Mob::BuffFadeBySlot)
 		.def("BuffFadeBySlot", (void(Lua_Mob::*)(int,bool))&Lua_Mob::BuffFadeBySlot)
 		.def("CanBuffStack", (int(Lua_Mob::*)(int,int))&Lua_Mob::CanBuffStack)
-		.def("CanBuffStack", (int(Lua_Mob::*)(int,int,bool))&Lua_Mob::CanBuffStack);
+		.def("CanBuffStack", (int(Lua_Mob::*)(int,int,bool))&Lua_Mob::CanBuffStack)
+		.def("SetPseudoRoot", (void(Lua_Mob::*)(bool))&Lua_Mob::SetPseudoRoot);
 }
 
 luabind::scope lua_register_special_abilities() {

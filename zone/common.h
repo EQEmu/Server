@@ -173,6 +173,18 @@ enum class NumHit {		  // Numhits type
 	OffensiveSpellProcs = 11  // Offensive buff procs
 };
 
+enum class PlayerState : uint32 {
+	None = 0,
+	Open = 1,
+	WeaponSheathed = 2,
+	Aggressive = 4,
+	ForcedAggressive = 8,
+	InstrumentEquipped = 16,
+	Stunned = 32,
+	PrimaryWeaponEquipped = 64,
+	SecondaryWeaponEquipped = 128
+};
+
 //this is our internal representation of the BUFF struct, can put whatever we want in it
 struct Buffs_Struct {
 	uint16	spellid;
@@ -190,6 +202,7 @@ struct Buffs_Struct {
 	int32	caston_z;
 	int32	ExtraDIChance;
 	int16	RootBreakChance; //Not saved to dbase
+	uint32	instrument_mod;
 	bool	persistant_buff;
 	bool	client; //True if the caster is a client
 	bool	UpdateClient;
@@ -438,7 +451,7 @@ struct StatBonuses {
 	int32	ShieldEquipHateMod;					// Hate mod when shield equiped.
 	int32	ShieldEquipDmgMod[2];				// Damage mod when shield equiped. 0 = damage modifier 1 = Unknown
 	bool	TriggerOnValueAmount;				// Triggers off various different conditions, bool to check if client has effect.
-	int8	StunBashChance;						// chance to stun with bash.	
+	int8	StunBashChance;						// chance to stun with bash.
 	int8	IncreaseChanceMemwipe;				// increases chance to memory wipe
 	int8	CriticalMend;						// chance critical monk mend
 	int32	ImprovedReclaimEnergy;				// Modifies amount of mana returned from reclaim energy
@@ -455,6 +468,7 @@ typedef struct
 	uint16 spellID;
 	uint16 chance;
 	uint16 base_spellID;
+	int level_override;
 } tProc;
 
 struct Shielders_Struct {
@@ -507,7 +521,8 @@ typedef enum {
 	petOther,
 	petCharmed,
 	petNPCFollow,
-	petTargetLock			//remain active as long something is on the hatelist. Don't listen to any commands
+	petTargetLock,			//remain active as long something is on the hatelist. Don't listen to any commands
+	petNone = 0xFF // not a pet
 } PetType;
 
 typedef enum {

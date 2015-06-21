@@ -89,7 +89,7 @@ int32 Mob::GetActSpellDamage(uint16 spell_id, int32 value, Mob* target) {
 
 		if (IsClient() && GetClass() == WIZARD)
 			ratio += RuleI(Spells, WizCritRatio); //Default is zero
-	
+
 		if (Critical){
 
 			value = value_BaseEffect*ratio/100;
@@ -172,7 +172,7 @@ int32 Mob::GetActDoTDamage(uint16 spell_id, int32 value, Mob* target) {
 		value += int(value_BaseEffect*GetFocusEffect(focusImprovedDamage, spell_id)/100)*ratio/100;
 		value += int(value_BaseEffect*GetFocusEffect(focusFcDamagePctCrit, spell_id)/100)*ratio/100;
 		value += int(value_BaseEffect*target->GetVulnerability(this, spell_id, 0)/100)*ratio/100;
-		extra_dmg = target->GetFcDamageAmtIncoming(this, spell_id) + 
+		extra_dmg = target->GetFcDamageAmtIncoming(this, spell_id) +
 					int(GetFocusEffect(focusFcDamageAmtCrit, spell_id)*ratio/100) +
 					GetFocusEffect(focusFcDamageAmt, spell_id);
 
@@ -219,11 +219,11 @@ int32 Mob::GetExtraSpellAmt(uint16 spell_id, int32 extra_spell_amt, int32 base_s
 		total_cast_time = spells[spell_id].recovery_time + spells[spell_id].cast_time;
 
 	if (total_cast_time > 0 && total_cast_time <= 2500)
-		extra_spell_amt = extra_spell_amt*25/100; 
-	 else if (total_cast_time > 2500 && total_cast_time < 7000) 
-		 extra_spell_amt = extra_spell_amt*(167*((total_cast_time - 1000)/1000)) / 1000; 
-	 else 
-		 extra_spell_amt = extra_spell_amt * total_cast_time / 7000; 
+		extra_spell_amt = extra_spell_amt*25/100;
+	 else if (total_cast_time > 2500 && total_cast_time < 7000)
+		 extra_spell_amt = extra_spell_amt*(167*((total_cast_time - 1000)/1000)) / 1000;
+	 else
+		 extra_spell_amt = extra_spell_amt * total_cast_time / 7000;
 
 		if(extra_spell_amt*2 < base_spell_dmg)
 			return 0;
@@ -281,7 +281,7 @@ int32 Mob::GetActSpellHealing(uint16 spell_id, int32 value, Mob* target) {
 		if (Critical) {
 			entity_list.MessageClose_StringID(this, true, 100, MT_SpellCrits,
 					OTHER_CRIT_HEAL, GetName(), itoa(value));
-			
+
 			if (IsClient())
 				Message_StringID(MT_SpellCrits, YOU_CRIT_HEAL, itoa(value));
 		}
@@ -421,16 +421,21 @@ int32 Mob::GetActSpellDuration(uint16 spell_id, int32 duration)
 	int tic_inc = 0;
 	tic_inc = GetFocusEffect(focusSpellDurByTic, spell_id);
 
-	// Only need this for clients, since the change was for bard songs, I assume we should keep non bard songs getting +1
-	// However if its bard or not and is mez, charm or fear, we need to add 1 so that client is in sync
-	if (IsClient() && !(IsShortDurationBuff(spell_id) && IsBardSong(spell_id)) ||
-			IsFearSpell(spell_id) ||
-			IsCharmSpell(spell_id) ||
-			IsMezSpell(spell_id) ||
-			IsBlindSpell(spell_id))
-		tic_inc += 1;
+	// unsure on the exact details, but bard songs that don't cost mana at some point get an extra tick, 60 for now
+	// a level 53 bard reported getting 2 tics
+	// bard DOTs do get this extra tick, but beneficial long bard songs don't? (invul, crescendo)
+	if ((IsShortDurationBuff(spell_id) || IsDetrimentalSpell(spell_id)) && IsBardSong(spell_id) &&
+	    spells[spell_id].mana == 0 && GetClass() == BARD && GetLevel() > 60)
+		tic_inc++;
+	float focused = ((duration * increase) / 100.0f) + tic_inc;
+	int ifocused = static_cast<int>(focused);
 
-	return (((duration * increase) / 100) + tic_inc);
+	// 7.6 is rounded to 7, 8.6 is rounded to 9
+	// 6 is 6, etc
+	if (FCMP(focused, ifocused) || ifocused % 2) // equal or odd
+		return ifocused;
+	else // even and not equal round to odd
+		return ifocused + 1;
 }
 
 int32 Client::GetActSpellCasttime(uint16 spell_id, int32 casttime)
@@ -771,7 +776,7 @@ void EntityList::AESpell(Mob *caster, Mob *center, uint16 spell_id, bool affect_
 				caster->SpellOnTarget(spell_id, curmob, false, true, resist_adjust);
 			}
 		} else {
-			if (spells[spell_id].aemaxtargets && iCounter < spells[spell_id].aemaxtargets) 
+			if (spells[spell_id].aemaxtargets && iCounter < spells[spell_id].aemaxtargets)
 				caster->SpellOnTarget(spell_id, curmob, false, true, resist_adjust);
 			if (!spells[spell_id].aemaxtargets)
 				caster->SpellOnTarget(spell_id, curmob, false, true, resist_adjust);
@@ -859,7 +864,7 @@ void EntityList::AEBardPulse(Mob *caster, Mob *center, uint16 spell_id, bool aff
 			if (!center->CheckLosFN(curmob))
 				continue;
 		} else { // check to stop casting beneficial ae buffs (to wit: bard songs) on enemies...
-			// See notes in AESpell() above for more info. 
+			// See notes in AESpell() above for more info.
 			if (caster->IsAttackAllowed(curmob, true))
 				continue;
 			if (caster->CheckAggro(curmob))

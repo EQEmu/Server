@@ -123,29 +123,6 @@ void Mob::ProcessFlee()
 	}
 }
 
-float Mob::GetFearSpeed()
-{
-	if (flee_mode) {
-		//we know ratio < FLEE_HP_RATIO
-		float speed = GetBaseRunspeed();
-		float ratio = GetHPRatio();
-		float multiplier = RuleR(Combat, FleeMultiplier);
-
-		if (GetSnaredAmount() > 40)
-			multiplier = multiplier / 6.0f;
-
-		speed = speed * ratio * multiplier / 100;
-
-		//NPC will eventually stop. Snares speeds this up.
-		if (speed < 0.09)
-			speed = 0.0001f;
-
-		return speed;
-	}
-	// fear and blind use their normal run speed
-	return GetRunspeed();
-}
-
 void Mob::CalculateNewFearpoint()
 {
 	if(RuleB(Pathing, Fear) && zone->pathing)

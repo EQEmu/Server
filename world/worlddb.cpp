@@ -105,6 +105,7 @@ void WorldDatabase::GetCharSelectInfo(uint32 accountID, EQApplicationPacket **ou
 		memset(&pp, 0, sizeof(PlayerProfile_Struct));
 		
 		/* Fill CharacterSelectEntry_Struct */
+		memset(cse->Name, 0, sizeof(cse->Name));
 		strcpy(cse->Name, row[1]);
 		cse->Class = (uint8)atoi(row[4]);
 		cse->Race = (uint32)atoi(row[3]);

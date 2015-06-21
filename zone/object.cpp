@@ -485,7 +485,22 @@ bool Object::HandleClick(Client* sender, const ClickObject_Struct* click_object)
 			buf[9] = '\0';
 			std::vector<EQEmu::Any> args;
 			args.push_back(m_inst);
-			parse->EventPlayer(EVENT_PLAYER_PICKUP, sender, buf, 0, &args);
+			if(parse->EventPlayer(EVENT_PLAYER_PICKUP, sender, buf, this->GetID(), &args))
+			{
+				EQApplicationPacket* outapp = new EQApplicationPacket(OP_ClickObject, sizeof(ClickObject_Struct));
+				memcpy(outapp->pBuffer, click_object, sizeof(ClickObject_Struct));
+				ClickObject_Struct* co = (ClickObject_Struct*)outapp->pBuffer;
+				co->drop_id = 0;
+				entity_list.QueueClients(nullptr, outapp, false);
+				safe_delete(outapp);
+				
+				// No longer using a tradeskill object
+				sender->SetTradeskillObject(nullptr);
+				user = nullptr;
+
+				return true;
+			}
+
 
 			// Transfer item to client
 			sender->PutItemInInventory(MainCursor, *m_inst, false);
@@ -809,7 +824,7 @@ void Object::SetModelName(const char* modelname)
 
 void Object::SetSize(uint16 size)
 {
-	m_data.unknown008 = size;
+	m_data.size = size;
 	EQApplicationPacket* app = new EQApplicationPacket();
 	EQApplicationPacket* app2 = new EQApplicationPacket();
 	this->CreateDeSpawnPacket(app);
@@ -822,7 +837,7 @@ void Object::SetSize(uint16 size)
 
 void Object::SetSolidType(uint16 solidtype)
 {
-	m_data.unknown010 = solidtype;
+	m_data.solidtype = solidtype;
 	EQApplicationPacket* app = new EQApplicationPacket();
 	EQApplicationPacket* app2 = new EQApplicationPacket();
 	this->CreateDeSpawnPacket(app);
@@ -835,12 +850,12 @@ void Object::SetSolidType(uint16 solidtype)
 
 uint16 Object::GetSize()
 {
-	return m_data.unknown008;
+	return m_data.size;
 }
 
 uint16 Object::GetSolidType()
 {
-	return m_data.unknown010;
+	return m_data.solidtype;
 }
 
 const char* Object::GetModelName()

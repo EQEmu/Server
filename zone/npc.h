@@ -119,6 +119,7 @@ public:
 	virtual void	AI_Start(uint32 iMoveDelay = 0);
 	virtual void	AI_Stop();
 	void			AI_DoMovement();
+	void			AI_SetupNextWaypoint();
 	bool			AI_AddNPCSpells(uint32 iDBSpellsID);
 	bool			AI_AddNPCSpellsEffects(uint32 iDBSpellsEffectsID);
 	virtual bool	AI_EngagedCastCheck();
@@ -406,6 +407,7 @@ public:
 	void	SetHeroForgeModel(uint32 model) { herosforgemodel = model; }
 
 	bool IsRaidTarget() const { return raid_target; };
+	void ResetHPUpdateTimer() { sendhpupdate_timer.Start(); }
 
 protected:
 

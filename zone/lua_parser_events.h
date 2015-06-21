@@ -6,6 +6,7 @@ typedef void(*NPCArgumentHandler)(QuestInterface*, lua_State*, NPC*, Mob*, std::
 typedef void(*PlayerArgumentHandler)(QuestInterface*, lua_State*, Client*, std::string, uint32, std::vector<EQEmu::Any>*);
 typedef void(*ItemArgumentHandler)(QuestInterface*, lua_State*, Client*, ItemInst*, Mob*, std::string, uint32, std::vector<EQEmu::Any>*);
 typedef void(*SpellArgumentHandler)(QuestInterface*, lua_State*, NPC*, Client*, uint32, uint32, std::vector<EQEmu::Any>*);
+typedef void(*EncounterArgumentHandler)(QuestInterface*, lua_State*, Encounter* encounter, std::string, uint32, std::vector<EQEmu::Any>*);
 
 //NPC
 void handle_npc_event_say(QuestInterface *parse, lua_State* L, NPC* npc, Mob *init, std::string data, uint32 extra_data,
@@ -125,6 +126,17 @@ void handle_spell_fade(QuestInterface *parse, lua_State* L, NPC* npc, Client* cl
 void handle_translocate_finish(QuestInterface *parse, lua_State* L, NPC* npc, Client* client, uint32 spell_id, uint32 extra_data,
 		std::vector<EQEmu::Any> *extra_pointers);
 void handle_spell_null(QuestInterface *parse, lua_State* L, NPC* npc, Client* client, uint32 spell_id, uint32 extra_data,
+		std::vector<EQEmu::Any> *extra_pointers);
+
+
+//Encounter
+void handle_encounter_timer(QuestInterface *parse, lua_State* L, Encounter* encounter, std::string data, uint32 extra_data,
+		std::vector<EQEmu::Any> *extra_pointers);
+void handle_encounter_load(QuestInterface *parse, lua_State* L, Encounter* encounter, std::string data, uint32 extra_data,
+	std::vector<EQEmu::Any> *extra_pointers);
+void handle_encounter_unload(QuestInterface *parse, lua_State* L, Encounter* encounter, std::string data, uint32 extra_data,
+	std::vector<EQEmu::Any> *extra_pointers);
+void handle_encounter_null(QuestInterface *parse, lua_State* L, Encounter* encounter, std::string data, uint32 extra_data,
 		std::vector<EQEmu::Any> *extra_pointers);
 
 #endif

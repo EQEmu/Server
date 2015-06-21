@@ -16,7 +16,7 @@
 #define snprintf _snprintf
 #endif
 
-//#define PATHDEBUG 
+//#define PATHDEBUG
 
 extern Zone *zone;
 
@@ -205,10 +205,10 @@ glm::vec3 PathManager::GetPathNodeCoordinates(int NodeNumber, bool BestZ)
 }
 
 std::deque<int> PathManager::FindRoute(int startID, int endID)
-{ 
+{
 	Log.Out(Logs::Detail, Logs::None, "FindRoute from node %i to %i", startID, endID);
 
-	memset(ClosedListFlag, 0, sizeof(int) * Head.PathNodeCount); 
+	memset(ClosedListFlag, 0, sizeof(int) * Head.PathNodeCount);
 
 	std::deque<AStarNode> OpenList, ClosedList;
 
@@ -664,6 +664,9 @@ glm::vec3 Mob::UpdatePath(float ToX, float ToY, float ToZ, float Speed, bool &Wa
 	glm::vec3 To(ToX, ToY, ToZ);
 
 	bool SameDestination = (To == PathingDestination);
+
+	if (Speed <= 0) // our speed is 0, we cant move so lets return the dest
+		return To; // this will also avoid the teleports cleanly
 
 	int NextNode;
 
