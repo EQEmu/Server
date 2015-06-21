@@ -5554,8 +5554,8 @@ void command_setaapts(Client *c, const Seperator *sep)
 
 	if(sep->arg[1][0] == '\0' || sep->arg[2][0] == '\0')
 		c->Message(0, "Usage: #setaapts <AA|group|raid> <new AA points value>");
-	else if(atoi(sep->arg[2]) <= 0 || atoi(sep->arg[2]) > 200)
-		c->Message(0, "You must have a number greater than 0 for points and no more than 200.");
+	else if(atoi(sep->arg[2]) <= 0 || atoi(sep->arg[2]) > 5000)
+		c->Message(0, "You must have a number greater than 0 for points and no more than 5000.");
 	else if(!strcasecmp(sep->arg[1], "group")) {
 		t->GetPP().group_leadership_points = atoi(sep->arg[2]);
 		t->GetPP().group_leadership_exp = 0;

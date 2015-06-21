@@ -1520,7 +1520,9 @@ void Zone::LoadAlternateAdvancement() {
 		//process these ranks
 		AA::Rank *current = ability.second->first;
 		int i = 1;
+		int prev_id = -1;
 		while(current) {
+			current->prev_id = prev_id;
 			current->prev = GetAlternateAdvancementRank(current->prev_id);
 			current->next = GetAlternateAdvancementRank(current->next_id);
 			current->base_ability = ability.second.get();
@@ -1531,11 +1533,11 @@ void Zone::LoadAlternateAdvancement() {
 
 				//check prereqs here
 				for(auto &prev_prereq : current->prev->prereqs) {
-				//	//if prev has an aa we dont have set
-				//	//	then set it here too
-				//	//if prev has an aa we have and the count is different
-				//	//	then set to whichever is highest
-				//
+					//if prev has an aa we dont have set
+					//	then set it here too
+					//if prev has an aa we have
+					//	then set to whichever is highest
+					
 					auto iter = current->prereqs.find(prev_prereq.first);
 					if(iter == current->prereqs.end()) {
 						//not found
@@ -1557,6 +1559,7 @@ void Zone::LoadAlternateAdvancement() {
 			}
 
 			i++;
+			prev_id = current->id;
 			current = current->next;
 		}
 	}
@@ -1602,7 +1605,7 @@ bool ZoneDatabase::LoadAlternateAdvancementAbilities(std::unordered_map<int, std
 	Log.Out(Logs::General, Logs::Status, "Loading Alternate Advancement Ability Ranks...");
 	ranks.clear();
 	query = "SELECT id, upper_hotkey_sid, lower_hotkey_sid, title_sid, desc_sid, cost, level_req, spell, spell_type, recast_time, "
-		"prev_id, next_id, expansion FROM aa_ranks";
+		"next_id, expansion FROM aa_ranks";
 	results = QueryDatabase(query);
 	if(results.Success()) {
 		for(auto row = results.begin(); row != results.end(); ++row) {
@@ -1617,11 +1620,11 @@ bool ZoneDatabase::LoadAlternateAdvancementAbilities(std::unordered_map<int, std
 			rank->spell = atoi(row[7]);
 			rank->spell_type = atoi(row[8]);
 			rank->recast_time = atoi(row[9]);
-			rank->prev_id = atoi(row[10]);
-			rank->next_id = atoi(row[11]);
-			rank->expansion = atoi(row[12]);
+			rank->next_id = atoi(row[10]);
+			rank->expansion = atoi(row[11]);
 			rank->base_ability = nullptr;
 			rank->total_cost = 0;
+			rank->prev_id = -1;
 			rank->next = nullptr;
 			rank->prev = nullptr;
 
