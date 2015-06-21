@@ -878,7 +878,7 @@ void EntityList::AEBardPulse(Mob *caster, Mob *center, uint16 spell_id, bool aff
 		caster->CastToClient()->CheckSongSkillIncrease(spell_id);
 }
 
-//Dook- Rampage and stuff for clients.
+// Rampage and stuff for clients. Normal and Duration rampages
 //NPCs handle it differently in Mob::Rampage
 void EntityList::AEAttack(Mob *attacker, float dist, int Hand, int count, bool IsFromSpell) {
 //Dook- Will need tweaking, currently no pets or players or horses
@@ -896,7 +896,10 @@ void EntityList::AEAttack(Mob *attacker, float dist, int Hand, int count, bool I
 				&& curmob->GetRace() != 216 && curmob->GetRace() != 472 /* dont attack horses */
 				&& (DistanceSquared(curmob->GetPosition(), attacker->GetPosition()) <= dist2)
 		) {
-			attacker->Attack(curmob, Hand, false, false, IsFromSpell);
+			if (!attacker->IsClient() || attacker->GetClass() == MONK || attacker->GetClass() == RANGER)
+				attacker->Attack(curmob, Hand, false, false, IsFromSpell);
+			else
+				attacker->CastToClient()->DoAttackRounds(curmob, Hand, IsFromSpell);
 			hit++;
 			if (count != 0 && hit >= count)
 				return;

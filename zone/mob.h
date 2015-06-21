@@ -971,6 +971,7 @@ public:
 	void CalcAABonuses(StatBonuses* newbon);
 	void ApplyAABonuses(const AA::Rank &rank, StatBonuses* newbon);
 	void GrantAlternateAdvancementAbility(int aa_id, int points);
+	bool CheckAATimer(int timer);
 
 protected:
 	void CommonDamage(Mob* other, int32 &damage, const uint16 spell_id, const SkillUseTypes attack_skill, bool &avoidable, const int8 buffslot, const bool iBuffTic);

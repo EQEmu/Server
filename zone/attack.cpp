@@ -5056,3 +5056,39 @@ void NPC::SetAttackTimer()
 		TimerToUse->SetAtTrigger(std::max(RuleI(Combat, MinHastedDelay), speed), true, true);
 	}
 }
+
+void Client::DoAttackRounds(Mob *target, int hand, bool IsFromSpell)
+{
+	if (!target)
+		return;
+
+	Attack(target, hand, false, false, IsFromSpell);
+
+	if (CanThisClassDoubleAttack()) {
+		CheckIncreaseSkill(SkillDoubleAttack, target, -10);
+		if (CheckDoubleAttack())
+			Attack(target, hand, false, false, IsFromSpell);
+		if (hand == MainPrimary && GetLevel() >= 60 &&
+		    (GetClass() == MONK || GetClass() == WARRIOR || GetClass() == RANGER || GetClass() == BERSERKER) &&
+		    CheckDoubleAttack(true))
+			Attack(target, hand, false, false, IsFromSpell);
+	}
+	if (hand == MainPrimary) {
+		auto flurrychance = aabonuses.FlurryChance + spellbonuses.FlurryChance + itembonuses.FlurryChance;
+		if (flurrychance && zone->random.Roll(flurrychance)) {
+			Message_StringID(MT_NPCFlurry, YOU_FLURRY);
+			Attack(target, hand, false, false, IsFromSpell);
+			Attack(target, hand, false, false, IsFromSpell);
+		}
+
+		auto extraattackchance = aabonuses.ExtraAttackChance + spellbonuses.ExtraAttackChance + itembonuses.ExtraAttackChance;
+		if (extraattackchance) {
+			auto wpn = GetInv().GetItem(MainPrimary);
+			if (wpn && (wpn->GetItem()->ItemType == ItemType2HBlunt ||
+				    wpn->GetItem()->ItemType == ItemType2HSlash ||
+				    wpn->GetItem()->ItemType == ItemType2HPiercing))
+				if (zone->random.Roll(extraattackchance))
+					Attack(target, hand, false, false, IsFromSpell);
+		}
+	}
+}
