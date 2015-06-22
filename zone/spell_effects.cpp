@@ -5190,6 +5190,9 @@ uint16 Client::GetSympatheticFocusEffect(focusType type, uint16 spell_id) {
 
 int16 Client::GetFocusEffect(focusType type, uint16 spell_id)
 {
+	if (IsBardSong(spell_id) && type != focusFcBaseEffects && type != focusSpellDuration)
+		return 0;
+
 	int16 realTotal = 0;
 	int16 realTotal2 = 0;
 	int16 realTotal3 = 0;
