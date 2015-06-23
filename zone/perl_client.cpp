@@ -4894,6 +4894,34 @@ XS(XS_Client_IncrementAA)
 	XSRETURN_EMPTY;
 }
 
+XS(XS_Client_GrantAlternateAdvancementAbility); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Client_GrantAlternateAdvancementAbility)
+{
+	dXSARGS;
+	if(items != 3)
+		Perl_croak(aTHX_ "Usage: Client::GrantAlternateAdvancementAbility(THIS, aa_id, points)");
+	{
+		Client *		THIS;
+		bool			RETVAL;
+		int			aa_id = (int)SvIV(ST(1));
+		int			points = (int)SvIV(ST(2));
+
+		if(sv_derived_from(ST(0), "Client")) {
+			IV tmp = SvIV((SV*)SvRV(ST(0)));
+			THIS = INT2PTR(Client *, tmp);
+		}
+		else
+			Perl_croak(aTHX_ "THIS is not of type Client");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
+
+		RETVAL = THIS->GrantAlternateAdvancementAbility(aa_id, points);
+		ST(0) = boolSV(RETVAL);
+		sv_2mortal(ST(0));
+	}
+	XSRETURN(1);
+}
+
 XS(XS_Client_GetAALevel);
 XS(XS_Client_GetAALevel)
 {
@@ -6437,6 +6465,7 @@ XS(boot_Client)
 		newXSproto(strcpy(buf, "GetIP"), XS_Client_GetIP, file, "$");
 		newXSproto(strcpy(buf, "AddLevelBasedExp"), XS_Client_AddLevelBasedExp, file, "$$;$");
 		newXSproto(strcpy(buf, "IncrementAA"), XS_Client_IncrementAA, file, "$$");
+		newXSproto(strcpy(buf, "GrantAlternateAdvancementAbility"), XS_Client_GrantAlternateAdvancementAbility, file, "$$$");
 		newXSproto(strcpy(buf, "GetAALevel"), XS_Client_GetAALevel, file, "$$");
 		newXSproto(strcpy(buf, "MarkCompassLoc"), XS_Client_MarkCompassLoc, file, "$$$$");
 		newXSproto(strcpy(buf, "ClearCompassMark"), XS_Client_ClearCompassMark, file, "$");

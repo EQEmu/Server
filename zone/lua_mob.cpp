@@ -1210,11 +1210,6 @@ bool Lua_Mob::SetAA(int rank_id, int new_value, int charges) {
 	return self->SetAA(rank_id, new_value, charges);
 }
 
-void Lua_Mob::GrantAlternateAdvancementAbility(int aa_id, int points) {
-	Lua_Safe_Call_Void();
-	self->GrantAlternateAdvancementAbility(aa_id, points);
-}
-
 bool Lua_Mob::DivineAura() {
 	Lua_Safe_Call_Bool();
 	return self->DivineAura();
@@ -2097,7 +2092,6 @@ luabind::scope lua_register_mob() {
 		.def("GetAAByAAID", (int(Lua_Mob::*)(int))&Lua_Mob::GetAAByAAID)
 		.def("SetAA", (bool(Lua_Mob::*)(int,int))&Lua_Mob::SetAA)
 		.def("SetAA", (bool(Lua_Mob::*)(int,int,int))&Lua_Mob::SetAA)
-		.def("GrantAlternateAdvancementAbility", (void(Lua_Mob::*)(int, int))&Lua_Mob::GrantAlternateAdvancementAbility)
 		.def("DivineAura", (bool(Lua_Mob::*)(void))&Lua_Mob::DivineAura)
 		.def("SetOOCRegen", (void(Lua_Mob::*)(int))&Lua_Mob::SetOOCRegen)
 		.def("GetEntityVariable", (const char*(Lua_Mob::*)(const char*))&Lua_Mob::GetEntityVariable)

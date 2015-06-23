@@ -532,10 +532,6 @@ bool Client::SaveAA() {
 		if(!ability)
 			continue;
 
-		if(ability->grant_only) {
-			continue;
-		}
-
 		if(rank.second.first > 0) {
 			AA::Rank *r = ability->GetRankByPointsSpent(rank.second.first);
 

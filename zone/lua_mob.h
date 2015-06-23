@@ -252,7 +252,6 @@ public:
 	int GetAAByAAID(int id);
 	bool SetAA(int rank_id, int new_value);
 	bool SetAA(int rank_id, int new_value, int charges);
-	void GrantAlternateAdvancementAbility(int aa_id, int points);
 	bool DivineAura();
 	void SetOOCRegen(int regen);
 	const char* GetEntityVariable(const char *name);

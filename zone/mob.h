@@ -965,12 +965,11 @@ public:
 	bool SetAA(uint32 rank_id, uint32 new_value, uint32 charges = 0);
 	void ClearAAs() { aa_ranks.clear(); }
 	bool CanUseAlternateAdvancementRank(AA::Rank *rank);
-	bool CanPurchaseAlternateAdvancementRank(AA::Rank *rank, bool check_price);
+	bool CanPurchaseAlternateAdvancementRank(AA::Rank *rank, bool check_price, bool check_grant);
 	int GetAlternateAdvancementCooldownReduction(AA::Rank *rank_in);
 	void ExpendAlternateAdvancementCharge(uint32 aa_id);
 	void CalcAABonuses(StatBonuses* newbon);
 	void ApplyAABonuses(const AA::Rank &rank, StatBonuses* newbon);
-	void GrantAlternateAdvancementAbility(int aa_id, int points);
 	bool CheckAATimer(int timer);
 
 protected:

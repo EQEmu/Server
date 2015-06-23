@@ -1027,6 +1027,11 @@ void Lua_Client::IncrementAA(int aa) {
 	self->IncrementAlternateAdvancementRank(aa);
 }
 
+bool Lua_Client::GrantAlternateAdvancementAbility(int aa_id, int points) {
+	Lua_Safe_Call_Bool();
+	self->GrantAlternateAdvancementAbility(aa_id, points);
+}
+
 void Lua_Client::MarkSingleCompassLoc(float in_x, float in_y, float in_z) {
 	Lua_Safe_Call_Void();
 	self->MarkSingleCompassLoc(in_x, in_y, in_z);
@@ -1500,6 +1505,7 @@ luabind::scope lua_register_client() {
 		.def("AddLevelBasedExp", (void(Lua_Client::*)(int))&Lua_Client::AddLevelBasedExp)
 		.def("AddLevelBasedExp", (void(Lua_Client::*)(int,int))&Lua_Client::AddLevelBasedExp)
 		.def("IncrementAA", (void(Lua_Client::*)(int))&Lua_Client::IncrementAA)
+		.def("GrantAlternateAdvancementAbility", (bool(Lua_Client::*)(int, int))&Lua_Client::GrantAlternateAdvancementAbility)
 		.def("MarkSingleCompassLoc", (void(Lua_Client::*)(float,float,float))&Lua_Client::MarkSingleCompassLoc)
 		.def("MarkSingleCompassLoc", (void(Lua_Client::*)(float,float,float,int))&Lua_Client::MarkSingleCompassLoc)
 		.def("GetNextAvailableSpellBookSlot", (int(Lua_Client::*)(void))&Lua_Client::GetNextAvailableSpellBookSlot)

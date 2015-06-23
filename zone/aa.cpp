@@ -902,7 +902,7 @@ void Client::SendAlternateAdvancementPoints() {
 			AA::Rank *rank = aa.second->GetRankByPointsSpent(ranks);
 			if(rank) {
 				aa2->aa_list[i].AA = rank->id;
-				aa2->aa_list[i].value = ranks;
+				aa2->aa_list[i].value = rank->total_cost;
 				aa2->aa_list[i].charges = charges;
 				i++;
 			}
@@ -993,9 +993,36 @@ void Client::PurchaseAlternateAdvancementRank(int rank_id) {
 		return;
 	}
 
-	if(!CanPurchaseAlternateAdvancementRank(rank, true)) {
+	if(!CanPurchaseAlternateAdvancementRank(rank, true, true)) {
 		return;
 	}
+
+	FinishAlternateAdvancementPurchase(rank);
+}
+
+bool Client::GrantAlternateAdvancementAbility(int aa_id, int points) {
+	auto ability_rank = zone->GetAlternateAdvancementAbilityAndRank(aa_id, points);
+	auto ability = ability_rank.first;
+	auto rank = ability_rank.second;
+
+	if(!rank) {
+		return false;
+	}
+
+	if(!rank->base_ability) {
+		return false;
+	}
+
+	if(!CanPurchaseAlternateAdvancementRank(rank, true, false)) {
+		return false;
+	}
+
+	FinishAlternateAdvancementPurchase(rank);
+	return true;
+}
+
+void Client::FinishAlternateAdvancementPurchase(AA::Rank *rank) {
+	int rank_id = rank->base_ability->first_rank_id;
 
 	if(rank->base_ability->charges > 0) {
 		uint32 charges = 0;
@@ -1006,7 +1033,8 @@ void Client::PurchaseAlternateAdvancementRank(int rank_id) {
 		}
 
 		SetAA(rank_id, rank->current_value, rank->base_ability->charges);
-	} else {
+	}
+	else {
 		SetAA(rank_id, rank->current_value, 0);
 
 		//if not max then send next aa
@@ -1029,17 +1057,18 @@ void Client::PurchaseAlternateAdvancementRank(int rank_id) {
 						 std::to_string(AA_POINTS).c_str());
 
 		/* QS: Player_Log_AA_Purchases */
-		if (RuleB(QueryServ, PlayerLogAAPurchases)){
+		if(RuleB(QueryServ, PlayerLogAAPurchases)){
 			std::string event_desc = StringFormat("Ranked AA Purchase :: aa_id:%i at cost:%i in zoneid:%i instid:%i", rank->id, rank->cost, GetZoneID(), GetInstanceID());
 			QServ->PlayerLogEvent(Player_Log_AA_Purchases, CharacterID(), event_desc);
 		}
-	} else {
+	}
+	else {
 		Message_StringID(15, AA_GAIN_ABILITY,
 						 std::to_string(rank->title_sid).c_str(),
 						 std::to_string(rank->cost).c_str(),
 						 std::to_string(AA_POINTS).c_str());
 		/* QS: Player_Log_AA_Purchases */
-		if (RuleB(QueryServ, PlayerLogAAPurchases)){
+		if(RuleB(QueryServ, PlayerLogAAPurchases)){
 			std::string event_desc = StringFormat("Initial AA Purchase :: aa_id:%i at cost:%i in zoneid:%i instid:%i", rank->id, rank->cost, GetZoneID(), GetInstanceID());
 			QServ->PlayerLogEvent(Player_Log_AA_Purchases, CharacterID(), event_desc);
 		}
@@ -1061,7 +1090,7 @@ void Client::IncrementAlternateAdvancementRank(int rank_id) {
 		return;
 	}
 
-	if(!CanPurchaseAlternateAdvancementRank(rank, false)) {
+	if(!CanPurchaseAlternateAdvancementRank(rank, false, true)) {
 		return;
 	}
 
@@ -1443,7 +1472,7 @@ bool Mob::CanUseAlternateAdvancementRank(AA::Rank *rank) {
 	return true;
 }
 
-bool Mob::CanPurchaseAlternateAdvancementRank(AA::Rank *rank, bool check_price) {
+bool Mob::CanPurchaseAlternateAdvancementRank(AA::Rank *rank, bool check_price, bool check_grant) {
 	AA::Ability *ability = rank->base_ability;
 
 	if(!ability)
@@ -1454,7 +1483,7 @@ bool Mob::CanPurchaseAlternateAdvancementRank(AA::Rank *rank, bool check_price) 
 	}
 
 	//You can't purchase grant only AAs they can only be assigned
-	if(ability->grant_only) {
+	if(check_grant && ability->grant_only) {
 		return false;
 	}
 
@@ -1690,45 +1719,6 @@ bool ZoneDatabase::LoadAlternateAdvancementAbilities(std::unordered_map<int, std
 	Log.Out(Logs::General, Logs::Status, "Loaded Alternate Advancement Ability Rank Prereqs");
 
 	return true;
-}
-
-void Mob::GrantAlternateAdvancementAbility(int aa_id, int points) {
-	if(!zone)
-		return;
-
-	auto ability_rank = zone->GetAlternateAdvancementAbilityAndRank(aa_id, points);
-	auto ability = ability_rank.first;
-	auto rank = ability_rank.second;
-
-	if(!ability) {
-		return;
-	}
-
-	if(ability->charges > 0) {
-		return;
-	}
-
-	if(!ability->grant_only) {
-		return;
-	}
-
-	if(!CanUseAlternateAdvancementRank(rank)) {
-		return;
-	}
-
-	SetAA(ability->first_rank_id, rank->current_value, 0);
-
-	if(IsClient()) {
-		Client *c = CastToClient();
-
-		if(rank->next) {
-			c->SendAlternateAdvancementRank(rank->base_ability->id, rank->next->current_value);
-		}
-
-		c->SendAlternateAdvancementPoints();
-		c->SendAlternateAdvancementStats();
-		c->CalcBonuses();
-	}
 }
 
 bool Mob::CheckAATimer(int timer)

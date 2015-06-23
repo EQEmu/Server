@@ -6438,31 +6438,6 @@ XS(XS_Mob_SetAA)
 	XSRETURN(1);
 }
 
-XS(XS_Mob_GrantAlternateAdvancementAbility); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Mob_GrantAlternateAdvancementAbility)
-{
-	dXSARGS;
-	if(items != 3)
-		Perl_croak(aTHX_ "Usage: Mob::GrantAlternateAdvancementAbility(THIS, aa_id, points)");
-	{
-		Mob *		THIS;
-		int			aa_id = (int)SvIV(ST(1));
-		int			points = (int)SvIV(ST(2));
-
-		if(sv_derived_from(ST(0), "Mob")) {
-			IV tmp = SvIV((SV*)SvRV(ST(0)));
-			THIS = INT2PTR(Mob *, tmp);
-		}
-		else
-			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if(THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
-		THIS->GrantAlternateAdvancementAbility(aa_id, points);
-	}
-	XSRETURN_EMPTY;
-}
-
 XS(XS_Mob_DivineAura); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_DivineAura)
 {
@@ -8708,7 +8683,6 @@ XS(boot_Mob)
 		newXSproto(strcpy(buf, "GetAA"), XS_Mob_GetAA, file, "$$");
 		newXSproto(strcpy(buf, "GetAAByAAID"), XS_Mob_GetAAByAAID, file, "$$");
 		newXSproto(strcpy(buf, "SetAA"), XS_Mob_SetAA, file, "$$$;$");
-		newXSproto(strcpy(buf, "GrantAlternateAdvancementAbility"), XS_Mob_GrantAlternateAdvancementAbility, file, "$$$");
 		newXSproto(strcpy(buf, "DivineAura"), XS_Mob_DivineAura, file, "$");
 		newXSproto(strcpy(buf, "AddFeignMemory"), XS_Mob_AddFeignMemory, file, "$$");
 		newXSproto(strcpy(buf, "RemoveFromFeignMemory"), XS_Mob_RemoveFromFeignMemory, file, "$$");
