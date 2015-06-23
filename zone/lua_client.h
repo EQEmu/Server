@@ -234,6 +234,7 @@ public:
 	void AddLevelBasedExp(int exp_pct, int max_level);
 	void IncrementAA(int aa);
 	bool GrantAlternateAdvancementAbility(int aa_id, int points);
+	bool GrantAlternateAdvancementAbility(int aa_id, int points, bool ignore_cost);
 	void MarkSingleCompassLoc(float in_x, float in_y, float in_z);
 	void MarkSingleCompassLoc(float in_x, float in_y, float in_z, int count);
 	int GetNextAvailableSpellBookSlot();

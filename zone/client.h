@@ -763,7 +763,7 @@ public:
 	void SendAlternateAdvancementTable();
 	void SendAlternateAdvancementStats();
 	void PurchaseAlternateAdvancementRank(int rank_id);
-	bool GrantAlternateAdvancementAbility(int aa_id, int points);
+	bool GrantAlternateAdvancementAbility(int aa_id, int points, bool ignore_cost = false);
 	void IncrementAlternateAdvancementRank(int rank_id);
 	void ActivateAlternateAdvancementAbility(int rank_id, int target_id);
 	void SendAlternateAdvancementPoints();
@@ -1263,7 +1263,7 @@ protected:
 	int16 GetFocusEffect(focusType type, uint16 spell_id);
 	uint16 GetSympatheticFocusEffect(focusType type, uint16 spell_id);
 
-	void FinishAlternateAdvancementPurchase(AA::Rank *rank);
+	void FinishAlternateAdvancementPurchase(AA::Rank *rank, bool ignore_cost);
 
 	Mob* bind_sight_target;
 

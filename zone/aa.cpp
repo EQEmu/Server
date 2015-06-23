@@ -762,6 +762,10 @@ void Client::RefundAA() {
 			continue;
 		}
 
+		if(ability->grant_only) {
+			continue;
+		}
+
 		refunded += rank->total_cost;
 	}
 
@@ -997,31 +1001,36 @@ void Client::PurchaseAlternateAdvancementRank(int rank_id) {
 		return;
 	}
 
-	FinishAlternateAdvancementPurchase(rank);
+	FinishAlternateAdvancementPurchase(rank, false);
 }
 
-bool Client::GrantAlternateAdvancementAbility(int aa_id, int points) {
-	auto ability_rank = zone->GetAlternateAdvancementAbilityAndRank(aa_id, points);
-	auto ability = ability_rank.first;
-	auto rank = ability_rank.second;
+bool Client::GrantAlternateAdvancementAbility(int aa_id, int points, bool ignore_cost) {
+	bool ret = false;
+	for(int i = 1; i <= points; ++i) {
+		auto ability_rank = zone->GetAlternateAdvancementAbilityAndRank(aa_id, i);
+		auto ability = ability_rank.first;
+		auto rank = ability_rank.second;
 
-	if(!rank) {
-		return false;
+		if(!rank) {
+			continue;
+		}
+
+		if(!rank->base_ability) {
+			continue;
+		}
+
+		if(!CanPurchaseAlternateAdvancementRank(rank, !ignore_cost, false)) {
+			continue;
+		}
+
+		ret = true;
+		FinishAlternateAdvancementPurchase(rank, ignore_cost);
 	}
 
-	if(!rank->base_ability) {
-		return false;
-	}
-
-	if(!CanPurchaseAlternateAdvancementRank(rank, true, false)) {
-		return false;
-	}
-
-	FinishAlternateAdvancementPurchase(rank);
-	return true;
+	return ret;
 }
 
-void Client::FinishAlternateAdvancementPurchase(AA::Rank *rank) {
+void Client::FinishAlternateAdvancementPurchase(AA::Rank *rank, bool ignore_cost) {
 	int rank_id = rank->base_ability->first_rank_id;
 
 	if(rank->base_ability->charges > 0) {
@@ -1043,7 +1052,9 @@ void Client::FinishAlternateAdvancementPurchase(AA::Rank *rank) {
 		}
 	}
 
-	m_pp.aapoints -= rank->cost;
+	int cost = !ignore_cost ? rank->cost : 0;
+
+	m_pp.aapoints -= cost ;
 	SaveAA();
 
 	SendAlternateAdvancementPoints();
@@ -1053,30 +1064,33 @@ void Client::FinishAlternateAdvancementPurchase(AA::Rank *rank) {
 		Message_StringID(15, AA_IMPROVE,
 						 std::to_string(rank->title_sid).c_str(),
 						 std::to_string(rank->prev->current_value).c_str(),
-						 std::to_string(rank->cost).c_str(),
-						 std::to_string(AA_POINTS).c_str());
+						 std::to_string(cost).c_str(),
+						 cost == 1 ? std::to_string(AA_POINT).c_str() : std::to_string(AA_POINTS).c_str());
 
 		/* QS: Player_Log_AA_Purchases */
-		if(RuleB(QueryServ, PlayerLogAAPurchases)){
-			std::string event_desc = StringFormat("Ranked AA Purchase :: aa_id:%i at cost:%i in zoneid:%i instid:%i", rank->id, rank->cost, GetZoneID(), GetInstanceID());
+		if(RuleB(QueryServ, PlayerLogAAPurchases)) {
+			std::string event_desc = StringFormat("Ranked AA Purchase :: aa_id:%i at cost:%i in zoneid:%i instid:%i", rank->id, cost, GetZoneID(), GetInstanceID());
 			QServ->PlayerLogEvent(Player_Log_AA_Purchases, CharacterID(), event_desc);
 		}
 	}
 	else {
 		Message_StringID(15, AA_GAIN_ABILITY,
 						 std::to_string(rank->title_sid).c_str(),
-						 std::to_string(rank->cost).c_str(),
-						 std::to_string(AA_POINTS).c_str());
+						 std::to_string(cost).c_str(),
+						 cost == 1 ? std::to_string(AA_POINT).c_str() : std::to_string(AA_POINTS).c_str());
 		/* QS: Player_Log_AA_Purchases */
-		if(RuleB(QueryServ, PlayerLogAAPurchases)){
-			std::string event_desc = StringFormat("Initial AA Purchase :: aa_id:%i at cost:%i in zoneid:%i instid:%i", rank->id, rank->cost, GetZoneID(), GetInstanceID());
+		if(RuleB(QueryServ, PlayerLogAAPurchases)) {
+			std::string event_desc = StringFormat("Initial AA Purchase :: aa_id:%i at cost:%i in zoneid:%i instid:%i", rank->id, cost, GetZoneID(), GetInstanceID());
 			QServ->PlayerLogEvent(Player_Log_AA_Purchases, CharacterID(), event_desc);
 		}
 	}
 
 	CalcBonuses();
-	if(title_manager.IsNewAATitleAvailable(m_pp.aapoints_spent, GetBaseClass()))
-		NotifyNewTitlesAvailable();
+
+	if(cost > 0) {
+		if(title_manager.IsNewAATitleAvailable(m_pp.aapoints_spent, GetBaseClass()))
+			NotifyNewTitlesAvailable();
+	}
 }
 
 //need to rewrite this
@@ -1090,54 +1104,8 @@ void Client::IncrementAlternateAdvancementRank(int rank_id) {
 		return;
 	}
 
-	if(!CanPurchaseAlternateAdvancementRank(rank, false, true)) {
-		return;
-	}
-
-	if(rank->base_ability->charges > 0) {
-		SetAA(rank_id, rank->current_value, rank->base_ability->charges);
-	}
-	else {
-		SetAA(rank_id, rank->current_value, 0);
-
-		//if not max then send next aa
-		if(rank->next) {
-			SendAlternateAdvancementRank(rank->base_ability->id, rank->next->current_value);
-		}
-	}
-
-	SaveAA();
-
-	SendAlternateAdvancementPoints();
-	SendAlternateAdvancementStats();
-
-	if(rank->prev) {
-		Message_StringID(15, AA_IMPROVE,
-						 std::to_string(rank->title_sid).c_str(),
-						 std::to_string(rank->prev->current_value).c_str(),
-						 std::to_string(rank->cost).c_str(),
-						 std::to_string(AA_POINTS).c_str());
-
-		/* QS: Player_Log_AA_Purchases */
-		if (RuleB(QueryServ, PlayerLogAAPurchases)){
-			std::string event_desc = StringFormat("Ranked AA Purchase :: aa_id:%i at cost:%i in zoneid:%i instid:%i", rank->id, rank->cost, GetZoneID(), GetInstanceID());
-			QServ->PlayerLogEvent(Player_Log_AA_Purchases, CharacterID(), event_desc);
-		}
-	}
-	else {
-		Message_StringID(15, AA_GAIN_ABILITY,
-						 std::to_string(rank->title_sid).c_str(),
-						 std::to_string(rank->cost).c_str(),
-						 std::to_string(AA_POINTS).c_str());
-
-		/* QS: Player_Log_AA_Purchases */
-		if (RuleB(QueryServ, PlayerLogAAPurchases)){
-			std::string event_desc = StringFormat("Initial AA Purchase :: aa_id:%i at cost:%i in zoneid:%i instid:%i", rank->id, rank->cost, GetZoneID(), GetInstanceID());
-			QServ->PlayerLogEvent(Player_Log_AA_Purchases, this->CharacterID(), event_desc);
-		}
-	}
-
-	CalcBonuses();
+	int points = GetAA(rank_id);
+	GrantAlternateAdvancementAbility(rank->base_ability->id, points + 1, true);
 }
 
 void Client::ActivateAlternateAdvancementAbility(int rank_id, int target_id) {
@@ -1496,10 +1464,16 @@ bool Mob::CanPurchaseAlternateAdvancementRank(AA::Rank *rank, bool check_price, 
 	auto points = GetAA(rank->id, &current_charges);
 
 	//check that we are on previous rank already (if exists)
-	if(rank->prev) {
+	//grant ignores the req to own the previous rank.
+	if(check_grant && rank->prev) {
 		if(points != rank->prev->current_value) {
 			return false;
 		}
+	}
+
+	//check that we aren't already on this rank or one ahead of us
+	if(points >= rank->current_value) {
+		return false;
 	}
 
 	//if expendable only let us purchase if we have no charges already
