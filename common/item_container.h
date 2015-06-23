@@ -31,7 +31,7 @@ namespace EQEmu
 	class ItemContainer
 	{
 	public:
-		typedef std::map<int, std::shared_ptr<ItemInstance>>::const_iterator ItemContainerIter;
+		typedef std::map<int, ItemInstance::pointer>::const_iterator ItemContainerIter;
 
 		ItemContainer();
 		ItemContainer(ItemContainerSerializationStrategy *strategy);
@@ -39,8 +39,8 @@ namespace EQEmu
 		ItemContainer(ItemContainer &&other);
 		ItemContainer& operator=(ItemContainer &&other);
 
-		std::shared_ptr<ItemInstance> Get(const int slot_id);
-		bool Put(const int slot_id, std::shared_ptr<ItemInstance> inst);
+		ItemInstance::pointer Get(const int slot_id);
+		bool Put(const int slot_id, ItemInstance::pointer &inst);
 		bool Delete(const int slot_id);
 
 		//Utility

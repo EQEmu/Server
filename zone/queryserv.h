@@ -29,7 +29,6 @@ class QueryServ{
 		QueryServ();
 		~QueryServ();
 		void SendQuery(std::string Query);
-		void PlayerLogEvent(int Event_Type, int Character_ID, std::string Event_Desc);
 };
 
 #endif /* QUERYSERV_ZONE_H */ 

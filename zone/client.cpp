@@ -2113,79 +2113,18 @@ bool Client::TakeMoneyFromPP(uint64 copper, bool updateclient) {
 	}
 }
 
-void Client::AddMoneyToPP(uint64 copper, bool updateclient){
-	uint64 tmp;
-	uint64 tmp2;
-	tmp = copper;
+void Client::AddMoneyToPP(uint64 copper, bool updateclient) {
 
-	/* Add Amount of Platinum */
-	tmp2 = tmp/1000;
-	int32 new_val = m_pp.platinum + tmp2;
-	if(new_val < 0) { m_pp.platinum = 0; }
-	else { m_pp.platinum = m_pp.platinum + tmp2; }
-	tmp-=tmp2*1000;
-
-	//if (updateclient)
-	//	SendClientMoneyUpdate(3,tmp2);
-
-	/* Add Amount of Gold */
-	tmp2 = tmp/100;
-	new_val = m_pp.gold + tmp2;
-	if(new_val < 0) { m_pp.gold = 0; }
-	else { m_pp.gold = m_pp.gold + tmp2; }
-
-	tmp-=tmp2*100;
-	//if (updateclient)
-	//	SendClientMoneyUpdate(2,tmp2);
-
-	/* Add Amount of Silver */
-	tmp2 = tmp/10;
-	new_val = m_pp.silver + tmp2;
-	if(new_val < 0) {
-		m_pp.silver = 0;
-	} else {
-		m_pp.silver = m_pp.silver + tmp2;
-	}
-	tmp-=tmp2*10;
-	//if (updateclient)
-	//	SendClientMoneyUpdate(1,tmp2);
-
-	// Add Copper
-	//tmp	= tmp - (tmp2* 10);
-	//if (updateclient)
-	//	SendClientMoneyUpdate(0,tmp);
-	tmp2 = tmp;
-	new_val = m_pp.copper + tmp2;
-	if(new_val < 0) {
-		m_pp.copper = 0;
-	} else {
-		m_pp.copper = m_pp.copper + tmp2;
-	}
-
-
-	//send them all at once, since the above code stopped working.
-	if(updateclient)
-		SendMoneyUpdate();
-
-	RecalcWeight();
-
-	SaveCurrency();
-
-	Log.Out(Logs::General, Logs::None, "Client::AddMoneyToPP() %s should have: plat:%i gold:%i silver:%i copper:%i", GetName(), m_pp.platinum, m_pp.gold, m_pp.silver, m_pp.copper);
+	uint64 plat = copper / 1000;
+	copper -= plat * 1000;
+	uint64 gold = copper / 100;
+	copper -= gold * 100;
+	uint64 silver = copper / 10;
+	copper -= silver * 10;
+	AddMoneyToPP(copper, silver, gold, plat, updateclient);
 }
 
-void Client::ItemScriptStopReturn(){
-	/* Set a timestamp in an entity variable for plugin check_handin.pl in return_items
-		This will stopgap players from items being returned if global_npc.pl has a catch all return_items
-	*/
-	struct timeval read_time;
-	char buffer[50];
-	gettimeofday(&read_time, 0);
-	sprintf(buffer, "%li.%li \n", read_time.tv_sec, read_time.tv_usec);
-	SetEntityVariable("Stop_Return", buffer);
-}
-
-void Client::AddMoneyToPP(uint32 copper, uint32 silver, uint32 gold, uint32 platinum, bool updateclient){
+void Client::AddMoneyToPP(uint32 copper, uint32 silver, uint32 gold, uint32 platinum, bool updateclient) {
 	ItemScriptStopReturn();
 
 	int32 new_value = m_pp.platinum + platinum;
@@ -2209,11 +2148,17 @@ void Client::AddMoneyToPP(uint32 copper, uint32 silver, uint32 gold, uint32 plat
 
 	RecalcWeight();
 	SaveCurrency();
+}
 
-#if (EQDEBUG>=5)
-		Log.Out(Logs::General, Logs::None, "Client::AddMoneyToPP() %s should have: plat:%i gold:%i silver:%i copper:%i",
-			GetName(), m_pp.platinum, m_pp.gold, m_pp.silver, m_pp.copper);
-#endif
+void Client::ItemScriptStopReturn() {
+	/* Set a timestamp in an entity variable for plugin check_handin.pl in return_items
+		This will stopgap players from items being returned if global_npc.pl has a catch all return_items
+	*/
+	struct timeval read_time;
+	char buffer[50];
+	gettimeofday(&read_time, 0);
+	sprintf(buffer, "%li.%li \n", read_time.tv_sec, read_time.tv_usec);
+	SetEntityVariable("Stop_Return", buffer);
 }
 
 void Client::SendMoneyUpdate() {
@@ -2517,31 +2462,32 @@ void Client::SetFeigned(bool in_feigned) {
 
 void Client::LogMerchant(Client* player, Mob* merchant, uint32 quantity, uint32 price, const ItemData* item, bool buying)
 {
-	if(!player || !merchant || !item)
-		return;
-
-	std::string LogText = "Qty: ";
-
-	char Buffer[255];
-	memset(Buffer, 0, sizeof(Buffer));
-
-	snprintf(Buffer, sizeof(Buffer)-1, "%3i", quantity);
-	LogText += Buffer;
-	snprintf(Buffer, sizeof(Buffer)-1, "%10i", price);
-	LogText += " TotalValue: ";
-	LogText += Buffer;
-	snprintf(Buffer, sizeof(Buffer)-1, " ItemID: %7i", item->ID);
-	LogText += Buffer;
-	LogText += " ";
-	snprintf(Buffer, sizeof(Buffer)-1, " %s", item->Name);
-	LogText += Buffer;
-
-	if (buying==true) {
-		database.logevents(player->AccountName(),player->AccountID(),player->admin,player->GetName(),merchant->GetName(),"Buying from Merchant",LogText.c_str(),2);
-	}
-	else {
-		database.logevents(player->AccountName(),player->AccountID(),player->admin,player->GetName(),merchant->GetName(),"Selling to Merchant",LogText.c_str(),3);
-	}
+	//Inv2 redo or remove
+	//if(!player || !merchant || !item)
+	//	return;
+	//
+	//std::string LogText = "Qty: ";
+	//
+	//char Buffer[255];
+	//memset(Buffer, 0, sizeof(Buffer));
+	//
+	//snprintf(Buffer, sizeof(Buffer)-1, "%3i", quantity);
+	//LogText += Buffer;
+	//snprintf(Buffer, sizeof(Buffer)-1, "%10i", price);
+	//LogText += " TotalValue: ";
+	//LogText += Buffer;
+	//snprintf(Buffer, sizeof(Buffer)-1, " ItemID: %7i", item->ID);
+	//LogText += Buffer;
+	//LogText += " ";
+	//snprintf(Buffer, sizeof(Buffer)-1, " %s", item->Name);
+	//LogText += Buffer;
+	//
+	//if (buying==true) {
+	//	database.logevents(player->AccountName(),player->AccountID(),player->admin,player->GetName(),merchant->GetName(),"Buying from Merchant",LogText.c_str(),2);
+	//}
+	//else {
+	//	database.logevents(player->AccountName(),player->AccountID(),player->admin,player->GetName(),merchant->GetName(),"Selling to Merchant",LogText.c_str(),3);
+	//}
 }
 
 bool Client::BindWound(Mob* bindmob, bool start, bool fail){
@@ -6922,11 +6868,7 @@ void Client::AddAlternateCurrencyValue(uint32 currency_id, int32 amount, int8 me
 
 	/* Added via Quest, rest of the logging methods may be done inline due to information available in that area of the code */
 	if (method == 1){
-		/* QS: PlayerLogAlternateCurrencyTransactions :: Cursor to Item Storage */
-		if (RuleB(QueryServ, PlayerLogAlternateCurrencyTransactions)){
-			std::string event_desc = StringFormat("Added via Quest :: Cursor to Item :: alt_currency_id:%i amount:%i in zoneid:%i instid:%i", currency_id, this->GetZoneID(), this->GetInstanceID());
-			QServ->PlayerLogEvent(Player_Log_Alternate_Currency_Transactions, this->CharacterID(), event_desc);
-		}
+		
 	}
 
 	if(amount == 0) {

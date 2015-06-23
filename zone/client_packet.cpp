@@ -783,11 +783,6 @@ void Client::CompleteConnect()
 	/* This sub event is for if a player logs in for the first time since entering world. */
 	if (firstlogon == 1){
 		parse->EventPlayer(EVENT_CONNECT, this, "", 0);
-		/* QS: PlayerLogConnectDisconnect */
-		if (RuleB(QueryServ, PlayerLogConnectDisconnect)){
-			std::string event_desc = StringFormat("Connect :: Logged into zoneid:%i instid:%i", this->GetZoneID(), this->GetInstanceID());
-			QServ->PlayerLogEvent(Player_Log_Connect_State, this->CharacterID(), event_desc);
-		}
 	}
 
 	if (zone) {
@@ -2585,12 +2580,6 @@ void Client::Handle_OP_AltCurrencyPurchase(const EQApplicationPacket *app)
 			return;
 		}
 
-		/* QS: PlayerLogAlternateCurrencyTransactions :: Merchant Purchase */
-		if (RuleB(QueryServ, PlayerLogAlternateCurrencyTransactions)){
-			std::string event_desc = StringFormat("Merchant Purchase :: Spent alt_currency_id:%i cost:%i for itemid:%i in zoneid:%i instid:%i", alt_cur_id, cost, item->ID, this->GetZoneID(), this->GetInstanceID());
-			QServ->PlayerLogEvent(Player_Log_Alternate_Currency_Transactions, this->CharacterID(), event_desc);
-		}
-
 		AddAlternateCurrencyValue(alt_cur_id, -((int32)cost));
 		int16 charges = 1;
 		if (item->MaxCharges != 0)
@@ -2628,12 +2617,6 @@ void Client::Handle_OP_AltCurrencyReclaim(const EQApplicationPacket *app)
 		uint32 removed = NukeItem(item_id, invWhereWorn | invWherePersonal | invWhereCursor);
 		if (removed > 0) {
 			AddAlternateCurrencyValue(reclaim->currency_id, removed);
-
-			/* QS: PlayerLogAlternateCurrencyTransactions :: Item to Currency */
-			if (RuleB(QueryServ, PlayerLogAlternateCurrencyTransactions)){
-				std::string event_desc = StringFormat("Reclaim :: Item to Currency :: alt_currency_id:%i amount:%i to currency tab in zoneid:%i instid:%i", reclaim->currency_id, removed, this->GetZoneID(), this->GetInstanceID());
-				QServ->PlayerLogEvent(Player_Log_Alternate_Currency_Transactions, this->CharacterID(), event_desc);
-			}
 		}
 	}
 	/* Cursor to Item storage */
@@ -2651,11 +2634,6 @@ void Client::Handle_OP_AltCurrencyReclaim(const EQApplicationPacket *app)
 		else {
 			SummonItem(item_id, reclaim->count, 0, 0, 0, 0, 0, 0, false, MainCursor);
 			AddAlternateCurrencyValue(reclaim->currency_id, -((int32)reclaim->count));
-		}
-		/* QS: PlayerLogAlternateCurrencyTransactions :: Cursor to Item Storage */
-		if (RuleB(QueryServ, PlayerLogAlternateCurrencyTransactions)){
-			std::string event_desc = StringFormat("Reclaim :: Cursor to Item :: alt_currency_id:%i amount:-%i in zoneid:%i instid:%i", reclaim->currency_id, reclaim->count, this->GetZoneID(), this->GetInstanceID());
-			QServ->PlayerLogEvent(Player_Log_Alternate_Currency_Transactions, this->CharacterID(), event_desc);
 		}
 	}
 }
@@ -2745,12 +2723,6 @@ void Client::Handle_OP_AltCurrencySell(const EQApplicationPacket *app)
 		}
 
 		sell->cost = cost;
-
-		/* QS: PlayerLogAlternateCurrencyTransactions :: Sold to Merchant*/
-		if (RuleB(QueryServ, PlayerLogAlternateCurrencyTransactions)){
-			std::string event_desc = StringFormat("Sold to Merchant :: itemid:%u npcid:%u alt_currency_id:%u cost:%u in zoneid:%u instid:%i", item->ID, npc_id, alt_cur_id, cost, this->GetZoneID(), this->GetInstanceID());
-			QServ->PlayerLogEvent(Player_Log_Alternate_Currency_Transactions, this->CharacterID(), event_desc);
-		}
 
 		FastQueuePacket(&outapp);
 		AddAlternateCurrencyValue(alt_cur_id, cost);
@@ -12000,22 +11972,23 @@ void Client::Handle_OP_ShopPlayerBuy(const EQApplicationPacket *app)
 		return;
 	}
 	Merchant_Sell_Struct* mp = (Merchant_Sell_Struct*)app->pBuffer;
-
+	
 	int merchantid;
 	bool tmpmer_used = false;
 	Mob* tmp = entity_list.GetMob(mp->npcid);
-
+	
 	if (!tmp || !tmp->IsNPC() || tmp->GetClass() != MERCHANT)
 		return;
-
-	if (mp->quantity < 1) return;
-
+	
+	if (mp->quantity < 1) 
+		return;
+	
 	//you have to be somewhat close to them to be properly using them
 	if (DistanceSquared(m_Position, tmp->GetPosition()) > USE_NPC_RANGE2)
 		return;
-
+	
 	merchantid = tmp->CastToNPC()->MerchantType;
-
+	
 	uint32 item_id = 0;
 	std::list<MerchantList> merlist = zone->merchanttable[merchantid];
 	std::list<MerchantList>::const_iterator itr;
@@ -12024,18 +11997,18 @@ void Client::Handle_OP_ShopPlayerBuy(const EQApplicationPacket *app)
 		if (GetLevel() < ml.level_required) {
 			continue;
 		}
-
+	
 		int32 fac = tmp->GetPrimaryFaction();
 		if (fac != 0 && GetModCharacterFactionLevel(fac) < ml.faction_required) {
 			continue;
 		}
-
+	
 		if (mp->itemslot == ml.slot){
 			item_id = ml.item;
 			break;
 		}
 	}
-	const ItemData* item = nullptr;
+	
 	uint32 prevcharges = 0;
 	if (item_id == 0) { //check to see if its on the temporary table
 		std::list<TempMerchantList> tmp_merlist = zone->tmpmerchanttable[tmp->GetNPCTypeID()];
@@ -12051,7 +12024,8 @@ void Client::Handle_OP_ShopPlayerBuy(const EQApplicationPacket *app)
 			}
 		}
 	}
-	item = database.GetItem(item_id);
+	
+	const ItemData* item = database.GetItem(item_id);
 	if (!item){
 		//error finding item, client didnt get the update packet for whatever reason, roleplay a tad
 		Message(15, "%s tells you 'Sorry, that item is for display purposes only.' as they take the item off the shelf.", tmp->GetCleanName());
@@ -12065,11 +12039,13 @@ void Client::Handle_OP_ShopPlayerBuy(const EQApplicationPacket *app)
 		safe_delete(delitempacket);
 		return;
 	}
+
 	if (m_inventory.CheckLoreConflict(item))
 	{
 		Message(15, "You can only have one of a lore item.");
 		return;
 	}
+
 	if (tmpmer_used && (mp->quantity > prevcharges || item->MaxCharges > 1))
 	{
 		if (prevcharges > item->MaxCharges && item->MaxCharges > 1)
@@ -12077,88 +12053,75 @@ void Client::Handle_OP_ShopPlayerBuy(const EQApplicationPacket *app)
 		else
 			mp->quantity = prevcharges;
 	}
-
+	
 	// Item's stackable, but the quantity they want to buy exceeds the max stackable quantity.
 	if (item->Stackable && mp->quantity > item->StackSize)
 		mp->quantity = item->StackSize;
-
+	
 	EQApplicationPacket* outapp = new EQApplicationPacket(OP_ShopPlayerBuy, sizeof(Merchant_Sell_Struct));
 	Merchant_Sell_Struct* mpo = (Merchant_Sell_Struct*)outapp->pBuffer;
 	mpo->quantity = mp->quantity;
 	mpo->playerid = mp->playerid;
 	mpo->npcid = mp->npcid;
 	mpo->itemslot = mp->itemslot;
-
+	
 	EQEmu::InventorySlot free_slot;
-	int16 charges = 0;
+	int charges = 0;
 	if (item->Stackable || item->MaxCharges > 1)
 		charges = mp->quantity;
 	else
 		charges = item->MaxCharges;
-
-	auto inst = database.CreateItem(item->ID, charges);
-
+	
 	int SinglePrice = 0;
 	if (RuleB(Merchant, UsePriceMod))
 		SinglePrice = (item->Price * (RuleR(Merchant, SellCostMod)) * item->SellRate * Client::CalcPriceMod(tmp, false));
 	else
 		SinglePrice = (item->Price * (RuleR(Merchant, SellCostMod)) * item->SellRate);
-
+	
 	if (item->MaxCharges > 1)
 		mpo->price = SinglePrice;
 	else
 		mpo->price = SinglePrice * mp->quantity;
-
+	
 	if (mpo->price < 0)
 	{
+		safe_delete(outapp);
+		return;
+	}
+	
+	if(m_inventory.Get(EQEmu::InventorySlot(EQEmu::InvTypePersonal, EQEmu::PersonalSlotCursor))) {
+		safe_delete(outapp);
+		return;
+	}
+	
+	auto inst = database.CreateItem(item->ID, charges);
+
+	if(!CanPutItemInInventory(inst, EQEmu::InvTypePersonal, EQEmu::PersonalSlotGeneral1, EQEmu::PersonalSlotGeneral10)) {
+		Message(13, "You do not have room for any more items.");
+
+		QueuePacket(outapp);
 		safe_delete(outapp);
 		return;
 	}
 
 	// this area needs some work..two inventory insertion check failure points
 	// below do not return player's money..is this the intended behavior?
-
 	if (!TakeMoneyFromPP(mpo->price))
 	{
-		char *hacker_str = nullptr;
-		MakeAnyLenString(&hacker_str, "Vendor Cheat: attempted to buy %i of %i: %s that cost %d cp but only has %d pp %d gp %d sp %d cp\n",
+		std::string hacker_str = StringFormat("Vendor Cheat: attempted to buy %i of %i: %s that cost %d cp but only has %d pp %d gp %d sp %d cp\n",
 			mpo->quantity, item->ID, item->Name,
 			mpo->price, m_pp.platinum, m_pp.gold, m_pp.silver, m_pp.copper);
-		database.SetMQDetectionFlag(AccountName(), GetName(), hacker_str, zone->GetShortName());
-		safe_delete_array(hacker_str);
+		database.SetMQDetectionFlag(AccountName(), GetName(), hacker_str.c_str(), zone->GetShortName());
 		safe_delete(outapp);
 		return;
 	}
 
-	bool stacked = TryStacking(inst);
-	if(!stacked) {
-		free_slot = m_inventory.FindFreeSlot(false, true, item->Size);
-	}
-
-	if(free_slot.IsCursor()) {
-		Message(13, "You do not have room for any more items.");
-		safe_delete(outapp);
-		return;
-	}
-
-	if(!stacked && !free_slot.IsValid())
-	{
-		Message(13, "You do not have room for any more items.");
-		safe_delete(outapp);
-		return;
-	}
-	
-	std::string packet;
-	if(!stacked && inst) {
-		PutItemInInventory(free_slot, inst);
-		SendItemPacket(free_slot, inst, ItemPacketTrade);
-	}
-	else if (!stacked){
-		Log.Out(Logs::General, Logs::Error, "OP_ShopPlayerBuy: item->ItemClass Unknown! Type: %i", item->ItemClass);
-	}
-	
 	QueuePacket(outapp);
-	if (inst && tmpmer_used){
+	safe_delete(outapp);
+		
+	PutItemInInventory(inst, EQEmu::InvTypePersonal, EQEmu::PersonalSlotGeneral1, EQEmu::PersonalSlotGeneral10, true);
+
+	if (inst && tmpmer_used) {
 		int32 new_charges = prevcharges - mp->quantity;
 		zone->SaveTempItem(merchantid, tmp->GetNPCTypeID(), item_id, new_charges);
 		if (new_charges <= 0){
@@ -12181,12 +12144,8 @@ void Client::Handle_OP_ShopPlayerBuy(const EQApplicationPacket *app)
 			SendItemPacket(EQEmu::InventorySlot(EQEmu::InvTypeMerchant, mp->itemslot), inst, ItemPacketMerchant);
 		}
 	}
-	safe_delete(outapp);
-
 	
-	if (RuleB(EventLog, RecordBuyFromMerchant))
-		LogMerchant(this, tmp, mpo->quantity, mpo->price, item, true);
-	
+	zone->LogEvent(EventLogItemBuy, this, StringFormat("Merc(%i) -> player %s(%i) %i charges for %ic", merchantid, item->Name, item->ID, mpo->quantity, mpo->price));
 	if ((RuleB(Character, EnableDiscoveredItems)))
 	{
 		if (!GetGM() && !IsDiscovered(item_id))
@@ -12288,38 +12247,38 @@ void Client::Handle_OP_ShopPlayerSell(const EQApplicationPacket *app)
 	}
 
 	// start QS code
-	if (RuleB(QueryServ, PlayerLogMerchantTransactions)) {
-		ServerPacket* qspack = new ServerPacket(ServerOP_QSPlayerLogMerchantTransactions, sizeof(QSMerchantLogTransaction_Struct)+sizeof(QSTransactionItems_Struct));
-		QSMerchantLogTransaction_Struct* qsaudit = (QSMerchantLogTransaction_Struct*)qspack->pBuffer;
-
-		qsaudit->zone_id = zone->GetZoneID();
-		qsaudit->merchant_id = vendor->CastToNPC()->MerchantType;
-		qsaudit->merchant_money.platinum = (price / 1000);
-		qsaudit->merchant_money.gold = (price / 100) % 10;
-		qsaudit->merchant_money.silver = (price / 10) % 10;
-		qsaudit->merchant_money.copper = price % 10;
-		qsaudit->merchant_count = 0;
-		qsaudit->char_id = character_id;
-		qsaudit->char_money.platinum = 0;
-		qsaudit->char_money.gold = 0;
-		qsaudit->char_money.silver = 0;
-		qsaudit->char_money.copper = 0;
-		qsaudit->char_count = 1;
-
-		qsaudit->items[0].char_slot = mp->itemslot;
-		qsaudit->items[0].item_id = itemid;
-		qsaudit->items[0].charges = charges;
-		qsaudit->items[0].aug_1 = m_inv[mp->itemslot]->GetAugmentItemID(1);
-		qsaudit->items[0].aug_2 = m_inv[mp->itemslot]->GetAugmentItemID(2);
-		qsaudit->items[0].aug_3 = m_inv[mp->itemslot]->GetAugmentItemID(3);
-		qsaudit->items[0].aug_4 = m_inv[mp->itemslot]->GetAugmentItemID(4);
-		qsaudit->items[0].aug_5 = m_inv[mp->itemslot]->GetAugmentItemID(5);
-
-		qspack->Deflate();
-		if (worldserver.Connected()) { worldserver.SendPacket(qspack); }
-		safe_delete(qspack);
-	}
-	// end QS code
+	//if (RuleB(QueryServ, PlayerLogMerchantTransactions)) {
+	//	ServerPacket* qspack = new ServerPacket(ServerOP_QSPlayerLogMerchantTransactions, sizeof(QSMerchantLogTransaction_Struct)+sizeof(QSTransactionItems_Struct));
+	//	QSMerchantLogTransaction_Struct* qsaudit = (QSMerchantLogTransaction_Struct*)qspack->pBuffer;
+	//
+	//	qsaudit->zone_id = zone->GetZoneID();
+	//	qsaudit->merchant_id = vendor->CastToNPC()->MerchantType;
+	//	qsaudit->merchant_money.platinum = (price / 1000);
+	//	qsaudit->merchant_money.gold = (price / 100) % 10;
+	//	qsaudit->merchant_money.silver = (price / 10) % 10;
+	//	qsaudit->merchant_money.copper = price % 10;
+	//	qsaudit->merchant_count = 0;
+	//	qsaudit->char_id = character_id;
+	//	qsaudit->char_money.platinum = 0;
+	//	qsaudit->char_money.gold = 0;
+	//	qsaudit->char_money.silver = 0;
+	//	qsaudit->char_money.copper = 0;
+	//	qsaudit->char_count = 1;
+	//
+	//	qsaudit->items[0].char_slot = mp->itemslot;
+	//	qsaudit->items[0].item_id = itemid;
+	//	qsaudit->items[0].charges = charges;
+	//	qsaudit->items[0].aug_1 = m_inv[mp->itemslot]->GetAugmentItemID(1);
+	//	qsaudit->items[0].aug_2 = m_inv[mp->itemslot]->GetAugmentItemID(2);
+	//	qsaudit->items[0].aug_3 = m_inv[mp->itemslot]->GetAugmentItemID(3);
+	//	qsaudit->items[0].aug_4 = m_inv[mp->itemslot]->GetAugmentItemID(4);
+	//	qsaudit->items[0].aug_5 = m_inv[mp->itemslot]->GetAugmentItemID(5);
+	//
+	//	qspack->Deflate();
+	//	if (worldserver.Connected()) { worldserver.SendPacket(qspack); }
+	//	safe_delete(qspack);
+	//}
+	//// end QS code
 
 	// Now remove the item from the player, this happens regardless of outcome
 	if (!inst->IsStackable())
@@ -13107,46 +13066,8 @@ void Client::Handle_OP_TradeAcceptClick(const EQApplicationPacket *app)
 				other->trade->LogTrade();
 				trade->LogTrade();
 
-				// start QS code
-				if (RuleB(QueryServ, PlayerLogTrades)) {
-					QSPlayerLogTrade_Struct event_entry;
-					std::list<void*> event_details;
-
-					memset(&event_entry, 0, sizeof(QSPlayerLogTrade_Struct));
-
-					// Perform actual trade
-					this->FinishTrade(other, true, &event_entry, &event_details);
-					other->FinishTrade(this, false, &event_entry, &event_details);
-
-					event_entry._detail_count = event_details.size();
-
-					ServerPacket* qs_pack = new ServerPacket(ServerOP_QSPlayerLogTrades, sizeof(QSPlayerLogTrade_Struct)+(sizeof(QSTradeItems_Struct)* event_entry._detail_count));
-					QSPlayerLogTrade_Struct* qs_buf = (QSPlayerLogTrade_Struct*)qs_pack->pBuffer;
-
-					memcpy(qs_buf, &event_entry, sizeof(QSPlayerLogTrade_Struct));
-
-					int offset = 0;
-
-					for (std::list<void*>::iterator iter = event_details.begin(); iter != event_details.end(); ++iter, ++offset) {
-						QSTradeItems_Struct* detail = reinterpret_cast<QSTradeItems_Struct*>(*iter);
-						qs_buf->items[offset] = *detail;
-						safe_delete(detail);
-					}
-
-					event_details.clear();
-
-					qs_pack->Deflate();
-
-					if (worldserver.Connected())
-						worldserver.SendPacket(qs_pack);
-
-					safe_delete(qs_pack);
-					// end QS code
-				}
-				else {
-					this->FinishTrade(other);
-					other->FinishTrade(this);
-				}
+				this->FinishTrade(other);
+				other->FinishTrade(this);
 
 				other->trade->Reset();
 				trade->Reset();
@@ -13163,42 +13084,7 @@ void Client::Handle_OP_TradeAcceptClick(const EQApplicationPacket *app)
 		QueuePacket(outapp);
 		safe_delete(outapp);
 		if (with->IsNPC()) {
-			// Audit trade to database for player trade stream
-			if (RuleB(QueryServ, PlayerLogHandins)) {
-				QSPlayerLogHandin_Struct event_entry;
-				std::list<void*> event_details;
-
-				memset(&event_entry, 0, sizeof(QSPlayerLogHandin_Struct));
-
-				FinishTrade(with->CastToNPC(), false, &event_entry, &event_details);
-
-				event_entry._detail_count = event_details.size();
-
-				ServerPacket* qs_pack = new ServerPacket(ServerOP_QSPlayerLogHandins, sizeof(QSPlayerLogHandin_Struct)+(sizeof(QSHandinItems_Struct)* event_entry._detail_count));
-				QSPlayerLogHandin_Struct* qs_buf = (QSPlayerLogHandin_Struct*)qs_pack->pBuffer;
-
-				memcpy(qs_buf, &event_entry, sizeof(QSPlayerLogHandin_Struct));
-
-				int offset = 0;
-
-				for (std::list<void*>::iterator iter = event_details.begin(); iter != event_details.end(); ++iter, ++offset) {
-					QSHandinItems_Struct* detail = reinterpret_cast<QSHandinItems_Struct*>(*iter);
-					qs_buf->items[offset] = *detail;
-					safe_delete(detail);
-				}
-
-				event_details.clear();
-
-				qs_pack->Deflate();
-
-				if (worldserver.Connected())
-					worldserver.SendPacket(qs_pack);
-
-				safe_delete(qs_pack);
-			}
-			else {
-				FinishTrade(with->CastToNPC());
-			}
+			FinishTrade(with->CastToNPC());
 		}
 #ifdef BOTS
 		// TODO: Log Bot trades

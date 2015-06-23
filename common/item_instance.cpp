@@ -86,21 +86,21 @@ EQEmu::ItemInstance::~ItemInstance() {
 }
 
 
-std::shared_ptr<EQEmu::ItemInstance> EQEmu::ItemInstance::Split(int charges) {
+EQEmu::ItemInstance::pointer EQEmu::ItemInstance::Split(int charges) {
 	if(!IsStackable()) {
 		//Can't split non stackable items!
-		return std::shared_ptr<EQEmu::ItemInstance>(nullptr);
+		return pointer(nullptr);
 	}
 
 	if(charges >= GetCharges()) {
-		return std::shared_ptr<EQEmu::ItemInstance>(nullptr);
+		return pointer(nullptr);
 	}
 
 	if(impl_->contents_.Size() > 0) {
-		return std::shared_ptr<EQEmu::ItemInstance>(nullptr);
+		return pointer(nullptr);
 	}
 
-	std::shared_ptr<EQEmu::ItemInstance> split = std::shared_ptr<EQEmu::ItemInstance>(new EQEmu::ItemInstance(impl_->base_item_, charges));
+	pointer split = pointer(new EQEmu::ItemInstance(impl_->base_item_, charges));
 	split->SetSerialNumber(EQEmu::GetNextItemInstanceSerial());
 	//Set Tracking here
 	split->impl_->attuned_ = impl_->attuned_;
@@ -130,20 +130,20 @@ const ItemData *EQEmu::ItemInstance::GetBaseItem() const {
 	return impl_->base_item_;
 }
 
-std::shared_ptr<EQEmu::ItemInstance> EQEmu::ItemInstance::Get(const int index) {
+EQEmu::ItemInstance::pointer EQEmu::ItemInstance::Get(const int index) {
 	if(EQEmu::ValueWithin(index, 0, 255)) {
 		return impl_->contents_.Get(index);
 	}
 	
-	return std::shared_ptr<EQEmu::ItemInstance>(nullptr);
+	return pointer(nullptr);
 }
 
-bool EQEmu::ItemInstance::Put(const int index, std::shared_ptr<ItemInstance> inst) {
+bool EQEmu::ItemInstance::Put(const int index, pointer &inst) {
 	if(!impl_->base_item_) {
 		return false;
 	}
 
-	auto *item = impl_->base_item_;
+	auto item = impl_->base_item_;
 	if(item->ItemClass == ItemClassContainer) { // Bag
 		if(!EQEmu::ValueWithin(index, 0, item->BagSlots)) {
 			return false;

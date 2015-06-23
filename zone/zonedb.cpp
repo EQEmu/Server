@@ -311,33 +311,6 @@ void ZoneDatabase::UpdateSpawn2Status(uint32 id, uint8 new_status)
 	QueryDatabase(query);
 }
 
-bool ZoneDatabase::logevents(const char* accountname,uint32 accountid,uint8 status,const char* charname, const char* target,const char* descriptiontype, const char* description,int event_nid){
-
-	uint32 len = strlen(description);
-	uint32 len2 = strlen(target);
-	char* descriptiontext = new char[2*len+1];
-	char* targetarr = new char[2*len2+1];
-	memset(descriptiontext, 0, 2*len+1);
-	memset(targetarr, 0, 2*len2+1);
-	DoEscapeString(descriptiontext, description, len);
-	DoEscapeString(targetarr, target, len2);
-
-	std::string query = StringFormat("INSERT INTO eventlog (accountname, accountid, status, "
-                                    "charname, target, descriptiontype, description, event_nid) "
-                                    "VALUES('%s', %i, %i, '%s', '%s', '%s', '%s', '%i')",
-                                    accountname, accountid, status, charname, targetarr,
-                                    descriptiontype, descriptiontext, event_nid);
-    safe_delete_array(descriptiontext);
-	safe_delete_array(targetarr);
-	auto results = QueryDatabase(query);
-	if (!results.Success())	{
-		return false;
-	}
-
-	return true;
-}
-
-
 void ZoneDatabase::UpdateBug(BugStruct* bug) {
 
 	uint32 len = strlen(bug->bug);

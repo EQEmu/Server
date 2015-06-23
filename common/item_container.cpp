@@ -4,7 +4,7 @@
 
 struct EQEmu::ItemContainer::impl
 {
-	std::map<int, std::shared_ptr<ItemInstance>> items_;
+	std::map<int, ItemInstance::pointer> items_;
 	ItemContainerSerializationStrategy *serialize_strat_;
 };
 
@@ -41,16 +41,16 @@ EQEmu::ItemContainer& EQEmu::ItemContainer::operator=(ItemContainer &&other) {
 	return *this;
 }
 
-std::shared_ptr<EQEmu::ItemInstance> EQEmu::ItemContainer::Get(const int slot_id) {
+EQEmu::ItemInstance::pointer EQEmu::ItemContainer::Get(const int slot_id) {
 	auto iter = impl_->items_.find(slot_id);
 	if(iter != impl_->items_.end()) {
 		return iter->second;
 	}
 
-	return std::shared_ptr<EQEmu::ItemInstance>(nullptr);
+	return EQEmu::ItemInstance::pointer(nullptr);
 }
 
-bool EQEmu::ItemContainer::Put(const int slot_id, std::shared_ptr<ItemInstance> inst) {
+bool EQEmu::ItemContainer::Put(const int slot_id, ItemInstance::pointer &inst) {
 	if(!inst) {
 		impl_->items_.erase(slot_id);
 		return true;

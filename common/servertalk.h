@@ -181,14 +181,7 @@
 #define ServerOP_CZMessagePlayer 0x4008
 #define ServerOP_ReloadWorld 0x4009
 #define ServerOP_ReloadLogs 0x4010
-/* Query Server OP Codes */
-#define ServerOP_QSPlayerLogTrades					0x5010
-#define ServerOP_QSPlayerLogHandins					0x5011
-#define ServerOP_QSPlayerLogNPCKills				0x5012
-#define ServerOP_QSPlayerLogDeletes					0x5013
-#define ServerOP_QSPlayerLogMoves					0x5014
-#define ServerOP_QSPlayerLogMerchantTransactions	0x5015
-#define ServerOP_QSSendQuery						0x5016
+#define ServerOP_QSSendQuery						0x5000
 #define ServerOP_CZSignalNPC						0x5017
 #define ServerOP_CZSetEntityVariableByNPCTypeID		0x5018
 
@@ -1111,132 +1104,6 @@ struct CZNPCSignal_Struct {
 struct CZClientSignalByName_Struct {
 	char Name[64];
 	uint32 data;
-};
-
-struct QSTradeItems_Struct {
-	uint32 from_id;
-	uint16 from_slot;
-	uint32 to_id;
-	uint16 to_slot;
-	uint32 item_id;
-	uint16 charges;
-	uint32 aug_1;
-	uint32 aug_2;
-	uint32 aug_3;
-	uint32 aug_4;
-	uint32 aug_5;
-};
-
-struct QSPlayerLogTrade_Struct {
-	uint32				char1_id;
-	MoneyUpdate_Struct	char1_money;
-	uint16				char1_count;
-	uint32				char2_id;
-	MoneyUpdate_Struct	char2_money;
-	uint16				char2_count;
-	uint16				_detail_count;
-	QSTradeItems_Struct items[0];
-};
-
-struct QSHandinItems_Struct {
-	char action_type[7]; // handin, return or reward
-	uint16 char_slot;
-	uint32 item_id;
-	uint16 charges;
-	uint32 aug_1;
-	uint32 aug_2;
-	uint32 aug_3;
-	uint32 aug_4;
-	uint32 aug_5;
-};
-
-struct QSPlayerLogHandin_Struct {
-	uint32				quest_id;
-	uint32				char_id;
-	MoneyUpdate_Struct	char_money;
-	uint16				char_count;
-	uint32				npc_id;
-	MoneyUpdate_Struct	npc_money;
-	uint16				npc_count;
-	uint16				_detail_count;
-	QSHandinItems_Struct items[0];
-};
-
-struct QSPlayerLogNPCKillSub_Struct{
-	uint32 NPCID;
-	uint32 ZoneID;
-	uint32 Type;
-};
-
-struct QSPlayerLogNPCKillsPlayers_Struct{
-	uint32 char_id;
-};
-
-struct QSPlayerLogNPCKill_Struct{
-	QSPlayerLogNPCKillSub_Struct s1;
-	QSPlayerLogNPCKillsPlayers_Struct Chars[0];
-};
-
-struct QSDeleteItems_Struct {
-	uint16 char_slot;
-	uint32 item_id;
-	uint16 charges;
-	uint32 aug_1;
-	uint32 aug_2;
-	uint32 aug_3;
-	uint32 aug_4;
-	uint32 aug_5;
-};
-
-struct QSPlayerLogDelete_Struct {
-	uint32					char_id;
-	uint16					stack_size; // '0' indicates full stack or non-stackable item move
-	uint16					char_count;
-	QSDeleteItems_Struct	items[0];
-};
-
-struct QSMoveItems_Struct {
-	uint16 from_slot;
-	uint16 to_slot;
-	uint32 item_id;
-	uint16 charges;
-	uint32 aug_1;
-	uint32 aug_2;
-	uint32 aug_3;
-	uint32 aug_4;
-	uint32 aug_5;
-};
-
-struct QSPlayerLogMove_Struct {
-	uint32			char_id;
-	uint16			from_slot;
-	uint16			to_slot;
-	uint16			stack_size; // '0' indicates full stack or non-stackable item move
-	uint16			char_count;
-	bool			postaction;
-	QSMoveItems_Struct items[0];
-};
-
-struct QSTransactionItems_Struct {
-	uint16 char_slot;
-	uint32 item_id;
-	uint16 charges;
-	uint32 aug_1;
-	uint32 aug_2;
-	uint32 aug_3;
-	uint32 aug_4;
-	uint32 aug_5;
-};
-
-struct QSMerchantLogTransaction_Struct {
-	uint32					zone_id;
-	uint32					merchant_id;
-	MoneyUpdate_Struct		merchant_money;
-	uint16					merchant_count;
-	uint32					char_id;
-	MoneyUpdate_Struct		char_money;
-	uint16					char_count;
-	QSTransactionItems_Struct items[0];
 };
 
 struct QSGeneralQuery_Struct {

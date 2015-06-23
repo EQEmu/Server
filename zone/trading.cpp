@@ -189,107 +189,107 @@ void Trade::SendItemData(const ItemInst* inst, int16 dest_slot_id)
 // Audit trade: The part logged is what travels owner -> with
 void Trade::LogTrade()
 {
-	Mob* with = With();
-	if (!owner->IsClient() || !with)
-		return; // Should never happen
-
-	Client* trader = owner->CastToClient();
-	bool logtrade = false;
-	int admin_level = 0;
-	uint8 item_count = 0;
-
-	if (zone->tradevar != 0) {
-		for (uint16 i = EmuConstants::TRADE_BEGIN; i <= EmuConstants::TRADE_END; i++) {
-			if (trader->GetInv().GetItem(i))
-				item_count++;
-		}
-
-		if (((this->cp + this->sp + this->gp + this->pp)>0) || (item_count>0))
-			admin_level = trader->Admin();
-		else
-			admin_level = 999;
-
-		if (zone->tradevar == 7) {
-			logtrade = true;
-		}
-		else if ((admin_level>=10) && (admin_level<20)) {
-			if ((zone->tradevar<8) && (zone->tradevar>5))
-				logtrade = true;
-		}
-		else if (admin_level<=20) {
-			if ((zone->tradevar<8) && (zone->tradevar>4))
-				logtrade = true;
-		}
-		else if (admin_level<=80) {
-			if ((zone->tradevar<8) && (zone->tradevar>3))
-				logtrade = true;
-		}
-		else if (admin_level<=100){
-			if ((zone->tradevar<9) && (zone->tradevar>2))
-				logtrade = true;
-		}
-		else if (admin_level<=150){
-			if (((zone->tradevar<8) && (zone->tradevar>1)) || (zone->tradevar==9))
-				logtrade = true;
-		}
-		else if (admin_level<=255){
-			if ((zone->tradevar<8) && (zone->tradevar>0))
-				logtrade = true;
-		}
-	}
-
-	if (logtrade == true) {
-		char logtext[1000] = {0};
-		uint32 cash = 0;
-		bool comma = false;
-
-		// Log items offered by owner
-		cash = this->cp + this->sp + this->gp + this->pp;
-		if ((cash>0) || (item_count>0)) {
-			sprintf(logtext, "%s gave %s ", trader->GetName(), with->GetName());
-
-			if (item_count > 0) {
-				strcat(logtext, "items {");
-
-				for (uint16 i = EmuConstants::TRADE_BEGIN; i <= EmuConstants::TRADE_END; i++) {
-					const ItemInst* inst = trader->GetInv().GetItem(i);
-
-					if (!comma)
-						comma = true;
-					else {
-						if (inst)
-							strcat(logtext, ",");
-					}
-
-					if (inst) {
-						char item_num[15] = {0};
-						sprintf(item_num, "%i", inst->GetItem()->ID);
-						strcat(logtext, item_num);
-
-						if (inst->IsType(ItemClassContainer)) {
-							for (uint8 j = SUB_BEGIN; j < EmuConstants::ITEM_CONTAINER_SIZE; j++) {
-								inst = trader->GetInv().GetItem(i, j);
-								if (inst) {
-									strcat(logtext, ",");
-									sprintf(item_num, "%i", inst->GetItem()->ID);
-									strcat(logtext, item_num);
-								}
-							}
-						}
-					}
-				}
-			}
-
-			if (cash > 0) {
-				char money[100] = {0};
-				sprintf(money, " %ipp, %igp, %isp, %icp", trader->trade->pp, trader->trade->gp, trader->trade->sp, trader->trade->cp);
-				strcat(logtext, money);
-			}
-
-			database.logevents(trader->AccountName(), trader->AccountID(),
-				trader->Admin(), trader->GetName(), with->GetName(), "Trade", logtext, 6);
-		}
-	}
+	//Mob* with = With();
+	//if (!owner->IsClient() || !with)
+	//	return; // Should never happen
+	//
+	//Client* trader = owner->CastToClient();
+	//bool logtrade = false;
+	//int admin_level = 0;
+	//uint8 item_count = 0;
+	//
+	//if (zone->tradevar != 0) {
+	//	for (uint16 i = EmuConstants::TRADE_BEGIN; i <= EmuConstants::TRADE_END; i++) {
+	//		if (trader->GetInv().GetItem(i))
+	//			item_count++;
+	//	}
+	//
+	//	if (((this->cp + this->sp + this->gp + this->pp)>0) || (item_count>0))
+	//		admin_level = trader->Admin();
+	//	else
+	//		admin_level = 999;
+	//
+	//	if (zone->tradevar == 7) {
+	//		logtrade = true;
+	//	}
+	//	else if ((admin_level>=10) && (admin_level<20)) {
+	//		if ((zone->tradevar<8) && (zone->tradevar>5))
+	//			logtrade = true;
+	//	}
+	//	else if (admin_level<=20) {
+	//		if ((zone->tradevar<8) && (zone->tradevar>4))
+	//			logtrade = true;
+	//	}
+	//	else if (admin_level<=80) {
+	//		if ((zone->tradevar<8) && (zone->tradevar>3))
+	//			logtrade = true;
+	//	}
+	//	else if (admin_level<=100){
+	//		if ((zone->tradevar<9) && (zone->tradevar>2))
+	//			logtrade = true;
+	//	}
+	//	else if (admin_level<=150){
+	//		if (((zone->tradevar<8) && (zone->tradevar>1)) || (zone->tradevar==9))
+	//			logtrade = true;
+	//	}
+	//	else if (admin_level<=255){
+	//		if ((zone->tradevar<8) && (zone->tradevar>0))
+	//			logtrade = true;
+	//	}
+	//}
+	//
+	//if (logtrade == true) {
+	//	char logtext[1000] = {0};
+	//	uint32 cash = 0;
+	//	bool comma = false;
+	//
+	//	// Log items offered by owner
+	//	cash = this->cp + this->sp + this->gp + this->pp;
+	//	if ((cash>0) || (item_count>0)) {
+	//		sprintf(logtext, "%s gave %s ", trader->GetName(), with->GetName());
+	//
+	//		if (item_count > 0) {
+	//			strcat(logtext, "items {");
+	//
+	//			for (uint16 i = EmuConstants::TRADE_BEGIN; i <= EmuConstants::TRADE_END; i++) {
+	//				const ItemInst* inst = trader->GetInv().GetItem(i);
+	//
+	//				if (!comma)
+	//					comma = true;
+	//				else {
+	//					if (inst)
+	//						strcat(logtext, ",");
+	//				}
+	//
+	//				if (inst) {
+	//					char item_num[15] = {0};
+	//					sprintf(item_num, "%i", inst->GetItem()->ID);
+	//					strcat(logtext, item_num);
+	//
+	//					if (inst->IsType(ItemClassContainer)) {
+	//						for (uint8 j = SUB_BEGIN; j < EmuConstants::ITEM_CONTAINER_SIZE; j++) {
+	//							inst = trader->GetInv().GetItem(i, j);
+	//							if (inst) {
+	//								strcat(logtext, ",");
+	//								sprintf(item_num, "%i", inst->GetItem()->ID);
+	//								strcat(logtext, item_num);
+	//							}
+	//						}
+	//					}
+	//				}
+	//			}
+	//		}
+	//
+	//		if (cash > 0) {
+	//			char money[100] = {0};
+	//			sprintf(money, " %ipp, %igp, %isp, %icp", trader->trade->pp, trader->trade->gp, trader->trade->sp, trader->trade->cp);
+	//			strcat(logtext, money);
+	//		}
+	//
+	//		database.logevents(trader->AccountName(), trader->AccountID(),
+	//			trader->Admin(), trader->GetName(), with->GetName(), "Trade", logtext, 6);
+	//	}
+	//}
 }
 
 
@@ -454,37 +454,11 @@ void Client::ResetTrade() {
 void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, std::list<void*>* event_details) {
 	if(tradingWith && tradingWith->IsClient()) {
 		Client* other = tradingWith->CastToClient();
-		QSPlayerLogTrade_Struct* qs_audit = nullptr;
-		bool qs_log = false;
 
 		if(other) {
 			Log.Out(Logs::Detail, Logs::Trading, "Finishing trade with client %s", other->GetName());
 
 			this->AddMoneyToPP(other->trade->cp, other->trade->sp, other->trade->gp, other->trade->pp, true);
-
-			// step 0: pre-processing
-			// QS code
-			if (RuleB(QueryServ, PlayerLogTrades) && event_entry && event_details) {
-				qs_audit = (QSPlayerLogTrade_Struct*)event_entry;
-				qs_log = true;
-
-				if (finalizer) {
-					qs_audit->char2_id = this->character_id;
-
-					qs_audit->char2_money.platinum = this->trade->pp;
-					qs_audit->char2_money.gold = this->trade->gp;
-					qs_audit->char2_money.silver = this->trade->sp;
-					qs_audit->char2_money.copper = this->trade->cp;
-				}
-				else {
-					qs_audit->char1_id = this->character_id;
-
-					qs_audit->char1_money.platinum = this->trade->pp;
-					qs_audit->char1_money.gold = this->trade->gp;
-					qs_audit->char1_money.silver = this->trade->sp;
-					qs_audit->char1_money.copper = this->trade->cp;
-				}
-			}
 
 			// step 1: process bags
 			for (int16 trade_slot = EmuConstants::TRADE_BEGIN; trade_slot <= EmuConstants::TRADE_END; ++trade_slot) {
@@ -500,56 +474,6 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 						if (free_slot != INVALID_INDEX) {
 							if (other->PutItemInInventory(free_slot, *inst, true)) {
 								Log.Out(Logs::Detail, Logs::Trading, "Container %s (%d) successfully transferred, deleting from trade slot.", inst->GetItem()->Name, inst->GetItem()->ID);
-								if (qs_log) {
-									QSTradeItems_Struct* detail = new QSTradeItems_Struct;
-
-									detail->from_id = this->character_id;
-									detail->from_slot = trade_slot;
-									detail->to_id = other->CharacterID();
-									detail->to_slot = free_slot;
-									detail->item_id = inst->GetID();
-									detail->charges = 1;
-									detail->aug_1 = inst->GetAugmentItemID(1);
-									detail->aug_2 = inst->GetAugmentItemID(2);
-									detail->aug_3 = inst->GetAugmentItemID(3);
-									detail->aug_4 = inst->GetAugmentItemID(4);
-									detail->aug_5 = inst->GetAugmentItemID(5);
-
-									event_details->push_back(detail);
-
-									if (finalizer)
-										qs_audit->char2_count += detail->charges;
-									else
-										qs_audit->char1_count += detail->charges;
-
-									//for (uint8 sub_slot = SUB_BEGIN; ((sub_slot < inst->GetItem()->BagSlots) && (sub_slot < EmuConstants::ITEM_CONTAINER_SIZE)); ++sub_slot) {
-									for (uint8 sub_slot = SUB_BEGIN; (sub_slot < EmuConstants::ITEM_CONTAINER_SIZE); ++sub_slot) { // this is to catch ALL items
-										const ItemInst* bag_inst = inst->GetItem(sub_slot);
-
-										if (bag_inst) {
-											detail = new QSTradeItems_Struct;
-
-											detail->from_id = this->character_id;
-											detail->from_slot = InventoryOld::CalcSlotId(trade_slot, sub_slot);
-											detail->to_id = other->CharacterID();
-											detail->to_slot = InventoryOld::CalcSlotId(free_slot, sub_slot);
-											detail->item_id = bag_inst->GetID();
-											detail->charges = (!bag_inst->IsStackable() ? 1 : bag_inst->GetCharges());
-											detail->aug_1 = bag_inst->GetAugmentItemID(1);
-											detail->aug_2 = bag_inst->GetAugmentItemID(2);
-											detail->aug_3 = bag_inst->GetAugmentItemID(3);
-											detail->aug_4 = bag_inst->GetAugmentItemID(4);
-											detail->aug_5 = bag_inst->GetAugmentItemID(5);
-
-											event_details->push_back(detail);
-
-											if (finalizer)
-												qs_audit->char2_count += detail->charges;
-											else
-												qs_audit->char1_count += detail->charges;
-										}
-									}
-								}
 							}
 							else {
 								Log.Out(Logs::Detail, Logs::Trading, "Transfer of container %s (%d) to %s failed, returning to giver.", inst->GetItem()->Name, inst->GetItem()->ID, other->GetName());
@@ -611,28 +535,6 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 						if (other->PutItemInInventory(partial_slot, *partial_inst, true)) {
 							Log.Out(Logs::Detail, Logs::Trading, "Partial stack %s (%d) successfully transferred, deleting %i charges from trade slot.",
 								inst->GetItem()->Name, inst->GetItem()->ID, (old_charges - inst->GetCharges()));
-							if (qs_log) {
-								QSTradeItems_Struct* detail = new QSTradeItems_Struct;
-
-								detail->from_id = this->character_id;
-								detail->from_slot = trade_slot;
-								detail->to_id = other->CharacterID();
-								detail->to_slot = partial_slot;
-								detail->item_id = inst->GetID();
-								detail->charges = (old_charges - inst->GetCharges());
-								detail->aug_1 = 0;
-								detail->aug_2 = 0;
-								detail->aug_3 = 0;
-								detail->aug_4 = 0;
-								detail->aug_5 = 0;
-
-								event_details->push_back(detail);
-
-								if (finalizer)
-									qs_audit->char2_count += detail->charges;
-								else
-									qs_audit->char1_count += detail->charges;
-							}
 						}
 						else {
 							Log.Out(Logs::Detail, Logs::Trading, "Transfer of partial stack %s (%d) to %s failed, returning %i charges to trade slot.",
@@ -679,24 +581,6 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 							inst->SetCharges(0);
 						}
 
-						if (qs_log) {
-							QSTradeItems_Struct* detail = new QSTradeItems_Struct;
-
-							detail->from_id = this->character_id;
-							detail->from_slot = trade_slot;
-							detail->to_id = this->character_id;
-							detail->to_slot = bias_slot;
-							detail->item_id = inst->GetID();
-							detail->charges = (old_charges - inst->GetCharges());
-							detail->aug_1 = 0;
-							detail->aug_2 = 0;
-							detail->aug_3 = 0;
-							detail->aug_4 = 0;
-							detail->aug_5 = 0;
-
-							event_details->push_back(detail);
-						}
-
 						if (inst->GetCharges() == 0) {
 							DeleteItemInInventory(trade_slot);
 							break;
@@ -719,57 +603,6 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 						if (free_slot != INVALID_INDEX) {
 							if (other->PutItemInInventory(free_slot, *inst, true)) {
 								Log.Out(Logs::Detail, Logs::Trading, "Item %s (%d) successfully transferred, deleting from trade slot.", inst->GetItem()->Name, inst->GetItem()->ID);
-								if (qs_log) {
-									QSTradeItems_Struct* detail = new QSTradeItems_Struct;
-
-									detail->from_id = this->character_id;
-									detail->from_slot = trade_slot;
-									detail->to_id = other->CharacterID();
-									detail->to_slot = free_slot;
-									detail->item_id = inst->GetID();
-									detail->charges = (!inst->IsStackable() ? 1 : inst->GetCharges());
-									detail->aug_1 = inst->GetAugmentItemID(1);
-									detail->aug_2 = inst->GetAugmentItemID(2);
-									detail->aug_3 = inst->GetAugmentItemID(3);
-									detail->aug_4 = inst->GetAugmentItemID(4);
-									detail->aug_5 = inst->GetAugmentItemID(5);
-
-									event_details->push_back(detail);
-
-									if (finalizer)
-										qs_audit->char2_count += detail->charges;
-									else
-										qs_audit->char1_count += detail->charges;
-
-									// 'step 3' should never really see containers..but, just in case...
-									//for (uint8 sub_slot = SUB_BEGIN; ((sub_slot < inst->GetItem()->BagSlots) && (sub_slot < EmuConstants::ITEM_CONTAINER_SIZE)); ++sub_slot) {
-									for (uint8 sub_slot = SUB_BEGIN; (sub_slot < EmuConstants::ITEM_CONTAINER_SIZE); ++sub_slot) { // this is to catch ALL items
-										const ItemInst* bag_inst = inst->GetItem(sub_slot);
-
-										if (bag_inst) {
-											detail = new QSTradeItems_Struct;
-
-											detail->from_id = this->character_id;
-											detail->from_slot = trade_slot;
-											detail->to_id = other->CharacterID();
-											detail->to_slot = free_slot;
-											detail->item_id = bag_inst->GetID();
-											detail->charges = (!bag_inst->IsStackable() ? 1 : bag_inst->GetCharges());
-											detail->aug_1 = bag_inst->GetAugmentItemID(1);
-											detail->aug_2 = bag_inst->GetAugmentItemID(2);
-											detail->aug_3 = bag_inst->GetAugmentItemID(3);
-											detail->aug_4 = bag_inst->GetAugmentItemID(4);
-											detail->aug_5 = bag_inst->GetAugmentItemID(5);
-
-											event_details->push_back(detail);
-
-											if (finalizer)
-												qs_audit->char2_count += detail->charges;
-											else
-												qs_audit->char1_count += detail->charges;
-										}
-									}
-								}
 							}
 							else {
 								Log.Out(Logs::Detail, Logs::Trading, "Transfer of Item %s (%d) to %s failed, returning to giver.", inst->GetItem()->Name, inst->GetItem()->ID, other->GetName());
@@ -794,79 +627,6 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 		}
 	}
 	else if(tradingWith && tradingWith->IsNPC()) {
-		QSPlayerLogHandin_Struct* qs_audit = nullptr;
-		bool qs_log = false;
-
-		// QS code
-		if(RuleB(QueryServ, PlayerLogTrades) && event_entry && event_details) {
-			// Currently provides only basic functionality. Calling method will also
-			// need to be modified before item returns and rewards can be logged.
-			qs_audit = (QSPlayerLogHandin_Struct*)event_entry;
-			qs_log = true;
-
-			qs_audit->quest_id = 0;
-			qs_audit->char_id = character_id;
-			qs_audit->char_money.platinum = trade->pp;
-			qs_audit->char_money.gold = trade->gp;
-			qs_audit->char_money.silver = trade->sp;
-			qs_audit->char_money.copper = trade->cp;
-			qs_audit->char_count = 0;
-			qs_audit->npc_id = tradingWith->GetNPCTypeID();
-			qs_audit->npc_money.platinum = 0;
-			qs_audit->npc_money.gold = 0;
-			qs_audit->npc_money.silver = 0;
-			qs_audit->npc_money.copper = 0;
-			qs_audit->npc_count = 0;
-		}
-
-		if(qs_log) { // This can be incorporated below when revisions are made
-			for (int16 trade_slot = EmuConstants::TRADE_BEGIN; trade_slot <= EmuConstants::TRADE_NPC_END; ++trade_slot) {
-				const ItemInst* trade_inst = m_inv[trade_slot];
-
-				if(trade_inst) {
-					QSHandinItems_Struct* detail = new QSHandinItems_Struct;
-
-					strcpy(detail->action_type, "HANDIN");
-
-					detail->char_slot = trade_slot;
-					detail->item_id = trade_inst->GetID();
-					detail->charges = (!trade_inst->IsStackable() ? 1 : trade_inst->GetCharges());
-					detail->aug_1 = trade_inst->GetAugmentItemID(1);
-					detail->aug_2 = trade_inst->GetAugmentItemID(2);
-					detail->aug_3 = trade_inst->GetAugmentItemID(3);
-					detail->aug_4 = trade_inst->GetAugmentItemID(4);
-					detail->aug_5 = trade_inst->GetAugmentItemID(5);
-
-					event_details->push_back(detail);
-					qs_audit->char_count += detail->charges;
-
-					if(trade_inst->IsType(ItemClassContainer)) {
-						for (uint8 sub_slot = SUB_BEGIN; sub_slot < trade_inst->GetItem()->BagSlots; ++sub_slot) {
-							const ItemInst* trade_baginst = trade_inst->GetItem(sub_slot);
-
-							if(trade_baginst) {
-								detail = new QSHandinItems_Struct;
-
-								strcpy(detail->action_type, "HANDIN");
-
-								detail->char_slot = InventoryOld::CalcSlotId(trade_slot, sub_slot);
-								detail->item_id = trade_baginst->GetID();
-								detail->charges = (!trade_inst->IsStackable() ? 1 : trade_inst->GetCharges());
-								detail->aug_1 = trade_baginst->GetAugmentItemID(1);
-								detail->aug_2 = trade_baginst->GetAugmentItemID(2);
-								detail->aug_3 = trade_baginst->GetAugmentItemID(3);
-								detail->aug_4 = trade_baginst->GetAugmentItemID(4);
-								detail->aug_5 = trade_baginst->GetAugmentItemID(5);
-
-								event_details->push_back(detail);
-								qs_audit->char_count += detail->charges;
-							}
-						}
-					}
-				}
-			}
-		}
-
 		bool quest_npc = false;
 		if(parse->HasQuestSub(tradingWith->GetNPCTypeID(), EVENT_TRADE)) {
 			// This is a quest NPC

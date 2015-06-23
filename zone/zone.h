@@ -69,6 +69,14 @@ struct item_tick_struct {
     std::string qglobal;
 };
 
+enum EventLogTypes
+{
+	EventLogItemSummon = 0,
+	EventLogItemBuy = 1,
+	EventLogQuest = 500,
+	EventLogMax
+};
+
 class Client;
 class Map;
 class Mob;
@@ -227,11 +235,6 @@ public:
 	uint8	weather_intensity;
 	uint8	zone_weather;
 
-	uint8 loglevelvar;
-	uint8 merchantvar;
-	uint8 tradevar;
-	uint8 lootvar;
-
 	bool	HasGraveyard();
 	void	SetGraveyard(uint32 zoneid, const glm::vec4& graveyardPosition);
 
@@ -281,6 +284,8 @@ public:
 			entity_list.MessageStatus(0, 80, Log.GetGMSayColorFromCategory(log_category), "%s", message.c_str());
 		}
 	}
+
+	void LogEvent(EventLogTypes type, Client *c, const std::string &desc);
 
 	//MODDING HOOKS
 	void mod_init();

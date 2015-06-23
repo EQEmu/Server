@@ -51,6 +51,7 @@
 #include "worldserver.h"
 #include "zone.h"
 #include "zone_config.h"
+#include "queryserv.h"
 
 #include <time.h>
 #include <ctime>
@@ -62,8 +63,6 @@
 #define strcasecmp	_stricmp
 #endif
 
-
-
 extern bool staticzone;
 extern NetConnection net;
 extern PetitionList petition_list;
@@ -72,6 +71,7 @@ extern uint16 adverrornum;
 extern uint32 numclients;
 extern WorldServer worldserver;
 extern Zone* zone;
+extern QueryServ* QServ;
 
 Mutex MZoneShutdown;
 
@@ -104,34 +104,6 @@ bool Zone::Bootup(uint32 iZoneID, uint32 iInstanceID, bool iStaticZone) {
 	zone->zonemap = Map::LoadMapFile(zone->map_name);
 	zone->watermap = WaterMap::LoadWaterMapfile(zone->map_name);
 	zone->pathing = PathManager::LoadPathFile(zone->map_name);
-
-	char tmp[10];
-	if (database.GetVariable("loglevel",tmp, 9)) {
-		int log_levels[4];
-		if (atoi(tmp)>9){ //Server is using the new code
-			for(int i=0;i<4;i++){
-				if (((int)tmp[i]>=48) && ((int)tmp[i]<=57))
-					log_levels[i]=(int)tmp[i]-48; //get the value to convert it to an int from the ascii value
-				else
-					log_levels[i]=0; //set to zero on a bogue char
-			}
-			zone->loglevelvar = log_levels[0];
-			Log.Out(Logs::General, Logs::Status, "General logging level: %i", zone->loglevelvar);
-			zone->merchantvar = log_levels[1];
-			Log.Out(Logs::General, Logs::Status, "Merchant logging level: %i", zone->merchantvar);
-			zone->tradevar = log_levels[2];
-			Log.Out(Logs::General, Logs::Status, "Trade logging level: %i", zone->tradevar);
-			zone->lootvar = log_levels[3];
-			Log.Out(Logs::General, Logs::Status, "Loot logging level: %i", zone->lootvar);
-		}
-		else {
-			zone->loglevelvar = uint8(atoi(tmp)); //continue supporting only command logging (for now)
-			zone->merchantvar = 0;
-			zone->tradevar = 0;
-			zone->lootvar = 0;
-		}
-	}	
-
 	ZoneLoaded = true;
 
 	worldserver.SetZone(iZoneID, iInstanceID);
@@ -761,11 +733,6 @@ Zone::Zone(uint32 in_zoneid, uint32 in_instanceid, const char* in_short_name)
 	default_ruleset = 0;
 
 	is_zone_time_localized = false;
-
-	loglevelvar = 0;
-	merchantvar = 0;
-	tradevar = 0;
-	lootvar = 0;
 
 	if(RuleB(TaskSystem, EnableTaskSystem)) {
 		taskmanager->LoadProximities(zoneid);
@@ -2299,3 +2266,70 @@ void Zone::UpdateHotzone()
     is_hotzone = atoi(row[0]) == 0 ? false: true;
 }
 
+void Zone::LogEvent(EventLogTypes type, Client *c, const std::string &desc) {
+	if(!c)
+		return;
+
+	int zone_id = GetZoneID();
+	int zone_instance = GetInstanceID();
+	int zone_version = GetInstanceVersion();
+
+	int account_id = c->AccountID();
+	std::string name = c->GetName();
+	int id = c->CharacterID();
+
+	int target_account_id;
+	std::string target_name;
+	int target_id;
+
+	Mob *target = c->GetTarget();
+	if(target && target->IsClient()) {
+		Client *target_c = target->CastToClient();
+
+		target_account_id = target_c->AccountID();
+		target_name = target_c->GetName();
+		target_id = target_c->CharacterID();
+	}
+	else if(target && target->IsNPC()) {
+		NPC *target_n = target->CastToNPC();
+
+		target_account_id = 0;
+		target_name = target_n->GetName();
+		target_id = target_n->GetNPCTypeID();
+	}
+	else if(target) {
+		target_account_id = 0;
+		target_name = target->GetName();
+		target_id = 0;
+	}
+	else {
+		target_account_id = 0;
+		target_name = "";
+		target_id = 0;
+	}
+
+
+	std::string query = StringFormat("INSERT INTO event_log "
+									 "(type, zone_id, zone_instance, zone_version, player_account_id, "
+									 "player_id, player_name, target_account_id, target_id, target_name, `desc`)"
+									 " VALUES "
+									 "(%i, %i, %i, %i, %i, %i, '%s', %i, %i, '%s', '%s')",
+									 (int)type,
+									 zone_id,
+									 zone_instance,
+									 zone_version,
+									 account_id,
+									 id,
+									 EscapeString(name).c_str(),
+									 target_account_id,
+									 target_id,
+									 EscapeString(target_name).c_str(),
+									 EscapeString(desc).c_str()
+									 );
+
+	auto results = database.QueryDatabase(query);
+	if(!results.Success()) {
+		Log.Out(Logs::General, Logs::Error, "Log Error: %s", results.ErrorMessage().c_str());
+	}
+	//QServ->SendQuery(query);
+}

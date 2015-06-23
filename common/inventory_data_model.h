@@ -32,7 +32,7 @@ namespace EQEmu
 		virtual void Begin() = 0;
 		virtual bool Commit() = 0;
 		virtual void Rollback() = 0;
-		virtual void Insert(const InventorySlot &slot, std::shared_ptr<ItemInstance> inst) = 0;
+		virtual void Insert(const InventorySlot &slot, ItemInstance::pointer &inst) = 0;
 		virtual void Delete(const InventorySlot &slot) = 0;
 	};
 } // EQEmu

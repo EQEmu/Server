@@ -14,7 +14,7 @@ struct DataEvent
 {
 	DataEventTypes evt;
 	EQEmu::InventorySlot slot;
-	std::shared_ptr<EQEmu::ItemInstance> inst;
+	EQEmu::ItemInstance::pointer inst;
 };
 
 struct EQEmu::InventoryDatabaseDataModel::impl {
@@ -135,7 +135,7 @@ void EQEmu::InventoryDatabaseDataModel::Rollback() {
 	impl_->events_.clear();
 }
 
-void EQEmu::InventoryDatabaseDataModel::Insert(const InventorySlot &slot, std::shared_ptr<ItemInstance> inst) {
+void EQEmu::InventoryDatabaseDataModel::Insert(const InventorySlot &slot, ItemInstance::pointer &inst) {
 	DataEvent evt;
 	evt.evt = DB_Insert;
 	evt.inst = inst;

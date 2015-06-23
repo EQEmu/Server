@@ -155,7 +155,7 @@ void EQEmu::Inventory::SetDataModel(InventoryDataModel *dm) {
 	impl_->data_model_ = std::unique_ptr<InventoryDataModel>(dm);
 }
 
-std::shared_ptr<EQEmu::ItemInstance> EQEmu::Inventory::Get(const InventorySlot &slot) {
+EQEmu::ItemInstance::pointer EQEmu::Inventory::Get(const InventorySlot &slot) {
 	auto iter = impl_->containers_.find(slot.Type());
 	if(iter != impl_->containers_.end()) {
 		auto item = iter->second.Get(slot.Slot());
@@ -175,10 +175,10 @@ std::shared_ptr<EQEmu::ItemInstance> EQEmu::Inventory::Get(const InventorySlot &
 		}
 	}
 
-	return std::shared_ptr<ItemInstance>(nullptr);
+	return ItemInstance::pointer(nullptr);
 }
 
-bool EQEmu::Inventory::Put(const InventorySlot &slot, std::shared_ptr<ItemInstance> inst) {
+bool EQEmu::Inventory::Put(const InventorySlot &slot, ItemInstance::pointer &inst) {
 	if(impl_->containers_.count(slot.Type()) == 0) {
 		if(slot.Type() == 0) {
 			impl_->containers_.insert(std::pair<int, ItemContainer>(slot.Type(), ItemContainer(new ItemContainerPersonalSerialization())));
@@ -321,6 +321,7 @@ bool EQEmu::Inventory::Swap(const InventorySlot &src, const InventorySlot &dest,
 			}
 
 			i_dest->SetCharges(i_dest->GetCharges() + charges);
+			impl_->data_model_->Delete(dest);
 			impl_->data_model_->Insert(dest, i_dest);
 			impl_->data_model_->Commit();
 			return true;
@@ -335,6 +336,8 @@ bool EQEmu::Inventory::Swap(const InventorySlot &src, const InventorySlot &dest,
 				}
 
 				Put(dest, split);
+				impl_->data_model_->Delete(src);
+				impl_->data_model_->Delete(dest);
 				impl_->data_model_->Insert(src, i_src);
 				impl_->data_model_->Insert(dest, split);
 				impl_->data_model_->Commit();
@@ -366,44 +369,7 @@ bool EQEmu::Inventory::Swap(const InventorySlot &src, const InventorySlot &dest,
 	return true;
 }
 
-bool EQEmu::Inventory::TryStacking(std::shared_ptr<EQEmu::ItemInstance> inst, const InventorySlot &slot) {
-	auto target_inst = Get(slot);
-	
-	if(!inst || !target_inst ||
-	   !inst->IsStackable() || !target_inst->IsStackable()) 
-	{
-		return false;
-	}
-	
-	if(inst->GetBaseItem()->ID != target_inst->GetBaseItem()->ID) {
-		return false;
-	}
-	
-	int stack_avail = target_inst->GetBaseItem()->StackSize - target_inst->GetCharges();
-	
-	if(stack_avail <= 0) {
-		return false;
-	}
-	
-	impl_->data_model_->Begin();
-	if(inst->GetCharges() <= stack_avail) {
-		inst->SetCharges(0);
-		target_inst->SetCharges(target_inst->GetCharges() + inst->GetCharges());
-		impl_->data_model_->Delete(slot);
-		impl_->data_model_->Insert(slot, target_inst);
-	} else {
-		inst->SetCharges(inst->GetCharges() - stack_avail);
-		target_inst->SetCharges(target_inst->GetCharges() + stack_avail);
-		impl_->data_model_->Delete(slot);
-		impl_->data_model_->Insert(slot, target_inst);
-	}
-
-	impl_->data_model_->Commit();
-
-	return true;
-}
-
-bool EQEmu::Inventory::Summon(const InventorySlot &slot, std::shared_ptr<ItemInstance> inst) {
+bool EQEmu::Inventory::Summon(const InventorySlot &slot, ItemInstance::pointer &inst) {
 	if(!inst)
 		return false;
 
@@ -432,7 +398,7 @@ bool EQEmu::Inventory::Summon(const InventorySlot &slot, std::shared_ptr<ItemIns
 	return v;
 }
 
-bool EQEmu::Inventory::PushToCursorBuffer(std::shared_ptr<ItemInstance> inst) {
+bool EQEmu::Inventory::PushToCursorBuffer(ItemInstance::pointer &inst) {
 	if(impl_->containers_.count(InvTypeCursorBuffer) == 0) {
 		impl_->containers_.insert(std::pair<int, ItemContainer>(InvTypeCursorBuffer, ItemContainer()));
 	}
@@ -506,18 +472,23 @@ bool EQEmu::Inventory::PopFromCursorBuffer() {
 	return false;
 }
 
-EQEmu::InventorySlot EQEmu::Inventory::FindFreeSlot(bool for_bag, bool try_cursor, int min_size, bool is_arrow) {
-	//check basic inventory
-	for(int i = EQEmu::PersonalSlotGeneral1; i < EQEmu::PersonalSlotGeneral10; ++i) {
-		EQEmu::InventorySlot slot(EQEmu::InvTypePersonal, i);
+EQEmu::InventorySlot EQEmu::Inventory::FindFreeSlot(ItemInstance::pointer &inst, int container_id, int slot_id_start, int slot_id_end) {
+	bool for_bag = inst->GetItem()->ItemClass == ItemClassContainer;
+	int min_size = inst->GetItem()->Size;
+	bool is_arrow = inst->GetItem()->ItemType == ItemTypeArrow;
+
+	//check upper level inventory
+	for(int i = slot_id_start; i <= slot_id_end; ++i) {
+		EQEmu::InventorySlot slot(container_id, i);
 		if(!Get(slot)) {
 			return slot;
 		}
 	}
 	
+	//if not for a bag then check inside bags
 	if (!for_bag) {
-		for(int i = EQEmu::PersonalSlotGeneral1; i < EQEmu::PersonalSlotGeneral10; ++i) {
-			EQEmu::InventorySlot slot(EQEmu::InvTypePersonal, i);
+		for(int i = slot_id_start; i <= slot_id_end; ++i) {
+			EQEmu::InventorySlot slot(container_id, i);
 			auto inst = Get(slot);
 
 			if(inst && inst->GetBaseItem()->ItemClass == ItemClassContainer && inst->GetBaseItem()->BagSize >= min_size)
@@ -529,7 +500,7 @@ EQEmu::InventorySlot EQEmu::Inventory::FindFreeSlot(bool for_bag, bool try_curso
 
 				int slots = inst->GetBaseItem()->BagSlots;
 				for(int b_i = 0; b_i < slots; ++b_i) {
-					EQEmu::InventorySlot bag_slot(EQEmu::InvTypePersonal, i, b_i);
+					EQEmu::InventorySlot bag_slot(container_id, i, b_i);
 
 					if(!Get(bag_slot)) {
 						return bag_slot;
@@ -539,11 +510,77 @@ EQEmu::InventorySlot EQEmu::Inventory::FindFreeSlot(bool for_bag, bool try_curso
 		}
 	}
 
-	if(try_cursor) {
-		EQEmu::InventorySlot slot(EQEmu::InvTypePersonal, EQEmu::PersonalSlotCursor);
+	return EQEmu::InventorySlot();
+}
+
+int EQEmu::Inventory::FindFreeStackSlots(ItemInstance::pointer &inst, int container_id, int slot_id_start, int slot_id_end) {
+	if(!inst->IsStackable()) {
+		return 0;
 	}
 
-	return EQEmu::InventorySlot();
+	bool is_arrow = inst->GetItem()->ItemType == ItemTypeArrow;
+	int item_id = inst->GetItem()->ID;
+
+	int charges_to_check = inst->GetCharges();
+	int charges = 0;
+
+	auto iter = impl_->containers_.find(container_id);
+	if(iter == impl_->containers_.end()) {
+		return 0;
+	}
+
+	auto &container = iter->second;
+	for(int i = slot_id_start; i <= slot_id_end; ++i) {
+		auto current = container.Get(i);
+		if(!current) {
+			continue;
+		}
+
+		if(current->GetItem()->ID == item_id) {
+			int free_charges = current->GetItem()->StackSize - current->GetCharges();
+			if(free_charges)
+				charges += free_charges;
+
+			if(charges >= charges_to_check) {
+				return charges_to_check;
+			}
+		} else if(current->GetItem()->ItemClass == ItemClassContainer) {
+			int sz = current->GetItem()->BagSlots;
+			for(int i = 0; i < sz; ++i) {
+				auto sub_item = current->Get(i);
+				if(!sub_item) {
+					continue;
+				}
+
+				if(sub_item->GetItem()->ID == item_id) {
+					int free_charges = sub_item->GetItem()->StackSize - sub_item->GetCharges();
+					if(free_charges)
+						charges += free_charges;
+
+					if(charges >= charges_to_check) {
+						return charges_to_check;
+					}
+				}
+			}
+		}
+	}
+
+	if(charges >= charges_to_check) {
+		return charges_to_check;
+	}
+
+	return charges;
+}
+
+void EQEmu::Inventory::UpdateSlot(const InventorySlot &slot, ItemInstance::pointer &inst) {
+	impl_->data_model_->Begin();
+
+	impl_->data_model_->Delete(slot);
+	if(inst) {
+		impl_->data_model_->Insert(slot, inst);
+	}
+
+	impl_->data_model_->Commit();
 }
 
 int EQEmu::Inventory::CalcMaterialFromSlot(const InventorySlot &slot) {
@@ -600,7 +637,7 @@ EQEmu::InventorySlot EQEmu::Inventory::CalcSlotFromMaterial(int material) {
 	}
 }
 
-bool EQEmu::Inventory::CanEquip(std::shared_ptr<EQEmu::ItemInstance> inst, const EQEmu::InventorySlot &slot) {
+bool EQEmu::Inventory::CanEquip(EQEmu::ItemInstance::pointer &inst, const EQEmu::InventorySlot &slot) {
 	if(!inst) {
 		return false;
 	}
@@ -640,7 +677,8 @@ bool EQEmu::Inventory::CanEquip(std::shared_ptr<EQEmu::ItemInstance> inst, const
 	auto iter = inst->GetContainer()->Begin();
 	auto end = inst->GetContainer()->End();
 	while(iter != end) {
-		if(!CanEquip(iter->second, InventorySlot(slot.Type(), slot.Slot(), slot.BagIndex(), iter->first))) {
+		EQEmu::ItemInstance::pointer itm = iter->second;
+		if(!CanEquip(itm, InventorySlot(slot.Type(), slot.Slot(), slot.BagIndex(), iter->first))) {
 			return false;
 		}
 		++iter;
@@ -738,7 +776,7 @@ bool EQEmu::Inventory::_swap(const InventorySlot &src, const InventorySlot &dest
 }
 
 bool EQEmu::Inventory::_destroy(const InventorySlot &slot) {
-	bool v = Put(slot, std::shared_ptr<EQEmu::ItemInstance>(nullptr));
+	bool v = Put(slot, EQEmu::ItemInstance::pointer(nullptr));
 	impl_->data_model_->Delete(slot);
 	return v;
 }

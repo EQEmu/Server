@@ -133,19 +133,20 @@ namespace EQEmu
 		void SetDeity(int deity);
 		void SetDataModel(InventoryDataModel *dm);
 
-		std::shared_ptr<ItemInstance> Get(const InventorySlot &slot);
-		bool Put(const InventorySlot &slot, std::shared_ptr<ItemInstance> inst);
+		ItemInstance::pointer Get(const InventorySlot &slot);
+		bool Put(const InventorySlot &slot, ItemInstance::pointer &inst);
 		bool Swap(const InventorySlot &src, const InventorySlot &dest, int charges);
-		bool TryStacking(std::shared_ptr<EQEmu::ItemInstance> inst, const InventorySlot &slot);
-		bool Summon(const InventorySlot &slot, std::shared_ptr<ItemInstance> inst);
-		bool PushToCursorBuffer(std::shared_ptr<ItemInstance> inst);
+		bool Summon(const InventorySlot &slot, ItemInstance::pointer &inst);
+		bool PushToCursorBuffer(ItemInstance::pointer &inst);
 		bool PopFromCursorBuffer();
-		InventorySlot FindFreeSlot(bool for_bag, bool try_cursor, int min_size = 0, bool is_arrow = false);
+		InventorySlot FindFreeSlot(ItemInstance::pointer &inst, int container_id, int slot_id_start, int slot_id_end);
+		int FindFreeStackSlots(ItemInstance::pointer &inst, int container_id, int slot_id_start, int slot_id_end);
+		void UpdateSlot(const InventorySlot &slot, ItemInstance::pointer &inst);
 
 		//utility
 		static int CalcMaterialFromSlot(const InventorySlot &slot);
 		static InventorySlot CalcSlotFromMaterial(int material);
-		bool CanEquip(std::shared_ptr<EQEmu::ItemInstance> inst, const EQEmu::InventorySlot &slot);
+		bool CanEquip(EQEmu::ItemInstance::pointer &inst, const EQEmu::InventorySlot &slot);
 		bool CheckLoreConflict(const ItemData *item);
 		bool Serialize(MemoryBuffer &buf);
 

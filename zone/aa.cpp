@@ -1035,24 +1035,12 @@ void Client::BuyAA(AA_Action* action)
 		*/
 
 		/* Initial purchase of an AA ability */
-		if (cur_level < 1){
+		if (cur_level < 1) {
 			Message(15, "You have gained the ability \"%s\" at a cost of %d ability %s.", aa2->name, real_cost, (real_cost>1) ? "points" : "point");
-
-			/* QS: Player_Log_AA_Purchases */
-			if (RuleB(QueryServ, PlayerLogAAPurchases)){
-				std::string event_desc = StringFormat("Initial AA Purchase :: aa_name:%s aa_id:%i at cost:%i in zoneid:%i instid:%i", aa2->name, aa2->id, real_cost, this->GetZoneID(), this->GetInstanceID());
-				QServ->PlayerLogEvent(Player_Log_AA_Purchases, this->CharacterID(), event_desc);
-			}
 		}
 		/* Ranked purchase of an AA ability */
 		else{
 			Message(15, "You have improved %s %d at a cost of %d ability %s.", aa2->name, cur_level + 1, real_cost, (real_cost > 1) ? "points" : "point");
-
-			/* QS: Player_Log_AA_Purchases */
-			if (RuleB(QueryServ, PlayerLogAAPurchases)){
-				std::string event_desc = StringFormat("Ranked AA Purchase :: aa_name:%s aa_id:%i at cost:%i in zoneid:%i instid:%i", aa2->name, aa2->id, real_cost, this->GetZoneID(), this->GetInstanceID());
-				QServ->PlayerLogEvent(Player_Log_AA_Purchases, this->CharacterID(), event_desc);
-			}
 		}
 
 		SendAAStats();

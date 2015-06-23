@@ -1255,7 +1255,7 @@ ItemInst* SharedDatabase::CreateBaseItemOld(const ItemData* item, int16 charges)
 	return inst;
 }
 
-std::shared_ptr<EQEmu::ItemInstance> SharedDatabase::CreateItem(uint32 item_id, int16 charges, bool unique) {
+EQEmu::ItemInstance::pointer SharedDatabase::CreateItem(uint32 item_id, int16 charges, bool unique) {
 	const ItemData* item = GetItem(item_id);
 	if(item) {
 		if(charges == 0 && item->MaxCharges == -1) {
@@ -1266,7 +1266,7 @@ std::shared_ptr<EQEmu::ItemInstance> SharedDatabase::CreateItem(uint32 item_id, 
 			charges = 1;
 		}
 
-		std::shared_ptr<EQEmu::ItemInstance> inst = std::shared_ptr<EQEmu::ItemInstance>(new EQEmu::ItemInstance(item, charges));
+		EQEmu::ItemInstance::pointer inst = EQEmu::ItemInstance::pointer(new EQEmu::ItemInstance(item, charges));
 		if(unique) {
 			inst->SetSerialNumber(EQEmu::GetNextItemInstanceSerial());
 			//Set Tracking here
@@ -1274,7 +1274,7 @@ std::shared_ptr<EQEmu::ItemInstance> SharedDatabase::CreateItem(uint32 item_id, 
 		return inst;
 	}
 
-	return std::shared_ptr<EQEmu::ItemInstance>(nullptr);
+	return EQEmu::ItemInstance::pointer(nullptr);
 }
 
 int32 SharedDatabase::DeleteStalePlayerCorpses() {

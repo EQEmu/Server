@@ -3520,10 +3520,11 @@ XS(XS__qs_player_event)
 	if (items != 2){
 		Perl_croak(aTHX_ "Usage: qs_player_event(char_id, event_desc)");
 	}
-	else{
+	else {
 		int	char_id = (int)SvIV(ST(0));
 		std::string event_desc = (std::string)SvPV_nolen(ST(1));
-		QServ->PlayerLogEvent(Player_Log_Quest, char_id, event_desc);
+		Client *c = entity_list.GetClientByCharID(char_id);
+		zone->LogEvent(EventLogQuest, c, event_desc);
 	}
 	XSRETURN_EMPTY;
 }

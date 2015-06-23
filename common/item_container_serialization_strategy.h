@@ -30,7 +30,7 @@ namespace EQEmu
 	public:
 		ItemContainerSerializationStrategy() { }
 		virtual ~ItemContainerSerializationStrategy() { }
-		virtual bool Serialize(MemoryBuffer &buf, const int container_number, const std::map<int, std::shared_ptr<ItemInstance>>& items) = 0;
+		virtual bool Serialize(MemoryBuffer &buf, const int container_number, const std::map<int, ItemInstance::pointer>& items) = 0;
 	};
 } // EQEmu
 

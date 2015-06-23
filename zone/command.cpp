@@ -547,8 +547,6 @@ int command_realdispatch(Client *c, const char *message)
 {
 	Seperator sep(message, ' ', 10, 100, true); // "three word argument" should be considered 1 arg
 
-	command_logcommand(c, message);
-
 	std::string cstr(sep.arg[0]+1);
 
 	if(commandlist.count(cstr) != 1) {
@@ -559,12 +557,6 @@ int command_realdispatch(Client *c, const char *message)
 	if(c->Admin() < cur->access){
 		c->Message(13,"Your access level is not high enough to use this command.");
 		return(-1);
-	}
-
-	/* QS: Player_Log_Issued_Commands */
-	if (RuleB(QueryServ, PlayerLogIssuedCommandes)){
-		std::string event_desc = StringFormat("Issued command :: '%s' in zoneid:%i instid:%i",  message, c->GetZoneID(), c->GetInstanceID());
-		QServ->PlayerLogEvent(Player_Log_Issued_Commands, c->CharacterID(), event_desc);
 	}
 
 	if(cur->access >= COMMANDS_LOGGING_MIN_STATUS) {
@@ -581,71 +573,6 @@ int command_realdispatch(Client *c, const char *message)
 	return 0;
 
 }
-
-void command_logcommand(Client *c, const char *message)
-{
-	int admin=c->Admin();
-
-	bool continueevents=false;
-	switch (zone->loglevelvar){ //catch failsafe
-		case 9: { // log only LeadGM
-			if ((admin>= 150) && (admin <200))
-				continueevents=true;
-			break;
-		}
-		case 8: { // log only GM
-			if ((admin>= 100) && (admin <150))
-				continueevents=true;
-			break;
-		}
-		case 1: {
-			if ((admin>= 200))
-				continueevents=true;
-			break;
-		}
-		case 2: {
-			if ((admin>= 150))
-				continueevents=true;
-			break;
-		}
-		case 3: {
-			if ((admin>= 100))
-				continueevents=true;
-			break;
-		}
-		case 4: {
-			if ((admin>= 80))
-				continueevents=true;
-			break;
-		}
-		case 5: {
-			if ((admin>= 20))
-				continueevents=true;
-			break;
-		}
-		case 6: {
-			if ((admin>= 10))
-				continueevents=true;
-			break;
-		}
-		case 7: {
-				continueevents=true;
-				break;
-		}
-	}
-
-	if (continueevents)
-		database.logevents(
-			c->AccountName(),
-			c->AccountID(),
-			admin,c->GetName(),
-			c->GetTarget()?c->GetTarget()->GetName():"None", 
-			"Command", 
-			message,
-			1
-		);
-}
-
 
 /*
  * commands go below here

@@ -430,13 +430,6 @@ void Client::SetEXP(uint32 set_exp, uint32 set_aaxp, bool isrezzexp) {
 		//Message(15, "You have gained %d skill points!!", m_pp.aapoints - last_unspentAA);
 		char val1[20]={0};
 		Message_StringID(MT_Experience, GAIN_ABILITY_POINT,ConvertArray(m_pp.aapoints, val1),m_pp.aapoints == 1 ? "" : "(s)");	//You have gained an ability point! You now have %1 ability point%2.
-		
-		/* QS: PlayerLogAARate */
-		if (RuleB(QueryServ, PlayerLogAARate)){
-			int add_points = (m_pp.aapoints - last_unspentAA);
-			std::string query = StringFormat("INSERT INTO `qs_player_aa_rate_hourly` (char_id, aa_count, hour_time) VALUES (%i, %i, UNIX_TIMESTAMP() - MOD(UNIX_TIMESTAMP(), 3600)) ON DUPLICATE KEY UPDATE `aa_count` = `aa_count` + %i", this->CharacterID(), add_points, add_points);
-			QServ->SendQuery(query.c_str());
-		}
 
 		//Message(15, "You now have %d skill points available to spend.", m_pp.aapoints);
 	}
@@ -571,18 +564,6 @@ void Client::SetLevel(uint8 set_level, bool command)
 	}
 	if(set_level > m_pp.level) {
 		parse->EventPlayer(EVENT_LEVEL_UP, this, "", 0);
-		/* QS: PlayerLogLevels */
-		if (RuleB(QueryServ, PlayerLogLevels)){
-			std::string event_desc = StringFormat("Leveled UP :: to Level:%i from Level:%i in zoneid:%i instid:%i", set_level, m_pp.level, this->GetZoneID(), this->GetInstanceID());
-			QServ->PlayerLogEvent(Player_Log_Levels, this->CharacterID(), event_desc); 
-		}
-	}
-	else if (set_level < m_pp.level){
-		/* QS: PlayerLogLevels */
-		if (RuleB(QueryServ, PlayerLogLevels)){
-			std::string event_desc = StringFormat("Leveled DOWN :: to Level:%i from Level:%i in zoneid:%i instid:%i", set_level, m_pp.level, this->GetZoneID(), this->GetInstanceID());
-			QServ->PlayerLogEvent(Player_Log_Levels, this->CharacterID(), event_desc);
-		}
 	}
 
 	m_pp.level = set_level;

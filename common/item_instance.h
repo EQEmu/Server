@@ -30,6 +30,7 @@ namespace EQEmu
 	class ItemInstance
 	{
 	public:
+		typedef std::shared_ptr<ItemInstance> pointer;
 		ItemInstance(const ItemData* idata);
 		ItemInstance(const ItemData* idata, const int16 charges);
 		~ItemInstance();
@@ -38,11 +39,11 @@ namespace EQEmu
 		const ItemData *GetBaseItem();
 		const ItemData *GetBaseItem() const;
 
-		std::shared_ptr<ItemInstance> Split(int charges);
+		pointer Split(int charges);
 
 		//Container
-		std::shared_ptr<ItemInstance> Get(const int index);
-		bool Put(const int index, std::shared_ptr<ItemInstance> inst);
+		pointer Get(const int index);
+		bool Put(const int index, pointer &inst);
 
 		//Persistent State
 		int16 GetCharges();
@@ -107,6 +108,8 @@ namespace EQEmu
 
 		bool IsNoDrop();
 		bool IsNoDrop() const;
+
+		void CheckStackRemaining(pointer &insert, int &charges);
 
 		//Internal state
 		//Used for low level operations such as encode/decode

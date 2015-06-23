@@ -1821,11 +1821,6 @@ void ClientTaskState::IncrementDoneCount(Client *c, TaskInformation* Task, int T
 				buf[23] = '\0';
 				parse->EventPlayer(EVENT_TASK_STAGE_COMPLETE, c, buf, 0);
 			}
-			/* QS: PlayerLogTaskUpdates :: Update */
-			if (RuleB(QueryServ, PlayerLogTaskUpdates)){
-				std::string event_desc = StringFormat("Task Stage Complete :: taskid:%i activityid:%i donecount:%i in zoneid:%i instid:%i", ActiveTasks[TaskIndex].TaskID, ActiveTasks[TaskIndex].Activity[ActivityID].ActivityID, ActiveTasks[TaskIndex].Activity[ActivityID].DoneCount, c->GetZoneID(), c->GetInstanceID());
-				QServ->PlayerLogEvent(Player_Log_Task_Updates, c->CharacterID(), event_desc);
-			}
 		}
 
 		// If this task is now complete, the Completed tasks will have been
@@ -1836,12 +1831,6 @@ void ClientTaskState::IncrementDoneCount(Client *c, TaskInformation* Task, int T
 			snprintf(buf, 23, "%d %d %d", ActiveTasks[TaskIndex].Activity[ActivityID].DoneCount, ActiveTasks[TaskIndex].Activity[ActivityID].ActivityID, ActiveTasks[TaskIndex].TaskID);
 			buf[23] = '\0';
 			parse->EventPlayer(EVENT_TASK_COMPLETE, c, buf, 0);
-
-			/* QS: PlayerLogTaskUpdates :: Complete */
-			if (RuleB(QueryServ, PlayerLogTaskUpdates)){
-				std::string event_desc = StringFormat("Task Complete :: taskid:%i activityid:%i donecount:%i in zoneid:%i instid:%i", ActiveTasks[TaskIndex].TaskID, ActiveTasks[TaskIndex].Activity[ActivityID].ActivityID, ActiveTasks[TaskIndex].Activity[ActivityID].DoneCount, c->GetZoneID(), c->GetInstanceID());
-				QServ->PlayerLogEvent(Player_Log_Task_Updates, c->CharacterID(), event_desc);
-			}
 
 			taskmanager->SendCompletedTasksToClient(c, this);
 			c->SendTaskActivityComplete(ActiveTasks[TaskIndex].TaskID, 0, TaskIndex, false);

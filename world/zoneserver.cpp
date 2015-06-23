@@ -1268,15 +1268,8 @@ bool ZoneServer::Process() {
 				UCSLink.SendPacket(pack);
 				break;
 			}
-			case ServerOP_QSSendQuery:
 			case ServerOP_QueryServGeneric:
 			case ServerOP_Speech:
-			case ServerOP_QSPlayerLogTrades:
-			case ServerOP_QSPlayerLogHandins:
-			case ServerOP_QSPlayerLogNPCKills:
-			case ServerOP_QSPlayerLogDeletes:
-			case ServerOP_QSPlayerLogMoves:
-			case ServerOP_QSPlayerLogMerchantTransactions:
 			{
 				QSLink.SendPacket(pack);
 				break;

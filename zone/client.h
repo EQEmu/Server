@@ -245,8 +245,6 @@ public:
 	virtual bool IsClient() const { return true; }
 	void CompleteConnect();
 	bool TryStacking(ItemInst* item, uint8 type = ItemPacketTrade, bool try_worn = true, bool try_cursor = true);
-	bool TryStacking(std::shared_ptr<EQEmu::ItemInstance> item, uint8 type = ItemPacketTrade, bool try_worn = true, bool try_cursor = true);
-	bool TryStacking(std::shared_ptr<EQEmu::ItemInstance> item, const EQEmu::InventorySlot &slot, uint8 type = ItemPacketTrade);
 	void SendTraderPacket(Client* trader, uint32 Unknown72 = 51);
 	void SendBuyerPacket(Client* Buyer);
 	GetItems_Struct* GetTraderItems();
@@ -818,7 +816,6 @@ public:
 	void DeleteItemInInventory(int16 slot_id, int8 quantity = 0, bool client_update = false, bool update_db = true);
 	bool SwapItem(MoveItemOld_Struct* move_in);
 	void SwapItemResync(MoveItemOld_Struct* move_slots);
-	void QSSwapItemAuditor(MoveItemOld_Struct* move_in, bool postaction_call = false);
 	void PutLootInInventory(int16 slot_id, const ItemInst &inst, ServerLootItem_Struct** bag_item_data = 0);
 	bool AutoPutLootInInventory(ItemInst& inst, bool try_worn = false, bool try_cursor = true, ServerLootItem_Struct** bag_item_data = 0);
 	bool SummonItem(uint32 item_id, int16 charges = -1,
@@ -844,7 +841,10 @@ public:
 					uint32 ornament_icon = 0, 
 					uint32 ornament_idfile = 0, 
 					uint32 ornament_hero_model = 0);
-	bool PutItemInInventory(const EQEmu::InventorySlot &slot, std::shared_ptr<EQEmu::ItemInstance> inst, bool client_update = false);
+	bool PutItemInInventory(const EQEmu::InventorySlot &slot, EQEmu::ItemInstance::pointer &inst, bool client_update = false);
+	bool CanPutItemInInventory(EQEmu::ItemInstance::pointer &inst, int container_id, int slot_id_start, int slot_id_end);
+	void StackItem(EQEmu::ItemInstance::pointer &inst, int container_id, int slot_id_start, int slot_id_end, bool client_update);
+	void PutItemInInventory(EQEmu::ItemInstance::pointer &inst, int container_id, int slot_id_start, int slot_id_end, bool client_update);
 
 	//
 	// class Client::TextLink
@@ -902,7 +902,7 @@ public:
 	bool IsBankSlot(uint32 slot);
 
 	//inv2
-	void SendItemPacket(const EQEmu::InventorySlot &slot, std::shared_ptr<EQEmu::ItemInstance> inst, ItemPacketType packet_type);
+	void SendItemPacket(const EQEmu::InventorySlot &slot, EQEmu::ItemInstance::pointer &inst, ItemPacketType packet_type);
 
 	inline bool IsTrader() const { return(Trader); }
 	inline bool IsBuyer() const { return(Buyer); }

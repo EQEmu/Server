@@ -28,7 +28,7 @@ namespace EQEmu
 	public:
 		ItemContainerDefaultSerialization() { }
 		virtual ~ItemContainerDefaultSerialization() { }
-		virtual bool Serialize(MemoryBuffer &buf, const int container_number, const std::map<int, std::shared_ptr<ItemInstance>>& items);
+		virtual bool Serialize(MemoryBuffer &buf, const int container_number, const std::map<int, ItemInstance::pointer>& items);
 	};
 } // EQEmu
 

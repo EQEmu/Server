@@ -782,12 +782,6 @@ void Client::OnDisconnect(bool hard_disconnect) {
 			MyRaid->MemberZoned(this);
 
 		parse->EventPlayer(EVENT_DISCONNECT, this, "", 0);
-
-		/* QS: PlayerLogConnectDisconnect */
-		if (RuleB(QueryServ, PlayerLogConnectDisconnect)){
-			std::string event_desc = StringFormat("Disconnect :: in zoneid:%i instid:%i", this->GetZoneID(), this->GetInstanceID());
-			QServ->PlayerLogEvent(Player_Log_Connect_State, this->CharacterID(), event_desc);
-		}
 	}
 
 	Mob *Other = trade->With();

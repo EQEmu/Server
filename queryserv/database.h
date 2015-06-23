@@ -44,12 +44,6 @@ public:
 	~Database();
 
 	void AddSpeech(const char* from, const char* to, const char* message, uint16 minstatus, uint32 guilddbid, uint8 type);
-	void LogPlayerTrade(QSPlayerLogTrade_Struct* QS, uint32 DetailCount);
-	void LogPlayerHandin(QSPlayerLogHandin_Struct* QS, uint32 DetailCount);
-	void LogPlayerNPCKill(QSPlayerLogNPCKill_Struct* QS, uint32 Members);
-	void LogPlayerDelete(QSPlayerLogDelete_Struct* QS, uint32 Items);
-	void LogPlayerMove(QSPlayerLogMove_Struct* QS, uint32 Items);
-	void LogMerchantTransaction(QSMerchantLogTransaction_Struct* QS, uint32 Items);
 	void GeneralQueryReceive(ServerPacket *pack);
 
 	void LoadLogSettings(EQEmuLogSys::LogSettings* log_settings);

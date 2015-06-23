@@ -147,10 +147,10 @@ private:
 
 	void InitInventory()
 	{
-		std::shared_ptr<EQEmu::ItemInstance> m_bag(new EQEmu::ItemInstance(&container));
-		std::shared_ptr<EQEmu::ItemInstance> m_armor(new EQEmu::ItemInstance(&armor));
-		std::shared_ptr<EQEmu::ItemInstance> m_augment(new EQEmu::ItemInstance(&augment));
-		std::shared_ptr<EQEmu::ItemInstance> m_stackable(new EQEmu::ItemInstance(&stackable, 100));
+		EQEmu::ItemInstance::pointer m_bag(new EQEmu::ItemInstance(&container));
+		EQEmu::ItemInstance::pointer m_armor(new EQEmu::ItemInstance(&armor));
+		EQEmu::ItemInstance::pointer m_augment(new EQEmu::ItemInstance(&augment));
+		EQEmu::ItemInstance::pointer m_stackable(new EQEmu::ItemInstance(&stackable, 100));
 		inv.Put(EQEmu::InventorySlot(EQEmu::InvTypePersonal, EQEmu::PersonalSlotGeneral1), m_bag);
 		inv.Put(EQEmu::InventorySlot(EQEmu::InvTypePersonal, EQEmu::PersonalSlotGeneral1, 0), m_armor);
 		inv.Put(EQEmu::InventorySlot(EQEmu::InvTypePersonal, EQEmu::PersonalSlotGeneral1, 1), m_augment);
@@ -294,7 +294,7 @@ private:
 	}
 
 	void InventorySplitStackToCursor2() {
-		std::shared_ptr<EQEmu::ItemInstance> m_stackable_i(new EQEmu::ItemInstance(&stackable, 10));
+		EQEmu::ItemInstance::pointer m_stackable_i(new EQEmu::ItemInstance(&stackable, 10));
 		inv.Put(EQEmu::InventorySlot(EQEmu::InvTypePersonal, EQEmu::PersonalSlotGeneral2, 8), m_stackable_i);
 
 		auto swap_result = inv.Swap(EQEmu::InventorySlot(EQEmu::InvTypePersonal, EQEmu::PersonalSlotGeneral2, 8),

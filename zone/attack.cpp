@@ -1706,14 +1706,6 @@ bool Client::Death(Mob* killerMob, int32 damage, uint16 spell, SkillUseTypes att
 		GoToDeath();
 	}
 
-	/* QS: PlayerLogDeaths */
-	if (RuleB(QueryServ, PlayerLogDeaths)){
-		const char * killer_name = "";
-		if (killerMob && killerMob->GetCleanName()){ killer_name = killerMob->GetCleanName(); }
-		std::string event_desc = StringFormat("Died in zoneid:%i instid:%i by '%s', spellid:%i, damage:%i", this->GetZoneID(), this->GetInstanceID(), killer_name, spell, damage);
-		QServ->PlayerLogEvent(Player_Log_Deaths, this->CharacterID(), event_desc);
-	}
-
 	parse->EventPlayer(EVENT_DEATH_COMPLETE, this, buffer, 0);
 	return true;
 }
@@ -2180,27 +2172,6 @@ bool NPC::Death(Mob* killerMob, int32 damage, uint16 spell, SkillUseTypes attack
 					PlayerCount++;
 				}
 			}
-
-			// QueryServ Logging - Raid Kills
-			if(RuleB(QueryServ, PlayerLogNPCKills)){
-				ServerPacket* pack = new ServerPacket(ServerOP_QSPlayerLogNPCKills, sizeof(QSPlayerLogNPCKill_Struct) + (sizeof(QSPlayerLogNPCKillsPlayers_Struct) * PlayerCount));
-				PlayerCount = 0;
-				QSPlayerLogNPCKill_Struct* QS = (QSPlayerLogNPCKill_Struct*) pack->pBuffer;
-				QS->s1.NPCID = this->GetNPCTypeID();
-				QS->s1.ZoneID = this->GetZoneID();
-				QS->s1.Type = 2; // Raid Fight
-				for (int i = 0; i < MAX_RAID_MEMBERS; i++) {
-					if (kr->members[i].member != nullptr && kr->members[i].member->IsClient()) { // If Group Member is Client
-						Client *c = kr->members[i].member;
-						QS->Chars[PlayerCount].char_id = c->CharacterID();
-						PlayerCount++;
-					}
-				}
-				worldserver.SendPacket(pack); // Send Packet to World
-				safe_delete(pack);
-			}
-			// End QueryServ Logging
-
 		}
 		else if (give_exp_client->IsGrouped() && kg != nullptr)
 		{
@@ -2227,26 +2198,6 @@ bool NPC::Death(Mob* killerMob, int32 damage, uint16 spell, SkillUseTypes attack
 					PlayerCount++;
 				}
 			}
-
-			// QueryServ Logging - Group Kills
-			if(RuleB(QueryServ, PlayerLogNPCKills)){
-				ServerPacket* pack = new ServerPacket(ServerOP_QSPlayerLogNPCKills, sizeof(QSPlayerLogNPCKill_Struct) + (sizeof(QSPlayerLogNPCKillsPlayers_Struct) * PlayerCount));
-				PlayerCount = 0;
-				QSPlayerLogNPCKill_Struct* QS = (QSPlayerLogNPCKill_Struct*) pack->pBuffer;
-				QS->s1.NPCID = this->GetNPCTypeID();
-				QS->s1.ZoneID = this->GetZoneID();
-				QS->s1.Type = 1; // Group Fight
-				for (int i = 0; i < MAX_GROUP_MEMBERS; i++) {
-					if (kg->members[i] != nullptr && kg->members[i]->IsClient()) { // If Group Member is Client
-						Client *c = kg->members[i]->CastToClient();
-						QS->Chars[PlayerCount].char_id = c->CharacterID();
-						PlayerCount++;
-					}
-				}
-				worldserver.SendPacket(pack); // Send Packet to World
-				safe_delete(pack);
-			}
-			// End QueryServ Logging
 		}
 		else
 		{
@@ -2273,21 +2224,6 @@ bool NPC::Death(Mob* killerMob, int32 damage, uint16 spell, SkillUseTypes attack
 
 			if(RuleB(TaskSystem, EnableTaskSystem))
 				give_exp_client->UpdateTasksOnKill(GetNPCTypeID());
-
-			// QueryServ Logging - Solo
-			if(RuleB(QueryServ, PlayerLogNPCKills)){
-				ServerPacket* pack = new ServerPacket(ServerOP_QSPlayerLogNPCKills, sizeof(QSPlayerLogNPCKill_Struct) + (sizeof(QSPlayerLogNPCKillsPlayers_Struct) * 1));
-				QSPlayerLogNPCKill_Struct* QS = (QSPlayerLogNPCKill_Struct*) pack->pBuffer;
-				QS->s1.NPCID = this->GetNPCTypeID();
-				QS->s1.ZoneID = this->GetZoneID();
-				QS->s1.Type = 0; // Solo Fight
-				Client *c = give_exp_client;
-				QS->Chars[0].char_id = c->CharacterID();
-				PlayerCount++;
-				worldserver.SendPacket(pack); // Send Packet to World
-				safe_delete(pack);
-			}
-			// End QueryServ Logging
 		}
 	}
 
