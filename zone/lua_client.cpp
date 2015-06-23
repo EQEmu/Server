@@ -350,6 +350,11 @@ const char *Lua_Client::AccountName() {
 	return self->AccountName();
 }
 
+int Lua_Client::GetAccountAge() {
+	Lua_Safe_Call_Int();
+	return time(nullptr) - self->GetAccountCreation();
+}
+
 int Lua_Client::Admin() {
 	Lua_Safe_Call_Bool();
 	return self->Admin();
@@ -1375,6 +1380,7 @@ luabind::scope lua_register_client() {
 		.def("GetRawItemAC", (int(Lua_Client::*)(void))&Lua_Client::GetRawItemAC)
 		.def("AccountID", (uint32(Lua_Client::*)(void))&Lua_Client::AccountID)
 		.def("AccountName", (const char *(Lua_Client::*)(void))&Lua_Client::AccountName)
+		.def("GetAccountAge", (int(Lua_Client::*)(void))&Lua_Client::GetAccountAge)
 		.def("Admin", (int(Lua_Client::*)(void))&Lua_Client::Admin)
 		.def("CharacterID", (uint32(Lua_Client::*)(void))&Lua_Client::CharacterID)
 		.def("GuildRank", (int(Lua_Client::*)(void))&Lua_Client::GuildRank)
