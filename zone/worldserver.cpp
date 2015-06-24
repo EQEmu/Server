@@ -1841,6 +1841,41 @@ void WorldServer::Process() {
 			}
 			break;
 		}
+
+		case ServerOP_ChangeSharedMem:
+		{
+			std::string hotfix_name = std::string((char*)pack->pBuffer);
+			Log.Out(Logs::General, Logs::Zone_Server, "Loading items");
+			if(!database.LoadItems(hotfix_name)) {
+				Log.Out(Logs::General, Logs::Error, "Loading items FAILED!");
+			}
+
+			Log.Out(Logs::General, Logs::Zone_Server, "Loading npc faction lists");
+			if(!database.LoadNPCFactionLists(hotfix_name)) {
+				Log.Out(Logs::General, Logs::Error, "Loading npcs faction lists FAILED!");
+			}
+
+			Log.Out(Logs::General, Logs::Zone_Server, "Loading loot tables");
+			if(!database.LoadLoot(hotfix_name)) {
+				Log.Out(Logs::General, Logs::Error, "Loading loot FAILED!");
+			}
+
+			Log.Out(Logs::General, Logs::Zone_Server, "Loading skill caps");
+			if(!database.LoadSkillCaps(std::string(hotfix_name))) {
+				Log.Out(Logs::General, Logs::Error, "Loading skill caps FAILED!");
+			}
+
+			Log.Out(Logs::General, Logs::Zone_Server, "Loading spells");
+			if(!database.LoadSpells(hotfix_name, &SPDAT_RECORDS, &spells)) {
+				Log.Out(Logs::General, Logs::Error, "Loading spells FAILED!");
+			}
+
+			Log.Out(Logs::General, Logs::Zone_Server, "Loading base data");
+			if(!database.LoadBaseData(hotfix_name)) {
+				Log.Out(Logs::General, Logs::Error, "Loading base data FAILED!");
+			}
+			break;
+		}
 		default: {
 			std::cout << " Unknown ZSopcode:" << (int)pack->opcode;
 			std::cout << " size:" << pack->size << std::endl;

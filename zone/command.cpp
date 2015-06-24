@@ -361,6 +361,7 @@ int command_init(void) {
 		command_add("setlsinfo", "[email] [password] - Set login server email address and password (if supported by login server)", 10, command_setlsinfo) ||
 		command_add("setpass", "[accountname] [password] - Set local password for accountname", 150, command_setpass) ||
 		command_add("setpvppoints", "[value] - Set your or your player target's PVP points", 100, command_setpvppoints) ||
+		command_add("setsharedmem", "[hotfix_name] - Set your shared memory mapping to a specific hotfix", 250, command_set_shared_memory) ||
 		command_add("setskill", "[skillnum] [value] - Set your target's skill skillnum to value", 50, command_setskill) ||
 		command_add("setskillall", "[value] - Set all of your target's skills to value", 50, command_setskillall) ||
 		command_add("setstartzone", "[zoneid] - Set target's starting zone. Set to zero to allow the player to use /setstartcity", 80, command_setstartzone) ||
@@ -10654,4 +10655,17 @@ void command_mysqltest(Client *c, const Seperator *sep)
 		} 
 	}
 	Log.Out(Logs::General, Logs::Debug, "MySQL Test... Took %f seconds", ((float)(std::clock() - t)) / CLOCKS_PER_SEC); 
+}
+
+void command_set_shared_memory(Client *c, const Seperator *sep) {
+	std::string hotfix_name = sep->arg[1];
+	c->Message(0, "Setting shared memory hotfix mapping to '%s'", hotfix_name.c_str());
+
+	database.SetVariable("hotfix_name", hotfix_name.c_str());
+
+	ServerPacket pack(ServerOP_ChangeSharedMem, hotfix_name.length() + 1);
+	if(hotfix_name.length() > 0) {
+		strcpy((char*)pack.pBuffer, hotfix_name.c_str());
+	}
+	worldserver.SendPacket(&pack);
 }

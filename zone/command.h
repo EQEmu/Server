@@ -325,7 +325,8 @@ void command_tune(Client *c, const Seperator *sep);
 void command_logtest(Client *c, const Seperator *sep);
 void command_mysqltest(Client *c, const Seperator *sep);
 void command_logs(Client *c, const Seperator *sep);
- 
+void command_set_shared_memory(Client *c, const Seperator *sep);
+
 #ifdef EQPROFILE
 void command_profiledump(Client *c, const Seperator *sep);
 void command_profilereset(Client *c, const Seperator *sep);

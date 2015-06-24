@@ -25,7 +25,7 @@
 #include "../common/fixed_memory_variable_hash_set.h"
 #include "../common/loottable.h"
 
-void LoadLoot(SharedDatabase *database) {
+void LoadLoot(SharedDatabase *database, const std::string &prefix) {
 	EQEmu::IPCMutex mutex("loot");
 	mutex.Lock();
 
@@ -44,8 +44,11 @@ void LoadLoot(SharedDatabase *database) {
 		(loot_drop_count * sizeof(LootDrop_Struct)) +				//loot table headers
 		(loot_drop_entries_count * sizeof(LootDropEntries_Struct));	//number of loot table entries
 
-	EQEmu::MemoryMappedFile mmf_loot_table("shared/loot_table", loot_table_size);
-	EQEmu::MemoryMappedFile mmf_loot_drop("shared/loot_drop", loot_drop_size);
+	std::string file_name_lt = std::string("shared/") + prefix + std::string("loot_table");
+	std::string file_name_ld = std::string("shared/") + prefix + std::string("loot_drop");
+
+	EQEmu::MemoryMappedFile mmf_loot_table(file_name_lt, loot_table_size);
+	EQEmu::MemoryMappedFile mmf_loot_drop(file_name_ld, loot_drop_size);
 	mmf_loot_table.ZeroFile();
 	mmf_loot_drop.ZeroFile();
 

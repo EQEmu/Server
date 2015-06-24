@@ -24,7 +24,7 @@
 #include "../common/eqemu_exception.h"
 #include "../common/spdat.h"
 
-void LoadSpells(SharedDatabase *database) {
+void LoadSpells(SharedDatabase *database, const std::string &prefix) {
 	EQEmu::IPCMutex mutex("spells");
 	mutex.Lock();
 	int records = database->GetMaxSpellID() + 1;
@@ -32,8 +32,10 @@ void LoadSpells(SharedDatabase *database) {
 		EQ_EXCEPT("Shared Memory", "Unable to get any spells from the database.");
 	}
 
-	uint32 size = records * sizeof(SPDat_Spell_Struct);
-	EQEmu::MemoryMappedFile mmf("shared/spells", size);
+	uint32 size = records * sizeof(SPDat_Spell_Struct) + sizeof(uint32);
+
+	std::string file_name = std::string("shared/") + prefix + std::string("spells");
+	EQEmu::MemoryMappedFile mmf(file_name, size);
 	mmf.ZeroFile();
 
 	void *ptr = mmf.Get();

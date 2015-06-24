@@ -24,7 +24,7 @@
 #include "../common/eqemu_exception.h"
 #include "../common/faction.h"
 
-void LoadFactions(SharedDatabase *database) {
+void LoadFactions(SharedDatabase *database, const std::string &prefix) {
 	EQEmu::IPCMutex mutex("faction");
 	mutex.Lock();
 
@@ -33,7 +33,9 @@ void LoadFactions(SharedDatabase *database) {
 	database->GetFactionListInfo(lists, max_list);
 
 	uint32 size = static_cast<uint32>(EQEmu::FixedMemoryHashSet<NPCFactionList>::estimated_size(lists, max_list));
-	EQEmu::MemoryMappedFile mmf("shared/faction", size);
+
+	std::string file_name = std::string("shared/") + prefix + std::string("faction");
+	EQEmu::MemoryMappedFile mmf(file_name, size);
 	mmf.ZeroFile();
 
 	void *ptr = mmf.Get();
