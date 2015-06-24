@@ -441,15 +441,26 @@ void Mob::WakeTheDead(uint16 spell_id, Mob *target, uint32 duration)
 }
 
 void Client::ResetAA() {
+	SendClearAA();
 	RefundAA();
-	uint32 i;
-	for (i=0; i < MAX_PP_AA_ARRAY; i++) {
-		m_pp.aa_array[i].AA = 0;
-		m_pp.aa_array[i].value = 0;
-		m_pp.aa_array[i].charges= 0;
-	}
 
-	aa_ranks.clear();
+	memset(&m_pp.aa_array[0], 0, sizeof(AA_Array) * MAX_PP_AA_ARRAY);
+
+	int i = 0;
+	for(auto &rank_value : aa_ranks) {
+		auto ability_rank = zone->GetAlternateAdvancementAbilityAndRank(rank_value.first, rank_value.second.first);
+		auto ability = ability_rank.first;
+		auto rank = ability_rank.second;
+
+		if(!rank) {
+			continue;
+		}
+
+		m_pp.aa_array[i].AA = rank_value.first;
+		m_pp.aa_array[i].value = rank_value.second.first;
+		m_pp.aa_array[i].charges = rank_value.second.second;
+		++i;
+	}
 
 	for(int i = 0; i < _maxLeaderAA; ++i)
 		m_pp.leader_abilities.ranks[i] = 0;
@@ -459,13 +470,7 @@ void Client::ResetAA() {
 	m_pp.group_leadership_exp = 0;
 	m_pp.raid_leadership_exp = 0;
 
-	database.DeleteCharacterAAs(CharacterID());
-	SaveAA();
-	SendClearAA();
-	SendAlternateAdvancementTable();
-	SendAlternateAdvancementPoints();
-	SendAlternateAdvancementStats();
-	database.DeleteCharacterLeadershipAAs(this->CharacterID());
+	database.DeleteCharacterLeadershipAAs(CharacterID());
 	// undefined for these clients
 	if (GetClientVersionBit() & BIT_TitaniumAndEarlier)
 		Kick();
@@ -749,24 +754,29 @@ void Client::InspectBuffs(Client* Inspector, int Rank)
 void Client::RefundAA() {
 	int refunded = 0;
 
-	for(auto &rank_value : aa_ranks) {
-		auto ability_rank = zone->GetAlternateAdvancementAbilityAndRank(rank_value.first, rank_value.second.first);
+	auto rank_value = aa_ranks.begin();
+	while(rank_value != aa_ranks.end()) {
+		auto ability_rank = zone->GetAlternateAdvancementAbilityAndRank(rank_value->first, rank_value->second.first);
 		auto ability = ability_rank.first;
 		auto rank = ability_rank.second;
 
 		if(!ability) {
+			++rank_value;
 			continue;
 		}
 
-		if(ability->charges > 0 && rank_value.second.second < 1) {
+		if(ability->charges > 0 && rank_value->second.second < 1) {
+			++rank_value;
 			continue;
 		}
 
 		if(ability->grant_only) {
+			++rank_value;
 			continue;
 		}
 
 		refunded += rank->total_cost;
+		rank_value = aa_ranks.erase(rank_value);
 	}
 
 	if(refunded > 0) {
@@ -774,6 +784,10 @@ void Client::RefundAA() {
 		SaveAA();
 		Save();
 	}
+
+	SendAlternateAdvancementTable();
+	SendAlternateAdvancementPoints();
+	SendAlternateAdvancementStats();
 }
 
 AA_SwarmPetInfo::AA_SwarmPetInfo()
