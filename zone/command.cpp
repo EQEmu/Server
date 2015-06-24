@@ -37,6 +37,7 @@
 #include <sstream>
 #include <algorithm>
 #include <ctime>
+#include <thread>
 
 #ifdef _WINDOWS
 #define strcasecmp _stricmp
@@ -249,6 +250,7 @@ int command_init(void) {
 		command_add("heromodel",  "[hero model] [slot] - Full set of Hero's Forge Armor appearance. If slot is set, sends exact model just to slot.",  200, command_heromodel) ||
 		command_add("hideme", "[on/off] - Hide yourself from spawn lists.", 80, command_hideme) ||
 		command_add("hm",  "[hero model] [slot] - Full set of Hero's Forge Armor appearance. If slot is set, sends exact model just to slot.)",  200, command_heromodel) ||
+		command_add("hotfix", "[hotfix_name] - Reloads shared memory into a hotfix", 250, command_hotfix) ||
 		command_add("hp", "- Refresh your HP bar from the server.", 0, command_hp) ||
 		command_add("incstat", "- Increases or Decreases a client's stats permanently.", 200, command_incstat) ||
 		command_add("instance", "- Modify Instances", 200, command_instance) ||
@@ -361,7 +363,6 @@ int command_init(void) {
 		command_add("setlsinfo", "[email] [password] - Set login server email address and password (if supported by login server)", 10, command_setlsinfo) ||
 		command_add("setpass", "[accountname] [password] - Set local password for accountname", 150, command_setpass) ||
 		command_add("setpvppoints", "[value] - Set your or your player target's PVP points", 100, command_setpvppoints) ||
-		command_add("setsharedmem", "[hotfix_name] - Set your shared memory mapping to a specific hotfix", 250, command_set_shared_memory) ||
 		command_add("setskill", "[skillnum] [value] - Set your target's skill skillnum to value", 50, command_setskill) ||
 		command_add("setskillall", "[value] - Set all of your target's skills to value", 50, command_setskillall) ||
 		command_add("setstartzone", "[zoneid] - Set target's starting zone. Set to zero to allow the player to use /setstartcity", 80, command_setstartzone) ||
@@ -10657,15 +10658,47 @@ void command_mysqltest(Client *c, const Seperator *sep)
 	Log.Out(Logs::General, Logs::Debug, "MySQL Test... Took %f seconds", ((float)(std::clock() - t)) / CLOCKS_PER_SEC); 
 }
 
-void command_set_shared_memory(Client *c, const Seperator *sep) {
-	std::string hotfix_name = sep->arg[1];
-	c->Message(0, "Setting shared memory hotfix mapping to '%s'", hotfix_name.c_str());
+void command_hotfix(Client *c, const Seperator *sep) {
+	char hotfix[256] = { 0 };
+	database.GetVariable("hotfix_name", hotfix, 256);
+	std::string current_hotfix = hotfix;
 
-	database.SetVariable("hotfix_name", hotfix_name.c_str());
-
-	ServerPacket pack(ServerOP_ChangeSharedMem, hotfix_name.length() + 1);
-	if(hotfix_name.length() > 0) {
-		strcpy((char*)pack.pBuffer, hotfix_name.c_str());
+	std::string hotfix_name;
+	if(!strcasecmp(current_hotfix.c_str(), "hotfix_")) {
+		hotfix_name = "";
+	} else {
+		hotfix_name = "hotfix_";
 	}
-	worldserver.SendPacket(&pack);
+
+
+	c->Message(0, "Creating and applying hotfix");
+	//Not 100% certain on the thread safety of this.
+	//I think it's okay however
+	std::thread t1([c,hotfix_name]() {
+#ifdef WIN32
+		if(hotfix_name.length() > 0) {
+			system(StringFormat("shared_memory -hotfix=%s", hotfix_name.c_str()).c_str());
+		} else {
+			system(StringFormat("shared_memory").c_str());
+		}
+#else
+		if(hotfix_name.length() > 0) {
+			system(StringFormat("./shared_memory -hotfix=%s", hotfix_name.c_str()).c_str());
+		}
+		else {
+			system(StringFormat("./shared_memory").c_str());
+		}
+#endif
+		database.SetVariable("hotfix_name", hotfix_name.c_str());
+
+		ServerPacket pack(ServerOP_ChangeSharedMem, hotfix_name.length() + 1);
+		if(hotfix_name.length() > 0) {
+			strcpy((char*)pack.pBuffer, hotfix_name.c_str());
+		}
+		worldserver.SendPacket(&pack);
+
+		c->Message(0, "Hotfix applied");
+	});
+
+	t1.detach();
 }

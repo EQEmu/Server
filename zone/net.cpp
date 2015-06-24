@@ -206,7 +206,9 @@ int main(int argc, char** argv) {
 	
 	char hotfix_name[256] = { 0 };
 	if(database.GetVariable("hotfix_name", hotfix_name, 256)) {
-		Log.Out(Logs::General, Logs::Zone_Server, "Current hotfix in use: %s", hotfix_name);
+		if(strlen(hotfix_name) > 0) {
+			Log.Out(Logs::General, Logs::Zone_Server, "Current hotfix in use: '%s'", hotfix_name);
+		}
 	}
 
 	Log.Out(Logs::General, Logs::Zone_Server, "Loading zone names");
