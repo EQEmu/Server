@@ -3157,8 +3157,7 @@ struct SendAA_Struct {
 /*0052*/	uint32 spellid;
 /*0056*/	uint32 spell_type;
 /*0060*/	uint32 spell_refresh;
-/*0064*/	uint16 classes;
-/*0066*/	uint16 berserker; //seems to be 1 if its a berserker ability
+/*0064*/	uint32 classes;
 /*0068*/	uint32 max_level;
 /*0072*/	uint32 last_id;
 /*0076*/	uint32 next_id;
