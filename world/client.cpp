@@ -17,6 +17,7 @@
 #include "../common/clientversions.h"
 #include "../common/random.h"
 #include "../common/shareddb.h"
+#include "../common/file_verify.h"
 
 #include "client.h"
 #include "worlddb.h"
@@ -59,6 +60,11 @@
 
 std::vector<RaceClassAllocation> character_create_allocations;
 std::vector<RaceClassCombos> character_create_race_class_combos;
+
+EQEmu::FileVerify spell_verify("verify/spells_us.txt");
+EQEmu::FileVerify skills_verify("verify/SkillCaps.txt");
+EQEmu::FileVerify basedata_verify("verify/BaseData.txt");
+EQEmu::FileVerify eqgame_verify("verify/eqgame.exe");
 
 extern ZSList zoneserver_list;
 extern LoginServerList loginserverlist;
@@ -952,13 +958,48 @@ bool Client::HandlePacket(const EQApplicationPacket *app) {
 
 	switch(opcode)
 	{
-		case OP_World_Client_CRC1:
-		case OP_World_Client_CRC2:
+		case OP_World_SpellFileCheck:
 		{
-			// There is no obvious entry in the CC struct to indicate that the 'Start Tutorial button
-			// is selected when a character is created. I have observed that in this case, OP_EnterWorld is sent
-			// before OP_World_Client_CRC1. Therefore, if we receive OP_World_Client_CRC1 before OP_EnterWorld,
-			// then 'Start Tutorial' was not chosen.
+			if(spell_verify.Verify((char*)app->pBuffer, app->Size())) {
+				Log.Out(Logs::General, Logs::Status, "Spell file verified.");
+			} else {
+				Log.Out(Logs::General, Logs::Status, "Spell file not verified.");
+			}
+			StartInTutorial = false;
+			return true;
+		}
+
+		case OP_World_SkillFileCheck:
+		{
+			if(skills_verify.Verify((char*)app->pBuffer, app->Size())) {
+				Log.Out(Logs::General, Logs::Status, "Skill file verified.");
+			} else {
+				Log.Out(Logs::General, Logs::Status, "Skill file not verified.");
+			}
+			StartInTutorial = false;
+			return true;
+		}
+
+		case OP_World_BaseDataFileCheck:
+		{
+			if(basedata_verify.Verify((char*)app->pBuffer, app->Size())) {
+				Log.Out(Logs::General, Logs::Status, "BaseData file verified.");
+			} else {
+				Log.Out(Logs::General, Logs::Status, "BaseData file not verified.");
+			}
+
+			StartInTutorial = false;
+			return true;
+		}
+
+		case OP_World_ExeFileCheck:
+		{
+			if(eqgame_verify.Verify((char*)app->pBuffer, app->Size())) {
+				Log.Out(Logs::General, Logs::Status, "eqgame.exe verified.");
+			} else {
+				Log.Out(Logs::General, Logs::Status, "eqgame.exe not verified.");
+			}
+
 			StartInTutorial = false;
 			return true;
 		}
@@ -1001,14 +1042,16 @@ bool Client::HandlePacket(const EQApplicationPacket *app) {
 			// HoT sends this to world while zoning and wants it echoed back.
 			return HandleZoneChangePacket(app);
 		}
-		case OP_LoginUnknown1:
-		case OP_LoginUnknown2:
 		case OP_CrashDump:
 		case OP_WearChange:
 		case OP_LoginComplete:
 		case OP_ApproveWorld:
 		case OP_WorldClientReady:
 		{
+			//char buffer[64];
+			//app->build_header_dump(buffer);
+			//Log.Out(Logs::General, Logs::Status, "%s %s", buffer, DumpPacketToString(app).c_str());
+
 			// Essentially we are just 'eating' these packets, indicating
 			// they are handled.
 			return true;
@@ -1016,6 +1059,10 @@ bool Client::HandlePacket(const EQApplicationPacket *app) {
 		default:
 		{
 			Log.Out(Logs::Detail, Logs::World_Server,"Received unknown EQApplicationPacket");
+
+			//char buffer[64];
+			//app->build_header_dump(buffer);
+			//Log.Out(Logs::General, Logs::Status, "%s %s", buffer, DumpPacketToString(app).c_str());
 			return true;
 		}
 	}
