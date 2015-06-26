@@ -29,6 +29,7 @@ SET(common_sources
 	extprofile.cpp
 	faction.cpp
 	file_verify.cpp
+	file_verify_manager.cpp
 	guild_base.cpp
 	guilds.cpp
 	ipc_mutex.cpp
@@ -132,6 +133,7 @@ SET(common_headers
 	faction.h
 	features.h
 	file_verify.h
+	file_verify_manager.h
 	fixed_memory_hash_set.h
 	fixed_memory_variable_hash_set.h
 	global_define.h

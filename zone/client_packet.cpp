@@ -787,6 +787,13 @@ void Client::CompleteConnect()
 			std::string event_desc = StringFormat("Connect :: Logged into zoneid:%i instid:%i", this->GetZoneID(), this->GetInstanceID());
 			QServ->PlayerLogEvent(Player_Log_Connect_State, this->CharacterID(), event_desc);
 		}
+
+		ServerPacket pack(ServerOP_ClientFileStatus, sizeof(ServerRequestClientFileStatus));
+		ServerRequestClientFileStatus *req = (ServerRequestClientFileStatus*)pack.pBuffer;
+		req->zone_id = zone->GetZoneID();
+		req->instance_id = zone->GetInstanceID();
+		strn0cpy(req->name, GetName(), 64);
+		worldserver.SendPacket(&pack);
 	}
 
 	if (zone) {

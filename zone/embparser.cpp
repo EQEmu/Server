@@ -113,7 +113,8 @@ const char *QuestEventSubroutines[_LargestEventID] = {
 	"EVENT_LEAVE_AREA",
 	"EVENT_RESPAWN",
 	"EVENT_DEATH_COMPLETE",
-	"EVENT_UNHANDLED_OPCODE"
+	"EVENT_UNHANDLED_OPCODE",
+	"EVENT_CLIENT_FILE_STATUS"
 };
 
 PerlembParser::PerlembParser() : perl(nullptr) {

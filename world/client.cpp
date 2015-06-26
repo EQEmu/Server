@@ -17,7 +17,7 @@
 #include "../common/clientversions.h"
 #include "../common/random.h"
 #include "../common/shareddb.h"
-#include "../common/file_verify.h"
+#include "../common/file_verify_manager.h"
 
 #include "client.h"
 #include "worlddb.h"
@@ -61,11 +61,6 @@
 std::vector<RaceClassAllocation> character_create_allocations;
 std::vector<RaceClassCombos> character_create_race_class_combos;
 
-EQEmu::FileVerify spell_verify("verify/spells_us.txt");
-EQEmu::FileVerify skills_verify("verify/SkillCaps.txt");
-EQEmu::FileVerify basedata_verify("verify/BaseData.txt");
-EQEmu::FileVerify eqgame_verify("verify/eqgame.exe");
-
 extern ZSList zoneserver_list;
 extern LoginServerList loginserverlist;
 extern ClientList client_list;
@@ -96,7 +91,7 @@ Client::Client(EQStreamInterface* ieqs)
 
 	m_ClientVersion = eqs->GetClientVersion();
 	m_ClientVersionBit = ClientBitFromVersion(m_ClientVersion);
-	
+
 	numclients++;
 }
 
@@ -611,6 +606,10 @@ bool Client::HandleGenerateRandomNamePacket(const EQApplicationPacket *app) {
 }
 
 bool Client::HandleCharacterCreateRequestPacket(const EQApplicationPacket *app) {
+	if(!CanTakeAction()) {
+		return true;
+	}
+
 	// New OpCode in SoF
 	uint32 allocs = character_create_allocations.size();
 	uint32 combos = character_create_race_class_combos.size();
@@ -658,6 +657,10 @@ bool Client::HandleCharacterCreateRequestPacket(const EQApplicationPacket *app) 
 }
 
 bool Client::HandleCharacterCreatePacket(const EQApplicationPacket *app) {
+	if(!CanTakeAction()) {
+		return true;
+	}
+
 	if (GetAccountID() == 0) {
 		Log.Out(Logs::Detail, Logs::World_Server,"Account ID not set; unable to create character.");
 		return false;
@@ -689,6 +692,11 @@ bool Client::HandleCharacterCreatePacket(const EQApplicationPacket *app) {
 }
 
 bool Client::HandleEnterWorldPacket(const EQApplicationPacket *app) { 
+	if(!CanTakeAction()) {
+		ZoneUnavail();
+		return true;
+	}
+
 	if (GetAccountID() == 0) {
 		Log.Out(Logs::Detail, Logs::World_Server,"Enter world with no logged in account");
 		eqs->Close();
@@ -908,6 +916,9 @@ bool Client::HandleEnterWorldPacket(const EQApplicationPacket *app) {
 }
 
 bool Client::HandleDeleteCharacterPacket(const EQApplicationPacket *app) {
+	if(!CanTakeAction()) {
+		return true;
+	}
 
 	uint32 char_acct_id = database.GetAccountIDByChar((char*)app->pBuffer);
 	if(char_acct_id == GetAccountID()) {
@@ -960,49 +971,66 @@ bool Client::HandlePacket(const EQApplicationPacket *app) {
 	{
 		case OP_World_SpellFileCheck:
 		{
-			if(spell_verify.Verify((char*)app->pBuffer, app->Size())) {
-				Log.Out(Logs::General, Logs::Status, "Spell file verified.");
+			if(EQEmu::FileVerifyManager::Get().VerifySpellFile(app, eqs->GetClientVersion())) {
+				if(cle) {
+					cle->SetSpellFileVerified(true);
+				}
 			} else {
-				Log.Out(Logs::General, Logs::Status, "Spell file not verified.");
+				if(cle) {
+					cle->SetSpellFileVerified(false);
+				}
 			}
 			StartInTutorial = false;
 			return true;
 		}
-
+		
 		case OP_World_SkillFileCheck:
 		{
-			if(skills_verify.Verify((char*)app->pBuffer, app->Size())) {
-				Log.Out(Logs::General, Logs::Status, "Skill file verified.");
+			if(EQEmu::FileVerifyManager::Get().VerifySkillFile(app, eqs->GetClientVersion())) {
+				if(cle) {
+					cle->SetSkillFileVerified(true);
+				}
 			} else {
-				Log.Out(Logs::General, Logs::Status, "Skill file not verified.");
+				if(cle) {
+					cle->SetSkillFileVerified(false);
+				}
 			}
 			StartInTutorial = false;
 			return true;
 		}
-
+		
 		case OP_World_BaseDataFileCheck:
 		{
-			if(basedata_verify.Verify((char*)app->pBuffer, app->Size())) {
-				Log.Out(Logs::General, Logs::Status, "BaseData file verified.");
+			if(EQEmu::FileVerifyManager::Get().VerifyBaseDataFile(app, eqs->GetClientVersion())) {
+				if(cle) {
+					cle->SetBaseDataFileVerified(true);
+				}
 			} else {
-				Log.Out(Logs::General, Logs::Status, "BaseData file not verified.");
+				if(cle) {
+					cle->SetBaseDataFileVerified(false);
+				}
 			}
-
+		
 			StartInTutorial = false;
 			return true;
 		}
-
+		
 		case OP_World_ExeFileCheck:
 		{
-			if(eqgame_verify.Verify((char*)app->pBuffer, app->Size())) {
-				Log.Out(Logs::General, Logs::Status, "eqgame.exe verified.");
+			if(EQEmu::FileVerifyManager::Get().VerifyEQGame(app, eqs->GetClientVersion())) {
+				if(cle) {
+					cle->SetEQGameVerified(true);
+				}
 			} else {
-				Log.Out(Logs::General, Logs::Status, "eqgame.exe not verified.");
+				if(cle) {
+					cle->SetEQGameVerified(false);
+				}
 			}
-
+		
 			StartInTutorial = false;
 			return true;
 		}
+
 		case OP_SendLoginInfo:
 		{
 			return HandleSendLoginInfoPacket(app);
@@ -1048,21 +1076,15 @@ bool Client::HandlePacket(const EQApplicationPacket *app) {
 		case OP_ApproveWorld:
 		case OP_WorldClientReady:
 		{
-			//char buffer[64];
-			//app->build_header_dump(buffer);
-			//Log.Out(Logs::General, Logs::Status, "%s %s", buffer, DumpPacketToString(app).c_str());
-
-			// Essentially we are just 'eating' these packets, indicating
-			// they are handled.
 			return true;
 		}
 		default:
 		{
 			Log.Out(Logs::Detail, Logs::World_Server,"Received unknown EQApplicationPacket");
 
-			//char buffer[64];
-			//app->build_header_dump(buffer);
-			//Log.Out(Logs::General, Logs::Status, "%s %s", buffer, DumpPacketToString(app).c_str());
+			char buffer[64];
+			app->build_header_dump(buffer);
+			Log.Out(Logs::General, Logs::Status, "%s %s", buffer, DumpPacketToString(app).c_str());
 			return true;
 		}
 	}
@@ -2035,3 +2057,14 @@ void Client::SetClassLanguages(PlayerProfile_Struct *pp)
 	}
 }
 
+bool Client::CanTakeAction() {
+	if(RuleB(World, AllowActionWithBadFiles)) {
+		return true;
+	}
+
+	if(!cle) {
+		return true;
+	}
+
+	return cle->GetBaseDataFileVerified() && cle->GetEQGameVerified() && cle->GetSkillFileVerified() && cle->GetSpellFileVerified();
+}

@@ -116,7 +116,8 @@ const char *LuaEvents[_LargestEventID] = {
 	"event_leave_area",
 	"event_respawn",
 	"event_death_complete",
-	"event_unhandled_opcode"
+	"event_unhandled_opcode",
+	"event_client_file_status"
 };
 
 extern Zone *zone;
@@ -198,6 +199,7 @@ LuaParser::LuaParser() {
 	PlayerArgumentDispatch[EVENT_LEAVE_AREA] = handle_player_area;
 	PlayerArgumentDispatch[EVENT_RESPAWN] = handle_player_respawn;
 	PlayerArgumentDispatch[EVENT_UNHANDLED_OPCODE] = handle_player_packet;
+	PlayerArgumentDispatch[EVENT_CLIENT_FILE_STATUS] = handle_player_file_status;
 
 	ItemArgumentDispatch[EVENT_ITEM_CLICK] = handle_item_click;
 	ItemArgumentDispatch[EVENT_ITEM_CLICK_CAST] = handle_item_click;

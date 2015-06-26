@@ -55,6 +55,8 @@ enum class ClientVersion
 	MobMerc,
 	MobBot,
 	MobPet,
+
+	MaxClientVersions
 };
 
 #define CLIENT_VERSION_COUNT 12

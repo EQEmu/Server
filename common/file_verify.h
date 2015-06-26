@@ -6,10 +6,11 @@ namespace EQEmu
 	class FileVerify
 	{
 	public:
-		FileVerify(const char *file_name);
+		FileVerify();
 		~FileVerify();
 
-		bool Verify(const char *data, uint32 size);
+		bool Load(const char *file_name);
+		bool Verify(const char *data, uint32 size, ClientVersion version);
 
 	private:
 		char *buffer;

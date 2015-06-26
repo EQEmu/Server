@@ -1713,7 +1713,8 @@ luabind::scope lua_register_events() {
 			luabind::value("enter_area", static_cast<int>(EVENT_ENTER_AREA)),
 			luabind::value("leave_area", static_cast<int>(EVENT_LEAVE_AREA)),
 			luabind::value("death_complete", static_cast<int>(EVENT_DEATH_COMPLETE)),
-			luabind::value("unhandled_opcode", static_cast<int>(EVENT_UNHANDLED_OPCODE))
+			luabind::value("unhandled_opcode", static_cast<int>(EVENT_UNHANDLED_OPCODE)),
+			luabind::value("client_file_status", static_cast<int>(EVENT_CLIENT_FILE_STATUS))
 		];
 }
 

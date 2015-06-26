@@ -46,6 +46,11 @@ ClientListEntry::ClientListEntry(uint32 in_id, uint32 iLSID, const char* iLoginN
 	plocal=(local==1);
 
 	pinstance = 0;
+
+	spell_file_verified = true;
+	skill_file_verified = true;
+	base_data_file_verified = true;
+	eqgame_file_verified = true;
 }
 
 ClientListEntry::ClientListEntry(uint32 in_id, uint32 iAccID, const char* iAccName, MD5& iMD5Pass, int16 iAdmin)
@@ -63,6 +68,11 @@ ClientListEntry::ClientListEntry(uint32 in_id, uint32 iAccID, const char* iAccNa
 	padmin = iAdmin;
 
 	pinstance = 0;
+
+	spell_file_verified = true;
+	skill_file_verified = true;
+	base_data_file_verified = true;
+	eqgame_file_verified = true;
 }
 
 ClientListEntry::ClientListEntry(uint32 in_id, ZoneServer* iZS, ServerClientList_Struct* scl, int8 iOnline)
@@ -86,6 +96,11 @@ ClientListEntry::ClientListEntry(uint32 in_id, ZoneServer* iZS, ServerClientList
 		Update(iZS, scl, iOnline);
 	else
 		SetOnline(iOnline);
+
+	spell_file_verified = true;
+	skill_file_verified = true;
+	base_data_file_verified = true;
+	eqgame_file_verified = true;
 }
 
 ClientListEntry::~ClientListEntry() {

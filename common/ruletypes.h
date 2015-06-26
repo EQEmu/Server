@@ -188,6 +188,7 @@ RULE_BOOL (World, IsGMPetitionWindowEnabled, false)
 RULE_INT (World, FVNoDropFlag, 0) // Sets the Firiona Vie settings on the client. If set to 2, the flag will be set for GMs only, allowing trading of no-drop items.
 RULE_BOOL (World, IPLimitDisconnectAll, false)
 RULE_INT (World, TellQueueSize, 20)
+RULE_BOOL (World, AllowActionWithBadFiles, true) // if false then the client will be prevented from moving past world if their client files don't match the server's
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Zone)

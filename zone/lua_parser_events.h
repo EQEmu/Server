@@ -93,6 +93,8 @@ void handle_player_respawn(QuestInterface *parse, lua_State* L, Client* client, 
 		std::vector<EQEmu::Any> *extra_pointers);
 void handle_player_packet(QuestInterface *parse, lua_State* L, Client* client, std::string data, uint32 extra_data,
 		std::vector<EQEmu::Any> *extra_pointers);
+void handle_player_file_status(QuestInterface *parse, lua_State* L, Client* client, std::string data, uint32 extra_data,
+						  std::vector<EQEmu::Any> *extra_pointers);
 void handle_player_null(QuestInterface *parse, lua_State* L, Client* client, std::string data, uint32 extra_data,
 		std::vector<EQEmu::Any> *extra_pointers);
 

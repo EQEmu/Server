@@ -1311,6 +1311,25 @@ bool ZoneServer::Process() {
 				cle->ProcessTellQueue();
 				break;
 			}
+			case ServerOP_ClientFileStatus:
+			{
+				ServerRequestClientFileStatus *req = (ServerRequestClientFileStatus*) pack->pBuffer;
+				ClientListEntry *cle = client_list.FindCharacter(req->name);
+
+				if(cle) {
+					ServerPacket pack(ServerOP_ClientFileStatus, sizeof(ServerResponseClientFileStatus));
+					ServerResponseClientFileStatus *resp = (ServerResponseClientFileStatus*)pack.pBuffer;
+
+					strcpy(resp->name, req->name);
+					resp->spells = cle->GetSpellFileVerified();
+					resp->skills = cle->GetSkillFileVerified();
+					resp->base_data = cle->GetBaseDataFileVerified();
+					resp->eqgame = cle->GetEQGameVerified();
+					zoneserver_list.SendPacket(req->zone_id, req->instance_id, &pack);
+				}
+
+				break;
+			}
 			default:
 			{
 				Log.Out(Logs::Detail, Logs::World_Server, "Unknown ServerOPcode from zone 0x%04x, size %d", pack->opcode, pack->size);

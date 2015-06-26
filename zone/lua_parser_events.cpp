@@ -11,6 +11,7 @@
 #include "masterentity.h"
 #include "../common/seperator.h"
 #include "../common/misc_functions.h"
+#include "../common/string_util.h"
 #include "lua_item.h"
 #include "lua_iteminst.h"
 #include "lua_entity.h"
@@ -500,6 +501,30 @@ void handle_player_packet(QuestInterface *parse, lua_State* L, Client* client, s
 	lua_pushboolean(L, extra_data == 1 ? true : false);
 	lua_setfield(L, -2, "connecting");
 }
+
+void handle_player_file_status(QuestInterface *parse, lua_State* L, Client* client, std::string data, uint32 extra_data,
+						  std::vector<EQEmu::Any> *extra_pointers) {
+	auto values = SplitString(data, ' ');
+	if(values.size() >= 4) {
+		auto spells = atoi(values[0].c_str());
+		auto skills = atoi(values[1].c_str());
+		auto basedata = atoi(values[2].c_str());
+		auto eqgame = atoi(values[3].c_str());
+
+		lua_pushboolean(L, spells == 1 ? true : false);
+		lua_setfield(L, -2, "spell_file_status");
+
+		lua_pushboolean(L, skills == 1 ? true : false);
+		lua_setfield(L, -2, "skills_file_status");
+
+		lua_pushboolean(L, basedata == 1 ? true : false);
+		lua_setfield(L, -2, "base_data_file_status");
+
+		lua_pushboolean(L, eqgame == 1 ? true : false);
+		lua_setfield(L, -2, "eqgame_file_status");
+	}
+}
+
 
 void handle_player_null(QuestInterface *parse, lua_State* L, Client* client, std::string data, uint32 extra_data,
 						std::vector<EQEmu::Any> *extra_pointers) {

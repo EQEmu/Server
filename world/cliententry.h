@@ -87,6 +87,16 @@ public:
 	inline void PushToTellQueue(ServerChannelMessage_Struct *scm) { tell_queue.push_back(scm); }
 	void ProcessTellQueue();
 
+	bool GetSpellFileVerified() { return spell_file_verified; }
+	bool GetSkillFileVerified() { return skill_file_verified; }
+	bool GetBaseDataFileVerified() { return base_data_file_verified; }
+	bool GetEQGameVerified() { return eqgame_file_verified; }
+
+	void SetSpellFileVerified(bool v) { spell_file_verified = v; }
+	void SetSkillFileVerified(bool v) { skill_file_verified = v; }
+	void SetBaseDataFileVerified(bool v) { base_data_file_verified = v; }
+	void SetEQGameVerified(bool v) { eqgame_file_verified = v; }
+
 private:
 	void	ClearVars(bool iAll = false);
 
@@ -127,6 +137,11 @@ private:
 	uint8	pLFGToLevel;
 	bool	pLFGMatchFilter;
 	char	pLFGComments[64];
+
+	bool spell_file_verified;
+	bool skill_file_verified;
+	bool base_data_file_verified;
+	bool eqgame_file_verified;
 
 	// Tell Queue -- really a vector :D
 	std::vector<ServerChannelMessage_Struct *> tell_queue;

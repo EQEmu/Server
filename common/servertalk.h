@@ -153,6 +153,8 @@
 #define ServerOP_GetWorldTime		0x200C
 #define ServerOP_SyncWorldTime		0x200E
 
+#define ServerOP_ClientFileStatus   0x2020
+
 #define ServerOP_LSZoneInfo			0x3001
 #define ServerOP_LSZoneStart		0x3002
 #define ServerOP_LSZoneBoot			0x3003
@@ -1261,6 +1263,22 @@ struct ReloadWorld_Struct{
 
 struct ServerRequestTellQueue_Struct {
 	char	name[64];
+};
+
+struct ServerRequestClientFileStatus
+{
+	int zone_id;
+	int instance_id;
+	char name[64];
+};
+
+struct ServerResponseClientFileStatus
+{
+	char name[64];
+	bool spells;
+	bool skills;
+	bool base_data;
+	bool eqgame;
 };
 
 #pragma pack()

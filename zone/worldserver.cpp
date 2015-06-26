@@ -49,7 +49,7 @@
 #include "worldserver.h"
 #include "zone.h"
 #include "zone_config.h"
-
+#include "quest_parser_collection.h"
 
 extern EntityList entity_list;
 extern Zone* zone;
@@ -1841,6 +1841,20 @@ void WorldServer::Process() {
 			}
 			break;
 		}
+		case ServerOP_ClientFileStatus:
+		{
+			ServerResponseClientFileStatus *resp = (ServerResponseClientFileStatus*)pack->pBuffer;
+			Client* client = entity_list.GetClientByName(resp->name);
+			if(client) {
+				parse->EventPlayer(EVENT_CLIENT_FILE_STATUS, client, StringFormat("%d %d %d %d", 
+					resp->spells ? 1 : 0,
+					resp->skills ? 1 : 0,
+					resp->base_data ? 1 : 0,
+					resp->eqgame ? 1 : 0).c_str(), 0);
+			}
+			break;
+		}
+
 		default: {
 			std::cout << " Unknown ZSopcode:" << (int)pack->opcode;
 			std::cout << " size:" << pack->size << std::endl;

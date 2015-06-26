@@ -843,7 +843,11 @@ luabind::scope lua_register_packet_opcodes() {
 			luabind::value("OpenContainer", static_cast<int>(OP_OpenContainer)),
 			luabind::value("Marquee", static_cast<int>(OP_Marquee)),
 			luabind::value("ClientTimeStamp", static_cast<int>(OP_ClientTimeStamp)),
-			luabind::value("GuildPromote", static_cast<int>(OP_GuildPromote))
+			luabind::value("GuildPromote", static_cast<int>(OP_GuildPromote)),
+			luabind::value("World_SpellFileCheck", static_cast<int>(OP_World_SpellFileCheck)),
+			luabind::value("World_SkillFileCheck", static_cast<int>(OP_World_SkillFileCheck)),
+			luabind::value("World_BaseDataFileCheck", static_cast<int>(OP_World_BaseDataFileCheck)),
+			luabind::value("World_ExeFileCheck", static_cast<int>(OP_World_ExeFileCheck))
 		];
 }
 
