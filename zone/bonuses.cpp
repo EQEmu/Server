@@ -691,6 +691,9 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 		switch (effect) {
 		// Note: AA effects that use accuracy are skill limited, while spell effect is not.
 		case SE_Accuracy:
+			// Bad data or unsupported new skill
+			if (base2 > HIGHEST_SKILL)
+				break;
 			if ((base2 == ALL_SKILLS) && (newbon->Accuracy[HIGHEST_SKILL + 1] < base1))
 				newbon->Accuracy[HIGHEST_SKILL + 1] = base1;
 			else if (newbon->Accuracy[base2] < base1)
@@ -1031,6 +1034,9 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 			break;
 
 		case SE_HitChance: {
+			// Bad data or unsupported new skill
+			if (base2 > HIGHEST_SKILL)
+				break;
 			if (base2 == ALL_SKILLS)
 				newbon->HitChanceEffect[HIGHEST_SKILL + 1] += base1;
 			else
@@ -1082,6 +1088,9 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 			break;
 
 		case SE_CriticalHitChance: {
+			// Bad data or unsupported new skill
+			if (base2 > HIGHEST_SKILL)
+				break;
 			if (base2 == ALL_SKILLS)
 				newbon->CriticalHitChance[HIGHEST_SKILL + 1] += base1;
 			else
@@ -1089,6 +1098,9 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 		} break;
 
 		case SE_CriticalDamageMob: {
+			// Bad data or unsupported new skill
+			if (base2 > HIGHEST_SKILL)
+				break;
 			// base1 = effect value, base2 = skill restrictions(-1 for all)
 			if (base2 == ALL_SKILLS)
 				newbon->CritDmgMob[HIGHEST_SKILL + 1] += base1;
@@ -1116,6 +1128,9 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 		}
 
 		case SE_SkillDamageAmount: {
+			// Bad data or unsupported new skill
+			if (base2 > HIGHEST_SKILL)
+				break;
 			if (base2 == ALL_SKILLS)
 				newbon->SkillDamageAmount[HIGHEST_SKILL + 1] += base1;
 			else
@@ -1132,6 +1147,9 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 		}
 
 		case SE_DamageModifier: {
+			// Bad data or unsupported new skill
+			if (base2 > HIGHEST_SKILL)
+				break;
 			if (base2 == ALL_SKILLS)
 				newbon->DamageModifier[HIGHEST_SKILL + 1] += base1;
 			else
@@ -1140,6 +1158,9 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 		}
 
 		case SE_DamageModifier2: {
+			// Bad data or unsupported new skill
+			if (base2 > HIGHEST_SKILL)
+				break;
 			if (base2 == ALL_SKILLS)
 				newbon->DamageModifier2[HIGHEST_SKILL + 1] += base1;
 			else
@@ -1347,6 +1368,9 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 			break;
 
 		case SE_LimitToSkill: {
+			// Bad data or unsupported new skill
+			if (base2 > HIGHEST_SKILL)
+				break;
 			if (base1 <= HIGHEST_SKILL)
 				newbon->LimitToSkill[base1] = true;
 			break;
@@ -1899,6 +1923,9 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 
 			case SE_CriticalHitChance:
 			{
+				// Bad data or unsupported new skill
+				if (base2 > HIGHEST_SKILL)
+					break;
 				if (AdditiveWornBonus) {
 					if(base2 == ALL_SKILLS)
 						new_bonus->CriticalHitChance[HIGHEST_SKILL+1] += effect_value;
@@ -2102,6 +2129,9 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 
 			case SE_HitChance:
 			{
+				// Bad data or unsupported new skill
+				if (base2 > HIGHEST_SKILL)
+					break;
 
 				if (AdditiveWornBonus){
 					if(base2 == ALL_SKILLS)
@@ -2136,6 +2166,9 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 
 			case SE_DamageModifier:
 			{
+				// Bad data or unsupported new skill
+				if (base2 > HIGHEST_SKILL)
+					break;
 				if(base2 == ALL_SKILLS)
 					new_bonus->DamageModifier[HIGHEST_SKILL+1] += effect_value;
 				else
@@ -2145,6 +2178,9 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 
 			case SE_DamageModifier2:
 			{
+				// Bad data or unsupported new skill
+				if (base2 > HIGHEST_SKILL)
+					break;
 				if(base2 == ALL_SKILLS)
 					new_bonus->DamageModifier2[HIGHEST_SKILL+1] += effect_value;
 				else
@@ -2154,6 +2190,9 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 
 			case SE_MinDamageModifier:
 			{
+				// Bad data or unsupported new skill
+				if (base2 > HIGHEST_SKILL)
+					break;
 				if(base2 == ALL_SKILLS)
 					new_bonus->MinDamageModifier[HIGHEST_SKILL+1] += effect_value;
 				else
@@ -2227,6 +2266,9 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 
 			case SE_Accuracy:
 			{
+				// Bad data or unsupported new skill
+				if (base2 > HIGHEST_SKILL)
+					break;
 				if ((effect_value < 0) && (new_bonus->Accuracy[HIGHEST_SKILL+1] > effect_value))
 						new_bonus->Accuracy[HIGHEST_SKILL+1] = effect_value;
 
@@ -2250,6 +2292,9 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 
 			case SE_SkillDamageTaken:
 			{
+				// Bad data or unsupported new skill
+				if (base2 > HIGHEST_SKILL)
+					break;
 				//When using npc_spells_effects if MAX value set, use stackable quest based modifier.
 				if (IsAISpellEffect && max){
 					if(base2 == ALL_SKILLS)
@@ -2368,6 +2413,9 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 
 			case SE_CriticalDamageMob:
 			{
+				// Bad data or unsupported new skill
+				if (base2 > HIGHEST_SKILL)
+					break;
 				if(base2 == ALL_SKILLS)
 					new_bonus->CritDmgMob[HIGHEST_SKILL+1] += effect_value;
 				else
@@ -2384,6 +2432,9 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 
 			case SE_SkillDamageAmount:
 			{
+				// Bad data or unsupported new skill
+				if (base2 > HIGHEST_SKILL)
+					break;
 				if(base2 == ALL_SKILLS)
 					new_bonus->SkillDamageAmount[HIGHEST_SKILL+1] += effect_value;
 				else
@@ -2489,6 +2540,9 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 
 			case SE_SkillDamageAmount2:
 			{
+				// Bad data or unsupported new skill
+				if (base2 > HIGHEST_SKILL)
+					break;
 				if(base2 == ALL_SKILLS)
 					new_bonus->SkillDamageAmount2[HIGHEST_SKILL+1] += effect_value;
 				else
@@ -3023,6 +3077,9 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 				break;
 
 			case SE_LimitToSkill:{
+				// Bad data or unsupported new skill
+				if (base2 > HIGHEST_SKILL)
+					break;
 				if (effect_value <= HIGHEST_SKILL){
 					new_bonus->LimitToSkill[effect_value] = true;
 				}
