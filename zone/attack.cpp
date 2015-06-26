@@ -4459,7 +4459,7 @@ void Mob::DoRiposte(Mob *defender)
 
 		if (defender->GetClass() == MONK)
 			defender->MonkSpecialAttack(this, defender->aabonuses.GiveDoubleRiposte[2]);
-		else if (defender->IsClient())
+		else if (defender->IsClient() && defender->CastToClient()->HasSkill((SkillUseTypes)defender->aabonuses.GiveDoubleRiposte[2]))
 			defender->CastToClient()->DoClassAttacks(this, defender->aabonuses.GiveDoubleRiposte[2], true);
 	}
 }
