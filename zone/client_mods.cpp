@@ -1979,10 +1979,17 @@ uint32 Mob::GetInstrumentMod(uint16 spell_id) const
 
 	uint32 effectmod = 10;
 	int effectmodcap = 0;
-	if (RuleB(Character, UseSpellFileSongCap))
+	bool nocap = false;
+	if (RuleB(Character, UseSpellFileSongCap)) {
 		effectmodcap = spells[spell_id].songcap / 10;
-	else
+		// this looks a bit weird, but easiest way I could think to keep both systems working
+		if (effectmodcap == 0)
+			nocap = true;
+		else
+			effectmodcap += 10;
+	} else {
 		effectmodcap = RuleI(Character, BaseInstrumentSoftCap);
+	}
 	// this should never use spell modifiers...
 	// if a spell grants better modifers, they are copied into the item mods
 	// because the spells are supposed to act just like having the intrument.
@@ -2056,7 +2063,7 @@ uint32 Mob::GetInstrumentMod(uint16 spell_id) const
 		effectmodcap += aabonuses.songModCap + spellbonuses.songModCap + itembonuses.songModCap;
 	if (effectmod < 10)
 		effectmod = 10;
-	if (effectmodcap && effectmod > effectmodcap) // if the cap is calculated to be 0 using new rules, no cap.
+	if (!nocap && effectmod > effectmodcap) // if the cap is calculated to be 0 using new rules, no cap.
 		effectmod = effectmodcap;
 	Log.Out(Logs::Detail, Logs::Spells, "%s::GetInstrumentMod() spell=%d mod=%d modcap=%d\n", GetName(), spell_id,
 		effectmod, effectmodcap);
