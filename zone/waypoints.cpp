@@ -621,9 +621,9 @@ bool Mob::MakeNewPositionAndSendUpdate(float x, float y, float z, int speed, boo
 		if (numsteps>1)
 		{
 			tar_vector=1.0f	;
-			m_TargetV.x = 1.25f * m_TargetV.x/(float)numsteps;
-			m_TargetV.y = 1.25f * m_TargetV.y/(float)numsteps;
-			m_TargetV.z = 1.25f *m_TargetV.z/(float)numsteps;
+			m_TargetV.x = m_TargetV.x/(float)numsteps;
+			m_TargetV.y = m_TargetV.y/(float)numsteps;
+			m_TargetV.z = m_TargetV.z/(float)numsteps;
 
 			float new_x = m_Position.x + m_TargetV.x;
 			float new_y = m_Position.y + m_TargetV.y;
@@ -636,7 +636,7 @@ bool Mob::MakeNewPositionAndSendUpdate(float x, float y, float z, int speed, boo
 			m_Position.y = new_y;
 			m_Position.z = new_z;
 			m_Position.w = CalculateHeadingToTarget(x, y);
-			tar_ndx = 22 - numsteps;
+			tar_ndx = 20 - numsteps;
 			Log.Out(Logs::Detail, Logs::AI, "Next position2 (%.3f, %.3f, %.3f) (%d steps)", m_Position.x, m_Position.y, m_Position.z, numsteps);
 		}
 		else
