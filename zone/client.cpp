@@ -198,6 +198,7 @@ Client::Client(EQStreamInterface* ieqs)
 	SetTarget(0);
 	auto_attack = false;
 	auto_fire = false;
+	runmode = false;
 	linkdead_timer.Disable();
 	zonesummon_id = 0;
 	zonesummon_ignorerestrictions = 0;

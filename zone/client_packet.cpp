@@ -11836,6 +11836,18 @@ void Client::Handle_OP_SetGuildMOTD(const EQApplicationPacket *app)
 
 void Client::Handle_OP_SetRunMode(const EQApplicationPacket *app)
 {
+	if (app->size < sizeof(SetRunMode_Struct)) {
+		Log.Out(Logs::General, Logs::Error, "Received invalid sized "
+			"OP_SetRunMode: got %d, expected %d", app->size,
+			sizeof(SetRunMode_Struct));
+		DumpPacket(app);
+		return;
+	}
+	SetRunMode_Struct* rms = (SetRunMode_Struct*)app->pBuffer;
+	if (rms->mode)
+		runmode = true;
+	else
+		runmode = false;
 	return;
 }
 

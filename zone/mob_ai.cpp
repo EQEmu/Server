@@ -772,7 +772,10 @@ void Client::AI_Process()
 				engaged = true;
 			} else {
 				if(AImovement_timer->Check()) {
-					//animation = GetFearSpeed() * 21;
+					int speed = GetFearSpeed();
+					animation = speed;
+					speed *= 2;
+					SetCurrentSpeed(speed);
 					// Check if we have reached the last fear point
 					if ((std::abs(GetX() - m_FearWalkTarget.x) < 0.1) &&
 					    (std::abs(GetY() - m_FearWalkTarget.y) < 0.1)) {
@@ -780,18 +783,18 @@ void Client::AI_Process()
 						CalculateNewFearpoint();
 					}
 					if(!RuleB(Pathing, Fear) || !zone->pathing)
-						CalculateNewPosition2(m_FearWalkTarget.x, m_FearWalkTarget.y, m_FearWalkTarget.z, GetFearSpeed(), true);
+						CalculateNewPosition2(m_FearWalkTarget.x, m_FearWalkTarget.y, m_FearWalkTarget.z, speed, true);
 					else
 					{
 						bool WaypointChanged, NodeReached;
 
 						glm::vec3 Goal = UpdatePath(m_FearWalkTarget.x, m_FearWalkTarget.y, m_FearWalkTarget.z,
-									GetFearSpeed(), WaypointChanged, NodeReached);
+									speed, WaypointChanged, NodeReached);
 
 						if(WaypointChanged)
 							tar_ndx = 20;
 
-						CalculateNewPosition2(Goal.x, Goal.y, Goal.z, GetFearSpeed());
+						CalculateNewPosition2(Goal.x, Goal.y, Goal.z, speed);
 					}
 				}
 				return;
@@ -934,8 +937,12 @@ void Client::AI_Process()
 			{
 				if(AImovement_timer->Check())
 				{
+					int newspeed = GetRunspeed();
+					animation = newspeed;
+					newspeed *= 2;
+					SetCurrentSpeed(newspeed);
 					if(!RuleB(Pathing, Aggro) || !zone->pathing)
-						CalculateNewPosition2(GetTarget()->GetX(), GetTarget()->GetY(), GetTarget()->GetZ(), GetRunspeed());
+						CalculateNewPosition2(GetTarget()->GetX(), GetTarget()->GetY(), GetTarget()->GetZ(), newspeed);
 					else
 					{
 						bool WaypointChanged, NodeReached;
@@ -945,7 +952,7 @@ void Client::AI_Process()
 						if(WaypointChanged)
 							tar_ndx = 20;
 
-						CalculateNewPosition2(Goal.x, Goal.y, Goal.z, GetRunspeed());
+						CalculateNewPosition2(Goal.x, Goal.y, Goal.z, newspeed);
 					}
 				}
 			}
@@ -989,11 +996,12 @@ void Client::AI_Process()
 			{
 				if(AImovement_timer->Check())
 				{
-					int speed = GetWalkspeed();
-					if (dist >= 5625)
-						speed = GetRunspeed();
+					int nspeed = (dist >= 5625 ? GetRunspeed() : GetWalkspeed());
+					animation = nspeed;
+					nspeed *= 2;
+					SetCurrentSpeed(nspeed);
 							
-					CalculateNewPosition2(owner->GetX(), owner->GetY(), owner->GetZ(), speed);
+					CalculateNewPosition2(owner->GetX(), owner->GetY(), owner->GetZ(), nspeed);
 				}
 			}
 			else

@@ -1929,7 +1929,15 @@ void NPC::ModifyNPCStat(const char *identifier, const char *newValue)
 	else if(id == "pr") { PR = atoi(val.c_str()); return; }
 	else if(id == "dr") { DR = atoi(val.c_str()); return; }
 	else if(id == "PhR") { PhR = atoi(val.c_str()); return; }
-	else if(id == "runspeed") { runspeed = (float)atof(val.c_str()); CalcBonuses(); return; }
+	else if(id == "runspeed") { 
+		runspeed = (float)atof(val.c_str());
+		base_runspeed = (int)((float)runspeed * 40.0f);
+		base_walkspeed = base_runspeed * 100 / 265;
+		walkspeed = ((float)base_walkspeed) * 0.025f;
+		base_fearspeed = base_runspeed * 100 / 127;
+		fearspeed = ((float)base_fearspeed) * 0.025f;
+		CalcBonuses(); return; 
+	}
 	else if(id == "special_attacks") { NPCSpecialAttacks(val.c_str(), 0, 1); return; }
 	else if(id == "special_abilities") { ProcessSpecialAbilities(val.c_str()); return; }
 	else if(id == "attack_speed") { attack_speed = (float)atof(val.c_str()); CalcBonuses(); return; }
