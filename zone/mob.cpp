@@ -725,7 +725,7 @@ int Mob::_GetFearSpeed() const {
 		movemod = -85;
 
 	if (IsClient()) {
-		if (CastToClient()->IsRunning())
+		if (CastToClient()->GetRunMode())
 			speed_mod = GetBaseRunspeed();
 		else
 			speed_mod = GetBaseWalkspeed();
@@ -1085,7 +1085,7 @@ void Mob::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho)
 	ns->spawn.max_hp	= 100;		//this field needs a better name
 	ns->spawn.race		= race;
 	ns->spawn.runspeed	= runspeed;
-	ns->spawn.walkspeed	= runspeed * 0.5f;
+	ns->spawn.walkspeed	= walkspeed;
 	ns->spawn.class_	= class_;
 	ns->spawn.gender	= gender;
 	ns->spawn.level		= level;
@@ -1475,7 +1475,7 @@ void Mob::ShowStats(Client* client)
 			if(n->respawn2 != 0)
 				spawngroupid = n->respawn2->SpawnGroupID();
 			client->Message(0, "  NPCID: %u  SpawnGroupID: %u Grid: %i LootTable: %u FactionID: %i SpellsID: %u ", GetNPCTypeID(),spawngroupid, n->GetGrid(), n->GetLoottableID(), n->GetNPCFactionID(), n->GetNPCSpellsID());
-			client->Message(0, "  Accuracy: %i MerchantID: %i EmoteID: %i Runspeed: %u Walkspeed: %u", n->GetAccuracyRating(), n->MerchantType, n->GetEmoteID(), n->GetRunspeed(), n->GetWalkspeed());
+			client->Message(0, "  Accuracy: %i MerchantID: %i EmoteID: %i Runspeed: %.3f Walkspeed: %.3f", n->GetAccuracyRating(), n->MerchantType, n->GetEmoteID(), static_cast<float>(0.025f * n->GetRunspeed()), static_cast<float>(0.025f * n->GetWalkspeed()));
 			n->QueryLoot(client);
 		}
 		if (IsAIControlled()) {

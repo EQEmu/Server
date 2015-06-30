@@ -1157,6 +1157,7 @@ public:
 	void RemoveAutoXTargets();
 	void ShowXTargets(Client *c);
 	bool GroupFollow(Client* inviter);
+	inline bool  GetRunMode() const { return runmode; }
 
 	void InitializeMercInfo();
 	bool CheckCanSpawnMerc(uint32 template_id);
@@ -1385,6 +1386,7 @@ private:
 	bool AFK;
 	bool auto_attack;
 	bool auto_fire;
+	bool runmode;
 	uint8 gmspeed;
 	bool medding;
 	uint16 horseId;

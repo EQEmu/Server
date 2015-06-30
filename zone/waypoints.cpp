@@ -597,7 +597,7 @@ bool Mob::MakeNewPositionAndSendUpdate(float x, float y, float z, int speed, boo
 	pRunAnimSpeed = speed;
 	if(IsClient())
 	{
-		animation = speed;
+		animation = speed / 2;
 	}
 	//pRunAnimSpeed = (int8)(speed*NPC_RUNANIM_RATIO);
 	//speed *= NPC_SPEED_MULTIPLIER;
@@ -611,7 +611,7 @@ bool Mob::MakeNewPositionAndSendUpdate(float x, float y, float z, int speed, boo
 	tar_vector = (float)speed / mag;
 
 // mob move fix
-	int numsteps = (int) ( mag * 16.0f / (float)speed);
+	int numsteps = (int) ( mag * 16.0f / (float)speed + 0.5f);
 
 
 // mob move fix

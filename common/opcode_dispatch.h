@@ -146,6 +146,7 @@ INr(OP_GuildDelete);	//?
 IN(OP_GuildPublicNote, GuildUpdate_PublicNote);
 INz(OP_GetGuildsList);	//?
 IN(OP_SetGuildMOTD, GuildMOTD_Struct);
+IN(OP_SetRunMode, SetRunMode_Struct);
 INz(OP_GuildPeace);		//?
 INz(OP_GuildWar);		//?
 IN(OP_GuildLeader, GuildMakeLeader);
