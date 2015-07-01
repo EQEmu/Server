@@ -1354,8 +1354,9 @@ void Mob::SendHPUpdate(bool skip_self)
 		}
 	}
 
+	bool dospam = RuleB(Character, SpamHPUpdates);
 	// send to self - we need the actual hps here
-	if(IsClient() && !skip_self) {
+	if(IsClient() && (!skip_self || dospam)) {
 		EQApplicationPacket* hp_app2 = new EQApplicationPacket(OP_HPUpdate,sizeof(SpawnHPUpdate_Struct));
 		SpawnHPUpdate_Struct* ds = (SpawnHPUpdate_Struct*)hp_app2->pBuffer;
 		ds->cur_hp = CastToClient()->GetHP() - itembonuses.HP;
@@ -1364,7 +1365,8 @@ void Mob::SendHPUpdate(bool skip_self)
 		CastToClient()->QueuePacket(hp_app2);
 		safe_delete(hp_app2);
 	}
-	ResetHPUpdateTimer(); // delay the timer
+	if (!dospam)
+		ResetHPUpdateTimer(); // delay the timer
 }
 
 // this one just warps the mob to the current location

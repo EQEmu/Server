@@ -3693,11 +3693,11 @@ void Mob::CommonDamage(Mob* attacker, int32 &damage, const uint16 spell_id, cons
 
 		//send an HP update if we are hurt
 		if(GetHP() < GetMaxHP())
-			SendHPUpdate(!iBuffTic); // the OP_Damage actually updates the client in these cases, so we skill them
+			SendHPUpdate(!iBuffTic); // the OP_Damage actually updates the client in these cases, so we skip the HP update for them
 	}	//end `if damage was done`
 
 	//send damage packet...
-	if(!iBuffTic) { //buff ticks do not send damage, instead they just call SendHPUpdate(), which is done below
+	if(!iBuffTic) { //buff ticks do not send damage, instead they just call SendHPUpdate(), which is done above
 		EQApplicationPacket* outapp = new EQApplicationPacket(OP_Damage, sizeof(CombatDamage_Struct));
 		CombatDamage_Struct* a = (CombatDamage_Struct*)outapp->pBuffer;
 		a->target = GetID();
