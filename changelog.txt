@@ -3,6 +3,7 @@ EQEMu Changelog (Started on Sept 24, 2003 15:50)
 == 7/1/2015 ==
 Akkadius: Fix an issue where emote messages would overflow the buffer of 256 by increasing the size and changing some of the initialization
 Akkadius: Added a custom Health Update message that will display in the middle of the players screen, to enable this server wide you must enable rule 'Character:MarqueeHPUpdates'
+	Example: https://www.youtube.com/watch?v=KUVdbPxLIn0
 Akkadius: (Haynar) Fixed some runspeed issues with Perl and LUA scripts
 Akkadius: (Haynar) Updated #showstats and #npcstats for new speed calcs to display speeds again in familiar float format.
 Akkadius: (Haynar) Improved client movement while AI Controlled, such as feared and charmed.  Movement will be much smoother from clients perspective.
