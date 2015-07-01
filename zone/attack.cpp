@@ -3582,6 +3582,9 @@ void Mob::CommonDamage(Mob* attacker, int32 &damage, const uint16 spell_id, cons
 		//final damage has been determined.
 
 		SetHP(GetHP() - damage);
+		
+		if (IsClient())
+			this->CastToClient()->SendHPUpdateMarquee();
 
 		if(HasDied()) {
 			bool IsSaved = false;

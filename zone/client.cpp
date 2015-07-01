@@ -8639,3 +8639,16 @@ void Client::QuestReward(Mob* target, uint32 copper, uint32 silver, uint32 gold,
 	QueuePacket(outapp, false, Client::CLIENT_CONNECTED);
 	safe_delete(outapp);
 }
+
+void Client::SendHPUpdateMarquee(){
+	if (!RuleB(Character, MarqueeHPUpdates))
+		return;
+
+	/* Health Update Marquee Display: Custom*/
+	uint32 health_percentage = (uint32)(this->cur_hp * 100 / this->max_hp);
+	if (health_percentage == 100)
+		return;
+
+	std::string health_update_notification = StringFormat("Health: %u%%", health_percentage);
+	this->SendMarqueeMessage(15, 510, 0, 3000, 3000, health_update_notification);
+}
