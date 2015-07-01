@@ -1907,10 +1907,10 @@ bool WorldServer::SendEmoteMessage(const char* to, uint32 to_guilddbid, uint32 t
 
 bool WorldServer::SendEmoteMessage(const char* to, uint32 to_guilddbid, int16 to_minstatus, uint32 type, const char* message, ...) {
 	va_list argptr;
-	char buffer[256];
+	char buffer[256] = { 0 }; 
 
 	va_start(argptr, message);
-	vsnprintf(buffer, 256, message, argptr);
+	vsnprintf(buffer, sizeof(buffer) - 1, message, argptr);
 	va_end(argptr);
 
 	if (!Connected() && to == 0) {
