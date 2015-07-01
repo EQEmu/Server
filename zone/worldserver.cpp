@@ -1896,10 +1896,10 @@ bool WorldServer::SendChannelMessage(Client* from, const char* to, uint8 chan_nu
 
 bool WorldServer::SendEmoteMessage(const char* to, uint32 to_guilddbid, uint32 type, const char* message, ...) {
 	va_list argptr;
-	char buffer[256];
+	char buffer[4096] = { 0 };
 
 	va_start(argptr, message);
-	vsnprintf(buffer, 256, message, argptr);
+	vsnprintf(buffer, sizeof(buffer) - 1, message, argptr);
 	va_end(argptr);
 
 	return SendEmoteMessage(to, to_guilddbid, 0, type, buffer);
@@ -1907,7 +1907,7 @@ bool WorldServer::SendEmoteMessage(const char* to, uint32 to_guilddbid, uint32 t
 
 bool WorldServer::SendEmoteMessage(const char* to, uint32 to_guilddbid, int16 to_minstatus, uint32 type, const char* message, ...) {
 	va_list argptr;
-	char buffer[256] = { 0 }; 
+	char buffer[4096] = { 0 };
 
 	va_start(argptr, message);
 	vsnprintf(buffer, sizeof(buffer) - 1, message, argptr);
