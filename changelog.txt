@@ -1,5 +1,11 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 7/2/2015 ==
+KLS/Demonstar55: AA system has been rewritten fixing a ton of bugs and extending functionality while making it easier to create new AA points.
+KLS/Demonstar55: New tables are needed and so older data will need to be migrated to the new system.
+KLS/Demonstar55: The SQL saves the old aa points spent/avail/character_alt_abilities data if any server ops want to do something different than PEQ did with it.
+KLS/Demonstar55: Will try to get a wiki entry written up next week some time explaining the system but it's really not hard to follow the db tables in the meantime.
+
 == 7/1/2015 ==
 Akkadius: Fix an issue where emote messages would overflow the buffer of 256 by increasing the size and changing some of the initialization
 Akkadius: Added a custom Health Update message that will display in the middle of the players screen, to enable this server wide you must enable rule 'Character:MarqueeHPUpdates'

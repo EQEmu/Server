@@ -3,7 +3,7 @@ CREATE TABLE IF NOT EXISTS `aa_ability` (
   `id` int(10) unsigned NOT NULL,
   `name` text NOT NULL,
   `category` int(10) NOT NULL DEFAULT '-1',
-  `classes` int(10) NOT NULL DEFAULT '131070',
+  `classes` int(10) NOT NULL DEFAULT '65535',
   `races` int(10) NOT NULL DEFAULT '65535',
   `drakkin_heritage` int(10) NOT NULL DEFAULT '127',
   `deities` int(10) NOT NULL DEFAULT '131071',
