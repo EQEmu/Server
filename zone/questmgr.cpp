@@ -874,7 +874,7 @@ bool QuestManager::isdisctome(int item_id) {
 void QuestManager::safemove() {
 	QuestManagerCurrentQuestVars();
 	if (initiator && initiator->IsClient())
-		initiator->GoToSafeCoords(zone->GetZoneID(), 0);
+		initiator->GoToSafeCoords(zone->GetZoneID(), zone->GetInstanceID());
 }
 
 void QuestManager::rain(int weather) {
