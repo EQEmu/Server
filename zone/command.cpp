@@ -218,6 +218,7 @@ int command_init(void) {
 		command_add("flymode", "[0/1/2] - Set your or your player target's flymode to off/on/levitate", 50, command_flymode) ||
 		command_add("fov", "- Check wether you're behind or in your target's field of view", 80, command_fov) ||
 		command_add("freeze", "- Freeze your target", 80, command_freeze) ||
+		command_add("fz", nullptr, 10, command_findzone) ||
 		command_add("gassign", "[id] - Assign targetted NPC to predefined wandering grid id", 100, command_gassign) ||
 		command_add("gender", "[0/1/2] - Change your or your target's gender to male/female/neuter", 50, command_gender) ||
 		command_add("getplayerburriedcorpsecount", "- Get the target's total number of burried player corpses.",  100, command_getplayerburriedcorpsecount) ||
@@ -336,6 +337,7 @@ int command_init(void) {
 		command_add("resetaa", "- Resets a Player's AA in their profile and refunds spent AA's to unspent, may disconnect player.", 200, command_resetaa) ||
 		command_add("resetaa_timer", "Command to reset AA cooldown timers.", 200, command_resetaa_timer) ||
 		command_add("revoke", "[charname] [1/0] - Makes charname unable to talk on OOC", 200, command_revoke) ||
+		command_add("rq", nullptr, 150, command_reloadqst) ||
 		command_add("rules", "(subcommand) - Manage server rules",  250, command_rules) ||
 		command_add("save", "- Force your player or player corpse target to be saved to the database", 50, command_save) ||
 		command_add("scribespell",  "[spellid] - Scribe specified spell in your target's spell book.",  180, command_scribespell) ||
