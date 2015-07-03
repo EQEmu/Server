@@ -216,7 +216,6 @@ void command_time(Client *c, const Seperator *sep);
 void command_guild(Client *c, const Seperator *sep);
 bool helper_guild_edit(Client *c, uint32 dbid, uint32 eqid, uint8 rank, const char* what, const char* value);
 void command_zonestatus(Client *c, const Seperator *sep);
-void command_manaburn(Client *c, const Seperator *sep);
 void command_doanim(Client *c, const Seperator *sep);
 void command_randomfeatures(Client *c, const Seperator *sep);
 void command_face(Client *c, const Seperator *sep);
@@ -276,7 +275,6 @@ void command_guildlist(Client *c, const Seperator *sep);
 void command_rules(Client *c, const Seperator *sep);
 void command_task(Client *c, const Seperator *sep);
 void command_reloadtitles(Client *c, const Seperator *sep);
-void command_altactivate(Client *c, const Seperator *sep);
 void command_refundaa(Client *c, const Seperator *sep);
 void command_traindisc(Client *c, const Seperator *sep);
 void command_deletegraveyard(Client *c, const Seperator *sep);
@@ -325,7 +323,9 @@ void command_tune(Client *c, const Seperator *sep);
 void command_logtest(Client *c, const Seperator *sep);
 void command_mysqltest(Client *c, const Seperator *sep);
 void command_logs(Client *c, const Seperator *sep);
- 
+void command_resetaa_timer(Client *c, const Seperator *sep);
+void command_reloadaa(Client *c, const Seperator *sep);
+
 #ifdef EQPROFILE
 void command_profiledump(Client *c, const Seperator *sep);
 void command_profilereset(Client *c, const Seperator *sep);

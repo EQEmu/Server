@@ -2466,7 +2466,8 @@ namespace RoF2
 		outapp->WriteUInt32(emu->lastlogin);
 		outapp->WriteUInt32(emu->timePlayedMin);
 		outapp->WriteUInt32(emu->timeentitledonaccount);
-		outapp->WriteUInt32(0x0007ffff);		// Expansion bitmask
+		outapp->WriteUInt32(emu->expansions);
+		//outapp->WriteUInt32(0x0007ffff);		// Expansion bitmask
 
 		outapp->WriteUInt32(structs::MAX_PP_LANGUAGE);
 
@@ -2899,7 +2900,7 @@ namespace RoF2
 
 		eq->aa_spent = emu->aa_spent;
 		// These fields may need to be correctly populated at some point
-		eq->aapoints_assigned = emu->aa_spent + 1;
+		eq->aapoints_assigned = emu->aa_spent;
 		eq->aa_spent_general = 0;
 		eq->aa_spent_archetype = 0;
 		eq->aa_spent_class = 0;
@@ -2935,58 +2936,80 @@ namespace RoF2
 
 	ENCODE(OP_SendAATable)
 	{
-		ENCODE_LENGTH_ATLEAST(SendAA_Struct);
-		SETUP_VAR_ENCODE(SendAA_Struct);
-		ALLOC_VAR_ENCODE(structs::SendAA_Struct, sizeof(structs::SendAA_Struct) + emu->total_abilities*sizeof(structs::AA_Ability));
+		EQApplicationPacket *inapp = *p;
+		*p = nullptr;
+		AARankInfo_Struct *emu = (AARankInfo_Struct*)inapp->pBuffer;
+		
+		// the structs::SendAA_Struct includes enough space for 1 prereq which is the min even if it has no prereqs
+		auto prereq_size = emu->total_prereqs > 1 ? (emu->total_prereqs - 1) * 8 : 0;
+		auto outapp = new EQApplicationPacket(OP_SendAATable, sizeof(structs::SendAA_Struct) + emu->total_effects * sizeof(structs::AA_Ability) + prereq_size);
+		inapp->SetReadPosition(sizeof(AARankInfo_Struct)+emu->total_effects * sizeof(AARankEffect_Struct));
+		
 
-		// Check clientver field to verify this AA should be sent for SoF
-		// clientver 1 is for all clients and 5 is for Live
-		if (emu->clientver <= 8)
-		{
-			OUT(id);
-			eq->unknown004 = 1;
-			//eq->hotkey_sid = (emu->hotkey_sid==4294967295UL)?0:(emu->id - emu->current_level + 1);
-			//eq->hotkey_sid2 = (emu->hotkey_sid2==4294967295UL)?0:(emu->id - emu->current_level + 1);
-			//eq->title_sid = emu->id - emu->current_level + 1;
-			//eq->desc_sid = emu->id - emu->current_level + 1;
-			eq->hotkey_sid = (emu->hotkey_sid == 4294967295UL) ? -1 : (emu->sof_next_skill);
-			eq->hotkey_sid2 = (emu->hotkey_sid2 == 4294967295UL) ? -1 : (emu->sof_next_skill);
-			eq->title_sid = emu->sof_next_skill;
-			eq->desc_sid = emu->sof_next_skill;
-			OUT(class_type);
-			OUT(cost);
-			OUT(seq);
-			OUT(current_level);
-			eq->prereq_skill_count = 1;	// min 1
-			OUT(prereq_skill);
-			eq->prereq_minpoints_count = 1;	// min 1
-			OUT(prereq_minpoints);
-			eq->type = emu->sof_type;
-			OUT(spellid);
-			eq->unknown057 = 1;	// Introduced during HoT
-			OUT(spell_type);
-			OUT(spell_refresh);
-			OUT(classes);
-			OUT(berserker);
-			//eq->max_level = emu->sof_max_level;
-			OUT(max_level);
-			OUT(last_id);
-			OUT(next_id);
-			OUT(cost2);
-			eq->aa_expansion = emu->aa_expansion;
-			eq->special_category = emu->special_category;
-			OUT(total_abilities);
-			eq->expendable_charges = emu->special_category == 7 ? 1 : 0; // temp hack, this can actually be any number
-			unsigned int r;
-			for (r = 0; r < emu->total_abilities; r++) {
-				OUT(abilities[r].skill_id);
-				OUT(abilities[r].base1);
-				OUT(abilities[r].base2);
-				OUT(abilities[r].slot);
-			}
+		std::vector<int32> skill;
+		std::vector<int32> points;
+		for(auto i = 0; i < emu->total_prereqs; ++i) {
+			skill.push_back(inapp->ReadUInt32());
+			points.push_back(inapp->ReadUInt32());
 		}
 
-		FINISH_ENCODE();
+		outapp->WriteUInt32(emu->id);
+		outapp->WriteUInt8(1);
+		outapp->WriteSInt32(emu->upper_hotkey_sid);
+		outapp->WriteSInt32(emu->lower_hotkey_sid);
+		outapp->WriteSInt32(emu->title_sid);
+		outapp->WriteSInt32(emu->desc_sid);
+		outapp->WriteSInt32(emu->level_req);
+		outapp->WriteSInt32(emu->cost);
+		outapp->WriteUInt32(emu->seq);
+		outapp->WriteUInt32(emu->current_level);
+
+		if (emu->total_prereqs) {
+			outapp->WriteUInt32(emu->total_prereqs);
+			for (auto &e : skill)
+				outapp->WriteSInt32(e);
+			outapp->WriteUInt32(emu->total_prereqs);
+			for (auto &e : points)
+				outapp->WriteSInt32(e);
+		} else {
+			outapp->WriteUInt32(1);
+			outapp->WriteUInt32(0);
+			outapp->WriteUInt32(1);
+			outapp->WriteUInt32(0);
+		}
+
+		outapp->WriteSInt32(emu->type);
+		outapp->WriteSInt32(emu->spell);
+		outapp->WriteSInt32(1);
+		outapp->WriteSInt32(emu->spell_type);
+		outapp->WriteSInt32(emu->spell_refresh);
+		outapp->WriteSInt32(emu->classes);
+		outapp->WriteSInt32(emu->max_level);
+		outapp->WriteSInt32(emu->prev_id);
+		outapp->WriteSInt32(emu->next_id);
+		outapp->WriteSInt32(emu->total_cost);
+		outapp->WriteUInt8(0);
+		outapp->WriteUInt8(emu->grant_only);
+		outapp->WriteUInt8(0);
+		outapp->WriteUInt32(emu->charges);
+		outapp->WriteSInt32(emu->expansion);
+		outapp->WriteSInt32(emu->category);
+		outapp->WriteUInt8(0); // shroud
+		outapp->WriteUInt8(0); // unknown109
+		outapp->WriteUInt8(0); // loh
+		outapp->WriteUInt8(0); // unknown111
+		outapp->WriteUInt32(emu->total_effects);
+
+		inapp->SetReadPosition(sizeof(AARankInfo_Struct));
+		for(auto i = 0; i < emu->total_effects; ++i) {
+			outapp->WriteUInt32(inapp->ReadUInt32()); // skill_id
+			outapp->WriteUInt32(inapp->ReadUInt32()); // base1
+			outapp->WriteUInt32(inapp->ReadUInt32()); // base2
+			outapp->WriteUInt32(inapp->ReadUInt32()); // slot
+ 		}
+			
+		dest->FastQueuePacket(&outapp);
+		delete inapp;
 	}
 
 	ENCODE(OP_SendCharInfo)

@@ -307,8 +307,8 @@ Mob::Mob(const char* in_name,
 	casting_spell_id = 0;
 	casting_spell_timer = 0;
 	casting_spell_timer_duration = 0;
-	casting_spell_type = 0;
 	casting_spell_inventory_slot = 0;
+	casting_spell_aa_id = 0;
 	target = 0;
 
 	ActiveProjectileATK = false;
@@ -1141,6 +1141,10 @@ void Mob::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho)
 		ns->spawn.flymode = FindType(SE_Levitate) ? 2 : 0;
 	else
 		ns->spawn.flymode = flymode;
+
+	if(IsBoat()) {
+		ns->spawn.flymode = 1;
+	}
 
 	ns->spawn.lastName[0] = '\0';
 
@@ -3510,9 +3514,11 @@ void Mob::TriggerOnCast(uint32 focus_spell, uint32 spell_id, bool aa_trigger)
 
 	uint32 trigger_spell_id = 0;
 
-	if (aa_trigger && IsClient()){
-		//focus_spell = aaid
-		trigger_spell_id = CastToClient()->CalcAAFocus(focusTriggerOnCast, focus_spell, spell_id);
+	if (aa_trigger && IsClient()) {
+		// focus_spell = aaid
+		auto rank = zone->GetAlternateAdvancementRank(focus_spell);
+		if (rank)
+			trigger_spell_id = CastToClient()->CalcAAFocus(focusTriggerOnCast, *rank, spell_id);
 
 		if(IsValidSpell(trigger_spell_id) && GetTarget())
 			SpellFinished(trigger_spell_id, GetTarget(), 10, 0, -1, spells[trigger_spell_id].ResistDiff);
@@ -3768,10 +3774,7 @@ int16 Mob::GetSkillDmgTaken(const SkillUseTypes skill_used)
 	skilldmg_mod += itembonuses.SkillDmgTaken[HIGHEST_SKILL+1] + spellbonuses.SkillDmgTaken[HIGHEST_SKILL+1] +
 					itembonuses.SkillDmgTaken[skill_used] + spellbonuses.SkillDmgTaken[skill_used];
 
-
 	skilldmg_mod += SkillDmgTaken_Mod[skill_used] + SkillDmgTaken_Mod[HIGHEST_SKILL+1];
-
-	skilldmg_mod += spellbonuses.MeleeVulnerability + itembonuses.MeleeVulnerability + aabonuses.MeleeVulnerability;
 
 	if(skilldmg_mod < -100)
 		skilldmg_mod = -100;

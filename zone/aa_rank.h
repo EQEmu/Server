@@ -1,5 +1,5 @@
 /*	EQEMu: Everquest Server Emulator
-	Copyright (C) 2001-2013 EQEMu Development Team (http://eqemulator.net)
+	Copyright (C) 2001-2015 EQEMu Development Team (http://eqemulator.net)
 
 	This program is free software; you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -16,28 +16,41 @@
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 
-#ifndef _EQEMU_VERSION_H
-#define _EQEMU_VERSION_H
+#ifndef EQEMU_ZONE_AA_RANK_H
+#define EQEMU_ZONE_AA_RANK_H
 
-#define LOGIN_VERSION "0.8.0"
-#define EQEMU_PROTOCOL_VERSION "0.3.10"
+namespace AA
+{
 
-#define CURRENT_VERSION "1.1.3"
+class Ability;
+class Rank
+{
+public:
+	Rank() { }
+	~Rank() { }
 
-/*
-	Everytime a Database SQL is added to Github,
-		increment CURRENT_BINARY_DATABASE_VERSION number and make sure you update the manifest
-	Manifest: https://github.com/EQEmu/Server/blob/master/utils/sql/db_update_manifest.txt
-*/
+	int id;
+	int upper_hotkey_sid;
+	int lower_hotkey_sid;
+	int title_sid;
+	int desc_sid;
+	int cost;
+	int level_req;
+	int spell;
+	int spell_type;
+	int recast_time;
+	int prev_id;
+	Rank *prev;
+	int next_id;
+	Rank *next;
+	int current_value;
+	int expansion;
+	int total_cost;
+	Ability *base_ability;
+	std::vector<RankEffect> effects;
+	std::map<int, int> prereqs;
+};
 
-#define CURRENT_BINARY_DATABASE_VERSION 9086
-#define COMPILE_DATE	__DATE__
-#define COMPILE_TIME	__TIME__
-#ifndef WIN32
-	#define LAST_MODIFIED	__TIME__
-#else
-	#define LAST_MODIFIED	__TIMESTAMP__
+}
+
 #endif
-
-#endif
-

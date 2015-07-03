@@ -23,6 +23,8 @@
 #include "hate_list.h"
 #include "pathing.h"
 #include "position.h"
+#include "aa_ability.h"
+#include "aa.h"
 #include <set>
 #include <vector>
 #include <memory>
@@ -221,10 +223,12 @@ public:
 	virtual void SpellProcess();
 	virtual bool CastSpell(uint16 spell_id, uint16 target_id, uint16 slot = USE_ITEM_SPELL_SLOT, int32 casttime = -1,
 		int32 mana_cost = -1, uint32* oSpellWillFinish = 0, uint32 item_slot = 0xFFFFFFFF,
-		uint32 timer = 0xFFFFFFFF, uint32 timer_duration = 0, uint32 type = 0, int16 *resist_adjust = nullptr);
+		uint32 timer = 0xFFFFFFFF, uint32 timer_duration = 0, int16 *resist_adjust = nullptr,
+		uint32 aa_id = 0);
 	virtual bool DoCastSpell(uint16 spell_id, uint16 target_id, uint16 slot = 10, int32 casttime = -1,
 		int32 mana_cost = -1, uint32* oSpellWillFinish = 0, uint32 item_slot = 0xFFFFFFFF,
-		uint32 timer = 0xFFFFFFFF, uint32 timer_duration = 0, uint32 type = 0, int16 resist_adjust = 0);
+		uint32 timer = 0xFFFFFFFF, uint32 timer_duration = 0, int16 resist_adjust = 0,
+		uint32 aa_id = 0);
 	void CastedSpellFinished(uint16 spell_id, uint32 target_id, uint16 slot, uint16 mana_used,
 		uint32 inventory_slot = 0xFFFFFFFF, int16 resist_adjust = 0);
 	bool SpellFinished(uint16 spell_id, Mob *target, uint16 slot = 10, uint16 mana_used = 0,
@@ -860,7 +864,6 @@ public:
 	uint32 GetZoneID() const; //for perl
 	virtual int32 CheckAggroAmount(uint16 spell_id, bool isproc = false);
 	virtual int32 CheckHealAggroAmount(uint16 spell_id, uint32 heal_possible = 0);
-	virtual uint32 GetAA(uint32 aa_id) const { return(0); }
 
 	uint32 GetInstrumentMod(uint16 spell_id) const;
 	int CalcSpellEffectValue(uint16 spell_id, int effect_id, int caster_level = 1, uint32 instrument_mod = 10, Mob *caster = nullptr, int ticsremaining = 0);
@@ -956,6 +959,19 @@ public:
 	void Tune_FindAccuaryByHitChance(Mob* defender, Mob *attacker, float hit_chance, int interval, int max_loop, int avoid_override, int Msg = 0);
 	void Tune_FindAvoidanceByHitChance(Mob* defender, Mob *attacker, float hit_chance, int interval, int max_loop, int acc_override, int Msg = 0);
 
+	//aa new
+	uint32 GetAA(uint32 rank_id, uint32 *charges = nullptr) const;
+	uint32 GetAAByAAID(uint32 aa_id, uint32 *charges = nullptr) const;
+	bool SetAA(uint32 rank_id, uint32 new_value, uint32 charges = 0);
+	void ClearAAs() { aa_ranks.clear(); }
+	bool CanUseAlternateAdvancementRank(AA::Rank *rank);
+	bool CanPurchaseAlternateAdvancementRank(AA::Rank *rank, bool check_price, bool check_grant);
+	int GetAlternateAdvancementCooldownReduction(AA::Rank *rank_in);
+	void ExpendAlternateAdvancementCharge(uint32 aa_id);
+	void CalcAABonuses(StatBonuses* newbon);
+	void ApplyAABonuses(const AA::Rank &rank, StatBonuses* newbon);
+	bool CheckAATimer(int timer);
+
 protected:
 	void CommonDamage(Mob* other, int32 &damage, const uint16 spell_id, const SkillUseTypes attack_skill, bool &avoidable, const int8 buffslot, const bool iBuffTic);
 	static uint16 GetProcID(uint16 spell_id, uint8 effect_index);
@@ -968,7 +984,6 @@ protected:
 	virtual bool AI_EngagedCastCheck() { return(false); }
 	virtual bool AI_PursueCastCheck() { return(false); }
 	virtual bool AI_IdleCastCheck() { return(false); }
-
 
 	bool IsFullHP;
 	bool moved;
@@ -1145,6 +1160,7 @@ protected:
 	uint32 casting_spell_timer_duration;
 	uint32 casting_spell_type;
 	int16 casting_spell_resist_adjust;
+	uint32 casting_spell_aa_id;
 	bool casting_spell_checks;
 	uint16 bardsong;
 	uint8 bardsong_slot;
@@ -1310,6 +1326,9 @@ protected:
 	SpecialAbility SpecialAbilities[MAX_SPECIAL_ATTACK];
 	bool bEnraged;
 	bool destructibleobject;
+
+	std::unordered_map<uint32, std::pair<uint32, uint32>> aa_ranks;
+	Timer aa_timers[aaTimerMax];
 
 private:
 	void _StopSong(); //this is not what you think it is

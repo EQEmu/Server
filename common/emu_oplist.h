@@ -548,4 +548,5 @@ N(OP_ZoneServerInfo),
 N(OP_ZoneServerReady),
 N(OP_ZoneSpawns),
 N(OP_ZoneUnavail),
+N(OP_ResetAA),
 // mail and chat opcodes located in ../mail_oplist.h

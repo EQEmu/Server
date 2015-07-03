@@ -350,6 +350,11 @@ const char *Lua_Client::AccountName() {
 	return self->AccountName();
 }
 
+int Lua_Client::GetAccountAge() {
+	Lua_Safe_Call_Int();
+	return time(nullptr) - self->GetAccountCreation();
+}
+
 int Lua_Client::Admin() {
 	Lua_Safe_Call_Bool();
 	return self->Admin();
@@ -1024,7 +1029,17 @@ void Lua_Client::AddLevelBasedExp(int exp_pct, int max_level) {
 
 void Lua_Client::IncrementAA(int aa) {
 	Lua_Safe_Call_Void();
-	self->IncrementAA(aa);
+	self->IncrementAlternateAdvancementRank(aa);
+}
+
+bool Lua_Client::GrantAlternateAdvancementAbility(int aa_id, int points) {
+	Lua_Safe_Call_Bool();
+	self->GrantAlternateAdvancementAbility(aa_id, points);
+}
+
+bool Lua_Client::GrantAlternateAdvancementAbility(int aa_id, int points, bool ignore_cost) {
+	Lua_Safe_Call_Bool();
+	self->GrantAlternateAdvancementAbility(aa_id, points, ignore_cost);
 }
 
 void Lua_Client::MarkSingleCompassLoc(float in_x, float in_y, float in_z) {
@@ -1365,6 +1380,7 @@ luabind::scope lua_register_client() {
 		.def("GetRawItemAC", (int(Lua_Client::*)(void))&Lua_Client::GetRawItemAC)
 		.def("AccountID", (uint32(Lua_Client::*)(void))&Lua_Client::AccountID)
 		.def("AccountName", (const char *(Lua_Client::*)(void))&Lua_Client::AccountName)
+		.def("GetAccountAge", (int(Lua_Client::*)(void))&Lua_Client::GetAccountAge)
 		.def("Admin", (int(Lua_Client::*)(void))&Lua_Client::Admin)
 		.def("CharacterID", (uint32(Lua_Client::*)(void))&Lua_Client::CharacterID)
 		.def("GuildRank", (int(Lua_Client::*)(void))&Lua_Client::GuildRank)
@@ -1500,6 +1516,8 @@ luabind::scope lua_register_client() {
 		.def("AddLevelBasedExp", (void(Lua_Client::*)(int))&Lua_Client::AddLevelBasedExp)
 		.def("AddLevelBasedExp", (void(Lua_Client::*)(int,int))&Lua_Client::AddLevelBasedExp)
 		.def("IncrementAA", (void(Lua_Client::*)(int))&Lua_Client::IncrementAA)
+		.def("GrantAlternateAdvancementAbility", (bool(Lua_Client::*)(int, int))&Lua_Client::GrantAlternateAdvancementAbility)
+		.def("GrantAlternateAdvancementAbility", (bool(Lua_Client::*)(int, int, bool))&Lua_Client::GrantAlternateAdvancementAbility)
 		.def("MarkSingleCompassLoc", (void(Lua_Client::*)(float,float,float))&Lua_Client::MarkSingleCompassLoc)
 		.def("MarkSingleCompassLoc", (void(Lua_Client::*)(float,float,float,int))&Lua_Client::MarkSingleCompassLoc)
 		.def("GetNextAvailableSpellBookSlot", (int(Lua_Client::*)(void))&Lua_Client::GetNextAvailableSpellBookSlot)

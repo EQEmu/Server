@@ -58,7 +58,6 @@ extern uint32 numclients;
 extern PetitionList petition_list;
 
 extern char errorname[32];
-extern uint16 adverrornum;
 
 Entity::Entity()
 {
@@ -4703,5 +4702,13 @@ void EntityList::StopMobAI()
 	for (auto &mob : mob_list) {
 		mob.second->AI_Stop();
 		mob.second->AI_ShutDown();
+	}
+}
+
+void EntityList::SendAlternateAdvancementStats() {
+	for(auto &c : client_list) {
+		c.second->SendAlternateAdvancementTable();
+		c.second->SendAlternateAdvancementStats();
+		c.second->SendAlternateAdvancementPoints();
 	}
 }

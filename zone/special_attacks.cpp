@@ -149,21 +149,18 @@ void Mob::DoSpecialAttackDamage(Mob *who, SkillUseTypes skill, int32 max_damage,
 	}
 
 	who->AddToHateList(this, hate, 0, false);
+	if (max_damage > 0 && aabonuses.SkillAttackProc[0] && aabonuses.SkillAttackProc[1] == skill &&
+	    IsValidSpell(aabonuses.SkillAttackProc[2])) {
+		float chance = aabonuses.SkillAttackProc[0] / 1000.0f;
+		if (zone->random.Roll(chance))
+			SpellFinished(aabonuses.SkillAttackProc[2], who, 10, 0, -1,
+				      spells[aabonuses.SkillAttackProc[2]].ResistDiff);
+	}
 	who->Damage(this, max_damage, SPELL_UNKNOWN, skill, false);
 
 	//Make sure 'this' has not killed the target and 'this' is not dead (Damage shield ect).
 	if(!GetTarget())return;
 	if (HasDied())	return;
-
-	//[AA Dragon Punch] value[0] = 100 for 25%, chance value[1] = skill
-	if(aabonuses.SpecialAttackKBProc[0] && aabonuses.SpecialAttackKBProc[1] == skill){
-		int kb_chance = 25;
-		kb_chance += kb_chance*(100-aabonuses.SpecialAttackKBProc[0])/100;
-
-		if (zone->random.Roll(kb_chance))
-			SpellFinished(904, who, 10, 0, -1, spells[904].ResistDiff);
-			//who->Stun(100); Kayen: This effect does not stun on live, it only moves the NPC.
-	}
 
 	if (HasSkillProcs())
 		TrySkillProc(who, skill, ReuseTime*1000);
@@ -2442,18 +2439,17 @@ void Mob::DoMeleeSkillAttackDmg(Mob* other, uint16 weapon_damage, SkillUseTypes 
 	}
 
 	other->AddToHateList(this, hate, 0, false);
+	if (damage > 0 && aabonuses.SkillAttackProc[0] && aabonuses.SkillAttackProc[1] == skillinuse &&
+	    IsValidSpell(aabonuses.SkillAttackProc[2])) {
+		float chance = aabonuses.SkillAttackProc[0] / 1000.0f;
+		if (zone->random.Roll(chance))
+			SpellFinished(aabonuses.SkillAttackProc[2], other, 10, 0, -1,
+				      spells[aabonuses.SkillAttackProc[2]].ResistDiff);
+	}
 	other->Damage(this, damage, SPELL_UNKNOWN, skillinuse);
 
 	if (HasDied())
 		return;
-
-	if(aabonuses.SpecialAttackKBProc[0] && aabonuses.SpecialAttackKBProc[1] == skillinuse){
-		int kb_chance = 25;
-		kb_chance += kb_chance*(100-aabonuses.SpecialAttackKBProc[0])/100;
-
-		if (zone->random.Roll(kb_chance))
-			SpellFinished(904, other, 10, 0, -1, spells[904].ResistDiff);
-	}
 
 	if (CanSkillProc && HasSkillProcs())
 		TrySkillProc(other, skillinuse, ReuseTime);

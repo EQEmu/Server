@@ -249,6 +249,9 @@ public:
 	int CheckHealAggroAmount(int spell_id);
 	int CheckHealAggroAmount(int spell_id, uint32 heal_possible);
 	int GetAA(int id);
+	int GetAAByAAID(int id);
+	bool SetAA(int rank_id, int new_value);
+	bool SetAA(int rank_id, int new_value, int charges);
 	bool DivineAura();
 	void SetOOCRegen(int regen);
 	const char* GetEntityVariable(const char *name);

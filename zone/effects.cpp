@@ -421,12 +421,6 @@ int32 Mob::GetActSpellDuration(uint16 spell_id, int32 duration)
 	int tic_inc = 0;
 	tic_inc = GetFocusEffect(focusSpellDurByTic, spell_id);
 
-	// unsure on the exact details, but bard songs that don't cost mana at some point get an extra tick, 60 for now
-	// a level 53 bard reported getting 2 tics
-	// bard DOTs do get this extra tick, but beneficial long bard songs don't? (invul, crescendo)
-	if ((IsShortDurationBuff(spell_id) || IsDetrimentalSpell(spell_id)) && IsBardSong(spell_id) &&
-	    spells[spell_id].mana == 0 && GetClass() == BARD && GetLevel() > 60)
-		tic_inc++;
 	float focused = ((duration * increase) / 100.0f) + tic_inc;
 	int ifocused = static_cast<int>(focused);
 
@@ -878,7 +872,7 @@ void EntityList::AEBardPulse(Mob *caster, Mob *center, uint16 spell_id, bool aff
 		caster->CastToClient()->CheckSongSkillIncrease(spell_id);
 }
 
-//Dook- Rampage and stuff for clients.
+// Rampage and stuff for clients. Normal and Duration rampages
 //NPCs handle it differently in Mob::Rampage
 void EntityList::AEAttack(Mob *attacker, float dist, int Hand, int count, bool IsFromSpell) {
 //Dook- Will need tweaking, currently no pets or players or horses
@@ -896,7 +890,10 @@ void EntityList::AEAttack(Mob *attacker, float dist, int Hand, int count, bool I
 				&& curmob->GetRace() != 216 && curmob->GetRace() != 472 /* dont attack horses */
 				&& (DistanceSquared(curmob->GetPosition(), attacker->GetPosition()) <= dist2)
 		) {
-			attacker->Attack(curmob, Hand, false, false, IsFromSpell);
+			if (!attacker->IsClient() || attacker->GetClass() == MONK || attacker->GetClass() == RANGER)
+				attacker->Attack(curmob, Hand, false, false, IsFromSpell);
+			else
+				attacker->CastToClient()->DoAttackRounds(curmob, Hand, IsFromSpell);
 			hit++;
 			if (count != 0 && hit >= count)
 				return;

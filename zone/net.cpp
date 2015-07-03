@@ -96,7 +96,6 @@ EntityList entity_list;
 WorldServer worldserver;
 uint32 numclients = 0;
 char errorname[32];
-uint16 adverrornum = 0;
 extern Zone* zone;
 EQStreamFactory eqsf(ZoneStream);
 npcDecayTimes_Struct npcCorpseDecayTimes[100];
@@ -248,9 +247,6 @@ int main(int argc, char** argv) {
 	
 	Log.Out(Logs::General, Logs::Zone_Server, "Loading titles");
 	title_manager.LoadTitles();
-	
-	Log.Out(Logs::General, Logs::Zone_Server, "Loading AA effects");
-	database.LoadAAEffects();
 	
 	Log.Out(Logs::General, Logs::Zone_Server, "Loading tributes");
 	database.LoadTributes();

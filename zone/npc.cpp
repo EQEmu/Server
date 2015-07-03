@@ -31,7 +31,6 @@
 #include "../common/linked_list.h"
 #include "../common/servertalk.h"
 
-#include "aa.h"
 #include "client.h"
 #include "entity.h"
 #include "npc.h"

@@ -1372,6 +1372,13 @@ bool Client::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, b
 	///////////////////////////////////////////////////////////
 	////// Send Attack Damage
 	///////////////////////////////////////////////////////////
+	if (damage > 0 && aabonuses.SkillAttackProc[0] && aabonuses.SkillAttackProc[1] == skillinuse &&
+	    IsValidSpell(aabonuses.SkillAttackProc[2])) {
+		float chance = aabonuses.SkillAttackProc[0] / 1000.0f;
+		if (zone->random.Roll(chance))
+			SpellFinished(aabonuses.SkillAttackProc[2], other, 10, 0, -1,
+				      spells[aabonuses.SkillAttackProc[2]].ResistDiff);
+	}
 	other->Damage(this, damage, SPELL_UNKNOWN, skillinuse);
 
 	if (IsDead()) return false;
@@ -3512,14 +3519,6 @@ void Mob::CommonDamage(Mob* attacker, int32 &damage, const uint16 spell_id, cons
 	if(damage > 0) {
 		//if there is some damage being done and theres an attacker involved
 		if(attacker) {
-			if(spell_id == SPELL_HARM_TOUCH2 && attacker->IsClient() && attacker->CastToClient()->CheckAAEffect(aaEffectLeechTouch)){
-				int healed = damage;
-				healed = attacker->GetActSpellHealing(spell_id, healed);
-				attacker->HealDamage(healed);
-				entity_list.MessageClose(this, true, 300, MT_Emote, "%s beams a smile at %s", attacker->GetCleanName(), this->GetCleanName() );
-				attacker->CastToClient()->DisableAAEffect(aaEffectLeechTouch);
-			}
-
 			// if spell is lifetap add hp to the caster
 			if (spell_id != SPELL_UNKNOWN && IsLifetapSpell( spell_id )) {
 				int healed = damage;
@@ -4416,42 +4415,55 @@ bool Mob::TryFinishingBlow(Mob *defender, SkillUseTypes skillinuse)
 	return false;
 }
 
-void Mob::DoRiposte(Mob* defender) {
+void Mob::DoRiposte(Mob *defender)
+{
 	Log.Out(Logs::Detail, Logs::Combat, "Preforming a riposte");
 
 	if (!defender)
 		return;
 
 	defender->Attack(this, MainPrimary, true);
-	if (HasDied()) return;
+	if (HasDied())
+		return;
 
-	int32 DoubleRipChance = defender->aabonuses.GiveDoubleRiposte[0] +
-							defender->spellbonuses.GiveDoubleRiposte[0] +
-							defender->itembonuses.GiveDoubleRiposte[0];
+	// this effect isn't used on live? See no AAs or spells
+	int32 DoubleRipChance = defender->aabonuses.DoubleRiposte + defender->spellbonuses.DoubleRiposte +
+				defender->itembonuses.DoubleRiposte;
 
-	DoubleRipChance		 =  defender->aabonuses.DoubleRiposte +
-							defender->spellbonuses.DoubleRiposte +
-							defender->itembonuses.DoubleRiposte;
-
-	//Live AA - Double Riposte
-	if(DoubleRipChance && zone->random.Roll(DoubleRipChance)) {
-		Log.Out(Logs::Detail, Logs::Combat, "Preforming a double riposed (%d percent chance)", DoubleRipChance);
+	if (DoubleRipChance && zone->random.Roll(DoubleRipChance)) {
+		Log.Out(Logs::Detail, Logs::Combat,
+			"Preforming a double riposted from SE_DoubleRiposte (%d percent chance)", DoubleRipChance);
 		defender->Attack(this, MainPrimary, true);
-		if (HasDied()) return;
+		if (HasDied())
+			return;
 	}
 
-	//Double Riposte effect, allows for a chance to do RIPOSTE with a skill specfic special attack (ie Return Kick).
-	//Coded narrowly: Limit to one per client. Limit AA only. [1 = Skill Attack Chance, 2 = Skill]
+	DoubleRipChance = defender->aabonuses.GiveDoubleRiposte[0] + defender->spellbonuses.GiveDoubleRiposte[0] +
+			  defender->itembonuses.GiveDoubleRiposte[0];
+
+	// Live AA - Double Riposte
+	if (DoubleRipChance && zone->random.Roll(DoubleRipChance)) {
+		Log.Out(Logs::Detail, Logs::Combat,
+			"Preforming a double riposted from SE_GiveDoubleRiposte base1 == 0 (%d percent chance)",
+			DoubleRipChance);
+		defender->Attack(this, MainPrimary, true);
+		if (HasDied())
+			return;
+	}
+
+	// Double Riposte effect, allows for a chance to do RIPOSTE with a skill specific special attack (ie Return Kick).
+	// Coded narrowly: Limit to one per client. Limit AA only. [1 = Skill Attack Chance, 2 = Skill]
 
 	DoubleRipChance = defender->aabonuses.GiveDoubleRiposte[1];
 
-	if(DoubleRipChance && zone->random.Roll(DoubleRipChance)) {
-	Log.Out(Logs::Detail, Logs::Combat, "Preforming a return SPECIAL ATTACK (%d percent chance)", DoubleRipChance);
+	if (DoubleRipChance && zone->random.Roll(DoubleRipChance)) {
+		Log.Out(Logs::Detail, Logs::Combat, "Preforming a return SPECIAL ATTACK (%d percent chance)",
+			DoubleRipChance);
 
 		if (defender->GetClass() == MONK)
 			defender->MonkSpecialAttack(this, defender->aabonuses.GiveDoubleRiposte[2]);
-		else if (defender->IsClient())
-			defender->CastToClient()->DoClassAttacks(this,defender->aabonuses.GiveDoubleRiposte[2], true);
+		else if (defender->IsClient() && defender->CastToClient()->HasSkill((SkillUseTypes)defender->aabonuses.GiveDoubleRiposte[2]))
+			defender->CastToClient()->DoClassAttacks(this, defender->aabonuses.GiveDoubleRiposte[2], true);
 	}
 }
 
@@ -4643,7 +4655,7 @@ void Mob::TrySkillProc(Mob *on, uint16 skill, uint16 ReuseTime, bool Success, ui
 	if (IsClient() && aabonuses.LimitToSkill[skill]){
 
 		CanProc = true;
-		uint32 effect = 0;
+		uint32 effect_id = 0;
 		int32 base1 = 0;
 		int32 base2 = 0;
 		uint32 slot = 0;
@@ -4662,36 +4674,41 @@ void Mob::TrySkillProc(Mob *on, uint16 skill, uint16 ReuseTime, bool Success, ui
 				proc_spell_id = 0;
 				ProcMod = 0;
 
-				std::map<uint32, std::map<uint32, AA_Ability> >::const_iterator find_iter = aa_effects.find(aaid);
-				if(find_iter == aa_effects.end())
-					break;
+				for(auto &rank_info : aa_ranks) {
+					auto ability_rank = zone->GetAlternateAdvancementAbilityAndRank(rank_info.first, rank_info.second.first);
+					auto ability = ability_rank.first;
+					auto rank = ability_rank.second;
 
-				for (std::map<uint32, AA_Ability>::const_iterator iter = aa_effects[aaid].begin(); iter != aa_effects[aaid].end(); ++iter) {
-					effect = iter->second.skill_id;
-					base1 = iter->second.base1;
-					base2 = iter->second.base2;
-					slot = iter->second.slot;
-
-					if (effect == SE_SkillProc || effect == SE_SkillProcSuccess) {
-						proc_spell_id = base1;
-						ProcMod = static_cast<float>(base2);
+					if(!ability) {
+						continue;
 					}
 
-					else if (effect == SE_LimitToSkill && base1 <= HIGHEST_SKILL) {
+					for(auto &effect : rank->effects) {
+						effect_id = effect.effect_id;
+						base1 = effect.base1;
+						base2 = effect.base2;
+						slot = effect.slot;
 
-						if (CanProc && base1 == skill && IsValidSpell(proc_spell_id)) {
-							float final_chance = chance * (ProcMod / 100.0f);
+						if(effect_id == SE_SkillProc || effect_id == SE_SkillProcSuccess) {
+							proc_spell_id = base1;
+							ProcMod = static_cast<float>(base2);
+						}
+						else if(effect_id == SE_LimitToSkill && base1 <= HIGHEST_SKILL) {
 
-							if (zone->random.Roll(final_chance)) {
-								ExecWeaponProc(nullptr, proc_spell_id, on);
-								CanProc = false;
-								break;
+							if (CanProc && base1 == skill && IsValidSpell(proc_spell_id)) {
+								float final_chance = chance * (ProcMod / 100.0f);
+
+								if (zone->random.Roll(final_chance)) {
+									ExecWeaponProc(nullptr, proc_spell_id, on);
+									CanProc = false;
+									break;
+								}
 							}
 						}
-					}
-					else {
-						proc_spell_id = 0;
-						ProcMod = 0;
+						else {
+							proc_spell_id = 0;
+							ProcMod = 0;
+						}
 					}
 				}
 			}
@@ -5040,5 +5057,41 @@ void NPC::SetAttackTimer()
 		}
 
 		TimerToUse->SetAtTrigger(std::max(RuleI(Combat, MinHastedDelay), speed), true, true);
+	}
+}
+
+void Client::DoAttackRounds(Mob *target, int hand, bool IsFromSpell)
+{
+	if (!target)
+		return;
+
+	Attack(target, hand, false, false, IsFromSpell);
+
+	if (CanThisClassDoubleAttack()) {
+		CheckIncreaseSkill(SkillDoubleAttack, target, -10);
+		if (CheckDoubleAttack())
+			Attack(target, hand, false, false, IsFromSpell);
+		if (hand == MainPrimary && GetLevel() >= 60 &&
+		    (GetClass() == MONK || GetClass() == WARRIOR || GetClass() == RANGER || GetClass() == BERSERKER) &&
+		    CheckDoubleAttack(true))
+			Attack(target, hand, false, false, IsFromSpell);
+	}
+	if (hand == MainPrimary) {
+		auto flurrychance = aabonuses.FlurryChance + spellbonuses.FlurryChance + itembonuses.FlurryChance;
+		if (flurrychance && zone->random.Roll(flurrychance)) {
+			Message_StringID(MT_NPCFlurry, YOU_FLURRY);
+			Attack(target, hand, false, false, IsFromSpell);
+			Attack(target, hand, false, false, IsFromSpell);
+		}
+
+		auto extraattackchance = aabonuses.ExtraAttackChance + spellbonuses.ExtraAttackChance + itembonuses.ExtraAttackChance;
+		if (extraattackchance) {
+			auto wpn = GetInv().GetItem(MainPrimary);
+			if (wpn && (wpn->GetItem()->ItemType == ItemType2HBlunt ||
+				    wpn->GetItem()->ItemType == ItemType2HSlash ||
+				    wpn->GetItem()->ItemType == ItemType2HPiercing))
+				if (zone->random.Roll(extraattackchance))
+					Attack(target, hand, false, false, IsFromSpell);
+		}
 	}
 }
