@@ -20649,6 +20649,7 @@ INSERT INTO `aa_rank_prereqs` (`rank_id`, `aa_id`, `points`) VALUES
 	(17533, 677, 1),
 	(17549, 8700, 1);
 
+RENAME TABLE `character_alternate_abilities` TO `character_alternate_abilities_old`;
 DROP TABLE IF EXISTS `character_alternate_abilities`;
 CREATE TABLE IF NOT EXISTS `character_alternate_abilities` (
   `id` int(11) unsigned NOT NULL DEFAULT '0',
@@ -20657,3 +20658,22 @@ CREATE TABLE IF NOT EXISTS `character_alternate_abilities` (
   `charges` smallint(11) unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`,`aa_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+ALTER TABLE `character_data` ADD COLUMN `aa_points_spent_old` INT(11) UNSIGNED NOT NULL DEFAULT '0' AFTER `aa_points_spent`;
+ALTER TABLE `character_data` ADD COLUMN `aa_points_old` INT(11) UNSIGNED NOT NULL DEFAULT '0' AFTER `aa_points`;
+
+UPDATE `character_data` SET `aa_points_spent_old` = `aa_points_spent`, `aa_points_old` = `aa_points`;
+
+ -- sanity checks since if someone never logged in after the db conversion there is junk data
+ -- I don't have a good way of addressing this so I keep the old data in aa_points_spent_old and aa_points_old and character_alternate_abilities_old
+ -- for anyone who wants to personally polish up their player data
+UPDATE `character_data` SET `aa_points_spent` = 2700 WHERE `aa_points_spent` > 2700;
+UPDATE `character_data` SET `aa_points` = 5000 WHERE `aa_points` > 5000;
+
+ -- another sanity check, give people a few levels below 51 to keep their points
+UPDATE `character_data` SET `aa_points_spent` = 0 WHERE `level` < 48;
+UPDATE `character_data` SET `aa_points` = 0 WHERE `level` < 48;
+
+ -- aa refund here
+UPDATE `character_data` SET `aa_points` = `aa_points_spent` + `aa_points`;
+UPDATE `character_data` SET `aa_points_spent` = 0; 
