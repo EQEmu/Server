@@ -839,7 +839,7 @@ void Client::SendAlternateAdvancementRank(int aa_id, int level) {
 		return;
 	}
 
-	if(!(ability->classes & (1 << (GetClass() - 1)))) {
+	if(!(ability->classes & (1 << GetClass()))) {
 		return;
 	}
 
@@ -1400,7 +1400,7 @@ bool Mob::CanUseAlternateAdvancementRank(AA::Rank *rank) {
 	if(!ability)
 		return false;
 
-	if(!(ability->classes & (1 << (GetClass() - 1)))) {
+	if(!(ability->classes & (1 << GetClass()))) {
 		return false;
 	}
 
