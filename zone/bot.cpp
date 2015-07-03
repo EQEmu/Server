@@ -694,6 +694,7 @@ void Bot::GenerateBaseStats() {
 	this->pAggroRange = 0;
 	this->pAssistRange = 0;
 	this->raid_target = false;
+	this->deity = 396;
 }
 
 void Bot::GenerateAppearance() {
