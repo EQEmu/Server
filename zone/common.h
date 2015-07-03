@@ -22,6 +22,7 @@
 #define TARGET_RING_SPELL_SLOT 12
 #define DISCIPLINE_SPELL_SLOT 10
 #define ABILITY_SPELL_SLOT 9
+#define ALTERNATE_ABILITY_SPELL_SLOT 0xFF
 
 //LOS Parameters:
 #define HEAD_POSITION 0.9f	//ratio of GetSize() where NPCs see from

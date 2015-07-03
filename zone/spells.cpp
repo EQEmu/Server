@@ -409,24 +409,19 @@ bool Mob::DoCastSpell(uint16 spell_id, uint16 target_id, uint16 slot,
 	// ok now we know the target
 	casting_spell_targetid = target_id;
 
-	if (mana_cost == -1) {
+	// We don't get actual mana cost here, that's done when we consume the mana
+	if (mana_cost == -1)
 		mana_cost = spell.mana;
-		mana_cost = GetActSpellCost(spell_id, mana_cost);
-	}
-
-	if(HasMGB() && spells[spell_id].can_mgb)
-		mana_cost *= 2;
 
 	// mana is checked for clients on the frontend. we need to recheck it for NPCs though
-	// fix: items dont need mana :-/
 	// If you're at full mana, let it cast even if you dont have enough mana
 
 	// we calculated this above, now enforce it
-	if(mana_cost > 0 && slot != 10)
+	if(mana_cost > 0 && slot != USE_ITEM_SPELL_SLOT)
 	{
 		int my_curmana = GetMana();
 		int my_maxmana = GetMaxMana();
-		if(my_curmana < spell.mana)	// not enough mana
+		if(my_curmana < mana_cost)	// not enough mana
 		{
 			//this is a special case for NPCs with no mana...
 			if(IsNPC() && my_curmana == my_maxmana)
@@ -2157,11 +2152,11 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, uint16 slot, uint16 
 			}
 #endif //BOTS
 
+			// We hold off turning MBG off so we can still use it to calc the mana cost
 			if(spells[spell_id].can_mgb && HasMGB())
 			{
 				SpellOnTarget(spell_id, this);
 				entity_list.MassGroupBuff(this, this, spell_id, true);
-				SetMGB(false);
 			}
 			else
 			{
@@ -2262,13 +2257,21 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, uint16 slot, uint16 
 	}
 
 	// if this was a spell slot or an ability use up the mana for it
-	// CastSpell already reduced the cost for it if we're a client with focus
 	if(slot != USE_ITEM_SPELL_SLOT && slot != POTION_BELT_SPELL_SLOT && slot != TARGET_RING_SPELL_SLOT && mana_used > 0)
 	{
+		mana_used = GetActSpellCost(spell_id, mana_used);
+		if (HasMGB() && spells[spell_id].can_mgb) {
+			mana_used *= 2;
+			SetMGB(false);
+		}
+		// clamp if we some how got focused above our current mana
+		if (GetMana() < mana_used)
+			mana_used = GetMana();
 		Log.Out(Logs::Detail, Logs::Spells, "Spell %d: consuming %d mana", spell_id, mana_used);
-		if (!DoHPToManaCovert(mana_used))
+		if (!DoHPToManaCovert(mana_used)) {
 			SetMana(GetMana() - mana_used);
 			TryTriggerOnValueAmount(false, true);
+		}
 	}
 
 	//set our reuse timer on long ass reuse_time spells...
