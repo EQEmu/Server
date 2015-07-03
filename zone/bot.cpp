@@ -1271,6 +1271,7 @@ void Bot::LoadAAs() {
 
 		//skip expendables
 		if(!ability->first || ability->charges > 0) {
+			++iter;
 			continue;
 		}
 
