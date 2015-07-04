@@ -2192,24 +2192,25 @@ void Bot::DoMeleeSkillAttackDmg(Mob* other, uint16 weapon_damage, SkillUseTypes 
 		else
 			damage = zone->random.Int(min_hit, max_hit);
 
-		if(!other->CheckHitChance(this, skillinuse, Hand, chance_mod))
-			damage = 0;
-		else {
-			other->AvoidDamage(this, damage, CanRiposte);
-			other->MeleeMitigation(this, damage, min_hit);
-			if(damage > 0) {
-				damage += damage*focus/100;
-				ApplyMeleeDamageBonus(skillinuse, damage);
-				damage += other->GetFcDamageAmtIncoming(this, 0, true, skillinuse);
-				damage += ((itembonuses.HeroicSTR / 10) + (damage * other->GetSkillDmgTaken(skillinuse) / 100) + GetSkillDmgAmt(skillinuse));
-				TryCriticalHit(other, skillinuse, damage, nullptr);
+		if (other->AvoidDamage(this, damage, CanRiposte ? MainRange : MainPrimary)) { // MainRange excludes ripo, primary doesn't have any extra behavior
+			if (damage == -3) {
+				DoRiposte(other);
+				if (HasDied())
+					return;
 			}
-		}
-
-		if (damage == -3) {
-			DoRiposte(other);
-			if (HasDied())
-				return;
+		} else {
+			if (other->CheckHitChance(this, skillinuse, Hand, chance_mod)) {
+				other->MeleeMitigation(this, damage, min_hit);
+				if (damage > 0) {
+					damage += damage*focus/100;
+					ApplyMeleeDamageBonus(skillinuse, damage);
+					damage += other->GetFcDamageAmtIncoming(this, 0, true, skillinuse);
+					damage += ((itembonuses.HeroicSTR / 10) + (damage * other->GetSkillDmgTaken(skillinuse) / 100) + GetSkillDmgAmt(skillinuse));
+					TryCriticalHit(other, skillinuse, damage, nullptr);
+				}
+			} else {
+				damage = 0;
+			}
 		}
 	}
 	else
@@ -4813,70 +4814,38 @@ bool Bot::Attack(Mob* other, int Hand, bool FromRiposte, bool IsStrikethrough, b
 		}
 
 		//check to see if we hit..
-		if(!other->CheckHitChance(other, skillinuse, Hand)) {
-			Log.Out(Logs::Detail, Logs::Combat, "Attack missed. Damage set to 0.");
-			damage = 0;
-			other->AddToHateList(this, 0);
-		} else {	//we hit, try to avoid it
-			other->AvoidDamage(this, damage);
-			other->MeleeMitigation(this, damage, min_hit, opts);
-			if(damage > 0) {
+		if (other->AvoidDamage(this, damage, Hand)) {
+			if (!FromRiposte && !IsStrikethrough) {
+				int strike_through = itembonuses.StrikeThrough + spellbonuses.StrikeThrough + aabonuses.StrikeThrough;
+				if(strike_through && zone->random.Roll(strike_through)) {
+					Message_StringID(MT_StrikeThrough, STRIKETHROUGH_STRING); // You strike through your opponents defenses!
+					Attack(other, Hand, false, true); // Strikethrough only gives another attempted hit
+					return false;
+				}
+				if (damage == -3 && !FromRiposte) {
+					DoRiposte(other);
+					if (HasDied())
+						return false;
+				}
+			}
+		} else {
+			if (other->CheckHitChance(this, skillinuse, Hand)) {
+				other->MeleeMitigation(this, damage, min_hit, opts);
 				ApplyMeleeDamageBonus(skillinuse, damage);
 				damage += ((itembonuses.HeroicSTR / 10) + (damage * other->GetSkillDmgTaken(skillinuse) / 100) + GetSkillDmgAmt(skillinuse));
 				TryCriticalHit(other, skillinuse, damage, opts);
-				Log.Out(Logs::Detail, Logs::Combat, "Generating hate %d towards %s", hate, GetCleanName());
-				// now add done damage to the hate list
-				//other->AddToHateList(this, hate);
-			}
-			else
-				other->AddToHateList(this, 0);
-			Log.Out(Logs::Detail, Logs::Combat, "Final damage after all reductions: %d", damage);
-		}
-
-		//riposte
-		bool slippery_attack = false; // Part of hack to allow riposte to become a miss, but still allow a Strikethrough chance (like on Live)
-		if (damage == -3) {
-			if (FromRiposte)
-				return false;
-			else {
-				if (Hand == MainSecondary) {// Do we even have it & was attack with mainhand? If not, don't bother with other calculations
-					//Live AA - SlipperyAttacks
-					//This spell effect most likely directly modifies the actual riposte chance when using offhand attack.
-					int32 OffhandRiposteFail = (aabonuses.OffhandRiposteFail + itembonuses.OffhandRiposteFail + spellbonuses.OffhandRiposteFail);
-					OffhandRiposteFail *= -1; //Live uses a negative value for this.
-
-					if (OffhandRiposteFail &&
-						(OffhandRiposteFail > 99 || (zone->random.Int(0, 100) < OffhandRiposteFail))) {
-						damage = 0; // Counts as a miss
-						slippery_attack = true;
-					} else
-						DoRiposte(other);
-						if (GetHP() < 0)
-							return false;
-				}
-				else
-					DoRiposte(other);
-					if (GetHP() < 0)
-						return false;
+			} else {
+				damage = 0;
 			}
 		}
-
-		if (((damage < 0) || slippery_attack) && !FromRiposte && !IsStrikethrough) { // Hack to still allow Strikethrough chance w/ Slippery Attacks AA
-			int32 bonusStrikeThrough = (itembonuses.StrikeThrough + spellbonuses.StrikeThrough + aabonuses.StrikeThrough);
-			if(bonusStrikeThrough && (zone->random.Int(0, 100) < bonusStrikeThrough)) {
-				Message_StringID(MT_StrikeThrough, STRIKETHROUGH_STRING); // You strike through your opponents defenses!
-				Attack(other, Hand, false, true); // Strikethrough only gives another attempted hit
-				return false;
-			}
-		}
+		Log.Out(Logs::Detail, Logs::Combat, "Final damage after all reductions: %d", damage);
 	}
 	else
 		damage = -5;
 
 	// Hate Generation is on a per swing basis, regardless of a hit, miss, or block, its always the same.
 	// If we are this far, this means we are atleast making a swing.
-	if (!FromRiposte)
-		other->AddToHateList(this, hate);
+	other->AddToHateList(this, hate);
 
 	///////////////////////////////////////////////////////////
 	////// Send Attack Damage
@@ -5771,132 +5740,6 @@ float Bot::GetProcChances(float ProcBonus, uint16 hand) {
 	return ProcChance;
 }
 
-bool Bot::AvoidDamage(Mob* other, int32 &damage, bool CanRiposte) {
-	if(GetAppearance() == eaDead)
-		return false;
-
-	float skill = 0;
-	float bonus = 0;
-	float RollTable[4] = {0,0,0,0};
-	float roll = 0;
-	Mob *attacker = other;
-	Mob *defender = this;
-
-	bool ghit = false;
-	if((attacker->GetSpellBonuses().MeleeSkillCheck + attacker->GetItemBonuses().MeleeSkillCheck) > 500)
-		ghit = true;
-
-	if (IsEnraged() && !other->BehindMob(this, other->GetX(), other->GetY())) {
-		damage = -3;
-		Log.Out(Logs::Detail, Logs::Combat, "I am enraged, riposting frontal attack.");
-	}
-
-	float riposte_chance = 0.0f;
-	if (CanRiposte && damage > 0 && CanThisClassRiposte() && !other->BehindMob(this, other->GetX(), other->GetY())) {
-		riposte_chance = ((100.0f + (float)defender->GetAABonuses().RiposteChance + (float)defender->GetSpellBonuses().RiposteChance + (float)defender->GetItemBonuses().RiposteChance) / 100.0f);
-		skill = GetSkill(SkillRiposte);
-		if (!ghit) {
-			bonus = (2.0 + skill / 60.0 + (GetDEX() / 200));
-			bonus *= riposte_chance;
-			RollTable[0] = (bonus + (itembonuses.HeroicDEX / 25));
-		}
-	}
-
-	bool bBlockFromRear = false;
-	bool bShieldBlockFromRear = false;
-	if (this->IsBot()) {
-		int aaChance = 0;
-		int BlockBehindChance = (aabonuses.BlockBehind + spellbonuses.BlockBehind + itembonuses.BlockBehind);
-		if (BlockBehindChance && (BlockBehindChance > zone->random.Int(1, 100))){
-			bBlockFromRear = true;
-			if (spellbonuses.BlockBehind || itembonuses.BlockBehind)
-				bShieldBlockFromRear = true;
-		}
-	}
-
-	float block_chance = 0.0f;
-	if (damage > 0 && CanThisClassBlock() && (!other->BehindMob(this, other->GetX(), other->GetY()) || bBlockFromRear)) {
-		block_chance = ((100.0f + (float)spellbonuses.IncreaseBlockChance + (float)itembonuses.IncreaseBlockChance) / 100.0f);
-		skill = GetSkill(SkillBlock);
-		if (!ghit) {
-			bonus = (2.0 + skill / 35.0 + (GetDEX() / 200));
-			RollTable[1] = (RollTable[0] + (bonus * block_chance) - riposte_chance);
-			block_chance *= bonus;
-		}
-	} else
-		RollTable[1] = RollTable[0];
-
-	if(damage > 0 && (aabonuses.ShieldBlock || spellbonuses.ShieldBlock || itembonuses.ShieldBlock)
-		&& (!other->BehindMob(this, other->GetX(), other->GetY()) || bShieldBlockFromRear)) {
-		bool equiped = GetBotItem(MainSecondary);
-		if(equiped) {
-			uint8 shield = GetBotItem(MainSecondary)->GetItem()->ItemType;
-			float bonusShieldBlock = 0.0f;
-			if(shield == ItemTypeShield) {
-				bonusShieldBlock = (aabonuses.ShieldBlock + spellbonuses.ShieldBlock + itembonuses.ShieldBlock);
-				RollTable[1] = (RollTable[0] + bonusShieldBlock);
-			}
-		}
-	}
-
-	if(damage > 0 && (aabonuses.TwoHandBluntBlock || spellbonuses.TwoHandBluntBlock || itembonuses.TwoHandBluntBlock)
-		&& (!other->BehindMob(this, other->GetX(), other->GetY()) || bShieldBlockFromRear)) {
-		bool equiped2 = GetBotItem(MainPrimary);
-		if(equiped2) {
-			uint8 TwoHandBlunt = GetBotItem(MainPrimary)->GetItem()->ItemType;
-			float bonusStaffBlock = 0.0f;
-			if(TwoHandBlunt == ItemType2HBlunt) {
-				bonusStaffBlock = (aabonuses.TwoHandBluntBlock + spellbonuses.TwoHandBluntBlock + itembonuses.TwoHandBluntBlock);
-				RollTable[1] = (RollTable[0] + bonusStaffBlock);
-			}
-		}
-	}
-
-	float parry_chance = 0.0f;
-	if (damage > 0 && CanThisClassParry() && !other->BehindMob(this, other->GetX(), other->GetY())) {
-		parry_chance = ((100.0f + (float)defender->GetSpellBonuses().ParryChance + (float)defender->GetItemBonuses().ParryChance) / 100.0f);
-		skill = GetSkill(SkillParry);
-		if (!ghit) {
-			bonus = (2.0 + skill / 60.0 + (GetDEX() / 200));
-			bonus *= parry_chance;
-			RollTable[2] = (RollTable[1] + bonus - block_chance);
-		}
-	} else
-		RollTable[2] = (RollTable[1] - block_chance);
-
-	float dodge_chance = 0.0f;
-	if (damage > 0 && CanThisClassDodge() && !other->BehindMob(this, other->GetX(), other->GetY()))	 {
-		dodge_chance = ((100.0f + (float)defender->GetSpellBonuses().DodgeChance + (float)defender->GetItemBonuses().DodgeChance) / 100.0f);
-		skill = GetSkill(SkillDodge);
-		if (!ghit) {
-			bonus = (2.0 + skill / 60.0 + (GetAGI() / 200));
-			bonus *= dodge_chance;
-			RollTable[3] = (RollTable[2] + bonus - (itembonuses.HeroicDEX / 25) + (itembonuses.HeroicAGI / 25) - parry_chance);
-		}
-	} else {
-		RollTable[3] = (RollTable[2] - (itembonuses.HeroicDEX / 25) + (itembonuses.HeroicAGI / 25) - parry_chance);
-	}
-
-	if(damage > 0) {
-		roll = zone->random.Real(0,100);
-		if(roll <= RollTable[0])
-			damage = -3;
-		else if(roll <= RollTable[1])
-			damage = -1;
-		else if(roll <= RollTable[2])
-			damage = -2;
-		else if(roll <= RollTable[3])
-			damage = -4;
-	}
-
-	Log.Out(Logs::Detail, Logs::Combat, "Final damage after all avoidances: %d", damage);
-
-	if (damage < 0)
-		return true;
-
-	return false;
-}
-
 int Bot::GetMonkHandToHandDamage(void) {
 	static int damage[66] = {
 		// 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19
@@ -5986,26 +5829,25 @@ void Bot::DoSpecialAttackDamage(Mob *who, SkillUseTypes skill, int32 max_damage,
 	}
 
 	min_damage += (min_damage * GetMeleeMinDamageMod_SE(skill) / 100);
-	if(HitChance && !who->CheckHitChance(this, skill, MainPrimary))
-		max_damage = 0;
-	else {
-		bool CanRiposte = true;
-		if(skill == SkillThrowing || skill == SkillArchery)
-			CanRiposte = false;
-
-		who->AvoidDamage(this, max_damage, CanRiposte);
-		who->MeleeMitigation(this, max_damage, min_damage);
-
-		if(max_damage > 0) {
+	int hand = MainPrimary;
+	if (skill == SkillThrowing || skill == SkillArchery)
+		hand = MainRange;
+	if (who->AvoidDamage(this, max_damage, hand)) {
+		if (max_damage == -3)
+			DoRiposte(who);
+	} else {
+		if (HitChance || who->CheckHitChance(this, skill, MainPrimary)) {
+			who->MeleeMitigation(this, max_damage, min_damage);
 			ApplyMeleeDamageBonus(skill, max_damage);
 			max_damage += who->GetFcDamageAmtIncoming(this, 0, true, skill);
 			max_damage += ((itembonuses.HeroicSTR / 10) + (max_damage * who->GetSkillDmgTaken(skill) / 100) + GetSkillDmgAmt(skill));
 			TryCriticalHit(who, skill, max_damage);
+		} else {
+			max_damage = 0;
 		}
 	}
 
-	if(max_damage >= 0)
-		who->AddToHateList(this, hate);
+	who->AddToHateList(this, hate);
 
 	who->Damage(this, max_damage, SPELL_UNKNOWN, skill, false);
 
@@ -6030,9 +5872,6 @@ void Bot::DoSpecialAttackDamage(Mob *who, SkillUseTypes skill, int32 max_damage,
 
 	if (max_damage > 0 && HasSkillProcSuccess())
 		TrySkillProc(who, skill, (ReuseTime * 1000), true);
-
-	if(max_damage == -3 && !(who->GetHP() <= 0))
-		DoRiposte(who);
 }
 
 void Bot::TryBackstab(Mob *other, int ReuseTime) {

@@ -1,5 +1,10 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 7/4/2015 ==
+mackal: Reworked the activated avoidace skills (riposte, dodge, etc) based on dev quotes
+	This also fixes the order things are checked (avoidance skills, THEN hit/miss)
+	Also riposte immunity from the increase riposte chance spell effect.
+
 == 7/2/2015 ==
 KLS/Demonstar55: AA system has been rewritten fixing a ton of bugs and extending functionality while making it easier to create new AA points.
 KLS/Demonstar55: New tables are needed and so older data will need to be migrated to the new system.

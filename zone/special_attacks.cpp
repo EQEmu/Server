@@ -130,22 +130,19 @@ void Mob::DoSpecialAttackDamage(Mob *who, SkillUseTypes skill, int32 max_damage,
 
 	min_damage += min_damage * GetMeleeMinDamageMod_SE(skill) / 100;
 
-	if(HitChance && !who->CheckHitChance(this, skill, MainPrimary))
-		max_damage = 0;
-
-	else{
-		bool CanRiposte = true;
-		if(skill == SkillThrowing || skill == SkillArchery) // changed from '&&'
-			CanRiposte = false;
-
-		if (CanAvoid)
-			who->AvoidDamage(this, max_damage, CanRiposte);
-
-		who->MeleeMitigation(this, max_damage, min_damage);
-
-		if(max_damage > 0)
+	int hand = MainPrimary; // Avoid checks hand for throwing/archery exclusion, primary should work for most
+	if (skill == SkillThrowing || skill == SkillArchery)
+		hand = MainRange;
+	if (who->AvoidDamage(this, max_damage, hand)) {
+		if (max_damage == -3)
+			DoRiposte(who);
+	} else {
+		if (HitChance || who->CheckHitChance(this, skill, MainPrimary)) {
+			who->MeleeMitigation(this, max_damage, min_damage);
 			CommonOutgoingHitSuccess(who, max_damage, skill);
-
+		} else {
+			max_damage = 0;
+		}
 	}
 
 	who->AddToHateList(this, hate, 0, false);
@@ -168,8 +165,6 @@ void Mob::DoSpecialAttackDamage(Mob *who, SkillUseTypes skill, int32 max_damage,
 	if (max_damage > 0 && HasSkillProcSuccess())
 		TrySkillProc(who, skill, ReuseTime*1000, true);
 
-	if(max_damage == -3 && !who->HasDied())
-		DoRiposte(who);
 }
 
 
@@ -972,7 +967,7 @@ void Mob::DoArcheryAttackDmg(Mob* other,  const ItemInst* RangeWeapon, const Ite
 			}
 
 			if (!HeadShot)
-				other->AvoidDamage(this, TotalDmg, false);
+				other->AvoidDamage(this, TotalDmg, MainRange);
 
 			other->MeleeMitigation(this, TotalDmg, minDmg);
 			if(TotalDmg > 0){
@@ -1305,7 +1300,7 @@ void NPC::DoRangedAttackDmg(Mob* other, bool Launch, int16 damage_mod, int16 cha
 
 		TotalDmg += TotalDmg *  damage_mod / 100;
 
-		other->AvoidDamage(this, TotalDmg, false);
+		other->AvoidDamage(this, TotalDmg, MainRange);
 		other->MeleeMitigation(this, TotalDmg, MinDmg);
 
 		if (TotalDmg > 0)
@@ -1539,7 +1534,7 @@ void Mob::DoThrowingAttackDmg(Mob* other, const ItemInst* RangeWeapon, const Ite
 
 			Log.Out(Logs::Detail, Logs::Combat, "Item DMG %d. Max Damage %d. Hit for damage %d", WDmg, MaxDmg, TotalDmg);
 			if (!Assassinate_Dmg)
-				other->AvoidDamage(this, TotalDmg, false); //CanRiposte=false - Can not riposte throw attacks.
+				other->AvoidDamage(this, TotalDmg, MainRange);
 
 			other->MeleeMitigation(this, TotalDmg, minDmg);
 			if(TotalDmg > 0)
@@ -2411,26 +2406,25 @@ void Mob::DoMeleeSkillAttackDmg(Mob* other, uint16 weapon_damage, SkillUseTypes 
 		else
 			damage = zone->random.Int(min_hit, max_hit);
 
-		if(!other->CheckHitChance(this, skillinuse, Hand, chance_mod)) {
-			damage = 0;
+		if (other->AvoidDamage(this, damage, CanRiposte ? MainRange : MainPrimary)) { // MainRange excludes ripo, primary doesn't have any extra behavior
+			if (damage == -3) {
+				DoRiposte(other);
+				if (HasDied())
+					return;
+			}
 		} else {
-			other->AvoidDamage(this, damage, CanRiposte);
-			other->MeleeMitigation(this, damage, min_hit);
-			if(damage > 0)
+			if (other->CheckHitChance(this, skillinuse, Hand, chance_mod)) {
+				other->MeleeMitigation(this, damage, min_hit);
 				CommonOutgoingHitSuccess(other, damage, skillinuse);
+			} else {
+				damage = 0;
+			}
 		}
 
-		if (damage == -3) {
-			DoRiposte(other);
-			if (HasDied())
-				return;
-		}
 	}
 
 	else
 		damage = -5;
-
-	other->AddToHateList(this, hate);
 
 	bool CanSkillProc = true;
 	if (skillinuse == SkillOffense){ //Hack to allow damage to display.

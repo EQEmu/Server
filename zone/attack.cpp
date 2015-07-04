@@ -341,7 +341,7 @@ bool Mob::CheckHitChance(Mob* other, SkillUseTypes skillinuse, int Hand, int16 c
 	return(tohit_roll <= chancetohit);
 }
 
-bool Mob::AvoidDamage(Mob* other, int32 &damage, bool CanRiposte)
+bool Mob::AvoidDamage(Mob *other, int32 &damage, int hand)
 {
 	/* called when a mob is attacked, does the checks to see if it's a hit
 	* and does other mitigation checks. 'this' is the mob being attacked.
@@ -353,22 +353,32 @@ bool Mob::AvoidDamage(Mob* other, int32 &damage, bool CanRiposte)
 	* -4 - dodge
 	*
 	*/
-	float skill;
-	float bonus;
-	float RollTable[4] = {0,0,0,0};
-	float roll;
-	Mob *attacker=other;
-	Mob *defender=this;
 
-	//garunteed hit
-	bool ghit = false;
-	if((attacker->aabonuses.MeleeSkillCheck + attacker->spellbonuses.MeleeSkillCheck + attacker->itembonuses.MeleeSkillCheck) > 500)
-		ghit = true;
+	/* Order according to current (SoF+?) dev quotes:
+	 * https://forums.daybreakgames.com/eq/index.php?threads/test-update-06-10-15.223510/page-2#post-3261772
+	 * https://forums.daybreakgames.com/eq/index.php?threads/test-update-06-10-15.223510/page-2#post-3268227
+	 * Riposte 50, hDEX, must have weapon/fists, doesn't work on archery/throwing
+	 * Block 25, hDEX, works on archery/throwing, behind block done here if back to attacker base1 is chance
+	 * Parry 45, hDEX, doesn't work on throwing/archery, must be facing target
+	 * Dodge 45, hAGI, works on archery/throwing, monks can dodge attacks from behind
+	 * Shield Block, rand base1
+	 * Staff Block, rand base1
+	 *    regular strike through
+	 *    avoiding the attack (CheckHitChance)
+	 * As soon as one succeeds, none of the rest are checked
+	 *
+	 * Formula (all int math)
+	 * (posted for parry, assume rest at the same)
+	 * Chance = (((SKILL + 100) + [((SKILL+100) * SPA(175).Base1) / 100]) / 45) + [(hDex / 25) - min([hDex / 25], hStrikethrough)].
+	 * hStrikethrough is a mob stat that was added to counter the bonuses of heroic stats
+	 * Number rolled against 100, if the chance is greater than 100 it happens 100% of time
+	 *
+	 * Things with 10k accuracy mods can be avoided with these skills qq
+	 */
+	Mob *attacker = other;
+	Mob *defender = this;
 
-	bool InFront = false;
-
-	if (attacker->InFrontMob(this, attacker->GetX(), attacker->GetY()))
-		InFront = true;
+	bool InFront = attacker->InFrontMob(this, attacker->GetX(), attacker->GetY());
 
 	/*
 	This special ability adds a negative modifer to the defenders riposte/block/parry/chance
@@ -383,10 +393,9 @@ bool Mob::AvoidDamage(Mob* other, int32 &damage, bool CanRiposte)
 	int counter_parry = 0;
 	int counter_dodge = 0;
 
-	if (attacker->GetSpecialAbility(COUNTER_AVOID_DAMAGE)){
-
+	if (attacker->GetSpecialAbility(COUNTER_AVOID_DAMAGE)) {
 		counter_all = attacker->GetSpecialAbilityParam(COUNTER_AVOID_DAMAGE, 0);
-		counter_riposte = attacker->GetSpecialAbilityParam(COUNTER_AVOID_DAMAGE,1);
+		counter_riposte = attacker->GetSpecialAbilityParam(COUNTER_AVOID_DAMAGE, 1);
 		counter_block = attacker->GetSpecialAbilityParam(COUNTER_AVOID_DAMAGE, 2);
 		counter_parry = attacker->GetSpecialAbilityParam(COUNTER_AVOID_DAMAGE, 3);
 		counter_dodge = attacker->GetSpecialAbilityParam(COUNTER_AVOID_DAMAGE, 4);
@@ -400,31 +409,37 @@ bool Mob::AvoidDamage(Mob* other, int32 &damage, bool CanRiposte)
 		Log.Out(Logs::Detail, Logs::Combat, "I am enraged, riposting frontal attack.");
 	}
 
-	/////////////////////////////////////////////////////////
-	// riposte
-	/////////////////////////////////////////////////////////
-	float riposte_chance = 0.0f;
-	if (CanRiposte && damage > 0 && CanThisClassRiposte() && InFront)
-	{
-		riposte_chance = (100.0f + static_cast<float>(aabonuses.RiposteChance + spellbonuses.RiposteChance +
-			itembonuses.RiposteChance - counter_riposte - counter_all)) / 100.0f;
-		skill = GetSkill(SkillRiposte);
-		if (IsClient()) {
+	// riposte -- it may seem crazy, but if the attacker has SPA 173 on them, they are immune to Ripo
+	bool ImmuneRipo = attacker->aabonuses.RiposteChance || attacker->spellbonuses.RiposteChance || attacker->itembonuses.RiposteChance;
+	// Need to check if we have something in MainHand to actually attack with (or fists)
+	if (hand != MainRange && CanThisClassRiposte() && InFront && !ImmuneRipo) {
+		if (IsClient())
 			CastToClient()->CheckIncreaseSkill(SkillRiposte, other, -10);
+		// check auto discs ... I guess aa/items too :P
+		if (spellbonuses.RiposteChance == 10000 || aabonuses.RiposteChance == 10000 || itembonuses.RiposteChance == 10000) {
+			damage = -3;
+			return true;
 		}
-
-		if (!ghit) {	//if they are not using a garunteed hit discipline
-			bonus = 2.0 + skill/60.0 + (GetDEX()/200);
-			bonus *= riposte_chance;
-			bonus = mod_riposte_chance(bonus, attacker);
-			RollTable[0] = bonus + (itembonuses.HeroicDEX / 25); // 25 heroic = 1%, applies to ripo, parry, block
+		int chance = GetSkill(SkillRiposte) + 100;
+		chance += (chance * (aabonuses.RiposteChance + spellbonuses.RiposteChance + itembonuses.RiposteChance)) / 100;
+		chance /= 50;
+		chance += itembonuses.HeroicDEX / 25; // live has "heroic strickthrough" here to counter
+		if (counter_riposte || counter_all) {
+			float counter = (counter_riposte + counter_all) / 100.0f;
+			chance -= chance * counter;
+		}
+		// AA Slippery Attacks
+		if (hand == MainSecondary) {
+			int slip = aabonuses.OffhandRiposteFail + itembonuses.OffhandRiposteFail + spellbonuses.OffhandRiposteFail;
+			chance += chance * slip / 100;
+		}
+		if (chance > 0 && zone->random.Roll(chance)) { // could be <0 from offhand stuff
+			damage = -3;
+			return true;
 		}
 	}
 
-	///////////////////////////////////////////////////////
 	// block
-	///////////////////////////////////////////////////////
-
 	bool bBlockFromRear = false;
 
 	// a successful roll on this does not mean a successful block is forthcoming. only that a chance to block
@@ -435,101 +450,100 @@ bool Mob::AvoidDamage(Mob* other, int32 &damage, bool CanRiposte)
 	if (BlockBehindChance && zone->random.Roll(BlockBehindChance))
 		bBlockFromRear = true;
 
-	float block_chance = 0.0f;
-	if (damage > 0 && CanThisClassBlock() && (InFront || bBlockFromRear)) {
-		block_chance = (100.0f + static_cast<float>(aabonuses.IncreaseBlockChance + spellbonuses.IncreaseBlockChance +
-			itembonuses.IncreaseBlockChance - counter_block - counter_all)) / 100.0f;
-		skill = CastToClient()->GetSkill(SkillBlock);
-		if (IsClient()) {
+	if (CanThisClassBlock() && (InFront || bBlockFromRear)) {
+		if (IsClient())
 			CastToClient()->CheckIncreaseSkill(SkillBlock, other, -10);
-		}
-
-		if (!ghit) {	//if they are not using a garunteed hit discipline
-			bonus = 2.0 + skill/35.0 + (GetDEX()/200);
-			bonus = mod_block_chance(bonus, attacker);
-			RollTable[1] = RollTable[0] + (bonus * block_chance);
-		}
-	}
-	else{
-		RollTable[1] = RollTable[0];
-	}
-
-	//Try Shield Block OR TwoHandBluntBlockCheck
-	if(damage > 0 && HasShieldEquiped()	&& (aabonuses.ShieldBlock || spellbonuses.ShieldBlock || itembonuses.ShieldBlock) && (InFront || bBlockFromRear))
-		RollTable[1] += static_cast<float>(aabonuses.ShieldBlock + spellbonuses.ShieldBlock + itembonuses.ShieldBlock - counter_block - counter_all);
-
-	else if(damage > 0 && HasTwoHandBluntEquiped() && (aabonuses.TwoHandBluntBlock || spellbonuses.TwoHandBluntBlock || itembonuses.TwoHandBluntBlock)	&&  (InFront || bBlockFromRear))
-		RollTable[1] += static_cast<float>(aabonuses.TwoHandBluntBlock + spellbonuses.TwoHandBluntBlock + itembonuses.TwoHandBluntBlock - counter_block - counter_all);
-
-	//////////////////////////////////////////////////////
-	// parry
-	//////////////////////////////////////////////////////
-	float parry_chance = 0.0f;
-	if (damage > 0 && CanThisClassParry() && InFront){
-		parry_chance = (100.0f + static_cast<float>(aabonuses.ParryChance + itembonuses.ParryChance +
-			itembonuses.ParryChance - counter_parry - counter_all)) / 100.0f;
-		skill = CastToClient()->GetSkill(SkillParry);
-		if (IsClient()) {
-			CastToClient()->CheckIncreaseSkill(SkillParry, other, -10);
-		}
-
-		if (!ghit) {	//if they are not using a garunteed hit discipline
-			bonus = 2.0 + skill/60.0 + (GetDEX()/200);
-			bonus *= parry_chance;
-			bonus = mod_parry_chance(bonus, attacker);
-			RollTable[2] = RollTable[1] + bonus;
-		}
-	}
-	else{
-		RollTable[2] = RollTable[1];
-	}
-
-	////////////////////////////////////////////////////////
-	// dodge
-	////////////////////////////////////////////////////////
-	float dodge_chance = 0.0f;
-	if (damage > 0 && CanThisClassDodge() && InFront){
-
-		dodge_chance = (100.0f + static_cast<float>(aabonuses.DodgeChance + spellbonuses.DodgeChance +
-			itembonuses.DodgeChance - counter_dodge - counter_all)) / 100.0f;
-
-		skill = CastToClient()->GetSkill(SkillDodge);
-		if (IsClient()) {
-			CastToClient()->CheckIncreaseSkill(SkillDodge, other, -10);
-		}
-
-		if (!ghit) {	//if they are not using a garunteed hit discipline
-			bonus = 2.0 + skill/60.0 + (GetAGI()/200);
-			bonus *= dodge_chance;
-			//DCBOOMKAR
-			bonus = mod_dodge_chance(bonus, attacker);
-			RollTable[3] = RollTable[2] + bonus - (itembonuses.HeroicDEX / 25) + (itembonuses.HeroicAGI / 25);
-		}
-	}
-	else{
-		RollTable[3] = RollTable[2];
-	}
-
-	if(damage > 0){
-		roll = zone->random.Real(0,100);
-		if(roll <= RollTable[0]){
-			damage = -3;
-		}
-		else if(roll <= RollTable[1]){
+		// check auto discs ... I guess aa/items too :P
+		if (spellbonuses.IncreaseBlockChance == 10000 || aabonuses.IncreaseBlockChance == 10000 ||
+		    itembonuses.IncreaseBlockChance == 10000) {
 			damage = -1;
+			return true;
 		}
-		else if(roll <= RollTable[2]){
-			damage = -2;
+		int chance = GetSkill(SkillBlock) + 100;
+		chance += (chance * (aabonuses.IncreaseBlockChance + spellbonuses.IncreaseBlockChance + itembonuses.IncreaseBlockChance)) / 100;
+		chance /= 25;
+		chance += itembonuses.HeroicDEX / 25; // live has "heroic strickthrough" here to counter
+		if (counter_block || counter_all) {
+			float counter = (counter_block + counter_all) / 100.0f;
+			chance -= chance * counter;
 		}
-		else if(roll <= RollTable[3]){
-			damage = -4;
+		if (zone->random.Roll(chance)) {
+			damage = -1;
+			return true;
 		}
 	}
 
-	Log.Out(Logs::Detail, Logs::Combat, "Final damage after all avoidances: %d", damage);
+	// parry
+	if (CanThisClassParry() && InFront && hand != MainRange) {
+		if (IsClient())
+			CastToClient()->CheckIncreaseSkill(SkillParry, other, -10);
+		// check auto discs ... I guess aa/items too :P
+		if (spellbonuses.ParryChance == 10000 || aabonuses.ParryChance == 10000 || itembonuses.ParryChance == 10000) {
+			damage = -2;
+			return true;
+		}
+		int chance = GetSkill(SkillParry) + 100;
+		chance += (chance * (aabonuses.ParryChance + spellbonuses.ParryChance + itembonuses.ParryChance)) / 100;
+		chance /= 45;
+		chance += itembonuses.HeroicDEX / 25; // live has "heroic strickthrough" here to counter
+		if (counter_parry || counter_all) {
+			float counter = (counter_parry + counter_all) / 100.0f;
+			chance -= chance * counter;
+		}
+		if (zone->random.Roll(chance)) {
+			damage = -2;
+			return true;
+		}
+	}
 
-	if (damage < 0)
-		return true;
+	// dodge
+	if (CanThisClassDodge() && (InFront || GetClass() == MONK) ) {
+		if (IsClient())
+			CastToClient()->CheckIncreaseSkill(SkillDodge, other, -10);
+		// check auto discs ... I guess aa/items too :P
+		if (spellbonuses.DodgeChance == 10000 || aabonuses.DodgeChance == 10000 || itembonuses.DodgeChance == 10000) {
+			damage = -4;
+			return true;
+		}
+		int chance = GetSkill(SkillDodge) + 100;
+		chance += (chance * (aabonuses.DodgeChance + spellbonuses.DodgeChance + itembonuses.DodgeChance)) / 100;
+		chance /= 45;
+		chance += itembonuses.HeroicAGI / 25; // live has "heroic strickthrough" here to counter
+		if (counter_dodge || counter_all) {
+			float counter = (counter_dodge + counter_all) / 100.0f;
+			chance -= chance * counter;
+		}
+		if (zone->random.Roll(chance)) {
+			damage = -4;
+			return true;
+		}
+	}
+
+	// Try Shield Block OR TwoHandBluntBlockCheck
+	if (HasShieldEquiped() && (aabonuses.ShieldBlock || spellbonuses.ShieldBlock || itembonuses.ShieldBlock) && (InFront || bBlockFromRear)) {
+		int chance = aabonuses.ShieldBlock + spellbonuses.ShieldBlock + itembonuses.ShieldBlock;
+		if (counter_block || counter_all) {
+			float counter = (counter_block + counter_all) / 100.0f;
+			chance -= chance * counter;
+		}
+		if (zone->random.Roll(chance)) {
+			damage = -1;
+			return true;
+		}
+	}
+
+	if (HasTwoHandBluntEquiped() && (aabonuses.TwoHandBluntBlock || spellbonuses.TwoHandBluntBlock || itembonuses.TwoHandBluntBlock) && (InFront || bBlockFromRear)) {
+		int chance = aabonuses.TwoHandBluntBlock + itembonuses.TwoHandBluntBlock + spellbonuses.TwoHandBluntBlock;
+		if (counter_block || counter_all) {
+			float counter = (counter_block + counter_all) / 100.0f;
+			chance -= chance * counter;
+		}
+		if (zone->random.Roll(chance)) {
+			damage = -1;
+			return true;
+		}
+	}
+
 	return false;
 }
 
@@ -1286,6 +1300,7 @@ bool Client::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, b
 			}
 		}
 
+		// this effect is actually a min cap that happens after the final damage is calculated
 		min_hit += min_hit * GetMeleeMinDamageMod_SE(skillinuse) / 100;
 
 		if(max_hit < min_hit)
@@ -1312,62 +1327,41 @@ bool Client::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, b
 		}
 
 		//check to see if we hit..
-		if(!other->CheckHitChance(this, skillinuse, Hand, hit_chance_bonus)) {
-			Log.Out(Logs::Detail, Logs::Combat, "Attack missed. Damage set to 0.");
-			damage = 0;
-		} else {	//we hit, try to avoid it
-			other->AvoidDamage(this, damage);
-			other->MeleeMitigation(this, damage, min_hit, opts);
-			if(damage > 0)
-				CommonOutgoingHitSuccess(other, damage, skillinuse);
-
-			Log.Out(Logs::Detail, Logs::Combat, "Final damage after all reductions: %d", damage);
-		}
-
-		//riposte
-		bool slippery_attack = false; // Part of hack to allow riposte to become a miss, but still allow a Strikethrough chance (like on Live)
-		if (damage == -3) {
-			if (bRiposte) return false;
-			else {
-				if (Hand == MainSecondary) {// Do we even have it & was attack with mainhand? If not, don't bother with other calculations
-					//Live AA - SlipperyAttacks
-					//This spell effect most likely directly modifies the actual riposte chance when using offhand attack.
-					int32 OffhandRiposteFail = aabonuses.OffhandRiposteFail + itembonuses.OffhandRiposteFail + spellbonuses.OffhandRiposteFail;
-					OffhandRiposteFail *= -1; //Live uses a negative value for this.
-
-					if (OffhandRiposteFail &&
-						(OffhandRiposteFail > 99 || zone->random.Roll(OffhandRiposteFail))) {
-						damage = 0; // Counts as a miss
-						slippery_attack = true;
-					} else
-						DoRiposte(other);
-						if (IsDead()) return false;
+		if (other->AvoidDamage(this, damage, Hand)) {
+			if (!bRiposte && !IsStrikethrough) {
+				int strike_through = itembonuses.StrikeThrough + spellbonuses.StrikeThrough + aabonuses.StrikeThrough;
+				if(strike_through && zone->random.Roll(strike_through)) {
+					Message_StringID(MT_StrikeThrough, STRIKETHROUGH_STRING); // You strike through your opponents defenses!
+					Attack(other, Hand, false, true); // Strikethrough only gives another attempted hit
+					return false;
 				}
-				else
+				// I'm pretty sure you can riposte a riposte
+				if (damage == -3 && !bRiposte) {
 					DoRiposte(other);
-					if (IsDead()) return false;
+					if (IsDead())
+						return false;
+				}
+			}
+			Log.Out(Logs::Detail, Logs::Combat, "Avoided damage with code %d", damage);
+		} else {
+			if (other->CheckHitChance(this, skillinuse, Hand, hit_chance_bonus)) {
+				other->MeleeMitigation(this, damage, min_hit, opts);
+				if (damage > 0)
+					CommonOutgoingHitSuccess(other, damage, skillinuse);
+				Log.Out(Logs::Detail, Logs::Combat, "Final damage after all reductions: %d", damage);
+			} else {
+				Log.Out(Logs::Detail, Logs::Combat, "Attack missed. Damage set to 0.");
+				damage = 0;
 			}
 		}
-
-		if (((damage < 0) || slippery_attack) && !bRiposte && !IsStrikethrough) { // Hack to still allow Strikethrough chance w/ Slippery Attacks AA
-			int32 bonusStrikeThrough = itembonuses.StrikeThrough + spellbonuses.StrikeThrough + aabonuses.StrikeThrough;
-
-			if(bonusStrikeThrough && zone->random.Roll(bonusStrikeThrough)) {
-				Message_StringID(MT_StrikeThrough, STRIKETHROUGH_STRING); // You strike through your opponents defenses!
-				Attack(other, Hand, false, true); // Strikethrough only gives another attempted hit
-				return false;
-			}
-		}
-	}
-	else{
+	} else {
 		damage = -5;
 	}
 
 	// Hate Generation is on a per swing basis, regardless of a hit, miss, or block, its always the same.
 	// If we are this far, this means we are atleast making a swing.
 
-	if (!bRiposte) // Ripostes never generate any aggro.
-		other->AddToHateList(this, hate);
+	other->AddToHateList(this, hate);
 
 	///////////////////////////////////////////////////////////
 	////// Send Attack Damage
@@ -1912,21 +1906,18 @@ bool NPC::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool
 				hit_chance_bonus += opts->hit_chance;
 			}
 
-			if(!other->CheckHitChance(this, skillinuse, Hand, hit_chance_bonus)) {
-				damage = 0;	//miss
-			} else {	//hit, check for damage avoidance
-				other->AvoidDamage(this, damage);
-				other->MeleeMitigation(this, damage, min_dmg+eleBane, opts);
-				if(damage > 0) {
+			if (other->AvoidDamage(this, damage, Hand)) {
+				if (!bRiposte && damage == -3)
+					DoRiposte(other);
+			} else {
+				if (other->CheckHitChance(this, skillinuse, Hand, hit_chance_bonus)) {
+					other->MeleeMitigation(this, damage, min_dmg+eleBane, opts);
 					CommonOutgoingHitSuccess(other, damage, skillinuse);
+				} else {
+					damage = 0;
 				}
-				Log.Out(Logs::Detail, Logs::Combat, "Generating hate %d towards %s", hate, GetName());
-				// now add done damage to the hate list
-				if(damage > 0)
-					other->AddToHateList(this, hate);
-				else
-					other->AddToHateList(this, 0);
 			}
+			other->AddToHateList(this, hate);
 		}
 
 		Log.Out(Logs::Detail, Logs::Combat, "Final damage against %s: %d", other->GetName(), damage);
@@ -1938,12 +1929,6 @@ bool NPC::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool
 	}
 	else
 		damage = -5;
-
-	//cant riposte a riposte
-	if (bRiposte && damage == -3) {
-		Log.Out(Logs::Detail, Logs::Combat, "Riposte of riposte canceled.");
-		return false;
-	}
 
 	if(GetHP() > 0 && !other->HasDied()) {
 		other->Damage(this, damage, SPELL_UNKNOWN, skillinuse, false); // Not avoidable client already had thier chance to Avoid
@@ -1973,11 +1958,6 @@ bool NPC::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool
 
 	if(GetHP() > 0 && !other->HasDied())
 		TriggerDefensiveProcs(nullptr, other, Hand, damage);
-
-	// now check ripostes
-	if (damage == -3) { // riposting
-		DoRiposte(other);
-	}
 
 	if (damage > 0)
 		return true;
@@ -3581,7 +3561,7 @@ void Mob::CommonDamage(Mob* attacker, int32 &damage, const uint16 spell_id, cons
 		//final damage has been determined.
 
 		SetHP(GetHP() - damage);
-		
+
 		if (IsClient())
 			this->CastToClient()->SendHPUpdateMarquee();
 
