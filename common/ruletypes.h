@@ -448,6 +448,7 @@ RULE_BOOL(Combat, OneProcPerWeapon, true) //If enabled, One proc per weapon per 
 RULE_BOOL(Combat, ProjectileDmgOnImpact, true) //If enabled, projectiles (ie arrows) will hit on impact, instead of instantly.
 RULE_BOOL(Combat, MeleePush, true) // enable melee push
 RULE_INT(Combat, MeleePushChance, 50) // (NPCs) chance the target will be pushed. Made up, 100 actually isn't that bad
+RULE_BOOL(Combat, UseLiveCombatRounds, true) // turn this false if you don't want to worry about fixing up combat rounds for NPCs
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(NPC)

@@ -5120,6 +5120,18 @@ bool Client::CheckDualWield()
 
 void Mob::DoMainHandAttackRounds(Mob *target, ExtraAttackOptions *opts)
 {
+	if (!target)
+		return;
+
+	if (RuleB(Combat, UseLiveCombatRounds)) {
+		// A "quad" on live really is just a successful dual wield where both double attack
+		// The mobs that could triple lost the ability to when the triple attack skill was added in
+		Attack(target, MainPrimary, false, false, false, opts);
+		if (CanThisClassDoubleAttack() && CheckDoubleAttack())
+			Attack(target, MainPrimary, false, false, false, opts);
+		return;
+	}
+
 	if (IsNPC()) {
 		int16 n_atk = CastToNPC()->GetNumberOfAttacks();
 		if (n_atk <= 1) {
@@ -5133,26 +5145,23 @@ void Mob::DoMainHandAttackRounds(Mob *target, ExtraAttackOptions *opts)
 		Attack(target, MainPrimary, false, false, false, opts);
 	}
 
-	if (target) {
-		// we use this random value in three comparisons with different
-		// thresholds, and if its truely random, then this should work
-		// out reasonably and will save us compute resources.
-		int32 RandRoll = zone->random.Int(0, 99);
-		if ((CanThisClassDoubleAttack() || GetSpecialAbility(SPECATK_TRIPLE) || GetSpecialAbility(SPECATK_QUAD))
-		    // check double attack, this is NOT the same rules that clients use...
-		    &&
-		    RandRoll < (GetLevel() + NPCDualAttackModifier)) {
+	// we use this random value in three comparisons with different
+	// thresholds, and if its truely random, then this should work
+	// out reasonably and will save us compute resources.
+	int32 RandRoll = zone->random.Int(0, 99);
+	if ((CanThisClassDoubleAttack() || GetSpecialAbility(SPECATK_TRIPLE) || GetSpecialAbility(SPECATK_QUAD))
+	    // check double attack, this is NOT the same rules that clients use...
+	    &&
+	    RandRoll < (GetLevel() + NPCDualAttackModifier)) {
+		Attack(target, MainPrimary, false, false, false, opts);
+		// lets see if we can do a triple attack with the main hand
+		// pets are excluded from triple and quads...
+		if ((GetSpecialAbility(SPECATK_TRIPLE) || GetSpecialAbility(SPECATK_QUAD)) && !IsPet() &&
+		    RandRoll < (GetLevel() + NPCTripleAttackModifier)) {
 			Attack(target, MainPrimary, false, false, false, opts);
-			// lets see if we can do a triple attack with the main hand
-			// pets are excluded from triple and quads...
-			if ((GetSpecialAbility(SPECATK_TRIPLE) || GetSpecialAbility(SPECATK_QUAD)) && !IsPet() &&
-			    RandRoll < (GetLevel() + NPCTripleAttackModifier)) {
+			// now lets check the quad attack
+			if (GetSpecialAbility(SPECATK_QUAD) && RandRoll < (GetLevel() + NPCQuadAttackModifier)) {
 				Attack(target, MainPrimary, false, false, false, opts);
-				// now lets check the quad attack
-				if (GetSpecialAbility(SPECATK_QUAD) &&
-				    RandRoll < (GetLevel() + NPCQuadAttackModifier)) {
-					Attack(target, MainPrimary, false, false, false, opts);
-				}
 			}
 		}
 	}
@@ -5166,11 +5175,8 @@ void Mob::DoOffHandAttackRounds(Mob *target, ExtraAttackOptions *opts)
 	if (GetSpecialAbility(SPECATK_INNATE_DW) || GetEquipment(MaterialSecondary) != 0) {
 		if (CheckDualWield()) {
 			Attack(target, MainSecondary, false, false, false, opts);
-			if (CanThisClassDoubleAttack() && GetLevel() > 35) {
-				if (CheckDoubleAttack()) {
-					Attack(target, MainSecondary, false, false, false, opts);
-				}
-			}
+			if (CanThisClassDoubleAttack() && GetLevel() > 35 && CheckDoubleAttack())
+				Attack(target, MainSecondary, false, false, false, opts);
 		}
 	}
 }
