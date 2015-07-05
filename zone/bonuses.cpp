@@ -141,6 +141,7 @@ void Client::CalcItemBonuses(StatBonuses* newbon) {
 	ClearItemFactionBonuses();
 	SetShieldEquiped(false);
 	SetTwoHandBluntEquiped(false);
+	SetTwoHanderEquipped(false);
 
 	unsigned int i;
 	//should not include 21 (SLOT_AMMO)
@@ -154,8 +155,11 @@ void Client::CalcItemBonuses(StatBonuses* newbon) {
 		const Item_Struct *item = inst->GetItem();
 		if (i == MainSecondary && (item && item->ItemType == ItemTypeShield))
 			SetShieldEquiped(true);
-		else if (i == MainPrimary && (item && item->ItemType == ItemType2HBlunt))
+		else if (i == MainPrimary && (item && item->ItemType == ItemType2HBlunt)) {
 			SetTwoHandBluntEquiped(true);
+			SetTwoHanderEquipped(true);
+		} else if (i == MainPrimary && (item && (item->ItemType == ItemType2HSlash || item->ItemType == ItemType2HPiercing)))
+			SetTwoHanderEquipped(true);
 	}
 
 	//Power Source Slot

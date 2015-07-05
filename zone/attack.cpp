@@ -4921,7 +4921,6 @@ void Client::SetAttackTimer()
 	attack_timer.SetAtTrigger(4000, true);
 
 	Timer *TimerToUse = nullptr;
-	const Item_Struct *PrimaryWeapon = nullptr;
 
 	for (int i = MainRange; i <= MainSecondary; i++) {
 		//pick a timer
@@ -4943,19 +4942,8 @@ void Client::SetAttackTimer()
 
 		//special offhand stuff
 		if (i == MainSecondary) {
-			//if we have a 2H weapon in our main hand, no dual
-			if (PrimaryWeapon != nullptr) {
-				if (PrimaryWeapon->ItemClass == ItemClassCommon
-						&& (PrimaryWeapon->ItemType == ItemType2HSlash
-						|| PrimaryWeapon->ItemType == ItemType2HBlunt
-						|| PrimaryWeapon->ItemType == ItemType2HPiercing)) {
-					attack_dw_timer.Disable();
-					continue;
-				}
-			}
-
 			//if we cant dual wield, skip it
-			if (!CanThisClassDualWield()) {
+			if (!CanThisClassDualWield() || HasTwoHanderEquipped()) {
 				attack_dw_timer.Disable();
 				continue;
 			}
@@ -5004,9 +4992,6 @@ void Client::SetAttackTimer()
 		if (quiver_haste > 0)
 			speed *= quiver_haste;
 		TimerToUse->SetAtTrigger(std::max(RuleI(Combat, MinHastedDelay), speed), true, true);
-
-		if (i == MainPrimary)
-			PrimaryWeapon = ItemToUse;
 	}
 }
 
@@ -5044,7 +5029,7 @@ void NPC::SetAttackTimer()
 
 		//special offhand stuff
 		if (i == MainSecondary) {
-			if(!CanThisClassDualWield()) {
+			if(!CanThisClassDualWield() || HasTwoHanderEquipped()) {
 				attack_dw_timer.Disable();
 				continue;
 			}
@@ -5085,14 +5070,8 @@ void Client::DoAttackRounds(Mob *target, int hand, bool IsFromSpell)
 		}
 
 		auto extraattackchance = aabonuses.ExtraAttackChance + spellbonuses.ExtraAttackChance + itembonuses.ExtraAttackChance;
-		if (extraattackchance) {
-			auto wpn = GetInv().GetItem(MainPrimary);
-			if (wpn && (wpn->GetItem()->ItemType == ItemType2HBlunt ||
-				    wpn->GetItem()->ItemType == ItemType2HSlash ||
-				    wpn->GetItem()->ItemType == ItemType2HPiercing))
-				if (zone->random.Roll(extraattackchance))
-					Attack(target, hand, false, false, IsFromSpell);
-		}
+		if (extraattackchance && HasTwoHanderEquipped() && zone->random.Roll(extraattackchance))
+			Attack(target, hand, false, false, IsFromSpell);
 	}
 }
 

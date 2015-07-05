@@ -336,6 +336,8 @@ public:
 	inline void SetShieldEquiped(bool val) { has_shieldequiped = val; }
 	bool HasTwoHandBluntEquiped() const { return has_twohandbluntequiped; }
 	inline void SetTwoHandBluntEquiped(bool val) { has_twohandbluntequiped = val; }
+	bool HasTwoHanderEquipped() { return has_twohanderequipped; }
+	void SetTwoHanderEquipped(bool val) { has_twohanderequipped = val; }
 	virtual uint16 GetSkill(SkillUseTypes skill_num) const { return 0; }
 	virtual uint32 GetEquipment(uint8 material_slot) const { return(0); }
 	virtual int32 GetEquipmentMaterial(uint8 material_slot) const;
@@ -1221,6 +1223,7 @@ protected:
 	bool offhand;
 	bool has_shieldequiped;
 	bool has_twohandbluntequiped;
+	bool has_twohanderequipped;
 	bool has_numhits;
 	bool has_MGB;
 	bool has_ProjectIllusion;

@@ -211,6 +211,7 @@ Mob::Mob(const char* in_name,
 	trackable	= true;
 	has_shieldequiped = false;
 	has_twohandbluntequiped = false;
+	has_twohanderequipped = false;
 	has_numhits = false;
 	has_MGB = false;
 	has_ProjectIllusion = false;
