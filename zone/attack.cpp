@@ -5103,3 +5103,61 @@ bool Client::CheckDualWield()
 
 	return zone->random.Int(1, 375) <= chance;
 }
+
+void Mob::DoMainHandAttackRounds(Mob *target, ExtraAttackOptions *opts)
+{
+	if (IsNPC()) {
+		int16 n_atk = CastToNPC()->GetNumberOfAttacks();
+		if (n_atk <= 1) {
+			Attack(target, MainPrimary, false, false, false, opts);
+		} else {
+			for (int i = 0; i < n_atk; ++i) {
+				Attack(target, MainPrimary, false, false, false, opts);
+			}
+		}
+	} else {
+		Attack(target, MainPrimary, false, false, false, opts);
+	}
+
+	if (target) {
+		// we use this random value in three comparisons with different
+		// thresholds, and if its truely random, then this should work
+		// out reasonably and will save us compute resources.
+		int32 RandRoll = zone->random.Int(0, 99);
+		if ((CanThisClassDoubleAttack() || GetSpecialAbility(SPECATK_TRIPLE) || GetSpecialAbility(SPECATK_QUAD))
+		    // check double attack, this is NOT the same rules that clients use...
+		    &&
+		    RandRoll < (GetLevel() + NPCDualAttackModifier)) {
+			Attack(target, MainPrimary, false, false, false, opts);
+			// lets see if we can do a triple attack with the main hand
+			// pets are excluded from triple and quads...
+			if ((GetSpecialAbility(SPECATK_TRIPLE) || GetSpecialAbility(SPECATK_QUAD)) && !IsPet() &&
+			    RandRoll < (GetLevel() + NPCTripleAttackModifier)) {
+				Attack(target, MainPrimary, false, false, false, opts);
+				// now lets check the quad attack
+				if (GetSpecialAbility(SPECATK_QUAD) &&
+				    RandRoll < (GetLevel() + NPCQuadAttackModifier)) {
+					Attack(target, MainPrimary, false, false, false, opts);
+				}
+			}
+		}
+	}
+}
+
+void Mob::DoOffHandAttackRounds(Mob *target, ExtraAttackOptions *opts)
+{
+	if (!target)
+		return;
+	// Mobs will only dual wield w/ the flag or have a secondary weapon
+	if (GetSpecialAbility(SPECATK_INNATE_DW) || GetEquipment(MaterialSecondary) != 0) {
+		if (CheckDualWield()) {
+			Attack(target, MainSecondary, false, false, false, opts);
+			if (CanThisClassDoubleAttack()) {
+				// This isn't correct yet
+				if (zone->random.Roll(GetLevel() + 20)) {
+					Attack(target, MainSecondary, false, false, false, opts);
+				}
+			}
+		}
+	}
+}

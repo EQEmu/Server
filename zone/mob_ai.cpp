@@ -1101,42 +1101,7 @@ void Mob::AI_Process() {
 
 				//try main hand first
 				if(attack_timer.Check()) {
-					if(IsNPC()) {
-						int16 n_atk = CastToNPC()->GetNumberOfAttacks();
-						if(n_atk <= 1) {
-							Attack(target, MainPrimary);
-						} else {
-							for(int i = 0; i < n_atk; ++i) {
-								Attack(target, MainPrimary);
-							}
-						}
-					} else {
-						Attack(target, MainPrimary);
-					}
-
-					if (target) {
-						//we use this random value in three comparisons with different
-						//thresholds, and if its truely random, then this should work
-						//out reasonably and will save us compute resources.
-						int32 RandRoll = zone->random.Int(0, 99);
-						if ((CanThisClassDoubleAttack() || GetSpecialAbility(SPECATK_TRIPLE)
-								|| GetSpecialAbility(SPECATK_QUAD))
-								//check double attack, this is NOT the same rules that clients use...
-								&& RandRoll < (GetLevel() + NPCDualAttackModifier)) {
-							Attack(target, MainPrimary);
-							// lets see if we can do a triple attack with the main hand
-							//pets are excluded from triple and quads...
-							if ((GetSpecialAbility(SPECATK_TRIPLE) || GetSpecialAbility(SPECATK_QUAD))
-									&& !IsPet() && RandRoll < (GetLevel() + NPCTripleAttackModifier)) {
-								Attack(target, MainPrimary);
-								// now lets check the quad attack
-								if (GetSpecialAbility(SPECATK_QUAD)
-										&& RandRoll < (GetLevel() + NPCQuadAttackModifier)) {
-									Attack(target, MainPrimary);
-								}
-							}
-						}
-					}
+					DoMainHandAttackRounds(target);
 
 					if (GetSpecialAbility(SPECATK_FLURRY)) {
 						int flurry_chance = GetSpecialAbilityParam(SPECATK_FLURRY, 0);
@@ -1271,24 +1236,7 @@ void Mob::AI_Process() {
 
 				//now off hand
 				if (attack_dw_timer.Check() && CanThisClassDualWield())
-				{
-					int myclass = GetClass();
-					//can only dual wield without a weapon if your a monk
-					if(GetSpecialAbility(SPECATK_INNATE_DW) || (GetEquipment(MaterialSecondary) != 0 && GetLevel() > 29) || myclass == MONK || myclass == MONKGM) {
-						float DualWieldProbability = (GetSkill(SkillDualWield) + GetLevel()) / 400.0f;
-						if(zone->random.Roll(DualWieldProbability))
-						{
-							Attack(target, MainSecondary);
-							if (CanThisClassDoubleAttack())
-							{
-								if (zone->random.Roll(GetLevel() + 20))
-								{
-									Attack(target, MainSecondary);
-								}
-							}
-						}
-					}
-				}
+					DoOffHandAttackRounds(target);
 
 				//now special attacks (kick, etc)
 				if(IsNPC())

@@ -167,6 +167,8 @@ public:
 	void CommonBreakInvisible();
 	bool HasDied();
 	virtual bool CheckDualWield();
+	void DoMainHandAttackRounds(Mob *target, ExtraAttackOptions *opts = nullptr);
+	void DoOffHandAttackRounds(Mob *target, ExtraAttackOptions *opts = nullptr);
 
 	//Appearance
 	void SendLevelAppearance();
