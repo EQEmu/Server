@@ -428,16 +428,8 @@ bool Client::Process() {
 				//you can't see your target
 			}
 			else if(auto_attack_target->GetHP() > -10) {
-				float DualWieldProbability = 0.0f;
-
-				int16 Ambidexterity = aabonuses.Ambidexterity + spellbonuses.Ambidexterity + itembonuses.Ambidexterity;
-				DualWieldProbability = (GetSkill(SkillDualWield) + GetLevel() + Ambidexterity) / 400.0f; // 78.0 max
-				int16 DWBonus = spellbonuses.DualWieldChance + itembonuses.DualWieldChance;
-				DualWieldProbability += DualWieldProbability*float(DWBonus)/ 100.0f;
-
-				float random = zone->random.Real(0, 1);
 				CheckIncreaseSkill(SkillDualWield, auto_attack_target, -10);
-				if (random < DualWieldProbability) { // Max 78% of DW
+				if (CheckDualWield()) {
 					ItemInst *wpn = GetInv().GetItem(MainSecondary);
 					TryWeaponProc(wpn, auto_attack_target, MainSecondary);
 

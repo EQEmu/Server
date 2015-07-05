@@ -890,6 +890,7 @@ public:
 	void Insight(uint32 t_id);
 	bool CheckDoubleAttack(bool tripleAttack = false);
 	bool CheckDoubleRangedAttack();
+	bool CheckDualWield();
 
 	//remove charges/multiple objects from inventory:
 	//bool DecreaseByType(uint32 type, uint8 amt);

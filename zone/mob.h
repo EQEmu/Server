@@ -166,6 +166,7 @@ public:
 	void CommonOutgoingHitSuccess(Mob* defender, int32 &damage, SkillUseTypes skillInUse);
 	void CommonBreakInvisible();
 	bool HasDied();
+	virtual bool CheckDualWield();
 
 	//Appearance
 	void SendLevelAppearance();

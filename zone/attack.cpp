@@ -5075,3 +5075,31 @@ void Client::DoAttackRounds(Mob *target, int hand, bool IsFromSpell)
 		}
 	}
 }
+
+bool Mob::CheckDualWield()
+{
+	// Pets /might/ follow a slightly different progression
+	// although it could all be from pets having different skills than most mobs
+	int chance = GetSkill(SkillDualWield);
+	if (GetLevel() > 35)
+		chance += GetLevel();
+
+	chance += aabonuses.Ambidexterity + spellbonuses.Ambidexterity + itembonuses.Ambidexterity;
+	int per_inc = spellbonuses.DualWieldChance + aabonuses.DualWieldChance + itembonuses.DualWieldChance;
+	if (per_inc)
+		chance += chance * per_inc / 100;
+
+	return zone->random.Int(1, 375) <= chance;
+}
+
+bool Client::CheckDualWield()
+{
+	int chance = GetSkill(SkillDualWield) + GetLevel();
+
+	chance += aabonuses.Ambidexterity + spellbonuses.Ambidexterity + itembonuses.Ambidexterity;
+	int per_inc = spellbonuses.DualWieldChance + aabonuses.DualWieldChance + itembonuses.DualWieldChance;
+	if (per_inc)
+		chance += chance * per_inc / 100;
+
+	return zone->random.Int(1, 375) <= chance;
+}
