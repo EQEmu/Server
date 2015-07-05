@@ -278,6 +278,18 @@ NPC::NPC(const NPCType* d, Spawn2* in_respawn, const glm::vec4& position, int if
 	for(r = 0; r <= HIGHEST_SKILL; r++) {
 		skills[r] = database.GetSkillCap(GetClass(),(SkillUseTypes)r,moblevel);
 	}
+	// some overrides -- really we need to be able to set skills for mobs in the DB
+	// There are some known low level SHM/BST pets that do not follow this, which supports
+	// the theory of needing to be able to set skills for each mob separately
+	if (moblevel > 50) {
+		skills[SkillDoubleAttack] = 250;
+		skills[SkillDualWield] = 250;
+	} else if (moblevel > 3) {
+		skills[SkillDoubleAttack] = moblevel * 5;
+		skills[SkillDualWield] = skills[SkillDoubleAttack];
+	} else {
+		skills[SkillDoubleAttack] = moblevel * 5;
+	}
 
 	if(d->trap_template > 0)
 	{
@@ -1928,14 +1940,14 @@ void NPC::ModifyNPCStat(const char *identifier, const char *newValue)
 	else if(id == "pr") { PR = atoi(val.c_str()); return; }
 	else if(id == "dr") { DR = atoi(val.c_str()); return; }
 	else if(id == "PhR") { PhR = atoi(val.c_str()); return; }
-	else if(id == "runspeed") { 
+	else if(id == "runspeed") {
 		runspeed = (float)atof(val.c_str());
 		base_runspeed = (int)((float)runspeed * 40.0f);
 		base_walkspeed = base_runspeed * 100 / 265;
 		walkspeed = ((float)base_walkspeed) * 0.025f;
 		base_fearspeed = base_runspeed * 100 / 127;
 		fearspeed = ((float)base_fearspeed) * 0.025f;
-		CalcBonuses(); return; 
+		CalcBonuses(); return;
 	}
 	else if(id == "special_attacks") { NPCSpecialAttacks(val.c_str(), 0, 1); return; }
 	else if(id == "special_abilities") { ProcessSpecialAbilities(val.c_str()); return; }
