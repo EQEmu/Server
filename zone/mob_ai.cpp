@@ -827,112 +827,35 @@ void Client::AI_Process()
 
 		bool is_combat_range = CombatRange(GetTarget());
 
-		if(is_combat_range) {
-			if(charm_class_attacks_timer.Check()) {
+		if (is_combat_range) {
+			if (charm_class_attacks_timer.Check()) {
 				DoClassAttacks(GetTarget());
 			}
 
 			if (AImovement_timer->Check()) {
-				if(CalculateHeadingToTarget(GetTarget()->GetX(), GetTarget()->GetY()) != m_Position.w)
-				{
+				if (CalculateHeadingToTarget(GetTarget()->GetX(), GetTarget()->GetY()) !=
+				    m_Position.w) {
 					SetHeading(CalculateHeadingToTarget(GetTarget()->GetX(), GetTarget()->GetY()));
 					SendPosition();
 				}
 				SetCurrentSpeed(0);
 			}
-			if(GetTarget() && !IsStunned() && !IsMezzed() && !GetFeigned()) {
-				if(attack_timer.Check()) {
-					Attack(GetTarget(), MainPrimary);
-					if(GetTarget()) {
-						if(CheckDoubleAttack()) {
-							Attack(GetTarget(), MainPrimary);
-							if(GetTarget()) {
-								bool triple_attack_success = false;
-								if((((GetClass() == MONK || GetClass() == WARRIOR || GetClass() == RANGER || GetClass() == BERSERKER)
-									&& GetLevel() >= 60) || GetSpecialAbility(SPECATK_TRIPLE))
-									&& CheckDoubleAttack(true))
-								{
-									Attack(GetTarget(), MainPrimary, true);
-									triple_attack_success = true;
-								}
-
-								if(GetTarget())
-								{
-									//Live AA - Flurry, Rapid Strikes ect (Flurry does not require Triple Attack).
-									int16 flurrychance = aabonuses.FlurryChance + spellbonuses.FlurryChance + itembonuses.FlurryChance;
-
-									if (flurrychance)
-									{
-										if(zone->random.Roll(flurrychance))
-										{
-											Message_StringID(MT_NPCFlurry, YOU_FLURRY);
-											Attack(GetTarget(), MainPrimary, false);
-											Attack(GetTarget(), MainPrimary, false);
-										}
-									}
-
-									int16 ExtraAttackChanceBonus = spellbonuses.ExtraAttackChance + itembonuses.ExtraAttackChance + aabonuses.ExtraAttackChance;
-
-									if (ExtraAttackChanceBonus && GetTarget()) {
-										ItemInst *wpn = GetInv().GetItem(MainPrimary);
-										if(wpn){
-											if(wpn->GetItem()->ItemType == ItemType2HSlash ||
-												wpn->GetItem()->ItemType == ItemType2HBlunt ||
-												wpn->GetItem()->ItemType == ItemType2HPiercing )
-											{
-												if(zone->random.Roll(ExtraAttackChanceBonus))
-												{
-													Attack(GetTarget(), MainPrimary, false);
-												}
-											}
-										}
-									}
-
-									if (GetClass() == WARRIOR || GetClass() == BERSERKER)
-									{
-										if(!dead && !berserk && this->GetHPRatio() < 30)
-										{
-											entity_list.MessageClose_StringID(this, false, 200, 0, BERSERK_START, GetName());
-											berserk = true;
-										}
-										else if (berserk && this->GetHPRatio() > 30)
-										{
-											entity_list.MessageClose_StringID(this, false, 200, 0, BERSERK_END, GetName());
-											berserk = false;
-										}
-									}
-								}
-							}
-						}
-					}
+			if (GetTarget() && !IsStunned() && !IsMezzed() && !GetFeigned()) {
+				if (attack_timer.Check()) {
+					// Should charmed clients not be procing?
+					DoAttackRounds(GetTarget(), MainPrimary);
 				}
 			}
 
-			if(CanThisClassDualWield() && attack_dw_timer.Check())
-			{
-				if(GetTarget())
-				{
-					float DualWieldProbability = 0.0f;
-
-					int16 Ambidexterity = aabonuses.Ambidexterity + spellbonuses.Ambidexterity + itembonuses.Ambidexterity;
-					DualWieldProbability = (GetSkill(SkillDualWield) + GetLevel() + Ambidexterity) / 400.0f; // 78.0 max
-					int16 DWBonus = spellbonuses.DualWieldChance + itembonuses.DualWieldChance;
-					DualWieldProbability += DualWieldProbability*float(DWBonus)/ 100.0f;
-
-					if(zone->random.Roll(DualWieldProbability))
-					{
-						Attack(GetTarget(), MainSecondary);
-						if(CheckDoubleAttack())
-						{
-							Attack(GetTarget(), MainSecondary);
-						}
-
+			if (CanThisClassDualWield() && GetTarget() && !IsStunned() && !IsMezzed() && !GetFeigned()) {
+				if (attack_dw_timer.Check()) {
+					if (CheckDualWield()) {
+						// Should charmed clients not be procing?
+						DoAttackRounds(GetTarget(), MainSecondary);
 					}
 				}
 			}
-		}
-		else
-		{
+		} else {
 			if(!IsRooted())
 			{
 				if(AImovement_timer->Check())
@@ -1000,7 +923,7 @@ void Client::AI_Process()
 					animation = nspeed;
 					nspeed *= 2;
 					SetCurrentSpeed(nspeed);
-							
+
 					CalculateNewPosition2(owner->GetX(), owner->GetY(), owner->GetZ(), nspeed);
 				}
 			}
@@ -1502,7 +1425,7 @@ void Mob::AI_Process() {
 							int speed = GetWalkspeed();
 							if (dist >= 5625)
 								speed = GetRunspeed();
-							
+
 							CalculateNewPosition2(owner->GetX(), owner->GetY(), owner->GetZ(), speed);
 						}
 						else
