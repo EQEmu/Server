@@ -1,5 +1,14 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 07/05/2015 ==
+mackal: Rewrite NPC combat attack round logic
+	An NPC "quading" is really just an NPC with innate dual wield that doubles on both hands
+	The old rules allowed NPCs to hit 6 times in one round
+	NPCs also seem to have their own skill progression for DW/DA
+	See: http://www.eqemulator.org/forums/showthread.php?t=38708
+	You can set Combat:UseLiveCombatRounds to false to use the old rules
+	PC Double Attack rates kind of follow the same thing but still needs to be implemented
+
 == 7/4/2015 ==
 mackal: Reworked the activated avoidace skills (riposte, dodge, etc) based on dev quotes
 	This also fixes the order things are checked (avoidance skills, THEN hit/miss)
