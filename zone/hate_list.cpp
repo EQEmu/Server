@@ -535,37 +535,20 @@ int HateList::AreaRampage(Mob *caster, Mob *target, int count, ExtraAttackOption
 	if (!target || !caster)
 		return 0;
 
-	int ret = 0;
-	std::list<uint32> id_list;
-	auto iterator = list.begin();
-	while (iterator != list.end())
-	{
-		struct_HateList *h = (*iterator);
-		++iterator;
-		if (h && h->entity_on_hatelist && h->entity_on_hatelist != caster)
-		{
-			if (caster->CombatRange(h->entity_on_hatelist))
-			{
-				id_list.push_back(h->entity_on_hatelist->GetID());
-				++ret;
+	int hit_count = 0;
+	auto it = list.begin();
+	while (it != list.end() && hit_count < count) {
+		struct_HateList *h = (*it);
+		if (h && h->entity_on_hatelist && h->entity_on_hatelist != caster) {
+			if (caster->CombatRange(h->entity_on_hatelist)) {
+				++hit_count;
+				caster->ProcessAttackRounds(h->entity_on_hatelist, opts);
 			}
 		}
+		++it;
 	}
 
-	std::list<uint32>::iterator iter = id_list.begin();
-	while (iter != id_list.end())
-	{
-		Mob *cur = entity_list.GetMobID((*iter));
-		if (cur)
-		{
-			for (int i = 0; i < count; ++i) {
-				caster->Attack(cur, MainPrimary, false, false, false, opts);
-			}
-		}
-		iter++;
-	}
-
-	return ret;
+	return hit_count;
 }
 
 void HateList::SpellCast(Mob *caster, uint32 spell_id, float range, Mob* ae_center)

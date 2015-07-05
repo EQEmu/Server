@@ -1103,6 +1103,7 @@ void Mob::AI_Process() {
 				if(attack_timer.Check()) {
 					DoMainHandAttackRounds(target);
 
+					bool specialed = false; // NPCs can only do one of these a round
 					if (GetSpecialAbility(SPECATK_FLURRY)) {
 						int flurry_chance = GetSpecialAbilityParam(SPECATK_FLURRY, 0);
 						flurry_chance = flurry_chance > 0 ? flurry_chance : RuleI(Combat, NPCFlurryChance);
@@ -1134,6 +1135,7 @@ void Mob::AI_Process() {
 								opts.crit_flat = cur;
 
 							Flurry(&opts);
+							specialed = true;
 						}
 					}
 
@@ -1154,7 +1156,7 @@ void Mob::AI_Process() {
 						}
 					}
 
-					if (GetSpecialAbility(SPECATK_RAMPAGE))
+					if (GetSpecialAbility(SPECATK_RAMPAGE) && !specialed)
 					{
 						int rampage_chance = GetSpecialAbilityParam(SPECATK_RAMPAGE, 0);
 						rampage_chance = rampage_chance > 0 ? rampage_chance : 20;
@@ -1190,10 +1192,11 @@ void Mob::AI_Process() {
 								opts.crit_flat = cur;
 							}
 							Rampage(&opts);
+							specialed = true;
 						}
 					}
 
-					if (GetSpecialAbility(SPECATK_AREA_RAMPAGE))
+					if (GetSpecialAbility(SPECATK_AREA_RAMPAGE) && !specialed)
 					{
 						int rampage_chance = GetSpecialAbilityParam(SPECATK_AREA_RAMPAGE, 0);
 						rampage_chance = rampage_chance > 0 ? rampage_chance : 20;
@@ -1230,6 +1233,7 @@ void Mob::AI_Process() {
 							}
 
 							AreaRampage(&opts);
+							specialed = true;
 						}
 					}
 				}
@@ -1974,14 +1978,14 @@ bool Mob::Rampage(ExtraAttackOptions *opts)
 			if (m_target == GetTarget())
 				continue;
 			if (CombatRange(m_target)) {
-				Attack(m_target, MainPrimary, false, false, false, opts);
+				ProcessAttackRounds(m_target, opts);
 				index_hit++;
 			}
 		}
 	}
 
 	if (RuleB(Combat, RampageHitsTarget) && index_hit < rampage_targets)
-		Attack(GetTarget(), MainPrimary, false, false, false, opts);
+		ProcessAttackRounds(GetTarget(), opts);
 
 	return true;
 }
@@ -1999,9 +2003,8 @@ void Mob::AreaRampage(ExtraAttackOptions *opts)
 	rampage_targets = rampage_targets > 0 ? rampage_targets : 1;
 	index_hit = hate_list.AreaRampage(this, GetTarget(), rampage_targets, opts);
 
-	if(index_hit == 0) {
-		Attack(GetTarget(), MainPrimary, false, false, false, opts);
-	}
+	if(index_hit == 0)
+		ProcessAttackRounds(GetTarget(), opts);
 }
 
 uint32 Mob::GetLevelCon(uint8 mylevel, uint8 iOtherLevel) {

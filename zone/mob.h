@@ -170,6 +170,16 @@ public:
 	void DoMainHandAttackRounds(Mob *target, ExtraAttackOptions *opts = nullptr);
 	void DoOffHandAttackRounds(Mob *target, ExtraAttackOptions *opts = nullptr);
 	virtual bool CheckDoubleAttack(bool tripleAttack = false); // mob version doesn't use this flag
+	// inline process for places where we need to do them outside of the AI_Process
+	void ProcessAttackRounds(Mob *target, ExtraAttackOptions *opts = nullptr)
+	{
+		if (target) {
+			DoMainHandAttackRounds(target, opts);
+			if (CanThisClassDualWield())
+				DoOffHandAttackRounds(target, opts);
+		}
+		return;
+	}
 
 	//Appearance
 	void SendLevelAppearance();
