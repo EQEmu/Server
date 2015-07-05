@@ -5157,7 +5157,10 @@ void Mob::DoOffHandAttackRounds(Mob *target, ExtraAttackOptions *opts)
 	if (!target)
 		return;
 	// Mobs will only dual wield w/ the flag or have a secondary weapon
-	if (GetSpecialAbility(SPECATK_INNATE_DW) || GetEquipment(MaterialSecondary) != 0) {
+	// For now, SPECATK_QUAD means innate DW when Combat:UseLiveCombatRounds is true
+	if ((GetSpecialAbility(SPECATK_INNATE_DW) ||
+	     (RuleB(Combat, UseLiveCombatRounds) && GetSpecialAbility(SPECATK_QUAD))) ||
+	    GetEquipment(MaterialSecondary) != 0) {
 		if (CheckDualWield()) {
 			Attack(target, MainSecondary, false, false, false, opts);
 			if (CanThisClassDoubleAttack() && GetLevel() > 35 && CheckDoubleAttack())
