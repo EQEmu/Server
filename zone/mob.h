@@ -169,6 +169,7 @@ public:
 	virtual bool CheckDualWield();
 	void DoMainHandAttackRounds(Mob *target, ExtraAttackOptions *opts = nullptr);
 	void DoOffHandAttackRounds(Mob *target, ExtraAttackOptions *opts = nullptr);
+	virtual bool CheckDoubleAttack(bool tripleAttack = false); // mob version doesn't use this flag
 
 	//Appearance
 	void SendLevelAppearance();

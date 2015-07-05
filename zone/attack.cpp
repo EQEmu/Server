@@ -3452,6 +3452,21 @@ bool Client::CheckDoubleRangedAttack() {
 	return false;
 }
 
+bool Mob::CheckDoubleAttack(bool tripleAttack)
+{
+	// Not 100% certain pets follow this or if it's just from pets not always
+	// having the same skills as most mobs
+	int chance = GetSkill(SkillDoubleAttack);
+	if (GetLevel() > 35)
+		chance += GetLevel();
+
+	int per_inc = aabonuses.DoubleAttackChance + spellbonuses.DoubleAttackChance + itembonuses.DoubleAttackChance;
+	if (per_inc)
+		chance += chance * per_inc / 100;
+
+	return zone->random.Int(1, 500) <= chance;
+}
+
 void Mob::CommonDamage(Mob* attacker, int32 &damage, const uint16 spell_id, const SkillUseTypes skill_used, bool &avoidable, const int8 buffslot, const bool iBuffTic) {
 	// This method is called with skill_used=ABJURE for Damage Shield damage.
 	bool FromDamageShield = (skill_used == SkillAbjuration);
@@ -5029,8 +5044,7 @@ void NPC::SetAttackTimer()
 
 		//special offhand stuff
 		if (i == MainSecondary) {
-			//NPCs get it for free at 13
-			if(GetLevel() < 13) {
+			if(!CanThisClassDualWield()) {
 				attack_dw_timer.Disable();
 				continue;
 			}
@@ -5152,9 +5166,8 @@ void Mob::DoOffHandAttackRounds(Mob *target, ExtraAttackOptions *opts)
 	if (GetSpecialAbility(SPECATK_INNATE_DW) || GetEquipment(MaterialSecondary) != 0) {
 		if (CheckDualWield()) {
 			Attack(target, MainSecondary, false, false, false, opts);
-			if (CanThisClassDoubleAttack()) {
-				// This isn't correct yet
-				if (zone->random.Roll(GetLevel() + 20)) {
+			if (CanThisClassDoubleAttack() && GetLevel() > 35) {
+				if (CheckDoubleAttack()) {
 					Attack(target, MainSecondary, false, false, false, opts);
 				}
 			}
