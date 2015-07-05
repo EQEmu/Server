@@ -5061,7 +5061,13 @@ void Client::DoAttackRounds(Mob *target, int hand, bool IsFromSpell)
 
 	Attack(target, hand, false, false, IsFromSpell);
 
-	if (CanThisClassDoubleAttack()) {
+	bool candouble = CanThisClassDoubleAttack();
+	// extra off hand non-sense, can only double with skill of 150 or above
+	// or you have any amount of GiveDoubleAttack
+	if (candouble && hand == MainSecondary)
+		candouble = GetSkill(SkillDoubleAttack) > 149 || (aabonuses.GiveDoubleAttack + spellbonuses.GiveDoubleAttack + itembonuses.GiveDoubleAttack) > 0;
+
+	if (candouble) {
 		CheckIncreaseSkill(SkillDoubleAttack, target, -10);
 		if (CheckDoubleAttack())
 			Attack(target, hand, false, false, IsFromSpell);
@@ -5073,9 +5079,9 @@ void Client::DoAttackRounds(Mob *target, int hand, bool IsFromSpell)
 	if (hand == MainPrimary) {
 		auto flurrychance = aabonuses.FlurryChance + spellbonuses.FlurryChance + itembonuses.FlurryChance;
 		if (flurrychance && zone->random.Roll(flurrychance)) {
+			Attack(target, hand, false, false, IsFromSpell);
+			Attack(target, hand, false, false, IsFromSpell);
 			Message_StringID(MT_NPCFlurry, YOU_FLURRY);
-			Attack(target, hand, false, false, IsFromSpell);
-			Attack(target, hand, false, false, IsFromSpell);
 		}
 
 		auto extraattackchance = aabonuses.ExtraAttackChance + spellbonuses.ExtraAttackChance + itembonuses.ExtraAttackChance;
