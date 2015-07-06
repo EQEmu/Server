@@ -867,7 +867,7 @@ bool BaseGuildManager::QueryWithLogging(std::string query, const char *errmsg) {
 //factored out so I dont have to copy this crap.
 #ifdef BOTS
 #define GuildMemberBaseQuery \
-"SELECT c.id,c.name,c.class,c.level,c.timelaston,c.zoneid," \
+"SELECT c.id,c.name,c.class,c.level,c.last_login,c.zone_id," \
 " g.guild_id,g.rank,g.tribute_enable,g.total_tribute,g.last_tribute," \
 " g.banker,g.public_note,g.alt" \
 " FROM vwBotCharacterMobs AS c LEFT JOIN vwGuildMembers AS g ON c.id=g.char_id AND c.mobtype = g.mobtype "
