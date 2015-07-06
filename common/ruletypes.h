@@ -506,6 +506,8 @@ RULE_INT(Bots, BotAAExpansion, 8) // Bots get AAs through this expansion
 RULE_BOOL(Bots, BotGroupXP, false) // Determines whether client gets xp for bots outside their group.
 RULE_BOOL(Bots, BotBardUseOutOfCombatSongs, true) // Determines whether bard bots use additional out of combat songs.
 RULE_BOOL(Bots, BotLevelsWithOwner, false) // Auto-updates spawned bots as owner levels/de-levels (false is original behavior)
+RULE_BOOL(Bots, BotCharacterLevelEnabled, false) // Enables required level to spawn bots
+RULE_INT(Bots, BotCharacterLevel, 0) // 0 as default (if level > this value you can spawn bots if BotCharacterLevelEnabled is true)
 RULE_CATEGORY_END()
 #endif
 

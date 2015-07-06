@@ -513,16 +513,16 @@ void lua_toggle_spawn_event(int event_id, bool enable, bool strict, bool reset) 
 	quest_manager.toggle_spawn_event(event_id, enable, strict, reset);
 }
 
-void lua_summon_burried_player_corpse(uint32 char_id, float x, float y, float z, float h) {
-	quest_manager.summonburriedplayercorpse(char_id, glm::vec4(x, y, z, h));
+void lua_summon_buried_player_corpse(uint32 char_id, float x, float y, float z, float h) {
+	quest_manager.summonburiedplayercorpse(char_id, glm::vec4(x, y, z, h));
 }
 
 void lua_summon_all_player_corpses(uint32 char_id, float x, float y, float z, float h) {
 	quest_manager.summonallplayercorpses(char_id, glm::vec4(x, y, z, h));
 }
 
-int lua_get_player_burried_corpse_count(uint32 char_id) {
-	return quest_manager.getplayerburriedcorpsecount(char_id);
+int lua_get_player_buried_corpse_count(uint32 char_id) {
+	return quest_manager.getplayerburiedcorpsecount(char_id);
 }
 
 bool lua_bury_player_corpse(uint32 char_id) {
@@ -1524,9 +1524,9 @@ luabind::scope lua_register_general() {
 		luabind::def("spawn_condition", &lua_spawn_condition),
 		luabind::def("get_spawn_condition", &lua_get_spawn_condition),
 		luabind::def("toggle_spawn_event", &lua_toggle_spawn_event),
-		luabind::def("summon_burried_player_corpse", &lua_summon_burried_player_corpse),
+		luabind::def("summon_buried_player_corpse", &lua_summon_buried_player_corpse),
 		luabind::def("summon_all_player_corpses", &lua_summon_all_player_corpses),
-		luabind::def("get_player_burried_corpse_count", &lua_get_player_burried_corpse_count),
+		luabind::def("get_player_buried_corpse_count", &lua_get_player_buried_corpse_count),
 		luabind::def("bury_player_corpse", &lua_bury_player_corpse),
 		luabind::def("task_selector", &lua_task_selector),
 		luabind::def("task_set_selector", &lua_task_set_selector),

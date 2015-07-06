@@ -549,6 +549,8 @@ public:
 	void SetNumHealRotationMembers( uint8 numMembers ) { _numHealRotationMembers = numMembers; }
 	void SetBardUseOutOfCombatSongs(bool useOutOfCombatSongs) { _bardUseOutOfCombatSongs = useOutOfCombatSongs;}
 	void SetShowHelm(bool showhelm) { _showhelm = showhelm; }
+	
+	std::string CreateSayLink(Client* botOwner, const char* message, const char* name);
 
 	// Class Destructors
 	virtual ~Bot();

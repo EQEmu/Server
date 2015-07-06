@@ -1748,18 +1748,18 @@ XS(XS__clear_zone_flag)
 	XSRETURN_EMPTY;
 }
 
-XS(XS__summonburriedplayercorpse);
-XS(XS__summonburriedplayercorpse)
+XS(XS__summonburiedplayercorpse);
+XS(XS__summonburiedplayercorpse)
 {
 	dXSARGS;
 	if (items != 5)
-		Perl_croak(aTHX_ "Usage: summonburriedplayercorpse(char_id,dest_x,dest_y,dest_z,dest_heading)");
+		Perl_croak(aTHX_ "Usage: summonburiedplayercorpse(char_id,dest_x,dest_y,dest_z,dest_heading)");
 
 	bool RETVAL;
 	uint32	char_id = (int)SvIV(ST(0));
 	auto position = glm::vec4((float)SvIV(ST(1)), (float)SvIV(ST(2)), (float)SvIV(ST(3)),(float)SvIV(ST(4)));
 
-	RETVAL = quest_manager.summonburriedplayercorpse(char_id, position);
+	RETVAL = quest_manager.summonburiedplayercorpse(char_id, position);
 
 	ST(0) = boolSV(RETVAL);
 	sv_2mortal(ST(0));
@@ -1784,19 +1784,19 @@ XS(XS__summonallplayercorpses)
 	XSRETURN(1);
 }
 
-XS(XS__getplayerburriedcorpsecount);
-XS(XS__getplayerburriedcorpsecount)
+XS(XS__getplayerburiedcorpsecount);
+XS(XS__getplayerburiedcorpsecount)
 {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: getplayerburriedcorpsecount(char_id)");
+		Perl_croak(aTHX_ "Usage: getplayerburiedcorpsecount(char_id)");
 
 	uint32		RETVAL;
 	dXSTARG;
 
 	uint32	char_id = (int)SvIV(ST(0));
 
-	RETVAL = quest_manager.getplayerburriedcorpsecount(char_id);
+	RETVAL = quest_manager.getplayerburiedcorpsecount(char_id);
 	XSprePUSH; PUSHu((IV)RETVAL);
 
 	XSRETURN(1);
@@ -3712,7 +3712,7 @@ EXTERN_C XS(boot_quest)
 		newXS(strcpy(buf, "get_spawn_condition"), XS__get_spawn_condition, file);
 		newXS(strcpy(buf, "getguildnamebyid"), XS__getguildnamebyid, file);
 		newXS(strcpy(buf, "getlevel"), XS__getlevel, file);
-		newXS(strcpy(buf, "getplayerburriedcorpsecount"), XS__getplayerburriedcorpsecount, file);
+		newXS(strcpy(buf, "getplayerburiedcorpsecount"), XS__getplayerburiedcorpsecount, file);
 		newXS(strcpy(buf, "gettaskactivitydonecount"), XS__gettaskactivitydonecount, file);
 		newXS(strcpy(buf, "givecash"), XS__givecash, file);
 		newXS(strcpy(buf, "gmmove"), XS__gmmove, file);
@@ -3802,7 +3802,7 @@ EXTERN_C XS(boot_quest)
 		newXS(strcpy(buf, "stopalltimers"), XS__stopalltimers, file);
 		newXS(strcpy(buf, "stoptimer"), XS__stoptimer, file);
 		newXS(strcpy(buf, "summonallplayercorpses"), XS__summonallplayercorpses, file);
-		newXS(strcpy(buf, "summonburriedplayercorpse"), XS__summonburriedplayercorpse, file);
+		newXS(strcpy(buf, "summonburiedplayercorpse"), XS__summonburiedplayercorpse, file);
 		newXS(strcpy(buf, "summonitem"), XS__summonitem, file);
 		newXS(strcpy(buf, "surname"), XS__surname, file);
 		newXS(strcpy(buf, "targlobal"), XS__targlobal, file);
