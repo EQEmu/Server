@@ -1,5 +1,12 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 07/06/2015 ==
+mackal: Implement Triple Attack Skill
+	Parses showed about rand(1000) for the chance, may need more investigating
+	Corrected Double Attack chances as well
+	Running optional 2015_07_06_TripleAttack.sql will set current toons to their max skill
+	This is optional because the admins might want to go a different route.
+
 == 07/05/2015 ==
 mackal: Rewrite NPC combat attack round logic
 	An NPC "quading" is really just an NPC with innate dual wield that doubles on both hands

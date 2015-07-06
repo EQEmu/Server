@@ -146,7 +146,7 @@ Access Levels:
  */
 
 int command_init(void) {
-	
+
 	if
 	(
 
@@ -434,7 +434,7 @@ int command_init(void) {
 		command_add("zsave", " - Saves zheader to the database", 80, command_zsave) ||
 		command_add("zsky", "[skytype] - Change zone sky type", 80, command_zsky) ||
 		command_add("zstats", "- Show info about zone header", 80, command_zstats) ||
-		command_add("zunderworld", "[zcoord] - Sets the underworld using zcoord", 80, command_zunderworld) || 
+		command_add("zunderworld", "[zcoord] - Sets the underworld using zcoord", 80, command_zunderworld) ||
 		command_add("zuwcoords", "[z coord] - Set underworld coord", 80, command_zuwcoords)
 		)
 	{
@@ -644,8 +644,8 @@ void command_logcommand(Client *c, const char *message)
 			c->AccountName(),
 			c->AccountID(),
 			admin,c->GetName(),
-			c->GetTarget()?c->GetTarget()->GetName():"None", 
-			"Command", 
+			c->GetTarget()?c->GetTarget()->GetName():"None",
+			"Command",
 			message,
 			1
 		);
@@ -731,7 +731,7 @@ void command_setfaction(Client *c, const Seperator *sep)
     auto npcTypeID = c->GetTarget()->CastToNPC()->GetNPCTypeID();
     c->Message(15,"Setting NPC %u to faction %i",  npcTypeID, atoi(sep->argplus[1]));
 
-    std::string query = StringFormat("UPDATE npc_types SET npc_faction_id = %i WHERE id = %i", 
+    std::string query = StringFormat("UPDATE npc_types SET npc_faction_id = %i WHERE id = %i",
                                     atoi(sep->argplus[1]), npcTypeID);
     database.QueryDatabase(query);
 }
@@ -2302,7 +2302,7 @@ void command_setskill(Client *c, const Seperator *sep)
 		Log.Out(Logs::General, Logs::Normal, "Set skill request from %s, target:%s skill_id:%i value:%i",  c->GetName(), c->GetTarget()->GetName(), atoi(sep->arg[1]), atoi(sep->arg[2]) );
 		int skill_num = atoi(sep->arg[1]);
 		uint16 skill_value = atoi(sep->arg[2]);
-		if(skill_num < HIGHEST_SKILL)
+		if(skill_num <= HIGHEST_SKILL)
 			c->GetTarget()->CastToClient()->SetSkill((SkillUseTypes)skill_num, skill_value);
 	}
 }
@@ -2573,7 +2573,7 @@ void command_peekinv(Client *c, const Seperator *sep)
 
 		item_link = linker.GenerateLink();
 
-		c->Message((item_data == nullptr), "WornSlot: %i, Item: %i (%s), Charges: %i", 
+		c->Message((item_data == nullptr), "WornSlot: %i, Item: %i (%s), Charges: %i",
 			indexMain, ((item_data == nullptr) ? 0 : item_data->ID), item_link.c_str(), ((inst_main == nullptr) ? 0 : inst_main->GetCharges()));
 	}
 
@@ -2584,7 +2584,7 @@ void command_peekinv(Client *c, const Seperator *sep)
 
 		item_link = linker.GenerateLink();
 
-		c->Message((item_data == nullptr), "WornSlot: %i, Item: %i (%s), Charges: %i", 
+		c->Message((item_data == nullptr), "WornSlot: %i, Item: %i (%s), Charges: %i",
 			MainPowerSource, ((item_data == nullptr) ? 0 : item_data->ID), item_link.c_str(), ((inst_main == nullptr) ? 0 : inst_main->GetCharges()));
 	}
 
@@ -2596,7 +2596,7 @@ void command_peekinv(Client *c, const Seperator *sep)
 
 		item_link = linker.GenerateLink();
 
-		c->Message((item_data == nullptr), "InvSlot: %i, Item: %i (%s), Charges: %i", 
+		c->Message((item_data == nullptr), "InvSlot: %i, Item: %i (%s), Charges: %i",
 			indexMain, ((item_data == nullptr) ? 0 : item_data->ID), item_link.c_str(), ((inst_main == nullptr) ? 0 : inst_main->GetCharges()));
 
 		for (uint8 indexSub = SUB_BEGIN; inst_main && inst_main->IsType(ItemClassContainer) && (indexSub < EmuConstants::ITEM_CONTAINER_SIZE); ++indexSub) {
@@ -2606,7 +2606,7 @@ void command_peekinv(Client *c, const Seperator *sep)
 
 			item_link = linker.GenerateLink();
 
-			c->Message((item_data == nullptr), "  InvBagSlot: %i (Slot #%i, Bag #%i), Item: %i (%s), Charges: %i", 
+			c->Message((item_data == nullptr), "  InvBagSlot: %i (Slot #%i, Bag #%i), Item: %i (%s), Charges: %i",
 				Inventory::CalcSlotId(indexMain, indexSub), indexMain, indexSub, ((item_data == nullptr) ? 0 : item_data->ID), item_link.c_str(), ((inst_sub == nullptr) ? 0 : inst_sub->GetCharges()));
 		}
 	}
@@ -2618,7 +2618,7 @@ void command_peekinv(Client *c, const Seperator *sep)
 
 			item_link = linker.GenerateLink();
 
-			c->Message(1, "CursorSlot: %i, Item: %i (%s), Charges: %i", 
+			c->Message(1, "CursorSlot: %i, Item: %i (%s), Charges: %i",
 				MainCursor, 0, item_link.c_str(), 0);
 		}
 		else {
@@ -2630,7 +2630,7 @@ void command_peekinv(Client *c, const Seperator *sep)
 
 				item_link = linker.GenerateLink();
 
-				c->Message((item_data == nullptr), "CursorSlot: %i, Depth: %i, Item: %i (%s), Charges: %i", 
+				c->Message((item_data == nullptr), "CursorSlot: %i, Depth: %i, Item: %i (%s), Charges: %i",
 					MainCursor, cursorDepth, ((item_data == nullptr) ? 0 : item_data->ID), item_link.c_str(), ((inst_main == nullptr) ? 0 : inst_main->GetCharges()));
 
 				for (uint8 indexSub = SUB_BEGIN; (cursorDepth == 0) && inst_main && inst_main->IsType(ItemClassContainer) && (indexSub < EmuConstants::ITEM_CONTAINER_SIZE); ++indexSub) {
@@ -2640,7 +2640,7 @@ void command_peekinv(Client *c, const Seperator *sep)
 
 					item_link = linker.GenerateLink();
 
-					c->Message((item_data == nullptr), "  CursorBagSlot: %i (Slot #%i, Bag #%i), Item: %i (%s), Charges: %i", 
+					c->Message((item_data == nullptr), "  CursorBagSlot: %i (Slot #%i, Bag #%i), Item: %i (%s), Charges: %i",
 						Inventory::CalcSlotId(MainCursor, indexSub), MainCursor, indexSub, ((item_data == nullptr) ? 0 : item_data->ID), item_link.c_str(), ((inst_sub == nullptr) ? 0 : inst_sub->GetCharges()));
 				}
 			}
@@ -2655,7 +2655,7 @@ void command_peekinv(Client *c, const Seperator *sep)
 
 		item_link = linker.GenerateLink();
 
-		c->Message((item_data == nullptr), "TributeSlot: %i, Item: %i (%s), Charges: %i", 
+		c->Message((item_data == nullptr), "TributeSlot: %i, Item: %i (%s), Charges: %i",
 			indexMain, ((item_data == nullptr) ? 0 : item_data->ID), item_link.c_str(), ((inst_main == nullptr) ? 0 : inst_main->GetCharges()));
 	}
 
@@ -2667,7 +2667,7 @@ void command_peekinv(Client *c, const Seperator *sep)
 
 		item_link = linker.GenerateLink();
 
-		c->Message((item_data == nullptr), "BankSlot: %i, Item: %i (%s), Charges: %i", 
+		c->Message((item_data == nullptr), "BankSlot: %i, Item: %i (%s), Charges: %i",
 			indexMain, ((item_data == nullptr) ? 0 : item_data->ID), item_link.c_str(), ((inst_main == nullptr) ? 0 : inst_main->GetCharges()));
 
 		for (uint8 indexSub = SUB_BEGIN; inst_main && inst_main->IsType(ItemClassContainer) && (indexSub < EmuConstants::ITEM_CONTAINER_SIZE); ++indexSub) {
@@ -2677,7 +2677,7 @@ void command_peekinv(Client *c, const Seperator *sep)
 
 			item_link = linker.GenerateLink();
 
-			c->Message((item_data == nullptr), "  BankBagSlot: %i (Slot #%i, Bag #%i), Item: %i (%s), Charges: %i", 
+			c->Message((item_data == nullptr), "  BankBagSlot: %i (Slot #%i, Bag #%i), Item: %i (%s), Charges: %i",
 				Inventory::CalcSlotId(indexMain, indexSub), indexMain, indexSub, ((item_data == nullptr) ? 0 : item_data->ID), item_link.c_str(), ((inst_sub == nullptr) ? 0 : inst_sub->GetCharges()));
 		}
 	}
@@ -2688,8 +2688,8 @@ void command_peekinv(Client *c, const Seperator *sep)
 		linker.SetItemInst(inst_main);
 
 		item_link = linker.GenerateLink();
-		
-		c->Message((item_data == nullptr), "SharedBankSlot: %i, Item: %i (%s), Charges: %i", 
+
+		c->Message((item_data == nullptr), "SharedBankSlot: %i, Item: %i (%s), Charges: %i",
 			indexMain, ((item_data == nullptr) ? 0 : item_data->ID), item_link.c_str(), ((inst_main == nullptr) ? 0 : inst_main->GetCharges()));
 
 		for (uint8 indexSub = SUB_BEGIN; inst_main && inst_main->IsType(ItemClassContainer) && (indexSub < EmuConstants::ITEM_CONTAINER_SIZE); ++indexSub) {
@@ -2699,7 +2699,7 @@ void command_peekinv(Client *c, const Seperator *sep)
 
 			item_link = linker.GenerateLink();
 
-			c->Message((item_data == nullptr), "  SharedBankBagSlot: %i (Slot #%i, Bag #%i), Item: %i (%s), Charges: %i", 
+			c->Message((item_data == nullptr), "  SharedBankBagSlot: %i (Slot #%i, Bag #%i), Item: %i (%s), Charges: %i",
 				Inventory::CalcSlotId(indexMain, indexSub), indexMain, indexSub, ((item_data == nullptr) ? 0 : item_data->ID), item_link.c_str(), ((inst_sub == nullptr) ? 0 : inst_sub->GetCharges()));
 		}
 	}
@@ -2712,7 +2712,7 @@ void command_peekinv(Client *c, const Seperator *sep)
 
 		item_link = linker.GenerateLink();
 
-		c->Message((item_data == nullptr), "TradeSlot: %i, Item: %i (%s), Charges: %i", 
+		c->Message((item_data == nullptr), "TradeSlot: %i, Item: %i (%s), Charges: %i",
 			indexMain, ((item_data == nullptr) ? 0 : item_data->ID), item_link.c_str(), ((inst_main == nullptr) ? 0 : inst_main->GetCharges()));
 
 		for (uint8 indexSub = SUB_BEGIN; inst_main && inst_main->IsType(ItemClassContainer) && (indexSub < EmuConstants::ITEM_CONTAINER_SIZE); ++indexSub) {
@@ -2722,7 +2722,7 @@ void command_peekinv(Client *c, const Seperator *sep)
 
 			item_link = linker.GenerateLink();
 
-			c->Message((item_data == nullptr), "  TradeBagSlot: %i (Slot #%i, Bag #%i), Item: %i (%s), Charges: %i", 
+			c->Message((item_data == nullptr), "  TradeBagSlot: %i (Slot #%i, Bag #%i), Item: %i (%s), Charges: %i",
 				Inventory::CalcSlotId(indexMain, indexSub), indexMain, indexSub, ((item_data == nullptr) ? 0 : item_data->ID), item_link.c_str(), ((inst_sub == nullptr) ? 0 : inst_sub->GetCharges()));
 		}
 	}
@@ -2744,7 +2744,7 @@ void command_peekinv(Client *c, const Seperator *sep)
 
 				item_link = linker.GenerateLink();
 
-				c->Message((item_data == nullptr), "WorldSlot: %i, Item: %i (%s), Charges: %i", 
+				c->Message((item_data == nullptr), "WorldSlot: %i, Item: %i (%s), Charges: %i",
 					(EmuConstants::WORLD_BEGIN + indexMain), ((item_data == nullptr) ? 0 : item_data->ID), item_link.c_str(), ((inst_main == nullptr) ? 0 : inst_main->GetCharges()));
 
 				for (uint8 indexSub = SUB_BEGIN; inst_main && inst_main->IsType(ItemClassContainer) && (indexSub < EmuConstants::ITEM_CONTAINER_SIZE); ++indexSub) {
@@ -2754,7 +2754,7 @@ void command_peekinv(Client *c, const Seperator *sep)
 
 					item_link = linker.GenerateLink();
 
-					c->Message((item_data == nullptr), "  WorldBagSlot: %i (Slot #%i, Bag #%i), Item: %i (%s), Charges: %i", 
+					c->Message((item_data == nullptr), "  WorldBagSlot: %i (Slot #%i, Bag #%i), Item: %i (%s), Charges: %i",
 						INVALID_INDEX, indexMain, indexSub, ((item_data == nullptr) ? 0 : item_data->ID), item_link.c_str(), ((inst_sub == nullptr) ? 0 : inst_sub->GetCharges()));
 				}
 			}
@@ -3752,7 +3752,7 @@ void command_spellinfo(Client *c, const Seperator *sep)
 		c->Message(0, "  zonetype: %d",  s->zonetype);
 		c->Message(0, "  EnvironmentType: %d",  s->EnvironmentType);
 		c->Message(0, "  TimeOfDay: %d",  s->TimeOfDay);
-		c->Message(0, "  classes[15]: %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d", 
+		c->Message(0, "  classes[15]: %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d",
 			s->classes[0], s->classes[1], s->classes[2], s->classes[3], s->classes[4],
 			s->classes[5], s->classes[6], s->classes[7], s->classes[8], s->classes[9],
 			s->classes[10], s->classes[11], s->classes[12], s->classes[13], s->classes[14]);
@@ -3882,7 +3882,7 @@ void command_repop(Client *c, const Seperator *sep)
 		LinkedListIterator<Spawn2*> iterator(zone->spawn2_list);
 		iterator.Reset();
 		while (iterator.MoreElements()) {
-			std::string query = StringFormat("DELETE FROM respawn_times WHERE id = %lu AND instance_id = %lu", 
+			std::string query = StringFormat("DELETE FROM respawn_times WHERE id = %lu AND instance_id = %lu",
                                             (unsigned long)iterator.GetData()->GetID(),
                                             (unsigned long)zone->GetInstanceID());
 			auto results = database.QueryDatabase(query);
@@ -4256,7 +4256,7 @@ void command_spawnfix(Client *c, const Seperator *sep) {
         return;
     }
 
-    std::string query = StringFormat("UPDATE spawn2 SET x = '%f', y = '%f', z = '%f', heading = '%f' WHERE id = '%i'", 
+    std::string query = StringFormat("UPDATE spawn2 SET x = '%f', y = '%f', z = '%f', heading = '%f' WHERE id = '%i'",
                                     c->GetX(), c->GetY(), c->GetZ(), c->GetHeading(),s2->GetID());
     auto results = database.QueryDatabase(query);
     if (!results.Success()) {
@@ -4399,11 +4399,11 @@ void command_time(Client *c, const Seperator *sep)
 		c->Message(13, "To set the Time: #time HH [MM]");
 		TimeOfDay_Struct eqTime;
 		zone->zone_time.GetCurrentEQTimeOfDay( time(0), &eqTime);
-		sprintf(timeMessage,"%02d:%s%d %s (Timezone: %ih %im)", 
+		sprintf(timeMessage,"%02d:%s%d %s (Timezone: %ih %im)",
 			((eqTime.hour - 1) % 12) == 0 ? 12 : ((eqTime.hour - 1) % 12),
-			(eqTime.minute < 10) ? "0" : "", 
+			(eqTime.minute < 10) ? "0" : "",
 			eqTime.minute,
-			(eqTime.hour >= 13) ? "pm" : "am", 
+			(eqTime.hour >= 13) ? "pm" : "am",
 			zone->zone_time.getEQTimeZoneHr(),
 			zone->zone_time.getEQTimeZoneMin()
 			);
@@ -5734,7 +5734,7 @@ void command_suspend(Client *c, const Seperator *sep)
     }
 
 	std::string query = StringFormat("UPDATE `account` SET `suspendeduntil` = DATE_ADD(NOW(), INTERVAL %i DAY), "
-                                    "suspend_reason = '%s' WHERE `id` = %i", 
+                                    "suspend_reason = '%s' WHERE `id` = %i",
                                     duration, EscapeString(message).c_str(), accountID);
     auto results = database.QueryDatabase(query);
 
@@ -6206,21 +6206,21 @@ void command_npcedit(Client *c, const Seperator *sep)
 		database.QueryDatabase(query);
 		return;
 	}
-	
+
 	if (strcasecmp(sep->arg[1], "meleetype") == 0) {
         c->Message(15,"NPCID %u now has a primary melee type of %i and a secondary melee type of %i.",  npcTypeID, atoi(sep->arg[2]), atoi(sep->arg[3]));
 		std::string query = StringFormat("UPDATE npc_types SET prim_melee_type = %i, sec_melee_type = %i WHERE id = %i",  atoi(sep->arg[2]), atoi(sep->arg[3]), npcTypeID);
 		database.QueryDatabase(query);
 		return;
 	}
-	
+
 	if (strcasecmp(sep->arg[1], "rangedtype") == 0) {
         c->Message(15,"NPCID %u now has a ranged type of %i.",  npcTypeID, atoi(sep->argplus[2]));
 		std::string query = StringFormat("UPDATE npc_types SET rangedtype = %i WHERE id = %i",  atoi(sep->argplus[2]), npcTypeID);
 		database.QueryDatabase(query);
 		return;
 	}
-	
+
 	if (strcasecmp(sep->arg[1], "ammoidfile") == 0) {
         c->Message(15,"NPCID %u's ammo id file is now %i",  npcTypeID, atoi(sep->argplus[2]));
 		std::string query = StringFormat("UPDATE npc_types SET ammoidfile = %i WHERE id = %i",  atoi(sep->argplus[2]), npcTypeID);
@@ -6255,7 +6255,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 		database.QueryDatabase(query);
 		return;
 	}
-	
+
 	if (strcasecmp(sep->arg[1], "walkspeed") == 0) {
         c->Message(15,"NPCID %u now walks at %f",  npcTypeID, atof(sep->argplus[2]));
 		std::string query = StringFormat("UPDATE npc_types SET walkspeed = %f WHERE id = %i",  atof(sep->argplus[2]), npcTypeID);
@@ -6409,7 +6409,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 		database.QueryDatabase(query);
 		return;
 	}
-	
+
 	if (strcasecmp(sep->arg[1], "Avoidance") == 0) {
         c->Message(15,"NPCID %u now has %i Avoidance.",  npcTypeID, atoi(sep->argplus[2]));
 		std::string query = StringFormat("UPDATE npc_types SET avoidance = %i WHERE id = %i",  atoi(sep->argplus[2]), npcTypeID);
@@ -6465,7 +6465,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 		database.QueryDatabase(query);
 		return;
 	}
-	
+
 	if (strcasecmp(sep->arg[1], "Attackcount") == 0) {
 		c->Message(15,"NPCID %u now has attack_count set to %i", npcTypeID,atoi(sep->arg[2]));
 		std::string query = StringFormat("UPDATE npc_types SET attack_count = %i WHERE id = %i", atoi(sep->argplus[2]),npcTypeID);
@@ -6502,7 +6502,7 @@ void command_npcedit(Client *c, const Seperator *sep)
                                         "luclin_hairstyle = %i, luclin_beard = %i, "
                                         "face = %i, drakkin_heritage = %i, "
                                         "drakkin_tattoo = %i, drakkin_details = %i "
-                                        "WHERE id = %i", 
+                                        "WHERE id = %i",
                                         target->GetHairColor(), target->GetBeardColor(),
                                         target->GetHairStyle(), target->GetBeard(),
                                         target->GetLuclinFace(), target->GetDrakkinHeritage(),
@@ -6588,7 +6588,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 		database.QueryDatabase(query);
 		return;
 	}
-	
+
 	if (strcasecmp(sep->arg[1], "slow_mitigation") == 0) {
         c->Message(15, "NPCID %u's slow mitigation limit is now %i.",  npcTypeID, atoi(sep->arg[2]));
 		std::string query = StringFormat("UPDATE npc_types SET slow_mitigation = %i WHERE id = %i",  atoi(sep->argplus[2]), npcTypeID);
@@ -6643,7 +6643,7 @@ void command_qglobal(Client *c, const Seperator *sep) {
 	}
 
 	if(!strcasecmp(sep->arg[1], "on")) {
-        std::string query = StringFormat("UPDATE npc_types SET qglobal = 1 WHERE id = '%i'", 
+        std::string query = StringFormat("UPDATE npc_types SET qglobal = 1 WHERE id = '%i'",
                                         target->GetNPCTypeID());
         auto results = database.QueryDatabase(query);
 		if(!results.Success()) {
@@ -6656,7 +6656,7 @@ void command_qglobal(Client *c, const Seperator *sep) {
 	}
 
 	if(!strcasecmp(sep->arg[1], "off")) {
-        std::string query = StringFormat("UPDATE npc_types SET qglobal = 0 WHERE id = '%i'", 
+        std::string query = StringFormat("UPDATE npc_types SET qglobal = 0 WHERE id = '%i'",
                                         target->GetNPCTypeID());
         auto results = database.QueryDatabase(query);
 		if(!results.Success()) {
@@ -7052,13 +7052,13 @@ void command_ginfo(Client *c, const Seperator *sep)
 			if(g->membername[r][0] == '\0')
 				continue;
 			c->Message(0, "...Zoned Member: %s, Roles: %s %s %s",  g->membername[r],
-				(g->MemberRoles[r] & RoleAssist) ? "Assist" : "", 
-				(g->MemberRoles[r] & RoleTank) ? "Tank" : "", 
+				(g->MemberRoles[r] & RoleAssist) ? "Assist" : "",
+				(g->MemberRoles[r] & RoleTank) ? "Tank" : "",
 				(g->MemberRoles[r] & RolePuller) ? "Puller" : "");
 		} else {
 			c->Message(0, "...In-Zone Member: %s (0x%x) Roles: %s %s %s",  g->membername[r], g->members[r],
-				(g->MemberRoles[r] & RoleAssist) ? "Assist" : "", 
-				(g->MemberRoles[r] & RoleTank) ? "Tank" : "", 
+				(g->MemberRoles[r] & RoleAssist) ? "Assist" : "",
+				(g->MemberRoles[r] & RoleTank) ? "Tank" : "",
 				(g->MemberRoles[r] & RolePuller) ? "Puller" : "");
 
 		}
@@ -7221,7 +7221,7 @@ void command_flagedit(Client *c, const Seperator *sep) {
 		flag_name[127] = '\0';
 
         std::string query = StringFormat("UPDATE zone SET flag_needed = '%s' "
-                                        "WHERE zoneidnumber = %d AND version = %d", 
+                                        "WHERE zoneidnumber = %d AND version = %d",
                                         flag_name, zoneid, zone->GetInstanceVersion());
         auto results = database.QueryDatabase(query);
 		if(!results.Success()) {
@@ -7248,7 +7248,7 @@ void command_flagedit(Client *c, const Seperator *sep) {
 		}
 
         std::string query = StringFormat("UPDATE zone SET flag_needed = '' "
-                                        "WHERE zoneidnumber = %d AND version = %d", 
+                                        "WHERE zoneidnumber = %d AND version = %d",
                                         zoneid, zone->GetInstanceVersion());
         auto results = database.QueryDatabase(query);
 		if(!results.Success()) {
@@ -7880,7 +7880,7 @@ void command_advnpcspawn(Client *c, const Seperator *sep)
 
         std::string query = StringFormat("INSERT INTO spawngroup "
                                         "(name, spawn_limit, dist, max_x, min_x, max_y, min_y, delay) "
-                                        "VALUES (\"%s\",  %i, %f, %f, %f, %f, %f, %i)", 
+                                        "VALUES (\"%s\",  %i, %f, %f, %f, %f, %f, %i)",
                                         sep->arg[2],
                                         (sep->arg[3]? atoi(sep->arg[3]): 0),
                                         (sep->arg[4]? atof(sep->arg[4]): 0),
@@ -7907,7 +7907,7 @@ void command_advnpcspawn(Client *c, const Seperator *sep)
         }
 
         std::string query = StringFormat("INSERT INTO spawnentry (spawngroupID, npcID, chance) "
-                                        "VALUES (%i, %i, %i)", 
+                                        "VALUES (%i, %i, %i)",
                                         atoi(sep->arg[2]), atoi(sep->arg[3]), atoi(sep->arg[4]));
         auto results = database.QueryDatabase(query);
         if (!results.Success()) {
@@ -7928,7 +7928,7 @@ void command_advnpcspawn(Client *c, const Seperator *sep)
         }
 
         std::string query = StringFormat("UPDATE spawngroup SET dist = '%f', max_x = '%f', min_x = '%f', "
-                                        "max_y = '%f', min_y = '%f', delay = '%i' WHERE id = '%i'", 
+                                        "max_y = '%f', min_y = '%f', delay = '%i' WHERE id = '%i'",
                                         atof(sep->arg[3]), atof(sep->arg[4]), atof(sep->arg[5]),
                                         atof(sep->arg[6]), atof(sep->arg[7]), atoi(sep->arg[8]),
                                         atoi(sep->arg[2]));
@@ -8013,7 +8013,7 @@ void command_advnpcspawn(Client *c, const Seperator *sep)
         }
 
         std::string query = StringFormat("UPDATE spawn2 SET x = '%f', y = '%f', z = '%f', heading = '%f' "
-                                        "WHERE id = '%i'", 
+                                        "WHERE id = '%i'",
                                         c->GetX(), c->GetY(), c->GetZ(), c->GetHeading(),s2->GetID());
         auto results = database.QueryDatabase(query);
         if (!results.Success()) {
@@ -8084,7 +8084,7 @@ void command_advnpcspawn(Client *c, const Seperator *sep)
 
         int16 version = atoi(sep->arg[2]);
         std::string query = StringFormat("UPDATE spawn2 SET version = %i "
-                                        "WHERE spawngroupID = '%i'", 
+                                        "WHERE spawngroupID = '%i'",
                                         version, c->GetTarget()->CastToNPC()->GetSp2());
         auto results = database.QueryDatabase(query);
         if (!results.Success()) {
@@ -10135,7 +10135,7 @@ void command_zopp(Client *c, const Seperator *sep)
 
 		ItemInst* FakeItemInst = database.CreateItem(FakeItem, charges);
 		c->SendItemPacket(slotid, FakeItemInst, packettype);
-		c->Message(0, "Sending zephyr op packet to client - [%s] %s (%u) with %i %s to slot %i.", 
+		c->Message(0, "Sending zephyr op packet to client - [%s] %s (%u) with %i %s to slot %i.",
 			   packettype == ItemPacketTrade ? "Trade" : "Summon",  FakeItem->Name, itemid, charges,
 			   std::abs(charges == 1) ? "charge" : "charges",  slotid);
 		safe_delete(FakeItemInst);
@@ -10354,7 +10354,7 @@ void command_tune(Client *c, const Seperator *sep)
 			ac_override = 0;
 		if (!info_level)
 			info_level = 1;
-		
+
 		if(!strcasecmp(sep->arg[2], "A"))
 			c->Tune_FindATKByPctMitigation(defender, attacker, pct_mitigation, interval, max_loop,ac_override,info_level);
 		else if(!strcasecmp(sep->arg[2], "B"))
@@ -10389,7 +10389,7 @@ void command_tune(Client *c, const Seperator *sep)
 			atk_override = 0;
 		if (!info_level)
 			info_level = 1;
-				
+
 		if(!strcasecmp(sep->arg[2], "A"))
 			c->Tune_FindACByPctMitigation(defender, attacker, pct_mitigation, interval, max_loop,atk_override,info_level);
 		else if(!strcasecmp(sep->arg[2], "B"))
@@ -10431,7 +10431,7 @@ void command_tune(Client *c, const Seperator *sep)
 			c->Message(10, "#Tune - Error hit chance out of bounds. [Max %.2f Min .2f]",  RuleR(Combat,MaxChancetoHit),RuleR(Combat,MinChancetoHit));
 			return;
 		}
-		
+
 		if(!strcasecmp(sep->arg[2], "A"))
 			c->Tune_FindAccuaryByHitChance(defender, attacker, hit_chance, interval, max_loop,avoid_override,info_level);
 		else if(!strcasecmp(sep->arg[2], "B"))
@@ -10473,7 +10473,7 @@ void command_tune(Client *c, const Seperator *sep)
 			c->Message(10, "#Tune - Error hit chance out of bounds. [Max %.2f Min .2f]",  RuleR(Combat,MaxChancetoHit),RuleR(Combat,MinChancetoHit));
 			return;
 		}
-		
+
 		if(!strcasecmp(sep->arg[2], "A"))
 			c->Tune_FindAvoidanceByHitChance(defender, attacker, hit_chance, interval, max_loop,acc_override, info_level);
 		else if(!strcasecmp(sep->arg[2], "B"))
@@ -10499,7 +10499,7 @@ void command_logtest(Client *c, const Seperator *sep){
 		for (i = 0; i < atoi(sep->arg[1]); i++){
 			Log.Out(Logs::General, Logs::Debug, "[%u] Test #2... Took %f seconds", i, ((float)(std::clock() - t)) / CLOCKS_PER_SEC);
 		}
-		
+
 	}
 }
 
@@ -10555,7 +10555,7 @@ void command_logs(Client *c, const Seperator *sep){
 				c->Message(15, "Your Log Settings have been applied");
 				c->Message(15, "Output Method: %s :: Debug Level: %i - Category: %s",  sep->arg[2], atoi(sep->arg[4]), Logs::LogCategoryName[atoi(sep->arg[3])]);
 			}
-			/* We use a general 'is_category_enabled' now, let's update when we update any output settings 
+			/* We use a general 'is_category_enabled' now, let's update when we update any output settings
 				This is used in hot places of code to check if its enabled in any way before triggering logs
 			*/
 			if (sep->arg[4] > 0){
@@ -10583,9 +10583,9 @@ void command_mysqltest(Client *c, const Seperator *sep)
 		for (i = 0; i < atoi(sep->arg[1]); i++){
 			std::string query = "SELECT * FROM `zone`";
 			auto results = database.QueryDatabase(query);
-		} 
+		}
 	}
-	Log.Out(Logs::General, Logs::Debug, "MySQL Test... Took %f seconds", ((float)(std::clock() - t)) / CLOCKS_PER_SEC); 
+	Log.Out(Logs::General, Logs::Debug, "MySQL Test... Took %f seconds", ((float)(std::clock() - t)) / CLOCKS_PER_SEC);
 }
 
 void command_resetaa_timer(Client *c, const Seperator *sep) {
@@ -10596,18 +10596,18 @@ void command_resetaa_timer(Client *c, const Seperator *sep) {
 		target = c->GetTarget()->CastToClient();
 	}
 
-	if(sep->IsNumber(1)) 
+	if(sep->IsNumber(1))
 	{
 		int timer_id = atoi(sep->arg[1]);
 		c->Message(0, "Reset of timer %i for %s", timer_id, c->GetName());
 		c->ResetAlternateAdvancementTimer(timer_id);
 	}
-	else if(!strcasecmp(sep->arg[1], "all")) 
+	else if(!strcasecmp(sep->arg[1], "all"))
 	{
 		c->Message(0, "Reset all timers for %s", c->GetName());
 		c->ResetAlternateAdvancementTimers();
-	} 
-	else 
+	}
+	else
 	{
 		c->Message(0, "usage: #resetaa_timer [all | timer_id]");
 	}

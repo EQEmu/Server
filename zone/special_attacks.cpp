@@ -536,7 +536,7 @@ void Mob::TryBackstab(Mob *other, int ReuseTime) {
 
 		RogueBackstab(other,false,ReuseTime);
 		if (level > 54) {
-			if(IsClient() && CastToClient()->CheckDoubleAttack(false))
+			if(IsClient() && CastToClient()->CheckDoubleAttack())
 			{
 				if(other->GetHP() > 0)
 					RogueBackstab(other,false,ReuseTime);
@@ -558,7 +558,7 @@ void Mob::TryBackstab(Mob *other, int ReuseTime) {
 		if (level > 54) {
 
 			// Check for double attack with main hand assuming maxed DA Skill (MS)
-			if(IsClient() && CastToClient()->CheckDoubleAttack(false))
+			if(IsClient() && CastToClient()->CheckDoubleAttack())
 				if(other->GetHP() > 0)
 					RogueBackstab(other,true, ReuseTime);
 

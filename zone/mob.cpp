@@ -2409,6 +2409,14 @@ bool Mob::CanThisClassDoubleAttack(void) const
 	}
 }
 
+bool Mob::CanThisClassTripleAttack() const
+{
+	if (!IsClient())
+		return false; // When they added the real triple attack skill, mobs lost the ability to triple
+	else
+		return CastToClient()->HasSkill(SkillTripleAttack);
+}
+
 bool Mob::IsWarriorClass(void) const
 {
 	switch(GetClass())

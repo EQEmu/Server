@@ -169,7 +169,7 @@ public:
 	virtual bool CheckDualWield();
 	void DoMainHandAttackRounds(Mob *target, ExtraAttackOptions *opts = nullptr);
 	void DoOffHandAttackRounds(Mob *target, ExtraAttackOptions *opts = nullptr);
-	virtual bool CheckDoubleAttack(bool tripleAttack = false); // mob version doesn't use this flag
+	virtual bool CheckDoubleAttack();
 	// inline process for places where we need to do them outside of the AI_Process
 	void ProcessAttackRounds(Mob *target, ExtraAttackOptions *opts = nullptr)
 	{
@@ -750,6 +750,7 @@ public:
 	virtual int GetMonkHandToHandDamage(void);
 
 	bool CanThisClassDoubleAttack(void) const;
+	bool CanThisClassTripleAttack() const;
 	bool CanThisClassDualWield(void) const;
 	bool CanThisClassRiposte(void) const;
 	bool CanThisClassDodge(void) const;

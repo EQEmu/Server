@@ -3406,41 +3406,39 @@ bool Mob::HasRangedProcs() const
 	return false;
 }
 
-bool Client::CheckDoubleAttack(bool tripleAttack) {
-
+bool Client::CheckDoubleAttack()
+{
+	int chance = 0;
+	int skill = GetSkill(SkillDoubleAttack);
 	//Check for bonuses that give you a double attack chance regardless of skill (ie Bestial Frenzy/Harmonious Attack AA)
-	uint32 bonusGiveDA = aabonuses.GiveDoubleAttack + spellbonuses.GiveDoubleAttack + itembonuses.GiveDoubleAttack;
-
-	if(!HasSkill(SkillDoubleAttack) && !bonusGiveDA)
+	int bonusGiveDA = aabonuses.GiveDoubleAttack + spellbonuses.GiveDoubleAttack + itembonuses.GiveDoubleAttack;
+	if (skill > 0)
+		chance = skill + GetLevel();
+	else if (!bonusGiveDA)
 		return false;
 
-	float chance = 0.0f;
+	if (bonusGiveDA)
+		chance += bonusGiveDA / 100.0f * 500; // convert to skill value
+	int per_inc = aabonuses.DoubleAttackChance + spellbonuses.DoubleAttackChance + itembonuses.DoubleAttackChance;
+	if (per_inc)
+		chance += chance * per_inc / 100;
 
-	uint16 skill = GetSkill(SkillDoubleAttack);
+	return zone->random.Int(1, 500) <= chance;
+}
 
-	int32 bonusDA = aabonuses.DoubleAttackChance + spellbonuses.DoubleAttackChance + itembonuses.DoubleAttackChance;
+// Admittedly these parses were short, but this check worked for 3 toons across multiple levels
+// with varying triple attack skill (1-3% error at least)
+bool Client::CheckTripleAttack()
+{
+	int chance = GetSkill(SkillTripleAttack);
+	if (chance < 1)
+		return false;
 
-	//Use skill calculations otherwise, if you only have AA applied GiveDoubleAttack chance then use that value as the base.
-	if (skill)
-		chance = (float(skill+GetLevel()) * (float(100.0f+bonusDA+bonusGiveDA) /100.0f)) /500.0f;
-	else
-		chance = (float(bonusGiveDA) * (float(100.0f+bonusDA)/100.0f) ) /100.0f;
+	int per_inc = aabonuses.TripleAttackChance + spellbonuses.TripleAttackChance + itembonuses.TripleAttackChance;
+	if (per_inc)
+		chance += chance * per_inc / 100;
 
-	//Live now uses a static Triple Attack skill (lv 46 = 2% lv 60 = 20%) - We do not have this skill on EMU ATM.
-	//A reasonable forumla would then be TA = 20% * chance
-	//AA's can also give triple attack skill over cap. (ie Burst of Power) NOTE: Skill ID in spell data is 76 (Triple Attack)
-	//Kayen: Need to decide if we can implement triple attack skill before working in over the cap effect.
-	if(tripleAttack) {
-		// Only some Double Attack classes get Triple Attack [This is already checked in client_processes.cpp]
-		int32 triple_bonus = spellbonuses.TripleAttackChance + itembonuses.TripleAttackChance;
-		chance *= 0.2f; //Baseline chance is 20% of your double attack chance.
-		chance *= float(100.0f+triple_bonus)/100.0f; //Apply modifiers.
-	}
-
-	if(zone->random.Roll(chance))
-		return true;
-
-	return false;
+	return zone->random.Int(1, 1000) <= chance;
 }
 
 bool Client::CheckDoubleRangedAttack() {
@@ -3452,7 +3450,7 @@ bool Client::CheckDoubleRangedAttack() {
 	return false;
 }
 
-bool Mob::CheckDoubleAttack(bool tripleAttack)
+bool Mob::CheckDoubleAttack()
 {
 	// Not 100% certain pets follow this or if it's just from pets not always
 	// having the same skills as most mobs
@@ -5054,21 +5052,28 @@ void Client::DoAttackRounds(Mob *target, int hand, bool IsFromSpell)
 
 	if (candouble) {
 		CheckIncreaseSkill(SkillDoubleAttack, target, -10);
-		if (CheckDoubleAttack())
+		if (CheckDoubleAttack()) {
 			Attack(target, hand, false, false, IsFromSpell);
-		if (hand == MainPrimary && GetLevel() >= 60 &&
-		    (GetClass() == MONK || GetClass() == WARRIOR || GetClass() == RANGER || GetClass() == BERSERKER) &&
-		    CheckDoubleAttack(true))
-			Attack(target, hand, false, false, IsFromSpell);
+			// you can only triple from the main hand
+			if (hand == MainPrimary && CanThisClassTripleAttack()) {
+				CheckIncreaseSkill(SkillTripleAttack, target, -10);
+				if (CheckTripleAttack())
+					Attack(target, hand, false, false, IsFromSpell);
+			}
+		}
 	}
+
 	if (hand == MainPrimary) {
+		// According to http://www.monkly-business.net/forums/showpost.php?p=312095&postcount=168 a dev told them flurry isn't dependant on triple attack
+		// the parses kind of back that up and all of my parses seemed to be 4 or 5 attacks in the round which would work out to be
+		// doubles or triples with 2 from flurries or triple with 1 or 2 flurries ... Going with the "dev quote" I guess like we've always had it
 		auto flurrychance = aabonuses.FlurryChance + spellbonuses.FlurryChance + itembonuses.FlurryChance;
 		if (flurrychance && zone->random.Roll(flurrychance)) {
 			Attack(target, hand, false, false, IsFromSpell);
 			Attack(target, hand, false, false, IsFromSpell);
 			Message_StringID(MT_NPCFlurry, YOU_FLURRY);
 		}
-
+		// I haven't parsed where this guy happens, but it's not part of the normal chain above so this is fine
 		auto extraattackchance = aabonuses.ExtraAttackChance + spellbonuses.ExtraAttackChance + itembonuses.ExtraAttackChance;
 		if (extraattackchance && HasTwoHanderEquipped() && zone->random.Roll(extraattackchance))
 			Attack(target, hand, false, false, IsFromSpell);
