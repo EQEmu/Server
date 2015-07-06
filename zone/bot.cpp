@@ -132,7 +132,6 @@ Bot::Bot(uint32 botID, uint32 botOwnerCharacterID, uint32 botSpellsID, double to
 	SetHasBeenSummoned(false);
 	LoadStance();
 	SetTaunting((GetClass() == WARRIOR || GetClass() == PALADIN || GetClass() == SHADOWKNIGHT) && (GetBotStance() == BotStanceAggressive));
-	SetGroupMessagesOn(GetClass() == CLERIC || GetClass() == DRUID || GetClass() == SHAMAN || GetClass() == ENCHANTER);
 	SetInHealRotation(false);
 	SetHealRotationActive(false);
 	SetHasHealedThisCycle(false);
@@ -1857,7 +1856,7 @@ void Bot::SavePetItems(uint32* petItems, uint32 botPetSaveId) {
 	if(!petItems || botPetSaveId == 0)
         return;
 
-    for (int itemIndex = 0;itemIndex < EmuConstants::EQUIPMENT_SIZE; itemIndex++) {
+    for (int itemIndex = 0; itemIndex < EmuConstants::EQUIPMENT_SIZE; itemIndex++) {
 		if(petItems[itemIndex] == 0)
             continue;
 
@@ -6859,7 +6858,7 @@ bool Bot::SpellEffect(Mob* caster, uint16 spell_id, float partial) {
 		if(g) {
 			EQApplicationPacket hp_app;
 			CreateHPPacket(&hp_app);
-			for(int i=0; i<MAX_GROUP_MEMBERS; i++) {
+			for(int i = 0; i < MAX_GROUP_MEMBERS; i++) {
 				if(g->members[i] && g->members[i]->IsClient())
 					g->members[i]->CastToClient()->QueuePacket(&hp_app);
 			}
@@ -7188,7 +7187,7 @@ bool Bot::DoFinishedSpellSingleTarget(uint16 spell_id, Mob* spellTarget, uint16 
 		if(IsGrouped() && (spellTarget->IsBot() || spellTarget->IsClient()) && RuleB(Bots, BotGroupBuffing)) {
 			bool noGroupSpell = false;
 			uint16 thespell = spell_id;
-			for(int i=0; i < AIspells.size(); i++) {
+			for(int i = 0; i < AIspells.size(); i++) {
 				int j = BotGetSpells(i);
 				int spelltype = BotGetSpellType(i);
 				bool spellequal = (j == thespell);
@@ -7213,7 +7212,7 @@ bool Bot::DoFinishedSpellSingleTarget(uint16 spell_id, Mob* spellTarget, uint16 
 			if(!noGroupSpell) {
 				Group *g = GetGroup();
 				if(g) {
-					for(int i = 0; i < MAX_GROUP_MEMBERS;i++) {
+					for(int i = 0; i < MAX_GROUP_MEMBERS; i++) {
 						if(g->members[i]) {
 							if((g->members[i]->GetClass() == NECROMANCER) && (IsEffectInSpell(thespell, SE_AbsorbMagicAtt) || IsEffectInSpell(thespell, SE_Rune))) {
 							}
@@ -8090,7 +8089,7 @@ void Bot::BotGroupOrderAttack(Group* group, Mob* target, Client* client) {
 	if(group && target) {
 		Mob* groupLeader = group->GetLeader();
 		if(groupLeader) {
-			for(int i=0; i < MAX_GROUP_MEMBERS; i++) {
+			for(int i = 0; i < MAX_GROUP_MEMBERS; i++) {
 				if(group->members[i] && group->members[i]->IsBot()) {
 					Bot* botGroupMember = group->members[i]->CastToBot();
 					if(botGroupMember->GetBotOwnerCharacterID() == client->CharacterID()) {
@@ -8737,10 +8736,10 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 		c->Message(0, "#bot inventory remove [slotid] - remove the item at the given slot in the inventory of the targeted bot.");
 		c->Message(0, "#bot update - you must type that command once you gain a level.");
 		c->Message(0, "#bot summon - It will summon your targeted bot to you.");
-		c->Message(0, "#bot ai mez - If you're grouped with an Enchanter, he will mesmerize your target.");
+		c->Message(0, "#bot mez - If you're grouped with an Enchanter, he will mesmerize your target.");
 		c->Message(0, "#bot picklock - You must have a targeted Rogue bot in your group and be right on the door.");
 		c->Message(0, "#bot cure [poison|disease|curse|blindness] Cleric has most options");
-		c->Message(0, "#bot bindme - You must have a Cleric in your group to get Bind Affinity cast on you.");
+		c->Message(0, "#bot bind - You must have a Cleric in your group to get Bind Affinity cast on you.");
 		c->Message(0, "#bot track - look at mobs in the zone (Ranger has options)");
 		c->Message(0, "#bot target calm - attempts to pacify your target mob.");
 		c->Message(0, "#bot evac - transports your group to safe location in the current zone (bots are lost)");
@@ -8751,7 +8750,7 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 		c->Message(0, "#bot invis - Bot invisiblity (must have proper class in group)");
 		c->Message(0, "#bot levitate - Bot levitation (must have proper class in group)");
 		c->Message(0, "#bot resist - Bot resist buffs (must have proper class in group)");
-		c->Message(0, "#bot runeme - Enchanter bot casts Rune spell on you");
+		c->Message(0, "#bot rune - Enchanter bot casts Rune spell on you");
 		c->Message(0, "#bot shrink - Shaman or Beastlord will shrink target");
 		c->Message(0, "#bot endureb - Bot enduring breath (must have proper class in group)");
 		c->Message(0, "#bot charm - (must have proper class in group)");
@@ -8760,8 +8759,8 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 		c->Message(0, "#bot gate - Druid or Wizard bot will cast gate.");
 		c->Message(0, "#bot archery - Toggle Archery Skilled bots between using a Bow or using Melee weapons.");
 		c->Message(0, "#bot setpet [earth|water|air|fire|monster] - Select the pet type you want your Magician bot to use.");
-		c->Message(0, "#bot giveitem - Gives your targeted bot the item you have on your cursor.");
-		c->Message(0, "#bot augmentitem - Allows you to augment items for other classes. (You MUST have the Augmentation Sealer window filled)");
+		c->Message(0, "#bot [giveitem|gi] - Gives your targeted bot the item you have on your cursor.");
+		c->Message(0, "#bot [augmentitem|ai] - Allows you to augment items for other classes. (You MUST have the Augmentation Sealer window filled)");
 		c->Message(0, "#bot camp - Tells your bot to camp out of the game.");
 		c->Message(0, "#bot group help - Displays the commands available to manage any bots in your group.");
 		c->Message(0, "#bot botgroup help - Displays the commands available to manage bot ONLY groups.");
@@ -8771,11 +8770,10 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 		c->Message(0, "#bot armorcolor <slot> <red> <green> <blue> - #bot help armorcolor for info");
 		c->Message(0, "#bot taunt [on|off] - Determines whether or not your targeted bot will taunt.");
 		c->Message(0, "#bot stance [name] [stance (id)|list] - Sets/lists stance for named bot (Passive = 0, Balanced = 1, Efficient = 2, Reactive = 3, Aggressive = 4, Burn = 5, BurnAE = 6)");
-		c->Message(0, "#bot groupmessages [on|off] [bot name|all] - Turns group messages on/off for named bot/all bots.");
 		c->Message(0, "#bot defensive [bot name] - Causes Warrior, Shadow Knight, or Paladin bot to use their defensive discipline or buff.");
-		c->Message(0, "#bot healrotation help - Displays the commands available to manage BOT heal rotations.");
-		c->Message(0, "#bot pull [<bot name>] [target] - Bot Pulling Target NPCs");
-		c->Message(0, "#bot setinspectmessage - Copies your inspect message to a targeted bot that you own");
+		c->Message(0, "#bot healrotation help - Displays the commands available to manage bot heal rotations.");
+		c->Message(0, "#bot pull [<bot name>] [target] - Bot will attempt to pull your target NPC.");
+		c->Message(0, "#bot setinspectmessage - Copies your inspect message to a targeted bot that you own.");
 		c->Message(0, "#bot bardoutofcombat [on|off] - Determines whether Bard bots use out of combat songs.");
 		c->Message(0, "#bot showhelm [on|off] - Determines whether or not your targeted bot's helmet will show. (Requires a respawn to take effect)");
 		return;
@@ -8797,10 +8795,10 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 					haspuller = true;
 					Mob *puller = g->members[i];
 					if (puller->CastToBot()->IsArcheryRange(target)) {
-						puller->CastToBot()->BotGroupSay(puller->CastToBot(), "Trying to Pull %s \n", target->GetCleanName());
+						puller->CastToBot()->BotGroupSay(puller->CastToBot(), "Trying to pull %s.", target->GetCleanName());
 						puller->CastToBot()->BotRangedAttack(target);
 					} else {
-						puller->CastToBot()->BotGroupSay(puller->CastToBot(), "Out of Range %s \n", target->GetCleanName());
+						puller->CastToBot()->BotGroupSay(puller->CastToBot(), "%s is out of range.", target->GetCleanName());
 					}
 				}
 			}
@@ -8880,7 +8878,7 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 		return;
 	}
 
-	if(!strcasecmp(sep->arg[1], "augmentitem")) {
+	if(!strcasecmp(sep->arg[1], "augmentitem") || !strcasecmp(sep->arg[1], "ai")) {
 		AugmentItem_Struct* in_augment = new AugmentItem_Struct[sizeof(AugmentItem_Struct)];
 		in_augment->container_slot = 1000; // <watch>
 		in_augment->augment_slot = -1;
@@ -8888,15 +8886,14 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 		return;
 	}
 
-	if(!strcasecmp(sep->arg[1], "giveitem")) {
+	if(!strcasecmp(sep->arg[1], "giveitem") || !strcasecmp(sep->arg[1], "gi")) {
 		if(c->GetTarget() && c->GetTarget()->IsBot() && (c->GetTarget()->CastToBot()->GetBotOwner() == c)) {
 			Bot* targetedBot = c->GetTarget()->CastToBot();
 				if(targetedBot)
 					targetedBot->FinishTrade(c, BotTradeClientNoDropNoTrade);
 		}
-		else {
+		else
 			c->Message(15, "You must target a bot you own to do this.");
-		}
 
 		return;
 	}
@@ -8909,7 +8906,8 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 				Bot* targetedBot = c->GetTarget()->CastToBot();
 				if(targetedBot)
 					targetedBot->Camp();
-			} else
+			}
+			else
 				c->Message(15, "You must target a bot you own to do this.");
 		}
 
@@ -8918,16 +8916,16 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 
 	if(!strcasecmp(sep->arg[1], "create")) {
 		if(sep->arg[2][0] == '\0' || sep->arg[3][0] == '\0' || sep->arg[4][0] == '\0' || sep->arg[5][0] == '\0' || sep->arg[6][0] != '\0') {
-			c->Message(0, "Usage: #bot create [name] [class(id)] [race(id)] [gender (male/female)]");
+			c->Message(0, "Usage: #bot create [name] [class(id)] [race(id)] [gender (male/female|0/1)]");
 			return;
 		} else if(strcasecmp(sep->arg[3],"1") && strcasecmp(sep->arg[3],"2") && strcasecmp(sep->arg[3],"3") && strcasecmp(sep->arg[3],"4") && strcasecmp(sep->arg[3],"5") && strcasecmp(sep->arg[3],"6") && strcasecmp(sep->arg[3],"7") && strcasecmp(sep->arg[3],"8") && strcasecmp(sep->arg[3],"9") && strcasecmp(sep->arg[3],"10") && strcasecmp(sep->arg[3],"11") && strcasecmp(sep->arg[3],"12") && strcasecmp(sep->arg[3],"13") && strcasecmp(sep->arg[3],"14") && strcasecmp(sep->arg[3],"15") && strcasecmp(sep->arg[3],"16")) {
-			c->Message(0, "Usage: #bot create [name] [class(id)] [race(id)] [gender (male/female)]");
+			c->Message(0, "Usage: #bot create [name] [class(id)] [race(id)] [gender (male/female|0/1)]");
 			return;
 		} else if(strcasecmp(sep->arg[4],"1") && strcasecmp(sep->arg[4],"2") && strcasecmp(sep->arg[4],"3") && strcasecmp(sep->arg[4],"4") && strcasecmp(sep->arg[4],"5") && strcasecmp(sep->arg[4],"6") && strcasecmp(sep->arg[4],"7") && strcasecmp(sep->arg[4],"8") && strcasecmp(sep->arg[4],"9") && strcasecmp(sep->arg[4],"10") && strcasecmp(sep->arg[4],"11") && strcasecmp(sep->arg[4],"12") && strcasecmp(sep->arg[4],"330") && strcasecmp(sep->arg[4],"128") && strcasecmp(sep->arg[4],"130") && strcasecmp(sep->arg[4],"522")) {
-			c->Message(0, "Usage: #bot create [name] [class(1-16)] [race(1-12,128,130,330,522)] [gender (male/female)]");
+			c->Message(0, "Usage: #bot create [name] [class(1-16)] [race(1-12,128,130,330,522)] [gender (male/female|0/1)]");
 			return;
-		} else if(strcasecmp(sep->arg[5],"male") && strcasecmp(sep->arg[5],"female")) {
-			c->Message(0, "Usage: #bot create [name] [class(1-16)] [race(1-12,128,130,330,522)] [gender (male/female)]");
+		} else if(strcasecmp(sep->arg[5],"male") && strcasecmp(sep->arg[5],"0") && strcasecmp(sep->arg[5],"female") && strcasecmp(sep->arg[5],"1")) {
+			c->Message(0, "Usage: #bot create [name] [class(1-16)] [race(1-12,128,130,330,522)] [gender (male/female|0/1)]");
 			return;
 		}
 
@@ -8943,7 +8941,7 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 		}
 
 		int gender = 0;
-		if(!strcasecmp(sep->arg[5], "female"))
+		if(!strcasecmp(sep->arg[5], "female") || !strcasecmp(sep->arg[5], "1"))
 			gender = 1;
 
 		if(!IsBotNameAvailable(sep->arg[2],&TempErrorMessage)) {
@@ -8975,9 +8973,8 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 			else
 				c->Message(0, "%s saved as bot %u.", NewBot->GetCleanName(), NewBot->GetBotID());
 		}
-		else {
-			// TODO: Log error message here
-		}
+		else
+			Log.Out(Logs::General, Logs::Error, "Error in #bot create, cannot find NewBot");
 		return;
 	}
 
@@ -8992,23 +8989,18 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 	}
 
 	if(!strcasecmp(sep->arg[1], "delete") ) {
-		if((c->GetTarget() == nullptr) || !c->GetTarget()->IsBot())
-		{
+		if((c->GetTarget() == nullptr) || !c->GetTarget()->IsBot()) {
 			c->Message(15, "You must target a bot!");
 			return;
-		}
-		else if(c->GetTarget()->CastToBot()->GetBotOwnerCharacterID() != c->CharacterID())
-		{
+		} else if(c->GetTarget()->CastToBot()->GetBotOwnerCharacterID() != c->CharacterID()) {
 			c->Message(15, "You can't delete a bot that you don't own.");
 			return;
 		}
 
 		if(c->GetTarget()->IsBot()) {
 			Bot* BotTargeted = c->GetTarget()->CastToBot();
-
 			if(BotTargeted) {
 				BotTargeted->DeleteBot(&TempErrorMessage);
-
 				if(!TempErrorMessage.empty()) {
 					c->Message(13, "Database Error: %s", TempErrorMessage.c_str());
 					return;
@@ -9028,7 +9020,6 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 			listAll = false;
 
 		std::list<BotsAvailableList> AvailableBots = GetBotList(c->CharacterID(), &TempErrorMessage);
-
 		if(!TempErrorMessage.empty()) {
 			c->Message(13, "Database Error: %s", TempErrorMessage.c_str());
 			return;
@@ -9041,9 +9032,9 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 
 				c->Message(0, "Name: %s -- Class: %s -- Level: %u -- Race: %s", TempAvailableBotsList->BotName, ClassIdToString(TempAvailableBotsList->BotClass).c_str(), TempAvailableBotsList->BotLevel, RaceIdToString(TempAvailableBotsList->BotRace).c_str());
 			}
-		} else {
-			c->Message(0, "You have no bots created. Use the #bot create command to create a bot.");
 		}
+		else
+			c->Message(0, "You have no bots created. Use the #bot create command to create a bot.");
 	}
 
 	if(!strcasecmp(sep->arg[1], "mana")) {
@@ -9076,9 +9067,9 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 							c->Message(0, "Name: %s -- Class: %s -- Mana: %3.1f%%", tempBot->GetCleanName(), ClassIdToString(tempBot->GetClass()).c_str(), tempBot->GetManaRatio());
 					}
 				}
-			} else {
-				c->Message(0, "You have no spawned bots in this zone.");
 			}
+			else
+				c->Message(0, "You have no spawned bots in this zone.");
 		}
 		return;
 	}
@@ -9092,7 +9083,6 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 		}
 		
 		uint32 botId = GetBotIDByBotName(std::string(sep->arg[2]));
-
 		if(GetBotOwnerCharacterID(botId, &TempErrorMessage) != c->CharacterID()) {
 			c->Message(0, "You can't spawn a bot that you don't own.");
 			return;
@@ -9110,18 +9100,17 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 
 		if(c->IsGrouped()) {
 			Group *g = entity_list.GetGroupByClient(c);
-			for (int i=0; i<MAX_GROUP_MEMBERS; i++) {
+			for (int i = 0; i < MAX_GROUP_MEMBERS; i++) {
 				if(g && g->members[i] && !g->members[i]->qglobal && (g->members[i]->GetAppearance() != eaDead)
 					&& (g->members[i]->IsEngaged() || (g->members[i]->IsClient() && g->members[i]->CastToClient()->GetAggroCount()))) {
 					c->Message(0, "You can't summon bots while you are engaged.");
 					return;
 				}
-				if(g && g->members[i] && g->members[i]->qglobal) {
+				
+				if(g && g->members[i] && g->members[i]->qglobal)
 					return;
-				}
 			}
-		}
-		else {
+		} else {
 			if(c->GetAggroCount() > 0) {
 				c->Message(0, "You can't spawn bots while you are engaged.");
 				return;
@@ -9129,7 +9118,6 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 		}
 
 		Mob* TempBotMob = entity_list.GetMobByBotID(botId);
-
 		if(TempBotMob) {
 			c->Message(0, "This bot is already in the zone.");
 			return;
@@ -9144,7 +9132,6 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 
 		if(RuleB(Bots, BotQuest) && !c->GetGM()) {
 			const int allowedBots = AllowedBotSpawns(c->CharacterID(), &TempErrorMessage);
-
 			if(!TempErrorMessage.empty()) {
 				c->Message(13, "Database Error: %s", TempErrorMessage.c_str());
 				return;
@@ -9177,7 +9164,6 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 
 		if(TempBot) {
 			TempBot->Spawn(c, &TempErrorMessage);
-
 			if(!TempErrorMessage.empty()) {
 				c->Message(13, "Database Error: %s", TempErrorMessage.c_str());
 				safe_delete(TempBot);
@@ -9185,9 +9171,9 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 			}
 
 			TempBot->BotGroupSay(TempBot, "I am ready for battle.");
-		} else {
-			c->Message(0, "BotID: %i not found", atoi(sep->arg[2]));
 		}
+		else
+			c->Message(0, "BotID: %i not found", atoi(sep->arg[2]));
 
 		return;
 	}
@@ -9199,7 +9185,6 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 		}
 
 		Bot* archerBot = c->GetTarget()->CastToBot();
-
 		if(archerBot) {
 			if(archerBot->IsBotArcher())
 				archerBot->SetBotArcher(false);
@@ -9207,7 +9192,6 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 				archerBot->SetBotArcher(true);
 
 			archerBot->ChangeBotArcherWeapons(archerBot->IsBotArcher());
-
 			if(archerBot->GetClass() == RANGER && archerBot->GetLevel() >= 61)
 				archerBot->SetRangerAutoWeaponSelect(archerBot->IsBotArcher());
 		}
@@ -9216,30 +9200,25 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 	}
 
 	if(!strcasecmp(sep->arg[1], "picklock")) {
-		if((c->GetTarget() == nullptr) || (c->GetTarget() == c) || !c->GetTarget()->IsBot() || (c->GetTarget()->GetClass() != ROGUE)) {
-			c->Message(15, "You must target a rogue bot!");
-		}
-		else {
+		if((c->GetTarget() == nullptr) || (c->GetTarget() == c) || !c->GetTarget()->IsBot() || (c->GetTarget()->GetClass() != ROGUE))
+			c->Message(15, "You must target a Rogue bot!");
+		else
 			entity_list.BotPickLock(c->GetTarget()->CastToBot());
-		}
 
 		return;
 	}
 
 	if(!strcasecmp(sep->arg[1], "summon")) {
 		if((c->GetTarget() == nullptr) || (c->GetTarget() == c) || !c->GetTarget()->IsBot() || c->GetTarget()->IsPet())
-		{
 			c->Message(15, "You must target a bot!");
-		}
-		else if(c->GetTarget()->IsMob() && !c->GetTarget()->IsPet())
-		{
+		else if(c->GetTarget()->IsMob() && !c->GetTarget()->IsPet()) {
 			Mob *b = c->GetTarget();
 			if(b) {
-				if(!b->IsBot()){
+				if(!b->IsBot())
 					c->Message(15, "You must target a bot!");
-				} else if((b->CastToBot()->GetBotOwnerCharacterID() != c->CharacterID())) {
+				else if((b->CastToBot()->GetBotOwnerCharacterID() != c->CharacterID()))
 					b->CastToBot()->BotGroupSay(b->CastToBot(), "You can only summon your own bots.");
-				} else {
+				else {
 					b->SetTarget(c->CastToMob());
 					b->Warp(glm::vec3(c->GetPosition()));
 				}
@@ -9254,7 +9233,6 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 			if(c->GetTarget()->IsBot() && c->GetTarget()->CastToBot()->GetBotOwnerCharacterID() == c->CharacterID()) {
 				Mob* b = c->GetTarget();
 				int x = c->GetTarget()->CastToBot()->GetBotItemsCount(&TempErrorMessage);
-
 				if(!TempErrorMessage.empty()) {
 					c->Message(13, "Database Error: %s", TempErrorMessage.c_str());
 					return;
@@ -9273,9 +9251,8 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 				linker.SetLinkType(linker.linkItemInst);
 
 				for(int i = EmuConstants::EQUIPMENT_BEGIN; i <= (EmuConstants::EQUIPMENT_END + 1); ++i) {
-					if((i == MainSecondary) && is2Hweapon) {
+					if((i == MainSecondary) && is2Hweapon)
 						continue;
-					}
 
 					inst = b->CastToBot()->GetBotItem(i == 22 ? 9999 : i);
 					if (inst)
@@ -9287,37 +9264,35 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 						c->Message(13, "Database Error: %s", TempErrorMessage.c_str());
 						return;
 					}
+					
 					if(item == nullptr) {
 						c->Message(15, "I need something for my %s (Item %i)", equipped[i], (i == 22 ? 9999 : i));
 						continue;
 					}
+					
 					if((i == MainPrimary) && ((item->ItemType == ItemType2HSlash) || (item->ItemType == ItemType2HBlunt) || (item->ItemType == ItemType2HPiercing))) {
 						is2Hweapon = true;
 					}
 
 					linker.SetItemInst(inst);
-
 					item_link = linker.GenerateLink();
-
 					c->Message(15, "Using %s in my %s (Item %i)", item_link.c_str(), equipped[i], (i == 22 ? 9999 : i));
 				}
-			} else {
-				c->Message(15, "You must group your bot first.");
 			}
-		} else {
-			c->Message(15, "You must target a bot first.");
+			else
+				c->Message(15, "You must group your bot first.");
 		}
+		else
+			c->Message(15, "You must target a bot first.");
+		
 		return;
 	}
 
 	if(!strcasecmp(sep->arg[1], "inventory") && !strcasecmp(sep->arg[2], "remove")) {
-		if((c->GetTarget() == nullptr) || (sep->arg[3][0] == '\0') || !c->GetTarget()->IsBot())
-		{
+		if((c->GetTarget() == nullptr) || (sep->arg[3][0] == '\0') || !c->GetTarget()->IsBot()) {
 			c->Message(15, "Usage: #bot inventory remove [slotid] (You must have a bot targeted) ");
 			return;
-		}
-		else if(c->GetTarget()->IsBot() && c->GetTarget()->CastToBot()->GetBotOwnerCharacterID() == c->CharacterID())
-		{
+		} else if(c->GetTarget()->IsBot() && c->GetTarget()->CastToBot()->GetBotOwnerCharacterID() == c->CharacterID()) {
 			if(c->GetTradeskillObject() || (c->trade->state == Trading))
 				return;
 
@@ -9326,6 +9301,7 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 				c->Message(15, "A bot has 22 slots in its inventory, please choose a slot between 0 and 21 or 9999.");
 				return;
 			}
+			
 			const char* equipped[EmuConstants::EQUIPMENT_SIZE + 1] = {"Charm", "Left Ear", "Head", "Face", "Right Ear", "Neck", "Shoulders", "Arms", "Back",
 										"Left Wrist", "Right Wrist", "Range", "Hands", "Primary Hand", "Secondary Hand",
 										"Left Finger", "Right Finger", "Chest", "Legs", "Feet", "Waist", "Ammo", "Powersource" };
@@ -9358,9 +9334,9 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 				if(itm) {
 					c->PushItemOnCursor(*itminst, true);
 					Bot *gearbot = c->GetTarget()->CastToBot();
-					if((slotId == MainRange)||(slotId == MainAmmo)||(slotId == MainPrimary)||(slotId == MainSecondary)) {
+					if((slotId == MainRange)||(slotId == MainAmmo)||(slotId == MainPrimary)||(slotId == MainSecondary))
 						gearbot->SetBotArcher(false);
-					}
+					
 					gearbot->RemoveBotItemBySlot(slotId, &TempErrorMessage);
 
 					if(!TempErrorMessage.empty()) {
@@ -9452,7 +9428,7 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 
 			if(c->IsGrouped()) {
 				Group *g = entity_list.GetGroupByClient(c);
-				for (int i=0; i<MAX_GROUP_MEMBERS; i++) {
+				for (int i = 0; i < MAX_GROUP_MEMBERS; i++) {
 					if(g && g->members[i] && g->members[i]->IsEngaged()) {
 						c->Message(15, "You can't update bots while you are engaged.");
 						return;
@@ -9465,21 +9441,20 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 				bot->SetPetChooser(false);
 				bot->CalcBotStats();
 			} else {
-				if(c->GetFeigned()) {
+				if(c->GetFeigned())
 					c->Message(15, "You cannot update bots while feigned.");
-				} else {
-					c->Message(15, "You must target your bot first");
-				}
+				else
+					c->Message(15, "You must target your bot first.");
 			}
-		} else {
-			c->Message(15, "You must target a bot first");
 		}
+		else
+			c->Message(15, "You must target a bot first.");
 
 		return;
 	}
 
 	//Bind
-	if(!strcasecmp(sep->arg[1], "bindme")) {
+	if(!strcasecmp(sep->arg[1], "bind")) {
 		Mob *binder = nullptr;
 		bool hasbinder = false;
 		if(c->IsGrouped()) {
@@ -9505,7 +9480,7 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 	}
 
 	// Rune
-	if(!strcasecmp(sep->arg[1], "runeme")) {
+	if(!strcasecmp(sep->arg[1], "rune")) {
 		Mob *runeer = nullptr;
 		bool hasruneer = false;
 		if(c->IsGrouped()) {
@@ -9524,9 +9499,9 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 		}
 
 		if(hasruneer) {
-			if (c->GetLevel() <= 12) {
+			if (c->GetLevel() <= 12)
 				runeer->CastToBot()->BotGroupSay(runeer->CastToBot(), "I need to be level 13 or higher for this...");
-			} else if ((c->GetLevel() >= 13) && (c->GetLevel() <= 21)) {
+			else if ((c->GetLevel() >= 13) && (c->GetLevel() <= 21)) {
 				runeer->CastToBot()->BotGroupSay(runeer->CastToBot(), "Casting Rune I...");
 				runeer->CastSpell(481, c->GetID(), 1, -1, -1);
 			} else if ((c->GetLevel() >= 22) && (c->GetLevel() <= 32)) {
@@ -9587,13 +9562,13 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 			switch(TrackerClass) {
 				case RANGER:
 					if(!strcasecmp(sep->arg[2], "all")) {
-						Tracker->CastToBot()->BotGroupSay(Tracker->CastToBot(), "Tracking everything", c->GetName());
+						Tracker->CastToBot()->BotGroupSay(Tracker->CastToBot(), "Tracking everything.");
 						entity_list.ShowSpawnWindow(c, RangeR, false);
 					} else if(!strcasecmp(sep->arg[2], "rare")) {
-						Tracker->CastToBot()->BotGroupSay(Tracker->CastToBot(), "Selective tracking", c->GetName());
+						Tracker->CastToBot()->BotGroupSay(Tracker->CastToBot(), "Selective tracking.");
 						entity_list.ShowSpawnWindow(c, RangeR, true);
 					} else if(!strcasecmp(sep->arg[2], "near")) {
-						Tracker->CastToBot()->BotGroupSay(Tracker->CastToBot(), "Tracking mobs nearby", c->GetName());
+						Tracker->CastToBot()->BotGroupSay(Tracker->CastToBot(), "Tracking mobs nearby.");
 						entity_list.ShowSpawnWindow(c, RangeD, false);
 					} else
 						Tracker->CastToBot()->BotGroupSay(Tracker->CastToBot(), "Do you want to %s, %s, or %s?", Tracker->CastToBot()->CreateSayLink(c, "#bot track all", "track all").c_str(), Tracker->CastToBot()->CreateSayLink(c, "#bot track near", "track near").c_str(), Tracker->CastToBot()->CreateSayLink(c, "#bot track rare", "track rare").c_str());
@@ -9601,12 +9576,12 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 					break;
 				case BARD:
 					if(TrackerClass != RANGER)
-						Tracker->CastToBot()->BotGroupSay(Tracker->CastToBot(), "Tracking up", c->GetName());
+						Tracker->CastToBot()->BotGroupSay(Tracker->CastToBot(), "Tracking up.");
 					entity_list.ShowSpawnWindow(c, RangeB, false);
 					break;
 				case DRUID:
 					if(TrackerClass = BARD)
-						Tracker->CastToBot()->BotGroupSay(Tracker->CastToBot(), "Tracking up", c->GetName());
+						Tracker->CastToBot()->BotGroupSay(Tracker->CastToBot(), "Tracking up.");
 					entity_list.ShowSpawnWindow(c, RangeD, false);
 					break;
 				default:
@@ -9664,7 +9639,7 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 						|| !strcasecmp(sep->arg[2], "blindness") && (c->GetLevel() <= 3)
 						|| !strcasecmp(sep->arg[2], "disease") && (c->GetLevel() <= 4)
 						|| !strcasecmp(sep->arg[2], "poison") && (c->GetLevel() <= 1)) {
-							Curer->CastToBot()->BotGroupSay(Curer->CastToBot(), "I don't have the needed level yet", sep->arg[2]);
+							Curer->CastToBot()->BotGroupSay(Curer->CastToBot(), "I am not the required level yet.");
 					} else
 						Curer->CastToBot()->BotGroupSay(Curer->CastToBot(), "Do you want to cure %s, %s, %s, or %s?", Curer->CastToBot()->CreateSayLink(c, "#bot cure poison", "poison").c_str(), Curer->CastToBot()->CreateSayLink(c, "#bot cure disease", "disease").c_str(), Curer->CastToBot()->CreateSayLink(c, "#bot cure curse", "curse").c_str(), Curer->CastToBot()->CreateSayLink(c, "#bot cure blindness", "blindness").c_str());
 
@@ -9677,14 +9652,14 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 						Curer->CastToBot()->BotGroupSay(Curer->CastToBot(), "Trying to cure us of %s.", sep->arg[2]);
 						Curer->CastToBot()->Bot_Command_Cure(2, Curer->GetLevel());
 					} else if(!strcasecmp(sep->arg[2], "curse")) {
-						Curer->CastToBot()->BotGroupSay(Curer->CastToBot(), "I don't have that spell", sep->arg[2]);
+						Curer->CastToBot()->BotGroupSay(Curer->CastToBot(), "I don't have that spell.");
 					} else if(!strcasecmp(sep->arg[2], "blindness") && (c->GetLevel() >= 7)) {
 						Curer->CastToBot()->BotGroupSay(Curer->CastToBot(), "Trying to cure us of %s.", sep->arg[2]);
 						Curer->CastToBot()->Bot_Command_Cure(4, Curer->GetLevel());
 					} else if (!strcasecmp(sep->arg[2], "blindness") && (c->GetLevel() <= 7)
 						|| !strcasecmp(sep->arg[2], "disease") && (c->GetLevel() <= 1)
 						|| !strcasecmp(sep->arg[2], "poison") && (c->GetLevel() <= 2)) {
-							Curer->CastToBot()->BotGroupSay(Curer->CastToBot(), "I don't have the needed level yet", sep->arg[2]);
+							Curer->CastToBot()->BotGroupSay(Curer->CastToBot(), "I am not the required level yet.");
 					} else
 						Curer->CastToBot()->BotGroupSay(Curer->CastToBot(), "Do you want to cure %s, %s, or %s?", Curer->CastToBot()->CreateSayLink(c, "#bot cure poison", "poison").c_str(), Curer->CastToBot()->CreateSayLink(c, "#bot cure disease", "disease").c_str(), Curer->CastToBot()->CreateSayLink(c, "#bot cure blindness", "blindness").c_str());
 
@@ -9697,12 +9672,12 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 						Curer->CastToBot()->BotGroupSay(Curer->CastToBot(), "Trying to cure us of %s.", sep->arg[2]);
 						Curer->CastToBot()->Bot_Command_Cure(2, Curer->GetLevel());
 					} else if(!strcasecmp(sep->arg[2], "curse")) { // Fire level 1
-						Curer->CastToBot()->BotGroupSay(Curer->CastToBot(), "I don't have that spell", sep->arg[2]);
+						Curer->CastToBot()->BotGroupSay(Curer->CastToBot(), "I don't have that spell.");
 					} else if(!strcasecmp(sep->arg[2], "blindness") && (c->GetLevel() >= 13)) {
-						Curer->CastToBot()->BotGroupSay(Curer->CastToBot(), "I don't have that spell", sep->arg[2]);
+						Curer->CastToBot()->BotGroupSay(Curer->CastToBot(), "I don't have that spell.");
 					} else if (!strcasecmp(sep->arg[2], "disease") && (c->GetLevel() <= 4)
 						|| !strcasecmp(sep->arg[2], "poison") && (c->GetLevel() <= 5)) {
-							Curer->CastToBot()->BotGroupSay(Curer->CastToBot(), "I don't have the needed level yet", sep->arg[2]) ;
+							Curer->CastToBot()->BotGroupSay(Curer->CastToBot(), "I am not the required level yet.");
 					} else
 						Curer->CastToBot()->BotGroupSay(Curer->CastToBot(), "Do you want to cure %s or %s?", Curer->CastToBot()->CreateSayLink(c, "#bot cure poison", "poison").c_str(), Curer->CastToBot()->CreateSayLink(c, "#bot cure disease", "disease").c_str());
 					break;
@@ -9714,7 +9689,7 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 	}
 
 	//Mez
-	if(!strcasecmp(sep->arg[1], "ai") && !strcasecmp(sep->arg[2], "mez")) {
+	if(!strcasecmp(sep->arg[1], "mez")) {
 		Mob *target = c->GetTarget();
 		if(target == nullptr || target == c || target->IsBot() || (target->IsPet() && target->GetOwner() && target->GetOwner()->IsBot())) {
 			c->Message(15, "You must select a monster");
@@ -9932,7 +9907,8 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 								c->Message(0, "I have successfully pacified %s.", target->GetCleanName());
 
 							return;
-						} else
+						}
+						else
 							c->Message(0, "I failed to pacify %s.", target->GetCleanName());
 					}
 					// seperated cleric and chanter so chanter is primary
@@ -9945,7 +9921,8 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 								c->Message(0, "I have successfully pacified %s.", target->GetCleanName());
 
 							return;
-						} else
+						}
+						else
 							c->Message(0, "I failed to pacify %s.", target->GetCleanName());
 					}
 				}
@@ -9995,30 +9972,33 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 			switch(CharmerClass) {
 				case ENCHANTER:
 					if	(c->GetLevel() >= 11) {
-						Charmer->CastToBot()->BotGroupSay(Charmer->CastToBot(), "Trying to charm %s.", target->GetCleanName(), sep->arg[2]);
-						Charmer->CastToBot()->Bot_Command_CharmTarget (1,target);
-					} else if (c->GetLevel() <= 10){
-						Charmer->CastToBot()->BotGroupSay(Charmer->CastToBot(), "I don't have the required level yet.", sep->arg[2]);
-					} else
-						Charmer->CastToBot()->BotGroupSay(Charmer->CastToBot(), "Mob level is too high or can't be charmed.", c->GetName());
+						Charmer->CastToBot()->BotGroupSay(Charmer->CastToBot(), "Trying to charm %s.", target->GetCleanName());
+						Charmer->CastToBot()->Bot_Command_CharmTarget(1, target);
+					}
+					else if (c->GetLevel() <= 10)
+						Charmer->CastToBot()->BotGroupSay(Charmer->CastToBot(), "I am not the required level yet.");
+					else
+						Charmer->CastToBot()->BotGroupSay(Charmer->CastToBot(), "Mob level is too high or can't be charmed.");
 					break;
 				case NECROMANCER:
 					if	((c->GetLevel() >= 18) && (DBtype == 3)) {
-						Charmer->CastToBot()->BotGroupSay(Charmer->CastToBot(), "Trying to charm %s.", target->GetCleanName(), sep->arg[2]);
-						Charmer->CastToBot()->Bot_Command_CharmTarget (2,target);
-					} else if (c->GetLevel() <= 17){
-						Charmer->CastToBot()->BotGroupSay(Charmer->CastToBot(), "I don't have the required level yet.", sep->arg[2]);
-					} else
-						Charmer->CastToBot()->BotGroupSay(Charmer->CastToBot(), "Mob is not undead.", c->GetName());
+						Charmer->CastToBot()->BotGroupSay(Charmer->CastToBot(), "Trying to charm %s.", target->GetCleanName());
+						Charmer->CastToBot()->Bot_Command_CharmTarget(2, target);
+					}
+					else if (c->GetLevel() <= 17)
+						Charmer->CastToBot()->BotGroupSay(Charmer->CastToBot(), "I am not the required level yet.");
+					else
+						Charmer->CastToBot()->BotGroupSay(Charmer->CastToBot(), "Mob is not undead.");
 					break;
 				case DRUID:
 					if	((c->GetLevel() >= 13) && (DBtype == 21)) {
-						Charmer->CastToBot()->BotGroupSay(Charmer->CastToBot(), "Trying to charm %s.", target->GetCleanName(), sep->arg[2]);
-						Charmer->CastToBot()->Bot_Command_CharmTarget (3,target);
-					} else if (c->GetLevel() <= 12){
-						Charmer->CastToBot()->BotGroupSay(Charmer->CastToBot(), "I don't have the required level yet.", sep->arg[2]);
-					} else
-						Charmer->CastToBot()->BotGroupSay(Charmer->CastToBot(), "Mob is not an animal.", c->GetName());
+						Charmer->CastToBot()->BotGroupSay(Charmer->CastToBot(), "Trying to charm %s.", target->GetCleanName());
+						Charmer->CastToBot()->Bot_Command_CharmTarget(3, target);
+					}
+					else if (c->GetLevel() <= 12)
+						Charmer->CastToBot()->BotGroupSay(Charmer->CastToBot(), "I am not the required level yet.");
+					else
+						Charmer->CastToBot()->BotGroupSay(Charmer->CastToBot(), "Mob is not an animal.");
 					break;
 				default:
 					c->Message(15, "You must have an Enchanter, Necromancer, or Druid in your group.");
@@ -10044,9 +10024,11 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 						c->GetTarget()->CastToBot()->SetBotCharmer(true);
 						c->GetTarget()->CastToBot()->BotGroupSay(c->GetTarget()->CastToBot(), "Available for Dire Charm command.");
 					}
-			} else
+			}
+			else
 				c->Message(15, "You must target your Enchanter, Necromancer, or Druid bot.");
-		} else
+		}
+		else
 			c->Message(15, "You must target an Enchanter, Necromancer, or Druid bot.");
 
 		return;
@@ -10091,30 +10073,33 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 			switch(DirerClass) {
 				case ENCHANTER:
 					if	(c->GetLevel() >= 55) {
-						Direr->CastToBot()->BotGroupSay(Direr->CastToBot(), "Trying to dire charm %s.", target->GetCleanName(), sep->arg[2]);
+						Direr->CastToBot()->BotGroupSay(Direr->CastToBot(), "Trying to dire charm %s.", target->GetCleanName());
 						Direr->CastToBot()->Bot_Command_DireTarget (1,target);
-					} else if (c->GetLevel() <= 55){
-						Direr->CastToBot()->BotGroupSay(Direr->CastToBot(), "I don't have the required level yet.", sep->arg[2]);
-					} else
-						Direr->CastToBot()->BotGroupSay(Direr->CastToBot(), "Mob level is too high or can't be charmed.", c->GetName());
+					}
+					else if (c->GetLevel() <= 55)
+						Direr->CastToBot()->BotGroupSay(Direr->CastToBot(), "I am not the required level yet.");
+					else
+						Direr->CastToBot()->BotGroupSay(Direr->CastToBot(), "Mob level is too high or can't be charmed.");
 					break;
 				case NECROMANCER:
 					if	((c->GetLevel() >= 55) && (DBtype == 3)) {
-						Direr->CastToBot()->BotGroupSay(Direr->CastToBot(), "Trying to dire charm %s.", target->GetCleanName(), sep->arg[2]);
+						Direr->CastToBot()->BotGroupSay(Direr->CastToBot(), "Trying to dire charm %s.", target->GetCleanName());
 						Direr->CastToBot()->Bot_Command_DireTarget (2,target);
-					} else if (c->GetLevel() <= 55){
-						Direr->CastToBot()->BotGroupSay(Direr->CastToBot(), "I don't have the required level yet.", sep->arg[2]);
-					} else
-						Direr->CastToBot()->BotGroupSay(Direr->CastToBot(), "Mob is not undead.", c->GetName());
+					}
+					else if (c->GetLevel() <= 55)
+						Direr->CastToBot()->BotGroupSay(Direr->CastToBot(), "I am not the required level yet.");
+					else
+						Direr->CastToBot()->BotGroupSay(Direr->CastToBot(), "Mob is not undead.");
 					break;
 				case DRUID:
 					if	((c->GetLevel() >= 55) && (DBtype == 21)) {
-						Direr->CastToBot()->BotGroupSay(Direr->CastToBot(), "Trying to dire charm %s.", target->GetCleanName(), sep->arg[2]);
+						Direr->CastToBot()->BotGroupSay(Direr->CastToBot(), "Trying to dire charm %s.", target->GetCleanName());
 						Direr->CastToBot()->Bot_Command_DireTarget (3,target);
-					} else if (c->GetLevel() <= 55){
-						Direr->CastToBot()->BotGroupSay(Direr->CastToBot(), "I don't have the required level yet.", sep->arg[2]);
-					} else
-						Direr->CastToBot()->BotGroupSay(Direr->CastToBot(), "Mob is not an animal.", c->GetName());
+					}
+					else if (c->GetLevel() <= 55)
+						Direr->CastToBot()->BotGroupSay(Direr->CastToBot(), "I am not the required level yet.");
+					else
+						Direr->CastToBot()->BotGroupSay(Direr->CastToBot(), "Mob is not an animal.");
 					break;
 				default:
 					c->Message(15, "You must have an Enchanter, Necromancer, or Druid in your group.");
@@ -10145,8 +10130,9 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 		if((hasevac) && (c->GetLevel() >= 18)) {
 			evac->CastToBot()->BotGroupSay(evac->CastToBot(), "Attempting to evacuate you, %s.", c->GetName());
 			evac->CastToClient()->CastSpell(2183, c->GetID(), 1, -1, -1);
-		} else if((hasevac) && (c->GetLevel() <= 17))
-			evac->CastToBot()->BotGroupSay(evac->CastToBot(), "I'm not level 18 yet.", c->GetName());
+		}
+		else if((hasevac) && (c->GetLevel() <= 17))
+			evac->CastToBot()->BotGroupSay(evac->CastToBot(), "I'm not level 18 yet.");
 
 		return;
 	}
@@ -10778,7 +10764,7 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 						|| !strcasecmp(sep->arg[2], "fire") && (c->GetLevel() <= 8)
 						|| !strcasecmp(sep->arg[2], "disease") && (c->GetLevel() <= 11)
 						|| !strcasecmp(sep->arg[2], "poison") && (c->GetLevel() <= 6)) {
-							Resister->CastToBot()->BotGroupSay(Resister->CastToBot(), "I don't have the required level yet.");
+							Resister->CastToBot()->BotGroupSay(Resister->CastToBot(), "I am not the required level yet.");
 					} else
 						Resister->CastToBot()->BotGroupSay(Resister->CastToBot(), "Do you want %s, %s, %s, %s, or %s?", Resister->CastToBot()->CreateSayLink(c, "#bot resist poison", "Resist Poison").c_str(), Resister->CastToBot()->CreateSayLink(c, "#bot resist disease", "Resist Disease").c_str(), Resister->CastToBot()->CreateSayLink(c, "#bot invis fire", "Resist Fire").c_str(), Resister->CastToBot()->CreateSayLink(c, "#bot invis cold", "Resist Cold").c_str(), Resister->CastToBot()->CreateSayLink(c, "#bot invis magic", "Resist Magic").c_str());
 
@@ -10804,7 +10790,7 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 						|| !strcasecmp(sep->arg[2], "fire") && (c->GetLevel() <= 5)
 						|| !strcasecmp(sep->arg[2], "disease") && (c->GetLevel() <= 8)
 						|| !strcasecmp(sep->arg[2], "poison") && (c->GetLevel() <= 20)) {
-							Resister->CastToBot()->BotGroupSay(Resister->CastToBot(), "I don't have the needed level yet.");
+							Resister->CastToBot()->BotGroupSay(Resister->CastToBot(), "I am not the required level yet.");
 					} else
 						Resister->CastToBot()->BotGroupSay(Resister->CastToBot(), "Do you want %s, %s, %s, %s, or %s?", Resister->CastToBot()->CreateSayLink(c, "#bot resist poison", "Resist Poison").c_str(), Resister->CastToBot()->CreateSayLink(c, "#bot resist disease", "Resist Disease").c_str(), Resister->CastToBot()->CreateSayLink(c, "#bot invis fire", "Resist Fire").c_str(), Resister->CastToBot()->CreateSayLink(c, "#bot invis cold", "Resist Cold").c_str(), Resister->CastToBot()->CreateSayLink(c, "#bot invis magic", "Resist Magic").c_str());
 
@@ -10829,7 +10815,7 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 						|| !strcasecmp(sep->arg[2], "cold") && (c->GetLevel() <= 9)
 						|| !strcasecmp(sep->arg[2], "disease") && (c->GetLevel() <= 19)
 						|| !strcasecmp(sep->arg[2], "poison") && (c->GetLevel() <= 19)) {
-							Resister->CastToBot()->BotGroupSay(Resister->CastToBot(), "I don't have the required level yet.") ;
+							Resister->CastToBot()->BotGroupSay(Resister->CastToBot(), "I am not the required level yet.") ;
 					} else
 						Resister->CastToBot()->BotGroupSay(Resister->CastToBot(), "Do you want %s, %s, %s, %s, or %s?", Resister->CastToBot()->CreateSayLink(c, "#bot resist poison", "Resist Poison").c_str(), Resister->CastToBot()->CreateSayLink(c, "#bot resist disease", "Resist Disease").c_str(), Resister->CastToBot()->CreateSayLink(c, "#bot invis fire", "Resist Fire").c_str(), Resister->CastToBot()->CreateSayLink(c, "#bot invis cold", "Resist Cold").c_str(), Resister->CastToBot()->CreateSayLink(c, "#bot invis magic", "Resist Magic").c_str());
 					break;
@@ -11032,7 +11018,8 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 						botGroupLeader->BotGroupSay(botGroupLeader, "I have disbanded my group, %s.", c->GetName());
 					else
 						botGroupLeader->BotGroupSay(botGroupLeader, "I was not able to disband my group, %s.", c->GetName());
-				} else
+				}
+				else
 					botGroupLeader->BotGroupSay(botGroupLeader, "I can not disband my group, %s, because I am not the leader. %s is the leader of my group.", c->GetName(), g->GetLeaderName());
 			} else
 				botGroupLeader->BotGroupSay(botGroupLeader, "I am not a group leader, %s.", c->GetName());
@@ -11060,7 +11047,8 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 				if(g->IsLeader(botGroupLeader))
 					BotGroupSummon(g, c);
 			}
-		} else if(c->HasGroup())
+		}
+		else if(c->HasGroup())
 			BotGroupSummon(c->GetGroup(), c);
 
 		return;
@@ -11083,7 +11071,8 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 				if(g->IsLeader(botGroupLeader))
 					BotGroupOrderFollow(g, c);
 			}
-		} else if(c->HasGroup())
+		}
+		else if(c->HasGroup())
 			BotGroupOrderFollow(c->GetGroup(), c);
 
 		return;
@@ -11106,13 +11095,14 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 				if(g->IsLeader(botGroupLeader))
 					BotGroupOrderGuard(g, c);
 			}
-		} else if(c->HasGroup())
+		}
+		else if(c->HasGroup())
 			BotGroupOrderGuard(c->GetGroup(), c);
 
 		return;
 	}
 
-	if(!strcasecmp(sep->arg[1], "botgroup") && !strcasecmp(sep->arg[2], "attack") ) {
+	if(!strcasecmp(sep->arg[1], "botgroup") && !strcasecmp(sep->arg[2], "attack")) {
 		Mob* targetMob = c->GetTarget();
 		Bot* botGroupLeader = 0;
 		std::string botGroupLeaderName = std::string(sep->arg[3]);
@@ -11131,13 +11121,17 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 								if(g->IsLeader(botGroupLeader))
 									BotGroupOrderAttack(g, targetMob, c);
 							}
-						} else if(c->HasGroup())
+						}
+						else if(c->HasGroup())
 							BotGroupOrderAttack(c->GetGroup(), targetMob, c);
-					} else
+					}
+					else
 						c->Message(13, "You must target a monster.");
-				} else
+				}
+				else
 					c->Message(13, "You must target a monster.");
-			} else
+			}
+			else
 				c->Message(13, "You must target a spawned bot group leader first.");
 		}
 		return;
@@ -11153,7 +11147,8 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 		if(!botGroupList.empty()) {
 			for(std::list<BotGroupList>::iterator botGroupListItr = botGroupList.begin(); botGroupListItr != botGroupList.end(); ++botGroupListItr)
 				c->Message(0, "Bot Group Name: %s -- Bot Group Leader: %s", botGroupListItr->BotGroupName.c_str(), botGroupListItr->BotGroupLeaderName.c_str());
-		} else
+		}
+		else
 			c->Message(0, "You have no bot groups created. Use the #bot botgroup save command to save bot groups.");
 
 		return;
@@ -11326,11 +11321,14 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 							c->Message(13, "Database Error: %s", TempErrorMessage.c_str());
 						else
 							c->Message(0, "%s's bot group has been saved as %s.", groupLeader->GetName(), botGroupName.c_str());
-					} else
+					}
+					else
 						c->Message(0, "You must target a bot group leader only.");
-				} else
+				}
+				else
 					c->Message(0, "You must target a bot that is in the same zone as you.");
-			} else
+			}
+			else
 				c->Message(0, "The bot group name already exists. Please choose another name to save your bot group as.");
 		}
 		return;
@@ -11413,11 +11411,14 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 						c->Message(13, "%s save failed!", target->GetCleanName());
 
 					c->Message(0, "Feature changed.");
-				} else
+				}
+				else
 					c->Message(0, "You must own the bot to make changes.");
-			} else
+			}
+			else
 				c->Message(0, "Requires a value.");
-		} else
+		}
+		else
 			c->Message(0, "A bot needs to be targeted.");
 		return;
 	}
@@ -11457,13 +11458,15 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 						}
 
 						targetedBot->SetTaunting(taunt);
-					} else
+					}
+					else
 						c->Message(13, "You must select a bot with the taunt skill.");
-				} else {
-					c->Message(13, "You must target a spawned bot.");
 				}
+				else
+					c->Message(13, "You must target a spawned bot.");
 			}
-		} else
+		}
+		else
 			c->Message(0, "Usage #bot taunt [on|off]");
 
 		return;
@@ -11538,62 +11541,12 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 					}
 				}
 				c->Message(0, "Stance for %s: %s.", tempBot->GetCleanName(), stanceName.c_str());
-			} else
+			}
+			else
 				c->Message(13, "You must name a valid bot.");
-		} else
+		}
+		else
 			c->Message(0, "Usage #bot stance [name] [stance (id)] (Passive = 0, Balanced = 1, Efficient = 2, Reactive = 3, Aggressive = 4, Burn = 5, BurnAE = 6)");
-
-		return;
-	}
-
-	if(!strcasecmp(sep->arg[1], "groupmessages")) {
-		bool groupMessages = false;
-		if(sep->arg[2] && sep->arg[3]){
-			if(!strcasecmp(sep->arg[2], "on"))
-				groupMessages = true;
-			else if (!strcasecmp(sep->arg[2], "off"))
-				groupMessages = false;
-			else {
-				c->Message(0, "Usage #bot groupmessages [on|off] [bot name|all]");
-				return;
-			}
-
-			Bot* tempBot;
-			if(!strcasecmp(sep->arg[3], "all")) {
-				std::list<Bot*> spawnedBots = entity_list.GetBotsByBotOwnerCharacterID(c->CharacterID());
-				if(!spawnedBots.empty()) {
-					for(std::list<Bot*>::iterator botsListItr = spawnedBots.begin(); botsListItr != spawnedBots.end(); ++botsListItr) {
-						Bot* tempBot = *botsListItr;
-						if(tempBot) {
-							tempBot->SetGroupMessagesOn(groupMessages);
-						}
-					}
-				} else
-					c->Message(0, "You have no spawned bots in this zone.");
-
-				c->Message(0, "Group messages now %s for all bots.", groupMessages?"on":"off");
-			} else {
-				std::string botName = std::string(sep->arg[3]);
-				if(!botName.empty())
-					tempBot = entity_list.GetBotByBotName(botName);
-				else {
-					c->Message(13, "You must name a valid bot.");
-					return;
-				}
-
-				if(tempBot) {
-					if (tempBot->GetBotOwner() != c) {
-						c->Message(13, "You must target a bot that you own.");
-						return;
-					}
-					tempBot->SetGroupMessagesOn(groupMessages);
-					c->Message(0, "Group messages now %s.", groupMessages?"on":"off");
-				} else {
-					c->Message(13, "You must name a valid bot.");
-				}
-			}
-		} else
-			c->Message(0, "Usage #bot groupmessages [on|off] [bot name|all]");
 
 		return;
 	}
@@ -11660,7 +11613,8 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 
 			if(defensiveSpellID > 0)
 				tempBot->UseDiscipline(defensiveSpellID, tempBot->GetID());
-		} else
+		}
+		else
 			c->Message(13, "You must name a valid bot.");
 
 		return;
@@ -12669,7 +12623,7 @@ uint8 Bot::GetNumberNeedingHealedInGroup(uint8 hpr, bool includePets) {
 	if(this->HasGroup()) {
 		g = this->GetGroup();
 		if(g) {
-			for( int i = 0; i<MAX_GROUP_MEMBERS; i++) {
+			for(int i = 0; i < MAX_GROUP_MEMBERS; i++) {
 				if(g->members[i] && !g->members[i]->qglobal) {
 					if(g->members[i]->GetHPRatio() <= hpr)
 						needHealed++;
