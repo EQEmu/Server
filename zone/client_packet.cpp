@@ -6008,7 +6008,7 @@ void Client::Handle_OP_GMSearchCorpse(const EQApplicationPacket *app)
 	char *escSearchString = new char[129];
 	database.DoEscapeString(escSearchString, gmscs->Name, strlen(gmscs->Name));
 
-	std::string query = StringFormat("SELECT charname, zoneid, x, y, z, time_of_death, rezzed, IsBurried "
+	std::string query = StringFormat("SELECT charname, zoneid, x, y, z, time_of_death, is_rezzed, is_buried "
 		"FROM character_corpses WheRE charname LIKE '%%%s%%' ORDER BY charname LIMIT %i",
 		escSearchString, maxResults);
 	safe_delete_array(escSearchString);

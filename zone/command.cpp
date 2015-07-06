@@ -170,6 +170,7 @@ int command_init(void) {
 		command_add("appearance", "[type] [value] - Send an appearance packet for you or your target", 150, command_appearance) ||
 		command_add("attack", "[targetname] - Make your NPC target attack targetname", 150, command_attack) ||
 		command_add("augmentitem",  "Force augments an item. Must have the augment item window open.",  250, command_augmentitem) ||
+		command_add("aug", nullptr, 250, command_augmentitem) ||
 		command_add("ban", "[name] [reason]- Ban by character name", 150, command_ban) ||
 		command_add("beard", "- Change the beard of your target", 80, command_beard) ||
 		command_add("beardcolor", "- Change the beard color of your target", 80, command_beardcolor) ||
@@ -216,12 +217,14 @@ int command_init(void) {
 		command_add("flagedit", "- Edit zone flags on your target", 100, command_flagedit) ||
 		command_add("flags", "- displays the flags of you or your target", 0, command_flags) ||
 		command_add("flymode", "[0/1/2] - Set your or your player target's flymode to off/on/levitate", 50, command_flymode) ||
+		command_add("fn", nullptr, 100, command_findnpctype) ||
 		command_add("fov", "- Check wether you're behind or in your target's field of view", 80, command_fov) ||
 		command_add("freeze", "- Freeze your target", 80, command_freeze) ||
-		command_add("fz", nullptr, 10, command_findzone) ||
+		command_add("fs", nullptr, 50, command_findspell) ||
+		command_add("fz", nullptr, 100, command_findzone) ||
 		command_add("gassign", "[id] - Assign targetted NPC to predefined wandering grid id", 100, command_gassign) ||
 		command_add("gender", "[0/1/2] - Change your or your target's gender to male/female/neuter", 50, command_gender) ||
-		command_add("getplayerburriedcorpsecount", "- Get the target's total number of burried player corpses.",  100, command_getplayerburriedcorpsecount) ||
+		command_add("getplayerburiedcorpsecount", "- Get the target's total number of buried player corpses.",  100, command_getplayerburiedcorpsecount) ||
 		command_add("getvariable", "[varname] - Get the value of a variable from the database", 200, command_getvariable) ||
 		command_add("gi", nullptr,200, command_giveitem) ||
 		command_add("ginfo", "- get group info on target.", 20, command_ginfo) ||
@@ -386,7 +389,7 @@ int command_init(void) {
 		command_add("spon", "- Sends OP_MemorizeSpell", 80, command_spon) ||
 		command_add("stun", "[duration] - Stuns you or your target for duration", 100, command_stun) ||
 		command_add("summon", "[charname] - Summons your player/npc/corpse target, or charname if specified", 80, command_summon) ||
-		command_add("summonburriedplayercorpse", "- Summons the target's oldest burried corpse, if any exist.",  100, command_summonburriedplayercorpse) ||
+		command_add("summonburiedplayercorpse", "- Summons the target's oldest buried corpse, if any exist.",  100, command_summonburiedplayercorpse) ||
 		command_add("summonitem", "[itemid] [charges] - Summon an item onto your cursor. Charges are optional.", 200, command_summonitem) ||
 		command_add("suspend", "[name] [days] [reason] - Suspend by character name and for specificed number of days", 150, command_suspend) ||
 		command_add("task", "(subcommand) - Task system commands",  150, command_task) ||
@@ -7801,7 +7804,7 @@ void command_deletegraveyard(Client *c, const Seperator *sep)
 	return;
 }
 
-void command_summonburriedplayercorpse(Client *c, const Seperator *sep)
+void command_summonburiedplayercorpse(Client *c, const Seperator *sep)
 {
 	Client *t=c;
 
@@ -7815,12 +7818,12 @@ void command_summonburriedplayercorpse(Client *c, const Seperator *sep)
 	Corpse* PlayerCorpse = database.SummonBuriedCharacterCorpses(t->CharacterID(), t->GetZoneID(), zone->GetInstanceID(), t->GetPosition());
 
 	if(!PlayerCorpse)
-		c->Message(0, "Your target doesn't have any burried corpses.");
+		c->Message(0, "Your target doesn't have any buried corpses.");
 
 	return;
 }
 
-void command_getplayerburriedcorpsecount(Client *c, const Seperator *sep)
+void command_getplayerburiedcorpsecount(Client *c, const Seperator *sep)
 {
 	Client *t=c;
 
@@ -7834,9 +7837,9 @@ void command_getplayerburriedcorpsecount(Client *c, const Seperator *sep)
 	uint32 CorpseCount = database.GetCharacterBuriedCorpseCount(t->CharacterID());
 
 	if(CorpseCount > 0)
-		c->Message(0, "Your target has a total of %u burried corpses.",  CorpseCount);
+		c->Message(0, "Your target has a total of %u buried corpses.",  CorpseCount);
 	else
-		c->Message(0, "Your target doesn't have any burried corpses.");
+		c->Message(0, "Your target doesn't have any buried corpses.");
 
 	return;
 }

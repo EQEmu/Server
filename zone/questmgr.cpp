@@ -1774,7 +1774,7 @@ void QuestManager::sethp(int hpperc) {
 	owner->Damage(owner, newhp, SPELL_UNKNOWN, SkillHandtoHand, false, 0, false);
 }
 
-bool QuestManager::summonburriedplayercorpse(uint32 char_id, const glm::vec4& position) {
+bool QuestManager::summonburiedplayercorpse(uint32 char_id, const glm::vec4& position) {
 	bool Result = false;
 
 	if(char_id <= 0)
@@ -1798,7 +1798,7 @@ bool QuestManager::summonallplayercorpses(uint32 char_id, const glm::vec4& posit
 	return true;
 }
 
-uint32 QuestManager::getplayerburriedcorpsecount(uint32 char_id) {
+uint32 QuestManager::getplayerburiedcorpsecount(uint32 char_id) {
 	uint32 Result = 0;
 
 	if(char_id > 0) {
