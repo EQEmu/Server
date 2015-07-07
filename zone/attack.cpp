@@ -5027,7 +5027,8 @@ void NPC::SetAttackTimer()
 
 		//special offhand stuff
 		if (i == MainSecondary) {
-			if(!CanThisClassDualWield() || HasTwoHanderEquipped()) {
+			// SPECATK_QUAD is uncheesable
+			if(!CanThisClassDualWield() || (HasTwoHanderEquipped() && !GetSpecialAbility(SPECATK_QUAD))) {
 				attack_dw_timer.Disable();
 				continue;
 			}
