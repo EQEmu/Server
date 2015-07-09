@@ -1146,15 +1146,14 @@ void Client::ActivateAlternateAdvancementAbility(int rank_id, int target_id) {
 		return;
 	}
 
-	//if expendable make sure we have charges
-	if(ability->charges > 0) {
-		uint32 charges = 0;
-		GetAA(rank_id, &charges);
+	uint32 charges = 0;
+	// We don't have the AA
+	if (!GetAA(rank_id, &charges))
+		return;
 
-		if(charges < 0) {
-			return;
-		}
-	}
+	//if expendable make sure we have charges
+	if(ability->charges > 0 && charges < 1)
+		return;
 
 	//check cooldown
 	if(!p_timers.Expired(&database, rank->spell_type + pTimerAAStart)) {
