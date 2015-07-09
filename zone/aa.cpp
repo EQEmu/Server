@@ -1234,13 +1234,13 @@ void Mob::ExpendAlternateAdvancementCharge(uint32 aa_id) {
 				iter.second.second -= 1;
 
 				if(iter.second.second == 0) {
-					aa_ranks.erase(iter.first);
 					if(IsClient()) {
 						AA::Rank *r = ability->GetRankByPointsSpent(iter.second.first);
 						if(r) {
 							CastToClient()->GetEPP().expended_aa += r->cost;
 						}
 					}
+					aa_ranks.erase(iter.first);
 				}
 
 				if(IsClient()) {
