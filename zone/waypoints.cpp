@@ -635,7 +635,7 @@ bool Mob::MakeNewPositionAndSendUpdate(float x, float y, float z, int speed, boo
 
 	else {
 		tar_vector/=16.0f;
-		float dur = Timer::SetCurrentTime() - pLastChange;
+		float dur = Timer::GetCurrentTime() - pLastChange;
 		if(dur < 1.0f) {
 			dur = 1.0f;
 		}
