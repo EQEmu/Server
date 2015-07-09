@@ -1395,19 +1395,23 @@ void Mob::SendPosUpdate(uint8 iSendToSelf) {
 	MakeSpawnUpdate(spu);
 
 	if (iSendToSelf == 2) {
-		if (this->IsClient())
-			this->CastToClient()->FastQueuePacket(&app,false);
+		if (IsClient()) {
+			CastToClient()->FastQueuePacket(&app,false);
+		}
 	}
 	else
 	{
 		if(move_tic_count == RuleI(Zone, NPCPositonUpdateTicCount))
 		{
-			entity_list.QueueClients(this, app, (iSendToSelf==0), false);
+			entity_list.QueueClients(this, app, (iSendToSelf == 0), false);
 			move_tic_count = 0;
 		}
-		else
+		else if(move_tic_count % 2 == 0)
 		{
-			entity_list.QueueCloseClients(this, app, (iSendToSelf==0), 800, nullptr, false);
+			entity_list.QueueCloseClients(this, app, (iSendToSelf == 0), 700, nullptr, false);
+			move_tic_count++;
+		} 
+		else {
 			move_tic_count++;
 		}
 	}

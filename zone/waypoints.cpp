@@ -443,31 +443,10 @@ void NPC::NextGuardPosition() {
 	}
 }
 
-/*
-// we need this for charmed NPCs
-void Mob::SaveSpawnSpot() {
-	spawn_x = x_pos;
-	spawn_y = y_pos;
-	spawn_z = z_pos;
-	spawn_heading = heading;
-}*/
-
-
-
-
-/*float Mob::CalculateDistanceToNextWaypoint() {
-	return CalculateDistance(cur_wp_x, cur_wp_y, cur_wp_z);
-}*/
-
 float Mob::CalculateDistance(float x, float y, float z) {
 	return (float)sqrtf( ((m_Position.x-x)*(m_Position.x-x)) + ((m_Position.y-y)*(m_Position.y-y)) + ((m_Position.z-z)*(m_Position.z-z)) );
 }
 
-/*
-uint8 NPC::CalculateHeadingToNextWaypoint() {
-	return CalculateHeadingToTarget(cur_wp_x, cur_wp_y);
-}
-*/
 float Mob::CalculateHeadingToTarget(float in_x, float in_y) {
 	float angle;
 
@@ -656,6 +635,11 @@ bool Mob::MakeNewPositionAndSendUpdate(float x, float y, float z, int speed, boo
 
 	else {
 		tar_vector/=16.0f;
+		float dur = Timer::SetCurrentTime() - pLastChange;
+		if(dur < 1.0f) {
+			dur = 1.0f;
+		}
+		tar_vector = (tar_vector * AImovement_duration) / 100.0f;
 
 		float new_x = m_Position.x + m_TargetV.x*tar_vector;
 		float new_y = m_Position.y + m_TargetV.y*tar_vector;
@@ -717,8 +701,6 @@ bool Mob::MakeNewPositionAndSendUpdate(float x, float y, float z, int speed, boo
 	}
 	else
 	{
-		// force an update now
-		move_tic_count = RuleI(Zone, NPCPositonUpdateTicCount);
 		SendPosUpdate();
 		SetAppearance(eaStanding, false);
 	}
