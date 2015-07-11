@@ -34,10 +34,11 @@ void ZoneLaunch::InitStartTimer() {
 }
 
 ZoneLaunch::ZoneLaunch(WorldServer *world, const char *launcher_name,
-const char *zone_name, const EQEmuConfig *config)
+const char *zone_name, uint16 port, const EQEmuConfig *config)
 : m_state(StateStartPending),
 	m_world(world),
 	m_zone(zone_name),
+	m_port(port),
 	m_launcherName(launcher_name),
 	m_config(config),
 	m_timer(config->RestartWait),
@@ -61,10 +62,14 @@ void ZoneLaunch::SendStatus() const {
 void ZoneLaunch::Start() {
 	ProcLauncher::Spec *spec = new ProcLauncher::Spec();
 	spec->program = m_config->ZoneExe;
-//	if(m_zone.substr(0,7) == "dynamic")
-//		spec->args.push_back(".");
-//	else
-	spec->args.push_back(m_zone);
+
+	if(m_port) {
+		std::string arg = m_zone + std::string(":") + std::to_string(m_port);
+		spec->args.push_back(arg);
+	} else {
+		spec->args.push_back(m_zone);
+	}
+
 	spec->args.push_back(m_launcherName);
 	spec->handler = this;
 	spec->logFile = m_config->LogPrefix + m_zone + m_config->LogSuffix;

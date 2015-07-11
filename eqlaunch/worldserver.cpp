@@ -86,14 +86,13 @@ void WorldServer::Process() {
 			}
 			const LauncherZoneRequest *lzr = (const LauncherZoneRequest *) pack->pBuffer;
 
-
 			switch(ZoneRequestCommands(lzr->command)) {
 			case ZR_Start: {
 				if(m_zones.find(lzr->short_name) != m_zones.end()) {
 					Log.Out(Logs::Detail, Logs::Launcher, "World told us to start zone %s, but it is already running.", lzr->short_name);
 				} else {
 					Log.Out(Logs::Detail, Logs::Launcher, "World told us to start zone %s.", lzr->short_name);
-					ZoneLaunch *l = new ZoneLaunch(this, m_name, lzr->short_name, m_config);
+					ZoneLaunch *l = new ZoneLaunch(this, m_name, lzr->short_name, lzr->port, m_config);
 					m_zones[lzr->short_name] = l;
 				}
 				break;

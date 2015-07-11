@@ -28,7 +28,6 @@
 #include "../common/eq_packet_structs.h"
 #include "../common/mutex.h"
 #include "../common/version.h"
-
 #include "../common/packet_dump_file.h"
 #include "../common/opcodemgr.h"
 #include "../common/guilds.h"
@@ -57,17 +56,14 @@
 #include "titles.h"
 #include "guild_mgr.h"
 #include "tasks.h"
-
 #include "quest_parser_collection.h"
 #include "embparser.h"
 #include "lua_parser.h"
-
 #include "questmgr.h"
 
 #include <iostream>
 #include <string>
 #include <fstream>
-
 #include <stdlib.h>
 #include <stdio.h>
 #include <signal.h>
@@ -116,41 +112,83 @@ int main(int argc, char** argv) {
 	RegisterExecutablePlatform(ExePlatformZone); 
 	Log.LoadLogSettingsDefaults();
 	set_exception_handler(); 
-	const char *zone_name; 
 	QServ = new QueryServ;
 
-	if(argc == 3) {
+	Log.Out(Logs::General, Logs::Zone_Server, "Loading server configuration..");
+	if(!ZoneConfig::LoadConfig()) {
+		Log.Out(Logs::General, Logs::Error, "Loading server configuration failed.");
+		return 1;
+	}
+	const ZoneConfig *Config = ZoneConfig::get();
+
+	const char *zone_name;
+	uint32 instance_id = 0;
+	std::string z_name;
+	if(argc == 4) {
+		instance_id = atoi(argv[3]);
 		worldserver.SetLauncherName(argv[2]);
-		worldserver.SetLaunchedName(argv[1]);
-		if(strncmp(argv[1], "dynamic_", 8) == 0) {
-			//dynamic zone with a launcher name correlation
+		auto zone_port = SplitString(argv[1], ':');
+
+		if(zone_port.size() > 0) {
+			z_name = zone_port[0];
+		}
+
+		if(zone_port.size() > 1) {
+			std::string p_name = zone_port[1];
+			Config->SetZonePort(atoi(p_name.c_str()));
+		}
+
+		worldserver.SetLaunchedName(z_name.c_str());
+		if(strncmp(z_name.c_str(), "dynamic_", 8) == 0) {
+			zone_name = ".";
+		}
+		else {
+			zone_name = z_name.c_str();
+		}
+	} else if(argc == 3) {
+		worldserver.SetLauncherName(argv[2]);
+		auto zone_port = SplitString(argv[1], ':');
+
+		if(zone_port.size() > 0) {
+			z_name = zone_port[0];
+		}
+
+		if(zone_port.size() > 1) {
+			std::string p_name = zone_port[1];
+			Config->SetZonePort(atoi(p_name.c_str()));
+		}
+
+		worldserver.SetLaunchedName(z_name.c_str());
+		if(strncmp(z_name.c_str(), "dynamic_", 8) == 0) {
 			zone_name = ".";
 		} else {
-			zone_name = argv[1];
-			worldserver.SetLaunchedName(zone_name);
+			zone_name = z_name.c_str();
 		}
 	} else if (argc == 2) {
 		worldserver.SetLauncherName("NONE");
-		worldserver.SetLaunchedName(argv[1]);
-		if(strncmp(argv[1], "dynamic_", 8) == 0) {
-			//dynamic zone with a launcher name correlation
+		auto zone_port = SplitString(argv[1], ':');
+
+		if(zone_port.size() > 0) {
+			z_name = zone_port[0];
+		}
+
+		if(zone_port.size() > 1) {
+			std::string p_name = zone_port[1];
+			Config->SetZonePort(atoi(p_name.c_str()));
+		}
+
+		worldserver.SetLaunchedName(z_name.c_str());
+		if(strncmp(z_name.c_str(), "dynamic_", 8) == 0) {
 			zone_name = ".";
-		} else {
-			zone_name = argv[1];
-			worldserver.SetLaunchedName(zone_name);
+		}
+		else {
+			zone_name = z_name.c_str();
 		}
 	} else {
 		zone_name = ".";
 		worldserver.SetLaunchedName(".");
 		worldserver.SetLauncherName("NONE");
 	}
-
-	Log.Out(Logs::General, Logs::Zone_Server, "Loading server configuration..");
-	if (!ZoneConfig::LoadConfig()) {
-		Log.Out(Logs::General, Logs::Error, "Loading server configuration failed.");
-		return 1;
-	}
-	const ZoneConfig *Config = ZoneConfig::get();
 
 	worldserver.SetPassword(Config->SharedKey.c_str());
 
@@ -312,7 +350,7 @@ int main(int argc, char** argv) {
 #endif
 	if (!strlen(zone_name) || !strcmp(zone_name,".")) {
 		Log.Out(Logs::General, Logs::Zone_Server, "Entering sleep mode");
-	} else if (!Zone::Bootup(database.GetZoneID(zone_name), 0, true)) { //todo: go above and fix this to allow cmd line instance
+	} else if (!Zone::Bootup(database.GetZoneID(zone_name), instance_id, true)) {
 		Log.Out(Logs::General, Logs::Error, "Zone Bootup failed :: Zone::Bootup");
 		zone = 0;
 	}

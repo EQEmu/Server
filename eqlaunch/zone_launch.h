@@ -28,7 +28,7 @@ class EQEmuConfig;
 class ZoneLaunch : protected ProcLauncher::EventHandler {
 public:
 	ZoneLaunch(WorldServer *world, const char *launcher_name,
-		const char *zone_name, const EQEmuConfig *config);
+		const char *zone_name, uint16 port, const EQEmuConfig *config);
 	virtual ~ZoneLaunch();
 
 	void Stop(bool graceful = true);
@@ -63,6 +63,7 @@ protected:
 	const std::string m_zone;
 	const char *const m_launcherName;
 	const EQEmuConfig *const m_config;
+	const uint16 m_port;
 
 	Timer m_timer;
 	ProcLauncher::ProcRef m_ref;

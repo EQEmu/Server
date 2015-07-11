@@ -760,6 +760,7 @@ typedef enum {
 struct LauncherZoneRequest {
 	uint8 command;
 	char short_name[33];
+	uint16 port;
 };
 
 struct LauncherZoneStatus {
