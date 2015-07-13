@@ -2234,7 +2234,14 @@ luabind::scope lua_register_special_abilities() {
 				luabind::value("destructible_object", static_cast<int>(DESTRUCTIBLE_OBJECT)),
 				luabind::value("no_harm_from_client", static_cast<int>(NO_HARM_FROM_CLIENT)),
 				luabind::value("always_flee", static_cast<int>(ALWAYS_FLEE)),
-				luabind::value("flee_percent", static_cast<int>(FLEE_PERCENT))
+				luabind::value("flee_percent", static_cast<int>(FLEE_PERCENT)),
+				luabind::value("allow_beneficial", static_cast<int>(ALLOW_BENEFICIAL)),
+				luabind::value("disable_melee", static_cast<int>(DISABLE_MELEE)),
+				luabind::value("npc_chase_distance", static_cast<int>(NPC_CHASE_DISTANCE)),
+				luabind::value("allow_to_tank", static_cast<int>(ALLOW_TO_TANK)),
+				luabind::value("ignore_root_aggro_rules", static_cast<int>(IGNORE_ROOT_AGGRO_RULES)),
+				luabind::value("casting_resist_diff", static_cast<int>(CASTING_RESIST_DIFF)),
+				luabind::value("counter_avoid_damage", static_cast<int>(COUNTER_AVOID_DAMAGE))
 		];
 }
 
