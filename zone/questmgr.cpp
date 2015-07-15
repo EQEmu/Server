@@ -2200,11 +2200,11 @@ void QuestManager::taskexploredarea(int exploreid) {
 		initiator->UpdateTasksOnExplore(exploreid);
 }
 
-void QuestManager::assigntask(int taskid) {
+void QuestManager::assigntask(int taskid, bool enforce_level_requirement) {
 	QuestManagerCurrentQuestVars();
 
-	if(RuleB(TaskSystem, EnableTaskSystem) && initiator && owner)
-		initiator->AssignTask(taskid, owner->GetID());
+	if (RuleB(TaskSystem, EnableTaskSystem) && initiator && owner)
+		initiator->AssignTask(taskid, owner->GetID(), enforce_level_requirement);
 }
 
 void QuestManager::failtask(int taskid) {

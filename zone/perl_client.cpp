@@ -5126,13 +5126,20 @@ XS(XS_Client_AssignTask); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_AssignTask)
 {
 	dXSARGS;
-	if (items != 3)
-		Perl_croak(aTHX_ "Usage: Client::AssignTask(THIS, TaskID, NPCID)");
+	if (items != 3 && items != 4)
+		Perl_croak(aTHX_ "Usage: Client::AssignTask(THIS, TaskID, NPCID, enforce_level_requirement)");
 	{
 		Client *	THIS;
 		int		TaskID = (int)SvIV(ST(1));
 		int		NPCID = (int)SvIV(ST(2));
-
+		bool	enforce_level_requirement = false;
+		if (items == 4)
+		{
+			if ((int)SvIV(ST(3)) == 1)
+			{
+				enforce_level_requirement = true;
+			}
+		}
 		if (sv_derived_from(ST(0), "Client")) {
 			IV tmp = SvIV((SV*)SvRV(ST(0)));
 			THIS = INT2PTR(Client *,tmp);
@@ -5142,7 +5149,7 @@ XS(XS_Client_AssignTask)
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		THIS->AssignTask(TaskID, NPCID);
+		THIS->AssignTask(TaskID, NPCID, enforce_level_requirement);
 	}
 	XSRETURN_EMPTY;
 }
@@ -6477,7 +6484,7 @@ XS(boot_Client)
 		newXSproto(strcpy(buf, "GetFreeSpellBookSlot"), XS_Client_GetFreeSpellBookSlot, file, "$;$");
 		newXSproto(strcpy(buf, "GetSpellBookSlotBySpellID"), XS_Client_GetSpellBookSlotBySpellID, file, "$$");
 		newXSproto(strcpy(buf, "UpdateTaskActivity"), XS_Client_UpdateTaskActivity, file, "$$$$;$");
-		newXSproto(strcpy(buf, "AssignTask"), XS_Client_AssignTask, file, "$$$");
+		newXSproto(strcpy(buf, "AssignTask"), XS_Client_AssignTask, file, "$$$;$");
 		newXSproto(strcpy(buf, "FailTask"), XS_Client_FailTask, file, "$$");
 		newXSproto(strcpy(buf, "IsTaskCompleted"), XS_Client_IsTaskCompleted, file, "$$");
 		newXSproto(strcpy(buf, "IsTaskActive"), XS_Client_IsTaskActive, file, "$$");
