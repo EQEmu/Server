@@ -997,7 +997,7 @@ public:
 	inline void DisableTask(int TaskCount, int *TaskList) { if(taskstate) taskstate->DisableTask(CharacterID(), TaskCount, TaskList); }
 	inline bool IsTaskEnabled(int TaskID) { return (taskstate ? taskstate->IsTaskEnabled(TaskID) : false); }
 	inline void ProcessTaskProximities(float X, float Y, float Z) { if(taskstate) taskstate->ProcessTaskProximities(this, X, Y, Z); }
-	inline void AssignTask(int TaskID, int NPCID) { if(taskstate) taskstate->AcceptNewTask(this, TaskID, NPCID); }
+	inline void AssignTask(int TaskID, int NPCID, bool enforce_level_requirement = false) { if (taskstate) taskstate->AcceptNewTask(this, TaskID, NPCID, enforce_level_requirement); }
 	inline int ActiveSpeakTask(int NPCID) { if(taskstate) return taskstate->ActiveSpeakTask(NPCID); else return 0; }
 	inline int ActiveSpeakActivity(int NPCID, int TaskID) { if(taskstate) return taskstate->ActiveSpeakActivity(NPCID, TaskID); else return 0; }
 	inline void FailTask(int TaskID) { if(taskstate) taskstate->FailTask(this, TaskID); }

@@ -168,7 +168,7 @@ public:
 	int GetTaskActivityDoneCount(int index, int ActivityID);
 	int GetTaskActivityDoneCountFromTaskID(int TaskID, int ActivityID);
 	int GetTaskStartTime(int index);
-	void AcceptNewTask(Client *c, int TaskID, int NPCID);
+	void AcceptNewTask(Client *c, int TaskID, int NPCID, bool enforce_level_requirement = false);
 	void FailTask(Client *c, int TaskID);
 	int TaskTimeLeft(int TaskID);
 	int IsTaskCompleted(int TaskID);
@@ -230,6 +230,8 @@ public:
 	void SendTaskSelector(Client *c, Mob *mob, int TaskCount, int *TaskList);
 	void SendTaskSelectorNew(Client *c, Mob *mob, int TaskCount, int *TaskList);
 	bool AppropriateLevel(int TaskID, int PlayerLevel);
+	int GetTaskMinLevel(int TaskID);
+	int GetTaskMaxLevel(int TaskID);
 	void TaskSetSelector(Client *c, ClientTaskState *state, Mob *mob, int TaskSetID);
 	void SendActiveTasksToClient(Client *c, bool TaskComplete=false);
 	void SendSingleActiveTaskToClient(Client *c, int TaskIndex, bool TaskComplete, bool BringUpTaskJournal=false);

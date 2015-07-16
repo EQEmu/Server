@@ -895,6 +895,26 @@ bool TaskManager::AppropriateLevel(int TaskID, int PlayerLevel) {
 
 }
 
+int TaskManager::GetTaskMinLevel(int TaskID)
+{
+	if (Tasks[TaskID]->MinLevel)
+	{
+		return Tasks[TaskID]->MinLevel;
+	}
+		
+	return -1;
+}
+
+int TaskManager::GetTaskMaxLevel(int TaskID)
+{
+	if (Tasks[TaskID]->MaxLevel)
+	{
+		return Tasks[TaskID]->MaxLevel;
+	}
+
+	return -1;
+}
+
 void TaskManager::TaskSetSelector(Client *c, ClientTaskState *state, Mob *mob, int TaskSetID) {
 
 	unsigned int EnabledTaskIndex = 0;
@@ -2948,7 +2968,7 @@ void ClientTaskState::RemoveTask(Client *c, int sequenceNumber) {
 }
 
 
-void ClientTaskState::AcceptNewTask(Client *c, int TaskID, int NPCID) {
+void ClientTaskState::AcceptNewTask(Client *c, int TaskID, int NPCID, bool enforce_level_requirement) {
 
 	if(!taskmanager || TaskID<0 || TaskID>=MAXTASKS) {
 		c->Message(13, "Task system not functioning, or TaskID %i out of range.", TaskID);
@@ -2971,6 +2991,12 @@ void ClientTaskState::AcceptNewTask(Client *c, int TaskID, int NPCID) {
 			c->Message(13, "You have already been assigned this task.");
 			return;
 		}
+	}
+
+	if (enforce_level_requirement && !taskmanager->AppropriateLevel(TaskID, c->GetLevel()))
+	{
+		c->Message(13, "You are outside the level range of this task.");
+		return;
 	}
 
 	if(!taskmanager->IsTaskRepeatable(TaskID) && IsTaskCompleted(TaskID)) return;

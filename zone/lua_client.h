@@ -242,6 +242,7 @@ public:
 	int FindSpellBookSlotBySpellID(int spell_id);
 	void UpdateTaskActivity(int task, int activity, int count);
 	void AssignTask(int task, int npc_id);
+	void AssignTask(int task, int npc_id, bool enforce_level_requirement);
 	void FailTask(int task);
 	bool IsTaskCompleted(int task);
 	bool IsTaskActive(int task);

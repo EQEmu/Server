@@ -188,7 +188,7 @@ public:
 	void updatetaskactivity(int task, int activity, int count, bool ignore_quest_update = false);
 	void resettaskactivity(int task, int activity);
 	void taskexploredarea(int exploreid);
-	void assigntask(int taskid);
+	void assigntask(int taskid, bool enforce_level_requirement = false);
 	void failtask(int taskid);
 	int tasktimeleft(int taskid);
 	int istaskcompleted(int taskid);

@@ -2383,11 +2383,19 @@ XS(XS__assigntask)
 {
 	dXSARGS;
 	unsigned int taskid;
-	if(items == 1) {
+	bool enforce_level_requirement = false;
+	if(items == 1 || items == 2) {
 		taskid = (int)SvIV(ST(0));
-		quest_manager.assigntask(taskid);
+		if (items == 2)
+		{
+			if ((int)SvIV(ST(1)) == 1)
+			{
+				enforce_level_requirement = true;
+			}
+		}
+		quest_manager.assigntask(taskid, enforce_level_requirement);
 	} else {
-		Perl_croak(aTHX_ "Usage: assigntask(taskid)");
+		Perl_croak(aTHX_ "Usage: assigntask(taskid, enforce_level_requirement)");
 	}
 
 	XSRETURN_EMPTY;
