@@ -1224,21 +1224,34 @@ void Client::Clearance(int8 response)
 	const char *zs_addr = nullptr;
 	if(cle && cle->IsLocalClient()) {
 		const char *local_addr = zs->GetCLocalAddress();
+
 		if(local_addr[0]) {
 			zs_addr = local_addr;
 		} else {
-			struct in_addr in;
-			in.s_addr = zs->GetIP();
-			zs_addr = inet_ntoa(in);
+			if(strcmp(local_addr, "127.0.0.1") == 0)
+			{
+				zs_addr = WorldConfig::get()->LocalAddress.c_str();
+			} else {
+				struct in_addr in;
+				in.s_addr = zs->GetIP();
+				zs_addr = inet_ntoa(in);
+			}
 		}
+
 	} else {
 		const char *addr = zs->GetCAddress();
 		if(addr[0]) {
 			zs_addr = addr;
 		} else {
-			struct in_addr in;
-			in.s_addr = zs->GetIP();
-			zs_addr = inet_ntoa(in);
+			if(strcmp(addr, "127.0.0.1") == 0)
+			{
+				zs_addr = WorldConfig::get()->WorldAddress.c_str();
+			}
+			else {
+				struct in_addr in;
+				in.s_addr = zs->GetIP();
+				zs_addr = inet_ntoa(in);
+			}
 		}
 	}
 
