@@ -575,16 +575,6 @@ uint32 NetConnection::GetIP(char* name)
 
 }
 
-void NetConnection::SaveInfo(char* address, uint32 port, char* waddress, char* filename) {
-
-	ZoneAddress = new char[strlen(address)+1];
-	strcpy(ZoneAddress, address);
-	ZonePort = port;
-	WorldAddress = new char[strlen(waddress)+1];
-	strcpy(WorldAddress, waddress);
-	strn0cpy(ZoneFileName, filename, sizeof(ZoneFileName));
-}
-
 NetConnection::NetConnection()
 :
 	object_timer(5000),
@@ -594,9 +584,6 @@ NetConnection::NetConnection()
 	raid_timer(1000),
 	trap_timer(1000)
 {
-	ZonePort = 0;
-	ZoneAddress = 0;
-	WorldAddress = 0;
 	group_timer.Disable();
 	raid_timer.Disable();
 	corpse_timer.Disable();
@@ -606,10 +593,6 @@ NetConnection::NetConnection()
 }
 
 NetConnection::~NetConnection() {
-	if (ZoneAddress != 0)
-		safe_delete_array(ZoneAddress);
-	if (WorldAddress != 0)
-		safe_delete_array(WorldAddress);
 }
 
 /* Update Window Title with relevant information */

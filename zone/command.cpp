@@ -169,6 +169,7 @@ int command_init(void) {
 		command_add("aggrozone", "[aggro] - Aggro every mob in the zone with X aggro. Default is 0. Not recommend if you're not invulnerable.", 100, command_aggrozone) ||
 		command_add("ai", "[factionid/spellslist/con/guard/roambox/stop/start] - Modify AI on NPC target", 100, command_ai) ||
 		command_add("appearance", "[type] [value] - Send an appearance packet for you or your target", 150, command_appearance) ||
+		command_add("apply_shared_memory", "[shared_memory_name] - Tells every zone and world to apply a specific shared memory segment by name.", 250, command_apply_shared_memory) ||
 		command_add("attack", "[targetname] - Make your NPC target attack targetname", 150, command_attack) ||
 		command_add("augmentitem",  "Force augments an item. Must have the augment item window open.",  250, command_augmentitem) ||
 		command_add("aug", nullptr, 250, command_augmentitem) ||
@@ -253,7 +254,7 @@ int command_init(void) {
 		command_add("heromodel",  "[hero model] [slot] - Full set of Hero's Forge Armor appearance. If slot is set, sends exact model just to slot.",  200, command_heromodel) ||
 		command_add("hideme", "[on/off] - Hide yourself from spawn lists.", 80, command_hideme) ||
 		command_add("hm",  "[hero model] [slot] - Full set of Hero's Forge Armor appearance. If slot is set, sends exact model just to slot.)",  200, command_heromodel) ||
-		command_add("hotfix", "[hotfix_name] - Reloads shared memory into a hotfix", 250, command_hotfix) ||
+		command_add("hotfix", "[hotfix_name] - Reloads shared memory into a hotfix, equiv to load_shared_memory followed by apply_shared_memory", 250, command_hotfix) ||
 		command_add("hp", "- Refresh your HP bar from the server.", 0, command_hp) ||
 		command_add("incstat", "- Increases or Decreases a client's stats permanently.", 200, command_incstat) ||
 		command_add("instance", "- Modify Instances", 200, command_instance) ||
@@ -271,6 +272,7 @@ int command_init(void) {
 		command_add("level", "[level] - Set your or your target's level", 10, command_level) ||
 		command_add("listnpcs", "[name/range] - Search NPCs", 20, command_listnpcs) ||
 		command_add("listpetition", "- List petitions", 50, command_listpetition) ||
+		command_add("load_shared_memory", "[shared_memory_name] - Reloads shared memory and uses the input as output", 250, command_load_shared_memory) ||
 		command_add("loc", "- Print out your or your target's current location and heading", 0, command_loc) ||
 		command_add("lock", "- Lock the worldserver", 150, command_lock) ||
 		command_add("logs",  "Manage anything to do with logs",  250, command_logs) ||
@@ -10634,10 +10636,7 @@ void command_hotfix(Client *c, const Seperator *sep) {
 		hotfix_name = "hotfix_";
 	}
 
-
 	c->Message(0, "Creating and applying hotfix");
-	//Not 100% certain on the thread safety of this.
-	//I think it's okay however
 	std::thread t1([c,hotfix_name]() {
 #ifdef WIN32
 		if(hotfix_name.length() > 0) {
@@ -10665,4 +10664,53 @@ void command_hotfix(Client *c, const Seperator *sep) {
 	});
 
 	t1.detach();
+}
+
+void command_load_shared_memory(Client *c, const Seperator *sep) {
+	char hotfix[256] = { 0 };
+	database.GetVariable("hotfix_name", hotfix, 256);
+	std::string current_hotfix = hotfix;
+
+	std::string hotfix_name;
+	if(strcasecmp(current_hotfix.c_str(), sep->arg[1]) == 0) {
+		c->Message(0, "Cannot attempt to load this shared memory segment as it is already loaded.");
+		return;
+	}
+
+	hotfix_name = sep->arg[1];
+	c->Message(0, "Loading shared memory segment %s", hotfix_name.c_str());
+	std::thread t1([c,hotfix_name]() {
+#ifdef WIN32
+		if(hotfix_name.length() > 0) {
+			system(StringFormat("shared_memory -hotfix=%s", hotfix_name.c_str()).c_str());
+		} else {
+			system(StringFormat("shared_memory").c_str());
+		}
+#else
+		if(hotfix_name.length() > 0) {
+			system(StringFormat("./shared_memory -hotfix=%s", hotfix_name.c_str()).c_str());
+		}
+		else {
+			system(StringFormat("./shared_memory").c_str());
+		}
+#endif
+		c->Message(0, "Shared memory segment finished loading.");
+	});
+
+	t1.detach();
+}
+
+void command_apply_shared_memory(Client *c, const Seperator *sep) {
+	char hotfix[256] = { 0 };
+	database.GetVariable("hotfix_name", hotfix, 256);
+	std::string hotfix_name = sep->arg[1];
+	
+	c->Message(0, "Applying shared memory segment %s", hotfix_name.c_str());
+	database.SetVariable("hotfix_name", hotfix_name.c_str());
+
+	ServerPacket pack(ServerOP_ChangeSharedMem, hotfix_name.length() + 1);
+	if(hotfix_name.length() > 0) {
+		strcpy((char*)pack.pBuffer, hotfix_name.c_str());
+	}
+	worldserver.SendPacket(&pack);
 }
