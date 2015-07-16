@@ -130,40 +130,34 @@ void Mob::DoSpecialAttackDamage(Mob *who, SkillUseTypes skill, int32 max_damage,
 
 	min_damage += min_damage * GetMeleeMinDamageMod_SE(skill) / 100;
 
-	if(HitChance && !who->CheckHitChance(this, skill, MainPrimary))
-		max_damage = 0;
-
-	else{
-		bool CanRiposte = true;
-		if(skill == SkillThrowing || skill == SkillArchery) // changed from '&&'
-			CanRiposte = false;
-
-		if (CanAvoid)
-			who->AvoidDamage(this, max_damage, CanRiposte);
-
-		who->MeleeMitigation(this, max_damage, min_damage);
-
-		if(max_damage > 0)
+	int hand = MainPrimary; // Avoid checks hand for throwing/archery exclusion, primary should work for most
+	if (skill == SkillThrowing || skill == SkillArchery)
+		hand = MainRange;
+	if (who->AvoidDamage(this, max_damage, hand)) {
+		if (max_damage == -3)
+			DoRiposte(who);
+	} else {
+		if (HitChance || who->CheckHitChance(this, skill, MainPrimary)) {
+			who->MeleeMitigation(this, max_damage, min_damage);
 			CommonOutgoingHitSuccess(who, max_damage, skill);
-
+		} else {
+			max_damage = 0;
+		}
 	}
 
 	who->AddToHateList(this, hate, 0, false);
+	if (max_damage > 0 && aabonuses.SkillAttackProc[0] && aabonuses.SkillAttackProc[1] == skill &&
+	    IsValidSpell(aabonuses.SkillAttackProc[2])) {
+		float chance = aabonuses.SkillAttackProc[0] / 1000.0f;
+		if (zone->random.Roll(chance))
+			SpellFinished(aabonuses.SkillAttackProc[2], who, 10, 0, -1,
+				      spells[aabonuses.SkillAttackProc[2]].ResistDiff);
+	}
 	who->Damage(this, max_damage, SPELL_UNKNOWN, skill, false);
 
 	//Make sure 'this' has not killed the target and 'this' is not dead (Damage shield ect).
 	if(!GetTarget())return;
 	if (HasDied())	return;
-
-	//[AA Dragon Punch] value[0] = 100 for 25%, chance value[1] = skill
-	if(aabonuses.SpecialAttackKBProc[0] && aabonuses.SpecialAttackKBProc[1] == skill){
-		int kb_chance = 25;
-		kb_chance += kb_chance*(100-aabonuses.SpecialAttackKBProc[0])/100;
-
-		if (zone->random.Roll(kb_chance))
-			SpellFinished(904, who, 10, 0, -1, spells[904].ResistDiff);
-			//who->Stun(100); Kayen: This effect does not stun on live, it only moves the NPC.
-	}
 
 	if (HasSkillProcs())
 		TrySkillProc(who, skill, ReuseTime*1000);
@@ -171,8 +165,6 @@ void Mob::DoSpecialAttackDamage(Mob *who, SkillUseTypes skill, int32 max_damage,
 	if (max_damage > 0 && HasSkillProcSuccess())
 		TrySkillProc(who, skill, ReuseTime*1000, true);
 
-	if(max_damage == -3 && !who->HasDied())
-		DoRiposte(who);
 }
 
 
@@ -544,7 +536,7 @@ void Mob::TryBackstab(Mob *other, int ReuseTime) {
 
 		RogueBackstab(other,false,ReuseTime);
 		if (level > 54) {
-			if(IsClient() && CastToClient()->CheckDoubleAttack(false))
+			if(IsClient() && CastToClient()->CheckDoubleAttack())
 			{
 				if(other->GetHP() > 0)
 					RogueBackstab(other,false,ReuseTime);
@@ -566,7 +558,7 @@ void Mob::TryBackstab(Mob *other, int ReuseTime) {
 		if (level > 54) {
 
 			// Check for double attack with main hand assuming maxed DA Skill (MS)
-			if(IsClient() && CastToClient()->CheckDoubleAttack(false))
+			if(IsClient() && CastToClient()->CheckDoubleAttack())
 				if(other->GetHP() > 0)
 					RogueBackstab(other,true, ReuseTime);
 
@@ -975,7 +967,7 @@ void Mob::DoArcheryAttackDmg(Mob* other,  const ItemInst* RangeWeapon, const Ite
 			}
 
 			if (!HeadShot)
-				other->AvoidDamage(this, TotalDmg, false);
+				other->AvoidDamage(this, TotalDmg, MainRange);
 
 			other->MeleeMitigation(this, TotalDmg, minDmg);
 			if(TotalDmg > 0){
@@ -1308,7 +1300,7 @@ void NPC::DoRangedAttackDmg(Mob* other, bool Launch, int16 damage_mod, int16 cha
 
 		TotalDmg += TotalDmg *  damage_mod / 100;
 
-		other->AvoidDamage(this, TotalDmg, false);
+		other->AvoidDamage(this, TotalDmg, MainRange);
 		other->MeleeMitigation(this, TotalDmg, MinDmg);
 
 		if (TotalDmg > 0)
@@ -1542,7 +1534,7 @@ void Mob::DoThrowingAttackDmg(Mob* other, const ItemInst* RangeWeapon, const Ite
 
 			Log.Out(Logs::Detail, Logs::Combat, "Item DMG %d. Max Damage %d. Hit for damage %d", WDmg, MaxDmg, TotalDmg);
 			if (!Assassinate_Dmg)
-				other->AvoidDamage(this, TotalDmg, false); //CanRiposte=false - Can not riposte throw attacks.
+				other->AvoidDamage(this, TotalDmg, MainRange);
 
 			other->MeleeMitigation(this, TotalDmg, minDmg);
 			if(TotalDmg > 0)
@@ -2414,26 +2406,25 @@ void Mob::DoMeleeSkillAttackDmg(Mob* other, uint16 weapon_damage, SkillUseTypes 
 		else
 			damage = zone->random.Int(min_hit, max_hit);
 
-		if(!other->CheckHitChance(this, skillinuse, Hand, chance_mod)) {
-			damage = 0;
+		if (other->AvoidDamage(this, damage, CanRiposte ? MainRange : MainPrimary)) { // MainRange excludes ripo, primary doesn't have any extra behavior
+			if (damage == -3) {
+				DoRiposte(other);
+				if (HasDied())
+					return;
+			}
 		} else {
-			other->AvoidDamage(this, damage, CanRiposte);
-			other->MeleeMitigation(this, damage, min_hit);
-			if(damage > 0)
+			if (other->CheckHitChance(this, skillinuse, Hand, chance_mod)) {
+				other->MeleeMitigation(this, damage, min_hit);
 				CommonOutgoingHitSuccess(other, damage, skillinuse);
+			} else {
+				damage = 0;
+			}
 		}
 
-		if (damage == -3) {
-			DoRiposte(other);
-			if (HasDied())
-				return;
-		}
 	}
 
 	else
 		damage = -5;
-
-	other->AddToHateList(this, hate);
 
 	bool CanSkillProc = true;
 	if (skillinuse == SkillOffense){ //Hack to allow damage to display.
@@ -2442,18 +2433,17 @@ void Mob::DoMeleeSkillAttackDmg(Mob* other, uint16 weapon_damage, SkillUseTypes 
 	}
 
 	other->AddToHateList(this, hate, 0, false);
+	if (damage > 0 && aabonuses.SkillAttackProc[0] && aabonuses.SkillAttackProc[1] == skillinuse &&
+	    IsValidSpell(aabonuses.SkillAttackProc[2])) {
+		float chance = aabonuses.SkillAttackProc[0] / 1000.0f;
+		if (zone->random.Roll(chance))
+			SpellFinished(aabonuses.SkillAttackProc[2], other, 10, 0, -1,
+				      spells[aabonuses.SkillAttackProc[2]].ResistDiff);
+	}
 	other->Damage(this, damage, SPELL_UNKNOWN, skillinuse);
 
 	if (HasDied())
 		return;
-
-	if(aabonuses.SpecialAttackKBProc[0] && aabonuses.SpecialAttackKBProc[1] == skillinuse){
-		int kb_chance = 25;
-		kb_chance += kb_chance*(100-aabonuses.SpecialAttackKBProc[0])/100;
-
-		if (zone->random.Roll(kb_chance))
-			SpellFinished(904, other, 10, 0, -1, spells[904].ResistDiff);
-	}
 
 	if (CanSkillProc && HasSkillProcs())
 		TrySkillProc(other, skillinuse, ReuseTime);

@@ -169,7 +169,6 @@ public:
 	uint16 BotGetSpellType(int spellslot) { return AIspells[spellslot].type; }
 	uint16 BotGetSpellPriority(int spellslot) { return AIspells[spellslot].priority; }
 	virtual float GetProcChances(float ProcBonus, uint16 hand);
-	virtual bool AvoidDamage(Mob* other, int32 &damage, bool CanRiposte);
 	virtual int GetMonkHandToHandDamage(void);
 	virtual bool TryFinishingBlow(Mob *defender, SkillUseTypes skillinuse);
 	virtual void DoRiposte(Mob* defender);
@@ -314,11 +313,12 @@ public:
 	virtual float GetAOERange(uint16 spell_id);
 	virtual bool SpellEffect(Mob* caster, uint16 spell_id, float partial = 100);
 	virtual void DoBuffTic(const Buffs_Struct &buff, int slot, Mob* caster = nullptr);
-	virtual bool CastSpell(uint16 spell_id, uint16 target_id, uint16 slot = USE_ITEM_SPELL_SLOT, int32 casttime = -1, int32 mana_cost = -1, uint32* oSpellWillFinish = 0, uint32 item_slot = 0xFFFFFFFF, int16 *resist_adjust = nullptr);
+	virtual bool CastSpell(uint16 spell_id, uint16 target_id, uint16 slot = USE_ITEM_SPELL_SLOT, int32 casttime = -1, int32 mana_cost = -1, uint32* oSpellWillFinish = 0,
+						   uint32 item_slot = 0xFFFFFFFF, int16 *resist_adjust = nullptr, uint32 aa_id = 0);
 	virtual bool SpellOnTarget(uint16 spell_id, Mob* spelltar);
 	virtual bool IsImmuneToSpell(uint16 spell_id, Mob *caster);
 	virtual bool DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_center, CastAction_type &CastAction);
-	virtual bool DoCastSpell(uint16 spell_id, uint16 target_id, uint16 slot = USE_ITEM_SPELL_SLOT, int32 casttime = -1, int32 mana_cost = -1, uint32* oSpellWillFinish = 0, uint32 item_slot = 0xFFFFFFFF);
+	virtual bool DoCastSpell(uint16 spell_id, uint16 target_id, uint16 slot = USE_ITEM_SPELL_SLOT, int32 casttime = -1, int32 mana_cost = -1, uint32* oSpellWillFinish = 0, uint32 item_slot = 0xFFFFFFFF, uint32 aa_id = 0);
 
 	// Bot Action Command Methods
 	bool MesmerizeTarget(Mob* target);
@@ -448,12 +448,8 @@ public:
 	bool IsBotWISCaster() { return (GetClass() == CLERIC || GetClass() == DRUID || GetClass() == SHAMAN); }
 	bool CanHeal();
 	int GetRawACNoShield(int &shield_ac);
-	void LoadAAs();
-	uint32 GetAA(uint32 aa_id);
-	void ApplyAABonuses(uint32 aaid, uint32 slots, StatBonuses* newbon);
 	bool GetHasBeenSummoned() { return _hasBeenSummoned; }
 	const glm::vec3 GetPreSummonLocation() const { return m_PreSummonLocation; }
-	bool GetGroupMessagesOn() { return _groupMessagesOn; }
 	bool GetInHealRotation() { return _isInHealRotation; }
 	bool GetHealRotationActive() { return (GetInHealRotation() && _isHealRotationActive); }
 	bool GetHealRotationUseFastHeals() { return _healRotationUseFastHeals; }
@@ -539,7 +535,6 @@ public:
 	void SetDisciplineRecastTimer(int timer_index, int32 recast_delay);
 	void SetHasBeenSummoned(bool s);
 	void SetPreSummonLocation(const glm::vec3& location) { m_PreSummonLocation = location; }
-	void SetGroupMessagesOn(bool groupMessagesOn) { _groupMessagesOn = groupMessagesOn; }
 	void SetInHealRotation( bool inRotation ) { _isInHealRotation = inRotation; }
 	void SetHealRotationActive( bool isActive ) { _isHealRotationActive = isActive; }
 	void SetHealRotationUseFastHeals( bool useFastHeals ) { _healRotationUseFastHeals = useFastHeals; }
@@ -552,6 +547,8 @@ public:
 	void SetNumHealRotationMembers( uint8 numMembers ) { _numHealRotationMembers = numMembers; }
 	void SetBardUseOutOfCombatSongs(bool useOutOfCombatSongs) { _bardUseOutOfCombatSongs = useOutOfCombatSongs;}
 	void SetShowHelm(bool showhelm) { _showhelm = showhelm; }
+	
+	std::string CreateSayLink(Client* botOwner, const char* message, const char* name);
 
 	// Class Destructors
 	virtual ~Bot();
@@ -564,7 +561,7 @@ protected:
 	virtual bool CheckBotDoubleAttack(bool Triple = false);
 	virtual int32 GetBotFocusEffect(BotfocusType bottype, uint16 spell_id);
 	virtual int32 CalcBotFocusEffect(BotfocusType bottype, uint16 focus_id, uint16 spell_id, bool best_focus=false);
-	virtual int32 CalcBotAAFocus(BotfocusType type, uint32 aa_ID, uint16 spell_id);
+	virtual int32 CalcBotAAFocus(BotfocusType type, uint32 aa_ID, uint32 points, uint16 spell_id);
 	virtual void PerformTradeWithClient(int16 beginSlotID, int16 endSlotID, Client* client);
 	virtual bool AIDoSpellCast(uint8 i, Mob* tar, int32 mana_cost, uint32* oDontDoAgainBefore = 0);
 	virtual float GetMaxMeleeRangeToTarget(Mob* target);
@@ -608,7 +605,6 @@ private:
 	bool _hasBeenSummoned;
 	glm::vec3 m_PreSummonLocation;
 	uint8 _spellCastingChances[MaxStances][MaxSpellTypes];
-	bool _groupMessagesOn;
 	bool _isInHealRotation;
 	bool _isHealRotationActive;
 	bool _healRotationUseFastHeals;
@@ -646,12 +642,12 @@ private:
 	uint8 _baseGender;	// Bots gender. Necessary to preserve the original value otherwise it can be changed by illusions.
 
 	// Class Methods
+	void LoadAAs();
 	int32 acmod();
 	void GenerateBaseStats();
 	void GenerateAppearance();
 	void GenerateArmorClass();
 	int32 GenerateBaseHitPoints();
-	void GenerateAABonuses(StatBonuses* newbon);
 	int32 GenerateBaseManaPoints();
 	void GenerateSpecialAttacks();
 	void SetBotID(uint32 botID);

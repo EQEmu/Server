@@ -391,73 +391,12 @@ bool Client::Process() {
 			}
 			else if (auto_attack_target->GetHP() > -10) // -10 so we can watch people bleed in PvP
 			{
-				if(CheckAAEffect(aaEffectRampage))
-				{
-					entity_list.AEAttack(this, 30);
-				} else {
-					Attack(auto_attack_target, MainPrimary); // Kaiyodo - added attacking hand to arguments
-				}
 				ItemInst *wpn = GetInv().GetItem(MainPrimary);
 				TryWeaponProc(wpn, auto_attack_target, MainPrimary);
 
-				bool tripleAttackSuccess = false;
-				if( auto_attack_target && CanThisClassDoubleAttack() ) {
-
-					CheckIncreaseSkill(SkillDoubleAttack, auto_attack_target, -10);
-					if(CheckDoubleAttack()) {
-						//should we allow rampage on double attack?
-						if(CheckAAEffect(aaEffectRampage)) {
-							entity_list.AEAttack(this, 30);
-						} else {
-							Attack(auto_attack_target, MainPrimary, false);
-						}
-					}
-
-					//triple attack: rangers, monks, warriors, berserkers over level 60
-					if((((GetClass() == MONK || GetClass() == WARRIOR || GetClass() == RANGER || GetClass() == BERSERKER)
-						&& GetLevel() >= 60) || GetSpecialAbility(SPECATK_TRIPLE))
-						&& CheckDoubleAttack(true))
-					{
-						tripleAttackSuccess = true;
-						Attack(auto_attack_target, MainPrimary, false);
-					}
-
-					//quad attack, does this belong here??
-					if(GetSpecialAbility(SPECATK_QUAD) && CheckDoubleAttack(true))
-					{
-						Attack(auto_attack_target, MainPrimary, false);
-					}
-				}
-
-				//Live AA - Flurry, Rapid Strikes ect (Flurry does not require Triple Attack).
-				int16 flurrychance = aabonuses.FlurryChance + spellbonuses.FlurryChance + itembonuses.FlurryChance;
-
-				if (auto_attack_target && flurrychance)
-				{
-					if(zone->random.Int(0, 99) < flurrychance)
-					{
-						Message_StringID(MT_NPCFlurry, YOU_FLURRY);
-						Attack(auto_attack_target, MainPrimary, false);
-						Attack(auto_attack_target, MainPrimary, false);
-					}
-				}
-
-				int16 ExtraAttackChanceBonus = spellbonuses.ExtraAttackChance + itembonuses.ExtraAttackChance + aabonuses.ExtraAttackChance;
-
-				if (auto_attack_target && ExtraAttackChanceBonus) {
-					ItemInst *wpn = GetInv().GetItem(MainPrimary);
-					if(wpn){
-						if(wpn->GetItem()->ItemType == ItemType2HSlash ||
-							wpn->GetItem()->ItemType == ItemType2HBlunt ||
-							wpn->GetItem()->ItemType == ItemType2HPiercing )
-						{
-							if(zone->random.Int(0, 99) < ExtraAttackChanceBonus)
-							{
-								Attack(auto_attack_target, MainPrimary, false);
-							}
-						}
-					}
-				}
+				DoAttackRounds(auto_attack_target, MainPrimary);
+				if (CheckAATimer(aaTimerRampage))
+					entity_list.AEAttack(this, 30);
 			}
 		}
 
@@ -489,32 +428,12 @@ bool Client::Process() {
 				//you can't see your target
 			}
 			else if(auto_attack_target->GetHP() > -10) {
-				float DualWieldProbability = 0.0f;
-
-				int16 Ambidexterity = aabonuses.Ambidexterity + spellbonuses.Ambidexterity + itembonuses.Ambidexterity;
-				DualWieldProbability = (GetSkill(SkillDualWield) + GetLevel() + Ambidexterity) / 400.0f; // 78.0 max
-				int16 DWBonus = spellbonuses.DualWieldChance + itembonuses.DualWieldChance;
-				DualWieldProbability += DualWieldProbability*float(DWBonus)/ 100.0f;
-
-				float random = zone->random.Real(0, 1);
 				CheckIncreaseSkill(SkillDualWield, auto_attack_target, -10);
-				if (random < DualWieldProbability){ // Max 78% of DW
-					if(CheckAAEffect(aaEffectRampage)) {
-						entity_list.AEAttack(this, 30, MainSecondary);
-					} else {
-						Attack(auto_attack_target, MainSecondary);	// Single attack with offhand
-					}
+				if (CheckDualWield()) {
 					ItemInst *wpn = GetInv().GetItem(MainSecondary);
 					TryWeaponProc(wpn, auto_attack_target, MainSecondary);
 
-					if( CanThisClassDoubleAttack() && CheckDoubleAttack()) {
-						if(CheckAAEffect(aaEffectRampage)) {
-							entity_list.AEAttack(this, 30, MainSecondary);
-						} else {
-							if(auto_attack_target && auto_attack_target->GetHP() > -10)
-								Attack(auto_attack_target, MainSecondary);	// Single attack with offhand
-						}
-					}
+					DoAttackRounds(auto_attack_target, MainSecondary);
 				}
 			}
 		}
@@ -522,9 +441,7 @@ bool Client::Process() {
 		if (position_timer.Check()) {
 			if (IsAIControlled())
 			{
-				if(IsMoving())
-					SendPosUpdate(2);
-				else
+				if(!IsMoving())
 				{
 					animation = 0;
 					m_Delta = glm::vec4(0.0f, 0.0f, 0.0f, m_Delta.w);

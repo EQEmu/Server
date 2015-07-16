@@ -22,6 +22,7 @@
 #define TARGET_RING_SPELL_SLOT 12
 #define DISCIPLINE_SPELL_SLOT 10
 #define ABILITY_SPELL_SLOT 9
+#define ALTERNATE_ABILITY_SPELL_SLOT 0xFF
 
 //LOS Parameters:
 #define HEAD_POSITION 0.9f	//ratio of GetSize() where NPCs see from
@@ -400,7 +401,6 @@ struct StatBonuses {
 	int32	Metabolism;							// Food/drink consumption rates.
 	bool	Sanctuary;							// Sanctuary effect, lowers place on hate list until cast on others.
 	int32   FactionModPct;						// Modifies amount of faction gained.
-	int32	MeleeVulnerability;					// Weakness/mitigation to melee damage
 	bool	LimitToSkill[HIGHEST_SKILL+2];		// Determines if we need to search for a skill proc.
 	uint32  SkillProc[MAX_SKILL_PROCS];			// Max number of spells containing skill_procs.
 	uint32  SkillProcSuccess[MAX_SKILL_PROCS];	// Max number of spells containing skill_procs_success.
@@ -412,7 +412,7 @@ struct StatBonuses {
 	int8	BaseMovementSpeed;					// Adjust base run speed, does not stack with other movement bonuses.
 	uint8	IncreaseRunSpeedCap;				// Increase max run speed above cap.
 	int32	DoubleSpecialAttack;				// Chance to to perform a double special attack (ie flying kick 2x)
-	int32	SpecialAttackKBProc[2];				// Chance to to do a knockback from special attacks. (0 = chance 1 = Skill)
+	int32	SkillAttackProc[3];					// [0] chance to proc [2] spell on [1] skill usage
 	uint8	FrontalStunResist;					// Chance to resist a frontal stun
 	int32	BindWound;							// Increase amount of HP by percent.
 	int32	MaxBindWound;						// Increase max amount of HP you can bind wound.
@@ -461,6 +461,7 @@ struct StatBonuses {
 	uint8	AssassinateLevel;					// Max Level Assassinate will be effective at.
 	int32	PetMeleeMitigation;					// Add AC to owner's pet.
 	bool	IllusionPersistence;				// Causes illusions not to fade.
+	uint16	extra_xtargets;						// extra xtarget entries
 };
 
 typedef struct

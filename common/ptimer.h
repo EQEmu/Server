@@ -139,8 +139,4 @@ protected:
 	std::map<pTimerType, PersistentTimer *> _list;
 };
 
-//code prettying macros
-#define AA_Choose3(val, v1, v2, v3) (val==1?v1:(val==2?v2:v3))
-#define AA_Choose5(val, v1, v2, v3, v4, v5) (val==1?v1:(val==2?v2:(val==3?v3:(val==4?v4:v5))))
-
 #endif

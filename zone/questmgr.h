@@ -159,9 +159,9 @@ public:
 	void set_zone_flag(int zone_id);
 	void clear_zone_flag(int zone_id);
 	void sethp(int hpperc);
-	bool summonburriedplayercorpse(uint32 char_id, const glm::vec4& position);
+	bool summonburiedplayercorpse(uint32 char_id, const glm::vec4& position);
 	bool summonallplayercorpses(uint32 char_id, const glm::vec4& position);
-	uint32 getplayerburriedcorpsecount(uint32 char_id);
+	uint32 getplayerburiedcorpsecount(uint32 char_id);
 	bool buryplayercorpse(uint32 char_id);
 	void forcedooropen(uint32 doorid, bool altmode);
 	void forcedoorclose(uint32 doorid, bool altmode);

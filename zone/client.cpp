@@ -176,7 +176,6 @@ Client::Client(EQStreamInterface* ieqs)
 	admin = 0;
 	lsaccountid = 0;
 	shield_target = nullptr;
-	SQL_log = nullptr;
 	guild_id = GUILD_NONE;
 	guildrank = 0;
 	GuildBanker = false;
@@ -198,6 +197,7 @@ Client::Client(EQStreamInterface* ieqs)
 	SetTarget(0);
 	auto_attack = false;
 	auto_fire = false;
+	runmode = false;
 	linkdead_timer.Disable();
 	zonesummon_id = 0;
 	zonesummon_ignorerestrictions = 0;
@@ -440,7 +440,7 @@ void Client::SendZoneInPackets()
 
 	//Send AA Exp packet:
 	if (GetLevel() >= 51)
-		SendAAStats();
+		SendAlternateAdvancementStats();
 
 	// Send exp packets
 	outapp = new EQApplicationPacket(OP_ExpUpdate, sizeof(ExpUpdate_Struct));
@@ -457,7 +457,7 @@ void Client::SendZoneInPackets()
 	}
 	safe_delete(outapp);
 
-	SendAATimers();
+	SendAlternateAdvancementTimers();
 
 	outapp = new EQApplicationPacket(OP_RaidUpdate, sizeof(ZoneInSendName_Struct));
 	ZoneInSendName_Struct* zonesendname = (ZoneInSendName_Struct*)outapp->pBuffer;
@@ -524,48 +524,39 @@ void Client::ReportConnectingState() {
 	};
 }
 
-bool Client::SaveAA(){
-	int first_entry = 0;
-	std::string rquery;
-	/* Save Player AA */
+bool Client::SaveAA() {
+	std::string iquery;
 	int spentpoints = 0;
-	for (int a = 0; a < MAX_PP_AA_ARRAY; a++) {
-		uint32 points = aa[a]->value;
-		if (points > HIGHEST_AA_VALUE) {
-			aa[a]->value = HIGHEST_AA_VALUE;
-			points = HIGHEST_AA_VALUE;
-		}
-		if (points > 0) {
-			SendAA_Struct* curAA = zone->FindAA(aa[a]->AA - aa[a]->value + 1);
-			if (curAA) {
-				for (int rank = 0; rank<points; rank++) {
-					std::map<uint32, AALevelCost_Struct>::iterator RequiredLevel = AARequiredLevelAndCost.find(aa[a]->AA - aa[a]->value + 1 + rank);
-					if (RequiredLevel != AARequiredLevelAndCost.end()) {
-						spentpoints += RequiredLevel->second.Cost;
-					}
-					else
-						spentpoints += (curAA->cost + (curAA->cost_inc * rank));
-				}
-			}
-		}
-	}
-	m_pp.aapoints_spent = spentpoints + m_epp.expended_aa;
-	int highest = 0;
-	for (int a = 0; a < MAX_PP_AA_ARRAY; a++) {
-		if (aa[a]->AA > 0) { // those with value 0 will be cleaned up on next load
-			if (first_entry != 1){
-				rquery = StringFormat("REPLACE INTO `character_alternate_abilities` (id, slot, aa_id, aa_value, charges)"
-					" VALUES (%u, %u, %u, %u, %u)", character_id, a, aa[a]->AA, aa[a]->value, aa[a]->charges);
-				first_entry = 1;
+	int i = 0;
+	for(auto &rank : aa_ranks) {
+		AA::Ability *ability = zone->GetAlternateAdvancementAbility(rank.first);
+		if(!ability)
+			continue;
+
+		if(rank.second.first > 0) {
+			AA::Rank *r = ability->GetRankByPointsSpent(rank.second.first);
+
+			if(!r)
+				continue;
+
+			spentpoints += r->total_cost;
+
+			if(i == 0) {
+				iquery = StringFormat("REPLACE INTO `character_alternate_abilities` (id, aa_id, aa_value, charges)"
+									  " VALUES (%u, %u, %u, %u)", character_id, ability->first_rank_id, rank.second.first, rank.second.second);
 			} else {
-				rquery = rquery + StringFormat(", (%u, %u, %u, %u, %u)", character_id, a, aa[a]->AA, aa[a]->value, aa[a]->charges);
+				iquery += StringFormat(", (%u, %u, %u, %u)", character_id, ability->first_rank_id, rank.second.first, rank.second.second);
 			}
-			highest = a;
+			i++;
 		}
 	}
-	auto results = database.QueryDatabase(rquery);
-	/* This is another part of the hack to clean up holes left by expendable AAs */
-	rquery = StringFormat("DELETE FROM `character_alternate_abilities` WHERE `id` = %u AND `slot` > %d", character_id, highest);
+
+	m_pp.aapoints_spent = spentpoints + m_epp.expended_aa;
+
+	if(iquery.length() > 0) {
+		database.QueryDatabase(iquery);
+	}
+
 	return true;
 }
 
@@ -8040,56 +8031,6 @@ void Client::TryItemTimer(int slot)
 	}
 }
 
-void Client::RefundAA() {
-	int cur = 0;
-	bool refunded = false;
-
-	for(int x = 0; x < aaHighestID; x++) {
-		cur = GetAA(x);
-		if(cur > 0){
-			SendAA_Struct* curaa = zone->FindAA(x);
-			if(cur){
-				SetAA(x, 0);
-				for(int j = 0; j < cur; j++) {
-					m_pp.aapoints += curaa->cost + (curaa->cost_inc * j);
-					refunded = true;
-				}
-			}
-			else
-			{
-				m_pp.aapoints += cur;
-				SetAA(x, 0);
-				refunded = true;
-			}
-		}
-	}
-
-	if(refunded) {
-		SaveAA();
-		Save();
-		// Kick();
-	}
-}
-
-void Client::IncrementAA(int aa_id) {
-	SendAA_Struct* aa2 = zone->FindAA(aa_id);
-
-	if(aa2 == nullptr)
-		return;
-
-	if(GetAA(aa_id) == aa2->max_level)
-		return;
-
-	SetAA(aa_id, GetAA(aa_id) + 1);
-
-	SaveAA();
-
-	SendAA(aa_id);
-	SendAATable();
-	SendAAStats();
-	CalcBonuses();
-}
-
 void Client::SendItemScale(ItemInst *inst) {
 	int slot = m_inv.GetSlotByItemInst(inst);
 	if(slot != -1) {
@@ -8637,4 +8578,17 @@ void Client::QuestReward(Mob* target, uint32 copper, uint32 silver, uint32 gold,
 
 	QueuePacket(outapp, false, Client::CLIENT_CONNECTED);
 	safe_delete(outapp);
+}
+
+void Client::SendHPUpdateMarquee(){
+	if (!RuleB(Character, MarqueeHPUpdates))
+		return;
+
+	/* Health Update Marquee Display: Custom*/
+	uint32 health_percentage = (uint32)(this->cur_hp * 100 / this->max_hp);
+	if (health_percentage == 100)
+		return;
+
+	std::string health_update_notification = StringFormat("Health: %u%%", health_percentage);
+	this->SendMarqueeMessage(15, 510, 0, 3000, 3000, health_update_notification);
 }

@@ -60,7 +60,7 @@ bool LauncherLink::Process() {
 		end = m_states.end();
 		for(; cur != end; ++cur) {
 			if(!cur->second.up) {
-				StartZone(cur->first.c_str());
+				StartZone(cur->first.c_str(), cur->second.port);
 			}
 		}
 		m_bootTimer.Disable();
@@ -184,14 +184,6 @@ bool LauncherLink::Process() {
 
 bool LauncherLink::ContainsZone(const char *short_name) const {
 	return(m_states.find(short_name) != m_states.end());
-
-	/*
-	* std::map<std::string, bool>::const_iterator cur, end;
-	cur = m_states.begin();
-	end = m_states.end();
-	for(; cur != end; cur++) {
-		if(
-	}*/
 }
 
 void LauncherLink::BootZone(const char *short_name, uint16 port) {
@@ -202,15 +194,20 @@ void LauncherLink::BootZone(const char *short_name, uint16 port) {
 	Log.Out(Logs::Detail, Logs::World_Server, "%s: Loaded zone '%s' on port %d", m_name.c_str(), short_name, zs.port);
 	m_states[short_name] = zs;
 
-	StartZone(short_name);
+	StartZone(short_name, port);
 }
 
 void LauncherLink::StartZone(const char *short_name) {
+	StartZone(short_name, 0);
+}
+
+void LauncherLink::StartZone(const char *short_name, uint16 port) {
 	auto pack = new ServerPacket(ServerOP_LauncherZoneRequest, sizeof(LauncherZoneRequest));
 	LauncherZoneRequest* s = (LauncherZoneRequest *) pack->pBuffer;
 
 	strn0cpy(s->short_name, short_name, 32);
 	s->command = ZR_Start;
+	s->port = port;
 
 	SendPacket(pack);
 	delete pack;
@@ -222,6 +219,7 @@ void LauncherLink::RestartZone(const char *short_name) {
 
 	strn0cpy(s->short_name, short_name, 32);
 	s->command = ZR_Restart;
+	s->port = 0;
 
 	SendPacket(pack);
 	delete pack;
@@ -233,6 +231,7 @@ void LauncherLink::StopZone(const char *short_name) {
 
 	strn0cpy(s->short_name, short_name, 32);
 	s->command = ZR_Stop;
+	s->port = 0;
 
 	SendPacket(pack);
 	delete pack;
@@ -332,35 +331,3 @@ void LauncherLink::Shutdown() {
 	SendPacket(pack);
 	delete pack;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

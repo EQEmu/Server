@@ -27,6 +27,7 @@
 #include "qglobals.h"
 #include "spawn2.h"
 #include "spawngroup.h"
+#include "aa_ability.h"
 
 struct ZonePoint
 {
@@ -113,11 +114,13 @@ public:
 
 	inline const uint32& GetMaxClients() { return pMaxClients; }
 
-	void	LoadAAs();
-	int		GetTotalAAs() { return totalAAs; }
-	SendAA_Struct*	GetAABySequence(uint32 seq) { return aas[seq]; }
-	SendAA_Struct*	FindAA(uint32 id);
-	uint8	GetTotalAALevels(uint32 skill_id);
+	//new AA
+	void LoadAlternateAdvancement();
+	AA::Ability *GetAlternateAdvancementAbility(int id);
+	AA::Ability *GetAlternateAdvancementAbilityByRank(int rank_id);
+	AA::Rank *GetAlternateAdvancementRank(int rank_id);
+	std::pair<AA::Ability*, AA::Rank*> GetAlternateAdvancementAbilityAndRank(int id, int points_spent);
+
 	void	LoadZoneDoors(const char* zone, int16 version);
 	bool	LoadZoneObjects();
 	bool	LoadGroundSpawns();
@@ -192,6 +195,10 @@ public:
 	std::list<AltCurrencyDefinition_Struct> AlternateCurrencies;
 	char *adv_data;
 	bool did_adventure_actions;
+
+	//new AA
+	std::unordered_map<int, std::unique_ptr<AA::Ability>> aa_abilities;
+	std::unordered_map<int, std::unique_ptr<AA::Rank>> aa_ranks;
 
 	void	DoAdventureCountIncrease();
 	void	DoAdventureAssassinationCountIncrease();
@@ -312,9 +319,6 @@ private:
 
 	int	totalBS;
 	ZoneSpellsBlocked *blocked_spells;
-
-	int		totalAAs;
-	SendAA_Struct **aas;	//array of AA structs
 
 	/*
 		Spawn related things

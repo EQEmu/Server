@@ -447,7 +447,7 @@ bool IsTGBCompatibleSpell(uint16 spell_id)
 
 bool IsBardSong(uint16 spell_id)
 {
-	if (IsValidSpell(spell_id) && spells[spell_id].classes[BARD - 1] < 127 && !spells[spell_id].IsDisciplineBuff)
+	if (IsValidSpell(spell_id) && spells[spell_id].classes[BARD - 1] < 255 && !spells[spell_id].IsDisciplineBuff)
 		return true;
 
 	return false;

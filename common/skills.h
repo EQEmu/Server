@@ -108,15 +108,16 @@ enum SkillUseTypes
 /*13869*/	SkillBerserking,
 /*13902*/	SkillTaunt,
 /*05837*/	SkillFrenzy,					// This appears to be the only listed one not grouped with the others
-/*00000*/	_EmuSkillCount					// move to last position of active enumeration labels
 
 // SoF+ specific skills
-// /*03670*/	SkillRemoveTraps,
-// /*13049*/	SkillTripleAttack,
+/*03670*/	SkillRemoveTraps,
+/*13049*/	SkillTripleAttack,
 
 // RoF2+ specific skills
 // /*00789*/	Skill2HPiercing,
 // /*01216*/	SkillNone,						// This needs to move down as new skills are added
+
+/*00000*/	_EmuSkillCount					// move to last position of active enumeration labels
 
 // Skill Counts
 // /*-----*/	_SkillCount_62 = 75,			// use for Ti and earlier max skill checks
@@ -170,7 +171,7 @@ enum SkillUseTypes
 };
 
 // temporary until it can be sorted out...
-#define HIGHEST_SKILL	SkillFrenzy
+#define HIGHEST_SKILL	SkillTripleAttack
 // Spell Effects use this value to determine if an effect applies to all skills.
 #define ALL_SKILLS	-1
 

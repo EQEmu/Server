@@ -147,7 +147,7 @@ Access Levels:
  */
 
 int command_init(void) {
-	
+
 	if
 	(
 
@@ -168,10 +168,10 @@ int command_init(void) {
 		command_add("aggro", "(range) [-v] - Display aggro information for all mobs 'range' distance from your target. -v is verbose faction info.", 80, command_aggro) ||
 		command_add("aggrozone", "[aggro] - Aggro every mob in the zone with X aggro. Default is 0. Not recommend if you're not invulnerable.", 100, command_aggrozone) ||
 		command_add("ai", "[factionid/spellslist/con/guard/roambox/stop/start] - Modify AI on NPC target", 100, command_ai) ||
-		command_add("altactivate",  "[argument] - activates alternate advancement abilities, use altactivate help for more information",  0, command_altactivate) ||
 		command_add("appearance", "[type] [value] - Send an appearance packet for you or your target", 150, command_appearance) ||
 		command_add("attack", "[targetname] - Make your NPC target attack targetname", 150, command_attack) ||
 		command_add("augmentitem",  "Force augments an item. Must have the augment item window open.",  250, command_augmentitem) ||
+		command_add("aug", nullptr, 250, command_augmentitem) ||
 		command_add("ban", "[name] [reason]- Ban by character name", 150, command_ban) ||
 		command_add("beard", "- Change the beard of your target", 80, command_beard) ||
 		command_add("beardcolor", "- Change the beard color of your target", 80, command_beardcolor) ||
@@ -218,11 +218,14 @@ int command_init(void) {
 		command_add("flagedit", "- Edit zone flags on your target", 100, command_flagedit) ||
 		command_add("flags", "- displays the flags of you or your target", 0, command_flags) ||
 		command_add("flymode", "[0/1/2] - Set your or your player target's flymode to off/on/levitate", 50, command_flymode) ||
+		command_add("fn", nullptr, 100, command_findnpctype) ||
 		command_add("fov", "- Check wether you're behind or in your target's field of view", 80, command_fov) ||
 		command_add("freeze", "- Freeze your target", 80, command_freeze) ||
+		command_add("fs", nullptr, 50, command_findspell) ||
+		command_add("fz", nullptr, 100, command_findzone) ||
 		command_add("gassign", "[id] - Assign targetted NPC to predefined wandering grid id", 100, command_gassign) ||
 		command_add("gender", "[0/1/2] - Change your or your target's gender to male/female/neuter", 50, command_gender) ||
-		command_add("getplayerburriedcorpsecount", "- Get the target's total number of burried player corpses.",  100, command_getplayerburriedcorpsecount) ||
+		command_add("getplayerburiedcorpsecount", "- Get the target's total number of buried player corpses.",  100, command_getplayerburiedcorpsecount) ||
 		command_add("getvariable", "[varname] - Get the value of a variable from the database", 200, command_getvariable) ||
 		command_add("gi", nullptr,200, command_giveitem) ||
 		command_add("ginfo", "- get group info on target.", 20, command_ginfo) ||
@@ -275,7 +278,6 @@ int command_init(void) {
 		command_add("los", nullptr,0, command_checklos) ||
 		command_add("makepet", "[level] [class] [race] [texture] - Make a pet", 50, command_makepet) ||
 		command_add("mana", "- Fill your or your target's mana", 50, command_mana) ||
-		command_add("manaburn", "- Use AA Wizard class skill manaburn on target", 10, command_manaburn) ||
 		command_add("maxskills", "Maxes skills for you.",  200, command_max_all_skills) ||
 		command_add("memspell", "[slotid] [spellid] - Memorize spellid in the specified slot", 50, command_memspell) ||
 		command_add("merchant_close_shop",  "Closes a merchant shop",  100, command_merchantcloseshop) ||
@@ -324,6 +326,7 @@ int command_init(void) {
 		command_add("raidloot", "LEADER|GROUPLEADER|SELECTED|ALL - Sets your raid loot settings if you have permission to do so.", 0, command_raidloot) ||
 		command_add("randomfeatures", "- Temporarily randomizes the Facial Features of your target", 80, command_randomfeatures) ||
 		command_add("refreshgroup", "- Refreshes Group.",  0, command_refreshgroup) ||
+		command_add("reloadaa", "Reloads AA data", 200, command_reloadaa) ||
 		command_add("reloadallrules", "Executes a reload of all rules.", 80, command_reloadallrules) ||
 		command_add("reloademote", "Reloads NPC Emotes", 80, command_reloademote) ||
 		command_add("reloadlevelmods", nullptr,255, command_reloadlevelmods) ||
@@ -336,8 +339,10 @@ int command_init(void) {
 		command_add("reloadzonepoints", "- Reload zone points from database", 150, command_reloadzps) ||
 		command_add("reloadzps", nullptr,0, command_reloadzps) ||
 		command_add("repop", "[delay] - Repop the zone with optional delay", 100, command_repop) ||
-		command_add("resetaa", "- Resets a Player's AA in their profile and refunds spent AA's to unspent, disconnects player.", 200, command_resetaa) ||
+		command_add("resetaa", "- Resets a Player's AA in their profile and refunds spent AA's to unspent, may disconnect player.", 200, command_resetaa) ||
+		command_add("resetaa_timer", "Command to reset AA cooldown timers.", 200, command_resetaa_timer) ||
 		command_add("revoke", "[charname] [1/0] - Makes charname unable to talk on OOC", 200, command_revoke) ||
+		command_add("rq", nullptr, 150, command_reloadqst) ||
 		command_add("rules", "(subcommand) - Manage server rules",  250, command_rules) ||
 		command_add("save", "- Force your player or player corpse target to be saved to the database", 50, command_save) ||
 		command_add("scribespell",  "[spellid] - Scribe specified spell in your target's spell book.",  180, command_scribespell) ||
@@ -386,7 +391,7 @@ int command_init(void) {
 		command_add("spon", "- Sends OP_MemorizeSpell", 80, command_spon) ||
 		command_add("stun", "[duration] - Stuns you or your target for duration", 100, command_stun) ||
 		command_add("summon", "[charname] - Summons your player/npc/corpse target, or charname if specified", 80, command_summon) ||
-		command_add("summonburriedplayercorpse", "- Summons the target's oldest burried corpse, if any exist.",  100, command_summonburriedplayercorpse) ||
+		command_add("summonburiedplayercorpse", "- Summons the target's oldest buried corpse, if any exist.",  100, command_summonburiedplayercorpse) ||
 		command_add("summonitem", "[itemid] [charges] - Summon an item onto your cursor. Charges are optional.", 200, command_summonitem) ||
 		command_add("suspend", "[name] [days] [reason] - Suspend by character name and for specificed number of days", 150, command_suspend) ||
 		command_add("task", "(subcommand) - Task system commands",  150, command_task) ||
@@ -431,7 +436,7 @@ int command_init(void) {
 		command_add("zsave", " - Saves zheader to the database", 80, command_zsave) ||
 		command_add("zsky", "[skytype] - Change zone sky type", 80, command_zsky) ||
 		command_add("zstats", "- Show info about zone header", 80, command_zstats) ||
-		command_add("zunderworld", "[zcoord] - Sets the underworld using zcoord", 80, command_zunderworld) || 
+		command_add("zunderworld", "[zcoord] - Sets the underworld using zcoord", 80, command_zunderworld) ||
 		command_add("zuwcoords", "[z coord] - Set underworld coord", 80, command_zuwcoords)
 		)
 	{
@@ -641,8 +646,8 @@ void command_logcommand(Client *c, const char *message)
 			c->AccountName(),
 			c->AccountID(),
 			admin,c->GetName(),
-			c->GetTarget()?c->GetTarget()->GetName():"None", 
-			"Command", 
+			c->GetTarget()?c->GetTarget()->GetName():"None",
+			"Command",
 			message,
 			1
 		);
@@ -675,8 +680,8 @@ void command_incstat(Client* c, const Seperator* sep){
 	}
 }
 
-void command_resetaa(Client* c,const Seperator *sep){
-	if(c->GetTarget()!=0 && c->GetTarget()->IsClient()){
+void command_resetaa(Client* c,const Seperator *sep) {
+	if(c->GetTarget() && c->GetTarget()->IsClient()){
 		c->GetTarget()->CastToClient()->ResetAA();
 		c->Message(13,"Successfully reset %s's AAs", c->GetTarget()->GetName());
 	}
@@ -728,7 +733,7 @@ void command_setfaction(Client *c, const Seperator *sep)
     auto npcTypeID = c->GetTarget()->CastToNPC()->GetNPCTypeID();
     c->Message(15,"Setting NPC %u to faction %i",  npcTypeID, atoi(sep->argplus[1]));
 
-    std::string query = StringFormat("UPDATE npc_types SET npc_faction_id = %i WHERE id = %i", 
+    std::string query = StringFormat("UPDATE npc_types SET npc_faction_id = %i WHERE id = %i",
                                     atoi(sep->argplus[1]), npcTypeID);
     database.QueryDatabase(query);
 }
@@ -1486,7 +1491,7 @@ void command_npcstats(Client *c, const Seperator *sep)
 		c->Message(0, "Current HP: %i  Max HP: %i",  c->GetTarget()->GetHP(), c->GetTarget()->GetMaxHP());
 		//c->Message(0, "Weapon Item Number: %s", c->GetTarget()->GetWeapNo());
 		c->Message(0, "Gender: %i  Size: %f  Bodytype: %d",  c->GetTarget()->GetGender(), c->GetTarget()->GetSize(), c->GetTarget()->GetBodyType());
-		c->Message(0, "Runspeed: %i  Walkspeed: %i",  c->GetTarget()->GetRunspeed(), c->GetTarget()->GetWalkspeed());
+		c->Message(0, "Runspeed: %.3f  Walkspeed: %.3f",  static_cast<float>(0.025f * c->GetTarget()->GetRunspeed()), static_cast<float>(0.025f * c->GetTarget()->GetWalkspeed()));
 		c->Message(0, "Spawn Group: %i  Grid: %i",  c->GetTarget()->CastToNPC()->GetSp2(), c->GetTarget()->CastToNPC()->GetGrid());
 		c->Message(0, "EmoteID: %i",  c->GetTarget()->CastToNPC()->GetEmoteID());
 		c->GetTarget()->CastToNPC()->QueryLoot(c);
@@ -2299,7 +2304,7 @@ void command_setskill(Client *c, const Seperator *sep)
 		Log.Out(Logs::General, Logs::Normal, "Set skill request from %s, target:%s skill_id:%i value:%i",  c->GetName(), c->GetTarget()->GetName(), atoi(sep->arg[1]), atoi(sep->arg[2]) );
 		int skill_num = atoi(sep->arg[1]);
 		uint16 skill_value = atoi(sep->arg[2]);
-		if(skill_num < HIGHEST_SKILL)
+		if(skill_num <= HIGHEST_SKILL)
 			c->GetTarget()->CastToClient()->SetSkill((SkillUseTypes)skill_num, skill_value);
 	}
 }
@@ -2570,7 +2575,7 @@ void command_peekinv(Client *c, const Seperator *sep)
 
 		item_link = linker.GenerateLink();
 
-		c->Message((item_data == nullptr), "WornSlot: %i, Item: %i (%s), Charges: %i", 
+		c->Message((item_data == nullptr), "WornSlot: %i, Item: %i (%s), Charges: %i",
 			indexMain, ((item_data == nullptr) ? 0 : item_data->ID), item_link.c_str(), ((inst_main == nullptr) ? 0 : inst_main->GetCharges()));
 	}
 
@@ -2581,7 +2586,7 @@ void command_peekinv(Client *c, const Seperator *sep)
 
 		item_link = linker.GenerateLink();
 
-		c->Message((item_data == nullptr), "WornSlot: %i, Item: %i (%s), Charges: %i", 
+		c->Message((item_data == nullptr), "WornSlot: %i, Item: %i (%s), Charges: %i",
 			MainPowerSource, ((item_data == nullptr) ? 0 : item_data->ID), item_link.c_str(), ((inst_main == nullptr) ? 0 : inst_main->GetCharges()));
 	}
 
@@ -2593,7 +2598,7 @@ void command_peekinv(Client *c, const Seperator *sep)
 
 		item_link = linker.GenerateLink();
 
-		c->Message((item_data == nullptr), "InvSlot: %i, Item: %i (%s), Charges: %i", 
+		c->Message((item_data == nullptr), "InvSlot: %i, Item: %i (%s), Charges: %i",
 			indexMain, ((item_data == nullptr) ? 0 : item_data->ID), item_link.c_str(), ((inst_main == nullptr) ? 0 : inst_main->GetCharges()));
 
 		for (uint8 indexSub = SUB_BEGIN; inst_main && inst_main->IsType(ItemClassContainer) && (indexSub < EmuConstants::ITEM_CONTAINER_SIZE); ++indexSub) {
@@ -2603,7 +2608,7 @@ void command_peekinv(Client *c, const Seperator *sep)
 
 			item_link = linker.GenerateLink();
 
-			c->Message((item_data == nullptr), "  InvBagSlot: %i (Slot #%i, Bag #%i), Item: %i (%s), Charges: %i", 
+			c->Message((item_data == nullptr), "  InvBagSlot: %i (Slot #%i, Bag #%i), Item: %i (%s), Charges: %i",
 				Inventory::CalcSlotId(indexMain, indexSub), indexMain, indexSub, ((item_data == nullptr) ? 0 : item_data->ID), item_link.c_str(), ((inst_sub == nullptr) ? 0 : inst_sub->GetCharges()));
 		}
 	}
@@ -2615,7 +2620,7 @@ void command_peekinv(Client *c, const Seperator *sep)
 
 			item_link = linker.GenerateLink();
 
-			c->Message(1, "CursorSlot: %i, Item: %i (%s), Charges: %i", 
+			c->Message(1, "CursorSlot: %i, Item: %i (%s), Charges: %i",
 				MainCursor, 0, item_link.c_str(), 0);
 		}
 		else {
@@ -2627,7 +2632,7 @@ void command_peekinv(Client *c, const Seperator *sep)
 
 				item_link = linker.GenerateLink();
 
-				c->Message((item_data == nullptr), "CursorSlot: %i, Depth: %i, Item: %i (%s), Charges: %i", 
+				c->Message((item_data == nullptr), "CursorSlot: %i, Depth: %i, Item: %i (%s), Charges: %i",
 					MainCursor, cursorDepth, ((item_data == nullptr) ? 0 : item_data->ID), item_link.c_str(), ((inst_main == nullptr) ? 0 : inst_main->GetCharges()));
 
 				for (uint8 indexSub = SUB_BEGIN; (cursorDepth == 0) && inst_main && inst_main->IsType(ItemClassContainer) && (indexSub < EmuConstants::ITEM_CONTAINER_SIZE); ++indexSub) {
@@ -2637,7 +2642,7 @@ void command_peekinv(Client *c, const Seperator *sep)
 
 					item_link = linker.GenerateLink();
 
-					c->Message((item_data == nullptr), "  CursorBagSlot: %i (Slot #%i, Bag #%i), Item: %i (%s), Charges: %i", 
+					c->Message((item_data == nullptr), "  CursorBagSlot: %i (Slot #%i, Bag #%i), Item: %i (%s), Charges: %i",
 						Inventory::CalcSlotId(MainCursor, indexSub), MainCursor, indexSub, ((item_data == nullptr) ? 0 : item_data->ID), item_link.c_str(), ((inst_sub == nullptr) ? 0 : inst_sub->GetCharges()));
 				}
 			}
@@ -2652,7 +2657,7 @@ void command_peekinv(Client *c, const Seperator *sep)
 
 		item_link = linker.GenerateLink();
 
-		c->Message((item_data == nullptr), "TributeSlot: %i, Item: %i (%s), Charges: %i", 
+		c->Message((item_data == nullptr), "TributeSlot: %i, Item: %i (%s), Charges: %i",
 			indexMain, ((item_data == nullptr) ? 0 : item_data->ID), item_link.c_str(), ((inst_main == nullptr) ? 0 : inst_main->GetCharges()));
 	}
 
@@ -2664,7 +2669,7 @@ void command_peekinv(Client *c, const Seperator *sep)
 
 		item_link = linker.GenerateLink();
 
-		c->Message((item_data == nullptr), "BankSlot: %i, Item: %i (%s), Charges: %i", 
+		c->Message((item_data == nullptr), "BankSlot: %i, Item: %i (%s), Charges: %i",
 			indexMain, ((item_data == nullptr) ? 0 : item_data->ID), item_link.c_str(), ((inst_main == nullptr) ? 0 : inst_main->GetCharges()));
 
 		for (uint8 indexSub = SUB_BEGIN; inst_main && inst_main->IsType(ItemClassContainer) && (indexSub < EmuConstants::ITEM_CONTAINER_SIZE); ++indexSub) {
@@ -2674,7 +2679,7 @@ void command_peekinv(Client *c, const Seperator *sep)
 
 			item_link = linker.GenerateLink();
 
-			c->Message((item_data == nullptr), "  BankBagSlot: %i (Slot #%i, Bag #%i), Item: %i (%s), Charges: %i", 
+			c->Message((item_data == nullptr), "  BankBagSlot: %i (Slot #%i, Bag #%i), Item: %i (%s), Charges: %i",
 				Inventory::CalcSlotId(indexMain, indexSub), indexMain, indexSub, ((item_data == nullptr) ? 0 : item_data->ID), item_link.c_str(), ((inst_sub == nullptr) ? 0 : inst_sub->GetCharges()));
 		}
 	}
@@ -2685,8 +2690,8 @@ void command_peekinv(Client *c, const Seperator *sep)
 		linker.SetItemInst(inst_main);
 
 		item_link = linker.GenerateLink();
-		
-		c->Message((item_data == nullptr), "SharedBankSlot: %i, Item: %i (%s), Charges: %i", 
+
+		c->Message((item_data == nullptr), "SharedBankSlot: %i, Item: %i (%s), Charges: %i",
 			indexMain, ((item_data == nullptr) ? 0 : item_data->ID), item_link.c_str(), ((inst_main == nullptr) ? 0 : inst_main->GetCharges()));
 
 		for (uint8 indexSub = SUB_BEGIN; inst_main && inst_main->IsType(ItemClassContainer) && (indexSub < EmuConstants::ITEM_CONTAINER_SIZE); ++indexSub) {
@@ -2696,7 +2701,7 @@ void command_peekinv(Client *c, const Seperator *sep)
 
 			item_link = linker.GenerateLink();
 
-			c->Message((item_data == nullptr), "  SharedBankBagSlot: %i (Slot #%i, Bag #%i), Item: %i (%s), Charges: %i", 
+			c->Message((item_data == nullptr), "  SharedBankBagSlot: %i (Slot #%i, Bag #%i), Item: %i (%s), Charges: %i",
 				Inventory::CalcSlotId(indexMain, indexSub), indexMain, indexSub, ((item_data == nullptr) ? 0 : item_data->ID), item_link.c_str(), ((inst_sub == nullptr) ? 0 : inst_sub->GetCharges()));
 		}
 	}
@@ -2709,7 +2714,7 @@ void command_peekinv(Client *c, const Seperator *sep)
 
 		item_link = linker.GenerateLink();
 
-		c->Message((item_data == nullptr), "TradeSlot: %i, Item: %i (%s), Charges: %i", 
+		c->Message((item_data == nullptr), "TradeSlot: %i, Item: %i (%s), Charges: %i",
 			indexMain, ((item_data == nullptr) ? 0 : item_data->ID), item_link.c_str(), ((inst_main == nullptr) ? 0 : inst_main->GetCharges()));
 
 		for (uint8 indexSub = SUB_BEGIN; inst_main && inst_main->IsType(ItemClassContainer) && (indexSub < EmuConstants::ITEM_CONTAINER_SIZE); ++indexSub) {
@@ -2719,7 +2724,7 @@ void command_peekinv(Client *c, const Seperator *sep)
 
 			item_link = linker.GenerateLink();
 
-			c->Message((item_data == nullptr), "  TradeBagSlot: %i (Slot #%i, Bag #%i), Item: %i (%s), Charges: %i", 
+			c->Message((item_data == nullptr), "  TradeBagSlot: %i (Slot #%i, Bag #%i), Item: %i (%s), Charges: %i",
 				Inventory::CalcSlotId(indexMain, indexSub), indexMain, indexSub, ((item_data == nullptr) ? 0 : item_data->ID), item_link.c_str(), ((inst_sub == nullptr) ? 0 : inst_sub->GetCharges()));
 		}
 	}
@@ -2741,7 +2746,7 @@ void command_peekinv(Client *c, const Seperator *sep)
 
 				item_link = linker.GenerateLink();
 
-				c->Message((item_data == nullptr), "WorldSlot: %i, Item: %i (%s), Charges: %i", 
+				c->Message((item_data == nullptr), "WorldSlot: %i, Item: %i (%s), Charges: %i",
 					(EmuConstants::WORLD_BEGIN + indexMain), ((item_data == nullptr) ? 0 : item_data->ID), item_link.c_str(), ((inst_main == nullptr) ? 0 : inst_main->GetCharges()));
 
 				for (uint8 indexSub = SUB_BEGIN; inst_main && inst_main->IsType(ItemClassContainer) && (indexSub < EmuConstants::ITEM_CONTAINER_SIZE); ++indexSub) {
@@ -2751,7 +2756,7 @@ void command_peekinv(Client *c, const Seperator *sep)
 
 					item_link = linker.GenerateLink();
 
-					c->Message((item_data == nullptr), "  WorldBagSlot: %i (Slot #%i, Bag #%i), Item: %i (%s), Charges: %i", 
+					c->Message((item_data == nullptr), "  WorldBagSlot: %i (Slot #%i, Bag #%i), Item: %i (%s), Charges: %i",
 						INVALID_INDEX, indexMain, indexSub, ((item_data == nullptr) ? 0 : item_data->ID), item_link.c_str(), ((inst_sub == nullptr) ? 0 : inst_sub->GetCharges()));
 				}
 			}
@@ -3749,7 +3754,7 @@ void command_spellinfo(Client *c, const Seperator *sep)
 		c->Message(0, "  zonetype: %d",  s->zonetype);
 		c->Message(0, "  EnvironmentType: %d",  s->EnvironmentType);
 		c->Message(0, "  TimeOfDay: %d",  s->TimeOfDay);
-		c->Message(0, "  classes[15]: %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d", 
+		c->Message(0, "  classes[15]: %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d",
 			s->classes[0], s->classes[1], s->classes[2], s->classes[3], s->classes[4],
 			s->classes[5], s->classes[6], s->classes[7], s->classes[8], s->classes[9],
 			s->classes[10], s->classes[11], s->classes[12], s->classes[13], s->classes[14]);
@@ -3879,7 +3884,7 @@ void command_repop(Client *c, const Seperator *sep)
 		LinkedListIterator<Spawn2*> iterator(zone->spawn2_list);
 		iterator.Reset();
 		while (iterator.MoreElements()) {
-			std::string query = StringFormat("DELETE FROM respawn_times WHERE id = %lu AND instance_id = %lu", 
+			std::string query = StringFormat("DELETE FROM respawn_times WHERE id = %lu AND instance_id = %lu",
                                             (unsigned long)iterator.GetData()->GetID(),
                                             (unsigned long)zone->GetInstanceID());
 			auto results = database.QueryDatabase(query);
@@ -4253,7 +4258,7 @@ void command_spawnfix(Client *c, const Seperator *sep) {
         return;
     }
 
-    std::string query = StringFormat("UPDATE spawn2 SET x = '%f', y = '%f', z = '%f', heading = '%f' WHERE id = '%i'", 
+    std::string query = StringFormat("UPDATE spawn2 SET x = '%f', y = '%f', z = '%f', heading = '%f' WHERE id = '%i'",
                                     c->GetX(), c->GetY(), c->GetZ(), c->GetHeading(),s2->GetID());
     auto results = database.QueryDatabase(query);
     if (!results.Success()) {
@@ -4396,11 +4401,11 @@ void command_time(Client *c, const Seperator *sep)
 		c->Message(13, "To set the Time: #time HH [MM]");
 		TimeOfDay_Struct eqTime;
 		zone->zone_time.GetCurrentEQTimeOfDay( time(0), &eqTime);
-		sprintf(timeMessage,"%02d:%s%d %s (Timezone: %ih %im)", 
+		sprintf(timeMessage,"%02d:%s%d %s (Timezone: %ih %im)",
 			((eqTime.hour - 1) % 12) == 0 ? 12 : ((eqTime.hour - 1) % 12),
-			(eqTime.minute < 10) ? "0" : "", 
+			(eqTime.minute < 10) ? "0" : "",
 			eqTime.minute,
-			(eqTime.hour >= 13) ? "pm" : "am", 
+			(eqTime.hour >= 13) ? "pm" : "am",
 			zone->zone_time.getEQTimeZoneHr(),
 			zone->zone_time.getEQTimeZoneMin()
 			);
@@ -4839,36 +4844,6 @@ void command_zonestatus(Client *c, const Seperator *sep)
 		strcpy((char *) &pack->pBuffer[1], c->GetName());
 		worldserver.SendPacket(pack);
 		delete pack;
-	}
-}
-
-void command_manaburn(Client *c, const Seperator *sep)
-{
-	Mob* target=c->GetTarget();
-
-	if (c->GetTarget() == 0)
-		c->Message(0, "#Manaburn needs a target.");
-	else {
-		int cur_level=c->GetAA(MANA_BURN);//ManaBurn ID
-		if (DistanceSquared(c->GetPosition(), target->GetPosition()) > 200)
-			c->Message(0,"You are too far away from your target.");
-		else {
-			if(cur_level == 1) {
-				if(c->IsAttackAllowed(target))
-				{
-					c->SetMana(0);
-					int nukedmg=(c->GetMana())*2;
-					if (nukedmg>0)
-					{
-						target->Damage(c, nukedmg, 2751, SkillAbjuration/*hackish*/);
-						c->Message(4,"You unleash an enormous blast of magical energies.");
-					}
-					Log.Out(Logs::General, Logs::Normal, "Manaburn request from %s, damage: %d",  c->GetName(), nukedmg);
-				}
-			}
-			else
-				c->Message(0, "You have not learned this skill.");
-		}
 	}
 }
 
@@ -5586,16 +5561,23 @@ void command_setaapts(Client *c, const Seperator *sep)
 
 	if(sep->arg[1][0] == '\0' || sep->arg[2][0] == '\0')
 		c->Message(0, "Usage: #setaapts <AA|group|raid> <new AA points value>");
-	else if(atoi(sep->arg[2]) <= 0 || atoi(sep->arg[2]) > 200)
-		c->Message(0, "You must have a number greater than 0 for points and no more than 200.");
+	else if(atoi(sep->arg[2]) <= 0 || atoi(sep->arg[2]) > 5000)
+		c->Message(0, "You must have a number greater than 0 for points and no more than 5000.");
 	else if(!strcasecmp(sep->arg[1], "group")) {
-		t->SetLeadershipEXP(atoi(sep->arg[2])*GROUP_EXP_PER_POINT, t->GetRaidEXP());
+		t->GetPP().group_leadership_points = atoi(sep->arg[2]);
+		t->GetPP().group_leadership_exp = 0;
+		t->Message(MT_Experience, "Setting Group AA points to %u", t->GetPP().group_leadership_points);
+		t->SendLeadershipEXPUpdate();
 	} else if(!strcasecmp(sep->arg[1], "raid")) {
-		t->SetLeadershipEXP(t->GetGroupEXP(), atoi(sep->arg[2])*RAID_EXP_PER_POINT);
+		t->GetPP().raid_leadership_points = atoi(sep->arg[2]);
+		t->GetPP().raid_leadership_exp = 0;
+		t->Message(MT_Experience, "Setting Raid AA points to %u", t->GetPP().raid_leadership_points);
+		t->SendLeadershipEXPUpdate();
 	} else {
-		t->SetEXP(t->GetEXP(),t->GetMaxAAXP()*atoi(sep->arg[2]),false);
-		t->SendAAStats();
-		t->SendAATable();
+		t->GetPP().aapoints = atoi(sep->arg[2]);
+		t->GetPP().expAA = 0;
+		t->Message(MT_Experience, "Setting personal AA points to %u", t->GetPP().aapoints);
+		t->SendAlternateAdvancementStats();
 	}
 }
 
@@ -5754,7 +5736,7 @@ void command_suspend(Client *c, const Seperator *sep)
     }
 
 	std::string query = StringFormat("UPDATE `account` SET `suspendeduntil` = DATE_ADD(NOW(), INTERVAL %i DAY), "
-                                    "suspend_reason = '%s' WHERE `id` = %i", 
+                                    "suspend_reason = '%s' WHERE `id` = %i",
                                     duration, EscapeString(message).c_str(), accountID);
     auto results = database.QueryDatabase(query);
 
@@ -6226,21 +6208,21 @@ void command_npcedit(Client *c, const Seperator *sep)
 		database.QueryDatabase(query);
 		return;
 	}
-	
+
 	if (strcasecmp(sep->arg[1], "meleetype") == 0) {
         c->Message(15,"NPCID %u now has a primary melee type of %i and a secondary melee type of %i.",  npcTypeID, atoi(sep->arg[2]), atoi(sep->arg[3]));
 		std::string query = StringFormat("UPDATE npc_types SET prim_melee_type = %i, sec_melee_type = %i WHERE id = %i",  atoi(sep->arg[2]), atoi(sep->arg[3]), npcTypeID);
 		database.QueryDatabase(query);
 		return;
 	}
-	
+
 	if (strcasecmp(sep->arg[1], "rangedtype") == 0) {
         c->Message(15,"NPCID %u now has a ranged type of %i.",  npcTypeID, atoi(sep->argplus[2]));
 		std::string query = StringFormat("UPDATE npc_types SET rangedtype = %i WHERE id = %i",  atoi(sep->argplus[2]), npcTypeID);
 		database.QueryDatabase(query);
 		return;
 	}
-	
+
 	if (strcasecmp(sep->arg[1], "ammoidfile") == 0) {
         c->Message(15,"NPCID %u's ammo id file is now %i",  npcTypeID, atoi(sep->argplus[2]));
 		std::string query = StringFormat("UPDATE npc_types SET ammoidfile = %i WHERE id = %i",  atoi(sep->argplus[2]), npcTypeID);
@@ -6275,7 +6257,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 		database.QueryDatabase(query);
 		return;
 	}
-	
+
 	if (strcasecmp(sep->arg[1], "walkspeed") == 0) {
         c->Message(15,"NPCID %u now walks at %f",  npcTypeID, atof(sep->argplus[2]));
 		std::string query = StringFormat("UPDATE npc_types SET walkspeed = %f WHERE id = %i",  atof(sep->argplus[2]), npcTypeID);
@@ -6429,7 +6411,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 		database.QueryDatabase(query);
 		return;
 	}
-	
+
 	if (strcasecmp(sep->arg[1], "Avoidance") == 0) {
         c->Message(15,"NPCID %u now has %i Avoidance.",  npcTypeID, atoi(sep->argplus[2]));
 		std::string query = StringFormat("UPDATE npc_types SET avoidance = %i WHERE id = %i",  atoi(sep->argplus[2]), npcTypeID);
@@ -6485,7 +6467,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 		database.QueryDatabase(query);
 		return;
 	}
-	
+
 	if (strcasecmp(sep->arg[1], "Attackcount") == 0) {
 		c->Message(15,"NPCID %u now has attack_count set to %i", npcTypeID,atoi(sep->arg[2]));
 		std::string query = StringFormat("UPDATE npc_types SET attack_count = %i WHERE id = %i", atoi(sep->argplus[2]),npcTypeID);
@@ -6522,7 +6504,7 @@ void command_npcedit(Client *c, const Seperator *sep)
                                         "luclin_hairstyle = %i, luclin_beard = %i, "
                                         "face = %i, drakkin_heritage = %i, "
                                         "drakkin_tattoo = %i, drakkin_details = %i "
-                                        "WHERE id = %i", 
+                                        "WHERE id = %i",
                                         target->GetHairColor(), target->GetBeardColor(),
                                         target->GetHairStyle(), target->GetBeard(),
                                         target->GetLuclinFace(), target->GetDrakkinHeritage(),
@@ -6608,7 +6590,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 		database.QueryDatabase(query);
 		return;
 	}
-	
+
 	if (strcasecmp(sep->arg[1], "slow_mitigation") == 0) {
         c->Message(15, "NPCID %u's slow mitigation limit is now %i.",  npcTypeID, atoi(sep->arg[2]));
 		std::string query = StringFormat("UPDATE npc_types SET slow_mitigation = %i WHERE id = %i",  atoi(sep->argplus[2]), npcTypeID);
@@ -6663,7 +6645,7 @@ void command_qglobal(Client *c, const Seperator *sep) {
 	}
 
 	if(!strcasecmp(sep->arg[1], "on")) {
-        std::string query = StringFormat("UPDATE npc_types SET qglobal = 1 WHERE id = '%i'", 
+        std::string query = StringFormat("UPDATE npc_types SET qglobal = 1 WHERE id = '%i'",
                                         target->GetNPCTypeID());
         auto results = database.QueryDatabase(query);
 		if(!results.Success()) {
@@ -6676,7 +6658,7 @@ void command_qglobal(Client *c, const Seperator *sep) {
 	}
 
 	if(!strcasecmp(sep->arg[1], "off")) {
-        std::string query = StringFormat("UPDATE npc_types SET qglobal = 0 WHERE id = '%i'", 
+        std::string query = StringFormat("UPDATE npc_types SET qglobal = 0 WHERE id = '%i'",
                                         target->GetNPCTypeID());
         auto results = database.QueryDatabase(query);
 		if(!results.Success()) {
@@ -7072,13 +7054,13 @@ void command_ginfo(Client *c, const Seperator *sep)
 			if(g->membername[r][0] == '\0')
 				continue;
 			c->Message(0, "...Zoned Member: %s, Roles: %s %s %s",  g->membername[r],
-				(g->MemberRoles[r] & RoleAssist) ? "Assist" : "", 
-				(g->MemberRoles[r] & RoleTank) ? "Tank" : "", 
+				(g->MemberRoles[r] & RoleAssist) ? "Assist" : "",
+				(g->MemberRoles[r] & RoleTank) ? "Tank" : "",
 				(g->MemberRoles[r] & RolePuller) ? "Puller" : "");
 		} else {
 			c->Message(0, "...In-Zone Member: %s (0x%x) Roles: %s %s %s",  g->membername[r], g->members[r],
-				(g->MemberRoles[r] & RoleAssist) ? "Assist" : "", 
-				(g->MemberRoles[r] & RoleTank) ? "Tank" : "", 
+				(g->MemberRoles[r] & RoleAssist) ? "Assist" : "",
+				(g->MemberRoles[r] & RoleTank) ? "Tank" : "",
 				(g->MemberRoles[r] & RolePuller) ? "Puller" : "");
 
 		}
@@ -7241,7 +7223,7 @@ void command_flagedit(Client *c, const Seperator *sep) {
 		flag_name[127] = '\0';
 
         std::string query = StringFormat("UPDATE zone SET flag_needed = '%s' "
-                                        "WHERE zoneidnumber = %d AND version = %d", 
+                                        "WHERE zoneidnumber = %d AND version = %d",
                                         flag_name, zoneid, zone->GetInstanceVersion());
         auto results = database.QueryDatabase(query);
 		if(!results.Success()) {
@@ -7268,7 +7250,7 @@ void command_flagedit(Client *c, const Seperator *sep) {
 		}
 
         std::string query = StringFormat("UPDATE zone SET flag_needed = '' "
-                                        "WHERE zoneidnumber = %d AND version = %d", 
+                                        "WHERE zoneidnumber = %d AND version = %d",
                                         zoneid, zone->GetInstanceVersion());
         auto results = database.QueryDatabase(query);
 		if(!results.Success()) {
@@ -7678,56 +7660,6 @@ void command_reloadtitles(Client *c, const Seperator *sep)
 
 }
 
-void command_altactivate(Client *c, const Seperator *sep){
-	if(sep->arg[1][0] == '\0'){
-		c->Message(10, "Invalid argument, usage:");
-		c->Message(10, "#altactivate list - lists the AA ID numbers that are available to you");
-		c->Message(10, "#altactivate time [argument] - returns the time left until you can use the AA with the ID that matches the argument.");
-		c->Message(10, "#altactivate [argument] - activates the AA with the ID that matches the argument.");
-		return;
-	}
-	if(!strcasecmp(sep->arg[1], "help")){
-		c->Message(10, "Usage:");
-		c->Message(10, "#altactivate list - lists the AA ID numbers that are available to you");
-		c->Message(10, "#altactivate time [argument] - returns the time left until you can use the AA with the ID that matches the argument.");
-		c->Message(10, "#altactivate [argument] - activates the AA with the ID that matches the argument.");
-		return;
-	}
-	if(!strcasecmp(sep->arg[1], "list")){
-		c->Message(10, "You have access to the following AA Abilities:");
-		int x, val;
-		SendAA_Struct* saa = nullptr;
-		for(x = 0; x < aaHighestID; x++){
-			if(AA_Actions[x][0].spell_id || AA_Actions[x][0].action){ //if there's an action or spell associated we assume it's a valid
-				val = 0;					//and assume if they don't have a value for the first rank then it isn't valid for any rank
-				saa = nullptr;
-				val = c->GetAA(x);
-				if(val){
-					saa = zone->FindAA(x);
-					c->Message(10, "%d: %s %d",  x, saa->name, val);
-				}
-			}
-		}
-	}
-	else if(!strcasecmp(sep->arg[1], "time")){
-		int ability = atoi(sep->arg[2]);
-		if(c->GetAA(ability)){
-			int remain = c->GetPTimers().GetRemainingTime(pTimerAAStart + ability);
-			if(remain)
-				c->Message(10, "You may use that ability in %d minutes and %d seconds.",  (remain/60), (remain%60));
-			else
-				c->Message(10, "You may use that ability now.");
-		}
-		else{
-			c->Message(10, "You do not have access to that ability.");
-		}
-	}
-	else
-	{
-		c->ActivateAA((aaID) atoi(sep->arg[1]));
-	}
-}
-
 void command_traindisc(Client *c, const Seperator *sep)
 {
 	uint8 max_level, min_level;
@@ -7874,7 +7806,7 @@ void command_deletegraveyard(Client *c, const Seperator *sep)
 	return;
 }
 
-void command_summonburriedplayercorpse(Client *c, const Seperator *sep)
+void command_summonburiedplayercorpse(Client *c, const Seperator *sep)
 {
 	Client *t=c;
 
@@ -7888,12 +7820,12 @@ void command_summonburriedplayercorpse(Client *c, const Seperator *sep)
 	Corpse* PlayerCorpse = database.SummonBuriedCharacterCorpses(t->CharacterID(), t->GetZoneID(), zone->GetInstanceID(), t->GetPosition());
 
 	if(!PlayerCorpse)
-		c->Message(0, "Your target doesn't have any burried corpses.");
+		c->Message(0, "Your target doesn't have any buried corpses.");
 
 	return;
 }
 
-void command_getplayerburriedcorpsecount(Client *c, const Seperator *sep)
+void command_getplayerburiedcorpsecount(Client *c, const Seperator *sep)
 {
 	Client *t=c;
 
@@ -7907,9 +7839,9 @@ void command_getplayerburriedcorpsecount(Client *c, const Seperator *sep)
 	uint32 CorpseCount = database.GetCharacterBuriedCorpseCount(t->CharacterID());
 
 	if(CorpseCount > 0)
-		c->Message(0, "Your target has a total of %u burried corpses.",  CorpseCount);
+		c->Message(0, "Your target has a total of %u buried corpses.",  CorpseCount);
 	else
-		c->Message(0, "Your target doesn't have any burried corpses.");
+		c->Message(0, "Your target doesn't have any buried corpses.");
 
 	return;
 }
@@ -7950,7 +7882,7 @@ void command_advnpcspawn(Client *c, const Seperator *sep)
 
         std::string query = StringFormat("INSERT INTO spawngroup "
                                         "(name, spawn_limit, dist, max_x, min_x, max_y, min_y, delay) "
-                                        "VALUES (\"%s\",  %i, %f, %f, %f, %f, %f, %i)", 
+                                        "VALUES (\"%s\",  %i, %f, %f, %f, %f, %f, %i)",
                                         sep->arg[2],
                                         (sep->arg[3]? atoi(sep->arg[3]): 0),
                                         (sep->arg[4]? atof(sep->arg[4]): 0),
@@ -7977,7 +7909,7 @@ void command_advnpcspawn(Client *c, const Seperator *sep)
         }
 
         std::string query = StringFormat("INSERT INTO spawnentry (spawngroupID, npcID, chance) "
-                                        "VALUES (%i, %i, %i)", 
+                                        "VALUES (%i, %i, %i)",
                                         atoi(sep->arg[2]), atoi(sep->arg[3]), atoi(sep->arg[4]));
         auto results = database.QueryDatabase(query);
         if (!results.Success()) {
@@ -7998,7 +7930,7 @@ void command_advnpcspawn(Client *c, const Seperator *sep)
         }
 
         std::string query = StringFormat("UPDATE spawngroup SET dist = '%f', max_x = '%f', min_x = '%f', "
-                                        "max_y = '%f', min_y = '%f', delay = '%i' WHERE id = '%i'", 
+                                        "max_y = '%f', min_y = '%f', delay = '%i' WHERE id = '%i'",
                                         atof(sep->arg[3]), atof(sep->arg[4]), atof(sep->arg[5]),
                                         atof(sep->arg[6]), atof(sep->arg[7]), atoi(sep->arg[8]),
                                         atoi(sep->arg[2]));
@@ -8083,7 +8015,7 @@ void command_advnpcspawn(Client *c, const Seperator *sep)
         }
 
         std::string query = StringFormat("UPDATE spawn2 SET x = '%f', y = '%f', z = '%f', heading = '%f' "
-                                        "WHERE id = '%i'", 
+                                        "WHERE id = '%i'",
                                         c->GetX(), c->GetY(), c->GetZ(), c->GetHeading(),s2->GetID());
         auto results = database.QueryDatabase(query);
         if (!results.Success()) {
@@ -8154,7 +8086,7 @@ void command_advnpcspawn(Client *c, const Seperator *sep)
 
         int16 version = atoi(sep->arg[2]);
         std::string query = StringFormat("UPDATE spawn2 SET version = %i "
-                                        "WHERE spawngroupID = '%i'", 
+                                        "WHERE spawngroupID = '%i'",
                                         version, c->GetTarget()->CastToNPC()->GetSp2());
         auto results = database.QueryDatabase(query);
         if (!results.Success()) {
@@ -10205,7 +10137,7 @@ void command_zopp(Client *c, const Seperator *sep)
 
 		ItemInst* FakeItemInst = database.CreateItem(FakeItem, charges);
 		c->SendItemPacket(slotid, FakeItemInst, packettype);
-		c->Message(0, "Sending zephyr op packet to client - [%s] %s (%u) with %i %s to slot %i.", 
+		c->Message(0, "Sending zephyr op packet to client - [%s] %s (%u) with %i %s to slot %i.",
 			   packettype == ItemPacketTrade ? "Trade" : "Summon",  FakeItem->Name, itemid, charges,
 			   std::abs(charges == 1) ? "charge" : "charges",  slotid);
 		safe_delete(FakeItemInst);
@@ -10424,7 +10356,7 @@ void command_tune(Client *c, const Seperator *sep)
 			ac_override = 0;
 		if (!info_level)
 			info_level = 1;
-		
+
 		if(!strcasecmp(sep->arg[2], "A"))
 			c->Tune_FindATKByPctMitigation(defender, attacker, pct_mitigation, interval, max_loop,ac_override,info_level);
 		else if(!strcasecmp(sep->arg[2], "B"))
@@ -10459,7 +10391,7 @@ void command_tune(Client *c, const Seperator *sep)
 			atk_override = 0;
 		if (!info_level)
 			info_level = 1;
-				
+
 		if(!strcasecmp(sep->arg[2], "A"))
 			c->Tune_FindACByPctMitigation(defender, attacker, pct_mitigation, interval, max_loop,atk_override,info_level);
 		else if(!strcasecmp(sep->arg[2], "B"))
@@ -10501,7 +10433,7 @@ void command_tune(Client *c, const Seperator *sep)
 			c->Message(10, "#Tune - Error hit chance out of bounds. [Max %.2f Min .2f]",  RuleR(Combat,MaxChancetoHit),RuleR(Combat,MinChancetoHit));
 			return;
 		}
-		
+
 		if(!strcasecmp(sep->arg[2], "A"))
 			c->Tune_FindAccuaryByHitChance(defender, attacker, hit_chance, interval, max_loop,avoid_override,info_level);
 		else if(!strcasecmp(sep->arg[2], "B"))
@@ -10543,7 +10475,7 @@ void command_tune(Client *c, const Seperator *sep)
 			c->Message(10, "#Tune - Error hit chance out of bounds. [Max %.2f Min .2f]",  RuleR(Combat,MaxChancetoHit),RuleR(Combat,MinChancetoHit));
 			return;
 		}
-		
+
 		if(!strcasecmp(sep->arg[2], "A"))
 			c->Tune_FindAvoidanceByHitChance(defender, attacker, hit_chance, interval, max_loop,acc_override, info_level);
 		else if(!strcasecmp(sep->arg[2], "B"))
@@ -10569,7 +10501,7 @@ void command_logtest(Client *c, const Seperator *sep){
 		for (i = 0; i < atoi(sep->arg[1]); i++){
 			Log.Out(Logs::General, Logs::Debug, "[%u] Test #2... Took %f seconds", i, ((float)(std::clock() - t)) / CLOCKS_PER_SEC);
 		}
-		
+
 	}
 }
 
@@ -10625,7 +10557,7 @@ void command_logs(Client *c, const Seperator *sep){
 				c->Message(15, "Your Log Settings have been applied");
 				c->Message(15, "Output Method: %s :: Debug Level: %i - Category: %s",  sep->arg[2], atoi(sep->arg[4]), Logs::LogCategoryName[atoi(sep->arg[3])]);
 			}
-			/* We use a general 'is_category_enabled' now, let's update when we update any output settings 
+			/* We use a general 'is_category_enabled' now, let's update when we update any output settings
 				This is used in hot places of code to check if its enabled in any way before triggering logs
 			*/
 			if (sep->arg[4] > 0){
@@ -10653,9 +10585,41 @@ void command_mysqltest(Client *c, const Seperator *sep)
 		for (i = 0; i < atoi(sep->arg[1]); i++){
 			std::string query = "SELECT * FROM `zone`";
 			auto results = database.QueryDatabase(query);
-		} 
+		}
 	}
-	Log.Out(Logs::General, Logs::Debug, "MySQL Test... Took %f seconds", ((float)(std::clock() - t)) / CLOCKS_PER_SEC); 
+	Log.Out(Logs::General, Logs::Debug, "MySQL Test... Took %f seconds", ((float)(std::clock() - t)) / CLOCKS_PER_SEC);
+}
+
+void command_resetaa_timer(Client *c, const Seperator *sep) {
+	Client *target = nullptr;
+	if(!c->GetTarget() || !c->GetTarget()->IsClient()) {
+		target = c;
+	} else {
+		target = c->GetTarget()->CastToClient();
+	}
+
+	if(sep->IsNumber(1))
+	{
+		int timer_id = atoi(sep->arg[1]);
+		c->Message(0, "Reset of timer %i for %s", timer_id, c->GetName());
+		c->ResetAlternateAdvancementTimer(timer_id);
+	}
+	else if(!strcasecmp(sep->arg[1], "all"))
+	{
+		c->Message(0, "Reset all timers for %s", c->GetName());
+		c->ResetAlternateAdvancementTimers();
+	}
+	else
+	{
+		c->Message(0, "usage: #resetaa_timer [all | timer_id]");
+	}
+}
+
+void command_reloadaa(Client *c, const Seperator *sep) {
+	c->Message(0, "Reloading Alternate Advancement Data...");
+	zone->LoadAlternateAdvancement();
+	c->Message(0, "Alternate Advancement Data Reloaded");
+	entity_list.SendAlternateAdvancementStats();
 }
 
 void command_hotfix(Client *c, const Seperator *sep) {

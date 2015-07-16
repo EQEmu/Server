@@ -6,6 +6,7 @@
 #include "position.h"
 #include "../common/faction.h"
 #include "../common/eqemu_logsys.h"
+#include "aa_ability.h"
 
 class Client;
 class Corpse;
@@ -339,17 +340,10 @@ public:
 	bool		SetCharacterFactionLevel(uint32 char_id, int32 faction_id, int32 value, uint8 temp, faction_map &val_list); // needed for factions Dec, 16 2001
 	bool		LoadFactionData();
 
-	/* AAs   */
-	bool		LoadAAEffects();
-	bool		LoadAAEffects2();
-	bool		LoadSwarmSpells();
-	SendAA_Struct*GetAASkillVars(uint32 skill_id);
-	uint8		GetTotalAALevels(uint32 skill_id);
-	uint32		GetSizeAA();
-	uint32		CountAAs();
-	void		LoadAAs(SendAA_Struct **load);
-	uint32		CountAAEffects();
-	void		FillAAEffects(SendAA_Struct* aa_struct);
+	/* AAs New */
+	bool	LoadAlternateAdvancementAbilities(std::unordered_map<int, std::unique_ptr<AA::Ability>> &abilities,
+											  std::unordered_map<int, std::unique_ptr<AA::Rank>> &ranks);
+	bool	LoadAlternateAdvancement(Client *c);
 
 	/* Zone related   */
 	bool		GetZoneCFG(uint32 zoneid, uint16 instance_id, NewZone_Struct *data, bool &can_bind, bool &can_combat, bool &can_levitate, bool &can_castoutdoor, bool &is_city, bool &is_hotzone, bool &allow_mercs, uint8 &zone_type, int &ruleset, char **map_filename);

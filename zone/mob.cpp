@@ -211,6 +211,7 @@ Mob::Mob(const char* in_name,
 	trackable	= true;
 	has_shieldequiped = false;
 	has_twohandbluntequiped = false;
+	has_twohanderequipped = false;
 	has_numhits = false;
 	has_MGB = false;
 	has_ProjectIllusion = false;
@@ -307,8 +308,8 @@ Mob::Mob(const char* in_name,
 	casting_spell_id = 0;
 	casting_spell_timer = 0;
 	casting_spell_timer_duration = 0;
-	casting_spell_type = 0;
 	casting_spell_inventory_slot = 0;
+	casting_spell_aa_id = 0;
 	target = 0;
 
 	ActiveProjectileATK = false;
@@ -725,7 +726,7 @@ int Mob::_GetFearSpeed() const {
 		movemod = -85;
 
 	if (IsClient()) {
-		if (CastToClient()->IsRunning())
+		if (CastToClient()->GetRunMode())
 			speed_mod = GetBaseRunspeed();
 		else
 			speed_mod = GetBaseWalkspeed();
@@ -1085,7 +1086,7 @@ void Mob::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho)
 	ns->spawn.max_hp	= 100;		//this field needs a better name
 	ns->spawn.race		= race;
 	ns->spawn.runspeed	= runspeed;
-	ns->spawn.walkspeed	= runspeed * 0.5f;
+	ns->spawn.walkspeed	= walkspeed;
 	ns->spawn.class_	= class_;
 	ns->spawn.gender	= gender;
 	ns->spawn.level		= level;
@@ -1141,6 +1142,10 @@ void Mob::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho)
 		ns->spawn.flymode = FindType(SE_Levitate) ? 2 : 0;
 	else
 		ns->spawn.flymode = flymode;
+
+	if(IsBoat()) {
+		ns->spawn.flymode = 1;
+	}
 
 	ns->spawn.lastName[0] = '\0';
 
@@ -1354,8 +1359,12 @@ void Mob::SendHPUpdate(bool skip_self)
 		}
 	}
 
+	bool dospam = RuleB(Character, SpamHPUpdates);
 	// send to self - we need the actual hps here
-	if(IsClient() && !skip_self) {
+	if(IsClient() && (!skip_self || dospam)) {
+
+		this->CastToClient()->SendHPUpdateMarquee();
+
 		EQApplicationPacket* hp_app2 = new EQApplicationPacket(OP_HPUpdate,sizeof(SpawnHPUpdate_Struct));
 		SpawnHPUpdate_Struct* ds = (SpawnHPUpdate_Struct*)hp_app2->pBuffer;
 		ds->cur_hp = CastToClient()->GetHP() - itembonuses.HP;
@@ -1364,7 +1373,8 @@ void Mob::SendHPUpdate(bool skip_self)
 		CastToClient()->QueuePacket(hp_app2);
 		safe_delete(hp_app2);
 	}
-	ResetHPUpdateTimer(); // delay the timer
+	if (!dospam)
+		ResetHPUpdateTimer(); // delay the timer
 }
 
 // this one just warps the mob to the current location
@@ -1385,19 +1395,23 @@ void Mob::SendPosUpdate(uint8 iSendToSelf) {
 	MakeSpawnUpdate(spu);
 
 	if (iSendToSelf == 2) {
-		if (this->IsClient())
-			this->CastToClient()->FastQueuePacket(&app,false);
+		if (IsClient()) {
+			CastToClient()->FastQueuePacket(&app,false);
+		}
 	}
 	else
 	{
 		if(move_tic_count == RuleI(Zone, NPCPositonUpdateTicCount))
 		{
-			entity_list.QueueClients(this, app, (iSendToSelf==0), false);
+			entity_list.QueueClients(this, app, (iSendToSelf == 0), false);
 			move_tic_count = 0;
 		}
-		else
+		else if(move_tic_count % 2 == 0)
 		{
-			entity_list.QueueCloseClients(this, app, (iSendToSelf==0), 800, nullptr, false);
+			entity_list.QueueCloseClients(this, app, (iSendToSelf == 0), 700, nullptr, false);
+			move_tic_count++;
+		} 
+		else {
 			move_tic_count++;
 		}
 	}
@@ -1475,7 +1489,7 @@ void Mob::ShowStats(Client* client)
 			if(n->respawn2 != 0)
 				spawngroupid = n->respawn2->SpawnGroupID();
 			client->Message(0, "  NPCID: %u  SpawnGroupID: %u Grid: %i LootTable: %u FactionID: %i SpellsID: %u ", GetNPCTypeID(),spawngroupid, n->GetGrid(), n->GetLoottableID(), n->GetNPCFactionID(), n->GetNPCSpellsID());
-			client->Message(0, "  Accuracy: %i MerchantID: %i EmoteID: %i Runspeed: %u Walkspeed: %u", n->GetAccuracyRating(), n->MerchantType, n->GetEmoteID(), n->GetRunspeed(), n->GetWalkspeed());
+			client->Message(0, "  Accuracy: %i MerchantID: %i EmoteID: %i Runspeed: %.3f Walkspeed: %.3f", n->GetAccuracyRating(), n->MerchantType, n->GetEmoteID(), static_cast<float>(0.025f * n->GetRunspeed()), static_cast<float>(0.025f * n->GetWalkspeed()));
 			n->QueryLoot(client);
 		}
 		if (IsAIControlled()) {
@@ -2397,6 +2411,14 @@ bool Mob::CanThisClassDoubleAttack(void) const
 		}
 		return(CastToClient()->HasSkill(SkillDoubleAttack));
 	}
+}
+
+bool Mob::CanThisClassTripleAttack() const
+{
+	if (!IsClient())
+		return false; // When they added the real triple attack skill, mobs lost the ability to triple
+	else
+		return CastToClient()->HasSkill(SkillTripleAttack);
 }
 
 bool Mob::IsWarriorClass(void) const
@@ -3505,9 +3527,11 @@ void Mob::TriggerOnCast(uint32 focus_spell, uint32 spell_id, bool aa_trigger)
 
 	uint32 trigger_spell_id = 0;
 
-	if (aa_trigger && IsClient()){
-		//focus_spell = aaid
-		trigger_spell_id = CastToClient()->CalcAAFocus(focusTriggerOnCast, focus_spell, spell_id);
+	if (aa_trigger && IsClient()) {
+		// focus_spell = aaid
+		auto rank = zone->GetAlternateAdvancementRank(focus_spell);
+		if (rank)
+			trigger_spell_id = CastToClient()->CalcAAFocus(focusTriggerOnCast, *rank, spell_id);
 
 		if(IsValidSpell(trigger_spell_id) && GetTarget())
 			SpellFinished(trigger_spell_id, GetTarget(), 10, 0, -1, spells[trigger_spell_id].ResistDiff);
@@ -3763,10 +3787,7 @@ int16 Mob::GetSkillDmgTaken(const SkillUseTypes skill_used)
 	skilldmg_mod += itembonuses.SkillDmgTaken[HIGHEST_SKILL+1] + spellbonuses.SkillDmgTaken[HIGHEST_SKILL+1] +
 					itembonuses.SkillDmgTaken[skill_used] + spellbonuses.SkillDmgTaken[skill_used];
 
-
 	skilldmg_mod += SkillDmgTaken_Mod[skill_used] + SkillDmgTaken_Mod[HIGHEST_SKILL+1];
-
-	skilldmg_mod += spellbonuses.MeleeVulnerability + itembonuses.MeleeVulnerability + aabonuses.MeleeVulnerability;
 
 	if(skilldmg_mod < -100)
 		skilldmg_mod = -100;

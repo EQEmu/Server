@@ -1,5 +1,46 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 07/06/2015 ==
+mackal: Implement Triple Attack Skill
+	Parses showed about rand(1000) for the chance, may need more investigating
+	Corrected Double Attack chances as well
+	Running optional 2015_07_06_TripleAttack.sql will set current toons to their max skill
+	This is optional because the admins might want to go a different route.
+
+== 07/05/2015 ==
+mackal: Rewrite NPC combat attack round logic
+	An NPC "quading" is really just an NPC with innate dual wield that doubles on both hands
+	The old rules allowed NPCs to hit 6 times in one round
+	NPCs also seem to have their own skill progression for DW/DA
+	See: http://www.eqemulator.org/forums/showthread.php?t=38708
+	You can set Combat:UseLiveCombatRounds to false to use the old rules
+	PC Double Attack rates kind of follow the same thing but still needs to be implemented
+Kinglykrab: WARNING: summonburriedplayercorpse is now summonburiedplayercorpse, getplayerburriedcorpsecount is now getplayerburiedcorpsecount, summon_burried_player_corpse is now summon_buried_player_corpse, and get_player_burried_corpse_count is now get_player_buried_corpse_count FIX THESE IN YOUR SCRIPTS OR THEY WILL NOT WORK!!!!
+	Added bot saylinks (thanks Uleat!)
+	Command aliases for #augmentitem (#aug), #findnpctype (#fn), #findspell (#fs)
+	Bot command changes: #bot sow -> #bot speed, #bot magepet -> #bot setpet, #bot resurrectme -> #bot resurrect
+	Changed all occurrences of burried to buried in the code.
+	client_packet.cpp was referencing old columns in character_corpses, not sure how we didn't already see this before.
+
+== 7/4/2015 ==
+mackal: Reworked the activated avoidace skills (riposte, dodge, etc) based on dev quotes
+	This also fixes the order things are checked (avoidance skills, THEN hit/miss)
+	Also riposte immunity from the increase riposte chance spell effect.
+
+== 7/2/2015 ==
+KLS/Demonstar55: AA system has been rewritten fixing a ton of bugs and extending functionality while making it easier to create new AA points.
+KLS/Demonstar55: New tables are needed and so older data will need to be migrated to the new system.
+KLS/Demonstar55: The SQL saves the old aa points spent/avail/character_alt_abilities data if any server ops want to do something different than PEQ did with it.
+KLS/Demonstar55: Will try to get a wiki entry written up next week some time explaining the system but it's really not hard to follow the db tables in the meantime.
+
+== 7/1/2015 ==
+Akkadius: Fix an issue where emote messages would overflow the buffer of 256 by increasing the size and changing some of the initialization
+Akkadius: Added a custom Health Update message that will display in the middle of the players screen, to enable this server wide you must enable rule 'Character:MarqueeHPUpdates'
+	Example: https://www.youtube.com/watch?v=KUVdbPxLIn0
+Akkadius: (Haynar) Fixed some runspeed issues with Perl and LUA scripts
+Akkadius: (Haynar) Updated #showstats and #npcstats for new speed calcs to display speeds again in familiar float format.
+Akkadius: (Haynar) Improved client movement while AI Controlled, such as feared and charmed.  Movement will be much smoother from clients perspective.
+
 == 06/12/2015 ==
 Uleat: Adjusted SessionStats to better reflect a sister implementation
 

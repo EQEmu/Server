@@ -1121,7 +1121,7 @@ int32 Client::CalcMaxMana()
 	switch (GetCasterClass()) {
 		case 'I':
 		case 'W': {
-				max_mana = (CalcBaseMana() + itembonuses.Mana + spellbonuses.Mana + GroupLeadershipAAManaEnhancement());
+				max_mana = (CalcBaseMana() + itembonuses.Mana + spellbonuses.Mana + aabonuses.Mana + GroupLeadershipAAManaEnhancement());
 				break;
 			}
 		case 'N': {
@@ -1978,7 +1978,18 @@ uint32 Mob::GetInstrumentMod(uint16 spell_id) const
 		return 10;
 
 	uint32 effectmod = 10;
-	int effectmodcap = RuleI(Character, BaseInstrumentSoftCap);
+	int effectmodcap = 0;
+	bool nocap = false;
+	if (RuleB(Character, UseSpellFileSongCap)) {
+		effectmodcap = spells[spell_id].songcap / 10;
+		// this looks a bit weird, but easiest way I could think to keep both systems working
+		if (effectmodcap == 0)
+			nocap = true;
+		else
+			effectmodcap += 10;
+	} else {
+		effectmodcap = RuleI(Character, BaseInstrumentSoftCap);
+	}
 	// this should never use spell modifiers...
 	// if a spell grants better modifers, they are copied into the item mods
 	// because the spells are supposed to act just like having the intrument.
@@ -2048,10 +2059,11 @@ uint32 Mob::GetInstrumentMod(uint16 spell_id) const
 		effectmod = 10;
 		return effectmod;
 	}
-	effectmodcap += aabonuses.songModCap + spellbonuses.songModCap + itembonuses.songModCap;
+	if (!RuleB(Character, UseSpellFileSongCap))
+		effectmodcap += aabonuses.songModCap + spellbonuses.songModCap + itembonuses.songModCap;
 	if (effectmod < 10)
 		effectmod = 10;
-	if (effectmod > effectmodcap)
+	if (!nocap && effectmod > effectmodcap) // if the cap is calculated to be 0 using new rules, no cap.
 		effectmod = effectmodcap;
 	Log.Out(Logs::Detail, Logs::Spells, "%s::GetInstrumentMod() spell=%d mod=%d modcap=%d\n", GetName(), spell_id,
 		effectmod, effectmodcap);

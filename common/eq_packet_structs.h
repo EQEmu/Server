@@ -4219,6 +4219,52 @@ struct UseAA_Struct {
 	uint32 end;
 };
 
+//new AA stuff
+//reference only
+struct AARankInfo_Struct
+{
+	uint32 id;
+	int32 upper_hotkey_sid;
+	int32 lower_hotkey_sid;
+	int32 title_sid;
+	int32 desc_sid;
+	int32 level_req;
+	int32 cost;
+	uint32 seq;
+	uint32 current_level;
+	uint32 type;
+	int32 spell;
+	int32 spell_type;
+	int32 spell_refresh;
+	int32 classes;
+	int32 max_level;
+	int32 prev_id;
+	int32 next_id;
+	int32 total_cost;
+	int32 expansion;
+	int32 category;
+	uint32 charges;
+	uint8 grant_only;
+	uint32 total_effects;
+	uint32 total_prereqs;
+};
+
+struct AARankPrereq_Struct
+{
+	int32 aa_id;
+	int32 points;
+};
+
+struct AARankEffect_Struct
+{
+	int32 effect_id;
+	int32 base1;
+	int32 base2;
+	int32 slot;
+};
+
+//old AA stuff
+
 struct AA_Ability {
 /*00*/	uint32 skill_id;
 /*04*/	uint32 base1;
@@ -4273,7 +4319,7 @@ struct SendAA_Struct {
 struct AA_Action {
 /*00*/	uint32	action;
 /*04*/	uint32	ability;
-/*08*/	uint32	unknown08;
+/*08*/	uint32	target_id;
 /*12*/	uint32	exp_value;
 };
 

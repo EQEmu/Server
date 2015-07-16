@@ -102,8 +102,6 @@ int main(int argc, char *argv[]) {
 
 	Log.Out(Logs::Detail, Logs::Launcher, "Starting main loop...");
 
-//	zones["test"] = new ZoneLaunch(&world, "./zone", "dynamic_1");
-
 	ProcLauncher *launch = ProcLauncher::get();
 	RunLoops = true;
 	while(RunLoops) {

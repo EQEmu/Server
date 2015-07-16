@@ -337,6 +337,9 @@
 9081|2015_05_23_dbstr_us.sql|SHOW TABLES LIKE 'db_str'|empty|
 9082|2015_05_25_npc_types_texture_fields.sql|SHOW COLUMNS FROM `npc_types` LIKE 'armtexture'|empty|
 9083|2015_06_07_aa_update.sql|SHOW COLUMNS FROM `character_alternate_abilities` LIKE 'charges'|empty|
+9084|2015_06_30_runspeed_adjustments.sql|SELECT `runspeed` FROM `npc_types` WHERE `runspeed` > 3|not_empty|
+9085|2015_07_01_Marquee_Rule.sql|SELECT * FROM `rule_values` WHERE `rule_name` LIKE '%Character:MarqueeHPUpdates%'|empty|
+9086|2015_07_02_aa_rework.sql|SHOW TABLES LIKE 'aa_ranks'|empty|
 
 # Upgrade conditions:
 # 	This won't be needed after this system is implemented, but it is used database that are not

@@ -75,7 +75,7 @@ bool Bot::AICastSpell(Mob* tar, uint8 iChance, uint16 iSpellTypes) {
 
 					MakeAnyLenString(&gmsg, "Attempting to mez %s.", addMob->GetCleanName());
 
-					if(gmsg && GetGroupMessagesOn())
+					if(gmsg)
 						BotGroupSay(this, gmsg);
 				}
 			}
@@ -262,7 +262,7 @@ bool Bot::AICastSpell(Mob* tar, uint8 iChance, uint16 iSpellTypes) {
 							}
 						}
 
-						if(gmsg && GetGroupMessagesOn())
+						if(gmsg)
 							BotGroupSay(this, gmsg);
 					}
 				}
@@ -793,7 +793,7 @@ bool Bot::AICastSpell(Mob* tar, uint8 iChance, uint16 iSpellTypes) {
 
 					MakeAnyLenString(&gmsg, "Attempting to slow %s.", tar->GetCleanName());
 
-					if(gmsg && GetGroupMessagesOn())
+					if(gmsg)
 						BotGroupSay(this, gmsg);
 				}
 			}

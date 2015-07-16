@@ -99,6 +99,7 @@ RULE_BOOL(Character, EnableXTargetting, true) // Enable Extended Targetting Wind
 RULE_BOOL(Character, KeepLevelOverMax, false) // Don't delevel a character that has somehow gone over the level cap
 RULE_INT(Character, FoodLossPerUpdate, 35) // How much food/water you lose per stamina update
 RULE_INT(Character, BaseInstrumentSoftCap, 36) // Softcap for instrument mods, 36 commonly referred to as "3.6" as well.
+RULE_BOOL(Character, UseSpellFileSongCap, true) // When they removed the AA that increased the cap they removed the above and just use the spell field
 RULE_INT(Character, BaseRunSpeedCap, 158) // Base Run Speed Cap, on live it's 158% which will give you a runspeed of 1.580 hard capped to 225.
 RULE_INT(Character, OrnamentationAugmentType, 20) //Ornamentation Augment Type
 RULE_REAL(Character, EnvironmentDamageMulipliter, 1)
@@ -113,6 +114,8 @@ RULE_INT(Character, TradeskillUpMakePoison, 2) // Make Poison skillup rate adjus
 RULE_INT(Character, TradeskillUpPottery, 4) // Pottery skillup rate adjust. Lower is faster.
 RULE_INT(Character, TradeskillUpResearch, 1) // Research skillup rate adjust. Lower is faster.
 RULE_INT(Character, TradeskillUpTinkering, 2) // Tinkering skillup rate adjust. Lower is faster.
+RULE_BOOL(Character, SpamHPUpdates, false) // if your server has stupid amounts of HP that causes client display issues, turn this on!
+RULE_BOOL(Character, MarqueeHPUpdates, false) // Will show Health % in center of screen < 100%
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Mercs)
@@ -183,6 +186,7 @@ RULE_INT(World, MinGMAntiHackStatus, 1) //Minimum GM status to check against Ant
 RULE_INT(World, SoFStartZoneID, -1) //Sets the Starting Zone for SoF Clients separate from Titanium Clients (-1 is disabled)
 RULE_INT(World, TitaniumStartZoneID, -1) //Sets the Starting Zone for Titanium Clients (-1 is disabled). Replaces the old method.
 RULE_INT(World, ExpansionSettings, 16383) // Sets the expansion settings for the server, This is sent on login to world and affects client expansion settings. Defaults to all expansions enabled up to TSS.
+RULE_BOOL(World, UseClientBasedExpansionSettings, true) // if true it will overrule World, ExpansionSettings and set someone's expansion based on the client they're using
 RULE_INT(World, PVPSettings, 0) // Sets the PVP settings for the server, 1 = Rallos Zek RuleSet, 2 = Tallon/Vallon Zek Ruleset, 4 = Sullon Zek Ruleset, 6 = Discord Ruleset, anything above 6 is the Discord Ruleset without the no-drop restrictions removed. TODO: Edit IsAttackAllowed in Zone to accomodate for these rules.
 RULE_BOOL (World, IsGMPetitionWindowEnabled, false)
 RULE_INT (World, FVNoDropFlag, 0) // Sets the Firiona Vie settings on the client. If set to 2, the flag will be set for GMs only, allowing trading of no-drop items.
@@ -444,6 +448,7 @@ RULE_BOOL(Combat, OneProcPerWeapon, true) //If enabled, One proc per weapon per 
 RULE_BOOL(Combat, ProjectileDmgOnImpact, true) //If enabled, projectiles (ie arrows) will hit on impact, instead of instantly.
 RULE_BOOL(Combat, MeleePush, true) // enable melee push
 RULE_INT(Combat, MeleePushChance, 50) // (NPCs) chance the target will be pushed. Made up, 100 actually isn't that bad
+RULE_BOOL(Combat, UseLiveCombatRounds, true) // turn this false if you don't want to worry about fixing up combat rounds for NPCs
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(NPC)
@@ -501,6 +506,8 @@ RULE_INT(Bots, BotAAExpansion, 8) // Bots get AAs through this expansion
 RULE_BOOL(Bots, BotGroupXP, false) // Determines whether client gets xp for bots outside their group.
 RULE_BOOL(Bots, BotBardUseOutOfCombatSongs, true) // Determines whether bard bots use additional out of combat songs.
 RULE_BOOL(Bots, BotLevelsWithOwner, false) // Auto-updates spawned bots as owner levels/de-levels (false is original behavior)
+RULE_BOOL(Bots, BotCharacterLevelEnabled, false) // Enables required level to spawn bots
+RULE_INT(Bots, BotCharacterLevel, 0) // 0 as default (if level > this value you can spawn bots if BotCharacterLevelEnabled is true)
 RULE_CATEGORY_END()
 #endif
 

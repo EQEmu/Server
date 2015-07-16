@@ -790,7 +790,7 @@ bool Lua_Mob::CastSpell(int spell_id, int target_id, int slot, int cast_time, in
 	int16 res = resist_adjust;
 
 	return self->CastSpell(spell_id, target_id, slot, cast_time, mana_cost, nullptr, static_cast<uint32>(item_slot),
-		static_cast<uint32>(timer), static_cast<uint32>(timer_duration), 0, &res);
+		static_cast<uint32>(timer), static_cast<uint32>(timer_duration), &res);
 }
 
 bool Lua_Mob::SpellFinished(int spell_id, Lua_Mob target) {
@@ -1193,6 +1193,21 @@ int Lua_Mob::CheckHealAggroAmount(int spell_id, uint32 heal_possible) {
 int Lua_Mob::GetAA(int id) {
 	Lua_Safe_Call_Int();
 	return self->GetAA(id);
+}
+
+int Lua_Mob::GetAAByAAID(int id) {
+	Lua_Safe_Call_Int();
+	return self->GetAAByAAID(id);
+}
+
+bool Lua_Mob::SetAA(int rank_id, int new_value) {
+	Lua_Safe_Call_Bool();
+	return self->SetAA(rank_id, new_value);
+}
+
+bool Lua_Mob::SetAA(int rank_id, int new_value, int charges) {
+	Lua_Safe_Call_Bool();
+	return self->SetAA(rank_id, new_value, charges);
 }
 
 bool Lua_Mob::DivineAura() {
@@ -2074,6 +2089,9 @@ luabind::scope lua_register_mob() {
 		.def("CheckHealAggroAmount", (int(Lua_Mob::*)(int))&Lua_Mob::CheckHealAggroAmount)
 		.def("CheckHealAggroAmount", (int(Lua_Mob::*)(int,uint32))&Lua_Mob::CheckHealAggroAmount)
 		.def("GetAA", (int(Lua_Mob::*)(int))&Lua_Mob::GetAA)
+		.def("GetAAByAAID", (int(Lua_Mob::*)(int))&Lua_Mob::GetAAByAAID)
+		.def("SetAA", (bool(Lua_Mob::*)(int,int))&Lua_Mob::SetAA)
+		.def("SetAA", (bool(Lua_Mob::*)(int,int,int))&Lua_Mob::SetAA)
 		.def("DivineAura", (bool(Lua_Mob::*)(void))&Lua_Mob::DivineAura)
 		.def("SetOOCRegen", (void(Lua_Mob::*)(int))&Lua_Mob::SetOOCRegen)
 		.def("GetEntityVariable", (const char*(Lua_Mob::*)(const char*))&Lua_Mob::GetEntityVariable)
@@ -2216,7 +2234,14 @@ luabind::scope lua_register_special_abilities() {
 				luabind::value("destructible_object", static_cast<int>(DESTRUCTIBLE_OBJECT)),
 				luabind::value("no_harm_from_client", static_cast<int>(NO_HARM_FROM_CLIENT)),
 				luabind::value("always_flee", static_cast<int>(ALWAYS_FLEE)),
-				luabind::value("flee_percent", static_cast<int>(FLEE_PERCENT))
+				luabind::value("flee_percent", static_cast<int>(FLEE_PERCENT)),
+				luabind::value("allow_beneficial", static_cast<int>(ALLOW_BENEFICIAL)),
+				luabind::value("disable_melee", static_cast<int>(DISABLE_MELEE)),
+				luabind::value("npc_chase_distance", static_cast<int>(NPC_CHASE_DISTANCE)),
+				luabind::value("allow_to_tank", static_cast<int>(ALLOW_TO_TANK)),
+				luabind::value("ignore_root_aggro_rules", static_cast<int>(IGNORE_ROOT_AGGRO_RULES)),
+				luabind::value("casting_resist_diff", static_cast<int>(CASTING_RESIST_DIFF)),
+				luabind::value("counter_avoid_damage", static_cast<int>(COUNTER_AVOID_DAMAGE))
 		];
 }
 
