@@ -16,29 +16,16 @@
 #include "string_util.h"
 
 SharedDatabase::SharedDatabase()
-: Database(), skill_caps_mmf(nullptr), items_mmf(nullptr), items_hash(nullptr), faction_mmf(nullptr), faction_hash(nullptr),
-	loot_table_mmf(nullptr), loot_table_hash(nullptr), loot_drop_mmf(nullptr), loot_drop_hash(nullptr), base_data_mmf(nullptr)
+: Database()
 {
 }
 
 SharedDatabase::SharedDatabase(const char* host, const char* user, const char* passwd, const char* database, uint32 port)
-: Database(host, user, passwd, database, port), skill_caps_mmf(nullptr), items_mmf(nullptr), items_hash(nullptr),
-	faction_mmf(nullptr), faction_hash(nullptr), loot_table_mmf(nullptr), loot_table_hash(nullptr), loot_drop_mmf(nullptr),
-	loot_drop_hash(nullptr), base_data_mmf(nullptr)
+: Database(host, user, passwd, database, port)
 {
 }
 
 SharedDatabase::~SharedDatabase() {
-	safe_delete(skill_caps_mmf);
-	safe_delete(items_mmf);
-	safe_delete(items_hash);
-	safe_delete(faction_mmf);
-	safe_delete(faction_hash);
-	safe_delete(loot_table_mmf);
-	safe_delete(loot_drop_mmf);
-	safe_delete(loot_table_hash);
-	safe_delete(loot_drop_hash);
-	safe_delete(base_data_mmf);
 }
 
 bool SharedDatabase::SetHideMe(uint32 account_id, uint8 hideme)
@@ -797,28 +784,15 @@ void SharedDatabase::GetItemsCount(int32 &item_count, uint32 &max_id)
 		item_count = atoi(row[1]);
 }
 
-bool SharedDatabase::LoadItems() {
-	if(items_mmf) {
-		return true;
-	}
+bool SharedDatabase::LoadItems(const std::string &prefix) {
+	items_mmf.reset(nullptr);
 
 	try {
 		EQEmu::IPCMutex mutex("items");
 		mutex.Lock();
-		items_mmf = new EQEmu::MemoryMappedFile("shared/items");
-
-		int32 items = -1;
-		uint32 max_item = 0;
-		GetItemsCount(items, max_item);
-		if(items == -1) {
-			EQ_EXCEPT("SharedDatabase", "Database returned no result");
-		}
-		uint32 size = static_cast<uint32>(EQEmu::FixedMemoryHashSet<Item_Struct>::estimated_size(items, max_item));
-		if(items_mmf->Size() != size) {
-			EQ_EXCEPT("SharedDatabase", "Couldn't load items because items_mmf->Size() != size");
-		}
-
-		items_hash = new EQEmu::FixedMemoryHashSet<Item_Struct>(reinterpret_cast<uint8*>(items_mmf->Get()), size);
+		std::string file_name = std::string("shared/") + prefix + std::string("items");
+		items_mmf = std::unique_ptr<EQEmu::MemoryMappedFile>(new EQEmu::MemoryMappedFile(file_name));
+		items_hash = std::unique_ptr<EQEmu::FixedMemoryHashSet<Item_Struct>>(new EQEmu::FixedMemoryHashSet<Item_Struct>(reinterpret_cast<uint8*>(items_mmf->Get()), items_mmf->Size()));
 		mutex.Unlock();
 	} catch(std::exception& ex) {
 		Log.Out(Logs::General, Logs::Error, "Error Loading Items: %s", ex.what());
@@ -1229,27 +1203,16 @@ void SharedDatabase::LoadNPCFactionLists(void *data, uint32 size, uint32 list_co
 
 }
 
-bool SharedDatabase::LoadNPCFactionLists() {
-	if(faction_hash) {
-		return true;
-	}
+bool SharedDatabase::LoadNPCFactionLists(const std::string &prefix) {
+	faction_mmf.reset(nullptr);
+	faction_hash.reset(nullptr);
 
 	try {
 		EQEmu::IPCMutex mutex("faction");
 		mutex.Lock();
-		faction_mmf = new EQEmu::MemoryMappedFile("shared/faction");
-
-		uint32 list_count = 0;
-		uint32 max_lists = 0;
-		GetFactionListInfo(list_count, max_lists);
-		uint32 size = static_cast<uint32>(EQEmu::FixedMemoryHashSet<NPCFactionList>::estimated_size(
-			list_count, max_lists));
-
-		if(faction_mmf->Size() != size) {
-			EQ_EXCEPT("SharedDatabase", "Couldn't load npc factions because faction_mmf->Size() != size");
-		}
-
-		faction_hash = new EQEmu::FixedMemoryHashSet<NPCFactionList>(reinterpret_cast<uint8*>(faction_mmf->Get()), size);
+		std::string file_name = std::string("shared/") + prefix + std::string("faction");
+		faction_mmf = std::unique_ptr<EQEmu::MemoryMappedFile>(new EQEmu::MemoryMappedFile(file_name));
+		faction_hash = std::unique_ptr<EQEmu::FixedMemoryHashSet<NPCFactionList>>(new EQEmu::FixedMemoryHashSet<NPCFactionList>(reinterpret_cast<uint8*>(faction_mmf->Get()), faction_mmf->Size()));
 		mutex.Unlock();
 	} catch(std::exception& ex) {
 		Log.Out(Logs::General, Logs::Error, "Error Loading npc factions: %s", ex.what());
@@ -1378,9 +1341,8 @@ bool SharedDatabase::GetCommandSettings(std::map<std::string,uint8> &commands) {
     return true;
 }
 
-bool SharedDatabase::LoadSkillCaps() {
-	if(skill_caps_mmf)
-		return true;
+bool SharedDatabase::LoadSkillCaps(const std::string &prefix) {
+	skill_caps_mmf.reset(nullptr);
 
 	uint32 class_count = PLAYER_CLASS_COUNT;
 	uint32 skill_count = HIGHEST_SKILL + 1;
@@ -1390,11 +1352,8 @@ bool SharedDatabase::LoadSkillCaps() {
 	try {
 		EQEmu::IPCMutex mutex("skill_caps");
 		mutex.Lock();
-		skill_caps_mmf = new EQEmu::MemoryMappedFile("shared/skill_caps");
-		if(skill_caps_mmf->Size() != size) {
-			EQ_EXCEPT("SharedDatabase", "Unable to load skill caps: skill_caps_mmf->Size() != size");
-		}
-
+		std::string file_name = std::string("shared/") + prefix + std::string("skill_caps");
+		skill_caps_mmf = std::unique_ptr<EQEmu::MemoryMappedFile>(new EQEmu::MemoryMappedFile(file_name));
 		mutex.Unlock();
 	} catch(std::exception &ex) {
 		Log.Out(Logs::General, Logs::Error, "Error loading skill caps: %s", ex.what());
@@ -1542,8 +1501,29 @@ int SharedDatabase::GetMaxSpellID() {
 	return atoi(row[0]);
 }
 
+bool SharedDatabase::LoadSpells(const std::string &prefix, int32 *records, const SPDat_Spell_Struct **sp) {
+	spells_mmf.reset(nullptr);
+
+	try {
+		EQEmu::IPCMutex mutex("spells");
+		mutex.Lock();
+	
+		std::string file_name = std::string("shared/") + prefix + std::string("spells");
+		spells_mmf = std::unique_ptr<EQEmu::MemoryMappedFile>(new EQEmu::MemoryMappedFile(file_name));
+		*records = *reinterpret_cast<uint32*>(spells_mmf->Get());
+		*sp = reinterpret_cast<const SPDat_Spell_Struct*>((char*)spells_mmf->Get() + 4);
+		mutex.Unlock();
+	}
+	catch(std::exception& ex) {
+		Log.Out(Logs::General, Logs::Error, "Error Loading Spells: %s", ex.what());
+		return false;
+	}
+	return true;
+}
+
 void SharedDatabase::LoadSpells(void *data, int max_spells) {
-	SPDat_Spell_Struct *sp = reinterpret_cast<SPDat_Spell_Struct*>(data);
+	*(uint32*)data = max_spells;
+	SPDat_Spell_Struct *sp = reinterpret_cast<SPDat_Spell_Struct*>((char*)data + sizeof(uint32));
 
 	const std::string query = "SELECT * FROM spells_new ORDER BY id ASC";
     auto results = QueryDatabase(query);
@@ -1720,25 +1700,15 @@ int SharedDatabase::GetMaxBaseDataLevel() {
 	return atoi(row[0]);
 }
 
-bool SharedDatabase::LoadBaseData() {
-	if(base_data_mmf) {
-		return true;
-	}
+bool SharedDatabase::LoadBaseData(const std::string &prefix) {
+	base_data_mmf.reset(nullptr);
 
 	try {
 		EQEmu::IPCMutex mutex("base_data");
 		mutex.Lock();
-		base_data_mmf = new EQEmu::MemoryMappedFile("shared/base_data");
 
-		int size = 16 * (GetMaxBaseDataLevel() + 1) * sizeof(BaseDataStruct);
-		if(size == 0) {
-			EQ_EXCEPT("SharedDatabase", "Base Data size is zero");
-		}
-
-		if(base_data_mmf->Size() != size) {
-			EQ_EXCEPT("SharedDatabase", "Couldn't load base data because base_data_mmf->Size() != size");
-		}
-
+		std::string file_name = std::string("shared/") + prefix + std::string("base_data");
+		base_data_mmf = std::unique_ptr<EQEmu::MemoryMappedFile>(new EQEmu::MemoryMappedFile(file_name));
 		mutex.Unlock();
 	} catch(std::exception& ex) {
 		Log.Out(Logs::General, Logs::Error, "Error Loading Base Data: %s", ex.what());
@@ -1794,7 +1764,6 @@ void SharedDatabase::LoadBaseData(void *data, int max_level) {
 		bd->mana_factor = atof(row[8]);
 		bd->endurance_factor = atof(row[9]);
     }
-
 }
 
 const BaseDataStruct* SharedDatabase::GetBaseData(int lvl, int cl) {
@@ -1968,21 +1937,23 @@ void SharedDatabase::LoadLootDrops(void *data, uint32 size) {
 
 }
 
-bool SharedDatabase::LoadLoot() {
-	if(loot_table_mmf || loot_drop_mmf)
-		return true;
+bool SharedDatabase::LoadLoot(const std::string &prefix) {
+	loot_table_mmf.reset(nullptr);
+	loot_drop_mmf.reset(nullptr);
 
 	try {
 		EQEmu::IPCMutex mutex("loot");
 		mutex.Lock();
-		loot_table_mmf = new EQEmu::MemoryMappedFile("shared/loot_table");
-		loot_table_hash = new EQEmu::FixedMemoryVariableHashSet<LootTable_Struct>(
+		std::string file_name_lt = std::string("shared/") + prefix + std::string("loot_table");
+		loot_table_mmf = std::unique_ptr<EQEmu::MemoryMappedFile>(new EQEmu::MemoryMappedFile(file_name_lt));
+		loot_table_hash = std::unique_ptr<EQEmu::FixedMemoryVariableHashSet<LootTable_Struct>>(new EQEmu::FixedMemoryVariableHashSet<LootTable_Struct>(
 			reinterpret_cast<uint8*>(loot_table_mmf->Get()),
-			loot_table_mmf->Size());
-		loot_drop_mmf = new EQEmu::MemoryMappedFile("shared/loot_drop");
-		loot_drop_hash = new EQEmu::FixedMemoryVariableHashSet<LootDrop_Struct>(
+			loot_table_mmf->Size()));
+		std::string file_name_ld = std::string("shared/") + prefix + std::string("loot_drop");
+		loot_drop_mmf = std::unique_ptr<EQEmu::MemoryMappedFile>(new EQEmu::MemoryMappedFile(file_name_ld));
+		loot_drop_hash = std::unique_ptr<EQEmu::FixedMemoryVariableHashSet<LootDrop_Struct>>(new EQEmu::FixedMemoryVariableHashSet<LootDrop_Struct>(
 			reinterpret_cast<uint8*>(loot_drop_mmf->Get()),
-			loot_drop_mmf->Size());
+			loot_drop_mmf->Size()));
 		mutex.Unlock();
 	} catch(std::exception &ex) {
 		Log.Out(Logs::General, Logs::Error, "Error loading loot: %s", ex.what());

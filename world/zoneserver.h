@@ -56,6 +56,7 @@ public:
 	inline uint32		GetIP() const		{ return tcpc->GetrIP(); }
 	inline uint16		GetPort() const		{ return tcpc->GetrPort(); }
 	inline const char*	GetCAddress() const	{ return clientaddress; }
+	inline const char*	GetCLocalAddress() const { return clientaddress; }
 	inline uint16		GetCPort() const	{ return clientport; }
 	inline uint32		GetID() const		{ return ID; }
 	inline bool			IsBootingUp() const	{ return BootingUp; }
@@ -73,6 +74,7 @@ private:
 
 	uint32	ID;
 	char	clientaddress[250];
+	char	clientlocaladdress[250];
 	uint16	clientport;
 	bool	BootingUp;
 	bool	staticzone;

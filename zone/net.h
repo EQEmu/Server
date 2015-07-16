@@ -39,20 +39,10 @@ public:
 
 	uint32	GetIP();
 	uint32	GetIP(char* name);
-	void	SaveInfo(char* address, uint32 port, char* waddress,char* filename);
-	char*	GetWorldAddress() { return WorldAddress; }
-	char*	GetZoneAddress() { return ZoneAddress; }
-	char*	GetZoneFileName() { return ZoneFileName; }
-	uint32	GetZonePort() { return ZonePort; }
 	Timer object_timer;
 	Timer door_timer;
 	Timer corpse_timer;
 	Timer group_timer;
 	Timer raid_timer;
 	Timer trap_timer;
-private:
-	uint16 ZonePort;
-	char* ZoneAddress;
-	char* WorldAddress;
-	char ZoneFileName[50];
 };

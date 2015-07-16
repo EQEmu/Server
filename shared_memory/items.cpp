@@ -24,7 +24,7 @@
 #include "../common/eqemu_exception.h"
 #include "../common/item_struct.h"
 
-void LoadItems(SharedDatabase *database) {
+void LoadItems(SharedDatabase *database, const std::string &prefix) {
 	EQEmu::IPCMutex mutex("items");
 	mutex.Lock();
 
@@ -36,7 +36,9 @@ void LoadItems(SharedDatabase *database) {
 	}
 
 	uint32 size = static_cast<uint32>(EQEmu::FixedMemoryHashSet<Item_Struct>::estimated_size(items, max_item));
-	EQEmu::MemoryMappedFile mmf("shared/items", size);
+
+	std::string file_name = std::string("shared/") + prefix + std::string("items");
+	EQEmu::MemoryMappedFile mmf(file_name, size);
 	mmf.ZeroFile();
 
 	void *ptr = mmf.Get();

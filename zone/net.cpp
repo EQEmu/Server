@@ -102,7 +102,6 @@ QuestParserCollection *parse = 0;
 EQEmuLogSys Log;
 
 const SPDat_Spell_Struct* spells;
-void LoadSpells(EQEmu::MemoryMappedFile **mmf);
 int32 SPDAT_RECORDS = -1;
 
 void Shutdown();
@@ -242,37 +241,46 @@ int main(int argc, char** argv) {
 	Log.Out(Logs::General, Logs::Zone_Server, "Loading Variables");
 	database.LoadVariables();
 	
+	char hotfix_name[256] = { 0 };
+	if(database.GetVariable("hotfix_name", hotfix_name, 256)) {
+		if(strlen(hotfix_name) > 0) {
+			Log.Out(Logs::General, Logs::Zone_Server, "Current hotfix in use: '%s'", hotfix_name);
+		}
+	}
+
 	Log.Out(Logs::General, Logs::Zone_Server, "Loading zone names");
 	database.LoadZoneNames();
 	
 	Log.Out(Logs::General, Logs::Zone_Server, "Loading items");
-	if (!database.LoadItems()) {
+	if(!database.LoadItems(hotfix_name)) {
 		Log.Out(Logs::General, Logs::Error, "Loading items FAILED!");
 		Log.Out(Logs::General, Logs::Error, "Failed. But ignoring error and going on...");
 	}
 
 	Log.Out(Logs::General, Logs::Zone_Server, "Loading npc faction lists");
-	if (!database.LoadNPCFactionLists()) {
+	if(!database.LoadNPCFactionLists(hotfix_name)) {
 		Log.Out(Logs::General, Logs::Error, "Loading npcs faction lists FAILED!");
 		return 1;
 	}
 	Log.Out(Logs::General, Logs::Zone_Server, "Loading loot tables");
-	if (!database.LoadLoot()) {
+	if(!database.LoadLoot(hotfix_name)) {
 		Log.Out(Logs::General, Logs::Error, "Loading loot FAILED!");
 		return 1;
 	}
 	Log.Out(Logs::General, Logs::Zone_Server, "Loading skill caps");
-	if (!database.LoadSkillCaps()) {
+	if(!database.LoadSkillCaps(std::string(hotfix_name))) {
 		Log.Out(Logs::General, Logs::Error, "Loading skill caps FAILED!");
 		return 1;
 	}
 
 	Log.Out(Logs::General, Logs::Zone_Server, "Loading spells");
-	EQEmu::MemoryMappedFile *mmf = nullptr;
-	LoadSpells(&mmf);
+	if(!database.LoadSpells(hotfix_name, &SPDAT_RECORDS, &spells)) {
+		Log.Out(Logs::General, Logs::Error, "Loading spells FAILED!");
+		return 1;
+	}
 
 	Log.Out(Logs::General, Logs::Zone_Server, "Loading base data");
-	if (!database.LoadBaseData()) {
+	if(!database.LoadBaseData(hotfix_name)) {
 		Log.Out(Logs::General, Logs::Error, "Loading base data FAILED!");
 		return 1;
 	}
@@ -502,7 +510,6 @@ int main(int argc, char** argv) {
 	safe_delete(lua_parser);
 #endif
 
-	safe_delete(mmf);
 	safe_delete(Config);
 
 	if (zone != 0)
@@ -568,16 +575,6 @@ uint32 NetConnection::GetIP(char* name)
 
 }
 
-void NetConnection::SaveInfo(char* address, uint32 port, char* waddress, char* filename) {
-
-	ZoneAddress = new char[strlen(address)+1];
-	strcpy(ZoneAddress, address);
-	ZonePort = port;
-	WorldAddress = new char[strlen(waddress)+1];
-	strcpy(WorldAddress, waddress);
-	strn0cpy(ZoneFileName, filename, sizeof(ZoneFileName));
-}
-
 NetConnection::NetConnection()
 :
 	object_timer(5000),
@@ -587,9 +584,6 @@ NetConnection::NetConnection()
 	raid_timer(1000),
 	trap_timer(1000)
 {
-	ZonePort = 0;
-	ZoneAddress = 0;
-	WorldAddress = 0;
 	group_timer.Disable();
 	raid_timer.Disable();
 	corpse_timer.Disable();
@@ -599,32 +593,6 @@ NetConnection::NetConnection()
 }
 
 NetConnection::~NetConnection() {
-	if (ZoneAddress != 0)
-		safe_delete_array(ZoneAddress);
-	if (WorldAddress != 0)
-		safe_delete_array(WorldAddress);
-}
-
-void LoadSpells(EQEmu::MemoryMappedFile **mmf) {
-	int records = database.GetMaxSpellID() + 1;
-
-	try {
-		EQEmu::IPCMutex mutex("spells");
-		mutex.Lock();
-		*mmf = new EQEmu::MemoryMappedFile("shared/spells");
-		uint32 size = (*mmf)->Size();
-		if(size != (records * sizeof(SPDat_Spell_Struct))) {
-			EQ_EXCEPT("Zone", "Unable to load spells: (*mmf)->Size() != records * sizeof(SPDat_Spell_Struct)");
-		}
-
-		spells = reinterpret_cast<SPDat_Spell_Struct*>((*mmf)->Get());
-		mutex.Unlock();
-	} catch(std::exception &ex) {
-		Log.Out(Logs::General, Logs::Error, "Error loading spells: %s", ex.what());
-		return;
-	}
-
-	SPDAT_RECORDS = records;
 }
 
 /* Update Window Title with relevant information */

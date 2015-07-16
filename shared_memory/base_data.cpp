@@ -23,7 +23,7 @@
 #include "../common/memory_mapped_file.h"
 #include "../common/eqemu_exception.h"
 
-void LoadBaseData(SharedDatabase *database) {
+void LoadBaseData(SharedDatabase *database, const std::string &prefix) {
 	EQEmu::IPCMutex mutex("base_data");
 	mutex.Lock();
 	int records = (database->GetMaxBaseDataLevel() + 1);
@@ -32,11 +32,12 @@ void LoadBaseData(SharedDatabase *database) {
 	}
 
 	uint32 size = records * 16 * sizeof(BaseDataStruct);
-	EQEmu::MemoryMappedFile mmf("shared/base_data", size);
+
+	std::string file_name = std::string("shared/") + prefix + std::string("base_data");
+	EQEmu::MemoryMappedFile mmf(file_name, size);
 	mmf.ZeroFile();
 
 	void *ptr = mmf.Get();
 	database->LoadBaseData(ptr, records);
 	mutex.Unlock();
 }
-

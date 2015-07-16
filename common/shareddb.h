@@ -12,6 +12,7 @@
 
 #include <list>
 #include <map>
+#include <memory>
 
 class EvolveInfo;
 class Inventory;
@@ -92,7 +93,7 @@ class SharedDatabase : public Database
 		//items
 		void GetItemsCount(int32 &item_count, uint32 &max_id);
 		void LoadItems(void *data, uint32 size, int32 items, uint32 max_item_id);
-		bool LoadItems();
+		bool LoadItems(const std::string &prefix);
 		const Item_Struct* IterateItems(uint32* id);
 		const Item_Struct* GetItem(uint32 id);
 		const EvolveInfo* GetEvolveInfo(uint32 loregroup);
@@ -101,43 +102,45 @@ class SharedDatabase : public Database
 		void GetFactionListInfo(uint32 &list_count, uint32 &max_lists);
 		const NPCFactionList* GetNPCFactionEntry(uint32 id);
 		void LoadNPCFactionLists(void *data, uint32 size, uint32 list_count, uint32 max_lists);
-		bool LoadNPCFactionLists();
+		bool LoadNPCFactionLists(const std::string &prefix);
 
 		//loot
 		void GetLootTableInfo(uint32 &loot_table_count, uint32 &max_loot_table, uint32 &loot_table_entries);
 		void GetLootDropInfo(uint32 &loot_drop_count, uint32 &max_loot_drop, uint32 &loot_drop_entries);
 		void LoadLootTables(void *data, uint32 size);
 		void LoadLootDrops(void *data, uint32 size);
-		bool LoadLoot();
+		bool LoadLoot(const std::string &prefix);
 		const LootTable_Struct* GetLootTable(uint32 loottable_id);
 		const LootDrop_Struct* GetLootDrop(uint32 lootdrop_id);
 
 		void LoadSkillCaps(void *data);
-		bool LoadSkillCaps();
+		bool LoadSkillCaps(const std::string &prefix);
 		uint16 GetSkillCap(uint8 Class_, SkillUseTypes Skill, uint8 Level);
 		uint8 GetTrainLevel(uint8 Class_, SkillUseTypes Skill, uint8 Level);
 
 		int GetMaxSpellID();
+		bool LoadSpells(const std::string &prefix, int32 *records, const SPDat_Spell_Struct **sp);
 		void LoadSpells(void *data, int max_spells);
 		void LoadDamageShieldTypes(SPDat_Spell_Struct* sp, int32 iMaxSpellID);
 
 		int GetMaxBaseDataLevel();
-		bool LoadBaseData();
+		bool LoadBaseData(const std::string &prefix);
 		void LoadBaseData(void *data, int max_level);
 		const BaseDataStruct* GetBaseData(int lvl, int cl);
 
 	protected:
 
-		EQEmu::MemoryMappedFile *skill_caps_mmf;
-		EQEmu::MemoryMappedFile *items_mmf;
-		EQEmu::FixedMemoryHashSet<Item_Struct> *items_hash;
-		EQEmu::MemoryMappedFile *faction_mmf;
-		EQEmu::FixedMemoryHashSet<NPCFactionList> *faction_hash;
-		EQEmu::MemoryMappedFile *loot_table_mmf;
-		EQEmu::FixedMemoryVariableHashSet<LootTable_Struct> *loot_table_hash;
-		EQEmu::MemoryMappedFile *loot_drop_mmf;
-		EQEmu::FixedMemoryVariableHashSet<LootDrop_Struct> *loot_drop_hash;
-		EQEmu::MemoryMappedFile *base_data_mmf;
+		std::unique_ptr<EQEmu::MemoryMappedFile> skill_caps_mmf;
+		std::unique_ptr<EQEmu::MemoryMappedFile> items_mmf;
+		std::unique_ptr<EQEmu::FixedMemoryHashSet<Item_Struct>> items_hash;
+		std::unique_ptr<EQEmu::MemoryMappedFile> faction_mmf;
+		std::unique_ptr<EQEmu::FixedMemoryHashSet<NPCFactionList>> faction_hash;
+		std::unique_ptr<EQEmu::MemoryMappedFile> loot_table_mmf;
+		std::unique_ptr<EQEmu::FixedMemoryVariableHashSet<LootTable_Struct>> loot_table_hash;
+		std::unique_ptr<EQEmu::MemoryMappedFile> loot_drop_mmf;
+		std::unique_ptr<EQEmu::FixedMemoryVariableHashSet<LootDrop_Struct>> loot_drop_hash;
+		std::unique_ptr<EQEmu::MemoryMappedFile> base_data_mmf;
+		std::unique_ptr<EQEmu::MemoryMappedFile> spells_mmf;
 };
 
 #endif /*SHAREDDB_H_*/

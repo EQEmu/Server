@@ -1217,30 +1217,31 @@ void Client::Clearance(int8 response)
 		return;
 	}
 
-	// @bp This is the chat server
-	/*
-	char packetData[] = "64.37.148.34.9876,MyServer,Testchar,23cd2c95";
-	outapp = new EQApplicationPacket(OP_0x0282, sizeof(packetData));
-	strcpy((char*)outapp->pBuffer, packetData);
-	QueuePacket(outapp);
-	delete outapp;
-	*/
-
 	// Send zone server IP data
 	outapp = new EQApplicationPacket(OP_ZoneServerInfo, sizeof(ZoneServerInfo_Struct));
 	ZoneServerInfo_Struct* zsi = (ZoneServerInfo_Struct*)outapp->pBuffer;
-	const char *zs_addr=zs->GetCAddress();
-	if (!zs_addr[0]) {
-		if (cle->IsLocalClient()) {
+
+	const char *zs_addr = nullptr;
+	if(cle && cle->IsLocalClient()) {
+		const char *local_addr = zs->GetCLocalAddress();
+		if(local_addr[0]) {
+			zs_addr = local_addr;
+		} else {
 			struct in_addr in;
 			in.s_addr = zs->GetIP();
-			zs_addr=inet_ntoa(in);
-			if (!strcmp(zs_addr,"127.0.0.1"))
-				zs_addr=WorldConfig::get()->LocalAddress.c_str();
+			zs_addr = inet_ntoa(in);
+		}
+	} else {
+		const char *addr = zs->GetCAddress();
+		if(addr[0]) {
+			zs_addr = addr;
 		} else {
-			zs_addr=WorldConfig::get()->WorldAddress.c_str();
+			struct in_addr in;
+			in.s_addr = zs->GetIP();
+			zs_addr = inet_ntoa(in);
 		}
 	}
+
 	strcpy(zsi->ip, zs_addr);
 	zsi->port =zs->GetCPort();
 	Log.Out(Logs::Detail, Logs::World_Server,"Sending client to zone %s (%d:%d) at %s:%d",zonename,zoneID,instanceID,zsi->ip,zsi->port);

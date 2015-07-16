@@ -1440,7 +1440,11 @@ int16 Inventory::_HasItemByLoreGroup(ItemInstQueue& iqueue, uint32 loregroup)
 //
 ItemInst::ItemInst(const Item_Struct* item, int16 charges) {
 	m_use_type = ItemInstNormal;
-	m_item = item;
+	if(item) {
+		m_item = new Item_Struct(*item);
+	} else {
+		m_item = nullptr;
+	}
 	m_charges = charges;
 	m_price = 0;
 	m_attuned = false;
@@ -1467,6 +1471,13 @@ ItemInst::ItemInst(const Item_Struct* item, int16 charges) {
 ItemInst::ItemInst(SharedDatabase *db, uint32 item_id, int16 charges) {
 	m_use_type = ItemInstNormal;
 	m_item = db->GetItem(item_id);
+	if(m_item) {
+		m_item = new Item_Struct(*m_item);
+	}
+	else {
+		m_item = nullptr;
+	}
+
 	m_charges = charges;
 	m_price = 0;
 	m_merchantslot = 0;
@@ -1515,7 +1526,11 @@ ItemInst::ItemInst(ItemInstTypes use_type) {
 ItemInst::ItemInst(const ItemInst& copy)
 {
 	m_use_type=copy.m_use_type;
-	m_item=copy.m_item;
+	if(copy.m_item)
+		m_item = new Item_Struct(*copy.m_item);
+	else
+		m_item = nullptr;
+
 	m_charges=copy.m_charges;
 	m_price=copy.m_price;
 	m_color=copy.m_color;
@@ -1568,6 +1583,7 @@ ItemInst::ItemInst(const ItemInst& copy)
 ItemInst::~ItemInst()
 {
 	Clear();
+	safe_delete(m_item);
 	safe_delete(m_scaledItem);
 	safe_delete(m_evolveInfo);
 }

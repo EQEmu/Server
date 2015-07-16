@@ -112,7 +112,16 @@ void WorldServer::OnConnected() {
 
 	pack = new ServerPacket(ServerOP_SetConnectInfo, sizeof(ServerConnectInfo));
 	ServerConnectInfo* sci = (ServerConnectInfo*) pack->pBuffer;
+	auto config = ZoneConfig::get();
 	sci->port = ZoneConfig::get()->ZonePort;
+	if(config->WorldAddress.length() > 0) {
+		strn0cpy(sci->address, config->WorldAddress.c_str(), 250);
+	}
+
+	if(config->LocalAddress.length() > 0) {
+		strn0cpy(sci->address, config->LocalAddress.c_str(), 250);
+	}
+
 	SendPacket(pack);
 	safe_delete(pack);
 
@@ -485,9 +494,7 @@ void WorldServer::Process() {
 			if (zst->adminname[0] != 0)
 				std::cout << "Zone bootup by " << zst->adminname << std::endl;
 
-			if (!(Zone::Bootup(zst->zoneid, zst->instanceid, zst->makestatic))) {
-				SendChannelMessage(0, 0, 10, 0, 0, "%s:%i Zone::Bootup failed: %s", net.GetZoneAddress(), net.GetZonePort(), database.GetZoneName(zst->zoneid));
-			}
+			Zone::Bootup(zst->zoneid, zst->instanceid, zst->makestatic);
 			break;
 		}
 		case ServerOP_ZoneIncClient: {
@@ -508,8 +515,6 @@ void WorldServer::Process() {
 				if ((Zone::Bootup(szic->zoneid, szic->instanceid))) {
 					zone->AddAuth(szic);
 				}
-				else
-					SendEmoteMessage(0, 0, 100, 0, "%s:%i Zone::Bootup failed: %s (%i)", net.GetZoneAddress(), net.GetZonePort(), database.GetZoneName(szic->zoneid, true), szic->zoneid);
 			}
 			break;
 		}
@@ -715,30 +720,6 @@ void WorldServer::Process() {
 		case ServerOP_ZoneReboot: {
 			std::cout << "Got Server Requested Zone reboot" << std::endl;
 			ServerZoneReboot_Struct* zb = (ServerZoneReboot_Struct*) pack->pBuffer;
-		//	printf("%i\n",zb->zoneid);
-			struct in_addr	in;
-			in.s_addr = GetIP();
-#ifdef _WINDOWS
-			char buffer[200];
-			snprintf(buffer,200,". %s %i %s",zb->ip2, zb->port, inet_ntoa(in));
-			if(zb->zoneid != 0) {
-				snprintf(buffer,200,"%s %s %i %s",database.GetZoneName(zb->zoneid),zb->ip2, zb->port ,inet_ntoa(in));
-				std::cout << "executing: " << buffer;
-				ShellExecute(0,"Open",net.GetZoneFileName(), buffer, 0, SW_SHOWDEFAULT);
-			}
-			else
-			{
-				std::cout << "executing: " << net.GetZoneFileName() << " " << buffer;
-				ShellExecute(0,"Open",net.GetZoneFileName(), buffer, 0, SW_SHOWDEFAULT);
-			}
-#else
-			char buffer[5];
-			snprintf(buffer,5,"%i",zb->port); //just to be sure that it will work on linux
-			if(zb->zoneid != 0)
-				execl(net.GetZoneFileName(),net.GetZoneFileName(),database.GetZoneName(zb->zoneid),zb->ip2, buffer,inet_ntoa(in), nullptr);
-			else
-				execl(net.GetZoneFileName(),net.GetZoneFileName(),".",zb->ip2, buffer,inet_ntoa(in), nullptr);
-#endif
 			break;
 		}
 		case ServerOP_SyncWorldTime: {
@@ -1838,6 +1819,41 @@ void WorldServer::Process() {
 			ReloadWorld_Struct* RW = (ReloadWorld_Struct*) pack->pBuffer;
 			if(zone){
 				zone->ReloadWorld(RW->Option);
+			}
+			break;
+		}
+
+		case ServerOP_ChangeSharedMem:
+		{
+			std::string hotfix_name = std::string((char*)pack->pBuffer);
+			Log.Out(Logs::General, Logs::Zone_Server, "Loading items");
+			if(!database.LoadItems(hotfix_name)) {
+				Log.Out(Logs::General, Logs::Error, "Loading items FAILED!");
+			}
+
+			Log.Out(Logs::General, Logs::Zone_Server, "Loading npc faction lists");
+			if(!database.LoadNPCFactionLists(hotfix_name)) {
+				Log.Out(Logs::General, Logs::Error, "Loading npcs faction lists FAILED!");
+			}
+
+			Log.Out(Logs::General, Logs::Zone_Server, "Loading loot tables");
+			if(!database.LoadLoot(hotfix_name)) {
+				Log.Out(Logs::General, Logs::Error, "Loading loot FAILED!");
+			}
+
+			Log.Out(Logs::General, Logs::Zone_Server, "Loading skill caps");
+			if(!database.LoadSkillCaps(std::string(hotfix_name))) {
+				Log.Out(Logs::General, Logs::Error, "Loading skill caps FAILED!");
+			}
+
+			Log.Out(Logs::General, Logs::Zone_Server, "Loading spells");
+			if(!database.LoadSpells(hotfix_name, &SPDAT_RECORDS, &spells)) {
+				Log.Out(Logs::General, Logs::Error, "Loading spells FAILED!");
+			}
+
+			Log.Out(Logs::General, Logs::Zone_Server, "Loading base data");
+			if(!database.LoadBaseData(hotfix_name)) {
+				Log.Out(Logs::General, Logs::Error, "Loading base data FAILED!");
 			}
 			break;
 		}
