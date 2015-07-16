@@ -1228,13 +1228,16 @@ void Client::Clearance(int8 response)
 		if(local_addr[0]) {
 			zs_addr = local_addr;
 		} else {
-			if(strcmp(local_addr, "127.0.0.1") == 0)
+			struct in_addr in;
+			in.s_addr = zs->GetIP();
+			zs_addr = inet_ntoa(in);
+
+			if(strcmp(zs_addr, "127.0.0.1") == 0)
 			{
+				Log.Out(Logs::Detail, Logs::World_Server, "Local zone address was %s, setting local address to: %s", zs_addr, WorldConfig::get()->LocalAddress.c_str());
 				zs_addr = WorldConfig::get()->LocalAddress.c_str();
 			} else {
-				struct in_addr in;
-				in.s_addr = zs->GetIP();
-				zs_addr = inet_ntoa(in);
+				Log.Out(Logs::Detail, Logs::World_Server, "Local zone address %s", zs_addr);
 			}
 		}
 
@@ -1243,15 +1246,7 @@ void Client::Clearance(int8 response)
 		if(addr[0]) {
 			zs_addr = addr;
 		} else {
-			if(strcmp(addr, "127.0.0.1") == 0)
-			{
-				zs_addr = WorldConfig::get()->WorldAddress.c_str();
-			}
-			else {
-				struct in_addr in;
-				in.s_addr = zs->GetIP();
-				zs_addr = inet_ntoa(in);
-			}
+			zs_addr = WorldConfig::get()->WorldAddress.c_str();
 		}
 	}
 
