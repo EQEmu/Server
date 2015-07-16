@@ -901,10 +901,8 @@ int TaskManager::GetTaskMinLevel(int TaskID)
 	{
 		return Tasks[TaskID]->MinLevel;
 	}
-	else
-	{
-		return -1;
-	}
+		
+	return -1;
 }
 
 int TaskManager::GetTaskMaxLevel(int TaskID)
@@ -913,10 +911,8 @@ int TaskManager::GetTaskMaxLevel(int TaskID)
 	{
 		return Tasks[TaskID]->MaxLevel;
 	}
-	else
-	{
-		return -1;
-	}
+
+	return -1;
 }
 
 void TaskManager::TaskSetSelector(Client *c, ClientTaskState *state, Mob *mob, int TaskSetID) {
