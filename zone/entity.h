@@ -41,7 +41,7 @@ class EntityList;
 class Group;
 class Merc;
 class Mob;
-class NPC; 
+class NPC;
 class Object;
 class Petition;
 class Raid;
@@ -333,7 +333,7 @@ public:
 	void	SendAlarm(Trap* trap, Mob* currenttarget, uint8 kos);
 	Trap*	FindNearbyTrap(Mob* searcher, float max_dist);
 
-	void	AddHealAggro(Mob* target, Mob* caster, uint16 thedam);
+	void	AddHealAggro(Mob* target, Mob* caster, uint16 hate);
 	Mob*	FindDefenseNPC(uint32 npcid);
 	void	OpenDoorsNear(NPC* opener);
 	void	UpdateWho(bool iSendFullUpdate = false);

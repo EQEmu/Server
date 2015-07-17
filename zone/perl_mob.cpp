@@ -6316,7 +6316,7 @@ XS(XS_Mob_CheckAggroAmount)
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		RETVAL = THIS->CheckAggroAmount(spellid);
+		RETVAL = THIS->CheckAggroAmount(spellid, nullptr);
 		XSprePUSH; PUSHu((UV)RETVAL);
 	}
 	XSRETURN(1);
@@ -6349,7 +6349,7 @@ XS(XS_Mob_CheckHealAggroAmount)
 			possible = (uint32)SvUV(ST(2));
 		}
 
-		RETVAL = THIS->CheckHealAggroAmount(spellid, possible);
+		RETVAL = THIS->CheckHealAggroAmount(spellid, nullptr, possible);
 		XSprePUSH; PUSHu((UV)RETVAL);
 	}
 	XSRETURN(1);
@@ -7405,7 +7405,7 @@ XS(XS_Mob_GetGlobal)
 		RETVAL = ret_val.c_str();
 		sv_setpv(TARG, RETVAL); XSprePUSH; PUSHTARG;
 	}
-	XSRETURN(1);		
+	XSRETURN(1);
 }
 
 XS(XS_Mob_SetGlobal);

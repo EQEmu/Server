@@ -879,8 +879,8 @@ public:
 	bool Charmed() const { return charmed; }
 	static uint32 GetLevelHP(uint8 tlevel);
 	uint32 GetZoneID() const; //for perl
-	virtual int32 CheckAggroAmount(uint16 spell_id, bool isproc = false);
-	virtual int32 CheckHealAggroAmount(uint16 spell_id, uint32 heal_possible = 0);
+	virtual int32 CheckAggroAmount(uint16 spell_id, Mob *target, bool isproc = false);
+	virtual int32 CheckHealAggroAmount(uint16 spell_id, Mob *target, uint32 heal_possible = 0);
 
 	uint32 GetInstrumentMod(uint16 spell_id) const;
 	int CalcSpellEffectValue(uint16 spell_id, int effect_id, int caster_level = 1, uint32 instrument_mod = 10, Mob *caster = nullptr, int ticsremaining = 0);

@@ -1172,22 +1172,22 @@ bool Lua_Mob::Charmed() {
 
 int Lua_Mob::CheckAggroAmount(int spell_id) {
 	Lua_Safe_Call_Int();
-	return self->CheckAggroAmount(spell_id);
+	return self->CheckAggroAmount(spell_id, nullptr);
 }
 
 int Lua_Mob::CheckAggroAmount(int spell_id, bool is_proc) {
 	Lua_Safe_Call_Int();
-	return self->CheckAggroAmount(spell_id, is_proc);
+	return self->CheckAggroAmount(spell_id, nullptr, is_proc);
 }
 
 int Lua_Mob::CheckHealAggroAmount(int spell_id) {
 	Lua_Safe_Call_Int();
-	return self->CheckHealAggroAmount(spell_id);
+	return self->CheckHealAggroAmount(spell_id, nullptr);
 }
 
 int Lua_Mob::CheckHealAggroAmount(int spell_id, uint32 heal_possible) {
 	Lua_Safe_Call_Int();
-	return self->CheckHealAggroAmount(spell_id, heal_possible);
+	return self->CheckHealAggroAmount(spell_id, nullptr, heal_possible);
 }
 
 int Lua_Mob::GetAA(int id) {

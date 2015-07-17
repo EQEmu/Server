@@ -3704,7 +3704,7 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob *spelltar, bool reflect, bool use_r
 				}
 
 				if (spelltar->IsAIControlled()) {
-					int32 aggro = CheckAggroAmount(spell_id);
+					int32 aggro = CheckAggroAmount(spell_id, spelltar);
 					if (aggro > 0) {
 						if (!IsHarmonySpell(spell_id))
 							spelltar->AddToHateList(this, aggro);
@@ -3733,20 +3733,20 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob *spelltar, bool reflect, bool use_r
 		spelltar->DamageShield(this, true);
 
 	if (spelltar->IsAIControlled() && IsDetrimentalSpell(spell_id) && !IsHarmonySpell(spell_id)) {
-		int32 aggro_amount = CheckAggroAmount(spell_id, isproc);
-		Log.Out(Logs::Detail, Logs::Spells, "Spell %d cast on %s generated %d hate", spell_id, spelltar->GetName(), aggro_amount);
-		if(aggro_amount > 0)
-			spelltar->AddToHateList(this, aggro_amount);		else{
+		int32 aggro_amount = CheckAggroAmount(spell_id, spelltar, isproc);
+		Log.Out(Logs::Detail, Logs::Spells, "Spell %d cast on %s generated %d hate", spell_id,
+			spelltar->GetName(), aggro_amount);
+		if (aggro_amount > 0) {
+			spelltar->AddToHateList(this, aggro_amount);
+		} else {
 			int32 newhate = spelltar->GetHateAmount(this) + aggro_amount;
-			if (newhate < 1) {
-				spelltar->SetHateAmountOnEnt(this,1);
-			} else {
-				spelltar->SetHateAmountOnEnt(this,newhate);
-			}
+			spelltar->SetHateAmountOnEnt(this, std::max(newhate, 1));
 		}
+	} else if (IsBeneficialSpell(spell_id) && !IsSummonPCSpell(spell_id)) {
+		entity_list.AddHealAggro(
+		    spelltar, this,
+		    CheckHealAggroAmount(spell_id, spelltar, (spelltar->GetMaxHP() - spelltar->GetHP())));
 	}
-	else if (IsBeneficialSpell(spell_id) && !IsSummonPCSpell(spell_id))
-		entity_list.AddHealAggro(spelltar, this, CheckHealAggroAmount(spell_id, (spelltar->GetMaxHP() - spelltar->GetHP())));
 
 	// make sure spelltar is high enough level for the buff
 	if(RuleB(Spells, BuffLevelRestrictions) && !spelltar->CheckSpellLevelRestriction(spell_id))
@@ -4059,7 +4059,7 @@ bool Mob::IsImmuneToSpell(uint16 spell_id, Mob *caster)
 		if(GetSpecialAbility(UNMEZABLE)) {
 			Log.Out(Logs::Detail, Logs::Spells, "We are immune to Mez spells.");
 			caster->Message_StringID(MT_Shout, CANNOT_MEZ);
-			int32 aggro = caster->CheckAggroAmount(spell_id);
+			int32 aggro = caster->CheckAggroAmount(spell_id, this);
 			if(aggro > 0) {
 				AddToHateList(caster, aggro);
 			} else {
@@ -4086,7 +4086,7 @@ bool Mob::IsImmuneToSpell(uint16 spell_id, Mob *caster)
 	{
 		Log.Out(Logs::Detail, Logs::Spells, "We are immune to Slow spells.");
 		caster->Message_StringID(MT_Shout, IMMUNE_ATKSPEED);
-		int32 aggro = caster->CheckAggroAmount(spell_id);
+		int32 aggro = caster->CheckAggroAmount(spell_id, this);
 		if(aggro > 0) {
 			AddToHateList(caster, aggro);
 		} else {
@@ -4102,7 +4102,7 @@ bool Mob::IsImmuneToSpell(uint16 spell_id, Mob *caster)
 		if(GetSpecialAbility(UNFEARABLE)) {
 			Log.Out(Logs::Detail, Logs::Spells, "We are immune to Fear spells.");
 			caster->Message_StringID(MT_Shout, IMMUNE_FEAR);
-			int32 aggro = caster->CheckAggroAmount(spell_id);
+			int32 aggro = caster->CheckAggroAmount(spell_id, this);
 			if(aggro > 0) {
 				AddToHateList(caster, aggro);
 			} else {
@@ -4119,7 +4119,7 @@ bool Mob::IsImmuneToSpell(uint16 spell_id, Mob *caster)
 		{
 			Log.Out(Logs::Detail, Logs::Spells, "Level is %d, cannot be feared by this spell.", GetLevel());
 			caster->Message_StringID(MT_Shout, FEAR_TOO_HIGH);
-			int32 aggro = caster->CheckAggroAmount(spell_id);
+			int32 aggro = caster->CheckAggroAmount(spell_id, this);
 			if (aggro > 0) {
 				AddToHateList(caster, aggro);
 			} else {
@@ -4142,7 +4142,7 @@ bool Mob::IsImmuneToSpell(uint16 spell_id, Mob *caster)
 		{
 			Log.Out(Logs::Detail, Logs::Spells, "We are immune to Charm spells.");
 			caster->Message_StringID(MT_Shout, CANNOT_CHARM);
-			int32 aggro = caster->CheckAggroAmount(spell_id);
+			int32 aggro = caster->CheckAggroAmount(spell_id, this);
 			if(aggro > 0) {
 				AddToHateList(caster, aggro);
 			} else {
@@ -4182,7 +4182,7 @@ bool Mob::IsImmuneToSpell(uint16 spell_id, Mob *caster)
 		if(GetSpecialAbility(UNSNAREABLE)) {
 			Log.Out(Logs::Detail, Logs::Spells, "We are immune to Snare spells.");
 			caster->Message_StringID(MT_Shout, IMMUNE_MOVEMENT);
-			int32 aggro = caster->CheckAggroAmount(spell_id);
+			int32 aggro = caster->CheckAggroAmount(spell_id, this);
 			if(aggro > 0) {
 				AddToHateList(caster, aggro);
 			} else {

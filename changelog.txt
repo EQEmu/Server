@@ -1,7 +1,10 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 07/16/2013 ==
+mackal: Rework spell aggro based on http://www.eqemulator.org/forums/showthread.php?t=39819
+
 == 07/15/2015 ==
-Hateborne: 	Added optional ability to enforce task level requirements in perl and lua via an added, optional parameter to $client->AssignTask and quest::assigntask. 
+Hateborne: 	Added optional ability to enforce task level requirements in perl and lua via an added, optional parameter to $client->AssignTask and quest::assigntask.
 		Use cases:
 			quest::assigntask(703); # this still assigns the task as normal, no functional change
 			quest::assigntask(703, 1); # this will assign the task, provided the character meets the db-stored level requirements

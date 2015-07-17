@@ -200,7 +200,7 @@ public:
 	virtual Mob* GetOwner();
 	virtual Mob* GetOwnerOrSelf();
 	inline virtual bool HasOwner() { return (GetBotOwner() ? true : false); }
-	virtual int32 CheckHealAggroAmount(uint16 spellid, uint32 heal_possible = 0);
+	virtual int32 CheckHealAggroAmount(uint16 spellid, Mob *target, uint32 heal_possible = 0);
 	virtual int32 CalcMaxMana();
 	virtual void SetAttackTimer();
 	uint32 GetClassHPFactor();
@@ -547,7 +547,7 @@ public:
 	void SetNumHealRotationMembers( uint8 numMembers ) { _numHealRotationMembers = numMembers; }
 	void SetBardUseOutOfCombatSongs(bool useOutOfCombatSongs) { _bardUseOutOfCombatSongs = useOutOfCombatSongs;}
 	void SetShowHelm(bool showhelm) { _showhelm = showhelm; }
-	
+
 	std::string CreateSayLink(Client* botOwner, const char* message, const char* name);
 
 	// Class Destructors

@@ -6220,14 +6220,14 @@ bool Bot::TryHeadShot(Mob* defender, SkillUseTypes skillInUse) {
 }
 
 int32 Bot::CheckAggroAmount(uint16 spellid) {
-	int32 AggroAmount = Mob::CheckAggroAmount(spellid);
+	int32 AggroAmount = Mob::CheckAggroAmount(spellid, nullptr);
 	int32 focusAggro = GetBotFocusEffect(BotfocusSpellHateMod, spellid);
 	AggroAmount = (AggroAmount * (100 + focusAggro) / 100);
 	return AggroAmount;
 }
 
-int32 Bot::CheckHealAggroAmount(uint16 spellid, uint32 heal_possible) {
-	int32 AggroAmount = Mob::CheckHealAggroAmount(spellid, heal_possible);
+int32 Bot::CheckHealAggroAmount(uint16 spellid, Mob *target, uint32 heal_possible) {
+	int32 AggroAmount = Mob::CheckHealAggroAmount(spellid, target, heal_possible);
 	int32 focusAggro = GetBotFocusEffect(BotfocusSpellHateMod, spellid);
 	AggroAmount = (AggroAmount * (100 + focusAggro) / 100);
 	return AggroAmount;
@@ -9081,7 +9081,7 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 				return;
 			}
 		}
-		
+
 		uint32 botId = GetBotIDByBotName(std::string(sep->arg[2]));
 		if(GetBotOwnerCharacterID(botId, &TempErrorMessage) != c->CharacterID()) {
 			c->Message(0, "You can't spawn a bot that you don't own.");
@@ -9106,7 +9106,7 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 					c->Message(0, "You can't summon bots while you are engaged.");
 					return;
 				}
-				
+
 				if(g && g->members[i] && g->members[i]->qglobal)
 					return;
 			}
@@ -9264,12 +9264,12 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 						c->Message(13, "Database Error: %s", TempErrorMessage.c_str());
 						return;
 					}
-					
+
 					if(item == nullptr) {
 						c->Message(15, "I need something for my %s (Item %i)", equipped[i], (i == 22 ? 9999 : i));
 						continue;
 					}
-					
+
 					if((i == MainPrimary) && ((item->ItemType == ItemType2HSlash) || (item->ItemType == ItemType2HBlunt) || (item->ItemType == ItemType2HPiercing))) {
 						is2Hweapon = true;
 					}
@@ -9284,7 +9284,7 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 		}
 		else
 			c->Message(15, "You must target a bot first.");
-		
+
 		return;
 	}
 
@@ -9301,7 +9301,7 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 				c->Message(15, "A bot has 22 slots in its inventory, please choose a slot between 0 and 21 or 9999.");
 				return;
 			}
-			
+
 			const char* equipped[EmuConstants::EQUIPMENT_SIZE + 1] = {"Charm", "Left Ear", "Head", "Face", "Right Ear", "Neck", "Shoulders", "Arms", "Back",
 										"Left Wrist", "Right Wrist", "Range", "Hands", "Primary Hand", "Secondary Hand",
 										"Left Finger", "Right Finger", "Chest", "Legs", "Feet", "Waist", "Ammo", "Powersource" };
@@ -9336,7 +9336,7 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 					Bot *gearbot = c->GetTarget()->CastToBot();
 					if((slotId == MainRange)||(slotId == MainAmmo)||(slotId == MainPrimary)||(slotId == MainSecondary))
 						gearbot->SetBotArcher(false);
-					
+
 					gearbot->RemoveBotItemBySlot(slotId, &TempErrorMessage);
 
 					if(!TempErrorMessage.empty()) {
