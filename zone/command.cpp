@@ -412,6 +412,8 @@ int command_init(void) {
 		command_add("unlock", "- Unlock the worldserver", 150, command_unlock) ||
 		command_add("unscribespell",  "[spellid] - Unscribe specified spell from your target's spell book.",  180, command_unscribespell) ||
 		command_add("unscribespells", "- Clear out your or your player target's spell book.", 180, command_unscribespells) ||
+		command_add("untraindisc", "[spellid] - Untrain specified discipline from your target.", 180, command_untraindisc) ||
+		command_add("untraindiscs", "- Untrains all disciplines from your target.", 180, command_untraindiscs) ||
 		command_add("uptime", "[zone server id] - Get uptime of worldserver, or zone server if argument provided", 10, command_uptime) ||
 		command_add("version", "- Display current version of EQEmu server", 0, command_version) ||
 		command_add("viewnpctype", "[npctype id] - Show info about an npctype", 100, command_viewnpctype) ||
@@ -5315,6 +5317,27 @@ void command_unscribespells(Client *c, const Seperator *sep)
 		t=c->GetTarget()->CastToClient();
 
 	t->UnscribeSpellAll();
+}
+
+void command_untraindisc(Client *c, const Seperator *sep) {
+	Client *t = c;
+	if (c->GetTarget() && c->GetTarget()->IsClient() && c->GetGM())
+		t = c->GetTarget()->CastToClient();
+	
+	for (int i = 0; i < MAX_PP_DISCIPLINES; i++) {
+		if (t->GetPP().disciplines.values[i] == atoi(sep->arg[1])) {
+			t->UntrainDisc(i, 1);
+			return;
+		}
+	}
+}
+
+void command_untraindiscs(Client *c, const Seperator *sep) {
+	Client *t = c;
+	if (c->GetTarget() && c->GetTarget()->IsClient() && c->GetGM())
+		t = c->GetTarget()->CastToClient();
+	
+	t->UntrainDiscAll();
 }
 
 void command_wpinfo(Client *c, const Seperator *sep)
