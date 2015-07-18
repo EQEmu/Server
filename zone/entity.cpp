@@ -3078,7 +3078,7 @@ void EntityList::AddHealAggro(Mob *target, Mob *caster, uint16 hate)
 		if (!npc->CheckAggro(target) || npc->IsFeared())
 			continue;
 
-		if (zone->random.Roll(15)) // witness check -- place holder
+		if (zone->random.Roll(50)) // witness check -- place holder
 			// This is either a level check (con color check?) or a stat roll
 			continue;
 
