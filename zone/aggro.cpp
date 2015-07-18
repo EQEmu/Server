@@ -1134,7 +1134,7 @@ int32 Mob::CheckAggroAmount(uint16 spell_id, Mob *target, bool isproc)
 int32 Mob::CheckHealAggroAmount(uint16 spell_id, Mob *target, uint32 heal_possible)
 {
 	int32 AggroAmount = 0;
-	auto target_level = target ? target->GetLevel() : GetLevel();
+	auto target_level = target ? target->GetLevel() : 1;
 	bool ignore_default_buff = false; // rune/hot don't use the default 9, HP buffs that heal (virtue) do use the default
 
 	for (int o = 0; o < EFFECT_COUNT; o++) {
@@ -1177,7 +1177,7 @@ int32 Mob::CheckHealAggroAmount(uint16 spell_id, Mob *target, uint32 heal_possib
 		AggroAmount = AggroAmount * RuleI(Aggro, PetSpellAggroMod) / 100;
 
 	if (!ignore_default_buff && IsBuffSpell(spell_id) && IsBeneficialSpell(spell_id))
-		AggroAmount = 9;
+		AggroAmount = IsBardSong(spell_id) ? 2 : 9;
 
 	if (AggroAmount > 0) {
 		int HateMod = RuleI(Aggro, SpellAggroMod);
