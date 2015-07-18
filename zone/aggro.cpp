@@ -1117,6 +1117,9 @@ int32 Mob::CheckAggroAmount(uint16 spell_id, Mob *target, bool isproc)
 		int HateMod = RuleI(Aggro, SpellAggroMod);
 		HateMod += GetFocusEffect(focusSpellHateMod, spell_id);
 
+		//Live AA - Spell casting subtlety
+		HateMod += aabonuses.hatemod + spellbonuses.hatemod + itembonuses.hatemod;
+
 		AggroAmount = (AggroAmount * HateMod) / 100;
 	}
 
