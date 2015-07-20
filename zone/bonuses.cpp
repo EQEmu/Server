@@ -38,7 +38,6 @@
 #include "../common/unix.h"
 #endif
 
-
 void Mob::CalcBonuses()
 {
 	CalcSpellBonuses(&spellbonuses);
@@ -3493,6 +3492,17 @@ uint8 Mob::IsFocusEffect(uint16 spell_id,int effect_index, bool AA,uint32 aa_eff
 	return 0;
 }
 
+// Avoid an internal compiler error in VS 2015 
+// Community RC (free) with the /O2 compiler
+// option enabled on x64 build; definite fail on
+// building Release-X64.  Disabling optimizations
+// for the entire file might be overkill and/or
+// inapplicable to other builds, more testing needed.
+// Bug has been reported to MS, fix ETA unknown.
+#if (defined(_MSC_VER) && defined(_WIN64)&& _MSC_VER==1900)
+#pragma optimize( "", off )
+#endif
+
 void Mob::NegateSpellsBonuses(uint16 spell_id)
 {
 	if(!IsValidSpell(spell_id))
@@ -4654,6 +4664,7 @@ void Mob::NegateSpellsBonuses(uint16 spell_id)
 						itembonuses.SkillProcSuccess[e] = effect_value;
 						aabonuses.SkillProcSuccess[e] = effect_value;
 					}
+					break;
 				 }
 
 				case SE_SkillProc:{
@@ -4663,9 +4674,15 @@ void Mob::NegateSpellsBonuses(uint16 spell_id)
 						itembonuses.SkillProc[e] = effect_value;
 						aabonuses.SkillProc[e] = effect_value;
 					}
+					break;
 				 }
 			}
 		}
 	}
 }
 
+
+// See line 3495 above, more or less
+#if (defined(_MSC_VER) && defined(_WIN64)&& _MSC_VER==1900)
+	#pragma optimize( "", on )
+#endif
