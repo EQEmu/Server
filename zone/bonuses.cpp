@@ -38,20 +38,6 @@
 #include "../common/unix.h"
 #endif
 
-<<<<<<< HEAD
-=======
-// Avoid an internal compiler error in VS 2015 
-// Community RC (free) with the /O2 compiler
-// option enabled on x64 build; definite fail on
-// building Release-X64.  Disabling optimizations
-// for the entire file might be overkill and/or
-// inapplicable to other builds, more testing needed.
-// Bug has been reported to MS, fix ETA unknown.
-#if (defined(_MSC_VER) && defined(_WIN64)&& _MSC_VER==1900)
-	#pragma optimize( "", off )
-#endif
-
->>>>>>> 663ff552710e460946ba6aed6b431602a8019a08
 void Mob::CalcBonuses()
 {
 	CalcSpellBonuses(&spellbonuses);
@@ -4695,11 +4681,8 @@ void Mob::NegateSpellsBonuses(uint16 spell_id)
 	}
 }
 
-<<<<<<< HEAD
+
 // See line 3495 above, more or less
-=======
-// See line 41 above, more or less
->>>>>>> 663ff552710e460946ba6aed6b431602a8019a08
 #if (defined(_MSC_VER) && defined(_WIN64)&& _MSC_VER==1900)
 	#pragma optimize( "", on )
 #endif

@@ -1279,6 +1279,11 @@ void Bot::LoadAAs() {
 		points = 0;
 
 		AA::Rank *current = ability->first;
+		
+		if (current->level_req > GetLevel()) {
+			++iter;
+			continue;
+		}
 
 		while(current) {
 			if(!CanUseAlternateAdvancementRank(current)) {
