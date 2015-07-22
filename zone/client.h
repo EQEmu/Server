@@ -991,7 +991,7 @@ public:
 	inline void UpdateTasksForItem(ActivityType Type, int ItemID, int Count=1) { if(taskstate) taskstate->UpdateTasksForItem(this, Type, ItemID, Count); }
 	inline void UpdateTasksOnExplore(int ExploreID) { if(taskstate) taskstate->UpdateTasksOnExplore(this, ExploreID); }
 	inline bool UpdateTasksOnSpeakWith(int NPCTypeID) { if(taskstate) return taskstate->UpdateTasksOnSpeakWith(this, NPCTypeID); else return false; }
-	inline bool UpdateTasksOnDeliver(uint32 *Items, int Cash, int NPCTypeID) { if(taskstate) return taskstate->UpdateTasksOnDeliver(this, Items, Cash, NPCTypeID); else return false; }
+	inline bool UpdateTasksOnDeliver(std::list<ItemInst*>& Items, int Cash, int NPCTypeID) { if (taskstate) return taskstate->UpdateTasksOnDeliver(this, Items, Cash, NPCTypeID); else return false; }
 	inline void TaskSetSelector(Mob *mob, int TaskSetID) { if(taskmanager) taskmanager->TaskSetSelector(this, taskstate, mob, TaskSetID); }
 	inline void EnableTask(int TaskCount, int *TaskList) { if(taskstate) taskstate->EnableTask(CharacterID(), TaskCount, TaskList); }
 	inline void DisableTask(int TaskCount, int *TaskList) { if(taskstate) taskstate->DisableTask(CharacterID(), TaskCount, TaskList); }
