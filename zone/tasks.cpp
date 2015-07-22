@@ -1692,7 +1692,7 @@ void ClientTaskState::UpdateTasksOnExplore(Client *c, int ExploreID) {
 	return;
 }
 
-bool ClientTaskState::UpdateTasksOnDeliver(Client *c, uint32 *Items, int Cash, int NPCTypeID) {
+bool ClientTaskState::UpdateTasksOnDeliver(Client *c, std::list<ItemInst*>& Items, int Cash, int NPCTypeID) {
 
 	bool Ret = false;
 
@@ -1731,17 +1731,15 @@ bool ClientTaskState::UpdateTasksOnDeliver(Client *c, uint32 *Items, int Cash, i
 				Ret = true;
 			}
 			else {
-				for(int k=0; k<4; k++) {
-					if(Items[k]==0) continue;
+				for(auto& k : Items) {
 					switch(Task->Activity[j].GoalMethod) {
 
 						case METHODSINGLEID:
-							if(Task->Activity[j].GoalID != (int)Items[k]) continue;
+							if(Task->Activity[j].GoalID != k->GetID()) continue;
 							break;
 
 						case METHODLIST:
-							if(!taskmanager->GoalListManager.IsInList(Task->Activity[j].GoalID,
-												Items[k]))
+							if (!taskmanager->GoalListManager.IsInList(Task->Activity[j].GoalID, k->GetID()))
 								continue;
 							break;
 
@@ -1751,7 +1749,7 @@ bool ClientTaskState::UpdateTasksOnDeliver(Client *c, uint32 *Items, int Cash, i
 					}
 					// We found an active task related to this item, so increment the done count
 					Log.Out(Logs::General, Logs::Tasks, "[UPDATE] Increment on GiveItem");
-					IncrementDoneCount(c, Task, i, j, 1);
+					IncrementDoneCount(c, Task, i, j, k->GetCharges());
 					Ret = true;
 				}
 			}

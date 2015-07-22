@@ -22,6 +22,7 @@ Copyright (C) 2001-2004 EQEMu Development Team (http://eqemulator.net)
 
 #include "../common/types.h"
 
+#include <list>
 #include <vector>
 
 #define MAXTASKS 10000
@@ -44,6 +45,7 @@ Copyright (C) 2001-2004 EQEMu Development Team (http://eqemulator.net)
 
 class Client;
 class Mob;
+class ItemInst;
 
 struct TaskGoalList_Struct {
 	int ListID;
@@ -185,7 +187,7 @@ public:
 	void UpdateTasksForItem(Client *c, ActivityType Type, int ItemID, int Count=1);
 	void UpdateTasksOnExplore(Client *c, int ExploreID);
 	bool UpdateTasksOnSpeakWith(Client *c, int NPCTypeID);
-	bool UpdateTasksOnDeliver(Client *c, uint32 *Items, int Cash, int NPCTypeID);
+	bool UpdateTasksOnDeliver(Client *c, std::list<ItemInst*>& Items, int Cash, int NPCTypeID);
 	void UpdateTasksOnTouch(Client *c, int ZoneID);
 	void ProcessTaskProximities(Client *c, float X, float Y, float Z);
 	bool TaskOutOfTime(int Index);
