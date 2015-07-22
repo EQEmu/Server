@@ -23,7 +23,9 @@
 */
 
 #ifdef _WINDOWS
-	#define snprintf	_snprintf
+	#if (!defined(_MSC_VER) || (defined(_MSC_VER) && _MSC_VER < 1900))
+		#define snprintf	_snprintf
+	#endif
 	#define strncasecmp	_strnicmp
 	#define strcasecmp	_stricmp
 
