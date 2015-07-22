@@ -1948,21 +1948,21 @@ void Client::SetRacialLanguages( PlayerProfile_Struct *pp )
 		}
 	case IKSAR:
 		{
-			pp->languages[LANG_COMMON_TONGUE] = 95;
+			pp->languages[LANG_COMMON_TONGUE] = RuleI(Character, IksarCommonTongue);
 			pp->languages[LANG_DARK_SPEECH] = 100;
 			pp->languages[LANG_LIZARDMAN] = 100;
 			break;
 		}
 	case OGRE:
 		{
-			pp->languages[LANG_COMMON_TONGUE] = 95;
+			pp->languages[LANG_COMMON_TONGUE] = RuleI(Character, OgreCommonTongue);
 			pp->languages[LANG_DARK_SPEECH] = 100;
 			pp->languages[LANG_OGRE] = 100;
 			break;
 		}
 	case TROLL:
 		{
-			pp->languages[LANG_COMMON_TONGUE] = 95;
+			pp->languages[LANG_COMMON_TONGUE] = RuleI(Character, TrollCommonTongue);
 			pp->languages[LANG_DARK_SPEECH] = 100;
 			pp->languages[LANG_TROLL] = 100;
 			break;
