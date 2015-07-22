@@ -955,18 +955,16 @@ int32 Mob::CheckAggroAmount(uint16 spell_id, Mob *target, bool isproc)
 	int32 AggroAmount = 0;
 	int32 nonModifiedAggro = 0;
 	uint16 slevel = GetLevel();
-	bool add_default = false;
-	bool stun_proc = false;
 	bool dispel = false;
 	bool on_hatelist = target ? target->CheckAggro(this) : false;
+	int proc_cap = RuleI(Aggro, MaxScalingProcAggro);
+	int hate_cap = isproc && proc_cap != -1 ? proc_cap : 1200;
 
 	int32 target_hp = target ? target->GetMaxHP() : 18000; // default to max
-	int32 default_aggro = 0;
+	int32 default_aggro = 25;
 	if (target_hp >= 18000) // max
-		default_aggro = 1200;
-	else if (target_hp < 390) // min, 390 is the first number with int division that is 26
-		default_aggro = 25;
-	else
+		default_aggro = hate_cap;
+	else if (target_hp >= 390) // min, 390 is the first number with int division that is 26
 		default_aggro = target_hp / 15;
 
 	for (int o = 0; o < EFFECT_COUNT; o++) {
@@ -981,7 +979,7 @@ int32 Mob::CheckAggroAmount(uint16 spell_id, Mob *target, bool isproc)
 			case SE_MovementSpeed: {
 				int val = CalcSpellEffectValue_formula(spells[spell_id].formula[o], spells[spell_id].base[o], spells[spell_id].max[o], slevel, spell_id);
 				if (val < 0)
-					add_default = true;
+					AggroAmount += default_aggro;
 				break;
 			}
 			case SE_AttackSpeed:
@@ -989,30 +987,27 @@ int32 Mob::CheckAggroAmount(uint16 spell_id, Mob *target, bool isproc)
 			case SE_AttackSpeed3: {
 				int val = CalcSpellEffectValue_formula(spells[spell_id].formula[o], spells[spell_id].base[o], spells[spell_id].max[o], slevel, spell_id);
 				if (val < 100)
-					add_default = true;
+					AggroAmount += default_aggro;
 				break;
 			}
 			case SE_Stun:
-				add_default = true;
-				stun_proc = isproc;
-				break;
 			case SE_Blind:
 			case SE_Mez:
 			case SE_Charm:
 			case SE_Fear:
-				add_default = true;
+				AggroAmount += default_aggro;
 				break;
 			case SE_Root:
 				AggroAmount += 10;
 				break;
-			case SE_ATK:
 			case SE_ACv2:
 			case SE_ArmorClass: {
 				int val = CalcSpellEffectValue_formula(spells[spell_id].formula[o], spells[spell_id].base[o], spells[spell_id].max[o], slevel, spell_id);
 				if (val < 0)
-					add_default = true;
+					AggroAmount += default_aggro;
 				break;
 			}
+			case SE_ATK:
 			case SE_ResistMagic:
 			case SE_ResistFire:
 			case SE_ResistCold:
@@ -1049,7 +1044,7 @@ int32 Mob::CheckAggroAmount(uint16 spell_id, Mob *target, bool isproc)
 			case SE_Amnesia:
 			case SE_Silence:
 			case SE_Destroy:
-				add_default = true;
+				AggroAmount += default_aggro;
 				break;
 			// unsure -- leave them this for now
 			case SE_Harmony:
@@ -1095,14 +1090,8 @@ int32 Mob::CheckAggroAmount(uint16 spell_id, Mob *target, bool isproc)
 		}
 	}
 
-	if (add_default) {
-		if (stun_proc && RuleI(Aggro, MaxStunProcAggro) > -1 && (default_aggro > RuleI(Aggro, MaxStunProcAggro)))
-			AggroAmount += RuleI(Aggro, MaxStunProcAggro);
-		else if (IsBardSong(spell_id) && default_aggro > 40)
-			AggroAmount += 40; // bard songs seem to cap to 40 for most of their spells?
-		else
-			AggroAmount += default_aggro;
-	}
+	if (IsBardSong(spell_id) && AggroAmount > 40)
+		AggroAmount = 40; // bard songs seem to cap to 40 for most of their spells?
 
 	if (dispel && target && target->GetHateAmount(this) < 100)
 		AggroAmount += 50;
@@ -1113,7 +1102,8 @@ int32 Mob::CheckAggroAmount(uint16 spell_id, Mob *target, bool isproc)
 	if (GetOwner() && IsPet())
 		AggroAmount = AggroAmount * RuleI(Aggro, PetSpellAggroMod) / 100;
 
-	if (AggroAmount > 0) {
+	// hate focus ignored on first action for some reason
+	if (!on_hatelist && AggroAmount > 0) {
 		int HateMod = RuleI(Aggro, SpellAggroMod);
 		HateMod += GetFocusEffect(focusSpellHateMod, spell_id);
 
@@ -1123,7 +1113,7 @@ int32 Mob::CheckAggroAmount(uint16 spell_id, Mob *target, bool isproc)
 		AggroAmount = (AggroAmount * HateMod) / 100;
 	}
 
-	// initial aggro gets a bonus 100
+	// initial aggro gets a bonus 100 besides for dispel or hate override
 	if (!dispel && spells[spell_id].HateAdded == 0 && !on_hatelist)
 		AggroAmount += 100;
 
@@ -1161,8 +1151,8 @@ int32 Mob::CheckHealAggroAmount(uint16 spell_id, Mob *target, uint32 heal_possib
 			break;
 		}
 		case SE_Rune:
-			AggroAmount += CalcSpellEffectValue_formula(spells[spell_id].formula[0],
-							 spells[spell_id].base[0], spells[spell_id].max[o], GetLevel(), spell_id) * 2;
+			AggroAmount += CalcSpellEffectValue_formula(spells[spell_id].formula[o],
+							 spells[spell_id].base[o], spells[spell_id].max[o], GetLevel(), spell_id) * 2;
 			ignore_default_buff = true;
 			break;
 		case SE_HealOverTime:
@@ -1189,10 +1179,7 @@ int32 Mob::CheckHealAggroAmount(uint16 spell_id, Mob *target, uint32 heal_possib
 		AggroAmount = (AggroAmount * HateMod) / 100;
 	}
 
-	if (AggroAmount < 0)
-		return 0;
-	else
-		return AggroAmount;
+	return std::max(0, AggroAmount);
 }
 
 void Mob::AddFeignMemory(Client* attacker) {

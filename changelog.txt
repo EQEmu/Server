@@ -1,6 +1,11 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
-== 07/16/2013 ==
+== 07/22/2015 ==
+mackal: Corrected some hate value calcs based on updated http://www.eqemulator.org/forums/showthread.php?t=39819
+
+	Rule Aggro:MaxStunProcAggro to Aggro:MaxScalingProcAggro since the cap applies to more than stuns
+
+== 07/16/2015 ==
 mackal: Rework spell aggro based on http://www.eqemulator.org/forums/showthread.php?t=39819
 
 == 07/15/2015 ==
