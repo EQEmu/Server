@@ -119,7 +119,7 @@ void WorldServer::OnConnected() {
 	}
 
 	if(config->LocalAddress.length() > 0) {
-		strn0cpy(sci->address, config->LocalAddress.c_str(), 250);
+		strn0cpy(sci->local_address, config->LocalAddress.c_str(), 250);
 	}
 
 	SendPacket(pack);
