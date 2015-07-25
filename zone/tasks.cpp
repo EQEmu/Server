@@ -1749,7 +1749,7 @@ bool ClientTaskState::UpdateTasksOnDeliver(Client *c, std::list<ItemInst*>& Item
 					}
 					// We found an active task related to this item, so increment the done count
 					Log.Out(Logs::General, Logs::Tasks, "[UPDATE] Increment on GiveItem");
-					IncrementDoneCount(c, Task, i, j, k->GetCharges());
+					IncrementDoneCount(c, Task, i, j, k->GetCharges() <= 0 ? 1 : k->GetCharges());
 					Ret = true;
 				}
 			}
