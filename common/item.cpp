@@ -1195,7 +1195,7 @@ int16 Inventory::_PutItem(int16 slot_id, ItemInst* inst)
 // Internal Method: Checks an inventory bucket for a particular item
 int16 Inventory::_HasItem(std::map<int16, ItemInst*>& bucket, uint32 item_id, uint8 quantity)
 {
-	uint8 quantity_found = 0;
+	uint32 quantity_found = 0;
 
 	for (auto iter = bucket.begin(); iter != bucket.end(); ++iter) {
 		auto inst = iter->second;
@@ -1243,7 +1243,7 @@ int16 Inventory::_HasItem(ItemInstQueue& iqueue, uint32 item_id, uint8 quantity)
 	// to unintended results. Funtionality should be observed when referencing the return value
 	// of this query
 	
-	uint8 quantity_found = 0;
+	uint32 quantity_found = 0;
 
 	for (auto iter = iqueue.cbegin(); iter != iqueue.cend(); ++iter) {
 		auto inst = *iter;
@@ -1288,7 +1288,7 @@ int16 Inventory::_HasItem(ItemInstQueue& iqueue, uint32 item_id, uint8 quantity)
 // Internal Method: Checks an inventory bucket for a particular item
 int16 Inventory::_HasItemByUse(std::map<int16, ItemInst*>& bucket, uint8 use, uint8 quantity)
 {
-	uint8 quantity_found = 0;
+	uint32 quantity_found = 0;
 
 	for (auto iter = bucket.begin(); iter != bucket.end(); ++iter) {
 		auto inst = iter->second;
@@ -1320,7 +1320,7 @@ int16 Inventory::_HasItemByUse(std::map<int16, ItemInst*>& bucket, uint8 use, ui
 // Internal Method: Checks an inventory queue type bucket for a particular item
 int16 Inventory::_HasItemByUse(ItemInstQueue& iqueue, uint8 use, uint8 quantity)
 {
-	uint8 quantity_found = 0;
+	uint32 quantity_found = 0;
 
 	for (auto iter = iqueue.cbegin(); iter != iqueue.cend(); ++iter) {
 		auto inst = *iter;
