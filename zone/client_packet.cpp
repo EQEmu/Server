@@ -12232,20 +12232,29 @@ void Client::Handle_OP_ShopPlayerBuy(const EQApplicationPacket *app)
 		qsaudit->items[0].item_id = item->ID;
 		qsaudit->items[0].charges = mpo->quantity;
 
-		if (freeslotid == INVALID_INDEX) {
+		const ItemInst* audit_inst = m_inv[freeslotid];
+
+		if (audit_inst) {
+			qsaudit->items[0].aug_1 = audit_inst->GetAugmentItemID(0);
+			qsaudit->items[0].aug_2 = audit_inst->GetAugmentItemID(1);
+			qsaudit->items[0].aug_3 = audit_inst->GetAugmentItemID(2);
+			qsaudit->items[0].aug_4 = audit_inst->GetAugmentItemID(3);
+			qsaudit->items[0].aug_5 = audit_inst->GetAugmentItemID(4);
+		}
+		else {
 			qsaudit->items[0].aug_1 = 0;
 			qsaudit->items[0].aug_2 = 0;
 			qsaudit->items[0].aug_3 = 0;
 			qsaudit->items[0].aug_4 = 0;
 			qsaudit->items[0].aug_5 = 0;
+
+			if (freeslotid != INVALID_INDEX) {
+				Log.Out(Logs::General, Logs::Error, "Handle_OP_ShopPlayerBuy: QS Audit could not locate merchant (%u) purchased item in player (%u) inventory slot (%i)",
+					qsaudit->merchant_id, qsaudit->char_id, freeslotid);
+			}
 		}
-		else {
-			qsaudit->items[0].aug_1 = m_inv[freeslotid]->GetAugmentItemID(0);
-			qsaudit->items[0].aug_2 = m_inv[freeslotid]->GetAugmentItemID(1);
-			qsaudit->items[0].aug_3 = m_inv[freeslotid]->GetAugmentItemID(2);
-			qsaudit->items[0].aug_4 = m_inv[freeslotid]->GetAugmentItemID(3);
-			qsaudit->items[0].aug_5 = m_inv[freeslotid]->GetAugmentItemID(4);
-		}
+
+		audit_inst = nullptr;
 
 		qspack->Deflate();
 		if (worldserver.Connected()) { worldserver.SendPacket(qspack); }
