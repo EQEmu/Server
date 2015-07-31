@@ -539,13 +539,13 @@ int HateList::AreaRampage(Mob *caster, Mob *target, int count, ExtraAttackOption
 	auto it = list.begin();
 	while (it != list.end() && (count == -1 || hit_count < count)) {
 		struct_HateList *h = (*it);
+		++it; // advancing the iterator here prevents the iterator being invalidated if they die
 		if (h && h->entity_on_hatelist && h->entity_on_hatelist != caster) {
 			if (caster->CombatRange(h->entity_on_hatelist)) {
 				++hit_count;
 				caster->ProcessAttackRounds(h->entity_on_hatelist, opts);
 			}
 		}
-		++it;
 	}
 
 	return hit_count;
