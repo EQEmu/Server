@@ -2000,7 +2000,7 @@ void Mob::AreaRampage(ExtraAttackOptions *opts)
 	}
 
 	int rampage_targets = GetSpecialAbilityParam(SPECATK_AREA_RAMPAGE, 1);
-	rampage_targets = rampage_targets > 0 ? rampage_targets : 1;
+	rampage_targets = rampage_targets > 0 ? rampage_targets : -1;
 	index_hit = hate_list.AreaRampage(this, GetTarget(), rampage_targets, opts);
 
 	if(index_hit == 0)
