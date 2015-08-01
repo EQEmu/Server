@@ -8592,3 +8592,79 @@ void Client::SendHPUpdateMarquee(){
 	std::string health_update_notification = StringFormat("Health: %u%%", health_percentage);
 	this->SendMarqueeMessage(15, 510, 0, 3000, 3000, health_update_notification);
 }
+
+uint32 Client::GetMoney(uint8 type, uint8 subtype) {
+	uint32 value = 0;
+	switch (type) {
+		case 0: {
+			switch (subtype) {
+				case 0:
+					value = static_cast<uint32>(m_pp.copper);
+					break;
+				case 1:
+					value = static_cast<uint32>(m_pp.copper_bank);
+					break;
+				case 2:
+					value = static_cast<uint32>(m_pp.copper_cursor);
+					break;
+				default:
+					break;
+			}
+			break;
+		}
+		case 1: {
+			switch (subtype) {
+				case 0:
+					value = static_cast<uint32>(m_pp.silver);
+					break;
+				case 1:
+					value = static_cast<uint32>(m_pp.silver_bank);
+					break;
+				case 2:
+					value = static_cast<uint32>(m_pp.silver_cursor);
+					break;
+				default:
+					break;
+			}
+			break;
+		}
+		case 2: {
+			switch (subtype) {
+				case 0:
+					value = static_cast<uint32>(m_pp.gold);
+					break;
+				case 1:
+					value = static_cast<uint32>(m_pp.gold_bank);
+					break;
+				case 2:
+					value = static_cast<uint32>(m_pp.gold_cursor);
+					break;
+				default:
+					break;
+			}
+			break;
+		}
+		case 3: {
+			switch (subtype) {
+				case 0:
+					value = static_cast<uint32>(m_pp.platinum);
+					break;
+				case 1:
+					value = static_cast<uint32>(m_pp.platinum_bank);
+					break;
+				case 2:
+					value = static_cast<uint32>(m_pp.platinum_cursor);
+					break;					
+				case 3:
+					value = static_cast<uint32>(m_pp.platinum_shared);
+					break;
+				default:
+					break;
+			}
+			break;
+		}
+		default:
+			break;
+	}
+	return value;
+}

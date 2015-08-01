@@ -6280,6 +6280,36 @@ XS(XS_Client_QuestReward)
 	XSRETURN_EMPTY;
 }
 
+XS(XS_Client_GetMoney);
+XS(XS_Client_GetMoney)
+{
+	dXSARGS;
+	if (items != 3)
+		Perl_croak(aTHX_ "Usage: GetMoney(THIS, type, subtype)");
+	{
+		Client* THIS;
+		uint32 RETVAL;
+		uint8 type = (uint8)SvUV(ST(1));
+		uint8 subtype = (uint8)SvUV(ST(2));
+		dXSTARG;
+
+		if (sv_derived_from(ST(0), "Client")) {
+			IV tmp = SvIV((SV*)SvRV(ST(0)));
+			THIS = INT2PTR(Client *,tmp);
+		}
+		else
+			Perl_croak(aTHX_ "THIS is not of type Client");
+		
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
+
+		RETVAL = THIS->GetMoney(type, subtype);
+		XSprePUSH; PUSHn((uint32)RETVAL);
+	}
+	XSRETURN(1);
+}
+
+
 #ifdef __cplusplus
 extern "C"
 #endif
@@ -6527,6 +6557,7 @@ XS(boot_Client)
 		newXSproto(strcpy(buf, "GetTargetRingZ"), XS_Client_GetTargetRingZ, file, "$$");
 		newXSproto(strcpy(buf, "QuestReward"), XS_Client_QuestReward, file, "$$;$$$$$$$");
 		newXSproto(strcpy(buf, "CalcEXP"), XS_Client_CalcEXP, file, "$");
+		newXSproto(strcpy(buf, "GetMoney"), XS_Client_GetMoney, file, "$$$");
 		XSRETURN_YES;
 }
 
