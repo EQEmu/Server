@@ -1045,7 +1045,7 @@ uint32 ZoneDatabase::CreateNewNPCCommand(const char *zone, uint32 zone_version, 
 		query = StringFormat("INSERT INTO npc_types (id, name, level, race, class, hp, gender, "
 				     "texture, helmtexture, size, loottable_id, merchant_id, face, "
 				     "runspeed, prim_melee_type, sec_melee_type) "
-				     "VALUES(%i, \"%s\" , %i, %i, %i, %i, %i, %i, %i, %f, %i, %i, %i, %f, %i, %i)",
+					 "VALUES(%i, \"%s\" , %i, %i, %i, %i, %i, %i, %i, %f, %i, %i, %i, %i, %i, %i)",
 				     npc_type_id, tmpstr, spawn->GetLevel(), spawn->GetRace(), spawn->GetClass(),
 				     spawn->GetMaxHP(), spawn->GetGender(), spawn->GetTexture(),
 				     spawn->GetHelmTexture(), spawn->GetSize(), spawn->GetLoottableID(),
@@ -1059,7 +1059,7 @@ uint32 ZoneDatabase::CreateNewNPCCommand(const char *zone, uint32 zone_version, 
 		query = StringFormat("INSERT INTO npc_types (name, level, race, class, hp, gender, "
 				     "texture, helmtexture, size, loottable_id, merchant_id, face, "
 				     "runspeed, prim_melee_type, sec_melee_type) "
-				     "VALUES(\"%s\", %i, %i, %i, %i, %i, %i, %i, %f, %i, %i, %i, %f, %i, %i)",
+					 "VALUES(\"%s\", %i, %i, %i, %i, %i, %i, %i, %f, %i, %i, %i, %i, %i, %i)",
 				     tmpstr, spawn->GetLevel(), spawn->GetRace(), spawn->GetClass(), spawn->GetMaxHP(),
 				     spawn->GetGender(), spawn->GetTexture(), spawn->GetHelmTexture(), spawn->GetSize(),
 				     spawn->GetLoottableID(), spawn->MerchantType, 0, spawn->GetRunspeed(), 28, 28);
@@ -1076,6 +1076,9 @@ uint32 ZoneDatabase::CreateNewNPCCommand(const char *zone, uint32 zone_version, 
 		return false;
 	}
 	uint32 spawngroupid = results.LastInsertedID();
+
+	spawn->SetSp2(spawngroupid);
+	spawn->SetNPCTypeID(npc_type_id);
 
 	query = StringFormat("INSERT INTO spawn2 (zone, version, x, y, z, respawntime, heading, spawngroupID) "
 			     "VALUES('%s', %u, %f, %f, %f, %i, %f, %i)",

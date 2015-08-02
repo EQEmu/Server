@@ -1,5 +1,9 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 08/02/2015 ==
+Shendare: VS2013 query StringFormat glitches when "%f" is passed for the int GetRunSpeed().
+Shendare: In CreateNewNPCCommand(), the npc_type_id and spawngroupid are created in the database, but never set in the spawn class, so later it can't delete them with #npcspawn remove or #npcspawn delete.
+
 == 07/27/2015 ==
 Uleat: Reworked the QS Audit code in Handle_OP_ShopPlayerBuy (\zone\client_packet.cpp) to help eliminate potential for exception errors
 
