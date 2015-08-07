@@ -4957,7 +4957,7 @@ void Client::ShowSkillsWindow()
 		"Singing","Sneak","Specialize Abjuration","Specialize Alteration","Specialize Conjuration","Specialize Divination","Specialize Evocation","Pick Pockets",
 		"Stringed Instruments","Swimming","Throwing","Tiger Claw","Tracking","Wind Instruments","Fishing","Make Poison","Tinkering","Research",
 		"Alchemy","Baking","Tailoring","Sense Traps","Blacksmithing","Fletching","Brewing","Alcohol Tolerance","Begging","Jewelry Making",
-		"Pottery","Percussion Instruments","Intimidation","Berserking","Taunt","Frenzy"};
+		"Pottery","Percussion Instruments","Intimidation","Berserking","Taunt","Frenzy","Remove Traps","Triple Attack"};
 	for(int i = 0; i <= (int)HIGHEST_SKILL; i++)
 		Skills[SkillName[i]] = (SkillUseTypes)i;
 
@@ -4978,7 +4978,6 @@ void Client::ShowSkillsWindow()
 	}
 	this->SendPopupToClient(WindowTitle, WindowText.c_str());
 }
-
 
 void Client::SetShadowStepExemption(bool v)
 {
@@ -8654,7 +8653,7 @@ uint32 Client::GetMoney(uint8 type, uint8 subtype) {
 					break;
 				case 2:
 					value = static_cast<uint32>(m_pp.platinum_cursor);
-					break;					
+					break;
 				case 3:
 					value = static_cast<uint32>(m_pp.platinum_shared);
 					break;
