@@ -6309,6 +6309,32 @@ XS(XS_Client_GetMoney)
 	XSRETURN(1);
 }
 
+XS(XS_Client_GetAccountAge);
+XS(XS_Client_GetAccountAge) {
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: GetAccountAge(THIS)");
+	{
+		Client* THIS;
+		int RETVAL;
+		dXSTARG;
+
+		if (sv_derived_from(ST(0), "Client")) {
+			IV tmp = SvIV((SV*)SvRV(ST(0)));
+			THIS = INT2PTR(Client *,tmp);
+		}
+		else
+			Perl_croak(aTHX_ "THIS is not of type Client");
+		
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
+
+		RETVAL = THIS->GetAccountAge();
+		XSprePUSH; PUSHn((int)RETVAL);		
+	}
+	XSRETURN(1);
+}
+
 
 #ifdef __cplusplus
 extern "C"
@@ -6558,6 +6584,7 @@ XS(boot_Client)
 		newXSproto(strcpy(buf, "QuestReward"), XS_Client_QuestReward, file, "$$;$$$$$$$");
 		newXSproto(strcpy(buf, "CalcEXP"), XS_Client_CalcEXP, file, "$");
 		newXSproto(strcpy(buf, "GetMoney"), XS_Client_GetMoney, file, "$$$");
+		newXSproto(strcpy(buf, "GetAccountAge"), XS_Client_GetAccountAge, file, "$");
 		XSRETURN_YES;
 }
 

@@ -664,6 +664,7 @@ public:
 	uint64 GetCarriedMoney();
 	uint64 GetAllMoney();
 	uint32 GetMoney(uint8 type, uint8 subtype);
+	int GetAccountAge();
 
 	bool IsDiscovered(uint32 itemid);
 	void DiscoverItem(uint32 itemid);
