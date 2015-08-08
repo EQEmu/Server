@@ -8667,3 +8667,7 @@ uint32 Client::GetMoney(uint8 type, uint8 subtype) {
 	}
 	return value;
 }
+
+int Client::GetAccountAge() {
+	return (time(nullptr) - GetAccountCreation());
+}
