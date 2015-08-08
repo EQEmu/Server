@@ -10188,7 +10188,7 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 						Sower->CastToBot()->BotGroupSay(Sower->CastToBot(), "I'm not level 10 yet.");
 					else if ((!strcasecmp(sep->arg[2], "wolf")) && zone->CanCastOutdoor() && (c->GetLevel() >= 20)) {
 						Sower->CastToBot()->BotGroupSay(Sower->CastToBot(), "Casting group Spirit of Wolf.");
-						Sower->CastSpell(428, c->GetID(), 1, -1, -1);
+						Sower->CastSpell(169, c->GetID(), 1, -1, -1);
 					}
 					else if ((!strcasecmp(sep->arg[2], "wolf")) && (c->GetLevel() <= 20))
 						Sower->CastToBot()->BotGroupSay(Sower->CastToBot(), "I'm not level 20 yet.");
