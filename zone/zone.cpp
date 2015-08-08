@@ -1346,7 +1346,6 @@ void Zone::ChangeWeather()
 
 			weathertimer = (duration*60)*1000;
 			Weather_Timer->Start(weathertimer);
-			zone->zone_weather = 0;
 			zone->weather_intensity = 0;
 		}
 		else if(tmpOldWeather == 2)
@@ -1358,7 +1357,6 @@ void Zone::ChangeWeather()
 
 			weathertimer = (duration*60)*1000;
 			Weather_Timer->Start(weathertimer);
-			zone->zone_weather = 0;
 			zone->weather_intensity = 0;
 		}
 	}
@@ -1377,6 +1375,10 @@ void Zone::ChangeWeather()
 	{
 		Log.Out(Logs::General, Logs::None, "The weather for zone: %s has changed. Old weather was = %i. New weather is = %i The next check will be in %i seconds. Rain chance: %i, Rain duration: %i, Snow chance %i, Snow duration: %i", zone->GetShortName(), tmpOldWeather, zone_weather,Weather_Timer->GetRemainingTime()/1000,rainchance,rainduration,snowchance,snowduration);
 		this->weatherSend();
+		if (zone->weather_intensity == 0)
+		{
+			zone->zone_weather = 0;
+		}
 	}
 }
 
