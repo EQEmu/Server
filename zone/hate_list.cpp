@@ -67,8 +67,10 @@ void HateList::WipeHateList()
 		{
 			parse->EventNPC(EVENT_HATE_LIST, hate_owner->CastToNPC(), m, "0", 0);
 
-			if (m->IsClient())
+			if (m->IsClient()) {
 				m->CastToClient()->DecrementAggroCount();
+				m->CastToClient()->RemoveXTarget(hate_owner, true);
+			}
 		}
 		delete (*iterator);
 		iterator = list.erase(iterator);
