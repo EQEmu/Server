@@ -82,6 +82,7 @@ typedef enum {
 	EVENT_RESPAWN,
 	EVENT_DEATH_COMPLETE,
 	EVENT_UNHANDLED_OPCODE,
+	EVENT_TICK,
 
 	_LargestEventID
 } QuestEventID;
