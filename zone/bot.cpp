@@ -4632,7 +4632,7 @@ bool Bot::Death(Mob *killerMob, int32 damage, uint16 spell_id, SkillUseTypes att
 	return true;
 }
 
-void Bot::Damage(Mob *from, int32 damage, uint16 spell_id, SkillUseTypes attack_skill, bool avoidable, int8 buffslot, bool iBuffTic) {
+void Bot::Damage(Mob *from, int32 damage, uint16 spell_id, SkillUseTypes attack_skill, bool avoidable, int8 buffslot, bool iBuffTic, int special) {
 	if(spell_id == 0)
 		spell_id = SPELL_UNKNOWN;
 
@@ -4651,7 +4651,7 @@ void Bot::Damage(Mob *from, int32 damage, uint16 spell_id, SkillUseTypes attack_
 		entity_list.MessageClose(this, true, 300, MT_Spells, "%s beams a smile at %s", GetCleanName(), from->GetCleanName() );
 	}
 
-	CommonDamage(from, damage, spell_id, attack_skill, avoidable, buffslot, iBuffTic);
+	CommonDamage(from, damage, spell_id, attack_skill, avoidable, buffslot, iBuffTic, special);
 	if(GetHP() < 0) {
 		if(IsCasting())
 			InterruptSpell();
@@ -4678,7 +4678,7 @@ void Bot::AddToHateList(Mob* other, uint32 hate /*= 0*/, int32 damage /*= 0*/, b
 	Mob::AddToHateList(other, hate, damage, iYellForHelp, bFrenzy, iBuffTic);
 }
 
-bool Bot::Attack(Mob* other, int Hand, bool FromRiposte, bool IsStrikethrough, bool IsFromSpell, ExtraAttackOptions *opts) {
+bool Bot::Attack(Mob* other, int Hand, bool FromRiposte, bool IsStrikethrough, bool IsFromSpell, ExtraAttackOptions *opts, int special) {
 	if (!other) {
 		SetTarget(nullptr);
 		Log.Out(Logs::General, Logs::Error, "A null Mob object was passed to Bot::Attack for evaluation!");

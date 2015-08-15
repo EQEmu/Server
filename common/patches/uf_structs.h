@@ -1333,7 +1333,8 @@ struct CombatDamage_Struct
 /* 11 */	float	force;		// cd cc cc 3d
 /* 15 */	float	meleepush_xy;		// see above notes in Action_Struct
 /* 19 */	float	meleepush_z;
-/* 23 */	uint8	unknown23[5];	// was [9]
+/* 23 */	uint8	unknown23;	// was [9]
+/* 24 */	uint32	special; // 2 = Rampage, 1 = Wild Rampage
 /* 28 */
 };
 

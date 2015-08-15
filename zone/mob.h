@@ -145,7 +145,7 @@ public:
 	uint16 GetThrownDamage(int16 wDmg, int32& TotalDmg, int& minDmg);
 	// 13 = Primary (default), 14 = secondary
 	virtual bool Attack(Mob* other, int Hand = MainPrimary, bool FromRiposte = false, bool IsStrikethrough = false,
-		bool IsFromSpell = false, ExtraAttackOptions *opts = nullptr) = 0;
+		bool IsFromSpell = false, ExtraAttackOptions *opts = nullptr, int special = 0) = 0;
 	int MonkSpecialAttack(Mob* other, uint8 skill_used);
 	virtual void TryBackstab(Mob *other,int ReuseTime = 10);
 	void TriggerDefensiveProcs(const ItemInst* weapon, Mob *on, uint16 hand = MainPrimary, int damage = 0);
@@ -167,16 +167,16 @@ public:
 	void CommonBreakInvisible();
 	bool HasDied();
 	virtual bool CheckDualWield();
-	void DoMainHandAttackRounds(Mob *target, ExtraAttackOptions *opts = nullptr);
-	void DoOffHandAttackRounds(Mob *target, ExtraAttackOptions *opts = nullptr);
+	void DoMainHandAttackRounds(Mob *target, ExtraAttackOptions *opts = nullptr, int special = 0);
+	void DoOffHandAttackRounds(Mob *target, ExtraAttackOptions *opts = nullptr, int special = 0);
 	virtual bool CheckDoubleAttack();
 	// inline process for places where we need to do them outside of the AI_Process
-	void ProcessAttackRounds(Mob *target, ExtraAttackOptions *opts = nullptr)
+	void ProcessAttackRounds(Mob *target, ExtraAttackOptions *opts = nullptr, int special = 0)
 	{
 		if (target) {
-			DoMainHandAttackRounds(target, opts);
+			DoMainHandAttackRounds(target, opts, special);
 			if (CanThisClassDualWield())
-				DoOffHandAttackRounds(target, opts);
+				DoOffHandAttackRounds(target, opts, special);
 		}
 		return;
 	}
@@ -348,7 +348,7 @@ public:
 	bool AffectedBySpellExcludingSlot(int slot, int effect);
 	virtual bool Death(Mob* killerMob, int32 damage, uint16 spell_id, SkillUseTypes attack_skill) = 0;
 	virtual void Damage(Mob* from, int32 damage, uint16 spell_id, SkillUseTypes attack_skill,
-		bool avoidable = true, int8 buffslot = -1, bool iBuffTic = false) = 0;
+		bool avoidable = true, int8 buffslot = -1, bool iBuffTic = false, int special = 0) = 0;
 	inline virtual void SetHP(int32 hp) { if (hp >= max_hp) cur_hp = max_hp; else cur_hp = hp;}
 	bool ChangeHP(Mob* other, int32 amount, uint16 spell_id = 0, int8 buffslot = -1, bool iBuffTic = false);
 	inline void SetOOCRegen(int32 newoocregen) {oocregen = newoocregen;}
@@ -991,7 +991,7 @@ public:
 	bool CheckAATimer(int timer);
 
 protected:
-	void CommonDamage(Mob* other, int32 &damage, const uint16 spell_id, const SkillUseTypes attack_skill, bool &avoidable, const int8 buffslot, const bool iBuffTic);
+	void CommonDamage(Mob* other, int32 &damage, const uint16 spell_id, const SkillUseTypes attack_skill, bool &avoidable, const int8 buffslot, const bool iBuffTic, int special = 0);
 	static uint16 GetProcID(uint16 spell_id, uint8 effect_index);
 	float _GetMovementSpeed(int mod) const;
 	int _GetWalkSpeed() const;

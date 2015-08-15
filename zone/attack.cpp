@@ -1168,7 +1168,7 @@ int Mob::GetWeaponDamage(Mob *against, const ItemInst *weapon_item, uint32 *hate
 //note: throughout this method, setting `damage` to a negative is a way to
 //stop the attack calculations
 // IsFromSpell added to allow spell effects to use Attack. (Mainly for the Rampage AA right now.)
-bool Client::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool IsFromSpell, ExtraAttackOptions *opts)
+bool Client::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool IsFromSpell, ExtraAttackOptions *opts, int special)
 {
 	if (!other) {
 		SetTarget(nullptr);
@@ -1373,7 +1373,7 @@ bool Client::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, b
 			SpellFinished(aabonuses.SkillAttackProc[2], other, 10, 0, -1,
 				      spells[aabonuses.SkillAttackProc[2]].ResistDiff);
 	}
-	other->Damage(this, damage, SPELL_UNKNOWN, skillinuse);
+	other->Damage(this, damage, SPELL_UNKNOWN, skillinuse, true, -1, false, special);
 
 	if (IsDead()) return false;
 
@@ -1401,7 +1401,7 @@ void Mob::Heal()
 	SendHPUpdate();
 }
 
-void Client::Damage(Mob* other, int32 damage, uint16 spell_id, SkillUseTypes attack_skill, bool avoidable, int8 buffslot, bool iBuffTic)
+void Client::Damage(Mob* other, int32 damage, uint16 spell_id, SkillUseTypes attack_skill, bool avoidable, int8 buffslot, bool iBuffTic, int special)
 {
 	if(dead || IsCorpse())
 		return;
@@ -1425,7 +1425,7 @@ void Client::Damage(Mob* other, int32 damage, uint16 spell_id, SkillUseTypes att
 		damage = -5;
 
 	//do a majority of the work...
-	CommonDamage(other, damage, spell_id, attack_skill, avoidable, buffslot, iBuffTic);
+	CommonDamage(other, damage, spell_id, attack_skill, avoidable, buffslot, iBuffTic, special);
 
 	if (damage > 0) {
 
@@ -1719,7 +1719,7 @@ bool Client::Death(Mob* killerMob, int32 damage, uint16 spell, SkillUseTypes att
 	return true;
 }
 
-bool NPC::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool IsFromSpell, ExtraAttackOptions *opts)
+bool NPC::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool IsFromSpell, ExtraAttackOptions *opts, int special)
 {
 	int damage = 0;
 
@@ -1931,7 +1931,7 @@ bool NPC::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool
 		damage = -5;
 
 	if(GetHP() > 0 && !other->HasDied()) {
-		other->Damage(this, damage, SPELL_UNKNOWN, skillinuse, false); // Not avoidable client already had thier chance to Avoid
+		other->Damage(this, damage, SPELL_UNKNOWN, skillinuse, true, -1, false, special); // Not avoidable client already had thier chance to Avoid
 	} else
 		return false;
 
@@ -1966,7 +1966,7 @@ bool NPC::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool
 		return false;
 }
 
-void NPC::Damage(Mob* other, int32 damage, uint16 spell_id, SkillUseTypes attack_skill, bool avoidable, int8 buffslot, bool iBuffTic) {
+void NPC::Damage(Mob* other, int32 damage, uint16 spell_id, SkillUseTypes attack_skill, bool avoidable, int8 buffslot, bool iBuffTic, int special) {
 	if(spell_id==0)
 		spell_id = SPELL_UNKNOWN;
 
@@ -2001,7 +2001,7 @@ void NPC::Damage(Mob* other, int32 damage, uint16 spell_id, SkillUseTypes attack
 	}
 
 	//do a majority of the work...
-	CommonDamage(other, damage, spell_id, attack_skill, avoidable, buffslot, iBuffTic);
+	CommonDamage(other, damage, spell_id, attack_skill, avoidable, buffslot, iBuffTic, special);
 
 	if(damage > 0) {
 		//see if we are gunna start fleeing
@@ -3465,7 +3465,7 @@ bool Mob::CheckDoubleAttack()
 	return zone->random.Int(1, 500) <= chance;
 }
 
-void Mob::CommonDamage(Mob* attacker, int32 &damage, const uint16 spell_id, const SkillUseTypes skill_used, bool &avoidable, const int8 buffslot, const bool iBuffTic) {
+void Mob::CommonDamage(Mob* attacker, int32 &damage, const uint16 spell_id, const SkillUseTypes skill_used, bool &avoidable, const int8 buffslot, const bool iBuffTic, int special) {
 	// This method is called with skill_used=ABJURE for Damage Shield damage.
 	bool FromDamageShield = (skill_used == SkillAbjuration);
 
@@ -3705,6 +3705,7 @@ void Mob::CommonDamage(Mob* attacker, int32 &damage, const uint16 spell_id, cons
 		a->type = SkillDamageTypes[skill_used]; // was 0x1c
 		a->damage = damage;
 		a->spellid = spell_id;
+		a->special = special;
 		a->meleepush_xy = attacker->GetHeading() * 2.0f;
 		if (RuleB(Combat, MeleePush) && damage > 0 && !IsRooted() &&
 		    (IsClient() || zone->random.Roll(RuleI(Combat, MeleePushChance)))) {
@@ -5109,7 +5110,7 @@ bool Client::CheckDualWield()
 	return zone->random.Int(1, 375) <= chance;
 }
 
-void Mob::DoMainHandAttackRounds(Mob *target, ExtraAttackOptions *opts)
+void Mob::DoMainHandAttackRounds(Mob *target, ExtraAttackOptions *opts, int special)
 {
 	if (!target)
 		return;
@@ -5117,23 +5118,23 @@ void Mob::DoMainHandAttackRounds(Mob *target, ExtraAttackOptions *opts)
 	if (RuleB(Combat, UseLiveCombatRounds)) {
 		// A "quad" on live really is just a successful dual wield where both double attack
 		// The mobs that could triple lost the ability to when the triple attack skill was added in
-		Attack(target, MainPrimary, false, false, false, opts);
+		Attack(target, MainPrimary, false, false, false, opts, special);
 		if (CanThisClassDoubleAttack() && CheckDoubleAttack())
-			Attack(target, MainPrimary, false, false, false, opts);
+			Attack(target, MainPrimary, false, false, false, opts, special);
 		return;
 	}
 
 	if (IsNPC()) {
 		int16 n_atk = CastToNPC()->GetNumberOfAttacks();
 		if (n_atk <= 1) {
-			Attack(target, MainPrimary, false, false, false, opts);
+			Attack(target, MainPrimary, false, false, false, opts, special);
 		} else {
 			for (int i = 0; i < n_atk; ++i) {
-				Attack(target, MainPrimary, false, false, false, opts);
+				Attack(target, MainPrimary, false, false, false, opts, special);
 			}
 		}
 	} else {
-		Attack(target, MainPrimary, false, false, false, opts);
+		Attack(target, MainPrimary, false, false, false, opts, special);
 	}
 
 	// we use this random value in three comparisons with different
@@ -5144,21 +5145,21 @@ void Mob::DoMainHandAttackRounds(Mob *target, ExtraAttackOptions *opts)
 	    // check double attack, this is NOT the same rules that clients use...
 	    &&
 	    RandRoll < (GetLevel() + NPCDualAttackModifier)) {
-		Attack(target, MainPrimary, false, false, false, opts);
+		Attack(target, MainPrimary, false, false, false, opts, special);
 		// lets see if we can do a triple attack with the main hand
 		// pets are excluded from triple and quads...
 		if ((GetSpecialAbility(SPECATK_TRIPLE) || GetSpecialAbility(SPECATK_QUAD)) && !IsPet() &&
 		    RandRoll < (GetLevel() + NPCTripleAttackModifier)) {
-			Attack(target, MainPrimary, false, false, false, opts);
+			Attack(target, MainPrimary, false, false, false, opts, special);
 			// now lets check the quad attack
 			if (GetSpecialAbility(SPECATK_QUAD) && RandRoll < (GetLevel() + NPCQuadAttackModifier)) {
-				Attack(target, MainPrimary, false, false, false, opts);
+				Attack(target, MainPrimary, false, false, false, opts, special);
 			}
 		}
 	}
 }
 
-void Mob::DoOffHandAttackRounds(Mob *target, ExtraAttackOptions *opts)
+void Mob::DoOffHandAttackRounds(Mob *target, ExtraAttackOptions *opts, int special)
 {
 	if (!target)
 		return;
@@ -5168,9 +5169,9 @@ void Mob::DoOffHandAttackRounds(Mob *target, ExtraAttackOptions *opts)
 	     (RuleB(Combat, UseLiveCombatRounds) && GetSpecialAbility(SPECATK_QUAD))) ||
 	    GetEquipment(MaterialSecondary) != 0) {
 		if (CheckDualWield()) {
-			Attack(target, MainSecondary, false, false, false, opts);
+			Attack(target, MainSecondary, false, false, false, opts, special);
 			if (CanThisClassDoubleAttack() && GetLevel() > 35 && CheckDoubleAttack())
-				Attack(target, MainSecondary, false, false, false, opts);
+				Attack(target, MainSecondary, false, false, false, opts, special);
 		}
 	}
 }

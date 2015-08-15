@@ -299,6 +299,23 @@ namespace Titanium
 		dest->FastQueuePacket(&in, ack_req);
 	}
 
+	ENCODE(OP_Damage)
+	{
+		ENCODE_LENGTH_EXACT(CombatDamage_Struct);
+		SETUP_DIRECT_ENCODE(CombatDamage_Struct, structs::CombatDamage_Struct);
+
+		OUT(target);
+		OUT(source);
+		OUT(type);
+		OUT(spellid);
+		OUT(damage);
+		OUT(force);
+		OUT(meleepush_xy);
+		OUT(meleepush_z);
+
+		FINISH_ENCODE();
+	}
+
 	ENCODE(OP_DeleteCharge) { ENCODE_FORWARD(OP_MoveItem); }
 
 	ENCODE(OP_DeleteItem)

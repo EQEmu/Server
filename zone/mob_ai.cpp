@@ -1978,14 +1978,14 @@ bool Mob::Rampage(ExtraAttackOptions *opts)
 			if (m_target == GetTarget())
 				continue;
 			if (CombatRange(m_target)) {
-				ProcessAttackRounds(m_target, opts);
+				ProcessAttackRounds(m_target, opts, 2);
 				index_hit++;
 			}
 		}
 	}
 
 	if (RuleB(Combat, RampageHitsTarget) && index_hit < rampage_targets)
-		ProcessAttackRounds(GetTarget(), opts);
+		ProcessAttackRounds(GetTarget(), opts, 2);
 
 	return true;
 }
@@ -2004,7 +2004,7 @@ void Mob::AreaRampage(ExtraAttackOptions *opts)
 	index_hit = hate_list.AreaRampage(this, GetTarget(), rampage_targets, opts);
 
 	if(index_hit == 0)
-		ProcessAttackRounds(GetTarget(), opts);
+		ProcessAttackRounds(GetTarget(), opts, 1);
 }
 
 uint32 Mob::GetLevelCon(uint8 mylevel, uint8 iOtherLevel) {

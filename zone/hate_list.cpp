@@ -545,7 +545,7 @@ int HateList::AreaRampage(Mob *caster, Mob *target, int count, ExtraAttackOption
 		if (h && h->entity_on_hatelist && h->entity_on_hatelist != caster) {
 			if (caster->CombatRange(h->entity_on_hatelist)) {
 				++hit_count;
-				caster->ProcessAttackRounds(h->entity_on_hatelist, opts);
+				caster->ProcessAttackRounds(h->entity_on_hatelist, opts, 1);
 			}
 		}
 	}

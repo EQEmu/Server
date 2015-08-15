@@ -4445,7 +4445,7 @@ void Merc::DoClassAttacks(Mob *target) {
 	classattack_timer.Start(reuse / HasteModifier);
 }
 
-bool Merc::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool IsFromSpell, ExtraAttackOptions *opts)
+bool Merc::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool IsFromSpell, ExtraAttackOptions *opts, int special)
 {
 	if (!other) {
 		SetTarget(nullptr);
@@ -4456,7 +4456,7 @@ bool Merc::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, boo
 	return NPC::Attack(other, Hand, bRiposte, IsStrikethrough, IsFromSpell, opts);
 }
 
-void Merc::Damage(Mob* other, int32 damage, uint16 spell_id, SkillUseTypes attack_skill, bool avoidable, int8 buffslot, bool iBuffTic)
+void Merc::Damage(Mob* other, int32 damage, uint16 spell_id, SkillUseTypes attack_skill, bool avoidable, int8 buffslot, bool iBuffTic, int special)
 {
 	if(IsDead() || IsCorpse())
 		return;
@@ -4464,7 +4464,7 @@ void Merc::Damage(Mob* other, int32 damage, uint16 spell_id, SkillUseTypes attac
 	if(spell_id==0)
 		spell_id = SPELL_UNKNOWN;
 
-	NPC::Damage(other, damage, spell_id, attack_skill, avoidable, buffslot, iBuffTic);
+	NPC::Damage(other, damage, spell_id, attack_skill, avoidable, buffslot, iBuffTic, special);
 
 	//Not needed since we're using NPC damage.
 	//CommonDamage(other, damage, spell_id, attack_skill, avoidable, buffslot, iBuffTic);

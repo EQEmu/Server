@@ -658,9 +658,10 @@ namespace RoF
 		OUT(type);
 		OUT(spellid);
 		OUT(damage);
-		OUT(force)
+		OUT(force);
 		OUT(meleepush_xy);
-		OUT(meleepush_z)
+		OUT(meleepush_z);
+		OUT(special);
 
 		FINISH_ENCODE();
 	}
