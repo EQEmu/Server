@@ -5302,6 +5302,14 @@ void Client::SendBuffDurationPacket(Buffs_Struct &buff)
 		int index = GetSpellEffectIndex(buff.spellid, SE_CurrentHP);
 		sbf->effect = abs(spells[buff.spellid].base[index]);
 	}
+	else if (IsEffectInSpell(buff.spellid, SE_SeeInvis))
+	{
+		// Wish I knew what this sbf->effect field was trying to tell
+		// the client.  10 seems to not break SeeInvis spells.  Level,
+		// which is what the old client sends breaks the client at at 
+		// least level 9, maybe more.
+		sbf->effect = 10;
+	}
 	else
 	{
 		// Default to what old code did until we find a better fix for
