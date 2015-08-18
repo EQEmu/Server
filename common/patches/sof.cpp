@@ -1665,6 +1665,8 @@ namespace SoF
 			emu_ptr += sizeof(CharacterSelectEntry_Struct);
 			eq_ptr += sizeof(structs::CharacterSelectEntry_Struct);
 		}
+
+		FINISH_ENCODE();
 	}
 
 	//hack hack hack
