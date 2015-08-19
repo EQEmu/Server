@@ -137,8 +137,8 @@ bool Client::Process() {
 		if(mana_timer.Check())
 			SendManaUpdatePacket();
 
-			if(dead && dead_timer.Check()) {
-				database.MoveCharacterToZone(GetName(), database.GetZoneName(m_pp.binds[0].zoneId));
+		if(dead && dead_timer.Check()) {
+			database.MoveCharacterToZone(GetName(), database.GetZoneName(m_pp.binds[0].zoneId));
 
 			m_pp.zone_id = m_pp.binds[0].zoneId;
 			m_pp.zoneInstance = m_pp.binds[0].instance_id;
