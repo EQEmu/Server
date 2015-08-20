@@ -2789,7 +2789,8 @@ int Mob::CheckStackConflict(uint16 spellid1, int caster_level1, uint16 spellid2,
 	bool effect_match = true; // Figure out if we're identical in effects on all slots.
 	if (spellid1 != spellid2) {
 		for (i = 0; i < EFFECT_COUNT; i++) {
-			if (sp1.effectid[i] != sp2.effectid[i]) {
+			// we don't want this optimization for mana burns
+			if (sp1.effectid[i] != sp2.effectid[i] || sp1.effectid[i] == SE_ManaBurn) {
 				effect_match = false;
 				break;
 			}
