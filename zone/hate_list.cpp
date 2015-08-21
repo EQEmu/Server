@@ -538,15 +538,22 @@ int HateList::AreaRampage(Mob *caster, Mob *target, int count, ExtraAttackOption
 		return 0;
 
 	int hit_count = 0;
-	auto it = list.begin();
-	while (it != list.end() && (count == -1 || hit_count < count)) {
-		struct_HateList *h = (*it);
-		++it; // advancing the iterator here prevents the iterator being invalidated if they die
-		if (h && h->entity_on_hatelist && h->entity_on_hatelist != caster) {
-			if (caster->CombatRange(h->entity_on_hatelist)) {
-				++hit_count;
-				caster->ProcessAttackRounds(h->entity_on_hatelist, opts, 1);
-			}
+	// This should prevent crashes if something dies (or mainly more than 1 thing goes away)
+	// This is a temp solution until the hate lists can be rewritten to not have that issue
+	std::vector<uint16> id_list;
+	for (auto &h : list) {
+		if (h->entity_on_hatelist && h->entity_on_hatelist != caster &&
+		    caster->CombatRange(h->entity_on_hatelist))
+			id_list.push_back(h->entity_on_hatelist->GetID());
+		if (count != -1 && id_list.size() > count)
+			break;
+	}
+
+	for (auto &id : id_list) {
+		auto mob = entity_list.GetMobID(id);
+		if (mob) {
+			++hit_count;
+			caster->ProcessAttackRounds(mob, opts, 1);
 		}
 	}
 
