@@ -2795,6 +2795,9 @@ int Mob::CheckStackConflict(uint16 spellid1, int caster_level1, uint16 spellid2,
 				break;
 			}
 		}
+	} else if (IsEffectInSpell(spellid1, SE_ManaBurn)) {
+		Log.Out(Logs::Detail, Logs::Spells, "We have a Mana Burn spell that is the same, they won't stack");
+		return -1;
 	}
 
 	// check for special stacking overwrite in spell2 against effects in spell1
