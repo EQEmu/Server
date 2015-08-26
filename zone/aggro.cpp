@@ -285,6 +285,14 @@ bool Mob::CheckWillAggro(Mob *mob) {
 		return(false);
 	}
 
+	// Don't aggro new clients if we are already engaged unless PROX_AGGRO is set
+	if (IsEngaged() && (!GetSpecialAbility(PROX_AGGRO) || (GetSpecialAbility(PROX_AGGRO) && !CombatRange(mob)))) {
+		Log.Out(Logs::Moderate, Logs::Aggro,
+			"%s is in combat, and does not have prox_aggro, or does and is out of combat range with %s",
+			GetName(), mob->GetName());
+		return false;
+	}
+
 	//im not sure I understand this..
 	//if I have an owner and it is not this mob, then I cannot
 	//aggro this mob...???
