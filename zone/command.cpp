@@ -6243,7 +6243,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 
 	if (strcasecmp(sep->arg[1], "rangedtype") == 0) {
         c->Message(15,"NPCID %u now has a ranged type of %i.",  npcTypeID, atoi(sep->argplus[2]));
-		std::string query = StringFormat("UPDATE npc_types SET rangedtype = %i WHERE id = %i",  atoi(sep->argplus[2]), npcTypeID);
+		std::string query = StringFormat("UPDATE npc_types SET ranged_type = %i WHERE id = %i",  atoi(sep->argplus[2]), npcTypeID);
 		database.QueryDatabase(query);
 		return;
 	}
