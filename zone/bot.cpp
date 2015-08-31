@@ -10771,7 +10771,7 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 						|| !strcasecmp(sep->arg[2], "poison") && (c->GetLevel() <= 6)) {
 							Resister->CastToBot()->BotGroupSay(Resister->CastToBot(), "I am not the required level yet.");
 					} else
-						Resister->CastToBot()->BotGroupSay(Resister->CastToBot(), "Do you want %s, %s, %s, %s, or %s?", Resister->CastToBot()->CreateSayLink(c, "#bot resist poison", "Resist Poison").c_str(), Resister->CastToBot()->CreateSayLink(c, "#bot resist disease", "Resist Disease").c_str(), Resister->CastToBot()->CreateSayLink(c, "#bot invis fire", "Resist Fire").c_str(), Resister->CastToBot()->CreateSayLink(c, "#bot invis cold", "Resist Cold").c_str(), Resister->CastToBot()->CreateSayLink(c, "#bot invis magic", "Resist Magic").c_str());
+						Resister->CastToBot()->BotGroupSay(Resister->CastToBot(), "Do you want %s, %s, %s, %s, or %s?", Resister->CastToBot()->CreateSayLink(c, "#bot resist poison", "Resist Poison").c_str(), Resister->CastToBot()->CreateSayLink(c, "#bot resist disease", "Resist Disease").c_str(), Resister->CastToBot()->CreateSayLink(c, "#bot resist fire", "Resist Fire").c_str(), Resister->CastToBot()->CreateSayLink(c, "#bot resist cold", "Resist Cold").c_str(), Resister->CastToBot()->CreateSayLink(c, "#bot resist magic", "Resist Magic").c_str());
 
 					break;
 				case SHAMAN:
@@ -10797,7 +10797,7 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 						|| !strcasecmp(sep->arg[2], "poison") && (c->GetLevel() <= 20)) {
 							Resister->CastToBot()->BotGroupSay(Resister->CastToBot(), "I am not the required level yet.");
 					} else
-						Resister->CastToBot()->BotGroupSay(Resister->CastToBot(), "Do you want %s, %s, %s, %s, or %s?", Resister->CastToBot()->CreateSayLink(c, "#bot resist poison", "Resist Poison").c_str(), Resister->CastToBot()->CreateSayLink(c, "#bot resist disease", "Resist Disease").c_str(), Resister->CastToBot()->CreateSayLink(c, "#bot invis fire", "Resist Fire").c_str(), Resister->CastToBot()->CreateSayLink(c, "#bot invis cold", "Resist Cold").c_str(), Resister->CastToBot()->CreateSayLink(c, "#bot invis magic", "Resist Magic").c_str());
+						Resister->CastToBot()->BotGroupSay(Resister->CastToBot(), "Do you want %s, %s, %s, %s, or %s?", Resister->CastToBot()->CreateSayLink(c, "#bot resist poison", "Resist Poison").c_str(), Resister->CastToBot()->CreateSayLink(c, "#bot resist disease", "Resist Disease").c_str(), Resister->CastToBot()->CreateSayLink(c, "#bot resist fire", "Resist Fire").c_str(), Resister->CastToBot()->CreateSayLink(c, "#bot resist cold", "Resist Cold").c_str(), Resister->CastToBot()->CreateSayLink(c, "#bot resist magic", "Resist Magic").c_str());
 
 					break;
 				case DRUID:
@@ -10822,7 +10822,7 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 						|| !strcasecmp(sep->arg[2], "poison") && (c->GetLevel() <= 19)) {
 							Resister->CastToBot()->BotGroupSay(Resister->CastToBot(), "I am not the required level yet.") ;
 					} else
-						Resister->CastToBot()->BotGroupSay(Resister->CastToBot(), "Do you want %s, %s, %s, %s, or %s?", Resister->CastToBot()->CreateSayLink(c, "#bot resist poison", "Resist Poison").c_str(), Resister->CastToBot()->CreateSayLink(c, "#bot resist disease", "Resist Disease").c_str(), Resister->CastToBot()->CreateSayLink(c, "#bot invis fire", "Resist Fire").c_str(), Resister->CastToBot()->CreateSayLink(c, "#bot invis cold", "Resist Cold").c_str(), Resister->CastToBot()->CreateSayLink(c, "#bot invis magic", "Resist Magic").c_str());
+						Resister->CastToBot()->BotGroupSay(Resister->CastToBot(), "Do you want %s, %s, %s, %s, or %s?", Resister->CastToBot()->CreateSayLink(c, "#bot resist poison", "Resist Poison").c_str(), Resister->CastToBot()->CreateSayLink(c, "#bot resist disease", "Resist Disease").c_str(), Resister->CastToBot()->CreateSayLink(c, "#bot resist fire", "Resist Fire").c_str(), Resister->CastToBot()->CreateSayLink(c, "#bot resist cold", "Resist Cold").c_str(), Resister->CastToBot()->CreateSayLink(c, "#bot resist magic", "Resist Magic").c_str());
 					break;
 				default:
 					c->Message(15, "You must have a Cleric, Shaman, or Druid in your group.");
