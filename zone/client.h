@@ -175,6 +175,7 @@ typedef enum
 struct XTarget_Struct
 {
 	XTargetType Type;
+	bool dirty;
 	uint16 ID;
 	char Name[65];
 };
@@ -1144,9 +1145,10 @@ public:
 	bool IsClientXTarget(const Client *c) const;
 	void UpdateClientXTarget(Client *c);
 	void UpdateXTargetType(XTargetType Type, Mob *m, const char *Name = nullptr);
-	void AddAutoXTarget(Mob *m);
+	void AddAutoXTarget(Mob *m, bool send = true);
 	void RemoveXTarget(Mob *m, bool OnlyAutoSlots);
 	void SendXTargetPacket(uint32 Slot, Mob *m);
+	void SendXTargetUpdates();
 	void RemoveGroupXTargets();
 	void RemoveAutoXTargets();
 	void ShowXTargets(Client *c);

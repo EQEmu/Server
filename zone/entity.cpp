@@ -1373,7 +1373,7 @@ void EntityList::RefreshAutoXTargets(Client *c)
 			continue;
 
 		if (m->CheckAggro(c) && !c->IsXTarget(m)) {
-			c->AddAutoXTarget(m);
+			c->AddAutoXTarget(m, false); // we only call this before a bulk, so lets not send right away
 			break;
 		}
 

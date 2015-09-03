@@ -7041,7 +7041,7 @@ void Client::UpdateClientXTarget(Client *c)
 	}
 }
 
-void Client::AddAutoXTarget(Mob *m)
+void Client::AddAutoXTarget(Mob *m, bool send)
 {
 	if(!XTargettingAvailable() || !XTargetAutoAddHaters)
 		return;
@@ -7054,7 +7054,10 @@ void Client::AddAutoXTarget(Mob *m)
 		if((XTargets[i].Type == Auto) && (XTargets[i].ID == 0))
 		{
 			XTargets[i].ID = m->GetID();
-			SendXTargetPacket(i, m);
+			if (send) // if we don't send we're bulk sending updates later on
+				SendXTargetPacket(i, m);
+			else
+				XTargets[i].dirty = true;
 			break;
 		}
 	}
@@ -7062,42 +7065,59 @@ void Client::AddAutoXTarget(Mob *m)
 
 void Client::RemoveXTarget(Mob *m, bool OnlyAutoSlots)
 {
-	if(!XTargettingAvailable())
+	if (!XTargettingAvailable())
 		return;
 
 	bool HadFreeAutoSlotsBefore = false;
 
 	int FreedAutoSlots = 0;
 
-	if(m->GetID() == 0)
+	if (m->GetID() == 0)
 		return;
 
-	for(int i = 0; i < GetMaxXTargets(); ++i)
-	{
-		if(OnlyAutoSlots && (XTargets[i].Type !=Auto))
+	for (int i = 0; i < GetMaxXTargets(); ++i) {
+		if (OnlyAutoSlots && XTargets[i].Type != Auto)
 			continue;
 
-		if(XTargets[i].ID == m->GetID())
-		{
-			if(XTargets[i].Type == CurrentTargetNPC)
+		if (XTargets[i].ID == m->GetID()) {
+			if (XTargets[i].Type == CurrentTargetNPC)
 				XTargets[i].Type = Auto;
 
-			if(XTargets[i].Type == Auto)
+			if (XTargets[i].Type == Auto)
 				++FreedAutoSlots;
 
 			XTargets[i].ID = 0;
-
-			SendXTargetPacket(i, nullptr);
-		}
-		else
-		{
-			if((XTargets[i].Type == Auto) && (XTargets[i].ID == 0))
+			XTargets[i].dirty = true;
+		} else {
+			if (XTargets[i].Type == Auto && XTargets[i].ID == 0)
 				HadFreeAutoSlotsBefore = true;
 		}
 	}
-	// If there are more mobs aggro on us than we had auto-hate slots, add one of those haters into the slot(s) we just freed up.
-	if(!HadFreeAutoSlotsBefore && FreedAutoSlots)
+
+	// move shit up!
+	std::queue<int> empty_slots;
+	for (int i = 0; i < GetMaxXTargets(); ++i) {
+		if (XTargets[i].Type != Auto)
+			continue;
+
+		if (XTargets[i].ID == 0) {
+			empty_slots.push(i);
+			continue;
+		}
+
+		if (XTargets[i].ID != 0 && !empty_slots.empty()) {
+			int temp = empty_slots.front();
+			std::swap(XTargets[i], XTargets[temp]);
+			XTargets[i].dirty = XTargets[temp].dirty = true;
+			empty_slots.pop();
+			empty_slots.push(i);
+		}
+	}
+	// If there are more mobs aggro on us than we had auto-hate slots, add one of those haters into the slot(s) we
+	// just freed up.
+	if (!HadFreeAutoSlotsBefore && FreedAutoSlots)
 		entity_list.RefreshAutoXTargets(this);
+	SendXTargetUpdates();
 }
 
 void Client::UpdateXTargetType(XTargetType Type, Mob *m, const char *Name)
@@ -7163,6 +7183,42 @@ void Client::SendXTargetPacket(uint32 Slot, Mob *m)
 	}
 	outapp->WriteUInt32(XTargets[Slot].ID);
 	outapp->WriteString(m ? m->GetCleanName() : XTargets[Slot].Name);
+	FastQueuePacket(&outapp);
+}
+
+// This is a bulk packet, we use it when we remove something since we need to reorder the xtargets and maybe
+// add new mobs! Currently doesn't check if there is a dirty flag set, so it should only be called when there is
+void Client::SendXTargetUpdates()
+{
+	if (!XTargettingAvailable())
+		return;
+
+	int count = 0;
+	// header is 4 bytes max xtargets, 4 bytes count
+	// entry is 4 bytes slot, 1 byte unknown, 4 bytes ID, 65 char name
+	auto outapp = new EQApplicationPacket(OP_XTargetResponse, 8 + 74 * GetMaxXTargets()); // fuck it max size
+	outapp->WriteUInt32(GetMaxXTargets());
+	outapp->WriteUInt32(1); // we will correct this later
+	for (int i = 0; i < GetMaxXTargets(); ++i) {
+		if (XTargets[i].dirty) {
+			outapp->WriteUInt32(i);
+			outapp->WriteUInt8(0); // no idea what this is
+			outapp->WriteUInt32(XTargets[i].ID);
+			outapp->WriteString(XTargets[i].Name);
+			count++;
+			XTargets[i].dirty = false;
+		}
+	}
+
+	assert(count > 0); // we don't have any logic to prevent this, assert for now
+
+	auto newbuff = new uchar[outapp->GetWritePosition()];
+	memcpy(newbuff, outapp->pBuffer, outapp->GetWritePosition());
+	safe_delete_array(outapp->pBuffer);
+	outapp->pBuffer = newbuff;
+	outapp->size = outapp->GetWritePosition();
+	outapp->SetWritePosition(4);
+	outapp->WriteUInt32(count);
 	FastQueuePacket(&outapp);
 }
 
