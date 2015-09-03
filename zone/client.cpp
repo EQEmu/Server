@@ -300,6 +300,7 @@ Client::Client(EQStreamInterface* ieqs)
 		XTargets[i].Type = Auto;
 		XTargets[i].ID = 0;
 		XTargets[i].Name[0] = 0;
+		XTargets[i].dirty = false;
 	}
 	MaxXTargets = 5;
 	XTargetAutoAddHaters = true;
