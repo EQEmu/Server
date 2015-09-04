@@ -7095,7 +7095,8 @@ void Client::RemoveXTarget(Mob *m, bool OnlyAutoSlots)
 		}
 	}
 
-	// move shit up!
+	// move shit up! If the removed NPC was in a CurrentTargetNPC slot it becomes Auto
+	// and we need to potentially fill it
 	std::queue<int> empty_slots;
 	for (int i = 0; i < GetMaxXTargets(); ++i) {
 		if (XTargets[i].Type != Auto)
@@ -7211,7 +7212,11 @@ void Client::SendXTargetUpdates()
 		}
 	}
 
-	assert(count > 0); // we don't have any logic to prevent this, assert for now
+	// RemoveXTarget probably got called with a mob not on our xtargets
+	if (count == 0) {
+		safe_delete(outapp);
+		return;
+	}
 
 	auto newbuff = new uchar[outapp->GetWritePosition()];
 	memcpy(newbuff, outapp->pBuffer, outapp->GetWritePosition());
