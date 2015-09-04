@@ -623,11 +623,17 @@ bool Client::UseDiscipline(uint32 spell_id, uint32 target) {
 	if(spell.recast_time > 0)
 	{
 		uint32 reduced_recast = spell.recast_time / 1000;
-		reduced_recast -= GetFocusEffect(focusReduceRecastTime, spell_id);
-		if(reduced_recast <= 0){
+		auto focus = GetFocusEffect(focusReduceRecastTime, spell_id);
+		// do stupid stuff because custom servers.
+		// we really should be able to just do the -= focus but since custom servers could have shorter reuse timers
+		// we have to make sure we don't underflow the uint32 ...
+		// and yes, the focus effect can be used to increase the durations (spell 38944)
+		if (focus > reduced_recast) {
 			reduced_recast = 0;
 			if (GetPTimers().Enabled((uint32)DiscTimer))
 				GetPTimers().Clear(&database, (uint32)DiscTimer);
+		} else {
+			reduced_recast -= focus;
 		}
 
 		if (reduced_recast > 0)
