@@ -23,7 +23,7 @@ VERBOSE = False  # messaging: {False - minimal, True - robust}
 base_path = os.getcwd()[:-14]  # '/utils/scripts'
 base_path = base_path.replace('\\', '/')
 
-client_list = ['6.2', 'Titanium', 'SoF', 'SoD', 'Underfoot', 'RoF', 'RoF2']
+client_list = ['6.2', 'Titanium', 'SoF', 'SoD', 'UF', 'RoF', 'RoF2']
 server_list = ['Login', 'World', 'Zone', 'UCS']
 
 client_opcodes = {}  # x[key='Client'][key='OP_CodeName'](value='0x####')
@@ -248,7 +248,7 @@ def loadclientopcodes():
     
     for client in client_list:
         try:
-            short_name = '/patch_{0}.conf'.format(client).lower()
+            short_name = '/patch_{0}.conf'.format(client)
 
             file_name = '{0}/utils/patches{1}'.format(
                 base_path,
