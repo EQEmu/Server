@@ -2429,17 +2429,23 @@ void Mob::AddToHateList(Mob* other, uint32 hate /*= 0*/, int32 damage /*= 0*/, b
 	Mob* targetmob = this->GetTarget();
 
 	if(other){
+		bool on_hatelist = CheckAggro(other);
 		AddRampage(other);
-		int hatemod = 100 + other->spellbonuses.hatemod + other->itembonuses.hatemod + other->aabonuses.hatemod;
+		if (on_hatelist) { // odd reason, if you're not on the hate list, subtlety etc don't apply!
+			// Spell Casting Subtlety etc
+			int hatemod = 100 + other->spellbonuses.hatemod + other->itembonuses.hatemod + other->aabonuses.hatemod;
 
-		int32 shieldhatemod = other->spellbonuses.ShieldEquipHateMod + other->itembonuses.ShieldEquipHateMod + other->aabonuses.ShieldEquipHateMod;
+			int32 shieldhatemod = other->spellbonuses.ShieldEquipHateMod + other->itembonuses.ShieldEquipHateMod + other->aabonuses.ShieldEquipHateMod;
 
-		if (shieldhatemod && other->HasShieldEquiped())
-			hatemod += shieldhatemod;
+			if (shieldhatemod && other->HasShieldEquiped())
+				hatemod += shieldhatemod;
 
-		if(hatemod < 1)
-			hatemod = 1;
-		hate = ((hate * (hatemod))/100);
+			if(hatemod < 1)
+				hatemod = 1;
+			hate = ((hate * (hatemod))/100);
+		} else {
+			hate += 100; // 100 bonus initial aggro
+		}
 	}
 
 	if(IsPet() && GetOwner() && GetOwner()->GetAA(aaPetDiscipline) && IsHeld() && !IsFocused()) { //ignore aggro if hold and !focus

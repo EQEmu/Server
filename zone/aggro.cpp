@@ -45,7 +45,7 @@ void EntityList::CheckClientAggro(Client *around)
 			continue;
 
 		if (mob->CheckWillAggro(around) && !mob->CheckAggro(around))
-			mob->AddToHateList(around, 100);
+			mob->AddToHateList(around, 25);
 	}
 }
 
@@ -1115,15 +1115,13 @@ int32 Mob::CheckAggroAmount(uint16 spell_id, Mob *target, bool isproc)
 		int HateMod = RuleI(Aggro, SpellAggroMod);
 		HateMod += GetFocusEffect(focusSpellHateMod, spell_id);
 
-		//Live AA - Spell casting subtlety
-		HateMod += aabonuses.hatemod + spellbonuses.hatemod + itembonuses.hatemod;
-
 		AggroAmount = (AggroAmount * HateMod) / 100;
 	}
 
 	// initial aggro gets a bonus 100 besides for dispel or hate override
-	if (!dispel && spells[spell_id].HateAdded == 0 && !on_hatelist)
-		AggroAmount += 100;
+	// We add this 100 in AddToHateList so we need to account for the oddities here
+	if (dispel && spells[spell_id].HateAdded > 0 && !on_hatelist)
+		AggroAmount -= 100;
 
 	return AggroAmount + spells[spell_id].bonushate + nonModifiedAggro;
 }
@@ -1180,9 +1178,6 @@ int32 Mob::CheckHealAggroAmount(uint16 spell_id, Mob *target, uint32 heal_possib
 	if (AggroAmount > 0) {
 		int HateMod = RuleI(Aggro, SpellAggroMod);
 		HateMod += GetFocusEffect(focusSpellHateMod, spell_id);
-
-		//Live AA - Spell casting subtlety
-		HateMod += aabonuses.hatemod + spellbonuses.hatemod + itembonuses.hatemod;
 
 		AggroAmount = (AggroAmount * HateMod) / 100;
 	}
