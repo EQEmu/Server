@@ -746,7 +746,7 @@ public:
 	inline void SetExtraHaste(int Haste) { ExtraHaste = Haste; }
 	virtual int GetHaste();
 
-	uint8 GetWeaponDamageBonus(const Item_Struct* Weapon);
+	uint8 GetWeaponDamageBonus(const Item_Struct* weapon, bool offhand = false);
 	uint16 GetDamageTable(SkillUseTypes skillinuse);
 	virtual int GetMonkHandToHandDamage(void);
 

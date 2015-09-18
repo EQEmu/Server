@@ -1292,7 +1292,7 @@ bool Client::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, b
 		if (Hand == MainSecondary) {
 			if (aabonuses.SecondaryDmgInc || itembonuses.SecondaryDmgInc || spellbonuses.SecondaryDmgInc){
 
-				ucDamageBonus = GetWeaponDamageBonus( weapon ? weapon->GetItem() : (const Item_Struct*) nullptr );
+				ucDamageBonus = GetWeaponDamageBonus(weapon ? weapon->GetItem() : (const Item_Struct*) nullptr, true );
 
 				min_hit += (int) ucDamageBonus;
 				max_hit += (int) ucDamageBonus;
@@ -2656,410 +2656,45 @@ void Mob::DamageShield(Mob* attacker, bool spell_ds) {
 	}
 }
 
-uint8 Mob::GetWeaponDamageBonus( const Item_Struct *Weapon )
+uint8 Mob::GetWeaponDamageBonus(const Item_Struct *weapon, bool offhand)
 {
-	// This function calculates and returns the damage bonus for the weapon identified by the parameter "Weapon".
-	// Modified 9/21/2008 by Cantus
-
-	// Assert: This function should only be called for hits by the mainhand, as damage bonuses apply only to the
-	// weapon in the primary slot. Be sure to check that Hand == MainPrimary before calling.
-
-	// Assert: The caller should ensure that Weapon is actually a weapon before calling this function.
-	// The ItemInst::IsWeapon() method can be used to quickly determine this.
-
-	// Assert: This function should not be called if the player's level is below 28, as damage bonuses do not begin
-	// to apply until level 28.
-
-	// Assert: This function should not be called unless the player is a melee class, as casters do not receive a damage bonus.
-
-	if( Weapon == nullptr || Weapon->ItemType == ItemType1HSlash || Weapon->ItemType == ItemType1HBlunt || Weapon->ItemType == ItemTypeMartial || Weapon->ItemType == ItemType1HPiercing )
-	{
-		// The weapon in the player's main (primary) hand is a one-handed weapon, or there is no item equipped at all.
-		//
-		// According to player posts on Allakhazam, 1H damage bonuses apply to bare fists (nothing equipped in the mainhand,
-		// as indicated by Weapon == nullptr).
-		//
-		// The following formula returns the correct damage bonus for all 1H weapons:
-
-		return (uint8) ((GetLevel() - 25) / 3);
-	}
-
-	// If we've gotten to this point, the weapon in the mainhand is a two-handed weapon.
-	// Calculating damage bonuses for 2H weapons is more complicated, as it's based on PC level AND the delay of the weapon.
-	// The formula to calculate 2H bonuses is HIDEOUS. It's a huge conglomeration of ternary operators and multiple operations.
+	// dev quote with old and new formulas
+	// https://forums.daybreakgames.com/eq/index.php?threads/test-update-09-17-15.226618/page-5#post-3326194
 	//
-	// The following is a hybrid approach. In cases where the Level and Delay merit a formula that does not use many operators,
-	// the formula is used. In other cases, lookup tables are used for speed.
-	// Though the following code may look bloated and ridiculous, it's actually a very efficient way of calculating these bonuses.
+	// We assume that the level check is done before calling this function and sinister strikes is checked before
+	// calling for offhand DB
+	auto level = GetLevel();
+	if (!weapon)
+		return 1 + ((level - 28) / 3); // how does weaponless scale?
 
-	// Player Level is used several times in the code below, so save it into a variable.
-	// If GetLevel() were an ordinary function, this would DEFINITELY make sense, as it'd cut back on all of the function calling
-	// overhead involved with multiple calls to GetLevel(). But in this case, GetLevel() is a simple, inline accessor method.
-	// So it probably doesn't matter. If anyone knows for certain that there is no overhead involved with calling GetLevel(),
-	// as I suspect, then please feel free to delete the following line, and replace all occurences of "ucPlayerLevel" with "GetLevel()".
-	uint8 ucPlayerLevel = (uint8) GetLevel();
-
-	// The following may look cleaner, and would certainly be easier to understand, if it was
-	// a simple 53x150 cell matrix.
-	//
-	// However, that would occupy 7,950 Bytes of memory (7.76 KB), and would likely result
-	// in "thrashing the cache" when performing lookups.
-	//
-	// Initially, I thought the best approach would be to reverse-engineer the formula used by
-	// Sony/Verant to calculate these 2H weapon damage bonuses. But the more than Reno and I
-	// worked on figuring out this formula, the more we're concluded that the formula itself ugly
-	// (that is, it contains so many operations and conditionals that it's fairly CPU intensive).
-	// Because of that, we're decided that, in most cases, a lookup table is the most efficient way
-	// to calculate these damage bonuses.
-	//
-	// The code below is a hybrid between a pure formulaic approach and a pure, brute-force
-	// lookup table. In cases where a formula is the best bet, I use a formula. In other places
-	// where a formula would be ugly, I use a lookup table in the interests of speed.
-
-	if( Weapon->Delay <= 27 )
-	{
-		// Damage Bonuses for all 2H weapons with delays of 27 or less are identical.
-		// They are the same as the damage bonus would be for a corresponding 1H weapon, plus one.
-		// This formula applies to all levels 28-80, and will probably continue to apply if
-
-		// the level cap on Live ever is increased beyond 80.
-
-		return (ucPlayerLevel - 22) / 3;
-	}
-
-	if( ucPlayerLevel == 65 && Weapon->Delay <= 59 )
-	{
-		// Consider these two facts:
-		// * Level 65 is the maximum level on many EQ Emu servers.
-		// * If you listed the levels of all characters logged on to a server, odds are that the number you'll
-		// see most frequently is level 65. That is, there are more level 65 toons than any other single level.
-		//
-		// Therefore, if we can optimize this function for level 65 toons, we're speeding up the server!
-		//
-		// With that goal in mind, I create an array of Damage Bonuses for level 65 characters wielding 2H weapons with
-		// delays between 28 and 59 (inclusive). I suspect that this one small lookup array will therefore handle
-		// many of the calls to this function.
-
-		static const uint8 ucLevel65DamageBonusesForDelays28to59[] = {35, 35, 36, 36, 37, 37, 38, 38, 39, 39, 40, 40, 42, 42, 42, 45, 45, 47, 48, 49, 49, 51, 51, 52, 53, 54, 54, 56, 56, 57, 58, 59};
-
-		return ucLevel65DamageBonusesForDelays28to59[Weapon->Delay-28];
-	}
-
-	if( ucPlayerLevel > 65 )
-	{
-		if( ucPlayerLevel > 80 )
-		{
-			// As level 80 is currently the highest achievable level on Live, we only include
-			// damage bonus information up to this level.
-			//
-			// If there is a custom EQEmu server that allows players to level beyond 80, the
-			// damage bonus for their 2H weapons will simply not increase beyond their damage
-			// bonus at level 80.
-
-			ucPlayerLevel = 80;
+	auto delay = weapon->Delay;
+	if (weapon->ItemType == ItemType1HSlash || weapon->ItemType == ItemType1HBlunt ||
+	    weapon->ItemType == ItemTypeMartial || weapon->ItemType == ItemType1HPiercing) {
+		// we assume sinister strikes is checked before calling here
+		if (!offhand) {
+			if (delay <= 39)
+				return 1 + ((level - 28) / 3);
+			else if (delay < 43)
+				return 2 + ((level - 28) / 3) + ((delay - 40) / 3);
+			else if (delay < 45)
+				return 3 + ((level - 28) / 3) + ((delay - 40) / 3);
+			else if (delay >= 45)
+				return 4 + ((level - 28) / 3) + ((delay - 40) / 3);
+		} else {
+			return 1 + ((level - 28) / 3) * (delay / 30);
 		}
-
-		// Lucy does not list a chart of damage bonuses for players levels 66+,
-		// so my original version of this function just applied the level 65 damage
-		// bonus for level 66+ toons. That sucked for higher level toons, as their
-		// 2H weapons stopped ramping up in DPS as they leveled past 65.
-		//
-		// Thanks to the efforts of two guys, this is no longer the case:
-		//
-		// Janusd (Zetrakyl) ran a nifty query against the PEQ item database to list
-		// the name of an example 2H weapon that represents each possible unique 2H delay.
-		//
-		// Romai then wrote an excellent script to automatically look up each of those
-		// weapons, open the Lucy item page associated with it, and iterate through all
-		// levels in the range 66 - 80. He saved the damage bonus for that weapon for
-		// each level, and that forms the basis of the lookup tables below.
-
-		if( Weapon->Delay <= 59 )
-		{
-			static const uint8 ucDelay28to59Levels66to80[32][15]=
-			{
-			/*							Level:								*/
-			/*	 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80	*/
-
-				{36, 37, 38, 39, 41, 42, 43, 44, 45, 47, 49, 49, 49, 50, 53},	/* Delay = 28 */
-				{36, 38, 38, 39, 42, 43, 43, 45, 46, 48, 49, 50, 51, 52, 54},	/* Delay = 29 */
-				{37, 38, 39, 40, 43, 43, 44, 46, 47, 48, 50, 51, 52, 53, 55},	/* Delay = 30 */
-				{37, 39, 40, 40, 43, 44, 45, 46, 47, 49, 51, 52, 52, 52, 54},	/* Delay = 31 */
-				{38, 39, 40, 41, 44, 45, 45, 47, 48, 48, 50, 52, 53, 55, 57},	/* Delay = 32 */
-				{38, 40, 41, 41, 44, 45, 46, 48, 49, 50, 52, 53, 54, 56, 58},	/* Delay = 33 */
-				{39, 40, 41, 42, 45, 46, 47, 48, 49, 51, 53, 54, 55, 57, 58},	/* Delay = 34 */
-				{39, 41, 42, 43, 46, 46, 47, 49, 50, 52, 54, 55, 56, 57, 59},	/* Delay = 35 */
-				{40, 41, 42, 43, 46, 47, 48, 50, 51, 53, 55, 55, 56, 58, 60},	/* Delay = 36 */
-				{40, 42, 43, 44, 47, 48, 49, 50, 51, 53, 55, 56, 57, 59, 61},	/* Delay = 37 */
-				{41, 42, 43, 44, 47, 48, 49, 51, 52, 54, 56, 57, 58, 60, 62},	/* Delay = 38 */
-				{41, 43, 44, 45, 48, 49, 50, 52, 53, 55, 57, 58, 59, 61, 63},	/* Delay = 39 */
-				{43, 45, 46, 47, 50, 51, 52, 54, 55, 57, 59, 60, 61, 63, 65},	/* Delay = 40 */
-				{43, 45, 46, 47, 50, 51, 52, 54, 55, 57, 59, 60, 61, 63, 65},	/* Delay = 41 */
-				{44, 46, 47, 48, 51, 52, 53, 55, 56, 58, 60, 61, 62, 64, 66},	/* Delay = 42 */
-				{46, 48, 49, 50, 53, 54, 55, 58, 59, 61, 63, 64, 65, 67, 69},	/* Delay = 43 */
-				{47, 49, 50, 51, 54, 55, 56, 58, 59, 61, 64, 65, 66, 68, 70},	/* Delay = 44 */
-				{48, 50, 51, 52, 56, 57, 58, 60, 61, 63, 65, 66, 68, 70, 72},	/* Delay = 45 */
-				{50, 52, 53, 54, 57, 58, 59, 62, 63, 65, 67, 68, 69, 71, 74},	/* Delay = 46 */
-				{50, 52, 53, 55, 58, 59, 60, 62, 63, 66, 68, 69, 70, 72, 74},	/* Delay = 47 */
-				{51, 53, 54, 55, 58, 60, 61, 63, 64, 66, 69, 69, 71, 73, 75},	/* Delay = 48 */
-				{52, 54, 55, 57, 60, 61, 62, 65, 66, 68, 70, 71, 73, 75, 77},	/* Delay = 49 */
-				{53, 55, 56, 57, 61, 62, 63, 65, 67, 69, 71, 72, 74, 76, 78},	/* Delay = 50 */
-				{53, 55, 57, 58, 61, 62, 64, 66, 67, 69, 72, 73, 74, 77, 79},	/* Delay = 51 */
-				{55, 57, 58, 59, 63, 64, 65, 68, 69, 71, 74, 75, 76, 78, 81},	/* Delay = 52 */
-				{57, 55, 59, 60, 63, 65, 66, 68, 70, 72, 74, 76, 77, 79, 82},	/* Delay = 53 */
-				{56, 58, 59, 61, 64, 65, 67, 69, 70, 73, 75, 76, 78, 80, 82},	/* Delay = 54 */
-				{57, 59, 61, 62, 66, 67, 68, 71, 72, 74, 77, 78, 80, 82, 84},	/* Delay = 55 */
-				{58, 60, 61, 63, 66, 68, 69, 71, 73, 75, 78, 79, 80, 83, 85},	/* Delay = 56 */
-
-				/* Important Note: Janusd's search for 2H weapons did not find	*/
-				/* any 2H weapon with a delay of 57. Therefore the values below	*/
-				/* are interpolated, not exact!									*/
-				{59, 61, 62, 64, 67, 69, 70, 72, 74, 76, 77, 78, 81, 84, 86},	/* Delay = 57 INTERPOLATED */
-
-				{60, 62, 63, 65, 68, 70, 71, 74, 75, 78, 80, 81, 83, 85, 88},	/* Delay = 58 */
-
-				/* Important Note: Janusd's search for 2H weapons did not find	*/
-				/* any 2H weapon with a delay of 59. Therefore the values below	*/
-				/* are interpolated, not exact!									*/
-				{60, 62, 64, 65, 69, 70, 72, 74, 76, 78, 81, 82, 84, 86, 89},	/* Delay = 59 INTERPOLATED */
-			};
-
-			return ucDelay28to59Levels66to80[Weapon->Delay-28][ucPlayerLevel-66];
-		}
-		else
-		{
-			// Delay is 60+
-
-			const static uint8 ucDelayOver59Levels66to80[6][15] =
-			{
-			/*							Level:								*/
-			/*	 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80	*/
-
-				{61, 63, 65, 66, 70, 71, 73, 75, 77, 79, 82, 83, 85, 87, 90},				/* Delay = 60 */
-				{65, 68, 69, 71, 75, 76, 78, 80, 82, 85, 87, 89, 91, 93, 96},				/* Delay = 65 */
-
-				/* Important Note: Currently, the only 2H weapon with a delay	*/
-				/* of 66 is not player equippable (it's None/None). So I'm		*/
-				/* leaving it commented out to keep this table smaller.			*/
-				//{66, 68, 70, 71, 75, 77, 78, 81, 83, 85, 88, 90, 91, 94, 97},				/* Delay = 66 */
-
-				{70, 72, 74, 76, 80, 81, 83, 86, 88, 88, 90, 95, 97, 99, 102},				/* Delay = 70 */
-				{82, 85, 87, 89, 89, 94, 98, 101, 103, 106, 109, 111, 114, 117, 120},		/* Delay = 85 */
-				{90, 93, 96, 98, 103, 105, 107, 111, 113, 116, 120, 122, 125, 128, 131},	/* Delay = 95 */
-
-				/* Important Note: Currently, the only 2H weapons with delay	*/
-				/* 100 are GM-only items purchased from vendors in Sunset Home	*/
-				/* (cshome). Because they are highly unlikely to be used in		*/
-				/* combat, I'm commenting it out to keep the table smaller.		*/
-				//{95, 98, 101, 103, 108, 110, 113, 116, 119, 122, 126, 128, 131, 134, 138},/* Delay = 100 */
-
-				{136, 140, 144, 148, 154, 157, 161, 166, 170, 174, 179, 183, 187, 191, 196}	/* Delay = 150 */
-			};
-
-			if( Weapon->Delay < 65 )
-			{
-				return ucDelayOver59Levels66to80[0][ucPlayerLevel-66];
-			}
-			else if( Weapon->Delay < 70 )
-			{
-				return ucDelayOver59Levels66to80[1][ucPlayerLevel-66];
-			}
-			else if( Weapon->Delay < 85 )
-			{
-				return ucDelayOver59Levels66to80[2][ucPlayerLevel-66];
-			}
-			else if( Weapon->Delay < 95 )
-			{
-				return ucDelayOver59Levels66to80[3][ucPlayerLevel-66];
-			}
-			else if( Weapon->Delay < 150 )
-			{
-				return ucDelayOver59Levels66to80[4][ucPlayerLevel-66];
-			}
-			else
-			{
-				return ucDelayOver59Levels66to80[5][ucPlayerLevel-66];
-			}
-		}
-	}
-
-	// If we've gotten to this point in the function without hitting a return statement,
-	// we know that the character's level is between 28 and 65, and that the 2H weapon's
-	// delay is 28 or higher.
-
-	// The Damage Bonus values returned by this function (in the level 28-65 range) are
-	// based on a table of 2H Weapon Damage Bonuses provided by Lucy at the following address:
-	// http://lucy.allakhazam.com/dmgbonus.html
-
-	if( Weapon->Delay <= 39 )
-	{
-		if( ucPlayerLevel <= 53)
-		{
-			// The Damage Bonus for all 2H weapons with delays between 28 and 39 (inclusive) is the same for players level 53 and below...
-			static const uint8 ucDelay28to39LevelUnder54[] = {1, 1, 2, 3, 3, 3, 4, 5, 5, 6, 6, 6, 8, 8, 8, 9, 9, 10, 11, 11, 11, 12, 13, 14, 16, 17};
-
-			// As a note: The following formula accurately calculates damage bonuses for 2H weapons with delays in the range 28-39 (inclusive)
-			// for characters levels 28-50 (inclusive):
-			// return ( (ucPlayerLevel - 22) / 3 ) + ( (ucPlayerLevel - 25) / 5 );
-			//
-			// However, the small lookup array used above is actually much faster. So we'll just use it instead of the formula
-			//
-			// (Thanks to Reno for helping figure out the above formula!)
-
-			return ucDelay28to39LevelUnder54[ucPlayerLevel-28];
-		}
-		else
-		{
-			// Use a matrix to look up the damage bonus for 2H weapons with delays between 28 and 39 wielded by characters level 54 and above.
-			static const uint8 ucDelay28to39Level54to64[12][11] =
-			{
-			/*						Level:					*/
-			/*	 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64	*/
-
-				{17, 21, 21, 23, 25, 26, 28, 30, 31, 31, 33},	/* Delay = 28 */
-				{17, 21, 22, 23, 25, 26, 29, 30, 31, 32, 34},	/* Delay = 29 */
-				{18, 21, 22, 23, 25, 27, 29, 31, 32, 32, 34},	/* Delay = 30 */
-				{18, 21, 22, 23, 25, 27, 29, 31, 32, 33, 34},	/* Delay = 31 */
-				{18, 21, 22, 24, 26, 27, 30, 32, 32, 33, 35},	/* Delay = 32 */
-				{18, 21, 22, 24, 26, 27, 30, 32, 33, 34, 35},	/* Delay = 33 */
-				{18, 22, 22, 24, 26, 28, 30, 32, 33, 34, 36},	/* Delay = 34 */
-				{18, 22, 23, 24, 26, 28, 31, 33, 34, 34, 36},	/* Delay = 35 */
-				{18, 22, 23, 25, 27, 28, 31, 33, 34, 35, 37},	/* Delay = 36 */
-				{18, 22, 23, 25, 27, 29, 31, 33, 34, 35, 37},	/* Delay = 37 */
-				{18, 22, 23, 25, 27, 29, 32, 34, 35, 36, 38},	/* Delay = 38 */
-				{18, 22, 23, 25, 27, 29, 32, 34, 35, 36, 38}	/* Delay = 39 */
-			};
-
-			return ucDelay28to39Level54to64[Weapon->Delay-28][ucPlayerLevel-54];
-		}
-	}
-	else if( Weapon->Delay <= 59 )
-	{
-		if( ucPlayerLevel <= 52 )
-		{
-			if( Weapon->Delay <= 45 )
-			{
-				static const uint8 ucDelay40to45Levels28to52[6][25] =
-				{
-				/*												Level:														*/
-				/*	 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52		*/
-
-					{2,  2,  3,  4,  4,  4,  5,  6,  6,  7,  7,  7,  9,  9,  9,  10, 10, 11, 12, 12, 12, 13, 14, 16, 18},	/* Delay = 40 */
-					{2,  2,  3,  4,  4,  4,  5,  6,  6,  7,  7,  7,  9,  9,  9,  10, 10, 11, 12, 12, 12, 13, 14, 16, 18},	/* Delay = 41 */
-					{2,  2,  3,  4,  4,  4,  5,  6,  6,  7,  7,  7,  9,  9,  9,  10, 10, 11, 12, 12, 12, 13, 14, 16, 18},	/* Delay = 42 */
-					{4,  4,  5,  6,  6,  6,  7,  8,  8,  9,  9,  9,  11, 11, 11, 12, 12, 13, 14, 14, 14, 15, 16, 18, 20},	/* Delay = 43 */
-					{4,  4,  5,  6,  6,  6,  7,  8,  8,  9,  9,  9,  11, 11, 11, 12, 12, 13, 14, 14, 14, 15, 16, 18, 20},	/* Delay = 44 */
-					{5,  5,  6,  7,  7,  7,  8,  9,  9,  10, 10, 10, 12, 12, 12, 13, 13, 14, 15, 15, 15, 16, 17, 19, 21} 	/* Delay = 45 */
-				};
-
-				return ucDelay40to45Levels28to52[Weapon->Delay-40][ucPlayerLevel-28];
-			}
-			else
-			{
-				static const uint8 ucDelay46Levels28to52[] = {6, 6, 7, 8, 8, 8, 9, 10, 10, 11, 11, 11, 13, 13, 13, 14, 14, 15, 16, 16, 16, 17, 18, 20, 22};
-
-				return ucDelay46Levels28to52[ucPlayerLevel-28] + ((Weapon->Delay-46) / 3);
-			}
-		}
-		else
-		{
-			// Player is in the level range 53 - 64
-
-			// Calculating damage bonus for 2H weapons with a delay between 40 and 59 (inclusive) involves, unforunately, a brute-force matrix lookup.
-			static const uint8 ucDelay40to59Levels53to64[20][37] =
-			{
-			/*						Level:							*/
-			/*	 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64		*/
-
-				{19, 20, 24, 25, 27, 29, 31, 34, 36, 37, 38, 40},	/* Delay = 40 */
-				{19, 20, 24, 25, 27, 29, 31, 34, 36, 37, 38, 40},	/* Delay = 41 */
-				{19, 20, 24, 25, 27, 29, 31, 34, 36, 37, 38, 40},	/* Delay = 42 */
-				{21, 22, 26, 27, 29, 31, 33, 37, 39, 40, 41, 43},	/* Delay = 43 */
-				{21, 22, 26, 27, 29, 32, 34, 37, 39, 40, 41, 43},	/* Delay = 44 */
-				{22, 23, 27, 28, 31, 33, 35, 38, 40, 42, 43, 45},	/* Delay = 45 */
-				{23, 24, 28, 30, 32, 34, 36, 40, 42, 43, 44, 46},	/* Delay = 46 */
-				{23, 24, 29, 30, 32, 34, 37, 40, 42, 43, 44, 47},	/* Delay = 47 */
-				{23, 24, 29, 30, 32, 35, 37, 40, 43, 44, 45, 47},	/* Delay = 48 */
-				{24, 25, 30, 31, 34, 36, 38, 42, 44, 45, 46, 49},	/* Delay = 49 */
-				{24, 26, 30, 31, 34, 36, 39, 42, 44, 46, 47, 49},	/* Delay = 50 */
-				{24, 26, 30, 31, 34, 36, 39, 42, 45, 46, 47, 49},	/* Delay = 51 */
-				{25, 27, 31, 33, 35, 38, 40, 44, 46, 47, 49, 51},	/* Delay = 52 */
-				{25, 27, 31, 33, 35, 38, 40, 44, 46, 48, 49, 51},	/* Delay = 53 */
-				{26, 27, 32, 33, 36, 38, 41, 44, 47, 48, 49, 52},	/* Delay = 54 */
-				{27, 28, 33, 34, 37, 39, 42, 46, 48, 50, 51, 53},	/* Delay = 55 */
-				{27, 28, 33, 34, 37, 40, 42, 46, 49, 50, 51, 54},	/* Delay = 56 */
-				{27, 28, 33, 34, 37, 40, 43, 46, 49, 50, 52, 54},	/* Delay = 57 */
-				{28, 29, 34, 36, 39, 41, 44, 48, 50, 52, 53, 56},	/* Delay = 58 */
-				{28, 29, 34, 36, 39, 41, 44, 48, 51, 52, 54, 56}	/* Delay = 59 */
-			};
-
-			return ucDelay40to59Levels53to64[Weapon->Delay-40][ucPlayerLevel-53];
-		}
-	}
-	else
-	{
-		// The following table allows us to look up Damage Bonuses for weapons with delays greater than or equal to 60.
-		//
-		// There aren't a lot of 2H weapons with a delay greater than 60. In fact, both a database and Lucy search run by janusd confirm
-		// that the only unique 2H delays greater than 60 are: 65, 70, 85, 95, and 150.
-		//
-		// To be fair, there are also weapons with delays of 66 and 100. But they are either not equippable (None/None), or are
-		// only available to GMs from merchants in Sunset Home (cshome). In order to keep this table "lean and mean", I will not
-		// include the values for delays 66 and 100. If they ever are wielded, the 66 delay weapon will use the 65 delay bonuses,
-		// and the 100 delay weapon will use the 95 delay bonuses. So it's not a big deal.
-		//
-		// Still, if someone in the future decides that they do want to include them, here are the tables for these two delays:
-		//
-		// {12, 12, 13, 14, 14, 14, 15, 16, 16, 17, 17, 17, 19, 19, 19, 20, 20, 21, 22, 22, 22, 23, 24, 26, 29, 30, 32, 37, 39, 42, 45, 48, 53, 55, 57, 59, 61, 64}		/* Delay = 66 */
-		// {24, 24, 25, 26, 26, 26, 27, 28, 28, 29, 29, 29, 31, 31, 31, 32, 32, 33, 34, 34, 34, 35, 36, 39, 43, 45, 48, 55, 57, 62, 66, 71, 77, 80, 83, 85, 89, 92}		/* Delay = 100 */
-		//
-		// In case there are 2H weapons added in the future with delays other than those listed above (and until the damage bonuses
-		// associated with that new delay are added to this function), this function is designed to do the following:
-		//
-		//		For weapons with delays in the range 60-64, use the Damage Bonus that would apply to a 2H weapon with delay 60.
-		//		For weapons with delays in the range 65-69, use the Damage Bonus that would apply to a 2H weapon with delay 65
-		//		For weapons with delays in the range 70-84, use the Damage Bonus that would apply to a 2H weapon with delay 70.
-		//		For weapons with delays in the range 85-94, use the Damage Bonus that would apply to a 2H weapon with delay 85.
-		//		For weapons with delays in the range 95-149, use the Damage Bonus that would apply to a 2H weapon with delay 95.
-		//		For weapons with delays 150 or higher, use the Damage Bonus that would apply to a 2H weapon with delay 150.
-
-		static const uint8 ucDelayOver59Levels28to65[6][38] =
-		{
-		/*																	Level:																					*/
-		/*	 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64. 65	*/
-
-			{10, 10, 11, 12, 12, 12, 13, 14, 14, 15, 15, 15, 17, 17, 17, 18, 18, 19, 20, 20, 20, 21, 22, 24, 27, 28, 30, 35, 36, 39, 42, 45, 49, 51, 53, 54, 57, 59},		/* Delay = 60 */
-			{12, 12, 13, 14, 14, 14, 15, 16, 16, 17, 17, 17, 19, 19, 19, 20, 20, 21, 22, 22, 22, 23, 24, 26, 29, 30, 32, 37, 39, 42, 45, 48, 52, 55, 57, 58, 61, 63},		/* Delay = 65 */
-			{14, 14, 15, 16, 16, 16, 17, 18, 18, 19, 19, 19, 21, 21, 21, 22, 22, 23, 24, 24, 24, 25, 26, 28, 31, 33, 35, 40, 42, 45, 48, 52, 56, 59, 61, 62, 65, 68},		/* Delay = 70 */
-			{19, 19, 20, 21, 21, 21, 22, 23, 23, 24, 24, 24, 26, 26, 26, 27, 27, 28, 29, 29, 29, 30, 31, 34, 37, 39, 41, 47, 49, 54, 57, 61, 66, 69, 72, 74, 77, 80},		/* Delay = 85 */
-			{22, 22, 23, 24, 24, 24, 25, 26, 26, 27, 27, 27, 29, 29, 29, 30, 30, 31, 32, 32, 32, 33, 34, 37, 40, 43, 45, 52, 54, 59, 62, 67, 73, 76, 79, 81, 84, 88},		/* Delay = 95 */
-			{40, 40, 41, 42, 42, 42, 43, 44, 44, 45, 45, 45, 47, 47, 47, 48, 48, 49, 50, 50, 50, 51, 52, 56, 61, 65, 69, 78, 82, 89, 94, 102, 110, 115, 119, 122, 127, 132}	/* Delay = 150 */
-		};
-
-		if( Weapon->Delay < 65 )
-		{
-			return ucDelayOver59Levels28to65[0][ucPlayerLevel-28];
-		}
-		else if( Weapon->Delay < 70 )
-		{
-			return ucDelayOver59Levels28to65[1][ucPlayerLevel-28];
-		}
-		else if( Weapon->Delay < 85 )
-		{
-			return ucDelayOver59Levels28to65[2][ucPlayerLevel-28];
-		}
-		else if( Weapon->Delay < 95 )
-		{
-			return ucDelayOver59Levels28to65[3][ucPlayerLevel-28];
-		}
-		else if( Weapon->Delay < 150 )
-		{
-			return ucDelayOver59Levels28to65[4][ucPlayerLevel-28];
-		}
-		else
-		{
-			return ucDelayOver59Levels28to65[5][ucPlayerLevel-28];
-		}
+	} else {
+		// 2h damage bonus
+		if (delay <= 27)
+			return 1 + ((level - 28) / 3);
+		else if (delay < 40)
+			return 1 + ((level - 28) / 3) + ((level - 30) / 5);
+		else if (delay < 43)
+			return 2 + ((level - 28) / 3) + ((level - 30) / 5) + ((delay - 40) / 3);
+		else if (delay < 45)
+			return 3 + ((level - 28) / 3) + ((level - 30) / 5) + ((delay - 40) / 3);
+		else if (delay >= 45)
+			return 4 + ((level - 28) / 3) + ((level - 30) / 5) + ((delay - 40) / 3);
 	}
 }
 
