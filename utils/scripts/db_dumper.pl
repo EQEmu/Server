@@ -15,7 +15,7 @@ $localdrive = "C:"; #::: Where Windows and all Install Programs are...
 $linesep = "---------------------------------------";
 
 use POSIX qw(strftime);
-my $date = strftime "%m-%d-%Y", localtime;
+my $date = strftime "%m_%d_%Y", localtime;
 print "\nTodays Date: " . $date . "\n";
 
 use Config;
@@ -105,7 +105,7 @@ else {
 
 if($t_tables ne ""){
 	$tables_f_l = substr($t_tables_l, 0, 20) . '...';
-	$target_file = '' . $tables_f_l . ' ' . $date . ''; 
+	$target_file = '' . $tables_f_l . '_' . $date . ''; 
 	print "Performing table based backup...\n";
 	#::: Backup Database... 
 	print "Backing up Database " . $db . "... \n\n"; 
@@ -114,7 +114,7 @@ if($t_tables ne ""){
 	system($cmd); 
 }
 else{ #::: Entire DB Backup
-	$target_file = '' . $db . ' ' . $date . ''; 
+	$target_file = '' . $db . '_' . $date . ''; 
 	#::: Backup Database... 
 	print "Backing up Database " . $db . "... \n\n";  
 	$cmd = 'mysqldump -u' . $user . ' --host ' . $host . ' --max_allowed_packet=512M --password="' . $pass . '" ' . $db . ' > "' . $B_LOC[1] . '' . $file_app . '' . $target_file . '.sql"'; 
