@@ -2681,7 +2681,7 @@ uint8 Mob::GetWeaponDamageBonus(const Item_Struct *weapon, bool offhand)
 			else if (delay >= 45)
 				return 4 + ((level - 28) / 3) + ((delay - 40) / 3);
 		} else {
-			return 1 + ((level - 28) / 3) * (delay / 30);
+			return 1 + ((level - 28) / 3) + (delay / 30);
 		}
 	} else {
 		// 2h damage bonus
