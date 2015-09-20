@@ -22,7 +22,7 @@ if($Config{osname}=~/linux/i){ $OS = "Linux"; }
 if($Config{osname}=~/Win|MS/i){ $OS = "Windows"; }
 
 #::: If current version is less than what world is reporting, then download a new one...
-$current_version = 7;
+$current_version = 8;
 
 if($ARGV[0] eq "V"){
 	if($ARGV[1] > $current_version){ 
@@ -377,9 +377,9 @@ sub AA_Fetch{
 	}
 
 	print "Pulling down PEQ AA Tables...\n";
-	GetRemoteFile("https://raw.githubusercontent.com/EQEmu/Server/master/utils/sql/peq_aa_tables.sql", "db_update/peq_aa_tables.sql");
+	GetRemoteFile("https://raw.githubusercontent.com/EQEmu/Server/master/utils/sql/peq_aa_tables_post_rework.sql", "db_update/peq_aa_tables_post_rework.sql");
 	print "\n\nInstalling AA Tables...\n";
-	print GetMySQLResultFromFile("db_update/peq_aa_tables.sql");
+	print GetMySQLResultFromFile("db_update/peq_aa_tables_post_rework.sql");
 	print "\nDone...\n\n";
 }
 
