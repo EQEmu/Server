@@ -1757,6 +1757,10 @@ void Mob::SendIllusionPacket(uint16 in_race, uint8 in_gender, uint8 in_texture, 
 
 	entity_list.QueueClients(this, outapp);
 	safe_delete(outapp);
+
+	/* Refresh armor and tints after send illusion packet */
+	this->SendArmorAppearance();
+
 	Log.Out(Logs::Detail, Logs::Spells, "Illusion: Race = %i, Gender = %i, Texture = %i, HelmTexture = %i, HairColor = %i, BeardColor = %i, EyeColor1 = %i, EyeColor2 = %i, HairStyle = %i, Face = %i, DrakkinHeritage = %i, DrakkinTattoo = %i, DrakkinDetails = %i, Size = %f",
 		race, gender, texture, helmtexture, haircolor, beardcolor, eyecolor1, eyecolor2, hairstyle, luclinface, drakkin_heritage, drakkin_tattoo, drakkin_details, size);
 }
@@ -2751,12 +2755,12 @@ void Mob::SendArmorAppearance(Client *one_client)
 		if (!IsClient())
 		{
 			const Item_Struct *item;
-			for (int i=0; i< 7 ; ++i)
+			for (int i = 0; i < 7; ++i)
 			{
-				item=database.GetItem(GetEquipment(i));
+				item = database.GetItem(GetEquipment(i));
 				if (item != 0)
 				{
-					SendWearChange(i,one_client);
+					SendWearChange(i, one_client);
 				}
 			}
 		}
