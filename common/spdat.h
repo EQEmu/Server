@@ -613,12 +613,25 @@ typedef enum {
 #define SE_ResourceTap					457 // implemented  Coverts a percent of dmg from dmg spells(DD/DoT) to hp/mana/end.
 #define SE_FactionModPct				458 // implemented  Modifies faction gains and losses by percent.
 #define SE_DamageModifier2				459 // implemented - Modifies melee damage by skill type
+//#define SE_Ff_Override_NotFocusable	460 // 
+//#define SE_Fc_Damage_%2				461 // 
+//#define SE_Fc_Damage_Amt2				462 // 
+//#define SE_Shield_Target				463 // 
+//#define SE_PC_Pet_Rampage				464 // 
+//#define SE_PC_Pet_AE_Rampage			465 // 
+//#define SE_PC_Pet_Flurry_Chance		466 // 
+//#define SE_DS_Mitigation_Amount		467 // 
+//#define SE_DS_Mitigation_Percentage	468 // 
+//#define SE_Chance_Best_in_Spell_Grp   469 //  
+//#define SE_Trigger_Best_in_Spell Grp  470 // 
+//#define SE_Double_Melee_Round			471 // 
+
 
 // LAST
 
 
 #define DF_Permanent			50
-#define DF_Aura				51
+#define DF_Aura					51
 
 // note this struct is historical, we don't actually need it to be
 // aligned to anything, but for maintaining it it is kept in the order that
