@@ -761,7 +761,8 @@ struct SPDat_Spell_Struct
 /* 212 */	bool AllowRest;
 /* 213 */	bool InCombat; //Allow spell if target is in combat
 /* 214 */   bool OutofCombat; //Allow spell if target is out of combat
-/* 215 - 217 */
+/* 215 - 216 */
+/* 217 */   int override_crit_chance; //Places a cap on the max chance to critical
 /* 218 */	int aemaxtargets;  //Is used for various AE effects
 /* 219 */	int maxtargets; //Is used for beam and ring spells for target # limits (not implemented)
 /* 220 - 223 */
