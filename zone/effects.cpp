@@ -73,6 +73,9 @@ int32 Mob::GetActSpellDamage(uint16 spell_id, int32 value, Mob* target) {
 		if (spell_id == SPELL_IMP_HARM_TOUCH && IsClient() && (GetAA(aaSpellCastingFury) > 0) && (GetAA(aaUnholyTouch) > 0))
 			 chance = 100;
 
+		if (spells[spell_id].override_crit_chance > 0 && chance > spells[spell_id].override_crit_chance)
+			chance = spells[spell_id].override_crit_chance;
+
 		if (zone->random.Roll(chance)) {
 			Critical = true;
 			ratio += itembonuses.SpellCritDmgIncrease + spellbonuses.SpellCritDmgIncrease + aabonuses.SpellCritDmgIncrease;
@@ -161,7 +164,10 @@ int32 Mob::GetActDoTDamage(uint16 spell_id, int32 value, Mob* target) {
 	chance += itembonuses.CriticalDoTChance + spellbonuses.CriticalDoTChance + aabonuses.CriticalDoTChance;
 
 	if (spellbonuses.CriticalDotDecay)
-			chance += GetDecayEffectValue(spell_id, SE_CriticalDotDecay);
+		chance += GetDecayEffectValue(spell_id, SE_CriticalDotDecay);
+
+	if (spells[spell_id].override_crit_chance > 0 && chance > spells[spell_id].override_crit_chance)
+		chance = spells[spell_id].override_crit_chance;
 
 	value_BaseEffect = value + (value*GetFocusEffect(focusFcBaseEffects, spell_id)/100);
 
@@ -259,6 +265,9 @@ int32 Mob::GetActSpellHealing(uint16 spell_id, int32 value, Mob* target) {
 
 		if (spellbonuses.CriticalHealDecay)
 			chance += GetDecayEffectValue(spell_id, SE_CriticalHealDecay);
+
+		if (spells[spell_id].override_crit_chance > 0 && chance > spells[spell_id].override_crit_chance)
+			chance = spells[spell_id].override_crit_chance;
 
 		if(chance && (zone->random.Roll(chance))) {
 			Critical = true;

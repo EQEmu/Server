@@ -1671,6 +1671,7 @@ void SharedDatabase::LoadSpells(void *data, int max_spells) {
 		sp[tempid].AllowRest = atoi(row[212]) != 0;
 		sp[tempid].InCombat = atoi(row[213]) != 0;
 		sp[tempid].OutofCombat = atoi(row[214]) != 0;
+		sp[tempid].override_crit_chance = atoi(row[217]);
 		sp[tempid].aemaxtargets = atoi(row[218]);
 		sp[tempid].maxtargets = atoi(row[219]);
 		sp[tempid].persistdeath = atoi(row[224]) != 0;
