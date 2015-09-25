@@ -62,6 +62,7 @@ typedef enum {	//focus types
 	focusManaCost,
 	focusImprovedHeal,
 	focusImprovedDamage,
+	focusImprovedDamage2,
 	focusImprovedDOT,		//i dont know about this...
 	focusFcDamagePctCrit,
 	focusImprovedUndeadDamage,
@@ -73,6 +74,7 @@ typedef enum {	//focus types
 	focusTwincast,
 	focusSympatheticProc,
 	focusFcDamageAmt,
+	focusFcDamageAmt2,
 	focusFcDamageAmtCrit,
 	focusSpellDurByTic,
 	focusSwarmPetDuration,

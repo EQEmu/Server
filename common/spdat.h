@@ -614,11 +614,11 @@ typedef enum {
 #define SE_FactionModPct				458 // implemented  Modifies faction gains and losses by percent.
 #define SE_DamageModifier2				459 // implemented - Modifies melee damage by skill type
 //#define SE_Ff_Override_NotFocusable	460 // 
-//#define SE_Fc_Damage_%2				461 // 
-//#define SE_Fc_Damage_Amt2				462 // 
+#define SE_ImprovedDamage2				461 // implemented - Increase spell damage by percent (SE_Fc_Damage_%2)
+#define SE_FcDamageAmt2					462 // implemented - Increase spell damage by flat amount (SE_Fc_Damage_Amt2)	
 //#define SE_Shield_Target				463 // 
-#define SE_PC_Pet_Rampage				464 // Base1 % chance to do rampage for base2 % of damage each melee round
-#define SE_PC_Pet_AE_Rampage			465 // Base1 % chance to do aerampage for base2 % of damage each melee round
+#define SE_PC_Pet_Rampage				464 // implemented - Base1 % chance to do rampage for base2 % of damage each melee round
+//#define SE_PC_Pet_AE_Rampage			465 // Would assume as above but need to confirm.
 //#define SE_PC_Pet_Flurry_Chance		466 // 
 //#define SE_DS_Mitigation_Amount		467 // 
 //#define SE_DS_Mitigation_Percentage	468 // 
