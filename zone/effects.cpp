@@ -98,6 +98,7 @@ int32 Mob::GetActSpellDamage(uint16 spell_id, int32 value, Mob* target) {
 			value = value_BaseEffect*ratio/100;
 
 			value += value_BaseEffect*GetFocusEffect(focusImprovedDamage, spell_id)/100;
+			value += value_BaseEffect*GetFocusEffect(focusImprovedDamage2, spell_id)/100;
 
 			value += int(value_BaseEffect*GetFocusEffect(focusFcDamagePctCrit, spell_id)/100)*ratio/100;
 
@@ -109,6 +110,7 @@ int32 Mob::GetActSpellDamage(uint16 spell_id, int32 value, Mob* target) {
 			value -= GetFocusEffect(focusFcDamageAmtCrit, spell_id)*ratio/100;
 
 			value -= GetFocusEffect(focusFcDamageAmt, spell_id);
+			value -= GetFocusEffect(focusFcDamageAmt2, spell_id);
 
 			if(itembonuses.SpellDmg && spells[spell_id].classes[(GetClass()%16) - 1] >= GetLevel() - 5)
 				value -= GetExtraSpellAmt(spell_id, itembonuses.SpellDmg, value)*ratio/100;
@@ -129,6 +131,7 @@ int32 Mob::GetActSpellDamage(uint16 spell_id, int32 value, Mob* target) {
 	value = value_BaseEffect;
 
 	value += value_BaseEffect*GetFocusEffect(focusImprovedDamage, spell_id)/100;
+	value += value_BaseEffect*GetFocusEffect(focusImprovedDamage2, spell_id)/100;
 
 	value += value_BaseEffect*GetFocusEffect(focusFcDamagePctCrit, spell_id)/100;
 
@@ -140,6 +143,7 @@ int32 Mob::GetActSpellDamage(uint16 spell_id, int32 value, Mob* target) {
 	value -= GetFocusEffect(focusFcDamageAmtCrit, spell_id);
 
 	value -= GetFocusEffect(focusFcDamageAmt, spell_id);
+	value -= GetFocusEffect(focusFcDamageAmt2, spell_id);
 
 	if(itembonuses.SpellDmg && spells[spell_id].classes[(GetClass()%16) - 1] >= GetLevel() - 5)
 		 value -= GetExtraSpellAmt(spell_id, itembonuses.SpellDmg, value);
@@ -176,11 +180,13 @@ int32 Mob::GetActDoTDamage(uint16 spell_id, int32 value, Mob* target) {
 		ratio += itembonuses.DotCritDmgIncrease + spellbonuses.DotCritDmgIncrease + aabonuses.DotCritDmgIncrease;
 		value = value_BaseEffect*ratio/100;
 		value += int(value_BaseEffect*GetFocusEffect(focusImprovedDamage, spell_id)/100)*ratio/100;
+		value += int(value_BaseEffect*GetFocusEffect(focusImprovedDamage2, spell_id)/100)*ratio/100;
 		value += int(value_BaseEffect*GetFocusEffect(focusFcDamagePctCrit, spell_id)/100)*ratio/100;
 		value += int(value_BaseEffect*target->GetVulnerability(this, spell_id, 0)/100)*ratio/100;
 		extra_dmg = target->GetFcDamageAmtIncoming(this, spell_id) +
 					int(GetFocusEffect(focusFcDamageAmtCrit, spell_id)*ratio/100) +
-					GetFocusEffect(focusFcDamageAmt, spell_id);
+					GetFocusEffect(focusFcDamageAmt, spell_id) +
+					GetFocusEffect(focusFcDamageAmt2, spell_id);
 
 		if (extra_dmg) {
 			int duration = CalcBuffDuration(this, this, spell_id);
@@ -194,11 +200,13 @@ int32 Mob::GetActDoTDamage(uint16 spell_id, int32 value, Mob* target) {
 
 		value = value_BaseEffect;
 		value += value_BaseEffect*GetFocusEffect(focusImprovedDamage, spell_id)/100;
+		value += value_BaseEffect*GetFocusEffect(focusImprovedDamage2, spell_id)/100;
 		value += value_BaseEffect*GetFocusEffect(focusFcDamagePctCrit, spell_id)/100;
 		value += value_BaseEffect*target->GetVulnerability(this, spell_id, 0)/100;
 		extra_dmg = target->GetFcDamageAmtIncoming(this, spell_id) +
 					GetFocusEffect(focusFcDamageAmtCrit, spell_id) +
-					GetFocusEffect(focusFcDamageAmt, spell_id);
+					GetFocusEffect(focusFcDamageAmt, spell_id) +
+					GetFocusEffect(focusFcDamageAmt2, spell_id);
 
 		if (extra_dmg) {
 			int duration = CalcBuffDuration(this, this, spell_id);

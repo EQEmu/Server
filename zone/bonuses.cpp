@@ -3437,6 +3437,8 @@ uint8 Mob::IsFocusEffect(uint16 spell_id,int effect_index, bool AA,uint32 aa_eff
 	{
 		case SE_ImprovedDamage:
 			return focusImprovedDamage;
+		case SE_ImprovedDamage2:
+			return focusImprovedDamage2;
 		case SE_ImprovedHeal:
 			return focusImprovedHeal;
 		case SE_ReduceManaCost:
@@ -3475,6 +3477,8 @@ uint8 Mob::IsFocusEffect(uint16 spell_id,int effect_index, bool AA,uint32 aa_eff
 			return focusSympatheticProc;
 		case SE_FcDamageAmt:
 			return focusFcDamageAmt;
+		case SE_FcDamageAmt2:
+			return focusFcDamageAmt2;
 		case SE_FcDamageAmtCrit:
 			return focusFcDamageAmtCrit;
 		case SE_FcDamagePctCrit:

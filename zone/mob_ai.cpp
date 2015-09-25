@@ -1156,7 +1156,6 @@ void Mob::AI_Process() {
 						if (spellbonuses.PC_Pet_Rampage[0] || itembonuses.PC_Pet_Rampage[0] || aabonuses.PC_Pet_Rampage[0]){
 							int chance = spellbonuses.PC_Pet_Rampage[0] + itembonuses.PC_Pet_Rampage[0] + aabonuses.PC_Pet_Rampage[0];
 							int dmg_mod = spellbonuses.PC_Pet_Rampage[1] + itembonuses.PC_Pet_Rampage[1] + aabonuses.PC_Pet_Rampage[1];
-							Shout("CHance %i", chance);
 							if(zone->random.Roll(chance)) {
 								ExtraAttackOptions opts;
 								opts.damage_percent = dmg_mod / 100.0f;

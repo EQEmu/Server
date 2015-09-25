@@ -2832,6 +2832,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 			case SE_Accuracy:
 			case SE_Flurry:
 			case SE_ImprovedDamage:
+			case SE_ImprovedDamage2:
 			case SE_ImprovedHeal:
 			case SE_IncreaseSpellHaste:
 			case SE_IncreaseSpellDuration:
@@ -2865,6 +2866,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 			case SE_MaxHPChange:
 			case SE_SympatheticProc:
 			case SE_FcDamageAmt:
+			case SE_FcDamageAmt2:
 			case SE_CriticalSpellChance:
 			case SE_SpellCritChance:
 			case SE_SpellCritDmgIncrease:
@@ -4397,6 +4399,11 @@ int16 Client::CalcAAFocus(focusType type, const AA::Rank &rank, uint16 spell_id)
 				value = base1;
 			break;
 
+		case SE_ImprovedDamage2:
+			if (type == focusImprovedDamage2 && base1 > value)
+				value = base1;
+			break;
+
 		case SE_ImprovedHeal:
 			if (type == focusImprovedHeal && base1 > value)
 				value = base1;
@@ -4503,6 +4510,11 @@ int16 Client::CalcAAFocus(focusType type, const AA::Rank &rank, uint16 spell_id)
 
 		case SE_FcDamageAmt:
 			if (type == focusFcDamageAmt)
+				value = base1;
+			break;
+
+		case SE_FcDamageAmt2:
+			if (type == focusFcDamageAmt2)
 				value = base1;
 			break;
 
@@ -4845,6 +4857,24 @@ int16 Mob::CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, boo
 			}
 			break;
 
+		case SE_ImprovedDamage2:
+			if (type == focusImprovedDamage2) {
+				if (best_focus) {
+					if (focus_spell.base2[i] != 0) {
+						value = focus_spell.base2[i];
+					}
+					else {
+						value = focus_spell.base[i];
+					}
+				}
+				else if (focus_spell.base2[i] == 0 || focus_spell.base[i] == focus_spell.base2[i]) {
+					value = focus_spell.base[i];
+				} else {
+					value = zone->random.Int(focus_spell.base[i], focus_spell.base2[i]);
+				}
+			}
+			break;
+
 		case SE_ImprovedHeal:
 			if (type == focusImprovedHeal) {
 				if (best_focus) {
@@ -4971,6 +5001,11 @@ int16 Mob::CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, boo
 
 		case SE_FcDamageAmt:
 			if (type == focusFcDamageAmt)
+				value = focus_spell.base[i];
+			break;
+
+		case SE_FcDamageAmt2:
+			if (type == focusFcDamageAmt2)
 				value = focus_spell.base[i];
 			break;
 
@@ -5200,7 +5235,7 @@ int16 Client::GetFocusEffect(focusType type, uint16 spell_id)
 
 	//Improved Healing, Damage & Mana Reduction are handled differently in that some are random percentages
 	//In these cases we need to find the most powerful effect, so that each piece of gear wont get its own chance
-	if(RuleB(Spells, LiveLikeFocusEffects) && (type == focusManaCost || type == focusImprovedHeal || type == focusImprovedDamage))
+	if(RuleB(Spells, LiveLikeFocusEffects) && (type == focusManaCost || type == focusImprovedHeal || type == focusImprovedDamage || type == focusImprovedDamage2))
 		rand_effectiveness = true;
 
 	//Check if item focus effect exists for the client.
@@ -5340,6 +5375,7 @@ int16 Client::GetFocusEffect(focusType type, uint16 spell_id)
 				string_id = SPARKLES;
 				break;
 			case focusImprovedDamage:
+			case focusImprovedDamage2:
 				if (realTotal)
 					string_id = ALIVE_WITH_POWER;
 				else
@@ -5469,7 +5505,7 @@ int16 NPC::GetFocusEffect(focusType type, uint16 spell_id) {
 
 	//Improved Healing, Damage & Mana Reduction are handled differently in that some are random percentages
 	//In these cases we need to find the most powerful effect, so that each piece of gear wont get its own chance
-	if(RuleB(Spells, LiveLikeFocusEffects) && (type == focusManaCost || type == focusImprovedHeal || type == focusImprovedDamage))
+	if(RuleB(Spells, LiveLikeFocusEffects) && (type == focusManaCost || type == focusImprovedHeal || type == focusImprovedDamage || type == focusImprovedDamage2))
 		rand_effectiveness = true;
 
 	if (RuleB(Spells, NPC_UseFocusFromItems) && itembonuses.FocusEffects[type]){
