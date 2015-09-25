@@ -617,8 +617,8 @@ typedef enum {
 //#define SE_Fc_Damage_%2				461 // 
 //#define SE_Fc_Damage_Amt2				462 // 
 //#define SE_Shield_Target				463 // 
-//#define SE_PC_Pet_Rampage				464 // 
-//#define SE_PC_Pet_AE_Rampage			465 // 
+#define SE_PC_Pet_Rampage				464 // Base1 % chance to do rampage for base2 % of damage each melee round
+#define SE_PC_Pet_AE_Rampage			465 // Base1 % chance to do aerampage for base2 % of damage each melee round
 //#define SE_PC_Pet_Flurry_Chance		466 // 
 //#define SE_DS_Mitigation_Amount		467 // 
 //#define SE_DS_Mitigation_Percentage	468 // 

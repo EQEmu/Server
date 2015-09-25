@@ -1139,20 +1139,29 @@ void Mob::AI_Process() {
 						}
 					}
 
-					if (IsPet() || (IsNPC() && CastToNPC()->GetSwarmOwner())) {
+					if (IsPet() || IsTempPet()) {
 						Mob *owner = nullptr;
-
-						if (IsPet())
-							owner = GetOwner();
-						else
-							owner = entity_list.GetMobID(CastToNPC()->GetSwarmOwner());
+						owner = GetOwner();
 
 						if (owner) {
-						int16 flurry_chance = owner->aabonuses.PetFlurry +
+							int16 flurry_chance = owner->aabonuses.PetFlurry +
 							owner->spellbonuses.PetFlurry + owner->itembonuses.PetFlurry;
 
 							if (flurry_chance && zone->random.Roll(flurry_chance))
 								Flurry(nullptr);
+						}
+					}
+
+					if ((IsPet() || IsTempPet()) && IsPetOwnerClient()){
+						if (spellbonuses.PC_Pet_Rampage[0] || itembonuses.PC_Pet_Rampage[0] || aabonuses.PC_Pet_Rampage[0]){
+							int chance = spellbonuses.PC_Pet_Rampage[0] + itembonuses.PC_Pet_Rampage[0] + aabonuses.PC_Pet_Rampage[0];
+							int dmg_mod = spellbonuses.PC_Pet_Rampage[1] + itembonuses.PC_Pet_Rampage[1] + aabonuses.PC_Pet_Rampage[1];
+							Shout("CHance %i", chance);
+							if(zone->random.Roll(chance)) {
+								ExtraAttackOptions opts;
+								opts.damage_percent = dmg_mod / 100.0f;
+								Rampage(&opts);
+							}
 						}
 					}
 
@@ -1245,6 +1254,7 @@ void Mob::AI_Process() {
 				//now special attacks (kick, etc)
 				if(IsNPC())
 					CastToNPC()->DoClassAttacks(target);
+
 			}
 			AI_EngagedCastCheck();
 		}	//end is within combat rangepet
