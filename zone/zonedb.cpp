@@ -887,7 +887,8 @@ bool ZoneDatabase::LoadCharacterData(uint32 character_id, PlayerProfile_Struct* 
 		"RestTimer,                 "
 		"`e_aa_effects`,			"
 		"`e_percent_to_aa`,			"
-		"`e_expended_aa_spent`		"
+		"`e_expended_aa_spent`,		"
+		"`e_last_invsnapshot`		"
 		"FROM                       "
 		"character_data             "
 		"WHERE `id` = %i         ", character_id);
@@ -983,7 +984,9 @@ bool ZoneDatabase::LoadCharacterData(uint32 character_id, PlayerProfile_Struct* 
 		pp->RestTimer = atoi(row[r]); r++;										 // "RestTimer,                 "
 		m_epp->aa_effects = atoi(row[r]); r++;									 // "`e_aa_effects`,			"
 		m_epp->perAA = atoi(row[r]); r++;										 // "`e_percent_to_aa`,			"
-		m_epp->expended_aa = atoi(row[r]); r++;									 // "`e_expended_aa_spent`		"
+		m_epp->expended_aa = atoi(row[r]); r++;									 // "`e_expended_aa_spent`,		"
+		m_epp->last_invsnapshot_time = atoi(row[r]); r++;						 // "`e_last_invsnapshot`		"
+		m_epp->next_invsnapshot_time = m_epp->last_invsnapshot_time + (RuleI(Character, InvSnapshotMinIntervalM) * 60);
 	}
 	return true;
 }
@@ -1377,6 +1380,56 @@ bool ZoneDatabase::SaveCharacterLeadershipAA(uint32 character_id, PlayerProfile_
 	return true;
 }
 
+bool ZoneDatabase::SaveCharacterInventorySnapshot(uint32 character_id){
+	uint32 time_index = time(nullptr);
+	std::string query = StringFormat(
+		"INSERT INTO inventory_snapshots ("
+		" time_index,"
+		" charid,"
+		" slotid,"
+		" itemid,"
+		" charges,"
+		" color,"
+		" augslot1,"
+		" augslot2,"
+		" augslot3,"
+		" augslot4,"
+		" augslot5,"
+		" augslot6,"
+		" instnodrop,"
+		" custom_data,"
+		" ornamenticon,"
+		" ornamentidfile,"
+		" ornament_hero_model"
+		")"
+		" SELECT"
+		" %u,"
+		" charid,"
+		" slotid,"
+		" itemid,"
+		" charges,"
+		" color,"
+		" augslot1,"
+		" augslot2,"
+		" augslot3,"
+		" augslot4,"
+		" augslot5,"
+		" augslot6,"
+		" instnodrop,"
+		" custom_data,"
+		" ornamenticon,"
+		" ornamentidfile,"
+		" ornament_hero_model"
+		" FROM inventory"
+		" WHERE charid = %u",
+		time_index,
+		character_id
+	);
+	auto results = database.QueryDatabase(query);
+	Log.Out(Logs::General, Logs::None, "ZoneDatabase::SaveCharacterInventorySnapshot %i (%s)", character_id, (results.Success() ? "pass" : "fail"));
+	return results.Success();
+}
+
 bool ZoneDatabase::SaveCharacterData(uint32 character_id, uint32 account_id, PlayerProfile_Struct* pp, ExtendedProfile_Struct* m_epp){
 	clock_t t = std::clock(); /* Function timer start */
 	std::string query = StringFormat(
@@ -1473,7 +1526,8 @@ bool ZoneDatabase::SaveCharacterData(uint32 character_id, uint32 account_id, Pla
 		" RestTimer,				 "
 		" e_aa_effects,				 "
 		" e_percent_to_aa,			 "
-		" e_expended_aa_spent		 "
+		" e_expended_aa_spent,		 "
+		" e_last_invsnapshot		 "
 		")							 "
 		"VALUES ("
 		"%u,"  // id																" id,                        "
@@ -1568,7 +1622,8 @@ bool ZoneDatabase::SaveCharacterData(uint32 character_id, uint32 account_id, Pla
 		"%u,"  // RestTimer					  pp->RestTimer,						" RestTimer)                 "
 		"%u,"  // e_aa_effects
 		"%u,"  // e_percent_to_aa
-		"%u"   // e_expended_aa_spent
+		"%u,"  // e_expended_aa_spent
+		"%u"   // e_last_invsnapshot
 		")",
 		character_id,					  // " id,                        "
 		account_id,						  // " account_id,                "
@@ -1662,7 +1717,8 @@ bool ZoneDatabase::SaveCharacterData(uint32 character_id, uint32 account_id, Pla
 		pp->RestTimer,					  // " RestTimer)                 "
 		m_epp->aa_effects,
 		m_epp->perAA,
-		m_epp->expended_aa
+		m_epp->expended_aa,
+		m_epp->last_invsnapshot_time
 	);
 	auto results = database.QueryDatabase(query);
 	Log.Out(Logs::General, Logs::None, "ZoneDatabase::SaveCharacterData %i, done... Took %f seconds", character_id, ((float)(std::clock() - t)) / CLOCKS_PER_SEC);

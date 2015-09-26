@@ -2173,3 +2173,12 @@ void Database::LoadLogSettings(EQEmuLogSys::LogSettings* log_settings)
 		}
 	}
 }
+
+void Database::ClearInvSnapshots(bool use_rule)
+{
+	uint32 del_time = time(nullptr);
+	if (use_rule) { del_time -= RuleI(Character, InvSnapshotHistoryD) * 86400; }
+
+	std::string query = StringFormat("DELETE FROM inventory_snapshots WHERE time_index <= %lu", (unsigned long)del_time);
+	QueryDatabase(query);
+}

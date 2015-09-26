@@ -1,5 +1,16 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 09/25/2015 ==
+Uleat: Implemented 'Inventory Snapshot' feature to track online player inventories at timed intervals.
+rules:
+	'Character:ActiveInvSnapshots'			- active (true) or inactive (false - default)
+	'Character:InvSnapshotMinIntervalM'		- minimum time between snapshots (in minutes)
+	'Character:InvSnapshotMinRetryM'		- minimum time to attempt a retry after a failed snapshot (in minutes)
+	'Character:InvSnapshotHistoryD'			- minimum time to keep snapshot entries (in days)
+commands:
+	'#invsnapshot'						- Takes a snapshot of target client's inventory (feature active or inactive)
+	'#clearinvsnapshots [use rule]'		- Clears snapshot entries based on bool argument ([true] - honors the 'InvSnapshotHistoryD' rule, [false] - erases all)
+	
 == 08/02/2015 ==
 Shendare: VS2013 query StringFormat glitches when "%f" is passed for the int GetRunSpeed().
 Shendare: In CreateNewNPCCommand(), the npc_type_id and spawngroupid are created in the database, but never set in the spawn class, so later it can't delete them with #npcspawn remove or #npcspawn delete.

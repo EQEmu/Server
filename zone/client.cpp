@@ -642,6 +642,17 @@ bool Client::Save(uint8 iCommitNow) {
 
 	m_pp.hunger_level = EQEmu::Clamp(m_pp.hunger_level, 0, 50000);
 	m_pp.thirst_level = EQEmu::Clamp(m_pp.thirst_level, 0, 50000);
+
+	// perform snapshot before SaveCharacterData() so that m_epp will contain the updated time
+	if (RuleB(Character, ActiveInvSnapshots) && time(nullptr) >= GetNextInvSnapshotTime()) {
+		if (database.SaveCharacterInventorySnapshot(CharacterID())) {
+			SetNextInvSnapshot(RuleI(Character, InvSnapshotMinIntervalM));
+		}
+		else {
+			SetNextInvSnapshot(RuleI(Character, InvSnapshotMinRetryM));
+		}
+	}
+
 	database.SaveCharacterData(this->CharacterID(), this->AccountID(), &m_pp, &m_epp); /* Save Character Data */
 
 	return true;

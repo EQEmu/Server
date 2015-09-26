@@ -183,6 +183,7 @@ int command_init(void) {
 		command_add("castspell", "[spellid] - Cast a spell", 50, command_castspell) ||
 		command_add("chat", "[channel num] [message] - Send a channel message to all zones", 200, command_chat) ||
 		command_add("checklos", "- Check for line of sight to your target", 50, command_checklos) ||
+		command_add("clearinvsnapshots", "[use rule] - Clear inventory snapshot history (true - elapsed entries, false - all entries)", 200, command_clearinvsnapshots) ||
 		command_add("close_shop",  nullptr, 100, command_merchantcloseshop) ||
 		command_add("connectworld", nullptr,0, command_connectworldserver) ||
 		command_add("connectworldserver", "- Make zone attempt to connect to worldserver", 200, command_connectworldserver) ||
@@ -260,6 +261,7 @@ int command_init(void) {
 		command_add("instance", "- Modify Instances", 200, command_instance) ||
 		command_add("interrogateinv", "- use [help] argument for available options", 0, command_interrogateinv) ||
 		command_add("interrupt", "[message id] [color] - Interrupt your casting. Arguments are optional.", 50, command_interrupt) ||
+		command_add("invsnapshot", "- Takes an inventory snapshot of your current target", 80, command_invsnapshot) ||
 		command_add("invul", nullptr,0, command_invul) ||
 		command_add("invulnerable", "[on/off] - Turn player target's or your invulnerable flag on or off", 80, command_invul) ||
 		command_add("ipban", "[IP address] - Ban IP by character name", 200, command_ipban) ||
@@ -2834,6 +2836,36 @@ void command_interrogateinv(Client *c, const Seperator *sep)
 
 	if (!success)
 		c->Message(13, "An unknown error occurred while processing Client::InterrogateInventory()");
+}
+
+void command_invsnapshot(Client *c, const Seperator *sep)
+{
+	auto t = c->GetTarget();
+	if (!t || !t->IsClient()) {
+		c->Message(0, "Target must be a client");
+		return;
+	}
+
+	if (database.SaveCharacterInventorySnapshot(((Client*)t)->CharacterID())) {
+		c->SetNextInvSnapshot(RuleI(Character, InvSnapshotMinIntervalM));
+		c->Message(0, "Successful inventory snapshot taken of %s", t->GetName());
+	}
+	else {
+		c->SetNextInvSnapshot(RuleI(Character, InvSnapshotMinRetryM));
+		c->Message(0, "Failed to take inventory snapshot of %s", t->GetName());
+	}
+}
+
+void command_clearinvsnapshots(Client *c, const Seperator *sep)
+{
+	if (strcmp(sep->arg[1], "false") == 0) {
+		database.ClearInvSnapshots(false);
+		c->Message(0, "Inventory snapshots cleared using current time");
+	}
+	else {
+		database.ClearInvSnapshots();
+		c->Message(0, "Inventory snapshots cleared using RuleI(Character, InvSnapshotHistoryD) (%i days)", RuleI(Character, InvSnapshotHistoryD));
+	}
 }
 
 void command_findnpctype(Client *c, const Seperator *sep)

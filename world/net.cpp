@@ -310,6 +310,8 @@ int main(int argc, char** argv) {
 	database.ClearRaid();
 	database.ClearRaidDetails();
 	database.ClearRaidLeader();
+	Log.Out(Logs::General, Logs::World_Server, "Clearing inventory snapshots..");
+	database.ClearInvSnapshots();
 	Log.Out(Logs::General, Logs::World_Server, "Loading items..");
 	if(!database.LoadItems(hotfix_name))
 		Log.Out(Logs::General, Logs::World_Server, "Error: Could not load item data. But ignoring");

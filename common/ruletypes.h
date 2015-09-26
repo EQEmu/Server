@@ -119,6 +119,10 @@ RULE_BOOL(Character, MarqueeHPUpdates, false) // Will show Health % in center of
 RULE_INT(Character, IksarCommonTongue, 95) // 95 By default (live-like?)
 RULE_INT(Character, OgreCommonTongue, 95) // 95 By default (live-like?)
 RULE_INT(Character, TrollCommonTongue, 95) // 95 By default (live-like?)
+RULE_BOOL(Character, ActiveInvSnapshots, false) // Takes a periodic snapshot of inventory contents from online players
+RULE_INT(Character, InvSnapshotMinIntervalM, 180) // Minimum time (in minutes) between inventory snapshots
+RULE_INT(Character, InvSnapshotMinRetryM, 30) // Time (in minutes) to re-attempt an inventory snapshot after a failure
+RULE_INT(Character, InvSnapshotHistoryD, 30) // Time (in days) to keep snapshot entries
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Mercs)
