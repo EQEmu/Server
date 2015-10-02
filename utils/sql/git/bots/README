@@ -1,3 +1,6 @@
-Use this new load_bots.sql to source bot information into your database.
+Use the eqemu_update.pl script to source/update bot information into your database.
 
-This file now contains all of the script information so that it may be run from inside of HeidiSQL.
+
+Developers: Please prefix 'bots_' to sql file description (after the date) in order to prevent issues naming conflicts.
+
+Example: 1980_01_01_bots_file_description.sql
