@@ -22,7 +22,7 @@ if($Config{osname}=~/linux/i){ $OS = "Linux"; }
 if($Config{osname}=~/Win|MS/i){ $OS = "Windows"; }
 
 #::: If current version is less than what world is reporting, then download a new one...
-$current_version = 9;
+$current_version = 10;
 
 if($ARGV[0] eq "V"){
 	if($ARGV[1] > $current_version){ 
@@ -146,9 +146,12 @@ if($db){
 	print "	Binary Revision / Local: (" . $bin_db_ver . " / " . $local_db_ver . ")\n";
 	
 	#::: Bots
-	$bots_local_db_version = trim(get_mysql_result("SELECT bots_version FROM db_version LIMIT 1"));
-	if($bots_local_db_version > 0){
-		print "	(Bots) Binary Revision / Local: (" . trim($db_version[2]) . " / " . $bots_local_db_version . ")\n";
+	#::: Make sure we're running a bots binary to begin with
+	if(trim($db_version[2]) > 0){
+		$bots_local_db_version = get_bots_db_version();
+		if($bots_local_db_version > 0){
+			print "	(Bots) Binary Revision / Local: (" . trim($db_version[2]) . " / " . $bots_local_db_version . ")\n";
+		}
 	}
 
 	#::: If World ran this script, and our version is up to date, continue...
@@ -707,6 +710,16 @@ sub are_file_sizes_different{
 	return;
 }
 
+sub get_bots_db_version{
+	#::: Check if bots_version column exists...
+	if(get_mysql_result("SHOW COLUMNS FROM db_version LIKE 'bots_version'") eq "" && $db){
+	   print get_mysql_result("ALTER TABLE db_version ADD bots_version int(11) DEFAULT '0' AFTER version;");
+	   print "\nColumn 'bots_version' does not exists.... Adding to 'db_version' table...\n\n";
+	}
+	$bots_local_db_version = trim(get_mysql_result("SELECT bots_version FROM db_version LIMIT 1"));
+	return $bots_local_db_version;
+}
+
 sub bots_db_management{
 	#::: Main Binary Database version
 	$bin_db_ver = trim($db_version[2]);
@@ -724,13 +737,7 @@ sub bots_db_management{
 	#::: Set on flag for running bot updates...
 	$bots_db_management = 1;
 	
-	#::: Check if bots_version column exists...
-	if(get_mysql_result("SHOW COLUMNS FROM db_version LIKE 'bots_version'") eq "" && $db){
-	   print get_mysql_result("ALTER TABLE db_version ADD bots_version int(11) DEFAULT '0' AFTER version;");
-	   print "Column 'bots_version' does not exists.... Adding to 'db_version' table...\n\n";
-	}
-	
-	$bots_local_db_version = trim(get_mysql_result("SELECT bots_version FROM db_version LIMIT 1"));
+	$bots_local_db_version = get_bots_db_version();
 	
 	run_database_check();
 }
