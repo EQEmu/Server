@@ -22,7 +22,7 @@ if($Config{osname}=~/linux/i){ $OS = "Linux"; }
 if($Config{osname}=~/Win|MS/i){ $OS = "Windows"; }
 
 #::: If current version is less than what world is reporting, then download a new one...
-$current_version = 10;
+$current_version = 11;
 
 if($ARGV[0] eq "V"){
 	if($ARGV[1] > $current_version){ 
@@ -241,31 +241,33 @@ sub menu_options {
 				$bots_management = "Install bots database pre-requisites (Requires bots server binaries)";
 			}
 			else{
-				$bots_management = "Check for Bot pending REQUIRED database updates...";
+				$bots_management = "Check for Bot pending REQUIRED database updates... (Must have bots enabled)";
 			}
 		}
 	}
 	else{
 		$option[3] = "Check and stage pending REQUIRED Database updates";
-		$bots_management = "Check for Bot REQUIRED database updates...";
+		$bots_management = "Check for Bot REQUIRED database updates... (Must have bots enabled)";
 	}
 
 return <<EO_MENU;
-EQEmu Update Utility Menu:
-	1) Backup Database - (Saves to Backups folder)
-	2) Backup Database Compressed - (Saves to Backups folder)
-	3) $option[3]
-	4) AAs - Download Latest AA's from PEQ (This overwrites existing data)
-	5) OPCodes - Download latest opcodes
-	6) Maps - Download latest map and water files
-	7) Plugins - Download latest Perl plugins
-	8) Quests - Download latest PEQ quests and stage updates
-	9) LUA Modules - Download latest LUA Modules (Required for Lua)
-	10) $bots_management
-	20) Force update this script (Redownload)
-	0) Exit
-	
-	Enter numbered option and press enter...	
+============================================================
+#::: EQEmu Update Utility Menu: (eqemu_update.pl)
+============================================================
+ 1) [Backup Database] :: (Saves to Backups folder)
+ 2) [Backup Database Compressed] :: (Saves to Backups folder)
+ 3) [EQEmu DB Schema] :: $option[3]
+ 4) [EQEmu DB Bots Schema] $bots_management
+ 5) [OPCodes] :: Download latest opcodes for each EQ Client
+ 6) [Maps] :: Download latest map and water files
+ 7) [Plugins (Perl)] :: Download latest Perl plugins
+ 8) [Quests (Perl/LUA)] :: Download latest PEQ quests and stage updates
+ 9) [LUA Modules] :: Download latest LUA Modules (Required for Lua)
+ 10) [DB Data : Alternate Advancement] :: Download Latest AA's from PEQ (This overwrites existing data)
+ 20) [Update the updater] Force update this script (Redownload)
+ 0) Exit
+ 
+ Enter numbered option and press enter...	
 	
 EO_MENU
 }
