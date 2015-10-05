@@ -66,6 +66,16 @@ while(<F>) {
 	elsif(/<db>(.*)<\/db>/i) { $db = $1; } 
 }
 
+if($ARGV[0] eq "installer"){
+	print "Running EQEmu Server installer routines...\n";
+	map_files_fetch_bulk();
+	opcodes_fetch();
+	plugins_fetch();
+	quest_files_fetch();
+	lua_modules_fetch();
+	exit;
+}
+
 $console_output = 
 "============================================================
            EQEmu: Automatic Upgrade Check         
@@ -463,6 +473,28 @@ sub copy_file{
 	copy $l_source_file, $l_dest_file;
 }
 
+sub map_files_fetch_bulk{
+	print "\n --- Fetching Latest Maps... (This could take a few minutes...) --- \n";
+	get_remote_file("http://github.com/Akkadius/EQEmuMaps/archive/master.zip", "maps/maps.zip", 1);
+	unzip('maps/maps.zip', 'maps/');
+	my @files;
+	my $start_dir = "maps\\EQEmuMaps-master\\maps";
+	find( 
+		sub { push @files, $File::Find::name unless -d; }, 
+		$start_dir
+	);
+	for my $file (@files) {
+		$dest_file = $file;
+		$dest_file =~s/maps\\EQEmuMaps-master\\maps\///g;
+		print "Installing :: " . $dest_file . "\n";
+		copy_file($file, "maps/" . $new_file);
+	}
+	print "\n --- Fetched Latest Maps... --- \n";
+	
+	rmtree('maps/EQEmuMaps-master');
+	unlink('maps/maps.zip');
+}
+
 sub map_files_fetch{
 	print "\n --- Fetching Latest Maps --- \n";
 	
@@ -550,6 +582,8 @@ sub quest_files_fetch{
 			}
 		}
 	}
+	
+	rmtree('updates_staged');
 	
 	if($fc == 0){
 		print "\nNo Quest Updates found... \n\n";
