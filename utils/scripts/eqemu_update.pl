@@ -14,6 +14,7 @@ use POSIX qw(strftime);
 use File::Path;
 use File::Find;
 use URI::Escape;
+use Time::HiRes qw(usleep);
 
 $time_stamp = strftime('%m-%d-%Y', gmtime());
 
@@ -49,9 +50,6 @@ no warnings;
 
 ($sec, $min, $hour, $mday, $mon, $year, $wday, $yday, $isdst) = localtime();
 
-#::: Cleanup staged folder...
-rmtree("updates_staged/");
-
 my $confile = "eqemu_config.xml"; #default
 open(F, "<$confile");
 my $indb = 0;
@@ -64,16 +62,6 @@ while(<F>) {
 	elsif(/<username>(.*)<\/username>/i) { $user = $1; } 
 	elsif(/<password>(.*)<\/password>/i) { $pass = $1; } 
 	elsif(/<db>(.*)<\/db>/i) { $db = $1; } 
-}
-
-if($ARGV[0] eq "installer"){
-	print "Running EQEmu Server installer routines...\n";
-	map_files_fetch_bulk();
-	opcodes_fetch();
-	plugins_fetch();
-	quest_files_fetch();
-	lua_modules_fetch();
-	exit;
 }
 
 $console_output = 
@@ -113,9 +101,37 @@ if($OS eq "Linux"){
 }
 
 #::: Path not found, error and exit
-if($path eq ""){ 
+if($path eq ""){
 	print "MySQL path not found, please add the path for automatic database upgrading to continue... \n\n";
 	print "script_exiting...\n";
+	exit;
+}
+
+if($ARGV[0] eq "installer"){
+	print "Running EQEmu Server installer routines...\n";
+	mkdir('logs');
+	mkdir('updates_staged');
+	fetch_latest_windows_binaries();
+	map_files_fetch_bulk();
+	opcodes_fetch();
+	plugins_fetch();
+	quest_files_fetch();
+	lua_modules_fetch();
+	get_remote_file("https://raw.githubusercontent.com/Akkadius/EQEmuInstall/master/lua51.dll", "lua51.dll", 1);
+	
+	#::: Database Routines
+	print "MariaDB :: Creating Database 'peq'\n";
+	print `"$path" --host $host --user $user --password="$pass" -N -B -e "DROP DATABASE peq;CREATE DATABASE peq"`;
+	if($OS eq "Windows"){ @db_version = split(': ', `world db_version`); }
+	if($OS eq "Linux"){ @db_version = split(': ', `./world db_version`); }  
+	$bin_db_ver = trim($db_version[1]);
+	check_db_version_table();
+	$local_db_ver = trim(get_mysql_result("SELECT version FROM db_version LIMIT 1"));
+	fetch_peq_db_full();
+	print "\nFetching Latest Database Updates...\n";
+	main_db_management();
+	print "\nApplying Latest Database Updates...\n";
+	main_db_management();
 	exit;
 }
 
@@ -128,14 +144,18 @@ if(trim(get_mysql_result("SHOW COLUMNS FROM db_version LIKE 'Revision'")) ne "" 
 	print "Old db_version table present, dropping...\n\n";
 }
 
-if(get_mysql_result("SHOW TABLES LIKE 'db_version'") eq "" && $db){
-	print get_mysql_result("
-		CREATE TABLE db_version (
-		  version int(11) DEFAULT '0'
-		) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-		INSERT INTO db_version (version) VALUES ('1000');");
-	print "Table 'db_version' does not exists.... Creating...\n\n";
+sub check_db_version_table{
+	if(get_mysql_result("SHOW TABLES LIKE 'db_version'") eq "" && $db){
+		print get_mysql_result("
+			CREATE TABLE db_version (
+			  version int(11) DEFAULT '0'
+			) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+			INSERT INTO db_version (version) VALUES ('1000');");
+		print "Table 'db_version' does not exists.... Creating...\n\n";
+	}
 }
+
+check_db_version_table();
 
 if($OS eq "Windows"){ @db_version = split(': ', `world db_version`); }
 if($OS eq "Linux"){ @db_version = split(': ', `./world db_version`); }  
@@ -307,7 +327,10 @@ sub database_dump_compress {
 	print `perl db_dumper.pl database="$db"  loc="backups" compress`;
 }
 
-sub script_exit{ }
+sub script_exit{ 
+	#::: Cleanup staged folder...
+	rmtree("updates_staged/");
+}
 
 #::: Returns Tab Delimited MySQL Result from Command Line
 sub get_mysql_result{
@@ -357,35 +380,48 @@ sub get_remote_file{
 	if($OS eq "Windows"){ 
 		#::: For non-text type requests...
 		if($content_type == 1){
-			use LWP::Simple qw(getstore);
-			if(!getstore($URL, $Dest_File)){
-				print "Error, no connection or failed request...\n\n";
-			}
-			else{
-				print " o URL: (" . $URL . ")\n";
-				print " o Saved: (" . $Dest_File . ") \n";
+			$break = 0;
+			while($break == 0) {
+				use LWP::Simple qw(getstore);
+				if(!getstore($URL, $Dest_File)){
+					# print "Error, no connection or failed request...\n\n";
+				}
+				# sleep(1);
+				#::: Make sure the file exists before continuing...
+				if(-e $Dest_File) { 
+					$break = 1;
+					print " [URL] :: " . $URL . "\n";
+					print "	[Saved] :: " . $Dest_File . "\n";
+				} else { $break = 0; }
+				usleep(500);
 			}
 		}
 		else{
-			require LWP::UserAgent; 
-			my $ua = LWP::UserAgent->new;
-			$ua->timeout(10);
-			$ua->env_proxy; 
-			my $response = $ua->get($URL);
-
-			if ($response->is_success){
-				open (FILE, '> ' . $Dest_File . '');
-				print FILE $response->decoded_content;
-				close (FILE); 
-				print " o URL: (" . $URL . ")\n";
-				print " o Saved: (" . $Dest_File . ") \n";
-			}
-			else {
-				print "Error, no connection or failed request...\n\n";
+			$break = 0;
+			while($break == 0) {
+				require LWP::UserAgent; 
+				my $ua = LWP::UserAgent->new;
+				$ua->timeout(10);
+				$ua->env_proxy; 
+				my $response = $ua->get($URL);
+				if ($response->is_success){
+					open (FILE, '> ' . $Dest_File . '');
+					print FILE $response->decoded_content;
+					close (FILE); 
+				}
+				else {
+					# print "Error, no connection or failed request...\n\n";
+				}
+				if(-e $Dest_File) { 
+					$break = 1;
+					print " [URL] :: " . $URL . "\n";
+					print "	[Saved] :: " . $Dest_File . "\n";
+				} else { $break = 0; }
+				usleep(500);
 			}
 		}
 	}
-	if($OS eq "Linux"){ 
+	if($OS eq "Linux"){
 		#::: wget -O db_update/db_update_manifest.txt https://raw.githubusercontent.com/EQEmu/Server/master/utils/sql/db_update_manifest.txt
 		$wget = `wget --no-check-certificate --quiet -O $Dest_File $URL`;
 		print " o URL: (" . $URL . ")\n";
@@ -471,6 +507,53 @@ sub copy_file{
 		}
 	}
 	copy $l_source_file, $l_dest_file;
+}
+
+sub fetch_latest_windows_binaries{
+	print "\n --- Fetching Latest Windows Binaries... --- \n";
+	get_remote_file("https://raw.githubusercontent.com/Akkadius/EQEmuInstall/master/master_windows_build.zip", "updates_staged/master_windows_build.zip", 1);
+	print "\n --- Fetched Latest Windows Binaries... --- \n";
+	print "\n --- Extracting... --- \n";
+	unzip('updates_staged/master_windows_build.zip', 'updates_staged/binaries/');
+	my @files;
+	my $start_dir = "updates_staged/binaries";
+	find( 
+		sub { push @files, $File::Find::name unless -d; }, 
+		$start_dir
+	);
+	for my $file (@files) {
+		$dest_file = $file;
+		$dest_file =~s/updates_staged\/binaries\///g;
+		print "Installing :: " . $dest_file . "\n";
+		copy_file($file, $dest_file);
+	}
+	print "\n --- Done... --- \n";
+	
+	rmtree('updates_staged');
+}
+
+sub fetch_peq_db_full{
+	print "Downloading latest PEQ Database... Please wait...\n";
+	get_remote_file("http://edit.peqtgc.com/weekly/peq_beta.zip", "updates_staged/peq_beta.zip", 1);
+	print "Downloaded latest PEQ Database... Extracting...\n";
+	unzip('updates_staged/peq_beta.zip', 'updates_staged/peq_db/');
+	my $start_dir = "updates_staged\\peq_db";
+	find( 
+		sub { push @files, $File::Find::name unless -d; }, 
+		$start_dir
+	);
+	for my $file (@files) {
+		$dest_file = $file;
+		$dest_file =~s/updates_staged\\peq_db\///g;
+		if($file=~/peqbeta|player_tables/i){
+			print "MariaDB :: Installing :: " . $dest_file . "\n";
+			get_mysql_result_from_file($file);
+		}
+		if($file=~/eqtime/i){
+			print "Installing eqtime.cfg\n";
+			copy_file($file, "eqtime.cfg");
+		}
+	}
 }
 
 sub map_files_fetch_bulk{
