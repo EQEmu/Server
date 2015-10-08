@@ -745,7 +745,8 @@ struct SPDat_Spell_Struct
 /* 195 */	float directional_end; // Cone End Angle:
 /* 196 */   bool sneak; // effect can only be used if sneaking (rogue 'Daggerfall' ect)
 /* 197 */	bool not_focusable; //prevents focus effects from being applied to spell
-/* 198- 199 */
+/* 198 */   bool no_detrimental_spell_aggro; 
+/* 199 */
 /* 200 */	bool suspendable; // buff is suspended in suspended buff zones
 /* 201 */	int viral_range;
 /* 202 */	int songcap; // individual song cap
@@ -764,7 +765,7 @@ struct SPDat_Spell_Struct
 /* 215 - 216 */
 /* 217 */   int override_crit_chance; //Places a cap on the max chance to critical
 /* 218 */	int aemaxtargets;  //Is used for various AE effects
-/* 219 */	int no_heal_damage_item_mod; //Is used for beam and ring spells for target # limits (not implemented)
+/* 219 */	int no_heal_damage_item_mod; 
 /* 220 - 223 */
 /* 224 */	bool persistdeath; // buff doesn't get stripped on death
 /* 225 - 226 */
@@ -880,6 +881,7 @@ uint32 GetPartialMeleeRuneReduction(uint32 spell_id);
 uint32 GetPartialMagicRuneReduction(uint32 spell_id);
 uint32 GetPartialMeleeRuneAmount(uint32 spell_id);
 uint32 GetPartialMagicRuneAmount(uint32 spell_id);
+bool NoDetrimentalSpellAggro(uint16 spell_id);
 
 int CalcPetHp(int levelb, int classb, int STA = 75);
 const char *GetRandPetName();
