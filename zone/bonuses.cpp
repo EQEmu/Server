@@ -1423,7 +1423,12 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 			if (newbon->PC_Pet_Rampage[1] < base2)
 				newbon->PC_Pet_Rampage[1] = base2; //Damage modifer - take highest
 			break;
-		}	
+		}
+
+		case SE_PC_Pet_Flurry_Chance: 
+			newbon->PC_Pet_Flurry += base1; //Chance to Flurry
+			break;
+
 		// to do
 		case SE_PetDiscipline:
 			break;
@@ -3132,7 +3137,11 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 				if (new_bonus->PC_Pet_Rampage[1] < base2)
 					new_bonus->PC_Pet_Rampage[1] = base2; //Damage modifer - take highest
 				break;
-			}		
+			}
+
+			case SE_PC_Pet_Flurry_Chance: 
+				new_bonus->PC_Pet_Flurry += effect_value; //Chance to Flurry
+				break;
 
 			//Special custom cases for loading effects on to NPC from 'npc_spels_effects' table
 			if (IsAISpellEffect) {
