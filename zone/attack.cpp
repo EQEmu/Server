@@ -4763,8 +4763,15 @@ void Mob::DoMainHandAttackRounds(Mob *target, ExtraAttackOptions *opts, int spec
 		// A "quad" on live really is just a successful dual wield where both double attack
 		// The mobs that could triple lost the ability to when the triple attack skill was added in
 		Attack(target, MainPrimary, false, false, false, opts, special);
-		if (CanThisClassDoubleAttack() && CheckDoubleAttack())
+		if (CanThisClassDoubleAttack() && CheckDoubleAttack()){
 			Attack(target, MainPrimary, false, false, false, opts, special);
+								
+			if ((IsPet() || IsTempPet()) && IsPetOwnerClient()){
+				int chance = spellbonuses.PC_Pet_Flurry + itembonuses.PC_Pet_Flurry + aabonuses.PC_Pet_Flurry;
+				if (chance && zone->random.Roll(chance))
+					Flurry(nullptr);
+			}
+		}
 		return;
 	}
 
@@ -4814,8 +4821,15 @@ void Mob::DoOffHandAttackRounds(Mob *target, ExtraAttackOptions *opts, int speci
 	    GetEquipment(MaterialSecondary) != 0) {
 		if (CheckDualWield()) {
 			Attack(target, MainSecondary, false, false, false, opts, special);
-			if (CanThisClassDoubleAttack() && GetLevel() > 35 && CheckDoubleAttack())
+			if (CanThisClassDoubleAttack() && GetLevel() > 35 && CheckDoubleAttack()){
 				Attack(target, MainSecondary, false, false, false, opts, special);
+
+				if ((IsPet() || IsTempPet()) && IsPetOwnerClient()){
+					int chance = spellbonuses.PC_Pet_Flurry + itembonuses.PC_Pet_Flurry + aabonuses.PC_Pet_Flurry;
+					if (chance && zone->random.Roll(chance))
+						Flurry(nullptr);
+				}
+			}
 		}
 	}
 }
