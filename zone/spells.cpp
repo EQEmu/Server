@@ -4298,7 +4298,7 @@ float Mob::ResistSpell(uint8 resist_type, uint16 spell_id, Mob *caster, bool use
 	}
 
 	//Get the resist chance for the target
-	if(resist_type == RESIST_NONE)
+	if(resist_type == RESIST_NONE || spells[spell_id].no_resist)
 	{
 		Log.Out(Logs::Detail, Logs::Spells, "Spell was unresistable");
 		return 100;

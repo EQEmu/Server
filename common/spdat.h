@@ -486,7 +486,7 @@ typedef enum {
 #define SE_CriticalDamageMob			330	// implemented
 #define SE_Salvage						331 // implemented - chance to recover items that would be destroyed in failed tradeskill combine
 //#define SE_SummonToCorpse				332 // *not implemented AA - Call of the Wild (Druid/Shaman Res spell with no exp)
-#define SE_CastOnRuneFadeEffect					333 // implemented
+#define SE_CastOnRuneFadeEffect			333 // implemented
 #define SE_BardAEDot					334	// implemented
 #define SE_BlockNextSpellFocus			335	// implemented - base1 chance to block next spell ie Puratus (8494)
 //#define SE_IllusionaryTarget			336	// not used
@@ -744,7 +744,7 @@ struct SPDat_Spell_Struct
 /* 194 */	float directional_start; //Cone Start Angle:
 /* 195 */	float directional_end; // Cone End Angle:
 /* 196 */   bool sneak; // effect can only be used if sneaking (rogue 'Daggerfall' ect)
-/* 197 */	bool not_extendable;
+/* 197 */	bool not_focusable; //prevents focus effects from being applied to spell
 /* 198- 199 */
 /* 200 */	bool suspendable; // buff is suspended in suspended buff zones
 /* 201 */	int viral_range;
@@ -755,7 +755,7 @@ struct SPDat_Spell_Struct
 /* 206 */
 /* 207 */	int spellgroup;
 /* 208 */	int rank; //increments AA effects with same name
-/* 209 */	int powerful_flag; //  Need more investigation to figure out what to call this, for now we know -1 makes charm spells not break before their duration is complete, it does alot more though
+/* 209 */	int no_resist; //makes spells unresistable, which makes charms unbreakable as well.  
 /* 210 */	// bool DurationFrozen; ???
 /* 211 */	int CastRestriction; //Various restriction categories for spells most seem targetable race related but have also seen others for instance only castable if target hp 20% or lower or only if target out of combat
 /* 212 */	bool AllowRest;
@@ -764,7 +764,7 @@ struct SPDat_Spell_Struct
 /* 215 - 216 */
 /* 217 */   int override_crit_chance; //Places a cap on the max chance to critical
 /* 218 */	int aemaxtargets;  //Is used for various AE effects
-/* 219 */	int maxtargets; //Is used for beam and ring spells for target # limits (not implemented)
+/* 219 */	int no_heal_damage_item_mod; //Is used for beam and ring spells for target # limits (not implemented)
 /* 220 - 223 */
 /* 224 */	bool persistdeath; // buff doesn't get stripped on death
 /* 225 - 226 */
@@ -773,7 +773,8 @@ struct SPDat_Spell_Struct
 /* 229 */	float max_dist; //spell power modified by distance from caster (Max Distance)
 /* 230 */   float max_dist_mod; //spell power modified by distance from caster (Modifier at Max Distance)
 /* 231 */   float min_range; //Min casting range
-/* 232 - 236 */
+/* 232 */   bool no_remove; //prevents buff from being removed by click
+/* 233 - 236 */
 			uint8 DamageShieldType; // This field does not exist in spells_us.txt
 };
 

@@ -5598,18 +5598,18 @@ int32 Mob::GetSpellStat(uint32 spell_id, const char *identifier, uint8 slot)
 	else if (id == "NimbusEffect") {return spells[spell_id].NimbusEffect; }
 	else if (id == "directional_start") {return static_cast<int32>(spells[spell_id].directional_start); }
 	else if (id == "directional_end") {return static_cast<int32>(spells[spell_id].directional_end); }
-	else if (id == "not_extendable") {return spells[spell_id].not_extendable; }
+	else if (id == "not_focusable") {return spells[spell_id].not_focusable; }
 	else if (id == "suspendable") {return spells[spell_id].suspendable; }
 	else if (id == "viral_range") {return spells[spell_id].viral_range; }
 	else if (id == "spellgroup") {return spells[spell_id].spellgroup; }
 	else if (id == "rank") {return spells[spell_id].rank; }
-	else if (id == "powerful_flag") {return spells[spell_id].powerful_flag; }
+	else if (id == "no_resist") {return spells[spell_id].no_resist; }
 	else if (id == "CastRestriction") {return spells[spell_id].CastRestriction; }
 	else if (id == "AllowRest") {return spells[spell_id].AllowRest; }
 	else if (id == "InCombat") {return spells[spell_id].InCombat; }
 	else if (id == "OutofCombat") {return spells[spell_id].OutofCombat; }
 	else if (id == "aemaxtargets") {return spells[spell_id].aemaxtargets; }
-	else if (id == "maxtargets") {return spells[spell_id].maxtargets; }
+	else if (id == "no_heal_damage_item_mod") {return spells[spell_id].no_heal_damage_item_mod; }
 	else if (id == "persistdeath") {return spells[spell_id].persistdeath; }
 	else if (id == "min_dist") {return static_cast<int32>(spells[spell_id].min_dist); }
 	else if (id == "min_dist_mod") {return static_cast<int32>(spells[spell_id].min_dist_mod); }
