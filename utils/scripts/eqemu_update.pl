@@ -330,6 +330,7 @@ sub database_dump_compress {
 sub script_exit{ 
 	#::: Cleanup staged folder...
 	rmtree("updates_staged/");
+	exit;
 }
 
 #::: Returns Tab Delimited MySQL Result from Command Line
