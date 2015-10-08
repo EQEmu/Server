@@ -4067,7 +4067,7 @@ bool Mob::IsImmuneToSpell(uint16 spell_id, Mob *caster)
 			if(aggro > 0) {
 				AddToHateList(caster, aggro);
 			} else {
-				AddToHateList(caster, 1);
+				AddToHateList(caster, 1,0,true,false,false,spell_id);
 			}
 			return true;
 		}
@@ -4094,7 +4094,7 @@ bool Mob::IsImmuneToSpell(uint16 spell_id, Mob *caster)
 		if(aggro > 0) {
 			AddToHateList(caster, aggro);
 		} else {
-			AddToHateList(caster, 1);
+			AddToHateList(caster, 1,0,true,false,false,spell_id);
 		}
 		return true;
 	}
@@ -4110,7 +4110,7 @@ bool Mob::IsImmuneToSpell(uint16 spell_id, Mob *caster)
 			if(aggro > 0) {
 				AddToHateList(caster, aggro);
 			} else {
-				AddToHateList(caster, 1);
+				AddToHateList(caster, 1,0,true,false,false,spell_id);
 			}
 			return true;
 		} else if(IsClient() && caster->IsClient() && (caster->CastToClient()->GetGM() == false))
@@ -4127,7 +4127,7 @@ bool Mob::IsImmuneToSpell(uint16 spell_id, Mob *caster)
 			if (aggro > 0) {
 				AddToHateList(caster, aggro);
 			} else {
-				AddToHateList(caster, 1);
+				AddToHateList(caster, 1,0,true,false,false,spell_id);
 			}
 			return true;
 		}
@@ -4150,7 +4150,7 @@ bool Mob::IsImmuneToSpell(uint16 spell_id, Mob *caster)
 			if(aggro > 0) {
 				AddToHateList(caster, aggro);
 			} else {
-				AddToHateList(caster, 1);
+				AddToHateList(caster, 1,0,true,false,false,spell_id);
 			}
 			return true;
 		}
@@ -4190,7 +4190,7 @@ bool Mob::IsImmuneToSpell(uint16 spell_id, Mob *caster)
 			if(aggro > 0) {
 				AddToHateList(caster, aggro);
 			} else {
-				AddToHateList(caster, 1);
+				AddToHateList(caster, 1,0,true,false,false,spell_id);
 			}
 			return true;
 		}

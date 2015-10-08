@@ -960,6 +960,9 @@ bool Mob::CheckLosFN(float posX, float posY, float posZ, float mobSize) {
 //offensive spell aggro
 int32 Mob::CheckAggroAmount(uint16 spell_id, Mob *target, bool isproc)
 {
+	if (NoDetrimentalSpellAggro(spell_id))
+		return 0;
+
 	int32 AggroAmount = 0;
 	int32 nonModifiedAggro = 0;
 	uint16 slevel = GetLevel();

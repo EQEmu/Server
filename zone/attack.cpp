@@ -2410,7 +2410,7 @@ bool NPC::Death(Mob* killerMob, int32 damage, uint16 spell, SkillUseTypes attack
 	return true;
 }
 
-void Mob::AddToHateList(Mob* other, uint32 hate /*= 0*/, int32 damage /*= 0*/, bool iYellForHelp /*= true*/, bool bFrenzy /*= false*/, bool iBuffTic /*= false*/)
+void Mob::AddToHateList(Mob* other, uint32 hate /*= 0*/, int32 damage /*= 0*/, bool iYellForHelp /*= true*/, bool bFrenzy /*= false*/, bool iBuffTic /*= false*/, uint16 spell_id)
 {
 	if(!other)
 		return;
@@ -2464,6 +2464,9 @@ void Mob::AddToHateList(Mob* other, uint32 hate /*= 0*/, int32 damage /*= 0*/, b
 		return;
 
 	if(IsFamiliar() || GetSpecialAbility(IMMUNE_AGGRO))
+		return;
+
+	if (spell_id != SPELL_UNKNOWN && NoDetrimentalSpellAggro(spell_id))
 		return;
 
 	if (other == myowner)
@@ -3139,15 +3142,15 @@ void Mob::CommonDamage(Mob* attacker, int32 &damage, const uint16 spell_id, cons
 			if(!RuleB(Combat, EXPFromDmgShield)) {
 			// Damage shield damage shouldn't count towards who gets EXP
 				if(!attacker->CastToClient()->GetFeigned() && !FromDamageShield)
-					AddToHateList(attacker, 0, damage, true, false, iBuffTic);
+					AddToHateList(attacker, 0, damage, true, false, iBuffTic, spell_id);
 			}
 			else {
 				if(!attacker->CastToClient()->GetFeigned())
-					AddToHateList(attacker, 0, damage, true, false, iBuffTic);
+					AddToHateList(attacker, 0, damage, true, false, iBuffTic, spell_id);
 			}
 		}
 		else
-			AddToHateList(attacker, 0, damage, true, false, iBuffTic);
+			AddToHateList(attacker, 0, damage, true, false, iBuffTic, spell_id);
 	}
 
 	if(damage > 0) {
@@ -3172,7 +3175,7 @@ void Mob::CommonDamage(Mob* attacker, int32 &damage, const uint16 spell_id, cons
 		{
 			if (!pet->IsHeld()) {
 				Log.Out(Logs::Detail, Logs::Aggro, "Sending pet %s into battle due to attack.", pet->GetName());
-				pet->AddToHateList(attacker, 1);
+				pet->AddToHateList(attacker, 1,0, true, false, false, spell_id);
 				pet->SetTarget(attacker);
 				Message_StringID(10, PET_ATTACKING, pet->GetCleanName(), attacker->GetCleanName());
 			}
