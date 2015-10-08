@@ -780,7 +780,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 
 				// define spells with fixed duration
 				// charm spells with -1 in field 209 are all of fixed duration, so lets use that instead of spell_ids
-				if(spells[spell_id].powerful_flag == -1)
+				if(spells[spell_id].no_resist)
 					bBreak = true;
 
 				if (!bBreak)
@@ -5228,6 +5228,9 @@ int16 Client::GetFocusEffect(focusType type, uint16 spell_id)
 	if (IsBardSong(spell_id) && type != focusFcBaseEffects && type != focusSpellDuration)
 		return 0;
 
+	if (spells[spell_id].not_focusable)
+		return 0;
+
 	int16 realTotal = 0;
 	int16 realTotal2 = 0;
 	int16 realTotal3 = 0;
@@ -5498,6 +5501,9 @@ int16 Client::GetFocusEffect(focusType type, uint16 spell_id)
 }
 
 int16 NPC::GetFocusEffect(focusType type, uint16 spell_id) {
+
+	if (spells[spell_id].not_focusable)
+		return 0;
 
 	int16 realTotal = 0;
 	int16 realTotal2 = 0;

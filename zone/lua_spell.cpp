@@ -406,7 +406,7 @@ int Lua_Spell::GetSpellGroup() {
 
 int Lua_Spell::GetPowerfulFlag() {
 	Lua_Safe_Call_Int();
-	return self->powerful_flag;
+	return self->no_resist;
 }
 
 int Lua_Spell::GetCastRestriction() {
@@ -436,7 +436,7 @@ int Lua_Spell::GetAEMaxTargets() {
 
 int Lua_Spell::GetMaxTargets() {
 	Lua_Safe_Call_Int();
-	return self->maxtargets;
+	return self->no_heal_damage_item_mod;
 }
 
 bool Lua_Spell::GetPersistDeath() {
