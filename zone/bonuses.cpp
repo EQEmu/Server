@@ -1429,12 +1429,22 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 			newbon->PC_Pet_Flurry += base1; //Chance to Flurry
 			break;
 
+		case SE_ShroudofStealth:
+			newbon->ShroudofStealth = true;
+			break;
+
+		case SE_ReduceFallDamage:
+			newbon->ReduceFallDamage += base1;
+			break;
+
+		case SE_ReduceTradeskillFail:
+			newbon->ReduceTradeskillFail[base2] += base1;
+			break;
+
 		// to do
 		case SE_PetDiscipline:
 			break;
 		case SE_PetDiscipline2:
-			break;
-		case SE_ReduceTradeskillFail:
 			break;
 		case SE_PotionBeltSlots:
 			break;
@@ -1458,13 +1468,9 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 			break;
 		case SE_TrapCircumvention:
 			break;
-		case SE_ShroudofStealth:
-			break;
 		case SE_FeignedMinion:
 			break;
 
-		// handled client side
-		case SE_ReduceFallDamage:
 		// not handled here
 		case SE_HastenedAASkill:
 		// not handled here but don't want to clutter debug log -- these may need to be verified to ignore
@@ -3141,6 +3147,18 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 
 			case SE_PC_Pet_Flurry_Chance: 
 				new_bonus->PC_Pet_Flurry += effect_value; //Chance to Flurry
+				break;
+
+			case SE_ShroudofStealth:
+				new_bonus->ShroudofStealth = true;
+				break;
+
+			case SE_ReduceFallDamage:
+				new_bonus->ReduceFallDamage += effect_value;
+				break;
+
+			case SE_ReduceTradeskillFail:
+				new_bonus->ReduceTradeskillFail[base2] += effect_value;
 				break;
 
 			//Special custom cases for loading effects on to NPC from 'npc_spels_effects' table
