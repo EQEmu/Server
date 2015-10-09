@@ -400,7 +400,7 @@ typedef enum {
 #define	SE_RootBreakChance				244	// implemented[AA] reduce the chance that your root will break.
 #define SE_TrapCircumvention			245	// *not implemented[AA] - decreases the chance that you will set off a trap when opening a chest
 #define SE_SetBreathLevel				246 // *not implemented as bonus
-#define SE_RaiseSkillCap				247	// *not implemented[AA] - adds skill over the skill cap.
+#define SE_RaiseSkillCap				247	// implemented[AA] - adds skill over the skill cap.
 #define SE_SecondaryForte				248 // not implemented as bonus(gives you a 2nd specialize skill that can go past 50 to 100)
 #define SE_SecondaryDmgInc				249 // implemented[AA] Allows off hand weapon to recieve a damage bonus (Sinister Strikes)
 #define SE_SpellProcChance				250	// implemented - Increase chance to proc from melee proc spells (ie Spirit of Panther)
@@ -416,7 +416,7 @@ typedef enum {
 #define SE_AddSingingMod				260 // implemented[AA] - Instrument/Singing Mastery, base1 is the mod, base2 is the ItemType
 #define SE_SongModCap					261	// implemented[AA] - Song Mod cap increase (no longer used on live)
 #define SE_RaiseStatCap					262 // implemented
-#define SE_TradeSkillMastery			263	// not implemented - lets you raise more than one tradeskill above master.
+#define SE_TradeSkillMastery			263	// implemented - lets you raise more than one tradeskill above master.
 #define SE_HastenedAASkill			    264 // implemented
 #define SE_MasteryofPast				265 // implemented[AA] - Spells less than effect values level can not be fizzled
 #define SE_ExtraAttackChance			266 // implemented - increase chance to score an extra attack with a 2-Handed Weapon.
@@ -478,7 +478,7 @@ typedef enum {
 #define SE_GateToHomeCity				322 // implemented
 #define SE_DefensiveProc				323 // implemented
 #define SE_HPToMana						324 // implemented
-//#define SE_ChanceInvsBreakToAoE		325	// *not implemented[AA] - [AA Nerves of Steel] increasing chance to remain hidden when they are an indirect target of an AoE spell.
+//#define SE_NoBreakAESneak				325	// *not implemented[AA] - [AA Nerves of Steel] increasing chance to remain hidden when they are an indirect target of an AoE spell.
 #define SE_SpellSlotIncrease			326 // *not implemented as bonus - increases your spell slot availability
 #define SE_MysticalAttune				327 // implemented - increases amount of buffs that a player can have
 #define SE_DelayDeath					328 // implemented - increases how far you can fall below 0 hp before you die

@@ -439,7 +439,7 @@ struct StatBonuses {
 	int32	CombatStability;					// Melee damage mitigation.
 	int32	DoubleRiposte;						// Chance to double riposte
 	int32	GiveDoubleRiposte[3];				// 0=Regular Chance, 1=Skill Attack Chance, 2=Skill
-	uint32	RaiseSkillCap[2];					// Raise a specific skill cap (1 = value, 2=skill)
+	uint32	RaiseSkillCap[HIGHEST_SKILL+1];		// Raise a specific skill cap (base1= value, base2=skill)
 	int32	Ambidexterity;						// Increase chance to duel wield by adding bonus 'skill'.
 	int32	PetMaxHP;							// Increase the max hp of your pet.
 	int32	PetFlurry;							// Chance for pet to flurry.
@@ -470,6 +470,7 @@ struct StatBonuses {
 	bool	ShroudofStealth;					// rogue improved invisiblity
 	uint16  ReduceFallDamage;					// reduce fall damage by percent
 	int32	ReduceTradeskillFail[HIGHEST_SKILL+1]; // Reduces chance for trade skills to fail by percent.
+	uint8	TradeSkillMastery;					// Allow number of tradeskills to exceed 200 skill.
 };
 
 typedef struct

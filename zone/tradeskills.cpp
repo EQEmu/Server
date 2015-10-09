@@ -1403,8 +1403,9 @@ bool Client::CanIncreaseTradeskill(SkillUseTypes tradeskill) {
 	uint8 Pottery	= (GetRawSkill(SkillPottery) > 200) ? 1 : 0;
 	uint8 Tailoring	= (GetRawSkill(SkillTailoring) > 200) ? 1 : 0;
 	uint8 SkillTotal = Baking + Smithing + Brewing + Fletching + Jewelry + Pottery + Tailoring; //Tradeskills above 200
-	uint32 aaLevel	= GetAA(aaNewTanaanCraftingMastery); //New Tanaan AA: Each level allows an additional tradeskill above 200 (first one is free)
-
+	//New Tanaan AA: Each level allows an additional tradeskill above 200 (first one is free)
+	uint8 aaLevel = spellbonuses.TradeSkillMastery + itembonuses.TradeSkillMastery + aabonuses.TradeSkillMastery; 
+	
 	switch (tradeskill) {
 		case SkillBaking:
 		case SkillBlacksmithing:

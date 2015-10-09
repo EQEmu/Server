@@ -2439,18 +2439,8 @@ uint16 Client::GetMaxSkillAfterSpecializationRules(SkillUseTypes skillid, uint16
 
 		}
 	}
-	// This should possibly be handled by bonuses rather than here.
-	switch(skillid)
-	{
-		case SkillTracking:
-		{
-			Result += ((GetAA(aaAdvancedTracking) * 10) + (GetAA(aaTuneofPursuance) * 10));
-			break;
-		}
-
-		default:
-			break;
-	}
+	
+	Result += spellbonuses.RaiseSkillCap[skillid] + itembonuses.RaiseSkillCap[skillid] + aabonuses.RaiseSkillCap[skillid];
 
 	return Result;
 }

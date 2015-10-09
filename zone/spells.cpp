@@ -750,14 +750,6 @@ bool Client::CheckFizzle(uint16 spell_id)
 	// always at least 1% chance to fail or 5% to succeed
 	fizzlechance = fizzlechance < 1 ? 1 : (fizzlechance > 95 ? 95 : fizzlechance);
 
-	/*
-	if(IsBardSong(spell_id))
-	{
-		//This was a channel chance modifier - no evidence for fizzle reduction
-		fizzlechance -= GetAA(aaInternalMetronome) * 1.5f;
-	}
-	*/
-
 	float fizzle_roll = zone->random.Real(0, 100);
 
 	Log.Out(Logs::Detail, Logs::Spells, "Check Fizzle %s  spell %d  fizzlechance: %0.2f%%   diff: %0.2f  roll: %0.2f", GetName(), spell_id, fizzlechance, diff, fizzle_roll);

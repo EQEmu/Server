@@ -1199,13 +1199,14 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 			break;
 		}
 
-		// Kayen: Not sure best way to implement this yet.
 		// Physically raises skill cap ie if 55/55 it will raise to 55/60
 		case SE_RaiseSkillCap: {
-			if (newbon->RaiseSkillCap[0] < base1) {
-				newbon->RaiseSkillCap[0] = base1; // value
-				newbon->RaiseSkillCap[1] = base2; // skill
-			}
+
+			if (base2 > HIGHEST_SKILL)
+				break;
+
+			if (newbon->RaiseSkillCap[base2] < base1) 
+				newbon->RaiseSkillCap[base2] = base1;
 			break;
 		}
 
@@ -1437,8 +1438,18 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 			newbon->ReduceFallDamage += base1;
 			break;
 
-		case SE_ReduceTradeskillFail:
+		case SE_ReduceTradeskillFail:{
+
+			if (base2 > HIGHEST_SKILL)
+				break;
+
 			newbon->ReduceTradeskillFail[base2] += base1;
+			break;
+		}
+
+		case SE_TradeSkillMastery:
+			if (newbon->TradeSkillMastery < base1)
+				newbon->TradeSkillMastery = base1;
 			break;
 
 		// to do
@@ -1451,8 +1462,6 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 		case SE_BandolierSlots:
 			break;
 		case SE_ForageSkill:
-			break;
-		case SE_TradeSkillMastery:
 			break;
 		case SE_SecondaryForte:
 			break;
@@ -3157,10 +3166,29 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 				new_bonus->ReduceFallDamage += effect_value;
 				break;
 
-			case SE_ReduceTradeskillFail:
+			case SE_ReduceTradeskillFail:{
+
+				if (base2 > HIGHEST_SKILL)
+					break;
+
 				new_bonus->ReduceTradeskillFail[base2] += effect_value;
 				break;
+			}
 
+			case SE_TradeSkillMastery:
+				if (new_bonus->TradeSkillMastery < effect_value)
+					new_bonus->TradeSkillMastery = effect_value;
+				break;
+
+			case SE_RaiseSkillCap: {
+				if (base2 > HIGHEST_SKILL)
+					break;
+				
+				if (new_bonus->RaiseSkillCap[base2] < effect_value) 
+					new_bonus->RaiseSkillCap[base2] = effect_value;
+				break;
+			}
+		
 			//Special custom cases for loading effects on to NPC from 'npc_spels_effects' table
 			if (IsAISpellEffect) {
 
