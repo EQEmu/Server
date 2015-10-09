@@ -381,7 +381,7 @@ typedef enum {
 #define SE_GiveDoubleAttack				225	// implemented[AA] - Allow any class to double attack with set chance.
 #define SE_TwoHandBash					226 // *not implemented as bonus
 #define SE_ReduceSkillTimer				227	// implemented
-#define SE_ReduceFallDamage				228	// not implented as bonus - reduce the damage that you take from falling
+#define SE_ReduceFallDamage				228	// implented - reduce the damage that you take from falling
 #define SE_PersistantCasting			229 // implemented
 #define SE_ExtendedShielding			230	// not used as bonus - increase range of /shield ability
 #define SE_StunBashChance				231	// implemented - increase chance to stun from bash.
@@ -409,7 +409,7 @@ typedef enum {
 #define SE_FrontalBackstabMinDmg		253	// implemented[AA] - allow a frontal backstab for mininum damage.
 #define SE_Blank						254 // implemented
 #define SE_ShieldDuration				255	// not implemented as bonus - increases duration of /shield
-#define SE_ShroudofStealth				256	// not implemented as bonus - rogue improved invs
+#define SE_ShroudofStealth				256	// implemented
 #define SE_PetDiscipline				257 // not implemented as bonus - /pet hold
 #define SE_TripleBackstab				258 // implemented[AA] - chance to perform a triple backstab
 #define SE_CombatStability				259 // implemented[AA] - damage mitigation
@@ -421,7 +421,7 @@ typedef enum {
 #define SE_MasteryofPast				265 // implemented[AA] - Spells less than effect values level can not be fizzled
 #define SE_ExtraAttackChance			266 // implemented - increase chance to score an extra attack with a 2-Handed Weapon.
 #define SE_PetDiscipline2				267 // *not implemented - /pet focus, /pet no cast
-#define SE_ReduceTradeskillFail			268 // *not implemented? - reduces chance to fail with given tradeskill by a percent chance
+#define SE_ReduceTradeskillFail			268 // implemented - reduces chance to fail with given tradeskill by a percent chance
 #define SE_MaxBindWound					269	// implemented[AA] - Increase max HP you can bind wound.
 #define SE_BardSongRange				270	// implemented[AA] - increase range of beneficial bard songs (Sionachie's Crescendo)
 #define SE_BaseMovementSpeed			271 // implemented[AA] - mods basemove speed, doesn't stack with other move mods

@@ -467,6 +467,9 @@ struct StatBonuses {
 	int32	PetMeleeMitigation;					// Add AC to owner's pet.
 	bool	IllusionPersistence;				// Causes illusions not to fade.
 	uint16	extra_xtargets;						// extra xtarget entries
+	bool	ShroudofStealth;					// rogue improved invisiblity
+	uint16  ReduceFallDamage;					// reduce fall damage by percent
+	int32	ReduceTradeskillFail[HIGHEST_SKILL+1]; // Reduces chance for trade skills to fail by percent.
 };
 
 typedef struct
