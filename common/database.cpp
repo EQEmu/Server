@@ -348,11 +348,11 @@ bool Database::DeleteCharacter(char *name) {
 	query = StringFormat("DELETE FROM `character_inspect_messages` WHERE `id` = %u", charid); QueryDatabase(query);
 	query = StringFormat("DELETE FROM `character_leadership_abilities` WHERE `id` = %u", charid); QueryDatabase(query);
 	query = StringFormat("DELETE FROM `character_alt_currency` WHERE `char_id` = '%d'", charid); QueryDatabase(query);
-#ifdef BOTS																														 
-	query = StringFormat("DELETE FROM `guild_members` WHERE `char_id` = '%d' AND GetMobTypeById(%i) = 'C'", charid);
-#else																															 
+#ifdef BOTS
+	query = StringFormat("DELETE FROM `guild_members` WHERE `char_id` = '%d' AND GetMobTypeById(%i) = 'C'", charid); // note: only use of GetMobTypeById()
+#else
 	query = StringFormat("DELETE FROM `guild_members` WHERE `char_id` = '%d'", charid);
-#endif																															 
+#endif
 	QueryDatabase(query);
 	
 	return true;

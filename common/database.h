@@ -209,7 +209,6 @@ public:
 	/* Database Conversions 'database_conversions.cpp' */
 
 	bool	CheckDatabaseConversions();
-	bool	CheckDatabaseConvertBotsPostPPDeblob();
 	bool	CheckDatabaseConvertCorpseDeblob();
 	bool	CheckDatabaseConvertPPDeblob();
 

@@ -2007,24 +2007,21 @@ void SharedDatabase::SaveCharacterInspectMessage(uint32 character_id, const Insp
 	auto results = QueryDatabase(query);
 }
 
-void SharedDatabase::GetBotInspectMessage(uint32 botid, InspectMessage_Struct* message) {
-
-	std::string query = StringFormat("SELECT BotInspectMessage FROM bots WHERE BotID = %i", botid);
+#ifdef BOTS
+void SharedDatabase::GetBotInspectMessage(uint32 bot_id, InspectMessage_Struct* message)
+{
+	std::string query = StringFormat("SELECT `inspect_message` FROM `bot_inspect_messages` WHERE `bot_id` = %i LIMIT 1", bot_id);
 	auto results = QueryDatabase(query);
-	if (!results.Success()) {
-        return;
+	auto row = results.begin();
+	memset(message, '\0', sizeof(InspectMessage_Struct));
+	for (auto row = results.begin(); row != results.end(); ++row) {
+		memcpy(message, row[0], sizeof(InspectMessage_Struct));
 	}
-
-    if (results.RowCount() != 1)
-        return;
-
-    auto row = results.begin();
-    memcpy(message, row[0], sizeof(InspectMessage_Struct));
-
 }
 
-void SharedDatabase::SetBotInspectMessage(uint32 botid, const InspectMessage_Struct* message) {
-	std::string msg = EscapeString(message->text);
-	std::string query = StringFormat("UPDATE bots SET BotInspectMessage = '%s' WHERE BotID = %i", msg.c_str(), botid);
-    QueryDatabase(query);
+void SharedDatabase::SetBotInspectMessage(uint32 bot_id, const InspectMessage_Struct* message)
+{
+	std::string query = StringFormat("REPLACE INTO `bot_inspect_messages` (bot_id, inspect_message) VALUES (%u, '%s')", bot_id, EscapeString(message->text).c_str());
+	auto results = QueryDatabase(query);
 }
+#endif

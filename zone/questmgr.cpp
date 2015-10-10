@@ -2041,23 +2041,23 @@ void QuestManager::popup(const char *title, const char *text, uint32 popupid, ui
 #ifdef BOTS
 
 int QuestManager::createbotcount() {
-	return RuleI(Bots, CreateBotCount);
+	return RuleI(Bots, CreationLimit);
 }
 
 int QuestManager::spawnbotcount() {
-	return RuleI(Bots, SpawnBotCount);
+	return RuleI(Bots, SpawnLimit);
 }
 
 bool QuestManager::botquest()
 {
-	return RuleB(Bots, BotQuest);
+	return RuleB(Bots, QuestableSpawnLimit);
 }
 
 bool QuestManager::createBot(const char *name, const char *lastname, uint8 level, uint16 race, uint8 botclass, uint8 gender)
 {
 	QuestManagerCurrentQuestVars();
 	std::string TempErrorMessage;
-	uint32 MaxBotCreate = RuleI(Bots, CreateBotCount);
+	uint32 MaxBotCreate = RuleI(Bots, CreationLimit);
 
 	if (initiator && initiator->IsClient())
 	{

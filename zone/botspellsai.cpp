@@ -883,7 +883,7 @@ bool Bot::AIDoSpellCast(uint8 i, Mob* tar, int32 mana_cost, uint32* oDontDoAgain
 	int32 hasMana = GetMana();
 
 	// Allow bots to cast buff spells even if they are out of mana
-	if(RuleB(Bots, BotFinishBuffing)) {
+	if(RuleB(Bots, FinishBuffing)) {
 		if(manaCost > hasMana) {
 			// Let's have the bots complete the buff time process
 			if(AIspells[i].type & SpellType_Buff) {

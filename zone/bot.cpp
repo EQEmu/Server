@@ -1260,7 +1260,7 @@ int32 Bot::GenerateBaseHitPoints() {
 }
 
 void Bot::LoadAAs() {
-	int maxAAExpansion = RuleI(Bots, BotAAExpansion); //get expansion to get AAs up to
+	int maxAAExpansion = RuleI(Bots, AAExpansion); //get expansion to get AAs up to
 	aa_ranks.clear();
 
 	int id = 0;
@@ -1535,7 +1535,7 @@ bool Bot::IsBotNameAvailable(char *botName, std::string* errorMessage) {
 	if (botName == "" || strlen(botName) > 15 || !database.CheckNameFilter(botName) || !database.CheckUsedName(botName))
 		return false;
 
-	std::string query = StringFormat("SELECT id FROM vwBotCharacterMobs WHERE name LIKE '%s'", botName);
+	std::string query = StringFormat("SELECT `id` FROM `vw_bot_character_mobs` WHERE `name` LIKE '%s'", botName);
 	auto results = database.QueryDatabase(query);
 	if(!results.Success()) {
 		*errorMessage = std::string(results.ErrorMessage());
@@ -1548,78 +1548,248 @@ bool Bot::IsBotNameAvailable(char *botName, std::string* errorMessage) {
 	return true; //We made it with a valid name!
 }
 
-bool Bot::Save() {
+bool Bot::Save()
+{
 	if(this->GetBotID() == 0) {
 		// New bot record
-		std::string query = StringFormat("INSERT INTO bots (BotOwnerCharacterID, BotSpellsID, Name, LastName, "
-                            "BotLevel, Race, Class, Gender, Size, Face, LuclinHairStyle, "
-                            "LuclinHairColor, LuclinEyeColor, LuclinEyeColor2, LuclinBeardColor, "
-                            "LuclinBeard, DrakkinHeritage, DrakkinTattoo, DrakkinDetails, HP, Mana, "
-                            "MR, CR, DR, FR, PR, Corrup, AC, STR, STA, DEX, AGI, _INT, WIS, CHA, ATK, "
-                            "LastSpawnDate, TotalPlayTime, LastZoneId) "
-                            "VALUES('%u', '%u', '%s', '%s', '%u', '%i', '%i', '%i', '%f', '%i', '%i', "
-                            "'%i', '%i', '%i', '%i', '%i', '%i', '%i', '%i', '%i', '%i', '%i', '%i', "
-                            "'%i', '%i', '%i', '%i', '%i', '%i', '%i', '%i', '%i', '%i', '%i', '%i', "
-                            "'%i', NOW(), 0, %i)",
-                            this->_botOwnerCharacterID, this->GetBotSpellID(), this->GetCleanName(),
-                            this->lastname, this->GetLevel(), GetRace(), GetClass(), GetGender(),
-                            GetSize(), this->GetLuclinFace(), this->GetHairStyle(), GetHairColor(),
-                            this->GetEyeColor1(), this->GetEyeColor2(), this->GetBeardColor(),
-                            this->GetBeard(), this->GetDrakkinHeritage(), this->GetDrakkinTattoo(),
-                            this->GetDrakkinDetails(), GetHP(), GetMana(), GetMR(), GetCR(), GetDR(),
-                            GetFR(), GetPR(), GetCorrup(), GetAC(), GetSTR(), GetSTA(), GetDEX(),
-                            GetAGI(), GetINT(), GetWIS(), GetCHA(), GetATK(), _lastZoneId);
-        auto results = database.QueryDatabase(query);
+		std::string query = StringFormat(
+			"INSERT INTO `bot_data` ("
+			" `owner_id`,"
+			" `spells_id`,"
+			" `name`,"
+			" `last_name`,"
+			" `zone_id`,"
+			" `gender`,"
+			" `race`,"
+			" `class`,"
+			" `level`,"
+			/*creation_day - not needed for bot creation*/
+			" `last_spawn`,"
+			" `time_spawned`,"
+			" `size`,"
+			" `face`,"
+			" `hair_color`,"
+			" `hair_style`,"
+			" `beard`,"
+			" `beard_color`,"
+			" `eye_color_1`,"
+			" `eye_color_2`,"
+			" `drakkin_heritage`,"
+			" `drakkin_tattoo`,"
+			" `drakkin_details`,"
+			" `ac`,"
+			" `atk`,"
+			" `hp`,"
+			" `mana`,"
+			" `str`,"
+			" `sta`,"
+			" `cha`,"
+			" `dex`,"
+			" `int`,"
+			" `agi`,"
+			" `wis`,"
+			" `fire`,"
+			" `cold`,"
+			" `magic`,"
+			" `poison`,"
+			" `disease`,"
+			" `corruption`"
+			")"
+			" VALUES ("
+			"'%u',"				/*owner_id*/
+			" '%u',"			/*spells_id*/
+			" '%s',"			/*name*/
+			" '%s',"			/*last_name*/
+			" '%i',"			/*zone_id*/
+			" '%i',"			/*gender*/
+			" '%i',"			/*race*/
+			" '%i',"			/*class*/
+			" '%u',"			/*level*/
+			/*creation_day*/
+			" NOW(),"			/*last_spawn*/
+			" 0,"				/*time_spawned*/
+			" '%f',"			/*size*/
+			" '%i',"			/*face*/
+			" '%i',"			/*hair_color*/
+			" '%i',"			/*hair_style*/
+			" '%i',"			/*beard*/
+			" '%i',"			/*beard_color*/
+			" '%i',"			/*eye_color_1*/
+			" '%i',"			/*eye_color_2*/
+			" '%i',"			/*drakkin_heritage*/
+			" '%i',"			/*drakkin_tattoo*/
+			" '%i',"			/*drakkin_details*/
+			" '%i',"			/*ac*/
+			" '%i',"			/*atk*/
+			" '%i',"			/*hp*/
+			" '%i',"			/*mana*/
+			" '%i',"			/*str*/
+			" '%i',"			/*sta*/
+			" '%i',"			/*cha*/
+			" '%i',"			/*dex*/
+			" '%i',"			/*int*/
+			" '%i',"			/*agi*/
+			" '%i',"			/*wis*/
+			" '%i',"			/*fire*/
+			" '%i',"			/*cold*/
+			" '%i',"			/*magic*/
+			" '%i',"			/*poison*/
+			" '%i',"			/*disease*/
+			" '%i'"				/*corruption*/
+			")",
+			this->_botOwnerCharacterID,
+			this->GetBotSpellID(),
+			this->GetCleanName(),
+			this->lastname,
+			_lastZoneId,
+			GetGender(),
+			GetRace(),
+			GetClass(),
+			this->GetLevel(),
+			GetSize(),
+			this->GetLuclinFace(),
+			GetHairColor(),
+			this->GetHairStyle(),
+			this->GetBeard(),
+			this->GetBeardColor(),
+			this->GetEyeColor1(),
+			this->GetEyeColor2(),
+			this->GetDrakkinHeritage(),
+			this->GetDrakkinTattoo(),
+			this->GetDrakkinDetails(),
+			GetAC(),
+			GetATK(),
+			GetHP(),
+			GetMana(),
+			GetSTR(),
+			GetSTA(),
+			GetCHA(),
+			GetDEX(),
+			GetINT(),
+			GetAGI(),
+			GetWIS(),
+			GetFR(),
+			GetCR(),
+			GetMR(),
+			GetPR(),
+			GetDR(),
+			GetCorrup()
+		);
+		auto results = database.QueryDatabase(query);
 		if(!results.Success()) {
-            auto botOwner = GetBotOwner();
+			auto botOwner = GetBotOwner();
 			if (botOwner)
-                botOwner->Message(13, results.ErrorMessage().c_str());
-
-            return false;
+				botOwner->Message(13, results.ErrorMessage().c_str());
+			
+			return false;
 		}
-
-        SetBotID(results.LastInsertedID());
-        SaveBuffs();
+		
+		SetBotID(results.LastInsertedID());
+		SaveBuffs();
 		SavePet();
 		SaveStance();
 		SaveTimers();
-        return true;
+		return true;
 	}
-
-    // Update existing bot record
-    std::string query = StringFormat("UPDATE bots SET BotOwnerCharacterID = '%u', BotSpellsID = '%u', "
-                                    "Name = '%s', LastName = '%s', BotLevel = '%u', Race = '%i', "
-                                    "Class = '%i', Gender = '%i', Size = '%f', Face = '%i', "
-                                    "LuclinHairStyle = '%i', LuclinHairColor = '%i', "
-                                    "LuclinEyeColor = '%i', LuclinEyeColor2 = '%i', "
-                                    "LuclinBeardColor = '%i', LuclinBeard = '%i', DrakkinHeritage = '%i', "
-                                    "DrakkinTattoo = '%i', DrakkinDetails = '%i', HP = '%i', Mana = '%i', "
-                                    "MR = '%i', CR = '%i', DR = '%i', FR = '%i', PR = '%i', "
-                                    "Corrup = '%i', AC = '%i', STR = '%i', STA = '%i', DEX = '%i', "
-                                    "AGI = '%i', _INT = '%i', WIS = '%i', CHA = '%i', ATK = '%i', "
-                                    "LastSpawnDate = NOW(), TotalPlayTime = '%u', LastZoneId = %i "
-                                    "WHERE BotID = '%u'",
-                                    _botOwnerCharacterID, this->GetBotSpellID(), this->GetCleanName(),
-                                    this->lastname, this->GetLevel(), _baseRace, this->GetClass(),
-                                    _baseGender, GetSize(), this->GetLuclinFace(), this->GetHairStyle(),
-                                    GetHairColor(), this->GetEyeColor1(), this->GetEyeColor2(),
-                                    this->GetBeardColor(), this->GetBeard(), this->GetDrakkinHeritage(),
-                                    GetDrakkinTattoo(), GetDrakkinDetails(), GetHP(), GetMana(),
-                                    _baseMR, _baseCR, _baseDR, _baseFR, _basePR, _baseCorrup, _baseAC,
-                                    _baseSTR, _baseSTA, _baseDEX, _baseAGI, _baseINT, _baseWIS, _baseCHA,
-                                    _baseATK, GetTotalPlayTime(), _lastZoneId, GetBotID());
-    auto results = database.QueryDatabase(query);
-    if(!results.Success()) {
-        auto botOwner = GetBotOwner();
-        if (botOwner)
-            botOwner->Message(13, results.ErrorMessage().c_str());
-
-        return false;
-    }
-    SaveBuffs();
-    SavePet();
-    SaveStance();
-    SaveTimers();
+	
+	// Update existing bot record
+	std::string query = StringFormat(
+		"UPDATE `bot_data`"
+		" SET"
+		" `owner_id` = '%u',"
+		" `spells_id` = '%u',"
+		" `name` = '%s',"
+		" `last_name` = '%s',"
+		" `zone_id` = '%i',"
+		" `gender` = '%i',"
+		" `race` = '%i',"
+		" `class` = '%i',"
+		" `level` = '%u',"
+		/*creation_day - check to see how client is handled*/
+		" `last_spawn` = NOW(),"
+		" `time_spawned` = '%u',"
+		" `size` = '%f',"
+		" `face` = '%i',"
+		" `hair_color` = '%i',"
+		" `hair_style` = '%i',"
+		" `beard` = '%i',"
+		" `beard_color` = '%i',"
+		" `eye_color_1` = '%i',"
+		" `eye_color_2` = '%i',"
+		" `drakkin_heritage` = '%i',"
+		" `drakkin_tattoo` = '%i',"
+		" `drakkin_details` = '%i',"
+		" `ac` = '%i',"
+		" `atk` = '%i',"
+		" `hp` = '%i',"
+		" `mana` = '%i',"
+		" `str` = '%i',"
+		" `sta` = '%i',"
+		" `cha` = '%i',"
+		" `dex` = '%i',"
+		" `int` = '%i',"
+		" `agi` = '%i',"
+		" `wis` = '%i',"
+		" `fire` = '%i',"
+		" `cold` = '%i',"
+		" `magic` = '%i',"
+		" `poison` = '%i',"
+		" `disease` = '%i',"
+		" `corruption` = '%i',"
+		" WHERE `bot_id` = '%u'",
+		_botOwnerCharacterID,
+		this->GetBotSpellID(),
+		this->GetCleanName(),
+		this->lastname,
+		_lastZoneId,
+		_baseGender,
+		_baseRace,
+		this->GetClass(),
+		this->GetLevel(),
+		/*creation_day*/
+		GetTotalPlayTime(),
+		GetSize(),
+		this->GetLuclinFace(),
+		GetHairColor(),
+		this->GetHairStyle(),
+		this->GetBeard(),
+		this->GetBeardColor(),
+		this->GetEyeColor1(),
+		this->GetEyeColor2(),
+		this->GetDrakkinHeritage(),
+		GetDrakkinTattoo(),
+		GetDrakkinDetails(),
+		_baseAC,
+		_baseATK,
+		GetHP(),
+		GetMana(),
+		_baseSTR,
+		_baseSTA,
+		_baseCHA,
+		_baseDEX,
+		_baseINT,
+		_baseAGI,
+		_baseWIS,
+		_baseFR,
+		_baseCR,
+		_baseMR,
+		_basePR,
+		_baseDR,
+		_baseCorrup,
+		GetBotID()
+	);
+	auto results = database.QueryDatabase(query);
+	if(!results.Success()) {
+		auto botOwner = GetBotOwner();
+		if (botOwner)
+			botOwner->Message(13, results.ErrorMessage().c_str());
+		
+		return false;
+	}
+	SaveBuffs();
+	SavePet();
+	SaveStance();
+	SaveTimers();
 	return true;
 }
 
@@ -1634,82 +1804,152 @@ uint32 Bot::GetTotalPlayTime() {
 	return Result;
 }
 
-void Bot::SaveBuffs() {
-    // Remove any existing buff saves
-    std::string query = StringFormat("DELETE FROM botbuffs WHERE BotId = %u", GetBotID());
-    auto results = database.QueryDatabase(query);
-    if(!results.Success())
-        return;
-
-	for (int buffIndex = 0; buffIndex < BUFF_COUNT; buffIndex++) {
-        if (buffs[buffIndex].spellid <= 0 || buffs[buffIndex].spellid == SPELL_UNKNOWN)
-            continue;
-
-        int isPersistent = buffs[buffIndex].persistant_buff? 1: 0;
-        query = StringFormat("INSERT INTO botbuffs (BotId, SpellId, CasterLevel, DurationFormula, "
-                            "TicsRemaining, PoisonCounters, DiseaseCounters, CurseCounters, "
-                            "CorruptionCounters, HitCount, MeleeRune, MagicRune, dot_rune, "
-                            "caston_x, Persistent, caston_y, caston_z, ExtraDIChance) "
-                            "VALUES (%u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %i, %u, "
-                            "%i, %i, %i)",
-                            GetBotID(), buffs[buffIndex].spellid, buffs[buffIndex].casterlevel,
-                            spells[buffs[buffIndex].spellid].buffdurationformula,
-                            buffs[buffIndex].ticsremaining,
-                            CalculatePoisonCounters(buffs[buffIndex].spellid) > 0 ? buffs[buffIndex].counters : 0,
-                            CalculateDiseaseCounters(buffs[buffIndex].spellid) > 0 ? buffs[buffIndex].counters : 0,
-                            CalculateCurseCounters(buffs[buffIndex].spellid) > 0 ? buffs[buffIndex].counters : 0,
-                            CalculateCorruptionCounters(buffs[buffIndex].spellid) > 0 ? buffs[buffIndex].counters : 0,
-                            buffs[buffIndex].numhits, buffs[buffIndex].melee_rune,
-                            buffs[buffIndex].magic_rune, buffs[buffIndex].dot_rune,
-                            buffs[buffIndex].caston_x, isPersistent, buffs[buffIndex].caston_y,
-                            buffs[buffIndex].caston_z, buffs[buffIndex].ExtraDIChance);
-        auto results = database.QueryDatabase(query);
-        if(!results.Success())
-            return;
-    }
-}
-
-void Bot::LoadBuffs() {
-	std::string query = StringFormat("SELECT SpellId, CasterLevel, DurationFormula, TicsRemaining, PoisonCounters, DiseaseCounters, CurseCounters, CorruptionCounters, HitCount, MeleeRune, MagicRune, dot_rune, caston_x, Persistent, caston_y, caston_z, ExtraDIChance FROM botbuffs WHERE BotId = %u", GetBotID());
-    auto results = database.QueryDatabase(query);
+void Bot::SaveBuffs()
+{
+	// Remove any existing buff saves
+	std::string query = StringFormat("DELETE FROM `bot_buffs` WHERE `bot_id` = %u", GetBotID());
+	auto results = database.QueryDatabase(query);
 	if(!results.Success())
 		return;
-
-    int buffCount = 0;
-    for (auto row = results.begin(); row != results.end(); ++row) {
-        if(buffCount == BUFF_COUNT)
-            break;
-
-        buffs[buffCount].spellid = atoi(row[0]);
-        buffs[buffCount].casterlevel = atoi(row[1]);
-        buffs[buffCount].ticsremaining = atoi(row[3]);
-        if(CalculatePoisonCounters(buffs[buffCount].spellid) > 0)
-            buffs[buffCount].counters = atoi(row[4]);
-        else if(CalculateDiseaseCounters(buffs[buffCount].spellid) > 0)
-            buffs[buffCount].counters = atoi(row[5]);
-        else if(CalculateCurseCounters(buffs[buffCount].spellid) > 0)
-            buffs[buffCount].counters = atoi(row[6]);
-        else if(CalculateCorruptionCounters(buffs[buffCount].spellid) > 0)
-            buffs[buffCount].counters = atoi(row[7]);
-
-        buffs[buffCount].numhits = atoi(row[8]);
-        buffs[buffCount].melee_rune = atoi(row[9]);
-        buffs[buffCount].magic_rune = atoi(row[10]);
-        buffs[buffCount].dot_rune = atoi(row[11]);
-        buffs[buffCount].caston_x = atoi(row[12]);
-        buffs[buffCount].casterid = 0;
-        buffs[buffCount].persistant_buff = atoi(row[13])? true: false;
-        buffs[buffCount].caston_y = atoi(row[14]);
-        buffs[buffCount].caston_z = atoi(row[15]);
-        buffs[buffCount].ExtraDIChance = atoi(row[16]);
-        buffCount++;
-    }
-    query = StringFormat("DELETE FROM botbuffs WHERE BotId = %u", GetBotID());
-    results = database.QueryDatabase(query);
+	
+	for (int buffIndex = 0; buffIndex < BUFF_COUNT; buffIndex++) {
+		if (buffs[buffIndex].spellid <= 0 || buffs[buffIndex].spellid == SPELL_UNKNOWN)
+			continue;
+		
+		int isPersistent = buffs[buffIndex].persistant_buff ? 1 : 0;
+		query = StringFormat(
+			"INSERT INTO `bot_buffs` ("
+			"`bot_id`,"
+			" `spell_id`,"
+			" `caster_level`,"
+			" `duration_formula`,"
+			" `tics_remaining`,"
+			" `poison_counters`,"
+			" `disease_counters`,"
+			" `curse_counters`,"
+			" `corruption_counters`,"
+			" `numhits`,"
+			" `melee_rune`,"
+			" `magic_rune`,"
+			" `dot_rune`,"
+			" `persistent`,"
+			" `caston_x`,"
+			" `caston_y`,"
+			" `caston_z`,"
+			" `extra_di_chance`"
+			")"
+			" VALUES ("
+			"%u,"				/*bot_id*/
+			" %u,"				/*spell_id*/
+			" %u,"				/*caster_level*/
+			" %u,"				/*duration_formula*/
+			" %u,"				/*tics_remaining*/
+			" %u,"				/*poison_counters*/
+			" %u,"				/*disease_counters*/
+			" %u,"				/*curse_counters*/
+			" %u,"				/*corruption_counters*/
+			" %u,"				/*numhits*/
+			" %u,"				/*melee_rune*/
+			" %u,"				/*magic_rune*/
+			" %u,"				/*dot_rune*/
+			" %u,"				/*persistent*/
+			" %i,"				/*caston_x*/
+			" %i,"				/*caston_y*/
+			" %i,"				/*caston_z*/
+			" %i"				/*extra_di_chance*/
+			")",
+			GetBotID(),
+			buffs[buffIndex].spellid,
+			buffs[buffIndex].casterlevel,
+			spells[buffs[buffIndex].spellid].buffdurationformula,
+			buffs[buffIndex].ticsremaining,
+			CalculatePoisonCounters(buffs[buffIndex].spellid) > 0 ? buffs[buffIndex].counters : 0,
+			CalculateDiseaseCounters(buffs[buffIndex].spellid) > 0 ? buffs[buffIndex].counters : 0,
+			CalculateCurseCounters(buffs[buffIndex].spellid) > 0 ? buffs[buffIndex].counters : 0,
+			CalculateCorruptionCounters(buffs[buffIndex].spellid) > 0 ? buffs[buffIndex].counters : 0,
+			buffs[buffIndex].numhits,
+			buffs[buffIndex].melee_rune,
+			buffs[buffIndex].magic_rune,
+			buffs[buffIndex].dot_rune,
+			isPersistent,
+			buffs[buffIndex].caston_x,
+			buffs[buffIndex].caston_y,
+			buffs[buffIndex].caston_z,
+			buffs[buffIndex].ExtraDIChance
+		);
+		auto results = database.QueryDatabase(query);
+		if(!results.Success())
+			return;
+	}
 }
 
-uint32 Bot::GetPetSaveId() {
-	std::string query = StringFormat("SELECT BotPetsId FROM botpets WHERE BotId = %u", GetBotID());
+void Bot::LoadBuffs()
+{
+	std::string query = StringFormat(
+		"SELECT"
+		" `spell_id`,"
+		" `caster_level`,"
+		" `duration_formula`,"
+		" `tics_remaining`,"
+		" `poison_counters`,"
+		" `disease_counters,"
+		" `curse_counters`,"
+		" `corruption_counters`,"
+		" `numhits`,"
+		" `melee_rune`,"
+		" `magic_rune`,"
+		" `dot_rune`,"
+		" `persistent`,"
+		" `caston_x`,"
+		" `caston_y`,"
+		" `caston_z`,"
+		" `extra_di_chance`"
+		" FROM `bot_buffs`"
+		" WHERE `bot_id` = %u",
+		GetBotID()
+	);
+	auto results = database.QueryDatabase(query);
+	if(!results.Success())
+		return;
+	
+	int buffCount = 0;
+	for (auto row = results.begin(); row != results.end(); ++row) {
+		if(buffCount == BUFF_COUNT)
+			break;
+		
+		buffs[buffCount].spellid = atoi(row[0]);
+		buffs[buffCount].casterlevel = atoi(row[1]);
+		//row[2] (duration_formula) can probably be removed
+		buffs[buffCount].ticsremaining = atoi(row[3]);
+
+		if(CalculatePoisonCounters(buffs[buffCount].spellid) > 0)
+			buffs[buffCount].counters = atoi(row[4]);
+		else if(CalculateDiseaseCounters(buffs[buffCount].spellid) > 0)
+			buffs[buffCount].counters = atoi(row[5]);
+		else if(CalculateCurseCounters(buffs[buffCount].spellid) > 0)
+			buffs[buffCount].counters = atoi(row[6]);
+		else if(CalculateCorruptionCounters(buffs[buffCount].spellid) > 0)
+			buffs[buffCount].counters = atoi(row[7]);
+		
+		buffs[buffCount].numhits = atoi(row[8]);
+		buffs[buffCount].melee_rune = atoi(row[9]);
+		buffs[buffCount].magic_rune = atoi(row[10]);
+		buffs[buffCount].dot_rune = atoi(row[11]);
+		buffs[buffCount].persistant_buff = atoi(row[12]) ? true : false;
+		buffs[buffCount].caston_x = atoi(row[13]);
+		buffs[buffCount].caston_y = atoi(row[14]);
+		buffs[buffCount].caston_z = atoi(row[15]);
+		buffs[buffCount].ExtraDIChance = atoi(row[16]);
+		buffs[buffCount].casterid = 0;
+		++buffCount;
+	}
+	query = StringFormat("DELETE FROM `bot_buffs` WHERE `bot_id` = %u", GetBotID());
+	results = database.QueryDatabase(query);
+}
+
+uint32 Bot::GetPetSaveId()
+{
+	std::string query = StringFormat("SELECT `pets_index` FROM `bot_pets` WHERE `bot_id` = %u", GetBotID());
     auto results = database.QueryDatabase(query);
 	if(!results.Success() || results.RowCount() == 0)
 		return 0;
@@ -1745,11 +1985,12 @@ void Bot::LoadPet() {
 	}
 }
 
-void Bot::LoadPetStats(std::string* petName, uint32* petMana, uint32* petHitPoints, uint32* botPetId, uint32 botPetSaveId) {
+void Bot::LoadPetStats(std::string* petName, uint32* petMana, uint32* petHitPoints, uint32* botPetId, uint32 botPetSaveId)
+{
 	if(botPetSaveId == 0)
         return;
 
-    std::string query = StringFormat("SELECT PetId, Name, Mana, HitPoints FROM botpets WHERE BotPetsId = %u", botPetSaveId);
+    std::string query = StringFormat("SELECT `pet_id`, `name`, `mana`, `hp` FROM `bot_pets` WHERE `pets_index` = %u", botPetSaveId);
     auto results = database.QueryDatabase(query);
     if(!results.Success() || results.RowCount() == 0)
         return;
@@ -1765,7 +2006,7 @@ void Bot::LoadPetBuffs(SpellBuff_Struct* petBuffs, uint32 botPetSaveId) {
 	if(!petBuffs || botPetSaveId == 0)
         return;
 
-    std::string query = StringFormat("SELECT SpellId, CasterLevel, Duration FROM botpetbuffs WHERE BotPetsId = %u;", botPetSaveId);
+    std::string query = StringFormat("SELECT `spell_id`, `caster_level`, `duration` FROM `bot_pet_buffs` WHERE `pets_index` = %u;", botPetSaveId);
     auto results = database.QueryDatabase(query);
 	if(!results.Success())
 		return;
@@ -1780,7 +2021,7 @@ void Bot::LoadPetBuffs(SpellBuff_Struct* petBuffs, uint32 botPetSaveId) {
 		petBuffs[buffIndex].duration = atoi(row[2]);
 		buffIndex++;
 	}
-	query = StringFormat("DELETE FROM botpetbuffs WHERE BotPetsId = %u;", botPetSaveId);
+	query = StringFormat("DELETE FROM `bot_pet_buffs` WHERE `pets_index` = %u;", botPetSaveId);
 	results = database.QueryDatabase(query);
 }
 
@@ -1788,7 +2029,7 @@ void Bot::LoadPetItems(uint32* petItems, uint32 botPetSaveId) {
     if(!petItems || botPetSaveId == 0)
         return;
 
-	std::string query = StringFormat("SELECT ItemId FROM botpetinventory WHERE BotPetsId = %u;", botPetSaveId);
+	std::string query = StringFormat("SELECT `item_id` FROM `bot_pet_inventories` WHERE `pets_index` = %u;", botPetSaveId);
     auto results = database.QueryDatabase(query);
 	if(!results.Success())
 		return;
@@ -1801,7 +2042,7 @@ void Bot::LoadPetItems(uint32* petItems, uint32 botPetSaveId) {
         petItems[itemIndex] = atoi(row[0]);
         itemIndex++;
     }
-    query = StringFormat("DELETE FROM botpetinventory WHERE BotPetsId = %u", botPetSaveId);
+    query = StringFormat("DELETE FROM `bot_pet_inventories` WHERE `pets_index` = %u", botPetSaveId);
     results = database.QueryDatabase(query);
 }
 
@@ -1833,28 +2074,58 @@ void Bot::SavePet() {
 	}
 }
 
-uint32 Bot::SavePetStats(std::string petName, uint32 petMana, uint32 petHitPoints, uint32 botPetId) {
-	std::string query = StringFormat("REPLACE INTO botpets SET PetId = %u, BotId = %u, Name = '%s', Mana = %u, HitPoints = %u", botPetId, GetBotID(), petName.c_str(), petMana, petHitPoints);
-    auto results = database.QueryDatabase(query);
+uint32 Bot::SavePetStats(std::string petName, uint32 petMana, uint32 petHitPoints, uint32 botPetId)
+{
+	std::string query = StringFormat(
+		"REPLACE INTO `bot_pets`"
+		" SET"
+		" `pet_id` = %u,"
+		" `bot_id` = %u,"
+		" `name` = '%s',"
+		" `mana` = %u,"
+		" `hp` = %u",
+		botPetId,
+		GetBotID(),
+		petName.c_str(),
+		petMana,
+		petHitPoints
+	);
+	auto results = database.QueryDatabase(query);
 	return 0;
 }
 
-void Bot::SavePetBuffs(SpellBuff_Struct* petBuffs, uint32 botPetSaveId) {
+void Bot::SavePetBuffs(SpellBuff_Struct* petBuffs, uint32 botPetSaveId)
+{
 	if(!petBuffs || botPetSaveId == 0)
-        return;
-
+		return;
+	
 	int buffIndex = 0;
 	while(buffIndex < BUFF_COUNT) {
-        if(petBuffs[buffIndex].spellid > 0 && petBuffs[buffIndex].spellid != SPELL_UNKNOWN) {
-
-            std::string query = StringFormat("INSERT INTO botpetbuffs (BotPetsId, SpellId, CasterLevel, Duration) VALUES(%u, %u, %u, %u)", botPetSaveId, petBuffs[buffIndex].spellid, petBuffs[buffIndex].level, petBuffs[buffIndex].duration);
-            auto results = database.QueryDatabase(query);
-            if(!results.Success())
-                break;
-        }
-        buffIndex++;
-    }
-
+		if(petBuffs[buffIndex].spellid > 0 && petBuffs[buffIndex].spellid != SPELL_UNKNOWN) {
+			std::string query = StringFormat(
+				"INSERT INTO `bot_pet_buffs` ("
+				"`pets_index`,"
+				" `spell_id`,"
+				" `caster_level`,"
+				" `duration`"
+				")"
+				" VALUES ("
+				"%u,"
+				" %u,"
+				" %u,"
+				" %u"
+				")",
+				botPetSaveId,
+				petBuffs[buffIndex].spellid,
+				petBuffs[buffIndex].level,
+				petBuffs[buffIndex].duration
+			);
+			auto results = database.QueryDatabase(query);
+			if(!results.Success())
+				break;
+		}
+		buffIndex++;
+	}
 }
 
 void Bot::SavePetItems(uint32* petItems, uint32 botPetSaveId) {
@@ -1865,7 +2136,7 @@ void Bot::SavePetItems(uint32* petItems, uint32 botPetSaveId) {
 		if(petItems[itemIndex] == 0)
             continue;
 
-        std::string query = StringFormat("INSERT INTO botpetinventory (BotPetsId, ItemId) VALUES(%u, %u)", botPetSaveId, petItems[itemIndex]);
+        std::string query = StringFormat("INSERT INTO `bot_pet_inventories` (`pets_index`, `item_id`) VALUES (%u, %u)", botPetSaveId, petItems[itemIndex]);
         auto results = database.QueryDatabase(query);
         if(!results.Success())
             break;
@@ -1876,7 +2147,7 @@ void Bot::DeletePetBuffs(uint32 botPetSaveId) {
 	if(botPetSaveId == 0)
         return;
 
-	std::string query = StringFormat("DELETE FROM botpetbuffs WHERE BotPetsId = %u", botPetSaveId);
+	std::string query = StringFormat("DELETE FROM `bot_pet_buffs` WHERE `pets_index` = %u", botPetSaveId);
     auto results = database.QueryDatabase(query);
 }
 
@@ -1884,7 +2155,7 @@ void Bot::DeletePetItems(uint32 botPetSaveId) {
 	if(botPetSaveId == 0)
         return;
 
-    std::string query = StringFormat("DELETE FROM botpetinventory WHERE BotPetsId = %u", botPetSaveId);
+    std::string query = StringFormat("DELETE FROM `bot_pet_inventories` WHERE `pets_index` = %u", botPetSaveId);
     auto results = database.QueryDatabase(query);
 }
 
@@ -1892,12 +2163,13 @@ void Bot::DeletePetStats(uint32 botPetSaveId) {
 	if(botPetSaveId == 0)
         return;
 
-	std::string query = StringFormat("DELETE from botpets where BotPetsId = %u", botPetSaveId);
+	std::string query = StringFormat("DELETE FROM `bot_pets` WHERE `pets_index` = %u", botPetSaveId);
     auto results = database.QueryDatabase(query);
 }
 
-void Bot::LoadStance() {
-	std::string query = StringFormat("SELECT StanceID FROM botstances WHERE BotID = %u", GetBotID());
+void Bot::LoadStance()
+{
+	std::string query = StringFormat("SELECT `stance_id` FROM `bot_stances` WHERE `bot_id` = %u", GetBotID());
 	auto results = database.QueryDatabase(query);
 	if(!results.Success() || results.RowCount() == 0) {
 		Log.Out(Logs::General, Logs::Error, "Error in Bot::LoadStance()");
@@ -1912,42 +2184,54 @@ void Bot::SaveStance() {
 	if(_baseBotStance == _botStance)
         return;
 
-    std::string query = StringFormat("REPLACE INTO botstances (BotID, StanceId) VALUES(%u, %u)", GetBotID(), GetBotStance());
+    std::string query = StringFormat("REPLACE INTO `bot_stances` (`bot_id`, `stance_id`) VALUES (%u, %u)", GetBotID(), GetBotStance());
     auto results = database.QueryDatabase(query);
     if(!results.Success())
         Log.Out(Logs::General, Logs::Error, "Error in Bot::SaveStance()");
 }
 
-void Bot::LoadTimers() {
-	std::string query = StringFormat("SELECT IfNull(bt.TimerID, 0) As TimerID, IfNull(bt.Value, 0) As Value, "
-                                    "IfNull(MAX(sn.recast_time), 0) AS MaxTimer FROM bottimers bt, spells_new sn "
-                                    "WHERE bt.BotID = %u AND sn.EndurTimerIndex = "
-                                    "(SELECT case WHEN TimerID > %i THEN TimerID - %i ELSE TimerID END AS TimerID "
-                                    "FROM bottimers WHERE TimerID = bt.TimerID AND BotID = bt.BotID ) "
-                                    "AND sn.classes%i <= %i",
-                                    GetBotID(), DisciplineReuseStart-1, DisciplineReuseStart-1, GetClass(), GetLevel());
-    auto results = database.QueryDatabase(query);
+void Bot::LoadTimers()
+{
+	std::string query = StringFormat(
+		"SELECT"
+		" IfNull(bt.`timer_id`, 0) As timer_id,"
+		" IfNull(bt.`timer_value`, 0) As timer_value,"
+		" IfNull(MAX(sn.`recast_time`), 0) AS MaxTimer"
+		" FROM `bot_timers` bt, `spells_new` sn"
+		" WHERE bt.`bot_id` = %u AND sn.`EndurTimerIndex` = ("
+		"SELECT case"
+		" WHEN timer_id > %i THEN timer_id - %i"
+		" ELSE timer_id END AS timer_id"
+		" FROM `bot_timers` WHERE `timer_id` = bt.`timer_id` AND `bot_id` = bt.`bot_id`" // double-check validity
+		")"
+		" AND sn.`classes%i` <= %i",
+		GetBotID(),
+		(DisciplineReuseStart - 1),
+		(DisciplineReuseStart - 1),
+		GetClass(),
+		GetLevel()
+	);
+	auto results = database.QueryDatabase(query);
 	if(!results.Success()) {
 		Log.Out(Logs::General, Logs::Error, "Error in Bot::LoadTimers()");
 		return;
 	}
-
-    int timerID = 0;
-    uint32 value = 0;
-    uint32 maxValue = 0;
-    for (auto row = results.begin(); row != results.end(); ++row) {
-        timerID = atoi(row[0]) - 1;
-        value = atoi(row[1]);
-        maxValue = atoi(row[2]);
-        if(timerID >= 0 && timerID < MaxTimer && value < (Timer::GetCurrentTime() + maxValue))
-            timers[timerID] = value;
-    }
-
+	
+	int timerID = 0;
+	uint32 value = 0;
+	uint32 maxValue = 0;
+	for (auto row = results.begin(); row != results.end(); ++row) {
+	timerID = atoi(row[0]) - 1;
+	value = atoi(row[1]);
+	maxValue = atoi(row[2]);
+	if(timerID >= 0 && timerID < MaxTimer && value < (Timer::GetCurrentTime() + maxValue))
+		timers[timerID] = value;
+	}
 }
 
 void Bot::SaveTimers() {
     bool hadError = false;
-	std::string query = StringFormat("DELETE FROM bottimers WHERE BotID = %u", GetBotID());
+	std::string query = StringFormat("DELETE FROM `bot_timers` WHERE `bot_id` = %u", GetBotID());
     auto results = database.QueryDatabase(query);
 	if(!results.Success())
 		hadError = true;
@@ -1956,7 +2240,7 @@ void Bot::SaveTimers() {
 		if(timers[timerIndex] <= Timer::GetCurrentTime())
             continue;
 
-        query = StringFormat("REPLACE INTO bottimers (BotID, TimerID, Value) VALUES(%u, %u, %u)", GetBotID(), timerIndex + 1, timers[timerIndex]);
+        query = StringFormat("REPLACE INTO `bot_timers` (`bot_id`, `timer_id`, `timer_value`) VALUES (%u, %u, %u)", GetBotID(), timerIndex + 1, timers[timerIndex]);
         results = database.QueryDatabase(query);
         if(!results.Success())
             hadError = true;
@@ -2975,28 +3259,28 @@ bool Bot::DeleteBot(std::string* errorMessage) {
         return false;
 
     // TODO: These queries need to be ran together as a transaction.. ie, if one or more fail then they all will fail to commit to the database.
-    std::string query = StringFormat("DELETE FROM botinventory WHERE botid = '%u'", this->GetBotID());
+    std::string query = StringFormat("DELETE FROM `bot_inventories` WHERE `bot_id` = '%u'", this->GetBotID());
     auto results = database.QueryDatabase(query);
     if(!results.Success()) {
         *errorMessage = std::string(results.ErrorMessage());
         hadError = true;
     }
 
-    query = StringFormat("DELETE FROM botbuffs WHERE botid = '%u'", this->GetBotID());
+    query = StringFormat("DELETE FROM `bot_buffs` WHERE `bot_id` = '%u'", this->GetBotID());
     results = database.QueryDatabase(query);
     if(!results.Success()) {
         *errorMessage = std::string(results.ErrorMessage());
         hadError = true;
     }
 
-    query = StringFormat("DELETE FROM botstances WHERE BotID = '%u'", this->GetBotID());
+    query = StringFormat("DELETE FROM `bot_stances` WHERE `bot_id` = '%u'", this->GetBotID());
     results = database.QueryDatabase(query);
     if(!results.Success()) {
         *errorMessage = std::string(results.ErrorMessage());
         hadError = true;
     }
 
-    query = StringFormat("DELETE FROM bots WHERE BotID = '%u'", this->GetBotID());
+    query = StringFormat("DELETE FROM `bot_data` WHERE `bot_id` = '%u'", this->GetBotID());
     results = database.QueryDatabase(query);
     if(!results.Success()) {
         *errorMessage = std::string(results.ErrorMessage());
@@ -3052,28 +3336,61 @@ void Bot::Spawn(Client* botCharacterOwner, std::string* errorMessage) {
 }
 
 // Saves the specified item as an inventory record in the database for this bot.
-void Bot::SetBotItemInSlot(uint32 slotID, uint32 itemID, const ItemInst* inst, std::string *errorMessage) {
+void Bot::SetBotItemInSlot(uint32 slotID, uint32 itemID, const ItemInst* inst, std::string *errorMessage)
+{
 	uint32 augslot[EmuConstants::ITEM_COMMON_SIZE] = { NO_ITEM, NO_ITEM, NO_ITEM, NO_ITEM, NO_ITEM };
 	if (this->GetBotID() == 0 || slotID < EmuConstants::EQUIPMENT_BEGIN || itemID <= NO_ITEM)
-        return;
+		return;
 
-    if (inst && inst->IsType(ItemClassCommon)) {
-        for(int i = AUG_BEGIN; i < EmuConstants::ITEM_COMMON_SIZE; ++i) {
-            ItemInst* auginst = inst->GetItem(i);
-            augslot[i] = (auginst && auginst->GetItem()) ? auginst->GetItem()->ID : 0;
-        }
-    }
+	if (inst && inst->IsType(ItemClassCommon)) {
+		for(int i = AUG_BEGIN; i < EmuConstants::ITEM_COMMON_SIZE; ++i) {
+			ItemInst* auginst = inst->GetItem(i);
+			augslot[i] = (auginst && auginst->GetItem()) ? auginst->GetItem()->ID : 0;
+		}
+	}
 
-    std::string query = StringFormat("REPLACE INTO botinventory (botid, slotid, itemid, charges, instnodrop, color, "
-                                    "augslot1, augslot2, augslot3, augslot4, augslot5) "
-                                    "VALUES(%lu, %lu, %lu, %lu, %lu, %lu, %lu, %lu, %lu, %lu, %lu)",
-                                    (unsigned long)this->GetBotID(), (unsigned long)slotID, (unsigned long)itemID,
-                                    (unsigned long)inst->GetCharges(), (unsigned long)(inst->IsAttuned()? 1: 0),
-                                    (unsigned long)inst->GetColor(), (unsigned long)augslot[0], (unsigned long)augslot[1],
-                                    (unsigned long)augslot[2], (unsigned long)augslot[3], (unsigned long)augslot[4]);
-    auto results = database.QueryDatabase(query);
-    if(!results.Success())
-        *errorMessage = std::string(results.ErrorMessage());
+	std::string query = StringFormat(
+		"REPLACE INTO `bot_inventories` ("
+		"`bot_id`,"
+		" `slot_id`,"
+		" `item_id`,"
+		" `inst_charges`,"
+		" `inst_color`,"
+		" `inst_no_drop`,"
+		" `augment_1`,"
+		" `augment_2`,"
+		" `augment_3`,"
+		" `augment_4`,"
+		" `augment_5`"
+		")"
+		" VALUES ("
+		"%lu,"			/*bot_id*/
+		" %lu,"			/*slot_id*/
+		" %lu,"			/*item_id*/
+		" %lu,"			/*inst_charges*/
+		" %lu,"			/*inst_color*/
+		" %lu,"			/*inst_no_drop*/
+		" %lu,"			/*augment_1*/
+		" %lu,"			/*augment_2*/
+		" %lu,"			/*augment_3*/
+		" %lu,"			/*augment_4*/
+		" %lu"			/*augment_5*/
+		")",
+		(unsigned long)this->GetBotID(),
+		(unsigned long)slotID,
+		(unsigned long)itemID,
+		(unsigned long)inst->GetCharges(),
+		(unsigned long)inst->GetColor(),
+		(unsigned long)(inst->IsAttuned()? 1: 0), // does this match the current flag implementation?
+		(unsigned long)augslot[0],
+		(unsigned long)augslot[1],
+		(unsigned long)augslot[2],
+		(unsigned long)augslot[3],
+		(unsigned long)augslot[4]
+	);
+	auto results = database.QueryDatabase(query);
+	if(!results.Success())
+		*errorMessage = std::string(results.ErrorMessage());
 }
 
 // Deletes the inventory record for the specified item from the database for this bot.
@@ -3081,7 +3398,7 @@ void Bot::RemoveBotItemBySlot(uint32 slotID, std::string *errorMessage) {
 	if(this->GetBotID() == 0)
         return;
 
-	std::string query = StringFormat("DELETE FROM botinventory WHERE botid = %i AND slotid = %i", this->GetBotID(), slotID);
+	std::string query = StringFormat("DELETE FROM `bot_inventories` WHERE `bot_id` = %i AND `slot_id` = %i", this->GetBotID(), slotID);
     auto results = database.QueryDatabase(query);
     if(!results.Success())
         *errorMessage = std::string(results.ErrorMessage());
@@ -3091,61 +3408,75 @@ void Bot::RemoveBotItemBySlot(uint32 slotID, std::string *errorMessage) {
 }
 
 // Retrieves all the inventory records from the database for this bot.
-void Bot::GetBotItems(std::string* errorMessage, Inventory &inv) {
+void Bot::GetBotItems(std::string* errorMessage, Inventory &inv)
+{
 	if(this->GetBotID() == 0)
-        return;
+	return;
 
-    std::string query = StringFormat("SELECT slotid, itemid, charges, color, "
-                                    "augslot1, augslot2, augslot3, augslot4, "
-                                    "augslot5, instnodrop FROM botinventory "
-                                    "WHERE botid = %i ORDER BY slotid", this->GetBotID());
-    auto results = database.QueryDatabase(query);
-    if (!results.Success()) {
-        *errorMessage = std::string(results.ErrorMessage());
-        return;
-    }
+	std::string query = StringFormat(
+		"SELECT"
+		" `slot_id`,"
+		" `item_id`,"
+		" `inst_charges`,"
+		" `inst_color`,"
+		" `augment_1`,"
+		" `augment_2`,"
+		" `augslot_3`,"
+		" `augslot_4`, "
+		" `augslot_5`,"
+		" `inst_no_drop`"
+		" FROM `bot_inventories`"
+		" WHERE `bot_id` = %i"
+		" ORDER BY `slot_id`",
+		this->GetBotID()
+	);
+	auto results = database.QueryDatabase(query);
+	if (!results.Success()) {
+		*errorMessage = std::string(results.ErrorMessage());
+		return;
+	}
 
-    for (auto row = results.begin(); row != results.end(); ++row) {
-        int16 slot_id = atoi(row[0]);
-        uint32 item_id = atoi(row[1]);
-        uint16 charges = atoi(row[2]);
-        uint32 color = atoul(row[3]);
-        uint32 aug[EmuConstants::ITEM_COMMON_SIZE];
-        aug[0] = (uint32)atoul(row[4]);
-        aug[1] = (uint32)atoul(row[5]);
-        aug[2] = (uint32)atoul(row[6]);
-        aug[3] = (uint32)atoul(row[7]);
-        aug[4] = (uint32)atoul(row[8]);
-        bool instnodrop	= (row[9] && (uint16)atoi(row[9])) ? true : false;
-        ItemInst* inst = database.CreateItem(item_id, charges, aug[0], aug[1], aug[2], aug[3], aug[4]);
-        if (!inst) {
-            Log.Out(Logs::General, Logs::Error, "Warning: botid %i has an invalid item_id %i in inventory slot %i", this->GetBotID(), item_id, slot_id);
-            continue;
-        }
-
-        int16 put_slot_id = INVALID_INDEX;
-
-        if (instnodrop || (((slot_id >= EmuConstants::EQUIPMENT_BEGIN) && (slot_id <= EmuConstants::EQUIPMENT_END) || slot_id == 9999)  && inst->GetItem()->Attuneable))
-            inst->SetAttuned(true);
-
-        if (color > 0)
-            inst->SetColor(color);
-
-        if (charges == 255)
-            inst->SetCharges(-1);
-        else
-            inst->SetCharges(charges);
-
-        if (slot_id < 8000 || slot_id > 8999)
-            put_slot_id = inv.PutItem(slot_id, *inst);
-
-        safe_delete(inst);
-
-        // Save ptr to item in inventory
-        if (put_slot_id == INVALID_INDEX)
-            Log.Out(Logs::General, Logs::Error, "Warning: Invalid slot_id for item in inventory: botid=%i, item_id=%i, slot_id=%i",this->GetBotID(), item_id, slot_id);
-    }
-
+	for (auto row = results.begin(); row != results.end(); ++row) {
+		int16 slot_id = atoi(row[0]);
+		uint32 item_id = atoi(row[1]);
+		uint16 charges = atoi(row[2]);
+		uint32 color = atoul(row[3]);
+		uint32 aug[EmuConstants::ITEM_COMMON_SIZE];
+		aug[0] = (uint32)atoul(row[4]);
+		aug[1] = (uint32)atoul(row[5]);
+		aug[2] = (uint32)atoul(row[6]);
+		aug[3] = (uint32)atoul(row[7]);
+		aug[4] = (uint32)atoul(row[8]);
+		bool instnodrop	= (row[9] && (uint16)atoi(row[9])) ? true : false;
+		ItemInst* inst = database.CreateItem(item_id, charges, aug[0], aug[1], aug[2], aug[3], aug[4]);
+		if (!inst) {
+			Log.Out(Logs::General, Logs::Error, "Warning: bot_id %i has an invalid item_id %i in inventory slot %i", this->GetBotID(), item_id, slot_id);
+			continue;
+		}
+		
+		int16 put_slot_id = INVALID_INDEX;
+		
+		if (instnodrop || (((slot_id >= EmuConstants::EQUIPMENT_BEGIN) && (slot_id <= EmuConstants::EQUIPMENT_END) || slot_id == 9999)  && inst->GetItem()->Attuneable))
+			inst->SetAttuned(true);
+		
+		if (color > 0)
+			inst->SetColor(color);
+		
+		if (charges == 255)
+			inst->SetCharges(-1);
+		else
+			inst->SetCharges(charges);
+		
+		if (slot_id < 8000 || slot_id > 8999)
+			put_slot_id = inv.PutItem(slot_id, *inst);
+		
+		safe_delete(inst);
+		
+		// Save ptr to item in inventory
+		if (put_slot_id == INVALID_INDEX)
+			Log.Out(Logs::General, Logs::Error, "Warning: Invalid slot_id for item in inventory: bot_id=%i, item_id=%i, slot_id=%i",this->GetBotID(), item_id, slot_id);
+	}
+	
 	UpdateEquipmentLight();
 }
 
@@ -3154,7 +3485,7 @@ uint32 Bot::GetBotItemBySlot(uint32 slotID) {
 	if(this->GetBotID() == 0 || slotID < EmuConstants::EQUIPMENT_BEGIN)
         return 0;
 
-    std::string query = StringFormat("SELECT itemid FROM botinventory WHERE botid = %i AND slotid = %i", GetBotID(), slotID);
+    std::string query = StringFormat("SELECT `item_id` FROM `bot_inventories` WHERE `bot_id` = %i AND `slot_id` = %i", GetBotID(), slotID);
     auto results = database.QueryDatabase(query);
     if(!results.Success() || results.RowCount() != 1)
         return 0;
@@ -3168,7 +3499,7 @@ uint32 Bot::GetBotItemsCount(std::string *errorMessage) {
 	if(this->GetBotID() == 0)
         return 0;
 
-    std::string query = StringFormat("SELECT COUNT(*) FROM botinventory WHERE botid = %i", this->GetBotID());
+    std::string query = StringFormat("SELECT COUNT(*) FROM `bot_inventories` WHERE `bot_id` = %i", this->GetBotID());
     auto results = database.QueryDatabase(query);
     if(!results.Success()) {
         *errorMessage = std::string(results.ErrorMessage());
@@ -3302,7 +3633,7 @@ uint32 Bot::GetBotIDByBotName(std::string botName) {
 	if(botName.empty())
         return 0;
 
-    std::string query = StringFormat("SELECT BotID FROM bots WHERE Name = '%s'", botName.c_str());
+    std::string query = StringFormat("SELECT `bot_id` FROM `bot_data` WHERE `name` = '%s'", botName.c_str());
     auto results = database.QueryDatabase(query);
     if(!results.Success() || results.RowCount() == 0)
         return 0;
@@ -3311,58 +3642,134 @@ uint32 Bot::GetBotIDByBotName(std::string botName) {
 	return atoi(row[0]);
 }
 
-Bot* Bot::LoadBot(uint32 botID, std::string* errorMessage) {
+Bot* Bot::LoadBot(uint32 botID, std::string* errorMessage)
+{
 	Bot* loadedBot = nullptr;
 	if(botID == 0)
-        return nullptr;
+		return nullptr;
+	
+	std::string query = StringFormat(
+		"SELECT"
+		" `owner_id`,"
+		" `spells_id`,"
+		" `name`,"
+		" `last_name`,"
+		" `level`,"
+		" `race`,"
+		" `class`,"
+		" `gender`,"
+		" `size`,"
+		" `face`,"
+		" `hair_style`,"
+		" `hair_color`,"
+		" `eye_color_1`,"
+		" `eye_color_2`,"
+		" `beard_color`,"
+		" `beard`,"
+		" `drakkin_heritage`,"
+		" `drakkin_tattoo`,"
+		" `drakkin_details`,"
+		" `hp`,"
+		" `mana`,"
+		" `magic`,"
+		" `cold`,"
+		" `disease`,"
+		" `fire`,"
+		" `poison`,"
+		" `corruption`,"
+		" `ac`,"
+		" `str`,"
+		" `sta`,"
+		" `dex`,"
+		" `agi`,"
+		" `int`,"
+		" `wis`,"
+		" `cha`,"
+		" `atk`,"
+		" `creation_day`,"
+		" `last_spawn`,"
+		" `time_spawned`,"
+		" `zone_id`"
+		" FROM `bot_data`"
+		" WHERE `bot_id` = '%u'",
+		botID
+	);
+	auto results = database.QueryDatabase(query);
+	if(!results.Success()) {
+		*errorMessage = std::string(results.ErrorMessage());
+		return nullptr;
+	}
 
-    std::string query = StringFormat("SELECT BotOwnerCharacterID, BotSpellsID, Name, LastName, BotLevel, "
-                                    "Race, Class, Gender, Size, Face, LuclinHairStyle, LuclinHairColor, "
-                                    "LuclinEyeColor, LuclinEyeColor2, LuclinBeardColor, LuclinBeard, "
-                                    "DrakkinHeritage, DrakkinTattoo, DrakkinDetails, HP, Mana, MR, CR, "
-                                    "DR, FR, PR, Corrup, AC, STR, STA, DEX, AGI, _INT, WIS, CHA, ATK, "
-                                    "BotCreateDate, LastSpawnDate, TotalPlayTime, LastZoneId "
-                                    "FROM bots WHERE BotID = '%u'", botID);
-    auto results = database.QueryDatabase(query);
-    if(!results.Success()) {
-        *errorMessage = std::string(results.ErrorMessage());
-        return nullptr;
-    }
-
-    if (results.RowCount() == 0)
-        return nullptr;
-
-    auto row = results.begin();
-    NPCType defaultNPCTypeStruct = CreateDefaultNPCTypeStructForBot(std::string(row[2]), std::string(row[3]), atoi(row[4]), atoi(row[5]), atoi(row[6]), atoi(row[7]));
-    NPCType tempNPCStruct = FillNPCTypeStruct(atoi(row[1]), std::string(row[2]), std::string(row[3]), atoi(row[4]),
-                                            atoi(row[5]), atoi(row[6]), atoi(row[7]), atof(row[8]), atoi(row[9]),
-                                            atoi(row[10]), atoi(row[11]), atoi(row[12]), atoi(row[13]), atoi(row[14]),
-                                            atoi(row[15]), atoi(row[16]), atoi(row[17]), atoi(row[18]), atoi(row[19]),
-                                            atoi(row[20]), defaultNPCTypeStruct.MR, defaultNPCTypeStruct.CR,
-                                            defaultNPCTypeStruct.DR, defaultNPCTypeStruct.FR, defaultNPCTypeStruct.PR,
-                                            defaultNPCTypeStruct.Corrup, defaultNPCTypeStruct.AC, defaultNPCTypeStruct.STR,
-                                            defaultNPCTypeStruct.STA, defaultNPCTypeStruct.DEX, defaultNPCTypeStruct.AGI,
-                                            defaultNPCTypeStruct.INT, defaultNPCTypeStruct.WIS, defaultNPCTypeStruct.CHA,
-                                            defaultNPCTypeStruct.ATK);
-    loadedBot = new Bot(botID, atoi(row[0]), atoi(row[1]), atof(row[38]), atoi(row[39]), tempNPCStruct);
+	if (results.RowCount() == 0)
+		return nullptr;
+	
+	auto row = results.begin();
+	NPCType defaultNPCTypeStruct = CreateDefaultNPCTypeStructForBot(std::string(row[2]), std::string(row[3]), atoi(row[4]), atoi(row[5]), atoi(row[6]), atoi(row[7]));
+	NPCType tempNPCStruct = FillNPCTypeStruct(
+		atoi(row[1]),
+		std::string(row[2]),
+		std::string(row[3]),
+		atoi(row[4]),
+		atoi(row[5]),
+		atoi(row[6]),
+		atoi(row[7]),
+		atof(row[8]),
+		atoi(row[9]),
+		atoi(row[10]),
+		atoi(row[11]),
+		atoi(row[12]),
+		atoi(row[13]),
+		atoi(row[14]),
+		atoi(row[15]),
+		atoi(row[16]),
+		atoi(row[17]),
+		atoi(row[18]),
+		atoi(row[19]),
+		atoi(row[20]),
+		defaultNPCTypeStruct.MR,
+		defaultNPCTypeStruct.CR,
+		defaultNPCTypeStruct.DR,
+		defaultNPCTypeStruct.FR,
+		defaultNPCTypeStruct.PR,
+		defaultNPCTypeStruct.Corrup,
+		defaultNPCTypeStruct.AC,
+		defaultNPCTypeStruct.STR,
+		defaultNPCTypeStruct.STA,
+		defaultNPCTypeStruct.DEX,
+		defaultNPCTypeStruct.AGI,
+		defaultNPCTypeStruct.INT,
+		defaultNPCTypeStruct.WIS,
+		defaultNPCTypeStruct.CHA,
+		defaultNPCTypeStruct.ATK
+	);
+	loadedBot = new Bot(botID, atoi(row[0]), atoi(row[1]), atof(row[38]), atoi(row[39]), tempNPCStruct);
 	return loadedBot;
 }
 
-std::list<uint32> Bot::GetGroupedBotsByGroupId(uint32 groupId, std::string* errorMessage) {
+std::list<uint32> Bot::GetGroupedBotsByGroupId(uint32 groupId, std::string* errorMessage)
+{
 	std::list<uint32> groupedBots;
 	if(groupId == 0)
-        return groupedBots;
-
-    std::string query = StringFormat("SELECT g.mobid AS BotID FROM vwGroups AS g JOIN bots AS b ON g.mobid = b.BotId AND g.mobtype = 'B' WHERE g.groupid = %u", groupId);
-    auto results = database.QueryDatabase(query);
+		return groupedBots;
+	
+	std::string query = StringFormat(
+		"SELECT g.`mob_id` AS bot_id"
+		" FROM `vw_groups` AS g"
+		" JOIN `bot_data` AS b"
+		" ON g.`mob_id` = b.`bot_id`"
+		" AND g.`mob_type` = 'B'"
+		" WHERE g.`group_id` = %u",
+		groupId
+	);
+	auto results = database.QueryDatabase(query);
 	if(!results.Success()) {
 		*errorMessage = std::string(results.ErrorMessage());
 		return groupedBots;
 	}
 
-    for (auto row = results.begin(); row != results.end(); ++row)
-        groupedBots.push_back(atoi(row[0]));
-
+	for (auto row = results.begin(); row != results.end(); ++row)
+		groupedBots.push_back(atoi(row[0]));
+	
 	return groupedBots;
 }
 
@@ -3421,7 +3828,7 @@ std::list<BotsAvailableList> Bot::GetBotList(uint32 botOwnerCharacterID, std::st
 	if(botOwnerCharacterID == 0)
         return ownersBots;
 
-    std::string query = StringFormat("SELECT BotID, Name, Class, BotLevel, Race FROM bots WHERE BotOwnerCharacterID = '%u'", botOwnerCharacterID);
+    std::string query = StringFormat("SELECT `bot_id`, `name`, `class`, `level`, `race` FROM `bot_data` WHERE `owner_id` = '%u'", botOwnerCharacterID);
     auto results = database.QueryDatabase(query);
     if(!results.Success()) {
 		*errorMessage = std::string(results.ErrorMessage());
@@ -3442,9 +3849,10 @@ std::list<BotsAvailableList> Bot::GetBotList(uint32 botOwnerCharacterID, std::st
 
 std::list<SpawnedBotsList> Bot::ListSpawnedBots(uint32 characterID, std::string* errorMessage) {
 	std::list<SpawnedBotsList> spawnedBots;
-	if(characterID == 0)
-        return spawnedBots;
+	//if(characterID == 0)
+	return spawnedBots;
 
+	// Dead table..function needs to be updated or removed (no calls listed to Bot::ListSpawnedBots())
 	std::string query = StringFormat("SELECT bot_name, zone_name FROM botleader WHERE leaderid = %i", characterID);
 	auto results = database.QueryDatabase(query);
     if(!results.Success()) {
@@ -3473,7 +3881,7 @@ void Bot::SaveBotGroup(Group* botGroup, std::string botGroupName, std::string* e
 
     uint32 botGroupId = 0;
     uint32 botGroupLeaderBotId = tempGroupLeader->CastToBot()->GetBotID();
-    std::string query = StringFormat("INSERT INTO botgroup (BotGroupLeaderBotId, BotGroupName) VALUES (%u, '%s')", botGroupLeaderBotId, botGroupName.c_str());
+    std::string query = StringFormat("INSERT INTO `bot_groups` (`group_leader_id`, `group_name`) VALUES (%u, '%s')", botGroupLeaderBotId, botGroupName.c_str());
     auto results = database.QueryDatabase(query);
     if(!results.Success()) {
         *errorMessage = std::string(results.ErrorMessage());
@@ -3489,7 +3897,7 @@ void Bot::SaveBotGroup(Group* botGroup, std::string botGroupName, std::string* e
             continue;
 
         uint32 botGroupMemberBotId = tempBot->CastToBot()->GetBotID();
-        query = StringFormat("INSERT INTO botgroupmembers (BotGroupId, BotId) VALUES (%u, %u)", botGroupId, botGroupMemberBotId);
+        query = StringFormat("INSERT INTO `bot_group_members` (`groups_index`, `bot_id`) VALUES (%u, %u)", botGroupId, botGroupMemberBotId);
         results = database.QueryDatabase(query);
         if(!results.Success())
             *errorMessage = std::string(results.ErrorMessage());
@@ -3505,14 +3913,14 @@ void Bot::DeleteBotGroup(std::string botGroupName, std::string* errorMessage) {
     if(!errorMessage->empty() || botGroupId== 0)
         return;
 
-    std::string query = StringFormat("DELETE FROM botgroupmembers WHERE BotGroupId = %u", botGroupId);
+    std::string query = StringFormat("DELETE FROM `bot_group_members` WHERE `groups_index` = %u", botGroupId);
     auto results = database.QueryDatabase(query);
     if(!results.Success()) {
         *errorMessage = std::string(results.ErrorMessage());
         return;
     }
 
-    query = StringFormat("DELETE FROM botgroup WHERE BotGroupId = %u", botGroupId);
+    query = StringFormat("DELETE FROM `bot_groups` WHERE `groups_index` = %u", botGroupId);
     results = database.QueryDatabase(query);
     if(!results.Success())
         *errorMessage = std::string(results.ErrorMessage());
@@ -3527,7 +3935,7 @@ std::list<BotGroup> Bot::LoadBotGroup(std::string botGroupName, std::string* err
 	if(botGroupId == 0)
         return botGroup;
 
-	std::string query = StringFormat("SELECT BotId FROM botgroupmembers WHERE BotGroupId = %u", botGroupId);
+	std::string query = StringFormat("SELECT `bot_id` FROM `bot_group_members` WHERE `groups_index` = %u", botGroupId);
 	auto results = database.QueryDatabase(query);
     if(!results.Success()) {
         *errorMessage = std::string(results.ErrorMessage());
@@ -3548,7 +3956,7 @@ std::list<BotGroupList> Bot::GetBotGroupListByBotOwnerCharacterId(uint32 botOwne
 	if(botOwnerCharacterId == 0)
         return botGroups;
 
-    std::string query = StringFormat("SELECT BotGroupName, BotGroupLeaderName FROM vwBotGroups WHERE BotOwnerCharacterId = %u", botOwnerCharacterId);
+    std::string query = StringFormat("SELECT `group_name`, `group_leader_name` FROM `vw_bot_groups` WHERE `owner_id` = %u", botOwnerCharacterId);
     auto results = database.QueryDatabase(query);
     if(!results.Success()) {
         *errorMessage = std::string(results.ErrorMessage());
@@ -3568,7 +3976,7 @@ bool Bot::DoesBotGroupNameExist(std::string botGroupName) {
 	if(botGroupName.empty())
         return false;
 
-	std::string query = StringFormat("SELECT BotGroupId FROM vwBotGroups WHERE BotGroupName = '%s'", botGroupName.c_str());
+	std::string query = StringFormat("SELECT `groups_index` FROM `vw_bot_groups` WHERE `group_name` = '%s'", botGroupName.c_str());
     auto results = database.QueryDatabase(query);
     if (!results.Success() || results.RowCount() == 0)
         return false;
@@ -3587,7 +3995,7 @@ uint32 Bot::CanLoadBotGroup(uint32 botOwnerCharacterId, std::string botGroupName
 	if(botOwnerCharacterId == 0 || botGroupName.empty())
         return 0;
 
-    std::string query = StringFormat("SELECT BotGroupId, BotGroupName FROM vwBotGroups WHERE BotOwnerCharacterId = %u", botOwnerCharacterId);
+    std::string query = StringFormat("SELECT `groups_index`, `group_name` FROM `vw_bot_groups` WHERE `owner_id` = %u", botOwnerCharacterId);
     auto results = database.QueryDatabase(query);
     if(!results.Success()) {
         *errorMessage = std::string(results.ErrorMessage());
@@ -3611,7 +4019,7 @@ uint32 Bot::GetBotGroupIdByBotGroupName(std::string botGroupName, std::string* e
 	if(botGroupName.empty())
         return 0;
 
-    std::string query = StringFormat("SELECT BotGroupId FROM vwBotGroups WHERE BotGroupName = '%s'", botGroupName.c_str());
+    std::string query = StringFormat("SELECT `groups_index` FROM `vw_bot_groups` WHERE `group_name` = '%s'", botGroupName.c_str());
     auto results = database.QueryDatabase(query);
     if(!results.Success()) {
         *errorMessage = std::string(results.ErrorMessage());
@@ -3629,7 +4037,7 @@ uint32 Bot::GetBotGroupLeaderIdByBotGroupName(std::string botGroupName) {
 	if(botGroupName.empty())
         return 0;
 
-	std::string query = StringFormat("SELECT BotGroupLeaderBotId FROM vwBotGroups WHERE BotGroupName = '%s'", botGroupName.c_str());
+	std::string query = StringFormat("SELECT `group_leader_id` FROM `vw_bot_groups` WHERE `group_name` = '%s'", botGroupName.c_str());
     auto results = database.QueryDatabase(query);
     if (!results.Success() || results.RowCount() == 0)
         return 0;
@@ -3669,7 +4077,7 @@ uint32 Bot::CreatedBotCount(uint32 botOwnerCharacterID, std::string* errorMessag
 	if(botOwnerCharacterID == 0)
         return 0;
 
-	std::string query = StringFormat("SELECT COUNT(BotID) FROM bots WHERE BotOwnerCharacterID=%i", botOwnerCharacterID);
+	std::string query = StringFormat("SELECT COUNT(`bot_id`) FROM `bot_data` WHERE `owner_id` = %i", botOwnerCharacterID);
     auto results = database.QueryDatabase(query);
     if (!results.Success()) {
         *errorMessage = std::string(results.ErrorMessage());
@@ -3688,7 +4096,7 @@ uint32 Bot::GetBotOwnerCharacterID(uint32 botID, std::string* errorMessage) {
 	if(botID == 0)
         return 0;
 
-    std::string query = StringFormat("SELECT BotOwnerCharacterID FROM bots WHERE BotID = %u", botID);
+    std::string query = StringFormat("SELECT `owner_id` FROM `bot_data` WHERE `bot_id` = %u", botID);
     auto results = database.QueryDatabase(query);
     if (!results.Success()) {
         *errorMessage = std::string(results.ErrorMessage());
@@ -6415,28 +6823,40 @@ void Bot::SetBotGuildMembership(uint32 botId, uint32 guildid, uint8 rank) {
         return;
 
     if(guildid > 0) {
-        std::string query = StringFormat("REPLACE INTO botguildmembers SET char_id = %u, guild_id = %u, rank = %u", botId, guildid, rank);
+        std::string query = StringFormat("REPLACE INTO `bot_guild_members` SET `bot_id` = %u, `guild_id` = %u, `rank` = %u", botId, guildid, rank);
         auto results = database.QueryDatabase(query);
         return;
     }
 
-    std::string query = StringFormat("DELETE FROM botguildmembers WHERE char_id = %u", botId);
+    std::string query = StringFormat("DELETE FROM `bot_guild_members` WHERE `bot_id` = %u", botId);
     auto results = database.QueryDatabase(query);
 }
 
-void Bot::LoadGuildMembership(uint32* guildId, uint8* guildRank, std::string* guildName) {
+void Bot::LoadGuildMembership(uint32* guildId, uint8* guildRank, std::string* guildName)
+{
 	if(guildId == nullptr || guildRank == nullptr || guildName == nullptr)
-        return;
-
-    std::string query = StringFormat("SELECT gm.guild_id, gm.rank, g.name FROM vwGuildMembers AS gm JOIN guilds AS g ON gm.guild_id = g.id WHERE gm.char_id = %u AND gm.mobtype = 'B'", GetBotID());
-    auto results = database.QueryDatabase(query);
-    if(!results.Success() || results.RowCount() == 0)
-        return;
-
-    auto row = results.begin();
-    *guildId = atoi(row[0]);
-    *guildRank = atoi(row[1]);
-    *guildName = std::string(row[2]);
+		return;
+	
+	std::string query = StringFormat(
+		"SELECT"
+		" gm.`guild_id`,"
+		" gm.`rank`,"
+		" g.`name`"
+		" FROM `vw_guild_members` AS gm"
+		" JOIN `guilds` AS g"
+		" ON gm.`guild_id` = g.`id`"
+		" WHERE gm.`char_id` = %u"
+		" AND gm.`mob_type` = 'B'",
+		GetBotID()
+	);
+	auto results = database.QueryDatabase(query);
+	if(!results.Success() || results.RowCount() == 0)
+		return;
+	
+	auto row = results.begin();
+	*guildId = atoi(row[0]);
+	*guildRank = atoi(row[1]);
+	*guildName = std::string(row[2]);
 }
 
 int32 Bot::CalcMaxMana() {
@@ -7189,7 +7609,7 @@ bool Bot::DoFinishedSpellAETarget(uint16 spell_id, Mob* spellTarget, uint16 slot
 
 bool Bot::DoFinishedSpellSingleTarget(uint16 spell_id, Mob* spellTarget, uint16 slot, bool& stopLogic) {
 	if(spellTarget) {
-		if(IsGrouped() && (spellTarget->IsBot() || spellTarget->IsClient()) && RuleB(Bots, BotGroupBuffing)) {
+		if(IsGrouped() && (spellTarget->IsBot() || spellTarget->IsClient()) && RuleB(Bots, GroupBuffing)) {
 			bool noGroupSpell = false;
 			uint16 thespell = spell_id;
 			for(int i = 0; i < AIspells.size(); i++) {
@@ -7725,7 +8145,7 @@ int32 Bot::CalcManaRegen() {
 
 	regen += aabonuses.ManaRegen;
 	regen = ((regen * RuleI(Character, ManaRegenMultiplier)) / 100);
-	float mana_regen_rate = RuleR(Bots, BotManaRegen);
+	float mana_regen_rate = RuleR(Bots, ManaRegen);
 	if(mana_regen_rate < 0.0f)
 		mana_regen_rate = 0.0f;
 
@@ -8847,7 +9267,7 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 			std::string query;
 			if (setslot == -1) {
 				int slots[] = { 2, 7, 9, 12, 17, 18, 19 };
-				query = StringFormat("UPDATE botinventory SET color = %u WHERE slotID IN (2, 7, 9, 12, 17, 18, 19) AND botID = %u", setcolor, botid);
+				query = StringFormat("UPDATE `bot_inventories` SET `inst_color` = %u WHERE `slot_id` IN (2, 7, 9, 12, 17, 18, 19) AND `bot_id` = %u", setcolor, botid);
 				auto results = database.QueryDatabase(query);
 				if (!results.Success())
 					return;
@@ -8857,7 +9277,7 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 					c->GetTarget()->CastToBot()->SendWearChange(slotmaterial);
 				}
 			} else {
-				query = StringFormat("UPDATE botinventory SET color = %u WHERE slotID = %i AND botID = %u", setcolor, setslot, botid);
+				query = StringFormat("UPDATE `bot_inventories` SET `inst_color` = %u WHERE `slot_id` = %i AND `bot_id` = %u", setcolor, setslot, botid);
 				auto results = database.QueryDatabase(query);
 				if (!results.Success())
 					return;
@@ -8934,7 +9354,7 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 			return;
 		}
 
-		uint32 MaxBotCreate = RuleI(Bots, CreateBotCount);
+		uint32 MaxBotCreate = RuleI(Bots, CreationLimit);
 		if(CreatedBotCount(c->CharacterID(), &TempErrorMessage) >= MaxBotCreate) {
 			c->Message(0, "You cannot create more than %i bots.", MaxBotCreate);
 			return;
@@ -9135,7 +9555,7 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 			return;
 		}
 
-		if(RuleB(Bots, BotQuest) && !c->GetGM()) {
+		if(RuleB(Bots, QuestableSpawnLimit) && !c->GetGM()) {
 			const int allowedBots = AllowedBotSpawns(c->CharacterID(), &TempErrorMessage);
 			if(!TempErrorMessage.empty()) {
 				c->Message(13, "Database Error: %s", TempErrorMessage.c_str());
@@ -9154,7 +9574,7 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 
 		}
 
-		if(spawnedBotCount >= RuleI(Bots, SpawnBotCount) && !c->GetGM()) {
+		if(spawnedBotCount >= RuleI(Bots, SpawnLimit) && !c->GetGM()) {
 			c->Message(0, "You cannot spawn more than %i bots.", spawnedBotCount);
 			return;
 		}
@@ -11206,7 +11626,7 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 			return;
 		}
 
-		if(RuleB(Bots, BotQuest)) {
+		if(RuleB(Bots, QuestableSpawnLimit)) {
 			const int allowedBotsBQ = AllowedBotSpawns(c->CharacterID(), &TempErrorMessage);
 			if(!TempErrorMessage.empty()) {
 				c->Message(13, "Database Error: %s", TempErrorMessage.c_str());
@@ -11224,7 +11644,7 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 			}
 		}
 
-		const int allowedBotsSBC = RuleI(Bots, SpawnBotCount);
+		const int allowedBotsSBC = RuleI(Bots, SpawnLimit);
 		if(spawnedBots >= allowedBotsSBC || spawnedBots + (int)botGroup.size() > allowedBotsSBC) {
 			c->Message(0, "You can't spawn more than %i bots.", allowedBotsSBC);
 			return;
@@ -12651,7 +13071,7 @@ uint32 Bot::GetEquipmentColor(uint8 material_slot) const {
 	if (slotid == INVALID_INDEX)
 		return 0;
 
-	std::string query = StringFormat("SELECT color FROM botinventory WHERE BotID = %u AND SlotID = %u", botid, slotid);
+	std::string query = StringFormat("SELECT `inst_color` FROM `bot_inventories` WHERE `bot_id` = %u AND `slot_id` = %u", botid, slotid);
     auto results = database.QueryDatabase(query);
     if (!results.Success() || results.RowCount() != 1)
         return 0;

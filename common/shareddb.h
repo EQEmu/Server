@@ -51,8 +51,6 @@ class SharedDatabase : public Database
 		int32	DeleteStalePlayerCorpses();
 		void	LoadCharacterInspectMessage(uint32 character_id, InspectMessage_Struct* message);
 		void	SaveCharacterInspectMessage(uint32 character_id, const InspectMessage_Struct* message);
-		void	GetBotInspectMessage(uint32 botid, InspectMessage_Struct* message);
-		void	SetBotInspectMessage(uint32 botid, const InspectMessage_Struct* message);
 		bool	GetCommandSettings(std::map<std::string, uint8> &commands);
 		uint32	GetTotalTimeEntitledOnAccount(uint32 AccountID);
 
@@ -127,6 +125,11 @@ class SharedDatabase : public Database
 		bool LoadBaseData(const std::string &prefix);
 		void LoadBaseData(void *data, int max_level);
 		const BaseDataStruct* GetBaseData(int lvl, int cl);
+
+#ifdef BOTS
+		void	GetBotInspectMessage(uint32 botid, InspectMessage_Struct* message);
+		void	SetBotInspectMessage(uint32 botid, const InspectMessage_Struct* message);
+#endif
 
 	protected:
 

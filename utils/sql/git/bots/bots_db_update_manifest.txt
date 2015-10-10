@@ -1,4 +1,4 @@
-9000|2015_09_30_bots.sql|SHOW TABLES LIKE 'bot%'|empty|
+9000|2015_09_30_bots.sql|SHOW TABLES LIKE 'bot_data'|empty|
 
 # Upgrade conditions:
 # 	This won't be needed after this system is implemented, but it is used database that are not
