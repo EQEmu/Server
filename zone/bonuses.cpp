@@ -1199,13 +1199,14 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 			break;
 		}
 
-		// Kayen: Not sure best way to implement this yet.
 		// Physically raises skill cap ie if 55/55 it will raise to 55/60
 		case SE_RaiseSkillCap: {
-			if (newbon->RaiseSkillCap[0] < base1) {
-				newbon->RaiseSkillCap[0] = base1; // value
-				newbon->RaiseSkillCap[1] = base2; // skill
-			}
+
+			if (base2 > HIGHEST_SKILL)
+				break;
+
+			if (newbon->RaiseSkillCap[base2] < base1) 
+				newbon->RaiseSkillCap[base2] = base1;
 			break;
 		}
 
@@ -1423,21 +1424,44 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 			if (newbon->PC_Pet_Rampage[1] < base2)
 				newbon->PC_Pet_Rampage[1] = base2; //Damage modifer - take highest
 			break;
-		}	
+		}
+
+		case SE_PC_Pet_Flurry_Chance: 
+			newbon->PC_Pet_Flurry += base1; //Chance to Flurry
+			break;
+
+		case SE_ShroudofStealth:
+			newbon->ShroudofStealth = true;
+			break;
+
+		case SE_ReduceFallDamage:
+			newbon->ReduceFallDamage += base1;
+			break;
+
+		case SE_ReduceTradeskillFail:{
+
+			if (base2 > HIGHEST_SKILL)
+				break;
+
+			newbon->ReduceTradeskillFail[base2] += base1;
+			break;
+		}
+
+		case SE_TradeSkillMastery:
+			if (newbon->TradeSkillMastery < base1)
+				newbon->TradeSkillMastery = base1;
+			break;
+
 		// to do
 		case SE_PetDiscipline:
 			break;
 		case SE_PetDiscipline2:
-			break;
-		case SE_ReduceTradeskillFail:
 			break;
 		case SE_PotionBeltSlots:
 			break;
 		case SE_BandolierSlots:
 			break;
 		case SE_ForageSkill:
-			break;
-		case SE_TradeSkillMastery:
 			break;
 		case SE_SecondaryForte:
 			break;
@@ -1453,13 +1477,9 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 			break;
 		case SE_TrapCircumvention:
 			break;
-		case SE_ShroudofStealth:
-			break;
 		case SE_FeignedMinion:
 			break;
 
-		// handled client side
-		case SE_ReduceFallDamage:
 		// not handled here
 		case SE_HastenedAASkill:
 		// not handled here but don't want to clutter debug log -- these may need to be verified to ignore
@@ -3132,8 +3152,43 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 				if (new_bonus->PC_Pet_Rampage[1] < base2)
 					new_bonus->PC_Pet_Rampage[1] = base2; //Damage modifer - take highest
 				break;
-			}		
+			}
 
+			case SE_PC_Pet_Flurry_Chance: 
+				new_bonus->PC_Pet_Flurry += effect_value; //Chance to Flurry
+				break;
+
+			case SE_ShroudofStealth:
+				new_bonus->ShroudofStealth = true;
+				break;
+
+			case SE_ReduceFallDamage:
+				new_bonus->ReduceFallDamage += effect_value;
+				break;
+
+			case SE_ReduceTradeskillFail:{
+
+				if (base2 > HIGHEST_SKILL)
+					break;
+
+				new_bonus->ReduceTradeskillFail[base2] += effect_value;
+				break;
+			}
+
+			case SE_TradeSkillMastery:
+				if (new_bonus->TradeSkillMastery < effect_value)
+					new_bonus->TradeSkillMastery = effect_value;
+				break;
+
+			case SE_RaiseSkillCap: {
+				if (base2 > HIGHEST_SKILL)
+					break;
+				
+				if (new_bonus->RaiseSkillCap[base2] < effect_value) 
+					new_bonus->RaiseSkillCap[base2] = effect_value;
+				break;
+			}
+		
 			//Special custom cases for loading effects on to NPC from 'npc_spels_effects' table
 			if (IsAISpellEffect) {
 

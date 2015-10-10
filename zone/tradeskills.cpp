@@ -941,135 +941,10 @@ bool Client::TradeskillExecute(DBTradeskillRecipe_Struct *spec) {
 	float res = zone->random.Real(0, 99);
 	int aa_chance = 0;
 
-	//AA modifiers
-	//can we do this with nested switches?
-	if(spec->tradeskill == SkillAlchemy){
-		switch(GetAA(aaAlchemyMastery)){
-		case 1:
-			aa_chance = 10;
-			break;
-		case 2:
-			aa_chance = 25;
-			break;
-		case 3:
-			aa_chance = 50;
-			break;
-		}
-	}
+	aa_chance = spellbonuses.ReduceTradeskillFail[spec->tradeskill] + itembonuses.ReduceTradeskillFail[spec->tradeskill] + aabonuses.ReduceTradeskillFail[spec->tradeskill];
 
-	if(spec->tradeskill == SkillJewelryMaking){
-		switch(GetAA(aaJewelCraftMastery)){
-		case 1:
-			aa_chance = 10;
-			break;
-		case 2:
-			aa_chance = 25;
-			break;
-		case 3:
-			aa_chance = 50;
-			break;
-		}
-	}
 	const Item_Struct* item = nullptr;
-
-	if (spec->tradeskill == SkillBlacksmithing) {
-		switch(GetAA(aaBlacksmithingMastery)) {
-		case 1:
-			aa_chance = 10;
-			break;
-		case 2:
-			aa_chance = 25;
-			break;
-		case 3:
-			aa_chance = 50;
-			break;
-		}
-	}
-
-	if (spec->tradeskill == SkillBaking) {
-		switch(GetAA(aaBakingMastery)) {
-		case 1:
-			aa_chance = 10;
-			break;
-		case 2:
-			aa_chance = 25;
-			break;
-		case 3:
-			aa_chance = 50;
-			break;
-		}
-	}
-
-	if (spec->tradeskill == SkillBrewing) {
-		switch(GetAA(aaBrewingMastery)) {
-		case 1:
-			aa_chance = 10;
-			break;
-		case 2:
-			aa_chance = 25;
-			break;
-		case 3:
-			aa_chance = 50;
-			break;
-		}
-	}
-
-	if (spec->tradeskill == SkillFletching) {
-		switch(GetAA(aaFletchingMastery2)) {
-		case 1:
-			aa_chance = 10;
-			break;
-		case 2:
-			aa_chance = 25;
-			break;
-		case 3:
-			aa_chance = 50;
-			break;
-		}
-	}
-
-	if (spec->tradeskill == SkillPottery) {
-		switch(GetAA(aaPotteryMastery)) {
-		case 1:
-			aa_chance = 10;
-			break;
-		case 2:
-			aa_chance = 25;
-			break;
-		case 3:
-			aa_chance = 50;
-			break;
-		}
-	}
-
-	if (spec->tradeskill == SkillTailoring) {
-		switch(GetAA(aaTailoringMastery)) {
-		case 1:
-			aa_chance = 10;
-			break;
-		case 2:
-			aa_chance = 25;
-			break;
-		case 3:
-			aa_chance = 50;
-			break;
-		}
-	}
-
-	if (spec->tradeskill == SkillResearch) {
-		switch(GetAA(aaArcaneTongues)) {
-		case 1:
-			aa_chance = 10;
-			break;
-		case 2:
-			aa_chance = 25;
-			break;
-		case 3:
-			aa_chance = 50;
-			break;
-		}
-	}
-
+	
 	chance = mod_tradeskill_chance(chance, spec);
 
 	if (((spec->tradeskill==75) || GetGM() || (chance > res)) || zone->random.Roll(aa_chance)) {
@@ -1528,8 +1403,9 @@ bool Client::CanIncreaseTradeskill(SkillUseTypes tradeskill) {
 	uint8 Pottery	= (GetRawSkill(SkillPottery) > 200) ? 1 : 0;
 	uint8 Tailoring	= (GetRawSkill(SkillTailoring) > 200) ? 1 : 0;
 	uint8 SkillTotal = Baking + Smithing + Brewing + Fletching + Jewelry + Pottery + Tailoring; //Tradeskills above 200
-	uint32 aaLevel	= GetAA(aaNewTanaanCraftingMastery); //New Tanaan AA: Each level allows an additional tradeskill above 200 (first one is free)
-
+	//New Tanaan AA: Each level allows an additional tradeskill above 200 (first one is free)
+	uint8 aaLevel = spellbonuses.TradeSkillMastery + itembonuses.TradeSkillMastery + aabonuses.TradeSkillMastery; 
+	
 	switch (tradeskill) {
 		case SkillBaking:
 		case SkillBlacksmithing:

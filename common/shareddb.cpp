@@ -1659,27 +1659,29 @@ void SharedDatabase::LoadSpells(void *data, int max_spells) {
 		sp[tempid].directional_start = static_cast<float>(atoi(row[194]));
 		sp[tempid].directional_end = static_cast<float>(atoi(row[195]));
 		sp[tempid].sneak = atoi(row[196]) != 0;
-		sp[tempid].not_extendable = atoi(row[197]) != 0;
+		sp[tempid].not_focusable = atoi(row[197]) != 0;
+		sp[tempid].no_detrimental_spell_aggro = atoi(row[198]) != 0;
 		sp[tempid].suspendable = atoi(row[200]) != 0;
 		sp[tempid].viral_range = atoi(row[201]);
 		sp[tempid].songcap = atoi(row[202]);
 		sp[tempid].no_block = atoi(row[205]);
 		sp[tempid].spellgroup=atoi(row[207]);
 		sp[tempid].rank = atoi(row[208]);
-		sp[tempid].powerful_flag=atoi(row[209]);
+		sp[tempid].no_resist=atoi(row[209]);
 		sp[tempid].CastRestriction = atoi(row[211]);
 		sp[tempid].AllowRest = atoi(row[212]) != 0;
 		sp[tempid].InCombat = atoi(row[213]) != 0;
 		sp[tempid].OutofCombat = atoi(row[214]) != 0;
 		sp[tempid].override_crit_chance = atoi(row[217]);
 		sp[tempid].aemaxtargets = atoi(row[218]);
-		sp[tempid].maxtargets = atoi(row[219]);
+		sp[tempid].no_heal_damage_item_mod = atoi(row[219]);
 		sp[tempid].persistdeath = atoi(row[224]) != 0;
 		sp[tempid].min_dist = atof(row[227]);
 		sp[tempid].min_dist_mod = atof(row[228]);
 		sp[tempid].max_dist = atof(row[229]);
 		sp[tempid].max_dist_mod = atof(row[230]);
 		sp[tempid].min_range = static_cast<float>(atoi(row[231]));
+		sp[tempid].no_remove = atoi(row[232]) != 0;
 		sp[tempid].DamageShieldType = 0;
     }
 

@@ -408,6 +408,7 @@ struct StatBonuses {
 	uint32  SkillProc[MAX_SKILL_PROCS];			// Max number of spells containing skill_procs.
 	uint32  SkillProcSuccess[MAX_SKILL_PROCS];	// Max number of spells containing skill_procs_success.
 	uint32  PC_Pet_Rampage[2];					// 0= % chance to rampage, 1=damage modifier
+	uint32  PC_Pet_Flurry;						// Percent chance flurry from double attack
 
 	// AAs
 	int8	Packrat;							//weight reduction for items, 1 point = 10%
@@ -438,7 +439,7 @@ struct StatBonuses {
 	int32	CombatStability;					// Melee damage mitigation.
 	int32	DoubleRiposte;						// Chance to double riposte
 	int32	GiveDoubleRiposte[3];				// 0=Regular Chance, 1=Skill Attack Chance, 2=Skill
-	uint32	RaiseSkillCap[2];					// Raise a specific skill cap (1 = value, 2=skill)
+	uint32	RaiseSkillCap[HIGHEST_SKILL+1];		// Raise a specific skill cap (base1= value, base2=skill)
 	int32	Ambidexterity;						// Increase chance to duel wield by adding bonus 'skill'.
 	int32	PetMaxHP;							// Increase the max hp of your pet.
 	int32	PetFlurry;							// Chance for pet to flurry.
@@ -466,6 +467,10 @@ struct StatBonuses {
 	int32	PetMeleeMitigation;					// Add AC to owner's pet.
 	bool	IllusionPersistence;				// Causes illusions not to fade.
 	uint16	extra_xtargets;						// extra xtarget entries
+	bool	ShroudofStealth;					// rogue improved invisiblity
+	uint16  ReduceFallDamage;					// reduce fall damage by percent
+	int32	ReduceTradeskillFail[HIGHEST_SKILL+1]; // Reduces chance for trade skills to fail by percent.
+	uint8	TradeSkillMastery;					// Allow number of tradeskills to exceed 200 skill.
 };
 
 typedef struct

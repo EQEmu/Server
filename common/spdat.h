@@ -381,7 +381,7 @@ typedef enum {
 #define SE_GiveDoubleAttack				225	// implemented[AA] - Allow any class to double attack with set chance.
 #define SE_TwoHandBash					226 // *not implemented as bonus
 #define SE_ReduceSkillTimer				227	// implemented
-#define SE_ReduceFallDamage				228	// not implented as bonus - reduce the damage that you take from falling
+#define SE_ReduceFallDamage				228	// implented - reduce the damage that you take from falling
 #define SE_PersistantCasting			229 // implemented
 #define SE_ExtendedShielding			230	// not used as bonus - increase range of /shield ability
 #define SE_StunBashChance				231	// implemented - increase chance to stun from bash.
@@ -400,7 +400,7 @@ typedef enum {
 #define	SE_RootBreakChance				244	// implemented[AA] reduce the chance that your root will break.
 #define SE_TrapCircumvention			245	// *not implemented[AA] - decreases the chance that you will set off a trap when opening a chest
 #define SE_SetBreathLevel				246 // *not implemented as bonus
-#define SE_RaiseSkillCap				247	// *not implemented[AA] - adds skill over the skill cap.
+#define SE_RaiseSkillCap				247	// implemented[AA] - adds skill over the skill cap.
 #define SE_SecondaryForte				248 // not implemented as bonus(gives you a 2nd specialize skill that can go past 50 to 100)
 #define SE_SecondaryDmgInc				249 // implemented[AA] Allows off hand weapon to recieve a damage bonus (Sinister Strikes)
 #define SE_SpellProcChance				250	// implemented - Increase chance to proc from melee proc spells (ie Spirit of Panther)
@@ -409,19 +409,19 @@ typedef enum {
 #define SE_FrontalBackstabMinDmg		253	// implemented[AA] - allow a frontal backstab for mininum damage.
 #define SE_Blank						254 // implemented
 #define SE_ShieldDuration				255	// not implemented as bonus - increases duration of /shield
-#define SE_ShroudofStealth				256	// not implemented as bonus - rogue improved invs
+#define SE_ShroudofStealth				256	// implemented
 #define SE_PetDiscipline				257 // not implemented as bonus - /pet hold
 #define SE_TripleBackstab				258 // implemented[AA] - chance to perform a triple backstab
 #define SE_CombatStability				259 // implemented[AA] - damage mitigation
 #define SE_AddSingingMod				260 // implemented[AA] - Instrument/Singing Mastery, base1 is the mod, base2 is the ItemType
 #define SE_SongModCap					261	// implemented[AA] - Song Mod cap increase (no longer used on live)
 #define SE_RaiseStatCap					262 // implemented
-#define SE_TradeSkillMastery			263	// not implemented - lets you raise more than one tradeskill above master.
+#define SE_TradeSkillMastery			263	// implemented - lets you raise more than one tradeskill above master.
 #define SE_HastenedAASkill			    264 // implemented
 #define SE_MasteryofPast				265 // implemented[AA] - Spells less than effect values level can not be fizzled
 #define SE_ExtraAttackChance			266 // implemented - increase chance to score an extra attack with a 2-Handed Weapon.
 #define SE_PetDiscipline2				267 // *not implemented - /pet focus, /pet no cast
-#define SE_ReduceTradeskillFail			268 // *not implemented? - reduces chance to fail with given tradeskill by a percent chance
+#define SE_ReduceTradeskillFail			268 // implemented - reduces chance to fail with given tradeskill by a percent chance
 #define SE_MaxBindWound					269	// implemented[AA] - Increase max HP you can bind wound.
 #define SE_BardSongRange				270	// implemented[AA] - increase range of beneficial bard songs (Sionachie's Crescendo)
 #define SE_BaseMovementSpeed			271 // implemented[AA] - mods basemove speed, doesn't stack with other move mods
@@ -478,7 +478,7 @@ typedef enum {
 #define SE_GateToHomeCity				322 // implemented
 #define SE_DefensiveProc				323 // implemented
 #define SE_HPToMana						324 // implemented
-//#define SE_ChanceInvsBreakToAoE		325	// *not implemented[AA] - [AA Nerves of Steel] increasing chance to remain hidden when they are an indirect target of an AoE spell.
+//#define SE_NoBreakAESneak				325	// *not implemented[AA] - [AA Nerves of Steel] increasing chance to remain hidden when they are an indirect target of an AoE spell.
 #define SE_SpellSlotIncrease			326 // *not implemented as bonus - increases your spell slot availability
 #define SE_MysticalAttune				327 // implemented - increases amount of buffs that a player can have
 #define SE_DelayDeath					328 // implemented - increases how far you can fall below 0 hp before you die
@@ -486,7 +486,7 @@ typedef enum {
 #define SE_CriticalDamageMob			330	// implemented
 #define SE_Salvage						331 // implemented - chance to recover items that would be destroyed in failed tradeskill combine
 //#define SE_SummonToCorpse				332 // *not implemented AA - Call of the Wild (Druid/Shaman Res spell with no exp)
-#define SE_CastOnRuneFadeEffect					333 // implemented
+#define SE_CastOnRuneFadeEffect			333 // implemented
 #define SE_BardAEDot					334	// implemented
 #define SE_BlockNextSpellFocus			335	// implemented - base1 chance to block next spell ie Puratus (8494)
 //#define SE_IllusionaryTarget			336	// not used
@@ -619,7 +619,7 @@ typedef enum {
 //#define SE_Shield_Target				463 // 
 #define SE_PC_Pet_Rampage				464 // implemented - Base1 % chance to do rampage for base2 % of damage each melee round
 //#define SE_PC_Pet_AE_Rampage			465 // Would assume as above but need to confirm.
-//#define SE_PC_Pet_Flurry_Chance		466 // 
+#define SE_PC_Pet_Flurry_Chance			466 // implemented - Base1 % chance to do flurry from double attack hit.
 //#define SE_DS_Mitigation_Amount		467 // 
 //#define SE_DS_Mitigation_Percentage	468 // 
 //#define SE_Chance_Best_in_Spell_Grp   469 //  
@@ -744,8 +744,9 @@ struct SPDat_Spell_Struct
 /* 194 */	float directional_start; //Cone Start Angle:
 /* 195 */	float directional_end; // Cone End Angle:
 /* 196 */   bool sneak; // effect can only be used if sneaking (rogue 'Daggerfall' ect)
-/* 197 */	bool not_extendable;
-/* 198- 199 */
+/* 197 */	bool not_focusable; //prevents focus effects from being applied to spell
+/* 198 */   bool no_detrimental_spell_aggro; 
+/* 199 */
 /* 200 */	bool suspendable; // buff is suspended in suspended buff zones
 /* 201 */	int viral_range;
 /* 202 */	int songcap; // individual song cap
@@ -755,7 +756,7 @@ struct SPDat_Spell_Struct
 /* 206 */
 /* 207 */	int spellgroup;
 /* 208 */	int rank; //increments AA effects with same name
-/* 209 */	int powerful_flag; //  Need more investigation to figure out what to call this, for now we know -1 makes charm spells not break before their duration is complete, it does alot more though
+/* 209 */	int no_resist; //makes spells unresistable, which makes charms unbreakable as well.  
 /* 210 */	// bool DurationFrozen; ???
 /* 211 */	int CastRestriction; //Various restriction categories for spells most seem targetable race related but have also seen others for instance only castable if target hp 20% or lower or only if target out of combat
 /* 212 */	bool AllowRest;
@@ -764,7 +765,7 @@ struct SPDat_Spell_Struct
 /* 215 - 216 */
 /* 217 */   int override_crit_chance; //Places a cap on the max chance to critical
 /* 218 */	int aemaxtargets;  //Is used for various AE effects
-/* 219 */	int maxtargets; //Is used for beam and ring spells for target # limits (not implemented)
+/* 219 */	int no_heal_damage_item_mod; 
 /* 220 - 223 */
 /* 224 */	bool persistdeath; // buff doesn't get stripped on death
 /* 225 - 226 */
@@ -773,7 +774,8 @@ struct SPDat_Spell_Struct
 /* 229 */	float max_dist; //spell power modified by distance from caster (Max Distance)
 /* 230 */   float max_dist_mod; //spell power modified by distance from caster (Modifier at Max Distance)
 /* 231 */   float min_range; //Min casting range
-/* 232 - 236 */
+/* 232 */   bool no_remove; //prevents buff from being removed by click
+/* 233 - 236 */
 			uint8 DamageShieldType; // This field does not exist in spells_us.txt
 };
 
@@ -879,6 +881,7 @@ uint32 GetPartialMeleeRuneReduction(uint32 spell_id);
 uint32 GetPartialMagicRuneReduction(uint32 spell_id);
 uint32 GetPartialMeleeRuneAmount(uint32 spell_id);
 uint32 GetPartialMagicRuneAmount(uint32 spell_id);
+bool NoDetrimentalSpellAggro(uint16 spell_id);
 
 int CalcPetHp(int levelb, int classb, int STA = 75);
 const char *GetRandPetName();

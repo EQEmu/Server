@@ -960,6 +960,9 @@ bool Mob::CheckLosFN(float posX, float posY, float posZ, float mobSize) {
 //offensive spell aggro
 int32 Mob::CheckAggroAmount(uint16 spell_id, Mob *target, bool isproc)
 {
+	if (NoDetrimentalSpellAggro(spell_id))
+		return 0;
+
 	int32 AggroAmount = 0;
 	int32 nonModifiedAggro = 0;
 	uint16 slevel = GetLevel();
@@ -1240,7 +1243,7 @@ bool Mob::PassCharismaCheck(Mob* caster, uint16 spell_id) {
 
 	if(IsCharmSpell(spell_id)) {
 
-		if (spells[spell_id].powerful_flag == -1) //If charm spell has this set(-1), it can not break till end of duration.
+		if (spells[spell_id].no_resist) //If charm spell has this set(-1), it can not break till end of duration.
 			return true;
 
 		//1: The mob has a default 25% chance of being allowed a resistance check against the charm.
