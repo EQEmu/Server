@@ -878,6 +878,7 @@ public:
 	void SetFilter(eqFilterType filter_id, eqFilterMode value) { ClientFilters[filter_id]=value; }
 
 	void BreakInvis();
+	void BreakSneakWhenCastOn(Mob* caster, bool IsResisted);
 	void LeaveGroup();
 
 	bool Hungry() const {if (GetGM()) return false; return m_pp.hunger_level <= 3000;}

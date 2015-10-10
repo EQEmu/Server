@@ -1452,6 +1452,11 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 				newbon->TradeSkillMastery = base1;
 			break;
 
+		case SE_NoBreakAESneak:
+			if (newbon->NoBreakAESneak < base1)
+				newbon->NoBreakAESneak = base1;
+			break;
+
 		// to do
 		case SE_PetDiscipline:
 			break;
@@ -3188,6 +3193,11 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 					new_bonus->RaiseSkillCap[base2] = effect_value;
 				break;
 			}
+
+			case SE_NoBreakAESneak:
+				if (new_bonus->NoBreakAESneak < effect_value)
+					new_bonus->NoBreakAESneak = effect_value;
+				break;
 		
 			//Special custom cases for loading effects on to NPC from 'npc_spels_effects' table
 			if (IsAISpellEffect) {
