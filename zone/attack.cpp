@@ -1382,7 +1382,7 @@ bool Client::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, b
 	if (damage > 0 && HasSkillProcSuccess() && other && other->GetHP() > 0)
 		TrySkillProc(other, skillinuse, 0, true, Hand);
 
-	CommonBreakInvisible();
+	CommonBreakInvisibleFromCombat();
 
 	if(GetTarget())
 		TriggerDefensiveProcs(weapon, other, Hand, damage);
@@ -1940,7 +1940,7 @@ bool NPC::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool
 
 	MeleeLifeTap(damage);
 
-	CommonBreakInvisible();
+	CommonBreakInvisibleFromCombat();
 
 	//I doubt this works...
 	if (!GetTarget())
@@ -4487,7 +4487,7 @@ void Mob::CommonOutgoingHitSuccess(Mob* defender, int32 &damage, SkillUseTypes s
 	CheckNumHitsRemaining(NumHit::OutgoingHitSuccess);
 }
 
-void Mob::CommonBreakInvisible()
+void Mob::CommonBreakInvisibleFromCombat()
 {
 	//break invis when you attack
 	if(invisible) {

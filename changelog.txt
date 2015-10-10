@@ -1,5 +1,12 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 10/10/2015 ==
+Kayen: Updated mechanics to be consistent with live regarding how invisible breaks when the client is the target of a spell.
+Invisible will drop whenever a client is hit with a detrimental spell, regardless of if resisted, if it does damage or AOE.
+Hide skill now also follows the same rules as above.
+Implemented support for Rogue AA - Nerves of Steel which gives a chance for hide NOT to break
+when client is hit with an AOE spell.
+
 == 09/25/2015 ==
 Uleat: Implemented 'Inventory Snapshot' feature to track online player inventories at timed intervals.
 rules:

@@ -805,7 +805,7 @@ void Client::RangedAttack(Mob* other, bool CanDoubleAttack) {
 	}
 
 	CheckIncreaseSkill(SkillArchery, GetTarget(), -15);
-	CommonBreakInvisible();
+	CommonBreakInvisibleFromCombat();
 }
 
 void Mob::DoArcheryAttackDmg(Mob* other,  const ItemInst* RangeWeapon, const ItemInst* Ammo, uint16 weapon_damage, int16 chance_mod, int16 focus, int ReuseTime,
@@ -1237,7 +1237,7 @@ void NPC::RangedAttack(Mob* other)
 
 		DoRangedAttackDmg(other);
 
-		CommonBreakInvisible();
+		CommonBreakInvisibleFromCombat();
 	}
 }
 
@@ -1433,7 +1433,7 @@ void Client::ThrowingAttack(Mob* other, bool CanDoubleAttack) { //old was 51
 	//consume ammo
 	DeleteItemInInventory(ammo_slot, 1, true);
 	CheckIncreaseSkill(SkillThrowing, GetTarget());
-	CommonBreakInvisible();
+	CommonBreakInvisibleFromCombat();
 }
 
 void Mob::DoThrowingAttackDmg(Mob* other, const ItemInst* RangeWeapon, const Item_Struct* AmmoItem, uint16 weapon_damage, int16 chance_mod,int16 focus, int ReuseTime, uint32 range_id, int AmmoSlot, float speed)

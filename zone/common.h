@@ -471,6 +471,7 @@ struct StatBonuses {
 	uint16  ReduceFallDamage;					// reduce fall damage by percent
 	int32	ReduceTradeskillFail[HIGHEST_SKILL+1]; // Reduces chance for trade skills to fail by percent.
 	uint8	TradeSkillMastery;					// Allow number of tradeskills to exceed 200 skill.
+	int16	NoBreakAESneak;						// Percent value
 };
 
 typedef struct

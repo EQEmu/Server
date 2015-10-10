@@ -3679,6 +3679,8 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob *spelltar, bool reflect, bool use_r
 	// not all unresistable, so changing this to only check certain spells
 	if(IsResistableSpell(spell_id))
 	{
+		spelltar->BreakInvisibleSpells(); //Any detrimental spell cast on you will drop invisible (can be AOE, non damage ect).
+
 		if (IsCharmSpell(spell_id) || IsMezSpell(spell_id) || IsFearSpell(spell_id))
 			spell_effectiveness = spelltar->ResistSpell(spells[spell_id].resisttype, spell_id, this, use_resist_adjust, resist_adjust, true, false, false, level_override);
 		else
@@ -3712,12 +3714,18 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob *spelltar, bool reflect, bool use_r
 					}
 				}
 
+				if (spelltar->IsClient())
+					spelltar->CastToClient()->BreakSneakWhenCastOn(this, true);
+				
 				spelltar->CheckNumHitsRemaining(NumHit::IncomingSpells);
 				CheckNumHitsRemaining(NumHit::OutgoingSpells);
 
 				safe_delete(action_packet);
 				return false;
 			}
+		}
+		if (spelltar->IsClient()){
+			spelltar->CastToClient()->BreakSneakWhenCastOn(this, false);
 		}
 	}
 	else

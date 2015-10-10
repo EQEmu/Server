@@ -164,7 +164,8 @@ public:
 	virtual inline bool IsBerserk() { return false; } // only clients
 	void RogueEvade(Mob *other);
 	void CommonOutgoingHitSuccess(Mob* defender, int32 &damage, SkillUseTypes skillInUse);
-	void CommonBreakInvisible();
+	void BreakInvisibleSpells();
+	void CommonBreakInvisibleFromCombat();
 	bool HasDied();
 	virtual bool CheckDualWield();
 	void DoMainHandAttackRounds(Mob *target, ExtraAttackOptions *opts = nullptr, int special = 0);
