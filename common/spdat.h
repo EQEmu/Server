@@ -478,7 +478,7 @@ typedef enum {
 #define SE_GateToHomeCity				322 // implemented
 #define SE_DefensiveProc				323 // implemented
 #define SE_HPToMana						324 // implemented
-//#define SE_NoBreakAESneak				325	// *not implemented[AA] - [AA Nerves of Steel] increasing chance to remain hidden when they are an indirect target of an AoE spell.
+#define SE_NoBreakAESneak				325	// implemented[AA] - [AA Nerves of Steel] increasing chance to remain hidden when they are an indirect target of an AoE spell.
 #define SE_SpellSlotIncrease			326 // *not implemented as bonus - increases your spell slot availability
 #define SE_MysticalAttune				327 // implemented - increases amount of buffs that a player can have
 #define SE_DelayDeath					328 // implemented - increases how far you can fall below 0 hp before you die

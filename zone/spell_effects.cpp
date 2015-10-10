@@ -6707,3 +6707,67 @@ void Mob::CalcSpellPowerDistanceMod(uint16 spell_id, float range, Mob* caster)
 		SetSpellPowerDistanceMod(static_cast<int>(mod));
 	}
 }
+
+void Mob::BreakInvisibleSpells()
+{
+	if(invisible) {
+		BuffFadeByEffect(SE_Invisibility);
+		BuffFadeByEffect(SE_Invisibility2);
+		invisible = false;
+	}
+	if(invisible_undead) {
+		BuffFadeByEffect(SE_InvisVsUndead);
+		BuffFadeByEffect(SE_InvisVsUndead2);
+		invisible_undead = false;
+	}
+	if(invisible_animals){
+		BuffFadeByEffect(SE_InvisVsAnimals);
+		invisible_animals = false;
+	}
+}
+
+void Client::BreakSneakWhenCastOn(Mob* caster, bool IsResisted)
+{
+	bool IsCastersTarget = false; //Chance to avoid only applies to AOE spells when not targeted.
+	if(hidden || improved_hidden){
+
+		if (caster){
+			Mob* target = nullptr;
+			target = caster->GetTarget();
+			if (target && target == this){
+				IsCastersTarget = true;
+			}
+		}
+
+		if (!IsCastersTarget){
+
+			int chance = spellbonuses.NoBreakAESneak + itembonuses.NoBreakAESneak + aabonuses.NoBreakAESneak;
+
+			if (IsResisted)
+				chance *= 2;
+
+			if(chance && (zone->random.Roll(chance)))
+				return; // Do not drop Sneak/Hide
+		}
+	
+		//TODO: The skill buttons should reset when this occurs. Not sure how to force that yet. - Kayen
+		hidden = false;
+		improved_hidden = false;
+		EQApplicationPacket* outapp = new EQApplicationPacket(OP_SpawnAppearance, sizeof(SpawnAppearance_Struct));
+		SpawnAppearance_Struct* sa_out = (SpawnAppearance_Struct*)outapp->pBuffer;
+		sa_out->spawn_id = GetID();
+		sa_out->type = 0x03;
+		sa_out->parameter = 0;
+		entity_list.QueueClients(this, outapp, false);
+		safe_delete(outapp);
+
+		Message_StringID(MT_Skills,NO_LONGER_HIDDEN);
+
+		//Sneaking alone will not be disabled from spells, only hide+sneak.
+		if (sneaking){
+			sneaking = false;
+			SendAppearancePacket(AT_Sneak, 0);
+			Message_StringID(MT_Skills,STOP_SNEAKING);
+		}
+	}
+}
