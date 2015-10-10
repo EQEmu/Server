@@ -32,19 +32,15 @@ BEGIN
 	
 	-- Alter
 	IF ((SELECT COUNT(*) FROM `information_schema`.`KEY_COLUMN_USAGE` WHERE `TABLE_SCHEMA` = DATABASE() AND `TABLE_NAME` = 'guild_members' AND `CONSTRAINT_NAME` = 'PRIMARY') > 0) THEN
-	-- IF ((SHOW KEYS IN `guild_members` WHERE `Key_name` LIKE 'PRIMARY') != '') THEN
 		ALTER TABLE `guild_members` DROP PRIMARY KEY;
 	END IF;
 	
 	IF ((SELECT COUNT(*) FROM `information_schema`.`KEY_COLUMN_USAGE` WHERE `TABLE_SCHEMA` = DATABASE() AND `TABLE_NAME` = 'group_id' AND `CONSTRAINT_NAME` = 'PRIMARY') > 0) THEN
-	-- IF ((SHOW KEYS IN `group_id` WHERE `Key_name` LIKE 'PRIMARY') != '') THEN
 		ALTER TABLE `group_id` DROP PRIMARY KEY;
 	END IF;
 	ALTER TABLE `group_id` ADD PRIMARY KEY USING BTREE(`groupid`, `charid`, `name`, `ismerc`);
 	--
 	-- From original bots.sql (for reference)
-	-- ALTER TABLE `group_id` DROP PRIMARY KEY, ADD PRIMARY KEY  USING BTREE(`groupid`, `charid`, `name`);
-	-- ALTER TABLE `guild_members` DROP PRIMARY KEY;
 	-- ALTER TABLE `group_id` ADD UNIQUE INDEX `U_group_id_1`(`name`);
 	-- ALTER TABLE `group_leaders` ADD UNIQUE INDEX `U_group_leaders_1`(`leadername`);
 	
@@ -169,7 +165,6 @@ BEGIN
 		INDEX `bot_id` (`bot_id`)
 	) ENGINE=InnoDB;
 	IF ((SELECT COUNT(*) FROM `information_schema`.`TABLES` WHERE `TABLE_SCHEMA` = DATABASE() AND `TABLE_NAME` = 'bots') > 0) THEN
-	-- IF ((SHOW TABLES LIKE 'bots') != '') THEN
 		INSERT INTO `bot_data` (
 			`bot_id`,
 			`owner_id`,
@@ -276,7 +271,6 @@ BEGIN
 		CONSTRAINT `FK_bot_stances_1` FOREIGN KEY (`bot_id`) REFERENCES `bot_data` (`bot_id`)
 	);
 	IF ((SELECT COUNT(*) FROM `information_schema`.`TABLES` WHERE `TABLE_SCHEMA` = DATABASE() AND `TABLE_NAME` = 'botstances') > 0) THEN
-	-- IF ((SHOW TABLES LIKE 'botstances') != '') THEN
 		INSERT INTO `bot_stances` (
 			`bot_id`,
 			`stance_id`
@@ -297,7 +291,6 @@ BEGIN
 		CONSTRAINT `FK_bot_timers_1` FOREIGN KEY (`bot_id`) REFERENCES `bot_data` (`bot_id`)
 	);
 	IF ((SELECT COUNT(*) FROM `information_schema`.`TABLES` WHERE `TABLE_SCHEMA` = DATABASE() AND `TABLE_NAME` = 'bottimers') > 0) THEN
-	-- IF ((SHOW TABLES LIKE 'bottimers') != '') THEN
 		INSERT INTO `bot_timers` (
 			`bot_id`,
 			`timer_id`,
@@ -338,7 +331,6 @@ BEGIN
 		CONSTRAINT `FK_bot_buffs_1` FOREIGN KEY (`bot_id`) REFERENCES `bot_data` (`bot_id`)
 	) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=latin1;
 	IF ((SELECT COUNT(*) FROM `information_schema`.`TABLES` WHERE `TABLE_SCHEMA` = DATABASE() AND `TABLE_NAME` = 'botbuffs') > 0) THEN
-	-- IF ((SHOW TABLES LIKE 'botbuffs') != '') THEN
 		INSERT INTO `bot_buffs` (
 			`buffs_index`,
 			`bot_id`,
@@ -373,38 +365,43 @@ BEGIN
 		FROM `botbuffs`;
 		
 		IF ((SELECT COUNT(*) FROM `information_schema`.`COLUMNS` WHERE `TABLE_SCHEMA` = DATABASE() AND `TABLE_NAME` = 'botbuffs' AND `COLUMN_NAME` = 'dot_rune') > 0) THEN
-		-- IF ((SHOW COLUMNS FROM `botbuffs` LIKE 'dot_rune') != '') THEN
-			UPDATE `bot_buffs`
-			SET `dot_rune` = `botbuffs`.`dot_rune`
-			WHERE `buffs_index` = `botbuffs`.`BotBuffId` AND `bot_id` = `botbuffs`.`BotID`;
+			UPDATE `bot_buffs` bb
+			INNER JOIN `botbuffs` bbo
+			ON bb.`buffs_index` = bbo.`BotBuffId`
+			SET bb.`dot_rune` = bbo.`dot_rune`
+			WHERE bb.`bot_id` = bbo.`BotID`;
 		END IF;
 		
 		IF ((SELECT COUNT(*) FROM `information_schema`.`COLUMNS` WHERE `TABLE_SCHEMA` = DATABASE() AND `TABLE_NAME` = 'botbuffs' AND `COLUMN_NAME` = 'caston_x') > 0) THEN
-		-- IF ((SHOW COLUMNS FROM `botbuffs` LIKE 'caston_x') != '') THEN
-			UPDATE `bot_buffs`
-			SET `caston_x` = `botbuffs`.`caston_x`
-			WHERE `buffs_index` = `botbuffs`.`BotBuffId` AND `bot_id` = `botbuffs`.`BotID`;
+			UPDATE `bot_buffs` bb
+			INNER JOIN `botbuffs` bbo
+			ON bb.`buffs_index` = bbo.`BotBuffId`
+			SET bb.`caston_x` = bbo.`caston_x`
+			WHERE bb.`bot_id` = bbo.`BotID`;
 		END IF;
 		
 		IF ((SELECT COUNT(*) FROM `information_schema`.`COLUMNS` WHERE `TABLE_SCHEMA` = DATABASE() AND `TABLE_NAME` = 'botbuffs' AND `COLUMN_NAME` = 'caston_y') > 0) THEN
-		-- IF ((SHOW COLUMNS FROM `botbuffs` LIKE 'caston_y') != '') THEN
-			UPDATE `bot_buffs`
-			SET `caston_y` = `botbuffs`.`caston_y`
-			WHERE `buffs_index` = `botbuffs`.`BotBuffId` AND `bot_id` = `botbuffs`.`BotID`;
+			UPDATE `bot_buffs` bb
+			INNER JOIN `botbuffs` bbo
+			ON bb.`buffs_index` = bbo.`BotBuffId`
+			SET bb.`caston_y` = bbo.`caston_y`
+			WHERE bb.`bot_id` = bbo.`BotID`;
 		END IF;
 		
 		IF ((SELECT COUNT(*) FROM `information_schema`.`COLUMNS` WHERE `TABLE_SCHEMA` = DATABASE() AND `TABLE_NAME` = 'botbuffs' AND `COLUMN_NAME` = 'caston_z') > 0) THEN
-		-- IF ((SHOW COLUMNS FROM `botbuffs` LIKE 'caston_z') != '') THEN
-			UPDATE `bot_buffs`
-			SET `caston_z` = `botbuffs`.`caston_z`
-			WHERE `buffs_index` = `botbuffs`.`BotBuffId` AND `bot_id` = `botbuffs`.`BotID`;
+			UPDATE `bot_buffs` bb
+			INNER JOIN `botbuffs` bbo
+			ON bb.`buffs_index` = bbo.`BotBuffId`
+			SET bb.`caston_z` = bbo.`caston_z`
+			WHERE bb.`bot_id` = bbo.`BotID`;
 		END IF;
 		
 		IF ((SELECT COUNT(*) FROM `information_schema`.`COLUMNS` WHERE `TABLE_SCHEMA` = DATABASE() AND `TABLE_NAME` = 'botbuffs' AND `COLUMN_NAME` = 'ExtraDIChance') > 0) THEN
-		-- IF ((SHOW COLUMNS FROM `botbuffs` LIKE 'ExtraDIChance') != '') THEN
-			UPDATE `bot_buffs`
-			SET `extra_di_chance` = `botbuffs`.`ExtraDIChance`
-			WHERE `buffs_index` = `botbuffs`.`BotBuffId` AND `bot_id` = `botbuffs`.`BotID`;
+			UPDATE `bot_buffs` bb
+			INNER JOIN `botbuffs` bbo
+			ON bb.`buffs_index` = bbo.`BotBuffId`
+			SET bb.`extra_di_chance` = bbo.`ExtraDIChance`
+			WHERE bb.`bot_id` = bbo.`BotID`;
 		END IF;
 		
 		RENAME TABLE `botbuffs` TO `botbuffs_old`;
@@ -433,7 +430,6 @@ BEGIN
 		CONSTRAINT `FK_bot_inventories_1` FOREIGN KEY (`bot_id`) REFERENCES `bot_data` (`bot_id`)
 	) ENGINE=InnoDB; 
 	IF ((SELECT COUNT(*) FROM `information_schema`.`TABLES` WHERE `TABLE_SCHEMA` = DATABASE() AND `TABLE_NAME` = 'botinventory') > 0) THEN
-	-- IF ((SHOW TABLES LIKE 'botinventory') != '') THEN
 		INSERT INTO `bot_inventories` (
 			`inventories_index`,
 			`bot_id`,
@@ -464,10 +460,11 @@ BEGIN
 		FROM `botinventory`;
 		
 		IF ((SELECT COUNT(*) FROM `information_schema`.`COLUMNS` WHERE `TABLE_SCHEMA` = DATABASE() AND `TABLE_NAME` = 'botinventory' AND `COLUMN_NAME` = 'augslot6') > 0) THEN
-		-- IF ((SHOW COLUMNS FROM `botinventory` LIKE 'augslot6') != '') THEN
-			UPDATE `bot_inventories`
-			SET `augment_6` = `botinventory`.`augslot6`
-			WHERE `inventories_index` = `botinventory`.`BotInventoryID` AND `bot_id` = `botinventory`.`BotID`;
+			UPDATE `bot_inventories` bi
+			INNER JOIN `botinventory` bio
+			ON bi.`inventories_index` = bio.`BotInventoryID`
+			SET bi.`augment_6` = bio.`augslot6`
+			WHERE bi.`bot_id` = bio.`BotID`;
 		END IF;
 		
 		RENAME TABLE `botinventory` TO `botinventory_old`;
@@ -486,7 +483,6 @@ BEGIN
 		CONSTRAINT `U_bot_pets_1` UNIQUE (`bot_id`)
 	) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=latin1;
 	IF ((SELECT COUNT(*) FROM `information_schema`.`TABLES` WHERE `TABLE_SCHEMA` = DATABASE() AND `TABLE_NAME` = 'botpets') > 0) THEN
-	-- IF ((SHOW TABLES LIKE 'botpets') != '') THEN
 		INSERT INTO `bot_pets` (
 			`pets_index`,
 			`pet_id`,
@@ -518,7 +514,6 @@ BEGIN
 		CONSTRAINT `FK_bot_pet_buffs_1` FOREIGN KEY (`pets_index`) REFERENCES `bot_pets` (`pets_index`)
 	) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=latin1;
 	IF ((SELECT COUNT(*) FROM `information_schema`.`TABLES` WHERE `TABLE_SCHEMA` = DATABASE() AND `TABLE_NAME` = 'botpetbuffs') > 0) THEN
-	-- IF ((SHOW TABLES LIKE 'botpetbuffs') != '') THEN
 		INSERT INTO `bot_pet_buffs` (
 			`pet_buffs_index`,
 			`pets_index`,
@@ -546,7 +541,6 @@ BEGIN
 		CONSTRAINT `FK_bot_pet_inventories_1` FOREIGN KEY (`pets_index`) REFERENCES `bot_pets` (`pets_index`)
 	) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=latin1;
 	IF ((SELECT COUNT(*) FROM `information_schema`.`TABLES` WHERE `TABLE_SCHEMA` = DATABASE() AND `TABLE_NAME` = 'botpetinventory') > 0) THEN
-	-- IF ((SHOW TABLES LIKE 'botpetinventory') != '') THEN
 		INSERT INTO `bot_pet_inventories` (
 			`pet_inventories_index`,
 			`pets_index`,
@@ -570,7 +564,6 @@ BEGIN
 		CONSTRAINT `FK_bot_groups_1` FOREIGN KEY (`group_leader_id`) REFERENCES `bot_data` (`bot_id`)
 	) ENGINE=InnoDB;
 	IF ((SELECT COUNT(*) FROM `information_schema`.`TABLES` WHERE `TABLE_SCHEMA` = DATABASE() AND `TABLE_NAME` = 'botgroup') > 0) THEN
-	-- IF ((SHOW TABLES LIKE 'botgroup') != '') THEN
 		INSERT INTO `bot_groups` (
 			`groups_index`,
 			`group_leader_id`,
@@ -596,7 +589,6 @@ BEGIN
 		CONSTRAINT `FK_bot_group_members_2` FOREIGN KEY (`bot_id`) REFERENCES `bot_data` (`bot_id`)
 	) ENGINE=InnoDB;
 	IF ((SELECT COUNT(*) FROM `information_schema`.`TABLES` WHERE `TABLE_SCHEMA` = DATABASE() AND `TABLE_NAME` = 'botgroupmembers') > 0) THEN
-	-- IF ((SHOW TABLES LIKE 'botgroupmembers') != '') THEN
 		INSERT INTO `bot_group_members` (
 			`group_members_index`,
 			`groups_index`,
@@ -624,7 +616,6 @@ BEGIN
 		PRIMARY KEY  (`bot_id`)
 	) ENGINE=InnoDB;
 	IF ((SELECT COUNT(*) FROM `information_schema`.`TABLES` WHERE `TABLE_SCHEMA` = DATABASE() AND `TABLE_NAME` = 'botguildmembers') > 0) THEN
-	-- IF ((SHOW TABLES LIKE 'botguildmembers') != '') THEN
 		INSERT INTO `bot_guild_members` (
 			`bot_id`,
 			`guild_id`,

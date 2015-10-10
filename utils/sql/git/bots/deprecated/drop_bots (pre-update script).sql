@@ -41,7 +41,6 @@ DELIMITER $$
 
 CREATE PROCEDURE `DropBotsSchema` ()
 BEGIN
-	
 	SELECT "deleting rules...";
 	DELETE FROM `rule_values` WHERE `rule_name` LIKE 'Bots%';
 	
@@ -52,16 +51,15 @@ BEGIN
 	
 	SELECT "restoring keys...";
 	IF ((SELECT COUNT(*) FROM `information_schema`.`KEY_COLUMN_USAGE` WHERE `TABLE_SCHEMA` = DATABASE() AND `TABLE_NAME` = 'group_id' AND `CONSTRAINT_NAME` = 'PRIMARY') > 0) THEN
-	-- IF ((SHOW KEYS IN `group_id` WHERE `Key_name` LIKE 'PRIMARY') != '') THEN
 		ALTER TABLE `group_id` DROP PRIMARY KEY;
 	END IF;
 	ALTER TABLE `group_id` ADD PRIMARY KEY (`groupid`, `charid`, `ismerc`);
 	
 	IF ((SELECT COUNT(*) FROM `information_schema`.`KEY_COLUMN_USAGE` WHERE `TABLE_SCHEMA` = DATABASE() AND `TABLE_NAME` = 'guild_members' AND `CONSTRAINT_NAME` = 'PRIMARY') > 0) THEN
-	-- IF ((SHOW KEYS IN `guild_members` WHERE `Key_name` LIKE 'PRIMARY') != '') THEN
 		ALTER TABLE `guild_members` DROP PRIMARY KEY;
 	END IF;
 	ALTER TABLE `guild_members` ADD PRIMARY KEY (`char_id`);
+	
 	
 	SELECT "de-activating spawns...";
 	UPDATE `spawn2` SET `enabled` = 0 WHERE `id` IN (59297,59298);
@@ -69,7 +67,6 @@ BEGIN
 	
 	SELECT "clearing database version...";
 	IF ((SELECT COUNT(*) FROM `information_schema`.`COLUMNS` WHERE `TABLE_SCHEMA` = DATABASE() AND `TABLE_NAME` = 'db_version' AND `COLUMN_NAME` = 'bots_version') > 0) THEN
-	-- IF ((SHOW COLUMNS FROM `db_version` LIKE 'bots_version') != '') THEN
 		UPDATE `db_version`
 		SET `bots_version` = 0;
 	END IF;
