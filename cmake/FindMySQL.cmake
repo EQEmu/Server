@@ -30,7 +30,7 @@ ELSE(MYSQL_ROOT)
 ENDIF(MYSQL_ROOT)
 
 # Library
-SET(MySQL_NAMES mysqlclient_r mysqlclient)
+SET(MySQL_NAMES libmysql mysqlclient_r mysqlclient)
 IF(MYSQL_ROOT)
 	FIND_LIBRARY(MySQL_LIBRARY_DEBUG
 		NAMES ${MySQL_NAMES}
