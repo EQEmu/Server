@@ -842,7 +842,7 @@ sub get_bots_db_version{
 
 sub bots_db_management{
 	#::: Main Binary Database version
-	$bin_db_ver = trim($db_version[2]);
+	$bin_db_ver = trim($db_version[1]);
 	
 	#::: If we have stale data from main db run
 	if($db_run_stage > 0 && $bots_db_management == 0){
