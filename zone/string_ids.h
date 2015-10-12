@@ -78,6 +78,7 @@
 #define ONLY_ONE_PET				246		//You cannot have more than one pet at a time.
 #define CANNOT_CHARM_YET			248		//Your target is too high of a level for your charm spell.
 #define CANNOT_AFFECT_NPC			251		//That spell can not affect this target NPC.
+#define FD_CAST_ON					254		//You are no longer feigning death, because a spell hit you.
 #define SUSPEND_MINION_HAS_AGGRO	256		//Your pet is the focus of something's attention.
 #define NO_PET						255		//You do not have a pet.
 #define GATE_FAIL					260		//Your gate is too unstable, and collapses.
@@ -356,6 +357,7 @@
 #define STRIKETHROUGH_STRING		9078	//You strike through your opponent's defenses!
 #define SPELL_REFLECT				9082	//%1's spell has been reflected by %2.
 #define NEW_SPELLS_AVAIL			9149	//You have new spells available to you. Check the merchants near your guild master.
+#define FD_CAST_ON_NO_BREAK			9174	//The strength of your will allows you to resume feigning death.
 #define SNEAK_RESTRICT				9240	//You can not use this ability because you have not been hidden for long enough.
 #define PET_NOW_FOCUSING			9254	//Focusing on one target, Master.
 #define PET_NOT_FOCUSING			9263	//No longer focusing on one target, Master.
