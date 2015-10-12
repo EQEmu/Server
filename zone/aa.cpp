@@ -1419,11 +1419,11 @@ bool Mob::CanUseAlternateAdvancementRank(AA::Rank *rank) {
 	}
 
 	if(IsClient()) {
-		if(!(CastToClient()->GetPP().expansions & (1 << (rank->expansion - 1)))) {
+		if(rank->expansion && !(CastToClient()->GetPP().expansions & (1 << (rank->expansion - 1)))) {
 			return false;
 		}
 	} else {
-		if(!(RuleI(World, ExpansionSettings) & (1 << (rank->expansion - 1)))) {
+		if(rank->expansion && !(RuleI(World, ExpansionSettings) & (1 << (rank->expansion - 1)))) {
 			return false;
 		}
 	}
