@@ -1563,7 +1563,6 @@ bool Bot::Save()
 			" `race`,"
 			" `class`,"
 			" `level`,"
-			/*creation_day - not needed for bot creation*/
 			" `last_spawn`,"
 			" `time_spawned`,"
 			" `size`,"
@@ -1605,8 +1604,7 @@ bool Bot::Save()
 			" '%i',"			/*race*/
 			" '%i',"			/*class*/
 			" '%u',"			/*level*/
-			/*creation_day*/
-			" NOW(),"			/*last_spawn*/
+			" UNIX_TIMESTAMP(),"/*last_spawn*/
 			" 0,"				/*time_spawned*/
 			" '%f',"			/*size*/
 			" '%i',"			/*face*/
@@ -1705,8 +1703,7 @@ bool Bot::Save()
 		" `race` = '%i',"
 		" `class` = '%i',"
 		" `level` = '%u',"
-		/*creation_day - check to see how client is handled*/
-		" `last_spawn` = NOW(),"
+		" `last_spawn` = UNIX_TIMESTAMP(),"
 		" `time_spawned` = '%u',"
 		" `size` = '%f',"
 		" `face` = '%i',"
@@ -1735,7 +1732,7 @@ bool Bot::Save()
 		" `magic` = '%i',"
 		" `poison` = '%i',"
 		" `disease` = '%i',"
-		" `corruption` = '%i',"
+		" `corruption` = '%i'"
 		" WHERE `bot_id` = '%u'",
 		_botOwnerCharacterID,
 		this->GetBotSpellID(),
@@ -1746,7 +1743,6 @@ bool Bot::Save()
 		_baseRace,
 		this->GetClass(),
 		this->GetLevel(),
-		/*creation_day*/
 		GetTotalPlayTime(),
 		GetSize(),
 		this->GetLuclinFace(),
@@ -1892,7 +1888,7 @@ void Bot::LoadBuffs()
 		" `duration_formula`,"
 		" `tics_remaining`,"
 		" `poison_counters`,"
-		" `disease_counters,"
+		" `disease_counters`,"
 		" `curse_counters`,"
 		" `corruption_counters`,"
 		" `numhits`,"
@@ -1905,7 +1901,7 @@ void Bot::LoadBuffs()
 		" `caston_z`,"
 		" `extra_di_chance`"
 		" FROM `bot_buffs`"
-		" WHERE `bot_id` = %u",
+		" WHERE `bot_id` = '%u'",
 		GetBotID()
 	);
 	auto results = database.QueryDatabase(query);
@@ -2091,7 +2087,7 @@ uint32 Bot::SavePetStats(std::string petName, uint32 petMana, uint32 petHitPoint
 		petHitPoints
 	);
 	auto results = database.QueryDatabase(query);
-	return 0;
+	return results.LastInsertedID();
 }
 
 void Bot::SavePetBuffs(SpellBuff_Struct* petBuffs, uint32 botPetSaveId)
@@ -3421,9 +3417,9 @@ void Bot::GetBotItems(std::string* errorMessage, Inventory &inv)
 		" `inst_color`,"
 		" `augment_1`,"
 		" `augment_2`,"
-		" `augslot_3`,"
-		" `augslot_4`, "
-		" `augslot_5`,"
+		" `augment_3`,"
+		" `augment_4`, "
+		" `augment_5`,"
 		" `inst_no_drop`"
 		" FROM `bot_inventories`"
 		" WHERE `bot_id` = %i"
@@ -3871,38 +3867,39 @@ std::list<SpawnedBotsList> Bot::ListSpawnedBots(uint32 characterID, std::string*
 	return spawnedBots;
 }
 
-void Bot::SaveBotGroup(Group* botGroup, std::string botGroupName, std::string* errorMessage) {
+void Bot::SaveBotGroup(Group* botGroup, std::string botGroupName, std::string* errorMessage)
+{
 	if(!botGroup || botGroupName.empty())
-        return;
+		return;
+	
+	Mob* tempGroupLeader = botGroup->GetLeader();
+	if(!tempGroupLeader->IsBot())
+		return;
+	
+	uint32 botGroupId = 0;
+	uint32 botGroupLeaderBotId = tempGroupLeader->CastToBot()->GetBotID();
+	std::string query = StringFormat("INSERT INTO `bot_groups` (`group_leader_id`, `group_name`) VALUES (%u, '%s')", botGroupLeaderBotId, botGroupName.c_str());
+	auto results = database.QueryDatabase(query);
+	if(!results.Success()) {
+		*errorMessage = std::string(results.ErrorMessage());
+		return;
+	}
 
-    Mob* tempGroupLeader = botGroup->GetLeader();
-    if(!tempGroupLeader->IsBot())
-        return;
-
-    uint32 botGroupId = 0;
-    uint32 botGroupLeaderBotId = tempGroupLeader->CastToBot()->GetBotID();
-    std::string query = StringFormat("INSERT INTO `bot_groups` (`group_leader_id`, `group_name`) VALUES (%u, '%s')", botGroupLeaderBotId, botGroupName.c_str());
-    auto results = database.QueryDatabase(query);
-    if(!results.Success()) {
-        *errorMessage = std::string(results.ErrorMessage());
-        return;
-    }
-
-    if(botGroupId == 0)
-        return;
-
-    for(int groupMemberIndex = 0; groupMemberIndex < botGroup->GroupCount(); groupMemberIndex++) {
-        Mob* tempBot = botGroup->members[groupMemberIndex];
-        if(!tempBot || !tempBot->IsBot())
-            continue;
-
-        uint32 botGroupMemberBotId = tempBot->CastToBot()->GetBotID();
-        query = StringFormat("INSERT INTO `bot_group_members` (`groups_index`, `bot_id`) VALUES (%u, %u)", botGroupId, botGroupMemberBotId);
-        results = database.QueryDatabase(query);
-        if(!results.Success())
-            *errorMessage = std::string(results.ErrorMessage());
-    }
-
+	botGroupId = results.LastInsertedID();
+	if(botGroupId == 0)
+		return;
+	
+	for(int groupMemberIndex = 0; groupMemberIndex < botGroup->GroupCount(); groupMemberIndex++) {
+		Mob* tempBot = botGroup->members[groupMemberIndex];
+		if(!tempBot || !tempBot->IsBot())
+			continue;
+		
+		uint32 botGroupMemberBotId = tempBot->CastToBot()->GetBotID();
+		query = StringFormat("INSERT INTO `bot_group_members` (`groups_index`, `bot_id`) VALUES (%u, %u)", botGroupId, botGroupMemberBotId);
+		results = database.QueryDatabase(query);
+		if(!results.Success())
+			*errorMessage = std::string(results.ErrorMessage());
+	}
 }
 
 void Bot::DeleteBotGroup(std::string botGroupName, std::string* errorMessage) {

@@ -124,9 +124,9 @@ BEGIN
 		`class` TINYINT(2) NOT NULL DEFAULT '0',
 		`level` TINYINT(2) UNSIGNED NOT NULL DEFAULT '0',
 		`deity` INT(11) UNSIGNED NOT NULL DEFAULT '0',			-- Unused
-		`creation_day` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-		`last_spawn` DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00',
-		`time_spawned` INT(10) UNSIGNED NOT NULL DEFAULT '0',
+		`creation_day` INT(11) UNSIGNED NOT NULL DEFAULT UNIX_TIMESTAMP,
+		`last_spawn` INT(11) UNSIGNED NOT NULL DEFAULT '0',
+		`time_spawned` INT(11) UNSIGNED NOT NULL DEFAULT '0',
 		`size` FLOAT NOT NULL DEFAULT '0',
 		`face` INT(10) NOT NULL DEFAULT '1',
 		`hair_color` INT(10) NOT NULL DEFAULT '1',
@@ -156,6 +156,7 @@ BEGIN
 		`disease` SMALLINT(5) NOT NULL DEFAULT '0',
 		`corruption` SMALLINT(5) NOT NULL DEFAULT '0',
 		`show_helm` INT(11) UNSIGNED NOT NULL DEFAULT '0',		-- Unused
+		`follow_distance` INT(11) UNSIGNED NOT NULL DEFAULT '200',	-- Unused
 		PRIMARY KEY (`bot_id`)
 	) ENGINE=InnoDB;
 	CREATE TABLE `bot_inspect_messages` (
@@ -219,8 +220,8 @@ BEGIN
 			`Race`,
 			`Class`,
 			`BotLevel`,
-			`BotCreateDate`,
-			`LastSpawnDate`,
+			UNIX_TIMESTAMP(`BotCreateDate`),
+			UNIX_TIMESTAMP(`LastSpawnDate`),
 			`TotalPlayTime`,
 			`Size`,
 			`Face`,
@@ -655,7 +656,7 @@ DROP PROCEDURE IF EXISTS `LoadBotsSchema`;
 -- Functions
 DELIMITER $$
 
--- (no code references)
+-- (no code references - see `vw_groups` below)
 CREATE FUNCTION `GetMobType` (mob_name VARCHAR(64)) RETURNS CHAR(1)
 BEGIN
 	DECLARE Result CHAR(1);

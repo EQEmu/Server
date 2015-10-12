@@ -3,4 +3,4 @@ Use the eqemu_update.pl script to source/update bot information into your databa
 
 Developers: Please prefix 'bots_' to sql file description (after the date) in order to prevent issues naming conflicts.
 
-Example: 1980_01_01_bots_file_description.sql
+Example: 1970_01_01_bots_file_description.sql
