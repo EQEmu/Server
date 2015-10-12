@@ -3714,8 +3714,10 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob *spelltar, bool reflect, bool use_r
 					}
 				}
 
-				if (spelltar->IsClient())
+				if (spelltar->IsClient()){
 					spelltar->CastToClient()->BreakSneakWhenCastOn(this, true);
+					spelltar->CastToClient()->BreakFeignDeathWhenCastOn(true);
+				}
 				
 				spelltar->CheckNumHitsRemaining(NumHit::IncomingSpells);
 				CheckNumHitsRemaining(NumHit::OutgoingSpells);
@@ -3724,8 +3726,10 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob *spelltar, bool reflect, bool use_r
 				return false;
 			}
 		}
+
 		if (spelltar->IsClient()){
 			spelltar->CastToClient()->BreakSneakWhenCastOn(this, false);
+			spelltar->CastToClient()->BreakFeignDeathWhenCastOn(false);
 		}
 	}
 	else
