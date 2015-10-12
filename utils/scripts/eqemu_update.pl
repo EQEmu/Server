@@ -30,8 +30,7 @@ if($ARGV[0] eq "V"){
 		print "eqemu_update.pl Automatic Database Upgrade Needs updating...\n";
 		print "	Current version: " . $current_version . "\n"; 
 		print "	New version: " . $ARGV[1] . "\n";  
-		#get_remote_file("https://raw.githubusercontent.com/EQEmu/Server/master/utils/scripts/eqemu_update.pl", "eqemu_update.pl");
-		get_remote_file("https://raw.githubusercontent.com/EQEmu/Server/bots_updater/utils/scripts/eqemu_update.pl", "eqemu_update.pl");
+		get_remote_file("https://raw.githubusercontent.com/EQEmu/Server/master/utils/scripts/eqemu_update.pl", "eqemu_update.pl");
 		exit;
 	}
 	else{
@@ -206,8 +205,7 @@ else{
 }
 
 sub do_update_self{
-	#get_remote_file("https://raw.githubusercontent.com/EQEmu/Server/master/utils/scripts/eqemu_update.pl", "eqemu_update.pl");
-	get_remote_file("https://raw.githubusercontent.com/EQEmu/Server/bots_updater/utils/scripts/eqemu_update.pl", "eqemu_update.pl");
+	get_remote_file("https://raw.githubusercontent.com/EQEmu/Server/master/utils/scripts/eqemu_update.pl", "eqemu_update.pl");
 	die "Rerun eqemu_update.pl";
 }
 
@@ -310,8 +308,7 @@ sub check_for_database_dump_script{
 	}
 	else{
 		print "db_dumper.pl not found... retrieving...\n\n";
-		#get_remote_file("https://raw.githubusercontent.com/EQEmu/Server/master/utils/scripts/db_dumper.pl", "db_dumper.pl");
-		get_remote_file("https://raw.githubusercontent.com/EQEmu/Server/bots_updater/utils/scripts/db_dumper.pl", "db_dumper.pl");
+		get_remote_file("https://raw.githubusercontent.com/EQEmu/Server/master/utils/scripts/db_dumper.pl", "db_dumper.pl");
 	}
 }
 
@@ -900,14 +897,12 @@ sub run_database_check{
 		#::: Pull down bots database manifest
 		if($bots_db_management == 1){
 			print "Retrieving latest bots database manifest...\n";
-			#get_remote_file("https://raw.githubusercontent.com/EQEmu/Server/master/utils/sql/git/bots/bots_db_update_manifest.txt", "db_update/db_update_manifest.txt"); 
-			get_remote_file("https://raw.githubusercontent.com/EQEmu/Server/bots_updater/utils/sql/git/bots/bots_db_update_manifest.txt", "db_update/db_update_manifest.txt"); 
+			get_remote_file("https://raw.githubusercontent.com/EQEmu/Server/master/utils/sql/git/bots/bots_db_update_manifest.txt", "db_update/db_update_manifest.txt"); 
 		}
 		#::: Pull down mainstream database manifest
 		else{
 			print "Retrieving latest database manifest...\n";
-			#get_remote_file("https://raw.githubusercontent.com/EQEmu/Server/master/utils/sql/db_update_manifest.txt", "db_update/db_update_manifest.txt");
-			get_remote_file("https://raw.githubusercontent.com/EQEmu/Server/bots_updater/utils/sql/db_update_manifest.txt", "db_update/db_update_manifest.txt");
+			get_remote_file("https://raw.githubusercontent.com/EQEmu/Server/master/utils/sql/db_update_manifest.txt", "db_update/db_update_manifest.txt");
 		}
 	}
 
@@ -1022,12 +1017,10 @@ sub fetch_missing_db_update{
 	$update_file = $_[1];
 	if($db_update >= 9000){
 		if($bots_db_management == 1){
-			#get_remote_file("https://raw.githubusercontent.com/EQEmu/Server/master/utils/sql/git/bots/required/" . $update_file, "db_update/" . $update_file . "");
-			get_remote_file("https://raw.githubusercontent.com/EQEmu/Server/bots_updater/utils/sql/git/bots/required/" . $update_file, "db_update/" . $update_file . "");
+			get_remote_file("https://raw.githubusercontent.com/EQEmu/Server/master/utils/sql/git/bots/required/" . $update_file, "db_update/" . $update_file . "");
 		}
 		else{
-			#get_remote_file("https://raw.githubusercontent.com/EQEmu/Server/master/utils/sql/git/required/" . $update_file, "db_update/" . $update_file . "");
-			get_remote_file("https://raw.githubusercontent.com/EQEmu/Server/bots_updater/utils/sql/git/required/" . $update_file, "db_update/" . $update_file . "");
+			get_remote_file("https://raw.githubusercontent.com/EQEmu/Server/master/utils/sql/git/required/" . $update_file, "db_update/" . $update_file . "");
 		}
 	}
 	elsif($db_update >= 5000 && $db_update <= 9000){

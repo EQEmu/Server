@@ -1,5 +1,9 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 10/12/2015 ==
+Uleat: Implemented 'bots' database versioning
+Note: See thread for more information: http://www.eqemulator.org/forums/showthread.php?t=40091
+
 == 10/10/2015 ==
 Kayen: Updated mechanics to be consistent with live regarding how invisible breaks when the client is the target of a spell.
 Invisible will drop whenever a client is hit with a detrimental spell, regardless of if resisted, if it does damage or AOE.
