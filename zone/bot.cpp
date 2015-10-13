@@ -3336,7 +3336,7 @@ void Bot::Spawn(Client* botCharacterOwner, std::string* errorMessage) {
 // Saves the specified item as an inventory record in the database for this bot.
 void Bot::SetBotItemInSlot(uint32 slotID, uint32 itemID, const ItemInst* inst, std::string *errorMessage)
 {
-	uint32 augslot[EmuConstants::ITEM_COMMON_SIZE] = { NO_ITEM, NO_ITEM, NO_ITEM, NO_ITEM, NO_ITEM };
+	uint32 augslot[EmuConstants::ITEM_COMMON_SIZE] = { NO_ITEM, NO_ITEM, NO_ITEM, NO_ITEM, NO_ITEM, NO_ITEM };
 	if (this->GetBotID() == 0 || slotID < EmuConstants::EQUIPMENT_BEGIN || itemID <= NO_ITEM)
 		return;
 
@@ -3355,11 +3355,16 @@ void Bot::SetBotItemInSlot(uint32 slotID, uint32 itemID, const ItemInst* inst, s
 		" `inst_charges`,"
 		" `inst_color`,"
 		" `inst_no_drop`,"
+		" `inst_custom_data`,"
+		" `ornament_icon`,"
+		" `ornament_id_file`,"
+		" `ornament_hero_model`,"
 		" `augment_1`,"
 		" `augment_2`,"
 		" `augment_3`,"
 		" `augment_4`,"
-		" `augment_5`"
+		" `augment_5`,"
+		" `augment_6`"
 		")"
 		" VALUES ("
 		"%lu,"			/*bot_id*/
@@ -3368,23 +3373,33 @@ void Bot::SetBotItemInSlot(uint32 slotID, uint32 itemID, const ItemInst* inst, s
 		" %lu,"			/*inst_charges*/
 		" %lu,"			/*inst_color*/
 		" %lu,"			/*inst_no_drop*/
+		" '%s',"		/*inst_custom_data*/
+		" %lu,"			/*ornament_icon*/
+		" %lu,"			/*ornament_id_file*/
+		" %lu,"			/*ornament_hero_model*/
 		" %lu,"			/*augment_1*/
 		" %lu,"			/*augment_2*/
 		" %lu,"			/*augment_3*/
 		" %lu,"			/*augment_4*/
-		" %lu"			/*augment_5*/
+		" %lu,"			/*augment_5*/
+		" %lu"			/*augment_6*/
 		")",
 		(unsigned long)this->GetBotID(),
 		(unsigned long)slotID,
 		(unsigned long)itemID,
 		(unsigned long)inst->GetCharges(),
 		(unsigned long)inst->GetColor(),
-		(unsigned long)(inst->IsAttuned()? 1: 0), // does this match the current flag implementation?
+		(unsigned long)(inst->IsAttuned()? 1: 0),
+		inst->GetCustomDataString().c_str(),
+		(unsigned long)inst->GetOrnamentationIcon(),
+		(unsigned long)inst->GetOrnamentationIDFile(),
+		(unsigned long)inst->GetOrnamentHeroModel(),
 		(unsigned long)augslot[0],
 		(unsigned long)augslot[1],
 		(unsigned long)augslot[2],
 		(unsigned long)augslot[3],
-		(unsigned long)augslot[4]
+		(unsigned long)augslot[4],
+		(unsigned long)augslot[5]
 	);
 	auto results = database.QueryDatabase(query);
 	if(!results.Success())
@@ -3417,12 +3432,17 @@ void Bot::GetBotItems(std::string* errorMessage, Inventory &inv)
 		" `item_id`,"
 		" `inst_charges`,"
 		" `inst_color`,"
+		" `inst_no_drop`,"
+		" `inst_custom_data`,"
+		" `ornament_icon`,"
+		" `ornament_id_file`,"
+		" `ornament_hero_model`,"
 		" `augment_1`,"
 		" `augment_2`,"
 		" `augment_3`,"
 		" `augment_4`, "
 		" `augment_5`,"
-		" `inst_no_drop`"
+		" `augment_6`"
 		" FROM `bot_inventories`"
 		" WHERE `bot_id` = %i"
 		" ORDER BY `slot_id`",
@@ -3438,39 +3458,73 @@ void Bot::GetBotItems(std::string* errorMessage, Inventory &inv)
 		int16 slot_id = atoi(row[0]);
 		uint32 item_id = atoi(row[1]);
 		uint16 charges = atoi(row[2]);
-		uint32 color = atoul(row[3]);
 		uint32 aug[EmuConstants::ITEM_COMMON_SIZE];
-		aug[0] = (uint32)atoul(row[4]);
-		aug[1] = (uint32)atoul(row[5]);
-		aug[2] = (uint32)atoul(row[6]);
-		aug[3] = (uint32)atoul(row[7]);
-		aug[4] = (uint32)atoul(row[8]);
-		bool instnodrop	= (row[9] && (uint16)atoi(row[9])) ? true : false;
-		ItemInst* inst = database.CreateItem(item_id, charges, aug[0], aug[1], aug[2], aug[3], aug[4]);
+		aug[0] = (uint32)atoul(row[9]);
+		aug[1] = (uint32)atoul(row[10]);
+		aug[2] = (uint32)atoul(row[11]);
+		aug[3] = (uint32)atoul(row[12]);
+		aug[4] = (uint32)atoul(row[13]);
+		aug[5] = (uint32)atoul(row[14]);
+		ItemInst* inst = database.CreateItem(item_id, charges, aug[0], aug[1], aug[2], aug[3], aug[4], aug[5]);
 		if (!inst) {
 			Log.Out(Logs::General, Logs::Error, "Warning: bot_id %i has an invalid item_id %i in inventory slot %i", this->GetBotID(), item_id, slot_id);
 			continue;
 		}
 		
-		int16 put_slot_id = INVALID_INDEX;
-		
-		if (instnodrop || (((slot_id >= EmuConstants::EQUIPMENT_BEGIN) && (slot_id <= EmuConstants::EQUIPMENT_END) || slot_id == 9999)  && inst->GetItem()->Attuneable))
-			inst->SetAttuned(true);
-		
-		if (color > 0)
-			inst->SetColor(color);
-		
 		if (charges == 255)
 			inst->SetCharges(-1);
 		else
 			inst->SetCharges(charges);
+
+		uint32 color = atoul(row[3]);
+		if (color > 0)
+			inst->SetColor(color);
 		
+		bool instnodrop = (row[4] && (uint16)atoi(row[4])) ? true : false;
+		if (instnodrop || (((slot_id >= EmuConstants::EQUIPMENT_BEGIN) && (slot_id <= EmuConstants::EQUIPMENT_END) || slot_id == 9999) && inst->GetItem()->Attuneable))
+			inst->SetAttuned(true);
+		
+		if (row[5]) {
+			std::string data_str(row[5]);
+			std::string idAsString;
+			std::string value;
+			bool use_id = true;
+
+			for (int i = 0; i < data_str.length(); ++i) {
+				if (data_str[i] == '^') {
+					if (!use_id) {
+						inst->SetCustomData(idAsString, value);
+						idAsString.clear();
+						value.clear();
+					}
+
+					use_id = !use_id;
+					continue;
+				}
+
+				char v = data_str[i];
+				if (use_id)
+					idAsString.push_back(v);
+				else
+					value.push_back(v);
+			}
+		}
+
+		uint32 ornament_icon = (uint32)atoul(row[6]);
+		inst->SetOrnamentIcon(ornament_icon);
+
+		uint32 ornament_idfile = (uint32)atoul(row[7]);
+		inst->SetOrnamentationIDFile(ornament_idfile);
+
+		uint32 ornament_hero_model = (uint32)atoul(row[8]);
+		inst->SetOrnamentHeroModel(ornament_hero_model);
+		
+		int16 put_slot_id = INVALID_INDEX;
 		if (slot_id < 8000 || slot_id > 8999)
 			put_slot_id = inv.PutItem(slot_id, *inst);
 		
 		safe_delete(inst);
 		
-		// Save ptr to item in inventory
 		if (put_slot_id == INVALID_INDEX)
 			Log.Out(Logs::General, Logs::Error, "Warning: Invalid slot_id for item in inventory: bot_id=%i, item_id=%i, slot_id=%i",this->GetBotID(), item_id, slot_id);
 	}
@@ -9265,15 +9319,28 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 			uint32 setcolor = (red << 16) | (green << 8) | blue;
 			std::string query;
 			if (setslot == -1) {
-				int slots[] = { 2, 7, 9, 12, 17, 18, 19 };
-				query = StringFormat("UPDATE `bot_inventories` SET `inst_color` = %u WHERE `slot_id` IN (2, 7, 9, 12, 17, 18, 19) AND `bot_id` = %u", setcolor, botid);
+				query = StringFormat(
+					"UPDATE `bot_inventories`"
+					" SET `inst_color` = %u"
+					" WHERE `slot_id`"
+					" IN (%u, %u, %u, %u, %u, %u, %u)"
+					" AND `bot_id` = %u",
+					setcolor,
+					MainHead,
+					MainArms,
+					MainWrist1,
+					MainHands,
+					MainChest,
+					MainLegs,
+					MainFeet,
+					botid
+				);
 				auto results = database.QueryDatabase(query);
 				if (!results.Success())
 					return;
 
-				for (int i = 0; i < 7; i++) {
-					uint8 slotmaterial = Inventory::CalcMaterialFromSlot((uint8)slots[i]);
-					c->GetTarget()->CastToBot()->SendWearChange(slotmaterial);
+				for (int i = MaterialHead; i <= MaterialFeet; ++i) {
+					c->GetTarget()->CastToBot()->SendWearChange(i);
 				}
 			} else {
 				query = StringFormat("UPDATE `bot_inventories` SET `inst_color` = %u WHERE `slot_id` = %i AND `bot_id` = %u", setcolor, setslot, botid);
@@ -9281,8 +9348,7 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 				if (!results.Success())
 					return;
 
-				uint8 slotmaterial = Inventory::CalcMaterialFromSlot(setslot);
-				c->GetTarget()->CastToBot()->SendWearChange(slotmaterial);
+				c->GetTarget()->CastToBot()->SendWearChange(Inventory::CalcMaterialFromSlot(setslot));
 			}
 
 		}
@@ -9294,11 +9360,12 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 
     if(!strcasecmp(sep->arg[1], "help") && !strcasecmp(sep->arg[2], "armorcolor")){
 		c->Message(0, "-----------------#bot armorcolor help-----------------------------");
-		c->Message(0, "Armor: -1(All), 2(Helm), 7(Arms), 9(Bracer), 12(Hands), 17(Chest/Robe), 18(Legs), 19(Boots)");
+		c->Message(0, "Armor: -1(All), %u(Helm), %u(Arms), %u(Bracer), %u(Hands), %u(Chest/Robe), %u(Legs), %u(Boots)",
+			MainHead, MainArms, MainWrist1, MainHands, MainChest, MainLegs, MainFeet);
 		c->Message(0, "------------------------------------------------------------------");
 		c->Message(0, "Color: [red] [green] [blue] (enter a number from 0-255 for each");
 		c->Message(0, "------------------------------------------------------------------");
-		c->Message(0, "Example: #bot armorcolor 17 0 255 0 - this would make the chest bright green");
+		c->Message(0, "Example: #bot armorcolor %u 0 255 0 - this would make the chest bright green", MainChest);
 		return;
 	}
 

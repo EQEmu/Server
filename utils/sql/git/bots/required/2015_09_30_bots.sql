@@ -422,16 +422,16 @@ BEGIN
 		`inst_charges` TINYINT(3) UNSIGNED DEFAULT 0,
 		`inst_color` INT(11) UNSIGNED NOT NULL DEFAULT '0',
 		`inst_no_drop` TINYINT(1) UNSIGNED NOT NULL DEFAULT '0',
-		`inst_custom_data` TEXT NULL,								-- Unused
-		`ornament_icon` INT(11) UNSIGNED NOT NULL DEFAULT '0',		-- Unused
-		`ornament_id_file` INT(11) UNSIGNED NOT NULL DEFAULT '0',	-- Unused
-		`ornament_hero_model` INT(11) NOT NULL DEFAULT '0',			-- Unused
+		`inst_custom_data` TEXT NULL,
+		`ornament_icon` INT(11) UNSIGNED NOT NULL DEFAULT '0',
+		`ornament_id_file` INT(11) UNSIGNED NOT NULL DEFAULT '0',
+		`ornament_hero_model` INT(11) NOT NULL DEFAULT '0',
 		`augment_1` MEDIUMINT(7) UNSIGNED NOT NULL DEFAULT '0',
 		`augment_2` MEDIUMINT(7) UNSIGNED NOT NULL DEFAULT '0',
 		`augment_3` MEDIUMINT(7) UNSIGNED NOT NULL DEFAULT '0',
 		`augment_4` MEDIUMINT(7) UNSIGNED NOT NULL DEFAULT '0',
 		`augment_5` MEDIUMINT(7) UNSIGNED NOT NULL DEFAULT '0',
-		`augment_6` MEDIUMINT(7) UNSIGNED NOT NULL DEFAULT '0',		-- Unused
+		`augment_6` MEDIUMINT(7) UNSIGNED NOT NULL DEFAULT '0',
 		PRIMARY KEY (`inventories_index`),
 		KEY `FK_bot_inventories_1` (`bot_id`),
 		CONSTRAINT `FK_bot_inventories_1` FOREIGN KEY (`bot_id`) REFERENCES `bot_data` (`bot_id`)
