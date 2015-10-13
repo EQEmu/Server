@@ -879,6 +879,7 @@ public:
 
 	void BreakInvis();
 	void BreakSneakWhenCastOn(Mob* caster, bool IsResisted);
+	void BreakFeignDeathWhenCastOn(bool IsResisted);
 	void LeaveGroup();
 
 	bool Hungry() const {if (GetGM()) return false; return m_pp.hunger_level <= 3000;}

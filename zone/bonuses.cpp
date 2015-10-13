@@ -1457,6 +1457,11 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 				newbon->NoBreakAESneak = base1;
 			break;
 
+		case SE_FeignedCastOnChance:
+			if (newbon->FeignedCastOnChance < base1)
+				newbon->FeignedCastOnChance = base1;
+			break;
+
 		// to do
 		case SE_PetDiscipline:
 			break;
@@ -1469,8 +1474,6 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 		case SE_ForageSkill:
 			break;
 		case SE_SecondaryForte:
-			break;
-		case SE_FeignedCastOnChance:
 			break;
 		case SE_ExtendedShielding:
 			break;
@@ -3197,6 +3200,11 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 			case SE_NoBreakAESneak:
 				if (new_bonus->NoBreakAESneak < effect_value)
 					new_bonus->NoBreakAESneak = effect_value;
+				break;
+
+			case SE_FeignedCastOnChance:
+				if (new_bonus->FeignedCastOnChance < effect_value)
+					new_bonus->FeignedCastOnChance = effect_value;
 				break;
 		
 			//Special custom cases for loading effects on to NPC from 'npc_spels_effects' table

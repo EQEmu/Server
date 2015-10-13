@@ -6771,3 +6771,22 @@ void Client::BreakSneakWhenCastOn(Mob* caster, bool IsResisted)
 		}
 	}
 }
+
+void Client::BreakFeignDeathWhenCastOn(bool IsResisted)
+{
+	if(GetFeigned()){
+
+		int chance = spellbonuses.FeignedCastOnChance + itembonuses.FeignedCastOnChance + aabonuses.FeignedCastOnChance;
+
+		if (IsResisted)
+			chance *= 2;
+
+		if(chance && (zone->random.Roll(chance))){
+			Message_StringID(MT_SpellFailure,FD_CAST_ON_NO_BREAK);
+			return;
+		}
+	
+		SetFeigned(false);
+		Message_StringID(MT_SpellFailure,FD_CAST_ON);
+	}
+}

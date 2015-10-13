@@ -1,8 +1,12 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+
 == 10/12/2015 ==
 Uleat: Implemented 'bots' database versioning
 Note: See thread for more information: http://www.eqemulator.org/forums/showthread.php?t=40091
+
+Kayen: Feign death will now break when hit by casted spells, consisted with live.
+Implemented suport for AA/spell effect which provides a chance to avoid FD breaking from spells.
 
 == 10/10/2015 ==
 Kayen: Updated mechanics to be consistent with live regarding how invisible breaks when the client is the target of a spell.
