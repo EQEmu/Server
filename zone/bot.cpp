@@ -1563,7 +1563,7 @@ bool Bot::Save()
 			" `race`,"
 			" `class`,"
 			" `level`,"
-			" `creation_date`,"
+			" `creation_day`,"
 			" `last_spawn`,"
 			" `time_spawned`,"
 			" `size`,"
@@ -1605,7 +1605,7 @@ bool Bot::Save()
 			" '%i',"			/*race*/
 			" '%i',"			/*class*/
 			" '%u',"			/*level*/
-			" UNIX_TIMESTAMP(),"/*creation_date*/
+			" UNIX_TIMESTAMP(),"/*creation_day*/
 			" UNIX_TIMESTAMP(),"/*last_spawn*/
 			" 0,"				/*time_spawned*/
 			" '%f',"			/*size*/
