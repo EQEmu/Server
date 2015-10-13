@@ -1,5 +1,5 @@
 -- '2015_09_30_bots' sql script file
--- current as of 10/09/2015
+-- current as of 10/13/2015
 --
 -- Use eqemu_update.pl to administer this script
 
@@ -277,9 +277,11 @@ BEGIN
 			`stance_id`
 		)
 		SELECT
-			`BotID`,
-			`StanceID`
-		FROM `botstances`;
+			bs.`BotID`,
+			bs.`StanceID`
+		FROM `botstances` bs
+		INNER JOIN `bot_data` bd
+		ON bs.`BotID` = bd.`bot_id`;
 		
 		RENAME TABLE `botstances` TO `botstances_old`;
 	END IF;
@@ -298,10 +300,12 @@ BEGIN
 			`timer_value`
 		)
 		SELECT
-			`BotID`,
-			`TimerID`,
-			`Value`
-		FROM `bottimers`;
+			bt.`BotID`,
+			bt.`TimerID`,
+			bt.`Value`
+		FROM `bottimers` bt
+		INNER JOIN `bot_data` bd
+		ON bt.`BotID` = bd.`bot_id`;
 		
 		RENAME TABLE `bottimers` TO `bottimers_old`;
 	END IF;
@@ -349,21 +353,23 @@ BEGIN
 			`persistent`
 		)
 		SELECT
-			`BotBuffId`,
-			`BotId`,
-			`SpellId`,
-			`CasterLevel`,
-			`DurationFormula`,
-			`TicsRemaining`,
-			`PoisonCounters`,
-			`DiseaseCounters`,
-			`CurseCounters`,
-			`CorruptionCounters`,
-			`HitCount`,
-			`MeleeRune`,
-			`MagicRune`,
-			`Persistent`
-		FROM `botbuffs`;
+			bb.`BotBuffId`,
+			bb.`BotId`,
+			bb.`SpellId`,
+			bb.`CasterLevel`,
+			bb.`DurationFormula`,
+			bb.`TicsRemaining`,
+			bb.`PoisonCounters`,
+			bb.`DiseaseCounters`,
+			bb.`CurseCounters`,
+			bb.`CorruptionCounters`,
+			bb.`HitCount`,
+			bb.`MeleeRune`,
+			bb.`MagicRune`,
+			bb.`Persistent`
+		FROM `botbuffs` bb
+		INNER JOIN `bot_data` bd
+		ON bb.`BotId` = bd.`bot_id`;
 		
 		IF ((SELECT COUNT(*) FROM `information_schema`.`COLUMNS` WHERE `TABLE_SCHEMA` = DATABASE() AND `TABLE_NAME` = 'botbuffs' AND `COLUMN_NAME` = 'dot_rune') > 0) THEN
 			UPDATE `bot_buffs` bb
@@ -446,19 +452,21 @@ BEGIN
 			`augment_5`
 		)
 		SELECT
-			`BotInventoryID`,
-			`BotID`,
-			`SlotID`,
-			`ItemID`,
-			`charges`,
-			`color`,
-			`instnodrop`,
-			`augslot1`,
-			`augslot2`,
-			`augslot3`,
-			`augslot4`,
-			`augslot5`
-		FROM `botinventory`;
+			bi.`BotInventoryID`,
+			bi.`BotID`,
+			bi.`SlotID`,
+			bi.`ItemID`,
+			bi.`charges`,
+			bi.`color`,
+			bi.`instnodrop`,
+			bi.`augslot1`,
+			bi.`augslot2`,
+			bi.`augslot3`,
+			bi.`augslot4`,
+			bi.`augslot5`
+		FROM `botinventory` bi
+		INNER JOIN `bot_data` bd
+		ON bi.`BotID` = bd.`bot_id`;
 		
 		IF ((SELECT COUNT(*) FROM `information_schema`.`COLUMNS` WHERE `TABLE_SCHEMA` = DATABASE() AND `TABLE_NAME` = 'botinventory' AND `COLUMN_NAME` = 'augslot6') > 0) THEN
 			UPDATE `bot_inventories` bi
@@ -493,13 +501,15 @@ BEGIN
 			`hp`
 		)
 		SELECT
-			`BotPetsId`,
-			`PetId`,
-			`BotId`,
-			`Name`,
-			`Mana`,
-			`HitPoints`
-		FROM `botpets`;
+			bp.`BotPetsId`,
+			bp.`PetId`,
+			bp.`BotId`,
+			bp.`Name`,
+			bp.`Mana`,
+			bp.`HitPoints`
+		FROM `botpets` bp
+		INNER JOIN `bot_data` bd
+		ON bp.`BotId` = bd.`bot_id`;
 		
 		RENAME TABLE `botpets` TO `botpets_old`;
 	END IF;
@@ -523,12 +533,14 @@ BEGIN
 			`duration`
 		)
 		SELECT
-			`BotPetBuffId`,
-			`BotPetsId`,
-			`SpellId`,
-			`CasterLevel`,
-			`Duration`
-		FROM `botpetbuffs`;
+			bpb.`BotPetBuffId`,
+			bpb.`BotPetsId`,
+			bpb.`SpellId`,
+			bpb.`CasterLevel`,
+			bpb.`Duration`
+		FROM `botpetbuffs` bpb
+		INNER JOIN `bot_pets` bp
+		ON bpb.`BotPetsId` = bp.`pets_index`;
 		
 		RENAME TABLE `botpetbuffs` TO `botpetbuffs_old`;
 	END IF;
@@ -548,10 +560,12 @@ BEGIN
 			`item_id`
 		)
 		SELECT
-			`BotPetInventoryId`,
-			`BotPetsId`,
-			`ItemId`
-		FROM `botpetinventory`;
+			bpi.`BotPetInventoryId`,
+			bpi.`BotPetsId`,
+			bpi.`ItemId`
+		FROM `botpetinventory` bpi
+		INNER JOIN `bot_pets` bp
+		ON bpi.`BotPetsId` = bp.`pets_index`;
 		
 		RENAME TABLE `botpetinventory` TO `botpetinventory_old`;
 	END IF;
@@ -571,10 +585,12 @@ BEGIN
 			`group_name`
 		)
 		SELECT
-			`BotGroupId`,
-			`BotGroupLeaderBotId`,
-			`BotGroupName`
-		FROM `botgroup`;
+			bg.`BotGroupId`,
+			bg.`BotGroupLeaderBotId`,
+			bg.`BotGroupName`
+		FROM `botgroup` bg
+		INNER JOIN `bot_data` bd
+		ON bg.`BotGroupLeaderBotId` = bd.`bot_id`;
 		
 		RENAME TABLE `botgroup` TO `botgroup_old`;
 	END IF;
@@ -596,10 +612,14 @@ BEGIN
 			`bot_id`
 		)
 		SELECT
-			`BotGroupMemberId`,
-			`BotGroupId`,
-			`BotId`
-		FROM `botgroupmembers`;
+			bgm.`BotGroupMemberId`,
+			bgm.`BotGroupId`,
+			bgm.`BotId`
+		FROM `botgroupmembers` bgm
+		INNER JOIN `bot_groups` bg
+		ON bgm.`BotGroupId` = bg.`groups_index`
+		INNER JOIN `bot_data` bd
+		ON bgm.`BotId` = bd.`bot_id`;
 		
 		RENAME TABLE `botgroupmembers` TO `botgroupmembers_old`;
 	END IF;
@@ -629,16 +649,20 @@ BEGIN
 			`alt`
 		)
 		SELECT
-			`char_id`,
-			`guild_id`,
-			`rank`,
-			`tribute_enable`,
-			`total_tribute`,
-			`last_tribute`,
-			`banker`,
-			`public_note`,
-			`alt`
-		FROM `botguildmembers`;
+			bgm.`char_id`,
+			bgm.`guild_id`,
+			bgm.`rank`,
+			bgm.`tribute_enable`,
+			bgm.`total_tribute`,
+			bgm.`last_tribute`,
+			bgm.`banker`,
+			bgm.`public_note`,
+			bgm.`alt`
+		FROM `botguildmembers` bgm
+		INNER JOIN `guilds` g
+		ON bgm.`guild_id` = g.`id`
+		INNER JOIN `bot_data` bd
+		ON bgm.`char_id` = bd.`bot_id`;
 		
 		RENAME TABLE `botguildmembers` TO `botguildmembers_old`;
 	END IF;
