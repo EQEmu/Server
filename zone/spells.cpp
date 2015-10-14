@@ -75,6 +75,7 @@ Copyright (C) 2001-2002 EQEMu Development Team (http://eqemu.org)
 #include "../common/skills.h"
 #include "../common/spdat.h"
 #include "../common/string_util.h"
+#include "../common/data_verification.h"
 
 #include "quest_parser_collection.h"
 #include "string_ids.h"
@@ -2248,13 +2249,13 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, uint16 slot, uint16 
 		}
 	}
 
+	bool mgb = HasMGB() && spells[spell_id].can_mgb;
 	// if this was a spell slot or an ability use up the mana for it
 	if(slot != USE_ITEM_SPELL_SLOT && slot != POTION_BELT_SPELL_SLOT && slot != TARGET_RING_SPELL_SLOT && mana_used > 0)
 	{
 		mana_used = GetActSpellCost(spell_id, mana_used);
-		if (HasMGB() && spells[spell_id].can_mgb) {
+		if (mgb) {
 			mana_used *= 2;
-			SetMGB(false);
 		}
 		// clamp if we some how got focused above our current mana
 		if (GetMana() < mana_used)
@@ -2265,6 +2266,16 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, uint16 slot, uint16 
 			TryTriggerOnValueAmount(false, true);
 		}
 	}
+	// one may want to check if this is a disc or not, but we actually don't, there are non disc stuff that have end cost
+	if (spells[spell_id].EndurCost) {
+		auto end_cost = spells[spell_id].EndurCost;
+		if (mgb)
+			end_cost *= 2;
+		SetEndurance(GetEndurance() - EQEmu::ClampUpper(end_cost, GetEndurance()));
+		TryTriggerOnValueAmount(false, false, true);
+	}
+	if (mgb)
+		SetMGB(false);
 
 	//set our reuse timer on long ass reuse_time spells...
 	if(IsClient() && !isproc)
