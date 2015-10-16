@@ -1,5 +1,8 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 10/16/2015 ==
+Uleat: Added command '#bot clearfollowdistance [ <target> | spawned | all ]' to coincide with the activation of the load/save feature for follow_distance
+
 == 10/13/2015 ==
 Uleat: Important update to 2015_09_30_bots.sql - fix for orphaned entries causing crashes during the conversion process
 Note: Please visit the thread below if you encounter issues during the conversion process

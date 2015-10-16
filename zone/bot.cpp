@@ -66,7 +66,7 @@ Bot::Bot(NPCType npcTypeData, Client* botOwner) : NPC(&npcTypeData, nullptr, glm
 	SetShowHelm(true);
 	CalcChanceToCast();
 	rest_timer.Disable();
-	SetFollowDistance(184);
+	SetFollowDistance(BOT_DEFAULT_FOLLOW_DISTANCE);
 	// Do this once and only in this constructor
 	GenerateAppearance();
 	GenerateBaseStats();
@@ -144,7 +144,7 @@ Bot::Bot(uint32 botID, uint32 botOwnerCharacterID, uint32 botSpellsID, double to
 	SetNumHealRotationMembers(0);
 	CalcChanceToCast();
 	rest_timer.Disable();
-	SetFollowDistance(184);
+	SetFollowDistance(BOT_DEFAULT_FOLLOW_DISTANCE);
 	strcpy(this->name, this->GetCleanName());
 	database.GetBotInspectMessage(this->GetBotID(), &_botInspectMessage);
 	LoadGuildMembership(&_guildId, &_guildRank, &_guildName);
@@ -1593,7 +1593,9 @@ bool Bot::Save()
 			" `magic`,"
 			" `poison`,"
 			" `disease`,"
-			" `corruption`"
+			" `corruption`,"
+			" `show_helm`,"
+			" `follow_distance`"
 			")"
 			" VALUES ("
 			"'%u',"				/*owner_id*/
@@ -1635,7 +1637,9 @@ bool Bot::Save()
 			" '%i',"			/*magic*/
 			" '%i',"			/*poison*/
 			" '%i',"			/*disease*/
-			" '%i'"				/*corruption*/
+			" '%i',"			/*corruption*/
+			" '1',"				/*show_helm*/
+			" '%i'"				/*follow_distance*/
 			")",
 			this->_botOwnerCharacterID,
 			this->GetBotSpellID(),
@@ -1673,7 +1677,8 @@ bool Bot::Save()
 			GetMR(),
 			GetPR(),
 			GetDR(),
-			GetCorrup()
+			GetCorrup(),
+			BOT_DEFAULT_FOLLOW_DISTANCE
 		);
 		auto results = database.QueryDatabase(query);
 		if(!results.Success()) {
@@ -1734,7 +1739,9 @@ bool Bot::Save()
 		" `magic` = '%i',"
 		" `poison` = '%i',"
 		" `disease` = '%i',"
-		" `corruption` = '%i'"
+		" `corruption` = '%i',"
+		" `show_helm` = '%i',"
+		" `follow_distance` = '%i'"
 		" WHERE `bot_id` = '%u'",
 		_botOwnerCharacterID,
 		this->GetBotSpellID(),
@@ -1774,6 +1781,8 @@ bool Bot::Save()
 		_basePR,
 		_baseDR,
 		_baseCorrup,
+		(GetShowHelm() ? 1 : 0),
+		GetFollowDistance(),
 		GetBotID()
 	);
 	auto results = database.QueryDatabase(query);
@@ -3626,13 +3635,13 @@ void Bot::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho) {
 		ns->spawn.is_npc = 0;				// 0=no, 1=yes
 		ns->spawn.is_pet = 0;
 		ns->spawn.guildrank = 0;
-		ns->spawn.showhelm = GetShowHelm();
+		ns->spawn.showhelm = GetShowHelm() ? 1 : 0;
 		ns->spawn.flymode = 0;
 		ns->spawn.size = 0;
 		ns->spawn.NPC = 0;					// 0=player,1=npc,2=pc corpse,3=npc corpse
 		UpdateActiveLight();
 		ns->spawn.light = m_Light.Type.Active;
-		ns->spawn.helm = (GetShowHelm() ? helmtexture : 0); //0xFF;
+		ns->spawn.helm = helmtexture; //(GetShowHelm() ? helmtexture : 0); //0xFF;
 		ns->spawn.equip_chest2 = texture; //0xFF;
 		const Item_Struct* item = 0;
 		const ItemInst* inst = 0;
@@ -3696,7 +3705,6 @@ uint32 Bot::GetBotIDByBotName(std::string botName) {
 
 Bot* Bot::LoadBot(uint32 botID, std::string* errorMessage)
 {
-	Bot* loadedBot = nullptr;
 	if(botID == 0)
 		return nullptr;
 	
@@ -3706,46 +3714,52 @@ Bot* Bot::LoadBot(uint32 botID, std::string* errorMessage)
 		" `spells_id`,"
 		" `name`,"
 		" `last_name`,"
-		" `level`,"
+		" `title`,"				/*planned use[4]*/
+		" `suffix`,"			/*planned use[5]*/
+		" `zone_id`,"
+		" `gender`,"
 		" `race`,"
 		" `class`,"
-		" `gender`,"
+		" `level`,"
+		" `deity`,"				/*planned use[11]*/
+		" `creation_day`,"		/*not in-use[12]*/
+		" `last_spawn`,"		/*not in-use[13]*/
+		" `time_spawned`,"
 		" `size`,"
 		" `face`,"
-		" `hair_style`,"
 		" `hair_color`,"
+		" `hair_style`,"
+		" `beard`,"
+		" `beard_color`,"
 		" `eye_color_1`,"
 		" `eye_color_2`,"
-		" `beard_color`,"
-		" `beard`,"
 		" `drakkin_heritage`,"
 		" `drakkin_tattoo`,"
 		" `drakkin_details`,"
-		" `hp`,"
-		" `mana`,"
-		" `magic`,"
-		" `cold`,"
-		" `disease`,"
-		" `fire`,"
-		" `poison`,"
-		" `corruption`,"
-		" `ac`,"
-		" `str`,"
-		" `sta`,"
-		" `dex`,"
-		" `agi`,"
-		" `int`,"
-		" `wis`,"
-		" `cha`,"
+		" `ac`,"				/*not in-use[26]*/
 		" `atk`,"
-		" `creation_day`,"
-		" `last_spawn`,"
-		" `time_spawned`,"
-		" `zone_id`"
+		" `hp`,"
+		" `mana`,"				/*not in-use[29]*/
+		" `str`,"				/*not in-use[30]*/
+		" `sta`,"				/*not in-use[31]*/
+		" `cha`,"				/*not in-use[32]*/
+		" `dex`,"				/*not in-use[33]*/
+		" `int`,"				/*not in-use[34]*/
+		" `agi`,"				/*not in-use[35]*/
+		" `wis`,"				/*not in-use[36]*/
+		" `fire`,"				/*not in-use[37]*/
+		" `cold`,"				/*not in-use[38]*/
+		" `magic`,"				/*not in-use[39]*/
+		" `poison`,"			/*not in-use[40]*/
+		" `disease`,"			/*not in-use[41]*/
+		" `corruption`,"		/*not in-use[42]*/
+		" `show_helm`,"
+		" `follow_distance`"
 		" FROM `bot_data`"
 		" WHERE `bot_id` = '%u'",
 		botID
 	);
+
 	auto results = database.QueryDatabase(query);
 	if(!results.Success()) {
 		*errorMessage = std::string(results.ErrorMessage());
@@ -3755,29 +3769,30 @@ Bot* Bot::LoadBot(uint32 botID, std::string* errorMessage)
 	if (results.RowCount() == 0)
 		return nullptr;
 	
+	// TODO: Consider removing resists and basic attributes from the load query above since we're using defaultNPCType values instead
 	auto row = results.begin();
-	NPCType defaultNPCTypeStruct = CreateDefaultNPCTypeStructForBot(std::string(row[2]), std::string(row[3]), atoi(row[4]), atoi(row[5]), atoi(row[6]), atoi(row[7]));
+	NPCType defaultNPCTypeStruct = CreateDefaultNPCTypeStructForBot(std::string(row[2]), std::string(row[3]), atoi(row[10]), atoi(row[8]), atoi(row[9]), atoi(row[7]));
 	NPCType tempNPCStruct = FillNPCTypeStruct(
 		atoi(row[1]),
 		std::string(row[2]),
 		std::string(row[3]),
-		atoi(row[4]),
-		atoi(row[5]),
-		atoi(row[6]),
-		atoi(row[7]),
-		atof(row[8]),
-		atoi(row[9]),
 		atoi(row[10]),
-		atoi(row[11]),
-		atoi(row[12]),
-		atoi(row[13]),
-		atoi(row[14]),
-		atoi(row[15]),
+		atoi(row[8]),
+		atoi(row[9]),
+		atoi(row[7]),
+		atof(row[15]),
 		atoi(row[16]),
-		atoi(row[17]),
 		atoi(row[18]),
-		atoi(row[19]),
+		atoi(row[17]),
+		atoi(row[21]),
+		atoi(row[22]),
 		atoi(row[20]),
+		atoi(row[19]),
+		atoi(row[23]),
+		atoi(row[24]),
+		atoi(row[25]),
+		atoi(row[27]),
+		atoi(row[28]),
 		defaultNPCTypeStruct.MR,
 		defaultNPCTypeStruct.CR,
 		defaultNPCTypeStruct.DR,
@@ -3794,7 +3809,13 @@ Bot* Bot::LoadBot(uint32 botID, std::string* errorMessage)
 		defaultNPCTypeStruct.CHA,
 		defaultNPCTypeStruct.ATK
 	);
-	loadedBot = new Bot(botID, atoi(row[0]), atoi(row[1]), atof(row[38]), atoi(row[39]), tempNPCStruct);
+
+	Bot* loadedBot = new Bot(botID, atoi(row[0]), atoi(row[1]), atof(row[14]), atoi(row[6]), tempNPCStruct);
+	if (loadedBot) {
+		loadedBot->SetShowHelm((atoi(row[43]) > 0 ? true : false));
+		loadedBot->SetFollowDistance(atoi(row[44]));
+	}
+
 	return loadedBot;
 }
 
@@ -9244,6 +9265,7 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 		c->Message(0, "#bot botgroup help - Displays the commands available to manage bot ONLY groups.");
 		c->Message(0, "#bot mana [<bot name or target> | all] - Displays a mana report for all your spawned bots.");
 		c->Message(0, "#bot setfollowdistance ### - sets target bots follow distance to ### (ie 30 or 250).");
+		c->Message(0, "#bot clearfollowdistance [<target> | spawned | all] - clears user-defined follow distance setting for bot target, spawned or all - includes spawned and unspawned.");
 		c->Message(0, "#bot [hair|haircolor|beard|beardcolor|face|eyes|heritage|tattoo|details <value>] - Change your bot's appearance.");
 		c->Message(0, "#bot armorcolor <slot> <red> <green> <blue> - #bot help armorcolor for info");
 		c->Message(0, "#bot taunt [on|off] - Determines whether or not your targeted bot will taunt.");
@@ -9295,6 +9317,43 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 		else {
 			uint32 BotFollowDistance = atoi(sep->arg[2]);
 			c->GetTarget()->SetFollowDistance(BotFollowDistance);
+		}
+
+		return;
+	}
+
+	if (!strcasecmp(sep->arg[1], "clearfollowdistance")) {
+		bool case_all = !strcasecmp(sep->arg[2], "all");
+		bool case_spawned = !strcasecmp(sep->arg[2], "spawned");
+		if (case_all || case_spawned) {
+			if (case_all) {
+				std::string query = StringFormat(
+					"UPDATE `bot_data`"
+					" SET `follow_distance` = '%u'"
+					" WHERE `owner_id` = '%u'",
+					BOT_DEFAULT_FOLLOW_DISTANCE,
+					c->CharacterID()
+					);
+				auto results = database.QueryDatabase(query);
+				if (!results.Success())
+					return;
+			}
+
+			std::list<Bot*> spawnedBots = entity_list.GetBotsByBotOwnerCharacterID(c->CharacterID());
+			if (!spawnedBots.empty()) {
+				for (std::list<Bot*>::iterator botsListItr = spawnedBots.begin(); botsListItr != spawnedBots.end(); ++botsListItr) {
+					Bot* tempBot = *botsListItr;
+					if (tempBot) {
+						tempBot->SetFollowDistance(BOT_DEFAULT_FOLLOW_DISTANCE);
+					}
+				}
+			}
+		}
+		else if ((c->GetTarget() == nullptr) || (c->GetTarget() == c) || (!c->GetTarget()->IsBot()) || (c->GetTarget()->CastToBot()->GetBotOwner() != c)) {
+			c->Message(15, "You must target a bot you own!");
+		}
+		else {
+			c->GetTarget()->SetFollowDistance(BOT_DEFAULT_FOLLOW_DISTANCE);
 		}
 
 		return;
@@ -12713,6 +12772,19 @@ void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
 				Bot* b = target->CastToBot();
 				if (b) {
 					b->SetShowHelm(showhelm);
+					EQApplicationPacket* outapp = new EQApplicationPacket(OP_SpawnAppearance, sizeof(SpawnAppearance_Struct));
+					SpawnAppearance_Struct* sa_out = (SpawnAppearance_Struct*)outapp->pBuffer;
+					/*
+					[10-16-2015 :: 14:58:02] [Packet :: Client -> Server (Dump)] [OP_SpawnAppearance - 0x01d1] [Size: 10] 
+					0: A4 02 [2B 00] 00 00 00 00 - showhelm = false
+					[10-16-2015 :: 14:57:56] [Packet :: Client -> Server (Dump)] [OP_SpawnAppearance - 0x01d1] [Size: 10] 
+					0: A4 02 [2B 00] 01 00 00 00 - showhelm = true
+					*/
+					sa_out->spawn_id = b->GetID();
+					sa_out->type = AT_ShowHelm; // value = 43 (0x002B)
+					sa_out->parameter = (showhelm ? 1 : 0);
+					entity_list.QueueClients(b, outapp, true);
+					safe_delete(outapp);
 					c->Message(0, "Your bot will %s show their helmet.", (showhelm ? "now" : "no longer"));
 				}
 			}

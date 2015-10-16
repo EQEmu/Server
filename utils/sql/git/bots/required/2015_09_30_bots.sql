@@ -155,8 +155,8 @@ BEGIN
 		`poison` SMALLINT(5) NOT NULL DEFAULT '0',
 		`disease` SMALLINT(5) NOT NULL DEFAULT '0',
 		`corruption` SMALLINT(5) NOT NULL DEFAULT '0',
-		`show_helm` INT(11) UNSIGNED NOT NULL DEFAULT '0',		-- Unused
-		`follow_distance` INT(11) UNSIGNED NOT NULL DEFAULT '200',	-- Unused
+		`show_helm` INT(11) UNSIGNED NOT NULL DEFAULT '0',
+		`follow_distance` INT(11) UNSIGNED NOT NULL DEFAULT '200',
 		PRIMARY KEY (`bot_id`)
 	) ENGINE=InnoDB;
 	CREATE TABLE `bot_inspect_messages` (
