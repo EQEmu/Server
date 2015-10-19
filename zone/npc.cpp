@@ -1978,6 +1978,7 @@ void NPC::ModifyNPCStat(const char *identifier, const char *newValue)
 	else if(id == "loottable_id") { loottable_id = atof(val.c_str()); return; }
 	else if(id == "healscale") { healscale = atof(val.c_str()); return; }
 	else if(id == "spellscale") { spellscale = atof(val.c_str()); return; }
+	else if(id == "npc_spells_id") { AI_AddNPCSpells(atoi(val.c_str())); return; }
 }
 
 void NPC::LevelScale() {
