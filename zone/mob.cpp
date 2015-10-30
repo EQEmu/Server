@@ -503,13 +503,9 @@ void Mob::SetInvisible(uint8 state)
 	SendAppearancePacket(AT_Invis, invisible);
 	// Invis and hide breaks charms
 
-	if ((this->GetPetType() == petCharmed) && (invisible || hidden || improved_hidden))
-	{
-		Mob* formerpet = this->GetPet();
-
-		if(formerpet)
-			formerpet->BuffFadeByEffect(SE_Charm);
-	}
+	auto formerpet = GetPet();
+	if (formerpet && formerpet->GetPetType() == petCharmed && (invisible || hidden || improved_hidden))
+		formerpet->BuffFadeByEffect(SE_Charm);
 }
 
 //check to see if `this` is invisible to `other`
