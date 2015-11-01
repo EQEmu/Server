@@ -349,7 +349,7 @@ void ZSList::SendZoneStatus(const char* to, int16 admin, WorldTCPConnection* con
 			}
 
 			AppendAnyLenString(&output, &outsize, &outlen, 
-				"#%-3i :: %s  :: %15s:%-5i :: %2i :: %s:%i :: %s :: (%u)", 
+				"#%-3i :: %s :: %15s:%-5i :: %2i :: %s:%i :: %s :: (%u)", 
 				zone_server_data->GetID(), 
 				is_static_string, 
 				inet_ntoa(in), 

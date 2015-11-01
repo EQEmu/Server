@@ -332,6 +332,7 @@ void command_load_shared_memory(Client *c, const Seperator *sep);
 void command_apply_shared_memory(Client *c, const Seperator *sep);
 void command_untraindisc(Client *c, const Seperator *sep);
 void command_untraindiscs(Client *c, const Seperator *sep);
+void command_reloadperlexportsettings(Client *c, const Seperator *sep);
 
 #ifdef EQPROFILE
 void command_profiledump(Client *c, const Seperator *sep);

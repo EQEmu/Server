@@ -39,6 +39,7 @@
 #include "client.h"
 #include "corpse.h"
 #include "entity.h"
+#include "quest_parser_collection.h"
 #include "guild_mgr.h"
 #include "mob.h"
 #include "net.h"
@@ -60,6 +61,9 @@ extern NetConnection net;
 extern PetitionList petition_list;
 extern uint32 numclients;
 extern volatile bool RunLoops;
+extern QuestParserCollection *parse;
+
+// QuestParserCollection *parse = 0;
 
 WorldServer::WorldServer()
 : WorldConnection(EmuTCPConnection::packetModeZone)
@@ -1740,6 +1744,10 @@ void WorldServer::Process() {
 		}
 		case ServerOP_ReloadLogs: {
 			database.LoadLogSettings(Log.log_settings);
+			break;
+		}
+		case ServerOP_ReloadPerlExportSettings: {
+			parse->LoadPerlEventExportSettings(parse->perl_event_export_settings);
 			break;
 		}
 		case ServerOP_CameraShake:

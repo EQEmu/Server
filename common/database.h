@@ -23,6 +23,7 @@
 
 #include "global_define.h"
 #include "eqemu_logsys.h"
+
 #include "types.h"
 #include "dbcore.h"
 #include "linked_list.h"

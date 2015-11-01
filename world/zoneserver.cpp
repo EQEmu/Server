@@ -826,6 +826,11 @@ bool ZoneServer::Process() {
 				RuleManager::Instance()->LoadRules(&database, "default");
 				break;
 			}
+			case ServerOP_ReloadPerlExportSettings:
+			{
+				zoneserver_list.SendPacket(pack);
+				break;
+			}
 			case ServerOP_CameraShake:
 			{
 				zoneserver_list.SendPacket(pack);

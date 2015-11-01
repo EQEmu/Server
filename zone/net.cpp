@@ -110,6 +110,7 @@ extern void MapOpcodes();
 int main(int argc, char** argv) {
 	RegisterExecutablePlatform(ExePlatformZone); 
 	Log.LoadLogSettingsDefaults();
+
 	set_exception_handler(); 
 	QServ = new QueryServ;
 
@@ -339,6 +340,10 @@ int main(int argc, char** argv) {
 #ifdef EMBPERL
 	PerlembParser *perl_parser = new PerlembParser();
 	parse->RegisterQuestInterface(perl_parser, "pl");
+
+	/* Load Perl Event Export Settings */
+	parse->LoadPerlEventExportSettings(parse->perl_event_export_settings);
+
 #endif
 
 	//now we have our parser, load the quests

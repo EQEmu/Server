@@ -7,6 +7,7 @@
 #include "../common/faction.h"
 #include "../common/eqemu_logsys.h"
 #include "aa_ability.h"
+#include "event_codes.h"
 
 class Client;
 class Corpse;

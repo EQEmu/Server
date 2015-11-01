@@ -183,15 +183,31 @@ int PerlembParser::EventCommon(QuestEventID event, uint32 objid, const char * da
 
 	int char_id = 0;
 	ExportCharID(package_name, char_id, npcmob, mob);
-	ExportQGlobals(isPlayerQuest, isGlobalPlayerQuest, isGlobalNPC, isItemQuest, isSpellQuest,
-		package_name, npcmob, mob, char_id);
+	
+	/* Check for QGlobal export event enable */
+	if (parse->perl_event_export_settings[event].qglobals){
+		ExportQGlobals(isPlayerQuest, isGlobalPlayerQuest, isGlobalNPC, isItemQuest, isSpellQuest, package_name, npcmob, mob, char_id);
+	}
 
-	//ExportGenericVariables();
-	ExportMobVariables(isPlayerQuest, isGlobalPlayerQuest, isGlobalNPC, isItemQuest, isSpellQuest,
-		package_name, mob, npcmob);
-	ExportZoneVariables(package_name);
-	ExportItemVariables(package_name, mob);
-	ExportEventVariables(package_name, event, objid, data, npcmob, iteminst, mob, extradata, extra_pointers);
+	/* Check for Mob export event enable */
+	if (parse->perl_event_export_settings[event].mob){
+		ExportMobVariables(isPlayerQuest, isGlobalPlayerQuest, isGlobalNPC, isItemQuest, isSpellQuest, package_name, mob, npcmob);
+	}
+
+	/* Check for Zone export event enable */
+	if (parse->perl_event_export_settings[event].zone){
+		ExportZoneVariables(package_name);
+	}
+
+	/* Check for Item export event enable */
+	if (parse->perl_event_export_settings[event].item){
+		ExportItemVariables(package_name, mob);
+	}
+
+	/* Check for Event export event enable */
+	if (parse->perl_event_export_settings[event].event_variables){
+		ExportEventVariables(package_name, event, objid, data, npcmob, iteminst, mob, extradata, extra_pointers);
+	}
 
 	if(isPlayerQuest || isGlobalPlayerQuest){
 		return SendCommands(package_name.c_str(), sub_name, 0, mob, mob, nullptr);
@@ -199,8 +215,7 @@ int PerlembParser::EventCommon(QuestEventID event, uint32 objid, const char * da
 	else if(isItemQuest) {
 		return SendCommands(package_name.c_str(), sub_name, 0, mob, mob, iteminst);
 	}
-	else if(isSpellQuest)
-	{
+	else if(isSpellQuest){
 		if(mob) {
 			return SendCommands(package_name.c_str(), sub_name, 0, mob, mob, nullptr);
 		} else {
