@@ -484,7 +484,7 @@ bool Mob::MakeNewPositionAndSendUpdate(float x, float y, float z, int speed, boo
 			Log.Out(Logs::Detail, Logs::AI, "Calc Position2 (%.3f, %.3f, %.3f): Jumping pure Z.", x, y, z);
 			return true;
 		}
-		Log.Out(Logs::Detail, Logs::AI, "Calc Position2 (%.3f, %.3f, %.3f) inWater=%d: We are there.", x, y, z, inWater);
+		// Log.Out(Logs::Detail, Logs::AI, "Calc Position2 (%.3f, %.3f, %.3f) inWater=%d: We are there.", x, y, z, inWater);
 		return false;
 	} else if ((std::abs(m_Position.x - x) < 0.1) && (std::abs(m_Position.y - y) < 0.1)) {
 		Log.Out(Logs::Detail, Logs::AI, "Calc Position2 (%.3f, %.3f, %.3f): X/Y difference <0.1, Jumping to target.", x, y, z);
