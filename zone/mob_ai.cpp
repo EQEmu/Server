@@ -480,7 +480,7 @@ void Mob::AI_Start(uint32 iMoveDelay) {
 	AI_movement_timer = std::unique_ptr<Timer>(new Timer(AImovement_duration));
 	AI_target_check_timer = std::unique_ptr<Timer>(new Timer(AItarget_check_duration));
 	AI_feign_remember_timer = std::unique_ptr<Timer>(new Timer(AIfeignremember_delay));
-	AI_scan_area_timer = std::unique_ptr<Timer>(new Timer(AIscanarea_delay));
+	AI_scan_area_timer = std::unique_ptr<Timer>(new Timer(RandomTimer(6000, 18000)));
 	AI_check_signal_timer = std::unique_ptr<Timer>(new Timer(AI_check_signal_timer_delay));
 
 #ifdef REVERSE_AGGRO
