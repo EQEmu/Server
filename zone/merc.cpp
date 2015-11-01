@@ -18,7 +18,7 @@
 #include "../common/string_util.h"
 #include "../common/rulesys.h"
 
-extern volatile bool ZoneLoaded;
+extern volatile bool is_zone_loaded;
 
 Merc::Merc(const NPCType* d, float x, float y, float z, float heading)
 : NPC(d, nullptr, glm::vec4(x, y, z, heading), 0, false), endupkeep_timer(1000), rest_timer(1), confidence_timer(6000), check_target_timer(2000)
@@ -5777,7 +5777,7 @@ bool Merc::RemoveMercFromGroup(Merc* merc, Group* group) {
 			{
 				merc->SetFollowID(0);
 
-				if (group->GroupCount() <= 2 && merc->GetGroup() == group && ZoneLoaded)
+				if (group->GroupCount() <= 2 && merc->GetGroup() == group && is_zone_loaded)
 				{
 					group->DisbandGroup();
 				}

@@ -53,7 +53,7 @@
 #endif
 
 extern Zone* zone;
-extern volatile bool ZoneLoaded;
+extern volatile bool is_zone_loaded;
 extern EntityList entity_list;
 
 NPC::NPC(const NPCType* d, Spawn2* in_respawn, const glm::vec4& position, int iflymode, bool IsCorpse)

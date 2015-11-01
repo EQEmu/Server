@@ -37,7 +37,7 @@ public:
 	bool SendEmoteMessage(const char* to, uint32 to_guilddbid, uint32 type, const char* message, ...);
 	bool SendEmoteMessage(const char* to, uint32 to_guilddbid, int16 to_minstatus, uint32 type, const char* message, ...);
 	bool SendVoiceMacro(Client* From, uint32 Type, char* Target, uint32 MacroNumber, uint32 GroupOrRaidID = 0);
-	void SetZone(uint32 iZoneID, uint32 iInstanceID = 0);
+	void SetZoneData(uint32 iZoneID, uint32 iInstanceID = 0);
 	uint32 SendGroupIdRequest();
 	bool RezzPlayer(EQApplicationPacket* rpack, uint32 rezzexp, uint32 dbid, uint16 opcode);
 	bool IsOOCMuted() const { return(oocmuted); }

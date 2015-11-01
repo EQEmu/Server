@@ -6,7 +6,7 @@
 #include "quest_parser_collection.h"
 #include "../common/string_util.h"
 
-extern volatile bool ZoneLoaded;
+extern volatile bool is_zone_loaded;
 
 // This constructor is used during the bot create command
 Bot::Bot(NPCType npcTypeData, Client* botOwner) : NPC(&npcTypeData, nullptr, glm::vec4(), 0, false), rest_timer(1) {

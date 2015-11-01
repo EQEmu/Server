@@ -84,7 +84,7 @@
 #endif
 
 volatile bool RunLoops = true;
-extern volatile bool ZoneLoaded;
+extern volatile bool is_zone_loaded;
 
 TimeoutManager timeout_manager;
 NetConnection net;
@@ -437,12 +437,12 @@ int main(int argc, char** argv) {
 			worldwasconnected = true;
 		}
 		else {
-			if (worldwasconnected && ZoneLoaded)
+			if (worldwasconnected && is_zone_loaded)
 				entity_list.ChannelMessageFromWorld(0, 0, 6, 0, 0, "WARNING: World server connection lost");
 			worldwasconnected = false;
 		}
 
-		if (ZoneLoaded && zoneupdate_timer.Check()) {
+		if (is_zone_loaded && zoneupdate_timer.Check()) {
 			{
 				if(net.group_timer.Enabled() && net.group_timer.Check())
 					entity_list.GroupProcess();

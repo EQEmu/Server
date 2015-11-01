@@ -53,7 +53,7 @@ extern volatile bool RunLoops;
 extern QueryServ* QServ;
 extern EntityList entity_list;
 extern Zone* zone;
-extern volatile bool ZoneLoaded;
+extern volatile bool is_zone_loaded;
 extern WorldServer worldserver;
 extern uint32 numclients;
 extern PetitionList petition_list;
@@ -371,7 +371,7 @@ Client::~Client() {
 		GetTarget()->IsTargeted(-1);
 
 	//if we are in a group and we are not zoning, force leave the group
-	if(isgrouped && !zoning && ZoneLoaded)
+	if(isgrouped && !zoning && is_zone_loaded)
 		LeaveGroup();
 
 	UpdateWho(2);

@@ -548,6 +548,7 @@ struct ServerConnectInfo {
 	char	address[250];
 	char	local_address[250];
 	uint16	port;
+	uint32  process_id;
 };
 
 struct ServerGMGoto_Struct {

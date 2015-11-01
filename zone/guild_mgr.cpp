@@ -29,7 +29,7 @@ ZoneGuildManager guild_mgr;
 GuildBankManager *GuildBanks;
 
 extern WorldServer worldserver;
-extern volatile bool ZoneLoaded;
+extern volatile bool is_zone_loaded;
 
 void ZoneGuildManager::SendGuildRefresh(uint32 guild_id, bool name, bool motd, bool rank, bool relation) {
 	Log.Out(Logs::Detail, Logs::Guilds, "Sending guild refresh for %d to world, changes: name=%d, motd=%d, rank=d, relation=%d", guild_id, name, motd, rank, relation);
@@ -334,7 +334,7 @@ void ZoneGuildManager::ProcessWorldPacket(ServerPacket *pack) {
 
 	case ServerOP_GuildRankUpdate:
 	{
-		if(ZoneLoaded)
+		if(is_zone_loaded)
 		{
 			if(pack->size != sizeof(ServerGuildRankUpdate_Struct))
 			{
@@ -388,7 +388,7 @@ void ZoneGuildManager::ProcessWorldPacket(ServerPacket *pack) {
 	{
 		ServerGuildMemberUpdate_Struct *sgmus = (ServerGuildMemberUpdate_Struct*)pack->pBuffer;
 
-		if(ZoneLoaded)
+		if(is_zone_loaded)
 		{
 			EQApplicationPacket *outapp = new EQApplicationPacket(OP_GuildMemberUpdate, sizeof(GuildMemberUpdate_Struct));
 
@@ -407,7 +407,7 @@ void ZoneGuildManager::ProcessWorldPacket(ServerPacket *pack) {
 		break;
 	}
 	case ServerOP_OnlineGuildMembersResponse:
-		if (ZoneLoaded)
+		if (is_zone_loaded)
 		{
 			char *Buffer = (char *)pack->pBuffer;
 
@@ -443,7 +443,7 @@ void ZoneGuildManager::ProcessWorldPacket(ServerPacket *pack) {
 
 	case ServerOP_LFGuildUpdate:
 	{
-		if(ZoneLoaded)
+		if(is_zone_loaded)
 		{
 			char GuildName[33];
 			char Comments[257];
