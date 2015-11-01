@@ -605,7 +605,7 @@ bool NPC::Process()
 		parse->EventNPC(EVENT_TICK, this, nullptr, "", 0);
 		BuffProcess();
 
-		if(curfp)
+		if(currently_fleeing)
 			ProcessFlee();
 
 		uint32 bonus = 0;

@@ -1428,7 +1428,7 @@ void Merc::AI_Process() {
 
 					if(RuleB(Combat, EnableFearPathing)) {
 						CalculateNewFearpoint();
-						if(curfp) {
+						if(currently_fleeing) {
 							return;
 						}
 					}

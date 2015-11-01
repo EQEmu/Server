@@ -1295,7 +1295,7 @@ protected:
 
 	int patrol;
 	glm::vec3 m_FearWalkTarget;
-	bool curfp;
+	bool currently_fleeing;
 
 	// Pathing
 	//

@@ -113,7 +113,7 @@ Mob::Mob(const char* in_name,
 	targeted = 0;
 	tar_ndx=0;
 	tar_vector=0;
-	curfp = false;
+	currently_fleeing = false;
 
 	AI_Init();
 	SetMoving(false);
@@ -371,7 +371,7 @@ Mob::Mob(const char* in_name,
 	follow=0;
 	follow_dist = 100;	// Default Distance for Follow
 	flee_mode = false;
-	curfp = false;
+	currently_fleeing = false;
 	flee_timer.Start();
 
 	permarooted = (runspeed > 0) ? false : true;

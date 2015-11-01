@@ -2286,7 +2286,7 @@ bool Bot::Process() {
 
 		BuffProcess();
 		CalcRestState();
-		if(curfp)
+		if(currently_fleeing)
 			ProcessFlee();
 
 		if(GetHP() < GetMaxHP())
