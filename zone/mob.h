@@ -1262,6 +1262,7 @@ protected:
 	std::unique_ptr<Timer> AIscanarea_timer;
 	std::unique_ptr<Timer> AIwalking_timer;
 	std::unique_ptr<Timer> AIfeignremember_timer;
+	std::unique_ptr<Timer> AI_check_signal_timer;
 	uint32 pLastFightingDelayMoving;
 	HateList hate_list;
 	std::set<uint32> feign_memory_list;

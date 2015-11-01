@@ -429,6 +429,8 @@ void Mob::AI_Init()
 	AItarget_check_timer.reset(nullptr);
 	AIfeignremember_timer.reset(nullptr);
 	AIscanarea_timer.reset(nullptr);
+	AI_check_signal_timer.reset(nullptr);
+
 	minLastFightingDelayMoving = RuleI(NPC, LastFightingDelayMovingMin);
 	maxLastFightingDelayMoving = RuleI(NPC, LastFightingDelayMovingMax);
 
@@ -479,6 +481,8 @@ void Mob::AI_Start(uint32 iMoveDelay) {
 	AItarget_check_timer = std::unique_ptr<Timer>(new Timer(AItarget_check_duration));
 	AIfeignremember_timer = std::unique_ptr<Timer>(new Timer(AIfeignremember_delay));
 	AIscanarea_timer = std::unique_ptr<Timer>(new Timer(AIscanarea_delay));
+	AI_check_signal_timer = std::unique_ptr<Timer>(new Timer(AI_check_signal_timer_delay));
+
 #ifdef REVERSE_AGGRO
 	if(IsNPC() && !CastToNPC()->WillAggroNPCs())
 		AIscanarea_timer->Disable();
@@ -544,6 +548,7 @@ void Mob::AI_Stop() {
 	AItarget_check_timer.reset(nullptr);
 	AIscanarea_timer.reset(nullptr);
 	AIfeignremember_timer.reset(nullptr);
+	AI_check_signal_timer.reset(nullptr);
 
 	hate_list.WipeHateList();
 }
@@ -998,7 +1003,7 @@ void Mob::AI_Process() {
 	}
 
 	// trigger EVENT_SIGNAL if required
-	if(IsNPC()) {
+	if (AI_check_signal_timer->Check() && IsNPC()) {
 		CastToNPC()->CheckSignal();
 	}
 

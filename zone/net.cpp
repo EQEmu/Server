@@ -393,10 +393,10 @@ int main(int argc, char** argv) {
 
 		worldserver.Process();
 
-		if (!eqsf.IsOpen() && Config->ZonePort!=0) {
-			Log.Out(Logs::General, Logs::Zone_Server, "Starting EQ Network server on port %d",Config->ZonePort);
+		if (!eqsf.IsOpen() && Config->ZonePort != 0) {
+			Log.Out(Logs::General, Logs::Zone_Server, "Starting EQ Network server on port %d", Config->ZonePort);
 			if (!eqsf.Open(Config->ZonePort)) {
-				Log.Out(Logs::General, Logs::Error, "Failed to open port %d",Config->ZonePort);
+				Log.Out(Logs::General, Logs::Error, "Failed to open port %d", Config->ZonePort);
 				ZoneConfig::SetZonePort(0);
 				worldserver.Disconnect();
 				worldwasconnected = false;
@@ -410,7 +410,7 @@ int main(int argc, char** argv) {
 			//structures and opcodes for that patch.
 			struct in_addr	in;
 			in.s_addr = eqss->GetRemoteIP();
-			Log.Out(Logs::Detail, Logs::World_Server, "New connection from %s:%d", inet_ntoa(in),ntohs(eqss->GetRemotePort()));
+			Log.Out(Logs::Detail, Logs::World_Server, "New connection from %s:%d", inet_ntoa(in), ntohs(eqss->GetRemotePort()));
 			stream_identifier.AddStream(eqss);	//takes the stream
 		}
 
