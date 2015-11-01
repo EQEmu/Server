@@ -2685,7 +2685,7 @@ void Bot::AI_Process() {
 
 	if(GetHasBeenSummoned()) {
 		if(IsBotCaster() || IsBotArcher()) {
-			if (AImovement_timer->Check()) {
+			if (AI_movement_timer->Check()) {
 				if(!GetTarget() || (IsBotCaster() && !IsBotCasterCombatRange(GetTarget())) || (IsBotArcher() && IsArcheryRange(GetTarget())) || (DistanceSquaredNoZ(static_cast<glm::vec3>(m_Position), m_PreSummonLocation) < 10)) {
 					if(GetTarget())
 						FaceTarget(GetTarget());
@@ -2831,7 +2831,7 @@ void Bot::AI_Process() {
 				}
 			}
 
-			if(AImovement_timer->Check()) {
+			if(AI_movement_timer->Check()) {
 				if(!IsMoving() && GetClass() == ROGUE && !BehindMob(GetTarget(), GetX(), GetY())) {
 					// Move the rogue to behind the mob
 					float newX = 0;
@@ -2967,7 +2967,7 @@ void Bot::AI_Process() {
 					AI_PursueCastCheck();
 			}
 
-			if (AImovement_timer->Check()) {
+			if (AI_movement_timer->Check()) {
 				if(!IsRooted()) {
 					Log.Out(Logs::Detail, Logs::AI, "Pursuing %s while engaged.", GetTarget()->GetCleanName());
 					CalculateNewPosition2(GetTarget()->GetX(), GetTarget()->GetY(), GetTarget()->GetZ(), GetRunspeed());
@@ -2995,7 +2995,7 @@ void Bot::AI_Process() {
 		if (m_PlayerState & static_cast<uint32>(PlayerState::Aggressive))
 			SendRemovePlayerState(PlayerState::Aggressive);
 
-		if(!IsMoving() && AIthink_timer->Check() && !spellend_timer.Enabled()) {
+		if(!IsMoving() && AI_think_timer->Check() && !spellend_timer.Enabled()) {
 			if(GetBotStance() != BotStancePassive) {
 				if(!AI_IdleCastCheck() && !IsCasting())
 					BotMeditate(true);
@@ -3004,7 +3004,7 @@ void Bot::AI_Process() {
 				BotMeditate(true);
 		}
 
-		if(AImovement_timer->Check()) {
+		if(AI_movement_timer->Check()) {
 			if(GetFollowID()) {
 				Mob* follow = entity_list.GetMob(GetFollowID());
 				if(follow) {

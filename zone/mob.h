@@ -925,8 +925,8 @@ public:
 	virtual FACTION_VALUE GetReverseFactionCon(Mob* iOther) { return FACTION_INDIFFERENT; }
 
 	inline bool IsTrackable() const { return(trackable); }
-	Timer* GetAIThinkTimer() { return AIthink_timer.get(); }
-	Timer* GetAIMovementTimer() { return AImovement_timer.get(); }
+	Timer* GetAIThinkTimer() { return AI_think_timer.get(); }
+	Timer* GetAIMovementTimer() { return AI_movement_timer.get(); }
 	Timer GetAttackTimer() { return attack_timer; }
 	Timer GetAttackDWTimer() { return attack_dw_timer; }
 	inline bool IsFindable() { return findable; }
@@ -1254,14 +1254,14 @@ protected:
 	uint32 maxLastFightingDelayMoving;
 	float pAggroRange;
 	float pAssistRange;
-	std::unique_ptr<Timer> AIthink_timer;
-	std::unique_ptr<Timer> AImovement_timer;
-	std::unique_ptr<Timer> AItarget_check_timer;
+	std::unique_ptr<Timer> AI_think_timer;
+	std::unique_ptr<Timer> AI_movement_timer;
+	std::unique_ptr<Timer> AI_target_check_timer;
 	bool movetimercompleted;
 	bool permarooted;
-	std::unique_ptr<Timer> AIscanarea_timer;
-	std::unique_ptr<Timer> AIwalking_timer;
-	std::unique_ptr<Timer> AIfeignremember_timer;
+	std::unique_ptr<Timer> AI_scan_area_timer;
+	std::unique_ptr<Timer> AI_walking_timer;
+	std::unique_ptr<Timer> AI_feign_remember_timer;
 	std::unique_ptr<Timer> AI_check_signal_timer;
 	uint32 pLastFightingDelayMoving;
 	HateList hate_list;

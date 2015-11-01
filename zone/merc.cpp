@@ -1500,7 +1500,7 @@ void Merc::AI_Process() {
 				}
 			}
 
-			if(AImovement_timer->Check())
+			if(AI_movement_timer->Check())
 			{
 				if(!IsMoving() && GetClass() == ROGUE && !BehindMob(GetTarget(), GetX(), GetY()))
 				{
@@ -1645,7 +1645,7 @@ void Merc::AI_Process() {
 				AI_PursueCastCheck();
 			}
 
-			if (AImovement_timer->Check())
+			if (AI_movement_timer->Check())
 			{
 				if(!IsRooted()) {
 					Log.Out(Logs::Detail, Logs::AI, "Pursuing %s while engaged.", GetTarget()->GetCleanName());
@@ -1687,7 +1687,7 @@ void Merc::AI_Process() {
 		if(!check_target_timer.Enabled())
 			check_target_timer.Start(2000, false);
 
-		if(!IsMoving() && AIthink_timer->Check() && !spellend_timer.Enabled())
+		if(!IsMoving() && AI_think_timer->Check() && !spellend_timer.Enabled())
 		{
 			//TODO: Implement passive stances.
 			//if(GetStance() != MercStancePassive) {
@@ -1698,7 +1698,7 @@ void Merc::AI_Process() {
 			}
 		}
 
-		if(AImovement_timer->Check())
+		if(AI_movement_timer->Check())
 		{
 			if(GetFollowID())
 			{

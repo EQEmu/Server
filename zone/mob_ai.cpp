@@ -423,12 +423,12 @@ bool EntityList::AICheckCloseBeneficialSpells(NPC* caster, uint8 iChance, float 
 void Mob::AI_Init()
 {
 	pAIControlled = false;
-	AIthink_timer.reset(nullptr);
-	AIwalking_timer.reset(nullptr);
-	AImovement_timer.reset(nullptr);
-	AItarget_check_timer.reset(nullptr);
-	AIfeignremember_timer.reset(nullptr);
-	AIscanarea_timer.reset(nullptr);
+	AI_think_timer.reset(nullptr);
+	AI_walking_timer.reset(nullptr);
+	AI_movement_timer.reset(nullptr);
+	AI_target_check_timer.reset(nullptr);
+	AI_feign_remember_timer.reset(nullptr);
+	AI_scan_area_timer.reset(nullptr);
 	AI_check_signal_timer.reset(nullptr);
 
 	minLastFightingDelayMoving = RuleI(NPC, LastFightingDelayMovingMin);
@@ -474,18 +474,18 @@ void Mob::AI_Start(uint32 iMoveDelay) {
 		pLastFightingDelayMoving = 0;
 
 	pAIControlled = true;
-	AIthink_timer = std::unique_ptr<Timer>(new Timer(AIthink_duration));
-	AIthink_timer->Trigger();
-	AIwalking_timer = std::unique_ptr<Timer>(new Timer(0));
-	AImovement_timer = std::unique_ptr<Timer>(new Timer(AImovement_duration));
-	AItarget_check_timer = std::unique_ptr<Timer>(new Timer(AItarget_check_duration));
-	AIfeignremember_timer = std::unique_ptr<Timer>(new Timer(AIfeignremember_delay));
-	AIscanarea_timer = std::unique_ptr<Timer>(new Timer(AIscanarea_delay));
+	AI_think_timer = std::unique_ptr<Timer>(new Timer(AIthink_duration));
+	AI_think_timer->Trigger();
+	AI_walking_timer = std::unique_ptr<Timer>(new Timer(0));
+	AI_movement_timer = std::unique_ptr<Timer>(new Timer(AImovement_duration));
+	AI_target_check_timer = std::unique_ptr<Timer>(new Timer(AItarget_check_duration));
+	AI_feign_remember_timer = std::unique_ptr<Timer>(new Timer(AIfeignremember_delay));
+	AI_scan_area_timer = std::unique_ptr<Timer>(new Timer(AIscanarea_delay));
 	AI_check_signal_timer = std::unique_ptr<Timer>(new Timer(AI_check_signal_timer_delay));
 
 #ifdef REVERSE_AGGRO
 	if(IsNPC() && !CastToNPC()->WillAggroNPCs())
-		AIscanarea_timer->Disable();
+		AI_scan_area_timer->Disable();
 #endif
 
 	if (GetAggroRange() == 0)
@@ -542,12 +542,12 @@ void Mob::AI_Stop() {
 
 	pAIControlled = false;
 
-	AIthink_timer.reset(nullptr);
-	AIwalking_timer.reset(nullptr);
-	AImovement_timer.reset(nullptr);
-	AItarget_check_timer.reset(nullptr);
-	AIscanarea_timer.reset(nullptr);
-	AIfeignremember_timer.reset(nullptr);
+	AI_think_timer.reset(nullptr);
+	AI_walking_timer.reset(nullptr);
+	AI_movement_timer.reset(nullptr);
+	AI_target_check_timer.reset(nullptr);
+	AI_scan_area_timer.reset(nullptr);
+	AI_feign_remember_timer.reset(nullptr);
 	AI_check_signal_timer.reset(nullptr);
 
 	hate_list.WipeHateList();
@@ -730,7 +730,7 @@ void Client::AI_Process()
 	if (!IsAIControlled())
 		return;
 
-	if (!(AIthink_timer->Check() || attack_timer.Check(false)))
+	if (!(AI_think_timer->Check() || attack_timer.Check(false)))
 		return;
 
 	if (IsCasting())
@@ -776,7 +776,7 @@ void Client::AI_Process()
 				//continue on to attack code, ensuring that we execute the engaged code
 				engaged = true;
 			} else {
-				if(AImovement_timer->Check()) {
+				if(AI_movement_timer->Check()) {
 					int speed = GetFearSpeed();
 					animation = speed;
 					speed *= 2;
@@ -813,7 +813,7 @@ void Client::AI_Process()
 			SetTarget(hate_list.GetClosestEntOnHateList(this));
 		else
 		{
-			if(AItarget_check_timer->Check())
+			if(AI_target_check_timer->Check())
 			{
 				SetTarget(hate_list.GetEntWithMostHateOnList(this));
 			}
@@ -837,7 +837,7 @@ void Client::AI_Process()
 				DoClassAttacks(GetTarget());
 			}
 
-			if (AImovement_timer->Check()) {
+			if (AI_movement_timer->Check()) {
 				if (CalculateHeadingToTarget(GetTarget()->GetX(), GetTarget()->GetY()) !=
 				    m_Position.w) {
 					SetHeading(CalculateHeadingToTarget(GetTarget()->GetX(), GetTarget()->GetY()));
@@ -863,7 +863,7 @@ void Client::AI_Process()
 		} else {
 			if(!IsRooted())
 			{
-				if(AImovement_timer->Check())
+				if(AI_movement_timer->Check())
 				{
 					int newspeed = GetRunspeed();
 					animation = newspeed;
@@ -894,7 +894,7 @@ void Client::AI_Process()
 	}
 	else
 	{
-		if(AIfeignremember_timer->Check()) {
+		if(AI_feign_remember_timer->Check()) {
 			std::set<uint32>::iterator RememberedCharID;
 			RememberedCharID = feign_memory_list.begin();
 			while (RememberedCharID != feign_memory_list.end()) {
@@ -922,7 +922,7 @@ void Client::AI_Process()
 			float dist = DistanceSquared(m_Position, owner->GetPosition());
 			if (dist >= 400)
 			{
-				if(AImovement_timer->Check())
+				if(AI_movement_timer->Check())
 				{
 					int nspeed = (dist >= 5625 ? GetRunspeed() : GetWalkspeed());
 					animation = nspeed;
@@ -948,7 +948,7 @@ void Mob::AI_Process() {
 	if (!IsAIControlled())
 		return;
 
-	if (!(AIthink_timer->Check() || attack_timer.Check(false)))
+	if (!(AI_think_timer->Check() || attack_timer.Check(false)))
 		return;
 
 	if (IsCasting())
@@ -973,7 +973,7 @@ void Mob::AI_Process() {
 				//continue on to attack code, ensuring that we execute the engaged code
 				engaged = true;
 			} else {
-				if(AImovement_timer->Check()) {
+				if(AI_movement_timer->Check()) {
 					// Check if we have reached the last fear point
 					if ((std::abs(GetX() - m_FearWalkTarget.x) < 0.1) &&
 					    (std::abs(GetY() - m_FearWalkTarget.y) < 0.1)) {
@@ -1017,7 +1017,7 @@ void Mob::AI_Process() {
 			SetTarget(hate_list.GetClosestEntOnHateList(this));
 		else
 		{
-			if(AItarget_check_timer->Check())
+			if(AI_target_check_timer->Check())
 			{
 				if (IsFocused()) {
 					if (!target) {
@@ -1079,7 +1079,7 @@ void Mob::AI_Process() {
 
 		if (is_combat_range)
 		{
-			if (AImovement_timer->Check())
+			if (AI_movement_timer->Check())
 			{
 				if(CalculateHeadingToTarget(GetTarget()->GetX(), GetTarget()->GetY()) != m_Position.w)
 				{
@@ -1273,7 +1273,7 @@ void Mob::AI_Process() {
 						WipeHateList();
 						Heal();
 						BuffFadeAll();
-						AIwalking_timer->Start(100);
+						AI_walking_timer->Start(100);
 						pLastFightingDelayMoving = Timer::GetCurrentTime();
 						return;
 					} else if(tar != nullptr) {
@@ -1295,7 +1295,7 @@ void Mob::AI_Process() {
 				if(AI_PursueCastCheck()){
 					//we did something, so do not process movement.
 				}
-				else if (AImovement_timer->Check())
+				else if (AI_movement_timer->Check())
 				{
 					if(!IsRooted()) {
 						Log.Out(Logs::Detail, Logs::AI, "Pursuing %s while engaged.", target->GetName());
@@ -1328,7 +1328,7 @@ void Mob::AI_Process() {
 	{
 		if (m_PlayerState & static_cast<uint32>(PlayerState::Aggressive))
 			SendRemovePlayerState(PlayerState::Aggressive);
-		if(AIfeignremember_timer->Check()) {
+		if(AI_feign_remember_timer->Check()) {
 			// 6/14/06
 			// Improved Feign Death Memory
 			// check to see if any of our previous feigned targets have gotten up.
@@ -1353,7 +1353,7 @@ void Mob::AI_Process() {
 		{
 			//we processed a spell action, so do nothing else.
 		}
-		else if (AIscanarea_timer->Check())
+		else if (AI_scan_area_timer->Check())
 		{
 			/*
 			* This is where NPCs look around to see if they want to attack anybody.
@@ -1368,7 +1368,7 @@ void Mob::AI_Process() {
 			if (tmptar)
 				AddToHateList(tmptar);
 		}
-		else if (AImovement_timer->Check() && !IsRooted())
+		else if (AI_movement_timer->Check() && !IsRooted())
 		{
 			if (IsPet())
 			{
@@ -1539,10 +1539,10 @@ void NPC::AI_DoMovement() {
 	}
 	else if (roamer)
 	{
-		if (AIwalking_timer->Check())
+		if (AI_walking_timer->Check())
 		{
 			movetimercompleted=true;
-			AIwalking_timer->Disable();
+			AI_walking_timer->Disable();
 		}
 
 
@@ -1552,7 +1552,7 @@ void NPC::AI_DoMovement() {
 			if (movetimercompleted==true) { // time to pause at wp is over
 				AI_SetupNextWaypoint();
 			}	// endif (movetimercompleted==true)
-			else if (!(AIwalking_timer->Enabled()))
+			else if (!(AI_walking_timer->Enabled()))
 			{	// currently moving
 				bool doMove = true;
 				if (m_CurrentWayPoint.x == GetX() && m_CurrentWayPoint.y == GetY())
@@ -1573,7 +1573,7 @@ void NPC::AI_DoMovement() {
 					sprintf(temp, "%d", cur_wp);
 					parse->EventNPC(EVENT_WAYPOINT_ARRIVE, CastToNPC(), nullptr, temp, 0);
 					// start moving directly to next waypoint if we're at a 0 pause waypoint and we didn't get quest halted.
-					if (!AIwalking_timer->Enabled())
+					if (!AI_walking_timer->Enabled())
 						AI_SetupNextWaypoint();
 					else
 						doMove = false;
@@ -1764,7 +1764,7 @@ void Mob::AI_Event_Engaged(Mob* attacker, bool iYellForHelp) {
 void Mob::AI_Event_NoLongerEngaged() {
 	if (!IsAIControlled())
 		return;
-	this->AIwalking_timer->Start(RandomTimer(3000,20000));
+	this->AI_walking_timer->Start(RandomTimer(3000,20000));
 	pLastFightingDelayMoving = Timer::GetCurrentTime();
 	if (minLastFightingDelayMoving == maxLastFightingDelayMoving)
 		pLastFightingDelayMoving += minLastFightingDelayMoving;
