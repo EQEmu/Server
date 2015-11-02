@@ -44,7 +44,7 @@ public:
 	void		LSBootUpdate(uint32 zoneid, uint32 iInstanceID = 0, bool startup = false);
 	void		LSSleepUpdate(uint32 zoneid);
 	void		LSShutDownUpdate(uint32 zoneid);
-	uint32		GetPrevZoneID() { return oldZoneID; }
+	uint32		GetPrevZoneID() { return zone_server_previous_zone_id; }
 	void		ChangeWID(uint32 iCharID, uint32 iWID);
 	void		SendGroupIDs();
 
@@ -52,41 +52,45 @@ public:
 	inline const char*	GetZoneLongName() const	{ return long_name; }
 	const char*			GetCompileTime() const{ return compiled; }
 	void				SetCompile(char* in_compile){ strcpy(compiled,in_compile); }
-	inline uint32		GetZoneID() const	{ return zoneID; }
+	inline uint32		GetZoneID() const	{ return zone_server_zone_id; }
 	inline uint32		GetIP() const		{ return tcpc->GetrIP(); }
 	inline uint16		GetPort() const		{ return tcpc->GetrPort(); }
-	inline const char*	GetCAddress() const	{ return clientaddress; }
-	inline const char*	GetCLocalAddress() const { return clientlocaladdress; }
-	inline uint16		GetCPort() const	{ return clientport; }
-	inline uint32		GetID() const		{ return ID; }
-	inline bool			IsBootingUp() const	{ return BootingUp; }
-	inline bool			IsStaticZone() const{ return staticzone; }
-	inline uint32		NumPlayers() const	{ return pNumPlayers; }
-	inline void			AddPlayer()			{ pNumPlayers++; }
-	inline void			RemovePlayer()		{ pNumPlayers--; }
+	inline const char*	GetCAddress() const	{ return client_address; }
+	inline const char*	GetCLocalAddress() const { return client_local_address; }
+	inline uint16		GetCPort() const	{ return client_port; }
+	inline uint32		GetID() const		{ return zone_server_id; }
+	inline bool			IsBootingUp() const	{ return is_booting_up; }
+	inline bool			IsStaticZone() const{ return is_static_zone; }
+	inline uint32		NumPlayers() const	{ return zone_player_count; }
+	inline void			AddPlayer()			{ zone_player_count++; }
+	inline void			RemovePlayer()		{ zone_player_count--; }
 	inline const char * GetLaunchName() const { return(launcher_name.c_str()); }
 	inline const char * GetLaunchedName() const { return(launched_name.c_str()); }
 
-	inline uint32		GetInstanceID() { return instanceID; }
-	inline void			SetInstanceID(uint32 i) { instanceID = i; }
+	inline uint32		GetInstanceID() { return instance_id; }
+	inline void			SetInstanceID(uint32 i) { instance_id = i; }
+
+	inline uint32		GetZoneOSProcessID() { return zone_os_process_id; }
+
 private:
 	EmuTCPConnection* const tcpc;
 
-	uint32	ID;
-	char	clientaddress[250];
-	char	clientlocaladdress[250];
-	uint16	clientport;
-	bool	BootingUp;
-	bool	staticzone;
-	bool	authenticated;
-	uint32	pNumPlayers;
+	uint32	zone_server_id;
+	char	client_address[250];
+	char	client_local_address[250];
+	uint16	client_port;
+	bool	is_booting_up;
+	bool	is_static_zone;
+	bool	is_authenticated;
+	uint32	zone_player_count;
 	char	compiled[25];
 	char	zone_name[32];
 	char	long_name[256];
-	uint32	zoneID;
-	uint32	oldZoneID;
-	Timer	ls_zboot;
-	uint32	instanceID;	//instance ids contain a zone id, and a zone version
+	uint32	zone_server_zone_id;
+	uint32	zone_server_previous_zone_id;
+	Timer	zone_boot_timer;
+	uint32	instance_id;	//instance ids contain a zone id, and a zone version
+	uint32  zone_os_process_id;
 	std::string launcher_name;	//the launcher which started us
 	std::string launched_name;	//the name of the zone we launched.
 };

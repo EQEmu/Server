@@ -334,6 +334,7 @@ int command_init(void) {
 		command_add("reloadallrules", "Executes a reload of all rules.", 80, command_reloadallrules) ||
 		command_add("reloademote", "Reloads NPC Emotes", 80, command_reloademote) ||
 		command_add("reloadlevelmods", nullptr,255, command_reloadlevelmods) ||
+		command_add("reloadperlexportsettings", nullptr, 255, command_reloadperlexportsettings) ||
 		command_add("reloadqst", " - Clear quest cache (any argument causes it to also stop all timers)", 150, command_reloadqst) ||
 		command_add("reloadquest", " - Clear quest cache (any argument causes it to also stop all timers)", 150, command_reloadqst) ||
 		command_add("reloadrulesworld", "Executes a reload of all rules in world specifically.", 80, command_reloadworldrules) ||
@@ -10768,4 +10769,16 @@ void command_apply_shared_memory(Client *c, const Seperator *sep) {
 		strcpy((char*)pack.pBuffer, hotfix_name.c_str());
 	}
 	worldserver.SendPacket(&pack);
+}
+
+void command_reloadperlexportsettings(Client *c, const Seperator *sep)
+{
+	if (c)
+	{
+		ServerPacket *pack = new ServerPacket(ServerOP_ReloadPerlExportSettings, 0);
+		worldserver.SendPacket(pack);
+		c->Message(13, "Successfully sent the packet to world to reload Perl Export settings");
+		safe_delete(pack);
+
+	}
 }

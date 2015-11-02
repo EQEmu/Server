@@ -477,6 +477,8 @@ RULE_BOOL(NPC, ReturnNonQuestNoDropItems, false)	// Returns NO DROP items on NPC
 RULE_INT(NPC, StartEnrageValue, 9) // % HP that an NPC will begin to enrage
 RULE_BOOL(NPC, LiveLikeEnrage, false) // If set to true then only player controlled pets will enrage
 RULE_BOOL(NPC, EnableMeritBasedFaction, false) // If set to true, faction will given in the same way as experience (solo/group/raid)
+RULE_INT(NPC, NPCToNPCAggroTimerMin, 500)
+RULE_INT(NPC, NPCToNPCAggroTimerMax, 6000)
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Aggro)

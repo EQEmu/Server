@@ -38,7 +38,7 @@
 
 
 extern Zone* zone;
-extern volatile bool ZoneLoaded;
+extern volatile bool is_zone_loaded;
 extern WorldServer worldserver;
 
 
@@ -864,7 +864,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 					}
 
 					CalculateNewFearpoint();
-					if(curfp)
+					if(currently_fleeing)
 					{
 						break;
 					}
@@ -3944,8 +3944,8 @@ void Mob::BuffFadeBySlot(int slot, bool iRecalcBonuses)
 			}
 
 			case SE_Blind:
-				if (curfp && !FindType(SE_Fear))
-					curfp = false;
+				if (currently_fleeing && !FindType(SE_Fear))
+					currently_fleeing = false;
 				break;
 
 			case SE_Fear:
@@ -3958,8 +3958,8 @@ void Mob::BuffFadeBySlot(int slot, bool iRecalcBonuses)
 							CastToClient()->AI_Stop();
 					}
 
-					if(curfp) {
-						curfp = false;
+					if(currently_fleeing) {
+						currently_fleeing = false;
 						break;
 					}
 				}
@@ -3974,7 +3974,7 @@ void Mob::BuffFadeBySlot(int slot, bool iRecalcBonuses)
 			{
 				if(RuleB(Combat, EnableFearPathing)){
 					if(flee_mode) {
-						curfp = true;
+						currently_fleeing = true;
 						CheckFlee();
 						break;
 					}

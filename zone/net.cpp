@@ -84,7 +84,7 @@
 #endif
 
 volatile bool RunLoops = true;
-extern volatile bool ZoneLoaded;
+extern volatile bool is_zone_loaded;
 
 TimeoutManager timeout_manager;
 NetConnection net;
@@ -110,6 +110,7 @@ extern void MapOpcodes();
 int main(int argc, char** argv) {
 	RegisterExecutablePlatform(ExePlatformZone); 
 	Log.LoadLogSettingsDefaults();
+
 	set_exception_handler(); 
 	QServ = new QueryServ;
 
@@ -339,6 +340,10 @@ int main(int argc, char** argv) {
 #ifdef EMBPERL
 	PerlembParser *perl_parser = new PerlembParser();
 	parse->RegisterQuestInterface(perl_parser, "pl");
+
+	/* Load Perl Event Export Settings */
+	parse->LoadPerlEventExportSettings(parse->perl_event_export_settings);
+
 #endif
 
 	//now we have our parser, load the quests
@@ -388,10 +393,10 @@ int main(int argc, char** argv) {
 
 		worldserver.Process();
 
-		if (!eqsf.IsOpen() && Config->ZonePort!=0) {
-			Log.Out(Logs::General, Logs::Zone_Server, "Starting EQ Network server on port %d",Config->ZonePort);
+		if (!eqsf.IsOpen() && Config->ZonePort != 0) {
+			Log.Out(Logs::General, Logs::Zone_Server, "Starting EQ Network server on port %d", Config->ZonePort);
 			if (!eqsf.Open(Config->ZonePort)) {
-				Log.Out(Logs::General, Logs::Error, "Failed to open port %d",Config->ZonePort);
+				Log.Out(Logs::General, Logs::Error, "Failed to open port %d", Config->ZonePort);
 				ZoneConfig::SetZonePort(0);
 				worldserver.Disconnect();
 				worldwasconnected = false;
@@ -405,7 +410,7 @@ int main(int argc, char** argv) {
 			//structures and opcodes for that patch.
 			struct in_addr	in;
 			in.s_addr = eqss->GetRemoteIP();
-			Log.Out(Logs::Detail, Logs::World_Server, "New connection from %s:%d", inet_ntoa(in),ntohs(eqss->GetRemotePort()));
+			Log.Out(Logs::Detail, Logs::World_Server, "New connection from %s:%d", inet_ntoa(in), ntohs(eqss->GetRemotePort()));
 			stream_identifier.AddStream(eqss);	//takes the stream
 		}
 
@@ -437,12 +442,12 @@ int main(int argc, char** argv) {
 			worldwasconnected = true;
 		}
 		else {
-			if (worldwasconnected && ZoneLoaded)
+			if (worldwasconnected && is_zone_loaded)
 				entity_list.ChannelMessageFromWorld(0, 0, 6, 0, 0, "WARNING: World server connection lost");
 			worldwasconnected = false;
 		}
 
-		if (ZoneLoaded && zoneupdate_timer.Check()) {
+		if (is_zone_loaded && zoneupdate_timer.Check()) {
 			{
 				if(net.group_timer.Enabled() && net.group_timer.Check())
 					entity_list.GroupProcess();

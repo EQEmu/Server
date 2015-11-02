@@ -1,5 +1,50 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 11/1/2015 ==
+Akkadius: Made many performance optimizing oriented code changes in the source
+	- Added Rate limit the rate in which signals are processed for NPC's (.5 seconds instead of .01 seconds)
+Akkadius: Added Perl Export Settings which should heavily reduce the Perl footprint
+	- Normally when any sub EVENT_ gets triggered, all kinds of variables have to get exported every single time an event is triggered and 
+		this can make Perl very slow when events are triggered constantly
+			- The two most taxing variable exports are the item variables ($itemcount{} $hasitem{} $oncursor{}) and qglobals ($qglobals{})
+			- qglobals can pose to be an issue quickly when global qglobals build up, it is highly recommend to use the GetGlobal() and SetGlobal()
+				methods instead as they don't reference the hashmap $qglobals{} that is rebuilt every single time a sub event is triggered
+	- A stress test conducted with 10,000 samples shows an excess of time taken to export variables: http://i.imgur.com/NEpW1tS.png
+	- After the Perl Export Settings table is implemented, and all exports are shut off you see the following test result:
+		http://i.imgur.com/Du5hth9.png
+	- The difference of eliminating uneeded exports brings the overhead and footprint of 10,000 triggers from 54 seconds to 2 seconds
+	- In a 10,000 sample test (10,000 sub event triggers), exporting item variables adds 12 seconds alone, when item variables are only needed in
+		EVENT_ITEM and EVENT_SAY a majority of the time if at all
+	- In a 10,000 sample test (10,000 sub event triggers), exporting qglobals with approximately 1,000 global qglobals in the database creates
+		about 11-20 seconds of delay on its own (Depending on hardware of course)
+	- I've written a parser that has determined which of these exports are needed in which sub routines and have turned off all of the unneeded
+		exports in sub routines that do not need them and used it to create the default table that will be installed in the database.
+	- The export table is called 'perl_event_export_settings' and it resembles the following structure and contains all current 81 EVENTS
+		- If an entry doesn't exist in this table and a new subroutine is added to the source, all exports will be on by default for that routine
+
+	+----------+-----------------------------------------+-----------------+------------+-------------+-------------+--------------+
+	| event_id | event_description                       | export_qglobals | export_mob | export_zone | export_item | export_event |
+	+----------+-----------------------------------------+-----------------+------------+-------------+-------------+--------------+
+	|        0 | EVENT_SAY                               |               1 |          1 |           1 |           1 |            1 |
+	|        1 | EVENT_ITEM                              |               1 |          1 |           1 |           0 |            1 |
+	|        2 | EVENT_DEATH                             |               1 |          1 |           1 |           0 |            1 |
+	|        3 | EVENT_SPAWN                             |               1 |          1 |           1 |           0 |            1 |
+	|        4 | EVENT_ATTACK                            |               0 |          1 |           1 |           0 |            1 |
+	|        5 | EVENT_COMBAT                            |               1 |          1 |           1 |           0 |            1 |
+	+----------+-----------------------------------------+-----------------+------------+-------------+-------------+--------------+
+	
+	- If a change is made to this table while the server is live and running, you can hot reload all zone process settings via:
+		#reloadperlexportsettings
+	- For those who wonder what "exports" are, they are reference to variables that are made available at runtime of the sub event, such as:
+		(export_qglobals) (Heavy) : $qglobals https://github.com/EQEmu/Server/blob/master/zone/embparser.cpp#L916
+		(export_item) (Heavy) : $itemcount{} $hasitem{} $oncursor{} https://github.com/EQEmu/Server/blob/master/zone/embparser.cpp#L1103
+		(export_zone) : $zoneid, $instanceid, $zoneln etc. https://github.com/EQEmu/Server/blob/master/zone/embparser.cpp#L1083
+		(export_mob) : $x, $y, $z, $h, $hpratio etc. https://github.com/EQEmu/Server/blob/master/zone/embparser.cpp#L1032
+		(export_event) : (event specific) IE: EVENT_SAY ($text) https://github.com/EQEmu/Server/blob/master/zone/embparser.cpp#L1141
+	
+== 10/16/2015 ==
+Uleat: Added command '#bot clearfollowdistance [ <target> | spawned | all ]' to coincide with the activation of the load/save feature for follow_distance
+
 == 10/13/2015 ==
 Uleat: Important update to 2015_09_30_bots.sql - fix for orphaned entries causing crashes during the conversion process
 Note: Please visit the thread below if you encounter issues during the conversion process

@@ -116,7 +116,7 @@ void EQEmuLogSys::LoadLogSettingsDefaults()
 		platform_file_name = "ucs";
 	else if (EQEmuLogSys::log_platform == EQEmuExePlatform::ExePlatformLogin)
 		platform_file_name = "login";
-	else if (EQEmuLogSys::log_platform == EQEmuExePlatform::ExePlatformLogin)
+	else if (EQEmuLogSys::log_platform == EQEmuExePlatform::ExePlatformLaunch)
 		platform_file_name = "launcher";
 }
 

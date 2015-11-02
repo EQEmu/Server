@@ -33,7 +33,7 @@ extern Zone* zone;
 //this is called whenever we are damaged to process possible fleeing
 void Mob::CheckFlee() {
 	//if were allready fleeing, dont need to check more...
-	if(flee_mode && curfp)
+	if(flee_mode && currently_fleeing)
 		return;
 
 	//dont bother if we are immune to fleeing
@@ -101,7 +101,7 @@ void Mob::ProcessFlee()
 	//When ImmuneToFlee effect fades it will turn fear back on and check if it can still flee.
 	if (flee_mode && (GetSpecialAbility(IMMUNE_FLEEING) || spellbonuses.ImmuneToFlee) &&
 			!spellbonuses.IsFeared && !spellbonuses.IsBlind) {
-		curfp = false;
+		currently_fleeing = false;
 		return;
 	}
 
@@ -118,7 +118,7 @@ void Mob::ProcessFlee()
 	//see if we are legitimately feared or blind now
 	if (!spellbonuses.IsFeared && !spellbonuses.IsBlind) {
 		//not feared or blind... were done...
-		curfp = false;
+		currently_fleeing = false;
 		return;
 	}
 }
@@ -140,7 +140,7 @@ void Mob::CalculateNewFearpoint()
 		if(Route.size() > 0)
 		{
             m_FearWalkTarget = glm::vec3(Loc.x, Loc.y, Loc.z);
-			curfp = true;
+			currently_fleeing = true;
 
 			Log.Out(Logs::Detail, Logs::None, "Feared to node %i (%8.3f, %8.3f, %8.3f)", Node, Loc.x, Loc.y, Loc.z);
 			return;
@@ -151,7 +151,7 @@ void Mob::CalculateNewFearpoint()
 
 	int loop = 0;
 	float ranx, rany, ranz;
-	curfp = false;
+	currently_fleeing = false;
 	while (loop < 100) //Max 100 tries
 	{
 		int ran = 250 - (loop*2);
@@ -164,11 +164,11 @@ void Mob::CalculateNewFearpoint()
 		float fdist = ranz - GetZ();
 		if (fdist >= -12 && fdist <= 12 && CheckCoordLosNoZLeaps(GetX(),GetY(),GetZ(),ranx,rany,ranz))
 		{
-			curfp = true;
+			currently_fleeing = true;
 			break;
 		}
 	}
-	if (curfp)
+	if (currently_fleeing)
         m_FearWalkTarget = glm::vec3(ranx, rany, ranz);
 	else //Break fear
 		BuffFadeByEffect(SE_Fear);

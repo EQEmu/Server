@@ -101,7 +101,7 @@ Copyright (C) 2001-2002 EQEMu Development Team (http://eqemu.org)
 
 
 extern Zone* zone;
-extern volatile bool ZoneLoaded;
+extern volatile bool is_zone_loaded;
 extern WorldServer worldserver;
 
 // this is run constantly for every mob

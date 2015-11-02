@@ -341,6 +341,7 @@
 9085|2015_07_01_Marquee_Rule.sql|SELECT * FROM `rule_values` WHERE `rule_name` LIKE '%Character:MarqueeHPUpdates%'|empty|
 9086|2015_07_02_aa_rework.sql|SHOW TABLES LIKE 'aa_ranks'|empty|
 9087|2015_09_25_inventory_snapshots.sql|SHOW TABLES LIKE 'inventory_snapshots'|empty|
+9088|2015_11_01_perl_event_export_settings.sql|SHOW TABLES LIKE 'perl_event_export_settings'|empty|
 
 # Upgrade conditions:
 # 	This won't be needed after this system is implemented, but it is used database that are not
