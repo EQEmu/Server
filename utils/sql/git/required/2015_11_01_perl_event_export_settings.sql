@@ -1,24 +1,3 @@
-/*
-Navicat MySQL Data Transfer
-
-Source Server         : localhost
-Source Server Version : 50505
-Source Host           : localhost:3306
-Source Database       : peq
-
-Target Server Type    : MYSQL
-Target Server Version : 50505
-File Encoding         : 65001
-
-Date: 2015-11-01 20:28:21
-*/
-
-SET FOREIGN_KEY_CHECKS=0;
-
--- ----------------------------
--- Table structure for perl_event_export_settings
--- ----------------------------
-DROP TABLE IF EXISTS `perl_event_export_settings`;
 CREATE TABLE `perl_event_export_settings` (
   `event_id` int(11) NOT NULL,
   `event_description` varchar(150) DEFAULT NULL,

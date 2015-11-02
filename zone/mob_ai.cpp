@@ -1364,6 +1364,8 @@ void Mob::AI_Process() {
 			*
 			*/
 
+			Log.Out(Logs::General, Logs::Zone_Server, "AI Scan area timer check for :: %s", this->GetCleanName());
+
 			Mob* tmptar = entity_list.AICheckCloseAggro(this, GetAggroRange(), GetAssistRange());
 			if (tmptar)
 				AddToHateList(tmptar);
