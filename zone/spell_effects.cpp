@@ -288,7 +288,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 					dmg = -dmg;
 					Damage(caster, dmg, spell_id, spell.skill, false, buffslot, false);
 				} else {
-					if (!PassCastRestriction(false, spells[spell_id].base2[i], true))
+					if (!PassCastRestriction(false, spells[spell_id].base2[i], false))
 						break;
 					HealDamage(dmg, caster);
 				}
