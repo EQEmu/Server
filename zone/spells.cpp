@@ -2267,7 +2267,9 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, uint16 slot, uint16 
 		}
 	}
 	// one may want to check if this is a disc or not, but we actually don't, there are non disc stuff that have end cost
-	if (spells[spell_id].EndurCost) {
+	// lets not consume end for custom items that have disc procs.
+	// One might also want to filter out USE_ITEM_SPELL_SLOT, but DISCIPLINE_SPELL_SLOT are both #defined to the same thing ...
+	if (spells[spell_id].EndurCost && !isproc) {
 		auto end_cost = spells[spell_id].EndurCost;
 		if (mgb)
 			end_cost *= 2;

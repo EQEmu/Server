@@ -283,9 +283,13 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 
 				//do any AAs apply to these spells?
 				if(dmg < 0) {
+					if (!PassCastRestriction(false, spells[spell_id].base2[i], true))
+						break;
 					dmg = -dmg;
 					Damage(caster, dmg, spell_id, spell.skill, false, buffslot, false);
 				} else {
+					if (!PassCastRestriction(false, spells[spell_id].base2[i], false))
+						break;
 					HealDamage(dmg, caster);
 				}
 				break;
@@ -3429,6 +3433,8 @@ void Mob::DoBuffTic(const Buffs_Struct &buff, int slot, Mob *caster)
 
 		switch (effect) {
 		case SE_CurrentHP: {
+			if (!PassCastRestriction(false, spells[buff.spellid].base2[i], true))
+				break;
 			effect_value = CalcSpellEffectValue(buff.spellid, i, buff.casterlevel, buff.instrument_mod,
 							    caster, buff.ticsremaining);
 			// Handle client cast DOTs here.
@@ -6224,16 +6230,17 @@ bool Mob::PassCastRestriction(bool UseCastRestriction,  int16 value, bool IsDama
 	Range 410 - 411 : UNKOWN
 	Range 500 - 599	: Heal if HP less than a specified value
 	Range 600 - 699	: Limit to Body Type [base2 - 600 = Body]
-	Range 700		: UNKNOWN
+	Range 700		: UNKNOWN -- Was added to higher HTs in Oct 21 2015 live patch
 	Range 701		: NOT PET
 	Range 800		: UKNOWN
 	Range 818 - 819 : If Undead/If Not Undead
 	Range 820 - 822	: UKNOWN
 	Range 835 		: Unknown *not implemented
-	Range 836 -	837	: Progression Server / Live Server *not implemented
-	Range 839 		: Unknown *not implemented
+	Range 836 -	837	: Progression Server / Live Server *not fully implemented
+	Range 839 		: Progression Server and GoD released -- broken until Oct 21 2015 on live *not fully implemented
 	Range 842 - 844 : Humaniod lv MAX ((842 - 800) * 2)
 	Range 845 - 847	: UNKNOWN
+	Range 860 - 871	: Humanoid lv MAX 860 = 90, 871 = 104 *not implemented
 	Range 10000 - 11000	: Limit to Race [base2 - 10000 = Race] (*Not on live: Too useful a function to not implement)
 	THIS IS A WORK IN PROGRESS
 	*/
@@ -6401,6 +6408,15 @@ bool Mob::PassCastRestriction(bool UseCastRestriction,  int16 value, bool IsDama
 				if (GetBodyType() != BT_Undead)
 					return true;
 				break;
+
+			case 836:
+				return true; // todo implement progression flag assume not progression for now
+
+			case 837:
+				return false; // todo implement progression flag assume not progression for now
+
+			case 839:
+				return true; // todo implement progression flag assume not progression for now, this one is a check if GoD is live
 
 			case 842:
 				if (GetBodyType() == BT_Humanoid && GetLevel() <= 84)

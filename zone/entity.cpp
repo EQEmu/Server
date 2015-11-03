@@ -2438,6 +2438,8 @@ void EntityList::Depop(bool StartSpawnTimer)
 			if (pnpc->IsFindable())
 				UpdateFindableNPCState(pnpc, true);
 
+			pnpc->WipeHateList();
+
 			pnpc->Depop(StartSpawnTimer);
 		}
 	}

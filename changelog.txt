@@ -1,5 +1,16 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 11/2/2015 ==
+Akkadius: Performance boost (exponential) - Adjusted default idle cast check timers in rules
+	- Spells:AI_IdleNoSpellMinRecast	500 (Now 6000) 6 seconds
+	- Spells:AI_IdleNoSpellMaxRecast	2000 (Now 60000) 60 seconds
+	- Database version 9089 will take care of this update automatically only if you used the default values
+	- The CPU cost of NPC's checking the entire entity list to cast beneficial spells (Heals/Buffs) becomes extremely high when higher NPC count zones exist (Based off of process profiling)
+			- Distance checks for every single NPC to every single other NPC who are casting beneficial spells occur every .5 - 2 seconds unless npc_spells dictates other values, which most of the time it does not
+	- Zones that once fluctuated from 1-8% CPU with no activity (Idle but players present) now idle at .5% based on my testings due 
+		to this change in conjunction with the past few performance commits, these are zones that have 600-800 NPC's in them
+	- These values normally are overidden by the spells table (npc_spells), fields (idle_no_sp_recast_min, idle_no_sp_recast_max)
+
 == 11/1/2015 ==
 Akkadius: Made many performance optimizing oriented code changes in the source
 	- Added Rate limit the rate in which signals are processed for NPC's (.5 seconds instead of .01 seconds)
