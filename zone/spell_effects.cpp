@@ -3433,6 +3433,8 @@ void Mob::DoBuffTic(const Buffs_Struct &buff, int slot, Mob *caster)
 
 		switch (effect) {
 		case SE_CurrentHP: {
+			if (!PassCastRestriction(false, spells[buff.spellid].base2[i], true))
+				break;
 			effect_value = CalcSpellEffectValue(buff.spellid, i, buff.casterlevel, buff.instrument_mod,
 							    caster, buff.ticsremaining);
 			// Handle client cast DOTs here.
