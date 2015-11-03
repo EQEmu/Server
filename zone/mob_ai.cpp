@@ -1364,9 +1364,14 @@ void Mob::AI_Process() {
 			*
 			*/
 
-			Mob* tmptar = entity_list.AICheckCloseAggro(this, GetAggroRange(), GetAssistRange());
-			if (tmptar)
-				AddToHateList(tmptar);
+			Mob* temp_target = entity_list.AICheckCloseAggro(this, GetAggroRange(), GetAssistRange());
+			if (temp_target){
+				AddToHateList(temp_target);
+			}
+
+			AI_scan_area_timer->Disable();
+			AI_scan_area_timer->Start(RandomTimer(RuleI(NPC, NPCToNPCAggroTimerMin), RuleI(NPC, NPCToNPCAggroTimerMax)), false);
+
 		}
 		else if (AI_movement_timer->Check() && !IsRooted())
 		{
