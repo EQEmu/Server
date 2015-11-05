@@ -3737,9 +3737,9 @@ Bot* Bot::LoadBot(uint32 botID, std::string* errorMessage)
 		" `drakkin_tattoo`,"
 		" `drakkin_details`,"
 		" `ac`,"				/*not in-use[26]*/
-		" `atk`,"
+		" `atk`,"				/*not in-use[27]*/
 		" `hp`,"
-		" `mana`,"				/*not in-use[29]*/
+		" `mana`,"
 		" `str`,"				/*not in-use[30]*/
 		" `sta`,"				/*not in-use[31]*/
 		" `cha`,"				/*not in-use[32]*/
@@ -3753,8 +3753,8 @@ Bot* Bot::LoadBot(uint32 botID, std::string* errorMessage)
 		" `poison`,"			/*not in-use[40]*/
 		" `disease`,"			/*not in-use[41]*/
 		" `corruption`,"		/*not in-use[42]*/
-		" `show_helm`,"
-		" `follow_distance`"
+		" `show_helm`,"//43
+		" `follow_distance`"//44
 		" FROM `bot_data`"
 		" WHERE `bot_id` = '%u'",
 		botID
@@ -3791,8 +3791,8 @@ Bot* Bot::LoadBot(uint32 botID, std::string* errorMessage)
 		atoi(row[23]),
 		atoi(row[24]),
 		atoi(row[25]),
-		atoi(row[27]),
 		atoi(row[28]),
+		atoi(row[29]),
 		defaultNPCTypeStruct.MR,
 		defaultNPCTypeStruct.CR,
 		defaultNPCTypeStruct.DR,
