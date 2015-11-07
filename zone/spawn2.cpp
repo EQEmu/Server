@@ -351,6 +351,112 @@ void Spawn2::DeathReset(bool realdeath)
 	}
 }
 
+bool ZoneDatabase::PopulateZoneSpawnListClose(uint32 zoneid, LinkedList<Spawn2*> &spawn2_list, int16 version, const glm::vec4& client_position, uint32 repop_distance)
+{
+	std::unordered_map<uint32, uint32> spawn_times;
+
+	float mob_distance = 0;
+
+	timeval tv;
+	gettimeofday(&tv, nullptr);
+
+	/* Bulk Load NPC Types Data into the cache */
+	database.LoadNPCTypesData(0, true);
+
+	std::string spawn_query = StringFormat(
+		"SELECT "
+		"respawn_times.id, "
+		"respawn_times.`start`, "
+		"respawn_times.duration "
+		"FROM "
+		"respawn_times "
+		"WHERE instance_id = %u",
+		zone->GetInstanceID()
+		);
+	auto results = QueryDatabase(spawn_query);
+	for (auto row = results.begin(); row != results.end(); ++row) {
+		uint32 start_duration = atoi(row[1]) > 0 ? atoi(row[1]) : 0;
+		uint32 end_duration = atoi(row[2]) > 0 ? atoi(row[2]) : 0;
+
+		/* Our current time was expired */
+		if ((start_duration + end_duration) <= tv.tv_sec) {
+			spawn_times[atoi(row[0])] = 0;
+		}
+		/* We still have time left on this timer */
+		else {
+			spawn_times[atoi(row[0])] = ((start_duration + end_duration) - tv.tv_sec) * 1000;
+		}
+	}
+
+	const char *zone_name = database.GetZoneName(zoneid);
+	std::string query = StringFormat(
+		"SELECT "
+		"id, "
+		"spawngroupID, "
+		"x, "
+		"y, "
+		"z, "
+		"heading, "
+		"respawntime, "
+		"variance, "
+		"pathgrid, "
+		"_condition, "
+		"cond_value, "
+		"enabled, "
+		"animation "
+		"FROM "
+		"spawn2 "
+		"WHERE zone = '%s' AND version = %u",
+		zone_name,
+		version
+		);
+	results = QueryDatabase(query);
+
+	if (!results.Success()) {
+		return false;
+	}
+
+	for (auto row = results.begin(); row != results.end(); ++row) {
+
+		uint32 spawn_time_left = 0;
+		Spawn2* new_spawn = 0;
+		bool perl_enabled = atoi(row[11]) == 1 ? true : false;
+
+		if (spawn_times.count(atoi(row[0])) != 0)
+			spawn_time_left = spawn_times[atoi(row[0])];
+
+		glm::vec4 point;
+		point.x = atof(row[2]);
+		point.y = atof(row[3]);
+
+		mob_distance = DistanceNoZ(client_position, point);
+
+		if (mob_distance > repop_distance)
+			continue;
+
+		new_spawn = new Spawn2(							   // 
+			atoi(row[0]), 								   // uint32 in_spawn2_id
+			atoi(row[1]), 								   // uint32 spawngroup_id
+			atof(row[2]), 								   // float in_x
+			atof(row[3]), 								   // float in_y
+			atof(row[4]),								   // float in_z
+			atof(row[5]), 								   // float in_heading
+			atoi(row[6]), 								   // uint32 respawn
+			atoi(row[7]), 								   // uint32 variance
+			spawn_time_left,							   // uint32 timeleft
+			atoi(row[8]),								   // uint32 grid
+			atoi(row[9]), 								   // uint16 in_cond_id
+			atoi(row[10]), 								   // int16 in_min_value
+			perl_enabled, 								   // bool in_enabled
+			(EmuAppearance)atoi(row[12])				   // EmuAppearance anim
+			);
+
+		spawn2_list.Insert(new_spawn);
+	}
+
+	return true;
+}
+
 bool ZoneDatabase::PopulateZoneSpawnList(uint32 zoneid, LinkedList<Spawn2*> &spawn2_list, int16 version, uint32 repopdelay) {
 
 	std::unordered_map<uint32, uint32> spawn_times;

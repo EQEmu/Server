@@ -1445,6 +1445,29 @@ void Zone::ClearNPCTypeCache(int id) {
 	}
 }
 
+void Zone::RepopClose(const glm::vec4& client_position, uint32 repop_distance)
+{
+
+	if (!Depop())
+		return;
+
+	LinkedListIterator<Spawn2*> iterator(spawn2_list);
+
+	iterator.Reset();
+	while (iterator.MoreElements()) {
+		iterator.RemoveCurrent();
+	}
+
+	quest_manager.ClearAllTimers();
+
+	if (!database.PopulateZoneSpawnListClose(zoneid, spawn2_list, GetInstanceVersion(), client_position, repop_distance))
+		Log.Out(Logs::General, Logs::None, "Error in Zone::Repop: database.PopulateZoneSpawnList failed");
+
+	initgrids_timer.Start();
+
+	mod_repop();
+}
+
 void Zone::Repop(uint32 delay) {
 
 	if(!Depop())

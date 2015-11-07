@@ -1,5 +1,11 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 11/7/2015 ==
+Akkadius: Implemented #repopclose [distance in units] - Used for development purposes, defaults to 500 units
+	- Real case use: Large zones with 700 NPC's and you are making fast quick tweaks to nearby NPC's you can refresh just the NPC's around you instead of all in the zone
+	- This can be quite the time saver
+	- This command will depop all NPC's and only respawn the NPC's that are 500 units around you or unless you specify otherwise
+
 == 11/2/2015 ==
 Akkadius: Performance boost (exponential) - Adjusted default idle cast check timers in rules
 	- Spells:AI_IdleNoSpellMinRecast	500 (Now 6000) 6 seconds
