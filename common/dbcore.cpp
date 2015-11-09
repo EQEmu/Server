@@ -129,7 +129,7 @@ MySQLRequestResult DBcore::QueryDatabase(const char* query, uint32 querylen, boo
 	
 	if (Log.log_settings[Logs::MySQLQuery].is_category_enabled == 1)
 	{
-		if ((strlen(query) > 6) && (_memicmp(query, "select", 6) == 0))
+		if ((strncasecmp(query, "select", 6) == 0))
 			Log.Out(Logs::General, Logs::MySQLQuery, "%s (%u row%s returned)", query, requestResult.RowCount(), requestResult.RowCount() == 1 ? "" : "s");
 		else
 			Log.Out(Logs::General, Logs::MySQLQuery, "%s (%u row%s affected)", query, requestResult.RowsAffected(), requestResult.RowsAffected() == 1 ? "" : "s");
