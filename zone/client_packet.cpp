@@ -386,6 +386,7 @@ void MapOpcodes()
 	ConnectedOpcodes[OP_WhoAllRequest] = &Client::Handle_OP_WhoAllRequest;
 	ConnectedOpcodes[OP_WorldUnknown001] = &Client::Handle_OP_Ignore;
 	ConnectedOpcodes[OP_XTargetAutoAddHaters] = &Client::Handle_OP_XTargetAutoAddHaters;
+	ConnectedOpcodes[OP_XTargetOpen] = &Client::Handle_OP_XTargetOpen;
 	ConnectedOpcodes[OP_XTargetRequest] = &Client::Handle_OP_XTargetRequest;
 	ConnectedOpcodes[OP_YellForHelp] = &Client::Handle_OP_YellForHelp;
 	ConnectedOpcodes[OP_ZoneChange] = &Client::Handle_OP_ZoneChange;
@@ -13923,6 +13924,18 @@ void Client::Handle_OP_XTargetAutoAddHaters(const EQApplicationPacket *app)
 	}
 
 	XTargetAutoAddHaters = app->ReadUInt8(0);
+}
+
+void Client::Handle_OP_XTargetOpen(const EQApplicationPacket *app)
+{
+	if (app->size != 4) {
+		Log.Out(Logs::General, Logs::None, "Size mismatch in OP_XTargetOpen, expected 1, got %i", app->size);
+		DumpPacket(app);
+		return;
+	}
+
+	auto outapp = new EQApplicationPacket(OP_XTargetOpenResponse, 0);
+	FastQueuePacket(&outapp);
 }
 
 void Client::Handle_OP_XTargetRequest(const EQApplicationPacket *app)
