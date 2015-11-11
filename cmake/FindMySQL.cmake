@@ -52,7 +52,7 @@ IF(MYSQL_ROOT)
 	)
 ELSE(MYSQL_ROOT)
 	FIND_LIBRARY(MySQL_LIBRARY
-		NAMES ${MySQL_NAMES}
+		NAMES ${MySQL_NAMES} mysqlclient_r mysqlclient
 		PATHS /usr/lib /usr/local/lib /usr/lib64 /usr/local/lib64
 		PATH_SUFFIXES mysql
 	)
