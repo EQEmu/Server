@@ -2924,7 +2924,6 @@ void Client::Handle_OP_AugmentItem(const EQApplicationPacket *app)
 		return;
 	}
 
-	// Delegate to tradeskill object to perform combine
 	AugmentItem_Struct* in_augment = (AugmentItem_Struct*)app->pBuffer;
 	bool deleteItems = false;
 	if (GetClientVersion() >= ClientVersion::RoF)
@@ -2934,7 +2933,7 @@ void Client::Handle_OP_AugmentItem(const EQApplicationPacket *app)
 		//Log.Out(Logs::DebugLevel::Moderate, Logs::Debug, "cslot: %i aslot: %i cidx: %i aidx: %i act: %i dest: %i",
 		//	in_augment->container_slot, in_augment->augment_slot, in_augment->container_index, in_augment->augment_index, in_augment->augment_action, in_augment->dest_inst_id);
 
-		ItemInst *tobe_auged = nullptr, *new_aug = nullptr, *old_aug = nullptr, *aug = nullptr, *solvent = nullptr;
+		ItemInst *tobe_auged = nullptr, *old_aug = nullptr, *new_aug = nullptr, *aug = nullptr, *solvent = nullptr;
 		Inventory& user_inv = GetInv();
 
 		uint16 item_slot = in_augment->container_slot;
@@ -2949,7 +2948,6 @@ void Client::Handle_OP_AugmentItem(const EQApplicationPacket *app)
 
 		tobe_auged = user_inv.GetItem(item_slot);
 		solvent = user_inv.GetItem(solvent_slot);
-		new_aug = user_inv.GetItem(MainCursor);
 
 		if (!tobe_auged)
 		{
@@ -2996,7 +2994,15 @@ void Client::Handle_OP_AugmentItem(const EQApplicationPacket *app)
 		{
 			case 0: // Adding an augment
 			case 2: // Swapping augment
-				if (new_aug)
+				new_aug = user_inv.GetItem(MainCursor);
+
+				if (!new_aug) // Shouldn't get the OP code without the augment on the user's cursor, but maybe it's h4x.
+				{
+					Log.Out(Logs::General, Logs::Error, "AugmentItem OpCode with 'Insert' or 'Swap' action received, but no augment on client's cursor.");
+					Message(13, "Error: No augment found on cursor for inserting.");
+					return;
+				}
+				else
 				{
 					if (((tobe_auged->IsAugmentSlotAvailable(new_aug->GetAugmentType(), in_augment->augment_index)) != -1) &&
 						(tobe_auged->AvailableWearSlot(new_aug->GetItem()->Slots)))
@@ -3014,7 +3020,6 @@ void Client::Handle_OP_AugmentItem(const EQApplicationPacket *app)
 
 							args.assign(1, tobe_auged);
 							args.push_back(false);
-
 							parse->EventItem(EVENT_AUGMENT_REMOVE, this, old_aug, nullptr, "", in_augment->augment_index, &args);
 						}
 
@@ -3057,27 +3062,29 @@ void Client::Handle_OP_AugmentItem(const EQApplicationPacket *app)
 
 							if (itemTwoToPush)
 							{
-								// Return the old aug to the player's cursor
-
-								PutItemInInventory(MainCursor, *itemTwoToPush, true);
+								// This is a swap. Return the old aug to the player's cursor.
+								if (PutItemInInventory(MainCursor, *itemTwoToPush, true))
+								{
+									Log.Out(Logs::General, Logs::Error, "Problem returning old augment to player's cursor after augmentation swap.");
+									Message(15, "Error: Failed to retrieve old augment after augmentation swap!");
+								}
 							}
 
 							if (PutItemInInventory(item_slot, *itemOneToPush, true))
 							{
-								CalcBonuses();
 								// Successfully added an augment to the item
+
+								CalcBonuses();
+
 								if (mat != _MaterialInvalid)
 								{
 									SendWearChange(mat); // Visible item augged while equipped. Send WC in case ornamentation changed.
 								}
-								return;
 							}
 							else
 							{
 								Message(13, "Error: No available slot for end result. Please free up the augment slot.");
 							}
-
-							return;
 						}
 						else
 						{
@@ -3109,37 +3116,49 @@ void Client::Handle_OP_AugmentItem(const EQApplicationPacket *app)
 					Message(13, "Error: Could not find augmentation to remove at index %i. Aborting.", in_augment->augment_index);
 					return;
 				}
+				
 				old_aug = tobe_auged->RemoveAugment(in_augment->augment_index);
 				tobe_auged->UpdateOrnamentationInfo();
 
 				itemOneToPush = tobe_auged->Clone();
 				if (old_aug)
 					itemTwoToPush = old_aug->Clone();
+
 				if (itemOneToPush && itemTwoToPush)
 				{
-					DeleteItemInInventory(item_slot, 0, true);
+					// Consume the augment distiller
 					DeleteItemInInventory(solvent_slot, solvent->IsStackable() ? 1 : 0, true);
 
+					// Remove the augmented item
+					DeleteItemInInventory(item_slot, 0, true);
+
+					// Replace it with the unaugmented item
 					if (!PutItemInInventory(item_slot, *itemOneToPush, true))
 					{
-						Message(15, "Failed to remove augment properly!");
+						Log.Out(Logs::General, Logs::Error, "Problem returning equipment item to player's inventory after safe augment removal.");
+						Message(15, "Error: Failed to return item after de-augmentation!");
 					}
 
-					if (PutItemInInventory(MainCursor, *itemTwoToPush, true))
+					CalcBonuses();
+					
+					if (mat != _MaterialInvalid)
 					{
-						CalcBonuses();
-						//Message(15, "Successfully removed an augmentation!");
-						if (mat != _MaterialInvalid)
-						{
-							SendWearChange(mat); // Visible item augged while equipped. Send WC in case ornamentation changed.
-						}
+						SendWearChange(mat); // Visible item augged while equipped. Send WC in case ornamentation changed.
+					}
+
+					// Drop the removed augment on the player's cursor
+					if (!PutItemInInventory(MainCursor, *itemTwoToPush, true))
+					{
+						Log.Out(Logs::General, Logs::Error, "Problem returning augment to player's cursor after safe removal.");
+						Message(15, "Error: Failed to return augment after removal from item!");
+						return;
 					}
 				}
 				break;
 			case 3: // Destroying augment (formerly done in birdbath/sealer with a solvent)
 
-					// RoF client does not require an augmentation solvent for destroying an augmentation in an item.
-					// Augments can be destroyed with a right click -> Destroy at any time.
+				// RoF client does not require an augmentation solvent for destroying an augmentation in an item.
+				// Augments can be destroyed with a right click -> Destroy at any time.
 
 				aug = tobe_auged->GetAugment(in_augment->augment_index);
 				if (aug)
@@ -3170,12 +3189,13 @@ void Client::Handle_OP_AugmentItem(const EQApplicationPacket *app)
 
 					if (!PutItemInInventory(item_slot, *itemOneToPush, true))
 					{
-						Message(15, "Failed to destroy augment properly!");
+						Log.Out(Logs::General, Logs::Error, "Problem returning equipment item to player's inventory after augment deletion.");
+						Message(15, "Error: Failed to return item after destroying augment!");
 					}
 				}
 
 				CalcBonuses();
-				//Message(15, "Successfully removed an augmentation!");
+
 				if (mat != _MaterialInvalid)
 				{
 					SendWearChange(mat);
@@ -3189,6 +3209,7 @@ void Client::Handle_OP_AugmentItem(const EQApplicationPacket *app)
 	}
 	else
 	{
+		// Delegate to tradeskill object to perform combine
 		Object::HandleAugmentation(this, in_augment, m_tradeskill_object);
 	}
 	return;
