@@ -4623,7 +4623,7 @@ struct ClickEffectStruct
 
 struct ProcEffectStruct
 {
-	uint32 effect;
+	int32 effect;
 	uint8 level2;
 	uint32 type;
 	uint8 level;
@@ -4638,7 +4638,7 @@ struct ProcEffectStruct
 
 struct WornEffectStruct //worn, focus and scroll effect
 {
-	uint32 effect;
+	int32 effect;
 	uint8 level2;
 	uint32 type;
 	uint8 level;

@@ -997,23 +997,23 @@ void SharedDatabase::LoadItems(void *data, uint32 size, int32 items, uint32 max_
 
         strcpy(item.CharmFile,row[ItemField::charmfile]);
 
-        item.Proc.Effect = (uint16)atoul(row[ItemField::proceffect]);
+        item.Proc.Effect = (int32)atoul(row[ItemField::proceffect]);
         item.Proc.Type = (uint8)atoul(row[ItemField::proctype]);
         item.Proc.Level = (uint8)atoul(row[ItemField::proclevel]);
         item.Proc.Level2 = (uint8)atoul(row[ItemField::proclevel2]);
-        item.Worn.Effect = (uint16)atoul(row[ItemField::worneffect]);
+        item.Worn.Effect = (int32)atoul(row[ItemField::worneffect]);
         item.Worn.Type = (uint8)atoul(row[ItemField::worntype]);
         item.Worn.Level = (uint8)atoul(row[ItemField::wornlevel]);
         item.Worn.Level2 = (uint8)atoul(row[ItemField::wornlevel2]);
-        item.Focus.Effect = (uint16)atoul(row[ItemField::focuseffect]);
+        item.Focus.Effect = (int32)atoul(row[ItemField::focuseffect]);
         item.Focus.Type = (uint8)atoul(row[ItemField::focustype]);
         item.Focus.Level = (uint8)atoul(row[ItemField::focuslevel]);
         item.Focus.Level2 = (uint8)atoul(row[ItemField::focuslevel2]);
-        item.Scroll.Effect = (uint16)atoul(row[ItemField::scrolleffect]);
+        item.Scroll.Effect = (int32)atoul(row[ItemField::scrolleffect]);
         item.Scroll.Type = (uint8)atoul(row[ItemField::scrolltype]);
         item.Scroll.Level = (uint8)atoul(row[ItemField::scrolllevel]);
         item.Scroll.Level2 = (uint8)atoul(row[ItemField::scrolllevel2]);
-        item.Bard.Effect = (uint16)atoul(row[ItemField::bardeffect]);
+        item.Bard.Effect = (int32)atoul(row[ItemField::bardeffect]);
         item.Bard.Type = (uint8)atoul(row[ItemField::bardtype]);
         item.Bard.Level = (uint8)atoul(row[ItemField::bardlevel]);
         item.Bard.Level2 = (uint8)atoul(row[ItemField::bardlevel2]);
