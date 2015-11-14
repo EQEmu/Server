@@ -3063,7 +3063,7 @@ void Client::Handle_OP_AugmentItem(const EQApplicationPacket *app)
 							if (itemTwoToPush)
 							{
 								// This is a swap. Return the old aug to the player's cursor.
-								if (PutItemInInventory(MainCursor, *itemTwoToPush, true))
+								if (!PutItemInInventory(MainCursor, *itemTwoToPush, true))
 								{
 									Log.Out(Logs::General, Logs::Error, "Problem returning old augment to player's cursor after augmentation swap.");
 									Message(15, "Error: Failed to retrieve old augment after augmentation swap!");
