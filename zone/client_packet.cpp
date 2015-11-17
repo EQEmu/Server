@@ -6683,20 +6683,6 @@ void Client::Handle_OP_GuildBank(const EQApplicationPacket *app)
 	uint32 Action = VARSTRUCT_DECODE_TYPE(uint32, Buffer);
 	uint32 sentAction = Action;
 
-	if (GetClientVersion() >= ClientVersion::RoF)
-	{
-		Action += 1;
-		/*
-		// Need to find all of the action types for RoF and switch case here
-		switch(Action)
-		{
-		case 4:
-			Action = 5;
-			break;
-		}
-		*/
-	}
-
 	if (!IsInAGuild())
 	{
 		Message(13, "You must be in a Guild to use the Guild Bank.");

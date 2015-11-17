@@ -4724,6 +4724,22 @@ struct GuildBankItemUpdate_Struct
 /*226*/	uint16	Unknown226;
 };
 
+// newer clients (RoF+) send a list that contains 240 entries
+// The packets don't actually use all 64 chars in the strings, but we'll just overallocate for these
+struct GuildBankItemListEntry_Struct
+{
+	uint8 vaild;
+	uint32 permissions;
+	char whofor[64];
+	char donator[64];
+	uint32 item_id;
+	uint32 item_icon;
+	uint32 quantity;
+	uint8 allow_merge; // 1 here for non-full stacks
+	uint8 usable;
+	char item_name[64];
+};
+
 struct GuildBankClear_Struct
 {
 /*00*/	uint32	Action;
