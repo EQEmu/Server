@@ -53,7 +53,7 @@
 #endif
 
 extern Zone* zone;
-extern volatile bool ZoneLoaded;
+extern volatile bool is_zone_loaded;
 extern EntityList entity_list;
 
 NPC::NPC(const NPCType* d, Spawn2* in_respawn, const glm::vec4& position, int iflymode, bool IsCorpse)
@@ -605,7 +605,7 @@ bool NPC::Process()
 		parse->EventNPC(EVENT_TICK, this, nullptr, "", 0);
 		BuffProcess();
 
-		if(curfp)
+		if(currently_fleeing)
 			ProcessFlee();
 
 		uint32 bonus = 0;

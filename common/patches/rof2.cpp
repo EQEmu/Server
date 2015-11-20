@@ -1250,6 +1250,54 @@ namespace RoF2
 		dest->FastQueuePacket(&outapp);
 	}
 
+	ENCODE(OP_GuildBank)
+	{
+		auto in = *p;
+		*p = nullptr;
+		auto outapp = new EQApplicationPacket(OP_GuildBank, in->size + 4); // all of them are 4 bytes bigger
+
+		// The first action in the enum was removed, everything 1 less
+		// Normally we cast them to their structs, but there are so many here! will only do when it's easier
+		switch (in->ReadUInt32()) {
+		case 10: // GuildBankAcknowledge
+			outapp->WriteUInt32(9);
+			outapp->WriteUInt32(in->ReadUInt32());
+			outapp->WriteUInt32(0);
+			break;
+		case 5: // GuildBankDeposit (ack)
+			outapp->WriteUInt32(4);
+			outapp->WriteUInt32(in->ReadUInt32());
+			outapp->WriteUInt32(0);
+			outapp->WriteUInt32(in->ReadUInt32());
+			break;
+		case 1: { // GuildBankItemUpdate
+			auto emu = (GuildBankItemUpdate_Struct *)in->pBuffer;
+			auto eq = (structs::GuildBankItemUpdate_Struct *)outapp->pBuffer;
+			eq->Action = 0;
+			OUT(Unknown004);
+			eq->Unknown08 = 0;
+			OUT(SlotID);
+			OUT(Area);
+			OUT(Unknown012);
+			OUT(ItemID);
+			OUT(Icon);
+			OUT(Quantity);
+			OUT(Permissions);
+			OUT(AllowMerge);
+			OUT(Useable);
+			OUT_str(ItemName);
+			OUT_str(Donator);
+			OUT_str(WhoFor);
+			OUT(Unknown226);
+			break;
+		}
+		default:
+			break;
+		}
+		delete in;
+		dest->FastQueuePacket(&outapp);
+	}
+
 	ENCODE(OP_GuildMemberList)
 	{
 		//consume the packet
@@ -4737,6 +4785,92 @@ namespace RoF2
 	{
 		//Log.LogDebugType(Logs::General, Logs::Netcode, "[ERROR] Received incoming OP_GroupInvite2. Forwarding");
 		DECODE_FORWARD(OP_GroupInvite);
+	}
+
+	DECODE(OP_GuildBank)
+	{
+		// all actions are 1 off due to the removal of one of enums
+		switch (__packet->ReadUInt32()) {
+		case 2: {// GuildBankPromote
+			DECODE_LENGTH_EXACT(structs::GuildBankPromote_Struct);
+			SETUP_DIRECT_DECODE(GuildBankPromote_Struct, structs::GuildBankPromote_Struct);
+			emu->Action = 3;
+			IN(Unknown04);
+			IN(Slot);
+			IN(Slot2);
+			FINISH_DIRECT_DECODE();
+			return;
+		}
+		case 3: { // GuildBankViewItem
+			DECODE_LENGTH_EXACT(structs::GuildBankViewItem_Struct);
+			SETUP_DIRECT_DECODE(GuildBankViewItem_Struct, structs::GuildBankViewItem_Struct);
+			emu->Action = 4;
+			IN(Unknown04);
+			IN(SlotID);
+			IN(Area);
+			IN(Unknown12);
+			IN(Unknown16);
+			FINISH_DIRECT_DECODE();
+			return;
+		}
+		case 4: { // GuildBankDeposit
+			__packet->WriteUInt32(5);
+			return;
+		}
+		case 5: { // GuildBankPermissions
+			DECODE_LENGTH_EXACT(structs::GuildBankPermissions_Struct);
+			SETUP_DIRECT_DECODE(GuildBankPermissions_Struct, structs::GuildBankPermissions_Struct);
+			emu->Action = 6;
+			IN(Unknown04);
+			IN(SlotID);
+			IN(Unknown10);
+			IN(ItemID);
+			IN(Permissions);
+			strn0cpy(emu->MemberName, eq->MemberName, 64);
+			FINISH_DIRECT_DECODE();
+			return;
+		}
+		case 6: { // GuildBankWithdraw
+			DECODE_LENGTH_EXACT(structs::GuildBankWithdrawItem_Struct);
+			SETUP_DIRECT_DECODE(GuildBankWithdrawItem_Struct, structs::GuildBankWithdrawItem_Struct);
+			emu->Action = 7;
+			IN(Unknown04);
+			IN(SlotID);
+			IN(Area);
+			IN(Unknown12);
+			IN(Quantity);
+			FINISH_DIRECT_DECODE();
+			return;
+		}
+		case 7: { // GuildBankSplitStacks
+			DECODE_LENGTH_EXACT(structs::GuildBankWithdrawItem_Struct);
+			SETUP_DIRECT_DECODE(GuildBankWithdrawItem_Struct, structs::GuildBankWithdrawItem_Struct);
+			emu->Action = 8;
+			IN(Unknown04);
+			IN(SlotID);
+			IN(Area);
+			IN(Unknown12);
+			IN(Quantity);
+			FINISH_DIRECT_DECODE();
+			return;
+		}
+		case 8: { // GuildBankMergeStacks
+			DECODE_LENGTH_EXACT(structs::GuildBankWithdrawItem_Struct);
+			SETUP_DIRECT_DECODE(GuildBankWithdrawItem_Struct, structs::GuildBankWithdrawItem_Struct);
+			emu->Action = 9;
+			IN(Unknown04);
+			IN(SlotID);
+			IN(Area);
+			IN(Unknown12);
+			IN(Quantity);
+			FINISH_DIRECT_DECODE();
+			return;
+		}
+		default:
+			Log.Out(Logs::Detail, Logs::Netcode, "Unhandled OP_GuildBank action");
+			__packet->SetOpcode(OP_Unknown); /* invalidate the packet */
+			return;
+		}
 	}
 
 	DECODE(OP_GuildDemote)

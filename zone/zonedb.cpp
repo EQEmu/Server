@@ -46,7 +46,7 @@ void ZoneDatabase::ZDBInitVars() {
 ZoneDatabase::~ZoneDatabase() {
 	unsigned int x;
 	if (npc_spells_cache) {
-		for (x=0; x<=npc_spells_maxid; x++) {
+		for (x = 0; x <= npc_spells_maxid; x++) {
 			safe_delete_array(npc_spells_cache[x]);
 		}
 		safe_delete_array(npc_spells_cache);
@@ -54,7 +54,7 @@ ZoneDatabase::~ZoneDatabase() {
 	safe_delete_array(npc_spells_loadtried);
 
 	if (npc_spellseffects_cache) {
-		for (x=0; x<=npc_spellseffects_maxid; x++) {
+		for (x = 0; x <= npc_spellseffects_maxid; x++) {
 			safe_delete_array(npc_spellseffects_cache[x]);
 		}
 		safe_delete_array(npc_spellseffects_cache);
@@ -62,7 +62,7 @@ ZoneDatabase::~ZoneDatabase() {
 	safe_delete_array(npc_spellseffects_loadtried);
 
 	if (faction_array != nullptr) {
-		for (x=0; x <= max_faction; x++) {
+		for (x = 0; x <= max_faction; x++) {
 			if (faction_array[x] != 0)
 				safe_delete(faction_array[x]);
 		}

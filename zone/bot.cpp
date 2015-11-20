@@ -6,7 +6,7 @@
 #include "quest_parser_collection.h"
 #include "../common/string_util.h"
 
-extern volatile bool ZoneLoaded;
+extern volatile bool is_zone_loaded;
 
 // This constructor is used during the bot create command
 Bot::Bot(NPCType npcTypeData, Client* botOwner) : NPC(&npcTypeData, nullptr, glm::vec4(), 0, false), rest_timer(1) {
@@ -2286,7 +2286,7 @@ bool Bot::Process() {
 
 		BuffProcess();
 		CalcRestState();
-		if(curfp)
+		if(currently_fleeing)
 			ProcessFlee();
 
 		if(GetHP() < GetMaxHP())
@@ -2685,7 +2685,7 @@ void Bot::AI_Process() {
 
 	if(GetHasBeenSummoned()) {
 		if(IsBotCaster() || IsBotArcher()) {
-			if (AImovement_timer->Check()) {
+			if (AI_movement_timer->Check()) {
 				if(!GetTarget() || (IsBotCaster() && !IsBotCasterCombatRange(GetTarget())) || (IsBotArcher() && IsArcheryRange(GetTarget())) || (DistanceSquaredNoZ(static_cast<glm::vec3>(m_Position), m_PreSummonLocation) < 10)) {
 					if(GetTarget())
 						FaceTarget(GetTarget());
@@ -2831,7 +2831,7 @@ void Bot::AI_Process() {
 				}
 			}
 
-			if(AImovement_timer->Check()) {
+			if(AI_movement_timer->Check()) {
 				if(!IsMoving() && GetClass() == ROGUE && !BehindMob(GetTarget(), GetX(), GetY())) {
 					// Move the rogue to behind the mob
 					float newX = 0;
@@ -2967,7 +2967,7 @@ void Bot::AI_Process() {
 					AI_PursueCastCheck();
 			}
 
-			if (AImovement_timer->Check()) {
+			if (AI_movement_timer->Check()) {
 				if(!IsRooted()) {
 					Log.Out(Logs::Detail, Logs::AI, "Pursuing %s while engaged.", GetTarget()->GetCleanName());
 					CalculateNewPosition2(GetTarget()->GetX(), GetTarget()->GetY(), GetTarget()->GetZ(), GetRunspeed());
@@ -2995,7 +2995,7 @@ void Bot::AI_Process() {
 		if (m_PlayerState & static_cast<uint32>(PlayerState::Aggressive))
 			SendRemovePlayerState(PlayerState::Aggressive);
 
-		if(!IsMoving() && AIthink_timer->Check() && !spellend_timer.Enabled()) {
+		if(!IsMoving() && AI_think_timer->Check() && !spellend_timer.Enabled()) {
 			if(GetBotStance() != BotStancePassive) {
 				if(!AI_IdleCastCheck() && !IsCasting())
 					BotMeditate(true);
@@ -3004,7 +3004,7 @@ void Bot::AI_Process() {
 				BotMeditate(true);
 		}
 
-		if(AImovement_timer->Check()) {
+		if(AI_movement_timer->Check()) {
 			if(GetFollowID()) {
 				Mob* follow = entity_list.GetMob(GetFollowID());
 				if(follow) {
@@ -3737,9 +3737,9 @@ Bot* Bot::LoadBot(uint32 botID, std::string* errorMessage)
 		" `drakkin_tattoo`,"
 		" `drakkin_details`,"
 		" `ac`,"				/*not in-use[26]*/
-		" `atk`,"
+		" `atk`,"				/*not in-use[27]*/
 		" `hp`,"
-		" `mana`,"				/*not in-use[29]*/
+		" `mana`,"
 		" `str`,"				/*not in-use[30]*/
 		" `sta`,"				/*not in-use[31]*/
 		" `cha`,"				/*not in-use[32]*/
@@ -3753,8 +3753,8 @@ Bot* Bot::LoadBot(uint32 botID, std::string* errorMessage)
 		" `poison`,"			/*not in-use[40]*/
 		" `disease`,"			/*not in-use[41]*/
 		" `corruption`,"		/*not in-use[42]*/
-		" `show_helm`,"
-		" `follow_distance`"
+		" `show_helm`,"//43
+		" `follow_distance`"//44
 		" FROM `bot_data`"
 		" WHERE `bot_id` = '%u'",
 		botID
@@ -3791,8 +3791,8 @@ Bot* Bot::LoadBot(uint32 botID, std::string* errorMessage)
 		atoi(row[23]),
 		atoi(row[24]),
 		atoi(row[25]),
-		atoi(row[27]),
 		atoi(row[28]),
+		atoi(row[29]),
 		defaultNPCTypeStruct.MR,
 		defaultNPCTypeStruct.CR,
 		defaultNPCTypeStruct.DR,

@@ -1189,21 +1189,21 @@ int32 Mob::CheckHealAggroAmount(uint16 spell_id, Mob *target, uint32 heal_possib
 }
 
 void Mob::AddFeignMemory(Client* attacker) {
-	if(feign_memory_list.empty() && AIfeignremember_timer != nullptr)
-		AIfeignremember_timer->Start(AIfeignremember_delay);
+	if(feign_memory_list.empty() && AI_feign_remember_timer != nullptr)
+		AI_feign_remember_timer->Start(AIfeignremember_delay);
 	feign_memory_list.insert(attacker->CharacterID());
 }
 
 void Mob::RemoveFromFeignMemory(Client* attacker) {
 	feign_memory_list.erase(attacker->CharacterID());
-	if(feign_memory_list.empty() && AIfeignremember_timer != nullptr)
-		AIfeignremember_timer->Disable();
+	if(feign_memory_list.empty() && AI_feign_remember_timer != nullptr)
+		AI_feign_remember_timer->Disable();
 	if(feign_memory_list.empty())
 	{
 		minLastFightingDelayMoving = RuleI(NPC, LastFightingDelayMovingMin);
 		maxLastFightingDelayMoving = RuleI(NPC, LastFightingDelayMovingMax);
-		if(AIfeignremember_timer != nullptr)
-			AIfeignremember_timer->Disable();
+		if(AI_feign_remember_timer != nullptr)
+			AI_feign_remember_timer->Disable();
 	}
 }
 
@@ -1220,8 +1220,8 @@ void Mob::ClearFeignMemory() {
 	feign_memory_list.clear();
 	minLastFightingDelayMoving = RuleI(NPC, LastFightingDelayMovingMin);
 	maxLastFightingDelayMoving = RuleI(NPC, LastFightingDelayMovingMax);
-	if(AIfeignremember_timer != nullptr)
-		AIfeignremember_timer->Disable();
+	if(AI_feign_remember_timer != nullptr)
+		AI_feign_remember_timer->Disable();
 }
 
 bool Mob::PassCharismaCheck(Mob* caster, uint16 spell_id) {

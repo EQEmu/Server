@@ -283,57 +283,84 @@ void ZSList::ListLockedZones(const char* to, WorldTCPConnection* connection) {
 }
 
 void ZSList::SendZoneStatus(const char* to, int16 admin, WorldTCPConnection* connection) {
+
 	LinkedListIterator<ZoneServer*> iterator(list);
 	struct in_addr in;
 
 	iterator.Reset();
 	char locked[4];
-	if (WorldConfig::get()->Locked == true)
+	if (WorldConfig::get()->Locked == true){
 		strcpy(locked, "Yes");
-	else
+	}
+	else {
 		strcpy(locked, "No");
+	}
 
 	char* output = 0;
 	uint32 outsize = 0, outlen = 0;
-	if (connection->IsConsole())
+
+	if (connection->IsConsole()){
 		AppendAnyLenString(&output, &outsize, &outlen, "World Locked: %s\r\n", locked);
-	else
+	}
+	else{
 		AppendAnyLenString(&output, &outsize, &outlen, "World Locked: %s^", locked);
-	if (connection->IsConsole())
+	}
+	if (connection->IsConsole()){
 		AppendAnyLenString(&output, &outsize, &outlen, "Zoneservers online:\r\n");
-	else
+	}
+	else{
 		AppendAnyLenString(&output, &outsize, &outlen, "Zoneservers online:^");
-//	connection->SendEmoteMessage(to, 0, 0, 0, "World Locked: %s", locked);
-//	connection->SendEmoteMessage(to, 0, 0, 0, "Zoneservers online:");
-	int v=0, w=0, x=0, y=0, z=0;
-	char tmpStatic[2] = { 0, 0 }, tmpZone[64];
-	memset(tmpZone, 0, sizeof(tmpZone));
-	ZoneServer* zs = 0;
-	while(iterator.MoreElements()) {
-		zs = iterator.GetData();
-		in.s_addr = zs->GetIP();
+	}
 
-		if(zs->IsStaticZone())
+	int v = 0, w = 0, x = 0, y = 0, z = 0;
+	char is_static_string[2] = { 0, 0 }, zone_data_string[64];
+	memset(zone_data_string, 0, sizeof(zone_data_string));
+
+	ZoneServer* zone_server_data = 0;
+
+	while (iterator.MoreElements()) {
+		zone_server_data = iterator.GetData();
+		in.s_addr = zone_server_data->GetIP();
+
+		if (zone_server_data->IsStaticZone()){
 			z++;
-		else if (zs->GetZoneID() != 0)
+		}
+		else if (zone_server_data->GetZoneID() != 0){
 			w++;
-		else if(zs->GetZoneID() == 0 && !zs->IsBootingUp())
+		}
+		else if (zone_server_data->GetZoneID() == 0 && !zone_server_data->IsBootingUp()){
 			v++;
+		}
 
-		if (zs->IsStaticZone())
-			tmpStatic[0] = 'S';
+		if (zone_server_data->IsStaticZone())
+			is_static_string[0] = 'S';
 		else
-			tmpStatic[0] = ' ';
+			is_static_string[0] = 'D';
 
 		if (admin >= 150) {
-			if (zs->GetZoneID())
-				snprintf(tmpZone, sizeof(tmpZone), "%s (%i)", zs->GetZoneName(), zs->GetZoneID());
-			else if (zs->IsBootingUp())
-				strcpy(tmpZone, "...");
-			else
-				tmpZone[0] = 0;
+			if (zone_server_data->GetZoneID()){
+				snprintf(zone_data_string, sizeof(zone_data_string), "%s (%i)", zone_server_data->GetZoneName(), zone_server_data->GetZoneID());
+			}
+			else if (zone_server_data->IsBootingUp()){
+				strcpy(zone_data_string, "...");
+			}
+			else{
+				zone_data_string[0] = 0;
+			}
 
-			AppendAnyLenString(&output, &outsize, &outlen, "  #%-3i %s %15s:%-5i %2i  %s:%i  %s", zs->GetID(), tmpStatic, inet_ntoa(in), zs->GetPort(), zs->NumPlayers(), zs->GetCAddress(), zs->GetCPort(), tmpZone);
+			AppendAnyLenString(&output, &outsize, &outlen, 
+				"#%-3i :: %s :: %15s:%-5i :: %2i :: %s:%i :: %s :: (%u)", 
+				zone_server_data->GetID(), 
+				is_static_string, 
+				inet_ntoa(in), 
+				zone_server_data->GetPort(), 
+				zone_server_data->NumPlayers(), 
+				zone_server_data->GetCAddress(), 
+				zone_server_data->GetCPort(), 
+				zone_data_string,
+				zone_server_data->GetZoneOSProcessID()
+			);
+			
 			if (outlen >= 3584) {
 				connection->SendEmoteMessageRaw(to, 0, 0, 10, output);
 				safe_delete(output);
@@ -348,12 +375,12 @@ void ZSList::SendZoneStatus(const char* to, int16 admin, WorldTCPConnection* con
 			}
 			x++;
 		}
-		else if (zs->GetZoneID() != 0) {
-			if (zs->GetZoneID())
-				strcpy(tmpZone, zs->GetZoneName());
+		else if (zone_server_data->GetZoneID() != 0) {
+			if (zone_server_data->GetZoneID())
+				strcpy(zone_data_string, zone_server_data->GetZoneName());
 			else
-				tmpZone[0] = 0;
-			AppendAnyLenString(&output, &outsize, &outlen, "  #%i %s  %s", zs->GetID(), tmpStatic, tmpZone);
+				zone_data_string[0] = 0;
+			AppendAnyLenString(&output, &outsize, &outlen, "  #%i %s  %s", zone_server_data->GetID(), is_static_string, zone_data_string);
 			if (outlen >= 3584) {
 				connection->SendEmoteMessageRaw(to, 0, 0, 10, output);
 				safe_delete(output);
@@ -361,25 +388,32 @@ void ZSList::SendZoneStatus(const char* to, int16 admin, WorldTCPConnection* con
 				outlen = 0;
 			}
 			else {
-				if (connection->IsConsole())
+				if (connection->IsConsole()){
 					AppendAnyLenString(&output, &outsize, &outlen, "\r\n");
-				else
+				}
+				else{
 					AppendAnyLenString(&output, &outsize, &outlen, "^");
+				}
 			}
 			x++;
 		}
 		y++;
 		iterator.Advance();
 	}
-	if (connection->IsConsole())
+
+	if (connection->IsConsole()){
 		AppendAnyLenString(&output, &outsize, &outlen, "%i servers listed. %i servers online.\r\n", x, y);
-	else
+	}
+	else {
 		AppendAnyLenString(&output, &outsize, &outlen, "%i servers listed. %i servers online.^", x, y);
-	AppendAnyLenString(&output, &outsize, &outlen, "%i zones are static zones, %i zones are booted zones, %i zones available.",z,w,v);
-//	connection->SendEmoteMessage(to, 0, 0, "%i servers listed. %i servers online.", x, y);
-//	connection->SendEmoteMessage(to,0,0,"%i zones are static zones, %i zones are booted zones, %i zones available.",z,w,v);
-	if (output)
+	}
+
+	AppendAnyLenString(&output, &outsize, &outlen, "%i zones are static zones, %i zones are booted zones, %i zones available.", z, w, v);
+
+	if (output){
 		connection->SendEmoteMessageRaw(to, 0, 0, 10, output);
+	}
+
 	safe_delete(output);
 }
 

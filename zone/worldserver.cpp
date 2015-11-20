@@ -39,6 +39,7 @@
 #include "client.h"
 #include "corpse.h"
 #include "entity.h"
+#include "quest_parser_collection.h"
 #include "guild_mgr.h"
 #include "mob.h"
 #include "net.h"
@@ -53,13 +54,16 @@
 
 extern EntityList entity_list;
 extern Zone* zone;
-extern volatile bool ZoneLoaded;
+extern volatile bool is_zone_loaded;
 extern void CatchSignal(int);
 extern WorldServer worldserver;
 extern NetConnection net;
 extern PetitionList petition_list;
 extern uint32 numclients;
 extern volatile bool RunLoops;
+extern QuestParserCollection *parse;
+
+// QuestParserCollection *parse = 0;
 
 WorldServer::WorldServer()
 : WorldConnection(EmuTCPConnection::packetModeZone)
@@ -85,7 +89,7 @@ WorldServer::~WorldServer() {
 	safe_delete(pack);
 }*/
 
-void WorldServer::SetZone(uint32 iZoneID, uint32 iInstanceID) {
+void WorldServer::SetZoneData(uint32 iZoneID, uint32 iInstanceID) {
 	ServerPacket* pack = new ServerPacket(ServerOP_SetZone, sizeof(SetZone_Struct));
 	SetZone_Struct* szs = (SetZone_Struct*) pack->pBuffer;
 	szs->zoneid = iZoneID;
@@ -99,10 +103,9 @@ void WorldServer::SetZone(uint32 iZoneID, uint32 iInstanceID) {
 
 void WorldServer::OnConnected() {
 	WorldConnection::OnConnected();
-
 	ServerPacket* pack;
 
-	//tell the launcher what name we were started with.
+	/* Tell the launcher what our information is */
 	pack = new ServerPacket(ServerOP_SetLaunchName,sizeof(LaunchName_Struct));
 	LaunchName_Struct* ln = (LaunchName_Struct*)pack->pBuffer;
 	strn0cpy(ln->launcher_name, m_launcherName.c_str(), 32);
@@ -110,28 +113,38 @@ void WorldServer::OnConnected() {
 	SendPacket(pack);
 	safe_delete(pack);
 
+	/* Tell the Worldserver basic information about this zone process */
 	pack = new ServerPacket(ServerOP_SetConnectInfo, sizeof(ServerConnectInfo));
 	ServerConnectInfo* sci = (ServerConnectInfo*) pack->pBuffer;
+
 	auto config = ZoneConfig::get();
 	sci->port = ZoneConfig::get()->ZonePort;
 	if(config->WorldAddress.length() > 0) {
 		strn0cpy(sci->address, config->WorldAddress.c_str(), 250);
 	}
-
 	if(config->LocalAddress.length() > 0) {
 		strn0cpy(sci->local_address, config->LocalAddress.c_str(), 250);
+	}
+
+	/* Fetch process ID */
+	if (getpid()){
+		sci->process_id = getpid();
+	}
+	else {
+		sci->process_id = 0;
 	}
 
 	SendPacket(pack);
 	safe_delete(pack);
 
-	if (ZoneLoaded) {
-		this->SetZone(zone->GetZoneID(), zone->GetInstanceID());
+	if (is_zone_loaded) {
+		this->SetZoneData(zone->GetZoneID(), zone->GetInstanceID());
 		entity_list.UpdateWho(true);
 		this->SendEmoteMessage(0, 0, 15, "Zone connect: %s", zone->GetLongName());
-			zone->GetTimeSync();
-	} else {
-		this->SetZone(0);
+		zone->GetTimeSync();
+	}
+	else {
+		this->SetZoneData(0);
 	}
 
 	pack = new ServerPacket(ServerOP_LSZoneBoot,sizeof(ZoneBoot_Struct));
@@ -174,7 +187,7 @@ void WorldServer::Process() {
 			break;
 		}
 		case ServerOP_ChannelMessage: {
-			if (!ZoneLoaded)
+			if (!is_zone_loaded)
 				break;
 			ServerChannelMessage_Struct* scm = (ServerChannelMessage_Struct*) pack->pBuffer;
 			if (scm->deliverto[0] == 0) {
@@ -207,7 +220,7 @@ void WorldServer::Process() {
 		}
 		case ServerOP_VoiceMacro: {
 
-			if (!ZoneLoaded)
+			if (!is_zone_loaded)
 				break;
 
 			ServerVoiceMacro_Struct* svm = (ServerVoiceMacro_Struct*) pack->pBuffer;
@@ -264,7 +277,7 @@ void WorldServer::Process() {
 		case ServerOP_SpawnCondition: {
 			if(pack->size != sizeof(ServerSpawnCondition_Struct))
 				break;
-			if (!ZoneLoaded)
+			if (!is_zone_loaded)
 				break;
 			ServerSpawnCondition_Struct* ssc = (ServerSpawnCondition_Struct*) pack->pBuffer;
 
@@ -274,7 +287,7 @@ void WorldServer::Process() {
 		case ServerOP_SpawnEvent: {
 			if(pack->size != sizeof(ServerSpawnEvent_Struct))
 				break;
-			if (!ZoneLoaded)
+			if (!is_zone_loaded)
 				break;
 			ServerSpawnEvent_Struct* sse = (ServerSpawnEvent_Struct*) pack->pBuffer;
 
@@ -285,7 +298,7 @@ void WorldServer::Process() {
 		case ServerOP_AcceptWorldEntrance: {
 			if(pack->size != sizeof(WorldToZone_Struct))
 				break;
-			if (!ZoneLoaded)
+			if (!is_zone_loaded)
 				break;
 			WorldToZone_Struct* wtz = (WorldToZone_Struct*) pack->pBuffer;
 
@@ -300,7 +313,7 @@ void WorldServer::Process() {
 		case ServerOP_ZoneToZoneRequest: {
 			if(pack->size != sizeof(ZoneToZone_Struct))
 				break;
-			if (!ZoneLoaded)
+			if (!is_zone_loaded)
 				break;
 			ZoneToZone_Struct* ztz = (ZoneToZone_Struct*) pack->pBuffer;
 
@@ -376,7 +389,7 @@ void WorldServer::Process() {
 			break;
 		}
 		case ServerOP_WhoAllReply:{
-			if(!ZoneLoaded)
+			if(!is_zone_loaded)
 				break;
 
 
@@ -403,7 +416,7 @@ void WorldServer::Process() {
 			break;
 		}
 		case ServerOP_EmoteMessage: {
-			if (!ZoneLoaded)
+			if (!is_zone_loaded)
 				break;
 			ServerEmoteMessage_Struct* sem = (ServerEmoteMessage_Struct*) pack->pBuffer;
 			if (sem->to[0] != 0) {
@@ -461,8 +474,8 @@ void WorldServer::Process() {
 				break;
 			}
 			// Annouce the change to the world
-			if (!ZoneLoaded) {
-				SetZone(0);
+			if (!is_zone_loaded) {
+				SetZoneData(0);
 			}
 			else {
 				SendEmoteMessage(0, 0, 15, "Zone shutdown: %s", zone->GetLongName());
@@ -479,8 +492,8 @@ void WorldServer::Process() {
 				break;
 			}
 			ServerZoneStateChange_struct* zst = (ServerZoneStateChange_struct *) pack->pBuffer;
-			if (ZoneLoaded) {
-				SetZone(zone->GetZoneID(), zone->GetInstanceID());
+			if (is_zone_loaded) {
+				SetZoneData(zone->GetZoneID(), zone->GetInstanceID());
 				if (zst->zoneid == zone->GetZoneID()) {
 					// This packet also doubles as "incoming client" notification, lets not shut down before they get here
 					zone->StartShutdownTimer(AUTHENTICATION_TIMEOUT * 1000);
@@ -503,8 +516,8 @@ void WorldServer::Process() {
 				break;
 			}
 			ServerZoneIncomingClient_Struct* szic = (ServerZoneIncomingClient_Struct*) pack->pBuffer;
-			if (ZoneLoaded) {
-				SetZone(zone->GetZoneID(), zone->GetInstanceID());
+			if (is_zone_loaded) {
+				SetZoneData(zone->GetZoneID(), zone->GetInstanceID());
 				if (szic->zoneid == zone->GetZoneID()) {
 					zone->AddAuth(szic);
 					// This packet also doubles as "incoming client" notification, lets not shut down before they get here
@@ -540,7 +553,7 @@ void WorldServer::Process() {
 			if (client != 0) {
 				if (skp->adminrank >= client->Admin()) {
 					client->WorldKick();
-					if (ZoneLoaded)
+					if (is_zone_loaded)
 						SendEmoteMessage(skp->adminname, 0, 0, "Remote Kick: %s booted in zone %s.", skp->name, zone->GetShortName());
 					else
 						SendEmoteMessage(skp->adminname, 0, 0, "Remote Kick: %s booted.", skp->name);
@@ -556,7 +569,7 @@ void WorldServer::Process() {
 			if (client != 0) {
 				if (skp->admin >= client->Admin()) {
 					client->GMKill();
-					if (ZoneLoaded)
+					if (is_zone_loaded)
 						SendEmoteMessage(skp->gmname, 0, 0, "Remote Kill: %s killed in zone %s.", skp->target, zone->GetShortName());
 					else
 						SendEmoteMessage(skp->gmname, 0, 0, "Remote Kill: %s killed.", skp->target);
@@ -594,7 +607,7 @@ void WorldServer::Process() {
 				std::cout << "Wrong size on ServerOP_GMGoto. Got: " << pack->size << ", Expected: " << sizeof(ServerGMGoto_Struct) << std::endl;
 				break;
 			}
-			if (!ZoneLoaded)
+			if (!is_zone_loaded)
 				break;
 			ServerGMGoto_Struct* gmg = (ServerGMGoto_Struct*) pack->pBuffer;
 			Client* client = entity_list.GetClientByName(gmg->gotoname);
@@ -1731,6 +1744,10 @@ void WorldServer::Process() {
 		}
 		case ServerOP_ReloadLogs: {
 			database.LoadLogSettings(Log.log_settings);
+			break;
+		}
+		case ServerOP_ReloadPerlExportSettings: {
+			parse->LoadPerlEventExportSettings(parse->perl_event_export_settings);
 			break;
 		}
 		case ServerOP_CameraShake:

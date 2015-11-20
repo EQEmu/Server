@@ -187,6 +187,7 @@ void command_myskills(Client *c, const Seperator *sep);
 void command_depop(Client *c, const Seperator *sep);
 void command_depopzone(Client *c, const Seperator *sep);
 void command_repop(Client *c, const Seperator *sep);
+void command_repopclose(Client *c, const Seperator *sep);
 void command_spawnstatus(Client *c, const Seperator *sep);
 void command_nukebuffs(Client *c, const Seperator *sep);
 void command_zuwcoords(Client *c, const Seperator *sep);
@@ -332,6 +333,7 @@ void command_load_shared_memory(Client *c, const Seperator *sep);
 void command_apply_shared_memory(Client *c, const Seperator *sep);
 void command_untraindisc(Client *c, const Seperator *sep);
 void command_untraindiscs(Client *c, const Seperator *sep);
+void command_reloadperlexportsettings(Client *c, const Seperator *sep);
 
 #ifdef EQPROFILE
 void command_profiledump(Client *c, const Seperator *sep);

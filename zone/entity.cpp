@@ -51,7 +51,7 @@
 #endif
 
 extern Zone *zone;
-extern volatile bool ZoneLoaded;
+extern volatile bool is_zone_loaded;
 extern WorldServer worldserver;
 extern NetConnection net;
 extern uint32 numclients;
@@ -2350,7 +2350,7 @@ void EntityList::Clear()
 
 void EntityList::UpdateWho(bool iSendFullUpdate)
 {
-	if ((!worldserver.Connected()) || !ZoneLoaded)
+	if ((!worldserver.Connected()) || !is_zone_loaded)
 		return;
 	uint32 tmpNumUpdates = numclients + 5;
 	ServerPacket* pack = 0;
@@ -2447,6 +2447,8 @@ void EntityList::Depop(bool StartSpawnTimer)
 
 			if (pnpc->IsFindable())
 				UpdateFindableNPCState(pnpc, true);
+
+			pnpc->WipeHateList();
 
 			pnpc->Depop(StartSpawnTimer);
 		}

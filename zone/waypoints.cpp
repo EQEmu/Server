@@ -94,7 +94,7 @@ void NPC::ResumeWandering()
 	{
 		if (GetGrid() < 0)
 		{	// we were paused by a quest
-			AIwalking_timer->Disable();
+			AI_walking_timer->Disable();
 			SetGrid( 0 - GetGrid());
 			if (cur_wp==-1)
 			{	// got here by a MoveTo()
@@ -103,10 +103,10 @@ void NPC::ResumeWandering()
 			}
 			Log.Out(Logs::Detail, Logs::Pathing, "Resume Wandering requested. Grid %d, wp %d", GetGrid(), cur_wp);
 		}
-		else if (AIwalking_timer->Enabled())
+		else if (AI_walking_timer->Enabled())
 		{	// we are at a waypoint paused normally
 			Log.Out(Logs::Detail, Logs::Pathing, "Resume Wandering on timed pause. Grid %d, wp %d", GetGrid(), cur_wp);
-			AIwalking_timer->Trigger();	// disable timer to end pause now
+			AI_walking_timer->Trigger();	// disable timer to end pause now
 		}
 		else
 		{
@@ -145,7 +145,7 @@ void NPC::PauseWandering(int pausetime)
 		}
 		else
 		{	// specified waiting time, he'll resume after that
-			AIwalking_timer->Start(pausetime*1000); // set the timer
+			AI_walking_timer->Start(pausetime*1000); // set the timer
 		}
 	} else {
 		Log.Out(Logs::General, Logs::Error, "NPC not on grid - can't pause wandering: %lu", (unsigned long)GetNPCTypeID());
@@ -162,7 +162,7 @@ void NPC::MoveTo(const glm::vec4& position, bool saveguardspot)
 			SetGrid( 0 - GetGrid());	// get him moving again
 			Log.Out(Logs::Detail, Logs::AI, "MoveTo during quest wandering. Canceling quest wandering and going back to grid %d when MoveTo is done.", GetGrid());
 		}
-		AIwalking_timer->Disable();	// disable timer in case he is paused at a wp
+		AI_walking_timer->Disable();	// disable timer in case he is paused at a wp
 		if (cur_wp>=0)
 		{	// we've not already done a MoveTo()
 			save_wp=cur_wp;	// save the current waypoint
@@ -193,8 +193,8 @@ void NPC::MoveTo(const glm::vec4& position, bool saveguardspot)
 	m_CurrentWayPoint = position;
 	cur_wp_pause = 0;
 	pLastFightingDelayMoving = 0;
-	if(AIwalking_timer->Enabled())
-		AIwalking_timer->Start(100);
+	if(AI_walking_timer->Enabled())
+		AI_walking_timer->Start(100);
 }
 
 void NPC::UpdateWaypoint(int wp_index)
@@ -393,8 +393,8 @@ void NPC::SetWaypointPause()
 	//Declare time to wait on current WP
 
 	if (cur_wp_pause == 0) {
-		AIwalking_timer->Start(100);
-		AIwalking_timer->Trigger();
+		AI_walking_timer->Start(100);
+		AI_walking_timer->Trigger();
 	}
 	else
 	{
@@ -402,13 +402,13 @@ void NPC::SetWaypointPause()
 		switch (pausetype)
 		{
 			case 0: //Random Half
-				AIwalking_timer->Start((cur_wp_pause - zone->random.Int(0, cur_wp_pause-1)/2)*1000);
+				AI_walking_timer->Start((cur_wp_pause - zone->random.Int(0, cur_wp_pause-1)/2)*1000);
 				break;
 			case 1: //Full
-				AIwalking_timer->Start(cur_wp_pause*1000);
+				AI_walking_timer->Start(cur_wp_pause*1000);
 				break;
 			case 2: //Random Full
-				AIwalking_timer->Start(zone->random.Int(0, cur_wp_pause-1)*1000);
+				AI_walking_timer->Start(zone->random.Int(0, cur_wp_pause-1)*1000);
 				break;
 		}
 	}
@@ -484,7 +484,7 @@ bool Mob::MakeNewPositionAndSendUpdate(float x, float y, float z, int speed, boo
 			Log.Out(Logs::Detail, Logs::AI, "Calc Position2 (%.3f, %.3f, %.3f): Jumping pure Z.", x, y, z);
 			return true;
 		}
-		Log.Out(Logs::Detail, Logs::AI, "Calc Position2 (%.3f, %.3f, %.3f) inWater=%d: We are there.", x, y, z, inWater);
+		// Log.Out(Logs::Detail, Logs::AI, "Calc Position2 (%.3f, %.3f, %.3f) inWater=%d: We are there.", x, y, z, inWater);
 		return false;
 	} else if ((std::abs(m_Position.x - x) < 0.1) && (std::abs(m_Position.y - y) < 0.1)) {
 		Log.Out(Logs::Detail, Logs::AI, "Calc Position2 (%.3f, %.3f, %.3f): X/Y difference <0.1, Jumping to target.", x, y, z);

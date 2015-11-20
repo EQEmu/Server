@@ -334,6 +334,7 @@ int command_init(void) {
 		command_add("reloadallrules", "Executes a reload of all rules.", 80, command_reloadallrules) ||
 		command_add("reloademote", "Reloads NPC Emotes", 80, command_reloademote) ||
 		command_add("reloadlevelmods", nullptr,255, command_reloadlevelmods) ||
+		command_add("reloadperlexportsettings", nullptr, 255, command_reloadperlexportsettings) ||
 		command_add("reloadqst", " - Clear quest cache (any argument causes it to also stop all timers)", 150, command_reloadqst) ||
 		command_add("reloadquest", " - Clear quest cache (any argument causes it to also stop all timers)", 150, command_reloadqst) ||
 		command_add("reloadrulesworld", "Executes a reload of all rules in world specifically.", 80, command_reloadworldrules) ||
@@ -343,6 +344,7 @@ int command_init(void) {
 		command_add("reloadzonepoints", "- Reload zone points from database", 150, command_reloadzps) ||
 		command_add("reloadzps", nullptr,0, command_reloadzps) ||
 		command_add("repop", "[delay] - Repop the zone with optional delay", 100, command_repop) ||
+		command_add("repopclose", "[distance in units] Repops only NPC's nearby for fast development purposes", 100, command_repopclose) ||
 		command_add("resetaa", "- Resets a Player's AA in their profile and refunds spent AA's to unspent, may disconnect player.", 200, command_resetaa) ||
 		command_add("resetaa_timer", "Command to reset AA cooldown timers.", 200, command_resetaa_timer) ||
 		command_add("revoke", "[charname] [1/0] - Makes charname unable to talk on OOC", 200, command_revoke) ||
@@ -3920,9 +3922,11 @@ void command_repop(Client *c, const Seperator *sep)
 		LinkedListIterator<Spawn2*> iterator(zone->spawn2_list);
 		iterator.Reset();
 		while (iterator.MoreElements()) {
-			std::string query = StringFormat("DELETE FROM respawn_times WHERE id = %lu AND instance_id = %lu",
-                                            (unsigned long)iterator.GetData()->GetID(),
-                                            (unsigned long)zone->GetInstanceID());
+			std::string query = StringFormat(
+				"DELETE FROM respawn_times WHERE id = %lu AND instance_id = %lu",
+				(unsigned long)iterator.GetData()->GetID(),
+				(unsigned long)zone->GetInstanceID()
+			);
 			auto results = database.QueryDatabase(query);
 			iterator.Advance();
 		}
@@ -3937,6 +3941,33 @@ void command_repop(Client *c, const Seperator *sep)
 
     c->Message(0, "Zone depoped. Repop in %i seconds",  atoi(sep->arg[timearg]));
 	zone->Repop(atoi(sep->arg[timearg])*1000);
+}
+
+void command_repopclose(Client *c, const Seperator *sep)
+{
+	int repop_distance = 500;
+
+	if (sep->arg[1] && strcasecmp(sep->arg[1], "force") == 0) {
+
+		LinkedListIterator<Spawn2*> iterator(zone->spawn2_list);
+		iterator.Reset();
+		while (iterator.MoreElements()) {
+			std::string query = StringFormat(
+				"DELETE FROM respawn_times WHERE id = %lu AND instance_id = %lu",
+				(unsigned long)iterator.GetData()->GetID(),
+				(unsigned long)zone->GetInstanceID()
+			);
+			auto results = database.QueryDatabase(query);
+			iterator.Advance();
+		}
+		c->Message(0, "Zone depop: Force resetting spawn timers.");
+	}
+	if (sep->IsNumber(1)) {
+		repop_distance = atoi(sep->arg[1]);
+	}
+
+	c->Message(0, "Zone depoped. Repopping NPC's within %i distance units", repop_distance);
+	zone->RepopClose(c->GetPosition(), repop_distance);
 }
 
 void command_spawnstatus(Client *c, const Seperator *sep)
@@ -10768,4 +10799,16 @@ void command_apply_shared_memory(Client *c, const Seperator *sep) {
 		strcpy((char*)pack.pBuffer, hotfix_name.c_str());
 	}
 	worldserver.SendPacket(&pack);
+}
+
+void command_reloadperlexportsettings(Client *c, const Seperator *sep)
+{
+	if (c)
+	{
+		ServerPacket *pack = new ServerPacket(ServerOP_ReloadPerlExportSettings, 0);
+		worldserver.SendPacket(pack);
+		c->Message(13, "Successfully sent the packet to world to reload Perl Export settings");
+		safe_delete(pack);
+
+	}
 }

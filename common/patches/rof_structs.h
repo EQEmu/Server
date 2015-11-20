@@ -1889,6 +1889,114 @@ struct GuildUpdate_Struct {
 	GuildsListEntry_Struct entry;
 };
 
+struct GuildBankAck_Struct
+{
+/*00*/	uint32	Action;	//	10
+/*04*/	uint32	Unknown04;
+/*08*/	uint32	Unknown08;
+};
+
+struct GuildBankDepositAck_Struct
+{
+/*00*/	uint32	Action;	//	10
+/*04*/	uint32	Unknown04;
+/*08*/	uint32	Unknown08;
+/*08*/	uint32	Fail;	//1 = Fail, 0 = Success
+};
+
+struct GuildBankPromote_Struct
+{
+/*00*/	uint32	Action;	// 3
+/*04*/	uint32	Unknown04;
+/*08*/	uint32	Unknown08;
+/*12*/	uint32	Slot;
+/*16*/	uint32	Slot2;	// Always appears to be the same as Slot for Action code 3
+/*20*/  uint32  unknown20;
+};
+
+struct GuildBankPermissions_Struct
+{
+/*00*/	uint32	Action;	// 6
+/*04*/	uint32	Unknown04;
+/*08*/	uint32	Unknown08;
+/*08*/	uint16	SlotID;
+/*10*/	uint16	Unknown10; // Saw 1, probably indicating it is the main area rather than deposits
+/*12*/	uint32	ItemID;
+/*16*/	uint32	Permissions;
+/*20*/	char	MemberName[64];
+};
+
+struct GuildBankViewItem_Struct
+{
+/*00*/	uint32	Action;
+/*04*/	uint32	Unknown04;
+/*08*/	uint32	Unknown08;
+/*08*/	uint16	SlotID;	// 0 = Deposit area, 1 = Main area
+/*10*/	uint16	Area;
+/*12*/	uint32	Unknown12;
+/*16*/	uint32	Unknown16;
+};
+
+struct GuildBankWithdrawItem_Struct
+{
+/*00*/	uint32	Action;
+/*04*/	uint32	Unknown04;
+/*08*/	uint32	Unknown08;
+/*08*/	uint16	SlotID;
+/*10*/	uint16	Area;
+/*12*/	uint32	Unknown12;
+/*16*/	uint32	Quantity;
+/*20*/
+};
+
+struct GuildBankItemUpdate_Struct
+{
+	void Init(uint32 inAction, uint32 inUnknown004, uint16 inSlotID, uint16 inArea, uint16 inUnknown012, uint32 inItemID, uint32 inIcon, uint32 inQuantity,
+			uint32 inPermissions, uint32 inAllowMerge, bool inUseable)
+	{
+		Action = inAction;
+		Unknown004 = inUnknown004;
+		SlotID = inSlotID;
+		Area = inArea;
+		Unknown012 = inUnknown012;
+		ItemID = inItemID;
+		Icon = inIcon;
+		Quantity = inQuantity;
+		Permissions = inPermissions;
+		AllowMerge = inAllowMerge;
+		Useable = inUseable;
+		ItemName[0] = '\0';
+		Donator[0] = '\0';
+		WhoFor[0] = '\0';
+	};
+
+/*000*/	uint32	Action;
+/*004*/	uint32	Unknown004;
+/*008*/	uint32	Unknown08;
+/*012*/	uint16	SlotID;
+/*014*/	uint16	Area;
+/*016*/	uint32	Unknown012;
+/*020*/	uint32	ItemID;
+/*024*/	uint32	Icon;
+/*028*/	uint32	Quantity;
+/*032*/	uint32	Permissions;
+/*036*/	uint8	AllowMerge;
+/*037*/	uint8	Useable;	// Used in conjunction with the Public-if-useable permission.
+/*038*/	char	ItemName[64];
+/*102*/	char	Donator[64];
+/*166*/ char	WhoFor[64];
+/*230*/	uint16	Unknown226;
+};
+
+struct GuildBankClear_Struct
+{
+/*00*/	uint32	Action;
+/*04*/	uint32	Unknown04;
+/*08*/	uint32	Unknown08;
+/*12*/	uint32	DepositAreaCount;
+/*16*/	uint32	MainAreaCount;
+};
+
 /*
 ** Money Loot
 ** Length: 22 Bytes
@@ -4623,7 +4731,7 @@ struct ClickEffectStruct
 
 struct ProcEffectStruct
 {
-	uint32 effect;
+	int32 effect;
 	uint8 level2;
 	uint32 type;
 	uint8 level;
@@ -4638,7 +4746,7 @@ struct ProcEffectStruct
 
 struct WornEffectStruct //worn, focus and scroll effect
 {
-	uint32 effect;
+	int32 effect;
 	uint8 level2;
 	uint32 type;
 	uint8 level;

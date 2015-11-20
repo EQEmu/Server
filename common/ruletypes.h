@@ -347,8 +347,8 @@ RULE_INT(Spells, AI_EngagedDetrimentalChance, 20) // Chance during third AI Cast
 RULE_INT(Spells, AI_PursueNoSpellMinRecast, 500) // AI spell recast time(MS) check when no spell is cast while chasing target. (min time in random)
 RULE_INT(Spells, AI_PursueNoSpellMaxRecast, 2000) // AI spell recast time(MS) check when no spell is cast while chasing target. (max time in random)
 RULE_INT(Spells, AI_PursueDetrimentalChance, 90) // Chance while chasing target to cast a detrimental spell.
-RULE_INT(Spells, AI_IdleNoSpellMinRecast, 500) // AI spell recast time(MS) check when no spell is cast while idle. (min time in random)
-RULE_INT(Spells, AI_IdleNoSpellMaxRecast, 2000) // AI spell recast time(MS) check when no spell is cast while chasing target. (max time in random)
+RULE_INT(Spells, AI_IdleNoSpellMinRecast, 6000) // AI spell recast time(MS) check when no spell is cast while idle. (min time in random)
+RULE_INT(Spells, AI_IdleNoSpellMaxRecast, 60000) // AI spell recast time(MS) check when no spell is cast while chasing target. (max time in random)
 RULE_INT(Spells, AI_IdleBeneficialChance, 100) // Chance while idle to do a beneficial spell on self or others.
 RULE_BOOL(Spells, SHDProcIDOffByOne, true) // pre June 2009 SHD spell procs were off by 1, they stopped doing this in June 2009 (so UF+ spell files need this false)
 RULE_BOOL(Spells, Jun182014HundredHandsRevamp, false) // this should be true for if you import a spell file newer than June 18, 2014
@@ -475,6 +475,8 @@ RULE_BOOL(NPC, ReturnNonQuestNoDropItems, false)	// Returns NO DROP items on NPC
 RULE_INT(NPC, StartEnrageValue, 9) // % HP that an NPC will begin to enrage
 RULE_BOOL(NPC, LiveLikeEnrage, false) // If set to true then only player controlled pets will enrage
 RULE_BOOL(NPC, EnableMeritBasedFaction, false) // If set to true, faction will given in the same way as experience (solo/group/raid)
+RULE_INT(NPC, NPCToNPCAggroTimerMin, 500)
+RULE_INT(NPC, NPCToNPCAggroTimerMax, 6000)
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Aggro)
