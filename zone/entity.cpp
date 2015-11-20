@@ -468,17 +468,27 @@ void EntityList::CorpseProcess()
 
 void EntityList::MobProcess()
 {
-#ifdef IDLE_WHEN_EMPTY
-	if (numclients < 1)
-		return;
-#endif
+	bool mob_dead;
+
 	auto it = mob_list.begin();
 	while (it != mob_list.end()) {
 		uint16 id = it->first;
 		Mob *mob = it->second;
 
 		size_t sz = mob_list.size();
-		bool p_val = mob->Process();
+
+#ifdef IDLE_WHEN_EMPTY
+		// spawn_events can cause spawns and deaths while zone empty.
+		// At the very least, process that.
+		if (numclients < 1) {
+			mob_dead = mob->CastToNPC()->GetDepop();
+		}	
+		else {
+			mob_dead = !mob->Process();
+		}
+#else
+		mob_dead = !mob->Process();
+#endif
 		size_t a_sz = mob_list.size();
 
 		if(a_sz > sz) {
@@ -491,7 +501,7 @@ void EntityList::MobProcess()
 			++it;
 		}
 
-		if(!p_val) {
+		if(mob_dead) {
 			if(mob->IsNPC()) {
 				entity_list.RemoveNPC(id);
 			}
