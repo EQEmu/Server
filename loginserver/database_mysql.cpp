@@ -26,8 +26,6 @@
 extern ErrorLog *server_log;
 extern LoginServer server;
 
-#pragma comment(lib, "mysqlclient.lib")
-
 DatabaseMySQL::DatabaseMySQL(string user, string pass, string host, string port, string name)
 {
 	this->user = user;
