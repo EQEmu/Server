@@ -134,6 +134,14 @@ if($ARGV[0] eq "installer"){
 	main_db_management();
 	print "\nApplying Latest Database Updates...\n";
 	main_db_management();
+	if($OS eq "Windows"){
+		check_windows_firewall_rules();
+	}
+	
+	exit;
+}
+if($ARGV[0] eq "firewall_rules"){
+	check_windows_firewall_rules();
 	exit;
 }
 
@@ -510,6 +518,39 @@ sub copy_file{
 		}
 	}
 	copy $l_source_file, $l_dest_file;
+}
+	
+sub check_windows_firewall_rules{
+	$output = `netsh advfirewall firewall show rule name=all`;
+	@output_buffer = split("\n", $output);
+	$has_world_rules = 0;
+	$has_zone_rules = 0;
+	foreach my $val (@output_buffer){
+		if($val=~/Rule Name/i){
+			$val=~s/Rule Name://g;
+			if($val=~/EQEmu World/i){
+				$has_world_rules = 1;
+				print "Found existing rule :: " . trim($val) . "\n";
+			}
+			if($val=~/EQEmu Zone/i){
+				$has_zone_rules = 1;
+				print "Found existing rule :: " . trim($val) . "\n";
+			}
+		}
+	}
+	
+	if($has_world_rules == 0){
+		print "Attempting to add EQEmu World Firewall Rules (TCP) port 9000 \n";
+		print `netsh advfirewall firewall add rule name="EQEmu World (9000) TCP" dir=in action=allow protocol=TCP localport=9000`;
+		print "Attempting to add EQEmu World Firewall Rules (UDP) port 9000 \n";
+		print `netsh advfirewall firewall add rule name="EQEmu World (9000) UDP" dir=in action=allow protocol=UDP localport=9000	`;
+	}
+	if($has_zone_rules == 0){
+		print "Attempting to add EQEmu Zones (7000-7500) TCP \n";
+		print `netsh advfirewall firewall add rule name="EQEmu Zones (7000-7500) TCP" dir=in action=allow protocol=TCP localport=7000-7500`;
+		print "Attempting to add EQEmu Zones (7000-7500) UDP \n";
+		print `netsh advfirewall firewall add rule name="EQEmu Zones (7000-7500) UDP" dir=in action=allow protocol=UDP localport=7000-7500`;
+	}
 }
 
 sub fetch_latest_windows_binaries{
