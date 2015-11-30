@@ -1,5 +1,5 @@
 -- '2015_09_30_bots' sql script file
--- current as of 10/13/2015
+-- current as of 11/30/2015
 --
 -- Use eqemu_update.pl to administer this script
 
@@ -31,11 +31,11 @@ BEGIN
 	
 	
 	-- Alter
-	IF ((SELECT COUNT(*) FROM `information_schema`.`KEY_COLUMN_USAGE` WHERE `TABLE_SCHEMA` = DATABASE() AND `TABLE_NAME` = 'guild_members' AND `CONSTRAINT_NAME` = 'PRIMARY') > 0) THEN
+	IF (EXISTS(SELECT `CONSTRAINT_NAME` FROM `information_schema`.`KEY_COLUMN_USAGE` WHERE `TABLE_SCHEMA` = DATABASE() AND `TABLE_NAME` = 'guild_members' AND `CONSTRAINT_NAME` = 'PRIMARY')) THEN
 		ALTER TABLE `guild_members` DROP PRIMARY KEY;
 	END IF;
 	
-	IF ((SELECT COUNT(*) FROM `information_schema`.`KEY_COLUMN_USAGE` WHERE `TABLE_SCHEMA` = DATABASE() AND `TABLE_NAME` = 'group_id' AND `CONSTRAINT_NAME` = 'PRIMARY') > 0) THEN
+	IF (EXISTS(SELECT `CONSTRAINT_NAME` FROM `information_schema`.`KEY_COLUMN_USAGE` WHERE `TABLE_SCHEMA` = DATABASE() AND `TABLE_NAME` = 'group_id' AND `CONSTRAINT_NAME` = 'PRIMARY')) THEN
 		ALTER TABLE `group_id` DROP PRIMARY KEY;
 	END IF;
 	ALTER TABLE `group_id` ADD PRIMARY KEY USING BTREE(`groupid`, `charid`, `name`, `ismerc`);
@@ -46,65 +46,65 @@ BEGIN
 	
 	
 	-- Commands
-	IF ((SELECT COUNT(`command`) FROM `commands` WHERE `command` LIKE 'bot') = 0) THEN
+	IF (NOT EXISTS(SELECT `command` FROM `commands` WHERE `command` LIKE 'bot')) THEN
 		INSERT INTO `commands` VALUES ('bot', '0');
 	END IF;
 	
 	
 	-- Rules
-	IF ((SELECT COUNT(`rule_name`) FROM `rule_values` WHERE `rule_name` LIKE 'Bots:BotAAExpansion') > 0) THEN
+	IF (EXISTS(SELECT `rule_name` FROM `rule_values` WHERE `rule_name` LIKE 'Bots:BotAAExpansion')) THEN
 		UPDATE `rule_values` SET `rule_name` = 'Bots:AAExpansion' WHERE `rule_name` LIKE 'Bots:BotAAExpansion';
 	END IF;
-	IF ((SELECT COUNT(`rule_name`) FROM `rule_values` WHERE `rule_name` LIKE 'Bots:AAExpansion') = 0) THEN
+	IF (NOT EXISTS(SELECT `rule_name` FROM `rule_values` WHERE `rule_name` LIKE 'Bots:AAExpansion')) THEN
 		INSERT INTO `rule_values` VALUES ('1', 'Bots:AAExpansion', '8', 'The expansion through which bots will obtain AAs');
 	END IF;
 	
-	IF ((SELECT COUNT(`rule_name`) FROM `rule_values` WHERE `rule_name` LIKE 'Bots:CreateBotCount') > 0) THEN
+	IF (EXISTS(SELECT `rule_name` FROM `rule_values` WHERE `rule_name` LIKE 'Bots:CreateBotCount')) THEN
 		UPDATE `rule_values` SET `rule_name` = 'Bots:CreationLimit' WHERE `rule_name` LIKE 'Bots:CreateBotCount';
 	END IF;
-	IF ((SELECT COUNT(`rule_name`) FROM `rule_values` WHERE `rule_name` LIKE 'Bots:CreationLimit') = 0) THEN
+	IF (NOT EXISTS(SELECT `rule_name` FROM `rule_values` WHERE `rule_name` LIKE 'Bots:CreationLimit')) THEN
 		INSERT INTO `rule_values` VALUES ('1', 'Bots:CreationLimit', '150', 'Number of bots that each account can create');
 	END IF;
 
-	IF ((SELECT COUNT(`rule_name`) FROM `rule_values` WHERE `rule_name` LIKE 'Bots:BotFinishBuffing') > 0) THEN
+	IF (EXISTS(SELECT `rule_name` FROM `rule_values` WHERE `rule_name` LIKE 'Bots:BotFinishBuffing')) THEN
 		UPDATE `rule_values` SET `rule_name` = 'Bots:FinishBuffing' WHERE `rule_name` LIKE 'Bots:BotFinishBuffing';
 	END IF;
-	IF ((SELECT COUNT(`rule_name`) FROM `rule_values` WHERE `rule_name` LIKE 'Bots:FinishBuffing') = 0) THEN
+	IF (NOT EXISTS(SELECT `rule_name` FROM `rule_values` WHERE `rule_name` LIKE 'Bots:FinishBuffing')) THEN
 		INSERT INTO `rule_values` VALUES ('1', 'Bots:FinishBuffing', 'false', 'Allow for buffs to complete even if the bot caster is out of mana.  Only affects buffing out of combat.');
 	END IF;
 
-	IF ((SELECT COUNT(`rule_name`) FROM `rule_values` WHERE `rule_name` LIKE 'Bots:BotGroupBuffing') > 0) THEN
+	IF (EXISTS(SELECT `rule_name` FROM `rule_values` WHERE `rule_name` LIKE 'Bots:BotGroupBuffing')) THEN
 		UPDATE `rule_values` SET `rule_name` = 'Bots:GroupBuffing' WHERE `rule_name` LIKE 'Bots:BotGroupBuffing';
 	END IF;
-	IF ((SELECT COUNT(`rule_name`) FROM `rule_values` WHERE `rule_name` LIKE 'Bots:GroupBuffing') = 0) THEN
+	IF (NOT EXISTS(SELECT `rule_name` FROM `rule_values` WHERE `rule_name` LIKE 'Bots:GroupBuffing')) THEN
 		INSERT INTO `rule_values` VALUES ('1', 'Bots:GroupBuffing', 'false', 'Bots will cast single target buffs as group buffs, default is false for single. Does not make single target buffs work for MGB.');
 	END IF;
 	
-	IF ((SELECT COUNT(`rule_name`) FROM `rule_values` WHERE `rule_name` LIKE 'Bots:BotManaRegen') > 0) THEN
+	IF (EXISTS(SELECT `rule_name` FROM `rule_values` WHERE `rule_name` LIKE 'Bots:BotManaRegen')) THEN
 		UPDATE `rule_values` SET `rule_name` = 'Bots:ManaRegen' WHERE `rule_name` LIKE 'Bots:BotManaRegen';
 	END IF;
-	IF ((SELECT COUNT(`rule_name`) FROM `rule_values` WHERE `rule_name` LIKE 'Bots:ManaRegen') = 0) THEN
+	IF (NOT EXISTS(SELECT `rule_name` FROM `rule_values` WHERE `rule_name` LIKE 'Bots:ManaRegen')) THEN
 		INSERT INTO `rule_values` VALUES ('1', 'Bots:ManaRegen', '3.0', 'Adjust mana regen for bots, 1 is fast and higher numbers slow it down 3 is about the same as players.');
 	END IF;
 	
-	IF ((SELECT COUNT(`rule_name`) FROM `rule_values` WHERE `rule_name` LIKE 'Bots:BotQuest') > 0) THEN
+	IF (EXISTS(SELECT `rule_name` FROM `rule_values` WHERE `rule_name` LIKE 'Bots:BotQuest')) THEN
 		UPDATE `rule_values` SET `rule_name` = 'Bots:QuestableSpawnLimit' WHERE `rule_name` LIKE 'Bots:BotQuest';
 	END IF;
-	IF ((SELECT COUNT(`rule_name`) FROM `rule_values` WHERE `rule_name` LIKE 'Bots:QuestableSpawnLimit') = 0) THEN
+	IF (NOT EXISTS(SELECT `rule_name` FROM `rule_values` WHERE `rule_name` LIKE 'Bots:QuestableSpawnLimit')) THEN
 		INSERT INTO `rule_values` VALUES ('1', 'Bots:QuestableSpawnLimit', 'false', 'Optional quest method to manage bot spawn limits using the quest_globals name bot_spawn_limit, see: /bazaar/Aediles_Thrall.pl');
 	END IF;
 	
-	IF ((SELECT COUNT(`rule_name`) FROM `rule_values` WHERE `rule_name` LIKE 'Bots:BotSpellQuest') > 0) THEN
+	IF (EXISTS(SELECT `rule_name` FROM `rule_values` WHERE `rule_name` LIKE 'Bots:BotSpellQuest')) THEN
 		UPDATE `rule_values` SET `rule_name` = 'Bots:QuestableSpells' WHERE `rule_name` LIKE 'Bots:BotSpellQuest';
 	END IF;
-	IF ((SELECT COUNT(`rule_name`) FROM `rule_values` WHERE `rule_name` LIKE 'Bots:QuestableSpells') = 0) THEN
+	IF (NOT EXISTS(SELECT `rule_name` FROM `rule_values` WHERE `rule_name` LIKE 'Bots:QuestableSpells')) THEN
 		INSERT INTO `rule_values` VALUES ('1', 'Bots:QuestableSpells', 'false', 'Anita Thrall\'s (Anita_Thrall.pl) Bot Spell Scriber quests.');
 	END IF;
 	
-	IF ((SELECT COUNT(`rule_name`) FROM `rule_values` WHERE `rule_name` LIKE 'Bots:SpawnBotCount') > 0) THEN
+	IF (EXISTS(SELECT `rule_name` FROM `rule_values` WHERE `rule_name` LIKE 'Bots:SpawnBotCount')) THEN
 		UPDATE `rule_values` SET `rule_name` = 'Bots:SpawnLimit' WHERE `rule_name` LIKE 'Bots:SpawnBotCount';
 	END IF;
-	IF ((SELECT COUNT(`rule_name`) FROM `rule_values` WHERE `rule_name` LIKE 'Bots:SpawnLimit') = 0) THEN
+	IF (NOT EXISTS(SELECT `rule_name` FROM `rule_values` WHERE `rule_name` LIKE 'Bots:SpawnLimit')) THEN
 		INSERT INTO `rule_values` VALUES ('1', 'Bots:SpawnLimit', '71', 'Number of bots a character can have spawned at one time, You + 71 bots is a 12 group raid');
 	END IF;
 	
@@ -165,7 +165,7 @@ BEGIN
 		PRIMARY KEY (`bot_id`),
 		INDEX `bot_id` (`bot_id`)
 	) ENGINE=InnoDB;
-	IF ((SELECT COUNT(*) FROM `information_schema`.`TABLES` WHERE `TABLE_SCHEMA` = DATABASE() AND `TABLE_NAME` = 'bots') > 0) THEN
+	IF (EXISTS(SELECT `TABLE_NAME` FROM `information_schema`.`TABLES` WHERE `TABLE_SCHEMA` = DATABASE() AND `TABLE_NAME` = 'bots')) THEN
 		INSERT INTO `bot_data` (
 			`bot_id`,
 			`owner_id`,
@@ -271,7 +271,7 @@ BEGIN
 		PRIMARY KEY (`bot_id`),
 		CONSTRAINT `FK_bot_stances_1` FOREIGN KEY (`bot_id`) REFERENCES `bot_data` (`bot_id`)
 	);
-	IF ((SELECT COUNT(*) FROM `information_schema`.`TABLES` WHERE `TABLE_SCHEMA` = DATABASE() AND `TABLE_NAME` = 'botstances') > 0) THEN
+	IF (EXISTS(SELECT `TABLE_NAME` FROM `information_schema`.`TABLES` WHERE `TABLE_SCHEMA` = DATABASE() AND `TABLE_NAME` = 'botstances')) THEN
 		INSERT INTO `bot_stances` (
 			`bot_id`,
 			`stance_id`
@@ -293,7 +293,7 @@ BEGIN
 		PRIMARY KEY (`bot_id`),
 		CONSTRAINT `FK_bot_timers_1` FOREIGN KEY (`bot_id`) REFERENCES `bot_data` (`bot_id`)
 	);
-	IF ((SELECT COUNT(*) FROM `information_schema`.`TABLES` WHERE `TABLE_SCHEMA` = DATABASE() AND `TABLE_NAME` = 'bottimers') > 0) THEN
+	IF (EXISTS(SELECT `TABLE_NAME` FROM `information_schema`.`TABLES` WHERE `TABLE_SCHEMA` = DATABASE() AND `TABLE_NAME` = 'bottimers')) THEN
 		INSERT INTO `bot_timers` (
 			`bot_id`,
 			`timer_id`,
@@ -335,7 +335,7 @@ BEGIN
 		KEY `FK_bot_buffs_1` (`bot_id`),
 		CONSTRAINT `FK_bot_buffs_1` FOREIGN KEY (`bot_id`) REFERENCES `bot_data` (`bot_id`)
 	) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=latin1;
-	IF ((SELECT COUNT(*) FROM `information_schema`.`TABLES` WHERE `TABLE_SCHEMA` = DATABASE() AND `TABLE_NAME` = 'botbuffs') > 0) THEN
+	IF (EXISTS(SELECT `TABLE_NAME` FROM `information_schema`.`TABLES` WHERE `TABLE_SCHEMA` = DATABASE() AND `TABLE_NAME` = 'botbuffs')) THEN
 		INSERT INTO `bot_buffs` (
 			`buffs_index`,
 			`bot_id`,
@@ -371,7 +371,7 @@ BEGIN
 		INNER JOIN `bot_data` bd
 		ON bb.`BotId` = bd.`bot_id`;
 		
-		IF ((SELECT COUNT(*) FROM `information_schema`.`COLUMNS` WHERE `TABLE_SCHEMA` = DATABASE() AND `TABLE_NAME` = 'botbuffs' AND `COLUMN_NAME` = 'dot_rune') > 0) THEN
+		IF (EXISTS(SELECT `COLUMN_NAME` FROM `information_schema`.`COLUMNS` WHERE `TABLE_SCHEMA` = DATABASE() AND `TABLE_NAME` = 'botbuffs' AND `COLUMN_NAME` = 'dot_rune')) THEN
 			UPDATE `bot_buffs` bb
 			INNER JOIN `botbuffs` bbo
 			ON bb.`buffs_index` = bbo.`BotBuffId`
@@ -379,7 +379,7 @@ BEGIN
 			WHERE bb.`bot_id` = bbo.`BotID`;
 		END IF;
 		
-		IF ((SELECT COUNT(*) FROM `information_schema`.`COLUMNS` WHERE `TABLE_SCHEMA` = DATABASE() AND `TABLE_NAME` = 'botbuffs' AND `COLUMN_NAME` = 'caston_x') > 0) THEN
+		IF (EXISTS(SELECT `COLUMN_NAME` FROM `information_schema`.`COLUMNS` WHERE `TABLE_SCHEMA` = DATABASE() AND `TABLE_NAME` = 'botbuffs' AND `COLUMN_NAME` = 'caston_x')) THEN
 			UPDATE `bot_buffs` bb
 			INNER JOIN `botbuffs` bbo
 			ON bb.`buffs_index` = bbo.`BotBuffId`
@@ -387,7 +387,7 @@ BEGIN
 			WHERE bb.`bot_id` = bbo.`BotID`;
 		END IF;
 		
-		IF ((SELECT COUNT(*) FROM `information_schema`.`COLUMNS` WHERE `TABLE_SCHEMA` = DATABASE() AND `TABLE_NAME` = 'botbuffs' AND `COLUMN_NAME` = 'caston_y') > 0) THEN
+		IF (EXISTS(SELECT `COLUMN_NAME` FROM `information_schema`.`COLUMNS` WHERE `TABLE_SCHEMA` = DATABASE() AND `TABLE_NAME` = 'botbuffs' AND `COLUMN_NAME` = 'caston_y')) THEN
 			UPDATE `bot_buffs` bb
 			INNER JOIN `botbuffs` bbo
 			ON bb.`buffs_index` = bbo.`BotBuffId`
@@ -395,7 +395,7 @@ BEGIN
 			WHERE bb.`bot_id` = bbo.`BotID`;
 		END IF;
 		
-		IF ((SELECT COUNT(*) FROM `information_schema`.`COLUMNS` WHERE `TABLE_SCHEMA` = DATABASE() AND `TABLE_NAME` = 'botbuffs' AND `COLUMN_NAME` = 'caston_z') > 0) THEN
+		IF (EXISTS(SELECT `COLUMN_NAME` FROM `information_schema`.`COLUMNS` WHERE `TABLE_SCHEMA` = DATABASE() AND `TABLE_NAME` = 'botbuffs' AND `COLUMN_NAME` = 'caston_z')) THEN
 			UPDATE `bot_buffs` bb
 			INNER JOIN `botbuffs` bbo
 			ON bb.`buffs_index` = bbo.`BotBuffId`
@@ -403,7 +403,7 @@ BEGIN
 			WHERE bb.`bot_id` = bbo.`BotID`;
 		END IF;
 		
-		IF ((SELECT COUNT(*) FROM `information_schema`.`COLUMNS` WHERE `TABLE_SCHEMA` = DATABASE() AND `TABLE_NAME` = 'botbuffs' AND `COLUMN_NAME` = 'ExtraDIChance') > 0) THEN
+		IF (EXISTS(SELECT `COLUMN_NAME` FROM `information_schema`.`COLUMNS` WHERE `TABLE_SCHEMA` = DATABASE() AND `TABLE_NAME` = 'botbuffs' AND `COLUMN_NAME` = 'ExtraDIChance')) THEN
 			UPDATE `bot_buffs` bb
 			INNER JOIN `botbuffs` bbo
 			ON bb.`buffs_index` = bbo.`BotBuffId`
@@ -436,7 +436,7 @@ BEGIN
 		KEY `FK_bot_inventories_1` (`bot_id`),
 		CONSTRAINT `FK_bot_inventories_1` FOREIGN KEY (`bot_id`) REFERENCES `bot_data` (`bot_id`)
 	) ENGINE=InnoDB; 
-	IF ((SELECT COUNT(*) FROM `information_schema`.`TABLES` WHERE `TABLE_SCHEMA` = DATABASE() AND `TABLE_NAME` = 'botinventory') > 0) THEN
+	IF (EXISTS(SELECT `TABLE_NAME` FROM `information_schema`.`TABLES` WHERE `TABLE_SCHEMA` = DATABASE() AND `TABLE_NAME` = 'botinventory')) THEN
 		INSERT INTO `bot_inventories` (
 			`inventories_index`,
 			`bot_id`,
@@ -468,7 +468,7 @@ BEGIN
 		INNER JOIN `bot_data` bd
 		ON bi.`BotID` = bd.`bot_id`;
 		
-		IF ((SELECT COUNT(*) FROM `information_schema`.`COLUMNS` WHERE `TABLE_SCHEMA` = DATABASE() AND `TABLE_NAME` = 'botinventory' AND `COLUMN_NAME` = 'augslot6') > 0) THEN
+		IF (EXISTS(SELECT `COLUMN_NAME` FROM `information_schema`.`COLUMNS` WHERE `TABLE_SCHEMA` = DATABASE() AND `TABLE_NAME` = 'botinventory' AND `COLUMN_NAME` = 'augslot6')) THEN
 			UPDATE `bot_inventories` bi
 			INNER JOIN `botinventory` bio
 			ON bi.`inventories_index` = bio.`BotInventoryID`
@@ -491,7 +491,7 @@ BEGIN
 		CONSTRAINT `FK_bot_pets_1` FOREIGN KEY (`bot_id`) REFERENCES `bot_data` (`bot_id`),
 		CONSTRAINT `U_bot_pets_1` UNIQUE (`bot_id`)
 	) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=latin1;
-	IF ((SELECT COUNT(*) FROM `information_schema`.`TABLES` WHERE `TABLE_SCHEMA` = DATABASE() AND `TABLE_NAME` = 'botpets') > 0) THEN
+	IF (EXISTS(SELECT `TABLE_NAME` FROM `information_schema`.`TABLES` WHERE `TABLE_SCHEMA` = DATABASE() AND `TABLE_NAME` = 'botpets')) THEN
 		INSERT INTO `bot_pets` (
 			`pets_index`,
 			`pet_id`,
@@ -524,7 +524,7 @@ BEGIN
 		KEY `FK_bot_pet_buffs_1` (`pets_index`),
 		CONSTRAINT `FK_bot_pet_buffs_1` FOREIGN KEY (`pets_index`) REFERENCES `bot_pets` (`pets_index`)
 	) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=latin1;
-	IF ((SELECT COUNT(*) FROM `information_schema`.`TABLES` WHERE `TABLE_SCHEMA` = DATABASE() AND `TABLE_NAME` = 'botpetbuffs') > 0) THEN
+	IF (EXISTS(SELECT `TABLE_NAME` FROM `information_schema`.`TABLES` WHERE `TABLE_SCHEMA` = DATABASE() AND `TABLE_NAME` = 'botpetbuffs')) THEN
 		INSERT INTO `bot_pet_buffs` (
 			`pet_buffs_index`,
 			`pets_index`,
@@ -553,7 +553,7 @@ BEGIN
 		KEY `FK_bot_pet_inventories_1` (`pets_index`),
 		CONSTRAINT `FK_bot_pet_inventories_1` FOREIGN KEY (`pets_index`) REFERENCES `bot_pets` (`pets_index`)
 	) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=latin1;
-	IF ((SELECT COUNT(*) FROM `information_schema`.`TABLES` WHERE `TABLE_SCHEMA` = DATABASE() AND `TABLE_NAME` = 'botpetinventory') > 0) THEN
+	IF (EXISTS(SELECT `TABLE_NAME` FROM `information_schema`.`TABLES` WHERE `TABLE_SCHEMA` = DATABASE() AND `TABLE_NAME` = 'botpetinventory')) THEN
 		INSERT INTO `bot_pet_inventories` (
 			`pet_inventories_index`,
 			`pets_index`,
@@ -578,7 +578,7 @@ BEGIN
 		KEY `FK_bot_groups_1` (`group_leader_id`),
 		CONSTRAINT `FK_bot_groups_1` FOREIGN KEY (`group_leader_id`) REFERENCES `bot_data` (`bot_id`)
 	) ENGINE=InnoDB;
-	IF ((SELECT COUNT(*) FROM `information_schema`.`TABLES` WHERE `TABLE_SCHEMA` = DATABASE() AND `TABLE_NAME` = 'botgroup') > 0) THEN
+	IF (EXISTS(SELECT `TABLE_NAME` FROM `information_schema`.`TABLES` WHERE `TABLE_SCHEMA` = DATABASE() AND `TABLE_NAME` = 'botgroup')) THEN
 		INSERT INTO `bot_groups` (
 			`groups_index`,
 			`group_leader_id`,
@@ -605,7 +605,7 @@ BEGIN
 		KEY `FK_bot_group_members_2` (`bot_id`),
 		CONSTRAINT `FK_bot_group_members_2` FOREIGN KEY (`bot_id`) REFERENCES `bot_data` (`bot_id`)
 	) ENGINE=InnoDB;
-	IF ((SELECT COUNT(*) FROM `information_schema`.`TABLES` WHERE `TABLE_SCHEMA` = DATABASE() AND `TABLE_NAME` = 'botgroupmembers') > 0) THEN
+	IF (EXISTS(SELECT `TABLE_NAME` FROM `information_schema`.`TABLES` WHERE `TABLE_SCHEMA` = DATABASE() AND `TABLE_NAME` = 'botgroupmembers')) THEN
 		INSERT INTO `bot_group_members` (
 			`group_members_index`,
 			`groups_index`,
@@ -636,7 +636,7 @@ BEGIN
 		`alt` TINYINT(3) UNSIGNED NOT NULL DEFAULT '0',
 		PRIMARY KEY  (`bot_id`)
 	) ENGINE=InnoDB;
-	IF ((SELECT COUNT(*) FROM `information_schema`.`TABLES` WHERE `TABLE_SCHEMA` = DATABASE() AND `TABLE_NAME` = 'botguildmembers') > 0) THEN
+	IF (EXISTS(SELECT `TABLE_NAME` FROM `information_schema`.`TABLES` WHERE `TABLE_SCHEMA` = DATABASE() AND `TABLE_NAME` = 'botguildmembers')) THEN
 		INSERT INTO `bot_guild_members` (
 			`bot_id`,
 			`guild_id`,

@@ -1,5 +1,8 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 11/30/2015 ==
+Uleat: Changed criteria for a few bots scripts from count to null/not null in hopes of fixing special case failures
+
 == 11/22/2015 ==
 Uleat: Fix for loginserver project compile failure
 
