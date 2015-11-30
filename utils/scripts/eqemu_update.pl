@@ -111,6 +111,7 @@ if($ARGV[0] eq "installer"){
 	print "Running EQEmu Server installer routines...\n";
 	mkdir('logs');
 	mkdir('updates_staged');
+	mkdir('shared');
 	fetch_latest_windows_binaries();
 	map_files_fetch_bulk();
 	opcodes_fetch();
@@ -121,7 +122,8 @@ if($ARGV[0] eq "installer"){
 	
 	#::: Database Routines
 	print "MariaDB :: Creating Database 'peq'\n";
-	print `"$path" --host $host --user $user --password="$pass" -N -B -e "DROP DATABASE peq;CREATE DATABASE peq"`;
+	print `"$path" --host $host --user $user --password="$pass" -N -B -e "DROP DATABASE IF EXISTS peq;"`;
+	print `"$path" --host $host --user $user --password="$pass" -N -B -e "CREATE DATABASE peq"`;
 	if($OS eq "Windows"){ @db_version = split(': ', `world db_version`); }
 	if($OS eq "Linux"){ @db_version = split(': ', `./world db_version`); }  
 	$bin_db_ver = trim($db_version[1]);
