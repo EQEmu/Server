@@ -23,7 +23,7 @@ if($Config{osname}=~/linux/i){ $OS = "Linux"; }
 if($Config{osname}=~/Win|MS/i){ $OS = "Windows"; }
 
 #::: If current version is less than what world is reporting, then download a new one...
-$current_version = 11;
+$current_version = 12;
 
 if($ARGV[0] eq "V"){
 	if($ARGV[1] > $current_version){ 
@@ -119,6 +119,8 @@ if($ARGV[0] eq "installer"){
 	quest_files_fetch();
 	lua_modules_fetch();
 	get_remote_file("https://raw.githubusercontent.com/Akkadius/EQEmuInstall/master/lua51.dll", "lua51.dll", 1);
+	get_remote_file("https://raw.githubusercontent.com/Akkadius/EQEmuInstall/master/zlib1.dll", "zlib1.dll", 1);
+	get_remote_file("https://raw.githubusercontent.com/Akkadius/EQEmuInstall/master/libmysql.dll", "libmysql.dll", 1);
 	
 	#::: Database Routines
 	print "MariaDB :: Creating Database 'peq'\n";
@@ -134,14 +136,6 @@ if($ARGV[0] eq "installer"){
 	main_db_management();
 	print "\nApplying Latest Database Updates...\n";
 	main_db_management();
-	if($OS eq "Windows"){
-		check_windows_firewall_rules();
-	}
-	
-	exit;
-}
-if($ARGV[0] eq "firewall_rules"){
-	check_windows_firewall_rules();
 	exit;
 }
 
@@ -231,6 +225,8 @@ sub show_menu_prompt {
         8 => \&quest_files_fetch,
         9 => \&lua_modules_fetch,
 		10 => \&aa_fetch,
+		11 => \&fetch_latest_windows_binaries,
+		12 => \&fetch_server_dlls,
         20 => \&do_update_self,
         0 => \&script_exit,
     );
@@ -304,6 +300,8 @@ return <<EO_MENU;
  8) [Quests (Perl/LUA)] :: Download latest PEQ quests and stage updates
  9) [LUA Modules] :: Download latest LUA Modules (Required for Lua)
  10) [DB Data : Alternate Advancement] :: Download Latest AA's from PEQ (This overwrites existing data)
+ 11) [Windows Server Build] :: Download Latest and Stable Server Build (Overwrites existing .exe's, includes .dll's)
+ 12) [Windows Server .dll's] :: Download Pre-Requisite Server .dll's
  20) [Update the updater] Force update this script (Redownload)
  0) Exit
  
@@ -519,39 +517,6 @@ sub copy_file{
 	}
 	copy $l_source_file, $l_dest_file;
 }
-	
-sub check_windows_firewall_rules{
-	$output = `netsh advfirewall firewall show rule name=all`;
-	@output_buffer = split("\n", $output);
-	$has_world_rules = 0;
-	$has_zone_rules = 0;
-	foreach my $val (@output_buffer){
-		if($val=~/Rule Name/i){
-			$val=~s/Rule Name://g;
-			if($val=~/EQEmu World/i){
-				$has_world_rules = 1;
-				print "Found existing rule :: " . trim($val) . "\n";
-			}
-			if($val=~/EQEmu Zone/i){
-				$has_zone_rules = 1;
-				print "Found existing rule :: " . trim($val) . "\n";
-			}
-		}
-	}
-	
-	if($has_world_rules == 0){
-		print "Attempting to add EQEmu World Firewall Rules (TCP) port 9000 \n";
-		print `netsh advfirewall firewall add rule name="EQEmu World (9000) TCP" dir=in action=allow protocol=TCP localport=9000`;
-		print "Attempting to add EQEmu World Firewall Rules (UDP) port 9000 \n";
-		print `netsh advfirewall firewall add rule name="EQEmu World (9000) UDP" dir=in action=allow protocol=UDP localport=9000	`;
-	}
-	if($has_zone_rules == 0){
-		print "Attempting to add EQEmu Zones (7000-7500) TCP \n";
-		print `netsh advfirewall firewall add rule name="EQEmu Zones (7000-7500) TCP" dir=in action=allow protocol=TCP localport=7000-7500`;
-		print "Attempting to add EQEmu Zones (7000-7500) UDP \n";
-		print `netsh advfirewall firewall add rule name="EQEmu Zones (7000-7500) UDP" dir=in action=allow protocol=UDP localport=7000-7500`;
-	}
-}
 
 sub fetch_latest_windows_binaries{
 	print "\n --- Fetching Latest Windows Binaries... --- \n";
@@ -574,6 +539,13 @@ sub fetch_latest_windows_binaries{
 	print "\n --- Done... --- \n";
 	
 	rmtree('updates_staged');
+}
+
+sub fetch_server_dlls{
+	print "Fetching lua51.dll, zlib1.dll, libmysql.dll...\n";
+	get_remote_file("https://raw.githubusercontent.com/Akkadius/EQEmuInstall/master/lua51.dll", "lua51.dll", 1);
+	get_remote_file("https://raw.githubusercontent.com/Akkadius/EQEmuInstall/master/zlib1.dll", "zlib1.dll", 1);
+	get_remote_file("https://raw.githubusercontent.com/Akkadius/EQEmuInstall/master/libmysql.dll", "libmysql.dll", 1);
 }
 
 sub fetch_peq_db_full{
