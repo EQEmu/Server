@@ -102,7 +102,7 @@ int main()
 	if (local_network.size() > 0)
 		server.options.WorldServerTypeTable(local_network);
 
-	//Create our DB from options.
+	/* Create database connection */
 	if (server.config->GetVariable("database", "subsystem").compare("MySQL") == 0) {
 #ifdef EQEMU_MYSQL_ENABLED
 		server_log->Log(log_debug, "MySQL Database Init.");
