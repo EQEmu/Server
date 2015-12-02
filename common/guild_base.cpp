@@ -969,7 +969,7 @@ bool BaseGuildManager::GetCharInfo(uint32 char_id, CharGuildInfo &into) {
 	//load up the rank info for each guild.
 	std::string query;
 #ifdef BOTS
-    query = StringFormat(GuildMemberBaseQuery " WHERE c.id=%d AND c.mobtype = 'C'", char_id);
+    query = StringFormat(GuildMemberBaseQuery " WHERE c.id=%d AND c.mob_type = 'C'", char_id);
 #else
     query = StringFormat(GuildMemberBaseQuery " WHERE c.id=%d", char_id);
 #endif
