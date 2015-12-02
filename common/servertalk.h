@@ -523,7 +523,7 @@ struct ServerLSPlayerZoneChange_Struct {
 	uint32 from; // 0 = world
 	uint32 to; // 0 = world
 };
-struct ServerLSClientAuth {
+struct ClientAuth_Struct {
 	uint32	lsaccount_id;	// ID# in login server's db
 	char	name[30];		// username in login server's db
 	char	key[30];		// the Key the client will present

@@ -145,7 +145,7 @@ bool LoginServer::Process() {
 				break;
 			}
 			case ServerOP_LSClientAuth: {
-				ServerLSClientAuth* slsca = (ServerLSClientAuth*) pack->pBuffer;
+				ClientAuth_Struct* slsca = (ClientAuth_Struct*) pack->pBuffer;
 
 				if (RuleI(World, AccountSessionLimit) >= 0) {
 					// Enforce the limit on the number of characters on the same account that can be

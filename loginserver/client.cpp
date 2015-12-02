@@ -245,7 +245,7 @@ void Client::Handle_Login(const char* data, unsigned int size)
 
 	if(result)
 	{
-		server.CM->RemoveExistingClient(d_account_id);
+		server.client_manager->RemoveExistingClient(d_account_id);
 		in_addr in;
 		in.s_addr = connection->GetRemoteIP();
 		server.db->UpdateLSAccountData(d_account_id, string(inet_ntoa(in)));
@@ -347,12 +347,12 @@ void Client::Handle_Play(const char* data)
 	this->play_server_id = (unsigned int)play->ServerNumber;
 	play_sequence_id = sequence_in;
 	play_server_id = server_id_in;
-	server.SM->SendUserToWorldRequest(server_id_in, account_id);
+	server.server_manager->SendUserToWorldRequest(server_id_in, account_id);
 }
 
 void Client::SendServerListPacket()
 {
-	EQApplicationPacket *outapp = server.SM->CreateServerListPacket(this);
+	EQApplicationPacket *outapp = server.server_manager->CreateServerListPacket(this);
 
 	if(server.options.IsDumpOutPacketsOn())
 	{
@@ -378,7 +378,7 @@ void Client::GenerateKey()
 {
 	key.clear();
 	int count = 0;
-	while(count < 10)
+	while (count < 10)
 	{
 		static const char key_selection[] =
 		{
