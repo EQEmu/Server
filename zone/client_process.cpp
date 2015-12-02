@@ -1153,6 +1153,11 @@ void Client::OPMemorizeSpell(const EQApplicationPacket* app)
 			{
 				const Item_Struct* item = inst->GetItem();
 
+				if (RuleB(Character, RestrictSpellScribing) && !item->IsEquipable(GetRace(), GetClass())) {
+					Message_StringID(13, CANNOT_USE_ITEM);
+					break;
+				}
+
 				if(item && item->Scroll.Effect == (int32)(memspell->spell_id))
 				{
 					ScribeSpell(memspell->spell_id, memspell->slot);
