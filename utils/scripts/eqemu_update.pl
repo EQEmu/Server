@@ -126,7 +126,7 @@ if($ARGV[0] eq "installer"){
 	print "MariaDB :: Creating Database 'peq'\n";
 	print `"$path" --host $host --user $user --password="$pass" -N -B -e "DROP DATABASE IF EXISTS peq;"`;
 	print `"$path" --host $host --user $user --password="$pass" -N -B -e "CREATE DATABASE peq"`;
-	if($OS eq "Windows"){ @db_version = split(': ', `world db_version`); }
+	if($OS eq "Windows"){ @db_version = split(': ', `world db_version`); } 
 	if($OS eq "Linux"){ @db_version = split(': ', `./world db_version`); }  
 	$bin_db_ver = trim($db_version[1]);
 	check_db_version_table();
@@ -139,6 +139,12 @@ if($ARGV[0] eq "installer"){
 	if($OS eq "Windows"){
 		check_windows_firewall_rules();
 	}
+	exit;
+}
+
+if($ARGV[0] eq "login_server_setup"){
+	do_windows_login_server_setup();
+	
 	exit;
 }
 
@@ -230,6 +236,7 @@ sub show_menu_prompt {
 		10 => \&aa_fetch,
 		11 => \&fetch_latest_windows_binaries,
 		12 => \&fetch_server_dlls,
+		13 => \&do_windows_login_server_setup,
         20 => \&do_update_self,
         0 => \&script_exit,
     );
@@ -305,6 +312,7 @@ return <<EO_MENU;
  10) [DB Data : Alternate Advancement] :: Download Latest AA's from PEQ (This overwrites existing data)
  11) [Windows Server Build] :: Download Latest and Stable Server Build (Overwrites existing .exe's, includes .dll's)
  12) [Windows Server .dll's] :: Download Pre-Requisite Server .dll's
+ 13) [Windows Server Loginserver Setup] :: Download and install Windows Loginserver
  20) [Update the updater] Force update this script (Redownload)
  0) Exit
  
@@ -544,6 +552,98 @@ sub fetch_latest_windows_binaries{
 	rmtree('updates_staged');
 }
 
+sub do_windows_login_server_setup{
+	print "\n --- Fetching Loginserver... --- \n";
+	get_remote_file("https://raw.githubusercontent.com/Akkadius/EQEmuInstall/master/login_server.zip", "updates_staged/login_server.zip", 1);
+	print "\n --- Extracting... --- \n";
+	unzip('updates_staged/login_server.zip', 'updates_staged/login_server/');
+	my @files;
+	my $start_dir = "updates_staged/login_server";
+	find( 
+		sub { push @files, $File::Find::name unless -d; }, 
+		$start_dir
+	);
+	for my $file (@files) {
+		$dest_file = $file;
+		$dest_file =~s/updates_staged\/login_server\///g;
+		print "Installing :: " . $dest_file . "\n";
+		copy_file($file, $dest_file);
+	}
+	print "\n Done... \n";
+	
+	print "Pulling down Loginserver database tables...\n";
+	get_remote_file("https://raw.githubusercontent.com/Akkadius/EQEmuInstall/master/login_server_tables.sql", "db_update/login_server_tables.sql");
+	print "\n\nInstalling Loginserver tables...\n";
+	print get_mysql_result_from_file("db_update/login_server_tables.sql");
+	print "\nDone...\n\n";
+	
+	add_login_server_firewall_rules();
+	
+	rmtree('updates_staged');
+	rmtree('db_update');
+	
+	print "\nPress any key to continue...\n";
+	
+	<>; #Read from STDIN
+	
+}
+
+sub add_login_server_firewall_rules{
+	#::: Check Loginserver Firewall install for Windows
+	if($OS eq "Windows"){
+		$output = `netsh advfirewall firewall show rule name=all`;
+		@output_buffer = split("\n", $output);
+		$has_loginserver_rules_titanium = 0;
+		$has_loginserver_rules_sod = 0;
+		foreach my $val (@output_buffer){
+			if($val=~/Rule Name/i){
+				$val=~s/Rule Name://g;
+				if($val=~/EQEmu Loginserver/i && $val=~/Titanium/i){
+					$has_loginserver_rules_titanium = 1;
+					print "Found existing rule :: " . trim($val) . "\n";
+				}
+				if($val=~/EQEmu Loginserver/i && $val=~/SOD/i){
+					$has_loginserver_rules_sod = 1;
+					print "Found existing rule :: " . trim($val) . "\n";
+				}
+			}
+		}
+		
+		if($has_loginserver_rules_titanium == 0){
+			print "Attempting to add EQEmu Loginserver Firewall Rules (Titanium) (TCP) port 5998 \n";
+			print `netsh advfirewall firewall add rule name="EQEmu Loginserver (Titanium) (5998) TCP" dir=in action=allow protocol=TCP localport=5998`;
+			print "Attempting to add EQEmu Loginserver Firewall Rules (Titanium) (UDP) port 5998 \n";
+			print `netsh advfirewall firewall add rule name="EQEmu Loginserver (Titanium) (5998) UDP" dir=in action=allow protocol=UDP localport=5998`;
+		}
+		if($has_loginserver_rules_sod == 0){
+			print "Attempting to add EQEmu Loginserver Firewall Rules (SOD+) (TCP) port 5999 \n";
+			print `netsh advfirewall firewall add rule name="EQEmu Loginserver (SOD+) (5999) TCP" dir=in action=allow protocol=TCP localport=5999`;
+			print "Attempting to add EQEmu Loginserver Firewall Rules (SOD+) (UDP) port 5999 \n";
+			print `netsh advfirewall firewall add rule name="EQEmu Loginserver (SOD+) (5999) UDP" dir=in action=allow protocol=UDP localport=5999`;
+		}
+		
+		print "If firewall rules don't add you must run this script (eqemu_update.pl) as administrator\n";
+		print "\n";
+		print "#::: Instructions \n";
+		print "In order to connect your server to the loginserver you must point your eqemu_config.xml to your local server similar to the following:\n";
+		print "
+	<loginserver1>
+		<host>login.eqemulator.net</host>
+		<port>5998</port>
+		<account></account>
+		<password></password>
+	</loginserver1>
+	<loginserver2>
+		<host>127.0.0.1</host>
+		<port>5998</port>
+		<account></account>
+		<password></password>
+	</loginserver2>
+		";
+		print "\nWhen done, make sure your EverQuest client points to your loginserver's IP (In this case it would be 127.0.0.1) in the eqhosts.txt file\n";
+	}
+}
+
 sub check_windows_firewall_rules{
 	$output = `netsh advfirewall firewall show rule name=all`;
 	@output_buffer = split("\n", $output);
@@ -567,7 +667,7 @@ sub check_windows_firewall_rules{
 		print "Attempting to add EQEmu World Firewall Rules (TCP) port 9000 \n";
 		print `netsh advfirewall firewall add rule name="EQEmu World (9000) TCP" dir=in action=allow protocol=TCP localport=9000`;
 		print "Attempting to add EQEmu World Firewall Rules (UDP) port 9000 \n";
-		print `netsh advfirewall firewall add rule name="EQEmu World (9000) UDP" dir=in action=allow protocol=UDP localport=9000	`;
+		print `netsh advfirewall firewall add rule name="EQEmu World (9000) UDP" dir=in action=allow protocol=UDP localport=9000`;
 	}
 	if($has_zone_rules == 0){
 		print "Attempting to add EQEmu Zones (7000-7500) TCP \n";
