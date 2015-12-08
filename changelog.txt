@@ -1,5 +1,20 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 12/07/2016 ==
+Uleat: Command aliases are no longer handled through the command_add() function.
+	- To add a command alias, edit the database table `command_settings` - here, you will find three columns: `command`, `access` and `aliases`
+	- Adding command aliases require that the command contain an entry in `command_settings`.`command`
+	- Only 'real' commands go inside of the command_init() function in command.cpp .. if you wish to add aliases, you must enter them into the database
+	- 'Real' commands are loaded first .. then any access/alias data is loaded and applied afterwards
+	- Duplicate aliases will be ignored .. only the first encountered occurrence will be honored - if it does not conflict with an existing command name
+	- Aliases should not contain whitespace and should be '|' (pipe) delimited
+	- The restriction on the number of aliases has been removed .. though each alias will still be limited to the access level of the parent command
+	- If you need need more name space for aliases, simply edit the `command_settings` table and increase the size of the `aliases` column
+	- The old `commands` table has been renamed to `commands_old` for reference
+	- All of the current 'standard' commands have been added to the new `command_settings` table
+	
+	- YOU WILL NEED TO VERIFY/IMPORT OLD ACCESS VALUES AS THIS CHANGE REVERTS ALL COMMAND ACCESS VALUES TO THEIR PEQDB DEFAULTS
+
 == 11/30/2015 ==
 Uleat: Changed criteria for a few bots scripts from count to null/not null in hopes of fixing special case failures
 
