@@ -118,9 +118,19 @@ if($ARGV[0] eq "installer"){
 	plugins_fetch();
 	quest_files_fetch();
 	lua_modules_fetch();
+	
+	#::: Binary dll's
 	get_remote_file("https://raw.githubusercontent.com/Akkadius/EQEmuInstall/master/lua51.dll", "lua51.dll", 1);
 	get_remote_file("https://raw.githubusercontent.com/Akkadius/EQEmuInstall/master/zlib1.dll", "zlib1.dll", 1);
 	get_remote_file("https://raw.githubusercontent.com/Akkadius/EQEmuInstall/master/libmysql.dll", "libmysql.dll", 1);
+	
+	#::: Server scripts
+	get_remote_file("https://raw.githubusercontent.com/Akkadius/EQEmuInstall/master/t_database_backup.bat", "t_database_backup.bat", 1);
+	get_remote_file("https://raw.githubusercontent.com/Akkadius/EQEmuInstall/master/t_server_crash_report.pl", "t_server_crash_report.pl", 1);
+	get_remote_file("https://raw.githubusercontent.com/Akkadius/EQEmuInstall/master/t_start_server.bat", "t_start_server.bat", 1);
+	get_remote_file("https://raw.githubusercontent.com/Akkadius/EQEmuInstall/master/t_start_server_with_login_server.bat", "t_start_server_with_login_server.bat", 1);
+	get_remote_file("https://raw.githubusercontent.com/Akkadius/EQEmuInstall/master/t_stop_server.bat", "t_stop_server.bat", 1);
+	
 	
 	#::: Database Routines
 	print "MariaDB :: Creating Database 'peq'\n";
@@ -145,7 +155,7 @@ if($ARGV[0] eq "installer"){
 	exit;
 }
 
-if($ARGV[0] eq "db_dump_compress"){ database_dump_compress(); exit; }
+if($ARGV[0] eq "db_dump_compress"){ database_dump_compress(); }
 if($ARGV[0] eq "login_server_setup"){
 	do_windows_login_server_setup();	
 	exit;
