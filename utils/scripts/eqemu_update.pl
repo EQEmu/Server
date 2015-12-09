@@ -145,6 +145,7 @@ if($ARGV[0] eq "installer"){
 	exit;
 }
 
+if($ARGV[0] eq "db_dump_compress"){ database_dump_compress(); }
 if($ARGV[0] eq "login_server_setup"){
 	do_windows_login_server_setup();	
 	exit;
