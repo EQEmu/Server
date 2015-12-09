@@ -136,6 +136,9 @@ if($ARGV[0] eq "installer"){
 	main_db_management();
 	print "\nApplying Latest Database Updates...\n";
 	main_db_management();
+	
+	print get_mysql_result("UPDATE `launcher` SET `dynamics` = 30 WHERE `name` = 'zone'");
+	
 	if($OS eq "Windows"){
 		check_windows_firewall_rules();
 	}
@@ -143,8 +146,7 @@ if($ARGV[0] eq "installer"){
 }
 
 if($ARGV[0] eq "login_server_setup"){
-	do_windows_login_server_setup();
-	
+	do_windows_login_server_setup();	
 	exit;
 }
 
