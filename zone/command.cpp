@@ -498,7 +498,11 @@ int command_add(std::string command_name, const char *desc, int access, CmdFuncP
 		return -1;
 	}
 
-	CommandRecord *c = new CommandRecord{ access, desc, function };
+	CommandRecord *c = new CommandRecord;
+	c->access = access;
+	c->desc = desc;
+	c->function = function;
+
 	commandlist[command_name] = c;
 	cleanup_commandlist.Append(c);
 	commandcount++;
