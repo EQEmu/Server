@@ -130,6 +130,7 @@ if($ARGV[0] eq "installer"){
 	get_remote_file("https://raw.githubusercontent.com/Akkadius/EQEmuInstall/master/t_start_server.bat", "t_start_server.bat", 1);
 	get_remote_file("https://raw.githubusercontent.com/Akkadius/EQEmuInstall/master/t_start_server_with_login_server.bat", "t_start_server_with_login_server.bat", 1);
 	get_remote_file("https://raw.githubusercontent.com/Akkadius/EQEmuInstall/master/t_stop_server.bat", "t_stop_server.bat", 1);
+	get_remote_file("https://raw.githubusercontent.com/Akkadius/EQEmuInstall/master/win_server_launcher.pl", "win_server_launcher.pl", 1);
 	
 	
 	#::: Database Routines
