@@ -44,6 +44,8 @@ int main()
 	set_exception_handler();
 	Log.LoadLogSettingsDefaults();
 
+	Log.log_settings[Logs::Error].log_to_console = Logs::General;
+
 	Log.Out(Logs::General, Logs::Login_Server, "Logging System Init.");
 
 	/* Parse out login.ini */

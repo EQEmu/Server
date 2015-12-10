@@ -114,6 +114,9 @@ void CatchSignal(int sig_num);
 int main(int argc, char** argv) {
 	RegisterExecutablePlatform(ExePlatformWorld);
 	Log.LoadLogSettingsDefaults();
+
+
+
 	set_exception_handler();
 
 	/* Database Version Check */
