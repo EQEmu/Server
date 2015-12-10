@@ -255,50 +255,49 @@ void Client::Handle_Login(const char* data, unsigned int size)
 
 		EQApplicationPacket *outapp = new EQApplicationPacket(OP_LoginAccepted, 10 + 80);
 		const LoginLoginRequest_Struct* llrs = (const LoginLoginRequest_Struct *)data;
-		LoginLoginAccepted_Struct* llas = (LoginLoginAccepted_Struct *)outapp->pBuffer;
-		llas->unknown1 = llrs->unknown1;
-		llas->unknown2 = llrs->unknown2;
-		llas->unknown3 = llrs->unknown3;
-		llas->unknown4 = llrs->unknown4;
-		llas->unknown5 = llrs->unknown5;
+		LoginAccepted_Struct* login_accepted = (LoginAccepted_Struct *)outapp->pBuffer;
+		login_accepted->unknown1 = llrs->unknown1;
+		login_accepted->unknown2 = llrs->unknown2;
+		login_accepted->unknown3 = llrs->unknown3;
+		login_accepted->unknown4 = llrs->unknown4;
+		login_accepted->unknown5 = llrs->unknown5;
 
-		Login_ReplyBlock_Struct * lrbs = new Login_ReplyBlock_Struct;
-		memset(lrbs, 0, sizeof(Login_ReplyBlock_Struct));
+		LoginFailedAttempts_Struct * login_failed_attempts = new LoginFailedAttempts_Struct;
+		memset(login_failed_attempts, 0, sizeof(LoginFailedAttempts_Struct));
 
-		lrbs->failed_attempts = 0;
-		lrbs->message = 0x01;
-		lrbs->lsid = d_account_id;
-		lrbs->unknown3[3] = 0x03;
-		lrbs->unknown4[3] = 0x02;
-		lrbs->unknown5[0] = 0xe7;
-		lrbs->unknown5[1] = 0x03;
-		lrbs->unknown6[0] = 0xff;
-		lrbs->unknown6[1] = 0xff;
-		lrbs->unknown6[2] = 0xff;
-		lrbs->unknown6[3] = 0xff;
-		lrbs->unknown7[0] = 0xa0;
-		lrbs->unknown7[1] = 0x05;
-		lrbs->unknown8[3] = 0x02;
-		lrbs->unknown9[0] = 0xff;
-		lrbs->unknown9[1] = 0x03;
-		lrbs->unknown11[0] = 0x63;
-		lrbs->unknown12[0] = 0x01;
-		memcpy(lrbs->key, key.c_str(), key.size());
+		login_failed_attempts->failed_attempts = 0;
+		login_failed_attempts->message = 0x01;
+		login_failed_attempts->lsid = d_account_id;
+		login_failed_attempts->unknown3[3] = 0x03;
+		login_failed_attempts->unknown4[3] = 0x02;
+		login_failed_attempts->unknown5[0] = 0xe7;
+		login_failed_attempts->unknown5[1] = 0x03;
+		login_failed_attempts->unknown6[0] = 0xff;
+		login_failed_attempts->unknown6[1] = 0xff;
+		login_failed_attempts->unknown6[2] = 0xff;
+		login_failed_attempts->unknown6[3] = 0xff;
+		login_failed_attempts->unknown7[0] = 0xa0;
+		login_failed_attempts->unknown7[1] = 0x05;
+		login_failed_attempts->unknown8[3] = 0x02;
+		login_failed_attempts->unknown9[0] = 0xff;
+		login_failed_attempts->unknown9[1] = 0x03;
+		login_failed_attempts->unknown11[0] = 0x63;
+		login_failed_attempts->unknown12[0] = 0x01;
+		memcpy(login_failed_attempts->key, key.c_str(), key.size());
 
 #ifdef WIN32
 		unsigned int e_size;
-		char *encrypted_buffer = server.eq_crypto->Encrypt((const char*)lrbs, 75, e_size);
-		memcpy(llas->encrypt, encrypted_buffer, 80);
+		char *encrypted_buffer = server.eq_crypto->Encrypt((const char*)login_failed_attempts, 75, e_size);
+		memcpy(login_accepted->encrypt, encrypted_buffer, 80);
 		server.eq_crypto->DeleteHeap(encrypted_buffer);
 #else
 		unsigned int e_size;
-		char *encrypted_buffer = Encrypt((const char*)lrbs, 75, e_size);
-		memcpy(llas->encrypt, encrypted_buffer, 80);
+		char *encrypted_buffer = Encrypt((const char*)login_failed_attempts, 75, e_size);
+		memcpy(login_accepted->encrypt, encrypted_buffer, 80);
 		_HeapDeleteCharBuffer(encrypted_buffer);
 #endif
 
-		if(server.options.IsDumpOutPacketsOn())
-		{
+		if(server.options.IsDumpOutPacketsOn()) {
 			DumpPacket(outapp);
 		}
 
@@ -317,8 +316,7 @@ void Client::Handle_Login(const char* data, unsigned int size)
 		llas->unknown5 = llrs->unknown5;
 		memcpy(llas->unknown6, FailedLoginResponseData, sizeof(FailedLoginResponseData));
 
-		if(server.options.IsDumpOutPacketsOn())
-		{
+		if(server.options.IsDumpOutPacketsOn()) {
 			DumpPacket(outapp);
 		}
 
