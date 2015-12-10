@@ -21,7 +21,9 @@
 #include "login_structures.h"
 #include <stdlib.h>
 
-extern ErrorLog *server_log;
+#include "../common/eqemu_logsys.h"
+
+extern EQEmuLogSys Log;
 extern LoginServer server;
 extern bool run_server;
 
@@ -32,10 +34,10 @@ ServerManager::ServerManager()
 	int listen_port = atoi(server.config->GetVariable("options", "listen_port").c_str());
 	tcps = new EmuTCPServer(listen_port, true);
 	if(tcps->Open(listen_port, error_buffer)) {
-		server_log->Log(log_network, "ServerManager listening on port %u", listen_port);
+		Log.Out(Logs::General, Logs::Login_Server, "ServerManager listening on port %u", listen_port);
 	}
 	else {
-		server_log->Log(log_error, "ServerManager fatal error opening port on %u: %s", listen_port, error_buffer);
+		Log.Out(Logs::General, Logs::Error, "ServerManager fatal error opening port on %u: %s", listen_port, error_buffer);
 		run_server = false;
 	}
 }
@@ -55,11 +57,11 @@ void ServerManager::Process()
 	while (tcp_c = tcps->NewQueuePop()) {
 		in_addr tmp;
 		tmp.s_addr = tcp_c->GetrIP();
-		server_log->Log(log_network, "New world server connection from %s:%d", inet_ntoa(tmp), tcp_c->GetrPort());
+		Log.Out(Logs::General, Logs::Login_Server, "New world server connection from %s:%d", inet_ntoa(tmp), tcp_c->GetrPort());
 
 		WorldServer *server_entity = GetServerByAddress(tcp_c->GetrIP());
 		if (server_entity) {
-			server_log->Log(log_network, "World server already existed for %s, removing existing connection and updating current.", inet_ntoa(tmp));
+			Log.Out(Logs::General, Logs::Login_Server, "World server already existed for %s, removing existing connection and updating current.", inet_ntoa(tmp));
 			server_entity->GetConnection()->Free();
 			server_entity->SetConnection(tcp_c);
 			server_entity->Reset();
@@ -73,7 +75,7 @@ void ServerManager::Process()
 	list<WorldServer*>::iterator iter = world_servers.begin();
 	while (iter != world_servers.end()) {
 		if ((*iter)->Process() == false) {
-			server_log->Log(log_world, "World server %s had a fatal error and had to be removed from the login.", (*iter)->GetLongName().c_str());
+			Log.Out(Logs::General, Logs::World_Server, "World server %s had a fatal error and had to be removed from the login.", (*iter)->GetLongName().c_str());
 			delete (*iter);
 			iter = world_servers.erase(iter);
 		}
@@ -91,7 +93,7 @@ void ServerManager::ProcessDisconnect()
 		if (!connection->Connected()) {
 			in_addr tmp;
 			tmp.s_addr = connection->GetrIP();
-			server_log->Log(log_network, "World server disconnected from the server, removing server and freeing connection.");
+			Log.Out(Logs::General, Logs::Login_Server, "World server disconnected from the server, removing server and freeing connection.");
 			connection->Free();
 			delete (*iter);
 			iter = world_servers.erase(iter);
@@ -258,7 +260,7 @@ void ServerManager::SendUserToWorldRequest(unsigned int server_id, unsigned int 
 	}
 
 	if (!found && server.options.IsTraceOn()) {
-		server_log->Log(log_client_error, "Client requested a user to world but supplied an invalid id of %u.", server_id);
+		Log.Out(Logs::General, Logs::Error, "Client requested a user to world but supplied an invalid id of %u.", server_id);
 	}
 }
 
