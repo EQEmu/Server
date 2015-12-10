@@ -32,7 +32,6 @@
 TimeoutManager timeout_manager;
 LoginServer server;
 EQEmuLogSys Log;
-ErrorLog *server_log;
 bool run_server = true;
 
 void CatchSignal(int sig_num)
@@ -45,15 +44,6 @@ int main()
 	set_exception_handler();
 	Log.LoadLogSettingsDefaults();
 
-	/* Start Loginserver log */
-	time_t current_time = time(nullptr);
-	std::stringstream log_name(std::stringstream::in | std::stringstream::out);
-#ifdef WIN32
-	log_name << ".\\logs\\login_" << (unsigned int)current_time << ".log";
-#else
-	log_name << "./logs/login_" << (unsigned int)current_time << ".log";
-#endif
-	server_log = new ErrorLog(log_name.str().c_str());
 	Log.Out(Logs::General, Logs::Login_Server, "Logging System Init.");
 
 	/* Parse out login.ini */
@@ -133,7 +123,6 @@ int main()
 		Log.Out(Logs::General, Logs::Login_Server, "Config System Shutdown.");
 		delete server.config;
 		Log.Out(Logs::General, Logs::Login_Server, "Log System Shutdown.");
-		delete server_log;
 		return 1;
 	}
 
@@ -151,8 +140,6 @@ int main()
 		delete server.db;
 		Log.Out(Logs::General, Logs::Login_Server, "Config System Shutdown.");
 		delete server.config;
-		Log.Out(Logs::General, Logs::Login_Server, "Log System Shutdown.");
-		delete server_log;
 		return 1;
 	}
 #endif
@@ -173,8 +160,6 @@ int main()
 		delete server.db;
 		Log.Out(Logs::General, Logs::Login_Server, "Config System Shutdown.");
 		delete server.config;
-		Log.Out(Logs::General, Logs::Login_Server, "Log System Shutdown.");
-		delete server_log;
 		return 1;
 	}
 
@@ -196,8 +181,6 @@ int main()
 		delete server.db;
 		Log.Out(Logs::General, Logs::Login_Server, "Config System Shutdown.");
 		delete server.config;
-		Log.Out(Logs::General, Logs::Login_Server, "Log System Shutdown.");
-		delete server_log;
 		return 1;
 	}
 
@@ -232,8 +215,6 @@ int main()
 	delete server.db;
 	Log.Out(Logs::General, Logs::Login_Server, "Config System Shutdown.");
 	delete server.config;
-	Log.Out(Logs::General, Logs::Login_Server, "Log System Shutdown.");
-	delete server_log;
 	return 0;
 }
 

@@ -17,7 +17,6 @@
 */
 #include "server_manager.h"
 #include "login_server.h"
-#include "error_log.h"
 #include "login_structures.h"
 #include <stdlib.h>
 

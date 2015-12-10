@@ -18,7 +18,6 @@
 #ifndef EQEMU_LOGINSERVER_H
 #define EQEMU_LOGINSERVER_H
 
-#include "error_log.h"
 #include "config.h"
 #include "database.h"
 #include "database_mysql.h"
