@@ -44,6 +44,8 @@ public:
 	*/
 	virtual bool GetLoginDataFromAccountName(std::string name, std::string &password, unsigned int &id) { return false; }
 
+	virtual bool CreateLoginData(std::string name, std::string &password, unsigned int &id) { return false; }
+
 	/**
 	* Retrieves the world registration from the long and short names provided.
 	* Needed for world login procedure.

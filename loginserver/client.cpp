@@ -175,83 +175,91 @@ void Client::Handle_SessionReady(const char* data, unsigned int size)
 
 void Client::Handle_Login(const char* data, unsigned int size)
 {
-	if(status != cs_waiting_for_login)
-	{
+	if(status != cs_waiting_for_login) {
 		Log.Out(Logs::General, Logs::Error, "Login received after already having logged in.");
 		return;
 	}
 
-	if((size - 12) % 8 != 0)
-	{
+	if((size - 12) % 8 != 0) {
 		Log.Out(Logs::General, Logs::Error, "Login received packet of size: %u, this would cause a block corruption, discarding.", size);
 		return;
 	}
 
 	status = cs_logged_in;
 
-	string e_user;
-	string e_hash;
-	char *e_buffer = nullptr;
-	unsigned int d_account_id = 0;
-	string d_pass_hash;
+	string entered_username;
+	string entered_password_hash_result;
+
+	char *login_packet_buffer = nullptr;
+
+	unsigned int db_account_id = 0;
+	string db_account_password_hash;
 
 #ifdef WIN32
-	e_buffer = server.eq_crypto->DecryptUsernamePassword(data, size, server.options.GetEncryptionMode());
+	login_packet_buffer = server.eq_crypto->DecryptUsernamePassword(data, size, server.options.GetEncryptionMode());
 
-	int buffer_len = strlen(e_buffer);
-	e_hash.assign(e_buffer, buffer_len);
-	e_user.assign((e_buffer + buffer_len + 1), strlen(e_buffer + buffer_len + 1));
+	int login_packet_buffer_length = strlen(login_packet_buffer);
+	entered_password_hash_result.assign(login_packet_buffer, login_packet_buffer_length);
+	entered_username.assign((login_packet_buffer + login_packet_buffer_length + 1), strlen(login_packet_buffer + login_packet_buffer_length + 1));
 
-	if(server.options.IsTraceOn())
-	{
-		Log.Out(Logs::General, Logs::Debug, "User: %s", e_user.c_str());
-		Log.Out(Logs::General, Logs::Debug, "Hash: %s", e_hash.c_str());
+	if(server.options.IsTraceOn()) {
+		Log.Out(Logs::General, Logs::Debug, "User: %s", entered_username.c_str());
+		Log.Out(Logs::General, Logs::Debug, "Hash: %s", entered_password_hash_result.c_str());
 	}
 
-	server.eq_crypto->DeleteHeap(e_buffer);
+	server.eq_crypto->DeleteHeap(login_packet_buffer);
 #else
-	e_buffer = DecryptUsernamePassword(data, size, server.options.GetEncryptionMode());
+	login_packet_buffer = DecryptUsernamePassword(data, size, server.options.GetEncryptionMode());
 
-	int buffer_len = strlen(e_buffer);
-	e_hash.assign(e_buffer, buffer_len);
-	e_user.assign((e_buffer + buffer_len + 1), strlen(e_buffer + buffer_len + 1));
+	int login_packet_buffer_length = strlen(login_packet_buffer);
+	entered_password_hash_result.assign(login_packet_buffer, login_packet_buffer_length);
+	entered_username.assign((login_packet_buffer + login_packet_buffer_length + 1), strlen(login_packet_buffer + login_packet_buffer_length + 1));
 
-	if(server.options.IsTraceOn())
-	{
-		Log.Out(Logs::General, Logs::Debug, "User: %s", e_user.c_str());
-		Log.Out(Logs::General, Logs::Debug, "Hash: %s", e_hash.c_str());
+	if(server.options.IsTraceOn()) {
+		Log.Out(Logs::General, Logs::Debug, "User: %s", entered_username.c_str());
+		Log.Out(Logs::General, Logs::Debug, "Hash: %s", entered_password_hash_result.c_str());
 	}
 
-	_HeapDeleteCharBuffer(e_buffer);
+	_HeapDeleteCharBuffer(login_packet_buffer);
 #endif
 
 	bool result;
-	if(server.db->GetLoginDataFromAccountName(e_user, d_pass_hash, d_account_id) == false)
-	{
-		Log.Out(Logs::General, Logs::Error, "Error logging in, user %s does not exist in the database.", e_user.c_str());
-		result = false;
-	}
-	else
-	{
-		if(d_pass_hash.compare(e_hash) == 0)
-		{
+	if(server.db->GetLoginDataFromAccountName(entered_username, db_account_password_hash, db_account_id) == false) {
+		/* If we have auto_create_accounts enabled in the login.ini, we will process the creation of an account on our own*/
+		if (
+			server.config->GetVariable("options", "auto_create_accounts").compare("TRUE") == 0 && 
+			server.db->CreateLoginData(entered_username, entered_password_hash_result, db_account_id) == true
+		){
+			Log.Out(Logs::General, Logs::Error, "User %s does not exist in the database, so we created it...", entered_username.c_str());
 			result = true;
 		}
-		else
-		{
+		else{
+			Log.Out(Logs::General, Logs::Error, "Error logging in, user %s does not exist in the database.", entered_username.c_str());
+			result = false;
+		}
+	}
+	else {
+		if(db_account_password_hash.compare(entered_password_hash_result) == 0) {
+			result = true;
+		}
+		else {
 			result = false;
 		}
 	}
 
-	if(result)
-	{
-		server.client_manager->RemoveExistingClient(d_account_id);
+	/* Login Accepted */
+	if(result) {
+
+		server.client_manager->RemoveExistingClient(db_account_id);
+
 		in_addr in;
 		in.s_addr = connection->GetRemoteIP();
-		server.db->UpdateLSAccountData(d_account_id, string(inet_ntoa(in)));
+
+		server.db->UpdateLSAccountData(db_account_id, string(inet_ntoa(in)));
 		GenerateKey();
-		account_id = d_account_id;
-		account_name = e_user;
+
+		account_id = db_account_id;
+		account_name = entered_username;
 
 		EQApplicationPacket *outapp = new EQApplicationPacket(OP_LoginAccepted, 10 + 80);
 		const LoginLoginRequest_Struct* llrs = (const LoginLoginRequest_Struct *)data;
@@ -267,7 +275,7 @@ void Client::Handle_Login(const char* data, unsigned int size)
 
 		login_failed_attempts->failed_attempts = 0;
 		login_failed_attempts->message = 0x01;
-		login_failed_attempts->lsid = d_account_id;
+		login_failed_attempts->lsid = db_account_id;
 		login_failed_attempts->unknown3[3] = 0x03;
 		login_failed_attempts->unknown4[3] = 0x02;
 		login_failed_attempts->unknown5[0] = 0xe7;
@@ -304,8 +312,7 @@ void Client::Handle_Login(const char* data, unsigned int size)
 		connection->QueuePacket(outapp);
 		delete outapp;
 	}
-	else
-	{
+	else {
 		EQApplicationPacket *outapp = new EQApplicationPacket(OP_LoginAccepted, sizeof(LoginLoginFailed_Struct));
 		const LoginLoginRequest_Struct* llrs = (const LoginLoginRequest_Struct *)data;
 		LoginLoginFailed_Struct* llas = (LoginLoginFailed_Struct *)outapp->pBuffer;

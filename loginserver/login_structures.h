@@ -47,7 +47,7 @@ struct LoginAccepted_Struct {
 	char encrypt[80];
 };
 
-struct LoginFailedReply_Struct
+struct LoginFailedAttempts_Struct
 {
 	char message; //0x01
 	char unknown2[7]; //0x00
