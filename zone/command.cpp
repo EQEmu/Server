@@ -23,12 +23,12 @@
 	1.	At the bottom of command.h you must add a prototype for it.
 	2.	Add the function in this file.
 	3.	In the command_init function you must add a call to command_add
-		for your function. If you want an alias for your command, add
-		a second call to command_add with the description and access args
-		set to nullptr and 0 respectively since they aren't used when adding
-		an alias. The function pointers being equal is makes it an alias.
-		The access level you set with command_add is only a default if
-		the command isn't listed in the commands db table.
+		for your function.
+		
+	Note: If you want an alias for your command, add an entry to the
+	`command_settings` table in your database. The access level you
+	set with command_add is the default setting if the command isn't
+	listed in the commands db table.
 
 */
 
