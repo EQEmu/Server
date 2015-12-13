@@ -25,10 +25,10 @@
 	3.	In the command_init function you must add a call to command_add
 		for your function.
 		
-	Note: If you want an alias for your command, add an entry to the
+	Notes: If you want an alias for your command, add an entry to the
 	`command_settings` table in your database. The access level you
 	set with command_add is the default setting if the command isn't
-	listed in the commands db table.
+	listed in the `command_settings` db table.
 
 */
 
