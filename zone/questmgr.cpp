@@ -2582,6 +2582,22 @@ void QuestManager::DestroyInstance(uint16 instance_id)
 	database.DeleteInstance(instance_id);
 }
 
+void QuestManager::UpdateInstanceTimer(uint16 instance_id, uint32 new_duration)
+{
+	std::string query = StringFormat("UPDATE instance_list SET duration = %lu, start_time = UNIX_TIMESTAMP() WHERE id = %lu",
+		(unsigned long)new_duration, (unsigned long)instance_id);
+	auto results = database.QueryDatabase(query);
+
+	if (results.Success()) {
+		auto pack = new ServerPacket(ServerOP_InstanceUpdateTime, sizeof(ServerInstanceUpdateTime_Struct));
+		ServerInstanceUpdateTime_Struct *ut = (ServerInstanceUpdateTime_Struct*)pack->pBuffer;
+		ut->instance_id = instance_id;
+		ut->new_duration = new_duration;
+		worldserver.SendPacket(pack);
+		safe_delete(pack);
+	}
+}
+
 uint16 QuestManager::GetInstanceID(const char *zone, int16 version)
 {
 	QuestManagerCurrentQuestVars();
