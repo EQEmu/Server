@@ -712,6 +712,7 @@ public:
 	// use this one instead
 	void MemSpell(uint16 spell_id, int slot, bool update_client = true);
 	void UnmemSpell(int slot, bool update_client = true);
+	void UnmemSpellBySpellID(int32 spell_id);
 	void UnmemSpellAll(bool update_client = true);
 	void ScribeSpell(uint16 spell_id, int slot, bool update_client = true);
 	void UnscribeSpell(int slot, bool update_client = true);
@@ -925,6 +926,8 @@ public:
 	void ResetTrade();
 	void DropInst(const ItemInst* inst);
 	bool TrainDiscipline(uint32 itemid);
+	void TrainDiscBySpellID(int32 spell_id);
+	int GetDiscSlotBySpellID(int32 spellid);
 	void SendDisciplineUpdate();
 	void SendDisciplineTimer(uint32 timer_id, uint32 duration);
 	bool UseDiscipline(uint32 spell_id, uint32 target);

@@ -2445,6 +2445,30 @@ XS(XS_Client_UnmemSpell)
 	XSRETURN_EMPTY;
 }
 
+XS(XS_Client_UnmemSpellBySpellID); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Client_UnmemSpellBySpellID)
+{
+	dXSARGS;
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: Client::UnmemSpellBySpellID(THIS, spell_id)");
+	{
+		Client *		THIS;
+		int32		spell_id = (int32)SvIV(ST(1));
+
+		if (sv_derived_from(ST(0), "Client")) {
+			IV tmp = SvIV((SV*)SvRV(ST(0)));
+			THIS = INT2PTR(Client *,tmp);
+		}
+		else
+			Perl_croak(aTHX_ "THIS is not of type Client");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
+
+		THIS->UnmemSpellBySpellID(spell_id);
+	}
+	XSRETURN_EMPTY;
+}
+
 XS(XS_Client_UnmemSpellAll); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_UnmemSpellAll)
 {
@@ -2566,6 +2590,57 @@ XS(XS_Client_UnscribeSpellAll)
 		THIS->UnscribeSpellAll(update_client);
 	}
 	XSRETURN_EMPTY;
+}
+
+XS(XS_Client_TrainDiscBySpellID); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Client_TrainDiscBySpellID)
+{
+	dXSARGS;
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: Client::TrainDiscBySpellID(THIS, spell_id)");
+	{
+		Client *		THIS;
+		int32		spell_id = (int32)SvIV(ST(1));
+
+		if (sv_derived_from(ST(0), "Client")) {
+			IV tmp = SvIV((SV*)SvRV(ST(0)));
+			THIS = INT2PTR(Client *,tmp);
+		}
+		else
+			Perl_croak(aTHX_ "THIS is not of type Client");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
+
+		THIS->TrainDiscBySpellID(spell_id);
+	}
+	XSRETURN_EMPTY;
+}
+
+XS(XS_Client_GetDiscSlotBySpellID); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Client_GetDiscSlotBySpellID)
+{
+	dXSARGS;
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: Client::GetDiscSlotBySpellID(THIS, spell_id)");
+	{
+		Client *	THIS;
+		int			RETVAL;
+		int32		spell_id = (int32)SvIV(ST(1));
+		dXSTARG;
+
+		if (sv_derived_from(ST(0), "Client")) {
+			IV tmp = SvIV((SV*)SvRV(ST(0)));
+			THIS = INT2PTR(Client *,tmp);
+		}
+		else
+			Perl_croak(aTHX_ "THIS is not of type Client");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
+
+		RETVAL = THIS->GetDiscSlotBySpellID(spell_id);
+		XSprePUSH; PUSHi((IV)RETVAL);
+	}
+	XSRETURN(1);
 }
 
 XS(XS_Client_UntrainDisc); /* prototype to pass -Wmissing-prototypes */
@@ -6443,10 +6518,13 @@ XS(boot_Client)
 		newXSproto(strcpy(buf, "ResetAA"), XS_Client_ResetAA, file, "$");
 		newXSproto(strcpy(buf, "MemSpell"), XS_Client_MemSpell, file, "$$$;$");
 		newXSproto(strcpy(buf, "UnmemSpell"), XS_Client_UnmemSpell, file, "$$;$");
+		newXSproto(strcpy(buf, "UnmemSpellBySpellID"), XS_Client_UnmemSpellBySpellID, file, "$$");
 		newXSproto(strcpy(buf, "UnmemSpellAll"), XS_Client_UnmemSpellAll, file, "$;$");
 		newXSproto(strcpy(buf, "ScribeSpell"), XS_Client_ScribeSpell, file, "$$$;$");
 		newXSproto(strcpy(buf, "UnscribeSpell"), XS_Client_UnscribeSpell, file, "$$;$");
 		newXSproto(strcpy(buf, "UnscribeSpellAll"), XS_Client_UnscribeSpellAll, file, "$;$");
+		newXSproto(strcpy(buf, "TrainDiscBySpellID"), XS_Client_TrainDiscBySpellID, file, "$$");
+		newXSproto(strcpy(buf, "GetDiscSlotBySpellID"), XS_Client_GetDiscSlotBySpellID, file, "$$");
 		newXSproto(strcpy(buf, "UntrainDisc"), XS_Client_UntrainDisc, file, "$$;$");
 		newXSproto(strcpy(buf, "UntrainDiscAll"), XS_Client_UntrainDiscAll, file, "$;$");
 		newXSproto(strcpy(buf, "IsSitting"), XS_Client_IsSitting, file, "$");
