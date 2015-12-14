@@ -8440,6 +8440,56 @@ XS(XS_Mob_CanClassEquipItem)
 	XSRETURN(1);
 }
 
+XS(XS_Mob_IsFeared);
+XS(XS_Mob_IsFeared) {
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: Mob::IsFeared(THIS)");
+	{
+		Mob* THIS;
+		bool RETVAL;
+		if (sv_derived_from(ST(0), "Mob")) {
+			IV tmp = SvIV((SV*)SvRV(ST(0)));
+			THIS = INT2PTR(Mob*, tmp);
+		}
+		else
+			Perl_croak(aTHX_ "THIS is not of type Mob");
+		
+		if (THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
+		
+		RETVAL = THIS->IsFeared();
+		ST(0) = boolSV(RETVAL);
+		sv_2mortal(ST(0));
+	}
+	XSRETURN(1);
+}
+
+XS(XS_Mob_IsBlind);
+XS(XS_Mob_IsBlind) {
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: Mob::IsBlind(THIS)");
+	{
+		Mob* THIS;
+		bool RETVAL;
+		if (sv_derived_from(ST(0), "Mob")) {
+			IV tmp = SvIV((SV*)SvRV(ST(0)));
+			THIS = INT2PTR(Mob*, tmp);
+		}
+		else
+			Perl_croak(aTHX_ "THIS is not of type Mob");
+		
+		if (THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
+		
+		RETVAL = THIS->IsBlind();
+		ST(0) = boolSV(RETVAL);
+		sv_2mortal(ST(0));
+	}
+	XSRETURN(1);
+}
+
 #ifdef __cplusplus
 extern "C"
 #endif
@@ -8751,6 +8801,8 @@ XS(boot_Mob)
 		newXSproto(strcpy(buf, "ClearSpecialAbilities"), XS_Mob_ClearSpecialAbilities, file, "$");
 		newXSproto(strcpy(buf, "ProcessSpecialAbilities"), XS_Mob_ProcessSpecialAbilities, file, "$$");
 		newXSproto(strcpy(buf, "CanClassEquipItem"), XS_Mob_CanClassEquipItem, file, "$$");
+		newXSproto(strcpy(buf, "IsFeared"), XS_Mob_IsFeared, file, "$");
+		newXSproto(strcpy(buf, "IsBlind"), XS_Mob_IsBlind, file, "$");
 	XSRETURN_YES;
 }
 
