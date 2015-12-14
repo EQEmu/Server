@@ -1871,6 +1871,16 @@ void Lua_Mob::SetPseudoRoot(bool in) {
 	self->SetPseudoRoot(in);
 }
 
+bool Lua_Mob::IsFeared() {
+	Lua_Safe_Call_Bool();
+	return self->IsFeared();
+}
+
+bool Lua_Mob::IsBlind() {
+	Lua_Safe_Call_Bool();
+	return self->IsBlind();
+}
+
 luabind::scope lua_register_mob() {
 	return luabind::class_<Lua_Mob, Lua_Entity>("Mob")
 		.def(luabind::constructor<>())
@@ -2156,6 +2166,8 @@ luabind::scope lua_register_mob() {
 		.def("WearChange", (void(Lua_Mob::*)(int,int,uint32))&Lua_Mob::WearChange)
 		.def("DoKnockback", (void(Lua_Mob::*)(Lua_Mob,uint32,uint32))&Lua_Mob::DoKnockback)
 		.def("RemoveNimbusEffect", (void(Lua_Mob::*)(int))&Lua_Mob::RemoveNimbusEffect)
+		.def("IsFeared", (bool(Lua_Mob::*)(void))&Lua_Mob::IsFeared)
+		.def("IsBlind", (bool(Lua_Mob::*)(void))&Lua_Mob::IsBlind)
 		.def("IsRunning", (bool(Lua_Mob::*)(void))&Lua_Mob::IsRunning)
 		.def("SetRunning", (void(Lua_Mob::*)(bool))&Lua_Mob::SetRunning)
 		.def("SetBodyType", (void(Lua_Mob::*)(int,bool))&Lua_Mob::SetBodyType)
