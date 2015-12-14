@@ -3,6 +3,9 @@ EQEMu Changelog (Started on Sept 24, 2003 15:50)
 == 12/14/2015 ==
 Kinglykrab: Added IsBlind() and IsFeared() functionality to Perl and Lua.
 	- Note: Both methods are Mob methods and may be used on NPCs or PCs.
+Natedog: Added Discipline functions, UpdateInstanceTimer function, and UnmemSpellBySpellID to lua and perl
+	-Examples: http://wiki.eqemulator.org/i?M=Pastebin&Paste=BJ0ygmNM
+	
 == 12/07/2015 ==
 Uleat: Command aliases are no longer handled through the command_add() function.
 	- To add a command alias, edit the database table `command_settings` - here, you will find three columns: `command`, `access` and `aliases`
