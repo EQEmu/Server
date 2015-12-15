@@ -23,12 +23,12 @@
 	1.	At the bottom of command.h you must add a prototype for it.
 	2.	Add the function in this file.
 	3.	In the command_init function you must add a call to command_add
-		for your function. If you want an alias for your command, add
-		a second call to command_add with the description and access args
-		set to nullptr and 0 respectively since they aren't used when adding
-		an alias. The function pointers being equal is makes it an alias.
-		The access level you set with command_add is only a default if
-		the command isn't listed in the commands db table.
+		for your function.
+		
+	Notes: If you want an alias for your command, add an entry to the
+	`command_settings` table in your database. The access level you
+	set with command_add is the default setting if the command isn't
+	listed in the `command_settings` db table.
 
 */
 
@@ -84,6 +84,7 @@ void command_bestz(Client *c, const Seperator *message);
 void command_pf(Client *c, const Seperator *message);
 
 std::map<std::string, CommandRecord *> commandlist;
+std::map<std::string, std::string> commandaliases;
 
 //All allocated CommandRecords get put in here so they get deleted on shutdown
 LinkedList<CommandRecord *> cleanup_commandlist;
@@ -418,6 +419,8 @@ int command_init(void)
 		return -1;
 	}
 	
+	commandaliases.clear();
+
 	std::map<std::string, std::pair<uint8, std::vector<std::string>>> command_settings;
 	database.GetCommandSettings(command_settings);
 	for (std::map<std::string, CommandRecord *>::iterator iter_cl = commandlist.begin(); iter_cl != commandlist.end(); ++iter_cl) {
@@ -442,6 +445,9 @@ int command_init(void)
 			}
 
 			commandlist[*iter_aka] = iter_cl->second;
+			commandaliases[*iter_aka] = iter_cl->first;
+
+			Log.Out(Logs::General, Logs::Commands, "command_init(): - Alias '%s' added to command '%s'.", iter_aka->c_str(), commandaliases[*iter_aka].c_str());
 		}
 	}
 
@@ -461,6 +467,7 @@ int command_init(void)
 void command_deinit(void)
 {
 	commandlist.clear();
+	commandaliases.clear();
 
 	command_dispatch = command_notavail;
 	commandcount = 0;

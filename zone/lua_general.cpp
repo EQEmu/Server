@@ -804,6 +804,10 @@ void lua_destroy_instance(uint32 instance_id) {
 	quest_manager.DestroyInstance(instance_id);
 }
 
+void lua_update_instance_timer(uint16 instance_id, uint32 new_duration) {
+	quest_manager.UpdateInstanceTimer(instance_id, new_duration);
+}
+
 int lua_get_instance_id(const char *zone, uint32 version) {
 	return quest_manager.GetInstanceID(zone, version);
 }
@@ -1576,6 +1580,7 @@ luabind::scope lua_register_general() {
 		luabind::def("get_guild_name_by_id", &lua_get_guild_name_by_id),
 		luabind::def("create_instance", &lua_create_instance),
 		luabind::def("destroy_instance", &lua_destroy_instance),
+		luabind::def("update_instance_timer", &lua_update_instance_timer),
 		luabind::def("get_instance_id", &lua_get_instance_id),
 		luabind::def("get_characters_in_instance", &lua_get_characters_in_instance),
 		luabind::def("assign_to_instance", &lua_assign_to_instance),

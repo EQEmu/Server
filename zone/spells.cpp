@@ -4910,6 +4910,16 @@ void Client::UnmemSpell(int slot, bool update_client)
 	}
 }
 
+void Client::UnmemSpellBySpellID(int32 spell_id)
+{
+	for(int i = 0; i < MAX_PP_MEMSPELL; i++) {
+		if(m_pp.mem_spells[i] == spell_id) {
+			UnmemSpell(i, true);
+			break;
+		}
+	}
+}
+
 void Client::UnmemSpellAll(bool update_client)
 {
 	int i;
