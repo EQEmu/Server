@@ -144,6 +144,8 @@ Access Levels:
 
 int command_init(void)
 {
+	commandaliases.clear();
+	
 	if (
 		command_add("acceptrules", "[acceptrules] - Accept the EQEmu Agreement", 0, command_acceptrules) ||
 		command_add("advnpcspawn", "[maketype|makegroup|addgroupentry|addgroupspawn][removegroupspawn|movespawn|editgroupbox|cleargroupbox]", 150, command_advnpcspawn) ||
@@ -419,8 +421,6 @@ int command_init(void)
 		return -1;
 	}
 	
-	commandaliases.clear();
-
 	std::map<std::string, std::pair<uint8, std::vector<std::string>>> command_settings;
 	database.GetCommandSettings(command_settings);
 	for (std::map<std::string, CommandRecord *>::iterator iter_cl = commandlist.begin(); iter_cl != commandlist.end(); ++iter_cl) {
@@ -511,6 +511,7 @@ int command_add(std::string command_name, const char *desc, int access, CmdFuncP
 	c->function = function;
 
 	commandlist[command_name] = c;
+	commandaliases[command_name] = command_name;
 	cleanup_commandlist.Append(c);
 	commandcount++;
 
