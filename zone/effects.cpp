@@ -571,6 +571,33 @@ bool Client::TrainDiscipline(uint32 itemid) {
 	return(false);
 }
 
+void Client::TrainDiscBySpellID(int32 spell_id)
+{
+	int i;
+	for(i = 0; i < MAX_PP_DISCIPLINES; i++) {
+		if(m_pp.disciplines.values[i] == 0) {
+			m_pp.disciplines.values[i] = spell_id;
+			database.SaveCharacterDisc(this->CharacterID(), i, spell_id);
+			SendDisciplineUpdate();
+			Message(15, "You have learned a new combat ability!");
+			return;
+		}
+	}
+}
+
+int Client::GetDiscSlotBySpellID(int32 spellid)
+{
+	int i;
+
+	for(i = 0; i < MAX_PP_DISCIPLINES; i++)
+	{
+		if(m_pp.disciplines.values[i] == spellid)
+			return i;
+	}
+	
+	return -1;
+}
+
 void Client::SendDisciplineUpdate() {
 	EQApplicationPacket app(OP_DisciplineUpdate, sizeof(Disciplines_Struct));
 	Disciplines_Struct *d = (Disciplines_Struct*)app.pBuffer;

@@ -51,7 +51,7 @@ class SharedDatabase : public Database
 		int32	DeleteStalePlayerCorpses();
 		void	LoadCharacterInspectMessage(uint32 character_id, InspectMessage_Struct* message);
 		void	SaveCharacterInspectMessage(uint32 character_id, const InspectMessage_Struct* message);
-		bool	GetCommandSettings(std::map<std::string, uint8> &commands);
+		bool	GetCommandSettings(std::map<std::string, std::pair<uint8, std::vector<std::string>>> &command_settings);
 		uint32	GetTotalTimeEntitledOnAccount(uint32 AccountID);
 
 		/*

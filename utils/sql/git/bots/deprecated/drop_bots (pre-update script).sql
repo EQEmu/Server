@@ -1,5 +1,5 @@
 -- 'drop_bots (pre-update script)' sql script file
--- current as of 10/09/2015
+-- current as of 11/30/2015
 --
 -- Note: This file will remove bot schema loaded by 'load_bots' sql scripts.
 -- There may still be remnants of bot activity in tables `guild_members` and
@@ -50,12 +50,12 @@ BEGIN
 	
 	
 	SELECT "restoring keys...";
-	IF ((SELECT COUNT(*) FROM `information_schema`.`KEY_COLUMN_USAGE` WHERE `TABLE_SCHEMA` = DATABASE() AND `TABLE_NAME` = 'group_id' AND `CONSTRAINT_NAME` = 'PRIMARY') > 0) THEN
+	IF (EXISTS(SELECT `CONSTRAINT_NAME` FROM `information_schema`.`KEY_COLUMN_USAGE` WHERE `TABLE_SCHEMA` = DATABASE() AND `TABLE_NAME` = 'group_id' AND `CONSTRAINT_NAME` = 'PRIMARY')) THEN
 		ALTER TABLE `group_id` DROP PRIMARY KEY;
 	END IF;
 	ALTER TABLE `group_id` ADD PRIMARY KEY (`groupid`, `charid`, `ismerc`);
 	
-	IF ((SELECT COUNT(*) FROM `information_schema`.`KEY_COLUMN_USAGE` WHERE `TABLE_SCHEMA` = DATABASE() AND `TABLE_NAME` = 'guild_members' AND `CONSTRAINT_NAME` = 'PRIMARY') > 0) THEN
+	IF (EXISTS(SELECT `CONSTRAINT_NAME` FROM `information_schema`.`KEY_COLUMN_USAGE` WHERE `TABLE_SCHEMA` = DATABASE() AND `TABLE_NAME` = 'guild_members' AND `CONSTRAINT_NAME` = 'PRIMARY')) THEN
 		ALTER TABLE `guild_members` DROP PRIMARY KEY;
 	END IF;
 	ALTER TABLE `guild_members` ADD PRIMARY KEY (`char_id`);
@@ -66,7 +66,7 @@ BEGIN
 	
 	
 	SELECT "clearing database version...";
-	IF ((SELECT COUNT(*) FROM `information_schema`.`COLUMNS` WHERE `TABLE_SCHEMA` = DATABASE() AND `TABLE_NAME` = 'db_version' AND `COLUMN_NAME` = 'bots_version') > 0) THEN
+	IF (EXISTS(SELECT `COLUMN_NAME` FROM `information_schema`.`COLUMNS` WHERE `TABLE_SCHEMA` = DATABASE() AND `TABLE_NAME` = 'db_version' AND `COLUMN_NAME` = 'bots_version')) THEN
 		UPDATE `db_version`
 		SET `bots_version` = 0;
 	END IF;

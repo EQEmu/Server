@@ -2906,6 +2906,19 @@ XS(XS__DestroyInstance) {
 	XSRETURN_EMPTY;
 }
 
+XS(XS__UpdateInstanceTimer);
+XS(XS__UpdateInstanceTimer) {
+	dXSARGS;
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: UpdateInstanceTimer(instance_id, new_duration)");
+
+	uint16 instance_id = (uint16)SvUV(ST(0));
+	uint32 new_duration = (uint32)SvUV(ST(1));
+	quest_manager.UpdateInstanceTimer(instance_id, new_duration);
+
+	XSRETURN_EMPTY;
+}
+
 XS(XS__GetInstanceID);
 XS(XS__GetInstanceID) {
 	dXSARGS;
@@ -3636,6 +3649,7 @@ EXTERN_C XS(boot_quest)
 		newXS(strcpy(buf, "ChooseRandom"), XS__ChooseRandom, file);
 		newXS(strcpy(buf, "CreateInstance"), XS__CreateInstance, file);
 		newXS(strcpy(buf, "DestroyInstance"), XS__DestroyInstance, file);
+		newXS(strcpy(buf, "UpdateInstanceTimer"), XS__UpdateInstanceTimer, file);
 		newXS(strcpy(buf, "FlagInstanceByGroupLeader"), XS__FlagInstanceByGroupLeader, file);
 		newXS(strcpy(buf, "FlagInstanceByRaidLeader"), XS__FlagInstanceByRaidLeader, file);
 		newXS(strcpy(buf, "FlyMode"), XS__FlyMode, file);

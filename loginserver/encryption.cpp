@@ -17,16 +17,16 @@
 */
 #include "../common/global_define.h"
 #include "encryption.h"
-#include "error_log.h"
 #include <string>
 
-extern ErrorLog *server_log;
+#include "../common/eqemu_logsys.h"
+extern EQEmuLogSys Log;
 
 bool Encryption::LoadCrypto(std::string name)
 {
 	if(!Load(name.c_str()))
 	{
-		server_log->Log(log_error, "Failed to load %s from the operating system.", name.c_str());
+		Log.Out(Logs::General, Logs::Error, "Failed to load %s from the operating system.", name.c_str());
 		return false;
 	}
 	else
@@ -34,21 +34,21 @@ bool Encryption::LoadCrypto(std::string name)
 		encrypt_func = (DLLFUNC_Encrypt)GetSym("Encrypt");
 		if(encrypt_func == NULL)
 		{
-			server_log->Log(log_error, "Failed to attach Encrypt.");
+			Log.Out(Logs::General, Logs::Error, "Failed to attach Encrypt.");
 			Unload();
 			return false;
 		}
 		decrypt_func = (DLLFUNC_DecryptUsernamePassword)GetSym("DecryptUsernamePassword");
 		if(decrypt_func == NULL)
 		{
-			server_log->Log(log_error, "Failed to attach DecryptUsernamePassword.");
+			Log.Out(Logs::General, Logs::Error, "Failed to attach DecryptUsernamePassword.");
 			Unload();
 			return false;
 		}
 		delete_func = (DLLFUNC_HeapDelete)GetSym("_HeapDeleteCharBuffer");
 		if(delete_func == NULL)
 		{
-			server_log->Log(log_error, "Failed to attach _HeapDeleteCharBuffer.");
+			Log.Out(Logs::General, Logs::Error, "Failed to attach _HeapDeleteCharBuffer.");
 			Unload();
 			return false;
 		}

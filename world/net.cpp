@@ -114,6 +114,9 @@ void CatchSignal(int sig_num);
 int main(int argc, char** argv) {
 	RegisterExecutablePlatform(ExePlatformWorld);
 	Log.LoadLogSettingsDefaults();
+
+
+
 	set_exception_handler();
 
 	/* Database Version Check */
@@ -481,19 +484,16 @@ int main(int argc, char** argv) {
 		if (InterserverTimer.Check()) {
 			InterserverTimer.Start();
 			database.ping();
-			// AsyncLoadVariables(dbasync, &database);
-			ReconnectCounter++;
-			if (ReconnectCounter >= 12) { // only create thread to reconnect every 10 minutes. previously we were creating a new thread every 10 seconds
-				ReconnectCounter = 0;
-				if (loginserverlist.AllConnected() == false) {
+
+			if (loginserverlist.AllConnected() == false) {
 #ifdef _WINDOWS
-					_beginthread(AutoInitLoginServer, 0, nullptr);
+				_beginthread(AutoInitLoginServer, 0, nullptr);
 #else
-					pthread_t thread;
-					pthread_create(&thread, nullptr, &AutoInitLoginServer, nullptr);
+				pthread_t thread;
+				pthread_create(&thread, nullptr, &AutoInitLoginServer, nullptr);
 #endif
-				}
 			}
+			
 		}
 		if (numclients == 0) {
 			Sleep(50);

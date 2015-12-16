@@ -2026,6 +2026,16 @@ void Bot::LoadPetBuffs(SpellBuff_Struct* petBuffs, uint32 botPetSaveId) {
 		petBuffs[buffIndex].spellid = atoi(row[0]);
 		petBuffs[buffIndex].level = atoi(row[1]);
 		petBuffs[buffIndex].duration = atoi(row[2]);
+		//Work around for loading the counters and setting them back to max. Need entry in DB for saved counters
+		if(CalculatePoisonCounters(petBuffs[buffIndex].spellid) > 0)
+			petBuffs[buffIndex].counters = CalculatePoisonCounters(petBuffs[buffIndex].spellid);
+		else if(CalculateDiseaseCounters(petBuffs[buffIndex].spellid) > 0)
+			petBuffs[buffIndex].counters = CalculateDiseaseCounters(petBuffs[buffIndex].spellid);
+		else if(CalculateCurseCounters(petBuffs[buffIndex].spellid) > 0)
+			petBuffs[buffIndex].counters = CalculateCurseCounters(petBuffs[buffIndex].spellid);
+		else if(CalculateCorruptionCounters(petBuffs[buffIndex].spellid) > 0)
+			petBuffs[buffIndex].counters = CalculateCorruptionCounters(petBuffs[buffIndex].spellid);
+
 		buffIndex++;
 	}
 	query = StringFormat("DELETE FROM `bot_pet_buffs` WHERE `pets_index` = %u;", botPetSaveId);

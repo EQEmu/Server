@@ -1325,18 +1325,27 @@ int32 SharedDatabase::DeleteStalePlayerCorpses() {
     return results.RowsAffected();
 }
 
-bool SharedDatabase::GetCommandSettings(std::map<std::string,uint8> &commands) {
+bool SharedDatabase::GetCommandSettings(std::map<std::string, std::pair<uint8, std::vector<std::string>>> &command_settings)
+{
+	command_settings.clear();
 
-	const std::string query = "SELECT command, access FROM commands";
+	std::string query = "SELECT `command`, `access`, `aliases` FROM `command_settings`";
 	auto results = QueryDatabase(query);
-	if (!results.Success()) {
+	if (!results.Success())
 		return false;
+    
+	for (auto row = results.begin(); row != results.end(); ++row) {
+		command_settings[row[0]].first = atoi(row[1]);
+		if (row[2][0] == 0)
+			continue;
+
+		std::vector<std::string> aliases = SplitString(row[2], '|');
+		for (std::vector<std::string>::iterator iter = aliases.begin(); iter != aliases.end(); ++iter) {
+			if (iter->empty())
+				continue;
+			command_settings[row[0]].second.push_back(*iter);
+		}
 	}
-
-    commands.clear();
-
-    for (auto row = results.begin(); row != results.end(); ++row)
-        commands[row[0]]=atoi(row[1]);
 
     return true;
 }

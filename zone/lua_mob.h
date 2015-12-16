@@ -40,6 +40,8 @@ public:
 	void SetLevel(int level, bool command);
 	void SendWearChange(int material_slot);
 	bool IsMoving();
+	bool IsFeared();
+	bool IsBlind();
 	void GotoBind();
 	void Gate();
 	bool Attack(Lua_Mob other);
