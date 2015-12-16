@@ -1,5 +1,8 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 12/16/2015 ==
+Noudess: Repaired issue with Bind Wounds on someone else.  Message was not coming out on client (hold still) and a bind wounds on someone already binding their wounds would interrupt their bind and make them stand.  Also removed some duplicate messaging.
+
 == 12/14/2015 ==
 Kinglykrab: Added IsBlind() and IsFeared() functionality to Perl and Lua.
 	- Note: Both methods are Mob methods and may be used on NPCs or PCs.
