@@ -2577,12 +2577,7 @@ bool Client::BindWound(Mob* bindmob, bool start, bool fail){
 			else {
 				// send bindmob "stand still"
 				if(!bindmob->IsAIControlled() && bindmob != this ) {
-					bind_out->type = 2; // ?
-					//bind_out->type = 3; // ?
-					bind_out->to = GetID(); // ?
-					bindmob->CastToClient()->QueuePacket(outapp);
-					bind_out->type = 0;
-					bind_out->to = 0;
+					bindmob->CastToClient()->Message_StringID(clientMessageYellow, YOU_ARE_BEING_BANDAGED);
 				}
 				else if (bindmob->IsAIControlled() && bindmob != this ){
 					; // Tell IPC to stand still?
@@ -2668,7 +2663,7 @@ bool Client::BindWound(Mob* bindmob, bool start, bool fail){
 					else {
 						//I dont have the real, live
 						Message(15, "You cannot bind wounds above %d%% hitpoints.", max_percent);
-						if(bindmob->IsClient())
+						if(bindmob != this && bindmob->IsClient())
 							bindmob->CastToClient()->Message(15, "You cannot have your wounds bound above %d%% hitpoints.", max_percent);
 						// Too many hp message goes here.
 					}
