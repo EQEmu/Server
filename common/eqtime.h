@@ -39,12 +39,6 @@ public:
 
 	static void ToString(TimeOfDay_Struct *t, std::string &str);
 
-	//Database functions
-	//bool loadDB(Database q);
-	//bool setDB(Database q);
-	bool loadFile(const char *filename);
-	bool saveFile(const char *filename);
-
 private:
 	//This is our reference clock.
 	eqTimeOfDay eqTime;

@@ -345,8 +345,11 @@ int main(int argc, char** argv) {
 		database.ClearMerchantTemp();
 	}
 	Log.Out(Logs::General, Logs::World_Server, "Loading EQ time of day..");
-	if (!zoneserver_list.worldclock.loadFile(Config->EQTimeFile.c_str()))
-		Log.Out(Logs::General, Logs::World_Server, "Unable to load %s", Config->EQTimeFile.c_str());
+	TimeOfDay_Struct eqTime;
+	time_t realtime;
+	eqTime = database.LoadTime(realtime);
+	zoneserver_list.worldclock.SetCurrentEQTimeOfDay(eqTime, realtime);
+	
 	Log.Out(Logs::General, Logs::World_Server, "Loading launcher list..");
 	launcher_list.LoadList();
 
@@ -519,8 +522,10 @@ int main(int argc, char** argv) {
 
 void CatchSignal(int sig_num) {
 	Log.Out(Logs::General, Logs::World_Server,"Caught signal %d",sig_num);
-	if(zoneserver_list.worldclock.saveFile(WorldConfig::get()->EQTimeFile.c_str())==false)
-		Log.Out(Logs::General, Logs::World_Server,"Failed to save time file.");
+	TimeOfDay_Struct eqTime;
+	zoneserver_list.worldclock.GetCurrentEQTimeOfDay(time(0), &eqTime);
+	if (!database.SaveTime(eqTime.minute, eqTime.hour, eqTime.day, eqTime.month, eqTime.year))
+		Log.Out(Logs::General, Logs::World_Server, "Failed to save eqtime.");
 	RunLoops = false;
 }
 
