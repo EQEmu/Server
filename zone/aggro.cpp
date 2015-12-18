@@ -476,7 +476,7 @@ void EntityList::AIYellForHelp(Mob* sender, Mob* attacker) {
 							attacker->GetName(), DistanceSquared(mob->GetPosition(),
 							sender->GetPosition()), fabs(sender->GetZ()+mob->GetZ()));
 #endif
-						mob->AddToHateList(attacker, 1, 0, false);
+						mob->AddToHateList(attacker, 25, 0, false);
 					}
 				}
 			}
