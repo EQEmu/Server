@@ -2422,6 +2422,11 @@ void Mob::AddToHateList(Mob* other, uint32 hate /*= 0*/, int32 damage /*= 0*/, b
 		hate = 1;
 	}
 
+	if (iYellForHelp)
+		SetPrimaryAggro(true);
+	else
+		SetAssistAggro(true);
+
 	bool wasengaged = IsEngaged();
 	Mob* owner = other->GetOwner();
 	Mob* mypet = this->GetPet();

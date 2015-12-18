@@ -431,10 +431,19 @@ void EntityList::AIYellForHelp(Mob* sender, Mob* attacker) {
 	if (sender->GetPrimaryFaction() == 0 )
 		return; // well, if we dont have a faction set, we're gonna be indiff to everybody
 
+	if (sender->HasAssistAggro())
+		return;
+
 	for (auto it = npc_list.begin(); it != npc_list.end(); ++it) {
 		NPC *mob = it->second;
 		if (!mob)
 			continue;
+
+		if (mob->CheckAggro(attacker))
+			continue;
+
+		if (sender->NPCAssistCap() >= RuleI(Combat, NPCAssistCap))
+			break;
 
 		float r = mob->GetAssistRange();
 		r = r * r;
@@ -477,6 +486,7 @@ void EntityList::AIYellForHelp(Mob* sender, Mob* attacker) {
 							sender->GetPosition()), fabs(sender->GetZ()+mob->GetZ()));
 #endif
 						mob->AddToHateList(attacker, 25, 0, false);
+						sender->AddAssistCap();
 					}
 				}
 			}

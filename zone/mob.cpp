@@ -433,6 +433,9 @@ Mob::Mob(const char* in_name,
 
 	emoteid = 0;
 	endur_upkeep = false;
+	PrimaryAggro = false;
+	AssistAggro = false;
+	npc_assist_cap = 0;
 }
 
 Mob::~Mob()
@@ -2693,6 +2696,8 @@ bool Mob::RemoveFromHateList(Mob* mob)
 		{
 			AI_Event_NoLongerEngaged();
 			zone->DelAggroMob();
+			if (IsNPC() && !RuleB(Aggro, AllowTickPulling))
+				ResetAssistCap();
 		}
 	}
 	if(GetTarget() == mob)

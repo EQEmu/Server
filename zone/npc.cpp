@@ -712,8 +712,18 @@ bool NPC::Process()
 	}
 
 	//Handle assists...
-	if(assist_timer.Check() && IsEngaged() && !Charmed()) {
+	if (assist_cap_timer.Check()) {
+		if (NPCAssistCap() > 0)
+			DelAssistCap();
+		else
+			assist_cap_timer.Disable();
+	}
+
+	if (assist_timer.Check() && IsEngaged() && !Charmed() && !HasAssistAggro() &&
+	    NPCAssistCap() < RuleI(Combat, NPCAssistCap)) {
 		entity_list.AIYellForHelp(this, GetTarget());
+		if (NPCAssistCap() > 0 && !assist_cap_timer.Enabled())
+			assist_cap_timer.Start(RuleI(Combat, NPCAssistCapTimer));
 	}
 
 	if(qGlobals)
