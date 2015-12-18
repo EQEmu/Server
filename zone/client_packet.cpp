@@ -2925,150 +2925,292 @@ void Client::Handle_OP_AugmentItem(const EQApplicationPacket *app)
 		return;
 	}
 
-	// Delegate to tradeskill object to perform combine
 	AugmentItem_Struct* in_augment = (AugmentItem_Struct*)app->pBuffer;
 	bool deleteItems = false;
 	if (GetClientVersion() >= ClientVersion::RoF)
 	{
 		ItemInst *itemOneToPush = nullptr, *itemTwoToPush = nullptr;
 
-		//Message(15, "%i %i %i %i %i %i", in_augment->container_slot, in_augment->augment_slot, in_augment->container_index, in_augment->augment_index, in_augment->augment_action, in_augment->dest_inst_id);
+		//Log.Out(Logs::DebugLevel::Moderate, Logs::Debug, "cslot: %i aslot: %i cidx: %i aidx: %i act: %i dest: %i",
+		//	in_augment->container_slot, in_augment->augment_slot, in_augment->container_index, in_augment->augment_index, in_augment->augment_action, in_augment->dest_inst_id);
 
-		// Adding augment
-		if (in_augment->augment_action == 0)
+		ItemInst *tobe_auged = nullptr, *old_aug = nullptr, *new_aug = nullptr, *aug = nullptr, *solvent = nullptr;
+		Inventory& user_inv = GetInv();
+
+		uint16 item_slot = in_augment->container_slot;
+		uint16 solvent_slot = in_augment->augment_slot;
+		uint8 mat = Inventory::CalcMaterialFromSlot(item_slot); // for when player is augging a piece of equipment while they're wearing it
+
+		if (item_slot == INVALID_INDEX || solvent_slot == INVALID_INDEX)
 		{
-			ItemInst *tobe_auged = nullptr, *auged_with = nullptr;
-			int8 slot = -1;
-			Inventory& user_inv = GetInv();
+			Message(13, "Error: Invalid Aug Index.");
+			return;
+		}
 
-			uint16 slot_id = in_augment->container_slot;
-			uint16 aug_slot_id = in_augment->augment_slot;
-			if (slot_id == INVALID_INDEX || aug_slot_id == INVALID_INDEX)
+		tobe_auged = user_inv.GetItem(item_slot);
+		solvent = user_inv.GetItem(solvent_slot);
+
+		if (!tobe_auged)
+		{
+			Message(13, "Error: Invalid item passed for augmenting.");
+			return;
+		}
+
+		if ((in_augment->augment_action == 1) || (in_augment->augment_action == 2))
+		{
+			// Check for valid distiller if safely removing / swapping an augmentation
+
+			if (!solvent)
 			{
-				Message(13, "Error: Invalid Aug Index.");
+				Log.Out(Logs::General, Logs::Error, "Player tried to safely remove an augment without a distiller.");
+				Message(13, "Error: Missing an augmentation distiller for safely removing this augment.");
 				return;
 			}
-
-			tobe_auged = user_inv.GetItem(slot_id);
-			auged_with = user_inv.GetItem(MainCursor);
-
-			if (tobe_auged && auged_with)
+			else if (solvent->GetItem()->ItemType == ItemUseTypes::ItemTypeAugmentationDistiller)
 			{
-				if (((tobe_auged->IsAugmentSlotAvailable(auged_with->GetAugmentType(), in_augment->augment_index)) != -1) &&
-					(tobe_auged->AvailableWearSlot(auged_with->GetItem()->Slots)))
+				old_aug = tobe_auged->GetAugment(in_augment->augment_index);
+
+				if (!old_aug)
 				{
-					tobe_auged->PutAugment(in_augment->augment_index, *auged_with);
-					tobe_auged->UpdateOrnamentationInfo();
+					Log.Out(Logs::General, Logs::Error, "Player tried to safely remove a nonexistent augment.");
+					Message(13, "Error: No augment found in slot %i for safely removing.", in_augment->augment_index);
+					return;
+				}
+				else if (solvent->GetItem()->ID != old_aug->GetItem()->AugDistiller)
+				{
+					Log.Out(Logs::General, Logs::Error, "Player tried to safely remove an augment with the wrong distiller (item %u vs expected %u).", solvent->GetItem()->ID, old_aug->GetItem()->AugDistiller);
+					Message(13, "Error: Wrong augmentation distiller for safely removing this augment.");
+					return;
+				}
+			}
+			else if (solvent->GetItem()->ItemType != ItemUseTypes::ItemTypePerfectedAugmentationDistiller)
+			{
+				Log.Out(Logs::General, Logs::Error, "Player tried to safely remove an augment with a non-distiller item.");
+				Message(13, "Error: Invalid augmentation distiller for safely removing this augment.");
+				return;
+			}
+		}
 
-					ItemInst *aug = tobe_auged->GetAugment(in_augment->augment_index);
-					if (aug) {
-						std::vector<EQEmu::Any> args;
-						args.push_back(aug);
-						parse->EventItem(EVENT_AUGMENT_ITEM, this, tobe_auged, nullptr, "", in_augment->augment_index, &args);
+		switch (in_augment->augment_action)
+		{
+			case 0: // Adding an augment
+			case 2: // Swapping augment
+				new_aug = user_inv.GetItem(MainCursor);
 
-						args.assign(1, tobe_auged);
-						parse->EventItem(EVENT_AUGMENT_INSERT, this, aug, nullptr, "", in_augment->augment_index, &args);
-					}
-					else
-					{
-						Message(13, "Error: Could not find augmentation at index %i. Aborting.", in_augment->augment_index);
-						return;
-					}
-
-					itemOneToPush = tobe_auged->Clone();
-					// Must push items after the items in inventory are deleted - necessary due to lore items...
-					if (itemOneToPush)
-					{
-						DeleteItemInInventory(slot_id, 0, true);
-						DeleteItemInInventory(MainCursor, 0, true);
-
-						if (PutItemInInventory(slot_id, *itemOneToPush, true))
-						{
-							CalcBonuses();
-							// Successfully added an augment to the item
-							return;
-						}
-						else
-						{
-							Message(13, "Error: No available slot for end result. Please free up the augment slot.");
-						}
-					}
-					else
-					{
-						Message(13, "Error in cloning item for augment. Aborted.");
-					}
-
+				if (!new_aug) // Shouldn't get the OP code without the augment on the user's cursor, but maybe it's h4x.
+				{
+					Log.Out(Logs::General, Logs::Error, "AugmentItem OpCode with 'Insert' or 'Swap' action received, but no augment on client's cursor.");
+					Message(13, "Error: No augment found on cursor for inserting.");
+					return;
 				}
 				else
 				{
-					Message(13, "Error: No available slot for augment in that item.");
+					if (((tobe_auged->IsAugmentSlotAvailable(new_aug->GetAugmentType(), in_augment->augment_index)) != -1) &&
+						(tobe_auged->AvailableWearSlot(new_aug->GetItem()->Slots)))
+					{
+						old_aug = tobe_auged->RemoveAugment(in_augment->augment_index);
+						if (old_aug)
+						{
+							// An old augment was removed in order to be replaced with the new one (augment_action 2)
+
+							CalcBonuses();
+
+							std::vector<EQEmu::Any> args;
+							args.push_back(old_aug);
+							parse->EventItem(EVENT_UNAUGMENT_ITEM, this, tobe_auged, nullptr, "", in_augment->augment_index, &args);
+
+							args.assign(1, tobe_auged);
+							args.push_back(false);
+							parse->EventItem(EVENT_AUGMENT_REMOVE, this, old_aug, nullptr, "", in_augment->augment_index, &args);
+						}
+
+						tobe_auged->PutAugment(in_augment->augment_index, *new_aug);
+						tobe_auged->UpdateOrnamentationInfo();
+
+						aug = tobe_auged->GetAugment(in_augment->augment_index);
+						if (aug)
+						{
+							std::vector<EQEmu::Any> args;
+							args.push_back(aug);
+							parse->EventItem(EVENT_AUGMENT_ITEM, this, tobe_auged, nullptr, "", in_augment->augment_index, &args);
+
+							args.assign(1, tobe_auged);
+							parse->EventItem(EVENT_AUGMENT_INSERT, this, aug, nullptr, "", in_augment->augment_index, &args);
+						}
+						else
+						{
+							Message(13, "Error: Could not properly insert augmentation into augment slot %i. Aborting.", in_augment->augment_index);
+							return;
+						}
+
+						itemOneToPush = tobe_auged->Clone();
+						if (old_aug)
+						{
+							itemTwoToPush = old_aug->Clone();
+						}
+
+						// Must push items after the items in inventory are deleted - necessary due to lore items...
+						if (itemOneToPush)
+						{
+							DeleteItemInInventory(item_slot, 0, true);
+							DeleteItemInInventory(MainCursor, new_aug->IsStackable() ? 1 : 0, true);
+
+							if (solvent)
+							{
+								// Consume the augment distiller
+								DeleteItemInInventory(solvent_slot, solvent->IsStackable() ? 1 : 0, true);
+							}
+
+							if (itemTwoToPush)
+							{
+								// This is a swap. Return the old aug to the player's cursor.
+								if (!PutItemInInventory(MainCursor, *itemTwoToPush, true))
+								{
+									Log.Out(Logs::General, Logs::Error, "Problem returning old augment to player's cursor after augmentation swap.");
+									Message(15, "Error: Failed to retrieve old augment after augmentation swap!");
+								}
+							}
+
+							if (PutItemInInventory(item_slot, *itemOneToPush, true))
+							{
+								// Successfully added an augment to the item
+
+								CalcBonuses();
+
+								if (mat != _MaterialInvalid)
+								{
+									SendWearChange(mat); // Visible item augged while equipped. Send WC in case ornamentation changed.
+								}
+							}
+							else
+							{
+								Message(13, "Error: No available slot for end result. Please free up the augment slot.");
+							}
+						}
+						else
+						{
+							Message(13, "Error in cloning item for augment. Aborted.");
+						}
+					}
+					else
+					{
+						Message(13, "Error: No available slot for augment in that item.");
+					}
 				}
-			}
-		}
-		else if (in_augment->augment_action == 1)
-		{
-			ItemInst *tobe_auged = nullptr, *auged_with = nullptr;
-			int8 slot = -1;
-			Inventory& user_inv = GetInv();
-
-			uint16 slot_id = in_augment->container_slot;
-			uint16 aug_slot_id = in_augment->augment_slot; //it's actually solvent slot
-			if (slot_id == INVALID_INDEX || aug_slot_id == INVALID_INDEX)
-			{
-				Message(13, "Error: Invalid Aug Index.");
-				return;
-			}
-
-			tobe_auged = user_inv.GetItem(slot_id);
-			auged_with = user_inv.GetItem(aug_slot_id);
-
-			ItemInst *old_aug = nullptr;
-			if (!auged_with)
-				return;
-			const uint32 id = auged_with->GetID();
-			ItemInst *aug = tobe_auged->GetAugment(in_augment->augment_index);
-			if (aug) {
-				std::vector<EQEmu::Any> args;
-				args.push_back(aug);
-				parse->EventItem(EVENT_UNAUGMENT_ITEM, this, tobe_auged, nullptr, "", in_augment->augment_index, &args);
-
-				args.assign(1, tobe_auged);
-
-				args.push_back(false);
-
-				parse->EventItem(EVENT_AUGMENT_REMOVE, this, aug, nullptr, "", in_augment->augment_index, &args);
-			}
-			else
-			{
-				Message(13, "Error: Could not find augmentation at index %i. Aborting.");
-				return;
-			}
-			old_aug = tobe_auged->RemoveAugment(in_augment->augment_index);
-			tobe_auged->UpdateOrnamentationInfo();
-
-			itemOneToPush = tobe_auged->Clone();
-			if (old_aug)
-				itemTwoToPush = old_aug->Clone();
-			if (itemOneToPush && itemTwoToPush && auged_with)
-			{
-				DeleteItemInInventory(slot_id, 0, true);
-				DeleteItemInInventory(aug_slot_id, auged_with->IsStackable() ? 1 : 0, true);
-
-				if (!PutItemInInventory(slot_id, *itemOneToPush, true))
+				break;
+			case 1: // Removing augment safely (distiller)
+				aug = tobe_auged->GetAugment(in_augment->augment_index);
+				if (aug)
 				{
-					Message(15, "Failed to remove augment properly!");
+					std::vector<EQEmu::Any> args;
+					args.push_back(aug);
+					parse->EventItem(EVENT_UNAUGMENT_ITEM, this, tobe_auged, nullptr, "", in_augment->augment_index, &args);
+
+					args.assign(1, tobe_auged);
+
+					args.push_back(false);
+
+					parse->EventItem(EVENT_AUGMENT_REMOVE, this, aug, nullptr, "", in_augment->augment_index, &args);
 				}
-
-				if (PutItemInInventory(MainCursor, *itemTwoToPush, true))
+				else
 				{
+					Message(13, "Error: Could not find augmentation to remove at index %i. Aborting.", in_augment->augment_index);
+					return;
+				}
+				
+				old_aug = tobe_auged->RemoveAugment(in_augment->augment_index);
+				tobe_auged->UpdateOrnamentationInfo();
+
+				itemOneToPush = tobe_auged->Clone();
+				if (old_aug)
+					itemTwoToPush = old_aug->Clone();
+
+				if (itemOneToPush && itemTwoToPush)
+				{
+					// Consume the augment distiller
+					DeleteItemInInventory(solvent_slot, solvent->IsStackable() ? 1 : 0, true);
+
+					// Remove the augmented item
+					DeleteItemInInventory(item_slot, 0, true);
+
+					// Replace it with the unaugmented item
+					if (!PutItemInInventory(item_slot, *itemOneToPush, true))
+					{
+						Log.Out(Logs::General, Logs::Error, "Problem returning equipment item to player's inventory after safe augment removal.");
+						Message(15, "Error: Failed to return item after de-augmentation!");
+					}
+
 					CalcBonuses();
-					//Message(15, "Successfully removed an augmentation!");
+					
+					if (mat != _MaterialInvalid)
+					{
+						SendWearChange(mat); // Visible item augged while equipped. Send WC in case ornamentation changed.
+					}
+
+					// Drop the removed augment on the player's cursor
+					if (!PutItemInInventory(MainCursor, *itemTwoToPush, true))
+					{
+						Log.Out(Logs::General, Logs::Error, "Problem returning augment to player's cursor after safe removal.");
+						Message(15, "Error: Failed to return augment after removal from item!");
+						return;
+					}
 				}
-			}
+				break;
+			case 3: // Destroying augment (formerly done in birdbath/sealer with a solvent)
+
+				// RoF client does not require an augmentation solvent for destroying an augmentation in an item.
+				// Augments can be destroyed with a right click -> Destroy at any time.
+
+				aug = tobe_auged->GetAugment(in_augment->augment_index);
+				if (aug)
+				{
+					std::vector<EQEmu::Any> args;
+					args.push_back(aug);
+					parse->EventItem(EVENT_UNAUGMENT_ITEM, this, tobe_auged, nullptr, "", in_augment->augment_index, &args);
+
+					args.assign(1, tobe_auged);
+
+					args.push_back(true);
+
+					parse->EventItem(EVENT_AUGMENT_REMOVE, this, aug, nullptr, "", in_augment->augment_index, &args);
+				}
+				else
+				{
+					Message(13, "Error: Could not find augmentation to remove at index %i. Aborting.");
+					return;
+				}
+
+				tobe_auged->DeleteAugment(in_augment->augment_index);
+				tobe_auged->UpdateOrnamentationInfo();
+
+				itemOneToPush = tobe_auged->Clone();
+				if (itemOneToPush)
+				{
+					DeleteItemInInventory(item_slot, 0, true);
+
+					if (!PutItemInInventory(item_slot, *itemOneToPush, true))
+					{
+						Log.Out(Logs::General, Logs::Error, "Problem returning equipment item to player's inventory after augment deletion.");
+						Message(15, "Error: Failed to return item after destroying augment!");
+					}
+				}
+
+				CalcBonuses();
+
+				if (mat != _MaterialInvalid)
+				{
+					SendWearChange(mat);
+				}
+				break;
+			default: // Unknown
+				Log.Out(Logs::General, Logs::Inventory, "Unrecognized augmentation action - cslot: %i aslot: %i cidx: %i aidx: %i act: %i dest: %i",
+					in_augment->container_slot, in_augment->augment_slot, in_augment->container_index, in_augment->augment_index, in_augment->augment_action, in_augment->dest_inst_id);
+				break;
 		}
 	}
 	else
 	{
+		// Delegate to tradeskill object to perform combine
 		Object::HandleAugmentation(this, in_augment, m_tradeskill_object);
 	}
 	return;
