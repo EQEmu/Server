@@ -2182,3 +2182,42 @@ void Database::ClearInvSnapshots(bool use_rule)
 	std::string query = StringFormat("DELETE FROM inventory_snapshots WHERE time_index <= %lu", (unsigned long)del_time);
 	QueryDatabase(query);
 }
+
+struct TimeOfDay_Struct Database::LoadTime(time_t &realtime)
+{
+
+	TimeOfDay_Struct eqTime;
+	std::string query = StringFormat("SELECT minute,hour,day,month,year,realtime FROM eqtime limit 1");
+	auto results = QueryDatabase(query);
+
+	if (!results.Success() || results.RowCount() == 0)
+	{
+		Log.Out(Logs::Detail, Logs::World_Server, "Loading EQ time of day failed. Using defaults.");
+		eqTime.minute = 0;
+		eqTime.hour = 9;
+		eqTime.day = 1;
+		eqTime.month = 1;
+		eqTime.year = 3100;
+		realtime = time(0);
+	}
+
+	auto row = results.begin();
+
+	eqTime.minute = atoi(row[0]);
+	eqTime.hour = atoi(row[1]);
+	eqTime.day = atoi(row[2]);
+	eqTime.month = atoi(row[3]);
+	eqTime.year = atoi(row[4]);
+	realtime = atoi(row[5]);
+
+	return eqTime;
+}
+
+bool Database::SaveTime(int8 minute, int8 hour, int8 day, int8 month, int16 year)
+{
+	std::string query = StringFormat("UPDATE eqtime set minute = %d, hour = %d, day = %d, month = %d, year = %d, realtime = %d limit 1", minute, hour, day, month, year, time(0));
+	auto results = QueryDatabase(query);
+
+	return results.Success();
+
+}

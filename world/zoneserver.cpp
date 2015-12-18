@@ -989,8 +989,8 @@ bool ZoneServer::Process() {
 				Log.Out(Logs::Detail, Logs::World_Server,"Received SetWorldTime");
 				eqTimeOfDay* newtime = (eqTimeOfDay*) pack->pBuffer;
 				zoneserver_list.worldclock.SetCurrentEQTimeOfDay(newtime->start_eqtime, newtime->start_realtime);
-				Log.Out(Logs::Detail, Logs::World_Server,"New time = %d-%d-%d %d:%d (%d)\n", newtime->start_eqtime.year, newtime->start_eqtime.month, (int)newtime->start_eqtime.day, (int)newtime->start_eqtime.hour, (int)newtime->start_eqtime.minute, (int)newtime->start_realtime);
-				zoneserver_list.worldclock.saveFile(WorldConfig::get()->EQTimeFile.c_str());
+				Log.Out(Logs::Detail, Logs::World_Server, "New time = %d-%d-%d %d:%d (%d)\n", newtime->start_eqtime.year, newtime->start_eqtime.month, (int)newtime->start_eqtime.day, (int)newtime->start_eqtime.hour, (int)newtime->start_eqtime.minute, (int)newtime->start_realtime);
+				database.SaveTime((int)newtime->start_eqtime.minute, (int)newtime->start_eqtime.hour, (int)newtime->start_eqtime.day, newtime->start_eqtime.month, newtime->start_eqtime.year);
 				zoneserver_list.SendTimeSync();
 				break;
 			}

@@ -241,6 +241,8 @@ public:
 	uint8	GetSkillCap(uint8 skillid, uint8 in_race, uint8 in_class, uint16 in_level);
 
 	void	AddReport(std::string who, std::string against, std::string lines);
+	struct TimeOfDay_Struct		LoadTime(time_t &realtime);
+	bool	SaveTime(int8 minute, int8 hour, int8 day, int8 month, int16 year);
 	void	ClearMerchantTemp();
 	void	ClearPTimers(uint32 charid);
 	void	SetFirstLogon(uint32 CharID, uint8 firstlogon);
