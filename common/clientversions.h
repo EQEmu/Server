@@ -24,20 +24,27 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 #include "types.h"
 
-static const uint32 BIT_Client62	= 1;
-static const uint32 BIT_Titanium	= 2;
-static const uint32 BIT_SoF			= 4;
-static const uint32 BIT_SoD			= 8;
-static const uint32 BIT_UF			= 16;
-static const uint32 BIT_RoF			= 32;
-static const uint32 BIT_RoF2		= 64;
+static const uint32 BIT_Client62			= 0x00000001; // 1 (unsupported - placeholder for scripts)
 
-static const uint32 BIT_TitaniumAndEarlier	= 0x00000003;
-static const uint32 BIT_SoFAndLater			= 0xFFFFFFFC;
-static const uint32 BIT_SoDAndLater			= 0xFFFFFFF8;
-static const uint32 BIT_UFAndLater			= 0xFFFFFFF0;
-static const uint32 BIT_RoFAndLater			= 0xFFFFFFE0;
-static const uint32 BIT_RoF2AndLater		= 0xFFFFFFC0;
+static const uint32 BIT_Titanium			= 0x00000002; // 2
+static const uint32 BIT_SoF					= 0x00000004; // 4
+static const uint32 BIT_SoD					= 0x00000008; // 8
+static const uint32 BIT_UF					= 0x00000010; // 16
+static const uint32 BIT_RoF					= 0x00000020; // 32
+static const uint32 BIT_RoF2				= 0x00000040; // 64
+
+static const uint32 BIT_TitaniumAndEarlier	= 0x00000003; // 3
+static const uint32 BIT_SoFAndEarlier		= 0x00000007; // 7
+static const uint32 BIT_SoDAndEarlier		= 0x0000000F; // 15
+static const uint32 BIT_UFAndEarlier		= 0x0000001F; // 31
+static const uint32 BIT_RoFAndEarlier		= 0x0000003F; // 63
+
+static const uint32 BIT_SoFAndLater			= 0xFFFFFFFC; // 4294967292
+static const uint32 BIT_SoDAndLater			= 0xFFFFFFF8; // 4294967288
+static const uint32 BIT_UFAndLater			= 0xFFFFFFF0; // 4294967280
+static const uint32 BIT_RoFAndLater			= 0xFFFFFFE0; // 4294967264
+static const uint32 BIT_RoF2AndLater		= 0xFFFFFFC0; // 4294967232
+
 static const uint32 BIT_AllClients			= 0xFFFFFFFF;
 
 enum class ClientVersion
