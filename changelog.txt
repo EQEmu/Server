@@ -1,5 +1,27 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 12/19/2015 ==
+Kinglykrab: Added many methods to Perl and Lua, list below:
+	- SeeInvisible()
+	- SeeInvisibleUndead()
+	- SeeHide()
+	- SeeImprovedHide()
+	- GetNimbusEffect1() - returns first nimbus effect
+	- GetNimbusEffect2() - returns second nimbus effect
+	- GetNimbusEffect3() - returns third nimbus effect
+	- IsTargetable()
+	- HasShieldEquiped()
+	- HasTwoHandBluntEquiped()
+	- HasTwoHanderEquiped()
+	- GetHerosForgeModel() - returns int32 Hero's Forge model
+	- IsEliteMaterialItem() - returns uint32 Hero's Forge Model
+	- GetBaseSize() - returns Mob's base size
+	- HasOwner()
+	- IsPet()
+	- HasPet()
+	- IsSilenced()
+	- IsAmnesiad()
+	
 == 12/16/2015 ==
 Noudess: Repaired issue with Bind Wounds on someone else.  Message was not coming out on client (hold still) and a bind wounds on someone already binding their wounds would interrupt their bind and make them stand.  Also removed some duplicate messaging.
 
