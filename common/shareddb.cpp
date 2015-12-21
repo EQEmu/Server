@@ -835,7 +835,7 @@ void SharedDatabase::LoadItems(void *data, uint32 size, int32 items, uint32 max_
 	Item_Struct item;
 
 	const std::string query = "SELECT source,"
-#define F(x) "`" #x "`,"
+#define F(x) "`"#x"`,"
 #include "item_fieldlist.h"
 #undef F
 		"updated FROM items ORDER BY id";
