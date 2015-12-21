@@ -8981,6 +8981,33 @@ XS(XS_Mob_IsAmnesiad) {
 	XSRETURN(1);
 }
 
+XS(XS_Mob_GetMeleeMitigation);
+XS(XS_Mob_GetMeleeMitigation) {
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: Mob::GetMeleeMitigation(THIS)");
+	{
+		Mob* THIS;
+		int32 RETVAL;
+		dXSTARG;
+		
+		if (sv_derived_from(ST(0), "Mob")) {
+			IV tmp = SvIV((SV*)SvRV(ST(0)));
+			THIS = INT2PTR(Mob*, tmp);
+		}
+		else
+			Perl_croak(aTHX_ "THIS is not of type Mob");
+		
+		if (THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
+		
+		RETVAL = THIS->GetMeleeMitigation();
+		XSprePUSH;
+		PUSHi((IV)RETVAL);
+	}
+	XSRETURN(1);
+}
+
 #ifdef __cplusplus
 extern "C"
 #endif
@@ -9313,6 +9340,7 @@ XS(boot_Mob)
 		newXSproto(strcpy(buf, "HasPet"), XS_Mob_HasPet, file, "$");
 		newXSproto(strcpy(buf, "IsSilenced"), XS_Mob_IsSilenced, file, "$");
 		newXSproto(strcpy(buf, "IsAmnesiad"), XS_Mob_IsAmnesiad, file, "$");
+		newXSproto(strcpy(buf, "GetMeleeMitigation"), XS_Mob_GetMeleeMitigation, file, "$");
 	XSRETURN_YES;
 }
 

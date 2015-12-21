@@ -6,6 +6,8 @@ Natedog: Updated item table fields and added a few missing fields for evolving i
 		items in your shared bank. (but item field located on items table)
 	-NYI - SkillModMax: Max skill point modification from the percent mods. EX:
 		100% 2HSlashing (Max 50) - can only increase 2hslash by 50 MAX! (item field located though)
+Kinglykrab: Added GetMeleeMitigation() for NPCs and Clients in Perl and Lua.
+	- This allows you to check total item, spell, and AA melee mitigation contribution.
 	
 == 12/19/2015 ==
 Kinglykrab: Added many methods to Perl and Lua, list below:

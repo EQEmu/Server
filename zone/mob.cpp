@@ -5682,3 +5682,11 @@ void Mob::SetCurrentSpeed(int in){
 		}
 	}
 }
+
+int32 Mob::GetMeleeMitigation() {
+	int32 mitigation = 0;
+	mitigation += spellbonuses.MeleeMitigationEffect;
+	mitigation += itembonuses.MeleeMitigationEffect;
+	mitigation += aabonuses.MeleeMitigationEffect;
+	return mitigation;
+}
