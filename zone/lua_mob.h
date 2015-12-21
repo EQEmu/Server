@@ -377,6 +377,7 @@ public:
 	bool HasPet();
 	bool IsSilenced();
 	bool IsAmnesiad();
+	int32 GetMeleeMitigation();
 };
 
 #endif

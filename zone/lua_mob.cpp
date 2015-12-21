@@ -1976,6 +1976,11 @@ bool Lua_Mob::IsAmnesiad() {
 	return self->IsAmnesiad();
 }
 
+int32 Lua_Mob::GetMeleeMitigation() {
+	Lua_Safe_Call_Int();
+	return self->GetMeleeMitigation();
+}
+
 luabind::scope lua_register_mob() {
 	return luabind::class_<Lua_Mob, Lua_Entity>("Mob")
 		.def(luabind::constructor<>())
@@ -2317,7 +2322,8 @@ luabind::scope lua_register_mob() {
 		.def("IsPet", (bool(Lua_Mob::*)(void))&Lua_Mob::IsPet)
 		.def("HasPet", (bool(Lua_Mob::*)(void))&Lua_Mob::HasPet)
 		.def("IsSilenced", (bool(Lua_Mob::*)(void))&Lua_Mob::IsSilenced)
-		.def("IsAmnesiad", (bool(Lua_Mob::*)(void))&Lua_Mob::IsAmnesiad);
+		.def("IsAmnesiad", (bool(Lua_Mob::*)(void))&Lua_Mob::IsAmnesiad)
+		.def("GetMeleeMitigation", (int32(Lua_Mob::*)(void))&Lua_Mob::GetMeleeMitigation);
 }
 
 luabind::scope lua_register_special_abilities() {

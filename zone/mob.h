@@ -752,6 +752,7 @@ public:
 	inline bool GetInvul(void) { return invulnerable; }
 	inline void SetExtraHaste(int Haste) { ExtraHaste = Haste; }
 	virtual int GetHaste();
+	int32 GetMeleeMitigation();
 
 	uint8 GetWeaponDamageBonus(const Item_Struct* weapon, bool offhand = false);
 	uint16 GetDamageTable(SkillUseTypes skillinuse);
