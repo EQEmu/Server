@@ -346,6 +346,7 @@
 9090|2015_12_01_spell_scribe_restriction_rule.sql|SELECT `rule_name` FROM `rule_values` WHERE `rule_name` LIKE 'Character:RestrictSpellScribing'|empty|
 9091|2015_12_07_command_settings.sql|SHOW TABLES LIKE 'command_settings'|empty|
 9092|2015_12_17_eqtime.sql|SHOW TABLES LIKE 'eqtime'|empty|
+9093|2015_12_21_items_updates_evoitem.sql|SHOW COLUMNS FROM `items` LIKE 'evoitem'|empty|
 
 # Upgrade conditions:
 # 	This won't be needed after this system is implemented, but it is used database that are not

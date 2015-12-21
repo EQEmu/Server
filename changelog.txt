@@ -1,5 +1,12 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 12/21/2015 ==
+Natedog: Updated item table fields and added a few missing fields for evolving items
+	-DO NOT implement Heirloom items till the inventory code is fixed to allow placing NO DROP
+		items in your shared bank. (but item field located on items table)
+	-NYI - SkillModMax: Max skill point modification from the percent mods. EX:
+		100% 2HSlashing (Max 50) - can only increase 2hslash by 50 MAX! (item field located though)
+	
 == 12/19/2015 ==
 Kinglykrab: Added many methods to Perl and Lua, list below:
 	- SeeInvisible()

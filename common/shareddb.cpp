@@ -878,7 +878,7 @@ void SharedDatabase::LoadItems(void *data, uint32 size, int32 items, uint32 max_
         item.AC = (int32)atoul(row[ItemField::ac]);
         item.Deity = (uint32)atoul(row[ItemField::deity]);
         item.SkillModValue = (int32)atoul(row[ItemField::skillmodvalue]);
-
+		item.SkillModMax = (int32)atoul(row[ItemField::skillmodmax]);
         item.SkillModType = (uint32)atoul(row[ItemField::skillmodtype]);
         item.BaneDmgRace = (uint32)atoul(row[ItemField::banedmgrace]);
         item.BaneDmgAmt = (int8)atoi(row[ItemField::banedmgamt]);
@@ -1020,7 +1020,10 @@ void SharedDatabase::LoadItems(void *data, uint32 size, int32 items, uint32 max_
         item.QuestItemFlag = (atoi(row[ItemField::questitemflag])==0) ? false : true;
         item.SVCorruption = (int32)atoi(row[ItemField::svcorruption]);
         item.Purity = (uint32)atoul(row[ItemField::purity]);
+		item.EvolvingItem = (uint8)atoul(row[ItemField::evoitem]);
+		item.EvolvingID = (uint8)atoul(row[ItemField::evoid]);
         item.EvolvingLevel = (uint8)atoul(row[ItemField::evolvinglevel]);
+		item.EvolvingMax = (uint8)atoul(row[ItemField::evomax]);
         item.BackstabDmg = (uint32)atoul(row[ItemField::backstabdmg]);
         item.DSMitigation = (uint32)atoul(row[ItemField::dsmitigation]);
         item.HeroicStr = (int32)atoi(row[ItemField::heroic_str]);
