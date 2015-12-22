@@ -69,6 +69,7 @@ void CoutTimestamp(bool ms) {
 	if (ms)
 		std::cout << "." << std::setw(3) << std::setfill('0') << (read_time.tv_usec / 1000);
 	std::cout << " GMT";
+	std::cout << std::endl;
 }
 
 

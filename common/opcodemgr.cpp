@@ -23,6 +23,7 @@
 #include <map>
 #include <stdio.h>
 #include <string>
+#include <iostream>
 
 OpcodeManager::OpcodeManager() {
 	loaded = false;
@@ -31,7 +32,8 @@ OpcodeManager::OpcodeManager() {
 bool OpcodeManager::LoadOpcodesFile(const char *filename, OpcodeSetStrategy *s, bool report_errors) {
 	FILE *opf = fopen(filename, "r");
 	if(opf == nullptr) {
-		fprintf(stderr, "Unable to open opcodes file '%s'. Thats bad.\n", filename);
+		fprintf(stderr, "Unable to open opcodes file '%s'. Thats bad.", filename);
+		std::cout << std::endl;
 		return(false);
 	}
 
@@ -184,7 +186,8 @@ uint16 RegularOpcodeManager::EmuToEQ(const EmuOpcode emu_op) {
 	res = emu_to_eq[emu_op];
 	MOpcodes.unlock();
 #ifdef DEBUG_TRANSLATE
-	fprintf(stderr, "M Translate Emu %s (%d) to EQ 0x%.4x\n", OpcodeNames[emu_op], emu_op, res);
+	fprintf(stderr, "M Translate Emu %s (%d) to EQ 0x%.4x", OpcodeNames[emu_op], emu_op, res);
+	std::cout << std::endl;
 #endif
 	return(res);
 }
@@ -199,7 +202,8 @@ EmuOpcode RegularOpcodeManager::EQToEmu(const uint16 eq_op) {
 	res = eq_to_emu[eq_op];
 	MOpcodes.unlock();
 #ifdef DEBUG_TRANSLATE
-	fprintf(stderr, "M Translate EQ 0x%.4x to Emu %s (%d)\n", eq_op, OpcodeNames[res], res);
+	fprintf(stderr, "M Translate EQ 0x%.4x to Emu %s (%d)", eq_op, OpcodeNames[res], res);
+	std::cout << std::endl;
 #endif
 	return(res);
 }

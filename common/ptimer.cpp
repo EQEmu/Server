@@ -108,7 +108,8 @@ PersistentTimer::PersistentTimer(uint32 char_id, pTimerType type, uint32 in_time
 		enabled = true;
 	}
 #ifdef DEBUG_PTIMERS
-	printf("New timer: char %lu of type %u at %lu for %lu seconds.\n", (unsigned long)_char_id, _type, (unsigned long)start_time, (unsigned long)timer_time);
+	printf("New timer: char %lu of type %u at %lu for %lu seconds.", (unsigned long)_char_id, _type, (unsigned long)start_time, (unsigned long)timer_time);
+	std::cout << std::endl;
 #endif
 }
 
@@ -120,14 +121,16 @@ PersistentTimer::PersistentTimer(uint32 char_id, pTimerType type, uint32 in_star
 	start_time = in_start_time;
 	enabled = in_enable;
 #ifdef DEBUG_PTIMERS
-	printf("New stored timer: char %lu of type %u at %lu for %lu seconds.\n", (unsigned long)_char_id, _type, (unsigned long)start_time, (unsigned long)timer_time);
+	printf("New stored timer: char %lu of type %u at %lu for %lu seconds.", (unsigned long)_char_id, _type, (unsigned long)start_time, (unsigned long)timer_time);
+	std::cout << std::endl;
 #endif
 }
 
 bool PersistentTimer::Load(Database *db) {
 
 #ifdef DEBUG_PTIMERS
-	printf("Loading timer: char %lu of type %u\n", (unsigned long)_char_id, _type);
+	printf("Loading timer: char %lu of type %u", (unsigned long)_char_id, _type);
+	std::cout << std::endl;
 #endif
     std::string query = StringFormat("SELECT start, duration, enable "
                                     "FROM timers WHERE char_id=%lu AND type=%u",
@@ -161,7 +164,8 @@ bool PersistentTimer::Store(Database *db) {
                                     (unsigned long)timer_time, enabled ? 1: 0);
 
 #ifdef DEBUG_PTIMERS
-	printf("Storing timer: char %lu of type %u: '%s'\n", (unsigned long)_char_id, _type, query.c_str());
+	printf("Storing timer: char %lu of type %u: '%s'", (unsigned long)_char_id, _type, query.c_str());
+	std::cout << std::endl;
 #endif
     auto results = db->QueryDatabase(query);
 	if (!results.Success()) {
@@ -180,7 +184,8 @@ bool PersistentTimer::Clear(Database *db) {
                                     "WHERE char_id = %lu AND type = %u ",
                                     (unsigned long)_char_id, _type);
 #ifdef DEBUG_PTIMERS
-	printf("Clearing timer: char %lu of type %u: '%s'\n", (unsigned long)_char_id, _type, query.c_str());
+	printf("Clearing timer: char %lu of type %u: '%s'", (unsigned long)_char_id, _type, query.c_str());
+	std::cout << std::endl;
 #endif
 
     auto results = db->QueryDatabase(query);
@@ -222,7 +227,8 @@ void PersistentTimer::Start(uint32 set_timer_time) {
 		timer_time = set_timer_time;
 	}
 #ifdef DEBUG_PTIMERS
-	printf("Starting timer: char %lu of type %u at %lu for %lu seconds.\n", (unsigned long)_char_id, _type, (unsigned long)start_time, (unsigned long)timer_time);
+	printf("Starting timer: char %lu of type %u at %lu for %lu seconds.", (unsigned long)_char_id, _type, (unsigned long)start_time, (unsigned long)timer_time);
+	std::cout << std::endl;
 #endif
 }
 
@@ -235,7 +241,8 @@ void PersistentTimer::SetTimer(uint32 set_timer_time) {
 		enabled = true;
 	}
 #ifdef DEBUG_PTIMERS
-	printf("Setting timer: char %lu of type %u at %lu for %lu seconds.\n", (unsigned long)_char_id, _type, (unsigned long)start_time, (unsigned long)timer_time);
+	printf("Setting timer: char %lu of type %u at %lu for %lu seconds.", (unsigned long)_char_id, _type, (unsigned long)start_time, (unsigned long)timer_time);
+	std::cout << std::endl;
 #endif
 }
 
@@ -282,7 +289,8 @@ bool PTimerList::Load(Database *db) {
 	_list.clear();
 
 #ifdef DEBUG_PTIMERS
-	printf("Loading all timers for char %lu\n", (unsigned long)_char_id);
+	printf("Loading all timers for char %lu", (unsigned long)_char_id);
+	std::cout << std::endl;
 #endif
 	std::string query = StringFormat("SELECT type, start, duration, enable "
                                     "FROM timers WHERE char_id = %lu",
@@ -320,7 +328,8 @@ bool PTimerList::Load(Database *db) {
 
 bool PTimerList::Store(Database *db) {
 #ifdef DEBUG_PTIMERS
-	printf("Storing all timers for char %lu\n", (unsigned long)_char_id);
+	printf("Storing all timers for char %lu", (unsigned long)_char_id);
+	std::cout << std::endl;
 #endif
 
 	std::map<pTimerType, PersistentTimer *>::iterator s;
@@ -329,7 +338,8 @@ bool PTimerList::Store(Database *db) {
 	while(s != _list.end()) {
 		if(s->second != nullptr) {
 #ifdef DEBUG_PTIMERS
-	printf("Storing timer %u for char %lu\n", s->first, (unsigned long)_char_id);
+			printf("Storing timer %u for char %lu", s->first, (unsigned long)_char_id);
+			std::cout << std::endl;
 #endif
 			if(!s->second->Store(db))
 				res = false;
@@ -344,7 +354,8 @@ bool PTimerList::Clear(Database *db) {
 
 	std::string query = StringFormat("DELETE FROM timers WHERE char_id=%lu ", (unsigned long)_char_id);
 #ifdef DEBUG_PTIMERS
-	printf("Storing all timers for char %lu: '%s'\n", (unsigned long)_char_id, query.c_str());
+	printf("Storing all timers for char %lu: '%s'", (unsigned long)_char_id, query.c_str());
+	std::cout << std::endl;
 #endif
     auto results = db->QueryDatabase(query);
 	if (!results.Success()) {
@@ -436,7 +447,8 @@ bool PTimerList::ClearOffline(Database *db, uint32 char_id, pTimerType type) {
 	std::string query = StringFormat("DELETE FROM timers WHERE char_id=%lu AND type=%u ",(unsigned long)char_id, type);
 
 #ifdef DEBUG_PTIMERS
-	printf("Clearing timer (offline): char %lu of type %u: '%s'\n", (unsigned long)char_id, type, query.c_str());
+	printf("Clearing timer (offline): char %lu of type %u: '%s'", (unsigned long)char_id, type, query.c_str());
+	std::cout << std::endl;
 #endif
     auto results = db->QueryDatabase(query);
 	if (!results.Success()) {

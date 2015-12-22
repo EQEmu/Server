@@ -18,6 +18,7 @@
 
 #include <string>
 #include <vector>
+#include <iostream>
 
 #include "global_define.h"
 #include "types.h"
@@ -236,14 +237,16 @@ ProcLauncher::ProcRef ProcLauncher::Launch(Spec *&to_launch) {
 			//we will put their output directly into a file.
 			int outfd = creat(it->logFile.c_str(), S_IRUSR | S_IWUSR | S_IRGRP); // S_I + R/W/X + USR/GRP/OTH
 			if(outfd == -1) {
-				fprintf(stderr, "Unable to open log file %s: %s.\n", it->logFile.c_str(), strerror(errno));
+				fprintf(stderr, "Unable to open log file %s: %s.", it->logFile.c_str(), strerror(errno));
+				std::cout << std::endl;
 				close(STDOUT_FILENO);
 				close(STDERR_FILENO);
 				close(STDIN_FILENO);
 			} else {
 				close(STDOUT_FILENO);
 				if(dup2(outfd, STDOUT_FILENO) == -1) {
-					fprintf(stderr, "Unable to duplicate FD %d to %d. Log file will be empty: %s\n", outfd, STDOUT_FILENO, strerror(errno));
+					fprintf(stderr, "Unable to duplicate FD %d to %d. Log file will be empty: %s", outfd, STDOUT_FILENO, strerror(errno));
+					std::cout << std::endl;
 					const char *err = "Unable to redirect stdout into this file. That sucks.";
 					write(outfd, err, strlen(err));
 				}

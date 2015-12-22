@@ -360,7 +360,8 @@ void TCPConnection::AsyncConnect(uint32 irIP, uint16 irPort) {
 	}
 	if(!ConnectReady()) {
 #if TCPN_DEBUG > 0
-		printf("Trying to do async connect in invalid state %s\n", GetState());
+		printf("Trying to do async connect in invalid state %s", GetState());
+		std::cout << std::endl;
 #endif
 		return;
 	}
@@ -368,12 +369,14 @@ void TCPConnection::AsyncConnect(uint32 irIP, uint16 irPort) {
 	if (pAsyncConnect) {
 		MAsyncConnect.unlock();
 #if TCPN_DEBUG > 0
-		printf("Trying to do async connect when already doing one.\n");
+		printf("Trying to do async connect when already doing one.");
+		std::cout << std::endl;
 #endif
 		return;
 	}
 #if TCPN_DEBUG > 0
-		printf("Start async connect.\n");
+	printf("Start async connect.");
+	std::cout << std::endl;
 #endif
 	pAsyncConnect = true;
 	if(irIP != 0)
