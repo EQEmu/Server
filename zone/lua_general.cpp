@@ -812,6 +812,10 @@ uint32 lua_get_instance_timer() {
 	return quest_manager.GetInstanceTimer();
 }
 
+uint32 lua_get_instance_timer_by_id(uint16 instance_id) {
+	return quest_manager.GetInstanceTimerByID(instance_id);
+}
+
 int lua_get_instance_id(const char *zone, uint32 version) {
 	return quest_manager.GetInstanceID(zone, version);
 }

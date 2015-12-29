@@ -2606,6 +2606,21 @@ uint32 QuestManager::GetInstanceTimer() {
 	return 0;
 }
 
+uint32 QuestManager::GetInstanceTimerByID(uint16 instance_id) {
+	if (instance_id == 0)
+		return 0;
+	
+	std::string query = StringFormat("SELECT ((start_time + duration) - UNIX_TIMESTAMP()) AS `remaining` FROM `instance_list` WHERE `id` = %lu", (unsigned long)instance_id);
+	auto results = database.QueryDatabase(query);
+	
+	if (results.Success()) {
+		auto row = results.begin();
+		uint32 timer = atoi(row[0]);
+		return timer;
+	}
+	return 0;
+}
+
 uint16 QuestManager::GetInstanceID(const char *zone, int16 version)
 {
 	QuestManagerCurrentQuestVars();
