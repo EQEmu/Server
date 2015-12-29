@@ -808,6 +808,10 @@ void lua_update_instance_timer(uint16 instance_id, uint32 new_duration) {
 	quest_manager.UpdateInstanceTimer(instance_id, new_duration);
 }
 
+uint32 lua_get_instance_timer() {
+	return quest_manager.GetInstanceTimer();
+}
+
 int lua_get_instance_id(const char *zone, uint32 version) {
 	return quest_manager.GetInstanceID(zone, version);
 }
