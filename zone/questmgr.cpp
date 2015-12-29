@@ -2598,6 +2598,14 @@ void QuestManager::UpdateInstanceTimer(uint16 instance_id, uint32 new_duration)
 	}
 }
 
+uint32 QuestManager::GetInstanceTimer() {
+	if (zone && zone->GetInstanceID() > 0 && zone->GetInstanceTimer()) {
+		uint32 ttime = zone->GetInstanceTimer()->GetRemainingTime();
+		return ttime;
+	}
+	return 0;
+}
+
 uint16 QuestManager::GetInstanceID(const char *zone, int16 version)
 {
 	QuestManagerCurrentQuestVars();

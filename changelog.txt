@@ -1,5 +1,8 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 12/28/2015 ==
+Kinglykrab: Added GetInstanceTimer() to Perl and Lua.
+	
 == 12/21/2015 ==
 Natedog: Updated item table fields and added a few missing fields for evolving items
 	-DO NOT implement Heirloom items till the inventory code is fixed to allow placing NO DROP
