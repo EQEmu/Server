@@ -32,7 +32,7 @@
 # 5032|285_optional_bot_spell_update.sql
 # 5033|292_augslots.sql|SELECT * FROM db_version WHERE version >= 5033|empty|
 5034|294_merchant_logging.sql|SHOW COLUMNS FROM `eventlog` LIKE 'event_nid'|empty|
-5035|304_faction_list.sql|SHOW COLUMNS FROM `faction_list` LIKE 'mod_c16'|empty|
+5035|304_faction_list.sql|SELECT * FROM db_version WHERE version >= 5035|empty|
 5036|326_aas.sql|SELECT * FROM db_version WHERE version > 5035|empty|
 # 5037|328_bot_management.sql
 # 5038|328_optional_bot_management.sql

@@ -549,6 +549,8 @@ bool ZoneDatabase::PopulateZoneSpawnList(uint32 zoneid, LinkedList<Spawn2*> &spa
 		spawn2_list.Insert(new_spawn);
 	}
 
+	NPC::SpawnZoneController();
+
 	return true;
 }
 
