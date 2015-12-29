@@ -2,6 +2,10 @@ EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
 == 12/28/2015 ==
 Kinglykrab: Added GetInstanceTimer() to Perl and Lua.
+	- Added GetInstanceTimerByID(instance_id) to Perl and Lua.
+	- Note: If you do not provide an instance id in the method it defaults to instance id 0 and returns 0 for time remaining.
+	- Added UpdateZoneHeader(type, value) to Perl and Lua.
+	- Note: UpdateZoneHeader allows you to manipulate fog color, fog density, and many other zone header settings on the fly in Perl and Lua.
 	
 == 12/21/2015 ==
 Natedog: Updated item table fields and added a few missing fields for evolving items
