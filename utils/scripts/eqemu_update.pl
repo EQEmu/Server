@@ -23,7 +23,7 @@ if($Config{osname}=~/linux/i){ $OS = "Linux"; }
 if($Config{osname}=~/Win|MS/i){ $OS = "Windows"; }
 
 #::: If current version is less than what world is reporting, then download a new one...
-$current_version = 13;
+$current_version = 14;
 
 if($ARGV[0] eq "V"){
 	if($ARGV[1] > $current_version){ 
@@ -132,6 +132,11 @@ if($ARGV[0] eq "install_peq_db"){
 	main_db_management();
 	
 	print get_mysql_result("UPDATE `launcher` SET `dynamics` = 30 WHERE `name` = 'zone'");
+}
+
+if($ARGV[0] eq "remove_duplicate_rules"){
+	remove_duplicate_rule_values();	
+	exit;
 }
 
 if($ARGV[0] eq "installer"){
@@ -278,6 +283,7 @@ sub show_menu_prompt {
 		11 => \&fetch_latest_windows_binaries,
 		12 => \&fetch_server_dlls,
 		13 => \&do_windows_login_server_setup,
+		14 => \&remove_duplicate_rule_values,
 		19 => \&do_bots_db_schema_drop,
         20 => \&do_update_self,
         0 => \&script_exit,
@@ -355,6 +361,7 @@ return <<EO_MENU;
  11) [Windows Server Build] :: Download Latest and Stable Server Build (Overwrites existing .exe's, includes .dll's)
  12) [Windows Server .dll's] :: Download Pre-Requisite Server .dll's
  13) [Windows Server Loginserver Setup] :: Download and install Windows Loginserver
+ 14) [Remove Duplicate Rule Values] :: Looks for redundant rule_values entries and removes them
  19) [EQEmu DB Drop Bots Schema] :: Remove Bots schema and return database to normal state
  20) [Update the updater] Force update this script (Redownload)
  0) Exit
@@ -546,6 +553,33 @@ sub opcodes_fetch{
 		$loop++; 
 	}
 	print "\nDone...\n\n";
+}
+
+sub remove_duplicate_rule_values{
+	$ruleset_id = trim(get_mysql_result("SELECT `ruleset_id` FROM `rule_sets` WHERE `name` = 'default'"));
+	print "Default Ruleset ID: " . $ruleset_id . "\n";
+	
+	$total_removed = 0;
+	#::: Store Default values...
+	$mysql_result = get_mysql_result("SELECT * FROM `rule_values` WHERE `ruleset_id` = " . $ruleset_id);
+	my @lines = split("\n", $mysql_result);
+	foreach my $val (@lines){
+		my @values = split("\t", $val);
+		$rule_set_values{$values[1]}[0] = $values[2];
+	}
+	#::: Compare default values against other rulesets to check for duplicates...
+	$mysql_result = get_mysql_result("SELECT * FROM `rule_values` WHERE `ruleset_id` != " . $ruleset_id);
+	my @lines = split("\n", $mysql_result);
+	foreach my $val (@lines){
+		my @values = split("\t", $val);
+		if($values[2] == $rule_set_values{$values[1]}[0]){
+			print "DUPLICATE : " . $values[1] . " (Ruleset (" . $values[0] . ")) matches default value of : " . $values[2] . ", removing...\n";
+			get_mysql_result("DELETE FROM `rule_values` WHERE `ruleset_id` = " .  $values[0] . " AND `rule_name` = '" . $values[1] . "'");
+			$total_removed++;
+		}
+	}
+	
+	print "Total duplicate rules removed... " . $total_removed . "\n";
 }
 
 sub copy_file{
