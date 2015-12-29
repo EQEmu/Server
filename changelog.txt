@@ -1,5 +1,21 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 12/29/2015 ==
+Akkadius: Implemented standardized zone controller scripts (Rule Zone, UseZoneController) Defaulted to true
+	- When a zone boots, it will spawn an invisible npc by the name of zone_controller
+	- Lua and Perl scripts can be represented with this npc as zone_controller.pl/lua
+	- This NPC's ID is ruled be define ZONE_CONTROLLER_NPC_ID 10
+	- Two EVENT's uniquely are handled with this NPC/controller (They only work with the zone_controller NPC)
+		- EVENT_SPAWN_ZONE :: All NPC spawns in the zone trigger the controller and pass the following variables:
+			$spawned_entity_id
+			$spawned_npc_id
+		- EVENT_DEATH_ZONE :: All NPC deaths in the zone trigger the controller event and pass the following variables:
+			$killer_id
+			$killer_damage
+			$killer_spell
+			$killer_skill
+			$killed_npc_id
+
 == 12/28/2015 ==
 Kinglykrab: Added GetInstanceTimer() to Perl and Lua.
 	- Added GetInstanceTimerByID(instance_id) to Perl and Lua.

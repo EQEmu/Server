@@ -845,18 +845,22 @@ bool NPC::DatabaseCastAccepted(int spell_id) {
 
 bool NPC::SpawnZoneController(){
 
+	if (!RuleB(Zone, UseZoneController))
+		return false;
+
 	NPCType* npc_type = new NPCType;
 	memset(npc_type, 0, sizeof(NPCType));
 
 	strncpy(npc_type->name, "zone_controller", 60);
 	npc_type->cur_hp = 2000000000;
 	npc_type->max_hp = 2000000000;
+	npc_type->hp_regen = 100000000;
 	npc_type->race = 240;
-	npc_type->gender = 0;
+	npc_type->gender = 2;
 	npc_type->class_ = 1;
 	npc_type->deity = 1;
 	npc_type->level = 200;
-	npc_type->npc_id = 0;
+	npc_type->npc_id = ZONE_CONTROLLER_NPC_ID;
 	npc_type->loottable_id = 0;
 	npc_type->texture = 3;
 	npc_type->runspeed = 0;
@@ -867,6 +871,9 @@ bool NPC::SpawnZoneController(){
 
 	npc_type->prim_melee_type = 28;
 	npc_type->sec_melee_type = 28;
+
+	npc_type->findable = 0;
+	npc_type->trackable = 0;
 
 	strcpy(npc_type->special_abilities, "12,1^13,1^14,1^15,1^16,1^17,1^19,1^22,1^24,1^25,1^28,1^31,1^35,1^39,1^42,1");
 
