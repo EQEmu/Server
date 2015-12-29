@@ -256,7 +256,7 @@ bool RuleManager::LoadRules(Database *database, const char *ruleset_name) {
 			Log.Out(Logs::Detail, Logs::Rules, "Failed to find default ruleset '%s' for load operation. Canceling.", default_ruleset_name.c_str());
 			return(false);
 		}
-		Log.Out(Logs::Detail, Logs::Rules, "Loading rule set '%s' (%d)", default_ruleset_name, default_ruleset_id);
+		Log.Out(Logs::Detail, Logs::Rules, "Loading rule set '%s' (%d)", default_ruleset_name.c_str(), default_ruleset_id);
 
 		std::string query = StringFormat("SELECT rule_name, rule_value FROM rule_values WHERE ruleset_id = %d", default_ruleset_id);
 		auto results = database->QueryDatabase(query);
