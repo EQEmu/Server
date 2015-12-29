@@ -107,6 +107,33 @@ if($path eq ""){
 	exit;
 }
 
+if($ARGV[0] eq "install_peq_db"){
+	
+	$db_name = "peq";
+	if($ARGV[1]){
+		$db_name = $ARGV[1];
+	}
+	
+	$db = $db_name;
+
+	#::: Database Routines
+	print "MariaDB :: Creating Database '" . $db_name . "'\n";
+	print `"$path" --host $host --user $user --password="$pass" -N -B -e "DROP DATABASE IF EXISTS $db_name;"`;
+	print `"$path" --host $host --user $user --password="$pass" -N -B -e "CREATE DATABASE $db_name"`;
+	if($OS eq "Windows"){ @db_version = split(': ', `world db_version`); } 
+	if($OS eq "Linux"){ @db_version = split(': ', `./world db_version`); }  
+	$bin_db_ver = trim($db_version[1]);
+	check_db_version_table();
+	$local_db_ver = trim(get_mysql_result("SELECT version FROM db_version LIMIT 1"));
+	fetch_peq_db_full();
+	print "\nFetching Latest Database Updates...\n";
+	main_db_management();
+	print "\nApplying Latest Database Updates...\n";
+	main_db_management();
+	
+	print get_mysql_result("UPDATE `launcher` SET `dynamics` = 30 WHERE `name` = 'zone'");
+}
+
 if($ARGV[0] eq "installer"){
 	print "Running EQEmu Server installer routines...\n";
 	mkdir('logs');
@@ -1316,8 +1343,14 @@ sub run_database_check{
 	
 	@total_updates = ();
 	
+	#::: This is where we set checkpoints for where a database might be so we don't check so far back in the manifest...
+	$revision_check = 1000;
+	if(get_mysql_result("SHOW TABLES LIKE 'character_data'") ne ""){
+		$revision_check = 9000;
+	}
+	
 	#::: Iterate through Manifest backwards from binary version down to local version...
-	for($i = $bin_db_ver; $i > 1000; $i--){ 
+	for($i = $bin_db_ver; $i > $revision_check; $i--){ 
 		if(!defined($m_d{$i}[0])){ next; } 
 		
 		$file_name 		= trim($m_d{$i}[1]);
