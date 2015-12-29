@@ -2303,7 +2303,7 @@ luabind::scope lua_register_mob() {
 		.def("BuffFadeBySlot", (void(Lua_Mob::*)(int,bool))&Lua_Mob::BuffFadeBySlot)
 		.def("CanBuffStack", (int(Lua_Mob::*)(int,int))&Lua_Mob::CanBuffStack)
 		.def("CanBuffStack", (int(Lua_Mob::*)(int,int,bool))&Lua_Mob::CanBuffStack)
-		.def("SetPseudoRoot", (void(Lua_Mob::*)(void))&Lua_Mob::SetPseudoRoot)
+		.def("SetPseudoRoot", (void(Lua_Mob::*)(bool))&Lua_Mob::SetPseudoRoot)
 		.def("SeeInvisible", (uint8(Lua_Mob::*)(void))&Lua_Mob::SeeInvisible)
 		.def("SeeInvisibleUndead", (bool(Lua_Mob::*)(void))&Lua_Mob::SeeInvisibleUndead)
 		.def("SeeHide", (bool(Lua_Mob::*)(void))&Lua_Mob::SeeHide)
