@@ -1304,6 +1304,10 @@ void lua_debug(std::string message, int level) {
 	Log.Out(static_cast<Logs::DebugLevel>(level), Logs::QuestDebug, message);
 }
 
+void lua_update_zone_header(std::string type, std::string value) {
+	quest_manager.UpdateZoneHeader(type, value);
+}
+
 #define LuaCreateNPCParse(name, c_type, default_value) do { \
 	cur = table[#name]; \
 	if(luabind::type(cur) != LUA_TNIL) { \

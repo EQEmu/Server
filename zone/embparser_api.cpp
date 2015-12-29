@@ -3637,6 +3637,19 @@ XS(XS__debug)
 	XSRETURN_EMPTY;
 }
 
+XS(XS__UpdateZoneHeader);
+XS(XS__UpdateZoneHeader) {
+	dXSARGS;
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: UpdateZoneHeader(type, value)");
+	
+	std::string type = (std::string)SvPV_nolen(ST(0));
+	std::string value = (std::string)SvPV_nolen(ST(1));
+	quest_manager.UpdateZoneHeader(type, value);
+	
+	XSRETURN_EMPTY;
+}
+
 
 /*
 This is the callback perl will look for to setup the
@@ -3866,6 +3879,7 @@ EXTERN_C XS(boot_quest)
 		newXS(strcpy(buf, "untraindiscs"), XS__untraindiscs, file);
 		newXS(strcpy(buf, "updatespawntimer"), XS__UpdateSpawnTimer, file);
 		newXS(strcpy(buf, "updatetaskactivity"), XS__updatetaskactivity, file);
+		newXS(strcpy(buf, "UpdateZoneHeader"), XS__UpdateZoneHeader, file);
 		newXS(strcpy(buf, "varlink"), XS__varlink, file);
 		newXS(strcpy(buf, "voicetell"), XS__voicetell, file);
 		newXS(strcpy(buf, "we"), XS__we, file);

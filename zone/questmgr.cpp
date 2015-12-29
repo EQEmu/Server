@@ -3093,3 +3093,75 @@ std::string QuestManager::GetEncounter() const {
 
 	return "";
 }
+
+void QuestManager::UpdateZoneHeader(std::string type, std::string value) {
+	if (strcasecmp(type.c_str(), "ztype") == 0)
+		zone->newzone_data.ztype = atoi(value.c_str());
+	else if (strcasecmp(type.c_str(), "fog_red") == 0) {
+		for (int i = 0; i < 4; i++) {
+			zone->newzone_data.fog_red[i] = atoi(value.c_str());
+		}
+	} else if (strcasecmp(type.c_str(), "fog_green") == 0) {
+		for (int i = 0; i < 4; i++) {
+			zone->newzone_data.fog_green[i] = atoi(value.c_str());
+		}
+	} else if (strcasecmp(type.c_str(), "fog_blue") == 0) {
+		for (int i = 0; i < 4; i++) {
+			zone->newzone_data.fog_blue[i] = atoi(value.c_str());
+		}
+	} else if (strcasecmp(type.c_str(), "fog_minclip") == 0) {
+		for (int i = 0; i < 4; i++) {
+			zone->newzone_data.fog_minclip[i] = atof(value.c_str());
+		}
+	} else if (strcasecmp(type.c_str(), "fog_maxclip") == 0) {
+		for (int i = 0; i < 4; i++) {
+			zone->newzone_data.fog_maxclip[i] = atof(value.c_str());
+		}
+	}
+	else if (strcasecmp(type.c_str(), "gravity") == 0)
+		zone->newzone_data.gravity = atof(value.c_str());
+	else if (strcasecmp(type.c_str(), "time_type") == 0)
+		zone->newzone_data.time_type = atoi(value.c_str());
+	else if (strcasecmp(type.c_str(), "rain_chance") == 0) {
+		for (int i = 0; i < 4; i++) {
+			zone->newzone_data.rain_chance[i] = atoi(value.c_str());
+		}
+	} else if (strcasecmp(type.c_str(), "rain_duration") == 0) {
+		for (int i = 0; i < 4; i++) {
+			zone->newzone_data.rain_duration[i] = atoi(value.c_str());
+		}
+	} else if (strcasecmp(type.c_str(), "snow_chance") == 0) {
+		for (int i = 0; i < 4; i++) {
+			zone->newzone_data.snow_chance[i] = atoi(value.c_str());
+		}
+	} else if (strcasecmp(type.c_str(), "snow_duration") == 0) {
+		for (int i = 0; i < 4; i++) {
+			zone->newzone_data.snow_duration[i] = atoi(value.c_str());
+		}
+	}
+	else if (strcasecmp(type.c_str(), "sky") == 0)
+		zone->newzone_data.sky = atoi(value.c_str());
+	else if (strcasecmp(type.c_str(), "safe_x") == 0)
+		zone->newzone_data.safe_x = atof(value.c_str());
+	else if (strcasecmp(type.c_str(), "safe_y") == 0)
+		zone->newzone_data.safe_y = atof(value.c_str());
+	else if (strcasecmp(type.c_str(), "safe_z") == 0)
+		zone->newzone_data.safe_z = atof(value.c_str());
+	else if (strcasecmp(type.c_str(), "max_z") == 0)
+		zone->newzone_data.max_z = atof(value.c_str());
+	else if (strcasecmp(type.c_str(), "underworld") == 0)
+		zone->newzone_data.underworld = atof(value.c_str());
+	else if (strcasecmp(type.c_str(), "minclip") == 0)
+		zone->newzone_data.minclip = atof(value.c_str());
+	else if (strcasecmp(type.c_str(), "maxclip") == 0)
+		zone->newzone_data.maxclip = atof(value.c_str());
+	else if (strcasecmp(type.c_str(), "fog_density") == 0)
+		zone->newzone_data.fog_density = atof(value.c_str());
+	else if (strcasecmp(type.c_str(), "suspendbuffs") == 0)
+		zone->newzone_data.SuspendBuffs = atoi(value.c_str());
+	
+	EQApplicationPacket* outapp = new EQApplicationPacket(OP_NewZone, sizeof(NewZone_Struct));
+	memcpy(outapp->pBuffer, &zone->newzone_data, outapp->size);
+	entity_list.QueueClients(0, outapp);
+	safe_delete(outapp);
+}
