@@ -1,6 +1,10 @@
 #include <iostream>
 #include <cstring>
 
+#if defined(_MSC_VER) && _MSC_VER >= 1900
+	#include <algorithm>
+#endif
+
 #include "classes.h"
 #include "eq_packet_structs.h"
 #include "eqemu_exception.h"
