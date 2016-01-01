@@ -1,7 +1,7 @@
 #include <iostream>
 #include <cstring>
 
-#if defined(_MSC_VER) && _MSC_VER >= 1900
+#if defined(_MSC_VER) && _MSC_VER >= 1800
 	#include <algorithm>
 #endif
 
