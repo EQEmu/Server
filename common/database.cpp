@@ -1183,21 +1183,16 @@ bool Database::CheckNameFilter(const char* name, bool surname)
 {
 	std::string str_name = name;
 
-	if(surname)
+	// the minimum 4 is enforced by the client too
+	if (!name || strlen(name) < 4)
 	{
-		// the minimum 4 is enforced by the client too
-		if(!name || strlen(name) < 3)
-		{
-			return false;
-		}
+		return false;
 	}
-	else
+
+	// Given name length is enforced by the client too
+	if (!surname && strlen(name) > 15)
 	{
-		// the minimum 4 is enforced by the client too
-		if(!name || strlen(name) < 4 || strlen(name) > 15)
-		{
-			return false;
-		}
+		return false;
 	}
 
 	for (size_t i = 0; i < str_name.size(); i++)
