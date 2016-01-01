@@ -184,6 +184,7 @@ if($ARGV[0] eq "installer"){
 	
 	if($OS eq "Windows"){
 		check_windows_firewall_rules();
+		do_windows_login_server_setup();
 	}
 	exit;
 }
