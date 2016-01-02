@@ -130,6 +130,7 @@ struct Item_Struct {
 	uint32	Deity;			// Bitmask of Deities that can equip this item
 	//uint32	Unk033
 	int32	SkillModValue;	// % Mod to skill specified in SkillModType
+	int32	SkillModMax;	// Max skill point modification
 	uint32	SkillModType;	// Type of skill for SkillModValue to apply to
 	uint32	BaneDmgRace;	// Bane Damage Race
 	int8	BaneDmgAmt;		// Bane Damage Body Amount
@@ -218,7 +219,10 @@ struct Item_Struct {
 	// Begin SoF Fields
 	int32 SVCorruption;
 	uint32 Purity;
+	uint8 EvolvingItem;
+	uint32 EvolvingID;
 	uint8 EvolvingLevel;
+	uint8 EvolvingMax;
 	uint32 BackstabDmg;
 	uint32 DSMitigation;
 	int32 HeroicStr;

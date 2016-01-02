@@ -1183,21 +1183,16 @@ bool Database::CheckNameFilter(const char* name, bool surname)
 {
 	std::string str_name = name;
 
-	if(surname)
+	// the minimum 4 is enforced by the client too
+	if (!name || strlen(name) < 4)
 	{
-		// the minimum 4 is enforced by the client too
-		if(!name || strlen(name) < 3)
-		{
-			return false;
-		}
+		return false;
 	}
-	else
+
+	// Given name length is enforced by the client too
+	if (!surname && strlen(name) > 15)
 	{
-		// the minimum 4 is enforced by the client too
-		if(!name || strlen(name) < 4 || strlen(name) > 15)
-		{
-			return false;
-		}
+		return false;
 	}
 
 	for (size_t i = 0; i < str_name.size(); i++)
@@ -1564,7 +1559,7 @@ void Database::AddReport(std::string who, std::string against, std::string lines
 	char *escape_str = new char[lines.size()*2+1];
 	DoEscapeString(escape_str, lines.c_str(), lines.size());
 
-	std::string query = StringFormat("INSERT INTO reports (name, reported, reported_text) VALUES('%s', '%s', '%s')", who.c_str(), against.c_str(), escape_str);
+	std::string query = StringFormat("INSERT INTO reports (name, reported, reported_text) VALUES('%s', '%s', '%s')", EscapeString(who).c_str(), EscapeString(against).c_str(), escape_str);
 	QueryDatabase(query);
 	safe_delete_array(escape_str);
 }
@@ -2181,4 +2176,43 @@ void Database::ClearInvSnapshots(bool use_rule)
 
 	std::string query = StringFormat("DELETE FROM inventory_snapshots WHERE time_index <= %lu", (unsigned long)del_time);
 	QueryDatabase(query);
+}
+
+struct TimeOfDay_Struct Database::LoadTime(time_t &realtime)
+{
+
+	TimeOfDay_Struct eqTime;
+	std::string query = StringFormat("SELECT minute,hour,day,month,year,realtime FROM eqtime limit 1");
+	auto results = QueryDatabase(query);
+
+	if (!results.Success() || results.RowCount() == 0)
+	{
+		Log.Out(Logs::Detail, Logs::World_Server, "Loading EQ time of day failed. Using defaults.");
+		eqTime.minute = 0;
+		eqTime.hour = 9;
+		eqTime.day = 1;
+		eqTime.month = 1;
+		eqTime.year = 3100;
+		realtime = time(0);
+	}
+
+	auto row = results.begin();
+
+	eqTime.minute = atoi(row[0]);
+	eqTime.hour = atoi(row[1]);
+	eqTime.day = atoi(row[2]);
+	eqTime.month = atoi(row[3]);
+	eqTime.year = atoi(row[4]);
+	realtime = atoi(row[5]);
+
+	return eqTime;
+}
+
+bool Database::SaveTime(int8 minute, int8 hour, int8 day, int8 month, int16 year)
+{
+	std::string query = StringFormat("UPDATE eqtime set minute = %d, hour = %d, day = %d, month = %d, year = %d, realtime = %d limit 1", minute, hour, day, month, year, time(0));
+	auto results = QueryDatabase(query);
+
+	return results.Success();
+
 }

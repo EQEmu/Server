@@ -358,6 +358,26 @@ public:
 	int CanBuffStack(int spell_id, int caster_level);
 	int CanBuffStack(int spell_id, int caster_level, bool fail_if_overwrite);
 	void SetPseudoRoot(bool in);
+	uint8 SeeInvisible();
+	bool SeeInvisibleUndead();
+	bool SeeHide();
+	bool SeeImprovedHide();
+	uint8 GetNimbusEffect1();
+	uint8 GetNimbusEffect2();
+	uint8 GetNimbusEffect3();
+	bool IsTargetable();
+	bool HasShieldEquiped();
+	bool HasTwoHandBluntEquiped();
+	bool HasTwoHanderEquipped();
+	uint32 GetHerosForgeModel(uint8 material_slot);
+	uint32 IsEliteMaterialItem(uint8 material_slot);
+	float GetBaseSize();
+	bool HasOwner();
+	bool IsPet();
+	bool HasPet();
+	bool IsSilenced();
+	bool IsAmnesiad();
+	int32 GetMeleeMitigation();
 };
 
 #endif

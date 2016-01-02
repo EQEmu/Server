@@ -5231,19 +5231,19 @@ namespace RoF
 		hdr.unknown044 = 0;
 		hdr.unknown048 = 0;
 		hdr.unknown052 = 0;
-		hdr.isEvolving = item->EvolvingLevel > 0 ? 1 : 0;
+		hdr.isEvolving = item->EvolvingItem;
 		ss.write((const char*)&hdr, sizeof(RoF::structs::ItemSerializationHeader));
 
-		if (item->EvolvingLevel > 0) {
+		if (item->EvolvingItem > 0) {
 			RoF::structs::EvolvingItem evotop;
 			evotop.unknown001 = 0;
 			evotop.unknown002 = 0;
 			evotop.unknown003 = 0;
 			evotop.unknown004 = 0;
 			evotop.evoLevel = item->EvolvingLevel;
-			evotop.progress = 95.512;
+			evotop.progress = 0;
 			evotop.Activated = 1;
-			evotop.evomaxlevel = 7;
+			evotop.evomaxlevel = item->EvolvingMax;
 			ss.write((const char*)&evotop, sizeof(RoF::structs::EvolvingItem));
 		}
 		//ORNAMENT IDFILE / ICON
@@ -5353,7 +5353,7 @@ namespace RoF
 		ibs.Races = item->Races;
 		ibs.Deity = item->Deity;
 		ibs.SkillModValue = item->SkillModValue;
-		ibs.SkillModMax = 0xffffffff;
+		ibs.SkillModMax = item->SkillModMax;
 		ibs.SkillModType = (int8)(item->SkillModType);
 		ibs.SkillModExtra = 0;
 		ibs.BaneDmgRace = item->BaneDmgRace;

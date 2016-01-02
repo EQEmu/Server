@@ -233,6 +233,8 @@ enum {	//some random constants
 #define GROUP_EXP_PER_POINT 1000
 #define RAID_EXP_PER_POINT 2000
 
+#define ZONE_CONTROLLER_NPC_ID 10
+
 //Some hard coded statuses from commands and other places:
 enum {
 	minStatusToBeGM = 40,

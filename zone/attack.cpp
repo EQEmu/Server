@@ -2009,15 +2009,15 @@ void NPC::Damage(Mob* other, int32 damage, uint16 spell_id, SkillUseTypes attack
 	}
 }
 
-bool NPC::Death(Mob* killerMob, int32 damage, uint16 spell, SkillUseTypes attack_skill) {
-	Log.Out(Logs::Detail, Logs::Combat, "Fatal blow dealt by %s with %d damage, spell %d, skill %d", killerMob->GetName(), damage, spell, attack_skill);
+bool NPC::Death(Mob* killer_mob, int32 damage, uint16 spell, SkillUseTypes attack_skill) {
+	Log.Out(Logs::Detail, Logs::Combat, "Fatal blow dealt by %s with %d damage, spell %d, skill %d", killer_mob->GetName(), damage, spell, attack_skill);
 
 	Mob *oos = nullptr;
-	if(killerMob) {
-		oos = killerMob->GetOwnerOrSelf();
+	if(killer_mob) {
+		oos = killer_mob->GetOwnerOrSelf();
 
 		char buffer[48] = { 0 };
-		snprintf(buffer, 47, "%d %d %d %d", killerMob ? killerMob->GetID() : 0, damage, spell, static_cast<int>(attack_skill));
+		snprintf(buffer, 47, "%d %d %d %d", killer_mob ? killer_mob->GetID() : 0, damage, spell, static_cast<int>(attack_skill));
 		if(parse->EventNPC(EVENT_DEATH, this, oos, buffer, 0) != 0)
 		{
 			if(GetHP() < 0) {
@@ -2026,15 +2026,15 @@ bool NPC::Death(Mob* killerMob, int32 damage, uint16 spell, SkillUseTypes attack
 			return false;
 		}
 
-		if(killerMob && killerMob->IsClient() && (spell != SPELL_UNKNOWN) && damage > 0) {
+		if(killer_mob && killer_mob->IsClient() && (spell != SPELL_UNKNOWN) && damage > 0) {
 			char val1[20]={0};
 			entity_list.MessageClose_StringID(this, false, 100, MT_NonMelee, HIT_NON_MELEE,
-				killerMob->GetCleanName(), GetCleanName(), ConvertArray(damage, val1));
+				killer_mob->GetCleanName(), GetCleanName(), ConvertArray(damage, val1));
 		}
 	} else {
 
 		char buffer[48] = { 0 };
-		snprintf(buffer, 47, "%d %d %d %d", killerMob ? killerMob->GetID() : 0, damage, spell, static_cast<int>(attack_skill));
+		snprintf(buffer, 47, "%d %d %d %d", killer_mob ? killer_mob->GetID() : 0, damage, spell, static_cast<int>(attack_skill));
 		if(parse->EventNPC(EVENT_DEATH, this, nullptr, buffer, 0) != 0)
 		{
 			if(GetHP() < 0) {
@@ -2072,21 +2072,21 @@ bool NPC::Death(Mob* killerMob, int32 damage, uint16 spell, SkillUseTypes attack
 	EQApplicationPacket* app= new EQApplicationPacket(OP_Death,sizeof(Death_Struct));
 	Death_Struct* d = (Death_Struct*)app->pBuffer;
 	d->spawn_id = GetID();
-	d->killer_id = killerMob ? killerMob->GetID() : 0;
+	d->killer_id = killer_mob ? killer_mob->GetID() : 0;
 	d->bindzoneid = 0;
 	d->spell_id = spell == SPELL_UNKNOWN ? 0xffffffff : spell;
 	d->attack_skill = SkillDamageTypes[attack_skill];
 	d->damage = damage;
 	app->priority = 6;
-	entity_list.QueueClients(killerMob, app, false);
+	entity_list.QueueClients(killer_mob, app, false);
 
 	if(respawn2) {
 		respawn2->DeathReset(1);
 	}
 
-	if (killerMob) {
+	if (killer_mob) {
 		if(GetClass() != LDON_TREASURE)
-			hate_list.AddEntToHateList(killerMob, damage);
+			hate_list.AddEntToHateList(killer_mob, damage);
 	}
 
 	safe_delete(app);
@@ -2148,8 +2148,8 @@ bool NPC::Death(Mob* killerMob, int32 damage, uint16 spell, SkillUseTypes attack
 		{
 			if(!IsLdonTreasure && MerchantType == 0) {
 				kr->SplitExp((finalxp), this);
-				if(killerMob && (kr->IsRaidMember(killerMob->GetName()) || kr->IsRaidMember(killerMob->GetUltimateOwner()->GetName())))
-					killerMob->TrySpellOnKill(killed_level,spell);
+				if(killer_mob && (kr->IsRaidMember(killer_mob->GetName()) || kr->IsRaidMember(killer_mob->GetUltimateOwner()->GetName())))
+					killer_mob->TrySpellOnKill(killed_level,spell);
 			}
 			/* Send the EVENT_KILLED_MERIT event for all raid members */
 			for (int i = 0; i < MAX_RAID_MEMBERS; i++) {
@@ -2193,8 +2193,8 @@ bool NPC::Death(Mob* killerMob, int32 damage, uint16 spell, SkillUseTypes attack
 		{
 			if(!IsLdonTreasure && MerchantType == 0) {
 				kg->SplitExp((finalxp), this);
-				if(killerMob && (kg->IsGroupMember(killerMob->GetName()) || kg->IsGroupMember(killerMob->GetUltimateOwner()->GetName())))
-					killerMob->TrySpellOnKill(killed_level,spell);
+				if(killer_mob && (kg->IsGroupMember(killer_mob->GetName()) || kg->IsGroupMember(killer_mob->GetUltimateOwner()->GetName())))
+					killer_mob->TrySpellOnKill(killed_level,spell);
 			}
 			/* Send the EVENT_KILLED_MERIT event and update kill tasks
 			* for all group members */
@@ -2244,8 +2244,8 @@ bool NPC::Death(Mob* killerMob, int32 damage, uint16 spell, SkillUseTypes attack
 					if(!GetOwner() || (GetOwner() && !GetOwner()->IsClient()))
 					{
 						give_exp_client->AddEXP((finalxp), conlevel);
-						if(killerMob && (killerMob->GetID() == give_exp_client->GetID() || killerMob->GetUltimateOwner()->GetID() == give_exp_client->GetID()))
-							killerMob->TrySpellOnKill(killed_level,spell);
+						if(killer_mob && (killer_mob->GetID() == give_exp_client->GetID() || killer_mob->GetUltimateOwner()->GetID() == give_exp_client->GetID()))
+							killer_mob->TrySpellOnKill(killed_level,spell);
 					}
 				}
 			}
@@ -2393,20 +2393,30 @@ bool NPC::Death(Mob* killerMob, int32 damage, uint16 spell, SkillUseTypes attack
 			uint16 emoteid = oos->GetEmoteID();
 			if(emoteid != 0)
 				oos->CastToNPC()->DoNPCEmote(KILLEDNPC, emoteid);
-			killerMob->TrySpellOnKill(killed_level, spell);
+			killer_mob->TrySpellOnKill(killed_level, spell);
 		}
 	}
 
 	WipeHateList();
 	p_depop = true;
-	if(killerMob && killerMob->GetTarget() == this) //we can kill things without having them targeted
-		killerMob->SetTarget(nullptr); //via AE effects and such..
+	if(killer_mob && killer_mob->GetTarget() == this) //we can kill things without having them targeted
+		killer_mob->SetTarget(nullptr); //via AE effects and such..
 
 	entity_list.UpdateFindableNPCState(this, true);
 
 	char buffer[48] = { 0 };
-	snprintf(buffer, 47, "%d %d %d %d", killerMob ? killerMob->GetID() : 0, damage, spell, static_cast<int>(attack_skill));
+	snprintf(buffer, 47, "%d %d %d %d", killer_mob ? killer_mob->GetID() : 0, damage, spell, static_cast<int>(attack_skill));
 	parse->EventNPC(EVENT_DEATH_COMPLETE, this, oos, buffer, 0);
+
+	/* Zone controller process EVENT_DEATH_ZONE (Death events) */
+	if (RuleB(Zone, UseZoneController)) {
+		if (entity_list.GetNPCByNPCTypeID(ZONE_CONTROLLER_NPC_ID) && this->GetNPCTypeID() != ZONE_CONTROLLER_NPC_ID){
+			char data_pass[100] = { 0 };
+			snprintf(data_pass, 99, "%d %d %d %d %d", killer_mob ? killer_mob->GetID() : 0, damage, spell, static_cast<int>(attack_skill), this->GetNPCTypeID());
+			parse->EventNPC(EVENT_DEATH_ZONE, entity_list.GetNPCByNPCTypeID(ZONE_CONTROLLER_NPC_ID)->CastToNPC(), nullptr, data_pass, 0);
+		}
+	}
+
 	return true;
 }
 
@@ -2421,6 +2431,11 @@ void Mob::AddToHateList(Mob* other, uint32 hate /*= 0*/, int32 damage /*= 0*/, b
 	if(damage < 0){
 		hate = 1;
 	}
+
+	if (iYellForHelp)
+		SetPrimaryAggro(true);
+	else
+		SetAssistAggro(true);
 
 	bool wasengaged = IsEngaged();
 	Mob* owner = other->GetOwner();
@@ -2688,16 +2703,38 @@ uint8 Mob::GetWeaponDamageBonus(const Item_Struct *weapon, bool offhand)
 		}
 	} else {
 		// 2h damage bonus
+		int damage_bonus = 1 + (level - 28) / 3;
 		if (delay <= 27)
-			return 1 + ((level - 28) / 3);
-		else if (delay < 40)
-			return 1 + ((level - 28) / 3) + ((level - 30) / 5);
-		else if (delay < 43)
-			return 2 + ((level - 28) / 3) + ((level - 30) / 5) + ((delay - 40) / 3);
-		else if (delay < 45)
-			return 3 + ((level - 28) / 3) + ((level - 30) / 5) + ((delay - 40) / 3);
-		else if (delay >= 45)
-			return 4 + ((level - 28) / 3) + ((level - 30) / 5) + ((delay - 40) / 3);
+			return damage_bonus + 1;
+		// Client isn't reflecting what the dev quoted, this matches better
+		if (level > 29) {
+			int level_bonus = (level - 30) / 5 + 1;
+			if (level > 50) {
+				level_bonus++;
+				int level_bonus2 = level - 50;
+				if (level > 67)
+					level_bonus2 += 5;
+				else if (level > 59)
+					level_bonus2 += 4;
+				else if (level > 58)
+					level_bonus2 += 3;
+				else if (level > 56)
+					level_bonus2 += 2;
+				else if (level > 54)
+					level_bonus2++;
+				level_bonus += level_bonus2 * delay / 40;
+			}
+			damage_bonus += level_bonus;
+		}
+		if (delay >= 40) {
+			int delay_bonus = (delay - 40) / 3 + 1;
+			if (delay >= 45)
+				delay_bonus += 2;
+			else if (delay >= 43)
+				delay_bonus++;
+			damage_bonus += delay_bonus;
+		}
+		return damage_bonus;
 	}
 }
 

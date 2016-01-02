@@ -114,7 +114,9 @@ const char *QuestEventSubroutines[_LargestEventID] = {
 	"EVENT_RESPAWN",
 	"EVENT_DEATH_COMPLETE",
 	"EVENT_UNHANDLED_OPCODE",
-	"EVENT_TICK"
+	"EVENT_TICK",
+	"EVENT_SPAWN_ZONE",
+	"EVENT_DEATH_ZONE",
 };
 
 PerlembParser::PerlembParser() : perl(nullptr) {
@@ -1422,6 +1424,21 @@ void PerlembParser::ExportEventVariables(std::string &package_name, QuestEventID
 			ExportVar(package_name.c_str(), "itemid", iteminst->GetItem()->ID);
 			ExportVar(package_name.c_str(), "spell_id", iteminst->GetItem()->Click.Effect);
 			ExportVar(package_name.c_str(), "slotid", extradata);
+			break;
+		}
+		case EVENT_SPAWN_ZONE: {
+			Seperator sep(data);
+			ExportVar(package_name.c_str(), "spawned_entity_id", sep.arg[0]);
+			ExportVar(package_name.c_str(), "spawned_npc_id", sep.arg[1]);
+			break;
+		}
+		case EVENT_DEATH_ZONE: {
+			Seperator sep(data);
+			ExportVar(package_name.c_str(), "killer_id", sep.arg[0]);
+			ExportVar(package_name.c_str(), "killer_damage", sep.arg[1]);
+			ExportVar(package_name.c_str(), "killer_spell", sep.arg[2]);
+			ExportVar(package_name.c_str(), "killer_skill", sep.arg[3]);
+			ExportVar(package_name.c_str(), "killed_npc_id", sep.arg[4]);
 			break;
 		}
 

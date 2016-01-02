@@ -166,25 +166,34 @@ void Object::HandleAugmentation(Client* user, const AugmentItem_Struct* in_augme
 	else
 	{
 		ItemInst *old_aug = nullptr;
-		const uint32 id = auged_with->GetID();
+		bool isSolvent = auged_with->GetItem()->ItemType == ItemUseTypes::ItemTypeAugmentationSolvent;
+		if (!isSolvent && auged_with->GetItem()->ItemType != ItemUseTypes::ItemTypeAugmentationDistiller)
+		{
+			Log.Out(Logs::General, Logs::Error, "Player tried to remove an augment without a solvent or distiller.");
+			user->Message(13, "Error: Missing an augmentation solvent or distiller for removing this augment.");
+
+			return;
+		}
+
 		ItemInst *aug = tobe_auged->GetAugment(in_augment->augment_slot);
-		if(aug) {
+		if (aug) {
+			if (!isSolvent && auged_with->GetItem()->ID != aug->GetItem()->AugDistiller)
+			{
+				Log.Out(Logs::General, Logs::Error, "Player tried to safely remove an augment with the wrong distiller (item %u vs expected %u).", auged_with->GetItem()->ID, aug->GetItem()->AugDistiller);
+				user->Message(13, "Error: Wrong augmentation distiller for safely removing this augment.");
+				return;
+			}
 			std::vector<EQEmu::Any> args;
 			args.push_back(aug);
 			parse->EventItem(EVENT_UNAUGMENT_ITEM, user, tobe_auged, nullptr, "", slot, &args);
 
 			args.assign(1, tobe_auged);
-			bool destroyed = false;
-			if(id == 40408 || id == 40409 || id == 40410) {
-				destroyed = true;
-			}
-
-			args.push_back(&destroyed);
+			args.push_back(&isSolvent);
 
 			parse->EventItem(EVENT_AUGMENT_REMOVE, user, aug, nullptr, "", slot, &args);
 		}
 
-		if(id == 40408 || id == 40409 || id == 40410)
+		if (isSolvent)
 			tobe_auged->DeleteAugment(in_augment->augment_slot);
 		else
 			old_aug = tobe_auged->RemoveAugment(in_augment->augment_slot);
