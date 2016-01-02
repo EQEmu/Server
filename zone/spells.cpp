@@ -5310,12 +5310,26 @@ void Client::SendBuffDurationPacket(Buffs_Struct &buff)
 	EQApplicationPacket* outapp;
 	outapp = new EQApplicationPacket(OP_Buff, sizeof(SpellBuffFade_Struct));
 	SpellBuffFade_Struct* sbf = (SpellBuffFade_Struct*) outapp->pBuffer;
+	int index;
 
 	sbf->entityid = GetID();
 	sbf->slot = 2;
 	sbf->spellid = buff.spellid;
 	sbf->slotid = 0;
 	sbf->level = buff.casterlevel > 0 ? buff.casterlevel : GetLevel();
+
+	// We really don't know what to send as sbf->effect.
+	// The code used to send level (and still does for cases we don't know)
+	//
+	// The fixes below address known issues with sending level in this field.
+	// Typically, when the packet is sent, or when the user
+	// next does something on the UI that causes an update (like opening a
+	// pack), the stats updated by the spell in question get corrupted.
+	// 
+	// The values were determined by trial and error.  I could not find a 
+	// pattern or find a field in spells_new that would work.
+
+	sbf->effect=sbf->level;
 
 	if (IsEffectInSpell(buff.spellid, SE_TotalHP))
 	{
@@ -5327,25 +5341,45 @@ void Client::SendBuffDurationPacket(Buffs_Struct &buff)
 	else if (IsEffectInSpell(buff.spellid, SE_CurrentHP))
 	{
 		// This is mostly a problem when we try and update duration on a
-		// dot or a hp->mana conversion.  Zero cancels the effect, any
-		// other value has the GUI doing that value at the same time server
-		// is doing theirs.  This makes the two match.
-		int index = GetSpellEffectIndex(buff.spellid, SE_CurrentHP);
+		// dot or a hp->mana conversion.  Zero cancels the effect
+		// Sending teh actual change again seems to work.
+		index = GetSpellEffectIndex(buff.spellid, SE_CurrentHP);
 		sbf->effect = abs(spells[buff.spellid].base[index]);
 	}
 	else if (IsEffectInSpell(buff.spellid, SE_SeeInvis))
 	{
-		// Wish I knew what this sbf->effect field was trying to tell
-		// the client.  10 seems to not break SeeInvis spells.  Level,
+		// 10 seems to not break SeeInvis spells.  Level,
 		// which is what the old client sends breaks the client at at 
 		// least level 9, maybe more.
 		sbf->effect = 10;
 	}
-	else
+	else if (IsEffectInSpell(buff.spellid, SE_ArmorClass) ||
+			 IsEffectInSpell(buff.spellid, SE_ResistFire) ||
+			 IsEffectInSpell(buff.spellid, SE_ResistCold) ||
+			 IsEffectInSpell(buff.spellid, SE_ResistPoison) ||
+			 IsEffectInSpell(buff.spellid, SE_ResistDisease) ||
+			 IsEffectInSpell(buff.spellid, SE_ResistMagic) ||
+			 IsEffectInSpell(buff.spellid, SE_STR) ||
+			 IsEffectInSpell(buff.spellid, SE_STA) ||
+			 IsEffectInSpell(buff.spellid, SE_DEX) ||
+			 IsEffectInSpell(buff.spellid, SE_WIS) ||
+			 IsEffectInSpell(buff.spellid, SE_INT) ||
+			 IsEffectInSpell(buff.spellid, SE_AGI))
 	{
-		// Default to what old code did until we find a better fix for
-		// other spell lines.
-		sbf->effect=sbf->level;
+		// This seems to work.  Previosly stats got corrupted when sending
+		// level.
+		sbf->effect = 46;
+	}
+	else if (IsEffectInSpell(buff.spellid, SE_CHA))
+	{
+		index = GetSpellEffectIndex(buff.spellid, SE_CHA);
+		sbf->effect = abs(spells[buff.spellid].base[index]);
+		// Only use this valie if its not a spacer.
+		if (sbf->effect != 0)
+		{
+			// Same as other stats, need this to prevent a double update.
+			sbf->effect = 46;
+		}
 	}
 
 	sbf->bufffade = 0;
