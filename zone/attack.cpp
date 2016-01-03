@@ -846,7 +846,7 @@ int Mob::GetWeaponDamage(Mob *against, const Item_Struct *weapon_item) {
 		}
 		else{
 			if((GetClass() == MONK || GetClass() == BEASTLORD) && GetLevel() >= 30){
-				dmg = GetMonkHandToHandDamage();
+				dmg = GetHandToHandDamage();
 			}
 			else if(GetOwner() && GetLevel() >= RuleI(Combat, PetAttackMagicLevel)){
 				//pets wouldn't actually use this but...
@@ -868,12 +868,7 @@ int Mob::GetWeaponDamage(Mob *against, const Item_Struct *weapon_item) {
 			dmg = dmg <= 0 ? 1 : dmg;
 		}
 		else{
-			if(GetClass() == MONK || GetClass() == BEASTLORD){
-				dmg = GetMonkHandToHandDamage();
-			}
-			else{
-				dmg = 1;
-			}
+			dmg = GetHandToHandDamage();
 		}
 	}
 
@@ -1006,7 +1001,7 @@ int Mob::GetWeaponDamage(Mob *against, const ItemInst *weapon_item, uint32 *hate
 
 			if((GetClass() == MONK || GetClass() == BEASTLORD)) {
 				if(MagicGloves || GetLevel() >= 30){
-					dmg = GetMonkHandToHandDamage();
+					dmg = GetHandToHandDamage();
 					if (hate) *hate += dmg;
 				}
 			}
@@ -1041,13 +1036,8 @@ int Mob::GetWeaponDamage(Mob *against, const ItemInst *weapon_item, uint32 *hate
 			}
 		}
 		else{
-			if(GetClass() == MONK || GetClass() == BEASTLORD){
-				dmg = GetMonkHandToHandDamage();
-				if (hate) *hate += dmg;
-			}
-			else{
-				dmg = 1;
-			}
+			dmg = GetHandToHandDamage();
+			if (hate) *hate += dmg;
 		}
 	}
 
@@ -2738,69 +2728,105 @@ uint8 Mob::GetWeaponDamageBonus(const Item_Struct *weapon, bool offhand)
 	}
 }
 
-int Mob::GetMonkHandToHandDamage(void)
+int Mob::GetHandToHandDamage(void)
 {
-	// Kaiyodo - Determine a monk's fist damage. Table data from www.monkly-business.com
-	// saved as static array - this should speed this function up considerably
-	static int damage[66] = {
-	// 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19
-		99, 4, 4, 4, 4, 5, 5, 5, 5, 5, 6, 6, 6, 6, 6, 7, 7, 7, 7, 7,
-		 8, 8, 8, 8, 8, 9, 9, 9, 9, 9,10,10,10,10,10,11,11,11,11,11,
-		12,12,12,12,12,13,13,13,13,13,14,14,14,14,14,14,14,14,14,14,
-		14,14,15,15,15,15 };
-
-	// Have a look to see if we have epic fists on
-
-	if (IsClient() && CastToClient()->GetItemIDAt(12) == 10652)
-		return(9);
-	else
-	{
-		int Level = GetLevel();
-		if (Level > 65)
-			return(19);
-		else
-			return damage[Level];
+	if (RuleB(Combat, UseRevampHandToHand)) {
+		// everyone uses this in the revamp!
+		int skill = GetSkill(SkillHandtoHand);
+		int epic = 0;
+		if (IsClient() && CastToClient()->GetItemIDAt(12) == 10652 && GetLevel() > 46)
+			epic = 280;
+		if (epic > skill)
+			skill = epic;
+		return skill / 15 + 3;
 	}
+
+	static uint8 mnk_dmg[] = {99,
+				4, 4, 4, 4, 5, 5, 5, 5, 5, 6,           // 1-10
+				6, 6, 6, 6, 7, 7, 7, 7, 7, 8,           // 11-20
+				8, 8, 8, 8, 9, 9, 9, 9, 9, 10,          // 21-30
+				10, 10, 10, 10, 11, 11, 11, 11, 11, 12, // 31-40
+				12, 12, 12, 12, 13, 13, 13, 13, 13, 14, // 41-50
+				14, 14, 14, 14, 14, 14, 14, 14, 14, 14, // 51-60
+				14, 14};                                // 61-62
+	static uint8 bst_dmg[] = {99,
+				4, 4, 4, 4, 4, 5, 5, 5, 5, 5,        // 1-10
+				5, 6, 6, 6, 6, 6, 6, 7, 7, 7,        // 11-20
+				7, 7, 7, 8, 8, 8, 8, 8, 8, 9,        // 21-30
+				9, 9, 9, 9, 9, 10, 10, 10, 10, 10,   // 31-40
+				10, 11, 11, 11, 11, 11, 11, 12, 12}; // 41-49
+	if (GetClass() == MONK) {
+		if (IsClient() && CastToClient()->GetItemIDAt(12) == 10652 && GetLevel() > 50)
+			return 9;
+		if (level > 62)
+			return 15;
+		return mnk_dmg[level];
+	} else if (GetClass() == BEASTLORD) {
+		if (level > 49)
+			return 13;
+		return bst_dmg[level];
+	}
+	return 2;
 }
 
-int Mob::GetMonkHandToHandDelay(void)
+int Mob::GetHandToHandDelay(void)
 {
-	// Kaiyodo - Determine a monk's fist delay. Table data from www.monkly-business.com
-	// saved as static array - this should speed this function up considerably
-	static int delayshuman[66] = {
-	//  0  1  2  3  4  5  6  7  8  9  10 11 12 13 14 15 16 17 18 19
-		99,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36,
-		36,36,36,36,36,35,35,35,35,35,34,34,34,34,34,33,33,33,33,33,
-		32,32,32,32,32,31,31,31,31,31,30,30,30,29,29,29,28,28,28,27,
-		26,24,22,20,20,20  };
-	static int delaysiksar[66] = {
-	//  0  1  2  3  4  5  6  7  8  9  10 11 12 13 14 15 16 17 18 19
-		99,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36,36,
-		36,36,36,36,36,36,36,36,36,36,35,35,35,35,35,34,34,34,34,34,
-		33,33,33,33,33,32,32,32,32,32,31,31,31,30,30,30,29,29,29,28,
-		27,24,22,20,20,20 };
-
-	// Have a look to see if we have epic fists on
-	if (IsClient() && CastToClient()->GetItemIDAt(12) == 10652)
-		return(16);
-	else
-	{
-		int Level = GetLevel();
-		if (GetRace() == HUMAN)
-		{
-			if (Level > 65)
-				return(24);
-			else
-				return delayshuman[Level];
-		}
-		else	//heko: iksar table
-		{
-			if (Level > 65)
-				return(25);
-			else
-				return delaysiksar[Level];
-		}
+	if (RuleB(Combat, UseRevampHandToHand)) {
+		// everyone uses this in the revamp!
+		int skill = GetSkill(SkillHandtoHand);
+		int epic = 0;
+		int iksar = 0;
+		if (IsClient() && CastToClient()->GetItemIDAt(12) == 10652 && GetLevel() > 46)
+			epic = 280;
+		else if (GetRace() == IKSAR)
+			iksar = 1;
+		if (epic > skill)
+			skill = epic;
+		return iksar - skill / 21 + 38;
 	}
+
+	int delay = 35;
+	static uint8 mnk_hum_delay[] = {99,
+				35, 35, 35, 35, 35, 35, 35, 35, 35, 35, // 1-10
+				35, 35, 35, 35, 35, 35, 35, 35, 35, 35, // 11-20
+				35, 35, 35, 35, 35, 35, 35, 34, 34, 34, // 21-30
+				34, 33, 33, 33, 33, 32, 32, 32, 32, 31, // 31-40
+				31, 31, 31, 30, 30, 30, 30, 29, 29, 29, // 41-50
+				29, 28, 28, 28, 28, 27, 27, 27, 27, 26, // 51-60
+				24, 22};                                // 61-62
+	static uint8 mnk_iks_delay[] = {99,
+				35, 35, 35, 35, 35, 35, 35, 35, 35, 35, // 1-10
+				35, 35, 35, 35, 35, 35, 35, 35, 35, 35, // 11-20
+				35, 35, 35, 35, 35, 35, 35, 35, 35, 34, // 21-30
+				34, 34, 34, 34, 34, 33, 33, 33, 33, 33, // 31-40
+				33, 32, 32, 32, 32, 32, 32, 31, 31, 31, // 41-50
+				31, 31, 31, 30, 30, 30, 30, 30, 30, 29, // 51-60
+				25, 23};                                // 61-62
+	static uint8 bst_delay[] = {99,
+				35, 35, 35, 35, 35, 35, 35, 35, 35, 35, // 1-10
+				35, 35, 35, 35, 35, 35, 35, 35, 35, 35, // 11-20
+				35, 35, 35, 35, 35, 35, 35, 35, 34, 34, // 21-30
+				34, 34, 34, 33, 33, 33, 33, 33, 32, 32, // 31-40
+				32, 32, 32, 31, 31, 31, 31, 31, 30, 30, // 41-50
+				30, 30, 30, 29, 29, 29, 29, 29, 28, 28, // 51-60
+				28, 28, 28, 27, 27, 27, 27, 27, 26, 26, // 61-70
+				26, 26, 26};                            // 71-73
+
+	if (GetClass() == MONK) {
+		// Have a look to see if we have epic fists on
+		if (IsClient() && CastToClient()->GetItemIDAt(12) == 10652 && GetLevel() > 50)
+			return 16;
+		int level = GetLevel();
+		if (level > 62)
+			return GetRace() == IKSAR ? 21 : 20;
+		return GetRace() == IKSAR ? mnk_iks_delay[level] : mnk_hum_delay[level];
+	} else if (GetClass() == BEASTLORD) {
+		int level = GetLevel();
+		if (level > 73)
+			return 25;
+		return bst_delay[level];
+	}
+	return 35;
 }
 
 int32 Mob::ReduceDamage(int32 damage)
@@ -4649,18 +4675,14 @@ void Client::SetAttackTimer()
 
 		int hhe = itembonuses.HundredHands + spellbonuses.HundredHands;
 		int speed = 0;
-		int delay = 3600;
+		int delay = 3500;
 
 		//if we have no weapon..
-		if (ItemToUse == nullptr) {
-			//above checks ensure ranged weapons do not fall into here
-			// Work out if we're a monk
-			if (GetClass() == MONK || GetClass() == BEASTLORD)
-				delay = 100 * GetMonkHandToHandDelay();
-		} else {
+		if (ItemToUse == nullptr)
+			delay = 100 * GetHandToHandDelay();
+		else
 			//we have a weapon, use its delay
 			delay = 100 * ItemToUse->Delay;
-		}
 
 		speed = delay / haste_mod;
 

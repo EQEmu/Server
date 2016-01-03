@@ -756,7 +756,7 @@ public:
 
 	uint8 GetWeaponDamageBonus(const Item_Struct* weapon, bool offhand = false);
 	uint16 GetDamageTable(SkillUseTypes skillinuse);
-	virtual int GetMonkHandToHandDamage(void);
+	virtual int GetHandToHandDamage(void);
 
 	bool CanThisClassDoubleAttack(void) const;
 	bool CanThisClassTripleAttack() const;
@@ -766,7 +766,7 @@ public:
 	bool CanThisClassParry(void) const;
 	bool CanThisClassBlock(void) const;
 
-	int GetMonkHandToHandDelay(void);
+	int GetHandToHandDelay(void);
 	uint32 GetClassLevelFactor();
 	void Mesmerize();
 	inline bool IsMezzed() const { return mezzed; }

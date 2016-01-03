@@ -6236,31 +6236,44 @@ float Bot::GetProcChances(float ProcBonus, uint16 hand) {
 	return ProcChance;
 }
 
-int Bot::GetMonkHandToHandDamage(void) {
-	static int damage[66] = {
-		// 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19
-		99, 4, 4, 4, 4, 5, 5, 5, 5, 5, 6, 6, 6, 6, 6, 7, 7, 7, 7, 7,
-		8, 8, 8, 8, 8, 9, 9, 9, 9, 9,10,10,10,10,10,11,11,11,11,11,
-		12,12,12,12,12,13,13,13,13,13,14,14,14,14,14,14,14,14,14,14,
-		14,14,15,15,15,15 };
+int Bot::GetHandToHandDamage(void) {
+	if (RuleB(Combat, UseRevampHandToHand)) {
+		// everyone uses this in the revamp!
+		int skill = GetSkill(SkillHandtoHand);
+		int epic = 0;
+		if (CastToNPC()->GetEquipment(MaterialHands) == 10652 && GetLevel() > 46)
+			epic = 280;
+		if (epic > skill)
+			skill = epic;
+		return skill / 15 + 3;
+	}
 
-		uint32 botWeaponId = INVALID_ID;
-		botWeaponId = CastToNPC()->GetEquipment(MaterialHands);
-		if(botWeaponId == 10652)
+	static uint8 mnk_dmg[] = {99,
+				4, 4, 4, 4, 5, 5, 5, 5, 5, 6,           // 1-10
+				6, 6, 6, 6, 7, 7, 7, 7, 7, 8,           // 11-20
+				8, 8, 8, 8, 9, 9, 9, 9, 9, 10,          // 21-30
+				10, 10, 10, 10, 11, 11, 11, 11, 11, 12, // 31-40
+				12, 12, 12, 12, 13, 13, 13, 13, 13, 14, // 41-50
+				14, 14, 14, 14, 14, 14, 14, 14, 14, 14, // 51-60
+				14, 14};                                // 61-62
+	static uint8 bst_dmg[] = {99,
+				4, 4, 4, 4, 4, 5, 5, 5, 5, 5,        // 1-10
+				5, 6, 6, 6, 6, 6, 6, 7, 7, 7,        // 11-20
+				7, 7, 7, 8, 8, 8, 8, 8, 8, 9,        // 21-30
+				9, 9, 9, 9, 9, 10, 10, 10, 10, 10,   // 31-40
+				10, 11, 11, 11, 11, 11, 11, 12, 12}; // 41-49
+	if (GetClass() == MONK) {
+		if (CastToNPC()->GetEquipment(MaterialHands) == 10652 && GetLevel() > 50)
 			return 9;
-		else {
-			int Level = GetLevel();
-			if(Level > 65)
-				return 19;
-			else
-				return damage[Level];
-		}
-
-		int Level = GetLevel();
-		if (Level > 65)
-			return 19;
-		else
-			return damage[Level];
+		if (level > 62)
+			return 15;
+		return mnk_dmg[level];
+	} else if (GetClass() == BEASTLORD) {
+		if (level > 49)
+			return 13;
+		return bst_dmg[level];
+	}
+	return 2;
 }
 
 bool Bot::TryFinishingBlow(Mob *defender, SkillUseTypes skillinuse) {
@@ -7012,8 +7025,7 @@ void Bot::SetAttackTimer() {
 		int speed = 0;
 		int delay = 36;
 		if (ItemToUse == nullptr) {
-			if ((GetClass() == MONK) || (GetClass() == BEASTLORD))
-				delay = GetMonkHandToHandDelay();
+			delay = GetHandToHandDelay();
 		} else {
 			delay = ItemToUse->Delay;
 		}
