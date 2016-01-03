@@ -450,7 +450,7 @@ RULE_REAL (Combat,TauntSkillFalloff, 0.33)//For every taunt skill point that's n
 RULE_BOOL (Combat,EXPFromDmgShield, false) //Determine if damage from a damage shield counts for EXP gain.
 RULE_INT(Combat, MonkACBonusWeight, 15)
 RULE_INT(Combat, ClientStunLevel, 55) //This is the level where client kicks and bashes can stun the target
-RULE_INT(Combat, QuiverWRHasteDiv, 3) //Weight Reduction is divided by this to get haste contribution for quivers
+RULE_INT(Combat, QuiverHasteCap, 1000) //Quiver haste cap 1000 on live for a while, currently 700 on live
 RULE_BOOL(Combat, UseArcheryBonusRoll, false) //Make the 51+ archery bonus require an actual roll
 RULE_INT(Combat, ArcheryBonusChance, 50)
 RULE_INT(Combat, BerserkerFrenzyStart, 35)

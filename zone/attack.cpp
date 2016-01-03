@@ -4649,28 +4649,31 @@ void Client::SetAttackTimer()
 
 		int hhe = itembonuses.HundredHands + spellbonuses.HundredHands;
 		int speed = 0;
-		int delay = 36;
-		float quiver_haste = 0.0f;
+		int delay = 3600;
 
 		//if we have no weapon..
 		if (ItemToUse == nullptr) {
 			//above checks ensure ranged weapons do not fall into here
 			// Work out if we're a monk
 			if (GetClass() == MONK || GetClass() == BEASTLORD)
-				delay = GetMonkHandToHandDelay();
+				delay = 100 * GetMonkHandToHandDelay();
 		} else {
 			//we have a weapon, use its delay
-			delay = ItemToUse->Delay;
-			if (ItemToUse->ItemType == ItemTypeBow || ItemToUse->ItemType == ItemTypeLargeThrowing)
-				quiver_haste = GetQuiverHaste();
+			delay = 100 * ItemToUse->Delay;
 		}
-		if (RuleB(Spells, Jun182014HundredHandsRevamp))
-			speed = static_cast<int>(((delay / haste_mod) + ((hhe / 1000.0f) * (delay / haste_mod))) * 100);
-		else
-			speed = static_cast<int>(((delay / haste_mod) + ((hhe / 100.0f) * delay)) * 100);
-		// this is probably wrong
-		if (quiver_haste > 0)
-			speed *= quiver_haste;
+
+		speed = delay / haste_mod;
+
+		if (ItemToUse && ItemToUse->ItemType == ItemTypeBow) {
+			// Live actually had a bug here where they would return the non-modified attack speed
+			// rather than the cap ...
+			speed = std::max(speed - GetQuiverHaste(speed), RuleI(Combat, QuiverHasteCap));
+		} else {
+			if (RuleB(Spells, Jun182014HundredHandsRevamp))
+				speed = static_cast<int>(speed + ((hhe / 1000.0f) * speed));
+			else
+				speed = static_cast<int>(speed + ((hhe / 100.0f) * delay));
+		}
 		TimerToUse->SetAtTrigger(std::max(RuleI(Combat, MinHastedDelay), speed), true, true);
 	}
 }
