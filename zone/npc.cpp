@@ -878,9 +878,9 @@ bool NPC::SpawnZoneController(){
 	strcpy(npc_type->special_abilities, "12,1^13,1^14,1^15,1^16,1^17,1^19,1^22,1^24,1^25,1^28,1^31,1^35,1^39,1^42,1");
 
 	glm::vec4 point;
-	point.x = 5000;
-	point.y = 5000;
-	point.z = -5000;
+	point.x = 3000;
+	point.y = 1000;
+	point.z = -500;
 
 	NPC* npc = new NPC(npc_type, nullptr, point, FlyMode3);
 	npc->GiveNPCTypeData(npc_type);
