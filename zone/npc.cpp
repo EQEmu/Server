@@ -856,7 +856,7 @@ bool NPC::SpawnZoneController(){
 	npc_type->max_hp = 2000000000;
 	npc_type->hp_regen = 100000000;
 	npc_type->race = 240;
-	npc_type->size = 1;
+	npc_type->size = .1;
 	npc_type->gender = 2;
 	npc_type->class_ = 1;
 	npc_type->deity = 1;
