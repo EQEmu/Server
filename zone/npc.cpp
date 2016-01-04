@@ -856,6 +856,7 @@ bool NPC::SpawnZoneController(){
 	npc_type->max_hp = 2000000000;
 	npc_type->hp_regen = 100000000;
 	npc_type->race = 240;
+	npc_type->size = 1;
 	npc_type->gender = 2;
 	npc_type->class_ = 1;
 	npc_type->deity = 1;
@@ -880,7 +881,7 @@ bool NPC::SpawnZoneController(){
 	glm::vec4 point;
 	point.x = 3000;
 	point.y = 1000;
-	point.z = -500;
+	point.z = 500;
 
 	NPC* npc = new NPC(npc_type, nullptr, point, FlyMode3);
 	npc->GiveNPCTypeData(npc_type);
