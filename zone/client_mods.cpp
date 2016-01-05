@@ -58,8 +58,8 @@ int32 Client::GetMaxResist() const
 {
 	int level = GetLevel();
 	int32 base = 500;
-	if (level > 60) {
-		base += ((level - 60) * 5);
+	if (level > 65) {
+		base += ((level - 65) * 5);
 	}
 	return base;
 }
