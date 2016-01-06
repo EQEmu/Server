@@ -1268,6 +1268,14 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, uint16 slot,
 		}
 	}
 
+	// we're done casting, now try to apply the spell
+	if( !SpellFinished(spell_id, spell_target, slot, mana_used, inventory_slot, resist_adjust) )
+	{
+		Log.Out(Logs::Detail, Logs::Spells, "Casting of %d canceled: SpellFinished returned false.", spell_id);
+		InterruptSpell();
+		return;
+	}
+
 	if(IsClient()) {
 		CheckNumHitsRemaining(NumHit::MatchingSpells);
 		TrySympatheticProc(target, spell_id);
@@ -1276,14 +1284,6 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, uint16 slot,
 	TryTwincast(this, target, spell_id);
 
 	TryTriggerOnCast(spell_id, 0);
-
-	// we're done casting, now try to apply the spell
-	if( !SpellFinished(spell_id, spell_target, slot, mana_used, inventory_slot, resist_adjust) )
-	{
-		Log.Out(Logs::Detail, Logs::Spells, "Casting of %d canceled: SpellFinished returned false.", spell_id);
-		InterruptSpell();
-		return;
-	}
 
 	if(DeleteChargeFromSlot >= 0)
 		CastToClient()->DeleteItemInInventory(DeleteChargeFromSlot, 1, true);
