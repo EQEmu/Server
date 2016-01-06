@@ -226,7 +226,7 @@ public:
 	virtual inline bool IsBerserk() { return berserk; }
 	virtual int32 GetMeleeMitDmg(Mob *attacker, int32 damage, int32 minhit, float mit_rating, float atk_rating);
 	virtual void SetAttackTimer();
-	float GetQuiverHaste();
+	int GetQuiverHaste(int delay);
 	void DoAttackRounds(Mob *target, int hand, bool IsFromSpell = false);
 
 	void AI_Init();
@@ -679,7 +679,7 @@ public:
 
 	void IncreaseSkill(int skill_id, int value = 1) { if (skill_id <= HIGHEST_SKILL) { m_pp.skills[skill_id] += value; } }
 	void IncreaseLanguageSkill(int skill_id, int value = 1);
-	virtual uint16 GetSkill(SkillUseTypes skill_id) const { if (skill_id <= HIGHEST_SKILL) { return((itembonuses.skillmod[skill_id] > 0) ? m_pp.skills[skill_id] * (100 + itembonuses.skillmod[skill_id]) / 100 : m_pp.skills[skill_id]); } return 0; }
+	virtual uint16 GetSkill(SkillUseTypes skill_id) const {if (skill_id <= HIGHEST_SKILL) {return(itembonuses.skillmod[skill_id] > 0 ? (itembonuses.skillmodmax[skill_id] > 0 ? std::min(m_pp.skills[skill_id] + itembonuses.skillmodmax[skill_id], m_pp.skills[skill_id] * (100 + itembonuses.skillmod[skill_id]) / 100) : m_pp.skills[skill_id] * (100 + itembonuses.skillmod[skill_id]) / 100) : m_pp.skills[skill_id]);} return 0;}
 	uint32 GetRawSkill(SkillUseTypes skill_id) const { if (skill_id <= HIGHEST_SKILL) { return(m_pp.skills[skill_id]); } return 0; }
 	bool HasSkill(SkillUseTypes skill_id) const;
 	bool CanHaveSkill(SkillUseTypes skill_id) const;

@@ -482,7 +482,7 @@ int main(int argc, char** argv) {
 			if (!database.SaveTime(tod.minute, tod.hour, tod.day, tod.month, tod.year))
 				Log.Out(Logs::General, Logs::World_Server, "Failed to save eqtime.");
 			else
-				Log.Out(Logs::General, Logs::World_Server, "EQTime successfully saved.");
+				Log.Out(Logs::Detail, Logs::World_Server, "EQTime successfully saved.");
 		}
 		
 		//check for timeouts in other threads

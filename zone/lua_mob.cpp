@@ -1023,14 +1023,14 @@ int Lua_Mob::GetHaste() {
 	return self->GetHaste();
 }
 
-int Lua_Mob::GetMonkHandToHandDamage() {
+int Lua_Mob::GetHandToHandDamage() {
 	Lua_Safe_Call_Int();
-	return self->GetMonkHandToHandDamage();
+	return self->GetHandToHandDamage();
 }
 
-int Lua_Mob::GetMonkHandToHandDelay() {
+int Lua_Mob::GetHandToHandDelay() {
 	Lua_Safe_Call_Int();
-	return self->GetMonkHandToHandDelay();
+	return self->GetHandToHandDelay();
 }
 
 void Lua_Mob::Mesmerize() {
@@ -1881,6 +1881,106 @@ bool Lua_Mob::IsBlind() {
 	return self->IsBlind();
 }
 
+uint8 Lua_Mob::SeeInvisible() {
+	Lua_Safe_Call_Int();
+	return self->SeeInvisible();
+}
+
+bool Lua_Mob::SeeInvisibleUndead() {
+	Lua_Safe_Call_Bool();
+	return self->SeeInvisibleUndead();
+}
+
+bool Lua_Mob::SeeHide() {
+	Lua_Safe_Call_Bool();
+	return self->SeeHide();
+}
+
+bool Lua_Mob::SeeImprovedHide() {
+	Lua_Safe_Call_Bool();
+	return self->SeeImprovedHide();
+}
+
+uint8 Lua_Mob::GetNimbusEffect1() {
+	Lua_Safe_Call_Int();
+	return self->GetNimbusEffect1();
+}
+
+uint8 Lua_Mob::GetNimbusEffect2() {
+	Lua_Safe_Call_Int();
+	return self->GetNimbusEffect2();
+}
+
+uint8 Lua_Mob::GetNimbusEffect3() {
+	Lua_Safe_Call_Int();
+	return self->GetNimbusEffect3();
+}
+
+bool Lua_Mob::IsTargetable() {
+	Lua_Safe_Call_Bool();
+	return self->IsTargetable();
+}
+
+bool Lua_Mob::HasShieldEquiped() {
+	Lua_Safe_Call_Bool();
+	return self->HasShieldEquiped();
+}
+
+bool Lua_Mob::HasTwoHandBluntEquiped() {
+	Lua_Safe_Call_Bool();
+	return self->HasTwoHandBluntEquiped();
+}
+
+bool Lua_Mob::HasTwoHanderEquipped() {
+	Lua_Safe_Call_Bool();
+	return self->HasTwoHanderEquipped();
+}
+
+uint32 Lua_Mob::GetHerosForgeModel(uint8 material_slot) {
+	Lua_Safe_Call_Int();
+	return self->GetHerosForgeModel(material_slot);
+}
+
+uint32 Lua_Mob::IsEliteMaterialItem(uint8 material_slot) {
+	Lua_Safe_Call_Int();
+	return self->IsEliteMaterialItem(material_slot);
+}
+
+float Lua_Mob::GetBaseSize() {
+	Lua_Safe_Call_Real();
+	return self->GetBaseSize();
+}
+
+bool Lua_Mob::HasOwner() {
+	Lua_Safe_Call_Bool();
+	return self->HasOwner();
+}
+
+bool Lua_Mob::IsPet() {
+	Lua_Safe_Call_Bool();
+	return self->IsPet();
+}
+
+bool Lua_Mob::HasPet() {
+	Lua_Safe_Call_Bool();
+	return self->HasPet();
+}
+
+bool Lua_Mob::IsSilenced() {
+	Lua_Safe_Call_Bool();
+	return self->IsSilenced();
+}
+
+bool Lua_Mob::IsAmnesiad() {
+	Lua_Safe_Call_Bool();
+	return self->IsAmnesiad();
+}
+
+int32 Lua_Mob::GetMeleeMitigation() {
+	Lua_Safe_Call_Int();
+	return self->GetMeleeMitigation();
+}
+
 luabind::scope lua_register_mob() {
 	return luabind::class_<Lua_Mob, Lua_Entity>("Mob")
 		.def(luabind::constructor<>())
@@ -2065,8 +2165,8 @@ luabind::scope lua_register_mob() {
 		.def("GetInvul", (bool(Lua_Mob::*)(void))&Lua_Mob::GetInvul)
 		.def("SetExtraHaste", (void(Lua_Mob::*)(int))&Lua_Mob::SetExtraHaste)
 		.def("GetHaste", (int(Lua_Mob::*)(void))&Lua_Mob::GetHaste)
-		.def("GetMonkHandToHandDamage", (int(Lua_Mob::*)(void))&Lua_Mob::GetMonkHandToHandDamage)
-		.def("GetMonkHandToHandDelay", (int(Lua_Mob::*)(void))&Lua_Mob::GetMonkHandToHandDelay)
+		.def("GetHandToHandDamage", (int(Lua_Mob::*)(void))&Lua_Mob::GetHandToHandDamage)
+		.def("GetHandToHandDelay", (int(Lua_Mob::*)(void))&Lua_Mob::GetHandToHandDelay)
 		.def("Mesmerize", (void(Lua_Mob::*)(void))&Lua_Mob::Mesmerize)
 		.def("IsMezzed", (bool(Lua_Mob::*)(void))&Lua_Mob::IsMezzed)
 		.def("IsEnraged", (bool(Lua_Mob::*)(void))&Lua_Mob::IsEnraged)
@@ -2203,7 +2303,27 @@ luabind::scope lua_register_mob() {
 		.def("BuffFadeBySlot", (void(Lua_Mob::*)(int,bool))&Lua_Mob::BuffFadeBySlot)
 		.def("CanBuffStack", (int(Lua_Mob::*)(int,int))&Lua_Mob::CanBuffStack)
 		.def("CanBuffStack", (int(Lua_Mob::*)(int,int,bool))&Lua_Mob::CanBuffStack)
-		.def("SetPseudoRoot", (void(Lua_Mob::*)(bool))&Lua_Mob::SetPseudoRoot);
+		.def("SetPseudoRoot", (void(Lua_Mob::*)(bool))&Lua_Mob::SetPseudoRoot)
+		.def("SeeInvisible", (uint8(Lua_Mob::*)(void))&Lua_Mob::SeeInvisible)
+		.def("SeeInvisibleUndead", (bool(Lua_Mob::*)(void))&Lua_Mob::SeeInvisibleUndead)
+		.def("SeeHide", (bool(Lua_Mob::*)(void))&Lua_Mob::SeeHide)
+		.def("SeeImprovedHide", (bool(Lua_Mob::*)(bool))&Lua_Mob::SeeImprovedHide)
+		.def("GetNimbusEffect1", (uint8(Lua_Mob::*)(void))&Lua_Mob::GetNimbusEffect1)
+		.def("GetNimbusEffect2", (uint8(Lua_Mob::*)(void))&Lua_Mob::GetNimbusEffect2)
+		.def("GetNimbusEffect3", (uint8(Lua_Mob::*)(void))&Lua_Mob::GetNimbusEffect3)
+		.def("IsTargetable", (bool(Lua_Mob::*)(void))&Lua_Mob::IsTargetable)
+		.def("HasShieldEquiped", (bool(Lua_Mob::*)(void))&Lua_Mob::HasShieldEquiped)		
+		.def("HasTwoHandBluntEquiped", (bool(Lua_Mob::*)(void))&Lua_Mob::HasTwoHandBluntEquiped)
+		.def("HasTwoHanderEquipped", (bool(Lua_Mob::*)(void))&Lua_Mob::HasTwoHanderEquipped)
+		.def("GetHerosForgeModel", (int32(Lua_Mob::*)(uint8))&Lua_Mob::GetHerosForgeModel)
+		.def("IsEliteMaterialItem", (uint32(Lua_Mob::*)(uint8))&Lua_Mob::IsEliteMaterialItem)
+		.def("GetBaseSize", (double(Lua_Mob::*)(void))&Lua_Mob::GetBaseSize)
+		.def("HasOwner", (bool(Lua_Mob::*)(void))&Lua_Mob::HasOwner)
+		.def("IsPet", (bool(Lua_Mob::*)(void))&Lua_Mob::IsPet)
+		.def("HasPet", (bool(Lua_Mob::*)(void))&Lua_Mob::HasPet)
+		.def("IsSilenced", (bool(Lua_Mob::*)(void))&Lua_Mob::IsSilenced)
+		.def("IsAmnesiad", (bool(Lua_Mob::*)(void))&Lua_Mob::IsAmnesiad)
+		.def("GetMeleeMitigation", (int32(Lua_Mob::*)(void))&Lua_Mob::GetMeleeMitigation);
 }
 
 luabind::scope lua_register_special_abilities() {

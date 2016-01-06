@@ -2577,12 +2577,7 @@ bool Client::BindWound(Mob* bindmob, bool start, bool fail){
 			else {
 				// send bindmob "stand still"
 				if(!bindmob->IsAIControlled() && bindmob != this ) {
-					bind_out->type = 2; // ?
-					//bind_out->type = 3; // ?
-					bind_out->to = GetID(); // ?
-					bindmob->CastToClient()->QueuePacket(outapp);
-					bind_out->type = 0;
-					bind_out->to = 0;
+					bindmob->CastToClient()->Message_StringID(clientMessageYellow, YOU_ARE_BEING_BANDAGED);
 				}
 				else if (bindmob->IsAIControlled() && bindmob != this ){
 					; // Tell IPC to stand still?
@@ -2668,7 +2663,7 @@ bool Client::BindWound(Mob* bindmob, bool start, bool fail){
 					else {
 						//I dont have the real, live
 						Message(15, "You cannot bind wounds above %d%% hitpoints.", max_percent);
-						if(bindmob->IsClient())
+						if(bindmob != this && bindmob->IsClient())
 							bindmob->CastToClient()->Message(15, "You cannot have your wounds bound above %d%% hitpoints.", max_percent);
 						// Too many hp message goes here.
 					}
@@ -6808,7 +6803,8 @@ void Client::SendStatsWindow(Client* client, bool use_window)
 	/*	AC		*/	indP << "<c \"#CCFF00\">AC: " << CalcAC() << "</c><br>" <<
 	/*	AC2		*/	indP << "- Mit: " << GetACMit() << " | Avoid: " << GetACAvoid() << " | Spell: " << spellbonuses.AC << " | Shield: " << shield_ac << "<br>" <<
 	/*	Haste	*/	indP << "<c \"#CCFF00\">Haste: " << GetHaste() << "</c><br>" <<
-	/*	Haste2	*/	indP << " - Item: " << itembonuses.haste << " + Spell: " << (spellbonuses.haste + spellbonuses.hastetype2) << " (Cap: " << RuleI(Character, HasteCap) << ") | Over: " << (spellbonuses.hastetype3 + ExtraHaste) << "<br><br>" <<
+	/*	Haste2	*/	indP << " - Item: " << itembonuses.haste << " + Spell: " << (spellbonuses.haste + spellbonuses.hastetype2) << " (Cap: " << RuleI(Character, HasteCap) << ") | Over: " << (spellbonuses.hastetype3 + ExtraHaste) << "<br>" <<
+	/*	RunSpeed*/	indP << "<c \"#CCFF00\">Runspeed: " << GetRunspeed() << "</c><br>" <<
 	/* RegenLbl	*/	indL << indS << "Regen<br>" << indS << indP << indP << " Base | Items (Cap) " << indP << " | Spell | A.A.s | Total<br>" <<
 	/*	Regen	*/	regen_string << "<br>" <<
 	/*	Stats	*/	stat_field << "<br><br>" <<
@@ -8360,21 +8356,19 @@ void Client::ShowNumHits()
 	return;
 }
 
-float Client::GetQuiverHaste()
+int Client::GetQuiverHaste(int delay)
 {
-	float quiver_haste = 0;
+	const ItemInst *pi = nullptr;
 	for (int r = EmuConstants::GENERAL_BEGIN; r <= EmuConstants::GENERAL_END; r++) {
-		const ItemInst *pi = GetInv().GetItem(r);
-		if (!pi)
-			continue;
-		if (pi->IsType(ItemClassContainer) && pi->GetItem()->BagType == BagTypeQuiver) {
-			float temp_wr = (pi->GetItem()->BagWR / RuleI(Combat, QuiverWRHasteDiv));
-			quiver_haste = std::max(temp_wr, quiver_haste);
-		}
+		pi = GetInv().GetItem(r);
+		if (pi && pi->IsType(ItemClassContainer) && pi->GetItem()->BagType == BagTypeQuiver &&
+		    pi->GetItem()->BagWR > 0)
+			break;
+		if (r == EmuConstants::GENERAL_END)
+			// we will get here if we don't find a valid quiver
+			return 0;
 	}
-	if (quiver_haste > 0)
-		quiver_haste = 1.0f / (1.0f + static_cast<float>(quiver_haste) / 100.0f);
-	return quiver_haste;
+	return (pi->GetItem()->BagWR * 0.0025f * delay) + 1;
 }
 
 void Client::SendColoredText(uint32 color, std::string message)

@@ -23,7 +23,7 @@ if($Config{osname}=~/linux/i){ $OS = "Linux"; }
 if($Config{osname}=~/Win|MS/i){ $OS = "Windows"; }
 
 #::: If current version is less than what world is reporting, then download a new one...
-$current_version = 13;
+$current_version = 14;
 
 if($ARGV[0] eq "V"){
 	if($ARGV[1] > $current_version){ 
@@ -107,6 +107,38 @@ if($path eq ""){
 	exit;
 }
 
+if($ARGV[0] eq "install_peq_db"){
+	
+	$db_name = "peq";
+	if($ARGV[1]){
+		$db_name = $ARGV[1];
+	}
+	
+	$db = $db_name;
+
+	#::: Database Routines
+	print "MariaDB :: Creating Database '" . $db_name . "'\n";
+	print `"$path" --host $host --user $user --password="$pass" -N -B -e "DROP DATABASE IF EXISTS $db_name;"`;
+	print `"$path" --host $host --user $user --password="$pass" -N -B -e "CREATE DATABASE $db_name"`;
+	if($OS eq "Windows"){ @db_version = split(': ', `world db_version`); } 
+	if($OS eq "Linux"){ @db_version = split(': ', `./world db_version`); }  
+	$bin_db_ver = trim($db_version[1]);
+	check_db_version_table();
+	$local_db_ver = trim(get_mysql_result("SELECT version FROM db_version LIMIT 1"));
+	fetch_peq_db_full();
+	print "\nFetching Latest Database Updates...\n";
+	main_db_management();
+	print "\nApplying Latest Database Updates...\n";
+	main_db_management();
+	
+	print get_mysql_result("UPDATE `launcher` SET `dynamics` = 30 WHERE `name` = 'zone'");
+}
+
+if($ARGV[0] eq "remove_duplicate_rules"){
+	remove_duplicate_rule_values();	
+	exit;
+}
+
 if($ARGV[0] eq "installer"){
 	print "Running EQEmu Server installer routines...\n";
 	mkdir('logs');
@@ -152,6 +184,7 @@ if($ARGV[0] eq "installer"){
 	
 	if($OS eq "Windows"){
 		check_windows_firewall_rules();
+		do_windows_login_server_setup();
 	}
 	exit;
 }
@@ -251,6 +284,7 @@ sub show_menu_prompt {
 		11 => \&fetch_latest_windows_binaries,
 		12 => \&fetch_server_dlls,
 		13 => \&do_windows_login_server_setup,
+		14 => \&remove_duplicate_rule_values,
 		19 => \&do_bots_db_schema_drop,
         20 => \&do_update_self,
         0 => \&script_exit,
@@ -328,6 +362,7 @@ return <<EO_MENU;
  11) [Windows Server Build] :: Download Latest and Stable Server Build (Overwrites existing .exe's, includes .dll's)
  12) [Windows Server .dll's] :: Download Pre-Requisite Server .dll's
  13) [Windows Server Loginserver Setup] :: Download and install Windows Loginserver
+ 14) [Remove Duplicate Rule Values] :: Looks for redundant rule_values entries and removes them
  19) [EQEmu DB Drop Bots Schema] :: Remove Bots schema and return database to normal state
  20) [Update the updater] Force update this script (Redownload)
  0) Exit
@@ -519,6 +554,33 @@ sub opcodes_fetch{
 		$loop++; 
 	}
 	print "\nDone...\n\n";
+}
+
+sub remove_duplicate_rule_values{
+	$ruleset_id = trim(get_mysql_result("SELECT `ruleset_id` FROM `rule_sets` WHERE `name` = 'default'"));
+	print "Default Ruleset ID: " . $ruleset_id . "\n";
+	
+	$total_removed = 0;
+	#::: Store Default values...
+	$mysql_result = get_mysql_result("SELECT * FROM `rule_values` WHERE `ruleset_id` = " . $ruleset_id);
+	my @lines = split("\n", $mysql_result);
+	foreach my $val (@lines){
+		my @values = split("\t", $val);
+		$rule_set_values{$values[1]}[0] = $values[2];
+	}
+	#::: Compare default values against other rulesets to check for duplicates...
+	$mysql_result = get_mysql_result("SELECT * FROM `rule_values` WHERE `ruleset_id` != " . $ruleset_id);
+	my @lines = split("\n", $mysql_result);
+	foreach my $val (@lines){
+		my @values = split("\t", $val);
+		if($values[2] == $rule_set_values{$values[1]}[0]){
+			print "DUPLICATE : " . $values[1] . " (Ruleset (" . $values[0] . ")) matches default value of : " . $values[2] . ", removing...\n";
+			get_mysql_result("DELETE FROM `rule_values` WHERE `ruleset_id` = " .  $values[0] . " AND `rule_name` = '" . $values[1] . "'");
+			$total_removed++;
+		}
+	}
+	
+	print "Total duplicate rules removed... " . $total_removed . "\n";
 }
 
 sub copy_file{
@@ -1316,8 +1378,14 @@ sub run_database_check{
 	
 	@total_updates = ();
 	
+	#::: This is where we set checkpoints for where a database might be so we don't check so far back in the manifest...
+	$revision_check = 1000;
+	if(get_mysql_result("SHOW TABLES LIKE 'character_data'") ne ""){
+		$revision_check = 9000;
+	}
+	
 	#::: Iterate through Manifest backwards from binary version down to local version...
-	for($i = $bin_db_ver; $i > 1000; $i--){ 
+	for($i = $bin_db_ver; $i > $revision_check; $i--){ 
 		if(!defined($m_d{$i}[0])){ next; } 
 		
 		$file_name 		= trim($m_d{$i}[1]);

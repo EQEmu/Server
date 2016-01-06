@@ -490,6 +490,7 @@ void Client::AddItemBonuses(const ItemInst *inst, StatBonuses* newbon, bool isAu
 			(item->SkillModValue < 0 && newbon->skillmod[item->SkillModType] > item->SkillModValue))
 		{
 			newbon->skillmod[item->SkillModType] = item->SkillModValue;
+			newbon->skillmodmax[item->SkillModType] = item->SkillModMax;
 		}
 	}
 

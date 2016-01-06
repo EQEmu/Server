@@ -1183,21 +1183,16 @@ bool Database::CheckNameFilter(const char* name, bool surname)
 {
 	std::string str_name = name;
 
-	if(surname)
+	// the minimum 4 is enforced by the client too
+	if (!name || strlen(name) < 4)
 	{
-		// the minimum 4 is enforced by the client too
-		if(!name || strlen(name) < 3)
-		{
-			return false;
-		}
+		return false;
 	}
-	else
+
+	// Given name length is enforced by the client too
+	if (!surname && strlen(name) > 15)
 	{
-		// the minimum 4 is enforced by the client too
-		if(!name || strlen(name) < 4 || strlen(name) > 15)
-		{
-			return false;
-		}
+		return false;
 	}
 
 	for (size_t i = 0; i < str_name.size(); i++)
@@ -1564,7 +1559,7 @@ void Database::AddReport(std::string who, std::string against, std::string lines
 	char *escape_str = new char[lines.size()*2+1];
 	DoEscapeString(escape_str, lines.c_str(), lines.size());
 
-	std::string query = StringFormat("INSERT INTO reports (name, reported, reported_text) VALUES('%s', '%s', '%s')", who.c_str(), against.c_str(), escape_str);
+	std::string query = StringFormat("INSERT INTO reports (name, reported, reported_text) VALUES('%s', '%s', '%s')", EscapeString(who).c_str(), EscapeString(against).c_str(), escape_str);
 	QueryDatabase(query);
 	safe_delete_array(escape_str);
 }

@@ -218,6 +218,9 @@ public:
 	uint32 MerchantCountItem(uint32 NPCid, uint32 itemid);
 	uint16 CreateInstance(const char *zone, int16 version, uint32 duration);
 	void UpdateInstanceTimer(uint16 instance_id, uint32 new_duration);
+	void UpdateZoneHeader(std::string type, std::string value);
+	uint32 GetInstanceTimer();
+	uint32 GetInstanceTimerByID(uint16 instance_id = 0);
 	void DestroyInstance(uint16 instance_id);
 	uint16 GetInstanceID(const char *zone, int16 version);
 	void AssignToInstance(uint16 instance_id);

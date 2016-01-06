@@ -1,5 +1,62 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 12/29/2015 ==
+Akkadius: Implemented standardized zone controller scripts (Rule Zone, UseZoneController) Defaulted to true
+	- When a zone boots, it will spawn an invisible npc by the name of zone_controller
+	- Lua and Perl scripts can be represented with this npc as zone_controller.pl/lua
+	- This NPC's ID is ruled be define ZONE_CONTROLLER_NPC_ID 10
+	- Two EVENT's uniquely are handled with this NPC/controller (They only work with the zone_controller NPC)
+		- EVENT_SPAWN_ZONE :: All NPC spawns in the zone trigger the controller and pass the following variables:
+			$spawned_entity_id
+			$spawned_npc_id
+		- EVENT_DEATH_ZONE :: All NPC deaths in the zone trigger the controller event and pass the following variables:
+			$killer_id
+			$killer_damage
+			$killer_spell
+			$killer_skill
+			$killed_npc_id
+
+== 12/28/2015 ==
+Kinglykrab: Added GetInstanceTimer() to Perl and Lua.
+	- Added GetInstanceTimerByID(instance_id) to Perl and Lua.
+	- Note: If you do not provide an instance id in the method it defaults to instance id 0 and returns 0 for time remaining.
+	- Added UpdateZoneHeader(type, value) to Perl and Lua.
+	- Note: UpdateZoneHeader allows you to manipulate fog color, fog density, and many other zone header settings on the fly in Perl and Lua.
+	
+== 12/21/2015 ==
+Natedog: Updated item table fields and added a few missing fields for evolving items
+	-DO NOT implement Heirloom items till the inventory code is fixed to allow placing NO DROP
+		items in your shared bank. (but item field located on items table)
+	-NYI - SkillModMax: Max skill point modification from the percent mods. EX:
+		100% 2HSlashing (Max 50) - can only increase 2hslash by 50 MAX! (item field located though)
+Kinglykrab: Added GetMeleeMitigation() for NPCs and Clients in Perl and Lua.
+	- This allows you to check total item, spell, and AA melee mitigation contribution.
+	
+== 12/19/2015 ==
+Kinglykrab: Added many methods to Perl and Lua, list below:
+	- SeeInvisible()
+	- SeeInvisibleUndead()
+	- SeeHide()
+	- SeeImprovedHide()
+	- GetNimbusEffect1() - returns first nimbus effect
+	- GetNimbusEffect2() - returns second nimbus effect
+	- GetNimbusEffect3() - returns third nimbus effect
+	- IsTargetable()
+	- HasShieldEquiped()
+	- HasTwoHandBluntEquiped()
+	- HasTwoHanderEquiped()
+	- GetHerosForgeModel() - returns int32 Hero's Forge model
+	- IsEliteMaterialItem() - returns uint32 Hero's Forge Model
+	- GetBaseSize() - returns Mob's base size
+	- HasOwner()
+	- IsPet()
+	- HasPet()
+	- IsSilenced()
+	- IsAmnesiad()
+	
+== 12/16/2015 ==
+Noudess: Repaired issue with Bind Wounds on someone else.  Message was not coming out on client (hold still) and a bind wounds on someone already binding their wounds would interrupt their bind and make them stand.  Also removed some duplicate messaging.
+
 == 12/14/2015 ==
 Kinglykrab: Added IsBlind() and IsFeared() functionality to Perl and Lua.
 	- Note: Both methods are Mob methods and may be used on NPCs or PCs.
