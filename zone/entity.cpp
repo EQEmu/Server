@@ -641,7 +641,17 @@ void EntityList::AddNPC(NPC *npc, bool SendSpawnPacket, bool dontqueue)
 {
 	npc->SetID(GetFreeID());
 	npc->SetMerchantProbability((uint8) zone->random.Int(0, 99));
+
 	parse->EventNPC(EVENT_SPAWN, npc, nullptr, "", 0);
+
+	/* Zone controller process EVENT_SPAWN_ZONE */
+	if (RuleB(Zone, UseZoneController)) {
+		if (entity_list.GetNPCByNPCTypeID(ZONE_CONTROLLER_NPC_ID) && npc->GetNPCTypeID() != ZONE_CONTROLLER_NPC_ID){
+			char data_pass[100] = { 0 };
+			snprintf(data_pass, 99, "%d %d", npc->GetID(), npc->GetNPCTypeID());
+			parse->EventNPC(EVENT_SPAWN_ZONE, entity_list.GetNPCByNPCTypeID(ZONE_CONTROLLER_NPC_ID)->CastToNPC(), nullptr, data_pass, 0);
+		}
+	}
 
 	uint16 emoteid = npc->GetEmoteID();
 	if (emoteid != 0)

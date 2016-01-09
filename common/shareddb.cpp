@@ -1,6 +1,10 @@
 #include <iostream>
 #include <cstring>
 
+#if defined(_MSC_VER) && _MSC_VER >= 1800
+	#include <algorithm>
+#endif
+
 #include "classes.h"
 #include "eq_packet_structs.h"
 #include "eqemu_exception.h"
@@ -954,7 +958,7 @@ void SharedDatabase::LoadItems(void *data, uint32 size, int32 items, uint32 max_
 		item.LDoNPrice = (uint32)atoul(row[ItemField::ldonprice]);
 		item.LDoNSold = (uint32)atoul(row[ItemField::ldonsold]);
 		item.BagType = (uint8)atoi(row[ItemField::bagtype]);
-		item.BagSlots = (uint8)atoi(row[ItemField::bagslots]);
+		item.BagSlots = (uint8)std::min(atoi(row[ItemField::bagslots]), 10); // FIXME: remove when big bags supported
 		item.BagSize = (uint8)atoi(row[ItemField::bagsize]);
 		item.BagWR = (uint8)atoi(row[ItemField::bagwr]);
 		item.Book = (uint8)atoi(row[ItemField::book]);

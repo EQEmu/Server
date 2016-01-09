@@ -194,6 +194,7 @@ int command_init(void)
 		command_add("enablerecipe",  "[recipe_id] - Enables a recipe using the recipe id.",  80, command_enablerecipe) ||
 		command_add("equipitem", "[slotid(0-21)] - Equip the item on your cursor into the specified slot", 50, command_equipitem) ||
 		command_add("face", "- Change the face of your target", 80, command_face) ||
+		command_add("findaliases", "[search term]- Searches for available command aliases, by alias or command", 0, command_findaliases) ||
 		command_add("findnpctype", "[search criteria] - Search database NPC types", 100, command_findnpctype) ||
 		command_add("findspell", "[searchstring] - Search for a spell", 50, command_findspell) ||
 		command_add("findzone", "[search criteria] - Search database zones", 100, command_findzone) ||
@@ -4943,6 +4944,38 @@ void command_face(Client *c, const Seperator *sep)
 
 		c->Message(0,"Face = %i",  atoi(sep->arg[1]));
 	}
+}
+
+void command_findaliases(Client *c, const Seperator *sep)
+{
+	if (!sep->arg[1][0]) {
+		c->Message(0, "Usage: #findaliases [alias | command]");
+		return;
+	}
+	
+	std::map<std::string, std::string>::iterator find_iter = commandaliases.find(sep->arg[1]);
+	if (find_iter == commandaliases.end()) {
+		c->Message(15, "No commands or aliases match '%s'", sep->arg[1]);
+		return;
+	}
+
+	std::map<std::string, CommandRecord *>::iterator command_iter = commandlist.find(find_iter->second);
+	if (find_iter->second.empty() || command_iter == commandlist.end()) {
+		c->Message(0, "An unknown condition occurred...");
+		return;
+	}
+
+	c->Message(0, "Available command aliases for '%s':", command_iter->first.c_str());
+
+	int commandaliasesshown = 0;
+	for (std::map<std::string, std::string>::iterator alias_iter = commandaliases.begin(); alias_iter != commandaliases.end(); ++alias_iter) {
+		if (strcasecmp(find_iter->second.c_str(), alias_iter->second.c_str()) || c->Admin() < command_iter->second->access)
+			continue;
+
+		c->Message(0, "%c%s", COMMAND_CHAR, alias_iter->first.c_str());
+		++commandaliasesshown;
+	}
+	c->Message(0, "%d command alias%s listed.", commandaliasesshown, commandaliasesshown != 1 ? "es" : "");
 }
 
 void command_details(Client *c, const Seperator *sep)

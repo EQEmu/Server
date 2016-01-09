@@ -111,6 +111,14 @@ sub read_items_file_from_13th_floor_text {
 	print "Processing (" . $read_items_file . ") :: (Items: " . $total_items . "/" . $total_items_file . ") 		\r";
 	
 	printf "\n" . $total_items . " items added to database... Took " . (time() - $start_time) . " second(s)... \n";
+	
+	print "Flipping slots 21 and 22...";
+	$rows_affected = $dbh->prepare("
+		UPDATE `items_floor` 
+		SET `slots` = (`slots` ^ 6291456) 
+		WHERE (`slots` & 6291456) 
+		IN (2097152, 4194304)")->execute();
+	print " Rows affected (" . $rows_affected . ")\n";
 }
 
 sub update_items_table {

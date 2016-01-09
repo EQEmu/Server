@@ -484,10 +484,17 @@ QuestInterface *QuestParserCollection::GetQIByNPCQuest(uint32 npcid, std::string
 
 	//second look for /quests/zone/npcname.ext (precedence)
 	const NPCType *npc_type = database.LoadNPCTypesData(npcid);
-	if(!npc_type) {
+	if (!npc_type && npcid != ZONE_CONTROLLER_NPC_ID) {
 		return nullptr;
 	}
-	std::string npc_name = npc_type->name;
+
+	std::string npc_name;
+	if (npcid == ZONE_CONTROLLER_NPC_ID){
+		npc_name = "zone_controller";
+	}
+	else{
+		npc_name = npc_type->name;
+	} 
 	int sz = static_cast<int>(npc_name.length());
 	for(int i = 0; i < sz; ++i) {
 		if(npc_name[i] == '`') {

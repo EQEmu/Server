@@ -1023,14 +1023,14 @@ int Lua_Mob::GetHaste() {
 	return self->GetHaste();
 }
 
-int Lua_Mob::GetMonkHandToHandDamage() {
+int Lua_Mob::GetHandToHandDamage() {
 	Lua_Safe_Call_Int();
-	return self->GetMonkHandToHandDamage();
+	return self->GetHandToHandDamage();
 }
 
-int Lua_Mob::GetMonkHandToHandDelay() {
+int Lua_Mob::GetHandToHandDelay() {
 	Lua_Safe_Call_Int();
-	return self->GetMonkHandToHandDelay();
+	return self->GetHandToHandDelay();
 }
 
 void Lua_Mob::Mesmerize() {
@@ -2165,8 +2165,8 @@ luabind::scope lua_register_mob() {
 		.def("GetInvul", (bool(Lua_Mob::*)(void))&Lua_Mob::GetInvul)
 		.def("SetExtraHaste", (void(Lua_Mob::*)(int))&Lua_Mob::SetExtraHaste)
 		.def("GetHaste", (int(Lua_Mob::*)(void))&Lua_Mob::GetHaste)
-		.def("GetMonkHandToHandDamage", (int(Lua_Mob::*)(void))&Lua_Mob::GetMonkHandToHandDamage)
-		.def("GetMonkHandToHandDelay", (int(Lua_Mob::*)(void))&Lua_Mob::GetMonkHandToHandDelay)
+		.def("GetHandToHandDamage", (int(Lua_Mob::*)(void))&Lua_Mob::GetHandToHandDamage)
+		.def("GetHandToHandDelay", (int(Lua_Mob::*)(void))&Lua_Mob::GetHandToHandDelay)
 		.def("Mesmerize", (void(Lua_Mob::*)(void))&Lua_Mob::Mesmerize)
 		.def("IsMezzed", (bool(Lua_Mob::*)(void))&Lua_Mob::IsMezzed)
 		.def("IsEnraged", (bool(Lua_Mob::*)(void))&Lua_Mob::IsEnraged)
@@ -2303,7 +2303,7 @@ luabind::scope lua_register_mob() {
 		.def("BuffFadeBySlot", (void(Lua_Mob::*)(int,bool))&Lua_Mob::BuffFadeBySlot)
 		.def("CanBuffStack", (int(Lua_Mob::*)(int,int))&Lua_Mob::CanBuffStack)
 		.def("CanBuffStack", (int(Lua_Mob::*)(int,int,bool))&Lua_Mob::CanBuffStack)
-		.def("SetPseudoRoot", (void(Lua_Mob::*)(void))&Lua_Mob::SetPseudoRoot)
+		.def("SetPseudoRoot", (void(Lua_Mob::*)(bool))&Lua_Mob::SetPseudoRoot)
 		.def("SeeInvisible", (uint8(Lua_Mob::*)(void))&Lua_Mob::SeeInvisible)
 		.def("SeeInvisibleUndead", (bool(Lua_Mob::*)(void))&Lua_Mob::SeeInvisibleUndead)
 		.def("SeeHide", (bool(Lua_Mob::*)(void))&Lua_Mob::SeeHide)

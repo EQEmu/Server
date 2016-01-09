@@ -217,8 +217,8 @@ public:
 	bool GetInvul();
 	void SetExtraHaste(int haste);
 	int GetHaste();
-	int GetMonkHandToHandDamage();
-	int GetMonkHandToHandDelay();
+	int GetHandToHandDamage();
+	int GetHandToHandDelay();
 	void Mesmerize();
 	bool IsMezzed();
 	bool IsEnraged();

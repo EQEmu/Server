@@ -94,6 +94,7 @@ void command_emoteview(Client* c, const Seperator *sep);
 void command_enablerecipe(Client *c, const Seperator *sep);
 void command_equipitem(Client *c, const Seperator *sep);
 void command_face(Client *c, const Seperator *sep);
+void command_findaliases(Client *c, const Seperator *sep);
 void command_findnpctype(Client *c, const Seperator *sep);
 void command_findspell(Client *c, const Seperator *sep);
 void command_findzone(Client *c, const Seperator *sep);

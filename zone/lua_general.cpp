@@ -808,6 +808,14 @@ void lua_update_instance_timer(uint16 instance_id, uint32 new_duration) {
 	quest_manager.UpdateInstanceTimer(instance_id, new_duration);
 }
 
+uint32 lua_get_instance_timer() {
+	return quest_manager.GetInstanceTimer();
+}
+
+uint32 lua_get_instance_timer_by_id(uint16 instance_id) {
+	return quest_manager.GetInstanceTimerByID(instance_id);
+}
+
 int lua_get_instance_id(const char *zone, uint32 version) {
 	return quest_manager.GetInstanceID(zone, version);
 }
@@ -1296,6 +1304,10 @@ void lua_debug(std::string message, int level) {
 	Log.Out(static_cast<Logs::DebugLevel>(level), Logs::QuestDebug, message);
 }
 
+void lua_update_zone_header(std::string type, std::string value) {
+	quest_manager.UpdateZoneHeader(type, value);
+}
+
 #define LuaCreateNPCParse(name, c_type, default_value) do { \
 	cur = table[#name]; \
 	if(luabind::type(cur) != LUA_TNIL) { \
@@ -1719,7 +1731,9 @@ luabind::scope lua_register_events() {
 			luabind::value("leave_area", static_cast<int>(EVENT_LEAVE_AREA)),
 			luabind::value("death_complete", static_cast<int>(EVENT_DEATH_COMPLETE)),
 			luabind::value("unhandled_opcode", static_cast<int>(EVENT_UNHANDLED_OPCODE)),
-			luabind::value("tick", static_cast<int>(EVENT_TICK))
+			luabind::value("tick", static_cast<int>(EVENT_TICK)),
+			luabind::value("spawn_zone", static_cast<int>(EVENT_SPAWN_ZONE)),
+			luabind::value("death_zone", static_cast<int>(EVENT_DEATH_ZONE))
 		];
 }
 

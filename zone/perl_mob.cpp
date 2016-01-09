@@ -4721,12 +4721,12 @@ XS(XS_Mob_GetHaste)
 	XSRETURN(1);
 }
 
-XS(XS_Mob_GetMonkHandToHandDamage); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Mob_GetMonkHandToHandDamage)
+XS(XS_Mob_GetHandToHandDamage); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Mob_GetHandToHandDamage)
 {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::GetMonkHandToHandDamage(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::GetHandToHandDamage(THIS)");
 	{
 		Mob *		THIS;
 		int		RETVAL;
@@ -4741,7 +4741,7 @@ XS(XS_Mob_GetMonkHandToHandDamage)
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		RETVAL = THIS->GetMonkHandToHandDamage();
+		RETVAL = THIS->GetHandToHandDamage();
 		XSprePUSH; PUSHi((IV)RETVAL);
 	}
 	XSRETURN(1);
@@ -4877,12 +4877,12 @@ XS(XS_Mob_CanThisClassParry)
 	XSRETURN(1);
 }
 
-XS(XS_Mob_GetMonkHandToHandDelay); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Mob_GetMonkHandToHandDelay)
+XS(XS_Mob_GetHandToHandDelay); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Mob_GetHandToHandDelay)
 {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::GetMonkHandToHandDelay(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::GetHandToHandDelay(THIS)");
 	{
 		Mob *		THIS;
 		int		RETVAL;
@@ -4897,7 +4897,7 @@ XS(XS_Mob_GetMonkHandToHandDelay)
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		RETVAL = THIS->GetMonkHandToHandDelay();
+		RETVAL = THIS->GetHandToHandDelay();
 		XSprePUSH; PUSHi((IV)RETVAL);
 	}
 	XSRETURN(1);
@@ -9192,13 +9192,13 @@ XS(boot_Mob)
 		newXSproto(strcpy(buf, "GetInvul"), XS_Mob_GetInvul, file, "$");
 		newXSproto(strcpy(buf, "SetExtraHaste"), XS_Mob_SetExtraHaste, file, "$$");
 		newXSproto(strcpy(buf, "GetHaste"), XS_Mob_GetHaste, file, "$");
-		newXSproto(strcpy(buf, "GetMonkHandToHandDamage"), XS_Mob_GetMonkHandToHandDamage, file, "$");
+		newXSproto(strcpy(buf, "GetHandToHandDamage"), XS_Mob_GetHandToHandDamage, file, "$");
 		newXSproto(strcpy(buf, "CanThisClassDoubleAttack"), XS_Mob_CanThisClassDoubleAttack, file, "$");
 		newXSproto(strcpy(buf, "CanThisClassDualWield"), XS_Mob_CanThisClassDualWield, file, "$");
 		newXSproto(strcpy(buf, "CanThisClassRiposte"), XS_Mob_CanThisClassRiposte, file, "$");
 		newXSproto(strcpy(buf, "CanThisClassDodge"), XS_Mob_CanThisClassDodge, file, "$");
 		newXSproto(strcpy(buf, "CanThisClassParry"), XS_Mob_CanThisClassParry, file, "$");
-		newXSproto(strcpy(buf, "GetMonkHandToHandDelay"), XS_Mob_GetMonkHandToHandDelay, file, "$");
+		newXSproto(strcpy(buf, "GetHandToHandDelay"), XS_Mob_GetHandToHandDelay, file, "$");
 		newXSproto(strcpy(buf, "GetClassLevelFactor"), XS_Mob_GetClassLevelFactor, file, "$");
 		newXSproto(strcpy(buf, "Mesmerize"), XS_Mob_Mesmerize, file, "$");
 		newXSproto(strcpy(buf, "IsMezzed"), XS_Mob_IsMezzed, file, "$");

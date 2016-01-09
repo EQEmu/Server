@@ -226,7 +226,7 @@ public:
 	virtual inline bool IsBerserk() { return berserk; }
 	virtual int32 GetMeleeMitDmg(Mob *attacker, int32 damage, int32 minhit, float mit_rating, float atk_rating);
 	virtual void SetAttackTimer();
-	float GetQuiverHaste();
+	int GetQuiverHaste(int delay);
 	void DoAttackRounds(Mob *target, int hand, bool IsFromSpell = false);
 
 	void AI_Init();
