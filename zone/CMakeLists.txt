@@ -33,6 +33,7 @@ SET(zone_sources
 	horse.cpp
 	inventory.cpp
 	loottables.cpp
+	lua_behavior_interface.cpp
 	lua_bit.cpp
 	lua_corpse.cpp
 	lua_client.cpp
@@ -150,6 +151,7 @@ SET(zone_headers
 	guild_mgr.h
 	hate_list.h
 	horse.h
+	lua_behavior_interface.h
 	lua_bit.h
 	lua_client.h
 	lua_corpse.h

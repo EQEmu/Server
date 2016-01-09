@@ -236,8 +236,8 @@ bool Client::Process() {
 			CheckMercSuspendTimer();
 		}
 
-		if(IsAIControlled())
-			AI_Process();
+		//if(IsAIControlled())
+			//AI_Process();
 
 		// Don't reset the bindwound timer so we can check it in BindWound as well.
 		if (bindwound_timer.Check(false) && bindwound_target != 0) {

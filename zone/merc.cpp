@@ -1304,7 +1304,7 @@ bool Merc::Process()
 		return true;
 
 	// Merc AI
-	AI_Process();
+	//AI_Process();
 
 	return true;
 }

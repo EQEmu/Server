@@ -87,7 +87,6 @@ private:
 
 	void LoadScript(std::string filename, std::string package_name);
 	bool HasFunction(std::string function, std::string package_name);
-	void ClearStates();
 	void MapFunctions(lua_State *L);
 	QuestEventID ConvertLuaEvent(QuestEventID evt);
 
