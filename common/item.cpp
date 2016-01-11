@@ -2416,7 +2416,7 @@ uint8 LightProfile_Struct::TypeToLevel(uint8 lightType)
 		return lightLevelSmallMagic;	// 3
 	case lightTypeTorch:
 		return lightLevelTorch;			// 2
-	case lightLevelCandle:
+	case lightTypeCandle:
 		return lightLevelCandle;		// 1
 	default:
 		return lightLevelUnlit;			// 0
