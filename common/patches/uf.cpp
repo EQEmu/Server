@@ -3048,11 +3048,21 @@ namespace UF
 				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);
 				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);
 
-				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->equipment[MaterialPrimary].Material);
+				if (emu->equipment[MaterialPrimary].Material > 99999) {
+					VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 63);
+				} else {
+					VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->equipment[MaterialPrimary].Material);
+				}
+
 				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);
 				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);
 
-				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->equipment[MaterialSecondary].Material);
+				if (emu->equipment[MaterialSecondary].Material > 99999) {
+					VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 63);
+				} else {
+					VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->equipment[MaterialSecondary].Material);
+				}
+
 				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);
 				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);
 			}
@@ -3062,7 +3072,11 @@ namespace UF
 				structs::EquipStruct *Equipment = (structs::EquipStruct *)Buffer;
 
 				for (k = 0; k < 9; k++) {
-					Equipment[k].Material = emu->equipment[k].Material;
+					if (emu->equipment[k].Material > 99999) {
+						Equipment[k].Material = 63;
+					} else {
+						Equipment[k].Material = emu->equipment[k].Material;
+					}
 					Equipment[k].Unknown1 = emu->equipment[k].Unknown1;
 					Equipment[k].EliteMaterial = emu->equipment[k].EliteMaterial;
 				}
