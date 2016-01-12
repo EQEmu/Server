@@ -1555,9 +1555,12 @@ void Mob::CalcSpellBonuses(StatBonuses* newbon)
 				NegateSpellsBonuses(buffs[i].spellid);
 		}
 	}
+
+	// THIS IS WRONG, leaving for now
 	//this prolly suffer from roundoff error slightly...
-	newbon->AC = newbon->AC * 10 / 34;	//ratio determined impirically from client.
-	if (GetClass() == BARD) newbon->ManaRegen = 0; // Bards do not get mana regen from spells.
+	newbon->AC = newbon->AC * 10 / 34;      //ratio determined impirically from client.
+	if (GetClass() == BARD)
+		newbon->ManaRegen = 0; // Bards do not get mana regen from spells.
 }
 
 void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *new_bonus, uint16 casterId,
@@ -2209,10 +2212,11 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 				// Bad data or unsupported new skill
 				if (base2 > HIGHEST_SKILL)
 					break;
-				if(base2 == ALL_SKILLS)
-					new_bonus->DamageModifier[HIGHEST_SKILL+1] += effect_value;
-				else
-					new_bonus->DamageModifier[base2] += effect_value;
+				int skill = base2 == ALL_SKILLS ? HIGHEST_SKILL + 1 : base2;
+				if (effect_value < 0 && new_bonus->DamageModifier[skill] > effect_value)
+					new_bonus->DamageModifier[skill] = effect_value;
+				else if (effect_value > 0 && new_bonus->DamageModifier[skill] < effect_value)
+					new_bonus->DamageModifier[skill] = effect_value;
 				break;
 			}
 
@@ -2221,10 +2225,11 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 				// Bad data or unsupported new skill
 				if (base2 > HIGHEST_SKILL)
 					break;
-				if(base2 == ALL_SKILLS)
-					new_bonus->DamageModifier2[HIGHEST_SKILL+1] += effect_value;
-				else
-					new_bonus->DamageModifier2[base2] += effect_value;
+				int skill = base2 == ALL_SKILLS ? HIGHEST_SKILL + 1 : base2;
+				if (effect_value < 0 && new_bonus->DamageModifier2[skill] > effect_value)
+					new_bonus->DamageModifier2[skill] = effect_value;
+				else if (effect_value > 0 && new_bonus->DamageModifier2[skill] < effect_value)
+					new_bonus->DamageModifier2[skill] = effect_value;
 				break;
 			}
 
@@ -2233,10 +2238,11 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 				// Bad data or unsupported new skill
 				if (base2 > HIGHEST_SKILL)
 					break;
-				if(base2 == ALL_SKILLS)
-					new_bonus->MinDamageModifier[HIGHEST_SKILL+1] += effect_value;
-				else
-					new_bonus->MinDamageModifier[base2] += effect_value;
+				int skill = base2 == ALL_SKILLS ? HIGHEST_SKILL + 1 : base2;
+				if (effect_value < 0 && new_bonus->MinDamageModifier[skill] > effect_value)
+					new_bonus->MinDamageModifier[skill] = effect_value;
+				else if (effect_value > 0 && new_bonus->MinDamageModifier[skill] < effect_value)
+					new_bonus->MinDamageModifier[skill] = effect_value;
 				break;
 			}
 
