@@ -1,5 +1,8 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 01/12/2016 ==
+Uleat: Fix for tradeskill containers remaining locked after a RoF+ client leaves. Intermediary fix for RoF+ clients accessing tradeskill containers when in use by another player.
+
 == 12/29/2015 ==
 Akkadius: Implemented standardized zone controller scripts (Rule Zone, UseZoneController) Defaulted to true
 	- When a zone boots, it will spawn an invisible npc by the name of zone_controller

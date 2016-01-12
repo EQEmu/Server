@@ -4253,15 +4253,11 @@ void Client::Handle_OP_ClickObjectAction(const EQApplicationPacket *app)
 		EQApplicationPacket end_trade2(OP_FinishWindow2, 0);
 		QueuePacket(&end_trade2);
 
-		return;
-
 		// RoF sends a 0 sized packet for closing objects
-		/*
-		Object* object = GetTradeskillObject();
-		if (object) {
-		object->CastToObject()->Close();
-		}
-		*/
+		if (GetTradeskillObject() && GetClientVersion() >= ClientVersion::RoF)
+			GetTradeskillObject()->CastToObject()->Close();
+		
+		return;
 	}
 	else
 	{
