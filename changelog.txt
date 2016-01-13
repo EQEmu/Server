@@ -3,6 +3,8 @@ EQEMu Changelog (Started on Sept 24, 2003 15:50)
 == 01/13/2016 ==
 Kinglykrab: Modified #flag so you can refresh your target's account status (GM status level) without them having to relog.
 	- Just target the person whose flag you want to refresh and type #flag.
+Uleat: Added itemlink functionality to the #summonitem command. Current use is limited to extracting the item id from the link.
+	- Invoking by item link '#summonitem Arrow' produces the same result as by item id '#summonitem 8005'
 	
 == 01/12/2016 ==
 Athrogate: Adding ClearCompassMark() to Lua.
