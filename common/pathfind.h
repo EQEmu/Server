@@ -50,7 +50,7 @@ public:
 	~PathfindingRoute();
 
 	bool Active() const { return m_active; }
-	bool PathfindingRoute::DestinationValid(const glm::vec3 &dest);
+	bool DestinationValid(const glm::vec3 &dest);
 	void CalcCurrentNode(const glm::vec3 &current_pos, bool &wp_changed);
 	const PathfindingNode& GetCurrentNode() { return m_nodes[m_current_node]; }
 	unsigned short GetPreviousNodeFlag();
