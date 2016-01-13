@@ -2,6 +2,7 @@
 #include "random.h"
 
 #include <stdio.h>
+#include <string.h>
 
 const uint32_t nav_mesh_file_version = 1;
 const float max_dest_drift = 10.0f;
