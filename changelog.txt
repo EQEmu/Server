@@ -1,5 +1,9 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 01/12/2016 ==
+Kinglykrab: Modified #flag so you can refresh your target's account status (GM status level) without them having to relog.
+	- Just target the person whose flag you want to refresh and type #flag.
+	
 == 12/28/2015 ==
 Kinglykrab: Added GetInstanceTimer() to Perl and Lua.
 	- Added GetInstanceTimerByID(instance_id) to Perl and Lua.
