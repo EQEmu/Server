@@ -4395,8 +4395,14 @@ void command_uptime(Client *c, const Seperator *sep)
 void command_flag(Client *c, const Seperator *sep)
 {
 	if(sep->arg[2][0] == 0) {
-		c->UpdateAdmin();
-		c->Message(0, "Refreshed your admin flag from DB.");
+		if (!c->GetTarget() || (c->GetTarget() && c->GetTarget() == c)) {
+			c->UpdateAdmin();
+			c->Message(0, "Refreshed your admin flag from DB.");
+		} else if (c->GetTarget() && c->GetTarget() != c && c->GetTarget()->IsClient()) {
+			c->GetTarget()->CastToClient()->UpdateAdmin();
+			c->Message(0, "%s's admin flag has been refreshed.", c->GetTarget()->GetName());
+			c->GetTarget()->Message(0, "%s refreshed your admin flag.", c->GetName());
+		}
 	}
 	else if (!sep->IsNumber(1) || atoi(sep->arg[1]) < -2 || atoi(sep->arg[1]) > 255 || strlen(sep->arg[2]) == 0)
 		c->Message(0, "Usage: #flag [status] [acctname]");
