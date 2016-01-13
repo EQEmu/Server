@@ -1300,38 +1300,6 @@ void PathManager::OpenDoors(int Node1, int Node2, Mob *ForWho)
 	}
 }
 
-//this assumes that the first point in the list is the player's
-//current position, I dont know how well it works if its not.
-void Client::SendPathPacket(std::vector<FindPerson_Point> &points) {
-	if(points.size() < 2) {
-		//empty length packet == not found.
-		EQApplicationPacket outapp(OP_FindPersonReply, 0);
-		QueuePacket(&outapp);
-		return;
-	}
-
-	int len = sizeof(FindPersonResult_Struct) + (points.size()+1) * sizeof(FindPerson_Point);
-	EQApplicationPacket *outapp = new EQApplicationPacket(OP_FindPersonReply, len);
-	FindPersonResult_Struct* fpr=(FindPersonResult_Struct*)outapp->pBuffer;
-
-	std::vector<FindPerson_Point>::iterator cur, end;
-	cur = points.begin();
-	end = points.end();
-	unsigned int r;
-	for(r = 0; cur != end; ++cur, r++) {
-		fpr->path[r] = *cur;
-
-	}
-	//put the last element into the destination field
-	--cur;
-	fpr->path[r] = *cur;
-	fpr->dest = *cur;
-
-	FastQueuePacket(&outapp);
-
-
-}
-
 PathNode* PathManager::FindPathNodeByCoordinates(float x, float y, float z)
 {
 	for(uint32 i = 0; i < Head.PathNodeCount; ++i)

@@ -24,6 +24,7 @@
 #include "../common/types.h"
 #include "../common/random.h"
 #include "../common/string_util.h"
+#include "../common/pathfind.h"
 #include "qglobals.h"
 #include "spawn2.h"
 #include "spawngroup.h"
@@ -212,6 +213,7 @@ public:
 	Map*	zonemap;
 	WaterMap* watermap;
 	PathManager *pathing;
+	PathfindingManager pathing_new;
 	NewZone_Struct	newzone_data;
 
 	SpawnConditionManager spawn_conditions;

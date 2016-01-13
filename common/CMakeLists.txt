@@ -64,6 +64,7 @@ SET(common_sources
 	unix.cpp
 	worldconn.cpp
 	xml_parser.cpp
+	pathfind.cpp
 	platform.cpp
 	patches/patches.cpp
 	patches/sod.cpp
@@ -156,6 +157,7 @@ SET(common_headers
 	packet_dump.h
 	packet_dump_file.h
 	packet_functions.h
+	pathfind.h
 	platform.h
 	proc_launcher.h
 	profiler.h

@@ -759,7 +759,7 @@ public:
 	void ChangeTributeSettings(TributeInfo_Struct *t);
 	void SendTributeTimer();
 	void ToggleTribute(bool enabled);
-	void SendPathPacket(std::vector<FindPerson_Point> &path);
+	void CreatePathFromRoute(const glm::vec3 &dest, const PathfindingRoute &route);
 
 	inline PTimerList &GetPTimers() { return(p_timers); }
 

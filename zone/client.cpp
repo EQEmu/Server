@@ -8728,3 +8728,31 @@ uint32 Client::GetMoney(uint8 type, uint8 subtype) {
 int Client::GetAccountAge() {
 	return (time(nullptr) - GetAccountCreation());
 }
+
+void Client::CreatePathFromRoute(const glm::vec3 &dest, const PathfindingRoute &route)
+{
+	auto nodes = route.GetNodes();
+
+	if (nodes.size() < 2) {
+		EQApplicationPacket outapp(OP_FindPersonReply, 0);
+		QueuePacket(&outapp);
+		return;
+	}
+
+	EQApplicationPacket outapp(OP_FindPersonReply, (nodes.size() + 1) * 12);
+	int i = 0;
+	FindPerson_Point *point_buffer = (FindPerson_Point*)outapp.pBuffer;
+	point_buffer[i].x = dest.x;
+	point_buffer[i].y = dest.y;
+	point_buffer[i].z = dest.z;
+	i++;
+
+	for (auto &node : nodes) {
+		point_buffer[i].x = node.position.x;
+		point_buffer[i].y = node.position.y;
+		point_buffer[i].z = node.position.z;
+		i++;
+	}
+
+	QueuePacket(&outapp);
+}

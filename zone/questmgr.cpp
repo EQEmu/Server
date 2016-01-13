@@ -1708,14 +1708,6 @@ void QuestManager::showgrid(int grid) {
 	if(initiator == nullptr)
 		return;
 
-	FindPerson_Point pt;
-	std::vector<FindPerson_Point> pts;
-
-	pt.x = initiator->GetX();
-	pt.y = initiator->GetY();
-	pt.z = initiator->GetZ();
-	pts.push_back(pt);
-
 	// Retrieve all waypoints for this grid
 	std::string query = StringFormat("SELECT `x`,`y`,`z` FROM grid_entries "
                                     "WHERE `gridid` = %i AND `zoneid` = %i "
@@ -1726,16 +1718,29 @@ void QuestManager::showgrid(int grid) {
 		return;
     }
 
-    for(auto row = results.begin(); row != results.end(); ++row) {
-        pt.x = atof(row[0]);
-        pt.y = atof(row[1]);
-        pt.z = atof(row[2]);
+	PathfindingRoute route;
+	auto& nodes = route.GetNodesEdit();
+	PathfindingNode node;
+	node.position.x = initiator->GetX();
+	node.position.y = initiator->GetY();
+	node.position.z = initiator->GetZ();
+	nodes.push_back(node);
 
-        pts.push_back(pt);
+    for(auto row = results.begin(); row != results.end(); ++row) {
+        node.position.x = atof(row[0]);
+        node.position.y = atof(row[1]);
+        node.position.z = atof(row[2]);
+
+        nodes.push_back(node);
     }
 
-    initiator->SendPathPacket(pts);
+	auto sz = nodes.size();
+	if (sz < 2) {
+		return;
+	}
 
+	glm::vec3 dest = nodes[sz].position;
+	initiator->CreatePathFromRoute(dest, route);
 }
 
 //change the value of a spawn condition
