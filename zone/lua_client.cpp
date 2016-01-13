@@ -1058,8 +1058,8 @@ bool Lua_Client::GrantAlternateAdvancementAbility(int aa_id, int points, bool ig
 }
 
 void Lua_Client::MarkSingleCompassLoc(float in_x, float in_y, float in_z) {
-	Lua_Safe_Call_Void();
-	self->MarkSingleCompassLoc(in_x, in_y, in_z);
+  Lua_Safe_Call_Void();
+  self->MarkSingleCompassLoc(in_x, in_y, in_z);
 }
 
 void Lua_Client::MarkSingleCompassLoc(float in_x, float in_y, float in_z, int count) {
