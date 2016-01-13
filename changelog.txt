@@ -9,7 +9,7 @@ Athrogate: Adding ClearCompassMark() to Lua.
 	- Lua didn't have ClearCompassMark().  Perl already had this.
 
 == 01/12/2016 ==
-Uleat: Fix for tradeskill containers remaining locked after a RoF+ client leaves. Intermediary fix for RoF+ clients accessing tradeskill containers when in use by another player.
+Uleat: Fix for tradeskill containers remaining locked after a RoF+ client leaves. Intermediary fix for RoF+ clients accessing tradeskill containers when in use by another player (thanks Natedog!)
 
 == 12/29/2015 ==
 Akkadius: Implemented standardized zone controller scripts (Rule Zone, UseZoneController) Defaulted to true
