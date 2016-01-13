@@ -415,15 +415,8 @@ Mob::Mob(const char* in_name,
     m_TargetRing = glm::vec3();
 
 	flymode = FlyMode3;
-	// Pathing
-	PathingLOSState = UnknownLOS;
-	PathingLoopCount = 0;
-	PathingLastNodeVisited = -1;
-	PathingLOSCheckTimer = new Timer(RuleI(Pathing, LOSCheckFrequency));
-	PathingRouteUpdateTimerShort = new Timer(RuleI(Pathing, RouteUpdateFrequencyShort));
-	PathingRouteUpdateTimerLong = new Timer(RuleI(Pathing, RouteUpdateFrequencyLong));
+
 	DistractedFromGrid = false;
-	PathingTraversedNodes = 0;
 	hate_list.SetHateOwner(this);
 
 	m_AllowBeneficial = false;
@@ -469,9 +462,6 @@ Mob::~Mob()
 		entity_list.DestroyTempPets(this);
 	}
 	entity_list.UnMarkNPC(GetID());
-	safe_delete(PathingLOSCheckTimer);
-	safe_delete(PathingRouteUpdateTimerShort);
-	safe_delete(PathingRouteUpdateTimerLong);
 	UninitializeBuffSlots();
 }
 
@@ -1564,8 +1554,7 @@ void Mob::ShowBuffList(Client* client) {
 }
 
 void Mob::GMMove(float x, float y, float z, float heading, bool SendUpdate) {
-
-	Route.clear();
+	m_pathing_route = PathfindingRoute();
 
 	if(IsNPC()) {
 		entity_list.ProcessMove(CastToNPC(), x, y, z);

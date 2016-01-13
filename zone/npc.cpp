@@ -734,7 +734,7 @@ bool NPC::Process()
 		}
 	}
 
-	//AI_Process();
+	AI_Process();
 
 	return true;
 }

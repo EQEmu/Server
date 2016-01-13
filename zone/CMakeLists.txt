@@ -183,7 +183,6 @@ SET(zone_headers
 	npc_ai.h
 	object.h
 	oriented_bounding_box.h
-	pathing.h
 	perlpacket.h
 	petitions.h
 	pets.h

@@ -42,7 +42,6 @@
 #include "net.h"
 #include "npc.h"
 #include "object.h"
-#include "pathing.h"
 #include "petitions.h"
 #include "quest_parser_collection.h"
 #include "spawn2.h"
@@ -102,8 +101,7 @@ bool Zone::Bootup(uint32 iZoneID, uint32 iInstanceID, bool iStaticZone) {
 	}
 	zone->zonemap = Map::LoadMapFile(zone->map_name);
 	zone->watermap = WaterMap::LoadWaterMapfile(zone->map_name);
-	zone->pathing = PathManager::LoadPathFile(zone->map_name);
-	zone->pathing_new.Load(zone->map_name);
+	zone->pathing.Load(zone->map_name);
 
 	char tmp[10];
 	if (database.GetVariable("loglevel",tmp, 9)) {
@@ -756,7 +754,6 @@ Zone::Zone(uint32 in_zoneid, uint32 in_instanceid, const char* in_short_name)
 	pers_instance = false;
 	zonemap = nullptr;
 	watermap = nullptr;
-	pathing = nullptr;
 	qGlobals = nullptr;
 	default_ruleset = 0;
 
@@ -845,7 +842,6 @@ Zone::~Zone() {
 	spawn2_list.Clear();
 	safe_delete(zonemap);
 	safe_delete(watermap);
-	safe_delete(pathing);
 	if (worldserver.Connected()) {
 		worldserver.SetZoneData(0);
 	}

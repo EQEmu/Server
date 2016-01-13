@@ -19,7 +19,6 @@
 #include "../common/rulesys.h"
 
 #include "map.h"
-#include "pathing.h"
 #include "zone.h"
 
 #ifdef _WINDOWS
@@ -46,7 +45,7 @@ void Mob::CheckFlee() {
 
 	//see if were possibly hurt enough
 	float ratio = GetHPRatio();
-	float fleeratio = GetSpecialAbility(FLEE_PERCENT);
+	float fleeratio = (float)GetSpecialAbility(FLEE_PERCENT);
 	fleeratio = fleeratio > 0 ? fleeratio : RuleI(Combat, FleeHPRatio);
 
 	if(ratio >= fleeratio)
@@ -106,7 +105,7 @@ void Mob::ProcessFlee()
 	}
 
 	//see if we are still dying, if so, do nothing
-	float fleeratio = GetSpecialAbility(FLEE_PERCENT);
+	float fleeratio = (float)GetSpecialAbility(FLEE_PERCENT);
 	fleeratio = fleeratio > 0 ? fleeratio : RuleI(Combat, FleeHPRatio);
 	if (GetHPRatio() < fleeratio)
 		return;
@@ -125,28 +124,11 @@ void Mob::ProcessFlee()
 
 void Mob::CalculateNewFearpoint()
 {
-	if(RuleB(Pathing, Fear) && zone->pathing)
-	{
-		int Node = zone->pathing->GetRandomPathNode();
-
-		glm::vec3 Loc = zone->pathing->GetPathNodeCoordinates(Node);
-
-		++Loc.z;
-
-		glm::vec3 CurrentPosition(GetX(), GetY(), GetZ());
-
-		std::deque<int> Route = zone->pathing->FindRoute(CurrentPosition, Loc);
-
-		if(Route.size() > 0)
-		{
-            m_FearWalkTarget = glm::vec3(Loc.x, Loc.y, Loc.z);
-			currently_fleeing = true;
-
-			Log.Out(Logs::Detail, Logs::None, "Feared to node %i (%8.3f, %8.3f, %8.3f)", Node, Loc.x, Loc.y, Loc.z);
-			return;
-		}
-
-		Log.Out(Logs::Detail, Logs::None, "No path found to selected node. Falling through to old fear point selection.");
+	glm::vec3 pos;
+	if (zone->pathing.GetRandomPoint(glm::vec3(GetX(), GetY(), GetZ()), 500.0f, pos)) {
+		currently_fleeing = true;
+		m_FearWalkTarget = pos;
+		return;
 	}
 
 	int loop = 0;
@@ -168,6 +150,7 @@ void Mob::CalculateNewFearpoint()
 			break;
 		}
 	}
+	
 	if (currently_fleeing)
         m_FearWalkTarget = glm::vec3(ranx, rany, ranz);
 	else //Break fear

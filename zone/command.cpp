@@ -58,7 +58,6 @@
 #include "command.h"
 #include "guild_mgr.h"
 #include "map.h"
-#include "pathing.h"
 #include "qglobals.h"
 #include "queryserv.h"
 #include "quest_parser_collection.h"

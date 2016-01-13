@@ -1256,7 +1256,7 @@ public:
 	bool InterrogateInventory(Client* requester, bool log, bool silent, bool allowtrip, bool& error, bool autolog = true);
 
 	void SetNextInvSnapshot(uint32 interval_in_min) {
-		m_epp.last_invsnapshot_time = time(nullptr);
+		m_epp.last_invsnapshot_time = (uint32)time(nullptr);
 		m_epp.next_invsnapshot_time = m_epp.last_invsnapshot_time + (interval_in_min * 60);
 	}
 	uint32 GetLastInvSnapshotTime() { return m_epp.last_invsnapshot_time; }

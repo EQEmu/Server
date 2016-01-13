@@ -5630,7 +5630,7 @@ void Client::Handle_OP_FindPersonRequest(const EQApplicationPacket *app)
 		}
 
 		glm::vec3 dest(target->GetX(), target->GetY(), target->GetZ());
-		auto route = zone->pathing_new.FindRoute(glm::vec3(GetX(), GetY(), GetZ()), dest);
+		auto route = zone->pathing.FindRoute(glm::vec3(GetX(), GetY(), GetZ()), dest);
 		CreatePathFromRoute(dest, route);
 	}
 }

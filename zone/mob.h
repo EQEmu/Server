@@ -18,10 +18,10 @@
 #ifndef MOB_H
 #define MOB_H
 
+#include "../common/pathfind.h"
 #include "common.h"
 #include "entity.h"
 #include "hate_list.h"
-#include "pathing.h"
 #include "position.h"
 #include "aa_ability.h"
 #include "aa.h"
@@ -473,7 +473,7 @@ public:
 	int GetBaseRunspeed() const { return base_runspeed; }
 	int GetBaseWalkspeed() const { return base_walkspeed; }
 	int GetBaseFearSpeed() const { return base_fearspeed; }
-	float GetMovespeed() const { return IsRunning() ? GetRunspeed() : GetWalkspeed(); }
+	float GetMovespeed() const { return IsRunning() ? (float)GetRunspeed() : (float)GetWalkspeed(); }
 	bool IsRunning() const { return m_is_running; }
 	void SetRunning(bool val) { m_is_running = val; }
 	virtual void GMMove(float x, float y, float z, float heading = 0.01, bool SendUpdate = true);
@@ -1141,8 +1141,8 @@ protected:
 	virtual int16 GetFocusEffect(focusType type, uint16 spell_id) { return 0; }
 	void CalculateNewFearpoint();
 	float FindGroundZ(float new_x, float new_y, float z_offset=0.0);
-	glm::vec3 UpdatePath(float ToX, float ToY, float ToZ, float Speed, bool &WaypointChange, bool &NodeReached);
-	void PrintRoute();
+	glm::vec3 UpdatePath(float ToX, float ToY, float ToZ, float Speed, bool &WaypointChange);
+	void TrySnapToMap();
 
 	virtual float GetSympatheticProcChances(uint16 spell_id, int16 ProcRateMod, int32 ItemProcRate = 0);
 	int16 GetSympatheticSpellProcRate(uint16 spell_id);
@@ -1313,19 +1313,8 @@ protected:
 	glm::vec3 m_FearWalkTarget;
 	bool currently_fleeing;
 
-	// Pathing
-	//
-	glm::vec3 PathingDestination;
-	glm::vec3 PathingLastPosition;
-	int PathingLoopCount;
-	int PathingLastNodeVisited;
-	std::deque<int> Route;
-	LOSType PathingLOSState;
-	Timer *PathingLOSCheckTimer;
-	Timer *PathingRouteUpdateTimerShort;
-	Timer *PathingRouteUpdateTimerLong;
+	PathfindingRoute m_pathing_route;
 	bool DistractedFromGrid;
-	int PathingTraversedNodes;
 
 	uint32 pDontHealMeBefore;
 	uint32 pDontBuffMeBefore;

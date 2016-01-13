@@ -2691,26 +2691,6 @@ void EntityList::ListPlayerCorpses(Client *client)
 	client->Message(0, "%d player corpses listed.", x);
 }
 
-void EntityList::FindPathsToAllNPCs()
-{
-	if (!zone->pathing)
-		return;
-
-	auto it = npc_list.begin();
-	while (it != npc_list.end()) {
-		glm::vec3 Node0 = zone->pathing->GetPathNodeCoordinates(0, false);
-		glm::vec3 Dest(it->second->GetX(), it->second->GetY(), it->second->GetZ());
-		std::deque<int> Route = zone->pathing->FindRoute(Node0, Dest);
-		if (Route.size() == 0)
-			printf("Unable to find a route to %s\n", it->second->GetName());
-		else
-			printf("Found a route to %s\n", it->second->GetName());
-		++it;
-	}
-
-	fflush(stdout);
-}
-
 // returns the number of corpses deleted. A negative number indicates an error code.
 int32 EntityList::DeleteNPCCorpses()
 {

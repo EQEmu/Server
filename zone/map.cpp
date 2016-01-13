@@ -873,7 +873,7 @@ bool Map::LoadV2(FILE *f) {
 		}
 	}
 
-	uint32 face_count = indices.size() / 3;
+	uint32 face_count = (uint32)indices.size() / 3;
 
 	if (imp) {
 		imp->rm->release();

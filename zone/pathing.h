@@ -74,10 +74,8 @@ public:
 	void OpenDoors(int Node1, int Node2, Mob* ForWho);
 
 	PathNode* FindPathNodeByCoordinates(float x, float y, float z);
-	void ShowPathNodeNeighbours(Client *c);
 	int GetRandomPathNode();
 
-	void NodeInfo(Client *c);
 	int32 AddNode(float x, float y, float z, float best_z, int32 requested_id = 0); //return -1 on failure, else returns the id of this node
 	bool DeleteNode(Client *c);
 	bool DeleteNode(int32 id); //returns true on success, false on failure, tries to delete a node from this map
