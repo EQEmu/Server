@@ -1067,6 +1067,11 @@ void Lua_Client::MarkSingleCompassLoc(float in_x, float in_y, float in_z, int co
 	self->MarkSingleCompassLoc(in_x, in_y, in_z, count);
 }
 
+void Lua_Client::ClearCompassMark() {
+  Lua_Safe_Call_Void();
+  self->MarkSingleCompassLoc(0,0,0,0);
+}
+
 int Lua_Client::GetNextAvailableSpellBookSlot() {
 	Lua_Safe_Call_Int();
 	return self->GetNextAvailableSpellBookSlot();
@@ -1548,6 +1553,7 @@ luabind::scope lua_register_client() {
 		.def("GrantAlternateAdvancementAbility", (bool(Lua_Client::*)(int, int, bool))&Lua_Client::GrantAlternateAdvancementAbility)
 		.def("MarkSingleCompassLoc", (void(Lua_Client::*)(float,float,float))&Lua_Client::MarkSingleCompassLoc)
 		.def("MarkSingleCompassLoc", (void(Lua_Client::*)(float,float,float,int))&Lua_Client::MarkSingleCompassLoc)
+    .def("ClearCompassMark",(void(Lua_Client::*)(void))&Lua_Client::ClearCompassMark)
 		.def("GetNextAvailableSpellBookSlot", (int(Lua_Client::*)(void))&Lua_Client::GetNextAvailableSpellBookSlot)
 		.def("GetNextAvailableSpellBookSlot", (int(Lua_Client::*)(int))&Lua_Client::GetNextAvailableSpellBookSlot)
 		.def("FindSpellBookSlotBySpellID", (int(Lua_Client::*)(int))&Lua_Client::FindSpellBookSlotBySpellID)

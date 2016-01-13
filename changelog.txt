@@ -1,6 +1,10 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
 == 01/12/2016 ==
+Athrogate: Adding ClearCompassMark() to Lua.
+	- Lua didn't have ClearCompassMark().  Perl already had this.
+
+== 01/12/2016 ==
 Uleat: Fix for tradeskill containers remaining locked after a RoF+ client leaves. Intermediary fix for RoF+ clients accessing tradeskill containers when in use by another player.
 
 == 12/29/2015 ==
