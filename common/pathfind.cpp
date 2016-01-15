@@ -152,15 +152,9 @@ PathfindingRoute PathfindingManager::FindRoute(const glm::vec3 &src_loc, const g
 	ret.m_active = true;
 
 	if (!m_nav_mesh) {
-		PathfindingNode src;
-		src.flag = NavigationPolyFlagNormal;
-		src.position = current_location;
-
 		PathfindingNode dest;
 		dest.flag = NavigationPolyFlagNormal;
-		dest.position = dest_location;
-
-		ret.m_nodes.push_back(src);
+		dest.position = dest_loc;
 		ret.m_nodes.push_back(dest);
 		return ret;
 	}
@@ -178,15 +172,9 @@ PathfindingRoute PathfindingManager::FindRoute(const glm::vec3 &src_loc, const g
 	m_nav_query->findNearestPoly(&dest_location[0], &ext[0], &m_filter, &end_ref, 0);
 
 	if (!start_ref || !end_ref) {
-		PathfindingNode src;
-		src.flag = NavigationPolyFlagNormal;
-		src.position = current_location;
-
 		PathfindingNode dest;
 		dest.flag = NavigationPolyFlagNormal;
-		dest.position = dest_location;
-
-		ret.m_nodes.push_back(src);
+		dest.position = dest_loc;
 		ret.m_nodes.push_back(dest);
 		return ret;
 	}
@@ -225,15 +213,9 @@ PathfindingRoute PathfindingManager::FindRoute(const glm::vec3 &src_loc, const g
 		}
 	}
 	else {
-		PathfindingNode src;
-		src.flag = NavigationPolyFlagNormal;
-		src.position = current_location;
-
 		PathfindingNode dest;
 		dest.flag = NavigationPolyFlagNormal;
-		dest.position = dest_location;
-
-		ret.m_nodes.push_back(src);
+		dest.position = dest_loc;
 		ret.m_nodes.push_back(dest);
 	}
 
