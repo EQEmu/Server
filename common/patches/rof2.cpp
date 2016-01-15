@@ -2471,13 +2471,14 @@ namespace RoF2
 		outapp->WriteSInt32(234);	// Endurance Total ?
 		outapp->WriteSInt32(345);	// Mana Total ?
 
-		outapp->WriteUInt32(0);		// Unknown
-		outapp->WriteUInt32(0);		// Unknown
-		outapp->WriteUInt32(0);		// Unknown
-		outapp->WriteUInt32(0);		// Unknown
-		outapp->WriteUInt32(0);		// Unknown
-		outapp->WriteUInt32(0);		// Unknown
-		outapp->WriteUInt32(0);		// Unknown
+		// these are needed to fix display bugs
+		outapp->WriteUInt32(0x19);		// base CR
+		outapp->WriteUInt32(0x19);		// base FR
+		outapp->WriteUInt32(0x19);		// base MR
+		outapp->WriteUInt32(0xf);		// base DR
+		outapp->WriteUInt32(0xf);		// base PR
+		outapp->WriteUInt32(0xf);		// base PhR?
+		outapp->WriteUInt32(0xf);		// base Corrup
 		outapp->WriteUInt32(0);		// Unknown
 		outapp->WriteUInt32(0);		// Unknown
 		outapp->WriteUInt32(0);		// Unknown
