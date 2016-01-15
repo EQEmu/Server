@@ -4393,8 +4393,14 @@ void command_uptime(Client *c, const Seperator *sep)
 void command_flag(Client *c, const Seperator *sep)
 {
 	if(sep->arg[2][0] == 0) {
-		c->UpdateAdmin();
-		c->Message(0, "Refreshed your admin flag from DB.");
+		if (!c->GetTarget() || (c->GetTarget() && c->GetTarget() == c)) {
+			c->UpdateAdmin();
+			c->Message(0, "Refreshed your admin flag from DB.");
+		} else if (c->GetTarget() && c->GetTarget() != c && c->GetTarget()->IsClient()) {
+			c->GetTarget()->CastToClient()->UpdateAdmin();
+			c->Message(0, "%s's admin flag has been refreshed.", c->GetTarget()->GetName());
+			c->GetTarget()->Message(0, "%s refreshed your admin flag.", c->GetName());
+		}
 	}
 	else if (!sep->IsNumber(1) || atoi(sep->arg[1]) < -2 || atoi(sep->arg[1]) > 255 || strlen(sep->arg[2]) == 0)
 		c->Message(0, "Usage: #flag [status] [acctname]");
@@ -5476,36 +5482,54 @@ void command_interrupt(Client *c, const Seperator *sep)
 
 void command_summonitem(Client *c, const Seperator *sep)
 {
-	if (!sep->IsNumber(1))
-		c->Message(0, "Usage: #summonitem [item id] [charges], charges are optional");
-	else {
-		uint32 itemid = atoi(sep->arg[1]);
-		int16 item_status = 0;
-		const Item_Struct* item = database.GetItem(itemid);
-		if(item) {
-			item_status = static_cast<int16>(item->MinStatus);
-		}
+	uint32 itemid = 0;
 
-		if (item_status > c->Admin())
-			c->Message(13, "Error: Insufficient status to summon this item.");
-		else if (sep->argnum==2 && sep->IsNumber(2))
-			c->SummonItem(itemid, atoi(sep->arg[2]));
-		else if (sep->argnum==3)
-			c->SummonItem(itemid, atoi(sep->arg[2]), atoi(sep->arg[3]));
-		else if (sep->argnum==4)
-			c->SummonItem(itemid, atoi(sep->arg[2]), atoi(sep->arg[3]), atoi(sep->arg[4]));
-		else if (sep->argnum==5)
-			c->SummonItem(itemid, atoi(sep->arg[2]), atoi(sep->arg[3]), atoi(sep->arg[4]), atoi(sep->arg[5]));
-		else if (sep->argnum==6)
-			c->SummonItem(itemid, atoi(sep->arg[2]), atoi(sep->arg[3]), atoi(sep->arg[4]), atoi(sep->arg[5]), atoi(sep->arg[6]));
-		else if (sep->argnum==7)
-			c->SummonItem(itemid, atoi(sep->arg[2]), atoi(sep->arg[3]), atoi(sep->arg[4]), atoi(sep->arg[5]), atoi(sep->arg[6]), atoi(sep->arg[7]));
-		else if (sep->argnum==8)
-			c->SummonItem(itemid, atoi(sep->arg[2]), atoi(sep->arg[3]), atoi(sep->arg[4]), atoi(sep->arg[5]), atoi(sep->arg[6]), atoi(sep->arg[7]), atoi(sep->arg[8]));
-		else {
-			c->SummonItem(itemid);
-		}
+	std::string cmd_msg = sep->msg;
+	size_t link_open = cmd_msg.find('\x12');
+	size_t link_close = cmd_msg.find_last_of('\x12');
+	if (link_open != link_close && (cmd_msg.length() - link_open) > EmuConstants::TEXT_LINK_BODY_LENGTH) {
+		TextLinkBody_Struct link_body;
+		Client::TextLink::DegenerateLinkBody(link_body, cmd_msg.substr(link_open + 1, EmuConstants::TEXT_LINK_BODY_LENGTH));
+		itemid = link_body.item_id;
 	}
+	else if (!sep->IsNumber(1)) {
+		c->Message(0, "Usage: #summonitem [item id | link] [charges], charges are optional");
+		return;
+	}
+	else {
+		itemid = atoi(sep->arg[1]);
+	}
+	if (!itemid) {
+		c->Message(0, "A valid item id number is required (derived: 0)");
+		return;
+	}
+
+	int16 item_status = 0;
+	const Item_Struct* item = database.GetItem(itemid);
+	if (item) {
+		item_status = static_cast<int16>(item->MinStatus);
+	}
+
+	if (item_status > c->Admin())
+		c->Message(13, "Error: Insufficient status to summon this item.");
+	else if (sep->argnum == 2 && sep->IsNumber(2))
+		c->SummonItem(itemid, atoi(sep->arg[2]));
+	else if (sep->argnum == 3)
+		c->SummonItem(itemid, atoi(sep->arg[2]), atoi(sep->arg[3]));
+	else if (sep->argnum == 4)
+		c->SummonItem(itemid, atoi(sep->arg[2]), atoi(sep->arg[3]), atoi(sep->arg[4]));
+	else if (sep->argnum == 5)
+		c->SummonItem(itemid, atoi(sep->arg[2]), atoi(sep->arg[3]), atoi(sep->arg[4]), atoi(sep->arg[5]));
+	else if (sep->argnum == 6)
+		c->SummonItem(itemid, atoi(sep->arg[2]), atoi(sep->arg[3]), atoi(sep->arg[4]), atoi(sep->arg[5]), atoi(sep->arg[6]));
+	else if (sep->argnum == 7)
+		c->SummonItem(itemid, atoi(sep->arg[2]), atoi(sep->arg[3]), atoi(sep->arg[4]), atoi(sep->arg[5]), atoi(sep->arg[6]), atoi(sep->arg[7]));
+	else if (sep->argnum == 8)
+		c->SummonItem(itemid, atoi(sep->arg[2]), atoi(sep->arg[3]), atoi(sep->arg[4]), atoi(sep->arg[5]), atoi(sep->arg[6]), atoi(sep->arg[7]), atoi(sep->arg[8]));
+	else {
+		c->SummonItem(itemid);
+	}
+	
 }
 
 void command_giveitem(Client *c, const Seperator *sep)

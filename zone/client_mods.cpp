@@ -1633,13 +1633,19 @@ int32	Client::CalcMR()
 			MR = 30;
 			break;
 		case DRAKKIN:
-			MR = 35;
+		{
+			MR = 25;
+			if (GetDrakkinHeritage() == 2)
+				MR += 10;
+			else if (GetDrakkinHeritage() == 5)
+				MR += 2;
 			break;
+		}
 		default:
 			MR = 20;
 	}
 	MR += itembonuses.MR + spellbonuses.MR + aabonuses.MR;
-	if (GetClass() == WARRIOR) {
+	if (GetClass() == WARRIOR || GetClass() == BERSERKER) {
 		MR += GetLevel() / 2;
 	}
 	if (MR < 1) {
@@ -1701,14 +1707,27 @@ int32	Client::CalcFR()
 			FR = 25;
 			break;
 		case DRAKKIN:
+		{
 			FR = 25;
+			if (GetDrakkinHeritage() == 0)
+				FR += 10;
+			else if (GetDrakkinHeritage() == 5)
+				FR += 2;
 			break;
+		}
 		default:
 			FR = 20;
 	}
 	int c = GetClass();
 	if (c == RANGER) {
 		FR += 4;
+		int l = GetLevel();
+		if (l > 49) {
+			FR += l - 49;
+		}
+	}
+	if (c == MONK) {
+		FR += 8;
 		int l = GetLevel();
 		if (l > 49) {
 			FR += l - 49;
@@ -1774,12 +1793,24 @@ int32	Client::CalcDR()
 			DR = 15;
 			break;
 		case DRAKKIN:
+		{
 			DR = 15;
+			if (GetDrakkinHeritage() == 1)
+				DR += 10;
+			else if (GetDrakkinHeritage() == 5)
+				DR += 2;
 			break;
+		}
 		default:
 			DR = 15;
 	}
 	int c = GetClass();
+	// the monk one is part of base resist
+	if (c == MONK) {
+		int l = GetLevel();
+		if (l > 50)
+			DR += l - 50;
+	}
 	if (c == PALADIN) {
 		DR += 8;
 		int l = GetLevel();
@@ -1787,7 +1818,7 @@ int32	Client::CalcDR()
 			DR += l - 49;
 		}
 	}
-	else if (c == SHADOWKNIGHT) {
+	else if (c == SHADOWKNIGHT || c == BEASTLORD) {
 		DR += 4;
 		int l = GetLevel();
 		if (l > 49) {
@@ -1854,12 +1885,24 @@ int32	Client::CalcPR()
 			PR = 30;
 			break;
 		case DRAKKIN:
+		{
 			PR = 15;
+			if (GetDrakkinHeritage() == 3)
+				PR += 10;
+			else if (GetDrakkinHeritage() == 5)
+				PR += 2;
 			break;
+		}
 		default:
 			PR = 15;
 	}
 	int c = GetClass();
+	// this monk bonus is part of the base
+	if (c == MONK) {
+		int l = GetLevel();
+		if (l > 50)
+			PR += l - 50;
+	}
 	if (c == ROGUE) {
 		PR += 8;
 		int l = GetLevel();
@@ -1934,13 +1977,19 @@ int32	Client::CalcCR()
 			CR = 25;
 			break;
 		case DRAKKIN:
+		{
 			CR = 25;
+			if (GetDrakkinHeritage() == 4)
+				CR += 10;
+			else if (GetDrakkinHeritage() == 5)
+				CR += 2;
 			break;
+		}
 		default:
 			CR = 25;
 	}
 	int c = GetClass();
-	if (c == RANGER) {
+	if (c == RANGER || c == BEASTLORD) {
 		CR += 4;
 		int l = GetLevel();
 		if (l > 49) {
