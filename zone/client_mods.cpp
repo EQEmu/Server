@@ -1901,7 +1901,7 @@ int32	Client::CalcPR()
 	if (c == MONK) {
 		int l = GetLevel();
 		if (l > 50)
-			PR += l = 50;
+			PR += l - 50;
 	}
 	if (c == ROGUE) {
 		PR += 8;
