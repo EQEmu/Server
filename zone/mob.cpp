@@ -108,7 +108,8 @@ Mob::Mob(const char* in_name,
 		m_TargetLocation(glm::vec3()),
 		m_TargetV(glm::vec3()),
 		flee_timer(FLEE_CHECK_TIMER),
-		m_Position(position)
+		m_Position(position),
+		m_pos_update_timer(3000)
 {
 	targeted = 0;
 	tar_ndx=0;
@@ -119,7 +120,8 @@ Mob::Mob(const char* in_name,
 	SetMoving(false);
 	moved=false;
 	m_RewindLocation = glm::vec3();
-	move_tic_count = 0;
+	m_pos_update_heading = INVALID_POS_HEADING;
+	m_pos_update_speed = 0;
 
 	_egnode = nullptr;
 	name[0]=0;
@@ -1372,39 +1374,34 @@ void Mob::SendPosition()
 	EQApplicationPacket* app = new EQApplicationPacket(OP_ClientUpdate, sizeof(PlayerPositionUpdateServer_Struct));
 	PlayerPositionUpdateServer_Struct* spu = (PlayerPositionUpdateServer_Struct*)app->pBuffer;
 	MakeSpawnUpdateNoDelta(spu);
-	move_tic_count = 0;
+	m_pos_update_heading = INVALID_POS_HEADING;
+	m_pos_update_speed = 0;
 	entity_list.QueueClients(this, app, true);
 	safe_delete(app);
 }
 
 // this one is for mobs on the move, with deltas - this makes them walk
 void Mob::SendPosUpdate(uint8 iSendToSelf) {
-	EQApplicationPacket* app = new EQApplicationPacket(OP_ClientUpdate, sizeof(PlayerPositionUpdateServer_Struct));
-	PlayerPositionUpdateServer_Struct* spu = (PlayerPositionUpdateServer_Struct*)app->pBuffer;
+	EQApplicationPacket app(OP_ClientUpdate, sizeof(PlayerPositionUpdateServer_Struct));
+	PlayerPositionUpdateServer_Struct* spu = (PlayerPositionUpdateServer_Struct*)app.pBuffer;
 	MakeSpawnUpdate(spu);
 
-	if (iSendToSelf == 2) {
-		if (IsClient()) {
-			CastToClient()->FastQueuePacket(&app,false);
-		}
+	if (IsClient() && iSendToSelf) {
+		CastToClient()->QueuePacket(&app,false);
 	}
 	else
 	{
-		if(move_tic_count == RuleI(Zone, NPCPositonUpdateTicCount))
+		if (m_pos_update_heading == INVALID_POS_HEADING || 
+			m_pos_update_timer.Check() || 
+			m_pos_update_speed != pRunAnimSpeed ||
+			abs(m_pos_update_heading - GetHeading()) > INVALID_POS_HEADING_EPS) 
 		{
-			entity_list.QueueClients(this, app, (iSendToSelf == 0), false);
-			move_tic_count = 0;
-		}
-		else if(move_tic_count % 2 == 0)
-		{
-			entity_list.QueueCloseClients(this, app, (iSendToSelf == 0), 700, nullptr, false);
-			move_tic_count++;
-		} 
-		else {
-			move_tic_count++;
+			m_pos_update_speed = pRunAnimSpeed;
+			m_pos_update_heading = GetHeading();
+			entity_list.QueueCloseClients(this, &app, (iSendToSelf == 0), 1000, nullptr, false);
+			m_pos_update_timer.Start();
 		}
 	}
-	safe_delete(app);
 }
 
 // this is for SendPosition()
@@ -1444,7 +1441,7 @@ void Mob::MakeSpawnUpdate(PlayerPositionUpdateServer_Struct* spu) {
 	if(this->IsClient())
 		spu->animation = animation;
 	else
-		spu->animation	= pRunAnimSpeed;//animation;
+		spu->animation	= pRunAnimSpeed;
 	spu->delta_heading = NewFloatToEQ13(m_Delta.w);
 }
 

@@ -19,18 +19,24 @@ glm::vec3 Mob::UpdatePath(float ToX, float ToY, float ToZ, float Speed, bool &Wa
 	if (to == from)
 		return to;
 
-	if (DistanceSquaredNoZ(m_Position, glm::vec4(ToX, ToY, ToZ, 0.0f)) < 100.0f) {
-		return to;
-	}
-
 	if (!m_pathing_route.Active() || !m_pathing_route.DestinationValid(to)) {
 		m_pathing_route = zone->pathing.FindRoute(from, to);
 
 		auto &nodes = m_pathing_route.GetNodesEdit();
 		auto &last_node = nodes[nodes.size() - 1];
-		if (DistanceSquared(glm::vec4(last_node.position, 1.0f), glm::vec4(ToX, ToY, ToZ, 0.0f)) > 100.0f) {
+		auto dist = DistanceSquared(glm::vec4(last_node.position, 1.0f), glm::vec4(ToX, ToY, ToZ, 0.0f));
+		if (dist > 10000.0f) {
+			auto flag_temp = last_node.flag;
 			last_node.flag = NavigationPolyFlagPortal;
 
+			PathfindingNode end;
+			end.position.x = ToX;
+			end.position.y = ToY;
+			end.position.z = ToZ;
+			end.flag = flag_temp;
+			nodes.push_back(end);
+		}
+		else if (dist > 100.0f) {
 			PathfindingNode end;
 			end.position.x = ToX;
 			end.position.y = ToY;

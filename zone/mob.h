@@ -32,6 +32,8 @@
 char* strn0cpy(char* dest, const char* source, uint32 size);
 
 #define MAX_SPECIAL_ATTACK_PARAMS 8
+#define INVALID_POS_HEADING -99999.0
+#define INVALID_POS_HEADING_EPS 0.01
 
 class EGNode;
 class Client;
@@ -1286,11 +1288,12 @@ protected:
 	int32 GetItemFactionBonus(uint32 pFactionID);
 	void ClearItemFactionBonuses();
 
-	void CalculateFearPosition();
-	uint32 move_tic_count;
-
 	bool flee_mode;
 	Timer flee_timer;
+
+	Timer m_pos_update_timer;
+	float m_pos_update_heading;
+	uint8 m_pos_update_speed;
 
 	bool pAIControlled;
 	bool roamer;
