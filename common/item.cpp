@@ -2342,31 +2342,31 @@ int ItemInst::GetItemElementalDamage(int &magic, int &fire, int &cold, int &pois
 	if (item) {
 		switch (item->ElemDmgType) {
 		case RESIST_MAGIC:
-			magic = item->ElemDmgAmt;
+			magic += item->ElemDmgAmt;
 			break;
 		case RESIST_FIRE:
-			fire = item->ElemDmgAmt;
+			fire += item->ElemDmgAmt;
 			break;
 		case RESIST_COLD:
-			cold = item->ElemDmgAmt;
+			cold += item->ElemDmgAmt;
 			break;
 		case RESIST_POISON:
-			poison = item->ElemDmgAmt;
+			poison += item->ElemDmgAmt;
 			break;
 		case RESIST_DISEASE:
-			disease = item->ElemDmgAmt;
+			disease += item->ElemDmgAmt;
 			break;
 		case RESIST_CHROMATIC:
-			chromatic = item->ElemDmgAmt;
+			chromatic += item->ElemDmgAmt;
 			break;
 		case RESIST_PRISMATIC:
-			prismatic = item->ElemDmgAmt;
+			prismatic += item->ElemDmgAmt;
 			break;
 		case RESIST_PHYSICAL:
-			physical = item->ElemDmgAmt;
+			physical += item->ElemDmgAmt;
 			break;
 		case RESIST_CORRUPTION:
-			corruption = item->ElemDmgAmt;
+			corruption += item->ElemDmgAmt;
 			break;
 		}
 
