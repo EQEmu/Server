@@ -231,6 +231,8 @@ public:
 		int resist_override = 0, bool CharismaCheck = false, bool CharmTick = false, bool IsRoot = false,
 		int level_override = -1);
 	int ResistPhysical(int level_diff, uint8 caster_level);
+	int ResistElementalWeaponDmg(const ItemInst *item);
+	int CheckBaneDamage(const ItemInst *item);
 	uint16 GetSpecializeSkillValue(uint16 spell_id) const;
 	void SendSpellBarDisable();
 	void SendSpellBarEnable(uint16 spellid);

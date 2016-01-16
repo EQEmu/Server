@@ -928,231 +928,108 @@ int Mob::GetWeaponDamage(Mob *against, const ItemInst *weapon_item, uint32 *hate
 	int banedmg = 0;
 	int x = 0;
 
-	if(!against || against->GetInvul() || against->GetSpecialAbility(IMMUNE_MELEE)){
+	if (!against || against->GetInvul() || against->GetSpecialAbility(IMMUNE_MELEE))
 		return 0;
-	}
 
-	//check for items being illegally attained
-	if(weapon_item){
-		const Item_Struct *mWeaponItem = weapon_item->GetItem();
-		if(mWeaponItem){
-			if(mWeaponItem->ReqLevel > GetLevel()){
-				return 0;
-			}
-
-			if(!weapon_item->IsEquipable(GetBaseRace(), GetClass())){
-				return 0;
-			}
-		}
-		else{
+	// check for items being illegally attained
+	if (weapon_item) {
+		if (!weapon_item->GetItem())
 			return 0;
-		}
+
+		if (weapon_item->GetItemRequiredLevel(true) > GetLevel())
+			return 0;
+
+		if (!weapon_item->IsEquipable(GetBaseRace(), GetClass()))
+			return 0;
 	}
 
-	if(against->GetSpecialAbility(IMMUNE_MELEE_NONMAGICAL)){
-		if(weapon_item){
+	if (against->GetSpecialAbility(IMMUNE_MELEE_NONMAGICAL)) {
+		if (weapon_item) {
 			// check to see if the weapon is magic
-			bool MagicWeapon = false;
-			if(weapon_item->GetItem() && weapon_item->GetItem()->Magic)
-				MagicWeapon = true;
-			else
-				if(spellbonuses.MagicWeapon || itembonuses.MagicWeapon)
-					MagicWeapon = true;
+			bool MagicWeapon = weapon_item->GetItemMagical(true) || spellbonuses.MagicWeapon || itembonuses.MagicWeapon;
+			if (MagicWeapon) {
+				auto rec_level = weapon_item->GetItemRecommendedLevel(true);
+				if (IsClient() && GetLevel() < rec_level)
+					dmg = CastToClient()->CalcRecommendedLevelBonus(
+					    GetLevel(), rec_level, weapon_item->GetItemWeaponDamage(true));
 				else
-					// An augment on the weapon that is marked magic makes
-					// the item magical.
-					for(x = 0; MagicWeapon == false && x < EmuConstants::ITEM_COMMON_SIZE; x++)
-					{
-						if(weapon_item->GetAugment(x) && weapon_item->GetAugment(x)->GetItem())
-						{
-							if (weapon_item->GetAugment(x)->GetItem()->Magic)
-								MagicWeapon = true;
-						}
-					}
-
-			if(MagicWeapon) {
-
-				if(IsClient() && GetLevel() < weapon_item->GetItem()->RecLevel){
-					dmg = CastToClient()->CalcRecommendedLevelBonus(GetLevel(), weapon_item->GetItem()->RecLevel, weapon_item->GetItem()->Damage);
-				}
-				else{
-					dmg = weapon_item->GetItem()->Damage;
-				}
-
-				for(int x = 0; x < EmuConstants::ITEM_COMMON_SIZE; x++){
-					if(weapon_item->GetAugment(x) && weapon_item->GetAugment(x)->GetItem()){
-						dmg += weapon_item->GetAugment(x)->GetItem()->Damage;
-						if (hate) *hate += weapon_item->GetAugment(x)->GetItem()->Damage + weapon_item->GetAugment(x)->GetItem()->ElemDmgAmt;
-					}
-				}
+					dmg = weapon_item->GetItemWeaponDamage(true);
 				dmg = dmg <= 0 ? 1 : dmg;
-			}
-			else
+			} else {
 				return 0;
-		}
-		else{
-			bool MagicGloves=false;
+			}
+		} else {
+			bool MagicGloves = false;
 			if (IsClient()) {
-				ItemInst *gloves=CastToClient()->GetInv().GetItem(MainHands);
-				if (gloves != nullptr) {
-					MagicGloves = gloves->GetItem()->Magic;
-				}
+				const ItemInst *gloves = CastToClient()->GetInv().GetItem(MainHands);
+				if (gloves)
+					MagicGloves = gloves->GetItemMagical(true);
 			}
 
-			if((GetClass() == MONK || GetClass() == BEASTLORD)) {
-				if(MagicGloves || GetLevel() >= 30){
+			if (GetClass() == MONK || GetClass() == BEASTLORD) {
+				if (MagicGloves || GetLevel() >= 30) {
 					dmg = GetHandToHandDamage();
-					if (hate) *hate += dmg;
+					if (hate)
+						*hate += dmg;
 				}
-			}
-			else if(GetOwner() && GetLevel() >= RuleI(Combat, PetAttackMagicLevel)){ //pets wouldn't actually use this but...
-				dmg = 1;															//it gives us an idea if we can hit
-			}
-			else if(MagicGloves || GetSpecialAbility(SPECATK_MAGICAL)){
+			} else if (GetOwner() &&
+				   GetLevel() >=
+				       RuleI(Combat, PetAttackMagicLevel)) { // pets wouldn't actually use this but...
+				dmg = 1; // it gives us an idea if we can hit
+			} else if (MagicGloves || GetSpecialAbility(SPECATK_MAGICAL)) {
 				dmg = 1;
-			}
-			else
+			} else
 				return 0;
 		}
-	}
-	else{
-		if(weapon_item){
-			if(weapon_item->GetItem()){
+	} else {
+		if (weapon_item) {
+			if (weapon_item->GetItem()) {
+				auto rec_level = weapon_item->GetItemRecommendedLevel(true);
+				if (IsClient() && GetLevel() < rec_level) {
+					dmg = CastToClient()->CalcRecommendedLevelBonus(
+					    GetLevel(), rec_level, weapon_item->GetItemWeaponDamage(true));
+				} else {
+					dmg = weapon_item->GetItemWeaponDamage(true);
+				}
 
-				if(IsClient() && GetLevel() < weapon_item->GetItem()->RecLevel){
-					dmg = CastToClient()->CalcRecommendedLevelBonus(GetLevel(), weapon_item->GetItem()->RecLevel, weapon_item->GetItem()->Damage);
-				}
-				else{
-					dmg = weapon_item->GetItem()->Damage;
-				}
-
-				for (int x = 0; x < EmuConstants::ITEM_COMMON_SIZE; x++){
-					if(weapon_item->GetAugment(x) && weapon_item->GetAugment(x)->GetItem()){
-						dmg += weapon_item->GetAugment(x)->GetItem()->Damage;
-						if (hate) *hate += weapon_item->GetAugment(x)->GetItem()->Damage + weapon_item->GetAugment(x)->GetItem()->ElemDmgAmt;
-					}
-				}
 				dmg = dmg <= 0 ? 1 : dmg;
 			}
-		}
-		else{
+		} else {
 			dmg = GetHandToHandDamage();
-			if (hate) *hate += dmg;
+			if (hate)
+				*hate += dmg;
 		}
 	}
 
 	int eledmg = 0;
-	if(!against->GetSpecialAbility(IMMUNE_MAGIC)){
-		if(weapon_item && weapon_item->GetItem() && weapon_item->GetItem()->ElemDmgAmt){
-			if(IsClient() && GetLevel() < weapon_item->GetItem()->RecLevel){
-				eledmg = CastToClient()->CalcRecommendedLevelBonus(GetLevel(), weapon_item->GetItem()->RecLevel, weapon_item->GetItem()->ElemDmgAmt);
-			}
-			else{
-				eledmg = weapon_item->GetItem()->ElemDmgAmt;
-			}
-
-			if(eledmg)
-			{
-				eledmg = (eledmg * against->ResistSpell(weapon_item->GetItem()->ElemDmgType, 0, this) / 100);
-			}
-		}
-
-		if(weapon_item){
-			for (int x = 0; x < EmuConstants::ITEM_COMMON_SIZE; x++){
-				if(weapon_item->GetAugment(x) && weapon_item->GetAugment(x)->GetItem()){
-					if(weapon_item->GetAugment(x)->GetItem()->ElemDmgAmt)
-						eledmg += (weapon_item->GetAugment(x)->GetItem()->ElemDmgAmt * against->ResistSpell(weapon_item->GetAugment(x)->GetItem()->ElemDmgType, 0, this) / 100);
-				}
-			}
-		}
+	if (!against->GetSpecialAbility(IMMUNE_MAGIC)) {
+		if (weapon_item && weapon_item->GetItem() && weapon_item->GetItemElementalFlag(true))
+			// the client actually has the way this is done, it does not appear to check req!
+			eledmg = against->ResistElementalWeaponDmg(weapon_item);
 	}
 
-	if(against->GetSpecialAbility(IMMUNE_MELEE_EXCEPT_BANE)){
-		if(weapon_item && weapon_item->GetItem()){
-			if(weapon_item->GetItem()->BaneDmgBody == against->GetBodyType()){
-				if(IsClient() && GetLevel() < weapon_item->GetItem()->RecLevel){
-					banedmg += CastToClient()->CalcRecommendedLevelBonus(GetLevel(), weapon_item->GetItem()->RecLevel, weapon_item->GetItem()->BaneDmgAmt);
-				}
-				else{
-					banedmg += weapon_item->GetItem()->BaneDmgAmt;
-				}
-			}
+	if (weapon_item && weapon_item->GetItem() &&
+			(weapon_item->GetItemBaneDamageBody(true) || weapon_item->GetItemBaneDamageRace(true)))
+		banedmg = against->CheckBaneDamage(weapon_item);
 
-			if(weapon_item->GetItem()->BaneDmgRace == against->GetRace()){
-				if(IsClient() && GetLevel() < weapon_item->GetItem()->RecLevel){
-					banedmg += CastToClient()->CalcRecommendedLevelBonus(GetLevel(), weapon_item->GetItem()->RecLevel, weapon_item->GetItem()->BaneDmgRaceAmt);
-				}
-				else{
-					banedmg += weapon_item->GetItem()->BaneDmgRaceAmt;
-				}
-			}
-
-			for (int x = 0; x < EmuConstants::ITEM_COMMON_SIZE; x++){
-				if(weapon_item->GetAugment(x) && weapon_item->GetAugment(x)->GetItem()){
-					if(weapon_item->GetAugment(x)->GetItem()->BaneDmgBody == against->GetBodyType()){
-						banedmg += weapon_item->GetAugment(x)->GetItem()->BaneDmgAmt;
-					}
-
-					if(weapon_item->GetAugment(x)->GetItem()->BaneDmgRace == against->GetRace()){
-						banedmg += weapon_item->GetAugment(x)->GetItem()->BaneDmgRaceAmt;
-					}
-				}
-			}
-		}
-
-		if(!eledmg && !banedmg)
-		{
-			if(!GetSpecialAbility(SPECATK_BANE))
+	if (against->GetSpecialAbility(IMMUNE_MELEE_EXCEPT_BANE)) {
+		if (!eledmg && !banedmg) {
+			if (!GetSpecialAbility(SPECATK_BANE))
 				return 0;
 			else
 				return 1;
-		}
-		else {
+		} else {
 			dmg += (banedmg + eledmg);
-			if (hate) *hate += banedmg;
+			if (hate)
+				*hate += banedmg;
 		}
-	}
-	else{
-		if(weapon_item && weapon_item->GetItem()){
-			if(weapon_item->GetItem()->BaneDmgBody == against->GetBodyType()){
-				if(IsClient() && GetLevel() < weapon_item->GetItem()->RecLevel){
-					banedmg += CastToClient()->CalcRecommendedLevelBonus(GetLevel(), weapon_item->GetItem()->RecLevel, weapon_item->GetItem()->BaneDmgAmt);
-				}
-				else{
-					banedmg += weapon_item->GetItem()->BaneDmgAmt;
-				}
-			}
-
-			if(weapon_item->GetItem()->BaneDmgRace == against->GetRace()){
-				if(IsClient() && GetLevel() < weapon_item->GetItem()->RecLevel){
-					banedmg += CastToClient()->CalcRecommendedLevelBonus(GetLevel(), weapon_item->GetItem()->RecLevel, weapon_item->GetItem()->BaneDmgRaceAmt);
-				}
-				else{
-					banedmg += weapon_item->GetItem()->BaneDmgRaceAmt;
-				}
-			}
-
-			for (int x = 0; x < EmuConstants::ITEM_COMMON_SIZE; x++){
-				if(weapon_item->GetAugment(x) && weapon_item->GetAugment(x)->GetItem()){
-					if(weapon_item->GetAugment(x)->GetItem()->BaneDmgBody == against->GetBodyType()){
-						banedmg += weapon_item->GetAugment(x)->GetItem()->BaneDmgAmt;
-					}
-
-					if(weapon_item->GetAugment(x)->GetItem()->BaneDmgRace == against->GetRace()){
-						banedmg += weapon_item->GetAugment(x)->GetItem()->BaneDmgRaceAmt;
-					}
-				}
-			}
-		}
+	} else {
 		dmg += (banedmg + eledmg);
-		if (hate) *hate += banedmg;
+		if (hate)
+			*hate += banedmg;
 	}
 
-	if(dmg <= 0){
-		return 0;
-	}
-	else
-		return dmg;
+	return std::max(0, dmg);
 }
 
 //note: throughout this method, setting `damage` to a negative is a way to
