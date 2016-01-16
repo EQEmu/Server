@@ -8829,7 +8829,7 @@ void Bot::CalcItemBonuses(StatBonuses* newbon)
 		newbon->EnduranceRegen = CalcEnduranceRegenCap();
 }
 
-void Bot::AddItemBonuses(const ItemInst *inst, StatBonuses* newbon, bool isAug, bool isTribute, in rec_override) {
+void Bot::AddItemBonuses(const ItemInst *inst, StatBonuses* newbon, bool isAug, bool isTribute, int rec_override) {
 	if(!inst || !inst->IsType(ItemClassCommon))
 	{
 		return;
