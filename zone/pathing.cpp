@@ -55,7 +55,7 @@ glm::vec3 Mob::UpdatePath(float ToX, float ToY, float ToZ, float Speed, bool &Wa
 			Teleport(current.position);
 		}
 
-		TrySnapToMap();
+		//TrySnapToMap();
 	}
 
 	return current.position;

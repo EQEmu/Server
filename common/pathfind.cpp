@@ -3,8 +3,46 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <zlib.h>
 
-const uint32_t nav_mesh_file_version = 1;
+namespace Pathfind
+{
+	uint32_t InflateData(const char* buffer, uint32_t len, char* out_buffer, uint32_t out_len_max) {
+		z_stream zstream;
+		int zerror = 0;
+		int i;
+
+		zstream.next_in = const_cast<unsigned char*>(reinterpret_cast<const unsigned char*>(buffer));
+		zstream.avail_in = len;
+		zstream.next_out = reinterpret_cast<unsigned char*>(out_buffer);;
+		zstream.avail_out = out_len_max;
+		zstream.zalloc = Z_NULL;
+		zstream.zfree = Z_NULL;
+		zstream.opaque = Z_NULL;
+
+		i = inflateInit2(&zstream, 15);
+		if (i != Z_OK) {
+			return 0;
+		}
+
+		zerror = inflate(&zstream, Z_FINISH);
+		if (zerror == Z_STREAM_END) {
+			inflateEnd(&zstream);
+			return zstream.total_out;
+		}
+		else {
+			if (zerror == -4 && zstream.msg == 0)
+			{
+				return 0;
+			}
+
+			zerror = inflateEnd(&zstream);
+			return 0;
+		}
+	}
+}
+
+const uint32_t nav_mesh_file_version = 2;
 const float max_dest_drift = 10.0f;
 const float at_waypoint_eps = 1.0f;
 EQEmu::Random path_rng;
@@ -67,63 +105,67 @@ void PathfindingManager::Load(const std::string &zone_name)
 			return;
 		}
 
+		uint32_t data_size;
+		if (fread(&data_size, sizeof(data_size), 1, f) != 1) {
+			fclose(f);
+			return;
+		}
+
+		uint32_t buffer_size;
+		if (fread(&buffer_size, sizeof(buffer_size), 1, f) != 1) {
+			fclose(f);
+			return;
+		}
+
+		std::vector<char> data;
+		data.resize(data_size);
+		if (fread(&data[0], data_size, 1, f) != 1) {
+			fclose(f);
+			return;
+		}
+
+		std::vector<char> buffer;
+		buffer.resize(buffer_size);
+		uint32_t v = Pathfind::InflateData(&data[0], data_size, &buffer[0], buffer_size);
+		fclose(f);
+
+		char *buf = &buffer[0];
 		m_nav_mesh = dtAllocNavMesh();
 
-		uint32_t number_of_tiles = 0;
-		if (fread(&number_of_tiles, sizeof(uint32_t), 1, f) != 1) {
-			Clear();
-			fclose(f);
-			return;
-		}
+		uint32_t number_of_tiles = *(uint32_t*)buf;
+		buf += sizeof(uint32_t);
 
-		dtNavMeshParams params;
-		if (fread(&params, sizeof(dtNavMeshParams), 1, f) != 1) {
-			Clear();
-			fclose(f);
-			return;
-		}
+		dtNavMeshParams params = *(dtNavMeshParams*)buf;
+		buf += sizeof(dtNavMeshParams);
 
 		dtStatus status = m_nav_mesh->init(&params);
 		if (dtStatusFailed(status))
 		{
-			Clear();
-			fclose(f);
+			dtFreeNavMesh(m_nav_mesh);
+			m_nav_mesh = nullptr;
 			return;
 		}
 
 		for (unsigned int i = 0; i < number_of_tiles; ++i)
 		{
-			uint32_t tile_ref = 0;
-			if (fread(&tile_ref, sizeof(uint32_t), 1, f) != 1) {
-				Clear();
-				fclose(f);
-				return;
-			}
+			uint32_t tile_ref = *(uint32_t*)buf;
+			buf += sizeof(uint32_t);
 
-			int32_t data_size = 0;
-			if (fread(&data_size, sizeof(int32_t), 1, f) != 1) {
-				Clear();
-				fclose(f);
-				return;
-			}
+			int32_t data_size = *(uint32_t*)buf;
+			buf += sizeof(uint32_t);
 
 			if (!tile_ref || !data_size) {
-				Clear();
-				fclose(f);
+				dtFreeNavMesh(m_nav_mesh);
+				m_nav_mesh = nullptr;
 				return;
 			}
 
 			unsigned char* data = (unsigned char*)dtAlloc(data_size, DT_ALLOC_PERM);
-			if (fread(data, data_size, 1, f) != 1) {
-				Clear();
-				fclose(f);
-				return;
-			}
+			memcpy(data, buf, data_size);
+			buf += data_size;
 
 			m_nav_mesh->addTile(data, data_size, DT_TILE_FREE_DATA, tile_ref, 0);
 		}
-
-		fclose(f);
 	}
 }
 

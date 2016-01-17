@@ -667,7 +667,7 @@ bool Mob::MakeNewPositionAndSendUpdate(float x, float y, float z, int speed, boo
 	}
 
 	//fix up pathing Z
-	if(!NPCFlyMode && checkZ && zone->HasMap() && RuleB(Map, FixPathingZWhenMoving)) {
+	if(!NPCFlyMode && checkZ && !zone->pathing.Loaded() && zone->HasMap() && RuleB(Map, FixPathingZWhenMoving)) {
 
 		if(!RuleB(Watermap, CheckForWaterWhenMoving) || !zone->HasWaterMap() ||
 		   (zone->HasWaterMap() && !zone->watermap->InWater(glm::vec3(m_Position))))
