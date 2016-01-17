@@ -73,7 +73,7 @@ void Mob::TrySnapToMap() {
 	if (snap && zone->HasMap()) {
 		if (!RuleB(Watermap, CheckForWaterWhenMoving) || 
 			!zone->HasWaterMap() ||
-			(zone->HasWaterMap() && !zone->watermap->InWater(glm::vec3(m_Position)))) {
+			(zone->HasWaterMap() && !zone->watermap->InLiquid(glm::vec3(m_Position)))) {
 			glm::vec3 dest(m_Position);
 			float newz = zone->zonemap->FindBestZ(dest, nullptr) + 3.5f;
 			m_Position.z = newz;

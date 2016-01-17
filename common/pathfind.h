@@ -77,6 +77,7 @@ public:
 	//Expects locations in EQEmu internal format eg what #loc returns not what /loc returns.
 	PathfindingRoute FindRoute(const glm::vec3 &current_location, const glm::vec3 &dest_location);
 	bool GetRandomPoint(const glm::vec3 &start, float radius, glm::vec3 &pos);
+	bool Loaded() const { return m_nav_mesh != nullptr; }
 private:
 	dtNavMesh *m_nav_mesh;
 	dtNavMeshQuery *m_nav_query;

@@ -109,7 +109,7 @@ Mob::Mob(const char* in_name,
 		m_TargetV(glm::vec3()),
 		flee_timer(FLEE_CHECK_TIMER),
 		m_Position(position),
-		m_pos_update_timer(8000)
+		m_pos_update_timer(3000) //this can be much longer but really need to redo ai and movement code first.
 {
 	targeted = 0;
 	tar_ndx=0;
