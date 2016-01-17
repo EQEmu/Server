@@ -304,6 +304,7 @@ int command_init(void)
 #endif
 
 		command_add("pvp", "[on/off] - Set your or your player target's PVP status", 100, command_pvp) ||
+		command_add("path", "to/from - Checks and reports on a path either from you to your target or from your target to you.", 100, command_path) ||
 		command_add("qglobal", "[on/off/view] - Toggles qglobal functionality on an NPC", 100, command_qglobal) ||
 		command_add("questerrors", "Shows quest errors.", 100, command_questerrors) ||
 		command_add("race", "[racenum] - Change your or your target's race. Use racenum 0 to return to normal", 50, command_race) ||
@@ -4042,6 +4043,77 @@ void command_unfreeze(Client *c, const Seperator *sep)
 		c->GetTarget()->SendAppearancePacket(AT_Anim, ANIM_STAND);
 	else
 		c->Message(0, "ERROR: Unfreeze requires a target.");
+}
+
+void command_path(Client *c, const Seperator *sep)
+{
+	auto target = c->GetTarget();
+	if (!target) {
+		c->Message(0, "Path command requires a target.");
+		return;
+	}
+
+	glm::vec3 src;
+	glm::vec3 dest;
+	if (strcasecmp(sep->arg[1], "to") == 0) {
+		src.x = c->GetX();
+		src.y = c->GetY();
+		src.z = c->GetZ();
+		dest.x = target->GetX();
+		dest.y = target->GetY();
+		dest.z = target->GetZ();
+	}
+	else if (strcasecmp(sep->arg[1], "from") == 0) {
+		src.x = target->GetX();
+		src.y = target->GetY();
+		src.z = target->GetZ();
+		dest.x = c->GetX();
+		dest.y = c->GetY();
+		dest.z = c->GetZ();
+	}
+	else {
+		c->Message(0, "Unknown path argument: '%s'.", sep->arg[1]);
+		return;
+	}
+
+	bool first = true;
+	auto route = zone->pathing.FindRoute(src, dest);
+	auto &nodes = route.GetNodes();
+	auto &last_node = nodes[nodes.size() - 1];
+	auto dist = DistanceSquared(glm::vec4(last_node.position, 1.0f), glm::vec4(dest.x, dest.y, dest.z, 0.0f));
+	if (dist > 10000.0f) {
+		c->Message(0, "Path from (%.2f, %.2f, %.2f) to (%.2f, %.2f, %.2f) found with %i nodes, broken path, would need warp.",
+			src.x,
+			src.y,
+			src.z,
+			dest.x,
+			dest.y,
+			dest.z,
+			(int)nodes.size());
+		return;
+	}
+	else if (dist > 100.0f) {
+		c->Message(0, "Path from (%.2f, %.2f, %.2f) to (%.2f, %.2f, %.2f) found with %i nodes, partial path.",
+			src.x,
+			src.y,
+			src.z,
+			dest.x,
+			dest.y,
+			dest.z,
+			(int)nodes.size());
+		return;
+	}
+
+	c->Message(0, "Path from (%.2f, %.2f, %.2f) to (%.2f, %.2f, %.2f) found with %i nodes, complete path.",
+		src.x,
+		src.y,
+		src.z,
+		dest.x,
+		dest.y,
+		dest.z,
+		(int)nodes.size());
+
+	return;
 }
 
 void command_pvp(Client *c, const Seperator *sep)

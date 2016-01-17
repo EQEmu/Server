@@ -910,7 +910,10 @@ void Client::AI_Process()
 					nspeed *= 2;
 					SetCurrentSpeed(nspeed);
 
-					CalculateNewPosition2(owner->GetX(), owner->GetY(), owner->GetZ(), nspeed);
+					bool WaypointChanged;
+					glm::vec3 Goal = UpdatePath(owner->GetX(), owner->GetY(), owner->GetZ(), nspeed, WaypointChanged);
+
+					CalculateNewPosition2(Goal.x, Goal.y, Goal.z, nspeed);
 				}
 			}
 			else
@@ -1362,7 +1365,11 @@ void Mob::AI_Process() {
 							if (dist >= 5625)
 								speed = GetRunspeed();
 
-							CalculateNewPosition2(owner->GetX(), owner->GetY(), owner->GetZ(), speed);
+							bool WaypointChanged;
+							glm::vec3 Goal = UpdatePath(owner->GetX(), owner->GetY(), owner->GetZ(),
+								speed, WaypointChanged);
+
+							CalculateNewPosition2(Goal.x, Goal.y, Goal.z, speed);
 						}
 						else
 						{
@@ -1418,7 +1425,12 @@ void Mob::AI_Process() {
 						int speed = GetWalkspeed();
 						if (dist2 >= followdist + 150)
 							speed = GetRunspeed();
-						CalculateNewPosition2(follow->GetX(), follow->GetY(), follow->GetZ(), speed);
+
+						bool WaypointChanged;
+						glm::vec3 Goal = UpdatePath(follow->GetX(), follow->GetY(), follow->GetZ(),
+							speed, WaypointChanged);
+
+						CalculateNewPosition2(Goal.x, Goal.y, Goal.z, speed);
 					}
 					else
 					{
@@ -1499,7 +1511,11 @@ void NPC::AI_DoMovement() {
 
 		Log.Out(Logs::Detail, Logs::AI, "Roam Box: d=%.3f (%.3f->%.3f,%.3f->%.3f): Go To (%.3f,%.3f)",
 			roambox_distance, roambox_min_x, roambox_max_x, roambox_min_y, roambox_max_y, roambox_movingto_x, roambox_movingto_y);
-		if (!CalculateNewPosition2(roambox_movingto_x, roambox_movingto_y, GetZ(), walksp, true))
+
+		bool WaypointChanged;
+		glm::vec3 Goal = UpdatePath(roambox_movingto_x, roambox_movingto_y, GetZ(), walksp, WaypointChanged);
+
+		if (!CalculateNewPosition2(Goal.x, Goal.y, Goal.z, walksp, true))
 		{
 			roambox_movingto_x = roambox_max_x + 1; // force update
 			pLastFightingDelayMoving = Timer::GetCurrentTime() + RandomTimer(roambox_min_delay, roambox_delay);
@@ -1553,8 +1569,17 @@ void NPC::AI_DoMovement() {
 				}
 				if (doMove)
 				{	// not at waypoint yet or at 0 pause WP, so keep moving
-					if(DistractedFromGrid == 0)
-						CalculateNewPosition2(m_CurrentWayPoint.x, m_CurrentWayPoint.y, m_CurrentWayPoint.z, walksp, true);
+					if (DistractedFromGrid == 0) {
+						bool WaypointChanged;
+						glm::vec3 Goal = UpdatePath(m_CurrentWayPoint.x, m_CurrentWayPoint.y, m_CurrentWayPoint.z,
+							walksp, WaypointChanged);
+
+						if (WaypointChanged) {
+							entity_list.OpenDoorsNear(CastToNPC());
+						}
+
+						CalculateNewPosition2(Goal.x, Goal.y, Goal.z, walksp, true);
+					}
 					else
 					{
 						bool WaypointChanged;
