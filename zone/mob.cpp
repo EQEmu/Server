@@ -1398,7 +1398,13 @@ void Mob::SendPosUpdate(uint8 iSendToSelf) {
 		{
 			m_pos_update_speed = pRunAnimSpeed;
 			m_pos_update_heading = GetHeading();
-			entity_list.QueueCloseClients(this, &app, (iSendToSelf == 0), 1000, nullptr, false);
+
+			if (IsBoat()) {
+				entity_list.QueueClients(this, &app, (iSendToSelf == 0), false);
+			}
+			else {
+				entity_list.QueueCloseClients(this, &app, (iSendToSelf == 0), 1000, nullptr, false);
+			}
 			m_pos_update_timer.Start();
 		}
 	}

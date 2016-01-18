@@ -5626,7 +5626,18 @@ void Client::Handle_OP_FindPersonRequest(const EQApplicationPacket *app)
 		}
 
 		glm::vec3 dest(target->GetX(), target->GetY(), target->GetZ());
-		auto route = zone->pathing.FindRoute(glm::vec3(GetX(), GetY(), GetZ()), dest);
+		glm::vec3 src(GetX(), GetY(), GetZ());
+		if (zone->HasMap()) {
+			auto best_z_src = zone->zonemap->FindBestZ(src, nullptr);
+			if (best_z_src != BEST_Z_INVALID) {
+				src.z = best_z_src;
+			}
+			auto best_z_dest = zone->zonemap->FindBestZ(dest, nullptr);
+			if (best_z_dest != BEST_Z_INVALID) {
+				dest.z = best_z_dest;
+			}
+		}
+		auto route = zone->pathing.FindRoute(src, dest);
 		CreatePathFromRoute(dest, route);
 	}
 }

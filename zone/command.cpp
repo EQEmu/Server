@@ -4062,6 +4062,17 @@ void command_path(Client *c, const Seperator *sep)
 		dest.x = target->GetX();
 		dest.y = target->GetY();
 		dest.z = target->GetZ();
+
+		if (zone->HasMap()) {
+			auto best_z_src = zone->zonemap->FindBestZ(src, nullptr);
+			if (best_z_src != BEST_Z_INVALID) {
+				src.z = best_z_src;
+			}
+			auto best_z_dest = zone->zonemap->FindBestZ(dest, nullptr);
+			if (best_z_dest != BEST_Z_INVALID) {
+				dest.z = best_z_dest;
+			}
+		}
 	}
 	else if (strcasecmp(sep->arg[1], "from") == 0) {
 		src.x = target->GetX();
@@ -4070,6 +4081,17 @@ void command_path(Client *c, const Seperator *sep)
 		dest.x = c->GetX();
 		dest.y = c->GetY();
 		dest.z = c->GetZ();
+
+		if (zone->HasMap()) {
+			auto best_z_src = zone->zonemap->FindBestZ(src, nullptr);
+			if (best_z_src != BEST_Z_INVALID) {
+				src.z = best_z_src;
+			}
+			auto best_z_dest = zone->zonemap->FindBestZ(dest, nullptr);
+			if (best_z_dest != BEST_Z_INVALID) {
+				dest.z = best_z_dest;
+			}
+		}
 	}
 	else {
 		c->Message(0, "Unknown path argument: '%s'.", sep->arg[1]);
@@ -4112,8 +4134,6 @@ void command_path(Client *c, const Seperator *sep)
 		dest.y,
 		dest.z,
 		(int)nodes.size());
-
-	return;
 }
 
 void command_pvp(Client *c, const Seperator *sep)

@@ -309,6 +309,10 @@ PathfindingRoute::~PathfindingRoute()
 
 bool PathfindingRoute::DestinationValid(const glm::vec3 &dest)
 {
+	if (m_current_node >= 255) {
+		return false;
+	}
+
 	auto dist = vec_dist(dest, m_dest);
 	if (dist <= max_dest_drift) {
 		return true;

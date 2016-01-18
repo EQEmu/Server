@@ -19,30 +19,51 @@ glm::vec3 Mob::UpdatePath(float ToX, float ToY, float ToZ, float Speed, bool &Wa
 	if (to == from)
 		return to;
 
+	//if from is swimming and has los to target then just swim toward them don't bother with pathing. 
+	if (zone->HasMap() && zone->HasWaterMap() && zone->watermap->InLiquid(from) && zone->zonemap->CheckLoS(from, to) ) {
+		return to;
+	}
+
 	if (!m_pathing_route.Active() || !m_pathing_route.DestinationValid(to)) {
+		if (zone->HasMap()) {
+			auto best_z_src = zone->zonemap->FindBestZ(from, nullptr);
+			if (best_z_src != BEST_Z_INVALID) {
+				from.z = best_z_src;
+			}
+			auto best_z_dest = zone->zonemap->FindBestZ(to, nullptr);
+			if (best_z_dest != BEST_Z_INVALID) {
+				to.z = best_z_dest;
+			}
+		}
+
 		m_pathing_route = zone->pathing.FindRoute(from, to);
 
 		auto &nodes = m_pathing_route.GetNodesEdit();
-		auto &last_node = nodes[nodes.size() - 1];
-		auto dist = DistanceSquared(glm::vec4(last_node.position, 1.0f), glm::vec4(ToX, ToY, ToZ, 0.0f));
-		if (dist > 10000.0f) {
-			auto flag_temp = last_node.flag;
-			last_node.flag = NavigationPolyFlagPortal;
+		//Code to complete partial paths.
+		//256 is the max number of nodes, if we get that back then we likely got a partial path that 
+		//*may* have more after so instead let it run the path till it gets there and then DestinationValid will return false again
+		if (nodes.size() < 256) {
+			auto &last_node = nodes[nodes.size() - 1];
+			auto dist = DistanceSquared(glm::vec4(last_node.position, 1.0f), glm::vec4(ToX, ToY, ToZ, 0.0f));
+			if (dist > 10000.0f) {
+				auto flag_temp = last_node.flag;
+				last_node.flag = NavigationPolyFlagPortal;
 
-			PathfindingNode end;
-			end.position.x = ToX;
-			end.position.y = ToY;
-			end.position.z = ToZ;
-			end.flag = flag_temp;
-			nodes.push_back(end);
-		}
-		else if (dist > 100.0f) {
-			PathfindingNode end;
-			end.position.x = ToX;
-			end.position.y = ToY;
-			end.position.z = ToZ;
-			end.flag = NavigationPolyFlagNormal;
-			nodes.push_back(end);
+				PathfindingNode end;
+				end.position.x = ToX;
+				end.position.y = ToY;
+				end.position.z = ToZ;
+				end.flag = flag_temp;
+				nodes.push_back(end);
+			}
+			else if (dist > 100.0f) {
+				PathfindingNode end;
+				end.position.x = ToX;
+				end.position.y = ToY;
+				end.position.z = ToZ;
+				end.flag = NavigationPolyFlagNormal;
+				nodes.push_back(end);
+			}
 		}
 	}
 
@@ -55,7 +76,7 @@ glm::vec3 Mob::UpdatePath(float ToX, float ToY, float ToZ, float Speed, bool &Wa
 			Teleport(current.position);
 		}
 
-		//TrySnapToMap();
+		TrySnapToMap();
 	}
 
 	return current.position;
