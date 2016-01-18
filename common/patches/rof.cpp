@@ -435,7 +435,7 @@ namespace RoF
 		memset(__packet->pBuffer, 0, sz);
 
 		__packet->WriteUInt32(emu->entity_id);
-		__packet->WriteUInt32(0);		// PlayerID ?
+		__packet->WriteUInt32(emu->tic_timer);
 		__packet->WriteUInt8(emu->all_buffs);			// 1 indicates all buffs on the player (0 to add or remove a single buff)
 		__packet->WriteUInt16(emu->count);
 

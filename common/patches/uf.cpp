@@ -365,7 +365,7 @@ namespace UF
 		memset(__packet->pBuffer, 0, sz);
 
 		__packet->WriteUInt32(emu->entity_id);
-		__packet->WriteUInt32(0);
+		__packet->WriteUInt32(emu->tic_timer);
 		__packet->WriteUInt8(emu->all_buffs); // 1 = all buffs, 0 = 1 buff
 		__packet->WriteUInt16(emu->count);
 

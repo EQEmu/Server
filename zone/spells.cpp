@@ -5399,6 +5399,7 @@ void Client::SendBuffNumHitPacket(Buffs_Struct &buff, int slot)
 	bi->entity_id = GetID();
 	bi->count = 1;
 	bi->all_buffs = 0;
+	bi->tic_timer = tic_timer.GetRemainingTime();
 
 	bi->entries[0].buff_slot = slot;
 	bi->entries[0].spell_id = buff.spellid;
@@ -5479,6 +5480,7 @@ EQApplicationPacket *Mob::MakeBuffsPacket(bool for_target)
 	buff->entity_id = GetID();
 	buff->count = count;
 	buff->all_buffs = 1;
+	buff->tic_timer = tic_timer.GetRemainingTime();
 	// there are more types, the client doesn't seem to really care though. The others are also currently hard to fill in here ...
 	// (see comment in common/eq_packet_structs.h)
 	if (for_target)
