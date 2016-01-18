@@ -2219,25 +2219,6 @@ namespace SoD
 			ptr += sizeof(uint32);
 			ptr += 1;
 		}
-		/*std::stringstream ss(std::stringstream::in | std::stringstream::out | std::stringstream::binary);
-
-		uint8 write_var8 = 1;
-		ss.write((const char*)&emu->entity_id, sizeof(uint32));
-		ss.write((const char*)&emu->count, sizeof(uint16));
-		write_var8 = 0;
-		for(uint16 i = 0; i < emu->count; ++i)
-		{
-		ss.write((const char*)&emu->entries[i].buff_slot, sizeof(uint32));
-		ss.write((const char*)&emu->entries[i].spell_id, sizeof(uint32));
-		ss.write((const char*)&emu->entries[i].tics_remaining, sizeof(uint32));
-		ss.write((const char*)&write_var8, sizeof(uint8));
-		}
-
-		__packet->size = ss.str().length();
-		__packet->pBuffer = new unsigned char[__packet->size];
-		memcpy(__packet->pBuffer, ss.str().c_str(), __packet->size);
-		*/
-
 		FINISH_ENCODE();
 	}
 
