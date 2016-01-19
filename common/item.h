@@ -29,6 +29,7 @@ class EvolveInfo;			// Stores information about an evolving item family
 #include "../common/eq_constants.h"
 #include "../common/item_struct.h"
 #include "../common/timer.h"
+#include "../common/bodytypes.h"
 
 #include <list>
 #include <map>
@@ -417,6 +418,58 @@ public:
 	void SetTimer(std::string name, uint32 time);
 	void StopTimer(std::string name);
 	void ClearTimers();
+
+	// Get a total of a stat, including augs
+	// These functions should be used in place of other code manually totaling
+	// to centralize where it is done to make future changes easier (ex. whenever powersources come around)
+	// and to minimize errors. CalcItemBonuses however doesn't use these in interest of performance
+	// by default these do not recurse into augs
+	int GetItemArmorClass(bool augments = false) const;
+	int GetItemElementalDamage(int &magic, int &fire, int &cold, int &poison, int &disease, int &chromatic, int &prismatic, int &physical, int &corruption, bool augments = false) const;
+	// These two differ in the fact that they're quick checks (they are checked BEFORE the one above
+	int GetItemElementalFlag(bool augments = false) const;
+	int GetItemElementalDamage(bool augments = false) const;
+	int GetItemRecommendedLevel(bool augments = false) const;
+	int GetItemRequiredLevel(bool augments = false) const;
+	int GetItemWeaponDamage(bool augments = false) const;
+	int GetItemBackstabDamage(bool augments = false) const;
+	// these two are just quick checks
+	int GetItemBaneDamageBody(bool augments = false) const;
+	int GetItemBaneDamageRace(bool augments = false) const;
+	int GetItemBaneDamageBody(bodyType against, bool augments = false) const;
+	int GetItemBaneDamageRace(uint16 against, bool augments = false) const;
+	int GetItemMagical(bool augments = false) const;
+	int GetItemHP(bool augments = false) const;
+	int GetItemMana(bool augments = false) const;
+	int GetItemEndur(bool augments = false) const;
+	int GetItemAttack(bool augments = false) const;
+	int GetItemStr(bool augments = false) const;
+	int GetItemSta(bool augments = false) const;
+	int GetItemDex(bool augments = false) const;
+	int GetItemAgi(bool augments = false) const;
+	int GetItemInt(bool augments = false) const;
+	int GetItemWis(bool augments = false) const;
+	int GetItemCha(bool augments = false) const;
+	int GetItemMR(bool augments = false) const;
+	int GetItemFR(bool augments = false) const;
+	int GetItemCR(bool augments = false) const;
+	int GetItemPR(bool augments = false) const;
+	int GetItemDR(bool augments = false) const;
+	int GetItemCorrup(bool augments = false) const;
+	int GetItemHeroicStr(bool augments = false) const;
+	int GetItemHeroicSta(bool augments = false) const;
+	int GetItemHeroicDex(bool augments = false) const;
+	int GetItemHeroicAgi(bool augments = false) const;
+	int GetItemHeroicInt(bool augments = false) const;
+	int GetItemHeroicWis(bool augments = false) const;
+	int GetItemHeroicCha(bool augments = false) const;
+	int GetItemHeroicMR(bool augments = false) const;
+	int GetItemHeroicFR(bool augments = false) const;
+	int GetItemHeroicCR(bool augments = false) const;
+	int GetItemHeroicPR(bool augments = false) const;
+	int GetItemHeroicDR(bool augments = false) const;
+	int GetItemHeroicCorrup(bool augments = false) const;
+	int GetItemHaste(bool augments = false) const;
 
 protected:
 	//////////////////////////

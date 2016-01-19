@@ -2322,6 +2322,708 @@ void ItemInst::ClearTimers() {
 	m_timers.clear();
 }
 
+int ItemInst::GetItemArmorClass(bool augments) const
+{
+	int ac = 0;
+	const auto item = GetItem();
+	if (item) {
+		ac = item->AC;
+		if (augments)
+			for (int i = AUG_BEGIN; i < EmuConstants::ITEM_COMMON_SIZE; ++i)
+				if (GetAugment(i))
+					ac += GetAugment(i)->GetItemArmorClass();
+	}
+	return ac;
+}
+
+int ItemInst::GetItemElementalDamage(int &magic, int &fire, int &cold, int &poison, int &disease, int &chromatic, int &prismatic, int &physical, int &corruption, bool augments) const
+{
+	const auto item = GetItem();
+	if (item) {
+		switch (item->ElemDmgType) {
+		case RESIST_MAGIC:
+			magic += item->ElemDmgAmt;
+			break;
+		case RESIST_FIRE:
+			fire += item->ElemDmgAmt;
+			break;
+		case RESIST_COLD:
+			cold += item->ElemDmgAmt;
+			break;
+		case RESIST_POISON:
+			poison += item->ElemDmgAmt;
+			break;
+		case RESIST_DISEASE:
+			disease += item->ElemDmgAmt;
+			break;
+		case RESIST_CHROMATIC:
+			chromatic += item->ElemDmgAmt;
+			break;
+		case RESIST_PRISMATIC:
+			prismatic += item->ElemDmgAmt;
+			break;
+		case RESIST_PHYSICAL:
+			physical += item->ElemDmgAmt;
+			break;
+		case RESIST_CORRUPTION:
+			corruption += item->ElemDmgAmt;
+			break;
+		}
+
+		if (augments)
+			for (int i = AUG_BEGIN; i < EmuConstants::ITEM_COMMON_SIZE; ++i)
+				if (GetAugment(i))
+					GetAugment(i)->GetItemElementalDamage(magic, fire, cold, poison, disease, chromatic, prismatic, physical, corruption);
+	}
+	return magic + fire + cold + poison + disease + chromatic + prismatic + physical + corruption;
+}
+
+int ItemInst::GetItemElementalFlag(bool augments) const
+{
+	int flag = 0;
+	const auto item = GetItem();
+	if (item) {
+		flag = item->ElemDmgType;
+		if (flag)
+			return flag;
+
+		if (augments) {
+			for (int i = AUG_BEGIN; i < EmuConstants::ITEM_COMMON_SIZE; ++i) {
+				if (GetAugment(i))
+					flag = GetAugment(i)->GetItemElementalFlag();
+				if (flag)
+					return flag;
+			}
+		}
+	}
+	return flag;
+}
+
+int ItemInst::GetItemElementalDamage(bool augments) const
+{
+	int damage = 0;
+	const auto item = GetItem();
+	if (item) {
+		damage = item->ElemDmgAmt;
+		if (damage)
+			return damage;
+
+		if (augments) {
+			for (int i = AUG_BEGIN; i < EmuConstants::ITEM_COMMON_SIZE; ++i) {
+				if (GetAugment(i))
+					damage = GetAugment(i)->GetItemElementalDamage();
+				if (damage)
+					return damage;
+			}
+		}
+	}
+	return damage;
+}
+
+int ItemInst::GetItemRecommendedLevel(bool augments) const
+{
+	int level = 0;
+	const auto item = GetItem();
+	if (item) {
+		level = item->RecLevel;
+
+		if (augments) {
+			for (int i = AUG_BEGIN; i < EmuConstants::ITEM_COMMON_SIZE; ++i) {
+				int temp = 0;
+				if (GetAugment(i)) {
+					temp = GetAugment(i)->GetItemRecommendedLevel();
+					if (temp > level)
+						level = temp;
+				}
+			}
+		}
+	}
+
+	return level;
+}
+
+int ItemInst::GetItemRequiredLevel(bool augments) const
+{
+	int level = 0;
+	const auto item = GetItem();
+	if (item) {
+		level = item->ReqLevel;
+
+		if (augments) {
+			for (int i = AUG_BEGIN; i < EmuConstants::ITEM_COMMON_SIZE; ++i) {
+				int temp = 0;
+				if (GetAugment(i)) {
+					temp = GetAugment(i)->GetItemRequiredLevel();
+					if (temp > level)
+						level = temp;
+				}
+			}
+		}
+	}
+
+	return level;
+}
+
+int ItemInst::GetItemWeaponDamage(bool augments) const
+{
+	int damage = 0;
+	const auto item = GetItem();
+	if (item) {
+		damage = item->Damage;
+
+		if (augments) {
+			for (int i = AUG_BEGIN; i < EmuConstants::ITEM_COMMON_SIZE; ++i)
+				if (GetAugment(i))
+					damage += GetAugment(i)->GetItemWeaponDamage();
+		}
+	}
+	return damage;
+}
+
+int ItemInst::GetItemBackstabDamage(bool augments) const
+{
+	int damage = 0;
+	const auto item = GetItem();
+	if (item) {
+		damage = item->BackstabDmg;
+
+		if (augments) {
+			for (int i = AUG_BEGIN; i < EmuConstants::ITEM_COMMON_SIZE; ++i)
+				if (GetAugment(i))
+					damage += GetAugment(i)->GetItemBackstabDamage();
+		}
+	}
+	return damage;
+}
+
+int ItemInst::GetItemBaneDamageBody(bool augments) const
+{
+	int body = 0;
+	const auto item = GetItem();
+	if (item) {
+		body = item->BaneDmgBody;
+		if (body)
+			return body;
+
+		if (augments) {
+			for (int i = AUG_BEGIN; i < EmuConstants::ITEM_COMMON_SIZE; ++i)
+				if (GetAugment(i)) {
+					body = GetAugment(i)->GetItemBaneDamageBody();
+					if (body)
+						return body;
+				}
+		}
+	}
+	return body;
+}
+
+int ItemInst::GetItemBaneDamageRace(bool augments) const
+{
+	int race = 0;
+	const auto item = GetItem();
+	if (item) {
+		race = item->BaneDmgRace;
+		if (race)
+			return race;
+
+		if (augments) {
+			for (int i = AUG_BEGIN; i < EmuConstants::ITEM_COMMON_SIZE; ++i)
+				if (GetAugment(i)) {
+					race = GetAugment(i)->GetItemBaneDamageRace();
+					if (race)
+						return race;
+				}
+		}
+	}
+	return race;
+}
+
+int ItemInst::GetItemBaneDamageBody(bodyType against, bool augments) const
+{
+	int damage = 0;
+	const auto item = GetItem();
+	if (item) {
+		if (item->BaneDmgBody == against)
+			damage += item->BaneDmgAmt;
+
+		if (augments) {
+			for (int i = AUG_BEGIN; i < EmuConstants::ITEM_COMMON_SIZE; ++i)
+				if (GetAugment(i))
+					damage += GetAugment(i)->GetItemBaneDamageBody(against);
+		}
+	}
+	return damage;
+}
+
+int ItemInst::GetItemBaneDamageRace(uint16 against, bool augments) const
+{
+	int damage = 0;
+	const auto item = GetItem();
+	if (item) {
+		if (item->BaneDmgRace == against)
+			damage += item->BaneDmgRaceAmt;
+
+		if (augments) {
+			for (int i = AUG_BEGIN; i < EmuConstants::ITEM_COMMON_SIZE; ++i)
+				if (GetAugment(i))
+					damage += GetAugment(i)->GetItemBaneDamageRace(against);
+		}
+	}
+	return damage;
+}
+
+int ItemInst::GetItemMagical(bool augments) const
+{
+	const auto item = GetItem();
+	if (item) {
+		if (item->Magic)
+			return 1;
+
+		if (augments) {
+			for (int i = AUG_BEGIN; i < EmuConstants::ITEM_COMMON_SIZE; ++i)
+				if (GetAugment(i) && GetAugment(i)->GetItemMagical())
+					return 1;
+		}
+	}
+	return 0;
+}
+
+int ItemInst::GetItemHP(bool augments) const
+{
+	int hp = 0;
+	const auto item = GetItem();
+	if (item) {
+		hp = item->HP;
+		if (augments)
+			for (int i = AUG_BEGIN; i < EmuConstants::ITEM_COMMON_SIZE; ++i)
+				if (GetAugment(i))
+					hp += GetAugment(i)->GetItemHP();
+	}
+	return hp;
+}
+
+int ItemInst::GetItemMana(bool augments) const
+{
+	int mana = 0;
+	const auto item = GetItem();
+	if (item) {
+		mana = item->Mana;
+		if (augments)
+			for (int i = AUG_BEGIN; i < EmuConstants::ITEM_COMMON_SIZE; ++i)
+				if (GetAugment(i))
+					mana += GetAugment(i)->GetItemMana();
+	}
+	return mana;
+}
+
+int ItemInst::GetItemEndur(bool augments) const
+{
+	int endur = 0;
+	const auto item = GetItem();
+	if (item) {
+		endur = item->Endur;
+		if (augments)
+			for (int i = AUG_BEGIN; i < EmuConstants::ITEM_COMMON_SIZE; ++i)
+				if (GetAugment(i))
+					endur += GetAugment(i)->GetItemEndur();
+	}
+	return endur;
+}
+
+int ItemInst::GetItemAttack(bool augments) const
+{
+	int atk = 0;
+	const auto item = GetItem();
+	if (item) {
+		atk = item->Attack;
+		if (augments)
+			for (int i = AUG_BEGIN; i < EmuConstants::ITEM_COMMON_SIZE; ++i)
+				if (GetAugment(i))
+					atk += GetAugment(i)->GetItemAttack();
+	}
+	return atk;
+}
+
+int ItemInst::GetItemStr(bool augments) const
+{
+	int str = 0;
+	const auto item = GetItem();
+	if (item) {
+		str = item->AStr;
+		if (augments)
+			for (int i = AUG_BEGIN; i < EmuConstants::ITEM_COMMON_SIZE; ++i)
+				if (GetAugment(i))
+					str += GetAugment(i)->GetItemStr();
+	}
+	return str;
+}
+
+int ItemInst::GetItemSta(bool augments) const
+{
+	int sta = 0;
+	const auto item = GetItem();
+	if (item) {
+		sta = item->ASta;
+		if (augments)
+			for (int i = AUG_BEGIN; i < EmuConstants::ITEM_COMMON_SIZE; ++i)
+				if (GetAugment(i))
+					sta += GetAugment(i)->GetItemSta();
+	}
+	return sta;
+}
+
+int ItemInst::GetItemDex(bool augments) const
+{
+	int total = 0;
+	const auto item = GetItem();
+	if (item) {
+		total = item->ADex;
+		if (augments)
+			for (int i = AUG_BEGIN; i < EmuConstants::ITEM_COMMON_SIZE; ++i)
+				if (GetAugment(i))
+					total += GetAugment(i)->GetItemDex();
+	}
+	return total;
+}
+
+int ItemInst::GetItemAgi(bool augments) const
+{
+	int total = 0;
+	const auto item = GetItem();
+	if (item) {
+		total = item->AAgi;
+		if (augments)
+			for (int i = AUG_BEGIN; i < EmuConstants::ITEM_COMMON_SIZE; ++i)
+				if (GetAugment(i))
+					total += GetAugment(i)->GetItemAgi();
+	}
+	return total;
+}
+
+int ItemInst::GetItemInt(bool augments) const
+{
+	int total = 0;
+	const auto item = GetItem();
+	if (item) {
+		total = item->AInt;
+		if (augments)
+			for (int i = AUG_BEGIN; i < EmuConstants::ITEM_COMMON_SIZE; ++i)
+				if (GetAugment(i))
+					total += GetAugment(i)->GetItemInt();
+	}
+	return total;
+}
+
+int ItemInst::GetItemWis(bool augments) const
+{
+	int total = 0;
+	const auto item = GetItem();
+	if (item) {
+		total = item->AWis;
+		if (augments)
+			for (int i = AUG_BEGIN; i < EmuConstants::ITEM_COMMON_SIZE; ++i)
+				if (GetAugment(i))
+					total += GetAugment(i)->GetItemWis();
+	}
+	return total;
+}
+
+int ItemInst::GetItemCha(bool augments) const
+{
+	int total = 0;
+	const auto item = GetItem();
+	if (item) {
+		total = item->ACha;
+		if (augments)
+			for (int i = AUG_BEGIN; i < EmuConstants::ITEM_COMMON_SIZE; ++i)
+				if (GetAugment(i))
+					total += GetAugment(i)->GetItemCha();
+	}
+	return total;
+}
+
+int ItemInst::GetItemMR(bool augments) const
+{
+	int total = 0;
+	const auto item = GetItem();
+	if (item) {
+		total = item->MR;
+		if (augments)
+			for (int i = AUG_BEGIN; i < EmuConstants::ITEM_COMMON_SIZE; ++i)
+				if (GetAugment(i))
+					total += GetAugment(i)->GetItemMR();
+	}
+	return total;
+}
+
+int ItemInst::GetItemFR(bool augments) const
+{
+	int total = 0;
+	const auto item = GetItem();
+	if (item) {
+		total = item->FR;
+		if (augments)
+			for (int i = AUG_BEGIN; i < EmuConstants::ITEM_COMMON_SIZE; ++i)
+				if (GetAugment(i))
+					total += GetAugment(i)->GetItemFR();
+	}
+	return total;
+}
+
+int ItemInst::GetItemCR(bool augments) const
+{
+	int total = 0;
+	const auto item = GetItem();
+	if (item) {
+		total = item->CR;
+		if (augments)
+			for (int i = AUG_BEGIN; i < EmuConstants::ITEM_COMMON_SIZE; ++i)
+				if (GetAugment(i))
+					total += GetAugment(i)->GetItemCR();
+	}
+	return total;
+}
+
+int ItemInst::GetItemPR(bool augments) const
+{
+	int total = 0;
+	const auto item = GetItem();
+	if (item) {
+		total = item->PR;
+		if (augments)
+			for (int i = AUG_BEGIN; i < EmuConstants::ITEM_COMMON_SIZE; ++i)
+				if (GetAugment(i))
+					total += GetAugment(i)->GetItemPR();
+	}
+	return total;
+}
+
+int ItemInst::GetItemDR(bool augments) const
+{
+	int total = 0;
+	const auto item = GetItem();
+	if (item) {
+		total = item->DR;
+		if (augments)
+			for (int i = AUG_BEGIN; i < EmuConstants::ITEM_COMMON_SIZE; ++i)
+				if (GetAugment(i))
+					total += GetAugment(i)->GetItemDR();
+	}
+	return total;
+}
+
+int ItemInst::GetItemCorrup(bool augments) const
+{
+	int total = 0;
+	const auto item = GetItem();
+	if (item) {
+		total = item->SVCorruption;
+		if (augments)
+			for (int i = AUG_BEGIN; i < EmuConstants::ITEM_COMMON_SIZE; ++i)
+				if (GetAugment(i))
+					total += GetAugment(i)->GetItemCorrup();
+	}
+	return total;
+}
+
+int ItemInst::GetItemHeroicStr(bool augments) const
+{
+	int total = 0;
+	const auto item = GetItem();
+	if (item) {
+		total = item->HeroicStr;
+		if (augments)
+			for (int i = AUG_BEGIN; i < EmuConstants::ITEM_COMMON_SIZE; ++i)
+				if (GetAugment(i))
+					total += GetAugment(i)->GetItemHeroicStr();
+	}
+	return total;
+}
+
+int ItemInst::GetItemHeroicSta(bool augments) const
+{
+	int total = 0;
+	const auto item = GetItem();
+	if (item) {
+		total = item->HeroicSta;
+		if (augments)
+			for (int i = AUG_BEGIN; i < EmuConstants::ITEM_COMMON_SIZE; ++i)
+				if (GetAugment(i))
+					total += GetAugment(i)->GetItemHeroicSta();
+	}
+	return total;
+}
+
+int ItemInst::GetItemHeroicDex(bool augments) const
+{
+	int total = 0;
+	const auto item = GetItem();
+	if (item) {
+		total = item->HeroicDex;
+		if (augments)
+			for (int i = AUG_BEGIN; i < EmuConstants::ITEM_COMMON_SIZE; ++i)
+				if (GetAugment(i))
+					total += GetAugment(i)->GetItemHeroicDex();
+	}
+	return total;
+}
+
+int ItemInst::GetItemHeroicAgi(bool augments) const
+{
+	int total = 0;
+	const auto item = GetItem();
+	if (item) {
+		total = item->HeroicAgi;
+		if (augments)
+			for (int i = AUG_BEGIN; i < EmuConstants::ITEM_COMMON_SIZE; ++i)
+				if (GetAugment(i))
+					total += GetAugment(i)->GetItemHeroicAgi();
+	}
+	return total;
+}
+
+int ItemInst::GetItemHeroicInt(bool augments) const
+{
+	int total = 0;
+	const auto item = GetItem();
+	if (item) {
+		total = item->HeroicInt;
+		if (augments)
+			for (int i = AUG_BEGIN; i < EmuConstants::ITEM_COMMON_SIZE; ++i)
+				if (GetAugment(i))
+					total += GetAugment(i)->GetItemHeroicInt();
+	}
+	return total;
+}
+
+int ItemInst::GetItemHeroicWis(bool augments) const
+{
+	int total = 0;
+	const auto item = GetItem();
+	if (item) {
+		total = item->HeroicWis;
+		if (augments)
+			for (int i = AUG_BEGIN; i < EmuConstants::ITEM_COMMON_SIZE; ++i)
+				if (GetAugment(i))
+					total += GetAugment(i)->GetItemHeroicWis();
+	}
+	return total;
+}
+
+int ItemInst::GetItemHeroicCha(bool augments) const
+{
+	int total = 0;
+	const auto item = GetItem();
+	if (item) {
+		total = item->HeroicCha;
+		if (augments)
+			for (int i = AUG_BEGIN; i < EmuConstants::ITEM_COMMON_SIZE; ++i)
+				if (GetAugment(i))
+					total += GetAugment(i)->GetItemHeroicCha();
+	}
+	return total;
+}
+
+int ItemInst::GetItemHeroicMR(bool augments) const
+{
+	int total = 0;
+	const auto item = GetItem();
+	if (item) {
+		total = item->HeroicMR;
+		if (augments)
+			for (int i = AUG_BEGIN; i < EmuConstants::ITEM_COMMON_SIZE; ++i)
+				if (GetAugment(i))
+					total += GetAugment(i)->GetItemHeroicMR();
+	}
+	return total;
+}
+
+int ItemInst::GetItemHeroicFR(bool augments) const
+{
+	int total = 0;
+	const auto item = GetItem();
+	if (item) {
+		total = item->HeroicFR;
+		if (augments)
+			for (int i = AUG_BEGIN; i < EmuConstants::ITEM_COMMON_SIZE; ++i)
+				if (GetAugment(i))
+					total += GetAugment(i)->GetItemHeroicFR();
+	}
+	return total;
+}
+
+int ItemInst::GetItemHeroicCR(bool augments) const
+{
+	int total = 0;
+	const auto item = GetItem();
+	if (item) {
+		total = item->HeroicCR;
+		if (augments)
+			for (int i = AUG_BEGIN; i < EmuConstants::ITEM_COMMON_SIZE; ++i)
+				if (GetAugment(i))
+					total += GetAugment(i)->GetItemHeroicCR();
+	}
+	return total;
+}
+
+int ItemInst::GetItemHeroicPR(bool augments) const
+{
+	int total = 0;
+	const auto item = GetItem();
+	if (item) {
+		total = item->HeroicPR;
+		if (augments)
+			for (int i = AUG_BEGIN; i < EmuConstants::ITEM_COMMON_SIZE; ++i)
+				if (GetAugment(i))
+					total += GetAugment(i)->GetItemHeroicPR();
+	}
+	return total;
+}
+
+int ItemInst::GetItemHeroicDR(bool augments) const
+{
+	int total = 0;
+	const auto item = GetItem();
+	if (item) {
+		total = item->HeroicDR;
+		if (augments)
+			for (int i = AUG_BEGIN; i < EmuConstants::ITEM_COMMON_SIZE; ++i)
+				if (GetAugment(i))
+					total += GetAugment(i)->GetItemHeroicDR();
+	}
+	return total;
+}
+
+int ItemInst::GetItemHeroicCorrup(bool augments) const
+{
+	int total = 0;
+	const auto item = GetItem();
+	if (item) {
+		total = item->HeroicSVCorrup;
+		if (augments)
+			for (int i = AUG_BEGIN; i < EmuConstants::ITEM_COMMON_SIZE; ++i)
+				if (GetAugment(i))
+					total += GetAugment(i)->GetItemHeroicCorrup();
+	}
+	return total;
+}
+
+int ItemInst::GetItemHaste(bool augments) const
+{
+	int total = 0;
+	const auto item = GetItem();
+	if (item) {
+		total = item->Haste;
+		if (augments)
+			for (int i = AUG_BEGIN; i < EmuConstants::ITEM_COMMON_SIZE; ++i)
+				if (GetAugment(i)) {
+					int temp = GetAugment(i)->GetItemHaste();
+					if (temp > total)
+						total = temp;
+				}
+	}
+	return total;
+}
 
 //
 // class EvolveInfo
