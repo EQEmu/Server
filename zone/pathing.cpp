@@ -39,11 +39,10 @@ glm::vec3 Mob::UpdatePath(float ToX, float ToY, float ToZ, float Speed, bool &Wa
 		m_pathing_route = zone->pathing.FindRoute(from, to);
 
 		auto &nodes = m_pathing_route.GetNodesEdit();
+		auto &last_node = nodes[nodes.size() - 1];
 		//Code to complete partial paths.
-		//256 is the max number of nodes, if we get that back then we likely got a partial path that 
-		//*may* have more after so instead let it run the path till it gets there and then DestinationValid will return false again
+		//If the path is too long then just warp to end.
 		if (nodes.size() < 256) {
-			auto &last_node = nodes[nodes.size() - 1];
 			auto dist = DistanceSquared(glm::vec4(last_node.position, 1.0f), glm::vec4(ToX, ToY, ToZ, 0.0f));
 			if (dist > 10000.0f) {
 				auto flag_temp = last_node.flag;
@@ -64,6 +63,16 @@ glm::vec3 Mob::UpdatePath(float ToX, float ToY, float ToZ, float Speed, bool &Wa
 				end.flag = NavigationPolyFlagNormal;
 				nodes.push_back(end);
 			}
+		}
+		else {
+			auto flag_temp = last_node.flag;
+			last_node.flag = NavigationPolyFlagPortal;
+			PathfindingNode end;
+			end.position.x = ToX;
+			end.position.y = ToY;
+			end.position.z = ToZ;
+			end.flag = flag_temp;
+			nodes.push_back(end);
 		}
 	}
 
