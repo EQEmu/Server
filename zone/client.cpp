@@ -8423,7 +8423,19 @@ void Client::TextLink::Reset()
 	m_ItemData = nullptr;
 	m_LootData = nullptr;
 	m_ItemInst = nullptr;
+	m_Proxy_unknown_1 = NOT_USED;
 	m_ProxyItemID = NOT_USED;
+	m_ProxyAugment1ID = NOT_USED;
+	m_ProxyAugment2ID = NOT_USED;
+	m_ProxyAugment3ID = NOT_USED;
+	m_ProxyAugment4ID = NOT_USED;
+	m_ProxyAugment5ID = NOT_USED;
+	m_ProxyAugment6ID = NOT_USED;
+	m_ProxyIsEvolving = NOT_USED;
+	m_ProxyEvolveGroup = NOT_USED;
+	m_ProxyEvolveLevel = NOT_USED;
+	m_ProxyOrnamentIcon = NOT_USED;
+	m_ProxyHash = NOT_USED;
 	m_ProxyText = nullptr;
 	m_TaskUse = false;
 	m_Link.clear();
@@ -8439,8 +8451,8 @@ void Client::TextLink::generate_body()
 
 	RoF2: "%1X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%1X" "%04X" "%02X" "%05X" "%08X" (56)
 	RoF:  "%1X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%1X" "%04X" "%1X"  "%05X" "%08X" (55)
-	SoF:  "%1X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X"		"%1X" "%04X" "%1X"  "%05X" "%08X" (50)
-	6.2:  "%1X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X"		"%1X" "%04X" "%1X"		 "%08X" (45)
+	SoF:  "%1X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X"        "%1X" "%04X" "%1X"  "%05X" "%08X" (50)
+	6.2:  "%1X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X"        "%1X" "%04X" "%1X"         "%08X" (45)
 	*/
 
 	memset(&m_LinkBodyStruct, 0, sizeof(TextLinkBody_Struct));
@@ -8492,13 +8504,36 @@ void Client::TextLink::generate_body()
 		break;
 	}
 
-	if (m_ProxyItemID != NOT_USED) {
+	if (m_Proxy_unknown_1)
+		m_LinkBodyStruct.unknown_1 = m_Proxy_unknown_1;
+	if (m_ProxyItemID)
 		m_LinkBodyStruct.item_id = m_ProxyItemID;
-	}
+	if (m_ProxyAugment1ID)
+		m_LinkBodyStruct.augment_1 = m_ProxyAugment1ID;
+	if (m_ProxyAugment2ID)
+		m_LinkBodyStruct.augment_2 = m_ProxyAugment2ID;
+	if (m_ProxyAugment3ID)
+		m_LinkBodyStruct.augment_3 = m_ProxyAugment3ID;
+	if (m_ProxyAugment4ID)
+		m_LinkBodyStruct.augment_4 = m_ProxyAugment4ID;
+	if (m_ProxyAugment5ID)
+		m_LinkBodyStruct.augment_5 = m_ProxyAugment5ID;
+	if (m_ProxyAugment6ID)
+		m_LinkBodyStruct.augment_6 = m_ProxyAugment6ID;
+	if (m_ProxyIsEvolving)
+		m_LinkBodyStruct.is_evolving = m_ProxyIsEvolving;
+	if (m_ProxyEvolveGroup)
+		m_LinkBodyStruct.evolve_group = m_ProxyEvolveGroup;
+	if (m_ProxyEvolveLevel)
+		m_LinkBodyStruct.evolve_level = m_ProxyEvolveLevel;
+	if (m_ProxyOrnamentIcon)
+		m_LinkBodyStruct.ornament_icon = m_ProxyOrnamentIcon;
+	if (m_ProxyHash)
+		m_LinkBodyStruct.hash = m_ProxyHash;
 
-	if (m_TaskUse) {
+
+	if (m_TaskUse)
 		m_LinkBodyStruct.hash = 0x14505DC2;
-	}
 
 	m_LinkBody = StringFormat(
 		"%1X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%1X" "%04X" "%02X" "%05X" "%08X",
@@ -8515,7 +8550,7 @@ void Client::TextLink::generate_body()
 		(0xFF & m_LinkBodyStruct.evolve_level),
 		(0x000FFFFF & m_LinkBodyStruct.ornament_icon),
 		(0xFFFFFFFF & m_LinkBodyStruct.hash)
-		);
+	);
 }
 
 void Client::TextLink::generate_text()
