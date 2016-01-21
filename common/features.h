@@ -273,6 +273,9 @@ enum {
 #define NPC_DEFAULT_LOGGING_ENABLED false
 
 
+// This is the item ID we use for say links, we use the max that fits in 5 ASCII chars
+#define SAYLINK_ITEM_ID 0xFFFFF
+
 
 /*
 

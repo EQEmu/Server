@@ -2766,14 +2766,13 @@ const char* QuestManager::saylink(char* Phrase, bool silent, const char* LinkNam
 	}
 	safe_delete_array(escaped_string);
 
-	if (silent)
-		sayid = sayid + 750000;
-	else
-		sayid = sayid + 500000;
-
 	//Create the say link as an item link hash
 	Client::TextLink linker;
-	linker.SetProxyItemID(sayid);
+	linker.SetProxyItemID(SAYLINK_ITEM_ID);
+	if (silent)
+		linker.SetProxyAugment2ID(sayid);
+	else
+		linker.SetProxyAugment1ID(sayid);
 	linker.SetProxyText(LinkName);
 
 	auto say_link = linker.GenerateLink();
