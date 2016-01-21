@@ -1920,6 +1920,7 @@ void SharedDatabase::LoadLootDrops(void *data, uint32 size) {
                             "ON lootdrop.id = lootdrop_entries.lootdrop_id ORDER BY lootdrop_id";
     auto results = QueryDatabase(query);
     if (!results.Success()) {
+		return;
     }
 
     uint32 current_id = 0;
