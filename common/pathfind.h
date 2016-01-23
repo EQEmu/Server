@@ -43,6 +43,13 @@ struct PathfindingNode
 	unsigned short flag;
 };
 
+enum PathfindingRouteStatus
+{
+	PathComplete,
+	PathPartial,
+	PathBroken
+};
+
 class PathfindingRoute
 {
 public:
@@ -56,11 +63,13 @@ public:
 	unsigned short GetPreviousNodeFlag();
 	const std::vector<PathfindingNode>& GetNodes() const { return m_nodes; }
 	std::vector<PathfindingNode>& GetNodesEdit() { return m_nodes; }
+	PathfindingRouteStatus GetStatus() { return m_status; }
 private:
 	glm::vec3 m_dest;
 	std::vector<PathfindingNode> m_nodes;
 	int m_current_node;
 	bool m_active;
+	PathfindingRouteStatus m_status;
 
 	friend class PathfindingManager;
 };

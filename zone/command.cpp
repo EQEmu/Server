@@ -4101,10 +4101,9 @@ void command_path(Client *c, const Seperator *sep)
 	bool first = true;
 	auto route = zone->pathing.FindRoute(src, dest);
 	auto &nodes = route.GetNodes();
-	auto &last_node = nodes[nodes.size() - 1];
-	auto dist = DistanceSquared(glm::vec4(last_node.position, 1.0f), glm::vec4(dest.x, dest.y, dest.z, 0.0f));
-	if (dist > 10000.0f) {
-		c->Message(0, "Path from (%.2f, %.2f, %.2f) to (%.2f, %.2f, %.2f) found with %i nodes, broken path, would need warp.",
+
+	if (route.GetStatus() == PathComplete) {
+		c->Message(0, "Path from (%.2f, %.2f, %.2f) to (%.2f, %.2f, %.2f) found with %i nodes, complete path.",
 			src.x,
 			src.y,
 			src.z,
@@ -4112,9 +4111,7 @@ void command_path(Client *c, const Seperator *sep)
 			dest.y,
 			dest.z,
 			(int)nodes.size());
-		return;
-	}
-	else if (dist > 100.0f) {
+	} else if (route.GetStatus() == PathPartial) {
 		c->Message(0, "Path from (%.2f, %.2f, %.2f) to (%.2f, %.2f, %.2f) found with %i nodes, partial path.",
 			src.x,
 			src.y,
@@ -4123,17 +4120,17 @@ void command_path(Client *c, const Seperator *sep)
 			dest.y,
 			dest.z,
 			(int)nodes.size());
-		return;
 	}
-
-	c->Message(0, "Path from (%.2f, %.2f, %.2f) to (%.2f, %.2f, %.2f) found with %i nodes, complete path.",
-		src.x,
-		src.y,
-		src.z,
-		dest.x,
-		dest.y,
-		dest.z,
-		(int)nodes.size());
+	else {
+		c->Message(0, "Path from (%.2f, %.2f, %.2f) to (%.2f, %.2f, %.2f) found with %i nodes, broken path.",
+			src.x,
+			src.y,
+			src.z,
+			dest.x,
+			dest.y,
+			dest.z,
+			(int)nodes.size());
+	}
 }
 
 void command_pvp(Client *c, const Seperator *sep)

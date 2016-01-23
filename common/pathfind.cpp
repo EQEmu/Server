@@ -188,7 +188,7 @@ PathfindingRoute PathfindingManager::FindRoute(const glm::vec3 &src_loc, const g
 	glm::vec3 dest_location(dest_loc.x, dest_loc.z, dest_loc.y);
 
 	PathfindingRoute ret;
-
+	ret.m_status = PathComplete;
 	ret.m_dest = dest_loc;
 	ret.m_current_node = 0;
 	ret.m_active = true;
@@ -208,7 +208,7 @@ PathfindingRoute PathfindingManager::FindRoute(const glm::vec3 &src_loc, const g
 
 	dtPolyRef start_ref;
 	dtPolyRef end_ref;
-	glm::vec3 ext(10.0f, 10.0f, 10.0f);
+	glm::vec3 ext(15.0f, 15.0f, 15.0f);
 
 	m_nav_query->findNearestPoly(&current_location[0], &ext[0], &m_filter, &start_ref, 0);
 	m_nav_query->findNearestPoly(&dest_location[0], &ext[0], &m_filter, &end_ref, 0);
@@ -223,20 +223,34 @@ PathfindingRoute PathfindingManager::FindRoute(const glm::vec3 &src_loc, const g
 
 	int npoly = 0;
 	dtPolyRef path[256] = { 0 };
-	m_nav_query->findPath(start_ref, end_ref, &current_location[0], &dest_location[0], &m_filter, path, &npoly, 256);
+	auto status = m_nav_query->findPath(start_ref, end_ref, &current_location[0], &dest_location[0], &m_filter, path, &npoly, 256);
+
+	if (status & DT_OUT_OF_NODES || status & DT_BUFFER_TOO_SMALL) {
+		ret.m_status = PathPartial;
+	}
+	else if (status & DT_PARTIAL_RESULT) {
+		ret.m_status = PathBroken;
+	}
 
 	if (npoly) {
 		glm::vec3 epos = dest_location;
 		if (path[npoly - 1] != end_ref)
 			m_nav_query->closestPointOnPoly(path[npoly - 1], &dest_location[0], &epos[0], 0);
 
-		float straight_path[256 * 3];
-		unsigned char straight_path_flags[256];
+		float straight_path[512 * 3];
+		unsigned char straight_path_flags[512];
 		int n_straight_polys;
-		dtPolyRef straight_path_polys[256];
-		m_nav_query->findStraightPath(&current_location[0], &epos[0], path, npoly,
+		dtPolyRef straight_path_polys[512];
+		status = m_nav_query->findStraightPath(&current_location[0], &epos[0], path, npoly,
 			straight_path, straight_path_flags,
-			straight_path_polys, &n_straight_polys, 256, DT_STRAIGHTPATH_ALL_CROSSINGS);
+			straight_path_polys, &n_straight_polys, 512, DT_STRAIGHTPATH_ALL_CROSSINGS);
+
+		if (ret.m_status == PathComplete && status & DT_OUT_OF_NODES || status & DT_BUFFER_TOO_SMALL) {
+			ret.m_status = PathPartial;
+		}
+		else if (ret.m_status == PathComplete && status & DT_PARTIAL_RESULT) {
+			ret.m_status = PathBroken;
+		}
 
 		if (n_straight_polys) {
 			ret.m_nodes.reserve(n_straight_polys);
@@ -309,6 +323,10 @@ PathfindingRoute::~PathfindingRoute()
 
 bool PathfindingRoute::DestinationValid(const glm::vec3 &dest)
 {
+	if (m_status == PathPartial && m_current_node + 1 == m_nodes.size()) {
+		return false;
+	}
+
 	auto dist = vec_dist(dest, m_dest);
 	if (dist <= max_dest_drift) {
 		return true;
