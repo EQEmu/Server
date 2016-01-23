@@ -13774,11 +13774,10 @@ std::string Bot::CreateSayLink(Client* c, const char* message, const char* name)
 	}
 	safe_delete_array(escaped_string);
 
-	sayid += 500000;
-
 	Client::TextLink linker;
 	linker.SetLinkType(linker.linkItemData);
-	linker.SetProxyItemID(sayid);
+	linker.SetProxyItemID(SAYLINK_ITEM_ID);
+	linker.SetProxyAugment1ID(sayid);
 	linker.SetProxyText(name);
 
 	auto say_link = linker.GenerateLink();
