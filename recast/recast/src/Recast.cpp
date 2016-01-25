@@ -257,7 +257,7 @@ void rcMarkWalkableTriangles(rcContext* ctx, const float walkableSlopeAngle,
 	
 	for (int i = 0; i < nt; ++i)
 	{
-		const int* tri = &tris[i*3];	
+		const int* tri = &tris[i*3];
 		calcTriNormal(&verts[tri[0]*3], &verts[tri[1]*3], &verts[tri[2]*3], norm);
 		// Check if the face is walkable.
 		if (norm[1] > walkableThr)
@@ -329,7 +329,7 @@ bool rcBuildCompactHeightfield(rcContext* ctx, const int walkableHeight, const i
 {
 	rcAssert(ctx);
 	
-	ctx->startTimer(RC_TIMER_BUILD_COMPACTHEIGHTFIELD);
+	rcScopedTimer timer(ctx, RC_TIMER_BUILD_COMPACTHEIGHTFIELD);
 	
 	const int w = hf.width;
 	const int h = hf.height;
@@ -456,8 +456,6 @@ bool rcBuildCompactHeightfield(rcContext* ctx, const int walkableHeight, const i
 		ctx->log(RC_LOG_ERROR, "rcBuildCompactHeightfield: Heightfield has too many layers %d (max: %d)",
 				 tooHighNeighbour, MAX_LAYERS);
 	}
-		
-	ctx->stopTimer(RC_TIMER_BUILD_COMPACTHEIGHTFIELD);
 	
 	return true;
 }

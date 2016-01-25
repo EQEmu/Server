@@ -250,19 +250,6 @@ void duDebugDrawNavMesh(duDebugDraw* dd, const dtNavMesh& mesh, unsigned char fl
 	}
 }
 
-void duDebugDrawNavMeshTile(struct duDebugDraw* dd, const dtNavMesh& mesh, int w, int h, int layer, unsigned char flags) {
-	const dtMeshTile* tile = mesh.getTileAt(w, h, layer);
-	if (!tile) {
-		return;
-	}
-
-	if (!tile->header) {
-		return;
-	}
-
-	drawMeshTile(dd, mesh, 0, tile, flags);
-}
-
 void duDebugDrawNavMeshWithClosedList(struct duDebugDraw* dd, const dtNavMesh& mesh, const dtNavMeshQuery& query, unsigned char flags)
 {
 	if (!dd) return;
