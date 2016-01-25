@@ -889,7 +889,7 @@ public:
 	Mob* GetShieldTarget() const { return shield_target; }
 	void SetShieldTarget(Mob* mob) { shield_target = mob; }
 	bool HasActiveSong() const { return(bardsong != 0); }
-	bool Charmed() const { return charmed; }
+	bool Charmed() const { return typeofpet == petCharmed; }
 	static uint32 GetLevelHP(uint8 tlevel);
 	uint32 GetZoneID() const; //for perl
 	virtual int32 CheckAggroAmount(uint16 spell_id, Mob *target, bool isproc = false);
