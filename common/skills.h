@@ -114,7 +114,7 @@ enum SkillUseTypes
 /*13049*/	SkillTripleAttack,
 
 // RoF2+ specific skills
-// /*00789*/	Skill2HPiercing,
+/*00789*/	Skill2HPiercing,
 // /*01216*/	SkillNone,						// This needs to move down as new skills are added
 
 /*00000*/	_EmuSkillCount					// move to last position of active enumeration labels
@@ -171,7 +171,7 @@ enum SkillUseTypes
 };
 
 // temporary until it can be sorted out...
-#define HIGHEST_SKILL	SkillTripleAttack
+#define HIGHEST_SKILL	Skill2HPiercing
 // Spell Effects use this value to determine if an effect applies to all skills.
 #define ALL_SKILLS	-1
 

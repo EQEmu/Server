@@ -1814,6 +1814,11 @@ void Client::SetClassStartingSkills(PlayerProfile_Struct *pp)
 			pp->skills[i] = database.GetSkillCap(pp->class_, (SkillUseTypes)i, 1);
 		}
 	}
+
+	if (cle->GetClientVersion() < static_cast<uint8>(ClientVersion::RoF2) && pp->class_ == BERSERKER) {
+		pp->skills[Skill1HPiercing] = pp->skills[Skill2HPiercing];
+		pp->skills[Skill2HPiercing] = 0;
+	}
 }
 
 void Client::SetRaceStartingSkills( PlayerProfile_Struct *pp )

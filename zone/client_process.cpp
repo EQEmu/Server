@@ -1553,6 +1553,11 @@ void Client::OPGMTraining(const EQApplicationPacket *app)
 			//Set it to 1 with CanHaveSkill or you wont be able to train past 1.
 		}
 	}
+
+	if (GetClientVersion() < ClientVersion::RoF2 && GetClass() == BERSERKER) {
+		gmtrain->skills[Skill1HPiercing] = gmtrain->skills[Skill2HPiercing];
+		gmtrain->skills[Skill2HPiercing] = 0;
+	}
 //#pragma GCC pop_options
 
 	uchar ending[]={0x34,0x87,0x8a,0x3F,0x01

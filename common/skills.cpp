@@ -71,7 +71,7 @@ float EQEmu::GetSkillMeleePushForce(SkillUseTypes skill)
 	case SkillEagleStrike:
 	case SkillKick:
 	case SkillTigerClaw:
-	//case Skill2HPiercing:
+	case Skill2HPiercing:
 		return 0.2f;
 	case SkillArchery:
 		return 0.15f;

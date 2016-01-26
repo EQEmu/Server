@@ -1179,7 +1179,7 @@ uint16 Bot::GetPrimarySkillValue() {
 				break;
 			}
 			case ItemType2HPiercing: {
-				skill = Skill1HPiercing; // change to Skill2HPiercing once activated
+				skill = Skill2HPiercing;
 				break;
 			}
 			case ItemTypeMartial: {
@@ -6493,7 +6493,7 @@ void Bot::RogueBackstab(Mob* other, bool min_damage, int ReuseTime) {
 		ndamage = -5;
 
 	DoSpecialAttackDamage(other, SkillBackstab, ndamage, min_hit, hate, ReuseTime);
-	DoAnim(animPiercing);
+	DoAnim(anim1HPiercing);
 }
 
 void Bot::RogueAssassinate(Mob* other) {
@@ -6505,7 +6505,7 @@ void Bot::RogueAssassinate(Mob* other) {
 			other->Damage(this, -5, SPELL_UNKNOWN, SkillBackstab);
 	}
 
-	DoAnim(animPiercing);
+	DoAnim(anim1HPiercing);
 }
 
 void Bot::DoClassAttacks(Mob *target, bool IsRiposte) {

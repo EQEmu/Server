@@ -511,7 +511,7 @@ typedef struct
 //make DoAnim take it instead of int, to enforce its use.
 enum {	//type arguments to DoAnim
 	animKick				= 1,
-	animPiercing			= 2,	//might be piercing?
+	anim1HPiercing			= 2,	//might be piercing?
 	anim2HSlashing			= 3,
 	anim2HWeapon			= 4,
 	anim1HWeapon			= 5,
