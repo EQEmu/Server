@@ -857,7 +857,7 @@ void SharedDatabase::LoadItems(void *data, uint32 size, int32 items, uint32 max_
 		strcpy(item.IDFile, row[ItemField::idfile]);
 
 		item.ID = (uint32)atoul(row[ItemField::id]);
-		item.Weight = (uint8)atoi(row[ItemField::weight]);
+		item.Weight = (int32)atoi(row[ItemField::weight]);
 		item.NoRent = disableNoRent ? (uint8)atoi("255") : (uint8)atoi(row[ItemField::norent]);
 		item.NoDrop = disableNoDrop ? (uint8)atoi("255") : (uint8)atoi(row[ItemField::nodrop]);
 		item.Size = (uint8)atoi(row[ItemField::size]);
