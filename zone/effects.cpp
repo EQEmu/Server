@@ -225,6 +225,9 @@ int32 Mob::GetActDoTDamage(uint16 spell_id, int32 value, Mob* target) {
 
 int32 Mob::GetExtraSpellAmt(uint16 spell_id, int32 extra_spell_amt, int32 base_spell_dmg)
 {
+	if (RuleB(Spells, CustomSpellDmgAllowance))
+		return extra_spell_amt;
+
 	int total_cast_time = 0;
 
 	if (spells[spell_id].recast_time >= spells[spell_id].recovery_time)
