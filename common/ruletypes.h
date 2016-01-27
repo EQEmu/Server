@@ -126,7 +126,6 @@ RULE_INT(Character, InvSnapshotMinIntervalM, 180) // Minimum time (in minutes) b
 RULE_INT(Character, InvSnapshotMinRetryM, 30) // Time (in minutes) to re-attempt an inventory snapshot after a failure
 RULE_INT(Character, InvSnapshotHistoryD, 30) // Time (in days) to keep snapshot entries
 RULE_BOOL(Character, RestrictSpellScribing, false) // Restricts spell scribing to allowable races/classes of spell scroll, if true
-RULE_BOOL(Character, CustomSpellDmgAllowance, false) // Ignores scaling recipe and returns full SpellDmg all the time
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Mercs)
@@ -362,6 +361,7 @@ RULE_BOOL(Spells, NPC_UseFocusFromSpells, true) // Allow npcs to use most spell 
 RULE_BOOL(Spells, NPC_UseFocusFromItems, false) // Allow npcs to use most item derived focus effects.
 RULE_BOOL(Spells, UseAdditiveFocusFromWornSlot, false) // Allows an additive focus effect to be calculated from worn slot.
 RULE_BOOL(Spells, AlwaysSendTargetsBuffs, false) // ignore LAA level if true
+RULE_BOOL(Spells, FlatItemExtraSpellAmt, false) // Ignores scaling recipe and returns full SpellDmg all the time
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Combat)
