@@ -213,7 +213,8 @@ SET(common_headers
 	patches/rof2_structs.h
 	patches/titanium.h
 	patches/titanium_constants.h
-	patches/titanium_itemfields.h
+	patches/titanium_itemfields_a.h
+	patches/titanium_itemfields_b.h
 	patches/titanium_ops.h
 	patches/titanium_structs.h
 	patches/uf.h
@@ -265,7 +266,8 @@ SOURCE_GROUP(Patches FILES
 	patches/rof2_constants.h
 	patches/rof2_structs.h
 	patches/titanium.h
-	patches/titanium_itemfields.h
+	patches/titanium_itemfields_a.h
+	patches/titanium_itemfields_b.h
 	patches/titanium_ops.h
 	patches/titanium_constants.h
 	patches/titanium_structs.h

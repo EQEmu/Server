@@ -2,6 +2,9 @@ EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
 == 01/26/2016 ==
 Uleat: Fix for Berserker 'Piercing' skill issues. Server Admins: If you run custom skill sets, this patch touches the code segments that you will need to modify if you have changed the default berserker 1H-/2H-piercing skill values.
+Uleat (Daerath): Fix for precision-loss item weight conversions in older clients.
+	- WARNING: YOU MUST RE-RUN SHARED_MEMORY.EXE BEFORE STARTING SERVER OR ITEM LOSS WILL OCCUR!
+	- Note: Cmake must be re-run to include/exclude the required files
 
 == 01/13/2016 ==
 Kinglykrab: Modified #flag so you can refresh your target's account status (GM status level) without them having to relog.

@@ -2126,7 +2126,9 @@ namespace Titanium
 #define C(field) "|%s"
 #define S(field) "|%s"
 #define F(field) "|%f"
-#include "titanium_itemfields.h"
+#include "titanium_itemfields_a.h"
+			"|%i"		// mask for item->Weight
+#include "titanium_itemfields_b.h"
 			"%.*s\""	// Quotes (and protection, if needed) around static data
 			"|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s"	// Sub items
 			"%.*s%s"	// For trailing quotes (and protection) if a subitem;
@@ -2138,7 +2140,9 @@ namespace Titanium
 #define C(field) ,field
 #define S(field) ,item->field
 #define F(field) ,item->field
-#include "titanium_itemfields.h"
+#include "titanium_itemfields_a.h"
+			, ((item->Weight > 255) ? (255) : (item->Weight))
+#include "titanium_itemfields_b.h"
 			, depth, protection
 			, sub_items[0] ? sub_items[0] : ""
 			, sub_items[1] ? sub_items[1] : ""
