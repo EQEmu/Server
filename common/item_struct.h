@@ -160,7 +160,7 @@ struct Item_Struct {
 	//uint32	Unk059;
 	union {
 		uint32 Fulfilment;	// Food fulfilment (How long it lasts)
-		int16 CastTime;		// Cast Time for clicky effects, in milliseconds
+		uint32 CastTime;		// Cast Time for clicky effects, in milliseconds
 	};
 	uint32 EliteMaterial;
 	int32	ProcRate;
