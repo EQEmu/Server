@@ -424,7 +424,9 @@ int command_init(void)
 	
 	std::map<std::string, std::pair<uint8, std::vector<std::string>>> command_settings;
 	database.GetCommandSettings(command_settings);
-	for (std::map<std::string, CommandRecord *>::iterator iter_cl = commandlist.begin(); iter_cl != commandlist.end(); ++iter_cl) {
+
+	std::map<std::string, CommandRecord *> working_cl = commandlist;
+	for (std::map<std::string, CommandRecord *>::iterator iter_cl = working_cl.begin(); iter_cl != working_cl.end(); ++iter_cl) {
 		std::map<std::string, std::pair<uint8, std::vector<std::string>>>::iterator iter_cs = command_settings.find(iter_cl->first);
 		if (iter_cs == command_settings.end()) {
 			if (iter_cl->second->access == 0)
