@@ -4076,6 +4076,17 @@ namespace RoF2
 			if (strlen(emu->suffix))
 				PacketSize += strlen(emu->suffix) + 1;
 
+			if (emu->DestructibleObject || emu->class_ == 62)
+			{
+				if (emu->DestructibleObject)
+					PacketSize = PacketSize - 4;	// No bodytype
+
+				PacketSize += 53;	// Fixed portion
+				PacketSize += strlen(emu->DestructibleModel) + 1;
+				PacketSize += strlen(emu->DestructibleName2) + 1;
+				PacketSize += strlen(emu->DestructibleString) + 1;
+			}
+
 			bool ShowName = 1;
 			if (emu->bodytype >= 66)
 			{
@@ -4110,7 +4121,14 @@ namespace RoF2
 			VARSTRUCT_ENCODE_STRING(Buffer, emu->name);
 			VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->spawnId);
 			VARSTRUCT_ENCODE_TYPE(uint8, Buffer, emu->level);
-			VARSTRUCT_ENCODE_TYPE(float, Buffer, SpawnSize - 0.7);	// Eye Height?
+			if (emu->DestructibleObject)
+			{
+				VARSTRUCT_ENCODE_TYPE(float, Buffer, 10);	// was int and 0x41200000
+			}
+			else
+			{
+				VARSTRUCT_ENCODE_TYPE(float, Buffer, SpawnSize - 0.7);	// Eye Height?
+			}
 			VARSTRUCT_ENCODE_TYPE(uint8, Buffer, emu->NPC);
 
 			structs::Spawn_Struct_Bitfields *Bitfields = (structs::Spawn_Struct_Bitfields*)Buffer;
@@ -4130,6 +4148,12 @@ namespace RoF2
 			Bitfields->targetable_with_hotkey = emu->targetable_with_hotkey ? 1 : 0;
 			Bitfields->showname = ShowName;
 
+			if (emu->DestructibleObject)
+			{
+				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0x1d600000);
+				Buffer = Buffer - 4;
+			}
+
 			// Not currently found
 			// Bitfields->statue = 0;
 			// Bitfields->buyer = 0;
@@ -4138,21 +4162,66 @@ namespace RoF2
 
 			uint8 OtherData = 0;
 
+			if (emu->class_ == 62) //LDoN Chest
+				OtherData = OtherData | 0x04;
+
 			if (strlen(emu->title))
 				OtherData = OtherData | 16;
 
 			if (strlen(emu->suffix))
 				OtherData = OtherData | 32;
 
+			if (emu->DestructibleObject)
+				OtherData = OtherData | 0xe1;	// Live has 0xe1 for OtherData
+
 			VARSTRUCT_ENCODE_TYPE(uint8, Buffer, OtherData);
 
-			VARSTRUCT_ENCODE_TYPE(float, Buffer, -1);	// unknown3
+			if (emu->DestructibleObject)
+			{
+				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0x00000000);
+			}
+			else
+			{
+				VARSTRUCT_ENCODE_TYPE(float, Buffer, -1);	// unknown3
+			}
 			VARSTRUCT_ENCODE_TYPE(float, Buffer, 0);	// unknown4
 
-			// Setting this next field to zero will cause a crash. Looking at ShowEQ, if it is zero, the bodytype field is not
-			// present. Will sort that out later.
-			VARSTRUCT_ENCODE_TYPE(uint8, Buffer, 1);	// This is a properties count field
-			VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->bodytype);
+			if (emu->DestructibleObject || emu->class_ == 62)
+			{
+				VARSTRUCT_ENCODE_STRING(Buffer, emu->DestructibleModel);
+				VARSTRUCT_ENCODE_STRING(Buffer, emu->DestructibleName2);
+				VARSTRUCT_ENCODE_STRING(Buffer, emu->DestructibleString);
+
+				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->DestructibleAppearance);
+				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->DestructibleUnk1);
+
+				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->DestructibleID1);
+				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->DestructibleID2);
+				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->DestructibleID3);
+				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->DestructibleID4);
+
+				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->DestructibleUnk2);
+				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->DestructibleUnk3);
+				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->DestructibleUnk4);
+				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->DestructibleUnk5);
+				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->DestructibleUnk6);
+				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->DestructibleUnk7);
+				VARSTRUCT_ENCODE_TYPE(uint8, Buffer, emu->DestructibleUnk8);
+				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->DestructibleUnk9);
+			}
+
+
+			if (!emu->DestructibleObject)
+			{
+				// Setting this next field to zero will cause a crash. Looking at ShowEQ, if it is zero, the bodytype field is not
+				// present. Will sort that out later.
+				VARSTRUCT_ENCODE_TYPE(uint8, Buffer, 1);	// This is a properties count field
+				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->bodytype);
+			}
+			else
+			{
+				VARSTRUCT_ENCODE_TYPE(uint8, Buffer, 0);
+			}
 
 			VARSTRUCT_ENCODE_TYPE(uint8, Buffer, emu->curHp);
 			VARSTRUCT_ENCODE_TYPE(uint8, Buffer, emu->haircolor);

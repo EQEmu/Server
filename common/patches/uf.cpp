@@ -2818,9 +2818,11 @@ namespace UF
 			if (strlen(emu->suffix))
 				PacketSize += strlen(emu->suffix) + 1;
 
-			if (emu->DestructibleObject)
+			if (emu->DestructibleObject || emu->class_ == 62)
 			{
-				PacketSize = PacketSize - 4;	// No bodytype
+				if (emu->DestructibleObject)
+					PacketSize = PacketSize - 4;	// No bodytype
+
 				PacketSize += 53;	// Fixed portion
 				PacketSize += strlen(emu->DestructibleModel) + 1;
 				PacketSize += strlen(emu->DestructibleName2) + 1;
@@ -2903,6 +2905,9 @@ namespace UF
 
 			uint8 OtherData = 0;
 
+			if (emu->class_ == 62) //Ldon chest
+				OtherData = OtherData | 0x01;
+
 			if (strlen(emu->title))
 				OtherData = OtherData | 0x04;
 
@@ -2924,7 +2929,7 @@ namespace UF
 			}
 			VARSTRUCT_ENCODE_TYPE(float, Buffer, 0);	// unknown4
 
-			if (emu->DestructibleObject)
+			if (emu->DestructibleObject || emu->class_ == 62)
 			{
 				VARSTRUCT_ENCODE_STRING(Buffer, emu->DestructibleModel);
 				VARSTRUCT_ENCODE_STRING(Buffer, emu->DestructibleName2);
