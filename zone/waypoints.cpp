@@ -1186,8 +1186,7 @@ uint32 ZoneDatabase::GetFreeGrid(uint16 zoneid) {
 		return 0;
 
 	auto row = results.begin();
-	uint32 freeGridID = 1;
-	freeGridID = atoi(row[0]) + 1;
+	uint32 freeGridID = row[0] ? atoi(row[0]) + 1 : 1;
 
 	return freeGridID;
 }
