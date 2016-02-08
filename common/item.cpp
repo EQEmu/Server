@@ -1656,12 +1656,12 @@ bool ItemInst::IsAugmentable() const
 	if (!m_item)
 		return false;
 
-	for (int index = 0; index < EmuConstants::ITEM_COMMON_SIZE; ++index) {
-		if (m_item->AugSlotType[index] != NO_ITEM)
-			return true;
-	}
-
-	return false;
+	// There are six augmentationtype slots, but they are always filled in order, so if
+	// AugSlotType 0 is not 0, then the item is augmentable.  I checked the database on
+	// 2016-02-08 and there are no cases where AugSlotTypeN is 0, but AugSlotTypeN+1 through
+	// AugSlotTypeMax is not 0.  Based on that, this is a simpler check.  If AugSlotType[0]
+	// is not equal to NO_ITEM, then the item is augmentable.
+	return m_item->AugSlotType[0] != NO_ITEM;
 }
 
 bool ItemInst::AvailableWearSlot(uint32 aug_wear_slots) const {
