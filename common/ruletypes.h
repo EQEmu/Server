@@ -361,6 +361,7 @@ RULE_BOOL(Spells, NPC_UseFocusFromSpells, true) // Allow npcs to use most spell 
 RULE_BOOL(Spells, NPC_UseFocusFromItems, false) // Allow npcs to use most item derived focus effects.
 RULE_BOOL(Spells, UseAdditiveFocusFromWornSlot, false) // Allows an additive focus effect to be calculated from worn slot.
 RULE_BOOL(Spells, AlwaysSendTargetsBuffs, false) // ignore LAA level if true
+RULE_BOOL(Spells, FlatItemExtraSpellAmt, false) // allow SpellDmg stat to affect all spells, regardless of cast time/cooldown/etc
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Combat)
