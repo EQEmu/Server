@@ -115,7 +115,7 @@ int32 Mob::GetActSpellDamage(uint16 spell_id, int32 value, Mob* target) {
 			if(RuleB(Spells, IgnoreSpellDmgLvlRestriction) && !spells[spell_id].no_heal_damage_item_mod && itembonuses.SpellDmg)
 				value -= GetExtraSpellAmt(spell_id, itembonuses.SpellDmg, value)*ratio / 100;
 
-			else if(!spells[spell_id].no_heal_damage_item_mod && itembonuses.SpellDmg && spells[spell_id].classes[(GetClass()%16) - 1] >= GetLevel() - 5)
+			else if(!spells[spell_id].no_heal_damage_item_mod && itembonuses.SpellDmg && spells[spell_id].classes[(GetClass()%17) - 1] >= GetLevel() - 5)
 				value -= GetExtraSpellAmt(spell_id, itembonuses.SpellDmg, value)*ratio/100;
 
 			else if (IsNPC() && CastToNPC()->GetSpellScale())
@@ -151,7 +151,7 @@ int32 Mob::GetActSpellDamage(uint16 spell_id, int32 value, Mob* target) {
 	if (RuleB(Spells, IgnoreSpellDmgLvlRestriction) && !spells[spell_id].no_heal_damage_item_mod && itembonuses.SpellDmg)
 		value -= GetExtraSpellAmt(spell_id, itembonuses.SpellDmg, value);
 
-	else if(!spells[spell_id].no_heal_damage_item_mod && itembonuses.SpellDmg && spells[spell_id].classes[(GetClass()%16) - 1] >= GetLevel() - 5)
+	else if(!spells[spell_id].no_heal_damage_item_mod && itembonuses.SpellDmg && spells[spell_id].classes[(GetClass()%17) - 1] >= GetLevel() - 5)
 		 value -= GetExtraSpellAmt(spell_id, itembonuses.SpellDmg, value);
 
 	if (IsNPC() && CastToNPC()->GetSpellScale())
