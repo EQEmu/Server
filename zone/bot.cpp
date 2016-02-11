@@ -5463,7 +5463,7 @@ int32 Bot::CalcBotAAFocus(BotfocusType type, uint32 aa_ID, uint32 points, uint16
 					LimitFound = true;
 				break;
 			case SE_LimitMaxLevel:
-				spell_level = spell.classes[(GetClass() % 16) - 1];
+				spell_level = spell.classes[(GetClass() % 17) - 1];
 				lvldiff = spell_level - base1;
 				//every level over cap reduces the effect by base2 percent unless from a clicky when ItemCastsUseFocus is true
 				if(lvldiff > 0 && (spell_level <= RuleI(Character, MaxLevel) || RuleB(Character, ItemCastsUseFocus) == false)) {
@@ -5477,7 +5477,7 @@ int32 Bot::CalcBotAAFocus(BotfocusType type, uint32 aa_ID, uint32 points, uint16
 				}
 				break;
 			case SE_LimitMinLevel:
-				if((spell.classes[(GetClass() % 16) - 1]) < base1)
+				if((spell.classes[(GetClass() % 17) - 1]) < base1)
 					LimitFound = true;
 				break;
 			case SE_LimitCastTimeMin:
@@ -5915,7 +5915,7 @@ int32 Bot::CalcBotFocusEffect(BotfocusType bottype, uint16 focus_id, uint16 spel
 			case SE_LimitMaxLevel:{
 				if (IsNPC())
 					break;
-				spell_level = spell.classes[(GetClass() % 16) - 1];
+				spell_level = spell.classes[(GetClass() % 17) - 1];
 				lvldiff = (spell_level - focus_spell.base[i]);
 				if(lvldiff > 0 && (spell_level <= RuleI(Character, MaxLevel) || RuleB(Character, ItemCastsUseFocus) == false)) {
 					if(focus_spell.base2[i] > 0) {
@@ -5931,7 +5931,7 @@ int32 Bot::CalcBotFocusEffect(BotfocusType bottype, uint16 focus_id, uint16 spel
 			case SE_LimitMinLevel:
 				if (IsNPC())
 					break;
-				if (spell.classes[(GetClass() % 16) - 1] < focus_spell.base[i])
+				if (spell.classes[(GetClass() % 17) - 1] < focus_spell.base[i])
 					return 0;
 				break;
 
@@ -7083,7 +7083,7 @@ int32 Bot::GetActSpellDamage(uint16 spell_id, int32 value, Mob* target) {
 
 			value -= GetBotFocusEffect(BotfocusFcDamageAmt, spell_id);
 
-			if(itembonuses.SpellDmg && spells[spell_id].classes[(GetClass() % 16) - 1] >= GetLevel() - 5)
+			if(itembonuses.SpellDmg && spells[spell_id].classes[(GetClass() % 17) - 1] >= GetLevel() - 5)
 				value += (GetExtraSpellAmt(spell_id, itembonuses.SpellDmg, value) * ratio / 100);
 
 			entity_list.MessageClose(this, false, 100, MT_SpellCrits, "%s delivers a critical blast! (%d)", GetName(), -value);
@@ -7102,7 +7102,7 @@ int32 Bot::GetActSpellDamage(uint16 spell_id, int32 value, Mob* target) {
 
 	value -= GetBotFocusEffect(BotfocusFcDamageAmtCrit, spell_id);
 	value -= GetBotFocusEffect(BotfocusFcDamageAmt, spell_id);
-	if(itembonuses.SpellDmg && spells[spell_id].classes[(GetClass() % 16) - 1] >= GetLevel() - 5)
+	if(itembonuses.SpellDmg && spells[spell_id].classes[(GetClass() % 17) - 1] >= GetLevel() - 5)
 		value += GetExtraSpellAmt(spell_id, itembonuses.SpellDmg, value);
 
 	return value;
@@ -7135,7 +7135,7 @@ int32 Bot::GetActSpellHealing(uint16 spell_id, int32 value, Mob* target) {
 		value += GetBotFocusEffect(BotfocusFcHealAmt, spell_id);
 		value += target->GetFocusIncoming(focusFcHealAmtIncoming, SE_FcHealAmtIncoming, this, spell_id);
 
-		if(itembonuses.HealAmt && spells[spell_id].classes[(GetClass() % 16) - 1] >= GetLevel() - 5)
+		if(itembonuses.HealAmt && spells[spell_id].classes[(GetClass() % 17) - 1] >= GetLevel() - 5)
 			value += (GetExtraSpellAmt(spell_id, itembonuses.HealAmt, value) * modifier);
 
 		value += (value * target->GetHealRate(spell_id, this) / 100);
@@ -7239,7 +7239,7 @@ int32 Bot::GetActSpellCasttime(uint16 spell_id, int32 casttime) {
 }
 
 int32 Bot::GetActSpellCost(uint16 spell_id, int32 cost) {
-	if(this->itembonuses.Clairvoyance && spells[spell_id].classes[(GetClass()%16) - 1] >= GetLevel() - 5) {
+	if(this->itembonuses.Clairvoyance && spells[spell_id].classes[(GetClass()%17) - 1] >= GetLevel() - 5) {
 		int32 mana_back = (this->itembonuses.Clairvoyance * zone->random.Int(1, 100) / 100);
 		if(mana_back > cost)
 			mana_back = cost;

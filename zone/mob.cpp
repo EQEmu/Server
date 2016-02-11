@@ -5117,7 +5117,7 @@ int8 Mob::GetDecayEffectValue(uint16 spell_id, uint16 spelleffect) {
 	if (!IsValidSpell(spell_id))
 		return false;
 
-	int spell_level = spells[spell_id].classes[(GetClass()%16) - 1];
+	int spell_level = spells[spell_id].classes[(GetClass()%17) - 1];
 	int effect_value = 0;
 	int lvlModifier = 100;
 
