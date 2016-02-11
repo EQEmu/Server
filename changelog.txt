@@ -1,5 +1,8 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 02/11/2016 ==
+Hateborne: Added IgnoreSpellDmgLvlRestriction rule (boolean) to ignore the 5 level spread when checking to add SpellDmg
+
 == 02/10/2016 ==
 Hateborne: Added FlatItemExtraSpellAmt rule (boolean) to allow SpellDmg on items to be added as raw damage versus scaled.
 
