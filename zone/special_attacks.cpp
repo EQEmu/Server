@@ -100,11 +100,14 @@ void Mob::DoSpecialAttackDamage(Mob *who, SkillUseTypes skill, int32 max_damage,
 	//this really should go through the same code as normal melee damage to
 	//pick up all the special behavior there
 
-	if (!who)
+	if ((who == nullptr || ((IsClient() && CastToClient()->dead) || (who->IsClient() && who->CastToClient()->dead)) || HasDied() || (!IsAttackAllowed(who))))
 		return;
+	
+	if(who->GetInvul() || who->GetSpecialAbility(IMMUNE_MELEE))
+		max_damage = -5;
 
-	if(who->GetInvul() || who->GetSpecialAbility(IMMUNE_MELEE) || who->GetSpecialAbility(IMMUNE_MELEE_EXCEPT_BANE))
-		return; //-5?
+	if (who->GetSpecialAbility(IMMUNE_MELEE_EXCEPT_BANE) && skill != SkillBackstab)
+		max_damage = -5;
 
 	uint32 hate = max_damage;
 	if(hate_override > -1)
