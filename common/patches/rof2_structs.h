@@ -2845,7 +2845,8 @@ struct Object_Struct {
 /*00*/	uint32	drop_id;			// Unique object id for zone
 /*00*/	uint32	unknown024;			// 53 9e f9 7e - same for all objects in the zone?
 /*00*/	float	heading;			// heading
-/*00*/	float	unknown032[2];		// 00 00 00 00 00 00 00 00
+/*00*/	float	x_tilt;				//Tilt entire object on X axis
+/*00*/	float	y_tilt;				//Tilt entire object on Y axis
 /*00*/	float	size;				// Size - default 1
 /*00*/	float	z;					// z coord
 /*00*/	float	x;					// x coord
