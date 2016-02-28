@@ -126,6 +126,7 @@ RULE_INT(Character, InvSnapshotMinIntervalM, 180) // Minimum time (in minutes) b
 RULE_INT(Character, InvSnapshotMinRetryM, 30) // Time (in minutes) to re-attempt an inventory snapshot after a failure
 RULE_INT(Character, InvSnapshotHistoryD, 30) // Time (in days) to keep snapshot entries
 RULE_BOOL(Character, RestrictSpellScribing, false) // Restricts spell scribing to allowable races/classes of spell scroll, if true
+RULE_BOOL(Character, UseStackablePickPocketing, true) // Allows stackable pickpocketed items to stack instead of only being allowed in empty inventory slots
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Mercs)
