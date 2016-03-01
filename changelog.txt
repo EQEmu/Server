@@ -1,5 +1,8 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 02/29/2016 ==
+Uleat: Change in AddItemBonuses - now includes ammo slot for skill mods only. Defined SoD- client SkillModMax packet property (client does not show..but, does enforce.)
+
 == 02/11/2016 ==
 Hateborne: Added IgnoreSpellDmgLvlRestriction rule (boolean) to ignore the 5 level spread when checking to add SpellDmg
 
