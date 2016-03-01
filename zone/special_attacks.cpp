@@ -904,7 +904,7 @@ void Mob::DoArcheryAttackDmg(Mob* other,  const ItemInst* RangeWeapon, const Ite
 			WDmg = weapon_damage;
 
 		if (LaunchProjectile){//1: Shoot the Projectile once we calculate weapon damage.
-			TryProjectileAttack(other, AmmoItem, SkillArchery, WDmg, RangeWeapon, Ammo, AmmoSlot, speed);
+			TryProjectileAttack(other, AmmoItem, SkillArchery, (WDmg + ADmg), RangeWeapon, Ammo, AmmoSlot, speed);
 			return;
 		}
 
@@ -926,7 +926,10 @@ void Mob::DoArcheryAttackDmg(Mob* other,  const ItemInst* RangeWeapon, const Ite
 
 			MaxDmg += MaxDmg*bonusArcheryDamageModifier / 100;
 
-			Log.Out(Logs::Detail, Logs::Combat, "Bow DMG %d, Arrow DMG %d, Max Damage %d.", WDmg, ADmg, MaxDmg);
+			if (RuleB(Combat, ProjectileDmgOnImpact))
+				Log.Out(Logs::Detail, Logs::Combat, "Bow and Arrow DMG %d, Max Damage %d.", WDmg, MaxDmg);
+			else
+				Log.Out(Logs::Detail, Logs::Combat, "Bow DMG %d, Arrow DMG %d, Max Damage %d.", WDmg, ADmg, MaxDmg);
 
 			bool dobonus = false;
 			if(GetClass() == RANGER && GetLevel() > 50){
