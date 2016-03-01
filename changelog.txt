@@ -1,5 +1,8 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 03/01/2016 ==
+Uleat: Fix for LDoN treasure 'npcs' not leaving a corpse (please report any issues..)
+
 == 02/29/2016 ==
 Uleat: Change in AddItemBonuses - now includes ammo slot for skill mods only. Defined SoD- client SkillModMax packet property (client does not show..but, does enforce.)
 
