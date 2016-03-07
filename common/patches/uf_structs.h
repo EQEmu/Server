@@ -2450,7 +2450,8 @@ struct Object_Struct {
 /*20*/	uint32	unknown020;			// 00 00 00 00
 /*24*/	uint32	unknown024;			// 53 9e f9 7e - same for all objects in the zone?
 /*40*/	float	heading;			// heading
-/*32*/	uint8	unknown032[8];		// 00 00 00 00 00 00 00 00
+/*00*/	float	x_tilt;				//Tilt entire object on X axis
+/*00*/	float	y_tilt;				//Tilt entire object on Y axis
 /*28*/	float	size;			// Size - default 1
 /*44*/	float	z;					// z coord
 /*48*/	float	x;					// x coord

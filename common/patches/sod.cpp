@@ -3661,7 +3661,7 @@ namespace SoD
 		ibs.Races = item->Races;
 		ibs.Deity = item->Deity;
 		ibs.SkillModValue = item->SkillModValue;
-		ibs.unknown6 = 0;
+		ibs.SkillModMax = item->SkillModMax;
 		ibs.SkillModType = item->SkillModType;
 		ibs.BaneDmgRace = item->BaneDmgRace;
 		ibs.BaneDmgBody = item->BaneDmgBody;

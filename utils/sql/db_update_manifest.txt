@@ -349,6 +349,7 @@
 9093|2015_12_21_items_updates_evoitem.sql|SHOW COLUMNS FROM `items` LIKE 'evoitem'|empty|
 9094|2015_12_29_quest_zone_events.sql|SELECT * FROM perl_event_export_settings WHERE event_description = 'EVENT_SPAWN_ZONE'|empty|
 9095|2016_01_08_command_find_aliases.sql|SELECT * FROM `command_settings` WHERE `command` LIKE 'findaliases'|empty|
+9096|2016_03_05_secondary_recall.sql|SHOW COLUMNS FROM `character_bind` LIKE 'slot'|empty|
 
 # Upgrade conditions:
 # 	This won't be needed after this system is implemented, but it is used database that are not

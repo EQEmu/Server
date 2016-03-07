@@ -1260,30 +1260,27 @@ bool ZoneDatabase::LoadCharacterPotions(uint32 character_id, PlayerProfile_Struc
 	return true;
 }
 
-bool ZoneDatabase::LoadCharacterBindPoint(uint32 character_id, PlayerProfile_Struct* pp){
-	std::string query = StringFormat("SELECT `zone_id`, `instance_id`, `x`, `y`, `z`, `heading`, `is_home` FROM `character_bind` WHERE `id` = %u LIMIT 2", character_id);
+bool ZoneDatabase::LoadCharacterBindPoint(uint32 character_id, PlayerProfile_Struct *pp)
+{
+	std::string query = StringFormat("SELECT `slot`, `zone_id`, `instance_id`, `x`, `y`, `z`, `heading` FROM "
+					 "`character_bind` WHERE `id` = %u LIMIT 5",
+					 character_id);
 	auto results = database.QueryDatabase(query);
 
+	if (!results.RowCount()) // SHIT -- this actually isn't good
+		return true;
+
 	for (auto row = results.begin(); row != results.end(); ++row) {
-
-		/* Is home bind */
-		if (atoi(row[6]) == 1){
-			pp->binds[4].zoneId = atoi(row[0]);
-			pp->binds[4].instance_id = atoi(row[1]);
-			pp->binds[4].x = atoi(row[2]);
-			pp->binds[4].y = atoi(row[3]);
-			pp->binds[4].z = atoi(row[4]);
-			pp->binds[4].heading = atoi(row[5]);
+		int index = atoi(row[0]);
+		if (index < 0 || index > 4)
 			continue;
-		}
 
-		/* Is regular bind point */
-		pp->binds[0].zoneId = atoi(row[0]);
-		pp->binds[0].instance_id = atoi(row[1]);
-		pp->binds[0].x = atoi(row[2]);
-		pp->binds[0].y = atoi(row[3]);
-		pp->binds[0].z = atoi(row[4]);
-		pp->binds[0].heading = atoi(row[5]);
+		pp->binds[index].zoneId = atoi(row[1]);
+		pp->binds[index].instance_id = atoi(row[2]);
+		pp->binds[index].x = atoi(row[3]);
+		pp->binds[index].y = atoi(row[4]);
+		pp->binds[index].z = atoi(row[5]);
+		pp->binds[index].heading = atoi(row[6]);
 	}
 
 	return true;
@@ -1295,19 +1292,23 @@ bool ZoneDatabase::SaveCharacterLanguage(uint32 character_id, uint32 lang_id, ui
 	return true;
 }
 
-bool ZoneDatabase::SaveCharacterBindPoint(uint32 character_id, uint32 zone_id, uint32 instance_id, const glm::vec4& position, uint8 is_home){
-	if (zone_id <= 0) {
-		return false;
-	}
-
+bool ZoneDatabase::SaveCharacterBindPoint(uint32 character_id, const BindStruct &bind, uint32 bind_num)
+{
 	/* Save Home Bind Point */
-	std::string query = StringFormat("REPLACE INTO `character_bind` (id, zone_id, instance_id, x, y, z, heading, is_home)"
-		" VALUES (%u, %u, %u, %f, %f, %f, %f, %i)", character_id, zone_id, instance_id, position.x, position.y, position.z, position.w, is_home);
-	Log.Out(Logs::General, Logs::None, "ZoneDatabase::SaveCharacterBindPoint for character ID: %i zone_id: %u instance_id: %u position: %s ishome: %u", character_id, zone_id, instance_id, to_string(position).c_str(), is_home);
+	std::string query =
+	    StringFormat("REPLACE INTO `character_bind` (id, zone_id, instance_id, x, y, z, heading, slot) VALUES (%u, "
+			 "%u, %u, %f, %f, %f, %f, %i)",
+			 character_id, bind.zoneId, bind.instance_id, bind.x, bind.y, bind.z, bind.heading, bind_num);
+
+	Log.Out(Logs::General, Logs::None, "ZoneDatabase::SaveCharacterBindPoint for character ID: %i zone_id: %u "
+					   "instance_id: %u position: %f %f %f %f bind_num: %u",
+		character_id, bind.zoneId, bind.instance_id, bind.x, bind.y, bind.z, bind.heading, bind_num);
+
 	auto results = QueryDatabase(query);
-	if (!results.RowsAffected()) {
-		Log.Out(Logs::General, Logs::None, "ERROR Bind Home Save: %s. %s", results.ErrorMessage().c_str(), query.c_str());
-	}
+	if (!results.RowsAffected())
+		Log.Out(Logs::General, Logs::None, "ERROR Bind Home Save: %s. %s", results.ErrorMessage().c_str(),
+			query.c_str());
+
 	return true;
 }
 

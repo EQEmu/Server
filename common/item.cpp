@@ -2230,11 +2230,12 @@ void ItemInst::ScaleItem() {
 	m_scaledItem->Mana = (int32)((float)m_item->Mana*Mult);
 	m_scaledItem->AC = (int32)((float)m_item->AC*Mult);
 
-	m_scaledItem->SkillModValue = (int32)((float)m_item->SkillModValue*Mult);
-	m_scaledItem->BaneDmgAmt = (int8)((float)m_item->BaneDmgAmt*Mult);
-	m_scaledItem->BardValue = (int32)((float)m_item->BardValue*Mult);
-	m_scaledItem->ElemDmgAmt = (uint8)((float)m_item->ElemDmgAmt*Mult);
-	m_scaledItem->Damage = (uint32)((float)m_item->Damage*Mult);
+	// check these..some may not need to be modified (really need to check all stats/bonuses)
+	//m_scaledItem->SkillModValue = (int32)((float)m_item->SkillModValue*Mult);
+	//m_scaledItem->BaneDmgAmt = (int8)((float)m_item->BaneDmgAmt*Mult);	// watch (10 entries with charmfileid)
+	m_scaledItem->BardValue = (int32)((float)m_item->BardValue*Mult);		// watch (no entries with charmfileid)
+	m_scaledItem->ElemDmgAmt = (uint8)((float)m_item->ElemDmgAmt*Mult);		// watch (no entries with charmfileid)
+	m_scaledItem->Damage = (uint32)((float)m_item->Damage*Mult);			// watch
 
 	m_scaledItem->CombatEffects = (int8)((float)m_item->CombatEffects*Mult);
 	m_scaledItem->Shielding = (int8)((float)m_item->Shielding*Mult);

@@ -39,7 +39,7 @@ These fields must be in the order of how they are serialized!
 /* 030 */	I(AC)
 /* 031 */	I(Deity)
 /* 032 */	I(SkillModValue)
-/* 033 */	C("0")
+/* 033 */	I(SkillModMax)
 /* 034 */	I(SkillModType)
 /* 035 */	I(BaneDmgRace)
 /* 036 */	I(BaneDmgAmt)

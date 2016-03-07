@@ -1,5 +1,19 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 03/05/2016 ==
+mackal: Implement extra bind points (secondary recall)
+	For SE_Gate, base2 is which bind to use (starting at 1)
+	For SE_BindAffinity, base1 is which bind to set (starting at 1)
+	For SE_GateCastersBindpoint, base1 is which bind to use (starting at 1)
+		There was actually no spells that don't send to the main bind, but it uses a base1 of 1 which matches with SE_Gate
+		This also doesn't break anything
+
+== 03/01/2016 ==
+Uleat: Fix for LDoN treasure 'npcs' not leaving a corpse (please report any issues..)
+
+== 02/29/2016 ==
+Uleat: Change in AddItemBonuses - now includes ammo slot for skill mods only. Defined SoD- client SkillModMax packet property (client does not show..but, does enforce.)
+
 == 02/11/2016 ==
 Hateborne: Added IgnoreSpellDmgLvlRestriction rule (boolean) to ignore the 5 level spread when checking to add SpellDmg
 

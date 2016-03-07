@@ -1425,13 +1425,13 @@ uint32 NPC::GetMaxDamage(uint8 tlevel)
 	return dmg;
 }
 
-void NPC::PickPocket(Client* thief) {
-
+void NPC::PickPocket(Client* thief)
+{
 	thief->CheckIncreaseSkill(SkillPickPockets, nullptr, 5);
 
-	//make sure were allowed to targte them:
-	int olevel = GetLevel();
-	if(olevel > (thief->GetLevel() + THIEF_PICKPOCKET_OVER)) {
+	//make sure were allowed to target them:
+	int over_level = GetLevel();
+	if(over_level > (thief->GetLevel() + THIEF_PICKPOCKET_OVER)) {
 		thief->Message(13, "You are too inexperienced to pick pocket this target");
 		thief->SendPickPocketResponse(this, 0, PickPocketFailed);
 		//should we check aggro
@@ -1447,150 +1447,109 @@ void NPC::PickPocket(Client* thief) {
 	}
 
 	int steal_skill = thief->GetSkill(SkillPickPockets);
-	int stealchance = steal_skill*100/(5*olevel+5);
-	ItemInst* inst = 0;
-	int x = 0;
-	int slot[50];
-	int steal_items[50];
-	int charges[50];
-	int money[4];
-	money[0] = GetPlatinum();
-	money[1] = GetGold();
-	money[2] = GetSilver();
-	money[3] = GetCopper();
-	if (steal_skill < 125)
-		money[0] = 0;
-	if (steal_skill < 60)
-		money[1] = 0;
-	memset(slot,0,50);
-	memset(steal_items,0,50);
-	memset(charges,0,50);
+	int steal_chance = steal_skill * 100 / (5 * over_level + 5);
+
 	//Determine wheter to steal money or an item.
-	bool no_coin = ((money[0] + money[1] + money[2] + money[3]) == 0);
-	bool steal_item = (zone->random.Roll(50) || no_coin);
-	if (steal_item)
-	{
-		ItemList::iterator cur,end;
-		cur = itemlist.begin();
-		end = itemlist.end();
-		for(; cur != end && x < 49; ++cur) {
-			ServerLootItem_Struct* citem = *cur;
-			const Item_Struct* item = database.GetItem(citem->item_id);
-			if (item)
-			{
-				inst = database.CreateItem(item, citem->charges);
-				bool is_arrow = (item->ItemType == ItemTypeArrow) ? true : false;
-				int slot_id = thief->GetInv().FindFreeSlot(false, true, inst->GetItem()->Size, is_arrow);
-				if (/*!Equipped(item->ID) &&*/
-					!item->Magic && item->NoDrop != 0 && !inst->IsType(ItemClassContainer) && slot_id != INVALID_INDEX
-					/*&& steal_skill > item->StealSkill*/ )
-				{
-					slot[x] = slot_id;
-					steal_items[x] = item->ID;
-					if (inst->IsStackable())
-						charges[x] = 1;
-					else
-						charges[x] = citem->charges;
-					x++;
-				}
-			}
+	int money[6] = { 0, ((steal_skill >= 125) ? (GetPlatinum()) : (0)), ((steal_skill >= 60) ? (GetGold()) : (0)), GetSilver(), GetCopper(), 0 };
+	bool has_coin = ((money[PickPocketPlatinum] | money[PickPocketGold] | money[PickPocketSilver] | money[PickPocketCopper]) != 0);
+	bool steal_item = (steal_skill >= steal_chance && (zone->random.Roll(50) || !has_coin));
+
+	// still needs to have FindFreeSlot vs PutItemInInventory issue worked out
+	while (steal_item) {
+		std::vector<std::pair<const Item_Struct*, uint16>> loot_selection; // <const Item_Struct*, charges>
+		for (auto item_iter : itemlist) {
+			if (!item_iter || !item_iter->item_id)
+				continue;
+
+			auto item_test = database.GetItem(item_iter->item_id);
+			if (item_test->Magic || !item_test->NoDrop || item_test->ItemType == ItemClassContainer || thief->CheckLoreConflict(item_test))
+				continue;
+
+			loot_selection.push_back(std::make_pair(item_test, ((item_test->Stackable) ? (1) : (item_iter->charges))));
 		}
-		if (x > 0)
-		{
-			int random = zone->random.Int(0, x-1);
-			inst = database.CreateItem(steal_items[random], charges[random]);
-			if (inst)
-			{
-				const Item_Struct* item = inst->GetItem();
-				if (item)
-				{
-					if (/*item->StealSkill || */steal_skill >= stealchance)
-					{
-						thief->PutItemInInventory(slot[random], *inst);
-						thief->SendItemPacket(slot[random], inst, ItemPacketTrade);
-						RemoveItem(item->ID);
-						thief->SendPickPocketResponse(this, 0, PickPocketItem, item);
-					}
-					else
-						steal_item = false;
-				}
-				else
-					steal_item = false;
-			}
-			else
-				steal_item = false;
-		}
-		else if (!no_coin)
-		{
+		if (loot_selection.empty()) {
 			steal_item = false;
-		}
-		else
-		{
-			thief->Message(0, "This target's pockets are empty");
-			thief->SendPickPocketResponse(this, 0, PickPocketFailed);
-		}
-	}
-	if (!steal_item) //Steal money
-	{
-		uint32 amt = zone->random.Int(1, (steal_skill/25)+1);
-		int steal_type = 0;
-		if (!money[0])
-		{
-			steal_type = 1;
-			if (!money[1])
-			{
-				steal_type = 2;
-				if (!money[2])
-				{
-					steal_type = 3;
-				}
-			}
+			break;
 		}
 
-		if (zone->random.Roll(stealchance))
-		{
-			switch (steal_type)
-			{
-				case 0:{
-						if (amt > GetPlatinum())
-							amt = GetPlatinum();
-						SetPlatinum(GetPlatinum()-amt);
-						thief->AddMoneyToPP(0,0,0,amt,false);
-						thief->SendPickPocketResponse(this, amt, PickPocketPlatinum);
-						break;
-				}
-				case 1:{
-						if (amt > GetGold())
-							amt = GetGold();
-						SetGold(GetGold()-amt);
-						thief->AddMoneyToPP(0,0,amt,0,false);
-						thief->SendPickPocketResponse(this, amt, PickPocketGold);
-						break;
-				}
-				case 2:{
-						if (amt > GetSilver())
-							amt = GetSilver();
-						SetSilver(GetSilver()-amt);
-						thief->AddMoneyToPP(0,amt,0,0,false);
-						thief->SendPickPocketResponse(this, amt, PickPocketSilver);
-						break;
-				}
-				case 3:{
-						if (amt > GetCopper())
-							amt = GetCopper();
-						SetCopper(GetCopper()-amt);
-						thief->AddMoneyToPP(amt,0,0,0,false);
-						thief->SendPickPocketResponse(this, amt, PickPocketCopper);
-						break;
-				}
+		int random = zone->random.Int(0, (loot_selection.size() - 1));
+		uint16 slot_id = thief->GetInv().FindFreeSlot(false, true, (loot_selection[random].first->Size), (loot_selection[random].first->ItemType == ItemTypeArrow));
+		if (slot_id == INVALID_INDEX) {
+			steal_item = false;
+			break;
+		}
+		
+		auto item_inst = database.CreateItem(loot_selection[random].first, loot_selection[random].second);
+		if (item_inst == nullptr) {
+			steal_item = false;
+			break;
+		}
+
+		// Successful item pickpocket
+		if (item_inst->IsStackable() && RuleB(Character, UseStackablePickPocketing)) {
+			if (!thief->TryStacking(item_inst, ItemPacketTrade, false, false)) {
+				thief->PutItemInInventory(slot_id, *item_inst);
+				thief->SendItemPacket(slot_id, item_inst, ItemPacketTrade);
 			}
 		}
-		else
-		{
-			thief->SendPickPocketResponse(this, 0, PickPocketFailed);
+		else {
+			thief->PutItemInInventory(slot_id, *item_inst);
+			thief->SendItemPacket(slot_id, item_inst, ItemPacketTrade);
 		}
+		RemoveItem(item_inst->GetID());
+		thief->SendPickPocketResponse(this, 0, PickPocketItem, item_inst->GetItem());
+
+		return;
 	}
-	safe_delete(inst);
+
+	while (!steal_item && has_coin) {
+		uint32 coin_amount = zone->random.Int(1, (steal_skill / 25) + 1);
+		
+		int coin_type = PickPocketPlatinum;
+		while (coin_type <= PickPocketCopper) {
+			if (money[coin_type]) {
+				if (coin_amount > money[coin_type])
+					coin_amount = money[coin_type];
+				break;
+			}
+			++coin_type;
+		}
+		if (coin_type > PickPocketCopper)
+			break;
+
+		memset(money, 0, (sizeof(int) * 6));
+		money[coin_type] = coin_amount;
+
+		if (zone->random.Roll(steal_chance)) { // Successful coin pickpocket
+			switch (coin_type) {
+			case PickPocketPlatinum:
+				SetPlatinum(GetPlatinum() - coin_amount);
+				break;
+			case PickPocketGold:
+				SetGold(GetGold() - coin_amount);
+				break;
+			case PickPocketSilver:
+				SetSilver(GetSilver() - coin_amount);
+				break;
+			case PickPocketCopper:
+				SetCopper(GetCopper() - coin_amount);
+				break;
+			default: // has_coin..but, doesn't have coin?
+				thief->SendPickPocketResponse(this, 0, PickPocketFailed);
+				return;
+			}
+
+			thief->AddMoneyToPP(money[3], money[2], money[1], money[0], false);
+			thief->SendPickPocketResponse(this, coin_amount, coin_type);
+			return;
+		}
+
+		thief->SendPickPocketResponse(this, 0, PickPocketFailed);
+		return;
+	}
+
+	thief->Message(0, "This target's pockets are empty");
+	thief->SendPickPocketResponse(this, 0, PickPocketFailed);
 }
 
 void Mob::NPCSpecialAttacks(const char* parse, int permtag, bool reset, bool remove) {

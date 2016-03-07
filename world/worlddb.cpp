@@ -159,10 +159,10 @@ void WorldDatabase::GetCharSelectInfo(uint32 accountID, EQApplicationPacket **ou
 		}
 
 		/* Set Bind Point Data for any character that may possibly be missing it for any reason */
-		cquery = StringFormat("SELECT `zone_id`, `instance_id`, `x`, `y`, `z`, `heading`, `is_home` FROM `character_bind`  WHERE `id` = %i LIMIT 2", character_id);
+		cquery = StringFormat("SELECT `zone_id`, `instance_id`, `x`, `y`, `z`, `heading`, `slot` FROM `character_bind`  WHERE `id` = %i LIMIT 5", character_id);
 		auto results_bind = database.QueryDatabase(cquery);
 		for (auto row_b = results_bind.begin(); row_b != results_bind.end(); ++row_b) {
-			if (row_b[6] && atoi(row_b[6]) == 1){ has_home = 1; }
+			if (row_b[6] && atoi(row_b[6]) == 4){ has_home = 1; }
 			if (row_b[6] && atoi(row_b[6]) == 0){ has_bind = 1; }
 		}
 
@@ -189,14 +189,14 @@ void WorldDatabase::GetCharSelectInfo(uint32 accountID, EQApplicationPacket **ou
 			pp.binds[0] = pp.binds[4];
 			/* If no home bind set, set it */
 			if (has_home == 0) {
-				std::string query = StringFormat("REPLACE INTO `character_bind` (id, zone_id, instance_id, x, y, z, heading, is_home)"
+				std::string query = StringFormat("REPLACE INTO `character_bind` (id, zone_id, instance_id, x, y, z, heading, slot)"
 					" VALUES (%u, %u, %u, %f, %f, %f, %f, %i)",
-					character_id, pp.binds[4].zoneId, 0, pp.binds[4].x, pp.binds[4].y, pp.binds[4].z, pp.binds[4].heading, 1);
+					character_id, pp.binds[4].zoneId, 0, pp.binds[4].x, pp.binds[4].y, pp.binds[4].z, pp.binds[4].heading, 4);
 				auto results_bset = QueryDatabase(query);
 			}
 			/* If no regular bind set, set it */
 			if (has_bind == 0) {
-				std::string query = StringFormat("REPLACE INTO `character_bind` (id, zone_id, instance_id, x, y, z, heading, is_home)"
+				std::string query = StringFormat("REPLACE INTO `character_bind` (id, zone_id, instance_id, x, y, z, heading, slot)"
 					" VALUES (%u, %u, %u, %f, %f, %f, %f, %i)",
 					character_id, pp.binds[0].zoneId, 0, pp.binds[0].x, pp.binds[0].y, pp.binds[0].z, pp.binds[0].heading, 0);
 				auto results_bset = QueryDatabase(query);
@@ -285,7 +285,7 @@ int WorldDatabase::MoveCharacterToBind(int CharID, uint8 bindnum)
 		bindnum = 0;
 	}
 
-	std::string query = StringFormat("SELECT zone_id, instance_id, x, y, z FROM character_bind WHERE id = %u AND is_home = %u LIMIT 1", CharID, bindnum == 4 ? 1 : 0);
+	std::string query = StringFormat("SELECT zone_id, instance_id, x, y, z FROM character_bind WHERE id = %u AND slot = %u LIMIT 1", CharID, bindnum);
 	auto results = database.QueryDatabase(query);
 	if(!results.Success() || results.RowCount() == 0) {
 		return 0;

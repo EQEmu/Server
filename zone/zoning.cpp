@@ -707,37 +707,40 @@ void Client::GoToSafeCoords(uint16 zone_id, uint16 instance_id) {
 }
 
 
-void Mob::Gate() {
-	GoToBind();
+void Mob::Gate(uint8 bindnum) {
+	GoToBind(bindnum);
 }
 
-void Client::Gate() {
-	Mob::Gate();
+void Client::Gate(uint8 bindnum) {
+	Mob::Gate(bindnum);
 }
 
-void NPC::Gate() {
+void NPC::Gate(uint8 bindnum) {
 	entity_list.MessageClose_StringID(this, true, 200, MT_Spells, GATES, GetCleanName());
 
-	Mob::Gate();
+	Mob::Gate(bindnum);
 }
 
-void Client::SetBindPoint(int to_zone, int to_instance, const glm::vec3& location) {
+void Client::SetBindPoint(int bind_num, int to_zone, int to_instance, const glm::vec3 &location)
+{
+	if (bind_num < 0 || bind_num >= 4)
+		bind_num = 0;
+
 	if (to_zone == -1) {
-		m_pp.binds[0].zoneId = zone->GetZoneID();
-		m_pp.binds[0].instance_id = (zone->GetInstanceID() != 0 && zone->IsInstancePersistent()) ? zone->GetInstanceID() : 0;
-		m_pp.binds[0].x = m_Position.x;
-		m_pp.binds[0].y = m_Position.y;
-		m_pp.binds[0].z = m_Position.z;
+		m_pp.binds[bind_num].zoneId = zone->GetZoneID();
+		m_pp.binds[bind_num].instance_id =
+		    (zone->GetInstanceID() != 0 && zone->IsInstancePersistent()) ? zone->GetInstanceID() : 0;
+		m_pp.binds[bind_num].x = m_Position.x;
+		m_pp.binds[bind_num].y = m_Position.y;
+		m_pp.binds[bind_num].z = m_Position.z;
+	} else {
+		m_pp.binds[bind_num].zoneId = to_zone;
+		m_pp.binds[bind_num].instance_id = to_instance;
+		m_pp.binds[bind_num].x = location.x;
+		m_pp.binds[bind_num].y = location.y;
+		m_pp.binds[bind_num].z = location.z;
 	}
-	else {
-		m_pp.binds[0].zoneId = to_zone;
-		m_pp.binds[0].instance_id = to_instance;
-		m_pp.binds[0].x = location.x;
-		m_pp.binds[0].y = location.y;
-		m_pp.binds[0].z = location.z;
-	}
-	auto regularBindPoint = glm::vec4(m_pp.binds[0].x, m_pp.binds[0].y, m_pp.binds[0].z, 0.0f);
-	database.SaveCharacterBindPoint(this->CharacterID(), m_pp.binds[0].zoneId, m_pp.binds[0].instance_id, regularBindPoint, 0);
+	database.SaveCharacterBindPoint(this->CharacterID(), m_pp.binds[bind_num], bind_num);
 }
 
 void Client::GoToBind(uint8 bindnum) {

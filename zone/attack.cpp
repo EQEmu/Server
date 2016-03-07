@@ -1874,50 +1874,52 @@ void NPC::Damage(Mob* other, int32 damage, uint16 spell_id, SkillUseTypes attack
 	}
 }
 
-bool NPC::Death(Mob* killer_mob, int32 damage, uint16 spell, SkillUseTypes attack_skill) {
-	Log.Out(Logs::Detail, Logs::Combat, "Fatal blow dealt by %s with %d damage, spell %d, skill %d", killer_mob->GetName(), damage, spell, attack_skill);
+bool NPC::Death(Mob* killer_mob, int32 damage, uint16 spell, SkillUseTypes attack_skill)
+{
+	Log.Out(Logs::Detail, Logs::Combat, "Fatal blow dealt by %s with %d damage, spell %d, skill %d",
+		((killer_mob) ? (killer_mob->GetName()) : ("[nullptr]")), damage, spell, attack_skill);
 
 	Mob *oos = nullptr;
-	if(killer_mob) {
+	if (killer_mob) {
 		oos = killer_mob->GetOwnerOrSelf();
 
 		char buffer[48] = { 0 };
-		snprintf(buffer, 47, "%d %d %d %d", killer_mob ? killer_mob->GetID() : 0, damage, spell, static_cast<int>(attack_skill));
-		if(parse->EventNPC(EVENT_DEATH, this, oos, buffer, 0) != 0)
-		{
-			if(GetHP() < 0) {
+		snprintf(buffer, 47, "%d %d %d %d", killer_mob->GetID(), damage, spell, static_cast<int>(attack_skill));
+
+		if (parse->EventNPC(EVENT_DEATH, this, oos, buffer, 0) != 0) {
+			if (GetHP() < 0) {
 				SetHP(0);
 			}
 			return false;
 		}
 
-		if(killer_mob && killer_mob->IsClient() && (spell != SPELL_UNKNOWN) && damage > 0) {
-			char val1[20]={0};
+		if (killer_mob->IsClient() && (spell != SPELL_UNKNOWN) && damage > 0) {
+			char val1[20] = { 0 };
 			entity_list.MessageClose_StringID(this, false, 100, MT_NonMelee, HIT_NON_MELEE,
 				killer_mob->GetCleanName(), GetCleanName(), ConvertArray(damage, val1));
 		}
-	} else {
-
+	}
+	else {
 		char buffer[48] = { 0 };
-		snprintf(buffer, 47, "%d %d %d %d", killer_mob ? killer_mob->GetID() : 0, damage, spell, static_cast<int>(attack_skill));
-		if(parse->EventNPC(EVENT_DEATH, this, nullptr, buffer, 0) != 0)
-		{
-			if(GetHP() < 0) {
+		snprintf(buffer, 47, "%d %d %d %d", 0, damage, spell, static_cast<int>(attack_skill));
+
+		if (parse->EventNPC(EVENT_DEATH, this, nullptr, buffer, 0) != 0) {
+			if (GetHP() < 0) {
 				SetHP(0);
 			}
 			return false;
 		}
 	}
 
-	if (IsEngaged())
-	{
+	if (IsEngaged()) {
 		zone->DelAggroMob();
 		Log.Out(Logs::Detail, Logs::Attack, "%s Mobs currently Aggro %i", __FUNCTION__, zone->MobsAggroCount());
 	}
+
 	SetHP(0);
 	SetPet(0);
 
-	if (GetSwarmOwner()){
+	if (GetSwarmOwner()) {
 		Mob* owner = entity_list.GetMobID(GetSwarmOwner());
 		if (owner)
 			owner->SetTempPetCount(owner->GetTempPetCount() - 1);
@@ -1927,14 +1929,14 @@ bool NPC::Death(Mob* killer_mob, int32 damage, uint16 spell, SkillUseTypes attac
 
 	entity_list.RemoveFromTargets(this, p_depop);
 
-	if(p_depop == true)
+	if (p_depop == true)
 		return false;
 
 	HasAISpellEffects = false;
 	BuffFadeAll();
 	uint8 killed_level = GetLevel();
 
-	EQApplicationPacket* app= new EQApplicationPacket(OP_Death,sizeof(Death_Struct));
+	EQApplicationPacket* app = new EQApplicationPacket(OP_Death, sizeof(Death_Struct));
 	Death_Struct* d = (Death_Struct*)app->pBuffer;
 	d->spawn_id = GetID();
 	d->killer_id = killer_mob ? killer_mob->GetID() : 0;
@@ -1945,55 +1947,49 @@ bool NPC::Death(Mob* killer_mob, int32 damage, uint16 spell, SkillUseTypes attac
 	app->priority = 6;
 	entity_list.QueueClients(killer_mob, app, false);
 
-	if(respawn2) {
+	safe_delete(app);
+
+	if (respawn2) {
 		respawn2->DeathReset(1);
 	}
 
-	if (killer_mob) {
-		if(GetClass() != LDON_TREASURE)
-			hate_list.AddEntToHateList(killer_mob, damage);
-	}
-
-	safe_delete(app);
+	if (killer_mob && GetClass() != LDON_TREASURE)
+		hate_list.AddEntToHateList(killer_mob, damage);
 
 	Mob *give_exp = hate_list.GetDamageTopOnHateList(this);
 
-	if(give_exp == nullptr)
+	if (give_exp == nullptr)
 		give_exp = killer;
 
-	if(give_exp && give_exp->HasOwner()) {
+	if (give_exp && give_exp->HasOwner()) {
 
 		bool ownerInGroup = false;
-		if((give_exp->HasGroup() && give_exp->GetGroup()->IsGroupMember(give_exp->GetUltimateOwner()))
+		if ((give_exp->HasGroup() && give_exp->GetGroup()->IsGroupMember(give_exp->GetUltimateOwner()))
 			|| (give_exp->IsPet() && (give_exp->GetOwner()->IsClient()
-			|| ( give_exp->GetOwner()->HasGroup() && give_exp->GetOwner()->GetGroup()->IsGroupMember(give_exp->GetOwner()->GetUltimateOwner())))))
+			|| (give_exp->GetOwner()->HasGroup() && give_exp->GetOwner()->GetGroup()->IsGroupMember(give_exp->GetOwner()->GetUltimateOwner())))))
 			ownerInGroup = true;
 
 		give_exp = give_exp->GetUltimateOwner();
 
 #ifdef BOTS
-		if(!RuleB(Bots, BotGroupXP) && !ownerInGroup) {
+		if (!RuleB(Bots, BotGroupXP) && !ownerInGroup) {
 			give_exp = nullptr;
 		}
 #endif //BOTS
 	}
 
-	if(give_exp && give_exp->IsTempPet() && give_exp->IsPetOwnerClient()) {
-
-		if (give_exp->IsNPC() && give_exp->CastToNPC()->GetSwarmOwner()){
-			Mob* temp_owner = nullptr;
-			temp_owner = entity_list.GetMobID(give_exp->CastToNPC()->GetSwarmOwner());
-
+	if (give_exp && give_exp->IsTempPet() && give_exp->IsPetOwnerClient()) {
+		if (give_exp->IsNPC() && give_exp->CastToNPC()->GetSwarmOwner()) {
+			Mob* temp_owner = entity_list.GetMobID(give_exp->CastToNPC()->GetSwarmOwner());
 			if (temp_owner)
 				give_exp = temp_owner;
 		}
 	}
 
-
 	int PlayerCount = 0; // QueryServ Player Counting
 
 	Client *give_exp_client = nullptr;
-	if(give_exp && give_exp->IsClient())
+	if (give_exp && give_exp->IsClient())
 		give_exp_client = give_exp->CastToClient();
 
 	//do faction hits even if we are a merchant, so long as a player killed us
@@ -2001,43 +1997,43 @@ bool NPC::Death(Mob* killer_mob, int32 damage, uint16 spell, SkillUseTypes attac
 		hate_list.DoFactionHits(GetNPCFactionID());
 
 	bool IsLdonTreasure = (this->GetClass() == LDON_TREASURE);
-	if (give_exp_client && !IsCorpse())
-	{
+
+	if (give_exp_client && !IsCorpse()) {
 		Group *kg = entity_list.GetGroupByClient(give_exp_client);
 		Raid *kr = entity_list.GetRaidByClient(give_exp_client);
 
 		int32 finalxp = EXP_FORMULA;
 		finalxp = give_exp_client->mod_client_xp(finalxp, this);
 
-		if(kr)
-		{
-			if(!IsLdonTreasure && MerchantType == 0) {
+		if (kr) {
+			if (!IsLdonTreasure && MerchantType == 0) {
 				kr->SplitExp((finalxp), this);
-				if(killer_mob && (kr->IsRaidMember(killer_mob->GetName()) || kr->IsRaidMember(killer_mob->GetUltimateOwner()->GetName())))
-					killer_mob->TrySpellOnKill(killed_level,spell);
+				if (killer_mob && (kr->IsRaidMember(killer_mob->GetName()) || kr->IsRaidMember(killer_mob->GetUltimateOwner()->GetName())))
+					killer_mob->TrySpellOnKill(killed_level, spell);
 			}
+
 			/* Send the EVENT_KILLED_MERIT event for all raid members */
 			for (int i = 0; i < MAX_RAID_MEMBERS; i++) {
 				if (kr->members[i].member != nullptr && kr->members[i].member->IsClient()) { // If Group Member is Client
 					Client *c = kr->members[i].member;
 					parse->EventNPC(EVENT_KILLED_MERIT, this, c, "killed", 0);
 
-					if(RuleB(NPC, EnableMeritBasedFaction))
+					if (RuleB(NPC, EnableMeritBasedFaction))
 						c->SetFactionLevel(c->CharacterID(), GetNPCFactionID(), c->GetBaseClass(), c->GetBaseRace(), c->GetDeity());
 
 					mod_npc_killed_merit(kr->members[i].member);
 
-					if(RuleB(TaskSystem, EnableTaskSystem))
+					if (RuleB(TaskSystem, EnableTaskSystem))
 						kr->members[i].member->UpdateTasksOnKill(GetNPCTypeID());
 					PlayerCount++;
 				}
 			}
 
 			// QueryServ Logging - Raid Kills
-			if(RuleB(QueryServ, PlayerLogNPCKills)){
+			if (RuleB(QueryServ, PlayerLogNPCKills)) {
 				ServerPacket* pack = new ServerPacket(ServerOP_QSPlayerLogNPCKills, sizeof(QSPlayerLogNPCKill_Struct) + (sizeof(QSPlayerLogNPCKillsPlayers_Struct) * PlayerCount));
 				PlayerCount = 0;
-				QSPlayerLogNPCKill_Struct* QS = (QSPlayerLogNPCKill_Struct*) pack->pBuffer;
+				QSPlayerLogNPCKill_Struct* QS = (QSPlayerLogNPCKill_Struct*)pack->pBuffer;
 				QS->s1.NPCID = this->GetNPCTypeID();
 				QS->s1.ZoneID = this->GetZoneID();
 				QS->s1.Type = 2; // Raid Fight
@@ -2054,13 +2050,13 @@ bool NPC::Death(Mob* killer_mob, int32 damage, uint16 spell, SkillUseTypes attac
 			// End QueryServ Logging
 
 		}
-		else if (give_exp_client->IsGrouped() && kg != nullptr)
-		{
-			if(!IsLdonTreasure && MerchantType == 0) {
+		else if (give_exp_client->IsGrouped() && kg != nullptr) {
+			if (!IsLdonTreasure && MerchantType == 0) {
 				kg->SplitExp((finalxp), this);
-				if(killer_mob && (kg->IsGroupMember(killer_mob->GetName()) || kg->IsGroupMember(killer_mob->GetUltimateOwner()->GetName())))
-					killer_mob->TrySpellOnKill(killed_level,spell);
+				if (killer_mob && (kg->IsGroupMember(killer_mob->GetName()) || kg->IsGroupMember(killer_mob->GetUltimateOwner()->GetName())))
+					killer_mob->TrySpellOnKill(killed_level, spell);
 			}
+
 			/* Send the EVENT_KILLED_MERIT event and update kill tasks
 			* for all group members */
 			for (int i = 0; i < MAX_GROUP_MEMBERS; i++) {
@@ -2068,12 +2064,12 @@ bool NPC::Death(Mob* killer_mob, int32 damage, uint16 spell, SkillUseTypes attac
 					Client *c = kg->members[i]->CastToClient();
 					parse->EventNPC(EVENT_KILLED_MERIT, this, c, "killed", 0);
 
-					if(RuleB(NPC, EnableMeritBasedFaction))
+					if (RuleB(NPC, EnableMeritBasedFaction))
 						c->SetFactionLevel(c->CharacterID(), GetNPCFactionID(), c->GetBaseClass(), c->GetBaseRace(), c->GetDeity());
 
 					mod_npc_killed_merit(c);
 
-					if(RuleB(TaskSystem, EnableTaskSystem))
+					if (RuleB(TaskSystem, EnableTaskSystem))
 						c->UpdateTasksOnKill(GetNPCTypeID());
 
 					PlayerCount++;
@@ -2081,10 +2077,10 @@ bool NPC::Death(Mob* killer_mob, int32 damage, uint16 spell, SkillUseTypes attac
 			}
 
 			// QueryServ Logging - Group Kills
-			if(RuleB(QueryServ, PlayerLogNPCKills)){
+			if (RuleB(QueryServ, PlayerLogNPCKills)) {
 				ServerPacket* pack = new ServerPacket(ServerOP_QSPlayerLogNPCKills, sizeof(QSPlayerLogNPCKill_Struct) + (sizeof(QSPlayerLogNPCKillsPlayers_Struct) * PlayerCount));
 				PlayerCount = 0;
-				QSPlayerLogNPCKill_Struct* QS = (QSPlayerLogNPCKill_Struct*) pack->pBuffer;
+				QSPlayerLogNPCKill_Struct* QS = (QSPlayerLogNPCKill_Struct*)pack->pBuffer;
 				QS->s1.NPCID = this->GetNPCTypeID();
 				QS->s1.ZoneID = this->GetZoneID();
 				QS->s1.Type = 1; // Group Fight
@@ -2100,36 +2096,34 @@ bool NPC::Death(Mob* killer_mob, int32 damage, uint16 spell, SkillUseTypes attac
 			}
 			// End QueryServ Logging
 		}
-		else
-		{
-			if(!IsLdonTreasure && MerchantType == 0) {
+		else {
+			if (!IsLdonTreasure && MerchantType == 0) {
 				int conlevel = give_exp->GetLevelCon(GetLevel());
-				if (conlevel != CON_GREEN)
-				{
-					if(!GetOwner() || (GetOwner() && !GetOwner()->IsClient()))
-					{
+				if (conlevel != CON_GREEN) {
+					if (!GetOwner() || (GetOwner() && !GetOwner()->IsClient())) {
 						give_exp_client->AddEXP((finalxp), conlevel);
-						if(killer_mob && (killer_mob->GetID() == give_exp_client->GetID() || killer_mob->GetUltimateOwner()->GetID() == give_exp_client->GetID()))
-							killer_mob->TrySpellOnKill(killed_level,spell);
+						if (killer_mob && (killer_mob->GetID() == give_exp_client->GetID() || killer_mob->GetUltimateOwner()->GetID() == give_exp_client->GetID()))
+							killer_mob->TrySpellOnKill(killed_level, spell);
 					}
 				}
 			}
-			 /* Send the EVENT_KILLED_MERIT event */
+
+			/* Send the EVENT_KILLED_MERIT event */
 			parse->EventNPC(EVENT_KILLED_MERIT, this, give_exp_client, "killed", 0);
 
-			if(RuleB(NPC, EnableMeritBasedFaction))
+			if (RuleB(NPC, EnableMeritBasedFaction))
 				give_exp_client->SetFactionLevel(give_exp_client->CharacterID(), GetNPCFactionID(), give_exp_client->GetBaseClass(),
-					give_exp_client->GetBaseRace(), give_exp_client->GetDeity());
+				give_exp_client->GetBaseRace(), give_exp_client->GetDeity());
 
 			mod_npc_killed_merit(give_exp_client);
 
-			if(RuleB(TaskSystem, EnableTaskSystem))
+			if (RuleB(TaskSystem, EnableTaskSystem))
 				give_exp_client->UpdateTasksOnKill(GetNPCTypeID());
 
 			// QueryServ Logging - Solo
-			if(RuleB(QueryServ, PlayerLogNPCKills)){
+			if (RuleB(QueryServ, PlayerLogNPCKills)) {
 				ServerPacket* pack = new ServerPacket(ServerOP_QSPlayerLogNPCKills, sizeof(QSPlayerLogNPCKill_Struct) + (sizeof(QSPlayerLogNPCKillsPlayers_Struct) * 1));
-				QSPlayerLogNPCKill_Struct* QS = (QSPlayerLogNPCKill_Struct*) pack->pBuffer;
+				QSPlayerLogNPCKill_Struct* QS = (QSPlayerLogNPCKill_Struct*)pack->pBuffer;
 				QS->s1.NPCID = this->GetNPCTypeID();
 				QS->s1.ZoneID = this->GetZoneID();
 				QS->s1.Type = 0; // Solo Fight
@@ -2144,74 +2138,73 @@ bool NPC::Death(Mob* killer_mob, int32 damage, uint16 spell, SkillUseTypes attac
 	}
 
 	if (!HasOwner() && !IsMerc() && class_ != MERCHANT && class_ != ADVENTUREMERCHANT && !GetSwarmInfo()
-		&& MerchantType == 0 && killer && (killer->IsClient() || (killer->HasOwner() && killer->GetUltimateOwner()->IsClient()) ||
+		&& MerchantType == 0 && ((killer && (killer->IsClient() || (killer->HasOwner() && killer->GetUltimateOwner()->IsClient()) ||
 		(killer->IsNPC() && killer->CastToNPC()->GetSwarmInfo() && killer->CastToNPC()->GetSwarmInfo()->GetOwner() && killer->CastToNPC()->GetSwarmInfo()->GetOwner()->IsClient())))
+		|| (killer_mob && IsLdonTreasure)))
 	{
-		if(killer != 0)
-		{
-			if(killer->GetOwner() != 0 && killer->GetOwner()->IsClient())
+		if (killer != 0) {
+			if (killer->GetOwner() != 0 && killer->GetOwner()->IsClient())
 				killer = killer->GetOwner();
 
-			if(!killer->CastToClient()->GetGM() && killer->IsClient())
+			if (killer->IsClient() && !killer->CastToClient()->GetGM())
 				this->CheckMinMaxLevel(killer);
 		}
+
 		entity_list.RemoveFromAutoXTargets(this);
 		uint16 emoteid = this->GetEmoteID();
-		Corpse* corpse = new Corpse(this, &itemlist, GetNPCTypeID(), &NPCTypedata,level>54?RuleI(NPC,MajorNPCCorpseDecayTimeMS):RuleI(NPC,MinorNPCCorpseDecayTimeMS));
+		Corpse* corpse = new Corpse(this, &itemlist, GetNPCTypeID(), &NPCTypedata, level>54 ? RuleI(NPC, MajorNPCCorpseDecayTimeMS) : RuleI(NPC, MinorNPCCorpseDecayTimeMS));
 		entity_list.LimitRemoveNPC(this);
 		entity_list.AddCorpse(corpse, GetID());
 
 		entity_list.UnMarkNPC(GetID());
 		entity_list.RemoveNPC(GetID());
 		this->SetID(0);
-		if(killer != 0 && emoteid != 0)
+
+		if (killer != 0 && emoteid != 0)
 			corpse->CastToNPC()->DoNPCEmote(AFTERDEATH, emoteid);
-		if(killer != 0 && killer->IsClient()) {
+		if (killer != 0 && killer->IsClient()) {
 			corpse->AllowPlayerLoot(killer, 0);
-			if(killer->IsGrouped()) {
+			if (killer->IsGrouped()) {
 				Group* group = entity_list.GetGroupByClient(killer->CastToClient());
-				if(group != 0) {
-					for(int i=0;i<6;i++) { // Doesnt work right, needs work
-						if(group->members[i] != nullptr) {
-							corpse->AllowPlayerLoot(group->members[i],i);
+				if (group != 0) {
+					for (int i = 0; i<6; i++) { // Doesnt work right, needs work
+						if (group->members[i] != nullptr) {
+							corpse->AllowPlayerLoot(group->members[i], i);
 						}
 					}
 				}
 			}
-			else if(killer->IsRaidGrouped()){
+			else if (killer->IsRaidGrouped()) {
 				Raid* r = entity_list.GetRaidByClient(killer->CastToClient());
-				if(r){
+				if (r) {
 					int i = 0;
-					for(int x = 0; x < MAX_RAID_MEMBERS; x++)
-					{
-						switch(r->GetLootType())
-						{
+					for (int x = 0; x < MAX_RAID_MEMBERS; x++) {
+						switch (r->GetLootType()) {
 						case 0:
 						case 1:
-							if(r->members[x].member && r->members[x].IsRaidLeader){
+							if (r->members[x].member && r->members[x].IsRaidLeader) {
 								corpse->AllowPlayerLoot(r->members[x].member, i);
 								i++;
 							}
 							break;
 						case 2:
-							if(r->members[x].member && r->members[x].IsRaidLeader){
+							if (r->members[x].member && r->members[x].IsRaidLeader) {
 								corpse->AllowPlayerLoot(r->members[x].member, i);
 								i++;
 							}
-							else if(r->members[x].member && r->members[x].IsGroupLeader){
+							else if (r->members[x].member && r->members[x].IsGroupLeader) {
 								corpse->AllowPlayerLoot(r->members[x].member, i);
 								i++;
 							}
 							break;
 						case 3:
-							if(r->members[x].member && r->members[x].IsLooter){
+							if (r->members[x].member && r->members[x].IsLooter) {
 								corpse->AllowPlayerLoot(r->members[x].member, i);
 								i++;
 							}
 							break;
 						case 4:
-							if(r->members[x].member)
-							{
+							if (r->members[x].member) {
 								corpse->AllowPlayerLoot(r->members[x].member, i);
 								i++;
 							}
@@ -2221,42 +2214,42 @@ bool NPC::Death(Mob* killer_mob, int32 damage, uint16 spell, SkillUseTypes attac
 				}
 			}
 		}
+		else if (killer_mob && IsLdonTreasure) {
+			auto u_owner = killer_mob->GetUltimateOwner();
+			if (u_owner->IsClient())
+				corpse->AllowPlayerLoot(u_owner, 0);
+		}
 
-		if(zone && zone->adv_data)
-		{
+		if (zone && zone->adv_data) {
 			ServerZoneAdventureDataReply_Struct *sr = (ServerZoneAdventureDataReply_Struct*)zone->adv_data;
-			if(sr->type == Adventure_Kill)
-			{
+			if (sr->type == Adventure_Kill) {
 				zone->DoAdventureCountIncrease();
 			}
-			else if(sr->type == Adventure_Assassinate)
-			{
-				if(sr->data_id == GetNPCTypeID())
-				{
+			else if (sr->type == Adventure_Assassinate) {
+				if (sr->data_id == GetNPCTypeID()) {
 					zone->DoAdventureCountIncrease();
 				}
-				else
-				{
+				else {
 					zone->DoAdventureAssassinationCountIncrease();
 				}
 			}
 		}
 	}
-	else
+	else {
 		entity_list.RemoveFromXTargets(this);
+	}
 
 	// Parse quests even if we're killed by an NPC
-	if(oos) {
+	if (oos) {
 		mod_npc_killed(oos);
 
 		uint16 emoteid = this->GetEmoteID();
-		if(emoteid != 0)
+		if (emoteid != 0)
 			this->DoNPCEmote(ONDEATH, emoteid);
-		if(oos->IsNPC())
-		{
+		if (oos->IsNPC()) {
 			parse->EventNPC(EVENT_NPC_SLAY, oos->CastToNPC(), this, "", 0);
 			uint16 emoteid = oos->GetEmoteID();
-			if(emoteid != 0)
+			if (emoteid != 0)
 				oos->CastToNPC()->DoNPCEmote(KILLEDNPC, emoteid);
 			killer_mob->TrySpellOnKill(killed_level, spell);
 		}
@@ -2264,7 +2257,8 @@ bool NPC::Death(Mob* killer_mob, int32 damage, uint16 spell, SkillUseTypes attac
 
 	WipeHateList();
 	p_depop = true;
-	if(killer_mob && killer_mob->GetTarget() == this) //we can kill things without having them targeted
+
+	if (killer_mob && killer_mob->GetTarget() == this) //we can kill things without having them targeted
 		killer_mob->SetTarget(nullptr); //via AE effects and such..
 
 	entity_list.UpdateFindableNPCState(this, true);
@@ -2275,7 +2269,7 @@ bool NPC::Death(Mob* killer_mob, int32 damage, uint16 spell, SkillUseTypes attac
 
 	/* Zone controller process EVENT_DEATH_ZONE (Death events) */
 	if (RuleB(Zone, UseZoneController)) {
-		if (entity_list.GetNPCByNPCTypeID(ZONE_CONTROLLER_NPC_ID) && this->GetNPCTypeID() != ZONE_CONTROLLER_NPC_ID){
+		if (entity_list.GetNPCByNPCTypeID(ZONE_CONTROLLER_NPC_ID) && this->GetNPCTypeID() != ZONE_CONTROLLER_NPC_ID) {
 			char data_pass[100] = { 0 };
 			snprintf(data_pass, 99, "%d %d %d %d %d", killer_mob ? killer_mob->GetID() : 0, damage, spell, static_cast<int>(attack_skill), this->GetNPCTypeID());
 			parse->EventNPC(EVENT_DEATH_ZONE, entity_list.GetNPCByNPCTypeID(ZONE_CONTROLLER_NPC_ID)->CastToNPC(), nullptr, data_pass, 0);
