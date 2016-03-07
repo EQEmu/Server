@@ -1734,7 +1734,7 @@ bool Mob::DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_ce
 						{
 							if (Raid* raid = GetRaid()) {
 								uint32 group_id = raid->GetGroup(CastToClient());
-                group_id_caster = (group_id == 0xFFFFFFFF) ? 0 : (group_id + 1);
+								group_id_caster = (group_id == 0xFFFFFFFF) ? 0 : (group_id + 1);
 							}
 						}
 					}
@@ -1749,7 +1749,7 @@ bool Mob::DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_ce
 						{
 							if (Raid* raid = owner->GetRaid()) {
 								uint32 group_id = raid->GetGroup(owner->CastToClient());
-                group_id_caster = (group_id == 0xFFFFFFFF) ? 0 : (group_id + 1);
+								group_id_caster = (group_id == 0xFFFFFFFF) ? 0 : (group_id + 1);
 							}
 						}
 					}
@@ -1778,7 +1778,7 @@ bool Mob::DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_ce
 						{
 							if (Raid* raid = spell_target->GetRaid()) {
 								uint32 group_id = raid->GetGroup(spell_target->CastToClient());
-                group_id_target = (group_id == 0xFFFFFFFF) ? 0 : (group_id + 1);
+								group_id_target = (group_id == 0xFFFFFFFF) ? 0 : (group_id + 1);
 							}
 						}
 					}
@@ -1793,7 +1793,7 @@ bool Mob::DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_ce
 						{
 							if (Raid* raid = owner->GetRaid()) {
 								uint32 group_id = raid->GetGroup(owner->CastToClient());
-                group_id_target = (group_id == 0xFFFFFFFF) ? 0 : (group_id + 1);
+								group_id_target = (group_id == 0xFFFFFFFF) ? 0 : (group_id + 1);
 							}
 						}
 					}
