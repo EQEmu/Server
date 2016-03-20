@@ -4950,36 +4950,27 @@ void Client::ShowSkillsWindow()
 {
 	const char *WindowTitle = "Skills";
 	std::string WindowText;
-	// using a map for easy alphabetizing of the skills list
-	std::map<std::string, SkillUseTypes> Skills;
-	std::map<std::string, SkillUseTypes>::iterator it;
+	std::map<SkillUseTypes, std::string> Skills = EQEmu::GetSkillUseTypesMap();
 
-	// this list of names must keep the same order as that in common/skills.h
-	const char* SkillName[] = {"1H Blunt","1H Slashing","2H Blunt","2H Slashing","Abjuration","Alteration","Apply Poison","Archery",
-		"Backstab","Bind Wound","Bash","Block","Brass Instruments","Channeling","Conjuration","Defense","Disarm","Disarm Traps","Divination",
-		"Dodge","Double Attack","Dragon Punch","Dual Wield","Eagle Strike","Evocation","Feign Death","Flying Kick","Forage","Hand to Hand",
-		"Hide","Kick","Meditate","Mend","Offense","Parry","Pick Lock","1H Piercing","Ripost","Round Kick","Safe Fall","Sense Heading",
-		"Singing","Sneak","Specialize Abjuration","Specialize Alteration","Specialize Conjuration","Specialize Divination","Specialize Evocation","Pick Pockets",
-		"Stringed Instruments","Swimming","Throwing","Tiger Claw","Tracking","Wind Instruments","Fishing","Make Poison","Tinkering","Research",
-		"Alchemy","Baking","Tailoring","Sense Traps","Blacksmithing","Fletching","Brewing","Alcohol Tolerance","Begging","Jewelry Making",
-		"Pottery","Percussion Instruments","Intimidation","Berserking","Taunt","Frenzy","Remove Traps","Triple Attack","2H Piercing"};
-	for(int i = 0; i <= (int)HIGHEST_SKILL; i++)
-		Skills[SkillName[i]] = (SkillUseTypes)i;
+	if (GetClientVersion() < ClientVersion::RoF2)
+		Skills[Skill1HPiercing] = "Piercing";
 
 	// print out all available skills
-	for(it = Skills.begin(); it != Skills.end(); ++it) {
-		if(GetSkill(it->second) > 0 || MaxSkill(it->second) > 0) {
-			WindowText += it->first;
-			// line up the values
-			for (int j = 0; j < EmuConstants::ITEM_COMMON_SIZE; j++)
-				WindowText += "&nbsp;";
-			WindowText += itoa(this->GetSkill(it->second));
-			if (MaxSkill(it->second) > 0) {
-				WindowText += "/";
-				WindowText += itoa(this->GetMaxSkillAfterSpecializationRules(it->second,this->MaxSkill(it->second)));
-			}
-			WindowText += "<br>";
+	for (auto skills_iter : Skills) {
+		if (skills_iter.first == Skill2HPiercing && GetClientVersion() < ClientVersion::RoF2)
+			continue;
+		if (!GetSkill(skills_iter.first) && !MaxSkill(skills_iter.first))
+			continue;
+
+		WindowText += skills_iter.second;
+		// line up the values
+		WindowText += "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
+		WindowText += itoa(this->GetSkill(skills_iter.first));
+		if (MaxSkill(skills_iter.first) > 0) {
+			WindowText += "/";
+			WindowText += itoa(this->GetMaxSkillAfterSpecializationRules(skills_iter.first, this->MaxSkill(skills_iter.first)));
 		}
+		WindowText += "<br>";
 	}
 	this->SendPopupToClient(WindowTitle, WindowText.c_str());
 }

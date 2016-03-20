@@ -18,6 +18,8 @@
 #ifndef SKILLS_H
 #define SKILLS_H
 
+#include <map>
+
 /*
 **	This is really messed up... Are we using SkillTypes as a pseudo repository? The 76th skill really throws
 **	things for standardization...
@@ -273,6 +275,8 @@ namespace EQEmu {
 	bool IsSpecializedSkill(SkillUseTypes skill);
 	float GetSkillMeleePushForce(SkillUseTypes skill);
 	bool IsBardInstrumentSkill(SkillUseTypes skill);
+
+	const std::map<SkillUseTypes, std::string>& GetSkillUseTypesMap();
 }
 
 #endif
