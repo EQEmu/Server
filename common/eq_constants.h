@@ -32,17 +32,17 @@ enum LightTypes
 	lightTypeTorch,
 	lightTypeTinyGlowingSkull,
 	lightTypeSmallLantern,
-	lightTypeSteinOfMoggok,
+	lightTypeSteinOfMoggok, // 5
 	lightTypeLargeLantern,
 	lightTypeFlamelessLantern,
 	lightTypeGlobeOfStars,
 	lightTypeLightGlobe,
-	lightTypeLightstone,
+	lightTypeLightstone, // 10
 	lightTypeGreaterLightstone,
 	lightTypeFireBeetleEye,
 	lightTypeColdlight,
 	lightTypeUnknown1,
-	lightTypeUnknown2
+	lightTypeUnknown2 // 15
 };
 
 #define LIGHT_TYPES_COUNT 16
@@ -58,12 +58,12 @@ enum LightLevels
 	lightLevelTorch,
 	lightLevelSmallMagic,
 	lightLevelRedLight,
-	lightLevelBlueLight,
+	lightLevelBlueLight, // 5
 	lightLevelSmallLantern,
 	lightLevelMagicLantern,
 	lightLevelLargeLantern,
 	lightLevelLargeMagic,
-	lightLevelBrilliant
+	lightLevelBrilliant // 10
 };
 
 #define LIGHT_LEVELS_COUNT 11
@@ -111,62 +111,62 @@ enum ItemUseTypes : uint8
 /*9140*/	ItemType1HPiercing,
 /*9139*/	ItemType1HBlunt,
 /*9142*/	ItemType2HBlunt,
-/*5504*/	ItemTypeBow,
+/*5504*/	ItemTypeBow, // 5
 /*----*/	ItemTypeUnknown1,
 /*----*/	ItemTypeLargeThrowing,
 /*5505*/	ItemTypeShield,
 /*5506*/	ItemTypeScroll,
-/*5507*/	ItemTypeArmor,
+/*5507*/	ItemTypeArmor, // 10
 /*5508*/	ItemTypeMisc,			// a lot of random crap has this item use.
 /*7564*/	ItemTypeLockPick,
 /*----*/	ItemTypeUnknown2,
 /*5509*/	ItemTypeFood,
-/*5510*/	ItemTypeDrink,
+/*5510*/	ItemTypeDrink, // 15
 /*5511*/	ItemTypeLight,
 /*5512*/	ItemTypeCombinable,		// not all stackable items are this use...
 /*5513*/	ItemTypeBandage,
 /*----*/	ItemTypeSmallThrowing,
-/*----*/	ItemTypeSpell,			// spells and tomes
+/*----*/	ItemTypeSpell, // 20	// spells and tomes
 /*5514*/	ItemTypePotion,
 /*----*/	ItemTypeUnknown3,
 /*0406*/	ItemTypeWindInstrument,
 /*0407*/	ItemTypeStringedInstrument,
-/*0408*/	ItemTypeBrassInstrument,
+/*0408*/	ItemTypeBrassInstrument, // 25
 /*0405*/	ItemTypePercussionInstrument,
 /*5515*/	ItemTypeArrow,
 /*----*/	ItemTypeUnknown4,
 /*5521*/	ItemTypeJewelry,
-/*----*/	ItemTypeSkull,
+/*----*/	ItemTypeSkull, // 30
 /*5516*/	ItemTypeBook,			// skill-up tomes/books? (would probably need a pp flag if true...)
 /*5517*/	ItemTypeNote,
 /*5518*/	ItemTypeKey,
 /*----*/	ItemTypeCoin,
-/*5520*/	ItemType2HPiercing,
+/*5520*/	ItemType2HPiercing, // 35
 /*----*/	ItemTypeFishingPole,
 /*----*/	ItemTypeFishingBait,
 /*5519*/	ItemTypeAlcohol,
 /*----*/	ItemTypeKey2,			// keys and satchels?? (questable keys?)
-/*----*/	ItemTypeCompass,
+/*----*/	ItemTypeCompass, // 40
 /*----*/	ItemTypeUnknown5,
 /*----*/	ItemTypePoison,			// might be wrong, but includes poisons
 /*----*/	ItemTypeUnknown6,
 /*----*/	ItemTypeUnknown7,
-/*5522*/	ItemTypeMartial,
+/*5522*/	ItemTypeMartial, // 45
 /*----*/	ItemTypeUnknown8,
 /*----*/	ItemTypeUnknown9,
 /*----*/	ItemTypeUnknown10,
 /*----*/	ItemTypeUnknown11,
-/*----*/	ItemTypeSinging,
+/*----*/	ItemTypeSinging, // 50
 /*5750*/	ItemTypeAllInstrumentTypes,
 /*5776*/	ItemTypeCharm,
 /*----*/	ItemTypeDye,
 /*----*/	ItemTypeAugmentation,
-/*----*/	ItemTypeAugmentationSolvent,
+/*----*/	ItemTypeAugmentationSolvent, // 55
 /*----*/	ItemTypeAugmentationDistiller,
 /*----*/	ItemTypeUnknown12,
 /*----*/	ItemTypeFellowshipKit,
 /*----*/	ItemTypeUnknown13,
-/*----*/	ItemTypeRecipe,
+/*----*/	ItemTypeRecipe, // 60
 /*----*/	ItemTypeAdvancedRecipe,
 /*----*/	ItemTypeJournal,		// only one(1) database entry
 /*----*/	ItemTypeAltCurrency,	// alt-currency (as opposed to coinage)
@@ -237,32 +237,32 @@ enum AugmentationUseTypes : uint8 {
 	AugTypeGeneralMultipleStat,
 	AugTypeGeneralSpellEffect,
 	AugTypeWeaponGeneral,
-	AugTypeWeaponElemDamage,
+	AugTypeWeaponElemDamage, // 5
 	AugTypeWeaponBaseDamage,
 	AugTypeGeneralGroup,
 	AugTypeGeneralRaid,
 	AugTypeGeneralDragonsPoints,
-	AugTypeCraftedCommon,
+	AugTypeCraftedCommon, // 10
 	AugTypeCraftedGroup1,
 	AugTypeCraftedRaid1,
 	AugTypeEnergeiacGroup,
 	AugTypeEnergeiacRaid,
-	AugTypeEmblem,
+	AugTypeEmblem, // 15
 	AugTypeCraftedGroup2,
 	AugTypeCraftedRaid2,
 	AugTypeUnknown1,
 	AugTypeUnknown2,
-	AugTypeOrnamentation,
+	AugTypeOrnamentation, // 20
 	AugTypeSpecialOrnamentation,
 	AugTypeUnknown3,
 	AugTypeUnknown4,
 	AugTypeUnknown5,
-	AugTypeUnknown6,
+	AugTypeUnknown6, // 25
 	AugTypeUnknown7,
 	AugTypeUnknown8,
 	AugTypeUnknown9,
 	AugTypeUnknown10,
-	AugTypeEpic25,
+	AugTypeEpic25, // 30
 	AugTypeTest,
 	_AugTypeCount,
 	AugTypeAll = 255
@@ -280,17 +280,17 @@ enum AugmentationRestrictionTypes : uint8 {
 /*9135*/	AugRestrWeapons,
 /*9136*/	AugRestr1HWeapons,
 /*9137*/	AugRestr2HWeapons,
-/*9138*/	AugRestr1HSlash,
+/*9138*/	AugRestr1HSlash, // 5
 /*9139*/	AugRestr1HBlunt,
 /*9140*/	AugRestrPiercing,
 /*9148*/	AugRestrHandToHand,
 /*9141*/	AugRestr2HSlash,
-/*9142*/	AugRestr2HBlunt,
+/*9142*/	AugRestr2HBlunt, // 10
 /*9143*/	AugRestr2HPierce,
 /*9144*/	AugRestrBows,
 /*9145*/	AugRestrShields,
 /*8052*/	AugRestr1HSlash1HBluntOrHandToHand,
-/*9200*/	AugRestr1HBluntOrHandToHand,		// no listed peq entries
+/*9200*/	AugRestr1HBluntOrHandToHand, // 15	// no listed peq entries
 
 // these three appear to be post-RoF (12-10-2012) and can not be verified until RoF (05-10-2013) is supported
 /*????*/	AugRestrUnknown1,
@@ -317,57 +317,57 @@ enum ContainerUseTypes : uint8
 /*3402*/	BagTypeQuiver,
 /*3403*/	BagTypeBeltPouch,
 /*3404*/	BagTypeWristPouch,
-/*3405*/	BagTypeBackPack,
+/*3405*/	BagTypeBackPack, // 5
 /*3406*/	BagTypeSmallChest,
 /*3407*/	BagTypeLargeChest,
 /*----*/	BagTypeBandolier,				// <*Database Reference Only>
 /*3408*/	BagTypeMedicineBag,
-/*3409*/	BagTypeToolBox,
+/*3409*/	BagTypeToolBox, // 10
 /*3410*/	BagTypeLexicon,
 /*3411*/	BagTypeMortar,
 /*3412*/	BagTypeSelfDusting,				// Quest container (Auto-clear contents?)
 /*3413*/	BagTypeMixingBowl,
-/*3414*/	BagTypeOven,
+/*3414*/	BagTypeOven, // 15
 /*3415*/	BagTypeSewingKit,
 /*3416*/	BagTypeForge,
 /*3417*/	BagTypeFletchingKit,
 /*3418*/	BagTypeBrewBarrel,
-/*3419*/	BagTypeJewelersKit,
+/*3419*/	BagTypeJewelersKit, // 20
 /*3420*/	BagTypePotteryWheel,
 /*3421*/	BagTypeKiln,
 /*3422*/	BagTypeKeymaker,				// (no database entries as of peq rev 69)
 /*3423*/	BagTypeWizardsLexicon,
-/*3424*/	BagTypeMagesLexicon,
+/*3424*/	BagTypeMagesLexicon, // 25
 /*3425*/	BagTypeNecromancersLexicon,
 /*3426*/	BagTypeEnchantersLexicon,
 /*----*/	BagTypeUnknown1,				// (a coin pouch/purse?) (no database entries as of peq rev 69)
 /*----*/	BagTypeConcordanceofResearch,	// <*Database Reference Only>
-/*3427*/	BagTypeAlwaysWorks,				// Quest container (Never-fail combines?)
+/*3427*/	BagTypeAlwaysWorks, // 30		// Quest container (Never-fail combines?)
 /*3428*/	BagTypeKoadaDalForge,			// High Elf
 /*3429*/	BagTypeTeirDalForge,			// Dark Elf
 /*3430*/	BagTypeOggokForge,				// Ogre
 /*3431*/	BagTypeStormguardForge,			// Dwarf
-/*3432*/	BagTypeAkanonForge,				// Gnome
+/*3432*/	BagTypeAkanonForge, // 35		// Gnome
 /*3433*/	BagTypeNorthmanForge,			// Barbarian
 /*----*/	BagTypeUnknown2,				// (no database entries as of peq rev 69)
 /*3434*/	BagTypeCabilisForge,			// Iksar
 /*3435*/	BagTypeFreeportForge,			// Human 1
-/*3436*/	BagTypeRoyalQeynosForge,		// Human 2
+/*3436*/	BagTypeRoyalQeynosForge, // 40	// Human 2
 /*3439*/	BagTypeHalflingTailoringKit,
 /*3438*/	BagTypeErudTailoringKit,
 /*3440*/	BagTypeFierDalTailoringKit,		// Wood Elf
 /*3441*/	BagTypeFierDalFletchingKit,		// Wood Elf
-/*3437*/	BagTypeIksarPotteryWheel,
+/*3437*/	BagTypeIksarPotteryWheel, // 45
 /*3442*/	BagTypeTackleBox,
 /*3443*/	BagTypeTrollForge,
 /*3445*/	BagTypeFierDalForge,			// Wood Elf
 /*3444*/	BagTypeValeForge,				// Halfling
-/*3446*/	BagTypeErudForge,
+/*3446*/	BagTypeErudForge, // 50
 /*----*/	BagTypeTradersSatchel,			// <*Database Reference Only> (db: Yellow Trader's Satchel Token?)
 /*5785*/	BagTypeGuktaForge,				// Froglok (no database entries as of peq rev 69)
 /*3359*/	BagTypeAugmentationSealer,
 /*----*/	BagTypeIceCreamChurn,			// <*Database Reference Only>
-/*6325*/	BagTypeTransformationmold,		// Ornamentation
+/*6325*/	BagTypeTransformationmold, // 55	// Ornamentation
 /*6340*/	BagTypeDetransformationmold,	// Ornamentation Stripper
 /*5400*/	BagTypeUnattuner,
 /*7684*/	BagTypeTradeskillBag,
@@ -816,7 +816,7 @@ enum MaterialUseSlots : uint8
 	MaterialArms,
 	MaterialWrist,
 	MaterialHands,
-	MaterialLegs,
+	MaterialLegs, // 5
 	MaterialFeet,
 	MaterialPrimary,
 	MaterialSecondary,
@@ -864,22 +864,22 @@ enum InventoryMapTypes : int16 {
 	MapSharedBank,
 	MapTrade,
 	MapWorld,
-	MapLimbo,
+	MapLimbo, // 5
 	MapTribute,
 	MapTrophyTribute,
 	MapGuildTribute,
 	MapMerchant,
-	MapDeleted,
+	MapDeleted, // 10
 	MapCorpse,
 	MapBazaar,
 	MapInspect,
 	MapRealEstate,
-	MapViewMODPC,
+	MapViewMODPC, // 15
 	MapViewMODBank,
 	MapViewMODSharedBank,
 	MapViewMODLimbo,
 	MapAltStorage,
-	MapArchived,
+	MapArchived, // 20
 	MapMail,
 	MapGuildTrophyTribute,
 	MapKrono,
@@ -893,35 +893,35 @@ enum InventoryMainTypes : int16 {
 	MainHead,
 	MainFace,
 	MainEar2,
-	MainNeck,
+	MainNeck, // 5
 	MainShoulders,
 	MainArms,
 	MainBack,
 	MainWrist1,
-	MainWrist2,
+	MainWrist2, // 10
 	MainRange,
 	MainHands,
 	MainPrimary,
 	MainSecondary,
-	MainFinger1,
+	MainFinger1, // 15
 	MainFinger2,
 	MainChest,
 	MainLegs,
 	MainFeet,
-	MainWaist,
+	MainWaist, // 20
 	MainPowerSource = 9999, // temp
 	MainAmmo = 21, // temp
 	MainGeneral1,
 	MainGeneral2,
 	MainGeneral3,
-	MainGeneral4,
+	MainGeneral4, // 25
 	MainGeneral5,
 	MainGeneral6,
 	MainGeneral7,
 	MainGeneral8,
 	//MainGeneral9,
 	//MainGeneral10,
-	MainCursor,
+	MainCursor, // 30
 	_MainCount
 };
 

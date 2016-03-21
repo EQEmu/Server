@@ -33,84 +33,84 @@ enum SkillUseTypes
 /*13857*/	Skill2HBlunt,
 /*13858*/	Skill2HSlashing,
 /*13859*/	SkillAbjuration,
-/*13861*/	SkillAlteration,
+/*13861*/	SkillAlteration, // 5
 /*13862*/	SkillApplyPoison,
 /*13863*/	SkillArchery,
 /*13864*/	SkillBackstab,
 /*13866*/	SkillBindWound,
-/*13867*/	SkillBash,
+/*13867*/	SkillBash, // 10
 /*13871*/	SkillBlock,
 /*13872*/	SkillBrassInstruments,
 /*13874*/	SkillChanneling,
 /*13875*/	SkillConjuration,
-/*13876*/	SkillDefense,
+/*13876*/	SkillDefense, // 15
 /*13877*/	SkillDisarm,
 /*13878*/	SkillDisarmTraps,
 /*13879*/	SkillDivination,
 /*13880*/	SkillDodge,
-/*13881*/	SkillDoubleAttack,
+/*13881*/	SkillDoubleAttack, // 20
 /*13882*/	SkillDragonPunch,
 /*13924*/	SkillTailRake = SkillDragonPunch, // Iksar Monk equivilent
 /*13883*/	SkillDualWield,
 /*13884*/	SkillEagleStrike,
 /*13885*/	SkillEvocation,
-/*13886*/	SkillFeignDeath,
+/*13886*/	SkillFeignDeath, // 25
 /*13888*/	SkillFlyingKick,
 /*13889*/	SkillForage,
 /*13890*/	SkillHandtoHand,
 /*13891*/	SkillHide,
-/*13893*/	SkillKick,
+/*13893*/	SkillKick, // 30
 /*13894*/	SkillMeditate,
 /*13895*/	SkillMend,
 /*13896*/	SkillOffense,
 /*13897*/	SkillParry,
-/*13899*/	SkillPickLock,
+/*13899*/	SkillPickLock, // 35
 /*13900*/	Skill1HPiercing,				// Changed in RoF2(05-10-2013)
 /*13903*/	SkillRiposte,
 /*13904*/	SkillRoundKick,
 /*13905*/	SkillSafeFall,
-/*13906*/	SkillSenseHeading,
+/*13906*/	SkillSenseHeading, // 40
 /*13908*/	SkillSinging,
 /*13909*/	SkillSneak,
 /*13910*/	SkillSpecializeAbjure,			// No idea why they truncated this one..especially when there are longer ones...
 /*13911*/	SkillSpecializeAlteration,
-/*13912*/	SkillSpecializeConjuration,
+/*13912*/	SkillSpecializeConjuration, // 45
 /*13913*/	SkillSpecializeDivination,
 /*13914*/	SkillSpecializeEvocation,
 /*13915*/	SkillPickPockets,
 /*13916*/	SkillStringedInstruments,
-/*13917*/	SkillSwimming,
+/*13917*/	SkillSwimming, // 50
 /*13919*/	SkillThrowing,
 /*13920*/	SkillTigerClaw,
 /*13921*/	SkillTracking,
 /*13923*/	SkillWindInstruments,
-/*13854*/	SkillFishing,
+/*13854*/	SkillFishing, // 55
 /*13853*/	SkillMakePoison,
 /*13852*/	SkillTinkering,
 /*13851*/	SkillResearch,
 /*13850*/	SkillAlchemy,
-/*13865*/	SkillBaking,
+/*13865*/	SkillBaking, // 60
 /*13918*/	SkillTailoring,
 /*13907*/	SkillSenseTraps,
 /*13870*/	SkillBlacksmithing,
 /*13887*/	SkillFletching,
-/*13873*/	SkillBrewing,
+/*13873*/	SkillBrewing, // 65
 /*13860*/	SkillAlcoholTolerance,
 /*13868*/	SkillBegging,
 /*13892*/	SkillJewelryMaking,
 /*13901*/	SkillPottery,
-/*13898*/	SkillPercussionInstruments,
+/*13898*/	SkillPercussionInstruments, // 70
 /*13922*/	SkillIntimidation,
 /*13869*/	SkillBerserking,
 /*13902*/	SkillTaunt,
-/*05837*/	SkillFrenzy,					// This appears to be the only listed one not grouped with the others
+/*05837*/	SkillFrenzy, // 74				// This appears to be the only listed one not grouped with the others
 
 // SoF+ specific skills
-/*03670*/	SkillRemoveTraps,
+/*03670*/	SkillRemoveTraps, // 75
 /*13049*/	SkillTripleAttack,
 
 // RoF2+ specific skills
-/*00789*/	Skill2HPiercing,
+/*00789*/	Skill2HPiercing, // 77
 // /*01216*/	SkillNone,						// This needs to move down as new skills are added
 
 /*00000*/	_EmuSkillCount					// move to last position of active enumeration labels
