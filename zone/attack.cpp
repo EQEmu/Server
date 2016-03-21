@@ -1936,6 +1936,16 @@ bool NPC::Death(Mob* killer_mob, int32 damage, uint16 spell, SkillUseTypes attac
 	BuffFadeAll();
 	uint8 killed_level = GetLevel();
 
+	if (GetClass() == LDON_TREASURE) { // open chest
+		EQApplicationPacket* outapp = new EQApplicationPacket(OP_Animation, sizeof(Animation_Struct));
+		Animation_Struct* anim = (Animation_Struct*)outapp->pBuffer;
+		anim->spawnid = GetID();
+		anim->action = 0x0F;
+		anim->speed = 10;
+		entity_list.QueueCloseClients(this, outapp);
+		safe_delete(outapp);
+	}
+
 	EQApplicationPacket* app = new EQApplicationPacket(OP_Death, sizeof(Death_Struct));
 	Death_Struct* d = (Death_Struct*)app->pBuffer;
 	d->spawn_id = GetID();
