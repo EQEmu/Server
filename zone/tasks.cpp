@@ -3043,7 +3043,7 @@ void ClientTaskState::AcceptNewTask(Client *c, int TaskID, int NPCID, bool enfor
 	NPC *npc = entity_list.GetID(NPCID)->CastToNPC();
 	if(!npc) {
 		c->Message(clientMessageYellow, "Task Giver ID is %i", NPCID);
-		c->Message(clientMessageError, "Unable to find NPC to send EVENT_TASKACCEPTD to. Report this bug.");
+		c->Message(clientMessageError, "Unable to find NPC to send EVENT_TASKACCEPTED to. Report this bug.");
 		safe_delete_array(buf);
 		return;
 	}

@@ -975,8 +975,8 @@ namespace RoF
 		VARSTRUCT_ENCODE_TYPE(uint32, OutBuffer, emu->drop_id);	// Some unique id
 		VARSTRUCT_ENCODE_TYPE(uint32, OutBuffer, 0);	// Same for all objects in the zone
 		VARSTRUCT_ENCODE_TYPE(float, OutBuffer, emu->heading);
-		VARSTRUCT_ENCODE_TYPE(float, OutBuffer, 0);	// Normally 0, but seen (float)255.0 as well
-		VARSTRUCT_ENCODE_TYPE(uint32, OutBuffer, emu->solidtype);	// Unknown
+		VARSTRUCT_ENCODE_TYPE(float, OutBuffer, 0);	// X tilt
+		VARSTRUCT_ENCODE_TYPE(float, OutBuffer, 0);	// Y tilt
 		VARSTRUCT_ENCODE_TYPE(float, OutBuffer, emu->size != 0 && (float)emu->size < 5000.f ? (float)((float)emu->size / 100.0f) : 1.f );	// This appears to be the size field. Hackish logic because some PEQ DB items were corrupt.
 		VARSTRUCT_ENCODE_TYPE(float, OutBuffer, emu->y);
 		VARSTRUCT_ENCODE_TYPE(float, OutBuffer, emu->x);
@@ -2392,13 +2392,14 @@ namespace RoF
 		outapp->WriteSInt32(234);	// Endurance Total ?
 		outapp->WriteSInt32(345);	// Mana Total ?
 
-		outapp->WriteUInt32(0);		// Unknown
-		outapp->WriteUInt32(0);		// Unknown
-		outapp->WriteUInt32(0);		// Unknown
-		outapp->WriteUInt32(0);		// Unknown
-		outapp->WriteUInt32(0);		// Unknown
-		outapp->WriteUInt32(0);		// Unknown
-		outapp->WriteUInt32(0);		// Unknown
+		// these are needed to fix display bugs
+		outapp->WriteUInt32(0x19);		// base CR
+		outapp->WriteUInt32(0x19);		// base FR
+		outapp->WriteUInt32(0x19);		// base MR
+		outapp->WriteUInt32(0xf);		// base DR
+		outapp->WriteUInt32(0xf);		// base PR
+		outapp->WriteUInt32(0xf);		// base PhR?
+		outapp->WriteUInt32(0xf);		// base Corrup
 		outapp->WriteUInt32(0);		// Unknown
 		outapp->WriteUInt32(0);		// Unknown
 		outapp->WriteUInt32(0);		// Unknown

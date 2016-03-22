@@ -292,7 +292,7 @@ bool Zone::LoadGroundSpawns() {
 	char* name=0;
 	uint32 gsnumber=0;
 	for(gsindex=0;gsindex<50;gsindex++){
-		if(groundspawn.spawn[gsindex].item>0 && groundspawn.spawn[gsindex].item<500000){
+		if(groundspawn.spawn[gsindex].item>0 && groundspawn.spawn[gsindex].item<SAYLINK_ITEM_ID){
 			ItemInst* inst = nullptr;
 			inst = database.CreateItem(groundspawn.spawn[gsindex].item);
 			gsnumber=groundspawn.spawn[gsindex].max_allowed;

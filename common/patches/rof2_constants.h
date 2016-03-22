@@ -186,6 +186,8 @@ namespace RoF2 {
 		static const size_t POTION_BELT_ITEM_COUNT = 5;
 
 		static const size_t TEXT_LINK_BODY_LENGTH = 56;
+
+		static const size_t PLAYER_PROFILE_SKILL_MAX = Skill2HPiercing;
 	}
 
 	namespace limits {

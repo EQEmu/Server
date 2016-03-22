@@ -636,11 +636,11 @@ bool Database::SaveCharacterCreate(uint32 character_id, uint32 account_id, Playe
 	);
 	auto results = QueryDatabase(query);
 	/* Save Bind Points */
-	query = StringFormat("REPLACE INTO `character_bind` (id, zone_id, instance_id, x, y, z, heading, is_home)"
+	query = StringFormat("REPLACE INTO `character_bind` (id, zone_id, instance_id, x, y, z, heading, slot)"
 		" VALUES (%u, %u, %u, %f, %f, %f, %f, %i), "
 		"(%u, %u, %u, %f, %f, %f, %f, %i)",
 		character_id, pp->binds[0].zoneId, 0, pp->binds[0].x, pp->binds[0].y, pp->binds[0].z, pp->binds[0].heading, 0,
-		character_id, pp->binds[4].zoneId, 0, pp->binds[4].x, pp->binds[4].y, pp->binds[4].z, pp->binds[4].heading, 1
+		character_id, pp->binds[4].zoneId, 0, pp->binds[4].x, pp->binds[4].y, pp->binds[4].z, pp->binds[4].heading, 4
 	); results = QueryDatabase(query); 
 
 	/* Save Skills */
@@ -2185,8 +2185,7 @@ struct TimeOfDay_Struct Database::LoadTime(time_t &realtime)
 	std::string query = StringFormat("SELECT minute,hour,day,month,year,realtime FROM eqtime limit 1");
 	auto results = QueryDatabase(query);
 
-	if (!results.Success() || results.RowCount() == 0)
-	{
+	if (!results.Success() || results.RowCount() == 0){
 		Log.Out(Logs::Detail, Logs::World_Server, "Loading EQ time of day failed. Using defaults.");
 		eqTime.minute = 0;
 		eqTime.hour = 9;
@@ -2195,15 +2194,16 @@ struct TimeOfDay_Struct Database::LoadTime(time_t &realtime)
 		eqTime.year = 3100;
 		realtime = time(0);
 	}
+	else{
+		auto row = results.begin();
 
-	auto row = results.begin();
-
-	eqTime.minute = atoi(row[0]);
-	eqTime.hour = atoi(row[1]);
-	eqTime.day = atoi(row[2]);
-	eqTime.month = atoi(row[3]);
-	eqTime.year = atoi(row[4]);
-	realtime = atoi(row[5]);
+		eqTime.minute = atoi(row[0]);
+		eqTime.hour = atoi(row[1]);
+		eqTime.day = atoi(row[2]);
+		eqTime.month = atoi(row[3]);
+		eqTime.year = atoi(row[4]);
+		realtime = atoi(row[5]);
+	}
 
 	return eqTime;
 }

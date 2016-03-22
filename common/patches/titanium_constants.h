@@ -181,6 +181,8 @@ namespace Titanium {
 		static const size_t POTION_BELT_ITEM_COUNT = 4;
 
 		static const size_t TEXT_LINK_BODY_LENGTH = 45;
+
+		static const size_t PLAYER_PROFILE_SKILL_MAX = SkillFrenzy;
 	}
 
 	namespace limits {

@@ -533,20 +533,26 @@ bool Object::HandleClick(Client* sender, const ClickObject_Struct* click_object)
 		ClickObjectAction_Struct* coa = (ClickObjectAction_Struct*)outapp->pBuffer;
 
 		//TODO: there is prolly a better way to do this.
-		//if this is not the main user, send them a close and a message
-		if(user == nullptr || user == sender)
-			coa->open		= 0x01;
-		else {
-			coa->open		= 0x00;
-			//sender->Message(13, "Somebody is allready using that container.");
-		}
-		m_inuse			= true;
-		coa->type		= m_type;
-		coa->unknown16	= 0x0a;
+		m_inuse = true;
+		coa->type = m_type;
+		coa->unknown16 = 0x0a;
 
-		coa->drop_id	= click_object->drop_id;
-		coa->player_id	= click_object->player_id;
-		coa->icon		= m_icon;
+		coa->drop_id = click_object->drop_id;
+		coa->player_id = click_object->player_id;
+		coa->icon = m_icon;
+
+		//if this is not the main user, send them a close and a message
+		if (user == nullptr || user == sender) {
+			coa->open = 0x01;
+		}
+		else {
+			coa->open = 0x00;
+
+			if (sender->GetClientVersion() >= ClientVersion::RoF) {
+				coa->drop_id = 0xFFFFFFFF;
+				sender->Message(0, "Someone else is using that. Try again later.");
+			}
+		}
 
 		if(sender->IsLooting())
 		{

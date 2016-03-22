@@ -4253,15 +4253,11 @@ void Client::Handle_OP_ClickObjectAction(const EQApplicationPacket *app)
 		EQApplicationPacket end_trade2(OP_FinishWindow2, 0);
 		QueuePacket(&end_trade2);
 
-		return;
-
 		// RoF sends a 0 sized packet for closing objects
-		/*
-		Object* object = GetTradeskillObject();
-		if (object) {
-		object->CastToObject()->Close();
-		}
-		*/
+		if (GetTradeskillObject() && GetClientVersion() >= ClientVersion::RoF)
+			GetTradeskillObject()->CastToObject()->Close();
+		
+		return;
 	}
 	else
 	{
@@ -6131,7 +6127,7 @@ void Client::Handle_OP_GMSearchCorpse(const EQApplicationPacket *app)
 	char *escSearchString = new char[129];
 	database.DoEscapeString(escSearchString, gmscs->Name, strlen(gmscs->Name));
 
-	std::string query = StringFormat("SELECT charname, zoneid, x, y, z, time_of_death, is_rezzed, is_buried "
+	std::string query = StringFormat("SELECT charname, zone_id, x, y, z, time_of_death, is_rezzed, is_buried "
 		"FROM character_corpses WheRE charname LIKE '%%%s%%' ORDER BY charname LIMIT %i",
 		escSearchString, maxResults);
 	safe_delete_array(escSearchString);
@@ -8094,97 +8090,80 @@ void Client::Handle_OP_InstillDoubt(const EQApplicationPacket *app)
 
 void Client::Handle_OP_ItemLinkClick(const EQApplicationPacket *app)
 {
-	if (app->size != sizeof(ItemViewRequest_Struct)){
-		Log.Out(Logs::General, Logs::Error, "Wrong size on OP_ItemLinkClick. Got: %i, Expected: %i", app->size, sizeof(ItemViewRequest_Struct));
+	if (app->size != sizeof(ItemViewRequest_Struct)) {
+		Log.Out(Logs::General, Logs::Error, "Wrong size on OP_ItemLinkClick. Got: %i, Expected: %i", app->size,
+			sizeof(ItemViewRequest_Struct));
 		DumpPacket(app);
 		return;
 	}
 
 	DumpPacket(app);
-	ItemViewRequest_Struct* ivrs = (ItemViewRequest_Struct*)app->pBuffer;
+	ItemViewRequest_Struct *ivrs = (ItemViewRequest_Struct *)app->pBuffer;
 
-	//todo: verify ivrs->link_hash based on a rule, in case we don't care about people being able to sniff data from the item DB
+	// todo: verify ivrs->link_hash based on a rule, in case we don't care about people being able to sniff data
+	// from the item DB
 
-	const Item_Struct* item = database.GetItem(ivrs->item_id);
+	const Item_Struct *item = database.GetItem(ivrs->item_id);
 	if (!item) {
-		if (ivrs->item_id > 500000)
-		{
-			std::string response = "";
-			int sayid = ivrs->item_id - 500000;
-			bool silentsaylink = false;
-
-			if (sayid > 250000)	//Silent Saylink
-			{
-				sayid = sayid - 250000;
-				silentsaylink = true;
-			}
-
-			if (sayid > 0)
-			{
-
-				std::string query = StringFormat("SELECT `phrase` FROM saylink WHERE `id` = '%i'", sayid);
-				auto results = database.QueryDatabase(query);
-				if (!results.Success()) {
-					Message(13, "Error: The saylink (%s) was not found in the database.", response.c_str());
-					return;
-				}
-
-				if (results.RowCount() != 1) {
-					Message(13, "Error: The saylink (%s) was not found in the database.", response.c_str());
-					return;
-				}
-
-				auto row = results.begin();
-				response = row[0];
-
-			}
-
-			if ((response).size() > 0)
-			{
-				if (!mod_saylink(response, silentsaylink)) { return; }
-
-				if (GetTarget() && GetTarget()->IsNPC())
-				{
-					if (silentsaylink)
-					{
-						parse->EventNPC(EVENT_SAY, GetTarget()->CastToNPC(), this, response.c_str(), 0);
-						parse->EventPlayer(EVENT_SAY, this, response.c_str(), 0);
-					}
-					else
-					{
-						Message(7, "You say, '%s'", response.c_str());
-						ChannelMessageReceived(8, 0, 100, response.c_str());
-					}
-					return;
-				}
-				else
-				{
-					if (silentsaylink)
-					{
-						parse->EventPlayer(EVENT_SAY, this, response.c_str(), 0);
-					}
-					else
-					{
-						Message(7, "You say, '%s'", response.c_str());
-						ChannelMessageReceived(8, 0, 100, response.c_str());
-					}
-					return;
-				}
-			}
-			else
-			{
-				Message(13, "Error: Say Link not found or is too long.");
-				return;
-			}
-		}
-		else {
+		if (ivrs->item_id != SAYLINK_ITEM_ID) {
 			Message(13, "Error: The item for the link you have clicked on does not exist!");
 			return;
 		}
+		// This new scheme will shuttle the ID in the first augment for non-silent links
+		// and the second augment for silent.
+		std::string response = "";
+		bool silentsaylink = ivrs->augments[1] > 0 ? true : false;
+		int sayid = silentsaylink ? ivrs->augments[1] : ivrs->augments[0];
 
+		if (sayid > 0) {
+			std::string query = StringFormat("SELECT `phrase` FROM saylink WHERE `id` = '%i'", sayid);
+			auto results = database.QueryDatabase(query);
+			if (!results.Success()) {
+				Message(13, "Error: The saylink (%s) was not found in the database.", response.c_str());
+				return;
+			}
+
+			if (results.RowCount() != 1) {
+				Message(13, "Error: The saylink (%s) was not found in the database.", response.c_str());
+				return;
+			}
+
+			auto row = results.begin();
+			response = row[0];
+		}
+
+		if ((response).size() > 0) {
+			if (!mod_saylink(response, silentsaylink)) {
+				return;
+			}
+
+			if (GetTarget() && GetTarget()->IsNPC()) {
+				if (silentsaylink) {
+					parse->EventNPC(EVENT_SAY, GetTarget()->CastToNPC(), this, response.c_str(), 0);
+					parse->EventPlayer(EVENT_SAY, this, response.c_str(), 0);
+				} else {
+					Message(7, "You say, '%s'", response.c_str());
+					ChannelMessageReceived(8, 0, 100, response.c_str());
+				}
+				return;
+			} else {
+				if (silentsaylink) {
+					parse->EventPlayer(EVENT_SAY, this, response.c_str(), 0);
+				} else {
+					Message(7, "You say, '%s'", response.c_str());
+					ChannelMessageReceived(8, 0, 100, response.c_str());
+				}
+				return;
+			}
+		} else {
+			Message(13, "Error: Say Link not found or is too long.");
+			return;
+		}
 	}
 
-	ItemInst* inst = database.CreateItem(item, item->MaxCharges, ivrs->augments[0], ivrs->augments[1], ivrs->augments[2], ivrs->augments[3], ivrs->augments[4], ivrs->augments[5]);
+	ItemInst *inst =
+	    database.CreateItem(item, item->MaxCharges, ivrs->augments[0], ivrs->augments[1], ivrs->augments[2],
+				ivrs->augments[3], ivrs->augments[4], ivrs->augments[5]);
 	if (inst) {
 		SendItemPacket(0, inst, ItemPacketViewLink);
 		safe_delete(inst);

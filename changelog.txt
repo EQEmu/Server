@@ -1,5 +1,44 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 03/05/2016 ==
+mackal: Implement extra bind points (secondary recall)
+	For SE_Gate, base2 is which bind to use (starting at 1)
+	For SE_BindAffinity, base1 is which bind to set (starting at 1)
+	For SE_GateCastersBindpoint, base1 is which bind to use (starting at 1)
+		There was actually no spells that don't send to the main bind, but it uses a base1 of 1 which matches with SE_Gate
+		This also doesn't break anything
+
+== 03/01/2016 ==
+Uleat: Fix for LDoN treasure 'npcs' not leaving a corpse (please report any issues..)
+
+== 02/29/2016 ==
+Uleat: Change in AddItemBonuses - now includes ammo slot for skill mods only. Defined SoD- client SkillModMax packet property (client does not show..but, does enforce.)
+
+== 02/11/2016 ==
+Hateborne: Added IgnoreSpellDmgLvlRestriction rule (boolean) to ignore the 5 level spread when checking to add SpellDmg
+
+== 02/10/2016 ==
+Hateborne: Added FlatItemExtraSpellAmt rule (boolean) to allow SpellDmg on items to be added as raw damage versus scaled.
+
+== 01/26/2016 ==
+Uleat: Fix for Berserker 'Piercing' skill issues. Server Admins: If you run custom skill sets, this patch touches the code segments that you will need to modify if you have changed the default berserker 1H-/2H-piercing skill values.
+Uleat (Daerath): Fix for precision-loss item weight conversions in older clients.
+	- WARNING: YOU MUST RE-RUN SHARED_MEMORY.EXE BEFORE STARTING SERVER OR ITEM LOSS WILL OCCUR!
+	- Note: Cmake must be re-run to include/exclude the required files
+
+== 01/13/2016 ==
+Kinglykrab: Modified #flag so you can refresh your target's account status (GM status level) without them having to relog.
+	- Just target the person whose flag you want to refresh and type #flag.
+Uleat: Added itemlink functionality to the #summonitem command. Current use is limited to extracting the item id from the link.
+	- Invoking by item link '#summonitem Arrow' produces the same result as by item id '#summonitem 8005'
+	
+== 01/12/2016 ==
+Athrogate: Adding ClearCompassMark() to Lua.
+	- Lua didn't have ClearCompassMark().  Perl already had this.
+
+== 01/12/2016 ==
+Uleat: Fix for tradeskill containers remaining locked after a RoF+ client leaves. Intermediary fix for RoF+ clients accessing tradeskill containers when in use by another player (thanks Natedog!)
+
 == 12/29/2015 ==
 Akkadius: Implemented standardized zone controller scripts (Rule Zone, UseZoneController) Defaulted to true
 	- When a zone boots, it will spawn an invisible npc by the name of zone_controller

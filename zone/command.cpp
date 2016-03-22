@@ -194,6 +194,7 @@ int command_init(void)
 		command_add("enablerecipe",  "[recipe_id] - Enables a recipe using the recipe id.",  80, command_enablerecipe) ||
 		command_add("equipitem", "[slotid(0-21)] - Equip the item on your cursor into the specified slot", 50, command_equipitem) ||
 		command_add("face", "- Change the face of your target", 80, command_face) ||
+		command_add("findaliases", "[search term]- Searches for available command aliases, by alias or command", 0, command_findaliases) ||
 		command_add("findnpctype", "[search criteria] - Search database NPC types", 100, command_findnpctype) ||
 		command_add("findspell", "[searchstring] - Search for a spell", 50, command_findspell) ||
 		command_add("findzone", "[search criteria] - Search database zones", 100, command_findzone) ||
@@ -423,7 +424,9 @@ int command_init(void)
 	
 	std::map<std::string, std::pair<uint8, std::vector<std::string>>> command_settings;
 	database.GetCommandSettings(command_settings);
-	for (std::map<std::string, CommandRecord *>::iterator iter_cl = commandlist.begin(); iter_cl != commandlist.end(); ++iter_cl) {
+
+	std::map<std::string, CommandRecord *> working_cl = commandlist;
+	for (std::map<std::string, CommandRecord *>::iterator iter_cl = working_cl.begin(); iter_cl != working_cl.end(); ++iter_cl) {
 		std::map<std::string, std::pair<uint8, std::vector<std::string>>>::iterator iter_cs = command_settings.find(iter_cl->first);
 		if (iter_cs == command_settings.end()) {
 			if (iter_cl->second->access == 0)
@@ -4394,8 +4397,14 @@ void command_uptime(Client *c, const Seperator *sep)
 void command_flag(Client *c, const Seperator *sep)
 {
 	if(sep->arg[2][0] == 0) {
-		c->UpdateAdmin();
-		c->Message(0, "Refreshed your admin flag from DB.");
+		if (!c->GetTarget() || (c->GetTarget() && c->GetTarget() == c)) {
+			c->UpdateAdmin();
+			c->Message(0, "Refreshed your admin flag from DB.");
+		} else if (c->GetTarget() && c->GetTarget() != c && c->GetTarget()->IsClient()) {
+			c->GetTarget()->CastToClient()->UpdateAdmin();
+			c->Message(0, "%s's admin flag has been refreshed.", c->GetTarget()->GetName());
+			c->GetTarget()->Message(0, "%s refreshed your admin flag.", c->GetName());
+		}
 	}
 	else if (!sep->IsNumber(1) || atoi(sep->arg[1]) < -2 || atoi(sep->arg[1]) > 255 || strlen(sep->arg[2]) == 0)
 		c->Message(0, "Usage: #flag [status] [acctname]");
@@ -4945,6 +4954,38 @@ void command_face(Client *c, const Seperator *sep)
 	}
 }
 
+void command_findaliases(Client *c, const Seperator *sep)
+{
+	if (!sep->arg[1][0]) {
+		c->Message(0, "Usage: #findaliases [alias | command]");
+		return;
+	}
+	
+	std::map<std::string, std::string>::iterator find_iter = commandaliases.find(sep->arg[1]);
+	if (find_iter == commandaliases.end()) {
+		c->Message(15, "No commands or aliases match '%s'", sep->arg[1]);
+		return;
+	}
+
+	std::map<std::string, CommandRecord *>::iterator command_iter = commandlist.find(find_iter->second);
+	if (find_iter->second.empty() || command_iter == commandlist.end()) {
+		c->Message(0, "An unknown condition occurred...");
+		return;
+	}
+
+	c->Message(0, "Available command aliases for '%s':", command_iter->first.c_str());
+
+	int commandaliasesshown = 0;
+	for (std::map<std::string, std::string>::iterator alias_iter = commandaliases.begin(); alias_iter != commandaliases.end(); ++alias_iter) {
+		if (strcasecmp(find_iter->second.c_str(), alias_iter->second.c_str()) || c->Admin() < command_iter->second->access)
+			continue;
+
+		c->Message(0, "%c%s", COMMAND_CHAR, alias_iter->first.c_str());
+		++commandaliasesshown;
+	}
+	c->Message(0, "%d command alias%s listed.", commandaliasesshown, commandaliasesshown != 1 ? "es" : "");
+}
+
 void command_details(Client *c, const Seperator *sep)
 {
 	Mob *target=c->GetTarget();
@@ -5445,36 +5486,54 @@ void command_interrupt(Client *c, const Seperator *sep)
 
 void command_summonitem(Client *c, const Seperator *sep)
 {
-	if (!sep->IsNumber(1))
-		c->Message(0, "Usage: #summonitem [item id] [charges], charges are optional");
-	else {
-		uint32 itemid = atoi(sep->arg[1]);
-		int16 item_status = 0;
-		const Item_Struct* item = database.GetItem(itemid);
-		if(item) {
-			item_status = static_cast<int16>(item->MinStatus);
-		}
+	uint32 itemid = 0;
 
-		if (item_status > c->Admin())
-			c->Message(13, "Error: Insufficient status to summon this item.");
-		else if (sep->argnum==2 && sep->IsNumber(2))
-			c->SummonItem(itemid, atoi(sep->arg[2]));
-		else if (sep->argnum==3)
-			c->SummonItem(itemid, atoi(sep->arg[2]), atoi(sep->arg[3]));
-		else if (sep->argnum==4)
-			c->SummonItem(itemid, atoi(sep->arg[2]), atoi(sep->arg[3]), atoi(sep->arg[4]));
-		else if (sep->argnum==5)
-			c->SummonItem(itemid, atoi(sep->arg[2]), atoi(sep->arg[3]), atoi(sep->arg[4]), atoi(sep->arg[5]));
-		else if (sep->argnum==6)
-			c->SummonItem(itemid, atoi(sep->arg[2]), atoi(sep->arg[3]), atoi(sep->arg[4]), atoi(sep->arg[5]), atoi(sep->arg[6]));
-		else if (sep->argnum==7)
-			c->SummonItem(itemid, atoi(sep->arg[2]), atoi(sep->arg[3]), atoi(sep->arg[4]), atoi(sep->arg[5]), atoi(sep->arg[6]), atoi(sep->arg[7]));
-		else if (sep->argnum==8)
-			c->SummonItem(itemid, atoi(sep->arg[2]), atoi(sep->arg[3]), atoi(sep->arg[4]), atoi(sep->arg[5]), atoi(sep->arg[6]), atoi(sep->arg[7]), atoi(sep->arg[8]));
-		else {
-			c->SummonItem(itemid);
-		}
+	std::string cmd_msg = sep->msg;
+	size_t link_open = cmd_msg.find('\x12');
+	size_t link_close = cmd_msg.find_last_of('\x12');
+	if (link_open != link_close && (cmd_msg.length() - link_open) > EmuConstants::TEXT_LINK_BODY_LENGTH) {
+		TextLinkBody_Struct link_body;
+		Client::TextLink::DegenerateLinkBody(link_body, cmd_msg.substr(link_open + 1, EmuConstants::TEXT_LINK_BODY_LENGTH));
+		itemid = link_body.item_id;
 	}
+	else if (!sep->IsNumber(1)) {
+		c->Message(0, "Usage: #summonitem [item id | link] [charges], charges are optional");
+		return;
+	}
+	else {
+		itemid = atoi(sep->arg[1]);
+	}
+	if (!itemid) {
+		c->Message(0, "A valid item id number is required (derived: 0)");
+		return;
+	}
+
+	int16 item_status = 0;
+	const Item_Struct* item = database.GetItem(itemid);
+	if (item) {
+		item_status = static_cast<int16>(item->MinStatus);
+	}
+
+	if (item_status > c->Admin())
+		c->Message(13, "Error: Insufficient status to summon this item.");
+	else if (sep->argnum == 2 && sep->IsNumber(2))
+		c->SummonItem(itemid, atoi(sep->arg[2]));
+	else if (sep->argnum == 3)
+		c->SummonItem(itemid, atoi(sep->arg[2]), atoi(sep->arg[3]));
+	else if (sep->argnum == 4)
+		c->SummonItem(itemid, atoi(sep->arg[2]), atoi(sep->arg[3]), atoi(sep->arg[4]));
+	else if (sep->argnum == 5)
+		c->SummonItem(itemid, atoi(sep->arg[2]), atoi(sep->arg[3]), atoi(sep->arg[4]), atoi(sep->arg[5]));
+	else if (sep->argnum == 6)
+		c->SummonItem(itemid, atoi(sep->arg[2]), atoi(sep->arg[3]), atoi(sep->arg[4]), atoi(sep->arg[5]), atoi(sep->arg[6]));
+	else if (sep->argnum == 7)
+		c->SummonItem(itemid, atoi(sep->arg[2]), atoi(sep->arg[3]), atoi(sep->arg[4]), atoi(sep->arg[5]), atoi(sep->arg[6]), atoi(sep->arg[7]));
+	else if (sep->argnum == 8)
+		c->SummonItem(itemid, atoi(sep->arg[2]), atoi(sep->arg[3]), atoi(sep->arg[4]), atoi(sep->arg[5]), atoi(sep->arg[6]), atoi(sep->arg[7]), atoi(sep->arg[8]));
+	else {
+		c->SummonItem(itemid);
+	}
+	
 }
 
 void command_giveitem(Client *c, const Seperator *sep)

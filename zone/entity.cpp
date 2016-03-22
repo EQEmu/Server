@@ -644,15 +644,6 @@ void EntityList::AddNPC(NPC *npc, bool SendSpawnPacket, bool dontqueue)
 
 	parse->EventNPC(EVENT_SPAWN, npc, nullptr, "", 0);
 
-	/* Zone controller process EVENT_SPAWN_ZONE */
-	if (RuleB(Zone, UseZoneController)) {
-		if (entity_list.GetNPCByNPCTypeID(ZONE_CONTROLLER_NPC_ID) && npc->GetNPCTypeID() != ZONE_CONTROLLER_NPC_ID){
-			char data_pass[100] = { 0 };
-			snprintf(data_pass, 99, "%d %d", npc->GetID(), npc->GetNPCTypeID());
-			parse->EventNPC(EVENT_SPAWN_ZONE, entity_list.GetNPCByNPCTypeID(ZONE_CONTROLLER_NPC_ID)->CastToNPC(), nullptr, data_pass, 0);
-		}
-	}
-
 	uint16 emoteid = npc->GetEmoteID();
 	if (emoteid != 0)
 		npc->DoNPCEmote(ONSPAWN, emoteid);
@@ -678,6 +669,16 @@ void EntityList::AddNPC(NPC *npc, bool SendSpawnPacket, bool dontqueue)
 
 	npc_list.insert(std::pair<uint16, NPC *>(npc->GetID(), npc));
 	mob_list.insert(std::pair<uint16, Mob *>(npc->GetID(), npc));
+
+	/* Zone controller process EVENT_SPAWN_ZONE */
+	if (RuleB(Zone, UseZoneController)) {
+		if (entity_list.GetNPCByNPCTypeID(ZONE_CONTROLLER_NPC_ID) && npc->GetNPCTypeID() != ZONE_CONTROLLER_NPC_ID){
+			char data_pass[100] = { 0 };
+			snprintf(data_pass, 99, "%d %d", npc->GetID(), npc->GetNPCTypeID());
+			parse->EventNPC(EVENT_SPAWN_ZONE, entity_list.GetNPCByNPCTypeID(ZONE_CONTROLLER_NPC_ID)->CastToNPC(), nullptr, data_pass, 0);
+		}
+	}
+
 }
 
 void EntityList::AddMerc(Merc *merc, bool SendSpawnPacket, bool dontqueue)

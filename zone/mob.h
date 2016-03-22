@@ -231,6 +231,8 @@ public:
 		int resist_override = 0, bool CharismaCheck = false, bool CharmTick = false, bool IsRoot = false,
 		int level_override = -1);
 	int ResistPhysical(int level_diff, uint8 caster_level);
+	int ResistElementalWeaponDmg(const ItemInst *item);
+	int CheckBaneDamage(const ItemInst *item);
 	uint16 GetSpecializeSkillValue(uint16 spell_id) const;
 	void SendSpellBarDisable();
 	void SendSpellBarEnable(uint16 spellid);
@@ -466,7 +468,7 @@ public:
 	inline bool IsMoving() const { return moving; }
 	virtual void SetMoving(bool move) { moving = move; m_Delta = glm::vec4(); }
 	virtual void GoToBind(uint8 bindnum = 0) { }
-	virtual void Gate();
+	virtual void Gate(uint8 bindnum = 0);
 	int GetWalkspeed() const { return(_GetWalkSpeed()); }
 	int GetRunspeed() const { return(_GetRunSpeed()); }
 	void SetCurrentSpeed(int in);
@@ -885,7 +887,7 @@ public:
 	Mob* GetShieldTarget() const { return shield_target; }
 	void SetShieldTarget(Mob* mob) { shield_target = mob; }
 	bool HasActiveSong() const { return(bardsong != 0); }
-	bool Charmed() const { return charmed; }
+	bool Charmed() const { return typeofpet == petCharmed; }
 	static uint32 GetLevelHP(uint8 tlevel);
 	uint32 GetZoneID() const; //for perl
 	virtual int32 CheckAggroAmount(uint16 spell_id, Mob *target, bool isproc = false);

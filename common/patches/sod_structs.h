@@ -4006,7 +4006,7 @@ struct ItemBodyStruct
 	uint32 Races;
 	uint32 Deity;
 	int32 SkillModValue;
-	uint32 unknown6;
+	uint32 SkillModMax;
 	uint32 SkillModType;
 	uint32 BaneDmgRace;
 	uint32 BaneDmgBody;

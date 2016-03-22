@@ -499,7 +499,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 
 				break;
 			}
-			case SE_GateCastersBindpoint: //Shin: Used on Teleport Bind.
+			case SE_GateCastersBindpoint: // Used on Teleport Bind.
 			case SE_Teleport:	// gates, rings, circles, etc
 			case SE_Teleport2:
 			{
@@ -532,13 +532,16 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 				}
 
 				if (effect == SE_GateCastersBindpoint && caster->IsClient())
-				{ //Shin: Teleport Bind uses caster's bind point
-					x = caster->CastToClient()->GetBindX();
-					y = caster->CastToClient()->GetBindY();
-					z = caster->CastToClient()->GetBindZ();
-					heading = caster->CastToClient()->GetBindHeading();
+				{ // Teleport Bind uses caster's bind point
+					int index = spells[spell_id].base[i] - 1;
+					if (index < 0 || index > 4)
+						index = 0;
+					x = caster->CastToClient()->GetBindX(index);
+					y = caster->CastToClient()->GetBindY(index);
+					z = caster->CastToClient()->GetBindZ(index);
+					heading = caster->CastToClient()->GetBindHeading(index);
 					//target_zone = caster->CastToClient()->GetBindZoneId(); target_zone doesn't work due to const char
-					CastToClient()->MovePC(caster->CastToClient()->GetBindZoneID(), 0, x, y, z, heading);
+					CastToClient()->MovePC(caster->CastToClient()->GetBindZoneID(index), 0, x, y, z, heading);
 					break;
 				}
 
@@ -917,7 +920,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 						if(caster->IsClient() && caster != this)
 							caster->CastToClient()->QueuePacket(message_packet);
 
-						CastToClient()->SetBindPoint();
+						CastToClient()->SetBindPoint(spells[spell_id].base[i] - 1);
 						Save();
 						safe_delete(action_packet);
 						safe_delete(message_packet);
@@ -966,7 +969,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 								if(caster->IsClient() && caster != this)
 									caster->CastToClient()->QueuePacket(message_packet);
 
-								CastToClient()->SetBindPoint();
+								CastToClient()->SetBindPoint(spells[spell_id].base[i] - 1);
 								Save();
 								safe_delete(action_packet);
 								safe_delete(message_packet);
@@ -1002,7 +1005,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 							if(caster->IsClient() && caster != this)
 								caster->CastToClient()->QueuePacket(message_packet);
 
-							CastToClient()->SetBindPoint();
+							CastToClient()->SetBindPoint(spells[spell_id].base[i] - 1);
 							Save();
 							safe_delete(action_packet);
 							safe_delete(message_packet);
@@ -1012,7 +1015,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 				break;
 			}
 
-			case SE_Gate: //TO DO: Add support for secondary and tertiary gate abilities (base2)
+			case SE_Gate:
 			{
 #ifdef SPELL_EFFECT_SPAM
 				snprintf(effect_desc, _EDLEN, "Gate");
@@ -1020,7 +1023,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 				if(!spellbonuses.AntiGate){
 
 					if(zone->random.Roll(effect_value))
-						Gate();
+						Gate(spells[spell_id].base2[i] - 1);
 					else
 						caster->Message_StringID(MT_SpellFailure,GATE_FAIL);
 				}
@@ -4227,7 +4230,7 @@ int16 Client::CalcAAFocus(focusType type, const AA::Rank &rank, uint16 spell_id)
 			break;
 
 		case SE_LimitMaxLevel:
-			spell_level = spell.classes[(GetClass() % 16) - 1];
+			spell_level = spell.classes[(GetClass() % 17) - 1];
 			lvldiff = spell_level - base1;
 			// every level over cap reduces the effect by base2 percent unless from a clicky when
 			// ItemCastsUseFocus is true
@@ -4243,7 +4246,7 @@ int16 Client::CalcAAFocus(focusType type, const AA::Rank &rank, uint16 spell_id)
 			break;
 
 		case SE_LimitMinLevel:
-			if ((spell.classes[(GetClass() % 16) - 1]) < base1)
+			if ((spell.classes[(GetClass() % 17) - 1]) < base1)
 				LimitFailure = true;
 			break;
 
@@ -4661,7 +4664,7 @@ int16 Mob::CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, boo
 		case SE_LimitMaxLevel:
 			if (IsNPC())
 				break;
-			spell_level = spell.classes[(GetClass() % 16) - 1];
+			spell_level = spell.classes[(GetClass() % 17) - 1];
 			lvldiff = spell_level - focus_spell.base[i];
 			// every level over cap reduces the effect by focus_spell.base2[i] percent unless from a clicky
 			// when ItemCastsUseFocus is true
@@ -4679,7 +4682,7 @@ int16 Mob::CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, boo
 		case SE_LimitMinLevel:
 			if (IsNPC())
 				break;
-			if (spell.classes[(GetClass() % 16) - 1] < focus_spell.base[i])
+			if (spell.classes[(GetClass() % 17) - 1] < focus_spell.base[i])
 				return (0);
 			break;
 

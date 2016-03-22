@@ -112,7 +112,10 @@ int32 Mob::GetActSpellDamage(uint16 spell_id, int32 value, Mob* target) {
 			value -= GetFocusEffect(focusFcDamageAmt, spell_id);
 			value -= GetFocusEffect(focusFcDamageAmt2, spell_id);
 
-			if(!spells[spell_id].no_heal_damage_item_mod && itembonuses.SpellDmg && spells[spell_id].classes[(GetClass()%16) - 1] >= GetLevel() - 5)
+			if (RuleB(Spells, IgnoreSpellDmgLvlRestriction) && !spells[spell_id].no_heal_damage_item_mod && itembonuses.SpellDmg)
+				value -= GetExtraSpellAmt(spell_id, itembonuses.SpellDmg, value)*ratio / 100;
+
+			else if(!spells[spell_id].no_heal_damage_item_mod && itembonuses.SpellDmg && spells[spell_id].classes[(GetClass() % 17) - 1] >= GetLevel() - 5)
 				value -= GetExtraSpellAmt(spell_id, itembonuses.SpellDmg, value)*ratio/100;
 
 			else if (IsNPC() && CastToNPC()->GetSpellScale())
@@ -145,7 +148,10 @@ int32 Mob::GetActSpellDamage(uint16 spell_id, int32 value, Mob* target) {
 	value -= GetFocusEffect(focusFcDamageAmt, spell_id);
 	value -= GetFocusEffect(focusFcDamageAmt2, spell_id);
 
-	if(!spells[spell_id].no_heal_damage_item_mod && itembonuses.SpellDmg && spells[spell_id].classes[(GetClass()%16) - 1] >= GetLevel() - 5)
+	if (RuleB(Spells, IgnoreSpellDmgLvlRestriction) && !spells[spell_id].no_heal_damage_item_mod && itembonuses.SpellDmg)
+		value -= GetExtraSpellAmt(spell_id, itembonuses.SpellDmg, value);
+
+	else if (!spells[spell_id].no_heal_damage_item_mod && itembonuses.SpellDmg && spells[spell_id].classes[(GetClass() % 17) - 1] >= GetLevel() - 5)
 		 value -= GetExtraSpellAmt(spell_id, itembonuses.SpellDmg, value);
 
 	if (IsNPC() && CastToNPC()->GetSpellScale())
@@ -225,6 +231,9 @@ int32 Mob::GetActDoTDamage(uint16 spell_id, int32 value, Mob* target) {
 
 int32 Mob::GetExtraSpellAmt(uint16 spell_id, int32 extra_spell_amt, int32 base_spell_dmg)
 {
+	if (RuleB(Spells, FlatItemExtraSpellAmt))
+		return extra_spell_amt;
+
 	int total_cast_time = 0;
 
 	if (spells[spell_id].recast_time >= spells[spell_id].recovery_time)
@@ -287,7 +296,7 @@ int32 Mob::GetActSpellHealing(uint16 spell_id, int32 value, Mob* target) {
 		value += GetFocusEffect(focusFcHealAmt, spell_id);
 		value += target->GetFocusIncoming(focusFcHealAmtIncoming, SE_FcHealAmtIncoming, this, spell_id);
 
-		if(!spells[spell_id].no_heal_damage_item_mod && itembonuses.HealAmt && spells[spell_id].classes[(GetClass()%16) - 1] >= GetLevel() - 5)
+		if(!spells[spell_id].no_heal_damage_item_mod && itembonuses.HealAmt && spells[spell_id].classes[(GetClass()%17) - 1] >= GetLevel() - 5)
 			value += GetExtraSpellAmt(spell_id, itembonuses.HealAmt, value) * modifier;
 
 		value += value*target->GetHealRate(spell_id, this)/100;
@@ -336,7 +345,7 @@ int32 Client::GetActSpellCost(uint16 spell_id, int32 cost)
 		cost *= 2;
 
 	// Formula = Unknown exact, based off a random percent chance up to mana cost(after focuses) of the cast spell
-	if(itembonuses.Clairvoyance && spells[spell_id].classes[(GetClass()%16) - 1] >= GetLevel() - 5)
+	if(itembonuses.Clairvoyance && spells[spell_id].classes[(GetClass()%17) - 1] >= GetLevel() - 5)
 	{
 		int16 mana_back = itembonuses.Clairvoyance * zone->random.Int(1, 100) / 100;
 		// Doesnt generate mana, so best case is a free spell

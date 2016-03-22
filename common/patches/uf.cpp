@@ -857,8 +857,8 @@ namespace UF
 		// This next field is actually a float. There is a groundspawn in freeportwest (sack of money sitting on some barrels) which requires this
 		// field to be set to (float)255.0 to appear at all, and also the size field below to be 5, to be the correct size. I think SoD has the same
 		// issue.
-		VARSTRUCT_ENCODE_TYPE(uint32, OutBuffer, 0);
-		VARSTRUCT_ENCODE_TYPE(uint32, OutBuffer, emu->solidtype);	// Unknown, observed 0
+		VARSTRUCT_ENCODE_TYPE(float, OutBuffer, 0); //X tilt
+		VARSTRUCT_ENCODE_TYPE(float, OutBuffer, 0);	//Y tilt
 		VARSTRUCT_ENCODE_TYPE(float, OutBuffer, emu->size != 0 && (float)emu->size < 5000.f ? (float)((float)emu->size / 100.0f) : 1.f );	// This appears to be the size field. Hackish logic because some PEQ DB items were corrupt.
 		VARSTRUCT_ENCODE_TYPE(float, OutBuffer, emu->y);
 		VARSTRUCT_ENCODE_TYPE(float, OutBuffer, emu->x);
@@ -2818,9 +2818,11 @@ namespace UF
 			if (strlen(emu->suffix))
 				PacketSize += strlen(emu->suffix) + 1;
 
-			if (emu->DestructibleObject)
+			if (emu->DestructibleObject || emu->class_ == 62)
 			{
-				PacketSize = PacketSize - 4;	// No bodytype
+				if (emu->DestructibleObject)
+					PacketSize = PacketSize - 4;	// No bodytype
+
 				PacketSize += 53;	// Fixed portion
 				PacketSize += strlen(emu->DestructibleModel) + 1;
 				PacketSize += strlen(emu->DestructibleName2) + 1;
@@ -2903,6 +2905,9 @@ namespace UF
 
 			uint8 OtherData = 0;
 
+			if (emu->class_ == 62) //Ldon chest
+				OtherData = OtherData | 0x01;
+
 			if (strlen(emu->title))
 				OtherData = OtherData | 0x04;
 
@@ -2924,7 +2929,7 @@ namespace UF
 			}
 			VARSTRUCT_ENCODE_TYPE(float, Buffer, 0);	// unknown4
 
-			if (emu->DestructibleObject)
+			if (emu->DestructibleObject || emu->class_ == 62)
 			{
 				VARSTRUCT_ENCODE_STRING(Buffer, emu->DestructibleModel);
 				VARSTRUCT_ENCODE_STRING(Buffer, emu->DestructibleName2);
@@ -3048,11 +3053,21 @@ namespace UF
 				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);
 				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);
 
-				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->equipment[MaterialPrimary].Material);
+				if (emu->equipment[MaterialPrimary].Material > 99999) {
+					VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 63);
+				} else {
+					VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->equipment[MaterialPrimary].Material);
+				}
+
 				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);
 				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);
 
-				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->equipment[MaterialSecondary].Material);
+				if (emu->equipment[MaterialSecondary].Material > 99999) {
+					VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 63);
+				} else {
+					VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->equipment[MaterialSecondary].Material);
+				}
+
 				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);
 				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);
 			}
@@ -3062,7 +3077,11 @@ namespace UF
 				structs::EquipStruct *Equipment = (structs::EquipStruct *)Buffer;
 
 				for (k = 0; k < 9; k++) {
-					Equipment[k].Material = emu->equipment[k].Material;
+					if (emu->equipment[k].Material > 99999) {
+						Equipment[k].Material = 63;
+					} else {
+						Equipment[k].Material = emu->equipment[k].Material;
+					}
 					Equipment[k].Unknown1 = emu->equipment[k].Unknown1;
 					Equipment[k].EliteMaterial = emu->equipment[k].EliteMaterial;
 				}
@@ -3910,7 +3929,8 @@ namespace UF
 		memset(&ibs, 0, sizeof(UF::structs::ItemBodyStruct));
 
 		ibs.id = item->ID;
-		ibs.weight = item->Weight;
+		// weight is uint8 in the struct, and some weights exceed that, so capping at 255.
+		ibs.weight = (item->Weight > 255) ? 255 : item->Weight;
 		ibs.norent = item->NoRent;
 		ibs.nodrop = item->NoDrop;
 		ibs.attune = item->Attuneable;

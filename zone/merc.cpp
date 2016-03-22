@@ -2678,7 +2678,7 @@ int16 Merc::GetFocusEffect(focusType type, uint16 spell_id) {
 int32 Merc::GetActSpellCost(uint16 spell_id, int32 cost)
 {
 	// Formula = Unknown exact, based off a random percent chance up to mana cost(after focuses) of the cast spell
-	if(this->itembonuses.Clairvoyance && spells[spell_id].classes[(GetClass()%16) - 1] >= GetLevel() - 5)
+	if(this->itembonuses.Clairvoyance && spells[spell_id].classes[(GetClass()%17) - 1] >= GetLevel() - 5)
 	{
 		int16 mana_back = this->itembonuses.Clairvoyance * zone->random.Int(1, 100) / 100;
 		// Doesnt generate mana, so best case is a free spell

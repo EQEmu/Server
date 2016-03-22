@@ -582,8 +582,8 @@ public:
 
 	void GoToBind(uint8 bindnum = 0);
 	void GoToSafeCoords(uint16 zone_id, uint16 instance_id);
-	void Gate();
-	void SetBindPoint(int to_zone = -1, int to_instance = 0, const glm::vec3& location = glm::vec3());
+	void Gate(uint8 bindnum = 0);
+	void SetBindPoint(int bind_num = 0, int to_zone = -1, int to_instance = 0, const glm::vec3& location = glm::vec3());
 	void SetStartZone(uint32 zoneid, float x = 0.0f, float y =0.0f, float z = 0.0f);
 	uint32 GetStartZone(void);
 	void MovePC(const char* zonename, float x, float y, float z, float heading, uint8 ignorerestrictions = 0, ZoneMode zm = ZoneSolicited);
@@ -831,7 +831,22 @@ public:
 		void SetItemData(const Item_Struct* itemData) { m_ItemData = itemData; }
 		void SetLootData(const ServerLootItem_Struct* lootData) { m_LootData = lootData; }
 		void SetItemInst(const ItemInst* itemInst) { m_ItemInst = itemInst; }
-		void SetProxyItemID(uint32 proxyItemID) { m_ProxyItemID = proxyItemID; } // mainly for saylinks..but, not limited to
+
+		// mainly for saylinks..but, not limited to
+		void SetProxyUnknown1(uint8 proxyUnknown1) { m_Proxy_unknown_1 = proxyUnknown1; }
+		void SetProxyItemID(uint32 proxyItemID) { m_ProxyItemID = proxyItemID; }
+		void SetProxyAugment1ID(uint32 proxyAugmentID) { m_ProxyAugment1ID = proxyAugmentID; }
+		void SetProxyAugment2ID(uint32 proxyAugmentID) { m_ProxyAugment2ID = proxyAugmentID; }
+		void SetProxyAugment3ID(uint32 proxyAugmentID) { m_ProxyAugment3ID = proxyAugmentID; }
+		void SetProxyAugment4ID(uint32 proxyAugmentID) { m_ProxyAugment4ID = proxyAugmentID; }
+		void SetProxyAugment5ID(uint32 proxyAugmentID) { m_ProxyAugment5ID = proxyAugmentID; }
+		void SetProxyAugment6ID(uint32 proxyAugmentID) { m_ProxyAugment6ID = proxyAugmentID; }
+		void SetProxyIsEvolving(uint8 proxyIsEvolving) { m_ProxyIsEvolving = proxyIsEvolving; }
+		void SetProxyEvolveGroup(uint32 proxyEvolveGroup) { m_ProxyEvolveGroup = proxyEvolveGroup; }
+		void SetProxyEvolveLevel(uint8 proxyEvolveLevel) { m_ProxyEvolveLevel = proxyEvolveLevel; }
+		void SetProxyOrnamentIcon(uint32 proxyOrnamentIcon) { m_ProxyOrnamentIcon = proxyOrnamentIcon; }
+		void SetProxyHash(int proxyHash) { m_ProxyHash = proxyHash; }
+
 		void SetProxyText(const char* proxyText) { m_ProxyText = proxyText; } // overrides standard text use
 		void SetTaskUse() { m_TaskUse = true; }
 
@@ -855,7 +870,20 @@ public:
 		const Item_Struct* m_ItemData;
 		const ServerLootItem_Struct* m_LootData;
 		const ItemInst* m_ItemInst;
+
+		uint8 m_Proxy_unknown_1;
 		uint32 m_ProxyItemID;
+		uint32 m_ProxyAugment1ID;
+		uint32 m_ProxyAugment2ID;
+		uint32 m_ProxyAugment3ID;
+		uint32 m_ProxyAugment4ID;
+		uint32 m_ProxyAugment5ID;
+		uint32 m_ProxyAugment6ID;
+		uint8 m_ProxyIsEvolving;
+		uint32 m_ProxyEvolveGroup;
+		uint8 m_ProxyEvolveLevel;
+		uint32 m_ProxyOrnamentIcon;
+		int m_ProxyHash;
 		const char* m_ProxyText;
 		bool m_TaskUse;
 		TextLinkBody_Struct m_LinkBodyStruct;
@@ -1275,7 +1303,7 @@ public:
 protected:
 	friend class Mob;
 	void CalcItemBonuses(StatBonuses* newbon);
-	void AddItemBonuses(const ItemInst *inst, StatBonuses* newbon, bool isAug = false, bool isTribute = false);
+	void AddItemBonuses(const ItemInst *inst, StatBonuses* newbon, bool isAug = false, bool isTribute = false, int rec_override = 0, bool ammo_slot_item = false);
 	void AdditiveWornBonuses(const ItemInst *inst, StatBonuses* newbon, bool isAug = false);
 	int CalcRecommendedLevelBonus(uint8 level, uint8 reclevel, int basestat);
 	void CalcEdibleBonuses(StatBonuses* newbon);

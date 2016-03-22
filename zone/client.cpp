@@ -587,10 +587,9 @@ bool Client::Save(uint8 iCommitNow) {
 	database.SaveCharacterCurrency(CharacterID(), &m_pp);
 
 	/* Save Current Bind Points */
-	auto regularBindPosition = glm::vec4(m_pp.binds[0].x, m_pp.binds[0].y, m_pp.binds[0].z, 0.0f);
-	auto homeBindPosition = glm::vec4(m_pp.binds[4].x, m_pp.binds[4].y, m_pp.binds[4].z, 0.0f);
-	database.SaveCharacterBindPoint(CharacterID(), m_pp.binds[0].zoneId, m_pp.binds[0].instance_id, regularBindPosition, 0); /* Regular bind */
-	database.SaveCharacterBindPoint(CharacterID(), m_pp.binds[4].zoneId, m_pp.binds[4].instance_id, homeBindPosition, 1); /* Home Bind */
+	for (int i = 0; i < 5; i++)
+		if (m_pp.binds[i].zoneId)
+			database.SaveCharacterBindPoint(CharacterID(), m_pp.binds[i], i);
 
 	/* Save Character Buffs */
 	database.SaveBuffs(this);
@@ -2343,11 +2342,17 @@ bool Client::HasSkill(SkillUseTypes skill_id) const {
 }
 
 bool Client::CanHaveSkill(SkillUseTypes skill_id) const {
+	if (GetClientVersion() < ClientVersion::RoF2 && class_ == BERSERKER && skill_id == Skill1HPiercing)
+		skill_id = Skill2HPiercing;
+
 	return(database.GetSkillCap(GetClass(), skill_id, RuleI(Character, MaxLevel)) > 0);
 	//if you don't have it by max level, then odds are you never will?
 }
 
 uint16 Client::MaxSkill(SkillUseTypes skillid, uint16 class_, uint16 level) const {
+	if (GetClientVersion() < ClientVersion::RoF2 && class_ == BERSERKER && skillid == Skill1HPiercing)
+		skillid = Skill2HPiercing;
+
 	return(database.GetSkillCap(class_, skillid, level));
 }
 
@@ -4211,7 +4216,10 @@ uint16 Client::GetPrimarySkillValue()
 			}
 			case ItemType2HPiercing: // 2H Piercing
 			{
-				skill = Skill1HPiercing; // change to Skill2HPiercing once activated
+				if (IsClient() && CastToClient()->GetClientVersion() < ClientVersion::RoF2)
+					skill = Skill1HPiercing;
+				else
+					skill = Skill2HPiercing;
 				break;
 			}
 			case ItemTypeMartial: // Hand to Hand
@@ -4629,7 +4637,7 @@ void Client::HandleLDoNOpen(NPC *target)
 					AddEXP(target->GetLevel()*target->GetLevel()*2625/10, GetLevelCon(target->GetLevel()));
 				}
 			}
-			target->Death(this, 1, SPELL_UNKNOWN, SkillHandtoHand);
+			target->Death(this, 0, SPELL_UNKNOWN, SkillHandtoHand);
 		}
 	}
 }
@@ -4942,36 +4950,27 @@ void Client::ShowSkillsWindow()
 {
 	const char *WindowTitle = "Skills";
 	std::string WindowText;
-	// using a map for easy alphabetizing of the skills list
-	std::map<std::string, SkillUseTypes> Skills;
-	std::map<std::string, SkillUseTypes>::iterator it;
+	std::map<SkillUseTypes, std::string> Skills = EQEmu::GetSkillUseTypesMap();
 
-	// this list of names must keep the same order as that in common/skills.h
-	const char* SkillName[] = {"1H Blunt","1H Slashing","2H Blunt","2H Slashing","Abjuration","Alteration","Apply Poison","Archery",
-		"Backstab","Bind Wound","Bash","Block","Brass Instruments","Channeling","Conjuration","Defense","Disarm","Disarm Traps","Divination",
-		"Dodge","Double Attack","Dragon Punch","Dual Wield","Eagle Strike","Evocation","Feign Death","Flying Kick","Forage","Hand to Hand",
-		"Hide","Kick","Meditate","Mend","Offense","Parry","Pick Lock","Piercing","Ripost","Round Kick","Safe Fall","Sense Heading",
-		"Singing","Sneak","Specialize Abjuration","Specialize Alteration","Specialize Conjuration","Specialize Divination","Specialize Evocation","Pick Pockets",
-		"Stringed Instruments","Swimming","Throwing","Tiger Claw","Tracking","Wind Instruments","Fishing","Make Poison","Tinkering","Research",
-		"Alchemy","Baking","Tailoring","Sense Traps","Blacksmithing","Fletching","Brewing","Alcohol Tolerance","Begging","Jewelry Making",
-		"Pottery","Percussion Instruments","Intimidation","Berserking","Taunt","Frenzy","Remove Traps","Triple Attack"};
-	for(int i = 0; i <= (int)HIGHEST_SKILL; i++)
-		Skills[SkillName[i]] = (SkillUseTypes)i;
+	if (GetClientVersion() < ClientVersion::RoF2)
+		Skills[Skill1HPiercing] = "Piercing";
 
 	// print out all available skills
-	for(it = Skills.begin(); it != Skills.end(); ++it) {
-		if(GetSkill(it->second) > 0 || MaxSkill(it->second) > 0) {
-			WindowText += it->first;
-			// line up the values
-			for (int j = 0; j < EmuConstants::ITEM_COMMON_SIZE; j++)
-				WindowText += "&nbsp;";
-			WindowText += itoa(this->GetSkill(it->second));
-			if (MaxSkill(it->second) > 0) {
-				WindowText += "/";
-				WindowText += itoa(this->GetMaxSkillAfterSpecializationRules(it->second,this->MaxSkill(it->second)));
-			}
-			WindowText += "<br>";
+	for (auto skills_iter : Skills) {
+		if (skills_iter.first == Skill2HPiercing && GetClientVersion() < ClientVersion::RoF2)
+			continue;
+		if (!GetSkill(skills_iter.first) && !MaxSkill(skills_iter.first))
+			continue;
+
+		WindowText += skills_iter.second;
+		// line up the values
+		WindowText += "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
+		WindowText += itoa(this->GetSkill(skills_iter.first));
+		if (MaxSkill(skills_iter.first) > 0) {
+			WindowText += "/";
+			WindowText += itoa(this->GetMaxSkillAfterSpecializationRules(skills_iter.first, this->MaxSkill(skills_iter.first)));
 		}
+		WindowText += "<br>";
 	}
 	this->SendPopupToClient(WindowTitle, WindowText.c_str());
 }
@@ -8423,7 +8422,19 @@ void Client::TextLink::Reset()
 	m_ItemData = nullptr;
 	m_LootData = nullptr;
 	m_ItemInst = nullptr;
+	m_Proxy_unknown_1 = NOT_USED;
 	m_ProxyItemID = NOT_USED;
+	m_ProxyAugment1ID = NOT_USED;
+	m_ProxyAugment2ID = NOT_USED;
+	m_ProxyAugment3ID = NOT_USED;
+	m_ProxyAugment4ID = NOT_USED;
+	m_ProxyAugment5ID = NOT_USED;
+	m_ProxyAugment6ID = NOT_USED;
+	m_ProxyIsEvolving = NOT_USED;
+	m_ProxyEvolveGroup = NOT_USED;
+	m_ProxyEvolveLevel = NOT_USED;
+	m_ProxyOrnamentIcon = NOT_USED;
+	m_ProxyHash = NOT_USED;
 	m_ProxyText = nullptr;
 	m_TaskUse = false;
 	m_Link.clear();
@@ -8439,8 +8450,8 @@ void Client::TextLink::generate_body()
 
 	RoF2: "%1X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%1X" "%04X" "%02X" "%05X" "%08X" (56)
 	RoF:  "%1X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%1X" "%04X" "%1X"  "%05X" "%08X" (55)
-	SoF:  "%1X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X"		"%1X" "%04X" "%1X"  "%05X" "%08X" (50)
-	6.2:  "%1X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X"		"%1X" "%04X" "%1X"		 "%08X" (45)
+	SoF:  "%1X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X"        "%1X" "%04X" "%1X"  "%05X" "%08X" (50)
+	6.2:  "%1X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X"        "%1X" "%04X" "%1X"         "%08X" (45)
 	*/
 
 	memset(&m_LinkBodyStruct, 0, sizeof(TextLinkBody_Struct));
@@ -8492,13 +8503,36 @@ void Client::TextLink::generate_body()
 		break;
 	}
 
-	if (m_ProxyItemID != NOT_USED) {
+	if (m_Proxy_unknown_1)
+		m_LinkBodyStruct.unknown_1 = m_Proxy_unknown_1;
+	if (m_ProxyItemID)
 		m_LinkBodyStruct.item_id = m_ProxyItemID;
-	}
+	if (m_ProxyAugment1ID)
+		m_LinkBodyStruct.augment_1 = m_ProxyAugment1ID;
+	if (m_ProxyAugment2ID)
+		m_LinkBodyStruct.augment_2 = m_ProxyAugment2ID;
+	if (m_ProxyAugment3ID)
+		m_LinkBodyStruct.augment_3 = m_ProxyAugment3ID;
+	if (m_ProxyAugment4ID)
+		m_LinkBodyStruct.augment_4 = m_ProxyAugment4ID;
+	if (m_ProxyAugment5ID)
+		m_LinkBodyStruct.augment_5 = m_ProxyAugment5ID;
+	if (m_ProxyAugment6ID)
+		m_LinkBodyStruct.augment_6 = m_ProxyAugment6ID;
+	if (m_ProxyIsEvolving)
+		m_LinkBodyStruct.is_evolving = m_ProxyIsEvolving;
+	if (m_ProxyEvolveGroup)
+		m_LinkBodyStruct.evolve_group = m_ProxyEvolveGroup;
+	if (m_ProxyEvolveLevel)
+		m_LinkBodyStruct.evolve_level = m_ProxyEvolveLevel;
+	if (m_ProxyOrnamentIcon)
+		m_LinkBodyStruct.ornament_icon = m_ProxyOrnamentIcon;
+	if (m_ProxyHash)
+		m_LinkBodyStruct.hash = m_ProxyHash;
 
-	if (m_TaskUse) {
+
+	if (m_TaskUse)
 		m_LinkBodyStruct.hash = 0x14505DC2;
-	}
 
 	m_LinkBody = StringFormat(
 		"%1X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%1X" "%04X" "%02X" "%05X" "%08X",
@@ -8515,7 +8549,7 @@ void Client::TextLink::generate_body()
 		(0xFF & m_LinkBodyStruct.evolve_level),
 		(0x000FFFFF & m_LinkBodyStruct.ornament_icon),
 		(0xFFFFFFFF & m_LinkBodyStruct.hash)
-		);
+	);
 }
 
 void Client::TextLink::generate_text()

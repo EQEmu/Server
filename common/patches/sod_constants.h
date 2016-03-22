@@ -182,6 +182,8 @@ namespace SoD {
 		static const size_t POTION_BELT_ITEM_COUNT = 5;
 
 		static const size_t TEXT_LINK_BODY_LENGTH = 50;
+
+		static const size_t PLAYER_PROFILE_SKILL_MAX = SkillTripleAttack;
 	}
 
 	namespace limits {

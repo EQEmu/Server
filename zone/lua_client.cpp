@@ -232,27 +232,27 @@ void Lua_Client::SetBindPoint() {
 
 void Lua_Client::SetBindPoint(int to_zone) {
 	Lua_Safe_Call_Void();
-	self->SetBindPoint(to_zone);
+	self->SetBindPoint(0, to_zone);
 }
 
 void Lua_Client::SetBindPoint(int to_zone, int to_instance) {
 	Lua_Safe_Call_Void();
-	self->SetBindPoint(to_zone, to_instance);
+	self->SetBindPoint(0, to_zone, to_instance);
 }
 
 void Lua_Client::SetBindPoint(int to_zone, int to_instance, float new_x) {
 	Lua_Safe_Call_Void();
-	self->SetBindPoint(to_zone, to_instance, glm::vec3(new_x,0.0f,0.0f));
+	self->SetBindPoint(0, to_zone, to_instance, glm::vec3(new_x,0.0f,0.0f));
 }
 
 void Lua_Client::SetBindPoint(int to_zone, int to_instance, float new_x, float new_y) {
 	Lua_Safe_Call_Void();
-	self->SetBindPoint(to_zone, to_instance, glm::vec3(new_x, new_y, 0.0f));
+	self->SetBindPoint(0, to_zone, to_instance, glm::vec3(new_x, new_y, 0.0f));
 }
 
 void Lua_Client::SetBindPoint(int to_zone, int to_instance, float new_x, float new_y, float new_z) {
 	Lua_Safe_Call_Void();
-	self->SetBindPoint(to_zone, to_instance, glm::vec3(new_x, new_y, new_z));
+	self->SetBindPoint(0, to_zone, to_instance, glm::vec3(new_x, new_y, new_z));
 }
 
 float Lua_Client::GetBindX() {
@@ -1067,6 +1067,11 @@ void Lua_Client::MarkSingleCompassLoc(float in_x, float in_y, float in_z, int co
 	self->MarkSingleCompassLoc(in_x, in_y, in_z, count);
 }
 
+void Lua_Client::ClearCompassMark() {
+	Lua_Safe_Call_Void();
+	self->MarkSingleCompassLoc(0,0,0,0);
+}
+
 int Lua_Client::GetNextAvailableSpellBookSlot() {
 	Lua_Safe_Call_Int();
 	return self->GetNextAvailableSpellBookSlot();
@@ -1548,6 +1553,7 @@ luabind::scope lua_register_client() {
 		.def("GrantAlternateAdvancementAbility", (bool(Lua_Client::*)(int, int, bool))&Lua_Client::GrantAlternateAdvancementAbility)
 		.def("MarkSingleCompassLoc", (void(Lua_Client::*)(float,float,float))&Lua_Client::MarkSingleCompassLoc)
 		.def("MarkSingleCompassLoc", (void(Lua_Client::*)(float,float,float,int))&Lua_Client::MarkSingleCompassLoc)
+		.def("ClearCompassMark",(void(Lua_Client::*)(void))&Lua_Client::ClearCompassMark)
 		.def("GetNextAvailableSpellBookSlot", (int(Lua_Client::*)(void))&Lua_Client::GetNextAvailableSpellBookSlot)
 		.def("GetNextAvailableSpellBookSlot", (int(Lua_Client::*)(int))&Lua_Client::GetNextAvailableSpellBookSlot)
 		.def("FindSpellBookSlotBySpellID", (int(Lua_Client::*)(int))&Lua_Client::FindSpellBookSlotBySpellID)

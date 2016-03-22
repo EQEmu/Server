@@ -193,7 +193,7 @@ public:
 	virtual int32 CheckAggroAmount(uint16 spellid);
 	virtual void CalcBonuses();
 	void CalcItemBonuses(StatBonuses* newbon);
-	void AddItemBonuses(const ItemInst *inst, StatBonuses* newbon, bool isAug = false, bool isTribute = false);
+	void AddItemBonuses(const ItemInst *inst, StatBonuses* newbon, bool isAug = false, bool isTribute = false, int rec_override = 0);
 	int CalcRecommendedLevelBonus(uint8 level, uint8 reclevel, int basestat);
 	virtual void MakePet(uint16 spell_id, const char* pettype, const char *petname = nullptr);
 	virtual FACTION_VALUE GetReverseFactionCon(Mob* iOther);
