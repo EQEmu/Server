@@ -1,5 +1,5 @@
 /*	EQEMu: Everquest Server Emulator
-Copyright (C) 2001-2004 EQEMu Development Team (http://eqemulator.net)
+Copyright (C) 2001-2016 EQEMu Development Team (http://eqemulator.net)
 
 	This program is free software; you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -1428,7 +1428,7 @@ bool Mob::CanUseAlternateAdvancementRank(AA::Rank *rank) {
 		}
 	}
 
-	auto race = GetArrayRace(GetBaseRace());
+	auto race = GetPlayerRaceValue(GetBaseRace());
 	race = race > 16 ? 1 : race;
 	if(!(ability->races & (1 << (race - 1)))) {
 		return false;

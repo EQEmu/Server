@@ -1,4 +1,6 @@
 9000|2015_09_30_bots.sql|SHOW TABLES LIKE 'bot_data'|empty|
+9001|2016_03_24_bots_command_settings.sql|SHOW TABLES LIKE 'bot_command_settings'|empty|
+9002|2016_03_24_bots_command_rules.sql|SELECT * FROM `rule_values` WHERE `rule_name` LIKE 'Bots:CommandSpellRank'|empty|
 
 # Upgrade conditions:
 # 	This won't be needed after this system is implemented, but it is used database that are not

@@ -1,5 +1,5 @@
 /*	EQEMu: Everquest Server Emulator
-	Copyright (C) 2001-2003 EQEMu Development Team (http://eqemulator.net)
+	Copyright (C) 2001-2016 EQEMu Development Team (http://eqemulator.net)
 
 	This program is free software; you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -390,30 +390,47 @@ enum {
 	ET_Scroll = 7
 };
 
-//SpawnAppearance types:
-#define AT_Die			0	// this causes the client to keel over and zone to bind point
-#define AT_WhoLevel		1	// the level that shows up on /who
-#define AT_Invis		3	// 0 = visible, 1 = invisible
-#define AT_PVP			4	// 0 = blue, 1 = pvp (red)
-#define AT_Light		5	// light type emitted by player (lightstone, shiny shield)
-#define AT_Anim			14	// 100=standing, 110=sitting, 111=ducking, 115=feigned, 105=looting
-#define AT_Sneak		15	// 0 = normal, 1 = sneaking
-#define AT_SpawnID		16	// server to client, sets player spawn id
-#define AT_HP			17	// Client->Server, my HP has changed (like regen tic)
-#define AT_Linkdead		18	// 0 = normal, 1 = linkdead
-#define AT_Levitate		19	// 0=off, 1=flymode, 2=levitate
-#define AT_GM			20	// 0 = normal, 1 = GM - all odd numbers seem to make it GM
-#define AT_Anon			21	// 0 = normal, 1 = anon, 2 = roleplay
-#define AT_GuildID		22
-#define AT_GuildRank	23	// 0=member, 1=officer, 2=leader
-#define AT_AFK			24	// 0 = normal, 1 = afk
-#define AT_Pet			25	// Param is EntityID of owner, or 0 for when charm breaks
-#define AT_Split		28	// 0 = normal, 1 = autosplit on
-#define AT_Size			29	// spawn's size
-#define AT_NPCName		31	// change PC's name's color to NPC color 0 = normal, 1 = npc name
-#define AT_ShowHelm		43	// 0 = do not show helmet graphic, 1 = show graphic
-#define AT_DamageState	44	// The damage state of a destructible object (0 through 4)
-//#define AT_Trader		300	// Bazzar Trader Mode
+//SpawnAppearance types: (compared two clients for server-originating types: SoF & RoF2)
+#define AT_Die 0			// this causes the client to keel over and zone to bind point (default action)
+#define AT_WhoLevel 1		// the level that shows up on /who
+//#define AT_2 2			// unknown
+#define AT_Invis 3			// 0 = visible, 1 = invisible
+#define AT_PVP 4			// 0 = blue, 1 = pvp (red)
+#define AT_Light 5			// light type emitted by player (lightstone, shiny shield)
+#define AT_Anim 14			// 100=standing, 110=sitting, 111=ducking, 115=feigned, 105=looting
+#define AT_Sneak 15			// 0 = normal, 1 = sneaking
+#define AT_SpawnID 16		// server to client, sets player spawn id
+#define AT_HP 17			// Client->Server, my HP has changed (like regen tic)
+#define AT_Linkdead 18		// 0 = normal, 1 = linkdead
+#define AT_Levitate 19		// 0=off, 1=flymode, 2=levitate
+#define AT_GM 20			// 0 = normal, 1 = GM - all odd numbers seem to make it GM
+#define AT_Anon 21			// 0 = normal, 1 = anon, 2 = roleplay
+#define AT_GuildID 22
+#define AT_GuildRank 23		// 0=member, 1=officer, 2=leader
+#define AT_AFK 24			// 0 = normal, 1 = afk
+#define AT_Pet 25			// Param is EntityID of owner, or 0 for when charm breaks
+//#define AT_27 27			// unknown
+#define AT_Split 28			// 0 = normal, 1 = autosplit on (not showing in SoF+) (client-to-server only)
+#define AT_Size 29			// spawn's size (present: SoF, absent: RoF2)
+//#define AT_30 30			// unknown
+#define AT_NPCName 31		// change PC's name's color to NPC color 0 = normal, 1 = npc name
+//#define AT_32 32			// unknown
+//#define AT_33 33			// unknown
+//#define AT_34 34			// unknown (present: SoF, absent: RoF2)
+//#define AT_35 35			// unknown
+//#define AT_36 36			// unknown
+//#define AT_37 37			// unknown
+//#define AT_38 38			// unknown
+//#define AT_39 39			// unknown
+#define AT_ShowHelm 43		// 0 = hide graphic, 1 = show graphic
+#define AT_DamageState 44	// The damage state of a destructible object (0 through 4)
+//#define AT_46 46			// unknown
+//#define AT_48 48			// unknown
+//#define AT_49 49			// unknown
+//#define AT_52 52			// (absent: SoF, present: RoF2) (not a replacement for RoF absent 29 or 34)
+//#define AT_53 53			// (absent: SoF, present: RoF2) (not a replacement for RoF absent 29 or 34)
+
+//#define AT_Trader 300		// Bazaar Trader Mode (not present in SoF or RoF2)
 
 // animations for AT_Anim
 #define ANIM_FREEZE	102
@@ -519,15 +536,40 @@ typedef enum {
 #define MT_StrikeThrough		339
 #define MT_Stun					340
 
+// TODO: Really should combine above and below into one
+
 //from showeq
 enum ChatColor
 {
+	/*
 	CC_Default					= 0,
 	CC_DarkGrey					= 1,
 	CC_DarkGreen				= 2,
 	CC_DarkBlue					= 3,
 	CC_Purple					= 5,
 	CC_LightGrey				= 6,
+	*/
+
+	CC_WhiteSmoke				= 0,	// FF|F0F0F0
+	CC_Green					= 2,	// FF|008000
+	CC_BrightBlue				= 3,	// FF|0040FF
+	CC_Magenta					= 5,	// FF|F000F0
+	CC_Gray						= 6,	// FF|808080
+	CC_LightGray				= 7,	// FF|E0E0E0
+	//CC_WhiteSmoke2				= 10,	// FF|F0F0F0
+	CC_DarkGray					= 12,	// FF|A0A0A0
+	CC_Red						= 13,	// FF|F00000
+	CC_Lime						= 14,	// FF|00F000
+	CC_Yellow					= 15,	// FF|F0F000
+	CC_Blue						= 16,	// FF|0000F0
+	CC_LightNavy				= 17,	// FF|0000AF
+	CC_Cyan						= 18,	// FF|00F0F0
+	CC_Black					= 20,	// FF|000000
+	
+	// any index <= 255 that is not defined above
+	CC_DimGray					= 1,	// FF|606060
+	CC_Default					= 1,
+
 	CC_User_Say					= 256,
 	CC_User_Tell				= 257,
 	CC_User_Group				= 258,

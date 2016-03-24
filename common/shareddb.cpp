@@ -1,3 +1,21 @@
+/*	EQEMu: Everquest Server Emulator
+	Copyright (C) 2001-2016 EQEMu Development Team (http://eqemulator.org)
+
+	This program is free software; you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation; version 2 of the License.
+
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY except by those people which sell it, which
+	are required to give you total support for your newly bought product;
+	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+	A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+	You should have received a copy of the GNU General Public License
+	along with this program; if not, write to the Free Software
+	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+*/
+
 #include <iostream>
 #include <cstring>
 
@@ -1647,6 +1665,7 @@ void SharedDatabase::LoadSpells(void *data, int max_spells) {
 
 		sp[tempid].short_buff_box = atoi(row[154]);
 		sp[tempid].descnum = atoi(row[155]);
+		sp[tempid].typedescnum = atoi(row[156]);
 		sp[tempid].effectdescnum = atoi(row[157]);
 
 		sp[tempid].npc_no_los = atoi(row[159]) != 0;
@@ -2025,22 +2044,3 @@ void SharedDatabase::SaveCharacterInspectMessage(uint32 character_id, const Insp
 	std::string query = StringFormat("REPLACE INTO `character_inspect_messages` (id, inspect_message) VALUES (%u, '%s')", character_id, EscapeString(message->text).c_str());
 	auto results = QueryDatabase(query);
 }
-
-#ifdef BOTS
-void SharedDatabase::GetBotInspectMessage(uint32 bot_id, InspectMessage_Struct* message)
-{
-	std::string query = StringFormat("SELECT `inspect_message` FROM `bot_inspect_messages` WHERE `bot_id` = %i LIMIT 1", bot_id);
-	auto results = QueryDatabase(query);
-	auto row = results.begin();
-	memset(message, '\0', sizeof(InspectMessage_Struct));
-	for (auto row = results.begin(); row != results.end(); ++row) {
-		memcpy(message, row[0], sizeof(InspectMessage_Struct));
-	}
-}
-
-void SharedDatabase::SetBotInspectMessage(uint32 bot_id, const InspectMessage_Struct* message)
-{
-	std::string query = StringFormat("REPLACE INTO `bot_inspect_messages` (bot_id, inspect_message) VALUES (%u, '%s')", bot_id, EscapeString(message->text).c_str());
-	auto results = QueryDatabase(query);
-}
-#endif

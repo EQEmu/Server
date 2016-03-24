@@ -1,5 +1,5 @@
 /*	EQEMu: Everquest Server Emulator
-	Copyright (C) 2001-2002 EQEMu Development Team (http://eqemu.org)
+	Copyright (C) 2001-2016 EQEMu Development Team (http://eqemu.org)
 
 	This program is free software; you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -473,6 +473,10 @@ Mob::~Mob()
 	safe_delete(PathingRouteUpdateTimerShort);
 	safe_delete(PathingRouteUpdateTimerLong);
 	UninitializeBuffSlots();
+
+#ifdef BOTS
+	LeaveHealRotationTargetPool();
+#endif
 }
 
 uint32 Mob::GetAppearanceValue(EmuAppearance iAppearance) {
@@ -1766,8 +1770,7 @@ void Mob::SendIllusionPacket(uint16 in_race, uint8 in_gender, uint8 in_texture, 
 
 bool Mob::RandomizeFeatures(bool send_illusion, bool set_variables)
 {
-	if (IsPlayerRace(GetRace()))
-	{
+	if (IsPlayerRace(GetRace())) {
 		uint8 Gender = GetGender();
 		uint8 Texture = 0xFF;
 		uint8 HelmTexture = 0xFF;
@@ -1788,160 +1791,158 @@ bool Mob::RandomizeFeatures(bool send_illusion, bool set_variables)
 		LuclinFace = zone->random.Int(0, 7);
 
 		// Adjust all settings based on the min and max for each feature of each race and gender
-		switch (GetRace())
-		{
-			case 1:	// Human
-				HairColor = zone->random.Int(0, 19);
-				if (Gender == 0) {
-					BeardColor = HairColor;
-					HairStyle = zone->random.Int(0, 3);
-					Beard = zone->random.Int(0, 5);
-				}
-				if (Gender == 1) {
-					HairStyle = zone->random.Int(0, 2);
-				}
-				break;
-			case 2:	// Barbarian
-				HairColor = zone->random.Int(0, 19);
+		switch (GetRace()) {
+		case HUMAN:
+			HairColor = zone->random.Int(0, 19);
+			if (Gender == MALE) {
+				BeardColor = HairColor;
+				HairStyle = zone->random.Int(0, 3);
+				Beard = zone->random.Int(0, 5);
+			}
+			if (Gender == FEMALE) {
+				HairStyle = zone->random.Int(0, 2);
+			}
+			break;
+		case BARBARIAN:
+			HairColor = zone->random.Int(0, 19);
+			LuclinFace = zone->random.Int(0, 87);
+			if (Gender == MALE) {
+				BeardColor = HairColor;
+				HairStyle = zone->random.Int(0, 3);
+				Beard = zone->random.Int(0, 5);
+			}
+			if (Gender == FEMALE) {
+				HairStyle = zone->random.Int(0, 2);
+			}
+			break;
+		case ERUDITE:
+			if (Gender == MALE) {
+				BeardColor = zone->random.Int(0, 19);
+				Beard = zone->random.Int(0, 5);
+				LuclinFace = zone->random.Int(0, 57);
+			}
+			if (Gender == FEMALE) {
 				LuclinFace = zone->random.Int(0, 87);
-				if (Gender == 0) {
-					BeardColor = HairColor;
-					HairStyle = zone->random.Int(0, 3);
-					Beard = zone->random.Int(0, 5);
-				}
-				if (Gender == 1) {
-					HairStyle = zone->random.Int(0, 2);
-				}
-				break;
-			case 3: // Erudite
-				if (Gender == 0) {
-					BeardColor = zone->random.Int(0, 19);
-					Beard = zone->random.Int(0, 5);
-					LuclinFace = zone->random.Int(0, 57);
-				}
-				if (Gender == 1) {
-					LuclinFace = zone->random.Int(0, 87);
-				}
-				break;
-			case 4: // WoodElf
-				HairColor = zone->random.Int(0, 19);
-				if (Gender == 0) {
-					HairStyle = zone->random.Int(0, 3);
-				}
-				if (Gender == 1) {
-					HairStyle = zone->random.Int(0, 2);
-				}
-				break;
-			case 5: // HighElf
-				HairColor = zone->random.Int(0, 14);
-				if (Gender == 0) {
-					HairStyle = zone->random.Int(0, 3);
-					LuclinFace = zone->random.Int(0, 37);
-					BeardColor = HairColor;
-				}
-				if (Gender == 1) {
-					HairStyle = zone->random.Int(0, 2);
-				}
-				break;
-			case 6: // DarkElf
-				HairColor = zone->random.Int(13, 18);
-				if (Gender == 0) {
-					HairStyle = zone->random.Int(0, 3);
-					LuclinFace = zone->random.Int(0, 37);
-					BeardColor = HairColor;
-				}
-				if (Gender == 1) {
-					HairStyle = zone->random.Int(0, 2);
-				}
-				break;
-			case 7: // HalfElf
-				HairColor = zone->random.Int(0, 19);
-				if (Gender == 0) {
-					HairStyle = zone->random.Int(0, 3);
-					LuclinFace = zone->random.Int(0, 37);
-					BeardColor = HairColor;
-				}
-				if (Gender == 1) {
-					HairStyle = zone->random.Int(0, 2);
-				}
-				break;
-			case 8: // Dwarf
-				HairColor = zone->random.Int(0, 19);
+			}
+			break;
+		case WOOD_ELF:
+			HairColor = zone->random.Int(0, 19);
+			if (Gender == MALE) {
+				HairStyle = zone->random.Int(0, 3);
+			}
+			if (Gender == FEMALE) {
+				HairStyle = zone->random.Int(0, 2);
+			}
+			break;
+		case HIGH_ELF:
+			HairColor = zone->random.Int(0, 14);
+			if (Gender == MALE) {
+				HairStyle = zone->random.Int(0, 3);
+				LuclinFace = zone->random.Int(0, 37);
 				BeardColor = HairColor;
-				if (Gender == 0) {
-					HairStyle = zone->random.Int(0, 3);
-					Beard = zone->random.Int(0, 5);
-				}
-				if (Gender == 1) {
-					HairStyle = zone->random.Int(0, 2);
-					LuclinFace = zone->random.Int(0, 17);
-				}
-				break;
-			case 9: // Troll
-				EyeColor1 = zone->random.Int(0, 10);
-				EyeColor2 = zone->random.Int(0, 10);
-				if (Gender == 1) {
-					HairStyle = zone->random.Int(0, 3);
-					HairColor = zone->random.Int(0, 23);
-				}
-				break;
-			case 10: // Ogre
-				if (Gender == 1) {
-					HairStyle = zone->random.Int(0, 3);
-					HairColor = zone->random.Int(0, 23);
-				}
-				break;
-			case 11: // Halfling
-				HairColor = zone->random.Int(0, 19);
-				if (Gender == 0) {
-					BeardColor = HairColor;
-					HairStyle = zone->random.Int(0, 3);
-					Beard = zone->random.Int(0, 5);
-				}
-				if (Gender == 1) {
-					HairStyle = zone->random.Int(0, 2);
-				}
-				break;
-			case 12: // Gnome
-				HairColor = zone->random.Int(0, 24);
-				if (Gender == 0) {
-					BeardColor = HairColor;
-					HairStyle = zone->random.Int(0, 3);
-					Beard = zone->random.Int(0, 5);
-				}
-				if (Gender == 1) {
-					HairStyle = zone->random.Int(0, 2);
-				}
-				break;
-			case 128: // Iksar
-			case 130: // VahShir
-				break;
-			case 330: // Froglok
-				LuclinFace = zone->random.Int(0, 9);
-			case 522: // Drakkin
-				HairColor = zone->random.Int(0, 3);
+			}
+			if (Gender == FEMALE) {
+				HairStyle = zone->random.Int(0, 2);
+			}
+			break;
+		case DARK_ELF:
+			HairColor = zone->random.Int(13, 18);
+			if (Gender == MALE) {
+				HairStyle = zone->random.Int(0, 3);
+				LuclinFace = zone->random.Int(0, 37);
 				BeardColor = HairColor;
-				EyeColor1 = zone->random.Int(0, 11);
-				EyeColor2 = zone->random.Int(0, 11);
-				LuclinFace = zone->random.Int(0, 6);
-				DrakkinHeritage = zone->random.Int(0, 6);
-				DrakkinTattoo = zone->random.Int(0, 7);
-				DrakkinDetails = zone->random.Int(0, 7);
-				if (Gender == 0) {
-					Beard = zone->random.Int(0, 12);
-					HairStyle = zone->random.Int(0, 8);
-				}
-				if (Gender == 1) {
-					Beard = zone->random.Int(0, 3);
-					HairStyle = zone->random.Int(0, 7);
-				}
-				break;
-			default:
-				break;
+			}
+			if (Gender == FEMALE) {
+				HairStyle = zone->random.Int(0, 2);
+			}
+			break;
+		case HALF_ELF:
+			HairColor = zone->random.Int(0, 19);
+			if (Gender == MALE) {
+				HairStyle = zone->random.Int(0, 3);
+				LuclinFace = zone->random.Int(0, 37);
+				BeardColor = HairColor;
+			}
+			if (Gender == FEMALE) {
+				HairStyle = zone->random.Int(0, 2);
+			}
+			break;
+		case DWARF:
+			HairColor = zone->random.Int(0, 19);
+			BeardColor = HairColor;
+			if (Gender == MALE) {
+				HairStyle = zone->random.Int(0, 3);
+				Beard = zone->random.Int(0, 5);
+			}
+			if (Gender == FEMALE) {
+				HairStyle = zone->random.Int(0, 2);
+				LuclinFace = zone->random.Int(0, 17);
+			}
+			break;
+		case TROLL:
+			EyeColor1 = zone->random.Int(0, 10);
+			EyeColor2 = zone->random.Int(0, 10);
+			if (Gender == FEMALE) {
+				HairStyle = zone->random.Int(0, 3);
+				HairColor = zone->random.Int(0, 23);
+			}
+			break;
+		case OGRE:
+			if (Gender == FEMALE) {
+				HairStyle = zone->random.Int(0, 3);
+				HairColor = zone->random.Int(0, 23);
+			}
+			break;
+		case HALFLING:
+			HairColor = zone->random.Int(0, 19);
+			if (Gender == MALE) {
+				BeardColor = HairColor;
+				HairStyle = zone->random.Int(0, 3);
+				Beard = zone->random.Int(0, 5);
+			}
+			if (Gender == FEMALE) {
+				HairStyle = zone->random.Int(0, 2);
+			}
+			break;
+		case GNOME:
+			HairColor = zone->random.Int(0, 24);
+			if (Gender == MALE) {
+				BeardColor = HairColor;
+				HairStyle = zone->random.Int(0, 3);
+				Beard = zone->random.Int(0, 5);
+			}
+			if (Gender == FEMALE) {
+				HairStyle = zone->random.Int(0, 2);
+			}
+			break;
+		case IKSAR:
+		case VAHSHIR:
+			break;
+		case FROGLOK:
+			LuclinFace = zone->random.Int(0, 9);
+		case DRAKKIN:
+			HairColor = zone->random.Int(0, 3);
+			BeardColor = HairColor;
+			EyeColor1 = zone->random.Int(0, 11);
+			EyeColor2 = zone->random.Int(0, 11);
+			LuclinFace = zone->random.Int(0, 6);
+			DrakkinHeritage = zone->random.Int(0, 6);
+			DrakkinTattoo = zone->random.Int(0, 7);
+			DrakkinDetails = zone->random.Int(0, 7);
+			if (Gender == MALE) {
+				Beard = zone->random.Int(0, 12);
+				HairStyle = zone->random.Int(0, 8);
+			}
+			if (Gender == FEMALE) {
+				Beard = zone->random.Int(0, 3);
+				HairStyle = zone->random.Int(0, 7);
+			}
+			break;
+		default:
+			break;
 		}
 
-		if (set_variables)
-		{
+		if (set_variables) {
 			haircolor = HairColor;
 			beardcolor = BeardColor;
 			eyecolor1 = EyeColor1;
@@ -1954,8 +1955,7 @@ bool Mob::RandomizeFeatures(bool send_illusion, bool set_variables)
 			drakkin_details = DrakkinDetails;
 		}
 
-		if (send_illusion)
-		{
+		if (send_illusion) {
 			SendIllusionPacket(GetRace(), Gender, Texture, HelmTexture, HairColor, BeardColor,
 				EyeColor1, EyeColor2, HairStyle, LuclinFace, Beard, 0xFF, DrakkinHeritage,
 				DrakkinTattoo, DrakkinDetails);
@@ -5861,3 +5861,69 @@ int Mob::CheckBaneDamage(const ItemInst *item)
 
 	return damage;
 }
+
+#ifdef BOTS
+bool Mob::JoinHealRotationTargetPool(std::shared_ptr<HealRotation>* heal_rotation)
+{
+	if (IsHealRotationTarget())
+		return false;
+	if (!heal_rotation->use_count())
+		return false;
+	if (!(*heal_rotation))
+		return false;
+	if (!HealRotation::IsTargetMobType(this))
+		return false;
+
+	if (!(*heal_rotation)->AddTargetToPool(this))
+		return false;
+
+	m_target_of_heal_rotation = *heal_rotation;
+
+	return IsHealRotationTarget();
+}
+
+bool Mob::LeaveHealRotationTargetPool()
+{
+	if (!IsHealRotationTarget()) {
+		m_target_of_heal_rotation.reset();
+		return true;
+	}
+
+	m_target_of_heal_rotation->RemoveTargetFromPool(this);
+	m_target_of_heal_rotation.reset();
+
+	return !IsHealRotationTarget();
+}
+
+uint32 Mob::HealRotationHealCount()
+{
+	if (!IsHealRotationTarget())
+		return 0;
+
+	return m_target_of_heal_rotation->HealCount(this);
+}
+
+uint32 Mob::HealRotationExtendedHealCount()
+{
+	if (!IsHealRotationTarget())
+		return 0;
+
+	return m_target_of_heal_rotation->ExtendedHealCount(this);
+}
+
+float Mob::HealRotationHealFrequency()
+{
+	if (!IsHealRotationTarget())
+		return 0.0f;
+
+	return m_target_of_heal_rotation->HealFrequency(this);
+}
+
+float Mob::HealRotationExtendedHealFrequency()
+{
+	if (!IsHealRotationTarget())
+		return 0.0f;
+
+	return m_target_of_heal_rotation->ExtendedHealFrequency(this);
+}
+#endif

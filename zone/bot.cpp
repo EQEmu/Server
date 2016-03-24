@@ -1,3 +1,21 @@
+/*	EQEMu: Everquest Server Emulator
+	Copyright (C) 2001-2016 EQEMu Development Team (http://eqemulator.org)
+
+	This program is free software; you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation; version 2 of the License.
+
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY except by those people which sell it, which
+	are required to give you total support for your newly bought product;
+	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+	A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+	You should have received a copy of the GNU General Public License
+	along with this program; if not, write to the Free Software
+	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+*/
+
 #ifdef BOTS
 
 #include "bot.h"
@@ -53,17 +71,10 @@ Bot::Bot(NPCType npcTypeData, Client* botOwner) : NPC(&npcTypeData, nullptr, glm
 	SetHasBeenSummoned(false);
 	SetTaunting(GetClass() == WARRIOR);
 	SetDefaultBotStance();
-	SetInHealRotation(false);
-	SetHealRotationActive(false);
-	SetHasHealedThisCycle(false);
-	ClearHealRotationLeader();
-	ClearHealRotationTargets();
-	ClearHealRotationMembers();
-	SetHealRotationNextHealTime(0);
-	SetHealRotationTimer(0);
-	SetNumHealRotationMembers(0);
-	SetBardUseOutOfCombatSongs(GetClass() == BARD);
+
+	SetAltOutOfCombatBehavior(GetClass() == BARD); // will need to be updated if more classes make use of this flag
 	SetShowHelm(true);
+	SetPauseAI(false);
 	CalcChanceToCast();
 	rest_timer.Disable();
 	SetFollowDistance(BOT_DEFAULT_FOLLOW_DISTANCE);
@@ -80,9 +91,6 @@ Bot::Bot(NPCType npcTypeData, Client* botOwner) : NPC(&npcTypeData, nullptr, glm
 	end_regen = CalcEnduranceRegen();
 	for (int i = 0; i < MaxTimer; i++)
 		timers[i] = 0;
-
-	for(int i = 0; i < MaxHealRotationTargets; i++)
-		_healRotationTargets[i] = 0;
 
 	strcpy(this->name, this->GetCleanName());
 	memset(&m_Light, 0, sizeof(LightProfile_Struct));
@@ -132,21 +140,13 @@ Bot::Bot(uint32 botID, uint32 botOwnerCharacterID, uint32 botSpellsID, double to
 	SetHasBeenSummoned(false);
 	LoadStance();
 	SetTaunting((GetClass() == WARRIOR || GetClass() == PALADIN || GetClass() == SHADOWKNIGHT) && (GetBotStance() == BotStanceAggressive));
-	SetInHealRotation(false);
-	SetHealRotationActive(false);
-	SetHasHealedThisCycle(false);
-	SetHealRotationUseFastHeals(false);
-	ClearHealRotationLeader();
-	ClearHealRotationTargets();
-	ClearHealRotationMembers();
-	SetHealRotationNextHealTime(0);
-	SetHealRotationTimer(0);
-	SetNumHealRotationMembers(0);
+	SetPauseAI(false);
+
 	CalcChanceToCast();
 	rest_timer.Disable();
 	SetFollowDistance(BOT_DEFAULT_FOLLOW_DISTANCE);
 	strcpy(this->name, this->GetCleanName());
-	database.GetBotInspectMessage(this->GetBotID(), &_botInspectMessage);
+	botdb.GetInspectMessage(this->GetBotID(), &_botInspectMessage);
 	LoadGuildMembership(&_guildId, &_guildRank, &_guildName);
 	std::string TempErrorMessage;
 	EquipBot(&TempErrorMessage);
@@ -157,9 +157,6 @@ Bot::Bot(uint32 botID, uint32 botOwnerCharacterID, uint32 botSpellsID, double to
 
 	for (int i = 0; i < MaxTimer; i++)
 		timers[i] = 0;
-
-	for(int i = 0; i < MaxHealRotationTargets; i++)
-		_healRotationTargets[i] = 0;
 
 	GenerateBaseStats();
 	LoadTimers();
@@ -187,6 +184,8 @@ Bot::Bot(uint32 botID, uint32 botOwnerCharacterID, uint32 botSpellsID, double to
 
 Bot::~Bot() {
 	AI_Stop();
+	LeaveHealRotationMemberPool();
+
 	if(HasGroup())
 		Bot::RemoveBotFromGroup(this, GetGroup());
 
@@ -226,18 +225,18 @@ void Bot::ChangeBotArcherWeapons(bool isArcher) {
 			BotAddEquipItem(MainPrimary, GetBotItemBySlot(MainPrimary));
 			BotAddEquipItem(MainSecondary, GetBotItemBySlot(MainSecondary));
 			SetAttackTimer();
-			BotGroupSay(this, "My blade is ready.");
+			BotGroupSay(this, "My blade is ready");
 		} else {
 			BotRemoveEquipItem(MainPrimary);
 			BotRemoveEquipItem(MainSecondary);
 			BotAddEquipItem(MainAmmo, GetBotItemBySlot(MainAmmo));
 			BotAddEquipItem(MainSecondary, GetBotItemBySlot(MainRange));
 			SetAttackTimer();
-			BotGroupSay(this, "My bow is true and ready.");
+			BotGroupSay(this, "My bow is true and ready");
 		}
 	}
 	else
-		BotGroupSay(this, "I don't know how to use a bow.");
+		BotGroupSay(this, "I don't know how to use a bow");
 }
 
 void Bot::Sit() {
@@ -1302,236 +1301,236 @@ void Bot::LoadAAs() {
 	}
 }
 
-bool Bot::IsValidRaceClassCombo() {
-	bool Result = false;
-
-	switch(GetRace()) {
-		case 1: // Human
-			switch(GetClass()) {
-				case 1: // Warrior
-				case 2: // Cleric
-				case 3: // Paladin
-				case 4: // Ranger
-				case 5: // Shadowknight
-				case 6: // Druid
-				case 7: // Monk
-				case 8: // Bard
-				case 9: // Rogue
-				case 11: // Necromancer
-				case 12: // Wizard
-				case 13: // Magician
-				case 14: // Enchanter
-					Result = true;
-					break;
-			}
-			break;
-		case 2: // Barbarian
-			switch(GetClass()) {
-				case 1: // Warrior
-				case 9: // Rogue
-				case 10: // Shaman
-				case 15: // Beastlord
-				case 16: // Berserker
-					Result = true;
-					break;
-			}
-			break;
-		case 3: // Erudite
-			switch(GetClass()) {
-				case 2: // Cleric
-				case 3: // Paladin
-				case 5: // Shadowknight
-				case 11: // Necromancer
-				case 12: // Wizard
-				case 13: // Magician
-				case 14: // Enchanter
-					Result = true;
-					break;
-			}
-			break;
-		case 4: // Wood Elf
-			switch(GetClass()) {
-				case 1: // Warrior
-				case 4: // Ranger
-				case 6: // Druid
-				case 8: // Bard
-				case 9: // Rogue
-					Result = true;
-					break;
-			}
-			break;
-		case 5: // High Elf
-			switch(GetClass()) {
-				case 2: // Cleric
-				case 3: // Paladin
-				case 12: // Wizard
-				case 13: // Magician
-				case 14: // Enchanter
-					Result = true;
-					break;
-			}
-			break;
-		case 6: // Dark Elf
-			switch(GetClass()) {
-				case 1: // Warrior
-				case 2: // Cleric
-				case 5: // Shadowknight
-				case 9: // Rogue
-				case 11: // Necromancer
-				case 12: // Wizard
-				case 13: // Magician
-				case 14: // Enchanter
-					Result = true;
-					break;
-			}
-			break;
-		case 7: // Half Elf
-			switch(GetClass()) {
-				case 1: // Warrior
-				case 3: // Paladin
-				case 4: // Ranger
-				case 6: // Druid
-				case 8: // Bard
-				case 9: // Rogue
-					Result = true;
-					break;
-			}
-			break;
-		case 8: // Dwarf
-			switch(GetClass()) {
-				case 1: // Warrior
-				case 2: // Cleric
-				case 3: // Paladin
-				case 9: // Rogue
-				case 16: // Berserker
-					Result = true;
-					break;
-			}
-			break;
-		case 9: // Troll
-			switch(GetClass()) {
-				case 1: // Warrior
-				case 5: // Shadowknight
-				case 10: // Shaman
-				case 15: // Beastlord
-				case 16: // Berserker
-					Result = true;
-					break;
-			}
-			break;
-		case 10: // Ogre
-			switch(GetClass()) {
-				case 1: // Warrior
-				case 5: // Shadowknight
-				case 10: // Shaman
-				case 15: // Beastlord
-				case 16: // Berserker
-					Result = true;
-					break;
-			}
-			break;
-		case 11: // Halfling
-			switch(GetClass()) {
-				case 1: // Warrior
-				case 2: // Cleric
-				case 3: // Paladin
-				case 4: // Ranger
-				case 6: // Druid
-				case 9: // Rogue
-					Result = true;
-					break;
-			}
-			break;
-		case 12: // Gnome
-			switch(GetClass()) {
-				case 1: // Warrior
-				case 2: // Cleric
-				case 3: // Paladin
-				case 5: // Shadowknight
-				case 9: // Rogue
-				case 11: // Necromancer
-				case 12: // Wizard
-				case 13: // Magician
-				case 14: // Enchanter
-					Result = true;
-					break;
-			}
-			break;
-		case 128: // Iksar
-			switch(GetClass()) {
-				case 1: // Warrior
-				case 5: // Shadowknight
-				case 7: // Monk
-				case 10: // Shaman
-				case 11: // Necromancer
-				case 15: // Beastlord
-					Result = true;
-					break;
-			}
-			break;
-		case 130: // Vah Shir
-			switch(GetClass()) {
-				case 1: // Warrior
-				case 8: // Bard
-				case 9: // Rogue
-				case 10: // Shaman
-				case 15: // Beastlord
-				case 16: // Berserker
-					Result = true;
-					break;
-			}
-			break;
-		case 330: // Froglok
-			switch(GetClass()) {
-				case 1: // Warrior
-				case 2: // Cleric
-				case 3: // Paladin
-				case 5: // Shadowknight
-				case 9: // Rogue
-				case 10: // Shaman
-				case 11: // Necromancer
-				case 12: // Wizard
-					Result = true;
-					break;
-			}
-			break;
-		case 522: // Drakkin
-			switch(GetClass()) {
-				case 1: // Warrior
-				case 2: // Cleric
-				case 3: // Paladin
-				case 4: // Ranger
-				case 5: // Shadowknight
-				case 6: // Druid
-				case 7: // Monk
-				case 8: // Bard
-				case 9: // Rogue
-				case 11: // Necromancer
-				case 12: // Wizard
-				case 13: // Magician
-				case 14: // Enchanter
-					Result = true;
-					break;
-			}
-			break;
-	}
-
-	return Result;
+bool Bot::IsValidRaceClassCombo()
+{
+	return Bot::IsValidRaceClassCombo(GetRace(), GetClass());
 }
 
-bool Bot::IsValidName() {
-	bool Result = false;
-	std::string TempBotName = std::string(this->GetCleanName());
-
-	for(int iCounter = 0; iCounter < TempBotName.length(); iCounter++) {
-		if(isalpha(TempBotName[iCounter]) || TempBotName[iCounter] == '_')
-			Result = true;
+bool Bot::IsValidRaceClassCombo(uint16 r, uint8 c)
+{
+	switch (r) {
+	case HUMAN:
+		switch (c) {
+		case WARRIOR:
+		case CLERIC:
+		case PALADIN:
+		case RANGER:
+		case SHADOWKNIGHT:
+		case DRUID:
+		case MONK:
+		case BARD:
+		case ROGUE:
+		case NECROMANCER:
+		case WIZARD:
+		case MAGICIAN:
+		case ENCHANTER:
+			return true;
+		}
+		break;
+	case BARBARIAN:
+		switch (c) {
+		case WARRIOR:
+		case ROGUE:
+		case SHAMAN:
+		case BEASTLORD:
+		case BERSERKER:
+			return true;
+		}
+		break;
+	case ERUDITE:
+		switch (c) {
+		case CLERIC:
+		case PALADIN:
+		case SHADOWKNIGHT:
+		case NECROMANCER:
+		case WIZARD:
+		case MAGICIAN:
+		case ENCHANTER:
+			return true;
+		}
+		break;
+	case WOOD_ELF:
+		switch (c) {
+		case WARRIOR:
+		case RANGER:
+		case DRUID:
+		case BARD:
+		case ROGUE:
+			return true;
+		}
+		break;
+	case HIGH_ELF:
+		switch (c) {
+		case CLERIC:
+		case PALADIN:
+		case WIZARD:
+		case MAGICIAN:
+		case ENCHANTER:
+			return true;
+		}
+		break;
+	case DARK_ELF:
+		switch (c) {
+		case WARRIOR:
+		case CLERIC:
+		case SHADOWKNIGHT:
+		case ROGUE:
+		case NECROMANCER:
+		case WIZARD:
+		case MAGICIAN:
+		case ENCHANTER:
+			return true;
+		}
+		break;
+	case HALF_ELF:
+		switch (c) {
+		case WARRIOR:
+		case PALADIN:
+		case RANGER:
+		case DRUID:
+		case BARD:
+		case ROGUE:
+			return true;
+		}
+		break;
+	case DWARF:
+		switch (c) {
+		case WARRIOR:
+		case CLERIC:
+		case PALADIN:
+		case ROGUE:
+		case BERSERKER:
+			return true;
+		}
+		break;
+	case TROLL:
+		switch (c) {
+		case WARRIOR:
+		case SHADOWKNIGHT:
+		case SHAMAN:
+		case BEASTLORD:
+		case BERSERKER:
+			return true;
+		}
+		break;
+	case OGRE:
+		switch (c) {
+		case WARRIOR:
+		case SHADOWKNIGHT:
+		case SHAMAN:
+		case BEASTLORD:
+		case BERSERKER:
+			return true;
+		}
+		break;
+	case HALFLING:
+		switch (c) {
+		case WARRIOR:
+		case CLERIC:
+		case PALADIN:
+		case RANGER:
+		case DRUID:
+		case ROGUE:
+			return true;
+		}
+		break;
+	case GNOME:
+		switch (c) {
+		case WARRIOR:
+		case CLERIC:
+		case PALADIN:
+		case SHADOWKNIGHT:
+		case ROGUE:
+		case NECROMANCER:
+		case WIZARD:
+		case MAGICIAN:
+		case ENCHANTER:
+			return true;
+		}
+		break;
+	case IKSAR:
+		switch (c) {
+		case WARRIOR:
+		case SHADOWKNIGHT:
+		case MONK:
+		case SHAMAN:
+		case NECROMANCER:
+		case BEASTLORD:
+			return true;
+		}
+		break;
+	case VAHSHIR:
+		switch (c) {
+		case WARRIOR:
+		case BARD:
+		case ROGUE:
+		case SHAMAN:
+		case BEASTLORD:
+		case BERSERKER:
+			return true;
+		}
+		break;
+	case FROGLOK:
+		switch (c) {
+		case WARRIOR:
+		case CLERIC:
+		case PALADIN:
+		case SHADOWKNIGHT:
+		case ROGUE:
+		case SHAMAN:
+		case NECROMANCER:
+		case WIZARD:
+			return true;
+		}
+		break;
+	case DRAKKIN:
+		switch (c) {
+		case WARRIOR:
+		case CLERIC:
+		case PALADIN:
+		case RANGER:
+		case SHADOWKNIGHT:
+		case DRUID:
+		case MONK:
+		case BARD:
+		case ROGUE:
+		case NECROMANCER:
+		case WIZARD:
+		case MAGICIAN:
+		case ENCHANTER:
+			return true;
+		}
+		break;
+	default:
+		break;
 	}
 
-	return Result;
+	return false;
 }
 
-bool Bot::IsBotNameAvailable(char *botName, std::string* errorMessage) {
+bool Bot::IsValidName()
+{
+	std::string name = this->GetCleanName();
+	return Bot::IsValidName(name);
+}
+
+bool Bot::IsValidName(std::string& name)
+{
+	if (name.length() < 4)
+		return false;
+	if (!IsCharUpper(name[0]))
+		return false;
+	
+	for (int i = 1; i < name.length(); ++i) {
+		if (!IsCharLower(name[i]) && name[i] != '_') {
+			return false;
+		}
+	}
+
+	return true;
+}
+
+bool Bot::IsBotNameAvailable(const char *botName, std::string* errorMessage) {
 	if (botName == "" || strlen(botName) > 15 || !database.CheckNameFilter(botName) || !database.CheckUsedName(botName))
 		return false;
 
@@ -2386,7 +2385,9 @@ void Bot::BotRangedAttack(Mob* other) {
 		return;
 
 	SendItemAnimation(other, Ammo, SkillArchery);
-	DoArcheryAttackDmg(GetTarget(), rangedItem, ammoItem);
+	//DoArcheryAttackDmg(GetTarget(), rangedItem, ammoItem);
+	DoArcheryAttackDmg(other, rangedItem, ammoItem); // watch
+
 	//break invis when you attack
 	if(invisible) {
 		Log.Out(Logs::Detail, Logs::Combat, "Removing invisibility due to melee attack.");
@@ -2655,13 +2656,30 @@ float Bot::GetMaxMeleeRangeToTarget(Mob* target) {
 
 // AI Processing for the Bot object
 void Bot::AI_Process() {
-	if(!IsAIControlled())
+	if (!IsAIControlled())
+		return;
+	if (GetPauseAI())
 		return;
 
 	uint8 botClass = GetClass();
 	uint8 botLevel = GetLevel();
-	if(IsCasting() && (botClass != BARD))
-		return;
+
+	if (IsCasting()) {
+		if (
+			IsHealRotationMember() &&
+			m_member_of_heal_rotation->CastingOverride() &&
+			m_member_of_heal_rotation->CastingTarget() != nullptr &&
+			m_member_of_heal_rotation->CastingReady() &&
+			m_member_of_heal_rotation->CastingMember() == this &&
+			!m_member_of_heal_rotation->MemberIsCasting(this)
+		)
+			InterruptSpell();
+		else if (botClass != BARD)
+			return;
+	}
+	else if (IsHealRotationMember()) {
+		m_member_of_heal_rotation->SetMemberIsCasting(this, false);
+	}
 
 	// A bot wont start its AI if not grouped
 	if(!GetBotOwner() || !IsGrouped() || GetAppearance() == eaDead)
@@ -2684,13 +2702,23 @@ void Bot::AI_Process() {
 		return;
 	}
 
-	if(GetHealRotationActive() && GetHealRotationTarget() && !GetHasHealedThisCycle() && GetHealRotationNextHealTime() < Timer::GetCurrentTime()) {
-		if(AIHealRotation(GetHealRotationTarget(), GetHealRotationUseFastHeals())) {
-			SetHasHealedThisCycle(true);
-			NotifyNextHealRotationMember();
+	if(IsMyHealRotationSet()) {
+		Mob* delete_me = HealRotationTarget();
+		if (AIHealRotation(HealRotationTarget(), UseHealRotationFastHeals())) {
+#if (EQDEBUG >= 12)
+			Log.Out(Logs::General, Logs::Error, "Bot::AI_Process() - Casting succeeded (m: %s, t: %s) : AdvHR(true)", GetCleanName(), ((delete_me) ? (delete_me->GetCleanName()) : ("nullptr")));
+#endif
+			m_member_of_heal_rotation->SetMemberIsCasting(this);
+			m_member_of_heal_rotation->UpdateTargetHealingStats(HealRotationTarget());
+			AdvanceHealRotation();
 		}
-		else
-			NotifyNextHealRotationMember(true);
+		else {
+#if (EQDEBUG >= 12)
+			Log.Out(Logs::General, Logs::Error, "Bot::AI_Process() - Casting failed (m: %s, t: %s) : AdvHR(false)", GetCleanName(), ((delete_me) ? (delete_me->GetCleanName()) : ("nullptr")));
+#endif
+			m_member_of_heal_rotation->SetMemberIsCasting(this, false);
+			AdvanceHealRotation(false);
+		}
 	}
 
 	if(GetHasBeenSummoned()) {
@@ -3584,48 +3612,6 @@ uint32 Bot::GetBotItemsCount(std::string *errorMessage) {
     return atoi(row[0]);
 }
 
-bool Bot::MesmerizeTarget(Mob* target) {
-	bool Result = false;
-	if(target) {
-		int mezid = 0;
-		int mezlevel = GetLevel();
-		if(mezlevel >= 69)
-			mezid = 5520;
-		else if(mezlevel == 68)
-			mezid = 8035;
-		else if(mezlevel == 67)
-			mezid = 5503;
-		else if(mezlevel >= 64)
-			mezid = 3358;
-		else if(mezlevel == 63)
-			mezid = 3354;
-		else if(mezlevel >= 61)
-			mezid = 3341;
-		else if(mezlevel == 60)
-			mezid = 2120;
-		else if(mezlevel == 59)
-			mezid = 1692;
-		else if(mezlevel >= 54)
-			mezid = 1691;
-		else if(mezlevel >= 47)
-			mezid = 190;
-		else if(mezlevel >= 30)
-			mezid = 188;
-		else if(mezlevel >= 13)
-			mezid = 187;
-		else if(mezlevel >= 2)
-			mezid = 292;
-		if(mezid > 0) {
-			uint32 DontRootMeBeforeTime = 0;
-			CastSpell(mezid, target->GetID(), 1, -1, -1, &DontRootMeBeforeTime);
-			target->SetDontRootMeBefore(DontRootMeBeforeTime);
-			Result = true;
-		}
-	}
-
-	return Result;
-}
-
 void Bot::SetLevel(uint8 in_level, bool command) {
 	if(in_level > 0)
 		Mob::SetLevel(in_level, command);
@@ -3911,7 +3897,7 @@ std::list<BotsAvailableList> Bot::GetBotList(uint32 botOwnerCharacterID, std::st
 	if(botOwnerCharacterID == 0)
         return ownersBots;
 
-    std::string query = StringFormat("SELECT `bot_id`, `name`, `class`, `level`, `race` FROM `bot_data` WHERE `owner_id` = '%u'", botOwnerCharacterID);
+    std::string query = StringFormat("SELECT `bot_id`, `name`, `class`, `level`, `race`, `gender` FROM `bot_data` WHERE `owner_id` = '%u'", botOwnerCharacterID);
     auto results = database.QueryDatabase(query);
     if(!results.Success()) {
 		*errorMessage = std::string(results.ErrorMessage());
@@ -3925,6 +3911,7 @@ std::list<BotsAvailableList> Bot::GetBotList(uint32 botOwnerCharacterID, std::st
         availableBot.BotClass = atoi(row[2]);
         availableBot.BotLevel = atoi(row[3]);
         availableBot.BotRace = atoi(row[4]);
+		availableBot.BotGender = atoi(row[5]);
         ownersBots.push_back(availableBot);
 	}
 	return ownersBots;
@@ -3952,182 +3939,6 @@ std::list<SpawnedBotsList> Bot::ListSpawnedBots(uint32 characterID, std::string*
     }
 
 	return spawnedBots;
-}
-
-void Bot::SaveBotGroup(Group* botGroup, std::string botGroupName, std::string* errorMessage)
-{
-	if(!botGroup || botGroupName.empty())
-		return;
-	
-	Mob* tempGroupLeader = botGroup->GetLeader();
-	if(!tempGroupLeader->IsBot())
-		return;
-	
-	uint32 botGroupId = 0;
-	uint32 botGroupLeaderBotId = tempGroupLeader->CastToBot()->GetBotID();
-	std::string query = StringFormat("INSERT INTO `bot_groups` (`group_leader_id`, `group_name`) VALUES (%u, '%s')", botGroupLeaderBotId, botGroupName.c_str());
-	auto results = database.QueryDatabase(query);
-	if(!results.Success()) {
-		*errorMessage = std::string(results.ErrorMessage());
-		return;
-	}
-
-	botGroupId = results.LastInsertedID();
-	if(botGroupId == 0)
-		return;
-	
-	for(int groupMemberIndex = 0; groupMemberIndex < botGroup->GroupCount(); groupMemberIndex++) {
-		Mob* tempBot = botGroup->members[groupMemberIndex];
-		if(!tempBot || !tempBot->IsBot())
-			continue;
-		
-		uint32 botGroupMemberBotId = tempBot->CastToBot()->GetBotID();
-		query = StringFormat("INSERT INTO `bot_group_members` (`groups_index`, `bot_id`) VALUES (%u, %u)", botGroupId, botGroupMemberBotId);
-		results = database.QueryDatabase(query);
-		if(!results.Success())
-			*errorMessage = std::string(results.ErrorMessage());
-	}
-}
-
-void Bot::DeleteBotGroup(std::string botGroupName, std::string* errorMessage) {
-	if(botGroupName.empty())
-        return;
-
-    uint32 botGroupId = GetBotGroupIdByBotGroupName(botGroupName, errorMessage);
-    if(!errorMessage->empty() || botGroupId== 0)
-        return;
-
-    std::string query = StringFormat("DELETE FROM `bot_group_members` WHERE `groups_index` = %u", botGroupId);
-    auto results = database.QueryDatabase(query);
-    if(!results.Success()) {
-        *errorMessage = std::string(results.ErrorMessage());
-        return;
-    }
-
-    query = StringFormat("DELETE FROM `bot_groups` WHERE `groups_index` = %u", botGroupId);
-    results = database.QueryDatabase(query);
-    if(!results.Success())
-        *errorMessage = std::string(results.ErrorMessage());
-}
-
-std::list<BotGroup> Bot::LoadBotGroup(std::string botGroupName, std::string* errorMessage) {
-	std::list<BotGroup> botGroup;
-	if(botGroupName.empty())
-        return botGroup;
-
-	uint32 botGroupId = GetBotGroupIdByBotGroupName(botGroupName, errorMessage);
-	if(botGroupId == 0)
-        return botGroup;
-
-	std::string query = StringFormat("SELECT `bot_id` FROM `bot_group_members` WHERE `groups_index` = %u", botGroupId);
-	auto results = database.QueryDatabase(query);
-    if(!results.Success()) {
-        *errorMessage = std::string(results.ErrorMessage());
-        return botGroup;
-    }
-
-    for(auto row = results.begin(); row != results.end(); ++row) {
-        BotGroup tempBotGroup;
-        tempBotGroup.BotGroupID = botGroupId;
-        tempBotGroup.BotID = atoi(row[0]);
-        botGroup.push_back(tempBotGroup);
-    }
-	return botGroup;
-}
-
-std::list<BotGroupList> Bot::GetBotGroupListByBotOwnerCharacterId(uint32 botOwnerCharacterId, std::string* errorMessage) {
-	std::list<BotGroupList> botGroups;
-	if(botOwnerCharacterId == 0)
-        return botGroups;
-
-    std::string query = StringFormat("SELECT `group_name`, `group_leader_name` FROM `vw_bot_groups` WHERE `owner_id` = %u", botOwnerCharacterId);
-    auto results = database.QueryDatabase(query);
-    if(!results.Success()) {
-        *errorMessage = std::string(results.ErrorMessage());
-        return botGroups;
-    }
-
-    for(auto row = results.begin(); row != results.end(); ++row) {
-		BotGroupList botGroupList;
-        botGroupList.BotGroupName = std::string(row[0]);
-        botGroupList.BotGroupLeaderName = std::string(row[1]);
-        botGroups.push_back(botGroupList);
-    }
-	return botGroups;
-}
-
-bool Bot::DoesBotGroupNameExist(std::string botGroupName) {
-	if(botGroupName.empty())
-        return false;
-
-	std::string query = StringFormat("SELECT `groups_index` FROM `vw_bot_groups` WHERE `group_name` = '%s'", botGroupName.c_str());
-    auto results = database.QueryDatabase(query);
-    if (!results.Success() || results.RowCount() == 0)
-        return false;
-
-    for(auto row = results.begin(); row != results.end(); ++row) {
-        uint32 tempBotGroupId = atoi(row[0]);
-		std::string tempBotGroupName = std::string(row[1]);
-		if (botGroupName == tempBotGroupName && tempBotGroupId != 0)
-            return true;
-    }
-
-	return false;
-}
-
-uint32 Bot::CanLoadBotGroup(uint32 botOwnerCharacterId, std::string botGroupName, std::string* errorMessage) {
-	if(botOwnerCharacterId == 0 || botGroupName.empty())
-        return 0;
-
-    std::string query = StringFormat("SELECT `groups_index`, `group_name` FROM `vw_bot_groups` WHERE `owner_id` = %u", botOwnerCharacterId);
-    auto results = database.QueryDatabase(query);
-    if(!results.Success()) {
-        *errorMessage = std::string(results.ErrorMessage());
-        return 0;
-    }
-
-    if(results.RowCount() == 0)
-        return 0;
-
-    for(auto row = results.begin(); row != results.end(); ++row) {
-        uint32 tempBotGroupId = atoi(row[0]);
-		std::string tempBotGroupName = std::string(row[1]);
-        if(botGroupName == tempBotGroupName)
-            return tempBotGroupId;
-    }
-
-	return 0;
-}
-
-uint32 Bot::GetBotGroupIdByBotGroupName(std::string botGroupName, std::string* errorMessage) {
-	if(botGroupName.empty())
-        return 0;
-
-    std::string query = StringFormat("SELECT `groups_index` FROM `vw_bot_groups` WHERE `group_name` = '%s'", botGroupName.c_str());
-    auto results = database.QueryDatabase(query);
-    if(!results.Success()) {
-        *errorMessage = std::string(results.ErrorMessage());
-        return 0;
-    }
-
-    if (results.RowCount() == 0)
-        return 0;
-
-    auto row = results.begin();
-    return atoi(row[0]);
-}
-
-uint32 Bot::GetBotGroupLeaderIdByBotGroupName(std::string botGroupName) {
-	if(botGroupName.empty())
-        return 0;
-
-	std::string query = StringFormat("SELECT `group_leader_id` FROM `vw_bot_groups` WHERE `group_name` = '%s'", botGroupName.c_str());
-    auto results = database.QueryDatabase(query);
-    if (!results.Success() || results.RowCount() == 0)
-        return 0;
-
-    auto row = results.begin();
-    return atoi(row[0]);
 }
 
 uint32 Bot::AllowedBotSpawns(uint32 botOwnerCharacterID, std::string* errorMessage) {
@@ -4424,120 +4235,6 @@ void Bot::BotTradeAddItem(uint32 id, const ItemInst* inst, int16 charges, uint32
 	this->BotAddEquipItem(lootSlot, id);
 }
 
-bool Bot::Bot_Command_Resist(int resisttype, int level) {
-	int resistid = 0;
-	switch(resisttype) {
-		case 1: // Poison Cleric
-			if(level >= 30)
-				resistid = 62;
-			else if(level >= 6)
-				resistid = 227;
-			break;
-		case 2: // Disease Cleric
-			if(level >= 36)
-				resistid = 63;
-			else if(level >= 11)
-				resistid = 226;
-			break;
-		case 3: // Fire Cleric
-			if(level >= 33)
-				resistid = 60;
-			else if(level >= 8)
-				resistid = 224;
-			break;
-		case 4: // Cold Cleric
-			if(level >= 38)
-				resistid = 61;
-			else if(level >= 13)
-				resistid = 225;
-			break;
-		case 5: // Magic Cleric
-			if(level >= 43)
-				resistid = 64;
-			else if(level >= 16)
-				resistid = 228;
-			break;
-		case 6: // Magic Enchanter
-			if(level >= 37)
-				resistid = 64;
-			else if(level >= 17)
-				resistid = 228;
-			break;
-		case 7: // Poison Druid
-			if(level >= 44)
-				resistid = 62;
-			else if(level >= 19)
-				resistid = 227;
-			break;
-		case 8: // Disease Druid
-			if(level >= 44)
-				resistid = 63;
-			else if(level >= 19)
-				resistid = 226;
-			break;
-		case 9: // Fire Druid
-			if(level >= 20)
-				resistid = 60;
-			else if(level >= 1)
-				resistid = 224;
-			break;
-		case 10: // Cold Druid
-			if(level >= 30)
-				resistid = 61;
-			else if(level >= 9)
-				resistid = 225;
-			break;
-		case 11: // Magic Druid
-			if(level >= 49)
-				resistid = 64;
-			else if(level >= 34)
-				resistid = 228;
-			break;
-		case 12: // Poison Shaman
-			if(level >= 35)
-				resistid = 62;
-			else if(level >= 20)
-				resistid = 227;
-			break;
-		case 13: // Disease Shaman
-			if(level >= 30)
-				resistid = 63;
-			else if(level >= 8)
-				resistid = 226;
-			break;
-		case 14: // Fire Shaman
-			if(level >= 27)
-				resistid = 60;
-			else if(level >= 5)
-				resistid = 224;
-			break;
-		case 15: // Cold Shaman
-			if(level >= 24)
-				resistid = 61;
-			else if(level >= 1)
-				resistid = 225;
-			break;
-		case 16: // Magic Shaman
-			if(level >= 43)
-				resistid = 64;
-			else if(level >= 19)
-				resistid = 228;
-			break;
-	}
-
-	if(resistid > 0) {
-		Group* g = GetGroup();
-		if(g) {
-			for(int k = 0; k < MAX_GROUP_MEMBERS; k++) {
-				if(g->members[k])
-					SpellOnTarget(resistid, g->members[k]);
-			}
-			return true;
-		}
-	}
-	return false;
-}
-
 bool Bot::RemoveBotFromGroup(Bot* bot, Group* group) {
 	bool Result = false;
 	if(bot && group) {
@@ -4582,230 +4279,6 @@ bool Bot::AddBotToGroup(Bot* bot, Group* group) {
 		}
 	}
 	return Result;
-}
-
-bool Bot::BotGroupCreate(std::string botGroupLeaderName) {
-	bool Result = false;
-	if(!botGroupLeaderName.empty()) {
-		Bot* botGroupLeader = entity_list.GetBotByBotName(botGroupLeaderName);
-		if(botGroupLeader)
-			Result = BotGroupCreate(botGroupLeader);
-	}
-	return Result;
-}
-
-bool Bot::BotGroupCreate(Bot* botGroupLeader) {
-	bool Result = false;
-	if(botGroupLeader && !botGroupLeader->HasGroup()) {
-		Group* newGroup = new Group(botGroupLeader);
-		if(newGroup) {
-			entity_list.AddGroup(newGroup);
-			database.SetGroupID(botGroupLeader->GetName(), newGroup->GetID(), botGroupLeader->GetBotID());
-			database.SetGroupLeaderName(newGroup->GetID(), botGroupLeader->GetName());
-			botGroupLeader->SetFollowID(botGroupLeader->GetBotOwner()->GetID());
-			Result = true;
-		}
-	}
-	return Result;
-}
-
-bool Bot::Bot_Command_CharmTarget(int charmtype, Mob *target) {
-	int charmid = 0;
-	int charmlevel = GetLevel();
-	if(target) {
-		switch(charmtype) {
-			case 1: // Enchanter
-				if((charmlevel >= 64) && (charmlevel <= 75))
-					charmid = 3355;
-				else if((charmlevel >= 62) && (charmlevel <= 63))
-					charmid = 3347;
-				else if((charmlevel >= 60) && (charmlevel <= 61))
-					charmid = 1707;
-				else if((charmlevel >= 53) && (charmlevel <= 59))
-					charmid = 1705;
-				else if((charmlevel >= 37) && (charmlevel <= 52))
-					charmid = 183;
-				else if((charmlevel >= 23) && (charmlevel <= 36))
-					charmid = 182;
-				else if((charmlevel >= 11) && (charmlevel <= 22))
-					charmid = 300;
-				break;
-			case 2: // Necromancer
-				if((charmlevel >= 60) && (charmlevel <= 75))
-					charmid = 1629;
-				else if((charmlevel >=47) && (charmlevel <= 59))
-					charmid = 198;
-				else if((charmlevel >= 31) && (charmlevel <= 46))
-					charmid = 197;
-				else if((charmlevel >= 18) && (charmlevel <= 30))
-					charmid = 196;
-				break;
-			case 3: // Druid
-				if((charmlevel >= 63) && (charmlevel <= 75))
-					charmid = 3445;
-				else if((charmlevel >= 55) && (charmlevel <= 62))
-					charmid = 1556;
-				else if((charmlevel >= 52) && (charmlevel <= 54))
-					charmid = 1553;
-				else if((charmlevel >= 43) && (charmlevel <= 51))
-					charmid = 142;
-				else if((charmlevel >= 33) && (charmlevel <= 42))
-					charmid = 141;
-				else if((charmlevel >= 23) && (charmlevel <= 32))
-					charmid = 260;
-				else if((charmlevel >= 13) && (charmlevel <= 22))
-					charmid = 242;
-				break;
-		}
-		if(charmid > 0) {
-			uint32 DontRootMeBeforeTime = 0;
-			CastSpell(charmid, target->GetID(), 1, -1, -1, &DontRootMeBeforeTime);
-			target->SetDontRootMeBefore(DontRootMeBeforeTime);
-			return true;
-		}
-	}
-	return false;
-}
-
-bool Bot::Bot_Command_DireTarget(int diretype, Mob *target) {
-	int direid = 0;
-	int direlevel = GetLevel();
-	if(target) {
-		switch(diretype) {
-			case 1: // Enchanter
-				if(direlevel >= 65)
-					direid = 5874;
-				else if(direlevel >= 55)
-					direid = 2761;
-				break;
-			case 2: // Necromancer
-				if(direlevel >= 65)
-					direid = 5876;
-				else if(direlevel >= 55)
-					direid = 2759;
-				break;
-			case 3: // Druid
-				if(direlevel >= 65)
-					direid = 5875;
-				else if(direlevel >= 55)
-					direid = 2760;
-				break;
-		}
-		if(direid > 0) {
-			uint32 DontRootMeBeforeTime = 0;
-			CastSpell(direid, target->GetID(), 1, -1, -1, &DontRootMeBeforeTime);
-			target->SetDontRootMeBefore(DontRootMeBeforeTime);
-			return true;
-		}
-	}
-	return false;
-}
-
-bool Bot::Bot_Command_CalmTarget(Mob *target) {
-	if(target) {
-		int calmid = 0;
-		int calmlevel = GetLevel();
-		if((calmlevel >= 67) && (calmlevel <= 75))
-			calmid = 5274;
-		else if((calmlevel >= 62) && (calmlevel <= 66))
-			calmid = 3197;
-		else if((calmlevel >= 35) && (calmlevel <= 61))
-			calmid = 45;
-		else if((calmlevel >= 18) && (calmlevel <= 34))
-			calmid = 47;
-		else if((calmlevel >= 6) && (calmlevel <= 17))
-			calmid = 501;
-		else if((calmlevel >= 1) && (calmlevel <= 5))
-			calmid = 208;
-		if(calmid > 0) {
-			uint32 DontRootMeBeforeTime = 0;
-			CastSpell(calmid, target->GetID(), 1, -1, -1, &DontRootMeBeforeTime);
-			target->SetDontRootMeBefore(DontRootMeBeforeTime);
-			return true;
-		}
-	}
-	return false;
-}
-
-bool Bot::Bot_Command_RezzTarget(Mob *target) {
-	if(target) {
-		int rezid = 0;
-		int rezlevel = GetLevel();
-		if(rezlevel >= 56)
-			rezid = 1524;
-		else if(rezlevel >= 47)
-			rezid = 392;
-		else if(rezlevel >= 42)
-			rezid = 2172;
-		else if(rezlevel >= 37)
-			rezid = 388;
-		else if(rezlevel >= 32)
-			rezid = 2171;
-		else if(rezlevel >= 27)
-			rezid = 391;
-		else if(rezlevel >= 22)
-			rezid = 2170;
-		else if(rezlevel >= 18)
-			rezid = 2169;
-		if(rezid > 0) {
-			uint32 DontRootMeBeforeTime = 0;
-			CastSpell(rezid, target->GetID(), 1, -1, -1, &DontRootMeBeforeTime);
-			target->SetDontRootMeBefore(DontRootMeBeforeTime);
-			return true;
-		}
-	}
-	return false;
-}
-
-bool Bot::Bot_Command_Cure(int curetype, int level) {
-	int cureid = 0;
-	switch(curetype) {
-		case 1: // Poison
-			if(level >= 58)
-				cureid = 1525;
-			else if(level >= 48)
-				cureid = 97;
-			else if(level >= 22)
-				cureid = 95;
-			else if(level >= 1)
-				cureid = 203;
-			break;
-		case 2: // Disease
-			if(level >= 51)
-				cureid = 3693;
-			else if(level >= 28)
-				cureid = 96;
-			else if(level >= 4)
-				cureid = 213;
-			break;
-		case 3: // Curse
-			if(level >= 54)
-				cureid = 2880;
-			else if(level >= 38)
-				cureid = 2946;
-			else if(level >= 23)
-				cureid = 4057;
-			else if(level >= 8)
-				cureid = 4056;
-			break;
-		case 4: // Blindness
-			if(level >= 3)
-				cureid = 212;
-			break;
-	}
-
-	if(cureid > 0) {
-		Group* g = GetGroup();
-		if(g) {
-			for(int k = 0; k < MAX_GROUP_MEMBERS; k++) {
-				if(g->members[k])
-					SpellOnTarget(cureid, g->members[k]);
-			}
-			return true;
-		}
-	}
-
-	return false;
 }
 
 // Completes a trade with a client bot owner
@@ -5117,8 +4590,7 @@ bool Bot::Death(Mob *killerMob, int32 damage, uint16 spell_id, SkillUseTypes att
 		}
 	}
 
-	if(GetInHealRotation())
-		GetHealRotationLeader()->RemoveHealRotationMember(this);
+	LeaveHealRotationMemberPool();
 
 	entity_list.RemoveBot(this->GetID());
 	return true;
@@ -8164,7 +7636,7 @@ void Bot::CalcRestState() {
 
 int32 Bot::LevelRegen() {
 	int level = GetLevel();
-	bool bonus = GetRaceBitmask(_baseRace) & RuleI(Character, BaseHPRegenBonusRaces);
+	bool bonus = GetPlayerRaceBit(_baseRace) & RuleI(Character, BaseHPRegenBonusRaces);
 	uint8 multiplier1 = bonus ? 2 : 1;
 	int32 hp = 0;
 	if (level < 51) {
@@ -8429,8 +7901,7 @@ void Bot::Camp(bool databaseSave) {
 	if(IsGrouped())
 		RemoveBotFromGroup(this, GetGroup());
 
-	if(GetInHealRotation())
-		GetHealRotationLeader()->RemoveHealRotationMember(this);
+	LeaveHealRotationMemberPool();
 
 	if(databaseSave)
 		Save();
@@ -8560,91 +8031,6 @@ bool Bot::CanHeal() {
 
 bool Bot::CalculateNewPosition2(float x, float y, float z, float speed, bool checkZ) {
 	return MakeNewPositionAndSendUpdate(x, y, z, speed, checkZ);
-}
-
-void Bot::BotGroupOrderFollow(Group* group, Client* client) {
-	if(group && client) {
-		Mob* groupLeader = group->GetLeader();
-		if(groupLeader) {
-			for(int i = 0; i< MAX_GROUP_MEMBERS; i++) {
-				if(group->members[i] && group->members[i]->IsBot()) {
-					Bot* botGroupMember = group->members[i]->CastToBot();
-					if(botGroupMember && botGroupMember->GetBotOwnerCharacterID() == client->CharacterID()) {
-						if(group->IsLeader(botGroupMember) && botGroupMember->GetBotOwner()) {
-							botGroupMember->SetFollowID(botGroupMember->GetBotOwner()->GetID());
-							if(botGroupMember->GetBotOwner())
-								botGroupMember->BotGroupSay(botGroupMember, "Following %s.", botGroupMember->GetBotOwner()->GetName());
-						} else {
-							botGroupMember->SetFollowID(groupLeader->GetID());
-							botGroupMember->BotGroupSay(botGroupMember, "Following %s.", groupLeader->GetCleanName());
-						}
-
-						botGroupMember->WipeHateList();
-						if(botGroupMember->HasPet() && botGroupMember->GetPet())
-							botGroupMember->GetPet()->WipeHateList();
-					}
-				}
-			}
-		}
-	}
-}
-
-void Bot::BotGroupOrderGuard(Group* group, Client* client) {
-	if(group && client) {
-		for(int i = 0; i< MAX_GROUP_MEMBERS; i++) {
-			if(group->members[i] && group->members[i]->IsBot()) {
-				Bot* botGroupMember = group->members[i]->CastToBot();
-				if(botGroupMember && botGroupMember->GetBotOwnerCharacterID() == client->CharacterID()) {
-					botGroupMember->SetFollowID(0);
-					botGroupMember->BotGroupSay(botGroupMember, "Guarding here.");
-					botGroupMember->WipeHateList();
-					if(botGroupMember->HasPet() && botGroupMember->GetPet())
-						botGroupMember->GetPet()->WipeHateList();
-				}
-			}
-		}
-	}
-}
-
-void Bot::BotGroupOrderAttack(Group* group, Mob* target, Client* client) {
-	if(group && target) {
-		Mob* groupLeader = group->GetLeader();
-		if(groupLeader) {
-			for(int i = 0; i < MAX_GROUP_MEMBERS; i++) {
-				if(group->members[i] && group->members[i]->IsBot()) {
-					Bot* botGroupMember = group->members[i]->CastToBot();
-					if(botGroupMember->GetBotOwnerCharacterID() == client->CharacterID()) {
-						botGroupMember->WipeHateList();
-						botGroupMember->AddToHateList(target, 1);
-						if(botGroupMember->HasPet() && botGroupMember->GetPet()) {
-							botGroupMember->GetPet()->WipeHateList();
-							botGroupMember->GetPet()->AddToHateList(target, 1);
-						}
-					}
-				}
-			}
-		}
-	}
-}
-
-void Bot::BotGroupSummon(Group* group, Client* client) {
-	if(group) {
-		for(int i = 0; i < MAX_GROUP_MEMBERS; i++) {
-			if(group->members[i] && group->members[i]->IsBot()) {
-				Bot* botMember = group->members[i]->CastToBot();
-				if(botMember->GetBotOwnerCharacterID() == client->CharacterID()) {
-					botMember->SetTarget(botMember->GetBotOwner());
-					botMember->WipeHateList();
-					botMember->Warp(glm::vec3(botMember->GetBotOwner()->GetPosition()));
-					if(botMember->HasPet() && botMember->GetPet()) {
-						botMember->GetPet()->SetTarget(botMember);
-						botMember->GetPet()->WipeHateList();
-						botMember->GetPet()->Warp(glm::vec3(botMember->GetBotOwner()->GetPosition()));
-					}
-				}
-			}
-		}
-	}
 }
 
 Bot* Bot::GetBotByBotClientOwnerAndBotName(Client* c, std::string botName) {
@@ -9157,11 +8543,11 @@ void Bot::CalcBotStats(bool showtext) {
 		return;
 
 	if(showtext) {
-		GetBotOwner()->Message(15, "Bot updating...");
+		GetBotOwner()->Message(15, "Updating %s...", GetCleanName());
 	}
 
 	if(!IsValidRaceClassCombo()) {
-		GetBotOwner()->Message(15, "A %s - %s bot was detected. Is this Race/Class combination allowed?.", GetRaceName(GetRace()), GetEQClassName(GetClass(), GetLevel()));
+		GetBotOwner()->Message(15, "A %s - %s bot was detected. Is this Race/Class combination allowed?.", GetRaceIDName(GetRace()), GetClassIDName(GetClass(), GetLevel()));
 		GetBotOwner()->Message(15, "Previous Bots Code releases did not check Race/Class combinations during create.");
 		GetBotOwner()->Message(15, "Unless you are experiencing heavy lag, you should delete and remake this bot.");
 	}
@@ -9191,7 +8577,7 @@ void Bot::CalcBotStats(bool showtext) {
 	AI_AddNPCSpells(this->GetBotSpellID());
 
 	if(showtext) {
-		GetBotOwner()->Message(15, "I'm updated.");
+		GetBotOwner()->Message(15, "%s has been updated.", GetCleanName());
 		GetBotOwner()->Message(15, "Level: %i HP: %i AC: %i Mana: %i STR: %i STA: %i DEX: %i AGI: %i INT: %i WIS: %i CHA: %i", GetLevel(), max_hp, GetAC(), max_mana, GetSTR(), GetSTA(), GetDEX(), GetAGI(), GetINT(), GetWIS(), GetCHA());
 		GetBotOwner()->Message(15, "Resists-- Magic: %i, Poison: %i, Fire: %i, Cold: %i, Disease: %i, Corruption: %i.",GetMR(),GetPR(),GetFR(),GetCR(),GetDR(),GetCorrup());
 		// Test Code
@@ -9231,3588 +8617,6 @@ bool Bot::GroupHasClass(Group* group, uint8 classId) {
 	}
 
 	return result;
-}
-
-void Bot::ProcessBotCommands(Client *c, const Seperator *sep) {
-	// All bot command processing occurs here now instead of in command.cpp
-
-	// TODO: Log any possible error messages as most of these will be MySQL error messages.
-	std::string TempErrorMessage;
-
-	if(sep->arg[1][0] == '\0') {
-		c->Message(13, "Bad argument, type #bot help");
-		return;
-	}
-	if(!strcasecmp( sep->arg[1], "help") && !strcasecmp( sep->arg[2], "\0")){
-		c->Message(0, "List of commands availables for bots:");
-		c->Message(0, "#bot help - show this");
-		c->Message(0, "#bot create [name] [class (id)] [race (id)] [model (male/female)] - create a permanent bot. See #bot help create.");
-		c->Message(0, "#bot help create - show all the race/class id. (make it easier to create bots)");
-		c->Message(0, "#bot delete - completely destroy forever the targeted bot and all its items.");
-		c->Message(0, "#bot list [all/class(1-16)] - list all of your bots or list by class. Classes: 1(WAR), 2(CLR), 3(PAL), 4(RNG), 5(SHD), 6(DRU), 7(MNK), 8(BRD), 9(ROG), 10(SHM), 11(NEC), 12(WIZ), 13(MAG), 14(ENC), 15(BST), 16(BER)");
-		c->Message(0, "#bot spawn [bot name] - spawn a bot from it's name (use list to see all the bots). ");
-		c->Message(0, "#bot inventory list - show the inventory (and the slots IDs) of the targeted bot.");
-		c->Message(0, "#bot inventory remove [slotid] - remove the item at the given slot in the inventory of the targeted bot.");
-		c->Message(0, "#bot update - you must type that command once you gain a level.");
-		c->Message(0, "#bot summon - It will summon your targeted bot to you.");
-		c->Message(0, "#bot mez - If you're grouped with an Enchanter, he will mesmerize your target.");
-		c->Message(0, "#bot picklock - You must have a targeted Rogue bot in your group and be right on the door.");
-		c->Message(0, "#bot cure [poison|disease|curse|blindness] Cleric has most options");
-		c->Message(0, "#bot bind - You must have a Cleric in your group to get Bind Affinity cast on you.");
-		c->Message(0, "#bot track - look at mobs in the zone (Ranger has options)");
-		c->Message(0, "#bot target calm - attempts to pacify your target mob.");
-		c->Message(0, "#bot evac - transports your group to safe location in the current zone (bots are lost)");
-		c->Message(0, "#bot resurrect - Your Cleric bot will resurrect your targeted player corpse.");
-		c->Message(0, "#bot corpse summon - Necromancers summon your targeted player's corpses.");
-		c->Message(0, "#bot lore - cast Identify on the item on your mouse pointer.");
-		c->Message(0, "#bot speed - Bots will cast Spirit of Wolf on you (Druid has options)");
-		c->Message(0, "#bot invis - Bot invisiblity (must have proper class in group)");
-		c->Message(0, "#bot levitate - Bot levitation (must have proper class in group)");
-		c->Message(0, "#bot resist - Bot resist buffs (must have proper class in group)");
-		c->Message(0, "#bot rune - Enchanter bot casts Rune spell on you");
-		c->Message(0, "#bot shrink - Shaman or Beastlord will shrink target");
-		c->Message(0, "#bot endureb - Bot enduring breath (must have proper class in group)");
-		c->Message(0, "#bot charm - (must have proper class in group)");
-		c->Message(0, "#bot dire charm - (must have proper class in group)");
-		c->Message(0, "#bot pet remove - (remove pet before charm)");
-		c->Message(0, "#bot gate - Druid or Wizard bot will cast gate.");
-		c->Message(0, "#bot archery - Toggle Archery Skilled bots between using a Bow or using Melee weapons.");
-		c->Message(0, "#bot setpet [earth|water|air|fire|monster] - Select the pet type you want your Magician bot to use.");
-		c->Message(0, "#bot [giveitem|gi] - Gives your targeted bot the item you have on your cursor.");
-		c->Message(0, "#bot [augmentitem|ai] - Allows you to augment items for other classes. (You MUST have the Augmentation Sealer window filled)");
-		c->Message(0, "#bot camp - Tells your bot to camp out of the game.");
-		c->Message(0, "#bot group help - Displays the commands available to manage any bots in your group.");
-		c->Message(0, "#bot botgroup help - Displays the commands available to manage bot ONLY groups.");
-		c->Message(0, "#bot mana [<bot name or target> | all] - Displays a mana report for all your spawned bots.");
-		c->Message(0, "#bot setfollowdistance ### - sets target bots follow distance to ### (ie 30 or 250).");
-		c->Message(0, "#bot clearfollowdistance [<target> | spawned | all] - clears user-defined follow distance setting for bot target, spawned or all - includes spawned and unspawned.");
-		c->Message(0, "#bot [hair|haircolor|beard|beardcolor|face|eyes|heritage|tattoo|details <value>] - Change your bot's appearance.");
-		c->Message(0, "#bot armorcolor <slot> <red> <green> <blue> - #bot help armorcolor for info");
-		c->Message(0, "#bot taunt [on|off] - Determines whether or not your targeted bot will taunt.");
-		c->Message(0, "#bot stance [name] [stance (id)|list] - Sets/lists stance for named bot (Passive = 0, Balanced = 1, Efficient = 2, Reactive = 3, Aggressive = 4, Burn = 5, BurnAE = 6)");
-		c->Message(0, "#bot defensive [bot name] - Causes Warrior, Shadow Knight, or Paladin bot to use their defensive discipline or buff.");
-		c->Message(0, "#bot healrotation help - Displays the commands available to manage bot heal rotations.");
-		c->Message(0, "#bot pull [<bot name>] [target] - Bot will attempt to pull your target NPC.");
-		c->Message(0, "#bot setinspectmessage - Copies your inspect message to a targeted bot that you own.");
-		c->Message(0, "#bot bardoutofcombat [on|off] - Determines whether Bard bots use out of combat songs.");
-		c->Message(0, "#bot showhelm [on|off] - Determines whether or not your targeted bot's helmet will show. (Requires a respawn to take effect)");
-		return;
-	}
-
-	// pull
-	if(!strcasecmp(sep->arg[1], "pull")) {
-		Mob *target = c->GetTarget();
-		if(target == nullptr || target == c || target->IsBot() || (target->IsPet() && target->GetOwner() && target->GetOwner()->IsBot())) {
-			c->Message(15, "You must select a monster");
-			return;
-		}
-
-		if(c->IsGrouped()) {
-			bool haspuller = false;
-			Group *g = c->GetGroup();
-			for(int i = 0; i < MAX_GROUP_MEMBERS; i++) {
-				if(g && g->members[i] && g->members[i]->IsBot() && !strcasecmp(g->members[i]->GetName() , sep->arg[2])) {
-					haspuller = true;
-					Mob *puller = g->members[i];
-					if (puller->CastToBot()->IsArcheryRange(target)) {
-						puller->CastToBot()->BotGroupSay(puller->CastToBot(), "Trying to pull %s.", target->GetCleanName());
-						puller->CastToBot()->BotRangedAttack(target);
-					} else {
-						puller->CastToBot()->BotGroupSay(puller->CastToBot(), "%s is out of range.", target->GetCleanName());
-					}
-				}
-			}
-			if(!haspuller) {
-				c->Message(15, "You must have an Puller in your group.");
-			}
-		}
-		return;
-	}
-
-	// added Bot follow distance - SetFollowDistance
-	if(!strcasecmp(sep->arg[1], "setfollowdistance")) {
-		if((c->GetTarget() == nullptr) || (c->GetTarget() == c) || (!c->GetTarget()->IsBot()) || (c->GetTarget()->CastToBot()->GetBotOwner() != c)) {
-			c->Message(15, "You must target a bot you own!");
-		}
-		else {
-			uint32 BotFollowDistance = atoi(sep->arg[2]);
-			c->GetTarget()->SetFollowDistance(BotFollowDistance);
-		}
-
-		return;
-	}
-
-	if (!strcasecmp(sep->arg[1], "clearfollowdistance")) {
-		bool case_all = !strcasecmp(sep->arg[2], "all");
-		bool case_spawned = !strcasecmp(sep->arg[2], "spawned");
-		if (case_all || case_spawned) {
-			if (case_all) {
-				std::string query = StringFormat(
-					"UPDATE `bot_data`"
-					" SET `follow_distance` = '%u'"
-					" WHERE `owner_id` = '%u'",
-					BOT_DEFAULT_FOLLOW_DISTANCE,
-					c->CharacterID()
-					);
-				auto results = database.QueryDatabase(query);
-				if (!results.Success())
-					return;
-			}
-
-			std::list<Bot*> spawnedBots = entity_list.GetBotsByBotOwnerCharacterID(c->CharacterID());
-			if (!spawnedBots.empty()) {
-				for (std::list<Bot*>::iterator botsListItr = spawnedBots.begin(); botsListItr != spawnedBots.end(); ++botsListItr) {
-					Bot* tempBot = *botsListItr;
-					if (tempBot) {
-						tempBot->SetFollowDistance(BOT_DEFAULT_FOLLOW_DISTANCE);
-					}
-				}
-			}
-		}
-		else if ((c->GetTarget() == nullptr) || (c->GetTarget() == c) || (!c->GetTarget()->IsBot()) || (c->GetTarget()->CastToBot()->GetBotOwner() != c)) {
-			c->Message(15, "You must target a bot you own!");
-		}
-		else {
-			c->GetTarget()->SetFollowDistance(BOT_DEFAULT_FOLLOW_DISTANCE);
-		}
-
-		return;
-	}
-
-	//bot armor colors
-	if(!strcasecmp(sep->arg[1], "armorcolor")) {
-		if(c->GetTarget() && c->GetTarget()->IsBot() && (c->GetTarget()->CastToBot()->GetBotOwner() == c)) {
-
-			if(sep->arg[2][0] == '\0' || sep->arg[3][0] == '\0' || sep->arg[4][0] == '\0' || sep->arg[5][0] == '\0') {
-				c->Message(0, "Usage: #bot armorcolor [slot] [red] [green] [blue] - use #bot help armorcolor for info");
-				return;
-			}
-
-			uint32 botid = c->GetTarget()->CastToBot()->GetBotID();
-			std::string errorMessage;
-
-			int setslot = atoi(sep->arg[2]);
-			uint8 red = atoi(sep->arg[3]);
-			uint8 green = atoi(sep->arg[4]);
-			uint8 blue = atoi(sep->arg[5]);
-			uint32 setcolor = (red << 16) | (green << 8) | blue;
-			std::string query;
-			if (setslot == -1) {
-				query = StringFormat(
-					"UPDATE `bot_inventories`"
-					" SET `inst_color` = %u"
-					" WHERE `slot_id`"
-					" IN (%u, %u, %u, %u, %u, %u, %u)"
-					" AND `bot_id` = %u",
-					setcolor,
-					MainHead,
-					MainArms,
-					MainWrist1,
-					MainHands,
-					MainChest,
-					MainLegs,
-					MainFeet,
-					botid
-				);
-				auto results = database.QueryDatabase(query);
-				if (!results.Success())
-					return;
-
-				for (int i = MaterialHead; i <= MaterialFeet; ++i) {
-					c->GetTarget()->CastToBot()->SendWearChange(i);
-				}
-			} else {
-				query = StringFormat("UPDATE `bot_inventories` SET `inst_color` = %u WHERE `slot_id` = %i AND `bot_id` = %u", setcolor, setslot, botid);
-				auto results = database.QueryDatabase(query);
-				if (!results.Success())
-					return;
-
-				c->GetTarget()->CastToBot()->SendWearChange(Inventory::CalcMaterialFromSlot(setslot));
-			}
-
-		}
-		else {
-			c->Message(15, "You must target a bot you own to do this.");
-		}
-		return;
-	}
-
-    if(!strcasecmp(sep->arg[1], "help") && !strcasecmp(sep->arg[2], "armorcolor")){
-		c->Message(0, "-----------------#bot armorcolor help-----------------------------");
-		c->Message(0, "Armor: -1(All), %u(Helm), %u(Arms), %u(Bracer), %u(Hands), %u(Chest/Robe), %u(Legs), %u(Boots)",
-			MainHead, MainArms, MainWrist1, MainHands, MainChest, MainLegs, MainFeet);
-		c->Message(0, "------------------------------------------------------------------");
-		c->Message(0, "Color: [red] [green] [blue] (enter a number from 0-255 for each");
-		c->Message(0, "------------------------------------------------------------------");
-		c->Message(0, "Example: #bot armorcolor %u 0 255 0 - this would make the chest bright green", MainChest);
-		return;
-	}
-
-	if(!strcasecmp(sep->arg[1], "augmentitem") || !strcasecmp(sep->arg[1], "ai")) {
-		AugmentItem_Struct* in_augment = new AugmentItem_Struct[sizeof(AugmentItem_Struct)];
-		in_augment->container_slot = 1000; // <watch>
-		in_augment->augment_slot = -1;
-		Object::HandleAugmentation(c, in_augment, c->GetTradeskillObject());
-		return;
-	}
-
-	if(!strcasecmp(sep->arg[1], "giveitem") || !strcasecmp(sep->arg[1], "gi")) {
-		if(c->GetTarget() && c->GetTarget()->IsBot() && (c->GetTarget()->CastToBot()->GetBotOwner() == c)) {
-			Bot* targetedBot = c->GetTarget()->CastToBot();
-				if(targetedBot)
-					targetedBot->FinishTrade(c, BotTradeClientNoDropNoTrade);
-		}
-		else
-			c->Message(15, "You must target a bot you own to do this.");
-
-		return;
-	}
-
-	if(!strcasecmp(sep->arg[1], "camp")) {
-		if(!strcasecmp(sep->arg[2], "all")) {
-			BotOrderCampAll(c);
-		} else {
-			if(c->GetTarget() && c->GetTarget()->IsBot() && (c->GetTarget()->CastToBot()->GetBotOwner()->CastToClient() == c)) {
-				Bot* targetedBot = c->GetTarget()->CastToBot();
-				if(targetedBot)
-					targetedBot->Camp();
-			}
-			else
-				c->Message(15, "You must target a bot you own to do this.");
-		}
-
-		return;
-	}
-
-	if(!strcasecmp(sep->arg[1], "create")) {
-		if(sep->arg[2][0] == '\0' || sep->arg[3][0] == '\0' || sep->arg[4][0] == '\0' || sep->arg[5][0] == '\0' || sep->arg[6][0] != '\0') {
-			c->Message(0, "Usage: #bot create [name] [class(id)] [race(id)] [gender (male/female|0/1)]");
-			return;
-		} else if(strcasecmp(sep->arg[3],"1") && strcasecmp(sep->arg[3],"2") && strcasecmp(sep->arg[3],"3") && strcasecmp(sep->arg[3],"4") && strcasecmp(sep->arg[3],"5") && strcasecmp(sep->arg[3],"6") && strcasecmp(sep->arg[3],"7") && strcasecmp(sep->arg[3],"8") && strcasecmp(sep->arg[3],"9") && strcasecmp(sep->arg[3],"10") && strcasecmp(sep->arg[3],"11") && strcasecmp(sep->arg[3],"12") && strcasecmp(sep->arg[3],"13") && strcasecmp(sep->arg[3],"14") && strcasecmp(sep->arg[3],"15") && strcasecmp(sep->arg[3],"16")) {
-			c->Message(0, "Usage: #bot create [name] [class(id)] [race(id)] [gender (male/female|0/1)]");
-			return;
-		} else if(strcasecmp(sep->arg[4],"1") && strcasecmp(sep->arg[4],"2") && strcasecmp(sep->arg[4],"3") && strcasecmp(sep->arg[4],"4") && strcasecmp(sep->arg[4],"5") && strcasecmp(sep->arg[4],"6") && strcasecmp(sep->arg[4],"7") && strcasecmp(sep->arg[4],"8") && strcasecmp(sep->arg[4],"9") && strcasecmp(sep->arg[4],"10") && strcasecmp(sep->arg[4],"11") && strcasecmp(sep->arg[4],"12") && strcasecmp(sep->arg[4],"330") && strcasecmp(sep->arg[4],"128") && strcasecmp(sep->arg[4],"130") && strcasecmp(sep->arg[4],"522")) {
-			c->Message(0, "Usage: #bot create [name] [class(1-16)] [race(1-12,128,130,330,522)] [gender (male/female|0/1)]");
-			return;
-		} else if(strcasecmp(sep->arg[5],"male") && strcasecmp(sep->arg[5],"0") && strcasecmp(sep->arg[5],"female") && strcasecmp(sep->arg[5],"1")) {
-			c->Message(0, "Usage: #bot create [name] [class(1-16)] [race(1-12,128,130,330,522)] [gender (male/female|0/1)]");
-			return;
-		}
-
-		uint32 MaxBotCreate = RuleI(Bots, CreationLimit);
-		if(CreatedBotCount(c->CharacterID(), &TempErrorMessage) >= MaxBotCreate) {
-			c->Message(0, "You cannot create more than %i bots.", MaxBotCreate);
-			return;
-		}
-
-		if(!TempErrorMessage.empty()) {
-			c->Message(13, "Database Error: %s", TempErrorMessage.c_str());
-			return;
-		}
-
-		int gender = 0;
-		if(!strcasecmp(sep->arg[5], "female") || !strcasecmp(sep->arg[5], "1"))
-			gender = 1;
-
-		if(!IsBotNameAvailable(sep->arg[2],&TempErrorMessage)) {
-			c->Message(0, "The name %s is already being used or is invalid. Please choose a different name.", sep->arg[2]);
-			return;
-		}
-
-		NPCType DefaultNPCTypeStruct = CreateDefaultNPCTypeStructForBot(std::string(sep->arg[2]), std::string(), c->GetLevel(), atoi(sep->arg[4]), atoi(sep->arg[3]), gender);
-		Bot* NewBot = new Bot(DefaultNPCTypeStruct, c);
-
-		if(NewBot) {
-			if(!NewBot->IsValidRaceClassCombo()) {
-				c->Message(0, "That Race/Class combination cannot be created.");
-				return;
-			}
-
-			if(!NewBot->IsValidName()) {
-				c->Message(0, "%s has invalid characters. You can use only the A-Z, a-z and _ characters in a bot name.", NewBot->GetCleanName());
-				return;
-			}
-
-			if(!TempErrorMessage.empty()) {
-				c->Message(13, "Database Error: %s", TempErrorMessage.c_str());
-				return;
-			}
-
-			if(!NewBot->Save())
-				c->Message(0, "Unable to save %s as a bot.", NewBot->GetCleanName());
-			else
-				c->Message(0, "%s saved as bot %u.", NewBot->GetCleanName(), NewBot->GetBotID());
-		}
-		else
-			Log.Out(Logs::General, Logs::Error, "Error in #bot create, cannot find NewBot");
-		return;
-	}
-
-	if(!strcasecmp(sep->arg[1], "help") && !strcasecmp(sep->arg[2], "create") ){
-		c->Message(0, "Classes: 1(WAR), 2(CLR), 3(PAL), 4(RNG), 5(SHD), 6(DRU), 7(MNK), 8(BRD), 9(ROG), 10(SHM), 11(NEC), 12(WIZ), 13(MAG), 14(ENC), 15(BST), 16(BER)");
-		c->Message(0, "------------------------------------------------------------------");
-		c->Message(0, "Races: 1(Human), 2(Barbarian), 3(Erudite), 4(Wood Elf), 5(High Elf), 6(Dark Elf), 7(Half Elf), 8(Dwarf), 9(Troll), 10(Ogre), 11(Halfling), 12(Gnome), 128(Iksar), 130(Vah Shir), 330(Froglok), 522(Drakkin)");
-		c->Message(0, "------------------------------------------------------------------");
-		c->Message(0, "Usage: #bot create [name] [class(1-16)] [race(1-12,128,130,330,522)] [gender(male/female)]");
-		c->Message(0, "Example: #bot create Sneaky 9 6 male");
-		return;
-	}
-
-	if(!strcasecmp(sep->arg[1], "delete") ) {
-		if((c->GetTarget() == nullptr) || !c->GetTarget()->IsBot()) {
-			c->Message(15, "You must target a bot!");
-			return;
-		} else if(c->GetTarget()->CastToBot()->GetBotOwnerCharacterID() != c->CharacterID()) {
-			c->Message(15, "You can't delete a bot that you don't own.");
-			return;
-		}
-
-		if(c->GetTarget()->IsBot()) {
-			Bot* BotTargeted = c->GetTarget()->CastToBot();
-			if(BotTargeted) {
-				BotTargeted->DeleteBot(&TempErrorMessage);
-				if(!TempErrorMessage.empty()) {
-					c->Message(13, "Database Error: %s", TempErrorMessage.c_str());
-					return;
-				}
-
-				BotTargeted->Camp(false);
-			}
-		}
-
-		return;
-	}
-
-	if(!strcasecmp(sep->arg[1], "list")) {
-		bool listAll = true;
-		int iClass = atoi(sep->arg[2]);
-		if(iClass > 0 && iClass < 17)
-			listAll = false;
-
-		std::list<BotsAvailableList> AvailableBots = GetBotList(c->CharacterID(), &TempErrorMessage);
-		if(!TempErrorMessage.empty()) {
-			c->Message(13, "Database Error: %s", TempErrorMessage.c_str());
-			return;
-		}
-
-		if(!AvailableBots.empty()) {
-			for(std::list<BotsAvailableList>::iterator TempAvailableBotsList = AvailableBots.begin(); TempAvailableBotsList != AvailableBots.end(); ++TempAvailableBotsList) {
-				if(!listAll && TempAvailableBotsList->BotClass != iClass)
-					continue;
-
-				c->Message(0, "Name: %s -- Class: %s -- Level: %u -- Race: %s", TempAvailableBotsList->BotName, ClassIdToString(TempAvailableBotsList->BotClass).c_str(), TempAvailableBotsList->BotLevel, RaceIdToString(TempAvailableBotsList->BotRace).c_str());
-			}
-		}
-		else
-			c->Message(0, "You have no bots created. Use the #bot create command to create a bot.");
-	}
-
-	if(!strcasecmp(sep->arg[1], "mana")) {
-		bool listAll = false;
-		Bot* bot = 0;
-		if(sep->argnum == 2) {
-			if(std::string(sep->arg[2]).compare("all") == 0)
-				listAll = true;
-			else {
-				std::string botName = std::string(sep->arg[2]);
-				Bot* tempBot = entity_list.GetBotByBotName(botName);
-				if(tempBot && tempBot->GetBotOwner() == c)
-					bot = tempBot;
-			}
-		} else {
-			if(c->GetTarget() && c->GetTarget()->IsBot())
-				bot = c->GetTarget()->CastToBot();
-		}
-
-		if(bot && !listAll) {
-			if(bot->GetClass() != WARRIOR && bot->GetClass() != MONK && bot->GetClass() != BARD && bot->GetClass() != BERSERKER && bot->GetClass() != ROGUE)
-				c->Message(0, "Name: %s -- Class: %s -- Mana: %3.1f%%", bot->GetCleanName(), ClassIdToString(bot->GetClass()).c_str(), bot->GetManaRatio());
-		} else {
-			std::list<Bot*> spawnedBots = entity_list.GetBotsByBotOwnerCharacterID(c->CharacterID());
-			if(!spawnedBots.empty()) {
-				for(std::list<Bot*>::iterator botsListItr = spawnedBots.begin(); botsListItr != spawnedBots.end(); ++botsListItr) {
-					Bot* tempBot = *botsListItr;
-					if(tempBot) {
-						if(tempBot->GetClass() != WARRIOR && tempBot->GetClass() != MONK && tempBot->GetClass() != BARD && tempBot->GetClass() != BERSERKER && tempBot->GetClass() != ROGUE)
-							c->Message(0, "Name: %s -- Class: %s -- Mana: %3.1f%%", tempBot->GetCleanName(), ClassIdToString(tempBot->GetClass()).c_str(), tempBot->GetManaRatio());
-					}
-				}
-			}
-			else
-				c->Message(0, "You have no spawned bots in this zone.");
-		}
-		return;
-	}
-
-	if(!strcasecmp(sep->arg[1], "spawn") ) {
-		if (RuleB(Bots, BotCharacterLevelEnabled)) {
-			if (c->GetLevel() < RuleI(Bots, BotCharacterLevel)) {
-				c->Message(0, "You are only level %d, you must be level %d to spawn a bot!", c->GetLevel(), RuleI(Bots, BotCharacterLevel));
-				return;
-			}
-		}
-
-		uint32 botId = GetBotIDByBotName(std::string(sep->arg[2]));
-		if(GetBotOwnerCharacterID(botId, &TempErrorMessage) != c->CharacterID()) {
-			c->Message(0, "You can't spawn a bot that you don't own.");
-			return;
-		}
-
-		if(!TempErrorMessage.empty()) {
-			c->Message(13, "Database Error: %s", TempErrorMessage.c_str());
-			return;
-		}
-
-		if(c->GetFeigned()) {
-			c->Message(0, "You can't summon bots while you are feigned.");
-			return;
-		}
-
-		if(c->IsGrouped()) {
-			Group *g = entity_list.GetGroupByClient(c);
-			for (int i = 0; i < MAX_GROUP_MEMBERS; i++) {
-				if(g && g->members[i] && !g->members[i]->qglobal && (g->members[i]->GetAppearance() != eaDead)
-					&& (g->members[i]->IsEngaged() || (g->members[i]->IsClient() && g->members[i]->CastToClient()->GetAggroCount()))) {
-					c->Message(0, "You can't summon bots while you are engaged.");
-					return;
-				}
-
-				if(g && g->members[i] && g->members[i]->qglobal)
-					return;
-			}
-		} else {
-			if(c->GetAggroCount() > 0) {
-				c->Message(0, "You can't spawn bots while you are engaged.");
-				return;
-			}
-		}
-
-		Mob* TempBotMob = entity_list.GetMobByBotID(botId);
-		if(TempBotMob) {
-			c->Message(0, "This bot is already in the zone.");
-			return;
-		}
-
-		int spawnedBotCount = SpawnedBotCount(c->CharacterID(), &TempErrorMessage);
-
-		if(!TempErrorMessage.empty()) {
-			c->Message(13, "Database Error: %s", TempErrorMessage.c_str());
-			return;
-		}
-
-		if(RuleB(Bots, QuestableSpawnLimit) && !c->GetGM()) {
-			const int allowedBots = AllowedBotSpawns(c->CharacterID(), &TempErrorMessage);
-			if(!TempErrorMessage.empty()) {
-				c->Message(13, "Database Error: %s", TempErrorMessage.c_str());
-				return;
-			}
-
-			if(allowedBots == 0) {
-				c->Message(0, "You cannot spawn any bots.");
-				return;
-			}
-
-			if(spawnedBotCount >= allowedBots) {
-				c->Message(0, "You cannot spawn more than %i bots.", spawnedBotCount);
-				return;
-			}
-
-		}
-
-		if(spawnedBotCount >= RuleI(Bots, SpawnLimit) && !c->GetGM()) {
-			c->Message(0, "You cannot spawn more than %i bots.", spawnedBotCount);
-			return;
-		}
-
-		Bot* TempBot = LoadBot(botId, &TempErrorMessage);
-
-		if(!TempErrorMessage.empty()) {
-			c->Message(13, "Database Error: %s", TempErrorMessage.c_str());
-			safe_delete(TempBot);
-			return;
-		}
-
-		if(TempBot) {
-			TempBot->Spawn(c, &TempErrorMessage);
-			if(!TempErrorMessage.empty()) {
-				c->Message(13, "Database Error: %s", TempErrorMessage.c_str());
-				safe_delete(TempBot);
-				return;
-			}
-
-			TempBot->BotGroupSay(TempBot, "I am ready for battle.");
-		}
-		else
-			c->Message(0, "BotID: %i not found", atoi(sep->arg[2]));
-
-		return;
-	}
-
-	if(!strcasecmp(sep->arg[1], "archery")) {
-		if((c->GetTarget() == nullptr) || (c->GetTarget() == c) || !c->GetTarget()->IsBot()) {
-			c->Message(15, "You must target a bot!");
-			return;
-		}
-
-		Bot* archerBot = c->GetTarget()->CastToBot();
-		if(archerBot) {
-			if(archerBot->IsBotArcher())
-				archerBot->SetBotArcher(false);
-			else
-				archerBot->SetBotArcher(true);
-
-			archerBot->ChangeBotArcherWeapons(archerBot->IsBotArcher());
-			if(archerBot->GetClass() == RANGER && archerBot->GetLevel() >= 61)
-				archerBot->SetRangerAutoWeaponSelect(archerBot->IsBotArcher());
-		}
-
-		return;
-	}
-
-	if(!strcasecmp(sep->arg[1], "picklock")) {
-		if((c->GetTarget() == nullptr) || (c->GetTarget() == c) || !c->GetTarget()->IsBot() || (c->GetTarget()->GetClass() != ROGUE))
-			c->Message(15, "You must target a Rogue bot!");
-		else
-			entity_list.BotPickLock(c->GetTarget()->CastToBot());
-
-		return;
-	}
-
-	if(!strcasecmp(sep->arg[1], "summon")) {
-		if((c->GetTarget() == nullptr) || (c->GetTarget() == c) || !c->GetTarget()->IsBot() || c->GetTarget()->IsPet())
-			c->Message(15, "You must target a bot!");
-		else if(c->GetTarget()->IsMob() && !c->GetTarget()->IsPet()) {
-			Mob *b = c->GetTarget();
-			if(b) {
-				if(!b->IsBot())
-					c->Message(15, "You must target a bot!");
-				else if((b->CastToBot()->GetBotOwnerCharacterID() != c->CharacterID()))
-					b->CastToBot()->BotGroupSay(b->CastToBot(), "You can only summon your own bots.");
-				else {
-					b->SetTarget(c->CastToMob());
-					b->Warp(glm::vec3(c->GetPosition()));
-				}
-			}
-		}
-
-		return;
-	}
-
-	if(!strcasecmp(sep->arg[1], "inventory") && !strcasecmp(sep->arg[2], "list")) {
-		if(c->GetTarget() != nullptr) {
-			if(c->GetTarget()->IsBot() && c->GetTarget()->CastToBot()->GetBotOwnerCharacterID() == c->CharacterID()) {
-				Mob* b = c->GetTarget();
-				int x = c->GetTarget()->CastToBot()->GetBotItemsCount(&TempErrorMessage);
-				if(!TempErrorMessage.empty()) {
-					c->Message(13, "Database Error: %s", TempErrorMessage.c_str());
-					return;
-				}
-
-				const char* equipped[EmuConstants::EQUIPMENT_SIZE + 1] = {"Charm", "Left Ear", "Head", "Face", "Right Ear", "Neck", "Shoulders", "Arms", "Back",
-					"Left Wrist", "Right Wrist", "Range", "Hands", "Primary Hand", "Secondary Hand",
-					"Left Finger", "Right Finger", "Chest", "Legs", "Feet", "Waist", "Ammo", "Powersource" };
-
-				const ItemInst* inst = nullptr;
-				const Item_Struct* item = nullptr;
-				bool is2Hweapon = false;
-
-				std::string item_link;
-				Client::TextLink linker;
-				linker.SetLinkType(linker.linkItemInst);
-
-				for(int i = EmuConstants::EQUIPMENT_BEGIN; i <= (EmuConstants::EQUIPMENT_END + 1); ++i) {
-					if((i == MainSecondary) && is2Hweapon)
-						continue;
-
-					inst = b->CastToBot()->GetBotItem(i == 22 ? 9999 : i);
-					if (inst)
-						item = inst->GetItem();
-					else
-						item = nullptr;
-
-					if(!TempErrorMessage.empty()) {
-						c->Message(13, "Database Error: %s", TempErrorMessage.c_str());
-						return;
-					}
-
-					if(item == nullptr) {
-						c->Message(15, "I need something for my %s (Item %i)", equipped[i], (i == 22 ? 9999 : i));
-						continue;
-					}
-
-					if((i == MainPrimary) && ((item->ItemType == ItemType2HSlash) || (item->ItemType == ItemType2HBlunt) || (item->ItemType == ItemType2HPiercing))) {
-						is2Hweapon = true;
-					}
-
-					linker.SetItemInst(inst);
-					item_link = linker.GenerateLink();
-					c->Message(15, "Using %s in my %s (Item %i)", item_link.c_str(), equipped[i], (i == 22 ? 9999 : i));
-				}
-			}
-			else
-				c->Message(15, "You must group your bot first.");
-		}
-		else
-			c->Message(15, "You must target a bot first.");
-
-		return;
-	}
-
-	if(!strcasecmp(sep->arg[1], "inventory") && !strcasecmp(sep->arg[2], "remove")) {
-		if((c->GetTarget() == nullptr) || (sep->arg[3][0] == '\0') || !c->GetTarget()->IsBot()) {
-			c->Message(15, "Usage: #bot inventory remove [slotid] (You must have a bot targeted) ");
-			return;
-		} else if(c->GetTarget()->IsBot() && c->GetTarget()->CastToBot()->GetBotOwnerCharacterID() == c->CharacterID()) {
-			if(c->GetTradeskillObject() || (c->trade->state == Trading))
-				return;
-
-			int slotId = atoi(sep->arg[3]);
-			if((slotId > EmuConstants::EQUIPMENT_END || slotId < EmuConstants::EQUIPMENT_BEGIN) && slotId != 9999) {
-				c->Message(15, "A bot has 22 slots in its inventory, please choose a slot between 0 and 21 or 9999.");
-				return;
-			}
-
-			const char* equipped[EmuConstants::EQUIPMENT_SIZE + 1] = {"Charm", "Left Ear", "Head", "Face", "Right Ear", "Neck", "Shoulders", "Arms", "Back",
-										"Left Wrist", "Right Wrist", "Range", "Hands", "Primary Hand", "Secondary Hand",
-										"Left Finger", "Right Finger", "Chest", "Legs", "Feet", "Waist", "Ammo", "Powersource" };
-
-			const Item_Struct* itm = nullptr;
-			const ItemInst* itminst = c->GetTarget()->CastToBot()->GetBotItem(slotId);
-			if(itminst)
-				itm = itminst->GetItem();
-
-			if(!TempErrorMessage.empty()) {
-				c->Message(13, "Database Error: %s", TempErrorMessage.c_str());
-				return;
-			}
-
-			// Don't allow the player to remove a lore item they already possess and cause a crash
-			bool failedLoreCheck = false;
-			if(itminst) {
-				for (int m = AUG_BEGIN; m < EmuConstants::ITEM_COMMON_SIZE; ++m) {
-					ItemInst *itma = itminst->GetAugment(m);
-					if(itma) {
-						if(c->CheckLoreConflict(itma->GetItem()))
-							failedLoreCheck = true;
-					}
-				}
-
-				if(c->CheckLoreConflict(itm))
-					failedLoreCheck = true;
-			}
-			if(!failedLoreCheck) {
-				if(itm) {
-					c->PushItemOnCursor(*itminst, true);
-					Bot *gearbot = c->GetTarget()->CastToBot();
-					if((slotId == MainRange)||(slotId == MainAmmo)||(slotId == MainPrimary)||(slotId == MainSecondary))
-						gearbot->SetBotArcher(false);
-
-					gearbot->RemoveBotItemBySlot(slotId, &TempErrorMessage);
-
-					if(!TempErrorMessage.empty()) {
-						c->Message(13, "Database Error: %s", TempErrorMessage.c_str());
-						return;
-					}
-
-					gearbot->BotRemoveEquipItem(slotId);
-					gearbot->CalcBotStats();
-					switch(slotId) {
-						case MainCharm:
-						case MainEar1:
-						case MainHead:
-						case MainFace:
-						case MainEar2:
-						case MainNeck:
-						case MainBack:
-						case MainWrist1:
-						case MainWrist2:
-						case MainRange:
-						case MainPrimary:
-						case MainSecondary:
-						case MainFinger1:
-						case MainFinger2:
-						case MainChest:
-						case MainWaist:
-						case MainPowerSource:
-						case MainAmmo:
-							gearbot->BotGroupSay(gearbot, "My %s is now unequipped.", equipped[slotId]);
-							break;
-						case MainShoulders:
-						case MainArms:
-						case MainHands:
-						case MainLegs:
-						case MainFeet:
-							gearbot->BotGroupSay(gearbot, "My %s are now unequipped.", equipped[slotId]);
-							break;
-						default:
-							break;
-					}
-				}
-				else {
-					switch(slotId) {
-						case MainCharm:
-						case MainEar1:
-						case MainHead:
-						case MainFace:
-						case MainEar2:
-						case MainNeck:
-						case MainBack:
-						case MainWrist1:
-						case MainWrist2:
-						case MainRange:
-						case MainPrimary:
-						case MainSecondary:
-						case MainFinger1:
-						case MainFinger2:
-						case MainChest:
-						case MainWaist:
-						case MainPowerSource:
-						case MainAmmo:
-							c->GetTarget()->CastToBot()->BotGroupSay(c->GetTarget()->CastToBot(), "My %s is already unequipped.", equipped[slotId]);
-							break;
-						case MainShoulders:
-						case MainArms:
-						case MainHands:
-						case MainLegs:
-						case MainFeet:
-							c->GetTarget()->CastToBot()->BotGroupSay(c->GetTarget()->CastToBot(), "My %s are already unequipped.", equipped[slotId]);
-							break;
-						default:
-							break;
-					}
-				}
-			}
-			else {
-				c->Message_StringID(0, PICK_LORE);
-			}
-		}
-		return;
-	}
-
-	if(!strcasecmp(sep->arg[1], "update")) {
-		if((c->GetTarget() != nullptr) && c->GetTarget()->IsBot()) {
-			if(c->GetLevel() <= c->GetTarget()->GetLevel()) {
-				c->Message(15, "This bot has already been updated.");
-				return;
-			}
-
-			if(c->IsGrouped()) {
-				Group *g = entity_list.GetGroupByClient(c);
-				for (int i = 0; i < MAX_GROUP_MEMBERS; i++) {
-					if(g && g->members[i] && g->members[i]->IsEngaged()) {
-						c->Message(15, "You can't update bots while you are engaged.");
-						return;
-					}
-				}
-			}
-
-			if((c->GetTarget()->CastToBot()->GetBotOwner() == c->CastToMob()) && !c->GetFeigned()) {
-				Bot* bot = c->GetTarget()->CastToBot();
-				bot->SetPetChooser(false);
-				bot->CalcBotStats();
-			} else {
-				if(c->GetFeigned())
-					c->Message(15, "You cannot update bots while feigned.");
-				else
-					c->Message(15, "You must target your bot first.");
-			}
-		}
-		else
-			c->Message(15, "You must target a bot first.");
-
-		return;
-	}
-
-	//Bind
-	if(!strcasecmp(sep->arg[1], "bind")) {
-		Mob *binder = nullptr;
-		bool hasbinder = false;
-		if(c->IsGrouped()) {
-			Group *g = c->GetGroup();
-			if(g) {
-				for(int i = 0; i < MAX_GROUP_MEMBERS; i++) {
-					if(g->members[i] && g->members[i]->IsBot() && (g->members[i]->GetClass() == CLERIC)) {
-						hasbinder = true;
-						binder = g->members[i];
-					}
-				}
-
-				if(!hasbinder)
-					c->Message(15, "You must have a Cleric in your group.");
-			}
-		}
-
-		if(hasbinder) {
-			binder->CastToBot()->BotGroupSay(binder->CastToBot(), "Attempting to bind you %s.", c->GetName());
-			binder->CastToNPC()->CastSpell(35, c->GetID(), 1, -1, -1);
-		}
-		return;
-	}
-
-	// Rune
-	if(!strcasecmp(sep->arg[1], "rune")) {
-		Mob *runeer = nullptr;
-		bool hasruneer = false;
-		if(c->IsGrouped()) {
-			Group *g = c->GetGroup();
-			if(g) {
-				for(int i = 0; i < MAX_GROUP_MEMBERS; i++) {
-					if(g->members[i] && g->members[i]->IsBot() && (g->members[i]->GetClass() == ENCHANTER)) {
-						hasruneer = true;
-						runeer = g->members[i];
-					}
-				}
-
-				if(!hasruneer)
-					c->Message(15, "You must have an Enchanter in your group.");
-			}
-		}
-
-		if(hasruneer) {
-			if (c->GetLevel() <= 12)
-				runeer->CastToBot()->BotGroupSay(runeer->CastToBot(), "I need to be level 13 or higher for this...");
-			else if ((c->GetLevel() >= 13) && (c->GetLevel() <= 21)) {
-				runeer->CastToBot()->BotGroupSay(runeer->CastToBot(), "Casting Rune I...");
-				runeer->CastSpell(481, c->GetID(), 1, -1, -1);
-			} else if ((c->GetLevel() >= 22) && (c->GetLevel() <= 32)) {
-				runeer->CastToBot()->BotGroupSay(runeer->CastToBot(), "Casting Rune II...");
-				runeer->CastSpell(482, c->GetID(), 1, -1, -1);
-			} else if ((c->GetLevel() >= 33) && (c->GetLevel() <= 39)) {
-				runeer->CastToBot()->BotGroupSay(runeer->CastToBot(), "Casting Rune III...");
-				runeer->CastSpell(483, c->GetID(), 1, -1, -1);
-			} else if ((c->GetLevel() >= 40) && (c->GetLevel() <= 51)) {
-				runeer->CastToBot()->BotGroupSay(runeer->CastToBot(), "Casting Rune IV...");
-				runeer->CastSpell(484, c->GetID(), 1, -1, -1);
-			} else if ((c->GetLevel() >= 52) && (c->GetLevel() <= 60)) {
-				runeer->CastToBot()->BotGroupSay(runeer->CastToBot(), "Casting Rune V...");
-				runeer->CastSpell(1689, c->GetID(), 1, -1, -1);
-			} else if (c->GetLevel() >= 61){
-				runeer->CastToBot()->BotGroupSay(runeer->CastToBot(), "Casting Rune of Zebuxoruk...");
-				runeer->CastSpell(3343, c->GetID(), 1, -1, -1);
-			}
-		}
-		return;
-	}
-
-	//Tracking
-	if(!strcasecmp(sep->arg[1], "track") && c->IsGrouped()) {
-		Mob *Tracker;
-		uint32 TrackerClass = 0;
-		Group *g = c->GetGroup();
-		if(g) {
-			for(int i = 0; i < MAX_GROUP_MEMBERS; i++) {
-				if(g->members[i] && g->members[i]->IsBot()) {
-					switch(g->members[i]->GetClass()) {
-						case RANGER:
-							Tracker = g->members[i];
-							TrackerClass = RANGER;
-							break;
-						case DRUID:
-							if(TrackerClass != RANGER) {
-								Tracker = g->members[i];
-								TrackerClass = DRUID;
-							}
-							break;
-						case BARD:
-							if(TrackerClass == 0) {
-								Tracker = g->members[i];
-								TrackerClass = BARD;
-							}
-							break;
-						default:
-							break;
-					}
-				}
-			}
-
-			int Level = (c->GetLevel());
-			int RangeR = (Level * 80); //Ranger
-			int RangeD = (Level * 30); //Druid
-			int RangeB = (Level * 20); //Bard
-			switch(TrackerClass) {
-				case RANGER:
-					if(!strcasecmp(sep->arg[2], "all")) {
-						Tracker->CastToBot()->BotGroupSay(Tracker->CastToBot(), "Tracking everything.");
-						entity_list.ShowSpawnWindow(c, RangeR, false);
-					} else if(!strcasecmp(sep->arg[2], "rare")) {
-						Tracker->CastToBot()->BotGroupSay(Tracker->CastToBot(), "Selective tracking.");
-						entity_list.ShowSpawnWindow(c, RangeR, true);
-					} else if(!strcasecmp(sep->arg[2], "near")) {
-						Tracker->CastToBot()->BotGroupSay(Tracker->CastToBot(), "Tracking mobs nearby.");
-						entity_list.ShowSpawnWindow(c, RangeD, false);
-					} else
-						Tracker->CastToBot()->BotGroupSay(Tracker->CastToBot(), "Do you want to %s, %s, or %s?", Tracker->CastToBot()->CreateSayLink(c, "#bot track all", "track all").c_str(), Tracker->CastToBot()->CreateSayLink(c, "#bot track near", "track near").c_str(), Tracker->CastToBot()->CreateSayLink(c, "#bot track rare", "track rare").c_str());
-
-					break;
-				case BARD:
-					if(TrackerClass != RANGER)
-						Tracker->CastToBot()->BotGroupSay(Tracker->CastToBot(), "Tracking up.");
-					entity_list.ShowSpawnWindow(c, RangeB, false);
-					break;
-				case DRUID:
-					if(TrackerClass = BARD)
-						Tracker->CastToBot()->BotGroupSay(Tracker->CastToBot(), "Tracking up.");
-					entity_list.ShowSpawnWindow(c, RangeD, false);
-					break;
-				default:
-					c->Message(15, "You must have a Ranger, Druid, or Bard in your group.");
-					break;
-			}
-		}
-	}
-
-	//Cure
-	if ((!strcasecmp(sep->arg[1], "cure")) && (c->IsGrouped())) {
-		Mob *Curer;
-		uint32 CurerClass = 0;
-		Group *g = c->GetGroup();
-		if(g) {
-			for(int i = 0; i < MAX_GROUP_MEMBERS; i++){
-				if(g->members[i] && g->members[i]->IsBot()) {
-					switch(g->members[i]->GetClass()) {
-						case CLERIC:
-							Curer = g->members[i];
-							CurerClass = CLERIC;
-							break;
-						case SHAMAN:
-							if(CurerClass != CLERIC){
-								Curer = g->members[i];
-								CurerClass = SHAMAN;
-							}
-							break;
-						case DRUID:
-							if (CurerClass == 0){
-								Curer = g->members[i];
-								CurerClass = DRUID;
-							}
-							break;
-						default:
-							break;
-					}
-				}
-			}
-			switch(CurerClass) {
-				case CLERIC:
-					if	(!strcasecmp(sep->arg[2], "poison") && (c->GetLevel() >= 1)) {
-						Curer->CastToBot()->BotGroupSay(Curer->CastToBot(), "Trying to cure us of %s.", sep->arg[2]);
-						Curer->CastToBot()->Bot_Command_Cure(1, Curer->GetLevel());
-					} else if (!strcasecmp(sep->arg[2], "disease") && (c->GetLevel() >= 4)) {
-						Curer->CastToBot()->BotGroupSay(Curer->CastToBot(), "Trying to cure us of %s.", sep->arg[2]);
-						Curer->CastToBot()->Bot_Command_Cure(2, Curer->GetLevel());
-					} else if(!strcasecmp(sep->arg[2], "curse") && (c->GetLevel() >= 8)) {
-						Curer->CastToBot()->BotGroupSay(Curer->CastToBot(), "Trying to cure us of %s.", sep->arg[2]);
-						Curer->CastToBot()->Bot_Command_Cure(3, Curer->GetLevel());
-					} else if(!strcasecmp(sep->arg[2], "blindness") && (c->GetLevel() >= 3)) {
-						Curer->CastToBot()->BotGroupSay(Curer->CastToBot(), "Trying to cure us of %s.", sep->arg[2]);
-						Curer->CastToBot()->Bot_Command_Cure(4, Curer->GetLevel());
-					} else if (!strcasecmp(sep->arg[2], "curse") && (c->GetLevel() <= 8)
-						|| !strcasecmp(sep->arg[2], "blindness") && (c->GetLevel() <= 3)
-						|| !strcasecmp(sep->arg[2], "disease") && (c->GetLevel() <= 4)
-						|| !strcasecmp(sep->arg[2], "poison") && (c->GetLevel() <= 1)) {
-							Curer->CastToBot()->BotGroupSay(Curer->CastToBot(), "I am not the required level yet.");
-					} else
-						Curer->CastToBot()->BotGroupSay(Curer->CastToBot(), "Do you want to cure %s, %s, %s, or %s?", Curer->CastToBot()->CreateSayLink(c, "#bot cure poison", "poison").c_str(), Curer->CastToBot()->CreateSayLink(c, "#bot cure disease", "disease").c_str(), Curer->CastToBot()->CreateSayLink(c, "#bot cure curse", "curse").c_str(), Curer->CastToBot()->CreateSayLink(c, "#bot cure blindness", "blindness").c_str());
-
-					break;
-				case SHAMAN:
-					if	(!strcasecmp(sep->arg[2], "poison") && (c->GetLevel() >= 2)) {
-						Curer->CastToBot()->BotGroupSay(Curer->CastToBot(), "Trying to cure us of %s.", sep->arg[2]);
-						Curer->CastToBot()->Bot_Command_Cure(1, Curer->GetLevel());
-					} else if (!strcasecmp(sep->arg[2], "disease") && (c->GetLevel() >= 1)) {
-						Curer->CastToBot()->BotGroupSay(Curer->CastToBot(), "Trying to cure us of %s.", sep->arg[2]);
-						Curer->CastToBot()->Bot_Command_Cure(2, Curer->GetLevel());
-					} else if(!strcasecmp(sep->arg[2], "curse")) {
-						Curer->CastToBot()->BotGroupSay(Curer->CastToBot(), "I don't have that spell.");
-					} else if(!strcasecmp(sep->arg[2], "blindness") && (c->GetLevel() >= 7)) {
-						Curer->CastToBot()->BotGroupSay(Curer->CastToBot(), "Trying to cure us of %s.", sep->arg[2]);
-						Curer->CastToBot()->Bot_Command_Cure(4, Curer->GetLevel());
-					} else if (!strcasecmp(sep->arg[2], "blindness") && (c->GetLevel() <= 7)
-						|| !strcasecmp(sep->arg[2], "disease") && (c->GetLevel() <= 1)
-						|| !strcasecmp(sep->arg[2], "poison") && (c->GetLevel() <= 2)) {
-							Curer->CastToBot()->BotGroupSay(Curer->CastToBot(), "I am not the required level yet.");
-					} else
-						Curer->CastToBot()->BotGroupSay(Curer->CastToBot(), "Do you want to cure %s, %s, or %s?", Curer->CastToBot()->CreateSayLink(c, "#bot cure poison", "poison").c_str(), Curer->CastToBot()->CreateSayLink(c, "#bot cure disease", "disease").c_str(), Curer->CastToBot()->CreateSayLink(c, "#bot cure blindness", "blindness").c_str());
-
-					break;
-				case DRUID:
-					if	(!strcasecmp(sep->arg[2], "poison") && (c->GetLevel() >= 5)) {
-						Curer->CastToBot()->BotGroupSay(Curer->CastToBot(), "Trying to cure us of %s.", sep->arg[2]);
-						Curer->CastToBot()->Bot_Command_Cure(1, Curer->GetLevel());
-					} else if (!strcasecmp(sep->arg[2], "disease") && (c->GetLevel() >= 4)) {
-						Curer->CastToBot()->BotGroupSay(Curer->CastToBot(), "Trying to cure us of %s.", sep->arg[2]);
-						Curer->CastToBot()->Bot_Command_Cure(2, Curer->GetLevel());
-					} else if(!strcasecmp(sep->arg[2], "curse")) { // Fire level 1
-						Curer->CastToBot()->BotGroupSay(Curer->CastToBot(), "I don't have that spell.");
-					} else if(!strcasecmp(sep->arg[2], "blindness") && (c->GetLevel() >= 13)) {
-						Curer->CastToBot()->BotGroupSay(Curer->CastToBot(), "I don't have that spell.");
-					} else if (!strcasecmp(sep->arg[2], "disease") && (c->GetLevel() <= 4)
-						|| !strcasecmp(sep->arg[2], "poison") && (c->GetLevel() <= 5)) {
-							Curer->CastToBot()->BotGroupSay(Curer->CastToBot(), "I am not the required level yet.");
-					} else
-						Curer->CastToBot()->BotGroupSay(Curer->CastToBot(), "Do you want to cure %s or %s?", Curer->CastToBot()->CreateSayLink(c, "#bot cure poison", "poison").c_str(), Curer->CastToBot()->CreateSayLink(c, "#bot cure disease", "disease").c_str());
-					break;
-				default:
-					c->Message(15, "You must have a Cleric, Shaman, or Druid in your group.");
-					break;
-			}
-		}
-	}
-
-	//Mez
-	if(!strcasecmp(sep->arg[1], "mez")) {
-		Mob *target = c->GetTarget();
-		if(target == nullptr || target == c || target->IsBot() || (target->IsPet() && target->GetOwner() && target->GetOwner()->IsBot())) {
-			c->Message(15, "You must select a monster");
-			return;
-		}
-
-		if(c->IsGrouped()) {
-			bool hasmezzer = false;
-			Group *g = c->GetGroup();
-			for(int i = 0; i < MAX_GROUP_MEMBERS; i++) {
-				if(g && g->members[i] && g->members[i]->IsBot() && (g->members[i]->GetClass() == ENCHANTER)) {
-					hasmezzer = true;
-					Mob *mezzer = g->members[i];
-					mezzer->CastToBot()->BotGroupSay(mezzer->CastToBot(), "Trying to mesmerize %s.", target->GetCleanName());
-					mezzer->CastToBot()->MesmerizeTarget(target);
-				}
-			}
-
-			if(!hasmezzer)
-				c->Message(15, "You must have an Enchanter in your group.");
-		}
-		return;
-	}
-
-	//Lore (Identify item)
-	if(!strcasecmp(sep->arg[1], "lore")) {
-		if(c->IsGrouped()) {
-			bool hascaster = false;
-			Group *g = c->GetGroup();
-			for(int i = 0; i < MAX_GROUP_MEMBERS; i++) {
-				if(g && g->members[i] && g->members[i]->IsBot()) {
-					uint8 casterlevel = g->members[i]->GetLevel();
-					switch(g->members[i]->GetClass()) {
-						case ENCHANTER:
-							if(casterlevel >= 15)
-								hascaster = true;
-
-							break;
-						case WIZARD:
-							if(casterlevel >= 14)
-								hascaster = true;
-
-							break;
-						case NECROMANCER:
-							if(casterlevel >= 17)
-								hascaster = true;
-
-							break;
-						case MAGICIAN:
-							if(casterlevel >= 13)
-								hascaster = true;
-
-							break;
-						default:
-							break;
-					}
-					if(hascaster) {
-						g->members[i]->CastToBot()->BotGroupSay(g->members[i]->CastToBot(), "Trying to Identify your item...");
-						g->members[i]->CastSpell(305, c->GetID(), 1, -1, -1);
-						break;
-					}
-				}
-			}
-
-			if(!hascaster)
-				c->Message(15, "You don't see anyone in your group that can cast Identify.");
-		} else
-			c->Message(15, "You don't see anyone in your group that can cast Identify.");
-
-		return;
-	}
-
-	//Resurrect
-	if(!strcasecmp(sep->arg[1], "resurrect"))	{
-		Mob *target = c->GetTarget();
-		if(target == nullptr || !target->IsPlayerCorpse()) {
-			c->Message(15, "You must select a corpse!");
-			return;
-		}
-
-		if(c->IsGrouped()) {
-			bool hasrezzer = false;
-			Group *g = c->GetGroup();
-			for(int i = 0; i < MAX_GROUP_MEMBERS; i++) {
-				if(g && g->members[i] && g->members[i]->IsBot() && (g->members[i]->GetClass() == CLERIC)) {
-					hasrezzer = true;
-					Mob *rezzer = g->members[i];
-					rezzer->CastToBot()->BotGroupSay(rezzer->CastToBot(), "Trying to resurrect %s.", target->GetCleanName());
-					rezzer->CastToBot()->Bot_Command_RezzTarget(target);
-					break;
-				}
-			}
-
-			if(!hasrezzer)
-				c->Message(15, "You must have a Cleric in your group!");
-		} else
-			c->Message(15, "You must have a Cleric in your group!");
-
-		return;
-	}
-
-	if(!strcasecmp(sep->arg[1], "setpet")) {
-		if(c->GetTarget() && c->GetTarget()->IsBot() && (c->GetTarget()->GetClass() == MAGICIAN)) {
-			if(c->GetTarget()->CastToBot()->GetBotOwnerCharacterID() == c->CharacterID()) {
-				int botlevel = c->GetTarget()->GetLevel();
-				c->GetTarget()->CastToBot()->SetPetChooser(true);
-				if(botlevel == 1) {
-					c->GetTarget()->CastToBot()->BotGroupSay(c->GetTarget()->CastToBot(), "I don't have any pets yet.");
-					return;
-				}
-
-				if(!strcasecmp(sep->arg[2], "water")) {
-					c->GetTarget()->CastToBot()->SetPetChooserID(0);
-				} else if(!strcasecmp(sep->arg[2], "fire")) {
-					if(botlevel < 3) {
-						c->GetTarget()->CastToBot()->BotGroupSay(c->GetTarget()->CastToBot(), "I don't have that pet yet.");
-						return;
-					} else
-						c->GetTarget()->CastToBot()->SetPetChooserID(1);
-				} else if(!strcasecmp(sep->arg[2], "air")) {
-					if(botlevel < 4) {
-						c->GetTarget()->CastToBot()->BotGroupSay(c->GetTarget()->CastToBot(), "I don't have that pet yet.");
-						return;
-					} else
-						c->GetTarget()->CastToBot()->SetPetChooserID(2);
-				} else if(!strcasecmp(sep->arg[2], "earth")) {
-					if(botlevel < 5) {
-						c->GetTarget()->CastToBot()->BotGroupSay(c->GetTarget()->CastToBot(), "I don't have that pet yet.");
-						return;
-					} else
-						c->GetTarget()->CastToBot()->SetPetChooserID(3);
-				} else if(!strcasecmp(sep->arg[2], "monster")) {
-					if(botlevel < 30) {
-						c->GetTarget()->CastToBot()->BotGroupSay(c->GetTarget()->CastToBot(), "I don't have that pet yet.");
-						return;
-					} else
-						c->GetTarget()->CastToBot()->SetPetChooserID(4);
-				}
-
-				if(c->GetTarget()->GetPet()) {
-					uint16 id = c->GetTarget()->GetPetID();
-					c->GetTarget()->SetPetID(0);
-					c->GetTarget()->CastSpell(331, id);
-				}
-			}
-		} else
-			c->Message(15, "You must target your Magician bot!");
-
-		return;
-	}
-
-	//Summon Corpse
-	if(!strcasecmp(sep->arg[1], "corpse") && !strcasecmp(sep->arg[2], "summon")) {
-		if(c->GetTarget() == nullptr) {
-			c->Message(15, "You must select player with his corpse in the zone!");
-			return;
-		}
-
-		if(c->IsGrouped()) {
-			bool hassummoner = false;
-			Mob *t = c->GetTarget();
-			Group *g = c->GetGroup();
-			int summonerlevel = 0;
-			for(int i = 0; i < MAX_GROUP_MEMBERS; i++) {
-				if(g && g->members[i] && g->members[i]->IsBot() && ((g->members[i]->GetClass() == NECROMANCER)||(g->members[i]->GetClass() == SHADOWKNIGHT))) {
-					hassummoner = true;
-					summonerlevel = g->members[i]->GetLevel();
-					g->members[i]->InterruptSpell();
-					if(!t->IsClient()) {
-						g->members[i]->CastToBot()->BotGroupSay(g->members[i]->CastToBot(), "You have to target a player with a corpse in the zone!");
-						return;
-					} else {
-						g->members[i]->SetTarget(t);
-						if(summonerlevel < 12) {
-							g->members[i]->CastToBot()->BotGroupSay(g->members[i]->CastToBot(), "I don't have that spell yet.");
-						} else if((summonerlevel > 11) && (summonerlevel < 35)) {
-							g->members[i]->CastToBot()->BotGroupSay(g->members[i]->CastToBot(), "Attempting to summon %s\'s corpse.", t->GetCleanName());
-							g->members[i]->CastSpell(2213, t->GetID(), 1, -1, -1);
-							return;
-						} else if((summonerlevel > 34) && (summonerlevel < 71)) {
-							g->members[i]->CastToBot()->BotGroupSay(g->members[i]->CastToBot(), "Attempting to summon %s\'s corpse.", t->GetCleanName());
-							g->members[i]->CastSpell(3, t->GetID(), 1, -1, -1);
-							return;
-						} else if(summonerlevel > 70) {
-							g->members[i]->CastToBot()->BotGroupSay(g->members[i]->CastToBot(), "Attempting to summon %s\'s corpse.", t->GetCleanName());
-							g->members[i]->CastSpell(10042, t->GetID(), 1, -1, -1);
-							return;
-						}
-					}
-				}
-			}
-
-			if (!hassummoner)
-				c->Message(15, "You must have a Necromancer or Shadow Knight in your group.");
-
-			return;
-		}
-	}
-
-	//Pacify
-	if(!strcasecmp(sep->arg[1], "target") && !strcasecmp(sep->arg[2], "calm")) {
-		Mob *target = c->GetTarget();
-		if(target == nullptr || target->IsClient() || target->IsBot() || (target->IsPet() && target->GetOwner() && target->GetOwner()->IsBot()))
-			c->Message(15, "You must select a monster!");
-		else {
-			if(c->IsGrouped()) {
-				Group *g = c->GetGroup();
-				for(int i = 0; i < MAX_GROUP_MEMBERS; i++) {
-					// seperated cleric and chanter so chanter is primary
-					if(g && g->members[i] && g->members[i]->IsBot() && (g->members[i]->GetClass() == ENCHANTER)) {
-						Bot *pacer = g->members[i]->CastToBot();
-						pacer->BotGroupSay(pacer, "Trying to pacify %s.", target->GetCleanName());
-						if(pacer->Bot_Command_CalmTarget(target)) {
-							if(target->FindType(SE_Lull) || target->FindType(SE_Harmony) || target->FindType(SE_InstantHate))
-								c->Message(0, "I have successfully pacified %s.", target->GetCleanName());
-
-							return;
-						}
-						else
-							c->Message(0, "I failed to pacify %s.", target->GetCleanName());
-					}
-					// seperated cleric and chanter so chanter is primary
-					if(g && g->members[i] && g->members[i]->IsBot() && (g->members[i]->GetClass() == CLERIC) && (GroupHasEnchanterClass(g) == false)) {
-						Bot *pacer = g->members[i]->CastToBot();
-						pacer->BotGroupSay(pacer, "Trying to pacify %s.", target->GetCleanName());
-
-						if(pacer->Bot_Command_CalmTarget(target)) {
-							if(target->FindType(SE_Lull) || target->FindType(SE_Harmony) || target->FindType(SE_InstantHate))
-								c->Message(0, "I have successfully pacified %s.", target->GetCleanName());
-
-							return;
-						}
-						else
-							c->Message(0, "I failed to pacify %s.", target->GetCleanName());
-					}
-				}
-			}
-		}
-
-		return;
-	}
-
-	//Charm
-	if(!strcasecmp(sep->arg[1], "charm")) {
-		Mob *target = c->GetTarget();
-		if(target == nullptr || target->IsClient() || target->IsBot() || (target->IsPet() && target->GetOwner() && target->GetOwner()->IsBot())) {
-			c->Message(15, "You must select a monster!");
-			return;
-		}
-
-		uint32 DBtype = c->GetTarget()->GetBodyType();
-		Mob *Charmer;
-		uint32 CharmerClass = 0;
-		Group *g = c->GetGroup();
-		if(g) {
-			for(int i = 0; i < MAX_GROUP_MEMBERS; i++){
-				if(g->members[i] && g->members[i]->IsBot()) {
-					switch(g->members[i]->GetClass()) {
-						case ENCHANTER:
-							Charmer = g->members[i];
-							CharmerClass = ENCHANTER;
-							break;
-						case NECROMANCER:
-							if(CharmerClass != ENCHANTER){
-								Charmer = g->members[i];
-								CharmerClass = NECROMANCER;
-							}
-							break;
-						case DRUID:
-							if (CharmerClass == 0){
-								Charmer = g->members[i];
-								CharmerClass = DRUID;
-							}
-							break;
-						default:
-							break;
-					}
-				}
-			}
-			switch(CharmerClass) {
-				case ENCHANTER:
-					if	(c->GetLevel() >= 11) {
-						Charmer->CastToBot()->BotGroupSay(Charmer->CastToBot(), "Trying to charm %s.", target->GetCleanName());
-						Charmer->CastToBot()->Bot_Command_CharmTarget(1, target);
-					}
-					else if (c->GetLevel() <= 10)
-						Charmer->CastToBot()->BotGroupSay(Charmer->CastToBot(), "I am not the required level yet.");
-					else
-						Charmer->CastToBot()->BotGroupSay(Charmer->CastToBot(), "Mob level is too high or can't be charmed.");
-					break;
-				case NECROMANCER:
-					if	((c->GetLevel() >= 18) && (DBtype == 3)) {
-						Charmer->CastToBot()->BotGroupSay(Charmer->CastToBot(), "Trying to charm %s.", target->GetCleanName());
-						Charmer->CastToBot()->Bot_Command_CharmTarget(2, target);
-					}
-					else if (c->GetLevel() <= 17)
-						Charmer->CastToBot()->BotGroupSay(Charmer->CastToBot(), "I am not the required level yet.");
-					else
-						Charmer->CastToBot()->BotGroupSay(Charmer->CastToBot(), "Mob is not undead.");
-					break;
-				case DRUID:
-					if	((c->GetLevel() >= 13) && (DBtype == 21)) {
-						Charmer->CastToBot()->BotGroupSay(Charmer->CastToBot(), "Trying to charm %s.", target->GetCleanName());
-						Charmer->CastToBot()->Bot_Command_CharmTarget(3, target);
-					}
-					else if (c->GetLevel() <= 12)
-						Charmer->CastToBot()->BotGroupSay(Charmer->CastToBot(), "I am not the required level yet.");
-					else
-						Charmer->CastToBot()->BotGroupSay(Charmer->CastToBot(), "Mob is not an animal.");
-					break;
-				default:
-					c->Message(15, "You must have an Enchanter, Necromancer, or Druid in your group.");
-					break;
-			}
-		}
-	}
-
-	// Remove Bot's Pet
-	if(!strcasecmp(sep->arg[1], "pet") && !strcasecmp(sep->arg[2], "remove")) {
-		if(c->GetTarget() != nullptr) {
-			if (c->IsGrouped() && c->GetTarget()->IsBot() && (c->GetTarget()->CastToBot()->GetBotOwner() == c) &&
-				((c->GetTarget()->GetClass() == NECROMANCER) || (c->GetTarget()->GetClass() == ENCHANTER) || (c->GetTarget()->GetClass() == DRUID))) {
-					if(c->GetTarget()->CastToBot()->IsBotCharmer()) {
-						c->GetTarget()->CastToBot()->SetBotCharmer(false);
-						c->GetTarget()->CastToBot()->BotGroupSay(c->GetTarget()->CastToBot(), "Using a summoned pet.");
-					} else {
-						if(c->GetTarget()->GetPet()) {
-							c->GetTarget()->GetPet()->Say_StringID(PET_GETLOST_STRING);
-							c->GetTarget()->GetPet()->Depop(false);
-							c->GetTarget()->SetPetID(0);
-						}
-						c->GetTarget()->CastToBot()->SetBotCharmer(true);
-						c->GetTarget()->CastToBot()->BotGroupSay(c->GetTarget()->CastToBot(), "Available for Dire Charm command.");
-					}
-			}
-			else
-				c->Message(15, "You must target your Enchanter, Necromancer, or Druid bot.");
-		}
-		else
-			c->Message(15, "You must target an Enchanter, Necromancer, or Druid bot.");
-
-		return;
-	}
-
-	//Dire Charm
-	if(!strcasecmp(sep->arg[1], "Dire") && !strcasecmp(sep->arg[2], "Charm")) {
-		Mob *target = c->GetTarget();
-		if(target == nullptr || target->IsClient() || target->IsBot() || (target->IsPet() && target->GetOwner() && target->GetOwner()->IsBot())) {
-			c->Message(15, "You must select a monster");
-			return;
-		}
-		uint32 DBtype = c->GetTarget()->GetBodyType();
-		Mob *Direr;
-		uint32 DirerClass = 0;
-		Group *g = c->GetGroup();
-		if(g) {
-			for(int i = 0; i < MAX_GROUP_MEMBERS; i++){
-				if(g->members[i] && g->members[i]->IsBot()) {
-					switch(g->members[i]->GetClass()) {
-						case ENCHANTER:
-							Direr = g->members[i];
-							DirerClass = ENCHANTER;
-							break;
-						case NECROMANCER:
-							if(DirerClass != ENCHANTER){
-								Direr = g->members[i];
-								DirerClass = NECROMANCER;
-							}
-							break;
-						case DRUID:
-							if (DirerClass == 0){
-								Direr = g->members[i];
-								DirerClass = DRUID;
-							}
-							break;
-						default:
-							break;
-					}
-				}
-			}
-			switch(DirerClass) {
-				case ENCHANTER:
-					if	(c->GetLevel() >= 55) {
-						Direr->CastToBot()->BotGroupSay(Direr->CastToBot(), "Trying to dire charm %s.", target->GetCleanName());
-						Direr->CastToBot()->Bot_Command_DireTarget (1,target);
-					}
-					else if (c->GetLevel() <= 55)
-						Direr->CastToBot()->BotGroupSay(Direr->CastToBot(), "I am not the required level yet.");
-					else
-						Direr->CastToBot()->BotGroupSay(Direr->CastToBot(), "Mob level is too high or can't be charmed.");
-					break;
-				case NECROMANCER:
-					if	((c->GetLevel() >= 55) && (DBtype == 3)) {
-						Direr->CastToBot()->BotGroupSay(Direr->CastToBot(), "Trying to dire charm %s.", target->GetCleanName());
-						Direr->CastToBot()->Bot_Command_DireTarget (2,target);
-					}
-					else if (c->GetLevel() <= 55)
-						Direr->CastToBot()->BotGroupSay(Direr->CastToBot(), "I am not the required level yet.");
-					else
-						Direr->CastToBot()->BotGroupSay(Direr->CastToBot(), "Mob is not undead.");
-					break;
-				case DRUID:
-					if	((c->GetLevel() >= 55) && (DBtype == 21)) {
-						Direr->CastToBot()->BotGroupSay(Direr->CastToBot(), "Trying to dire charm %s.", target->GetCleanName());
-						Direr->CastToBot()->Bot_Command_DireTarget (3,target);
-					}
-					else if (c->GetLevel() <= 55)
-						Direr->CastToBot()->BotGroupSay(Direr->CastToBot(), "I am not the required level yet.");
-					else
-						Direr->CastToBot()->BotGroupSay(Direr->CastToBot(), "Mob is not an animal.");
-					break;
-				default:
-					c->Message(15, "You must have an Enchanter, Necromancer, or Druid in your group.");
-					break;
-			}
-		}
-	}
-
-	// Evacuate
-	if(!strcasecmp(sep->arg[1], "evac")) {
-		Mob *evac = nullptr;
-		bool hasevac = false;
-		if(c->IsGrouped()) {
-			Group *g = c->GetGroup();
-			if(g) {
-				for(int i = 0; i < MAX_GROUP_MEMBERS; i++) {
-					if((g->members[i] && g->members[i]->IsBot() && (g->members[i]->GetClass() == DRUID)) || (g->members[i] && g->members[i]->IsBot() && (g->members[i]->GetClass() == WIZARD))) {
-						hasevac = true;
-						evac = g->members[i];
-					}
-				}
-
-				if(!hasevac)
-					c->Message(15, "You must have a Druid in your group.");
-			}
-		}
-
-		if((hasevac) && (c->GetLevel() >= 18)) {
-			evac->CastToBot()->BotGroupSay(evac->CastToBot(), "Attempting to evacuate you, %s.", c->GetName());
-			evac->CastToClient()->CastSpell(2183, c->GetID(), 1, -1, -1);
-		}
-		else if((hasevac) && (c->GetLevel() <= 17))
-			evac->CastToBot()->BotGroupSay(evac->CastToBot(), "I'm not level 18 yet.");
-
-		return;
-	}
-
-	// Sow
-	if ((!strcasecmp(sep->arg[1], "speed")) && (c->IsGrouped())) {
-		Mob *Sower;
-		uint32 SowerClass = 0;
-		Group *g = c->GetGroup();
-		if(g) {
-			for(int i = 0; i < MAX_GROUP_MEMBERS; i++){
-				if(g->members[i] && g->members[i]->IsBot()) {
-					switch(g->members[i]->GetClass()) {
-						case DRUID:
-							Sower = g->members[i];
-							SowerClass = DRUID;
-							break;
-						case SHAMAN:
-							if (SowerClass != DRUID){
-								Sower = g->members[i];
-								SowerClass = SHAMAN;
-							}
-							break;
-						case RANGER:
-							if (SowerClass == 0){
-								Sower = g->members[i];
-								SowerClass = RANGER;
-							}
-							break;
-						case BEASTLORD:
-							if (SowerClass == 0){
-								Sower = g->members[i];
-								SowerClass = BEASTLORD;
-							}
-							break;
-						default:
-							break;
-					}
-				}
-			}
-			switch(SowerClass) {
-				case DRUID:
-					if ((!strcasecmp(sep->arg[2], "regular")) && (zone->CanCastOutdoor()) && (c->GetLevel() >= 10)) {
-						Sower->CastToBot()->BotGroupSay(Sower->CastToBot(), "Casting Spirit of Wolf.");
-						Sower->CastSpell(278, c->GetID(), 1, -1, -1);
-					}
-					else if ((!strcasecmp(sep->arg[2], "regular")) && (zone->CanCastOutdoor()) && (c->GetLevel() <= 10))
-						Sower->CastToBot()->BotGroupSay(Sower->CastToBot(), "I'm not level 10 yet.");
-					else if ((!strcasecmp(sep->arg[2], "wolf")) && zone->CanCastOutdoor() && (c->GetLevel() >= 20)) {
-						Sower->CastToBot()->BotGroupSay(Sower->CastToBot(), "Casting group Spirit of Wolf.");
-						Sower->CastSpell(428, c->GetID(), 1, -1, -1);
-					}
-					else if ((!strcasecmp(sep->arg[2], "wolf")) && (c->GetLevel() <= 20))
-						Sower->CastToBot()->BotGroupSay(Sower->CastToBot(), "I'm not level 20 yet.");
-					else if ((!strcasecmp(sep->arg[2], "feral")) && (c->GetLevel() >= 50)) {
-						Sower->CastToBot()->BotGroupSay(Sower->CastToBot(), "Casting Feral Pack.");
-						Sower->CastSpell(4058, c->GetID(), 1, -1, -1);
-					}
-					else if ((!strcasecmp(sep->arg[2], "feral")) && (c->GetLevel() <= 50))
-						Sower->CastToBot()->BotGroupSay(Sower->CastToBot(), "I'm not level 50 yet.");
-					else if ((!strcasecmp(sep->arg[2], "shrew")) && (c->GetLevel() >= 35)) {
-						Sower->CastToBot()->BotGroupSay(Sower->CastToBot(), "Casting Pack Shrew.");
-						Sower->CastSpell(4055, c->GetID(), 1, -1, -1);
-					}
-					else if ((!strcasecmp(sep->arg[2], "wolf")) && (c->GetLevel() <= 35))
-						Sower->CastToBot()->BotGroupSay(Sower->CastToBot(), "I'm not level 35 yet.");
-					else if ((!zone->CanCastOutdoor()) && (!strcasecmp(sep->arg[2], "regular")) || (!zone->CanCastOutdoor()) && (!strcasecmp(sep->arg[2], "wolf")))
-						Sower->CastToBot()->BotGroupSay(Sower->CastToBot(), "I can't cast this spell indoors, try %s if you're 35 or higher, or %s if you're 50 or higher.", Sower->CastToBot()->CreateSayLink(c, "#bot speed shrew", "Pack Shrew").c_str(), Sower->CastToBot()->CreateSayLink(c, "#bot speed feral", "Feral Pack").c_str());
-					else if (!zone->CanCastOutdoor())
-						Sower->CastToBot()->BotGroupSay(Sower->CastToBot(), "I can't cast this spell indoors, try 5s if you're 35 or higher, or %s if you're 50 or higher.", Sower->CastToBot()->CreateSayLink(c, "#bot speed shrew", "Pack Shrew").c_str(), Sower->CastToBot()->CreateSayLink(c, "#bot speed feral", "Feral Pack").c_str());
-					else if (zone->CanCastOutdoor())
-						Sower->CastToBot()->BotGroupSay(Sower->CastToBot(), "Do you want %s or %s?", Sower->CastToBot()->CreateSayLink(c, "#bot speed regular", "Spirit of Wolf").c_str(), Sower->CastToBot()->CreateSayLink(c, "#bot speed wolf", "Group Spirit of Wolf").c_str());
-					else if (!zone->CanCastOutdoor())
-						Sower->CastToBot()->BotGroupSay(Sower->CastToBot(), "I can't cast this spell indoors, try %s if you're 35 or higher, or %s if you're 50 or higher.", Sower->CastToBot()->CreateSayLink(c, "#bot speed shrew", "Pack Shrew").c_str(), Sower->CastToBot()->CreateSayLink(c, "#bot speed feral", "Feral").c_str());
-					break;
-				case SHAMAN:
-					if ((zone->CanCastOutdoor()) && (c->GetLevel() >= 9)) {
-						Sower->CastToBot()->BotGroupSay(Sower->CastToBot(), "Casting Spirit of Wolf.");
-						Sower->CastToClient()->CastSpell(278, c->GetID(), 1, -1, -1);
-					}
-					else if (!zone->CanCastOutdoor())
-						Sower->CastToBot()->BotGroupSay(Sower->CastToBot(), "I can't cast this spell indoors.");
-					else if (c->GetLevel() <= 9)
-						Sower->CastToBot()->BotGroupSay(Sower->CastToBot(), "I'm not level 9 yet.");
-					break;
-				case RANGER:
-					if ((zone->CanCastOutdoor()) && (c->GetLevel() >= 28)){
-						Sower->CastToBot()->BotGroupSay(Sower->CastToBot(), "Casting Spirit of Wolf.");
-						Sower->CastToClient()->CastSpell(278, c->GetID(), 1, -1, -1);
-					}
-					else if (!zone->CanCastOutdoor())
-						Sower->CastToBot()->BotGroupSay(Sower->CastToBot(), "I can't cast this spell indoors.");
-					else if (c->GetLevel() <= 28)
-						Sower->CastToBot()->BotGroupSay(Sower->CastToBot(), "I'm not level 28 yet.");
-					break;
-				case BEASTLORD:
-					if((zone->CanCastOutdoor()) && (c->GetLevel() >= 24)) {
-						Sower->CastToBot()->BotGroupSay(Sower->CastToBot(), "Casting Spirit of Wolf.");
-						Sower->CastToClient()->CastSpell(278, c->GetID(), 1, -1, -1);
-					}
-					else if (!zone->CanCastOutdoor())
-						Sower->CastToBot()->BotGroupSay(Sower->CastToBot(), "I can't cast this spell indoors.");
-					else if (c->GetLevel() <= 24)
-						Sower->CastToBot()->BotGroupSay(Sower->CastToBot(), "I'm not level 24 yet.");
-					break;
-				default:
-					c->Message(15, "You must have a Druid, Shaman, Ranger, or Beastlord in your group.");
-					break;
-			}
-		}
-	}
-
-	// Shrink
-	if ((!strcasecmp(sep->arg[1], "shrink")) && (c->IsGrouped())) {
-		Mob *Shrinker;
-		uint32 ShrinkerClass = 0;
-		Group *g = c->GetGroup();
-		Mob *target = c->GetTarget();
-		if(target == nullptr || (!target->IsClient() && (c->GetTarget()->CastToBot()->GetBotOwner() != c)))
-			c->Message(15, "You must select a player or bot you own!");
-
-		else if(g) {
-			for(int i = 0; i < MAX_GROUP_MEMBERS; i++){
-				if(g->members[i] && g->members[i]->IsBot()) {
-					switch(g->members[i]->GetClass()) {
-						case SHAMAN:
-							Shrinker = g->members[i];
-							ShrinkerClass = SHAMAN;
-							break;
-						case BEASTLORD:
-							if (ShrinkerClass != SHAMAN){
-								Shrinker = g->members[i];
-								ShrinkerClass = BEASTLORD;
-							}
-							break;
-						default:
-							break;
-					}
-				}
-			}
-			switch(ShrinkerClass) {
-				case SHAMAN:
-					if (c->GetLevel() >= 15) {
-						Shrinker->CastToBot()->BotGroupSay(Shrinker->CastToBot(), "Casting Shrink.");
-						Shrinker->CastToBot()->SpellOnTarget(345, target);
-					}
-					else if (c->GetLevel() <= 14)
-						Shrinker->CastToBot()->BotGroupSay(Shrinker->CastToBot(), "I'm not level 15 yet.");
-					break;
-				case BEASTLORD:
-					if (c->GetLevel() >= 23) {
-						Shrinker->CastToBot()->BotGroupSay(Shrinker->CastToBot(), "Casting Shrink.");
-						Shrinker->CastToBot()->SpellOnTarget(345, target);
-					}
-					else if (c->GetLevel() <= 22)
-						Shrinker->CastToBot()->BotGroupSay(Shrinker->CastToBot(), "I'm not level 23 yet.");
-					break;
-				default:
-					c->Message(15, "You must have a Shaman or Beastlord in your group.");
-					break;
-			}
-		}
-	}
-
-	// Gate
-	if ((!strcasecmp(sep->arg[1], "gate")) && (c->IsGrouped())) {
-		const char* druidgate[25][4] = { { "#bot gate karana", "karana", "North Karana", "550" }, { "#bot gate commons", "commons", "West Commonlands", "551" },
-		{ "#bot gate tox", "tox", "Toxxulia Forest", "552" }, { "#bot gate butcher", "butcher", "Butcherblock Mountains", "553" }, { "#bot gate lava", "lava", "Lavastorm Mountains", "554" },
-		{ "#bot gate ro", "ro", "South Ro", "555" }, { "#bot gate feerott", "feerrott", "Feerrott", "556" }, { "#bot gate steamfont", "steamfont", "Steamfont Mountains", "557" },
-		{ "#bot gate misty", "misty", "Misty Thicket", "558" }, { "#bot gate wakening", "wakening", "Wakening Lands", "1398" }, { "#bot gate iceclad", "iceclad", "Ieclad Ocean", "1434" },
-		{ "#bot gate divide", "divide", "The Great Divide", "1438" }, { "#bot gate cobalt", "cobalt", "Cobalt Scar", "1440" }, { "#bot gate combines", "combines", "The Combines", "1517" },
-		{ "#bot gate surefall", "surefall", "Surefall Glade", "2020" }, { "#bot gate grimling", "grimling", "Grimling Forest", "2419" }, { "#bot gate twilight", "twilight", "The Twilight Sea", "2424" },
-		{ "#bot gate dawnshroud", "dawnshroud", "Dawnshroud Peak", "2429" }, { "#bot gate nexus", "nexus", "The Nexus", "2432" }, { "#bot gate pok", "pok", "Plane of Knowledge", "3184" },
-		{ "#bot gate stonebrunt", "stonebrunt", "Stonebrunt Mountains", "3792" }, { "#bot gate bloodfields", "bloodfields", "Bloodfields", "6184" },
-		{ "#bot gate emerald", "emerald", "The Emerald Jungle", "1737" }, { "#bot gate skyfire", "skyfire", "Skyfire Mountains", "1736" }, { "#bot gate slaughter", "slaughter", "Wall of Slaughter", "6179" } };
-		const char* wizardgate[24][4] = { { "#bot gate commons", "commons", "West Commonlands", "566" }, { "#bot gate fay", "fay", "Greater Faydark", "563" },
-		{ "#bot gate ro", "ro", "South Ro", "567" }, { "#bot gate tox", "tox", "Toxxulia Forest", "561" }, { "#bot gate nk", "nk", "North Karana", "562" },
-		{ "#bot gate nek", "nek", "Nektulos Forest", "564" }, { "#bot gate wakening", "wakening", "Wakening Lands", "1399" }, { "#bot gate iceclad", "iceclad", "Iceclad Ocean", "1418" },
-		{ "#bot gate divide", "divide", "The Great Divide", "1423" }, { "#bot gate cobalt", "cobalt", "Cobaltscar", "1425" }, { "#bot gate dreadlands", "dreadlands", "Dreadlands", "1516" },
-		{ "#bot gate wk", "wk", "West Karana", "568" }, { "#bot gate twilight", "twilight", "Twilight Sea", "2425" }, { "#bot gate dawnshroud", "dawnshroud", "Dawnshroud Peak", "2430" },
-		{ "#bot gate nexus", "nexus", "Nexus", "2944" }, { "#bot gate pok", "pok", "Plane of Knowledge", "3180" }, { "#bot gate wos", "wos", "Wall of Slaughter", "6178" },
-		{ "#bot gate grimling", "grimling", "Grimling Forest", "2420" }, { "#bot gate emerald", "emerald", "Emerald Jungle", "1739" }, { "#bot gate hateplane", "hateplane", "Plane of Hate", "666" },
-		{ "#bot gate airplane", "airplane", "Plane of Sky", "674" }, { "#bot gate skyfire", "skyfire", "Skyfire Mountains", "1738" },
-		{ "#bot gate bloodfields", "bloodfields", "Bloodfields", "6183" }, { "#bot gate stonebrunt", "stonebrunt", "Stonebrunt Mountains", "3793" } };
-		bool valid = false;
-		Mob *Gater;
-		uint32 GaterClass = 0;
-		Group *g = c->GetGroup();
-		if(g) {
-			for(int i = 0; i < MAX_GROUP_MEMBERS; i++){
-				if(g->members[i] && g->members[i]->IsBot()) {
-					switch(g->members[i]->GetClass()) {
-						case DRUID:
-							Gater = g->members[i];
-							GaterClass = DRUID;
-							break;
-						case WIZARD:
-							if (GaterClass == 0){
-								Gater = g->members[i];
-								GaterClass = WIZARD;
-							}
-							break;
-						default:
-							break;
-					}
-				}
-			}
-			switch(GaterClass) {
-				case DRUID: {
-					for (int i = 0; i < 25; i++) {
-						if (!strcasecmp(sep->arg[2], druidgate[i][1])) {
-							Gater->CastToBot()->BotGroupSay(Gater->CastToBot(), "Gating to %s!", druidgate[i][2]);
-							Gater->CastSpell(atoi(druidgate[i][3]), c->GetID(), 1, -1, -1);
-							valid = true;
-						}
-					}
-					if (!valid) {
-						Gater->CastToBot()->BotGroupSay(Gater->CastToBot(), "With the proper level I can gate you to all of the following zones:");
-						for (int i = 0; i < 25; i++)
-							Gater->CastToBot()->BotGroupSay(Gater->CastToBot(), "%s", Gater->CastToBot()->CreateSayLink(c, druidgate[i][0], druidgate[i][2]).c_str());
-					}
-					break;
-				}
-				case WIZARD: {
-					for (int i = 0; i < 24; i++) {
-						if (!strcasecmp(sep->arg[2], wizardgate[i][1])) {
-							Gater->CastToBot()->BotGroupSay(Gater->CastToBot(), "Gating to %s!", wizardgate[i][2]);
-							Gater->CastSpell(atoi(wizardgate[i][3]), c->GetID(), 1, -1, -1);
-							valid = true;
-						}
-					}
-					if (!valid) {
-						Gater->CastToBot()->BotGroupSay(Gater->CastToBot(), "With the proper level I can gate you to all of the following zones:");
-						for (int i = 0; i < 24; i++)
-							Gater->CastToBot()->BotGroupSay(Gater->CastToBot(), "%s", Gater->CastToBot()->CreateSayLink(c, wizardgate[i][0], wizardgate[i][2]).c_str());
-					}
-					break;
-				}
-				default:
-					c->Message(15, "You must have a Druid or Wizard in your group.");
-					break;
-			}
-		}
-	}
-
-	//Endure Breath
-	if ((!strcasecmp(sep->arg[1], "endureb")) && (c->IsGrouped())) {
-		Mob *Endurer;
-		uint32 EndurerClass = 0;
-		Group *g = c->GetGroup();
-		if(g) {
-			for(int i = 0; i < MAX_GROUP_MEMBERS; i++){
-				if(g->members[i] && g->members[i]->IsBot()) {
-					switch(g->members[i]->GetClass()) {
-						case DRUID:
-							Endurer = g->members[i];
-							EndurerClass = DRUID;
-							break;
-						case SHAMAN:
-							if (EndurerClass != DRUID){
-								Endurer = g->members[i];
-								EndurerClass = SHAMAN;
-							}
-							break;
-						case ENCHANTER:
-							if(EndurerClass == 0){
-								Endurer = g->members[i];
-								EndurerClass = ENCHANTER;
-							}
-							break;
-						case RANGER:
-							if(EndurerClass == 0) {
-								Endurer = g->members[i];
-								EndurerClass = RANGER;
-							}
-							break;
-						case BEASTLORD:
-							if(EndurerClass == 0) {
-								Endurer = g->members[i];
-								EndurerClass = BEASTLORD;
-							}
-							break;
-						default:
-							break;
-					}
-				}
-			}
-			switch(EndurerClass) {
-				case DRUID:
-					if (c->GetLevel() < 6)
-						Endurer->CastToBot()->BotGroupSay(Endurer->CastToBot(), "I'm not level 6 yet.");
-					else {
-						Endurer->CastToBot()->BotGroupSay(Endurer->CastToBot(), "Casting Enduring Breath.");
-						Endurer->CastSpell(86, c->GetID(), 1, -1, -1);
-						break;
-					}
-					break;
-				case SHAMAN:
-					if (c->GetLevel() < 12)
-						Endurer->CastToBot()->BotGroupSay(Endurer->CastToBot(), "I'm not level 12 yet.");
-					else {
-						Endurer->CastToBot()->BotGroupSay(Endurer->CastToBot(), "Casting Enduring Breath.");
-						Endurer->CastSpell(86, c->GetID(), 1, -1, -1);
-					}
-					break;
-				case RANGER:
-					if (c->GetLevel() < 20)
-						Endurer->CastToBot()->BotGroupSay(Endurer->CastToBot(), "I'm not level 20 yet.");
-					else {
-						Endurer->CastToBot()->BotGroupSay(Endurer->CastToBot(), "Casting Enduring Breath.");
-						Endurer->CastSpell(86, c->GetID(), 1, -1, -1);
-					}
-					break;
-				case ENCHANTER:
-					if (c->GetLevel() < 12)
-						Endurer->CastToBot()->BotGroupSay(Endurer->CastToBot(), "I'm not level 12 yet.");
-					else {
-						Endurer->CastToBot()->BotGroupSay(Endurer->CastToBot(), "Casting Enduring Breath.");
-						Endurer->CastSpell(86, c->GetID(), 1, -1, -1);
-					}
-					break;
-				case BEASTLORD:
-					if (c->GetLevel() < 25)
-						Endurer->CastToBot()->BotGroupSay(Endurer->CastToBot(), "I'm not level 25 yet.");
-					else {
-						Endurer->CastToBot()->BotGroupSay(Endurer->CastToBot(), "Casting Enduring Breath.");
-						Endurer->CastSpell(86, c->GetID(), 1, -1, -1);
-					}
-					break;
-				default:
-					c->Message(15, "You must have a Druid, Shaman, Ranger, Enchanter, or Beastlord in your group.");
-					break;
-			}
-		}
-	}
-
-	//Invisible
-	if ((!strcasecmp(sep->arg[1], "invis")) && (c->IsGrouped())) {
-		Mob *Inviser;
-		uint32 InviserClass = 0;
-		Group *g = c->GetGroup();
-		if(g) {
-			for(int i = 0; i < MAX_GROUP_MEMBERS; i++){
-				if(g->members[i] && g->members[i]->IsBot()) {
-					switch(g->members[i]->GetClass()) {
-						case ENCHANTER:
-							Inviser = g->members[i];
-							InviserClass = ENCHANTER;
-							break;
-						case MAGICIAN:
-							if (InviserClass != ENCHANTER){
-								Inviser = g->members[i];
-								InviserClass = MAGICIAN;
-							}
-							break;
-						case WIZARD:
-							if((InviserClass != ENCHANTER) && (InviserClass != MAGICIAN)){
-								Inviser = g->members[i];
-								InviserClass = WIZARD;
-							}
-							break;
-						case NECROMANCER:
-							if(InviserClass == 0){
-								Inviser = g->members[i];
-								InviserClass = NECROMANCER;
-							}
-							break;
-						case DRUID:
-							if((InviserClass != ENCHANTER) && (InviserClass != WIZARD)
-								|| (InviserClass != MAGICIAN)){
-									Inviser = g->members[i];
-									InviserClass = DRUID;
-							}
-							break;
-						default:
-							break;
-					}
-				}
-			}
-			switch(InviserClass) {
-				case ENCHANTER:
-					if ((c->GetLevel() <= 14) && (!strcasecmp(sep->arg[2], "undead")))
-						Inviser->CastToBot()->BotGroupSay(Inviser->CastToBot(), "I'm not level 14 yet.");
-					else if ((!c->IsInvisible(c)) && (!c->invisible_undead) && (c->GetLevel() >= 14) && (!strcasecmp(sep->arg[2], "undead"))) {
-						Inviser->CastToBot()->BotGroupSay(Inviser->CastToBot(), "Casting Invisibility vs. Undead.");
-						Inviser->CastSpell(235, c->GetID(), 1, -1, -1);
-					}
-					else if ((c->GetLevel() <= 4) && (!strcasecmp(sep->arg[2], "live")))
-						Inviser->CastToBot()->BotGroupSay(Inviser->CastToBot(), "I'm not level 4 yet.");
-					else if ((!c->IsInvisible(c))&& (!c->invisible_undead) && (c->GetLevel() >= 4) && (!strcasecmp(sep->arg[2], "live"))) {
-						Inviser->CastToBot()->BotGroupSay(Inviser->CastToBot(), "Casting Invisibilty.");
-						Inviser->CastSpell(42, c->GetID(), 1, -1, -1);
-					}
-					else if ((c->GetLevel() <= 6) && (!strcasecmp(sep->arg[2], "see")))
-						Inviser->CastToBot()->BotGroupSay(Inviser->CastToBot(), "I'm not level 6 yet.");
-					else if ((c->GetLevel() >= 6) && (!strcasecmp(sep->arg[2], "see"))) {
-						Inviser->CastToBot()->BotGroupSay(Inviser->CastToBot(), "Casting See Invisibility.");
-						Inviser->CastSpell(80, c->GetID(), 1, -1, -1);
-					}
-					else if ((c->IsInvisible(c)) || (c->invisible_undead))
-						Inviser->CastToBot()->BotGroupSay(Inviser->CastToBot(), "I can't cast this if you're already invis-buffed.");
-					else
-						Inviser->CastToBot()->BotGroupSay(Inviser->CastToBot(), "Do you want %s, %s, or %s?", Inviser->CastToBot()->CreateSayLink(c, "#bot invis live", "Invisibility").c_str(), Inviser->CastToBot()->CreateSayLink(c, "#bot invis undead", "Invisibility vs. Undead").c_str(), Inviser->CastToBot()->CreateSayLink(c, "#bot invis see", "See Invisibility").c_str());
-					break;
-				case MAGICIAN:
-					if (!strcasecmp(sep->arg[2], "undead"))
-						Inviser->CastToBot()->BotGroupSay(Inviser->CastToBot(), "I don't have that spell.");
-					else if ((c->GetLevel() <= 8) && (!strcasecmp(sep->arg[2], "live")))
-						Inviser->CastToBot()->BotGroupSay(Inviser->CastToBot(), "I'm not level 8 yet.");
-					else if ((!c->IsInvisible(c))&& (!c->invisible_undead) && (c->GetLevel() >= 8) && (!strcasecmp(sep->arg[2], "live"))) {
-						Inviser->CastToBot()->BotGroupSay(Inviser->CastToBot(), "Casting Invisibilty.");
-						Inviser->CastSpell(42, c->GetID(), 1, -1, -1);
-					}
-					else if ((c->GetLevel() <= 16) && (!strcasecmp(sep->arg[2], "see")))
-						Inviser->CastToBot()->BotGroupSay(Inviser->CastToBot(), "I'm not level 16 yet.");
-					else if ((c->GetLevel() >= 16) && (!strcasecmp(sep->arg[2], "see"))) {
-						Inviser->CastToBot()->BotGroupSay(Inviser->CastToBot(), "Casting See Invisibility.");
-						Inviser->CastSpell(80, c->GetID(), 1, -1, -1);
-					}
-					else if ((c->IsInvisible(c)) || (c->invisible_undead))
-						Inviser->CastToBot()->BotGroupSay(Inviser->CastToBot(), "I can't cast this if you're already invis-buffed.");
-					else
-						Inviser->CastToBot()->BotGroupSay(Inviser->CastToBot(), "Do you want %s or %s?", Inviser->CastToBot()->CreateSayLink(c, "#bot invis live", "Invisibility").c_str(), Inviser->CastToBot()->CreateSayLink(c, "#bot invis see", "see Invisibility").c_str());
-					break;
-				case WIZARD:
-					if ((c->GetLevel() <= 39) && (!strcasecmp(sep->arg[2], "undead")))
-						Inviser->CastToBot()->BotGroupSay(Inviser->CastToBot(), "I'm not level 39 yet.");
-					else if ((!c->IsInvisible(c))&& (!c->invisible_undead) && (c->GetLevel() >= 39) && (!strcasecmp(sep->arg[2], "undead"))) {
-						Inviser->CastToBot()->BotGroupSay(Inviser->CastToBot(), "Casting Invisibility vs. Undead.");
-						Inviser->CastSpell(235, c->GetID(), 1, -1, -1);
-					}
-					else if ((c->GetLevel() <= 16) && (!strcasecmp(sep->arg[2], "live")))
-						Inviser->CastToBot()->BotGroupSay(Inviser->CastToBot(), "I'm not level 16 yet.");
-					else if ((!c->IsInvisible(c))&& (!c->invisible_undead) && (c->GetLevel() >= 16) && (!strcasecmp(sep->arg[2], "live"))) {
-						Inviser->CastToBot()->BotGroupSay(Inviser->CastToBot(), "Casting Invisibilty.");
-						Inviser->CastSpell(42, c->GetID(), 1, -1, -1);
-					}
-					else if ((c->GetLevel() <= 4) && (!strcasecmp(sep->arg[2], "see")))
-						Inviser->CastToBot()->BotGroupSay(Inviser->CastToBot(), "I'm not level 6 yet.");
-					else if ((c->GetLevel() >= 4) && (!strcasecmp(sep->arg[2], "see"))) {
-						Inviser->CastToBot()->BotGroupSay(Inviser->CastToBot(), "Casting See Invisibility.");
-						Inviser->CastSpell(80, c->GetID(), 1, -1, -1);
-					}
-					else if ((c->IsInvisible(c)) || (c->invisible_undead))
-						Inviser->CastToBot()->BotGroupSay(Inviser->CastToBot(), "I can't cast this if you're already invis-buffed.");
-					else
-						Inviser->CastToBot()->BotGroupSay(Inviser->CastToBot(), "Do you want %s, %s, or %s?", Inviser->CastToBot()->CreateSayLink(c, "#bot invis undead", "Invisibility vs. Undead").c_str(), Inviser->CastToBot()->CreateSayLink(c, "#bot invis live", "Invisibility").c_str(), Inviser->CastToBot()->CreateSayLink(c, "#bot invis see", "See Invisibility").c_str());
-					break;
-				case NECROMANCER:
-					if ((!c->IsInvisible(c))&& (!c->invisible_undead) && (!strcasecmp(sep->arg[2], "undead"))) {
-						Inviser->CastToBot()->BotGroupSay(Inviser->CastToBot(), "Casting Invisibility vs. Undead.");
-						Inviser->CastSpell(235, c->GetID(), 1, -1, -1);
-					}
-					else if (!strcasecmp(sep->arg[2], "see"))
-						Inviser->CastToBot()->BotGroupSay(Inviser->CastToBot(), "I don't have that spell.");
-					else if (!strcasecmp(sep->arg[2], "live"))
-						Inviser->CastToBot()->BotGroupSay(Inviser->CastToBot(), "I don't have that spell.");
-					else if ((c->IsInvisible(c))|| (c->invisible_undead))
-						Inviser->CastToBot()->BotGroupSay(Inviser->CastToBot(), "I can't cast this if you're already invis-buffed.");
-					else
-						Inviser->CastToBot()->BotGroupSay(Inviser->CastToBot(), "I only have %s.", Inviser->CastToBot()->CreateSayLink(c, "#bot invis undead", "Invisibility vs. Undead").c_str());
-					break;
-				case DRUID:
-					if (!strcasecmp(sep->arg[2], "undead"))
-						Inviser->CastToBot()->BotGroupSay(Inviser->CastToBot(), "I don't have that spell.");
-					else if ((c->GetLevel() <= 4) && (!strcasecmp(sep->arg[2], "live")))
-						Inviser->CastToBot()->BotGroupSay(Inviser->CastToBot(), "I'm not level 4 yet.");
-					else if ((!c->IsInvisible(c))&& (!c->invisible_undead) && (c->GetLevel() >= 18) && (!strcasecmp(sep->arg[2], "live"))) {
-						Inviser->CastToBot()->BotGroupSay(Inviser->CastToBot(), "Casting Superior Camouflage.");
-						Inviser->CastSpell(34, c->GetID(), 1, -1, -1);
-					} else if ((!c->IsInvisible(c))&& (!c->invisible_undead) && (c->GetLevel() >= 4) && (!strcasecmp(sep->arg[2], "live")) && (zone->CanCastOutdoor())) {
-						Inviser->CastToBot()->BotGroupSay(Inviser->CastToBot(), "Casting Camouflage.");
-						Inviser->CastSpell(247, c->GetID(), 1, -1, -1);
-					}
-					else if ((c->GetLevel() >= 4) && (!strcasecmp(sep->arg[2], "live")) && (!zone->CanCastOutdoor()))
-						Inviser->CastToBot()->BotGroupSay(Inviser->CastToBot(), "I can't cast this spell indoors.");
-					else if ((c->GetLevel() <= 13) && (!strcasecmp(sep->arg[2], "see")))
-						Inviser->CastToBot()->BotGroupSay(Inviser->CastToBot(), "I'm not level 13 yet.");
-					else if ((c->GetLevel() >= 13) && (!strcasecmp(sep->arg[2], "see"))) {
-						Inviser->CastToBot()->BotGroupSay(Inviser->CastToBot(), "Casting See Invisibility.");
-						Inviser->CastSpell(80, c->GetID(), 1, -1, -1);
-					}
-					else if ((c->IsInvisible(c)) || (c->invisible_undead))
-						Inviser->CastToBot()->BotGroupSay(Inviser->CastToBot(), "I can't cast this if you're already invis-buffed.");
-					else
-						Inviser->CastToBot()->BotGroupSay(Inviser->CastToBot(), "Do you want %s or %s?", Inviser->CastToBot()->CreateSayLink(c, "#bot invis live", "Invisibility").c_str(), Inviser->CastToBot()->CreateSayLink(c, "#bot invis see", "See Invisibility").c_str());
-					break;
-				default:
-					c->Message(15, "You must have a Enchanter, Magician, Wizard, Druid, or Necromancer in your group.");
-					break;
-			}
-		}
-	}
-
-	//Levitate
-	if ((!strcasecmp(sep->arg[1], "levitate")) && (c->IsGrouped())) {
-		Mob *Lever;
-		uint32 LeverClass = 0;
-		Group *g = c->GetGroup();
-		if(g) {
-			for(int i = 0; i < MAX_GROUP_MEMBERS; i++){
-				if(g->members[i] && g->members[i]->IsBot()) {
-					switch(g->members[i]->GetClass()) {
-						case DRUID:
-							Lever = g->members[i];
-							LeverClass = DRUID;
-							break;
-						case SHAMAN:
-							if (LeverClass != DRUID){
-								Lever = g->members[i];
-								LeverClass = SHAMAN;
-							}
-							break;
-						case WIZARD:
-							if(LeverClass == 0){
-								Lever = g->members[i];
-								LeverClass = WIZARD;
-							}
-							break;
-						case ENCHANTER:
-							if (LeverClass == 0) {
-								Lever = g->members[i];
-								LeverClass = ENCHANTER;
-							}
-							break;
-						default:
-							break;
-					}
-				}
-			}
-			switch(LeverClass) {
-				case DRUID:
-					if (c->GetLevel() <= 14)
-						Lever->CastToBot()->BotGroupSay(Lever->CastToBot(), "I'm not level 14 yet.");
-					else if (zone->CanCastOutdoor()) {
-						Lever->CastToBot()->BotGroupSay(Lever->CastToBot(), "Casting Levitate.");
-						Lever->CastSpell(261, c->GetID(), 1, -1, -1);
-						break;
-					}
-					else if (!zone->CanCastOutdoor())
-						Lever->CastToBot()->BotGroupSay(Lever->CastToBot(), "I can't cast this spell indoors.");
-					break;
-				case SHAMAN:
-					if ((zone->CanCastOutdoor()) && (c->GetLevel() >= 10)) {
-						Lever->CastToBot()->BotGroupSay(Lever->CastToBot(), "Casting Levitate.");
-						Lever->CastToClient()->CastSpell(261, c->GetID(), 1, -1, -1);
-					}
-					else if (!zone->CanCastOutdoor())
-						Lever->CastToBot()->BotGroupSay(Lever->CastToBot(), "I can't cast this spell indoors.");
-					else if (c->GetLevel() <= 10)
-						Lever->CastToBot()->BotGroupSay(Lever->CastToBot(), "I'm not level 10 yet.");
-					break;
-				case WIZARD:
-					if((zone->CanCastOutdoor()) && (c->GetLevel() >= 22)) {
-						Lever->CastToBot()->BotGroupSay(Lever->CastToBot(), "Casting Levitate.");
-						Lever->CastToClient()->CastSpell(261, c->GetID(), 1, -1, -1);
-					}
-					else if (!zone->CanCastOutdoor())
-						Lever->CastToBot()->BotGroupSay(Lever->CastToBot(), "I can't cast this spell indoors.");
-					else if (c->GetLevel() <= 22)
-						Lever->CastToBot()->BotGroupSay(Lever->CastToBot(), "I'm not level 22 yet.");
-					break;
-				case ENCHANTER:
-					if((zone->CanCastOutdoor()) && (c->GetLevel() >= 15)) {
-						Lever->CastToBot()->BotGroupSay(Lever->CastToBot(), "Casting Levitate.");
-						Lever->CastToClient()->CastSpell(261, c->GetID(), 1, -1, -1);
-					}
-					else if (!zone->CanCastOutdoor())
-						Lever->CastToBot()->BotGroupSay(Lever->CastToBot(), "I can't cast this spell indoors.");
-					else if (c->GetLevel() <= 15)
-						Lever->CastToBot()->BotGroupSay(Lever->CastToBot(), "I'm not level 15 yet.");
-					break;
-				default:
-					c->Message(15, "You must have a Druid, Shaman, Wizard, or Enchanter in your group.");
-					break;
-			}
-		}
-	}
-
-	//Resists
-	if ((!strcasecmp(sep->arg[1], "resist")) && (c->IsGrouped())) {
-		Mob *Resister;
-		uint32 ResisterClass = 0;
-		Group *g = c->GetGroup();
-		if(g) {
-			for(int i = 0; i < MAX_GROUP_MEMBERS; i++){
-				if(g->members[i] && g->members[i]->IsBot()) {
-					switch(g->members[i]->GetClass()) {
-						case CLERIC:
-							Resister = g->members[i];
-							ResisterClass = CLERIC;
-							break;
-						case SHAMAN:
-							if(ResisterClass != CLERIC){
-								Resister = g->members[i];
-								ResisterClass = SHAMAN;
-							}
-							break;
-						case DRUID:
-							if (ResisterClass == 0){
-								Resister = g->members[i];
-								ResisterClass = DRUID;
-							}
-							break;
-						default:
-							break;
-					}
-				}
-			}
-			switch(ResisterClass) {
-				case CLERIC:
-					if(!strcasecmp(sep->arg[2], "poison") && (c->GetLevel() >= 6)) {
-						Resister->CastToBot()->BotGroupSay(Resister->CastToBot(), "Casting Poison protection.");
-						Resister->CastToBot()->Bot_Command_Resist(1, Resister->GetLevel());
-					} else if(!strcasecmp(sep->arg[2], "disease") && (c->GetLevel() >= 11)) {
-						Resister->CastToBot()->BotGroupSay(Resister->CastToBot(), "Casting Disease protection.");
-						Resister->CastToBot()->Bot_Command_Resist(2, Resister->GetLevel());
-					} else if(!strcasecmp(sep->arg[2], "fire") && (c->GetLevel() >= 8)) {
-						Resister->CastToBot()->BotGroupSay(Resister->CastToBot(), "Casting Fire protection.");
-						Resister->CastToBot()->Bot_Command_Resist(3, Resister->GetLevel());
-					} else if(!strcasecmp(sep->arg[2], "cold") && (c->GetLevel() >= 13)) {
-						Resister->CastToBot()->BotGroupSay(Resister->CastToBot(), "Casting Cold protection.");
-						Resister->CastToBot()->Bot_Command_Resist(4, Resister->GetLevel());
-					} else if(!strcasecmp(sep->arg[2], "magic") && (c->GetLevel() >= 16)) {
-						Resister->CastToBot()->BotGroupSay(Resister->CastToBot(), "Casting Magic protection.");
-						Resister->CastToBot()->Bot_Command_Resist(5, Resister->GetLevel());
-					} else if(!strcasecmp(sep->arg[2], "magic") && (c->GetLevel() <= 16)
-						|| !strcasecmp(sep->arg[2], "cold") && (c->GetLevel() <= 13)
-						|| !strcasecmp(sep->arg[2], "fire") && (c->GetLevel() <= 8)
-						|| !strcasecmp(sep->arg[2], "disease") && (c->GetLevel() <= 11)
-						|| !strcasecmp(sep->arg[2], "poison") && (c->GetLevel() <= 6)) {
-							Resister->CastToBot()->BotGroupSay(Resister->CastToBot(), "I am not the required level yet.");
-					} else
-						Resister->CastToBot()->BotGroupSay(Resister->CastToBot(), "Do you want %s, %s, %s, %s, or %s?", Resister->CastToBot()->CreateSayLink(c, "#bot resist poison", "Resist Poison").c_str(), Resister->CastToBot()->CreateSayLink(c, "#bot resist disease", "Resist Disease").c_str(), Resister->CastToBot()->CreateSayLink(c, "#bot resist fire", "Resist Fire").c_str(), Resister->CastToBot()->CreateSayLink(c, "#bot resist cold", "Resist Cold").c_str(), Resister->CastToBot()->CreateSayLink(c, "#bot resist magic", "Resist Magic").c_str());
-
-					break;
-				case SHAMAN:
-					if(!strcasecmp(sep->arg[2], "poison") && (c->GetLevel() >= 20)) {
-						Resister->CastToBot()->BotGroupSay(Resister->CastToBot(), "Casting Poison protection.");
-						Resister->CastToBot()->Bot_Command_Resist(12, Resister->GetLevel());
-					} else if(!strcasecmp(sep->arg[2], "disease") && (c->GetLevel() >= 8)) {
-						Resister->CastToBot()->BotGroupSay(Resister->CastToBot(), "Casting Disease protection.");
-						Resister->CastToBot()->Bot_Command_Resist(13, Resister->GetLevel());
-					} else if(!strcasecmp(sep->arg[2], "fire") && (c->GetLevel() >= 5)) {
-						Resister->CastToBot()->BotGroupSay(Resister->CastToBot(), "Casting Fire protection.");
-						Resister->CastToBot()->Bot_Command_Resist(14, Resister->GetLevel());
-					} else if(!strcasecmp(sep->arg[2], "cold") && (c->GetLevel() >= 1)) {
-						Resister->CastToBot()->BotGroupSay(Resister->CastToBot(), "Casting Cold protection.");
-						Resister->CastToBot()->Bot_Command_Resist(15, Resister->GetLevel());
-					} else if(!strcasecmp(sep->arg[2], "magic") && (c->GetLevel() >= 19)) {
-						Resister->CastToBot()->BotGroupSay(Resister->CastToBot(), "Casting Magic protection.");
-						Resister->CastToBot()->Bot_Command_Resist(16, Resister->GetLevel());
-					} else if(!strcasecmp(sep->arg[2], "magic") && (c->GetLevel() <= 19)
-						|| !strcasecmp(sep->arg[2], "cold") && (c->GetLevel() <= 1)
-						|| !strcasecmp(sep->arg[2], "fire") && (c->GetLevel() <= 5)
-						|| !strcasecmp(sep->arg[2], "disease") && (c->GetLevel() <= 8)
-						|| !strcasecmp(sep->arg[2], "poison") && (c->GetLevel() <= 20)) {
-							Resister->CastToBot()->BotGroupSay(Resister->CastToBot(), "I am not the required level yet.");
-					} else
-						Resister->CastToBot()->BotGroupSay(Resister->CastToBot(), "Do you want %s, %s, %s, %s, or %s?", Resister->CastToBot()->CreateSayLink(c, "#bot resist poison", "Resist Poison").c_str(), Resister->CastToBot()->CreateSayLink(c, "#bot resist disease", "Resist Disease").c_str(), Resister->CastToBot()->CreateSayLink(c, "#bot resist fire", "Resist Fire").c_str(), Resister->CastToBot()->CreateSayLink(c, "#bot resist cold", "Resist Cold").c_str(), Resister->CastToBot()->CreateSayLink(c, "#bot resist magic", "Resist Magic").c_str());
-
-					break;
-				case DRUID:
-					if	(!strcasecmp(sep->arg[2], "poison") && (c->GetLevel() >= 19)) {
-						Resister->CastToBot()->BotGroupSay(Resister->CastToBot(), "Casting Poison protection.");
-						Resister->CastToBot()->Bot_Command_Resist(7, Resister->GetLevel());
-					} else if (!strcasecmp(sep->arg[2], "disease") && (c->GetLevel() >= 19)) {
-						Resister->CastToBot()->BotGroupSay(Resister->CastToBot(), "Casting Disease protection.");
-						Resister->CastToBot()->Bot_Command_Resist(8, Resister->GetLevel());
-					} else if(!strcasecmp(sep->arg[2], "fire")) { // Fire level 1
-						Resister->CastToBot()->BotGroupSay(Resister->CastToBot(), "Casting Fire protection.");
-						Resister->CastToBot()->Bot_Command_Resist(9, Resister->GetLevel());
-					} else if(!strcasecmp(sep->arg[2], "cold") && (c->GetLevel() >= 13)) {
-						Resister->CastToBot()->BotGroupSay(Resister->CastToBot(), "Casting Cold protection.");
-						Resister->CastToBot()->Bot_Command_Resist(10, Resister->GetLevel());
-					} else if(!strcasecmp(sep->arg[2], "magic") && (c->GetLevel() >= 16)) {
-						Resister->CastToBot()->BotGroupSay(Resister->CastToBot(), "Casting Magic protection.");
-						Resister->CastToBot()->Bot_Command_Resist(11, Resister->GetLevel());
-					} else if (!strcasecmp(sep->arg[2], "magic") && (c->GetLevel() <= 16)
-						|| !strcasecmp(sep->arg[2], "cold") && (c->GetLevel() <= 9)
-						|| !strcasecmp(sep->arg[2], "disease") && (c->GetLevel() <= 19)
-						|| !strcasecmp(sep->arg[2], "poison") && (c->GetLevel() <= 19)) {
-							Resister->CastToBot()->BotGroupSay(Resister->CastToBot(), "I am not the required level yet.") ;
-					} else
-						Resister->CastToBot()->BotGroupSay(Resister->CastToBot(), "Do you want %s, %s, %s, %s, or %s?", Resister->CastToBot()->CreateSayLink(c, "#bot resist poison", "Resist Poison").c_str(), Resister->CastToBot()->CreateSayLink(c, "#bot resist disease", "Resist Disease").c_str(), Resister->CastToBot()->CreateSayLink(c, "#bot resist fire", "Resist Fire").c_str(), Resister->CastToBot()->CreateSayLink(c, "#bot resist cold", "Resist Cold").c_str(), Resister->CastToBot()->CreateSayLink(c, "#bot resist magic", "Resist Magic").c_str());
-					break;
-				default:
-					c->Message(15, "You must have a Cleric, Shaman, or Druid in your group.");
-					break;
-			}
-		}
-	}
-
-	// #bot group ...
-	if(!strcasecmp(sep->arg[1], "group") && !strcasecmp(sep->arg[2], "help")) {
-		c->Message(0, "#bot group help - will show this help.");
-		c->Message(0, "#bot group summon <bot group leader name or target>. Summons the bot group to your location.");
-		c->Message(0, "#bot group follow <bot group leader name or target>");
-		c->Message(0, "#bot group guard <bot group leader name or target>");
-		c->Message(0, "#bot group attack <bot group leader name> <mob name to attack or target>");
-		return;
-	}
-
-	if(!strcasecmp(sep->arg[1], "group")) {
-		if(!strcasecmp(sep->arg[2], "follow")) {
-			if(c->IsGrouped())
-				BotGroupOrderFollow(c->GetGroup(), c);
-		} else if(!strcasecmp(sep->arg[2], "guard")) {
-			if(c->IsGrouped())
-				BotGroupOrderGuard(c->GetGroup(), c);
-		} else if(!strcasecmp(sep->arg[2], "attack")) {
-			if(c->IsGrouped() && (c->GetTarget() != nullptr) && c->IsAttackAllowed(c->GetTarget()))
-				BotGroupOrderAttack(c->GetGroup(), c->GetTarget(), c);
-			else
-				c->Message(15, "You must target a monster.");
-		} else if(!strcasecmp(sep->arg[2], "summon")) {
-			if(c->IsGrouped())
-				BotGroupSummon(c->GetGroup(), c);
-		}
-		return;
-	}
-
-	// #bot botgroup ...
-	if(!strcasecmp(sep->arg[1], "botgroup") && !strcasecmp(sep->arg[2], "help")) {
-		c->Message(0, "#bot botgroup help - will show this help.");
-		c->Message(0, "#bot botgroup create <bot group leader name or target>. This will designate a bot to be a bot group leader.");
-		c->Message(0, "#bot botgroup add <bot group member name to add> <bot group leader name or target>");
-		c->Message(0, "#bot botgroup remove <bot group member name to remove or target>");
-		c->Message(0, "#bot botgroup disband <bot group leader name or target>. Disbands the designated bot group leader's bot group.");
-		c->Message(0, "#bot botgroup summon <bot group leader name or target>. Summons the bot group to your location.");
-		c->Message(0, "#bot botgroup follow <bot group leader name or target>");
-		c->Message(0, "#bot botgroup guard <bot group leader name or target>");
-		c->Message(0, "#bot botgroup attack <bot group leader name> <mob name to attack or target>");
-		c->Message(0, "#bot botgroup list");
-		c->Message(0, "#bot botgroup load <bot group name>");
-		c->Message(0, "#bot botgroup save <bot group name> <bot group leader name or target>");
-		c->Message(0, "#bot botgroup delete <bot group name>");
-
-		return;
-	}
-
-	if(!strcasecmp(sep->arg[1], "botgroup") && !strcasecmp(sep->arg[2], "create")) {
-		Mob* targetMob = c->GetTarget();
-		std::string targetName = std::string(sep->arg[3]);
-		Bot* botGroupLeader = 0;
-		if(!targetName.empty())
-			botGroupLeader = entity_list.GetBotByBotName(targetName);
-		else if(targetMob) {
-			if(targetMob->IsBot())
-				botGroupLeader = targetMob->CastToBot();
-		}
-
-		if(botGroupLeader) {
-			if(Bot::BotGroupCreate(botGroupLeader))
-				botGroupLeader->BotGroupSay(botGroupLeader, "I am prepared to lead.");
-			else
-				botGroupLeader->BotGroupSay(botGroupLeader, "I cannot lead.");
-		}
-		else
-			c->Message(13, "You must target a spawned bot first.");
-
-		return;
-	}
-
-	if(!strcasecmp(sep->arg[1], "botgroup") && !strcasecmp(sep->arg[2], "add")) {
-		int argCount = 0;
-		argCount = sep->argnum;
-		std::string botGroupLeaderName;
-		std::string botGroupMemberName;
-		if(argCount >= 3)
-			botGroupMemberName = std::string(sep->arg[3]);
-
-		Bot* botGroupMember = entity_list.GetBotByBotName(botGroupMemberName);
-		if(!botGroupMember) {
-			if(botGroupMemberName.empty())
-				c->Message(13, "You must target a bot in this zone. Please try again.");
-			else
-				c->Message(13, "%s is not a bot in this zone. Please try again.", botGroupMemberName.c_str());
-
-			return;
-		}
-
-		Bot* botGroupLeader = 0;
-		if(argCount == 4) {
-			botGroupLeaderName = std::string(sep->arg[4]);
-			botGroupLeader = entity_list.GetBotByBotName(botGroupLeaderName);
-		} else if(c->GetTarget() && c->GetTarget()->IsBot())
-			botGroupLeader = c->GetTarget()->CastToBot();
-
-		if(!botGroupLeader) {
-			if(botGroupLeaderName.empty())
-				c->Message(13, "You must target a bot in this zone. Please try again.");
-			else
-				c->Message(13, "%s is not a bot in this zone. Please try again.", botGroupLeaderName.c_str());
-
-			return;
-		}
-
-		if(botGroupLeader->HasGroup()) {
-			Group* g = botGroupLeader->GetGroup();
-
-			if(g) {
-				if(g->IsLeader(botGroupLeader)) {
-					if(g->GroupCount() < MAX_GROUP_MEMBERS) {
-						if(!botGroupMemberName.empty() && botGroupMember) {
-							botGroupMember = entity_list.GetBotByBotName(botGroupMemberName);
-						}
-
-						if(botGroupMember) {
-							if(!botGroupMember->HasGroup()) {
-								if(Bot::AddBotToGroup(botGroupMember, g)) {
-									database.SetGroupID(botGroupMember->GetName(), g->GetID(), botGroupMember->GetBotID());
-									botGroupMember->BotGroupSay(botGroupMember, "I have joined %s\'s group.", botGroupLeader->GetName());
-								}
-								else
-									botGroupMember->BotGroupSay(botGroupMember, "I can not join %s\'s group.", botGroupLeader->GetName());
-							} else {
-								Group* tempGroup = botGroupMember->GetGroup();
-								if(tempGroup)
-									botGroupMember->BotGroupSay(botGroupMember, "I can not join %s\'s group. I am already a member in %s\'s group.", botGroupLeader->GetName(), tempGroup->GetLeaderName());
-							}
-						}
-						else
-							c->Message(13, "You must target a spawned bot first.");
-					}
-					else
-						botGroupLeader->BotGroupSay(botGroupMember, "I have no more openings in my group, %s.", c->GetName());
-				} else {
-					Group* tempGroup = botGroupLeader->GetGroup();
-					if(tempGroup)
-						botGroupLeader->BotGroupSay(botGroupLeader, "I can not lead anyone because I am a member in %s\'s group.", tempGroup->GetLeaderName());
-				}
-			}
-		}
-		return;
-	}
-
-	if(!strcasecmp(sep->arg[1], "botgroup") && !strcasecmp(sep->arg[2], "remove")) {
-		Mob* targetMob = c->GetTarget();
-		std::string targetName = std::string(sep->arg[3]);
-		Bot* botGroupMember = 0;
-
-		if(!targetName.empty())
-			botGroupMember = entity_list.GetBotByBotName(targetName);
-		else if(targetMob) {
-			if(targetMob->IsBot())
-				botGroupMember = targetMob->CastToBot();
-		}
-
-		if(botGroupMember) {
-			if(botGroupMember->HasGroup()) {
-				Group* g = botGroupMember->GetGroup();
-				if(Bot::RemoveBotFromGroup(botGroupMember, g))
-					botGroupMember->BotGroupSay(botGroupMember, "I am no longer in a group.");
-				else
-					botGroupMember->BotGroupSay(botGroupMember, "I can not leave %s\'s group.", g->GetLeaderName());
-			}
-			else
-				botGroupMember->BotGroupSay(botGroupMember, "I am not in a group.");
-		}
-		else
-			c->Message(13, "You must target a spawned bot first.");
-
-		return;
-	}
-
-	if(!strcasecmp(sep->arg[1], "botgroup") && !strcasecmp(sep->arg[2], "disband")) {
-		Mob* targetMob = c->GetTarget();
-		std::string targetName = std::string(sep->arg[3]);
-		Bot* botGroupLeader = 0;
-		if(!targetName.empty())
-			botGroupLeader = entity_list.GetBotByBotName(targetName);
-		else if(targetMob) {
-			if(targetMob->IsBot())
-				botGroupLeader = targetMob->CastToBot();
-		}
-
-		if(botGroupLeader) {
-			if(botGroupLeader->HasGroup()) {
-				Group* g = botGroupLeader->GetGroup();
-				if(g->IsLeader(botGroupLeader)) {
-					if(Bot::RemoveBotFromGroup(botGroupLeader, g))
-						botGroupLeader->BotGroupSay(botGroupLeader, "I have disbanded my group, %s.", c->GetName());
-					else
-						botGroupLeader->BotGroupSay(botGroupLeader, "I was not able to disband my group, %s.", c->GetName());
-				}
-				else
-					botGroupLeader->BotGroupSay(botGroupLeader, "I can not disband my group, %s, because I am not the leader. %s is the leader of my group.", c->GetName(), g->GetLeaderName());
-			} else
-				botGroupLeader->BotGroupSay(botGroupLeader, "I am not a group leader, %s.", c->GetName());
-		} else
-			c->Message(13, "You must target a spawned bot group leader first.");
-
-		return;
-	}
-
-	if(!strcasecmp(sep->arg[1], "botgroup") && !strcasecmp(sep->arg[2], "summon") ) {
-		Mob* targetMob = c->GetTarget();
-		std::string targetName = std::string(sep->arg[3]);
-		Bot* botGroupLeader = 0;
-
-		if(!targetName.empty())
-			botGroupLeader = entity_list.GetBotByBotName(targetName);
-		else if(targetMob) {
-			if(targetMob->IsBot())
-				botGroupLeader = targetMob->CastToBot();
-		}
-
-		if(botGroupLeader) {
-			if(botGroupLeader->HasGroup()) {
-				Group* g = botGroupLeader->GetGroup();
-				if(g->IsLeader(botGroupLeader))
-					BotGroupSummon(g, c);
-			}
-		}
-		else if(c->HasGroup())
-			BotGroupSummon(c->GetGroup(), c);
-
-		return;
-	}
-
-	if(!strcasecmp(sep->arg[1], "botgroup") && !strcasecmp(sep->arg[2], "follow") ) {
-		Mob* targetMob = c->GetTarget();
-		std::string targetName = std::string(sep->arg[3]);
-		Bot* botGroupLeader = 0;
-		if(!targetName.empty())
-			botGroupLeader = entity_list.GetBotByBotName(targetName);
-		else if(targetMob) {
-			if(targetMob->IsBot())
-				botGroupLeader = targetMob->CastToBot();
-		}
-
-		if(botGroupLeader) {
-			if(botGroupLeader->HasGroup()) {
-				Group* g = botGroupLeader->GetGroup();
-				if(g->IsLeader(botGroupLeader))
-					BotGroupOrderFollow(g, c);
-			}
-		}
-		else if(c->HasGroup())
-			BotGroupOrderFollow(c->GetGroup(), c);
-
-		return;
-	}
-
-	if(!strcasecmp(sep->arg[1], "botgroup") && !strcasecmp(sep->arg[2], "guard") ) {
-		Mob* targetMob = c->GetTarget();
-		std::string targetName = std::string(sep->arg[3]);
-		Bot* botGroupLeader = 0;
-		if(!targetName.empty())
-			botGroupLeader = entity_list.GetBotByBotName(targetName);
-		else if(targetMob) {
-			if(targetMob->IsBot())
-				botGroupLeader = targetMob->CastToBot();
-		}
-
-		if(botGroupLeader) {
-			if(botGroupLeader->HasGroup()) {
-				Group* g = botGroupLeader->GetGroup();
-				if(g->IsLeader(botGroupLeader))
-					BotGroupOrderGuard(g, c);
-			}
-		}
-		else if(c->HasGroup())
-			BotGroupOrderGuard(c->GetGroup(), c);
-
-		return;
-	}
-
-	if(!strcasecmp(sep->arg[1], "botgroup") && !strcasecmp(sep->arg[2], "attack")) {
-		Mob* targetMob = c->GetTarget();
-		Bot* botGroupLeader = 0;
-		std::string botGroupLeaderName = std::string(sep->arg[3]);
-		std::string targetName = std::string(sep->arg[4]);
-		if(!botGroupLeaderName.empty()) {
-			botGroupLeader = entity_list.GetBotByBotName(botGroupLeaderName);
-			if(botGroupLeader) {
-				if(!targetName.empty())
-					targetMob = entity_list.GetMob(targetName.c_str());
-
-				if(targetMob) {
-					if(c->IsAttackAllowed(targetMob)) {
-						if(botGroupLeader->HasGroup()) {
-							Group* g = botGroupLeader->GetGroup();
-							if(g) {
-								if(g->IsLeader(botGroupLeader))
-									BotGroupOrderAttack(g, targetMob, c);
-							}
-						}
-						else if(c->HasGroup())
-							BotGroupOrderAttack(c->GetGroup(), targetMob, c);
-					}
-					else
-						c->Message(13, "You must target a monster.");
-				}
-				else
-					c->Message(13, "You must target a monster.");
-			}
-			else
-				c->Message(13, "You must target a spawned bot group leader first.");
-		}
-		return;
-	}
-
-	if(!strcasecmp(sep->arg[1], "botgroup") && !strcasecmp(sep->arg[2], "list")) {
-		std::list<BotGroupList> botGroupList = GetBotGroupListByBotOwnerCharacterId(c->CharacterID(), &TempErrorMessage);
-		if(!TempErrorMessage.empty()) {
-			c->Message(13, "Database Error: %s", TempErrorMessage.c_str());
-			return;
-		}
-
-		if(!botGroupList.empty()) {
-			for(std::list<BotGroupList>::iterator botGroupListItr = botGroupList.begin(); botGroupListItr != botGroupList.end(); ++botGroupListItr)
-				c->Message(0, "Bot Group Name: %s -- Bot Group Leader: %s", botGroupListItr->BotGroupName.c_str(), botGroupListItr->BotGroupLeaderName.c_str());
-		}
-		else
-			c->Message(0, "You have no bot groups created. Use the #bot botgroup save command to save bot groups.");
-
-		return;
-	}
-
-	if(!strcasecmp(sep->arg[1], "botgroup") && !strcasecmp(sep->arg[2], "load")) {
-		Group *g = c->GetGroup();
-		if(g) {
-			for(int i = 0; i < MAX_GROUP_MEMBERS; i++) {
-				if(!g->members[i])
-					continue;
-
-				if((g->members[i]->IsClient() && g->members[i]->CastToClient()->GetAggroCount()) || g->members[i]->IsEngaged()) {
-					c->Message(0, "You can't spawn bots while your group is engaged.");
-					return;
-				}
-			}
-		} else {
-			if(c->GetAggroCount() > 0) {
-				c->Message(0, "You can't spawn bots while you are engaged.");
-				return;
-			}
-		}
-
-		std::string botGroupName = std::string(sep->arg[3]);
-		if(botGroupName.empty()) {
-			c->Message(13, "Invalid botgroup name supplied.");
-			return;
-		}
-
-		uint32 botGroupID = CanLoadBotGroup(c->CharacterID(), botGroupName, &TempErrorMessage);
-		if(!TempErrorMessage.empty()) {
-			c->Message(13, "Database Error: %s", TempErrorMessage.c_str());
-			return;
-		}
-		if(botGroupID <= 0) {
-			c->Message(13, "Invalid botgroup id found.");
-			return;
-		}
-
-		std::list<BotGroup> botGroup = LoadBotGroup(botGroupName, &TempErrorMessage);
-		if(!TempErrorMessage.empty()) {
-			c->Message(13, "Database Error: %s", TempErrorMessage.c_str());
-			return;
-		}
-
-		int spawnedBots = SpawnedBotCount(c->CharacterID(), &TempErrorMessage);
-		if(!TempErrorMessage.empty()) {
-			c->Message(13, "Database Error: %s", TempErrorMessage.c_str());
-			return;
-		}
-
-		if(RuleB(Bots, QuestableSpawnLimit)) {
-			const int allowedBotsBQ = AllowedBotSpawns(c->CharacterID(), &TempErrorMessage);
-			if(!TempErrorMessage.empty()) {
-				c->Message(13, "Database Error: %s", TempErrorMessage.c_str());
-				return;
-			}
-
-			if(allowedBotsBQ == 0) {
-				c->Message(0, "You can't spawn any bots.");
-				return;
-			}
-
-			if(spawnedBots >= allowedBotsBQ || spawnedBots + (int)botGroup.size() > allowedBotsBQ) {
-				c->Message(0, "You can't spawn more than %i bot(s).", allowedBotsBQ);
-				return;
-			}
-		}
-
-		const int allowedBotsSBC = RuleI(Bots, SpawnLimit);
-		if(spawnedBots >= allowedBotsSBC || spawnedBots + (int)botGroup.size() > allowedBotsSBC) {
-			c->Message(0, "You can't spawn more than %i bots.", allowedBotsSBC);
-			return;
-		}
-
-		uint32 botGroupLeaderBotID = GetBotGroupLeaderIdByBotGroupName(botGroupName);
-		Bot *botGroupLeader = LoadBot(botGroupLeaderBotID, &TempErrorMessage);
-		if(!TempErrorMessage.empty()) {
-			c->Message(13, "Database Error: %s", TempErrorMessage.c_str());
-			safe_delete(botGroupLeader);
-			return;
-		}
-		if(!botGroupLeader) {
-			c->Message(13, "Failed to load botgroup leader.");
-			safe_delete(botGroupLeader);
-			return;
-		}
-
-		botGroupLeader->Spawn(c, &TempErrorMessage);
-		if(!TempErrorMessage.empty()) {
-			c->Message(13, "Database Error: %s", TempErrorMessage.c_str());
-			safe_delete(botGroupLeader);
-			return;
-		}
-
-		if(!BotGroupCreate(botGroupLeader)) {
-			c->Message(13, "Unable to create botgroup.");
-			return;
-		}
-
-		Group *newBotGroup = botGroupLeader->GetGroup();
-		if(!newBotGroup) {
-			c->Message(13, "Unable to find valid botgroup");
-			return;
-		}
-
-		for(auto botGroupItr = botGroup.begin(); botGroupItr != botGroup.end(); ++botGroupItr) {
-			if(botGroupItr->BotID == botGroupLeader->GetBotID())
-				continue;
-
-			Bot *botGroupMember = LoadBot(botGroupItr->BotID, &TempErrorMessage);
-			if(!TempErrorMessage.empty()) {
-				c->Message(13, "Database Error: %s", TempErrorMessage.c_str());
-				safe_delete(botGroupMember);
-				return;
-			}
-
-			if(!botGroupMember) {
-				safe_delete(botGroupMember);
-				continue;
-			}
-
-			botGroupMember->Spawn(c, &TempErrorMessage);
-			if(!TempErrorMessage.empty()) {
-				c->Message(13, "Database Error: %s", TempErrorMessage.c_str());
-				safe_delete(botGroupMember);
-				return;
-			}
-
-			AddBotToGroup(botGroupMember, newBotGroup);
-		}
-		return;
-	}
-
-	if(!strcasecmp(sep->arg[1], "botgroup") && !strcasecmp(sep->arg[2], "delete")) {
-		std::string botGroupName = std::string(sep->arg[3]);
-		if(!botGroupName.empty()) {
-			uint32 botGroupId = CanLoadBotGroup(c->CharacterID(), botGroupName, &TempErrorMessage);
-			if(!TempErrorMessage.empty()) {
-				c->Message(13, "Database Error: %s", TempErrorMessage.c_str());
-				return;
-			}
-
-			if(botGroupId > 0) {
-				DeleteBotGroup(botGroupName, &TempErrorMessage);
-				if(!TempErrorMessage.empty()) {
-					c->Message(13, "Database Error: %s", TempErrorMessage.c_str());
-					return;
-				}
-			}
-		}
-		return;
-	}
-
-	if(!strcasecmp(sep->arg[1], "botgroup") && !strcasecmp(sep->arg[2], "save")) {
-		std::string botGroupName = std::string(sep->arg[3]);
-		if(!botGroupName.empty()) {
-			if(!DoesBotGroupNameExist(botGroupName)) {
-				Bot* groupLeader = 0;
-				if(c->GetTarget() && c->GetTarget()->IsBot())
-					groupLeader = c->GetTarget()->CastToBot();
-				else
-					groupLeader = entity_list.GetBotByBotName(std::string(sep->arg[4]));
-
-				if(groupLeader) {
-					if(groupLeader->HasGroup() && groupLeader->GetGroup()->IsLeader(groupLeader)) {
-						SaveBotGroup(groupLeader->GetGroup(), botGroupName, &TempErrorMessage);
-						if(!TempErrorMessage.empty())
-							c->Message(13, "Database Error: %s", TempErrorMessage.c_str());
-						else
-							c->Message(0, "%s's bot group has been saved as %s.", groupLeader->GetName(), botGroupName.c_str());
-					}
-					else
-						c->Message(0, "You must target a bot group leader only.");
-				}
-				else
-					c->Message(0, "You must target a bot that is in the same zone as you.");
-			}
-			else
-				c->Message(0, "The bot group name already exists. Please choose another name to save your bot group as.");
-		}
-		return;
-	}
-
-	if(!strcasecmp(sep->arg[1], "haircolor") || !strcasecmp(sep->arg[1], "hair") || !strcasecmp(sep->arg[1], "beard") || !strcasecmp(sep->arg[1], "beardcolor") || !strcasecmp(sep->arg[1], "face")
-		|| !strcasecmp(sep->arg[1], "eyes") || !strcasecmp(sep->arg[1], "heritage") || !strcasecmp(sep->arg[1], "tattoo") || !strcasecmp(sep->arg[1], "details")) {
-		if(c->GetTarget() && c->GetTarget()->IsBot()) {
-			if (sep->IsNumber(2)) {
-				if (c->GetTarget()->CastToBot()->GetBotOwnerCharacterID() == c->CharacterID()) {
-					Bot *target = c->GetTarget()->CastToBot();
-					uint16 Race = target->GetRace();
-					uint8 Gender = target->GetGender();
-					uint8 Texture = 0xFF;
-					uint8 HelmTexture = 0xFF;
-					uint8 HairStyle = target->GetHairStyle();
-					uint8 HairColor = target->GetHairColor();
-					uint8 BeardColor = target->GetBeardColor();
-					uint8 EyeColor1 = target->GetEyeColor1();
-					uint8 EyeColor2 = target->GetEyeColor2();
-					uint8 LuclinFace = target->GetLuclinFace();
-					uint8 Beard = target->GetBeard();
-					uint32 DrakkinHeritage = target->GetDrakkinHeritage();
-					uint32 DrakkinTattoo = target->GetDrakkinTattoo();
-					uint32 DrakkinDetails = target->GetDrakkinDetails();
-					float Size = target->GetSize();
-					if (!strcasecmp(sep->arg[1], "hair"))
-						HairStyle = atoi(sep->arg[2]);
-
-					if (!strcasecmp(sep->arg[1], "haircolor"))
-						HairColor = atoi(sep->arg[2]);
-
-					if (!strcasecmp(sep->arg[1], "beard") || !strcasecmp(sep->arg[1], "beardcolor")) {
-						if (!Gender || Race == 8) {
-							if (!strcasecmp(sep->arg[1], "beard"))
-								Beard = atoi(sep->arg[2]);
-
-							if (!strcasecmp(sep->arg[1], "beardcolor"))
-								BeardColor = atoi(sep->arg[2]);
-						} else {
-							c->Message(0, "Must be a male bot, or dwarf.");
-							return;
-						}
-					}
-
-					if (!strcasecmp(sep->arg[1], "face"))
-						LuclinFace = atoi(sep->arg[2]);
-
-					if (!strcasecmp(sep->arg[1], "eyes")) {
-						EyeColor1 = EyeColor2 = atoi(sep->arg[2]);
-						c->Message(0, "Eye Values = 0 - 11");
-					}
-
-					if(!strcasecmp(sep->arg[1], "heritage") || !strcasecmp(sep->arg[1], "tattoo") || !strcasecmp(sep->arg[1], "details")) {
-						if(Race == 522) {
-							if(!strcasecmp(sep->arg[1], "heritage")) {
-								DrakkinHeritage = atoi(sep->arg[2]);
-								c->Message(0, "Heritage Values = 0 - 6");
-							}
-
-							if(!strcasecmp(sep->arg[1], "tattoo")) {
-								DrakkinTattoo = atoi(sep->arg[2]);
-								c->Message(0, "Tattoo Values = 0 - 7");
-							}
-
-							if(!strcasecmp(sep->arg[1], "details")) {
-								DrakkinDetails = atoi(sep->arg[2]);
-								c->Message(0, "Details Values = 0 - 7");
-							}
-						} else {
-							c->Message(0, "Drakkin only.");
-							return;
-						}
-					}
-
-					target->SendIllusionPacket(Race, Gender, Texture, HelmTexture, HairColor, BeardColor, EyeColor1, EyeColor2, HairStyle, LuclinFace, Beard, 0xFF, DrakkinHeritage, DrakkinTattoo, DrakkinDetails, Size);
-					if(target->CastToBot()->Save())
-						c->Message(0, "%s saved.", target->GetCleanName());
-					else
-						c->Message(13, "%s save failed!", target->GetCleanName());
-
-					c->Message(0, "Feature changed.");
-				}
-				else
-					c->Message(0, "You must own the bot to make changes.");
-			}
-			else
-				c->Message(0, "Requires a value.");
-		}
-		else
-			c->Message(0, "A bot needs to be targeted.");
-		return;
-	}
-
-	if(!strcasecmp(sep->arg[1], "taunt")) {
-		bool taunt = false;
-		bool toggle = false;
-
-		if(sep->arg[2]){
-			if(!strcasecmp(sep->arg[2], "on"))
-				taunt = true;
-			else if (!strcasecmp(sep->arg[2], "off"))
-				taunt = false;
-			else {
-				c->Message(0, "Usage #bot taunt [on|off]");
-				return;
-			}
-
-			Bot *targetedBot = nullptr;
-			if(c->GetTarget() != nullptr) {
-				if (c->GetTarget()->IsBot() && (c->GetTarget()->CastToBot()->GetBotOwner() == c))
-					targetedBot = c->GetTarget()->CastToBot();
-				else
-					c->Message(13, "You must target a bot that you own.");
-
-				if(targetedBot) {
-					if(targetedBot->GetSkill(SkillTaunt) > 0) {
-						if(toggle)
-							taunt = !targetedBot->taunting;
-
-						if(taunt) {
-							if(!targetedBot->taunting)
-								targetedBot->BotGroupSay(targetedBot, "I am now taunting.");
-						} else {
-							if(targetedBot->taunting)
-								targetedBot->BotGroupSay(targetedBot, "I am no longer taunting.");
-						}
-
-						targetedBot->SetTaunting(taunt);
-					}
-					else
-						c->Message(13, "You must select a bot with the taunt skill.");
-				}
-				else
-					c->Message(13, "You must target a spawned bot.");
-			}
-		}
-		else
-			c->Message(0, "Usage #bot taunt [on|off]");
-
-		return;
-	}
-
-	if(!strcasecmp(sep->arg[1], "stance")) {
-		if(sep->argnum == 3){
-			Bot* tempBot = nullptr;
-			std::string botName = std::string(sep->arg[2]);
-			if(!botName.empty())
-				tempBot = entity_list.GetBotByBotName(botName);
-			else
-				c->Message(13, "You must name a valid bot.");
-
-			if(tempBot) {
-				std::string stanceName;
-				BotStanceType botStance;
-				if (tempBot->GetBotOwner() != c) {
-					c->Message(13, "You must target a bot that you own.");
-					return;
-				}
-
-				if(!strcasecmp(sep->arg[3], "list"))
-					botStance = tempBot->GetBotStance();
-				else {
-					int stance = atoi(sep->arg[3]);
-					if(stance >= MaxStances || stance < 0){
-						c->Message(0, "Usage #bot stance [name] [stance (id)] (Passive = 0, Balanced = 1, Efficient = 2, Reactive = 3, Aggressive = 4, Burn = 5, BurnAE = 6)");
-						return;
-					} else {
-						botStance = (BotStanceType)stance;
-						if(botStance != tempBot->GetBotStance()) {
-							tempBot->SetBotStance(botStance);
-							tempBot->CalcChanceToCast();
-							tempBot->Save();
-						}
-					}
-				}
-
-				switch(botStance) {
-					case BotStancePassive: {
-						stanceName = "Passive";
-						break;
-					}
-					case BotStanceBalanced: {
-						stanceName = "Balanced";
-						break;
-					}
-					case BotStanceEfficient: {
-						stanceName = "Efficient";
-						break;
-					}
-					case BotStanceReactive: {
-						stanceName = "Reactive";
-						break;
-					}
-					case BotStanceAggressive: {
-						stanceName = "Aggressive";
-						break;
-					}
-					case BotStanceBurn: {
-						stanceName = "Burn";
-						break;
-					}
-					case BotStanceBurnAE: {
-						stanceName = "BurnAE";
-						break;
-					}
-					default: {
-						stanceName = "None";
-						break;
-					}
-				}
-				c->Message(0, "Stance for %s: %s.", tempBot->GetCleanName(), stanceName.c_str());
-			}
-			else
-				c->Message(13, "You must name a valid bot.");
-		}
-		else
-			c->Message(0, "Usage #bot stance [name] [stance (id)] (Passive = 0, Balanced = 1, Efficient = 2, Reactive = 3, Aggressive = 4, Burn = 5, BurnAE = 6)");
-
-		return;
-	}
-
-	if(!strcasecmp(sep->arg[1], "defensive")) {
-		Bot* tempBot;
-		std::string botName = std::string(sep->arg[2]);
-		if(!botName.empty())
-			tempBot = entity_list.GetBotByBotName(botName);
-		else {
-			c->Message(13, "You must name a valid bot.");
-			return;
-		}
-
-		if(tempBot) {
-			uint8 botlevel = tempBot->GetLevel();
-			uint32 defensiveSpellID = 0;
-			if (tempBot->GetBotOwner() != c) {
-				c->Message(13, "You must target a bot that you own.");
-				return;
-			}
-
-			switch (tempBot->GetClass()) {
-				case WARRIOR:
-					if(botlevel >= 72)
-						defensiveSpellID = 10965;		//Final Stand discipline
-					else if(botlevel >= 65)
-						defensiveSpellID = 4688;		//Stonewall discipline
-					else if(botlevel >= 55)
-						defensiveSpellID = 4499;		//Defensive discipline
-					else if(botlevel >= 52)
-						defensiveSpellID = 4503;		//Evasive discipline
-					else
-						c->Message(0, "Warrior must be level 52 or higher.");
-					break;
-				case PALADIN:
-					if(botlevel >= 73)
-						defensiveSpellID = 11854;		//Armor of Righteousness
-					else if(botlevel >= 69)
-						defensiveSpellID = 6663;		//Guard of Righteousness
-					else if(botlevel >= 61)
-						defensiveSpellID = 6731;		//Guard of Humility
-					else if(botlevel >= 56)
-						defensiveSpellID = 7004;		//Guard of Piety
-					else
-						c->Message(0, "Paladin must be level 56 or higher.");
-					break;
-				case SHADOWKNIGHT:
-					if(botlevel >= 73)
-						defensiveSpellID = 11866;		//Soul Carapace
-					else if(botlevel >= 69)
-						defensiveSpellID = 6673;		//Soul shield
-					else if(botlevel >= 61)
-						defensiveSpellID = 6741;		//Soul guard
-					else if(botlevel >= 56)
-						defensiveSpellID = 7005;		//Ichor guard
-					else
-						c->Message(0, "Shadow Knight must be level 56 or higher.");
-					break;
-				default:
-					c->Message(0, "You must select a Warrior, Paladin, or Shadow Knight.");
-					break;
-			}
-
-			if(defensiveSpellID > 0)
-				tempBot->UseDiscipline(defensiveSpellID, tempBot->GetID());
-		}
-		else
-			c->Message(13, "You must name a valid bot.");
-
-		return;
-	}
-
-	// #bot healrotation ...
-	if(!strcasecmp(sep->arg[1], "healrotation")) {
-		if(!strcasecmp(sep->arg[2], "help")) {
-			c->Message(0, "#bot healrotation help - will show this help.");
-			c->Message(0, "#bot healrotation create <bot healrotation leader name> <timer> <fasthealson | fasthealsoff> [target]. This will create a heal rotation with the designated leader.");
-			c->Message(0, "#bot healrotation addmember <bot healrotation leader name> <bot healrotation member name to add> ");
-			c->Message(0, "#bot healrotation removemember <bot healrotation leader name> <bot healrotation member name to remove>");
-			c->Message(0, "#bot healrotation addtarget <bot healrotation leader name> [bot healrotation target name to add] ");
-			c->Message(0, "#bot healrotation removetarget <bot healrotation leader name> <bot healrotation target name to remove>");
-			c->Message(0, "#bot healrotation cleartargets <bot healrotation leader name>");
-			c->Message(0, "#bot healrotation fastheals <bot healrotation leader name> <on | off>");
-			c->Message(0, "#bot healrotation start <bot healrotation leader name | all>");
-			c->Message(0, "#bot healrotation stop <bot healrotation leader name | all>");
-			c->Message(0, "#bot healrotation list <bot healrotation leader name | all>");
-			return;
-		}
-
-		if(!strcasecmp(sep->arg[2], "create")) {
-			if(sep->argnum == 5 || sep->argnum == 6) {
-				Bot* leaderBot;
-				std::string botName = std::string(sep->arg[3]);
-				if(!botName.empty())
-					leaderBot = entity_list.GetBotByBotName(botName);
-				else {
-					c->Message(13, "You must name a valid heal rotation leader.");
-					return;
-				}
-
-				if(leaderBot) {
-					Mob* target = nullptr;
-					uint32 timer;
-					bool fastHeals = false;
-					if (!sep->IsNumber(4)) {
-						c->Message(0, "Usage #bot healrotation create <bot healrotation leader name> <timer> <fasthealson | fasthealsoff> [target].");
-						return;
-					}
-
-					timer = (uint32)(atof(sep->arg[4]) * 1000);
-					if (leaderBot->GetBotOwner() != c) {
-						c->Message(13, "You must target a bot that you own.");
-						return;
-					}
-
-					if (!(leaderBot->IsBotCaster() && leaderBot->CanHeal())) {
-						c->Message(13, "Heal rotation members must be able to heal.");
-						return;
-					}
-
-					if(!strcasecmp(sep->arg[5], "fasthealson"))
-						fastHeals = true;
-					else if(strcasecmp(sep->arg[5], "fasthealsoff")) {
-						c->Message(0, "Usage #bot healrotation create <bot healrotation leader name> <timer> <fasthealson | fasthealsoff> [target].");
-						return;
-					}
-
-					if(!leaderBot->GetInHealRotation()) {
-						if(sep->argnum == 6) {
-							std::string targetName = std::string(sep->arg[6]);
-							if(!targetName.empty())
-								target = entity_list.GetMob(targetName.c_str());
-							else {
-								c->Message(13, "You must name a valid target.");
-								return;
-							}
-
-							if(!target) {
-								c->Message(13, "You must name a valid target.");
-								return;
-							}
-						}
-						leaderBot->CreateHealRotation(target, timer);
-						leaderBot->SetHealRotationUseFastHeals(fastHeals);
-						c->Message(0, "Bot heal rotation created successfully.");
-					} else {
-						c->Message(13, "That bot is already in a heal rotation.");
-						return;
-					}
-				} else {
-					c->Message(13, "You must name a valid bot.");
-					return;
-				}
-			} else {
-				c->Message(0, "Usage #bot healrotation create <bot healrotation leader name> <timer> <fasthealson | fasthealsoff> [target].");
-				return;
-			}
-		}
-
-		if(!strcasecmp(sep->arg[2], "addmember")) {
-			if(sep->argnum == 4) {
-				Bot* leaderBot;
-				std::string botName = std::string(sep->arg[3]);
-				if(!botName.empty())
-					leaderBot = entity_list.GetBotByBotName(botName);
-				else {
-					c->Message(13, "You must name a valid bot.");
-					return;
-				}
-
-				if(leaderBot) {
-					Bot* healer;
-					std::string healerName = std::string(sep->arg[4]);
-					if (leaderBot->GetBotOwner() != c) {
-						c->Message(13, "You must target a bot that you own.");
-						return;
-					}
-
-					if(!healerName.empty())
-						healer = entity_list.GetBotByBotName(healerName);
-					else {
-						c->Message(13, "You must name a valid bot.");
-						return;
-					}
-
-					if(healer) {
-						if (healer->GetBotOwner() != c) {
-							c->Message(13, "You must target a bot that you own.");
-							return;
-						}
-
-						if (!(healer->IsBotCaster() && healer->CanHeal())) {
-							c->Message(13, "Heal rotation members must be able to heal.");
-							return;
-						}
-
-						if(leaderBot->AddHealRotationMember(healer))
-							c->Message(0, "Bot heal rotation member added successfully.");
-						else
-							c->Message(13, "Unable to add bot to rotation.");
-					}
-				} else {
-					c->Message(13, "You must name a valid bot.");
-					return;
-				}
-			} else {
-				c->Message(0, "#bot healrotation addmember <bot healrotation leader name> <bot healrotation member name to add> ");
-				return;
-			}
-		}
-
-		if(!strcasecmp(sep->arg[2], "removemember")) {
-			if(sep->argnum == 4) {
-				Bot* leaderBot;
-				std::string botName = std::string(sep->arg[3]);
-
-				if(!botName.empty())
-					leaderBot = entity_list.GetBotByBotName(botName);
-				else {
-					c->Message(13, "You must name a valid bot.");
-					return;
-				}
-
-				if(leaderBot) {
-					if (leaderBot->GetBotOwner() != c) {
-						c->Message(13, "You must target a bot that you own.");
-						return;
-					}
-
-					Bot* healer;
-					std::string healerName = std::string(sep->arg[4]);
-					if(!healerName.empty())
-						healer = entity_list.GetBotByBotName(healerName);
-					else {
-						c->Message(13, "You must name a valid bot.");
-						return;
-					}
-
-					if(healer) {
-						if (healer->GetBotOwner() != c) {
-							c->Message(13, "You must target a bot that you own.");
-							return;
-						}
-
-						if(leaderBot->RemoveHealRotationMember(healer))
-							c->Message(0, "Bot heal rotation member removed successfully.");
-						else
-							c->Message(13, "Unable to remove bot from rotation.");
-					} else {
-						c->Message(13, "You must name a valid bot.");
-						return;
-					}
-				} else {
-					c->Message(13, "You must name a valid bot.");
-					return;
-				}
-			} else {
-				c->Message(0, "#bot healrotation removemember <bot healrotation leader name> <bot healrotation member name to remove>");
-				return;
-			}
-		}
-
-		if(!strcasecmp(sep->arg[2], "addtarget")) {
-			if(sep->argnum == 3 || sep->argnum == 4) {
-				Bot* leaderBot;
-				std::string botName = std::string(sep->arg[3]);
-				if(!botName.empty())
-					leaderBot = entity_list.GetBotByBotName(botName);
-				else {
-					c->Message(13, "You must name a valid heal rotation leader.");
-					return;
-				}
-
-				if(leaderBot) {
-					if (leaderBot->GetBotOwner() != c) {
-						c->Message(13, "You must target a bot that you own.");
-						return;
-					}
-
-					Mob* target = nullptr;
-					std::string targetName = std::string(sep->arg[4]);
-					if(!targetName.empty())
-						target = entity_list.GetMob(targetName.c_str());
-					else {
-						if(c->GetTarget() != nullptr)
-							target = c->GetTarget();
-					}
-
-					if(target) {
-						if(leaderBot->AddHealRotationTarget(target))
-							c->Message(0, "Bot heal rotation target added successfully.");
-						else
-							c->Message(13, "Unable to add rotation target.");
-					} else {
-						c->Message(13, "Invalid target.");
-						return;
-					}
-				} else {
-					c->Message(13, "You must name a valid bot.");
-					return;
-				}
-			} else {
-				c->Message(0, "#bot healrotation addtarget <bot healrotation leader name> [bot healrotation target name to add] ");
-				return;
-			}
-		}
-
-		if(!strcasecmp(sep->arg[2], "removetarget")) {
-			if(sep->argnum == 4) {
-				Bot* leaderBot;
-				std::string botName = std::string(sep->arg[3]);
-				if(!botName.empty())
-					leaderBot = entity_list.GetBotByBotName(botName);
-				else {
-					c->Message(13, "You must name a valid heal rotation leader.");
-					return;
-				}
-
-				if(leaderBot) {
-					if (leaderBot->GetBotOwner() != c) {
-						c->Message(13, "You must target a bot that you own.");
-						return;
-					}
-
-					Mob* target;
-					std::string targetName = std::string(sep->arg[4]);
-					if(!targetName.empty())
-						target = entity_list.GetMob(targetName.c_str());
-					else {
-						c->Message(13, "You must name a valid target.");
-						return;
-					}
-
-					if(target) {
-						if(leaderBot->RemoveHealRotationTarget(target))
-							c->Message(0, "Bot heal rotation target removed successfully.");
-						else
-							c->Message(13, "Unable to remove rotation target.");
-					}
-				} else {
-					c->Message(13, "You must name a valid bot.");
-					return;
-				}
-			} else {
-				c->Message(0, "#bot healrotation removetarget <bot healrotation leader name> <bot healrotation target name to remove>");
-				return;
-			}
-		}
-
-		if(!strcasecmp(sep->arg[2], "start")) {
-			if(sep->argnum == 3) {
-				if(!strcasecmp(sep->arg[3], "all")) {
-					std::list<Bot*> BotList = entity_list.GetBotsByBotOwnerCharacterID(c->CharacterID());
-					for(std::list<Bot*>::iterator botListItr = BotList.begin(); botListItr != BotList.end(); ++botListItr) {
-						Bot* leaderBot = *botListItr;
-						if(leaderBot->GetInHealRotation() && leaderBot->GetHealRotationLeader() == leaderBot) {
-							std::list<Bot*> rotationMemberList;
-							int index = 0;
-							rotationMemberList = GetBotsInHealRotation(leaderBot);
-							for(std::list<Bot*>::iterator rotationMemberItr = rotationMemberList.begin(); rotationMemberItr != rotationMemberList.end(); ++rotationMemberItr) {
-								Bot* tempBot = *rotationMemberItr;
-								if(tempBot) {
-									tempBot->SetHealRotationActive(true);
-									tempBot->SetHealRotationNextHealTime(Timer::GetCurrentTime() + index * leaderBot->GetHealRotationTimer() * 1000);
-									tempBot->SetHasHealedThisCycle(false);
-								}
-								index++;
-							}
-							c->Message(0, "Bot heal rotation started successfully.");
-						}
-					}
-				} else {
-					Bot* leaderBot;
-					std::string botName = std::string(sep->arg[3]);
-					if(!botName.empty())
-						leaderBot = entity_list.GetBotByBotName(botName);
-					else {
-						c->Message(13, "You must name a valid heal rotation leader.");
-						return;
-					}
-
-					if(leaderBot) {
-						std::list<Bot*> botList;
-						int index = 0;
-						if (leaderBot->GetBotOwner() != c) {
-							c->Message(13, "You must target a bot that you own.");
-							return;
-						}
-
-						botList = GetBotsInHealRotation(leaderBot);
-						for(std::list<Bot*>::iterator botListItr = botList.begin(); botListItr != botList.end(); ++botListItr) {
-							Bot* tempBot = *botListItr;
-							if(tempBot) {
-								tempBot->SetHealRotationActive(true);
-								tempBot->SetHealRotationNextHealTime(Timer::GetCurrentTime() + index * leaderBot->GetHealRotationTimer() * 1000);
-								tempBot->SetHasHealedThisCycle(false);
-							}
-							index++;
-						}
-						c->Message(0, "Bot heal rotation started successfully.");
-					} else {
-						c->Message(13, "You must name a valid bot.");
-						return;
-					}
-				}
-			} else {
-				c->Message(0, "#bot healrotation start <bot healrotation leader name | all>");
-				return;
-			}
-		}
-
-		if(!strcasecmp(sep->arg[2], "stop")) {
-			if(sep->argnum == 3) {
-				if(!strcasecmp(sep->arg[3], "all")) {
-					std::list<Bot*> BotList = entity_list.GetBotsByBotOwnerCharacterID(c->CharacterID());
-					for(std::list<Bot*>::iterator botListItr = BotList.begin(); botListItr != BotList.end(); ++botListItr) {
-						Bot* leaderBot = *botListItr;
-						if(leaderBot->GetInHealRotation() && leaderBot->GetHealRotationLeader() == leaderBot) {
-							std::list<Bot*> rotationMemberList;
-							rotationMemberList = GetBotsInHealRotation(leaderBot);
-							for(std::list<Bot*>::iterator rotationMemberItr = rotationMemberList.begin(); rotationMemberItr != rotationMemberList.end(); ++rotationMemberItr) {
-								Bot* tempBot = *rotationMemberItr;
-								if(tempBot) {
-									tempBot->SetHealRotationActive(false);
-									tempBot->SetHasHealedThisCycle(false);
-								}
-							}
-							c->Message(0, "Bot heal rotation started successfully.");
-						}
-					}
-				} else {
-					Bot* leaderBot;
-					std::string botName = std::string(sep->arg[3]);
-					if(!botName.empty())
-						leaderBot = entity_list.GetBotByBotName(botName);
-					else {
-						c->Message(13, "You must name a valid heal rotation leader.");
-						return;
-					}
-
-					if(leaderBot) {
-						std::list<Bot*> botList;
-						if (leaderBot->GetBotOwner() != c) {
-							c->Message(13, "You must target a bot that you own.");
-							return;
-						}
-
-						botList = GetBotsInHealRotation(leaderBot);
-						for(std::list<Bot*>::iterator botListItr = botList.begin(); botListItr != botList.end(); ++botListItr) {
-							Bot* tempBot = *botListItr;
-							if(tempBot && tempBot->GetBotOwnerCharacterID() == c->CharacterID()) {
-								tempBot->SetHealRotationActive(false);
-								tempBot->SetHasHealedThisCycle(false);
-							}
-						}
-
-						c->Message(0, "Bot heal rotation stopped successfully.");
-					} else {
-						c->Message(13, "You must name a valid bot.");
-						return;
-					}
-				}
-			} else {
-				c->Message(0, "#bot healrotation stop <bot healrotation leader name | all>");
-				return;
-			}
-		}
-
-		if(!strcasecmp(sep->arg[2], "list")) {
-			if(sep->argnum == 3) {
-				bool showAll = false;
-				Bot* leaderBot;
-				std::string botName = std::string(sep->arg[3]);
-				if(!strcasecmp(sep->arg[3], "all")) {
-					std::list<Bot*> BotList = entity_list.GetBotsByBotOwnerCharacterID(c->CharacterID());
-					for(std::list<Bot*>::iterator botListItr = BotList.begin(); botListItr != BotList.end(); ++botListItr) {
-						Bot* tempBot = *botListItr;
-						if(tempBot->GetInHealRotation() && tempBot->GetHealRotationLeader() == tempBot)
-							c->Message(0, "Bot Heal Rotation- Leader: %s, Number of Members: %i, Timer: %1.1f", tempBot->GetCleanName(), tempBot->GetNumHealRotationMembers(), (float)(tempBot->GetHealRotationTimer()/1000));
-					}
-				} else {
-					std::string botName = std::string(sep->arg[3]);
-					if(!botName.empty())
-						leaderBot = entity_list.GetBotByBotName(botName);
-					else {
-						c->Message(13, "You must name a valid heal rotation leader.");
-						return;
-					}
-
-					if(leaderBot) {
-						std::list<Bot*> botList;
-						if (leaderBot->GetBotOwner() != c) {
-							c->Message(13, "You must target a bot that you own.");
-							return;
-						}
-
-						botList = GetBotsInHealRotation(leaderBot);
-						c->Message(0, "Bot Heal Rotation- Leader: %s", leaderBot->GetCleanName());
-						c->Message(0, "Bot Heal Rotation- Timer: %1.1f", ((float)leaderBot->GetHealRotationTimer()/1000.0f));
-						for(std::list<Bot*>::iterator botListItr = botList.begin(); botListItr != botList.end(); ++botListItr) {
-							Bot* tempBot = *botListItr;
-							if(tempBot && tempBot->GetBotOwnerCharacterID() == c->CharacterID())
-								c->Message(0, "Bot Heal Rotation- Member: %s", tempBot->GetCleanName());
-						}
-
-						for(int i = 0; i < MaxHealRotationTargets; i++) {
-							if(leaderBot->GetHealRotationTarget(i)) {
-								Mob* tempTarget = leaderBot->GetHealRotationTarget(i);
-								if(tempTarget) {
-									std::string targetInfo = "";
-									targetInfo += tempTarget->GetHPRatio() < 0 ? "(dead) " : "";
-									targetInfo += tempTarget->GetZoneID() != leaderBot->GetZoneID() ? "(not in zone) " : "";
-									c->Message(0, "Bot Heal Rotation- Target: %s %s", tempTarget->GetCleanName(), targetInfo.c_str());
-								}
-							}
-						}
-					} else {
-						c->Message(13, "You must name a valid bot.");
-						return;
-					}
-				}
-			} else {
-				c->Message(0, "#bot healrotation list <bot healrotation leader name | all>");
-				return;
-			}
-		}
-
-		if(!strcasecmp(sep->arg[2], "cleartargets")) {
-			if(sep->argnum == 3) {
-				Bot* leaderBot;
-				std::string botName = std::string(sep->arg[3]);
-				if(!botName.empty())
-					leaderBot = entity_list.GetBotByBotName(botName);
-				else {
-					c->Message(13, "You must name a valid heal rotation leader.");
-					return;
-				}
-
-				if(leaderBot) {
-					std::list<Bot*> botList;
-					if (leaderBot->GetBotOwner() != c) {
-						c->Message(13, "You must target a bot that you own.");
-						return;
-					}
-
-					botList = GetBotsInHealRotation(leaderBot);
-					for(std::list<Bot*>::iterator botListItr = botList.begin(); botListItr != botList.end(); ++botListItr) {
-						Bot* tempBot = *botListItr;
-						if(tempBot && tempBot->GetBotOwnerCharacterID() == c->CharacterID())
-							tempBot->ClearHealRotationTargets();
-					}
-				} else {
-					c->Message(13, "You must name a valid bot.");
-					return;
-				}
-			} else {
-				c->Message(0, "#bot healrotation cleartargets <bot healrotation leader name>");
-				return;
-			}
-		}
-
-		if(!strcasecmp(sep->arg[2], "fastheals")) {
-			if(sep->argnum == 3) {
-				Bot* leaderBot;
-				std::string botName = std::string(sep->arg[3]);
-				if(!botName.empty())
-					leaderBot = entity_list.GetBotByBotName(botName);
-				else {
-					c->Message(13, "You must name a valid heal rotation leader.");
-					return;
-				}
-
-				if(leaderBot) {
-					bool fastHeals = false;
-					std::list<Bot*> botList;
-					if (leaderBot->GetBotOwner() != c) {
-						c->Message(13, "You must target a bot that you own.");
-						return;
-					}
-
-					if(!strcasecmp(sep->arg[4], "on"))
-						fastHeals = true;
-					else if(strcasecmp(sep->arg[4], "off")) {
-						c->Message(0, "Usage #bot healrotation fastheals <bot healrotation leader name> <on | off>.");
-						return;
-					}
-
-					botList = GetBotsInHealRotation(leaderBot);
-					for(std::list<Bot*>::iterator botListItr = botList.begin(); botListItr != botList.end(); ++botListItr) {
-						Bot* tempBot = *botListItr;
-						if(tempBot && tempBot->GetBotOwnerCharacterID() == c->CharacterID())
-							tempBot->SetHealRotationUseFastHeals(fastHeals);
-					}
-				} else {
-					c->Message(13, "You must name a valid bot.");
-					return;
-				}
-			} else {
-				c->Message(0, "#bot healrotation fastheals <bot healrotation leader name> <on | off>");
-				return;
-			}
-		}
-	}
-
-	if(!strcasecmp(sep->arg[1], "setinspectmessage")) {
-		if(!strcasecmp(sep->arg[2], "help")) {
-			c->Message(0, "[Titanium clients:]");
-			c->Message(0, "- Self-inspect and type your bot's inspect message");
-			c->Message(0, "- Close the self-inspect window");
-			c->Message(0, "- Self-inspect again to update the server");
-			c->Message(0, "- Target a bot that you own and wish to update");
-			c->Message(0, "- type #bot setinspectmessage to set the bot's message");
-			c->Message(0, "[Secrets of Faydwer and higher clients:]");
-			c->Message(0, "- Self-inspect and type your bot's inspect message");
-			c->Message(0, "- Close the self-inspect window to update the server");
-			c->Message(0, "- Target a bot that you own and wish to update");
-			c->Message(0, "- type #bot setinspectmessage to set the bot's message");
-		} else {
-			Mob *target = c->GetTarget();
-			if(target && target->IsBot() && (c == target->GetOwner()->CastToClient())) {
-				const InspectMessage_Struct& playermessage = c->GetInspectMessage();
-				InspectMessage_Struct& botmessage = target->CastToBot()->GetInspectMessage();
-				memcpy(&botmessage, &playermessage, sizeof(InspectMessage_Struct));
-				database.SetBotInspectMessage(target->CastToBot()->GetBotID(), &botmessage);
-				c->Message(0, "Bot %s's inspect message now reflects your inspect message.", target->GetName());
-			} else {
-				c->Message(0, "Your target must be a bot that you own.");
-			}
-		}
-	}
-
-	if(!strcasecmp(sep->arg[1], "bardoutofcombat")) {
-		bool useOutOfCombatSongs = false;
-		if(sep->arg[2] && sep->arg[3]){
-			if(!strcasecmp(sep->arg[2], "on"))
-				useOutOfCombatSongs = true;
-			else if (!strcasecmp(sep->arg[2], "off"))
-				useOutOfCombatSongs = false;
-			else {
-				c->Message(0, "Usage #bot bardoutofcombat [on|off]");
-				return;
-			}
-
-			Mob *target = c->GetTarget();
-			if(target && target->IsBot() && (c == target->GetOwner()->CastToClient())) {
-				Bot* bardBot = target->CastToBot();
-				if(bardBot) {
-					bardBot->SetBardUseOutOfCombatSongs(useOutOfCombatSongs);
-					c->Message(0, "Bard use of out of combat songs updated.");
-				}
-			} else
-				c->Message(0, "Your target must be a bot that you own.");
-		} else
-			c->Message(0, "Usage #bot bardoutofcombat [on|off]");
-		return;
-	}
-
-	if(!strcasecmp(sep->arg[1], "showhelm")) {
-		bool showhelm = true;
-		if (sep->arg[2]) {
-			if (!strcasecmp(sep->arg[2], "on"))
-				showhelm = true;
-			else if (!strcasecmp(sep->arg[2], "off"))
-				showhelm = false;
-			else {
-				c->Message(0, "Usage #bot showhelm [on|off]");
-				return;
-			}
-
-			Mob *target = c->GetTarget();
-			if (target && target->IsBot() && (c == target->GetOwner()->CastToClient())) {
-				Bot* b = target->CastToBot();
-				if (b) {
-					b->SetShowHelm(showhelm);
-					EQApplicationPacket* outapp = new EQApplicationPacket(OP_SpawnAppearance, sizeof(SpawnAppearance_Struct));
-					SpawnAppearance_Struct* sa_out = (SpawnAppearance_Struct*)outapp->pBuffer;
-					/*
-					[10-16-2015 :: 14:58:02] [Packet :: Client -> Server (Dump)] [OP_SpawnAppearance - 0x01d1] [Size: 10] 
-					0: A4 02 [2B 00] 00 00 00 00 - showhelm = false
-					[10-16-2015 :: 14:57:56] [Packet :: Client -> Server (Dump)] [OP_SpawnAppearance - 0x01d1] [Size: 10] 
-					0: A4 02 [2B 00] 01 00 00 00 - showhelm = true
-					*/
-					sa_out->spawn_id = b->GetID();
-					sa_out->type = AT_ShowHelm; // value = 43 (0x002B)
-					sa_out->parameter = (showhelm ? 1 : 0);
-					entity_list.QueueClients(b, outapp, true);
-					safe_delete(outapp);
-					c->Message(0, "Your bot will %s show their helmet.", (showhelm ? "now" : "no longer"));
-				}
-			}
-		} else
-			c->Message(0, "Usage #bot showhelm [on|off]");
-
-		return;
-	}
 }
 
 bool EntityList::Bot_AICheckCloseBeneficialSpells(Bot* caster, uint8 iChance, float iRange, uint16 iSpellTypes) {
@@ -13044,37 +8848,6 @@ std::list<Bot*> EntityList::GetBotsByBotOwnerCharacterID(uint32 botOwnerCharacte
 	return Result;
 }
 
-void EntityList::BotPickLock(Bot* rogue) {
-	for (auto it = door_list.begin(); it != door_list.end(); ++it) {
-		Doors *cdoor = it->second;
-		if(!cdoor || cdoor->IsDoorOpen())
-            continue;
-
-        auto diff = (rogue->GetPosition() - cdoor->GetPosition());
-		float curdist = ((diff.x * diff.x) + (diff.y * diff.y));
-        if(((diff.z * diff.z) >= 10) || curdist > 130)
-            continue;
-
-        const ItemInst* item1 = rogue->GetBotItem(MainHands);
-        const ItemInst* item2 = rogue->GetBotItem(MainPrimary);
-        float bonus1 = 0.0f;
-        float bonus2 = 0.0f;
-        float skill = rogue->GetSkill(SkillPickLock);
-        if(item1)
-            if(item1->GetItem()->SkillModType == SkillPickLock)
-                bonus1 = (skill * (((float)item1->GetItem()->SkillModValue) / 100.0f));
-
-        if(item2)
-            if(item2->GetItem()->SkillModType == SkillPickLock)
-                bonus2 = (skill * (((float)item2->GetItem()->SkillModValue) / 100.0f));
-
-        if((skill + bonus1 + bonus2) >= cdoor->GetLockpick())
-            cdoor->ForceOpen(rogue);
-        else
-            rogue->BotGroupSay(rogue, "I am not skilled enough for this lock.");
-	}
-}
-
 bool EntityList::RemoveBot(uint16 entityID) {
 	bool Result = false;
 	if(entityID > 0) {
@@ -13222,7 +8995,8 @@ uint8 Bot::GetNumberNeedingHealedInGroup(uint8 hpr, bool includePets) {
 	return needHealed;
 }
 
-uint32 Bot::GetEquipmentColor(uint8 material_slot) const {
+uint32 Bot::GetEquipmentColor(uint8 material_slot) const
+{
 	int16 slotid = 0;
 	uint32 botid = this->GetBotID();
 	slotid = Inventory::CalcSlotFromMaterial(material_slot);
@@ -13460,288 +9234,213 @@ bool Bot::UseDiscipline(uint32 spell_id, uint32 target) {
 	return true;
 }
 
-void Bot::CreateHealRotation( Mob* target, uint32 timer ) {
-	SetInHealRotation(true);
-	SetHealRotationActive(false);
-	SetNumHealRotationMembers(GetNumHealRotationMembers()+1);
-	SetHealRotationLeader(this);
-	SetNextHealRotationMember(this);
-	SetPrevHealRotationMember(this);
-	SetHealRotationTimer(timer);
-	SetHasHealedThisCycle(false);
-	if(target)
-		AddHealRotationTarget(target);
+// new healrotation code
+bool Bot::CreateHealRotation(uint32 interval_ms, bool fast_heals, bool adaptive_targeting, bool casting_override)
+{
+	if (IsHealRotationMember())
+		return false;
+	if (!HealRotation::IsMemberClass(GetClass()))
+		return false;
+	
+	m_member_of_heal_rotation = std::make_shared<HealRotation>(this, interval_ms, fast_heals, adaptive_targeting, casting_override);
+
+	return IsHealRotationMember();
 }
 
-bool Bot::AddHealRotationMember( Bot* healer ) {
-	if(healer) {
-		if(GetNumHealRotationMembers() > 0 && GetNumHealRotationMembers() < MaxHealRotationMembers) {
-			Bot* tempBot = GetPrevHealRotationMember();
-			if(tempBot) {
-				for(int i = 0; i < 3; i++){
-					healer->ClearHealRotationMembers();
-					healer->ClearHealRotationTargets();
-					healer->AddHealRotationTarget(entity_list.GetMob(_healRotationTargets[i]));
-				}
-				healer->SetHealRotationTimer(tempBot->GetHealRotationTimer());
-				healer->SetHealRotationLeader(this);
-				healer->SetNextHealRotationMember(this);
-				healer->SetPrevHealRotationMember(tempBot);
-				healer->SetInHealRotation(true);
-				healer->SetHasHealedThisCycle(false);
-				healer->SetHealRotationUseFastHeals(tempBot->GetHealRotationUseFastHeals());
-				tempBot->SetNextHealRotationMember(healer);
-				SetPrevHealRotationMember(healer);
-				std::list<Bot*> botList = GetBotsInHealRotation(this);
-				for(std::list<Bot*>::iterator botListItr = botList.begin(); botListItr != botList.end(); ++botListItr) {
-					Bot* tempBot = *botListItr;
-					if(tempBot)
-						tempBot->SetNumHealRotationMembers(GetNumHealRotationMembers()+1);
-				}
-				return true;
-			}
-		}
-	}
-	return false;
+bool Bot::DestroyHealRotation()
+{
+	if (!IsHealRotationMember())
+		return true;
+
+	m_member_of_heal_rotation->ClearTargetPool();
+	m_member_of_heal_rotation->ClearMemberPool();
+
+	return !IsHealRotationMember();
 }
 
-bool Bot::RemoveHealRotationMember( Bot* healer ) {
-	if(healer && GetNumHealRotationMembers() > 0) {
-		Bot* leader = healer->GetHealRotationLeader();
-		Bot* prevBot = healer->GetPrevHealRotationMember();
-		Bot* nextBot = healer->GetNextHealRotationMember();
-		if(healer == this) {
-			if(nextBot != this)
-				leader = nextBot;
-		}
+bool Bot::JoinHealRotationMemberPool(std::shared_ptr<HealRotation>* heal_rotation)
+{
+	if (IsHealRotationMember())
+		return false;
+	if (!heal_rotation->use_count())
+		return false;
+	if (!(*heal_rotation))
+		return false;
+	if (!HealRotation::IsMemberClass(GetClass()))
+		return false;
 
-		healer->SetHealRotationTimer(0);
-		healer->ClearHealRotationMembers();
-		healer->ClearHealRotationTargets();
-		healer->ClearHealRotationLeader();
-		healer->SetHasHealedThisCycle(false);
-		healer->SetHealRotationActive(false);
-		healer->SetInHealRotation(false);
-		if(prevBot && nextBot && GetNumHealRotationMembers() > 1) {
-			prevBot->SetNextHealRotationMember(nextBot);
-			nextBot->SetPrevHealRotationMember(prevBot);
-		}
+	if (!(*heal_rotation)->AddMemberToPool(this))
+		return false;
 
-		std::list<Bot*> botList = GetBotsInHealRotation(leader);
-		for(std::list<Bot*>::iterator botListItr = botList.begin(); botListItr != botList.end(); ++botListItr) {
-			Bot* tempBot = *botListItr;
-			if(tempBot) {
-				tempBot->SetNumHealRotationMembers(GetNumHealRotationMembers() - 1);
-				if(tempBot->GetHealRotationLeader() != leader)
-					tempBot->SetHealRotationLeader(leader);
-			}
-		}
+	m_member_of_heal_rotation = *heal_rotation;
+
+	return true;
+}
+
+bool Bot::LeaveHealRotationMemberPool()
+{
+	if (!IsHealRotationMember()) {
+		m_member_of_heal_rotation.reset();
 		return true;
 	}
-	return false;
+
+	m_member_of_heal_rotation->RemoveMemberFromPool(this);
+	m_member_of_heal_rotation.reset();
+
+	return !IsHealRotationMember();
 }
 
-void Bot::SetHealRotationLeader( Bot* leader ) {
-	_healRotationLeader = leader->GetBotID();
+bool Bot::UseHealRotationFastHeals()
+{
+	if (!IsHealRotationMember())
+		return false;
+	
+	return m_member_of_heal_rotation->FastHeals();
 }
 
-void Bot::SetNextHealRotationMember( Bot* healer ) {
-	_healRotationMemberNext = healer->GetBotID();
+bool Bot::UseHealRotationAdaptiveTargeting()
+{
+	if (!IsHealRotationMember())
+		return false;
+
+	return m_member_of_heal_rotation->AdaptiveTargeting();
 }
 
-void Bot::SetPrevHealRotationMember( Bot* healer ) {
-	_healRotationMemberPrev = healer->GetBotID();
+bool Bot::IsHealRotationActive()
+{
+	if (!IsHealRotationMember())
+		return false;
+
+	return m_member_of_heal_rotation->IsActive();
 }
 
-Bot* Bot::GetHealRotationLeader( ) {
-	if(_healRotationLeader)
-		return entity_list.GetBotByBotID(_healRotationLeader);
+bool Bot::IsHealRotationReady()
+{
+	if (!IsHealRotationMember())
+		return false;
 
-	return 0;
+	return m_member_of_heal_rotation->CastingReady();
 }
 
-Bot* Bot::GetNextHealRotationMember( ) {
-	if(_healRotationMemberNext)
-		return entity_list.GetBotByBotID(_healRotationMemberNext);
+bool Bot::IsHealRotationCaster()
+{
+	if (!IsHealRotationMember())
+		return false;
 
-	return 0;
+	return (m_member_of_heal_rotation->CastingMember() == this);
 }
 
-Bot* Bot::GetPrevHealRotationMember( ) {
-	if(_healRotationMemberNext)
-		return entity_list.GetBotByBotID(_healRotationMemberPrev);
+bool Bot::HealRotationPokeTarget()
+{
+	if (!IsHealRotationMember())
+		return false;
 
-	return 0;
+	return m_member_of_heal_rotation->PokeCastingTarget();
 }
 
-bool Bot::AddHealRotationTarget( Mob* target ) {
-	if(target) {
-		for (int i = 0; i < MaxHealRotationTargets; ++i) {
-			if(_healRotationTargets[i] > 0) {
-				Mob* tempTarget = entity_list.GetMob(_healRotationTargets[i]);
-				if(!tempTarget) {
-					_healRotationTargets[i] = 0;
-				} else if(!strcasecmp(tempTarget->GetCleanName(), target->GetCleanName())) {
-					if(tempTarget->GetID() != target->GetID())
-						_healRotationTargets[i] = target->GetID();
+Mob* Bot::HealRotationTarget()
+{
+	if (!IsHealRotationMember())
+		return nullptr;
 
-					return false;
-				}
-			}
+	return m_member_of_heal_rotation->CastingTarget();
+}
 
-			if (_healRotationTargets[i] == 0) {
-				std::list<Bot*> botList = GetBotsInHealRotation(this);
-				_healRotationTargets[i] = target->GetID();
-				for(std::list<Bot*>::iterator botListItr = botList.begin(); botListItr != botList.end(); ++botListItr) {
-					Bot* tempBot = *botListItr;
-					if(tempBot && tempBot != this)
-						tempBot->AddHealRotationTarget(target, i);
-				}
-				return true;
-			}
+bool Bot::AdvanceHealRotation(bool use_interval)
+{
+	if (!IsHealRotationMember())
+		return false;
+
+	return m_member_of_heal_rotation->AdvanceRotation(use_interval);
+}
+
+bool Bot::IsMyHealRotationSet()
+{
+	if (!IsHealRotationMember())
+		return false;
+	if (!m_member_of_heal_rotation->IsActive())
+		return false;
+	if (!m_member_of_heal_rotation->CastingReady())
+		return false;
+	if (m_member_of_heal_rotation->CastingMember() != this)
+		return false;
+	if (!m_member_of_heal_rotation->PokeCastingTarget())
+		return false;
+
+	return true;
+}
+
+bool Bot::AmICastingForHealRotation()
+{
+	if (!IsHealRotationMember())
+		return false;
+
+	return m_member_of_heal_rotation->MemberIsCasting(this);
+}
+
+void Bot::SetMyCastingForHealRotation(bool flag)
+{
+	if (!IsHealRotationMember())
+		return;
+
+	m_member_of_heal_rotation->SetMemberIsCasting(this, flag);
+}
+
+bool Bot::DyeArmor(int16 slot_id, uint32 rgb, bool all_flag, bool save_flag)
+{
+	if (all_flag) {
+		if (slot_id != INVALID_INDEX)
+			return false;
+
+		for (uint8 i = 0; i < MaterialPrimary; ++i) {
+			uint8 inv_slot = Inventory::CalcSlotFromMaterial(i);
+			ItemInst* inst = m_inv.GetItem(inv_slot);
+			if (!inst)
+				continue;
+
+			inst->SetColor(rgb);
+			SendWearChange(i);
 		}
 	}
-	return false;
-}
+	else {
+		uint8 mat_slot = Inventory::CalcMaterialFromSlot(slot_id);
+		if (mat_slot == _MaterialInvalid || mat_slot >= MaterialPrimary)
+			return false;
 
-bool Bot::AddHealRotationTarget( Mob *target, int index ) {
-	if (target && index < MaxHealRotationTargets) {
-		_healRotationTargets[index] = target->GetID();
-		return true;
+		ItemInst* inst = m_inv.GetItem(slot_id);
+		if (!inst)
+			return false;
+
+		inst->SetColor(rgb);
+		SendWearChange(mat_slot);
 	}
-	return false;
-}
 
-bool Bot::RemoveHealRotationTarget( Mob* target ) {
-	int index = 0;
-	bool removed = false;
-	if(target) {
-		for(int i = 0; i < MaxHealRotationTargets; i++){
-			if(_healRotationTargets[i] == target->GetID()) {
-				std::list<Bot*> botList = GetBotsInHealRotation(this);
-				_healRotationTargets[i] = 0;
-				index = i;
-				removed = true;
-				for(std::list<Bot*>::iterator botListItr = botList.begin(); botListItr != botList.end(); ++botListItr) {
-					Bot* tempBot = *botListItr;
-					if(tempBot)
-						tempBot->RemoveHealRotationTarget(i);
-				}
-			}
-		}
-	}
-	return removed;
-}
+	if (save_flag) {
+		std::string where_clause;
+		if (all_flag)
+			where_clause = StringFormat(" WHERE `slot_id` IN ('%u', '%u', '%u', '%u', '%u', '%u', '%u')",
+			MainHead, MainArms, MainWrist1, MainHands, MainChest, MainLegs, MainFeet);
+		else
+			where_clause = StringFormat(" WHERE `slot_id` = '%u'", slot_id);
 
-bool Bot::RemoveHealRotationTarget( int index ) {
-	if(index >= 0) {
-		_healRotationTargets[index] = 0;
-		if(index < MaxHealRotationTargets) {
-			for(int i = index; i < MaxHealRotationTargets; i++){
-				_healRotationTargets[i] = _healRotationTargets[i + 1];
-				_healRotationTargets[i + 1] = 0;
-			}
-			return true;
-		}
-	}
-	return false;
-}
+		std::string query = StringFormat(
+			"UPDATE `bot_inventories`"
+			" SET `inst_color` = '%u'"
+			" %s"
+			" AND `bot_id` = '%u'",
+			rgb,
+			where_clause.c_str(),
+			GetBotID()
+			);
 
-void Bot::ClearHealRotationMembers() {
-	_healRotationMemberPrev = 0;
-	_healRotationMemberNext = 0;
-}
-
-void Bot::ClearHealRotationTargets() {
-	for(int i = 0; i < MaxHealRotationTargets; i++) {
-		_healRotationTargets[i] = 0;
-	}
-}
-
-Mob* Bot::GetHealRotationTarget( ) {
-	Mob* tank = nullptr;
-	Mob* first = nullptr;
-	Mob* target = nullptr;
-	int removeIndex = 0;
-	int count = 0;
-	for(int i = 0; i < MaxHealRotationTargets; i++) {
-		if(_healRotationTargets[i] > 0) {
-			target = entity_list.GetMob(_healRotationTargets[i]);
-			if(target) {
-				if(target->GetZoneID() == GetZoneID() && !(target->GetAppearance() == eaDead && !(target->IsClient() && target->CastToClient()->GetFeigned()))) {
-					count++;
-					if(!first)
-						first = target;
-
-					if(!tank) {
-						Group* g = target->GetGroup();
-						if(g && !strcasecmp(g->GetMainTankName(), target->GetCleanName()))
-							tank = target;
-					}
-				}
-			} else {
-				if(removeIndex == 0)
-					removeIndex = i;
-			}
+		auto results = database.QueryDatabase(query);
+		if (!results.Success() && GetOwner() && GetOwner()->IsClient()) {
+			GetOwner()->CastToClient()->Message(15, "Failed to save dye armor changes for %s due to unknown cause", GetCleanName());
+			return false;
 		}
 	}
 
-	if (removeIndex > 0)
-		RemoveHealRotationTarget(removeIndex);
-
-	if(tank)
-		return tank;
-
-	return first;
-}
-
-Mob* Bot::GetHealRotationTarget( uint8 index ) {
-	Mob* target = nullptr;
-	if(_healRotationTargets[index] > 0)
-		target = entity_list.GetMob(_healRotationTargets[index]);
-
-	return target;
-}
-
-std::list<Bot*> Bot::GetBotsInHealRotation(Bot* rotationLeader) {
-	std::list<Bot*> Result;
-	if(rotationLeader != nullptr) {
-		Result.push_back(rotationLeader);
-		Bot* rotationMember = rotationLeader->GetNextHealRotationMember();
-		while(rotationMember && rotationMember != rotationLeader) {
-			Result.push_back(rotationMember);
-			rotationMember = rotationMember->GetNextHealRotationMember();
-		}
-	}
-	return Result;
-}
-
-void Bot::NotifyNextHealRotationMember(bool notifyNow) {
-	uint32 nextHealTime = notifyNow ? Timer::GetCurrentTime() : Timer::GetCurrentTime() + GetHealRotationTimer();
-	Bot* nextMember = GetNextHealRotationMember();
-	if(nextMember && nextMember != this) {
-		nextMember->SetHealRotationNextHealTime(nextHealTime);
-		nextMember->SetHasHealedThisCycle(false);
-	}
-}
-
-void Bot::BotHealRotationsClear(Client* c) {
-	if(c) {
-		std::list<Bot*> BotList = entity_list.GetBotsByBotOwnerCharacterID(c->CharacterID());
-		for(std::list<Bot*>::iterator botListItr = BotList.begin(); botListItr != BotList.end(); ++botListItr) {
-			Bot* tempBot = *botListItr;
-			if(tempBot->GetInHealRotation()) {
-				tempBot->SetInHealRotation(false);
-				tempBot->SetHealRotationActive(false);
-				tempBot->SetHasHealedThisCycle(false);
-				tempBot->SetHealRotationTimer(0);
-				tempBot->ClearHealRotationMembers();
-				tempBot->ClearHealRotationTargets();
-				tempBot->SetNumHealRotationMembers(0);
-				tempBot->ClearHealRotationLeader();
-			}
-		}
-	}
+	return true;
 }
 
 std::string Bot::CreateSayLink(Client* c, const char* message, const char* name) {

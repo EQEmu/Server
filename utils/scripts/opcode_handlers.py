@@ -745,6 +745,7 @@ def discoverserverhandlers():
         locations['Zone'].append('/zone/aa.cpp')
         locations['Zone'].append('/zone/attack.cpp')
         locations['Zone'].append('/zone/bot.cpp')
+        locations['Zone'].append('/zone/bot_command.cpp')
         locations['Zone'].append('/zone/client.cpp')
         locations['Zone'].append('/zone/client_packet.cpp')
         locations['Zone'].append('/zone/client_process.cpp')

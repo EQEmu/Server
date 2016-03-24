@@ -1,5 +1,5 @@
 /*	EQEMu: Everquest Server Emulator
-	Copyright (C) 2001-2006 EQEMu Development Team (http://eqemulator.net)
+	Copyright (C) 2001-2016 EQEMu Development Team (http://eqemulator.net)
 
 	This program is free software; you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -193,9 +193,9 @@ std::map<std::string,std::string> EQW::GetPlayerDetails(Const_char *char_name) {
 	res["location_id"] = itoa(cle->zone());
 	res["ip"] = long2ip(cle->GetIP());
 	res["level"] = itoa(cle->level());
-	res["race"] = GetRaceName(cle->race());
+	res["race"] = GetRaceIDName(cle->race());
 	res["race_id"] = itoa(cle->race());
-	res["class"] = GetEQClassName(cle->class_());
+	res["class"] = GetClassIDName(cle->class_());
 	res["class_id"] = itoa(cle->class_());
 	res["guild_id"] = itoa(cle->GuildID());
 	res["guild"] = guild_mgr.GetGuildName(cle->GuildID());

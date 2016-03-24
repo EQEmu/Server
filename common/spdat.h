@@ -1,5 +1,5 @@
 /*	EQEMu: Everquest Server Emulator
-	Copyright (C) 2001-2005 EQEMu Development Team (http://eqemulator.net)
+	Copyright (C) 2001-2016 EQEMu Development Team (http://eqemulator.net)
 
 	This program is free software; you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -639,7 +639,7 @@ typedef enum {
 // number. note that the id field is counted as 0, this way the numbers
 // here match the numbers given to sep in the loading function net.cpp
 //
-#define SPELL_LOAD_FIELD_COUNT 231
+#define SPELL_LOAD_FIELD_COUNT 236
 
 struct SPDat_Spell_Struct
 {
@@ -707,7 +707,7 @@ struct SPDat_Spell_Struct
 								// 152 & 153: all set to 0
 /* 154 */	int8 short_buff_box;	// != 0, goes to short buff box.
 /* 155 */	int descnum; // eqstr of description of spell
-/* 156 */	//int typedescnum; // eqstr of type description
+/* 156 */	int typedescnum; // eqstr of type description
 /* 157 */	int effectdescnum; // eqstr of effect description
 /* 158 */   //Category Desc ID 3
 /* 159 */	bool npc_no_los;

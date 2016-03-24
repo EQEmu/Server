@@ -1,5 +1,5 @@
 /*	EQEMu: Everquest Server Emulator
-	Copyright (C) 2001-2003 EQEMu Development Team (http://eqemulator.net)
+	Copyright (C) 2001-2016 EQEMu Development Team (http://eqemulator.net)
 
 	This program is free software; you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -3063,7 +3063,7 @@ bool Item_Struct::IsEquipable(uint16 Race, uint16 Class_) const
 
 	uint32 Classes_ = Classes;
 	uint32 Races_ = Races;
-	uint32 Race_ = GetArrayRace(Race);
+	uint32 Race_ = GetPlayerRaceValue(Race);
 
 	for (int CurrentClass = 1; CurrentClass <= PLAYER_CLASS_COUNT; ++CurrentClass) {
 		if (Classes_ & 1) {

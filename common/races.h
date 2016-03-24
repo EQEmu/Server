@@ -1,5 +1,5 @@
 /*	EQEMu: Everquest Server Emulator
-	Copyright (C) 2001-2002 EQEMu Development Team (http://eqemu.org)
+	Copyright (C) 2001-2016 EQEMu Development Team (http://eqemu.org)
 
 	This program is free software; you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -15,92 +15,130 @@
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
+
 #ifndef RACES_H
 #define RACES_H
 #include "../common/types.h"
-#include <cmath>
+
+#define MALE 0
+#define FEMALE 1
+#define NEUTER 2
 
 //theres a big list straight from the client below.
 
-#define HUMAN			1
-#define BARBARIAN		2
-#define ERUDITE			3
-#define WOOD_ELF		4
-#define HIGH_ELF		5
-#define DARK_ELF		6
-#define HALF_ELF		7
-#define DWARF			8
-#define TROLL			9
-#define OGRE			10
-#define HALFLING		11
-#define GNOME			12
-#define WEREWOLF		14
-#define WOLF			42
-#define BEAR			43
-#define SKELETON		60
-#define TIGER			63
-#define ELEMENTAL		75
-#define ALLIGATOR		91
-#define EYE_OF_ZOMM		108
-#define WOLF_ELEMENTAL	120
-#define INVISIBLE_MAN	127
-#define IKSAR			128
-#define VAHSHIR			130
+#define HUMAN 1
+#define BARBARIAN 2
+#define ERUDITE 3
+#define WOOD_ELF 4
+#define HIGH_ELF 5
+#define DARK_ELF 6
+#define HALF_ELF 7
+#define DWARF 8
+#define TROLL 9
+#define OGRE 10
+#define HALFLING 11
+#define GNOME 12
+#define WEREWOLF 14
+#define WOLF 42
+#define BEAR 43
+#define SKELETON 60
+#define TIGER 63
+#define ELEMENTAL 75
+#define ALLIGATOR 91
+#define EYE_OF_ZOMM 108
+#define WOLF_ELEMENTAL 120
+#define INVISIBLE_MAN 127
+#define IKSAR 128
+#define VAHSHIR 130
 #define CONTROLLED_BOAT 141
-#define MINOR_ILL_OBJ	142
-#define TREE			143
-#define IKSAR_SKELETON	161
-#define FROGLOK			330
-#define FROGLOK2		74	// Not sure why /who all reports race as 74 for frogloks
-#define DRAKKIN			522 // 32768
-#define EMU_RACE_NPC	131069 // was 65533
-#define EMU_RACE_PET	131070 // was 65534
+#define MINOR_ILL_OBJ 142
+#define TREE 143
+#define IKSAR_SKELETON 161
+#define FROGLOK 330
+// TODO: check all clients for (BYTE) usage of '/who all' class and remove FROGLOK2, if possible (330 - 74 = 256 .. WORD->BYTE conversion loss...)
+#define FROGLOK2 74	// Not sure why /who all reports race as 74 for frogloks
+#define FAIRY 473
+#define DRAKKIN 522 // 32768
+#define EMU_RACE_NPC 131069 // was 65533
+#define EMU_RACE_PET 131070 // was 65534
 #define EMU_RACE_UNKNOWN 131071 // was 65535
 
 
-#define human_1			1
-#define barbarian_1		2
-#define erudite_1		4
-#define woodelf_1		8
-#define highelf_1		16
-#define darkelf_1		32
-#define halfelf_1		64
-#define dwarf_1			128
-#define troll_1			256
-#define ogre_1			512
-#define halfling_1		1024
-#define gnome_1			2048
-#define iksar_1			4096
-#define vahshir_1		8192
-#define rall_1			16384 //froglok?
-#define drakkin_1		32768
+// player race values
+#define PLAYER_RACE_UNKNOWN 0
+#define PLAYER_RACE_HUMAN 1
+#define PLAYER_RACE_BARBARIAN 2
+#define PLAYER_RACE_ERUDITE 3
+#define PLAYER_RACE_WOOD_ELF 4
+#define PLAYER_RACE_HIGH_ELF 5
+#define PLAYER_RACE_DARK_ELF 6
+#define PLAYER_RACE_HALF_ELF 7
+#define PLAYER_RACE_DWARF 8
+#define PLAYER_RACE_TROLL 9
+#define PLAYER_RACE_OGRE 10
+#define PLAYER_RACE_HALFLING 11
+#define PLAYER_RACE_GNOME 12
+#define PLAYER_RACE_IKSAR 13
+#define PLAYER_RACE_VAHSHIR 14
+#define PLAYER_RACE_FROGLOK 15
+#define PLAYER_RACE_DRAKKIN 16
 
-const char* GetRaceName(uint16 race);
+#define PLAYER_RACE_COUNT 16
 
-uint32 GetArrayRace(uint16 race);
-inline uint32 GetRaceBitmask(uint16 race) { return uint32(pow(2.0f, float(GetArrayRace(race) - 1))); }
 
-#define Array_Race_UNKNOWN		0
-#define Array_Race_HUMAN		1
-#define Array_Race_BARBARIAN	2
-#define Array_Race_ERUDITE		3
-#define Array_Race_WOOD_ELF		4
-#define Array_Race_HIGH_ELF		5
-#define Array_Race_DARK_ELF		6
-#define Array_Race_HALF_ELF		7
-#define Array_Race_DWARF		8
-#define Array_Race_TROLL		9
-#define Array_Race_OGRE			10
-#define Array_Race_HALFLING		11
-#define Array_Race_GNOME		12
-#define Array_Race_IKSAR		13
-#define Array_Race_VAHSHIR		14
-#define Array_Race_FROGLOK		15
-#define Array_Race_DRAKKIN		16
-#define Array_Race_NPC			17
-#define Array_Race_PET			18
-#define Count_Array_Race		19 // used for array defines, must be the max + 1
-#define PLAYER_RACE_COUNT		16 // The count of all player races
+#define PLAYER_RACE_EMU_NPC 17
+#define PLAYER_RACE_EMU_PET 18
+#define PLAYER_RACE_EMU_COUNT 19
+
+
+// player race bits
+#define PLAYER_RACE_UNKNOWN_BIT 0
+#define PLAYER_RACE_HUMAN_BIT 1
+#define PLAYER_RACE_BARBARIAN_BIT 2
+#define PLAYER_RACE_ERUDITE_BIT 4
+#define PLAYER_RACE_WOOD_ELF_BIT 8
+#define PLAYER_RACE_HIGH_ELF_BIT 16
+#define PLAYER_RACE_DARK_ELF_BIT 32
+#define PLAYER_RACE_HALF_ELF_BIT 64
+#define PLAYER_RACE_DWARF_BIT 128
+#define PLAYER_RACE_TROLL_BIT 256
+#define PLAYER_RACE_OGRE_BIT 512
+#define PLAYER_RACE_HALFLING_BIT 1024
+#define PLAYER_RACE_GNOME_BIT 2048
+#define PLAYER_RACE_IKSAR_BIT 4096
+#define PLAYER_RACE_VAHSHIR_BIT 8192
+#define PLAYER_RACE_FROGLOK_BIT 16384
+#define PLAYER_RACE_DRAKKIN_BIT 32768
+
+#define PLAYER_RACE_ALL_MASK 65535
+
+
+const char* GetRaceIDName(uint16 race_id);
+const char* GetPlayerRaceName(uint32 player_race_value);
+
+uint32 GetPlayerRaceValue(uint16 race_id);
+uint32 GetPlayerRaceBit(uint16 race_id);
+
+uint16 GetRaceIDFromPlayerRaceValue(uint32 player_race_value);
+uint16 GetRaceIDFromPlayerRaceBit(uint32 player_race_bit);
+
+
+// player race-/gender-based model feature validators
+namespace PlayerAppearance
+{
+	bool IsValidBeard(uint16 race_id, uint8 gender_id, uint8 beard_value, bool use_luclin = true);
+	bool IsValidBeardColor(uint16 race_id, uint8 gender_id, uint8 beard_color_value, bool use_luclin = true);
+	bool IsValidDetail(uint16 race_id, uint8 gender_id, uint32 detail_value, bool use_luclin = true);
+	bool IsValidEyeColor(uint16 race_id, uint8 gender_id, uint8 eye_color_value, bool use_luclin = true);
+	bool IsValidFace(uint16 race_id, uint8 gender_id, uint8 face_value, bool use_luclin = true);
+	bool IsValidHair(uint16 race_id, uint8 gender_id, uint8 hair_value, bool use_luclin = true);
+	bool IsValidHairColor(uint16 race_id, uint8 gender_id, uint8 hair_color_value, bool use_luclin = true);
+	bool IsValidHead(uint16 race_id, uint8 gender_id, uint8 head_value, bool use_luclin = true);
+	bool IsValidHeritage(uint16 race_id, uint8 gender_id, uint32 heritage_value, bool use_luclin = true);
+	bool IsValidTattoo(uint16 race_id, uint8 gender_id, uint32 tattoo_value, bool use_luclin = true);
+	bool IsValidTexture(uint16 race_id, uint8 gender_id, uint8 texture_value, bool use_luclin = true);
+	bool IsValidWoad(uint16 race_id, uint8 gender_id, uint8 woad_value, bool use_luclin = true);
+}
 
 /*
 

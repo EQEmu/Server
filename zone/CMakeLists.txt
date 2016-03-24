@@ -8,6 +8,8 @@ SET(zone_sources
 	beacon.cpp
 	bonuses.cpp
 	bot.cpp
+	bot_command.cpp
+	bot_database.cpp
 	botspellsai.cpp
 	client.cpp
 	client_mods.cpp
@@ -30,6 +32,7 @@ SET(zone_sources
 	guild.cpp
 	guild_mgr.cpp
 	hate_list.cpp
+	heal_rotation.cpp
 	horse.cpp
 	inventory.cpp
 	loottables.cpp
@@ -131,6 +134,8 @@ SET(zone_headers
 	basic_functions.h
 	beacon.h
 	bot.h
+	bot_command.h
+	bot_database.h
 	bot_structs.h
 	client.h
 	client_packet.h
@@ -149,6 +154,7 @@ SET(zone_headers
 	groups.h
 	guild_mgr.h
 	hate_list.h
+	heal_rotation.h
 	horse.h
 	lua_bit.h
 	lua_client.h

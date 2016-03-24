@@ -1,5 +1,5 @@
 /*	EQEMu: Everquest Server Emulator
-	Copyright (C) 2001-2002 EQEMu Development Team (http://eqemu.org)
+	Copyright (C) 2001-2016 EQEMu Development Team (http://eqemu.org)
 
 	This program is free software; you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -28,6 +28,10 @@
 #include <set>
 #include <vector>
 #include <memory>
+
+#ifdef BOTS
+#include "heal_rotation.h"
+#endif
 
 char* strn0cpy(char* dest, const char* source, uint32 size);
 
@@ -1005,6 +1009,20 @@ public:
 	void DelAssistCap() { --npc_assist_cap; }
 	void ResetAssistCap() { npc_assist_cap = 0; }
 
+	// Bots HealRotation methods
+#ifdef BOTS
+	bool IsHealRotationTarget() { return (m_target_of_heal_rotation.use_count() && m_target_of_heal_rotation.get()); }
+	bool JoinHealRotationTargetPool(std::shared_ptr<HealRotation>* heal_rotation);
+	bool LeaveHealRotationTargetPool();
+
+	uint32 HealRotationHealCount();
+	uint32 HealRotationExtendedHealCount();
+	float HealRotationHealFrequency();
+	float HealRotationExtendedHealFrequency();
+
+	const std::shared_ptr<HealRotation>* TargetOfHealRotation() const { return &m_target_of_heal_rotation; }
+#endif
+
 protected:
 	void CommonDamage(Mob* other, int32 &damage, const uint16 spell_id, const SkillUseTypes attack_skill, bool &avoidable, const int8 buffslot, const bool iBuffTic, int special = 0);
 	static uint16 GetProcID(uint16 spell_id, uint8 effect_index);
@@ -1373,6 +1391,11 @@ protected:
 private:
 	void _StopSong(); //this is not what you think it is
 	Mob* target;
+
+#ifdef BOTS
+	std::shared_ptr<HealRotation> m_target_of_heal_rotation;
+#endif
+
 };
 
 #endif

@@ -1,5 +1,5 @@
 /*	EQEMu: Everquest Server Emulator
-	Copyright (C) 2001-2003 EQEMu Development Team (http://eqemulator.org)
+	Copyright (C) 2001-2016 EQEMu Development Team (http://eqemulator.org)
 
 	This program is free software; you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -44,6 +44,9 @@ extern volatile bool RunLoops;
 #include "zonedb.h"
 #include "petitions.h"
 #include "command.h"
+#ifdef BOTS
+#include "bot_command.h"
+#endif
 #include "string_ids.h"
 
 #include "guild_mgr.h"
@@ -1045,6 +1048,24 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 			}
 			break;
 		}
+
+#ifdef BOTS
+		if (message[0] == BOT_COMMAND_CHAR) {
+			if (bot_command_dispatch(this, message) == -2) {
+				if (parse->PlayerHasQuestSub(EVENT_COMMAND)) {
+					int i = parse->EventPlayer(EVENT_COMMAND, this, message, 0);
+					if (i == 0 && !RuleB(Chat, SuppressCommandErrors)) {
+						Message(13, "Bot command '%s' not recognized.", message);
+					}
+				}
+				else {
+					if (!RuleB(Chat, SuppressCommandErrors))
+						Message(13, "Bot command '%s' not recognized.", message);
+				}
+			}
+			break;
+		}
+#endif
 
 		Mob* sender = this;
 		if (GetPet() && GetPet()->FindType(SE_VoiceGraft))
@@ -3561,7 +3582,7 @@ void Client::Insight(uint32 t_id)
 	}
 	strcat(resists," to disease.");
 
-	Message(0,"Your target is a level %i %s. It appears %s and %s for its level. It seems %s",who->GetLevel(),GetEQClassName(who->GetClass(),1),dmg,hitpoints,resists);
+	Message(0,"Your target is a level %i %s. It appears %s and %s for its level. It seems %s",who->GetLevel(),GetClassIDName(who->GetClass(),1),dmg,hitpoints,resists);
 }
 
 void Client::GetGroupAAs(GroupLeadershipAA_Struct *into) const {
@@ -7546,8 +7567,13 @@ void Client::GarbleMessage(char *message, uint8 variance)
 	int delimiter_count = 0;
 
 	// Don't garble # commands
-	if (message[0] == '#')
+	if (message[0] == COMMAND_CHAR)
 		return;
+
+#ifdef BOTS
+	if (message[0] == BOT_COMMAND_CHAR)
+		return;
+#endif
 
 	for (size_t i = 0; i < strlen(message); i++) {
 		// Client expects hex values inside of a text link body

@@ -1,5 +1,5 @@
 /*	EQEMu: Everquest Server Emulator
-	Copyright (C) 2001-2013 EQEMu Development Team (http://eqemulator.net)
+	Copyright (C) 2001-2016 EQEMu Development Team (http://eqemulator.net)
 
 	This program is free software; you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -32,7 +32,7 @@
 
 #define CURRENT_BINARY_DATABASE_VERSION 9096
 #ifdef BOTS
-	#define CURRENT_BINARY_BOTS_DATABASE_VERSION 9000
+	#define CURRENT_BINARY_BOTS_DATABASE_VERSION 9002
 #else
 	#define CURRENT_BINARY_BOTS_DATABASE_VERSION 0 // must be 0
 #endif

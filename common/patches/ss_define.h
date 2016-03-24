@@ -1,3 +1,20 @@
+/*	EQEMu: Everquest Server Emulator
+	Copyright (C) 2001-2016 EQEMu Development Team (http://eqemulator.org)
+
+	This program is free software; you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation; version 2 of the License.
+
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY except by those people which sell it, which
+	are required to give you total support for your newly bought product;
+	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+	A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+	You should have received a copy of the GNU General Public License
+	along with this program; if not, write to the Free Software
+	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+*/
 
 #define ENCODE(x) void Strategy::Encode_##x(EQApplicationPacket **p, std::shared_ptr<EQStream> dest, bool ack_req)
 #define DECODE(x) void Strategy::Decode_##x(EQApplicationPacket *__packet)
@@ -116,6 +133,12 @@
 //a shorter assignment for direct mode
 #undef IN
 #define IN(x) emu->x = eq->x;
+#define IN_str(x) \
+	strncpy(emu->x, eq->x, sizeof(emu->x)); \
+        emu->x[sizeof(emu->x)-1] = '\0';
+#define IN_array(x, n) \
+	for(__i = 0; __i < n; __i++) \
+		emu->x[__i] = eq->x[__i];
 
 //call before any premature returns in an encoder using SETUP_DIRECT_DECODE
 #define FAIL_DIRECT_DECODE() \

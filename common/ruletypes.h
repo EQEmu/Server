@@ -1,5 +1,20 @@
+/*	EQEMu: Everquest Server Emulator
+	Copyright (C) 2001-2016 EQEMu Development Team (http://eqemulator.org)
 
+	This program is free software; you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation; version 2 of the License.
 
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY except by those people which sell it, which
+	are required to give you total support for your newly bought product;
+	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+	A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+	You should have received a copy of the GNU General Public License
+	along with this program; if not, write to the Free Software
+	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+*/
 
 #ifndef RULE_CATEGORY
 #define RULE_CATEGORY(name)
@@ -516,10 +531,14 @@ RULE_CATEGORY_END()
 #ifdef BOTS
 RULE_CATEGORY(Bots)
 RULE_INT(Bots, AAExpansion, 8) // Bots get AAs through this expansion
+RULE_INT(Bots, CommandSpellRank, 1) // Filters bot command spells by rank (1, 2 and 3 are valid filters - any other number allows all ranks)
 RULE_INT(Bots, CreationLimit, 150) // Number of bots that each account can create
 RULE_BOOL(Bots, FinishBuffing, false) // Allow for buffs to complete even if the bot caster is out of mana. Only affects buffing out of combat.
 RULE_BOOL(Bots, GroupBuffing, false) // Bots will cast single target buffs as group buffs, default is false for single. Does not make single target buffs work for MGB.
+RULE_INT(Bots, HealRotationMaxMembers, 24) // Maximum number of heal rotation members
+RULE_INT(Bots, HealRotationMaxTargets, 12) // Maximum number of heal rotation targets
 RULE_REAL(Bots, ManaRegen, 2.0) // Adjust mana regen for bots, 1 is fast and higher numbers slow it down 3 is about the same as players.
+RULE_BOOL(Bots, PreferNoManaCommandSpells, true) // Give sorting priority to newer no-mana spells (i.e., 'Bind Affinity')
 RULE_BOOL(Bots, QuestableSpawnLimit, false) // Optional quest method to manage bot spawn limits using the quest_globals name bot_spawn_limit, see: /bazaar/Aediles_Thrall.pl
 RULE_BOOL(Bots, QuestableSpells, false) // Anita Thrall's (Anita_Thrall.pl) Bot Spell Scriber quests.
 RULE_INT(Bots, SpawnLimit, 71) // Number of bots a character can have spawned at one time, You + 71 bots is a 12 group raid

@@ -1,3 +1,21 @@
+/*	EQEMu: Everquest Server Emulator
+	Copyright (C) 2001-2016 EQEMu Development Team (http://eqemulator.org)
+
+	This program is free software; you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation; version 2 of the License.
+
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY except by those people which sell it, which
+	are required to give you total support for your newly bought product;
+	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+	A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+	You should have received a copy of the GNU General Public License
+	along with this program; if not, write to the Free Software
+	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+*/
+
 #ifndef BOT_H
 #define BOT_H
 
@@ -7,9 +25,11 @@
 #include "mob.h"
 #include "client.h"
 #include "pets.h"
+#include "heal_rotation.h"
 #include "groups.h"
 #include "corpse.h"
 #include "zonedb.h"
+#include "bot_database.h"
 #include "string_ids.h"
 #include "../common/misc_functions.h"
 #include "../common/global_define.h"
@@ -29,8 +49,6 @@ const int DisciplineReuseStart = MaxSpellTimer + 1;
 const int MaxTimer = MaxSpellTimer + MaxDisciplineTimer;
 const int MaxStances = 7;
 const int MaxSpellTypes = 16;
-const int MaxHealRotationMembers = 6;
-const int MaxHealRotationTargets = 3;
 
 enum BotStanceType {
 	BotStancePassive,
@@ -39,8 +57,57 @@ enum BotStanceType {
 	BotStanceReactive,
 	BotStanceAggressive,
 	BotStanceBurn,
-	BotStanceBurnAE
+	BotStanceBurnAE,
+	BotStanceUnknown
 };
+
+#define BOT_STANCE_COUNT 8
+#define VALIDBOTSTANCE(x) ((x >= (int)BotStancePassive && x <= (int)BotStanceBurnAE) ? ((BotStanceType)x) : (BotStanceUnknown))
+
+static const std::string bot_stance_name[BOT_STANCE_COUNT] = {
+	"Passive",		// 0
+	"Balanced",		// 1
+	"Efficient",	// 2
+	"Reactive",		// 3
+	"Aggressive",	// 4
+	"Burn",			// 5
+	"BurnAE",		// 6
+	"Unknown"		// 7
+};
+
+static const char* GetBotStanceName(int stance_id) { return bot_stance_name[VALIDBOTSTANCE(stance_id)].c_str(); }
+
+#define VALIDBOTEQUIPSLOT(x) ((x >= EmuConstants::EQUIPMENT_BEGIN && x <= EmuConstants::EQUIPMENT_END) ? (x) : ((x == MainPowerSource) ? (22) : (23)))
+
+static std::string bot_equip_slot_name[EmuConstants::EQUIPMENT_SIZE + 2] =
+{
+	"Charm",			// MainCharm
+	"Left Ear",			// MainEar1
+	"Head",				// MainHead
+	"Face",				// MainFace
+	"Right Ear",		// MainEar2
+	"Neck",				// MainNeck 
+	"Shoulders",		// MainShoulders
+	"Arms",				// MainArms
+	"Back",				// MainBack
+	"Left Wrist",		// MainWrist1
+	"Right Wrist",		// MainWrist2
+	"Range",			// MainRange
+	"Hands",			// MainHands
+	"Primary Hand",		// MainPrimary
+	"Secondary Hand",	// MainSecondary
+	"Left Finger",		// MainFinger1
+	"Right Finger",		// MainFinger2
+	"Chest",			// MainChest
+	"Legs",				// MainLegs
+	"Feet",				// MainFeet
+	"Waist",			// MainWaist
+	"Ammo",				// MainAmmo
+	"Power Source",		// 22 (MainPowerSource = 9999)
+	"Unknown"
+};
+
+static const char* GetBotEquipSlotName(int slot_id) { return bot_equip_slot_name[VALIDBOTEQUIPSLOT(slot_id)].c_str(); }
 
 enum SpellTypeIndex {
 	SpellType_NukeIndex,
@@ -110,7 +177,7 @@ public:
 		BotRoleRaidHealer
 	};
 
-	enum EqExpansions {
+	enum EqExpansions { // expansions are off..EQ should be '0'
 		ExpansionNone,
 		ExpansionEQ,
 		ExpansionRoK,
@@ -156,8 +223,10 @@ public:
 
 	// Class Methods
 	bool IsValidRaceClassCombo();
+	static bool IsValidRaceClassCombo(uint16 r, uint8 c);
 	bool IsValidName();
-	static bool IsBotNameAvailable(char *botName, std::string* errorMessage);
+	static bool IsValidName(std::string& name);
+	static bool IsBotNameAvailable(const char *botName, std::string* errorMessage);
 	bool DeleteBot(std::string* errorMessage);
 	void Spawn(Client* botCharacterOwner, std::string* errorMessage);
 	virtual void SetLevel(uint8 in_level, bool command = false);
@@ -230,18 +299,7 @@ public:
 	bool HasOrMayGetAggro();
 	void SetDefaultBotStance();
 	void CalcChanceToCast();
-	void CreateHealRotation( Mob* target, uint32 timer = 10000 );
-	bool AddHealRotationMember( Bot* healer );
-	bool RemoveHealRotationMember( Bot* healer );
-	bool AddHealRotationTarget( Mob* target );
-	//bool AddHealRotationTarget( const char *targetName, int index);
-	bool AddHealRotationTarget( Mob* target, int index);
-	bool RemoveHealRotationTarget( Mob* target );
-	bool RemoveHealRotationTarget( int index);
-	void NotifyNextHealRotationMember( bool notifyNow = false );
-	void ClearHealRotationLeader() { _healRotationLeader = 0; }
-	void ClearHealRotationMembers();
-	void ClearHealRotationTargets();
+
 	inline virtual int32	GetMaxStat();
 	inline virtual int32	GetMaxResist();
 	inline virtual int32	GetMaxSTR();
@@ -299,6 +357,9 @@ public:
 	virtual bool AI_PursueCastCheck();
 	virtual bool AI_IdleCastCheck();
 	bool AIHealRotation(Mob* tar, bool useFastHeals);
+	bool GetPauseAI() { return _pauseAI; }
+	void SetPauseAI(bool pause_flag) { _pauseAI = pause_flag; }
+	
 
 	// Mob AI Virtual Override Methods
 	virtual void AI_Process();
@@ -322,15 +383,6 @@ public:
 	virtual bool DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_center, CastAction_type &CastAction);
 	virtual bool DoCastSpell(uint16 spell_id, uint16 target_id, uint16 slot = USE_ITEM_SPELL_SLOT, int32 casttime = -1, int32 mana_cost = -1, uint32* oSpellWillFinish = 0, uint32 item_slot = 0xFFFFFFFF, uint32 aa_id = 0);
 
-	// Bot Action Command Methods
-	bool MesmerizeTarget(Mob* target);
-	bool Bot_Command_Resist(int resisttype, int level);
-	bool Bot_Command_DireTarget(int diretype, Mob *target);
-	bool Bot_Command_CharmTarget(int charmtype, Mob *target);
-	bool Bot_Command_CalmTarget(Mob *target);
-	bool Bot_Command_RezzTarget(Mob *target);
-	bool Bot_Command_Cure(int curetype, int level);
-
 	// Bot Equipment & Inventory Class Methods
 	void BotTradeSwapItem(Client* client, int16 lootSlot, const ItemInst* inst, const ItemInst* inst_swap, uint32 equipableSlots, std::string* errorMessage, bool swap = true);
 	void BotTradeAddItem(uint32 id, const ItemInst* inst, int16 charges, uint32 equipableSlots, uint16 lootSlot, std::string* errorMessage, bool addToDb = true);
@@ -339,20 +391,11 @@ public:
 	uint32 GetEquipmentColor(uint8 material_slot) const;
 	virtual void UpdateEquipmentLight() { m_Light.Type.Equipment = m_inv.FindBrightestLightType(); m_Light.Level.Equipment = m_Light.TypeToLevel(m_Light.Type.Equipment); }
 
-	// Static Class Methods
-	static void SaveBotGroup(Group* botGroup, std::string botGroupName, std::string* errorMessage);
-	static void DeleteBotGroup(std::string botGroupName, std::string* errorMessage);
-	static std::list<BotGroup> LoadBotGroup(std::string botGroupName, std::string* errorMessage);
-	static uint32 CanLoadBotGroup(uint32 botOwnerCharacterId, std::string botGroupName, std::string* errorMessage);
-	static uint32 GetBotGroupIdByBotGroupName(std::string botGroupName, std::string* errorMessage);
-	static uint32 GetBotGroupLeaderIdByBotGroupName(std::string botGroupName);
-	static std::list<BotGroupList> GetBotGroupListByBotOwnerCharacterId(uint32 botOwnerCharacterId, std::string* errorMessage);
-	static bool DoesBotGroupNameExist(std::string botGroupName);
+	// Static Class Methods	
 	//static void DestroyBotRaidObjects(Client* client);	// Can be removed after bot raids are dumped
 	static uint32 GetBotIDByBotName(std::string botName);
 	static Bot* LoadBot(uint32 botID, std::string* errorMessage);
 	static std::list<BotsAvailableList> GetBotList(uint32 botOwnerCharacterID, std::string* errorMessage);
-	static void ProcessBotCommands(Client *c, const Seperator *sep);
 	static std::list<SpawnedBotsList> ListSpawnedBots(uint32 characterID, std::string* errorMessage);
 	static uint32 SpawnedBotCount(uint32 botOwnerCharacterID, std::string* errorMessage);
 	static uint32 CreatedBotCount(uint32 botOwnerCharacterID, std::string* errorMessage);
@@ -363,15 +406,10 @@ public:
 	static std::string ClassIdToString(uint16 classId);
 	static std::string RaceIdToString(uint16 raceId);
 	static bool IsBotAttackAllowed(Mob* attacker, Mob* target, bool& hasRuleDefined);
-	static void BotGroupOrderFollow(Group* group, Client* client);
-	static void BotGroupOrderGuard(Group* group, Client* client);
-	static void BotGroupOrderAttack(Group* group, Mob* target, Client* client);
-	static void BotGroupSummon(Group* group, Client* client);
 	static Bot* GetBotByBotClientOwnerAndBotName(Client* c, std::string botName);
 	static void ProcessBotGroupInvite(Client* c, std::string botName);
 	static void ProcessBotGroupDisband(Client* c, std::string botName);
 	static void BotOrderCampAll(Client* c);
-	static void BotHealRotationsClear( Client* c );
 	static void ProcessBotInspectionRequest(Bot* inspectedBot, Client* client);
 	static std::list<uint32> GetGroupedBotsByGroupId(uint32 groupId, std::string* errorMessage);
 	static void LoadAndSpawnAllZonedBots(Client* botOwner);
@@ -411,13 +449,10 @@ public:
 	static BotSpell GetBestBotSpellForCure(Bot* botCaster, Mob* target);
 	static BotSpell GetBestBotSpellForResistDebuff(Bot* botCaster, Mob* target);
 	static NPCType CreateDefaultNPCTypeStructForBot(std::string botName, std::string botLastName, uint8 botLevel, uint16 botRace, uint8 botClass, uint8 gender);
-	static std::list<Bot*> GetBotsInHealRotation( Bot* leader );
 
 	// Static Bot Group Methods
 	static bool AddBotToGroup(Bot* bot, Group* group);
 	static bool RemoveBotFromGroup(Bot* bot, Group* group);
-	static bool BotGroupCreate(std::string botGroupLeaderName);
-	static bool BotGroupCreate(Bot* botGroupLeader);
 	static bool	GroupHasClass(Group* group, uint8 classId);
 	static bool GroupHasClericClass(Group* group) { return GroupHasClass(group, CLERIC); }
 	static bool GroupHasDruidClass(Group* group) { return GroupHasClass(group, DRUID); }
@@ -445,26 +480,38 @@ public:
 	uint8 GetChanceToCastBySpellType(uint16 spellType);
 	bool IsGroupPrimaryHealer();
 	bool IsGroupPrimarySlower();
-	bool IsBotCaster() { return (GetClass() == CLERIC || GetClass() == DRUID || GetClass() == SHAMAN || GetClass() == NECROMANCER || GetClass() == WIZARD || GetClass() == MAGICIAN || GetClass() == ENCHANTER); }
-	bool IsBotINTCaster() { return (GetClass() == NECROMANCER || GetClass() == WIZARD || GetClass() == MAGICIAN || GetClass() == ENCHANTER); }
-	bool IsBotWISCaster() { return (GetClass() == CLERIC || GetClass() == DRUID || GetClass() == SHAMAN); }
+	bool IsBotCaster() { return IsCasterClass(GetClass()); }
+	bool IsBotINTCaster() { return IsINTCasterClass(GetClass()); }
+	bool IsBotWISCaster() { return IsWISCasterClass(GetClass()); }
 	bool CanHeal();
 	int GetRawACNoShield(int &shield_ac);
 	bool GetHasBeenSummoned() { return _hasBeenSummoned; }
 	const glm::vec3 GetPreSummonLocation() const { return m_PreSummonLocation; }
-	bool GetInHealRotation() { return _isInHealRotation; }
-	bool GetHealRotationActive() { return (GetInHealRotation() && _isHealRotationActive); }
-	bool GetHealRotationUseFastHeals() { return _healRotationUseFastHeals; }
-	bool GetHasHealedThisCycle() { return _hasHealedThisCycle; }
-	Mob* GetHealRotationTarget();
-	Mob* GetHealRotationTarget(uint8 index);
-	Bot* GetHealRotationLeader();
-	Bot* GetNextHealRotationMember();
-	Bot* GetPrevHealRotationMember();
-	uint8 GetNumHealRotationMembers () { return _numHealRotationMembers; }
-	uint32 GetHealRotationNextHealTime() { return _healRotationNextHeal; }
-	uint32 GetHealRotationTimer () { return _healRotationTimer; }
-	bool GetBardUseOutOfCombatSongs() { return _bardUseOutOfCombatSongs;}
+
+	// new heal rotation code
+	bool CreateHealRotation(uint32 cycle_duration_ms = 5000, bool fast_heals = false, bool adaptive_targeting = false, bool casting_override = false);
+	bool DestroyHealRotation();
+	bool JoinHealRotationMemberPool(std::shared_ptr<HealRotation>* heal_rotation);
+	bool LeaveHealRotationMemberPool();
+
+	bool IsHealRotationMember() { return (m_member_of_heal_rotation.use_count() && m_member_of_heal_rotation.get()); }
+	bool UseHealRotationFastHeals();
+	bool UseHealRotationAdaptiveTargeting();
+
+	bool IsHealRotationActive();
+	bool IsHealRotationReady();
+	bool IsHealRotationCaster();
+	bool HealRotationPokeTarget();
+	Mob* HealRotationTarget();
+	bool AdvanceHealRotation(bool use_interval = true);
+
+	bool IsMyHealRotationSet();
+	bool AmICastingForHealRotation();
+	void SetMyCastingForHealRotation(bool flag = true);
+
+	std::shared_ptr<HealRotation>* MemberOfHealRotation() { return &m_member_of_heal_rotation; }
+
+	bool GetAltOutOfCombatBehavior() { return _altoutofcombatbehavior;}
 	bool GetShowHelm() { return _showhelm; }
 	inline virtual int32	GetAC()	const { return AC; }
 	inline virtual int32	GetSTR()	const { return STR; }
@@ -532,34 +579,41 @@ public:
 	// void SetBotOwnerCharacterID(uint32 botOwnerCharacterID) { _botOwnerCharacterID = botOwnerCharacterID; }
 	void SetRangerAutoWeaponSelect(bool enable) { GetClass() == RANGER ? _rangerAutoWeaponSelect = enable : _rangerAutoWeaponSelect = false; }
 	void SetBotRole(BotRoleType botRole) { _botRole = botRole; }
-	void SetBotStance(BotStanceType botStance) { _botStance = botStance; }
+	void SetBotStance(BotStanceType botStance) { _botStance = ((botStance != BotStanceUnknown) ? (botStance) : (BotStancePassive)); }
 	void SetSpellRecastTimer(int timer_index, int32 recast_delay);
 	void SetDisciplineRecastTimer(int timer_index, int32 recast_delay);
 	void SetHasBeenSummoned(bool s);
 	void SetPreSummonLocation(const glm::vec3& location) { m_PreSummonLocation = location; }
-	void SetInHealRotation( bool inRotation ) { _isInHealRotation = inRotation; }
-	void SetHealRotationActive( bool isActive ) { _isHealRotationActive = isActive; }
-	void SetHealRotationUseFastHeals( bool useFastHeals ) { _healRotationUseFastHeals = useFastHeals; }
-	void SetHasHealedThisCycle( bool hasHealed ) { _hasHealedThisCycle = hasHealed; }
-	void SetHealRotationLeader( Bot* leader );
-	void SetNextHealRotationMember( Bot* healer );
-	void SetPrevHealRotationMember( Bot* healer );
-	void SetHealRotationNextHealTime( uint32 nextHealTime ) { _healRotationNextHeal = nextHealTime; }
-	void SetHealRotationTimer( uint32 timer ) { _healRotationTimer = timer; }
-	void SetNumHealRotationMembers( uint8 numMembers ) { _numHealRotationMembers = numMembers; }
-	void SetBardUseOutOfCombatSongs(bool useOutOfCombatSongs) { _bardUseOutOfCombatSongs = useOutOfCombatSongs;}
+
+	void SetAltOutOfCombatBehavior(bool behavior_flag) { _altoutofcombatbehavior = behavior_flag;}
 	void SetShowHelm(bool showhelm) { _showhelm = showhelm; }
+	void SetBeardColor(uint8 value) { beardcolor = value; }
+	void SetBeard(uint8 value) { beard = value; }
+	void SetEyeColor1(uint8 value) { eyecolor1 = value; }
+	void SetEyeColor2(uint8 value) { eyecolor2 = value; }
+	void SetLuclinFace(uint8 value) { luclinface = value; }
+	void SetHairColor(uint8 value) { haircolor = value; }
+	void SetHairStyle(uint8 value) { hairstyle = value; }
+	void SetDrakkinDetails(uint32 value) { drakkin_details = value; }
+	void SetDrakkinHeritage(uint32 value) { drakkin_heritage = value; }
+	void SetDrakkinTattoo(uint32 value) { drakkin_tattoo = value; }
+	bool DyeArmor(int16 slot_id, uint32 rgb, bool all_flag = false, bool save_flag = true);
 
 	std::string CreateSayLink(Client* botOwner, const char* message, const char* name);
 
 	// Class Destructors
 	virtual ~Bot();
 
+	// Publicized protected/private functions
+	virtual void BotRangedAttack(Mob* other); // protected
+	uint32 GetBotItemsCount(std::string* errorMessage); // private
+	void BotRemoveEquipItem(int slot); // private
+	void RemoveBotItemBySlot(uint32 slotID, std::string* errorMessage); // private
+
 protected:
 	virtual void PetAIProcess();
 	static NPCType FillNPCTypeStruct(uint32 botSpellsID, std::string botName, std::string botLastName, uint8 botLevel, uint16 botRace, uint8 botClass, uint8 gender, float size, uint32 face, uint32 hairStyle, uint32 hairColor, uint32 eyeColor, uint32 eyeColor2, uint32 beardColor, uint32 beard, uint32 drakkinHeritage, uint32 drakkinTattoo, uint32 drakkinDetails, int32 hp, int32 mana, int32 mr, int32 cr, int32 dr, int32 fr, int32 pr, int32 corrup, int32 ac, uint32 str, uint32 sta, uint32 dex, uint32 agi, uint32 _int, uint32 wis, uint32 cha, uint32 attack);
 	virtual void BotMeditate(bool isSitting);
-	virtual void BotRangedAttack(Mob* other);
 	virtual bool CheckBotDoubleAttack(bool Triple = false);
 	virtual int32 GetBotFocusEffect(BotfocusType bottype, uint16 spell_id);
 	virtual int32 CalcBotFocusEffect(BotfocusType bottype, uint16 focus_id, uint16 spell_id, bool best_focus=false);
@@ -607,22 +661,14 @@ private:
 	bool _hasBeenSummoned;
 	glm::vec3 m_PreSummonLocation;
 	uint8 _spellCastingChances[MaxStances][MaxSpellTypes];
-	bool _isInHealRotation;
-	bool _isHealRotationActive;
-	bool _healRotationUseFastHeals;
-	bool _hasHealedThisCycle;
-	uint32 _healRotationTimer;
-	uint32 _healRotationNextHeal;
-	//char _healRotationTargets[MaxHealRotationTargets][64];
-	uint16 _healRotationTargets[MaxHealRotationTargets];
-	uint32 _healRotationLeader;
-	uint32 _healRotationMemberNext;
-	uint32 _healRotationMemberPrev;
-	uint8 _numHealRotationMembers;
+
+	std::shared_ptr<HealRotation> m_member_of_heal_rotation;
+
 	std::map<uint32, BotAA> botAAs;
 	InspectMessage_Struct _botInspectMessage;
-	bool _bardUseOutOfCombatSongs;
+	bool _altoutofcombatbehavior;
 	bool _showhelm;
+	bool _pauseAI;
 
 	// Private "base stats" Members
 	int32 _baseMR;
@@ -656,12 +702,9 @@ private:
 
 	// Private "Inventory" Methods
 	void GetBotItems(std::string* errorMessage, Inventory &inv);
-	void BotRemoveEquipItem(int slot);
 	void BotAddEquipItem(int slot, uint32 id);
 	uint32 GetBotItemBySlot(uint32 slotID);
-	void RemoveBotItemBySlot(uint32 slotID, std::string* errorMessage);
 	void SetBotItemInSlot(uint32 slotID, uint32 itemID, const ItemInst* inst, std::string* errorMessage);
-	uint32 GetBotItemsCount(std::string* errorMessage);
 	uint32 GetTotalPlayTime();
 	void SaveBuffs();	// Saves existing buffs to the database to persist zoning and camping
 	void LoadBuffs();	// Retrieves saved buffs from the database on spawning

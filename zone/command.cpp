@@ -1,5 +1,5 @@
 /*	EQEMu: Everquest Server Emulator
-	Copyright (C) 2001-2002 EQEMu Development Team (http://eqemulator.org)
+	Copyright (C) 2001-2016 EQEMu Development Team (http://eqemulator.org)
 
 	This program is free software; you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -86,7 +86,7 @@ void command_pf(Client *c, const Seperator *message);
 std::map<std::string, CommandRecord *> commandlist;
 std::map<std::string, std::string> commandaliases;
 
-//All allocated CommandRecords get put in here so they get deleted on shutdown
+// All allocated CommandRecords get put in here so they get deleted on shutdown
 LinkedList<CommandRecord *> cleanup_commandlist;
 
 /*
@@ -103,9 +103,9 @@ int command_notavail(Client *c, const char *message)
 	return -1;
 }
 
-/*****************************************************************************/
-/* the rest below here could be in a dynamically loaded module eventually */
-/*****************************************************************************/
+/**************************************************************************
+/* the rest below here could be in a dynamically loaded module eventually *
+/*************************************************************************/
 
 /*
 
@@ -163,7 +163,7 @@ int command_init(void)
 		command_add("bind", "- Sets your targets bind spot to their current location", 200, command_bind) ||
 
 #ifdef BOTS
-		command_add("bot", "- Type \"#bot help\" to the see the list of available commands for bots.", 0, command_bot) ||
+		command_add("bot", "- Type \"#bot help\" or \"^help\" to the see the list of available commands for bots.", 0, command_bot) ||
 #endif
 
 		command_add("camerashake",  "Shakes the camera on everyone's screen globally.",  80, command_camerashake) ||
@@ -9665,14 +9665,6 @@ void command_showspellslist(Client *c, const Seperator *sep)
 	return;
 }
 
-// All new code added to command.cpp ought to be BEFORE this comment line. Do no append code to this file below the BOTS code block.
-#ifdef BOTS
-// Function delegate to support the command interface for Bots with the client.
-void command_bot(Client *c, const Seperator *sep) {
-	Bot::ProcessBotCommands(c, sep);
-}
-#endif
-
 void command_raidloot(Client *c, const Seperator *sep)
 {
 	if(!sep->arg[1][0]) {
@@ -10843,3 +10835,29 @@ void command_reloadperlexportsettings(Client *c, const Seperator *sep)
 
 	}
 }
+
+
+// All new code added to command.cpp should be BEFORE this comment line. Do no append code to this file below the BOTS code block.
+#ifdef BOTS
+#include "bot_command.h"
+// Function delegate to support the command interface for Bots with the client.
+void command_bot(Client *c, const Seperator *sep)
+{
+	std::string bot_message = sep->msg;
+	bot_message = bot_message.substr(bot_message.find_first_not_of("#bot"));
+	bot_message[0] = BOT_COMMAND_CHAR;
+	
+	if (bot_command_dispatch(c, bot_message.c_str()) == -2) {
+		if (parse->PlayerHasQuestSub(EVENT_COMMAND)) {
+			int i = parse->EventPlayer(EVENT_COMMAND, c, bot_message, 0);
+			if (i == 0 && !RuleB(Chat, SuppressCommandErrors)) {
+				c->Message(13, "Bot command '%s' not recognized.", bot_message.c_str());
+			}
+		}
+		else {
+			if (!RuleB(Chat, SuppressCommandErrors))
+				c->Message(13, "Bot command '%s' not recognized.", bot_message.c_str());
+		}
+	}
+}
+#endif

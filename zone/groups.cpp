@@ -1,5 +1,5 @@
 /*	EQEMu: Everquest Server Emulator
-	Copyright (C) 2001-2002 EQEMu Development Team (http://eqemu.org)
+	Copyright (C) 2001-2016 EQEMu Development Team (http://eqemu.org)
 
 	This program is free software; you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -15,6 +15,7 @@
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
+
 #include "../common/global_define.h"
 #include "../common/eqemu_logsys.h"
 #include "masterentity.h"
@@ -937,6 +938,41 @@ void Group::DisbandGroup() {
 
 	safe_delete(outapp);
 }
+
+void Group::GetMemberList(std::list<Mob*>& member_list, bool clear_list)
+{
+	if (clear_list)
+		member_list.clear();
+
+	for (auto member_iter : members) {
+		if (member_iter)
+			member_list.push_back(member_iter);
+	}
+}
+
+void Group::GetClientList(std::list<Client*>& client_list, bool clear_list)
+{
+	if (clear_list)
+		client_list.clear();
+
+	for (auto client_iter : members) {
+		if (client_iter && client_iter->IsClient())
+			client_list.push_back(client_iter->CastToClient());
+	}
+}
+
+#ifdef BOTS
+void Group::GetBotList(std::list<Bot*>& bot_list, bool clear_list)
+{
+	if (clear_list)
+		bot_list.clear();
+
+	for (auto bot_iter : members) {
+		if (bot_iter && bot_iter->IsBot())
+			bot_list.push_back(bot_iter->CastToBot());
+	}
+}
+#endif
 
 bool Group::Process() {
 	if(disbandcheck && !GroupCount())
@@ -2292,6 +2328,30 @@ void Group::SetPuller(const char *NewPullerName)
 		else
 			MemberRoles[i] &= ~RolePuller;
 	}
+}
+
+bool Group::AmIMainTank(const char *mob_name)
+{
+	if (!mob_name)
+		return false;
+
+	return !((bool)MainTankName.compare(mob_name));
+}
+
+bool Group::AmIMainAssist(const char *mob_name)
+{
+	if (!mob_name)
+		return false;
+
+	return !((bool)MainTankName.compare(mob_name));
+}
+
+bool Group::AmIPuller(const char *mob_name)
+{
+	if (!mob_name)
+		return false;
+	
+	return !((bool)PullerName.compare(mob_name));
 }
 
 bool Group::HasRole(Mob *m, uint8 Role)

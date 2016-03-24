@@ -1,5 +1,5 @@
 /*	EQEMu: Everquest Server Emulator
-	Copyright (C) 2001-2009 EQEMu Development Team (http://eqemulator.net)
+	Copyright (C) 2001-2016 EQEMu Development Team (http://eqemulator.net)
 
 	This program is free software; you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -3896,7 +3896,6 @@ void Client::Handle_OP_Camp(const EQApplicationPacket *app)
 {
 #ifdef BOTS
 	// This block is necessary to clean up any bot objects owned by a Client
-	Bot::BotHealRotationsClear(this);
 	Bot::BotOrderCampAll(this);
 #endif
 	if (IsLFP())

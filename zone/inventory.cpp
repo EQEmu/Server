@@ -1,5 +1,5 @@
 /*	EQEMu: Everquest Server Emulator
-	Copyright (C) 2001-2003 EQEMu Development Team (http://eqemulator.net)
+	Copyright (C) 2001-2016 EQEMu Development Team (http://eqemulator.net)
 
 	This program is free software; you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -2020,10 +2020,7 @@ void Client::QSSwapItemAuditor(MoveItem_Struct* move_in, bool postaction_call) {
 void Client::DyeArmor(DyeStruct* dye){
 	int16 slot=0;
 	for (int i = EmuConstants::MATERIAL_BEGIN; i <= EmuConstants::MATERIAL_TINT_END; i++) {
-		if (m_pp.item_tint[i].RGB.Blue != dye->dye[i].RGB.Blue ||
-			m_pp.item_tint[i].RGB.Red != dye->dye[i].RGB.Red ||
-			m_pp.item_tint[i].RGB.Green != dye->dye[i].RGB.Green
-			) {
+		if ((m_pp.item_tint[i].Color & 0x00FFFFFF) != (dye->dye[i].Color & 0x00FFFFFF)) {
 			slot = m_inv.HasItem(32557, 1, invWherePersonal);
 			if (slot != INVALID_INDEX){
 				DeleteItemInInventory(slot,1,true);
