@@ -1518,11 +1518,11 @@ bool Bot::IsValidName(std::string& name)
 {
 	if (name.length() < 4)
 		return false;
-	if (!IsCharUpper(name[0]))
+	if (!isupper(name[0]))
 		return false;
 	
 	for (int i = 1; i < name.length(); ++i) {
-		if (!IsCharLower(name[i]) && name[i] != '_') {
+		if (!islower(name[i]) && name[i] != '_') {
 			return false;
 		}
 	}

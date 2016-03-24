@@ -990,19 +990,19 @@ private:
 					if (l_size_type < r_size_type)
 						return true;
 					if (l_size_type == BCEnum::SzT_Enlarge && r_size_type == BCEnum::SzT_Enlarge) {
-						if (EQ_STBASE(l, r, target_type) && GT_SPELLS(l, r, base, 1))
+						if (EQ_STBASE(l, r, target_type) && GT_SPELLS_EFFECT_ID(l, r, base, 1))
 							return true;
-						if (EQ_STBASE(l, r, target_type) && EQ_SPELLS(l, r, base, 1) && GT_STBASE(l, r, spell_level))
+						if (EQ_STBASE(l, r, target_type) && EQ_SPELLS_EFFECT_ID(l, r, base, 1) && GT_STBASE(l, r, spell_level))
 							return true;
-						if (EQ_STBASE(l, r, target_type) && EQ_SPELLS(l, r, base, 1) && EQ_STBASE(l, r, spell_level) && LT_STBASE(l, r, caster_class))
+						if (EQ_STBASE(l, r, target_type) && EQ_SPELLS_EFFECT_ID(l, r, base, 1) && EQ_STBASE(l, r, spell_level) && LT_STBASE(l, r, caster_class))
 							return true;
 					}
 					if (l_size_type == BCEnum::SzT_Reduce && r_size_type == BCEnum::SzT_Reduce) {
-						if (EQ_STBASE(l, r, target_type) && LT_SPELLS(l, r, base, 1))
+						if (EQ_STBASE(l, r, target_type) && LT_SPELLS_EFFECT_ID(l, r, base, 1))
 							return true;
-						if (EQ_STBASE(l, r, target_type) && EQ_SPELLS(l, r, base, 1) && GT_STBASE(l, r, spell_level))
+						if (EQ_STBASE(l, r, target_type) && EQ_SPELLS_EFFECT_ID(l, r, base, 1) && GT_STBASE(l, r, spell_level))
 							return true;
-						if (EQ_STBASE(l, r, target_type) && EQ_SPELLS(l, r, base, 1) && EQ_STBASE(l, r, spell_level) && LT_STBASE(l, r, caster_class))
+						if (EQ_STBASE(l, r, target_type) && EQ_SPELLS_EFFECT_ID(l, r, base, 1) && EQ_STBASE(l, r, spell_level) && LT_STBASE(l, r, caster_class))
 							return true;
 					}
 
