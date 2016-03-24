@@ -109,6 +109,7 @@ bool EQEmu::IsBardInstrumentSkill(SkillUseTypes skill)
 
 const std::map<SkillUseTypes, std::string>& EQEmu::GetSkillUseTypesMap()
 {
+	/* VS2013 code
 	static const std::map<SkillUseTypes, std::string> skill_use_types_map = {
 		{ Skill1HBlunt, "1H Blunt" },
 		{ Skill1HSlashing, "1H Slashing" },
@@ -189,6 +190,99 @@ const std::map<SkillUseTypes, std::string>& EQEmu::GetSkillUseTypesMap()
 		{ SkillTripleAttack, "Triple Attack" },
 		{ Skill2HPiercing, "2H Piercing" }
 	};
+	*/
+
+	/* VS2012 code - begin */
+
+	static const char* skill_use_names[_EmuSkillCount] = {
+		"1H Blunt",
+		"1H Slashing",
+		"2H Blunt",
+		"2H Slashing",
+		"Abjuration",
+		"Alteration",
+		"Apply Poison",
+		"Archery",
+		"Backstab",
+		"Bind Wound",
+		"Bash",
+		"Block",
+		"Brass Instruments",
+		"Channeling",
+		"Conjuration",
+		"Defense",
+		"Disarm",
+		"Disarm Traps",
+		"Divination",
+		"Dodge",
+		"Double Attack",
+		"Dragon Punch",
+		"Dual Wield",
+		"Eagle Strike",
+		"Evocation",
+		"Feign Death",
+		"Flying Kick",
+		"Forage",
+		"Hand to Hand",
+		"Hide",
+		"Kick",
+		"Meditate",
+		"Mend",
+		"Offense",
+		"Parry",
+		"Pick Lock",
+		"1H Piercing",
+		"Riposte",
+		"Round Kick",
+		"Safe Fall",
+		"Sense Heading",
+		"Singing",
+		"Sneak",
+		"Specialize Abjuration",
+		"Specialize Alteration",
+		"Specialize Conjuration",
+		"Specialize Divination",
+		"Specialize Evocation",
+		"Pick Pockets",
+		"Stringed Instruments",
+		"Swimming",
+		"Throwing",
+		"Tiger Claw",
+		"Tracking",
+		"Wind Instruments",
+		"Fishing",
+		"Make Poison",
+		"Tinkering",
+		"Research",
+		"Alchemy",
+		"Baking",
+		"Tailoring",
+		"Sense Traps",
+		"Blacksmithing",
+		"Fletching",
+		"Brewing",
+		"Alcohol Tolerance",
+		"Begging",
+		"Jewelry Making",
+		"Pottery",
+		"Percussion Instruments",
+		"Intimidation",
+		"Berserking",
+		"Taunt",
+		"Frenzy",
+		"Remove Traps",
+		"Triple Attack",
+		"2H Piercing"
+	};
+
+	static std::map<SkillUseTypes, std::string> skill_use_types_map;
+
+	skill_use_types_map.clear();
+
+	for (int i = Skill1HBlunt; i < _EmuSkillCount; ++i)
+		skill_use_types_map[(SkillUseTypes)i] = skill_use_names[i];
+
+	/* VS2012 code - end */
 
 	return skill_use_types_map;
 }
