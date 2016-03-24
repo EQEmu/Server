@@ -712,10 +712,10 @@ void Client::SendDisciplineTimer(uint32 timer_id, uint32 duration)
 	}
 }
 
-void EntityList::AETaunt(Client* taunter, float range)
+void EntityList::AETaunt(Client* taunter, float range, int32 bonus_hate)
 {
 	if (range == 0)
-		range = 100;		//arbitrary default...
+		range = 40;		//Live AE taunt range - Hardcoded.
 
 	range = range * range;
 
@@ -729,7 +729,7 @@ void EntityList::AETaunt(Client* taunter, float range)
 				&& taunter->IsAttackAllowed(them)
 				&& DistanceSquaredNoZ(taunter->GetPosition(), them->GetPosition()) <= range) {
 			if (taunter->CheckLosFN(them)) {
-				taunter->Taunt(them, true);
+				taunter->Taunt(them, true,0,true,bonus_hate);
 			}
 		}
 		++it;

@@ -2230,17 +2230,18 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 				break;
 			}
 
-			case SE_AETaunt://Dook- slapped it in the spell effect so client does the animations
-			{			// and incase there are similar spells we havent found yet
+			case SE_AETaunt:
+			{			
 #ifdef SPELL_EFFECT_SPAM
 				snprintf(effect_desc, _EDLEN, "AE Taunt");
 #endif
 				if(caster && caster->IsClient()){
-					float range = 0.0f;
-					if (spells[spell_id].base2[i])
-						range = (float)spells[spell_id].base[i];
+					//Live AE Taunt range is hardcoded at 40 (Spells for AE taunt all use zero range) Target type should be self only.
+					float range = 40;
+					if (spells[spell_id].max[i])//custom support if you want to alter range of AE Taunt.
+						range = spells[spell_id].max[i];
 
-					entity_list.AETaunt(caster->CastToClient(), range);
+					entity_list.AETaunt(caster->CastToClient(), range, spells[spell_id].base[i]);
 				}
 				break;
 			}
@@ -2650,10 +2651,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 			case SE_Taunt:
 			{
 				if (IsNPC()){
-					caster->Taunt(this->CastToNPC(), false, static_cast<float>(spell.base[i]));
-
-					if (spell.base2[i] > 0)
-						CastToNPC()->SetHateAmountOnEnt(caster, (CastToNPC()->GetHateAmount(caster) + spell.base2[i]));
+					caster->Taunt(this->CastToNPC(), false, static_cast<float>(spell.base[i]), true, spell.base2[i]);
 				}
 				break;
 			}
