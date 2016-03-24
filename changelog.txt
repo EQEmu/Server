@@ -1,5 +1,9 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 03/24/2016 ==
+Kayen: Fix for AE taunt to use correct range and hate modifier.
+       Fix for spell effect version of taunt to use correct range.
+
 == 03/05/2016 ==
 mackal: Implement extra bind points (secondary recall)
 	For SE_Gate, base2 is which bind to use (starting at 1)

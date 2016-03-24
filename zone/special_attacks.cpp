@@ -2103,7 +2103,7 @@ void Client::DoClassAttacks(Mob *ca_target, uint16 skill, bool IsRiposte)
 	}
 }
 
-void Mob::Taunt(NPC* who, bool always_succeed, float chance_bonus) {
+void Mob::Taunt(NPC* who, bool always_succeed, float chance_bonus, bool FromSpell, int32 bonus_hate) {
 
 	if (who == nullptr)
 		return;
@@ -2111,7 +2111,7 @@ void Mob::Taunt(NPC* who, bool always_succeed, float chance_bonus) {
 	if(DivineAura())
 		return;
 
-	if(!CombatRange(who))
+	if(!FromSpell && !CombatRange(who))
 		return;
 
 	if(!always_succeed && IsClient())
@@ -2167,7 +2167,7 @@ void Mob::Taunt(NPC* who, bool always_succeed, float chance_bonus) {
 
 		if (tauntchance > zone->random.Real(0, 1)) {
 			if (hate_top && hate_top != this){
-				newhate = (who->GetNPCHate(hate_top) - who->GetNPCHate(this)) + 1;
+				newhate = (who->GetNPCHate(hate_top) - who->GetNPCHate(this)) + 1 + bonus_hate;
 				who->CastToNPC()->AddToHateList(this, newhate);
 				Success = true;
 			}
