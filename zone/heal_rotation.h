@@ -47,6 +47,7 @@ class HealRotation
 {
 public:
 	HealRotation(Bot* hr_creator, uint32 interval_ms = CASTING_CYCLE_DEFAULT_INTERVAL, bool fast_heals = false, bool adaptive_targeting = false, bool casting_override = false);
+	HealRotation(HealRotation* allocator_shunt) {};
 
 	void SetIntervalMS(uint32 interval_ms);
 	void SetIntervalS(uint32 interval_s);
@@ -140,9 +141,6 @@ private:
 
 	float m_safe_hp_ratio[ARMOR_TYPE_COUNT];
 	float m_critical_hp_ratio[ARMOR_TYPE_COUNT];
-
-	friend class std::_Ref_count_obj<HealRotation>;
-	HealRotation(HealRotation* allocator_shunt) {};
 };
 
 #endif
