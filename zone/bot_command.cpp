@@ -2570,10 +2570,34 @@ void bot_command_bind_affinity(Client *c, const Seperator *sep)
 
 void bot_command_bot(Client *c, const Seperator *sep)
 {
+	/* VS2012 code - begin */
+	std::list<const char*> subcommand_list;
+	subcommand_list.push_back("botappearance");
+	subcommand_list.push_back("botcamp");
+	subcommand_list.push_back("botclone");
+	subcommand_list.push_back("botcreate");
+	subcommand_list.push_back("botdelete");
+	subcommand_list.push_back("botdetails");
+	subcommand_list.push_back("botdyearmor");
+	subcommand_list.push_back("botinspectmessage");
+	subcommand_list.push_back("botfollowdistance");
+	subcommand_list.push_back("botlist");
+	subcommand_list.push_back("botoutofcombat");
+	subcommand_list.push_back("botreport");
+	subcommand_list.push_back("botspawn");
+	subcommand_list.push_back("botstance");
+	subcommand_list.push_back("botsummon");
+	subcommand_list.push_back("bottogglearcher");
+	subcommand_list.push_back("bottogglehelm");
+	subcommand_list.push_back("botupdate");
+	/* VS2012 code - end */
+
+	/* VS2013 code
 	const std::list<const char*> subcommand_list = {
 		"botappearance", "botcamp", "botclone", "botcreate", "botdelete", "botdetails", "botdyearmor", "botinspectmessage", "botfollowdistance",
 		"botlist", "botoutofcombat", "botreport", "botspawn", "botstance", "botsummon", "bottogglearcher", "bottogglehelm", "botupdate"
 	};
+	*/
 	
 	if (helper_command_alias_fail(c, "bot_command_bot", sep->arg[0], "bot"))
 		return;
@@ -2583,9 +2607,21 @@ void bot_command_bot(Client *c, const Seperator *sep)
 
 void bot_command_botgroup(Client *c, const Seperator *sep)
 {
+	/* VS2012 code - begin */
+	std::list<const char*> subcommand_list;
+	subcommand_list.push_back("botgroupaddmember");
+	subcommand_list.push_back("botgroupcreate");
+	subcommand_list.push_back("botgroupdelete");
+	subcommand_list.push_back("botgrouplist");
+	subcommand_list.push_back("botgroupload");
+	subcommand_list.push_back("botgroupremovemember");
+	/* VS2012 code - end */
+
+	/* VS2013 code
 	const std::list<const char*> subcommand_list = {
 		"botgroupaddmember", "botgroupcreate", "botgroupdelete", "botgrouplist", "botgroupload", "botgroupremovemember"
 	};
+	*/
 	
 	if (helper_command_alias_fail(c, "bot_command_botgroup", sep->arg[0], "botgroup"))
 		return;
@@ -3010,11 +3046,33 @@ void bot_command_guard(Client *c, const Seperator *sep)
 
 void bot_command_heal_rotation(Client *c, const Seperator *sep)
 {
+	/* VS2012 code - begin */
+	std::list<const char*> subcommand_list;
+	subcommand_list.push_back("healrotationadaptivetargeting");
+	subcommand_list.push_back("healrotationaddmember");
+	subcommand_list.push_back("healrotationaddtarget");
+	subcommand_list.push_back("healrotationadjustcritical");
+	subcommand_list.push_back("healrotationadjustsafe");
+	subcommand_list.push_back("healrotationcastoverride");
+	subcommand_list.push_back("healrotationchangeinterval");
+	subcommand_list.push_back("healrotationcleartargets");
+	subcommand_list.push_back("healrotationcreate");
+	subcommand_list.push_back("healrotationfastheals");
+	subcommand_list.push_back("healrotationlist");
+	subcommand_list.push_back("healrotationremovemember");
+	subcommand_list.push_back("healrotationremovetarget");
+	subcommand_list.push_back("healrotationresetlimits");
+	subcommand_list.push_back("healrotationstart");
+	subcommand_list.push_back("healrotationstop");
+	/* VS2012 code - end */
+	
+	/* VS2013 code
 	const std::list<const char*> subcommand_list = {
 		"healrotationadaptivetargeting", "healrotationaddmember", "healrotationaddtarget", "healrotationadjustcritical", "healrotationadjustsafe",
 		"healrotationcastoverride", "healrotationchangeinterval", "healrotationcleartargets", "healrotationcreate", "healrotationfastheals",
 		"healrotationlist", "healrotationremovemember", "healrotationremovetarget", "healrotationresetlimits", "healrotationstart", "healrotationstop"
 	};
+	*/
 	
 	if (helper_command_alias_fail(c, "bot_command_heal_rotation", sep->arg[0], "healrotation"))
 		return;
@@ -3118,8 +3176,17 @@ void bot_command_identify(Client *c, const Seperator *sep)
 
 void bot_command_inventory(Client *c, const Seperator *sep)
 {
+	/* VS2012 code - begin */
+	std::list<const char*> subcommand_list;
+	subcommand_list.push_back("inventorygive");
+	subcommand_list.push_back("inventorylist");
+	subcommand_list.push_back("inventoryremove");
+	/* VS2012 code - end */
+
+	/* VS2013 code
 	const std::list<const char*> subcommand_list = { "inventorygive", "inventorylist", "inventoryremove" };
-	
+	*/
+
 	if (helper_command_alias_fail(c, "bot_command_inventory", sep->arg[0], "inventory"))
 		return;
 
@@ -3349,8 +3416,16 @@ void bot_command_movement_speed(Client *c, const Seperator *sep)
 
 void bot_command_pet(Client *c, const Seperator *sep)
 {
-	const std::list<const char*> subcommand_list = { "petremove", "petsettype" };
+	/* VS2012 code - begin */
+	std::list<const char*> subcommand_list;
+	subcommand_list.push_back("petremove");
+	subcommand_list.push_back("petsettype");
+	/* VS2012 code - end */
 	
+	/* VS2013 code
+	const std::list<const char*> subcommand_list = { "petremove", "petsettype" };
+	*/
+
 	if (helper_command_alias_fail(c, "bot_command_pet", sep->arg[0], "pet"))
 		return;
 
@@ -3950,10 +4025,26 @@ void bot_command_water_breathing(Client *c, const Seperator *sep)
  */
 void bot_subcommand_bot_appearance(Client *c, const Seperator *sep)
 {
+	/* VS2012 code - begin */
+	std::list<const char*> subcommand_list;
+	subcommand_list.push_back("botbeardcolor");
+	subcommand_list.push_back("botbeardstyle");
+	subcommand_list.push_back("botdetails");
+	subcommand_list.push_back("boteyes");
+	subcommand_list.push_back("botface");
+	subcommand_list.push_back("bothaircolor");
+	subcommand_list.push_back("bothairstyle");
+	subcommand_list.push_back("botheritage");
+	subcommand_list.push_back("bottattoo");
+	subcommand_list.push_back("botwoad");
+	/* VS2012 code - end */
+	
+	/* VS2013 code
 	const std::list<const char*> subcommand_list = {
 		"botbeardcolor", "botbeardstyle", "botdetails", "boteyes", "botface",
 		"bothaircolor", "bothairstyle", "botheritage", "bottattoo", "botwoad"
 	};
+	*/
 	
 	if (helper_command_alias_fail(c, "bot_subcommand_bot_appearance", sep->arg[0], "botappearance"))
 		return;
