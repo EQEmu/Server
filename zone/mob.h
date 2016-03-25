@@ -563,7 +563,7 @@ public:
 		bool lookForAftArc = true);
 
 	//Procs
-	void TriggerDefensiveProcs(Mob *on, uint16 hand = MainPrimary, bool SkillProc=false, int damage = 0);
+	void TriggerDefensiveProcs(Mob *on, uint16 hand = MainPrimary, bool FromSkillProc=false, int damage = 0);
 	bool AddRangedProc(uint16 spell_id, uint16 iChance = 3, uint16 base_spell_id = SPELL_UNKNOWN);
 	bool RemoveRangedProc(uint16 spell_id, bool bAll = false);
 	bool HasRangedProcs() const;
