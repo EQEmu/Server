@@ -3399,12 +3399,13 @@ int Mob::GetSnaredAmount()
 	return worst_snare;
 }
 
-void Mob::TriggerDefensiveProcs(const ItemInst* weapon, Mob *on, uint16 hand, int damage)
+void Mob::TriggerDefensiveProcs(Mob *on, uint16 hand, bool FromSkillProc, int damage)
 {
 	if (!on)
 		return;
 
-	on->TryDefensiveProc(weapon, this, hand);
+	if (!FromSkillProc)
+		on->TryDefensiveProc(this, hand);
 
 	//Defensive Skill Procs
 	if (damage < 0 && damage >= -4) {

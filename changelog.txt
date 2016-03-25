@@ -2,6 +2,8 @@ EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
 == 03/25/2016 ==
 Uleat: Fix for heal rotation 'Stack Overflow' error
+Kayen: Defensive procs will now only proc once per attack round (instead of every attack chance). 
+       Live like modifier added that decreases defensive proc chance if you are higher level then your attacker.
 
 == 03/24/2016 ==
 Kayen: Fix for AE taunt to use correct range and hate modifier.

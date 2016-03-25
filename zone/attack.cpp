@@ -1255,7 +1255,7 @@ bool Client::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, b
 	CommonBreakInvisibleFromCombat();
 
 	if(GetTarget())
-		TriggerDefensiveProcs(weapon, other, Hand, damage);
+		TriggerDefensiveProcs(other, Hand, true, damage);
 
 	if (damage > 0)
 		return true;
@@ -1822,7 +1822,7 @@ bool NPC::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool
 	}
 
 	if(GetHP() > 0 && !other->HasDied())
-		TriggerDefensiveProcs(nullptr, other, Hand, damage);
+		TriggerDefensiveProcs(other, Hand, true, damage);
 
 	if (damage > 0)
 		return true;
@@ -3516,7 +3516,7 @@ float Mob::GetDefensiveProcChances(float &ProcBonus, float &ProcChance, uint16 h
 }
 
 // argument 'weapon' not used
-void Mob::TryDefensiveProc(const ItemInst* weapon, Mob *on, uint16 hand) {
+void Mob::TryDefensiveProc(Mob *on, uint16 hand) {
 
 	if (!on) {
 		SetTarget(nullptr);
@@ -3524,29 +3524,37 @@ void Mob::TryDefensiveProc(const ItemInst* weapon, Mob *on, uint16 hand) {
 		return;
 	}
 
-	bool bDefensiveProc = HasDefensiveProcs();
-
-	if (!bDefensiveProc)
+	if (!HasDefensiveProcs())
 		return;
 
-	float ProcChance, ProcBonus;
-	on->GetDefensiveProcChances(ProcBonus, ProcChance, hand , this);
+	if (!on->HasDied() && on->GetHP() > 0){
 
-	if(hand != MainPrimary)
-		ProcChance /= 2;
+		float ProcChance, ProcBonus;
+		on->GetDefensiveProcChances(ProcBonus, ProcChance, hand , this);
 
-		if (bDefensiveProc){
-			for (int i = 0; i < MAX_PROCS; i++) {
-				if (IsValidSpell(DefensiveProcs[i].spellID)) {
-					float chance = ProcChance * (static_cast<float>(DefensiveProcs[i].chance)/100.0f);
-					if (zone->random.Roll(chance)) {
-						ExecWeaponProc(nullptr, DefensiveProcs[i].spellID, on);
-						CheckNumHitsRemaining(NumHit::DefensiveSpellProcs, 0,
-											  DefensiveProcs[i].base_spellID);
-					}
+		if(hand != MainPrimary)
+			ProcChance /= 2;
+
+		int level_penalty = 0;
+		int level_diff = GetLevel() - on->GetLevel();
+		if (level_diff > 6)//10% penalty per level if > 6 levels over target.
+			level_penalty = (level_diff - 6) * 10;
+
+		ProcChance -= ProcChance*level_penalty/100;
+
+		if (ProcChance < 0)
+			return;
+
+		for (int i = 0; i < MAX_PROCS; i++) {
+			if (IsValidSpell(DefensiveProcs[i].spellID)) {
+				float chance = ProcChance * (static_cast<float>(DefensiveProcs[i].chance)/100.0f);
+				if (zone->random.Roll(chance)) {
+					ExecWeaponProc(nullptr, DefensiveProcs[i].spellID, on);
+					CheckNumHitsRemaining(NumHit::DefensiveSpellProcs, 0,DefensiveProcs[i].base_spellID);
 				}
 			}
 		}
+	}
 }
 
 void Mob::TryWeaponProc(const ItemInst* weapon_g, Mob *on, uint16 hand) {
