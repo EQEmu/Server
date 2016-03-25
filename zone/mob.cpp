@@ -5891,7 +5891,7 @@ bool Mob::LeaveHealRotationTargetPool()
 
 	m_target_of_heal_rotation->RemoveTargetFromPool(this);
 	m_target_of_heal_rotation.reset();
-
+	
 	return !IsHealRotationTarget();
 }
 

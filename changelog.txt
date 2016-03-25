@@ -1,5 +1,8 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 03/25/2016 ==
+Uleat: Fix for heal rotation 'Stack Overflow' error
+
 == 03/24/2016 ==
 Kayen: Fix for AE taunt to use correct range and hate modifier.
        Fix for spell effect version of taunt to use correct range.

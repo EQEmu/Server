@@ -47,6 +47,8 @@ HealRotation::HealRotation(Bot* hr_creator, uint32 interval_ms, bool fast_heals,
 	ResetArmorTypeHPLimits();
 
 	m_is_active = false;
+
+	m_consumed = false;
 }
 
 void HealRotation::SetIntervalMS(uint32 interval_ms)
@@ -502,8 +504,10 @@ bool HealRotation::valid_state()
 	
 	cycle_refresh();
 
-	if (m_member_pool.empty())
-		ClearTargetPool(); // Consumes HealRotation at this point
+	if (m_member_pool.empty() && !m_consumed) { // Consumes HealRotation at this point
+		m_consumed = true;
+		ClearTargetPool();
+	}
 
 	return (!m_member_pool.empty());
 }

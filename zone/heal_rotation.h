@@ -127,6 +127,8 @@ private:
 
 	bool m_is_active;
 
+	bool m_consumed;
+
 	std::list<Bot*> m_member_pool;
 	std::list<Bot*> m_cycle_pool;
 	std::list<Mob*> m_target_pool;
