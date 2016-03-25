@@ -2911,6 +2911,7 @@ void Bot::AI_Process() {
 				DoClassAttacks(GetTarget());
 				if(attack_timer.Check()) {
 					Attack(GetTarget(), MainPrimary);
+					TriggerDefensiveProcs(GetTarget(), MainPrimary, false);
 					ItemInst *wpn = GetBotItem(MainPrimary);
 					TryWeaponProc(wpn, GetTarget(), MainPrimary);
 					bool tripleSuccess = false;
@@ -4865,7 +4866,7 @@ bool Bot::Attack(Mob* other, int Hand, bool FromRiposte, bool IsStrikethrough, b
 		BuffFadeByEffect(SE_NegateIfCombat);
 
 	if(GetTarget())
-		TriggerDefensiveProcs(weapon, other, Hand, damage);
+		TriggerDefensiveProcs(other, Hand, true, damage);
 
 	if (damage > 0)
 		return true;
