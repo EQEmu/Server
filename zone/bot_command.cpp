@@ -831,31 +831,32 @@ private:
 				});
 				continue;
 			case BCEnum::SpT_Identify:
-#ifdef PREFER_NO_MANA_COST_SPELLS
-				spell_list->sort([](const STBaseEntry* l, const STBaseEntry* r) {
-					if (LT_SPELLS(l, r, mana))
-						return true;
-					if (EQ_SPELLS(l, r, mana) && LT_STBASE(l, r, target_type))
-						return true;
-					if (EQ_SPELLS(l, r, mana) && EQ_STBASE(l, r, target_type) && LT_STBASE(l, r, spell_level))
-						return true;
-					if (EQ_SPELLS(l, r, mana) && EQ_STBASE(l, r, target_type) && EQ_STBASE(l, r, spell_level) && LT_STBASE(l, r, caster_class))
-						return true;
+				if (RuleB(Bots, PreferNoManaCommandSpells)) {
+					spell_list->sort([](const STBaseEntry* l, const STBaseEntry* r) {
+						if (LT_SPELLS(l, r, mana))
+							return true;
+						if (EQ_SPELLS(l, r, mana) && LT_STBASE(l, r, target_type))
+							return true;
+						if (EQ_SPELLS(l, r, mana) && EQ_STBASE(l, r, target_type) && LT_STBASE(l, r, spell_level))
+							return true;
+						if (EQ_SPELLS(l, r, mana) && EQ_STBASE(l, r, target_type) && EQ_STBASE(l, r, spell_level) && LT_STBASE(l, r, caster_class))
+							return true;
 
-					return false;
-				});
-#else
-				spell_list->sort([](const STBaseEntry* l, const STBaseEntry* r) {
-					if (LT_STBASE(l, r, target_type))
-						return true;
-					if (EQ_STBASE(l, r, target_type) && LT_STBASE(l, r, spell_level))
-						return true;
-					if (EQ_STBASE(l, r, target_type) && EQ_STBASE(l, r, spell_level) && LT_STBASE(l, r, caster_class))
-						return true;
+						return false;
+					});
+				}
+				else {
+					spell_list->sort([](const STBaseEntry* l, const STBaseEntry* r) {
+						if (LT_STBASE(l, r, target_type))
+							return true;
+						if (EQ_STBASE(l, r, target_type) && LT_STBASE(l, r, spell_level))
+							return true;
+						if (EQ_STBASE(l, r, target_type) && EQ_STBASE(l, r, spell_level) && LT_STBASE(l, r, caster_class))
+							return true;
 
-					return false;
-				});
-#endif
+						return false;
+					});
+				}
 				continue;
 			case BCEnum::SpT_Invisibility:
 				spell_list->sort([](STBaseEntry* l, STBaseEntry* r) {
