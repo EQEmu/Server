@@ -5871,7 +5871,7 @@ bool Mob::JoinHealRotationTargetPool(std::shared_ptr<HealRotation>* heal_rotatio
 		return false;
 	if (!(*heal_rotation))
 		return false;
-	if (!HealRotation::IsTargetMobType(this))
+	if (!IsHealRotationTargetMobType(this))
 		return false;
 
 	if (!(*heal_rotation)->AddTargetToPool(this))

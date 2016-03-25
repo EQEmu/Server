@@ -107,9 +107,6 @@ public:
 
 	void ResetArmorTypeHPLimits();
 
-	static bool IsMemberClass(uint8 class_id);
-	static bool IsTargetMobType(Mob* target_mob);
-
 private:
 	bool valid_state();
 	void cycle_refresh();
@@ -142,5 +139,8 @@ private:
 	float m_safe_hp_ratio[ARMOR_TYPE_COUNT];
 	float m_critical_hp_ratio[ARMOR_TYPE_COUNT];
 };
+
+bool IsHealRotationMemberClass(uint8 class_id);
+bool IsHealRotationTargetMobType(Mob* target_mob);
 
 #endif

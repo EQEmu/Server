@@ -9239,7 +9239,7 @@ bool Bot::CreateHealRotation(uint32 interval_ms, bool fast_heals, bool adaptive_
 {
 	if (IsHealRotationMember())
 		return false;
-	if (!HealRotation::IsMemberClass(GetClass()))
+	if (!IsHealRotationMemberClass(GetClass()))
 		return false;
 	
 	m_member_of_heal_rotation = std::make_shared<HealRotation>(this, interval_ms, fast_heals, adaptive_targeting, casting_override);
@@ -9266,7 +9266,7 @@ bool Bot::JoinHealRotationMemberPool(std::shared_ptr<HealRotation>* heal_rotatio
 		return false;
 	if (!(*heal_rotation))
 		return false;
-	if (!HealRotation::IsMemberClass(GetClass()))
+	if (!IsHealRotationMemberClass(GetClass()))
 		return false;
 
 	if (!(*heal_rotation)->AddMemberToPool(this))

@@ -74,7 +74,7 @@ bool HealRotation::AddMemberToPool(Bot* hr_member)
 {
 	if (!hr_member)
 		return false;
-	if (!IsMemberClass(hr_member->GetClass()))
+	if (!IsHealRotationMemberClass(hr_member->GetClass()))
 		return false;
 	if (m_member_pool.size() >= RuleI(Bots, HealRotationMaxMembers))
 		return false;
@@ -96,7 +96,7 @@ bool HealRotation::AddTargetToPool(Mob* hr_target)
 		return false;
 	if (!valid_state())
 		return false;
-	if (!IsTargetMobType(hr_target))
+	if (!IsHealRotationTargetMobType(hr_target))
 		return false;
 	if (m_target_pool.size() >= RuleI(Bots, HealRotationMaxTargets))
 		return false;
@@ -498,7 +498,7 @@ void HealRotation::ResetArmorTypeHPLimits()
 bool HealRotation::valid_state()
 {
 	m_member_pool.remove(nullptr);
-	m_member_pool.remove_if([](Mob* l) {return (!IsMemberClass(l->GetClass())); });
+	m_member_pool.remove_if([](Mob* l) {return (!IsHealRotationMemberClass(l->GetClass())); });
 	
 	cycle_refresh();
 
@@ -565,7 +565,7 @@ void HealRotation::bias_targets()
 #define EQ_ALIVE(l, r) (l->GetAppearance() != eaDead && r->GetAppearance() != eaDead)
 #define EQ_READY(l, r, ct) (l->DontHealMeBefore() <= ct && r->DontHealMeBefore() <= ct)
 #define EQ_TANK(l, r) ((l->HasGroup() && l->GetGroup()->AmIMainTank(l->GetCleanName())) && (r->HasGroup() && r->GetGroup()->AmIMainTank(r->GetCleanName())))
-#define EQ_HEALER(l, r) (IsMemberClass(l->GetClass()) && IsMemberClass(r->GetClass()))
+#define EQ_HEALER(l, r) (IsHealRotationMemberClass(l->GetClass()) && IsHealRotationMemberClass(r->GetClass()))
 #define EQ_ARMTYPE(l, r) (ClassArmorType(l->GetClass()) == ClassArmorType(r->GetClass()))
 #define EQ_ATCRIT(l, r) (l->GetHPRatio() <= (*l->TargetOfHealRotation())->ArmorTypeCriticalHPRatio(ClassArmorType(l->GetClass())) && \
 	r->GetHPRatio() <= (*r->TargetOfHealRotation())->ArmorTypeCriticalHPRatio(ClassArmorType(r->GetClass())))
@@ -575,7 +575,7 @@ void HealRotation::bias_targets()
 #define GT_ALIVE(l, r) (l->GetAppearance() != eaDead && r->GetAppearance() == eaDead)
 #define GT_READY(l, r, ct) (l->DontHealMeBefore() <= ct && r->DontHealMeBefore() > ct)
 #define GT_TANK(l, r) ((l->HasGroup() && l->GetGroup()->AmIMainTank(l->GetCleanName())) && (!r->HasGroup() || !r->GetGroup()->AmIMainTank(r->GetCleanName())))
-#define GT_HEALER(l, r) (IsMemberClass(l->GetClass()) && !IsMemberClass(r->GetClass()))
+#define GT_HEALER(l, r) (IsHealRotationMemberClass(l->GetClass()) && !IsHealRotationMemberClass(r->GetClass()))
 #define GT_HEALFREQ(l, r) (l->HealRotationHealFrequency() > r->HealRotationHealFrequency())
 #define GT_HEALCNT(l, r) (l->HealRotationHealCount() > r->HealRotationHealCount())
 #define GT_ATCRIT(l, r) (l->GetHPRatio() <= (*l->TargetOfHealRotation())->ArmorTypeCriticalHPRatio(ClassArmorType(l->GetClass())) && \
@@ -593,7 +593,7 @@ void HealRotation::bias_targets()
 	
 	// attempt to clear invalid target pool entries
 	m_target_pool.remove(nullptr);
-	m_target_pool.remove_if([](Mob* l) { return (!IsTargetMobType(l)); });
+	m_target_pool.remove_if([](Mob* l) { return (!IsHealRotationTargetMobType(l)); });
 
 	uint32 sort_type = 0; // debug
 
@@ -629,7 +629,7 @@ void HealRotation::bias_targets()
 
 			return false;
 		});
-		if (IsMemberClass(m_target_pool.front()->GetClass()) && healable_target(false))
+		if (IsHealRotationMemberClass(m_target_pool.front()->GetClass()) && healable_target(false))
 			break;
 
 		sort_type = 3; // default
@@ -710,7 +710,7 @@ void HealRotation::bias_targets()
 
 			return false;
 		});
-		if (IsMemberClass(m_target_pool.front()->GetClass()) && healable_target(true, true))
+		if (IsHealRotationMemberClass(m_target_pool.front()->GetClass()) && healable_target(true, true))
 			break;
 
 		sort_type = 105;
@@ -857,7 +857,7 @@ void HealRotation::bias_targets()
 #endif
 }
 
-bool HealRotation::IsMemberClass(uint8 class_id)
+bool IsHealRotationMemberClass(uint8 class_id)
 {
 	switch (class_id) {
 	case CLERIC:
@@ -869,7 +869,7 @@ bool HealRotation::IsMemberClass(uint8 class_id)
 	}
 }
 
-bool HealRotation::IsTargetMobType(Mob* target_mob)
+bool IsHealRotationTargetMobType(Mob* target_mob)
 {
 	if (!target_mob)
 		return false;
