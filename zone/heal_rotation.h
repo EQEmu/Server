@@ -20,6 +20,8 @@
 #ifndef HEAL_ROTATION_H
 #define HEAL_ROTATION_H
 
+#ifdef BOTS
+
 #include "mob.h"
 
 #define CASTING_CYCLE_MINIMUM_INTERVAL 1000
@@ -146,3 +148,5 @@ bool IsHealRotationMemberClass(uint8 class_id);
 bool IsHealRotationTargetMobType(Mob* target_mob);
 
 #endif
+
+#endif // BOTS

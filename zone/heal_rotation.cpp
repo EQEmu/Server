@@ -16,6 +16,8 @@
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 
+#ifdef BOTS
+
 #include "bot.h"
 
 #define SAFE_HP_RATIO_CLOTH 95.0f
@@ -884,3 +886,5 @@ bool IsHealRotationTargetMobType(Mob* target_mob)
 
 	return true;
 }
+
+#endif // BOTS

@@ -32,6 +32,8 @@
 
 */
 
+#ifdef BOTS
+
 #include <string.h>
 #include <stdlib.h>
 #include <sstream>
@@ -7311,3 +7313,5 @@ bool helper_spell_list_fail(Client *bot_owner, bcst_list* spell_list, BCEnum::Sp
 
 	return false;
 }
+
+#endif // BOTS

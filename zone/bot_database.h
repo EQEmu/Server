@@ -20,6 +20,8 @@
 #ifndef BOT_DATABASE_H
 #define BOT_DATABASE_H
 
+#ifdef BOTS
+
 #include "../common/dbcore.h"
 #include "../common/eq_packet_structs.h"
 
@@ -85,3 +87,5 @@ public:
 extern BotDatabase botdb;
 
 #endif
+
+#endif // BOTS

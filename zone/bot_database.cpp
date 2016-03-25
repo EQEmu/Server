@@ -16,6 +16,7 @@
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 
+#ifdef BOTS
 
 #include "../common/global_define.h"
 #include "../common/rulesys.h"
@@ -719,7 +720,7 @@ std::list<std::pair<std::string, std::string>> BotDatabase::GetGroupsListByOwner
 		return groups_list;
 
 	std::string query = StringFormat("SELECT `group_name`, `group_leader_name` FROM `vw_bot_groups` WHERE `owner_id` = '%u'", owner_id);
-	auto results = database.QueryDatabase(query);
+	auto results = QueryDatabase(query);
 	if (!results.Success()) {
 		error_message = results.ErrorMessage();
 		return groups_list;
@@ -730,3 +731,5 @@ std::list<std::pair<std::string, std::string>> BotDatabase::GetGroupsListByOwner
 	
 	return groups_list;
 }
+
+#endif // BOTS
