@@ -1877,8 +1877,10 @@ namespace MyBots
 				if (bot_iter->GetBotID() != group_iter)
 					continue;
 
-				if (IsMyBot(bot_owner, bot_iter))
+				if (IsMyBot(bot_owner, bot_iter)) {
 					sbl.push_back(bot_iter);
+					break;
+				}
 			}
 		}
 
