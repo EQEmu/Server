@@ -1711,34 +1711,6 @@ namespace MyBots
 			UniquifySBL(sbl);
 	}
 
-	static void PopulateSBL_ByBotGroup(Client *bot_owner, std::list<Bot*> &sbl, const char* name, bool clear_list = true) {
-		if (clear_list)
-			sbl.clear();
-		if (!bot_owner)
-			return;
-
-		std::list<Bot*> selectable_bot_list;
-		if (name)
-			PopulateSBL_ByNamedBot(bot_owner, selectable_bot_list, name);
-		else if (IsMyBot(bot_owner, bot_owner->GetTarget()))
-			selectable_bot_list.push_back(bot_owner->GetTarget()->CastToBot());
-
-		if (selectable_bot_list.empty())
-			return;
-		if (!selectable_bot_list.front()->GetGroup() || !IsMyBot(bot_owner, selectable_bot_list.front()->GetGroup()->GetLeader()))
-			return;
-
-		std::list<Mob*> group_list;
-		selectable_bot_list.front()->GetGroup()->GetMemberList(group_list);
-		for (auto member_iter : group_list) {
-			if (IsMyBot(bot_owner, member_iter))
-				sbl.push_back(member_iter->CastToBot());
-		}
-		
-		if (!clear_list)
-			UniquifySBL(sbl);
-	}
-
 	static void PopulateSBL_ByTargetsGroupedBots(Client *bot_owner, std::list<Bot*> &sbl, bool clear_list = true) {
 		if (clear_list)
 			sbl.clear();
@@ -1876,6 +1848,42 @@ namespace MyBots
 
 		sbl = entity_list.GetBotsByBotOwnerCharacterID(bot_owner->CharacterID());
 		sbl.remove(nullptr);
+	}
+
+	static void PopulateSBL_ByBotGroup(Client *bot_owner, std::list<Bot*> &sbl, const char* name, bool clear_list = true) {
+		if (clear_list)
+			sbl.clear();
+		if (!bot_owner || !name)
+			return;
+
+		std::string group_name = name;
+		std::string error_message;
+		uint32 group_id = botdb.GetGroupIDForLoadGroup(bot_owner->CharacterID(), group_name, error_message);
+		if (!group_id || error_message.size())
+			return;
+
+		std::map<uint32, std::list<uint32>> group_list = botdb.LoadGroup(group_name, error_message);
+		if (group_list.find(group_id) == group_list.end() || !group_list[group_id].size() || error_message.size())
+			return;
+
+		std::list<Bot*> selectable_bot_list;
+		PopulateSBL_BySpawnedBots(bot_owner, selectable_bot_list);
+		if (selectable_bot_list.empty())
+			return;
+
+		selectable_bot_list.remove(nullptr);
+		for (auto group_iter : group_list[group_id]) {
+			for (auto bot_iter : selectable_bot_list) {
+				if (bot_iter->GetBotID() != group_iter)
+					continue;
+
+				if (IsMyBot(bot_owner, bot_iter))
+					sbl.push_back(bot_iter);
+			}
+		}
+
+		if (!clear_list)
+			UniquifySBL(sbl);
 	}
 };
 
@@ -2427,7 +2435,7 @@ void bot_command_actionable(Client *c, const Seperator *sep)
 	c->Message(m_usage, "target: selects target as single bot - use ^command' [target] or imply by empty actionable argument");
 	c->Message(m_usage, "byname [name]: selects single bot by name");
 	c->Message(m_usage, "ownergroup: selects all bots in the owner's group");
-	c->Message(m_usage, "botgroup [name]: NEEDS REWORK???");
+	c->Message(m_usage, "botgroup [name]: selects members of a bot-group by it's name");
 	c->Message(m_usage, "targetgroup: selects all bots in target's group");
 	c->Message(m_usage, "namesgroup [name]: selects all bots in name's group");
 	c->Message(m_usage, "healrotation [name]: selects all member and target bots of a heal rotation where name is a member");
