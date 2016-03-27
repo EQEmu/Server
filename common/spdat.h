@@ -529,7 +529,7 @@ typedef enum {
 #define SE_CastOnFadeEffectAlways		373 // implemented - Triggers if fades after natural duration OR from rune/numhits fades.
 #define SE_ApplyEffect					374 // implemented
 #define SE_DotCritDmgIncrease			375	// implemented - Increase damage of DoT critical amount
-#define SE_Fling						376	// *not implemented - used in 2 test spells  (12945 | Movement Test Spell 1)
+//#define SE_Fling						376	// *not implemented - used in 2 test spells  (12945 | Movement Test Spell 1)
 #define SE_CastOnFadeEffectNPC			377	// implemented - Triggers only if fades after natural duration (On live these are usually players spells that effect an NPC).
 #define SE_SpellEffectResistChance		378	// implemented - Increase chance to resist specific spell effect (base1=value, base2=spell effect id)
 #define SE_ShadowStepDirectional		379 // implemented - handled by client
