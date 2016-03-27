@@ -108,7 +108,7 @@ int Client::mod_food_value(const Item_Struct *item, int change) { return(change)
 int Client::mod_drink_value(const Item_Struct *item, int change) { return(change); }
 
 //effect_vallue - Spell effect value as calculated by default formulas.  You will want to ignore effects that don't lend themselves to scaling - pet ID's, gate coords, etc.
-int Mob::mod_effect_value(int effect_value, uint16 spell_id, int effect_type, Mob* caster) { return(effect_value); }
+int Mob::mod_effect_value(int effect_value, uint16 spell_id, int effect_type, Mob* caster, uint16 caster_id) { return(effect_value); }
 
 //chancetohit - 0 to 100 percent - set over 1000 for a guaranteed hit
 float Mob::mod_hit_chance(float chancetohit, SkillUseTypes skillinuse, Mob* attacker) { return(chancetohit); }
