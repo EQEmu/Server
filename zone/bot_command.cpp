@@ -1898,6 +1898,13 @@ namespace ActionableTarget
 		return (bot_owner->GetGroup() == grouped_player->GetGroup());
 	}
 
+	static bool IsAttackable(Client *bot_owner, Mob* target_mob) {
+		if (!bot_owner || !target_mob || bot_owner == target_mob)
+			return false;
+
+		return bot_owner->IsAttackAllowed(target_mob);
+	}
+
 	static Client* AsSingle_ByPlayer(Client *bot_owner, bool return_me_on_null_target = true) {
 		if (!bot_owner)
 			return nullptr;
@@ -1940,7 +1947,7 @@ namespace ActionableTarget
 	}
 
 	static Mob* AsSingle_ByAttackable(Client *bot_owner) {
-		if (!bot_owner || !bot_owner->IsAttackAllowed(bot_owner->GetTarget()))
+		if (!IsAttackable(bot_owner, bot_owner->GetTarget()))
 			return nullptr;
 
 		return bot_owner->GetTarget();
@@ -1954,13 +1961,10 @@ namespace ActionableTarget
 	}
 
 	static Mob* VerifyFriendly(Client* bot_owner, BCEnum::TType target_type, bool return_me_on_null_target = true) {
-		if (!bot_owner || target_type == BCEnum::TT_None)
+		if (IsAttackable(bot_owner, bot_owner->GetTarget()) || target_type == BCEnum::TT_None)
 			return nullptr;
 
 		auto target_mob = bot_owner->GetTarget();
-		if (!IsFriendlyAllowed(target_mob))
-			return nullptr;
-
 		Mob* verified_friendly = nullptr;
 		switch (target_type) {
 		case BCEnum::TT_Single:
@@ -2010,13 +2014,10 @@ namespace ActionableTarget
 	}
 
 	static Mob* VerifyEnemy(Client* bot_owner, BCEnum::TType target_type) {
-		if (!bot_owner || target_type == BCEnum::TT_None)
+		if (!IsAttackable(bot_owner, bot_owner->GetTarget()) || target_type == BCEnum::TT_None)
 			return nullptr;
 
 		auto target_mob = bot_owner->GetTarget();
-		if (!target_mob || !bot_owner->IsAttackAllowed(target_mob))
-			return nullptr;
-
 		Mob* verified_enemy = nullptr;
 		switch (target_type) {
 		case BCEnum::TT_Animal:
@@ -2437,7 +2438,7 @@ void bot_command_actionable(Client *c, const Seperator *sep)
 	c->Message(m_usage, "target - selects target as single bot .. use ^command [target] or imply by empty actionable argument");
 	c->Message(m_usage, "byname [name] - selects single bot by name");
 	c->Message(m_usage, "ownergroup - selects all bots in the owner's group");
-	c->Message(m_usage, "botgroup [name] - selects members of a bot-group by it's name");
+	c->Message(m_usage, "botgroup [name] - selects members of a bot-group by its name");
 	c->Message(m_usage, "targetgroup - selects all bots in target's group");
 	c->Message(m_usage, "namesgroup [name] - selects all bots in name's group");
 	c->Message(m_usage, "healrotation [name] - selects all member and target bots of a heal rotation where name is a member");
@@ -2972,15 +2973,10 @@ void bot_command_follow(Client *c, const Seperator *sep)
 		name_arg = 3;
 	}
 	else {
-		if (c->GetTarget()) {
-			if (c != c->GetTarget() && c->IsAttackAllowed(c->GetTarget())) {
-				c->Message(m_fail, "You must <target> a friendly mob to use this command");
-				return;
-			}
-			target_mob = c->GetTarget();
-		}
-		else {
-			target_mob = c;
+		target_mob = ActionableTarget::VerifyFriendly(c, BCEnum::TT_Single);
+		if (!target_mob) {
+			c->Message(m_fail, "You must <target> a friendly mob to use this command");
+			return;
 		}
 	}
 
@@ -3000,7 +2996,10 @@ void bot_command_follow(Client *c, const Seperator *sep)
 					bot_iter->SetFollowID(my_group->GetLeader()->GetID());
 			}
 			else {
-				bot_iter->SetFollowID(target_mob->GetID());
+				if (bot_iter == target_mob)
+					bot_iter->SetFollowID(c->GetID());
+				else
+					bot_iter->SetFollowID(target_mob->GetID());
 			}
 		}
 		else {
@@ -3917,7 +3916,7 @@ void bot_command_taunt(Client *c, const Seperator *sep)
 			c->Message(m_action, "%i of your bots %s %s taunting", taunting_count, ((taunting_count != 1) ? ("have") : ("has")), ((taunt_state) ? ("started") : ("stopped")));
 	}
 	else {
-		c->Message(m_fail, "None of your bots are able to taunt");
+		c->Message(m_fail, "None of your bots are capable of taunting");
 	}
 }
 
