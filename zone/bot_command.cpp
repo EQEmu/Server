@@ -2973,7 +2973,7 @@ void bot_command_follow(Client *c, const Seperator *sep)
 	}
 	else {
 		if (c->GetTarget()) {
-			if (c->IsAttackAllowed(c->GetTarget())) {
+			if (c != c->GetTarget() && c->IsAttackAllowed(c->GetTarget())) {
 				c->Message(m_fail, "You must <target> a friendly mob to use this command");
 				return;
 			}
