@@ -2434,17 +2434,17 @@ void bot_command_actionable(Client *c, const Seperator *sep)
 
 	c->Message(m_message, "Actionable command arguments:");
 
-	c->Message(m_usage, "target: selects target as single bot - use ^command' [target] or imply by empty actionable argument");
-	c->Message(m_usage, "byname [name]: selects single bot by name");
-	c->Message(m_usage, "ownergroup: selects all bots in the owner's group");
-	c->Message(m_usage, "botgroup [name]: selects members of a bot-group by it's name");
-	c->Message(m_usage, "targetgroup: selects all bots in target's group");
-	c->Message(m_usage, "namesgroup [name]: selects all bots in name's group");
-	c->Message(m_usage, "healrotation [name]: selects all member and target bots of a heal rotation where name is a member");
-	c->Message(m_usage, "healrotationmembers [name]: selects all member bots of a heal rotation where name is a member");
-	c->Message(m_usage, "healrotationtargets [name]: selects all target bots of a heal rotation where name is a member");
-	c->Message(m_usage, "spawned: selects all spawned bots");
-	c->Message(m_usage, "all: selects all spawned bots - argument use indicates en masse database updating");
+	c->Message(m_usage, "target - selects target as single bot .. use ^command [target] or imply by empty actionable argument");
+	c->Message(m_usage, "byname [name] - selects single bot by name");
+	c->Message(m_usage, "ownergroup - selects all bots in the owner's group");
+	c->Message(m_usage, "botgroup [name] - selects members of a bot-group by it's name");
+	c->Message(m_usage, "targetgroup - selects all bots in target's group");
+	c->Message(m_usage, "namesgroup [name] - selects all bots in name's group");
+	c->Message(m_usage, "healrotation [name] - selects all member and target bots of a heal rotation where name is a member");
+	c->Message(m_usage, "healrotationmembers [name] - selects all member bots of a heal rotation where name is a member");
+	c->Message(m_usage, "healrotationtargets [name] - selects all target bots of a heal rotation where name is a member");
+	c->Message(m_usage, "spawned - selects all spawned bots");
+	c->Message(m_usage, "all - selects all spawned bots .. argument use indicates en masse database updating");
 
 	c->Message(m_message, "You may only select your bots as actionable");
 }
