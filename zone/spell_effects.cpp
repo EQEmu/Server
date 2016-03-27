@@ -1270,7 +1270,9 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 #ifdef SPELL_EFFECT_SPAM
 				snprintf(effect_desc, _EDLEN, "Melee Absorb Rune: %+i", effect_value);
 #endif
-				effect_value = ApplySpellEffectiveness(caster, spell_id, effect_value);
+				if (caster)
+					effect_value = caster->ApplySpellEffectiveness(spell_id, effect_value);
+				
 				buffs[buffslot].melee_rune = effect_value;
 				break;
 			}
@@ -3020,7 +3022,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 }
 
 int Mob::CalcSpellEffectValue(uint16 spell_id, int effect_id, int caster_level, uint32 instrument_mod, Mob *caster,
-			      int ticsremaining)
+			      int ticsremaining, uint16 caster_id)
 {
 	int formula, base, max, effect_value;
 
@@ -3048,13 +3050,13 @@ int Mob::CalcSpellEffectValue(uint16 spell_id, int effect_id, int caster_level, 
 	    spells[spell_id].effectid[effect_id] != SE_ManaRegen_v2) {
 
 		int oval = effect_value;
-		int mod = ApplySpellEffectiveness(caster, spell_id, instrument_mod, true);
+		int mod = ApplySpellEffectiveness(spell_id, instrument_mod, true, caster_id);
 		effect_value = effect_value * mod / 10;
 		Log.Out(Logs::Detail, Logs::Spells, "Effect value %d altered with bard modifier of %d to yeild %d",
 			oval, mod, effect_value);
 	}
 
-	effect_value = mod_effect_value(effect_value, spell_id, spells[spell_id].effectid[effect_id], caster);
+	effect_value = mod_effect_value(effect_value, spell_id, spells[spell_id].effectid[effect_id], caster, caster_id);
 
 	return effect_value;
 }
@@ -6043,16 +6045,21 @@ int32 Mob::GetFocusIncoming(focusType type, int effect, Mob *caster, uint32 spel
 	return value;
 }
 
-int32 Mob::ApplySpellEffectiveness(Mob* caster, int16 spell_id, int32 value, bool IsBard) {
+int32 Mob::ApplySpellEffectiveness(int16 spell_id, int32 value, bool IsBard, uint16 caster_id) {
 
 	// 9-17-12: This is likely causing crashes, disabled till can resolve.
 	if (IsBard)
 		return value;
 
+	Mob* caster = this;
+
+	if (caster_id && caster_id != GetID())//Make sure we are checking the casters focus
+		caster = entity_list.GetMob(caster_id);
+
 	if (!caster)
 		return value;
 
-	int16 focus = GetFocusEffect(focusFcBaseEffects, spell_id);
+	int16 focus = caster->GetFocusEffect(focusFcBaseEffects, spell_id);
 
 	if (IsBard)
 		value += focus;
