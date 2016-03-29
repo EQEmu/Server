@@ -3317,7 +3317,7 @@ XS(XS__wearchange);
 XS(XS__wearchange)
 {
 	dXSARGS;
-	if (items < 4)
+	if (items < 2)
 		Perl_croak(aTHX_ "Usage: wearchange(slot, texture, [hero_forge_model], [elite_material])");
 
 	uint8		slot = (int)SvUV(ST(0));
