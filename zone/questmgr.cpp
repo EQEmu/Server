@@ -2881,11 +2881,11 @@ void QuestManager::removetitle(int titleset) {
 	initiator->RemoveTitle(titleset);
 }
 
-void QuestManager::wearchange(uint8 slot, uint16 texture)
+void QuestManager::wearchange(uint8 slot, uint16 texture, uint32 hero_forge_model /*= 0*/, uint32 elite_material /*= 0*/)
 {
 	QuestManagerCurrentQuestVars();
 	if(owner){
-		owner->SendTextureWC(slot, texture);
+		owner->SendTextureWC(slot, texture, hero_forge_model, elite_material);
 		if(owner->IsNPC()) {
 			owner->CastToNPC()->NPCSlotTexture(slot, texture);
 		}

@@ -3317,13 +3317,22 @@ XS(XS__wearchange);
 XS(XS__wearchange)
 {
 	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: wearchange(slot, texture)");
+	if (items < 4)
+		Perl_croak(aTHX_ "Usage: wearchange(slot, texture, [hero_forge_model], [elite_material])");
 
 	uint8		slot = (int)SvUV(ST(0));
 	uint16		texture = (int)SvUV(ST(1));
 
-	quest_manager.wearchange(slot, texture);
+	uint32 hero_forge_model = 0;
+	uint32 elite_material = 0;
+
+	if (items > 2)
+		hero_forge_model = (int)SvUV(ST(2));
+
+	if (items > 3)
+		elite_material = (int)SvUV(ST(3));
+
+	quest_manager.wearchange(slot, texture, hero_forge_model, elite_material);
 
 	XSRETURN_EMPTY;
 }
