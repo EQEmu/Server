@@ -5361,10 +5361,10 @@ struct TextLinkBody_Struct {
 
 
 struct fling_struct {
-/* 00 */ uint32 unk1;
+/* 00 */ uint32 collision; // 0 collision is off, anything else it's on
 /* 04 */ int32 travel_time; // ms -- UF we need to calc this, RoF+ -1 auto calcs
-/* 08 */ char unk3; // bool, set to 1 has something to do with z-axis or something
-/* 09 */ char disable_fall_damage; // 1 you take no fall damage, 0 you take fall damage
+/* 08 */ uint8 unk3; // bool, set to 1 has something to do with z-axis or something weird things happen if the new Z is above or equal to yours
+/* 09 */ uint8 disable_fall_damage; // 1 you take no fall damage, 0 you take fall damage
 /* 10 */ uint8 padding[2];
 /* 12 */ float speed_z;
 /* 16 */ float new_y;
