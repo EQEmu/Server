@@ -488,6 +488,8 @@ public:
 	void MakeSpawnUpdateNoDelta(PlayerPositionUpdateServer_Struct* spu);
 	void MakeSpawnUpdate(PlayerPositionUpdateServer_Struct* spu);
 	void SendPosition();
+	void SetSpawned() { spawned = true; };
+	bool Spawned() { return spawned; };
 	void SetFlyMode(uint8 flymode);
 	inline void Teleport(glm::vec3 NewPosition) { m_Position.x = NewPosition.x; m_Position.y = NewPosition.y;
 		m_Position.z = NewPosition.z; };
@@ -1137,6 +1139,7 @@ protected:
 	bool held;
 	bool nocast;
 	bool focused;
+	bool spawned;
 	void CalcSpellBonuses(StatBonuses* newbon);
 	virtual void CalcBonuses();
 	void TrySkillProc(Mob *on, uint16 skill, uint16 ReuseTime, bool Success = false, uint16 hand = 0, bool IsDefensive = false); // hand = MainCharm?

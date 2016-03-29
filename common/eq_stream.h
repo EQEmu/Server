@@ -153,7 +153,6 @@ class EQStream : public EQStreamInterface {
 		std::deque<EQProtocolPacket *> SequencedQueue;
 		uint16 NextOutSeq;
 		uint16 SequencedBase;	//the sequence number of SequencedQueue[0]
-		long NextSequencedSend;	//index into SequencedQueue
 		Mutex MOutboundQueue;
 
 		//a buffer we use for compression/decompression
@@ -174,7 +173,7 @@ class EQStream : public EQStreamInterface {
 		Mutex MRate;
 		int32 RateThreshold;
 		int32 DecayRate;
-
+		uint32 AverageDelta;
 
 		OpcodeManager **OpMgr;
 

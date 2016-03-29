@@ -495,7 +495,7 @@ void Client::CompleteConnect()
 {
 	UpdateWho();
 	client_state = CLIENT_CONNECTED;
-
+	SendAllPackets();
 	hpupdate_timer.Start();
 	position_timer.Start();
 	autosave_timer.Start();
@@ -749,8 +749,6 @@ void Client::CompleteConnect()
 	}
 
 	entity_list.SendTraders(this);
-
-	zoneinpacket_timer.Start();
 
 	if (GetPet()){
 		GetPet()->SendPetBuffsToClient();
@@ -1729,7 +1727,7 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 
 	SetAttackTimer();
 	conn_state = ZoneInfoSent;
-
+	zoneinpacket_timer.Start();
 	return;
 }
 
