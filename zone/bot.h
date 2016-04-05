@@ -226,9 +226,7 @@ public:
 	static bool IsValidRaceClassCombo(uint16 r, uint8 c);
 	bool IsValidName();
 	static bool IsValidName(std::string& name);
-	static bool IsBotNameAvailable(const char *botName, std::string* errorMessage);
-	bool DeleteBot(std::string* errorMessage);
-	void Spawn(Client* botCharacterOwner, std::string* errorMessage);
+	void Spawn(Client* botCharacterOwner);
 	virtual void SetLevel(uint8 in_level, bool command = false);
 	virtual void FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho);
 	virtual bool Process();
@@ -388,19 +386,12 @@ public:
 	void BotTradeAddItem(uint32 id, const ItemInst* inst, int16 charges, uint32 equipableSlots, uint16 lootSlot, std::string* errorMessage, bool addToDb = true);
 	void EquipBot(std::string* errorMessage);
 	bool CheckLoreConflict(const Item_Struct* item);
-	uint32 GetEquipmentColor(uint8 material_slot) const;
 	virtual void UpdateEquipmentLight() { m_Light.Type.Equipment = m_inv.FindBrightestLightType(); m_Light.Level.Equipment = m_Light.TypeToLevel(m_Light.Type.Equipment); }
 
 	// Static Class Methods	
 	//static void DestroyBotRaidObjects(Client* client);	// Can be removed after bot raids are dumped
-	static uint32 GetBotIDByBotName(std::string botName);
-	static Bot* LoadBot(uint32 botID, std::string* errorMessage);
-	static std::list<BotsAvailableList> GetBotList(uint32 botOwnerCharacterID, std::string* errorMessage);
-	static std::list<SpawnedBotsList> ListSpawnedBots(uint32 characterID, std::string* errorMessage);
-	static uint32 SpawnedBotCount(uint32 botOwnerCharacterID, std::string* errorMessage);
-	static uint32 CreatedBotCount(uint32 botOwnerCharacterID, std::string* errorMessage);
-	static uint32 AllowedBotSpawns(uint32 botOwnerCharacterID, std::string* errorMessage);
-	static uint32 GetBotOwnerCharacterID(uint32 botID, std::string* errorMessage);
+	static Bot* LoadBot(uint32 botID);
+	static uint32 SpawnedBotCount(uint32 botOwnerCharacterID);
 	static void LevelBotWithClient(Client* client, uint8 level, bool sendlvlapp);
 	//static bool SetBotOwnerCharacterID(uint32 botID, uint32 botOwnerCharacterID, std::string* errorMessage);
 	static std::string ClassIdToString(uint16 classId);
@@ -411,7 +402,6 @@ public:
 	static void ProcessBotGroupDisband(Client* c, std::string botName);
 	static void BotOrderCampAll(Client* c);
 	static void ProcessBotInspectionRequest(Bot* inspectedBot, Client* client);
-	static std::list<uint32> GetGroupedBotsByGroupId(uint32 groupId, std::string* errorMessage);
 	static void LoadAndSpawnAllZonedBots(Client* botOwner);
 	static bool GroupHasBot(Group* group);
 	static Bot* GetFirstBotInGroup(Group* group);
@@ -604,15 +594,37 @@ public:
 	// Class Destructors
 	virtual ~Bot();
 
-	// Publicized protected/private functions
-	virtual void BotRangedAttack(Mob* other); // protected
-	uint32 GetBotItemsCount(std::string* errorMessage); // private
-	void BotRemoveEquipItem(int slot); // private
-	void RemoveBotItemBySlot(uint32 slotID, std::string* errorMessage); // private
+	// Publicized protected functions
+	virtual void BotRangedAttack(Mob* other);
 
+	// Publicized private functions
+	static NPCType FillNPCTypeStruct(uint32 botSpellsID, std::string botName, std::string botLastName, uint8 botLevel, uint16 botRace, uint8 botClass, uint8 gender, float size, uint32 face, uint32 hairStyle, uint32 hairColor, uint32 eyeColor, uint32 eyeColor2, uint32 beardColor, uint32 beard, uint32 drakkinHeritage, uint32 drakkinTattoo, uint32 drakkinDetails, int32 hp, int32 mana, int32 mr, int32 cr, int32 dr, int32 fr, int32 pr, int32 corrup, int32 ac, uint32 str, uint32 sta, uint32 dex, uint32 agi, uint32 _int, uint32 wis, uint32 cha, uint32 attack);
+	void BotRemoveEquipItem(int slot);
+	void RemoveBotItemBySlot(uint32 slotID, std::string* errorMessage);
+	uint32 GetTotalPlayTime();
+
+	// New accessors for BotDatabase access
+	bool DeleteBot();
+	uint32* GetTimers() { return timers; }
+	uint32 GetLastZoneID() { return _lastZoneId; }
+	int32 GetBaseAC() { return _baseAC; }
+	int32 GetBaseATK() { return _baseATK; }
+	int32 GetBaseSTR() { return _baseSTR; }
+	int32 GetBaseSTA() { return _baseSTA; }
+	int32 GetBaseCHA() { return _baseCHA; }
+	int32 GetBaseDEX() { return _baseDEX; }
+	int32 GetBaseINT() { return _baseINT; }
+	int32 GetBaseAGI() { return _baseAGI; }
+	int32 GetBaseWIS() { return _baseWIS; }
+	int32 GetBaseFR() { return _baseFR; }
+	int32 GetBaseCR() { return _baseCR; }
+	int32 GetBaseMR() { return _baseMR; }
+	int32 GetBasePR() { return _basePR; }
+	int32 GetBaseDR() { return _baseDR; }
+	int32 GetBaseCorrup() { return _baseCorrup; }
+	
 protected:
 	virtual void PetAIProcess();
-	static NPCType FillNPCTypeStruct(uint32 botSpellsID, std::string botName, std::string botLastName, uint8 botLevel, uint16 botRace, uint8 botClass, uint8 gender, float size, uint32 face, uint32 hairStyle, uint32 hairColor, uint32 eyeColor, uint32 eyeColor2, uint32 beardColor, uint32 beard, uint32 drakkinHeritage, uint32 drakkinTattoo, uint32 drakkinDetails, int32 hp, int32 mana, int32 mr, int32 cr, int32 dr, int32 fr, int32 pr, int32 corrup, int32 ac, uint32 str, uint32 sta, uint32 dex, uint32 agi, uint32 _int, uint32 wis, uint32 cha, uint32 attack);
 	virtual void BotMeditate(bool isSitting);
 	virtual bool CheckBotDoubleAttack(bool Triple = false);
 	virtual int32 GetBotFocusEffect(BotfocusType bottype, uint16 spell_id);
@@ -621,8 +633,6 @@ protected:
 	virtual void PerformTradeWithClient(int16 beginSlotID, int16 endSlotID, Client* client);
 	virtual bool AIDoSpellCast(uint8 i, Mob* tar, int32 mana_cost, uint32* oDontDoAgainBefore = 0);
 	virtual float GetMaxMeleeRangeToTarget(Mob* target);
-
-	static void SetBotGuildMembership(uint32 botId, uint32 guildid, uint8 rank);
 
 private:
 	// Class Members
@@ -701,30 +711,14 @@ private:
 	void SetBotID(uint32 botID);
 
 	// Private "Inventory" Methods
-	void GetBotItems(std::string* errorMessage, Inventory &inv);
+	void GetBotItems(Inventory &inv, std::string* errorMessage);
 	void BotAddEquipItem(int slot, uint32 id);
 	uint32 GetBotItemBySlot(uint32 slotID);
-	void SetBotItemInSlot(uint32 slotID, uint32 itemID, const ItemInst* inst, std::string* errorMessage);
-	uint32 GetTotalPlayTime();
-	void SaveBuffs();	// Saves existing buffs to the database to persist zoning and camping
-	void LoadBuffs();	// Retrieves saved buffs from the database on spawning
-	void LoadPetBuffs(SpellBuff_Struct* petBuffs, uint32 botPetSaveId);
-	void SavePetBuffs(SpellBuff_Struct* petBuffs, uint32 botPetSaveId);
-	void LoadPetItems(uint32* petItems, uint32 botPetSaveId);
-	void SavePetItems(uint32* petItems, uint32 botPetSaveId);
-	void LoadPetStats(std::string* petName, uint32* petMana, uint32* petHitPoints, uint32* botPetId, uint32 botPetSaveId);
-	uint32 SavePetStats(std::string petName, uint32 petMana, uint32 petHitPoints, uint32 botPetId);
-	void LoadPet();	// Load and spawn bot pet if there is one
-	void SavePet();	// Save and depop bot pet if there is one
-	uint32 GetPetSaveId();
-	void DeletePetBuffs(uint32 botPetSaveId);
-	void DeletePetItems(uint32 botPetSaveId);
-	void DeletePetStats(uint32 botPetSaveId);
-	void LoadGuildMembership(uint32* guildId, uint8* guildRank, std::string* guildName);
-	void LoadStance();
-	void SaveStance();
-	void LoadTimers();
-	void SaveTimers();
+
+	// Private "Pet" Methods
+	bool LoadPet();	// Load and spawn bot pet if there is one
+	bool SavePet();	// Save and depop bot pet if there is one
+	bool DeletePet();
 };
 
 #endif // BOTS

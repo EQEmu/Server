@@ -1413,7 +1413,7 @@ int bot_command_init(void)
 	}
 
 	std::map<std::string, std::pair<uint8, std::vector<std::string>>> bot_command_settings;
-	botdb.GetCommandSettings(bot_command_settings);
+	botdb.LoadBotCommandSettings(bot_command_settings);
 
 	auto working_bcl = bot_command_list;
 	for (auto working_bcl_iter : working_bcl) {
@@ -1857,13 +1857,13 @@ namespace MyBots
 			return;
 
 		std::string group_name = name;
-		std::string error_message;
-		uint32 group_id = botdb.GetGroupIDForLoadGroup(bot_owner->CharacterID(), group_name, error_message);
-		if (!group_id || error_message.size())
+
+		uint32 botgroup_id = 0;
+		if (!botdb.LoadBotGroupIDForLoadBotGroup(bot_owner->CharacterID(), group_name, botgroup_id) || !botgroup_id)
 			return;
 
-		std::map<uint32, std::list<uint32>> group_list = botdb.LoadGroup(group_name, error_message);
-		if (group_list.find(group_id) == group_list.end() || !group_list[group_id].size() || error_message.size())
+		std::map<uint32, std::list<uint32>> botgroup_list;
+		if (!botdb.LoadBotGroup(group_name, botgroup_list) || botgroup_list.find(botgroup_id) == botgroup_list.end() || !botgroup_list[botgroup_id].size())
 			return;
 
 		std::list<Bot*> selectable_bot_list;
@@ -1872,7 +1872,7 @@ namespace MyBots
 			return;
 
 		selectable_bot_list.remove(nullptr);
-		for (auto group_iter : group_list[group_id]) {
+		for (auto group_iter : botgroup_list[botgroup_id]) {
 			for (auto bot_iter : selectable_bot_list) {
 				if (bot_iter->GetBotID() != group_iter)
 					continue;
@@ -4185,34 +4185,45 @@ void bot_subcommand_bot_clone(Client *c, const Seperator *sep)
 		return;
 	}
 
-	std::string TempErrorMessage;
+	std::string error_message;
 
-	if (!Bot::IsBotNameAvailable(bot_name.c_str(), &TempErrorMessage)) {
-		if (!TempErrorMessage.empty())
-			c->Message(m_unknown, "Database Error: %s", TempErrorMessage.c_str());
+	bool available_flag = false;
+	if (!botdb.QueryNameAvailablity(bot_name, available_flag)) {
+		c->Message(m_fail, "%s", BotDatabase::fail::QueryNameAvailablity());
+		return;
+	}
+	if (!available_flag) {
 		c->Message(m_fail, "The name %s is already being used. Please choose a different name", bot_name.c_str());
 		return;
 	}
 
-	uint32 mbc = RuleI(Bots, CreationLimit);
-	if (Bot::CreatedBotCount(c->CharacterID(), &TempErrorMessage) >= mbc) {
-		if (!TempErrorMessage.empty())
-			c->Message(m_unknown, "Database Error: %s", TempErrorMessage.c_str());
-		c->Message(m_fail, "You have reached the maximum limit of %i bots", mbc);
+	uint32 max_bot_count = RuleI(Bots, CreationLimit);
+
+	uint32 bot_count = 0;
+	if (!botdb.QueryBotCount(c->CharacterID(), bot_count)) {
+		c->Message(m_fail, "%s", BotDatabase::fail::QueryBotCount());
+		return;
+	}
+	if (bot_count >= max_bot_count) {
+		c->Message(m_fail, "You have reached the maximum limit of %i bots", max_bot_count);
 		return;
 	}
 
-	auto clone_id = botdb.Clone(c->CharacterID(), my_bot->GetBotID(), bot_name.c_str());
-	if (!clone_id) {
-		c->Message(m_fail, "Clone creation of bot '%s' failed...", my_bot->GetCleanName());
+	uint32 clone_id = 0;
+	if (!botdb.CreateCloneBot(c->CharacterID(), my_bot->GetBotID(), bot_name, clone_id) || !clone_id) {
+		c->Message(m_fail, "%s '%s'", BotDatabase::fail::CreateCloneBot(), bot_name.c_str());
 		return;
 	}
 
-	if (!botdb.CloneInventory(c->CharacterID(), my_bot->GetBotID(), clone_id)) {
-		c->Message(m_fail, "Inventory import for bot clone '%s' failed...", bot_name.c_str());
-		return;
-	}
+	BotStanceType clone_stance = BotStancePassive;
+	if (!botdb.LoadStance(my_bot->GetBotID(), clone_stance))
+		c->Message(m_fail, "%s for bot '%s'", BotDatabase::fail::LoadStance(), my_bot->GetCleanName());
+	if (!botdb.SaveStance(clone_id, clone_stance))
+		c->Message(m_fail, "%s for clone '%s'", BotDatabase::fail::SaveStance(), bot_name.c_str());
 
+	if (!botdb.CreateCloneBotInventory(c->CharacterID(), my_bot->GetBotID(), clone_id))
+		c->Message(m_fail, "%s for clone '%s'", BotDatabase::fail::CreateCloneBotInventory(), bot_name.c_str());
+	
 	c->Message(m_action, "Bot '%s' was successfully cloned to bot '%s'", my_bot->GetCleanName(), bot_name.c_str());
 }
 
@@ -4276,11 +4287,10 @@ void bot_subcommand_bot_delete(Client *c, const Seperator *sep)
 		return;
 	}
 
-	std::string TempErrorMessage;
+	std::string error_message;
 
-	my_bot->DeleteBot(&TempErrorMessage);
-	if (!TempErrorMessage.empty()) {
-		c->Message(m_unknown, "Failed to delete '%s' due to database error: %s", my_bot->GetCleanName(), TempErrorMessage.c_str());
+	if (!my_bot->DeleteBot()) {
+		c->Message(m_unknown, "Failed to delete '%s' due to database error", my_bot->GetCleanName());
 		return;
 	}
 
@@ -4401,14 +4411,14 @@ void bot_subcommand_bot_dye_armor(Client *c, const Seperator *sep)
 	}
 
 	if (ab_type == ActionableBots::ABT_All) {
-		bool action_success = false;
-		if (dye_all)
-			action_success = botdb.SetAllArmorColors(c->CharacterID(), rgb_value);
-		else
-			action_success = botdb.SetAllArmorColorBySlot(c->CharacterID(), slot_id, rgb_value);
-
-		if (!action_success)
-			c->Message(m_unknown, "Failed to save dye armor changes for your bots due to unknown cause");
+		if (dye_all) {
+			if (!botdb.SaveAllArmorColors(c->CharacterID(), rgb_value))
+				c->Message(m_fail, "%s", BotDatabase::fail::SaveAllArmorColors());
+		}
+		else {
+			if (!botdb.SaveAllArmorColorBySlot(c->CharacterID(), slot_id, rgb_value))
+				c->Message(m_fail, "%s", BotDatabase::fail::SaveAllArmorColorBySlot());
+		}
 	}
 }
 
@@ -4551,8 +4561,8 @@ void bot_subcommand_bot_follow_distance(Client *c, const Seperator *sep)
 			continue;
 
 		bot_iter->SetFollowDistance(bfd);
-		if (ab_type != ActionableBots::ABT_All && !botdb.SetFollowDistance(c->CharacterID(), bot_iter->GetBotID(), bfd)) {
-			c->Message(m_unknown, "DATABASE ERROR: Could not change follow distance for bot %s", bot_iter->GetCleanName());
+		if (ab_type != ActionableBots::ABT_All && !botdb.SaveFollowDistance(c->CharacterID(), bot_iter->GetBotID(), bfd)) {
+			c->Message(m_fail, "%s for '%s'", BotDatabase::fail::SaveFollowDistance(), bot_iter->GetCleanName());
 			return;
 		}
 
@@ -4560,8 +4570,8 @@ void bot_subcommand_bot_follow_distance(Client *c, const Seperator *sep)
 	}
 
 	if (ab_type == ActionableBots::ABT_All) {
-		if (!botdb.SetAllFollowDistances(c->CharacterID(), bfd)) {
-			c->Message(m_unknown, "Failed to save follow distance changes for your bots due to unknown cause");
+		if (!botdb.SaveAllFollowDistances(c->CharacterID(), bfd)) {
+			c->Message(m_fail, "%s", BotDatabase::fail::SaveAllFollowDistances());
 			return;
 		}
 
@@ -4717,32 +4727,34 @@ void bot_subcommand_bot_inspect_message(Client *c, const Seperator *sep)
 	if (ab_type == ActionableBots::ABT_None)
 		return;
 
-	const auto cms = &c->GetInspectMessage();
+	const auto client_message_struct = &c->GetInspectMessage();
 
 	int bot_count = 0;
 	for (auto bot_iter : sbl) {
 		if (!bot_iter)
 			continue;
 
-		auto bms = &bot_iter->GetInspectMessage();
-		memset(bms, 0, sizeof(InspectMessage_Struct));
+		auto bot_message_struct = &bot_iter->GetInspectMessage();
+		memset(bot_message_struct, 0, sizeof(InspectMessage_Struct));
 		if (set_flag)
-			memcpy(bms, cms, sizeof(InspectMessage_Struct));
+			memcpy(bot_message_struct, client_message_struct, sizeof(InspectMessage_Struct));
 
-		if (ab_type != ActionableBots::ABT_All)
-			botdb.SetInspectMessage(bot_iter->GetBotID(), bms);
+		if (ab_type != ActionableBots::ABT_All && !botdb.SaveInspectMessage(bot_iter->GetBotID(), *bot_message_struct)) {
+			c->Message(m_fail, "%s for '%s'", BotDatabase::fail::SaveInspectMessage(), bot_iter->GetCleanName());
+			return;
+		}
 
 		++bot_count;
 	}
 
 	if (ab_type == ActionableBots::ABT_All) {
-		InspectMessage_Struct bms;
-		memset(&bms, 0, sizeof(InspectMessage_Struct));
+		InspectMessage_Struct bot_message_struct;
+		memset(&bot_message_struct, 0, sizeof(InspectMessage_Struct));
 		if (set_flag)
-			memcpy(&bms, cms, sizeof(InspectMessage_Struct));
+			memcpy(&bot_message_struct, client_message_struct, sizeof(InspectMessage_Struct));
 
-		if (!botdb.SetAllInspectMessages(c->CharacterID(), &bms)) {
-			c->Message(m_fail, "Failed to save inspect message changes for your bots due to unknown cause");
+		if (!botdb.SaveAllInspectMessages(c->CharacterID(), bot_message_struct)) {
+			c->Message(m_fail, "%s", BotDatabase::fail::SaveAllInspectMessages());
 			return;
 		}
 
@@ -4796,29 +4808,27 @@ void bot_subcommand_bot_list(Client *c, const Seperator *sep)
 		return;
 	}
 
-	std::string TempErrorMessage;
-	auto dbbl = Bot::GetBotList(c->CharacterID(), &TempErrorMessage);
-
-	if (!TempErrorMessage.empty()) {
-		c->Message(m_fail, "Failed to load 'BotsAvailableList' due to unknown cause");
+	std::list<BotsAvailableList> bots_list;
+	if (!botdb.LoadBotsList(c->CharacterID(), bots_list)) {
+		c->Message(m_fail, "%s", BotDatabase::fail::LoadBotsList());
 		return;
 	}
-	if (dbbl.empty()) {
+	if (bots_list.empty()) {
 		c->Message(m_fail, "You have no bots");
 		return;
 	}
 
 	int bot_count = 0;
-	for (auto dbbl_iter : dbbl) {
+	for (auto bots_iter : bots_list) {
 		if (filter_mask) {
-			if ((filter_mask & MaskClass) && filter_value[FilterClass] != dbbl_iter.BotClass)
+			if ((filter_mask & MaskClass) && filter_value[FilterClass] != bots_iter.Class)
 				continue;
-			if ((filter_mask & MaskRace) && filter_value[FilterRace] != dbbl_iter.BotRace)
+			if ((filter_mask & MaskRace) && filter_value[FilterRace] != bots_iter.Race)
 				continue;
 			if (filter_mask & MaskName) {
 				std::string name_criteria = sep->arg[name_criteria_arg];
 				std::transform(name_criteria.begin(), name_criteria.end(), name_criteria.begin(), ::tolower);
-				std::string name_check = dbbl_iter.BotName;
+				std::string name_check = bots_iter.Name;
 				std::transform(name_check.begin(), name_check.end(), name_check.begin(), ::tolower);
 				if (name_check.find(name_criteria) == std::string::npos)
 					continue;
@@ -4826,11 +4836,11 @@ void bot_subcommand_bot_list(Client *c, const Seperator *sep)
 		}
 
 		c->Message(m_message, "%s is a level %u %s %s %s",
-			dbbl_iter.BotName,
-			dbbl_iter.BotLevel,
-			Bot::RaceIdToString(dbbl_iter.BotRace).c_str(),
-			((dbbl_iter.BotGender == FEMALE) ? ("Female") : ((dbbl_iter.BotGender == MALE) ? ("Male") : ("Neuter"))),
-			Bot::ClassIdToString(dbbl_iter.BotClass).c_str()
+			bots_iter.Name,
+			bots_iter.Level,
+			Bot::RaceIdToString(bots_iter.Race).c_str(),
+			((bots_iter.Gender == FEMALE) ? ("Female") : ((bots_iter.Gender == MALE) ? ("Male") : ("Neuter"))),
+			Bot::ClassIdToString(bots_iter.Class).c_str()
 		);
 
 		++bot_count;
@@ -4839,7 +4849,7 @@ void bot_subcommand_bot_list(Client *c, const Seperator *sep)
 		c->Message(m_fail, "You have no bots meeting this criteria");
 	}
 	else {
-		c->Message(m_action, "%i of %i bot%s shown", bot_count, dbbl.size(), ((bot_count != 1) ? ("s") : ("")));
+		c->Message(m_action, "%i of %i bot%s shown", bot_count, bots_list.size(), ((bot_count != 1) ? ("s") : ("")));
 		c->Message(m_message, "Your limit is %i bot%s", RuleI(Bots, CreationLimit), ((RuleI(Bots, CreationLimit) != 1) ? ("s") : ("")));
 	}
 }
@@ -4946,32 +4956,26 @@ void bot_subcommand_bot_spawn(Client *c, const Seperator *sep)
 		return;
 	}
 
-	std::string TempErrorMessage;
-
-	int sbc = Bot::SpawnedBotCount(c->CharacterID(), &TempErrorMessage);
-	if (!TempErrorMessage.empty()) {
-		c->Message(m_unknown, "Database Error: %s", TempErrorMessage.c_str());
-		return;
-	}
+	int spawned_bot_count = Bot::SpawnedBotCount(c->CharacterID());
 
 	int rule_limit = RuleI(Bots, SpawnLimit);
-	if (sbc >= rule_limit && !c->GetGM()) {
+	if (spawned_bot_count >= rule_limit && !c->GetGM()) {
 		c->Message(m_fail, "You can not have more than %i spawned bots", rule_limit);
 		return;
 	}
 
 	if (RuleB(Bots, QuestableSpawnLimit) && !c->GetGM()) {
-		int abc = Bot::AllowedBotSpawns(c->CharacterID(), &TempErrorMessage);
-		if (!TempErrorMessage.empty()) {
-			c->Message(m_unknown, "Database Error: %s", TempErrorMessage.c_str());
+		int allowed_bot_count = 0;
+		if (!botdb.LoadQuestableSpawnCount(c->CharacterID(), allowed_bot_count)) {
+			c->Message(m_fail, "%s", BotDatabase::fail::LoadQuestableSpawnCount());
 			return;
 		}
-		if (!abc) {
+		if (!allowed_bot_count) {
 			c->Message(m_fail, "You are not currently allowed any spawned bots");
 			return;
 		}
-		if (sbc >= abc) {
-			c->Message(m_fail, "You have reached your current limit of %i spawned bots", abc);
+		if (spawned_bot_count >= allowed_bot_count) {
+			c->Message(m_fail, "You have reached your current limit of %i spawned bots", allowed_bot_count);
 			return;
 		}
 	}
@@ -4982,10 +4986,12 @@ void bot_subcommand_bot_spawn(Client *c, const Seperator *sep)
 	}
 	std::string bot_name = sep->arg[1];
 
-	auto bot_id = Bot::GetBotIDByBotName(bot_name);
-	if (Bot::GetBotOwnerCharacterID(bot_id, &TempErrorMessage) != c->CharacterID()) {
-		if (!TempErrorMessage.empty())
-			c->Message(m_unknown, "Database Error: %s", TempErrorMessage.c_str());
+	uint32 bot_id = 0;
+	if (!botdb.LoadBotID(c->CharacterID(), bot_name, bot_id)) {
+		c->Message(m_fail, "%s for '%s'", BotDatabase::fail::LoadBotID(), bot_name.c_str());
+		return;
+	}
+	if (!bot_id) {
 		c->Message(m_fail, "You don't own a bot named '%s'", bot_name.c_str());
 		return;
 	}
@@ -5020,18 +5026,13 @@ void bot_subcommand_bot_spawn(Client *c, const Seperator *sep)
 	//	return;
 	//}
 
-	auto my_bot = Bot::LoadBot(bot_id, &TempErrorMessage);
-	if (!TempErrorMessage.empty()) {
-		c->Message(m_unknown, "Database Error: %s", TempErrorMessage.c_str());
-		safe_delete(my_bot);
-		return;
-	}
+	auto my_bot = Bot::LoadBot(bot_id);
 	if (!my_bot) {
 		c->Message(m_fail, "No valid bot '%s' (id: %i) exists", bot_name.c_str(), bot_id);
 		return;
 	}
 
-	my_bot->Spawn(c, &TempErrorMessage); // 'TempErrorMessage' not used...
+	my_bot->Spawn(c);
 
 	static const char* bot_spawn_message[16] = {
 		"A solid weapon is my ally!", // WARRIOR / 'generic'
@@ -5267,8 +5268,8 @@ void bot_subcommand_bot_toggle_helm(Client *c, const Seperator *sep)
 			bot_iter->SetShowHelm(helm_state);
 
 		if (ab_type != ActionableBots::ABT_All) {
-			if (!botdb.SetHelmAppearance(c->CharacterID(), bot_iter->GetBotID(), bot_iter->GetShowHelm())) {
-				c->Message(m_unknown, "DATABASE ERROR: Could not change helm appearance for bot %s", bot_iter->GetCleanName());
+			if (!botdb.SaveHelmAppearance(c->CharacterID(), bot_iter->GetBotID(), bot_iter->GetShowHelm())) {
+				c->Message(m_unknown, "%s for '%s'", bot_iter->GetCleanName());
 				return;
 			}
 
@@ -5287,15 +5288,14 @@ void bot_subcommand_bot_toggle_helm(Client *c, const Seperator *sep)
 	}
 
 	if (ab_type == ActionableBots::ABT_All) {
-		bool action_success = false;
 		std::string query;
-		if (toggle_helm)
-			action_success = botdb.ToggleAllHelmAppearances(c->CharacterID());
-		else
-			action_success = botdb.SetAllHelmAppearances(c->CharacterID(), helm_state);
-		if (!action_success) {
-			c->Message(m_unknown, "Failed to save helm changes for your bots due to unknown cause");
-			return;
+		if (toggle_helm) {
+			if (!botdb.ToggleAllHelmAppearances(c->CharacterID()))
+				c->Message(m_fail, "%s", BotDatabase::fail::ToggleAllHelmAppearances());
+		}
+		else {
+			if (!botdb.SaveAllHelmAppearances(c->CharacterID(), helm_state))
+				c->Message(m_fail, "%s", BotDatabase::fail::SaveAllHelmAppearances());
 		}
 
 		c->Message(m_action, "%s all of your bot show helm flags", toggle_helm ? "Toggled" : (helm_state ? "Set" : "Cleared"));
@@ -5451,10 +5451,12 @@ void bot_subcommand_botgroup_add_member(Client *c, const Seperator *sep)
 		return;
 	}
 
-	std::string error_message;
-	if (botdb.GetGroupIDByMemberID(new_member->GetBotID(), error_message)) {
-		if (!error_message.empty())
-			c->Message(m_unknown, "Database Error: %s", error_message.c_str());
+	uint32 botgroup_id = 0;
+	if (!botdb.LoadBotGroupIDByMemberID(new_member->GetBotID(), botgroup_id)) {
+		c->Message(m_fail, "%s for '%s'", BotDatabase::fail::LoadBotGroupIDByMemberID(), new_member->GetCleanName());
+		return;
+	}
+	if (botgroup_id) {
 		c->Message(m_fail, "%s is already a current member of a bot-group", new_member->GetCleanName());
 		return;
 	}
@@ -5467,34 +5469,44 @@ void bot_subcommand_botgroup_add_member(Client *c, const Seperator *sep)
 		return;
 	}
 
-	auto group_leader = sbl.front();
-	if (!group_leader) {
+	auto botgroup_leader = sbl.front();
+	if (!botgroup_leader) {
 		c->Message(m_unknown, "Error: Group leader bot dereferenced to nullptr");
 		return;
 	}
 
-	Group* group_inst = group_leader->GetGroup();
-	if (!group_inst || group_inst->GetLeader() != group_leader) {
-		c->Message(m_fail, "%s is not the current leader of a group", group_leader->GetCleanName());
+	Group* group_inst = botgroup_leader->GetGroup();
+	if (!group_inst || group_inst->GetLeader() != botgroup_leader) {
+		c->Message(m_fail, "%s is not the current leader of a group", botgroup_leader->GetCleanName());
 		return;
 	}
 
-	if (!botdb.GetGroupIDByLeaderID(group_leader->GetBotID(), error_message)) {
-		if (!error_message.empty())
-			c->Message(m_unknown, "Database Error: %s", error_message.c_str());
-		c->Message(m_fail, "%s is not the current leader of a bot-group", group_leader->GetCleanName());
+	botgroup_id = 0;
+	if (!botdb.LoadBotGroupIDByLeaderID(botgroup_leader->GetBotID(), botgroup_id)) {
+		c->Message(m_fail, "%s for '%s'", BotDatabase::fail::LoadBotGroupIDByLeaderID(), botgroup_leader->GetCleanName());
+		return;
+	}
+	if (!botgroup_id) {
+		c->Message(m_fail, "%s is not the current leader of a bot-group", botgroup_leader->GetCleanName());
 		return;
 	}
 
 	if (!Bot::AddBotToGroup(new_member, group_inst)) {
-		c->Message(m_fail, "Could not add %s as a new member to %s's group", new_member->GetCleanName(), group_leader->GetCleanName());
+		c->Message(m_fail, "Could not add %s as a new member to %s's group", new_member->GetCleanName(), botgroup_leader->GetCleanName());
 		return;
 	}
 
 	database.SetGroupID(new_member->GetName(), group_inst->GetID(), new_member->GetBotID());
-	botdb.AddMemberToBotGroup(group_leader->GetBotID(), new_member->GetBotID(), error_message);
 
-	std::string botgroup_name = botdb.GetGroupNameByLeaderID(group_leader->GetBotID(), error_message);
+	if (!botdb.AddMemberToBotGroup(botgroup_leader->GetBotID(), new_member->GetBotID())) {
+		c->Message(m_fail, "%s - %s->%s", BotDatabase::fail::AddMemberToBotGroup(), new_member->GetCleanName(), botgroup_leader->GetCleanName());
+		Bot::RemoveBotFromGroup(new_member, botgroup_leader->GetGroup());
+		return;
+	}
+
+	std::string botgroup_name;
+	if (!botdb.LoadBotGroupNameByLeaderID(botgroup_leader->GetBotID(), botgroup_name))
+		c->Message(m_fail, "%s", BotDatabase::fail::LoadBotGroupNameByLeaderID());
 
 	c->Message(m_action, "Successfully added %s to bot-group %s", new_member->GetCleanName(), botgroup_name.c_str());
 }
@@ -5508,13 +5520,19 @@ void bot_subcommand_botgroup_create(Client *c, const Seperator *sep)
 		return;
 	}
 
-	std::string group_name_arg = sep->arg[1];
-	if (group_name_arg.empty()) {
+	std::string botgroup_name_arg = sep->arg[1];
+	if (botgroup_name_arg.empty()) {
 		c->Message(m_fail, "You must specify a [name] for this bot-group to use this command");
 		return;
 	}
-	if (botdb.DoesBotGroupExist(group_name_arg)) {
-		c->Message(m_fail, "The [name] %s already exists for a bot-group. Please choose another", group_name_arg.c_str());
+
+	bool extant_flag = false;
+	if (!botdb.QueryBotGroupExistence(botgroup_name_arg, extant_flag)) {
+		c->Message(m_fail, "%s for '%s'", BotDatabase::fail::QueryBotGroupExistence(), botgroup_name_arg.c_str());
+		return;
+	}
+	if (extant_flag) {
+		c->Message(m_fail, "The [name] %s already exists for a bot-group. Please choose another", botgroup_name_arg.c_str());
 		return;
 	}
 
@@ -5527,50 +5545,55 @@ void bot_subcommand_botgroup_create(Client *c, const Seperator *sep)
 		return;
 	}
 
-	auto group_leader = sbl.front();
-	if (!group_leader) {
+	auto botgroup_leader = sbl.front();
+	if (!botgroup_leader) {
 		c->Message(m_unknown, "Error: Group leader bot dereferenced to nullptr");
 		return;
 	}
 
-	if (group_leader->HasGroup()) {
-		c->Message(m_fail, "%s is already a current member of a group", group_leader->GetCleanName());
+	if (botgroup_leader->HasGroup()) {
+		c->Message(m_fail, "%s is already a current member of a group", botgroup_leader->GetCleanName());
 		return;
 	}
 
-	std::string error_message;
-	if (botdb.GetGroupIDByLeaderID(group_leader->GetBotID(), error_message)) {
-		if (!error_message.empty())
-			c->Message(m_unknown, "Database Error: %s", error_message.c_str());
-		c->Message(m_fail, "%s is already the current leader of a bot-group", group_leader->GetCleanName());
+	uint32 botgroup_id = 0;
+	if (!botdb.LoadBotGroupIDByLeaderID(botgroup_leader->GetBotID(), botgroup_id)) {
+		c->Message(m_fail, "%s for '%s'", BotDatabase::fail::LoadBotGroupIDByLeaderID(), botgroup_leader->GetCleanName());
 		return;
 	}
-	if (botdb.GetGroupIDByMemberID(group_leader->GetBotID(), error_message)) {
-		if (!error_message.empty())
-			c->Message(m_unknown, "Database Error: %s", error_message.c_str());
-		c->Message(m_fail, "%s is already a current member of a bot-group", group_leader->GetCleanName());
+	if (botgroup_id) {
+		c->Message(m_fail, "%s is already the current leader of a bot-group", botgroup_leader->GetCleanName());
 		return;
 	}
 
-	Group* group_inst = new Group(group_leader);
+	botgroup_id = 0;
+	if (!botdb.LoadBotGroupIDByMemberID(botgroup_leader->GetBotID(), botgroup_id)) {
+		c->Message(m_fail, "%s for '%s'", BotDatabase::fail::LoadBotGroupIDByMemberID(), botgroup_leader->GetCleanName());
+		return;
+	}
+	if (botgroup_id) {
+		c->Message(m_fail, "%s is already a current member of a bot-group", botgroup_leader->GetCleanName());
+		return;
+	}
+
+	Group* group_inst = new Group(botgroup_leader);
 	if (!group_inst) {
 		c->Message(m_unknown, "Could not create a new group instance");
 		return;
 	}
 
-	if (!botdb.CreateBotGroup(group_name_arg, group_leader->GetBotID(), error_message)) {
-		if (!error_message.empty())
-			c->Message(m_unknown, "Database Error: %s", error_message.c_str());
-		c->Message(m_fail, "Could not create bot-group %s", group_name_arg.c_str());
+	if (!botdb.CreateBotGroup(botgroup_name_arg, botgroup_leader->GetBotID())) {
+		c->Message(m_fail, "%s '%s'", BotDatabase::fail::CreateBotGroup(), botgroup_name_arg.c_str());
 		safe_delete(group_inst);
 		return;
 	}
-	entity_list.AddGroup(group_inst);
-	database.SetGroupID(group_leader->GetCleanName(), group_inst->GetID(), group_leader->GetBotID());
-	database.SetGroupLeaderName(group_inst->GetID(), group_leader->GetCleanName());
-	group_leader->SetFollowID(c->GetID());
 
-	c->Message(m_action, "Successfully created bot-group %s with %s as its leader", group_name_arg.c_str(), group_leader->GetCleanName());
+	entity_list.AddGroup(group_inst);
+	database.SetGroupID(botgroup_leader->GetCleanName(), group_inst->GetID(), botgroup_leader->GetBotID());
+	database.SetGroupLeaderName(group_inst->GetID(), botgroup_leader->GetCleanName());
+	botgroup_leader->SetFollowID(c->GetID());
+
+	c->Message(m_action, "Successfully created bot-group '%s' with '%s' as its leader", botgroup_name_arg.c_str(), botgroup_leader->GetCleanName());
 }
 
 void bot_subcommand_botgroup_delete(Client *c, const Seperator *sep)
@@ -5582,36 +5605,48 @@ void bot_subcommand_botgroup_delete(Client *c, const Seperator *sep)
 		return;
 	}
 
-	std::string group_name_arg = sep->arg[1];
-	if (group_name_arg.empty()) {
+	std::string botgroup_name_arg = sep->arg[1];
+	if (botgroup_name_arg.empty()) {
 		c->Message(m_fail, "You must specify a [name] for this bot-group to use this command");
 		return;
 	}
 
-	std::string error_message;
-	uint32 group_id = botdb.GetGroupIDForLoadGroup(c->CharacterID(), group_name_arg, error_message);
-	if (!group_id) {
-		if (!error_message.empty())
-			c->Message(m_unknown, "Database Error: %s", error_message.c_str());
-		c->Message(m_fail, "Could not locate group id for %s", group_name_arg.c_str());
+	uint32 botgroup_id = 0;
+	if (!botdb.LoadBotGroupIDForLoadBotGroup(c->CharacterID(), botgroup_name_arg, botgroup_id)) {
+		c->Message(m_fail, "%s for '%s'", BotDatabase::fail::LoadBotGroupIDForLoadBotGroup(), botgroup_name_arg.c_str());
+		return;
+	}
+	if (!botgroup_id) {
+		c->Message(m_fail, "Could not locate group id for '%s'", botgroup_name_arg.c_str());
 		return;
 	}
 
-	uint32 leader_id = botdb.GetLeaderIDByGroupID(group_id, error_message);
+	uint32 leader_id = 0;
+	if (!botdb.LoadLeaderIDByBotGroupID(botgroup_id, leader_id)) {
+		c->Message(m_fail, "%s for '%s'", BotDatabase::fail::LoadLeaderIDByBotGroupID(), botgroup_name_arg.c_str());
+		return;
+	}
 	if (!leader_id) {
-		if (!error_message.empty())
-			c->Message(m_unknown, "Database Error: %s", error_message.c_str());
-		c->Message(m_fail, "Could not locate leader id for %s", group_name_arg.c_str());
+		c->Message(m_fail, "Could not locate leader id for '%s'", botgroup_name_arg.c_str());
 		return;
 	}
 
 	std::list<Bot*> gbl;
 	std::list<Bot*> sbl;
 	MyBots::PopulateSBL_BySpawnedBots(c, sbl);
-	std::map<uint32, std::list<uint32>> groups_list = botdb.LoadGroup(group_name_arg, error_message);
+
+	std::map<uint32, std::list<uint32>> member_list;
+	if (!botdb.LoadBotGroup(botgroup_name_arg, member_list)) {
+		c->Message(m_fail, "%s '%s'", BotDatabase::fail::LoadBotGroup(), botgroup_name_arg.c_str());
+		return;
+	}
+	if (member_list.find(botgroup_id) == member_list.end() || member_list[botgroup_id].empty()) {
+		c->Message(m_fail, "Could not locate member list for bot-group '%s'", botgroup_name_arg.c_str());
+		return;
+	}
 
 	for (auto bot_iter : sbl) {
-		for (auto group_iter : groups_list[group_id]) {
+		for (auto group_iter : member_list[botgroup_id]) {
 			if (bot_iter->GetBotID() == group_iter) {
 				gbl.push_back(bot_iter);
 				break;
@@ -5625,14 +5660,12 @@ void bot_subcommand_botgroup_delete(Client *c, const Seperator *sep)
 			Bot::RemoveBotFromGroup(group_member, group_member->GetGroup());
 	}
 
-	if (!botdb.DeleteBotGroup(leader_id, error_message)) {
-		if (!error_message.empty())
-			c->Message(m_unknown, "Database Error: %s", error_message.c_str());
-		c->Message(m_fail, "Failed to delete bot-group %s", group_name_arg.c_str());
+	if (!botdb.DeleteBotGroup(leader_id)) {
+		c->Message(m_fail, "%s '%s'", BotDatabase::fail::DeleteBotGroup(), botgroup_name_arg.c_str());
 		return;
 	}
 
-	c->Message(m_action, "Successfully deleted bot-group %s", group_name_arg.c_str());
+	c->Message(m_action, "Successfully deleted bot-group %s", botgroup_name_arg.c_str());
 }
 
 void bot_subcommand_botgroup_list(Client *c, const Seperator *sep)
@@ -5644,18 +5677,19 @@ void bot_subcommand_botgroup_list(Client *c, const Seperator *sep)
 		return;
 	}
 
-	std::string error_message;
-	auto groups_list = botdb.GetGroupsListByOwnerID(c->CharacterID(), error_message);
-	if (groups_list.empty()) {
-		if (!error_message.empty())
-			c->Message(m_unknown, "Database Error: %s", error_message.c_str());
+	std::list<std::pair<std::string, std::string>> botgroups_list;
+	if (!botdb.LoadBotGroupsListByOwnerID(c->CharacterID(), botgroups_list)) {
+		c->Message(m_fail, "%s", BotDatabase::fail::LoadBotGroupsListByOwnerID());
+		return;
+	}
+	if (botgroups_list.empty()) {
 		c->Message(m_fail, "You have no saved bot-groups");
 		return;
 	}
 
 	int botgroup_count = 0;
-	for (auto groups_iter : groups_list)
-		c->Message(m_message, "(%i) Bot-group name: %s | Leader: %s", (++botgroup_count), groups_iter.first.c_str(), groups_iter.second.c_str());
+	for (auto botgroups_iter : botgroups_list)
+		c->Message(m_message, "(%i) Bot-group name: %s | Leader: %s", (++botgroup_count), botgroups_iter.first.c_str(), botgroups_iter.second.c_str());
 
 	c->Message(m_action, "%i bot-groups listed", botgroup_count);
 }
@@ -5669,13 +5703,19 @@ void bot_subcommand_botgroup_load(Client *c, const Seperator *sep)
 		return;
 	}
 
-	std::string group_name_arg = sep->arg[1];
-	if (group_name_arg.empty()) {
+	std::string botgroup_name_arg = sep->arg[1];
+	if (botgroup_name_arg.empty()) {
 		c->Message(m_fail, "You must specify the [name] of a bot-group to load to use this command");
 		return;
 	}
-	if (!botdb.DoesBotGroupExist(group_name_arg)) {
-		c->Message(m_fail, "Bot-group %s does not exist", group_name_arg.c_str());
+
+	bool extant_flag = false;
+	if (!botdb.QueryBotGroupExistence(botgroup_name_arg, extant_flag)) {
+		c->Message(m_fail, "%s for '%s'", BotDatabase::fail::QueryBotGroupExistence(), botgroup_name_arg.c_str());
+		return;
+	}
+	if (!extant_flag) {
+		c->Message(m_fail, "Bot-group %s does not exist", botgroup_name_arg.c_str());
 		return;
 	}
 
@@ -5699,33 +5739,28 @@ void bot_subcommand_botgroup_load(Client *c, const Seperator *sep)
 		}
 	}
 
-	std::string error_message;
-	uint32 group_id = botdb.GetGroupIDForLoadGroup(c->CharacterID(), group_name_arg, error_message);
-	if (!group_id) {
-		if (!error_message.empty())
-			c->Message(m_unknown, "Database Error: %s", error_message.c_str());
-		c->Message(m_fail, "Can not resolve bot-group %s to a valid id", group_name_arg.c_str());
+	uint32 botgroup_id = 0;
+	if (!botdb.LoadBotGroupIDForLoadBotGroup(c->CharacterID(), botgroup_name_arg, botgroup_id) || !botgroup_id) {
+		c->Message(m_fail, "%s for '%s'", BotDatabase::fail::LoadBotGroupIDForLoadBotGroup(), botgroup_name_arg.c_str());
 		return;
 	}
 
-	std::map<uint32, std::list<uint32>> group_list = botdb.LoadGroup(group_name_arg, error_message);
-	if (group_list.empty()) {
-		if (!error_message.empty())
-			c->Message(m_unknown, "Database Error: %s", error_message.c_str());
-		c->Message(m_fail, "Database returned an empty list for got-group %s", group_name_arg.c_str());
+	std::map<uint32, std::list<uint32>> member_list;
+	if (!botdb.LoadBotGroup(botgroup_name_arg, member_list)) {
+		c->Message(m_fail, "%s for '%s'", BotDatabase::fail::LoadBotGroup(), botgroup_name_arg.c_str());
+		return;
+	}
+	if (member_list.find(botgroup_id) == member_list.end() || member_list[botgroup_id].empty()) {
+		c->Message(m_fail, "Database returned an empty list for bot-group '%s'", botgroup_name_arg.c_str());
 		return;
 	}
 
-	int spawned_bot_count = Bot::SpawnedBotCount(c->CharacterID(), &error_message);
-	if (!error_message.empty()) {
-		c->Message(m_unknown, "Database Error: %s", error_message.c_str());
-		return;
-	}
+	int spawned_bot_count = Bot::SpawnedBotCount(c->CharacterID());
 
 	if (RuleB(Bots, QuestableSpawnLimit)) {
-		const int allowed_bot_count = Bot::AllowedBotSpawns(c->CharacterID(), &error_message);
-		if (!error_message.empty()) {
-			c->Message(m_unknown, "Database Error: %s", error_message.c_str());
+		int allowed_bot_count = 0;
+		if (!botdb.LoadQuestableSpawnCount(c->CharacterID(), allowed_bot_count)) {
+			c->Message(m_fail, "%s", BotDatabase::fail::LoadQuestableSpawnCount());
 			return;
 		}
 
@@ -5734,63 +5769,59 @@ void bot_subcommand_botgroup_load(Client *c, const Seperator *sep)
 			return;
 		}
 
-		if (spawned_bot_count >= allowed_bot_count || (spawned_bot_count + group_list.begin()->second.size()) > allowed_bot_count) {
+		if (spawned_bot_count >= allowed_bot_count || (spawned_bot_count + member_list.begin()->second.size()) > allowed_bot_count) {
 			c->Message(m_fail, "You can not spawn more than %i bot%s (quest-limit)", allowed_bot_count, ((allowed_bot_count == 1) ? ("") : ("s")));
 			return;
 		}
 	}
 
 	const int allowed_bot_limit = RuleI(Bots, SpawnLimit);
-	if (spawned_bot_count >= allowed_bot_limit || (spawned_bot_count + group_list.begin()->second.size()) > allowed_bot_limit) {
+	if (spawned_bot_count >= allowed_bot_limit || (spawned_bot_count + member_list.begin()->second.size()) > allowed_bot_limit) {
 		c->Message(m_fail, "You can not spawn more than %i bot%s (hard-limit)", allowed_bot_limit, ((allowed_bot_limit == 1) ? ("") : ("s")));
 		return;
 	}
 
-	uint32 leader_id = botdb.GetLeaderIDByGroupName(group_name_arg, error_message);
+	uint32 leader_id = 0;
+	if (!botdb.LoadLeaderIDByBotGroupName(botgroup_name_arg, leader_id)) {
+		c->Message(m_fail, "%s for '%s'", BotDatabase::fail::LoadLeaderIDByBotGroupName(), botgroup_name_arg.c_str());
+		return;
+	}
 	if (!leader_id) {
-		if (!error_message.empty())
-			c->Message(m_unknown, "Database Error: %s", error_message.c_str());
-		c->Message(m_fail, "Can not locate bot-group leader id for %s", group_name_arg.c_str());
+		c->Message(m_fail, "Can not locate bot-group leader id for '%s'", botgroup_name_arg.c_str());
 		return;
 	}
 
-	auto group_leader = Bot::LoadBot(leader_id, &error_message);
-	if (!group_leader) {
-		if (!error_message.empty())
-			c->Message(m_unknown, "Database Error: %s", error_message.c_str());
-		c->Message(m_fail, "Could not spawn bot-group leader for %s", group_name_arg.c_str());
-		safe_delete(group_leader);
+	auto botgroup_leader = Bot::LoadBot(leader_id);
+	if (!botgroup_leader) {
+		c->Message(m_fail, "Could not spawn bot-group leader for '%s'", botgroup_name_arg.c_str());
+		safe_delete(botgroup_leader);
 		return;
 	}
 
-	group_leader->Spawn(c, &error_message);
-	// No error_message code in Bot::Spawn()
+	botgroup_leader->Spawn(c);
 	
-	Group* group_inst = new Group(group_leader);
+	Group* group_inst = new Group(botgroup_leader);
 
 	entity_list.AddGroup(group_inst);
-	database.SetGroupID(group_leader->GetCleanName(), group_inst->GetID(), group_leader->GetBotID());
-	database.SetGroupLeaderName(group_inst->GetID(), group_leader->GetCleanName());
-	group_leader->SetFollowID(c->GetID());
+	database.SetGroupID(botgroup_leader->GetCleanName(), group_inst->GetID(), botgroup_leader->GetBotID());
+	database.SetGroupLeaderName(group_inst->GetID(), botgroup_leader->GetCleanName());
+	botgroup_leader->SetFollowID(c->GetID());
 
-	group_list[group_id].remove(0);
-	group_list[group_id].remove(group_leader->GetBotID());
-	for (auto member_iter : group_list[group_id]) {
-		auto group_member = Bot::LoadBot(member_iter, &error_message);
-		if (!group_member) {
-			if (!error_message.empty())
-				c->Message(m_unknown, "Database Error: %s", error_message.c_str());
+	member_list[botgroup_id].remove(0);
+	member_list[botgroup_id].remove(botgroup_leader->GetBotID());
+	for (auto member_iter : member_list[botgroup_id]) {
+		auto botgroup_member = Bot::LoadBot(member_iter);
+		if (!botgroup_member) {
 			c->Message(m_fail, "Could not load bot id %i", member_iter);
-			safe_delete(group_member);
+			safe_delete(botgroup_member);
 			return;
 		}
 
-		group_member->Spawn(c, &error_message);
-		// No error_message code in Bot::Spawn()
-		Bot::AddBotToGroup(group_member, group_inst);
+		botgroup_member->Spawn(c);
+		Bot::AddBotToGroup(botgroup_member, group_inst);
 	}
 
-	c->Message(m_action, "Successfully loaded bot-group %s", group_name_arg.c_str());
+	c->Message(m_action, "Successfully loaded bot-group %s", botgroup_name_arg.c_str());
 }
 
 void bot_subcommand_botgroup_remove_member(Client *c, const Seperator *sep)
@@ -5827,11 +5858,8 @@ void bot_subcommand_botgroup_remove_member(Client *c, const Seperator *sep)
 		return;
 	}
 
-	std::string error_message;
-	if (!botdb.RemoveMemberFromBotGroup(group_member->GetBotID(), error_message)) {
-		if (!error_message.empty())
-			c->Message(m_unknown, "Database Error: %s", error_message.c_str());
-		c->Message(m_fail, "Could not remove %s from their bot-group", group_member->GetCleanName());
+	if (!botdb.RemoveMemberFromBotGroup(group_member->GetBotID())) {
+		c->Message(m_fail, "%s - '%s'", BotDatabase::fail::RemoveMemberFromBotGroup(), group_member->GetCleanName());
 		return;
 	}
 
@@ -6786,13 +6814,6 @@ void bot_subcommand_inventory_list(Client *c, const Seperator *sep)
 		return;
 	}
 
-	std::string TempErrorMessage;
-	my_bot->GetBotItemsCount(&TempErrorMessage); // database check to avoid false 'vacancy' reporting?
-	if (!TempErrorMessage.empty()) {
-		c->Message(m_unknown, "Database Error: %s", TempErrorMessage.c_str());
-		return;
-	}
-
 	const ItemInst* inst = nullptr;
 	const Item_Struct* item = nullptr;
 	bool is2Hweapon = false;
@@ -6801,6 +6822,7 @@ void bot_subcommand_inventory_list(Client *c, const Seperator *sep)
 	Client::TextLink linker;
 	linker.SetLinkType(linker.linkItemInst);
 
+	uint32 inventory_count = 0;
 	for (int i = EmuConstants::EQUIPMENT_BEGIN; i <= (EmuConstants::EQUIPMENT_END + 1); ++i) {
 		if ((i == MainSecondary) && is2Hweapon)
 			continue;
@@ -6819,7 +6841,16 @@ void bot_subcommand_inventory_list(Client *c, const Seperator *sep)
 		linker.SetItemInst(inst);
 		item_link = linker.GenerateLink();
 		c->Message(m_message, "Using %s in my %s (slot %i)", item_link.c_str(), GetBotEquipSlotName(i), (i == 22 ? 9999 : i));
+
+		++inventory_count;
 	}
+
+	uint32 database_count = 0;
+	if (!botdb.QueryInventoryCount(my_bot->GetBotID(), database_count))
+		c->Message(m_unknown, "%s", BotDatabase::fail::QueryInventoryCount());
+
+	if (inventory_count != database_count)
+		c->Message(m_unknown, "Inventory-database item count mismatch: inv = '%u', db = '%u'", inventory_count, database_count);
 }
 
 void bot_subcommand_inventory_remove(Client *c, const Seperator *sep)
@@ -6844,13 +6875,6 @@ void bot_subcommand_inventory_remove(Client *c, const Seperator *sep)
 	auto my_bot = sbl.front();
 	if (!my_bot) {
 		c->Message(m_unknown, "ActionableBots returned 'nullptr'");
-		return;
-	}
-
-	std::string TempErrorMessage;
-	my_bot->GetBotItemsCount(&TempErrorMessage); // added same check as in bot_subcommand_inventory_list() - same note
-	if (!TempErrorMessage.empty()) {
-		c->Message(m_unknown, "Database Error: %s", TempErrorMessage.c_str());
 		return;
 	}
 
@@ -6884,14 +6908,15 @@ void bot_subcommand_inventory_remove(Client *c, const Seperator *sep)
 		return;
 	}
 	
+	std::string error_message;
 	if (itm) {
 		c->PushItemOnCursor(*itminst, true);
 		if ((slotId == MainRange) || (slotId == MainAmmo) || (slotId == MainPrimary) || (slotId == MainSecondary))
 			my_bot->SetBotArcher(false);
 
-		my_bot->RemoveBotItemBySlot(slotId, &TempErrorMessage);
-		if (!TempErrorMessage.empty()) {
-			c->Message(m_unknown, "Database Error: %s", TempErrorMessage.c_str());
+		my_bot->RemoveBotItemBySlot(slotId, &error_message);
+		if (!error_message.empty()) {
+			c->Message(m_unknown, "Database Error: %s", error_message.c_str());
 			return;
 		}
 
@@ -7183,11 +7208,12 @@ uint32 helper_bot_create(Client *bot_owner, std::string bot_name, uint8 bot_clas
 		return bot_id;
 	}
 
-	std::string TempErrorMessage;
-
-	if (!Bot::IsBotNameAvailable(bot_name.c_str(), &TempErrorMessage)) {
-		if (!TempErrorMessage.empty())
-			bot_owner->Message(m_unknown, "Database Error: %s", TempErrorMessage.c_str());
+	bool available_flag = false;
+	if (!botdb.QueryNameAvailablity(bot_name, available_flag)) {
+		bot_owner->Message(m_fail, "%s for '%s'", BotDatabase::fail::QueryNameAvailablity(), bot_name.c_str());
+		return bot_id;
+	}
+	if (!available_flag) {
 		bot_owner->Message(m_fail, "The name %s is already being used. Please choose a different name", bot_name.c_str());
 		return bot_id;
 	}
@@ -7203,11 +7229,15 @@ uint32 helper_bot_create(Client *bot_owner, std::string bot_name, uint8 bot_clas
 		return bot_id;
 	}
 
-	uint32 mbc = RuleI(Bots, CreationLimit);
-	if (Bot::CreatedBotCount(bot_owner->CharacterID(), &TempErrorMessage) >= mbc) {
-		if (!TempErrorMessage.empty())
-			bot_owner->Message(m_unknown, "Database Error: %s", TempErrorMessage.c_str());
-		bot_owner->Message(m_fail, "You have reached the maximum limit of %i bots", mbc);
+	uint32 max_bot_count = RuleI(Bots, CreationLimit);
+
+	uint32 bot_count = 0;
+	if (!botdb.QueryBotCount(bot_owner->CharacterID(), bot_count)) {
+		bot_owner->Message(m_fail, "%s", BotDatabase::fail::QueryBotCount());
+		return bot_id;
+	}
+	if (bot_count >= max_bot_count) {
+		bot_owner->Message(m_fail, "You have reached the maximum limit of %i bots", max_bot_count);
 		return bot_id;
 	}
 

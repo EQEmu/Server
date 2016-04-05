@@ -2056,24 +2056,23 @@ bool QuestManager::botquest()
 bool QuestManager::createBot(const char *name, const char *lastname, uint8 level, uint16 race, uint8 botclass, uint8 gender)
 {
 	QuestManagerCurrentQuestVars();
-	std::string TempErrorMessage;
 	uint32 MaxBotCreate = RuleI(Bots, CreationLimit);
 
 	if (initiator && initiator->IsClient())
 	{
-		if(Bot::SpawnedBotCount(initiator->CharacterID(), &TempErrorMessage) >= MaxBotCreate)
+		if(Bot::SpawnedBotCount(initiator->CharacterID()) >= MaxBotCreate)
 		{
 			initiator->Message(15,"You have the maximum number of bots allowed.");
 			return false;
 		}
 
-		if(!TempErrorMessage.empty())
-		{
-			initiator->Message(13, "Database Error: %s", TempErrorMessage.c_str());
+		std::string test_name = name;
+		bool available_flag = false;
+		if(!botdb.QueryNameAvailablity(test_name, available_flag)) {
+			initiator->Message(0, "%s for '%s'", BotDatabase::fail::QueryNameAvailablity(), (char*)name);
 			return false;
 		}
-
-		if(Bot::IsBotNameAvailable((char*)name,&TempErrorMessage)) {
+		if (!available_flag) {
 			initiator->Message(0, "The name %s is already being used or is invalid. Please choose a different name.", (char*)name);
 			return false;
 		}
@@ -2090,11 +2089,6 @@ bool QuestManager::createBot(const char *name, const char *lastname, uint8 level
 
 			if(!NewBot->IsValidName()) {
 				initiator->Message(0, "%s has invalid characters. You can use only the A-Z, a-z and _ characters in a bot name.", NewBot->GetCleanName());
-				return false;
-			}
-
-			if(!TempErrorMessage.empty()) {
-				initiator->Message(13, "Database Error: %s", TempErrorMessage.c_str());
 				return false;
 			}
 

@@ -26,12 +26,12 @@
 #include <sstream>
 
 struct BotsAvailableList {
-	uint32 BotID;
-	char BotName[64];
-	uint16 BotClass;
-	uint8 BotLevel;
-	uint16 BotRace;
-	uint8 BotGender;
+	uint32 ID;
+	char Name[64];
+	uint16 Class;
+	uint8 Level;
+	uint16 Race;
+	uint8 Gender;
 };
 
 struct BotGroup {

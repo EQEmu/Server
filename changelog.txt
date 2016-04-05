@@ -1,5 +1,8 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 04/05/2016 ==
+Uleat: Moved database query code out of bot.cpp and into the new BotDatabase class
+
 == 03/25/2016 ==
 Uleat: Fix for heal rotation 'Stack Overflow' error
 Kayen: Defensive procs will now only proc once per attack round (instead of every attack chance). 
