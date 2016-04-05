@@ -4215,7 +4215,7 @@ void bot_subcommand_bot_clone(Client *c, const Seperator *sep)
 		return;
 	}
 
-	BotStanceType clone_stance = BotStancePassive;
+	int clone_stance = BotStancePassive;
 	if (!botdb.LoadStance(my_bot->GetBotID(), clone_stance))
 		c->Message(m_fail, "%s for bot '%s'", BotDatabase::fail::LoadStance(), my_bot->GetCleanName());
 	if (!botdb.SaveStance(clone_id, clone_stance))

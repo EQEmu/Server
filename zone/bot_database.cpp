@@ -763,7 +763,7 @@ bool BotDatabase::DeleteBuffs(const uint32 bot_id)
 	return true;
 }
 
-bool BotDatabase::LoadStance(const uint32 bot_id, BotStanceType& bot_stance)
+bool BotDatabase::LoadStance(const uint32 bot_id, int& bot_stance)
 {
 	if (!bot_id)
 		return false;
@@ -776,7 +776,7 @@ bool BotDatabase::LoadStance(const uint32 bot_id, BotStanceType& bot_stance)
 		return true;
 
 	auto row = results.begin();
-	bot_stance = (BotStanceType)atoi(row[0]);
+	bot_stance = atoi(row[0]);
 
 	return true;
 }
@@ -802,7 +802,7 @@ bool BotDatabase::LoadStance(Bot* bot_inst, bool& stance_flag)
 	return true;
 }
 
-bool BotDatabase::SaveStance(const uint32 bot_id, const BotStanceType bot_stance)
+bool BotDatabase::SaveStance(const uint32 bot_id, const int bot_stance)
 {
 	if (!bot_id)
 		return false;

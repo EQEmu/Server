@@ -34,7 +34,6 @@ class Bot;
 class ItemInst;
 class Inventory;
 struct BotsAvailableList;
-enum BotStanceType;
 
 
 class BotDatabase : public DBcore
@@ -68,9 +67,9 @@ public:
 	bool SaveBuffs(Bot* bot_inst);
 	bool DeleteBuffs(const uint32 bot_id);
 
-	bool LoadStance(const uint32 bot_id, BotStanceType& bot_stance);
+	bool LoadStance(const uint32 bot_id, int& bot_stance);
 	bool LoadStance(Bot* bot_inst, bool& stance_flag);
-	bool SaveStance(const uint32 bot_id, const BotStanceType bot_stance);
+	bool SaveStance(const uint32 bot_id, const int bot_stance);
 	bool SaveStance(Bot* bot_inst);
 	bool DeleteStance(const uint32 bot_id);
 
