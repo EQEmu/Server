@@ -6152,7 +6152,7 @@ void bot_subcommand_heal_rotation_adjust_safe(Client *c, const Seperator *sep)
 	if (helper_command_alias_fail(c, "bot_subcommand_heal_rotation_adjust_safe", sep->arg[0], "healrotationadjustsafe"))
 		return;
 	if (helper_is_help_or_usage(sep->arg[1])) {
-		c->Message(m_usage, "usage: (<target_member>) %s [value: %3.1f-%3.1f | + | -] ([member_name])", sep->arg[0], CRITICAL_HP_RATIO_BASE, SAFE_HP_RATIO_BASE);
+		c->Message(m_usage, "usage: (<target_member>) %s [armor_type] [value: %3.1f-%3.1f | + | -] ([member_name])", sep->arg[0], CRITICAL_HP_RATIO_BASE, SAFE_HP_RATIO_BASE);
 		c->Message(m_note, "armor_types: %u(Base), %u(Cloth), %u(Leather), %u(Chain), %u(Plate)",
 			ARMOR_TYPE_UNKNOWN, ARMOR_TYPE_CLOTH, ARMOR_TYPE_LEATHER, ARMOR_TYPE_CHAIN, ARMOR_TYPE_PLATE);
 		return;
