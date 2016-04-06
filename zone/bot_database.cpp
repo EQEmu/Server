@@ -1407,7 +1407,7 @@ bool BotDatabase::SavePetStats(const uint32 bot_id, const std::string& pet_name,
 		" VALUES ("
 		"'%u',"
 		" '%u',"
-		" '%u',"
+		" '%s',"
 		" '%u',"
 		" '%u'"
 		")",

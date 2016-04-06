@@ -1739,15 +1739,16 @@ bool Bot::SavePet()
 	
 	pet_inst->GetPetState(pet_buffs, pet_items, pet_name);
 	
-	std::string error_message;
-
-	if (!botdb.SavePetStats(GetBotID(), pet_name, pet_inst->GetMana(), pet_inst->GetHP(), pet_inst->GetPetSpellID())) {
-		bot_owner->Message(13, "%s for %s's pet", BotDatabase::fail::SavePetStats(), GetCleanName());
-		safe_delete_array(pet_name);
-		return false;
-	}
+	std::string pet_name_str = pet_name;
 	safe_delete_array(pet_name);
 
+	std::string error_message;
+
+	if (!botdb.SavePetStats(GetBotID(), pet_name_str, pet_inst->GetMana(), pet_inst->GetHP(), pet_inst->GetPetSpellID())) {
+		bot_owner->Message(13, "%s for %s's pet", BotDatabase::fail::SavePetStats(), GetCleanName());
+		return false;
+	}
+	
 	if (!botdb.SavePetBuffs(GetBotID(), pet_buffs))
 		bot_owner->Message(13, "%s for %s's pet", BotDatabase::fail::SavePetBuffs(), GetCleanName());
 	if (!botdb.SavePetItems(GetBotID(), pet_items))
