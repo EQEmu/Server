@@ -1878,7 +1878,7 @@ namespace UF
 		//	OUT(unknown06160[4]);
 
 		// Copy bandoliers where server and client indexes converge
-		for (r = 0; r < EmuConstants::BANDOLIERS_SIZE && r < consts::BANDOLIERS_SIZE; ++r) {
+		for (r = 0; r < EQEmu::Constants::BANDOLIERS_SIZE && r < consts::BANDOLIERS_SIZE; ++r) {
 			OUT_str(bandoliers[r].Name);
 			for (uint32 k = 0; k < consts::BANDOLIER_ITEM_COUNT; ++k) { // Will need adjusting if 'server != client' is ever true
 				OUT(bandoliers[r].Items[k].ID);
@@ -1887,7 +1887,7 @@ namespace UF
 			}
 		}
 		// Nullify bandoliers where server and client indexes diverge, with a client bias
-		for (r = EmuConstants::BANDOLIERS_SIZE; r < consts::BANDOLIERS_SIZE; ++r) {
+		for (r = EQEmu::Constants::BANDOLIERS_SIZE; r < consts::BANDOLIERS_SIZE; ++r) {
 			eq->bandoliers[r].Name[0] = '\0';
 			for (uint32 k = 0; k < consts::BANDOLIER_ITEM_COUNT; ++k) { // Will need adjusting if 'server != client' is ever true
 				eq->bandoliers[r].Items[k].ID = 0;
@@ -1899,13 +1899,13 @@ namespace UF
 		//	OUT(unknown07444[5120]);
 
 		// Copy potion belt where server and client indexes converge
-		for (r = 0; r < EmuConstants::POTION_BELT_ITEM_COUNT && r < consts::POTION_BELT_ITEM_COUNT; ++r) {
+		for (r = 0; r < EQEmu::Constants::POTION_BELT_ITEM_COUNT && r < consts::POTION_BELT_ITEM_COUNT; ++r) {
 			OUT(potionbelt.Items[r].ID);
 			OUT(potionbelt.Items[r].Icon);
 			OUT_str(potionbelt.Items[r].Name);
 		}
 		// Nullify potion belt where server and client indexes diverge, with a client bias
-		for (r = EmuConstants::POTION_BELT_ITEM_COUNT; r < consts::POTION_BELT_ITEM_COUNT; ++r) {
+		for (r = EQEmu::Constants::POTION_BELT_ITEM_COUNT; r < consts::POTION_BELT_ITEM_COUNT; ++r) {
 			eq->potionbelt.Items[r].ID = 0;
 			eq->potionbelt.Items[r].Icon = 0;
 			eq->potionbelt.Items[r].Name[0] = '\0';
@@ -2274,7 +2274,7 @@ namespace UF
 			eq_cse->HairColor = emu_cse->HairColor;
 			eq_cse->Face = emu_cse->Face;
 
-			for (int equip_index = 0; equip_index < _MaterialCount; equip_index++) {
+			for (int equip_index = 0; equip_index < MaterialCount; equip_index++) {
 				eq_cse->Equip[equip_index].Material = emu_cse->Equip[equip_index].Material;
 				eq_cse->Equip[equip_index].Unknown1 = emu_cse->Equip[equip_index].Unknown1;
 				eq_cse->Equip[equip_index].EliteMaterial = emu_cse->Equip[equip_index].EliteMaterial;
@@ -4263,7 +4263,7 @@ namespace UF
 
 		uint32 SubLengths[10];
 
-		for (int x = SUB_BEGIN; x < EmuConstants::ITEM_CONTAINER_SIZE; ++x) {
+		for (int x = SUB_BEGIN; x < EQEmu::Constants::ITEM_CONTAINER_SIZE; ++x) {
 
 			SubSerializations[x] = nullptr;
 
@@ -4275,15 +4275,15 @@ namespace UF
 
 				iqbs.subitem_count++;
 
-				if (slot_id_in >= EmuConstants::GENERAL_BEGIN && slot_id_in <= EmuConstants::GENERAL_END) // (< 30) - no cursor?
+				if (slot_id_in >= EQEmu::Constants::GENERAL_BEGIN && slot_id_in <= EQEmu::Constants::GENERAL_END) // (< 30) - no cursor?
 					//SubSlotNumber = (((slot_id_in + 3) * 10) + x + 1);
-					SubSlotNumber = (((slot_id_in + 3) * EmuConstants::ITEM_CONTAINER_SIZE) + x + 1);
-				else if (slot_id_in >= EmuConstants::BANK_BEGIN && slot_id_in <= EmuConstants::BANK_END)
+					SubSlotNumber = (((slot_id_in + 3) * EQEmu::Constants::ITEM_CONTAINER_SIZE) + x + 1);
+				else if (slot_id_in >= EQEmu::Constants::BANK_BEGIN && slot_id_in <= EQEmu::Constants::BANK_END)
 					//SubSlotNumber = (((slot_id_in - 2000) * 10) + 2030 + x + 1);
-					SubSlotNumber = (((slot_id_in - EmuConstants::BANK_BEGIN) * EmuConstants::ITEM_CONTAINER_SIZE) + EmuConstants::BANK_BAGS_BEGIN + x);
-				else if (slot_id_in >= EmuConstants::SHARED_BANK_BEGIN && slot_id_in <= EmuConstants::SHARED_BANK_END)
+					SubSlotNumber = (((slot_id_in - EQEmu::Constants::BANK_BEGIN) * EQEmu::Constants::ITEM_CONTAINER_SIZE) + EQEmu::Constants::BANK_BAGS_BEGIN + x);
+				else if (slot_id_in >= EQEmu::Constants::SHARED_BANK_BEGIN && slot_id_in <= EQEmu::Constants::SHARED_BANK_END)
 					//SubSlotNumber = (((slot_id_in - 2500) * 10) + 2530 + x + 1);
-					SubSlotNumber = (((slot_id_in - EmuConstants::SHARED_BANK_BEGIN) * EmuConstants::ITEM_CONTAINER_SIZE) + EmuConstants::SHARED_BANK_BAGS_BEGIN + x);
+					SubSlotNumber = (((slot_id_in - EQEmu::Constants::SHARED_BANK_BEGIN) * EQEmu::Constants::ITEM_CONTAINER_SIZE) + EQEmu::Constants::SHARED_BANK_BAGS_BEGIN + x);
 				else
 					SubSlotNumber = slot_id_in; // ???????
 
@@ -4322,16 +4322,16 @@ namespace UF
 	{
 		uint32 UnderfootSlot = 0;
 
-		if (serverSlot >= MainAmmo && serverSlot <= 53) // Cursor/Ammo/Power Source and Normal Inventory Slots
+		if (serverSlot >= SlotAmmo && serverSlot <= 53) // Cursor/Ammo/Power Source and Normal Inventory Slots
 			UnderfootSlot = serverSlot + 1;
-		else if (serverSlot >= EmuConstants::GENERAL_BAGS_BEGIN && serverSlot <= EmuConstants::CURSOR_BAG_END)
+		else if (serverSlot >= EQEmu::Constants::GENERAL_BAGS_BEGIN && serverSlot <= EQEmu::Constants::CURSOR_BAG_END)
 			UnderfootSlot = serverSlot + 11;
-		else if (serverSlot >= EmuConstants::BANK_BAGS_BEGIN && serverSlot <= EmuConstants::BANK_BAGS_END)
+		else if (serverSlot >= EQEmu::Constants::BANK_BAGS_BEGIN && serverSlot <= EQEmu::Constants::BANK_BAGS_END)
 			UnderfootSlot = serverSlot + 1;
-		else if (serverSlot >= EmuConstants::SHARED_BANK_BAGS_BEGIN && serverSlot <= EmuConstants::SHARED_BANK_BAGS_END)
+		else if (serverSlot >= EQEmu::Constants::SHARED_BANK_BAGS_BEGIN && serverSlot <= EQEmu::Constants::SHARED_BANK_BAGS_END)
 			UnderfootSlot = serverSlot + 1;
-		else if (serverSlot == MainPowerSource)
-			UnderfootSlot = slots::MainPowerSource;
+		else if (serverSlot == SlotPowerSource)
+			UnderfootSlot = inventory::SlotPowerSource;
 		else
 			UnderfootSlot = serverSlot;
 
@@ -4348,7 +4348,7 @@ namespace UF
 	{
 		uint32 ServerSlot = 0;
 
-		if (ufSlot >= slots::MainAmmo && ufSlot <= consts::CORPSE_END) // Cursor/Ammo/Power Source and Normal Inventory Slots
+		if (ufSlot >= inventory::SlotAmmo && ufSlot <= consts::CORPSE_END) // Cursor/Ammo/Power Source and Normal Inventory Slots
 			ServerSlot = ufSlot - 1;
 		else if (ufSlot >= consts::GENERAL_BAGS_BEGIN && ufSlot <= consts::CURSOR_BAG_END)
 			ServerSlot = ufSlot - 11;
@@ -4356,8 +4356,8 @@ namespace UF
 			ServerSlot = ufSlot - 1;
 		else if (ufSlot >= consts::SHARED_BANK_BAGS_BEGIN && ufSlot <= consts::SHARED_BANK_BAGS_END)
 			ServerSlot = ufSlot - 1;
-		else if (ufSlot == slots::MainPowerSource)
-			ServerSlot = MainPowerSource;
+		else if (ufSlot == inventory::SlotPowerSource)
+			ServerSlot = SlotPowerSource;
 		else
 			ServerSlot = ufSlot;
 
@@ -4372,7 +4372,7 @@ namespace UF
 
 	static inline void ServerToUFTextLink(std::string& ufTextLink, const std::string& serverTextLink)
 	{
-		if ((consts::TEXT_LINK_BODY_LENGTH == EmuConstants::TEXT_LINK_BODY_LENGTH) || (serverTextLink.find('\x12') == std::string::npos)) {
+		if ((consts::TEXT_LINK_BODY_LENGTH == EQEmu::Constants::TEXT_LINK_BODY_LENGTH) || (serverTextLink.find('\x12') == std::string::npos)) {
 			ufTextLink = serverTextLink;
 			return;
 		}
@@ -4381,7 +4381,7 @@ namespace UF
 
 		for (size_t segment_iter = 0; segment_iter < segments.size(); ++segment_iter) {
 			if (segment_iter & 1) {
-				if (segments[segment_iter].length() <= EmuConstants::TEXT_LINK_BODY_LENGTH) {
+				if (segments[segment_iter].length() <= EQEmu::Constants::TEXT_LINK_BODY_LENGTH) {
 					ufTextLink.append(segments[segment_iter]);
 					// TODO: log size mismatch error
 					continue;
@@ -4412,7 +4412,7 @@ namespace UF
 
 	static inline void UFToServerTextLink(std::string& serverTextLink, const std::string& ufTextLink)
 	{
-		if ((EmuConstants::TEXT_LINK_BODY_LENGTH == consts::TEXT_LINK_BODY_LENGTH) || (ufTextLink.find('\x12') == std::string::npos)) {
+		if ((EQEmu::Constants::TEXT_LINK_BODY_LENGTH == consts::TEXT_LINK_BODY_LENGTH) || (ufTextLink.find('\x12') == std::string::npos)) {
 			serverTextLink = ufTextLink;
 			return;
 		}

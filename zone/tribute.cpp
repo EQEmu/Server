@@ -66,7 +66,7 @@ void Client::ToggleTribute(bool enabled) {
 		int r;
 		uint32 cost = 0;
 		uint32 level = GetLevel();
-		for(r = 0; r < EmuConstants::TRIBUTE_SIZE; r++) {
+		for (r = 0; r < EQEmu::Constants::TRIBUTE_SIZE; r++) {
 			uint32 tid = m_pp.tributes[r].tribute;
 			if(tid == TRIBUTE_NONE)
 				continue;
@@ -119,7 +119,7 @@ void Client::DoTributeUpdate() {
 	tis->tribute_master_id = tribute_master_id;	//Dont know what this is for
 
 	int r;
-	for(r = 0; r < EmuConstants::TRIBUTE_SIZE; r++) {
+	for (r = 0; r < EQEmu::Constants::TRIBUTE_SIZE; r++) {
 		if(m_pp.tributes[r].tribute != TRIBUTE_NONE) {
 			tis->tributes[r] = m_pp.tributes[r].tribute;
 			tis->tiers[r] = m_pp.tributes[r].tier;
@@ -134,24 +134,24 @@ void Client::DoTributeUpdate() {
 
 	if(m_pp.tribute_active) {
 		//send and equip tribute items...
-		for(r = 0; r < EmuConstants::TRIBUTE_SIZE; r++) {
+		for (r = 0; r < EQEmu::Constants::TRIBUTE_SIZE; r++) {
 			uint32 tid = m_pp.tributes[r].tribute;
 			if(tid == TRIBUTE_NONE) {
-				if(m_inv[EmuConstants::TRIBUTE_BEGIN + r])
-					DeleteItemInInventory(EmuConstants::TRIBUTE_BEGIN + r, 0, false);
+				if (m_inv[EQEmu::Constants::TRIBUTE_BEGIN + r])
+					DeleteItemInInventory(EQEmu::Constants::TRIBUTE_BEGIN + r, 0, false);
 				continue;
 			}
 
 			if(tribute_list.count(tid) != 1) {
-				if (m_inv[EmuConstants::TRIBUTE_BEGIN + r])
-					DeleteItemInInventory(EmuConstants::TRIBUTE_BEGIN + r, 0, false);
+				if (m_inv[EQEmu::Constants::TRIBUTE_BEGIN + r])
+					DeleteItemInInventory(EQEmu::Constants::TRIBUTE_BEGIN + r, 0, false);
 				continue;
 			}
 
 			//sanity check
 			if(m_pp.tributes[r].tier >= MAX_TRIBUTE_TIERS) {
-				if (m_inv[EmuConstants::TRIBUTE_BEGIN + r])
-					DeleteItemInInventory(EmuConstants::TRIBUTE_BEGIN + r, 0, false);
+				if (m_inv[EQEmu::Constants::TRIBUTE_BEGIN + r])
+					DeleteItemInInventory(EQEmu::Constants::TRIBUTE_BEGIN + r, 0, false);
 				m_pp.tributes[r].tier = 0;
 				continue;
 			}
@@ -165,15 +165,15 @@ void Client::DoTributeUpdate() {
 			if(inst == nullptr)
 				continue;
 
-			PutItemInInventory(EmuConstants::TRIBUTE_BEGIN + r, *inst, false);
-			SendItemPacket(EmuConstants::TRIBUTE_BEGIN + r, inst, ItemPacketTributeItem);
+			PutItemInInventory(EQEmu::Constants::TRIBUTE_BEGIN + r, *inst, false);
+			SendItemPacket(EQEmu::Constants::TRIBUTE_BEGIN + r, inst, ItemPacketTributeItem);
 			safe_delete(inst);
 		}
 	} else {
 		//unequip tribute items...
-		for(r = 0; r < EmuConstants::TRIBUTE_SIZE; r++) {
-			if (m_inv[EmuConstants::TRIBUTE_BEGIN + r])
-				DeleteItemInInventory(EmuConstants::TRIBUTE_BEGIN + r, 0, false);
+		for (r = 0; r < EQEmu::Constants::TRIBUTE_SIZE; r++) {
+			if (m_inv[EQEmu::Constants::TRIBUTE_BEGIN + r])
+				DeleteItemInInventory(EQEmu::Constants::TRIBUTE_BEGIN + r, 0, false);
 		}
 	}
 	CalcBonuses();
@@ -192,7 +192,7 @@ void Client::SendTributeTimer() {
 
 void Client::ChangeTributeSettings(TributeInfo_Struct *t) {
 	int r;
-	for(r = 0; r < EmuConstants::TRIBUTE_SIZE; r++) {
+	for (r = 0; r < EQEmu::Constants::TRIBUTE_SIZE; r++) {
 
 		m_pp.tributes[r].tribute = TRIBUTE_NONE;
 

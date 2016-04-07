@@ -1,5 +1,8 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 04/07/2016 ==
+Uleat: Rework of eq_dictionary to facilitate inventory work
+
 == 04/05/2016 ==
 Uleat: Moved database query code out of bot.cpp and into the new BotDatabase class
 

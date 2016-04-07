@@ -1,7 +1,7 @@
 /*
 EQEMu:  Everquest Server Emulator
 
-Copyright (C) 2001-2014 EQEMu Development Team (http://eqemulator.net)
+Copyright (C) 2001-2016 EQEMu Development Team (http://eqemulator.net)
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -25,122 +25,119 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #include "../types.h"
 
 namespace SoD {
-	namespace maps {
+	namespace inventory {
 		typedef enum : int16 {
-			// this needs work to match actual client equivilents
-			MapPossessions = 0,
-			MapBank,
-			MapSharedBank,
-			MapTrade,
-			MapWorld,
-			MapLimbo,
-			MapTribute,
-			MapTrophyTribute,
-			MapGuildTribute,
-			MapMerchant,
-			MapDeleted,
-			MapCorpse,
-			MapBazaar,
-			MapInspect,
-			MapRealEstate,
-			MapViewMODPC,
-			MapViewMODBank,
-			MapViewMODSharedBank,
-			MapViewMODLimbo,
-			MapAltStorage,
-			MapArchived,
-			MapMail,
-			MapGuildTrophyTribute,
-			MapOther,
-			_MapCount
-		} InventoryMaps;
-	}
+			TypePossessions = 0,
+			TypeBank,
+			TypeSharedBank,
+			TypeTrade,
+			TypeWorld,
+			TypeLimbo,
+			TypeTribute,
+			TypeTrophyTribute,
+			TypeGuildTribute,
+			TypeMerchant,
+			TypeDeleted,
+			TypeCorpse,
+			TypeBazaar,
+			TypeInspect,
+			TypeRealEstate,
+			TypeViewMODPC,
+			TypeViewMODBank,
+			TypeViewMODSharedBank,
+			TypeViewMODLimbo,
+			TypeAltStorage,
+			TypeArchived,
+			TypeMail,
+			TypeGuildTrophyTribute,
+			TypeOther,
+			TypeCount
+		} InventoryTypes;
 
-	namespace slots {
 		typedef enum : int16 {
-			MainCharm = 0,
-			MainEar1,
-			MainHead,
-			MainFace,
-			MainEar2,
-			MainNeck,
-			MainShoulders,
-			MainArms,
-			MainBack,
-			MainWrist1,
-			MainWrist2,
-			MainRange,
-			MainHands,
-			MainPrimary,
-			MainSecondary,
-			MainFinger1,
-			MainFinger2,
-			MainChest,
-			MainLegs,
-			MainFeet,
-			MainWaist,
-			MainPowerSource,
-			MainAmmo,
-			MainGeneral1,
-			MainGeneral2,
-			MainGeneral3,
-			MainGeneral4,
-			MainGeneral5,
-			MainGeneral6,
-			MainGeneral7,
-			MainGeneral8,
-			MainCursor,
-			_MainCount,
-			_MainEquipmentBegin = MainCharm,
-			_MainEquipmentEnd = MainAmmo,
-			_MainEquipmentCount = (_MainEquipmentEnd - _MainEquipmentBegin + 1),
-			_MainGeneralBegin = MainGeneral1,
-			_MainGeneralEnd = MainGeneral8,
-			_MainGeneralCount = (_MainGeneralEnd - _MainGeneralBegin + 1)
-		} EquipmentSlots;
+			SlotCharm = 0,
+			SlotEar1,
+			SlotHead,
+			SlotFace,
+			SlotEar2,
+			SlotNeck,
+			SlotShoulders,
+			SlotArms,
+			SlotBack,
+			SlotWrist1,
+			SlotWrist2,
+			SlotRange,
+			SlotHands,
+			SlotPrimary,
+			SlotSecondary,
+			SlotFinger1,
+			SlotFinger2,
+			SlotChest,
+			SlotLegs,
+			SlotFeet,
+			SlotWaist,
+			SlotPowerSource,
+			SlotAmmo,
+			SlotGeneral1,
+			SlotGeneral2,
+			SlotGeneral3,
+			SlotGeneral4,
+			SlotGeneral5,
+			SlotGeneral6,
+			SlotGeneral7,
+			SlotGeneral8,
+			SlotCursor,
+			SlotCount,
+			SlotEquipmentBegin = SlotCharm,
+			SlotEquipmentEnd = SlotAmmo,
+			SlotEquipmentCount = (SlotEquipmentEnd - SlotEquipmentBegin + 1),
+			SlotGeneralBegin = SlotGeneral1,
+			SlotGeneralEnd = SlotGeneral8,
+			SlotGeneralCount = (SlotGeneralEnd - SlotGeneralBegin + 1)
+		} PossessionsSlots;
 	}
 
 	namespace consts {
 		static const size_t CHARACTER_CREATION_LIMIT = 12;
 
-		static const uint16	MAP_POSSESSIONS_SIZE = slots::_MainCount;
-		static const uint16 MAP_BANK_SIZE = 24;
-		static const uint16 MAP_SHARED_BANK_SIZE = 2;
-		static const uint16 MAP_TRADE_SIZE = 8;
-		static const uint16 MAP_WORLD_SIZE = 10;
-		static const uint16 MAP_LIMBO_SIZE = 36;
-		static const uint16 MAP_TRIBUTE_SIZE = 0; //?
-		static const uint16 MAP_TROPHY_TRIBUTE_SIZE = 0;
-		static const uint16 MAP_GUILD_TRIBUTE_SIZE = 0;
-		static const uint16 MAP_MERCHANT_SIZE = 0;
-		static const uint16 MAP_DELETED_SIZE = 0;
-		static const uint16 MAP_CORPSE_SIZE = slots::_MainCount;
-		static const uint16 MAP_BAZAAR_SIZE = 80;
-		static const uint16 MAP_INSPECT_SIZE = slots::_MainEquipmentCount;
-		static const uint16 MAP_REAL_ESTATE_SIZE = 0;
-		static const uint16 MAP_VIEW_MOD_PC_SIZE = MAP_POSSESSIONS_SIZE;
-		static const uint16 MAP_VIEW_MOD_BANK_SIZE = MAP_BANK_SIZE;
-		static const uint16 MAP_VIEW_MOD_SHARED_BANK_SIZE = MAP_SHARED_BANK_SIZE;
-		static const uint16 MAP_VIEW_MOD_LIMBO_SIZE = MAP_LIMBO_SIZE;
-		static const uint16 MAP_ALT_STORAGE_SIZE = 0;
-		static const uint16 MAP_ARCHIVED_SIZE = 0;
-		static const uint16 MAP_MAIL_SIZE = 0;
-		static const uint16 MAP_GUILD_TROPHY_TRIBUTE_SIZE = 0;
-		static const uint16 MAP_KRONO_SIZE = NOT_USED;
-		static const uint16 MAP_OTHER_SIZE = 0;
+		static const uint16	TYPE_POSSESSIONS_SIZE = inventory::SlotCount;
+		static const uint16 TYPE_BANK_SIZE = 24;
+		static const uint16 TYPE_SHARED_BANK_SIZE = 2;
+		static const uint16 TYPE_TRADE_SIZE = 8;
+		static const uint16 TYPE_WORLD_SIZE = 10;
+		static const uint16 TYPE_LIMBO_SIZE = 36;
+		static const uint16 TYPE_TRIBUTE_SIZE = 0; //?
+		static const uint16 TYPE_TROPHY_TRIBUTE_SIZE = 0;
+		static const uint16 TYPE_GUILD_TRIBUTE_SIZE = 0;
+		static const uint16 TYPE_MERCHANT_SIZE = 0;
+		static const uint16 TYPE_DELETED_SIZE = 0;
+		static const uint16 TYPE_CORPSE_SIZE = inventory::SlotCount;
+		static const uint16 TYPE_BAZAAR_SIZE = 80;
+		static const uint16 TYPE_INSPECT_SIZE = inventory::SlotEquipmentCount;
+		static const uint16 TYPE_REAL_ESTATE_SIZE = 0;
+		static const uint16 TYPE_VIEW_MOD_PC_SIZE = TYPE_POSSESSIONS_SIZE;
+		static const uint16 TYPE_VIEW_MOD_BANK_SIZE = TYPE_BANK_SIZE;
+		static const uint16 TYPE_VIEW_MOD_SHARED_BANK_SIZE = TYPE_SHARED_BANK_SIZE;
+		static const uint16 TYPE_VIEW_MOD_LIMBO_SIZE = TYPE_LIMBO_SIZE;
+		static const uint16 TYPE_ALT_STORAGE_SIZE = 0;
+		static const uint16 TYPE_ARCHIVED_SIZE = 0;
+		static const uint16 TYPE_MAIL_SIZE = 0;
+		static const uint16 TYPE_GUILD_TROPHY_TRIBUTE_SIZE = 0;
+		static const uint16 TYPE_KRONO_SIZE = NOT_USED;
+		static const uint16 TYPE_OTHER_SIZE = 0;
 
-		static const int16 EQUIPMENT_BEGIN = slots::MainCharm;
-		static const int16 EQUIPMENT_END = slots::MainAmmo;
-		static const uint16 EQUIPMENT_SIZE = slots::_MainEquipmentCount;
+		static const int16 EQUIPMENT_BEGIN = inventory::SlotCharm;
+		static const int16 EQUIPMENT_END = inventory::SlotAmmo;
+		static const uint16 EQUIPMENT_SIZE = inventory::SlotEquipmentCount;
 
-		static const int16 GENERAL_BEGIN = slots::MainGeneral1;
-		static const int16 GENERAL_END = slots::MainGeneral8;
-		static const uint16 GENERAL_SIZE = slots::_MainGeneralCount;
+		static const int16 GENERAL_BEGIN = inventory::SlotGeneral1;
+		static const int16 GENERAL_END = inventory::SlotGeneral8;
+		static const uint16 GENERAL_SIZE = inventory::SlotGeneralCount;
 		static const int16 GENERAL_BAGS_BEGIN = 262;
 		static const int16 GENERAL_BAGS_END_OFFSET = 79;
 		static const int16 GENERAL_BAGS_END = GENERAL_BAGS_BEGIN + GENERAL_BAGS_END_OFFSET;
 
-		static const int16 CURSOR = slots::MainCursor;
+		static const int16 CURSOR = inventory::SlotCursor;
 		static const int16 CURSOR_BAG_BEGIN = 342;
 		static const int16 CURSOR_BAG_END_OFFSET = 9;
 		static const int16 CURSOR_BAG_END = CURSOR_BAG_BEGIN + CURSOR_BAG_END_OFFSET;
@@ -170,8 +167,8 @@ namespace SoD {
 		static const int16 TRIBUTE_BEGIN = 400;
 		static const int16 TRIBUTE_END = 404;
 
-		static const int16 CORPSE_BEGIN = slots::MainGeneral1;
-		static const int16 CORPSE_END = slots::MainGeneral1 + slots::MainCursor;
+		static const int16 CORPSE_BEGIN = inventory::SlotGeneral1;
+		static const int16 CORPSE_END = inventory::SlotGeneral1 + inventory::SlotCursor;
 
 		static const uint16 ITEM_COMMON_SIZE = 5;
 		static const uint16 ITEM_CONTAINER_SIZE = 10;

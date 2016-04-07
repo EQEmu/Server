@@ -35,7 +35,7 @@ uint32 Client::NukeItem(uint32 itemnum, uint8 where_to_check) {
 
 	int i;
 	if(where_to_check & invWhereWorn) {
-		for (i = EmuConstants::EQUIPMENT_BEGIN; i <= EmuConstants::EQUIPMENT_END; i++) {
+		for (i = EQEmu::Constants::EQUIPMENT_BEGIN; i <= EQEmu::Constants::EQUIPMENT_END; i++) {
 			if (GetItemIDAt(i) == itemnum || (itemnum == 0xFFFE && GetItemIDAt(i) != INVALID_ID)) {
 				cur = m_inv.GetItem(i);
 				if(cur && cur->GetItem()->Stackable) {
@@ -48,8 +48,8 @@ uint32 Client::NukeItem(uint32 itemnum, uint8 where_to_check) {
 			}
 		}
 
-		if (GetItemIDAt(MainPowerSource) == itemnum || (itemnum == 0xFFFE && GetItemIDAt(MainPowerSource) != INVALID_ID)) {
-			cur = m_inv.GetItem(MainPowerSource);
+		if (GetItemIDAt(SlotPowerSource) == itemnum || (itemnum == 0xFFFE && GetItemIDAt(SlotPowerSource) != INVALID_ID)) {
+			cur = m_inv.GetItem(SlotPowerSource);
 			if(cur && cur->GetItem()->Stackable) {
 				x += cur->GetCharges();
 			} else {
@@ -57,25 +57,25 @@ uint32 Client::NukeItem(uint32 itemnum, uint8 where_to_check) {
 			}
 
 			if (GetClientVersion() >= ClientVersion::SoF)
-				DeleteItemInInventory(MainPowerSource, 0, true);
+				DeleteItemInInventory(SlotPowerSource, 0, true);
 			else
-				DeleteItemInInventory(MainPowerSource, 0, false);	// Prevents Titanium crash
+				DeleteItemInInventory(SlotPowerSource, 0, false);	// Prevents Titanium crash
 		}
 	}
 
 	if(where_to_check & invWhereCursor) {
-		if (GetItemIDAt(MainCursor) == itemnum || (itemnum == 0xFFFE && GetItemIDAt(MainCursor) != INVALID_ID)) {
-			cur = m_inv.GetItem(MainCursor);
+		if (GetItemIDAt(SlotCursor) == itemnum || (itemnum == 0xFFFE && GetItemIDAt(SlotCursor) != INVALID_ID)) {
+			cur = m_inv.GetItem(SlotCursor);
 			if(cur && cur->GetItem()->Stackable) {
 				x += cur->GetCharges();
 			} else {
 				x++;
 			}
 
-			DeleteItemInInventory(MainCursor, 0, true);
+			DeleteItemInInventory(SlotCursor, 0, true);
 		}
 
-		for (i = EmuConstants::CURSOR_BAG_BEGIN; i <= EmuConstants::CURSOR_BAG_END; i++) {
+		for (i = EQEmu::Constants::CURSOR_BAG_BEGIN; i <= EQEmu::Constants::CURSOR_BAG_END; i++) {
 			if (GetItemIDAt(i) == itemnum || (itemnum == 0xFFFE && GetItemIDAt(i) != INVALID_ID)) {
 				cur = m_inv.GetItem(i);
 				if(cur && cur->GetItem()->Stackable) {
@@ -90,7 +90,7 @@ uint32 Client::NukeItem(uint32 itemnum, uint8 where_to_check) {
 	}
 
 	if(where_to_check & invWherePersonal) {
-		for (i = EmuConstants::GENERAL_BEGIN; i <= EmuConstants::GENERAL_END; i++) {
+		for (i = EQEmu::Constants::GENERAL_BEGIN; i <= EQEmu::Constants::GENERAL_END; i++) {
 			if (GetItemIDAt(i) == itemnum || (itemnum == 0xFFFE && GetItemIDAt(i) != INVALID_ID)) {
 				cur = m_inv.GetItem(i);
 				if(cur && cur->GetItem()->Stackable) {
@@ -103,7 +103,7 @@ uint32 Client::NukeItem(uint32 itemnum, uint8 where_to_check) {
 			}
 		}
 
-		for (i = EmuConstants::GENERAL_BAGS_BEGIN; i <= EmuConstants::GENERAL_BAGS_END; i++) {
+		for (i = EQEmu::Constants::GENERAL_BAGS_BEGIN; i <= EQEmu::Constants::GENERAL_BAGS_END; i++) {
 			if (GetItemIDAt(i) == itemnum || (itemnum == 0xFFFE && GetItemIDAt(i) != INVALID_ID)) {
 				cur = m_inv.GetItem(i);
 				if(cur && cur->GetItem()->Stackable) {
@@ -118,7 +118,7 @@ uint32 Client::NukeItem(uint32 itemnum, uint8 where_to_check) {
 	}
 
 	if(where_to_check & invWhereBank) {
-		for (i = EmuConstants::BANK_BEGIN; i <= EmuConstants::BANK_END; i++) {
+		for (i = EQEmu::Constants::BANK_BEGIN; i <= EQEmu::Constants::BANK_END; i++) {
 			if (GetItemIDAt(i) == itemnum || (itemnum == 0xFFFE && GetItemIDAt(i) != INVALID_ID)) {
 				cur = m_inv.GetItem(i);
 				if(cur && cur->GetItem()->Stackable) {
@@ -131,7 +131,7 @@ uint32 Client::NukeItem(uint32 itemnum, uint8 where_to_check) {
 			}
 		}
 
-		for (i = EmuConstants::BANK_BAGS_BEGIN; i <= EmuConstants::BANK_BAGS_END; i++) {
+		for (i = EQEmu::Constants::BANK_BAGS_BEGIN; i <= EQEmu::Constants::BANK_BAGS_END; i++) {
 			if (GetItemIDAt(i) == itemnum || (itemnum == 0xFFFE && GetItemIDAt(i) != INVALID_ID)) {
 				cur = m_inv.GetItem(i);
 				if(cur && cur->GetItem()->Stackable) {
@@ -146,7 +146,7 @@ uint32 Client::NukeItem(uint32 itemnum, uint8 where_to_check) {
 	}
 
 	if(where_to_check & invWhereSharedBank) {
-		for (i = EmuConstants::SHARED_BANK_BEGIN; i <= EmuConstants::SHARED_BANK_END; i++) {
+		for (i = EQEmu::Constants::SHARED_BANK_BEGIN; i <= EQEmu::Constants::SHARED_BANK_END; i++) {
 			if (GetItemIDAt(i) == itemnum || (itemnum == 0xFFFE && GetItemIDAt(i) != INVALID_ID)) {
 				cur = m_inv.GetItem(i);
 				if(cur && cur->GetItem()->Stackable) {
@@ -159,7 +159,7 @@ uint32 Client::NukeItem(uint32 itemnum, uint8 where_to_check) {
 			}
 		}
 
-		for (i = EmuConstants::SHARED_BANK_BAGS_BEGIN; i <= EmuConstants::SHARED_BANK_BAGS_END; i++) {
+		for (i = EQEmu::Constants::SHARED_BANK_BAGS_BEGIN; i <= EQEmu::Constants::SHARED_BANK_BAGS_END; i++) {
 			if (GetItemIDAt(i) == itemnum || (itemnum == 0xFFFE && GetItemIDAt(i) != INVALID_ID)) {
 				cur = m_inv.GetItem(i);
 				if(cur && cur->GetItem()->Stackable) {
@@ -236,7 +236,7 @@ bool Client::SummonItem(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2,
 	}
 	*/
 
-	uint32 augments[EmuConstants::ITEM_COMMON_SIZE] = { aug1, aug2, aug3, aug4, aug5, aug6 };
+	uint32 augments[EQEmu::Constants::ITEM_COMMON_SIZE] = { aug1, aug2, aug3, aug4, aug5, aug6 };
 
 	uint32 classes	= item->Classes;
 	uint32 races	= item->Races;
@@ -246,7 +246,7 @@ bool Client::SummonItem(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2,
 	bool enforcerestr	= RuleB(Inventory, EnforceAugmentRestriction);
 	bool enforceusable	= RuleB(Inventory, EnforceAugmentUsability);
 	
-	for (int iter = AUG_BEGIN; iter < EmuConstants::ITEM_COMMON_SIZE; ++iter) {
+	for (int iter = AUG_BEGIN; iter < EQEmu::Constants::ITEM_COMMON_SIZE; ++iter) {
 		const Item_Struct* augtest = database.GetItem(augments[iter]);
 
 		if(augtest == nullptr) {
@@ -540,7 +540,7 @@ bool Client::SummonItem(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2,
 	}
 
 	// add any validated augments
-	for (int iter = AUG_BEGIN; iter < EmuConstants::ITEM_COMMON_SIZE; ++iter) {
+	for (int iter = AUG_BEGIN; iter < EQEmu::Constants::ITEM_COMMON_SIZE; ++iter) {
 		if(augments[iter])
 			inst->PutAugment(&database, iter, augments[iter]);
 	}
@@ -554,22 +554,22 @@ bool Client::SummonItem(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2,
 	inst->SetOrnamentHeroModel(ornament_hero_model);
 
 	// check to see if item is usable in requested slot
-	if(enforceusable && (((to_slot >= MainCharm) && (to_slot <= MainAmmo)) || (to_slot == MainPowerSource))) {
-		uint32 slottest = (to_slot == MainPowerSource) ? 22 : to_slot; // can't change '22' just yet...
+	if(enforceusable && (((to_slot >= SlotCharm) && (to_slot <= SlotAmmo)) || (to_slot == SlotPowerSource))) {
+		uint32 slottest = (to_slot == SlotPowerSource) ? 22 : to_slot; // can't change '22' just yet...
 
 		if(!(slots & ((uint32)1 << slottest))) {
 			Message(0, "This item is not equipable at slot %u - moving to cursor.", to_slot);
 			Log.Out(Logs::Detail, Logs::Inventory, "Player %s on account %s attempted to equip an item unusable in slot %u - moved to cursor.\n(Item: %u, Aug1: %u, Aug2: %u, Aug3: %u, Aug4: %u, Aug5: %u, Aug6: %u)\n",
 				GetName(), account_name, to_slot, item->ID, aug1, aug2, aug3, aug4, aug5, aug6);
 
-			to_slot = MainCursor;
+			to_slot = SlotCursor;
 		}
 	}
 
 	// put item into inventory
-	if (to_slot == MainCursor) {
+	if (to_slot == SlotCursor) {
 		PushItemOnCursor(*inst);
-		SendItemPacket(MainCursor, inst, ItemPacketSummonItem);
+		SendItemPacket(SlotCursor, inst, ItemPacketSummonItem);
 	}
 	else {
 		PutItemInInventory(to_slot, *inst, true);
@@ -583,7 +583,7 @@ bool Client::SummonItem(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2,
 			DiscoverItem(item_id);
 		/*
 		// Augments should have been discovered prior to being placed on an item.
-		for (int iter = AUG_BEGIN; iter < EmuConstants::ITEM_COMMON_SIZE; ++iter) {
+		for (int iter = AUG_BEGIN; iter < EQEmu::Constants::ITEM_COMMON_SIZE; ++iter) {
 			if(augments[iter] && !IsDiscovered(augments[iter]))
 				DiscoverItem(augments[iter]);
 		}
@@ -617,7 +617,7 @@ void Client::DropItem(int16 slot_id)
 	}
 
 	// Save client inventory change to database
-	if (slot_id == MainCursor) {
+	if (slot_id == SlotCursor) {
 		SendCursorBuffer();
 		auto s = m_inv.cursor_cbegin(), e = m_inv.cursor_cend();
 		database.SaveCursor(CharacterID(), s, e);
@@ -706,11 +706,11 @@ void Client::SendCursorBuffer()
 			GetName(), test_item->Name, test_item->ID);
 		Message_StringID(MT_LootMessages, 290);
 		parse->EventItem(EVENT_DESTROY_ITEM, this, test_inst, nullptr, "", 0);
-		DeleteItemInInventory(MainCursor);
+		DeleteItemInInventory(SlotCursor);
 		SendCursorBuffer();
 	}
 	else {
-		SendItemPacket(MainCursor, test_inst, ItemPacketSummonItem);
+		SendItemPacket(SlotCursor, test_inst, ItemPacketSummonItem);
 	}
 }
 
@@ -788,7 +788,7 @@ void Client::DeleteItemInInventory(int16 slot_id, int8 quantity, bool client_upd
 	bool isDeleted = m_inv.DeleteItem(slot_id, quantity);
 
 	const ItemInst* inst = nullptr;
-	if (slot_id == MainCursor) {
+	if (slot_id == SlotCursor) {
 		auto s = m_inv.cursor_cbegin(), e = m_inv.cursor_cend();
 		if(update_db)
 			database.SaveCursor(character_id, s, e);
@@ -840,7 +840,7 @@ bool Client::PushItemOnCursor(const ItemInst& inst, bool client_update)
 	m_inv.PushCursor(inst);
 
 	if (client_update) {
-		SendItemPacket(MainCursor, &inst, ItemPacketSummonItem);
+		SendItemPacket(SlotCursor, &inst, ItemPacketSummonItem);
 	}
 
 	auto s = m_inv.cursor_cbegin(), e = m_inv.cursor_cend();
@@ -854,7 +854,7 @@ bool Client::PushItemOnCursor(const ItemInst& inst, bool client_update)
 bool Client::PutItemInInventory(int16 slot_id, const ItemInst& inst, bool client_update) {
 	Log.Out(Logs::Detail, Logs::Inventory, "Putting item %s (%d) into slot %d", inst.GetItem()->Name, inst.GetItem()->ID, slot_id);
 
-	if (slot_id == MainCursor) { // don't trust macros before conditional statements...
+	if (slot_id == SlotCursor) { // don't trust macros before conditional statements...
 		return PushItemOnCursor(inst, client_update);
 	}
 	else {
@@ -863,11 +863,11 @@ bool Client::PutItemInInventory(int16 slot_id, const ItemInst& inst, bool client
 
 	if (client_update)
 	{
-		SendItemPacket(slot_id, &inst, ((slot_id == MainCursor) ? ItemPacketSummonItem : ItemPacketTrade));
+		SendItemPacket(slot_id, &inst, ((slot_id == SlotCursor) ? ItemPacketSummonItem : ItemPacketTrade));
 		//SendWearChange(Inventory::CalcMaterialFromSlot(slot_id));
 	}
 		
-	if (slot_id == MainCursor) {
+	if (slot_id == SlotCursor) {
 		auto s = m_inv.cursor_cbegin(), e = m_inv.cursor_cend();
 		return database.SaveCursor(this->CharacterID(), s, e);
 	}
@@ -885,7 +885,7 @@ void Client::PutLootInInventory(int16 slot_id, const ItemInst &inst, ServerLootI
 
 	bool cursor_empty = m_inv.CursorEmpty();
 
-	if (slot_id == MainCursor) {
+	if (slot_id == SlotCursor) {
 		m_inv.PushCursor(inst);
 		auto s = m_inv.cursor_cbegin(), e = m_inv.cursor_cend();
 		database.SaveCursor(this->CharacterID(), s, e);
@@ -896,7 +896,7 @@ void Client::PutLootInInventory(int16 slot_id, const ItemInst &inst, ServerLootI
 	}
 
 	// Subordinate items in cursor buffer must be sent via ItemPacketSummonItem or we just overwrite the visible cursor and desync the client
-	if (slot_id == MainCursor && !cursor_empty) {
+	if (slot_id == SlotCursor && !cursor_empty) {
 		// RoF+ currently has a specialized cursor handler
 		if (GetClientVersion() < ClientVersion::RoF)
 			SendItemPacket(slot_id, &inst, ItemPacketSummonItem);
@@ -906,7 +906,7 @@ void Client::PutLootInInventory(int16 slot_id, const ItemInst &inst, ServerLootI
 	}
 	
 	if (bag_item_data) {
-		for (int index = 0; index < EmuConstants::ITEM_CONTAINER_SIZE; ++index) {
+		for (int index = 0; index < EQEmu::Constants::ITEM_CONTAINER_SIZE; ++index) {
 			if (bag_item_data[index] == nullptr)
 				continue;
 
@@ -924,12 +924,12 @@ void Client::PutLootInInventory(int16 slot_id, const ItemInst &inst, ServerLootI
 
 			// Dump bag contents to cursor in the event that owning bag is not the first cursor item
 			// (This assumes that the data passed is correctly associated..no safety checks are implemented)
-			if (slot_id == MainCursor && !cursor_empty) {
+			if (slot_id == SlotCursor && !cursor_empty) {
 				Log.Out(Logs::Detail, Logs::Inventory,
 					"Putting bag loot item %s (%d) into slot %d (non-empty cursor override)",
-					inst.GetItem()->Name, inst.GetItem()->ID, MainCursor);
+					inst.GetItem()->Name, inst.GetItem()->ID, SlotCursor);
 
-				PutLootInInventory(MainCursor, *bagitem);
+				PutLootInInventory(SlotCursor, *bagitem);
 			}
 			else {
 				auto bag_slot = Inventory::CalcSlotId(slot_id, index);
@@ -951,7 +951,7 @@ bool Client::TryStacking(ItemInst* item, uint8 type, bool try_worn, bool try_cur
 		return false;
 	int16 i;
 	uint32 item_id = item->GetItem()->ID;
-	for (i = EmuConstants::GENERAL_BEGIN; i <= EmuConstants::GENERAL_END; i++) {
+	for (i = EQEmu::Constants::GENERAL_BEGIN; i <= EQEmu::Constants::GENERAL_END; i++) {
 		ItemInst* tmp_inst = m_inv.GetItem(i);
 		if(tmp_inst && tmp_inst->GetItem()->ID == item_id && tmp_inst->GetCharges() < tmp_inst->GetItem()->StackSize){
 			MoveItemCharges(*item, i, type);
@@ -962,8 +962,8 @@ bool Client::TryStacking(ItemInst* item, uint8 type, bool try_worn, bool try_cur
 			return true;
 		}
 	}
-	for (i = EmuConstants::GENERAL_BEGIN; i <= EmuConstants::GENERAL_END; i++) {
-		for (uint8 j = SUB_BEGIN; j < EmuConstants::ITEM_CONTAINER_SIZE; j++) {
+	for (i = EQEmu::Constants::GENERAL_BEGIN; i <= EQEmu::Constants::GENERAL_END; i++) {
+		for (uint8 j = SUB_BEGIN; j < EQEmu::Constants::ITEM_CONTAINER_SIZE; j++) {
 			uint16 slotid = Inventory::CalcSlotId(i, j);
 			ItemInst* tmp_inst = m_inv.GetItem(slotid);
 
@@ -988,29 +988,29 @@ bool Client::AutoPutLootInInventory(ItemInst& inst, bool try_worn, bool try_curs
 	// #1: Try to auto equip
 	if (try_worn && inst.IsEquipable(GetBaseRace(), GetClass()) && inst.GetItem()->ReqLevel<=level && (!inst.GetItem()->Attuneable || inst.IsAttuned()) && inst.GetItem()->ItemType != ItemTypeAugmentation) {
 		// too messy as-is... <watch>
-		for (int16 i = EmuConstants::EQUIPMENT_BEGIN; i < MainPowerSource; i++) { // originally (i < 22)
-			if (i == EmuConstants::GENERAL_BEGIN) {
+		for (int16 i = EQEmu::Constants::EQUIPMENT_BEGIN; i < SlotPowerSource; i++) { // originally (i < 22)
+			if (i == EQEmu::Constants::GENERAL_BEGIN) {
 				// added power source check for SoF+ clients
 				if (this->GetClientVersion() >= ClientVersion::SoF)
-					i = MainPowerSource;
+					i = SlotPowerSource;
 				else
 					break;
 			}
 
 			if (!m_inv[i]) {
-				if (i == MainPrimary && inst.IsWeapon()) { // If item is primary slot weapon
+				if (i == SlotPrimary && inst.IsWeapon()) { // If item is primary slot weapon
 					if ((inst.GetItem()->ItemType == ItemType2HSlash) || (inst.GetItem()->ItemType == ItemType2HBlunt) || (inst.GetItem()->ItemType == ItemType2HPiercing)) { // and uses 2hs \ 2hb \ 2hp
-						if (m_inv[MainSecondary]) { // and if secondary slot is not empty
+						if (m_inv[SlotSecondary]) { // and if secondary slot is not empty
 							continue; // Can't auto-equip
 						}
 					}
 				}
-				if (i == MainSecondary && m_inv[MainPrimary]) { // check to see if primary slot is a two hander
-					uint8 use = m_inv[MainPrimary]->GetItem()->ItemType;
+				if (i == SlotSecondary && m_inv[SlotPrimary]) { // check to see if primary slot is a two hander
+					uint8 use = m_inv[SlotPrimary]->GetItem()->ItemType;
 					if (use == ItemType2HSlash || use == ItemType2HBlunt || use == ItemType2HPiercing)
 						continue;
 				}
-				if (i == MainSecondary && inst.IsWeapon() && !CanThisClassDualWield()) {
+				if (i == SlotSecondary && inst.IsWeapon() && !CanThisClassDualWield()) {
 					continue;
 				}
 
@@ -1018,7 +1018,7 @@ bool Client::AutoPutLootInInventory(ItemInst& inst, bool try_worn, bool try_curs
 					//send worn to everyone...
 					PutLootInInventory(i, inst);
 					uint8 worn_slot_material = Inventory::CalcMaterialFromSlot(i);
-					if (worn_slot_material != _MaterialInvalid) {
+					if (worn_slot_material != MaterialInvalid) {
 						SendWearChange(worn_slot_material);
 					}
 					
@@ -1061,7 +1061,7 @@ void Client::MoveItemCharges(ItemInst &from, int16 to_slot, uint8 type)
 		tmp_inst->SetCharges(tmp_inst->GetCharges() + charges_to_move);
 		from.SetCharges(from.GetCharges() - charges_to_move);
 		SendLootItemInPacket(tmp_inst, to_slot);
-		if (to_slot == MainCursor) {
+		if (to_slot == SlotCursor) {
 			auto s = m_inv.cursor_cbegin(), e = m_inv.cursor_cend();
 			database.SaveCursor(this->CharacterID(), s, e);
 		}
@@ -1318,16 +1318,16 @@ void Client::SendLootItemInPacket(const ItemInst* inst, int16 slot_id)
 
 bool Client::IsValidSlot(uint32 slot) {
 	if ((slot == (uint32)INVALID_INDEX) ||
-		(slot >= MAIN_BEGIN && slot < EmuConstants::MAP_POSSESSIONS_SIZE) ||
-		(slot >= EmuConstants::GENERAL_BAGS_BEGIN && slot <= EmuConstants::CURSOR_BAG_END) ||
-		(slot >= EmuConstants::TRIBUTE_BEGIN && slot <= EmuConstants::TRIBUTE_END) ||
-		(slot >= EmuConstants::BANK_BEGIN && slot <= EmuConstants::BANK_END) ||
-		(slot >= EmuConstants::BANK_BAGS_BEGIN && slot <= EmuConstants::BANK_BAGS_END) ||
-		(slot >= EmuConstants::SHARED_BANK_BEGIN && slot <= EmuConstants::SHARED_BANK_END) ||
-		(slot >= EmuConstants::SHARED_BANK_BAGS_BEGIN && slot <= EmuConstants::SHARED_BANK_BAGS_END) ||
-		(slot >= EmuConstants::TRADE_BEGIN && slot <= EmuConstants::TRADE_END) ||
-		(slot >= EmuConstants::WORLD_BEGIN && slot <= EmuConstants::WORLD_END) ||
-		(slot == MainPowerSource)
+		(slot >= SLOT_BEGIN && slot < EQEmu::Constants::TYPE_POSSESSIONS_SIZE) ||
+		(slot >= EQEmu::Constants::GENERAL_BAGS_BEGIN && slot <= EQEmu::Constants::CURSOR_BAG_END) ||
+		(slot >= EQEmu::Constants::TRIBUTE_BEGIN && slot <= EQEmu::Constants::TRIBUTE_END) ||
+		(slot >= EQEmu::Constants::BANK_BEGIN && slot <= EQEmu::Constants::BANK_END) ||
+		(slot >= EQEmu::Constants::BANK_BAGS_BEGIN && slot <= EQEmu::Constants::BANK_BAGS_END) ||
+		(slot >= EQEmu::Constants::SHARED_BANK_BEGIN && slot <= EQEmu::Constants::SHARED_BANK_END) ||
+		(slot >= EQEmu::Constants::SHARED_BANK_BAGS_BEGIN && slot <= EQEmu::Constants::SHARED_BANK_BAGS_END) ||
+		(slot >= EQEmu::Constants::TRADE_BEGIN && slot <= EQEmu::Constants::TRADE_END) ||
+		(slot >= EQEmu::Constants::WORLD_BEGIN && slot <= EQEmu::Constants::WORLD_END) ||
+		(slot == SlotPowerSource)
 		) {
 		return true;
 	}
@@ -1338,10 +1338,10 @@ bool Client::IsValidSlot(uint32 slot) {
 
 bool Client::IsBankSlot(uint32 slot)
 {
-	if ((slot >= EmuConstants::BANK_BEGIN && slot <= EmuConstants::BANK_END) ||
-		(slot >= EmuConstants::BANK_BAGS_BEGIN && slot <= EmuConstants::BANK_BAGS_END) ||
-		(slot >= EmuConstants::SHARED_BANK_BEGIN && slot <= EmuConstants::SHARED_BANK_END) ||
-		(slot >= EmuConstants::SHARED_BANK_BAGS_BEGIN && slot <= EmuConstants::SHARED_BANK_BAGS_END))
+	if ((slot >= EQEmu::Constants::BANK_BEGIN && slot <= EQEmu::Constants::BANK_END) ||
+		(slot >= EQEmu::Constants::BANK_BAGS_BEGIN && slot <= EQEmu::Constants::BANK_BAGS_END) ||
+		(slot >= EQEmu::Constants::SHARED_BANK_BEGIN && slot <= EQEmu::Constants::SHARED_BANK_END) ||
+		(slot >= EQEmu::Constants::SHARED_BANK_BAGS_BEGIN && slot <= EQEmu::Constants::SHARED_BANK_BAGS_END))
 	{
 		return true;
 	}
@@ -1377,8 +1377,8 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 		if(RuleB(QueryServ, PlayerLogMoves)) { QSSwapItemAuditor(move_in); } // QS Audit
 		if (GetClientVersion() >= ClientVersion::RoF) { return true; } // Can't do RoF+
 
-		if (move_in->to_slot == MainCursor) {
-			auto test_inst = m_inv.GetItem(MainCursor);
+		if (move_in->to_slot == SlotCursor) {
+			auto test_inst = m_inv.GetItem(SlotCursor);
 			if (test_inst == nullptr) { return true; }
 			auto test_item = test_inst->GetItem();
 			if (test_item == nullptr) { return true; }
@@ -1397,18 +1397,18 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 					GetName(), test_item->Name, test_item->ID);
 				Message_StringID(MT_LootMessages, 290);
 				parse->EventItem(EVENT_DESTROY_ITEM, this, test_inst, nullptr, "", 0);
-				DeleteItemInInventory(MainCursor, 0, true);
+				DeleteItemInInventory(SlotCursor, 0, true);
 			}
 		}
 		return true;
 	}
 
 	if (move_in->to_slot == (uint32)INVALID_INDEX) {
-		if (move_in->from_slot == (uint32)MainCursor) {
+		if (move_in->from_slot == (uint32)SlotCursor) {
 			Log.Out(Logs::Detail, Logs::Inventory, "Client destroyed item from cursor slot %d", move_in->from_slot);
 			if(RuleB(QueryServ, PlayerLogMoves)) { QSSwapItemAuditor(move_in); } // QS Audit
 
-			ItemInst *inst = m_inv.GetItem(MainCursor);
+			ItemInst *inst = m_inv.GetItem(SlotCursor);
 			if(inst) {
 				parse->EventItem(EVENT_DESTROY_ITEM, this, inst, nullptr, "", 0);
 			}
@@ -1425,9 +1425,9 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 			return true; // Item deletion
 		}
 	}
-	if(auto_attack && (move_in->from_slot == MainPrimary || move_in->from_slot == MainSecondary || move_in->from_slot == MainRange))
+	if(auto_attack && (move_in->from_slot == SlotPrimary || move_in->from_slot == SlotSecondary || move_in->from_slot == SlotRange))
 		SetAttackTimer();
-	else if(auto_attack && (move_in->to_slot == MainPrimary || move_in->to_slot == MainSecondary || move_in->to_slot == MainRange))
+	else if(auto_attack && (move_in->to_slot == SlotPrimary || move_in->to_slot == SlotSecondary || move_in->to_slot == SlotRange))
 		SetAttackTimer();
 	// Step 1: Variables
 	int16 src_slot_id = (int16)move_in->from_slot;
@@ -1475,13 +1475,13 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 		uint32 dstbagid = 0;
 
 		//if (src_slot_id >= 250 && src_slot_id < 330) {
-		if (src_slot_id >= EmuConstants::GENERAL_BAGS_BEGIN && src_slot_id <= EmuConstants::GENERAL_BAGS_END) {
+		if (src_slot_id >= EQEmu::Constants::GENERAL_BAGS_BEGIN && src_slot_id <= EQEmu::Constants::GENERAL_BAGS_END) {
 			srcbag = m_inv.GetItem(((int)(src_slot_id / 10)) - 3);
 			if (srcbag)
 				srcbagid = srcbag->GetItem()->ID;
 		}
 		//if (dst_slot_id >= 250 && dst_slot_id < 330) {
-		if (dst_slot_id >= EmuConstants::GENERAL_BAGS_BEGIN && dst_slot_id <= EmuConstants::GENERAL_BAGS_END) {
+		if (dst_slot_id >= EQEmu::Constants::GENERAL_BAGS_BEGIN && dst_slot_id <= EQEmu::Constants::GENERAL_BAGS_END) {
 			dstbag = m_inv.GetItem(((int)(dst_slot_id / 10)) - 3);
 			if (dstbag)
 				dstbagid = dstbag->GetItem()->ID;
@@ -1494,7 +1494,7 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 
 	// Step 2: Validate item in from_slot
 	// After this, we can assume src_inst is a valid ptr
-	if (!src_inst && (src_slot_id < EmuConstants::WORLD_BEGIN || src_slot_id > EmuConstants::WORLD_END)) {
+	if (!src_inst && (src_slot_id < EQEmu::Constants::WORLD_BEGIN || src_slot_id > EQEmu::Constants::WORLD_END)) {
 		if (dst_inst) {
 			// If there is no source item, but there is a destination item,
 			// move the slots around before deleting the invalid source slot item,
@@ -1508,14 +1508,14 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 		return false;
 	}
 	//verify shared bank transactions in the database
-	if(src_inst && src_slot_id >= EmuConstants::SHARED_BANK_BEGIN && src_slot_id <= EmuConstants::SHARED_BANK_BAGS_END) {
+	if(src_inst && src_slot_id >= EQEmu::Constants::SHARED_BANK_BEGIN && src_slot_id <= EQEmu::Constants::SHARED_BANK_BAGS_END) {
 		if(!database.VerifyInventory(account_id, src_slot_id, src_inst)) {
 			Log.Out(Logs::General, Logs::Error, "Player %s on account %s was found exploiting the shared bank.\n", GetName(), account_name);
 			DeleteItemInInventory(dst_slot_id,0,true);
 			return(false);
 		}
-		if(src_slot_id >= EmuConstants::SHARED_BANK_BEGIN && src_slot_id <= EmuConstants::SHARED_BANK_END && src_inst->IsType(ItemClassContainer)){
-			for (uint8 idx = SUB_BEGIN; idx < EmuConstants::ITEM_CONTAINER_SIZE; idx++) {
+		if(src_slot_id >= EQEmu::Constants::SHARED_BANK_BEGIN && src_slot_id <= EQEmu::Constants::SHARED_BANK_END && src_inst->IsType(ItemClassContainer)){
+			for (uint8 idx = SUB_BEGIN; idx < EQEmu::Constants::ITEM_CONTAINER_SIZE; idx++) {
 				const ItemInst* baginst = src_inst->GetItem(idx);
 				if(baginst && !database.VerifyInventory(account_id, Inventory::CalcSlotId(src_slot_id, idx), baginst)){
 					DeleteItemInInventory(Inventory::CalcSlotId(src_slot_id, idx),0,false);
@@ -1523,14 +1523,14 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 			}
 		}
 	}
-	if(dst_inst && dst_slot_id >= EmuConstants::SHARED_BANK_BEGIN && dst_slot_id <= EmuConstants::SHARED_BANK_BAGS_END) {
+	if(dst_inst && dst_slot_id >= EQEmu::Constants::SHARED_BANK_BEGIN && dst_slot_id <= EQEmu::Constants::SHARED_BANK_BAGS_END) {
 		if(!database.VerifyInventory(account_id, dst_slot_id, dst_inst)) {
 			Log.Out(Logs::General, Logs::Error, "Player %s on account %s was found exploting the shared bank.\n", GetName(), account_name);
 			DeleteItemInInventory(src_slot_id,0,true);
 			return(false);
 		}
-		if(dst_slot_id >= EmuConstants::SHARED_BANK_BEGIN && dst_slot_id <= EmuConstants::SHARED_BANK_END && dst_inst->IsType(ItemClassContainer)){
-			for (uint8 idx = SUB_BEGIN; idx < EmuConstants::ITEM_CONTAINER_SIZE; idx++) {
+		if(dst_slot_id >= EQEmu::Constants::SHARED_BANK_BEGIN && dst_slot_id <= EQEmu::Constants::SHARED_BANK_END && dst_inst->IsType(ItemClassContainer)){
+			for (uint8 idx = SUB_BEGIN; idx < EQEmu::Constants::ITEM_CONTAINER_SIZE; idx++) {
 				const ItemInst* baginst = dst_inst->GetItem(idx);
 				if(baginst && !database.VerifyInventory(account_id, Inventory::CalcSlotId(dst_slot_id, idx), baginst)){
 					DeleteItemInInventory(Inventory::CalcSlotId(dst_slot_id, idx),0,false);
@@ -1542,8 +1542,8 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 
 	// Check for No Drop Hacks
 	Mob* with = trade->With();
-	if (((with && with->IsClient() && dst_slot_id >= EmuConstants::TRADE_BEGIN && dst_slot_id <= EmuConstants::TRADE_END) ||
-	(dst_slot_id >= EmuConstants::SHARED_BANK_BEGIN && dst_slot_id <= EmuConstants::SHARED_BANK_BAGS_END))
+	if (((with && with->IsClient() && dst_slot_id >= EQEmu::Constants::TRADE_BEGIN && dst_slot_id <= EQEmu::Constants::TRADE_END) ||
+	(dst_slot_id >= EQEmu::Constants::SHARED_BANK_BEGIN && dst_slot_id <= EQEmu::Constants::SHARED_BANK_BAGS_END))
 	&& GetInv().CheckNoDrop(src_slot_id)
 	&& RuleI(World, FVNoDropFlag) == 0 || RuleI(Character, MinStatusForNoDropExemptions) < Admin() && RuleI(World, FVNoDropFlag) == 2) {
 		auto ndh_inst = m_inv[src_slot_id];
@@ -1573,7 +1573,7 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 
 	// Step 3: Check for interaction with World Container (tradeskills)
 	if(m_tradeskill_object != nullptr) {
-		if (src_slot_id >= EmuConstants::WORLD_BEGIN && src_slot_id <= EmuConstants::WORLD_END) {
+		if (src_slot_id >= EQEmu::Constants::WORLD_BEGIN && src_slot_id <= EQEmu::Constants::WORLD_END) {
 			// Picking up item from world container
 			ItemInst* inst = m_tradeskill_object->PopItem(Inventory::CalcBagIdx(src_slot_id));
 			if (inst) {
@@ -1585,7 +1585,7 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 
 			return true;
 		}
-		else if (dst_slot_id >= EmuConstants::WORLD_BEGIN && dst_slot_id <= EmuConstants::WORLD_END) {
+		else if (dst_slot_id >= EQEmu::Constants::WORLD_BEGIN && dst_slot_id <= EQEmu::Constants::WORLD_END) {
 			// Putting item into world container, which may swap (or pile onto) with existing item
 			uint8 world_idx = Inventory::CalcBagIdx(dst_slot_id);
 			ItemInst* world_inst = m_tradeskill_object->PopItem(world_idx);
@@ -1637,7 +1637,7 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 			}
 
 			safe_delete(world_inst);
-			if (src_slot_id == MainCursor)
+			if (src_slot_id == SlotCursor)
 			{
 				if (dstitemid == 0)
 				{
@@ -1658,15 +1658,15 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 	}
 
 	// Step 4: Check for entity trade
-	if (dst_slot_id >= EmuConstants::TRADE_BEGIN && dst_slot_id <= EmuConstants::TRADE_END) {
-		if (src_slot_id != MainCursor) {
+	if (dst_slot_id >= EQEmu::Constants::TRADE_BEGIN && dst_slot_id <= EQEmu::Constants::TRADE_END) {
+		if (src_slot_id != SlotCursor) {
 			Kick();
 			return false;
 		}
 		if (with) {
 			Log.Out(Logs::Detail, Logs::Inventory, "Trade item move from slot %d to slot %d (trade with %s)", src_slot_id, dst_slot_id, with->GetName());
 			// Fill Trade list with items from cursor
-			if (!m_inv[MainCursor]) {
+			if (!m_inv[SlotCursor]) {
 				Message(13, "Error: Cursor item not located on server!");
 				return false;
 			}
@@ -1686,7 +1686,7 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 			if(RuleB(QueryServ, PlayerLogMoves)) { QSSwapItemAuditor(move_in); } // QS Audit
 
 			SummonItem(src_inst->GetID(), src_inst->GetCharges());
-			DeleteItemInInventory(MainCursor);
+			DeleteItemInInventory(SlotCursor);
 
 			return true;
 		}
@@ -1751,12 +1751,12 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 	}
 	else {
 		// Not dealing with charges - just do direct swap
-		if(src_inst && (dst_slot_id <= EmuConstants::EQUIPMENT_END || dst_slot_id == MainPowerSource) && dst_slot_id >= EmuConstants::EQUIPMENT_BEGIN) {
+		if(src_inst && (dst_slot_id <= EQEmu::Constants::EQUIPMENT_END || dst_slot_id == SlotPowerSource) && dst_slot_id >= EQEmu::Constants::EQUIPMENT_BEGIN) {
 			if (src_inst->GetItem()->Attuneable) {
 				src_inst->SetAttuned(true);
 			}
 			if (src_inst->IsAugmented()) {
-				for (int i = AUG_BEGIN; i < EmuConstants::ITEM_COMMON_SIZE; i++) {
+				for (int i = AUG_BEGIN; i < EQEmu::Constants::ITEM_COMMON_SIZE; i++) {
 					if (src_inst->GetAugment(i)) {
 						if (src_inst->GetAugment(i)->GetItem()->Attuneable) {
 							src_inst->GetAugment(i)->SetAttuned(true);
@@ -1769,7 +1769,7 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 		if(!m_inv.SwapItem(src_slot_id, dst_slot_id)) { return false; }
 		Log.Out(Logs::Detail, Logs::Inventory, "Moving entire item from slot %d to slot %d", src_slot_id, dst_slot_id);
 
-		if(src_slot_id <= EmuConstants::EQUIPMENT_END || src_slot_id == MainPowerSource) {
+		if(src_slot_id <= EQEmu::Constants::EQUIPMENT_END || src_slot_id == SlotPowerSource) {
 			if(src_inst) {
 				parse->EventItem(EVENT_UNEQUIP_ITEM, this, src_inst, nullptr, "", src_slot_id);
 			}
@@ -1779,7 +1779,7 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 			}
 		}
 
-		if(dst_slot_id <= EmuConstants::EQUIPMENT_END || dst_slot_id == MainPowerSource) {
+		if(dst_slot_id <= EQEmu::Constants::EQUIPMENT_END || dst_slot_id == SlotPowerSource) {
 			if(dst_inst) {
 				parse->EventItem(EVENT_UNEQUIP_ITEM, this, dst_inst, nullptr, "", dst_slot_id);
 			}
@@ -1791,12 +1791,12 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 	}
 
 	int matslot = SlotConvert2(dst_slot_id);
-	if (dst_slot_id <= EmuConstants::EQUIPMENT_END && matslot != MaterialHead) { // think this is to allow the client to update with /showhelm
+	if (dst_slot_id <= EQEmu::Constants::EQUIPMENT_END && matslot != MaterialHead) { // think this is to allow the client to update with /showhelm
 		SendWearChange(matslot);
 	}
 
 	// Step 7: Save change to the database
-	if (src_slot_id == MainCursor) {
+	if (src_slot_id == SlotCursor) {
 		// If not swapping another item to cursor and stacking items were depleted
 		if (dstitemid == 0 || all_to_stack == true)
 		{
@@ -1809,7 +1809,7 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 		database.SaveInventory(character_id, m_inv.GetItem(src_slot_id), src_slot_id);
 	}
 
-	if (dst_slot_id == MainCursor) {
+	if (dst_slot_id == SlotCursor) {
 		auto s = m_inv.cursor_cbegin(), e = m_inv.cursor_cend();
 		database.SaveCursor(character_id, s, e);
 	}
@@ -1833,7 +1833,7 @@ void Client::SwapItemResync(MoveItem_Struct* move_slots) {
 	Log.Out(Logs::Detail, Logs::Inventory, "Inventory desyncronization. (charname: %s, source: %i, destination: %i)", GetName(), move_slots->from_slot, move_slots->to_slot);
 	Message(15, "Inventory Desyncronization detected: Resending slot data...");
 
-	if((move_slots->from_slot >= EmuConstants::EQUIPMENT_BEGIN && move_slots->from_slot <= EmuConstants::CURSOR_BAG_END) || move_slots->from_slot == MainPowerSource) {
+	if((move_slots->from_slot >= EQEmu::Constants::EQUIPMENT_BEGIN && move_slots->from_slot <= EQEmu::Constants::CURSOR_BAG_END) || move_slots->from_slot == SlotPowerSource) {
 		int16 resync_slot = (Inventory::CalcSlotId(move_slots->from_slot) == INVALID_INDEX) ? move_slots->from_slot : Inventory::CalcSlotId(move_slots->from_slot);
 		if (IsValidSlot(resync_slot) && resync_slot != INVALID_INDEX) {
 			// This prevents the client from crashing when closing any 'phantom' bags
@@ -1876,7 +1876,7 @@ void Client::SwapItemResync(MoveItem_Struct* move_slots) {
 		else { Message(13, "Could not resyncronize source slot %i.", move_slots->from_slot); }
 	}
 
-	if((move_slots->to_slot >= EmuConstants::EQUIPMENT_BEGIN && move_slots->to_slot <= EmuConstants::CURSOR_BAG_END) || move_slots->to_slot == MainPowerSource) {
+	if((move_slots->to_slot >= EQEmu::Constants::EQUIPMENT_BEGIN && move_slots->to_slot <= EQEmu::Constants::CURSOR_BAG_END) || move_slots->to_slot == SlotPowerSource) {
 		int16 resync_slot = (Inventory::CalcSlotId(move_slots->to_slot) == INVALID_INDEX) ? move_slots->to_slot : Inventory::CalcSlotId(move_slots->to_slot);
 		if (IsValidSlot(resync_slot) && resync_slot != INVALID_INDEX) {
 			const Item_Struct* token_struct = database.GetItem(22292); // 'Copper Coin'
@@ -2019,7 +2019,7 @@ void Client::QSSwapItemAuditor(MoveItem_Struct* move_in, bool postaction_call) {
 
 void Client::DyeArmor(DyeStruct* dye){
 	int16 slot=0;
-	for (int i = EmuConstants::MATERIAL_BEGIN; i <= EmuConstants::MATERIAL_TINT_END; i++) {
+	for (int i = EQEmu::Constants::MATERIAL_BEGIN; i <= EQEmu::Constants::MATERIAL_TINT_END; i++) {
 		if ((m_pp.item_tint[i].Color & 0x00FFFFFF) != (dye->dye[i].Color & 0x00FFFFFF)) {
 			slot = m_inv.HasItem(32557, 1, invWherePersonal);
 			if (slot != INVALID_INDEX){
@@ -2058,7 +2058,7 @@ bool Client::DecreaseByItemType(uint32 type, uint8 amt) {
 	const Item_Struct* TempItem = 0;
 	ItemInst* ins;
 	int x;
-	for(x=EmuConstants::POSSESSIONS_BEGIN; x <= EmuConstants::POSSESSIONS_END; x++)
+	for(x=EQEmu::Constants::POSSESSIONS_BEGIN; x <= EQEmu::Constants::POSSESSIONS_END; x++)
 	{
 		TempItem = 0;
 		ins = GetInv().GetItem(x);
@@ -2080,7 +2080,7 @@ bool Client::DecreaseByItemType(uint32 type, uint8 amt) {
 				return true;
 		}
 	}
-	for(x=EmuConstants::GENERAL_BAGS_BEGIN; x <= EmuConstants::GENERAL_BAGS_END; x++)
+	for(x=EQEmu::Constants::GENERAL_BAGS_BEGIN; x <= EQEmu::Constants::GENERAL_BAGS_END; x++)
 	{
 		TempItem = 0;
 		ins = GetInv().GetItem(x);
@@ -2111,10 +2111,10 @@ bool Client::DecreaseByID(uint32 type, uint8 amt) {
 	ItemInst* ins = nullptr;
 	int x;
 	int num = 0;
-	for(x = EmuConstants::EQUIPMENT_BEGIN; x <= EmuConstants::GENERAL_BAGS_END; x++)
+	for(x = EQEmu::Constants::EQUIPMENT_BEGIN; x <= EQEmu::Constants::GENERAL_BAGS_END; x++)
 	{
-		if (x == MainCursor + 1)
-			x = EmuConstants::GENERAL_BAGS_BEGIN;
+		if (x == SlotCursor + 1)
+			x = EQEmu::Constants::GENERAL_BAGS_BEGIN;
 		TempItem = nullptr;
 		ins = GetInv().GetItem(x);
 		if (ins)
@@ -2128,10 +2128,10 @@ bool Client::DecreaseByID(uint32 type, uint8 amt) {
 	}
 	if (num < amt)
 		return false;
-	for(x = EmuConstants::EQUIPMENT_BEGIN; x <= EmuConstants::GENERAL_BAGS_END; x++) // should this be CURSOR_BAG_END?
+	for(x = EQEmu::Constants::EQUIPMENT_BEGIN; x <= EQEmu::Constants::GENERAL_BAGS_END; x++) // should this be CURSOR_BAG_END?
 	{
-		if (x == MainCursor + 1)
-			x = EmuConstants::GENERAL_BAGS_BEGIN;
+		if (x == SlotCursor + 1)
+			x = EQEmu::Constants::GENERAL_BAGS_BEGIN;
 		TempItem = nullptr;
 		ins = GetInv().GetItem(x);
 		if (ins)
@@ -2227,7 +2227,7 @@ static bool CopyBagContents(ItemInst* new_bag, const ItemInst* old_bag)
 
 void Client::DisenchantSummonedBags(bool client_update)
 {
-	for (auto slot_id = EmuConstants::GENERAL_BEGIN; slot_id <= EmuConstants::GENERAL_END; ++slot_id) {
+	for (auto slot_id = EQEmu::Constants::GENERAL_BEGIN; slot_id <= EQEmu::Constants::GENERAL_END; ++slot_id) {
 		auto inst = m_inv[slot_id];
 		if (!inst) { continue; }
 		if (!IsSummonedBagID(inst->GetItem()->ID)) { continue; }
@@ -2248,7 +2248,7 @@ void Client::DisenchantSummonedBags(bool client_update)
 		safe_delete(new_inst);
 	}
 
-	for (auto slot_id = EmuConstants::BANK_BEGIN; slot_id <= EmuConstants::BANK_END; ++slot_id) {
+	for (auto slot_id = EQEmu::Constants::BANK_BEGIN; slot_id <= EQEmu::Constants::BANK_END; ++slot_id) {
 		auto inst = m_inv[slot_id];
 		if (!inst) { continue; }
 		if (!IsSummonedBagID(inst->GetItem()->ID)) { continue; }
@@ -2269,7 +2269,7 @@ void Client::DisenchantSummonedBags(bool client_update)
 		safe_delete(new_inst);
 	}
 
-	for (auto slot_id = EmuConstants::SHARED_BANK_BEGIN; slot_id <= EmuConstants::SHARED_BANK_END; ++slot_id) {
+	for (auto slot_id = EQEmu::Constants::SHARED_BANK_BEGIN; slot_id <= EQEmu::Constants::SHARED_BANK_END; ++slot_id) {
 		auto inst = m_inv[slot_id];
 		if (!inst) { continue; }
 		if (!IsSummonedBagID(inst->GetItem()->ID)) { continue; }
@@ -2291,7 +2291,7 @@ void Client::DisenchantSummonedBags(bool client_update)
 	}
 
 	while (!m_inv.CursorEmpty()) {
-		auto inst = m_inv[MainCursor];
+		auto inst = m_inv[SlotCursor];
 		if (!inst) { break; }
 		if (!IsSummonedBagID(inst->GetItem()->ID)) { break; }
 		if (inst->GetItem()->ItemClass != ItemClassContainer) { break; }
@@ -2305,14 +2305,14 @@ void Client::DisenchantSummonedBags(bool client_update)
 		if (!new_inst) { break; }
 
 		if (CopyBagContents(new_inst, inst)) {
-			Log.Out(Logs::General, Logs::Inventory, "Disenchant Summoned Bags: Replacing %s with %s in slot %i", inst->GetItem()->Name, new_inst->GetItem()->Name, MainCursor);
+			Log.Out(Logs::General, Logs::Inventory, "Disenchant Summoned Bags: Replacing %s with %s in slot %i", inst->GetItem()->Name, new_inst->GetItem()->Name, SlotCursor);
 			std::list<ItemInst*> local;
 			local.push_front(new_inst);
-			m_inv.PopItem(MainCursor);
+			m_inv.PopItem(SlotCursor);
 			safe_delete(inst);
 
 			while (!m_inv.CursorEmpty()) {
-				auto limbo_inst = m_inv.PopItem(MainCursor);
+				auto limbo_inst = m_inv.PopItem(SlotCursor);
 				if (limbo_inst == nullptr) { continue; }
 				local.push_back(limbo_inst);
 			}
@@ -2338,7 +2338,7 @@ void Client::DisenchantSummonedBags(bool client_update)
 
 void Client::RemoveNoRent(bool client_update)
 {
-	for (auto slot_id = EmuConstants::EQUIPMENT_BEGIN; slot_id <= EmuConstants::EQUIPMENT_END; ++slot_id) {
+	for (auto slot_id = EQEmu::Constants::EQUIPMENT_BEGIN; slot_id <= EQEmu::Constants::EQUIPMENT_END; ++slot_id) {
 		auto inst = m_inv[slot_id];
 		if(inst && !inst->GetItem()->NoRent) {
 			Log.Out(Logs::Detail, Logs::Inventory, "NoRent Timer Lapse: Deleting %s from slot %i", inst->GetItem()->Name, slot_id);
@@ -2346,7 +2346,7 @@ void Client::RemoveNoRent(bool client_update)
 		}
 	}
 
-	for (auto slot_id = EmuConstants::GENERAL_BEGIN; slot_id <= EmuConstants::GENERAL_END; ++slot_id) {
+	for (auto slot_id = EQEmu::Constants::GENERAL_BEGIN; slot_id <= EQEmu::Constants::GENERAL_END; ++slot_id) {
 		auto inst = m_inv[slot_id];
 		if (inst && !inst->GetItem()->NoRent) {
 			Log.Out(Logs::Detail, Logs::Inventory, "NoRent Timer Lapse: Deleting %s from slot %i", inst->GetItem()->Name, slot_id);
@@ -2354,15 +2354,15 @@ void Client::RemoveNoRent(bool client_update)
 		}
 	}
 
-	if (m_inv[MainPowerSource]) {
-		auto inst = m_inv[MainPowerSource];
+	if (m_inv[SlotPowerSource]) {
+		auto inst = m_inv[SlotPowerSource];
 		if (inst && !inst->GetItem()->NoRent) {
-			Log.Out(Logs::Detail, Logs::Inventory, "NoRent Timer Lapse: Deleting %s from slot %i", inst->GetItem()->Name, MainPowerSource);
-			DeleteItemInInventory(MainPowerSource, 0, (GetClientVersion() >= ClientVersion::SoF) ? client_update : false); // Ti slot non-existent
+			Log.Out(Logs::Detail, Logs::Inventory, "NoRent Timer Lapse: Deleting %s from slot %i", inst->GetItem()->Name, SlotPowerSource);
+			DeleteItemInInventory(SlotPowerSource, 0, (GetClientVersion() >= ClientVersion::SoF) ? client_update : false); // Ti slot non-existent
 		}
 	}
 
-	for (auto slot_id = EmuConstants::GENERAL_BAGS_BEGIN; slot_id <= EmuConstants::CURSOR_BAG_END; ++slot_id) {
+	for (auto slot_id = EQEmu::Constants::GENERAL_BAGS_BEGIN; slot_id <= EQEmu::Constants::CURSOR_BAG_END; ++slot_id) {
 		auto inst = m_inv[slot_id];
 		if(inst && !inst->GetItem()->NoRent) {
 			Log.Out(Logs::Detail, Logs::Inventory, "NoRent Timer Lapse: Deleting %s from slot %i", inst->GetItem()->Name, slot_id);
@@ -2370,7 +2370,7 @@ void Client::RemoveNoRent(bool client_update)
 		}
 	}
 
-	for (auto slot_id = EmuConstants::BANK_BEGIN; slot_id <= EmuConstants::BANK_END; ++slot_id) {
+	for (auto slot_id = EQEmu::Constants::BANK_BEGIN; slot_id <= EQEmu::Constants::BANK_END; ++slot_id) {
 		auto inst = m_inv[slot_id];
 		if(inst && !inst->GetItem()->NoRent) {
 			Log.Out(Logs::Detail, Logs::Inventory, "NoRent Timer Lapse: Deleting %s from slot %i", inst->GetItem()->Name, slot_id);
@@ -2378,7 +2378,7 @@ void Client::RemoveNoRent(bool client_update)
 		}
 	}
 
-	for (auto slot_id = EmuConstants::BANK_BAGS_BEGIN; slot_id <= EmuConstants::BANK_BAGS_END; ++slot_id) {
+	for (auto slot_id = EQEmu::Constants::BANK_BAGS_BEGIN; slot_id <= EQEmu::Constants::BANK_BAGS_END; ++slot_id) {
 		auto inst = m_inv[slot_id];
 		if(inst && !inst->GetItem()->NoRent) {
 			Log.Out(Logs::Detail, Logs::Inventory, "NoRent Timer Lapse: Deleting %s from slot %i", inst->GetItem()->Name, slot_id);
@@ -2386,7 +2386,7 @@ void Client::RemoveNoRent(bool client_update)
 		}
 	}
 
-	for (auto slot_id = EmuConstants::SHARED_BANK_BEGIN; slot_id <= EmuConstants::SHARED_BANK_END; ++slot_id) {
+	for (auto slot_id = EQEmu::Constants::SHARED_BANK_BEGIN; slot_id <= EQEmu::Constants::SHARED_BANK_END; ++slot_id) {
 		auto inst = m_inv[slot_id];
 		if(inst && !inst->GetItem()->NoRent) {
 			Log.Out(Logs::Detail, Logs::Inventory, "NoRent Timer Lapse: Deleting %s from slot %i", inst->GetItem()->Name, slot_id);
@@ -2394,7 +2394,7 @@ void Client::RemoveNoRent(bool client_update)
 		}
 	}
 
-	for (auto slot_id = EmuConstants::SHARED_BANK_BAGS_BEGIN; slot_id <= EmuConstants::SHARED_BANK_BAGS_END; ++slot_id) {
+	for (auto slot_id = EQEmu::Constants::SHARED_BANK_BAGS_BEGIN; slot_id <= EQEmu::Constants::SHARED_BANK_BAGS_END; ++slot_id) {
 		auto inst = m_inv[slot_id];
 		if(inst && !inst->GetItem()->NoRent) {
 			Log.Out(Logs::Detail, Logs::Inventory, "NoRent Timer Lapse: Deleting %s from slot %i", inst->GetItem()->Name, slot_id);
@@ -2406,7 +2406,7 @@ void Client::RemoveNoRent(bool client_update)
 		std::list<ItemInst*> local;
 
 		while (!m_inv.CursorEmpty()) {
-			auto inst = m_inv.PopItem(MainCursor);
+			auto inst = m_inv.PopItem(SlotCursor);
 			if (inst == nullptr) { continue; }
 			local.push_back(inst);
 		}
@@ -2432,7 +2432,7 @@ void Client::RemoveNoRent(bool client_update)
 // Two new methods to alleviate perpetual login desyncs
 void Client::RemoveDuplicateLore(bool client_update)
 {
-	for (auto slot_id = EmuConstants::EQUIPMENT_BEGIN; slot_id <= EmuConstants::EQUIPMENT_END; ++slot_id) {
+	for (auto slot_id = EQEmu::Constants::EQUIPMENT_BEGIN; slot_id <= EQEmu::Constants::EQUIPMENT_END; ++slot_id) {
 		auto inst = m_inv.PopItem(slot_id);
 		if (inst == nullptr) { continue; }
 		if(CheckLoreConflict(inst->GetItem())) {
@@ -2445,7 +2445,7 @@ void Client::RemoveDuplicateLore(bool client_update)
 		safe_delete(inst);
 	}
 	
-	for (auto slot_id = EmuConstants::GENERAL_BEGIN; slot_id <= EmuConstants::GENERAL_END; ++slot_id) {
+	for (auto slot_id = EQEmu::Constants::GENERAL_BEGIN; slot_id <= EQEmu::Constants::GENERAL_END; ++slot_id) {
 		auto inst = m_inv.PopItem(slot_id);
 		if (inst == nullptr) { continue; }
 		if (CheckLoreConflict(inst->GetItem())) {
@@ -2458,21 +2458,21 @@ void Client::RemoveDuplicateLore(bool client_update)
 		safe_delete(inst);
 	}
 
-	if (m_inv[MainPowerSource]) {
-		auto inst = m_inv.PopItem(MainPowerSource);
+	if (m_inv[SlotPowerSource]) {
+		auto inst = m_inv.PopItem(SlotPowerSource);
 		if (inst) {
 			if (CheckLoreConflict(inst->GetItem())) {
-				Log.Out(Logs::Detail, Logs::Inventory, "Lore Duplication Error: Deleting %s from slot %i", inst->GetItem()->Name, MainPowerSource);
-				database.SaveInventory(character_id, nullptr, MainPowerSource);
+				Log.Out(Logs::Detail, Logs::Inventory, "Lore Duplication Error: Deleting %s from slot %i", inst->GetItem()->Name, SlotPowerSource);
+				database.SaveInventory(character_id, nullptr, SlotPowerSource);
 			}
 			else {
-				m_inv.PutItem(MainPowerSource, *inst);
+				m_inv.PutItem(SlotPowerSource, *inst);
 			}
 			safe_delete(inst);
 		}
 	}
 
-	for (auto slot_id = EmuConstants::GENERAL_BAGS_BEGIN; slot_id <= EmuConstants::CURSOR_BAG_END; ++slot_id) {
+	for (auto slot_id = EQEmu::Constants::GENERAL_BAGS_BEGIN; slot_id <= EQEmu::Constants::CURSOR_BAG_END; ++slot_id) {
 		auto inst = m_inv.PopItem(slot_id);
 		if (inst == nullptr) { continue; }
 		if(CheckLoreConflict(inst->GetItem())) {
@@ -2485,7 +2485,7 @@ void Client::RemoveDuplicateLore(bool client_update)
 		safe_delete(inst);
 	}
 
-	for (auto slot_id = EmuConstants::BANK_BEGIN; slot_id <= EmuConstants::BANK_END; ++slot_id) {
+	for (auto slot_id = EQEmu::Constants::BANK_BEGIN; slot_id <= EQEmu::Constants::BANK_END; ++slot_id) {
 		auto inst = m_inv.PopItem(slot_id);
 		if (inst == nullptr) { continue; }
 		if(CheckLoreConflict(inst->GetItem())) {
@@ -2498,7 +2498,7 @@ void Client::RemoveDuplicateLore(bool client_update)
 		safe_delete(inst);
 	}
 
-	for (auto slot_id = EmuConstants::BANK_BAGS_BEGIN; slot_id <= EmuConstants::BANK_BAGS_END; ++slot_id) {
+	for (auto slot_id = EQEmu::Constants::BANK_BAGS_BEGIN; slot_id <= EQEmu::Constants::BANK_BAGS_END; ++slot_id) {
 		auto inst = m_inv.PopItem(slot_id);
 		if (inst == nullptr) { continue; }
 		if(CheckLoreConflict(inst->GetItem())) {
@@ -2518,7 +2518,7 @@ void Client::RemoveDuplicateLore(bool client_update)
 		std::list<ItemInst*> local_2;
 
 		while (!m_inv.CursorEmpty()) {
-			auto inst = m_inv.PopItem(MainCursor);
+			auto inst = m_inv.PopItem(SlotCursor);
 			if (inst == nullptr) { continue; }
 			local_1.push_back(inst);
 		}
@@ -2559,7 +2559,7 @@ void Client::RemoveDuplicateLore(bool client_update)
 
 void Client::MoveSlotNotAllowed(bool client_update)
 {
-	for (auto slot_id = EmuConstants::EQUIPMENT_BEGIN; slot_id <= EmuConstants::EQUIPMENT_END; ++slot_id) {
+	for (auto slot_id = EQEmu::Constants::EQUIPMENT_BEGIN; slot_id <= EQEmu::Constants::EQUIPMENT_END; ++slot_id) {
 		if(m_inv[slot_id] && !m_inv[slot_id]->IsSlotAllowed(slot_id)) {
 			auto inst = m_inv.PopItem(slot_id);
 			bool is_arrow = (inst->GetItem()->ItemType == ItemTypeArrow) ? true : false;
@@ -2571,13 +2571,13 @@ void Client::MoveSlotNotAllowed(bool client_update)
 		}
 	}
 
-	if (m_inv[MainPowerSource] && !m_inv[MainPowerSource]->IsSlotAllowed(MainPowerSource)) {
-		auto inst = m_inv.PopItem(MainPowerSource);
+	if (m_inv[SlotPowerSource] && !m_inv[SlotPowerSource]->IsSlotAllowed(SlotPowerSource)) {
+		auto inst = m_inv.PopItem(SlotPowerSource);
 		bool is_arrow = (inst->GetItem()->ItemType == ItemTypeArrow) ? true : false;
 		int16 free_slot_id = m_inv.FindFreeSlot(inst->IsType(ItemClassContainer), true, inst->GetItem()->Size, is_arrow);
-		Log.Out(Logs::Detail, Logs::Inventory, "Slot Assignment Error: Moving %s from slot %i to %i", inst->GetItem()->Name, MainPowerSource, free_slot_id);
+		Log.Out(Logs::Detail, Logs::Inventory, "Slot Assignment Error: Moving %s from slot %i to %i", inst->GetItem()->Name, SlotPowerSource, free_slot_id);
 		PutItemInInventory(free_slot_id, *inst, (GetClientVersion() >= ClientVersion::SoF) ? client_update : false);
-		database.SaveInventory(character_id, nullptr, MainPowerSource);
+		database.SaveInventory(character_id, nullptr, SlotPowerSource);
 		safe_delete(inst);
 	}
 
@@ -2591,7 +2591,7 @@ uint32 Client::GetEquipment(uint8 material_slot) const
 	int16 invslot;
 	const ItemInst *item;
 
-	if(material_slot > EmuConstants::MATERIAL_END)
+	if(material_slot > EQEmu::Constants::MATERIAL_END)
 	{
 		return 0;
 	}
@@ -2629,7 +2629,7 @@ int32 Client::GetEquipmentMaterial(uint8 material_slot)
 
 uint32 Client::GetEquipmentColor(uint8 material_slot) const
 {
-	if (material_slot > EmuConstants::MATERIAL_END)
+	if (material_slot > EQEmu::Constants::MATERIAL_END)
 		return 0;
 
 	const Item_Struct *item = database.GetItem(GetEquipment(material_slot));
@@ -2695,13 +2695,13 @@ static int16 BandolierSlotToWeaponSlot(int BandolierSlot)
 	switch (BandolierSlot)
 	{
 	case bandolierPrimary:
-		return MainPrimary;
+		return SlotPrimary;
 	case bandolierSecondary:
-		return MainSecondary;
+		return SlotSecondary;
 	case bandolierRange:
-		return MainRange;
+		return SlotRange;
 	default:
-		return MainAmmo;
+		return SlotAmmo;
 	}
 }
 
@@ -2774,13 +2774,13 @@ void Client::SetBandolier(const EQApplicationPacket *app)
 
 			// removed 'invWhereCursor' argument from above and implemented slots 30, 331-340 checks here
 			if (slot == INVALID_INDEX) {
-				if (m_inv.GetItem(MainCursor)) {
-					if (m_inv.GetItem(MainCursor)->GetItem()->ID == m_pp.bandoliers[bss->Number].Items[BandolierSlot].ID &&
-						m_inv.GetItem(MainCursor)->GetCharges() >= 1) { // '> 0' the same, but this matches Inventory::_HasItem conditional check
-						slot = MainCursor;
+				if (m_inv.GetItem(SlotCursor)) {
+					if (m_inv.GetItem(SlotCursor)->GetItem()->ID == m_pp.bandoliers[bss->Number].Items[BandolierSlot].ID &&
+						m_inv.GetItem(SlotCursor)->GetCharges() >= 1) { // '> 0' the same, but this matches Inventory::_HasItem conditional check
+						slot = SlotCursor;
 					}
-					else if (m_inv.GetItem(MainCursor)->GetItem()->ItemClass == 1) {
-						for(int16 CursorBagSlot = EmuConstants::CURSOR_BAG_BEGIN; CursorBagSlot <= EmuConstants::CURSOR_BAG_END; CursorBagSlot++) {
+					else if (m_inv.GetItem(SlotCursor)->GetItem()->ItemClass == 1) {
+						for(int16 CursorBagSlot = EQEmu::Constants::CURSOR_BAG_BEGIN; CursorBagSlot <= EQEmu::Constants::CURSOR_BAG_END; CursorBagSlot++) {
 							if (m_inv.GetItem(CursorBagSlot)) {
 								if (m_inv.GetItem(CursorBagSlot)->GetItem()->ID == m_pp.bandoliers[bss->Number].Items[BandolierSlot].ID &&
 									m_inv.GetItem(CursorBagSlot)->GetCharges() >= 1) { // ditto
@@ -2926,7 +2926,7 @@ bool Client::MoveItemToInventory(ItemInst *ItemToReturn, bool UpdateClient) {
 	//
 	if(ItemToReturn->IsStackable()) {
 
-		for (int16 i = EmuConstants::GENERAL_BEGIN; i <= MainCursor; i++) { // changed slot max to 30 from 29. client will stack into slot 30 (bags too) before moving.
+		for (int16 i = EQEmu::Constants::GENERAL_BEGIN; i <= SlotCursor; i++) { // changed slot max to 30 from 29. client will stack into slot 30 (bags too) before moving.
 
 			ItemInst* InvItem = m_inv.GetItem(i);
 
@@ -2985,7 +2985,7 @@ bool Client::MoveItemToInventory(ItemInst *ItemToReturn, bool UpdateClient) {
 
 	// We have tried stacking items, now just try and find an empty slot.
 
-	for (int16 i = EmuConstants::GENERAL_BEGIN; i <= MainCursor; i++) { // changed slot max to 30 from 29. client will move into slot 30 (bags too) before pushing onto cursor.
+	for (int16 i = EQEmu::Constants::GENERAL_BEGIN; i <= SlotCursor; i++) { // changed slot max to 30 from 29. client will move into slot 30 (bags too) before pushing onto cursor.
 
 		ItemInst* InvItem = m_inv.GetItem(i);
 
@@ -3046,27 +3046,27 @@ bool Client::InterrogateInventory(Client* requester, bool log, bool silent, bool
 	std::map<int16, const ItemInst*> instmap;
 
 	// build reference map
-	for (int16 index = MAIN_BEGIN; index < EmuConstants::MAP_POSSESSIONS_SIZE; ++index) {
+	for (int16 index = SLOT_BEGIN; index < EQEmu::Constants::TYPE_POSSESSIONS_SIZE; ++index) {
 		auto inst = m_inv[index];
 		if (inst == nullptr) { continue; }
 		instmap[index] = inst;
 	}
-	for (int16 index = EmuConstants::TRIBUTE_BEGIN; index <= EmuConstants::TRIBUTE_END; ++index) {
+	for (int16 index = EQEmu::Constants::TRIBUTE_BEGIN; index <= EQEmu::Constants::TRIBUTE_END; ++index) {
 		auto inst = m_inv[index];
 		if (inst == nullptr) { continue; }
 		instmap[index] = inst;
 	}
-	for (int16 index = EmuConstants::BANK_BEGIN; index <= EmuConstants::BANK_END; ++index) {
+	for (int16 index = EQEmu::Constants::BANK_BEGIN; index <= EQEmu::Constants::BANK_END; ++index) {
 		auto inst = m_inv[index];
 		if (inst == nullptr) { continue; }
 		instmap[index] = inst;
 	}
-	for (int16 index = EmuConstants::SHARED_BANK_BEGIN; index <= EmuConstants::SHARED_BANK_END; ++index) {
+	for (int16 index = EQEmu::Constants::SHARED_BANK_BEGIN; index <= EQEmu::Constants::SHARED_BANK_END; ++index) {
 		auto inst = m_inv[index];
 		if (inst == nullptr) { continue; }
 		instmap[index] = inst;
 	}
-	for (int16 index = EmuConstants::TRADE_BEGIN; index <= EmuConstants::TRADE_END; ++index) {
+	for (int16 index = EQEmu::Constants::TRADE_BEGIN; index <= EQEmu::Constants::TRADE_END; ++index) {
 		auto inst = m_inv[index];
 		if (inst == nullptr) { continue; }
 		instmap[index] = inst;
@@ -3074,24 +3074,24 @@ bool Client::InterrogateInventory(Client* requester, bool log, bool silent, bool
 
 	auto tsobject = GetTradeskillObject();
 	if (tsobject != nullptr) {
-		for (int16 index = MAIN_BEGIN; index < EmuConstants::MAP_WORLD_SIZE; ++index) {
+		for (int16 index = SLOT_BEGIN; index < EQEmu::Constants::TYPE_WORLD_SIZE; ++index) {
 			auto inst = tsobject->GetItem(index);
 			if (inst == nullptr) { continue; }
-			instmap[EmuConstants::WORLD_BEGIN + index] = inst;
+			instmap[EQEmu::Constants::WORLD_BEGIN + index] = inst;
 		}
 	}
 
 	int limbo = 0;
 	for (auto cursor_itr = m_inv.cursor_cbegin(); cursor_itr != m_inv.cursor_cend(); ++cursor_itr, ++limbo) {
-		// m_inv.cursor_begin() is referenced as MainCursor in MapPossessions above
+		// m_inv.cursor_begin() is referenced as SlotCursor in MapPossessions above
 		if (cursor_itr == m_inv.cursor_cbegin())
 			continue;
 
 		instmap[8000 + limbo] = *cursor_itr;
 	}
 
-	if (m_inv[MainPowerSource])
-		instmap[MainPowerSource] = m_inv[MainPowerSource];
+	if (m_inv[SlotPowerSource])
+		instmap[SlotPowerSource] = m_inv[SlotPowerSource];
 
 	// call InterrogateInventory_ for error check
 	for (std::map<int16, const ItemInst*>::iterator instmap_itr = instmap.begin(); (instmap_itr != instmap.end()) && (!error); ++instmap_itr) {
@@ -3149,7 +3149,7 @@ void Client::InterrogateInventory_(bool errorcheck, Client* requester, int16 hea
 		}
 		else {
 			if (inst) {
-				for (int16 sub = SUB_BEGIN; (sub < EmuConstants::ITEM_CONTAINER_SIZE) && (!error); ++sub) { // treat any ItemInst as having the max internal slots available
+				for (int16 sub = SUB_BEGIN; (sub < EQEmu::Constants::ITEM_CONTAINER_SIZE) && (!error); ++sub) { // treat any ItemInst as having the max internal slots available
 					if (inst->GetItem(sub))
 						InterrogateInventory_(true, requester, head, sub, inst->GetItem(sub), inst, log, silent, error, depth + 1);
 				}
@@ -3179,7 +3179,7 @@ void Client::InterrogateInventory_(bool errorcheck, Client* requester, int16 hea
 		}
 
 		if (inst) {
-			for (int16 sub = SUB_BEGIN; (sub < EmuConstants::ITEM_CONTAINER_SIZE); ++sub) {
+			for (int16 sub = SUB_BEGIN; (sub < EQEmu::Constants::ITEM_CONTAINER_SIZE); ++sub) {
 				if (inst->GetItem(sub))
 					InterrogateInventory_(false, requester, head, sub, inst->GetItem(sub), inst, log, silent, error, depth + 1);
 			}
@@ -3194,11 +3194,11 @@ bool Client::InterrogateInventory_error(int16 head, int16 index, const ItemInst*
 	// very basic error checking - can be elaborated upon if more in-depth testing is needed...
 
 	if (
-		(head >= EmuConstants::EQUIPMENT_BEGIN && head <= EmuConstants::EQUIPMENT_END) ||
-		(head >= EmuConstants::TRIBUTE_BEGIN && head <= EmuConstants::TRIBUTE_END) ||
-		(head >= EmuConstants::WORLD_BEGIN && head <= EmuConstants::WORLD_END) ||
+		(head >= EQEmu::Constants::EQUIPMENT_BEGIN && head <= EQEmu::Constants::EQUIPMENT_END) ||
+		(head >= EQEmu::Constants::TRIBUTE_BEGIN && head <= EQEmu::Constants::TRIBUTE_END) ||
+		(head >= EQEmu::Constants::WORLD_BEGIN && head <= EQEmu::Constants::WORLD_END) ||
 		(head >= 8000 && head <= 8101) ||
-		(head == MainPowerSource)) {
+		(head == SlotPowerSource)) {
 		switch (depth)
 		{
 		case 0: // requirement: inst is extant
@@ -3210,7 +3210,7 @@ bool Client::InterrogateInventory_error(int16 head, int16 index, const ItemInst*
 				return true;
 			if (!parent->IsType(ItemClassCommon))
 				return true;
-			if (index >= EmuConstants::ITEM_COMMON_SIZE)
+			if (index >= EQEmu::Constants::ITEM_COMMON_SIZE)
 				return true;
 			break;
 		default: // requirement: none (something bad happened...)
@@ -3218,11 +3218,11 @@ bool Client::InterrogateInventory_error(int16 head, int16 index, const ItemInst*
 		}
 	}
 	else if (
-		(head >= EmuConstants::GENERAL_BEGIN && head <= EmuConstants::GENERAL_END) ||
-		(head == MainCursor) ||
-		(head >= EmuConstants::BANK_BEGIN && head <= EmuConstants::BANK_END) ||
-		(head >= EmuConstants::SHARED_BANK_BEGIN && head <= EmuConstants::SHARED_BANK_END) ||
-		(head >= EmuConstants::TRADE_BEGIN && head <= EmuConstants::TRADE_END)) {
+		(head >= EQEmu::Constants::GENERAL_BEGIN && head <= EQEmu::Constants::GENERAL_END) ||
+		(head == SlotCursor) ||
+		(head >= EQEmu::Constants::BANK_BEGIN && head <= EQEmu::Constants::BANK_END) ||
+		(head >= EQEmu::Constants::SHARED_BANK_BEGIN && head <= EQEmu::Constants::SHARED_BANK_END) ||
+		(head >= EQEmu::Constants::TRADE_BEGIN && head <= EQEmu::Constants::TRADE_END)) {
 		switch (depth)
 		{
 		case 0: // requirement: inst is extant
@@ -3239,7 +3239,7 @@ bool Client::InterrogateInventory_error(int16 head, int16 index, const ItemInst*
 			if (parent->IsType(ItemClassCommon)) {
 				if (!(inst->GetItem()->AugType > 0))
 					return true;
-				if (index >= EmuConstants::ITEM_COMMON_SIZE)
+				if (index >= EQEmu::Constants::ITEM_COMMON_SIZE)
 					return true;
 			}
 			break;
@@ -3253,7 +3253,7 @@ bool Client::InterrogateInventory_error(int16 head, int16 index, const ItemInst*
 			if (parent->IsType(ItemClassCommon)) {
 				if (!(inst->GetItem()->AugType > 0))
 					return true;
-				if (index >= EmuConstants::ITEM_COMMON_SIZE)
+				if (index >= EQEmu::Constants::ITEM_COMMON_SIZE)
 					return true;
 			}
 			break;

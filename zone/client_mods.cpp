@@ -485,7 +485,7 @@ int32 Client::GetRawItemAC()
 {
 	int32 Total = 0;
 	// this skips MainAmmo..add an '=' conditional if that slot is required (original behavior)
-	for (int16 slot_id = EmuConstants::EQUIPMENT_BEGIN; slot_id < EmuConstants::EQUIPMENT_END; slot_id++) {
+	for (int16 slot_id = EQEmu::Constants::EQUIPMENT_BEGIN; slot_id < EQEmu::Constants::EQUIPMENT_END; slot_id++) {
 		const ItemInst* inst = m_inv[slot_id];
 		if (inst && inst->IsType(ItemClassCommon)) {
 			Total += inst->GetItem()->AC;
@@ -1067,9 +1067,9 @@ int32 Client::CalcAC()
 	}
 	// Shield AC bonus for HeroicSTR
 	if (itembonuses.HeroicSTR) {
-		bool equiped = CastToClient()->m_inv.GetItem(MainSecondary);
+		bool equiped = CastToClient()->m_inv.GetItem(SlotSecondary);
 		if (equiped) {
-			uint8 shield = CastToClient()->m_inv.GetItem(MainSecondary)->GetItem()->ItemType;
+			uint8 shield = CastToClient()->m_inv.GetItem(SlotSecondary)->GetItem()->ItemType;
 			if (shield == ItemTypeShield) {
 				displayed += itembonuses.HeroicSTR / 2;
 			}
@@ -1096,9 +1096,9 @@ int32 Client::GetACMit()
 	}
 	// Shield AC bonus for HeroicSTR
 	if (itembonuses.HeroicSTR) {
-		bool equiped = CastToClient()->m_inv.GetItem(MainSecondary);
+		bool equiped = CastToClient()->m_inv.GetItem(SlotSecondary);
 		if (equiped) {
-			uint8 shield = CastToClient()->m_inv.GetItem(MainSecondary)->GetItem()->ItemType;
+			uint8 shield = CastToClient()->m_inv.GetItem(SlotSecondary)->GetItem()->ItemType;
 			if (shield == ItemTypeShield) {
 				mitigation += itembonuses.HeroicSTR / 2;
 			}
@@ -1306,7 +1306,7 @@ uint32 Client::CalcCurrentWeight()
 	ItemInst* ins;
 	uint32 Total = 0;
 	int x;
-	for (x = EmuConstants::EQUIPMENT_BEGIN; x <= MainCursor; x++) { // include cursor or not?
+	for (x = EQEmu::Constants::EQUIPMENT_BEGIN; x <= SlotCursor; x++) { // include cursor or not?
 		TempItem = 0;
 		ins = GetInv().GetItem(x);
 		if (ins) {
@@ -1316,7 +1316,7 @@ uint32 Client::CalcCurrentWeight()
 			Total += TempItem->Weight;
 		}
 	}
-	for (x = EmuConstants::GENERAL_BAGS_BEGIN; x <= EmuConstants::GENERAL_BAGS_END; x++) { // include cursor bags or not?
+	for (x = EQEmu::Constants::GENERAL_BAGS_BEGIN; x <= EQEmu::Constants::GENERAL_BAGS_END; x++) { // include cursor bags or not?
 		int TmpWeight = 0;
 		TempItem = 0;
 		ins = GetInv().GetItem(x);
@@ -1329,9 +1329,9 @@ uint32 Client::CalcCurrentWeight()
 		if (TmpWeight > 0) {
 			// this code indicates that weight redux bags can only be in the first general inventory slot to be effective...
 			// is this correct? or can we scan for the highest weight redux and use that? (need client verifications)
-			int bagslot = MainGeneral1;
+			int bagslot = SlotGeneral1;
 			int reduction = 0;
-			for (int m = EmuConstants::GENERAL_BAGS_BEGIN + 10; m <= EmuConstants::GENERAL_BAGS_END; m += 10) { // include cursor bags or not?
+			for (int m = EQEmu::Constants::GENERAL_BAGS_BEGIN + 10; m <= EQEmu::Constants::GENERAL_BAGS_END; m += 10) { // include cursor bags or not?
 				if (x >= m) {
 					bagslot += 1;
 				}
@@ -1355,7 +1355,7 @@ uint32 Client::CalcCurrentWeight()
 	    This is the ONLY instance I have seen where the client is hard coded to particular Item IDs to set a certain property for an item. It is very odd.
 	*/
 	// SoD+ client has no weight for coin
-	if (EQLimits::CoinHasWeight(GetClientVersion())) {
+	if (EQEmu::Limits::CoinHasWeight(GetClientVersion())) {
 		Total += (m_pp.platinum + m_pp.gold + m_pp.silver + m_pp.copper) / 4;
 	}
 	float Packrat = (float)spellbonuses.Packrat + (float)aabonuses.Packrat + (float)itembonuses.Packrat;
@@ -2205,12 +2205,12 @@ int Client::GetRawACNoShield(int &shield_ac) const
 {
 	int ac = itembonuses.AC + spellbonuses.AC + aabonuses.AC;
 	shield_ac = 0;
-	const ItemInst *inst = m_inv.GetItem(MainSecondary);
+	const ItemInst *inst = m_inv.GetItem(SlotSecondary);
 	if (inst) {
 		if (inst->GetItem()->ItemType == ItemTypeShield) {
 			ac -= inst->GetItem()->AC;
 			shield_ac = inst->GetItem()->AC;
-			for (uint8 i = AUG_BEGIN; i < EmuConstants::ITEM_COMMON_SIZE; i++) {
+			for (uint8 i = AUG_BEGIN; i < EQEmu::Constants::ITEM_COMMON_SIZE; i++) {
 				if (inst->GetAugment(i)) {
 					ac -= inst->GetAugment(i)->GetItem()->AC;
 					shield_ac += inst->GetAugment(i)->GetItem()->AC;

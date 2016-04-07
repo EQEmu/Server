@@ -2395,7 +2395,7 @@ namespace ActionableBots
 				continue;
 
 			mod_skill_value = base_skill_value;
-			for (int16 index = EmuConstants::EQUIPMENT_BEGIN; index <= EmuConstants::EQUIPMENT_END; ++index) {
+			for (int16 index = EQEmu::Constants::EQUIPMENT_BEGIN; index <= EQEmu::Constants::EQUIPMENT_END; ++index) {
 				const ItemInst* indexed_item = bot_iter->GetBotItem(index);
 				if (indexed_item && indexed_item->GetItem()->SkillModType == skill_type)
 					mod_skill_value += (base_skill_value * (((float)indexed_item->GetItem()->SkillModValue) / 100.0f));
@@ -4357,7 +4357,7 @@ void bot_subcommand_bot_dye_armor(Client *c, const Seperator *sep)
 	}
 	const int ab_mask = ActionableBots::ABM_NoFilter;
 
-	uint8 material_slot = _MaterialInvalid;
+	uint8 material_slot = MaterialInvalid;
 	int16 slot_id = INVALID_INDEX;
 
 	bool dye_all = (sep->arg[1][0] == '*');
@@ -6823,24 +6823,24 @@ void bot_subcommand_inventory_list(Client *c, const Seperator *sep)
 	linker.SetLinkType(linker.linkItemInst);
 
 	uint32 inventory_count = 0;
-	for (int i = EmuConstants::EQUIPMENT_BEGIN; i <= (EmuConstants::EQUIPMENT_END + 1); ++i) {
-		if ((i == MainSecondary) && is2Hweapon)
+	for (int i = EQEmu::Constants::EQUIPMENT_BEGIN; i <= (EQEmu::Constants::EQUIPMENT_END + 1); ++i) {
+		if ((i == SlotSecondary) && is2Hweapon)
 			continue;
 
-		inst = my_bot->CastToBot()->GetBotItem(i == 22 ? 9999 : i);
+		inst = my_bot->CastToBot()->GetBotItem(i == 22 ? SlotPowerSource : i);
 		if (!inst || !inst->GetItem()) {
-			c->Message(m_message, "I need something for my %s (slot %i)", GetBotEquipSlotName(i), (i == 22 ? 9999 : i));
+			c->Message(m_message, "I need something for my %s (slot %i)", GetBotEquipSlotName(i), (i == 22 ? SlotPowerSource : i));
 			continue;
 		}
 		
 		item = inst->GetItem();
-		if ((i == MainPrimary) && ((item->ItemType == ItemType2HSlash) || (item->ItemType == ItemType2HBlunt) || (item->ItemType == ItemType2HPiercing))) {
+		if ((i == SlotPrimary) && ((item->ItemType == ItemType2HSlash) || (item->ItemType == ItemType2HBlunt) || (item->ItemType == ItemType2HPiercing))) {
 			is2Hweapon = true;
 		}
 
 		linker.SetItemInst(inst);
 		item_link = linker.GenerateLink();
-		c->Message(m_message, "Using %s in my %s (slot %i)", item_link.c_str(), GetBotEquipSlotName(i), (i == 22 ? 9999 : i));
+		c->Message(m_message, "Using %s in my %s (slot %i)", item_link.c_str(), GetBotEquipSlotName(i), (i == 22 ? SlotPowerSource : i));
 
 		++inventory_count;
 	}
@@ -6879,7 +6879,7 @@ void bot_subcommand_inventory_remove(Client *c, const Seperator *sep)
 	}
 
 	int slotId = atoi(sep->arg[1]);
-	if (!sep->IsNumber(1) || ((slotId > EmuConstants::EQUIPMENT_END || slotId < EmuConstants::EQUIPMENT_BEGIN) && slotId != 9999)) {
+	if (!sep->IsNumber(1) || ((slotId > EQEmu::Constants::EQUIPMENT_END || slotId < EQEmu::Constants::EQUIPMENT_BEGIN) && slotId != SlotPowerSource)) {
 		c->Message(m_fail, "Valid slots are 0-21 or 9999");
 		return;
 	}
@@ -6894,7 +6894,7 @@ void bot_subcommand_inventory_remove(Client *c, const Seperator *sep)
 		return;
 	}
 
-	for (int m = AUG_BEGIN; m < EmuConstants::ITEM_COMMON_SIZE; ++m) {
+	for (int m = AUG_BEGIN; m < EQEmu::Constants::ITEM_COMMON_SIZE; ++m) {
 		if (!itminst)
 			break;
 
@@ -6911,7 +6911,7 @@ void bot_subcommand_inventory_remove(Client *c, const Seperator *sep)
 	std::string error_message;
 	if (itm) {
 		c->PushItemOnCursor(*itminst, true);
-		if ((slotId == MainRange) || (slotId == MainAmmo) || (slotId == MainPrimary) || (slotId == MainSecondary))
+		if ((slotId == SlotRange) || (slotId == SlotAmmo) || (slotId == SlotPrimary) || (slotId == SlotSecondary))
 			my_bot->SetBotArcher(false);
 
 		my_bot->RemoveBotItemBySlot(slotId, &error_message);
@@ -6925,31 +6925,31 @@ void bot_subcommand_inventory_remove(Client *c, const Seperator *sep)
 	}
 
 	switch (slotId) {
-	case MainCharm:
-	case MainEar1:
-	case MainHead:
-	case MainFace:
-	case MainEar2:
-	case MainNeck:
-	case MainBack:
-	case MainWrist1:
-	case MainWrist2:
-	case MainRange:
-	case MainPrimary:
-	case MainSecondary:
-	case MainFinger1:
-	case MainFinger2:
-	case MainChest:
-	case MainWaist:
-	case MainPowerSource:
-	case MainAmmo:
+	case SlotCharm:
+	case SlotEar1:
+	case SlotHead:
+	case SlotFace:
+	case SlotEar2:
+	case SlotNeck:
+	case SlotBack:
+	case SlotWrist1:
+	case SlotWrist2:
+	case SlotRange:
+	case SlotPrimary:
+	case SlotSecondary:
+	case SlotFinger1:
+	case SlotFinger2:
+	case SlotChest:
+	case SlotWaist:
+	case SlotPowerSource:
+	case SlotAmmo:
 		c->Message(m_message, "My %s is %s unequipped", GetBotEquipSlotName(slotId), ((itm) ? ("now") : ("already")));
 		break;
-	case MainShoulders:
-	case MainArms:
-	case MainHands:
-	case MainLegs:
-	case MainFeet:
+	case SlotShoulders:
+	case SlotArms:
+	case SlotHands:
+	case SlotLegs:
+	case SlotFeet:
 		c->Message(m_message, "My %s are %s unequipped", GetBotEquipSlotName(slotId), ((itm) ? ("now") : ("already")));
 		break;
 	default:

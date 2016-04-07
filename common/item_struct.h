@@ -184,9 +184,9 @@ struct Item_Struct {
 	int32	FactionAmt4;	// Faction Amt 4
 	char	CharmFile[32];	// ?
 	uint32	AugType;
-	uint8	AugSlotType[EmuConstants::ITEM_COMMON_SIZE];	// RoF: Augment Slot 1-6 Type
-	uint8	AugSlotVisible[EmuConstants::ITEM_COMMON_SIZE];	// RoF: Augment Slot 1-6 Visible
-	uint8	AugSlotUnk2[EmuConstants::ITEM_COMMON_SIZE];	// RoF: Augment Slot 1-6 Unknown Most likely Powersource related
+	uint8	AugSlotType[EQEmu::Constants::ITEM_COMMON_SIZE];	// RoF: Augment Slot 1-6 Type
+	uint8	AugSlotVisible[EQEmu::Constants::ITEM_COMMON_SIZE];	// RoF: Augment Slot 1-6 Visible
+	uint8	AugSlotUnk2[EQEmu::Constants::ITEM_COMMON_SIZE];	// RoF: Augment Slot 1-6 Unknown Most likely Powersource related
 	uint32	LDoNTheme;
 	uint32	LDoNPrice;
 	uint32	LDoNSold;

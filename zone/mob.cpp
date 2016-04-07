@@ -73,7 +73,7 @@ Mob::Mob(const char* in_name,
 		uint32		in_drakkin_heritage,
 		uint32		in_drakkin_tattoo,
 		uint32		in_drakkin_details,
-		uint32		in_armor_tint[_MaterialCount],
+		uint32		in_armor_tint[MaterialCount],
 
 		uint8		in_aa_title,
 		uint8		in_see_invis, // see through invis/ivu
@@ -279,7 +279,7 @@ Mob::Mob(const char* in_name,
 		RangedProcs[j].level_override = -1;
 	}
 
-	for (i = 0; i < _MaterialCount; i++)
+	for (i = 0; i < MaterialCount; i++)
 	{
 		if (in_armor_tint)
 		{
@@ -2378,8 +2378,8 @@ bool Mob::CanThisClassDualWield(void) const {
 		return(GetSkill(SkillDualWield) > 0);
 	}
 	else if(CastToClient()->HasSkill(SkillDualWield)) {
-		const ItemInst* pinst = CastToClient()->GetInv().GetItem(MainPrimary);
-		const ItemInst* sinst = CastToClient()->GetInv().GetItem(MainSecondary);
+		const ItemInst* pinst = CastToClient()->GetInv().GetItem(SlotPrimary);
+		const ItemInst* sinst = CastToClient()->GetInv().GetItem(SlotSecondary);
 
 		// 2HS, 2HB, or 2HP
 		if(pinst && pinst->IsWeapon()) {

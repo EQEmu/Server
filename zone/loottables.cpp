@@ -272,7 +272,7 @@ void NPC::AddLootDrop(const Item_Struct *item2, ItemList* itemlist, int16 charge
 		// it is an improvement.
 
 		if (!item2->NoPet) {
-			for (int i = 0; !found && i<EmuConstants::EQUIPMENT_SIZE; i++) {
+			for (int i = 0; !found && i < EQEmu::Constants::EQUIPMENT_SIZE; i++) {
 				uint32 slots = (1 << i);
 				if (item2->Slots & slots) {
 					if(equipment[i])
@@ -313,7 +313,7 @@ void NPC::AddLootDrop(const Item_Struct *item2, ItemList* itemlist, int16 charge
 		// @merth: IDFile size has been increased, this needs to change
 		uint16 emat;
 		if(item2->Material <= 0
-			|| item2->Slots & (1 << MainPrimary | 1 << MainSecondary)) {
+			|| item2->Slots & (1 << SlotPrimary | 1 << SlotSecondary)) {
 			memset(newid, 0, sizeof(newid));
 			for(int i=0;i<7;i++){
 				if (!isalpha(item2->IDFile[i])){
@@ -327,7 +327,7 @@ void NPC::AddLootDrop(const Item_Struct *item2, ItemList* itemlist, int16 charge
 			emat = item2->Material;
 		}
 
-		if (foundslot == MainPrimary) {
+		if (foundslot == SlotPrimary) {
 			if (item2->Proc.Effect != 0)
 				CastToMob()->AddProcToWeapon(item2->Proc.Effect, true);
 
@@ -337,7 +337,7 @@ void NPC::AddLootDrop(const Item_Struct *item2, ItemList* itemlist, int16 charge
 			if (item2->ItemType == ItemType2HBlunt || item2->ItemType == ItemType2HSlash || item2->ItemType == ItemType2HPiercing)
 				SetTwoHanderEquipped(true);
 		}
-		else if (foundslot == MainSecondary
+		else if (foundslot == SlotSecondary
 			&& (GetOwner() != nullptr || (CanThisClassDualWield() && zone->random.Roll(NPC_DW_CHANCE)) || (item2->Damage==0)) &&
 			(item2->ItemType == ItemType1HSlash || item2->ItemType == ItemType1HBlunt || item2->ItemType == ItemTypeShield ||
 			item2->ItemType == ItemType1HPiercing))
@@ -349,25 +349,25 @@ void NPC::AddLootDrop(const Item_Struct *item2, ItemList* itemlist, int16 charge
 			if (item2->Damage > 0)
 				SendAddPlayerState(PlayerState::SecondaryWeaponEquipped);
 		}
-		else if (foundslot == MainHead) {
+		else if (foundslot == SlotHead) {
 			eslot = MaterialHead;
 		}
-		else if (foundslot == MainChest) {
+		else if (foundslot == SlotChest) {
 			eslot = MaterialChest;
 		}
-		else if (foundslot == MainArms) {
+		else if (foundslot == SlotArms) {
 			eslot = MaterialArms;
 		}
-		else if (foundslot == MainWrist1 || foundslot == MainWrist2) {
+		else if (foundslot == SlotWrist1 || foundslot == SlotWrist2) {
 			eslot = MaterialWrist;
 		}
-		else if (foundslot == MainHands) {
+		else if (foundslot == SlotHands) {
 			eslot = MaterialHands;
 		}
-		else if (foundslot == MainLegs) {
+		else if (foundslot == SlotLegs) {
 			eslot = MaterialLegs;
 		}
-		else if (foundslot == MainFeet) {
+		else if (foundslot == SlotFeet) {
 			eslot = MaterialFeet;
 		}
 

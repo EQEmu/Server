@@ -206,7 +206,7 @@ void Merc::CalcItemBonuses(StatBonuses* newbon) {
 
 	unsigned int i;
 	//should not include 21 (SLOT_AMMO)
-	for (i=0; i<MainAmmo; i++) {
+	for (i = 0; i < SlotAmmo; i++) {
 		if(equipment[i] == 0)
 			continue;
 		const Item_Struct * itm = database.GetItem(equipment[i]);
@@ -1551,24 +1551,24 @@ void Merc::AI_Process() {
 				//try main hand first
 				if(attack_timer.Check())
 				{
-					Attack(GetTarget(), MainPrimary);
+					Attack(GetTarget(), SlotPrimary);
 
 					bool tripleSuccess = false;
 
 					if(GetOwner() && GetTarget() && CanThisClassDoubleAttack())
 					{
 						if(GetOwner()) {
-							Attack(GetTarget(), MainPrimary, true);
+							Attack(GetTarget(), SlotPrimary, true);
 						}
 
 						if(GetOwner() && GetTarget() && GetSpecialAbility(SPECATK_TRIPLE)) {
 							tripleSuccess = true;
-							Attack(GetTarget(), MainPrimary, true);
+							Attack(GetTarget(), SlotPrimary, true);
 						}
 
 						//quad attack, does this belong here??
 						if(GetOwner() && GetTarget() && GetSpecialAbility(SPECATK_QUAD)) {
-							Attack(GetTarget(), MainPrimary, true);
+							Attack(GetTarget(), SlotPrimary, true);
 						}
 					}
 
@@ -1580,8 +1580,8 @@ void Merc::AI_Process() {
 						if(zone->random.Roll(flurrychance))
 						{
 							Message_StringID(MT_NPCFlurry, YOU_FLURRY);
-							Attack(GetTarget(), MainPrimary, false);
-							Attack(GetTarget(), MainPrimary, false);
+							Attack(GetTarget(), SlotPrimary, false);
+							Attack(GetTarget(), SlotPrimary, false);
 						}
 					}
 
@@ -1590,7 +1590,7 @@ void Merc::AI_Process() {
 					if (GetTarget() && ExtraAttackChanceBonus) {
 						if(zone->random.Roll(ExtraAttackChanceBonus))
 						{
-							Attack(GetTarget(), MainPrimary, false);
+							Attack(GetTarget(), SlotPrimary, false);
 						}
 					}
 				}
@@ -1625,11 +1625,11 @@ void Merc::AI_Process() {
 						// Max 78% of DW
 						if (zone->random.Roll(DualWieldProbability))
 						{
-							Attack(GetTarget(), MainSecondary);     // Single attack with offhand
+							Attack(GetTarget(), SlotSecondary);     // Single attack with offhand
 
 							if(CanThisClassDoubleAttack()) {
 								if(GetTarget() && GetTarget()->GetHP() > -10)
-									Attack(GetTarget(), MainSecondary);     // Single attack with offhand
+									Attack(GetTarget(), SlotSecondary);     // Single attack with offhand
 							}
 						}
 					}
@@ -2544,7 +2544,7 @@ int16 Merc::GetFocusEffect(focusType type, uint16 spell_id) {
 		int16 focus_max_real = 0;
 
 		//item focus
-		for (int x = 0; x < EmuConstants::EQUIPMENT_SIZE; ++x)
+		for (int x = 0; x < EQEmu::Constants::EQUIPMENT_SIZE; ++x)
 		{
 			TempItem = nullptr;
 			if (equipment[x] == 0)
@@ -5017,12 +5017,12 @@ void Merc::ScaleStats(int scalepercent, bool setmax) {
 void Merc::UpdateMercAppearance() {
 	// Copied from Bot Code:
 	uint32 itemID = NO_ITEM;
-	uint8 materialFromSlot = _MaterialInvalid;
-	for(int i = EmuConstants::EQUIPMENT_BEGIN; i <= EmuConstants::EQUIPMENT_END; ++i) {
+	uint8 materialFromSlot = MaterialInvalid;
+	for (int i = EQEmu::Constants::EQUIPMENT_BEGIN; i <= EQEmu::Constants::EQUIPMENT_END; ++i) {
 		itemID = equipment[i];
 		if(itemID != NO_ITEM) {
 			materialFromSlot = Inventory::CalcMaterialFromSlot(i);
-			if(materialFromSlot != _MaterialInvalid)
+			if(materialFromSlot != MaterialInvalid)
 				this->SendWearChange(materialFromSlot);
 		}
 	}
@@ -5036,8 +5036,8 @@ void Merc::UpdateEquipmentLight()
 	m_Light.Type.Equipment = 0;
 	m_Light.Level.Equipment = 0;
 
-	for (int index = MAIN_BEGIN; index < EmuConstants::EQUIPMENT_SIZE; ++index) {
-		if (index == MainAmmo) { continue; }
+	for (int index = SLOT_BEGIN; index < EQEmu::Constants::EQUIPMENT_SIZE; ++index) {
+		if (index == SlotAmmo) { continue; }
 
 		auto item = database.GetItem(equipment[index]);
 		if (item == nullptr) { continue; }

@@ -106,7 +106,7 @@ public:
 	//abstract virtual function implementations requird by base abstract class
 	virtual bool Death(Mob* killerMob, int32 damage, uint16 spell_id, SkillUseTypes attack_skill);
 	virtual void Damage(Mob* from, int32 damage, uint16 spell_id, SkillUseTypes attack_skill, bool avoidable = true, int8 buffslot = -1, bool iBuffTic = false, int special = 0);
-	virtual bool Attack(Mob* other, int Hand = MainPrimary, bool FromRiposte = false, bool IsStrikethrough = false,
+	virtual bool Attack(Mob* other, int Hand = SlotPrimary, bool FromRiposte = false, bool IsStrikethrough = false,
 		bool IsFromSpell = false, ExtraAttackOptions *opts = nullptr, int special = 0);
 	virtual bool HasRaid() { return false; }
 	virtual bool HasGroup() { return false; }
@@ -495,7 +495,7 @@ protected:
 
 	uint16	skills[HIGHEST_SKILL+1];
 
-	uint32	equipment[EmuConstants::EQUIPMENT_SIZE];	//this is an array of item IDs
+	uint32	equipment[EQEmu::Constants::EQUIPMENT_SIZE];	//this is an array of item IDs
 
 	uint32	herosforgemodel;			//this is the Hero Forge Armor Model (i.e 63 or 84 or 203)
 	uint16	d_melee_texture1;			//this is an item Material value

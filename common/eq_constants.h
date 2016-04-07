@@ -851,7 +851,7 @@ static const uint8 SkillDamageTypes[HIGHEST_SKILL + 1] = // change to _SkillServ
 **	Material use slots
 **
 */
-enum MaterialUseSlots : uint8
+enum MaterialSlots : uint8
 {
 	MaterialHead = 0,
 	MaterialChest,
@@ -862,8 +862,8 @@ enum MaterialUseSlots : uint8
 	MaterialFeet,
 	MaterialPrimary,
 	MaterialSecondary,
-	_MaterialCount,
-	_MaterialInvalid = 255
+	MaterialCount,
+	MaterialInvalid = 255
 };
 
 /*
@@ -900,71 +900,73 @@ enum MaterialUseSlots : uint8
 **
 */
 
-enum InventoryMapTypes : int16 {
-	MapPossessions = 0,
-	MapBank,
-	MapSharedBank,
-	MapTrade,
-	MapWorld,
-	MapLimbo, // 5
-	MapTribute,
-	MapTrophyTribute,
-	MapGuildTribute,
-	MapMerchant,
-	MapDeleted, // 10
-	MapCorpse,
-	MapBazaar,
-	MapInspect,
-	MapRealEstate,
-	MapViewMODPC, // 15
-	MapViewMODBank,
-	MapViewMODSharedBank,
-	MapViewMODLimbo,
-	MapAltStorage,
-	MapArchived, // 20
-	MapMail,
-	MapGuildTrophyTribute,
-	MapKrono,
-	MapOther,
-	_MapCount
+enum InventoryTypes : int16
+{
+	TypePossessions = 0,
+	TypeBank,
+	TypeSharedBank,
+	TypeTrade,
+	TypeWorld,
+	TypeLimbo, // 5
+	TypeTribute,
+	TypeTrophyTribute,
+	TypeGuildTribute,
+	TypeMerchant,
+	TypeDeleted, // 10
+	TypeCorpse,
+	TypeBazaar,
+	TypeInspect,
+	TypeRealEstate,
+	TypeViewMODPC, // 15
+	TypeViewMODBank,
+	TypeViewMODSharedBank,
+	TypeViewMODLimbo,
+	TypeAltStorage,
+	TypeArchived, // 20
+	TypeMail,
+	TypeGuildTrophyTribute,
+	TypeKrono,
+	TypeOther,
+	TypeCount
 };
 
-enum InventoryMainTypes : int16 {
-	MainCharm = 0,
-	MainEar1,
-	MainHead,
-	MainFace,
-	MainEar2,
-	MainNeck, // 5
-	MainShoulders,
-	MainArms,
-	MainBack,
-	MainWrist1,
-	MainWrist2, // 10
-	MainRange,
-	MainHands,
-	MainPrimary,
-	MainSecondary,
-	MainFinger1, // 15
-	MainFinger2,
-	MainChest,
-	MainLegs,
-	MainFeet,
-	MainWaist, // 20
-	MainPowerSource = 9999, // temp
-	MainAmmo = 21, // temp
-	MainGeneral1,
-	MainGeneral2,
-	MainGeneral3,
-	MainGeneral4, // 25
-	MainGeneral5,
-	MainGeneral6,
-	MainGeneral7,
-	MainGeneral8,
-	//MainGeneral9,
-	//MainGeneral10,
-	MainCursor, // 30
-	_MainCount
+enum PossessionsSlots : int16
+{
+	SlotCharm = 0,
+	SlotEar1,
+	SlotHead,
+	SlotFace,
+	SlotEar2,
+	SlotNeck, // 5
+	SlotShoulders,
+	SlotArms,
+	SlotBack,
+	SlotWrist1,
+	SlotWrist2, // 10
+	SlotRange,
+	SlotHands,
+	SlotPrimary,
+	SlotSecondary,
+	SlotFinger1, // 15
+	SlotFinger2,
+	SlotChest,
+	SlotLegs,
+	SlotFeet,
+	SlotWaist, // 20
+	SlotPowerSource = 9999, // temp
+	SlotAmmo = 21, // temp
+	SlotGeneral1,
+	SlotGeneral2,
+	SlotGeneral3,
+	SlotGeneral4, // 25
+	SlotGeneral5,
+	SlotGeneral6,
+	SlotGeneral7,
+	SlotGeneral8,
+	//SlotGeneral9,
+	//SlotGeneral10,
+	SlotCursor, // 30
+	SlotCount
 };
 
 #define INVALID_INDEX	-1
@@ -973,8 +975,8 @@ enum InventoryMainTypes : int16 {
 
 // yes..these are redundant... but, they help to identify and define what is actually being performed
 // plus, since they're pre-op's, they don't affect the actual binary size
-#define MAP_BEGIN	0
-#define MAIN_BEGIN	0
+#define TYPE_BEGIN	0
+#define SLOT_BEGIN	0
 #define SUB_BEGIN	0
 #define AUG_BEGIN	0
 

@@ -1757,47 +1757,47 @@ luabind::scope lua_register_slot() {
 	return luabind::class_<Slots>("Slot")
 		.enum_("constants")
 		[
-			luabind::value("Charm", static_cast<int>(MainCharm)),
-			luabind::value("Ear1", static_cast<int>(MainEar1)),
-			luabind::value("Head", static_cast<int>(MainHead)),
-			luabind::value("Face", static_cast<int>(MainFace)),
-			luabind::value("Ear2", static_cast<int>(MainEar2)),
-			luabind::value("Neck", static_cast<int>(MainNeck)),
-			luabind::value("Shoulder", static_cast<int>(MainShoulders)), // deprecated
-			luabind::value("Shoulders", static_cast<int>(MainShoulders)),
-			luabind::value("Arms", static_cast<int>(MainArms)),
-			luabind::value("Back", static_cast<int>(MainBack)),
-			luabind::value("Bracer1", static_cast<int>(MainWrist1)), // deprecated
-			luabind::value("Wrist1", static_cast<int>(MainWrist1)),
-			luabind::value("Bracer2", static_cast<int>(MainWrist2)), // deprecated
-			luabind::value("Wrist2", static_cast<int>(MainWrist2)),
-			luabind::value("Range", static_cast<int>(MainRange)),
-			luabind::value("Hands", static_cast<int>(MainHands)),
-			luabind::value("Primary", static_cast<int>(MainPrimary)),
-			luabind::value("Secondary", static_cast<int>(MainSecondary)),
-			luabind::value("Ring1", static_cast<int>(MainFinger1)), // deprecated
-			luabind::value("Finger1", static_cast<int>(MainFinger1)),
-			luabind::value("Ring2", static_cast<int>(MainFinger2)), // deprecated
-			luabind::value("Finger2", static_cast<int>(MainFinger2)),
-			luabind::value("Chest", static_cast<int>(MainChest)),
-			luabind::value("Legs", static_cast<int>(MainLegs)),
-			luabind::value("Feet", static_cast<int>(MainFeet)),
-			luabind::value("Waist", static_cast<int>(MainWaist)),
-			luabind::value("PowerSource", static_cast<int>(MainPowerSource)),
-			luabind::value("Ammo", static_cast<int>(MainAmmo)),
-			luabind::value("General1", static_cast<int>(MainGeneral1)),
-			luabind::value("General2", static_cast<int>(MainGeneral2)),
-			luabind::value("General3", static_cast<int>(MainGeneral3)),
-			luabind::value("General4", static_cast<int>(MainGeneral4)),
-			luabind::value("General5", static_cast<int>(MainGeneral5)),
-			luabind::value("General6", static_cast<int>(MainGeneral6)),
-			luabind::value("General7", static_cast<int>(MainGeneral7)),
-			luabind::value("General8", static_cast<int>(MainGeneral8)),
-			luabind::value("Cursor", static_cast<int>(MainCursor)),
-			luabind::value("PersonalBegin", static_cast<int>(EmuConstants::GENERAL_BEGIN)), // deprecated
-			luabind::value("GeneralBegin", static_cast<int>(EmuConstants::GENERAL_BEGIN)),
-			luabind::value("PersonalEnd", static_cast<int>(EmuConstants::GENERAL_END)), // deprecated
-			luabind::value("GeneralEnd", static_cast<int>(EmuConstants::GENERAL_END)),
+			luabind::value("Charm", static_cast<int>(SlotCharm)),
+			luabind::value("Ear1", static_cast<int>(SlotEar1)),
+			luabind::value("Head", static_cast<int>(SlotHead)),
+			luabind::value("Face", static_cast<int>(SlotFace)),
+			luabind::value("Ear2", static_cast<int>(SlotEar2)),
+			luabind::value("Neck", static_cast<int>(SlotNeck)),
+			luabind::value("Shoulder", static_cast<int>(SlotShoulders)), // deprecated
+			luabind::value("Shoulders", static_cast<int>(SlotShoulders)),
+			luabind::value("Arms", static_cast<int>(SlotArms)),
+			luabind::value("Back", static_cast<int>(SlotBack)),
+			luabind::value("Bracer1", static_cast<int>(SlotWrist1)), // deprecated
+			luabind::value("Wrist1", static_cast<int>(SlotWrist1)),
+			luabind::value("Bracer2", static_cast<int>(SlotWrist2)), // deprecated
+			luabind::value("Wrist2", static_cast<int>(SlotWrist2)),
+			luabind::value("Range", static_cast<int>(SlotRange)),
+			luabind::value("Hands", static_cast<int>(SlotHands)),
+			luabind::value("Primary", static_cast<int>(SlotPrimary)),
+			luabind::value("Secondary", static_cast<int>(SlotSecondary)),
+			luabind::value("Ring1", static_cast<int>(SlotFinger1)), // deprecated
+			luabind::value("Finger1", static_cast<int>(SlotFinger1)),
+			luabind::value("Ring2", static_cast<int>(SlotFinger2)), // deprecated
+			luabind::value("Finger2", static_cast<int>(SlotFinger2)),
+			luabind::value("Chest", static_cast<int>(SlotChest)),
+			luabind::value("Legs", static_cast<int>(SlotLegs)),
+			luabind::value("Feet", static_cast<int>(SlotFeet)),
+			luabind::value("Waist", static_cast<int>(SlotWaist)),
+			luabind::value("PowerSource", static_cast<int>(SlotPowerSource)),
+			luabind::value("Ammo", static_cast<int>(SlotAmmo)),
+			luabind::value("General1", static_cast<int>(SlotGeneral1)),
+			luabind::value("General2", static_cast<int>(SlotGeneral2)),
+			luabind::value("General3", static_cast<int>(SlotGeneral3)),
+			luabind::value("General4", static_cast<int>(SlotGeneral4)),
+			luabind::value("General5", static_cast<int>(SlotGeneral5)),
+			luabind::value("General6", static_cast<int>(SlotGeneral6)),
+			luabind::value("General7", static_cast<int>(SlotGeneral7)),
+			luabind::value("General8", static_cast<int>(SlotGeneral8)),
+			luabind::value("Cursor", static_cast<int>(SlotCursor)),
+			luabind::value("PersonalBegin", static_cast<int>(EQEmu::Constants::GENERAL_BEGIN)), // deprecated
+			luabind::value("GeneralBegin", static_cast<int>(EQEmu::Constants::GENERAL_BEGIN)),
+			luabind::value("PersonalEnd", static_cast<int>(EQEmu::Constants::GENERAL_END)), // deprecated
+			luabind::value("GeneralEnd", static_cast<int>(EQEmu::Constants::GENERAL_END)),
 			luabind::value("CursorEnd", 0xFFFE), // deprecated
 			luabind::value("Tradeskill", static_cast<int>(legacy::SLOT_TRADESKILL)), // deprecated
 			luabind::value("Augment", static_cast<int>(legacy::SLOT_AUGMENT)), // deprecated
@@ -1819,9 +1819,9 @@ luabind::scope lua_register_material() {
 			luabind::value("Feet", static_cast<int>(MaterialFeet)),
 			luabind::value("Primary", static_cast<int>(MaterialPrimary)),
 			luabind::value("Secondary", static_cast<int>(MaterialSecondary)),
-			luabind::value("Max", static_cast<int>(_MaterialCount)), // deprecated
-			luabind::value("Count", static_cast<int>(_MaterialCount)),
-			luabind::value("Invalid", static_cast<int>(_MaterialInvalid))
+			luabind::value("Max", static_cast<int>(MaterialCount)), // deprecated
+			luabind::value("Count", static_cast<int>(MaterialCount)),
+			luabind::value("Invalid", static_cast<int>(MaterialInvalid))
 		];
 }
 

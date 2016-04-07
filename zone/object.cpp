@@ -324,7 +324,7 @@ void Object::Delete(bool reset_state)
 }
 
 const ItemInst* Object::GetItem(uint8 index) {
-	if (index < EmuConstants::MAP_WORLD_SIZE) {
+	if (index < EQEmu::Constants::TYPE_WORLD_SIZE) {
 		return m_inst->GetItem(index);
 	}
 
@@ -362,7 +362,7 @@ void Object::Close() {
 		ItemInst* container = this->m_inst;
 		if(container != nullptr)
 		{
-			for (uint8 i = SUB_BEGIN; i < EmuConstants::ITEM_CONTAINER_SIZE; i++)
+			for (uint8 i = SUB_BEGIN; i < EQEmu::Constants::ITEM_CONTAINER_SIZE; i++)
 			{
 				ItemInst* inst = container->PopItem(i);
 				if(inst != nullptr)
@@ -503,11 +503,11 @@ bool Object::HandleClick(Client* sender, const ClickObject_Struct* click_object)
 
 
 			// Transfer item to client
-			sender->PutItemInInventory(MainCursor, *m_inst, false);
-			sender->SendItemPacket(MainCursor, m_inst, ItemPacketTrade);
+			sender->PutItemInInventory(SlotCursor, *m_inst, false);
+			sender->SendItemPacket(SlotCursor, m_inst, ItemPacketTrade);
 
 			if(cursordelete)	// delete the item if it's a duplicate lore. We have to do this because the client expects the item packet
-				sender->DeleteItemInInventory(MainCursor);
+				sender->DeleteItemInInventory(SlotCursor);
 
 			if(!m_ground_spawn)
 				safe_delete(m_inst);
@@ -583,7 +583,7 @@ bool Object::HandleClick(Client* sender, const ClickObject_Struct* click_object)
 			EQApplicationPacket* outapp=new EQApplicationPacket(OP_ClientReady,0);
 			sender->QueuePacket(outapp);
 			safe_delete(outapp);
-			for (uint8 i = SUB_BEGIN; i < EmuConstants::ITEM_CONTAINER_SIZE; i++) {
+			for (uint8 i = SUB_BEGIN; i < EQEmu::Constants::ITEM_CONTAINER_SIZE; i++) {
 				const ItemInst* inst = m_inst->GetItem(i);
 				if (inst) {
 					//sender->GetInv().PutItem(i+4000,inst);

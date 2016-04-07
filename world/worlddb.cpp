@@ -37,11 +37,11 @@ void WorldDatabase::GetCharSelectInfo(uint32 accountID, EQApplicationPacket **ou
 {
 	/* Set Character Creation Limit */
 	ClientVersion client_version = ClientVersionFromBit(clientVersionBit);
-	size_t character_limit = EQLimits::CharacterCreationLimit(client_version);
+	size_t character_limit = EQEmu::Limits::CharacterCreationLimit(client_version);
 	
 	// Validate against absolute server max
-	if (character_limit > EmuConstants::CHARACTER_CREATION_LIMIT)
-		character_limit = EmuConstants::CHARACTER_CREATION_LIMIT;
+	if (character_limit > EQEmu::Constants::CHARACTER_CREATION_LIMIT)
+		character_limit = EQEmu::Constants::CHARACTER_CREATION_LIMIT;
 
 	// Force Titanium clients to use '8'
 	if (client_version == ClientVersion::Titanium)
@@ -117,7 +117,7 @@ void WorldDatabase::GetCharSelectInfo(uint32 accountID, EQApplicationPacket **ou
 		cse->Gender = (uint8)atoi(row[2]);
 		cse->Face = (uint8)atoi(row[15]);
 
-		for (uint32 matslot = 0; matslot < _MaterialCount; matslot++) {	// Processed below
+		for (uint32 matslot = 0; matslot < MaterialCount; matslot++) {	// Processed below
 			cse->Equip[matslot].Material = 0;
 			cse->Equip[matslot].Unknown1 = 0;
 			cse->Equip[matslot].EliteMaterial = 0;
@@ -223,7 +223,7 @@ void WorldDatabase::GetCharSelectInfo(uint32 accountID, EQApplicationPacket **ou
 			const ItemInst* inst = nullptr;
 			int16 invslot = 0;
 
-			for (uint32 matslot = 0; matslot < _MaterialCount; matslot++) {
+			for (uint32 matslot = 0; matslot < MaterialCount; matslot++) {
 				invslot = Inventory::CalcSlotFromMaterial(matslot);
 				if (invslot == INVALID_INDEX) { continue; }
 				inst = inv.GetItem(invslot);
