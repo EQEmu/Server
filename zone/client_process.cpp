@@ -66,7 +66,7 @@ bool Client::Process() {
 	if(Connected() || IsLD())
 	{
 		// try to send all packets that weren't sent before
-		if(!IsLD() && zoneinpacket_timer.Check())
+		if (!IsLD() && zoneinpacket_timer.Check())
 		{
 			SendAllPackets();
 		}

@@ -7832,6 +7832,7 @@ Bot* EntityList::GetBotByBotName(std::string botName) {
 void EntityList::AddBot(Bot *newBot, bool SendSpawnPacket, bool dontqueue) {
 	if(newBot) {
 		newBot->SetID(GetFreeID());
+		newBot->SetSpawned();
 		if(SendSpawnPacket) {
 			if(dontqueue) {
 				EQApplicationPacket* outapp = new EQApplicationPacket();

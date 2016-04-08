@@ -647,7 +647,7 @@ void EntityList::AddNPC(NPC *npc, bool SendSpawnPacket, bool dontqueue)
 	uint16 emoteid = npc->GetEmoteID();
 	if (emoteid != 0)
 		npc->DoNPCEmote(ONSPAWN, emoteid);
-
+	npc->SetSpawned();
 	if (SendSpawnPacket) {
 		if (dontqueue) { // aka, SEND IT NOW BITCH!
 			EQApplicationPacket *app = new EQApplicationPacket;
@@ -686,7 +686,7 @@ void EntityList::AddMerc(Merc *merc, bool SendSpawnPacket, bool dontqueue)
 	if (merc)
 	{
 		merc->SetID(GetFreeID());
-
+		merc->SetSpawned();
 		if (SendSpawnPacket)
 		{
 			if (dontqueue) {
@@ -1231,7 +1231,7 @@ void EntityList::SendZoneSpawnsBulk(Client *client)
 	int32 race=-1;
 	for (auto it = mob_list.begin(); it != mob_list.end(); ++it) {
 		spawn = it->second;
-		if (spawn && spawn->InZone()) {
+		if (spawn && spawn->GetID() > 0 && spawn->Spawned()) {
 			if (spawn->IsClient() && (spawn->CastToClient()->GMHideMe(client) ||
 					spawn->CastToClient()->IsHoveringForRespawn()))
 				continue;
