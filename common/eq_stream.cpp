@@ -1361,12 +1361,14 @@ void EQStream::Decay()
 	// check for any timed out acks
 	if ((GetExecutablePlatform() == ExePlatformWorld || GetExecutablePlatform() == ExePlatformZone) && RETRANSMIT_TIMEOUT_MULT && retransmittimeout) {
 		int count = 0;
+		MOutboundQueue.lock();
 		for (std::deque<EQProtocolPacket *>::iterator sitr = SequencedQueue.begin(); sitr != SequencedQueue.end(); sitr++, count++) {
 			if (!(*sitr)->acked && (*sitr)->sent_time > 0 && ((*sitr)->sent_time + retransmittimeout) < Timer::GetCurrentTime()) {
 				(*sitr)->sent_time = 0;
 				Log.Out(Logs::Detail, Logs::Netcode, _L "Timeout exceeded for seq %d.  Flagging packet for retransmission" __L, SequencedBase + count);
 			}
 		}
+		MOutboundQueue.unlock();
 	}
 }
 
