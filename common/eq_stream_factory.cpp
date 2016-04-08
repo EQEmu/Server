@@ -250,8 +250,7 @@ void EQStreamFactory::CheckTimeout()
 
 void EQStreamFactory::WriterLoop()
 {
-	std::map<std::pair<uint32, uint16>, std::shared_ptr<EQStream>>::iterator stream_itr;
-	bool havework=true;
+	bool havework = true;
 	std::vector<std::shared_ptr<EQStream>> wants_write;
 	std::vector<std::shared_ptr<EQStream>>::iterator cur, end;
 	bool decay = false;
@@ -260,7 +259,7 @@ void EQStreamFactory::WriterLoop()
 	WriterRunning = true;
 	DecayTimer.Enable();
 
-	while(sock!=-1) {
+	while (sock != -1) {
 		MWriterRunning.lock();
 		if (!WriterRunning)
 			break;
@@ -269,34 +268,36 @@ void EQStreamFactory::WriterLoop()
 		havework = false;
 		wants_write.clear();
 
-		decay=DecayTimer.Check();
+		decay = DecayTimer.Check();
 
-		//copy streams into a seperate list so we dont have to keep
-		//MStreams locked while we are writting
+		// copy streams into a seperate list so we dont have to keep
+		// MStreams locked while we are writting
 		MStreams.lock();
-		for(stream_itr=Streams.begin();stream_itr!=Streams.end();++stream_itr) {
+		for (auto stream_itr = Streams.begin(); stream_itr != Streams.end(); ++stream_itr) {
 			// If it's time to decay the bytes sent, then let's do it before we try to write
 			if (decay)
 				stream_itr->second->Decay();
 
-			//bullshit checking, to see if this is really happening, GDB seems to think so...
-			if(stream_itr->second == nullptr) {
-				fprintf(stderr, "ERROR: nullptr Stream encountered in EQStreamFactory::WriterLoop for: %i:%i", stream_itr->first.first, stream_itr->first.second);
+			// bullshit checking, to see if this is really happening, GDB seems to think so...
+			if (stream_itr->second == nullptr) {
+				fprintf(stderr,
+					"ERROR: nullptr Stream encountered in EQStreamFactory::WriterLoop for: %i:%i",
+					stream_itr->first.first, stream_itr->first.second);
 				continue;
 			}
 
 			if (stream_itr->second->HasOutgoingData()) {
-				havework=true;
+				havework = true;
 				stream_itr->second->PutInUse();
 				wants_write.push_back(stream_itr->second);
 			}
 		}
 		MStreams.unlock();
 
-		//do the actual writes
+		// do the actual writes
 		cur = wants_write.begin();
 		end = wants_write.end();
-		for(; cur != end; ++cur) {
+		for (; cur != end; ++cur) {
 			(*cur)->Write(sock);
 			(*cur)->ReleaseFromUse();
 		}

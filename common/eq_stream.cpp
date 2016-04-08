@@ -425,14 +425,11 @@ void EQStream::ProcessPacket(EQProtocolPacket *p)
 				uint16 index = seq - SequencedBase;
 				Log.Out(Logs::Detail, Logs::Netcode, _L "OP_OutOfOrderAck marking packet acked in queue (queue index = %d, queue size = %d)." __L, index, sqsize);
 				if (index < sqsize) {
-					std::deque<EQProtocolPacket *>::iterator sitr;
-					sitr = SequencedQueue.begin();
-					sitr += index;
-					(*sitr)->acked = true;
+					SequencedQueue[index]->acked = true;
 					// flag packets for a resend
 					uint16 count = 0;
 					uint32 timeout = AverageDelta * 2 + 100;
-					for (sitr = SequencedQueue.begin(); sitr != SequencedQueue.end() && count < index; ++sitr, ++count) {
+					for (auto sitr = SequencedQueue.begin(); sitr != SequencedQueue.end() && count < index; ++sitr, ++count) {
 						if (!(*sitr)->acked && (*sitr)->sent_time > 0 && (((*sitr)->sent_time + timeout) < Timer::GetCurrentTime())) {
 							(*sitr)->sent_time = 0;
 							Log.Out(Logs::Detail, Logs::Netcode, _L "OP_OutOfOrderAck Flagging packet %d for retransmission" __L, SequencedBase + count);
@@ -619,19 +616,21 @@ void EQStream::SequencedPush(EQProtocolPacket *p)
 	delete p;
 #else
 	MOutboundQueue.lock();
-if(uint16(SequencedBase + SequencedQueue.size()) != NextOutSeq) {
-	Log.Out(Logs::Detail, Logs::Netcode, _L "Pre-Push Invalid Sequenced queue: BS %d + SQ %d != NOS %d" __L, SequencedBase, SequencedQueue.size(), NextOutSeq);
-}
+	if (uint16(SequencedBase + SequencedQueue.size()) != NextOutSeq) {
+		Log.Out(Logs::Detail, Logs::Netcode, _L "Pre-Push Invalid Sequenced queue: BS %d + SQ %d != NOS %d" __L,
+			SequencedBase, SequencedQueue.size(), NextOutSeq);
+	}
 
-
-	Log.Out(Logs::Detail, Logs::Netcode, _L "Pushing sequenced packet %d of length %d. Base Seq is %d." __L, NextOutSeq, p->size, SequencedBase);
-	*(uint16 *)(p->pBuffer)=htons(NextOutSeq);
+	Log.Out(Logs::Detail, Logs::Netcode, _L "Pushing sequenced packet %d of length %d. Base Seq is %d." __L,
+		NextOutSeq, p->size, SequencedBase);
+	*(uint16 *)(p->pBuffer) = htons(NextOutSeq);
 	SequencedQueue.push_back(p);
 	NextOutSeq++;
 
-if(uint16(SequencedBase + SequencedQueue.size()) != NextOutSeq) {
-	Log.Out(Logs::Detail, Logs::Netcode, _L "Push Invalid Sequenced queue: BS %d + SQ %d != NOS %d" __L, SequencedBase, SequencedQueue.size(), NextOutSeq);
-}
+	if (uint16(SequencedBase + SequencedQueue.size()) != NextOutSeq) {
+		Log.Out(Logs::Detail, Logs::Netcode, _L "Push Invalid Sequenced queue: BS %d + SQ %d != NOS %d" __L,
+			SequencedBase, SequencedQueue.size(), NextOutSeq);
+	}
 
 	MOutboundQueue.unlock();
 #endif
@@ -696,8 +695,8 @@ void EQStream::Write(int eq_fd)
 	uint16 count = 0;
 	// get to start of packets
 	while (sitr != SequencedQueue.end() && (*sitr)->sent_time > 0) {
-		sitr++;
-		count++;
+		++sitr;
+		++count;
 	}
 
 	// Loop until both are empty or MaxSends is reached
@@ -735,11 +734,9 @@ void EQStream::Write(int eq_fd)
 			NonSeqEmpty=true;
 		}
 
-
-		if (sitr!=SequencedQueue.end()) {
-
+		if (sitr != SequencedQueue.end()) {
 			uint16 seq_send = SequencedBase + count;	//just for logging...
-			
+
 			if(SequencedQueue.empty()) {
 				Log.Out(Logs::Detail, Logs::Netcode, _L "Tried to write a packet with an empty queue (%d is past next out %d)" __L, seq_send, NextOutSeq);
 				SeqEmpty=true;
@@ -1362,7 +1359,7 @@ void EQStream::Decay()
 	if ((GetExecutablePlatform() == ExePlatformWorld || GetExecutablePlatform() == ExePlatformZone) && RETRANSMIT_TIMEOUT_MULT && retransmittimeout) {
 		int count = 0;
 		MOutboundQueue.lock();
-		for (std::deque<EQProtocolPacket *>::iterator sitr = SequencedQueue.begin(); sitr != SequencedQueue.end(); sitr++, count++) {
+		for (auto sitr = SequencedQueue.begin(); sitr != SequencedQueue.end(); ++sitr, count++) {
 			if (!(*sitr)->acked && (*sitr)->sent_time > 0 && ((*sitr)->sent_time + retransmittimeout) < Timer::GetCurrentTime()) {
 				(*sitr)->sent_time = 0;
 				Log.Out(Logs::Detail, Logs::Netcode, _L "Timeout exceeded for seq %d.  Flagging packet for retransmission" __L, SequencedBase + count);
