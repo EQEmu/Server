@@ -123,7 +123,7 @@ Client::Client(EQStreamInterface* ieqs)
 	camp_timer(29000),
 	process_timer(100),
 	stamina_timer(40000),
-	zoneinpacket_timer(3000),
+	zoneinpacket_timer(1000),
 	linkdead_timer(RuleI(Zone,ClientLinkdeadMS)),
 	dead_timer(2000),
 	global_channel_timer(1000),
@@ -439,6 +439,7 @@ void Client::SendZoneInPackets()
 	outapp->priority = 6;
 	if (!GetHideMe()) entity_list.QueueClients(this, outapp, true);
 	safe_delete(outapp);
+	SetSpawned();
 	if (GetPVP())	//force a PVP update until we fix the spawn struct
 		SendAppearancePacket(AT_PVP, GetPVP(), true, false);
 
