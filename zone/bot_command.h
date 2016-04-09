@@ -633,13 +633,17 @@ void bot_subcommand_heal_rotation_adjust_critical(Client *c, const Seperator *se
 void bot_subcommand_heal_rotation_adjust_safe(Client *c, const Seperator *sep);
 void bot_subcommand_heal_rotation_casting_override(Client *c, const Seperator *sep);
 void bot_subcommand_heal_rotation_change_interval(Client *c, const Seperator *sep);
+void bot_subcommand_heal_rotation_clear_hot(Client *c, const Seperator *sep);
 void bot_subcommand_heal_rotation_clear_targets(Client *c, const Seperator *sep);
 void bot_subcommand_heal_rotation_create(Client *c, const Seperator *sep);
+void bot_subcommand_heal_rotation_delete(Client *c, const Seperator *sep);
 void bot_subcommand_heal_rotation_fast_heals(Client *c, const Seperator *sep);
 void bot_subcommand_heal_rotation_list(Client *c, const Seperator *sep);
 void bot_subcommand_heal_rotation_remove_member(Client *c, const Seperator *sep);
 void bot_subcommand_heal_rotation_remove_target(Client *c, const Seperator *sep);
 void bot_subcommand_heal_rotation_reset_limits(Client *c, const Seperator *sep);
+void bot_subcommand_heal_rotation_save(Client *c, const Seperator *sep);
+void bot_subcommand_heal_rotation_set_hot(Client *c, const Seperator *sep);
 void bot_subcommand_heal_rotation_start(Client *c, const Seperator *sep);
 void bot_subcommand_heal_rotation_stop(Client *c, const Seperator *sep);
 void bot_subcommand_inventory_give(Client *c, const Seperator *sep);

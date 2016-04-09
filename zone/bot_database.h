@@ -167,6 +167,17 @@ public:
 	bool LoadGroupedBotsByGroupID(const uint32 group_id, std::list<uint32>& group_list);
 
 
+	/* Bot heal rotation functions   */
+	bool LoadHealRotationIDByBotID(const uint32 bot_id, uint32& hr_index);
+
+	bool LoadHealRotation(Bot* hr_member, std::list<uint32>& member_list, std::list<std::string>& target_list, bool& load_flag, bool& member_fail, bool& target_fail);
+	bool LoadHealRotationMembers(const uint32 hr_index, std::list<uint32>& member_list);
+	bool LoadHealRotationTargets(const uint32 hr_index, std::list<std::string>& target_list);
+	bool SaveHealRotation(Bot* hr_member, bool& member_fail, bool& target_fail);
+	bool DeleteHealRotation(const uint32 creator_id);
+
+	bool DeleteAllHealRotations(const uint32 owner_id);
+
 	/* Bot miscellaneous functions   */
 
 
@@ -256,6 +267,15 @@ public:
 
 		/* fail::Bot group functions   */
 		static const char* LoadGroupedBotsByGroupID();
+
+		/* fail::Bot heal rotation functions   */
+		static const char* LoadHealRotationIDByBotID();
+		static const char* LoadHealRotation();
+		static const char* LoadHealRotationMembers();
+		static const char* LoadHealRotationTargets();
+		static const char* SaveHealRotation();
+		static const char* DeleteHealRotation();
+		static const char* DeleteAllHealRotations();
 
 		/* fail::Bot miscellaneous functions   */
 	};

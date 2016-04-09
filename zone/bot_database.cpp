@@ -2407,6 +2407,284 @@ bool BotDatabase::LoadGroupedBotsByGroupID(const uint32 group_id, std::list<uint
 }
 
 
+/* Bot heal rotation functions   */
+bool BotDatabase::LoadHealRotationIDByBotID(const uint32 bot_id, uint32& hr_index)
+{
+	if (!bot_id)
+		return false;
+
+	query = StringFormat("SELECT `heal_rotation_index` FROM `bot_heal_rotations` WHERE `bot_id` = '%u' LIMIT 1", bot_id);
+	auto results = QueryDatabase(query);
+	if (!results.Success())
+		return false;
+	if (!results.RowCount())
+		return true;
+
+	auto row = results.begin();
+	hr_index = atoi(row[0]);
+
+	return true;
+}
+
+bool BotDatabase::LoadHealRotation(Bot* hr_member, std::list<uint32>& member_list, std::list<std::string>& target_list, bool& load_flag, bool& member_fail, bool& target_fail)
+{
+	if (!hr_member)
+		return false;
+
+	uint32 hr_index = 0;
+	if (!LoadHealRotationIDByBotID(hr_member->GetBotID(), hr_index))
+		return false;
+	if (!hr_index)
+		return true;
+
+	if (!hr_member->IsHealRotationMember())
+		return false;
+
+	query = StringFormat(
+		"SELECT "
+		" `interval`,"
+		" `fast_heals`,"
+		" `adaptive_targeting`,"
+		" `casting_override`,"
+		" `safe_hp_base`,"
+		" `safe_hp_cloth`,"
+		" `safe_hp_leather`,"
+		" `safe_hp_chain`,"
+		" `safe_hp_plate`,"
+		" `critical_hp_base`,"
+		" `critical_hp_cloth`,"
+		" `critical_hp_leather`,"
+		" `critical_hp_chain`,"
+		" `critical_hp_plate`"
+		" FROM `bot_heal_rotations`"
+		" WHERE `heal_rotation_index` = '%u'"
+		" LIMIT 1",
+		hr_index
+	);
+	auto results = QueryDatabase(query);
+	if (!results.Success())
+		return false;
+	if (!results.RowCount())
+		return true;
+
+	auto row = results.begin();
+	(*hr_member->MemberOfHealRotation())->SetIntervalS((uint32)atoi(row[0]));
+	(*hr_member->MemberOfHealRotation())->SetFastHeals((bool)atoi(row[1]));
+	(*hr_member->MemberOfHealRotation())->SetAdaptiveTargeting((bool)atoi(row[2]));
+	(*hr_member->MemberOfHealRotation())->SetCastingOverride((bool)atoi(row[3]));
+	(*hr_member->MemberOfHealRotation())->SetArmorTypeSafeHPRatio(ARMOR_TYPE_UNKNOWN, atof(row[4]));
+	(*hr_member->MemberOfHealRotation())->SetArmorTypeSafeHPRatio(ARMOR_TYPE_CLOTH, atof(row[5]));
+	(*hr_member->MemberOfHealRotation())->SetArmorTypeSafeHPRatio(ARMOR_TYPE_LEATHER, atof(row[6]));
+	(*hr_member->MemberOfHealRotation())->SetArmorTypeSafeHPRatio(ARMOR_TYPE_CHAIN, atof(row[7]));
+	(*hr_member->MemberOfHealRotation())->SetArmorTypeSafeHPRatio(ARMOR_TYPE_PLATE, atof(row[8]));
+	(*hr_member->MemberOfHealRotation())->SetArmorTypeCriticalHPRatio(ARMOR_TYPE_UNKNOWN, atof(row[9]));
+	(*hr_member->MemberOfHealRotation())->SetArmorTypeCriticalHPRatio(ARMOR_TYPE_CLOTH, atof(row[10]));
+	(*hr_member->MemberOfHealRotation())->SetArmorTypeCriticalHPRatio(ARMOR_TYPE_LEATHER, atof(row[11]));
+	(*hr_member->MemberOfHealRotation())->SetArmorTypeCriticalHPRatio(ARMOR_TYPE_CHAIN, atof(row[12]));
+	(*hr_member->MemberOfHealRotation())->SetArmorTypeCriticalHPRatio(ARMOR_TYPE_PLATE, atof(row[13]));
+
+	load_flag = true;
+
+	if (!LoadHealRotationMembers(hr_index, member_list))
+		member_fail = true;
+
+	if (!LoadHealRotationTargets(hr_index, target_list))
+		target_fail = true;
+
+	return true;
+}
+
+bool BotDatabase::LoadHealRotationMembers(const uint32 hr_index, std::list<uint32>& member_list)
+{
+	if (!hr_index)
+		return false;
+
+	query = StringFormat("SELECT `bot_id` FROM `bot_heal_rotation_members` WHERE `heal_rotation_index` = '%u'", hr_index);
+	auto results = QueryDatabase(query);
+	if (!results.Success())
+		return false;
+	if (!results.RowCount())
+		return true;
+
+	for (auto row : results) {
+		if (row[0])
+			member_list.push_back(atoi(row[0]));
+	}
+
+	return true;
+}
+
+bool BotDatabase::LoadHealRotationTargets(const uint32 hr_index, std::list<std::string>& target_list)
+{
+	if (!hr_index)
+		return false;
+
+	query = StringFormat("SELECT `target_name` FROM `bot_heal_rotation_targets` WHERE `heal_rotation_index` = '%u'", hr_index);
+	auto results = QueryDatabase(query);
+	if (!results.Success())
+		return false;
+	if (!results.RowCount())
+		return true;
+
+	for (auto row : results) {
+		if (row[0])
+			target_list.push_back(row[0]);
+	}
+
+	return true;
+}
+
+bool BotDatabase::SaveHealRotation(Bot* hr_member, bool& member_fail, bool& target_fail)
+{
+	if (!hr_member)
+		return false;
+
+	if (!DeleteHealRotation(hr_member->GetBotID()))
+		return false;
+
+	if (!hr_member->IsHealRotationMember())
+		return false;
+
+	query = StringFormat(
+		"INSERT INTO `bot_heal_rotations` ("
+		"`bot_id`,"
+		" `interval`,"
+		" `fast_heals`,"
+		" `adaptive_targeting`,"
+		" `casting_override`,"
+		" `safe_hp_base`,"
+		" `safe_hp_cloth`,"
+		" `safe_hp_leather`,"
+		" `safe_hp_chain`,"
+		" `safe_hp_plate`,"
+		" `critical_hp_base`,"
+		" `critical_hp_cloth`,"
+		" `critical_hp_leather`,"
+		" `critical_hp_chain`,"
+		" `critical_hp_plate`"
+		")"
+		" VALUES ("
+		"'%u',"
+		" '%u',"
+		" '%u',"
+		" '%u',"
+		" '%u',"
+		" '%f',"
+		" '%f',"
+		" '%f',"
+		" '%f',"
+		" '%f',"
+		" '%f',"
+		" '%f',"
+		" '%f',"
+		" '%f',"
+		" '%f'"
+		")",
+		hr_member->GetBotID(),
+		((*hr_member->MemberOfHealRotation())->IntervalS()),
+		((*hr_member->MemberOfHealRotation())->FastHeals()),
+		((*hr_member->MemberOfHealRotation())->AdaptiveTargeting()),
+		((*hr_member->MemberOfHealRotation())->CastingOverride()),
+		((*hr_member->MemberOfHealRotation())->ArmorTypeSafeHPRatio(ARMOR_TYPE_UNKNOWN)),
+		((*hr_member->MemberOfHealRotation())->ArmorTypeSafeHPRatio(ARMOR_TYPE_CLOTH)),
+		((*hr_member->MemberOfHealRotation())->ArmorTypeSafeHPRatio(ARMOR_TYPE_LEATHER)),
+		((*hr_member->MemberOfHealRotation())->ArmorTypeSafeHPRatio(ARMOR_TYPE_CHAIN)),
+		((*hr_member->MemberOfHealRotation())->ArmorTypeSafeHPRatio(ARMOR_TYPE_PLATE)),
+		((*hr_member->MemberOfHealRotation())->ArmorTypeCriticalHPRatio(ARMOR_TYPE_UNKNOWN)),
+		((*hr_member->MemberOfHealRotation())->ArmorTypeCriticalHPRatio(ARMOR_TYPE_CLOTH)),
+		((*hr_member->MemberOfHealRotation())->ArmorTypeCriticalHPRatio(ARMOR_TYPE_LEATHER)),
+		((*hr_member->MemberOfHealRotation())->ArmorTypeCriticalHPRatio(ARMOR_TYPE_CHAIN)),
+		((*hr_member->MemberOfHealRotation())->ArmorTypeCriticalHPRatio(ARMOR_TYPE_PLATE))
+	);
+	auto results = QueryDatabase(query);
+	if (!results.Success())
+		return false;
+
+	uint32 hr_index = results.LastInsertedID();
+	if (!hr_index)
+		return false;
+
+	std::list<Bot*>* member_list = (*hr_member->MemberOfHealRotation())->MemberList();
+
+	for (auto member_iter : *member_list) {
+		if (!member_iter)
+			continue;
+
+		query = StringFormat("INSERT INTO `bot_heal_rotation_members` (`heal_rotation_index`, `bot_id`) VALUES ('%u', '%u')", hr_index, member_iter->GetBotID());
+		auto results = QueryDatabase(query);
+		if (!results.Success()) {
+			member_fail = true;
+			break;
+		}
+	}
+
+	std::list<Mob*>* target_list = (*hr_member->MemberOfHealRotation())->TargetList();
+
+	for (auto target_iter : *target_list) {
+		if (!target_iter)
+			continue;
+
+		query = StringFormat("INSERT INTO `bot_heal_rotation_targets` (`heal_rotation_index`, `target_name`) VALUES ('%u', '%s')", hr_index, target_iter->GetCleanName());
+		auto results = QueryDatabase(query);
+		if (!results.Success()) {
+			target_fail = true;
+			break;
+		}
+	}
+
+	return true;
+}
+
+bool BotDatabase::DeleteHealRotation(const uint32 creator_id)
+{
+	if (!creator_id)
+		return false;
+
+	uint32 hr_index = 0;
+	if (!LoadHealRotationIDByBotID(creator_id, hr_index))
+		return false;
+	if (!hr_index)
+		return true;
+
+	query = StringFormat("DELETE FROM `bot_heal_rotation_targets` WHERE `heal_rotation_index` = '%u'", hr_index);
+	auto results = QueryDatabase(query);
+	if (!results.Success())
+		return false;
+
+	query = StringFormat("DELETE FROM `bot_heal_rotation_members` WHERE `heal_rotation_index` = '%u'", hr_index);
+	results = QueryDatabase(query);
+	if (!results.Success())
+		return false;
+
+	query = StringFormat("DELETE FROM `bot_heal_rotations` WHERE `heal_rotation_index` = '%u'", hr_index);
+	results = QueryDatabase(query);
+	if (!results.Success())
+		return false;
+
+	return true;
+}
+
+bool BotDatabase::DeleteAllHealRotations(const uint32 owner_id)
+{
+	if (!owner_id)
+		return false;
+
+	query = StringFormat("SELECT `bot_id` FROM `bot_heal_rotations` WHERE `bot_id` IN (SELECT `bot_id` FROM `bot_data` WHERE `owner_id` = '%u')", owner_id);
+	auto results = QueryDatabase(query);
+	if (!results.Success())
+		return false;
+
+	for (auto row : results) {
+		if (!row[0])
+			continue;
+
+		DeleteHealRotation(atoi(row[0]));
+	}
+
+	return true;
+}
+
+
 /* Bot miscellaneous functions   */
 
 
@@ -2494,6 +2772,15 @@ const char* BotDatabase::fail::LoadBotGroupsListByOwnerID() { return "Failed to 
 
 /* fail::Bot group functions   */
 const char* BotDatabase::fail::LoadGroupedBotsByGroupID() { return "Failed to load grouped bots by group id"; }
+
+/* fail::Bot heal rotation functions   */
+const char* BotDatabase::fail::LoadHealRotationIDByBotID() { return "Failed to load heal rotation id by bot id"; }
+const char* BotDatabase::fail::LoadHealRotation() { return "Failed to load heal rotation"; }
+const char* BotDatabase::fail::LoadHealRotationMembers() { return "Failed to load heal rotation members"; }
+const char* BotDatabase::fail::LoadHealRotationTargets() { return "Failed to load heal rotation targets"; }
+const char* BotDatabase::fail::SaveHealRotation() { return "Failed to save heal rotation"; }
+const char* BotDatabase::fail::DeleteHealRotation() { return "Failed to delete heal rotation"; }
+const char* BotDatabase::fail::DeleteAllHealRotations() { return "Failed to delete all heal rotations"; }
 
 /* fail::Bot miscellaneous functions   */
 

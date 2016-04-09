@@ -35,8 +35,11 @@
 #define HEALING_STATS_RESET_INTERVAL 60000
 #define HEALING_STATS_RESET_INTERVAL_S 60
 
+#define SAFE_HP_RATIO_ABS 100.0f
 #define SAFE_HP_RATIO_BASE 95.0f
-#define CRITICAL_HP_RATIO_BASE 10.0f
+
+#define CRITICAL_HP_RATIO_ABS 0.0f
+#define CRITICAL_HP_RATIO_BASE 30.0f
 
 struct HealingStats
 {
@@ -49,7 +52,7 @@ class HealRotation
 {
 public:
 	HealRotation(Bot* hr_creator, uint32 interval_ms = CASTING_CYCLE_DEFAULT_INTERVAL, bool fast_heals = false, bool adaptive_targeting = false, bool casting_override = false);
-	HealRotation(HealRotation* allocator_shunt) {};
+	HealRotation(HealRotation* allocator_shunt) {}; // use should be limited to the shared_ptr<HealRotation> memory allocation call
 
 	void SetIntervalMS(uint32 interval_ms);
 	void SetIntervalS(uint32 interval_s);
@@ -72,10 +75,15 @@ public:
 	bool ClearMemberPool();
 	bool ClearTargetPool();
 
+	Mob* HOTTarget() { return m_hot_target; }
+	bool SetHOTTarget(Mob* hot_target);
+	bool ClearHOTTarget();
+
 	bool Start();
 	bool Stop();
 
 	bool IsActive() { return m_is_active; }
+	bool IsHOTActive() { return m_hot_active; }
 	bool CastingReady() { return (Timer::GetCurrentTime() >= m_next_cast_time_ms); }
 	Bot* CastingMember();
 	bool PokeCastingTarget();
@@ -88,6 +96,7 @@ public:
 
 	bool IsMemberInPool(Bot* hr_member);
 	bool IsTargetInPool(Mob* hr_target);
+	bool IsHOTTarget(Mob* hot_target);
 
 	void SetMemberIsCasting(Bot* hr_member, bool flag = true);
 	bool MemberIsCasting(Bot* hr_member);
@@ -114,6 +123,7 @@ private:
 	void cycle_refresh();
 	bool healable_target(bool use_class_at = true, bool critical_only = false);
 	void bias_targets();
+	void validate_hot();
 
 	uint32 m_creation_time_ms;
 	uint32 m_last_heal_time_ms;
@@ -130,6 +140,9 @@ private:
 	bool m_is_active;
 
 	bool m_consumed;
+
+	Mob* m_hot_target;
+	bool m_hot_active;
 
 	std::list<Bot*> m_member_pool;
 	std::list<Bot*> m_cycle_pool;

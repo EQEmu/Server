@@ -1370,13 +1370,17 @@ int bot_command_init(void)
 		bot_command_add("healrotationadjustsafe", "Adjusts the safe HP limit of the heal rotation instance's Class Armor Type criteria", 0, bot_subcommand_heal_rotation_adjust_safe) ||
 		bot_command_add("healrotationcastingoverride", "Enables or disables casting overrides within the heal rotation instance", 0, bot_subcommand_heal_rotation_casting_override) ||
 		bot_command_add("healrotationchangeinterval", "Changes casting interval between members within the heal rotation instance", 0, bot_subcommand_heal_rotation_change_interval) ||
+		bot_command_add("healrotationclearhot", "Clears the HOT of a heal rotation instance", 0, bot_subcommand_heal_rotation_clear_hot) ||
 		bot_command_add("healrotationcleartargets", "Removes all targets from a heal rotation instance", 0, bot_subcommand_heal_rotation_clear_targets) ||
 		bot_command_add("healrotationcreate", "Creates a bot heal rotation instance and designates a leader", 0, bot_subcommand_heal_rotation_create) ||
+		bot_command_add("healrotationdelete", "Deletes a bot heal rotation entry by leader", 0, bot_subcommand_heal_rotation_delete) ||
 		bot_command_add("healrotationfastheals", "Enables or disables fast heals within the heal rotation instance", 0, bot_subcommand_heal_rotation_fast_heals) ||
 		bot_command_add("healrotationlist", "Reports heal rotation instance(s) information", 0, bot_subcommand_heal_rotation_list) ||
 		bot_command_add("healrotationremovemember", "Removes a bot from a heal rotation instance", 0, bot_subcommand_heal_rotation_remove_member) ||
 		bot_command_add("healrotationremovetarget", "Removes target from a heal rotations instance", 0, bot_subcommand_heal_rotation_remove_target) ||
 		bot_command_add("healrotationresetlimits", "Resets all Class Armor Type HP limit criteria in a heal rotation to its default value", 0, bot_subcommand_heal_rotation_reset_limits) ||
+		bot_command_add("healrotationsave", "Saves a bot heal rotation entry by leader", 0, bot_subcommand_heal_rotation_save) ||
+		bot_command_add("healrotationsethot", "Sets the HOT in a heal rotation instance", 0, bot_subcommand_heal_rotation_set_hot) ||
 		bot_command_add("healrotationstart", "Starts a heal rotation", 0, bot_subcommand_heal_rotation_start) ||
 		bot_command_add("healrotationstop", "Stops a heal rotation", 0, bot_subcommand_heal_rotation_stop) ||
 		bot_command_add("help", "List available commands and their description - specify partial command as argument to search", 0, bot_command_help) ||
@@ -3064,13 +3068,17 @@ void bot_command_heal_rotation(Client *c, const Seperator *sep)
 	subcommand_list.push_back("healrotationadjustsafe");
 	subcommand_list.push_back("healrotationcastoverride");
 	subcommand_list.push_back("healrotationchangeinterval");
+	subcommand_list.push_back("healrotationclearhot");
 	subcommand_list.push_back("healrotationcleartargets");
 	subcommand_list.push_back("healrotationcreate");
+	subcommand_list.push_back("healrotationdelete");
 	subcommand_list.push_back("healrotationfastheals");
 	subcommand_list.push_back("healrotationlist");
 	subcommand_list.push_back("healrotationremovemember");
 	subcommand_list.push_back("healrotationremovetarget");
 	subcommand_list.push_back("healrotationresetlimits");
+	subcommand_list.push_back("healrotationsave");
+	subcommand_list.push_back("healrotationsethot");
 	subcommand_list.push_back("healrotationstart");
 	subcommand_list.push_back("healrotationstop");
 	/* VS2012 code - end */
@@ -3078,8 +3086,9 @@ void bot_command_heal_rotation(Client *c, const Seperator *sep)
 	/* VS2013 code
 	const std::list<const char*> subcommand_list = {
 		"healrotationadaptivetargeting", "healrotationaddmember", "healrotationaddtarget", "healrotationadjustcritical", "healrotationadjustsafe",
-		"healrotationcastoverride", "healrotationchangeinterval", "healrotationcleartargets", "healrotationcreate", "healrotationfastheals",
-		"healrotationlist", "healrotationremovemember", "healrotationremovetarget", "healrotationresetlimits", "healrotationstart", "healrotationstop"
+		"healrotationcastoverride", "healrotationchangeinterval", "healrotationclearhot", "healrotationcleartargets", "healrotationcreate",
+		"healrotationdelete", "healrotationfastheals", "healrotationlist", "healrotationremovemember", "healrotationremovetarget", "healrotationsave",
+		"healrotationresetlimits", "healrotationsethot", "healrotationstart", "healrotationstop"
 	};
 	*/
 	
@@ -6132,10 +6141,10 @@ void bot_subcommand_heal_rotation_adjust_critical(Client *c, const Seperator *se
 	else if (!critical_arg.compare("-"))
 		critical_ratio = (*current_member->MemberOfHealRotation())->ArmorTypeCriticalHPRatio(armor_type_value) - HP_RATIO_DELTA;
 
-	if (critical_ratio > SAFE_HP_RATIO_BASE)
-		critical_ratio = SAFE_HP_RATIO_BASE;
-	if (critical_ratio < CRITICAL_HP_RATIO_BASE)
-		critical_ratio = CRITICAL_HP_RATIO_BASE;
+	if (critical_ratio > SAFE_HP_RATIO_ABS)
+		critical_ratio = SAFE_HP_RATIO_ABS;
+	if (critical_ratio < CRITICAL_HP_RATIO_ABS)
+		critical_ratio = CRITICAL_HP_RATIO_ABS;
 
 	if (!(*current_member->MemberOfHealRotation())->SetArmorTypeCriticalHPRatio(armor_type_value, critical_ratio)) {
 		c->Message(m_fail, "Critical value %3.1f%%(%u) exceeds safe value %3.1f%%(%u) for %s's Heal Rotation",
@@ -6198,10 +6207,10 @@ void bot_subcommand_heal_rotation_adjust_safe(Client *c, const Seperator *sep)
 	else if (!safe_arg.compare("-"))
 		safe_ratio = (*current_member->MemberOfHealRotation())->ArmorTypeSafeHPRatio(armor_type_value) - HP_RATIO_DELTA;
 
-	if (safe_ratio > SAFE_HP_RATIO_BASE)
-		safe_ratio = SAFE_HP_RATIO_BASE;
-	if (safe_ratio < CRITICAL_HP_RATIO_BASE)
-		safe_ratio = CRITICAL_HP_RATIO_BASE;
+	if (safe_ratio > SAFE_HP_RATIO_ABS)
+		safe_ratio = SAFE_HP_RATIO_ABS;
+	if (safe_ratio < CRITICAL_HP_RATIO_ABS)
+		safe_ratio = CRITICAL_HP_RATIO_ABS;
 
 	if (!(*current_member->MemberOfHealRotation())->SetArmorTypeSafeHPRatio(armor_type_value, safe_ratio)) {
 		c->Message(m_fail, "Safe value %3.1f%%(%u) does not exceed critical value %3.1f%%(%u) for %s's Heal Rotation",
@@ -6256,13 +6265,13 @@ void bot_subcommand_heal_rotation_casting_override(Client *c, const Seperator *s
 		hr_casting_override = true;
 	}
 	else if (casting_override_arg.compare("off")) {
-		c->Message(m_action, "Fast heals are currently '%s' for %s's Heal Rotation", (((*current_member->MemberOfHealRotation())->CastingOverride()) ? ("on") : ("off")), current_member->GetCleanName());
+		c->Message(m_action, "Casting override is currently '%s' for %s's Heal Rotation", (((*current_member->MemberOfHealRotation())->CastingOverride()) ? ("on") : ("off")), current_member->GetCleanName());
 		return;
 	}
 
 	(*current_member->MemberOfHealRotation())->SetCastingOverride(hr_casting_override);
 
-	c->Message(m_action, "Fast heals are now '%s' for %s's Heal Rotation", (((*current_member->MemberOfHealRotation())->CastingOverride()) ? ("on") : ("off")), current_member->GetCleanName());
+	c->Message(m_action, "Casting override is now '%s' for %s's Heal Rotation", (((*current_member->MemberOfHealRotation())->CastingOverride()) ? ("on") : ("off")), current_member->GetCleanName());
 }
 
 void bot_subcommand_heal_rotation_change_interval(Client *c, const Seperator *sep)
@@ -6321,6 +6330,42 @@ void bot_subcommand_heal_rotation_change_interval(Client *c, const Seperator *se
 
 	hr_change_interval_s = (*current_member->MemberOfHealRotation())->IntervalS();
 	c->Message(m_action, "Casting interval is now '%i' second%s for %s's Heal Rotation", hr_change_interval_s, ((hr_change_interval_s == 1) ? ("") : ("s")), current_member->GetCleanName());
+}
+
+void bot_subcommand_heal_rotation_clear_hot(Client *c, const Seperator *sep)
+{
+	if (helper_command_alias_fail(c, "bot_subcommand_heal_rotation_clear_hot", sep->arg[0], "healrotationclearhot"))
+		return;
+	if (helper_is_help_or_usage(sep->arg[1])) {
+		c->Message(m_usage, "usage: (<target_member>) %s ([member_name])", sep->arg[0]);
+		return;
+	}
+
+	std::list<Bot*> sbl;
+	MyBots::PopulateSBL_ByNamedBot(c, sbl, sep->arg[1]);
+	if (sbl.empty())
+		MyBots::PopulateSBL_ByTargetedBot(c, sbl);
+	if (sbl.empty()) {
+		c->Message(m_fail, "You must <target> or [name] a current member as a bot that you own to use this command");
+		return;
+	}
+
+	auto current_member = sbl.front();
+	if (!current_member) {
+		c->Message(m_unknown, "Error: Current member bot dereferenced to nullptr");
+		return;
+	}
+
+	if (!current_member->IsHealRotationMember()) {
+		c->Message(m_fail, "%s is not a current member of a Heal Rotation", current_member->GetCleanName());
+		return;
+	}
+
+	if (!(*current_member->MemberOfHealRotation())->ClearHOTTarget()) {
+		c->Message(m_fail, "Failed to clear %s's Heal Rotation HOT", current_member->GetCleanName());
+	}
+
+	c->Message(m_action, "Succeeded in clearing %s's Heal Rotation HOT", current_member->GetCleanName());
 }
 
 void bot_subcommand_heal_rotation_clear_targets(Client *c, const Seperator *sep)
@@ -6437,8 +6482,115 @@ void bot_subcommand_heal_rotation_create(Client *c, const Seperator *sep)
 		c->Message(m_fail, "Failed to add %s as a current member to a new Heal Rotation", creator_member->GetCleanName());
 		return;
 	}
+
+	std::list<uint32> member_list;
+	std::list<std::string> target_list;
+	bool load_flag = false;
+	bool member_fail = false;
+	bool target_fail = false;
+
+	if (!botdb.LoadHealRotation(creator_member, member_list, target_list, load_flag, member_fail, target_fail))
+		c->Message(m_fail, "%s", BotDatabase::fail::LoadHealRotation());
 	
-	c->Message(m_action, "Successfully added %s as a current member to a new Heal Rotation", creator_member->GetCleanName());
+	if (!load_flag) {
+		c->Message(m_action, "Successfully added %s as a current member to a new Heal Rotation", creator_member->GetCleanName());
+		return;
+	}
+	
+	if (!member_fail) {
+		MyBots::PopulateSBL_BySpawnedBots(c, sbl);
+		for (auto member_iter : member_list) {
+			if (!member_iter || member_iter == creator_member->GetBotID())
+				continue;
+
+			bool member_found = false;
+			for (auto bot_iter : sbl) {
+				if (bot_iter->GetBotID() != member_iter)
+					continue;
+
+				if (!bot_iter->JoinHealRotationMemberPool(creator_member->MemberOfHealRotation()))
+					c->Message(m_fail, "Failed to add member '%s'", bot_iter->GetCleanName());
+				member_found = true;
+
+				break;
+			}
+
+			if (!member_found)
+				c->Message(m_fail, "Could not locate member with bot id '%u'", member_iter);
+		}
+	}
+	else {
+		c->Message(m_fail, "%s", BotDatabase::fail::LoadHealRotationMembers());
+	}
+
+	if (!target_fail) {
+		for (auto target_iter : target_list) {
+			if (target_iter.empty())
+				continue;
+
+			auto target_mob = entity_list.GetMob(target_iter.c_str());
+			if (!target_mob) {
+				c->Message(m_fail, "Could not locate target '%s'", target_iter.c_str());
+				continue;
+			}
+
+			if (!target_mob->JoinHealRotationTargetPool(creator_member->MemberOfHealRotation()))
+				c->Message(m_fail, "Failed to add target '%s'", target_mob->GetCleanName());
+		}
+	}
+	else {
+		c->Message(m_fail, "%s", BotDatabase::fail::LoadHealRotationTargets());
+	}
+	
+	c->Message(m_action, "Successfully loaded %s's Heal Rotation", creator_member->GetCleanName());
+}
+
+void bot_subcommand_heal_rotation_delete(Client *c, const Seperator *sep)
+{
+	if (helper_command_alias_fail(c, "bot_subcommand_heal_rotation_delete", sep->arg[0], "healrotationdelete"))
+		return;
+	if (helper_is_help_or_usage(sep->arg[1])) {
+		c->Message(m_usage, "usage: (<target_member>) %s ([option: all]) ([member_name])", sep->arg[0]);
+		return;
+	}
+
+	bool all_flag = false;
+	int name_arg = 1;
+	if (!strcasecmp(sep->arg[1], "all")) {
+		all_flag = true;
+		name_arg = 2;
+	}
+
+	if (all_flag) {
+		if (botdb.DeleteAllHealRotations(c->CharacterID()))
+			c->Message(m_action, "Succeeded in deleting all heal rotations");
+		else
+			c->Message(m_fail, "%s", BotDatabase::fail::DeleteAllHealRotations());
+
+		return;
+	}
+
+	std::list<Bot*> sbl;
+	MyBots::PopulateSBL_ByNamedBot(c, sbl, sep->arg[name_arg]);
+	if (sbl.empty())
+		MyBots::PopulateSBL_ByTargetedBot(c, sbl);
+	if (sbl.empty()) {
+		c->Message(m_fail, "You must <target> or [name] a current member as a bot that you own to use this command");
+		return;
+	}
+
+	auto current_member = sbl.front();
+	if (!current_member) {
+		c->Message(m_unknown, "Error: Current member bot dereferenced to nullptr");
+		return;
+	}
+
+	if (!botdb.DeleteHealRotation(current_member->GetBotID())) {
+		c->Message(m_fail, "%s", BotDatabase::fail::DeleteHealRotation());
+		return;
+	}
+
+	c->Message(m_action, "Succeeded in deleting %s's heal rotation", current_member->GetCleanName());
 }
 
 void bot_subcommand_heal_rotation_fast_heals(Client *c, const Seperator *sep)
@@ -6529,6 +6681,8 @@ void bot_subcommand_heal_rotation_list(Client *c, const Seperator *sep)
 	c->Message(m_message, "Fast heals: '%s'", (((*current_member->MemberOfHealRotation())->FastHeals()) ? ("on") : ("off")));
 	c->Message(m_message, "Adaptive targeting: '%s'", (((*current_member->MemberOfHealRotation())->AdaptiveTargeting()) ? ("on") : ("off")));
 	c->Message(m_message, "Casting override: '%s'", (((*current_member->MemberOfHealRotation())->CastingOverride()) ? ("on") : ("off")));
+	c->Message(m_message, "HOT state: %s", (((*current_member->MemberOfHealRotation())->IsHOTActive()) ? ("active") : ("inactive")));
+	c->Message(m_message, "HOT target: %s", (((*current_member->MemberOfHealRotation())->HOTTarget()) ? ((*current_member->MemberOfHealRotation())->HOTTarget()->GetCleanName()) : ("null")));
 
 	c->Message(m_message, "Base hp limits - critical: %3.1f%%, safe: %3.1f%%",
 		(*current_member->MemberOfHealRotation())->ArmorTypeCriticalHPRatio(ARMOR_TYPE_UNKNOWN),
@@ -6685,6 +6839,97 @@ void bot_subcommand_heal_rotation_reset_limits(Client *c, const Seperator *sep)
 	(*current_member->MemberOfHealRotation())->ResetArmorTypeHPLimits();
 
 	c->Message(m_action, "Class Armor Type HP limit criteria has been set to default values for %s's Heal Rotation", current_member->GetCleanName());
+}
+
+void bot_subcommand_heal_rotation_save(Client *c, const Seperator *sep)
+{
+	if (helper_command_alias_fail(c, "bot_subcommand_heal_rotation_save", sep->arg[0], "healrotationsave"))
+		return;
+	if (helper_is_help_or_usage(sep->arg[1])) {
+		c->Message(m_usage, "usage: (<target_member>) %s ([member_name])", sep->arg[0]);
+		return;
+	}
+
+	std::list<Bot*> sbl;
+	MyBots::PopulateSBL_ByNamedBot(c, sbl, sep->arg[1]);
+	if (sbl.empty())
+		MyBots::PopulateSBL_ByTargetedBot(c, sbl);
+	if (sbl.empty()) {
+		c->Message(m_fail, "You must <target> or [name] a current member as a bot that you own to use this command");
+		return;
+	}
+
+	auto current_member = sbl.front();
+	if (!current_member) {
+		c->Message(m_unknown, "Error: Current member bot dereferenced to nullptr");
+		return;
+	}
+
+	if (!current_member->IsHealRotationMember()) {
+		c->Message(m_fail, "%s is not a current member of a Heal Rotation", current_member->GetCleanName());
+		return;
+	}
+
+	bool member_fail = false;
+	bool target_fail = false;
+	if (!botdb.SaveHealRotation(current_member, member_fail, target_fail)) {
+		c->Message(m_fail, "%s", BotDatabase::fail::SaveHealRotation());
+		return;
+	}
+	if (member_fail)
+		c->Message(m_fail, "Failed to save heal rotation members");
+	if (target_fail)
+		c->Message(m_fail, "Failed to save heal rotation targets");
+
+	c->Message(m_action, "Succeeded in saving %s's heal rotation", current_member->GetCleanName());
+}
+
+void bot_subcommand_heal_rotation_set_hot(Client *c, const Seperator *sep)
+{
+	if (helper_command_alias_fail(c, "bot_subcommand_heal_rotation_set_hot", sep->arg[0], "healrotationsethot"))
+		return;
+	if (helper_is_help_or_usage(sep->arg[1])) {
+		c->Message(m_usage, "usage: (<target_member>) %s [heal_override_target_name] ([member_name])", sep->arg[0]);
+		return;
+	}
+
+	std::list<Bot*> sbl;
+	MyBots::PopulateSBL_ByNamedBot(c, sbl, sep->arg[2]);
+	if (sbl.empty())
+		MyBots::PopulateSBL_ByTargetedBot(c, sbl);
+	if (sbl.empty()) {
+		c->Message(m_fail, "You must <target> or [name] a current member as a bot that you own to use this command");
+		return;
+	}
+
+	auto current_member = sbl.front();
+	if (!current_member) {
+		c->Message(m_unknown, "Error: Current member bot dereferenced to nullptr");
+		return;
+	}
+
+	if (!current_member->IsHealRotationMember()) {
+		c->Message(m_fail, "%s is not a member of a Heal Rotation", current_member->GetCleanName());
+		return;
+	}
+
+	auto hot_target = entity_list.GetMob(sep->arg[1]);
+	if (!hot_target) {
+		c->Message(m_fail, "No target exists by the name '%s'", sep->arg[1]);
+		return;
+	}
+
+	if (!(*current_member->MemberOfHealRotation())->IsTargetInPool(hot_target)) {
+		c->Message(m_fail, "%s is not a target in %s's Heal Rotation", hot_target->GetCleanName(), current_member->GetCleanName());
+		return;
+	}
+
+	if (!(*current_member->MemberOfHealRotation())->SetHOTTarget(hot_target)) {
+		c->Message(m_fail, "Failed to set %s as the HOT in %s's Heal Rotation", hot_target->GetCleanName(), current_member->GetCleanName());
+		return;
+	}
+
+	c->Message(m_action, "Succeeded in setting %s as the HOT in %s's Heal Rotation", hot_target->GetCleanName(), current_member->GetCleanName());
 }
 
 void bot_subcommand_heal_rotation_start(Client *c, const Seperator *sep)

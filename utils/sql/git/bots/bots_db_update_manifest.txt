@@ -2,6 +2,8 @@
 9001|2016_03_24_bots_command_settings.sql|SHOW TABLES LIKE 'bot_command_settings'|empty|
 9002|2016_03_24_bots_command_rules.sql|SELECT * FROM `rule_values` WHERE `rule_name` LIKE 'Bots:CommandSpellRank'|empty|
 9003|2016_04_05_bots_pet_spell_id_field.sql|SHOW COLUMNS FROM `bot_pets` LIKE 'pet_id'|not_empty|
+9004|2016_04_07_bots_heal_override_target.sql|SELECT `bot_command` FROM `bot_command_settings` WHERE `bot_command` LIKE 'healrotationclearhot'|empty|
+9005|2016_04_08_bots_heal_rotations.sql|SHOW TABLES LIKE 'bot_heal_rotations'|empty|
 
 # Upgrade conditions:
 # 	This won't be needed after this system is implemented, but it is used database that are not

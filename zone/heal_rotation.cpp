@@ -25,10 +25,10 @@
 #define SAFE_HP_RATIO_CHAIN 80.0f
 #define SAFE_HP_RATIO_PLATE 75.0f
 
-#define CRITICAL_HP_RATIO_CLOTH 30.0f
-#define CRITICAL_HP_RATIO_LEATHER 25.0f
-#define CRITICAL_HP_RATIO_CHAIN 15.0f
-#define CRITICAL_HP_RATIO_PLATE 10.0f
+#define CRITICAL_HP_RATIO_CLOTH 45.0f
+#define CRITICAL_HP_RATIO_LEATHER 40.0f
+#define CRITICAL_HP_RATIO_CHAIN 35.0f
+#define CRITICAL_HP_RATIO_PLATE 30.0f
 
 HealRotation::HealRotation(Bot* hr_creator, uint32 interval_ms, bool fast_heals, bool adaptive_targeting, bool casting_override)
 {
@@ -51,6 +51,9 @@ HealRotation::HealRotation(Bot* hr_creator, uint32 interval_ms, bool fast_heals,
 	m_is_active = false;
 
 	m_consumed = false;
+
+	m_hot_target = nullptr;
+	m_hot_active = false;
 }
 
 void HealRotation::SetIntervalMS(uint32 interval_ms)
@@ -143,6 +146,11 @@ bool HealRotation::RemoveTargetFromPool(Mob* hr_target)
 		if (target_iter != hr_target)
 			continue;
 		
+		if (m_hot_target == hr_target) {
+			m_hot_target = nullptr;
+			m_hot_active = false;
+		}
+
 		m_target_healing_stats_2.erase(hr_target);
 		m_target_healing_stats_1.erase(hr_target);
 		m_target_pool.remove(hr_target);
@@ -172,6 +180,8 @@ bool HealRotation::ClearMemberPool()
 
 bool HealRotation::ClearTargetPool()
 {
+	m_hot_target = nullptr;
+	m_hot_active = false;
 	m_is_active = false;
 
 	auto clear_list = m_target_pool;
@@ -184,11 +194,32 @@ bool HealRotation::ClearTargetPool()
 	return m_target_pool.empty();
 }
 
+bool HealRotation::SetHOTTarget(Mob* hot_target)
+{
+	if (!hot_target || !IsTargetInPool(hot_target))
+		return false;
+
+	m_hot_target = hot_target;
+	m_hot_active = true;
+
+	return true;
+}
+
+bool HealRotation::ClearHOTTarget()
+{
+	m_hot_target = nullptr;
+	m_hot_active = false;
+
+	return true;
+}
+
 bool HealRotation::Start()
 {
 	m_is_active = false;
-	if (m_member_pool.empty() || m_target_pool.empty())
+	if (m_member_pool.empty() || m_target_pool.empty()) {
+		validate_hot();
 		return false;
+	}
 
 	m_cycle_pool = m_member_pool;
 	m_is_active = true;
@@ -207,7 +238,7 @@ bool HealRotation::Stop()
 
 Bot* HealRotation::CastingMember()
 {
-	if (!m_is_active)
+	if (!m_is_active && !m_hot_active)
 		return nullptr;
 	
 	if (m_cycle_pool.empty()) {
@@ -222,6 +253,9 @@ Bot* HealRotation::CastingMember()
 
 bool HealRotation::PokeCastingTarget()
 {
+	if (m_hot_target && m_hot_active)
+		return true;
+	
 	if (!m_is_active)
 		return false;
 
@@ -248,6 +282,9 @@ bool HealRotation::PokeCastingTarget()
 
 Mob* HealRotation::CastingTarget()
 {
+	if (m_hot_target && m_hot_active)
+		return m_hot_target;
+	
 	if (!m_is_active)
 		return nullptr;
 	if (!m_active_heal_target)
@@ -302,6 +339,16 @@ bool HealRotation::IsTargetInPool(Mob* hr_target)
 	}
 
 	return false;
+}
+
+bool HealRotation::IsHOTTarget(Mob* hot_target)
+{
+	if (!hot_target)
+		return false;
+	if (m_hot_target != hot_target)
+		return false;
+
+	return true;
 }
 
 void HealRotation::SetMemberIsCasting(Bot* hr_member, bool flag)
@@ -444,7 +491,7 @@ bool HealRotation::SetArmorTypeSafeHPRatio(uint8 armor_type, float hp_ratio)
 {
 	if (armor_type >= ARMOR_TYPE_COUNT)
 		return false;
-	if (hp_ratio < CRITICAL_HP_RATIO_BASE || hp_ratio > SAFE_HP_RATIO_BASE)
+	if (hp_ratio < CRITICAL_HP_RATIO_ABS || hp_ratio > SAFE_HP_RATIO_ABS)
 		return false;
 	if (hp_ratio < m_critical_hp_ratio[armor_type])
 		return false;
@@ -458,7 +505,7 @@ bool HealRotation::SetArmorTypeCriticalHPRatio(uint8 armor_type, float hp_ratio)
 {
 	if (armor_type >= ARMOR_TYPE_COUNT)
 		return false;
-	if (hp_ratio < CRITICAL_HP_RATIO_BASE || hp_ratio > SAFE_HP_RATIO_BASE)
+	if (hp_ratio < CRITICAL_HP_RATIO_ABS || hp_ratio > SAFE_HP_RATIO_ABS)
 		return false;
 	if (hp_ratio > m_safe_hp_ratio[armor_type])
 		return false;
@@ -861,6 +908,19 @@ void HealRotation::bias_targets()
 	}
 	if (!target_index) { Log.Out(Logs::General, Logs::Error, "(0) None (hp: 0.0\%, at: 0, dontheal: F, crit(base): F(F), safe(base): F(F), hcnt(ext): 0(0), hfreq(ext): 0.0(0.0))"); }
 #endif
+}
+
+void HealRotation::validate_hot()
+{
+	if (!m_hot_target) {
+		m_hot_active = false;
+		return;
+	}
+
+	if (!IsTargetInPool(m_hot_target)) {
+		m_hot_target = nullptr;
+		m_hot_active = false;
+	}
 }
 
 bool IsHealRotationMemberClass(uint8 class_id)

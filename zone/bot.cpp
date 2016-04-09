@@ -1597,6 +1597,25 @@ bool Bot::DeleteBot()
 	if (!bot_owner)
 		return false;
 
+	if (!botdb.DeleteHealRotation(GetBotID())) {
+		bot_owner->Message(13, "%s", BotDatabase::fail::DeleteHealRotation());
+		return false;
+	}
+
+	std::string query = StringFormat("DELETE FROM `bot_heal_rotation_members` WHERE `bot_id` = '%u'", GetBotID());
+	auto results = botdb.QueryDatabase(query);
+	if (!results.Success()) {
+		bot_owner->Message(13, "Failed to delete heal rotation member '%s'", GetCleanName());
+		return false;
+	}
+
+	query = StringFormat("DELETE FROM `bot_heal_rotation_targets` WHERE `target_name` LIKE '%s'", GetCleanName());
+	results = botdb.QueryDatabase(query);
+	if (!results.Success()) {
+		bot_owner->Message(13, "Failed to delete heal rotation target '%s'", GetCleanName());
+		return false;
+	}
+
 	if (!DeletePet()) {
 		bot_owner->Message(13, "Failed to delete pet for '%s'", GetCleanName());
 		return false;
@@ -8358,7 +8377,7 @@ bool Bot::IsMyHealRotationSet()
 {
 	if (!IsHealRotationMember())
 		return false;
-	if (!m_member_of_heal_rotation->IsActive())
+	if (!m_member_of_heal_rotation->IsActive() && !m_member_of_heal_rotation->IsHOTActive())
 		return false;
 	if (!m_member_of_heal_rotation->CastingReady())
 		return false;

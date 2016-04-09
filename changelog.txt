@@ -1,5 +1,9 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 04/08/2016 ==
+Uleat: Added Heal Rotation HOTs (Heal Override Targets) that can be set for proactive healing (default HR behavior is reactive)
+Uleat: Added the ability to save/load/delete Heal Rotations based on targeted member - load is automatic when ^hrcreate is used on a bot that has a saved HR entry
+
 == 04/07/2016 ==
 Uleat: Rework of eq_dictionary to facilitate inventory work
 
