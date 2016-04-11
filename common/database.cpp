@@ -313,7 +313,10 @@ bool Database::DeleteCharacter(char *name) {
 	std::string query = StringFormat("SELECT `id` from `character_data` WHERE `name` = '%s'", name);
 	auto results = QueryDatabase(query);
 	for (auto row = results.begin(); row != results.end(); ++row) { charid = atoi(row[0]); }
-	if (charid <= 0){ std::cerr << "Database::DeleteCharacter :: Character not found, stopping delete...\n"; return false; }
+	if (charid <= 0){ 
+		Log.Out(Logs::General, Logs::Error, "Database::DeleteCharacter :: Character (%s) not found, stopping delete...", name);
+		return false; 
+	}
 
 	query = StringFormat("DELETE FROM `quest_globals` WHERE `charid` = '%d'", charid); QueryDatabase(query);
 	query = StringFormat("DELETE FROM `character_activities` WHERE `charid` = '%d'", charid); QueryDatabase(query);
