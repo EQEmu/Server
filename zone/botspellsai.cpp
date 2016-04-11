@@ -21,6 +21,14 @@
 #include "bot.h"
 #include "../common/string_util.h"
 
+#if EQDEBUG >= 12
+	#define BotAI_DEBUG_Spells	25
+#elif EQDEBUG >= 9
+	#define BotAI_DEBUG_Spells	10
+#else
+	#define BotAI_DEBUG_Spells	-1
+#endif
+
 bool Bot::AICastSpell(Mob* tar, uint8 iChance, uint16 iSpellTypes) {
 
 	if (!tar) {
@@ -995,8 +1003,8 @@ bool Bot::AI_IdleCastCheck() {
 	bool result = false;
 
 	if (AIautocastspell_timer->Check(false)) {
-#if MobAI_DEBUG_Spells >= 25
-		std::cout << "Non-Engaged autocast check triggered: " << this->GetCleanName() << std::endl; // cout undefine [CODEBUG]
+#if BotAI_DEBUG_Spells >= 25
+		Log.Out(Logs::Detail, Logs::AI, "Bot Non-Engaged autocast check triggered: %s", this->GetCleanName());
 #endif
 		AIautocastspell_timer->Disable();	//prevent the timer from going off AGAIN while we are casting.
 
@@ -1319,6 +1327,11 @@ bool Bot::AIHealRotation(Mob* tar, bool useFastHeals) {
 			botSpell = GetFirstBotSpellBySpellType(this, SpellType_Heal);
 		}
 	}
+
+#if BotAI_DEBUG_Spells >= 10
+	Log.Out(Logs::Detail, Logs::AI, "Bot::AIHealRotation: heal spellid = %u, fastheals = %c, casterlevel = %u",
+		botSpell.SpellId, ((useFastHeals) ? ('T') : ('F')), GetLevel());
+#endif
 
 	// If there is still no spell id, then there isn't going to be one so we are done
 	if (botSpell.SpellId == 0)

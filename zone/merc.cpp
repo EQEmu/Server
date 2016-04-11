@@ -20,6 +20,14 @@
 
 extern volatile bool is_zone_loaded;
 
+#if EQDEBUG >= 12
+	#define MercAI_DEBUG_Spells	25
+#elif EQDEBUG >= 9
+	#define MercAI_DEBUG_Spells	10
+#else
+	#define MercAI_DEBUG_Spells	-1
+#endif
+
 Merc::Merc(const NPCType* d, float x, float y, float z, float heading)
 : NPC(d, nullptr, glm::vec4(x, y, z, heading), 0, false), endupkeep_timer(1000), rest_timer(1), confidence_timer(6000), check_target_timer(2000)
 {
@@ -1768,7 +1776,7 @@ bool Merc::AI_EngagedCastCheck() {
 	{
 		AIautocastspell_timer->Disable();       //prevent the timer from going off AGAIN while we are casting.
 
-		Log.Out(Logs::Detail, Logs::AI, "Engaged autocast check triggered (MERCS).");
+		Log.Out(Logs::Detail, Logs::AI, "Merc Engaged autocast check triggered");
 
 		int8 mercClass = GetClass();
 
@@ -1822,8 +1830,8 @@ bool Merc::AI_IdleCastCheck() {
 	bool failedToCast = false;
 
 	if (AIautocastspell_timer->Check(false)) {
-#if MobAI_DEBUG_Spells >= 25
-		std::cout << "Non-Engaged autocast check triggered: " << this->GetCleanName() << std::endl;
+#if MercAI_DEBUG_Spells >= 25
+		Log.Out(Logs::Detail, Logs::AI, "Merc Non-Engaged autocast check triggered: %s", this->GetCleanName());
 #endif
 		AIautocastspell_timer->Disable();       //prevent the timer from going off AGAIN while we are casting.
 
