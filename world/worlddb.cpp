@@ -269,7 +269,8 @@ void WorldDatabase::GetCharSelectInfo(uint32 accountID, EQApplicationPacket **ou
 			}
 		}
 		else {
-			printf("Error loading inventory for %s\n", cse->Name);
+			printf("Error loading inventory for %s", cse->Name);
+			std::cout << std::endl;
 		}
 		/* Load Inventory End */
 
@@ -339,7 +340,8 @@ bool WorldDatabase::GetStartZone(PlayerProfile_Struct* in_pp, CharCreate_Struct*
 	Log.Out(Logs::General, Logs::Status, "SoF Start zone query: %s\n", query.c_str());
 
     if (results.RowCount() == 0) {
-        printf("No start_zones entry in database, using defaults\n");
+		printf("No start_zones entry in database, using defaults");
+		std::cout << std::endl;
 		isTitanium ? SetTitaniumDefaultStartZone(in_pp, in_cc) : SetSoFDefaultStartZone(in_pp, in_cc);
     }
     else {

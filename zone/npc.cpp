@@ -823,7 +823,8 @@ bool NPC::DatabaseCastAccepted(int spell_id) {
 		case SE_SummonPet: {
 			if(GetPet()){
 #ifdef SPELLQUEUE
-				printf("%s: Attempted to make a second pet, denied.\n",GetName());
+				printf("%s: Attempted to make a second pet, denied.",GetName());
+				std::cout << std::endl;
 #endif
 				return false;
 			}

@@ -1511,7 +1511,8 @@ void Zone::SetDate(uint16 year, uint8 month, uint8 day, uint8 hour, uint8 minute
 		eqtod->start_eqtime.month=month;
 		eqtod->start_eqtime.year=year;
 		eqtod->start_realtime=time(0);
-		printf("Setting master date on world server to: %d-%d-%d %d:%d (%d)\n", year, month, day, hour, minute, (int)eqtod->start_realtime);
+		printf("Setting master date on world server to: %d-%d-%d %d:%d (%d)", year, month, day, hour, minute, (int)eqtod->start_realtime);
+		std::cout << std::endl;
 		worldserver.SendPacket(pack);
 		safe_delete(pack);
 	}

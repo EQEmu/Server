@@ -534,7 +534,8 @@ void WorldServer::Process() {
 		case ServerOP_ZonePlayer: {
 			ServerZonePlayer_Struct* szp = (ServerZonePlayer_Struct*) pack->pBuffer;
 			Client* client = entity_list.GetClientByName(szp->name);
-			printf("Zoning %s to %s(%u) - %u\n", client != nullptr ? client->GetCleanName() : "Unknown", szp->zone, database.GetZoneID(szp->zone), szp->instance_id);
+			printf("Zoning %s to %s(%u) - %u", client != nullptr ? client->GetCleanName() : "Unknown", szp->zone, database.GetZoneID(szp->zone), szp->instance_id);
+			std::cout << std::endl;
 			if (client != 0) {
 				if (strcasecmp(szp->adminname, szp->name) == 0)
 					client->Message(0, "Zoning to: %s", szp->zone);
@@ -803,7 +804,8 @@ void WorldServer::Process() {
 			cur_groupid = ids->start;
 			last_groupid = ids->end;
 #ifdef _EQDEBUG
-			printf("Got new group id set: %lu -> %lu\n", (unsigned long)cur_groupid, (unsigned long)last_groupid);
+			printf("Got new group id set: %lu -> %lu", (unsigned long)cur_groupid, (unsigned long)last_groupid);
+			std::cout << std::endl;
 #endif
 			break;
 		}
@@ -2105,7 +2107,8 @@ uint32 WorldServer::NextGroupID() {
 		SendPacket(pack);
 		safe_delete(pack);
 	}
-	printf("Handing out new group id %d\n", cur_groupid);
+	printf("Handing out new group id %d", cur_groupid);
+	std::cout << std::endl;
 	return(cur_groupid++);
 }
 

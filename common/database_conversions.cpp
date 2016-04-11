@@ -541,7 +541,8 @@ bool Database::CheckDatabaseConvertPPDeblob(){
 		results = QueryDatabase(rquery);
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			number_of_characters = atoi(row[0]);
-			printf("Number of Characters in Database: %i \n", number_of_characters);
+			printf("Number of Characters in Database: %i", number_of_characters);
+			std::cout << std::endl;
 		}
 
 		/* Check for table `character_data` */
@@ -655,7 +656,8 @@ bool Database::CheckDatabaseConvertPPDeblob(){
 				") ENGINE = InnoDB AUTO_INCREMENT = 1 DEFAULT CHARSET = latin1;		"
 				);
 			auto results = QueryDatabase(rquery);
-			printf(" done...\n");
+			printf(" done...");
+			std::cout << std::endl;
 		}
 		/* Check for table `character_currency` */
 		rquery = StringFormat("SHOW TABLES LIKE 'character_currency'");
@@ -686,7 +688,8 @@ bool Database::CheckDatabaseConvertPPDeblob(){
 				" ) ENGINE=InnoDB DEFAULT CHARSET=latin1;             "
 				);
 			auto results = QueryDatabase(rquery);
-			printf(" done...\n");
+			printf(" done...");
+			std::cout << std::endl;
 		}
 		/* Check for table `character_alternate_abilities` */
 		rquery = StringFormat("SHOW TABLES LIKE 'character_alternate_abilities'");
@@ -704,7 +707,8 @@ bool Database::CheckDatabaseConvertPPDeblob(){
 				" ) ENGINE = InnoDB DEFAULT CHARSET = latin1;		"
 				);
 			auto results = QueryDatabase(rquery);
-			printf(" done...\n");
+			printf(" done...");
+			std::cout << std::endl;
 		}
 		/* Check for table `character_bind` */
 		rquery = StringFormat("SHOW TABLES LIKE 'character_bind'");
@@ -726,7 +730,8 @@ bool Database::CheckDatabaseConvertPPDeblob(){
 				") ENGINE = InnoDB DEFAULT CHARSET = latin1;"
 				);
 			auto results = QueryDatabase(rquery);
-			printf(" done...\n");
+			printf(" done...");
+			std::cout << std::endl;
 		}
 		/* Check for table `character_languages` */
 		rquery = StringFormat("SHOW TABLES LIKE 'character_languages'");
@@ -743,7 +748,8 @@ bool Database::CheckDatabaseConvertPPDeblob(){
 				") ENGINE = InnoDB DEFAULT CHARSET = latin1;"
 				);
 			auto results = QueryDatabase(rquery);
-			printf(" done...\n");
+			printf(" done...");
+			std::cout << std::endl;
 		}
 		/* Check for table `character_skills` */
 		rquery = StringFormat("SHOW TABLES LIKE 'character_skills'");
@@ -760,7 +766,8 @@ bool Database::CheckDatabaseConvertPPDeblob(){
 				") ENGINE = InnoDB DEFAULT CHARSET = latin1;"
 				);
 			auto results = QueryDatabase(rquery);
-			printf(" done...\n");
+			printf(" done...");
+			std::cout << std::endl;
 		}
 		/* Check for table `character_spells` */
 		rquery = StringFormat("SHOW TABLES LIKE 'character_spells'");
@@ -777,7 +784,8 @@ bool Database::CheckDatabaseConvertPPDeblob(){
 				") ENGINE = InnoDB DEFAULT CHARSET = latin1;"
 				);
 			auto results = QueryDatabase(rquery);
-			printf(" done...\n");
+			printf(" done...");
+			std::cout << std::endl;
 		}
 		/* Check for table `character_memmed_spells` */
 		rquery = StringFormat("SHOW TABLES LIKE 'character_memmed_spells'");
@@ -794,7 +802,8 @@ bool Database::CheckDatabaseConvertPPDeblob(){
 				") ENGINE = InnoDB DEFAULT CHARSET = latin1;"
 				);
 			auto results = QueryDatabase(rquery);
-			printf(" done...\n");
+			printf(" done...");
+			std::cout << std::endl;
 		}
 		/* Check for table `character_disciplines` */
 		rquery = StringFormat("SHOW TABLES LIKE 'character_disciplines'");
@@ -811,7 +820,8 @@ bool Database::CheckDatabaseConvertPPDeblob(){
 				" ) ENGINE = InnoDB DEFAULT CHARSET = latin1;  "
 				);
 			auto results = QueryDatabase(rquery);
-			printf(" done...\n");
+			printf(" done...");
+			std::cout << std::endl;
 		}
 		/* Check for table `character_material` */
 		rquery = StringFormat("SHOW TABLES LIKE 'character_material'");
@@ -832,7 +842,8 @@ bool Database::CheckDatabaseConvertPPDeblob(){
 				") ENGINE = InnoDB AUTO_INCREMENT = 1 DEFAULT CHARSET = latin1;"
 				);
 			auto results = QueryDatabase(rquery);
-			printf(" done...\n");
+			printf(" done...");
+			std::cout << std::endl;
 		}
 		/* Check for table `character_tribute` */
 		rquery = StringFormat("SHOW TABLES LIKE 'character_tribute'");
@@ -848,7 +859,8 @@ bool Database::CheckDatabaseConvertPPDeblob(){
 				") ENGINE = InnoDB DEFAULT CHARSET = latin1;"
 				);
 			auto results = QueryDatabase(rquery);
-			printf(" done...\n");
+			printf(" done...");
+			std::cout << std::endl;
 		}
 		/* Check for table `character_bandolier` */
 		rquery = StringFormat("SHOW TABLES LIKE 'character_bandolier'");
@@ -868,7 +880,8 @@ bool Database::CheckDatabaseConvertPPDeblob(){
 				") ENGINE = InnoDB DEFAULT CHARSET = latin1;	"
 				);
 			auto results = QueryDatabase(rquery);
-			printf(" done...\n");
+			printf(" done...");
+			std::cout << std::endl;
 		}
 		/* Check for table `character_potionbelt` */
 		rquery = StringFormat("SHOW TABLES LIKE 'character_potionbelt'");
@@ -886,7 +899,8 @@ bool Database::CheckDatabaseConvertPPDeblob(){
 				") ENGINE = InnoDB DEFAULT CHARSET = latin1;"
 				);
 			auto results = QueryDatabase(rquery);
-			printf(" done...\n");
+			printf(" done...");
+			std::cout << std::endl;
 		}
 		/* Check for table `character_potionbelt` */
 		rquery = StringFormat("SHOW TABLES LIKE 'character_inspect_messages'");
@@ -902,7 +916,8 @@ bool Database::CheckDatabaseConvertPPDeblob(){
 				") ENGINE = InnoDB DEFAULT CHARSET = latin1;"
 				);
 			auto results = QueryDatabase(rquery);
-			printf(" done...\n");
+			printf(" done...");
+			std::cout << std::endl;
 		}
 		/* Check for table `character_leadership_abilities` */
 		rquery = StringFormat("SHOW TABLES LIKE 'character_leadership_abilities'");
@@ -919,11 +934,13 @@ bool Database::CheckDatabaseConvertPPDeblob(){
 				") ENGINE = InnoDB DEFAULT CHARSET = latin1; "
 				);
 			auto results = QueryDatabase(rquery);
-			printf(" done...\n");
+			printf(" done...");
+			std::cout << std::endl;
 		}
 
 		/* Done */
-		printf("Starting conversion...\n\n");
+		printf("Starting conversion...\n");
+		std::cout << std::endl;
 
 
 		int char_iter_count = 0;
@@ -1484,7 +1501,8 @@ bool Database::CheckDatabaseConvertPPDeblob(){
 		if (runconvert == 1){
 			std::string rquery = StringFormat("RENAME TABLE `character_` TO `character_old`"); QueryDatabase(rquery);
 			printf("\n\nRenaming `character_` table to `character_old`, this is a LARGE table so when you don't need it anymore, I would suggest deleting it yourself...\n");
-			printf("\n\nCharacter blob conversion complete, continuing world bootup...\n");
+			printf("\n\nCharacter blob conversion complete, continuing world bootup...");
+			std::cout << std::endl;
 		}
 	}
 	return true;

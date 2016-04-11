@@ -1606,7 +1606,8 @@ void Client::UpdateAdmin(bool iFromDB) {
 
 void Client::SetStats(uint8 type,int16 set_val){
 	if(type>STAT_DISEASE){
-		printf("Error in Client::IncStats, received invalid type of: %i\n",type);
+		printf("Error in Client::IncStats, received invalid type of: %i", type);
+		std::cout << std::endl;
 		return;
 	}
 	EQApplicationPacket* outapp = new EQApplicationPacket(OP_IncreaseStats,sizeof(IncreaseStat_Struct));
@@ -1689,7 +1690,8 @@ void Client::SetStats(uint8 type,int16 set_val){
 
 void Client::IncStats(uint8 type,int16 increase_val){
 	if(type>STAT_DISEASE){
-		printf("Error in Client::IncStats, received invalid type of: %i\n",type);
+		printf("Error in Client::IncStats, received invalid type of: %i", type);
+		std::cout << std::endl;
 		return;
 	}
 	EQApplicationPacket* outapp = new EQApplicationPacket(OP_IncreaseStats,sizeof(IncreaseStat_Struct));

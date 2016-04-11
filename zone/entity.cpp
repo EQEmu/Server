@@ -2709,6 +2709,7 @@ void EntityList::FindPathsToAllNPCs()
 		++it;
 	}
 
+	std::cout << std::endl;
 	fflush(stdout);
 }
 

@@ -264,7 +264,7 @@ void EQEmuLogSys::ProcessConsoleMessage(uint16 debug_level, uint16 log_category,
 		wcscpy(info.FaceName, L"Lucida Console");
 		SetCurrentConsoleFontEx(console_handle, NULL, &info);
 		SetConsoleTextAttribute(console_handle, EQEmuLogSys::GetWindowsConsoleColorFromCategory(log_category));
-		std::cout << message << "\n";
+		std::cout << message << std::endl;
 		SetConsoleTextAttribute(console_handle, Console::Color::White);
 	#else
 		std::cout << EQEmuLogSys::GetLinuxConsoleColorFromCategory(log_category) << message << LC_RESET << std::endl;

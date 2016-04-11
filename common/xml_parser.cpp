@@ -18,6 +18,8 @@
 #include "global_define.h"
 #include "xml_parser.h"
 
+#include <iostream>
+
 XMLParser::XMLParser() {
 	ParseOkay = false;
 }
@@ -26,13 +28,15 @@ bool XMLParser::ParseFile(const char *file, const char *root_ele) {
 	std::map<std::string,ElementHandler>::iterator handler;
 	TiXmlDocument doc( file );
 	if(!doc.LoadFile()) {
-		printf("Unable to load '%s': %s\n", file, doc.ErrorDesc());
+		printf("Unable to load '%s': %s", file, doc.ErrorDesc());
+		std::cout << std::endl;
 		return(false);
 	}
 
 	TiXmlElement *root = doc.FirstChildElement( root_ele );
 	if(root == nullptr) {
-		printf("Unable to find root '%s' in %s\n",root_ele, file);
+		printf("Unable to find root '%s' in %s", root_ele, file);
+		std::cout << std::endl;
 		return(false);
 	}
 
@@ -73,15 +77,18 @@ const char *XMLParser::ParseTextBlock(TiXmlNode *within, const char *name, bool 
 	TiXmlElement * txt = within->FirstChildElement(name);
 	if(txt == nullptr) {
 		if(!optional) {
-			printf("Unable to find a '%s' element on %s element at line %d\n", name, within->Value(), within->Row());
+			printf("Unable to find a '%s' element on %s element at line %d", name, within->Value(), within->Row());
+			std::cout << std::endl;
 			ParseOkay=false;
 		}
 		return(nullptr);
 	}
 	TiXmlNode *contents = txt->FirstChild();
 	if(contents == nullptr || contents->Type() != TiXmlNode::TEXT) {
-		if(!optional)
-			printf("Node '%s' was expected to be a text element in %s element at line %d\n", name, txt->Value(), txt->Row());
+		if (!optional) {
+			printf("Node '%s' was expected to be a text element in %s element at line %d", name, txt->Value(), txt->Row());
+			std::cout << std::endl;
+		}
 		return(nullptr);
 	}
 	return(contents->Value());
@@ -91,7 +98,8 @@ const char *XMLParser::GetText(TiXmlNode *within, bool optional) {
 	TiXmlNode *contents = within->FirstChild();
 	if(contents == nullptr || contents->Type() != TiXmlNode::TEXT) {
 		if(!optional) {
-			printf("Node was expected to be a text element in %s element at line %d\n", within->Value(), within->Row());
+			printf("Node was expected to be a text element in %s element at line %d", within->Value(), within->Row());
+			std::cout << std::endl;
 			ParseOkay=false;
 		}
 		return(nullptr);

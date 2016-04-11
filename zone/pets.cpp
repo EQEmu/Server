@@ -112,7 +112,8 @@ const char *GetRandPetName()
 		"Zobarn","Zober","Zobn","Zonanab","Zonaner","Zonann","Zonantik","Zonarer",
 		"Zonartik","Zonobn","Zonobtik","Zontik","Ztik" };
 	int r = zone->random.Int(0, (sizeof(petnames)/sizeof(const char *))-1);
-	printf("Pet being created: %s\n",petnames[r]); // DO NOT COMMENT THIS OUT!
+	printf("Pet being created: %s",petnames[r]); // DO NOT COMMENT THIS OUT!
+	std::cout << std::endl;
 	return petnames[r];
 }
 
