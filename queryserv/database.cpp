@@ -361,7 +361,7 @@ void Database::GeneralQueryReceive(ServerPacket *pack) {
 	}
 
 	safe_delete(pack);
-	safe_delete(queryBuffer);
+	safe_delete_array(queryBuffer);
 }
 
 void Database::LoadLogSettings(EQEmuLogSys::LogSettings* log_settings){
