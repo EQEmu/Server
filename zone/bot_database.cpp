@@ -2322,7 +2322,7 @@ bool BotDatabase::LoadBotGroupIDForLoadBotGroup(const uint32 owner_id, const std
 	if (!owner_id || group_name.empty())
 		return false;
 
-	query = StringFormat("SELECT `groups_index`, `group_name` FROM `vw_bot_groups` WHERE `owner_id` = '%u' LIMIT 1", owner_id);
+	query = StringFormat("SELECT `groups_index`, `group_name` FROM `vw_bot_groups` WHERE `owner_id` = '%u'", owner_id);
 	auto results = QueryDatabase(query);
 	if (!results.Success())
 		return false;

@@ -6228,6 +6228,7 @@ bool Bot::DoFinishedSpellSingleTarget(uint16 spell_id, Mob* spellTarget, uint16 
 					if((spelltypeequal || spelltypetargetequal) || spelltypeclassequal || slotequal) {
 						if(((spells[thespell].effectid[0] == 0) && (spells[thespell].base[0] < 0)) &&
 							(spellTarget->GetHP() < ((spells[thespell].base[0] * (-1)) + 100))) {
+							Log.Out(Logs::General, Logs::Spells, "Bot::DoFinishedSpellSingleTarget - GroupBuffing failure");
 							return false;
 						}
 
