@@ -2329,10 +2329,13 @@ bool BotDatabase::LoadBotGroupIDForLoadBotGroup(const uint32 owner_id, const std
 	if (!results.RowCount())
 		return true;
 
-	auto row = results.begin();
-	if (!group_name.compare(row[1]))
-		botgroup_id = atoi(row[0]);
-	
+	for (auto row = results.begin(); row != results.end(); ++row) {
+		if (!group_name.compare(row[1])) {
+			botgroup_id = atoi(row[0]);
+			break;
+		}
+	}
+
 	return true;
 }
 
