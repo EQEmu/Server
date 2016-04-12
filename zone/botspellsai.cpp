@@ -1332,6 +1332,9 @@ bool Bot::AIHealRotation(Mob* tar, bool useFastHeals) {
 	Log.Out(Logs::Detail, Logs::AI, "Bot::AIHealRotation: heal spellid = %u, fastheals = %c, casterlevel = %u",
 		botSpell.SpellId, ((useFastHeals) ? ('T') : ('F')), GetLevel());
 #endif
+#if BotAI_DEBUG_Spells >= 25
+	Log.Out(Logs::Detail, Logs::AI, "Bot::AIHealRotation: target = %s, current_time = %u, donthealmebefore = %u", tar->GetCleanName(), Timer::GetCurrentTime(), tar->DontHealMeBefore());
+#endif
 
 	// If there is still no spell id, then there isn't going to be one so we are done
 	if (botSpell.SpellId == 0)

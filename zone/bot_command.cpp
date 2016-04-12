@@ -1390,6 +1390,7 @@ int bot_command_init(void)
 		bot_command_add("inventorygive", "Gives the item on your cursor to a bot", 0, bot_subcommand_inventory_give) ||
 		bot_command_add("inventorylist", "Lists all items in a bot's inventory", 0, bot_subcommand_inventory_list) ||
 		bot_command_add("inventoryremove", "Removes an item from a bot's inventory", 0, bot_subcommand_inventory_remove) ||
+		bot_command_add("inventorywindow", "Displays all items in a bot's inventory in a pop-up window", 0, bot_subcommand_inventory_window) ||
 		bot_command_add("invisibility", "Orders a bot to cast a cloak of invisibility, or allow them to be seen", 0, bot_command_invisibility) ||
 		bot_command_add("levitation", "Orders a bot to cast a levitation spell", 0, bot_command_levitation) ||
 		bot_command_add("lull", "Orders a bot to cast a pacification spell", 0, bot_command_lull) ||
@@ -3199,10 +3200,11 @@ void bot_command_inventory(Client *c, const Seperator *sep)
 	subcommand_list.push_back("inventorygive");
 	subcommand_list.push_back("inventorylist");
 	subcommand_list.push_back("inventoryremove");
+	subcommand_list.push_back("inventorywindow");
 	/* VS2012 code - end */
 
 	/* VS2013 code
-	const std::list<const char*> subcommand_list = { "inventorygive", "inventorylist", "inventoryremove" };
+	const std::list<const char*> subcommand_list = { "inventorygive", "inventorylist", "inventoryremove", "inventorywindow" };
 	*/
 
 	if (helper_command_alias_fail(c, "bot_command_inventory", sep->arg[0], "inventory"))
@@ -7201,6 +7203,63 @@ void bot_subcommand_inventory_remove(Client *c, const Seperator *sep)
 		c->Message(m_fail, "I'm soo confused...");
 		break;
 	}
+}
+
+void bot_subcommand_inventory_window(Client *c, const Seperator *sep)
+{
+	if (helper_command_alias_fail(c, "bot_subcommand_inventory_window", sep->arg[0], "inventorywindow"))
+		return;
+	if (helper_is_help_or_usage(sep->arg[1])) {
+		c->Message(m_usage, "usage: %s [actionable: target]", sep->arg[0]);
+		return;
+	}
+	int ab_mask = ActionableBots::ABM_Target;
+
+	std::list<Bot*> sbl;
+	if (ActionableBots::PopulateSBL(c, sep->arg[1], sbl, ab_mask, sep->arg[2]) == ActionableBots::ABT_None)
+		return;
+
+	auto my_bot = sbl.front();
+	if (!my_bot) {
+		c->Message(m_unknown, "ActionableBots returned 'nullptr'");
+		return;
+	}
+
+	std::string window_title = my_bot->GetCleanName();
+	window_title.append("`s Inventory");
+
+	std::string window_text;
+	//std::string item_link;
+	//Client::TextLink linker;
+	//linker.SetLinkType(linker.linkItemInst);
+
+	for (int i = EQEmu::Constants::EQUIPMENT_BEGIN; i <= (EQEmu::Constants::EQUIPMENT_END + 1); ++i) {
+		const Item_Struct* item = nullptr;
+		const ItemInst* inst = my_bot->CastToBot()->GetBotItem(i == 22 ? SlotPowerSource : i);
+		if (inst)
+			item = inst->GetItem();
+
+		window_text.append("<c \"#FFFFFF\">");
+		window_text.append(GetBotEquipSlotName(i == 22 ? SlotPowerSource : i));
+		window_text.append(": ");
+		if (item) {
+			//window_text.append("</c>");
+			//linker.SetItemInst(inst);
+			//item_link = linker.GenerateLink();
+			//window_text.append(item_link.c_str());
+
+			window_text.append("<c \"#00FF00\">");
+			window_text.append(StringFormat("%s", item->Name));
+		}
+		else {
+			window_text.append("<c \"#FFFF00\">");
+			window_text.append("[empty]");
+		}
+		window_text.append("<br>");
+	}
+	window_text.append("</c>");
+
+	c->SendPopupToClient(window_title.c_str(), window_text.c_str());
 }
 
 void bot_subcommand_pet_remove(Client *c, const Seperator *sep)
