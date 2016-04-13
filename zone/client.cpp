@@ -8705,6 +8705,9 @@ void Client::SendHPUpdateMarquee(){
 	if (!RuleB(Character, MarqueeHPUpdates))
 		return;
 
+	if (!this || !this->IsClient() || !this->cur_hp || !this->max_hp)
+		return;
+
 	/* Health Update Marquee Display: Custom*/
 	uint32 health_percentage = (uint32)(this->cur_hp * 100 / this->max_hp);
 	if (health_percentage == 100)
