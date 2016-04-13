@@ -2211,10 +2211,16 @@ void Bot::AI_Process() {
 			m_member_of_heal_rotation->CastingReady() &&
 			m_member_of_heal_rotation->CastingMember() == this &&
 			!m_member_of_heal_rotation->MemberIsCasting(this)
-		)
+		) {
 			InterruptSpell();
-		else if (botClass != BARD)
+		}
+		else if (AmICastingForHealRotation() && m_member_of_heal_rotation->CastingMember() == this) {
+			AdvanceHealRotation(false);
 			return;
+		}
+		else if (botClass != BARD) {
+			return;
+		}
 	}
 	else if (IsHealRotationMember()) {
 		m_member_of_heal_rotation->SetMemberIsCasting(this, false);
@@ -8384,6 +8390,8 @@ bool Bot::IsMyHealRotationSet()
 	if (!m_member_of_heal_rotation->CastingReady())
 		return false;
 	if (m_member_of_heal_rotation->CastingMember() != this)
+		return false;
+	if (m_member_of_heal_rotation->MemberIsCasting(this))
 		return false;
 	if (!m_member_of_heal_rotation->PokeCastingTarget())
 		return false;
