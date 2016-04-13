@@ -1004,7 +1004,8 @@ void Client::Handle_Connect_OP_ClientError(const EQApplicationPacket *app)
 void Client::Handle_Connect_OP_ClientReady(const EQApplicationPacket *app)
 {
 	conn_state = ClientReadyReceived;
-
+	if (!Spawned())
+		SendZoneInPackets();
 	CompleteConnect();
 	SendHPUpdate();
 }
