@@ -93,7 +93,7 @@ Bot::Bot(NPCType npcTypeData, Client* botOwner) : NPC(&npcTypeData, nullptr, glm
 		timers[i] = 0;
 
 	strcpy(this->name, this->GetCleanName());
-	memset(&m_Light, 0, sizeof(LightProfile_Struct));
+	memset(&m_Light, 0, sizeof(EQEmu::LightSource::impl));
 	memset(&_botInspectMessage, 0, sizeof(InspectMessage_Struct));
 }
 
@@ -8469,8 +8469,8 @@ std::string Bot::CreateSayLink(Client* c, const char* message, const char* name)
 	uint32 saylink_id = database.LoadSaylinkID(escaped_string);
 	safe_delete_array(escaped_string);
 
-	Client::TextLink linker;
-	linker.SetLinkType(linker.linkItemData);
+	EQEmu::SayLink::impl linker;
+	linker.SetLinkType(EQEmu::SayLink::LinkItemData);
 	linker.SetProxyItemID(SAYLINK_ITEM_ID);
 	linker.SetProxyAugment1ID(saylink_id);
 	linker.SetProxyText(name);

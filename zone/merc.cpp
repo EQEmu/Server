@@ -5050,9 +5050,9 @@ void Merc::UpdateEquipmentLight()
 		auto item = database.GetItem(equipment[index]);
 		if (item == nullptr) { continue; }
 
-		if (m_Light.IsLevelGreater(item->Light, m_Light.Type.Equipment)) {
+		if (EQEmu::LightSource::IsLevelGreater(item->Light, m_Light.Type.Equipment)) {
 			m_Light.Type.Equipment = item->Light;
-			m_Light.Level.Equipment = m_Light.TypeToLevel(m_Light.Type.Equipment);
+			m_Light.Level.Equipment = EQEmu::LightSource::TypeToLevel(m_Light.Type.Equipment);
 		}
 	}
 
@@ -5064,14 +5064,14 @@ void Merc::UpdateEquipmentLight()
 		if (item->ItemClass != ItemClassCommon) { continue; }
 		if (item->Light < 9 || item->Light > 13) { continue; }
 
-		if (m_Light.TypeToLevel(item->Light))
+		if (EQEmu::LightSource::TypeToLevel(item->Light))
 			general_light_type = item->Light;
 	}
 
-	if (m_Light.IsLevelGreater(general_light_type, m_Light.Type.Equipment))
+	if (EQEmu::LightSource::IsLevelGreater(general_light_type, m_Light.Type.Equipment))
 		m_Light.Type.Equipment = general_light_type;
 
-	m_Light.Level.Equipment = m_Light.TypeToLevel(m_Light.Type.Equipment);
+	m_Light.Level.Equipment = EQEmu::LightSource::TypeToLevel(m_Light.Type.Equipment);
 }
 
 void Merc::AddItem(uint8 slot, uint32 item_id) {

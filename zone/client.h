@@ -736,7 +736,7 @@ public:
 #endif
 	uint32 GetEquipment(uint8 material_slot) const; // returns item id
 	uint32 GetEquipmentColor(uint8 material_slot) const;
-	virtual void UpdateEquipmentLight() { m_Light.Type.Equipment = m_inv.FindBrightestLightType(); m_Light.Level.Equipment = m_Light.TypeToLevel(m_Light.Type.Equipment); }
+	virtual void UpdateEquipmentLight() { m_Light.Type.Equipment = m_inv.FindBrightestLightType(); m_Light.Level.Equipment = EQEmu::LightSource::TypeToLevel(m_Light.Type.Equipment); }
 
 	inline bool AutoSplitEnabled() { return m_pp.autosplit != 0; }
 
@@ -817,81 +817,6 @@ public:
 	void SetStats(uint8 type,int16 set_val);
 	void IncStats(uint8 type,int16 increase_val);
 	void DropItem(int16 slot_id);
-
-	//
-	// class Client::TextLink
-	//
-	class TextLink {
-	public:
-		enum LinkType { linkBlank = 0, linkItemData, linkLootItem, linkItemInst };
-
-		TextLink() { Reset(); }
-
-		void SetLinkType(LinkType linkType) { m_LinkType = linkType; }
-		void SetItemData(const Item_Struct* itemData) { m_ItemData = itemData; }
-		void SetLootData(const ServerLootItem_Struct* lootData) { m_LootData = lootData; }
-		void SetItemInst(const ItemInst* itemInst) { m_ItemInst = itemInst; }
-
-		// mainly for saylinks..but, not limited to
-		void SetProxyUnknown1(uint8 proxyUnknown1) { m_Proxy_unknown_1 = proxyUnknown1; }
-		void SetProxyItemID(uint32 proxyItemID) { m_ProxyItemID = proxyItemID; }
-		void SetProxyAugment1ID(uint32 proxyAugmentID) { m_ProxyAugment1ID = proxyAugmentID; }
-		void SetProxyAugment2ID(uint32 proxyAugmentID) { m_ProxyAugment2ID = proxyAugmentID; }
-		void SetProxyAugment3ID(uint32 proxyAugmentID) { m_ProxyAugment3ID = proxyAugmentID; }
-		void SetProxyAugment4ID(uint32 proxyAugmentID) { m_ProxyAugment4ID = proxyAugmentID; }
-		void SetProxyAugment5ID(uint32 proxyAugmentID) { m_ProxyAugment5ID = proxyAugmentID; }
-		void SetProxyAugment6ID(uint32 proxyAugmentID) { m_ProxyAugment6ID = proxyAugmentID; }
-		void SetProxyIsEvolving(uint8 proxyIsEvolving) { m_ProxyIsEvolving = proxyIsEvolving; }
-		void SetProxyEvolveGroup(uint32 proxyEvolveGroup) { m_ProxyEvolveGroup = proxyEvolveGroup; }
-		void SetProxyEvolveLevel(uint8 proxyEvolveLevel) { m_ProxyEvolveLevel = proxyEvolveLevel; }
-		void SetProxyOrnamentIcon(uint32 proxyOrnamentIcon) { m_ProxyOrnamentIcon = proxyOrnamentIcon; }
-		void SetProxyHash(int proxyHash) { m_ProxyHash = proxyHash; }
-
-		void SetProxyText(const char* proxyText) { m_ProxyText = proxyText; } // overrides standard text use
-		void SetTaskUse() { m_TaskUse = true; }
-
-		std::string GenerateLink();
-		bool LinkError() { return m_Error; }
-
-		std::string GetLink() { return m_Link; }			// contains full string format: '/12x' '<LinkBody>' '<LinkText>' '/12x'
-		std::string GetLinkBody() { return m_LinkBody; }	// contains string format: '<LinkBody>'
-		std::string GetLinkText() { return m_LinkText; }	// contains string format: '<LinkText>'
-
-		void Reset();
-
-		static bool DegenerateLinkBody(TextLinkBody_Struct& textLinkBodyStruct, const std::string& textLinkBody);
-		static bool GenerateLinkBody(std::string& textLinkBody, const TextLinkBody_Struct& textLinkBodyStruct);
-
-	private:
-		void generate_body();
-		void generate_text();
-
-		int m_LinkType;
-		const Item_Struct* m_ItemData;
-		const ServerLootItem_Struct* m_LootData;
-		const ItemInst* m_ItemInst;
-
-		uint8 m_Proxy_unknown_1;
-		uint32 m_ProxyItemID;
-		uint32 m_ProxyAugment1ID;
-		uint32 m_ProxyAugment2ID;
-		uint32 m_ProxyAugment3ID;
-		uint32 m_ProxyAugment4ID;
-		uint32 m_ProxyAugment5ID;
-		uint32 m_ProxyAugment6ID;
-		uint8 m_ProxyIsEvolving;
-		uint32 m_ProxyEvolveGroup;
-		uint8 m_ProxyEvolveLevel;
-		uint32 m_ProxyOrnamentIcon;
-		int m_ProxyHash;
-		const char* m_ProxyText;
-		bool m_TaskUse;
-		TextLinkBody_Struct m_LinkBodyStruct;
-		std::string m_Link;
-		std::string m_LinkBody;
-		std::string m_LinkText;
-		bool m_Error;
-	};
 
 	int GetItemLinkHash(const ItemInst* inst); // move to Item_Struct..or make use of the pre-calculated database field
 

@@ -23,7 +23,6 @@ Copyright (C) 2001-2016 EQEMu Development Team (http://eqemulator.net)
 #include "../common/races.h"
 #include "../common/spdat.h"
 #include "../common/string_util.h"
-#include "../common/deity.h"
 #include "aa.h"
 #include "client.h"
 #include "corpse.h"
@@ -1434,7 +1433,7 @@ bool Mob::CanUseAlternateAdvancementRank(AA::Rank *rank) {
 		return false;
 	}
 
-	auto deity = ConvertDeityToBitDeity((DeityTypes)GetDeity());
+	auto deity = GetDeityBit();
 	if(!(ability->deities & deity)) {
 		return false;
 	}

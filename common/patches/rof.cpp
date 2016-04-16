@@ -5101,7 +5101,7 @@ namespace RoF
 
 		int16 slot_id = RoFToServerSlot(eq->container_slot);
 		if (slot_id == 4000) {
-			slot_id = legacy::SLOT_TRADESKILL;	// 1000
+			slot_id = EQEmu::Legacy::SLOT_TRADESKILL;	// 1000
 		}
 		emu->container_slot = slot_id;
 		emu->guildtribute_slot = RoFToServerSlot(eq->guildtribute_slot); // this should only return INVALID_INDEX until implemented

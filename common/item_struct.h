@@ -1,5 +1,5 @@
 /*	EQEMu: Everquest Server Emulator
-	Copyright (C) 2001-2003 EQEMu Development Team (http://eqemulator.net)
+	Copyright (C) 2001-2016 EQEMu Development Team (http://eqemulator.net)
 
 	This program is free software; you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -42,8 +42,7 @@
  *	Made ya look! Ha!
  */
 
-//#include "eq_constants.h"
-#include "eq_dictionary.h"
+#include "emu_constants.h"
 
 /*
 ** Child struct of Item_Struct:

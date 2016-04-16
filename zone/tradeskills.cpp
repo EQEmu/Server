@@ -264,7 +264,7 @@ void Object::HandleCombine(Client* user, const NewCombine_Struct* in_combine, Ob
 	uint32 some_id = 0;
 	bool worldcontainer=false;
 
-	if (in_combine->container_slot == legacy::SLOT_TRADESKILL) {
+	if (in_combine->container_slot == EQEmu::Legacy::SLOT_TRADESKILL) {
 		if(!worldo) {
 			user->Message(13, "Error: Server is not aware of the tradeskill container you are attempting to use");
 			return;

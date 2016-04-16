@@ -1307,8 +1307,8 @@ void QuestManager::itemlink(int item_id) {
 		if (item == nullptr)
 			return;
 
-		Client::TextLink linker;
-		linker.SetLinkType(linker.linkItemData);
+		EQEmu::SayLink::impl linker;
+		linker.SetLinkType(EQEmu::SayLink::LinkItemData);
 		linker.SetItemData(item);
 
 		auto item_link = linker.GenerateLink();
@@ -2535,8 +2535,8 @@ const char* QuestManager::varlink(char* perltext, int item_id) {
 	if (!item)
 		return "INVALID ITEM ID IN VARLINK";
 
-	Client::TextLink linker;
-	linker.SetLinkType(linker.linkItemData);
+	EQEmu::SayLink::impl linker;
+	linker.SetLinkType(EQEmu::SayLink::LinkItemData);
 	linker.SetItemData(item);
 
 	auto item_link = linker.GenerateLink();
@@ -2761,7 +2761,7 @@ const char* QuestManager::saylink(char* Phrase, bool silent, const char* LinkNam
 	safe_delete_array(escaped_string);
 
 	//Create the say link as an item link hash
-	Client::TextLink linker;
+	EQEmu::SayLink::impl linker;
 	linker.SetProxyItemID(SAYLINK_ITEM_ID);
 	if (silent)
 		linker.SetProxyAugment2ID(sayid);

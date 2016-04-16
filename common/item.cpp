@@ -1006,7 +1006,7 @@ uint8 Inventory::FindBrightestLightType()
 		auto item = inst->GetItem();
 		if (item == nullptr) { continue; }
 
-		if (LightProfile_Struct::IsLevelGreater(item->Light, brightest_light_type))
+		if (EQEmu::LightSource::IsLevelGreater(item->Light, brightest_light_type))
 			brightest_light_type = item->Light;
 	}
 
@@ -1022,11 +1022,11 @@ uint8 Inventory::FindBrightestLightType()
 		if (item->ItemClass != ItemClassCommon) { continue; }
 		if (item->Light < 9 || item->Light > 13) { continue; }
 
-		if (LightProfile_Struct::TypeToLevel(item->Light))
+		if (EQEmu::LightSource::TypeToLevel(item->Light))
 			general_light_type = item->Light;
 	}
 
-	if (LightProfile_Struct::IsLevelGreater(general_light_type, brightest_light_type))
+	if (EQEmu::LightSource::IsLevelGreater(general_light_type, brightest_light_type))
 		brightest_light_type = general_light_type;
 
 	return brightest_light_type;
@@ -1209,7 +1209,7 @@ int16 Inventory::_HasItem(std::map<int16, ItemInst*>& bucket, uint32 item_id, ui
 
 		for (int index = AUG_BEGIN; index < EQEmu::Constants::ITEM_COMMON_SIZE; ++index) {
 			if (inst->GetAugmentItemID(index) == item_id && quantity <= 1)
-				return legacy::SLOT_AUGMENT;
+				return EQEmu::Legacy::SLOT_AUGMENT;
 		}
 		
 		if (!inst->IsType(ItemClassContainer)) { continue; }
@@ -1226,7 +1226,7 @@ int16 Inventory::_HasItem(std::map<int16, ItemInst*>& bucket, uint32 item_id, ui
 
 			for (int index = AUG_BEGIN; index < EQEmu::Constants::ITEM_COMMON_SIZE; ++index) {
 				if (bag_inst->GetAugmentItemID(index) == item_id && quantity <= 1)
-					return legacy::SLOT_AUGMENT;
+					return EQEmu::Legacy::SLOT_AUGMENT;
 			}
 		}
 	}
@@ -1257,7 +1257,7 @@ int16 Inventory::_HasItem(ItemInstQueue& iqueue, uint32 item_id, uint8 quantity)
 
 		for (int index = AUG_BEGIN; index < EQEmu::Constants::ITEM_COMMON_SIZE; ++index) {
 			if (inst->GetAugmentItemID(index) == item_id && quantity <= 1)
-				return legacy::SLOT_AUGMENT;
+				return EQEmu::Legacy::SLOT_AUGMENT;
 		}
 
 		if (!inst->IsType(ItemClassContainer)) { continue; }
@@ -1274,7 +1274,7 @@ int16 Inventory::_HasItem(ItemInstQueue& iqueue, uint32 item_id, uint8 quantity)
 
 			for (int index = AUG_BEGIN; index < EQEmu::Constants::ITEM_COMMON_SIZE; ++index) {
 				if (bag_inst->GetAugmentItemID(index) == item_id && quantity <= 1)
-					return legacy::SLOT_AUGMENT;
+					return EQEmu::Legacy::SLOT_AUGMENT;
 			}
 		}
 
@@ -1366,7 +1366,7 @@ int16 Inventory::_HasItemByLoreGroup(std::map<int16, ItemInst*>& bucket, uint32 
 			if (aug_inst == nullptr) { continue; }
 
 			if (aug_inst->GetItem()->LoreGroup == loregroup)
-				return legacy::SLOT_AUGMENT;
+				return EQEmu::Legacy::SLOT_AUGMENT;
 		}
 
 		if (!inst->IsType(ItemClassContainer)) { continue; }
@@ -1383,7 +1383,7 @@ int16 Inventory::_HasItemByLoreGroup(std::map<int16, ItemInst*>& bucket, uint32 
 				if (aug_inst == nullptr) { continue; }
 
 				if (aug_inst->GetItem()->LoreGroup == loregroup)
-					return legacy::SLOT_AUGMENT;
+					return EQEmu::Legacy::SLOT_AUGMENT;
 			}
 		}
 	}
@@ -1406,7 +1406,7 @@ int16 Inventory::_HasItemByLoreGroup(ItemInstQueue& iqueue, uint32 loregroup)
 			if (aug_inst == nullptr) { continue; }
 
 			if (aug_inst->GetItem()->LoreGroup == loregroup)
-				return legacy::SLOT_AUGMENT;
+				return EQEmu::Legacy::SLOT_AUGMENT;
 		}
 
 		if (!inst->IsType(ItemClassContainer)) { continue; }
@@ -1423,7 +1423,7 @@ int16 Inventory::_HasItemByLoreGroup(ItemInstQueue& iqueue, uint32 loregroup)
 				if (aug_inst == nullptr) { continue; }
 
 				if (aug_inst->GetItem()->LoreGroup == loregroup)
-					return legacy::SLOT_AUGMENT;
+					return EQEmu::Legacy::SLOT_AUGMENT;
 			}
 		}
 
@@ -3088,67 +3088,4 @@ bool Item_Struct::IsEquipable(uint16 Race, uint16 Class_) const
 	}
 
 	return (IsRace && IsClass);
-}
-
-//
-// struct LightProfile_Struct
-//
-uint8 LightProfile_Struct::TypeToLevel(uint8 lightType)
-{
-	switch (lightType) {
-	case lightTypeGlobeOfStars:
-		return lightLevelBrilliant;		// 10
-	case lightTypeFlamelessLantern:
-	case lightTypeGreaterLightstone:
-		return lightLevelLargeMagic;	// 9
-	case lightTypeLargeLantern:
-		return lightLevelLargeLantern;	// 8
-	case lightTypeSteinOfMoggok:
-	case lightTypeLightstone:
-		return lightLevelMagicLantern;	// 7
-	case lightTypeSmallLantern:
-		return lightLevelSmallLantern;	// 6
-	case lightTypeColdlight:
-	case lightTypeUnknown2:
-		return lightLevelBlueLight;		// 5
-	case lightTypeFireBeetleEye:
-	case lightTypeUnknown1:
-		return lightLevelRedLight;		// 4
-	case lightTypeTinyGlowingSkull:
-	case lightTypeLightGlobe:
-		return lightLevelSmallMagic;	// 3
-	case lightTypeTorch:
-		return lightLevelTorch;			// 2
-	case lightTypeCandle:
-		return lightLevelCandle;		// 1
-	default:
-		return lightLevelUnlit;			// 0
-	}
-}
-
-bool LightProfile_Struct::IsLevelGreater(uint8 leftType, uint8 rightType)
-{
-	static const uint8 light_levels[LIGHT_TYPES_COUNT] = {
-		lightLevelUnlit,			/* lightTypeNone */
-		lightLevelCandle,			/* lightTypeCandle */
-		lightLevelTorch,			/* lightTypeTorch */
-		lightLevelSmallMagic,		/* lightTypeTinyGlowingSkull */
-		lightLevelSmallLantern,		/* lightTypeSmallLantern */
-		lightLevelMagicLantern,		/* lightTypeSteinOfMoggok */
-		lightLevelLargeLantern,		/* lightTypeLargeLantern */
-		lightLevelLargeMagic,		/* lightTypeFlamelessLantern */
-		lightLevelBrilliant,		/* lightTypeGlobeOfStars */
-		lightLevelSmallMagic,		/* lightTypeLightGlobe */
-		lightLevelMagicLantern,		/* lightTypeLightstone */
-		lightLevelLargeMagic,		/* lightTypeGreaterLightstone */
-		lightLevelRedLight,			/* lightTypeFireBeetleEye */
-		lightLevelBlueLight,		/* lightTypeColdlight */
-		lightLevelRedLight,			/* lightTypeUnknown1 */
-		lightLevelBlueLight			/* lightTypeUnknown2 */
-	};
-
-	if (leftType >= LIGHT_TYPES_COUNT) { leftType = lightTypeNone; }
-	if (rightType >= LIGHT_TYPES_COUNT) { rightType = lightTypeNone; }
-
-	return (light_levels[leftType] > light_levels[rightType]);
 }

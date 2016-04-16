@@ -1,5 +1,5 @@
 /*	EQEMu: Everquest Server Emulator
-	Copyright (C) 2001-2003 EQEMu Development Team (http://eqemulator.net)
+	Copyright (C) 2001-2016 EQEMu Development Team (http://eqemulator.net)
 
 	This program is free software; you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -33,8 +33,7 @@ static const uint32 MAX_MERC_GRADES = 10;
 static const uint32 MAX_MERC_STANCES = 10;
 static const uint32 BLOCKED_BUFF_COUNT = 20;
 
-//#include "eq_constants.h"
-#include "eq_dictionary.h"
+#include "emu_constants.h"
 
 /*
 ** Compiler override to ensure
@@ -5341,23 +5340,6 @@ struct ClientMarqueeMessage_Struct {
 };
 
 typedef std::list<ServerLootItem_Struct*> ItemList;
-
-struct TextLinkBody_Struct {
-	// Current server mask: EQClientRoF2
-	uint8 unknown_1;		/* %1X */
-	uint32 item_id;			/* %05X */
-	uint32 augment_1;		/* %05X */
-	uint32 augment_2;		/* %05X */
-	uint32 augment_3;		/* %05X */
-	uint32 augment_4;		/* %05X */
-	uint32 augment_5;		/* %05X */
-	uint32 augment_6;		/* %05X */
-	uint8 is_evolving;		/* %1X */
-	uint32 evolve_group;	/* %05X */
-	uint8 evolve_level;		/* %02X */
-	uint32 ornament_icon;	/* %05X */
-	int hash;				/* %08X */
-};
 
 
 struct fling_struct {

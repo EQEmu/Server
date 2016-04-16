@@ -7066,8 +7066,8 @@ void bot_subcommand_inventory_list(Client *c, const Seperator *sep)
 	bool is2Hweapon = false;
 
 	std::string item_link;
-	Client::TextLink linker;
-	linker.SetLinkType(linker.linkItemInst);
+	EQEmu::SayLink::impl linker;
+	linker.SetLinkType(EQEmu::SayLink::LinkItemInst);
 
 	uint32 inventory_count = 0;
 	for (int i = EQEmu::Constants::EQUIPMENT_BEGIN; i <= (EQEmu::Constants::EQUIPMENT_END + 1); ++i) {

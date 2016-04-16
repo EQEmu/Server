@@ -525,43 +525,4 @@ public:
 	~EvolveInfo();
 };
 
-struct LightProfile_Struct
-{
-	/*
-	Current criteria (light types):
-	Equipment:	{ 0 .. 15 }
-	General:	{ 9 .. 13 }
-
-	Notes:
-	- Initial character load and item movement updates use different light source update behaviors
-	-- Server procedure matches the item movement behavior since most updates occur post-character load
-	- MainAmmo is not considered when determining light sources
-	- No 'Sub' or 'Aug' items are recognized as light sources
-	- Light types '< 9' and '> 13' are not considered for general (carried) light sources
-	- If values > 0x0F are valid, then assignment limiters will need to be removed
-	- MainCursor 'appears' to be a valid light source update slot..but, have not experienced updates during debug sessions
-	- All clients have a bug regarding stackable items (light and sound updates are not processed when picking up an item)
-	-- The timer-based update cancels out the invalid light source
-	*/
-
-	static uint8 TypeToLevel(uint8 lightType);
-	static bool IsLevelGreater(uint8 leftType, uint8 rightType);
-
-	// Light types (classifications)
-	struct {
-		uint8 Innate;		// Defined by db field `npc_types`.`light` - where appropriate
-		uint8 Equipment;	// Item_Struct::light value of worn/carried equipment
-		uint8 Spell;		// Set value of any light-producing spell (can be modded to mimic equip_light behavior)
-		uint8 Active;		// Highest value of all light sources
-	} Type;
-
-	// Light levels (intensities) - used to determine which light source should be active
-	struct {
-		uint8 Innate;
-		uint8 Equipment;
-		uint8 Spell;
-		uint8 Active;
-	} Level;
-};
-
 #endif // #define __ITEM_H

@@ -11,15 +11,18 @@ SET(common_sources
 	database_conversions.cpp
 	database_instances.cpp
 	dbcore.cpp
+	deity.cpp
+	emu_constants.cpp
+	emu_legacy.cpp
 	emu_opcodes.cpp
 	emu_tcp_connection.cpp
 	emu_tcp_server.cpp
-	eq_dictionary.cpp
 	eqdb.cpp
 	eqdb_res.cpp
 	eqemu_exception.cpp
 	eqemu_config.cpp
 	eqemu_logsys.cpp
+	eq_limits.cpp
 	eq_packet.cpp
 	eq_stream.cpp
 	eq_stream_factory.cpp
@@ -32,6 +35,7 @@ SET(common_sources
 	guilds.cpp
 	ipc_mutex.cpp
 	item.cpp
+	light_source.cpp
 	md5.cpp
 	memory_mapped_file.cpp
 	misc.cpp
@@ -51,6 +55,7 @@ SET(common_sources
 	races.cpp
 	rdtsc.cpp
 	rulesys.cpp
+	say_link.cpp
 	serverinfo.cpp
 	shareddb.cpp
 	skills.cpp
@@ -104,12 +109,13 @@ SET(common_headers
 	database.h
 	dbcore.h
 	deity.h
+	emu_constants.h
+	emu_legacy.h
 	emu_opcodes.h
 	emu_oplist.h
 	emu_tcp_connection.h
 	emu_tcp_server.h
 	eq_constants.h
-	eq_dictionary.h
 	eq_packet_structs.h
 	eqdb.h
 	eqdb_res.h
@@ -117,6 +123,7 @@ SET(common_headers
 	eqemu_config.h
 	eqemu_config_elements.h
 	eqemu_logsys.h
+	eq_limits.h
 	eq_packet.h
 	eq_stream.h
 	eq_stream_factory.h
@@ -140,6 +147,7 @@ SET(common_headers
 	item_fieldlist.h
 	item_struct.h
 	languages.h
+	light_source.h
 	linked_list.h
 	loottable.h
 	mail_oplist.h
@@ -166,6 +174,7 @@ SET(common_headers
 	rdtsc.h
 	rulesys.h
 	ruletypes.h
+	say_link.h
 	seperator.h
 	serverinfo.h
 	servertalk.h
