@@ -1961,7 +1961,7 @@ void NPC::ModifyNPCStat(const char *identifier, const char *newValue)
 	else if(id == "cr") { CR = atoi(val.c_str()); return; }
 	else if(id == "pr") { PR = atoi(val.c_str()); return; }
 	else if(id == "dr") { DR = atoi(val.c_str()); return; }
-	else if(id == "PhR") { PhR = atoi(val.c_str()); return; }
+	else if(id == "phr") { PhR = atoi(val.c_str()); return; }
 	else if(id == "runspeed") {
 		runspeed = (float)atof(val.c_str());
 		base_runspeed = (int)((float)runspeed * 40.0f);
