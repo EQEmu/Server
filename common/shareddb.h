@@ -111,7 +111,11 @@ class SharedDatabase : public Database
 		void LoadItems(void *data, uint32 size, int32 items, uint32 max_item_id);
 		bool LoadItems(const std::string &prefix);
 		const Item_Struct* IterateItems(uint32* id);
+#if (defined(_MSC_VER) && (_MSC_VER > 1899))
+		Item_Struct* GetItem(uint32 id);
+#else
 		const Item_Struct* GetItem(uint32 id);
+#endif
 		const EvolveInfo* GetEvolveInfo(uint32 loregroup);
 
 		//faction lists

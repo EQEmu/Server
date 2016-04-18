@@ -1084,7 +1084,11 @@ void SharedDatabase::LoadItems(void *data, uint32 size, int32 items, uint32 max_
 	}
 }
 
+#if (defined(_MSC_VER) && (_MSC_VER > 1899))
+Item_Struct* SharedDatabase::GetItem(uint32 id) {
+#else
 const Item_Struct* SharedDatabase::GetItem(uint32 id) {
+#endif
 	if (id == 0)
 	{
 		return nullptr;
