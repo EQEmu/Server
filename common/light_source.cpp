@@ -20,7 +20,12 @@
 #include "light_source.h"
 
 
-void EQEmu::LightSource::impl::Clear()
+EQEmu::lightsource::LightSourceProfile::LightSourceProfile()
+{
+	Clear();
+}
+
+void EQEmu::lightsource::LightSourceProfile::Clear()
 {
 	Type.Innate = 0;
 	Type.Equipment = 0;
@@ -33,62 +38,62 @@ void EQEmu::LightSource::impl::Clear()
 	Level.Active = 0;
 }
 
-uint8 EQEmu::LightSource::TypeToLevel(uint8 light_type)
+uint8 EQEmu::lightsource::TypeToLevel(uint8 light_type)
 {
 	switch (light_type) {
-	case TypeGlobeOfStars:
-		return LevelBrilliant;		// 10
-	case TypeFlamelessLantern:
-	case TypeGreaterLightstone:
-		return LevelLargeMagic;		// 9
-	case TypeLargeLantern:
-		return LevelLargeLantern;	// 8
-	case TypeSteinOfMoggok:
-	case TypeLightstone:
-		return LevelMagicLantern;	// 7
-	case TypeSmallLantern:
-		return LevelSmallLantern;	// 6
-	case TypeColdlight:
-	case TypeUnknown2:
-		return LevelBlueLight;		// 5
-	case TypeFireBeetleEye:
-	case TypeUnknown1:
-		return LevelRedLight;		// 4
-	case TypeTinyGlowingSkull:
-	case TypeLightGlobe:
-		return LevelSmallMagic;		// 3
-	case TypeTorch:
-		return LevelTorch;			// 2
-	case TypeCandle:
-		return LevelCandle;			// 1
+	case LightTypeGlobeOfStars:
+		return LightLevelBrilliant;		// 10
+	case LightTypeFlamelessLantern:
+	case LightTypeGreaterLightstone:
+		return LightLevelLargeMagic;	// 9
+	case LightTypeLargeLantern:
+		return LightLevelLargeLantern;	// 8
+	case LightTypeSteinOfMoggok:
+	case LightTypeLightstone:
+		return LightLevelMagicLantern;	// 7
+	case LightTypeSmallLantern:
+		return LightLevelSmallLantern;	// 6
+	case LightTypeColdlight:
+	case LightTypeUnknown2:
+		return LightLevelBlueLight;		// 5
+	case LightTypeFireBeetleEye:
+	case LightTypeUnknown1:
+		return LightLevelRedLight;		// 4
+	case LightTypeTinyGlowingSkull:
+	case LightTypeLightGlobe:
+		return LightLevelSmallMagic;	// 3
+	case LightTypeTorch:
+		return LightLevelTorch;			// 2
+	case LightTypeCandle:
+		return LightLevelCandle;		// 1
 	default:
-		return LevelUnlit;			// 0
+		return LightLevelUnlit;			// 0
 	}
 }
 
-bool EQEmu::LightSource::IsLevelGreater(uint8 left_type, uint8 right_type)
+bool EQEmu::lightsource::IsLevelGreater(uint8 left_type, uint8 right_type)
 {
-	static const uint8 light_levels[TypeCount] = {
-		LevelUnlit,				/* TypeNone */
-		LevelCandle,			/* TypeCandle */
-		LevelTorch,				/* TypeTorch */
-		LevelSmallMagic,		/* TypeTinyGlowingSkull */
-		LevelSmallLantern,		/* TypeSmallLantern */
-		LevelMagicLantern,		/* TypeSteinOfMoggok */
-		LevelLargeLantern,		/* TypeLargeLantern */
-		LevelLargeMagic,		/* TypeFlamelessLantern */
-		LevelBrilliant,			/* TypeGlobeOfStars */
-		LevelSmallMagic,		/* TypeLightGlobe */
-		LevelMagicLantern,		/* TypeLightstone */
-		LevelLargeMagic,		/* TypeGreaterLightstone */
-		LevelRedLight,			/* TypeFireBeetleEye */
-		LevelBlueLight,			/* TypeColdlight */
-		LevelRedLight,			/* TypeUnknown1 */
-		LevelBlueLight			/* TypeUnknown2 */
+	static const uint8 light_levels[LightTypeCount] = {
+		LightLevelUnlit,			/* LightTypeNone */
+		LightLevelCandle,			/* LightTypeCandle */
+		LightLevelTorch,			/* LightTypeTorch */
+		LightLevelSmallMagic,		/* LightTypeTinyGlowingSkull */
+		LightLevelSmallLantern,		/* LightTypeSmallLantern */
+		LightLevelMagicLantern,		/* LightTypeSteinOfMoggok */
+		LightLevelLargeLantern,		/* LightTypeLargeLantern */
+		LightLevelLargeMagic,		/* LightTypeFlamelessLantern */
+		LightLevelBrilliant,		/* LightTypeGlobeOfStars */
+		LightLevelSmallMagic,		/* LightTypeLightGlobe */
+		LightLevelMagicLantern,		/* LightTypeLightstone */
+		LightLevelLargeMagic,		/* LightTypeGreaterLightstone */
+		LightLevelRedLight,			/* LightTypeFireBeetleEye */
+		LightLevelBlueLight,		/* LightTypeColdlight */
+		LightLevelRedLight,			/* LightTypeUnknown1 */
+		LightLevelBlueLight			/* LightTypeUnknown2 */
 	};
 
-	if (left_type >= TypeCount) { left_type = TypeNone; }
-	if (right_type >= TypeCount) { right_type = TypeNone; }
+	if (left_type >= LightTypeCount) { left_type = LightTypeNone; }
+	if (right_type >= LightTypeCount) { right_type = LightTypeNone; }
 
 	return (light_levels[left_type] > light_levels[right_type]);
 }

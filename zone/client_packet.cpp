@@ -1313,7 +1313,7 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	}
 
 	/* Set item material tint */
-	for (int i = EQEmu::Constants::MATERIAL_BEGIN; i <= EQEmu::Constants::MATERIAL_END; i++)
+	for (int i = EQEmu::constants::MATERIAL_BEGIN; i <= EQEmu::constants::MATERIAL_END; i++)
 	{
 		if (m_pp.item_tint[i].RGB.UseTint == 1 || m_pp.item_tint[i].RGB.UseTint == 255)
 		{
@@ -7994,7 +7994,7 @@ void Client::Handle_OP_InspectAnswer(const EQApplicationPacket *app)
 	const Item_Struct* item = nullptr;
 
 	int ornamentationAugtype = RuleI(Character, OrnamentationAugmentType);
-	for (int16 L = EQEmu::Constants::EQUIPMENT_BEGIN; L <= SlotWaist; L++) {
+	for (int16 L = EQEmu::constants::EQUIPMENT_BEGIN; L <= SlotWaist; L++) {
 		const ItemInst* inst = GetInv().GetItem(L);
 		item = inst ? inst->GetItem() : nullptr;
 
@@ -8474,7 +8474,7 @@ void Client::Handle_OP_ItemVerifyRequest(const EQApplicationPacket *app)
 		ItemInst* clickaug = 0;
 		Item_Struct* augitem = 0;
 
-		for (r = 0; r < EQEmu::Constants::ITEM_COMMON_SIZE; r++) {
+		for (r = 0; r < EQEmu::constants::ITEM_COMMON_SIZE; r++) {
 			const ItemInst* aug_i = inst->GetAugment(r);
 			if (!aug_i)
 				continue;
@@ -9675,7 +9675,7 @@ void Client::Handle_OP_MoveItem(const EQApplicationPacket *app)
 	MoveItem_Struct* mi = (MoveItem_Struct*)app->pBuffer;
 	if (spellend_timer.Enabled() && casting_spell_id && !IsBardSong(casting_spell_id))
 	{
-		if (mi->from_slot != mi->to_slot && (mi->from_slot <= EQEmu::Constants::GENERAL_END || mi->from_slot > 39) && IsValidSlot(mi->from_slot) && IsValidSlot(mi->to_slot))
+		if (mi->from_slot != mi->to_slot && (mi->from_slot <= EQEmu::constants::GENERAL_END || mi->from_slot > 39) && IsValidSlot(mi->from_slot) && IsValidSlot(mi->to_slot))
 		{
 			char *detect = nullptr;
 			const ItemInst *itm_from = GetInv().GetItem(mi->from_slot);
@@ -9696,8 +9696,8 @@ void Client::Handle_OP_MoveItem(const EQApplicationPacket *app)
 	// Illegal bagslot usage checks. Currently, user only receives a message if this check is triggered.
 	bool mi_hack = false;
 
-	if (mi->from_slot >= EQEmu::Constants::GENERAL_BAGS_BEGIN && mi->from_slot <= EQEmu::Constants::CURSOR_BAG_END) {
-		if (mi->from_slot >= EQEmu::Constants::CURSOR_BAG_BEGIN) { mi_hack = true; }
+	if (mi->from_slot >= EQEmu::constants::GENERAL_BAGS_BEGIN && mi->from_slot <= EQEmu::constants::CURSOR_BAG_END) {
+		if (mi->from_slot >= EQEmu::constants::CURSOR_BAG_BEGIN) { mi_hack = true; }
 		else {
 			int16 from_parent = m_inv.CalcSlotId(mi->from_slot);
 			if (!m_inv[from_parent]) { mi_hack = true; }
@@ -9706,8 +9706,8 @@ void Client::Handle_OP_MoveItem(const EQApplicationPacket *app)
 		}
 	}
 
-	if (mi->to_slot >= EQEmu::Constants::GENERAL_BAGS_BEGIN && mi->to_slot <= EQEmu::Constants::CURSOR_BAG_END) {
-		if (mi->to_slot >= EQEmu::Constants::CURSOR_BAG_BEGIN) { mi_hack = true; }
+	if (mi->to_slot >= EQEmu::constants::GENERAL_BAGS_BEGIN && mi->to_slot <= EQEmu::constants::CURSOR_BAG_END) {
+		if (mi->to_slot >= EQEmu::constants::CURSOR_BAG_BEGIN) { mi_hack = true; }
 		else {
 			int16 to_parent = m_inv.CalcSlotId(mi->to_slot);
 			if (!m_inv[to_parent]) { mi_hack = true; }

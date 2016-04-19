@@ -272,7 +272,7 @@ void NPC::AddLootDrop(const Item_Struct *item2, ItemList* itemlist, int16 charge
 		// it is an improvement.
 
 		if (!item2->NoPet) {
-			for (int i = 0; !found && i < EQEmu::Constants::EQUIPMENT_SIZE; i++) {
+			for (int i = 0; !found && i < EQEmu::constants::EQUIPMENT_SIZE; i++) {
 				uint32 slots = (1 << i);
 				if (item2->Slots & slots) {
 					if(equipment[i])

@@ -1614,7 +1614,7 @@ namespace SoD
 		//	OUT(unknown06160[4]);
 
 		// Copy bandoliers where server and client indexes converge
-		for (r = 0; r < EQEmu::Constants::BANDOLIERS_SIZE && r < consts::BANDOLIERS_SIZE; ++r) {
+		for (r = 0; r < EQEmu::constants::BANDOLIERS_SIZE && r < consts::BANDOLIERS_SIZE; ++r) {
 			OUT_str(bandoliers[r].Name);
 			for (uint32 k = 0; k < consts::BANDOLIER_ITEM_COUNT; ++k) { // Will need adjusting if 'server != client' is ever true
 				OUT(bandoliers[r].Items[k].ID);
@@ -1623,7 +1623,7 @@ namespace SoD
 			}
 		}
 		// Nullify bandoliers where server and client indexes diverge, with a client bias
-		for (r = EQEmu::Constants::BANDOLIERS_SIZE; r < consts::BANDOLIERS_SIZE; ++r) {
+		for (r = EQEmu::constants::BANDOLIERS_SIZE; r < consts::BANDOLIERS_SIZE; ++r) {
 			eq->bandoliers[r].Name[0] = '\0';
 			for (uint32 k = 0; k < consts::BANDOLIER_ITEM_COUNT; ++k) { // Will need adjusting if 'server != client' is ever true
 				eq->bandoliers[r].Items[k].ID = 0;
@@ -1635,13 +1635,13 @@ namespace SoD
 		//	OUT(unknown07444[5120]);
 
 		// Copy potion belt where server and client indexes converge
-		for (r = 0; r < EQEmu::Constants::POTION_BELT_ITEM_COUNT && r < consts::POTION_BELT_ITEM_COUNT; ++r) {
+		for (r = 0; r < EQEmu::constants::POTION_BELT_ITEM_COUNT && r < consts::POTION_BELT_ITEM_COUNT; ++r) {
 			OUT(potionbelt.Items[r].ID);
 			OUT(potionbelt.Items[r].Icon);
 			OUT_str(potionbelt.Items[r].Name);
 		}
 		// Nullify potion belt where server and client indexes diverge, with a client bias
-		for (r = EQEmu::Constants::POTION_BELT_ITEM_COUNT; r < consts::POTION_BELT_ITEM_COUNT; ++r) {
+		for (r = EQEmu::constants::POTION_BELT_ITEM_COUNT; r < consts::POTION_BELT_ITEM_COUNT; ++r) {
 			eq->potionbelt.Items[r].ID = 0;
 			eq->potionbelt.Items[r].Icon = 0;
 			eq->potionbelt.Items[r].Name[0] = '\0';
@@ -3934,7 +3934,7 @@ namespace SoD
 
 		uint32 SubLengths[10];
 
-		for (int x = SUB_BEGIN; x < EQEmu::Constants::ITEM_CONTAINER_SIZE; ++x) {
+		for (int x = SUB_INDEX_BEGIN; x < EQEmu::constants::ITEM_CONTAINER_SIZE; ++x) {
 
 			SubSerializations[x] = nullptr;
 
@@ -3946,15 +3946,15 @@ namespace SoD
 
 				iqbs.subitem_count++;
 
-				if (slot_id_in >= EQEmu::Constants::GENERAL_BEGIN && slot_id_in <= EQEmu::Constants::GENERAL_END) // (< 30) - no cursor?
+				if (slot_id_in >= EQEmu::constants::GENERAL_BEGIN && slot_id_in <= EQEmu::constants::GENERAL_END) // (< 30) - no cursor?
 					//SubSlotNumber = (((slot_id_in + 3) * 10) + x + 1);
-					SubSlotNumber = (((slot_id_in + 3) * EQEmu::Constants::ITEM_CONTAINER_SIZE) + x + 1);
-				else if (slot_id_in >= EQEmu::Constants::BANK_BEGIN && slot_id_in <= EQEmu::Constants::BANK_END)
+					SubSlotNumber = (((slot_id_in + 3) * EQEmu::constants::ITEM_CONTAINER_SIZE) + x + 1);
+				else if (slot_id_in >= EQEmu::constants::BANK_BEGIN && slot_id_in <= EQEmu::constants::BANK_END)
 					//SubSlotNumber = (((slot_id_in - 2000) * 10) + 2030 + x + 1);
-					SubSlotNumber = (((slot_id_in - EQEmu::Constants::BANK_BEGIN) * EQEmu::Constants::ITEM_CONTAINER_SIZE) + EQEmu::Constants::BANK_BAGS_BEGIN + x);
-				else if (slot_id_in >= EQEmu::Constants::SHARED_BANK_BEGIN && slot_id_in <= EQEmu::Constants::SHARED_BANK_END)
+					SubSlotNumber = (((slot_id_in - EQEmu::constants::BANK_BEGIN) * EQEmu::constants::ITEM_CONTAINER_SIZE) + EQEmu::constants::BANK_BAGS_BEGIN + x);
+				else if (slot_id_in >= EQEmu::constants::SHARED_BANK_BEGIN && slot_id_in <= EQEmu::constants::SHARED_BANK_END)
 					//SubSlotNumber = (((slot_id_in - 2500) * 10) + 2530 + x + 1);
-					SubSlotNumber = (((slot_id_in - EQEmu::Constants::SHARED_BANK_BEGIN) * EQEmu::Constants::ITEM_CONTAINER_SIZE) + EQEmu::Constants::SHARED_BANK_BAGS_BEGIN + x);
+					SubSlotNumber = (((slot_id_in - EQEmu::constants::SHARED_BANK_BEGIN) * EQEmu::constants::ITEM_CONTAINER_SIZE) + EQEmu::constants::SHARED_BANK_BAGS_BEGIN + x);
 				else
 					SubSlotNumber = slot_id_in; // ???????
 
@@ -3995,11 +3995,11 @@ namespace SoD
 
 		if (serverSlot >= SlotAmmo && serverSlot <= 53) // Cursor/Ammo/Power Source and Normal Inventory Slots
 			SoDSlot = serverSlot + 1;
-		else if (serverSlot >= EQEmu::Constants::GENERAL_BAGS_BEGIN && serverSlot <= EQEmu::Constants::CURSOR_BAG_END)
+		else if (serverSlot >= EQEmu::constants::GENERAL_BAGS_BEGIN && serverSlot <= EQEmu::constants::CURSOR_BAG_END)
 			SoDSlot = serverSlot + 11;
-		else if (serverSlot >= EQEmu::Constants::BANK_BAGS_BEGIN && serverSlot <= EQEmu::Constants::BANK_BAGS_END)
+		else if (serverSlot >= EQEmu::constants::BANK_BAGS_BEGIN && serverSlot <= EQEmu::constants::BANK_BAGS_END)
 			SoDSlot = serverSlot + 1;
-		else if (serverSlot >= EQEmu::Constants::SHARED_BANK_BAGS_BEGIN && serverSlot <= EQEmu::Constants::SHARED_BANK_BAGS_END)
+		else if (serverSlot >= EQEmu::constants::SHARED_BANK_BAGS_BEGIN && serverSlot <= EQEmu::constants::SHARED_BANK_BAGS_END)
 			SoDSlot = serverSlot + 1;
 		else if (serverSlot == SlotPowerSource)
 			SoDSlot = inventory::SlotPowerSource;
@@ -4041,7 +4041,7 @@ namespace SoD
 
 	static inline void ServerToSoDTextLink(std::string& sodTextLink, const std::string& serverTextLink)
 	{
-		if ((consts::TEXT_LINK_BODY_LENGTH == EQEmu::Constants::TEXT_LINK_BODY_LENGTH) || (serverTextLink.find('\x12') == std::string::npos)) {
+		if ((consts::TEXT_LINK_BODY_LENGTH == EQEmu::constants::TEXT_LINK_BODY_LENGTH) || (serverTextLink.find('\x12') == std::string::npos)) {
 			sodTextLink = serverTextLink;
 			return;
 		}
@@ -4050,7 +4050,7 @@ namespace SoD
 
 		for (size_t segment_iter = 0; segment_iter < segments.size(); ++segment_iter) {
 			if (segment_iter & 1) {
-				if (segments[segment_iter].length() <= EQEmu::Constants::TEXT_LINK_BODY_LENGTH) {
+				if (segments[segment_iter].length() <= EQEmu::constants::TEXT_LINK_BODY_LENGTH) {
 					sodTextLink.append(segments[segment_iter]);
 					// TODO: log size mismatch error
 					continue;
@@ -4081,7 +4081,7 @@ namespace SoD
 
 	static inline void SoDToServerTextLink(std::string& serverTextLink, const std::string& sodTextLink)
 	{
-		if ((EQEmu::Constants::TEXT_LINK_BODY_LENGTH == consts::TEXT_LINK_BODY_LENGTH) || (sodTextLink.find('\x12') == std::string::npos)) {
+		if ((EQEmu::constants::TEXT_LINK_BODY_LENGTH == consts::TEXT_LINK_BODY_LENGTH) || (sodTextLink.find('\x12') == std::string::npos)) {
 			serverTextLink = sodTextLink;
 			return;
 		}

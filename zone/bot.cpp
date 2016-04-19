@@ -93,7 +93,7 @@ Bot::Bot(NPCType npcTypeData, Client* botOwner) : NPC(&npcTypeData, nullptr, glm
 		timers[i] = 0;
 
 	strcpy(this->name, this->GetCleanName());
-	memset(&m_Light, 0, sizeof(EQEmu::LightSource::impl));
+	memset(&m_Light, 0, sizeof(EQEmu::lightsource::LightSourceProfile));
 	memset(&_botInspectMessage, 0, sizeof(InspectMessage_Struct));
 }
 
@@ -1722,8 +1722,8 @@ bool Bot::LoadPet()
 	if (!botdb.LoadPetBuffs(GetBotID(), pet_buffs))
 		bot_owner->Message(13, "%s for %s's pet", BotDatabase::fail::LoadPetBuffs(), GetCleanName());
 
-	uint32 pet_items[EQEmu::Constants::EQUIPMENT_SIZE];
-	memset(pet_items, 0, (sizeof(uint32) * EQEmu::Constants::EQUIPMENT_SIZE));
+	uint32 pet_items[EQEmu::constants::EQUIPMENT_SIZE];
+	memset(pet_items, 0, (sizeof(uint32) * EQEmu::constants::EQUIPMENT_SIZE));
 	if (!botdb.LoadPetItems(GetBotID(), pet_items))
 		bot_owner->Message(13, "%s for %s's pet", BotDatabase::fail::LoadPetItems(), GetCleanName());
 
@@ -1750,11 +1750,11 @@ bool Bot::SavePet()
 
 	char* pet_name = new char[64];
 	SpellBuff_Struct pet_buffs[BUFF_COUNT];
-	uint32 pet_items[EQEmu::Constants::EQUIPMENT_SIZE];
+	uint32 pet_items[EQEmu::constants::EQUIPMENT_SIZE];
 
 	memset(pet_name, 0, 64);
 	memset(pet_buffs, 0, (sizeof(SpellBuff_Struct) * BUFF_COUNT));
-	memset(pet_items, 0, (sizeof(uint32) * EQEmu::Constants::EQUIPMENT_SIZE));
+	memset(pet_items, 0, (sizeof(uint32) * EQEmu::constants::EQUIPMENT_SIZE));
 	
 	pet_inst->GetPetState(pet_buffs, pet_items, pet_name);
 	
@@ -2121,7 +2121,7 @@ void Bot::ApplySpecialAttackMod(SkillUseTypes skill, int32 &dmg, int32 &mindmg) 
 			break;
 	}
 
-	if (item_slot >= EQEmu::Constants::EQUIPMENT_BEGIN){
+	if (item_slot >= EQEmu::constants::EQUIPMENT_BEGIN){
 		const ItemInst* inst = GetBotItem(item_slot);
 		const Item_Struct* botweapon = 0;
 		if(inst)
@@ -2878,7 +2878,7 @@ void Bot::Spawn(Client* botCharacterOwner) {
 		// I re-enabled this until I can sort it out
 		uint32 itemID = 0;
 		uint8 materialFromSlot = 0xFF;
-		for (int i = EQEmu::Constants::EQUIPMENT_BEGIN; i <= EQEmu::Constants::EQUIPMENT_END; ++i) {
+		for (int i = EQEmu::constants::EQUIPMENT_BEGIN; i <= EQEmu::constants::EQUIPMENT_END; ++i) {
 			itemID = GetBotItemBySlot(i);
 			if(itemID != 0) {
 				materialFromSlot = Inventory::CalcMaterialFromSlot(i);
@@ -3361,7 +3361,7 @@ void Bot::FinishTrade(Client* client, BotTradeType tradeType) {
 		if(tradeType == BotTradeClientNormal) {
 			// Items being traded are found in the normal trade window used to trade between a Client and a Client or NPC
 			// Items in this mode are found in slot ids 3000 thru 3003 - thought bots used the full 8-slot window..?
-			PerformTradeWithClient(EQEmu::Constants::TRADE_BEGIN, EQEmu::Constants::TRADE_END, client); // {3000..3007}
+			PerformTradeWithClient(EQEmu::constants::TRADE_BEGIN, EQEmu::constants::TRADE_END, client); // {3000..3007}
 		}
 		else if(tradeType == BotTradeClientNoDropNoTrade) {
 			// Items being traded are found on the Client's cursor slot, slot id 30. This item can be either a single item or it can be a bag.
@@ -3378,7 +3378,7 @@ void Bot::FinishTrade(Client* client, BotTradeType tradeType) {
 void Bot::PerformTradeWithClient(int16 beginSlotID, int16 endSlotID, Client* client) {
 	if(client) {
 		// TODO: Figure out what the actual max slot id is
-		const int MAX_SLOT_ID = EQEmu::Constants::TRADE_BAGS_END; // was the old incorrect 3179..
+		const int MAX_SLOT_ID = EQEmu::constants::TRADE_BAGS_END; // was the old incorrect 3179..
 		uint32 items[MAX_SLOT_ID] = {0};
 		uint8 charges[MAX_SLOT_ID] = {0};
 		bool botCanWear[MAX_SLOT_ID] = {0};
@@ -3403,7 +3403,7 @@ void Bot::PerformTradeWithClient(int16 beginSlotID, int16 endSlotID, Client* cli
 				std::string TempErrorMessage;
 				const Item_Struct* mWeaponItem = inst->GetItem();
 				bool failedLoreCheck = false;
-				for (int m = AUG_BEGIN; m < EQEmu::Constants::ITEM_COMMON_SIZE; ++m) {
+				for (int m = AUG_INDEX_BEGIN; m < EQEmu::constants::ITEM_COMMON_SIZE; ++m) {
 					ItemInst *itm = inst->GetAugment(m);
 					if(itm)
 					{
@@ -3423,12 +3423,12 @@ void Bot::PerformTradeWithClient(int16 beginSlotID, int16 endSlotID, Client* cli
 					botCanWear[i] = BotCanWear;
 					ItemInst* swap_item = nullptr;
 
-					const char* equipped[EQEmu::Constants::EQUIPMENT_SIZE + 1] = { "Charm", "Left Ear", "Head", "Face", "Right Ear", "Neck", "Shoulders", "Arms", "Back",
+					const char* equipped[EQEmu::constants::EQUIPMENT_SIZE + 1] = { "Charm", "Left Ear", "Head", "Face", "Right Ear", "Neck", "Shoulders", "Arms", "Back",
 												"Left Wrist", "Right Wrist", "Range", "Hands", "Primary Hand", "Secondary Hand",
 												"Left Finger", "Right Finger", "Chest", "Legs", "Feet", "Waist", "Ammo", "Powersource" };
 					bool success = false;
 					int how_many_slots = 0;
-					for (int j = EQEmu::Constants::EQUIPMENT_BEGIN; j <= (EQEmu::Constants::EQUIPMENT_END + 1); ++j) {
+					for (int j = EQEmu::constants::EQUIPMENT_BEGIN; j <= (EQEmu::constants::EQUIPMENT_END + 1); ++j) {
 						if((mWeaponItem->Slots & (1 << j))) {
 							if (j == 22)
 								j = 9999;
@@ -3489,14 +3489,14 @@ void Bot::PerformTradeWithClient(int16 beginSlotID, int16 endSlotID, Client* cli
 						}
 					}
 					if(!success) {
-						for (int j = EQEmu::Constants::EQUIPMENT_BEGIN; j <= (EQEmu::Constants::EQUIPMENT_END + 1); ++j) {
+						for (int j = EQEmu::constants::EQUIPMENT_BEGIN; j <= (EQEmu::constants::EQUIPMENT_END + 1); ++j) {
 							if((mWeaponItem->Slots & (1 << j))) {
 								if (j == 22)
 									j = 9999;
 
 								swap_item = GetBotItem(j);
 								failedLoreCheck = false;
-								for (int k = AUG_BEGIN; k < EQEmu::Constants::ITEM_COMMON_SIZE; ++k) {
+								for (int k = AUG_INDEX_BEGIN; k < EQEmu::constants::ITEM_COMMON_SIZE; ++k) {
 									ItemInst *itm = swap_item->GetAugment(k);
 									if(itm)
 									{
@@ -4294,7 +4294,7 @@ int32 Bot::GetBotFocusEffect(BotfocusType bottype, uint16 spell_id) {
 		int32 focus_max = 0;
 		int32 focus_max_real = 0;
 		//item focus
-		for (int x = EQEmu::Constants::EQUIPMENT_BEGIN; x <= EQEmu::Constants::EQUIPMENT_END; x++) {
+		for (int x = EQEmu::constants::EQUIPMENT_BEGIN; x <= EQEmu::constants::EQUIPMENT_END; x++) {
 			TempItem = nullptr;
 			ItemInst* ins = GetBotItem(x);
 			if (!ins)
@@ -4319,7 +4319,7 @@ int32 Bot::GetBotFocusEffect(BotfocusType bottype, uint16 spell_id) {
 				}
 			}
 
-			for (int y = AUG_BEGIN; y < EQEmu::Constants::ITEM_COMMON_SIZE; ++y) {
+			for (int y = AUG_INDEX_BEGIN; y < EQEmu::constants::ITEM_COMMON_SIZE; ++y) {
 				ItemInst *aug = nullptr;
 				aug = ins->GetAugment(y);
 				if(aug) {
@@ -4999,7 +4999,7 @@ void Bot::RogueBackstab(Mob* other, bool min_damage, int ReuseTime) {
 	if(botweaponInst) {
 		primaryweapondamage = GetWeaponDamage(other, botweaponInst);
 		backstab_dmg = botweaponInst->GetItem()->BackstabDmg;
-		for (int i = AUG_BEGIN; i < EQEmu::Constants::ITEM_COMMON_SIZE; ++i) {
+		for (int i = AUG_INDEX_BEGIN; i < EQEmu::constants::ITEM_COMMON_SIZE; ++i) {
 			ItemInst *aug = botweaponInst->GetAugment(i);
 			if(aug)
 				backstab_dmg += aug->GetItem()->BackstabDmg;
@@ -5374,7 +5374,7 @@ void Bot::EquipBot(std::string* errorMessage) {
 	GetBotItems(m_inv, errorMessage);
 	const ItemInst* inst = 0;
 	const Item_Struct* item = 0;
-	for (int i = EQEmu::Constants::EQUIPMENT_BEGIN; i <= EQEmu::Constants::EQUIPMENT_END; ++i) {
+	for (int i = EQEmu::constants::EQUIPMENT_BEGIN; i <= EQEmu::constants::EQUIPMENT_END; ++i) {
 		inst = GetBotItem(i);
 		if(inst) {
 			item = inst->GetItem();
@@ -7192,7 +7192,7 @@ void Bot::ProcessBotInspectionRequest(Bot* inspectedBot, Client* client) {
 		// Modded to display power source items (will only show up on SoF+ client inspect windows though.)
 		// I don't think bots are currently coded to use them..but, you'll have to use '#bot inventory list'
 		// to see them on a Titanium client when/if they are activated.
-		for (int16 L = EQEmu::Constants::EQUIPMENT_BEGIN; L <= SlotWaist; L++) {
+		for (int16 L = EQEmu::constants::EQUIPMENT_BEGIN; L <= SlotWaist; L++) {
 			inst = inspectedBot->GetBotItem(L);
 
 			if(inst) {
@@ -7240,7 +7240,7 @@ void Bot::CalcItemBonuses(StatBonuses* newbon)
 {
 	const Item_Struct* itemtmp = 0;
 
-	for (int i = EQEmu::Constants::EQUIPMENT_BEGIN; i <= (EQEmu::Constants::EQUIPMENT_END + 1); ++i) {
+	for (int i = EQEmu::constants::EQUIPMENT_BEGIN; i <= (EQEmu::constants::EQUIPMENT_END + 1); ++i) {
 		const ItemInst* item = GetBotItem((i == 22 ? 9999 : i));
 		if(item) {
 			AddItemBonuses(item, newbon);
@@ -7553,7 +7553,7 @@ void Bot::AddItemBonuses(const ItemInst *inst, StatBonuses* newbon, bool isAug, 
 
 	if (!isAug)
 	{
-		for (int i = 0; i < EQEmu::Constants::ITEM_COMMON_SIZE; i++)
+		for (int i = 0; i < EQEmu::constants::ITEM_COMMON_SIZE; i++)
 			AddItemBonuses(inst->GetAugment(i),newbon,true, false, rec_level);
 	}
 
@@ -8047,7 +8047,7 @@ int Bot::GetRawACNoShield(int &shield_ac) {
 		if(inst->GetItem()->ItemType == ItemTypeShield) {
 			ac -= inst->GetItem()->AC;
 			shield_ac = inst->GetItem()->AC;
-			for (uint8 i = AUG_BEGIN; i < EQEmu::Constants::ITEM_COMMON_SIZE; i++) {
+			for (uint8 i = AUG_INDEX_BEGIN; i < EQEmu::constants::ITEM_COMMON_SIZE; i++) {
 				if(inst->GetAugment(i)) {
 					ac -= inst->GetAugment(i)->GetItem()->AC;
 					shield_ac += inst->GetAugment(i)->GetItem()->AC;
@@ -8062,7 +8062,7 @@ uint32 Bot::CalcCurrentWeight() {
 	const Item_Struct* TempItem = 0;
 	ItemInst* inst;
 	uint32 Total = 0;
-	for (int i = EQEmu::Constants::EQUIPMENT_BEGIN; i <= EQEmu::Constants::EQUIPMENT_END; ++i) {
+	for (int i = EQEmu::constants::EQUIPMENT_BEGIN; i <= EQEmu::constants::EQUIPMENT_END; ++i) {
 		inst = GetBotItem(i);
 		if(inst) {
 			TempItem = inst->GetItem();
@@ -8469,8 +8469,8 @@ std::string Bot::CreateSayLink(Client* c, const char* message, const char* name)
 	uint32 saylink_id = database.LoadSaylinkID(escaped_string);
 	safe_delete_array(escaped_string);
 
-	EQEmu::SayLink::impl linker;
-	linker.SetLinkType(EQEmu::SayLink::LinkItemData);
+	EQEmu::saylink::SayLinkEngine linker;
+	linker.SetLinkType(linker.SayLinkItemData);
 	linker.SetProxyItemID(SAYLINK_ITEM_ID);
 	linker.SetProxyAugment1ID(saylink_id);
 	linker.SetProxyText(name);

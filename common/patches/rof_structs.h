@@ -31,11 +31,11 @@ struct WorldObjectsSent_Struct {
 // New for RoF - Size: 12
 struct InventorySlot_Struct
 {
-/*000*/	int16	Type;	// Worn and Normal inventory = 0, Bank = 1, Shared Bank = 2, Delete Item = -1
+/*000*/	int16	Type;		// Worn and Normal inventory = 0, Bank = 1, Shared Bank = 2, Delete Item = -1
 /*002*/	int16	Unknown02;
 /*004*/	int16	Slot;
-/*006*/	int16	Sub;
-/*008*/	int16	Aug;	// Guessing - Seen 0xffff
+/*006*/	int16	SubIndex;
+/*008*/	int16	AugIndex;	// Guessing - Seen 0xffff
 /*010*/	int16	Unknown01;	// Normally 0 - Seen 13262 when deleting an item, but didn't match item ID
 /*012*/
 };
@@ -45,8 +45,8 @@ struct InventorySlot_Struct
 struct TypelessInventorySlot_Struct
 {
 /*000*/	int16	Slot;
-/*002*/	int16	Sub;
-/*004*/	int16	Aug;
+/*002*/	int16	SubIndex;
+/*004*/	int16	AugIndex;
 /*006*/	int16	Unknown01;
 /*008*/
 };

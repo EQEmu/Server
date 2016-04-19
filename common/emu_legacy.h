@@ -17,8 +17,8 @@
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
-#ifndef EMU_LEGACY_H
-#define EMU_LEGACY_H
+#ifndef COMMON_EMU_LEGACY_H
+#define COMMON_EMU_LEGACY_H
 
 #include "types.h"
 
@@ -26,9 +26,8 @@
 namespace EQEmu
 {
 	// this is for perl and other legacy systems
-	class Legacy {
-	public:
-		typedef enum {
+	namespace legacy {
+		enum InventorySlot : int16 {
 			SLOT_CHARM = 0,
 			SLOT_EAR01 = 1,
 			SLOT_HEAD = 2,
@@ -102,8 +101,8 @@ namespace EQEmu
 
 			SLOT_WORLD_BEGIN = 4000,
 			SLOT_WORLD_END = 4009
-		} InventorySlot;
-	};
+		};
+	}
 }
 
-#endif /* EMU_LEGACY_H */
+#endif /* COMMON_EMU_LEGACY_H */

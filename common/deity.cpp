@@ -20,92 +20,92 @@
 #include "deity.h"
 
 
-EQEmu::Deity::TypeBits EQEmu::Deity::ConvertDeityToDeityBit(Types deity)
+EQEmu::deity::DeityTypeBit EQEmu::deity::ConvertDeityToDeityBit(DeityType deity)
 {
 	switch (deity) {
 	case DeityBertoxxulous:
-		return BIT_DeityBertoxxulous;
+		return bit_DeityBertoxxulous;
 	case DeityBrellSirilis:
-		return BIT_DeityBrellSirilis;
+		return bit_DeityBrellSirilis;
 	case DeityCazicThule:
-		return BIT_DeityCazicThule;
+		return bit_DeityCazicThule;
 	case DeityErollisiMarr:
-		return BIT_DeityErollisiMarr;
+		return bit_DeityErollisiMarr;
 	case DeityBristlebane:
-		return BIT_DeityBristlebane;
+		return bit_DeityBristlebane;
 	case DeityInnoruuk:
-		return BIT_DeityInnoruuk;
+		return bit_DeityInnoruuk;
 	case DeityKarana:
-		return BIT_DeityKarana;
+		return bit_DeityKarana;
 	case DeityMithanielMarr:
-		return BIT_DeityMithanielMarr;
+		return bit_DeityMithanielMarr;
 	case DeityPrexus:
-		return BIT_DeityPrexus;
+		return bit_DeityPrexus;
 	case DeityQuellious:
-		return BIT_DeityQuellious;
+		return bit_DeityQuellious;
 	case DeityRallosZek:
-		return BIT_DeityRallosZek;
+		return bit_DeityRallosZek;
 	case DeityRodcetNife:
-		return BIT_DeityRodcetNife;
+		return bit_DeityRodcetNife;
 	case DeitySolusekRo:
-		return BIT_DeitySolusekRo;
+		return bit_DeitySolusekRo;
 	case DeityTheTribunal:
-		return BIT_DeityTheTribunal;
+		return bit_DeityTheTribunal;
 	case DeityTunare:
-		return BIT_DeityTunare;
+		return bit_DeityTunare;
 	case DeityVeeshan:
-		return BIT_DeityVeeshan;
+		return bit_DeityVeeshan;
 	case DeityAgnostic_LB:
 	case DeityAgnostic:
-		return BIT_DeityAgnostic;
+		return bit_DeityAgnostic;
 	default:
-		return BIT_DeityAll;
+		return bit_DeityAll;
 	};
 }
 
-EQEmu::Deity::Types EQEmu::Deity::ConvertDeityBitToDeity(TypeBits deity_bit)
+EQEmu::deity::DeityType EQEmu::deity::ConvertDeityBitToDeity(DeityTypeBit deity_bit)
 {
 	switch (deity_bit) {
-	case BIT_DeityAgnostic:
+	case bit_DeityAgnostic:
 		return DeityAgnostic;
-	case BIT_DeityBertoxxulous:
+	case bit_DeityBertoxxulous:
 		return DeityBertoxxulous;
-	case BIT_DeityBrellSirilis:
+	case bit_DeityBrellSirilis:
 		return DeityBrellSirilis;
-	case BIT_DeityCazicThule:
+	case bit_DeityCazicThule:
 		return DeityCazicThule;
-	case BIT_DeityErollisiMarr:
+	case bit_DeityErollisiMarr:
 		return DeityErollisiMarr;
-	case BIT_DeityBristlebane:
+	case bit_DeityBristlebane:
 		return DeityBristlebane;
-	case BIT_DeityInnoruuk:
+	case bit_DeityInnoruuk:
 		return DeityInnoruuk;
-	case BIT_DeityKarana:
+	case bit_DeityKarana:
 		return DeityKarana;
-	case BIT_DeityMithanielMarr:
+	case bit_DeityMithanielMarr:
 		return DeityMithanielMarr;
-	case BIT_DeityPrexus:
+	case bit_DeityPrexus:
 		return DeityPrexus;
-	case BIT_DeityQuellious:
+	case bit_DeityQuellious:
 		return DeityQuellious;
-	case BIT_DeityRallosZek:
+	case bit_DeityRallosZek:
 		return DeityRallosZek;
-	case BIT_DeityRodcetNife:
+	case bit_DeityRodcetNife:
 		return DeityRodcetNife;
-	case BIT_DeitySolusekRo:
+	case bit_DeitySolusekRo:
 		return DeitySolusekRo;
-	case BIT_DeityTheTribunal:
+	case bit_DeityTheTribunal:
 		return DeityTheTribunal;
-	case BIT_DeityTunare:
+	case bit_DeityTunare:
 		return DeityTunare;
-	case BIT_DeityVeeshan:
+	case bit_DeityVeeshan:
 		return DeityVeeshan;
 	default:
 		return DeityUnknown;
 	};
 }
 
-const char* EQEmu::Deity::GetDeityName(Types deity)
+const char* EQEmu::deity::GetDeityName(DeityType deity)
 {
 	switch (deity) {
 	case DeityBertoxxulous:

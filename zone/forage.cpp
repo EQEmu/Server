@@ -258,7 +258,7 @@ void Client::GoFish()
 		Bait = m_inv.GetItem(bslot);
 
 	//if the bait isnt equipped, need to add its skill bonus
-	if (bslot >= EQEmu::Constants::GENERAL_BEGIN && Bait != nullptr && Bait->GetItem()->SkillModType == SkillFishing) {
+	if (bslot >= EQEmu::constants::GENERAL_BEGIN && Bait != nullptr && Bait->GetItem()->SkillModType == SkillFishing) {
 		fishing_skill += Bait->GetItem()->SkillModValue;
 	}
 

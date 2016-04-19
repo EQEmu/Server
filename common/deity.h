@@ -1,5 +1,5 @@
 /*	EQEMu: Everquest Server Emulator
-	Copyright (C) 2001-2002 EQEMu Development Team (http://eqemu.org)
+	Copyright (C) 2001-2016 EQEMu Development Team (http://eqemu.org)
 
 	This program is free software; you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -15,17 +15,16 @@
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
-#ifndef DEITY_H
-#define DEITY_H
+#ifndef COMMON_DEITY_H
+#define COMMON_DEITY_H
 
 #include "types.h"
 
 
 namespace EQEmu
 {
-	class Deity {
-	public:
-		enum Types {
+	namespace deity {
+		enum DeityType {
 			DeityUnknown = 0,
 			DeityAgnostic_LB = 140,
 			DeityBertoxxulous = 201,
@@ -47,31 +46,31 @@ namespace EQEmu
 			DeityAgnostic = 396
 		};
 
-		enum TypeBits : uint32 {
-			BIT_DeityAll = 0x00000000,
-			BIT_DeityAgnostic = 0x00000001,
-			BIT_DeityBertoxxulous = 0x00000002,
-			BIT_DeityBrellSirilis = 0x00000004,
-			BIT_DeityCazicThule = 0x00000008,
-			BIT_DeityErollisiMarr = 0x00000010,
-			BIT_DeityBristlebane = 0x00000020,
-			BIT_DeityInnoruuk = 0x00000040,
-			BIT_DeityKarana = 0x00000080,
-			BIT_DeityMithanielMarr = 0x00000100,
-			BIT_DeityPrexus = 0x00000200,
-			BIT_DeityQuellious = 0x00000400,
-			BIT_DeityRallosZek = 0x00000800,
-			BIT_DeityRodcetNife = 0x00001000,
-			BIT_DeitySolusekRo = 0x00002000,
-			BIT_DeityTheTribunal = 0x00004000,
-			BIT_DeityTunare = 0x00008000,
-			BIT_DeityVeeshan = 0x00010000
+		enum DeityTypeBit : uint32 {
+			bit_DeityAll = 0x00000000,
+			bit_DeityAgnostic = 0x00000001,
+			bit_DeityBertoxxulous = 0x00000002,
+			bit_DeityBrellSirilis = 0x00000004,
+			bit_DeityCazicThule = 0x00000008,
+			bit_DeityErollisiMarr = 0x00000010,
+			bit_DeityBristlebane = 0x00000020,
+			bit_DeityInnoruuk = 0x00000040,
+			bit_DeityKarana = 0x00000080,
+			bit_DeityMithanielMarr = 0x00000100,
+			bit_DeityPrexus = 0x00000200,
+			bit_DeityQuellious = 0x00000400,
+			bit_DeityRallosZek = 0x00000800,
+			bit_DeityRodcetNife = 0x00001000,
+			bit_DeitySolusekRo = 0x00002000,
+			bit_DeityTheTribunal = 0x00004000,
+			bit_DeityTunare = 0x00008000,
+			bit_DeityVeeshan = 0x00010000
 		};
 
-		static TypeBits ConvertDeityToDeityBit(Types deity);
-		static Types ConvertDeityBitToDeity(TypeBits deity_bit);
-		static const char* GetDeityName(Types deity);
-	};
+		DeityTypeBit ConvertDeityToDeityBit(DeityType deity);
+		DeityType ConvertDeityBitToDeity(DeityTypeBit deity_bit);
+		const char* GetDeityName(DeityType deity);
+	}
 }
 
-#endif /* DEITY_H */
+#endif /* COMMON_DEITY_H */

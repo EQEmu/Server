@@ -596,7 +596,7 @@ void Mob::RogueBackstab(Mob* other, bool min_damage, int ReuseTime)
 		if(wpn) {
 			primaryweapondamage = GetWeaponDamage(other, wpn);
 			backstab_dmg = wpn->GetItem()->BackstabDmg;
-			for (int i = 0; i < EQEmu::Constants::ITEM_COMMON_SIZE; ++i)
+			for (int i = 0; i < EQEmu::constants::ITEM_COMMON_SIZE; ++i)
 			{
 				ItemInst *aug = wpn->GetAugment(i);
 				if(aug)
@@ -729,7 +729,7 @@ void Client::RangedAttack(Mob* other, bool CanDoubleAttack) {
 		//first look for quivers
 		int r;
 		bool found = false;
-		for(r = EQEmu::Constants::GENERAL_BEGIN; r <= EQEmu::Constants::GENERAL_END; r++) {
+		for(r = EQEmu::constants::GENERAL_BEGIN; r <= EQEmu::constants::GENERAL_END; r++) {
 			const ItemInst *pi = m_inv[r];
 			if(pi == nullptr || !pi->IsType(ItemClassContainer))
 				continue;

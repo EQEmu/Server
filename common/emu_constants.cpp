@@ -21,7 +21,7 @@
 #include "string_util.h"
 
 
-uint16 EQEmu::Constants::InventoryTypeSize(int16 type_index)
+uint16 EQEmu::constants::InventoryTypeSize(int16 type_index)
 {
 	switch (type_index) {
 	case TypePossessions:
@@ -80,7 +80,7 @@ uint16 EQEmu::Constants::InventoryTypeSize(int16 type_index)
 }
 
 /*
-const char* EQEmu::Constants::InventoryLocationName(Location_Struct location)
+const char* EQEmu::constants::InventoryLocationName(Location_Struct location)
 {
 	// not ready for implementation...
 	std::string ret_str;
@@ -89,7 +89,7 @@ const char* EQEmu::Constants::InventoryLocationName(Location_Struct location)
 }
 */
 
-const char* EQEmu::Constants::InventoryTypeName(int16 type_index)
+const char* EQEmu::constants::InventoryTypeName(int16 type_index)
 {
 	switch (type_index) {
 	case INVALID_INDEX:
@@ -149,7 +149,7 @@ const char* EQEmu::Constants::InventoryTypeName(int16 type_index)
 	}
 }
 
-const char* EQEmu::Constants::InventorySlotName(int16 slot_index)
+const char* EQEmu::constants::InventorySlotName(int16 slot_index)
 {
 	switch (slot_index) {
 	case INVALID_INDEX:
@@ -229,7 +229,7 @@ const char* EQEmu::Constants::InventorySlotName(int16 slot_index)
 	}
 }
 
-const char* EQEmu::Constants::InventorySubName(int16 sub_index)
+const char* EQEmu::constants::InventorySubName(int16 sub_index)
 {
 	if (sub_index == INVALID_INDEX)
 		return "Invalid Sub";
@@ -243,7 +243,7 @@ const char* EQEmu::Constants::InventorySubName(int16 sub_index)
 	return ret_str.c_str();
 }
 
-const char* EQEmu::Constants::InventoryAugName(int16 aug_index)
+const char* EQEmu::constants::InventoryAugName(int16 aug_index)
 {
 	if (aug_index == INVALID_INDEX)
 		return "Invalid Aug";

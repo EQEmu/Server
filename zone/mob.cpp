@@ -179,7 +179,7 @@ Mob::Mob(const char* in_name,
 		runspeed = 1.25f;
 
 	m_Light.Type.Innate = in_light;
-	m_Light.Level.Innate = EQEmu::LightSource::TypeToLevel(m_Light.Type.Innate);
+	m_Light.Level.Innate = EQEmu::lightsource::TypeToLevel(m_Light.Type.Innate);
 	m_Light.Level.Equipment = m_Light.Type.Equipment = 0;
 	m_Light.Level.Spell = m_Light.Type.Spell = 0;
 	m_Light.Type.Active = m_Light.Type.Innate;
@@ -2232,11 +2232,11 @@ bool Mob::UpdateActiveLight()
 	m_Light.Type.Active = 0;
 	m_Light.Level.Active = 0;
 
-	if (EQEmu::LightSource::IsLevelGreater((m_Light.Type.Innate & 0x0F), m_Light.Type.Active)) { m_Light.Type.Active = m_Light.Type.Innate; }
+	if (EQEmu::lightsource::IsLevelGreater((m_Light.Type.Innate & 0x0F), m_Light.Type.Active)) { m_Light.Type.Active = m_Light.Type.Innate; }
 	if (m_Light.Level.Equipment > m_Light.Level.Active) { m_Light.Type.Active = m_Light.Type.Equipment; } // limiter in property handler
 	if (m_Light.Level.Spell > m_Light.Level.Active) { m_Light.Type.Active = m_Light.Type.Spell; } // limiter in property handler
 
-	m_Light.Level.Active = EQEmu::LightSource::TypeToLevel(m_Light.Type.Active);
+	m_Light.Level.Active = EQEmu::lightsource::TypeToLevel(m_Light.Type.Active);
 
 	return (m_Light.Level.Active != old_light_level);
 }

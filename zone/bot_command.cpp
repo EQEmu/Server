@@ -2400,7 +2400,7 @@ namespace ActionableBots
 				continue;
 
 			mod_skill_value = base_skill_value;
-			for (int16 index = EQEmu::Constants::EQUIPMENT_BEGIN; index <= EQEmu::Constants::EQUIPMENT_END; ++index) {
+			for (int16 index = EQEmu::constants::EQUIPMENT_BEGIN; index <= EQEmu::constants::EQUIPMENT_END; ++index) {
 				const ItemInst* indexed_item = bot_iter->GetBotItem(index);
 				if (indexed_item && indexed_item->GetItem()->SkillModType == skill_type)
 					mod_skill_value += (base_skill_value * (((float)indexed_item->GetItem()->SkillModValue) / 100.0f));
@@ -7066,11 +7066,11 @@ void bot_subcommand_inventory_list(Client *c, const Seperator *sep)
 	bool is2Hweapon = false;
 
 	std::string item_link;
-	EQEmu::SayLink::impl linker;
-	linker.SetLinkType(EQEmu::SayLink::LinkItemInst);
+	EQEmu::saylink::SayLinkEngine linker;
+	linker.SetLinkType(linker.SayLinkItemInst);
 
 	uint32 inventory_count = 0;
-	for (int i = EQEmu::Constants::EQUIPMENT_BEGIN; i <= (EQEmu::Constants::EQUIPMENT_END + 1); ++i) {
+	for (int i = EQEmu::constants::EQUIPMENT_BEGIN; i <= (EQEmu::constants::EQUIPMENT_END + 1); ++i) {
 		if ((i == SlotSecondary) && is2Hweapon)
 			continue;
 
@@ -7126,7 +7126,7 @@ void bot_subcommand_inventory_remove(Client *c, const Seperator *sep)
 	}
 
 	int slotId = atoi(sep->arg[1]);
-	if (!sep->IsNumber(1) || ((slotId > EQEmu::Constants::EQUIPMENT_END || slotId < EQEmu::Constants::EQUIPMENT_BEGIN) && slotId != SlotPowerSource)) {
+	if (!sep->IsNumber(1) || ((slotId > EQEmu::constants::EQUIPMENT_END || slotId < EQEmu::constants::EQUIPMENT_BEGIN) && slotId != SlotPowerSource)) {
 		c->Message(m_fail, "Valid slots are 0-21 or 9999");
 		return;
 	}
@@ -7141,7 +7141,7 @@ void bot_subcommand_inventory_remove(Client *c, const Seperator *sep)
 		return;
 	}
 
-	for (int m = AUG_BEGIN; m < EQEmu::Constants::ITEM_COMMON_SIZE; ++m) {
+	for (int m = AUG_INDEX_BEGIN; m < EQEmu::constants::ITEM_COMMON_SIZE; ++m) {
 		if (!itminst)
 			break;
 
@@ -7233,7 +7233,7 @@ void bot_subcommand_inventory_window(Client *c, const Seperator *sep)
 	//Client::TextLink linker;
 	//linker.SetLinkType(linker.linkItemInst);
 
-	for (int i = EQEmu::Constants::EQUIPMENT_BEGIN; i <= (EQEmu::Constants::EQUIPMENT_END + 1); ++i) {
+	for (int i = EQEmu::constants::EQUIPMENT_BEGIN; i <= (EQEmu::constants::EQUIPMENT_END + 1); ++i) {
 		const Item_Struct* item = nullptr;
 		const ItemInst* inst = my_bot->CastToBot()->GetBotItem(i == 22 ? SlotPowerSource : i);
 		if (inst)

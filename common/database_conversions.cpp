@@ -330,7 +330,7 @@ namespace Convert {
 		/*7212*/	uint32							tribute_points;
 		/*7216*/	uint32							unknown7252;
 		/*7220*/	uint32							tribute_active;		//1=active
-		/*7224*/	Convert::Tribute_Struct			tributes[EQEmu::Constants::TRIBUTE_SIZE];
+		/*7224*/	Convert::Tribute_Struct			tributes[EQEmu::constants::TRIBUTE_SIZE];
 		/*7264*/	Convert::Disciplines_Struct		disciplines;
 		/*7664*/	uint32							recastTimers[MAX_RECAST_TYPES];	// Timers (GMT of last use)
 		/*7744*/	char							unknown7780[160];
@@ -1428,7 +1428,7 @@ bool Database::CheckDatabaseConvertPPDeblob(){
 				if (rquery != ""){ results = QueryDatabase(rquery); }
 				/* Run Tribute Convert */
 				first_entry = 0; rquery = "";
-				for (i = 0; i < EQEmu::Constants::TRIBUTE_SIZE; i++){
+				for (i = 0; i < EQEmu::constants::TRIBUTE_SIZE; i++){
 					if (pp->tributes[i].tribute > 0 && pp->tributes[i].tribute != 4294967295){
 						if (first_entry != 1){
 							rquery = StringFormat("REPLACE INTO `character_tribute` (id, tier, tribute) VALUES (%u, %u, %u)", character_id, pp->tributes[i].tier, pp->tributes[i].tribute);

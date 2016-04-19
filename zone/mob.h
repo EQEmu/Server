@@ -364,7 +364,7 @@ public:
 	virtual inline uint16 GetBaseRace() const { return base_race; }
 	virtual inline uint8 GetBaseGender() const { return base_gender; }
 	virtual inline uint16 GetDeity() const { return deity; }
-	virtual inline EQEmu::Deity::TypeBits GetDeityBit() { return EQEmu::Deity::ConvertDeityToDeityBit((EQEmu::Deity::Types)deity); }
+	virtual EQEmu::deity::DeityTypeBit GetDeityBit() { return EQEmu::deity::ConvertDeityToDeityBit((EQEmu::deity::DeityType)deity); }
 	inline uint16 GetRace() const { return race; }
 	inline uint8 GetGender() const { return gender; }
 	inline uint8 GetTexture() const { return texture; }
@@ -708,12 +708,12 @@ public:
 	inline uint8 GetSpellLightType() { return m_Light.Type.Spell; }
 
 	virtual void UpdateEquipmentLight() { m_Light.Type.Equipment = 0; m_Light.Level.Equipment = 0; }
-	inline void SetSpellLightType(uint8 light_type) { m_Light.Type.Spell = (light_type & 0x0F); m_Light.Level.Spell = EQEmu::LightSource::TypeToLevel(m_Light.Type.Spell); }
+	inline void SetSpellLightType(uint8 light_type) { m_Light.Type.Spell = (light_type & 0x0F); m_Light.Level.Spell = EQEmu::lightsource::TypeToLevel(m_Light.Type.Spell); }
 
 	inline uint8 GetActiveLightType() { return m_Light.Type.Active; }
 	bool UpdateActiveLight(); // returns true if change, false if no change
 
-	EQEmu::LightSource::impl* GetLightProfile() { return &m_Light; }
+	EQEmu::lightsource::LightSourceProfile* GetLightProfile() { return &m_Light; }
 
 	Mob* GetPet();
 	void SetPet(Mob* newpet);
@@ -1185,7 +1185,7 @@ protected:
 
 	glm::vec4 m_Delta;
 
-	EQEmu::LightSource::impl m_Light;
+	EQEmu::lightsource::LightSourceProfile m_Light;
 
 	float fixedZ;
 	EmuAppearance _appearance;

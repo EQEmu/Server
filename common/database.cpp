@@ -708,7 +708,7 @@ bool Database::StoreCharacter(uint32 account_id, PlayerProfile_Struct* pp, Inven
 
 	/* Insert starting inventory... */
 	std::string invquery;
-	for (int16 i = EQEmu::Constants::EQUIPMENT_BEGIN; i <= EQEmu::Constants::BANK_BAGS_END;) {
+	for (int16 i = EQEmu::constants::EQUIPMENT_BEGIN; i <= EQEmu::constants::BANK_BAGS_END;) {
 		const ItemInst* newinv = inv->GetItem(i);
 		if (newinv) {
 			invquery = StringFormat("INSERT INTO `inventory` (charid, slotid, itemid, charges, color) VALUES (%u, %i, %u, %i, %u)",
@@ -718,15 +718,15 @@ bool Database::StoreCharacter(uint32 account_id, PlayerProfile_Struct* pp, Inven
 		}
 
 		if (i == SlotCursor) { 
-			i = EQEmu::Constants::GENERAL_BAGS_BEGIN; 
+			i = EQEmu::constants::GENERAL_BAGS_BEGIN; 
 			continue;
 		}
-		else if (i == EQEmu::Constants::CURSOR_BAG_END) { 
-			i = EQEmu::Constants::BANK_BEGIN; 
+		else if (i == EQEmu::constants::CURSOR_BAG_END) { 
+			i = EQEmu::constants::BANK_BEGIN; 
 			continue; 
 		}
-		else if (i == EQEmu::Constants::BANK_END) { 
-			i = EQEmu::Constants::BANK_BAGS_BEGIN; 
+		else if (i == EQEmu::constants::BANK_END) { 
+			i = EQEmu::constants::BANK_BAGS_BEGIN; 
 			continue; 
 		} 
 		i++;

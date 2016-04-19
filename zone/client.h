@@ -736,7 +736,7 @@ public:
 #endif
 	uint32 GetEquipment(uint8 material_slot) const; // returns item id
 	uint32 GetEquipmentColor(uint8 material_slot) const;
-	virtual void UpdateEquipmentLight() { m_Light.Type.Equipment = m_inv.FindBrightestLightType(); m_Light.Level.Equipment = EQEmu::LightSource::TypeToLevel(m_Light.Type.Equipment); }
+	virtual void UpdateEquipmentLight() { m_Light.Type.Equipment = m_inv.FindBrightestLightType(); m_Light.Level.Equipment = EQEmu::lightsource::TypeToLevel(m_Light.Type.Equipment); }
 
 	inline bool AutoSplitEnabled() { return m_pp.autosplit != 0; }
 
