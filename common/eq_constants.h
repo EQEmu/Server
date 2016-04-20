@@ -931,8 +931,8 @@ enum PossessionsSlots : int16
 // plus, since they're pre-op's, they don't affect the actual binary size
 #define TYPE_BEGIN	0
 #define SLOT_BEGIN	0
-#define SUB_BEGIN	0
-#define AUG_BEGIN	0
+#define SUB_INDEX_BEGIN	0
+#define AUG_INDEX_BEGIN	0
 
 static const uint32 MAX_SPELL_DB_ID_VAL = 65535;
 

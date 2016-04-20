@@ -17,8 +17,8 @@
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
-#ifndef SAY_LINK_H
-#define SAY_LINK_H
+#ifndef COMMON_SAY_LINK_H
+#define COMMON_SAY_LINK_H
 
 #include "types.h"
 
@@ -26,16 +26,13 @@
 
 
 class ItemInst;
-class Item_Struct;
-class ServerLootItem_Struct;
+struct Item_Struct;
+struct ServerLootItem_Struct;
 
 
 namespace EQEmu
 {
-	class SayLink {
-	public:
-		enum Type { LinkBlank = 0, LinkItemData, LinkLootItem, LinkItemInst };
-
+	namespace saylink {
 		// Current server mask: EQClientRoF2
 		struct SayLinkBody_Struct {
 			uint8 unknown_1;		/* %1X */
@@ -53,11 +50,18 @@ namespace EQEmu
 			int hash;				/* %08X */
 		};
 
-		class impl {
+		class SayLinkEngine {
 		public:
-			impl() { Reset(); }
+			enum SayLinkType {
+				SayLinkBlank = 0,
+				SayLinkItemData,
+				SayLinkLootItem,
+				SayLinkItemInst
+			};
 
-			void SetLinkType(Type link_type) { m_LinkType = link_type; }
+			SayLinkEngine();
+
+			void SetLinkType(SayLinkType link_type) { m_LinkType = link_type; }
 			void SetItemData(const Item_Struct* item_data) { m_ItemData = item_data; }
 			void SetLootData(const ServerLootItem_Struct* loot_data) { m_LootData = loot_data; }
 			void SetItemInst(const ItemInst* item_inst) { m_ItemInst = item_inst; }
@@ -83,9 +87,9 @@ namespace EQEmu
 			std::string GenerateLink();
 			bool LinkError() { return m_Error; }
 
-			std::string GetLink() { return m_Link; }			// contains full string format: '/12x' '<LinkBody>' '<LinkText>' '/12x'
-			std::string GetLinkBody() { return m_LinkBody; }	// contains string format: '<LinkBody>'
-			std::string GetLinkText() { return m_LinkText; }	// contains string format: '<LinkText>'
+			std::string Link() { return m_Link; }			// contains full string format: '/12x' '<LinkBody>' '<LinkText>' '/12x'
+			std::string LinkBody() { return m_LinkBody; }	// contains string format: '<LinkBody>'
+			std::string LinkText() { return m_LinkText; }	// contains string format: '<LinkText>'
 
 			void Reset();
 
@@ -120,11 +124,9 @@ namespace EQEmu
 			bool m_Error;
 		};
 
-		
-
-		static bool DegenerateLinkBody(SayLinkBody_Struct& say_Link_body_struct, const std::string& say_link_body);
-		static bool GenerateLinkBody(std::string& say_link_body, const SayLinkBody_Struct& say_link_body_struct);
-	};
+		bool DegenerateLinkBody(SayLinkBody_Struct& say_Link_body_struct, const std::string& say_link_body);
+		bool GenerateLinkBody(std::string& say_link_body, const SayLinkBody_Struct& say_link_body_struct);
+	}
 }
 
-#endif /* SAY_LINK_H */
+#endif /* COMMON_SAY_LINK_H */

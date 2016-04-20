@@ -2413,14 +2413,14 @@ void command_texture(Client *c, const Seperator *sep)
 		// Player Races Wear Armor, so Wearchange is sent instead
 		int i;
 		if (!c->GetTarget())
-			for (i = EQEmu::Constants::MATERIAL_BEGIN; i <= EQEmu::Constants::MATERIAL_TINT_END; i++)
+			for (i = EQEmu::constants::MATERIAL_BEGIN; i <= EQEmu::constants::MATERIAL_TINT_END; i++)
 			{
 				c->SendTextureWC(i, texture);
 			}
 		else if ((c->GetTarget()->GetRace() > 0 && c->GetTarget()->GetRace() <= 12) ||
 			c->GetTarget()->GetRace() == 128 || c->GetTarget()->GetRace() == 130 ||
 			c->GetTarget()->GetRace() == 330 || c->GetTarget()->GetRace() == 522) {
-			for (i = EQEmu::Constants::MATERIAL_BEGIN; i <= EQEmu::Constants::MATERIAL_TINT_END; i++)
+			for (i = EQEmu::constants::MATERIAL_BEGIN; i <= EQEmu::constants::MATERIAL_TINT_END; i++)
 			{
 				c->GetTarget()->SendTextureWC(i, texture);
 			}
@@ -2545,13 +2545,13 @@ void command_peekinv(Client *c, const Seperator *sep)
 	const ItemInst* inst_sub = nullptr;
 	const Item_Struct* item_data = nullptr;
 	std::string item_link;
-	EQEmu::SayLink::impl linker;
-	linker.SetLinkType(EQEmu::SayLink::LinkItemInst);
+	EQEmu::saylink::SayLinkEngine linker;
+	linker.SetLinkType(linker.SayLinkItemInst);
 
 	c->Message(0, "Displaying inventory for %s...",  targetClient->GetName());
 
 	// worn
-	for (int16 indexMain = EQEmu::Constants::EQUIPMENT_BEGIN; (scopeWhere & peekWorn) && (indexMain <= EQEmu::Constants::EQUIPMENT_END); ++indexMain) {
+	for (int16 indexMain = EQEmu::constants::EQUIPMENT_BEGIN; (scopeWhere & peekWorn) && (indexMain <= EQEmu::constants::EQUIPMENT_END); ++indexMain) {
 		inst_main = targetClient->GetInv().GetItem(indexMain);
 		item_data = (inst_main == nullptr) ? nullptr : inst_main->GetItem();
 		linker.SetItemInst(inst_main);
@@ -2574,7 +2574,7 @@ void command_peekinv(Client *c, const Seperator *sep)
 	}
 
 	// inv
-	for (int16 indexMain = EQEmu::Constants::GENERAL_BEGIN; (scopeWhere & peekInv) && (indexMain <= EQEmu::Constants::GENERAL_END); ++indexMain) {
+	for (int16 indexMain = EQEmu::constants::GENERAL_BEGIN; (scopeWhere & peekInv) && (indexMain <= EQEmu::constants::GENERAL_END); ++indexMain) {
 		inst_main = targetClient->GetInv().GetItem(indexMain);
 		item_data = (inst_main == nullptr) ? nullptr : inst_main->GetItem();
 		linker.SetItemInst(inst_main);
@@ -2584,7 +2584,7 @@ void command_peekinv(Client *c, const Seperator *sep)
 		c->Message((item_data == nullptr), "InvSlot: %i, Item: %i (%s), Charges: %i",
 			indexMain, ((item_data == nullptr) ? 0 : item_data->ID), item_link.c_str(), ((inst_main == nullptr) ? 0 : inst_main->GetCharges()));
 
-		for (uint8 indexSub = SUB_BEGIN; inst_main && inst_main->IsType(ItemClassContainer) && (indexSub < EQEmu::Constants::ITEM_CONTAINER_SIZE); ++indexSub) {
+		for (uint8 indexSub = SUB_INDEX_BEGIN; inst_main && inst_main->IsType(ItemClassContainer) && (indexSub < EQEmu::constants::ITEM_CONTAINER_SIZE); ++indexSub) {
 			inst_sub = inst_main->GetItem(indexSub);
 			item_data = (inst_sub == nullptr) ? nullptr : inst_sub->GetItem();
 			linker.SetItemInst(inst_sub);
@@ -2618,7 +2618,7 @@ void command_peekinv(Client *c, const Seperator *sep)
 				c->Message((item_data == nullptr), "CursorSlot: %i, Depth: %i, Item: %i (%s), Charges: %i",
 					SlotCursor, cursorDepth, ((item_data == nullptr) ? 0 : item_data->ID), item_link.c_str(), ((inst_main == nullptr) ? 0 : inst_main->GetCharges()));
 
-				for (uint8 indexSub = SUB_BEGIN; (cursorDepth == 0) && inst_main && inst_main->IsType(ItemClassContainer) && (indexSub < EQEmu::Constants::ITEM_CONTAINER_SIZE); ++indexSub) {
+				for (uint8 indexSub = SUB_INDEX_BEGIN; (cursorDepth == 0) && inst_main && inst_main->IsType(ItemClassContainer) && (indexSub < EQEmu::constants::ITEM_CONTAINER_SIZE); ++indexSub) {
 					inst_sub = inst_main->GetItem(indexSub);
 					item_data = (inst_sub == nullptr) ? nullptr : inst_sub->GetItem();
 					linker.SetItemInst(inst_sub);
@@ -2633,7 +2633,7 @@ void command_peekinv(Client *c, const Seperator *sep)
 	}
 
 	// trib
-	for (int16 indexMain = EQEmu::Constants::TRIBUTE_BEGIN; (scopeWhere & peekTrib) && (indexMain <= EQEmu::Constants::TRIBUTE_END); ++indexMain) {
+	for (int16 indexMain = EQEmu::constants::TRIBUTE_BEGIN; (scopeWhere & peekTrib) && (indexMain <= EQEmu::constants::TRIBUTE_END); ++indexMain) {
 		inst_main = targetClient->GetInv().GetItem(indexMain);
 		item_data = (inst_main == nullptr) ? nullptr : inst_main->GetItem();
 		linker.SetItemInst(inst_main);
@@ -2645,7 +2645,7 @@ void command_peekinv(Client *c, const Seperator *sep)
 	}
 
 	// bank
-	for (int16 indexMain = EQEmu::Constants::BANK_BEGIN; (scopeWhere & peekBank) && (indexMain <= EQEmu::Constants::BANK_END); ++indexMain) {
+	for (int16 indexMain = EQEmu::constants::BANK_BEGIN; (scopeWhere & peekBank) && (indexMain <= EQEmu::constants::BANK_END); ++indexMain) {
 		inst_main = targetClient->GetInv().GetItem(indexMain);
 		item_data = (inst_main == nullptr) ? nullptr : inst_main->GetItem();
 		linker.SetItemInst(inst_main);
@@ -2655,7 +2655,7 @@ void command_peekinv(Client *c, const Seperator *sep)
 		c->Message((item_data == nullptr), "BankSlot: %i, Item: %i (%s), Charges: %i",
 			indexMain, ((item_data == nullptr) ? 0 : item_data->ID), item_link.c_str(), ((inst_main == nullptr) ? 0 : inst_main->GetCharges()));
 
-		for (uint8 indexSub = SUB_BEGIN; inst_main && inst_main->IsType(ItemClassContainer) && (indexSub < EQEmu::Constants::ITEM_CONTAINER_SIZE); ++indexSub) {
+		for (uint8 indexSub = SUB_INDEX_BEGIN; inst_main && inst_main->IsType(ItemClassContainer) && (indexSub < EQEmu::constants::ITEM_CONTAINER_SIZE); ++indexSub) {
 			inst_sub = inst_main->GetItem(indexSub);
 			item_data = (inst_sub == nullptr) ? nullptr : inst_sub->GetItem();
 			linker.SetItemInst(inst_sub);
@@ -2667,7 +2667,7 @@ void command_peekinv(Client *c, const Seperator *sep)
 		}
 	}
 
-	for (int16 indexMain = EQEmu::Constants::SHARED_BANK_BEGIN; (scopeWhere & peekBank) && (indexMain <= EQEmu::Constants::SHARED_BANK_END); ++indexMain) {
+	for (int16 indexMain = EQEmu::constants::SHARED_BANK_BEGIN; (scopeWhere & peekBank) && (indexMain <= EQEmu::constants::SHARED_BANK_END); ++indexMain) {
 		inst_main = targetClient->GetInv().GetItem(indexMain);
 		item_data = (inst_main == nullptr) ? nullptr : inst_main->GetItem();
 		linker.SetItemInst(inst_main);
@@ -2677,7 +2677,7 @@ void command_peekinv(Client *c, const Seperator *sep)
 		c->Message((item_data == nullptr), "SharedBankSlot: %i, Item: %i (%s), Charges: %i",
 			indexMain, ((item_data == nullptr) ? 0 : item_data->ID), item_link.c_str(), ((inst_main == nullptr) ? 0 : inst_main->GetCharges()));
 
-		for (uint8 indexSub = SUB_BEGIN; inst_main && inst_main->IsType(ItemClassContainer) && (indexSub < EQEmu::Constants::ITEM_CONTAINER_SIZE); ++indexSub) {
+		for (uint8 indexSub = SUB_INDEX_BEGIN; inst_main && inst_main->IsType(ItemClassContainer) && (indexSub < EQEmu::constants::ITEM_CONTAINER_SIZE); ++indexSub) {
 			inst_sub = inst_main->GetItem(indexSub);
 			item_data = (inst_sub == nullptr) ? nullptr : inst_sub->GetItem();
 			linker.SetItemInst(inst_sub);
@@ -2690,7 +2690,7 @@ void command_peekinv(Client *c, const Seperator *sep)
 	}
 
 	// trade
-	for (int16 indexMain = EQEmu::Constants::TRADE_BEGIN; (scopeWhere & peekTrade) && (indexMain <= EQEmu::Constants::TRADE_END); ++indexMain) {
+	for (int16 indexMain = EQEmu::constants::TRADE_BEGIN; (scopeWhere & peekTrade) && (indexMain <= EQEmu::constants::TRADE_END); ++indexMain) {
 		inst_main = targetClient->GetInv().GetItem(indexMain);
 		item_data = (inst_main == nullptr) ? nullptr : inst_main->GetItem();
 		linker.SetItemInst(inst_main);
@@ -2700,7 +2700,7 @@ void command_peekinv(Client *c, const Seperator *sep)
 		c->Message((item_data == nullptr), "TradeSlot: %i, Item: %i (%s), Charges: %i",
 			indexMain, ((item_data == nullptr) ? 0 : item_data->ID), item_link.c_str(), ((inst_main == nullptr) ? 0 : inst_main->GetCharges()));
 
-		for (uint8 indexSub = SUB_BEGIN; inst_main && inst_main->IsType(ItemClassContainer) && (indexSub < EQEmu::Constants::ITEM_CONTAINER_SIZE); ++indexSub) {
+		for (uint8 indexSub = SUB_INDEX_BEGIN; inst_main && inst_main->IsType(ItemClassContainer) && (indexSub < EQEmu::constants::ITEM_CONTAINER_SIZE); ++indexSub) {
 			inst_sub = inst_main->GetItem(indexSub);
 			item_data = (inst_sub == nullptr) ? nullptr : inst_sub->GetItem();
 			linker.SetItemInst(inst_sub);
@@ -2722,7 +2722,7 @@ void command_peekinv(Client *c, const Seperator *sep)
 		else {
 			c->Message(0, "[WorldObject DBID: %i (entityid: %i)]",  objectTradeskill->GetDBID(), objectTradeskill->GetID());
 
-			for (int16 indexMain = SLOT_BEGIN; indexMain < EQEmu::Constants::TYPE_WORLD_SIZE; ++indexMain) {
+			for (int16 indexMain = SLOT_BEGIN; indexMain < EQEmu::constants::TYPE_WORLD_SIZE; ++indexMain) {
 				inst_main = objectTradeskill->GetItem(indexMain);
 				item_data = (inst_main == nullptr) ? nullptr : inst_main->GetItem();
 				linker.SetItemInst(inst_main);
@@ -2730,9 +2730,9 @@ void command_peekinv(Client *c, const Seperator *sep)
 				item_link = linker.GenerateLink();
 
 				c->Message((item_data == nullptr), "WorldSlot: %i, Item: %i (%s), Charges: %i",
-					(EQEmu::Constants::WORLD_BEGIN + indexMain), ((item_data == nullptr) ? 0 : item_data->ID), item_link.c_str(), ((inst_main == nullptr) ? 0 : inst_main->GetCharges()));
+					(EQEmu::constants::WORLD_BEGIN + indexMain), ((item_data == nullptr) ? 0 : item_data->ID), item_link.c_str(), ((inst_main == nullptr) ? 0 : inst_main->GetCharges()));
 
-				for (uint8 indexSub = SUB_BEGIN; inst_main && inst_main->IsType(ItemClassContainer) && (indexSub < EQEmu::Constants::ITEM_CONTAINER_SIZE); ++indexSub) {
+				for (uint8 indexSub = SUB_INDEX_BEGIN; inst_main && inst_main->IsType(ItemClassContainer) && (indexSub < EQEmu::constants::ITEM_CONTAINER_SIZE); ++indexSub) {
 					inst_sub = inst_main->GetItem(indexSub);
 					item_data = (inst_sub == nullptr) ? nullptr : inst_sub->GetItem();
 					linker.SetItemInst(inst_sub);
@@ -3140,7 +3140,7 @@ void command_listpetition(Client *c, const Seperator *sep)
 void command_equipitem(Client *c, const Seperator *sep)
 {
 	uint32 slot_id = atoi(sep->arg[1]);
-	if (sep->IsNumber(1) && ((slot_id >= EQEmu::Constants::EQUIPMENT_BEGIN) && (slot_id <= EQEmu::Constants::EQUIPMENT_END) || (slot_id == SlotPowerSource))) {
+	if (sep->IsNumber(1) && ((slot_id >= EQEmu::constants::EQUIPMENT_BEGIN) && (slot_id <= EQEmu::constants::EQUIPMENT_END) || (slot_id == SlotPowerSource))) {
 		const ItemInst* from_inst = c->GetInv().GetItem(SlotCursor);
 		const ItemInst* to_inst = c->GetInv().GetItem(slot_id); // added (desync issue when forcing stack to stack)
 		bool partialmove = false;
@@ -4341,8 +4341,8 @@ void command_iteminfo(Client *c, const Seperator *sep)
 		c->Message(13, "Error: This item has no data reference");
 	}
 
-	EQEmu::SayLink::impl linker;
-	linker.SetLinkType(EQEmu::SayLink::LinkItemInst);
+	EQEmu::saylink::SayLinkEngine linker;
+	linker.SetLinkType(linker.SayLinkItemInst);
 	linker.SetItemInst(inst);
 
 	auto item_link = linker.GenerateLink();
@@ -5491,9 +5491,9 @@ void command_summonitem(Client *c, const Seperator *sep)
 	std::string cmd_msg = sep->msg;
 	size_t link_open = cmd_msg.find('\x12');
 	size_t link_close = cmd_msg.find_last_of('\x12');
-	if (link_open != link_close && (cmd_msg.length() - link_open) > EQEmu::Constants::TEXT_LINK_BODY_LENGTH) {
-		EQEmu::SayLink::SayLinkBody_Struct link_body;
-		EQEmu::SayLink::DegenerateLinkBody(link_body, cmd_msg.substr(link_open + 1, EQEmu::Constants::TEXT_LINK_BODY_LENGTH));
+	if (link_open != link_close && (cmd_msg.length() - link_open) > EQEmu::constants::TEXT_LINK_BODY_LENGTH) {
+		EQEmu::saylink::SayLinkBody_Struct link_body;
+		EQEmu::saylink::DegenerateLinkBody(link_body, cmd_msg.substr(link_open + 1, EQEmu::constants::TEXT_LINK_BODY_LENGTH));
 		itemid = link_body.item_id;
 	}
 	else if (!sep->IsNumber(1)) {
@@ -5603,8 +5603,8 @@ void command_itemsearch(Client *c, const Seperator *sep)
 
 		const Item_Struct* item = nullptr;
 		std::string item_link;
-		EQEmu::SayLink::impl linker;
-		linker.SetLinkType(EQEmu::SayLink::LinkItemData);
+		EQEmu::saylink::SayLinkEngine linker;
+		linker.SetLinkType(linker.SayLinkItemData);
 
 		if (Seperator::IsNumber(search_criteria)) {
 			item = database.GetItem(atoi(search_criteria));
@@ -7114,7 +7114,7 @@ void command_path(Client *c, const Seperator *sep)
 }
 
 void Client::Undye() {
-	for (int cur_slot = EQEmu::Constants::MATERIAL_BEGIN; cur_slot <= EQEmu::Constants::MATERIAL_END; cur_slot++ ) {
+	for (int cur_slot = EQEmu::constants::MATERIAL_BEGIN; cur_slot <= EQEmu::constants::MATERIAL_END; cur_slot++ ) {
 		uint8 slot2=SlotConvert(cur_slot);
 		ItemInst* inst = m_inv.GetItem(slot2);
 

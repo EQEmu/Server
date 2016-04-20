@@ -17,52 +17,51 @@
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
-#ifndef LIGHT_SOURCE_H
-#define LIGHT_SOURCE_H
+#ifndef COMMON_LIGHT_SOURCE_H
+#define COMMON_LIGHT_SOURCE_H
 
 #include "types.h"
 
 
 namespace EQEmu
 {
-	class LightSource {
-	public:
-		enum Types {
-			TypeNone = 0,
-			TypeCandle,
-			TypeTorch,
-			TypeTinyGlowingSkull,
-			TypeSmallLantern,
-			TypeSteinOfMoggok, // 5
-			TypeLargeLantern,
-			TypeFlamelessLantern,
-			TypeGlobeOfStars,
-			TypeLightGlobe,
-			TypeLightstone, // 10
-			TypeGreaterLightstone,
-			TypeFireBeetleEye,
-			TypeColdlight,
-			TypeUnknown1,
-			TypeUnknown2, // 15
-			TypeCount
+	namespace lightsource {
+		enum LightType {
+			LightTypeNone = 0,
+			LightTypeCandle,
+			LightTypeTorch,
+			LightTypeTinyGlowingSkull,
+			LightTypeSmallLantern,
+			LightTypeSteinOfMoggok, // 5
+			LightTypeLargeLantern,
+			LightTypeFlamelessLantern,
+			LightTypeGlobeOfStars,
+			LightTypeLightGlobe,
+			LightTypeLightstone, // 10
+			LightTypeGreaterLightstone,
+			LightTypeFireBeetleEye,
+			LightTypeColdlight,
+			LightTypeUnknown1,
+			LightTypeUnknown2, // 15
+			LightTypeCount
 		};
 
-		enum Levels {
-			LevelUnlit = 0,
-			LevelCandle,
-			LevelTorch,
-			LevelSmallMagic,
-			LevelRedLight,
-			LevelBlueLight, // 5
-			LevelSmallLantern,
-			LevelMagicLantern,
-			LevelLargeLantern,
-			LevelLargeMagic,
-			LevelBrilliant, // 10
-			LevelCount
+		enum LightLevel {
+			LightLevelUnlit = 0,
+			LightLevelCandle,
+			LightLevelTorch,
+			LightLevelSmallMagic,
+			LightLevelRedLight,
+			LightLevelBlueLight, // 5
+			LightLevelSmallLantern,
+			LightLevelMagicLantern,
+			LightLevelLargeLantern,
+			LightLevelLargeMagic,
+			LightLevelBrilliant, // 10
+			LightLevelCount
 		};
 
-		class impl {
+		struct LightSourceProfile {
 			/*
 			Current criteria (light types):
 			Equipment:	{ 0 .. 15 }
@@ -79,8 +78,7 @@ namespace EQEmu
 			- All clients have a bug regarding stackable items (light and sound updates are not processed when picking up an item)
 			-- The timer-based update cancels out the invalid light source
 			*/
-		public:
-			impl() { Clear(); }
+			LightSourceProfile();
 
 			void Clear();
 
@@ -101,9 +99,9 @@ namespace EQEmu
 			} Level;
 		};
 
-		static uint8 TypeToLevel(uint8 light_type);
-		static bool IsLevelGreater(uint8 left_type, uint8 right_type);
+		uint8 TypeToLevel(uint8 light_type);
+		bool IsLevelGreater(uint8 left_type, uint8 right_type);
 	};
 }
 
-#endif /* LIGHT_SOURCE_H */
+#endif /* COMMON_LIGHT_SOURCE_H */

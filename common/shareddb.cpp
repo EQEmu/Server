@@ -105,7 +105,7 @@ bool SharedDatabase::SaveCursor(uint32 char_id, std::list<ItemInst*>::const_iter
                                     "AND ((slotid >= 8000 AND slotid <= 8999) "
                                     "OR slotid = %i OR (slotid >= %i AND slotid <= %i) )",
                                     char_id, SlotCursor,
-									EQEmu::Constants::CURSOR_BAG_BEGIN, EQEmu::Constants::CURSOR_BAG_END);
+									EQEmu::constants::CURSOR_BAG_BEGIN, EQEmu::constants::CURSOR_BAG_END);
     auto results = QueryDatabase(query);
     if (!results.Success()) {
         std::cout << "Clearing cursor failed: " << results.ErrorMessage() << std::endl;
@@ -161,10 +161,10 @@ bool SharedDatabase::VerifyInventory(uint32 account_id, int16 slot_id, const Ite
 bool SharedDatabase::SaveInventory(uint32 char_id, const ItemInst* inst, int16 slot_id) {
 
 	//never save tribute slots:
-	if (slot_id >= EQEmu::Constants::TRIBUTE_BEGIN && slot_id <= EQEmu::Constants::TRIBUTE_END)
+	if (slot_id >= EQEmu::constants::TRIBUTE_BEGIN && slot_id <= EQEmu::constants::TRIBUTE_END)
 		return true;
 
-	if (slot_id >= EQEmu::Constants::SHARED_BANK_BEGIN && slot_id <= EQEmu::Constants::SHARED_BANK_BAGS_END) {
+	if (slot_id >= EQEmu::constants::SHARED_BANK_BEGIN && slot_id <= EQEmu::constants::SHARED_BANK_BAGS_END) {
         // Shared bank inventory
 		if (!inst) {
 			return DeleteSharedBankSlot(char_id, slot_id);
@@ -191,9 +191,9 @@ bool SharedDatabase::SaveInventory(uint32 char_id, const ItemInst* inst, int16 s
 bool SharedDatabase::UpdateInventorySlot(uint32 char_id, const ItemInst* inst, int16 slot_id) {
 	// need to check 'inst' argument for valid pointer
 
-	uint32 augslot[EQEmu::Constants::ITEM_COMMON_SIZE] = { NO_ITEM, NO_ITEM, NO_ITEM, NO_ITEM, NO_ITEM, NO_ITEM };
+	uint32 augslot[EQEmu::constants::ITEM_COMMON_SIZE] = { NO_ITEM, NO_ITEM, NO_ITEM, NO_ITEM, NO_ITEM, NO_ITEM };
 	if (inst->IsType(ItemClassCommon)) {
-		for (int i = AUG_BEGIN; i < EQEmu::Constants::ITEM_COMMON_SIZE; i++) {
+		for (int i = AUG_INDEX_BEGIN; i < EQEmu::constants::ITEM_COMMON_SIZE; i++) {
 			ItemInst *auginst = inst->GetItem(i);
 			augslot[i] = (auginst && auginst->GetItem()) ? auginst->GetItem()->ID : NO_ITEM;
 		}
@@ -223,7 +223,7 @@ bool SharedDatabase::UpdateInventorySlot(uint32 char_id, const ItemInst* inst, i
 	if (inst->IsType(ItemClassContainer) && Inventory::SupportsContainers(slot_id))
 		// Limiting to bag slot count will get rid of 'hidden' duplicated items and 'Invalid Slot ID'
 		// messages through attrition (and the modded code in SaveInventory)
-		for (uint8 idx = SUB_BEGIN; idx < inst->GetItem()->BagSlots && idx < EQEmu::Constants::ITEM_CONTAINER_SIZE; idx++) {
+		for (uint8 idx = SUB_INDEX_BEGIN; idx < inst->GetItem()->BagSlots && idx < EQEmu::constants::ITEM_CONTAINER_SIZE; idx++) {
 			const ItemInst* baginst = inst->GetItem(idx);
 			SaveInventory(char_id, baginst, Inventory::CalcSlotId(slot_id, idx));
 		}
@@ -238,9 +238,9 @@ bool SharedDatabase::UpdateInventorySlot(uint32 char_id, const ItemInst* inst, i
 bool SharedDatabase::UpdateSharedBankSlot(uint32 char_id, const ItemInst* inst, int16 slot_id) {
 	// need to check 'inst' argument for valid pointer
 
-	uint32 augslot[EQEmu::Constants::ITEM_COMMON_SIZE] = { NO_ITEM, NO_ITEM, NO_ITEM, NO_ITEM, NO_ITEM, NO_ITEM };
+	uint32 augslot[EQEmu::constants::ITEM_COMMON_SIZE] = { NO_ITEM, NO_ITEM, NO_ITEM, NO_ITEM, NO_ITEM, NO_ITEM };
 	if (inst->IsType(ItemClassCommon)) {
-		for (int i = AUG_BEGIN; i < EQEmu::Constants::ITEM_COMMON_SIZE; i++) {
+		for (int i = AUG_INDEX_BEGIN; i < EQEmu::constants::ITEM_COMMON_SIZE; i++) {
 			ItemInst *auginst = inst->GetItem(i);
 			augslot[i] = (auginst && auginst->GetItem()) ? auginst->GetItem()->ID : NO_ITEM;
 		}
@@ -269,7 +269,7 @@ bool SharedDatabase::UpdateSharedBankSlot(uint32 char_id, const ItemInst* inst, 
 	if (inst->IsType(ItemClassContainer) && Inventory::SupportsContainers(slot_id)) {
 		// Limiting to bag slot count will get rid of 'hidden' duplicated items and 'Invalid Slot ID'
 		// messages through attrition (and the modded code in SaveInventory)
-		for (uint8 idx = SUB_BEGIN; idx < inst->GetItem()->BagSlots && idx < EQEmu::Constants::ITEM_CONTAINER_SIZE; idx++) {
+		for (uint8 idx = SUB_INDEX_BEGIN; idx < inst->GetItem()->BagSlots && idx < EQEmu::constants::ITEM_CONTAINER_SIZE; idx++) {
 			const ItemInst* baginst = inst->GetItem(idx);
 			SaveInventory(char_id, baginst, Inventory::CalcSlotId(slot_id, idx));
 		}
@@ -295,7 +295,7 @@ bool SharedDatabase::DeleteInventorySlot(uint32 char_id, int16 slot_id) {
     if (!Inventory::SupportsContainers(slot_id))
         return true;
 
-    int16 base_slot_id = Inventory::CalcSlotId(slot_id, SUB_BEGIN);
+	int16 base_slot_id = Inventory::CalcSlotId(slot_id, SUB_INDEX_BEGIN);
     query = StringFormat("DELETE FROM inventory WHERE charid = %i AND slotid >= %i AND slotid < %i",
                         char_id, base_slot_id, (base_slot_id+10));
     results = QueryDatabase(query);
@@ -321,7 +321,7 @@ bool SharedDatabase::DeleteSharedBankSlot(uint32 char_id, int16 slot_id) {
 	if (!Inventory::SupportsContainers(slot_id))
         return true;
 
-    int16 base_slot_id = Inventory::CalcSlotId(slot_id, SUB_BEGIN);
+	int16 base_slot_id = Inventory::CalcSlotId(slot_id, SUB_INDEX_BEGIN);
     query = StringFormat("DELETE FROM sharedbank WHERE acctid = %i "
                         "AND slotid >= %i AND slotid < %i",
                         account_id, base_slot_id, (base_slot_id+10));
@@ -427,7 +427,7 @@ bool SharedDatabase::GetSharedBank(uint32 id, Inventory *inv, bool is_charid)
 		uint32 item_id = (uint32)atoi(row[1]);
 		int8 charges = (int8)atoi(row[2]);
 
-		uint32 aug[EQEmu::Constants::ITEM_COMMON_SIZE];
+		uint32 aug[EQEmu::constants::ITEM_COMMON_SIZE];
 		aug[0] = (uint32)atoi(row[3]);
 		aug[1] = (uint32)atoi(row[4]);
 		aug[2] = (uint32)atoi(row[5]);
@@ -448,7 +448,7 @@ bool SharedDatabase::GetSharedBank(uint32 id, Inventory *inv, bool is_charid)
 
 		ItemInst *inst = CreateBaseItem(item, charges);
 		if (inst && item->ItemClass == ItemClassCommon) {
-			for (int i = AUG_BEGIN; i < EQEmu::Constants::ITEM_COMMON_SIZE; i++) {
+			for (int i = AUG_INDEX_BEGIN; i < EQEmu::constants::ITEM_COMMON_SIZE; i++) {
 				if (aug[i])
 					inst->PutAugment(this, i, aug[i]);
 			}
@@ -522,7 +522,7 @@ bool SharedDatabase::GetInventory(uint32 char_id, Inventory *inv)
 		uint16 charges = atoi(row[2]);
 		uint32 color = atoul(row[3]);
 
-		uint32 aug[EQEmu::Constants::ITEM_COMMON_SIZE];
+		uint32 aug[EQEmu::constants::ITEM_COMMON_SIZE];
 
 		aug[0] = (uint32)atoul(row[4]);
 		aug[1] = (uint32)atoul(row[5]);
@@ -584,7 +584,7 @@ bool SharedDatabase::GetInventory(uint32 char_id, Inventory *inv)
 		inst->SetOrnamentHeroModel(ornament_hero_model);
 
 		if (instnodrop ||
-			(((slot_id >= EQEmu::Constants::EQUIPMENT_BEGIN && slot_id <= EQEmu::Constants::EQUIPMENT_END) ||
+			(((slot_id >= EQEmu::constants::EQUIPMENT_BEGIN && slot_id <= EQEmu::constants::EQUIPMENT_END) ||
 		      slot_id == SlotPowerSource) &&
 		     inst->GetItem()->Attuneable))
 			inst->SetAttuned(true);
@@ -608,7 +608,7 @@ bool SharedDatabase::GetInventory(uint32 char_id, Inventory *inv)
 		}
 
 		if (item->ItemClass == ItemClassCommon) {
-			for (int i = AUG_BEGIN; i < EQEmu::Constants::ITEM_COMMON_SIZE; i++) {
+			for (int i = AUG_INDEX_BEGIN; i < EQEmu::constants::ITEM_COMMON_SIZE; i++) {
 				if (aug[i])
 					inst->PutAugment(this, i, aug[i]);
 			}
@@ -665,7 +665,7 @@ bool SharedDatabase::GetInventory(uint32 account_id, char *name, Inventory *inv)
 		int8 charges = atoi(row[2]);
 		uint32 color = atoul(row[3]);
 
-		uint32 aug[EQEmu::Constants::ITEM_COMMON_SIZE];
+		uint32 aug[EQEmu::constants::ITEM_COMMON_SIZE];
 		aug[0] = (uint32)atoi(row[4]);
 		aug[1] = (uint32)atoi(row[5]);
 		aug[2] = (uint32)atoi(row[6]);
@@ -726,7 +726,7 @@ bool SharedDatabase::GetInventory(uint32 account_id, char *name, Inventory *inv)
 		inst->SetCharges(charges);
 
 		if (item->ItemClass == ItemClassCommon) {
-			for (int i = AUG_BEGIN; i < EQEmu::Constants::ITEM_COMMON_SIZE; i++) {
+			for (int i = AUG_INDEX_BEGIN; i < EQEmu::constants::ITEM_COMMON_SIZE; i++) {
 				if (aug[i])
 					inst->PutAugment(this, i, aug[i]);
 			}

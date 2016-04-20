@@ -529,8 +529,8 @@ void NPC::QueryLoot(Client* to)
 			continue;
 		}
 
-		EQEmu::SayLink::impl linker;
-		linker.SetLinkType(EQEmu::SayLink::LinkItemData);
+		EQEmu::saylink::SayLinkEngine linker;
+		linker.SetLinkType(linker.SayLinkItemData);
 		linker.SetItemData(item);
 
 		auto item_link = linker.GenerateLink();
@@ -748,15 +748,15 @@ void NPC::UpdateEquipmentLight()
 	m_Light.Type.Equipment = 0;
 	m_Light.Level.Equipment = 0;
 
-	for (int index = SLOT_BEGIN; index < EQEmu::Constants::EQUIPMENT_SIZE; ++index) {
+	for (int index = SLOT_BEGIN; index < EQEmu::constants::EQUIPMENT_SIZE; ++index) {
 		if (index == SlotAmmo) { continue; }
 
 		auto item = database.GetItem(equipment[index]);
 		if (item == nullptr) { continue; }
 
-		if (EQEmu::LightSource::IsLevelGreater(item->Light, m_Light.Type.Equipment)) {
+		if (EQEmu::lightsource::IsLevelGreater(item->Light, m_Light.Type.Equipment)) {
 			m_Light.Type.Equipment = item->Light;
-			m_Light.Level.Equipment = EQEmu::LightSource::TypeToLevel(m_Light.Type.Equipment);
+			m_Light.Level.Equipment = EQEmu::lightsource::TypeToLevel(m_Light.Type.Equipment);
 		}
 	}
 
@@ -768,14 +768,14 @@ void NPC::UpdateEquipmentLight()
 		if (item->ItemClass != ItemClassCommon) { continue; }
 		if (item->Light < 9 || item->Light > 13) { continue; }
 
-		if (EQEmu::LightSource::TypeToLevel(item->Light))
+		if (EQEmu::lightsource::TypeToLevel(item->Light))
 			general_light_type = item->Light;
 	}
 
-	if (EQEmu::LightSource::IsLevelGreater(general_light_type, m_Light.Type.Equipment))
+	if (EQEmu::lightsource::IsLevelGreater(general_light_type, m_Light.Type.Equipment))
 		m_Light.Type.Equipment = general_light_type;
 
-	m_Light.Level.Equipment = EQEmu::LightSource::TypeToLevel(m_Light.Type.Equipment);
+	m_Light.Level.Equipment = EQEmu::lightsource::TypeToLevel(m_Light.Type.Equipment);
 }
 
 void NPC::Depop(bool StartSpawnTimer) {
@@ -1961,7 +1961,7 @@ void NPC::ModifyNPCStat(const char *identifier, const char *newValue)
 	else if(id == "cr") { CR = atoi(val.c_str()); return; }
 	else if(id == "pr") { PR = atoi(val.c_str()); return; }
 	else if(id == "dr") { DR = atoi(val.c_str()); return; }
-	else if(id == "PhR") { PhR = atoi(val.c_str()); return; }
+	else if(id == "phr") { PhR = atoi(val.c_str()); return; }
 	else if(id == "runspeed") {
 		runspeed = (float)atof(val.c_str());
 		base_runspeed = (int)((float)runspeed * 40.0f);

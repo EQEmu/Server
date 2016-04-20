@@ -2552,7 +2552,7 @@ int16 Merc::GetFocusEffect(focusType type, uint16 spell_id) {
 		int16 focus_max_real = 0;
 
 		//item focus
-		for (int x = 0; x < EQEmu::Constants::EQUIPMENT_SIZE; ++x)
+		for (int x = 0; x < EQEmu::constants::EQUIPMENT_SIZE; ++x)
 		{
 			TempItem = nullptr;
 			if (equipment[x] == 0)
@@ -5026,7 +5026,7 @@ void Merc::UpdateMercAppearance() {
 	// Copied from Bot Code:
 	uint32 itemID = NO_ITEM;
 	uint8 materialFromSlot = MaterialInvalid;
-	for (int i = EQEmu::Constants::EQUIPMENT_BEGIN; i <= EQEmu::Constants::EQUIPMENT_END; ++i) {
+	for (int i = EQEmu::constants::EQUIPMENT_BEGIN; i <= EQEmu::constants::EQUIPMENT_END; ++i) {
 		itemID = equipment[i];
 		if(itemID != NO_ITEM) {
 			materialFromSlot = Inventory::CalcMaterialFromSlot(i);
@@ -5044,15 +5044,15 @@ void Merc::UpdateEquipmentLight()
 	m_Light.Type.Equipment = 0;
 	m_Light.Level.Equipment = 0;
 
-	for (int index = SLOT_BEGIN; index < EQEmu::Constants::EQUIPMENT_SIZE; ++index) {
+	for (int index = SLOT_BEGIN; index < EQEmu::constants::EQUIPMENT_SIZE; ++index) {
 		if (index == SlotAmmo) { continue; }
 
 		auto item = database.GetItem(equipment[index]);
 		if (item == nullptr) { continue; }
 
-		if (EQEmu::LightSource::IsLevelGreater(item->Light, m_Light.Type.Equipment)) {
+		if (EQEmu::lightsource::IsLevelGreater(item->Light, m_Light.Type.Equipment)) {
 			m_Light.Type.Equipment = item->Light;
-			m_Light.Level.Equipment = EQEmu::LightSource::TypeToLevel(m_Light.Type.Equipment);
+			m_Light.Level.Equipment = EQEmu::lightsource::TypeToLevel(m_Light.Type.Equipment);
 		}
 	}
 
@@ -5064,14 +5064,14 @@ void Merc::UpdateEquipmentLight()
 		if (item->ItemClass != ItemClassCommon) { continue; }
 		if (item->Light < 9 || item->Light > 13) { continue; }
 
-		if (EQEmu::LightSource::TypeToLevel(item->Light))
+		if (EQEmu::lightsource::TypeToLevel(item->Light))
 			general_light_type = item->Light;
 	}
 
-	if (EQEmu::LightSource::IsLevelGreater(general_light_type, m_Light.Type.Equipment))
+	if (EQEmu::lightsource::IsLevelGreater(general_light_type, m_Light.Type.Equipment))
 		m_Light.Type.Equipment = general_light_type;
 
-	m_Light.Level.Equipment = EQEmu::LightSource::TypeToLevel(m_Light.Type.Equipment);
+	m_Light.Level.Equipment = EQEmu::lightsource::TypeToLevel(m_Light.Type.Equipment);
 }
 
 void Merc::AddItem(uint8 slot, uint32 item_id) {

@@ -1429,7 +1429,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 					}
 				}
 
-				for (int x = EQEmu::Constants::MATERIAL_BEGIN; x <= EQEmu::Constants::MATERIAL_TINT_END; x++)
+				for (int x = EQEmu::constants::MATERIAL_BEGIN; x <= EQEmu::constants::MATERIAL_TINT_END; x++)
 					SendWearChange(x);
 
 				if (caster == this &&
@@ -1455,7 +1455,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 						);
 						caster->SendAppearancePacket(AT_Size, static_cast<uint32>(caster->GetTarget()->GetSize()));
 
-						for (int x = EQEmu::Constants::MATERIAL_BEGIN; x <= EQEmu::Constants::MATERIAL_TINT_END; x++)
+						for (int x = EQEmu::constants::MATERIAL_BEGIN; x <= EQEmu::constants::MATERIAL_TINT_END; x++)
 							caster->SendWearChange(x);
 				}
 			}
@@ -3809,7 +3809,7 @@ void Mob::BuffFadeBySlot(int slot, bool iRecalcBonuses)
 				else{
 					SendAppearancePacket(AT_Size, 6);
 				}
-				for (int x = EQEmu::Constants::MATERIAL_BEGIN; x <= EQEmu::Constants::MATERIAL_TINT_END; x++){
+				for (int x = EQEmu::constants::MATERIAL_BEGIN; x <= EQEmu::constants::MATERIAL_TINT_END; x++){
 					SendWearChange(x);
 				}
 				break;
@@ -5126,7 +5126,7 @@ uint16 Client::GetSympatheticFocusEffect(focusType type, uint16 spell_id) {
 
 		const Item_Struct* TempItem = 0;
 
-		for (int x = EQEmu::Constants::EQUIPMENT_BEGIN; x <= EQEmu::Constants::EQUIPMENT_END; x++)
+		for (int x = EQEmu::constants::EQUIPMENT_BEGIN; x <= EQEmu::constants::EQUIPMENT_END; x++)
 		{
 			if (SympatheticProcList.size() > MAX_SYMPATHETIC_PROCS)
 				continue;
@@ -5146,7 +5146,7 @@ uint16 Client::GetSympatheticFocusEffect(focusType type, uint16 spell_id) {
 				}
 			}
 
-			for (int y = AUG_BEGIN; y < EQEmu::Constants::ITEM_COMMON_SIZE; ++y)
+			for (int y = AUG_INDEX_BEGIN; y < EQEmu::constants::ITEM_COMMON_SIZE; ++y)
 			{
 				if (SympatheticProcList.size() > MAX_SYMPATHETIC_PROCS)
 					continue;
@@ -5261,7 +5261,7 @@ int16 Client::GetFocusEffect(focusType type, uint16 spell_id)
 		int16 focus_max_real = 0;
 
 		//item focus
-		for (int x = EQEmu::Constants::EQUIPMENT_BEGIN; x <= EQEmu::Constants::EQUIPMENT_END; x++)
+		for (int x = EQEmu::constants::EQUIPMENT_BEGIN; x <= EQEmu::constants::EQUIPMENT_END; x++)
 		{
 			TempItem = nullptr;
 			ItemInst* ins = GetInv().GetItem(x);
@@ -5295,7 +5295,7 @@ int16 Client::GetFocusEffect(focusType type, uint16 spell_id)
 				}
 			}
 
-			for (int y = AUG_BEGIN; y < EQEmu::Constants::ITEM_COMMON_SIZE; ++y)
+			for (int y = AUG_INDEX_BEGIN; y < EQEmu::constants::ITEM_COMMON_SIZE; ++y)
 			{
 				ItemInst *aug = nullptr;
 				aug = ins->GetAugment(y);
@@ -5333,7 +5333,7 @@ int16 Client::GetFocusEffect(focusType type, uint16 spell_id)
 		}
 
 		//Tribute Focus
-		for (int x = EQEmu::Constants::TRIBUTE_BEGIN; x <= EQEmu::Constants::TRIBUTE_END; ++x)
+		for (int x = EQEmu::constants::TRIBUTE_BEGIN; x <= EQEmu::constants::TRIBUTE_END; ++x)
 		{
 			TempItem = nullptr;
 			ItemInst* ins = GetInv().GetItem(x);
@@ -5533,7 +5533,7 @@ int16 NPC::GetFocusEffect(focusType type, uint16 spell_id) {
 		int16 focus_max_real = 0;
 
 		//item focus
-		for (int i = 0; i < EQEmu::Constants::EQUIPMENT_SIZE; i++){
+		for (int i = 0; i < EQEmu::constants::EQUIPMENT_SIZE; i++){
 			const Item_Struct *cur = database.GetItem(equipment[i]);
 
 			if(!cur)

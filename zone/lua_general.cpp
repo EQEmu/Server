@@ -1794,13 +1794,13 @@ luabind::scope lua_register_slot() {
 			luabind::value("General7", static_cast<int>(SlotGeneral7)),
 			luabind::value("General8", static_cast<int>(SlotGeneral8)),
 			luabind::value("Cursor", static_cast<int>(SlotCursor)),
-			luabind::value("PersonalBegin", static_cast<int>(EQEmu::Constants::GENERAL_BEGIN)), // deprecated
-			luabind::value("GeneralBegin", static_cast<int>(EQEmu::Constants::GENERAL_BEGIN)),
-			luabind::value("PersonalEnd", static_cast<int>(EQEmu::Constants::GENERAL_END)), // deprecated
-			luabind::value("GeneralEnd", static_cast<int>(EQEmu::Constants::GENERAL_END)),
+			luabind::value("PersonalBegin", static_cast<int>(EQEmu::constants::GENERAL_BEGIN)), // deprecated
+			luabind::value("GeneralBegin", static_cast<int>(EQEmu::constants::GENERAL_BEGIN)),
+			luabind::value("PersonalEnd", static_cast<int>(EQEmu::constants::GENERAL_END)), // deprecated
+			luabind::value("GeneralEnd", static_cast<int>(EQEmu::constants::GENERAL_END)),
 			luabind::value("CursorEnd", 0xFFFE), // deprecated
-			luabind::value("Tradeskill", static_cast<int>(EQEmu::Legacy::SLOT_TRADESKILL)), // deprecated
-			luabind::value("Augment", static_cast<int>(EQEmu::Legacy::SLOT_AUGMENT)), // deprecated
+			luabind::value("Tradeskill", static_cast<int>(EQEmu::legacy::SLOT_TRADESKILL)), // deprecated
+			luabind::value("Augment", static_cast<int>(EQEmu::legacy::SLOT_AUGMENT)), // deprecated
 			luabind::value("Invalid", INVALID_INDEX)
 		];
 }

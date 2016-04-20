@@ -288,7 +288,7 @@ protected:
 	std::map<uint32,MercTimer> timers;
 
 	uint16 skills[HIGHEST_SKILL+1];
-	uint32 equipment[EQEmu::Constants::EQUIPMENT_SIZE]; //this is an array of item IDs
+	uint32 equipment[EQEmu::constants::EQUIPMENT_SIZE]; //this is an array of item IDs
 	uint16 d_melee_texture1; //this is an item Material value
 	uint16 d_melee_texture2; //this is an item Material value (offhand)
 	uint8 prim_melee_type; //Sets the Primary Weapon attack message and animation

@@ -742,7 +742,7 @@ void Client::BulkSendInventoryItems() {
 
 	// LINKDEAD TRADE ITEMS
 	// Move trade slot items back into normal inventory..need them there now for the proceeding validity checks
-	for(slot_id = EQEmu::Constants::TRADE_BEGIN; slot_id <= EQEmu::Constants::TRADE_END; slot_id++) {
+	for(slot_id = EQEmu::constants::TRADE_BEGIN; slot_id <= EQEmu::constants::TRADE_END; slot_id++) {
 		ItemInst* inst = m_inv.PopItem(slot_id);
 		if(inst) {
 			bool is_arrow = (inst->GetItem()->ItemType == ItemTypeArrow) ? true : false;
@@ -790,7 +790,7 @@ void Client::BulkSendInventoryItems() {
 	std::map<uint16, std::string>::iterator itr;
 
 	//Inventory items
-	for(slot_id = SLOT_BEGIN; slot_id < EQEmu::Constants::TYPE_POSSESSIONS_SIZE; slot_id++) {
+	for(slot_id = SLOT_BEGIN; slot_id < EQEmu::constants::TYPE_POSSESSIONS_SIZE; slot_id++) {
 		const ItemInst* inst = m_inv[slot_id];
 		if(inst) {
 			std::string packet = inst->Serialize(slot_id);
@@ -810,7 +810,7 @@ void Client::BulkSendInventoryItems() {
 	}
 
 	// Bank items
-	for(slot_id = EQEmu::Constants::BANK_BEGIN; slot_id <= EQEmu::Constants::BANK_END; slot_id++) {
+	for(slot_id = EQEmu::constants::BANK_BEGIN; slot_id <= EQEmu::constants::BANK_END; slot_id++) {
 		const ItemInst* inst = m_inv[slot_id];
 		if(inst) {
 			std::string packet = inst->Serialize(slot_id);
@@ -820,7 +820,7 @@ void Client::BulkSendInventoryItems() {
 	}
 
 	// Shared Bank items
-	for(slot_id = EQEmu::Constants::SHARED_BANK_BEGIN; slot_id <= EQEmu::Constants::SHARED_BANK_END; slot_id++) {
+	for(slot_id = EQEmu::constants::SHARED_BANK_BEGIN; slot_id <= EQEmu::constants::SHARED_BANK_END; slot_id++) {
 		const ItemInst* inst = m_inv[slot_id];
 		if(inst) {
 			std::string packet = inst->Serialize(slot_id);
@@ -851,14 +851,14 @@ void Client::BulkSendInventoryItems()
 	if(deletenorent){//client was offline for more than 30 minutes, delete no rent items
 		RemoveNoRent();
 	}
-	for (slot_id=EQEmu::Constants::POSSESSIONS_BEGIN; slot_id<=EQEmu::Constants::POSSESSIONS_END; slot_id++) {
+	for (slot_id=EQEmu::constants::POSSESSIONS_BEGIN; slot_id<=EQEmu::constants::POSSESSIONS_END; slot_id++) {
 		const ItemInst* inst = m_inv[slot_id];
 		if (inst){
 			SendItemPacket(slot_id, inst, ItemPacketCharInventory);
 		}
 	}
 	// Bank items
-	for (slot_id=EQEmu::Constants::BANK_BEGIN; slot_id<=EQEmu::Constants::BANK_END; slot_id++) { // 2015...
+	for (slot_id=EQEmu::constants::BANK_BEGIN; slot_id<=EQEmu::constants::BANK_END; slot_id++) { // 2015...
 		const ItemInst* inst = m_inv[slot_id];
 		if (inst){
 			SendItemPacket(slot_id, inst, ItemPacketCharInventory);
@@ -866,7 +866,7 @@ void Client::BulkSendInventoryItems()
 	}
 
 	// Shared Bank items
-	for (slot_id=EQEmu::Constants::SHARED_BANK_BEGIN; slot_id<=EQEmu::Constants::SHARED_BANK_END; slot_id++) {
+	for (slot_id=EQEmu::constants::SHARED_BANK_BEGIN; slot_id<=EQEmu::constants::SHARED_BANK_END; slot_id++) {
 		const ItemInst* inst = m_inv[slot_id];
 		if (inst){
 			SendItemPacket(slot_id, inst, ItemPacketCharInventory);
@@ -876,7 +876,7 @@ void Client::BulkSendInventoryItems()
 	// LINKDEAD TRADE ITEMS
 	// If player went LD during a trade, they have items in the trade inventory
 	// slots. These items are now being put into their inventory (then queue up on cursor)
-	for (int16 trade_slot_id=EQEmu::Constants::TRADE_BEGIN; trade_slot_id<=EQEmu::Constants::TRADE_END; trade_slot_id++) {
+	for (int16 trade_slot_id=EQEmu::constants::TRADE_BEGIN; trade_slot_id<=EQEmu::constants::TRADE_END; trade_slot_id++) {
 		const ItemInst* inst = m_inv[slot_id];
 		if (inst) {
 			int16 free_slot_id = m_inv.FindFreeSlot(inst->IsType(ItemClassContainer), true, inst->GetItem()->Size);

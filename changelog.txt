@@ -1,5 +1,9 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 04/19/2016 ==
+Uleat: Changed the recent EQEmu rework to eliminate the nested class design (possible cause of VS2015 update crashes - unverified)
+Uleat: Some more inv2 convergence work
+
 == 04/15/2016 ==
 Uleat: Reworked EQDictionary into namespace EQEmu
 

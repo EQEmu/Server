@@ -69,7 +69,7 @@ void Object::HandleAugmentation(Client* user, const AugmentItem_Struct* in_augme
 
 				// Verify that no more than two items are in container to guarantee no inadvertant wipes.
 				uint8 itemsFound = 0;
-				for (uint8 i = SLOT_BEGIN; i < EQEmu::Constants::TYPE_WORLD_SIZE; i++)
+				for (uint8 i = SLOT_BEGIN; i < EQEmu::constants::TYPE_WORLD_SIZE; i++)
 				{
 					const ItemInst* inst = container->GetItem(i);
 					if (inst)
@@ -222,7 +222,7 @@ void Object::HandleAugmentation(Client* user, const AugmentItem_Struct* in_augme
 		else
 		{
 			// Delete items in our inventory container...
-			for (uint8 i = SLOT_BEGIN; i < EQEmu::Constants::TYPE_WORLD_SIZE; i++)
+			for (uint8 i = SLOT_BEGIN; i < EQEmu::constants::TYPE_WORLD_SIZE; i++)
 			{
 				const ItemInst* inst = container->GetItem(i);
 				if (inst)
@@ -264,7 +264,7 @@ void Object::HandleCombine(Client* user, const NewCombine_Struct* in_combine, Ob
 	uint32 some_id = 0;
 	bool worldcontainer=false;
 
-	if (in_combine->container_slot == EQEmu::Legacy::SLOT_TRADESKILL) {
+	if (in_combine->container_slot == EQEmu::legacy::SLOT_TRADESKILL) {
 		if(!worldo) {
 			user->Message(13, "Error: Server is not aware of the tradeskill container you are attempting to use");
 			return;
@@ -401,7 +401,7 @@ void Object::HandleCombine(Client* user, const NewCombine_Struct* in_combine, Ob
 		safe_delete(outapp);
 		database.DeleteWorldContainer(worldo->m_id, zone->GetZoneID());
 	} else{
-		for (uint8 i = SLOT_BEGIN; i < EQEmu::Constants::TYPE_WORLD_SIZE; i++) {
+		for (uint8 i = SLOT_BEGIN; i < EQEmu::constants::TYPE_WORLD_SIZE; i++) {
 			const ItemInst* inst = container->GetItem(i);
 			if (inst) {
 				user->DeleteItemInInventory(Inventory::CalcSlotId(in_combine->container_slot,i),0,true);
@@ -1227,7 +1227,7 @@ bool ZoneDatabase::GetTradeRecipe(const ItemInst* container, uint8 c_type, uint3
 	for (auto row = results.begin(); row != results.end(); ++row) {
         int ccnt = 0;
 
-		for (int x = SLOT_BEGIN; x < EQEmu::Constants::TYPE_WORLD_SIZE; x++) {
+		for (int x = SLOT_BEGIN; x < EQEmu::constants::TYPE_WORLD_SIZE; x++) {
             const ItemInst* inst = container->GetItem(x);
             if(!inst)
                 continue;

@@ -1206,7 +1206,7 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, uint16 slot,
 			if (inst == nullptr)
 				break;
 
-			for (int r = AUG_BEGIN; r < EQEmu::Constants::ITEM_COMMON_SIZE; r++) {
+			for (int r = AUG_INDEX_BEGIN; r < EQEmu::constants::ITEM_COMMON_SIZE; r++) {
 				const ItemInst* aug_i = inst->GetAugment(r);
 
 				if (!aug_i)

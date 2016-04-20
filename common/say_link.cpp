@@ -25,7 +25,12 @@
 #include "../zone/zonedb.h"
 
 
-std::string EQEmu::SayLink::impl::GenerateLink()
+EQEmu::saylink::SayLinkEngine::SayLinkEngine()
+{
+	Reset();
+}
+
+std::string EQEmu::saylink::SayLinkEngine::GenerateLink()
 {
 	m_Link.clear();
 	m_LinkBody.clear();
@@ -34,7 +39,7 @@ std::string EQEmu::SayLink::impl::GenerateLink()
 	generate_body();
 	generate_text();
 
-	if ((m_LinkBody.length() == EQEmu::Constants::TEXT_LINK_BODY_LENGTH) && (m_LinkText.length() > 0)) {
+	if ((m_LinkBody.length() == EQEmu::constants::TEXT_LINK_BODY_LENGTH) && (m_LinkText.length() > 0)) {
 		m_Link.push_back(0x12);
 		m_Link.append(m_LinkBody);
 		m_Link.append(m_LinkText);
@@ -53,9 +58,9 @@ std::string EQEmu::SayLink::impl::GenerateLink()
 	return m_Link;
 }
 
-void EQEmu::SayLink::impl::Reset()
+void EQEmu::saylink::SayLinkEngine::Reset()
 {
-	m_LinkType = LinkBlank;
+	m_LinkType = SayLinkBlank;
 	m_ItemData = nullptr;
 	m_LootData = nullptr;
 	m_ItemInst = nullptr;
@@ -80,7 +85,7 @@ void EQEmu::SayLink::impl::Reset()
 	m_Error = false;
 }
 
-void EQEmu::SayLink::impl::generate_body()
+void EQEmu::saylink::SayLinkEngine::generate_body()
 {
 	/*
 	Current server mask: EQClientRoF2
@@ -96,16 +101,16 @@ void EQEmu::SayLink::impl::generate_body()
 	const Item_Struct* item_data = nullptr;
 
 	switch (m_LinkType) {
-	case LinkBlank:
+	case SayLinkBlank:
 		break;
-	case LinkItemData:
+	case SayLinkItemData:
 		if (m_ItemData == nullptr) { break; }
 		m_LinkBodyStruct.item_id = m_ItemData->ID;
 		m_LinkBodyStruct.evolve_group = m_ItemData->LoreGroup; // this probably won't work for all items
 		//m_LinkBodyStruct.evolve_level = m_ItemData->EvolvingLevel;
 		// TODO: add hash call
 		break;
-	case LinkLootItem:
+	case SayLinkLootItem:
 		if (m_LootData == nullptr) { break; }
 		item_data = database.GetItem(m_LootData->item_id);
 		if (item_data == nullptr) { break; }
@@ -120,7 +125,7 @@ void EQEmu::SayLink::impl::generate_body()
 		//m_LinkBodyStruct.evolve_level = item_data->EvolvingLevel;
 		// TODO: add hash call
 		break;
-	case LinkItemInst:
+	case SayLinkItemInst:
 		if (m_ItemInst == nullptr) { break; }
 		if (m_ItemInst->GetItem() == nullptr) { break; }
 		m_LinkBodyStruct.item_id = m_ItemInst->GetItem()->ID;
@@ -189,7 +194,7 @@ void EQEmu::SayLink::impl::generate_body()
 	);
 }
 
-void EQEmu::SayLink::impl::generate_text()
+void EQEmu::saylink::SayLinkEngine::generate_text()
 {
 	if (m_ProxyText != nullptr) {
 		m_LinkText = m_ProxyText;
@@ -199,19 +204,19 @@ void EQEmu::SayLink::impl::generate_text()
 	const Item_Struct* item_data = nullptr;
 
 	switch (m_LinkType) {
-	case LinkBlank:
+	case SayLinkBlank:
 		break;
-	case LinkItemData:
+	case SayLinkItemData:
 		if (m_ItemData == nullptr) { break; }
 		m_LinkText = m_ItemData->Name;
 		return;
-	case LinkLootItem:
+	case SayLinkLootItem:
 		if (m_LootData == nullptr) { break; }
 		item_data = database.GetItem(m_LootData->item_id);
 		if (item_data == nullptr) { break; }
 		m_LinkText = item_data->Name;
 		return;
-	case LinkItemInst:
+	case SayLinkItemInst:
 		if (m_ItemInst == nullptr) { break; }
 		if (m_ItemInst->GetItem() == nullptr) { break; }
 		m_LinkText = m_ItemInst->GetItem()->Name;
@@ -223,10 +228,10 @@ void EQEmu::SayLink::impl::generate_text()
 	m_LinkText = "null";
 }
 
-bool EQEmu::SayLink::DegenerateLinkBody(SayLinkBody_Struct& say_link_body_struct, const std::string& say_link_body)
+bool EQEmu::saylink::DegenerateLinkBody(SayLinkBody_Struct& say_link_body_struct, const std::string& say_link_body)
 {
 	memset(&say_link_body_struct, 0, sizeof(say_link_body_struct));
-	if (say_link_body.length() != EQEmu::Constants::TEXT_LINK_BODY_LENGTH)
+	if (say_link_body.length() != EQEmu::constants::TEXT_LINK_BODY_LENGTH)
 		return false;
 
 	say_link_body_struct.unknown_1 = (uint8)strtol(say_link_body.substr(0, 1).c_str(), nullptr, 16);
@@ -246,7 +251,7 @@ bool EQEmu::SayLink::DegenerateLinkBody(SayLinkBody_Struct& say_link_body_struct
 	return true;
 }
 
-bool EQEmu::SayLink::GenerateLinkBody(std::string& say_link_body, const SayLinkBody_Struct& say_link_body_struct)
+bool EQEmu::saylink::GenerateLinkBody(std::string& say_link_body, const SayLinkBody_Struct& say_link_body_struct)
 {
 	say_link_body = StringFormat(
 		"%1X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%1X" "%04X" "%02X" "%05X" "%08X",
@@ -265,7 +270,7 @@ bool EQEmu::SayLink::GenerateLinkBody(std::string& say_link_body, const SayLinkB
 		(0xFFFFFFFF & say_link_body_struct.hash)
 	);
 
-	if (say_link_body.length() != EQEmu::Constants::TEXT_LINK_BODY_LENGTH)
+	if (say_link_body.length() != EQEmu::constants::TEXT_LINK_BODY_LENGTH)
 		return false;
 
 	return true;

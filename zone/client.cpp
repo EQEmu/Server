@@ -5392,7 +5392,7 @@ bool Client::TryReward(uint32 claim_id)
 	// save
 	uint32 free_slot = 0xFFFFFFFF;
 
-	for (int i = EQEmu::Constants::GENERAL_BEGIN; i <= EQEmu::Constants::GENERAL_END; ++i) {
+	for (int i = EQEmu::constants::GENERAL_BEGIN; i <= EQEmu::constants::GENERAL_END; ++i) {
 		ItemInst *item = GetInv().GetItem(i);
 		if (!item) {
 			free_slot = i;
@@ -6307,7 +6307,7 @@ void Client::Doppelganger(uint16 spell_id, Mob *target, const char *name_overrid
 	made_npc->drakkin_details = GetDrakkinDetails();
 	made_npc->d_melee_texture1 = GetEquipmentMaterial(MaterialPrimary);
 	made_npc->d_melee_texture2 = GetEquipmentMaterial(MaterialSecondary);
-	for (int i = EQEmu::Constants::MATERIAL_BEGIN; i <= EQEmu::Constants::MATERIAL_END; i++)	{
+	for (int i = EQEmu::constants::MATERIAL_BEGIN; i <= EQEmu::constants::MATERIAL_END; i++)	{
 		made_npc->armor_tint[i] = GetEquipmentColor(i);
 	}
 	made_npc->loottable_id = 0;
@@ -7583,7 +7583,7 @@ void Client::GarbleMessage(char *message, uint8 variance)
 	for (size_t i = 0; i < strlen(message); i++) {
 		// Client expects hex values inside of a text link body
 		if (message[i] == delimiter) {
-			if (!(delimiter_count & 1)) { i += EQEmu::Constants::TEXT_LINK_BODY_LENGTH; }
+			if (!(delimiter_count & 1)) { i += EQEmu::constants::TEXT_LINK_BODY_LENGTH; }
 			++delimiter_count;
 			continue;
 		}
@@ -8008,17 +8008,17 @@ void Client::TickItemCheck()
 	if(zone->tick_items.empty()) { return; }
 
 	//Scan equip slots for items
-	for (i = EQEmu::Constants::EQUIPMENT_BEGIN; i <= EQEmu::Constants::EQUIPMENT_END; i++)
+	for (i = EQEmu::constants::EQUIPMENT_BEGIN; i <= EQEmu::constants::EQUIPMENT_END; i++)
 	{
 		TryItemTick(i);
 	}
 	//Scan main inventory + cursor
-	for (i = EQEmu::Constants::GENERAL_BEGIN; i <= SlotCursor; i++)
+	for (i = EQEmu::constants::GENERAL_BEGIN; i <= SlotCursor; i++)
 	{
 		TryItemTick(i);
 	}
 	//Scan bags
-	for (i = EQEmu::Constants::GENERAL_BAGS_BEGIN; i <= EQEmu::Constants::CURSOR_BAG_END; i++)
+	for (i = EQEmu::constants::GENERAL_BAGS_BEGIN; i <= EQEmu::constants::CURSOR_BAG_END; i++)
 	{
 		TryItemTick(i);
 	}
@@ -8034,7 +8034,7 @@ void Client::TryItemTick(int slot)
 
 	if(zone->tick_items.count(iid) > 0)
 	{
-		if (GetLevel() >= zone->tick_items[iid].level && zone->random.Int(0, 100) >= (100 - zone->tick_items[iid].chance) && (zone->tick_items[iid].bagslot || slot <= EQEmu::Constants::EQUIPMENT_END))
+		if (GetLevel() >= zone->tick_items[iid].level && zone->random.Int(0, 100) >= (100 - zone->tick_items[iid].chance) && (zone->tick_items[iid].bagslot || slot <= EQEmu::constants::EQUIPMENT_END))
 		{
 			ItemInst* e_inst = (ItemInst*)inst;
 			parse->EventItem(EVENT_ITEM_TICK, this, e_inst, nullptr, "", slot);
@@ -8042,9 +8042,9 @@ void Client::TryItemTick(int slot)
 	}
 
 	//Only look at augs in main inventory
-	if (slot > EQEmu::Constants::EQUIPMENT_END) { return; }
+	if (slot > EQEmu::constants::EQUIPMENT_END) { return; }
 
-	for (int x = AUG_BEGIN; x < EQEmu::Constants::ITEM_COMMON_SIZE; ++x)
+	for (int x = AUG_INDEX_BEGIN; x < EQEmu::constants::ITEM_COMMON_SIZE; ++x)
 	{
 		ItemInst * a_inst = inst->GetAugment(x);
 		if(!a_inst) { continue; }
@@ -8065,17 +8065,17 @@ void Client::TryItemTick(int slot)
 void Client::ItemTimerCheck()
 {
 	int i;
-	for (i = EQEmu::Constants::EQUIPMENT_BEGIN; i <= EQEmu::Constants::EQUIPMENT_END; i++)
+	for (i = EQEmu::constants::EQUIPMENT_BEGIN; i <= EQEmu::constants::EQUIPMENT_END; i++)
 	{
 		TryItemTimer(i);
 	}
 
-	for (i = EQEmu::Constants::GENERAL_BEGIN; i <= SlotCursor; i++)
+	for (i = EQEmu::constants::GENERAL_BEGIN; i <= SlotCursor; i++)
 	{
 		TryItemTimer(i);
 	}
 
-	for (i = EQEmu::Constants::GENERAL_BAGS_BEGIN; i <= EQEmu::Constants::CURSOR_BAG_END; i++)
+	for (i = EQEmu::constants::GENERAL_BAGS_BEGIN; i <= EQEmu::constants::CURSOR_BAG_END; i++)
 	{
 		TryItemTimer(i);
 	}
@@ -8097,11 +8097,11 @@ void Client::TryItemTimer(int slot)
 		++it_iter;
 	}
 
-	if (slot > EQEmu::Constants::EQUIPMENT_END) {
+	if (slot > EQEmu::constants::EQUIPMENT_END) {
 		return;
 	}
 
-	for (int x = AUG_BEGIN; x < EQEmu::Constants::ITEM_COMMON_SIZE; ++x)
+	for (int x = AUG_INDEX_BEGIN; x < EQEmu::constants::ITEM_COMMON_SIZE; ++x)
 	{
 		ItemInst * a_inst = inst->GetAugment(x);
 		if(!a_inst) {
@@ -8389,12 +8389,12 @@ void Client::ShowNumHits()
 int Client::GetQuiverHaste(int delay)
 {
 	const ItemInst *pi = nullptr;
-	for (int r = EQEmu::Constants::GENERAL_BEGIN; r <= EQEmu::Constants::GENERAL_END; r++) {
+	for (int r = EQEmu::constants::GENERAL_BEGIN; r <= EQEmu::constants::GENERAL_END; r++) {
 		pi = GetInv().GetItem(r);
 		if (pi && pi->IsType(ItemClassContainer) && pi->GetItem()->BagType == BagTypeQuiver &&
 		    pi->GetItem()->BagWR > 0)
 			break;
-		if (r == EQEmu::Constants::GENERAL_END)
+		if (r == EQEmu::constants::GENERAL_END)
 			// we will get here if we don't find a valid quiver
 			return 0;
 	}

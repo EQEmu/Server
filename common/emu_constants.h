@@ -17,8 +17,8 @@
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
-#ifndef EMU_CONSTANTS_H
-#define EMU_CONSTANTS_H
+#ifndef COMMON_EMU_CONSTANTS_H
+#define COMMON_EMU_CONSTANTS_H
 
 #include "eq_limits.h"
 // (future use)
@@ -42,8 +42,7 @@
 namespace EQEmu
 {
 	// an immutable value is required to initialize arrays, etc... use this class as a repository for those
-	class Constants {
-	public:
+	namespace constants {
 		// database
 		static const ClientVersion CHARACTER_CREATION_CLIENT = ClientVersion::RoF2; // adjust according to starting item placement and target client
 
@@ -149,7 +148,7 @@ namespace EQEmu
 		static const size_t POTION_BELT_ITEM_COUNT = RoF2::consts::POTION_BELT_ITEM_COUNT;
 
 		static const size_t TEXT_LINK_BODY_LENGTH = RoF2::consts::TEXT_LINK_BODY_LENGTH;
-	};
+	}
 }
 
-#endif /* EMU_CONSTANTS_H */
+#endif /* COMMON_EMU_CONSTANTS_H */

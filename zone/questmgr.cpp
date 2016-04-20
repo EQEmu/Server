@@ -1307,8 +1307,8 @@ void QuestManager::itemlink(int item_id) {
 		if (item == nullptr)
 			return;
 
-		EQEmu::SayLink::impl linker;
-		linker.SetLinkType(EQEmu::SayLink::LinkItemData);
+		EQEmu::saylink::SayLinkEngine linker;
+		linker.SetLinkType(linker.SayLinkItemData);
 		linker.SetItemData(item);
 
 		auto item_link = linker.GenerateLink();
@@ -2441,12 +2441,12 @@ int QuestManager::collectitems(uint32 item_id, bool remove)
 	int quantity = 0;
 	int slot_id;
 
-	for (slot_id = EQEmu::Constants::GENERAL_BEGIN; slot_id <= EQEmu::Constants::GENERAL_END; ++slot_id)
+	for (slot_id = EQEmu::constants::GENERAL_BEGIN; slot_id <= EQEmu::constants::GENERAL_END; ++slot_id)
 	{
 		quantity += collectitems_processSlot(slot_id, item_id, remove);
 	}
 
-	for (slot_id = EQEmu::Constants::GENERAL_BAGS_BEGIN; slot_id <= EQEmu::Constants::GENERAL_BAGS_END; ++slot_id)
+	for (slot_id = EQEmu::constants::GENERAL_BAGS_BEGIN; slot_id <= EQEmu::constants::GENERAL_BAGS_END; ++slot_id)
 	{
 		quantity += collectitems_processSlot(slot_id, item_id, remove);
 	}
@@ -2535,8 +2535,8 @@ const char* QuestManager::varlink(char* perltext, int item_id) {
 	if (!item)
 		return "INVALID ITEM ID IN VARLINK";
 
-	EQEmu::SayLink::impl linker;
-	linker.SetLinkType(EQEmu::SayLink::LinkItemData);
+	EQEmu::saylink::SayLinkEngine linker;
+	linker.SetLinkType(linker.SayLinkItemData);
 	linker.SetItemData(item);
 
 	auto item_link = linker.GenerateLink();
@@ -2761,7 +2761,7 @@ const char* QuestManager::saylink(char* Phrase, bool silent, const char* LinkNam
 	safe_delete_array(escaped_string);
 
 	//Create the say link as an item link hash
-	EQEmu::SayLink::impl linker;
+	EQEmu::saylink::SayLinkEngine linker;
 	linker.SetProxyItemID(SAYLINK_ITEM_ID);
 	if (silent)
 		linker.SetProxyAugment2ID(sayid);
