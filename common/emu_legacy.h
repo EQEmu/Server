@@ -27,7 +27,7 @@ namespace EQEmu
 {
 	// this is for perl and other legacy systems
 	namespace legacy {
-		enum InventorySlot : int16 {
+		enum InventorySlot {
 			SLOT_CHARM = 0,
 			SLOT_EAR01 = 1,
 			SLOT_HEAD = 2,
