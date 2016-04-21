@@ -105,7 +105,7 @@ EQEmu::deity::DeityType EQEmu::deity::ConvertDeityBitToDeity(DeityTypeBit deity_
 	};
 }
 
-const char* EQEmu::deity::GetDeityName(DeityType deity)
+const char* EQEmu::deity::DeityName(DeityType deity)
 {
 	switch (deity) {
 	case DeityBertoxxulous:
