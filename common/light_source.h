@@ -99,8 +99,8 @@ namespace EQEmu
 			} Level;
 		};
 
-		uint8 TypeToLevel(uint8 light_type);
-		bool IsLevelGreater(uint8 left_type, uint8 right_type);
+		extern uint8 TypeToLevel(uint8 light_type);
+		extern bool IsLevelGreater(uint8 left_type, uint8 right_type);
 	};
 }
 
