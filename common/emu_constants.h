@@ -49,12 +49,12 @@ namespace EQEmu
 		static const size_t CHARACTER_CREATION_LIMIT = RoF2::consts::CHARACTER_CREATION_LIMIT;
 
 		// inventory
-		static uint16 InventoryTypeSize(int16 type_index);
-		//static const char* InventoryLocationName(Location_Struct location);
-		static const char* InventoryTypeName(int16 type_index);
-		static const char* InventorySlotName(int16 slot_index);
-		static const char* InventorySubName(int16 sub_index);
-		static const char* InventoryAugName(int16 aug_index);
+		extern uint16 InventoryTypeSize(int16 type_index);
+		//extern const char* InventoryLocationName(Location_Struct location);
+		extern const char* InventoryTypeName(int16 type_index);
+		extern const char* InventorySlotName(int16 slot_index);
+		extern const char* InventorySubName(int16 sub_index);
+		extern const char* InventoryAugName(int16 aug_index);
 
 		// these are currently hard-coded for existing inventory system..do not use in place of special client version handlers until ready
 		static const uint16	TYPE_POSSESSIONS_SIZE = SlotCount;
