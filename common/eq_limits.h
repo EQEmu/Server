@@ -45,36 +45,36 @@ namespace EQEmu
 	namespace limits {
 		// client version validation (checks to avoid crashing zone server when accessing reference arrays)
 		// use this inside of class Client (limits to actual clients)
-		bool IsValidPCClientVersion(ClientVersion clientVersion);
-		ClientVersion ValidatePCClientVersion(ClientVersion clientVersion);
+		extern bool IsValidPCClientVersion(ClientVersion clientVersion);
+		extern ClientVersion ValidatePCClientVersion(ClientVersion clientVersion);
 
 		// basically..any non-client classes - do not invoke when setting a valid client
-		bool IsValidNPCClientVersion(ClientVersion clientVersion);
-		ClientVersion ValidateNPCClientVersion(ClientVersion clientVersion);
+		extern bool IsValidNPCClientVersion(ClientVersion clientVersion);
+		extern ClientVersion ValidateNPCClientVersion(ClientVersion clientVersion);
 
 		// these are 'universal' - do not invoke when setting a valid client
-		bool IsValidMobClientVersion(ClientVersion clientVersion);
-		ClientVersion ValidateMobClientVersion(ClientVersion clientVersion);
+		extern bool IsValidMobClientVersion(ClientVersion clientVersion);
+		extern ClientVersion ValidateMobClientVersion(ClientVersion clientVersion);
 
 		// database
-		size_t CharacterCreationLimit(ClientVersion clientVersion);
+		extern size_t CharacterCreationLimit(ClientVersion clientVersion);
 
 		// inventory
-		uint16 InventoryMapSize(int16 indexMap, ClientVersion clientVersion);
-		uint64 PossessionsBitmask(ClientVersion clientVersion);
-		uint64 EquipmentBitmask(ClientVersion clientVersion);
-		uint64 GeneralBitmask(ClientVersion clientVersion);
-		uint64 CursorBitmask(ClientVersion clientVersion);
+		extern uint16 InventoryMapSize(int16 indexMap, ClientVersion clientVersion);
+		extern uint64 PossessionsBitmask(ClientVersion clientVersion);
+		extern uint64 EquipmentBitmask(ClientVersion clientVersion);
+		extern uint64 GeneralBitmask(ClientVersion clientVersion);
+		extern uint64 CursorBitmask(ClientVersion clientVersion);
 
-		bool AllowsEmptyBagInBag(ClientVersion clientVersion);
-		bool AllowsClickCastFromBag(ClientVersion clientVersion);
+		extern bool AllowsEmptyBagInBag(ClientVersion clientVersion);
+		extern bool AllowsClickCastFromBag(ClientVersion clientVersion);
 
 		// items
-		uint16 ItemCommonSize(ClientVersion clientVersion);
-		uint16 ItemContainerSize(ClientVersion clientVersion);
+		extern uint16 ItemCommonSize(ClientVersion clientVersion);
+		extern uint16 ItemContainerSize(ClientVersion clientVersion);
 
 		// player profile
-		bool CoinHasWeight(ClientVersion clientVersion);
+		extern bool CoinHasWeight(ClientVersion clientVersion);
 	}
 }
 
