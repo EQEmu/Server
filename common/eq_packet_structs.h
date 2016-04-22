@@ -293,7 +293,7 @@ struct Spawn_Struct {
 		/*0000*/ EquipStruct equip_primary;    // Equipment: Main visual
 		/*0000*/ EquipStruct equip_secondary;  // Equipment: Off visual
 	} equip;
-	/*0000*/ EquipStruct equipment[MaterialCount];
+	/*0000*/ EquipStruct equipment[EQEmu::legacy::MaterialCount];
 };
 /*0233*/ float	runspeed;		// Speed when running
 /*0036*/ uint8	afk;			// 0=no, 1=afk
@@ -339,7 +339,7 @@ union
 				/*0376*/ Color_Struct color_primary;	// Color of primary item
 				/*0380*/ Color_Struct color_secondary;	// Color of secondary item
 			} equipment_colors;
-			/*0348*/ Color_Struct colors[MaterialCount]; // Array elements correspond to struct equipment_colors above
+			/*0348*/ Color_Struct colors[EQEmu::legacy::MaterialCount]; // Array elements correspond to struct equipment_colors above
 		 };
 /*0384*/ uint8	lfg;			// 0=off, 1=lfg on
 /*0385*/
@@ -776,7 +776,7 @@ struct BandolierItem_Struct
 struct Bandolier_Struct
 {
 	char Name[32];
-	BandolierItem_Struct Items[EQEmu::constants::BANDOLIER_ITEM_COUNT];
+	BandolierItem_Struct Items[EQEmu::legacy::BANDOLIER_ITEM_COUNT];
 };
 
 //len = 72
@@ -790,7 +790,7 @@ struct PotionBeltItem_Struct
 //len = 288
 struct PotionBelt_Struct
 {
-	PotionBeltItem_Struct Items[EQEmu::constants::POTION_BELT_ITEM_COUNT];
+	PotionBeltItem_Struct Items[EQEmu::legacy::POTION_BELT_ITEM_COUNT];
 };
 
 struct MovePotionToBelt_Struct
@@ -881,7 +881,7 @@ struct SuspendedMinion_Struct
 	/*002*/	uint32 HP;
 	/*006*/	uint32 Mana;
 	/*010*/	SpellBuff_Struct Buffs[BUFF_COUNT];
-	/*510*/	uint32 Items[MaterialCount];
+	/*510*/	uint32 Items[EQEmu::legacy::MaterialCount];
 	/*546*/	char Name[64];
 	/*610*/
 };
@@ -989,9 +989,9 @@ struct PlayerProfile_Struct
 /*0304*/	uint8				ability_time_minutes;
 /*0305*/	uint8				ability_time_hours;	//place holder
 /*0306*/	uint8				unknown0306[6];		// @bp Spacer/Flag?
-/*0312*/	uint32				item_material[MaterialCount];	// Item texture/material of worn/held items
+/*0312*/	uint32				item_material[EQEmu::legacy::MaterialCount];	// Item texture/material of worn/held items
 /*0348*/	uint8				unknown0348[44];
-/*0392*/	Color_Struct		item_tint[MaterialCount];
+/*0392*/	Color_Struct		item_tint[EQEmu::legacy::MaterialCount];
 /*0428*/	AA_Array			aa_array[MAX_PP_AA_ARRAY];
 /*2348*/	float				unknown2384;		//seen ~128, ~47
 /*2352*/	char				servername[32];		// length probably not right
@@ -1092,7 +1092,7 @@ struct PlayerProfile_Struct
 /*7212*/	uint32				tribute_points;
 /*7216*/	uint32				unknown7252;
 /*7220*/	uint32				tribute_active;		//1=active
-/*7224*/	Tribute_Struct		tributes[EQEmu::constants::TRIBUTE_SIZE];
+/*7224*/	Tribute_Struct		tributes[EQEmu::legacy::TRIBUTE_SIZE];
 /*7264*/	Disciplines_Struct	disciplines;
 /*7664*/	uint32				recastTimers[MAX_RECAST_TYPES];	// Timers (GMT of last use)
 /*7744*/	char				unknown7780[160];
@@ -1119,7 +1119,7 @@ struct PlayerProfile_Struct
 /*12800*/	uint32				expAA;
 /*12804*/	uint32				aapoints;			//avaliable, unspent
 /*12808*/	uint8				unknown12844[36];
-/*12844*/	Bandolier_Struct	bandoliers[EQEmu::constants::BANDOLIERS_SIZE];
+/*12844*/	Bandolier_Struct	bandoliers[EQEmu::legacy::BANDOLIERS_SIZE];
 /*14124*/	uint8				unknown14160[4506];
 /*18630*/	SuspendedMinion_Struct	SuspendedMinion; // No longer in use
 /*19240*/	uint32				timeentitledonaccount;
@@ -2124,7 +2124,7 @@ struct Illusion_Struct { //size: 256 - SoF
 /*092*/	uint32	drakkin_heritage;	//
 /*096*/	uint32	drakkin_tattoo;		//
 /*100*/	uint32	drakkin_details;	//
-/*104*/	uint32	armor_tint[MaterialCount];	//
+/*104*/	uint32	armor_tint[EQEmu::legacy::MaterialCount];	//
 /*140*/	uint8	eyecolor1;		// Field Not Identified in any Illusion Struct
 /*141*/	uint8	eyecolor2;		// Field Not Identified in any Illusion Struct
 /*142*/	uint8	unknown138[114];	//
@@ -3411,7 +3411,7 @@ struct DyeStruct
 			struct Color_Struct secondary;	// or this
 		}
 		dyes;
-		struct Color_Struct dye[MaterialCount];
+		struct Color_Struct dye[EQEmu::legacy::MaterialCount];
 	};
 };
 
@@ -3472,8 +3472,8 @@ struct SelectTributeReply_Struct {
 
 struct TributeInfo_Struct {
 	uint32	active;		//0 == inactive, 1 == active
-	uint32	tributes[EQEmu::constants::TRIBUTE_SIZE];	//-1 == NONE
-	uint32	tiers[EQEmu::constants::TRIBUTE_SIZE];		//all 00's
+	uint32	tributes[EQEmu::legacy::TRIBUTE_SIZE];	//-1 == NONE
+	uint32	tiers[EQEmu::legacy::TRIBUTE_SIZE];		//all 00's
 	uint32	tribute_master_id;
 };
 

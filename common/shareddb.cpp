@@ -104,8 +104,8 @@ bool SharedDatabase::SaveCursor(uint32 char_id, std::list<ItemInst*>::const_iter
 	std::string query = StringFormat("DELETE FROM inventory WHERE charid = %i "
                                     "AND ((slotid >= 8000 AND slotid <= 8999) "
                                     "OR slotid = %i OR (slotid >= %i AND slotid <= %i) )",
-                                    char_id, SlotCursor,
-									EQEmu::constants::CURSOR_BAG_BEGIN, EQEmu::constants::CURSOR_BAG_END);
+									char_id, EQEmu::legacy::SlotCursor,
+									EQEmu::legacy::CURSOR_BAG_BEGIN, EQEmu::legacy::CURSOR_BAG_END);
     auto results = QueryDatabase(query);
     if (!results.Success()) {
         std::cout << "Clearing cursor failed: " << results.ErrorMessage() << std::endl;
@@ -116,7 +116,7 @@ bool SharedDatabase::SaveCursor(uint32 char_id, std::list<ItemInst*>::const_iter
     for(auto it = start; it != end; ++it, i++) {
 		if (i > 8999) { break; } // shouldn't be anything in the queue that indexes this high
         ItemInst *inst = *it;
-		int16 use_slot = (i == 8000) ? SlotCursor : i;
+		int16 use_slot = (i == 8000) ? EQEmu::legacy::SlotCursor : i;
 		if (!SaveInventory(char_id, inst, use_slot)) {
 			return false;
 		}
@@ -161,10 +161,10 @@ bool SharedDatabase::VerifyInventory(uint32 account_id, int16 slot_id, const Ite
 bool SharedDatabase::SaveInventory(uint32 char_id, const ItemInst* inst, int16 slot_id) {
 
 	//never save tribute slots:
-	if (slot_id >= EQEmu::constants::TRIBUTE_BEGIN && slot_id <= EQEmu::constants::TRIBUTE_END)
+	if (slot_id >= EQEmu::legacy::TRIBUTE_BEGIN && slot_id <= EQEmu::legacy::TRIBUTE_END)
 		return true;
 
-	if (slot_id >= EQEmu::constants::SHARED_BANK_BEGIN && slot_id <= EQEmu::constants::SHARED_BANK_BAGS_END) {
+	if (slot_id >= EQEmu::legacy::SHARED_BANK_BEGIN && slot_id <= EQEmu::legacy::SHARED_BANK_BAGS_END) {
         // Shared bank inventory
 		if (!inst) {
 			return DeleteSharedBankSlot(char_id, slot_id);
@@ -191,9 +191,9 @@ bool SharedDatabase::SaveInventory(uint32 char_id, const ItemInst* inst, int16 s
 bool SharedDatabase::UpdateInventorySlot(uint32 char_id, const ItemInst* inst, int16 slot_id) {
 	// need to check 'inst' argument for valid pointer
 
-	uint32 augslot[EQEmu::constants::ITEM_COMMON_SIZE] = { NO_ITEM, NO_ITEM, NO_ITEM, NO_ITEM, NO_ITEM, NO_ITEM };
+	uint32 augslot[EQEmu::legacy::ITEM_COMMON_SIZE] = { NO_ITEM, NO_ITEM, NO_ITEM, NO_ITEM, NO_ITEM, NO_ITEM };
 	if (inst->IsType(ItemClassCommon)) {
-		for (int i = AUG_INDEX_BEGIN; i < EQEmu::constants::ITEM_COMMON_SIZE; i++) {
+		for (int i = AUG_INDEX_BEGIN; i < EQEmu::legacy::ITEM_COMMON_SIZE; i++) {
 			ItemInst *auginst = inst->GetItem(i);
 			augslot[i] = (auginst && auginst->GetItem()) ? auginst->GetItem()->ID : NO_ITEM;
 		}
@@ -223,7 +223,7 @@ bool SharedDatabase::UpdateInventorySlot(uint32 char_id, const ItemInst* inst, i
 	if (inst->IsType(ItemClassContainer) && Inventory::SupportsContainers(slot_id))
 		// Limiting to bag slot count will get rid of 'hidden' duplicated items and 'Invalid Slot ID'
 		// messages through attrition (and the modded code in SaveInventory)
-		for (uint8 idx = SUB_INDEX_BEGIN; idx < inst->GetItem()->BagSlots && idx < EQEmu::constants::ITEM_CONTAINER_SIZE; idx++) {
+		for (uint8 idx = SUB_INDEX_BEGIN; idx < inst->GetItem()->BagSlots && idx < EQEmu::legacy::ITEM_CONTAINER_SIZE; idx++) {
 			const ItemInst* baginst = inst->GetItem(idx);
 			SaveInventory(char_id, baginst, Inventory::CalcSlotId(slot_id, idx));
 		}
@@ -238,9 +238,9 @@ bool SharedDatabase::UpdateInventorySlot(uint32 char_id, const ItemInst* inst, i
 bool SharedDatabase::UpdateSharedBankSlot(uint32 char_id, const ItemInst* inst, int16 slot_id) {
 	// need to check 'inst' argument for valid pointer
 
-	uint32 augslot[EQEmu::constants::ITEM_COMMON_SIZE] = { NO_ITEM, NO_ITEM, NO_ITEM, NO_ITEM, NO_ITEM, NO_ITEM };
+	uint32 augslot[EQEmu::legacy::ITEM_COMMON_SIZE] = { NO_ITEM, NO_ITEM, NO_ITEM, NO_ITEM, NO_ITEM, NO_ITEM };
 	if (inst->IsType(ItemClassCommon)) {
-		for (int i = AUG_INDEX_BEGIN; i < EQEmu::constants::ITEM_COMMON_SIZE; i++) {
+		for (int i = AUG_INDEX_BEGIN; i < EQEmu::legacy::ITEM_COMMON_SIZE; i++) {
 			ItemInst *auginst = inst->GetItem(i);
 			augslot[i] = (auginst && auginst->GetItem()) ? auginst->GetItem()->ID : NO_ITEM;
 		}
@@ -269,7 +269,7 @@ bool SharedDatabase::UpdateSharedBankSlot(uint32 char_id, const ItemInst* inst, 
 	if (inst->IsType(ItemClassContainer) && Inventory::SupportsContainers(slot_id)) {
 		// Limiting to bag slot count will get rid of 'hidden' duplicated items and 'Invalid Slot ID'
 		// messages through attrition (and the modded code in SaveInventory)
-		for (uint8 idx = SUB_INDEX_BEGIN; idx < inst->GetItem()->BagSlots && idx < EQEmu::constants::ITEM_CONTAINER_SIZE; idx++) {
+		for (uint8 idx = SUB_INDEX_BEGIN; idx < inst->GetItem()->BagSlots && idx < EQEmu::legacy::ITEM_CONTAINER_SIZE; idx++) {
 			const ItemInst* baginst = inst->GetItem(idx);
 			SaveInventory(char_id, baginst, Inventory::CalcSlotId(slot_id, idx));
 		}
@@ -427,7 +427,7 @@ bool SharedDatabase::GetSharedBank(uint32 id, Inventory *inv, bool is_charid)
 		uint32 item_id = (uint32)atoi(row[1]);
 		int8 charges = (int8)atoi(row[2]);
 
-		uint32 aug[EQEmu::constants::ITEM_COMMON_SIZE];
+		uint32 aug[EQEmu::legacy::ITEM_COMMON_SIZE];
 		aug[0] = (uint32)atoi(row[3]);
 		aug[1] = (uint32)atoi(row[4]);
 		aug[2] = (uint32)atoi(row[5]);
@@ -448,7 +448,7 @@ bool SharedDatabase::GetSharedBank(uint32 id, Inventory *inv, bool is_charid)
 
 		ItemInst *inst = CreateBaseItem(item, charges);
 		if (inst && item->ItemClass == ItemClassCommon) {
-			for (int i = AUG_INDEX_BEGIN; i < EQEmu::constants::ITEM_COMMON_SIZE; i++) {
+			for (int i = AUG_INDEX_BEGIN; i < EQEmu::legacy::ITEM_COMMON_SIZE; i++) {
 				if (aug[i])
 					inst->PutAugment(this, i, aug[i]);
 			}
@@ -522,7 +522,7 @@ bool SharedDatabase::GetInventory(uint32 char_id, Inventory *inv)
 		uint16 charges = atoi(row[2]);
 		uint32 color = atoul(row[3]);
 
-		uint32 aug[EQEmu::constants::ITEM_COMMON_SIZE];
+		uint32 aug[EQEmu::legacy::ITEM_COMMON_SIZE];
 
 		aug[0] = (uint32)atoul(row[4]);
 		aug[1] = (uint32)atoul(row[5]);
@@ -584,8 +584,8 @@ bool SharedDatabase::GetInventory(uint32 char_id, Inventory *inv)
 		inst->SetOrnamentHeroModel(ornament_hero_model);
 
 		if (instnodrop ||
-			(((slot_id >= EQEmu::constants::EQUIPMENT_BEGIN && slot_id <= EQEmu::constants::EQUIPMENT_END) ||
-		      slot_id == SlotPowerSource) &&
+			(((slot_id >= EQEmu::legacy::EQUIPMENT_BEGIN && slot_id <= EQEmu::legacy::EQUIPMENT_END) ||
+			slot_id == EQEmu::legacy::SlotPowerSource) &&
 		     inst->GetItem()->Attuneable))
 			inst->SetAttuned(true);
 
@@ -608,7 +608,7 @@ bool SharedDatabase::GetInventory(uint32 char_id, Inventory *inv)
 		}
 
 		if (item->ItemClass == ItemClassCommon) {
-			for (int i = AUG_INDEX_BEGIN; i < EQEmu::constants::ITEM_COMMON_SIZE; i++) {
+			for (int i = AUG_INDEX_BEGIN; i < EQEmu::legacy::ITEM_COMMON_SIZE; i++) {
 				if (aug[i])
 					inst->PutAugment(this, i, aug[i]);
 			}
@@ -665,7 +665,7 @@ bool SharedDatabase::GetInventory(uint32 account_id, char *name, Inventory *inv)
 		int8 charges = atoi(row[2]);
 		uint32 color = atoul(row[3]);
 
-		uint32 aug[EQEmu::constants::ITEM_COMMON_SIZE];
+		uint32 aug[EQEmu::legacy::ITEM_COMMON_SIZE];
 		aug[0] = (uint32)atoi(row[4]);
 		aug[1] = (uint32)atoi(row[5]);
 		aug[2] = (uint32)atoi(row[6]);
@@ -726,7 +726,7 @@ bool SharedDatabase::GetInventory(uint32 account_id, char *name, Inventory *inv)
 		inst->SetCharges(charges);
 
 		if (item->ItemClass == ItemClassCommon) {
-			for (int i = AUG_INDEX_BEGIN; i < EQEmu::constants::ITEM_COMMON_SIZE; i++) {
+			for (int i = AUG_INDEX_BEGIN; i < EQEmu::legacy::ITEM_COMMON_SIZE; i++) {
 				if (aug[i])
 					inst->PutAugment(this, i, aug[i]);
 			}

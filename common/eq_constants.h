@@ -802,25 +802,6 @@ static const uint8 SkillDamageTypes[HIGHEST_SKILL + 1] = // change to _SkillServ
 };
 
 /*
-**	Material use slots
-**
-*/
-enum MaterialSlots : uint8
-{
-	MaterialHead = 0,
-	MaterialChest,
-	MaterialArms,
-	MaterialWrist,
-	MaterialHands,
-	MaterialLegs, // 5
-	MaterialFeet,
-	MaterialPrimary,
-	MaterialSecondary,
-	MaterialCount,
-	MaterialInvalid = 255
-};
-
-/*
 // Used for worn NPC inventory tracking. NPCs don't use
 // augments, so only the basic slots need to be kept track of.
 #define MAX_WORN_INVENTORY	22
@@ -853,75 +834,6 @@ enum MaterialSlots : uint8
 **	-	-		11	12	[Note: Additional slots are only available in RoF and higher]
 **
 */
-
-enum InventoryTypes : int16
-{
-	TypePossessions = 0,
-	TypeBank,
-	TypeSharedBank,
-	TypeTrade,
-	TypeWorld,
-	TypeLimbo, // 5
-	TypeTribute,
-	TypeTrophyTribute,
-	TypeGuildTribute,
-	TypeMerchant,
-	TypeDeleted, // 10
-	TypeCorpse,
-	TypeBazaar,
-	TypeInspect,
-	TypeRealEstate,
-	TypeViewMODPC, // 15
-	TypeViewMODBank,
-	TypeViewMODSharedBank,
-	TypeViewMODLimbo,
-	TypeAltStorage,
-	TypeArchived, // 20
-	TypeMail,
-	TypeGuildTrophyTribute,
-	TypeKrono,
-	TypeOther,
-	TypeCount
-};
-
-enum PossessionsSlots : int16
-{
-	SlotCharm = 0,
-	SlotEar1,
-	SlotHead,
-	SlotFace,
-	SlotEar2,
-	SlotNeck, // 5
-	SlotShoulders,
-	SlotArms,
-	SlotBack,
-	SlotWrist1,
-	SlotWrist2, // 10
-	SlotRange,
-	SlotHands,
-	SlotPrimary,
-	SlotSecondary,
-	SlotFinger1, // 15
-	SlotFinger2,
-	SlotChest,
-	SlotLegs,
-	SlotFeet,
-	SlotWaist, // 20
-	SlotPowerSource = 9999, // temp
-	SlotAmmo = 21, // temp
-	SlotGeneral1,
-	SlotGeneral2,
-	SlotGeneral3,
-	SlotGeneral4, // 25
-	SlotGeneral5,
-	SlotGeneral6,
-	SlotGeneral7,
-	SlotGeneral8,
-	//SlotGeneral9,
-	//SlotGeneral10,
-	SlotCursor, // 30
-	SlotCount
-};
 
 #define INVALID_INDEX	-1
 #define NOT_USED		0

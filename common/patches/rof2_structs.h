@@ -1084,11 +1084,11 @@ union
 	/*00184*/ EquipStruct equipment[22];		// Total Slots
 };
 /*00624*/ uint32 equip2_count;			// Seen 9
-/*00628*/ EquipStruct equipment2[MaterialCount];	// Appears to be Visible slots, but all 0s
+/*00628*/ EquipStruct equipment2[EQEmu::legacy::MaterialCount];	// Appears to be Visible slots, but all 0s
 /*00808*/ uint32 tint_count;			// Seen 9
-/*00812*/ Color_Struct item_tint[MaterialCount];	// RR GG BB 00
+/*00812*/ Color_Struct item_tint[EQEmu::legacy::MaterialCount];	// RR GG BB 00
 /*00848*/ uint32 tint_count2;			// Seen 9
-/*00852*/ Color_Struct item_tint2[MaterialCount];	// RR GG BB 00
+/*00852*/ Color_Struct item_tint2[EQEmu::legacy::MaterialCount];	// RR GG BB 00
 /*00888*/ uint8   haircolor;			// Player hair color
 /*00889*/ uint8   beardcolor;			// Player beard color
 /*00890*/ uint32 unknown_rof5;			//

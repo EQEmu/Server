@@ -582,13 +582,13 @@ int32 Client::Tune_GetMeleeMitDmg(Mob* GM, Mob *attacker, int32 damage, int32 mi
 
 int32 Client::GetMeleeDamage(Mob* other, bool GetMinDamage)
 {
-	int Hand = SlotPrimary;
+	int Hand = EQEmu::legacy::SlotPrimary;
 
 	if (!other) 
 		return 0;
 	
 	ItemInst* weapon;
-	weapon = GetInv().GetItem(SlotPrimary);
+	weapon = GetInv().GetItem(EQEmu::legacy::SlotPrimary);
 	
 	if(weapon != nullptr) {
 		if (!weapon->IsWeapon()) {
@@ -628,7 +628,7 @@ int32 Client::GetMeleeDamage(Mob* other, bool GetMinDamage)
 
 		int ucDamageBonus = 0;
 
-		if( Hand == SlotPrimary && GetLevel() >= 28 && IsWarriorClass() )
+		if (Hand == EQEmu::legacy::SlotPrimary && GetLevel() >= 28 && IsWarriorClass())
 		{
 			ucDamageBonus = GetWeaponDamageBonus( weapon ? weapon->GetItem() : (const Item_Struct*) nullptr );
 
@@ -662,24 +662,24 @@ void Mob::Tune_FindAccuaryByHitChance(Mob* defender, Mob *attacker, float hit_ch
 	if (attacker->IsClient())
 	{//Will check first equiped weapon for skill. Ie. remove wepaons to assess bow.
 		ItemInst* weapon;
-		weapon = attacker->CastToClient()->GetInv().GetItem(SlotPrimary);
+		weapon = attacker->CastToClient()->GetInv().GetItem(EQEmu::legacy::SlotPrimary);
 			
 		if(weapon && weapon->IsWeapon()){
-			attacker->CastToClient()->AttackAnimation(skillinuse, SlotPrimary, weapon);
+			attacker->CastToClient()->AttackAnimation(skillinuse, EQEmu::legacy::SlotPrimary, weapon);
 		}
 		else {
-			weapon = attacker->CastToClient()->GetInv().GetItem(SlotSecondary);
+			weapon = attacker->CastToClient()->GetInv().GetItem(EQEmu::legacy::SlotSecondary);
 			if (weapon && weapon->IsWeapon()) 
-				attacker->CastToClient()->AttackAnimation(skillinuse, SlotSecondary, weapon);
+				attacker->CastToClient()->AttackAnimation(skillinuse, EQEmu::legacy::SlotSecondary, weapon);
 			else {
-				weapon = attacker->CastToClient()->GetInv().GetItem(SlotRange);
+				weapon = attacker->CastToClient()->GetInv().GetItem(EQEmu::legacy::SlotRange);
 				if (weapon && weapon->IsWeapon()) 
-					attacker->CastToClient()->AttackAnimation(skillinuse, SlotRange, weapon);
+					attacker->CastToClient()->AttackAnimation(skillinuse, EQEmu::legacy::SlotRange, weapon);
 			}
 		}
 	}
 
-	tmp_hit_chance = Tune_CheckHitChance(defender,attacker, skillinuse, SlotPrimary,0,0,0, avoid_override);
+	tmp_hit_chance = Tune_CheckHitChance(defender, attacker, skillinuse, EQEmu::legacy::SlotPrimary, 0, 0, 0, avoid_override);
 
 	
 	Message(0, "#Tune - Begin Parse [Interval %i Max Loop Iterations %i]", interval, max_loop);
@@ -691,7 +691,7 @@ void Mob::Tune_FindAccuaryByHitChance(Mob* defender, Mob *attacker, float hit_ch
 
 	for (int j=0; j < max_loop; j++)        
 	{
-		tmp_hit_chance =Tune_CheckHitChance(defender,attacker, skillinuse, SlotPrimary,0,false,0, avoid_override, add_acc);
+		tmp_hit_chance = Tune_CheckHitChance(defender, attacker, skillinuse, EQEmu::legacy::SlotPrimary, 0, false, 0, avoid_override, add_acc);
 
 		if (Msg >= 3)
 			Message(15, "#Tune - Processing... [%i] [ACCURACY %i] Hit Chance %.2f ",j,add_acc,tmp_hit_chance);
@@ -706,7 +706,7 @@ void Mob::Tune_FindAccuaryByHitChance(Mob* defender, Mob *attacker, float hit_ch
 
 		if (end){
 			
-			Tune_CheckHitChance(defender,attacker, skillinuse, SlotPrimary,0,Msg,0,avoid_override);//Display Stat Report
+			Tune_CheckHitChance(defender, attacker, skillinuse, EQEmu::legacy::SlotPrimary, 0, Msg, 0, avoid_override);//Display Stat Report
 			
 			Message(0, " ");
 
@@ -742,24 +742,24 @@ void Mob::Tune_FindAvoidanceByHitChance(Mob* defender, Mob *attacker, float hit_
 	if (attacker->IsClient())
 	{//Will check first equiped weapon for skill. Ie. remove wepaons to assess bow.
 		ItemInst* weapon;
-		weapon = attacker->CastToClient()->GetInv().GetItem(SlotPrimary);
+		weapon = attacker->CastToClient()->GetInv().GetItem(EQEmu::legacy::SlotPrimary);
 			
 		if(weapon && weapon->IsWeapon()){
-			attacker->CastToClient()->AttackAnimation(skillinuse, SlotPrimary, weapon);
+			attacker->CastToClient()->AttackAnimation(skillinuse, EQEmu::legacy::SlotPrimary, weapon);
 		}
 		else {
-			weapon = attacker->CastToClient()->GetInv().GetItem(SlotSecondary);
+			weapon = attacker->CastToClient()->GetInv().GetItem(EQEmu::legacy::SlotSecondary);
 			if (weapon && weapon->IsWeapon()) 
-				attacker->CastToClient()->AttackAnimation(skillinuse, SlotSecondary, weapon);
+				attacker->CastToClient()->AttackAnimation(skillinuse, EQEmu::legacy::SlotSecondary, weapon);
 			else {
-				weapon = attacker->CastToClient()->GetInv().GetItem(SlotRange);
+				weapon = attacker->CastToClient()->GetInv().GetItem(EQEmu::legacy::SlotRange);
 				if (weapon && weapon->IsWeapon()) 
-					attacker->CastToClient()->AttackAnimation(skillinuse, SlotRange, weapon);
+					attacker->CastToClient()->AttackAnimation(skillinuse, EQEmu::legacy::SlotRange, weapon);
 			}
 		}
 	}
 
-	tmp_hit_chance = Tune_CheckHitChance(defender, attacker, skillinuse, SlotPrimary,0,0,acc_override, 0);
+	tmp_hit_chance = Tune_CheckHitChance(defender, attacker, skillinuse, EQEmu::legacy::SlotPrimary, 0, 0, acc_override, 0);
 
 	Message(0, "#Tune - Begin Parse [Interval %i Max Loop Iterations %i]", interval, max_loop);
 	Message(0, "#Tune - Processing... Find Avoidance for hit chance on defender of (%.0f) pct from attacker. [Current Hit Chance %.2f]", hit_chance, tmp_hit_chance);
@@ -769,7 +769,7 @@ void Mob::Tune_FindAvoidanceByHitChance(Mob* defender, Mob *attacker, float hit_
 
 	for (int j=0; j < max_loop; j++)        
 	{
-		tmp_hit_chance = Tune_CheckHitChance(defender, attacker, skillinuse, SlotPrimary, 0,0, acc_override, 0,0,add_avoid);
+		tmp_hit_chance = Tune_CheckHitChance(defender, attacker, skillinuse, EQEmu::legacy::SlotPrimary, 0, 0, acc_override, 0, 0, add_avoid);
 
 		if (Msg >= 3)
 			Message(0, "#Tune - Processing... [%i] [AVOIDANCE %i] Hit Chance %.2f ",j,add_avoid,tmp_hit_chance);
@@ -784,7 +784,7 @@ void Mob::Tune_FindAvoidanceByHitChance(Mob* defender, Mob *attacker, float hit_
 
 		if (end){
 			
-			Tune_CheckHitChance(defender,attacker, skillinuse, SlotPrimary,0,Msg,acc_override, 0);//Display Stat Report
+			Tune_CheckHitChance(defender, attacker, skillinuse, EQEmu::legacy::SlotPrimary, 0, Msg, acc_override, 0);//Display Stat Report
 			
 			Message(0, " ");
 

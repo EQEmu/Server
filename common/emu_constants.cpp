@@ -24,56 +24,56 @@
 uint16 EQEmu::constants::InventoryTypeSize(int16 type_index)
 {
 	switch (type_index) {
-	case TypePossessions:
-		return TYPE_POSSESSIONS_SIZE;
-	case TypeBank:
-		return TYPE_BANK_SIZE;
-	case TypeSharedBank:
-		return TYPE_SHARED_BANK_SIZE;
-	case TypeTrade:
-		return TYPE_TRADE_SIZE;
-	case TypeWorld:
-		return TYPE_WORLD_SIZE;
-	case TypeLimbo:
-		return TYPE_LIMBO_SIZE;
-	case TypeTribute:
-		return TYPE_TRIBUTE_SIZE;
-	case TypeTrophyTribute:
-		return TYPE_TROPHY_TRIBUTE_SIZE;
-	case TypeGuildTribute:
-		return TYPE_GUILD_TRIBUTE_SIZE;
-	case TypeMerchant:
-		return TYPE_MERCHANT_SIZE;
-	case TypeDeleted:
-		return TYPE_DELETED_SIZE;
-	case TypeCorpse:
-		return TYPE_CORPSE_SIZE;
-	case TypeBazaar:
-		return TYPE_BAZAAR_SIZE;
-	case TypeInspect:
-		return TYPE_INSPECT_SIZE;
-	case TypeRealEstate:
-		return TYPE_REAL_ESTATE_SIZE;
-	case TypeViewMODPC:
-		return TYPE_VIEW_MOD_PC_SIZE;
-	case TypeViewMODBank:
-		return TYPE_VIEW_MOD_BANK_SIZE;
-	case TypeViewMODSharedBank:
-		return TYPE_VIEW_MOD_SHARED_BANK_SIZE;
-	case TypeViewMODLimbo:
-		return TYPE_VIEW_MOD_LIMBO_SIZE;
-	case TypeAltStorage:
-		return TYPE_ALT_STORAGE_SIZE;
-	case TypeArchived:
-		return TYPE_ARCHIVED_SIZE;
-	case TypeMail:
-		return TYPE_MAIL_SIZE;
-	case TypeGuildTrophyTribute:
-		return TYPE_GUILD_TROPHY_TRIBUTE_SIZE;
-	case TypeKrono:
-		return TYPE_KRONO_SIZE;
-	case TypeOther:
-		return TYPE_OTHER_SIZE;
+	case legacy::TypePossessions:
+		return legacy::TYPE_POSSESSIONS_SIZE;
+	case legacy::TypeBank:
+		return legacy::TYPE_BANK_SIZE;
+	case legacy::TypeSharedBank:
+		return legacy::TYPE_SHARED_BANK_SIZE;
+	case legacy::TypeTrade:
+		return legacy::TYPE_TRADE_SIZE;
+	case legacy::TypeWorld:
+		return legacy::TYPE_WORLD_SIZE;
+	case legacy::TypeLimbo:
+		return legacy::TYPE_LIMBO_SIZE;
+	case legacy::TypeTribute:
+		return legacy::TYPE_TRIBUTE_SIZE;
+	case legacy::TypeTrophyTribute:
+		return legacy::TYPE_TROPHY_TRIBUTE_SIZE;
+	case legacy::TypeGuildTribute:
+		return legacy::TYPE_GUILD_TRIBUTE_SIZE;
+	case legacy::TypeMerchant:
+		return legacy::TYPE_MERCHANT_SIZE;
+	case legacy::TypeDeleted:
+		return legacy::TYPE_DELETED_SIZE;
+	case legacy::TypeCorpse:
+		return legacy::TYPE_CORPSE_SIZE;
+	case legacy::TypeBazaar:
+		return legacy::TYPE_BAZAAR_SIZE;
+	case legacy::TypeInspect:
+		return legacy::TYPE_INSPECT_SIZE;
+	case legacy::TypeRealEstate:
+		return legacy::TYPE_REAL_ESTATE_SIZE;
+	case legacy::TypeViewMODPC:
+		return legacy::TYPE_VIEW_MOD_PC_SIZE;
+	case legacy::TypeViewMODBank:
+		return legacy::TYPE_VIEW_MOD_BANK_SIZE;
+	case legacy::TypeViewMODSharedBank:
+		return legacy::TYPE_VIEW_MOD_SHARED_BANK_SIZE;
+	case legacy::TypeViewMODLimbo:
+		return legacy::TYPE_VIEW_MOD_LIMBO_SIZE;
+	case legacy::TypeAltStorage:
+		return legacy::TYPE_ALT_STORAGE_SIZE;
+	case legacy::TypeArchived:
+		return legacy::TYPE_ARCHIVED_SIZE;
+	case legacy::TypeMail:
+		return legacy::TYPE_MAIL_SIZE;
+	case legacy::TypeGuildTrophyTribute:
+		return legacy::TYPE_GUILD_TROPHY_TRIBUTE_SIZE;
+	case legacy::TypeKrono:
+		return legacy::TYPE_KRONO_SIZE;
+	case legacy::TypeOther:
+		return legacy::TYPE_OTHER_SIZE;
 	default:
 		return NOT_USED;
 	}
@@ -94,55 +94,55 @@ const char* EQEmu::constants::InventoryTypeName(int16 type_index)
 	switch (type_index) {
 	case INVALID_INDEX:
 		return "Invalid Type";
-	case TypePossessions:
+	case legacy::TypePossessions:
 		return "Possessions";
-	case TypeBank:
+	case legacy::TypeBank:
 		return "Bank";
-	case TypeSharedBank:
+	case legacy::TypeSharedBank:
 		return "SharedBank";
-	case TypeTrade:
+	case legacy::TypeTrade:
 		return "Trade";
-	case TypeWorld:
+	case legacy::TypeWorld:
 		return "World";
-	case TypeLimbo:
+	case legacy::TypeLimbo:
 		return "Limbo";
-	case TypeTribute:
+	case legacy::TypeTribute:
 		return "Tribute";
-	case TypeTrophyTribute:
+	case legacy::TypeTrophyTribute:
 		return "TrophyTribute";
-	case TypeGuildTribute:
+	case legacy::TypeGuildTribute:
 		return "GuildTribute";
-	case TypeMerchant:
+	case legacy::TypeMerchant:
 		return "Merchant";
-	case TypeDeleted:
+	case legacy::TypeDeleted:
 		return "Deleted";
-	case TypeCorpse:
+	case legacy::TypeCorpse:
 		return "Corpse";
-	case TypeBazaar:
+	case legacy::TypeBazaar:
 		return "Bazaar";
-	case TypeInspect:
+	case legacy::TypeInspect:
 		return "Inspect";
-	case TypeRealEstate:
+	case legacy::TypeRealEstate:
 		return "RealEstate";
-	case TypeViewMODPC:
+	case legacy::TypeViewMODPC:
 		return "ViewMODPC";
-	case TypeViewMODBank:
+	case legacy::TypeViewMODBank:
 		return "ViewMODBank";
-	case TypeViewMODSharedBank:
+	case legacy::TypeViewMODSharedBank:
 		return "ViewMODSharedBank";
-	case TypeViewMODLimbo:
+	case legacy::TypeViewMODLimbo:
 		return "ViewMODLimbo";
-	case TypeAltStorage:
+	case legacy::TypeAltStorage:
 		return "AltStorage";
-	case TypeArchived:
+	case legacy::TypeArchived:
 		return "Archived";
-	case TypeMail:
+	case legacy::TypeMail:
 		return "Mail";
-	case TypeGuildTrophyTribute:
+	case legacy::TypeGuildTrophyTribute:
 		return "GuildTrophyTribute";
-	case TypeKrono:
+	case legacy::TypeKrono:
 		return "Krono";
-	case TypeOther:
+	case legacy::TypeOther:
 		return "Other";
 	default:
 		return "Unknown Type";
@@ -154,75 +154,75 @@ const char* EQEmu::constants::InventorySlotName(int16 slot_index)
 	switch (slot_index) {
 	case INVALID_INDEX:
 		return "Invalid Slot";
-	case SlotCharm:
+	case legacy::SlotCharm:
 		return "Charm";
-	case SlotEar1:
+	case legacy::SlotEar1:
 		return "Ear1";
-	case SlotHead:
+	case legacy::SlotHead:
 		return "Head";
-	case SlotFace:
+	case legacy::SlotFace:
 		return "Face";
-	case SlotEar2:
+	case legacy::SlotEar2:
 		return "Ear2";
-	case SlotNeck:
+	case legacy::SlotNeck:
 		return "Neck";
-	case SlotShoulders:
+	case legacy::SlotShoulders:
 		return "Shoulders";
-	case SlotArms:
+	case legacy::SlotArms:
 		return "Arms";
-	case SlotBack:
+	case legacy::SlotBack:
 		return "Back";
-	case SlotWrist1:
+	case legacy::SlotWrist1:
 		return "Wrist1";
-	case SlotWrist2:
+	case legacy::SlotWrist2:
 		return "Wrist2";
-	case SlotRange:
+	case legacy::SlotRange:
 		return "Range";
-	case SlotHands:
+	case legacy::SlotHands:
 		return "Hands";
-	case SlotPrimary:
+	case legacy::SlotPrimary:
 		return "Primary";
-	case SlotSecondary:
+	case legacy::SlotSecondary:
 		return "Secondary";
-	case SlotFinger1:
+	case legacy::SlotFinger1:
 		return "Finger1";
-	case SlotFinger2:
+	case legacy::SlotFinger2:
 		return "Finger2";
-	case SlotChest:
+	case legacy::SlotChest:
 		return "Chest";
-	case SlotLegs:
+	case legacy::SlotLegs:
 		return "Legs";
-	case SlotFeet:
+	case legacy::SlotFeet:
 		return "Feet";
-	case SlotWaist:
+	case legacy::SlotWaist:
 		return "Waist";
-	case SlotPowerSource:
+	case legacy::SlotPowerSource:
 		return "PowerSource";
-	case SlotAmmo:
+	case legacy::SlotAmmo:
 		return "Ammo";
-	case SlotGeneral1:
+	case legacy::SlotGeneral1:
 		return "General1";
-	case SlotGeneral2:
+	case legacy::SlotGeneral2:
 		return "General2";
-	case SlotGeneral3:
+	case legacy::SlotGeneral3:
 		return "General3";
-	case SlotGeneral4:
+	case legacy::SlotGeneral4:
 		return "General4";
-	case SlotGeneral5:
+	case legacy::SlotGeneral5:
 		return "General5";
-	case SlotGeneral6:
+	case legacy::SlotGeneral6:
 		return "General6";
-	case SlotGeneral7:
+	case legacy::SlotGeneral7:
 		return "General7";
-	case SlotGeneral8:
+	case legacy::SlotGeneral8:
 		return "General8";
 	/*
-	case SlotGeneral9:
+	case legacy::SlotGeneral9:
 		return "General9";
-	case SlotGeneral10:
+	case legacy::SlotGeneral10:
 		return "General10";
 	*/
-	case SlotCursor:
+	case legacy::SlotCursor:
 		return "Cursor";
 	default:
 		return "Unknown Slot";
@@ -234,7 +234,7 @@ const char* EQEmu::constants::InventorySubName(int16 sub_index)
 	if (sub_index == INVALID_INDEX)
 		return "Invalid Sub";
 
-	if ((uint16)sub_index >= ITEM_CONTAINER_SIZE)
+	if ((uint16)sub_index >= legacy::ITEM_CONTAINER_SIZE)
 		return "Unknown Sub";
 
 	static std::string ret_str;
@@ -248,7 +248,7 @@ const char* EQEmu::constants::InventoryAugName(int16 aug_index)
 	if (aug_index == INVALID_INDEX)
 		return "Invalid Aug";
 
-	if ((uint16)aug_index >= ITEM_COMMON_SIZE)
+	if ((uint16)aug_index >= legacy::ITEM_COMMON_SIZE)
 		return "Unknown Aug";
 
 	static std::string ret_str;

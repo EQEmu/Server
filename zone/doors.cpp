@@ -187,7 +187,7 @@ void Doors::HandleClick(Client* sender, uint8 trigger)
 	uint8 keepoffkeyring = GetNoKeyring();
 	uint32 haskey = 0;
 	uint32 playerkey = 0;
-	const ItemInst *lockpicks = sender->GetInv().GetItem(SlotCursor);
+	const ItemInst *lockpicks = sender->GetInv().GetItem(EQEmu::legacy::SlotCursor);
 
 	haskey = sender->GetInv().HasItem(keyneeded, 1);
 

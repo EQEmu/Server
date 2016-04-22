@@ -2441,12 +2441,12 @@ int QuestManager::collectitems(uint32 item_id, bool remove)
 	int quantity = 0;
 	int slot_id;
 
-	for (slot_id = EQEmu::constants::GENERAL_BEGIN; slot_id <= EQEmu::constants::GENERAL_END; ++slot_id)
+	for (slot_id = EQEmu::legacy::GENERAL_BEGIN; slot_id <= EQEmu::legacy::GENERAL_END; ++slot_id)
 	{
 		quantity += collectitems_processSlot(slot_id, item_id, remove);
 	}
 
-	for (slot_id = EQEmu::constants::GENERAL_BAGS_BEGIN; slot_id <= EQEmu::constants::GENERAL_BAGS_END; ++slot_id)
+	for (slot_id = EQEmu::legacy::GENERAL_BAGS_BEGIN; slot_id <= EQEmu::legacy::GENERAL_BAGS_END; ++slot_id)
 	{
 		quantity += collectitems_processSlot(slot_id, item_id, remove);
 	}

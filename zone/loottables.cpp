@@ -272,7 +272,7 @@ void NPC::AddLootDrop(const Item_Struct *item2, ItemList* itemlist, int16 charge
 		// it is an improvement.
 
 		if (!item2->NoPet) {
-			for (int i = 0; !found && i < EQEmu::constants::EQUIPMENT_SIZE; i++) {
+			for (int i = 0; !found && i < EQEmu::legacy::EQUIPMENT_SIZE; i++) {
 				uint32 slots = (1 << i);
 				if (item2->Slots & slots) {
 					if(equipment[i])
@@ -313,7 +313,7 @@ void NPC::AddLootDrop(const Item_Struct *item2, ItemList* itemlist, int16 charge
 		// @merth: IDFile size has been increased, this needs to change
 		uint16 emat;
 		if(item2->Material <= 0
-			|| item2->Slots & (1 << SlotPrimary | 1 << SlotSecondary)) {
+			|| item2->Slots & (1 << EQEmu::legacy::SlotPrimary | 1 << EQEmu::legacy::SlotSecondary)) {
 			memset(newid, 0, sizeof(newid));
 			for(int i=0;i<7;i++){
 				if (!isalpha(item2->IDFile[i])){
@@ -327,17 +327,17 @@ void NPC::AddLootDrop(const Item_Struct *item2, ItemList* itemlist, int16 charge
 			emat = item2->Material;
 		}
 
-		if (foundslot == SlotPrimary) {
+		if (foundslot == EQEmu::legacy::SlotPrimary) {
 			if (item2->Proc.Effect != 0)
 				CastToMob()->AddProcToWeapon(item2->Proc.Effect, true);
 
-			eslot = MaterialPrimary;
+			eslot = EQEmu::legacy::MaterialPrimary;
 			if (item2->Damage > 0)
 				SendAddPlayerState(PlayerState::PrimaryWeaponEquipped);
 			if (item2->ItemType == ItemType2HBlunt || item2->ItemType == ItemType2HSlash || item2->ItemType == ItemType2HPiercing)
 				SetTwoHanderEquipped(true);
 		}
-		else if (foundslot == SlotSecondary
+		else if (foundslot == EQEmu::legacy::SlotSecondary
 			&& (GetOwner() != nullptr || (CanThisClassDualWield() && zone->random.Roll(NPC_DW_CHANCE)) || (item2->Damage==0)) &&
 			(item2->ItemType == ItemType1HSlash || item2->ItemType == ItemType1HBlunt || item2->ItemType == ItemTypeShield ||
 			item2->ItemType == ItemType1HPiercing))
@@ -345,30 +345,30 @@ void NPC::AddLootDrop(const Item_Struct *item2, ItemList* itemlist, int16 charge
 			if (item2->Proc.Effect!=0)
 				CastToMob()->AddProcToWeapon(item2->Proc.Effect, true);
 
-			eslot = MaterialSecondary;
+			eslot = EQEmu::legacy::MaterialSecondary;
 			if (item2->Damage > 0)
 				SendAddPlayerState(PlayerState::SecondaryWeaponEquipped);
 		}
-		else if (foundslot == SlotHead) {
-			eslot = MaterialHead;
+		else if (foundslot == EQEmu::legacy::SlotHead) {
+			eslot = EQEmu::legacy::MaterialHead;
 		}
-		else if (foundslot == SlotChest) {
-			eslot = MaterialChest;
+		else if (foundslot == EQEmu::legacy::SlotChest) {
+			eslot = EQEmu::legacy::MaterialChest;
 		}
-		else if (foundslot == SlotArms) {
-			eslot = MaterialArms;
+		else if (foundslot == EQEmu::legacy::SlotArms) {
+			eslot = EQEmu::legacy::MaterialArms;
 		}
-		else if (foundslot == SlotWrist1 || foundslot == SlotWrist2) {
-			eslot = MaterialWrist;
+		else if (foundslot == EQEmu::legacy::SlotWrist1 || foundslot == EQEmu::legacy::SlotWrist2) {
+			eslot = EQEmu::legacy::MaterialWrist;
 		}
-		else if (foundslot == SlotHands) {
-			eslot = MaterialHands;
+		else if (foundslot == EQEmu::legacy::SlotHands) {
+			eslot = EQEmu::legacy::MaterialHands;
 		}
-		else if (foundslot == SlotLegs) {
-			eslot = MaterialLegs;
+		else if (foundslot == EQEmu::legacy::SlotLegs) {
+			eslot = EQEmu::legacy::MaterialLegs;
 		}
-		else if (foundslot == SlotFeet) {
-			eslot = MaterialFeet;
+		else if (foundslot == EQEmu::legacy::SlotFeet) {
+			eslot = EQEmu::legacy::MaterialFeet;
 		}
 
 		/*

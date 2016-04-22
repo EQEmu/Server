@@ -322,7 +322,7 @@ public:
 	void	QueueToGroupsForNPCHealthAA(Mob* sender, const EQApplicationPacket* app);
 	void	QueueManaged(Mob* sender, const EQApplicationPacket* app, bool ignore_sender=false, bool ackreq = true);
 
-	void	AEAttack(Mob *attacker, float dist, int Hand = SlotPrimary, int count = 0, bool IsFromSpell = false);
+	void	AEAttack(Mob *attacker, float dist, int Hand = EQEmu::legacy::SlotPrimary, int count = 0, bool IsFromSpell = false);
 	void	AETaunt(Client *caster, float range=0, int32 bonus_hate=0);
 	void	AESpell(Mob *caster, Mob *center, uint16 spell_id, bool affect_caster = true, int16 resist_adjust = 0);
 	void	MassGroupBuff(Mob *caster, Mob *center, uint16 spell_id, bool affect_caster = true);

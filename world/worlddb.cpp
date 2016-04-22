@@ -117,7 +117,7 @@ void WorldDatabase::GetCharSelectInfo(uint32 accountID, EQApplicationPacket **ou
 		cse->Gender = (uint8)atoi(row[2]);
 		cse->Face = (uint8)atoi(row[15]);
 
-		for (uint32 matslot = 0; matslot < MaterialCount; matslot++) {	// Processed below
+		for (uint32 matslot = 0; matslot < EQEmu::legacy::MaterialCount; matslot++) {	// Processed below
 			cse->Equip[matslot].Material = 0;
 			cse->Equip[matslot].Unknown1 = 0;
 			cse->Equip[matslot].EliteMaterial = 0;
@@ -223,7 +223,7 @@ void WorldDatabase::GetCharSelectInfo(uint32 accountID, EQApplicationPacket **ou
 			const ItemInst* inst = nullptr;
 			int16 invslot = 0;
 
-			for (uint32 matslot = 0; matslot < MaterialCount; matslot++) {
+			for (uint32 matslot = 0; matslot < EQEmu::legacy::MaterialCount; matslot++) {
 				invslot = Inventory::CalcSlotFromMaterial(matslot);
 				if (invslot == INVALID_INDEX) { continue; }
 				inst = inv.GetItem(invslot);
@@ -244,7 +244,7 @@ void WorldDatabase::GetCharSelectInfo(uint32 accountID, EQApplicationPacket **ou
 							cse->Equip[matslot].Material = idfile;
 						}
 					}
-					if (matslot == MaterialPrimary) {
+					if (matslot == EQEmu::legacy::MaterialPrimary) {
 						cse->PrimaryIDFile = idfile;
 					}
 					else {

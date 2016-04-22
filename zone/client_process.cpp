@@ -296,7 +296,7 @@ bool Client::Process() {
 		}
 
 		if(AutoFireEnabled()){
-			ItemInst *ranged = GetInv().GetItem(SlotRange);
+			ItemInst *ranged = GetInv().GetItem(EQEmu::legacy::SlotRange);
 			if(ranged)
 			{
 				if(ranged->GetItem() && ranged->GetItem()->ItemType == ItemTypeBow){
@@ -391,10 +391,10 @@ bool Client::Process() {
 			}
 			else if (auto_attack_target->GetHP() > -10) // -10 so we can watch people bleed in PvP
 			{
-				ItemInst *wpn = GetInv().GetItem(SlotPrimary);
-				TryWeaponProc(wpn, auto_attack_target, SlotPrimary);
+				ItemInst *wpn = GetInv().GetItem(EQEmu::legacy::SlotPrimary);
+				TryWeaponProc(wpn, auto_attack_target, EQEmu::legacy::SlotPrimary);
 
-				DoAttackRounds(auto_attack_target, SlotPrimary);
+				DoAttackRounds(auto_attack_target, EQEmu::legacy::SlotPrimary);
 				if (CheckAATimer(aaTimerRampage))
 					entity_list.AEAttack(this, 30);
 			}
@@ -430,10 +430,10 @@ bool Client::Process() {
 			else if(auto_attack_target->GetHP() > -10) {
 				CheckIncreaseSkill(SkillDualWield, auto_attack_target, -10);
 				if (CheckDualWield()) {
-					ItemInst *wpn = GetInv().GetItem(SlotSecondary);
-					TryWeaponProc(wpn, auto_attack_target, SlotSecondary);
+					ItemInst *wpn = GetInv().GetItem(EQEmu::legacy::SlotSecondary);
+					TryWeaponProc(wpn, auto_attack_target, EQEmu::legacy::SlotSecondary);
 
-					DoAttackRounds(auto_attack_target, SlotSecondary);
+					DoAttackRounds(auto_attack_target, EQEmu::legacy::SlotSecondary);
 				}
 			}
 		}
@@ -742,7 +742,7 @@ void Client::BulkSendInventoryItems() {
 
 	// LINKDEAD TRADE ITEMS
 	// Move trade slot items back into normal inventory..need them there now for the proceeding validity checks
-	for(slot_id = EQEmu::constants::TRADE_BEGIN; slot_id <= EQEmu::constants::TRADE_END; slot_id++) {
+	for (slot_id = EQEmu::legacy::TRADE_BEGIN; slot_id <= EQEmu::legacy::TRADE_END; slot_id++) {
 		ItemInst* inst = m_inv.PopItem(slot_id);
 		if(inst) {
 			bool is_arrow = (inst->GetItem()->ItemType == ItemTypeArrow) ? true : false;
@@ -790,7 +790,7 @@ void Client::BulkSendInventoryItems() {
 	std::map<uint16, std::string>::iterator itr;
 
 	//Inventory items
-	for(slot_id = SLOT_BEGIN; slot_id < EQEmu::constants::TYPE_POSSESSIONS_SIZE; slot_id++) {
+	for (slot_id = SLOT_BEGIN; slot_id < EQEmu::legacy::TYPE_POSSESSIONS_SIZE; slot_id++) {
 		const ItemInst* inst = m_inv[slot_id];
 		if(inst) {
 			std::string packet = inst->Serialize(slot_id);
@@ -801,16 +801,16 @@ void Client::BulkSendInventoryItems() {
 
 	// Power Source
 	if (ClientVersion() >= EQEmu::versions::ClientVersion::SoF) {
-		const ItemInst* inst = m_inv[SlotPowerSource];
+		const ItemInst* inst = m_inv[EQEmu::legacy::SlotPowerSource];
 		if(inst) {
-			std::string packet = inst->Serialize(SlotPowerSource);
+			std::string packet = inst->Serialize(EQEmu::legacy::SlotPowerSource);
 			ser_items[i++] = packet;
 			size += packet.length();
 		}
 	}
 
 	// Bank items
-	for(slot_id = EQEmu::constants::BANK_BEGIN; slot_id <= EQEmu::constants::BANK_END; slot_id++) {
+	for (slot_id = EQEmu::legacy::BANK_BEGIN; slot_id <= EQEmu::legacy::BANK_END; slot_id++) {
 		const ItemInst* inst = m_inv[slot_id];
 		if(inst) {
 			std::string packet = inst->Serialize(slot_id);
@@ -820,7 +820,7 @@ void Client::BulkSendInventoryItems() {
 	}
 
 	// Shared Bank items
-	for(slot_id = EQEmu::constants::SHARED_BANK_BEGIN; slot_id <= EQEmu::constants::SHARED_BANK_END; slot_id++) {
+	for (slot_id = EQEmu::legacy::SHARED_BANK_BEGIN; slot_id <= EQEmu::legacy::SHARED_BANK_END; slot_id++) {
 		const ItemInst* inst = m_inv[slot_id];
 		if(inst) {
 			std::string packet = inst->Serialize(slot_id);
@@ -1147,7 +1147,7 @@ void Client::OPMemorizeSpell(const EQApplicationPacket* app)
 	switch(memspell->scribing)
 	{
 		case memSpellScribing:	{	// scribing spell to book
-			const ItemInst* inst = m_inv[SlotCursor];
+			const ItemInst* inst = m_inv[EQEmu::legacy::SlotCursor];
 
 			if(inst && inst->IsType(ItemClassCommon))
 			{
@@ -1161,7 +1161,7 @@ void Client::OPMemorizeSpell(const EQApplicationPacket* app)
 				if(item && item->Scroll.Effect == (int32)(memspell->spell_id))
 				{
 					ScribeSpell(memspell->spell_id, memspell->slot);
-					DeleteItemInInventory(SlotCursor, 1, true);
+					DeleteItemInInventory(EQEmu::legacy::SlotCursor, 1, true);
 				}
 				else
 					Message(0,"Scribing spell: inst exists but item does not or spell ids do not match.");

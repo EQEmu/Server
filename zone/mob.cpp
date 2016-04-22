@@ -73,7 +73,7 @@ Mob::Mob(const char* in_name,
 		uint32		in_drakkin_heritage,
 		uint32		in_drakkin_tattoo,
 		uint32		in_drakkin_details,
-		uint32		in_armor_tint[MaterialCount],
+		uint32		in_armor_tint[EQEmu::legacy::MaterialCount],
 
 		uint8		in_aa_title,
 		uint8		in_see_invis, // see through invis/ivu
@@ -280,7 +280,7 @@ Mob::Mob(const char* in_name,
 		RangedProcs[j].level_override = -1;
 	}
 
-	for (i = 0; i < MaterialCount; i++)
+	for (i = 0; i < EQEmu::legacy::MaterialCount; i++)
 	{
 		if (in_armor_tint)
 		{
@@ -2379,8 +2379,8 @@ bool Mob::CanThisClassDualWield(void) const {
 		return(GetSkill(SkillDualWield) > 0);
 	}
 	else if(CastToClient()->HasSkill(SkillDualWield)) {
-		const ItemInst* pinst = CastToClient()->GetInv().GetItem(SlotPrimary);
-		const ItemInst* sinst = CastToClient()->GetInv().GetItem(SlotSecondary);
+		const ItemInst* pinst = CastToClient()->GetInv().GetItem(EQEmu::legacy::SlotPrimary);
+		const ItemInst* sinst = CastToClient()->GetInv().GetItem(EQEmu::legacy::SlotSecondary);
 
 		// 2HS, 2HB, or 2HP
 		if(pinst && pinst->IsWeapon()) {
@@ -2865,7 +2865,7 @@ int32 Mob::GetEquipmentMaterial(uint8 material_slot) const
 	if (item != 0)
 	{
 		// For primary and secondary we need the model, not the material
-		if (material_slot == MaterialPrimary || material_slot == MaterialSecondary)
+		if (material_slot == EQEmu::legacy::MaterialPrimary || material_slot == EQEmu::legacy::MaterialSecondary)
 		{
 			if (this->IsClient())
 			{
@@ -2909,7 +2909,7 @@ int32 Mob::GetEquipmentMaterial(uint8 material_slot) const
 int32 Mob::GetHerosForgeModel(uint8 material_slot) const
 {
 	uint32 HeroModel = 0;
-	if (material_slot >= 0 && material_slot < MaterialPrimary)
+	if (material_slot >= 0 && material_slot < EQEmu::legacy::MaterialPrimary)
 	{
 		uint32 ornamentationAugtype = RuleI(Character, OrnamentationAugmentType);
 		const Item_Struct *item;

@@ -56,34 +56,34 @@ uint16 EQEmu::limits::InventoryTypeSize(versions::InventoryVersion inventory_ver
 	//
 	// when setting NPC-based values, try to adhere to an constants::<property> or NOT_USED value to avoid unnecessary issues
 
-	static const uint16 local[TypeCount][versions::InventoryVersionCount] = {
+	static const uint16 local[legacy::TypeCount][versions::InventoryVersionCount] = {
 		// server and database are sync'd to current TypePossessions's client as set in 'using namespace RoF::slots;' and
 		// 'constants::TYPE_POSSESSIONS_SIZE' - use/update EquipmentBitmask(), GeneralBitmask() and CursorBitmask()
 		// for partial range validation checks and 'constants::TYPE_POSSESSIONS_SIZE' for full range iterations
 		{ // local[TypePossessions]
 /*Unknown*/		NOT_USED,
-/*62*/			constants::TYPE_POSSESSIONS_SIZE,
-/*Titanium*/	constants::TYPE_POSSESSIONS_SIZE,
-/*SoF*/			constants::TYPE_POSSESSIONS_SIZE,
-/*SoD*/			constants::TYPE_POSSESSIONS_SIZE,
-/*Underfoot*/	constants::TYPE_POSSESSIONS_SIZE,
-/*RoF*/			constants::TYPE_POSSESSIONS_SIZE,
-/*RoF2*/		constants::TYPE_POSSESSIONS_SIZE,
+/*62*/			legacy::TYPE_POSSESSIONS_SIZE,
+/*Titanium*/	legacy::TYPE_POSSESSIONS_SIZE,
+/*SoF*/			legacy::TYPE_POSSESSIONS_SIZE,
+/*SoD*/			legacy::TYPE_POSSESSIONS_SIZE,
+/*Underfoot*/	legacy::TYPE_POSSESSIONS_SIZE,
+/*RoF*/			legacy::TYPE_POSSESSIONS_SIZE,
+/*RoF2*/		legacy::TYPE_POSSESSIONS_SIZE,
 
-/*NPC*/			constants::TYPE_POSSESSIONS_SIZE,
-/*Merc*/		constants::TYPE_POSSESSIONS_SIZE,
-/*Bot*/			constants::TYPE_POSSESSIONS_SIZE,
-/*Pet*/			constants::TYPE_POSSESSIONS_SIZE
+/*NPC*/			legacy::TYPE_POSSESSIONS_SIZE,
+/*Merc*/		legacy::TYPE_POSSESSIONS_SIZE,
+/*Bot*/			legacy::TYPE_POSSESSIONS_SIZE,
+/*Pet*/			legacy::TYPE_POSSESSIONS_SIZE
 		},
 		{ // local[TypeBank]
 /*Unknown*/		NOT_USED,
 /*62*/			NOT_USED,
 /*Titanium*/	Titanium::consts::TYPE_BANK_SIZE,
-/*SoF*/			constants::TYPE_BANK_SIZE,
-/*SoD*/			constants::TYPE_BANK_SIZE,
-/*Underfoot*/	constants::TYPE_BANK_SIZE,
-/*RoF*/			constants::TYPE_BANK_SIZE,
-/*RoF2*/		constants::TYPE_BANK_SIZE,
+/*SoF*/			legacy::TYPE_BANK_SIZE,
+/*SoD*/			legacy::TYPE_BANK_SIZE,
+/*Underfoot*/	legacy::TYPE_BANK_SIZE,
+/*RoF*/			legacy::TYPE_BANK_SIZE,
+/*RoF2*/		legacy::TYPE_BANK_SIZE,
 
 /*NPC*/			NOT_USED,
 /*Merc*/		NOT_USED,
@@ -92,13 +92,13 @@ uint16 EQEmu::limits::InventoryTypeSize(versions::InventoryVersion inventory_ver
 		},
 		{ // local[TypeSharedBank]
 /*Unknown*/		NOT_USED,
-/*62*/			constants::TYPE_SHARED_BANK_SIZE,
-/*Titanium*/	constants::TYPE_SHARED_BANK_SIZE,
-/*SoF*/			constants::TYPE_SHARED_BANK_SIZE,
-/*SoD*/			constants::TYPE_SHARED_BANK_SIZE,
-/*Underfoot*/	constants::TYPE_SHARED_BANK_SIZE,
-/*RoF*/			constants::TYPE_SHARED_BANK_SIZE,
-/*RoF2*/		constants::TYPE_SHARED_BANK_SIZE,
+/*62*/			legacy::TYPE_SHARED_BANK_SIZE,
+/*Titanium*/	legacy::TYPE_SHARED_BANK_SIZE,
+/*SoF*/			legacy::TYPE_SHARED_BANK_SIZE,
+/*SoD*/			legacy::TYPE_SHARED_BANK_SIZE,
+/*Underfoot*/	legacy::TYPE_SHARED_BANK_SIZE,
+/*RoF*/			legacy::TYPE_SHARED_BANK_SIZE,
+/*RoF2*/		legacy::TYPE_SHARED_BANK_SIZE,
 
 /*NPC*/			NOT_USED,
 /*Merc*/		NOT_USED,
@@ -107,28 +107,28 @@ uint16 EQEmu::limits::InventoryTypeSize(versions::InventoryVersion inventory_ver
 		},
 		{ // local[TypeTrade]
 /*Unknown*/		NOT_USED,
-/*62*/			constants::TYPE_TRADE_SIZE,
-/*Titanium*/	constants::TYPE_TRADE_SIZE,
-/*SoF*/			constants::TYPE_TRADE_SIZE,
-/*SoD*/			constants::TYPE_TRADE_SIZE,
-/*Underfoot*/	constants::TYPE_TRADE_SIZE,
-/*RoF*/			constants::TYPE_TRADE_SIZE,
-/*RoF2*/		constants::TYPE_TRADE_SIZE,
+/*62*/			legacy::TYPE_TRADE_SIZE,
+/*Titanium*/	legacy::TYPE_TRADE_SIZE,
+/*SoF*/			legacy::TYPE_TRADE_SIZE,
+/*SoD*/			legacy::TYPE_TRADE_SIZE,
+/*Underfoot*/	legacy::TYPE_TRADE_SIZE,
+/*RoF*/			legacy::TYPE_TRADE_SIZE,
+/*RoF2*/		legacy::TYPE_TRADE_SIZE,
 
 /*NPC*/			4,
 /*Merc*/		4,
-/*Bot*/			constants::TYPE_TRADE_SIZE, // client thinks this is another client
+/*Bot*/			legacy::TYPE_TRADE_SIZE, // client thinks this is another client
 /*Pet*/			4
 		},
 		{ // local[TypeWorld]
 /*Unknown*/		NOT_USED,
-/*62*/			constants::TYPE_WORLD_SIZE,
-/*Titanium*/	constants::TYPE_WORLD_SIZE,
-/*SoF*/			constants::TYPE_WORLD_SIZE,
-/*SoD*/			constants::TYPE_WORLD_SIZE,
-/*Underfoot*/	constants::TYPE_WORLD_SIZE,
-/*RoF*/			constants::TYPE_WORLD_SIZE,
-/*RoF2*/		constants::TYPE_WORLD_SIZE,
+/*62*/			legacy::TYPE_WORLD_SIZE,
+/*Titanium*/	legacy::TYPE_WORLD_SIZE,
+/*SoF*/			legacy::TYPE_WORLD_SIZE,
+/*SoD*/			legacy::TYPE_WORLD_SIZE,
+/*Underfoot*/	legacy::TYPE_WORLD_SIZE,
+/*RoF*/			legacy::TYPE_WORLD_SIZE,
+/*RoF2*/		legacy::TYPE_WORLD_SIZE,
 
 /*NPC*/			NOT_USED,
 /*Merc*/		NOT_USED,
@@ -137,13 +137,13 @@ uint16 EQEmu::limits::InventoryTypeSize(versions::InventoryVersion inventory_ver
 		},
 		{ // local[TypeLimbo]
 /*Unknown*/		NOT_USED,
-/*62*/			constants::TYPE_LIMBO_SIZE,
-/*Titanium*/	constants::TYPE_LIMBO_SIZE,
-/*SoF*/			constants::TYPE_LIMBO_SIZE,
-/*SoD*/			constants::TYPE_LIMBO_SIZE,
-/*Underfoot*/	constants::TYPE_LIMBO_SIZE,
-/*RoF*/			constants::TYPE_LIMBO_SIZE,
-/*RoF2*/		constants::TYPE_LIMBO_SIZE,
+/*62*/			legacy::TYPE_LIMBO_SIZE,
+/*Titanium*/	legacy::TYPE_LIMBO_SIZE,
+/*SoF*/			legacy::TYPE_LIMBO_SIZE,
+/*SoD*/			legacy::TYPE_LIMBO_SIZE,
+/*Underfoot*/	legacy::TYPE_LIMBO_SIZE,
+/*RoF*/			legacy::TYPE_LIMBO_SIZE,
+/*RoF2*/		legacy::TYPE_LIMBO_SIZE,
 
 /*NPC*/			NOT_USED,
 /*Merc*/		NOT_USED,
@@ -152,13 +152,13 @@ uint16 EQEmu::limits::InventoryTypeSize(versions::InventoryVersion inventory_ver
 		},
 		{ // local[TypeTribute]
 /*Unknown*/		NOT_USED,
-/*62*/			constants::TYPE_TRIBUTE_SIZE,
-/*Titanium*/	constants::TYPE_TRIBUTE_SIZE,
-/*SoF*/			constants::TYPE_TRIBUTE_SIZE,
-/*SoD*/			constants::TYPE_TRIBUTE_SIZE,
-/*Underfoot*/	constants::TYPE_TRIBUTE_SIZE,
-/*RoF*/			constants::TYPE_TRIBUTE_SIZE,
-/*RoF2*/		constants::TYPE_TRIBUTE_SIZE,
+/*62*/			legacy::TYPE_TRIBUTE_SIZE,
+/*Titanium*/	legacy::TYPE_TRIBUTE_SIZE,
+/*SoF*/			legacy::TYPE_TRIBUTE_SIZE,
+/*SoD*/			legacy::TYPE_TRIBUTE_SIZE,
+/*Underfoot*/	legacy::TYPE_TRIBUTE_SIZE,
+/*RoF*/			legacy::TYPE_TRIBUTE_SIZE,
+/*RoF2*/		legacy::TYPE_TRIBUTE_SIZE,
 
 /*NPC*/			0,
 /*Merc*/		0,
@@ -172,8 +172,8 @@ uint16 EQEmu::limits::InventoryTypeSize(versions::InventoryVersion inventory_ver
 /*SoF*/			0,
 /*SoD*/			0,
 /*Underfoot*/	0,
-/*RoF*/			constants::TYPE_TROPHY_TRIBUTE_SIZE,
-/*RoF2*/		constants::TYPE_TROPHY_TRIBUTE_SIZE,
+/*RoF*/			legacy::TYPE_TROPHY_TRIBUTE_SIZE,
+/*RoF2*/		legacy::TYPE_TROPHY_TRIBUTE_SIZE,
 
 /*NPC*/			0,
 /*Merc*/		0,
@@ -187,8 +187,8 @@ uint16 EQEmu::limits::InventoryTypeSize(versions::InventoryVersion inventory_ver
 /*SoF*/			0,
 /*SoD*/			0,
 /*Underfoot*/	0,
-/*RoF*/			constants::TYPE_GUILD_TRIBUTE_SIZE,
-/*RoF2*/		constants::TYPE_GUILD_TRIBUTE_SIZE,
+/*RoF*/			legacy::TYPE_GUILD_TRIBUTE_SIZE,
+/*RoF2*/		legacy::TYPE_GUILD_TRIBUTE_SIZE,
 
 /*NPC*/			0,
 /*Merc*/		0,
@@ -202,8 +202,8 @@ uint16 EQEmu::limits::InventoryTypeSize(versions::InventoryVersion inventory_ver
 /*SoF*/			0,
 /*SoD*/			0,
 /*Underfoot*/	0,
-/*RoF*/			constants::TYPE_MERCHANT_SIZE,
-/*RoF2*/		constants::TYPE_MERCHANT_SIZE,
+/*RoF*/			legacy::TYPE_MERCHANT_SIZE,
+/*RoF2*/		legacy::TYPE_MERCHANT_SIZE,
 
 /*NPC*/			0,
 /*Merc*/		0,
@@ -217,8 +217,8 @@ uint16 EQEmu::limits::InventoryTypeSize(versions::InventoryVersion inventory_ver
 /*SoF*/			0,
 /*SoD*/			0,
 /*Underfoot*/	0,
-/*RoF*/			constants::TYPE_DELETED_SIZE,
-/*RoF2*/		constants::TYPE_DELETED_SIZE,
+/*RoF*/			legacy::TYPE_DELETED_SIZE,
+/*RoF2*/		legacy::TYPE_DELETED_SIZE,
 
 /*NPC*/			0,
 /*Merc*/		0,
@@ -242,15 +242,15 @@ uint16 EQEmu::limits::InventoryTypeSize(versions::InventoryVersion inventory_ver
 		},
 		{ // local[TypeBazaar]
 /*Unknown*/		NOT_USED,
-/*62*/			constants::TYPE_BAZAAR_SIZE,
-/*Titanium*/	constants::TYPE_BAZAAR_SIZE,
-/*SoF*/			constants::TYPE_BAZAAR_SIZE,
-/*SoD*/			constants::TYPE_BAZAAR_SIZE,
-/*Underfoot*/	constants::TYPE_BAZAAR_SIZE,
-/*RoF*/			constants::TYPE_BAZAAR_SIZE,
-/*RoF2*/		constants::TYPE_BAZAAR_SIZE,
+/*62*/			legacy::TYPE_BAZAAR_SIZE,
+/*Titanium*/	legacy::TYPE_BAZAAR_SIZE,
+/*SoF*/			legacy::TYPE_BAZAAR_SIZE,
+/*SoD*/			legacy::TYPE_BAZAAR_SIZE,
+/*Underfoot*/	legacy::TYPE_BAZAAR_SIZE,
+/*RoF*/			legacy::TYPE_BAZAAR_SIZE,
+/*RoF2*/		legacy::TYPE_BAZAAR_SIZE,
 
-/*NPC*/			0, // this may need to be 'constants::TYPE_BAZAAR_SIZE' if offline client traders respawn as an npc
+/*NPC*/			0, // this may need to be 'legacy::TYPE_BAZAAR_SIZE' if offline client traders respawn as an npc
 /*Merc*/		0,
 /*Bot*/			0,
 /*Pet*/			0
@@ -277,8 +277,8 @@ uint16 EQEmu::limits::InventoryTypeSize(versions::InventoryVersion inventory_ver
 /*SoF*/			0,
 /*SoD*/			0,
 /*Underfoot*/	0,
-/*RoF*/			constants::TYPE_REAL_ESTATE_SIZE,
-/*RoF2*/		constants::TYPE_REAL_ESTATE_SIZE,
+/*RoF*/			legacy::TYPE_REAL_ESTATE_SIZE,
+/*RoF2*/		legacy::TYPE_REAL_ESTATE_SIZE,
 
 /*NPC*/			0,
 /*Merc*/		0,
@@ -292,8 +292,8 @@ uint16 EQEmu::limits::InventoryTypeSize(versions::InventoryVersion inventory_ver
 /*SoF*/			0,
 /*SoD*/			0,
 /*Underfoot*/	0,
-/*RoF*/			constants::TYPE_VIEW_MOD_PC_SIZE,
-/*RoF2*/		constants::TYPE_VIEW_MOD_PC_SIZE,
+/*RoF*/			legacy::TYPE_VIEW_MOD_PC_SIZE,
+/*RoF2*/		legacy::TYPE_VIEW_MOD_PC_SIZE,
 
 /*NPC*/			0,
 /*Merc*/		0,
@@ -307,8 +307,8 @@ uint16 EQEmu::limits::InventoryTypeSize(versions::InventoryVersion inventory_ver
 /*SoF*/			0,
 /*SoD*/			0,
 /*Underfoot*/	0,
-/*RoF*/			constants::TYPE_VIEW_MOD_BANK_SIZE,
-/*RoF2*/		constants::TYPE_VIEW_MOD_BANK_SIZE,
+/*RoF*/			legacy::TYPE_VIEW_MOD_BANK_SIZE,
+/*RoF2*/		legacy::TYPE_VIEW_MOD_BANK_SIZE,
 
 /*NPC*/			0,
 /*Merc*/		0,
@@ -322,8 +322,8 @@ uint16 EQEmu::limits::InventoryTypeSize(versions::InventoryVersion inventory_ver
 /*SoF*/			0,
 /*SoD*/			0,
 /*Underfoot*/	0,
-/*RoF*/			constants::TYPE_VIEW_MOD_SHARED_BANK_SIZE,
-/*RoF2*/		constants::TYPE_VIEW_MOD_SHARED_BANK_SIZE,
+/*RoF*/			legacy::TYPE_VIEW_MOD_SHARED_BANK_SIZE,
+/*RoF2*/		legacy::TYPE_VIEW_MOD_SHARED_BANK_SIZE,
 
 /*NPC*/			0,
 /*Merc*/		0,
@@ -337,8 +337,8 @@ uint16 EQEmu::limits::InventoryTypeSize(versions::InventoryVersion inventory_ver
 /*SoF*/			0,
 /*SoD*/			0,
 /*Underfoot*/	0,
-/*RoF*/			constants::TYPE_VIEW_MOD_LIMBO_SIZE,
-/*RoF2*/		constants::TYPE_VIEW_MOD_LIMBO_SIZE,
+/*RoF*/			legacy::TYPE_VIEW_MOD_LIMBO_SIZE,
+/*RoF2*/		legacy::TYPE_VIEW_MOD_LIMBO_SIZE,
 
 /*NPC*/			0,
 /*Merc*/		0,
@@ -352,8 +352,8 @@ uint16 EQEmu::limits::InventoryTypeSize(versions::InventoryVersion inventory_ver
 /*SoF*/			0,
 /*SoD*/			0,
 /*Underfoot*/	0,
-/*RoF*/			constants::TYPE_ALT_STORAGE_SIZE,
-/*RoF2*/		constants::TYPE_ALT_STORAGE_SIZE,
+/*RoF*/			legacy::TYPE_ALT_STORAGE_SIZE,
+/*RoF2*/		legacy::TYPE_ALT_STORAGE_SIZE,
 
 /*NPC*/			0,
 /*Merc*/		0,
@@ -367,8 +367,8 @@ uint16 EQEmu::limits::InventoryTypeSize(versions::InventoryVersion inventory_ver
 /*SoF*/			0,
 /*SoD*/			0,
 /*Underfoot*/	0,
-/*RoF*/			constants::TYPE_ARCHIVED_SIZE,
-/*RoF2*/		constants::TYPE_ARCHIVED_SIZE,
+/*RoF*/			legacy::TYPE_ARCHIVED_SIZE,
+/*RoF2*/		legacy::TYPE_ARCHIVED_SIZE,
 
 /*NPC*/			0,
 /*Merc*/		0,
@@ -382,8 +382,8 @@ uint16 EQEmu::limits::InventoryTypeSize(versions::InventoryVersion inventory_ver
 /*SoF*/			0,
 /*SoD*/			0,
 /*Underfoot*/	0,
-/*RoF*/			constants::TYPE_MAIL_SIZE,
-/*RoF2*/		constants::TYPE_MAIL_SIZE,
+/*RoF*/			legacy::TYPE_MAIL_SIZE,
+/*RoF2*/		legacy::TYPE_MAIL_SIZE,
 
 /*NPC*/			0,
 /*Merc*/		0,
@@ -397,8 +397,8 @@ uint16 EQEmu::limits::InventoryTypeSize(versions::InventoryVersion inventory_ver
 /*SoF*/			0,
 /*SoD*/			0,
 /*Underfoot*/	0,
-/*RoF*/			constants::TYPE_GUILD_TROPHY_TRIBUTE_SIZE,
-/*RoF2*/		constants::TYPE_GUILD_TROPHY_TRIBUTE_SIZE,
+/*RoF*/			legacy::TYPE_GUILD_TROPHY_TRIBUTE_SIZE,
+/*RoF2*/		legacy::TYPE_GUILD_TROPHY_TRIBUTE_SIZE,
 
 /*NPC*/			0,
 /*Merc*/		0,
@@ -412,8 +412,8 @@ uint16 EQEmu::limits::InventoryTypeSize(versions::InventoryVersion inventory_ver
 /*SoF*/			NOT_USED,
 /*SoD*/			NOT_USED,
 /*Underfoot*/	NOT_USED,
-/*RoF*/			constants::TYPE_KRONO_SIZE,
-/*RoF2*/		constants::TYPE_KRONO_SIZE,
+/*RoF*/			legacy::TYPE_KRONO_SIZE,
+/*RoF2*/		legacy::TYPE_KRONO_SIZE,
 
 /*NPC*/			0,
 /*Merc*/		0,
@@ -427,8 +427,8 @@ uint16 EQEmu::limits::InventoryTypeSize(versions::InventoryVersion inventory_ver
 /*SoF*/			0,
 /*SoD*/			0,
 /*Underfoot*/	0,
-/*RoF*/			constants::TYPE_OTHER_SIZE,
-/*RoF2*/		constants::TYPE_OTHER_SIZE,
+/*RoF*/			legacy::TYPE_OTHER_SIZE,
+/*RoF2*/		legacy::TYPE_OTHER_SIZE,
 
 /*NPC*/			0,
 /*Merc*/		0,
@@ -437,7 +437,7 @@ uint16 EQEmu::limits::InventoryTypeSize(versions::InventoryVersion inventory_ver
 		}
 	};
 
-	if ((uint16)inv_type < TypeCount)
+	if ((uint16)inv_type < legacy::TypeCount)
 		return local[inv_type][static_cast<size_t>(versions::ValidateInventoryVersion(inventory_version))];
 
 	return NOT_USED;
@@ -584,18 +584,18 @@ uint16 EQEmu::limits::ItemCommonSize(versions::InventoryVersion inventory_versio
 {
 	static const uint16 local[versions::InventoryVersionCount] = {
 /*Unknown*/		NOT_USED,
-/*62*/			constants::ITEM_COMMON_SIZE,
-/*Titanium*/	constants::ITEM_COMMON_SIZE,
-/*SoF*/			constants::ITEM_COMMON_SIZE,
-/*SoD*/			constants::ITEM_COMMON_SIZE,
-/*Underfoot*/	constants::ITEM_COMMON_SIZE,
-/*RoF*/			constants::ITEM_COMMON_SIZE,
-/*RoF2*/		constants::ITEM_COMMON_SIZE,
+/*62*/			legacy::ITEM_COMMON_SIZE,
+/*Titanium*/	legacy::ITEM_COMMON_SIZE,
+/*SoF*/			legacy::ITEM_COMMON_SIZE,
+/*SoD*/			legacy::ITEM_COMMON_SIZE,
+/*Underfoot*/	legacy::ITEM_COMMON_SIZE,
+/*RoF*/			legacy::ITEM_COMMON_SIZE,
+/*RoF2*/		legacy::ITEM_COMMON_SIZE,
 
-/*NPC*/			constants::ITEM_COMMON_SIZE,
-/*Merc*/		constants::ITEM_COMMON_SIZE,
-/*Bot*/			constants::ITEM_COMMON_SIZE,
-/*Pet*/			constants::ITEM_COMMON_SIZE
+/*NPC*/			legacy::ITEM_COMMON_SIZE,
+/*Merc*/		legacy::ITEM_COMMON_SIZE,
+/*Bot*/			legacy::ITEM_COMMON_SIZE,
+/*Pet*/			legacy::ITEM_COMMON_SIZE
 	};
 
 	return local[static_cast<size_t>(versions::ValidateInventoryVersion(inventory_version))];
@@ -605,18 +605,18 @@ uint16 EQEmu::limits::ItemContainerSize(versions::InventoryVersion inventory_ver
 {
 	static const uint16 local[versions::InventoryVersionCount] = {
 /*Unknown*/		NOT_USED,
-/*62*/			constants::ITEM_CONTAINER_SIZE,
-/*Titanium*/	constants::ITEM_CONTAINER_SIZE,
-/*SoF*/			constants::ITEM_CONTAINER_SIZE,
-/*SoD*/			constants::ITEM_CONTAINER_SIZE,
-/*Underfoot*/	constants::ITEM_CONTAINER_SIZE,
-/*RoF*/			constants::ITEM_CONTAINER_SIZE,
-/*RoF2*/		constants::ITEM_CONTAINER_SIZE,
+/*62*/			legacy::ITEM_CONTAINER_SIZE,
+/*Titanium*/	legacy::ITEM_CONTAINER_SIZE,
+/*SoF*/			legacy::ITEM_CONTAINER_SIZE,
+/*SoD*/			legacy::ITEM_CONTAINER_SIZE,
+/*Underfoot*/	legacy::ITEM_CONTAINER_SIZE,
+/*RoF*/			legacy::ITEM_CONTAINER_SIZE,
+/*RoF2*/		legacy::ITEM_CONTAINER_SIZE,
 
-/*NPC*/			constants::ITEM_CONTAINER_SIZE,
-/*Merc*/		constants::ITEM_CONTAINER_SIZE,
-/*Bot*/			constants::ITEM_CONTAINER_SIZE,
-/*Pet*/			constants::ITEM_CONTAINER_SIZE
+/*NPC*/			legacy::ITEM_CONTAINER_SIZE,
+/*Merc*/		legacy::ITEM_CONTAINER_SIZE,
+/*Bot*/			legacy::ITEM_CONTAINER_SIZE,
+/*Pet*/			legacy::ITEM_CONTAINER_SIZE
 	};
 
 	return local[static_cast<size_t>(versions::ValidateInventoryVersion(inventory_version))];

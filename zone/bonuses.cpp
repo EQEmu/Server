@@ -145,34 +145,35 @@ void Client::CalcItemBonuses(StatBonuses* newbon) {
 
 	unsigned int i;
 	// Update: MainAmmo should only calc skill mods (TODO: Check for other cases)
-	for (i = SlotCharm; i <= SlotAmmo; i++) {
+	for (i = EQEmu::legacy::SlotCharm; i <= EQEmu::legacy::SlotAmmo; i++) {
 		const ItemInst* inst = m_inv[i];
 		if(inst == 0)
 			continue;
-		AddItemBonuses(inst, newbon, false, false, 0, (i == SlotAmmo));
+		AddItemBonuses(inst, newbon, false, false, 0, (i == EQEmu::legacy::SlotAmmo));
 
 		//These are given special flags due to how often they are checked for various spell effects.
 		const Item_Struct *item = inst->GetItem();
-		if (i == SlotSecondary && (item && item->ItemType == ItemTypeShield))
+		if (i == EQEmu::legacy::SlotSecondary && (item && item->ItemType == ItemTypeShield))
 			SetShieldEquiped(true);
-		else if (i == SlotPrimary && (item && item->ItemType == ItemType2HBlunt)) {
+		else if (i == EQEmu::legacy::SlotPrimary && (item && item->ItemType == ItemType2HBlunt)) {
 			SetTwoHandBluntEquiped(true);
 			SetTwoHanderEquipped(true);
-		} else if (i == SlotPrimary && (item && (item->ItemType == ItemType2HSlash || item->ItemType == ItemType2HPiercing)))
+		}
+		else if (i == EQEmu::legacy::SlotPrimary && (item && (item->ItemType == ItemType2HSlash || item->ItemType == ItemType2HPiercing)))
 			SetTwoHanderEquipped(true);
 	}
 
 	//Power Source Slot
 	if (ClientVersion() >= EQEmu::versions::ClientVersion::SoF)
 	{
-		const ItemInst* inst = m_inv[SlotPowerSource];
+		const ItemInst* inst = m_inv[EQEmu::legacy::SlotPowerSource];
 		if(inst)
 			AddItemBonuses(inst, newbon);
 	}
 
 	//tribute items
-	for (i = 0; i < EQEmu::constants::TRIBUTE_SIZE; i++) {
-		const ItemInst* inst = m_inv[EQEmu::constants::TRIBUTE_BEGIN + i];
+	for (i = 0; i < EQEmu::legacy::TRIBUTE_SIZE; i++) {
+		const ItemInst* inst = m_inv[EQEmu::legacy::TRIBUTE_BEGIN + i];
 		if(inst == 0)
 			continue;
 		AddItemBonuses(inst, newbon, false, true);
@@ -180,7 +181,7 @@ void Client::CalcItemBonuses(StatBonuses* newbon) {
 
 	//Optional ability to have worn effects calculate as an addititive bonus instead of highest value
 	if (RuleI(Spells, AdditiveBonusWornType) && RuleI(Spells, AdditiveBonusWornType) != ET_WornEffect){
-		for (i = SlotCharm; i < SlotAmmo; i++) {
+		for (i = EQEmu::legacy::SlotCharm; i < EQEmu::legacy::SlotAmmo; i++) {
 			const ItemInst* inst = m_inv[i];
 			if(inst == 0)
 				continue;
@@ -526,7 +527,7 @@ void Client::AddItemBonuses(const ItemInst *inst, StatBonuses *newbon, bool isAu
 	}
 
 	if (!isAug) {
-		for (int i = 0; i < EQEmu::constants::ITEM_COMMON_SIZE; i++)
+		for (int i = 0; i < EQEmu::legacy::ITEM_COMMON_SIZE; i++)
 			AddItemBonuses(inst->GetAugment(i), newbon, true, false, rec_level, ammo_slot_item);
 	}
 }
@@ -564,7 +565,7 @@ void Client::AdditiveWornBonuses(const ItemInst *inst, StatBonuses* newbon, bool
 	if (!isAug)
 	{
 		int i;
-		for (i = 0; i < EQEmu::constants::ITEM_COMMON_SIZE; i++) {
+		for (i = 0; i < EQEmu::legacy::ITEM_COMMON_SIZE; i++) {
 			AdditiveWornBonuses(inst->GetAugment(i),newbon,true);
 		}
 	}
@@ -575,7 +576,7 @@ void Client::CalcEdibleBonuses(StatBonuses* newbon) {
 
 	bool food = false;
 	bool drink = false;
-	for (i = EQEmu::constants::GENERAL_BEGIN; i <= EQEmu::constants::GENERAL_BAGS_BEGIN; i++)
+	for (i = EQEmu::legacy::GENERAL_BEGIN; i <= EQEmu::legacy::GENERAL_BAGS_BEGIN; i++)
 	{
 		if (food && drink)
 			break;
@@ -591,7 +592,7 @@ void Client::CalcEdibleBonuses(StatBonuses* newbon) {
 			AddItemBonuses(inst, newbon);
 		}
 	}
-	for (i = EQEmu::constants::GENERAL_BAGS_BEGIN; i <= EQEmu::constants::GENERAL_BAGS_END; i++)
+	for (i = EQEmu::legacy::GENERAL_BAGS_BEGIN; i <= EQEmu::legacy::GENERAL_BAGS_END; i++)
 	{
 		if (food && drink)
 			break;
@@ -3200,7 +3201,7 @@ void NPC::CalcItemBonuses(StatBonuses *newbon)
 {
 	if(newbon){
 
-		for (int i = 0; i < EQEmu::constants::EQUIPMENT_SIZE; i++){
+		for (int i = 0; i < EQEmu::legacy::EQUIPMENT_SIZE; i++){
 			const Item_Struct *cur = database.GetItem(equipment[i]);
 			if(cur){
 				//basic stats
@@ -3278,24 +3279,24 @@ void Client::CalcItemScale() {
 	bool changed = false;
 
 	// MainAmmo excluded in helper function below
-	if (CalcItemScale(EQEmu::constants::EQUIPMENT_BEGIN, EQEmu::constants::EQUIPMENT_END)) // original coding excluded MainAmmo (< 21)
+	if (CalcItemScale(EQEmu::legacy::EQUIPMENT_BEGIN, EQEmu::legacy::EQUIPMENT_END)) // original coding excluded MainAmmo (< 21)
 		changed = true;
 
-	if (CalcItemScale(EQEmu::constants::GENERAL_BEGIN, EQEmu::constants::GENERAL_END)) // original coding excluded MainCursor (< 30)
+	if (CalcItemScale(EQEmu::legacy::GENERAL_BEGIN, EQEmu::legacy::GENERAL_END)) // original coding excluded MainCursor (< 30)
 		changed = true;
 
 	// I excluded cursor bag slots here because cursor was excluded above..if this is incorrect, change 'slot_y' here to CURSOR_BAG_END
 	// and 'slot_y' above to CURSOR from GENERAL_END above - or however it is supposed to be...
-	if (CalcItemScale(EQEmu::constants::GENERAL_BAGS_BEGIN, EQEmu::constants::GENERAL_BAGS_END)) // (< 341)
+	if (CalcItemScale(EQEmu::legacy::GENERAL_BAGS_BEGIN, EQEmu::legacy::GENERAL_BAGS_END)) // (< 341)
 		changed = true;
 
-	if (CalcItemScale(EQEmu::constants::TRIBUTE_BEGIN, EQEmu::constants::TRIBUTE_END)) // (< 405)
+	if (CalcItemScale(EQEmu::legacy::TRIBUTE_BEGIN, EQEmu::legacy::TRIBUTE_END)) // (< 405)
 		changed = true;
 
 	//Power Source Slot
 	if (ClientVersion() >= EQEmu::versions::ClientVersion::SoF)
 	{
-		if(CalcItemScale(SlotPowerSource, SlotPowerSource))
+		if (CalcItemScale(EQEmu::legacy::SlotPowerSource, EQEmu::legacy::SlotPowerSource))
 			changed = true;
 	}
 
@@ -3310,7 +3311,7 @@ bool Client::CalcItemScale(uint32 slot_x, uint32 slot_y) {
 	bool changed = false;
 	uint32 i;
 	for (i = slot_x; i <= slot_y; i++) {
-		if (i == SlotAmmo) // moved here from calling procedure to facilitate future range changes where MainAmmo may not be the last slot
+		if (i == EQEmu::legacy::SlotAmmo) // moved here from calling procedure to facilitate future range changes where MainAmmo may not be the last slot
 			continue;
 
 		ItemInst* inst = m_inv.GetItem(i);
@@ -3320,7 +3321,7 @@ bool Client::CalcItemScale(uint32 slot_x, uint32 slot_y) {
 
 		// TEST CODE: test for bazaar trader crashing with charm items
 		if (Trader)
-			if (i >= EQEmu::constants::GENERAL_BAGS_BEGIN && i <= EQEmu::constants::GENERAL_BAGS_END) {
+			if (i >= EQEmu::legacy::GENERAL_BAGS_BEGIN && i <= EQEmu::legacy::GENERAL_BAGS_END) {
 				ItemInst* parent_item = m_inv.GetItem(Inventory::CalcSlotId(i));
 				if (parent_item && parent_item->GetItem()->ID == 17899) // trader satchel
 					continue;
@@ -3340,7 +3341,7 @@ bool Client::CalcItemScale(uint32 slot_x, uint32 slot_y) {
 		}
 
 		//iterate all augments
-		for (int x = AUG_INDEX_BEGIN; x < EQEmu::constants::ITEM_COMMON_SIZE; ++x)
+		for (int x = AUG_INDEX_BEGIN; x < EQEmu::legacy::ITEM_COMMON_SIZE; ++x)
 		{
 			ItemInst * a_inst = inst->GetAugment(x);
 			if(!a_inst)
@@ -3372,24 +3373,24 @@ void Client::DoItemEnterZone() {
 	bool changed = false;
 
 	// MainAmmo excluded in helper function below
-	if (DoItemEnterZone(EQEmu::constants::EQUIPMENT_BEGIN, EQEmu::constants::EQUIPMENT_END)) // original coding excluded MainAmmo (< 21)
+	if (DoItemEnterZone(EQEmu::legacy::EQUIPMENT_BEGIN, EQEmu::legacy::EQUIPMENT_END)) // original coding excluded MainAmmo (< 21)
 		changed = true;
 
-	if (DoItemEnterZone(EQEmu::constants::GENERAL_BEGIN, EQEmu::constants::GENERAL_END)) // original coding excluded MainCursor (< 30)
+	if (DoItemEnterZone(EQEmu::legacy::GENERAL_BEGIN, EQEmu::legacy::GENERAL_END)) // original coding excluded MainCursor (< 30)
 		changed = true;
 
 	// I excluded cursor bag slots here because cursor was excluded above..if this is incorrect, change 'slot_y' here to CURSOR_BAG_END
 	// and 'slot_y' above to CURSOR from GENERAL_END above - or however it is supposed to be...
-	if (DoItemEnterZone(EQEmu::constants::GENERAL_BAGS_BEGIN, EQEmu::constants::GENERAL_BAGS_END)) // (< 341)
+	if (DoItemEnterZone(EQEmu::legacy::GENERAL_BAGS_BEGIN, EQEmu::legacy::GENERAL_BAGS_END)) // (< 341)
 		changed = true;
 
-	if (DoItemEnterZone(EQEmu::constants::TRIBUTE_BEGIN, EQEmu::constants::TRIBUTE_END)) // (< 405)
+	if (DoItemEnterZone(EQEmu::legacy::TRIBUTE_BEGIN, EQEmu::legacy::TRIBUTE_END)) // (< 405)
 		changed = true;
 
 	//Power Source Slot
 	if (ClientVersion() >= EQEmu::versions::ClientVersion::SoF)
 	{
-		if(DoItemEnterZone(SlotPowerSource, SlotPowerSource))
+		if (DoItemEnterZone(EQEmu::legacy::SlotPowerSource, EQEmu::legacy::SlotPowerSource))
 			changed = true;
 	}
 
@@ -3403,7 +3404,7 @@ bool Client::DoItemEnterZone(uint32 slot_x, uint32 slot_y) {
 	// behavior change: 'slot_y' is now [RANGE]_END and not [RANGE]_END + 1
 	bool changed = false;
 	for(uint32 i = slot_x; i <= slot_y; i++) {
-		if (i == SlotAmmo) // moved here from calling procedure to facilitate future range changes where MainAmmo may not be the last slot
+		if (i == EQEmu::legacy::SlotAmmo) // moved here from calling procedure to facilitate future range changes where MainAmmo may not be the last slot
 			continue;
 
 		ItemInst* inst = m_inv.GetItem(i);
@@ -3413,7 +3414,7 @@ bool Client::DoItemEnterZone(uint32 slot_x, uint32 slot_y) {
 
 		// TEST CODE: test for bazaar trader crashing with charm items
 		if (Trader)
-			if (i >= EQEmu::constants::GENERAL_BAGS_BEGIN && i <= EQEmu::constants::GENERAL_BAGS_END) {
+			if (i >= EQEmu::legacy::GENERAL_BAGS_BEGIN && i <= EQEmu::legacy::GENERAL_BAGS_END) {
 				ItemInst* parent_item = m_inv.GetItem(Inventory::CalcSlotId(i));
 				if (parent_item && parent_item->GetItem()->ID == 17899) // trader satchel
 					continue;
@@ -3425,7 +3426,7 @@ bool Client::DoItemEnterZone(uint32 slot_x, uint32 slot_y) {
 			uint16 oldexp = inst->GetExp();
 
 			parse->EventItem(EVENT_ITEM_ENTER_ZONE, this, inst, nullptr, "", 0);
-			if(i <= SlotAmmo || i == SlotPowerSource) {
+			if (i <= EQEmu::legacy::SlotAmmo || i == EQEmu::legacy::SlotPowerSource) {
 				parse->EventItem(EVENT_EQUIP_ITEM, this, inst, nullptr, "", i);
 			}
 
@@ -3435,7 +3436,7 @@ bool Client::DoItemEnterZone(uint32 slot_x, uint32 slot_y) {
 				update_slot = true;
 			}
 		} else {
-			if(i <= SlotAmmo || i == SlotPowerSource) {
+			if (i <= EQEmu::legacy::SlotAmmo || i == EQEmu::legacy::SlotPowerSource) {
 				parse->EventItem(EVENT_EQUIP_ITEM, this, inst, nullptr, "", i);
 			}
 
@@ -3443,7 +3444,7 @@ bool Client::DoItemEnterZone(uint32 slot_x, uint32 slot_y) {
 		}
 
 		//iterate all augments
-		for (int x = AUG_INDEX_BEGIN; x < EQEmu::constants::ITEM_COMMON_SIZE; ++x)
+		for (int x = AUG_INDEX_BEGIN; x < EQEmu::legacy::ITEM_COMMON_SIZE; ++x)
 		{
 			ItemInst *a_inst = inst->GetAugment(x);
 			if(!a_inst)

@@ -39,7 +39,7 @@ std::string EQEmu::saylink::SayLinkEngine::GenerateLink()
 	generate_body();
 	generate_text();
 
-	if ((m_LinkBody.length() == EQEmu::constants::TEXT_LINK_BODY_LENGTH) && (m_LinkText.length() > 0)) {
+	if ((m_LinkBody.length() == EQEmu::legacy::TEXT_LINK_BODY_LENGTH) && (m_LinkText.length() > 0)) {
 		m_Link.push_back(0x12);
 		m_Link.append(m_LinkBody);
 		m_Link.append(m_LinkText);
@@ -231,7 +231,7 @@ void EQEmu::saylink::SayLinkEngine::generate_text()
 bool EQEmu::saylink::DegenerateLinkBody(SayLinkBody_Struct& say_link_body_struct, const std::string& say_link_body)
 {
 	memset(&say_link_body_struct, 0, sizeof(say_link_body_struct));
-	if (say_link_body.length() != EQEmu::constants::TEXT_LINK_BODY_LENGTH)
+	if (say_link_body.length() != EQEmu::legacy::TEXT_LINK_BODY_LENGTH)
 		return false;
 
 	say_link_body_struct.unknown_1 = (uint8)strtol(say_link_body.substr(0, 1).c_str(), nullptr, 16);
@@ -270,7 +270,7 @@ bool EQEmu::saylink::GenerateLinkBody(std::string& say_link_body, const SayLinkB
 		(0xFFFFFFFF & say_link_body_struct.hash)
 	);
 
-	if (say_link_body.length() != EQEmu::constants::TEXT_LINK_BODY_LENGTH)
+	if (say_link_body.length() != EQEmu::legacy::TEXT_LINK_BODY_LENGTH)
 		return false;
 
 	return true;
