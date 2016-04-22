@@ -20,9 +20,9 @@
 #include "deity.h"
 
 
-EQEmu::deity::DeityTypeBit EQEmu::deity::ConvertDeityToDeityBit(DeityType deity)
+EQEmu::deity::DeityTypeBit EQEmu::deity::ConvertDeityTypeToDeityTypeBit(DeityType deity_type)
 {
-	switch (deity) {
+	switch (deity_type) {
 	case DeityBertoxxulous:
 		return bit_DeityBertoxxulous;
 	case DeityBrellSirilis:
@@ -63,9 +63,9 @@ EQEmu::deity::DeityTypeBit EQEmu::deity::ConvertDeityToDeityBit(DeityType deity)
 	};
 }
 
-EQEmu::deity::DeityType EQEmu::deity::ConvertDeityBitToDeity(DeityTypeBit deity_bit)
+EQEmu::deity::DeityType EQEmu::deity::ConvertDeityTypeBitToDeityType(DeityTypeBit deity_type_bit)
 {
-	switch (deity_bit) {
+	switch (deity_type_bit) {
 	case bit_DeityAgnostic:
 		return DeityAgnostic;
 	case bit_DeityBertoxxulous:
@@ -105,9 +105,9 @@ EQEmu::deity::DeityType EQEmu::deity::ConvertDeityBitToDeity(DeityTypeBit deity_
 	};
 }
 
-const char* EQEmu::deity::DeityName(DeityType deity)
+const char* EQEmu::deity::DeityName(DeityType deity_type)
 {
-	switch (deity) {
+	switch (deity_type) {
 	case DeityBertoxxulous:
 		return "Bertoxxulous";
 	case DeityBrellSirilis:

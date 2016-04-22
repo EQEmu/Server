@@ -67,9 +67,9 @@ namespace EQEmu
 			bit_DeityVeeshan = 0x00010000
 		};
 
-		extern DeityTypeBit ConvertDeityToDeityBit(DeityType deity);
-		extern DeityType ConvertDeityBitToDeity(DeityTypeBit deity_bit);
-		extern const char* DeityName(DeityType deity);
+		extern DeityTypeBit ConvertDeityTypeToDeityTypeBit(DeityType deity_type);
+		extern DeityType ConvertDeityTypeBitToDeityType(DeityTypeBit deity_type_bit);
+		extern const char* DeityName(DeityType deity_type);
 	}
 }
 
