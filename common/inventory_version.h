@@ -45,7 +45,7 @@ namespace EQEmu
 		static const InventoryVersion LastInventoryVersion = InventoryVersion::Pet;
 		static const InventoryVersion LastPCInventoryVersion = InventoryVersion::RoF2;
 		static const InventoryVersion LastNonPCInventoryVersion = InventoryVersion::Pet;
-		static const size_t InventoryVersionCount = (static_cast<size_t>(LastInventoryVersion) + 1);
+		static const size_t InventoryVersionCount = (static_cast<unsigned int>(LastInventoryVersion) + 1);
 
 		extern bool IsValidInventoryVersion(InventoryVersion inventory_version);
 		extern bool IsValidPCInventoryVersion(InventoryVersion inventory_version);

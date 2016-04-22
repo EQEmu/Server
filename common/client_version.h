@@ -60,7 +60,7 @@ namespace EQEmu
 		};
 
 		static const ClientVersion LastClientVersion = ClientVersion::RoF2;
-		static const size_t ClientVersionCount = (static_cast<size_t>(LastClientVersion) + 1);
+		static const size_t ClientVersionCount = (static_cast<unsigned int>(LastClientVersion) + 1);
 
 		extern bool IsValidClientVersion(ClientVersion client_version);
 		extern ClientVersion ValidateClientVersion(ClientVersion client_version);
