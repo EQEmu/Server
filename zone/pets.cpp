@@ -475,7 +475,7 @@ void Pet::SetTarget(Mob *mob)
 		return;
 
 	auto owner = GetOwner();
-	if (owner && owner->IsClient() && owner->CastToClient()->GetClientVersionBit() & BIT_UFAndLater) {
+	if (owner && owner->IsClient() && owner->CastToClient()->ClientVersionBit() & EQEmu::versions::bit_UFAndLater) {
 		auto app = new EQApplicationPacket(OP_PetHoTT, sizeof(ClientTarget_Struct));
 		auto ct = (ClientTarget_Struct *)app->pBuffer;
 		ct->new_target = mob ? mob->GetID() : 0;

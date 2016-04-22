@@ -259,7 +259,7 @@ bool Mob::CastSpell(uint16 spell_id, uint16 target_id, uint16 slot,
 		bitmask = bitmask << (CastToClient()->GetClass() - 1);
 		if( itm && itm->GetItem()->Classes != 65535 ) {
 			if ((itm->GetItem()->Click.Type == ET_EquipClick) && !(itm->GetItem()->Classes & bitmask)) {
-				if (CastToClient()->GetClientVersion() < ClientVersion::SoF) {
+				if (CastToClient()->ClientVersion() < EQEmu::versions::ClientVersion::SoF) {
 					// They are casting a spell from an item that requires equipping but shouldn't let them equip it
 					Log.Out(Logs::General, Logs::Error, "HACKER: %s (account: %s) attempted to click an equip-only effect on item %s (id: %d) which they shouldn't be able to equip!",
 						CastToClient()->GetCleanName(), CastToClient()->AccountName(), itm->GetItem()->Name, itm->GetItem()->ID);
@@ -271,14 +271,14 @@ bool Mob::CastSpell(uint16 spell_id, uint16 target_id, uint16 slot,
 				return(false);
 			}
 			if ((itm->GetItem()->Click.Type == ET_ClickEffect2) && !(itm->GetItem()->Classes & bitmask)) {
-				if (CastToClient()->GetClientVersion() < ClientVersion::SoF) {
+				if (CastToClient()->ClientVersion() < EQEmu::versions::ClientVersion::SoF) {
 					// They are casting a spell from an item that they don't meet the race/class requirements to cast
 					Log.Out(Logs::General, Logs::Error, "HACKER: %s (account: %s) attempted to click a race/class restricted effect on item %s (id: %d) which they shouldn't be able to click!",
 						CastToClient()->GetCleanName(), CastToClient()->AccountName(), itm->GetItem()->Name, itm->GetItem()->ID);
 					database.SetHackerFlag(CastToClient()->AccountName(), CastToClient()->GetCleanName(), "Clicking race/class restricted item with an invalid class");
 				}
 				else {
-					if (CastToClient()->GetClientVersion() >= ClientVersion::RoF)
+					if (CastToClient()->ClientVersion() >= EQEmu::versions::ClientVersion::RoF)
 					{
 						// Line 181 in eqstr_us.txt was changed in RoF+
 						Message(15, "Your race, class, or deity cannot use this item.");
@@ -292,7 +292,7 @@ bool Mob::CastSpell(uint16 spell_id, uint16 target_id, uint16 slot,
 			}
 		}
 		if( itm && (itm->GetItem()->Click.Type == ET_EquipClick) && !(item_slot <= SlotAmmo || item_slot == SlotPowerSource) ){
-			if (CastToClient()->GetClientVersion() < ClientVersion::SoF) {
+			if (CastToClient()->ClientVersion() < EQEmu::versions::ClientVersion::SoF) {
 				// They are attempting to cast a must equip clicky without having it equipped
 				Log.Out(Logs::General, Logs::Error, "HACKER: %s (account: %s) attempted to click an equip-only effect on item %s (id: %d) without equiping it!", CastToClient()->GetCleanName(), CastToClient()->AccountName(), itm->GetItem()->Name, itm->GetItem()->ID);
 				database.SetHackerFlag(CastToClient()->AccountName(), CastToClient()->GetCleanName(), "Clicking equip-only item without equiping it");
@@ -3246,7 +3246,7 @@ int Mob::AddBuff(Mob *caster, uint16 spell_id, int duration, int32 level_overrid
 	{
 		EQApplicationPacket *outapp = MakeBuffsPacket();
 
-		entity_list.QueueClientsByTarget(this, outapp, false, nullptr, true, false, BIT_SoDAndLater);
+		entity_list.QueueClientsByTarget(this, outapp, false, nullptr, true, false, EQEmu::versions::bit_SoDAndLater);
 
 		if(IsClient() && GetTarget() == this)
 			CastToClient()->QueuePacket(outapp);
@@ -3256,7 +3256,7 @@ int Mob::AddBuff(Mob *caster, uint16 spell_id, int duration, int32 level_overrid
 
 	if (IsNPC()) {
 		EQApplicationPacket *outapp = MakeBuffsPacket();
-		entity_list.QueueClientsByTarget(this, outapp, false, nullptr, true, false, BIT_SoDAndLater, true);
+		entity_list.QueueClientsByTarget(this, outapp, false, nullptr, true, false, EQEmu::versions::bit_SoDAndLater, true);
 		safe_delete(outapp);
 	}
 
@@ -5403,7 +5403,7 @@ void Client::SendBuffDurationPacket(Buffs_Struct &buff)
 void Client::SendBuffNumHitPacket(Buffs_Struct &buff, int slot)
 {
 	// UF+ use this packet
-	if (GetClientVersion() < ClientVersion::UF)
+	if (ClientVersion() < EQEmu::versions::ClientVersion::UF)
 		return;
 	EQApplicationPacket *outapp;
 	outapp = new EQApplicationPacket(OP_BuffCreate, sizeof(BuffIcon_Struct) + sizeof(BuffIconEntry_Struct));
@@ -5457,7 +5457,7 @@ void Mob::SendBuffsToClient(Client *c)
 	if(!c)
 		return;
 
-	if(c->GetClientVersionBit() & BIT_SoDAndLater)
+	if (c->ClientVersionBit() & EQEmu::versions::bit_SoDAndLater)
 	{
 		EQApplicationPacket *outapp = MakeBuffsPacket();
 		c->FastQueuePacket(&outapp);

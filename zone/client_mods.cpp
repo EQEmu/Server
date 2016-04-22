@@ -42,7 +42,7 @@ int32 Client::GetMaxStat() const
 	if (level < 61) {
 		base = 255;
 	}
-	else if (GetClientVersion() >= ClientVersion::SoF) {
+	else if (ClientVersion() >= EQEmu::versions::ClientVersion::SoF) {
 		base = 255 + 5 * (level - 60);
 	}
 	else if (level < 71) {
@@ -409,7 +409,7 @@ uint32 Mob::GetClassLevelFactor()
 
 int32 Client::CalcBaseHP()
 {
-	if (GetClientVersion() >= ClientVersion::SoF && RuleB(Character, SoDClientUseSoDHPManaEnd)) {
+	if (ClientVersion() >= EQEmu::versions::ClientVersion::SoF && RuleB(Character, SoDClientUseSoDHPManaEnd)) {
 		int stats = GetSTA();
 		if (stats > 255) {
 			stats = (stats - 255) / 2;
@@ -1162,7 +1162,7 @@ int32 Client::CalcBaseMana()
 	switch (GetCasterClass()) {
 		case 'I':
 			WisInt = GetINT();
-			if (GetClientVersion() >= ClientVersion::SoF && RuleB(Character, SoDClientUseSoDHPManaEnd)) {
+			if (ClientVersion() >= EQEmu::versions::ClientVersion::SoF && RuleB(Character, SoDClientUseSoDHPManaEnd)) {
 				if (WisInt > 100) {
 					ConvertedWisInt = (((WisInt - 100) * 5 / 2) + 100);
 					if (WisInt > 201) {
@@ -1195,7 +1195,7 @@ int32 Client::CalcBaseMana()
 			break;
 		case 'W':
 			WisInt = GetWIS();
-			if (GetClientVersion() >= ClientVersion::SoF && RuleB(Character, SoDClientUseSoDHPManaEnd)) {
+			if (ClientVersion() >= EQEmu::versions::ClientVersion::SoF && RuleB(Character, SoDClientUseSoDHPManaEnd)) {
 				if (WisInt > 100) {
 					ConvertedWisInt = (((WisInt - 100) * 5 / 2) + 100);
 					if (WisInt > 201) {
@@ -1355,7 +1355,7 @@ uint32 Client::CalcCurrentWeight()
 	    This is the ONLY instance I have seen where the client is hard coded to particular Item IDs to set a certain property for an item. It is very odd.
 	*/
 	// SoD+ client has no weight for coin
-	if (EQEmu::limits::CoinHasWeight(GetClientVersion())) {
+	if (EQEmu::limits::CoinHasWeight(EQEmu::versions::ConvertClientVersionToInventoryVersion(ClientVersion()))) {
 		Total += (m_pp.platinum + m_pp.gold + m_pp.silver + m_pp.copper) / 4;
 	}
 	float Packrat = (float)spellbonuses.Packrat + (float)aabonuses.Packrat + (float)itembonuses.Packrat;
@@ -2140,7 +2140,7 @@ void Client::CalcMaxEndurance()
 int32 Client::CalcBaseEndurance()
 {
 	int32 base_end = 0;
-	if (GetClientVersion() >= ClientVersion::SoF && RuleB(Character, SoDClientUseSoDHPManaEnd)) {
+	if (ClientVersion() >= EQEmu::versions::ClientVersion::SoF && RuleB(Character, SoDClientUseSoDHPManaEnd)) {
 		double heroic_stats = (GetHeroicSTR() + GetHeroicSTA() + GetHeroicDEX() + GetHeroicAGI()) / 4.0f;
 		double stats = (GetSTR() + GetSTA() + GetDEX() + GetAGI()) / 4.0f;
 		if (stats > 201.0f) {

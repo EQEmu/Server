@@ -114,22 +114,23 @@ public:
 	///////////////////////////////
 	// Public Methods
 	///////////////////////////////
-
-	Inventory() { m_version = ClientVersion::Unknown; m_versionset = false; }
+	
+	Inventory() { m_inventory_version = EQEmu::versions::InventoryVersion::Unknown; m_inventory_version_set = false; }
 	~Inventory();
 
-	// Inventory v2 creep
-	bool SetInventoryVersion(ClientVersion version) {
-		if (!m_versionset) {
-			m_version = version;
-			return (m_versionset = true);
+	// inv2 creep
+	bool SetInventoryVersion(EQEmu::versions::InventoryVersion inventory_version) {
+		if (!m_inventory_version_set) {
+			m_inventory_version = EQEmu::versions::ValidateInventoryVersion(inventory_version);
+			return (m_inventory_version_set = true);
 		}
 		else {
 			return false;
 		}
 	}
+	bool SetInventoryVersion(EQEmu::versions::ClientVersion client_version) { return SetInventoryVersion(EQEmu::versions::ConvertClientVersionToInventoryVersion(client_version)); }
 
-	ClientVersion GetInventoryVersion() { return m_version; }
+	EQEmu::versions::InventoryVersion InventoryVersion() { return m_inventory_version; }
 
 	static void CleanDirty();
 	static void MarkDirty(ItemInst *inst);
@@ -252,8 +253,8 @@ protected:
 
 private:
 	// Active inventory version
-	ClientVersion m_version;
-	bool m_versionset;
+	EQEmu::versions::InventoryVersion m_inventory_version;
+	bool m_inventory_version_set;
 };
 
 class SharedDatabase;

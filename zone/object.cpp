@@ -117,7 +117,7 @@ Object::Object(Client* client, const ItemInst* inst)
 	m_data.heading = client->GetHeading();
 	m_data.x = client->GetX();
 	m_data.y = client->GetY();
-	if (client->GetClientVersion() >= ClientVersion::RoF2)
+	if (client->ClientVersion() >= EQEmu::versions::ClientVersion::RoF2)
 	{
 		// RoF2 places items at player's Z, which is 0.625 of their height.
 		m_data.z = client->GetZ() - (client->GetSize() * 0.625f);
@@ -548,7 +548,7 @@ bool Object::HandleClick(Client* sender, const ClickObject_Struct* click_object)
 		else {
 			coa->open = 0x00;
 
-			if (sender->GetClientVersion() >= ClientVersion::RoF) {
+			if (sender->ClientVersion() >= EQEmu::versions::ClientVersion::RoF) {
 				coa->drop_id = 0xFFFFFFFF;
 				sender->Message(0, "Someone else is using that. Try again later.");
 			}

@@ -1529,7 +1529,7 @@ void Raid::SendHPPacketsTo(Client *c)
 			{
 				members[x].member->CreateHPPacket(&hpapp);
 				c->QueuePacket(&hpapp, false);
-				if(c->GetClientVersion() >= ClientVersion::SoD)
+				if (c->ClientVersion() >= EQEmu::versions::ClientVersion::SoD)
 				{
 					outapp.SetOpcode(OP_MobManaUpdate);
 					MobManaUpdate_Struct *mmus = (MobManaUpdate_Struct *)outapp.pBuffer;
@@ -1565,7 +1565,7 @@ void Raid::SendHPPacketsFrom(Mob *m)
 			if(!m->IsClient() || ((members[x].member != m->CastToClient()) && (members[x].GroupNumber == gid)))
 			{
 				members[x].member->QueuePacket(&hpapp, false);
-				if(members[x].member->GetClientVersion() >= ClientVersion::SoD)
+				if (members[x].member->ClientVersion() >= EQEmu::versions::ClientVersion::SoD)
 				{
 					outapp.SetOpcode(OP_MobManaUpdate);
 					MobManaUpdate_Struct *mmus = (MobManaUpdate_Struct *)outapp.pBuffer;

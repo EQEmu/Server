@@ -26,6 +26,7 @@
 //using namespace RoF::slots;	// server possessions slots enumeration (code and database sync'd to reference)
 
 #include "emu_legacy.h"
+#include "inventory_version.h"
 #include "light_source.h"
 #include "deity.h"
 #include "say_link.h"
@@ -44,9 +45,8 @@ namespace EQEmu
 	// an immutable value is required to initialize arrays, etc... use this class as a repository for those
 	namespace constants {
 		// database
-		static const ClientVersion CHARACTER_CREATION_CLIENT = ClientVersion::RoF2; // adjust according to starting item placement and target client
-
-		static const size_t CHARACTER_CREATION_LIMIT = RoF2::consts::CHARACTER_CREATION_LIMIT;
+		static const EQEmu::versions::ClientVersion CharacterCreationClient = EQEmu::versions::ClientVersion::RoF2;
+		static const size_t CharacterCreationLimit = RoF2::consts::CHARACTER_CREATION_LIMIT;
 
 		// inventory
 		extern uint16 InventoryTypeSize(int16 type_index);

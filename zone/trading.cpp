@@ -1098,7 +1098,7 @@ void Client::Trader_EndTrader() {
 			for(int i = 0; i < 80; i++) {
 				if(gis->Items[i] != 0) {
 
-					if (Customer->GetClientVersion() >= ClientVersion::RoF)
+					if (Customer->ClientVersion() >= EQEmu::versions::ClientVersion::RoF)
 					{
 						// RoF+ use Item IDs for now
 						tdis->ItemID = gis->Items[i];
@@ -1351,7 +1351,7 @@ void Client::NukeTraderItem(uint16 Slot,int16 Charges,uint16 Quantity,Client* Cu
 
 		tdis->Unknown000 = 0;
 		tdis->TraderID = Customer->GetID();
-		if (Customer->GetClientVersion() >= ClientVersion::RoF)
+		if (Customer->ClientVersion() >= EQEmu::versions::ClientVersion::RoF)
 		{
 			// RoF+ use Item IDs for now
 			tdis->ItemID = itemid;
@@ -1487,7 +1487,7 @@ void Client::ReturnTraderReq(const EQApplicationPacket* app, int16 TraderItemCha
 
 	EQApplicationPacket* outapp = nullptr;
 
-	if (GetClientVersion() >= ClientVersion::RoF)
+	if (ClientVersion() >= EQEmu::versions::ClientVersion::RoF)
 	{
 		outapp = new EQApplicationPacket(OP_TraderShop, sizeof(TraderBuy_Struct));
 	}
@@ -1499,7 +1499,7 @@ void Client::ReturnTraderReq(const EQApplicationPacket* app, int16 TraderItemCha
 	TraderBuy_Struct* outtbs = (TraderBuy_Struct*)outapp->pBuffer;
 	memcpy(outtbs, tbs, app->size);
 
-	if (GetClientVersion() >= ClientVersion::RoF)
+	if (ClientVersion() >= EQEmu::versions::ClientVersion::RoF)
 	{
 		// Convert Serial Number back to Item ID for RoF+
 		outtbs->ItemID = itemid;
@@ -1567,7 +1567,7 @@ void Client::BuyTraderItem(TraderBuy_Struct* tbs, Client* Trader, const EQApplic
 	const ItemInst* BuyItem = nullptr;
 	uint32 ItemID = 0;
 
-	if (GetClientVersion() >= ClientVersion::RoF)
+	if (ClientVersion() >= EQEmu::versions::ClientVersion::RoF)
 	{
 		// Convert Item ID to Serial Number for RoF+
 		ItemID = tbs->ItemID;
@@ -1629,7 +1629,7 @@ void Client::BuyTraderItem(TraderBuy_Struct* tbs, Client* Trader, const EQApplic
 	// This cannot overflow assuming MAX_TRANSACTION_VALUE, checked above, is the default of 2000000000
 	uint32 TotalCost = tbs->Price * outtbs->Quantity;
 
-	if(Trader->GetClientVersion() >= ClientVersion::RoF)
+	if (Trader->ClientVersion() >= EQEmu::versions::ClientVersion::RoF)
 	{
 		// RoF+ uses individual item price where older clients use total price
 		outtbs->Price = tbs->Price;
@@ -1680,7 +1680,7 @@ void Client::BuyTraderItem(TraderBuy_Struct* tbs, Client* Trader, const EQApplic
 
 	Trader->FindAndNukeTraderItem(tbs->ItemID, outtbs->Quantity, this, 0);
 
-	if (ItemID > 0 && Trader->GetClientVersion() >= ClientVersion::RoF)
+	if (ItemID > 0 && Trader->ClientVersion() >= EQEmu::versions::ClientVersion::RoF)
 	{
 		// Convert Serial Number back to ItemID for RoF+
 		outtbs->ItemID = ItemID;
@@ -1698,7 +1698,7 @@ void Client::SendBazaarWelcome()
 		auto row = results.begin();
 
 		EQApplicationPacket* outapp = nullptr;
-		if (GetClientVersion() >= ClientVersion::RoF)
+		if (ClientVersion() >= EQEmu::versions::ClientVersion::RoF)
 		{
 			outapp = new EQApplicationPacket(OP_TraderShop, sizeof(BazaarWelcome_Struct));
 		}
@@ -1716,7 +1716,7 @@ void Client::SendBazaarWelcome()
 		bws->Traders = atoi(row[0]);
 		bws->Items = atoi(row[1]);
 
-		if (GetClientVersion() >= ClientVersion::RoF)
+		if (ClientVersion() >= EQEmu::versions::ClientVersion::RoF)
 		{
 			bws->Unknown012 = GetID();
 		}
@@ -2091,7 +2091,7 @@ static void UpdateTraderCustomerPriceChanged(uint32 CustomerID, TraderCharges_St
 		for(int i = 0; i < 80; i++) {
 
 			if(gis->ItemID[i] == ItemID) {
-				if (Customer->GetClientVersion() >= ClientVersion::RoF)
+				if (Customer->ClientVersion() >= EQEmu::versions::ClientVersion::RoF)
 				{
 					// RoF+ use Item IDs for now
 					tdis->ItemID = gis->ItemID[i];
@@ -2745,7 +2745,7 @@ void Client::SellToBuyer(const EQApplicationPacket *app) {
 	VARSTRUCT_ENCODE_TYPE(uint32, Buf, Quantity);
 	VARSTRUCT_ENCODE_TYPE(uint32, Buf, Quantity * Price);
 
-	if(GetClientVersion() >= ClientVersion::SoD)
+	if (ClientVersion() >= EQEmu::versions::ClientVersion::SoD)
 	{
 		VARSTRUCT_ENCODE_TYPE(uint32, Buf, 0);	// Think this is the upper 32 bits of a 64 bit price
 	}
@@ -2769,7 +2769,7 @@ void Client::SellToBuyer(const EQApplicationPacket *app) {
 	VARSTRUCT_ENCODE_TYPE(uint32, Buf, Quantity);
 	VARSTRUCT_ENCODE_TYPE(uint32, Buf, Quantity * Price);
 
-	if(Buyer->GetClientVersion() >= ClientVersion::SoD)
+	if (Buyer->ClientVersion() >= EQEmu::versions::ClientVersion::SoD)
 	{
 		VARSTRUCT_ENCODE_TYPE(uint32, Buf, 0);	// Think this is the upper 32 bits of a 64 bit price
 	}

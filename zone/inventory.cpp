@@ -56,7 +56,7 @@ uint32 Client::NukeItem(uint32 itemnum, uint8 where_to_check) {
 				x++;
 			}
 
-			if (GetClientVersion() >= ClientVersion::SoF)
+			if (ClientVersion() >= EQEmu::versions::ClientVersion::SoF)
 				DeleteItemInInventory(SlotPowerSource, 0, true);
 			else
 				DeleteItemInInventory(SlotPowerSource, 0, false);	// Prevents Titanium crash
@@ -685,7 +685,7 @@ void Client::SendCursorBuffer()
 	// Temporary work-around for the RoF+ Client Buffer
 	// Instead of dealing with client moving items in cursor buffer,
 	// we can just send the next item in the cursor buffer to the cursor.
-	if (GetClientVersion() < ClientVersion::RoF) { return; }
+	if (ClientVersion() < EQEmu::versions::ClientVersion::RoF) { return; }
 	if (GetInv().CursorEmpty()) { return; }
 
 	auto test_inst = GetInv().GetCursorItem();
@@ -898,7 +898,7 @@ void Client::PutLootInInventory(int16 slot_id, const ItemInst &inst, ServerLootI
 	// Subordinate items in cursor buffer must be sent via ItemPacketSummonItem or we just overwrite the visible cursor and desync the client
 	if (slot_id == SlotCursor && !cursor_empty) {
 		// RoF+ currently has a specialized cursor handler
-		if (GetClientVersion() < ClientVersion::RoF)
+		if (ClientVersion() < EQEmu::versions::ClientVersion::RoF)
 			SendItemPacket(slot_id, &inst, ItemPacketSummonItem);
 	}
 	else {
@@ -991,7 +991,7 @@ bool Client::AutoPutLootInInventory(ItemInst& inst, bool try_worn, bool try_curs
 		for (int16 i = EQEmu::constants::EQUIPMENT_BEGIN; i < SlotPowerSource; i++) { // originally (i < 22)
 			if (i == EQEmu::constants::GENERAL_BEGIN) {
 				// added power source check for SoF+ clients
-				if (this->GetClientVersion() >= ClientVersion::SoF)
+				if (this->ClientVersion() >= EQEmu::versions::ClientVersion::SoF)
 					i = SlotPowerSource;
 				else
 					break;
@@ -1375,7 +1375,7 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 
 	if (move_in->from_slot == move_in->to_slot) { // Item summon, no further processing needed
 		if(RuleB(QueryServ, PlayerLogMoves)) { QSSwapItemAuditor(move_in); } // QS Audit
-		if (GetClientVersion() >= ClientVersion::RoF) { return true; } // Can't do RoF+
+		if (ClientVersion() >= EQEmu::versions::ClientVersion::RoF) { return true; } // Can't do RoF+
 
 		if (move_in->to_slot == SlotCursor) {
 			auto test_inst = m_inv.GetItem(SlotCursor);
@@ -2358,7 +2358,7 @@ void Client::RemoveNoRent(bool client_update)
 		auto inst = m_inv[SlotPowerSource];
 		if (inst && !inst->GetItem()->NoRent) {
 			Log.Out(Logs::Detail, Logs::Inventory, "NoRent Timer Lapse: Deleting %s from slot %i", inst->GetItem()->Name, SlotPowerSource);
-			DeleteItemInInventory(SlotPowerSource, 0, (GetClientVersion() >= ClientVersion::SoF) ? client_update : false); // Ti slot non-existent
+			DeleteItemInInventory(SlotPowerSource, 0, (ClientVersion() >= EQEmu::versions::ClientVersion::SoF) ? client_update : false); // Ti slot non-existent
 		}
 	}
 
@@ -2576,7 +2576,7 @@ void Client::MoveSlotNotAllowed(bool client_update)
 		bool is_arrow = (inst->GetItem()->ItemType == ItemTypeArrow) ? true : false;
 		int16 free_slot_id = m_inv.FindFreeSlot(inst->IsType(ItemClassContainer), true, inst->GetItem()->Size, is_arrow);
 		Log.Out(Logs::Detail, Logs::Inventory, "Slot Assignment Error: Moving %s from slot %i to %i", inst->GetItem()->Name, SlotPowerSource, free_slot_id);
-		PutItemInInventory(free_slot_id, *inst, (GetClientVersion() >= ClientVersion::SoF) ? client_update : false);
+		PutItemInInventory(free_slot_id, *inst, (ClientVersion() >= EQEmu::versions::ClientVersion::SoF) ? client_update : false);
 		database.SaveInventory(character_id, nullptr, SlotPowerSource);
 		safe_delete(inst);
 	}

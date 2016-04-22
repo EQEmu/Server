@@ -33,7 +33,8 @@ struct Item_Struct;
 #include "../common/ptimer.h"
 #include "../common/emu_opcodes.h"
 #include "../common/eq_packet_structs.h"
-#include "../common/eq_constants.h"
+//#include "../common/eq_constants.h"
+#include "../common/emu_constants.h" // inv2 watch
 #include "../common/eq_stream_intf.h"
 #include "../common/eq_packet.h"
 #include "../common/linked_list.h"
@@ -43,7 +44,7 @@ struct Item_Struct;
 #include "../common/item.h"
 #include "../common/guilds.h"
 #include "../common/item_struct.h"
-#include "../common/clientversions.h"
+//#include "../common/clientversions.h"
 
 #include "common.h"
 #include "merc.h"
@@ -976,9 +977,9 @@ public:
 	inline int ActiveTasksInSet(int TaskSet) { return (taskstate ? taskstate->ActiveTasksInSet(TaskSet) :0); }
 	inline int CompletedTasksInSet(int TaskSet) { return (taskstate ? taskstate->CompletedTasksInSet(TaskSet) :0); }
 
-	inline const ClientVersion GetClientVersion() const { return m_ClientVersion; }
-	inline const uint32 GetClientVersionBit() const { return m_ClientVersionBit; }
-	inline void SetClientVersion(ClientVersion in) { m_ClientVersion = in; }
+	inline const EQEmu::versions::ClientVersion ClientVersion() const { return m_ClientVersion; }
+	inline const uint32 ClientVersionBit() const { return m_ClientVersionBit; }
+	inline void SetClientVersion(EQEmu::versions::ClientVersion client_version) { m_ClientVersion = client_version; }
 
 	/** Adventure Stuff **/
 	void SendAdventureError(const char *error);
@@ -1096,7 +1097,7 @@ public:
 	void HandleLFGuildResponse(ServerPacket *pack);
 	void SendLFGuildStatus();
 	void SendGuildLFGuildStatus();
-	inline bool XTargettingAvailable() const { return ((m_ClientVersionBit & BIT_UFAndLater) && RuleB(Character, EnableXTargetting)); }
+	inline bool XTargettingAvailable() const { return ((m_ClientVersionBit & EQEmu::versions::bit_UFAndLater) && RuleB(Character, EnableXTargetting)); }
 	inline uint8 GetMaxXTargets() const { return MaxXTargets; }
 	void SetMaxXTargets(uint8 NewMax);
 	bool IsXTarget(const Mob *m) const;
@@ -1489,7 +1490,7 @@ private:
 	Timer *GlobalChatLimiterTimer; //60 seconds
 	uint32 AttemptedMessages;
 
-	ClientVersion m_ClientVersion;
+	EQEmu::versions::ClientVersion m_ClientVersion;
 	uint32 m_ClientVersionBit;
 
 	int XPRate;

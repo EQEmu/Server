@@ -854,12 +854,12 @@ void Lua_Client::SetAATitle(const char *title) {
 
 int Lua_Client::GetClientVersion() {
 	Lua_Safe_Call_Int();
-	return static_cast<unsigned int>(self->GetClientVersion());
+	return static_cast<unsigned int>(self->ClientVersion());
 }
 
 uint32 Lua_Client::GetClientVersionBit() {
 	Lua_Safe_Call_Int();
-	return self->GetClientVersionBit();
+	return self->ClientVersionBit();
 }
 
 void Lua_Client::SetTitleSuffix(const char *text) {

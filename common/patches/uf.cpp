@@ -113,9 +113,9 @@ namespace UF
 		return(r);
 	}
 
-	const ClientVersion Strategy::GetClientVersion() const
+	const EQEmu::versions::ClientVersion Strategy::ClientVersion() const
 	{
-		return ClientVersion::UF;
+		return EQEmu::versions::ClientVersion::UF;
 	}
 
 #include "ss_define.h"

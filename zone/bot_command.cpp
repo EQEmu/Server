@@ -4709,7 +4709,7 @@ void bot_subcommand_bot_inspect_message(Client *c, const Seperator *sep)
 	if (helper_is_help_or_usage(sep->arg[1])) {
 		c->Message(m_usage, "usage: %s [set | clear] ([actionable: target | byname | ownergroup | botgroup | targetgroup | namesgroup | healrotation | spawned] ([actionable_name]))", sep->arg[0]);
 		c->Message(m_note, "Notes:");
-		if (c->GetClientVersion() >= ClientVersion::SoF) {
+		if (c->ClientVersion() >= EQEmu::versions::ClientVersion::SoF) {
 			c->Message(m_message, "- Self-inspect and type your bot's inspect message");
 			c->Message(m_message, "- Close the self-inspect window to update the server");
 			c->Message(m_message, "- Type '%s set' to set the bot's inspect message", sep->arg[0]);

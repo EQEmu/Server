@@ -257,7 +257,7 @@ Client::Client(EQStreamInterface* ieqs)
 	GlobalChatLimiterTimer = new Timer(RuleI(Chat, IntervalDurationMS));
 	AttemptedMessages = 0;
 	TotalKarma = 0;
-	m_ClientVersion = ClientVersion::Unknown;
+	m_ClientVersion = EQEmu::versions::ClientVersion::Unknown;
 	m_ClientVersionBit = 0;
 	AggroCount = 0;
 	RestRegenHP = 0;
@@ -1533,7 +1533,7 @@ void Client::UpdateWho(uint8 remove) {
 	else if (m_pp.anon >= 2)
 		scl->anon = 2;
 
-	scl->ClientVersion = static_cast<unsigned int>(GetClientVersion());
+	scl->ClientVersion = static_cast<unsigned int>(ClientVersion());
 	scl->tellsoff = tellsoff;
 	scl->guild_id = guild_id;
 	scl->LFG = LFG;
@@ -1789,7 +1789,7 @@ void Client::SendManaUpdatePacket() {
 	if (!Connected() || IsCasting())
 		return;
 
-	if (GetClientVersion() >= ClientVersion::SoD) {
+	if (ClientVersion() >= EQEmu::versions::ClientVersion::SoD) {
 		SendManaUpdate();
 		SendEnduranceUpdate();
 	}
@@ -1824,7 +1824,7 @@ void Client::SendManaUpdatePacket() {
 
 
 			for(int i = 0; i < MAX_GROUP_MEMBERS; ++i)
-				if(g->members[i] && g->members[i]->IsClient() && (g->members[i] != this) && (g->members[i]->CastToClient()->GetClientVersion() >= ClientVersion::SoD))
+				if (g->members[i] && g->members[i]->IsClient() && (g->members[i] != this) && (g->members[i]->CastToClient()->ClientVersion() >= EQEmu::versions::ClientVersion::SoD))
 				{
 					g->members[i]->CastToClient()->QueuePacket(outapp);
 					g->members[i]->CastToClient()->QueuePacket(outapp2);
@@ -2007,7 +2007,7 @@ void Client::ReadBook(BookRequest_Struct *book) {
 
 		BookText_Struct *out = (BookText_Struct *) outapp->pBuffer;
 		out->window = book->window;
-		if(GetClientVersion() >= ClientVersion::SoF)
+		if (ClientVersion() >= EQEmu::versions::ClientVersion::SoF)
 		{
 			const ItemInst *inst = m_inv[book->invslot];
 			if(inst)
@@ -2364,7 +2364,7 @@ bool Client::HasSkill(SkillUseTypes skill_id) const {
 }
 
 bool Client::CanHaveSkill(SkillUseTypes skill_id) const {
-	if (GetClientVersion() < ClientVersion::RoF2 && class_ == BERSERKER && skill_id == Skill1HPiercing)
+	if (ClientVersion() < EQEmu::versions::ClientVersion::RoF2 && class_ == BERSERKER && skill_id == Skill1HPiercing)
 		skill_id = Skill2HPiercing;
 
 	return(database.GetSkillCap(GetClass(), skill_id, RuleI(Character, MaxLevel)) > 0);
@@ -2372,7 +2372,7 @@ bool Client::CanHaveSkill(SkillUseTypes skill_id) const {
 }
 
 uint16 Client::MaxSkill(SkillUseTypes skillid, uint16 class_, uint16 level) const {
-	if (GetClientVersion() < ClientVersion::RoF2 && class_ == BERSERKER && skillid == Skill1HPiercing)
+	if (ClientVersion() < EQEmu::versions::ClientVersion::RoF2 && class_ == BERSERKER && skillid == Skill1HPiercing)
 		skillid = Skill2HPiercing;
 
 	return(database.GetSkillCap(class_, skillid, level));
@@ -2380,7 +2380,7 @@ uint16 Client::MaxSkill(SkillUseTypes skillid, uint16 class_, uint16 level) cons
 
 uint8 Client::SkillTrainLevel(SkillUseTypes skillid, uint16 class_)
 {
-	if (GetClientVersion() < ClientVersion::RoF2 && class_ == BERSERKER && skillid == Skill1HPiercing)
+	if (ClientVersion() < EQEmu::versions::ClientVersion::RoF2 && class_ == BERSERKER && skillid == Skill1HPiercing)
 		skillid = Skill2HPiercing;
 
 	return(database.GetTrainLevel(class_, skillid, RuleI(Character, MaxLevel)));
@@ -2817,7 +2817,7 @@ void Client::ServerFilter(SetServerFilter_Struct* filter){
 	Filter0(FilterMissedMe);
 	Filter1(FilterDamageShields);
 
-	if (GetClientVersionBit() & BIT_SoDAndLater) {
+	if (ClientVersionBit() & EQEmu::versions::bit_SoDAndLater) {
 		if (filter->filters[FilterDOT] == 0)
 			ClientFilters[FilterDOT] = FilterShow;
 		else if (filter->filters[FilterDOT] == 1)
@@ -2838,7 +2838,7 @@ void Client::ServerFilter(SetServerFilter_Struct* filter){
 	Filter1(FilterFocusEffects);
 	Filter1(FilterPetSpells);
 
-	if (GetClientVersionBit() & BIT_SoDAndLater) {
+	if (ClientVersionBit() & EQEmu::versions::bit_SoDAndLater) {
 		if (filter->filters[FilterHealOverTime] == 0)
 			ClientFilters[FilterHealOverTime] = FilterShow;
 		// This is called 'Show Mine Only' in the clients, but functions the same as show
@@ -4123,7 +4123,7 @@ bool Client::GroupFollow(Client* inviter) {
 			group->UpdateGroupAAs();
 
 			//Invite the inviter into the group first.....dont ask
-			if (inviter->GetClientVersion() < ClientVersion::SoD)
+			if (inviter->ClientVersion() < EQEmu::versions::ClientVersion::SoD)
 			{
 				EQApplicationPacket* outapp = new EQApplicationPacket(OP_GroupUpdate, sizeof(GroupJoin_Struct));
 				GroupJoin_Struct* outgj = (GroupJoin_Struct*)outapp->pBuffer;
@@ -4169,13 +4169,13 @@ bool Client::GroupFollow(Client* inviter) {
 			return false;
 		}
 
-		if (GetClientVersion() >= ClientVersion::SoD)
+		if (ClientVersion() >= EQEmu::versions::ClientVersion::SoD)
 		{
 			SendGroupJoinAcknowledge();
 		}
 
 		// Temporary hack for SoD, as things seem to work quite differently
-		if (inviter->IsClient() && inviter->GetClientVersion() >= ClientVersion::SoD)
+		if (inviter->IsClient() && inviter->ClientVersion() >= EQEmu::versions::ClientVersion::SoD)
 		{
 			database.RefreshGroupFromDB(inviter);
 		}
@@ -4242,7 +4242,7 @@ uint16 Client::GetPrimarySkillValue()
 			}
 			case ItemType2HPiercing: // 2H Piercing
 			{
-				if (IsClient() && CastToClient()->GetClientVersion() < ClientVersion::RoF2)
+				if (IsClient() && CastToClient()->ClientVersion() < EQEmu::versions::ClientVersion::RoF2)
 					skill = Skill1HPiercing;
 				else
 					skill = Skill2HPiercing;
@@ -4412,7 +4412,7 @@ void Client::IncrementAggroCount() {
 	if (AggroCount == 1)
 		SavedRaidRestTimer = rest_timer.GetRemainingTime();
 
-	if(GetClientVersion() >= ClientVersion::SoF) {
+	if (ClientVersion() >= EQEmu::versions::ClientVersion::SoF) {
 
 		EQApplicationPacket *outapp = new EQApplicationPacket(OP_RestState, 1);
 		char *Buffer = (char *)outapp->pBuffer;
@@ -4457,7 +4457,7 @@ void Client::DecrementAggroCount() {
 
 	rest_timer.Start(time_until_rest);
 
-	if(GetClientVersion() >= ClientVersion::SoF) {
+	if (ClientVersion() >= EQEmu::versions::ClientVersion::SoF) {
 
 		EQApplicationPacket *outapp = new EQApplicationPacket(OP_RestState, 5);
 		char *Buffer = (char *)outapp->pBuffer;
@@ -4978,12 +4978,12 @@ void Client::ShowSkillsWindow()
 	std::string WindowText;
 	std::map<SkillUseTypes, std::string> Skills = EQEmu::GetSkillUseTypesMap();
 
-	if (GetClientVersion() < ClientVersion::RoF2)
+	if (ClientVersion() < EQEmu::versions::ClientVersion::RoF2)
 		Skills[Skill1HPiercing] = "Piercing";
 
 	// print out all available skills
 	for (auto skills_iter : Skills) {
-		if (skills_iter.first == Skill2HPiercing && GetClientVersion() < ClientVersion::RoF2)
+		if (skills_iter.first == Skill2HPiercing && ClientVersion() < EQEmu::versions::ClientVersion::RoF2)
 			continue;
 		if (!GetSkill(skills_iter.first) && !MaxSkill(skills_iter.first))
 			continue;
@@ -6115,7 +6115,7 @@ void Client::SendZonePoints()
 	while(iterator.MoreElements())
 	{
 		ZonePoint* data = iterator.GetData();
-		if(GetClientVersionBit() & data->client_version_mask)
+		if(ClientVersionBit() & data->client_version_mask)
 		{
 			count++;
 		}
@@ -6132,7 +6132,7 @@ void Client::SendZonePoints()
 	while(iterator.MoreElements())
 	{
 		ZonePoint* data = iterator.GetData();
-		if(GetClientVersionBit() & data->client_version_mask)
+		if(ClientVersionBit() & data->client_version_mask)
 		{
 			zp->zpe[i].iterator = data->number;
 			zp->zpe[i].x = data->target_x;
@@ -6852,7 +6852,7 @@ void Client::SendStatsWindow(Client* client, bool use_window)
 	if(use_window) {
 		if(final_stats.size() < 4096)
 		{
-			uint32 Buttons = (client->GetClientVersion() < ClientVersion::SoD) ? 0 : 1;
+			uint32 Buttons = (client->ClientVersion() < EQEmu::versions::ClientVersion::SoD) ? 0 : 1;
 			client->SendWindow(0, POPUPID_UPDATE_SHOWSTATSWINDOW, Buttons, "Cancel", "Update", 0, 1, this, "", "%s", final_stats.c_str());
 			goto Extra_Info;
 		}
@@ -6888,7 +6888,7 @@ void Client::SendStatsWindow(Client* client, bool use_window)
 }
 
 void Client::SendAltCurrencies() {
-	if(GetClientVersion() >= ClientVersion::SoF) {
+	if (ClientVersion() >= EQEmu::versions::ClientVersion::SoF) {
 		uint32 count = zone->AlternateCurrencies.size();
 		if(count == 0) {
 			return;
@@ -7439,7 +7439,7 @@ void Client::SendMercPersonalInfo()
 
 	if(mercData)
 	{
-		if (GetClientVersion() >= ClientVersion::RoF)
+		if (ClientVersion() >= EQEmu::versions::ClientVersion::RoF)
 		{
 			if (mercCount > 0)
 			{
@@ -7550,7 +7550,7 @@ void Client::SendClearMercInfo()
 
 void Client::DuplicateLoreMessage(uint32 ItemID)
 {
-	if (!(m_ClientVersionBit & BIT_RoFAndLater))
+	if (!(m_ClientVersionBit & EQEmu::versions::bit_RoFAndLater))
 	{
 		Message_StringID(0, PICK_LORE);
 		return;

@@ -864,7 +864,7 @@ void WorldServer::Process() {
 					database.SetGroupLeaderName(group->GetID(), Inviter->GetName());
 					group->UpdateGroupAAs();
 
-					if(Inviter->CastToClient()->GetClientVersion() < ClientVersion::SoD)
+					if (Inviter->CastToClient()->ClientVersion() < EQEmu::versions::ClientVersion::SoD)
 					{
 						EQApplicationPacket* outapp=new EQApplicationPacket(OP_GroupUpdate,sizeof(GroupJoin_Struct));
 						GroupJoin_Struct* outgj=(GroupJoin_Struct*)outapp->pBuffer;

@@ -20,61 +20,10 @@
 #include "emu_constants.h"
 
 
-// client validation
-bool EQEmu::limits::IsValidPCClientVersion(ClientVersion clientVersion)
-{
-	if (clientVersion > ClientVersion::Unknown && clientVersion <= LAST_PC_CLIENT)
-		return true;
-
-	return false;
-}
-
-ClientVersion EQEmu::limits::ValidatePCClientVersion(ClientVersion clientVersion)
-{
-	if (clientVersion > ClientVersion::Unknown && clientVersion <= LAST_PC_CLIENT)
-		return clientVersion;
-
-	return ClientVersion::Unknown;
-}
-
-// npc validation
-bool EQEmu::limits::IsValidNPCClientVersion(ClientVersion clientVersion)
-{
-	if (clientVersion > LAST_PC_CLIENT && clientVersion <= LAST_NPC_CLIENT)
-		return true;
-
-	return false;
-}
-
-ClientVersion EQEmu::limits::ValidateNPCClientVersion(ClientVersion clientVersion)
-{
-	if (clientVersion > LAST_PC_CLIENT && clientVersion <= LAST_NPC_CLIENT)
-		return clientVersion;
-
-	return ClientVersion::Unknown;
-}
-
-// mob validation
-bool EQEmu::limits::IsValidMobClientVersion(ClientVersion clientVersion)
-{
-	if (clientVersion > ClientVersion::Unknown && clientVersion <= LAST_NPC_CLIENT)
-		return true;
-
-	return false;
-}
-
-ClientVersion EQEmu::limits::ValidateMobClientVersion(ClientVersion clientVersion)
-{
-	if (clientVersion > ClientVersion::Unknown && clientVersion <= LAST_NPC_CLIENT)
-		return clientVersion;
-
-	return ClientVersion::Unknown;
-}
-
 // database
-size_t EQEmu::limits::CharacterCreationLimit(ClientVersion clientVersion)
+size_t EQEmu::limits::CharacterCreationLimit(versions::ClientVersion client_version)
 {
-	static const size_t local[CLIENT_VERSION_COUNT] = {
+	static const size_t local[versions::InventoryVersionCount] = {
 /*Unknown*/		NOT_USED,
 /*Client62*/	NOT_USED,
 /*Titanium*/	Titanium::consts::CHARACTER_CREATION_LIMIT,
@@ -90,11 +39,11 @@ size_t EQEmu::limits::CharacterCreationLimit(ClientVersion clientVersion)
 /*MobPet*/		NOT_USED
 	};
 
-	return local[static_cast<unsigned int>(ValidateMobClientVersion(clientVersion))];
+	return local[static_cast<size_t>(versions::ValidateClientVersion(client_version))];
 }
 
 // inventory
-uint16 EQEmu::limits::InventoryMapSize(int16 indexMap, ClientVersion clientVersion)
+uint16 EQEmu::limits::InventoryTypeSize(versions::InventoryVersion inventory_version, int16 inv_type)
 {
 	// not all maps will have an instantiated container..some are references for queue generators (i.e., bazaar, mail, etc...)
 	// a zero '0' indicates a needed value..otherwise, change to '_NOTUSED' for a null value so indices requiring research can be identified
@@ -107,7 +56,7 @@ uint16 EQEmu::limits::InventoryMapSize(int16 indexMap, ClientVersion clientVersi
 	//
 	// when setting NPC-based values, try to adhere to an constants::<property> or NOT_USED value to avoid unnecessary issues
 
-	static const uint16 local[TypeCount][CLIENT_VERSION_COUNT] = {
+	static const uint16 local[TypeCount][versions::InventoryVersionCount] = {
 		// server and database are sync'd to current TypePossessions's client as set in 'using namespace RoF::slots;' and
 		// 'constants::TYPE_POSSESSIONS_SIZE' - use/update EquipmentBitmask(), GeneralBitmask() and CursorBitmask()
 		// for partial range validation checks and 'constants::TYPE_POSSESSIONS_SIZE' for full range iterations
@@ -488,20 +437,20 @@ uint16 EQEmu::limits::InventoryMapSize(int16 indexMap, ClientVersion clientVersi
 		}
 	};
 
-	if ((uint16)indexMap < TypeCount)
-		return local[indexMap][static_cast<unsigned int>(ValidateMobClientVersion(clientVersion))];
+	if ((uint16)inv_type < TypeCount)
+		return local[inv_type][static_cast<size_t>(versions::ValidateInventoryVersion(inventory_version))];
 
 	return NOT_USED;
 }
 
-uint64 EQEmu::limits::PossessionsBitmask(ClientVersion clientVersion)
+uint64 EQEmu::limits::PossessionsBitmask(versions::InventoryVersion inventory_version)
 {
 	// these are for the new inventory system (RoF)..not the current (Ti) one...
 	// 0x0000000000200000 is SlotPowerSource (SoF+)
 	// 0x0000000080000000 is SlotGeneral9 (RoF+)
 	// 0x0000000100000000 is SlotGeneral10 (RoF+)
 
-	static const uint64 local[CLIENT_VERSION_COUNT] = {
+	static const uint64 local[versions::InventoryVersionCount] = {
 /*Unknown*/		NOT_USED,
 /*62*/			0x000000027FDFFFFF,
 /*Titanium*/	0x000000027FDFFFFF,
@@ -518,12 +467,12 @@ uint64 EQEmu::limits::PossessionsBitmask(ClientVersion clientVersion)
 	};
 
 	return NOT_USED;
-	//return local[static_cast<unsigned int>(ValidateMobClientVersion(clientVersion))];
+	//return local[static_cast<size_t>(versions::ValidateInventoryVersion(inventory_version))];
 }
 
-uint64 EQEmu::limits::EquipmentBitmask(ClientVersion clientVersion)
+uint64 EQEmu::limits::EquipmentBitmask(versions::InventoryVersion inventory_version)
 {
-	static const uint64 local[CLIENT_VERSION_COUNT] = {
+	static const uint64 local[versions::InventoryVersionCount] = {
 /*Unknown*/		NOT_USED,
 /*62*/			0x00000000005FFFFF,
 /*Titanium*/	0x00000000005FFFFF,
@@ -540,12 +489,12 @@ uint64 EQEmu::limits::EquipmentBitmask(ClientVersion clientVersion)
 	};
 
 	return NOT_USED;
-	//return local[static_cast<unsigned int>(ValidateMobClientVersion(clientVersion))];
+	//return local[static_cast<size_t>(versions::ValidateInventoryVersion(inventory_version))];
 }
 
-uint64 EQEmu::limits::GeneralBitmask(ClientVersion clientVersion)
+uint64 EQEmu::limits::GeneralBitmask(versions::InventoryVersion inventory_version)
 {
-	static const uint64 local[CLIENT_VERSION_COUNT] = {
+	static const uint64 local[versions::InventoryVersionCount] = {
 /*Unknown*/		NOT_USED,
 /*62*/			0x000000007F800000,
 /*Titanium*/	0x000000007F800000,
@@ -562,12 +511,12 @@ uint64 EQEmu::limits::GeneralBitmask(ClientVersion clientVersion)
 	};
 
 	return NOT_USED;
-	//return local[static_cast<unsigned int>(ValidateMobClientVersion(clientVersion))];
+	//return local[static_cast<size_t>(versions::ValidateInventoryVersion(inventory_version))];
 }
 
-uint64 EQEmu::limits::CursorBitmask(ClientVersion clientVersion)
+uint64 EQEmu::limits::CursorBitmask(versions::InventoryVersion inventory_version)
 {
-	static const uint64 local[CLIENT_VERSION_COUNT] = {
+	static const uint64 local[versions::InventoryVersionCount] = {
 /*Unknown*/		NOT_USED,
 /*62*/			0x0000000200000000,
 /*Titanium*/	0x0000000200000000,
@@ -584,12 +533,12 @@ uint64 EQEmu::limits::CursorBitmask(ClientVersion clientVersion)
 	};
 
 	return NOT_USED;
-	//return local[static_cast<unsigned int>(ValidateMobClientVersion(clientVersion))];
+	//return local[static_cast<size_t>(versions::ValidateInventoryVersion(inventory_version))];
 }
 
-bool EQEmu::limits::AllowsEmptyBagInBag(ClientVersion clientVersion)
+bool EQEmu::limits::AllowEmptyBagInBag(versions::InventoryVersion inventory_version)
 {
-	static const bool local[CLIENT_VERSION_COUNT] = {
+	static const bool local[versions::InventoryVersionCount] = {
 /*Unknown*/		false,
 /*62*/			false,
 /*Titanium*/	Titanium::limits::ALLOWS_EMPTY_BAG_IN_BAG,
@@ -606,12 +555,12 @@ bool EQEmu::limits::AllowsEmptyBagInBag(ClientVersion clientVersion)
 	};
 
 	return false; // not implemented
-	//return local[static_cast<unsigned int>(ValidateMobClientVersion(clientVersion))];
+	//return local[static_cast<size_t>(versions::ValidateInventoryVersion(inventory_version))];
 }
 
-bool EQEmu::limits::AllowsClickCastFromBag(ClientVersion clientVersion)
+bool EQEmu::limits::AllowClickCastFromBag(versions::InventoryVersion inventory_version)
 {
-	static const bool local[CLIENT_VERSION_COUNT] = {
+	static const bool local[versions::InventoryVersionCount] = {
 /*Unknown*/		false,
 /*62*/			false,
 /*Titanium*/	Titanium::limits::ALLOWS_CLICK_CAST_FROM_BAG,
@@ -627,13 +576,13 @@ bool EQEmu::limits::AllowsClickCastFromBag(ClientVersion clientVersion)
 /*Pet*/			false
 	};
 
-	return local[static_cast<unsigned int>(ValidateMobClientVersion(clientVersion))];
+	return local[static_cast<size_t>(versions::ValidateInventoryVersion(inventory_version))];
 }
 
 // items
-uint16 EQEmu::limits::ItemCommonSize(ClientVersion clientVersion)
+uint16 EQEmu::limits::ItemCommonSize(versions::InventoryVersion inventory_version)
 {
-	static const uint16 local[CLIENT_VERSION_COUNT] = {
+	static const uint16 local[versions::InventoryVersionCount] = {
 /*Unknown*/		NOT_USED,
 /*62*/			constants::ITEM_COMMON_SIZE,
 /*Titanium*/	constants::ITEM_COMMON_SIZE,
@@ -649,12 +598,12 @@ uint16 EQEmu::limits::ItemCommonSize(ClientVersion clientVersion)
 /*Pet*/			constants::ITEM_COMMON_SIZE
 	};
 
-	return local[static_cast<unsigned int>(ValidateMobClientVersion(clientVersion))];
+	return local[static_cast<size_t>(versions::ValidateInventoryVersion(inventory_version))];
 }
 
-uint16 EQEmu::limits::ItemContainerSize(ClientVersion clientVersion)
+uint16 EQEmu::limits::ItemContainerSize(versions::InventoryVersion inventory_version)
 {
-	static const uint16 local[CLIENT_VERSION_COUNT] = {
+	static const uint16 local[versions::InventoryVersionCount] = {
 /*Unknown*/		NOT_USED,
 /*62*/			constants::ITEM_CONTAINER_SIZE,
 /*Titanium*/	constants::ITEM_CONTAINER_SIZE,
@@ -670,12 +619,12 @@ uint16 EQEmu::limits::ItemContainerSize(ClientVersion clientVersion)
 /*Pet*/			constants::ITEM_CONTAINER_SIZE
 	};
 
-	return local[static_cast<unsigned int>(ValidateMobClientVersion(clientVersion))];
+	return local[static_cast<size_t>(versions::ValidateInventoryVersion(inventory_version))];
 }
 
-bool EQEmu::limits::CoinHasWeight(ClientVersion clientVersion)
+bool EQEmu::limits::CoinHasWeight(versions::InventoryVersion inventory_version)
 {
-	static const bool local[CLIENT_VERSION_COUNT] = {
+	static const bool local[versions::InventoryVersionCount] = {
 /*Unknown*/		true,
 /*62*/			true,
 /*Titanium*/	Titanium::limits::COIN_HAS_WEIGHT,
@@ -691,5 +640,5 @@ bool EQEmu::limits::CoinHasWeight(ClientVersion clientVersion)
 /*Pet*/			true
 	};
 
-	return local[static_cast<unsigned int>(ValidateMobClientVersion(clientVersion))];
+	return local[static_cast<size_t>(versions::ValidateInventoryVersion(inventory_version))];
 }

@@ -1566,7 +1566,7 @@ ZonePoint* Zone::GetClosestZonePoint(const glm::vec3& location, uint32 to, Clien
 	while(iterator.MoreElements())
 	{
 		ZonePoint* zp = iterator.GetData();
-		uint32 mask_test = client->GetClientVersionBit();
+		uint32 mask_test = client->ClientVersionBit();
 		if(!(zp->client_version_mask & mask_test))
 		{
 			iterator.Advance();
@@ -1620,7 +1620,7 @@ ZonePoint* Zone::GetClosestZonePointWithoutZone(float x, float y, float z, Clien
 	while(iterator.MoreElements())
 	{
 		ZonePoint* zp = iterator.GetData();
-		uint32 mask_test = client->GetClientVersionBit();
+		uint32 mask_test = client->ClientVersionBit();
 
 		if(!(zp->client_version_mask & mask_test))
 		{

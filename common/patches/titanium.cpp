@@ -111,9 +111,9 @@ namespace Titanium
 		return(r);
 	}
 
-	const ClientVersion Strategy::GetClientVersion() const
+	const EQEmu::versions::ClientVersion Strategy::ClientVersion() const
 	{
-		return ClientVersion::Titanium;
+		return EQEmu::versions::ClientVersion::Titanium;
 	}
 
 #include "ss_define.h"

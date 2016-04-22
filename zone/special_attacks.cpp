@@ -182,7 +182,7 @@ void Client::OPCombatAbility(const EQApplicationPacket *app) {
 	pTimerType timer = pTimerCombatAbility;
 	// RoF2+ Tiger Claw is unlinked from other monk skills, if they ever do that for other classes there will need
 	// to be more checks here
-	if (GetClientVersion() >= ClientVersion::RoF2 && ca_atk->m_skill == SkillTigerClaw)
+	if (ClientVersion() >= EQEmu::versions::ClientVersion::RoF2 && ca_atk->m_skill == SkillTigerClaw)
 		timer = pTimerCombatAbility2;
 
 	/* Check to see if actually have skill */

@@ -3974,7 +3974,7 @@ XS(XS_Client_GetClientVersion)
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		RETVAL = static_cast<unsigned int>(THIS->GetClientVersion());
+		RETVAL = static_cast<unsigned int>(THIS->ClientVersion());
 		XSprePUSH; PUSHu((UV)RETVAL);
 	}
 	XSRETURN(1);
@@ -4000,7 +4000,7 @@ XS(XS_Client_GetClientVersionBit)
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		RETVAL = THIS->GetClientVersionBit();
+		RETVAL = THIS->ClientVersionBit();
 		XSprePUSH; PUSHu((UV)RETVAL);
 	}
 	XSRETURN(1);

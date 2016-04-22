@@ -510,7 +510,7 @@ void Client::CompleteConnect()
 
 	if (IsInAGuild()){
 		uint8 rank = GuildRank();
-		if (GetClientVersion() >= ClientVersion::RoF)
+		if (ClientVersion() >= EQEmu::versions::ClientVersion::RoF)
 		{
 			switch (rank) {
 			case 0: { rank = 5; break; }	// GUILD_MEMBER	0
@@ -831,7 +831,7 @@ void Client::CompleteConnect()
 	if (zone->GetZoneID() == RuleI(World, GuildBankZoneID) && GuildBanks)
 		GuildBanks->SendGuildBank(this);
 
-	if (GetClientVersion() >= ClientVersion::SoD)
+	if (ClientVersion() >= EQEmu::versions::ClientVersion::SoD)
 		entity_list.SendFindableNPCList(this);
 
 	if (IsInAGuild()) {
@@ -846,7 +846,7 @@ void Client::CompleteConnect()
 	worldserver.SendPacket(pack);
 	delete pack;
 
-	if (IsClient() && CastToClient()->GetClientVersionBit() & BIT_UFAndLater) {
+	if (IsClient() && CastToClient()->ClientVersionBit() & EQEmu::versions::bit_UFAndLater) {
 		EQApplicationPacket *outapp = MakeBuffsPacket(false);
 		CastToClient()->FastQueuePacket(&outapp);
 	}
@@ -1044,7 +1044,7 @@ void Client::Handle_Connect_OP_ReqClientSpawn(const EQApplicationPacket *app)
 	outapp = new EQApplicationPacket(OP_SendExpZonein, 0);
 	FastQueuePacket(&outapp);
 
-	if (GetClientVersion() >= ClientVersion::RoF)
+	if (ClientVersion() >= EQEmu::versions::ClientVersion::RoF)
 	{
 		outapp = new EQApplicationPacket(OP_ClientReady, 0);
 		FastQueuePacket(&outapp);
@@ -1103,7 +1103,7 @@ void Client::Handle_Connect_OP_SendExpZonein(const EQApplicationPacket *app)
 	safe_delete(outapp);
 
 	// SoF+ Gets Zone-In packets after sending OP_WorldObjectsSent
-	if (GetClientVersion() < ClientVersion::SoF)
+	if (ClientVersion() < EQEmu::versions::ClientVersion::SoF)
 	{
 		SendZoneInPackets();
 	}
@@ -1199,8 +1199,8 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 
 	conn_state = ReceivedZoneEntry;
 
-	SetClientVersion(Connection()->GetClientVersion());
-	m_ClientVersionBit = ClientBitFromVersion(Connection()->GetClientVersion());
+	SetClientVersion(Connection()->ClientVersion());
+	m_ClientVersionBit = EQEmu::versions::ConvertClientVersionToClientVersionBit(Connection()->ClientVersion());
 
 	bool siv = m_inv.SetInventoryVersion(m_ClientVersion);
 	Log.Out(Logs::General, Logs::None, "%s inventory version to %s(%i)", (siv ? "Succeeded in setting" : "Failed to set"), ClientVersionName(m_ClientVersion), m_ClientVersion);
@@ -1387,7 +1387,7 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 		m_pp.guild_id = GuildID();
 		uint8 rank = guild_mgr.GetDisplayedRank(GuildID(), GuildRank(), CharacterID());
 		// FIXME: RoF guild rank
-		if (GetClientVersion() >= ClientVersion::RoF) {
+		if (ClientVersion() >= EQEmu::versions::ClientVersion::RoF) {
 			switch (rank) {
 			case 0:
 				rank = 5;
@@ -1441,7 +1441,7 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	if (m_pp.ldon_points_available < 0 || m_pp.ldon_points_available > 2000000000){ m_pp.ldon_points_available = 0; }
 
 	if(RuleB(World, UseClientBasedExpansionSettings)) {
-		m_pp.expansions = ExpansionFromClientVersion(GetClientVersion());
+		m_pp.expansions = EQEmu::versions::ConvertClientVersionToExpansion(ClientVersion());
 	}
 	else {
 		m_pp.expansions = RuleI(World, ExpansionSettings);
@@ -1696,13 +1696,13 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	/* Task Packets */
 	LoadClientTaskState();
 
-	if (GetClientVersion() >= ClientVersion::RoF) {
+	if (ClientVersion() >= EQEmu::versions::ClientVersion::RoF) {
 		outapp = new EQApplicationPacket(OP_ReqNewZone, 0);
 		Handle_Connect_OP_ReqNewZone(outapp);
 		safe_delete(outapp);
 	}
 
-	if (m_ClientVersionBit & BIT_UFAndLater) {
+	if (m_ClientVersionBit & EQEmu::versions::bit_UFAndLater) {
 		outapp = new EQApplicationPacket(OP_XTargetResponse, 8);
 		outapp->WriteUInt32(GetMaxXTargets());
 		outapp->WriteUInt32(0);
@@ -2926,7 +2926,7 @@ void Client::Handle_OP_AugmentItem(const EQApplicationPacket *app)
 
 	AugmentItem_Struct* in_augment = (AugmentItem_Struct*)app->pBuffer;
 	bool deleteItems = false;
-	if (GetClientVersion() >= ClientVersion::RoF)
+	if (ClientVersion() >= EQEmu::versions::ClientVersion::RoF)
 	{
 		ItemInst *itemOneToPush = nullptr, *itemTwoToPush = nullptr;
 
@@ -4252,7 +4252,7 @@ void Client::Handle_OP_ClickObjectAction(const EQApplicationPacket *app)
 		QueuePacket(&end_trade2);
 
 		// RoF sends a 0 sized packet for closing objects
-		if (GetTradeskillObject() && GetClientVersion() >= ClientVersion::RoF)
+		if (GetTradeskillObject() && ClientVersion() >= EQEmu::versions::ClientVersion::RoF)
 			GetTradeskillObject()->CastToObject()->Close();
 		
 		return;
@@ -5141,7 +5141,7 @@ void Client::Handle_OP_DeleteItem(const EQApplicationPacket *app)
 		int16 AlcoholTolerance = GetSkill(SkillAlcoholTolerance);
 		int16 IntoxicationIncrease;
 
-		if (GetClientVersion() < ClientVersion::SoD)
+		if (ClientVersion() < EQEmu::versions::ClientVersion::SoD)
 			IntoxicationIncrease = (200 - AlcoholTolerance) * 30 / 200 + 10;
 		else
 			IntoxicationIncrease = (270 - AlcoholTolerance) * 0.111111108 + 10;
@@ -5453,7 +5453,7 @@ void Client::Handle_OP_EndLootRequest(const EQApplicationPacket *app)
 	Entity* entity = entity_list.GetID(*((uint16*)app->pBuffer));
 	if (entity == 0) {
 		Message(13, "Error: OP_EndLootRequest: Corpse not found (ent = 0)");
-		if (GetClientVersion() >= ClientVersion::SoD)
+		if (ClientVersion() >= EQEmu::versions::ClientVersion::SoD)
 			Corpse::SendEndLootErrorPacket(this);
 		else
 			Corpse::SendLootReqErrorPacket(this);
@@ -7333,11 +7333,11 @@ void Client::Handle_OP_GuildInvite(const EQApplicationPacket *app)
 					gc->guildeqid = GuildID();
 
 				// Convert Membership Level between RoF and previous clients.
-				if (client->GetClientVersion() < ClientVersion::RoF && GetClientVersion() >= ClientVersion::RoF)
+				if (client->ClientVersion() < EQEmu::versions::ClientVersion::RoF && ClientVersion() >= EQEmu::versions::ClientVersion::RoF)
 				{
 					gc->officer = 0;
 				}
-				if (client->GetClientVersion() >= ClientVersion::RoF && GetClientVersion() < ClientVersion::RoF)
+				if (client->ClientVersion() >= EQEmu::versions::ClientVersion::RoF && ClientVersion() < EQEmu::versions::ClientVersion::RoF)
 				{
 					gc->officer = 8;
 				}
@@ -7378,7 +7378,7 @@ void Client::Handle_OP_GuildInviteAccept(const EQApplicationPacket *app)
 
 	uint32 guildrank = gj->response;
 
-	if (GetClientVersion() >= ClientVersion::RoF)
+	if (ClientVersion() >= EQEmu::versions::ClientVersion::RoF)
 	{
 		if (gj->response > 9)
 		{
@@ -7413,11 +7413,11 @@ void Client::Handle_OP_GuildInviteAccept(const EQApplicationPacket *app)
 		{
 			Client* client = inviter->CastToClient();
 			// Convert Membership Level between RoF and previous clients.
-			if (client->GetClientVersion() < ClientVersion::RoF && GetClientVersion() >= ClientVersion::RoF)
+			if (client->ClientVersion() < EQEmu::versions::ClientVersion::RoF && ClientVersion() >= EQEmu::versions::ClientVersion::RoF)
 			{
 				guildrank = 0;
 			}
-			if (client->GetClientVersion() >= ClientVersion::RoF && GetClientVersion() < ClientVersion::RoF)
+			if (client->ClientVersion() >= EQEmu::versions::ClientVersion::RoF && ClientVersion() < EQEmu::versions::ClientVersion::RoF)
 			{
 				guildrank = 8;
 			}
@@ -7454,7 +7454,7 @@ void Client::Handle_OP_GuildInviteAccept(const EQApplicationPacket *app)
 
 			guildrank = gj->response;
 
-			if (GetClientVersion() >= ClientVersion::RoF)
+			if (ClientVersion() >= EQEmu::versions::ClientVersion::RoF)
 			{
 				if (gj->response == 8)
 				{
@@ -8060,7 +8060,7 @@ void Client::Handle_OP_InspectRequest(const EQApplicationPacket *app)
 	Mob* tmp = entity_list.GetMob(ins->TargetID);
 
 	if (tmp != 0 && tmp->IsClient()) {
-		if (tmp->CastToClient()->GetClientVersion() < ClientVersion::SoF) { tmp->CastToClient()->QueuePacket(app); } // Send request to target
+		if (tmp->CastToClient()->ClientVersion() < EQEmu::versions::ClientVersion::SoF) { tmp->CastToClient()->QueuePacket(app); } // Send request to target
 		// Inspecting an SoF or later client will make the server handle the request
 		else { ProcessInspectRequest(tmp->CastToClient(), this); }
 	}
@@ -8563,7 +8563,7 @@ void Client::Handle_OP_ItemVerifyRequest(const EQApplicationPacket *app)
 			}
 			else
 			{
-				if (GetClientVersion() >= ClientVersion::SoD && !inst->IsEquipable(GetBaseRace(), GetClass()))
+				if (ClientVersion() >= EQEmu::versions::ClientVersion::SoD && !inst->IsEquipable(GetBaseRace(), GetClass()))
 				{
 					if (item->ItemType != ItemTypeFood && item->ItemType != ItemTypeDrink && item->ItemType != ItemTypeAlcohol)
 					{
@@ -9391,14 +9391,14 @@ void Client::Handle_OP_MercenaryDataRequest(const EQApplicationPacket *app)
 			return;
 		}
 
-		mercTypeCount = tar->GetNumMercTypes(static_cast<unsigned int>(GetClientVersion()));
-		mercCount = tar->GetNumMercs(static_cast<unsigned int>(GetClientVersion()));
+		mercTypeCount = tar->GetNumMercTypes(static_cast<unsigned int>(ClientVersion()));
+		mercCount = tar->GetNumMercs(static_cast<unsigned int>(ClientVersion()));
 
 		if (mercCount > MAX_MERC)
 			return;
 
-		std::list<MercType> mercTypeList = tar->GetMercTypesList(static_cast<unsigned int>(GetClientVersion()));
-		std::list<MercData> mercDataList = tar->GetMercsList(static_cast<unsigned int>(GetClientVersion()));
+		std::list<MercType> mercTypeList = tar->GetMercTypesList(static_cast<unsigned int>(ClientVersion()));
+		std::list<MercData> mercDataList = tar->GetMercsList(static_cast<unsigned int>(ClientVersion()));
 
 		int i = 0;
 		int StanceCount = 0;
@@ -11320,7 +11320,7 @@ void Client::Handle_OP_ReadBook(const EQApplicationPacket *app)
 	}
 	BookRequest_Struct* book = (BookRequest_Struct*)app->pBuffer;
 	ReadBook(book);
-	if (GetClientVersion() >= ClientVersion::SoF)
+	if (ClientVersion() >= EQEmu::versions::ClientVersion::SoF)
 	{
 		EQApplicationPacket EndOfBook(OP_FinishWindow, 0);
 		QueuePacket(&EndOfBook);
@@ -12669,7 +12669,7 @@ void Client::Handle_OP_SpawnAppearance(const EQApplicationPacket *app)
 		{
 			if (!HasSkill(SkillHide) && GetSkill(SkillHide) == 0)
 			{
-				if (GetClientVersion() < ClientVersion::SoF)
+				if (ClientVersion() < EQEmu::versions::ClientVersion::SoF)
 				{
 					char *hack_str = nullptr;
 					MakeAnyLenString(&hack_str, "Player sent OP_SpawnAppearance with AT_Invis: %i", sa->parameter);
@@ -13519,7 +13519,7 @@ void Client::Handle_OP_Trader(const EQApplicationPacket *app)
 			this->Trader_StartTrader();
 
 			// This refreshes the Trader window to display the End Trader button
-			if (GetClientVersion() >= ClientVersion::RoF)
+			if (ClientVersion() >= EQEmu::versions::ClientVersion::RoF)
 			{
 				EQApplicationPacket* outapp = new EQApplicationPacket(OP_Trader, sizeof(TraderStatus_Struct));
 				TraderStatus_Struct* tss = (TraderStatus_Struct*)outapp->pBuffer;

@@ -163,7 +163,7 @@ void Client::CalcItemBonuses(StatBonuses* newbon) {
 	}
 
 	//Power Source Slot
-	if (GetClientVersion() >= ClientVersion::SoF)
+	if (ClientVersion() >= EQEmu::versions::ClientVersion::SoF)
 	{
 		const ItemInst* inst = m_inv[SlotPowerSource];
 		if(inst)
@@ -3293,7 +3293,7 @@ void Client::CalcItemScale() {
 		changed = true;
 
 	//Power Source Slot
-	if (GetClientVersion() >= ClientVersion::SoF)
+	if (ClientVersion() >= EQEmu::versions::ClientVersion::SoF)
 	{
 		if(CalcItemScale(SlotPowerSource, SlotPowerSource))
 			changed = true;
@@ -3387,7 +3387,7 @@ void Client::DoItemEnterZone() {
 		changed = true;
 
 	//Power Source Slot
-	if (GetClientVersion() >= ClientVersion::SoF)
+	if (ClientVersion() >= EQEmu::versions::ClientVersion::SoF)
 	{
 		if(DoItemEnterZone(SlotPowerSource, SlotPowerSource))
 			changed = true;

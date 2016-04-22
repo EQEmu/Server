@@ -322,7 +322,7 @@ void ZoneGuildManager::ProcessWorldPacket(ServerPacket *pack) {
 		else if(c != nullptr && s->guild_id != GUILD_NONE) {
 			//char is in zone, and has changed into a new guild, send MOTD.
 			c->SendGuildMOTD();
-			if(c->GetClientVersion() >= ClientVersion::RoF)
+			if (c->ClientVersion() >= EQEmu::versions::ClientVersion::RoF)
 			{
 				c->SendGuildRanks();
 			}
@@ -691,7 +691,7 @@ void GuildBankManager::SendGuildBank(Client *c)
 	auto &guild_bank = *Iterator;
 
 	// RoF+ uses a bulk list packet -- This is also how the Action 0 of older clients basically works
-	if (c->GetClientVersionBit() & BIT_RoFAndLater) {
+	if (c->ClientVersionBit() & EQEmu::versions::bit_RoFAndLater) {
 		auto outapp = new EQApplicationPacket(OP_GuildBankItemList, sizeof(GuildBankItemListEntry_Struct) * 240);
 		for (int i = 0; i < GUILD_BANK_DEPOSIT_AREA_SIZE; ++i) {
 			const Item_Struct *Item = database.GetItem(guild_bank->Items.DepositArea[i].ItemID);

@@ -93,7 +93,7 @@ bool Mob::AttackAnimation(SkillUseTypes &skillinuse, int Hand, const ItemInst* w
 			}
 			case ItemType2HPiercing: // 2H Piercing
 			{
-				if (IsClient() && CastToClient()->GetClientVersion() < ClientVersion::RoF2)
+				if (IsClient() && CastToClient()->ClientVersion() < EQEmu::versions::ClientVersion::RoF2)
 					skillinuse = Skill1HPiercing;
 				else
 					skillinuse = Skill2HPiercing;
@@ -1486,7 +1486,7 @@ bool Client::Death(Mob* killerMob, int32 damage, uint16 spell, SkillUseTypes att
 		//this generates a lot of 'updates' to the client that the client does not need
 		BuffFadeNonPersistDeath();
 		if (RuleB(Character, UnmemSpellsOnDeath)) {
-			if((GetClientVersionBit() & BIT_SoFAndLater) && RuleB(Character, RespawnFromHover))
+			if((ClientVersionBit() & EQEmu::versions::bit_SoFAndLater) && RuleB(Character, RespawnFromHover))
 				UnmemSpellAll(true);
 			else
 				UnmemSpellAll(false);
@@ -1549,7 +1549,7 @@ bool Client::Death(Mob* killerMob, int32 damage, uint16 spell, SkillUseTypes att
 		from these and overwrite what we set in pp anyway
 	*/
 
-	if(LeftCorpse && (GetClientVersionBit() & BIT_SoFAndLater) && RuleB(Character, RespawnFromHover))
+	if(LeftCorpse && (ClientVersionBit() & EQEmu::versions::bit_SoFAndLater) && RuleB(Character, RespawnFromHover))
 	{
 		ClearDraggedCorpses();
 		RespawnFromHoverTimer.Start(RuleI(Character, RespawnFromHoverTimer) * 1000);
@@ -3425,14 +3425,14 @@ void Mob::HealDamage(uint32 amount, Mob *caster, uint16 spell_id)
 			if (IsBuffSpell(spell_id)) { // hots
 				// message to caster
 				if (caster->IsClient() && caster == this) {
-					if (caster->CastToClient()->GetClientVersionBit() & BIT_SoFAndLater)
+					if (caster->CastToClient()->ClientVersionBit() & EQEmu::versions::bit_SoFAndLater)
 						FilteredMessage_StringID(caster, MT_NonMelee, FilterHealOverTime,
 								HOT_HEAL_SELF, itoa(acthealed), spells[spell_id].name);
 					else
 						FilteredMessage_StringID(caster, MT_NonMelee, FilterHealOverTime,
 								YOU_HEALED, GetCleanName(), itoa(acthealed));
 				} else if (caster->IsClient() && caster != this) {
-					if (caster->CastToClient()->GetClientVersionBit() & BIT_SoFAndLater)
+					if (caster->CastToClient()->ClientVersionBit() & EQEmu::versions::bit_SoFAndLater)
 						caster->FilteredMessage_StringID(caster, MT_NonMelee, FilterHealOverTime,
 								HOT_HEAL_OTHER, GetCleanName(), itoa(acthealed),
 								spells[spell_id].name);
@@ -3442,7 +3442,7 @@ void Mob::HealDamage(uint32 amount, Mob *caster, uint16 spell_id)
 				}
 				// message to target
 				if (IsClient() && caster != this) {
-					if (CastToClient()->GetClientVersionBit() & BIT_SoFAndLater)
+					if (CastToClient()->ClientVersionBit() & EQEmu::versions::bit_SoFAndLater)
 						FilteredMessage_StringID(this, MT_NonMelee, FilterHealOverTime,
 								HOT_HEALED_OTHER, caster->GetCleanName(),
 								itoa(acthealed), spells[spell_id].name);

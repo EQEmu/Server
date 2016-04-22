@@ -22,7 +22,7 @@
 
 #include "types.h"
 #include "eq_constants.h"
-#include "clientversions.h"
+#include "inventory_version.h" // inv2 watch
 #include "../common/patches/titanium_constants.h"
 #include "../common/patches/sof_constants.h"
 #include "../common/patches/sod_constants.h"
@@ -39,42 +39,26 @@
 
 namespace EQEmu
 {
-	// values should default to a non-beneficial value..unless value conflicts with intended operation
-	//
-	// EQEmu::Constants may be used as references..but, not every reference needs to be in EQEmu::Constants (i.e., AllowsEmptyBagInBag(), CoinHasWeight(), etc...)
 	namespace limits {
-		// client version validation (checks to avoid crashing zone server when accessing reference arrays)
-		// use this inside of class Client (limits to actual clients)
-		extern bool IsValidPCClientVersion(ClientVersion clientVersion);
-		extern ClientVersion ValidatePCClientVersion(ClientVersion clientVersion);
-
-		// basically..any non-client classes - do not invoke when setting a valid client
-		extern bool IsValidNPCClientVersion(ClientVersion clientVersion);
-		extern ClientVersion ValidateNPCClientVersion(ClientVersion clientVersion);
-
-		// these are 'universal' - do not invoke when setting a valid client
-		extern bool IsValidMobClientVersion(ClientVersion clientVersion);
-		extern ClientVersion ValidateMobClientVersion(ClientVersion clientVersion);
-
 		// database
-		extern size_t CharacterCreationLimit(ClientVersion clientVersion);
+		extern size_t CharacterCreationLimit(versions::ClientVersion client_version);
 
 		// inventory
-		extern uint16 InventoryMapSize(int16 indexMap, ClientVersion clientVersion);
-		extern uint64 PossessionsBitmask(ClientVersion clientVersion);
-		extern uint64 EquipmentBitmask(ClientVersion clientVersion);
-		extern uint64 GeneralBitmask(ClientVersion clientVersion);
-		extern uint64 CursorBitmask(ClientVersion clientVersion);
+		extern uint16 InventoryTypeSize(versions::InventoryVersion inventory_version, int16 inv_type);
+		extern uint64 PossessionsBitmask(versions::InventoryVersion inventory_version);
+		extern uint64 EquipmentBitmask(versions::InventoryVersion inventory_version);
+		extern uint64 GeneralBitmask(versions::InventoryVersion inventory_version);
+		extern uint64 CursorBitmask(versions::InventoryVersion inventory_version);
 
-		extern bool AllowsEmptyBagInBag(ClientVersion clientVersion);
-		extern bool AllowsClickCastFromBag(ClientVersion clientVersion);
+		extern bool AllowEmptyBagInBag(versions::InventoryVersion inventory_version);
+		extern bool AllowClickCastFromBag(versions::InventoryVersion inventory_version);
 
 		// items
-		extern uint16 ItemCommonSize(ClientVersion clientVersion);
-		extern uint16 ItemContainerSize(ClientVersion clientVersion);
+		extern uint16 ItemCommonSize(versions::InventoryVersion inventory_version);
+		extern uint16 ItemContainerSize(versions::InventoryVersion inventory_version);
 
 		// player profile
-		extern bool CoinHasWeight(ClientVersion clientVersion);
+		extern bool CoinHasWeight(versions::InventoryVersion inventory_version);
 	}
 }
 

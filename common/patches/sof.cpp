@@ -113,9 +113,9 @@ namespace SoF
 		return(r);
 	}
 
-	const ClientVersion Strategy::GetClientVersion() const
+	const EQEmu::versions::ClientVersion Strategy::ClientVersion() const
 	{
-		return ClientVersion::SoF;
+		return EQEmu::versions::ClientVersion::SoF;
 	}
 
 #include "ss_define.h"

@@ -135,7 +135,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 		if (spells[spell_id].EndurUpkeep > 0)
 			SetEndurUpkeep(true);
 
-		if(IsClient() && CastToClient()->GetClientVersionBit() & BIT_UFAndLater)
+		if (IsClient() && CastToClient()->ClientVersionBit() & EQEmu::versions::bit_UFAndLater)
 		{
 			EQApplicationPacket *outapp = MakeBuffsPacket(false);
 			CastToClient()->FastQueuePacket(&outapp);
@@ -818,7 +818,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 				{
 					CastToClient()->SetSenseExemption(true);
 
-					if(CastToClient()->GetClientVersionBit() & BIT_SoDAndLater)
+					if (CastToClient()->ClientVersionBit() & EQEmu::versions::bit_SoDAndLater)
 					{
 						bodyType bt = BT_Undead;
 
@@ -1627,7 +1627,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 #endif
 				// This is handled by the client prior to SoD.
 				//
-				if(IsClient() && (CastToClient()->GetClientVersionBit() & BIT_SoDAndLater))
+				if (IsClient() && (CastToClient()->ClientVersionBit() & EQEmu::versions::bit_SoDAndLater))
 					CastToClient()->LocateCorpse();
 
 				break;
@@ -3374,7 +3374,7 @@ void Mob::BuffProcess()
 						Log.Out(Logs::Detail, Logs::Spells, "Buff %d in slot %d has %d tics remaining.", buffs[buffs_i].spellid, buffs_i, buffs[buffs_i].ticsremaining);
 					}
 				}
-				else if(IsClient() && !(CastToClient()->GetClientVersionBit() & BIT_SoFAndLater))
+				else if (IsClient() && !(CastToClient()->ClientVersionBit() & EQEmu::versions::bit_SoFAndLater))
 				{
 					buffs[buffs_i].UpdateClient = true;
 				}
@@ -3386,7 +3386,7 @@ void Mob::BuffProcess()
 				{
 					CastToClient()->SendBuffDurationPacket(buffs[buffs_i]);
 					// Hack to get UF to play nicer, RoF seems fine without it
-					if (CastToClient()->GetClientVersion() == ClientVersion::UF && buffs[buffs_i].numhits > 0)
+					if (CastToClient()->ClientVersion() == EQEmu::versions::ClientVersion::UF && buffs[buffs_i].numhits > 0)
 						CastToClient()->SendBuffNumHitPacket(buffs[buffs_i], buffs_i);
 					buffs[buffs_i].UpdateClient = false;
 				}
@@ -3649,7 +3649,7 @@ void Mob::DoBuffTic(const Buffs_Struct &buff, int slot, Mob *caster)
 		case SE_LocateCorpse: {
 			// This is handled by the client prior to SoD.
 
-			if (IsClient() && (CastToClient()->GetClientVersionBit() & BIT_SoDAndLater))
+			if (IsClient() && (CastToClient()->ClientVersionBit() & EQEmu::versions::bit_SoDAndLater))
 				CastToClient()->LocateCorpse();
 		}
 		case SE_TotalHP: {
@@ -4113,7 +4113,7 @@ void Mob::BuffFadeBySlot(int slot, bool iRecalcBonuses)
 	{
 		EQApplicationPacket *outapp = MakeBuffsPacket();
 
-		entity_list.QueueClientsByTarget(this, outapp, false, nullptr, true, false, BIT_SoDAndLater);
+		entity_list.QueueClientsByTarget(this, outapp, false, nullptr, true, false, EQEmu::versions::bit_SoDAndLater);
 		if(IsClient() && GetTarget() == this) {
 			CastToClient()->QueuePacket(outapp);
 		}
@@ -4123,11 +4123,11 @@ void Mob::BuffFadeBySlot(int slot, bool iRecalcBonuses)
 
 	if (IsNPC()) {
 		EQApplicationPacket *outapp = MakeBuffsPacket();
-		entity_list.QueueClientsByTarget(this, outapp, false, nullptr, true, false, BIT_SoDAndLater, true);
+		entity_list.QueueClientsByTarget(this, outapp, false, nullptr, true, false, EQEmu::versions::bit_SoDAndLater, true);
 		safe_delete(outapp);
 	}
 
-	if(IsClient() && CastToClient()->GetClientVersionBit() & BIT_UFAndLater)
+	if (IsClient() && CastToClient()->ClientVersionBit() & EQEmu::versions::bit_UFAndLater)
 	{
 		EQApplicationPacket *outapp = MakeBuffsPacket(false);
 		CastToClient()->FastQueuePacket(&outapp);
@@ -6574,7 +6574,7 @@ bool Mob::TrySpellProjectile(Mob* spell_target,  uint16 spell_id, float speed){
 		if (spells[spell_id].resisttype == RESIST_FIRE) {
 
 			if (IsClient()){
-				if (CastToClient()->GetClientVersionBit() <= 4) //Titanium needs alternate graphic.
+				if (CastToClient()->ClientVersionBit() <= 4) //Titanium needs alternate graphic.
 					ProjectileAnimation(spell_target,(RuleI(Spells, FRProjectileItem_Titanium)), false, speed);
 				else
 					ProjectileAnimation(spell_target,(RuleI(Spells, FRProjectileItem_SOF)), false, speed);

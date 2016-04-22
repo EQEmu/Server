@@ -313,7 +313,7 @@ Corpse::Corpse(Client* client, int32 in_rezexp) : Mob (
 		// cash
 		// Let's not move the cash when 'RespawnFromHover = true' && 'client->GetClientVersion() < EQClientSoF' since the client doesn't.
 		// (change to first client that supports 'death hover' mode, if not SoF.)
-		if (!RuleB(Character, RespawnFromHover) || client->GetClientVersion() < ClientVersion::SoF) {
+		if (!RuleB(Character, RespawnFromHover) || client->ClientVersion() < EQEmu::versions::ClientVersion::SoF) {
 			SetCash(pp->copper, pp->silver, pp->gold, pp->platinum);
 			pp->copper = 0;
 			pp->silver = 0;
@@ -329,7 +329,7 @@ Corpse::Corpse(Client* client, int32 in_rezexp) : Mob (
 		std::list<uint32> removed_list;
 		
 		for(i = SLOT_BEGIN; i < EQEmu::constants::TYPE_POSSESSIONS_SIZE; ++i) {
-			if(i == SlotAmmo && client->GetClientVersion() >= ClientVersion::SoF) {
+			if (i == SlotAmmo && client->ClientVersion() >= EQEmu::versions::ClientVersion::SoF) {
 				item = client->GetInv().GetItem(SlotPowerSource);
 				if (item != nullptr) {
 					if (!client->IsBecomeNPC() || (client->IsBecomeNPC() && !item->GetItem()->NoRent))
@@ -1000,7 +1000,7 @@ void Corpse::MakeLootRequestPackets(Client* client, const EQApplicationPacket* a
 		cur = itemlist.begin();
 		end = itemlist.end();
 
-		int corpselootlimit = EQEmu::limits::InventoryMapSize(TypeCorpse, client->GetClientVersion());
+		int corpselootlimit = EQEmu::limits::InventoryTypeSize(EQEmu::versions::ConvertClientVersionToInventoryVersion(client->ClientVersion()), TypeCorpse);
 
 		for(; cur != end; ++cur) {
 			ServerLootItem_Struct* item_data = *cur;
@@ -1060,7 +1060,7 @@ void Corpse::MakeLootRequestPackets(Client* client, const EQApplicationPacket* a
 
 	// This is required for the 'Loot All' feature to work for SoD clients. I expect it is to tell the client that the
 	// server has now sent all the items on the corpse.
-	if(client->GetClientVersion() >= ClientVersion::SoD) { SendLootReqErrorPacket(client, 6); }
+	if (client->ClientVersion() >= EQEmu::versions::ClientVersion::SoD) { SendLootReqErrorPacket(client, 6); }
 }
 
 void Corpse::LootItem(Client* client, const EQApplicationPacket* app) {
@@ -1294,7 +1294,7 @@ void Corpse::QueryLoot(Client* to) {
 	cur = itemlist.begin();
 	end = itemlist.end();
 
-	int corpselootlimit = EQEmu::limits::InventoryMapSize(TypeCorpse, to->GetClientVersion());
+	int corpselootlimit = EQEmu::limits::InventoryTypeSize(EQEmu::versions::ConvertClientVersionToInventoryVersion(to->ClientVersion()), TypeCorpse);
 
 	for(; cur != end; ++cur) {
 		ServerLootItem_Struct* sitem = *cur;

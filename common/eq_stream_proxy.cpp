@@ -21,9 +21,9 @@ std::string EQStreamProxy::Describe() const {
 	return(m_structs->Describe());
 }
 
-const ClientVersion EQStreamProxy::GetClientVersion() const
+const EQEmu::versions::ClientVersion EQStreamProxy::ClientVersion() const
 {
-	return m_structs->GetClientVersion();
+	return m_structs->ClientVersion();
 }
 
 void EQStreamProxy::QueuePacket(const EQApplicationPacket *p, bool ack_req) {

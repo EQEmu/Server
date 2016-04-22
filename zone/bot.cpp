@@ -1255,7 +1255,7 @@ int32 Bot::GenerateBaseHitPoints() {
 	uint32 lm = GetClassLevelFactor();
 	int32 Post255;
 	int32 NormalSTA = GetSTA();
-	if(GetOwner() && GetOwner()->CastToClient() && GetOwner()->CastToClient()->GetClientVersion() >= ClientVersion::SoD && RuleB(Character, SoDClientUseSoDHPManaEnd)) {
+	if (GetOwner() && GetOwner()->CastToClient() && GetOwner()->CastToClient()->ClientVersion() >= EQEmu::versions::ClientVersion::SoD && RuleB(Character, SoDClientUseSoDHPManaEnd)) {
 		float SoDPost255;
 		if(((NormalSTA - 255) / 2) > 0)
 			SoDPost255 = ((NormalSTA - 255) / 2);
@@ -6127,7 +6127,7 @@ int32 Bot::GenerateBaseManaPoints() {
 	switch(GetCasterClass()) {
 		case 'I':
 			WisInt = INT;
-			if(GetOwner() && GetOwner()->CastToClient() && GetOwner()->CastToClient()->GetClientVersion() >= ClientVersion::SoD && RuleB(Character, SoDClientUseSoDHPManaEnd)) {
+			if (GetOwner() && GetOwner()->CastToClient() && GetOwner()->CastToClient()->ClientVersion() >= EQEmu::versions::ClientVersion::SoD && RuleB(Character, SoDClientUseSoDHPManaEnd)) {
 				if(WisInt > 100) {
 					ConvertedWisInt = (((WisInt - 100) * 5 / 2) + 100);
 					if(WisInt > 201)
@@ -6162,7 +6162,7 @@ int32 Bot::GenerateBaseManaPoints() {
 			break;
 		case 'W':
 			WisInt = WIS;
-			if(GetOwner() && GetOwner()->CastToClient() && GetOwner()->CastToClient()->GetClientVersion() >= ClientVersion::SoD && RuleB(Character, SoDClientUseSoDHPManaEnd)) {
+			if (GetOwner() && GetOwner()->CastToClient() && GetOwner()->CastToClient()->ClientVersion() >= EQEmu::versions::ClientVersion::SoD && RuleB(Character, SoDClientUseSoDHPManaEnd)) {
 				if(WisInt > 100) {
 					ConvertedWisInt = (((WisInt - 100) * 5 / 2) + 100);
 					if(WisInt > 201)
@@ -6346,7 +6346,7 @@ int32 Bot::GetMaxStat() {
 	int32 base = 0;
 	if (level < 61)
 		base = 255;
-	else if (GetOwner() && GetOwner()->CastToClient() && GetOwner()->CastToClient()->GetClientVersion() >= ClientVersion::SoF)
+	else if (GetOwner() && GetOwner()->CastToClient() && GetOwner()->CastToClient()->ClientVersion() >= EQEmu::versions::ClientVersion::SoF)
 		base = (255 + 5 * (level - 60));
 	else if (level < 71)
 		base = (255 + 5 * (level - 60));
@@ -6841,7 +6841,7 @@ int32 Bot::CalcBaseEndurance() {
 	int32 ConvertedStats = 0;
 	int32 sta_end = 0;
 	int Stats = 0;
-	if(GetOwner() && GetOwner()->CastToClient() && GetOwner()->CastToClient()->GetClientVersion() >= ClientVersion::SoD && RuleB(Character, SoDClientUseSoDHPManaEnd)) {
+	if (GetOwner() && GetOwner()->CastToClient() && GetOwner()->CastToClient()->ClientVersion() >= EQEmu::versions::ClientVersion::SoD && RuleB(Character, SoDClientUseSoDHPManaEnd)) {
 		int HeroicStats = 0;
 		Stats = ((GetSTR() + GetSTA() + GetDEX() + GetAGI()) / 4);
 		HeroicStats = ((GetHeroicSTR() + GetHeroicSTA() + GetHeroicDEX() + GetHeroicAGI()) / 4);

@@ -113,9 +113,9 @@ namespace SoD
 		return(r);
 	}
 
-	const ClientVersion Strategy::GetClientVersion() const
+	const EQEmu::versions::ClientVersion Strategy::ClientVersion() const
 	{
-		return ClientVersion::SoD;
+		return EQEmu::versions::ClientVersion::SoD;
 	}
 
 #include "ss_define.h"

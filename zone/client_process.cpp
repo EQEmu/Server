@@ -126,7 +126,7 @@ bool Client::Process() {
 				HandleRespawnFromHover(0);
 		}
 
-		if(IsTracking() && (GetClientVersion() >= ClientVersion::SoD) && TrackingTimer.Check())
+		if (IsTracking() && (ClientVersion() >= EQEmu::versions::ClientVersion::SoD) && TrackingTimer.Check())
 			DoTracking();
 
 		// SendHPUpdate calls hpupdate_timer.Start so it can delay this timer, so lets not reset with the check
@@ -800,7 +800,7 @@ void Client::BulkSendInventoryItems() {
 	}
 
 	// Power Source
-	if(GetClientVersion() >= ClientVersion::SoF) {
+	if (ClientVersion() >= EQEmu::versions::ClientVersion::SoF) {
 		const ItemInst* inst = m_inv[SlotPowerSource];
 		if(inst) {
 			std::string packet = inst->Serialize(SlotPowerSource);
@@ -890,7 +890,7 @@ void Client::BulkSendInventoryItems()
 void Client::BulkSendMerchantInventory(int merchant_id, int npcid) {
 	const Item_Struct* handyitem = nullptr;
 	uint32 numItemSlots = 80; //The max number of items passed in the transaction.
-	if (m_ClientVersionBit & BIT_RoFAndLater) { // RoF+ can send 200 items
+	if (m_ClientVersionBit & EQEmu::versions::bit_RoFAndLater) { // RoF+ can send 200 items
 		numItemSlots = 200;
 	}
 	const Item_Struct *item;
@@ -1554,7 +1554,7 @@ void Client::OPGMTraining(const EQApplicationPacket *app)
 		}
 	}
 
-	if (GetClientVersion() < ClientVersion::RoF2 && GetClass() == BERSERKER) {
+	if (ClientVersion() < EQEmu::versions::ClientVersion::RoF2 && GetClass() == BERSERKER) {
 		gmtrain->skills[Skill1HPiercing] = gmtrain->skills[Skill2HPiercing];
 		gmtrain->skills[Skill2HPiercing] = 0;
 	}
@@ -1734,7 +1734,7 @@ void Client::OPGMTrainSkill(const EQApplicationPacket *app)
 		}
 	}
 
-	if(GetClientVersion() >= ClientVersion::SoF) {
+	if (ClientVersion() >= EQEmu::versions::ClientVersion::SoF) {
 		// The following packet decreases the skill points left in the Training Window and
 		// produces the 'You have increased your skill / learned the basics of' message.
 		//
@@ -2174,7 +2174,7 @@ void Client::ClearHover()
 	entity_list.QueueClients(this, outapp, false);
 	safe_delete(outapp);
 
-	if(IsClient() && CastToClient()->GetClientVersionBit() & BIT_UFAndLater)
+	if (IsClient() && CastToClient()->ClientVersionBit() & EQEmu::versions::bit_UFAndLater)
 	{
 		EQApplicationPacket *outapp = MakeBuffsPacket(false);
 		CastToClient()->FastQueuePacket(&outapp);

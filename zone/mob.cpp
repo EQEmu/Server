@@ -1284,7 +1284,7 @@ void Mob::SendHPUpdate(bool skip_self)
 	CreateHPPacket(&hp_app);
 
 	// send to people who have us targeted
-	entity_list.QueueClientsByTarget(this, &hp_app, false, 0, false, true, BIT_AllClients);
+	entity_list.QueueClientsByTarget(this, &hp_app, false, 0, false, true, EQEmu::versions::bit_AllClients);
 	entity_list.QueueClientsByXTarget(this, &hp_app, false);
 	entity_list.QueueToGroupsForNPCHealthAA(this, &hp_app);
 
@@ -5031,7 +5031,7 @@ uint16 Mob::GetSkillByItemType(int ItemType)
 		case ItemType2HBlunt:
 			return Skill2HBlunt;
 		case ItemType2HPiercing:
-			if (IsClient() && CastToClient()->GetClientVersion() < ClientVersion::RoF2)
+			if (IsClient() && CastToClient()->ClientVersion() < EQEmu::versions::ClientVersion::RoF2)
 				return Skill1HPiercing;
 			else
 				return Skill2HPiercing;

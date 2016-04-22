@@ -117,9 +117,9 @@ namespace RoF
 		return(r);
 	}
 
-	const ClientVersion Strategy::GetClientVersion() const
+	const EQEmu::versions::ClientVersion Strategy::ClientVersion() const
 	{
-		return ClientVersion::RoF;
+		return EQEmu::versions::ClientVersion::RoF;
 	}
 
 #include "ss_define.h"
