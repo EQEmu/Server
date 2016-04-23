@@ -22,6 +22,8 @@
 
 #include "types.h"
 
+#include <stdlib.h>
+
 
 namespace EQEmu
 {
@@ -260,18 +262,13 @@ namespace EQEmu
 		static const uint16 ITEM_CONTAINER_SIZE = 10;//Titanium::consts::ITEM_CONTAINER_SIZE;
 
 		// BANDOLIERS_SIZE sets maximum limit..active limit will need to be handled by the appropriate AA or spell (or item?)
-		//static const size_t BANDOLIERS_SIZE = 20;//RoF2::consts::BANDOLIERS_SIZE;			// number of bandolier instances
-		static const unsigned int BANDOLIERS_SIZE = 20;//RoF2::consts::BANDOLIERS_SIZE;			// number of bandolier instances
-		
-		//static const size_t BANDOLIER_ITEM_COUNT = 4;//RoF2::consts::BANDOLIER_ITEM_COUNT;	// number of equipment slots in bandolier instance
-		static const unsigned int BANDOLIER_ITEM_COUNT = 4;//RoF2::consts::BANDOLIER_ITEM_COUNT;	// number of equipment slots in bandolier instance
+		static const size_t BANDOLIERS_SIZE = 20;//RoF2::consts::BANDOLIERS_SIZE;			// number of bandolier instances
+		static const size_t BANDOLIER_ITEM_COUNT = 4;//RoF2::consts::BANDOLIER_ITEM_COUNT;	// number of equipment slots in bandolier instance
 
 		// POTION_BELT_SIZE sets maximum limit..active limit will need to be handled by the appropriate AA or spell (or item?)
-		//static const size_t POTION_BELT_ITEM_COUNT = 5;//RoF2::consts::POTION_BELT_ITEM_COUNT;
-		static const unsigned int POTION_BELT_ITEM_COUNT = 5;//RoF2::consts::POTION_BELT_ITEM_COUNT;
+		static const size_t POTION_BELT_ITEM_COUNT = 5;//RoF2::consts::POTION_BELT_ITEM_COUNT;
 
-		//static const size_t TEXT_LINK_BODY_LENGTH = 56;//RoF2::consts::TEXT_LINK_BODY_LENGTH;
-		static const unsigned int TEXT_LINK_BODY_LENGTH = 56;//RoF2::consts::TEXT_LINK_BODY_LENGTH;
+		static const size_t TEXT_LINK_BODY_LENGTH = 56;//RoF2::consts::TEXT_LINK_BODY_LENGTH;
 	}
 }
 

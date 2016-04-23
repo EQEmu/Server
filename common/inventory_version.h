@@ -44,7 +44,7 @@ namespace EQEmu
 		static const InventoryVersion LastInventoryVersion = InventoryVersion::Pet;
 		static const InventoryVersion LastPCInventoryVersion = InventoryVersion::RoF2;
 		static const InventoryVersion LastNonPCInventoryVersion = InventoryVersion::Pet;
-		static const unsigned int InventoryVersionCount = 12; //(static_cast<size_t>(LastInventoryVersion) + 1); - travis either doesn't like this or decl 'size_t'
+		static const size_t InventoryVersionCount = (static_cast<size_t>(LastInventoryVersion) + 1);
 
 		extern bool IsValidInventoryVersion(InventoryVersion inventory_version);
 		extern bool IsValidPCInventoryVersion(InventoryVersion inventory_version);
