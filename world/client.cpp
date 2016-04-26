@@ -1511,7 +1511,25 @@ bool Client::OPCharCreate(char *name, CharCreate_Struct *cc)
 		pp.x = pp.y = pp.z = -1;
 	}
 
-	/* Set Home Binds */
+	/* Set Home Binds  -- yep, all of them */
+	pp.binds[1].zoneId = pp.zone_id;
+	pp.binds[1].x = pp.x;
+	pp.binds[1].y = pp.y;
+	pp.binds[1].z = pp.z;
+	pp.binds[1].heading = pp.heading;
+
+	pp.binds[2].zoneId = pp.zone_id;
+	pp.binds[2].x = pp.x;
+	pp.binds[2].y = pp.y;
+	pp.binds[2].z = pp.z;
+	pp.binds[2].heading = pp.heading;
+
+	pp.binds[3].zoneId = pp.zone_id;
+	pp.binds[3].x = pp.x;
+	pp.binds[3].y = pp.y;
+	pp.binds[3].z = pp.z;
+	pp.binds[3].heading = pp.heading;
+
 	pp.binds[4].zoneId = pp.zone_id;
 	pp.binds[4].x = pp.x;
 	pp.binds[4].y = pp.y;

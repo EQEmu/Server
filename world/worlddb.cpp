@@ -161,8 +161,20 @@ void WorldDatabase::GetCharSelectInfo(uint32 accountID, EQApplicationPacket **ou
 		/* Set Bind Point Data for any character that may possibly be missing it for any reason */
 		cquery = StringFormat("SELECT `zone_id`, `instance_id`, `x`, `y`, `z`, `heading`, `slot` FROM `character_bind`  WHERE `id` = %i LIMIT 5", character_id);
 		auto results_bind = database.QueryDatabase(cquery);
+		auto bind_count = results_bind.RowCount();
 		for (auto row_b = results_bind.begin(); row_b != results_bind.end(); ++row_b) {
-			if (row_b[6] && atoi(row_b[6]) == 4){ has_home = 1; }
+			if (row_b[6] && atoi(row_b[6]) == 4) {
+				has_home = 1;
+				// If our bind count is less than 5, we need to actually make use of this data so lets parse it
+				if (bind_count < 5) {
+					pp.binds[4].zoneId = atoi(row_b[0]);
+					pp.binds[4].instance_id = atoi(row_b[1]);
+					pp.binds[4].x = atof(row_b[2]);
+					pp.binds[4].y = atof(row_b[3]);
+					pp.binds[4].z = atof(row_b[4]);
+					pp.binds[4].heading = atof(row_b[5]);
+				}
+			}
 			if (row_b[6] && atoi(row_b[6]) == 0){ has_bind = 1; }
 		}
 
@@ -199,6 +211,20 @@ void WorldDatabase::GetCharSelectInfo(uint32 accountID, EQApplicationPacket **ou
 				std::string query = StringFormat("REPLACE INTO `character_bind` (id, zone_id, instance_id, x, y, z, heading, slot)"
 					" VALUES (%u, %u, %u, %f, %f, %f, %f, %i)",
 					character_id, pp.binds[0].zoneId, 0, pp.binds[0].x, pp.binds[0].y, pp.binds[0].z, pp.binds[0].heading, 0);
+				auto results_bset = QueryDatabase(query);
+			}
+		}
+		/* If our bind count is less than 5, then we have null data that needs to be filled in. */
+		if (bind_count < 5) {
+			// we know that home and main bind must be valid here, so we don't check those
+			// we also use home to fill in the null data like live does.
+			for (int i = 1; i < 4;  i++) {
+				if (pp.binds[i].zoneId != 0) // we assume 0 is the only invalid one ...
+					continue;
+
+				std::string query = StringFormat("REPLACE INTO `character_bind` (id, zone_id, instance_id, x, y, z, heading, slot)"
+					" VALUES (%u, %u, %u, %f, %f, %f, %f, %i)",
+					character_id, pp.binds[4].zoneId, 0, pp.binds[4].x, pp.binds[4].y, pp.binds[4].z, pp.binds[4].heading, i);
 				auto results_bset = QueryDatabase(query);
 			}
 		}

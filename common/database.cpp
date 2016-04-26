@@ -641,10 +641,16 @@ bool Database::SaveCharacterCreate(uint32 character_id, uint32 account_id, Playe
 	/* Save Bind Points */
 	query = StringFormat("REPLACE INTO `character_bind` (id, zone_id, instance_id, x, y, z, heading, slot)"
 		" VALUES (%u, %u, %u, %f, %f, %f, %f, %i), "
+		"(%u, %u, %u, %f, %f, %f, %f, %i), ",
+		"(%u, %u, %u, %f, %f, %f, %f, %i), ",
+		"(%u, %u, %u, %f, %f, %f, %f, %i), ",
 		"(%u, %u, %u, %f, %f, %f, %f, %i)",
 		character_id, pp->binds[0].zoneId, 0, pp->binds[0].x, pp->binds[0].y, pp->binds[0].z, pp->binds[0].heading, 0,
+		character_id, pp->binds[1].zoneId, 0, pp->binds[1].x, pp->binds[1].y, pp->binds[1].z, pp->binds[1].heading, 1,
+		character_id, pp->binds[2].zoneId, 0, pp->binds[2].x, pp->binds[2].y, pp->binds[2].z, pp->binds[2].heading, 2,
+		character_id, pp->binds[3].zoneId, 0, pp->binds[3].x, pp->binds[3].y, pp->binds[3].z, pp->binds[3].heading, 3,
 		character_id, pp->binds[4].zoneId, 0, pp->binds[4].x, pp->binds[4].y, pp->binds[4].z, pp->binds[4].heading, 4
-	); results = QueryDatabase(query); 
+	); results = QueryDatabase(query);
 
 	/* Save Skills */
 	int firstquery = 0;
