@@ -1464,7 +1464,7 @@ XS(XS_Mob_GetBuffSlotFromType)
 		Mob *		THIS;
 		int8		RETVAL;
 		dXSTARG;
-		uint8		type = (uint8)SvUV(ST(1));
+		uint16		type = (uint16)SvUV(ST(1));
 
 		if (sv_derived_from(ST(0), "Mob")) {
 			IV tmp = SvIV((SV*)SvRV(ST(0)));
