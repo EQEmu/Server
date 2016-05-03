@@ -96,7 +96,7 @@ void Mob::ApplySpecialAttackMod(SkillUseTypes skill, int32 &dmg, int32 &mindmg) 
 }
 
 void Mob::DoSpecialAttackDamage(Mob *who, SkillUseTypes skill, int32 max_damage, int32 min_damage, int32 hate_override,int ReuseTime,
-								bool HitChance, bool CanAvoid) {
+								bool CheckHitChance, bool CanAvoid) {
 	//this really should go through the same code as normal melee damage to
 	//pick up all the special behavior there
 
@@ -140,7 +140,7 @@ void Mob::DoSpecialAttackDamage(Mob *who, SkillUseTypes skill, int32 max_damage,
 		if (max_damage == -3)
 			DoRiposte(who);
 	} else {
-		if (HitChance || who->CheckHitChance(this, skill, EQEmu::legacy::SlotPrimary)) {
+		if (!CheckHitChance || (CheckHitChance && who->CheckHitChance(this, skill, EQEmu::legacy::SlotPrimary))) {
 			who->MeleeMitigation(this, max_damage, min_damage);
 			CommonOutgoingHitSuccess(who, max_damage, skill);
 		} else {
