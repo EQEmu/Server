@@ -1217,7 +1217,7 @@ bool Client::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, b
 			if (other->CheckHitChance(this, skillinuse, Hand, hit_chance_bonus)) {
 				other->MeleeMitigation(this, damage, min_hit, opts);
 				if (damage > 0)
-					CommonOutgoingHitSuccess(other, damage, skillinuse);
+					CommonOutgoingHitSuccess(other, damage, skillinuse,opts);
 				Log.Out(Logs::Detail, Logs::Combat, "Final damage after all reductions: %d", damage);
 			} else {
 				Log.Out(Logs::Detail, Logs::Combat, "Attack missed. Damage set to 0.");
@@ -1746,7 +1746,7 @@ bool NPC::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool
 		if(other->IsClient() && other->CastToClient()->IsSitting()) {
 			Log.Out(Logs::Detail, Logs::Combat, "Client %s is sitting. Hitting for max damage (%d).", other->GetName(), (max_dmg+eleBane));
 			damage = (max_dmg+eleBane);
-			damage += (itembonuses.HeroicSTR / 10) + (damage * other->GetSkillDmgTaken(skillinuse) / 100) + GetSkillDmgAmt(skillinuse);
+			damage += (itembonuses.HeroicSTR / 10) + (damage * other->GetSkillDmgTaken(skillinuse, opts) / 100) + GetSkillDmgAmt(skillinuse);
 
 			if(opts) {
 				damage *= opts->damage_percent;
@@ -1777,7 +1777,7 @@ bool NPC::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool
 			} else {
 				if (other->CheckHitChance(this, skillinuse, Hand, hit_chance_bonus)) {
 					other->MeleeMitigation(this, damage, min_dmg+eleBane, opts);
-					CommonOutgoingHitSuccess(other, damage, skillinuse);
+					CommonOutgoingHitSuccess(other, damage, skillinuse, opts);
 				} else {
 					damage = 0;
 				}
@@ -4055,7 +4055,7 @@ void Mob::DoRiposte(Mob *defender)
 	}
 }
 
-void Mob::ApplyMeleeDamageBonus(uint16 skill, int32 &damage){
+void Mob::ApplyMeleeDamageBonus(uint16 skill, int32 &damage,ExtraAttackOptions *opts){
 
 	if(!RuleB(Combat, UseIntervalAC)){
 		if(IsNPC()){ //across the board NPC damage bonuses.
@@ -4068,7 +4068,13 @@ void Mob::ApplyMeleeDamageBonus(uint16 skill, int32 &damage){
 		}
 	}
 
-	damage += damage * GetMeleeDamageMod_SE(skill) / 100;
+	int dmgbonusmod = 0;
+	
+	dmgbonusmod += GetMeleeDamageMod_SE(skill);
+	if (opts)
+		dmgbonusmod += opts->melee_damage_bonus_flat;
+
+	damage += damage * dmgbonusmod / 100;
 }
 
 bool Mob::HasDied() {
@@ -4426,14 +4432,14 @@ int32 Mob::RuneAbsorb(int32 damage, uint16 type)
 	return damage;
 }
 
-void Mob::CommonOutgoingHitSuccess(Mob* defender, int32 &damage, SkillUseTypes skillInUse)
+void Mob::CommonOutgoingHitSuccess(Mob* defender, int32 &damage, SkillUseTypes skillInUse, ExtraAttackOptions *opts)
 {
 	if (!defender)
 		return;
 
-	ApplyMeleeDamageBonus(skillInUse, damage);
-	damage += (damage * defender->GetSkillDmgTaken(skillInUse) / 100) + (GetSkillDmgAmt(skillInUse) + defender->GetFcDamageAmtIncoming(this, 0, true, skillInUse));
-	TryCriticalHit(defender, skillInUse, damage);
+	ApplyMeleeDamageBonus(skillInUse, damage, opts);
+	damage += (damage * defender->GetSkillDmgTaken(skillInUse, opts) / 100) + (GetSkillDmgAmt(skillInUse) + defender->GetFcDamageAmtIncoming(this, 0, true, skillInUse));
+	TryCriticalHit(defender, skillInUse, damage,opts);
 	CheckNumHitsRemaining(NumHit::OutgoingHitSuccess);
 }
 
