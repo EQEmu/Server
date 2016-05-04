@@ -11,7 +11,9 @@ class Lua_ItemInst;
 
 namespace luabind {
 	struct scope;
-	class object;
+	namespace adl {
+		class object;
+	}
 }
 
 luabind::scope lua_register_mob();
