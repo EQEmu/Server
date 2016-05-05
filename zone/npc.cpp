@@ -1449,8 +1449,8 @@ void NPC::PickPocket(Client* thief)
 	int steal_skill = thief->GetSkill(SkillPickPockets);
 	int steal_chance = steal_skill * 100 / (5 * over_level + 5);
 
-	//Determine wheter to steal money or an item.
-	int money[6] = { 0, ((steal_skill >= 125) ? (GetPlatinum()) : (0)), ((steal_skill >= 60) ? (GetGold()) : (0)), GetSilver(), GetCopper(), 0 };
+	// Determine whether to steal money or an item.
+	uint32 money[6] = { 0, ((steal_skill >= 125) ? (GetPlatinum()) : (0)), ((steal_skill >= 60) ? (GetGold()) : (0)), GetSilver(), GetCopper(), 0 };
 	bool has_coin = ((money[PickPocketPlatinum] | money[PickPocketGold] | money[PickPocketSilver] | money[PickPocketCopper]) != 0);
 	bool steal_item = (steal_skill >= steal_chance && (zone->random.Roll(50) || !has_coin));
 
@@ -1539,7 +1539,7 @@ void NPC::PickPocket(Client* thief)
 				return;
 			}
 
-			thief->AddMoneyToPP(money[3], money[2], money[1], money[0], false);
+			thief->AddMoneyToPP(money[PickPocketCopper], money[PickPocketSilver], money[PickPocketGold], money[PickPocketPlatinum], false);
 			thief->SendPickPocketResponse(this, coin_amount, coin_type);
 			return;
 		}
