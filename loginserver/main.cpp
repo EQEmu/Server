@@ -199,6 +199,7 @@ int main()
 		Timer::SetCurrentTime();
 		server.client_manager->Process();
 		server.server_manager->Process();
+		timeout_manager.CheckTimeouts();
 		Sleep(100);
 	}
 
