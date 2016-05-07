@@ -860,17 +860,11 @@ void Database::GetCharName(uint32 char_id, char* name) {
 }
 
 bool Database::LoadVariables() {
-	char *query = nullptr;
-
-	auto results = QueryDatabase(query, LoadVariables_MQ(&query));
+	auto results = QueryDatabase(StringFormat("SELECT varname, value, unix_timestamp() FROM variables where unix_timestamp(ts) >= %d", varcache_lastupdate));
 
 	if (!results.Success())
-	{
-		safe_delete_array(query);
 		return false;
-	}
 
-	safe_delete_array(query);
 	return LoadVariables_result(std::move(results));
 }
 

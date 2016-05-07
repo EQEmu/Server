@@ -1049,12 +1049,12 @@ void Lua_Client::IncrementAA(int aa) {
 
 bool Lua_Client::GrantAlternateAdvancementAbility(int aa_id, int points) {
 	Lua_Safe_Call_Bool();
-	self->GrantAlternateAdvancementAbility(aa_id, points);
+	return self->GrantAlternateAdvancementAbility(aa_id, points);
 }
 
 bool Lua_Client::GrantAlternateAdvancementAbility(int aa_id, int points, bool ignore_cost) {
 	Lua_Safe_Call_Bool();
-	self->GrantAlternateAdvancementAbility(aa_id, points, ignore_cost);
+	return self->GrantAlternateAdvancementAbility(aa_id, points, ignore_cost);
 }
 
 void Lua_Client::MarkSingleCompassLoc(float in_x, float in_y, float in_z) {
