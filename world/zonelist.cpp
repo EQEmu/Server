@@ -598,7 +598,7 @@ void ZSList::RebootZone(const char* ip1,uint16 port,const char* ip2, uint32 skip
 		iterator.Advance();
 	}
 	if (y == 0) {
-		safe_delete(tmp);
+		safe_delete_array(tmp);
 		return;
 	}
 	uint32 z = emu_random.Int(0, y-1);
