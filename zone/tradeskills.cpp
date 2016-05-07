@@ -680,7 +680,7 @@ SkillUseTypes Object::TypeToSkill(uint32 type)
 	return TradeskillUnknown;
 }
 
-void Client::TradeskillSearchResults(const std::string query, unsigned long objtype, unsigned long someid) {
+void Client::TradeskillSearchResults(const std::string &query, unsigned long objtype, unsigned long someid) {
 
     auto results = database.QueryDatabase(query);
 	if (!results.Success()) {
