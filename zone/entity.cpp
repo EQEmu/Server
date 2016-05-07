@@ -4567,6 +4567,7 @@ void EntityList::ExpeditionWarning(uint32 minutes_left)
 		it->second->QueuePacket(outapp);
 		++it;
 	}
+	safe_delete(outapp);
 }
 
 Mob *EntityList::GetClosestMobByBodyType(Mob *sender, bodyType BodyType)

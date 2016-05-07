@@ -2568,25 +2568,25 @@ void Client::LogMerchant(Client* player, Mob* merchant, uint32 quantity, uint32 
 	}
 }
 
-bool Client::BindWound(Mob* bindmob, bool start, bool fail){
-	EQApplicationPacket* outapp = 0;
-	if(!fail)
-	{
+bool Client::BindWound(Mob *bindmob, bool start, bool fail)
+{
+	EQApplicationPacket *outapp = nullptr;
+	if (!fail) {
 		outapp = new EQApplicationPacket(OP_Bind_Wound, sizeof(BindWound_Struct));
-		BindWound_Struct* bind_out = (BindWound_Struct*) outapp->pBuffer;
+		BindWound_Struct *bind_out = (BindWound_Struct *)outapp->pBuffer;
 		// Start bind
-		if(!bindwound_timer.Enabled())
-		{
-			//make sure we actually have a bandage... and consume it.
-			int16 bslot = m_inv.HasItemByUse(ItemTypeBandage, 1, invWhereWorn|invWherePersonal);
+		if (!bindwound_timer.Enabled()) {
+			// make sure we actually have a bandage... and consume it.
+			int16 bslot = m_inv.HasItemByUse(ItemTypeBandage, 1, invWhereWorn | invWherePersonal);
 			if (bslot == INVALID_INDEX) {
 				bind_out->type = 3;
 				QueuePacket(outapp);
-				bind_out->type = 7;	//this is the wrong message, dont know the right one.
+				bind_out->type = 7; // this is the wrong message, dont know the right one.
 				QueuePacket(outapp);
-				return(true);
+				safe_delete(outapp);
+				return (true);
 			}
-			DeleteItemInInventory(bslot, 1, true);	//do we need client update?
+			DeleteItemInInventory(bslot, 1, true); // do we need client update?
 
 			// start complete timer
 			bindwound_timer.Start(10000);
@@ -2597,51 +2597,46 @@ bool Client::BindWound(Mob* bindmob, bool start, bool fail){
 			QueuePacket(outapp);
 			bind_out->type = 0;
 			// Client Unlocked
-			if(!bindmob) {
+			if (!bindmob) {
 				// send "bindmob dead" to client
 				bind_out->type = 4;
 				QueuePacket(outapp);
 				bind_out->type = 0;
 				bindwound_timer.Disable();
 				bindwound_target = 0;
-			}
-			else {
+			} else {
 				// send bindmob "stand still"
-				if(!bindmob->IsAIControlled() && bindmob != this ) {
-					bindmob->CastToClient()->Message_StringID(clientMessageYellow, YOU_ARE_BEING_BANDAGED);
-				}
-				else if (bindmob->IsAIControlled() && bindmob != this ){
+				if (!bindmob->IsAIControlled() && bindmob != this) {
+					bindmob->CastToClient()->Message_StringID(clientMessageYellow,
+										  YOU_ARE_BEING_BANDAGED);
+				} else if (bindmob->IsAIControlled() && bindmob != this) {
 					; // Tell IPC to stand still?
-				}
-				else {
+				} else {
 					; // Binding self
 				}
 			}
-		}
-		else if (bindwound_timer.Check()) // Did the timer finish?
+		} else if (bindwound_timer.Check()) // Did the timer finish?
 		{
-		// finish bind
+			// finish bind
 			// disable complete timer
 			bindwound_timer.Disable();
 			bindwound_target = 0;
-			if(!bindmob){
-					// send "bindmob gone" to client
-					bind_out->type = 5; // not in zone
-					QueuePacket(outapp);
-					bind_out->type = 0;
+			if (!bindmob) {
+				// send "bindmob gone" to client
+				bind_out->type = 5; // not in zone
+				QueuePacket(outapp);
+				bind_out->type = 0;
 			}
 
 			else {
-				if (!GetFeigned() && (DistanceSquared(bindmob->GetPosition(), m_Position)  <= 400)) {
+				if (!GetFeigned() && (DistanceSquared(bindmob->GetPosition(), m_Position) <= 400)) {
 					// send bindmob bind done
-					if(!bindmob->IsAIControlled() && bindmob != this ) {
+					if (!bindmob->IsAIControlled() && bindmob != this) {
 
-					}
-					else if(bindmob->IsAIControlled() && bindmob != this ) {
-					// Tell IPC to resume??
-					}
-					else {
-					// Binding self
+					} else if (bindmob->IsAIControlled() && bindmob != this) {
+						// Tell IPC to resume??
+					} else {
+						// Binding self
 					}
 					// Send client bind done
 
@@ -2650,58 +2645,61 @@ bool Client::BindWound(Mob* bindmob, bool start, bool fail){
 					bind_out->type = 0;
 					CheckIncreaseSkill(SkillBindWound, nullptr, 5);
 
-					int maxHPBonus = spellbonuses.MaxBindWound + itembonuses.MaxBindWound + aabonuses.MaxBindWound;
+					int maxHPBonus = spellbonuses.MaxBindWound + itembonuses.MaxBindWound +
+							 aabonuses.MaxBindWound;
 
 					int max_percent = 50 + 10 * maxHPBonus;
 
-					if(GetClass() == MONK && GetSkill(SkillBindWound) > 200) {
+					if (GetClass() == MONK && GetSkill(SkillBindWound) > 200) {
 						max_percent = 70 + 10 * maxHPBonus;
 					}
 
 					max_percent = mod_bindwound_percent(max_percent, bindmob);
 
-					int max_hp = bindmob->GetMaxHP()*max_percent/100;
+					int max_hp = bindmob->GetMaxHP() * max_percent / 100;
 
 					// send bindmob new hp's
-					if (bindmob->GetHP() < bindmob->GetMaxHP() && bindmob->GetHP() <= (max_hp)-1){
+					if (bindmob->GetHP() < bindmob->GetMaxHP() && bindmob->GetHP() <= (max_hp)-1) {
 						// 0.120 per skill point, 0.60 per skill level, minimum 3 max 30
 						int bindhps = 3;
 
-
 						if (GetSkill(SkillBindWound) > 200) {
-							bindhps += GetSkill(SkillBindWound)*4/10;
+							bindhps += GetSkill(SkillBindWound) * 4 / 10;
 						} else if (GetSkill(SkillBindWound) >= 10) {
-							bindhps += GetSkill(SkillBindWound)/4;
+							bindhps += GetSkill(SkillBindWound) / 4;
 						}
 
-						//Implementation of aaMithanielsBinding is a guess (the multiplier)
-						int bindBonus = spellbonuses.BindWound + itembonuses.BindWound + aabonuses.BindWound;
+						// Implementation of aaMithanielsBinding is a guess (the multiplier)
+						int bindBonus = spellbonuses.BindWound + itembonuses.BindWound +
+								aabonuses.BindWound;
 
-						bindhps += bindhps*bindBonus / 100;
+						bindhps += bindhps * bindBonus / 100;
 
 						bindhps = mod_bindwound_hp(bindhps, bindmob);
 
-						//if the bind takes them above the max bindable
-						//cap it at that value. Dont know if live does it this way
-						//but it makes sense to me.
+						// if the bind takes them above the max bindable
+						// cap it at that value. Dont know if live does it this way
+						// but it makes sense to me.
 						int chp = bindmob->GetHP() + bindhps;
-						if(chp > max_hp)
+						if (chp > max_hp)
 							chp = max_hp;
 
 						bindmob->SetHP(chp);
 						bindmob->SendHPUpdate();
-					}
-					else {
-						//I dont have the real, live
-						Message(15, "You cannot bind wounds above %d%% hitpoints.", max_percent);
-						if(bindmob != this && bindmob->IsClient())
-							bindmob->CastToClient()->Message(15, "You cannot have your wounds bound above %d%% hitpoints.", max_percent);
+					} else {
+						// I dont have the real, live
+						Message(15, "You cannot bind wounds above %d%% hitpoints.",
+							max_percent);
+						if (bindmob != this && bindmob->IsClient())
+							bindmob->CastToClient()->Message(
+							    15,
+							    "You cannot have your wounds bound above %d%% hitpoints.",
+							    max_percent);
 						// Too many hp message goes here.
 					}
-				}
-				else {
+				} else {
 					// Send client bind failed
-					if(bindmob != this)
+					if (bindmob != this)
 						bind_out->type = 6; // They moved
 					else
 						bind_out->type = 7; // Bandager moved
@@ -2711,11 +2709,10 @@ bool Client::BindWound(Mob* bindmob, bool start, bool fail){
 				}
 			}
 		}
-	}
-	else if (bindwound_timer.Enabled()) {
+	} else if (bindwound_timer.Enabled()) {
 		// You moved
 		outapp = new EQApplicationPacket(OP_Bind_Wound, sizeof(BindWound_Struct));
-		BindWound_Struct* bind_out = (BindWound_Struct*) outapp->pBuffer;
+		BindWound_Struct *bind_out = (BindWound_Struct *)outapp->pBuffer;
 		bindwound_timer.Disable();
 		bindwound_target = 0;
 		bind_out->type = 7;
@@ -3649,19 +3646,25 @@ void Client::SetEndurance(int32 newEnd)
 	SendManaUpdatePacket();
 }
 
-void Client::SacrificeConfirm(Client *caster) {
+void Client::SacrificeConfirm(Client *caster)
+{
+	EQApplicationPacket *outapp = new EQApplicationPacket(OP_Sacrifice, sizeof(Sacrifice_Struct));
+	Sacrifice_Struct *ss = (Sacrifice_Struct *)outapp->pBuffer;
 
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_Sacrifice, sizeof(Sacrifice_Struct));
-	Sacrifice_Struct *ss = (Sacrifice_Struct*)outapp->pBuffer;
-
-	if(!caster || PendingSacrifice) return;
-
-	if(GetLevel() < RuleI(Spells, SacrificeMinLevel)){
-		caster->Message_StringID(13, SAC_TOO_LOW);	//This being is not a worthy sacrifice.
+	if (!caster || PendingSacrifice) {
+		safe_delete(outapp);
 		return;
 	}
+
+	if (GetLevel() < RuleI(Spells, SacrificeMinLevel)) {
+		caster->Message_StringID(13, SAC_TOO_LOW); // This being is not a worthy sacrifice.
+		safe_delete(outapp);
+		return;
+	}
+
 	if (GetLevel() > RuleI(Spells, SacrificeMaxLevel)) {
 		caster->Message_StringID(13, SAC_TOO_HIGH);
+		safe_delete(outapp);
 		return;
 	}
 
@@ -3803,20 +3806,23 @@ void Client::SetHoTT(uint32 mobid) {
 	safe_delete(outapp);
 }
 
-void Client::SendPopupToClient(const char *Title, const char *Text, uint32 PopupID, uint32 Buttons, uint32 Duration) {
+void Client::SendPopupToClient(const char *Title, const char *Text, uint32 PopupID, uint32 Buttons, uint32 Duration)
+{
 
 	EQApplicationPacket *outapp = new EQApplicationPacket(OP_OnLevelMessage, sizeof(OnLevelMessage_Struct));
-	OnLevelMessage_Struct *olms = (OnLevelMessage_Struct *) outapp->pBuffer;
+	OnLevelMessage_Struct *olms = (OnLevelMessage_Struct *)outapp->pBuffer;
 
-	if((strlen(Title) > (sizeof(olms->Title)-1)) ||
-		(strlen(Text) > (sizeof(olms->Text)-1))) return;
+	if ((strlen(Title) > (sizeof(olms->Title) - 1)) || (strlen(Text) > (sizeof(olms->Text) - 1))) {
+		safe_delete(outapp);
+		return;
+	}
 
 	strcpy(olms->Title, Title);
 	strcpy(olms->Text, Text);
 
 	olms->Buttons = Buttons;
 
-	if(Duration > 0)
+	if (Duration > 0)
 		olms->Duration = Duration * 1000;
 	else
 		olms->Duration = 0xffffffff;
@@ -3843,8 +3849,10 @@ void Client::SendWindow(uint32 PopupID, uint32 NegativeID, uint32 Buttons, const
 	EQApplicationPacket* app = new EQApplicationPacket(OP_OnLevelMessage, sizeof(OnLevelMessage_Struct));
 	OnLevelMessage_Struct* olms=(OnLevelMessage_Struct*)app->pBuffer;
 
-	if(strlen(Text) > (sizeof(olms->Text)-1))
+	if(strlen(Text) > (sizeof(olms->Text)-1)) {
+		safe_delete(app);
 		return;
+	}
 
 	if(!target)
 		title_type = 0;

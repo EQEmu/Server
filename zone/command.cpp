@@ -3171,6 +3171,7 @@ void command_equipitem(Client *c, const Seperator *sep)
 			if (partialmove) { // remove this con check if someone can figure out removing charges from cursor stack issue below
 				// mi->number_in_stack is always from_inst->GetCharges() when partialmove is false
 				c->Message(13, "Error: Partial stack added to existing stack exceeds allowable stacksize");
+				safe_delete(outapp);
 				return;
 			}
 			else if(c->SwapItem(mi)) {

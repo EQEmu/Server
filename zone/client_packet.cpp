@@ -13691,6 +13691,7 @@ void Client::Handle_OP_TraderShop(const EQApplicationPacket *app)
 			else {
 				Log.Out(Logs::Detail, Logs::Trading, "Client::Handle_OP_TraderShop: entity_list.GetClientByID(tcs->traderid)"
 					" returned a nullptr pointer");
+				safe_delete(outapp);
 				return;
 			}
 

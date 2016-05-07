@@ -2401,8 +2401,10 @@ void Client::SendBuyerResults(char* searchString, uint32 searchID) {
 
 		const Item_Struct* item = database.GetItem(itemID);
 
-		if(!item)
+		if(!item) {
+			safe_delete(outapp);
             continue;
+		}
 
         // Save having to scan the client list when dealing with multiple buylines for the same Character.
 		if(charID != lastCharID) {
@@ -2410,8 +2412,10 @@ void Client::SendBuyerResults(char* searchString, uint32 searchID) {
 			lastCharID = charID;
 		}
 
-		if(!buyer)
+		if(!buyer) {
+			safe_delete(outapp);
             continue;
+		}
 
         VARSTRUCT_ENCODE_TYPE(uint32, buf, Barter_BuyerSearchResults);	// Command
 		VARSTRUCT_ENCODE_TYPE(uint32, buf, searchID);			// Match up results with the request
@@ -2493,8 +2497,10 @@ void Client::ShowBuyLines(const EQApplicationPacket *app) {
 
 		const Item_Struct* item = database.GetItem(ItemID);
 
-		if(!item)
+		if(!item) {
+			safe_delete(outapp);
             continue;
+		}
 
         VARSTRUCT_ENCODE_TYPE(uint32, Buf, Barter_BuyerInspectWindow);
 		VARSTRUCT_ENCODE_TYPE(uint32, Buf, BuySlot);
