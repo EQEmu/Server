@@ -177,8 +177,8 @@ void Doors::HandleClick(Client* sender, uint8 trigger)
 				ads->id = GetDoorDBID();
 				worldserver.SendPacket(pack);
 				safe_delete(pack);
-				safe_delete(outapp);
 			}
+			safe_delete(outapp);
 			return;
 		}
 	}
