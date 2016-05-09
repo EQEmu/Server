@@ -202,13 +202,13 @@ SET(common_headers
 	patches/patches.h
 	patches/sod.h
 	patches/sod_constants.h
-	patches/sod_itemfields.h
+#	patches/sod_itemfields.h
 	patches/sod_ops.h
 	patches/sod_structs.h
 	patches/sof.h
 	patches/sof_constants.h
-	patches/sof_itemfields.h
-	patches/sof_opcode_list.h
+#	patches/sof_itemfields.h
+#	patches/sof_opcode_list.h
 	patches/sof_ops.h
 	patches/sof_structs.h
 	patches/ss_declare.h
@@ -216,23 +216,23 @@ SET(common_headers
 	patches/ss_register.h
 	patches/rof.h
 	patches/rof_constants.h
-	patches/rof_itemfields.h
+#	patches/rof_itemfields.h
 	patches/rof_ops.h
 	patches/rof_structs.h
 	patches/rof2.h
 	patches/rof2_constants.h
-	patches/rof2_itemfields.h
+#	patches/rof2_itemfields.h
 	patches/rof2_ops.h
 	patches/rof2_structs.h
 	patches/titanium.h
 	patches/titanium_constants.h
-	patches/titanium_itemfields_a.h
-	patches/titanium_itemfields_b.h
+#	patches/titanium_itemfields_a.h
+#	patches/titanium_itemfields_b.h
 	patches/titanium_ops.h
 	patches/titanium_structs.h
 	patches/uf.h
 	patches/uf_constants.h
-	patches/uf_itemfields.h
+#	patches/uf_itemfields.h
 	patches/uf_ops.h
 	patches/uf_structs.h
 	SocketLib/Base64.h
@@ -255,13 +255,13 @@ SET(common_headers
 SOURCE_GROUP(Patches FILES
 	patches/patches.h
 	patches/sod.h
-	patches/sod_itemfields.h
+#	patches/sod_itemfields.h
 	patches/sod_ops.h
 	patches/sod_constants.h
 	patches/sod_structs.h
 	patches/sof.h
-	patches/sof_itemfields.h
-	patches/sof_opcode_list.h
+#	patches/sof_itemfields.h
+#	patches/sof_opcode_list.h
 	patches/sof_ops.h
 	patches/sof_constants.h
 	patches/sof_structs.h
@@ -269,23 +269,23 @@ SOURCE_GROUP(Patches FILES
 	patches/ss_define.h
 	patches/ss_register.h
 	patches/rof.h
-	patches/rof_itemfields.h
+#	patches/rof_itemfields.h
 	patches/rof_ops.h
 	patches/rof_constants.h
 	patches/rof_structs.h
 	patches/rof2.h
-	patches/rof2_itemfields.h
+#	patches/rof2_itemfields.h
 	patches/rof2_ops.h
 	patches/rof2_constants.h
 	patches/rof2_structs.h
 	patches/titanium.h
-	patches/titanium_itemfields_a.h
-	patches/titanium_itemfields_b.h
+#	patches/titanium_itemfields_a.h
+#	patches/titanium_itemfields_b.h
 	patches/titanium_ops.h
 	patches/titanium_constants.h
 	patches/titanium_structs.h
 	patches/uf.h
-	patches/uf_itemfields.h
+#	patches/uf_itemfields.h
 	patches/uf_ops.h
 	patches/uf_constants.h
 	patches/uf_structs.h

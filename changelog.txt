@@ -1,5 +1,8 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 05/08/2016 ==
+Uleat: Re-coded Titanium client translator 'SerializeItem()' to use coded property assignments over file enumerated ones
+
 == 04/22/2016 ==
 Uleat: Reworked ClientVersion into namespace EQEmu; Added InventoryVersion
 Uleat: Delinked current inventory slot enumeration and constants from EQEmu::constants and global definition (inv2 pre-work)

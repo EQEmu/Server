@@ -20,7 +20,7 @@ namespace Titanium
 	static OpcodeManager *opcodes = nullptr;
 	static Strategy struct_strategy;
 
-	char* SerializeItem(const ItemInst *inst, int16 slot_id_in, uint32 *length, uint8 depth);
+	std::string SerializeItem(const ItemInst *inst, int16 slot_id_in, uint8 depth);
 
 	// server to client inventory location converters
 	static inline int16 ServerToTitaniumSlot(uint32 serverSlot);
@@ -275,14 +275,12 @@ namespace Titanium
 		InternalSerializedItem_Struct *eq = (InternalSerializedItem_Struct *)in->pBuffer;
 
 		//do the transform...
-		int r;
 		std::string serial_string;
-		for (r = 0; r < itemcount; r++, eq++) {
-			uint32 length;
-			char *serialized = SerializeItem((const ItemInst*)eq->inst, eq->slot_id, &length, 0);
-			if (serialized) {
-				serial_string.append(serialized, length + 1);
-				safe_delete_array(serialized);
+		for (int r = 0; r < itemcount; r++, eq++) {
+			std::string serialized = SerializeItem((const ItemInst*)eq->inst, eq->slot_id, 0); // assumed move operation: string& = string&&
+			if (!serialized.empty()) {
+				serial_string.append(serialized);
+				serial_string.push_back('\0');
 			}
 			else {
 				Log.Out(Logs::General, Logs::Netcode, "[STRUCTS] Serialization failed on item slot %d during OP_CharInventory.  Item skipped.", eq->slot_id);
@@ -290,9 +288,10 @@ namespace Titanium
 
 		}
 
-		in->size = serial_string.length();
+		// do we need to account for a trailing null escape?
+		in->size = serial_string.size();
 		in->pBuffer = new unsigned char[in->size];
-		memcpy(in->pBuffer, serial_string.c_str(), serial_string.length());
+		memcpy(in->pBuffer, serial_string.c_str(), serial_string.size());
 
 		delete[] __emu_buffer;
 
@@ -725,22 +724,21 @@ namespace Titanium
 		ItemPacket_Struct *old_item_pkt = (ItemPacket_Struct *)__emu_buffer;
 		InternalSerializedItem_Struct *int_struct = (InternalSerializedItem_Struct *)(old_item_pkt->SerializedItem);
 
-		uint32 length;
-		char *serialized = SerializeItem((ItemInst *)int_struct->inst, int_struct->slot_id, &length, 0);
-
-		if (!serialized) {
+		std::string serialized = SerializeItem((ItemInst *)int_struct->inst, int_struct->slot_id, 0); // assumed move operation: string& = string&&
+		if (serialized.empty()) {
 			Log.Out(Logs::General, Logs::Netcode, "[STRUCTS] Serialization failed on item slot %d.", int_struct->slot_id);
 			delete in;
 			return;
 		}
-		in->size = length + 5;	// ItemPacketType + Serialization + \0
+
+		in->size = serialized.size() + 5;	// ItemPacketType + Serialization + \0
 		in->pBuffer = new unsigned char[in->size];
 		ItemPacket_Struct *new_item_pkt = (ItemPacket_Struct *)in->pBuffer;
 		new_item_pkt->PacketType = old_item_pkt->PacketType;
-		memcpy(new_item_pkt->SerializedItem, serialized, length + 1);
+		memcpy(new_item_pkt->SerializedItem, serialized.c_str(), serialized.size());
+		new_item_pkt->SerializedItem[serialized.size()] = '\0';
 
 		delete[] __emu_buffer;
-		safe_delete_array(serialized);
 
 		dest->FastQueuePacket(&in, ack_req);
 	}
@@ -2079,90 +2077,207 @@ namespace Titanium
 	}
 
 // file scope helper methods
-	char *SerializeItem(const ItemInst *inst, int16 slot_id_in, uint32 *length, uint8 depth)
+	std::string SerializeItem(const ItemInst *inst, int16 slot_id_in, uint8 depth)
 	{
-		char *serialization = nullptr;
-		char *instance = nullptr;
-		const char *protection = (const char *)"\\\\\\\\\\";
-		char *sub_items[10] = { nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr };
-		bool stackable = inst->IsStackable();
-		int16 slot_id = ServerToTitaniumSlot(slot_id_in);
-		uint32 merchant_slot = inst->GetMerchantSlot();
-		int16 charges = inst->GetCharges();
-		const Item_Struct *item = inst->GetUnscaledItem();
-		int i;
-		uint32 sub_length;
+		std::string serialization;
+		std::string instance;
+		std::string protection = "\\\\\\\\\\";
+		const Item_Struct* item = inst->GetUnscaledItem();
 
-		MakeAnyLenString(&instance,
-			"%i|%i|%i|%i|%i|%i|%i|%i|%i|%i|%i|",
-			stackable ? charges : 0,
-			0,
-			//(merchant_slot == 0) ? slot_id : merchant_slot, // change when translator activated
-			(merchant_slot == 0) ? slot_id_in : merchant_slot,
-			inst->GetPrice(),
-			(merchant_slot == 0) ? 1 : inst->GetMerchantCount(),
-			inst->IsScaling() ? inst->GetExp() / 100 : 0,
-			//merchant_slot,	//instance ID, bullshit for now
-			(merchant_slot == 0) ? inst->GetSerialNumber() : merchant_slot,
-			inst->GetRecastTimestamp(),
-			(stackable ? ((inst->GetItem()->ItemType == ItemTypePotion) ? 1 : 0) : charges),
-			inst->IsAttuned() ? 1 : 0,
-			0
-			);
+		instance = StringFormat("%i|", (inst->IsStackable() ? inst->GetCharges() : 0)); // stack count
+		instance.append("0|"); // unknown
+		instance.append(StringFormat("%i|", (!inst->GetMerchantSlot() ? slot_id_in : inst->GetMerchantSlot()))); // inst slot/merchant slot
+		instance.append(StringFormat("%i|", inst->GetPrice())); // merchant price
+		instance.append(StringFormat("%i|", (!inst->GetMerchantSlot() ? 1 : inst->GetMerchantCount()))); // inst count/merchant count
+		instance.append(StringFormat("%i|", (inst->IsScaling() ? (inst->GetExp() / 100) : 0))); // inst experience
+		instance.append(StringFormat("%i|", (!inst->GetMerchantSlot() ? inst->GetSerialNumber() : inst->GetMerchantSlot()))); // merchant serial number
+		instance.append(StringFormat("%i|", inst->GetRecastTimestamp())); // recast timestamp
+		instance.append(StringFormat("%i|", ((inst->IsStackable() ? ((inst->GetItem()->ItemType == ItemTypePotion) ? 1 : 0) : inst->GetCharges())))); // charge count
+		instance.append(StringFormat("%i|", (inst->IsAttuned() ? 1 : 0))); // inst attuned
+		instance.append("0|"); // unknown
 
-		for (i = 0; i<10; i++) {
-			ItemInst *sub = inst->GetItem(i);
-			if (sub) {
-				sub_items[i] = SerializeItem(sub, 0, &sub_length, depth + 1);
+		serialization = StringFormat("%.*s%s", (depth ? (depth - 1) : 0), protection.c_str(), (depth ? "\"" : "")); // For leading quotes (and protection) if a subitem;
+		serialization.append(StringFormat("%s", instance.c_str())); // Instance data
+		serialization.append(StringFormat("%.*s\"", depth, protection.c_str())); // Quotes (and protection, if needed) around static data
+
+		serialization.append(StringFormat("%i", item->ItemClass)); // item->ItemClass so we can do |%s instead of %s|
+
+//#include "titanium_itemfields_a.h" - begin
+		serialization.append(StringFormat("|%s", item->Name));
+		serialization.append(StringFormat("|%s", item->Lore));
+		serialization.append(StringFormat("|%s", item->IDFile));
+		serialization.append(StringFormat("|%i", item->ID));
+//#include "titanium_itemfields_a.h" - end
+		serialization.append(StringFormat("|%i", ((item->Weight > 255) ? 255 : item->Weight)));
+//#include "titanium_itemfields_b.h" - begin
+		serialization.append(StringFormat("|%i", item->NoRent));
+		serialization.append(StringFormat("|%i", item->NoDrop));
+		serialization.append(StringFormat("|%i", item->Size));
+		serialization.append(StringFormat("|%i", item->Slots));
+		serialization.append(StringFormat("|%i", item->Price));
+		serialization.append(StringFormat("|%i", item->Icon));
+		serialization.append("|0"); // unknown
+		serialization.append("|0"); // unknown
+		serialization.append(StringFormat("|%i", item->BenefitFlag));
+		serialization.append(StringFormat("|%i", item->Tradeskills));
+		serialization.append(StringFormat("|%i", item->CR));
+		serialization.append(StringFormat("|%i", item->DR));
+		serialization.append(StringFormat("|%i", item->PR));
+		serialization.append(StringFormat("|%i", item->MR));
+		serialization.append(StringFormat("|%i", item->FR));
+		serialization.append(StringFormat("|%i", item->AStr));
+		serialization.append(StringFormat("|%i", item->ASta));
+		serialization.append(StringFormat("|%i", item->AAgi));
+		serialization.append(StringFormat("|%i", item->ADex));
+		serialization.append(StringFormat("|%i", item->ACha));
+		serialization.append(StringFormat("|%i", item->AInt));
+		serialization.append(StringFormat("|%i", item->AWis));
+		serialization.append(StringFormat("|%i", item->HP));
+		serialization.append(StringFormat("|%i", item->Mana));
+		serialization.append(StringFormat("|%i", item->AC));
+		serialization.append(StringFormat("|%i", item->Deity));
+		serialization.append(StringFormat("|%i", item->SkillModValue));
+		serialization.append(StringFormat("|%i", item->SkillModMax));
+		serialization.append(StringFormat("|%i", item->SkillModType));
+		serialization.append(StringFormat("|%i", item->BaneDmgRace));
+		serialization.append(StringFormat("|%i", item->BaneDmgAmt));
+		serialization.append(StringFormat("|%i", item->BaneDmgBody));
+		serialization.append(StringFormat("|%i", item->Magic));
+		serialization.append(StringFormat("|%i", item->CastTime_));
+		serialization.append(StringFormat("|%i", item->ReqLevel));
+		serialization.append(StringFormat("|%i", item->BardType));
+		serialization.append(StringFormat("|%i", item->BardValue));
+		serialization.append(StringFormat("|%i", item->Light));
+		serialization.append(StringFormat("|%i", item->Delay));
+		serialization.append(StringFormat("|%i", item->RecLevel));
+		serialization.append(StringFormat("|%i", item->RecSkill));
+		serialization.append(StringFormat("|%i", item->ElemDmgType));
+		serialization.append(StringFormat("|%i", item->ElemDmgAmt));
+		serialization.append(StringFormat("|%i", item->Range));
+		serialization.append(StringFormat("|%i", item->Damage));
+		serialization.append(StringFormat("|%i", item->Color));
+		serialization.append(StringFormat("|%i", item->Classes));
+		serialization.append(StringFormat("|%i", item->Races));
+		serialization.append("|0"); // unknown
+		serialization.append(StringFormat("|%i", item->MaxCharges));
+		serialization.append(StringFormat("|%i", item->ItemType));
+		serialization.append(StringFormat("|%i", item->Material));
+		serialization.append(StringFormat("|%i", item->SellRate));
+		serialization.append("|0"); // unknown
+		serialization.append(StringFormat("|%i", item->CastTime_));
+		serialization.append("|0"); // unknown
+		serialization.append(StringFormat("|%i", item->ProcRate));
+		serialization.append(StringFormat("|%i", item->CombatEffects));
+		serialization.append(StringFormat("|%i", item->Shielding));
+		serialization.append(StringFormat("|%i", item->StunResist));
+		serialization.append(StringFormat("|%i", item->StrikeThrough));
+		serialization.append(StringFormat("|%i", item->ExtraDmgSkill));
+		serialization.append(StringFormat("|%i", item->ExtraDmgAmt));
+		serialization.append(StringFormat("|%i", item->SpellShield));
+		serialization.append(StringFormat("|%i", item->Avoidance));
+		serialization.append(StringFormat("|%i", item->Accuracy));
+		serialization.append(StringFormat("|%i", item->CharmFileID));
+		serialization.append(StringFormat("|%i", item->FactionMod1));
+		serialization.append(StringFormat("|%i", item->FactionMod2));
+		serialization.append(StringFormat("|%i", item->FactionMod3));
+		serialization.append(StringFormat("|%i", item->FactionMod4));
+		serialization.append(StringFormat("|%i", item->FactionAmt1));
+		serialization.append(StringFormat("|%i", item->FactionAmt2));
+		serialization.append(StringFormat("|%i", item->FactionAmt3));
+		serialization.append(StringFormat("|%i", item->FactionAmt4));
+		serialization.append(StringFormat("|%s", item->CharmFile));
+		serialization.append(StringFormat("|%i", item->AugType));
+		serialization.append(StringFormat("|%i", item->AugSlotType[0]));
+		serialization.append(StringFormat("|%i", item->AugSlotVisible[0]));
+		serialization.append(StringFormat("|%i", item->AugSlotType[1]));
+		serialization.append(StringFormat("|%i", item->AugSlotVisible[1]));
+		serialization.append(StringFormat("|%i", item->AugSlotType[2]));
+		serialization.append(StringFormat("|%i", item->AugSlotVisible[2]));
+		serialization.append(StringFormat("|%i", item->AugSlotType[3]));
+		serialization.append(StringFormat("|%i", item->AugSlotVisible[3]));
+		serialization.append(StringFormat("|%i", item->AugSlotType[4]));
+		serialization.append(StringFormat("|%i", item->AugSlotVisible[4]));
+		serialization.append(StringFormat("|%i", item->LDoNTheme));
+		serialization.append(StringFormat("|%i", item->LDoNPrice));
+		serialization.append(StringFormat("|%i", item->LDoNSold));
+		serialization.append(StringFormat("|%i", item->BagType));
+		serialization.append(StringFormat("|%i", item->BagSlots));
+		serialization.append(StringFormat("|%i", item->BagSize));
+		serialization.append(StringFormat("|%i", item->BagWR));
+		serialization.append(StringFormat("|%i", item->Book));
+		serialization.append(StringFormat("|%i", item->BookType));
+		serialization.append(StringFormat("|%s", item->Filename));
+		serialization.append(StringFormat("|%i", item->BaneDmgRaceAmt));
+		serialization.append(StringFormat("|%i", item->AugRestrict));
+		serialization.append(StringFormat("|%i", item->LoreGroup));
+		serialization.append(StringFormat("|%i", item->PendingLoreFlag));
+		serialization.append(StringFormat("|%i", item->ArtifactFlag));
+		serialization.append(StringFormat("|%i", item->SummonedFlag));
+		serialization.append(StringFormat("|%i", item->Favor));
+		serialization.append(StringFormat("|%i", item->FVNoDrop));
+		serialization.append(StringFormat("|%i", item->Endur));
+		serialization.append(StringFormat("|%i", item->DotShielding));
+		serialization.append(StringFormat("|%i", item->Attack));
+		serialization.append(StringFormat("|%i", item->Regen));
+		serialization.append(StringFormat("|%i", item->ManaRegen));
+		serialization.append(StringFormat("|%i", item->EnduranceRegen));
+		serialization.append(StringFormat("|%i", item->Haste));
+		serialization.append(StringFormat("|%i", item->DamageShield));
+		serialization.append(StringFormat("|%i", item->RecastDelay));
+		serialization.append(StringFormat("|%i", item->RecastType));
+		serialization.append(StringFormat("|%i", item->GuildFavor));
+		serialization.append(StringFormat("|%i", item->AugDistiller));
+		serialization.append("|0"); // unknown
+		serialization.append("|0"); // unknown
+		serialization.append(StringFormat("|%i", item->Attuneable));
+		serialization.append(StringFormat("|%i", item->NoPet));
+		serialization.append("|0"); // unknown
+		serialization.append(StringFormat("|%i", item->PointType));
+		serialization.append(StringFormat("|%i", item->PotionBelt));
+		serialization.append(StringFormat("|%i", item->PotionBeltSlots));
+		serialization.append(StringFormat("|%i", item->StackSize));
+		serialization.append(StringFormat("|%i", item->NoTransfer));
+		serialization.append(StringFormat("|%i", item->Stackable));
+		serialization.append(StringFormat("|%i", item->Click.Effect));
+		serialization.append(StringFormat("|%i", item->Click.Type));
+		serialization.append(StringFormat("|%i", item->Click.Level2));
+		serialization.append(StringFormat("|%i", item->Click.Level));
+		serialization.append("|0"); // Click name
+		serialization.append(StringFormat("|%i", item->Proc.Effect));
+		serialization.append(StringFormat("|%i", item->Proc.Type));
+		serialization.append(StringFormat("|%i", item->Proc.Level2));
+		serialization.append(StringFormat("|%i", item->Proc.Level));
+		serialization.append("|0"); // Proc name
+		serialization.append(StringFormat("|%i", item->Worn.Effect));
+		serialization.append(StringFormat("|%i", item->Worn.Type));
+		serialization.append(StringFormat("|%i", item->Worn.Level2));
+		serialization.append(StringFormat("|%i", item->Worn.Level));
+		serialization.append("|0"); // Worn name
+		serialization.append(StringFormat("|%i", item->Focus.Effect));
+		serialization.append(StringFormat("|%i", item->Focus.Type));
+		serialization.append(StringFormat("|%i", item->Focus.Level2));
+		serialization.append(StringFormat("|%i", item->Focus.Level));
+		serialization.append("|0"); // Focus name
+		serialization.append(StringFormat("|%i", item->Scroll.Effect));
+		serialization.append(StringFormat("|%i", item->Scroll.Type));
+		serialization.append(StringFormat("|%i", item->Scroll.Level2));
+		serialization.append(StringFormat("|%i", item->Scroll.Level));
+		serialization.append("|0"); // Scroll name
+//#include "titanium_itemfields_b.h" - end
+
+		serialization.append(StringFormat("%.*s\"", depth, protection.c_str())); // Quotes (and protection, if needed) around static data
+		for (int index = SUB_INDEX_BEGIN; index < consts::ITEM_CONTAINER_SIZE; ++index) {
+			ItemInst *sub = inst->GetItem(index);
+			if (!sub) {
+				serialization.push_back('|'); // Sub items (empty)
+			}
+			else {
+				std::string sub_item = SerializeItem(sub, 0, (depth + 1));
+				serialization.append(StringFormat("|%s", sub_item.c_str())); // Sub items
 			}
 		}
+		serialization.append(StringFormat("%.*s%s", (depth ? (depth - 1) : 0), protection.c_str(), (depth ? "\"" : ""))); // For trailing quotes (and protection) if a subitem;
 
-		*length = MakeAnyLenString(&serialization,
-			"%.*s%s"	// For leading quotes (and protection) if a subitem;
-			"%s"		// Instance data
-			"%.*s\""	// Quotes (and protection, if needed) around static data
-			"%i"		// item->ItemClass so we can do |%s instead of %s|
-#define I(field) "|%i"
-#define C(field) "|%s"
-#define S(field) "|%s"
-#define F(field) "|%f"
-#include "titanium_itemfields_a.h"
-			"|%i"		// mask for item->Weight
-#include "titanium_itemfields_b.h"
-			"%.*s\""	// Quotes (and protection, if needed) around static data
-			"|%s|%s|%s|%s|%s|%s|%s|%s|%s|%s"	// Sub items
-			"%.*s%s"	// For trailing quotes (and protection) if a subitem;
-			, depth ? depth - 1 : 0, protection, (depth) ? "\"" : ""
-			, instance
-			, depth, protection
-			, item->ItemClass
-#define I(field) ,item->field
-#define C(field) ,field
-#define S(field) ,item->field
-#define F(field) ,item->field
-#include "titanium_itemfields_a.h"
-			, ((item->Weight > 255) ? (255) : (item->Weight))
-#include "titanium_itemfields_b.h"
-			, depth, protection
-			, sub_items[0] ? sub_items[0] : ""
-			, sub_items[1] ? sub_items[1] : ""
-			, sub_items[2] ? sub_items[2] : ""
-			, sub_items[3] ? sub_items[3] : ""
-			, sub_items[4] ? sub_items[4] : ""
-			, sub_items[5] ? sub_items[5] : ""
-			, sub_items[6] ? sub_items[6] : ""
-			, sub_items[7] ? sub_items[7] : ""
-			, sub_items[8] ? sub_items[8] : ""
-			, sub_items[9] ? sub_items[9] : ""
-			, (depth) ? depth - 1 : 0, protection, (depth) ? "\"" : ""
-			);
-
-		for (i = 0; i<10; i++) {
-			if (sub_items[i])
-				safe_delete_array(sub_items[i]);
-		}
-
-		safe_delete_array(instance);
 		return serialization;
 	}
 

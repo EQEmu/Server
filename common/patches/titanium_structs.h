@@ -3341,6 +3341,177 @@ struct LFGuild_GuildToggle_Struct
 /*616*/
 };
 
+//struct ItemEffect_Struct
+//{
+//	int16	Effect;
+//	uint8	Type;
+//	uint8	Level;
+//	uint8	Level2;
+//};
+//
+//struct Item_Struct
+//{
+//	// "titanium_itemfields_a.h"
+//	char Name; // "\0"
+//	char Lore; // "\0"
+//	char IDFile; // "\0"
+//	int ID;
+//
+//	int Weight;
+//
+//	// "titanium_itemfields_b.h"
+//	int NoRent;
+//	int NoDrop;
+//	int Size;
+//	int Slots;
+//	int Price;
+//	int Icon;
+//	char Unk1; // '0'
+//	char Unk2; // '0'
+//	int BenefitFlag;
+//	int Tradeskills;
+//	int CR;
+//	int DR;
+//	int PR;
+//	int MR;
+//	int FR;
+//	int AStr;
+//	int ASta;
+//	int AAgi;
+//	int ADex;
+//	int ACha;
+//	int AInt;
+//	int AWis;
+//	int HP;
+//	int Mana;
+//	int AC;
+//	int Deity;
+//	int SkillModValue;
+//	int SkillModMax;
+//	int SkillModType;
+//	int BaneDmgRace;
+//	int BaneDmgAmt;
+//	int BaneDmgBody;
+//	int Magic;
+//	int CastTime_;
+//	int ReqLevel;
+//	int BardType;
+//	int BardValue;
+//	int Light;
+//	int Delay;
+//	int RecLevel;
+//	int RecSkill;
+//	int ElemDmgType;
+//	int ElemDmgAmt;
+//	int Range;
+//	int Damage;
+//	int Color;
+//	int Classes;
+//	int Races;
+//	char Unk3; // '0'
+//	int MaxCharges;
+//	int ItemType;
+//	int Material;
+//	int SellRate;
+//	char Unk4; // '0'
+//	int _CastTime_;
+//	char Unk5; // '0'
+//	int ProcRate;
+//	int CombatEffects;
+//	int Shielding;
+//	int StunResist;
+//	int StrikeThrough;
+//	int ExtraDmgSkill;
+//	int ExtraDmgAmt;
+//	int SpellShield;
+//	int Avoidance;
+//	int Accuracy;
+//	int CharmFileID;
+//	int FactionMod1;
+//	int FactionMod2;
+//	int FactionMod3;
+//	int FactionMod4;
+//	int FactionAmt1;
+//	int FactionAmt2;
+//	int FactionAmt3;
+//	int FactionAmt4;
+//	char CharmFile; // "\0"
+//	int AugType;
+//
+//	struct {
+//		int AugSlotType;
+//		int AugSlotVisible;
+//	} AugSlot[5];
+//
+//	int LDoNTheme;
+//	int LDoNPrice;
+//	int LDoNSold;
+//	int BagType;
+//	int BagSlots;
+//	int BagSize;
+//	int BagWR;
+//	int Book;
+//	int BookType;
+//	char Filename; // "\0"
+//	int BaneDmgRaceAmt;
+//	int AugRestrict;
+//	int LoreGroup;
+//	int PendingLoreFlag;
+//	int ArtifactFlag;
+//	int SummonedFlag;
+//	int Favor;
+//	int FVNoDrop;
+//	int Endur;
+//	int DotShielding;
+//	int Attack;
+//	int Regen;
+//	int ManaRegen;
+//	int EnduranceRegen;
+//	int Haste;
+//	int DamageShield;
+//	int RecastDelay;
+//	int RecastType;
+//	int GuildFavor;
+//	int AugDistiller;
+//	char Unk6; // '0'
+//	char Unk7; // '0'
+//	int Attunable;
+//	int NoPet;
+//	char Unk8; // '0'
+//	int PointType;
+//	int PotionBelt;
+//	int PotionBeltSlots;
+//	int StackSize;
+//	int NoTransfer;
+//	int Stackable;
+//
+//	int ClickEffect;
+//	int ClickType;
+//	int ClickLevel2;
+//	int ClickLevel;
+//	char ClickName; // '0'
+//	int ProcEffect;
+//	int ProcType;
+//	int ProcLevel2;
+//	int ProcLevel;
+//	char ProcName; // '0'
+//	int WornEffect;
+//	int WornType;
+//	int WornLevel2;
+//	int WornLevel;
+//	char WornName; // '0'
+//	int FocusEffect;
+//	int FocusType;
+//	int FocusLevel2;
+//	int FocusLevel;
+//	char FocusName; // '0'
+//	int ScrollEffect;
+//	int ScrollType;
+//	int ScrollLevel2;
+//	int ScrollLevel;
+//	char ScrollName; // '0'
+//};
+
 	};	//end namespace structs
 };	//end namespace Titanium
 
