@@ -65,10 +65,10 @@ int main(int argc, char **argv) {
 	database.LoadVariables();
 
 	/* If we're running shared memory and hotfix has no custom name, we probably want to start from scratch... */
-	char db_hotfix_name[256] = { 0 };
-	if (database.GetVariable("hotfix_name", db_hotfix_name, 256)) {
-		if (strlen(db_hotfix_name) > 0 && strcasecmp("hotfix_", db_hotfix_name) == 0) { 
-			Log.Out(Logs::General, Logs::Status, "Current hotfix in variables is the default %s, clearing out variable", db_hotfix_name);
+	std::string db_hotfix_name;
+	if (database.GetVariable("hotfix_name", db_hotfix_name)) {
+		if (!db_hotfix_name.empty() && strcasecmp("hotfix_", db_hotfix_name.c_str()) == 0) {
+			Log.Out(Logs::General, Logs::Status, "Current hotfix in variables is the default %s, clearing out variable", db_hotfix_name.c_str());
 			std::string query = StringFormat("UPDATE `variables` SET `value`='' WHERE (`varname`='hotfix_name')");
 			database.QueryDatabase(query);
 		}

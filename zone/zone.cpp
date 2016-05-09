@@ -104,10 +104,11 @@ bool Zone::Bootup(uint32 iZoneID, uint32 iInstanceID, bool iStaticZone) {
 	zone->watermap = WaterMap::LoadWaterMapfile(zone->map_name);
 	zone->pathing = PathManager::LoadPathFile(zone->map_name);
 
-	char tmp[10];
-	if (database.GetVariable("loglevel",tmp, 9)) {
+	std::string tmp;
+	if (database.GetVariable("loglevel", tmp)) {
 		int log_levels[4];
-		if (atoi(tmp)>9){ //Server is using the new code
+		int tmp_i = atoi(tmp.c_str());
+		if (tmp_i>9){ //Server is using the new code
 			for(int i=0;i<4;i++){
 				if (((int)tmp[i]>=48) && ((int)tmp[i]<=57))
 					log_levels[i]=(int)tmp[i]-48; //get the value to convert it to an int from the ascii value
@@ -124,12 +125,12 @@ bool Zone::Bootup(uint32 iZoneID, uint32 iInstanceID, bool iStaticZone) {
 			Log.Out(Logs::General, Logs::Status, "Loot logging level: %i", zone->lootvar);
 		}
 		else {
-			zone->loglevelvar = uint8(atoi(tmp)); //continue supporting only command logging (for now)
+			zone->loglevelvar = uint8(tmp_i); //continue supporting only command logging (for now)
 			zone->merchantvar = 0;
 			zone->tradevar = 0;
 			zone->lootvar = 0;
 		}
-	}	
+	}
 
 	is_zone_loaded = true;
 

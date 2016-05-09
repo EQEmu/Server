@@ -3598,10 +3598,8 @@ void Client::GetRaidAAs(RaidLeadershipAA_Struct *into) const {
 void Client::EnteringMessages(Client* client)
 {
 	//server rules
-	char *rules;
-	rules = new char [4096];
-
-	if(database.GetVariable("Rules", rules, 4096))
+	std::string rules;
+	if(database.GetVariable("Rules", rules))
 	{
 		uint8 flag = database.GetAgreementFlag(client->AccountID());
 		if(!flag)
@@ -3612,25 +3610,18 @@ void Client::EnteringMessages(Client* client)
 			client->SendAppearancePacket(AT_Anim, ANIM_FREEZE);
 		}
 	}
-	safe_delete_array(rules);
 }
 
 void Client::SendRules(Client* client)
 {
-	char *rules;
-	rules = new char [4096];
-	char *ptr;
+	std::string rules;
 
-	database.GetVariable("Rules", rules, 4096);
+	if (!database.GetVariable("Rules", rules))
+		return;
 
-	ptr = strtok(rules, "\n");
-	while(ptr != nullptr)
-	{
-
-		client->Message(0,"%s",ptr);
-		ptr = strtok(nullptr, "\n");
-	}
-	safe_delete_array(rules);
+	auto lines = SplitString(rules, '\n');
+	for (auto&& e : lines)
+		client->Message(0, "%s", e.c_str());
 }
 
 void Client::SetEndurance(int32 newEnd)

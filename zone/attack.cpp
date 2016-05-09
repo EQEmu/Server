@@ -687,25 +687,25 @@ void Mob::MeleeMitigation(Mob *attacker, int32 &damage, int32 minhit, ExtraAttac
 
 		if (damage > 0 && myac > 0) {
 			int acfail=1000;
-			char tmp[10];
+			std::string tmp;
 
-			if (database.GetVariable("ACfail", tmp, 9)) {
-				acfail = (int) (atof(tmp) * 100);
+			if (database.GetVariable("ACfail", tmp)) {
+				acfail = (int) (atof(tmp.c_str()) * 100);
 				if (acfail>100) acfail=100;
 			}
 
 			if (acfail<=0 || zone->random.Int(0, 100)>acfail) {
 				float acreduction=1;
 				int acrandom=300;
-				if (database.GetVariable("ACreduction", tmp, 9))
+				if (database.GetVariable("ACreduction", tmp))
 				{
-					acreduction=atof(tmp);
+					acreduction=atof(tmp.c_str());
 					if (acreduction>100) acreduction=100;
 				}
 
-				if (database.GetVariable("ACrandom", tmp, 9))
+				if (database.GetVariable("ACrandom", tmp))
 				{
-					acrandom = (int) ((atof(tmp)+1) * 100);
+					acrandom = (int) ((atof(tmp.c_str())+1) * 100);
 					if (acrandom>10100) acrandom=10100;
 				}
 
@@ -1497,15 +1497,14 @@ bool Client::Death(Mob* killerMob, int32 damage, uint16 spell, SkillUseTypes att
 			// creating the corpse takes the cash/items off the player too
 			Corpse *new_corpse = new Corpse(this, exploss);
 
-			char tmp[20];
-			database.GetVariable("ServerType", tmp, 9);
-			if(atoi(tmp)==1 && killerMob != nullptr && killerMob->IsClient()){
-				char tmp2[10] = {0};
-				database.GetVariable("PvPreward", tmp, 9);
-				int reward = atoi(tmp);
+			std::string tmp;
+			database.GetVariable("ServerType", tmp);
+			if(tmp[0] == '1' && tmp[1] == '\0' && killerMob != nullptr && killerMob->IsClient()){
+				database.GetVariable("PvPreward", tmp);
+				int reward = atoi(tmp.c_str());
 				if(reward==3){
-					database.GetVariable("PvPitem", tmp2, 9);
-					int pvpitem = atoi(tmp2);
+					database.GetVariable("PvPitem", tmp);
+					int pvpitem = atoi(tmp.c_str());
 					if(pvpitem>0 && pvpitem<200000)
 						new_corpse->SetPlayerKillItemID(pvpitem);
 				}

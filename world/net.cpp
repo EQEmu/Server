@@ -193,7 +193,7 @@ int main(int argc, char** argv) {
 
 	bool ignore_db = false;
 	if (argc >= 2) {
-		char tmp[2];
+		std::string tmp;
 		if (strcasecmp(argv[1], "help") == 0 || strcasecmp(argv[1], "?") == 0 || strcasecmp(argv[1], "/?") == 0 || strcasecmp(argv[1], "-?") == 0 || strcasecmp(argv[1], "-h") == 0 || strcasecmp(argv[1], "-help") == 0) {
 			std::cout << "Worldserver command line commands:" << std::endl;
 			std::cout << "adduser username password flag    - adds a user account" << std::endl;
@@ -206,8 +206,8 @@ int main(int argc, char** argv) {
 			std::cout << "Reboot Zones mode ON" << std::endl;
 			holdzones = true;
 		}
-		else if (database.GetVariable("disablecommandline", tmp, 2)) {
-			if (strlen(tmp) == 1) {
+		else if (database.GetVariable("disablecommandline", tmp)) {
+			if (tmp.length() == 1) {
 				if (tmp[0] == '1') {
 					std::cerr << "Command line disabled in database... exiting" << std::endl;
 					return 1;
@@ -299,10 +299,10 @@ int main(int argc, char** argv) {
 	Log.Out(Logs::General, Logs::World_Server, "Loading variables..");
 	database.LoadVariables();
 
-	char hotfix_name[256] = { 0 };
-	if(database.GetVariable("hotfix_name", hotfix_name, 256)) {
-		if(strlen(hotfix_name) > 0) {
-			Log.Out(Logs::General, Logs::Zone_Server, "Current hotfix in use: '%s'", hotfix_name);
+	std::string hotfix_name;
+	if(database.GetVariable("hotfix_name", hotfix_name)) {
+		if (!hotfix_name.empty()) {
+			Log.Out(Logs::General, Logs::Zone_Server, "Current hotfix in use: '%s'", hotfix_name.c_str());
 		}
 	}
 
@@ -326,17 +326,17 @@ int main(int argc, char** argv) {
 	guild_mgr.LoadGuilds();
 	//rules:
 	{
-		char tmp[64];
-		if (database.GetVariable("RuleSet", tmp, sizeof(tmp)-1)) {
-			Log.Out(Logs::General, Logs::World_Server, "Loading rule set '%s'", tmp);
-			if(!RuleManager::Instance()->LoadRules(&database, tmp)) {
-				Log.Out(Logs::General, Logs::World_Server, "Failed to load ruleset '%s', falling back to defaults.", tmp);
+		std::string tmp;
+		if (database.GetVariable("RuleSet", tmp)) {
+			Log.Out(Logs::General, Logs::World_Server, "Loading rule set '%s'", tmp.c_str());
+			if(!RuleManager::Instance()->LoadRules(&database, tmp.c_str())) {
+				Log.Out(Logs::General, Logs::World_Server, "Failed to load ruleset '%s', falling back to defaults.", tmp.c_str());
 			}
 		} else {
 			if(!RuleManager::Instance()->LoadRules(&database, "default")) {
 				Log.Out(Logs::General, Logs::World_Server, "No rule set configured, using default rules");
 			} else {
-				Log.Out(Logs::General, Logs::World_Server, "Loaded default rule set 'default'", tmp);
+				Log.Out(Logs::General, Logs::World_Server, "Loaded default rule set 'default'", tmp.c_str());
 			}
 		}
 	}
@@ -355,10 +355,9 @@ int main(int argc, char** argv) {
 	Log.Out(Logs::General, Logs::World_Server, "Loading launcher list..");
 	launcher_list.LoadList();
 
-	char tmp[20];
-	tmp[0] = '\0';
-	database.GetVariable("holdzones",tmp, 20);
-	if ((strcasecmp(tmp, "1") == 0)) {
+	std::string tmp;
+	database.GetVariable("holdzones",tmp);
+	if (tmp.length() == 1 && tmp[0] == '1') {
 		holdzones = true;
 	}
 	Log.Out(Logs::General, Logs::World_Server, "Reboot zone modes %s",holdzones ? "ON" : "OFF");

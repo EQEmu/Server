@@ -212,8 +212,8 @@ bool LoginServer::InitLoginServer() {
 }
 
 bool LoginServer::Connect() {
-	char tmp[25];
-	if(database.GetVariable("loginType",tmp,sizeof(tmp)) && strcasecmp(tmp,"MinILogin") == 0){
+	std::string tmp;
+	if(database.GetVariable("loginType", tmp) && strcasecmp(tmp.c_str(), "MinILogin") == 0) {
 		minilogin = true;
 		Log.Out(Logs::Detail, Logs::World_Server, "Setting World to MiniLogin Server type");
 	}

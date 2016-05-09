@@ -67,8 +67,14 @@ struct npcDecayTimes_Struct {
 
 
 struct VarCache_Struct {
-	char varname[26];	
-	char value[0];
+	std::map<std::string, std::string> m_cache;
+	uint32 last_update;
+	VarCache_Struct() : last_update(0) { }
+	void Add(const std::string &key, const std::string &value) { m_cache[key] = value; }
+	const std::string *Get(const std::string &key) {
+		auto it = m_cache.find(key);
+		return (it != m_cache.end() ? &it->second : nullptr);
+	}
 };
 
 class PTimerList;
@@ -215,11 +221,9 @@ public:
 
 	/* Database Variables */
 
-	bool	GetVariable(const char* varname, char* varvalue, uint16 varvalue_len);
-	bool	SetVariable(const char* varname, const char* varvalue);
+	bool	GetVariable(std::string varname, std::string &varvalue);
+	bool	SetVariable(const std::string varname, const std::string &varvalue);
 	bool	LoadVariables();
-	uint32	LoadVariables_MQ(char** query);
-	bool	LoadVariables_result(MySQLRequestResult results);
 
 	/* General Queries */
 
@@ -256,14 +260,10 @@ public:
 	void	LoadLogSettings(EQEmuLogSys::LogSettings* log_settings);
 
 private:
-	void DBInitVars();
-
 	std::map<uint32,std::string>	zonename_array;
 
-	Mutex				Mvarcache;
-	uint32				varcache_max;
-	VarCache_Struct**	varcache_array;
-	uint32				varcache_lastupdate;
+	Mutex Mvarcache;
+	VarCache_Struct varcache;
 
 	/* Groups, utility methods. */
 	void    ClearAllGroupLeaders();

@@ -883,7 +883,6 @@ void Corpse::AllowPlayerLoot(Mob *them, uint8 slot) {
 
 void Corpse::MakeLootRequestPackets(Client* client, const EQApplicationPacket* app) {
 	// Added 12/08. Started compressing loot struct on live.
-	char tmp[10];
 	if(player_corpse_depop) {
 		SendLootReqErrorPacket(client, 0);
 		return;
@@ -914,8 +913,9 @@ void Corpse::MakeLootRequestPackets(Client* client, const EQApplicationPacket* a
 
 	uint8 Loot_Request_Type = 1;
 	bool loot_coin = false;
-	if(database.GetVariable("LootCoin", tmp, 9))
-		loot_coin = (atoi(tmp) == 1);
+	std::string tmp;
+	if(database.GetVariable("LootCoin", tmp))
+		loot_coin = tmp[0] == 1 && tmp[1] == '\0';
 
 	if (this->being_looted_by != 0xFFFFFFFF && this->being_looted_by != client->GetID()) {
 		SendLootReqErrorPacket(client, 0);

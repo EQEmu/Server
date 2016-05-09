@@ -828,27 +828,27 @@ void SharedDatabase::LoadItems(void *data, uint32 size, int32 items, uint32 max_
 {
 	EQEmu::FixedMemoryHashSet<Item_Struct> hash(reinterpret_cast<uint8 *>(data), size, items, max_item_id);
 
-	char ndbuffer[4];
+	std::string ndbuffer;
 	bool disableNoRent = false;
-	if (GetVariable("disablenorent", ndbuffer, 4)) {
+	if (GetVariable("disablenorent", ndbuffer)) {
 		if (ndbuffer[0] == '1' && ndbuffer[1] == '\0') {
 			disableNoRent = true;
 		}
 	}
 	bool disableNoDrop = false;
-	if (GetVariable("disablenodrop", ndbuffer, 4)) {
+	if (GetVariable("disablenodrop", ndbuffer)) {
 		if (ndbuffer[0] == '1' && ndbuffer[1] == '\0') {
 			disableNoDrop = true;
 		}
 	}
 	bool disableLoreGroup = false;
-	if (GetVariable("disablelore", ndbuffer, 4)) {
+	if (GetVariable("disablelore", ndbuffer)) {
 		if (ndbuffer[0] == '1' && ndbuffer[1] == '\0') {
 			disableLoreGroup = true;
 		}
 	}
 	bool disableNoTransfer = false;
-	if (GetVariable("disablenotransfer", ndbuffer, 4)) {
+	if (GetVariable("disablenotransfer", ndbuffer)) {
 		if (ndbuffer[0] == '1' && ndbuffer[1] == '\0') {
 			disableNoTransfer = true;
 		}

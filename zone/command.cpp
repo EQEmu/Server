@@ -856,9 +856,9 @@ char buffer[255];
 
 void command_getvariable(Client *c, const Seperator *sep)
 {
-	char tmp[512];
-	if (database.GetVariable(sep->argplus[1], tmp, sizeof(tmp)))
-		c->Message(0, "%s = %s",  sep->argplus[1], tmp);
+	std::string tmp;
+	if (database.GetVariable(sep->argplus[1], tmp))
+		c->Message(0, "%s = %s",  sep->argplus[1], tmp.c_str());
 	else
 		c->Message(0, "GetVariable(%s) returned false",  sep->argplus[1]);
 }
@@ -10735,12 +10735,11 @@ void command_reloadaa(Client *c, const Seperator *sep) {
 }
 
 void command_hotfix(Client *c, const Seperator *sep) {
-	char hotfix[256] = { 0 };
-	database.GetVariable("hotfix_name", hotfix, 256);
-	std::string current_hotfix = hotfix;
+	std::string hotfix;
+	database.GetVariable("hotfix_name", hotfix);
 
 	std::string hotfix_name;
-	if(!strcasecmp(current_hotfix.c_str(), "hotfix_")) {
+	if(!strcasecmp(hotfix.c_str(), "hotfix_")) {
 		hotfix_name = "";
 	} else {
 		hotfix_name = "hotfix_";
@@ -10762,7 +10761,7 @@ void command_hotfix(Client *c, const Seperator *sep) {
 			system(StringFormat("./shared_memory").c_str());
 		}
 #endif
-		database.SetVariable("hotfix_name", hotfix_name.c_str());
+		database.SetVariable("hotfix_name", hotfix_name);
 
 		ServerPacket pack(ServerOP_ChangeSharedMem, hotfix_name.length() + 1);
 		if(hotfix_name.length() > 0) {
@@ -10777,12 +10776,11 @@ void command_hotfix(Client *c, const Seperator *sep) {
 }
 
 void command_load_shared_memory(Client *c, const Seperator *sep) {
-	char hotfix[256] = { 0 };
-	database.GetVariable("hotfix_name", hotfix, 256);
-	std::string current_hotfix = hotfix;
+	std::string hotfix;
+	database.GetVariable("hotfix_name", hotfix);
 
 	std::string hotfix_name;
-	if(strcasecmp(current_hotfix.c_str(), sep->arg[1]) == 0) {
+	if(strcasecmp(hotfix.c_str(), sep->arg[1]) == 0) {
 		c->Message(0, "Cannot attempt to load this shared memory segment as it is already loaded.");
 		return;
 	}
@@ -10811,12 +10809,12 @@ void command_load_shared_memory(Client *c, const Seperator *sep) {
 }
 
 void command_apply_shared_memory(Client *c, const Seperator *sep) {
-	char hotfix[256] = { 0 };
-	database.GetVariable("hotfix_name", hotfix, 256);
+	std::string hotfix;
+	database.GetVariable("hotfix_name", hotfix);
 	std::string hotfix_name = sep->arg[1];
-	
+
 	c->Message(0, "Applying shared memory segment %s", hotfix_name.c_str());
-	database.SetVariable("hotfix_name", hotfix_name.c_str());
+	database.SetVariable("hotfix_name", hotfix_name);
 
 	ServerPacket pack(ServerOP_ChangeSharedMem, hotfix_name.length() + 1);
 	if(hotfix_name.length() > 0) {

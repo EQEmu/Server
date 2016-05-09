@@ -277,10 +277,10 @@ bool ClientListEntry::CheckAuth(uint32 iLSID, const char* iKey) {
 			strn0cpy(paccountname, plsname, sizeof(paccountname));
 			padmin = tmpStatus;
 		}
-		char lsworldadmin[15] = "0";
-		database.GetVariable("honorlsworldadmin", lsworldadmin, sizeof(lsworldadmin));
-		if (atoi(lsworldadmin) == 1 && pworldadmin != 0 && (padmin < pworldadmin || padmin == 0))
-			padmin = pworldadmin;
+		std::string lsworldadmin;
+		if (database.GetVariable("honorlsworldadmin", lsworldadmin))
+			if (atoi(lsworldadmin.c_str()) == 1 && pworldadmin != 0 && (padmin < pworldadmin || padmin == 0))
+				padmin = pworldadmin;
 		return true;
 	}
 	return false;

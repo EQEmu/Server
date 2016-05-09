@@ -23,6 +23,7 @@
 #include <iomanip>
 #include <iostream>
 #include <map>
+#include <algorithm>
 #include <mysqld_error.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -48,7 +49,6 @@
 extern Client client;
 
 Database::Database () {
-	DBInitVars();
 }
 
 /*
@@ -57,7 +57,6 @@ Establish a connection to a mysql database with the supplied parameters
 
 Database::Database(const char* host, const char* user, const char* passwd, const char* database, uint32 port)
 {
-	DBInitVars();
 	Connect(host, user, passwd, database, port);
 }
 
@@ -74,25 +73,12 @@ bool Database::Connect(const char* host, const char* user, const char* passwd, c
 	}
 }
 
-void Database::DBInitVars() { 
-	varcache_array = 0;
-	varcache_max = 0;
-	varcache_lastupdate = 0;
-}
-
 /*
 	Close the connection to the database
 */
 
 Database::~Database()
 {
-	unsigned int x;
-	if (varcache_array) {
-		for (x=0; x<varcache_max; x++) {
-			safe_delete_array(varcache_array[x]);
-		}
-		safe_delete_array(varcache_array);
-	}
 }
 
 /*
@@ -845,7 +831,7 @@ void Database::GetAccountName(uint32 accountid, char* name, uint32* oLSAccountID
 
 }
 
-void Database::GetCharName(uint32 char_id, char* name) { 
+void Database::GetCharName(uint32 char_id, char* name) {
 	std::string query = StringFormat("SELECT `name` FROM `character_data` WHERE id='%i'", char_id);
 	auto results = QueryDatabase(query);
 
@@ -860,139 +846,69 @@ void Database::GetCharName(uint32 char_id, char* name) {
 }
 
 bool Database::LoadVariables() {
-	auto results = QueryDatabase(StringFormat("SELECT varname, value, unix_timestamp() FROM variables where unix_timestamp(ts) >= %d", varcache_lastupdate));
+	auto results = QueryDatabase(StringFormat("SELECT varname, value, unix_timestamp() FROM variables where unix_timestamp(ts) >= %d", varcache.last_update));
 
 	if (!results.Success())
 		return false;
 
-	return LoadVariables_result(std::move(results));
-}
-
-uint32 Database::LoadVariables_MQ(char** query)
-{
-	return MakeAnyLenString(query, "SELECT varname, value, unix_timestamp() FROM variables where unix_timestamp(ts) >= %d", varcache_lastupdate);
-}
-
-// always returns true? not sure about this.
-bool Database::LoadVariables_result(MySQLRequestResult results)
-{
-	uint32 i = 0;
-	LockMutex lock(&Mvarcache);
-
 	if (results.RowCount() == 0)
 		return true;
 
-	if (!varcache_array) {
-		varcache_max = results.RowCount();
-		varcache_array = new VarCache_Struct*[varcache_max];
-		for (i=0; i<varcache_max; i++)
-			varcache_array[i] = 0;
-	}
-	else {
-		uint32 tmpnewmax = varcache_max + results.RowCount();
-		VarCache_Struct** tmp = new VarCache_Struct*[tmpnewmax];
-		for (i=0; i<tmpnewmax; i++)
-			tmp[i] = 0;
-		for (i=0; i<varcache_max; i++)
-			tmp[i] = varcache_array[i];
-		VarCache_Struct** tmpdel = varcache_array;
-		varcache_array = tmp;
-		varcache_max = tmpnewmax;
-		delete [] tmpdel;
-	}
+	LockMutex lock(&Mvarcache);
 
-	for (auto row = results.begin(); row != results.end(); ++row)
-	{
-		varcache_lastupdate = atoi(row[2]);
-		for (i=0; i<varcache_max; i++) {
-			if (varcache_array[i]) {
-				if (strcasecmp(varcache_array[i]->varname, row[0]) == 0) {
-					delete varcache_array[i];
-					varcache_array[i] = (VarCache_Struct*) new uint8[sizeof(VarCache_Struct) + strlen(row[1]) + 1];
-					strn0cpy(varcache_array[i]->varname, row[0], sizeof(varcache_array[i]->varname));
-					strcpy(varcache_array[i]->value, row[1]);
-					break;
-				}
-			}
-			else {
-				varcache_array[i] = (VarCache_Struct*) new uint8[sizeof(VarCache_Struct) + strlen(row[1]) + 1];
-				strcpy(varcache_array[i]->varname, row[0]);
-				strcpy(varcache_array[i]->value, row[1]);
-				break;
-			}
-		}
+	std::string key, value;
+	for (auto row = results.begin(); row != results.end(); ++row) {
+		varcache.last_update = atoi(row[2]); // ahh should we be comparing if this is newer?
+		key = row[0];
+		value = row[1];
+		std::transform(std::begin(key), std::end(key), std::begin(key), ::tolower); // keys are lower case, DB doesn't have to be
+		varcache.Add(key, value);
 	}
-
-	uint32 max_used = 0;
-	for (i=0; i<varcache_max; i++) {
-		if (varcache_array[i]) {
-			if (i > max_used)
-				max_used = i;
-		}
-	}
-
-	varcache_max = max_used + 1;
 
 	return true;
 }
 
 // Gets variable from 'variables' table
-bool Database::GetVariable(const char* varname, char* varvalue, uint16 varvalue_len) {
-	varvalue[0] = '\0';
+bool Database::GetVariable(std::string varname, std::string &varvalue)
+{
+	varvalue.clear();
 
 	LockMutex lock(&Mvarcache);
-	if (strlen(varname) <= 1)
-		return false;
-	for (uint32 i=0; i<varcache_max; i++) {
 
-		if (varcache_array[i]) {
-			if (strcasecmp(varcache_array[i]->varname, varname) == 0) {
-				snprintf(varvalue, varvalue_len, "%s", varcache_array[i]->value);
-				varvalue[varvalue_len-1] = 0;
-				return true;
-			}
-		}
-		else
-			return false;
+	if (varname.empty())
+		return false;
+
+	std::transform(std::begin(varname), std::end(varname), std::begin(varname), ::tolower); // all keys are lower case
+	auto tmp = varcache.Get(varname);
+	if (tmp) {
+		varvalue = *tmp;
+		return true;
 	}
 	return false;
 }
 
-bool Database::SetVariable(const char* varname_in, const char* varvalue_in) {
-	
-	char *varname,*varvalue;
-
-	varname=(char *)malloc(strlen(varname_in)*2+1);
-	varvalue=(char *)malloc(strlen(varvalue_in)*2+1);
-	DoEscapeString(varname, varname_in, strlen(varname_in));
-	DoEscapeString(varvalue, varvalue_in, strlen(varvalue_in));
-
-	std::string query = StringFormat("Update variables set value='%s' WHERE varname like '%s'", varvalue, varname);
+bool Database::SetVariable(const std::string varname, const std::string &varvalue)
+{
+	std::string escaped_name = EscapeString(varname);
+	std::string escaped_value = EscapeString(varvalue);
+	std::string query = StringFormat("Update variables set value='%s' WHERE varname like '%s'", escaped_value.c_str(), escaped_name.c_str());
 	auto results = QueryDatabase(query);
 
 	if (!results.Success())
-	{
-		free(varname);
-		free(varvalue);
 		return false;
-	}
 
 	if (results.RowsAffected() == 1)
 	{
 		LoadVariables(); // refresh cache
-		free(varname);
-		free(varvalue);
 		return true;
 	}
 
-	query = StringFormat("Insert Into variables (varname, value) values ('%s', '%s')", varname, varvalue);
+	query = StringFormat("Insert Into variables (varname, value) values ('%s', '%s')", escaped_name.c_str(), escaped_value.c_str());
 	results = QueryDatabase(query);
-	free(varname);
-	free(varvalue);
 
 	if (results.RowsAffected() != 1)
 		return false;
-	
+
 	LoadVariables(); // refresh cache
 	return true;
 }
