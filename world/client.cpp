@@ -859,7 +859,7 @@ bool Client::HandleEnterWorldPacket(const EQApplicationPacket *app) {
 	outapp = new EQApplicationPacket(OP_MOTD);
 	std::string tmp;
 	if (database.GetVariable("MOTD", tmp)) {
-		outapp->size = tmp.length();
+		outapp->size = tmp.length() + 1;
 		outapp->pBuffer = new uchar[outapp->size];
 		memset(outapp->pBuffer,0,outapp->size);
 		strcpy((char*)outapp->pBuffer, tmp.c_str());
