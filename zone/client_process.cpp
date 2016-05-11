@@ -768,7 +768,7 @@ void Client::BulkSendInventoryItems()
 		if (!inst)
 			continue;
 
-		ss << inst->Serialize(slot_id);
+		inst->Serialize(ss, slot_id);
 
 		if (ss.tellp() == last_pos)
 			Log.Out(Logs::General, Logs::Inventory, "Serialization failed on item slot %d during BulkSendInventoryItems.  Item skipped.", slot_id);
@@ -780,7 +780,7 @@ void Client::BulkSendInventoryItems()
 	if (ClientVersion() >= EQEmu::versions::ClientVersion::SoF) {
 		const ItemInst* inst = m_inv[EQEmu::legacy::SlotPowerSource];
 		if (inst) {
-			ss << inst->Serialize(EQEmu::legacy::SlotPowerSource);
+			inst->Serialize(ss, EQEmu::legacy::SlotPowerSource);
 
 			if (ss.tellp() == last_pos)
 				Log.Out(Logs::General, Logs::Inventory, "Serialization failed on item slot %d during BulkSendInventoryItems.  Item skipped.", EQEmu::legacy::SlotPowerSource);
@@ -795,7 +795,7 @@ void Client::BulkSendInventoryItems()
 		if (!inst)
 			continue;
 
-		ss << inst->Serialize(slot_id);
+		inst->Serialize(ss, slot_id);
 
 		if (ss.tellp() == last_pos)
 			Log.Out(Logs::General, Logs::Inventory, "Serialization failed on item slot %d during BulkSendInventoryItems.  Item skipped.", slot_id);
@@ -809,7 +809,7 @@ void Client::BulkSendInventoryItems()
 		if (!inst)
 			continue;
 
-		ss << inst->Serialize(slot_id);
+		inst->Serialize(ss, slot_id);
 
 		if (ss.tellp() == last_pos)
 			Log.Out(Logs::General, Logs::Inventory, "Serialization failed on item slot %d during BulkSendInventoryItems.  Item skipped.", slot_id);
