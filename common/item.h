@@ -33,6 +33,7 @@ class EvolveInfo;			// Stores information about an evolving item family
 
 #include <list>
 #include <map>
+#include <sstream>
 
 
 namespace ItemField
