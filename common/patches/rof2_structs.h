@@ -4795,7 +4795,7 @@ struct ItemQuaternaryBodyStruct
 	int32 HeroicSVCorrup;
 	int32 HealAmt;
 	int32 SpellDmg;
-	int32 clairvoyance;
+	int32 Clairvoyance;
 	uint8 unknown18;	//Power Source Capacity or evolve filename?
 	uint32 evolve_string; // Some String, but being evolution related is just a guess
 	uint8 unknown19;
@@ -4833,7 +4833,6 @@ struct ItemQuaternaryBodyStruct
 	uint8 unknown37a;	// New to RoF2 - Probably variable length string
 	uint8 unknown38;	// 0
 	uint8 unknown39;	// 1
-	uint32 subitem_count;
 };
 
 struct AugmentInfo_Struct

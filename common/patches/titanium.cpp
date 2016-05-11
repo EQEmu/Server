@@ -20,7 +20,7 @@ namespace Titanium
 	static OpcodeManager *opcodes = nullptr;
 	static Strategy struct_strategy;
 
-	std::string SerializeItem(const ItemInst *inst, int16 slot_id_in, uint8 depth);
+	void SerializeItem(std::stringstream& ss, const ItemInst *inst, int16 slot_id_in, uint8 depth);
 
 	// server to client inventory location converters
 	static inline int16 ServerToTitaniumSlot(uint32 serverSlot);
@@ -260,11 +260,11 @@ namespace Titanium
 	ENCODE(OP_CharInventory)
 	{
 		//consume the packet
-		EQApplicationPacket *in = *p;
+		EQApplicationPacket* in = *p;
 		*p = nullptr;
 
 		//store away the emu struct
-		unsigned char *__emu_buffer = in->pBuffer;
+		uchar* __emu_buffer = in->pBuffer;
 
 		int itemcount = in->size / sizeof(InternalSerializedItem_Struct);
 		if (itemcount == 0 || (in->size % sizeof(InternalSerializedItem_Struct)) != 0) {
@@ -272,26 +272,25 @@ namespace Titanium
 			delete in;
 			return;
 		}
-		InternalSerializedItem_Struct *eq = (InternalSerializedItem_Struct *)in->pBuffer;
+		InternalSerializedItem_Struct* eq = (InternalSerializedItem_Struct*)in->pBuffer;
 
 		//do the transform...
-		std::string serial_string;
-		for (int r = 0; r < itemcount; r++, eq++) {
-			std::string serialized = SerializeItem((const ItemInst*)eq->inst, eq->slot_id, 0); // assumed move operation: string& = string&&
-			if (!serialized.empty()) {
-				serial_string.append(serialized);
-				serial_string.push_back('\0');
-			}
-			else {
-				Log.Out(Logs::General, Logs::Netcode, "[STRUCTS] Serialization failed on item slot %d during OP_CharInventory.  Item skipped.", eq->slot_id);
-			}
+		std::stringstream ss(std::stringstream::in | std::stringstream::out);
+		std::stringstream::pos_type last_pos = ss.tellp();
 
+		for (int r = 0; r < itemcount; r++, eq++) {
+			SerializeItem(ss, (const ItemInst*)eq->inst, eq->slot_id, 0);
+			if (ss.tellp() == last_pos)
+				Log.Out(Logs::General, Logs::Netcode, "[STRUCTS] Serialization failed on item slot %d during OP_CharInventory.  Item skipped.", eq->slot_id);
+			
+			last_pos = ss.tellp();
 		}
 
-		// do we need to account for a trailing null escape?
-		in->size = serial_string.size();
-		in->pBuffer = new unsigned char[in->size];
-		memcpy(in->pBuffer, serial_string.c_str(), serial_string.size());
+		std::string serialized = ss.str();
+
+		in->size = serialized.size();
+		in->pBuffer = new uchar[in->size];
+		memcpy(in->pBuffer, serialized.c_str(), serialized.size());
 
 		delete[] __emu_buffer;
 
@@ -716,27 +715,34 @@ namespace Titanium
 	ENCODE(OP_ItemPacket)
 	{
 		//consume the packet
-		EQApplicationPacket *in = *p;
+		EQApplicationPacket* in = *p;
 		*p = nullptr;
 
 		//store away the emu struct
-		unsigned char *__emu_buffer = in->pBuffer;
-		ItemPacket_Struct *old_item_pkt = (ItemPacket_Struct *)__emu_buffer;
-		InternalSerializedItem_Struct *int_struct = (InternalSerializedItem_Struct *)(old_item_pkt->SerializedItem);
+		uchar* __emu_buffer = in->pBuffer;
+		//ItemPacket_Struct* old_item_pkt = (ItemPacket_Struct*)__emu_buffer;
+		//InternalSerializedItem_Struct* int_struct = (InternalSerializedItem_Struct*)(old_item_pkt->SerializedItem);
+		InternalSerializedItem_Struct* int_struct = (InternalSerializedItem_Struct*)(&__emu_buffer[4]);
 
-		std::string serialized = SerializeItem((ItemInst *)int_struct->inst, int_struct->slot_id, 0); // assumed move operation: string& = string&&
-		if (serialized.empty()) {
+		std::stringstream ss(std::stringstream::in | std::stringstream::out);
+		std::stringstream::pos_type last_pos = ss.tellp();
+
+		ss.write((const char*)__emu_buffer, 4);
+
+		SerializeItem(ss, (const ItemInst*)int_struct->inst, int_struct->slot_id, 0);
+		if (ss.tellp() == last_pos) {
 			Log.Out(Logs::General, Logs::Netcode, "[STRUCTS] Serialization failed on item slot %d.", int_struct->slot_id);
 			delete in;
 			return;
 		}
 
-		in->size = serialized.size() + 5;	// ItemPacketType + Serialization + \0
-		in->pBuffer = new unsigned char[in->size];
-		ItemPacket_Struct *new_item_pkt = (ItemPacket_Struct *)in->pBuffer;
-		new_item_pkt->PacketType = old_item_pkt->PacketType;
-		memcpy(new_item_pkt->SerializedItem, serialized.c_str(), serialized.size());
-		new_item_pkt->SerializedItem[serialized.size()] = '\0';
+		std::string serialized = ss.str();
+		
+		in->size = serialized.size();
+		in->pBuffer = new uchar[in->size];
+		//ItemPacket_Struct* new_item_pkt = (ItemPacket_Struct*)in->pBuffer;
+		//new_item_pkt->PacketType = old_item_pkt->PacketType;
+		memcpy(in->pBuffer, serialized.c_str(), serialized.size());
 
 		delete[] __emu_buffer;
 
@@ -2077,301 +2083,241 @@ namespace Titanium
 	}
 
 // file scope helper methods
-	std::string SerializeItem(const ItemInst *inst, int16 slot_id_in, uint8 depth)
+	void SerializeItem(std::stringstream& ss, const ItemInst *inst, int16 slot_id_in, uint8 depth)
 	{
-		std::string serialization;
 		const char* protection = "\\\\\\\\\\";
 		const Item_Struct* item = inst->GetUnscaledItem();
 
-		serialization = StringFormat("%.*s%s", (depth ? (depth - 1) : 0), protection, (depth ? "\"" : "")); // For leading quotes (and protection) if a subitem;
+		ss << StringFormat("%.*s%s", (depth ? (depth - 1) : 0), protection, (depth ? "\"" : "")); // For leading quotes (and protection) if a subitem;
 		
 		// Instance data
-		serialization.append(
-			StringFormat(
-				"%i|%i|%i|%i|%i|%i|%i|%i|%i|%i|%i|",
-				(inst->IsStackable() ? inst->GetCharges() : 0), // stack count
-				0, // unknown
-				(!inst->GetMerchantSlot() ? slot_id_in : inst->GetMerchantSlot()), // inst slot/merchant slot
-				inst->GetPrice(), // merchant price
-				(!inst->GetMerchantSlot() ? 1 : inst->GetMerchantCount()), // inst count/merchant count
-				(inst->IsScaling() ? (inst->GetExp() / 100) : 0), // inst experience
-				(!inst->GetMerchantSlot() ? inst->GetSerialNumber() : inst->GetMerchantSlot()), // merchant serial number
-				inst->GetRecastTimestamp(), // recast timestamp
-				((inst->IsStackable() ? ((inst->GetItem()->ItemType == ItemTypePotion) ? 1 : 0) : inst->GetCharges())), // charge count
-				(inst->IsAttuned() ? 1 : 0), // inst attuned
-				0 // unknown
-			)
-		);
-		
-		serialization.append(StringFormat("%.*s\"", depth, protection)); // Quotes (and protection, if needed) around static data
+		ss << itoa((inst->IsStackable() ? inst->GetCharges() : 0)); // stack count
+		ss << '|' << itoa(0); // unknown
+		ss << '|' << itoa((!inst->GetMerchantSlot() ? slot_id_in : inst->GetMerchantSlot())); // inst slot/merchant slot
+		ss << '|' << itoa(inst->GetPrice()); // merchant price
+		ss << '|' << itoa((!inst->GetMerchantSlot() ? 1 : inst->GetMerchantCount())); // inst count/merchant count
+		ss << '|' << itoa((inst->IsScaling() ? (inst->GetExp() / 100) : 0)); // inst experience
+		ss << '|' << itoa((!inst->GetMerchantSlot() ? inst->GetSerialNumber() : inst->GetMerchantSlot())); // merchant serial number
+		ss << '|' << itoa(inst->GetRecastTimestamp()); // recast timestamp
+		ss << '|' << itoa(((inst->IsStackable() ? ((inst->GetItem()->ItemType == ItemTypePotion) ? 1 : 0) : inst->GetCharges()))); // charge count
+		ss << '|' << itoa((inst->IsAttuned() ? 1 : 0)); // inst attuned
+		ss << '|' << itoa(0); // unknown
+		ss << '|';
 
-		serialization.append(StringFormat("%i", item->ItemClass)); // item->ItemClass so we can do |%s instead of %s|
-		
-		serialization.append(
-			StringFormat(
-				"|%s|%s|%s|%i|%i|%i|%i|%i|%i|%i|%i|%s|%s|%i|%i",
-				item->Name,
-				item->Lore,
-				item->IDFile,
-				item->ID,
-				((item->Weight > 255) ? 255 : item->Weight),
-				item->NoRent,
-				item->NoDrop,
-				item->Size,
-				item->Slots,
-				item->Price,
-				item->Icon,
-				"0", // unknown
-				"0", // unknown
-				item->BenefitFlag,
-				item->Tradeskills
-			)
-		);
+		ss << StringFormat("%.*s\"", depth, protection); // Quotes (and protection, if needed) around static data
 
-		serialization.append(
-			StringFormat(
-				"|%i|%i|%i|%i|%i|%i|%i|%i|%i|%i|%i|%i|%i|%i|%i",
-				item->CR,
-				item->DR,
-				item->PR,
-				item->MR,
-				item->FR,
-				item->AStr,
-				item->ASta,
-				item->AAgi,
-				item->ADex,
-				item->ACha,
-				item->AInt,
-				item->AWis,
-				item->HP,
-				item->Mana,
-				item->AC
-			)
-		);
+		// Item data
+		ss << itoa(item->ItemClass);
+		ss << '|' << item->Name;
+		ss << '|' << item->Lore;
+		ss << '|' << item->IDFile;
+		ss << '|' << itoa(item->ID);
+		ss << '|' << itoa(((item->Weight > 255) ? 255 : item->Weight));
 
+		ss << '|' << itoa(item->NoRent);
+		ss << '|' << itoa(item->NoDrop);
+		ss << '|' << itoa(item->Size);
+		ss << '|' << itoa(item->Slots);
+		ss << '|' << itoa(item->Price);
+		ss << '|' << itoa(item->Icon);
+		ss << '|' << "0";
+		ss << '|' << "0";
+		ss << '|' << itoa(item->BenefitFlag);
+		ss << '|' << itoa(item->Tradeskills);
 
-		serialization.append(
-			StringFormat(
-				"|%i|%i|%i|%i|%i|%i|%i|%i|%i|%i|%i|%i|%i|%i",
-				item->Deity,
-				item->SkillModValue,
-				item->SkillModMax,
-				item->SkillModType,
-				item->BaneDmgRace,
-				item->BaneDmgAmt,
-				item->BaneDmgBody,
-				item->Magic,
-				item->CastTime_,
-				item->ReqLevel,
-				item->BardType,
-				item->BardValue,
-				item->Light,
-				item->Delay
-			)
-		);
+		ss << '|' << itoa(item->CR);
+		ss << '|' << itoa(item->DR);
+		ss << '|' << itoa(item->PR);
+		ss << '|' << itoa(item->MR);
+		ss << '|' << itoa(item->FR);
 
-		serialization.append(
-			StringFormat(
-				"|%i|%i|%i|%i|%i|%i|%i|%i|%i|%s|%i|%i|%i|%i",
-				item->RecLevel,
-				item->RecSkill,
-				item->ElemDmgType,
-				item->ElemDmgAmt,
-				item->Range,
-				item->Damage,
-				item->Color,
-				item->Classes,
-				item->Races,
-				"0", // unknown
-				item->MaxCharges,
-				item->ItemType,
-				item->Material,
-				item->SellRate
-			)
-		);
+		ss << '|' << itoa(item->AStr);
+		ss << '|' << itoa(item->ASta);
+		ss << '|' << itoa(item->AAgi);
+		ss << '|' << itoa(item->ADex);
+		ss << '|' << itoa(item->ACha);
+		ss << '|' << itoa(item->AInt);
+		ss << '|' << itoa(item->AWis);
 
-		serialization.append(
-			StringFormat(
-				"|%s|%i|%s|%i|%i|%i|%i|%i|%i|%i|%i|%i|%i|%i",
-				"0", // unknown
-				item->CastTime_,
-				"0", // unknown
-				item->ProcRate,
-				item->CombatEffects,
-				item->Shielding,
-				item->StunResist,
-				item->StrikeThrough,
-				item->ExtraDmgSkill,
-				item->ExtraDmgAmt,
-				item->SpellShield,
-				item->Avoidance,
-				item->Accuracy,
-				item->CharmFileID
-			)
-		);
+		ss << '|' << itoa(item->HP);
+		ss << '|' << itoa(item->Mana);
+		ss << '|' << itoa(item->AC);
+		ss << '|' << itoa(item->Deity);
 
-		serialization.append(
-			StringFormat(
-				"|%i|%i|%i|%i|%i|%i|%i|%i|%s",
-				item->FactionMod1,
-				item->FactionMod2,
-				item->FactionMod3,
-				item->FactionMod4,
-				item->FactionAmt1,
-				item->FactionAmt2,
-				item->FactionAmt3,
-				item->FactionAmt4,
-				item->CharmFile
-			)
-		);
+		ss << '|' << itoa(item->SkillModValue);
+		ss << '|' << itoa(item->SkillModMax);
+		ss << '|' << itoa(item->SkillModType);
 
-		serialization.append(
-			StringFormat(
-				"|%i|%i|%i|%i|%i|%i|%i|%i|%i|%i|%i",
-				item->AugType,
-				item->AugSlotType[0],
-				item->AugSlotVisible[0],
-				item->AugSlotType[1],
-				item->AugSlotVisible[1],
-				item->AugSlotType[2],
-				item->AugSlotVisible[2],
-				item->AugSlotType[3],
-				item->AugSlotVisible[3],
-				item->AugSlotType[4],
-				item->AugSlotVisible[4]
-			)
-		);
+		ss << '|' << itoa(item->BaneDmgRace);
+		ss << '|' << itoa(item->BaneDmgAmt);
+		ss << '|' << itoa(item->BaneDmgBody);
 
-		serialization.append(
-			StringFormat(
-				"|%i|%i|%i|%i|%i|%i|%i|%i|%i|%s|%i|%i|%i|%i|%i|%i",
-				item->LDoNTheme,
-				item->LDoNPrice,
-				item->LDoNSold,
-				item->BagType,
-				item->BagSlots,
-				item->BagSize,
-				item->BagWR,
-				item->Book,
-				item->BookType,
-				item->Filename,
-				item->BaneDmgRaceAmt,
-				item->AugRestrict,
-				item->LoreGroup,
-				item->PendingLoreFlag,
-				item->ArtifactFlag,
-				item->SummonedFlag
-			)
-		);
+		ss << '|' << itoa(item->Magic);
+		ss << '|' << itoa(item->CastTime_);
+		ss << '|' << itoa(item->ReqLevel);
+		ss << '|' << itoa(item->BardType);
+		ss << '|' << itoa(item->BardValue);
+		ss << '|' << itoa(item->Light);
+		ss << '|' << itoa(item->Delay);
 
-		serialization.append(
-			StringFormat(
-				"|%i|%i|%i|%i|%i|%i|%i|%i|%i|%i|%i|%i|%i|%i",
-				item->Favor,
-				item->FVNoDrop,
-				item->Endur,
-				item->DotShielding,
-				item->Attack,
-				item->Regen,
-				item->ManaRegen,
-				item->EnduranceRegen,
-				item->Haste,
-				item->DamageShield,
-				item->RecastDelay,
-				item->RecastType,
-				item->GuildFavor,
-				item->AugDistiller
-			)
-		);
+		ss << '|' << itoa(item->RecLevel);
+		ss << '|' << itoa(item->RecSkill);
 
-		serialization.append(
-			StringFormat(
-				"|%s|%s|%i|%i|%s|%i|%i|%i|%i|%i|%i",
-				"0", // unknown
-				"0", // unknown
-				item->Attuneable,
-				item->NoPet,
-				"0", // unknown
-				item->PointType,
-				item->PotionBelt,
-				item->PotionBeltSlots,
-				item->StackSize,
-				item->NoTransfer,
-				item->Stackable
-			)
-		);
+		ss << '|' << itoa(item->ElemDmgType);
+		ss << '|' << itoa(item->ElemDmgAmt);
 
-		serialization.append(
-			StringFormat(
-				"|%i|%i|%i|%i|%s",
-				item->Click.Effect,
-				item->Click.Type,
-				item->Click.Level2,
-				item->Click.Level,
-				"0" // Click name
-			)
-		);
+		ss << '|' << itoa(item->Range);
+		ss << '|' << itoa(item->Damage);
 
-		serialization.append(
-			StringFormat(
-				"|%i|%i|%i|%i|%s",
-				item->Proc.Effect,
-				item->Proc.Type,
-				item->Proc.Level2,
-				item->Proc.Level,
-				"0" // Proc name
-			)
-		);
+		ss << '|' << itoa(item->Color);
+		ss << '|' << itoa(item->Classes);
+		ss << '|' << itoa(item->Races);
+		ss << '|' << "0";
 
-		serialization.append(
-			StringFormat(
-				"|%i|%i|%i|%i|%s",
-				item->Worn.Effect,
-				item->Worn.Type,
-				item->Worn.Level2,
-				item->Worn.Level,
-				"0" // Worn name
-			)
-		);
+		ss << '|' << itoa(item->MaxCharges);
+		ss << '|' << itoa(item->ItemType);
+		ss << '|' << itoa(item->Material);
+		ss << '|' << StringFormat("%f", item->SellRate);
 
-		serialization.append(
-			StringFormat(
-				"|%i|%i|%i|%i|%s",
-				item->Focus.Effect,
-				item->Focus.Type,
-				item->Focus.Level2,
-				item->Focus.Level,
-				"0" // Focus name
-			)
-		);
+		ss << '|' << "0";
+		ss << '|' << itoa(item->CastTime_);
+		ss << '|' << "0";
 
-		serialization.append(
-			StringFormat(
-				"|%i|%i|%i|%i|%s",
-				item->Scroll.Effect,
-				item->Scroll.Type,
-				item->Scroll.Level2,
-				item->Scroll.Level,
-				"0" // Scroll name
-			)
-		);
+		ss << '|' << itoa(item->ProcRate);
+		ss << '|' << itoa(item->CombatEffects);
+		ss << '|' << itoa(item->Shielding);
+		ss << '|' << itoa(item->StunResist);
+		ss << '|' << itoa(item->StrikeThrough);
+		ss << '|' << itoa(item->ExtraDmgSkill);
+		ss << '|' << itoa(item->ExtraDmgAmt);
+		ss << '|' << itoa(item->SpellShield);
+		ss << '|' << itoa(item->Avoidance);
+		ss << '|' << itoa(item->Accuracy);
 
-		serialization.append(StringFormat("%.*s\"", depth, protection)); // Quotes (and protection, if needed) around static data
+		ss << '|' << itoa(item->CharmFileID);
 
+		ss << '|' << itoa(item->FactionMod1);
+		ss << '|' << itoa(item->FactionMod2);
+		ss << '|' << itoa(item->FactionMod3);
+		ss << '|' << itoa(item->FactionMod4);
+
+		ss << '|' << itoa(item->FactionAmt1);
+		ss << '|' << itoa(item->FactionAmt2);
+		ss << '|' << itoa(item->FactionAmt3);
+		ss << '|' << itoa(item->FactionAmt4);
+
+		ss << '|' << item->CharmFile;
+
+		ss << '|' << itoa(item->AugType);
+
+		ss << '|' << itoa(item->AugSlotType[0]);
+		ss << '|' << itoa(item->AugSlotVisible[0]);
+		ss << '|' << itoa(item->AugSlotType[1]);
+		ss << '|' << itoa(item->AugSlotVisible[1]);
+		ss << '|' << itoa(item->AugSlotType[2]);
+		ss << '|' << itoa(item->AugSlotVisible[2]);
+		ss << '|' << itoa(item->AugSlotType[3]);
+		ss << '|' << itoa(item->AugSlotVisible[3]);
+		ss << '|' << itoa(item->AugSlotType[4]);
+		ss << '|' << itoa(item->AugSlotVisible[4]);
+
+		ss << '|' << itoa(item->LDoNTheme);
+		ss << '|' << itoa(item->LDoNPrice);
+		ss << '|' << itoa(item->LDoNSold);
+
+		ss << '|' << itoa(item->BagType);
+		ss << '|' << itoa(item->BagSlots);
+		ss << '|' << itoa(item->BagSize);
+		ss << '|' << itoa(item->BagWR);
+
+		ss << '|' << itoa(item->Book);
+		ss << '|' << itoa(item->BookType);
+
+		ss << '|' << item->Filename;
+
+		ss << '|' << itoa(item->BaneDmgRaceAmt);
+		ss << '|' << itoa(item->AugRestrict);
+		ss << '|' << itoa(item->LoreGroup);
+		ss << '|' << itoa(item->PendingLoreFlag);
+		ss << '|' << itoa(item->ArtifactFlag);
+		ss << '|' << itoa(item->SummonedFlag);
+
+		ss << '|' << itoa(item->Favor);
+		ss << '|' << itoa(item->FVNoDrop);
+		ss << '|' << itoa(item->Endur);
+		ss << '|' << itoa(item->DotShielding);
+		ss << '|' << itoa(item->Attack);
+		ss << '|' << itoa(item->Regen);
+		ss << '|' << itoa(item->ManaRegen);
+		ss << '|' << itoa(item->EnduranceRegen);
+		ss << '|' << itoa(item->Haste);
+		ss << '|' << itoa(item->DamageShield);
+		ss << '|' << itoa(item->RecastDelay);
+		ss << '|' << itoa(item->RecastType);
+		ss << '|' << itoa(item->GuildFavor);
+
+		ss << '|' << itoa(item->AugDistiller);
+
+		ss << '|' << "0"; // unknown
+		ss << '|' << "0"; // unknown
+		ss << '|' << itoa(item->Attuneable);
+		ss << '|' << itoa(item->NoPet);
+		ss << '|' << "0"; // unknown
+		ss << '|' << itoa(item->PointType);
+
+		ss << '|' << itoa(item->PotionBelt);
+		ss << '|' << itoa(item->PotionBeltSlots);
+		ss << '|' << itoa(item->StackSize);
+		ss << '|' << itoa(item->NoTransfer);
+		ss << '|' << itoa(item->Stackable);
+
+		ss << '|' << itoa(item->Click.Effect);
+		ss << '|' << itoa(item->Click.Type);
+		ss << '|' << itoa(item->Click.Level2);
+		ss << '|' << itoa(item->Click.Level);
+		ss << '|' << "0"; // Click name
+
+		ss << '|' << itoa(item->Proc.Effect);
+		ss << '|' << itoa(item->Proc.Type);
+		ss << '|' << itoa(item->Proc.Level2);
+		ss << '|' << itoa(item->Proc.Level);
+		ss << '|' << "0"; // Proc name
+
+		ss << '|' << itoa(item->Worn.Effect);
+		ss << '|' << itoa(item->Worn.Type);
+		ss << '|' << itoa(item->Worn.Level2);
+		ss << '|' << itoa(item->Worn.Level);
+		ss << '|' << "0"; // Worn name
+
+		ss << '|' << itoa(item->Focus.Effect);
+		ss << '|' << itoa(item->Focus.Type);
+		ss << '|' << itoa(item->Focus.Level2);
+		ss << '|' << itoa(item->Focus.Level);
+		ss << '|' << "0"; // Focus name
+
+		ss << '|' << itoa(item->Scroll.Effect);
+		ss << '|' << itoa(item->Scroll.Type);
+		ss << '|' << itoa(item->Scroll.Level2);
+		ss << '|' << itoa(item->Scroll.Level);
+		ss << '|' << "0"; // Scroll name
+
+		ss << StringFormat("%.*s\"", depth, protection); // Quotes (and protection, if needed) around static data
+
+		// Sub data
 		for (int index = SUB_INDEX_BEGIN; index < consts::ITEM_CONTAINER_SIZE; ++index) {
-			ItemInst *sub = inst->GetItem(index);
-			if (!sub) {
-				serialization.push_back('|'); // Sub items (empty)
-			}
-			else {
-				std::string sub_item = SerializeItem(sub, 0, (depth + 1));
-				serialization.append(StringFormat("|%s", sub_item.c_str())); // Sub items
-			}
+			ss << '|';
+
+			ItemInst* sub = inst->GetItem(index);
+			if (!sub)
+				continue;
+			
+			SerializeItem(ss, sub, 0, (depth + 1));
 		}
 
-		serialization.append(StringFormat("%.*s%s", (depth ? (depth - 1) : 0), protection, (depth ? "\"" : ""))); // For trailing quotes (and protection) if a subitem;
+		ss << StringFormat("%.*s%s", (depth ? (depth - 1) : 0), protection, (depth ? "\"" : "")); // For trailing quotes (and protection) if a subitem;
 
-		return serialization;
+		if (!depth)
+			ss.write("\0", 1);
 	}
 
 	static inline int16 ServerToTitaniumSlot(uint32 serverSlot)

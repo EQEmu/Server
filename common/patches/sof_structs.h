@@ -4039,7 +4039,6 @@ struct ItemQuaternaryBodyStruct
 	int32 HealAmt;
 	int32 SpellDmg;
 	uint32 evolve_string; // Some String, but being evolution related is just a guess
-	uint32 subitem_count;
 };
 
 struct AugmentInfo_Struct

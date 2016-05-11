@@ -4530,7 +4530,7 @@ struct ItemSerializationHeader
 /*025*/	uint8  slot_type;	// 0 = normal, 1 = bank, 2 = shared bank, 9 = merchant, 20 = ?
 /*026*/	uint16 main_slot;
 /*028*/ uint16 sub_slot;
-/*030*/ uint16 unknown013;	// 0xffff
+/*030*/ uint16 aug_slot;	// 0xffff
 /*032*/	uint32 price;
 /*036*/	uint32 merchant_slot; //1 if not a merchant item
 /*040*/	uint32 scaled_value; //0
@@ -4794,7 +4794,7 @@ struct ItemQuaternaryBodyStruct
 	int32 HeroicSVCorrup;
 	int32 HealAmt;
 	int32 SpellDmg;
-	int32 clairvoyance;
+	int32 Clairvoyance;
 	uint8 unknown18;	//Power Source Capacity or evolve filename?
 	uint32 evolve_string; // Some String, but being evolution related is just a guess
 	uint8 unknown19;
@@ -4821,7 +4821,6 @@ struct ItemQuaternaryBodyStruct
 	uint32 unknown_RoF8;
 	uint8 unknown38;	// 0
 	uint8 unknown39;	// 1
-	uint32 subitem_count;
 };
 
 struct AugmentInfo_Struct
