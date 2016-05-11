@@ -2,6 +2,7 @@ EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
 == 05/10/2016 ==
 Uleat: Converted client translators' 'SerializeItem()' to recursive, single buffer methodology. Titanium SerializeItem() now adds a null term between parent items instead of the invoking function
+Uleat: Converted server 'BulkSendInventoryItems()' to use single buffer methodology
 
 == 05/08/2016 ==
 Uleat: Re-coded Titanium client translator 'SerializeItem()' to use coded property assignments over file enumerated ones

@@ -733,16 +733,11 @@ void Client::OnDisconnect(bool hard_disconnect) {
 }
 
 // Sends the client complete inventory used in character login
-
-// DO WE STILL NEED THE 'ITEMCOMBINED' CONDITIONAL CODE?
-
-//#ifdef ITEMCOMBINED
-void Client::BulkSendInventoryItems() {
-	int16 slot_id = 0;
-
+void Client::BulkSendInventoryItems()
+{
 	// LINKDEAD TRADE ITEMS
 	// Move trade slot items back into normal inventory..need them there now for the proceeding validity checks
-	for (slot_id = EQEmu::legacy::TRADE_BEGIN; slot_id <= EQEmu::legacy::TRADE_END; slot_id++) {
+	for (int16 slot_id = EQEmu::legacy::TRADE_BEGIN; slot_id <= EQEmu::legacy::TRADE_END; slot_id++) {
 		ItemInst* inst = m_inv.PopItem(slot_id);
 		if(inst) {
 			bool is_arrow = (inst->GetItem()->ItemType == ItemTypeArrow) ? true : false;
@@ -764,128 +759,72 @@ void Client::BulkSendInventoryItems() {
 	RemoveDuplicateLore(false);
 	MoveSlotNotAllowed(false);
 
-	// The previous three method calls took care of moving/removing expired/illegal item placements
+	std::stringstream ss(std::stringstream::in | std::stringstream::out);
+	std::stringstream::pos_type last_pos = ss.tellp();
 
-	//TODO: this function is just retarded... it re-allocates the buffer for every
-	//new item. It should be changed to loop through once, gather the
-	//lengths, and item packet pointers into an array (fixed length), and
-	//then loop again to build the packet.
-	//EQApplicationPacket *packets[50];
-	//unsigned long buflen = 0;
-	//unsigned long pos = 0;
-	//memset(packets, 0, sizeof(packets));
-	//foreach item in the invendor sections
-	//	packets[pos++] = ReturnItemPacket(...)
-	//	buflen += temp->size
-	//...
-	//allocat the buffer
-	//for r from 0 to pos
-	//	put pos[r]->pBuffer into the buffer
-	//for r from 0 to pos
-	//	safe_delete(pos[r]);
-
-	uint32 size = 0;
-	uint16 i = 0;
-	std::map<uint16, std::string> ser_items;
-	std::map<uint16, std::string>::iterator itr;
-
-	//Inventory items
-	for (slot_id = SLOT_BEGIN; slot_id < EQEmu::legacy::TYPE_POSSESSIONS_SIZE; slot_id++) {
+	// Possessions items
+	for (int16 slot_id = SLOT_BEGIN; slot_id < EQEmu::legacy::TYPE_POSSESSIONS_SIZE; slot_id++) {
 		const ItemInst* inst = m_inv[slot_id];
-		if(inst) {
-			std::string packet = inst->Serialize(slot_id);
-			ser_items[i++] = packet;
-			size += packet.length();
-		}
+		if (!inst)
+			continue;
+
+		ss << inst->Serialize(slot_id);
+
+		if (ss.tellp() == last_pos)
+			Log.Out(Logs::General, Logs::Inventory, "Serialization failed on item slot %d during BulkSendInventoryItems.  Item skipped.", slot_id);
+		
+		last_pos = ss.tellp();
 	}
 
-	// Power Source
+	// PowerSource item
 	if (ClientVersion() >= EQEmu::versions::ClientVersion::SoF) {
 		const ItemInst* inst = m_inv[EQEmu::legacy::SlotPowerSource];
-		if(inst) {
-			std::string packet = inst->Serialize(EQEmu::legacy::SlotPowerSource);
-			ser_items[i++] = packet;
-			size += packet.length();
+		if (inst) {
+			ss << inst->Serialize(EQEmu::legacy::SlotPowerSource);
+
+			if (ss.tellp() == last_pos)
+				Log.Out(Logs::General, Logs::Inventory, "Serialization failed on item slot %d during BulkSendInventoryItems.  Item skipped.", EQEmu::legacy::SlotPowerSource);
+
+			last_pos = ss.tellp();
 		}
 	}
 
 	// Bank items
-	for (slot_id = EQEmu::legacy::BANK_BEGIN; slot_id <= EQEmu::legacy::BANK_END; slot_id++) {
+	for (int16 slot_id = EQEmu::legacy::BANK_BEGIN; slot_id <= EQEmu::legacy::BANK_END; slot_id++) {
 		const ItemInst* inst = m_inv[slot_id];
-		if(inst) {
-			std::string packet = inst->Serialize(slot_id);
-			ser_items[i++] = packet;
-			size += packet.length();
-		}
+		if (!inst)
+			continue;
+
+		ss << inst->Serialize(slot_id);
+
+		if (ss.tellp() == last_pos)
+			Log.Out(Logs::General, Logs::Inventory, "Serialization failed on item slot %d during BulkSendInventoryItems.  Item skipped.", slot_id);
+
+		last_pos = ss.tellp();
 	}
 
-	// Shared Bank items
-	for (slot_id = EQEmu::legacy::SHARED_BANK_BEGIN; slot_id <= EQEmu::legacy::SHARED_BANK_END; slot_id++) {
+	// SharedBank items
+	for (int16 slot_id = EQEmu::legacy::SHARED_BANK_BEGIN; slot_id <= EQEmu::legacy::SHARED_BANK_END; slot_id++) {
 		const ItemInst* inst = m_inv[slot_id];
-		if(inst) {
-			std::string packet = inst->Serialize(slot_id);
-			ser_items[i++] = packet;
-			size += packet.length();
-		}
+		if (!inst)
+			continue;
+
+		ss << inst->Serialize(slot_id);
+
+		if (ss.tellp() == last_pos)
+			Log.Out(Logs::General, Logs::Inventory, "Serialization failed on item slot %d during BulkSendInventoryItems.  Item skipped.", slot_id);
+
+		last_pos = ss.tellp();
 	}
 
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_CharInventory, size);
-	uchar* ptr = outapp->pBuffer;
-	for(itr = ser_items.begin(); itr != ser_items.end(); ++itr){
-		int length = itr->second.length();
-		if(length > 5) {
-			memcpy(ptr, itr->second.c_str(), length);
-			ptr += length;
-		}
-	}
+	std::string serialized = ss.str();
+
+	EQApplicationPacket* outapp = new EQApplicationPacket(OP_CharInventory, serialized.size());
+	memcpy(outapp->pBuffer, serialized.c_str(), serialized.size());
+
 	QueuePacket(outapp);
 	safe_delete(outapp);
 }
-/*#else
-void Client::BulkSendInventoryItems()
-{
-	// Search all inventory buckets for items
-	bool deletenorent=database.NoRentExpired(GetName());
-	// Worn items and Inventory items
-	int16 slot_id = 0;
-	if(deletenorent){//client was offline for more than 30 minutes, delete no rent items
-		RemoveNoRent();
-	}
-	for (slot_id=EQEmu::constants::POSSESSIONS_BEGIN; slot_id<=EQEmu::constants::POSSESSIONS_END; slot_id++) {
-		const ItemInst* inst = m_inv[slot_id];
-		if (inst){
-			SendItemPacket(slot_id, inst, ItemPacketCharInventory);
-		}
-	}
-	// Bank items
-	for (slot_id=EQEmu::constants::BANK_BEGIN; slot_id<=EQEmu::constants::BANK_END; slot_id++) { // 2015...
-		const ItemInst* inst = m_inv[slot_id];
-		if (inst){
-			SendItemPacket(slot_id, inst, ItemPacketCharInventory);
-		}
-	}
-
-	// Shared Bank items
-	for (slot_id=EQEmu::constants::SHARED_BANK_BEGIN; slot_id<=EQEmu::constants::SHARED_BANK_END; slot_id++) {
-		const ItemInst* inst = m_inv[slot_id];
-		if (inst){
-			SendItemPacket(slot_id, inst, ItemPacketCharInventory);
-		}
-	}
-
-	// LINKDEAD TRADE ITEMS
-	// If player went LD during a trade, they have items in the trade inventory
-	// slots. These items are now being put into their inventory (then queue up on cursor)
-	for (int16 trade_slot_id=EQEmu::constants::TRADE_BEGIN; trade_slot_id<=EQEmu::constants::TRADE_END; trade_slot_id++) {
-		const ItemInst* inst = m_inv[slot_id];
-		if (inst) {
-			int16 free_slot_id = m_inv.FindFreeSlot(inst->IsType(ItemClassContainer), true, inst->GetItem()->Size);
-			DeleteItemInInventory(trade_slot_id, 0, false);
-			PutItemInInventory(free_slot_id, *inst, true);
-		}
-	}
-}
-#endif*/
 
 void Client::BulkSendMerchantInventory(int merchant_id, int npcid) {
 	const Item_Struct* handyitem = nullptr;
