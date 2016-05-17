@@ -695,6 +695,7 @@ void Clientlist::Process()
 			safe_delete((*it));
 
 			it = ClientChatConnections.erase(it);
+			continue;
 		}
 		++it;
 	}
