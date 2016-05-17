@@ -749,7 +749,7 @@ void ClientList::SendWhoAll(uint32 fromid,const char* to, int16 admin, Who_All_S
 	//zoneserver_list.SendPacket(pack2); // NO NO NO WHY WOULD YOU SEND IT TO EVERY ZONE SERVER?!?
 	SendPacket(to,pack2);
 	safe_delete(pack2);
-	safe_delete(output);
+	safe_delete_array(output);
 	}
 	catch(...){
 		Log.Out(Logs::Detail, Logs::World_Server,"Unknown error in world's SendWhoAll (probably mem error), ignoring...");
