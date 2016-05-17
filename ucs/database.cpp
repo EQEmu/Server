@@ -48,7 +48,7 @@
 #include "../common/string_util.h"
 #include "chatchannel.h"
 
-extern Clientlist *CL;
+extern Clientlist *g_Clientlist;
 extern std::string GetMailPrefix();
 extern ChatChannelList *ChannelList;
 extern uint32 MailMessagesSent;
@@ -463,7 +463,7 @@ bool Database::SendMail(std::string recipient, std::string from, std::string sub
 	Log.Out(Logs::Detail, Logs::UCS_Server, "MessageID %i generated, from %s, to %s", results.LastInsertedID(), from.c_str(), recipient.c_str());
 
 
-	Client *client = CL->IsCharacterOnline(characterName);
+	Client *client = g_Clientlist->IsCharacterOnline(characterName);
 
 	if(client) {
 		std::string FQN = GetMailPrefix() + from;

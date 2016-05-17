@@ -38,7 +38,7 @@ extern Database database;
 extern std::string WorldShortName;
 extern std::string GetMailPrefix();
 extern ChatChannelList *ChannelList;
-extern Clientlist *CL;
+extern Clientlist *g_Clientlist;
 extern uint32 ChatMessagesSent;
 extern uint32 MailMessagesSent;
 
@@ -1749,7 +1749,7 @@ void Client::ChannelInvite(std::string CommandString) {
 
 	Log.Out(Logs::Detail, Logs::UCS_Server, "[%s] invites [%s] to channel [%s]", GetName().c_str(), Invitee.c_str(), ChannelName.c_str());
 
-	Client *RequiredClient = CL->FindCharacter(Invitee);
+	Client *RequiredClient = g_Clientlist->FindCharacter(Invitee);
 
 	if(!RequiredClient) {
 
@@ -1877,7 +1877,7 @@ void Client::ChannelGrantModerator(std::string CommandString) {
 
 	Log.Out(Logs::Detail, Logs::UCS_Server, "[%s] gives [%s] moderator rights to channel [%s]", GetName().c_str(), Moderator.c_str(), ChannelName.c_str());
 
-	Client *RequiredClient = CL->FindCharacter(Moderator);
+	Client *RequiredClient = g_Clientlist->FindCharacter(Moderator);
 
 	if(!RequiredClient && (database.FindCharacter(Moderator.c_str()) < 0)) {
 
@@ -1958,7 +1958,7 @@ void Client::ChannelGrantVoice(std::string CommandString) {
 
 	Log.Out(Logs::Detail, Logs::UCS_Server, "[%s] gives [%s] voice to channel [%s]", GetName().c_str(), Voicee.c_str(), ChannelName.c_str());
 
-	Client *RequiredClient = CL->FindCharacter(Voicee);
+	Client *RequiredClient = g_Clientlist->FindCharacter(Voicee);
 
 	if(!RequiredClient && (database.FindCharacter(Voicee.c_str()) < 0)) {
 
@@ -2046,7 +2046,7 @@ void Client::ChannelKick(std::string CommandString) {
 
 	Log.Out(Logs::Detail, Logs::UCS_Server, "[%s] kicks [%s] from channel [%s]", GetName().c_str(), Kickee.c_str(), ChannelName.c_str());
 
-	Client *RequiredClient = CL->FindCharacter(Kickee);
+	Client *RequiredClient = g_Clientlist->FindCharacter(Kickee);
 
 	if(!RequiredClient) {
 
