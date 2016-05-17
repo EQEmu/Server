@@ -565,10 +565,9 @@ void ChatChannelList::Process() {
 	}
 }
 
-void ChatChannel::AddInvitee(std::string Invitee) {
-
-	if(!IsInvitee(Invitee)) {
-
+void ChatChannel::AddInvitee(const std::string &Invitee)
+{
+	if (!IsInvitee(Invitee)) {
 		Invitees.push_back(Invitee);
 
 		Log.Out(Logs::Detail, Logs::UCS_Server, "Added %s as invitee to channel %s", Invitee.c_str(), Name.c_str());
@@ -576,34 +575,19 @@ void ChatChannel::AddInvitee(std::string Invitee) {
 
 }
 
-void ChatChannel::RemoveInvitee(std::string Invitee) {
+void ChatChannel::RemoveInvitee(std::string Invitee)
+{
+	auto it = std::find(std::begin(Invitees), std::end(Invitees), Invitee);
 
-	std::list<std::string>::iterator Iterator;
-
-	for(Iterator = Invitees.begin(); Iterator != Invitees.end(); ++Iterator) {
-
-		if((*Iterator) == Invitee) {
-
-			Invitees.erase(Iterator);
-
-			Log.Out(Logs::Detail, Logs::UCS_Server, "Removed %s as invitee to channel %s", Invitee.c_str(), Name.c_str());
-
-			return;
-		}
+	if(it != std::end(Invitees)) {
+		Invitees.erase(it);
+		Log.Out(Logs::Detail, Logs::UCS_Server, "Removed %s as invitee to channel %s", Invitee.c_str(), Name.c_str());
 	}
 }
 
-bool ChatChannel::IsInvitee(std::string Invitee) {
-
-	std::list<std::string>::iterator Iterator;
-
-	for(Iterator = Invitees.begin(); Iterator != Invitees.end(); ++Iterator) {
-
-		if((*Iterator) == Invitee)
-			return true;
-	}
-
-	return false;
+bool ChatChannel::IsInvitee(std::string Invitee)
+{
+	return std::find(std::begin(Invitees), std::end(Invitees), Invitee) != std::end(Invitees);
 }
 
 void ChatChannel::AddModerator(const std::string &Moderator)

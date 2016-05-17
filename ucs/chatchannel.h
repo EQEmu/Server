@@ -32,7 +32,7 @@ public:
 	int GetMinStatus() { return MinimumStatus; }
 	bool ReadyToDelete() { return DeleteTimer.Check(); }
 	void SendOPList(Client *c);
-	void AddInvitee(std::string Invitee);
+	void AddInvitee(const std::string &Invitee);
 	void RemoveInvitee(std::string Invitee);
 	bool IsInvitee(std::string Invitee);
 	void AddModerator(const std::string &Moderator);
@@ -62,7 +62,7 @@ private:
 	LinkedList<Client*> ClientsInChannel;
 
 	std::vector<std::string> Moderators;
-	std::list<std::string> Invitees;
+	std::vector<std::string> Invitees;
 	std::list<std::string> Voiced;
 
 };
