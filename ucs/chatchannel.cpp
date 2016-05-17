@@ -23,6 +23,7 @@
 #include "clientlist.h"
 #include "database.h"
 #include <cstdlib>
+#include <algorithm>
 
 extern Database database;
 extern uint32 ChatMessagesSent;
@@ -307,17 +308,15 @@ bool ChatChannel::RemoveClient(Client *c) {
 	return true;
 }
 
-void ChatChannel::SendOPList(Client *c) {
-
-	if(!c) return;
+void ChatChannel::SendOPList(Client *c)
+{
+	if (!c)
+		return;
 
 	c->GeneralChannelMessage("Channel " + Name + " op-list: (Owner=" + Owner + ")");
 
-	std::list<std::string>::iterator Iterator;
-
-	for(Iterator = Moderators.begin(); Iterator != Moderators.end(); ++Iterator)
-		c->GeneralChannelMessage((*Iterator));
-
+	for (auto &&m : Moderators)
+		c->GeneralChannelMessage(m);
 }
 
 void ChatChannel::SendChannelMembers(Client *c) {
@@ -607,10 +606,9 @@ bool ChatChannel::IsInvitee(std::string Invitee) {
 	return false;
 }
 
-void ChatChannel::AddModerator(std::string Moderator) {
-
-	if(!IsModerator(Moderator)) {
-
+void ChatChannel::AddModerator(const std::string &Moderator)
+{
+	if (!IsModerator(Moderator)) {
 		Moderators.push_back(Moderator);
 
 		Log.Out(Logs::Detail, Logs::UCS_Server, "Added %s as moderator to channel %s", Moderator.c_str(), Name.c_str());
@@ -618,34 +616,19 @@ void ChatChannel::AddModerator(std::string Moderator) {
 
 }
 
-void ChatChannel::RemoveModerator(std::string Moderator) {
+void ChatChannel::RemoveModerator(const std::string &Moderator)
+{
+	auto it = std::find(std::begin(Moderators), std::end(Moderators), Moderator);
 
-	std::list<std::string>::iterator Iterator;
-
-	for(Iterator = Moderators.begin(); Iterator != Moderators.end(); ++Iterator) {
-
-		if((*Iterator) == Moderator) {
-
-			Moderators.erase(Iterator);
-
-			Log.Out(Logs::Detail, Logs::UCS_Server, "Removed %s as moderator to channel %s", Moderator.c_str(), Name.c_str());
-
-			return;
-		}
+	if (it != std::end(Moderators)) {
+		Moderators.erase(it);
+		Log.Out(Logs::Detail, Logs::UCS_Server, "Removed %s as moderator to channel %s", Moderator.c_str(), Name.c_str());
 	}
 }
 
-bool ChatChannel::IsModerator(std::string Moderator) {
-
-	std::list<std::string>::iterator Iterator;
-
-	for(Iterator = Moderators.begin(); Iterator != Moderators.end(); ++Iterator) {
-
-		if((*Iterator) == Moderator)
-			return true;
-	}
-
-	return false;
+bool ChatChannel::IsModerator(std::string Moderator)
+{
+	return std::find(std::begin(Moderators), std::end(Moderators), Moderator) != std::end(Moderators);
 }
 
 void ChatChannel::AddVoice(std::string inVoiced) {

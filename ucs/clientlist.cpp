@@ -574,7 +574,6 @@ void Clientlist::CheckForStaleConnections(Client *c) {
 
 void Clientlist::Process()
 {
-
 	std::shared_ptr<EQStream> eqs;
 
 	while ((eqs = chatsf->Pop())) {
@@ -610,7 +609,7 @@ void Clientlist::Process()
 
 		bool KeyValid = true;
 
-		while (KeyValid && !(*it)->GetForceDisconnect() && (app = (EQApplicationPacket *)(*it)->ClientStream->PopPacket())) {
+		while (KeyValid && !(*it)->GetForceDisconnect() && (app = (*it)->ClientStream->PopPacket())) {
 			EmuOpcode opcode = app->GetOpcode();
 
 			switch (opcode) {
