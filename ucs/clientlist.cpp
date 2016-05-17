@@ -2252,23 +2252,22 @@ void Client::SendNotification(int MailBoxNumber, std::string Subject, std::strin
 	safe_delete(outapp);
 }
 
-void Client::ChangeMailBox(int NewMailBox) {
-
+void Client::ChangeMailBox(int NewMailBox)
+{
 	Log.Out(Logs::Detail, Logs::UCS_Server, "%s Change to mailbox %i", MailBoxName().c_str(), NewMailBox);
 
 	SetMailBox(NewMailBox);
+	auto id = std::to_string(NewMailBox);
 
 	Log.Out(Logs::Detail, Logs::UCS_Server, "New mailbox is %s", MailBoxName().c_str());
 
-	auto outapp = new EQApplicationPacket(OP_MailboxChange, 2);
+	auto outapp = new EQApplicationPacket(OP_MailboxChange, id.length() + 1);
 
 	char *buf = (char *)outapp->pBuffer;
 
-	VARSTRUCT_ENCODE_INTSTRING(buf, NewMailBox);
-
+	VARSTRUCT_ENCODE_STRING(buf, id.c_str());
 
 	QueuePacket(outapp);
-
 	safe_delete(outapp);
 }
 
