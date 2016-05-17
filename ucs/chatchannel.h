@@ -5,7 +5,6 @@
 #include "../common/linked_list.h"
 #include "../common/timer.h"
 #include <string>
-#include <list>
 #include <vector>
 
 class Client;
