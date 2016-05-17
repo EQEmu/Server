@@ -38,8 +38,8 @@ public:
 	void AddModerator(const std::string &Moderator);
 	void RemoveModerator(const std::string &Moderator);
 	bool IsModerator(std::string Moderator);
-	void AddVoice(std::string Voiced);
-	void RemoveVoice(std::string Voiced);
+	void AddVoice(const std::string &Voiced);
+	void RemoveVoice(const std::string &Voiced);
 	bool HasVoice(std::string Voiced);
 	inline bool IsModerated() { return Moderated; }
 	void SetModerated(bool inModerated);
@@ -63,7 +63,7 @@ private:
 
 	std::vector<std::string> Moderators;
 	std::vector<std::string> Invitees;
-	std::list<std::string> Voiced;
+	std::vector<std::string> Voiced;
 
 };
 
