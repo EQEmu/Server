@@ -1,30 +1,30 @@
-/*
-EQEMu:  Everquest Server Emulator
+/*	EQEMu:  Everquest Server Emulator
+	
+	Copyright (C) 2001-2016 EQEMu Development Team (http://eqemulator.net)
 
-Copyright (C) 2001-2016 EQEMu Development Team (http://eqemulator.net)
+	This program is free software; you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation; version 2 of the License.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; version 2 of the License.
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY except by those people which sell it, which
+	are required to give you total support for your newly bought product;
+	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+	A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY except by those people which sell it, which
-are required to give you total support for your newly bought product;
-without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-
+	You should have received a copy of the GNU General Public License
+	along with this program; if not, write to the Free Software
+	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
-#ifndef UF_CONSTANTS_H_
-#define UF_CONSTANTS_H_
+#ifndef COMMON_UF_CONSTANTS_H
+#define COMMON_UF_CONSTANTS_H
 
 #include "../types.h"
 
-namespace UF {
+
+namespace UF
+{
 	namespace inventory {
 		typedef enum : int16 {
 			TypePossessions = 0,
@@ -189,29 +189,6 @@ namespace UF {
 		static const bool COIN_HAS_WEIGHT = false;
 	}
 
-};	//end namespace UF
+}; /*UF*/
 
-#endif /*UF_CONSTANTS_H_*/
-
-/*
-UF Notes:
-	** Integer-based inventory **
-ok	Possessions: 0 - 31 (Corpse: 23 - 54 [Offset 23])
-ok		[Equipment: 0 - 22]
-ok		[General: 23 - 30]
-ok		[Cursor: 31]
-ok	General Bags: 262 - 341
-ok	Cursor Bags: 342 - 351
-
-ok	Bank: 2000 - 2023
-ok	Bank Bags: 2032 - 2271
-
-ok	Shared Bank: 2500 - 2501
-ok	Shared Bank Bags: 2532 - 2551
-
-	Trade: 3000 - 3007
-	(Trade Bags: 3031 - 3110 -- server values)
-
-	World: 4000 - 4009
-
-*/
+#endif /*COMMON_UF_CONSTANTS_H*/

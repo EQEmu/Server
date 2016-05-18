@@ -1,30 +1,30 @@
-/*
-EQEMu:  Everquest Server Emulator
+/*	EQEMu:  Everquest Server Emulator
+	
+	Copyright (C) 2001-2016 EQEMu Development Team (http://eqemulator.net)
 
-Copyright (C) 2001-2016 EQEMu Development Team (http://eqemulator.net)
+	This program is free software; you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation; version 2 of the License.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; version 2 of the License.
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY except by those people which sell it, which
+	are required to give you total support for your newly bought product;
+	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+	A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY except by those people which sell it, which
-are required to give you total support for your newly bought product;
-without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-
+	You should have received a copy of the GNU General Public License
+	along with this program; if not, write to the Free Software
+	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
-#ifndef TITANIUM_CONSTANTS_H_
-#define TITANIUM_CONSTANTS_H_
+#ifndef COMMON_TITANIUM_CONSTANTS_H
+#define COMMON_TITANIUM_CONSTANTS_H
 
 #include "../types.h"
 
-namespace Titanium {
+
+namespace Titanium
+{
 	namespace inventory {
 		typedef enum : int16 {
 			TypePossessions = 0,
@@ -188,29 +188,6 @@ namespace Titanium {
 		static const bool COIN_HAS_WEIGHT = true;
 	}
 
-};	//end namespace Titanium
+}; /*Titanium*/
 
-#endif /*TITANIUM_CONSTANTS_H_*/
-
-/*
-Titanium Notes:
-	** Integer-based inventory **
-ok	Possessions: 0 - 30 (Corpse: 22 - 52 [Offset 22])
-ok		[Equipment: 0 - 21]
-ok		[General: 22 - 29]
-ok		[Cursor: 30]
-ok	General Bags: 251 - 330
-ok	Cursor Bags: 331 - 340
-
-ok	Bank: 2000 - 2015
-ok	Bank Bags: 2031 - 2190
-
-ok	Shared Bank: 2500 - 2501
-ok	Shared Bank Bags: 2531 - 2550
-
-	Trade: 3000 - 3007
-	(Trade Bags: 3031 - 3110 -- server values)
-
-	World: 4000 - 4009
-
-*/
+#endif /*COMMON_TITANIUM_CONSTANTS_H*/

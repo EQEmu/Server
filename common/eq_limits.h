@@ -23,12 +23,12 @@
 #include "types.h"
 #include "eq_constants.h"
 #include "inventory_version.h" // inv2 watch
-#include "../common/patches/titanium_constants.h"
-#include "../common/patches/sof_constants.h"
-#include "../common/patches/sod_constants.h"
-#include "../common/patches/uf_constants.h"
-#include "../common/patches/rof_constants.h"
-#include "../common/patches/rof2_constants.h"
+#include "../common/patches/titanium_limits.h"
+#include "../common/patches/sof_limits.h"
+#include "../common/patches/sod_limits.h"
+#include "../common/patches/uf_limits.h"
+#include "../common/patches/rof_limits.h"
+#include "../common/patches/rof2_limits.h"
 
 
 // *** DO NOT CHANGE without a full understanding of the consequences..the server is set up to use these settings explicitly!! ***
