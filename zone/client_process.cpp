@@ -759,8 +759,8 @@ void Client::BulkSendInventoryItems()
 	RemoveDuplicateLore(false);
 	MoveSlotNotAllowed(false);
 
-	std::stringstream ss(std::stringstream::in | std::stringstream::out);
-	std::stringstream::pos_type last_pos = ss.tellp();
+	EQEmu::OutBuffer ob;
+	EQEmu::OutBuffer::pos_type last_pos = ob.tellp();
 
 	// Possessions items
 	for (int16 slot_id = SLOT_BEGIN; slot_id < EQEmu::legacy::TYPE_POSSESSIONS_SIZE; slot_id++) {
@@ -768,24 +768,24 @@ void Client::BulkSendInventoryItems()
 		if (!inst)
 			continue;
 
-		inst->Serialize(ss, slot_id);
+		inst->Serialize(ob, slot_id);
 
-		if (ss.tellp() == last_pos)
+		if (ob.tellp() == last_pos)
 			Log.Out(Logs::General, Logs::Inventory, "Serialization failed on item slot %d during BulkSendInventoryItems.  Item skipped.", slot_id);
 		
-		last_pos = ss.tellp();
+		last_pos = ob.tellp();
 	}
 
 	// PowerSource item
 	if (ClientVersion() >= EQEmu::versions::ClientVersion::SoF) {
 		const ItemInst* inst = m_inv[EQEmu::legacy::SlotPowerSource];
 		if (inst) {
-			inst->Serialize(ss, EQEmu::legacy::SlotPowerSource);
+			inst->Serialize(ob, EQEmu::legacy::SlotPowerSource);
 
-			if (ss.tellp() == last_pos)
+			if (ob.tellp() == last_pos)
 				Log.Out(Logs::General, Logs::Inventory, "Serialization failed on item slot %d during BulkSendInventoryItems.  Item skipped.", EQEmu::legacy::SlotPowerSource);
 
-			last_pos = ss.tellp();
+			last_pos = ob.tellp();
 		}
 	}
 
@@ -795,12 +795,12 @@ void Client::BulkSendInventoryItems()
 		if (!inst)
 			continue;
 
-		inst->Serialize(ss, slot_id);
+		inst->Serialize(ob, slot_id);
 
-		if (ss.tellp() == last_pos)
+		if (ob.tellp() == last_pos)
 			Log.Out(Logs::General, Logs::Inventory, "Serialization failed on item slot %d during BulkSendInventoryItems.  Item skipped.", slot_id);
 
-		last_pos = ss.tellp();
+		last_pos = ob.tellp();
 	}
 
 	// SharedBank items
@@ -809,19 +809,17 @@ void Client::BulkSendInventoryItems()
 		if (!inst)
 			continue;
 
-		inst->Serialize(ss, slot_id);
+		inst->Serialize(ob, slot_id);
 
-		if (ss.tellp() == last_pos)
+		if (ob.tellp() == last_pos)
 			Log.Out(Logs::General, Logs::Inventory, "Serialization failed on item slot %d during BulkSendInventoryItems.  Item skipped.", slot_id);
 
-		last_pos = ss.tellp();
+		last_pos = ob.tellp();
 	}
 
-	std::string serialized = ss.str();
-
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_CharInventory, serialized.size());
-	memcpy(outapp->pBuffer, serialized.c_str(), serialized.size());
-
+	EQApplicationPacket* outapp = new EQApplicationPacket(OP_CharInventory);
+	outapp->size = ob.size();
+	outapp->pBuffer = ob.detach();
 	QueuePacket(outapp);
 	safe_delete(outapp);
 }

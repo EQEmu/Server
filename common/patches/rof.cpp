@@ -24,7 +24,7 @@ namespace RoF
 	static OpcodeManager *opcodes = nullptr;
 	static Strategy struct_strategy;
 
-	void SerializeItem(std::stringstream& ss, const ItemInst *inst, int16 slot_id, uint8 depth);
+	void SerializeItem(EQEmu::OutBuffer& ob, const ItemInst *inst, int16 slot_id, uint8 depth);
 
 	// server to client inventory location converters
 	static inline structs::InventorySlot_Struct ServerToRoFSlot(uint32 serverSlot);
@@ -557,24 +557,21 @@ namespace RoF
 
 		InternalSerializedItem_Struct* eq = (InternalSerializedItem_Struct*)in->pBuffer;
 
-		std::stringstream ss(std::stringstream::in | std::stringstream::out);
-		std::stringstream::pos_type last_pos = ss.tellp();
+		EQEmu::OutBuffer ob;
+		EQEmu::OutBuffer::pos_type last_pos = ob.tellp();
 
-		ss.write((const char*)&item_count, sizeof(uint32));
+		ob.write((const char*)&item_count, sizeof(uint32));
 
 		for (int index = 0; index < item_count; ++index, ++eq) {
-			SerializeItem(ss, (const ItemInst*)eq->inst, eq->slot_id, 0);
-			if (ss.tellp() == last_pos)
+			SerializeItem(ob, (const ItemInst*)eq->inst, eq->slot_id, 0);
+			if (ob.tellp() == last_pos)
 				Log.Out(Logs::General, Logs::Netcode, "[STRUCTS] Serialization failed on item slot %d during OP_CharInventory.  Item skipped.", eq->slot_id);
 
-			last_pos = ss.tellp();
+			last_pos = ob.tellp();
 		}
 
-		std::string serialized = ss.str();
-
-		in->size = serialized.size();
-		in->pBuffer = new uchar[in->size];
-		memcpy(in->pBuffer, serialized.c_str(), serialized.size());
+		in->size = ob.size();
+		in->pBuffer = ob.detach();
 
 		delete[] __emu_buffer;
 
@@ -1492,30 +1489,24 @@ namespace RoF
 
 		//store away the emu struct
 		uchar* __emu_buffer = in->pBuffer;
-		//ItemPacket_Struct* old_item_pkt = (ItemPacket_Struct*)__emu_buffer;
-		//InternalSerializedItem_Struct* int_struct = (InternalSerializedItem_Struct*)(old_item_pkt->SerializedItem);
+
 		InternalSerializedItem_Struct* int_struct = (InternalSerializedItem_Struct*)(&__emu_buffer[4]);
 
-		std::stringstream ss(std::stringstream::in | std::stringstream::out);
-		std::stringstream::pos_type last_pos = ss.tellp();
+		EQEmu::OutBuffer ob;
+		EQEmu::OutBuffer::pos_type last_pos = ob.tellp();
 
-		ss.write((const char*)__emu_buffer, 4);
+		ob.write((const char*)__emu_buffer, 4);
 
-		SerializeItem(ss, (const ItemInst*)int_struct->inst, int_struct->slot_id, 0);
-		if (ss.tellp() == last_pos) {
+		SerializeItem(ob, (const ItemInst*)int_struct->inst, int_struct->slot_id, 0);
+		if (ob.tellp() == last_pos) {
 			Log.Out(Logs::General, Logs::Netcode, "[STRUCTS] Serialization failed on item slot %d.", int_struct->slot_id);
 			delete in;
 			return;
 		}
 
-		std::string serialized = ss.str();
-
-		in->size = serialized.size();
-		in->pBuffer = new uchar[in->size];
-		//ItemPacket_Struct* new_item_pkt = (ItemPacket_Struct*)in->pBuffer;
-		//new_item_pkt->PacketType = old_item_pkt->PacketType;
-		memcpy(in->pBuffer, serialized.c_str(), serialized.size());
-
+		in->size = ob.size();
+		in->pBuffer = ob.detach();
+		
 		delete[] __emu_buffer;
 
 		dest->FastQueuePacket(&in, ack_req);
@@ -5180,7 +5171,7 @@ namespace RoF
 		return NextItemInstSerialNumber;
 	}
 
-	void SerializeItem(std::stringstream& ss, const ItemInst *inst, int16 slot_id_in, uint8 depth)
+	void SerializeItem(EQEmu::OutBuffer& ob, const ItemInst *inst, int16 slot_id_in, uint8 depth)
 	{
 		const Item_Struct *item = inst->GetUnscaledItem();
 		
@@ -5212,7 +5203,7 @@ namespace RoF
 		hdr.unknown052 = 0;
 		hdr.isEvolving = item->EvolvingItem;
 
-		ss.write((const char*)&hdr, sizeof(RoF::structs::ItemSerializationHeader));
+		ob.write((const char*)&hdr, sizeof(RoF::structs::ItemSerializationHeader));
 
 		if (item->EvolvingItem > 0) {
 			RoF::structs::EvolvingItem evotop;
@@ -5226,7 +5217,7 @@ namespace RoF
 			evotop.Activated = 1;
 			evotop.evomaxlevel = item->EvolvingMax;
 
-			ss.write((const char*)&evotop, sizeof(RoF::structs::EvolvingItem));
+			ob.write((const char*)&evotop, sizeof(RoF::structs::EvolvingItem));
 		}
 
 		//ORNAMENT IDFILE / ICON
@@ -5241,16 +5232,16 @@ namespace RoF
 			char tmp[30]; memset(tmp, 0x0, 30); sprintf(tmp, "IT%d", inst->GetOrnamentationIDFile());
 
 			//Mainhand
-			ss.write(tmp, strlen(tmp));
-			ss.write("\0", 1);
+			ob.write(tmp, strlen(tmp));
+			ob.write("\0", 1);
 
 			//Offhand
-			ss.write(tmp, strlen(tmp));
-			ss.write("\0", 1);
+			ob.write(tmp, strlen(tmp));
+			ob.write("\0", 1);
 		}
 		else {
-			ss.write("\0", 1); // no main hand Ornamentation
-			ss.write("\0", 1); // no off hand Ornamentation
+			ob.write("\0", 1); // no main hand Ornamentation
+			ob.write("\0", 1); // no off hand Ornamentation
 		}
 
 		RoF::structs::ItemSerializationHeaderFinish hdrf;
@@ -5264,21 +5255,21 @@ namespace RoF
 		hdrf.unknowna5 = 0;
 		hdrf.ItemClass = item->ItemClass;
 
-		ss.write((const char*)&hdrf, sizeof(RoF::structs::ItemSerializationHeaderFinish));
+		ob.write((const char*)&hdrf, sizeof(RoF::structs::ItemSerializationHeaderFinish));
 
 		if (strlen(item->Name) > 0)
-			ss.write(item->Name, strlen(item->Name));
-		ss.write("\0", 1);
+			ob.write(item->Name, strlen(item->Name));
+		ob.write("\0", 1);
 
 		if (strlen(item->Lore) > 0)
-			ss.write(item->Lore, strlen(item->Lore));
-		ss.write("\0", 1);
+			ob.write(item->Lore, strlen(item->Lore));
+		ob.write("\0", 1);
 
 		if (strlen(item->IDFile) > 0)
-			ss.write(item->IDFile, strlen(item->IDFile));
-		ss.write("\0", 1);
+			ob.write(item->IDFile, strlen(item->IDFile));
+		ob.write("\0", 1);
 
-		ss.write("\0", 1);
+		ob.write("\0", 1);
 		
 		RoF::structs::ItemBodyStruct ibs;
 		memset(&ibs, 0, sizeof(RoF::structs::ItemBodyStruct));
@@ -5369,12 +5360,12 @@ namespace RoF
 		ibs.FactionAmt4 = item->FactionAmt4;
 		ibs.FactionMod4 = item->FactionMod4;
 
-		ss.write((const char*)&ibs, sizeof(RoF::structs::ItemBodyStruct));
+		ob.write((const char*)&ibs, sizeof(RoF::structs::ItemBodyStruct));
 
 		//charm text
 		if (strlen(item->CharmFile) > 0)
-			ss.write((const char*)item->CharmFile, strlen(item->CharmFile));
-		ss.write("\0", 1);
+			ob.write((const char*)item->CharmFile, strlen(item->CharmFile));
+		ob.write("\0", 1);
 
 		RoF::structs::ItemSecondaryBodyStruct isbs;
 		memset(&isbs, 0, sizeof(RoF::structs::ItemSecondaryBodyStruct));
@@ -5403,11 +5394,11 @@ namespace RoF
 		isbs.book = item->Book;
 		isbs.booktype = item->BookType;
 
-		ss.write((const char*)&isbs, sizeof(RoF::structs::ItemSecondaryBodyStruct));
+		ob.write((const char*)&isbs, sizeof(RoF::structs::ItemSecondaryBodyStruct));
 
 		if (strlen(item->Filename) > 0)
-			ss.write((const char*)item->Filename, strlen(item->Filename));
-		ss.write("\0", 1);
+			ob.write((const char*)item->Filename, strlen(item->Filename));
+		ob.write("\0", 1);
 
 		RoF::structs::ItemTertiaryBodyStruct itbs;
 		memset(&itbs, 0, sizeof(RoF::structs::ItemTertiaryBodyStruct));
@@ -5442,7 +5433,7 @@ namespace RoF
 		itbs.unknown13 = 0;
 		itbs.unknown14 = 0;
 
-		ss.write((const char*)&itbs, sizeof(RoF::structs::ItemTertiaryBodyStruct));
+		ob.write((const char*)&itbs, sizeof(RoF::structs::ItemTertiaryBodyStruct));
 
 		// Effect Structures Broken down to allow variable length strings for effect names
 		int32 effect_unknown = 0;
@@ -5459,13 +5450,13 @@ namespace RoF
 		ices.recast = item->RecastDelay;
 		ices.recast_type = item->RecastType;
 
-		ss.write((const char*)&ices, sizeof(RoF::structs::ClickEffectStruct));
+		ob.write((const char*)&ices, sizeof(RoF::structs::ClickEffectStruct));
 
 		if (strlen(item->ClickName) > 0)
-			ss.write((const char*)item->ClickName, strlen(item->ClickName));
-		ss.write("\0", 1);
+			ob.write((const char*)item->ClickName, strlen(item->ClickName));
+		ob.write("\0", 1);
 
-		ss.write((const char*)&effect_unknown, sizeof(int32));	// clickunk7
+		ob.write((const char*)&effect_unknown, sizeof(int32));	// clickunk7
 
 		RoF::structs::ProcEffectStruct ipes;
 		memset(&ipes, 0, sizeof(RoF::structs::ProcEffectStruct));
@@ -5476,13 +5467,13 @@ namespace RoF
 		ipes.level = item->Proc.Level;
 		ipes.procrate = item->ProcRate;
 
-		ss.write((const char*)&ipes, sizeof(RoF::structs::ProcEffectStruct));
+		ob.write((const char*)&ipes, sizeof(RoF::structs::ProcEffectStruct));
 
 		if (strlen(item->ProcName) > 0)
-			ss.write((const char*)item->ProcName, strlen(item->ProcName));
-		ss.write("\0", 1);
+			ob.write((const char*)item->ProcName, strlen(item->ProcName));
+		ob.write("\0", 1);
 
-		ss.write((const char*)&effect_unknown, sizeof(int32));	// unknown5
+		ob.write((const char*)&effect_unknown, sizeof(int32));	// unknown5
 
 		RoF::structs::WornEffectStruct iwes;
 		memset(&iwes, 0, sizeof(RoF::structs::WornEffectStruct));
@@ -5492,13 +5483,13 @@ namespace RoF
 		iwes.type = item->Worn.Type;
 		iwes.level = item->Worn.Level;
 
-		ss.write((const char*)&iwes, sizeof(RoF::structs::WornEffectStruct));
+		ob.write((const char*)&iwes, sizeof(RoF::structs::WornEffectStruct));
 
 		if (strlen(item->WornName) > 0)
-			ss.write((const char*)item->WornName, strlen(item->WornName));
-		ss.write("\0", 1);
+			ob.write((const char*)item->WornName, strlen(item->WornName));
+		ob.write("\0", 1);
 
-		ss.write((const char*)&effect_unknown, sizeof(int32));	// unknown6
+		ob.write((const char*)&effect_unknown, sizeof(int32));	// unknown6
 
 		RoF::structs::WornEffectStruct ifes;
 		memset(&ifes, 0, sizeof(RoF::structs::WornEffectStruct));
@@ -5508,13 +5499,13 @@ namespace RoF
 		ifes.type = item->Focus.Type;
 		ifes.level = item->Focus.Level;
 
-		ss.write((const char*)&ifes, sizeof(RoF::structs::WornEffectStruct));
+		ob.write((const char*)&ifes, sizeof(RoF::structs::WornEffectStruct));
 
 		if (strlen(item->FocusName) > 0)
-			ss.write((const char*)item->FocusName, strlen(item->FocusName));
-		ss.write("\0", 1);
+			ob.write((const char*)item->FocusName, strlen(item->FocusName));
+		ob.write("\0", 1);
 
-		ss.write((const char*)&effect_unknown, sizeof(int32));	// unknown6
+		ob.write((const char*)&effect_unknown, sizeof(int32));	// unknown6
 
 		RoF::structs::WornEffectStruct ises;
 		memset(&ises, 0, sizeof(RoF::structs::WornEffectStruct));
@@ -5524,13 +5515,13 @@ namespace RoF
 		ises.type = item->Scroll.Type;
 		ises.level = item->Scroll.Level;
 
-		ss.write((const char*)&ises, sizeof(RoF::structs::WornEffectStruct));
+		ob.write((const char*)&ises, sizeof(RoF::structs::WornEffectStruct));
 
 		if (strlen(item->ScrollName) > 0)
-			ss.write((const char*)item->ScrollName, strlen(item->ScrollName));
-		ss.write("\0", 1);
+			ob.write((const char*)item->ScrollName, strlen(item->ScrollName));
+		ob.write("\0", 1);
 
-		ss.write((const char*)&effect_unknown, sizeof(int32));	// unknown6
+		ob.write((const char*)&effect_unknown, sizeof(int32));	// unknown6
 
 		// Bard Effect?
 		RoF::structs::WornEffectStruct ibes;
@@ -5542,7 +5533,7 @@ namespace RoF
 		ibes.level = 0;
 		//ibes.unknown6 = 0xffffffff;
 
-		ss.write((const char*)&ibes, sizeof(RoF::structs::WornEffectStruct));
+		ob.write((const char*)&ibes, sizeof(RoF::structs::WornEffectStruct));
 
 		/*
 		if(strlen(item->BardName) > 0)
@@ -5551,9 +5542,9 @@ namespace RoF
 		ss.write((const char*)&null_term, sizeof(uint8));
 		}
 		else */
-		ss.write("\0", 1);
+		ob.write("\0", 1);
 
-		ss.write((const char*)&effect_unknown, sizeof(int32));	// unknown6
+		ob.write((const char*)&effect_unknown, sizeof(int32));	// unknown6
 		// End of Effects
 
 		RoF::structs::ItemQuaternaryBodyStruct iqbs;
@@ -5586,12 +5577,12 @@ namespace RoF
 		iqbs.unknown30 = 0;
 		iqbs.unknown39 = 1;
 		
-		ss.write((const char*)&iqbs, sizeof(RoF::structs::ItemQuaternaryBodyStruct));
+		ob.write((const char*)&iqbs, sizeof(RoF::structs::ItemQuaternaryBodyStruct));
 
-		std::stringstream::pos_type count_pos = ss.tellp();
+		std::stringstream::pos_type count_pos = ob.tellp();
 		uint32 subitem_count = 0;
 
-		ss.write((const char*)&subitem_count, sizeof(uint32));
+		ob.write((const char*)&subitem_count, sizeof(uint32));
 
 		for (uint32 index = SUB_INDEX_BEGIN; index < EQEmu::legacy::ITEM_CONTAINER_SIZE; ++index) {
 			ItemInst* sub = inst->GetItem(index);
@@ -5608,20 +5599,14 @@ namespace RoF
 			else
 				SubSlotNumber = slot_id_in;
 
-			ss.write((const char*)&index, sizeof(uint32));
+			ob.write((const char*)&index, sizeof(uint32));
 
-			SerializeItem(ss, sub, SubSlotNumber, (depth + 1));
+			SerializeItem(ob, sub, SubSlotNumber, (depth + 1));
 			++subitem_count;
 		}
 
-		if (subitem_count) {
-			std::stringstream::pos_type cur_pos = ss.tellp();
-			ss.seekp(count_pos);
-
-			ss.write((const char*)&subitem_count, sizeof(uint32));
-
-			ss.seekp(cur_pos);
-		}
+		if (subitem_count)
+			ob.overwrite(count_pos, (const char*)&subitem_count, sizeof(uint32));
 	}
 
 	static inline structs::InventorySlot_Struct ServerToRoFSlot(uint32 serverSlot)

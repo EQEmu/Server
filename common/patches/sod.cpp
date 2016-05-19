@@ -22,7 +22,7 @@ namespace SoD
 	static OpcodeManager *opcodes = nullptr;
 	static Strategy struct_strategy;
 
-	void SerializeItem(std::stringstream& ss, const ItemInst *inst, int16 slot_id, uint8 depth);
+	void SerializeItem(EQEmu::OutBuffer& ob, const ItemInst *inst, int16 slot_id, uint8 depth);
 
 	// server to client inventory location converters
 	static inline uint32 ServerToSoDSlot(uint32 ServerSlot);
@@ -361,25 +361,22 @@ namespace SoD
 
 		InternalSerializedItem_Struct* eq = (InternalSerializedItem_Struct*)in->pBuffer;
 
-		std::stringstream ss(std::stringstream::in | std::stringstream::out);
-		std::stringstream::pos_type last_pos = ss.tellp();
+		EQEmu::OutBuffer ob;
+		EQEmu::OutBuffer::pos_type last_pos = ob.tellp();
 
-		ss.write((const char*)&item_count, sizeof(uint32));
+		ob.write((const char*)&item_count, sizeof(uint32));
 
 		for (int index = 0; index < item_count; ++index, ++eq) {
-			SerializeItem(ss, (const ItemInst*)eq->inst, eq->slot_id, 0);
-			if (ss.tellp() == last_pos)
+			SerializeItem(ob, (const ItemInst*)eq->inst, eq->slot_id, 0);
+			if (ob.tellp() == last_pos)
 				Log.Out(Logs::General, Logs::Netcode, "[STRUCTS] Serialization failed on item slot %d during OP_CharInventory.  Item skipped.", eq->slot_id);
 
-			last_pos = ss.tellp();
+			last_pos = ob.tellp();
 		}
 
-		std::string serialized = ss.str();
-
-		in->size = serialized.size();
-		in->pBuffer = new uchar[in->size];
-		memcpy(in->pBuffer, serialized.c_str(), serialized.size());
-
+		in->size = ob.size();
+		in->pBuffer = ob.detach();
+		
 		delete[] __emu_buffer;
 
 		dest->FastQueuePacket(&in, ack_req);
@@ -1023,30 +1020,24 @@ namespace SoD
 
 		//store away the emu struct
 		uchar* __emu_buffer = in->pBuffer;
-		//ItemPacket_Struct* old_item_pkt = (ItemPacket_Struct*)__emu_buffer;
-		//InternalSerializedItem_Struct* int_struct = (InternalSerializedItem_Struct*)(old_item_pkt->SerializedItem);
+		
 		InternalSerializedItem_Struct* int_struct = (InternalSerializedItem_Struct*)(&__emu_buffer[4]);
 
-		std::stringstream ss(std::stringstream::in | std::stringstream::out);
-		std::stringstream::pos_type last_pos = ss.tellp();
+		EQEmu::OutBuffer ob;
+		EQEmu::OutBuffer::pos_type last_pos = ob.tellp();
 
-		ss.write((const char*)__emu_buffer, 4);
+		ob.write((const char*)__emu_buffer, 4);
 
-		SerializeItem(ss, (const ItemInst*)int_struct->inst, int_struct->slot_id, 0);
-		if (ss.tellp() == last_pos) {
+		SerializeItem(ob, (const ItemInst*)int_struct->inst, int_struct->slot_id, 0);
+		if (ob.tellp() == last_pos) {
 			Log.Out(Logs::General, Logs::Netcode, "[STRUCTS] Serialization failed on item slot %d.", int_struct->slot_id);
 			delete in;
 			return;
 		}
 
-		std::string serialized = ss.str();
-
-		in->size = serialized.size();
-		in->pBuffer = new uchar[in->size];
-		//ItemPacket_Struct* new_item_pkt = (ItemPacket_Struct*)in->pBuffer;
-		//new_item_pkt->PacketType = old_item_pkt->PacketType;
-		memcpy(in->pBuffer, serialized.c_str(), serialized.size());
-
+		in->size = ob.size();
+		in->pBuffer = ob.detach();
+		
 		delete[] __emu_buffer;
 
 		dest->FastQueuePacket(&in, ack_req);
@@ -3540,7 +3531,7 @@ namespace SoD
 		return NextItemInstSerialNumber;
 	}
 
-	void SerializeItem(std::stringstream& ss, const ItemInst *inst, int16 slot_id_in, uint8 depth)
+	void SerializeItem(EQEmu::OutBuffer& ob, const ItemInst *inst, int16 slot_id_in, uint8 depth)
 	{
 		const Item_Struct *item = inst->GetUnscaledItem();
 		
@@ -3569,19 +3560,19 @@ namespace SoD
 		hdr.unknown062 = 0;
 		hdr.ItemClass = item->ItemClass;
 
-		ss.write((const char*)&hdr, sizeof(SoD::structs::ItemSerializationHeader));
+		ob.write((const char*)&hdr, sizeof(SoD::structs::ItemSerializationHeader));
 
 		if (strlen(item->Name) > 0)
-			ss.write(item->Name, strlen(item->Name));
-		ss.write("\0", 1);
+			ob.write(item->Name, strlen(item->Name));
+		ob.write("\0", 1);
 
 		if (strlen(item->Lore) > 0)
-			ss.write(item->Lore, strlen(item->Lore));
-		ss.write("\0", 1);
+			ob.write(item->Lore, strlen(item->Lore));
+		ob.write("\0", 1);
 
 		if (strlen(item->IDFile) > 0)
-			ss.write(item->IDFile, strlen(item->IDFile));
-		ss.write("\0", 1);
+			ob.write(item->IDFile, strlen(item->IDFile));
+		ob.write("\0", 1);
 
 		SoD::structs::ItemBodyStruct ibs;
 		memset(&ibs, 0, sizeof(SoD::structs::ItemBodyStruct));
@@ -3670,12 +3661,12 @@ namespace SoD
 		ibs.FactionAmt4 = item->FactionAmt4;
 		ibs.FactionMod4 = item->FactionMod4;
 
-		ss.write((const char*)&ibs, sizeof(SoD::structs::ItemBodyStruct));
+		ob.write((const char*)&ibs, sizeof(SoD::structs::ItemBodyStruct));
 
 		//charm text
 		if (strlen(item->CharmFile) > 0)
-			ss.write((const char*)item->CharmFile, strlen(item->CharmFile));
-		ss.write("\0", 1);
+			ob.write((const char*)item->CharmFile, strlen(item->CharmFile));
+		ob.write("\0", 1);
 
 		SoD::structs::ItemSecondaryBodyStruct isbs;
 		memset(&isbs, 0, sizeof(SoD::structs::ItemSecondaryBodyStruct));
@@ -3703,11 +3694,11 @@ namespace SoD
 		isbs.book = item->Book;
 		isbs.booktype = item->BookType;
 
-		ss.write((const char*)&isbs, sizeof(SoD::structs::ItemSecondaryBodyStruct));
+		ob.write((const char*)&isbs, sizeof(SoD::structs::ItemSecondaryBodyStruct));
 
 		if (strlen(item->Filename) > 0)
-			ss.write((const char*)item->Filename, strlen(item->Filename));
-		ss.write("\0", 1);
+			ob.write((const char*)item->Filename, strlen(item->Filename));
+		ob.write("\0", 1);
 
 		SoD::structs::ItemTertiaryBodyStruct itbs;
 		memset(&itbs, 0, sizeof(SoD::structs::ItemTertiaryBodyStruct));
@@ -3731,7 +3722,7 @@ namespace SoD
 		itbs.no_transfer = item->NoTransfer;
 		itbs.expendablearrow = item->ExpendableArrow;
 
-		ss.write((const char*)&itbs, sizeof(SoD::structs::ItemTertiaryBodyStruct));
+		ob.write((const char*)&itbs, sizeof(SoD::structs::ItemTertiaryBodyStruct));
 
 		// Effect Structures Broken down to allow variable length strings for effect names
 		int32 effect_unknown = 0;
@@ -3748,13 +3739,13 @@ namespace SoD
 		ices.recast = item->RecastDelay;
 		ices.recast_type = item->RecastType;
 
-		ss.write((const char*)&ices, sizeof(SoD::structs::ClickEffectStruct));
+		ob.write((const char*)&ices, sizeof(SoD::structs::ClickEffectStruct));
 
 		if (strlen(item->ClickName) > 0)
-			ss.write((const char*)item->ClickName, strlen(item->ClickName));
-		ss.write("\0", 1);
+			ob.write((const char*)item->ClickName, strlen(item->ClickName));
+		ob.write("\0", 1);
 
-		ss.write((const char*)&effect_unknown, sizeof(int32));	// clickunk7
+		ob.write((const char*)&effect_unknown, sizeof(int32));	// clickunk7
 
 		SoD::structs::ProcEffectStruct ipes;
 		memset(&ipes, 0, sizeof(SoD::structs::ProcEffectStruct));
@@ -3765,13 +3756,13 @@ namespace SoD
 		ipes.level = item->Proc.Level;
 		ipes.procrate = item->ProcRate;
 
-		ss.write((const char*)&ipes, sizeof(SoD::structs::ProcEffectStruct));
+		ob.write((const char*)&ipes, sizeof(SoD::structs::ProcEffectStruct));
 
 		if (strlen(item->ProcName) > 0)
-			ss.write((const char*)item->ProcName, strlen(item->ProcName));
-		ss.write("\0", 1);
+			ob.write((const char*)item->ProcName, strlen(item->ProcName));
+		ob.write("\0", 1);
 
-		ss.write((const char*)&effect_unknown, sizeof(int32));	// unknown5
+		ob.write((const char*)&effect_unknown, sizeof(int32));	// unknown5
 
 		SoD::structs::WornEffectStruct iwes;
 		memset(&iwes, 0, sizeof(SoD::structs::WornEffectStruct));
@@ -3781,13 +3772,13 @@ namespace SoD
 		iwes.type = item->Worn.Type;
 		iwes.level = item->Worn.Level;
 
-		ss.write((const char*)&iwes, sizeof(SoD::structs::WornEffectStruct));
+		ob.write((const char*)&iwes, sizeof(SoD::structs::WornEffectStruct));
 
 		if (strlen(item->WornName) > 0)
-			ss.write((const char*)item->WornName, strlen(item->WornName));
-		ss.write("\0", 1);
+			ob.write((const char*)item->WornName, strlen(item->WornName));
+		ob.write("\0", 1);
 
-		ss.write((const char*)&effect_unknown, sizeof(int32));	// unknown6
+		ob.write((const char*)&effect_unknown, sizeof(int32));	// unknown6
 
 		SoD::structs::WornEffectStruct ifes;
 		memset(&ifes, 0, sizeof(SoD::structs::WornEffectStruct));
@@ -3797,13 +3788,13 @@ namespace SoD
 		ifes.type = item->Focus.Type;
 		ifes.level = item->Focus.Level;
 
-		ss.write((const char*)&ifes, sizeof(SoD::structs::WornEffectStruct));
+		ob.write((const char*)&ifes, sizeof(SoD::structs::WornEffectStruct));
 
 		if (strlen(item->FocusName) > 0)
-			ss.write((const char*)item->FocusName, strlen(item->FocusName));
-		ss.write("\0", 1);
+			ob.write((const char*)item->FocusName, strlen(item->FocusName));
+		ob.write("\0", 1);
 
-		ss.write((const char*)&effect_unknown, sizeof(int32));	// unknown6
+		ob.write((const char*)&effect_unknown, sizeof(int32));	// unknown6
 
 		SoD::structs::WornEffectStruct ises;
 		memset(&ises, 0, sizeof(SoD::structs::WornEffectStruct));
@@ -3813,13 +3804,13 @@ namespace SoD
 		ises.type = item->Scroll.Type;
 		ises.level = item->Scroll.Level;
 
-		ss.write((const char*)&ises, sizeof(SoD::structs::WornEffectStruct));
+		ob.write((const char*)&ises, sizeof(SoD::structs::WornEffectStruct));
 
 		if (strlen(item->ScrollName) > 0)
-			ss.write((const char*)item->ScrollName, strlen(item->ScrollName));
-		ss.write("\0", 1);
+			ob.write((const char*)item->ScrollName, strlen(item->ScrollName));
+		ob.write("\0", 1);
 
-		ss.write((const char*)&effect_unknown, sizeof(int32));	// unknown6
+		ob.write((const char*)&effect_unknown, sizeof(int32));	// unknown6
 		// End of Effects
 
 		SoD::structs::ItemQuaternaryBodyStruct iqbs;
@@ -3849,12 +3840,12 @@ namespace SoD
 		iqbs.SpellDmg = item->SpellDmg;
 		iqbs.Clairvoyance = item->Clairvoyance;
 		
-		ss.write((const char*)&iqbs, sizeof(SoD::structs::ItemQuaternaryBodyStruct));
+		ob.write((const char*)&iqbs, sizeof(SoD::structs::ItemQuaternaryBodyStruct));
 
-		std::stringstream::pos_type count_pos = ss.tellp();
+		std::stringstream::pos_type count_pos = ob.tellp();
 		uint32 subitem_count = 0;
 
-		ss.write((const char*)&subitem_count, sizeof(uint32));
+		ob.write((const char*)&subitem_count, sizeof(uint32));
 
 		for (uint32 index = SUB_INDEX_BEGIN; index < EQEmu::legacy::ITEM_CONTAINER_SIZE; ++index) {
 			ItemInst* sub = inst->GetItem(index);
@@ -3871,20 +3862,14 @@ namespace SoD
 			else
 				SubSlotNumber = slot_id_in;
 
-			ss.write((const char*)&index, sizeof(uint32));
+			ob.write((const char*)&index, sizeof(uint32));
 
-			SerializeItem(ss, sub, SubSlotNumber, (depth + 1));
+			SerializeItem(ob, sub, SubSlotNumber, (depth + 1));
 			++subitem_count;
 		}
 
-		if (subitem_count) {
-			std::stringstream::pos_type cur_pos = ss.tellp();
-			ss.seekp(count_pos);
-
-			ss.write((const char*)&subitem_count, sizeof(uint32));
-
-			ss.seekp(cur_pos);
-		}
+		if (subitem_count)
+			ob.overwrite(count_pos, (const char*)&subitem_count, sizeof(uint32));
 	}
 
 	static inline uint32 ServerToSoDSlot(uint32 serverSlot)

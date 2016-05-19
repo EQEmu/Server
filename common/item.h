@@ -31,9 +31,11 @@ class EvolveInfo;			// Stores information about an evolving item family
 #include "../common/timer.h"
 #include "../common/bodytypes.h"
 
+#include "string_util.h"
+
 #include <list>
 #include <map>
-#include <sstream>
+//#include <sstream>
 
 
 namespace ItemField
@@ -413,7 +415,7 @@ public:
 	uint32 GetKillsNeeded(uint8 currentlevel);
 
 	std::string Serialize(int16 slot_id) const { InternalSerializedItem_Struct s; s.slot_id = slot_id; s.inst = (const void*)this; std::string ser; ser.assign((char*)&s, sizeof(InternalSerializedItem_Struct)); return ser; }
-	void Serialize(std::stringstream& ss, int16 slot_id) const { InternalSerializedItem_Struct isi; isi.slot_id = slot_id; isi.inst = (const void*)this; ss.write((const char*)&isi, sizeof(isi)); }
+	void Serialize(EQEmu::OutBuffer& ob, int16 slot_id) const { InternalSerializedItem_Struct isi; isi.slot_id = slot_id; isi.inst = (const void*)this; ob.write((const char*)&isi, sizeof(isi)); }
 	
 	inline int32 GetSerialNumber() const { return m_SerialNumber; }
 	inline void SetSerialNumber(int32 id) { m_SerialNumber = id; }

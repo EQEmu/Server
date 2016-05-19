@@ -20,7 +20,7 @@ namespace Titanium
 	static OpcodeManager *opcodes = nullptr;
 	static Strategy struct_strategy;
 
-	void SerializeItem(std::stringstream& ss, const ItemInst *inst, int16 slot_id_in, uint8 depth);
+	void SerializeItem(EQEmu::OutBuffer& ob, const ItemInst *inst, int16 slot_id_in, uint8 depth);
 
 	// server to client inventory location converters
 	static inline int16 ServerToTitaniumSlot(uint32 serverSlot);
@@ -272,26 +272,24 @@ namespace Titanium
 			delete in;
 			return;
 		}
+
 		InternalSerializedItem_Struct* eq = (InternalSerializedItem_Struct*)in->pBuffer;
 
 		//do the transform...
-		std::stringstream ss(std::stringstream::in | std::stringstream::out);
-		std::stringstream::pos_type last_pos = ss.tellp();
+		EQEmu::OutBuffer ob;
+		EQEmu::OutBuffer::pos_type last_pos = ob.tellp();
 
 		for (int r = 0; r < itemcount; r++, eq++) {
-			SerializeItem(ss, (const ItemInst*)eq->inst, eq->slot_id, 0);
-			if (ss.tellp() == last_pos)
+			SerializeItem(ob, (const ItemInst*)eq->inst, eq->slot_id, 0);
+			if (ob.tellp() == last_pos)
 				Log.Out(Logs::General, Logs::Netcode, "[STRUCTS] Serialization failed on item slot %d during OP_CharInventory.  Item skipped.", eq->slot_id);
 			
-			last_pos = ss.tellp();
+			last_pos = ob.tellp();
 		}
 
-		std::string serialized = ss.str();
-
-		in->size = serialized.size();
-		in->pBuffer = new uchar[in->size];
-		memcpy(in->pBuffer, serialized.c_str(), serialized.size());
-
+		in->size = ob.size();
+		in->pBuffer = ob.detach();
+		
 		delete[] __emu_buffer;
 
 		dest->FastQueuePacket(&in, ack_req);
@@ -720,30 +718,24 @@ namespace Titanium
 
 		//store away the emu struct
 		uchar* __emu_buffer = in->pBuffer;
-		//ItemPacket_Struct* old_item_pkt = (ItemPacket_Struct*)__emu_buffer;
-		//InternalSerializedItem_Struct* int_struct = (InternalSerializedItem_Struct*)(old_item_pkt->SerializedItem);
+		
 		InternalSerializedItem_Struct* int_struct = (InternalSerializedItem_Struct*)(&__emu_buffer[4]);
 
-		std::stringstream ss(std::stringstream::in | std::stringstream::out);
-		std::stringstream::pos_type last_pos = ss.tellp();
+		EQEmu::OutBuffer ob;
+		EQEmu::OutBuffer::pos_type last_pos = ob.tellp();
 
-		ss.write((const char*)__emu_buffer, 4);
+		ob.write((const char*)__emu_buffer, 4);
 
-		SerializeItem(ss, (const ItemInst*)int_struct->inst, int_struct->slot_id, 0);
-		if (ss.tellp() == last_pos) {
+		SerializeItem(ob, (const ItemInst*)int_struct->inst, int_struct->slot_id, 0);
+		if (ob.tellp() == last_pos) {
 			Log.Out(Logs::General, Logs::Netcode, "[STRUCTS] Serialization failed on item slot %d.", int_struct->slot_id);
 			delete in;
 			return;
 		}
 
-		std::string serialized = ss.str();
+		in->size = ob.size();
+		in->pBuffer = ob.detach();
 		
-		in->size = serialized.size();
-		in->pBuffer = new uchar[in->size];
-		//ItemPacket_Struct* new_item_pkt = (ItemPacket_Struct*)in->pBuffer;
-		//new_item_pkt->PacketType = old_item_pkt->PacketType;
-		memcpy(in->pBuffer, serialized.c_str(), serialized.size());
-
 		delete[] __emu_buffer;
 
 		dest->FastQueuePacket(&in, ack_req);
@@ -2083,241 +2075,241 @@ namespace Titanium
 	}
 
 // file scope helper methods
-	void SerializeItem(std::stringstream& ss, const ItemInst *inst, int16 slot_id_in, uint8 depth)
+	void SerializeItem(EQEmu::OutBuffer& ob, const ItemInst *inst, int16 slot_id_in, uint8 depth)
 	{
 		const char* protection = "\\\\\\\\\\";
 		const Item_Struct* item = inst->GetUnscaledItem();
 
-		ss << StringFormat("%.*s%s", (depth ? (depth - 1) : 0), protection, (depth ? "\"" : "")); // For leading quotes (and protection) if a subitem;
+		ob << StringFormat("%.*s%s", (depth ? (depth - 1) : 0), protection, (depth ? "\"" : "")); // For leading quotes (and protection) if a subitem;
 		
 		// Instance data
-		ss << itoa((inst->IsStackable() ? inst->GetCharges() : 0)); // stack count
-		ss << '|' << itoa(0); // unknown
-		ss << '|' << itoa((!inst->GetMerchantSlot() ? slot_id_in : inst->GetMerchantSlot())); // inst slot/merchant slot
-		ss << '|' << itoa(inst->GetPrice()); // merchant price
-		ss << '|' << itoa((!inst->GetMerchantSlot() ? 1 : inst->GetMerchantCount())); // inst count/merchant count
-		ss << '|' << itoa((inst->IsScaling() ? (inst->GetExp() / 100) : 0)); // inst experience
-		ss << '|' << itoa((!inst->GetMerchantSlot() ? inst->GetSerialNumber() : inst->GetMerchantSlot())); // merchant serial number
-		ss << '|' << itoa(inst->GetRecastTimestamp()); // recast timestamp
-		ss << '|' << itoa(((inst->IsStackable() ? ((inst->GetItem()->ItemType == ItemTypePotion) ? 1 : 0) : inst->GetCharges()))); // charge count
-		ss << '|' << itoa((inst->IsAttuned() ? 1 : 0)); // inst attuned
-		ss << '|' << itoa(0); // unknown
-		ss << '|';
+		ob << itoa((inst->IsStackable() ? inst->GetCharges() : 0)); // stack count
+		ob << '|' << itoa(0); // unknown
+		ob << '|' << itoa((!inst->GetMerchantSlot() ? slot_id_in : inst->GetMerchantSlot())); // inst slot/merchant slot
+		ob << '|' << itoa(inst->GetPrice()); // merchant price
+		ob << '|' << itoa((!inst->GetMerchantSlot() ? 1 : inst->GetMerchantCount())); // inst count/merchant count
+		ob << '|' << itoa((inst->IsScaling() ? (inst->GetExp() / 100) : 0)); // inst experience
+		ob << '|' << itoa((!inst->GetMerchantSlot() ? inst->GetSerialNumber() : inst->GetMerchantSlot())); // merchant serial number
+		ob << '|' << itoa(inst->GetRecastTimestamp()); // recast timestamp
+		ob << '|' << itoa(((inst->IsStackable() ? ((inst->GetItem()->ItemType == ItemTypePotion) ? 1 : 0) : inst->GetCharges()))); // charge count
+		ob << '|' << itoa((inst->IsAttuned() ? 1 : 0)); // inst attuned
+		ob << '|' << itoa(0); // unknown
+		ob << '|';
 
-		ss << StringFormat("%.*s\"", depth, protection); // Quotes (and protection, if needed) around static data
+		ob << StringFormat("%.*s\"", depth, protection); // Quotes (and protection, if needed) around static data
 
 		// Item data
-		ss << itoa(item->ItemClass);
-		ss << '|' << item->Name;
-		ss << '|' << item->Lore;
-		ss << '|' << item->IDFile;
-		ss << '|' << itoa(item->ID);
-		ss << '|' << itoa(((item->Weight > 255) ? 255 : item->Weight));
+		ob << itoa(item->ItemClass);
+		ob << '|' << item->Name;
+		ob << '|' << item->Lore;
+		ob << '|' << item->IDFile;
+		ob << '|' << itoa(item->ID);
+		ob << '|' << itoa(((item->Weight > 255) ? 255 : item->Weight));
 
-		ss << '|' << itoa(item->NoRent);
-		ss << '|' << itoa(item->NoDrop);
-		ss << '|' << itoa(item->Size);
-		ss << '|' << itoa(item->Slots);
-		ss << '|' << itoa(item->Price);
-		ss << '|' << itoa(item->Icon);
-		ss << '|' << "0";
-		ss << '|' << "0";
-		ss << '|' << itoa(item->BenefitFlag);
-		ss << '|' << itoa(item->Tradeskills);
+		ob << '|' << itoa(item->NoRent);
+		ob << '|' << itoa(item->NoDrop);
+		ob << '|' << itoa(item->Size);
+		ob << '|' << itoa(item->Slots);
+		ob << '|' << itoa(item->Price);
+		ob << '|' << itoa(item->Icon);
+		ob << '|' << "0";
+		ob << '|' << "0";
+		ob << '|' << itoa(item->BenefitFlag);
+		ob << '|' << itoa(item->Tradeskills);
 
-		ss << '|' << itoa(item->CR);
-		ss << '|' << itoa(item->DR);
-		ss << '|' << itoa(item->PR);
-		ss << '|' << itoa(item->MR);
-		ss << '|' << itoa(item->FR);
+		ob << '|' << itoa(item->CR);
+		ob << '|' << itoa(item->DR);
+		ob << '|' << itoa(item->PR);
+		ob << '|' << itoa(item->MR);
+		ob << '|' << itoa(item->FR);
 
-		ss << '|' << itoa(item->AStr);
-		ss << '|' << itoa(item->ASta);
-		ss << '|' << itoa(item->AAgi);
-		ss << '|' << itoa(item->ADex);
-		ss << '|' << itoa(item->ACha);
-		ss << '|' << itoa(item->AInt);
-		ss << '|' << itoa(item->AWis);
+		ob << '|' << itoa(item->AStr);
+		ob << '|' << itoa(item->ASta);
+		ob << '|' << itoa(item->AAgi);
+		ob << '|' << itoa(item->ADex);
+		ob << '|' << itoa(item->ACha);
+		ob << '|' << itoa(item->AInt);
+		ob << '|' << itoa(item->AWis);
 
-		ss << '|' << itoa(item->HP);
-		ss << '|' << itoa(item->Mana);
-		ss << '|' << itoa(item->AC);
-		ss << '|' << itoa(item->Deity);
+		ob << '|' << itoa(item->HP);
+		ob << '|' << itoa(item->Mana);
+		ob << '|' << itoa(item->AC);
+		ob << '|' << itoa(item->Deity);
 
-		ss << '|' << itoa(item->SkillModValue);
-		ss << '|' << itoa(item->SkillModMax);
-		ss << '|' << itoa(item->SkillModType);
+		ob << '|' << itoa(item->SkillModValue);
+		ob << '|' << itoa(item->SkillModMax);
+		ob << '|' << itoa(item->SkillModType);
 
-		ss << '|' << itoa(item->BaneDmgRace);
-		ss << '|' << itoa(item->BaneDmgAmt);
-		ss << '|' << itoa(item->BaneDmgBody);
+		ob << '|' << itoa(item->BaneDmgRace);
+		ob << '|' << itoa(item->BaneDmgAmt);
+		ob << '|' << itoa(item->BaneDmgBody);
 
-		ss << '|' << itoa(item->Magic);
-		ss << '|' << itoa(item->CastTime_);
-		ss << '|' << itoa(item->ReqLevel);
-		ss << '|' << itoa(item->BardType);
-		ss << '|' << itoa(item->BardValue);
-		ss << '|' << itoa(item->Light);
-		ss << '|' << itoa(item->Delay);
+		ob << '|' << itoa(item->Magic);
+		ob << '|' << itoa(item->CastTime_);
+		ob << '|' << itoa(item->ReqLevel);
+		ob << '|' << itoa(item->BardType);
+		ob << '|' << itoa(item->BardValue);
+		ob << '|' << itoa(item->Light);
+		ob << '|' << itoa(item->Delay);
 
-		ss << '|' << itoa(item->RecLevel);
-		ss << '|' << itoa(item->RecSkill);
+		ob << '|' << itoa(item->RecLevel);
+		ob << '|' << itoa(item->RecSkill);
 
-		ss << '|' << itoa(item->ElemDmgType);
-		ss << '|' << itoa(item->ElemDmgAmt);
+		ob << '|' << itoa(item->ElemDmgType);
+		ob << '|' << itoa(item->ElemDmgAmt);
 
-		ss << '|' << itoa(item->Range);
-		ss << '|' << itoa(item->Damage);
+		ob << '|' << itoa(item->Range);
+		ob << '|' << itoa(item->Damage);
 
-		ss << '|' << itoa(item->Color);
-		ss << '|' << itoa(item->Classes);
-		ss << '|' << itoa(item->Races);
-		ss << '|' << "0";
+		ob << '|' << itoa(item->Color);
+		ob << '|' << itoa(item->Classes);
+		ob << '|' << itoa(item->Races);
+		ob << '|' << "0";
 
-		ss << '|' << itoa(item->MaxCharges);
-		ss << '|' << itoa(item->ItemType);
-		ss << '|' << itoa(item->Material);
-		ss << '|' << StringFormat("%f", item->SellRate);
+		ob << '|' << itoa(item->MaxCharges);
+		ob << '|' << itoa(item->ItemType);
+		ob << '|' << itoa(item->Material);
+		ob << '|' << StringFormat("%f", item->SellRate);
 
-		ss << '|' << "0";
-		ss << '|' << itoa(item->CastTime_);
-		ss << '|' << "0";
+		ob << '|' << "0";
+		ob << '|' << itoa(item->CastTime_);
+		ob << '|' << "0";
 
-		ss << '|' << itoa(item->ProcRate);
-		ss << '|' << itoa(item->CombatEffects);
-		ss << '|' << itoa(item->Shielding);
-		ss << '|' << itoa(item->StunResist);
-		ss << '|' << itoa(item->StrikeThrough);
-		ss << '|' << itoa(item->ExtraDmgSkill);
-		ss << '|' << itoa(item->ExtraDmgAmt);
-		ss << '|' << itoa(item->SpellShield);
-		ss << '|' << itoa(item->Avoidance);
-		ss << '|' << itoa(item->Accuracy);
+		ob << '|' << itoa(item->ProcRate);
+		ob << '|' << itoa(item->CombatEffects);
+		ob << '|' << itoa(item->Shielding);
+		ob << '|' << itoa(item->StunResist);
+		ob << '|' << itoa(item->StrikeThrough);
+		ob << '|' << itoa(item->ExtraDmgSkill);
+		ob << '|' << itoa(item->ExtraDmgAmt);
+		ob << '|' << itoa(item->SpellShield);
+		ob << '|' << itoa(item->Avoidance);
+		ob << '|' << itoa(item->Accuracy);
 
-		ss << '|' << itoa(item->CharmFileID);
+		ob << '|' << itoa(item->CharmFileID);
 
-		ss << '|' << itoa(item->FactionMod1);
-		ss << '|' << itoa(item->FactionMod2);
-		ss << '|' << itoa(item->FactionMod3);
-		ss << '|' << itoa(item->FactionMod4);
+		ob << '|' << itoa(item->FactionMod1);
+		ob << '|' << itoa(item->FactionMod2);
+		ob << '|' << itoa(item->FactionMod3);
+		ob << '|' << itoa(item->FactionMod4);
 
-		ss << '|' << itoa(item->FactionAmt1);
-		ss << '|' << itoa(item->FactionAmt2);
-		ss << '|' << itoa(item->FactionAmt3);
-		ss << '|' << itoa(item->FactionAmt4);
+		ob << '|' << itoa(item->FactionAmt1);
+		ob << '|' << itoa(item->FactionAmt2);
+		ob << '|' << itoa(item->FactionAmt3);
+		ob << '|' << itoa(item->FactionAmt4);
 
-		ss << '|' << item->CharmFile;
+		ob << '|' << item->CharmFile;
 
-		ss << '|' << itoa(item->AugType);
+		ob << '|' << itoa(item->AugType);
 
-		ss << '|' << itoa(item->AugSlotType[0]);
-		ss << '|' << itoa(item->AugSlotVisible[0]);
-		ss << '|' << itoa(item->AugSlotType[1]);
-		ss << '|' << itoa(item->AugSlotVisible[1]);
-		ss << '|' << itoa(item->AugSlotType[2]);
-		ss << '|' << itoa(item->AugSlotVisible[2]);
-		ss << '|' << itoa(item->AugSlotType[3]);
-		ss << '|' << itoa(item->AugSlotVisible[3]);
-		ss << '|' << itoa(item->AugSlotType[4]);
-		ss << '|' << itoa(item->AugSlotVisible[4]);
+		ob << '|' << itoa(item->AugSlotType[0]);
+		ob << '|' << itoa(item->AugSlotVisible[0]);
+		ob << '|' << itoa(item->AugSlotType[1]);
+		ob << '|' << itoa(item->AugSlotVisible[1]);
+		ob << '|' << itoa(item->AugSlotType[2]);
+		ob << '|' << itoa(item->AugSlotVisible[2]);
+		ob << '|' << itoa(item->AugSlotType[3]);
+		ob << '|' << itoa(item->AugSlotVisible[3]);
+		ob << '|' << itoa(item->AugSlotType[4]);
+		ob << '|' << itoa(item->AugSlotVisible[4]);
 
-		ss << '|' << itoa(item->LDoNTheme);
-		ss << '|' << itoa(item->LDoNPrice);
-		ss << '|' << itoa(item->LDoNSold);
+		ob << '|' << itoa(item->LDoNTheme);
+		ob << '|' << itoa(item->LDoNPrice);
+		ob << '|' << itoa(item->LDoNSold);
 
-		ss << '|' << itoa(item->BagType);
-		ss << '|' << itoa(item->BagSlots);
-		ss << '|' << itoa(item->BagSize);
-		ss << '|' << itoa(item->BagWR);
+		ob << '|' << itoa(item->BagType);
+		ob << '|' << itoa(item->BagSlots);
+		ob << '|' << itoa(item->BagSize);
+		ob << '|' << itoa(item->BagWR);
 
-		ss << '|' << itoa(item->Book);
-		ss << '|' << itoa(item->BookType);
+		ob << '|' << itoa(item->Book);
+		ob << '|' << itoa(item->BookType);
 
-		ss << '|' << item->Filename;
+		ob << '|' << item->Filename;
 
-		ss << '|' << itoa(item->BaneDmgRaceAmt);
-		ss << '|' << itoa(item->AugRestrict);
-		ss << '|' << itoa(item->LoreGroup);
-		ss << '|' << itoa(item->PendingLoreFlag);
-		ss << '|' << itoa(item->ArtifactFlag);
-		ss << '|' << itoa(item->SummonedFlag);
+		ob << '|' << itoa(item->BaneDmgRaceAmt);
+		ob << '|' << itoa(item->AugRestrict);
+		ob << '|' << itoa(item->LoreGroup);
+		ob << '|' << itoa(item->PendingLoreFlag);
+		ob << '|' << itoa(item->ArtifactFlag);
+		ob << '|' << itoa(item->SummonedFlag);
 
-		ss << '|' << itoa(item->Favor);
-		ss << '|' << itoa(item->FVNoDrop);
-		ss << '|' << itoa(item->Endur);
-		ss << '|' << itoa(item->DotShielding);
-		ss << '|' << itoa(item->Attack);
-		ss << '|' << itoa(item->Regen);
-		ss << '|' << itoa(item->ManaRegen);
-		ss << '|' << itoa(item->EnduranceRegen);
-		ss << '|' << itoa(item->Haste);
-		ss << '|' << itoa(item->DamageShield);
-		ss << '|' << itoa(item->RecastDelay);
-		ss << '|' << itoa(item->RecastType);
-		ss << '|' << itoa(item->GuildFavor);
+		ob << '|' << itoa(item->Favor);
+		ob << '|' << itoa(item->FVNoDrop);
+		ob << '|' << itoa(item->Endur);
+		ob << '|' << itoa(item->DotShielding);
+		ob << '|' << itoa(item->Attack);
+		ob << '|' << itoa(item->Regen);
+		ob << '|' << itoa(item->ManaRegen);
+		ob << '|' << itoa(item->EnduranceRegen);
+		ob << '|' << itoa(item->Haste);
+		ob << '|' << itoa(item->DamageShield);
+		ob << '|' << itoa(item->RecastDelay);
+		ob << '|' << itoa(item->RecastType);
+		ob << '|' << itoa(item->GuildFavor);
 
-		ss << '|' << itoa(item->AugDistiller);
+		ob << '|' << itoa(item->AugDistiller);
 
-		ss << '|' << "0"; // unknown
-		ss << '|' << "0"; // unknown
-		ss << '|' << itoa(item->Attuneable);
-		ss << '|' << itoa(item->NoPet);
-		ss << '|' << "0"; // unknown
-		ss << '|' << itoa(item->PointType);
+		ob << '|' << "0"; // unknown
+		ob << '|' << "0"; // unknown
+		ob << '|' << itoa(item->Attuneable);
+		ob << '|' << itoa(item->NoPet);
+		ob << '|' << "0"; // unknown
+		ob << '|' << itoa(item->PointType);
 
-		ss << '|' << itoa(item->PotionBelt);
-		ss << '|' << itoa(item->PotionBeltSlots);
-		ss << '|' << itoa(item->StackSize);
-		ss << '|' << itoa(item->NoTransfer);
-		ss << '|' << itoa(item->Stackable);
+		ob << '|' << itoa(item->PotionBelt);
+		ob << '|' << itoa(item->PotionBeltSlots);
+		ob << '|' << itoa(item->StackSize);
+		ob << '|' << itoa(item->NoTransfer);
+		ob << '|' << itoa(item->Stackable);
 
-		ss << '|' << itoa(item->Click.Effect);
-		ss << '|' << itoa(item->Click.Type);
-		ss << '|' << itoa(item->Click.Level2);
-		ss << '|' << itoa(item->Click.Level);
-		ss << '|' << "0"; // Click name
+		ob << '|' << itoa(item->Click.Effect);
+		ob << '|' << itoa(item->Click.Type);
+		ob << '|' << itoa(item->Click.Level2);
+		ob << '|' << itoa(item->Click.Level);
+		ob << '|' << "0"; // Click name
 
-		ss << '|' << itoa(item->Proc.Effect);
-		ss << '|' << itoa(item->Proc.Type);
-		ss << '|' << itoa(item->Proc.Level2);
-		ss << '|' << itoa(item->Proc.Level);
-		ss << '|' << "0"; // Proc name
+		ob << '|' << itoa(item->Proc.Effect);
+		ob << '|' << itoa(item->Proc.Type);
+		ob << '|' << itoa(item->Proc.Level2);
+		ob << '|' << itoa(item->Proc.Level);
+		ob << '|' << "0"; // Proc name
 
-		ss << '|' << itoa(item->Worn.Effect);
-		ss << '|' << itoa(item->Worn.Type);
-		ss << '|' << itoa(item->Worn.Level2);
-		ss << '|' << itoa(item->Worn.Level);
-		ss << '|' << "0"; // Worn name
+		ob << '|' << itoa(item->Worn.Effect);
+		ob << '|' << itoa(item->Worn.Type);
+		ob << '|' << itoa(item->Worn.Level2);
+		ob << '|' << itoa(item->Worn.Level);
+		ob << '|' << "0"; // Worn name
 
-		ss << '|' << itoa(item->Focus.Effect);
-		ss << '|' << itoa(item->Focus.Type);
-		ss << '|' << itoa(item->Focus.Level2);
-		ss << '|' << itoa(item->Focus.Level);
-		ss << '|' << "0"; // Focus name
+		ob << '|' << itoa(item->Focus.Effect);
+		ob << '|' << itoa(item->Focus.Type);
+		ob << '|' << itoa(item->Focus.Level2);
+		ob << '|' << itoa(item->Focus.Level);
+		ob << '|' << "0"; // Focus name
 
-		ss << '|' << itoa(item->Scroll.Effect);
-		ss << '|' << itoa(item->Scroll.Type);
-		ss << '|' << itoa(item->Scroll.Level2);
-		ss << '|' << itoa(item->Scroll.Level);
-		ss << '|' << "0"; // Scroll name
+		ob << '|' << itoa(item->Scroll.Effect);
+		ob << '|' << itoa(item->Scroll.Type);
+		ob << '|' << itoa(item->Scroll.Level2);
+		ob << '|' << itoa(item->Scroll.Level);
+		ob << '|' << "0"; // Scroll name
 
-		ss << StringFormat("%.*s\"", depth, protection); // Quotes (and protection, if needed) around static data
+		ob << StringFormat("%.*s\"", depth, protection); // Quotes (and protection, if needed) around static data
 
 		// Sub data
 		for (int index = SUB_INDEX_BEGIN; index < consts::ITEM_CONTAINER_SIZE; ++index) {
-			ss << '|';
+			ob << '|';
 
 			ItemInst* sub = inst->GetItem(index);
 			if (!sub)
 				continue;
 			
-			SerializeItem(ss, sub, 0, (depth + 1));
+			SerializeItem(ob, sub, 0, (depth + 1));
 		}
 
-		ss << StringFormat("%.*s%s", (depth ? (depth - 1) : 0), protection, (depth ? "\"" : "")); // For trailing quotes (and protection) if a subitem;
+		ob << StringFormat("%.*s%s", (depth ? (depth - 1) : 0), protection, (depth ? "\"" : "")); // For trailing quotes (and protection) if a subitem;
 
 		if (!depth)
-			ss.write("\0", 1);
+			ob.write("\0", 1);
 	}
 
 	static inline int16 ServerToTitaniumSlot(uint32 serverSlot)
