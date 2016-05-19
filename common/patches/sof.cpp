@@ -3165,7 +3165,7 @@ namespace SoF
 		
 		ob.write((const char*)&iqbs, sizeof(SoF::structs::ItemQuaternaryBodyStruct));
 
-		std::stringstream::pos_type count_pos = ob.tellp();
+		EQEmu::OutBuffer::pos_type count_pos = ob.tellp();
 		uint32 subitem_count = 0;
 
 		ob.write((const char*)&subitem_count, sizeof(uint32));
