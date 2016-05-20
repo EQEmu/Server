@@ -1,4 +1,5 @@
 /*	EQEMu: Everquest Server Emulator
+
 	Copyright (C) 2001-2016 EQEMu Development Team (http://eqemu.org)
 
 	This program is free software; you can redistribute it and/or modify
@@ -13,8 +14,9 @@
 
 	You should have received a copy of the GNU General Public License
 	along with this program; if not, write to the Free Software
-	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
+
 #ifndef COMMON_DEITY_H
 #define COMMON_DEITY_H
 
@@ -70,7 +72,9 @@ namespace EQEmu
 		extern DeityTypeBit ConvertDeityTypeToDeityTypeBit(DeityType deity_type);
 		extern DeityType ConvertDeityTypeBitToDeityType(DeityTypeBit deity_type_bit);
 		extern const char* DeityName(DeityType deity_type);
-	}
-}
+
+	} /*deity*/
+
+} /*EQEmu*/
 
 #endif /* COMMON_DEITY_H */

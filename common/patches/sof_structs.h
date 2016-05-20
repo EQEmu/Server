@@ -1,7 +1,28 @@
-#ifndef SOF_STRUCTS_H_
-#define SOF_STRUCTS_H_
+/*	EQEMu: Everquest Server Emulator
+	
+	Copyright (C) 2001-2016 EQEMu Development Team (http://eqemulator.net)
 
-namespace SoF {
+	This program is free software; you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation; version 2 of the License.
+
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY except by those people which sell it, which
+	are required to give you total support for your newly bought product;
+	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+	A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+
+	You should have received a copy of the GNU General Public License
+	along with this program; if not, write to the Free Software
+	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+*/
+
+#ifndef COMMON_SOF_STRUCTS_H
+#define COMMON_SOF_STRUCTS_H
+
+
+namespace SoF
+{
 	namespace structs {
 
 
@@ -4133,7 +4154,8 @@ struct AltCurrencySellItem_Struct {
 /*010*/ uint32 cost;
 };
 
-	};	//end namespace structs
-};	//end namespace SoF
+	}; /*structs*/
 
-#endif /*SOF_STRUCTS_H_*/
+}; /*SoF*/
+
+#endif /*COMMON_SOF_STRUCTS_H*/
