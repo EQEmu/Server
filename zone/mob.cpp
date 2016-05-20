@@ -178,12 +178,10 @@ Mob::Mob(const char* in_name,
 	if (runspeed < 0 || runspeed > 20)
 		runspeed = 1.25f;
 
-	m_Light.Type.Innate = in_light;
-	m_Light.Level.Innate = EQEmu::lightsource::TypeToLevel(m_Light.Type.Innate);
-	m_Light.Level.Equipment = m_Light.Type.Equipment = 0;
-	m_Light.Level.Spell = m_Light.Type.Spell = 0;
-	m_Light.Type.Active = m_Light.Type.Innate;
-	m_Light.Level.Active = m_Light.Level.Innate;
+	m_Light.Type[EQEmu::lightsource::LightInnate] = in_light;
+	m_Light.Level[EQEmu::lightsource::LightInnate] = EQEmu::lightsource::TypeToLevel(m_Light.Type[EQEmu::lightsource::LightInnate]);
+	m_Light.Type[EQEmu::lightsource::LightActive] = m_Light.Type[EQEmu::lightsource::LightInnate];
+	m_Light.Level[EQEmu::lightsource::LightActive] = m_Light.Level[EQEmu::lightsource::LightInnate];
 
 	texture		= in_texture;
 	helmtexture	= in_helmtexture;
@@ -1100,7 +1098,7 @@ void Mob::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho)
 	ns->spawn.findable	= findable?1:0;
 
 	UpdateActiveLight();
-	ns->spawn.light		= m_Light.Type.Active;
+	ns->spawn.light		= m_Light.Type[EQEmu::lightsource::LightActive];
 
 	ns->spawn.showhelm = (helmtexture && helmtexture != 0xFF) ? 1 : 0;
 
@@ -2227,18 +2225,18 @@ void Mob::SetAppearance(EmuAppearance app, bool iIgnoreSelf) {
 
 bool Mob::UpdateActiveLight()
 {
-	uint8 old_light_level = m_Light.Level.Active;
+	uint8 old_light_level = m_Light.Level[EQEmu::lightsource::LightActive];
 
-	m_Light.Type.Active = 0;
-	m_Light.Level.Active = 0;
+	m_Light.Type[EQEmu::lightsource::LightActive] = 0;
+	m_Light.Level[EQEmu::lightsource::LightActive] = 0;
 
-	if (EQEmu::lightsource::IsLevelGreater((m_Light.Type.Innate & 0x0F), m_Light.Type.Active)) { m_Light.Type.Active = m_Light.Type.Innate; }
-	if (m_Light.Level.Equipment > m_Light.Level.Active) { m_Light.Type.Active = m_Light.Type.Equipment; } // limiter in property handler
-	if (m_Light.Level.Spell > m_Light.Level.Active) { m_Light.Type.Active = m_Light.Type.Spell; } // limiter in property handler
+	if (EQEmu::lightsource::IsLevelGreater((m_Light.Type[EQEmu::lightsource::LightInnate] & 0x0F), m_Light.Type[EQEmu::lightsource::LightActive])) { m_Light.Type[EQEmu::lightsource::LightActive] = m_Light.Type[EQEmu::lightsource::LightInnate]; }
+	if (m_Light.Level[EQEmu::lightsource::LightEquipment] > m_Light.Level[EQEmu::lightsource::LightActive]) { m_Light.Type[EQEmu::lightsource::LightActive] = m_Light.Type[EQEmu::lightsource::LightEquipment]; } // limiter in property handler
+	if (m_Light.Level[EQEmu::lightsource::LightSpell] > m_Light.Level[EQEmu::lightsource::LightActive]) { m_Light.Type[EQEmu::lightsource::LightActive] = m_Light.Type[EQEmu::lightsource::LightSpell]; } // limiter in property handler
 
-	m_Light.Level.Active = EQEmu::lightsource::TypeToLevel(m_Light.Type.Active);
+	m_Light.Level[EQEmu::lightsource::LightActive] = EQEmu::lightsource::TypeToLevel(m_Light.Type[EQEmu::lightsource::LightActive]);
 
-	return (m_Light.Level.Active != old_light_level);
+	return (m_Light.Level[EQEmu::lightsource::LightActive] != old_light_level);
 }
 
 void Mob::ChangeSize(float in_size = 0, bool bNoRestriction) {

@@ -93,7 +93,6 @@ Bot::Bot(NPCType npcTypeData, Client* botOwner) : NPC(&npcTypeData, nullptr, glm
 		timers[i] = 0;
 
 	strcpy(this->name, this->GetCleanName());
-	memset(&m_Light, 0, sizeof(EQEmu::lightsource::LightSourceProfile));
 	memset(&_botInspectMessage, 0, sizeof(InspectMessage_Struct));
 }
 
@@ -2955,7 +2954,7 @@ void Bot::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho) {
 		ns->spawn.size = 0;
 		ns->spawn.NPC = 0;					// 0=player,1=npc,2=pc corpse,3=npc corpse
 		UpdateActiveLight();
-		ns->spawn.light = m_Light.Type.Active;
+		ns->spawn.light = m_Light.Type[EQEmu::lightsource::LightActive];
 		ns->spawn.helm = helmtexture; //(GetShowHelm() ? helmtexture : 0); //0xFF;
 		ns->spawn.equip_chest2 = texture; //0xFF;
 		const Item_Struct* item = 0;

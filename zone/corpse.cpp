@@ -139,10 +139,8 @@ Corpse* Corpse::LoadCharacterCorpseEntity(uint32 in_dbid, uint32 in_charid, std:
 	pc->IsRezzed(rezzed);
 	pc->become_npc = false;
 
-	pc->m_Light.Level.Innate = pc->m_Light.Type.Innate = 0;
 	pc->UpdateEquipmentLight(); // itemlist populated above..need to determine actual values
-	pc->m_Light.Level.Spell = pc->m_Light.Type.Spell = 0;
-
+	
 	safe_delete_array(pcs);
 
 	return pc;
@@ -531,7 +529,6 @@ in_helmtexture,
 	SetPlayerKillItemID(0);
 
 	UpdateEquipmentLight();
-	m_Light.Level.Spell = m_Light.Type.Spell = 0;
 	UpdateActiveLight();
 }
 
@@ -1283,7 +1280,7 @@ void Corpse::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho) {
 	ns->spawn.NPC = 2;
 
 	UpdateActiveLight();
-	ns->spawn.light = m_Light.Type.Active;
+	ns->spawn.light = m_Light.Type[EQEmu::lightsource::LightActive];
 }
 
 void Corpse::QueryLoot(Client* to) {
@@ -1432,8 +1429,8 @@ uint32 Corpse::GetEquipmentColor(uint8 material_slot) const {
 
 void Corpse::UpdateEquipmentLight()
 {
-	m_Light.Type.Equipment = 0;
-	m_Light.Level.Equipment = 0;
+	m_Light.Type[EQEmu::lightsource::LightEquipment] = 0;
+	m_Light.Level[EQEmu::lightsource::LightEquipment] = 0;
 
 	for (auto iter = itemlist.begin(); iter != itemlist.end(); ++iter) {
 		if (((*iter)->equip_slot < EQEmu::legacy::EQUIPMENT_BEGIN || (*iter)->equip_slot > EQEmu::legacy::EQUIPMENT_END) && (*iter)->equip_slot != EQEmu::legacy::SlotPowerSource) { continue; }
@@ -1442,8 +1439,8 @@ void Corpse::UpdateEquipmentLight()
 		auto item = database.GetItem((*iter)->item_id);
 		if (item == nullptr) { continue; }
 		
-		if (EQEmu::lightsource::IsLevelGreater(item->Light, m_Light.Type.Equipment))
-			m_Light.Type.Equipment = item->Light;
+		if (EQEmu::lightsource::IsLevelGreater(item->Light, m_Light.Type[EQEmu::lightsource::LightEquipment]))
+			m_Light.Type[EQEmu::lightsource::LightEquipment] = item->Light;
 	}
 	
 	uint8 general_light_type = 0;
@@ -1460,10 +1457,10 @@ void Corpse::UpdateEquipmentLight()
 			general_light_type = item->Light;
 	}
 
-	if (EQEmu::lightsource::IsLevelGreater(general_light_type, m_Light.Type.Equipment))
-		m_Light.Type.Equipment = general_light_type;
+	if (EQEmu::lightsource::IsLevelGreater(general_light_type, m_Light.Type[EQEmu::lightsource::LightEquipment]))
+		m_Light.Type[EQEmu::lightsource::LightEquipment] = general_light_type;
 
-	m_Light.Level.Equipment = EQEmu::lightsource::TypeToLevel(m_Light.Type.Equipment);
+	m_Light.Level[EQEmu::lightsource::LightEquipment] = EQEmu::lightsource::TypeToLevel(m_Light.Type[EQEmu::lightsource::LightEquipment]);
 }
 
 void Corpse::AddLooter(Mob* who) {

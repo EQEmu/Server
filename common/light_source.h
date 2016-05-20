@@ -1,4 +1,4 @@
-/*	EQEMu:  Everquest Server Emulator
+/*	EQEMu: Everquest Server Emulator
 	
 	Copyright (C) 2001-2016 EQEMu Development Team (http://eqemulator.net)
 
@@ -26,6 +26,15 @@
 namespace EQEmu
 {
 	namespace lightsource {
+		enum LightSlot {
+			LightInnate = 0,	// Defined by db field `npc_types`.`light` - where appropriate
+			LightEquipment,		// Item_Struct::light value of worn/carried equipment
+			LightSpell,			// Set value of any light-producing spell (can be modded to mimic equip_light behavior)
+			LightActive,		// Highest value of all light sources
+			LightCount
+		};
+
+
 		enum LightType {
 			LightTypeNone = 0,
 			LightTypeCandle,
@@ -61,47 +70,47 @@ namespace EQEmu
 			LightLevelCount
 		};
 
-		struct LightSourceProfile {
-			/*
-			Current criteria (light types):
-			Equipment:	{ 0 .. 15 }
-			General:	{ 9 .. 13 }
+		struct Light_Struct {
+			uint8 Slot[LightCount];
 
-			Notes:
-			- Initial character load and item movement updates use different light source update behaviors
-			-- Server procedure matches the item movement behavior since most updates occur post-character load
-			- MainAmmo is not considered when determining light sources
-			- No 'Sub' or 'Aug' items are recognized as light sources
-			- Light types '< 9' and '> 13' are not considered for general (carried) light sources
-			- If values > 0x0F are valid, then assignment limiters will need to be removed
-			- MainCursor 'appears' to be a valid light source update slot..but, have not experienced updates during debug sessions
-			- All clients have a bug regarding stackable items (light and sound updates are not processed when picking up an item)
-			-- The timer-based update cancels out the invalid light source
-			*/
-			LightSourceProfile();
+			Light_Struct();
 
 			void Clear();
 
-			// Light types (classifications)
-			struct {
-				uint8 Innate;		// Defined by db field `npc_types`.`light` - where appropriate
-				uint8 Equipment;	// Item_Struct::light value of worn/carried equipment
-				uint8 Spell;		// Set value of any light-producing spell (can be modded to mimic equip_light behavior)
-				uint8 Active;		// Highest value of all light sources
-			} Type;
-
-			// Light levels (intensities) - used to determine which light source should be active
-			struct {
-				uint8 Innate;
-				uint8 Equipment;
-				uint8 Spell;
-				uint8 Active;
-			} Level;
+			inline uint8& operator[](LightSlot index) { return Slot[index]; }
 		};
 
 		extern uint8 TypeToLevel(uint8 light_type);
 		extern bool IsLevelGreater(uint8 left_type, uint8 right_type);
-	};
-}
+	
+	}; /*lightsource*/
 
-#endif /* COMMON_LIGHT_SOURCE_H */
+	struct LightSourceProfile {
+		/*
+		Current criteria (light types):
+		Equipment:	{ 0 .. 15 }
+		General:	{ 9 .. 13 }
+
+		Notes:
+		- Initial character load and item movement updates use different light source update behaviors
+		-- Server procedure matches the item movement behavior since most updates occur post-character load
+		- MainAmmo is not considered when determining light sources
+		- No 'Sub' or 'Aug' items are recognized as light sources
+		- Light types '< 9' and '> 13' are not considered for general (carried) light sources
+		- If values > 0x0F are valid, then assignment limiters will need to be removed
+		- MainCursor 'appears' to be a valid light source update slot..but, have not experienced updates during debug sessions
+		- All clients have a bug regarding stackable items (light and sound updates are not processed when picking up an item)
+		-- The timer-based update cancels out the invalid light source
+		*/
+
+		lightsource::Light_Struct Type; // Light types (classifications)
+		lightsource::Light_Struct Level; // Light levels (intensities) - used to determine which light source should be active
+
+		LightSourceProfile() { }
+
+		void Clear();
+	};
+
+} /*EQEmu*/
+
+#endif /*COMMON_LIGHT_SOURCE_H*/

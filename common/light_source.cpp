@@ -1,4 +1,4 @@
-/*	EQEMu:  Everquest Server Emulator
+/*	EQEMu: Everquest Server Emulator
 	
 	Copyright (C) 2001-2016 EQEMu Development Team (http://eqemulator.net)
 
@@ -19,24 +19,8 @@
 
 #include "light_source.h"
 
+#include <memory>
 
-EQEmu::lightsource::LightSourceProfile::LightSourceProfile()
-{
-	Clear();
-}
-
-void EQEmu::lightsource::LightSourceProfile::Clear()
-{
-	Type.Innate = 0;
-	Type.Equipment = 0;
-	Type.Spell = 0;
-	Type.Active = 0;
-
-	Level.Innate = 0;
-	Level.Equipment = 0;
-	Level.Spell = 0;
-	Level.Active = 0;
-}
 
 uint8 EQEmu::lightsource::TypeToLevel(uint8 light_type)
 {
@@ -96,4 +80,20 @@ bool EQEmu::lightsource::IsLevelGreater(uint8 left_type, uint8 right_type)
 	if (right_type >= LightTypeCount) { right_type = LightTypeNone; }
 
 	return (light_levels[left_type] > light_levels[right_type]);
+}
+
+EQEmu::lightsource::Light_Struct::Light_Struct()
+{
+	Clear();
+}
+
+void EQEmu::lightsource::Light_Struct::Clear()
+{
+	memset(&Slot, 0, (sizeof(uint8) * sizeof(Slot)));
+}
+
+void EQEmu::LightSourceProfile::Clear()
+{
+	Type.Clear();
+	Level.Clear();
 }

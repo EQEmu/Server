@@ -703,17 +703,17 @@ public:
 	bool IsDestructibleObject() { return destructibleobject; }
 	void SetDestructibleObject(bool in) { destructibleobject = in; }
 
-	inline uint8 GetInnateLightType() { return m_Light.Type.Innate; }
-	inline uint8 GetEquipmentLightType() { return m_Light.Type.Equipment; }
-	inline uint8 GetSpellLightType() { return m_Light.Type.Spell; }
+	inline uint8 GetInnateLightType() { return m_Light.Type[EQEmu::lightsource::LightInnate]; }
+	inline uint8 GetEquipmentLightType() { return m_Light.Type[EQEmu::lightsource::LightEquipment]; }
+	inline uint8 GetSpellLightType() { return m_Light.Type[EQEmu::lightsource::LightSpell]; }
 
-	virtual void UpdateEquipmentLight() { m_Light.Type.Equipment = 0; m_Light.Level.Equipment = 0; }
-	inline void SetSpellLightType(uint8 light_type) { m_Light.Type.Spell = (light_type & 0x0F); m_Light.Level.Spell = EQEmu::lightsource::TypeToLevel(m_Light.Type.Spell); }
+	virtual void UpdateEquipmentLight() { m_Light.Type[EQEmu::lightsource::LightEquipment] = 0; m_Light.Level[EQEmu::lightsource::LightEquipment] = 0; }
+	inline void SetSpellLightType(uint8 light_type) { m_Light.Type[EQEmu::lightsource::LightSpell] = (light_type & 0x0F); m_Light.Level[EQEmu::lightsource::LightSpell] = EQEmu::lightsource::TypeToLevel(m_Light.Type[EQEmu::lightsource::LightSpell]); }
 
-	inline uint8 GetActiveLightType() { return m_Light.Type.Active; }
+	inline uint8 GetActiveLightType() { return m_Light.Type[EQEmu::lightsource::LightActive]; }
 	bool UpdateActiveLight(); // returns true if change, false if no change
 
-	EQEmu::lightsource::LightSourceProfile* GetLightProfile() { return &m_Light; }
+	EQEmu::LightSourceProfile* GetLightProfile() { return &m_Light; }
 
 	Mob* GetPet();
 	void SetPet(Mob* newpet);
@@ -1185,7 +1185,7 @@ protected:
 
 	glm::vec4 m_Delta;
 
-	EQEmu::lightsource::LightSourceProfile m_Light;
+	EQEmu::LightSourceProfile m_Light;
 
 	float fixedZ;
 	EmuAppearance _appearance;

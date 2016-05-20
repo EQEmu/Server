@@ -1,4 +1,4 @@
-/*	EQEMu:  Everquest Server Emulator
+/*	EQEMu: Everquest Server Emulator
 	
 	Copyright (C) 2001-2016 EQEMu Development Team (http://eqemulator.net)
 
@@ -55,7 +55,9 @@ namespace EQEmu
 		extern const char* InventoryVersionName(InventoryVersion inventory_version);
 		extern ClientVersion ConvertInventoryVersionToClientVersion(InventoryVersion inventory_version);
 		extern InventoryVersion ConvertClientVersionToInventoryVersion(ClientVersion client_version);
-	}
-}
+	
+	} /*versions*/
 
-#endif /* COMMON_INVENTORY_VERSION_H */
+} /*EQEmu*/
+
+#endif /*COMMON_INVENTORY_VERSION_H*/

@@ -1,4 +1,4 @@
-/*	EQEMu:  Everquest Server Emulator
+/*	EQEMu: Everquest Server Emulator
 	
 	Copyright (C) 2001-2016 EQEMu Development Team (http://eqemulator.net)
 
@@ -70,7 +70,9 @@ namespace EQEmu
 		extern uint32 ConvertClientVersionToClientVersionBit(ClientVersion client_version);
 		extern ClientVersion ConvertClientVersionBitToClientVersion(uint32 client_version_bit);
 		extern uint32 ConvertClientVersionToExpansion(ClientVersion client_version);
-	}
-}
+	
+	} /*versions*/
 
-#endif /* COMMON_CLIENT_VERSION_H */
+} /*EQEmu*/
+
+#endif /*COMMON_CLIENT_VERSION_H*/
