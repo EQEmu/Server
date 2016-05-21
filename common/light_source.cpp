@@ -19,7 +19,7 @@
 
 #include "light_source.h"
 
-#include <string>
+#include <string.h>
 
 
 uint8 EQEmu::lightsource::TypeToLevel(uint8 light_type)
