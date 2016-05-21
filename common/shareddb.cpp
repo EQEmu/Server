@@ -407,13 +407,13 @@ bool SharedDatabase::GetSharedBank(uint32 id, Inventory *inv, bool is_charid)
 				     "sb.augslot1, sb.augslot2, sb.augslot3, "
 				     "sb.augslot4, sb.augslot5, sb.augslot6, sb.custom_data "
 				     "FROM sharedbank sb INNER JOIN character_data ch "
-				     "ON ch.account_id=sb.acctid WHERE ch.id = %i",
+				     "ON ch.account_id=sb.acctid WHERE ch.id = %i ORDER BY sb.slotid",
 				     id);
 	else
 		query = StringFormat("SELECT slotid, itemid, charges, "
 				     "augslot1, augslot2, augslot3, "
 				     "augslot4, augslot5, augslot6, custom_data "
-				     "FROM sharedbank WHERE acctid=%i",
+				     "FROM sharedbank WHERE acctid=%i ORDER BY slotid",
 				     id);
 	auto results = QueryDatabase(query);
 	if (!results.Success()) {
