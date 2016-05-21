@@ -104,9 +104,9 @@ QueryServ *QServ = 0;
 TaskManager *taskmanager = 0;
 QuestParserCollection *parse = 0;
 EQEmuLogSys Log;
-
 const SPDat_Spell_Struct* spells;
 int32 SPDAT_RECORDS = -1;
+const ZoneConfig *Config;
 
 void Shutdown();
 extern void MapOpcodes();
@@ -123,7 +123,7 @@ int main(int argc, char** argv) {
 		Log.Out(Logs::General, Logs::Error, "Loading server configuration failed.");
 		return 1;
 	}
-	const ZoneConfig *Config = ZoneConfig::get();
+	Config = ZoneConfig::get();
 
 	const char *zone_name;
 	uint32 instance_id = 0;
@@ -195,7 +195,7 @@ int main(int argc, char** argv) {
 	}
 
 	worldserver.SetPassword(Config->SharedKey.c_str());
-
+	
 	Log.Out(Logs::General, Logs::Zone_Server, "Connecting to MySQL...");
 	if (!database.Connect(
 		Config->DatabaseHost.c_str(),

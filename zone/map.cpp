@@ -227,7 +227,7 @@ bool Map::CheckLoS(glm::vec3 myloc, glm::vec3 oloc) const {
 }
 
 Map *Map::LoadMapFile(std::string file) {
-	std::string filename = MAP_DIR;
+	std::string filename = Config->MapDir;
 	filename += "/";
 	std::transform(file.begin(), file.end(), file.begin(), ::tolower);
 	filename += file;

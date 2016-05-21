@@ -25,7 +25,11 @@
 #include "position.h"
 #include <stdio.h>
 
+#include "zone_config.h"
+
 #define BEST_Z_INVALID -99999
+
+extern const ZoneConfig *Config;
 
 class Map
 {

@@ -21,6 +21,7 @@
 #define COMMON_TITANIUM_H
 
 #include "../struct_strategy.h"
+#include "../eqemu_config_extern.h"
 
 
 class EQStreamIdentifier;
