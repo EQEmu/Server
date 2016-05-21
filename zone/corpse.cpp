@@ -407,7 +407,7 @@ void Corpse::MoveItemToCorpse(Client *client, ItemInst *inst, int16 equipSlot, s
 	removedList.push_back(equipSlot);
 
 	while (true) {
-		if (!inst->IsType(ItemClassContainer)) { break; }
+		if (!inst->IsClassBag()) { break; }
 		if (equipSlot < EQEmu::legacy::GENERAL_BEGIN || equipSlot > EQEmu::legacy::SlotCursor) { break; }
 
 		for (auto sub_index = SUB_INDEX_BEGIN; sub_index < EQEmu::legacy::ITEM_CONTAINER_SIZE; ++sub_index) {
@@ -977,7 +977,7 @@ void Corpse::MakeLootRequestPackets(Client* client, const EQApplicationPacket* a
 		safe_delete(outapp);
 		if(Loot_Request_Type == 5) {
 			int pkitem = GetPlayerKillItem();
-			const Item_Struct* item = database.GetItem(pkitem);
+			const EQEmu::Item_Struct* item = database.GetItem(pkitem);
 			ItemInst* inst = database.CreateItem(item, item->MaxCharges);
 			if(inst) {
 				if (item->RecastDelay)
@@ -992,7 +992,7 @@ void Corpse::MakeLootRequestPackets(Client* client, const EQApplicationPacket* a
 		}
 
 		int i = 0;
-		const Item_Struct* item = 0;
+		const EQEmu::Item_Struct* item = 0;
 		ItemList::iterator cur,end;
 		cur = itemlist.begin();
 		end = itemlist.end();
@@ -1107,7 +1107,7 @@ void Corpse::LootItem(Client* client, const EQApplicationPacket* app) {
 		being_looted_by = 0xFFFFFFFF;
 		return;
 	}
-	const Item_Struct* item = 0;
+	const EQEmu::Item_Struct* item = 0;
 	ItemInst *inst = 0;
 	ServerLootItem_Struct* item_data = nullptr, *bag_item_data[10];
 
@@ -1206,7 +1206,7 @@ void Corpse::LootItem(Client* client, const EQApplicationPacket* app) {
 		}
 
 		/* Remove Bag Contents */
-		if (item->ItemClass == ItemClassContainer && (GetPlayerKillItem() != -1 || GetPlayerKillItem() != 1)) {
+		if (item->IsClassBag() && (GetPlayerKillItem() != -1 || GetPlayerKillItem() != 1)) {
 			for (int i = SUB_INDEX_BEGIN; i < EQEmu::legacy::ITEM_CONTAINER_SIZE; i++) {
 				if (bag_item_data[i]) {
 					/* Delete needs to be before RemoveItem because its deletes the pointer for item_data/bag_item_data */
@@ -1302,7 +1302,7 @@ void Corpse::QueryLoot(Client* to) {
 			else
 				x < corpselootlimit ? sitem->lootslot = x : sitem->lootslot = 0xFFFF;
 
-			const Item_Struct* item = database.GetItem(sitem->item_id);
+			const EQEmu::Item_Struct* item = database.GetItem(sitem->item_id);
 
 			if (item)
 				to->Message((sitem->lootslot == 0xFFFF), "LootSlot: %i (EquipSlot: %i) Item: %s (%d), Count: %i", static_cast<int16>(sitem->lootslot), sitem->equip_slot, item->Name, item->ID, sitem->charges);
@@ -1316,7 +1316,7 @@ void Corpse::QueryLoot(Client* to) {
 		}
 		else {
 			sitem->lootslot=y;
-			const Item_Struct* item = database.GetItem(sitem->item_id);
+			const EQEmu::Item_Struct* item = database.GetItem(sitem->item_id);
 
 			if (item)
 				to->Message(0, "LootSlot: %i Item: %s (%d), Count: %i", sitem->lootslot, item->Name, item->ID, sitem->charges);
@@ -1411,7 +1411,7 @@ uint32 Corpse::GetEquipment(uint8 material_slot) const {
 }
 
 uint32 Corpse::GetEquipmentColor(uint8 material_slot) const {
-	const Item_Struct *item;
+	const EQEmu::Item_Struct *item;
 
 	if (material_slot > EQEmu::legacy::MATERIAL_END) {
 		return 0;
@@ -1450,7 +1450,7 @@ void Corpse::UpdateEquipmentLight()
 		auto item = database.GetItem((*iter)->item_id);
 		if (item == nullptr) { continue; }
 		
-		if (item->ItemClass != ItemClassCommon) { continue; }
+		if (!item->IsClassCommon()) { continue; }
 		if (item->Light < 9 || item->Light > 13) { continue; }
 
 		if (EQEmu::lightsource::TypeToLevel(item->Light))

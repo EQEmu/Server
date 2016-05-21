@@ -35,7 +35,7 @@ void LoadItems(SharedDatabase *database, const std::string &prefix) {
 		EQ_EXCEPT("Shared Memory", "Unable to get any items from the database.");
 	}
 
-	uint32 size = static_cast<uint32>(EQEmu::FixedMemoryHashSet<Item_Struct>::estimated_size(items, max_item));
+	uint32 size = static_cast<uint32>(EQEmu::FixedMemoryHashSet<EQEmu::Item_Struct>::estimated_size(items, max_item));
 
 	std::string file_name = std::string("shared/") + prefix + std::string("items");
 	EQEmu::MemoryMappedFile mmf(file_name, size);

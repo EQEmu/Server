@@ -152,14 +152,14 @@ void Client::CalcItemBonuses(StatBonuses* newbon) {
 		AddItemBonuses(inst, newbon, false, false, 0, (i == EQEmu::legacy::SlotAmmo));
 
 		//These are given special flags due to how often they are checked for various spell effects.
-		const Item_Struct *item = inst->GetItem();
-		if (i == EQEmu::legacy::SlotSecondary && (item && item->ItemType == ItemTypeShield))
+		const EQEmu::Item_Struct *item = inst->GetItem();
+		if (i == EQEmu::legacy::SlotSecondary && (item && item->ItemType == EQEmu::item::ItemTypeShield))
 			SetShieldEquiped(true);
-		else if (i == EQEmu::legacy::SlotPrimary && (item && item->ItemType == ItemType2HBlunt)) {
+		else if (i == EQEmu::legacy::SlotPrimary && (item && item->ItemType == EQEmu::item::ItemType2HBlunt)) {
 			SetTwoHandBluntEquiped(true);
 			SetTwoHanderEquipped(true);
 		}
-		else if (i == EQEmu::legacy::SlotPrimary && (item && (item->ItemType == ItemType2HSlash || item->ItemType == ItemType2HPiercing)))
+		else if (i == EQEmu::legacy::SlotPrimary && (item && (item->ItemType == EQEmu::item::ItemType2HSlash || item->ItemType == EQEmu::item::ItemType2HPiercing)))
 			SetTwoHanderEquipped(true);
 	}
 
@@ -180,7 +180,7 @@ void Client::CalcItemBonuses(StatBonuses* newbon) {
 	}
 
 	//Optional ability to have worn effects calculate as an addititive bonus instead of highest value
-	if (RuleI(Spells, AdditiveBonusWornType) && RuleI(Spells, AdditiveBonusWornType) != ET_WornEffect){
+	if (RuleI(Spells, AdditiveBonusWornType) && RuleI(Spells, AdditiveBonusWornType) != EQEmu::item::ItemEffectWorn){
 		for (i = EQEmu::legacy::SlotCharm; i < EQEmu::legacy::SlotAmmo; i++) {
 			const ItemInst* inst = m_inv[i];
 			if(inst == 0)
@@ -210,7 +210,7 @@ void Client::ProcessItemCaps()
 
 void Client::AddItemBonuses(const ItemInst *inst, StatBonuses *newbon, bool isAug, bool isTribute, int rec_override, bool ammo_slot_item)
 {
-	if (!inst || !inst->IsType(ItemClassCommon)) {
+	if (!inst || !inst->IsClassCommon()) {
 		return;
 	}
 
@@ -218,10 +218,10 @@ void Client::AddItemBonuses(const ItemInst *inst, StatBonuses *newbon, bool isAu
 		return;
 	}
 
-	const Item_Struct *item = inst->GetItem();
+	const EQEmu::Item_Struct *item = inst->GetItem();
 
 	if (!isTribute && !inst->IsEquipable(GetBaseRace(), GetClass())) {
-		if (item->ItemType != ItemTypeFood && item->ItemType != ItemTypeDrink)
+		if (item->ItemType != EQEmu::item::ItemTypeFood && item->ItemType != EQEmu::item::ItemTypeDrink)
 			return;
 	}
 
@@ -430,11 +430,11 @@ void Client::AddItemBonuses(const ItemInst *inst, StatBonuses *newbon, bool isAu
 			else
 				newbon->DSMitigation += item->DSMitigation;
 		}
-		if (item->Worn.Effect > 0 && item->Worn.Type == ET_WornEffect) { // latent effects
+		if (item->Worn.Effect > 0 && item->Worn.Type == EQEmu::item::ItemEffectWorn) { // latent effects
 			ApplySpellsBonuses(item->Worn.Effect, item->Worn.Level, newbon, 0, item->Worn.Type);
 		}
 
-		if (item->Focus.Effect > 0 && (item->Focus.Type == ET_Focus)) { // focus effects
+		if (item->Focus.Effect > 0 && (item->Focus.Type == EQEmu::item::ItemEffectFocus)) { // focus effects
 			ApplySpellsBonuses(item->Focus.Effect, item->Focus.Level, newbon, 0);
 		}
 
@@ -544,13 +544,13 @@ void Client::AdditiveWornBonuses(const ItemInst *inst, StatBonuses* newbon, bool
 	which will also stack with regular (worntype 2) effects. [Ie set rule = 3 and item worntype = 3]
 	*/
 
-	if(!inst || !inst->IsType(ItemClassCommon))
+	if (!inst || !inst->IsClassCommon())
 		return;
 
 	if(inst->GetAugmentType()==0 && isAug == true)
 		return;
 
-	const Item_Struct *item = inst->GetItem();
+	const EQEmu::Item_Struct *item = inst->GetItem();
 
 	if(!inst->IsEquipable(GetBaseRace(),GetClass()))
 		return;
@@ -581,11 +581,11 @@ void Client::CalcEdibleBonuses(StatBonuses* newbon) {
 		if (food && drink)
 			break;
 		const ItemInst* inst = GetInv().GetItem(i);
-		if (inst && inst->GetItem() && inst->IsType(ItemClassCommon)) {
-			const Item_Struct *item=inst->GetItem();
-			if (item->ItemType == ItemTypeFood && !food)
+		if (inst && inst->GetItem() && inst->IsClassCommon()) {
+			const EQEmu::Item_Struct *item=inst->GetItem();
+			if (item->ItemType == EQEmu::item::ItemTypeFood && !food)
 				food = true;
-			else if (item->ItemType == ItemTypeDrink && !drink)
+			else if (item->ItemType == EQEmu::item::ItemTypeDrink && !drink)
 				drink = true;
 			else
 				continue;
@@ -597,11 +597,11 @@ void Client::CalcEdibleBonuses(StatBonuses* newbon) {
 		if (food && drink)
 			break;
 		const ItemInst* inst = GetInv().GetItem(i);
-		if (inst && inst->GetItem() && inst->IsType(ItemClassCommon)) {
-			const Item_Struct *item=inst->GetItem();
-			if (item->ItemType == ItemTypeFood && !food)
+		if (inst && inst->GetItem() && inst->IsClassCommon()) {
+			const EQEmu::Item_Struct *item=inst->GetItem();
+			if (item->ItemType == EQEmu::item::ItemTypeFood && !food)
 				food = true;
-			else if (item->ItemType == ItemTypeDrink && !drink)
+			else if (item->ItemType == EQEmu::item::ItemTypeDrink && !drink)
 				drink = true;
 			else
 				continue;
@@ -911,19 +911,19 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 			break;
 		case SE_AddSingingMod:
 			switch (base2) {
-			case ItemTypeWindInstrument:
+			case EQEmu::item::ItemTypeWindInstrument:
 				newbon->windMod += base1;
 				break;
-			case ItemTypeStringedInstrument:
+			case EQEmu::item::ItemTypeStringedInstrument:
 				newbon->stringedMod += base1;
 				break;
-			case ItemTypeBrassInstrument:
+			case EQEmu::item::ItemTypeBrassInstrument:
 				newbon->brassMod += base1;
 				break;
-			case ItemTypePercussionInstrument:
+			case EQEmu::item::ItemTypePercussionInstrument:
 				newbon->percussionMod += base1;
 				break;
-			case ItemTypeSinging:
+			case EQEmu::item::ItemTypeSinging:
 				newbon->singingMod += base1;
 				break;
 			}
@@ -2753,23 +2753,24 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 				break;
 
 			case SE_AddSingingMod:
-				switch (base2)
-				{
-					case ItemTypeWindInstrument:
-						new_bonus->windMod += effect_value;
-						break;
-					case ItemTypeStringedInstrument:
-						new_bonus->stringedMod += effect_value;
-						break;
-					case ItemTypeBrassInstrument:
-						new_bonus->brassMod += effect_value;
-						break;
-					case ItemTypePercussionInstrument:
-						new_bonus->percussionMod += effect_value;
-						break;
-					case ItemTypeSinging:
-						new_bonus->singingMod += effect_value;
-						break;
+				switch (base2) {
+				case EQEmu::item::ItemTypeWindInstrument:
+					new_bonus->windMod += effect_value;
+					break;
+				case EQEmu::item::ItemTypeStringedInstrument:
+					new_bonus->stringedMod += effect_value;
+					break;
+				case EQEmu::item::ItemTypeBrassInstrument:
+					new_bonus->brassMod += effect_value;
+					break;
+				case EQEmu::item::ItemTypePercussionInstrument:
+					new_bonus->percussionMod += effect_value;
+					break;
+				case EQEmu::item::ItemTypeSinging:
+					new_bonus->singingMod += effect_value;
+					break;
+				default:
+					break;
 				}
 				break;
 
@@ -3202,7 +3203,7 @@ void NPC::CalcItemBonuses(StatBonuses *newbon)
 	if(newbon){
 
 		for (int i = 0; i < EQEmu::legacy::EQUIPMENT_SIZE; i++){
-			const Item_Struct *cur = database.GetItem(equipment[i]);
+			const EQEmu::Item_Struct *cur = database.GetItem(equipment[i]);
 			if(cur){
 				//basic stats
 				newbon->AC += cur->AC;
@@ -3257,12 +3258,12 @@ void NPC::CalcItemBonuses(StatBonuses *newbon)
 				if(cur->CombatEffects > 0) {
 					newbon->ProcChance += cur->CombatEffects;
 				}
-				if (cur->Worn.Effect>0 && (cur->Worn.Type == ET_WornEffect)) { // latent effects
+				if (cur->Worn.Effect>0 && (cur->Worn.Type == EQEmu::item::ItemEffectWorn)) { // latent effects
 					ApplySpellsBonuses(cur->Worn.Effect, cur->Worn.Level, newbon, 0, cur->Worn.Type);
 				}
 
 				if (RuleB(Spells, NPC_UseFocusFromItems)){
-					if (cur->Focus.Effect>0 && (cur->Focus.Type == ET_Focus)){  // focus effects
+					if (cur->Focus.Effect>0 && (cur->Focus.Type == EQEmu::item::ItemEffectFocus)){  // focus effects
 						ApplySpellsBonuses(cur->Focus.Effect, cur->Focus.Level, newbon);
 					}
 				}

@@ -33,7 +33,7 @@
 
 const char *getItemName(unsigned itemid) 
 { 
-  const Item_Struct* item = nullptr; 
+  const EQEmu::Item_Struct* item = nullptr; 
   item = database.GetItem(itemid); 
 
   if (item) 

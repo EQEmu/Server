@@ -1,5 +1,9 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 05/21/2016 ==
+Uleat: Moved struct Item_Struct into namespace EQEmu along with associated enumerations - enumerations into namespace EQEmu::item (run shared_memory)
+Uleat: Fixed a few possible crash points in linux builds associated with augments/ornamentations
+
 == 05/18/2016 ==
 Uleat: Changed client 'constants' files to 'limits'
 

@@ -27,7 +27,11 @@ class Object;
 class Raid;
 class Seperator;
 class ServerPacket;
-struct Item_Struct;
+
+namespace EQEmu
+{
+	struct Item_Struct;
+}
 
 #include "../common/timer.h"
 #include "../common/ptimer.h"
@@ -290,7 +294,7 @@ public:
 
 	void FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho);
 	virtual bool Process();
-	void LogMerchant(Client* player, Mob* merchant, uint32 quantity, uint32 price, const Item_Struct* item, bool buying);
+	void LogMerchant(Client* player, Mob* merchant, uint32 quantity, uint32 price, const EQEmu::Item_Struct* item, bool buying);
 	void SendPacketQueue(bool Block = true);
 	void QueuePacket(const EQApplicationPacket* app, bool ack_req = true, CLIENT_CONN_STATUS = CLIENT_CONNECTINGALL, eqFilterType filter=FilterNone);
 	void FastQueuePacket(EQApplicationPacket** app, bool ack_req = true, CLIENT_CONN_STATUS = CLIENT_CONNECTINGALL);
@@ -398,7 +402,7 @@ public:
 
 	inline uint8 GetLanguageSkill(uint16 n) const { return m_pp.languages[n]; }
 
-	void SendPickPocketResponse(Mob *from, uint32 amt, int type, const Item_Struct* item = nullptr);
+	void SendPickPocketResponse(Mob *from, uint32 amt, int type, const EQEmu::Item_Struct* item = nullptr);
 
 	inline const char* GetLastName() const { return lastname; }
 
@@ -594,7 +598,7 @@ public:
 	void AssignToInstance(uint16 instance_id);
 	void RemoveFromInstance(uint16 instance_id);
 	void WhoAll();
-	bool CheckLoreConflict(const Item_Struct* item);
+	bool CheckLoreConflict(const EQEmu::Item_Struct* item);
 	void ChangeLastName(const char* in_lastname);
 	void GetGroupAAs(GroupLeadershipAA_Struct *into) const;
 	void GetRaidAAs(RaidLeadershipAA_Struct *into) const;
@@ -1173,7 +1177,7 @@ public:
 	void LoadAccountFlags();
 	void SetAccountFlag(std::string flag, std::string val);
 	std::string GetAccountFlag(std::string flag); float GetDamageMultiplier(SkillUseTypes);
-	void Consume(const Item_Struct *item, uint8 type, int16 slot, bool auto_consume);
+	void Consume(const EQEmu::Item_Struct *item, uint8 type, int16 slot, bool auto_consume);
 	void PlayMP3(const char* fname);
 	void ExpeditionSay(const char *str, int ExpID);
 	int mod_client_damage(int damage, SkillUseTypes skillinuse, int hand, const ItemInst* weapon, Mob* other);
@@ -1195,9 +1199,9 @@ public:
 	int32 mod_client_xp(int32 in_exp, NPC *npc);
 	uint32 mod_client_xp_for_level(uint32 xp, uint16 check_level);
 	int mod_client_haste_cap(int cap);
-	int mod_consume(Item_Struct *item, ItemUseTypes type, int change);
-	int mod_food_value(const Item_Struct *item, int change);
-	int mod_drink_value(const Item_Struct *item, int change);
+	int mod_consume(EQEmu::Item_Struct *item, EQEmu::item::ItemType type, int change);
+	int mod_food_value(const EQEmu::Item_Struct *item, int change);
+	int mod_drink_value(const EQEmu::Item_Struct *item, int change);
 
 	void SetEngagedRaidTarget(bool value) { EngagedRaidTarget = value; }
 	bool GetEngagedRaidTarget() const { return EngagedRaidTarget; }

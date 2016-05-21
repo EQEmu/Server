@@ -61,8 +61,8 @@ void Object::HandleAugmentation(Client* user, const AugmentItem_Struct* in_augme
 		inst = user_inv.GetItem(in_augment->container_slot);
 		if (inst)
 		{
-			const Item_Struct* item = inst->GetItem();
-			if (item && inst->IsType(ItemClassContainer) && item->BagType == 53)
+			const EQEmu::Item_Struct* item = inst->GetItem();
+			if (item && inst->IsType(EQEmu::item::ItemClassBag) && item->BagType == 53)
 			{
 				// We have found an appropriate inventory augmentation sealer
 				container = inst;
@@ -166,8 +166,8 @@ void Object::HandleAugmentation(Client* user, const AugmentItem_Struct* in_augme
 	else
 	{
 		ItemInst *old_aug = nullptr;
-		bool isSolvent = auged_with->GetItem()->ItemType == ItemUseTypes::ItemTypeAugmentationSolvent;
-		if (!isSolvent && auged_with->GetItem()->ItemType != ItemUseTypes::ItemTypeAugmentationDistiller)
+		bool isSolvent = auged_with->GetItem()->ItemType == EQEmu::item::ItemTypeAugmentationSolvent;
+		if (!isSolvent && auged_with->GetItem()->ItemType != EQEmu::item::ItemTypeAugmentationDistiller)
 		{
 			Log.Out(Logs::General, Logs::Error, "Player tried to remove an augment without a solvent or distiller.");
 			user->Message(13, "Error: Missing an augmentation solvent or distiller for removing this augment.");
@@ -276,25 +276,25 @@ void Object::HandleCombine(Client* user, const NewCombine_Struct* in_combine, Ob
 	else {
 		inst = user_inv.GetItem(in_combine->container_slot);
 		if (inst) {
-			const Item_Struct* item = inst->GetItem();
-			if (item && inst->IsType(ItemClassContainer)) {
+			const EQEmu::Item_Struct* item = inst->GetItem();
+			if (item && inst->IsType(EQEmu::item::ItemClassBag)) {
 				c_type = item->BagType;
 				some_id = item->ID;
 			}
 		}
 	}
 
-	if (!inst || !inst->IsType(ItemClassContainer)) {
+	if (!inst || !inst->IsType(EQEmu::item::ItemClassBag)) {
 		user->Message(13, "Error: Server does not recognize specified tradeskill container");
 		return;
 	}
 
 	container = inst;
-	if (container->GetItem() && container->GetItem()->BagType == BagTypeTransformationmold) {
+	if (container->GetItem() && container->GetItem()->BagType == EQEmu::item::BagTypeTransformationmold) {
 		const ItemInst* inst = container->GetItem(0);
 		bool AllowAll = RuleB(Inventory, AllowAnyWeaponTransformation);
 		if (inst && ItemInst::CanTransform(inst->GetItem(), container->GetItem(), AllowAll)) {
-			const Item_Struct* new_weapon = inst->GetItem();
+			const EQEmu::Item_Struct* new_weapon = inst->GetItem();
 			user->DeleteItemInInventory(Inventory::CalcSlotId(in_combine->container_slot, 0), 0, true);
 			container->Clear();
 			user->SummonItem(new_weapon->ID, inst->GetCharges(), inst->GetAugmentItemID(0), inst->GetAugmentItemID(1), inst->GetAugmentItemID(2), inst->GetAugmentItemID(3), inst->GetAugmentItemID(4), inst->GetAugmentItemID(5), inst->IsAttuned(), EQEmu::legacy::SlotCursor, container->GetItem()->Icon, atoi(container->GetItem()->IDFile + 2));
@@ -311,10 +311,10 @@ void Object::HandleCombine(Client* user, const NewCombine_Struct* in_combine, Ob
 		return;
 	}
 
-	if (container->GetItem() && container->GetItem()->BagType == BagTypeDetransformationmold) {
+	if (container->GetItem() && container->GetItem()->BagType == EQEmu::item::BagTypeDetransformationmold) {
 		const ItemInst* inst = container->GetItem(0);
 		if (inst && inst->GetOrnamentationIcon() && inst->GetOrnamentationIcon()) {
-			const Item_Struct* new_weapon = inst->GetItem();
+			const EQEmu::Item_Struct* new_weapon = inst->GetItem();
 			user->DeleteItemInInventory(Inventory::CalcSlotId(in_combine->container_slot, 0), 0, true);
 			container->Clear();
 			user->SummonItem(new_weapon->ID, inst->GetCharges(), inst->GetAugmentItemID(0), inst->GetAugmentItemID(1), inst->GetAugmentItemID(2), inst->GetAugmentItemID(3), inst->GetAugmentItemID(4), inst->GetAugmentItemID(5), inst->IsAttuned(), EQEmu::legacy::SlotCursor, 0, 0);
@@ -538,7 +538,7 @@ void Object::HandleAutoCombine(Client* user, const RecipeAutoCombine_Struct* rac
 
 		for(std::list<int>::iterator it = MissingItems.begin(); it != MissingItems.end(); ++it)
 		{
-			const Item_Struct* item = database.GetItem(*it);
+			const EQEmu::Item_Struct* item = database.GetItem(*it);
 
 			if(item)
 				user->Message_StringID(MT_Skills, TRADESKILL_MISSING_ITEM, item->Name);
@@ -607,77 +607,87 @@ void Object::HandleAutoCombine(Client* user, const RecipeAutoCombine_Struct* rac
 
 SkillUseTypes Object::TypeToSkill(uint32 type)
 {
-	switch(type) // grouped and ordered by SkillUseTypes name - new types need to be verified for proper SkillUseTypes and use
-	{
+	switch(type) { // grouped and ordered by SkillUseTypes name - new types need to be verified for proper SkillUseTypes and use
 /*SkillAlchemy*/
-		case BagTypeMedicineBag: { return SkillAlchemy; }
+	case EQEmu::item::BagTypeMedicineBag:
+		return SkillAlchemy;
 
 /*SkillBaking*/
-		// case BagTypeMixingBowl: // No idea...
-		case BagTypeOven: { return SkillBaking; }
+	//case EQEmu::item::BagTypeMixingBowl: // No idea...
+	case EQEmu::item::BagTypeOven:
+		return SkillBaking;
 
 /*SkillBlacksmithing*/
-		case BagTypeForge:
-		// case BagTypeKoadaDalForge:
-		case BagTypeTeirDalForge:
-		case BagTypeOggokForge:
-		case BagTypeStormguardForge:
-		// case BagTypeAkanonForge:
-		// case BagTypeNorthmanForge:
-		// case BagTypeCabilisForge:
-		// case BagTypeFreeportForge:
-		// case BagTypeRoyalQeynosForge:
-		// case BagTypeTrollForge:
-		case BagTypeFierDalForge:
-		case BagTypeValeForge: { return SkillBlacksmithing; } // Delete return if BagTypeGuktaForge enabled
-		// case BagTypeErudForge:
-		// case BagTypeGuktaForge: { return SkillBlacksmithing; }
+	case EQEmu::item::BagTypeForge:
+	//case EQEmu::item::BagTypeKoadaDalForge:
+	case EQEmu::item::BagTypeTeirDalForge:
+	case EQEmu::item::BagTypeOggokForge:
+	case EQEmu::item::BagTypeStormguardForge:
+	//case EQEmu::item::BagTypeAkanonForge:
+	//case EQEmu::item::BagTypeNorthmanForge:
+	//case EQEmu::item::BagTypeCabilisForge:
+	//case EQEmu::item::BagTypeFreeportForge:
+	//case EQEmu::item::BagTypeRoyalQeynosForge:
+	//case EQEmu::item::BagTypeTrollForge:
+	case EQEmu::item::BagTypeFierDalForge:
+	case EQEmu::item::BagTypeValeForge:
+	//case EQEmu::item::BagTypeErudForge:
+	//case EQEmu::item::BagTypeGuktaForge:
+		return SkillBlacksmithing;
 
 /*SkillBrewing*/
-		// case BagTypeIceCreamChurn: // No idea...
-		case BagTypeBrewBarrel: { return SkillBrewing; }
+	//case EQEmu::item::BagTypeIceCreamChurn: // No idea...
+	case EQEmu::item::BagTypeBrewBarrel:
+		return SkillBrewing;
 
 /*SkillFishing*/
-		case BagTypeTackleBox: { return SkillFishing; }
+	case EQEmu::item::BagTypeTackleBox:
+		return SkillFishing;
 
 /*SkillFletching*/
-		case BagTypeFletchingKit: { return SkillFletching; } // Delete return if BagTypeFierDalFletchingKit enabled
-		// case BagTypeFierDalFletchingKit: { return SkillFletching; }
+	case EQEmu::item::BagTypeFletchingKit:
+	//case EQEmu::item::BagTypeFierDalFletchingKit:
+		return SkillFletching;
 
 /*SkillJewelryMaking*/
-		case BagTypeJewelersKit: { return SkillJewelryMaking; }
+	case EQEmu::item::BagTypeJewelersKit:
+		return SkillJewelryMaking;
 
 /*SkillMakePoison*/
-		// This is a guess and needs to be verified... (Could be SkillAlchemy)
-		// case BagTypeMortar: { return SkillMakePoison; }
+	// This is a guess and needs to be verified... (Could be SkillAlchemy)
+	//case EQEmu::item::BagTypeMortar:
+		// return SkillMakePoison;
 
 /*SkillPottery*/
-		case BagTypePotteryWheel:
-		case BagTypeKiln: { return SkillPottery; } // Delete return if BagTypeIksarPotteryWheel enabled
-		// case BagTypeIksarPotteryWheel: { return SkillPottery; }
+	case EQEmu::item::BagTypePotteryWheel:
+	case EQEmu::item::BagTypeKiln:
+	//case EQEmu::item::BagTypeIksarPotteryWheel:
+		return SkillPottery;
 
 /*SkillResearch*/
-		// case BagTypeLexicon:
-		case BagTypeWizardsLexicon:
-		case BagTypeMagesLexicon:
-		case BagTypeNecromancersLexicon:
-		case BagTypeEnchantersLexicon: { return SkillResearch; } // Delete return if BagTypeConcordanceofResearch enabled
-		// case BagTypeConcordanceofResearch: { return SkillResearch; }
+	//case EQEmu::item::BagTypeLexicon:
+	case EQEmu::item::BagTypeWizardsLexicon:
+	case EQEmu::item::BagTypeMagesLexicon:
+	case EQEmu::item::BagTypeNecromancersLexicon:
+	case EQEmu::item::BagTypeEnchantersLexicon:
+	//case EQEmu::item::BagTypeConcordanceofResearch:
+		return SkillResearch;
 
 /*SkillTailoring*/
-		case BagTypeSewingKit: { return SkillTailoring; } // Delete return if BagTypeFierDalTailoringKit enabled
-		// case BagTypeHalflingTailoringKit:
-		// case BagTypeErudTailoringKit:
-		// case BagTypeFierDalTailoringKit: { return SkillTailoring; }
+	case EQEmu::item::BagTypeSewingKit:
+	//case EQEmu::item::BagTypeHalflingTailoringKit:
+	//case EQEmu::item::BagTypeErudTailoringKit:
+	//case EQEmu::item::BagTypeFierDalTailoringKit:
+		return SkillTailoring;
 
 /*SkillTinkering*/
-		case BagTypeToolBox: { return SkillTinkering; }
+	case EQEmu::item::BagTypeToolBox:
+		return SkillTinkering;
 
 /*Undefined*/
-		default: { break; }
+	default:
+		return TradeskillUnknown;
 	}
-
-	return TradeskillUnknown;
 }
 
 void Client::TradeskillSearchResults(const std::string &query, unsigned long objtype, unsigned long someid) {
@@ -952,7 +962,7 @@ bool Client::TradeskillExecute(DBTradeskillRecipe_Struct *spec) {
 
 	aa_chance = spellbonuses.ReduceTradeskillFail[spec->tradeskill] + itembonuses.ReduceTradeskillFail[spec->tradeskill] + aabonuses.ReduceTradeskillFail[spec->tradeskill];
 
-	const Item_Struct* item = nullptr;
+	const EQEmu::Item_Struct* item = nullptr;
 	
 	chance = mod_tradeskill_chance(chance, spec);
 
@@ -1103,7 +1113,7 @@ bool ZoneDatabase::GetTradeRecipe(const ItemInst* container, uint8 c_type, uint3
 		if (!inst)
             continue;
 
-        const Item_Struct* item = GetItem(inst->GetItem()->ID);
+        const EQEmu::Item_Struct* item = GetItem(inst->GetItem()->ID);
         if (!item)
             continue;
 
@@ -1232,7 +1242,7 @@ bool ZoneDatabase::GetTradeRecipe(const ItemInst* container, uint8 c_type, uint3
             if(!inst)
                 continue;
 
-            const Item_Struct* item = GetItem(inst->GetItem()->ID);
+            const EQEmu::Item_Struct* item = GetItem(inst->GetItem()->ID);
             if (!item)
                 continue;
 

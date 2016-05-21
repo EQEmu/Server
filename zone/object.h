@@ -69,7 +69,7 @@ IT10714_ACTORDEF=Augmentation Sealer
 IT10725_ACTORDEF=Shuriken
 */
 
-#define OT_DROPPEDITEM BagTypeLargeBag
+#define OT_DROPPEDITEM EQEmu::item::BagTypeLargeBag
 
 // Icon values:
 //0x0453 a pie

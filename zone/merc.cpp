@@ -217,7 +217,7 @@ void Merc::CalcItemBonuses(StatBonuses* newbon) {
 	for (i = 0; i < EQEmu::legacy::SlotAmmo; i++) {
 		if(equipment[i] == 0)
 			continue;
-		const Item_Struct * itm = database.GetItem(equipment[i]);
+		const EQEmu::Item_Struct * itm = database.GetItem(equipment[i]);
 		if(itm)
 			AddItemBonuses(itm, newbon);
 	}
@@ -243,7 +243,7 @@ void Merc::CalcItemBonuses(StatBonuses* newbon) {
 	SetAttackTimer();
 }
 
-void Merc::AddItemBonuses(const Item_Struct *item, StatBonuses* newbon) {
+void Merc::AddItemBonuses(const EQEmu::Item_Struct *item, StatBonuses* newbon) {
 
 	if(GetLevel() < item->ReqLevel)
 	{
@@ -456,11 +456,11 @@ void Merc::AddItemBonuses(const Item_Struct *item, StatBonuses* newbon) {
 		else
 			newbon->DSMitigation += item->DSMitigation;
 	}
-	if (item->Worn.Effect>0 && (item->Worn.Type == ET_WornEffect)) { // latent effects
+	if (item->Worn.Effect>0 && (item->Worn.Type == EQEmu::item::ItemEffectWorn)) { // latent effects
 		ApplySpellsBonuses(item->Worn.Effect, item->Worn.Level, newbon, 0, item->Worn.Type);
 	}
 
-	if (item->Focus.Effect>0 && (item->Focus.Type == ET_Focus)) { // focus effects
+	if (item->Focus.Effect>0 && (item->Focus.Type == EQEmu::item::ItemEffectFocus)) { // focus effects
 		ApplySpellsBonuses(item->Focus.Effect, item->Focus.Level, newbon, 0);
 	}
 
@@ -1621,7 +1621,8 @@ void Merc::AI_Process() {
 					int weapontype = 0; // No weapon type
 					bool bIsFist = true;
 
-					if(bIsFist || ((weapontype != ItemType2HSlash) && (weapontype != ItemType2HPiercing) && (weapontype != ItemType2HBlunt)))
+					// why are we checking 'weapontype' when we know it's set to '0' above?
+					if (bIsFist || ((weapontype != EQEmu::item::ItemType2HSlash) && (weapontype != EQEmu::item::ItemType2HPiercing) && (weapontype != EQEmu::item::ItemType2HBlunt)))
 					{
 						float DualWieldProbability = 0.0f;
 
@@ -2544,8 +2545,8 @@ int16 Merc::GetFocusEffect(focusType type, uint16 spell_id) {
 	//Check if item focus effect exists for the client.
 	if (itembonuses.FocusEffects[type]){
 
-		const Item_Struct* TempItem = 0;
-		const Item_Struct* UsedItem = 0;
+		const EQEmu::Item_Struct* TempItem = 0;
+		const EQEmu::Item_Struct* UsedItem = 0;
 		uint16 UsedFocusID = 0;
 		int16 Total = 0;
 		int16 focus_max = 0;
@@ -4407,7 +4408,7 @@ void Merc::DoClassAttacks(Mob *target) {
 						DoAnim(animKick);
 						int32 dmg = 0;
 
-						if(GetWeaponDamage(target, (const Item_Struct*)nullptr) <= 0){
+						if(GetWeaponDamage(target, (const EQEmu::Item_Struct*)nullptr) <= 0){
 							dmg = -5;
 						}
 						else{
@@ -4429,7 +4430,7 @@ void Merc::DoClassAttacks(Mob *target) {
 						DoAnim(animTailRake);
 						int32 dmg = 0;
 
-						if(GetWeaponDamage(target, (const Item_Struct*)nullptr) <= 0){
+						if(GetWeaponDamage(target, (const EQEmu::Item_Struct*)nullptr) <= 0){
 							dmg = -5;
 						}
 						else{
@@ -5061,7 +5062,7 @@ void Merc::UpdateEquipmentLight()
 		auto item = database.GetItem((*iter)->item_id);
 		if (item == nullptr) { continue; }
 
-		if (item->ItemClass != ItemClassCommon) { continue; }
+		if (!item->IsClassCommon()) { continue; }
 		if (item->Light < 9 || item->Light > 13) { continue; }
 
 		if (EQEmu::lightsource::TypeToLevel(item->Light))

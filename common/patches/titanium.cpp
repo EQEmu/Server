@@ -286,14 +286,15 @@ namespace Titanium
 		//store away the emu struct
 		uchar* __emu_buffer = in->pBuffer;
 
-		int itemcount = in->size / sizeof(InternalSerializedItem_Struct);
-		if (itemcount == 0 || (in->size % sizeof(InternalSerializedItem_Struct)) != 0) {
-			Log.Out(Logs::General, Logs::Netcode, "[STRUCTS] Wrong size on outbound %s: Got %d, expected multiple of %d", opcodes->EmuToName(in->GetOpcode()), in->size, sizeof(InternalSerializedItem_Struct));
+		int itemcount = in->size / sizeof(EQEmu::InternalSerializedItem_Struct);
+		if (itemcount == 0 || (in->size % sizeof(EQEmu::InternalSerializedItem_Struct)) != 0) {
+			Log.Out(Logs::General, Logs::Netcode, "[STRUCTS] Wrong size on outbound %s: Got %d, expected multiple of %d",
+				opcodes->EmuToName(in->GetOpcode()), in->size, sizeof(EQEmu::InternalSerializedItem_Struct));
 			delete in;
 			return;
 		}
 
-		InternalSerializedItem_Struct* eq = (InternalSerializedItem_Struct*)in->pBuffer;
+		EQEmu::InternalSerializedItem_Struct* eq = (EQEmu::InternalSerializedItem_Struct*)in->pBuffer;
 
 		//do the transform...
 		EQEmu::OutBuffer ob;
@@ -739,7 +740,7 @@ namespace Titanium
 		//store away the emu struct
 		uchar* __emu_buffer = in->pBuffer;
 		
-		InternalSerializedItem_Struct* int_struct = (InternalSerializedItem_Struct*)(&__emu_buffer[4]);
+		EQEmu::InternalSerializedItem_Struct* int_struct = (EQEmu::InternalSerializedItem_Struct*)(&__emu_buffer[4]);
 
 		EQEmu::OutBuffer ob;
 		EQEmu::OutBuffer::pos_type last_pos = ob.tellp();
@@ -2098,7 +2099,7 @@ namespace Titanium
 	void SerializeItem(EQEmu::OutBuffer& ob, const ItemInst *inst, int16 slot_id_in, uint8 depth)
 	{
 		const char* protection = "\\\\\\\\\\";
-		const Item_Struct* item = inst->GetUnscaledItem();
+		const EQEmu::Item_Struct* item = inst->GetUnscaledItem();
 
 		ob << StringFormat("%.*s%s", (depth ? (depth - 1) : 0), protection, (depth ? "\"" : "")); // For leading quotes (and protection) if a subitem;
 		
@@ -2111,7 +2112,7 @@ namespace Titanium
 		ob << '|' << itoa((inst->IsScaling() ? (inst->GetExp() / 100) : 0)); // inst experience
 		ob << '|' << itoa((!inst->GetMerchantSlot() ? inst->GetSerialNumber() : inst->GetMerchantSlot())); // merchant serial number
 		ob << '|' << itoa(inst->GetRecastTimestamp()); // recast timestamp
-		ob << '|' << itoa(((inst->IsStackable() ? ((inst->GetItem()->ItemType == ItemTypePotion) ? 1 : 0) : inst->GetCharges()))); // charge count
+		ob << '|' << itoa(((inst->IsStackable() ? ((inst->GetItem()->ItemType == EQEmu::item::ItemTypePotion) ? 1 : 0) : inst->GetCharges()))); // charge count
 		ob << '|' << itoa((inst->IsAttuned() ? 1 : 0)); // inst attuned
 		ob << '|' << itoa(0); // unknown
 		ob << '|';

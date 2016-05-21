@@ -285,7 +285,7 @@ void Doors::HandleClick(Client* sender, uint8 trigger)
 		{
 			if(sender->GetSkill(SkillPickLock))
 			{
-				if(lockpicks->GetItem()->ItemType == ItemTypeLockPick)
+				if(lockpicks->GetItem()->ItemType == EQEmu::item::ItemTypeLockPick)
 				{
 					float modskill=sender->GetSkill(SkillPickLock);
 					sender->CheckIncreaseSkill(SkillPickLock, nullptr, 1);

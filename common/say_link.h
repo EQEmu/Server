@@ -25,13 +25,14 @@
 #include <string>
 
 
-struct Item_Struct;
 struct ServerLootItem_Struct;
 class ItemInst;
 
 
 namespace EQEmu
 {
+	struct Item_Struct;
+	
 	namespace saylink {
 		struct SayLinkBody_Struct; // Current server mask: EQClientRoF2
 
@@ -73,7 +74,7 @@ public:
 	SayLinkEngine();
 
 	void SetLinkType(SayLinkType link_type) { m_LinkType = link_type; }
-	void SetItemData(const Item_Struct* item_data) { m_ItemData = item_data; }
+	void SetItemData(const EQEmu::Item_Struct* item_data) { m_ItemData = item_data; }
 	void SetLootData(const ServerLootItem_Struct* loot_data) { m_LootData = loot_data; }
 	void SetItemInst(const ItemInst* item_inst) { m_ItemInst = item_inst; }
 
@@ -109,7 +110,7 @@ private:
 	void generate_text();
 
 	int m_LinkType;
-	const Item_Struct* m_ItemData;
+	const EQEmu::Item_Struct* m_ItemData;
 	const ServerLootItem_Struct* m_LootData;
 	const ItemInst* m_ItemInst;
 
@@ -135,4 +136,4 @@ private:
 	bool m_Error;
 };
 
-#endif /* COMMON_SAY_LINK_H */
+#endif /*COMMON_SAY_LINK_H*/

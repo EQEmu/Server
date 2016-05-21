@@ -352,16 +352,16 @@ namespace SoF
 		//store away the emu struct
 		uchar* __emu_buffer = in->pBuffer;
 
-		int item_count = in->size / sizeof(InternalSerializedItem_Struct);
-		if (!item_count || (in->size % sizeof(InternalSerializedItem_Struct)) != 0) {
+		int item_count = in->size / sizeof(EQEmu::InternalSerializedItem_Struct);
+		if (!item_count || (in->size % sizeof(EQEmu::InternalSerializedItem_Struct)) != 0) {
 			Log.Out(Logs::General, Logs::Netcode, "[STRUCTS] Wrong size on outbound %s: Got %d, expected multiple of %d",
-				opcodes->EmuToName(in->GetOpcode()), in->size, sizeof(InternalSerializedItem_Struct));
+				opcodes->EmuToName(in->GetOpcode()), in->size, sizeof(EQEmu::InternalSerializedItem_Struct));
 
 			delete in;
 			return;
 		}
 
-		InternalSerializedItem_Struct* eq = (InternalSerializedItem_Struct*)in->pBuffer;
+		EQEmu::InternalSerializedItem_Struct* eq = (EQEmu::InternalSerializedItem_Struct*)in->pBuffer;
 
 		EQEmu::OutBuffer ob;
 		EQEmu::OutBuffer::pos_type last_pos = ob.tellp();
@@ -841,7 +841,7 @@ namespace SoF
 		//store away the emu struct
 		uchar* __emu_buffer = in->pBuffer;
 		
-		InternalSerializedItem_Struct* int_struct = (InternalSerializedItem_Struct*)(&__emu_buffer[4]);
+		EQEmu::InternalSerializedItem_Struct* int_struct = (EQEmu::InternalSerializedItem_Struct*)(&__emu_buffer[4]);
 
 		EQEmu::OutBuffer ob;
 		EQEmu::OutBuffer::pos_type last_pos = ob.tellp();
@@ -2878,7 +2878,7 @@ namespace SoF
 
 	void SerializeItem(EQEmu::OutBuffer& ob, const ItemInst *inst, int16 slot_id_in, uint8 depth)
 	{
-		const Item_Struct *item = inst->GetUnscaledItem();
+		const EQEmu::Item_Struct *item = inst->GetUnscaledItem();
 		
 		SoF::structs::ItemSerializationHeader hdr;
 

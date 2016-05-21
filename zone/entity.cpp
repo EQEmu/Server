@@ -1955,7 +1955,7 @@ void EntityList::QueueClientsGuildBankItemUpdate(const GuildBankItemUpdate_Struc
 
 	memcpy(outgbius, gbius, sizeof(GuildBankItemUpdate_Struct));
 
-	const Item_Struct *Item = database.GetItem(gbius->ItemID);
+	const EQEmu::Item_Struct *Item = database.GetItem(gbius->ItemID);
 
 	auto it = client_list.begin();
 	while (it != client_list.end()) {
@@ -3821,7 +3821,7 @@ void EntityList::GroupMessage(uint32 gid, const char *from, const char *message)
 
 uint16 EntityList::CreateGroundObject(uint32 itemid, const glm::vec4& position, uint32 decay_time)
 {
-	const Item_Struct *is = database.GetItem(itemid);
+	const EQEmu::Item_Struct *is = database.GetItem(itemid);
 	if (!is)
 		return 0;
 

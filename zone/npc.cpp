@@ -523,7 +523,7 @@ void NPC::QueryLoot(Client* to)
 
 	int x = 0;
 	for(ItemList::iterator cur = itemlist.begin(); cur != itemlist.end(); ++cur, ++x) {
-		const Item_Struct* item = database.GetItem((*cur)->item_id);
+		const EQEmu::Item_Struct* item = database.GetItem((*cur)->item_id);
 		if (item == nullptr) {
 			Log.Out(Logs::General, Logs::Error, "Database error, invalid item");
 			continue;
@@ -765,7 +765,7 @@ void NPC::UpdateEquipmentLight()
 		auto item = database.GetItem((*iter)->item_id);
 		if (item == nullptr) { continue; }
 
-		if (item->ItemClass != ItemClassCommon) { continue; }
+		if (!item->IsClassCommon()) { continue; }
 		if (item->Light < 9 || item->Light > 13) { continue; }
 
 		if (EQEmu::lightsource::TypeToLevel(item->Light))
@@ -1456,13 +1456,13 @@ void NPC::PickPocket(Client* thief)
 
 	// still needs to have FindFreeSlot vs PutItemInInventory issue worked out
 	while (steal_item) {
-		std::vector<std::pair<const Item_Struct*, uint16>> loot_selection; // <const Item_Struct*, charges>
+		std::vector<std::pair<const EQEmu::Item_Struct*, uint16>> loot_selection; // <const Item_Struct*, charges>
 		for (auto item_iter : itemlist) {
 			if (!item_iter || !item_iter->item_id)
 				continue;
 
 			auto item_test = database.GetItem(item_iter->item_id);
-			if (item_test->Magic || !item_test->NoDrop || item_test->ItemType == ItemClassContainer || thief->CheckLoreConflict(item_test))
+			if (item_test->Magic || !item_test->NoDrop || item_test->IsClassBag() || thief->CheckLoreConflict(item_test))
 				continue;
 
 			loot_selection.push_back(std::make_pair(item_test, ((item_test->Stackable) ? (1) : (item_iter->charges))));
@@ -1473,7 +1473,7 @@ void NPC::PickPocket(Client* thief)
 		}
 
 		int random = zone->random.Int(0, (loot_selection.size() - 1));
-		uint16 slot_id = thief->GetInv().FindFreeSlot(false, true, (loot_selection[random].first->Size), (loot_selection[random].first->ItemType == ItemTypeArrow));
+		uint16 slot_id = thief->GetInv().FindFreeSlot(false, true, (loot_selection[random].first->Size), (loot_selection[random].first->ItemType == EQEmu::item::ItemTypeArrow));
 		if (slot_id == INVALID_INDEX) {
 			steal_item = false;
 			break;

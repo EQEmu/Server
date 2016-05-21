@@ -37,6 +37,7 @@ SET(common_sources
 	inventory_version.cpp
 	ipc_mutex.cpp
 	item.cpp
+	item_struct.cpp
 	light_source.cpp
 	md5.cpp
 	memory_mapped_file.cpp
