@@ -169,7 +169,7 @@ uint8 EQEmu::item::ConvertAugTypeBitToAugType(uint32 aug_type_bit)
 
 bool EQEmu::Item_Struct::IsEquipable(uint16 race_id, uint16 class_id)
 {
-	if (!(Races & GetPlayerRaceBit(GetPlayerRaceValue(race_id))))
+	if (!(Races & GetPlayerRaceBit(race_id)))
 		return false;
 
 	if (!(Classes & GetPlayerClassBit(GetPlayerClassValue(class_id))))
