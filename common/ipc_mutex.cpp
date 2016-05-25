@@ -18,7 +18,9 @@
 
 #include "ipc_mutex.h"
 #ifdef _WINDOWS
+#define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
+#undef WIN32_LEAN_AND_MEAN
 #else
 #include <sys/types.h>
 #include <sys/stat.h>
