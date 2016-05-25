@@ -23,7 +23,7 @@
 
 size_t EQEmu::constants::CharacterCreationLimit(versions::ClientVersion client_version)
 {
-	static const size_t local[versions::InventoryVersionCount] = {
+	static const size_t local[versions::ClientVersionCount] = {
 		ClientUnknown::Null,
 		Client62::Null,
 		Titanium::constants::CharacterCreationLimit,
@@ -31,11 +31,7 @@ size_t EQEmu::constants::CharacterCreationLimit(versions::ClientVersion client_v
 		SoD::constants::CharacterCreationLimit,
 		UF::constants::CharacterCreationLimit,
 		RoF::constants::CharacterCreationLimit,
-		RoF2::constants::CharacterCreationLimit,
-		EntityLimits::npc::Null,
-		EntityLimits::merc::Null,
-		EntityLimits::bot::Null,
-		EntityLimits::pet::Null
+		RoF2::constants::CharacterCreationLimit
 	};
 
 	return local[static_cast<size_t>(versions::ValidateClientVersion(client_version))];
