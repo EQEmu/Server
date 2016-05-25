@@ -55,6 +55,7 @@ namespace EQEmu {
 			EQ_EXCEPT("IPC Mutex", "Could not create mutex.");
 		}
 #else
+		auto Config = EQEmuConfig::get();
 		std::string final_name = Config->SharedMemDir + name;
 		final_name += ".lock";
 
