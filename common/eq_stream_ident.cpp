@@ -1,3 +1,5 @@
+#include <utility>
+
 #include "global_define.h"
 #include "eqemu_logsys.h"
 #include "eq_stream_ident.h"
@@ -156,7 +158,7 @@ EQStreamInterface *EQStreamIdentifier::PopIdentified() {
 }
 
 EQStreamIdentifier::Record::Record(std::shared_ptr<EQStream> s)
-:	stream(s),
+:	stream(std::move(s)),
 	expire(STREAM_IDENT_WAIT_MS)
 {
 }
