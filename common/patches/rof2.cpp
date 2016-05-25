@@ -18,6 +18,7 @@
 */
 
 #include "../global_define.h"
+#include "../eqemu_config.h"
 #include "../eqemu_logsys.h"
 #include "rof2.h"
 #include "../opcodemgr.h"
@@ -31,7 +32,6 @@
 #include "../item.h"
 #include "rof2_structs.h"
 #include "../rulesys.h"
-#include "../eqemu_config.h"
 
 #include <iostream>
 #include <sstream>
