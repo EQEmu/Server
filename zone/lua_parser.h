@@ -8,6 +8,10 @@
 #include <list>
 #include <map>
 
+#include "zone_config.h"
+
+extern const ZoneConfig *Config;
+
 struct lua_State;
 class ItemInst;
 class Client;

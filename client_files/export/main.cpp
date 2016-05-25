@@ -27,6 +27,7 @@
 #include "../../common/rulesys.h"
 #include "../../common/string_util.h"
 
+const EQEmuConfig *Config;
 EQEmuLogSys Log;
 
 void ExportSpells(SharedDatabase *db);
@@ -45,12 +46,12 @@ int main(int argc, char **argv) {
 		return 1;
 	}
 
-	const EQEmuConfig *config = EQEmuConfig::get();
+	Config = EQEmuConfig::get();
 
 	SharedDatabase database;
 	Log.Out(Logs::General, Logs::Status, "Connecting to database...");
-	if(!database.Connect(config->DatabaseHost.c_str(), config->DatabaseUsername.c_str(),
-		config->DatabasePassword.c_str(), config->DatabaseDB.c_str(), config->DatabasePort)) {
+	if(!database.Connect(Config->DatabaseHost.c_str(), Config->DatabaseUsername.c_str(),
+		Config->DatabasePassword.c_str(), Config->DatabaseDB.c_str(), Config->DatabasePort)) {
 		Log.Out(Logs::General, Logs::Error, "Unable to connect to the database, cannot continue without a "
 			"database connection");
 		return 1;

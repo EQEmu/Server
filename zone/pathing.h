@@ -2,8 +2,10 @@
 #define PATHING_H
 
 #include "map.h"
-
+#include "zone_config.h"
 #include <deque>
+
+extern const ZoneConfig *Config;
 
 class Client;
 class Mob;

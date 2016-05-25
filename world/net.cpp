@@ -104,7 +104,7 @@ volatile bool RunLoops = true;
 uint32 numclients = 0;
 uint32 numzones = 0;
 bool holdzones = false;
-
+const WorldConfig *Config;
 EQEmuLogSys Log;
 
 extern ConsoleList console_list;
@@ -135,7 +135,7 @@ int main(int argc, char** argv) {
 		Log.Out(Logs::General, Logs::World_Server, "Loading server configuration failed.");
 		return 1;
 	}
-	const WorldConfig *Config=WorldConfig::get();
+	Config=WorldConfig::get();
 
 	Log.Out(Logs::General, Logs::World_Server, "CURRENT_VERSION: %s", CURRENT_VERSION);
 

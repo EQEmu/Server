@@ -10,6 +10,8 @@ Eglin
 
 #ifdef EMBPERL
 
+#include "zone_config.h"
+
 #include <string>
 #include <vector>
 #include <map>
@@ -57,6 +59,7 @@ extern "C" {	//the perl headers dont do this for us...
 EXTERN_C void boot_DynaLoader(pTHX_ CV* cv);
 EXTERN_C void xs_init(pTHX);
 
+extern const ZoneConfig *Config;
 class Embperl
 {
 private:

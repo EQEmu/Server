@@ -24,6 +24,7 @@
 #include "quest_interface.h"
 #include "zone.h"
 #include "questmgr.h"
+#include "zone_config.h"
 
 #include <stdio.h>
 
@@ -459,7 +460,7 @@ int QuestParserCollection::EventEncounter(QuestEventID evt, std::string encounte
 
 QuestInterface *QuestParserCollection::GetQIByNPCQuest(uint32 npcid, std::string &filename) {
 	//first look for /quests/zone/npcid.ext (precedence)
-	filename = "quests/";
+	filename = Config->QuestDir;
 	filename += zone->GetShortName();
 	filename += "/";
 	filename += itoa(npcid);
@@ -502,7 +503,7 @@ QuestInterface *QuestParserCollection::GetQIByNPCQuest(uint32 npcid, std::string
 		}
 	}
 
-	filename = "quests/";
+	filename = Config->QuestDir;
 	filename += zone->GetShortName();
 	filename += "/";
 	filename += npc_name;
@@ -524,7 +525,7 @@ QuestInterface *QuestParserCollection::GetQIByNPCQuest(uint32 npcid, std::string
 	}
 
 	//third look for /quests/global/npcid.ext (precedence)
-	filename = "quests/";
+	filename = Config->QuestDir;
 	filename += QUEST_GLOBAL_DIRECTORY;
 	filename += "/";
 	filename += itoa(npcid);
@@ -545,7 +546,7 @@ QuestInterface *QuestParserCollection::GetQIByNPCQuest(uint32 npcid, std::string
 	}
 
 	//fourth look for /quests/global/npcname.ext (precedence)
-	filename = "quests/";
+	filename = Config->QuestDir;
 	filename += QUEST_GLOBAL_DIRECTORY;
 	filename += "/";
 	filename += npc_name;
@@ -566,7 +567,7 @@ QuestInterface *QuestParserCollection::GetQIByNPCQuest(uint32 npcid, std::string
 	}
 
 	//fifth look for /quests/zone/default.ext (precedence)
-	filename = "quests/";
+	filename = Config->QuestDir;
 	filename += zone->GetShortName();
 	filename += "/";
 	filename += "default";
@@ -587,7 +588,7 @@ QuestInterface *QuestParserCollection::GetQIByNPCQuest(uint32 npcid, std::string
 	}
 
 	//last look for /quests/global/default.ext (precedence)
-	filename = "quests/";
+	filename = Config->QuestDir;
 	filename += QUEST_GLOBAL_DIRECTORY;
 	filename += "/";
 	filename += "default";
@@ -615,7 +616,7 @@ QuestInterface *QuestParserCollection::GetQIByPlayerQuest(std::string &filename)
 		return nullptr;
 
 	//first look for /quests/zone/player_v[instance_version].ext (precedence)
-	filename = "quests/";
+	filename = Config->QuestDir;
 	filename += zone->GetShortName();
 	filename += "/";
 	filename += "player_v";
@@ -640,7 +641,7 @@ QuestInterface *QuestParserCollection::GetQIByPlayerQuest(std::string &filename)
 	}
 
 	//second look for /quests/zone/player.ext (precedence)
-	filename = "quests/";
+	filename = Config->QuestDir;
 	filename += zone->GetShortName();
 	filename += "/";
 	filename += "player";
@@ -662,7 +663,7 @@ QuestInterface *QuestParserCollection::GetQIByPlayerQuest(std::string &filename)
 	}
 
 	//third look for /quests/global/player.ext (precedence)
-	filename = "quests/";
+	filename = Config->QuestDir;
 	filename += QUEST_GLOBAL_DIRECTORY;
 	filename += "/";
 	filename += "player";
@@ -687,7 +688,7 @@ QuestInterface *QuestParserCollection::GetQIByPlayerQuest(std::string &filename)
 
 QuestInterface *QuestParserCollection::GetQIByGlobalNPCQuest(std::string &filename) {
 	// simply look for /quests/global/global_npc.ext
-	filename = "quests/";
+	filename = Config->QuestDir;
 	filename += QUEST_GLOBAL_DIRECTORY;
 	filename += "/";
 	filename += "global_npc";
@@ -715,7 +716,7 @@ QuestInterface *QuestParserCollection::GetQIByGlobalNPCQuest(std::string &filena
 
 QuestInterface *QuestParserCollection::GetQIByGlobalPlayerQuest(std::string &filename) {
 	//first look for /quests/global/player.ext (precedence)
-	filename = "quests/";
+	filename = Config->QuestDir;
 	filename += QUEST_GLOBAL_DIRECTORY;
 	filename += "/";
 	filename += "global_player";
@@ -743,7 +744,7 @@ QuestInterface *QuestParserCollection::GetQIByGlobalPlayerQuest(std::string &fil
 
 QuestInterface *QuestParserCollection::GetQIBySpellQuest(uint32 spell_id, std::string &filename) {
 	//first look for /quests/zone/spells/spell_id.ext (precedence)
-	filename = "quests/";
+	filename = Config->QuestDir;
 	filename += zone->GetShortName();
 	filename += "/spells/";
 	filename += itoa(spell_id);
@@ -767,7 +768,7 @@ QuestInterface *QuestParserCollection::GetQIBySpellQuest(uint32 spell_id, std::s
 	}
 
 	//second look for /quests/global/spells/spell_id.ext (precedence)
-	filename = "quests/";
+	filename = Config->QuestDir;
 	filename += QUEST_GLOBAL_DIRECTORY;
 	filename += "/spells/";
 	filename += itoa(spell_id);
@@ -789,7 +790,7 @@ QuestInterface *QuestParserCollection::GetQIBySpellQuest(uint32 spell_id, std::s
 	}
 
 	//third look for /quests/zone/spells/default.ext (precedence)
-	filename = "quests/";
+	filename = Config->QuestDir;
 	filename += zone->GetShortName();
 	filename += "/spells/default";
 
@@ -810,7 +811,7 @@ QuestInterface *QuestParserCollection::GetQIBySpellQuest(uint32 spell_id, std::s
 	}
 
 	//last look for /quests/global/spells/default.ext (precedence)
-	filename = "quests/";
+	filename = Config->QuestDir;
 	filename += QUEST_GLOBAL_DIRECTORY;
 	filename += "/spells/default";
 
@@ -835,7 +836,7 @@ QuestInterface *QuestParserCollection::GetQIBySpellQuest(uint32 spell_id, std::s
 
 QuestInterface *QuestParserCollection::GetQIByItemQuest(std::string item_script, std::string &filename) {
 	//first look for /quests/zone/items/item_script.ext (precedence)
-	filename = "quests/";
+	filename = Config->QuestDir;
 	filename += zone->GetShortName();
 	filename += "/items/";
 	filename += item_script;
@@ -859,7 +860,7 @@ QuestInterface *QuestParserCollection::GetQIByItemQuest(std::string item_script,
 	}
 	
 	//second look for /quests/global/items/item_script.ext (precedence)
-	filename = "quests/";
+	filename = Config->QuestDir;
 	filename += QUEST_GLOBAL_DIRECTORY;
 	filename += "/items/";
 	filename += item_script;
@@ -881,7 +882,7 @@ QuestInterface *QuestParserCollection::GetQIByItemQuest(std::string item_script,
 	}
 
 	//third look for /quests/zone/items/default.ext (precedence)
-	filename = "quests/";
+	filename = Config->QuestDir;
 	filename += zone->GetShortName();
 	filename += "/items/default";
 
@@ -902,7 +903,7 @@ QuestInterface *QuestParserCollection::GetQIByItemQuest(std::string item_script,
 	}
 
 	//last look for /quests/global/items/default.ext (precedence)
-	filename = "quests/";
+	filename = Config->QuestDir;
 	filename += QUEST_GLOBAL_DIRECTORY;
 	filename += "/items/default";
 
@@ -927,7 +928,7 @@ QuestInterface *QuestParserCollection::GetQIByItemQuest(std::string item_script,
 
 QuestInterface *QuestParserCollection::GetQIByEncounterQuest(std::string encounter_name, std::string &filename) {
 	//first look for /quests/zone/encounters/encounter_name.ext (precedence)
-	filename = "quests/";
+	filename = Config->QuestDir;
 	filename += zone->GetShortName();
 	filename += "/encounters/";
 	filename += encounter_name;
@@ -951,7 +952,7 @@ QuestInterface *QuestParserCollection::GetQIByEncounterQuest(std::string encount
 	}
 	
 	//second look for /quests/global/encounters/encounter_name.ext (precedence)
-	filename = "quests/";
+	filename = Config->QuestDir;
 	filename += QUEST_GLOBAL_DIRECTORY;
 	filename += "/encounters/";
 	filename += encounter_name;
