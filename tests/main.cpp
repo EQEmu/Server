@@ -34,10 +34,7 @@
 const EQEmuConfig *Config;
 
 int main() {
-	if(!EQEmuConfig::LoadConfig()) {
-		std::cout << "Problem loading configuration." << std::endl;
-		return 1;
-	}
+	auto ConfigLoadResult = EQEmuConfig::LoadConfig();
         Config = EQEmuConfig::get();
 	try {
 		std::ofstream outfile("test_output.txt");
