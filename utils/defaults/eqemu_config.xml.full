@@ -90,5 +90,6 @@
 		<!-- <lua_modules>lua_modules/</lua_modules> -->
 		<!-- <patches>./</patches> -->
 		<!-- <shared_memory>shared/</shared_memory> -->
+		<!-- <logs>logs/</logs> -->
 	</directories>
 </server>
