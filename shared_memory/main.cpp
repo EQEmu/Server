@@ -35,7 +35,7 @@
 #include "base_data.h"
 
 EQEmuLogSys Log;
-const EQEmuConfig *Config;
+
 int main(int argc, char **argv) {
 	RegisterExecutablePlatform(ExePlatformSharedMemory);
 	Log.LoadLogSettingsDefaults();
@@ -47,7 +47,7 @@ int main(int argc, char **argv) {
 		return 1;
 	}
 
-	Config = EQEmuConfig::get();
+	auto Config = EQEmuConfig::get();
 
 	SharedDatabase database;
 	Log.Out(Logs::General, Logs::Status, "Connecting to database...");

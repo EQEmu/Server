@@ -22,8 +22,6 @@
 #include <string>
 #include "../common/eqemu_config.h"
 
-extern const EQEmuConfig *Config;
-
 class SharedDatabase;
 void LoadSpells(SharedDatabase *database, const std::string &prefix);
 

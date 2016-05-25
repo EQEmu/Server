@@ -35,8 +35,8 @@
 #include "mysql.h"
 #include "rulesys.h"
 #include "shareddb.h"
-#include "eqemu_config_extern.h"
 #include "string_util.h"
+#include "eqemu_config.h"
 
 SharedDatabase::SharedDatabase()
 : Database()
@@ -811,6 +811,7 @@ bool SharedDatabase::LoadItems(const std::string &prefix) {
 	items_mmf.reset(nullptr);
 
 	try {
+		auto Config = EQEmuConfig::get();
 		EQEmu::IPCMutex mutex("items");
 		mutex.Lock();
 		std::string file_name = Config->SharedMemDir + prefix + std::string("items");
@@ -1234,6 +1235,7 @@ bool SharedDatabase::LoadNPCFactionLists(const std::string &prefix) {
 	faction_hash.reset(nullptr);
 
 	try {
+		auto Config = EQEmuConfig::get();
 		EQEmu::IPCMutex mutex("faction");
 		mutex.Lock();
 		std::string file_name = Config->SharedMemDir + prefix + std::string("faction");
@@ -1385,6 +1387,7 @@ bool SharedDatabase::LoadSkillCaps(const std::string &prefix) {
 	uint32 size = (class_count * skill_count * level_count * sizeof(uint16));
 
 	try {
+		auto Config = EQEmuConfig::get();
 		EQEmu::IPCMutex mutex("skill_caps");
 		mutex.Lock();
 		std::string file_name = Config->SharedMemDir + prefix + std::string("skill_caps");
@@ -1540,6 +1543,7 @@ bool SharedDatabase::LoadSpells(const std::string &prefix, int32 *records, const
 	spells_mmf.reset(nullptr);
 
 	try {
+		auto Config = EQEmuConfig::get();
 		EQEmu::IPCMutex mutex("spells");
 		mutex.Lock();
 	
@@ -1743,6 +1747,7 @@ bool SharedDatabase::LoadBaseData(const std::string &prefix) {
 	base_data_mmf.reset(nullptr);
 
 	try {
+		auto Config = EQEmuConfig::get();
 		EQEmu::IPCMutex mutex("base_data");
 		mutex.Lock();
 
@@ -1982,6 +1987,7 @@ bool SharedDatabase::LoadLoot(const std::string &prefix) {
 	loot_drop_mmf.reset(nullptr);
 
 	try {
+		auto Config = EQEmuConfig::get();
 		EQEmu::IPCMutex mutex("loot");
 		mutex.Lock();
 		std::string file_name_lt = Config->SharedMemDir + prefix + std::string("loot_table");

@@ -37,6 +37,7 @@ void LoadItems(SharedDatabase *database, const std::string &prefix) {
 
 	uint32 size = static_cast<uint32>(EQEmu::FixedMemoryHashSet<EQEmu::Item_Struct>::estimated_size(items, max_item));
 
+	auto Config = EQEmuConfig::get();
 	std::string file_name = Config->SharedMemDir + prefix + std::string("items");
 	EQEmu::MemoryMappedFile mmf(file_name, size);
 	mmf.ZeroFile();

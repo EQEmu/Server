@@ -27,7 +27,6 @@
 #include "../../common/rulesys.h"
 #include "../../common/string_util.h"
 
-const EQEmuConfig *Config;
 EQEmuLogSys Log;
 
 void ExportSpells(SharedDatabase *db);
@@ -46,7 +45,7 @@ int main(int argc, char **argv) {
 		return 1;
 	}
 
-	Config = EQEmuConfig::get();
+	auto Config = EQEmuConfig::get();
 
 	SharedDatabase database;
 	Log.Out(Logs::General, Logs::Status, "Connecting to database...");

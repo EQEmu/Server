@@ -29,7 +29,7 @@
 #endif
 #include "types.h"
 #include "eqemu_exception.h"
-#include "eqemu_config_extern.h"
+#include "eqemu_config.h"
 
 namespace EQEmu {
 	struct IPCMutex::Implementation {
@@ -43,6 +43,7 @@ namespace EQEmu {
 	IPCMutex::IPCMutex(std::string name) : locked_(false) {
 		imp_ = new Implementation;
 #ifdef _WINDOWS
+		auto Config = EQEmuConfig::get();
 		std::string final_name = Config->SharedMemDir + "EQEmuMutex_";
 		final_name += name;
 

@@ -31,6 +31,7 @@
 #include "../item.h"
 #include "sof_structs.h"
 #include "../rulesys.h"
+#include "../eqemu_config.h"
 
 #include <iostream>
 #include <sstream>
@@ -63,6 +64,7 @@ namespace SoF
 		//create our opcode manager if we havent already
 		if (opcodes == nullptr) {
 			//TODO: get this file name from the config file
+			auto Config = EQEmuConfig::get();
 			std::string opfile = Config->PatchDir;
 			opfile += "patch_";
 			opfile += name;
@@ -108,6 +110,7 @@ namespace SoF
 
 		if (opcodes != nullptr) {
 			//TODO: get this file name from the config file
+			auto Config = EQEmuConfig::get();
 			std::string opfile = Config->PatchDir;
 			opfile += "patch_";
 			opfile += name;

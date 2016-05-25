@@ -31,6 +31,7 @@
 #include "../item.h"
 #include "rof_structs.h"
 #include "../rulesys.h"
+#include "../eqemu_config.h"
 
 #include <iostream>
 #include <sstream>
@@ -67,6 +68,7 @@ namespace RoF
 		//create our opcode manager if we havent already
 		if (opcodes == nullptr) {
 			//TODO: get this file name from the config file
+			auto Config = EQEmuConfig::get();
 			std::string opfile = Config->PatchDir;
 			opfile += "patch_";
 			opfile += name;
@@ -98,9 +100,6 @@ namespace RoF
 		signature.first_length = sizeof(structs::ClientZoneEntry_Struct);
 		signature.first_eq_opcode = opcodes->EmuToEQ(OP_ZoneEntry);
 		into.RegisterPatch(signature, pname.c_str(), &opcodes, &struct_strategy);
-
-
-
 		Log.Out(Logs::General, Logs::Netcode, "[IDENTIFY] Registered patch %s", name);
 	}
 
@@ -112,6 +111,7 @@ namespace RoF
 
 		if (opcodes != nullptr) {
 			//TODO: get this file name from the config file
+			auto Config = EQEmuConfig::get();
 			std::string opfile = Config->PatchDir;
 			opfile += "patch_";
 			opfile += name;

@@ -33,6 +33,7 @@ void LoadBaseData(SharedDatabase *database, const std::string &prefix) {
 
 	uint32 size = records * 16 * sizeof(BaseDataStruct);
 
+	auto Config = EQEmuConfig::get();
 	std::string file_name = Config->SharedMemDir + prefix + std::string("base_data");
 	EQEmu::MemoryMappedFile mmf(file_name, size);
 	mmf.ZeroFile();

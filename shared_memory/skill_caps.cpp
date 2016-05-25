@@ -34,6 +34,7 @@ void LoadSkillCaps(SharedDatabase *database, const std::string &prefix) {
 	uint32 level_count = HARD_LEVEL_CAP + 1;
 	uint32 size = (class_count * skill_count * level_count * sizeof(uint16));
 
+	auto Config = EQEmuConfig::get();
 	std::string file_name = Config->SharedMemDir + prefix + std::string("skill_caps");
 	EQEmu::MemoryMappedFile mmf(file_name, size);
 	mmf.ZeroFile();

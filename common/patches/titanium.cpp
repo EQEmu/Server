@@ -30,6 +30,7 @@
 #include "../misc_functions.h"
 #include "../string_util.h"
 #include "../item.h"
+#include "../eqemu_config.h"
 #include "titanium_structs.h"
 
 #include <sstream>
@@ -59,6 +60,7 @@ namespace Titanium
 
 	void Register(EQStreamIdentifier &into)
 	{
+		auto Config = EQEmuConfig::get();
 		//create our opcode manager if we havent already
 		if (opcodes == nullptr) {
 			//TODO: get this file name from the config file
@@ -107,6 +109,7 @@ namespace Titanium
 
 		if (opcodes != nullptr) {
 			//TODO: get this file name from the config file
+			auto Config = EQEmuConfig::get();
 			std::string opfile = Config->PatchDir;
 			opfile += "patch_";
 			opfile += name;
