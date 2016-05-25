@@ -25,8 +25,8 @@
 
 #ifdef _WINDOWS
 	#include <process.h>
+	#include <winsock2.h>
 	#include <windows.h>
-	#include <winsock.h>
 
 	#define snprintf	_snprintf
 	#define strncasecmp	_strnicmp

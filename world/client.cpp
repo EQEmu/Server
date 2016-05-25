@@ -61,8 +61,8 @@
 
 // Disgrace: for windows compile
 #ifdef _WINDOWS
+	#include <winsock2.h>
 	#include <windows.h>
-	#include <winsock.h>
 #else
 	
 	#ifdef FREEBSD //Timothy Whitman - January 7, 2003

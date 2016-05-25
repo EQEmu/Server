@@ -3,7 +3,7 @@
 #include "eq_stream_factory.h"
 
 #ifdef _WINDOWS
-	#include <winsock.h>
+	#include <winsock2.h>
 	#include <process.h>
 	#include <io.h>
 	#include <stdio.h>
