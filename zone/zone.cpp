@@ -266,7 +266,7 @@ bool Zone::LoadZoneObjects() {
         }
 
         // Load child objects if container
-        if (inst && inst->IsType(ItemClassContainer)) {
+		if (inst && inst->IsType(EQEmu::item::ItemClassBag)) {
             database.LoadWorldContainer(id, inst);
         }
 

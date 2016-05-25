@@ -138,7 +138,7 @@ Object::Object(Client* client, const ItemInst* inst)
 
 	// Set object name
 	if (inst) {
-		const Item_Struct* item = inst->GetItem();
+		const EQEmu::Item_Struct* item = inst->GetItem();
 		if (item && item->IDFile) {
 			if (strlen(item->IDFile) == 0) {
 				strcpy(m_data.object_name, DEFAULT_OBJECT_NAME);
@@ -194,7 +194,7 @@ Object::Object(const ItemInst *inst, float x, float y, float z, float heading, u
 
 	// Set object name
 	if (inst) {
-		const Item_Struct* item = inst->GetItem();
+		const EQEmu::Item_Struct* item = inst->GetItem();
 		if (item && item->IDFile) {
 			if (strlen(item->IDFile) == 0) {
 				strcpy(m_data.object_name, DEFAULT_OBJECT_NAME);
@@ -339,7 +339,7 @@ void Object::PutItem(uint8 index, const ItemInst* inst)
 		return;
 	}
 
-	if (m_inst && m_inst->IsType(ItemClassContainer)) {
+	if (m_inst && m_inst->IsType(EQEmu::item::ItemClassBag)) {
 		if (inst) {
 			m_inst->PutItem(index, *inst);
 		}
@@ -380,7 +380,7 @@ void Object::Close() {
 // Remove item from container
 void Object::DeleteItem(uint8 index)
 {
-	if (m_inst && m_inst->IsType(ItemClassContainer)) {
+	if (m_inst && m_inst->IsType(EQEmu::item::ItemClassBag)) {
 		m_inst->DeleteItem(index);
 
 		// This is _highly_ inefficient, but for now it will work: Save entire object to database
@@ -393,7 +393,7 @@ ItemInst* Object::PopItem(uint8 index)
 {
 	ItemInst* inst = nullptr;
 
-	if (m_inst && m_inst->IsType(ItemClassContainer)) {
+	if (m_inst && m_inst->IsType(EQEmu::item::ItemClassBag)) {
 		inst = m_inst->PopItem(index);
 
 		// This is _highly_ inefficient, but for now it will work: Save entire object to database
@@ -574,7 +574,7 @@ bool Object::HandleClick(Client* sender, const ClickObject_Struct* click_object)
 
 		// Send items inside of container
 
-		if (m_inst && m_inst->IsType(ItemClassContainer)) {
+		if (m_inst && m_inst->IsType(EQEmu::item::ItemClassBag)) {
 
 			//Clear out no-drop and no-rent items first if different player opens it
 			if(user != last_user)
@@ -628,7 +628,7 @@ uint32 ZoneDatabase::AddObject(uint32 type, uint32 icon, const Object_Struct& ob
 	}
 
     // Save container contents, if container
-    if (inst && inst->IsType(ItemClassContainer))
+	if (inst && inst->IsType(EQEmu::item::ItemClassBag))
         SaveWorldContainer(object.zone_id, database_id, inst);
 
 	return database_id;
@@ -665,7 +665,7 @@ void ZoneDatabase::UpdateObject(uint32 id, uint32 type, uint32 icon, const Objec
 	}
 
     // Save container contents, if container
-    if (inst && inst->IsType(ItemClassContainer))
+	if (inst && inst->IsType(EQEmu::item::ItemClassBag))
         SaveWorldContainer(object.zone_id, id, inst);
 }
 
@@ -881,7 +881,7 @@ uint32 Object::GetItemID()
 		return 0;
 	}
 
-	const Item_Struct* item = this->m_inst->GetItem();
+	const EQEmu::Item_Struct* item = this->m_inst->GetItem();
 
 	if (item == 0)
 	{

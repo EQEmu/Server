@@ -98,7 +98,7 @@ void EQEmu::saylink::SayLinkEngine::generate_body()
 
 	memset(&m_LinkBodyStruct, 0, sizeof(SayLinkBody_Struct));
 
-	const Item_Struct* item_data = nullptr;
+	const EQEmu::Item_Struct* item_data = nullptr;
 
 	switch (m_LinkType) {
 	case SayLinkBlank:
@@ -201,7 +201,7 @@ void EQEmu::saylink::SayLinkEngine::generate_text()
 		return;
 	}
 
-	const Item_Struct* item_data = nullptr;
+	const EQEmu::Item_Struct* item_data = nullptr;
 
 	switch (m_LinkType) {
 	case SayLinkBlank:

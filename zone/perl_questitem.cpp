@@ -134,7 +134,7 @@ XS(XS_QuestItem_IsType)
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		RETVAL = THIS->IsType((ItemClassTypes)type);
+		RETVAL = THIS->IsType((EQEmu::item::ItemClass)type);
 		ST(0) = boolSV(RETVAL);
 		sv_2mortal(ST(0));
 	}

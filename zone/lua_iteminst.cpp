@@ -41,7 +41,7 @@ Lua_ItemInst::Lua_ItemInst(const Lua_ItemInst& o) {
 
 bool Lua_ItemInst::IsType(int item_class) {
 	Lua_Safe_Call_Bool();
-	return self->IsType(static_cast<ItemClassTypes>(item_class));
+	return self->IsType(static_cast<EQEmu::item::ItemClass>(item_class));
 }
 
 bool Lua_ItemInst::IsStackable() {

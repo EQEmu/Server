@@ -7062,7 +7062,7 @@ void bot_subcommand_inventory_list(Client *c, const Seperator *sep)
 	}
 
 	const ItemInst* inst = nullptr;
-	const Item_Struct* item = nullptr;
+	const EQEmu::Item_Struct* item = nullptr;
 	bool is2Hweapon = false;
 
 	std::string item_link;
@@ -7081,7 +7081,7 @@ void bot_subcommand_inventory_list(Client *c, const Seperator *sep)
 		}
 		
 		item = inst->GetItem();
-		if ((i == EQEmu::legacy::SlotPrimary) && ((item->ItemType == ItemType2HSlash) || (item->ItemType == ItemType2HBlunt) || (item->ItemType == ItemType2HPiercing))) {
+		if ((i == EQEmu::legacy::SlotPrimary) && item->IsType2HWeapon()) {
 			is2Hweapon = true;
 		}
 
@@ -7131,7 +7131,7 @@ void bot_subcommand_inventory_remove(Client *c, const Seperator *sep)
 		return;
 	}
 
-	const Item_Struct* itm = nullptr;
+	const EQEmu::Item_Struct* itm = nullptr;
 	const ItemInst* itminst = my_bot->GetBotItem(slotId);
 	if (itminst)
 		itm = itminst->GetItem();
@@ -7234,7 +7234,7 @@ void bot_subcommand_inventory_window(Client *c, const Seperator *sep)
 	//linker.SetLinkType(linker.linkItemInst);
 
 	for (int i = EQEmu::legacy::EQUIPMENT_BEGIN; i <= (EQEmu::legacy::EQUIPMENT_END + 1); ++i) {
-		const Item_Struct* item = nullptr;
+		const EQEmu::Item_Struct* item = nullptr;
 		const ItemInst* inst = my_bot->CastToBot()->GetBotItem(i == 22 ? EQEmu::legacy::SlotPowerSource : i);
 		if (inst)
 			item = inst->GetItem();

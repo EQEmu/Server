@@ -2098,7 +2098,7 @@ struct AdventureLeaderboard_Struct
 /*struct Item_Shop_Struct {
 	uint16 merchantid;
 	uint8 itemtype;
-	Item_Struct item;
+	EQEmu::Item_Struct item;
 	uint8 iss_unknown001[6];
 };*/
 

@@ -1884,7 +1884,7 @@ void ClientTaskState::RewardTask(Client *c, TaskInformation *Task) {
 
 	if(!Task || !c) return;
 
-	const Item_Struct* Item;
+	const EQEmu::Item_Struct* Item;
 	std::vector<int> RewardList;
 
 	switch(Task->RewardMethod) {
@@ -2777,7 +2777,7 @@ void TaskManager::SendActiveTaskDescription(Client *c, int TaskID, int SequenceN
 		}
 
 		if(ItemID) {
-			const Item_Struct* reward_item = database.GetItem(ItemID);
+			const EQEmu::Item_Struct* reward_item = database.GetItem(ItemID);
 
 			EQEmu::saylink::SayLinkEngine linker;
 			linker.SetLinkType(linker.SayLinkItemData);

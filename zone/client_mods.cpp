@@ -487,7 +487,7 @@ int32 Client::GetRawItemAC()
 	// this skips MainAmmo..add an '=' conditional if that slot is required (original behavior)
 	for (int16 slot_id = EQEmu::legacy::EQUIPMENT_BEGIN; slot_id < EQEmu::legacy::EQUIPMENT_END; slot_id++) {
 		const ItemInst* inst = m_inv[slot_id];
-		if (inst && inst->IsType(ItemClassCommon)) {
+		if (inst && inst->IsClassCommon()) {
 			Total += inst->GetItem()->AC;
 		}
 	}
@@ -1070,7 +1070,7 @@ int32 Client::CalcAC()
 		bool equiped = CastToClient()->m_inv.GetItem(EQEmu::legacy::SlotSecondary);
 		if (equiped) {
 			uint8 shield = CastToClient()->m_inv.GetItem(EQEmu::legacy::SlotSecondary)->GetItem()->ItemType;
-			if (shield == ItemTypeShield) {
+			if (shield == EQEmu::item::ItemTypeShield) {
 				displayed += itembonuses.HeroicSTR / 2;
 			}
 		}
@@ -1099,7 +1099,7 @@ int32 Client::GetACMit()
 		bool equiped = CastToClient()->m_inv.GetItem(EQEmu::legacy::SlotSecondary);
 		if (equiped) {
 			uint8 shield = CastToClient()->m_inv.GetItem(EQEmu::legacy::SlotSecondary)->GetItem()->ItemType;
-			if (shield == ItemTypeShield) {
+			if (shield == EQEmu::item::ItemTypeShield) {
 				mitigation += itembonuses.HeroicSTR / 2;
 			}
 		}
@@ -1302,7 +1302,7 @@ int32 Client::CalcManaRegenCap()
 
 uint32 Client::CalcCurrentWeight()
 {
-	const Item_Struct* TempItem = 0;
+	const EQEmu::Item_Struct* TempItem = 0;
 	ItemInst* ins;
 	uint32 Total = 0;
 	int x;
@@ -1337,7 +1337,7 @@ uint32 Client::CalcCurrentWeight()
 				}
 			}
 			ItemInst* baginst = GetInv().GetItem(bagslot);
-			if (baginst && baginst->GetItem() && baginst->IsType(ItemClassContainer)) {
+			if (baginst && baginst->GetItem() && baginst->IsClassBag()) {
 				reduction = baginst->GetItem()->BagWR;
 			}
 			if (reduction > 0) {
@@ -2207,7 +2207,7 @@ int Client::GetRawACNoShield(int &shield_ac) const
 	shield_ac = 0;
 	const ItemInst *inst = m_inv.GetItem(EQEmu::legacy::SlotSecondary);
 	if (inst) {
-		if (inst->GetItem()->ItemType == ItemTypeShield) {
+		if (inst->GetItem()->ItemType == EQEmu::item::ItemTypeShield) {
 			ac -= inst->GetItem()->AC;
 			shield_ac = inst->GetItem()->AC;
 			for (uint8 i = AUG_INDEX_BEGIN; i < EQEmu::legacy::ITEM_COMMON_SIZE; i++) {

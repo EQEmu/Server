@@ -54,110 +54,75 @@ bool Mob::AttackAnimation(SkillUseTypes &skillinuse, int Hand, const ItemInst* w
 {
 	// Determine animation
 	int type = 0;
-	if (weapon && weapon->IsType(ItemClassCommon)) {
-		const Item_Struct* item = weapon->GetItem();
+	if (weapon && weapon->IsClassCommon()) {
+		const EQEmu::Item_Struct* item = weapon->GetItem();
 
 		Log.Out(Logs::Detail, Logs::Attack, "Weapon skill : %i", item->ItemType);
 
-		switch (item->ItemType)
-		{
-			case ItemType1HSlash: // 1H Slashing
-			{
-				skillinuse = Skill1HSlashing;
-				type = anim1HWeapon;
-				break;
-			}
-			case ItemType2HSlash: // 2H Slashing
-			{
-				skillinuse = Skill2HSlashing;
-				type = anim2HSlashing;
-				break;
-			}
-			case ItemType1HPiercing: // Piercing
-			{
+		switch (item->ItemType) {
+		case EQEmu::item::ItemType1HSlash: // 1H Slashing
+			skillinuse = Skill1HSlashing;
+			type = anim1HWeapon;
+			break;
+		case EQEmu::item::ItemType2HSlash: // 2H Slashing
+			skillinuse = Skill2HSlashing;
+			type = anim2HSlashing;
+			break;
+		case EQEmu::item::ItemType1HPiercing: // Piercing
+			skillinuse = Skill1HPiercing;
+			type = anim1HPiercing;
+			break;
+		case EQEmu::item::ItemType1HBlunt: // 1H Blunt
+			skillinuse = Skill1HBlunt;
+			type = anim1HWeapon;
+			break;
+		case EQEmu::item::ItemType2HBlunt: // 2H Blunt
+			skillinuse = Skill2HBlunt;
+			type = anim2HSlashing; //anim2HWeapon
+			break;
+		case EQEmu::item::ItemType2HPiercing: // 2H Piercing
+			if (IsClient() && CastToClient()->ClientVersion() < EQEmu::versions::ClientVersion::RoF2)
 				skillinuse = Skill1HPiercing;
-				type = anim1HPiercing;
-				break;
-			}
-			case ItemType1HBlunt: // 1H Blunt
-			{
-				skillinuse = Skill1HBlunt;
-				type = anim1HWeapon;
-				break;
-			}
-			case ItemType2HBlunt: // 2H Blunt
-			{
-				skillinuse = Skill2HBlunt;
-				type = anim2HSlashing; //anim2HWeapon
-				break;
-			}
-			case ItemType2HPiercing: // 2H Piercing
-			{
-				if (IsClient() && CastToClient()->ClientVersion() < EQEmu::versions::ClientVersion::RoF2)
-					skillinuse = Skill1HPiercing;
-				else
-					skillinuse = Skill2HPiercing;
-				type = anim2HWeapon;
-				break;
-			}
-			case ItemTypeMartial:
-			{
-				skillinuse = SkillHandtoHand;
-				type = animHand2Hand;
-				break;
-			}
-			default:
-			{
-				skillinuse = SkillHandtoHand;
-				type = animHand2Hand;
-				break;
-			}
+			else
+				skillinuse = Skill2HPiercing;
+			type = anim2HWeapon;
+			break;
+		case EQEmu::item::ItemTypeMartial:
+			skillinuse = SkillHandtoHand;
+			type = animHand2Hand;
+			break;
+		default:
+			skillinuse = SkillHandtoHand;
+			type = animHand2Hand;
+			break;
 		}// switch
 	}
 	else if(IsNPC()) {
-
-		switch (skillinuse)
-		{
-			case Skill1HSlashing: // 1H Slashing
-			{
-				type = anim1HWeapon;
-				break;
-			}
-			case Skill2HSlashing: // 2H Slashing
-			{
-				type = anim2HSlashing;
-				break;
-			}
-			case Skill1HPiercing: // Piercing
-			{
-				type = anim1HPiercing;
-				break;
-			}
-			case Skill1HBlunt: // 1H Blunt
-			{
-				type = anim1HWeapon;
-				break;
-			}
-			case Skill2HBlunt: // 2H Blunt
-			{
-				type = anim2HSlashing; //anim2HWeapon
-				break;
-			}
-			case Skill2HPiercing: // 2H Piercing
-			{
-				type = anim2HWeapon;
-				break;
-			}
-			case SkillHandtoHand:
-			{
-				type = animHand2Hand;
-				break;
-			}
-			default:
-			{
-				type = animHand2Hand;
-				break;
-			}
+		switch (skillinuse) {
+		case Skill1HSlashing: // 1H Slashing
+			type = anim1HWeapon;
+			break;
+		case Skill2HSlashing: // 2H Slashing
+			type = anim2HSlashing;
+			break;
+		case Skill1HPiercing: // Piercing
+			type = anim1HPiercing;
+			break;
+		case Skill1HBlunt: // 1H Blunt
+			type = anim1HWeapon;
+			break;
+		case Skill2HBlunt: // 2H Blunt
+			type = anim2HSlashing; //anim2HWeapon
+			break;
+		case Skill2HPiercing: // 2H Piercing
+			type = anim2HWeapon;
+			break;
+		case SkillHandtoHand:
+			type = animHand2Hand;
+			break;
+		default:
+			type = animHand2Hand;
+			break;
 		}// switch
 	}
 	else {
@@ -825,7 +790,7 @@ int32 Client::GetMeleeMitDmg(Mob *attacker, int32 damage, int32 minhit,
 //Else we know we can hit.
 //GetWeaponDamage(mob*, const Item_Struct*) is intended to be used for mobs or any other situation where we do not have a client inventory item
 //GetWeaponDamage(mob*, const ItemInst*) is intended to be used for situations where we have a client inventory item
-int Mob::GetWeaponDamage(Mob *against, const Item_Struct *weapon_item) {
+int Mob::GetWeaponDamage(Mob *against, const EQEmu::Item_Struct *weapon_item) {
 	int dmg = 0;
 	int banedmg = 0;
 
@@ -1151,7 +1116,7 @@ bool Client::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, b
 			// Damage bonuses apply only to hits from the main hand (Hand == MainPrimary) by characters level 28 and above
 			// who belong to a melee class. If we're here, then all of these conditions apply.
 
-			ucDamageBonus = GetWeaponDamageBonus( weapon ? weapon->GetItem() : (const Item_Struct*) nullptr );
+			ucDamageBonus = GetWeaponDamageBonus( weapon ? weapon->GetItem() : (const EQEmu::Item_Struct*) nullptr );
 
 			min_hit += (int) ucDamageBonus;
 			max_hit += (int) ucDamageBonus;
@@ -1162,7 +1127,7 @@ bool Client::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, b
 		if (Hand == EQEmu::legacy::SlotSecondary) {
 			if (aabonuses.SecondaryDmgInc || itembonuses.SecondaryDmgInc || spellbonuses.SecondaryDmgInc){
 
-				ucDamageBonus = GetWeaponDamageBonus(weapon ? weapon->GetItem() : (const Item_Struct*) nullptr, true );
+				ucDamageBonus = GetWeaponDamageBonus(weapon ? weapon->GetItem() : (const EQEmu::Item_Struct*) nullptr, true );
 
 				min_hit += (int) ucDamageBonus;
 				max_hit += (int) ucDamageBonus;
@@ -1630,7 +1595,7 @@ bool NPC::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool
 	}
 
 	//figure out what weapon they are using, if any
-	const Item_Struct* weapon = nullptr;
+	const EQEmu::Item_Struct* weapon = nullptr;
 	if (Hand == EQEmu::legacy::SlotPrimary && equipment[EQEmu::legacy::SlotPrimary] > 0)
 		weapon = database.GetItem(equipment[EQEmu::legacy::SlotPrimary]);
 	else if (equipment[EQEmu::legacy::SlotSecondary])
@@ -1641,40 +1606,40 @@ bool NPC::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool
 	if(weapon) {
 		Log.Out(Logs::Detail, Logs::Combat, "Attacking with weapon: %s (%d) (too bad im not using it for much)", weapon->Name, weapon->ID);
 
-		if (Hand == EQEmu::legacy::SlotSecondary && weapon->ItemType == ItemTypeShield){
+		if (Hand == EQEmu::legacy::SlotSecondary && weapon->ItemType == EQEmu::item::ItemTypeShield){
 			Log.Out(Logs::Detail, Logs::Combat, "Attack with shield canceled.");
 			return false;
 		}
 
-		switch(weapon->ItemType){
-			case ItemType1HSlash:
-				skillinuse = Skill1HSlashing;
-				break;
-			case ItemType2HSlash:
-				skillinuse = Skill2HSlashing;
-				break;
-			case ItemType1HPiercing:
-				skillinuse = Skill1HPiercing;
-				break;
-			case ItemType2HPiercing:
-				skillinuse = Skill2HPiercing;
-				break;
-			case ItemType1HBlunt:
-				skillinuse = Skill1HBlunt;
-				break;
-			case ItemType2HBlunt:
-				skillinuse = Skill2HBlunt;
-				break;
-			case ItemTypeBow:
-				skillinuse = SkillArchery;
-				break;
-			case ItemTypeLargeThrowing:
-			case ItemTypeSmallThrowing:
-				skillinuse = SkillThrowing;
-				break;
-			default:
-				skillinuse = SkillHandtoHand;
-				break;
+		switch(weapon->ItemType) {
+		case EQEmu::item::ItemType1HSlash:
+			skillinuse = Skill1HSlashing;
+			break;
+		case EQEmu::item::ItemType2HSlash:
+			skillinuse = Skill2HSlashing;
+			break;
+		case EQEmu::item::ItemType1HPiercing:
+			skillinuse = Skill1HPiercing;
+			break;
+		case EQEmu::item::ItemType2HPiercing:
+			skillinuse = Skill2HPiercing;
+			break;
+		case EQEmu::item::ItemType1HBlunt:
+			skillinuse = Skill1HBlunt;
+			break;
+		case EQEmu::item::ItemType2HBlunt:
+			skillinuse = Skill2HBlunt;
+			break;
+		case EQEmu::item::ItemTypeBow:
+			skillinuse = SkillArchery;
+			break;
+		case EQEmu::item::ItemTypeLargeThrowing:
+		case EQEmu::item::ItemTypeSmallThrowing:
+			skillinuse = SkillThrowing;
+			break;
+		default:
+			skillinuse = SkillHandtoHand;
+			break;
 		}
 	}
 
@@ -2542,7 +2507,7 @@ void Mob::DamageShield(Mob* attacker, bool spell_ds) {
 	}
 }
 
-uint8 Mob::GetWeaponDamageBonus(const Item_Struct *weapon, bool offhand)
+uint8 Mob::GetWeaponDamageBonus(const EQEmu::Item_Struct *weapon, bool offhand)
 {
 	// dev quote with old and new formulas
 	// https://forums.daybreakgames.com/eq/index.php?threads/test-update-09-17-15.226618/page-5#post-3326194
@@ -2554,8 +2519,7 @@ uint8 Mob::GetWeaponDamageBonus(const Item_Struct *weapon, bool offhand)
 		return 1 + ((level - 28) / 3); // how does weaponless scale?
 
 	auto delay = weapon->Delay;
-	if (weapon->ItemType == ItemType1HSlash || weapon->ItemType == ItemType1HBlunt ||
-	    weapon->ItemType == ItemTypeMartial || weapon->ItemType == ItemType1HPiercing) {
+	if (weapon->IsType1HWeapon() || weapon->ItemType == EQEmu::item::ItemTypeMartial) {
 		// we assume sinister strikes is checked before calling here
 		if (!offhand) {
 			if (delay <= 39)
@@ -3574,12 +3538,12 @@ void Mob::TryWeaponProc(const ItemInst* weapon_g, Mob *on, uint16 hand) {
 	}
 
 	if(!weapon_g) {
-		TrySpellProc(nullptr, (const Item_Struct*)nullptr, on);
+		TrySpellProc(nullptr, (const EQEmu::Item_Struct*)nullptr, on);
 		return;
 	}
 
-	if(!weapon_g->IsType(ItemClassCommon)) {
-		TrySpellProc(nullptr, (const Item_Struct*)nullptr, on);
+	if (!weapon_g->IsClassCommon()) {
+		TrySpellProc(nullptr, (const EQEmu::Item_Struct*)nullptr, on);
 		return;
 	}
 
@@ -3592,7 +3556,7 @@ void Mob::TryWeaponProc(const ItemInst* weapon_g, Mob *on, uint16 hand) {
 	return;
 }
 
-void Mob::TryWeaponProc(const ItemInst *inst, const Item_Struct *weapon, Mob *on, uint16 hand)
+void Mob::TryWeaponProc(const ItemInst *inst, const EQEmu::Item_Struct *weapon, Mob *on, uint16 hand)
 {
 
 	if (!weapon)
@@ -3611,7 +3575,7 @@ void Mob::TryWeaponProc(const ItemInst *inst, const Item_Struct *weapon, Mob *on
 	// We can proc once here, either weapon or one aug
 	bool proced = false; // silly bool to prevent augs from going if weapon does
 	skillinuse = GetSkillByItemType(weapon->ItemType);
-	if (weapon->Proc.Type == ET_CombatProc && IsValidSpell(weapon->Proc.Effect)) {
+	if (weapon->Proc.Type == EQEmu::item::ItemEffectCombatProc && IsValidSpell(weapon->Proc.Effect)) {
 		float WPC = ProcChance * (100.0f + // Proc chance for this weapon
 				static_cast<float>(weapon->ProcRate)) / 100.0f;
 		if (zone->random.Roll(WPC)) {	// 255 dex = 0.084 chance of proc. No idea what this number should be really.
@@ -3645,11 +3609,11 @@ void Mob::TryWeaponProc(const ItemInst *inst, const Item_Struct *weapon, Mob *on
 			const ItemInst *aug_i = inst->GetAugment(r);
 			if (!aug_i) // no aug, try next slot!
 				continue;
-			const Item_Struct *aug = aug_i->GetItem();
+			const EQEmu::Item_Struct *aug = aug_i->GetItem();
 			if (!aug)
 				continue;
 
-			if (aug->Proc.Type == ET_CombatProc && IsValidSpell(aug->Proc.Effect)) {
+			if (aug->Proc.Type == EQEmu::item::ItemEffectCombatProc && IsValidSpell(aug->Proc.Effect)) {
 				float APC = ProcChance * (100.0f + // Proc chance for this aug
 					static_cast<float>(aug->ProcRate)) / 100.0f;
 				if (zone->random.Roll(APC)) {
@@ -3675,7 +3639,7 @@ void Mob::TryWeaponProc(const ItemInst *inst, const Item_Struct *weapon, Mob *on
 	return;
 }
 
-void Mob::TrySpellProc(const ItemInst *inst, const Item_Struct *weapon, Mob *on, uint16 hand)
+void Mob::TrySpellProc(const ItemInst *inst, const EQEmu::Item_Struct *weapon, Mob *on, uint16 hand)
 {
 	float ProcBonus = static_cast<float>(spellbonuses.SpellProcChance +
 			itembonuses.SpellProcChance + aabonuses.SpellProcChance);
@@ -3687,11 +3651,12 @@ void Mob::TrySpellProc(const ItemInst *inst, const Item_Struct *weapon, Mob *on,
 
 	bool rangedattk = false;
 	if (weapon && hand == EQEmu::legacy::SlotRange) {
-		if (weapon->ItemType == ItemTypeArrow ||
-				weapon->ItemType == ItemTypeLargeThrowing ||
-				weapon->ItemType == ItemTypeSmallThrowing ||
-				weapon->ItemType == ItemTypeBow)
+		if (weapon->ItemType == EQEmu::item::ItemTypeArrow ||
+			weapon->ItemType == EQEmu::item::ItemTypeLargeThrowing ||
+			weapon->ItemType == EQEmu::item::ItemTypeSmallThrowing ||
+			weapon->ItemType == EQEmu::item::ItemTypeBow) {
 			rangedattk = true;
+		}
 	}
 
 	if (!weapon && hand == EQEmu::legacy::SlotRange && GetSpecialAbility(SPECATK_RANGED_ATK))
@@ -4531,7 +4496,7 @@ void Client::SetAttackTimer()
 		else	//invalid slot (hands will always hit this)
 			continue;
 
-		const Item_Struct *ItemToUse = nullptr;
+		const EQEmu::Item_Struct *ItemToUse = nullptr;
 
 		//find our item
 		ItemInst *ci = GetInv().GetItem(i);
@@ -4550,16 +4515,16 @@ void Client::SetAttackTimer()
 		//see if we have a valid weapon
 		if (ItemToUse != nullptr) {
 			//check type and damage/delay
-			if (ItemToUse->ItemClass != ItemClassCommon
-					|| ItemToUse->Damage == 0
-					|| ItemToUse->Delay == 0) {
+			if (!ItemToUse->IsClassCommon()
+				|| ItemToUse->Damage == 0
+				|| ItemToUse->Delay == 0) {
 				//no weapon
 				ItemToUse = nullptr;
 			}
 			// Check to see if skill is valid
-			else if ((ItemToUse->ItemType > ItemTypeLargeThrowing) &&
-					(ItemToUse->ItemType != ItemTypeMartial) &&
-					(ItemToUse->ItemType != ItemType2HPiercing)) {
+			else if ((ItemToUse->ItemType > EQEmu::item::ItemTypeLargeThrowing) &&
+				(ItemToUse->ItemType != EQEmu::item::ItemTypeMartial) &&
+				(ItemToUse->ItemType != EQEmu::item::ItemType2HPiercing)) {
 				//no weapon
 				ItemToUse = nullptr;
 			}
@@ -4578,7 +4543,7 @@ void Client::SetAttackTimer()
 
 		speed = delay / haste_mod;
 
-		if (ItemToUse && ItemToUse->ItemType == ItemTypeBow) {
+		if (ItemToUse && ItemToUse->ItemType == EQEmu::item::ItemTypeBow) {
 			// Live actually had a bug here where they would return the non-modified attack speed
 			// rather than the cap ...
 			speed = std::max(speed - GetQuiverHaste(speed), RuleI(Combat, QuiverHasteCap));

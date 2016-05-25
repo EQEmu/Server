@@ -178,12 +178,10 @@ Mob::Mob(const char* in_name,
 	if (runspeed < 0 || runspeed > 20)
 		runspeed = 1.25f;
 
-	m_Light.Type.Innate = in_light;
-	m_Light.Level.Innate = EQEmu::lightsource::TypeToLevel(m_Light.Type.Innate);
-	m_Light.Level.Equipment = m_Light.Type.Equipment = 0;
-	m_Light.Level.Spell = m_Light.Type.Spell = 0;
-	m_Light.Type.Active = m_Light.Type.Innate;
-	m_Light.Level.Active = m_Light.Level.Innate;
+	m_Light.Type[EQEmu::lightsource::LightInnate] = in_light;
+	m_Light.Level[EQEmu::lightsource::LightInnate] = EQEmu::lightsource::TypeToLevel(m_Light.Type[EQEmu::lightsource::LightInnate]);
+	m_Light.Type[EQEmu::lightsource::LightActive] = m_Light.Type[EQEmu::lightsource::LightInnate];
+	m_Light.Level[EQEmu::lightsource::LightActive] = m_Light.Level[EQEmu::lightsource::LightInnate];
 
 	texture		= in_texture;
 	helmtexture	= in_helmtexture;
@@ -1100,7 +1098,7 @@ void Mob::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho)
 	ns->spawn.findable	= findable?1:0;
 
 	UpdateActiveLight();
-	ns->spawn.light		= m_Light.Type.Active;
+	ns->spawn.light		= m_Light.Type[EQEmu::lightsource::LightActive];
 
 	ns->spawn.showhelm = (helmtexture && helmtexture != 0xFF) ? 1 : 0;
 
@@ -2227,18 +2225,18 @@ void Mob::SetAppearance(EmuAppearance app, bool iIgnoreSelf) {
 
 bool Mob::UpdateActiveLight()
 {
-	uint8 old_light_level = m_Light.Level.Active;
+	uint8 old_light_level = m_Light.Level[EQEmu::lightsource::LightActive];
 
-	m_Light.Type.Active = 0;
-	m_Light.Level.Active = 0;
+	m_Light.Type[EQEmu::lightsource::LightActive] = 0;
+	m_Light.Level[EQEmu::lightsource::LightActive] = 0;
 
-	if (EQEmu::lightsource::IsLevelGreater((m_Light.Type.Innate & 0x0F), m_Light.Type.Active)) { m_Light.Type.Active = m_Light.Type.Innate; }
-	if (m_Light.Level.Equipment > m_Light.Level.Active) { m_Light.Type.Active = m_Light.Type.Equipment; } // limiter in property handler
-	if (m_Light.Level.Spell > m_Light.Level.Active) { m_Light.Type.Active = m_Light.Type.Spell; } // limiter in property handler
+	if (EQEmu::lightsource::IsLevelGreater((m_Light.Type[EQEmu::lightsource::LightInnate] & 0x0F), m_Light.Type[EQEmu::lightsource::LightActive])) { m_Light.Type[EQEmu::lightsource::LightActive] = m_Light.Type[EQEmu::lightsource::LightInnate]; }
+	if (m_Light.Level[EQEmu::lightsource::LightEquipment] > m_Light.Level[EQEmu::lightsource::LightActive]) { m_Light.Type[EQEmu::lightsource::LightActive] = m_Light.Type[EQEmu::lightsource::LightEquipment]; } // limiter in property handler
+	if (m_Light.Level[EQEmu::lightsource::LightSpell] > m_Light.Level[EQEmu::lightsource::LightActive]) { m_Light.Type[EQEmu::lightsource::LightActive] = m_Light.Type[EQEmu::lightsource::LightSpell]; } // limiter in property handler
 
-	m_Light.Level.Active = EQEmu::lightsource::TypeToLevel(m_Light.Type.Active);
+	m_Light.Level[EQEmu::lightsource::LightActive] = EQEmu::lightsource::TypeToLevel(m_Light.Type[EQEmu::lightsource::LightActive]);
 
-	return (m_Light.Level.Active != old_light_level);
+	return (m_Light.Level[EQEmu::lightsource::LightActive] != old_light_level);
 }
 
 void Mob::ChangeSize(float in_size = 0, bool bNoRestriction) {
@@ -2384,9 +2382,9 @@ bool Mob::CanThisClassDualWield(void) const {
 
 		// 2HS, 2HB, or 2HP
 		if(pinst && pinst->IsWeapon()) {
-			const Item_Struct* item = pinst->GetItem();
+			const EQEmu::Item_Struct* item = pinst->GetItem();
 
-			if((item->ItemType == ItemType2HBlunt) || (item->ItemType == ItemType2HSlash) || (item->ItemType == ItemType2HPiercing))
+			if (item->IsType2HWeapon())
 				return false;
 		}
 
@@ -2756,7 +2754,7 @@ void Mob::SendArmorAppearance(Client *one_client)
 	{
 		if (!IsClient())
 		{
-			const Item_Struct *item;
+			const EQEmu::Item_Struct *item;
 			for (int i = 0; i < 7; ++i)
 			{
 				item = database.GetItem(GetEquipment(i));
@@ -2859,7 +2857,7 @@ int32 Mob::GetEquipmentMaterial(uint8 material_slot) const
 {
 	uint32 equipmaterial = 0;
 	int32 ornamentationAugtype = RuleI(Character, OrnamentationAugmentType);
-	const Item_Struct *item;
+	const EQEmu::Item_Struct *item;
 	item = database.GetItem(GetEquipment(material_slot));
 
 	if (item != 0)
@@ -2912,7 +2910,7 @@ int32 Mob::GetHerosForgeModel(uint8 material_slot) const
 	if (material_slot >= 0 && material_slot < EQEmu::legacy::MaterialPrimary)
 	{
 		uint32 ornamentationAugtype = RuleI(Character, OrnamentationAugmentType);
-		const Item_Struct *item;
+		const EQEmu::Item_Struct *item;
 		item = database.GetItem(GetEquipment(material_slot));
 		int16 invslot = Inventory::CalcSlotFromMaterial(material_slot);
 
@@ -2966,7 +2964,7 @@ int32 Mob::GetHerosForgeModel(uint8 material_slot) const
 
 uint32 Mob::GetEquipmentColor(uint8 material_slot) const
 {
-	const Item_Struct *item;
+	const EQEmu::Item_Struct *item;
 
 	if (armor_tint[material_slot])
 	{
@@ -2982,7 +2980,7 @@ uint32 Mob::GetEquipmentColor(uint8 material_slot) const
 
 uint32 Mob::IsEliteMaterialItem(uint8 material_slot) const
 {
-	const Item_Struct *item;
+	const EQEmu::Item_Struct *item;
 
 	item = database.GetItem(GetEquipment(material_slot));
 	if(item != 0)
@@ -3898,7 +3896,7 @@ int32 Mob::GetItemStat(uint32 itemid, const char *identifier)
 	if (!inst)
 		return 0;
 
-	const Item_Struct* item = inst->GetItem();
+	const EQEmu::Item_Struct* item = inst->GetItem();
 	if (!item)
 		return 0;
 
@@ -5021,62 +5019,58 @@ void Mob::SlowMitigation(Mob* caster)
 
 uint16 Mob::GetSkillByItemType(int ItemType)
 {
-	switch (ItemType)
-	{
-		case ItemType1HSlash:
-			return Skill1HSlashing;
-		case ItemType2HSlash:
-			return Skill2HSlashing;
-		case ItemType1HPiercing:
+	switch (ItemType) {
+	case EQEmu::item::ItemType1HSlash:
+		return Skill1HSlashing;
+	case EQEmu::item::ItemType2HSlash:
+		return Skill2HSlashing;
+	case EQEmu::item::ItemType1HPiercing:
+		return Skill1HPiercing;
+	case EQEmu::item::ItemType1HBlunt:
+		return Skill1HBlunt;
+	case EQEmu::item::ItemType2HBlunt:
+		return Skill2HBlunt;
+	case EQEmu::item::ItemType2HPiercing:
+		if (IsClient() && CastToClient()->ClientVersion() < EQEmu::versions::ClientVersion::RoF2)
 			return Skill1HPiercing;
-		case ItemType1HBlunt:
-			return Skill1HBlunt;
-		case ItemType2HBlunt:
-			return Skill2HBlunt;
-		case ItemType2HPiercing:
-			if (IsClient() && CastToClient()->ClientVersion() < EQEmu::versions::ClientVersion::RoF2)
-				return Skill1HPiercing;
-			else
-				return Skill2HPiercing;
-		case ItemTypeBow:
-			return SkillArchery;
-		case ItemTypeLargeThrowing:
-		case ItemTypeSmallThrowing:
-			return SkillThrowing;
-		case ItemTypeMartial:
-			return SkillHandtoHand;
-		default:
-			return SkillHandtoHand;
+		else
+			return Skill2HPiercing;
+	case EQEmu::item::ItemTypeBow:
+		return SkillArchery;
+	case EQEmu::item::ItemTypeLargeThrowing:
+	case EQEmu::item::ItemTypeSmallThrowing:
+		return SkillThrowing;
+	case EQEmu::item::ItemTypeMartial:
+		return SkillHandtoHand;
+	default:
+		return SkillHandtoHand;
 	}
-	return SkillHandtoHand;
  }
 
 uint8 Mob::GetItemTypeBySkill(SkillUseTypes skill)
 {
-	switch (skill)
-	{
-		case SkillThrowing:
-			return ItemTypeSmallThrowing;
-		case SkillArchery:
-			return ItemTypeArrow;
-		case Skill1HSlashing:
-			return ItemType1HSlash;
-		case Skill2HSlashing:
-			return ItemType2HSlash;
-		case Skill1HPiercing:
-			return ItemType1HPiercing;
-		case Skill2HPiercing: // watch for undesired client behavior
-			return ItemType2HPiercing;
-		case Skill1HBlunt:
-			return ItemType1HBlunt;
-		case Skill2HBlunt:
-			return ItemType2HBlunt;
-		case SkillHandtoHand:
-			return ItemTypeMartial;
-		default:
-			return ItemTypeMartial;
+	switch (skill) {
+	case SkillThrowing:
+		return EQEmu::item::ItemTypeSmallThrowing;
+	case SkillArchery:
+		return EQEmu::item::ItemTypeArrow;
+	case Skill1HSlashing:
+		return EQEmu::item::ItemType1HSlash;
+	case Skill2HSlashing:
+		return EQEmu::item::ItemType2HSlash;
+	case Skill1HPiercing:
+		return EQEmu::item::ItemType1HPiercing;
+	case Skill2HPiercing: // watch for undesired client behavior
+		return EQEmu::item::ItemType2HPiercing;
+	case Skill1HBlunt:
+		return EQEmu::item::ItemType1HBlunt;
+	case Skill2HBlunt:
+		return EQEmu::item::ItemType2HBlunt;
+	case SkillHandtoHand:
+		return EQEmu::item::ItemTypeMartial;
+	default:
+		return EQEmu::item::ItemTypeMartial;
 	}
-	return ItemTypeMartial;
  }
 
 
@@ -5633,7 +5627,7 @@ int32 Mob::GetSpellStat(uint32 spell_id, const char *identifier, uint8 slot)
 
 bool Mob::CanClassEquipItem(uint32 item_id)
 {
-	const Item_Struct* itm = nullptr;
+	const EQEmu::Item_Struct* itm = nullptr;
 	itm = database.GetItem(item_id);
 
 	if (!itm)

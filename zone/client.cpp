@@ -1902,7 +1902,7 @@ void Client::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho)
 
 	UpdateEquipmentLight();
 	UpdateActiveLight();
-	ns->spawn.light = m_Light.Type.Active;
+	ns->spawn.light = m_Light.Type[EQEmu::lightsource::LightActive];
 }
 
 bool Client::GMHideMe(Client* client) {
@@ -2539,7 +2539,7 @@ void Client::SetFeigned(bool in_feigned) {
 	feigned=in_feigned;
  }
 
-void Client::LogMerchant(Client* player, Mob* merchant, uint32 quantity, uint32 price, const Item_Struct* item, bool buying)
+void Client::LogMerchant(Client* player, Mob* merchant, uint32 quantity, uint32 price, const EQEmu::Item_Struct* item, bool buying)
 {
 	if(!player || !merchant || !item)
 		return;
@@ -2577,7 +2577,7 @@ bool Client::BindWound(Mob *bindmob, bool start, bool fail)
 		// Start bind
 		if (!bindwound_timer.Enabled()) {
 			// make sure we actually have a bandage... and consume it.
-			int16 bslot = m_inv.HasItemByUse(ItemTypeBandage, 1, invWhereWorn | invWherePersonal);
+			int16 bslot = m_inv.HasItemByUse(EQEmu::item::ItemTypeBandage, 1, invWhereWorn | invWherePersonal);
 			if (bslot == INVALID_INDEX) {
 				bind_out->type = 3;
 				QueuePacket(outapp);
@@ -2725,8 +2725,8 @@ bool Client::BindWound(Mob *bindmob, bool start, bool fail)
 }
 
 void Client::SetMaterial(int16 in_slot, uint32 item_id) {
-	const Item_Struct* item = database.GetItem(item_id);
-	if (item && (item->ItemClass==ItemClassCommon))
+	const EQEmu::Item_Struct* item = database.GetItem(item_id);
+	if (item && item->IsClassCommon())
 	{
 		uint8 matslot = Inventory::CalcMaterialFromSlot(in_slot);
 		if (matslot != EQEmu::legacy::MaterialInvalid)
@@ -3768,7 +3768,7 @@ void Client::SendOPTranslocateConfirm(Mob *Caster, uint16 SpellID) {
 
 	return;
 }
-void Client::SendPickPocketResponse(Mob *from, uint32 amt, int type, const Item_Struct* item){
+void Client::SendPickPocketResponse(Mob *from, uint32 amt, int type, const EQEmu::Item_Struct* item){
 		EQApplicationPacket* outapp = new EQApplicationPacket(OP_PickPocket, sizeof(sPickPocket_Struct));
 		sPickPocket_Struct* pick_out = (sPickPocket_Struct*) outapp->pBuffer;
 		pick_out->coin = amt;
@@ -3945,7 +3945,7 @@ bool Client::KeyRingCheck(uint32 item_id)
 void Client::KeyRingList()
 {
 	Message(4,"Keys on Keyring:");
-	const Item_Struct *item = 0;
+	const EQEmu::Item_Struct *item = 0;
 	for(std::list<uint32>::iterator iter = keyring.begin();
 		iter != keyring.end();
 		++iter)
@@ -4212,51 +4212,34 @@ uint16 Client::GetPrimarySkillValue()
 
 		uint8 type = m_inv.GetItem(EQEmu::legacy::SlotPrimary)->GetItem()->ItemType; //is this the best way to do this?
 
-		switch (type)
-		{
-			case ItemType1HSlash: // 1H Slashing
-			{
-				skill = Skill1HSlashing;
-				break;
-			}
-			case ItemType2HSlash: // 2H Slashing
-			{
-				skill = Skill2HSlashing;
-				break;
-			}
-			case ItemType1HPiercing: // Piercing
-			{
+		switch (type) {
+		case EQEmu::item::ItemType1HSlash: // 1H Slashing
+			skill = Skill1HSlashing;
+			break;
+		case EQEmu::item::ItemType2HSlash: // 2H Slashing
+			skill = Skill2HSlashing;
+			break;
+		case EQEmu::item::ItemType1HPiercing: // Piercing
+			skill = Skill1HPiercing;
+			break;
+		case EQEmu::item::ItemType1HBlunt: // 1H Blunt
+			skill = Skill1HBlunt;
+			break;
+		case EQEmu::item::ItemType2HBlunt: // 2H Blunt
+			skill = Skill2HBlunt;
+			break;
+		case EQEmu::item::ItemType2HPiercing: // 2H Piercing
+			if (IsClient() && CastToClient()->ClientVersion() < EQEmu::versions::ClientVersion::RoF2)
 				skill = Skill1HPiercing;
-				break;
-			}
-			case ItemType1HBlunt: // 1H Blunt
-			{
-				skill = Skill1HBlunt;
-				break;
-			}
-			case ItemType2HBlunt: // 2H Blunt
-			{
-				skill = Skill2HBlunt;
-				break;
-			}
-			case ItemType2HPiercing: // 2H Piercing
-			{
-				if (IsClient() && CastToClient()->ClientVersion() < EQEmu::versions::ClientVersion::RoF2)
-					skill = Skill1HPiercing;
-				else
-					skill = Skill2HPiercing;
-				break;
-			}
-			case ItemTypeMartial: // Hand to Hand
-			{
-				skill = SkillHandtoHand;
-				break;
-			}
-			default: // All other types default to Hand to Hand
-			{
-				skill = SkillHandtoHand;
-				break;
-			}
+			else
+				skill = Skill2HPiercing;
+			break;
+		case EQEmu::item::ItemTypeMartial: // Hand to Hand
+			skill = SkillHandtoHand;
+			break;
+		default: // All other types default to Hand to Hand
+			skill = SkillHandtoHand;
+			break;
 		}
 	}
 
@@ -5708,7 +5691,7 @@ void Client::ProcessInspectRequest(Client* requestee, Client* requester) {
 		insr->TargetID = requester->GetID();
 		insr->playerid = requestee->GetID();
 
-		const Item_Struct* item = nullptr;
+		const EQEmu::Item_Struct* item = nullptr;
 		const ItemInst* inst = nullptr;
 		int ornamentationAugtype = RuleI(Character, OrnamentationAugmentType);
 		for(int16 L = 0; L <= 20; L++) {
@@ -5720,7 +5703,7 @@ void Client::ProcessInspectRequest(Client* requestee, Client* requester) {
 					strcpy(insr->itemnames[L], item->Name);
 					if (inst && inst->GetOrnamentationAug(ornamentationAugtype))
 					{
-						const Item_Struct *aug_item = inst->GetOrnamentationAug(ornamentationAugtype)->GetItem();
+						const EQEmu::Item_Struct *aug_item = inst->GetOrnamentationAug(ornamentationAugtype)->GetItem();
 						insr->itemicons[L] = aug_item->Icon;
 					}
 					else if (inst && inst->GetOrnamentationIcon())
@@ -6902,7 +6885,7 @@ void Client::SendAltCurrencies() {
 		uint32 i = 0;
 		std::list<AltCurrencyDefinition_Struct>::iterator iter = zone->AlternateCurrencies.begin();
 		while(iter != zone->AlternateCurrencies.end()) {
-			const Item_Struct* item = database.GetItem((*iter).item_id);
+			const EQEmu::Item_Struct* item = database.GetItem((*iter).item_id);
 			altc->entries[i].currency_number = (*iter).id;
 			altc->entries[i].unknown00 = 1;
 			altc->entries[i].currency_number2 = (*iter).id;
@@ -7555,7 +7538,7 @@ void Client::DuplicateLoreMessage(uint32 ItemID)
 		return;
 	}
 
-	const Item_Struct *item = database.GetItem(ItemID);
+	const EQEmu::Item_Struct *item = database.GetItem(ItemID);
 
 	if(!item)
 		return;
@@ -8272,7 +8255,7 @@ void Client::SetConsumption(int32 in_hunger, int32 in_thirst)
 	safe_delete(outapp);
 }
 
-void Client::Consume(const Item_Struct *item, uint8 type, int16 slot, bool auto_consume)
+void Client::Consume(const EQEmu::Item_Struct *item, uint8 type, int16 slot, bool auto_consume)
 {
    if(!item) { return; }
 
@@ -8285,7 +8268,7 @@ void Client::Consume(const Item_Struct *item, uint8 type, int16 slot, bool auto_
 	else
 		 cons_mod = cons_mod * RuleI(Character, ConsumptionMultiplier) / 100;
 
-   if(type == ItemTypeFood)
+	if (type == EQEmu::item::ItemTypeFood)
    {
 	   int hchange = item->CastTime * cons_mod;
 	   hchange = mod_food_value(item, hchange);
@@ -8390,7 +8373,7 @@ int Client::GetQuiverHaste(int delay)
 	const ItemInst *pi = nullptr;
 	for (int r = EQEmu::legacy::GENERAL_BEGIN; r <= EQEmu::legacy::GENERAL_END; r++) {
 		pi = GetInv().GetItem(r);
-		if (pi && pi->IsType(ItemClassContainer) && pi->GetItem()->BagType == BagTypeQuiver &&
+		if (pi && pi->IsClassBag() && pi->GetItem()->BagType == EQEmu::item::BagTypeQuiver &&
 		    pi->GetItem()->BagWR > 0)
 			break;
 		if (r == EQEmu::legacy::GENERAL_END)
