@@ -714,7 +714,7 @@ void ClientTaskState::EnableTask(int characterID, int taskCount, int *tasks) {
 	for(unsigned int i=0; i<EnabledTasks.size(); i++)
 		Log.Out(Logs::General, Logs::Tasks, "[UPDATE] %i", EnabledTasks[i]);
 
-	if(tasksEnabled.size() == 0 )
+	if(tasksEnabled.empty() )
         return;
 
 	std::stringstream queryStream("REPLACE INTO character_enabledtasks (charid, taskid) VALUES ");
@@ -758,7 +758,7 @@ void ClientTaskState::DisableTask(int charID, int taskCount, int *taskList) {
 	for(unsigned int i=0; i<EnabledTasks.size(); i++)
 		Log.Out(Logs::General, Logs::Tasks, "[UPDATE] %i", EnabledTasks[i]);
 
-	if(tasksDisabled.size() == 0)
+	if(tasksDisabled.empty())
         return;
 
 	std::stringstream queryStream(StringFormat("DELETE FROM character_enabledtasks WHERE charid = %i AND (", charID));
@@ -848,7 +848,7 @@ int TaskManager::FirstTaskInSet(int TaskSetID) {
 
 	if((TaskSetID<=0) || (TaskSetID>=MAXTASKSETS)) return 0;
 
-	if(TaskSets[TaskSetID].size() == 0) return 0;
+	if(TaskSets[TaskSetID].empty()) return 0;
 
 	std::vector<int>::iterator Iterator = TaskSets[TaskSetID].begin();
 
@@ -865,7 +865,7 @@ int TaskManager::LastTaskInSet(int TaskSetID) {
 
 	if((TaskSetID<=0) || (TaskSetID>=MAXTASKSETS)) return 0;
 
-	if(TaskSets[TaskSetID].size() == 0) return 0;
+	if(TaskSets[TaskSetID].empty()) return 0;
 
 	return TaskSets[TaskSetID][TaskSets[TaskSetID].size()-1];
 }
@@ -874,7 +874,7 @@ int TaskManager::NextTaskInSet(int TaskSetID, int TaskID) {
 
 	if((TaskSetID<=0) || (TaskSetID>=MAXTASKSETS)) return 0;
 
-	if(TaskSets[TaskSetID].size() == 0) return 0;
+	if(TaskSets[TaskSetID].empty()) return 0;
 
 	for(unsigned int i=0; i<TaskSets[TaskSetID].size(); i++) {
 		if(TaskSets[TaskSetID][i] > TaskID) return TaskSets[TaskSetID][i];
@@ -927,7 +927,7 @@ void TaskManager::TaskSetSelector(Client *c, ClientTaskState *state, Mob *mob, i
 				state->EnabledTasks.size());
 	if((TaskSetID<=0) || (TaskSetID>=MAXTASKSETS)) return;
 
-	if(TaskSets[TaskSetID].size() > 0) {
+	if(!TaskSets[TaskSetID].empty()) {
 
 		// A TaskID of 0 in a TaskSet indicates that all Tasks in the set are enabled for all players.
 

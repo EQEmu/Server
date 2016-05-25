@@ -224,7 +224,7 @@ std::deque<int> PathManager::FindRoute(int startID, int endID)
 
 	OpenList.push_back(AStarEntry);
 
-	while(OpenList.size() > 0)
+	while(!OpenList.empty())
 	{
 		// The OpenList is maintained in sorted order, lowest to highest cost.
 
@@ -610,7 +610,7 @@ void PathManager::MeshTest()
 
 			std::deque<int> Route = FindRoute(PathNodes[i].id, PathNodes[j].id);
 
-			if(Route.size() == 0)
+			if(Route.empty())
 			{
 				++NoConnections;
 				printf("FindRoute(%i, %i) **** NO ROUTE FOUND ****\n", PathNodes[i].id, PathNodes[j].id);
@@ -637,7 +637,7 @@ void PathManager::SimpleMeshTest()
 	{
 		std::deque<int> Route = FindRoute(PathNodes[0].id, PathNodes[j].id);
 
-		if(Route.size() == 0)
+		if(Route.empty())
 		{
 			++NoConnections;
 			printf("FindRoute(%i, %i) **** NO ROUTE FOUND ****\n", PathNodes[0].id, PathNodes[j].id);
@@ -683,7 +683,7 @@ glm::vec3 Mob::UpdatePath(float ToX, float ToY, float ToZ, float Speed, bool &Wa
 		{
 			Log.Out(Logs::Detail, Logs::None, "appears to be stuck. Teleporting them to next position.", GetName());
 
-			if(Route.size() == 0)
+			if(Route.empty())
 			{
 				Teleport(To);
 
@@ -715,7 +715,7 @@ glm::vec3 Mob::UpdatePath(float ToX, float ToY, float ToZ, float Speed, bool &Wa
 		PathingLastPosition = From;
 	}
 
-	if(Route.size() > 0)
+	if(!Route.empty())
 	{
 
 		// If we are already pathing, and the destination is the same as before ...
@@ -790,7 +790,7 @@ glm::vec3 Mob::UpdatePath(float ToX, float ToY, float ToZ, float Speed, bool &Wa
 				WaypointChanged = true;
 
 				// If there are more nodes on the route, return the coords of the next node
-				if(Route.size() > 0)
+				if(!Route.empty())
 				{
 					NextNode = Route.front();
 
@@ -799,7 +799,7 @@ glm::vec3 Mob::UpdatePath(float ToX, float ToY, float ToZ, float Speed, bool &Wa
 						// -1 indicates a teleport to the next node
 						Route.pop_front();
 
-						if(Route.size() == 0)
+						if(Route.empty())
 						{
 							Log.Out(Logs::Detail, Logs::None, "Missing node after teleport.");
 							return To;
@@ -815,7 +815,7 @@ glm::vec3 Mob::UpdatePath(float ToX, float ToY, float ToZ, float Speed, bool &Wa
 
 						Route.pop_front();
 
-						if(Route.size() == 0)
+						if(Route.empty())
 							return To;
 
 						NextNode = Route.front();
@@ -965,7 +965,7 @@ glm::vec3 Mob::UpdatePath(float ToX, float ToY, float ToZ, float Speed, bool &Wa
 
 					WaypointChanged = true;
 
-					if(Route.size() > 0)
+					if(!Route.empty())
 					{
 						NextNode = Route.front();
 
@@ -974,7 +974,7 @@ glm::vec3 Mob::UpdatePath(float ToX, float ToY, float ToZ, float Speed, bool &Wa
 							// -1 indicates a teleport to the next node
 							Route.pop_front();
 
-							if(Route.size() == 0)
+							if(Route.empty())
 							{
 								Log.Out(Logs::Detail, Logs::None, "Missing node after teleport.");
 								return To;
@@ -990,7 +990,7 @@ glm::vec3 Mob::UpdatePath(float ToX, float ToY, float ToZ, float Speed, bool &Wa
 
 							Route.pop_front();
 
-							if(Route.size() == 0)
+							if(Route.empty())
 								return To;
 
 							NextNode = Route.front();
@@ -1061,7 +1061,7 @@ glm::vec3 Mob::UpdatePath(float ToX, float ToY, float ToZ, float Speed, bool &Wa
 
 	PathingTraversedNodes = 0;
 
-	if(Route.size() == 0)
+	if(Route.empty())
 	{
 		Log.Out(Logs::Detail, Logs::None, "  No route available, running direct.");
 

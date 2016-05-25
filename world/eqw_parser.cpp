@@ -227,7 +227,7 @@ bool EQWParser::dosub(const char * subname, const std::vector<std::string> &args
 	ENTER;				// everything created after here
 	SAVETMPS;			// ...is a temporary variable
 	PUSHMARK(SP);		// remember the stack pointer
-	if(args.size() > 0)
+	if(!args.empty())
 	{
 		for (auto i = args.begin(); i != args.end(); ++i) { /* push the arguments onto the perl stack */
 			XPUSHs(sv_2mortal(newSVpv(i->c_str(), i->length())));

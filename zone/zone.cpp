@@ -672,13 +672,13 @@ void Zone::Shutdown(bool quite)
 	entity_list.StopMobAI();
 
 	std::map<uint32,NPCType *>::iterator itr;
-	while(zone->npctable.size()) {
+	while(!zone->npctable.empty()) {
 		itr=zone->npctable.begin();
 		delete itr->second;
 		zone->npctable.erase(itr);
 	}
 
-	while(zone->merctable.size()) {
+	while(!zone->merctable.empty()) {
 		itr=zone->merctable.begin();
 		delete itr->second;
 		zone->merctable.erase(itr);
@@ -687,7 +687,7 @@ void Zone::Shutdown(bool quite)
 	zone->adventure_entry_list_flavor.clear();
 
 	std::map<uint32,LDoNTrapTemplate*>::iterator itr4;
-	while(zone->ldon_trap_list.size())
+	while(!zone->ldon_trap_list.empty())
 	{
 		itr4 = zone->ldon_trap_list.begin();
 		delete itr4->second;
@@ -1415,7 +1415,7 @@ bool Zone::Depop(bool StartSpawnTimer) {
 	entity_list.Depop(StartSpawnTimer);
 
 	/* Refresh npctable (cache), getting current info from database. */
-	while(npctable.size()) { 
+	while(!npctable.empty()) {
 		itr = npctable.begin();
 		delete itr->second;
 		npctable.erase(itr);

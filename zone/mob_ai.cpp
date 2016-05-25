@@ -516,7 +516,7 @@ void NPC::AI_Start(uint32 iMoveDelay) {
 	if (!pAIControlled)
 		return;
 
-	if (AIspells.size() == 0) {
+	if (AIspells.empty()) {
 		AIautocastspell_timer = std::unique_ptr<Timer>(new Timer(1000));
 		AIautocastspell_timer->Disable();
 	} else {
@@ -679,7 +679,7 @@ void Client::AI_SpellCast()
 		spell_to_cast = valid_spells[0];
 		slot_to_use = slots[0];
 	}
-	else if(valid_spells.size() == 0)
+	else if(valid_spells.empty())
 	{
 		return;
 	}
@@ -2386,7 +2386,7 @@ bool NPC::AI_AddNPCSpells(uint32 iDBSpellsID) {
 	AISpellVar.idle_no_sp_recast_max = (_idle_no_sp_recast_max) ? _idle_no_sp_recast_max : RuleI(Spells, AI_IdleNoSpellMaxRecast);
 	AISpellVar.idle_beneficial_chance = (_idle_beneficial_chance) ? _idle_beneficial_chance : RuleI(Spells, AI_IdleBeneficialChance);
 
-	if (AIspells.size() == 0)
+	if (AIspells.empty())
 		AIautocastspell_timer->Disable();
 	else
 		AIautocastspell_timer->Trigger();

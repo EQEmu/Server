@@ -5656,7 +5656,7 @@ void Client::Handle_OP_FindPersonRequest(const EQApplicationPacket *app)
 			{
 				std::deque<int> pathlist = zone->pathing->FindRoute(Start, End);
 
-				if (pathlist.size() == 0)
+				if (pathlist.empty())
 				{
 					EQApplicationPacket outapp(OP_FindPersonReply, 0);
 					QueuePacket(&outapp);

@@ -939,7 +939,7 @@ EQApplicationPacket *EQStream::PopPacket()
 EQRawApplicationPacket *p=nullptr;
 
 	MInboundQueue.lock();
-	if (InboundQueue.size()) {
+	if (!InboundQueue.empty()) {
 		std::vector<EQRawApplicationPacket *>::iterator itr=InboundQueue.begin();
 		p=*itr;
 		InboundQueue.erase(itr);
@@ -964,7 +964,7 @@ EQRawApplicationPacket *EQStream::PopRawPacket()
 EQRawApplicationPacket *p=nullptr;
 
 	MInboundQueue.lock();
-	if (InboundQueue.size()) {
+	if (!InboundQueue.empty()) {
 		std::vector<EQRawApplicationPacket *>::iterator itr=InboundQueue.begin();
 		p=*itr;
 		InboundQueue.erase(itr);
@@ -991,7 +991,7 @@ EQRawApplicationPacket *EQStream::PeekPacket()
 EQRawApplicationPacket *p=nullptr;
 
 	MInboundQueue.lock();
-	if (InboundQueue.size()) {
+	if (!InboundQueue.empty()) {
 		std::vector<EQRawApplicationPacket *>::iterator itr=InboundQueue.begin();
 		p=*itr;
 	}

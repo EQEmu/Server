@@ -137,7 +137,7 @@ void Mob::CalculateNewFearpoint()
 
 		std::deque<int> Route = zone->pathing->FindRoute(CurrentPosition, Loc);
 
-		if(Route.size() > 0)
+		if(!Route.empty())
 		{
             m_FearWalkTarget = glm::vec3(Loc.x, Loc.y, Loc.z);
 			currently_fleeing = true;

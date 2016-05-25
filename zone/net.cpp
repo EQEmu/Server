@@ -133,7 +133,7 @@ int main(int argc, char** argv) {
 		worldserver.SetLauncherName(argv[2]);
 		auto zone_port = SplitString(argv[1], ':');
 
-		if(zone_port.size() > 0) {
+		if(!zone_port.empty()) {
 			z_name = zone_port[0];
 		}
 
@@ -153,7 +153,7 @@ int main(int argc, char** argv) {
 		worldserver.SetLauncherName(argv[2]);
 		auto zone_port = SplitString(argv[1], ':');
 
-		if(zone_port.size() > 0) {
+		if(!zone_port.empty()) {
 			z_name = zone_port[0];
 		}
 
@@ -172,7 +172,7 @@ int main(int argc, char** argv) {
 		worldserver.SetLauncherName("NONE");
 		auto zone_port = SplitString(argv[1], ':');
 
-		if(zone_port.size() > 0) {
+		if(!zone_port.empty()) {
 			z_name = zone_port[0];
 		}
 

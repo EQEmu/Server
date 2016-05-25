@@ -5333,7 +5333,7 @@ void Client::SendRewards()
 		rewards.push_back(cr);
 	}
 
-	if(rewards.size() == 0)
+	if(rewards.empty())
 		return;
 
 	EQApplicationPacket *vetapp = new EQApplicationPacket(OP_VetRewardsAvaliable, (sizeof(InternalVeteranReward) * rewards.size()));

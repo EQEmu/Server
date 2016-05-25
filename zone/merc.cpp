@@ -1747,7 +1747,7 @@ void Merc::AI_Start(int32 iMoveDelay) {
 	if (!pAIControlled)
 		return;
 
-	if (merc_spells.size() == 0) {
+	if (merc_spells.empty()) {
 		AIautocastspell_timer->SetTimer(1000);
 		AIautocastspell_timer->Disable();
 	} else {
@@ -4688,7 +4688,7 @@ bool Merc::LoadMercSpells() {
 		return a.slot > b.slot;
 	});
 
-	if (merc_spells.size() == 0)
+	if (merc_spells.empty())
 		AIautocastspell_timer->Disable();
 	else {
 		HasAISpell = true;

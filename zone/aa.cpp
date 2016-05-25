@@ -1141,7 +1141,7 @@ void Client::ActivateAlternateAdvancementAbility(int rank_id, int target_id) {
 	}
 
 	//make sure it is not a passive
-	if(rank->effects.size() > 0) {
+	if(!rank->effects.empty()) {
 		return;
 	}
 

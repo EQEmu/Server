@@ -120,7 +120,7 @@ std::shared_ptr<EQStream> EQStreamFactory::Pop()
 {
 	std::shared_ptr<EQStream> s = nullptr;
 	MNewStreams.lock();
-	if (NewStreams.size()) {
+	if (!NewStreams.empty()) {
 		s = NewStreams.front();
 		NewStreams.pop();
 		s->PutInUse();

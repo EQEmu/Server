@@ -278,7 +278,7 @@ int Embperl::dosub(const char * subname, const std::vector<std::string> * args, 
 	ENTER;
 	SAVETMPS;
 	PUSHMARK(SP);
-	if(args && args->size())
+	if(args && !args->empty())
 	{
 		for(std::vector<std::string>::const_iterator i = args->begin(); i != args->end(); ++i)
 		{

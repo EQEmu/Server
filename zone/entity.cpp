@@ -2702,7 +2702,7 @@ void EntityList::FindPathsToAllNPCs()
 		glm::vec3 Node0 = zone->pathing->GetPathNodeCoordinates(0, false);
 		glm::vec3 Dest(it->second->GetX(), it->second->GetY(), it->second->GetZ());
 		std::deque<int> Route = zone->pathing->FindRoute(Node0, Dest);
-		if (Route.size() == 0)
+		if (Route.empty())
 			printf("Unable to find a route to %s\n", it->second->GetName());
 		else
 			printf("Found a route to %s\n", it->second->GetName());
@@ -4503,7 +4503,7 @@ void EntityList::AddLootToNPCS(uint32 item_id, uint32 count)
 		for (int j = 0; j < npc_count; ++j)
 			selection.push_back(j);
 
-		while (selection.size() > 0 && count > 0) {
+		while (!selection.empty() && count > 0) {
 			int k = zone->random.Int(0, selection.size() - 1);
 			counts[selection[k]]++;
 			count--;
@@ -4683,7 +4683,7 @@ Mob *EntityList::GetTargetForVirus(Mob *spreader, int range)
 		++it;
 	}
 
-	if(TargetsInRange.size() == 0)
+	if(TargetsInRange.empty())
 		return nullptr;
 
 	return TargetsInRange[zone->random.Int(0, TargetsInRange.size() - 1)];

@@ -2326,7 +2326,7 @@ void Client::SendFriends() {
 
 std::string Client::MailBoxName() {
 
-	if((Characters.size() == 0) || (CurrentMailBox > (Characters.size() - 1)))
+	if((Characters.empty()) || (CurrentMailBox > (Characters.size() - 1)))
 	{
 		Log.Out(Logs::Detail, Logs::UCS_Server, "MailBoxName() called with CurrentMailBox set to %i and Characters.size() is %i",
 				CurrentMailBox, Characters.size());
@@ -2343,7 +2343,7 @@ std::string Client::MailBoxName() {
 
 int Client::GetCharID() {
 
-	if(Characters.size() == 0)
+	if(Characters.empty())
 		return 0;
 
 	return Characters[0].CharID;
