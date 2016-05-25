@@ -10,6 +10,12 @@
 #include "types.h"
 #include "mysql_request_row.h"
 
+#ifdef __FreeBSD__
+	#include <string>
+	#include <sstream>
+	#include <iostream>
+#endif
+
 class MySQLRequestResult {
 private:
 	MYSQL_RES* m_Result;
