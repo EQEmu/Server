@@ -358,12 +358,12 @@ int main(int argc, char** argv) {
 
 	parse = new QuestParserCollection();
 #ifdef LUA_EQEMU
-	LuaParser *lua_parser = new LuaParser();
+	auto lua_parser = new LuaParser();
 	parse->RegisterQuestInterface(lua_parser, "lua");
 #endif
 
 #ifdef EMBPERL
-	PerlembParser *perl_parser = new PerlembParser();
+	auto perl_parser = new PerlembParser();
 	parse->RegisterQuestInterface(perl_parser, "pl");
 
 	/* Load Perl Event Export Settings */
@@ -448,7 +448,7 @@ int main(int argc, char** argv) {
 			struct in_addr	in;
 			in.s_addr = eqsi->GetRemoteIP();
 			Log.Out(Logs::Detail, Logs::World_Server, "New client from %s:%d", inet_ntoa(in), ntohs(eqsi->GetRemotePort()));
-			Client* client = new Client(eqsi);
+			auto client = new Client(eqsi);
 			entity_list.AddClient(client);
 		}
 

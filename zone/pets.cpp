@@ -264,7 +264,7 @@ void Mob::MakePoweredPet(uint16 spell_id, const char* pettype, int16 petpower,
 	}
 
 	//we copy the npc_type data because we need to edit it a bit
-	NPCType *npc_type = new NPCType;
+	auto npc_type = new NPCType;
 	memcpy(npc_type, base, sizeof(NPCType));
 
 	// If pet power is set to -1 in the DB, use stat scaling
@@ -412,7 +412,7 @@ void Mob::MakePoweredPet(uint16 spell_id, const char* pettype, int16 petpower,
 	}
 
 	//this takes ownership of the npc_type data
-	Pet *npc = new Pet(npc_type, this, (PetType)record.petcontrol, spell_id, record.petpower);
+	auto npc = new Pet(npc_type, this, (PetType)record.petcontrol, spell_id, record.petpower);
 
 	// Now that we have an actual object to interact with, load
 	// the base items for the pet. These are always loaded

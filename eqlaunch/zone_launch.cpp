@@ -60,7 +60,7 @@ void ZoneLaunch::SendStatus() const {
 }
 
 void ZoneLaunch::Start() {
-	ProcLauncher::Spec *spec = new ProcLauncher::Spec();
+	auto spec = new ProcLauncher::Spec();
 	spec->program = m_config->ZoneExe;
 
 	if(m_port) {

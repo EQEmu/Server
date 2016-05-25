@@ -288,7 +288,7 @@ void RemoveApostrophes(std::string &s)
 
 char *RemoveApostrophes(const char *s)
 {
-	char *NewString = new char[strlen(s) + 1];
+	auto NewString = new char[strlen(s) + 1];
 
 	strcpy(NewString, s);
 
@@ -452,7 +452,7 @@ uchar* EQEmu::OutBuffer::detach()
 	if (buffer_size == 0)
 		return nullptr;
 
-	uchar* out_buffer = new uchar[buffer_size];
+	auto out_buffer = new uchar[buffer_size];
 	memcpy(out_buffer, str().c_str(), buffer_size);
 	flush();
 

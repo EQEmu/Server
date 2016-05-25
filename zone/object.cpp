@@ -425,7 +425,7 @@ void Object::CreateDeSpawnPacket(EQApplicationPacket* app)
 bool Object::Process(){
 	if(m_type == OT_DROPPEDITEM && decay_timer.Enabled() && decay_timer.Check()) {
 		// Send click to all clients (removes entity on client)
-		EQApplicationPacket* outapp = new EQApplicationPacket(OP_ClickObject, sizeof(ClickObject_Struct));
+		auto outapp = new EQApplicationPacket(OP_ClickObject, sizeof(ClickObject_Struct));
 		ClickObject_Struct* click_object = (ClickObject_Struct*)outapp->pBuffer;
 		click_object->drop_id = GetID();
 		entity_list.QueueClients(nullptr, outapp, false);
@@ -487,7 +487,7 @@ bool Object::HandleClick(Client* sender, const ClickObject_Struct* click_object)
 			args.push_back(m_inst);
 			if(parse->EventPlayer(EVENT_PLAYER_PICKUP, sender, buf, this->GetID(), &args))
 			{
-				EQApplicationPacket* outapp = new EQApplicationPacket(OP_ClickObject, sizeof(ClickObject_Struct));
+				auto outapp = new EQApplicationPacket(OP_ClickObject, sizeof(ClickObject_Struct));
 				memcpy(outapp->pBuffer, click_object, sizeof(ClickObject_Struct));
 				ClickObject_Struct* co = (ClickObject_Struct*)outapp->pBuffer;
 				co->drop_id = 0;
@@ -518,7 +518,7 @@ bool Object::HandleClick(Client* sender, const ClickObject_Struct* click_object)
 		}
 
 		// Send click to all clients (removes entity on client)
-		EQApplicationPacket* outapp = new EQApplicationPacket(OP_ClickObject, sizeof(ClickObject_Struct));
+		auto outapp = new EQApplicationPacket(OP_ClickObject, sizeof(ClickObject_Struct));
 		memcpy(outapp->pBuffer, click_object, sizeof(ClickObject_Struct));
 		entity_list.QueueClients(nullptr, outapp, false);
 		safe_delete(outapp);
@@ -529,7 +529,7 @@ bool Object::HandleClick(Client* sender, const ClickObject_Struct* click_object)
 			entity_list.RemoveEntity(this->GetID());
 	} else {
 		// Tradeskill item
-		EQApplicationPacket* outapp = new EQApplicationPacket(OP_ClickObjectAction, sizeof(ClickObjectAction_Struct));
+		auto outapp = new EQApplicationPacket(OP_ClickObjectAction, sizeof(ClickObjectAction_Struct));
 		ClickObjectAction_Struct* coa = (ClickObjectAction_Struct*)outapp->pBuffer;
 
 		//TODO: there is prolly a better way to do this.
@@ -580,7 +580,7 @@ bool Object::HandleClick(Client* sender, const ClickObject_Struct* click_object)
 			if(user != last_user)
 				m_inst->ClearByFlags(byFlagSet, byFlagSet);
 
-			EQApplicationPacket* outapp=new EQApplicationPacket(OP_ClientReady,0);
+			auto outapp = new EQApplicationPacket(OP_ClientReady, 0);
 			sender->QueuePacket(outapp);
 			safe_delete(outapp);
 			for (uint8 i = SUB_INDEX_BEGIN; i < EQEmu::legacy::ITEM_CONTAINER_SIZE; i++) {
@@ -610,7 +610,7 @@ uint32 ZoneDatabase::AddObject(uint32 type, uint32 icon, const Object_Struct& ob
 
 	// SQL Escape object_name
 	uint32 len = strlen(object.object_name) * 2 + 1;
-	char* object_name = new char[len];
+	auto object_name = new char[len];
 	DoEscapeString(object_name, object.object_name, strlen(object.object_name));
 
     // Save new record for object
@@ -647,7 +647,7 @@ void ZoneDatabase::UpdateObject(uint32 id, uint32 type, uint32 icon, const Objec
 
 	// SQL Escape object_name
 	uint32 len = strlen(object.object_name) * 2 + 1;
-	char* object_name = new char[len];
+	auto object_name = new char[len];
 	DoEscapeString(object_name, object.object_name, strlen(object.object_name));
 
 	// Save new record for object
@@ -754,8 +754,8 @@ void Object::SetX(float pos)
 {
 	this->m_data.x = pos;
 
-	EQApplicationPacket* app = new EQApplicationPacket();
-	EQApplicationPacket* app2 = new EQApplicationPacket();
+	auto app = new EQApplicationPacket();
+	auto app2 = new EQApplicationPacket();
 	this->CreateDeSpawnPacket(app);
 	this->CreateSpawnPacket(app2);
 	entity_list.QueueClients(0, app);
@@ -768,8 +768,8 @@ void Object::SetY(float pos)
 {
 	this->m_data.y = pos;
 
-	EQApplicationPacket* app = new EQApplicationPacket();
-	EQApplicationPacket* app2 = new EQApplicationPacket();
+	auto app = new EQApplicationPacket();
+	auto app2 = new EQApplicationPacket();
 	this->CreateDeSpawnPacket(app);
 	this->CreateSpawnPacket(app2);
 	entity_list.QueueClients(0, app);
@@ -780,7 +780,7 @@ void Object::SetY(float pos)
 
 void Object::Depop()
 {
-	EQApplicationPacket* app = new EQApplicationPacket();
+	auto app = new EQApplicationPacket();
 	this->CreateDeSpawnPacket(app);
 	entity_list.QueueClients(0, app);
 	safe_delete(app);
@@ -789,8 +789,8 @@ void Object::Depop()
 
 void Object::Repop()
 {
-	EQApplicationPacket* app = new EQApplicationPacket();
-	EQApplicationPacket* app2 = new EQApplicationPacket();
+	auto app = new EQApplicationPacket();
+	auto app2 = new EQApplicationPacket();
 	this->CreateDeSpawnPacket(app);
 	this->CreateSpawnPacket(app2);
 	entity_list.QueueClients(0, app);
@@ -805,8 +805,8 @@ void Object::SetZ(float pos)
 {
 	this->m_data.z = pos;
 
-	EQApplicationPacket* app = new EQApplicationPacket();
-	EQApplicationPacket* app2 = new EQApplicationPacket();
+	auto app = new EQApplicationPacket();
+	auto app2 = new EQApplicationPacket();
 	this->CreateDeSpawnPacket(app);
 	this->CreateSpawnPacket(app2);
 	entity_list.QueueClients(0, app);
@@ -818,8 +818,8 @@ void Object::SetZ(float pos)
 void Object::SetModelName(const char* modelname)
 {
 	strn0cpy(m_data.object_name, modelname, sizeof(m_data.object_name)); // 32 is the max for chars in object_name, this should be safe
-	EQApplicationPacket* app = new EQApplicationPacket();
-	EQApplicationPacket* app2 = new EQApplicationPacket();
+	auto app = new EQApplicationPacket();
+	auto app2 = new EQApplicationPacket();
 	this->CreateDeSpawnPacket(app);
 	this->CreateSpawnPacket(app2);
 	entity_list.QueueClients(0, app);
@@ -831,8 +831,8 @@ void Object::SetModelName(const char* modelname)
 void Object::SetSize(uint16 size)
 {
 	m_data.size = size;
-	EQApplicationPacket* app = new EQApplicationPacket();
-	EQApplicationPacket* app2 = new EQApplicationPacket();
+	auto app = new EQApplicationPacket();
+	auto app2 = new EQApplicationPacket();
 	this->CreateDeSpawnPacket(app);
 	this->CreateSpawnPacket(app2);
 	entity_list.QueueClients(0, app);
@@ -844,8 +844,8 @@ void Object::SetSize(uint16 size)
 void Object::SetSolidType(uint16 solidtype)
 {
 	m_data.solidtype = solidtype;
-	EQApplicationPacket* app = new EQApplicationPacket();
-	EQApplicationPacket* app2 = new EQApplicationPacket();
+	auto app = new EQApplicationPacket();
+	auto app2 = new EQApplicationPacket();
 	this->CreateDeSpawnPacket(app);
 	this->CreateSpawnPacket(app2);
 	entity_list.QueueClients(0, app);
@@ -940,8 +940,8 @@ void Object::SetLocation(float x, float y, float z)
 	this->m_data.x = x;
 	this->m_data.y = y;
 	this->m_data.z = z;
-	EQApplicationPacket* app = new EQApplicationPacket();
-	EQApplicationPacket* app2 = new EQApplicationPacket();
+	auto app = new EQApplicationPacket();
+	auto app2 = new EQApplicationPacket();
 	this->CreateDeSpawnPacket(app);
 	this->CreateSpawnPacket(app2);
 	entity_list.QueueClients(0, app);
@@ -961,8 +961,8 @@ void Object::GetHeading(float* heading)
 void Object::SetHeading(float heading)
 {
 	this->m_data.heading = heading;
-	EQApplicationPacket* app = new EQApplicationPacket();
-	EQApplicationPacket* app2 = new EQApplicationPacket();
+	auto app = new EQApplicationPacket();
+	auto app2 = new EQApplicationPacket();
 	this->CreateDeSpawnPacket(app);
 	this->CreateSpawnPacket(app2);
 	entity_list.QueueClients(0, app);
@@ -982,7 +982,7 @@ const char* Object::GetEntityVariable(const char *id)
 	if(!id)
 		return nullptr;
 
-	std::map<std::string, std::string>::iterator iter = o_EntityVariables.find(id);
+	auto iter = o_EntityVariables.find(id);
 	if(iter != o_EntityVariables.end())
 	{
 		return iter->second.c_str();
@@ -995,7 +995,7 @@ bool Object::EntityVariableExists(const char * id)
 	if(!id)
 		return false;
 
-	std::map<std::string, std::string>::iterator iter = o_EntityVariables.find(id);
+	auto iter = o_EntityVariables.find(id);
 	if(iter != o_EntityVariables.end())
 	{
 		return true;

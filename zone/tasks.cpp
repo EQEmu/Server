@@ -850,7 +850,7 @@ int TaskManager::FirstTaskInSet(int TaskSetID) {
 
 	if(TaskSets[TaskSetID].empty()) return 0;
 
-	std::vector<int>::iterator Iterator = TaskSets[TaskSetID].begin();
+	auto Iterator = TaskSets[TaskSetID].begin();
 
 	while(Iterator != TaskSets[TaskSetID].end()) {
 		if((*Iterator) > 0)
@@ -934,7 +934,7 @@ void TaskManager::TaskSetSelector(Client *c, ClientTaskState *state, Mob *mob, i
 		if(TaskSets[TaskSetID][0] == 0) {
 
 			Log.Out(Logs::General, Logs::Tasks, "[UPDATE] TaskSets[%i][0] == 0. All Tasks in Set enabled.", TaskSetID);
-			std::vector<int>::iterator Iterator = TaskSets[TaskSetID].begin();
+			auto Iterator = TaskSets[TaskSetID].begin();
 
 			while((Iterator != TaskSets[TaskSetID].end()) && (TaskListIndex < MAXCHOOSERENTRIES)) {
 				if(AppropriateLevel((*Iterator), PlayerLevel) && !state->IsTaskActive((*Iterator)) &&
@@ -1039,7 +1039,7 @@ void TaskManager::SendTaskSelector(Client *c, Mob *mob, int TaskCount, int *Task
 
 	if(ValidTasks == 0) return;
 
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_OpenNewTasksWindow, PacketLength);
+	auto outapp = new EQApplicationPacket(OP_OpenNewTasksWindow, PacketLength);
 
 	AvailableTaskHeader = (AvailableTaskHeader_Struct*)outapp->pBuffer;
 
@@ -1164,7 +1164,7 @@ void TaskManager::SendTaskSelectorNew(Client *c, Mob *mob, int TaskCount, int *T
 
 	if(ValidTasks == 0) return;
 
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_OpenNewTasksWindow, PacketLength);
+	auto outapp = new EQApplicationPacket(OP_OpenNewTasksWindow, PacketLength);
 
 	outapp->WriteUInt32(ValidTasks);	// TaskCount
 	outapp->WriteUInt32(2);			// Unknown2
@@ -1333,7 +1333,7 @@ bool ClientTaskState::UnlockActivities(int CharID, int TaskIndex) {
 		if(AllActivitiesComplete && RuleB(TaskSystem, RecordCompletedTasks)) {
 			if(RuleB(TasksSystem, KeepOneRecordPerCompletedTask)) {
 				Log.Out(Logs::General, Logs::Tasks, "[UPDATE] KeepOneRecord enabled");
-				std::vector<CompletedTaskInformation>::iterator Iterator = CompletedTasks.begin();
+				auto Iterator = CompletedTasks.begin();
 				int ErasedElements = 0;
 				while(Iterator != CompletedTasks.end()) {
 					int TaskID = (*Iterator).TaskID;
@@ -1406,7 +1406,7 @@ bool ClientTaskState::UnlockActivities(int CharID, int TaskIndex) {
 			// the same task again, erase the previous completed entry for this task.
 			if(RuleB(TasksSystem, KeepOneRecordPerCompletedTask)) {
 				Log.Out(Logs::General, Logs::Tasks, "[UPDATE] KeepOneRecord enabled");
-				std::vector<CompletedTaskInformation>::iterator Iterator = CompletedTasks.begin();
+				auto Iterator = CompletedTasks.begin();
 				int ErasedElements = 0;
 				while(Iterator != CompletedTasks.end()) {
 					int TaskID = (*Iterator).TaskID;
@@ -2325,9 +2325,7 @@ void ClientTaskState::SendTaskHistory(Client *c, int TaskIndex) {
 		}
 	}
 
-
-
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_TaskHistoryReply, PacketLength);
+	auto outapp = new EQApplicationPacket(OP_TaskHistoryReply, PacketLength);
 
 	ths = (TaskHistoryReplyHeader_Struct*)outapp->pBuffer;
 
@@ -2370,7 +2368,7 @@ void Client::SendTaskActivityComplete(int TaskID, int ActivityID, int TaskIndex,
 
 	TaskActivityComplete_Struct* tac;
 
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_TaskActivityComplete, sizeof(TaskActivityComplete_Struct));
+	auto outapp = new EQApplicationPacket(OP_TaskActivityComplete, sizeof(TaskActivityComplete_Struct));
 
 	tac = (TaskActivityComplete_Struct*)outapp->pBuffer;
 
@@ -2400,7 +2398,7 @@ void Client::SendTaskFailed(int TaskID, int TaskIndex) {
 
 	TaskActivityComplete_Struct* tac;
 
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_TaskActivityComplete, sizeof(TaskActivityComplete_Struct));
+	auto outapp = new EQApplicationPacket(OP_TaskActivityComplete, sizeof(TaskActivityComplete_Struct));
 
 	tac = (TaskActivityComplete_Struct*)outapp->pBuffer;
 
@@ -2450,7 +2448,7 @@ void TaskManager::SendCompletedTasksToClient(Client *c, ClientTaskState *State) 
 		PacketLength = PacketLength + 8 + strlen(Tasks[TaskID]->Title) + 1;
 	}
 
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_CompletedTasks, PacketLength);
+	auto outapp = new EQApplicationPacket(OP_CompletedTasks, PacketLength);
 	char *buf = (char*)outapp->pBuffer;
 
 	//*(uint32 *)buf = State->CompletedTasks.size();
@@ -2487,7 +2485,7 @@ void TaskManager::SendTaskActivityShort(Client *c, int TaskID, int ActivityID, i
 
 	if (c->ClientVersionBit() & EQEmu::versions::bit_RoFAndLater)
 	{
-		EQApplicationPacket* outapp = new EQApplicationPacket(OP_TaskActivity, 25);
+		auto outapp = new EQApplicationPacket(OP_TaskActivity, 25);
 		outapp->WriteUInt32(ClientTaskIndex);
 		outapp->WriteUInt32(2);
 		outapp->WriteUInt32(TaskID);
@@ -2500,7 +2498,7 @@ void TaskManager::SendTaskActivityShort(Client *c, int TaskID, int ActivityID, i
 		return;
 	}
 
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_TaskActivity, sizeof(TaskActivityShort_Struct));
+	auto outapp = new EQApplicationPacket(OP_TaskActivity, sizeof(TaskActivityShort_Struct));
 
 	tass = (TaskActivityShort_Struct*)outapp->pBuffer;
 
@@ -2538,7 +2536,7 @@ void TaskManager::SendTaskActivityLong(Client *c, int TaskID, int ActivityID, in
 				strlen(Tasks[TaskID]->Activity[ActivityID].Text2) + 1 +
 				strlen(Tasks[TaskID]->Activity[ActivityID].Text3) + 1;
 
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_TaskActivity, PacketLength);
+	auto outapp = new EQApplicationPacket(OP_TaskActivity, PacketLength);
 
 	tah = (TaskActivityHeader_Struct*)outapp->pBuffer;
 
@@ -2619,7 +2617,7 @@ void TaskManager::SendTaskActivityNew(Client *c, int TaskID, int ActivityID, int
 				((strlen(itoa(Tasks[TaskID]->Activity[ActivityID].ZoneID)) + 1) * 2) +
 				3 + String2Len;
 
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_TaskActivity, PacketLength);
+	auto outapp = new EQApplicationPacket(OP_TaskActivity, PacketLength);
 
 	outapp->WriteUInt32(ClientTaskIndex);	// TaskSequenceNumber
 	outapp->WriteUInt32(2);		// unknown2
@@ -2805,7 +2803,7 @@ void TaskManager::SendActiveTaskDescription(Client *c, int TaskID, int SequenceN
 	TaskDescriptionData2_Struct* tdd2;
 	TaskDescriptionTrailer_Struct* tdt;
 
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_TaskDescription, PacketLength);
+	auto outapp = new EQApplicationPacket(OP_TaskDescription, PacketLength);
 
 	tdh = (TaskDescriptionHeader_Struct*)outapp->pBuffer;
 
@@ -2924,7 +2922,7 @@ void ClientTaskState::CancelAllTasks(Client *c) {
 }
 void ClientTaskState::CancelTask(Client *c, int SequenceNumber, bool RemoveFromDB) {
 
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_CancelTask, sizeof(CancelTask_Struct));
+	auto outapp = new EQApplicationPacket(OP_CancelTask, sizeof(CancelTask_Struct));
 
 	CancelTask_Struct* cts = (CancelTask_Struct*)outapp->pBuffer;
 	cts->SequenceNumber = SequenceNumber;

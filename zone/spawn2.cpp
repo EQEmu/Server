@@ -574,9 +574,9 @@ Spawn2* ZoneDatabase::LoadSpawn2(LinkedList<Spawn2*> &spawn2_list, uint32 spawn2
 
     bool perl_enabled = atoi(row[11]) == 1 ? true : false;
 
-	Spawn2* newSpawn = new Spawn2(atoi(row[0]), atoi(row[1]), atof(row[2]), atof(row[3]), atof(row[4]),
-                                    atof(row[5]), atoi(row[6]), atoi(row[7]), timeleft, atoi(row[8]),
-                                    atoi(row[9]), atoi(row[10]), perl_enabled, (EmuAppearance)atoi(row[12]));
+    auto newSpawn = new Spawn2(atoi(row[0]), atoi(row[1]), atof(row[2]), atof(row[3]), atof(row[4]), atof(row[5]),
+			       atoi(row[6]), atoi(row[7]), timeleft, atoi(row[8]), atoi(row[9]), atoi(row[10]),
+			       perl_enabled, (EmuAppearance)atoi(row[12]));
 
     spawn2_list.Insert(newSpawn);
 
@@ -1128,7 +1128,7 @@ void SpawnConditionManager::SetCondition(const char *zone_short, uint32 instance
 
 		UpdateDBCondition(zone_short, instance_id, condition_id, new_value);
 
-		ServerPacket* pack = new ServerPacket(ServerOP_SpawnCondition, sizeof(ServerSpawnCondition_Struct));
+		auto pack = new ServerPacket(ServerOP_SpawnCondition, sizeof(ServerSpawnCondition_Struct));
 		ServerSpawnCondition_Struct* ssc = (ServerSpawnCondition_Struct*)pack->pBuffer;
 
 		ssc->zoneID = database.GetZoneID(zone_short);
@@ -1260,7 +1260,7 @@ void SpawnConditionManager::ToggleEvent(uint32 event_id, bool enabled, bool stri
 
 
 	//now notify the zone
-	ServerPacket* pack = new ServerPacket(ServerOP_SpawnEvent, sizeof(ServerSpawnEvent_Struct));
+	auto pack = new ServerPacket(ServerOP_SpawnEvent, sizeof(ServerSpawnEvent_Struct));
 	ServerSpawnEvent_Struct* sse = (ServerSpawnEvent_Struct*)pack->pBuffer;
 
 	sse->zoneID = database.GetZoneID(zone_short_name.c_str());

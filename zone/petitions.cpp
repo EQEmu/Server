@@ -44,7 +44,7 @@ PetitionList petition_list;
 extern WorldServer worldserver;
 
 void Petition::SendPetitionToPlayer(Client* clientto) {
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_PetitionCheckout,sizeof(Petition_Struct));
+	auto outapp = new EQApplicationPacket(OP_PetitionCheckout, sizeof(Petition_Struct));
 	Petition_Struct* pet = (Petition_Struct*) outapp->pBuffer;
 	strcpy(pet->accountid,this->GetAccountName());
 	strcpy(pet->lastgm,this->GetLastGM());
@@ -136,7 +136,7 @@ bool PetitionList::DeletePetitionByCharName(const char* charname) {
 	return false;
 }
 void PetitionList::UpdateZoneListQueue() {
-	ServerPacket* pack = new ServerPacket(ServerOP_Petition, sizeof(ServerPetitionUpdate_Struct));
+	auto pack = new ServerPacket(ServerOP_Petition, sizeof(ServerPetitionUpdate_Struct));
 	ServerPetitionUpdate_Struct* pupdate = (ServerPetitionUpdate_Struct*) pack->pBuffer;
 	pupdate->petid = 0x00;
 	pupdate->status = 0x00;
@@ -229,7 +229,7 @@ void ZoneDatabase::InsertPetitionToDB(Petition* wpet)
 {
 
 	uint32 len = strlen(wpet->GetPetitionText());
-	char* petitiontext = new char[2*len+1];
+	auto petitiontext = new char[2 * len + 1];
 	memset(petitiontext, 0, 2*len+1);
 	DoEscapeString(petitiontext, wpet->GetPetitionText(), len);
 

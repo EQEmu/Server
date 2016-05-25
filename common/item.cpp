@@ -2119,7 +2119,7 @@ const EQEmu::Item_Struct* ItemInst::GetUnscaledItem() const
 
 std::string ItemInst::GetCustomDataString() const {
 	std::string ret_val;
-	std::map<std::string, std::string>::const_iterator iter = m_custom_data.begin();
+	auto iter = m_custom_data.begin();
 	while (iter != m_custom_data.end()) {
 		if (ret_val.length() > 0) {
 			ret_val += "^";
@@ -2172,7 +2172,7 @@ void ItemInst::SetCustomData(std::string identifier, bool value) {
 }
 
 void ItemInst::DeleteCustomData(std::string identifier) {
-	std::map<std::string, std::string>::iterator iter = m_custom_data.find(identifier);
+	auto iter = m_custom_data.find(identifier);
 	if (iter != m_custom_data.end()) {
 		m_custom_data.erase(iter);
 	}

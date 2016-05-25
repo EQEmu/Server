@@ -726,7 +726,7 @@ void Client::OnDisconnect(bool hard_disconnect) {
 	/* Remove ourself from all proximities */
 	ClearAllProximities();
 
-	EQApplicationPacket *outapp = new EQApplicationPacket(OP_LogoutReply);
+	auto outapp = new EQApplicationPacket(OP_LogoutReply);
 	FastQueuePacket(&outapp);
 
 	Disconnect();
@@ -817,7 +817,7 @@ void Client::BulkSendInventoryItems()
 		last_pos = ob.tellp();
 	}
 
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_CharInventory);
+	auto outapp = new EQApplicationPacket(OP_CharInventory);
 	outapp->size = ob.size();
 	outapp->pBuffer = ob.detach();
 	QueuePacket(outapp);
@@ -1131,7 +1131,7 @@ void Client::BreakInvis()
 {
 	if (invisible)
 	{
-		EQApplicationPacket* outapp = new EQApplicationPacket(OP_SpawnAppearance, sizeof(SpawnAppearance_Struct));
+		auto outapp = new EQApplicationPacket(OP_SpawnAppearance, sizeof(SpawnAppearance_Struct));
 		SpawnAppearance_Struct* sa_out = (SpawnAppearance_Struct*)outapp->pBuffer;
 		sa_out->spawn_id = GetID();
 		sa_out->type = 0x03;
@@ -1444,7 +1444,7 @@ void Client::OPMoveCoin(const EQApplicationPacket* app)
 			trade->sp, trade->cp
 		);
 
-		EQApplicationPacket* outapp = new EQApplicationPacket(OP_TradeCoins,sizeof(TradeCoin_Struct));
+		auto outapp = new EQApplicationPacket(OP_TradeCoins, sizeof(TradeCoin_Struct));
 		TradeCoin_Struct* tcs = (TradeCoin_Struct*)outapp->pBuffer;
 		tcs->trader = trader->GetID();
 		tcs->slot = mc->cointype2;
@@ -1513,7 +1513,7 @@ void Client::OPGMTraining(const EQApplicationPacket *app)
 
 void Client::OPGMEndTraining(const EQApplicationPacket *app)
 {
-	EQApplicationPacket *outapp = new EQApplicationPacket(OP_GMEndTrainingResponse, 0);
+	auto outapp = new EQApplicationPacket(OP_GMEndTrainingResponse, 0);
 	GMTrainEnd_Struct *p = (GMTrainEnd_Struct *)app->pBuffer;
 
 	FastQueuePacket(&outapp);
@@ -1675,7 +1675,7 @@ void Client::OPGMTrainSkill(const EQApplicationPacket *app)
 		// The following packet decreases the skill points left in the Training Window and
 		// produces the 'You have increased your skill / learned the basics of' message.
 		//
-		EQApplicationPacket* outapp = new EQApplicationPacket(OP_GMTrainSkillConfirm, sizeof(GMTrainSkillConfirm_Struct));
+		auto outapp = new EQApplicationPacket(OP_GMTrainSkillConfirm, sizeof(GMTrainSkillConfirm_Struct));
 
 		GMTrainSkillConfirm_Struct *gmtsc = (GMTrainSkillConfirm_Struct *)outapp->pBuffer;
 		gmtsc->SkillID = gmskill->skill_id;
@@ -1733,7 +1733,7 @@ void Client::OPGMSummon(const EQApplicationPacket *app)
 			}
 			else if (tmp < '0' || tmp > '9') // dont send to world if it's not a player's name
 			{
-				ServerPacket* pack = new ServerPacket(ServerOP_ZonePlayer, sizeof(ServerZonePlayer_Struct));
+				auto pack = new ServerPacket(ServerOP_ZonePlayer, sizeof(ServerZonePlayer_Struct));
 				ServerZonePlayer_Struct* szp = (ServerZonePlayer_Struct*) pack->pBuffer;
 				strcpy(szp->adminname, this->GetName());
 				szp->adminrank = this->Admin();
@@ -1775,7 +1775,7 @@ void Client::DoStaminaUpdate() {
 	if(!stamina_timer.Check())
 		return;
 
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_Stamina, sizeof(Stamina_Struct));
+	auto outapp = new EQApplicationPacket(OP_Stamina, sizeof(Stamina_Struct));
 	Stamina_Struct* sta = (Stamina_Struct*)outapp->pBuffer;
 
 	if(zone->GetZoneID() != 151) {
@@ -2001,7 +2001,8 @@ void Client::HandleRespawnFromHover(uint32 Option)
 				m_Position.z = corpse->GetZ();
 			}
 
-			EQApplicationPacket* outapp = new EQApplicationPacket(OP_ZonePlayerToBind, sizeof(ZonePlayerToBind_Struct) + 10);
+			auto outapp =
+			    new EQApplicationPacket(OP_ZonePlayerToBind, sizeof(ZonePlayerToBind_Struct) + 10);
 			ZonePlayerToBind_Struct* gmg = (ZonePlayerToBind_Struct*) outapp->pBuffer;
 
 			gmg->bind_zone_id = zone->GetZoneID();
@@ -2033,7 +2034,8 @@ void Client::HandleRespawnFromHover(uint32 Option)
 		{
 			PendingRezzSpellID = 0;
 
-			EQApplicationPacket* outapp = new EQApplicationPacket(OP_ZonePlayerToBind, sizeof(ZonePlayerToBind_Struct) + chosen->name.length() + 1);
+			auto outapp = new EQApplicationPacket(OP_ZonePlayerToBind, sizeof(ZonePlayerToBind_Struct) +
+										       chosen->name.length() + 1);
 			ZonePlayerToBind_Struct* gmg = (ZonePlayerToBind_Struct*) outapp->pBuffer;
 
 			gmg->bind_zone_id = zone->GetZoneID();
@@ -2100,7 +2102,7 @@ void Client::ClearHover()
 	// Our Entity ID is currently zero, set in Client::Death
 	SetID(entity_list.GetFreeID());
 
-	EQApplicationPacket *outapp = new EQApplicationPacket(OP_ZoneEntry, sizeof(ServerZoneEntry_Struct));
+	auto outapp = new EQApplicationPacket(OP_ZoneEntry, sizeof(ServerZoneEntry_Struct));
 	ServerZoneEntry_Struct* sze = (ServerZoneEntry_Struct*)outapp->pBuffer;
 
 	FillSpawnStruct(&sze->player,CastToMob());
@@ -2152,7 +2154,7 @@ void Client::HandleLFGuildResponse(ServerPacket *pack)
 				--i;
 			}
 
-			EQApplicationPacket *outapp = new EQApplicationPacket(OP_LFGuild, PacketSize);
+			auto outapp = new EQApplicationPacket(OP_LFGuild, PacketSize);
 			outapp->WriteUInt32(3);
 			outapp->WriteUInt32(0xeb63);	// Don't know the significance of this value.
 			outapp->WriteUInt32(NumberOfMatches);
@@ -2180,7 +2182,7 @@ void Client::HandleLFGuildResponse(ServerPacket *pack)
 		}
 		case QSG_LFGuild_RequestPlayerInfo:
 		{
-			EQApplicationPacket *outapp = new EQApplicationPacket(OP_LFGuild, sizeof(LFGuild_PlayerToggle_Struct));
+			auto outapp = new EQApplicationPacket(OP_LFGuild, sizeof(LFGuild_PlayerToggle_Struct));
 			LFGuild_PlayerToggle_Struct *pts = (LFGuild_PlayerToggle_Struct *)outapp->pBuffer;
 
 			pts->Command = 0;
@@ -2210,7 +2212,7 @@ void Client::HandleLFGuildResponse(ServerPacket *pack)
 				--i;
 			}
 
-			EQApplicationPacket *outapp = new EQApplicationPacket(OP_LFGuild, PacketSize);
+			auto outapp = new EQApplicationPacket(OP_LFGuild, PacketSize);
 			outapp->WriteUInt32(4);
 			outapp->WriteUInt32(0xeb63);
 			outapp->WriteUInt32(NumberOfMatches);
@@ -2244,7 +2246,7 @@ void Client::HandleLFGuildResponse(ServerPacket *pack)
 			TimeZone = pack->ReadUInt32();
 			TimePosted = pack->ReadUInt32();
 
-			EQApplicationPacket *outapp = new EQApplicationPacket(OP_LFGuild, sizeof(LFGuild_GuildToggle_Struct));
+			auto outapp = new EQApplicationPacket(OP_LFGuild, sizeof(LFGuild_GuildToggle_Struct));
 
 			LFGuild_GuildToggle_Struct *gts = (LFGuild_GuildToggle_Struct *)outapp->pBuffer;
 			gts->Command = 1;
@@ -2271,7 +2273,7 @@ void Client::HandleLFGuildResponse(ServerPacket *pack)
 
 void Client::SendLFGuildStatus()
 {
-	ServerPacket* pack = new ServerPacket(ServerOP_QueryServGeneric, strlen(GetName()) + 17);
+	auto pack = new ServerPacket(ServerOP_QueryServGeneric, strlen(GetName()) + 17);
 
 	pack->WriteUInt32(zone->GetZoneID());
 	pack->WriteUInt32(zone->GetInstanceID());
@@ -2286,7 +2288,8 @@ void Client::SendLFGuildStatus()
 
 void Client::SendGuildLFGuildStatus()
 {
-	ServerPacket* pack = new ServerPacket(ServerOP_QueryServGeneric, strlen(GetName()) + +strlen(guild_mgr.GetGuildName(GuildID())) + 18);
+	auto pack = new ServerPacket(ServerOP_QueryServGeneric,
+				     strlen(GetName()) + +strlen(guild_mgr.GetGuildName(GuildID())) + 18);
 
 	pack->WriteUInt32(zone->GetZoneID());
 	pack->WriteUInt32(zone->GetInstanceID());

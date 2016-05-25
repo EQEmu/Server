@@ -33,7 +33,7 @@ WaterMap* WaterMap::LoadWaterMapfile(std::string zone_name) {
 		}
 		
 		if(version == 1) {
-			WaterMapV1 *wm = new WaterMapV1();
+			auto wm = new WaterMapV1();
 			if(!wm->Load(f)) {
 				delete wm;
 				wm = nullptr;
@@ -42,7 +42,7 @@ WaterMap* WaterMap::LoadWaterMapfile(std::string zone_name) {
 			fclose(f);
 			return wm;
 		} else if(version == 2) {
-			WaterMapV2 *wm = new WaterMapV2();
+			auto wm = new WaterMapV2();
 			if(!wm->Load(f)) {
 				delete wm;
 				wm = nullptr;

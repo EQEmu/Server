@@ -280,8 +280,7 @@ int Embperl::dosub(const char * subname, const std::vector<std::string> * args, 
 	PUSHMARK(SP);
 	if(args && !args->empty())
 	{
-		for(std::vector<std::string>::const_iterator i = args->begin(); i != args->end(); ++i)
-		{
+		for (auto i = args->begin(); i != args->end(); ++i) {
 			XPUSHs(sv_2mortal(newSVpv(i->c_str(), i->length())));
 		}
 	}

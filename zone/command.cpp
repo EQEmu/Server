@@ -426,8 +426,8 @@ int command_init(void)
 	database.GetCommandSettings(command_settings);
 
 	std::map<std::string, CommandRecord *> working_cl = commandlist;
-	for (std::map<std::string, CommandRecord *>::iterator iter_cl = working_cl.begin(); iter_cl != working_cl.end(); ++iter_cl) {
-		std::map<std::string, std::pair<uint8, std::vector<std::string>>>::iterator iter_cs = command_settings.find(iter_cl->first);
+	for (auto iter_cl = working_cl.begin(); iter_cl != working_cl.end(); ++iter_cl) {
+		auto iter_cs = command_settings.find(iter_cl->first);
 		if (iter_cs == command_settings.end()) {
 			if (iter_cl->second->access == 0)
 				Log.Out(Logs::General, Logs::Commands, "command_init(): Warning: Command '%s' defaulting to access level 0!", iter_cl->first.c_str());
@@ -439,7 +439,8 @@ int command_init(void)
 		if (iter_cs->second.second.empty())
 			continue;
 
-		for (std::vector<std::string>::iterator iter_aka = iter_cs->second.second.begin(); iter_aka != iter_cs->second.second.end(); ++iter_aka) {
+		for (auto iter_aka = iter_cs->second.second.begin(); iter_aka != iter_cs->second.second.end();
+		     ++iter_aka) {
 			if (iter_aka->empty())
 				continue;
 			if (commandlist.find(*iter_aka) != commandlist.end()) {
@@ -501,14 +502,14 @@ int command_add(std::string command_name, const char *desc, int access, CmdFuncP
 		Log.Out(Logs::General, Logs::Error, "command_add() - Command '%s' is a duplicate command name - check command.cpp.", command_name.c_str());
 		return -1;
 	}
-	for (std::map<std::string, CommandRecord *>::iterator iter = commandlist.begin(); iter != commandlist.end(); ++iter) {
+	for (auto iter = commandlist.begin(); iter != commandlist.end(); ++iter) {
 		if (iter->second->function != function)
 			continue;
 		Log.Out(Logs::General, Logs::Error, "command_add() - Command '%s' equates to an alias of '%s' - check command.cpp.", command_name.c_str(), iter->first.c_str());
 		return -1;
 	}
 
-	CommandRecord *c = new CommandRecord;
+	auto c = new CommandRecord;
 	c->access = access;
 	c->desc = desc;
 	c->function = function;
@@ -995,7 +996,7 @@ void command_summon(Client *c, const Seperator *sep)
 				//c->Message(0, "Summoning player from another zone not yet implemented.");
 				//return;
 
-				ServerPacket* pack = new ServerPacket(ServerOP_ZonePlayer, sizeof(ServerZonePlayer_Struct));
+				auto pack = new ServerPacket(ServerOP_ZonePlayer, sizeof(ServerZonePlayer_Struct));
 				ServerZonePlayer_Struct* szp = (ServerZonePlayer_Struct*) pack->pBuffer;
 				strcpy(szp->adminname, c->GetName());
 				szp->adminrank = c->Admin();
@@ -1390,7 +1391,7 @@ void command_timezone(Client *c, const Seperator *sep)
 		database.SetZoneTZ(zone->GetZoneID(), zone->GetInstanceVersion(), ntz);
 
 		// Update all clients with new TZ.
-		EQApplicationPacket* outapp = new EQApplicationPacket(OP_TimeOfDay, sizeof(TimeOfDay_Struct));
+		auto outapp = new EQApplicationPacket(OP_TimeOfDay, sizeof(TimeOfDay_Struct));
 		TimeOfDay_Struct* tod = (TimeOfDay_Struct*)outapp->pBuffer;
 		zone->zone_time.GetCurrentEQTimeOfDay(time(0), tod);
 		entity_list.QueueClients(c, outapp);
@@ -1503,7 +1504,7 @@ void command_zclip(Client *c, const Seperator *sep)
 			zone->newzone_data.fog_maxclip[0]=atof(sep->arg[5]);
 		if(sep->arg[6][0]!=0)
 			zone->newzone_data.fog_maxclip[1]=atof(sep->arg[6]);
-		EQApplicationPacket* outapp = new EQApplicationPacket(OP_NewZone, sizeof(NewZone_Struct));
+		auto outapp = new EQApplicationPacket(OP_NewZone, sizeof(NewZone_Struct));
 		memcpy(outapp->pBuffer, &zone->newzone_data, outapp->size);
 		entity_list.QueueClients(c, outapp);
 		safe_delete(outapp);
@@ -1617,7 +1618,7 @@ void command_weather(Client *c, const Seperator *sep)
 			if(sep->arg[2][0] != 0 && sep->arg[3][0] != 0) {
 				c->Message(0, "Sending weather packet... TYPE=%s, INTENSITY=%s",  sep->arg[2], sep->arg[3]);
 				zone->zone_weather = atoi(sep->arg[2]);
-				EQApplicationPacket* outapp = new EQApplicationPacket(OP_Weather, 8);
+				auto outapp = new EQApplicationPacket(OP_Weather, 8);
 				outapp->pBuffer[0] = atoi(sep->arg[2]);
 				outapp->pBuffer[4] = atoi(sep->arg[3]); // This number changes in the packets, intensity?
 				entity_list.QueueClients(c, outapp);
@@ -1630,7 +1631,7 @@ void command_weather(Client *c, const Seperator *sep)
 		else if(sep->arg[1][0] == '2')	{
 			entity_list.Message(0, 0, "Snowflakes begin to fall from the sky.");
 			zone->zone_weather = 2;
-			EQApplicationPacket* outapp = new EQApplicationPacket(OP_Weather, 8);
+			auto outapp = new EQApplicationPacket(OP_Weather, 8);
 			outapp->pBuffer[0] = 0x01;
 			outapp->pBuffer[4] = 0x02; // This number changes in the packets, intensity?
 			entity_list.QueueClients(c, outapp);
@@ -1639,7 +1640,7 @@ void command_weather(Client *c, const Seperator *sep)
 		else if(sep->arg[1][0] == '1')	{
 			entity_list.Message(0, 0, "Raindrops begin to fall from the sky.");
 			zone->zone_weather = 1;
-			EQApplicationPacket* outapp = new EQApplicationPacket(OP_Weather, 8);
+			auto outapp = new EQApplicationPacket(OP_Weather, 8);
 			outapp->pBuffer[4] = 0x01; // This is how it's done in Fear, and you can see a decent distance with it at this value
 			entity_list.QueueClients(c, outapp);
 			safe_delete(outapp);
@@ -1649,7 +1650,7 @@ void command_weather(Client *c, const Seperator *sep)
 		if(zone->zone_weather == 1)	{ // Doing this because if you have rain/snow on, you can only turn one off.
 			entity_list.Message(0, 0, "The sky clears as the rain ceases to fall.");
 			zone->zone_weather = 0;
-			EQApplicationPacket* outapp = new EQApplicationPacket(OP_Weather, 8);
+			auto outapp = new EQApplicationPacket(OP_Weather, 8);
 			// To shutoff weather you send an empty 8 byte packet (You get this everytime you zone even if the sky is clear)
 			entity_list.QueueClients(c, outapp);
 			safe_delete(outapp);
@@ -1657,7 +1658,7 @@ void command_weather(Client *c, const Seperator *sep)
 		else if(zone->zone_weather == 2) {
 			entity_list.Message(0, 0, "The sky clears as the snow stops falling.");
 			zone->zone_weather = 0;
-			EQApplicationPacket* outapp = new EQApplicationPacket(OP_Weather, 8);
+			auto outapp = new EQApplicationPacket(OP_Weather, 8);
 			// To shutoff weather you send an empty 8 byte packet (You get this everytime you zone even if the sky is clear)
 			outapp->pBuffer[0] = 0x01; // Snow has it's own shutoff packet
 			entity_list.QueueClients(c, outapp);
@@ -1666,7 +1667,7 @@ void command_weather(Client *c, const Seperator *sep)
 		else {
 			entity_list.Message(0, 0, "The sky clears.");
 			zone->zone_weather = 0;
-			EQApplicationPacket* outapp = new EQApplicationPacket(OP_Weather, 8);
+			auto outapp = new EQApplicationPacket(OP_Weather, 8);
 			// To shutoff weather you send an empty 8 byte packet (You get this everytime you zone even if the sky is clear)
 			entity_list.QueueClients(c, outapp);
 			safe_delete(outapp);
@@ -1688,7 +1689,7 @@ void command_zheader(Client *c, const Seperator *sep)
 			c->Message(0, "Successfully loaded zone header for %s from database.",  sep->argplus[1]);
 		else
 			c->Message(0, "Failed to load zone header %s from database",  sep->argplus[1]);
-		EQApplicationPacket* outapp = new EQApplicationPacket(OP_NewZone, sizeof(NewZone_Struct));
+		auto outapp = new EQApplicationPacket(OP_NewZone, sizeof(NewZone_Struct));
 		memcpy(outapp->pBuffer, &zone->newzone_data, outapp->size);
 		entity_list.QueueClients(c, outapp);
 		safe_delete(outapp);
@@ -1704,7 +1705,7 @@ void command_zsky(Client *c, const Seperator *sep)
 		c->Message(0, "ERROR: Sky type can not be less than 0 or greater than 255!");
 	else {
 		zone->newzone_data.sky = atoi(sep->arg[1]);
-		EQApplicationPacket* outapp = new EQApplicationPacket(OP_NewZone, sizeof(NewZone_Struct));
+		auto outapp = new EQApplicationPacket(OP_NewZone, sizeof(NewZone_Struct));
 		memcpy(outapp->pBuffer, &zone->newzone_data, outapp->size);
 		entity_list.QueueClients(c, outapp);
 		safe_delete(outapp);
@@ -1728,7 +1729,7 @@ void command_zcolor(Client *c, const Seperator *sep)
 			zone->newzone_data.fog_green[z] = atoi(sep->arg[2]);
 			zone->newzone_data.fog_blue[z] = atoi(sep->arg[3]);
 		}
-		EQApplicationPacket* outapp = new EQApplicationPacket(OP_NewZone, sizeof(NewZone_Struct));
+		auto outapp = new EQApplicationPacket(OP_NewZone, sizeof(NewZone_Struct));
 		memcpy(outapp->pBuffer, &zone->newzone_data, outapp->size);
 		entity_list.QueueClients(c, outapp);
 		safe_delete(outapp);
@@ -1742,7 +1743,7 @@ void command_spon(Client *c, const Seperator *sep)
 
 void command_spoff(Client *c, const Seperator *sep)
 {
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_ManaChange, 0);
+	auto outapp = new EQApplicationPacket(OP_ManaChange, 0);
 	outapp->priority = 5;
 	c->QueuePacket(outapp);
 	safe_delete(outapp);
@@ -1761,7 +1762,7 @@ void command_itemtest(Client *c, const Seperator *sep)
 	fread(chBuffer, sizeof(chBuffer), sizeof(char), f);
 	fclose(f);
 
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_ItemLinkResponse, strlen(chBuffer)+5);
+	auto outapp = new EQApplicationPacket(OP_ItemLinkResponse, strlen(chBuffer) + 5);
 	memcpy(&outapp->pBuffer[4], chBuffer, strlen(chBuffer));
 	c->QueuePacket(outapp);
 	safe_delete(outapp);
@@ -1884,7 +1885,7 @@ void command_worldshutdown(Client *c, const Seperator *sep)
 		if(sep->IsNumber(1) && sep->IsNumber(2) && ((time=atoi(sep->arg[1]))>0) && ((interval=atoi(sep->arg[2]))>0)) {
 			worldserver.SendEmoteMessage(0,0,15,"<SYSTEMWIDE MESSAGE>:SYSTEM MSG:World coming down in %i minutes, everyone log out before this time.",  (time / 60 ));
 			c->Message(0, "Sending shutdown packet now, World will shutdown in: %i minutes with an interval of: %i seconds",  (time / 60), interval);
-			ServerPacket* pack = new ServerPacket(ServerOP_ShutdownAll,sizeof(WorldShutDown_Struct));
+			auto pack = new ServerPacket(ServerOP_ShutdownAll, sizeof(WorldShutDown_Struct));
 			WorldShutDown_Struct* wsd = (WorldShutDown_Struct*)pack->pBuffer;
 			wsd->time=time*1000;
 			wsd->interval=(interval*1000);
@@ -1894,7 +1895,7 @@ void command_worldshutdown(Client *c, const Seperator *sep)
 		else if(strcasecmp(sep->arg[1], "now") == 0){
 			worldserver.SendEmoteMessage(0,0,15,"<SYSTEMWIDE MESSAGE>:SYSTEM MSG:World coming down, everyone log out now.");
 			c->Message(0, "Sending shutdown packet");
-			ServerPacket* pack = new ServerPacket;
+			auto pack = new ServerPacket;
 			pack->opcode = ServerOP_ShutdownAll;
 			pack->size=0;
 			worldserver.SendPacket(pack);
@@ -1902,7 +1903,7 @@ void command_worldshutdown(Client *c, const Seperator *sep)
 		}
 		else if(strcasecmp(sep->arg[1], "disable") == 0){
 			c->Message(0, "Shutdown prevented, next time I may not be so forgiving...");
-			ServerPacket* pack = new ServerPacket(ServerOP_ShutdownAll,sizeof(WorldShutDown_Struct));
+			auto pack = new ServerPacket(ServerOP_ShutdownAll, sizeof(WorldShutDown_Struct));
 			WorldShutDown_Struct* wsd = (WorldShutDown_Struct*)pack->pBuffer;
 			wsd->time=0;
 			wsd->interval=0;
@@ -1991,7 +1992,7 @@ void command_setlsinfo(Client *c, const Seperator *sep)
 	if(sep->argnum != 2)
 		c->Message(0, "Format: #setlsinfo email password");
 	else {
-		ServerPacket* pack = new ServerPacket(ServerOP_LSAccountUpdate, sizeof(ServerLSAccountUpdate_Struct));
+		auto pack = new ServerPacket(ServerOP_LSAccountUpdate, sizeof(ServerLSAccountUpdate_Struct));
 		ServerLSAccountUpdate_Struct* s = (ServerLSAccountUpdate_Struct *) pack->pBuffer;
 		s->useraccountid = c->LSAccountID();
 		strn0cpy(s->useraccount, c->AccountName(), 30);
@@ -2040,7 +2041,8 @@ void command_wp(Client *c, const Seperator *sep)
 
 void command_iplookup(Client *c, const Seperator *sep)
 {
-	ServerPacket* pack = new ServerPacket(ServerOP_IPLookup, sizeof(ServerGenericWorldQuery_Struct) + strlen(sep->argplus[1]) + 1);
+	auto pack =
+	    new ServerPacket(ServerOP_IPLookup, sizeof(ServerGenericWorldQuery_Struct) + strlen(sep->argplus[1]) + 1);
 	ServerGenericWorldQuery_Struct* s = (ServerGenericWorldQuery_Struct *) pack->pBuffer;
 	strcpy(s->from, c->GetName());
 	s->admin = c->Admin();
@@ -2453,7 +2455,7 @@ void command_npctypespawn(Client *c, const Seperator *sep)
 		const NPCType* tmp = 0;
 		if ((tmp = database.LoadNPCTypesData(atoi(sep->arg[1])))) {
 			//tmp->fixedZ = 1;
-			NPC* npc = new NPC(tmp, 0, c->GetPosition(), FlyMode3);
+			auto npc = new NPC(tmp, 0, c->GetPosition(), FlyMode3);
 			if (npc && sep->IsNumber(2))
 				npc->SetNPCFactionID(atoi(sep->arg[2]));
 
@@ -2900,12 +2902,13 @@ void command_findzone(Client *c, const Seperator *sep)
     std::string query;
     int id = atoi((const char *)sep->arg[1]);
     if (id == 0) { // If id evaluates to 0, then search as if user entered a string.
-        char *escName = new char[strlen(sep->arg[1]) * 2 + 1];
-		database.DoEscapeString(escName, sep->arg[1], strlen(sep->arg[1]));
+	    auto escName = new char[strlen(sep->arg[1]) * 2 + 1];
+	    database.DoEscapeString(escName, sep->arg[1], strlen(sep->arg[1]));
 
-        query = StringFormat("SELECT zoneidnumber, short_name, long_name FROM zone "
-                            "WHERE long_name RLIKE '%s' AND version = 0",  escName);
-		safe_delete_array(escName);
+	    query = StringFormat("SELECT zoneidnumber, short_name, long_name FROM zone "
+				 "WHERE long_name RLIKE '%s' AND version = 0",
+				 escName);
+	    safe_delete_array(escName);
     }
     else // Otherwise, look for just that zoneidnumber.
 		query = StringFormat("SELECT zoneidnumber, short_name, long_name FROM zone "
@@ -2983,7 +2986,7 @@ void command_reloadqst(Client *c, const Seperator *sep)
 void command_reloadworld(Client *c, const Seperator *sep)
 {
 	c->Message(0, "Reloading quest cache and repopping zones worldwide.");
-	ServerPacket* pack = new ServerPacket(ServerOP_ReloadWorld, sizeof(ReloadWorld_Struct));
+	auto pack = new ServerPacket(ServerOP_ReloadWorld, sizeof(ReloadWorld_Struct));
 	ReloadWorld_Struct* RW = (ReloadWorld_Struct*) pack->pBuffer;
 	RW->Option = ((atoi(sep->arg[1]) == 1) ? 1 : 0);
 	worldserver.SendPacket(pack);
@@ -3016,7 +3019,7 @@ void command_zoneshutdown(Client *c, const Seperator *sep)
 	else if (sep->arg[1][0] == 0)
 		c->Message(0, "Usage: #zoneshutdown zoneshortname");
 	else {
-		ServerPacket* pack = new ServerPacket(ServerOP_ZoneShutdown, sizeof(ServerZoneStateChange_struct));
+		auto pack = new ServerPacket(ServerOP_ZoneShutdown, sizeof(ServerZoneStateChange_struct));
 		ServerZoneStateChange_struct* s = (ServerZoneStateChange_struct *) pack->pBuffer;
 		strcpy(s->adminname, c->GetName());
 		if (sep->arg[1][0] >= '0' && sep->arg[1][0] <= '9')
@@ -3036,7 +3039,7 @@ void command_zonebootup(Client *c, const Seperator *sep)
 		c->Message(0, "Usage: #zonebootup ZoneServerID# zoneshortname");
 	}
 	else {
-		ServerPacket* pack = new ServerPacket(ServerOP_ZoneBootup, sizeof(ServerZoneStateChange_struct));
+		auto pack = new ServerPacket(ServerOP_ZoneBootup, sizeof(ServerZoneStateChange_struct));
 		ServerZoneStateChange_struct* s = (ServerZoneStateChange_struct *) pack->pBuffer;
 		s->ZoneServerID = atoi(sep->arg[1]);
 		strcpy(s->adminname, c->GetName());
@@ -3056,7 +3059,7 @@ void command_kick(Client *c, const Seperator *sep)
 		if (client != 0) {
 			if (client->Admin() <= c->Admin()) {
 				client->Message(0, "You have been kicked by %s", c->GetName());
-				EQApplicationPacket* outapp = new EQApplicationPacket(OP_GMKick,0);
+				auto outapp = new EQApplicationPacket(OP_GMKick, 0);
 				client->QueuePacket(outapp);
 				client->Kick();
 				c->Message(0, "Kick: local: kicking %s",  sep->arg[1]);
@@ -3065,7 +3068,7 @@ void command_kick(Client *c, const Seperator *sep)
 		else if (!worldserver.Connected())
 			c->Message(0, "Error: World server disconnected");
 		else {
-			ServerPacket* pack = new ServerPacket(ServerOP_KickPlayer, sizeof(ServerKickPlayer_Struct));
+			auto pack = new ServerPacket(ServerOP_KickPlayer, sizeof(ServerKickPlayer_Struct));
 			ServerKickPlayer_Struct* skp = (ServerKickPlayer_Struct*) pack->pBuffer;
 			strcpy(skp->adminname, c->GetName());
 			strcpy(skp->name, sep->arg[1]);
@@ -3091,7 +3094,7 @@ void command_attack(Client *c, const Seperator *sep)
 
 void command_lock(Client *c, const Seperator *sep)
 {
-	ServerPacket* outpack = new ServerPacket(ServerOP_Lock, sizeof(ServerLock_Struct));
+	auto outpack = new ServerPacket(ServerOP_Lock, sizeof(ServerLock_Struct));
 	ServerLock_Struct* lss = (ServerLock_Struct*) outpack->pBuffer;
 	strcpy(lss->myname, c->GetName());
 	lss->mode = 1;
@@ -3101,7 +3104,7 @@ void command_lock(Client *c, const Seperator *sep)
 
 void command_unlock(Client *c, const Seperator *sep)
 {
-	ServerPacket* outpack = new ServerPacket(ServerOP_Lock, sizeof(ServerLock_Struct));
+	auto outpack = new ServerPacket(ServerOP_Lock, sizeof(ServerLock_Struct));
 	ServerLock_Struct* lss = (ServerLock_Struct*) outpack->pBuffer;
 	strcpy(lss->myname, c->GetName());
 	lss->mode = 0;
@@ -3111,7 +3114,7 @@ void command_unlock(Client *c, const Seperator *sep)
 
 void command_motd(Client *c, const Seperator *sep)
 {
-	ServerPacket* outpack = new ServerPacket(ServerOP_Motd, sizeof(ServerMotd_Struct));
+	auto outpack = new ServerPacket(ServerOP_Motd, sizeof(ServerMotd_Struct));
 	ServerMotd_Struct* mss = (ServerMotd_Struct*) outpack->pBuffer;
 	strn0cpy(mss->myname, c->GetName(),64);
 	strn0cpy(mss->motd, sep->argplus[1],512);
@@ -3147,7 +3150,7 @@ void command_equipitem(Client *c, const Seperator *sep)
 		int16 movecount;
 
 		if (from_inst && from_inst->IsClassCommon()) {
-			EQApplicationPacket* outapp = new EQApplicationPacket(OP_MoveItem, sizeof(MoveItem_Struct));
+			auto outapp = new EQApplicationPacket(OP_MoveItem, sizeof(MoveItem_Struct));
 			MoveItem_Struct* mi	= (MoveItem_Struct*)outapp->pBuffer;
 			mi->from_slot = EQEmu::legacy::SlotCursor;
 			mi->to_slot			= slot_id;
@@ -3215,7 +3218,7 @@ void command_equipitem(Client *c, const Seperator *sep)
 
 void command_zonelock(Client *c, const Seperator *sep)
 {
-	ServerPacket* pack = new ServerPacket(ServerOP_LockZone, sizeof(ServerLockZone_Struct));
+	auto pack = new ServerPacket(ServerOP_LockZone, sizeof(ServerLockZone_Struct));
 	ServerLockZone_Struct* s = (ServerLockZone_Struct*) pack->pBuffer;
 	strn0cpy(s->adminname, c->GetName(), sizeof(s->adminname));
 	if (strcasecmp(sep->arg[1], "list") == 0) {
@@ -3994,7 +3997,7 @@ void command_zuwcoords(Client *c, const Seperator *sep)
 		zone->newzone_data.underworld = atof(sep->arg[1]);
 		//float newdata = atof(sep->arg[1]);
 		//memcpy(&zone->zone_header_data[130], &newdata, sizeof(float));
-		EQApplicationPacket* outapp = new EQApplicationPacket(OP_NewZone, sizeof(NewZone_Struct));
+		auto outapp = new EQApplicationPacket(OP_NewZone, sizeof(NewZone_Struct));
 		memcpy(outapp->pBuffer, &zone->newzone_data, outapp->size);
 		entity_list.QueueClients(c, outapp);
 		safe_delete(outapp);
@@ -4026,7 +4029,7 @@ void command_zsafecoords(Client *c, const Seperator *sep)
 		//memcpy(&zone->zone_header_data[118], &newdatay, sizeof(float));
 		//memcpy(&zone->zone_header_data[122], &newdataz, sizeof(float));
 		//zone->SetSafeCoords();
-		EQApplicationPacket* outapp = new EQApplicationPacket(OP_NewZone, sizeof(NewZone_Struct));
+		auto outapp = new EQApplicationPacket(OP_NewZone, sizeof(NewZone_Struct));
 		memcpy(outapp->pBuffer, &zone->newzone_data, outapp->size);
 		entity_list.QueueClients(c, outapp);
 		safe_delete(outapp);
@@ -4385,7 +4388,7 @@ void command_uptime(Client *c, const Seperator *sep)
 		c->Message(0, "Error: World server disconnected");
 	else
 	{
-		ServerPacket* pack = new ServerPacket(ServerOP_Uptime, sizeof(ServerUptime_Struct));
+		auto pack = new ServerPacket(ServerOP_Uptime, sizeof(ServerUptime_Struct));
 		ServerUptime_Struct* sus = (ServerUptime_Struct*) pack->pBuffer;
 		strcpy(sus->adminname, c->GetName());
 		if (sep->IsNumber(1) && atoi(sep->arg[1]) > 0)
@@ -4425,7 +4428,7 @@ void command_flag(Client *c, const Seperator *sep)
 			c->Message(0, "Unable to set GM Flag.");
 		else {
 			c->Message(0, "Set GM Flag on account.");
-			ServerPacket* pack = new ServerPacket(ServerOP_FlagUpdate, 6);
+			auto pack = new ServerPacket(ServerOP_FlagUpdate, 6);
 			*((uint32*) pack->pBuffer) = database.GetAccountIDByName(sep->argplus[2]);
 			*((int16*) &pack->pBuffer[4]) = atoi(sep->arg[1]);
 			worldserver.SendPacket(pack);
@@ -4888,7 +4891,7 @@ void command_zonestatus(Client *c, const Seperator *sep)
 	if (!worldserver.Connected())
 		c->Message(0, "Error: World server disconnected");
 	else {
-		ServerPacket* pack = new ServerPacket(ServerOP_ZoneStatus, strlen(c->GetName())+2);
+		auto pack = new ServerPacket(ServerOP_ZoneStatus, strlen(c->GetName()) + 2);
 		memset(pack->pBuffer, (uint8) c->Admin(), 1);
 		strcpy((char *) &pack->pBuffer[1], c->GetName());
 		worldserver.SendPacket(pack);
@@ -4961,14 +4964,14 @@ void command_findaliases(Client *c, const Seperator *sep)
 		c->Message(0, "Usage: #findaliases [alias | command]");
 		return;
 	}
-	
-	std::map<std::string, std::string>::iterator find_iter = commandaliases.find(sep->arg[1]);
+
+	auto find_iter = commandaliases.find(sep->arg[1]);
 	if (find_iter == commandaliases.end()) {
 		c->Message(15, "No commands or aliases match '%s'", sep->arg[1]);
 		return;
 	}
 
-	std::map<std::string, CommandRecord *>::iterator command_iter = commandlist.find(find_iter->second);
+	auto command_iter = commandlist.find(find_iter->second);
 	if (find_iter->second.empty() || command_iter == commandlist.end()) {
 		c->Message(0, "An unknown condition occurred...");
 		return;
@@ -4977,7 +4980,7 @@ void command_findaliases(Client *c, const Seperator *sep)
 	c->Message(0, "Available command aliases for '%s':", command_iter->first.c_str());
 
 	int commandaliasesshown = 0;
-	for (std::map<std::string, std::string>::iterator alias_iter = commandaliases.begin(); alias_iter != commandaliases.end(); ++alias_iter) {
+	for (auto alias_iter = commandaliases.begin(); alias_iter != commandaliases.end(); ++alias_iter) {
 		if (strcasecmp(find_iter->second.c_str(), alias_iter->second.c_str()) || c->Admin() < command_iter->second->access)
 			continue;
 
@@ -5845,7 +5848,7 @@ void command_suspend(Client *c, const Seperator *sep)
         }
     }
 
-    char *escName = new char[strlen(sep->arg[1]) * 2 + 1];
+    auto escName = new char[strlen(sep->arg[1]) * 2 + 1];
     database.DoEscapeString(escName, sep->arg[1], strlen(sep->arg[1]));
     int accountID = database.GetAccountIDByChar(escName);
     safe_delete_array(escName);
@@ -5872,16 +5875,16 @@ void command_suspend(Client *c, const Seperator *sep)
         return;
     }
 
-    ServerPacket* pack = new ServerPacket(ServerOP_KickPlayer, sizeof(ServerKickPlayer_Struct));
-	ServerKickPlayer_Struct* sks = (ServerKickPlayer_Struct*) pack->pBuffer;
+    auto pack = new ServerPacket(ServerOP_KickPlayer, sizeof(ServerKickPlayer_Struct));
+    ServerKickPlayer_Struct *sks = (ServerKickPlayer_Struct *)pack->pBuffer;
 
-	strn0cpy(sks->adminname, c->GetName(), sizeof(sks->adminname));
-	strn0cpy(sks->name, sep->arg[1], sizeof(sks->name));
-	sks->adminrank = c->Admin();
+    strn0cpy(sks->adminname, c->GetName(), sizeof(sks->adminname));
+    strn0cpy(sks->name, sep->arg[1], sizeof(sks->name));
+    sks->adminrank = c->Admin();
 
-	worldserver.SendPacket(pack);
+    worldserver.SendPacket(pack);
 
-	safe_delete(pack);
+    safe_delete(pack);
 }
 
 void command_ipban(Client *c, const Seperator *sep)
@@ -5926,13 +5929,13 @@ void command_revoke(Client *c, const Seperator *sep)
 
 	c->Message(13, "#revoke: Couldn't find %s in this zone, passing request to worldserver.", sep->arg[1]);
 
-    ServerPacket * outapp = new ServerPacket (ServerOP_Revoke,sizeof(RevokeStruct));
-    RevokeStruct* revoke = (RevokeStruct*)outapp->pBuffer;
-    strn0cpy(revoke->adminname, c->GetName(), 64);
-    strn0cpy(revoke->name, sep->arg[1], 64);
-    revoke->toggle = flag;
-    worldserver.SendPacket(outapp);
-    safe_delete(outapp);
+	auto outapp = new ServerPacket(ServerOP_Revoke, sizeof(RevokeStruct));
+	RevokeStruct *revoke = (RevokeStruct *)outapp->pBuffer;
+	strn0cpy(revoke->adminname, c->GetName(), 64);
+	strn0cpy(revoke->name, sep->arg[1], 64);
+	revoke->toggle = flag;
+	worldserver.SendPacket(outapp);
+	safe_delete(outapp);
 }
 
 void command_oocmute(Client *c, const Seperator *sep)
@@ -5940,10 +5943,10 @@ void command_oocmute(Client *c, const Seperator *sep)
 	if(sep->arg[1][0] == 0 || !(sep->arg[1][0] == '1' || sep->arg[1][0] == '0'))
 		c->Message(0, "Usage: #oocmute [1/0]");
 	else {
-	ServerPacket * outapp = new ServerPacket (ServerOP_OOCMute,1);
-	*(outapp->pBuffer)=atoi(sep->arg[1]);
-	worldserver.SendPacket(outapp);
-	safe_delete(outapp);
+		auto outapp = new ServerPacket(ServerOP_OOCMute, 1);
+		*(outapp->pBuffer) = atoi(sep->arg[1]);
+		worldserver.SendPacket(outapp);
+		safe_delete(outapp);
 	}
 }
 
@@ -7773,7 +7776,7 @@ void command_task(Client *c, const Seperator *sep) {
 }
 void command_reloadtitles(Client *c, const Seperator *sep)
 {
-	ServerPacket* pack = new ServerPacket(ServerOP_ReloadTitles, 0);
+	auto pack = new ServerPacket(ServerOP_ReloadTitles, 0);
 	worldserver.SendPacket(pack);
 	safe_delete(pack);
 	c->Message(15, "Player Titles Reloaded.");
@@ -9862,7 +9865,7 @@ void command_globalview(Client *c, const Seperator *sep)
 			QGlobalCache::Combine(globalMap, zone_c->GetBucket(), ntype, c->CharacterID(), zone->GetZoneID());
 		}
 
-		std::list<QGlobal>::iterator iter = globalMap.begin();
+		auto iter = globalMap.begin();
 		uint32 gcount = 0;
 
 		c->Message(0, "Name, Value");
@@ -9895,7 +9898,7 @@ void command_globalview(Client *c, const Seperator *sep)
 			QGlobalCache::Combine(globalMap, zone_c->GetBucket(), ntype, c->CharacterID(), zone->GetZoneID());
 		}
 
-		std::list<QGlobal>::iterator iter = globalMap.begin();
+		auto iter = globalMap.begin();
 		uint32 gcount = 0;
 
 		c->Message(0, "Name, Value");
@@ -9921,7 +9924,8 @@ void command_cvs(Client *c, const Seperator *sep)
 {
 	if(c)
 	{
-		ServerPacket *pack = new ServerPacket(ServerOP_ClientVersionSummary, sizeof(ServerRequestClientVersionSummary_Struct));
+		auto pack =
+		    new ServerPacket(ServerOP_ClientVersionSummary, sizeof(ServerRequestClientVersionSummary_Struct));
 
 		ServerRequestClientVersionSummary_Struct *srcvss = (ServerRequestClientVersionSummary_Struct*)pack->pBuffer;
 
@@ -9981,7 +9985,7 @@ void command_reloadallrules(Client *c, const Seperator *sep)
 {
 	if(c)
 	{
-		ServerPacket *pack = new ServerPacket(ServerOP_ReloadRules, 0);
+		auto pack = new ServerPacket(ServerOP_ReloadRules, 0);
 		worldserver.SendPacket(pack);
 		c->Message(13, "Successfully sent the packet to world to reload rules globally. (including world)");
 		safe_delete(pack);
@@ -9993,7 +9997,7 @@ void command_reloadworldrules(Client *c, const Seperator *sep)
 {
 	if(c)
 	{
-		ServerPacket *pack = new ServerPacket(ServerOP_ReloadRulesWorld, 0);
+		auto pack = new ServerPacket(ServerOP_ReloadRulesWorld, 0);
 		worldserver.SendPacket(pack);
 		c->Message(13, "Successfully sent the packet to world to reload rules. (only world)");
 		safe_delete(pack);
@@ -10006,7 +10010,7 @@ void command_camerashake(Client *c, const Seperator *sep)
 	{
 		if(sep->arg[1][0] && sep->arg[2][0])
 		{
-			ServerPacket *pack = new ServerPacket(ServerOP_CameraShake, sizeof(ServerCameraShake_Struct));
+			auto pack = new ServerPacket(ServerOP_CameraShake, sizeof(ServerCameraShake_Struct));
 			ServerCameraShake_Struct* scss = (ServerCameraShake_Struct*) pack->pBuffer;
 			scss->duration = atoi(sep->arg[1]);
 			scss->intensity = atoi(sep->arg[2]);
@@ -10261,10 +10265,10 @@ void command_augmentitem(Client *c, const Seperator *sep)
 	if (!c)
 		return;
 
-		AugmentItem_Struct* in_augment = new AugmentItem_Struct[sizeof(AugmentItem_Struct)];
-		in_augment->container_slot = 1000; // <watch>
-		in_augment->augment_slot = -1;
-		if(c->GetTradeskillObject() != nullptr)
+	auto in_augment = new AugmentItem_Struct[sizeof(AugmentItem_Struct)];
+	in_augment->container_slot = 1000; // <watch>
+	in_augment->augment_slot = -1;
+	if (c->GetTradeskillObject() != nullptr)
 		Object::HandleAugmentation(c, in_augment, c->GetTradeskillObject());
 		safe_delete_array(in_augment);
 }
@@ -10629,7 +10633,7 @@ void command_logs(Client *c, const Seperator *sep){
 	if (sep->argnum > 0) {
 		/* #logs reload_all */
 		if (strcasecmp(sep->arg[1], "reload_all") == 0){
-			ServerPacket *pack = new ServerPacket(ServerOP_ReloadLogs, 0);
+			auto pack = new ServerPacket(ServerOP_ReloadLogs, 0);
 			worldserver.SendPacket(pack);
 			c->Message(13, "Successfully sent the packet to world to reload log settings from the database for all zones");
 			safe_delete(pack);
@@ -10827,7 +10831,7 @@ void command_reloadperlexportsettings(Client *c, const Seperator *sep)
 {
 	if (c)
 	{
-		ServerPacket *pack = new ServerPacket(ServerOP_ReloadPerlExportSettings, 0);
+		auto pack = new ServerPacket(ServerOP_ReloadPerlExportSettings, 0);
 		worldserver.SendPacket(pack);
 		c->Message(13, "Successfully sent the packet to world to reload Perl Export settings");
 		safe_delete(pack);

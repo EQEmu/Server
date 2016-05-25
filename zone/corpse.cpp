@@ -58,13 +58,13 @@ extern WorldServer worldserver;
 extern npcDecayTimes_Struct npcCorpseDecayTimes[100];
 
 void Corpse::SendEndLootErrorPacket(Client* client) {
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_LootComplete, 0);
+	auto outapp = new EQApplicationPacket(OP_LootComplete, 0);
 	client->QueuePacket(outapp);
 	safe_delete(outapp);
 }
 
 void Corpse::SendLootReqErrorPacket(Client* client, uint8 response) {
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_MoneyOnCorpse, sizeof(moneyOnCorpseStruct));
+	auto outapp = new EQApplicationPacket(OP_MoneyOnCorpse, sizeof(moneyOnCorpseStruct));
 	moneyOnCorpseStruct* d = (moneyOnCorpseStruct*) outapp->pBuffer;
 	d->response		= response;
 	d->unknown1		= 0x5a;
@@ -75,7 +75,8 @@ void Corpse::SendLootReqErrorPacket(Client* client, uint8 response) {
 
 Corpse* Corpse::LoadCharacterCorpseEntity(uint32 in_dbid, uint32 in_charid, std::string in_charname, const glm::vec4& position, std::string time_of_death, bool rezzed, bool was_at_graveyard) {
 	uint32 item_count = database.GetCharacterCorpseItemCount(in_dbid);
-	char *buffer = new char[sizeof(PlayerCorpse_Struct) + (item_count * sizeof(player_lootitem::ServerLootItem_Struct))];
+	auto buffer =
+	    new char[sizeof(PlayerCorpse_Struct) + (item_count * sizeof(player_lootitem::ServerLootItem_Struct))];
 	PlayerCorpse_Struct *pcs = (PlayerCorpse_Struct*)buffer;
 	database.LoadCharacterCorpseData(in_dbid, pcs);
 
@@ -89,27 +90,26 @@ Corpse* Corpse::LoadCharacterCorpseEntity(uint32 in_dbid, uint32 in_charid, std:
 	}
 
 	/* Create Corpse Entity */
-	Corpse* pc = new Corpse(
-		in_dbid,			   // uint32 in_dbid
-		in_charid,			   // uint32 in_charid
-		in_charname.c_str(),   // char* in_charname
-		&itemlist,			   // ItemList* in_itemlist
-		pcs->copper,		   // uint32 in_copper
-		pcs->silver,		   // uint32 in_silver
-		pcs->gold,			   // uint32 in_gold
-		pcs->plat,			   // uint32 in_plat
-		position,
-		pcs->size,			   // float in_size
-		pcs->gender,		   // uint8 in_gender
-		pcs->race,			   // uint16 in_race
-		pcs->class_,		   // uint8 in_class
-		pcs->deity,			   // uint8 in_deity
-		pcs->level,			   // uint8 in_level
-		pcs->texture,		   // uint8 in_texture
-		pcs->helmtexture,	   // uint8 in_helmtexture
-		pcs->exp,			   // uint32 in_rezexp
-		was_at_graveyard	   // bool wasAtGraveyard
-	);
+	auto pc = new Corpse(in_dbid,		  // uint32 in_dbid
+			     in_charid,		  // uint32 in_charid
+			     in_charname.c_str(), // char* in_charname
+			     &itemlist,		  // ItemList* in_itemlist
+			     pcs->copper,	 // uint32 in_copper
+			     pcs->silver,	 // uint32 in_silver
+			     pcs->gold,		  // uint32 in_gold
+			     pcs->plat,		  // uint32 in_plat
+			     position,
+			     pcs->size,	// float in_size
+			     pcs->gender,      // uint8 in_gender
+			     pcs->race,	// uint16 in_race
+			     pcs->class_,      // uint8 in_class
+			     pcs->deity,       // uint8 in_deity
+			     pcs->level,       // uint8 in_level
+			     pcs->texture,     // uint8 in_texture
+			     pcs->helmtexture, // uint8 in_helmtexture
+			     pcs->exp,	 // uint32 in_rezexp
+			     was_at_graveyard  // bool wasAtGraveyard
+			     );
 
 	if (pcs->locked)
 		pc->Lock();
@@ -658,7 +658,7 @@ void Corpse::AddItem(uint32 itemnum, uint16 charges, int16 slot, uint32 aug1, ui
 
 	is_corpse_changed = true;
 
-	ServerLootItem_Struct* item = new ServerLootItem_Struct;
+	auto item = new ServerLootItem_Struct;
 
 	memset(item, 0, sizeof(ServerLootItem_Struct));
 	item->item_id = itemnum;
@@ -798,7 +798,7 @@ bool Corpse::Process() {
 			database.SendCharacterCorpseToGraveyard(corpse_db_id, zone->graveyard_zoneid(),
 				(zone->GetZoneID() == zone->graveyard_zoneid()) ? zone->GetInstanceID() : 0, zone->GetGraveyardPoint());
 			corpse_graveyard_timer.Disable();
-			ServerPacket* pack = new ServerPacket(ServerOP_SpawnPlayerCorpse, sizeof(SpawnPlayerCorpse_Struct));
+			auto pack = new ServerPacket(ServerOP_SpawnPlayerCorpse, sizeof(SpawnPlayerCorpse_Struct));
 			SpawnPlayerCorpse_Struct* spc = (SpawnPlayerCorpse_Struct*)pack->pBuffer;
 			spc->player_corpse_id = corpse_db_id;
 			spc->zone_id = zone->graveyard_zoneid();
@@ -942,7 +942,7 @@ void Corpse::MakeLootRequestPackets(Client* client, const EQApplicationPacket* a
 
 	if(Loot_Request_Type >= 2 || (Loot_Request_Type == 1 && client->Admin() >= 100 && client->GetGM())) {
 		this->being_looted_by = client->GetID();
-		EQApplicationPacket* outapp = new EQApplicationPacket(OP_MoneyOnCorpse, sizeof(moneyOnCorpseStruct));
+		auto outapp = new EQApplicationPacket(OP_MoneyOnCorpse, sizeof(moneyOnCorpseStruct));
 		moneyOnCorpseStruct* d = (moneyOnCorpseStruct*) outapp->pBuffer;
 
 		d->response		= 1;
@@ -1260,7 +1260,7 @@ void Corpse::LootItem(Client* client, const EQApplicationPacket* app) {
 }
 
 void Corpse::EndLoot(Client* client, const EQApplicationPacket* app) {
-	EQApplicationPacket* outapp = new EQApplicationPacket;
+	auto outapp = new EQApplicationPacket;
 	outapp->SetOpcode(OP_LootComplete);
 	outapp->size = 0;
 	client->QueuePacket(outapp);
@@ -1390,7 +1390,7 @@ void Corpse::CompleteResurrection(){
 }
 
 void Corpse::Spawn() {
-	EQApplicationPacket* app = new EQApplicationPacket;
+	auto app = new EQApplicationPacket;
 	this->CreateSpawnPacket(app, this);
 	entity_list.QueueClients(this, app);
 	safe_delete(app);

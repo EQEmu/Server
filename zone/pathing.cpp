@@ -546,7 +546,7 @@ void PathManager::SpawnPathNodes()
 
 	for(uint32 i = 0; i < Head.PathNodeCount; ++i)
 	{
-		NPCType* npc_type = new NPCType;
+		auto npc_type = new NPCType;
 		memset(npc_type, 0, sizeof(NPCType));
 
 		if(PathNodes[i].id < 10)
@@ -585,10 +585,10 @@ void PathManager::SpawnPathNodes()
 
 		npc_type->findable = 1;
         auto position = glm::vec4(PathNodes[i].v.x, PathNodes[i].v.y, PathNodes[i].v.z, 0.0f);
-		NPC* npc = new NPC(npc_type, nullptr, position, FlyMode1);
-		npc->GiveNPCTypeData(npc_type);
+	auto npc = new NPC(npc_type, nullptr, position, FlyMode1);
+	npc->GiveNPCTypeData(npc_type);
 
-		entity_list.AddNPC(npc, true, true);
+	entity_list.AddNPC(npc, true, true);
 	}
 }
 
@@ -1311,7 +1311,7 @@ void Client::SendPathPacket(std::vector<FindPerson_Point> &points) {
 	}
 
 	int len = sizeof(FindPersonResult_Struct) + (points.size()+1) * sizeof(FindPerson_Point);
-	EQApplicationPacket *outapp = new EQApplicationPacket(OP_FindPersonReply, len);
+	auto outapp = new EQApplicationPacket(OP_FindPersonReply, len);
 	FindPersonResult_Struct* fpr=(FindPersonResult_Struct*)outapp->pBuffer;
 
 	std::vector<FindPerson_Point>::iterator cur, end;
@@ -1509,7 +1509,7 @@ int32 PathManager::AddNode(float x, float y, float z, float best_z, int32 reques
 	Head.PathNodeCount++;
 	if(Head.PathNodeCount > 1)
 	{
-		PathNode *t_PathNodes = new PathNode[Head.PathNodeCount];
+		auto t_PathNodes = new PathNode[Head.PathNodeCount];
 		for(uint32 x = 0; x < (Head.PathNodeCount - 1); ++x)
 		{
 			t_PathNodes[x].v.x = PathNodes[x].v.x;
@@ -1544,7 +1544,7 @@ int32 PathManager::AddNode(float x, float y, float z, float best_z, int32 reques
 		delete[] PathNodes;
 		PathNodes = t_PathNodes;
 
-		NPCType* npc_type = new NPCType;
+		auto npc_type = new NPCType;
 		memset(npc_type, 0, sizeof(NPCType));
 		if(new_id < 10)
 			sprintf(npc_type->name, "%s", DigitToWord(new_id));
@@ -1581,13 +1581,13 @@ int32 PathManager::AddNode(float x, float y, float z, float best_z, int32 reques
 		npc_type->findable = 1;
 
         auto position = glm::vec4(new_node.v.x, new_node.v.y, new_node.v.z, 0.0f);
-		NPC* npc = new NPC(npc_type, nullptr, position, FlyMode1);
-		npc->GiveNPCTypeData(npc_type);
-		entity_list.AddNPC(npc, true, true);
+	auto npc = new NPC(npc_type, nullptr, position, FlyMode1);
+	npc->GiveNPCTypeData(npc_type);
+	entity_list.AddNPC(npc, true, true);
 
-		safe_delete_array(ClosedListFlag);
-		ClosedListFlag = new int[Head.PathNodeCount];
-		return new_id;
+	safe_delete_array(ClosedListFlag);
+	ClosedListFlag = new int[Head.PathNodeCount];
+	return new_id;
 	}
 	else
 	{
@@ -1605,7 +1605,7 @@ int32 PathManager::AddNode(float x, float y, float z, float best_z, int32 reques
 			PathNodes[0].Neighbours[n].Teleport = new_node.Neighbours[n].Teleport;
 		}
 
-		NPCType* npc_type = new NPCType;
+		auto npc_type = new NPCType;
 		memset(npc_type, 0, sizeof(NPCType));
 		if(new_id < 10)
 			sprintf(npc_type->name, "%s", DigitToWord(new_id));
@@ -1642,13 +1642,13 @@ int32 PathManager::AddNode(float x, float y, float z, float best_z, int32 reques
 		npc_type->findable = 1;
 
         auto position = glm::vec4(new_node.v.x, new_node.v.y, new_node.v.z, 0.0f);
-		NPC* npc = new NPC(npc_type, nullptr, position, FlyMode1);
-		npc->GiveNPCTypeData(npc_type);
-		entity_list.AddNPC(npc, true, true);
+	auto npc = new NPC(npc_type, nullptr, position, FlyMode1);
+	npc->GiveNPCTypeData(npc_type);
+	entity_list.AddNPC(npc, true, true);
 
-		ClosedListFlag = new int[Head.PathNodeCount];
+	ClosedListFlag = new int[Head.PathNodeCount];
 
-		return new_id;
+	return new_id;
 	}
 }
 
@@ -1684,7 +1684,7 @@ bool PathManager::DeleteNode(int32 id)
 
 	if(Head.PathNodeCount > 1)
 	{
-		PathNode *t_PathNodes = new PathNode[Head.PathNodeCount-1];
+		auto t_PathNodes = new PathNode[Head.PathNodeCount - 1];
 		uint32 index = 0;
 		for(uint32 x = 0; x < Head.PathNodeCount; x++)
 		{
@@ -2233,7 +2233,7 @@ void PathManager::SortNodes()
 		sorted_vals.push_back(tmp);
 	}
 
-	PathNode *t_PathNodes = new PathNode[Head.PathNodeCount];
+	auto t_PathNodes = new PathNode[Head.PathNodeCount];
 	memcpy(t_PathNodes, PathNodes, sizeof(PathNode)*Head.PathNodeCount);
 	for(uint32 i = 0; i < Head.PathNodeCount; ++i)
 	{

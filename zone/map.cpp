@@ -233,7 +233,7 @@ Map *Map::LoadMapFile(std::string file) {
 	filename += file;
 	filename += ".map";
 
-	Map *m = new Map();
+	auto m = new Map();
 	if (m->Load(filename)) {
 		return m;
 	}

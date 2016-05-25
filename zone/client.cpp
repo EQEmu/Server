@@ -424,7 +424,7 @@ void Client::SendZoneInPackets()
 {
 	//////////////////////////////////////////////////////
 	// Spawn Appearance Packet
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_SpawnAppearance, sizeof(SpawnAppearance_Struct));
+	auto outapp = new EQApplicationPacket(OP_SpawnAppearance, sizeof(SpawnAppearance_Struct));
 	SpawnAppearance_Struct* sa = (SpawnAppearance_Struct*)outapp->pBuffer;
 	sa->type = AT_SpawnID;			// Is 0x10 used to set the player id?
 	sa->parameter = GetID();	// Four bytes for this parameter...
@@ -486,7 +486,7 @@ void Client::SendZoneInPackets()
 
 void Client::SendLogoutPackets() {
 
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_CancelTrade, sizeof(CancelTrade_Struct));
+	auto outapp = new EQApplicationPacket(OP_CancelTrade, sizeof(CancelTrade_Struct));
 	CancelTrade_Struct* ct = (CancelTrade_Struct*) outapp->pBuffer;
 	ct->fromid = GetID();
 	ct->action = groupActUpdate;
@@ -683,7 +683,7 @@ bool Client::AddPacket(const EQApplicationPacket *pApp, bool bAckreq) {
 		//drop the packet because it will never get sent.
 		return(false);
 	}
-	CLIENTPACKET *c = new CLIENTPACKET;
+	auto c = new CLIENTPACKET;
 
 	c->ack_req = bAckreq;
 	c->app = pApp->Copy();
@@ -700,7 +700,7 @@ bool Client::AddPacket(EQApplicationPacket** pApp, bool bAckreq) {
 		//drop the packet because it will never get sent.
 		return(false);
 	}
-	CLIENTPACKET *c = new CLIENTPACKET;
+	auto c = new CLIENTPACKET;
 
 	c->ack_req = bAckreq;
 	c->app = *pApp;
@@ -821,7 +821,7 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 
 	/* Logs Player Chat */
 	if (RuleB(QueryServ, PlayerLogChat)) {
-		ServerPacket* pack = new ServerPacket(ServerOP_Speech, sizeof(Server_Speech_Struct) + strlen(message) + 1);
+		auto pack = new ServerPacket(ServerOP_Speech, sizeof(Server_Speech_Struct) + strlen(message) + 1);
 		Server_Speech_Struct* sem = (Server_Speech_Struct*) pack->pBuffer;
 
 		if(chan_num == 0)
@@ -1123,7 +1123,7 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 		if (msg_len > 512)
 			message[512] = '\0';
 
-		EQApplicationPacket* outapp = new EQApplicationPacket(OP_Emote, 4 + msg_len + strlen(GetName()) + 2);
+		auto outapp = new EQApplicationPacket(OP_Emote, 4 + msg_len + strlen(GetName()) + 2);
 		Emote_Struct* es = (Emote_Struct*)outapp->pBuffer;
 		char *Buffer = (char *)es;
 		Buffer += 4;
@@ -1218,7 +1218,7 @@ void Client::Message(uint32 type, const char* message, ...) {
 		return;
 
 	va_list argptr;
-	char *buffer = new char[4096];
+	auto buffer = new char[4096];
 	va_start(argptr, message);
 	vsnprintf(buffer, 4096, message, argptr);
 	va_end(argptr);
@@ -1231,7 +1231,7 @@ void Client::Message(uint32 type, const char* message, ...) {
 	//len = 4096 - sizeof(SpecialMesg_Struct);
 
 	uint32 len_packet = sizeof(SpecialMesg_Struct)+len;
-	EQApplicationPacket* app = new EQApplicationPacket(OP_SpecialMesg, len_packet);
+	auto app = new EQApplicationPacket(OP_SpecialMesg, len_packet);
 	SpecialMesg_Struct* sm=(SpecialMesg_Struct*)app->pBuffer;
 	sm->header[0] = 0x00; // Header used for #emote style messages..
 	sm->header[1] = 0x00; // Play around with these to see other types
@@ -1262,7 +1262,7 @@ void Client::QuestJournalledMessage(const char *npcname, const char* message) {
 	snprintf(OutMessage, MaxMessageLength, "%s", message); OutMessage[MaxMessageLength]='\0';
 
 	uint32 len_packet = sizeof(SpecialMesg_Struct) + strlen(OutNPCName) + strlen(OutMessage);
-	EQApplicationPacket* app = new EQApplicationPacket(OP_SpecialMesg, len_packet);
+	auto app = new EQApplicationPacket(OP_SpecialMesg, len_packet);
 	SpecialMesg_Struct* sm=(SpecialMesg_Struct*)app->pBuffer;
 
 	sm->header[0] = 0;
@@ -1417,7 +1417,7 @@ bool Client::UpdateLDoNPoints(int32 points, uint32 theme)
 	}
 	m_pp.ldon_points_available += points;
 
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_AdventurePointsUpdate, sizeof(AdventurePoints_Update_Struct));
+	auto outapp = new EQApplicationPacket(OP_AdventurePointsUpdate, sizeof(AdventurePoints_Update_Struct));
 	AdventurePoints_Update_Struct* apus = (AdventurePoints_Update_Struct*)outapp->pBuffer;
 	apus->ldon_available_points = m_pp.ldon_points_available;
 	apus->ldon_guk_points = m_pp.ldon_points_guk;
@@ -1440,7 +1440,7 @@ void Client::SetSkill(SkillUseTypes skillid, uint16 value) {
 
 	database.SaveCharacterSkill(this->CharacterID(), skillid, value);
 
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_SkillUpdate, sizeof(SkillUpdate_Struct));
+	auto outapp = new EQApplicationPacket(OP_SkillUpdate, sizeof(SkillUpdate_Struct));
 	SkillUpdate_Struct* skill = (SkillUpdate_Struct*)outapp->pBuffer;
 	skill->skillId=skillid;
 	skill->value=value;
@@ -1460,7 +1460,7 @@ void Client::IncreaseLanguageSkill(int skill_id, int value) {
 
 	database.SaveCharacterLanguage(this->CharacterID(), skill_id, m_pp.languages[skill_id]);
 
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_SkillUpdate, sizeof(SkillUpdate_Struct));
+	auto outapp = new EQApplicationPacket(OP_SkillUpdate, sizeof(SkillUpdate_Struct));
 	SkillUpdate_Struct* skill = (SkillUpdate_Struct*)outapp->pBuffer;
 	skill->skillId = 100 + skill_id;
 	skill->value = m_pp.languages[skill_id];
@@ -1481,7 +1481,7 @@ void Client::AddSkill(SkillUseTypes skillid, uint16 value) {
 }
 
 void Client::SendSound(){//Makes a sound.
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_Sound, 68);
+	auto outapp = new EQApplicationPacket(OP_Sound, 68);
 	unsigned char x[68];
 	memset(x, 0, 68);
 	x[0]=0x22;
@@ -1507,7 +1507,7 @@ void Client::UpdateWho(uint8 remove) {
 		return;
 	if (!worldserver.Connected())
 		return;
-	ServerPacket* pack = new ServerPacket(ServerOP_ClientList, sizeof(ServerClientList_Struct));
+	auto pack = new ServerPacket(ServerOP_ClientList, sizeof(ServerClientList_Struct));
 	ServerClientList_Struct* scl = (ServerClientList_Struct*) pack->pBuffer;
 	scl->remove = remove;
 	scl->wid = this->GetWID();
@@ -1553,7 +1553,7 @@ void Client::WhoAll(Who_All_Struct* whom) {
 	if (!worldserver.Connected())
 		Message(0, "Error: World server disconnected");
 	else {
-		ServerPacket* pack = new ServerPacket(ServerOP_Who, sizeof(ServerWhoAll_Struct));
+		auto pack = new ServerPacket(ServerOP_Who, sizeof(ServerWhoAll_Struct));
 		ServerWhoAll_Struct* whoall = (ServerWhoAll_Struct*) pack->pBuffer;
 		whoall->admin = this->Admin();
 		whoall->fromid=this->GetID();
@@ -1574,7 +1574,8 @@ void Client::FriendsWho(char *FriendsString) {
 	if (!worldserver.Connected())
 		Message(0, "Error: World server disconnected");
 	else {
-		ServerPacket* pack = new ServerPacket(ServerOP_FriendsWho, sizeof(ServerFriendsWho_Struct) + strlen(FriendsString));
+		auto pack =
+		    new ServerPacket(ServerOP_FriendsWho, sizeof(ServerFriendsWho_Struct) + strlen(FriendsString));
 		ServerFriendsWho_Struct* FriendsWho = (ServerFriendsWho_Struct*) pack->pBuffer;
 		FriendsWho->FromID = this->GetID();
 		strcpy(FriendsWho->FromName, GetName());
@@ -1609,7 +1610,7 @@ void Client::SetStats(uint8 type,int16 set_val){
 		printf("Error in Client::IncStats, received invalid type of: %i\n",type);
 		return;
 	}
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_IncreaseStats,sizeof(IncreaseStat_Struct));
+	auto outapp = new EQApplicationPacket(OP_IncreaseStats, sizeof(IncreaseStat_Struct));
 	IncreaseStat_Struct* iss=(IncreaseStat_Struct*)outapp->pBuffer;
 	switch(type){
 		case STAT_STR:
@@ -1692,7 +1693,7 @@ void Client::IncStats(uint8 type,int16 increase_val){
 		printf("Error in Client::IncStats, received invalid type of: %i\n",type);
 		return;
 	}
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_IncreaseStats,sizeof(IncreaseStat_Struct));
+	auto outapp = new EQApplicationPacket(OP_IncreaseStats, sizeof(IncreaseStat_Struct));
 	IncreaseStat_Struct* iss=(IncreaseStat_Struct*)outapp->pBuffer;
 	switch(type){
 		case STAT_STR:
@@ -1796,9 +1797,7 @@ void Client::SendManaUpdatePacket() {
 
 	if (last_reported_mana != cur_mana || last_reported_endur != cur_end) {
 
-
-
-		EQApplicationPacket* outapp = new EQApplicationPacket(OP_ManaChange, sizeof(ManaChange_Struct));
+		auto outapp = new EQApplicationPacket(OP_ManaChange, sizeof(ManaChange_Struct));
 		ManaChange_Struct* manachange = (ManaChange_Struct*)outapp->pBuffer;
 		manachange->new_mana = cur_mana;
 		manachange->stamina = cur_end;
@@ -1812,7 +1811,8 @@ void Client::SendManaUpdatePacket() {
 		if(g)
 		{
 			outapp = new EQApplicationPacket(OP_MobManaUpdate, sizeof(MobManaUpdate_Struct));
-			EQApplicationPacket *outapp2 = new EQApplicationPacket(OP_MobEnduranceUpdate, sizeof(MobEnduranceUpdate_Struct));
+			auto outapp2 =
+			    new EQApplicationPacket(OP_MobEnduranceUpdate, sizeof(MobEnduranceUpdate_Struct));
 
 			MobManaUpdate_Struct *mmus = (MobManaUpdate_Struct *)outapp->pBuffer;
 			MobEnduranceUpdate_Struct *meus = (MobEnduranceUpdate_Struct *)outapp2->pBuffer;
@@ -1843,7 +1843,7 @@ void Client::SendManaUpdatePacket() {
 // sends mana update to self
 void Client::SendManaUpdate()
 {
-	EQApplicationPacket* mana_app = new EQApplicationPacket(OP_ManaUpdate,sizeof(ManaUpdate_Struct));
+	auto mana_app = new EQApplicationPacket(OP_ManaUpdate, sizeof(ManaUpdate_Struct));
 	ManaUpdate_Struct* mus = (ManaUpdate_Struct*)mana_app->pBuffer;
 	mus->cur_mana = GetMana();
 	mus->max_mana = GetMaxMana();
@@ -1856,7 +1856,7 @@ void Client::SendManaUpdate()
 // sends endurance update to self
 void Client::SendEnduranceUpdate()
 {
-	EQApplicationPacket* end_app = new EQApplicationPacket(OP_EnduranceUpdate,sizeof(EnduranceUpdate_Struct));
+	auto end_app = new EQApplicationPacket(OP_EnduranceUpdate, sizeof(EnduranceUpdate_Struct));
 	EnduranceUpdate_Struct* eus = (EnduranceUpdate_Struct*)end_app->pBuffer;
 	eus->cur_end = GetEndurance();
 	eus->max_end = GetMaxEndurance();
@@ -1929,7 +1929,7 @@ void Client::Stand() {
 void Client::ChangeLastName(const char* in_lastname) {
 	memset(m_pp.last_name, 0, sizeof(m_pp.last_name));
 	strn0cpy(m_pp.last_name, in_lastname, sizeof(m_pp.last_name));
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_GMLastName, sizeof(GMLastName_Struct));
+	auto outapp = new EQApplicationPacket(OP_GMLastName, sizeof(GMLastName_Struct));
 	GMLastName_Struct* gmn = (GMLastName_Struct*)outapp->pBuffer;
 	strcpy(gmn->name, name);
 	strcpy(gmn->gmname, name);
@@ -1962,7 +1962,7 @@ bool Client::ChangeFirstName(const char* in_firstname, const char* gmname)
 	Save();
 
 	// send name update packet
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_GMNameChange, sizeof(GMName_Struct));
+	auto outapp = new EQApplicationPacket(OP_GMNameChange, sizeof(GMName_Struct));
 	GMName_Struct* gmn=(GMName_Struct*)outapp->pBuffer;
 	strn0cpy(gmn->gmname,gmname,64);
 	strn0cpy(gmn->oldname,GetName(),64);
@@ -2003,7 +2003,7 @@ void Client::ReadBook(BookRequest_Struct *book) {
 #if EQDEBUG >= 6
 		Log.Out(Logs::General, Logs::Normal, "Client::ReadBook() textfile:%s Text:%s", txtfile, booktxt2.c_str());
 #endif
-		EQApplicationPacket* outapp = new EQApplicationPacket(OP_ReadBook, length + sizeof(BookText_Struct));
+		auto outapp = new EQApplicationPacket(OP_ReadBook, length + sizeof(BookText_Struct));
 
 		BookText_Struct *out = (BookText_Struct *) outapp->pBuffer;
 		out->window = book->window;
@@ -2031,7 +2031,7 @@ void Client::QuestReadBook(const char* text, uint8 type) {
 	std::string booktxt2 = text;
 	int length = booktxt2.length();
 	if (booktxt2[0] != '\0') {
-		EQApplicationPacket* outapp = new EQApplicationPacket(OP_ReadBook, length + sizeof(BookText_Struct));
+		auto outapp = new EQApplicationPacket(OP_ReadBook, length + sizeof(BookText_Struct));
 		BookText_Struct *out = (BookText_Struct *) outapp->pBuffer;
 		out->window = 0xFF;
 		out->type = type;
@@ -2043,7 +2043,7 @@ void Client::QuestReadBook(const char* text, uint8 type) {
 }
 
 void Client::SendClientMoneyUpdate(uint8 type,uint32 amount){
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_TradeMoneyUpdate,sizeof(TradeMoneyUpdate_Struct));
+	auto outapp = new EQApplicationPacket(OP_TradeMoneyUpdate, sizeof(TradeMoneyUpdate_Struct));
 	TradeMoneyUpdate_Struct* mus= (TradeMoneyUpdate_Struct*)outapp->pBuffer;
 	mus->amount=amount;
 	mus->trader=0;
@@ -2241,7 +2241,7 @@ void Client::AddMoneyToPP(uint32 copper, uint32 silver, uint32 gold, uint32 plat
 }
 
 void Client::SendMoneyUpdate() {
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_MoneyUpdate,sizeof(MoneyUpdate_Struct));
+	auto outapp = new EQApplicationPacket(OP_MoneyUpdate, sizeof(MoneyUpdate_Struct));
 	MoneyUpdate_Struct* mus= (MoneyUpdate_Struct*)outapp->pBuffer;
 
 	mus->platinum = m_pp.platinum;
@@ -2489,7 +2489,7 @@ void Client::SetPVP(bool toggle) {
 }
 
 void Client::WorldKick() {
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_GMKick, sizeof(GMKick_Struct));
+	auto outapp = new EQApplicationPacket(OP_GMKick, sizeof(GMKick_Struct));
 	GMKick_Struct* gmk = (GMKick_Struct *)outapp->pBuffer;
 	strcpy(gmk->name,GetName());
 	QueuePacket(outapp);
@@ -2498,7 +2498,7 @@ void Client::WorldKick() {
 }
 
 void Client::GMKill() {
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_GMKill, sizeof(GMKill_Struct));
+	auto outapp = new EQApplicationPacket(OP_GMKill, sizeof(GMKill_Struct));
 	GMKill_Struct* gmk = (GMKill_Struct *)outapp->pBuffer;
 	strcpy(gmk->name,GetName());
 	QueuePacket(outapp);
@@ -2513,7 +2513,7 @@ bool Client::CheckAccess(int16 iDBLevel, int16 iDefaultLevel) {
 }
 
 void Client::MemorizeSpell(uint32 slot,uint32 spellid,uint32 scribing){
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_MemorizeSpell,sizeof(MemorizeSpell_Struct));
+	auto outapp = new EQApplicationPacket(OP_MemorizeSpell, sizeof(MemorizeSpell_Struct));
 	MemorizeSpell_Struct* mss=(MemorizeSpell_Struct*)outapp->pBuffer;
 	mss->scribing=scribing;
 	mss->slot=slot;
@@ -2859,7 +2859,7 @@ void Client::Message_StringID(uint32 type, uint32 string_id, uint32 distance)
 		return;
 	if (GetFilter(FilterSpellCrits) == FilterHide && type == MT_SpellCrits)
 		return;
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_SimpleMessage,12);
+	auto outapp = new EQApplicationPacket(OP_SimpleMessage, 12);
 	SimpleMessage_Struct* sms = (SimpleMessage_Struct*)outapp->pBuffer;
 	sms->color=type;
 	sms->string_id=string_id;
@@ -2921,7 +2921,7 @@ void Client::Message_StringID(uint32 type, uint32 string_id, const char* message
 
 	length += 1;
 
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_FormattedMessage, sizeof(FormattedMessage_Struct) + length);
+	auto outapp = new EQApplicationPacket(OP_FormattedMessage, sizeof(FormattedMessage_Struct) + length);
 	FormattedMessage_Struct *fm = (FormattedMessage_Struct *)outapp->pBuffer;
 	fm->string_id = string_id;
 	fm->type = type;
@@ -2987,7 +2987,7 @@ void Client::FilteredMessage_StringID(Mob *sender, uint32 type,
 	if (!FilteredMessageCheck(sender, filter))
 		return;
 
-	EQApplicationPacket *outapp = new EQApplicationPacket(OP_SimpleMessage, 12);
+	auto outapp = new EQApplicationPacket(OP_SimpleMessage, 12);
 	SimpleMessage_Struct *sms = (SimpleMessage_Struct *)outapp->pBuffer;
 	sms->color = type;
 	sms->string_id = string_id;
@@ -3035,7 +3035,7 @@ void Client::FilteredMessage_StringID(Mob *sender, uint32 type, eqFilterType fil
 
 	length += 1;
 
-	EQApplicationPacket *outapp = new EQApplicationPacket(OP_FormattedMessage, sizeof(FormattedMessage_Struct) + length);
+	auto outapp = new EQApplicationPacket(OP_FormattedMessage, sizeof(FormattedMessage_Struct) + length);
 	FormattedMessage_Struct *fm = (FormattedMessage_Struct *)outapp->pBuffer;
 	fm->string_id = string_id;
 	fm->type = type;
@@ -3113,7 +3113,7 @@ void Client::SetLanguageSkill(int langid, int value)
 	m_pp.languages[langid] = value;
 	database.SaveCharacterLanguage(this->CharacterID(), langid, value);
 
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_SkillUpdate, sizeof(SkillUpdate_Struct));
+	auto outapp = new EQApplicationPacket(OP_SkillUpdate, sizeof(SkillUpdate_Struct));
 	SkillUpdate_Struct* skill = (SkillUpdate_Struct*)outapp->pBuffer;
 	skill->skillId = 100 + langid;
 	skill->value = m_pp.languages[langid];
@@ -3639,7 +3639,7 @@ void Client::SetEndurance(int32 newEnd)
 
 void Client::SacrificeConfirm(Client *caster)
 {
-	EQApplicationPacket *outapp = new EQApplicationPacket(OP_Sacrifice, sizeof(Sacrifice_Struct));
+	auto outapp = new EQApplicationPacket(OP_Sacrifice, sizeof(Sacrifice_Struct));
 	Sacrifice_Struct *ss = (Sacrifice_Struct *)outapp->pBuffer;
 
 	if (!caster || PendingSacrifice) {
@@ -3712,7 +3712,7 @@ void Client::Sacrifice(Client *caster)
 						}
 						ClearAllProximities();
 						if(RuleB(Character, LeaveCorpses)){
-							Corpse *new_corpse = new Corpse(this, 0);
+							auto new_corpse = new Corpse(this, 0);
 							entity_list.AddCorpse(new_corpse, GetID());
 							SetID(0);
 							entity_list.QueueClients(this, &app2, true);
@@ -3734,7 +3734,7 @@ void Client::SendOPTranslocateConfirm(Mob *Caster, uint16 SpellID) {
 
 	const SPDat_Spell_Struct &Spell = spells[SpellID];
 
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_Translocate, sizeof(Translocate_Struct));
+	auto outapp = new EQApplicationPacket(OP_Translocate, sizeof(Translocate_Struct));
 	Translocate_Struct *ts = (Translocate_Struct*)outapp->pBuffer;
 
 	strcpy(ts->Caster, Caster->GetName());
@@ -3769,28 +3769,28 @@ void Client::SendOPTranslocateConfirm(Mob *Caster, uint16 SpellID) {
 	return;
 }
 void Client::SendPickPocketResponse(Mob *from, uint32 amt, int type, const EQEmu::Item_Struct* item){
-		EQApplicationPacket* outapp = new EQApplicationPacket(OP_PickPocket, sizeof(sPickPocket_Struct));
-		sPickPocket_Struct* pick_out = (sPickPocket_Struct*) outapp->pBuffer;
-		pick_out->coin = amt;
-		pick_out->from = GetID();
-		pick_out->to = from->GetID();
-		pick_out->myskill = GetSkill(SkillPickPockets);
+	auto outapp = new EQApplicationPacket(OP_PickPocket, sizeof(sPickPocket_Struct));
+	sPickPocket_Struct *pick_out = (sPickPocket_Struct *)outapp->pBuffer;
+	pick_out->coin = amt;
+	pick_out->from = GetID();
+	pick_out->to = from->GetID();
+	pick_out->myskill = GetSkill(SkillPickPockets);
 
-		if((type >= PickPocketPlatinum) && (type <= PickPocketCopper) && (amt == 0))
-			type = PickPocketFailed;
+	if ((type >= PickPocketPlatinum) && (type <= PickPocketCopper) && (amt == 0))
+		type = PickPocketFailed;
 
-		pick_out->type = type;
-		if(item)
-			strcpy(pick_out->itemname, item->Name);
-		else
-			pick_out->itemname[0] = '\0';
-		//if we do not send this packet the client will lock up and require the player to relog.
-		QueuePacket(outapp);
-		safe_delete(outapp);
+	pick_out->type = type;
+	if (item)
+		strcpy(pick_out->itemname, item->Name);
+	else
+		pick_out->itemname[0] = '\0';
+	// if we do not send this packet the client will lock up and require the player to relog.
+	QueuePacket(outapp);
+	safe_delete(outapp);
 }
 
 void Client::SetHoTT(uint32 mobid) {
-	EQApplicationPacket *outapp = new EQApplicationPacket(OP_TargetHoTT, sizeof(ClientTarget_Struct));
+	auto outapp = new EQApplicationPacket(OP_TargetHoTT, sizeof(ClientTarget_Struct));
 	ClientTarget_Struct *ct = (ClientTarget_Struct *) outapp->pBuffer;
 	ct->new_target = mobid;
 	QueuePacket(outapp);
@@ -3800,7 +3800,7 @@ void Client::SetHoTT(uint32 mobid) {
 void Client::SendPopupToClient(const char *Title, const char *Text, uint32 PopupID, uint32 Buttons, uint32 Duration)
 {
 
-	EQApplicationPacket *outapp = new EQApplicationPacket(OP_OnLevelMessage, sizeof(OnLevelMessage_Struct));
+	auto outapp = new EQApplicationPacket(OP_OnLevelMessage, sizeof(OnLevelMessage_Struct));
 	OnLevelMessage_Struct *olms = (OnLevelMessage_Struct *)outapp->pBuffer;
 
 	if ((strlen(Title) > (sizeof(olms->Title) - 1)) || (strlen(Text) > (sizeof(olms->Text) - 1))) {
@@ -3837,7 +3837,7 @@ void Client::SendWindow(uint32 PopupID, uint32 NegativeID, uint32 Buttons, const
 
 	size_t len = strlen(buffer);
 
-	EQApplicationPacket* app = new EQApplicationPacket(OP_OnLevelMessage, sizeof(OnLevelMessage_Struct));
+	auto app = new EQApplicationPacket(OP_OnLevelMessage, sizeof(OnLevelMessage_Struct));
 	OnLevelMessage_Struct* olms=(OnLevelMessage_Struct*)app->pBuffer;
 
 	if(strlen(Text) > (sizeof(olms->Text)-1)) {
@@ -3932,10 +3932,7 @@ void Client::KeyRingAdd(uint32 item_id)
 
 bool Client::KeyRingCheck(uint32 item_id)
 {
-	for(std::list<uint32>::iterator iter = keyring.begin();
-		iter != keyring.end();
-		++iter)
-	{
+	for (auto iter = keyring.begin(); iter != keyring.end(); ++iter) {
 		if(*iter == item_id)
 			return true;
 	}
@@ -3946,10 +3943,7 @@ void Client::KeyRingList()
 {
 	Message(4,"Keys on Keyring:");
 	const EQEmu::Item_Struct *item = 0;
-	for(std::list<uint32>::iterator iter = keyring.begin();
-		iter != keyring.end();
-		++iter)
-	{
+	for (auto iter = keyring.begin(); iter != keyring.end(); ++iter) {
 		if ((item = database.GetItem(*iter))!=nullptr) {
 			Message(4,item->Name);
 		}
@@ -4124,7 +4118,7 @@ bool Client::GroupFollow(Client* inviter) {
 			//Invite the inviter into the group first.....dont ask
 			if (inviter->ClientVersion() < EQEmu::versions::ClientVersion::SoD)
 			{
-				EQApplicationPacket* outapp = new EQApplicationPacket(OP_GroupUpdate, sizeof(GroupJoin_Struct));
+				auto outapp = new EQApplicationPacket(OP_GroupUpdate, sizeof(GroupJoin_Struct));
 				GroupJoin_Struct* outgj = (GroupJoin_Struct*)outapp->pBuffer;
 				strcpy(outgj->membername, inviter->GetName());
 				strcpy(outgj->yourname, inviter->GetName());
@@ -4396,7 +4390,7 @@ void Client::IncrementAggroCount() {
 
 	if (ClientVersion() >= EQEmu::versions::ClientVersion::SoF) {
 
-		EQApplicationPacket *outapp = new EQApplicationPacket(OP_RestState, 1);
+		auto outapp = new EQApplicationPacket(OP_RestState, 1);
 		char *Buffer = (char *)outapp->pBuffer;
 		VARSTRUCT_ENCODE_TYPE(uint8, Buffer, 0x01);
 		QueuePacket(outapp);
@@ -4441,7 +4435,7 @@ void Client::DecrementAggroCount() {
 
 	if (ClientVersion() >= EQEmu::versions::ClientVersion::SoF) {
 
-		EQApplicationPacket *outapp = new EQApplicationPacket(OP_RestState, 5);
+		auto outapp = new EQApplicationPacket(OP_RestState, 5);
 		char *Buffer = (char *)outapp->pBuffer;
 		VARSTRUCT_ENCODE_TYPE(uint8, Buffer, 0x00);
 		VARSTRUCT_ENCODE_TYPE(uint32, Buffer, (uint32)(time_until_rest / 1000));
@@ -4457,7 +4451,7 @@ void Client::SendPVPStats()
 	// When the PVP Stats window is opened, no opcode is sent. Therefore this method should be called
 	// from Client::CompleteConnect, and also when the player makes a PVP kill.
 	//
-	EQApplicationPacket *outapp = new EQApplicationPacket(OP_PVPStats, sizeof(PVPStats_Struct));
+	auto outapp = new EQApplicationPacket(OP_PVPStats, sizeof(PVPStats_Struct));
 	PVPStats_Struct *pvps = (PVPStats_Struct *)outapp->pBuffer;
 
 	pvps->Kills = m_pp.PVPKills;
@@ -4476,7 +4470,7 @@ void Client::SendPVPStats()
 
 void Client::SendCrystalCounts()
 {
-	EQApplicationPacket *outapp = new EQApplicationPacket(OP_CrystalCountUpdate, sizeof(CrystalCountUpdate_Struct));
+	auto outapp = new EQApplicationPacket(OP_CrystalCountUpdate, sizeof(CrystalCountUpdate_Struct));
 	CrystalCountUpdate_Struct *ccus = (CrystalCountUpdate_Struct *)outapp->pBuffer;
 
 	ccus->CurrentRadiantCrystals = GetRadiantCrystals();
@@ -4492,7 +4486,7 @@ void Client::SendCrystalCounts()
 void Client::SendDisciplineTimers()
 {
 
-	EQApplicationPacket *outapp = new EQApplicationPacket(OP_DisciplineTimer, sizeof(DisciplineTimer_Struct));
+	auto outapp = new EQApplicationPacket(OP_DisciplineTimer, sizeof(DisciplineTimer_Struct));
 	DisciplineTimer_Struct *dts = (DisciplineTimer_Struct *)outapp->pBuffer;
 
 	for(unsigned int i = 0; i < MAX_DISCIPLINE_TIMERS; ++i)
@@ -4556,7 +4550,7 @@ void Client::SendRespawnBinds()
 		PacketLength += opt->name.size() + 1; //+1 for cstring
 	}
 
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_RespawnWindow, PacketLength);
+	auto outapp = new EQApplicationPacket(OP_RespawnWindow, PacketLength);
 	char* buffer = (char*)outapp->pBuffer;
 
 	//Packet header
@@ -4820,7 +4814,7 @@ void Client::SummonAndRezzAllCorpses()
 {
 	PendingRezzXP = -1;
 
-	ServerPacket *Pack = new ServerPacket(ServerOP_DepopAllPlayersCorpses, sizeof(ServerDepopAllPlayersCorpses_Struct));
+	auto Pack = new ServerPacket(ServerOP_DepopAllPlayersCorpses, sizeof(ServerDepopAllPlayersCorpses_Struct));
 
 	ServerDepopAllPlayersCorpses_Struct *sdapcs = (ServerDepopAllPlayersCorpses_Struct*)Pack->pBuffer;
 
@@ -4855,7 +4849,7 @@ void Client::SummonAllCorpses(const glm::vec4& position)
 	if(IsOrigin(position) && position.w == 0.0f)
 		summonLocation = GetPosition();
 
-	ServerPacket *Pack = new ServerPacket(ServerOP_DepopAllPlayersCorpses, sizeof(ServerDepopAllPlayersCorpses_Struct));
+	auto Pack = new ServerPacket(ServerOP_DepopAllPlayersCorpses, sizeof(ServerDepopAllPlayersCorpses_Struct));
 
 	ServerDepopAllPlayersCorpses_Struct *sdapcs = (ServerDepopAllPlayersCorpses_Struct*)Pack->pBuffer;
 
@@ -4874,7 +4868,7 @@ void Client::SummonAllCorpses(const glm::vec4& position)
 
 void Client::DepopAllCorpses()
 {
-	ServerPacket *Pack = new ServerPacket(ServerOP_DepopAllPlayersCorpses, sizeof(ServerDepopAllPlayersCorpses_Struct));
+	auto Pack = new ServerPacket(ServerOP_DepopAllPlayersCorpses, sizeof(ServerDepopAllPlayersCorpses_Struct));
 
 	ServerDepopAllPlayersCorpses_Struct *sdapcs = (ServerDepopAllPlayersCorpses_Struct*)Pack->pBuffer;
 
@@ -4891,7 +4885,7 @@ void Client::DepopAllCorpses()
 
 void Client::DepopPlayerCorpse(uint32 dbid)
 {
-	ServerPacket *Pack = new ServerPacket(ServerOP_DepopPlayerCorpse, sizeof(ServerDepopPlayerCorpse_Struct));
+	auto Pack = new ServerPacket(ServerOP_DepopPlayerCorpse, sizeof(ServerDepopPlayerCorpse_Struct));
 
 	ServerDepopPlayerCorpse_Struct *sdpcs = (ServerDepopPlayerCorpse_Struct*)Pack->pBuffer;
 
@@ -4913,7 +4907,7 @@ void Client::BuryPlayerCorpses()
 
 void Client::NotifyNewTitlesAvailable()
 {
-	EQApplicationPacket *outapp = new EQApplicationPacket(OP_NewTitlesAvailable, 0);
+	auto outapp = new EQApplicationPacket(OP_NewTitlesAvailable, 0);
 
 	QueuePacket(outapp);
 
@@ -5336,7 +5330,7 @@ void Client::SendRewards()
 	if(rewards.empty())
 		return;
 
-	EQApplicationPacket *vetapp = new EQApplicationPacket(OP_VetRewardsAvaliable, (sizeof(InternalVeteranReward) * rewards.size()));
+	auto vetapp = new EQApplicationPacket(OP_VetRewardsAvaliable, (sizeof(InternalVeteranReward) * rewards.size()));
 	uchar *data = vetapp->pBuffer;
 	for(int i = 0; i < rewards.size(); ++i) {
 		InternalVeteranReward *ivr = (InternalVeteranReward*)data;
@@ -5686,7 +5680,7 @@ void Client::AddCrystals(uint32 Radiant, uint32 Ebon)
 // Processes a client request to inspect a SoF+ client's equipment.
 void Client::ProcessInspectRequest(Client* requestee, Client* requester) {
 	if(requestee && requester) {
-		EQApplicationPacket* outapp = new EQApplicationPacket(OP_InspectAnswer, sizeof(InspectResponse_Struct));
+		auto outapp = new EQApplicationPacket(OP_InspectAnswer, sizeof(InspectResponse_Struct));
 		InspectResponse_Struct* insr = (InspectResponse_Struct*) outapp->pBuffer;
 		insr->TargetID = requester->GetID();
 		insr->playerid = requestee->GetID();
@@ -5758,7 +5752,7 @@ void Client::ProcessInspectRequest(Client* requestee, Client* requester) {
 
 void Client::GuildBankAck()
 {
-	EQApplicationPacket *outapp = new EQApplicationPacket(OP_GuildBank, sizeof(GuildBankAck_Struct));
+	auto outapp = new EQApplicationPacket(OP_GuildBank, sizeof(GuildBankAck_Struct));
 
 	GuildBankAck_Struct *gbas = (GuildBankAck_Struct*) outapp->pBuffer;
 
@@ -5770,7 +5764,7 @@ void Client::GuildBankAck()
 void Client::GuildBankDepositAck(bool Fail, int8 action)
 {
 
-	EQApplicationPacket *outapp = new EQApplicationPacket(OP_GuildBank, sizeof(GuildBankDepositAck_Struct));
+	auto outapp = new EQApplicationPacket(OP_GuildBank, sizeof(GuildBankDepositAck_Struct));
 
 	GuildBankDepositAck_Struct *gbdas = (GuildBankDepositAck_Struct*) outapp->pBuffer;
 
@@ -5783,7 +5777,7 @@ void Client::GuildBankDepositAck(bool Fail, int8 action)
 
 void Client::ClearGuildBank()
 {
-	EQApplicationPacket *outapp = new EQApplicationPacket(OP_GuildBank, sizeof(GuildBankClear_Struct));
+	auto outapp = new EQApplicationPacket(OP_GuildBank, sizeof(GuildBankClear_Struct));
 
 	GuildBankClear_Struct *gbcs = (GuildBankClear_Struct*) outapp->pBuffer;
 
@@ -5798,7 +5792,7 @@ void Client::SendGroupCreatePacket()
 {
 	// For SoD and later clients, this is sent the Group Leader upon initial creation of the group
 	//
-	EQApplicationPacket *outapp=new EQApplicationPacket(OP_GroupUpdateB, 32 + strlen(GetName()));
+	auto outapp = new EQApplicationPacket(OP_GroupUpdateB, 32 + strlen(GetName()));
 
 	char *Buffer = (char *)outapp->pBuffer;
 	// Header
@@ -5824,7 +5818,7 @@ void Client::SendGroupLeaderChangePacket(const char *LeaderName)
 {
 	// For SoD and later, send name of Group Leader to this client
 
-	EQApplicationPacket *outapp=new EQApplicationPacket(OP_GroupLeaderChange, sizeof(GroupLeaderChange_Struct));
+	auto outapp = new EQApplicationPacket(OP_GroupLeaderChange, sizeof(GroupLeaderChange_Struct));
 
 	GroupLeaderChange_Struct *glcs = (GroupLeaderChange_Struct*)outapp->pBuffer;
 
@@ -5836,14 +5830,14 @@ void Client::SendGroupLeaderChangePacket(const char *LeaderName)
 void Client::SendGroupJoinAcknowledge()
 {
 	// For SoD and later, This produces the 'You have joined the group' message.
-	EQApplicationPacket* outapp=new EQApplicationPacket(OP_GroupAcknowledge, 4);
+	auto outapp = new EQApplicationPacket(OP_GroupAcknowledge, 4);
 	FastQueuePacket(&outapp);
 }
 
 void Client::SendAdventureError(const char *error)
 {
 	size_t error_size = strlen(error);
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_AdventureInfo, (error_size + 2));
+	auto outapp = new EQApplicationPacket(OP_AdventureInfo, (error_size + 2));
 	strn0cpy((char*)outapp->pBuffer, error, error_size);
 	FastQueuePacket(&outapp);
 }
@@ -5853,7 +5847,7 @@ void Client::SendAdventureDetails()
 	if(adv_data)
 	{
 		ServerSendAdventureData_Struct *ad = (ServerSendAdventureData_Struct*)adv_data;
-		EQApplicationPacket* outapp = new EQApplicationPacket(OP_AdventureData, sizeof(AdventureRequestResponse_Struct));
+		auto outapp = new EQApplicationPacket(OP_AdventureData, sizeof(AdventureRequestResponse_Struct));
 		AdventureRequestResponse_Struct *arr = (AdventureRequestResponse_Struct*)outapp->pBuffer;
 		arr->unknown000 = 0xBFC40100;
 		arr->unknown2080 = 0x0A;
@@ -5882,14 +5876,14 @@ void Client::SendAdventureDetails()
 	else
 	{
 		ServerSendAdventureData_Struct *ad = (ServerSendAdventureData_Struct*)adv_data;
-		EQApplicationPacket* outapp = new EQApplicationPacket(OP_AdventureData, sizeof(AdventureRequestResponse_Struct));
+		auto outapp = new EQApplicationPacket(OP_AdventureData, sizeof(AdventureRequestResponse_Struct));
 		FastQueuePacket(&outapp);
 	}
 }
 
 void Client::SendAdventureCount(uint32 count, uint32 total)
 {
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_AdventureUpdate, sizeof(AdventureCountUpdate_Struct));
+	auto outapp = new EQApplicationPacket(OP_AdventureUpdate, sizeof(AdventureCountUpdate_Struct));
 	AdventureCountUpdate_Struct *acu = (AdventureCountUpdate_Struct*)outapp->pBuffer;
 	acu->current = count;
 	acu->total = total;
@@ -5899,7 +5893,7 @@ void Client::SendAdventureCount(uint32 count, uint32 total)
 void Client::NewAdventure(int id, int theme, const char *text, int member_count, const char *members)
 {
 	size_t text_size = strlen(text);
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_AdventureDetails, text_size + 2);
+	auto outapp = new EQApplicationPacket(OP_AdventureDetails, text_size + 2);
 	strn0cpy((char*)outapp->pBuffer, text, text_size);
 	FastQueuePacket(&outapp);
 
@@ -5941,7 +5935,7 @@ void Client::LeaveAdventure()
 	if(!GetPendingAdventureLeave())
 	{
 		PendingAdventureLeave();
-		ServerPacket *pack = new ServerPacket(ServerOP_AdventureLeave, 64);
+		auto pack = new ServerPacket(ServerOP_AdventureLeave, 64);
 		strcpy((char*)pack->pBuffer, GetName());
 		pack->Deflate();
 		worldserver.SendPacket(pack);
@@ -5978,7 +5972,7 @@ void Client::ClearCurrentAdventure()
 void Client::AdventureFinish(bool win, int theme, int points)
 {
 	UpdateLDoNPoints(points, theme);
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_AdventureFinish, sizeof(AdventureFinish_Struct));
+	auto outapp = new EQApplicationPacket(OP_AdventureFinish, sizeof(AdventureFinish_Struct));
 	AdventureFinish_Struct *af = (AdventureFinish_Struct*)outapp->pBuffer;
 	af->win_lose = win ? 1 : 0;
 	af->points = points;
@@ -6074,7 +6068,8 @@ void Client::CheckEmoteHail(Mob *target, const char* message)
 void Client::MarkSingleCompassLoc(float in_x, float in_y, float in_z, uint8 count)
 {
 
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_DzCompass, sizeof(ExpeditionInfo_Struct) + sizeof(ExpeditionCompassEntry_Struct) * count);
+	auto outapp = new EQApplicationPacket(OP_DzCompass, sizeof(ExpeditionInfo_Struct) +
+								sizeof(ExpeditionCompassEntry_Struct) * count);
 	ExpeditionCompass_Struct *ecs = (ExpeditionCompass_Struct*)outapp->pBuffer;
 	//ecs->clientid = GetID();
 	ecs->count = count;
@@ -6105,7 +6100,7 @@ void Client::SendZonePoints()
 	}
 
 	uint32 zpsize = sizeof(ZonePoints) + ((count + 1) * sizeof(ZonePoint_Entry));
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_SendZonepoints, zpsize);
+	auto outapp = new EQApplicationPacket(OP_SendZonepoints, zpsize);
 	ZonePoints* zp = (ZonePoints*)outapp->pBuffer;
 	zp->count = count;
 
@@ -6132,7 +6127,7 @@ void Client::SendZonePoints()
 
 void Client::SendTargetCommand(uint32 EntityID)
 {
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_TargetCommand, sizeof(ClientTarget_Struct));
+	auto outapp = new EQApplicationPacket(OP_TargetCommand, sizeof(ClientTarget_Struct));
 	ClientTarget_Struct *cts = (ClientTarget_Struct*)outapp->pBuffer;
 	cts->new_target = EntityID;
 	FastQueuePacket(&outapp);
@@ -6322,7 +6317,7 @@ void Client::Doppelganger(uint16 spell_id, Mob *target, const char *name_overrid
 				FlyMode3);
 
 		if(!npca->GetSwarmInfo()){
-			AA_SwarmPetInfo* nSI = new AA_SwarmPetInfo;
+			auto nSI = new AA_SwarmPetInfo;
 			npca->SetSwarmInfo(nSI);
 			npca->GetSwarmInfo()->duration = new Timer(pet_duration*1000);
 		}
@@ -6773,10 +6768,7 @@ void Client::SendStatsWindow(Client* client, bool use_window)
 	std::string faction_item_string = "";
 	char faction_buf[256];
 
-	for(std::map <uint32, int32>::iterator iter = item_faction_bonuses.begin();
-		iter != item_faction_bonuses.end();
-		++iter)
-	{
+	for (auto iter = item_faction_bonuses.begin(); iter != item_faction_bonuses.end(); ++iter) {
 		memset(&faction_buf, 0, sizeof(faction_buf));
 
 		if(!database.GetFactionName((int32)((*iter).first), faction_buf, sizeof(faction_buf)))
@@ -6876,14 +6868,15 @@ void Client::SendAltCurrencies() {
 			return;
 		}
 
-		EQApplicationPacket *outapp = new EQApplicationPacket(OP_AltCurrency,
-			sizeof(AltCurrencyPopulate_Struct) + sizeof(AltCurrencyPopulateEntry_Struct) * count);
+		auto outapp =
+		    new EQApplicationPacket(OP_AltCurrency, sizeof(AltCurrencyPopulate_Struct) +
+								sizeof(AltCurrencyPopulateEntry_Struct) * count);
 		AltCurrencyPopulate_Struct *altc = (AltCurrencyPopulate_Struct*)outapp->pBuffer;
 		altc->opcode = ALT_CURRENCY_OP_POPULATE;
 		altc->count = count;
 
 		uint32 i = 0;
-		std::list<AltCurrencyDefinition_Struct>::iterator iter = zone->AlternateCurrencies.begin();
+		auto iter = zone->AlternateCurrencies.begin();
 		while(iter != zone->AlternateCurrencies.end()) {
 			const EQEmu::Item_Struct* item = database.GetItem((*iter).item_id);
 			altc->entries[i].currency_number = (*iter).id;
@@ -6934,7 +6927,7 @@ void Client::AddAlternateCurrencyValue(uint32 currency_id, int32 amount, int8 me
 	}
 
 	int new_value = 0;
-	std::map<uint32, uint32>::iterator iter = alternate_currency.find(currency_id);
+	auto iter = alternate_currency.find(currency_id);
 	if(iter == alternate_currency.end()) {
 		new_value = amount;
 	} else {
@@ -6953,7 +6946,7 @@ void Client::AddAlternateCurrencyValue(uint32 currency_id, int32 amount, int8 me
 
 void Client::SendAlternateCurrencyValues()
 {
-	std::list<AltCurrencyDefinition_Struct>::iterator iter = zone->AlternateCurrencies.begin();
+	auto iter = zone->AlternateCurrencies.begin();
 	while(iter != zone->AlternateCurrencies.end()) {
 		SendAlternateCurrencyValue((*iter).id, false);
 		++iter;
@@ -6964,7 +6957,7 @@ void Client::SendAlternateCurrencyValue(uint32 currency_id, bool send_if_null)
 {
 	uint32 value = GetAlternateCurrencyValue(currency_id);
 	if(value > 0 || (value == 0 && send_if_null)) {
-		EQApplicationPacket* outapp = new EQApplicationPacket(OP_AltCurrency, sizeof(AltCurrencyUpdate_Struct));
+		auto outapp = new EQApplicationPacket(OP_AltCurrency, sizeof(AltCurrencyUpdate_Struct));
 		AltCurrencyUpdate_Struct *update = (AltCurrencyUpdate_Struct*)outapp->pBuffer;
 		update->opcode = 7;
 		strcpy(update->name, GetName());
@@ -6977,7 +6970,7 @@ void Client::SendAlternateCurrencyValue(uint32 currency_id, bool send_if_null)
 
 uint32 Client::GetAlternateCurrencyValue(uint32 currency_id) const
 {
-	std::map<uint32, uint32>::const_iterator iter = alternate_currency.find(currency_id);
+	auto iter = alternate_currency.find(currency_id);
 	if(iter == alternate_currency.end()) {
 		return 0;
 	} else {
@@ -6997,7 +6990,7 @@ void Client::ProcessAlternateCurrencyQueue() {
 
 void Client::OpenLFGuildWindow()
 {
-	EQApplicationPacket *outapp = new EQApplicationPacket(OP_LFGuild, 8);
+	auto outapp = new EQApplicationPacket(OP_LFGuild, 8);
 
 	outapp->WriteUInt32(6);
 
@@ -7162,7 +7155,7 @@ void Client::SendXTargetPacket(uint32 Slot, Mob *m)
 		PacketSize += strlen(XTargets[Slot].Name);
 	}
 
-	EQApplicationPacket *outapp = new EQApplicationPacket(OP_XTargetResponse, PacketSize);
+	auto outapp = new EQApplicationPacket(OP_XTargetResponse, PacketSize);
 	outapp->WriteUInt32(GetMaxXTargets());
 	outapp->WriteUInt32(1);
 	outapp->WriteUInt32(Slot);
@@ -7300,7 +7293,7 @@ void Client::SetMaxXTargets(uint8 NewMax)
 		XTargets[i].Name[0] = 0;
 	}
 
-	EQApplicationPacket *outapp = new EQApplicationPacket(OP_XTargetResponse, 8);
+	auto outapp = new EQApplicationPacket(OP_XTargetResponse, 8);
 	outapp->WriteUInt32(GetMaxXTargets());
 	outapp->WriteUInt32(0);
 	FastQueuePacket(&outapp);
@@ -7392,7 +7385,7 @@ void Client::SendWebLink(const char *website)
 	size_t len = strlen(website) + 1;
 	if(website != 0 && len > 1)
 	{
-		EQApplicationPacket* outapp = new EQApplicationPacket(OP_Weblink, sizeof(Weblink_Struct) + len);
+		auto outapp = new EQApplicationPacket(OP_Weblink, sizeof(Weblink_Struct) + len);
 		Weblink_Struct *wl = (Weblink_Struct*)outapp->pBuffer;
 		memcpy(wl->weblink, website, len);
 		wl->weblink[len] = '\0';
@@ -7425,7 +7418,8 @@ void Client::SendMercPersonalInfo()
 		{
 			if (mercCount > 0)
 			{
-				EQApplicationPacket *outapp = new EQApplicationPacket(OP_MercenaryDataUpdate, sizeof(MercenaryDataUpdate_Struct));
+				auto outapp =
+				    new EQApplicationPacket(OP_MercenaryDataUpdate, sizeof(MercenaryDataUpdate_Struct));
 				MercenaryDataUpdate_Struct* mdus = (MercenaryDataUpdate_Struct*)outapp->pBuffer;
 				mdus->MercStatus = 0;
 				mdus->MercCount = mercCount;
@@ -7449,7 +7443,7 @@ void Client::SendMercPersonalInfo()
 				uint32 stanceindex = 0;
 				if (mdus->MercData[i].StanceCount != 0)
 				{
-					std::list<MercStanceInfo>::iterator iter = zone->merc_stance_list[mercData->MercTemplateID].begin();
+					auto iter = zone->merc_stance_list[mercData->MercTemplateID].begin();
 					while(iter != zone->merc_stance_list[mercData->MercTemplateID].end())
 					{
 						mdus->MercData[i].Stances[stanceindex].StanceIndex = stanceindex;
@@ -7469,7 +7463,8 @@ void Client::SendMercPersonalInfo()
 		{
 			if(mercTypeCount > 0 && mercCount > 0)
 			{
-				EQApplicationPacket *outapp = new EQApplicationPacket(OP_MercenaryDataResponse, sizeof(MercenaryMerchantList_Struct));
+				auto outapp = new EQApplicationPacket(OP_MercenaryDataResponse,
+								      sizeof(MercenaryMerchantList_Struct));
 				MercenaryMerchantList_Struct* mml = (MercenaryMerchantList_Struct*)outapp->pBuffer;
 				mml->MercTypeCount = mercTypeCount; //We should only have one merc entry.
 				mml->MercGrades[i] = 1;
@@ -7494,7 +7489,7 @@ void Client::SendMercPersonalInfo()
 				int stanceindex = 0;
 				if(mml->Mercs[i].StanceCount != 0)
 				{
-					std::list<MercStanceInfo>::iterator iter = zone->merc_stance_list[mercData->MercTemplateID].begin();
+					auto iter = zone->merc_stance_list[mercData->MercTemplateID].begin();
 					while(iter != zone->merc_stance_list[mercData->MercTemplateID].end())
 					{
 						mml->Mercs[i].Stances[stanceindex].StanceIndex = stanceindex;
@@ -7521,7 +7516,7 @@ void Client::SendMercPersonalInfo()
 
 void Client::SendClearMercInfo()
 {
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_MercenaryDataUpdate, sizeof(NoMercenaryHired_Struct));
+	auto outapp = new EQApplicationPacket(OP_MercenaryDataUpdate, sizeof(NoMercenaryHired_Struct));
 	NoMercenaryHired_Struct *nmhs = (NoMercenaryHired_Struct*)outapp->pBuffer;
 	nmhs->MercStatus = -1;
 	nmhs->MercCount = 0;
@@ -8327,7 +8322,7 @@ void Client::SendMarqueeMessage(uint32 type, uint32 priority, uint32 fade_in, ui
 void Client::PlayMP3(const char* fname)
 {
 	std::string filename = fname;
-	EQApplicationPacket *outapp = new EQApplicationPacket(OP_PlayMP3, filename.length() + 1);
+	auto outapp = new EQApplicationPacket(OP_PlayMP3, filename.length() + 1);
 	PlayMP3_Struct* buf = (PlayMP3_Struct*)outapp->pBuffer;
 	strncpy(buf->filename, fname, filename.length());
 	QueuePacket(outapp);
@@ -8388,8 +8383,7 @@ void Client::SendColoredText(uint32 color, std::string message)
 	// arbitrary size limit
 	if (message.size() > 512) // live does send this with empty strings sometimes ...
 		return;
-	EQApplicationPacket *outapp = new EQApplicationPacket(OP_ColoredText,
-									sizeof(ColoredText_Struct) + message.size());
+	auto outapp = new EQApplicationPacket(OP_ColoredText, sizeof(ColoredText_Struct) + message.size());
 	ColoredText_Struct *cts = (ColoredText_Struct *)outapp->pBuffer;
 	cts->color = color;
 	strcpy(cts->msg, message.c_str());
@@ -8400,7 +8394,7 @@ void Client::SendColoredText(uint32 color, std::string message)
 
 void Client::QuestReward(Mob* target, uint32 copper, uint32 silver, uint32 gold, uint32 platinum, uint32 itemid, uint32 exp, bool faction) {
 
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_Sound, sizeof(QuestReward_Struct));
+	auto outapp = new EQApplicationPacket(OP_Sound, sizeof(QuestReward_Struct));
 	memset(outapp->pBuffer, 0, sizeof(outapp->pBuffer));
 	QuestReward_Struct* qr = (QuestReward_Struct*)outapp->pBuffer;
 

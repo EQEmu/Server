@@ -629,7 +629,7 @@ void Client::DropItem(int16 slot_id)
 		return;
 
 	// Package as zone object
-	Object* object = new Object(this, inst);
+	auto object = new Object(this, inst);
 	entity_list.AddObject(object, true);
 	object->StartDecay();
 
@@ -653,7 +653,7 @@ void Client::DropInst(const ItemInst* inst)
 	}
 
 	// Package as zone object
-	Object* object = new Object(this, inst);
+	auto object = new Object(this, inst);
 	entity_list.AddObject(object, true);
 	object->StartDecay();
 }
@@ -743,7 +743,9 @@ void Client::DeleteItemInInventory(int16 slot_id, int8 quantity, bool client_upd
 
 		if(m_inv[slot_id]) { delete_count += m_inv.GetItem(slot_id)->GetTotalItemCount(); }
 
-		ServerPacket* qspack = new ServerPacket(ServerOP_QSPlayerLogDeletes, sizeof(QSPlayerLogDelete_Struct) + (sizeof(QSDeleteItems_Struct) * delete_count));
+		auto qspack =
+		    new ServerPacket(ServerOP_QSPlayerLogDeletes,
+				     sizeof(QSPlayerLogDelete_Struct) + (sizeof(QSDeleteItems_Struct) * delete_count));
 		QSPlayerLogDelete_Struct* qsaudit = (QSPlayerLogDelete_Struct*)qspack->pBuffer;
 		uint16 parent_offset = 0;
 
@@ -1283,7 +1285,7 @@ packet with the item number in it, but I cant seem to find it right now
 
 	const EQEmu::Item_Struct* item = inst->GetItem();
 	const char* name2 = &item->Name[0];
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_ItemLinkText,strlen(name2)+68);
+	auto outapp = new EQApplicationPacket(OP_ItemLinkText, strlen(name2) + 68);
 	char buffer2[135] = {0};
 	char itemlink[135] = {0};
 	sprintf(itemlink,"%c0%06u0%05u-%05u-%05u-%05u-%05u00000000%c",
@@ -1843,7 +1845,7 @@ void Client::SwapItemResync(MoveItem_Struct* move_slots) {
 
 			if(m_inv[resync_slot]) { SendItemPacket(resync_slot, m_inv[resync_slot], ItemPacketTrade); }
 			else {
-				EQApplicationPacket* outapp		= new EQApplicationPacket(OP_DeleteItem, sizeof(DeleteItem_Struct));
+				auto outapp = new EQApplicationPacket(OP_DeleteItem, sizeof(DeleteItem_Struct));
 				DeleteItem_Struct* delete_slot	= (DeleteItem_Struct*)outapp->pBuffer;
 				delete_slot->from_slot			= resync_slot;
 				delete_slot->to_slot			= 0xFFFFFFFF;
@@ -1885,7 +1887,7 @@ void Client::SwapItemResync(MoveItem_Struct* move_slots) {
 
 			if(m_inv[resync_slot]) { SendItemPacket(resync_slot, m_inv[resync_slot], ItemPacketTrade); }
 			else {
-				EQApplicationPacket* outapp		= new EQApplicationPacket(OP_DeleteItem, sizeof(DeleteItem_Struct));
+				auto outapp = new EQApplicationPacket(OP_DeleteItem, sizeof(DeleteItem_Struct));
 				DeleteItem_Struct* delete_slot	= (DeleteItem_Struct*)outapp->pBuffer;
 				delete_slot->from_slot			= resync_slot;
 				delete_slot->to_slot			= 0xFFFFFFFF;
@@ -1930,7 +1932,8 @@ void Client::QSSwapItemAuditor(MoveItem_Struct* move_in, bool postaction_call) {
 	if(m_inv[from_slot_id]) { move_count += m_inv[from_slot_id]->GetTotalItemCount(); }
 	if(to_slot_id != from_slot_id) { if(m_inv[to_slot_id]) { move_count += m_inv[to_slot_id]->GetTotalItemCount(); } }
 
-	ServerPacket* qspack = new ServerPacket(ServerOP_QSPlayerLogMoves, sizeof(QSPlayerLogMove_Struct) + (sizeof(QSMoveItems_Struct) * move_count));
+	auto qspack = new ServerPacket(ServerOP_QSPlayerLogMoves,
+				       sizeof(QSPlayerLogMove_Struct) + (sizeof(QSMoveItems_Struct) * move_count));
 	QSPlayerLogMove_Struct* qsaudit = (QSPlayerLogMove_Struct*)qspack->pBuffer;
 
 	qsaudit->char_id	= character_id;
@@ -2046,7 +2049,7 @@ void Client::DyeArmor(DyeStruct* dye){
 			}
 		}
 	}
-	EQApplicationPacket* outapp=new EQApplicationPacket(OP_Dye,0);
+	auto outapp = new EQApplicationPacket(OP_Dye, 0);
 	QueuePacket(outapp);
 	safe_delete(outapp);
 	
@@ -3093,7 +3096,7 @@ bool Client::InterrogateInventory(Client* requester, bool log, bool silent, bool
 		instmap[EQEmu::legacy::SlotPowerSource] = m_inv[EQEmu::legacy::SlotPowerSource];
 
 	// call InterrogateInventory_ for error check
-	for (std::map<int16, const ItemInst*>::iterator instmap_itr = instmap.begin(); (instmap_itr != instmap.end()) && (!error); ++instmap_itr) {
+	for (auto instmap_itr = instmap.begin(); (instmap_itr != instmap.end()) && (!error); ++instmap_itr) {
 		InterrogateInventory_(true, requester, instmap_itr->first, INVALID_INDEX, instmap_itr->second, nullptr, log, silent, error, 0);
 	}
 
@@ -3108,7 +3111,7 @@ bool Client::InterrogateInventory(Client* requester, bool log, bool silent, bool
 	}
 
 	// call InterrogateInventory_ for report
-	for (std::map<int16, const ItemInst*>::iterator instmap_itr = instmap.begin(); (instmap_itr != instmap.end()); ++instmap_itr) {
+	for (auto instmap_itr = instmap.begin(); (instmap_itr != instmap.end()); ++instmap_itr) {
 		InterrogateInventory_(false, requester, instmap_itr->first, INVALID_INDEX, instmap_itr->second, nullptr, log, silent, error, 0);
 	}
 

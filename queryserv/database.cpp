@@ -100,9 +100,9 @@ Database::~Database()
 
 void Database::AddSpeech(const char* from, const char* to, const char* message, uint16 minstatus, uint32 guilddbid, uint8 type) {
 
-	char *escapedFrom = new char[strlen(from) * 2 + 1];
-	char *escapedTo = new char[strlen(to) * 2 + 1];
-	char *escapedMessage = new char[strlen(message) * 2 + 1];
+	auto escapedFrom = new char[strlen(from) * 2 + 1];
+	auto escapedTo = new char[strlen(to) * 2 + 1];
+	auto escapedMessage = new char[strlen(message) * 2 + 1];
 	DoEscapeString(escapedFrom, from, strlen(from));
 	DoEscapeString(escapedTo, to, strlen(to));
 	DoEscapeString(escapedMessage, message, strlen(message));
@@ -350,7 +350,7 @@ void Database::GeneralQueryReceive(ServerPacket *pack) {
 	/*
 		These are general queries passed from anywhere in zone instead of packing structures and breaking them down again and again
 	*/
-	char *queryBuffer = new char[pack->ReadUInt32() + 1];
+	auto queryBuffer = new char[pack->ReadUInt32() + 1];
 	pack->ReadString(queryBuffer);
 
 	std::string query(queryBuffer);

@@ -1218,7 +1218,7 @@ void Mob::RemoveFromFeignMemory(Client* attacker) {
 }
 
 void Mob::ClearFeignMemory() {
-	std::set<uint32>::iterator RememberedCharID = feign_memory_list.begin();
+	auto RememberedCharID = feign_memory_list.begin();
 	while (RememberedCharID != feign_memory_list.end())
 	{
 		Client* remember_client = entity_list.GetClientByCharID(*RememberedCharID);

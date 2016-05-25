@@ -98,14 +98,14 @@ MySQLRequestResult DBcore::QueryDatabase(const char* query, uint32 querylen, boo
 
 			pStatus = Error;
 
-			char *errorBuffer = new char[MYSQL_ERRMSG_SIZE];
+			auto errorBuffer = new char[MYSQL_ERRMSG_SIZE];
 
 			snprintf(errorBuffer, MYSQL_ERRMSG_SIZE, "#%i: %s", mysql_errno(&mysql), mysql_error(&mysql));
 
 			return MySQLRequestResult(nullptr, 0, 0, 0, 0, (uint32)mysql_errno(&mysql), errorBuffer);
 		}
 
-		char *errorBuffer = new char[MYSQL_ERRMSG_SIZE];
+		auto errorBuffer = new char[MYSQL_ERRMSG_SIZE];
 		snprintf(errorBuffer, MYSQL_ERRMSG_SIZE, "#%i: %s", mysql_errno(&mysql), mysql_error(&mysql));
 
 		/* Implement Logging at the Root */

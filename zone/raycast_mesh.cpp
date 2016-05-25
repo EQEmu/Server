@@ -518,8 +518,7 @@ public:
 				// Copy the triangle indices into the leaf triangles array
 				mLeafTriangleIndex = leafTriangles.size(); // assign the array start location for these leaf triangles.
 				leafTriangles.push_back(count);
-				for (TriVector::const_iterator i=triangles.begin(); i!=triangles.end(); ++i)
-				{
+				for (auto i = triangles.begin(); i != triangles.end(); ++i) {
 					RmUint32 tri = *i;
 					leafTriangles.push_back(tri);
 				}
@@ -541,8 +540,7 @@ public:
 
 				// Create two arrays; one of all triangles which intersect the 'left' half of the bounding volume node
 				// and another array that includes all triangles which intersect the 'right' half of the bounding volume node.
-				for (TriVector::const_iterator i=triangles.begin(); i!=triangles.end(); ++i)
-				{
+				for (auto i = triangles.begin(); i != triangles.end(); ++i) {
 
 					RmUint32 tri = (*i); 
 
@@ -934,7 +932,7 @@ RaycastMesh * createRaycastMesh(RmUint32 vcount,		// The number of vertices in t
 								RmReal	minAxisSize	// once a particular axis is less than this size, stop sub-dividing.
 								)
 {
-	MyRaycastMesh *m = new MyRaycastMesh(vcount,vertices,tcount,indices,maxDepth,minLeafSize,minAxisSize);
+	auto m = new MyRaycastMesh(vcount, vertices, tcount, indices, maxDepth, minLeafSize, minAxisSize);
 	return static_cast< RaycastMesh * >(m);
 }
 

@@ -1368,7 +1368,7 @@ bool SharedDatabase::GetCommandSettings(std::map<std::string, std::pair<uint8, s
 			continue;
 
 		std::vector<std::string> aliases = SplitString(row[2], '|');
-		for (std::vector<std::string>::iterator iter = aliases.begin(); iter != aliases.end(); ++iter) {
+		for (auto iter = aliases.begin(); iter != aliases.end(); ++iter) {
 			if (iter->empty())
 				continue;
 			command_settings[row[0]].second.push_back(*iter);

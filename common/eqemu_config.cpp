@@ -80,7 +80,7 @@ void EQEmuConfig::do_world(TiXmlElement *ele)
 			sprintf(str, "loginserver%i", ++LoginCount);
 			sub_ele = ele->FirstChildElement(str);
 			if (sub_ele) {
-				LoginConfig* loginconfig = new LoginConfig;
+				auto loginconfig = new LoginConfig;
 				text = ParseTextBlock(sub_ele, "host", true);
 				if (text) {
 					loginconfig->LoginHost = text;

@@ -26,7 +26,7 @@
 extern WorldServer worldserver;
 
 void Client::SendGuildMOTD(bool GetGuildMOTDReply) {
-	EQApplicationPacket *outapp = new EQApplicationPacket(OP_GuildMOTD, sizeof(GuildMOTD_Struct));
+	auto outapp = new EQApplicationPacket(OP_GuildMOTD, sizeof(GuildMOTD_Struct));
 
 	// When the Client gets an OP_GuildMOTD, it compares the text to the version it has previously stored.
 	// If the text in the OP_GuildMOTD packet is the same, it does nothing. If not the same, it displays
@@ -68,7 +68,8 @@ void Client::SendGuildURL()
 
 	if(IsInAGuild())
 	{
-		EQApplicationPacket *outapp = new EQApplicationPacket(OP_GuildUpdateURLAndChannel, sizeof(GuildUpdateURLAndChannel_Struct));
+		auto outapp =
+		    new EQApplicationPacket(OP_GuildUpdateURLAndChannel, sizeof(GuildUpdateURLAndChannel_Struct));
 
 		GuildUpdateURLAndChannel_Struct *guuacs = (GuildUpdateURLAndChannel_Struct*) outapp->pBuffer;
 
@@ -89,7 +90,8 @@ void Client::SendGuildChannel()
 
 	if(IsInAGuild())
 	{
-		EQApplicationPacket *outapp = new EQApplicationPacket(OP_GuildUpdateURLAndChannel, sizeof(GuildUpdateURLAndChannel_Struct));
+		auto outapp =
+		    new EQApplicationPacket(OP_GuildUpdateURLAndChannel, sizeof(GuildUpdateURLAndChannel_Struct));
 
 		GuildUpdateURLAndChannel_Struct *guuacs = (GuildUpdateURLAndChannel_Struct*) outapp->pBuffer;
 
@@ -119,7 +121,8 @@ void Client::SendGuildRanks()
 		{
 			while(i < permissions)
 			{
-				EQApplicationPacket *outapp = new EQApplicationPacket(OP_GuildUpdateURLAndChannel, sizeof(GuildUpdateRanks_Struct));
+				auto outapp = new EQApplicationPacket(OP_GuildUpdateURLAndChannel,
+								      sizeof(GuildUpdateRanks_Struct));
 				GuildUpdateRanks_Struct *guuacs = (GuildUpdateRanks_Struct*) outapp->pBuffer;
 				//guuacs->Unknown0008 = this->GuildID();
 				strncpy(guuacs->Unknown0012, this->GetCleanName(), 64);
@@ -187,7 +190,7 @@ void Client::SendGuildMembers() {
 	if(data == nullptr)
 		return;	//invalid guild, shouldent happen.
 
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_GuildMemberList);
+	auto outapp = new EQApplicationPacket(OP_GuildMemberList);
 	outapp->size = len;
 	outapp->pBuffer = data;
 	data = nullptr;
@@ -196,7 +199,8 @@ void Client::SendGuildMembers() {
 
 	FastQueuePacket(&outapp);
 
-	ServerPacket* pack = new ServerPacket(ServerOP_RequestOnlineGuildMembers, sizeof(ServerRequestOnlineGuildMembers_Struct));
+	auto pack =
+	    new ServerPacket(ServerOP_RequestOnlineGuildMembers, sizeof(ServerRequestOnlineGuildMembers_Struct));
 
 	ServerRequestOnlineGuildMembers_Struct *srogms = (ServerRequestOnlineGuildMembers_Struct*)pack->pBuffer;
 
@@ -235,7 +239,7 @@ void Client::RefreshGuildInfo()
 	{
 		if(WasBanker != GuildBanker)
 		{
-			EQApplicationPacket *outapp = new EQApplicationPacket(OP_SetGuildRank, sizeof(GuildSetRank_Struct));
+			auto outapp = new EQApplicationPacket(OP_SetGuildRank, sizeof(GuildSetRank_Struct));
 
 			GuildSetRank_Struct *gsrs = (GuildSetRank_Struct*)outapp->pBuffer;
 
@@ -328,7 +332,7 @@ void EntityList::SendGuildList() {
 }
 
 void Client::SendGuildJoin(GuildJoin_Struct* gj){
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_GuildManageAdd, sizeof(GuildJoin_Struct));
+	auto outapp = new EQApplicationPacket(OP_GuildManageAdd, sizeof(GuildJoin_Struct));
 	GuildJoin_Struct* outgj=(GuildJoin_Struct*)outapp->pBuffer;
 	outgj->class_ = gj->class_;
 	outgj->guild_id = gj->guild_id;

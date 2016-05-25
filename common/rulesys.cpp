@@ -307,7 +307,7 @@ void RuleManager::_SaveRule(Database *database, RuleType type, uint16 index) {
 int RuleManager::GetRulesetID(Database *database, const char *ruleset_name) {
 
 	uint32 len = strlen(ruleset_name);
-	char* rst = new char[2 * len + 1];
+	auto rst = new char[2 * len + 1];
 	database->DoEscapeString(rst, ruleset_name, len);
 
 	std::string query = StringFormat("SELECT ruleset_id FROM rule_sets WHERE name='%s'", rst);
@@ -331,7 +331,7 @@ int RuleManager::_FindOrCreateRuleset(Database *database, const char *in_ruleset
 		return ruleset_id;	//found and existing one...
 
 	uint32 len = strlen(in_ruleset_name);
-	char* ruleset_name = new char[2 * len + 1];
+	auto ruleset_name = new char[2 * len + 1];
 	database->DoEscapeString(ruleset_name, in_ruleset_name, len);
 
 	std::string query = StringFormat("INSERT INTO rule_sets (ruleset_id, name) VALUES(0, '%s')", ruleset_name);

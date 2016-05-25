@@ -229,7 +229,7 @@ void NPC::AddLootDrop(const EQEmu::Item_Struct *item2, ItemList* itemlist, int16
 	if(!itemlist && !wearchange)
 		return;
 
-	ServerLootItem_Struct* item = new ServerLootItem_Struct;
+	auto item = new ServerLootItem_Struct;
 #if EQDEBUG>=11
 		Log.Out(Logs::General, Logs::None, "Adding drop to npc: %s, Item: %i", GetName(), item2->ID);
 #endif

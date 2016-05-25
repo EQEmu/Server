@@ -283,14 +283,14 @@ void Client::GoFish()
 					if(tmp != nullptr) {
                         auto positionNPC = GetPosition();
                         positionNPC.x = positionNPC.x + 3;
-						NPC* npc = new NPC(tmp, nullptr, positionNPC, FlyMode3);
-						npc->AddLootTable();
+			auto npc = new NPC(tmp, nullptr, positionNPC, FlyMode3);
+			npc->AddLootTable();
 
-						npc->AddToHateList(this, 1, 0, false);	//no help yelling
+			npc->AddToHateList(this, 1, 0, false); // no help yelling
 
-						entity_list.AddNPC(npc);
+			entity_list.AddNPC(npc);
 
-						Message(MT_Emote, "You fish up a little more than you bargained for...");
+			Message(MT_Emote, "You fish up a little more than you bargained for...");
 					}
 				}
 			}

@@ -315,8 +315,8 @@ bool ZoneDatabase::logevents(const char* accountname,uint32 accountid,uint8 stat
 
 	uint32 len = strlen(description);
 	uint32 len2 = strlen(target);
-	char* descriptiontext = new char[2*len+1];
-	char* targetarr = new char[2*len2+1];
+	auto descriptiontext = new char[2 * len + 1];
+	auto targetarr = new char[2 * len2 + 1];
 	memset(descriptiontext, 0, 2*len+1);
 	memset(targetarr, 0, 2*len2+1);
 	DoEscapeString(descriptiontext, description, len);
@@ -382,7 +382,7 @@ void ZoneDatabase::UpdateBug(BugStruct* bug) {
 void ZoneDatabase::UpdateBug(PetitionBug_Struct* bug){
 
 	uint32 len = strlen(bug->text);
-	char* bugtext = new char[2*len+1];
+	auto bugtext = new char[2 * len + 1];
 	memset(bugtext, 0, 2*len+1);
 	DoEscapeString(bugtext, bug->text, len);
 
@@ -562,7 +562,7 @@ void ZoneDatabase::DeleteWorldContainer(uint32 parent_id, uint32 zone_id)
 
 Trader_Struct* ZoneDatabase::LoadTraderItem(uint32 char_id)
 {
-	Trader_Struct* loadti = new Trader_Struct;
+	auto loadti = new Trader_Struct;
 	memset(loadti,0,sizeof(Trader_Struct));
 
 	std::string query = StringFormat("SELECT * FROM trader WHERE char_id = %i ORDER BY slot_id LIMIT 80", char_id);
@@ -587,7 +587,7 @@ Trader_Struct* ZoneDatabase::LoadTraderItem(uint32 char_id)
 
 TraderCharges_Struct* ZoneDatabase::LoadTraderItemWithCharges(uint32 char_id)
 {
-	TraderCharges_Struct* loadti = new TraderCharges_Struct;
+	auto loadti = new TraderCharges_Struct;
 	memset(loadti,0,sizeof(TraderCharges_Struct));
 
 	std::string query = StringFormat("SELECT * FROM trader WHERE char_id=%i ORDER BY slot_id LIMIT 80", char_id);
@@ -2791,7 +2791,7 @@ void ZoneDatabase::RefreshGroupFromDB(Client *client){
 	if(!group)
 		return;
 
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_GroupUpdate,sizeof(GroupUpdate2_Struct));
+	auto outapp = new EQApplicationPacket(OP_GroupUpdate, sizeof(GroupUpdate2_Struct));
 	GroupUpdate2_Struct* gu = (GroupUpdate2_Struct*)outapp->pBuffer;
 	gu->action = groupActUpdate;
 
@@ -3366,7 +3366,7 @@ bool ZoneDatabase::GetFactionData(FactionMods* fm, uint32 class_mod, uint32 race
 		char str[32];
 		sprintf(str, "r%u", race_mod);
 
-		std::map<std::string, int16>::iterator iter = faction_array[faction_id]->mods.find(str);
+		auto iter = faction_array[faction_id]->mods.find(str);
 		if(iter != faction_array[faction_id]->mods.end()) {
 			fm->race_mod = iter->second;
 		} else {
@@ -3380,7 +3380,7 @@ bool ZoneDatabase::GetFactionData(FactionMods* fm, uint32 class_mod, uint32 race
 		char str[32];
 		sprintf(str, "d%u", deity_mod);
 
-		std::map<std::string, int16>::iterator iter = faction_array[faction_id]->mods.find(str);
+		auto iter = faction_array[faction_id]->mods.find(str);
 		if(iter != faction_array[faction_id]->mods.end()) {
 			fm->deity_mod = iter->second;
 		} else {

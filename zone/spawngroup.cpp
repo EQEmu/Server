@@ -154,9 +154,9 @@ bool ZoneDatabase::LoadSpawnGroups(const char *zone_name, uint16 version, SpawnG
 	}
 
 	for (auto row = results.begin(); row != results.end(); ++row) {
-		SpawnGroup *newSpawnGroup = new SpawnGroup(atoi(row[0]), row[1], atoi(row[2]), atof(row[3]),
-							   atof(row[4]), atof(row[5]), atof(row[6]), atof(row[7]),
-							   atoi(row[8]), atoi(row[9]), atoi(row[10]), atoi(row[11]));
+		auto newSpawnGroup = new SpawnGroup(atoi(row[0]), row[1], atoi(row[2]), atof(row[3]), atof(row[4]),
+						    atof(row[5]), atof(row[6]), atof(row[7]), atoi(row[8]),
+						    atoi(row[9]), atoi(row[10]), atoi(row[11]));
 		spawn_group_list->AddSpawnGroup(newSpawnGroup);
 	}
 
@@ -174,7 +174,7 @@ bool ZoneDatabase::LoadSpawnGroups(const char *zone_name, uint16 version, SpawnG
 	}
 
 	for (auto row = results.begin(); row != results.end(); ++row) {
-		SpawnEntry *newSpawnEntry = new SpawnEntry(atoi(row[1]), atoi(row[2]), row[3] ? atoi(row[3]) : 0);
+		auto newSpawnEntry = new SpawnEntry(atoi(row[1]), atoi(row[2]), row[3] ? atoi(row[3]) : 0);
 		SpawnGroup *sg = spawn_group_list->GetSpawnGroup(atoi(row[0]));
 
 		if (!sg) {
@@ -203,9 +203,9 @@ bool ZoneDatabase::LoadSpawnGroupsByID(int spawngroupid, SpawnGroupList *spawn_g
 	}
 
 	for (auto row = results.begin(); row != results.end(); ++row) {
-		SpawnGroup *newSpawnGroup = new SpawnGroup(atoi(row[0]), row[1], atoi(row[2]), atof(row[3]),
-							   atof(row[4]), atof(row[5]), atof(row[6]), atof(row[7]),
-							   atoi(row[8]), atoi(row[9]), atoi(row[10]), atoi(row[11]));
+		auto newSpawnGroup = new SpawnGroup(atoi(row[0]), row[1], atoi(row[2]), atof(row[3]), atof(row[4]),
+						    atof(row[5]), atof(row[6]), atof(row[7]), atoi(row[8]),
+						    atoi(row[9]), atoi(row[10]), atoi(row[11]));
 		spawn_group_list->AddSpawnGroup(newSpawnGroup);
 	}
 
@@ -221,7 +221,7 @@ bool ZoneDatabase::LoadSpawnGroupsByID(int spawngroupid, SpawnGroupList *spawn_g
 	}
 
 	for (auto row = results.begin(); row != results.end(); ++row) {
-		SpawnEntry *newSpawnEntry = new SpawnEntry(atoi(row[1]), atoi(row[2]), row[3] ? atoi(row[3]) : 0);
+		auto newSpawnEntry = new SpawnEntry(atoi(row[1]), atoi(row[2]), row[3] ? atoi(row[3]) : 0);
 		SpawnGroup *sg = spawn_group_list->GetSpawnGroup(atoi(row[0]));
 		if (!sg) {
 			safe_delete(newSpawnEntry);

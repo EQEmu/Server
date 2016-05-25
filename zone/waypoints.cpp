@@ -253,7 +253,7 @@ void NPC::CalculateNewWaypoint()
 	{
 		std::list<wplist> closest;
 		GetClosestWaypoint(closest, 10, glm::vec3(GetPosition()));
-		std::list<wplist>::iterator iter = closest.begin();
+		auto iter = closest.begin();
 		if(closest.size() != 0)
 		{
 			iter = closest.begin();
@@ -310,7 +310,7 @@ void NPC::CalculateNewWaypoint()
 		std::list<wplist> closest;
 		GetClosestWaypoint(closest, 5, glm::vec3(GetPosition()));
 
-		std::list<wplist>::iterator iter = closest.begin();
+		auto iter = closest.begin();
 		while(iter != closest.end())
 		{
 			if(CheckLosFN((*iter).x, (*iter).y, (*iter).z, GetSize()))
@@ -380,7 +380,7 @@ void NPC::GetClosestWaypoint(std::list<wplist> &wp_list, int count, const glm::v
 		return a.dist < b.dist;
 	});
 
-	std::list<wp_distance>::iterator iter = distances.begin();
+	auto iter = distances.begin();
 	for(int i = 0; i < count; ++i)
 	{
 		wp_list.push_back(Waypoints[(*iter).index]);

@@ -650,14 +650,14 @@ void EntityList::AddNPC(NPC *npc, bool SendSpawnPacket, bool dontqueue)
 	npc->SetSpawned();
 	if (SendSpawnPacket) {
 		if (dontqueue) { // aka, SEND IT NOW BITCH!
-			EQApplicationPacket *app = new EQApplicationPacket;
+			auto app = new EQApplicationPacket;
 			npc->CreateSpawnPacket(app, npc);
 			QueueClients(npc, app);
 			npc->SendArmorAppearance();
 			npc->SetAppearance(npc->GetGuardPointAnim(),false);
 			safe_delete(app);
 		} else {
-			NewSpawn_Struct *ns = new NewSpawn_Struct;
+			auto ns = new NewSpawn_Struct;
 			memset(ns, 0, sizeof(NewSpawn_Struct));
 			npc->FillSpawnStruct(ns, nullptr);	// Not working on player newspawns, so it's safe to use a ForWho of 0
 			AddToSpawnQueue(npc->GetID(), &ns);
@@ -691,14 +691,14 @@ void EntityList::AddMerc(Merc *merc, bool SendSpawnPacket, bool dontqueue)
 		{
 			if (dontqueue) {
 				// Send immediately
-				EQApplicationPacket *outapp = new EQApplicationPacket();
+				auto outapp = new EQApplicationPacket();
 				merc->CreateSpawnPacket(outapp);
 				outapp->priority = 6;
 				QueueClients(merc, outapp, true);
 				safe_delete(outapp);
 			} else {
 				// Queue the packet
-				NewSpawn_Struct *ns = new NewSpawn_Struct;
+				auto ns = new NewSpawn_Struct;
 				memset(ns, 0, sizeof(NewSpawn_Struct));
 				merc->FillSpawnStruct(ns, 0);
 				AddToSpawnQueue(merc->GetID(), &ns);
@@ -882,7 +882,7 @@ bool EntityList::MakeDoorSpawnPacket(EQApplicationPacket *app, Client *client)
 		return false;
 
 	uint32 length = count * sizeof(Door_Struct);
-	uchar *packet_buffer = new uchar[length];
+	auto packet_buffer = new uchar[length];
 	memset(packet_buffer, 0, length);
 	uchar *ptr = packet_buffer;
 	Doors *door;
@@ -1226,7 +1226,7 @@ void EntityList::SendZoneSpawnsBulk(Client *client)
 
 	if (maxspawns > mob_list.size())
 		maxspawns = mob_list.size();
-	BulkZoneSpawnPacket *bzsp = new BulkZoneSpawnPacket(client, maxspawns);
+	auto bzsp = new BulkZoneSpawnPacket(client, maxspawns);
 
 	int32 race=-1;
 	for (auto it = mob_list.begin(); it != mob_list.end(); ++it) {
@@ -1291,7 +1291,7 @@ void EntityList::SendZoneCorpsesBulk(Client *client)
 	Corpse *spawn;
 	uint32 maxspawns = 100;
 
-	BulkZoneSpawnPacket *bzsp = new BulkZoneSpawnPacket(client, maxspawns);
+	auto bzsp = new BulkZoneSpawnPacket(client, maxspawns);
 
 	for (auto it = corpse_list.begin(); it != corpse_list.end(); ++it) {
 		spawn = it->second;
@@ -1308,7 +1308,7 @@ void EntityList::SendZoneObjects(Client *client)
 {
 	auto it = object_list.begin();
 	while (it != object_list.end()) {
-		EQApplicationPacket *app = new EQApplicationPacket;
+		auto app = new EQApplicationPacket;
 		it->second->CreateSpawnPacket(app);
 		client->FastQueuePacket(&app);
 		++it;
@@ -1949,7 +1949,7 @@ void EntityList::QueueClientsGuild(Mob *sender, const EQApplicationPacket *app,
 
 void EntityList::QueueClientsGuildBankItemUpdate(const GuildBankItemUpdate_Struct *gbius, uint32 GuildID)
 {
-	EQApplicationPacket *outapp = new EQApplicationPacket(OP_GuildBank, sizeof(GuildBankItemUpdate_Struct));
+	auto outapp = new EQApplicationPacket(OP_GuildBank, sizeof(GuildBankItemUpdate_Struct));
 
 	GuildBankItemUpdate_Struct *outgbius = (GuildBankItemUpdate_Struct*)outapp->pBuffer;
 
@@ -2132,7 +2132,7 @@ void EntityList::RemoveAllDoors()
 
 void EntityList::DespawnAllDoors()
 {
-	EQApplicationPacket *outapp = new EQApplicationPacket(OP_RemoveAllDoors, 0);
+	auto outapp = new EQApplicationPacket(OP_RemoveAllDoors, 0);
 	this->QueueClients(0,outapp);
 	safe_delete(outapp);
 }
@@ -2142,7 +2142,7 @@ void EntityList::RespawnAllDoors()
 	auto it = client_list.begin();
 	while (it != client_list.end()) {
 		if (it->second) {
-			EQApplicationPacket *outapp = new EQApplicationPacket();
+			auto outapp = new EQApplicationPacket();
 			MakeDoorSpawnPacket(outapp, it->second);
 			it->second->FastQueuePacket(&outapp);
 		}
@@ -2631,7 +2631,7 @@ void EntityList::ListNPCs(Client* client, const char *arg1, const char *arg2, ui
 		}
 	} else if (searchtype == 1) {
 		client->Message(0, "Searching by name method. (%s)",arg1);
-		char* tmp = new char[strlen(arg1) + 1];
+		auto tmp = new char[strlen(arg1) + 1];
 		strcpy(tmp, arg1);
 		strupr(tmp);
 		while (it != npc_list.end()) {
@@ -2746,7 +2746,7 @@ int32 EntityList::DeletePlayerCorpses()
 
 void EntityList::SendPetitionToAdmins()
 {
-	EQApplicationPacket *outapp = new EQApplicationPacket(OP_PetitionUpdate,sizeof(PetitionUpdate_Struct));
+	auto outapp = new EQApplicationPacket(OP_PetitionUpdate, sizeof(PetitionUpdate_Struct));
 	PetitionUpdate_Struct *pcus = (PetitionUpdate_Struct*) outapp->pBuffer;
 	pcus->petnumber = 0;		// Petition Number
 	pcus->color = 0;
@@ -2766,7 +2766,7 @@ void EntityList::SendPetitionToAdmins()
 
 void EntityList::SendPetitionToAdmins(Petition *pet)
 {
-	EQApplicationPacket *outapp = new EQApplicationPacket(OP_PetitionUpdate,sizeof(PetitionUpdate_Struct));
+	auto outapp = new EQApplicationPacket(OP_PetitionUpdate, sizeof(PetitionUpdate_Struct));
 	PetitionUpdate_Struct *pcus = (PetitionUpdate_Struct*) outapp->pBuffer;
 	pcus->petnumber = pet->GetID();		// Petition Number
 	if (pet->CheckedOut()) {
@@ -2799,7 +2799,7 @@ void EntityList::SendPetitionToAdmins(Petition *pet)
 
 void EntityList::ClearClientPetitionQueue()
 {
-	EQApplicationPacket *outapp = new EQApplicationPacket(OP_PetitionUpdate,sizeof(PetitionUpdate_Struct));
+	auto outapp = new EQApplicationPacket(OP_PetitionUpdate, sizeof(PetitionUpdate_Struct));
 	PetitionUpdate_Struct *pet = (PetitionUpdate_Struct*) outapp->pBuffer;
 	pet->color = 0x00;
 	pet->status = 0xFFFFFFFF;
@@ -2867,7 +2867,7 @@ void BulkZoneSpawnPacket::SendBuffer()
 		return;
 
 	uint32 tmpBufSize = (index * sizeof(NewSpawn_Struct));
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_ZoneSpawns, (unsigned char *)data, tmpBufSize);
+	auto outapp = new EQApplicationPacket(OP_ZoneSpawns, (unsigned char *)data, tmpBufSize);
 
 	if (pSendTo) {
 		pSendTo->FastQueuePacket(&outapp);
@@ -3034,7 +3034,7 @@ bool EntityList::MakeTrackPacket(Client *client)
 		[](const std::pair<Mob *, float> &a, const std::pair<Mob *, float> &b) {
 			return a.first->GetSpawnTimeStamp() > b.first->GetSpawnTimeStamp();
 		});
-	EQApplicationPacket *outapp = new EQApplicationPacket(OP_Track, sizeof(Track_Struct) * tracking_list.size());
+	auto outapp = new EQApplicationPacket(OP_Track, sizeof(Track_Struct) * tracking_list.size());
 	Tracking_Struct *outtrack = (Tracking_Struct *)outapp->pBuffer;
 	outapp->priority = 6;
 
@@ -3686,7 +3686,7 @@ void EntityList::QuestJournalledSayClose(Mob *sender, Client *QuestInitiator,
 
 	// Send the message to the quest initiator such that the client will enter it into the NPC Quest Journal
 	if (QuestInitiator) {
-		char *buf = new char[strlen(mobname) + strlen(message) + 10];
+		auto buf = new char[strlen(mobname) + strlen(message) + 10];
 		sprintf(buf, "%s says, '%s'", mobname, message);
 		QuestInitiator->QuestJournalledMessage(mobname, buf);
 		safe_delete_array(buf);
@@ -3756,7 +3756,7 @@ void EntityList::SendGroupLeave(uint32 gid, const char *name)
 			g = c->GetGroup();
 			if (g) {
 				if (g->GetID() == gid) {
-					EQApplicationPacket* outapp = new EQApplicationPacket(OP_GroupUpdate,sizeof(GroupJoin_Struct));
+					auto outapp = new EQApplicationPacket(OP_GroupUpdate, sizeof(GroupJoin_Struct));
 					GroupJoin_Struct* gj = (GroupJoin_Struct*) outapp->pBuffer;
 					strcpy(gj->membername, name);
 					gj->action = groupActLeave;
@@ -3785,7 +3785,7 @@ void EntityList::SendGroupJoin(uint32 gid, const char *name)
 			g = it->second->GetGroup();
 			if (g) {
 				if (g->GetID() == gid) {
-					EQApplicationPacket* outapp = new EQApplicationPacket(OP_GroupUpdate,sizeof(GroupJoin_Struct));
+					auto outapp = new EQApplicationPacket(OP_GroupUpdate, sizeof(GroupJoin_Struct));
 					GroupJoin_Struct* gj = (GroupJoin_Struct*) outapp->pBuffer;
 					strcpy(gj->membername, name);
 					gj->action = groupActJoin;
@@ -3825,11 +3825,11 @@ uint16 EntityList::CreateGroundObject(uint32 itemid, const glm::vec4& position, 
 	if (!is)
 		return 0;
 
-	ItemInst *i = new ItemInst(is, is->MaxCharges);
+	auto i = new ItemInst(is, is->MaxCharges);
 	if (!i)
 		return 0;
 
-	Object *object = new Object(i, position.x, position.y, position.z, position.w,decay_time);
+	auto object = new Object(i, position.x, position.y, position.z, position.w, decay_time);
 	entity_list.AddObject(object, true);
 
 	safe_delete(i);
@@ -3844,7 +3844,7 @@ uint16 EntityList::CreateGroundObjectFromModel(const char *model, const glm::vec
 	if (!model)
 		return 0;
 
-	Object *object = new Object(model, position.x, position.y, position.z, position.w, type);
+	auto object = new Object(model, position.x, position.y, position.z, position.w, type);
 	entity_list.AddObject(object, true);
 
 	if (!object)
@@ -3858,7 +3858,7 @@ uint16 EntityList::CreateDoor(const char *model, const glm::vec4& position, uint
 	if (!model)
 		return 0; // fell through everything, this is bad/incomplete from perl
 
-	Doors *door = new Doors(model, position, opentype, size);
+	auto door = new Doors(model, position, opentype, size);
 	RemoveAllDoors();
 	zone->LoadZoneDoors(zone->GetShortName(), zone->GetInstanceVersion());
 	entity_list.AddDoor(door);
@@ -4033,7 +4033,7 @@ void EntityList::ZoneWho(Client *c, Who_All_Struct *Who)
 	}
 
 	PacketLength = PacketLength + sizeof(WhoAllReturnStruct) + (47 * Entries);
-	EQApplicationPacket *outapp = new EQApplicationPacket(OP_WhoAllResponse, PacketLength);
+	auto outapp = new EQApplicationPacket(OP_WhoAllResponse, PacketLength);
 	char *Buffer = (char *)outapp->pBuffer;
 	WhoAllReturnStruct *WARS = (WhoAllReturnStruct *)Buffer;
 	WARS->id = 0;
@@ -4219,7 +4219,7 @@ uint16 EntityList::GetClientCount(){
 	uint16 ClientCount = 0;
 	std::list<Client*> client_list;
 	entity_list.GetClientList(client_list);
-	std::list<Client*>::iterator iter = client_list.begin();
+	auto iter = client_list.begin();
 	while (iter != client_list.end()) {
 		Client *entry = (*iter);
 		entry->GetCleanName();
@@ -4353,7 +4353,7 @@ void EntityList::SendFindableNPCList(Client *c)
 	if (!c)
 		return;
 
-	EQApplicationPacket *outapp = new EQApplicationPacket(OP_SendFindableNPCs, sizeof(FindableNPC_Struct));
+	auto outapp = new EQApplicationPacket(OP_SendFindableNPCs, sizeof(FindableNPC_Struct));
 
 	FindableNPC_Struct *fnpcs = (FindableNPC_Struct *)outapp->pBuffer;
 
@@ -4388,7 +4388,7 @@ void EntityList::UpdateFindableNPCState(NPC *n, bool Remove)
 	if (!n || !n->IsFindable())
 		return;
 
-	EQApplicationPacket *outapp = new EQApplicationPacket(OP_SendFindableNPCs, sizeof(FindableNPC_Struct));
+	auto outapp = new EQApplicationPacket(OP_SendFindableNPCs, sizeof(FindableNPC_Struct));
 
 	FindableNPC_Struct *fnpcs = (FindableNPC_Struct *)outapp->pBuffer;
 
@@ -4479,9 +4479,9 @@ void EntityList::AddLootToNPCS(uint32 item_id, uint32 count)
 	if (npc_count == 0)
 		return;
 
-	NPC **npcs = new NPC*[npc_count];
-	int *counts = new int[npc_count];
-	bool *marked = new bool[npc_count];
+	auto npcs = new NPC *[npc_count];
+	auto counts = new int[npc_count];
+	auto marked = new bool[npc_count];
 	memset(counts, 0, sizeof(int) * npc_count);
 	memset(marked, 0, sizeof(bool) * npc_count);
 
@@ -4523,7 +4523,7 @@ void EntityList::AddLootToNPCS(uint32 item_id, uint32 count)
 
 void EntityList::CameraEffect(uint32 duration, uint32 intensity)
 {
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_CameraEffect, sizeof(Camera_Struct));
+	auto outapp = new EQApplicationPacket(OP_CameraEffect, sizeof(Camera_Struct));
 	Camera_Struct* cs = (Camera_Struct*) outapp->pBuffer;
 	cs->duration = duration;	// Duration in milliseconds
 	cs->intensity = ((intensity * 6710886) + 1023410176);	// Intensity ranges from 1023410176 to 1090519040, so simplify it from 0 to 10.
@@ -4557,7 +4557,7 @@ NPC *EntityList::GetClosestBanker(Mob *sender, uint32 &distance)
 
 void EntityList::ExpeditionWarning(uint32 minutes_left)
 {
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_DzExpeditionEndsWarning, sizeof(ExpeditionExpireWarning));
+	auto outapp = new EQApplicationPacket(OP_DzExpeditionEndsWarning, sizeof(ExpeditionExpireWarning));
 	ExpeditionExpireWarning *ew = (ExpeditionExpireWarning*)outapp->pBuffer;
 	ew->minutes_remaining = minutes_left;
 

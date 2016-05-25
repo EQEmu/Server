@@ -235,7 +235,7 @@ void EQStreamFactory::CheckTimeout()
 				//give it a little time for everybody to finish with it
 			} else {
 				//everybody is done, we can delete it now
-				std::map<std::pair<uint32, uint16>, std::shared_ptr<EQStream>>::iterator temp = stream_itr;
+				auto temp = stream_itr;
 				++stream_itr;
 				temp->second = nullptr;
 				Streams.erase(temp);

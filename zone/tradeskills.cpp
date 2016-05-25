@@ -212,7 +212,7 @@ void Object::HandleAugmentation(Client* user, const AugmentItem_Struct* in_augme
 		if (worldo)
 		{
 			container->Clear();
-			EQApplicationPacket* outapp = new EQApplicationPacket(OP_ClearObject, sizeof(ClearObject_Struct));
+			auto outapp = new EQApplicationPacket(OP_ClearObject, sizeof(ClearObject_Struct));
 			ClearObject_Struct *cos = (ClearObject_Struct *)outapp->pBuffer;
 			cos->Clear = 1;
 			user->QueuePacket(outapp);
@@ -305,7 +305,7 @@ void Object::HandleCombine(Client* user, const NewCombine_Struct* in_combine, Ob
 		else if (inst) {
 			user->Message_StringID(4, TRANSFORM_FAILED, inst->GetItem()->Name);
 		}
-		EQApplicationPacket* outapp = new EQApplicationPacket(OP_TradeSkillCombine, 0);
+		auto outapp = new EQApplicationPacket(OP_TradeSkillCombine, 0);
 		user->QueuePacket(outapp);
 		safe_delete(outapp);
 		return;
@@ -323,7 +323,7 @@ void Object::HandleCombine(Client* user, const NewCombine_Struct* in_combine, Ob
 		else if (inst) {
 			user->Message_StringID(4, DETRANSFORM_FAILED, inst->GetItem()->Name);
 		}
-		EQApplicationPacket* outapp = new EQApplicationPacket(OP_TradeSkillCombine, 0);
+		auto outapp = new EQApplicationPacket(OP_TradeSkillCombine, 0);
 		user->QueuePacket(outapp);
 		safe_delete(outapp);
 		return;
@@ -332,7 +332,7 @@ void Object::HandleCombine(Client* user, const NewCombine_Struct* in_combine, Ob
 	DBTradeskillRecipe_Struct spec;
 	if (!database.GetTradeRecipe(container, c_type, some_id, user->CharacterID(), &spec)) {
 		user->Message_StringID(MT_Emote,TRADESKILL_NOCOMBINE);
-		EQApplicationPacket* outapp = new EQApplicationPacket(OP_TradeSkillCombine, 0);
+		auto outapp = new EQApplicationPacket(OP_TradeSkillCombine, 0);
 		user->QueuePacket(outapp);
 		safe_delete(outapp);
 		return;
@@ -347,7 +347,7 @@ void Object::HandleCombine(Client* user, const NewCombine_Struct* in_combine, Ob
 	if ((spec.must_learn&0xF) == 1 && !spec.has_learnt) {
 		// Made up message for the client. Just giving a DNC is the other option.
 		user->Message(4, "You need to learn how to combine these first.");
-		EQApplicationPacket* outapp = new EQApplicationPacket(OP_TradeSkillCombine, 0);
+		auto outapp = new EQApplicationPacket(OP_TradeSkillCombine, 0);
 		user->QueuePacket(outapp);
 		safe_delete(outapp);
 		return;
@@ -356,7 +356,7 @@ void Object::HandleCombine(Client* user, const NewCombine_Struct* in_combine, Ob
 	if(spec.skill_needed > 0 && user->GetSkill(spec.tradeskill) < spec.skill_needed ) {
 		// Notify client.
 		user->Message(4, "You are not skilled enough.");
-		EQApplicationPacket* outapp = new EQApplicationPacket(OP_TradeSkillCombine, 0);
+		auto outapp = new EQApplicationPacket(OP_TradeSkillCombine, 0);
 		user->QueuePacket(outapp);
 		safe_delete(outapp);
 		return;
@@ -387,7 +387,7 @@ void Object::HandleCombine(Client* user, const NewCombine_Struct* in_combine, Ob
 	}
 
 	// Send acknowledgement packets to client
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_TradeSkillCombine, 0);
+	auto outapp = new EQApplicationPacket(OP_TradeSkillCombine, 0);
 	user->QueuePacket(outapp);
 	safe_delete(outapp);
 
@@ -441,7 +441,7 @@ void Object::HandleCombine(Client* user, const NewCombine_Struct* in_combine, Ob
 void Object::HandleAutoCombine(Client* user, const RecipeAutoCombine_Struct* rac) {
 
 	//get our packet ready, gotta send one no matter what...
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_RecipeAutoCombine, sizeof(RecipeAutoCombine_Struct));
+	auto outapp = new EQApplicationPacket(OP_RecipeAutoCombine, sizeof(RecipeAutoCombine_Struct));
 	RecipeAutoCombine_Struct *outp = (RecipeAutoCombine_Struct *)outapp->pBuffer;
 	outp->object_type = rac->object_type;
 	outp->some_id = rac->some_id;
@@ -536,8 +536,7 @@ void Object::HandleAutoCombine(Client* user, const RecipeAutoCombine_Struct* rac
 
 		user->Message_StringID(MT_Skills, TRADESKILL_MISSING_COMPONENTS);
 
-		for(std::list<int>::iterator it = MissingItems.begin(); it != MissingItems.end(); ++it)
-		{
+		for (auto it = MissingItems.begin(); it != MissingItems.end(); ++it) {
 			const EQEmu::Item_Struct* item = database.GetItem(*it);
 
 			if(item)
@@ -723,7 +722,7 @@ void Client::TradeskillSearchResults(const std::string &query, unsigned long obj
             && row[4] == nullptr)
 				continue;
 
-		EQApplicationPacket* outapp = new EQApplicationPacket(OP_RecipeReply, sizeof(RecipeReply_Struct));
+		auto outapp = new EQApplicationPacket(OP_RecipeReply, sizeof(RecipeReply_Struct));
 		RecipeReply_Struct *reply = (RecipeReply_Struct *) outapp->pBuffer;
 
 		reply->object_type = objtype;
@@ -762,7 +761,7 @@ void Client::SendTradeskillDetails(uint32 recipe_id) {
 
 	//biggest this packet can ever be:
 	// 64 * 10 + 8 * 10 + 4 + 4 * 10 = 764
-	char *buf = new char[775];	//dynamic so we can just give it to EQApplicationPacket
+	auto buf = new char[775]; // dynamic so we can just give it to EQApplicationPacket
 	uint8 r,k;
 
 	uint32 *header = (uint32 *) buf;
@@ -835,7 +834,7 @@ void Client::SendTradeskillDetails(uint32 recipe_id) {
 
 	uint32 total = sizeof(uint32) + dist + datalen;
 
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_RecipeDetails);
+	auto outapp = new EQApplicationPacket(OP_RecipeDetails);
 	outapp->size = total;
 	outapp->pBuffer = (uchar*) buf;
 	QueuePacket(outapp);

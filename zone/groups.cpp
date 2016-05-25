@@ -272,7 +272,7 @@ bool Group::AddMember(Mob* newmember, const char *NewMemberName, uint32 Characte
 	int x=1;
 
 	//build the template join packet
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_GroupUpdate,sizeof(GroupJoin_Struct));
+	auto outapp = new EQApplicationPacket(OP_GroupUpdate, sizeof(GroupJoin_Struct));
 	GroupJoin_Struct* gj = (GroupJoin_Struct*) outapp->pBuffer;
 	strcpy(gj->membername, NewMemberName);
 	gj->action = groupActJoin;
@@ -534,7 +534,7 @@ void Group::SendGroupJoinOOZ(Mob* NewMember) {
 	}
 
 	//send updates to clients out of zone...
-	ServerPacket* pack = new ServerPacket(ServerOP_GroupJoin, sizeof(ServerGroupJoin_Struct));
+	auto pack = new ServerPacket(ServerOP_GroupJoin, sizeof(ServerGroupJoin_Struct));
 	ServerGroupJoin_Struct* gj = (ServerGroupJoin_Struct*)pack->pBuffer;
 	gj->gid = GetID();
 	gj->zoneid = zone->GetZoneID();
@@ -634,7 +634,7 @@ bool Group::DelMember(Mob* oldmember, bool ignoresender)
 		return true;
 	}
 
-	ServerPacket* pack = new ServerPacket(ServerOP_GroupLeave, sizeof(ServerGroupLeave_Struct));
+	auto pack = new ServerPacket(ServerOP_GroupLeave, sizeof(ServerGroupLeave_Struct));
 	ServerGroupLeave_Struct* gl = (ServerGroupLeave_Struct*)pack->pBuffer;
 	gl->gid = GetID();
 	gl->zoneid = zone->GetZoneID();
@@ -643,7 +643,7 @@ bool Group::DelMember(Mob* oldmember, bool ignoresender)
 	worldserver.SendPacket(pack);
 	safe_delete(pack);
 
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_GroupUpdate,sizeof(GroupJoin_Struct));
+	auto outapp = new EQApplicationPacket(OP_GroupUpdate, sizeof(GroupJoin_Struct));
 	GroupJoin_Struct* gu = (GroupJoin_Struct*) outapp->pBuffer;
 	gu->action = groupActLeave;
 	strcpy(gu->membername, oldmember->GetCleanName());
@@ -847,7 +847,8 @@ void Group::GroupMessage(Mob* sender, uint8 language, uint8 lang_skill, const ch
 			members[i]->CastToClient()->ChannelMessageSend(sender->GetName(),members[i]->GetName(),2,language,lang_skill,message);
 	}
 
-	ServerPacket* pack = new ServerPacket(ServerOP_OOZGroupMessage, sizeof(ServerGroupChannelMessage_Struct) + strlen(message) + 1);
+	auto pack =
+	    new ServerPacket(ServerOP_OOZGroupMessage, sizeof(ServerGroupChannelMessage_Struct) + strlen(message) + 1);
 	ServerGroupChannelMessage_Struct* gcm = (ServerGroupChannelMessage_Struct*)pack->pBuffer;
 	gcm->zoneid = zone->GetZoneID();
 	gcm->groupid = GetID();
@@ -872,7 +873,7 @@ uint32 Group::GetTotalGroupDamage(Mob* other) {
 }
 
 void Group::DisbandGroup() {
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_GroupUpdate,sizeof(GroupUpdate_Struct));
+	auto outapp = new EQApplicationPacket(OP_GroupUpdate, sizeof(GroupUpdate_Struct));
 
 	GroupUpdate_Struct* gu = (GroupUpdate_Struct*) outapp->pBuffer;
 	gu->action = groupActDisband;
@@ -916,7 +917,7 @@ void Group::DisbandGroup() {
 
 	ClearAllNPCMarks();
 
-	ServerPacket* pack = new ServerPacket(ServerOP_DisbandGroup, sizeof(ServerDisbandGroup_Struct));
+	auto pack = new ServerPacket(ServerOP_DisbandGroup, sizeof(ServerDisbandGroup_Struct));
 	ServerDisbandGroup_Struct* dg = (ServerDisbandGroup_Struct*)pack->pBuffer;
 	dg->zoneid = zone->GetZoneID();
 	dg->groupid = GetID();
@@ -987,7 +988,7 @@ void Group::SendUpdate(uint32 type, Mob* member)
 	if(!member->IsClient())
 		return;
 
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_GroupUpdate, sizeof(GroupUpdate2_Struct));
+	auto outapp = new EQApplicationPacket(OP_GroupUpdate, sizeof(GroupUpdate2_Struct));
 	GroupUpdate2_Struct* gu = (GroupUpdate2_Struct*)outapp->pBuffer;
 	gu->action = type;
 	strcpy(gu->yourname,member->GetName());
@@ -1021,7 +1022,7 @@ void Group::SendLeadershipAAUpdate()
 	// If a group member is not in the same zone as the leader when the leader purchases a new AA, they will not become
 	// aware of it until they are next in the same zone as the leader.
 
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_GroupUpdate,sizeof(GroupJoin_Struct));
+	auto outapp = new EQApplicationPacket(OP_GroupUpdate, sizeof(GroupJoin_Struct));
 	GroupJoin_Struct* gu = (GroupJoin_Struct*)outapp->pBuffer;
 	gu->action = groupActAAUpdate;
 	gu->leader_aas = LeaderAbilities;
@@ -1428,7 +1429,7 @@ void Group::MarkNPC(Mob* Target, int Number)
 
 	MarkedNPCs[Number - 1] = EntityID;
 
-	EQApplicationPacket *outapp = new EQApplicationPacket(OP_MarkNPC, sizeof(MarkNPC_Struct));
+	auto outapp = new EQApplicationPacket(OP_MarkNPC, sizeof(MarkNPC_Struct));
 
 	MarkNPC_Struct* mnpcs = (MarkNPC_Struct *)outapp->pBuffer;
 
@@ -1613,7 +1614,7 @@ void Group::NotifyMainTank(Client *c, uint8 toggle)
 	}
 	else
 	{
-		EQApplicationPacket *outapp = new EQApplicationPacket(OP_GroupRoles, sizeof(GroupRole_Struct));
+		auto outapp = new EQApplicationPacket(OP_GroupRoles, sizeof(GroupRole_Struct));
 
 		GroupRole_Struct *grs = (GroupRole_Struct*)outapp->pBuffer;
 
@@ -1646,7 +1647,7 @@ void Group::NotifyMainAssist(Client *c, uint8 toggle)
 
 	if (c->ClientVersion() < EQEmu::versions::ClientVersion::SoD)
 	{
-		EQApplicationPacket *outapp = new EQApplicationPacket(OP_DelegateAbility, sizeof(DelegateAbility_Struct));
+		auto outapp = new EQApplicationPacket(OP_DelegateAbility, sizeof(DelegateAbility_Struct));
 
 		DelegateAbility_Struct* das = (DelegateAbility_Struct*)outapp->pBuffer;
 
@@ -1666,7 +1667,7 @@ void Group::NotifyMainAssist(Client *c, uint8 toggle)
 	}
 	else
 	{
-		EQApplicationPacket *outapp = new EQApplicationPacket(OP_GroupRoles, sizeof(GroupRole_Struct));
+		auto outapp = new EQApplicationPacket(OP_GroupRoles, sizeof(GroupRole_Struct));
 
 		GroupRole_Struct *grs = (GroupRole_Struct*)outapp->pBuffer;
 
@@ -1708,7 +1709,7 @@ void Group::NotifyPuller(Client *c, uint8 toggle)
 	}
 	else
 	{
-		EQApplicationPacket *outapp = new EQApplicationPacket(OP_GroupRoles, sizeof(GroupRole_Struct));
+		auto outapp = new EQApplicationPacket(OP_GroupRoles, sizeof(GroupRole_Struct));
 
 		GroupRole_Struct *grs = (GroupRole_Struct*)outapp->pBuffer;
 
@@ -1760,7 +1761,7 @@ void Group::UnDelegateMainAssist(const char *OldMainAssistName, uint8 toggle)
 	// informing them of the change and update the group_leaders table.
 	//
 	if(OldMainAssistName == MainAssistName) {
-		EQApplicationPacket *outapp = new EQApplicationPacket(OP_DelegateAbility, sizeof(DelegateAbility_Struct));
+		auto outapp = new EQApplicationPacket(OP_DelegateAbility, sizeof(DelegateAbility_Struct));
 
 		DelegateAbility_Struct* das = (DelegateAbility_Struct*)outapp->pBuffer;
 
@@ -1918,7 +1919,7 @@ void Group::NotifyAssistTarget(Client *c)
 	if(!c)
 		return;
 
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_SetGroupTarget, sizeof(MarkNPC_Struct));
+	auto outapp = new EQApplicationPacket(OP_SetGroupTarget, sizeof(MarkNPC_Struct));
 
 	MarkNPC_Struct* mnpcs = (MarkNPC_Struct *)outapp->pBuffer;
 
@@ -1991,7 +1992,7 @@ void Group::NotifyMarkNPC(Client *c)
 	if(!NPCMarkerName.size())
 		return;
 
-	EQApplicationPacket *outapp = new EQApplicationPacket(OP_DelegateAbility, sizeof(DelegateAbility_Struct));
+	auto outapp = new EQApplicationPacket(OP_DelegateAbility, sizeof(DelegateAbility_Struct));
 
 	DelegateAbility_Struct* das = (DelegateAbility_Struct*)outapp->pBuffer;
 
@@ -2033,7 +2034,7 @@ void Group::UnDelegateMarkNPC(const char *OldNPCMarkerName)
 	if(!NPCMarkerName.size())
 		return;
 
-	EQApplicationPacket *outapp = new EQApplicationPacket(OP_DelegateAbility, sizeof(DelegateAbility_Struct));
+	auto outapp = new EQApplicationPacket(OP_DelegateAbility, sizeof(DelegateAbility_Struct));
 
 	DelegateAbility_Struct* das = (DelegateAbility_Struct*)outapp->pBuffer;
 
@@ -2067,8 +2068,8 @@ void Group::SaveGroupLeaderAA()
 {
 	// Stores the Group Leaders Leadership AA data from the Player Profile as a blob in the group_leaders table.
 	// This is done so that group members not in the same zone as the Leader still have access to this information.
-	char *queryBuffer = new char[sizeof(GroupLeadershipAA_Struct) * 2 + 1];
-    database.DoEscapeString(queryBuffer, (char*)&LeaderAbilities, sizeof(GroupLeadershipAA_Struct));
+	auto queryBuffer = new char[sizeof(GroupLeadershipAA_Struct) * 2 + 1];
+	database.DoEscapeString(queryBuffer, (char *)&LeaderAbilities, sizeof(GroupLeadershipAA_Struct));
 
 	std::string query = "UPDATE group_leaders SET leadershipaa = '";
 	query += queryBuffer;
@@ -2117,7 +2118,7 @@ void Group::SendMarkedNPCsToMember(Client *c, bool Clear)
 	if(!c)
 		return;
 
-	EQApplicationPacket *outapp = new EQApplicationPacket(OP_MarkNPC, sizeof(MarkNPC_Struct));
+	auto outapp = new EQApplicationPacket(OP_MarkNPC, sizeof(MarkNPC_Struct));
 
 	MarkNPC_Struct *mnpcs = (MarkNPC_Struct *)outapp->pBuffer;
 
@@ -2252,7 +2253,7 @@ void Group::ChangeLeader(Mob* newleader)
 
 	Mob* oldleader = GetLeader();
 
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_GroupUpdate,sizeof(GroupJoin_Struct));
+	auto outapp = new EQApplicationPacket(OP_GroupUpdate, sizeof(GroupJoin_Struct));
 	GroupJoin_Struct* gu = (GroupJoin_Struct*) outapp->pBuffer;
 	gu->action = groupActMakeLeader;
 

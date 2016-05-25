@@ -1986,7 +1986,7 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, uint16 slot, uint16 
 	if(IsAEDurationSpell(spell_id)) {
 		// the spells are AE target, but we aim them on a beacon
 		Mob *beacon_loc = spell_target ? spell_target : this;
-		Beacon *beacon = new Beacon(beacon_loc, spells[spell_id].AEDuration);
+		auto beacon = new Beacon(beacon_loc, spells[spell_id].AEDuration);
 		entity_list.AddBeacon(beacon);
 		Log.Out(Logs::Detail, Logs::Spells, "Spell %d: AE duration beacon created, entity id %d", spell_id, beacon->GetName());
 		spell_target = nullptr;
@@ -2335,7 +2335,7 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, uint16 slot, uint16 
 			database.UpdateItemRecastTimestamps(
 			    CastToClient()->CharacterID(), recast_type,
 			    CastToClient()->GetPTimers().Get(pTimerItemStart + recast_type)->GetReadyTimestamp());
-			EQApplicationPacket *outapp = new EQApplicationPacket(OP_ItemRecastDelay, sizeof(ItemRecastDelay_Struct));
+			auto outapp = new EQApplicationPacket(OP_ItemRecastDelay, sizeof(ItemRecastDelay_Struct));
 			ItemRecastDelay_Struct *ird = (ItemRecastDelay_Struct *)outapp->pBuffer;
 			ird->recast_delay = itm->GetItem()->RecastDelay;
 			ird->recast_type = recast_type;
@@ -2530,7 +2530,7 @@ void Mob::BardPulse(uint16 spell_id, Mob *caster) {
 		//be a lot of traffic for no reason...
 //this may be the wrong packet...
 		if(IsClient()) {
-			EQApplicationPacket *packet = new EQApplicationPacket(OP_Action, sizeof(Action_Struct));
+			auto packet = new EQApplicationPacket(OP_Action, sizeof(Action_Struct));
 
 			Action_Struct* action = (Action_Struct*) packet->pBuffer;
 			action->source = caster->GetID();
@@ -2558,7 +2558,8 @@ void Mob::BardPulse(uint16 spell_id, Mob *caster) {
 						CastToClient()->SetKnockBackExemption(true);
 
 						action->buff_unknown = 0;
-						EQApplicationPacket* outapp_push = new EQApplicationPacket(OP_ClientUpdate, sizeof(PlayerPositionUpdateServer_Struct));
+						auto outapp_push = new EQApplicationPacket(
+						    OP_ClientUpdate, sizeof(PlayerPositionUpdateServer_Struct));
 						PlayerPositionUpdateServer_Struct* spu = (PlayerPositionUpdateServer_Struct*)outapp_push->pBuffer;
 
 						double look_heading = caster->CalculateHeadingToTarget(GetX(), GetY());
@@ -2602,7 +2603,7 @@ void Mob::BardPulse(uint16 spell_id, Mob *caster) {
 				CastToClient()->QueuePacket(packet);
 			}
 
-			EQApplicationPacket *message_packet = new EQApplicationPacket(OP_Damage, sizeof(CombatDamage_Struct));
+			auto message_packet = new EQApplicationPacket(OP_Damage, sizeof(CombatDamage_Struct));
 			CombatDamage_Struct *cd = (CombatDamage_Struct *)message_packet->pBuffer;
 			cd->target = action->target;
 			cd->source = action->source;
@@ -3833,7 +3834,8 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob *spelltar, bool reflect, bool use_r
 				spelltar->CastToClient()->SetKnockBackExemption(true);
 
 				action->buff_unknown = 0;
-				EQApplicationPacket* outapp_push = new EQApplicationPacket(OP_ClientUpdate, sizeof(PlayerPositionUpdateServer_Struct));
+				auto outapp_push =
+				    new EQApplicationPacket(OP_ClientUpdate, sizeof(PlayerPositionUpdateServer_Struct));
 				PlayerPositionUpdateServer_Struct* spu = (PlayerPositionUpdateServer_Struct*)outapp_push->pBuffer;
 
 				double look_heading = CalculateHeadingToTarget(spelltar->GetX(), spelltar->GetY());
@@ -3923,7 +3925,7 @@ void Corpse::CastRezz(uint16 spellid, Mob* Caster)
 	}
 	*/
 
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_RezzRequest, sizeof(Resurrect_Struct));
+	auto outapp = new EQApplicationPacket(OP_RezzRequest, sizeof(Resurrect_Struct));
 	Resurrect_Struct* rezz = (Resurrect_Struct*) outapp->pBuffer;
 	// Why are we truncating these names to 30 characters ?
 	memcpy(rezz->your_name,this->corpse_name,30);
@@ -4695,7 +4697,7 @@ float Mob::GetAOERange(uint16 spell_id) {
 
 void Mob::Spin() {
 	if(IsClient()) {
-		EQApplicationPacket* outapp = new EQApplicationPacket(OP_Action, sizeof(Action_Struct));
+		auto outapp = new EQApplicationPacket(OP_Action, sizeof(Action_Struct));
 		outapp->pBuffer[0] = 0x0B;
 		outapp->pBuffer[1] = 0x0A;
 		outapp->pBuffer[2] = 0x0B;
@@ -4742,7 +4744,7 @@ void Mob::SendSpellBarEnable(uint16 spell_id)
 	if(!IsClient())
 		return;
 
-	EQApplicationPacket *outapp = new EQApplicationPacket(OP_ManaChange, sizeof(ManaChange_Struct));
+	auto outapp = new EQApplicationPacket(OP_ManaChange, sizeof(ManaChange_Struct));
 	ManaChange_Struct* manachange = (ManaChange_Struct*)outapp->pBuffer;
 	manachange->new_mana = GetMana();
 	manachange->spell_id = spell_id;
@@ -4786,7 +4788,7 @@ void Client::Stun(int duration)
 {
 	Mob::Stun(duration);
 
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_Stun, sizeof(Stun_Struct));
+	auto outapp = new EQApplicationPacket(OP_Stun, sizeof(Stun_Struct));
 	Stun_Struct* stunon = (Stun_Struct*) outapp->pBuffer;
 	stunon->duration = duration;
 	outapp->priority = 5;
@@ -4797,7 +4799,7 @@ void Client::Stun(int duration)
 void Client::UnStun() {
 	Mob::UnStun();
 
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_Stun, sizeof(Stun_Struct));
+	auto outapp = new EQApplicationPacket(OP_Stun, sizeof(Stun_Struct));
 	Stun_Struct* stunon = (Stun_Struct*) outapp->pBuffer;
 	stunon->duration = 0;
 	outapp->priority = 5;
@@ -4973,7 +4975,7 @@ void Client::UnscribeSpell(int slot, bool update_client)
 	database.DeleteCharacterSpell(this->CharacterID(), m_pp.spell_book[slot], slot);
 	if(update_client)
 	{
-		EQApplicationPacket* outapp = new EQApplicationPacket(OP_DeleteSpell, sizeof(DeleteSpell_Struct));
+		auto outapp = new EQApplicationPacket(OP_DeleteSpell, sizeof(DeleteSpell_Struct));
 		DeleteSpell_Struct* del = (DeleteSpell_Struct*)outapp->pBuffer;
 		del->spell_slot = slot;
 		del->success = 1;
@@ -5428,7 +5430,7 @@ void Mob::SendPetBuffsToClient()
 
 	int PetBuffCount = 0;
 
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_PetBuffWindow,sizeof(PetBuff_Struct));
+	auto outapp = new EQApplicationPacket(OP_PetBuffWindow, sizeof(PetBuff_Struct));
 	PetBuff_Struct* pbs=(PetBuff_Struct*)outapp->pBuffer;
 	memset(outapp->pBuffer,0,outapp->size);
 	pbs->petid=GetID();

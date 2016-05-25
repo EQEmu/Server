@@ -179,7 +179,7 @@ BaseGuildManager::GuildInfo *BaseGuildManager::_CreateGuild(uint32 guild_id, con
 	}
 
 	//make the new entry and store it into the map.
-	GuildInfo *info = new GuildInfo;
+	auto info = new GuildInfo;
 	info->name = guild_name;
 	info->leader_char_id = leader_char_id;
 	info->minstatus = minstatus;
@@ -236,9 +236,9 @@ bool BaseGuildManager::_StoreGuildDB(uint32 guild_id) {
 	results = m_db->QueryDatabase(query);
 
 	//escape our strings.
-	char *name_esc = new char[info->name.length()*2+1];
-	char *motd_esc = new char[info->motd.length()*2+1];
-	char *motd_set_esc = new char[info->motd_setter.length()*2+1];
+	auto name_esc = new char[info->name.length() * 2 + 1];
+	auto motd_esc = new char[info->motd.length() * 2 + 1];
+	auto motd_set_esc = new char[info->motd_setter.length() * 2 + 1];
 	m_db->DoEscapeString(name_esc, info->name.c_str(), info->name.length());
 	m_db->DoEscapeString(motd_esc, info->motd.c_str(), info->motd.length());
 	m_db->DoEscapeString(motd_set_esc, info->motd_setter.c_str(), info->motd_setter.length());
@@ -264,7 +264,7 @@ bool BaseGuildManager::_StoreGuildDB(uint32 guild_id) {
 	for(rank = 0; rank <= GUILD_MAX_RANK; rank++) {
 		const RankInfo &rankInfo = info->ranks[rank];
 
-		char *title_esc = new char[rankInfo.name.length()*2+1];
+		auto title_esc = new char[rankInfo.name.length() * 2 + 1];
 		m_db->DoEscapeString(title_esc, rankInfo.name.c_str(), rankInfo.name.length());
 
         query = StringFormat("INSERT INTO guild_ranks "
@@ -564,7 +564,7 @@ bool BaseGuildManager::DBRenameGuild(uint32 guild_id, const char* name) {
 
 	//escape our strings.
 	uint32 len = strlen(name);
-	char *esc = new char[len*2+1];
+	auto esc = new char[len * 2 + 1];
 	m_db->DoEscapeString(esc, name, len);
 
 	//insert the new `guilds` entry
@@ -636,8 +636,8 @@ bool BaseGuildManager::DBSetGuildMOTD(uint32 guild_id, const char* motd, const c
 	//escape our strings.
 	uint32 len = strlen(motd);
 	uint32 len2 = strlen(setter);
-	char *esc = new char[len*2+1];
-	char *esc_set = new char[len2*2+1];
+	auto esc = new char[len * 2 + 1];
+	auto esc_set = new char[len2 * 2 + 1];
 	m_db->DoEscapeString(esc, motd, len);
 	m_db->DoEscapeString(esc_set, setter, len2);
 
@@ -675,7 +675,7 @@ bool BaseGuildManager::DBSetGuildURL(uint32 GuildID, const char* URL)
 
 	//escape our strings.
 	uint32 len = strlen(URL);
-	char *esc = new char[len*2+1];
+	auto esc = new char[len * 2 + 1];
 	m_db->DoEscapeString(esc, URL, len);
 
     std::string query = StringFormat("UPDATE guilds SET url='%s' WHERE id=%d", esc, GuildID);
@@ -709,7 +709,7 @@ bool BaseGuildManager::DBSetGuildChannel(uint32 GuildID, const char* Channel)
 
 	//escape our strings.
 	uint32 len = strlen(Channel);
-	char *esc = new char[len*2+1];
+	auto esc = new char[len * 2 + 1];
 	m_db->DoEscapeString(esc, Channel, len);
 
     std::string query = StringFormat("UPDATE guilds SET channel='%s' WHERE id=%d", esc, GuildID);
@@ -832,7 +832,7 @@ bool BaseGuildManager::DBSetPublicNote(uint32 charid, const char* note) {
 
 	//escape our strings.
 	uint32 len = strlen(note);
-	char *esc = new char[len*2+1];
+	auto esc = new char[len * 2 + 1];
 	m_db->DoEscapeString(esc, note, len);
 
 	//insert the new `guilds` entry
@@ -918,8 +918,8 @@ bool BaseGuildManager::GetEntireGuild(uint32 guild_id, std::vector<CharGuildInfo
 		return false;
 	}
 
-    for (auto row = results.begin(); row != results.end(); ++row) {
-		CharGuildInfo *ci = new CharGuildInfo;
+	for (auto row = results.begin(); row != results.end(); ++row) {
+		auto ci = new CharGuildInfo;
 		ProcessGuildMember(row, *ci);
 		members.push_back(ci);
 	}
@@ -937,7 +937,7 @@ bool BaseGuildManager::GetCharInfo(const char *char_name, CharGuildInfo &into) {
 
 	//escape our strings.
 	uint32 nl = strlen(char_name);
-	char *esc = new char[nl*2+1];
+	auto esc = new char[nl * 2 + 1];
 	m_db->DoEscapeString(esc, char_name, nl);
 
 	//load up the rank info for each guild.
@@ -994,7 +994,7 @@ uint8 *BaseGuildManager::MakeGuildList(const char *head_name, uint32 &length) co
 	//dynamic structs will make this a lot less painful.
 
 	length = sizeof(GuildsList_Struct);
-	uint8 *buffer = new uint8[length];
+	auto buffer = new uint8[length];
 
 	//a bit little better than memsetting the whole thing...
 	uint32 r,pos;

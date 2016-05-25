@@ -599,7 +599,7 @@ void HateList::SpellCast(Mob *caster, uint32 spell_id, float range, Mob* ae_cent
 		++iterator;
 	}
 
-	std::list<uint32>::iterator iter = id_list.begin();
+	auto iter = id_list.begin();
 	while (iter != id_list.end())
 	{
 		Mob *cur = entity_list.GetMobID((*iter));

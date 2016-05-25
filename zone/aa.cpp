@@ -120,7 +120,7 @@ void Mob::TemporaryPets(uint16 spell_id, Mob *targ, const char *name_override, u
 			npca->SetFollowID(GetID());
 
 		if(!npca->GetSwarmInfo()){
-			AA_SwarmPetInfo* nSI = new AA_SwarmPetInfo;
+			auto nSI = new AA_SwarmPetInfo;
 			npca->SetSwarmInfo(nSI);
 			npca->GetSwarmInfo()->duration = new Timer(pet_duration*1000);
 		}
@@ -217,7 +217,7 @@ void Mob::TypesTemporaryPets(uint32 typesid, Mob *targ, const char *name_overrid
 			npca->SetFollowID(GetID());
 
 		if(!npca->GetSwarmInfo()){
-			AA_SwarmPetInfo* nSI = new AA_SwarmPetInfo;
+			auto nSI = new AA_SwarmPetInfo;
 			npca->SetSwarmInfo(nSI);
 			npca->GetSwarmInfo()->duration = new Timer(pet_duration*1000);
 		}
@@ -260,7 +260,7 @@ void Mob::WakeTheDead(uint16 spell_id, Mob *target, uint32 duration)
 
 	//assuming we have pets in our table; we take the first pet as a base type.
 	const NPCType *base_type = database.LoadNPCTypesData(500);
-	NPCType *make_npc = new NPCType;
+	auto make_npc = new NPCType;
 	memcpy(make_npc, base_type, sizeof(NPCType));
 
 	//combat stats
@@ -397,10 +397,10 @@ void Mob::WakeTheDead(uint16 spell_id, Mob *target, uint32 duration)
 	make_npc->d_melee_texture1 = 0;
 	make_npc->d_melee_texture2 = 0;
 
-	NPC* npca = new NPC(make_npc, 0, GetPosition(), FlyMode3);
+	auto npca = new NPC(make_npc, 0, GetPosition(), FlyMode3);
 
 	if(!npca->GetSwarmInfo()){
-		AA_SwarmPetInfo* nSI = new AA_SwarmPetInfo;
+		auto nSI = new AA_SwarmPetInfo;
 		npca->SetSwarmInfo(nSI);
 		npca->GetSwarmInfo()->duration = new Timer(duration*1000);
 	}
@@ -477,7 +477,7 @@ void Client::ResetAA() {
 
 void Client::SendClearAA()
 {
-	EQApplicationPacket *outapp = new EQApplicationPacket(OP_ClearLeadershipAbilities, 0);
+	auto outapp = new EQApplicationPacket(OP_ClearLeadershipAbilities, 0);
 	FastQueuePacket(&outapp);
 	outapp = new EQApplicationPacket(OP_ClearAA, 0);
 	FastQueuePacket(&outapp);
@@ -733,7 +733,7 @@ void Client::InspectBuffs(Client* Inspector, int Rank)
 	if (!Inspector || Rank == 0)
 		return;
 
-	EQApplicationPacket *outapp = new EQApplicationPacket(OP_InspectBuffs, sizeof(InspectBuffs_Struct));
+	auto outapp = new EQApplicationPacket(OP_InspectBuffs, sizeof(InspectBuffs_Struct));
 	InspectBuffs_Struct *ib = (InspectBuffs_Struct *)outapp->pBuffer;
 
 	uint32 buff_count = GetMaxTotalSlots();
@@ -847,7 +847,7 @@ void Client::SendAlternateAdvancementRank(int aa_id, int level) {
 	}
 
 	int size = sizeof(AARankInfo_Struct) + (sizeof(AARankEffect_Struct) * rank->effects.size()) + (sizeof(AARankPrereq_Struct) * rank->prereqs.size());
-	EQApplicationPacket *outapp = new EQApplicationPacket(OP_SendAATable, size);
+	auto outapp = new EQApplicationPacket(OP_SendAATable, size);
 	AARankInfo_Struct *aai = (AARankInfo_Struct*)outapp->pBuffer;
 
 	aai->id = rank->id;
@@ -898,7 +898,7 @@ void Client::SendAlternateAdvancementRank(int aa_id, int level) {
 }
 
 void Client::SendAlternateAdvancementStats() {
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_AAExpUpdate, sizeof(AltAdvStats_Struct));
+	auto outapp = new EQApplicationPacket(OP_AAExpUpdate, sizeof(AltAdvStats_Struct));
 	AltAdvStats_Struct *aps = (AltAdvStats_Struct *)outapp->pBuffer;
 	aps->experience = (uint32)(((float)330.0f * (float)m_pp.expAA) / (float)max_AAXP);
 	aps->unspent = m_pp.aapoints;
@@ -908,7 +908,7 @@ void Client::SendAlternateAdvancementStats() {
 }
 
 void Client::SendAlternateAdvancementPoints() {
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_RespondAA, sizeof(AATable_Struct));
+	auto outapp = new EQApplicationPacket(OP_RespondAA, sizeof(AATable_Struct));
 	AATable_Struct* aa2 = (AATable_Struct *)outapp->pBuffer;
 
 	int i = 0;
@@ -933,7 +933,7 @@ void Client::SendAlternateAdvancementPoints() {
 }
 
 void Client::SendAlternateAdvancementTimer(int ability, int begin, int end) {
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_AAAction, sizeof(UseAA_Struct));
+	auto outapp = new EQApplicationPacket(OP_AAAction, sizeof(UseAA_Struct));
 	UseAA_Struct* uaaout = (UseAA_Struct*)outapp->pBuffer;
 	uaaout->ability = ability;
 	uaaout->begin = begin;
@@ -945,7 +945,7 @@ void Client::SendAlternateAdvancementTimer(int ability, int begin, int end) {
 //sends all AA timers.
 void Client::SendAlternateAdvancementTimers() {
 	//we dont use SendAATimer because theres no reason to allocate the EQApplicationPacket every time
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_AAAction, sizeof(UseAA_Struct));
+	auto outapp = new EQApplicationPacket(OP_AAAction, sizeof(UseAA_Struct));
 	UseAA_Struct* uaaout = (UseAA_Struct*)outapp->pBuffer;
 
 	PTimerList::iterator c, e;
@@ -974,7 +974,7 @@ void Client::ResetAlternateAdvancementTimer(int ability) {
 }
 
 void Client::ResetAlternateAdvancementTimers() {
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_AAAction, sizeof(UseAA_Struct));
+	auto outapp = new EQApplicationPacket(OP_AAAction, sizeof(UseAA_Struct));
 	UseAA_Struct* uaaout = (UseAA_Struct*)outapp->pBuffer;
 
 	PTimerList::iterator c, e;
@@ -1592,7 +1592,7 @@ bool ZoneDatabase::LoadAlternateAdvancementAbilities(std::unordered_map<int, std
 	auto results = QueryDatabase(query);
 	if(results.Success()) {
 		for(auto row = results.begin(); row != results.end(); ++row) {
-			AA::Ability *ability = new AA::Ability;
+			auto ability = new AA::Ability;
 			ability->id = atoi(row[0]);
 			ability->name = row[1];
 			ability->category = atoi(row[2]);
@@ -1624,7 +1624,7 @@ bool ZoneDatabase::LoadAlternateAdvancementAbilities(std::unordered_map<int, std
 	results = QueryDatabase(query);
 	if(results.Success()) {
 		for(auto row = results.begin(); row != results.end(); ++row) {
-			AA::Rank *rank = new AA::Rank;
+			auto rank = new AA::Rank;
 			rank->id = atoi(row[0]);
 			rank->upper_hotkey_sid = atoi(row[1]);
 			rank->lower_hotkey_sid = atoi(row[2]);

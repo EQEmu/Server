@@ -146,7 +146,7 @@ void Trap::Trigger(Mob* trigger)
 				{
 					auto randomOffset = glm::vec4(zone->random.Int(-5, 5),zone->random.Int(-5, 5),zone->random.Int(-5, 5), zone->random.Int(0, 249));
 					auto spawnPosition = randomOffset + glm::vec4(m_Position, 0.0f);
-					NPC* new_npc = new NPC(tmp, nullptr, spawnPosition, FlyMode3);
+					auto new_npc = new NPC(tmp, nullptr, spawnPosition, FlyMode3);
 					new_npc->AddLootTable();
 					entity_list.AddNPC(new_npc);
 					new_npc->AddToHateList(trigger,1);
@@ -169,7 +169,7 @@ void Trap::Trigger(Mob* trigger)
 				{
 					auto randomOffset = glm::vec4(zone->random.Int(-2, 2), zone->random.Int(-2, 2), zone->random.Int(-2, 2), zone->random.Int(0, 249));
 					auto spawnPosition = randomOffset + glm::vec4(m_Position, 0.0f);
-					NPC* new_npc = new NPC(tmp, nullptr, spawnPosition, FlyMode3);
+					auto new_npc = new NPC(tmp, nullptr, spawnPosition, FlyMode3);
 					new_npc->AddLootTable();
 					entity_list.AddNPC(new_npc);
 					new_npc->AddToHateList(trigger,1);
@@ -187,7 +187,7 @@ void Trap::Trigger(Mob* trigger)
 			}
 			if(trigger->IsClient())
 			{
-				EQApplicationPacket* outapp = new EQApplicationPacket(OP_Damage, sizeof(CombatDamage_Struct));
+				auto outapp = new EQApplicationPacket(OP_Damage, sizeof(CombatDamage_Struct));
 				CombatDamage_Struct* a = (CombatDamage_Struct*)outapp->pBuffer;
 				int dmg = zone->random.Int(effectvalue, effectvalue2);
 				trigger->SetHP(trigger->GetHP() - dmg);
@@ -268,7 +268,7 @@ bool ZoneDatabase::LoadTraps(const char* zonename, int16 version) {
 	}
 
 	for (auto row = results.begin(); row != results.end(); ++row) {
-		Trap* trap = new Trap();
+		auto trap = new Trap();
 		trap->trap_id = atoi(row[0]);
 		trap->m_Position = glm::vec3(atof(row[1]), atof(row[2]), atof(row[3]));
 		trap->effect = atoi(row[4]);
@@ -295,7 +295,7 @@ void Trap::CreateHiddenTrigger()
 		return;
 
 	const NPCType *base_type = database.LoadNPCTypesData(500);
-	NPCType *make_npc = new NPCType;
+	auto make_npc = new NPCType;
 	memcpy(make_npc, base_type, sizeof(NPCType));
 	make_npc->max_hp = 100000;
 	make_npc->cur_hp = 100000;

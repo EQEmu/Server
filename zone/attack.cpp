@@ -1460,7 +1460,7 @@ bool Client::Death(Mob* killerMob, int32 damage, uint16 spell, SkillUseTypes att
 		if((RuleB(Character, LeaveCorpses) && GetLevel() >= RuleI(Character, DeathItemLossLevel)) || RuleB(Character, LeaveNakedCorpses))
 		{
 			// creating the corpse takes the cash/items off the player too
-			Corpse *new_corpse = new Corpse(this, exploss);
+			auto new_corpse = new Corpse(this, exploss);
 
 			std::string tmp;
 			database.GetVariable("ServerType", tmp);
@@ -1901,7 +1901,7 @@ bool NPC::Death(Mob* killer_mob, int32 damage, uint16 spell, SkillUseTypes attac
 	uint8 killed_level = GetLevel();
 
 	if (GetClass() == LDON_TREASURE) { // open chest
-		EQApplicationPacket* outapp = new EQApplicationPacket(OP_Animation, sizeof(Animation_Struct));
+		auto outapp = new EQApplicationPacket(OP_Animation, sizeof(Animation_Struct));
 		Animation_Struct* anim = (Animation_Struct*)outapp->pBuffer;
 		anim->spawnid = GetID();
 		anim->action = 0x0F;
@@ -1910,7 +1910,7 @@ bool NPC::Death(Mob* killer_mob, int32 damage, uint16 spell, SkillUseTypes attac
 		safe_delete(outapp);
 	}
 
-	EQApplicationPacket* app = new EQApplicationPacket(OP_Death, sizeof(Death_Struct));
+	auto app = new EQApplicationPacket(OP_Death, sizeof(Death_Struct));
 	Death_Struct* d = (Death_Struct*)app->pBuffer;
 	d->spawn_id = GetID();
 	d->killer_id = killer_mob ? killer_mob->GetID() : 0;
@@ -2005,7 +2005,10 @@ bool NPC::Death(Mob* killer_mob, int32 damage, uint16 spell, SkillUseTypes attac
 
 			// QueryServ Logging - Raid Kills
 			if (RuleB(QueryServ, PlayerLogNPCKills)) {
-				ServerPacket* pack = new ServerPacket(ServerOP_QSPlayerLogNPCKills, sizeof(QSPlayerLogNPCKill_Struct) + (sizeof(QSPlayerLogNPCKillsPlayers_Struct) * PlayerCount));
+				auto pack =
+				    new ServerPacket(ServerOP_QSPlayerLogNPCKills,
+						     sizeof(QSPlayerLogNPCKill_Struct) +
+							 (sizeof(QSPlayerLogNPCKillsPlayers_Struct) * PlayerCount));
 				PlayerCount = 0;
 				QSPlayerLogNPCKill_Struct* QS = (QSPlayerLogNPCKill_Struct*)pack->pBuffer;
 				QS->s1.NPCID = this->GetNPCTypeID();
@@ -2052,7 +2055,10 @@ bool NPC::Death(Mob* killer_mob, int32 damage, uint16 spell, SkillUseTypes attac
 
 			// QueryServ Logging - Group Kills
 			if (RuleB(QueryServ, PlayerLogNPCKills)) {
-				ServerPacket* pack = new ServerPacket(ServerOP_QSPlayerLogNPCKills, sizeof(QSPlayerLogNPCKill_Struct) + (sizeof(QSPlayerLogNPCKillsPlayers_Struct) * PlayerCount));
+				auto pack =
+				    new ServerPacket(ServerOP_QSPlayerLogNPCKills,
+						     sizeof(QSPlayerLogNPCKill_Struct) +
+							 (sizeof(QSPlayerLogNPCKillsPlayers_Struct) * PlayerCount));
 				PlayerCount = 0;
 				QSPlayerLogNPCKill_Struct* QS = (QSPlayerLogNPCKill_Struct*)pack->pBuffer;
 				QS->s1.NPCID = this->GetNPCTypeID();
@@ -2096,7 +2102,9 @@ bool NPC::Death(Mob* killer_mob, int32 damage, uint16 spell, SkillUseTypes attac
 
 			// QueryServ Logging - Solo
 			if (RuleB(QueryServ, PlayerLogNPCKills)) {
-				ServerPacket* pack = new ServerPacket(ServerOP_QSPlayerLogNPCKills, sizeof(QSPlayerLogNPCKill_Struct) + (sizeof(QSPlayerLogNPCKillsPlayers_Struct) * 1));
+				auto pack = new ServerPacket(ServerOP_QSPlayerLogNPCKills,
+							     sizeof(QSPlayerLogNPCKill_Struct) +
+								 (sizeof(QSPlayerLogNPCKillsPlayers_Struct) * 1));
 				QSPlayerLogNPCKill_Struct* QS = (QSPlayerLogNPCKill_Struct*)pack->pBuffer;
 				QS->s1.NPCID = this->GetNPCTypeID();
 				QS->s1.ZoneID = this->GetZoneID();
@@ -2126,7 +2134,9 @@ bool NPC::Death(Mob* killer_mob, int32 damage, uint16 spell, SkillUseTypes attac
 
 		entity_list.RemoveFromAutoXTargets(this);
 		uint16 emoteid = this->GetEmoteID();
-		Corpse* corpse = new Corpse(this, &itemlist, GetNPCTypeID(), &NPCTypedata, level>54 ? RuleI(NPC, MajorNPCCorpseDecayTimeMS) : RuleI(NPC, MinorNPCCorpseDecayTimeMS));
+		auto corpse = new Corpse(this, &itemlist, GetNPCTypeID(), &NPCTypedata,
+					 level > 54 ? RuleI(NPC, MajorNPCCorpseDecayTimeMS)
+						    : RuleI(NPC, MinorNPCCorpseDecayTimeMS));
 		entity_list.LimitRemoveNPC(this);
 		entity_list.AddCorpse(corpse, GetID());
 
@@ -2477,7 +2487,7 @@ void Mob::DamageShield(Mob* attacker, bool spell_ds) {
 		}
 		attacker->Damage(this, -DS, spellid, SkillAbjuration/*hackish*/, false);
 		//we can assume there is a spell now
-		EQApplicationPacket* outapp = new EQApplicationPacket(OP_Damage, sizeof(CombatDamage_Struct));
+		auto outapp = new EQApplicationPacket(OP_Damage, sizeof(CombatDamage_Struct));
 		CombatDamage_Struct* cds = (CombatDamage_Struct*)outapp->pBuffer;
 		cds->target = attacker->GetID();
 		cds->source = GetID();
@@ -3242,7 +3252,7 @@ void Mob::CommonDamage(Mob* attacker, int32 &damage, const uint16 spell_id, cons
 
 	//send damage packet...
 	if(!iBuffTic) { //buff ticks do not send damage, instead they just call SendHPUpdate(), which is done above
-		EQApplicationPacket* outapp = new EQApplicationPacket(OP_Damage, sizeof(CombatDamage_Struct));
+		auto outapp = new EQApplicationPacket(OP_Damage, sizeof(CombatDamage_Struct));
 		CombatDamage_Struct* a = (CombatDamage_Struct*)outapp->pBuffer;
 		a->target = GetID();
 		if (attacker == nullptr)
@@ -4434,7 +4444,7 @@ void Mob::CommonBreakInvisibleFromCombat()
 	if(hidden || improved_hidden){
 		hidden = false;
 		improved_hidden = false;
-		EQApplicationPacket* outapp = new EQApplicationPacket(OP_SpawnAppearance, sizeof(SpawnAppearance_Struct));
+		auto outapp = new EQApplicationPacket(OP_SpawnAppearance, sizeof(SpawnAppearance_Struct));
 		SpawnAppearance_Struct* sa_out = (SpawnAppearance_Struct*)outapp->pBuffer;
 		sa_out->spawn_id = GetID();
 		sa_out->type = 0x03;

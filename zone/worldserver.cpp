@@ -90,7 +90,7 @@ WorldServer::~WorldServer() {
 }*/
 
 void WorldServer::SetZoneData(uint32 iZoneID, uint32 iInstanceID) {
-	ServerPacket* pack = new ServerPacket(ServerOP_SetZone, sizeof(SetZone_Struct));
+	auto pack = new ServerPacket(ServerOP_SetZone, sizeof(SetZone_Struct));
 	SetZone_Struct* szs = (SetZone_Struct*) pack->pBuffer;
 	szs->zoneid = iZoneID;
 	szs->instanceid = iInstanceID;
@@ -225,7 +225,7 @@ void WorldServer::Process() {
 
 			ServerVoiceMacro_Struct* svm = (ServerVoiceMacro_Struct*) pack->pBuffer;
 
-			EQApplicationPacket* outapp = new EQApplicationPacket(OP_VoiceMacroOut,sizeof(VoiceMacroOut_Struct));
+			auto outapp = new EQApplicationPacket(OP_VoiceMacroOut, sizeof(VoiceMacroOut_Struct));
 			VoiceMacroOut_Struct* vmo = (VoiceMacroOut_Struct*)outapp->pBuffer;
 
 			strcpy(vmo->From, svm->From);
@@ -400,10 +400,10 @@ void WorldServer::Process() {
 					if(pack->size==64)//no results
 						client->Message_StringID(0,WHOALL_NO_RESULTS);
 					else{
-					EQApplicationPacket* outapp = new EQApplicationPacket(OP_WhoAllResponse, pack->size);
-					memcpy(outapp->pBuffer, pack->pBuffer, pack->size);
-					client->QueuePacket(outapp);
-					safe_delete(outapp);
+						auto outapp = new EQApplicationPacket(OP_WhoAllResponse, pack->size);
+						memcpy(outapp->pBuffer, pack->pBuffer, pack->size);
+						client->QueuePacket(outapp);
+						safe_delete(outapp);
 					}
 				}
 				else {
@@ -613,7 +613,7 @@ void WorldServer::Process() {
 			Client* client = entity_list.GetClientByName(gmg->gotoname);
 			if (client != 0) {
 				SendEmoteMessage(gmg->myname, 0, 13, "Summoning you to: %s @ %s, %1.1f, %1.1f, %1.1f", client->GetName(), zone->GetShortName(), client->GetX(), client->GetY(), client->GetZ());
-				ServerPacket* outpack = new ServerPacket(ServerOP_ZonePlayer, sizeof(ServerZonePlayer_Struct));
+				auto outpack = new ServerPacket(ServerOP_ZonePlayer, sizeof(ServerZonePlayer_Struct));
 				ServerZonePlayer_Struct* szp = (ServerZonePlayer_Struct*) outpack->pBuffer;
 				strcpy(szp->adminname, gmg->myname);
 				strcpy(szp->name, gmg->myname);
@@ -634,7 +634,7 @@ void WorldServer::Process() {
 			ServerMultiLineMsg_Struct* mlm = (ServerMultiLineMsg_Struct*) pack->pBuffer;
 			Client* client = entity_list.GetClientByName(mlm->to);
 			if (client) {
-				EQApplicationPacket* outapp = new EQApplicationPacket(OP_MultiLineMsg, strlen(mlm->message));
+				auto outapp = new EQApplicationPacket(OP_MultiLineMsg, strlen(mlm->message));
 				strcpy((char*) outapp->pBuffer, mlm->message);
 				client->QueuePacket(outapp);
 				safe_delete(outapp);
@@ -681,7 +681,8 @@ void WorldServer::Process() {
 				{
 					if(client->IsRezzPending())
 					{
-						ServerPacket * Response = new ServerPacket(ServerOP_RezzPlayerReject, strlen(srs->rez.rezzer_name) + 1);
+						auto Response = new ServerPacket(ServerOP_RezzPlayerReject,
+										 strlen(srs->rez.rezzer_name) + 1);
 
 						char *Buffer = (char *)Response->pBuffer;
 						sprintf(Buffer, "%s", srs->rez.rezzer_name);
@@ -694,12 +695,12 @@ void WorldServer::Process() {
 					client->SetPendingRezzData(srs->exp, srs->dbid, srs->rez.spellid, srs->rez.corpse_name);
 							Log.Out(Logs::Detail, Logs::Spells, "OP_RezzRequest in zone %s for %s, spellid:%i",
 							zone->GetShortName(), client->GetName(), srs->rez.spellid);
-					EQApplicationPacket* outapp = new EQApplicationPacket(OP_RezzRequest,
-												sizeof(Resurrect_Struct));
-					memcpy(outapp->pBuffer, &srs->rez, sizeof(Resurrect_Struct));
-					client->QueuePacket(outapp);
-					safe_delete(outapp);
-					break;
+							auto outapp = new EQApplicationPacket(OP_RezzRequest,
+											      sizeof(Resurrect_Struct));
+							memcpy(outapp->pBuffer, &srs->rez, sizeof(Resurrect_Struct));
+							client->QueuePacket(outapp);
+							safe_delete(outapp);
+							break;
 				}
 			}
 			if (srs->rezzopcode == OP_RezzComplete){
@@ -741,7 +742,7 @@ void WorldServer::Process() {
 
 				eqTimeOfDay* newtime = (eqTimeOfDay*)pack->pBuffer;
 				zone->zone_time.SetCurrentEQTimeOfDay(newtime->start_eqtime, newtime->start_realtime);
-				EQApplicationPacket* outapp = new EQApplicationPacket(OP_TimeOfDay, sizeof(TimeOfDay_Struct));
+				auto outapp = new EQApplicationPacket(OP_TimeOfDay, sizeof(TimeOfDay_Struct));
 				TimeOfDay_Struct* time_of_day = (TimeOfDay_Struct*)outapp->pBuffer;
 				zone->zone_time.GetCurrentEQTimeOfDay(time(0), time_of_day);
 				entity_list.QueueClients(0, outapp, false);
@@ -825,7 +826,7 @@ void WorldServer::Process() {
 
 			if(Invitee && Invitee->IsClient() && Invitee->CastToClient()->MercOnlyOrNoGroup() && !Invitee->IsRaidGrouped())
 			{
-				EQApplicationPacket* outapp = new EQApplicationPacket(OP_GroupInvite, sizeof(GroupInvite_Struct));
+				auto outapp = new EQApplicationPacket(OP_GroupInvite, sizeof(GroupInvite_Struct));
 				memcpy(outapp->pBuffer, gis, sizeof(GroupInvite_Struct));
 				Invitee->CastToClient()->QueuePacket(outapp);
 				safe_delete(outapp);
@@ -866,7 +867,8 @@ void WorldServer::Process() {
 
 					if (Inviter->CastToClient()->ClientVersion() < EQEmu::versions::ClientVersion::SoD)
 					{
-						EQApplicationPacket* outapp=new EQApplicationPacket(OP_GroupUpdate,sizeof(GroupJoin_Struct));
+						auto outapp =
+						    new EQApplicationPacket(OP_GroupUpdate, sizeof(GroupJoin_Struct));
 						GroupJoin_Struct* outgj=(GroupJoin_Struct*)outapp->pBuffer;
 						strcpy(outgj->membername, Inviter->GetName());
 						strcpy(outgj->yourname, Inviter->GetName());
@@ -889,7 +891,7 @@ void WorldServer::Process() {
 					break;
 				}
 
-				EQApplicationPacket* outapp=new EQApplicationPacket(OP_GroupFollow, sizeof(GroupGeneric_Struct));
+				auto outapp = new EQApplicationPacket(OP_GroupFollow, sizeof(GroupGeneric_Struct));
 				GroupGeneric_Struct *gg = (GroupGeneric_Struct *)outapp->pBuffer;
 				strn0cpy(gg->name1, sgfs->gf.name1, sizeof(gg->name1));
 				strn0cpy(gg->name2, sgfs->gf.name2, sizeof(gg->name2));
@@ -902,7 +904,7 @@ void WorldServer::Process() {
 				if(Inviter->CastToClient()->IsLFP())
 					Inviter->CastToClient()->UpdateLFP();
 
-				ServerPacket* pack2 = new ServerPacket(ServerOP_GroupJoin, sizeof(ServerGroupJoin_Struct));
+				auto pack2 = new ServerPacket(ServerOP_GroupJoin, sizeof(ServerGroupJoin_Struct));
 				ServerGroupJoin_Struct* gj = (ServerGroupJoin_Struct*)pack2->pBuffer;
 				gj->gid = group->GetID();
 				gj->zoneid = zone->GetZoneID();
@@ -914,7 +916,8 @@ void WorldServer::Process() {
 				
 
 				// Send acknowledgement back to the Invitee to let them know we have added them to the group.
-				ServerPacket* pack3 = new ServerPacket(ServerOP_GroupFollowAck, sizeof(ServerGroupFollowAck_Struct));
+				auto pack3 =
+				    new ServerPacket(ServerOP_GroupFollowAck, sizeof(ServerGroupFollowAck_Struct));
 				ServerGroupFollowAck_Struct* sgfas = (ServerGroupFollowAck_Struct*)pack3->pBuffer;
 				strn0cpy(sgfas->Name, sgfs->gf.name2, sizeof(sgfas->Name));
 				worldserver.SendPacket(pack3);
@@ -1011,7 +1014,7 @@ void WorldServer::Process() {
 
 			if(Inviter && Inviter->IsClient())
 			{
-				EQApplicationPacket* outapp = new EQApplicationPacket(OP_GroupCancelInvite, sizeof(GroupCancel_Struct));
+				auto outapp = new EQApplicationPacket(OP_GroupCancelInvite, sizeof(GroupCancel_Struct));
 				memcpy(outapp->pBuffer, sgcs, sizeof(GroupCancel_Struct));
 				Inviter->CastToClient()->QueuePacket(outapp);
 				safe_delete(outapp);
@@ -1234,7 +1237,8 @@ void WorldServer::Process() {
 				Client *c = entity_list.GetClientByName(rga->playername);
 				if(c)
 				{
-					EQApplicationPacket* outapp = new EQApplicationPacket(OP_GroupUpdate,sizeof(GroupUpdate_Struct));
+					auto outapp =
+					    new EQApplicationPacket(OP_GroupUpdate, sizeof(GroupUpdate_Struct));
 					GroupUpdate_Struct* gu = (GroupUpdate_Struct*) outapp->pBuffer;
 					gu->action = groupActDisband;
 					strn0cpy(gu->leadersname, c->GetName(), 64);
@@ -1252,7 +1256,7 @@ void WorldServer::Process() {
 				if(r){
 					r->LearnMembers();
 					r->VerifyRaid();
-					EQApplicationPacket* outapp = new EQApplicationPacket(OP_GroupUpdate, sizeof(GroupJoin_Struct));
+					auto outapp = new EQApplicationPacket(OP_GroupUpdate, sizeof(GroupJoin_Struct));
 					GroupJoin_Struct* gj = (GroupJoin_Struct*) outapp->pBuffer;
 					strn0cpy(gj->membername, rga->membername, 64);
 					gj->action = groupActJoin;
@@ -1283,7 +1287,7 @@ void WorldServer::Process() {
 				if(r){
 					r->LearnMembers();
 					r->VerifyRaid();
-					EQApplicationPacket* outapp = new EQApplicationPacket(OP_GroupUpdate, sizeof(GroupJoin_Struct));
+					auto outapp = new EQApplicationPacket(OP_GroupUpdate, sizeof(GroupJoin_Struct));
 					GroupJoin_Struct* gj = (GroupJoin_Struct*) outapp->pBuffer;
 					strn0cpy(gj->membername, rga->membername, 64);
 					gj->action = groupActLeave;
@@ -1387,7 +1391,8 @@ void WorldServer::Process() {
 				else
 					client->consent_list.remove(s->ownername);
 
-				EQApplicationPacket* outapp = new EQApplicationPacket(OP_ConsentResponse, sizeof(ConsentResponse_Struct));
+				auto outapp =
+				    new EQApplicationPacket(OP_ConsentResponse, sizeof(ConsentResponse_Struct));
 				ConsentResponse_Struct* crs = (ConsentResponse_Struct*)outapp->pBuffer;
 				strcpy(crs->grantname, s->grantname);
 				strcpy(crs->ownername, s->ownername);
@@ -1404,7 +1409,8 @@ void WorldServer::Process() {
 				// CONSENT_INVALID_NAME = 397
 				// TARGET_NOT_FOUND = 101
 
-				ServerPacket *scs_pack = new ServerPacket(ServerOP_Consent_Response, sizeof(ServerOP_Consent_Struct));
+				auto scs_pack =
+				    new ServerPacket(ServerOP_Consent_Response, sizeof(ServerOP_Consent_Struct));
 				ServerOP_Consent_Struct* scs = (ServerOP_Consent_Struct*)scs_pack->pBuffer;
 				strcpy(scs->grantname, s->grantname);
 				strcpy(scs->ownername, s->ownername);
@@ -1623,7 +1629,7 @@ void WorldServer::Process() {
 			if(c)
 			{
 				c->ClearAdventureData();
-				char * adv_data = new char[pack->size];
+				auto adv_data = new char[pack->size];
 				memcpy(adv_data, pack->pBuffer, pack->size);
 				c->SetAdventureData(adv_data);
 				c->ClearPendingAdventureData();
@@ -1731,7 +1737,8 @@ void WorldServer::Process() {
 			Client *c = entity_list.GetClientByName((const char*)pack->pBuffer);
 			if(c)
 			{
-				EQApplicationPacket* outapp = new EQApplicationPacket(OP_AdventureLeaderboardReply, sizeof(AdventureLeaderboard_Struct));
+				auto outapp = new EQApplicationPacket(OP_AdventureLeaderboardReply,
+								      sizeof(AdventureLeaderboard_Struct));
 				memcpy(outapp->pBuffer, pack->pBuffer+64, sizeof(AdventureLeaderboard_Struct));
 				c->FastQueuePacket(&outapp);
 			}
@@ -1897,7 +1904,7 @@ bool WorldServer::SendChannelMessage(Client* from, const char* to, uint8 chan_nu
 	va_end(argptr);
 	buffer[511] = '\0';
 
-	ServerPacket* pack = new ServerPacket(ServerOP_ChannelMessage, sizeof(ServerChannelMessage_Struct) + strlen(buffer) + 1);
+	auto pack = new ServerPacket(ServerOP_ChannelMessage, sizeof(ServerChannelMessage_Struct) + strlen(buffer) + 1);
 	ServerChannelMessage_Struct* scm = (ServerChannelMessage_Struct*) pack->pBuffer;
 
 	if (from == 0) {
@@ -1951,7 +1958,7 @@ bool WorldServer::SendEmoteMessage(const char* to, uint32 to_guilddbid, int16 to
 		return false;
 	}
 
-	ServerPacket* pack = new ServerPacket(ServerOP_EmoteMessage, sizeof(ServerEmoteMessage_Struct)+strlen(buffer)+1);
+	auto pack = new ServerPacket(ServerOP_EmoteMessage, sizeof(ServerEmoteMessage_Struct) + strlen(buffer) + 1);
 	ServerEmoteMessage_Struct* sem = (ServerEmoteMessage_Struct*) pack->pBuffer;
 	sem->type = type;
 	if (to != 0)
@@ -1971,7 +1978,7 @@ bool WorldServer::SendVoiceMacro(Client* From, uint32 Type, char* Target, uint32
 	if(!worldserver.Connected() || !From)
 		return false;
 
-	ServerPacket* pack = new ServerPacket(ServerOP_VoiceMacro, sizeof(ServerVoiceMacro_Struct));
+	auto pack = new ServerPacket(ServerOP_VoiceMacro, sizeof(ServerVoiceMacro_Struct));
 
 	ServerVoiceMacro_Struct* svm = (ServerVoiceMacro_Struct*) pack->pBuffer;
 
@@ -2010,7 +2017,7 @@ bool WorldServer::SendVoiceMacro(Client* From, uint32 Type, char* Target, uint32
 bool WorldServer::RezzPlayer(EQApplicationPacket* rpack, uint32 rezzexp, uint32 dbid, uint16 opcode)
 {
 	Log.Out(Logs::Detail, Logs::Spells, "WorldServer::RezzPlayer rezzexp is %i (0 is normal for RezzComplete", rezzexp);
-	ServerPacket* pack = new ServerPacket(ServerOP_RezzPlayer, sizeof(RezzPlayer_Struct));
+	auto pack = new ServerPacket(ServerOP_RezzPlayer, sizeof(RezzPlayer_Struct));
 	RezzPlayer_Struct* sem = (RezzPlayer_Struct*) pack->pBuffer;
 	sem->rezzopcode = opcode;
 	sem->rez = *(Resurrect_Struct*) rpack->pBuffer;
@@ -2027,7 +2034,7 @@ bool WorldServer::RezzPlayer(EQApplicationPacket* rpack, uint32 rezzexp, uint32 
 }
 
 void WorldServer::SendReloadTasks(int Command, int TaskID) {
-	ServerPacket* pack = new ServerPacket(ServerOP_ReloadTasks, sizeof(ReloadTasks_Struct));
+	auto pack = new ServerPacket(ServerOP_ReloadTasks, sizeof(ReloadTasks_Struct));
 	ReloadTasks_Struct* rts = (ReloadTasks_Struct*) pack->pBuffer;
 
 	rts->Command = Command;
@@ -2101,7 +2108,7 @@ uint32 WorldServer::NextGroupID() {
 	}
 	if(cur_groupid > (last_groupid - /*50*/995)) {
 		//running low, request more
-		ServerPacket* pack = new ServerPacket(ServerOP_GroupIDReq);
+		auto pack = new ServerPacket(ServerOP_GroupIDReq);
 		SendPacket(pack);
 		safe_delete(pack);
 	}
@@ -2112,7 +2119,7 @@ uint32 WorldServer::NextGroupID() {
 void WorldServer::UpdateLFP(uint32 LeaderID, uint8 Action, uint8 MatchFilter, uint32 FromLevel, uint32 ToLevel, uint32 Classes,
 				const char *Comments, GroupLFPMemberEntry *LFPMembers) {
 
-	ServerPacket* pack = new ServerPacket(ServerOP_LFPUpdate, sizeof(ServerLFPUpdate_Struct));
+	auto pack = new ServerPacket(ServerOP_LFPUpdate, sizeof(ServerLFPUpdate_Struct));
 	ServerLFPUpdate_Struct* sus = (ServerLFPUpdate_Struct*) pack->pBuffer;
 
 	sus->LeaderID = LeaderID;
@@ -2159,7 +2166,7 @@ void WorldServer::HandleLFGMatches(ServerPacket *pack) {
 			smrs++;
 		}
 
-		EQApplicationPacket* outapp = new EQApplicationPacket(OP_LFGGetMatchesResponse, PacketLength);
+		auto outapp = new EQApplicationPacket(OP_LFGGetMatchesResponse, PacketLength);
 
 		smrs = (ServerLFGMatchesResponse_Struct*)Buffer;
 
@@ -2206,7 +2213,7 @@ void WorldServer::HandleLFPMatches(ServerPacket *pack) {
 			}
 			smrs++;
 		}
-		EQApplicationPacket* outapp = new EQApplicationPacket(OP_LFPGetMatchesResponse, PacketLength);
+		auto outapp = new EQApplicationPacket(OP_LFPGetMatchesResponse, PacketLength);
 
 		smrs = (ServerLFPMatchesResponse_Struct*)Buffer;
 
@@ -2249,7 +2256,7 @@ void WorldServer::RequestTellQueue(const char *who)
 	if (!who)
 		return;
 
-	ServerPacket* pack = new ServerPacket(ServerOP_RequestTellQueue, sizeof(ServerRequestTellQueue_Struct));
+	auto pack = new ServerPacket(ServerOP_RequestTellQueue, sizeof(ServerRequestTellQueue_Struct));
 	ServerRequestTellQueue_Struct* rtq = (ServerRequestTellQueue_Struct*) pack->pBuffer;
 
 	strn0cpy(rtq->name, who, sizeof(rtq->name));

@@ -303,7 +303,7 @@ NPC::NPC(const NPCType* d, Spawn2* in_respawn, const glm::vec4& position, int if
 			trap_list = trap_ent_iter->second;
 			if(trap_list.size() > 0)
 			{
-				std::list<LDoNTrapTemplate*>::iterator trap_list_iter = trap_list.begin();
+				auto trap_list_iter = trap_list.begin();
 				std::advance(trap_list_iter, zone->random.Int(0, trap_list.size() - 1));
 				LDoNTrapTemplate* tt = (*trap_list_iter);
 				if(tt)
@@ -479,7 +479,7 @@ void NPC::CheckMinMaxLevel(Mob *them)
 	uint16 themlevel = them->GetLevel();
 	uint8 material;
 
-	std::list<ServerLootItem_Struct*>::iterator cur = itemlist.begin();
+	auto cur = itemlist.begin();
 	while(cur != itemlist.end())
 	{
 		if(!(*cur))
@@ -522,7 +522,7 @@ void NPC::QueryLoot(Client* to)
 	to->Message(0, "Coin: %ip %ig %is %ic", platinum, gold, silver, copper);
 
 	int x = 0;
-	for(ItemList::iterator cur = itemlist.begin(); cur != itemlist.end(); ++cur, ++x) {
+	for (auto cur = itemlist.begin(); cur != itemlist.end(); ++cur, ++x) {
 		const EQEmu::Item_Struct* item = database.GetItem((*cur)->item_id);
 		if (item == nullptr) {
 			Log.Out(Logs::General, Logs::Error, "Database error, invalid item");
@@ -848,7 +848,7 @@ bool NPC::SpawnZoneController(){
 	if (!RuleB(Zone, UseZoneController))
 		return false;
 
-	NPCType* npc_type = new NPCType;
+	auto npc_type = new NPCType;
 	memset(npc_type, 0, sizeof(NPCType));
 
 	strncpy(npc_type->name, "zone_controller", 60);
@@ -883,7 +883,7 @@ bool NPC::SpawnZoneController(){
 	point.y = 1000;
 	point.z = 500;
 
-	NPC* npc = new NPC(npc_type, nullptr, point, FlyMode3);
+	auto npc = new NPC(npc_type, nullptr, point, FlyMode3);
 	npc->GiveNPCTypeData(npc_type);
 
 	entity_list.AddNPC(npc);
@@ -1016,7 +1016,7 @@ NPC* NPC::SpawnNPC(const char* spawncommand, const glm::vec4& position, Client* 
 		}
 
 		//Time to create the NPC!!
-		NPCType* npc_type = new NPCType;
+		auto npc_type = new NPCType;
 		memset(npc_type, 0, sizeof(NPCType));
 
 		strncpy(npc_type->name, sep.arg[0], 60);
@@ -1050,7 +1050,7 @@ NPC* NPC::SpawnNPC(const char* spawncommand, const glm::vec4& position, Client* 
 		npc_type->prim_melee_type = 28;
 		npc_type->sec_melee_type = 28;
 
-		NPC* npc = new NPC(npc_type, nullptr, position, FlyMode3);
+		auto npc = new NPC(npc_type, nullptr, position, FlyMode3);
 		npc->GiveNPCTypeData(npc_type);
 
 		entity_list.AddNPC(npc);
@@ -2464,7 +2464,7 @@ void NPC::DoQuestPause(Mob *other) {
 void NPC::ChangeLastName(const char* in_lastname)
 {
 
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_GMLastName, sizeof(GMLastName_Struct));
+	auto outapp = new EQApplicationPacket(OP_GMLastName, sizeof(GMLastName_Struct));
 	GMLastName_Struct* gmn = (GMLastName_Struct*)outapp->pBuffer;
 	strcpy(gmn->name, GetName());
 	strcpy(gmn->gmname, GetName());

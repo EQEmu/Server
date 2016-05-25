@@ -38,7 +38,7 @@ WorldServer::~WorldServer() {
 void WorldServer::OnConnected() {
 	WorldConnection::OnConnected();
 
-	ServerPacket* pack = new ServerPacket(ServerOP_LauncherConnectInfo, sizeof(LauncherConnectInfo));
+	auto pack = new ServerPacket(ServerOP_LauncherConnectInfo, sizeof(LauncherConnectInfo));
 	LauncherConnectInfo* sci = (LauncherConnectInfo*) pack->pBuffer;
 	strn0cpy(sci->name, m_name, sizeof(sci->name));
 //	sci->port = net.GetZonePort();
@@ -92,13 +92,13 @@ void WorldServer::Process() {
 					Log.Out(Logs::Detail, Logs::Launcher, "World told us to start zone %s, but it is already running.", lzr->short_name);
 				} else {
 					Log.Out(Logs::Detail, Logs::Launcher, "World told us to start zone %s.", lzr->short_name);
-					ZoneLaunch *l = new ZoneLaunch(this, m_name, lzr->short_name, lzr->port, m_config);
+					auto l = new ZoneLaunch(this, m_name, lzr->short_name, lzr->port, m_config);
 					m_zones[lzr->short_name] = l;
 				}
 				break;
 			}
 			case ZR_Restart: {
-				std::map<std::string, ZoneLaunch *>::iterator res = m_zones.find(lzr->short_name);
+				auto res = m_zones.find(lzr->short_name);
 				if(res == m_zones.end()) {
 					Log.Out(Logs::Detail, Logs::Launcher, "World told us to restart zone %s, but it is not running.", lzr->short_name);
 				} else {
@@ -108,7 +108,7 @@ void WorldServer::Process() {
 				break;
 			}
 			case ZR_Stop: {
-				std::map<std::string, ZoneLaunch *>::iterator res = m_zones.find(lzr->short_name);
+				auto res = m_zones.find(lzr->short_name);
 				if(res == m_zones.end()) {
 					Log.Out(Logs::Detail, Logs::Launcher, "World told us to stop zone %s, but it is not running.", lzr->short_name);
 				} else {
@@ -137,7 +137,7 @@ void WorldServer::Process() {
 
 
 void WorldServer::SendStatus(const char *short_name, uint32 start_count, bool running) {
-	ServerPacket* pack = new ServerPacket(ServerOP_LauncherZoneStatus, sizeof(LauncherZoneStatus));
+	auto pack = new ServerPacket(ServerOP_LauncherZoneStatus, sizeof(LauncherZoneStatus));
 	LauncherZoneStatus* it =(LauncherZoneStatus*) pack->pBuffer;
 
 	strn0cpy(it->short_name, short_name, 32);

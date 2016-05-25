@@ -1474,8 +1474,9 @@ void Database::SetFirstLogon(uint32 CharID, uint8 firstlogon) {
 	QueryDatabase(query); 
 }
 
-void Database::AddReport(std::string who, std::string against, std::string lines) { 
-	char *escape_str = new char[lines.size()*2+1];
+void Database::AddReport(std::string who, std::string against, std::string lines)
+{
+	auto escape_str = new char[lines.size() * 2 + 1];
 	DoEscapeString(escape_str, lines.c_str(), lines.size());
 
 	std::string query = StringFormat("INSERT INTO reports (name, reported, reported_text) VALUES('%s', '%s', '%s')", EscapeString(who).c_str(), EscapeString(against).c_str(), escape_str);

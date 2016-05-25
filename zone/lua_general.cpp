@@ -46,7 +46,7 @@ void unregister_event(std::string package_name, std::string name, int evt);
 void load_encounter(std::string name) {
 	if(lua_encounters_loaded.count(name) > 0)
 		return;
-	Encounter *enc = new Encounter(name.c_str());
+	auto enc = new Encounter(name.c_str());
 	entity_list.AddEncounter(enc);
 	lua_encounters[name] = enc;
 	lua_encounters_loaded[name] = true;
@@ -56,7 +56,7 @@ void load_encounter(std::string name) {
 void load_encounter_with_data(std::string name, std::string info_str) {
 	if(lua_encounters_loaded.count(name) > 0)
 		return;
-	Encounter *enc = new Encounter(name.c_str());
+	auto enc = new Encounter(name.c_str());
 	entity_list.AddEncounter(enc);
 	lua_encounters[name] = enc;
 	lua_encounters_loaded[name] = true;
@@ -1216,8 +1216,8 @@ void lua_add_spawn_point(luabind::adl::object table) {
 
 		lua_remove_spawn_point(spawn2_id);
 
-		Spawn2 *t = new Spawn2(spawn2_id, spawngroup_id, x, y, z, heading, respawn, variance, timeleft, grid, condition_id,
-			condition_min_value, enabled, static_cast<EmuAppearance>(animation));
+		auto t = new Spawn2(spawn2_id, spawngroup_id, x, y, z, heading, respawn, variance, timeleft, grid,
+				    condition_id, condition_min_value, enabled, static_cast<EmuAppearance>(animation));
 		zone->spawn2_list.Insert(t);
 	}
 }
@@ -1344,7 +1344,7 @@ void lua_create_npc(luabind::adl::object table, float x, float y, float z, float
 		return;
 	}
 
-	NPCType* npc_type = new NPCType;
+	auto npc_type = new NPCType;
 	memset(npc_type, 0, sizeof(NPCType));
 
 

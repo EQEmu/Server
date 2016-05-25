@@ -561,12 +561,12 @@ void EQStream::SendPacket(uint16 opcode, EQApplicationPacket *p)
 	if (p->size>(MaxLen-8)) { // proto-op(2), seq(2), app-op(2) ... data ... crc(2)
 		Log.Out(Logs::Detail, Logs::Netcode, _L "Making oversized packet, len %d" __L, p->Size());
 
-		unsigned char *tmpbuff=new unsigned char[p->size+3];
+		auto tmpbuff = new unsigned char[p->size + 3];
 		length=p->serialize(opcode, tmpbuff);
 		if (length != p->Size())
 			Log.Out(Logs::Detail, Logs::Netcode, _L "Packet adjustment, len %d to %d" __L, p->Size(), length);
 
-		EQProtocolPacket *out=new EQProtocolPacket(OP_Fragment,nullptr,MaxLen-4);
+		auto out = new EQProtocolPacket(OP_Fragment, nullptr, MaxLen - 4);
 		*(uint32 *)(out->pBuffer+2)=htonl(length);
 		used=MaxLen-10;
 		memcpy(out->pBuffer+6,tmpbuff,used);
@@ -587,10 +587,10 @@ void EQStream::SendPacket(uint16 opcode, EQApplicationPacket *p)
 		delete[] tmpbuff;
 	} else {
 
-		unsigned char *tmpbuff=new unsigned char[p->Size()+3];
+		auto tmpbuff = new unsigned char[p->Size() + 3];
 		length=p->serialize(opcode, tmpbuff+2) + 2;
 
-		EQProtocolPacket *out=new EQProtocolPacket(OP_Packet,tmpbuff,length);
+		auto out = new EQProtocolPacket(OP_Packet, tmpbuff, length);
 
 		delete[] tmpbuff;
 		SequencedPush(out);
@@ -882,7 +882,7 @@ sockaddr_in address;
 
 void EQStream::SendSessionResponse()
 {
-EQProtocolPacket *out=new EQProtocolPacket(OP_SessionResponse,nullptr,sizeof(SessionResponse));
+	auto out = new EQProtocolPacket(OP_SessionResponse, nullptr, sizeof(SessionResponse));
 	SessionResponse *Response=(SessionResponse *)out->pBuffer;
 	Response->Session=htonl(Session);
 	Response->MaxLength=htonl(MaxLen);
@@ -904,7 +904,7 @@ EQProtocolPacket *out=new EQProtocolPacket(OP_SessionResponse,nullptr,sizeof(Ses
 
 void EQStream::SendSessionRequest()
 {
-EQProtocolPacket *out=new EQProtocolPacket(OP_SessionRequest,nullptr,sizeof(SessionRequest));
+	auto out = new EQProtocolPacket(OP_SessionRequest, nullptr, sizeof(SessionRequest));
 	SessionRequest *Request=(SessionRequest *)out->pBuffer;
 	memset(Request,0,sizeof(SessionRequest));
 	Request->Session=htonl(time(nullptr));
@@ -920,7 +920,7 @@ void EQStream::_SendDisconnect()
 	if(GetState() == CLOSED)
 		return;
 
-	EQProtocolPacket *out=new EQProtocolPacket(OP_SessionDisconnect,nullptr,sizeof(uint32));
+	auto out = new EQProtocolPacket(OP_SessionDisconnect, nullptr, sizeof(uint32));
 	*(uint32 *)out->pBuffer=htonl(Session);
 	NonSequencedPush(out);
 
@@ -940,7 +940,7 @@ EQRawApplicationPacket *p=nullptr;
 
 	MInboundQueue.lock();
 	if (!InboundQueue.empty()) {
-		std::vector<EQRawApplicationPacket *>::iterator itr=InboundQueue.begin();
+		auto itr = InboundQueue.begin();
 		p=*itr;
 		InboundQueue.erase(itr);
 	}
@@ -965,7 +965,7 @@ EQRawApplicationPacket *p=nullptr;
 
 	MInboundQueue.lock();
 	if (!InboundQueue.empty()) {
-		std::vector<EQRawApplicationPacket *>::iterator itr=InboundQueue.begin();
+		auto itr = InboundQueue.begin();
 		p=*itr;
 		InboundQueue.erase(itr);
 	}
@@ -992,7 +992,7 @@ EQRawApplicationPacket *p=nullptr;
 
 	MInboundQueue.lock();
 	if (!InboundQueue.empty()) {
-		std::vector<EQRawApplicationPacket *>::iterator itr=InboundQueue.begin();
+		auto itr = InboundQueue.begin();
 		p=*itr;
 	}
 	MInboundQueue.unlock();

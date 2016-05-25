@@ -703,7 +703,7 @@ void Client::SendDisciplineTimer(uint32 timer_id, uint32 duration)
 {
 	if (timer_id < MAX_DISCIPLINE_TIMERS)
 	{
-		EQApplicationPacket *outapp = new EQApplicationPacket(OP_DisciplineTimer, sizeof(DisciplineTimer_Struct));
+		auto outapp = new EQApplicationPacket(OP_DisciplineTimer, sizeof(DisciplineTimer_Struct));
 		DisciplineTimer_Struct *dts = (DisciplineTimer_Struct *)outapp->pBuffer;
 		dts->TimerID = timer_id;
 		dts->Duration = duration;

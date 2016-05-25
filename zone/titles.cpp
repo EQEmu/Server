@@ -91,7 +91,7 @@ EQApplicationPacket *TitleManager::MakeTitlesPacket(Client *c)
 
 	}
 
-	EQApplicationPacket *outapp = new EQApplicationPacket(OP_SendTitleList, Length);
+	auto outapp = new EQApplicationPacket(OP_SendTitleList, Length);
 
 	char *Buffer = (char *)outapp->pBuffer;
 
@@ -243,7 +243,7 @@ void TitleManager::CreateNewPlayerTitle(Client *client, const char *title)
 	if(!client || !title)
 		return;
 
-	char *escTitle = new char[strlen(title) * 2 + 1];
+	auto escTitle = new char[strlen(title) * 2 + 1];
 
 	client->SetAATitle(title);
 
@@ -265,7 +265,7 @@ void TitleManager::CreateNewPlayerTitle(Client *client, const char *title)
         return;
     }
 
-    ServerPacket* pack = new ServerPacket(ServerOP_ReloadTitles, 0);
+    auto pack = new ServerPacket(ServerOP_ReloadTitles, 0);
     worldserver.SendPacket(pack);
     safe_delete(pack);
 }
@@ -277,8 +277,8 @@ void TitleManager::CreateNewPlayerSuffix(Client *client, const char *suffix)
 
     client->SetTitleSuffix(suffix);
 
-	char *escSuffix = new char[strlen(suffix) * 2 + 1];
-	database.DoEscapeString(escSuffix, suffix, strlen(suffix));
+    auto escSuffix = new char[strlen(suffix) * 2 + 1];
+    database.DoEscapeString(escSuffix, suffix, strlen(suffix));
 
     std::string query = StringFormat("SELECT `id` FROM titles "
                                     "WHERE `suffix` = '%s' AND char_id = %i",
@@ -297,7 +297,7 @@ void TitleManager::CreateNewPlayerSuffix(Client *client, const char *suffix)
         return;
     }
 
-    ServerPacket* pack = new ServerPacket(ServerOP_ReloadTitles, 0);
+    auto pack = new ServerPacket(ServerOP_ReloadTitles, 0);
     worldserver.SendPacket(pack);
     safe_delete(pack);
 }
@@ -306,7 +306,7 @@ void Client::SetAATitle(const char *Title)
 {
 	strn0cpy(m_pp.title, Title, sizeof(m_pp.title));
 
-	EQApplicationPacket *outapp = new EQApplicationPacket(OP_SetTitleReply, sizeof(SetTitleReply_Struct));
+	auto outapp = new EQApplicationPacket(OP_SetTitleReply, sizeof(SetTitleReply_Struct));
 
 	SetTitleReply_Struct *strs = (SetTitleReply_Struct *)outapp->pBuffer;
 
@@ -323,7 +323,7 @@ void Client::SetTitleSuffix(const char *Suffix)
 {
 	strn0cpy(m_pp.suffix, Suffix, sizeof(m_pp.suffix));
 
-	EQApplicationPacket *outapp = new EQApplicationPacket(OP_SetTitleReply, sizeof(SetTitleReply_Struct));
+	auto outapp = new EQApplicationPacket(OP_SetTitleReply, sizeof(SetTitleReply_Struct));
 
 	SetTitleReply_Struct *strs = (SetTitleReply_Struct *)outapp->pBuffer;
 
