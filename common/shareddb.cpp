@@ -35,6 +35,7 @@
 #include "mysql.h"
 #include "rulesys.h"
 #include "shareddb.h"
+#include "eqemu_config_extern.h"
 #include "string_util.h"
 
 SharedDatabase::SharedDatabase()
@@ -812,7 +813,7 @@ bool SharedDatabase::LoadItems(const std::string &prefix) {
 	try {
 		EQEmu::IPCMutex mutex("items");
 		mutex.Lock();
-		std::string file_name = std::string("shared/") + prefix + std::string("items");
+		std::string file_name = Config->SharedMemDir + prefix + std::string("items");
 		items_mmf = std::unique_ptr<EQEmu::MemoryMappedFile>(new EQEmu::MemoryMappedFile(file_name));
 		items_hash = std::unique_ptr<EQEmu::FixedMemoryHashSet<EQEmu::Item_Struct>>(new EQEmu::FixedMemoryHashSet<EQEmu::Item_Struct>(reinterpret_cast<uint8*>(items_mmf->Get()), items_mmf->Size()));
 		mutex.Unlock();
@@ -1235,7 +1236,7 @@ bool SharedDatabase::LoadNPCFactionLists(const std::string &prefix) {
 	try {
 		EQEmu::IPCMutex mutex("faction");
 		mutex.Lock();
-		std::string file_name = std::string("shared/") + prefix + std::string("faction");
+		std::string file_name = Config->SharedMemDir + prefix + std::string("faction");
 		faction_mmf = std::unique_ptr<EQEmu::MemoryMappedFile>(new EQEmu::MemoryMappedFile(file_name));
 		faction_hash = std::unique_ptr<EQEmu::FixedMemoryHashSet<NPCFactionList>>(new EQEmu::FixedMemoryHashSet<NPCFactionList>(reinterpret_cast<uint8*>(faction_mmf->Get()), faction_mmf->Size()));
 		mutex.Unlock();
@@ -1386,7 +1387,7 @@ bool SharedDatabase::LoadSkillCaps(const std::string &prefix) {
 	try {
 		EQEmu::IPCMutex mutex("skill_caps");
 		mutex.Lock();
-		std::string file_name = std::string("shared/") + prefix + std::string("skill_caps");
+		std::string file_name = Config->SharedMemDir + prefix + std::string("skill_caps");
 		skill_caps_mmf = std::unique_ptr<EQEmu::MemoryMappedFile>(new EQEmu::MemoryMappedFile(file_name));
 		mutex.Unlock();
 	} catch(std::exception &ex) {
@@ -1542,7 +1543,7 @@ bool SharedDatabase::LoadSpells(const std::string &prefix, int32 *records, const
 		EQEmu::IPCMutex mutex("spells");
 		mutex.Lock();
 	
-		std::string file_name = std::string("shared/") + prefix + std::string("spells");
+		std::string file_name = Config->SharedMemDir + prefix + std::string("spells");
 		spells_mmf = std::unique_ptr<EQEmu::MemoryMappedFile>(new EQEmu::MemoryMappedFile(file_name));
 		*records = *reinterpret_cast<uint32*>(spells_mmf->Get());
 		*sp = reinterpret_cast<const SPDat_Spell_Struct*>((char*)spells_mmf->Get() + 4);
@@ -1745,7 +1746,7 @@ bool SharedDatabase::LoadBaseData(const std::string &prefix) {
 		EQEmu::IPCMutex mutex("base_data");
 		mutex.Lock();
 
-		std::string file_name = std::string("shared/") + prefix + std::string("base_data");
+		std::string file_name = Config->SharedMemDir + prefix + std::string("base_data");
 		base_data_mmf = std::unique_ptr<EQEmu::MemoryMappedFile>(new EQEmu::MemoryMappedFile(file_name));
 		mutex.Unlock();
 	} catch(std::exception& ex) {
@@ -1983,12 +1984,12 @@ bool SharedDatabase::LoadLoot(const std::string &prefix) {
 	try {
 		EQEmu::IPCMutex mutex("loot");
 		mutex.Lock();
-		std::string file_name_lt = std::string("shared/") + prefix + std::string("loot_table");
+		std::string file_name_lt = Config->SharedMemDir + prefix + std::string("loot_table");
 		loot_table_mmf = std::unique_ptr<EQEmu::MemoryMappedFile>(new EQEmu::MemoryMappedFile(file_name_lt));
 		loot_table_hash = std::unique_ptr<EQEmu::FixedMemoryVariableHashSet<LootTable_Struct>>(new EQEmu::FixedMemoryVariableHashSet<LootTable_Struct>(
 			reinterpret_cast<uint8*>(loot_table_mmf->Get()),
 			loot_table_mmf->Size()));
-		std::string file_name_ld = std::string("shared/") + prefix + std::string("loot_drop");
+		std::string file_name_ld = Config->SharedMemDir + prefix + std::string("loot_drop");
 		loot_drop_mmf = std::unique_ptr<EQEmu::MemoryMappedFile>(new EQEmu::MemoryMappedFile(file_name_ld));
 		loot_drop_hash = std::unique_ptr<EQEmu::FixedMemoryVariableHashSet<LootDrop_Struct>>(new EQEmu::FixedMemoryVariableHashSet<LootDrop_Struct>(
 			reinterpret_cast<uint8*>(loot_drop_mmf->Get()),

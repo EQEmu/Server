@@ -173,25 +173,27 @@ void Embperl::DoInit() {
 	Log.Out(Logs::General, Logs::Quests, "Loading perlemb plugins.");
 	try
 	{
-		eval_pv("main::eval_file('plugin', 'plugin.pl');", FALSE);
+		std::string perl_command;
+		perl_command = "main::eval_file('plugin', '" + Config->PluginPlFile + "');";
+		eval_pv(perl_command.c_str(), FALSE);
 	}
 	catch(const char *err)
 	{
-		Log.Out(Logs::General, Logs::Quests, "Warning - plugin.pl: %s", err);
+		Log.Out(Logs::General, Logs::Quests, "Warning - %s: %s", Config->PluginPlFile.c_str(), err);
 	}
 	try
 	{
 		//should probably read the directory in c, instead, so that
 		//I can echo filenames as I do it, but c'mon... I'm lazy and this 1 line reads in all the plugins
-		eval_pv(
-			"if(opendir(D,'plugins')) { "
+		std::string perl_command =
+			"if(opendir(D,'" + Config->PluginDir +"')) { "
 			"	my @d = readdir(D);"
 			"	closedir(D);"
 			"	foreach(@d){ "
-			"		main::eval_file('plugin','plugins/'.$_)if/\\.pl$/;"
+			"		main::eval_file('plugin','" + Config->PluginDir + "/'.$_)if/\\.pl$/;"
 			"	}"
-			"}"
-		,FALSE);
+			"}";
+		eval_pv(perl_command.c_str(),FALSE);
 	}
 	catch(const char *err)
 	{

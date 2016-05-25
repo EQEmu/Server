@@ -16,7 +16,8 @@ static Strategy struct_strategy;
 void Register(EQStreamIdentifier &into) {
 	//create our opcode manager if we havent already
 	if(opcodes == NULL) {
-		string opfile = "patch_";
+		string opfile = Config->PatchDir;
+		opfile += "patch_";
 		opfile += name;
 		opfile += ".conf";
 		//load up the opcode manager.
@@ -51,7 +52,8 @@ void Reload() {
 
 	if(opcodes != NULL) {
 		//TODO: get this file name from the config file
-		string opfile = "patch_";
+		string opfile = Config->PatchDir;
+		opfile += "patch_";
 		opfile += name;
 		opfile += ".conf";
 		if(!opcodes->ReloadOpcodes(opfile.c_str())) {

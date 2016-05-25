@@ -33,6 +33,7 @@
 #include "lua_general.h"
 #include "questmgr.h"
 #include "zone.h"
+#include "zone_config.h"
 #include "lua_parser.h"
 #include "lua_encounter.h"
 
@@ -851,7 +852,7 @@ void LuaParser::ReloadQuests() {
 	lua_getglobal(L, "package");
 	lua_getfield(L, -1, "path");
 	std::string module_path = lua_tostring(L,-1);
-	module_path += ";./lua_modules/?.lua";
+	module_path += ";./" + Config->LuaModuleDir + "/?.lua";
 	lua_pop(L, 1);
 	lua_pushstring(L, module_path.c_str());
 	lua_setfield(L, -2, "path");
@@ -860,7 +861,8 @@ void LuaParser::ReloadQuests() {
 	MapFunctions(L);
 
 	//load init
-	std::string path = "quests/";
+	std::string path = Config->QuestDir;
+	path += "/";
 	path += QUEST_GLOBAL_DIRECTORY;
 	path += "/script_init.lua";
 
@@ -876,7 +878,8 @@ void LuaParser::ReloadQuests() {
 
 	//zone init - always loads after global
 	if(zone) {
-		std::string zone_script = "quests/";
+		std::string zone_script = Config->QuestDir;
+		zone_script += "/";
 		zone_script += zone->GetShortName();
 		zone_script += "/script_init_v";
 		zone_script += std::to_string(zone->GetInstanceVersion());
@@ -893,7 +896,8 @@ void LuaParser::ReloadQuests() {
 			return;
 		}
 
-		zone_script = "quests/";
+		zone_script = Config->QuestDir;
+		zone_script += "/";
 		zone_script += zone->GetShortName();
 		zone_script += "/script_init.lua";
 		f = fopen(zone_script.c_str(), "r");

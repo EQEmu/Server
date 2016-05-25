@@ -1,5 +1,5 @@
 /*	EQEMu: Everquest Server Emulator
-	Copyright (C) 2001-2013 EQEMu Development Team (http://eqemulator.net)
+	Copyright (C) 2001-2016 EQEMu Development Team (http://eqemulator.org)
 
 	This program is free software; you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -16,15 +16,7 @@
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 
-#ifndef __EQEMU_SHARED_MEMORY_ITEMS_H
-#define __EQEMU_SHARED_MEMORY_ITEMS_H
-
-#include <string>
-#include "../common/eqemu_config.h"
+#include "eqemu_config.h"
 
 extern const EQEmuConfig *Config;
 
-class SharedDatabase;
-void LoadItems(SharedDatabase *database, const std::string &prefix);
-
-#endif
