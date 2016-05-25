@@ -54,6 +54,7 @@
 #include "../common/rulesys.h"
 #include "../common/serverinfo.h"
 #include "../common/string_util.h"
+#include "../common/say_link.h"
 #include "../common/eqemu_logsys.h"
 
 
@@ -335,11 +336,11 @@ public:
 				while (spells[spell_id].typedescnum == 27) {
 					if (!spells[spell_id].goodEffect)
 						break;
-					if (spells[spell_id].skill != SkillOffense && spells[spell_id].skill != SkillDefense)
+					if (spells[spell_id].skill != EQEmu::skills::SkillOffense && spells[spell_id].skill != EQEmu::skills::SkillDefense)
 						break;
 
 					entry_prototype = new STStanceEntry();
-					if (spells[spell_id].skill == SkillOffense)
+					if (spells[spell_id].skill == EQEmu::skills::SkillOffense)
 						entry_prototype->SafeCastToStance()->stance_type = BCEnum::StT_Aggressive;
 					else
 						entry_prototype->SafeCastToStance()->stance_type = BCEnum::StT_Defensive;
@@ -2388,7 +2389,7 @@ namespace ActionableBots
 		sbl.remove_if([bot_owner](Bot* l) { return (!l->IsBotArcher()); });
 	}
 	
-	static void Filter_ByHighestSkill(Client* bot_owner, std::list<Bot*>& sbl, SkillUseTypes skill_type, float& skill_value) {
+	static void Filter_ByHighestSkill(Client* bot_owner, std::list<Bot*>& sbl, EQEmu::skills::SkillType skill_type, float& skill_value) {
 		sbl.remove_if([bot_owner](Bot* l) { return (!MyBots::IsMyBot(bot_owner, l)); });
 		skill_value = 0.0f;
 
@@ -2425,7 +2426,7 @@ namespace ActionableBots
 		sbl.remove_if([bot_owner](const Bot* l) { return (l->GetClass() == ROGUE && l->GetLevel() < 5); });
 		sbl.remove_if([bot_owner](const Bot* l) { return (l->GetClass() == BARD && l->GetLevel() < 40); });
 
-		ActionableBots::Filter_ByHighestSkill(bot_owner, sbl, SkillPickLock, pick_lock_value);
+		ActionableBots::Filter_ByHighestSkill(bot_owner, sbl, EQEmu::skills::SkillPickLock, pick_lock_value);
 	}
 };
 
@@ -3906,7 +3907,7 @@ void bot_command_taunt(Client *c, const Seperator *sep)
 	
 	int taunting_count = 0;
 	for (auto bot_iter : sbl) {
-		if (!bot_iter->GetSkill(SkillTaunt))
+		if (!bot_iter->GetSkill(EQEmu::skills::SkillTaunt))
 			continue;
 		
 		if (toggle_taunt)

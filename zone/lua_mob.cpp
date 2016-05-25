@@ -178,22 +178,22 @@ bool Lua_Mob::Attack(Lua_Mob other, int hand, bool from_riposte, bool is_striket
 
 void Lua_Mob::Damage(Lua_Mob from, int damage, int spell_id, int attack_skill) {
 	Lua_Safe_Call_Void();
-	return self->Damage(from, damage, spell_id, static_cast<SkillUseTypes>(attack_skill));
+	return self->Damage(from, damage, spell_id, static_cast<EQEmu::skills::SkillType>(attack_skill));
 }
 
 void Lua_Mob::Damage(Lua_Mob from, int damage, int spell_id, int attack_skill, bool avoidable) {
 	Lua_Safe_Call_Void();
-	return self->Damage(from, damage, spell_id, static_cast<SkillUseTypes>(attack_skill), avoidable);
+	return self->Damage(from, damage, spell_id, static_cast<EQEmu::skills::SkillType>(attack_skill), avoidable);
 }
 
 void Lua_Mob::Damage(Lua_Mob from, int damage, int spell_id, int attack_skill, bool avoidable, int buffslot) {
 	Lua_Safe_Call_Void();
-	return self->Damage(from, damage, spell_id, static_cast<SkillUseTypes>(attack_skill), avoidable, buffslot);
+	return self->Damage(from, damage, spell_id, static_cast<EQEmu::skills::SkillType>(attack_skill), avoidable, buffslot);
 }
 
 void Lua_Mob::Damage(Lua_Mob from, int damage, int spell_id, int attack_skill, bool avoidable, int buffslot, bool buff_tic) {
 	Lua_Safe_Call_Void();
-	return self->Damage(from, damage, spell_id, static_cast<SkillUseTypes>(attack_skill), avoidable, buffslot, buff_tic);
+	return self->Damage(from, damage, spell_id, static_cast<EQEmu::skills::SkillType>(attack_skill), avoidable, buffslot, buff_tic);
 }
 
 void Lua_Mob::RangedAttack(Lua_Mob other) {
@@ -1252,28 +1252,28 @@ bool Lua_Mob::CombatRange(Lua_Mob other) {
 
 void Lua_Mob::DoSpecialAttackDamage(Lua_Mob other, int skill, int max_damage) {
 	Lua_Safe_Call_Void();
-	self->DoSpecialAttackDamage(other, static_cast<SkillUseTypes>(skill), max_damage);
+	self->DoSpecialAttackDamage(other, static_cast<EQEmu::skills::SkillType>(skill), max_damage);
 }
 
 void Lua_Mob::DoSpecialAttackDamage(Lua_Mob other, int skill, int max_damage, int min_damage) {
 	Lua_Safe_Call_Void();
-	self->DoSpecialAttackDamage(other, static_cast<SkillUseTypes>(skill), max_damage, min_damage);
+	self->DoSpecialAttackDamage(other, static_cast<EQEmu::skills::SkillType>(skill), max_damage, min_damage);
 }
 
 void Lua_Mob::DoSpecialAttackDamage(Lua_Mob other, int skill, int max_damage, int min_damage, int hate_override) {
 	Lua_Safe_Call_Void();
-	self->DoSpecialAttackDamage(other, static_cast<SkillUseTypes>(skill), max_damage, min_damage, hate_override);
+	self->DoSpecialAttackDamage(other, static_cast<EQEmu::skills::SkillType>(skill), max_damage, min_damage, hate_override);
 }
 
 void Lua_Mob::DoSpecialAttackDamage(Lua_Mob other, int skill, int max_damage, int min_damage, int hate_override, int reuse_time) {
 	Lua_Safe_Call_Void();
-	self->DoSpecialAttackDamage(other, static_cast<SkillUseTypes>(skill), max_damage, min_damage, hate_override, reuse_time);
+	self->DoSpecialAttackDamage(other, static_cast<EQEmu::skills::SkillType>(skill), max_damage, min_damage, hate_override, reuse_time);
 }
 
 void Lua_Mob::DoSpecialAttackDamage(Lua_Mob other, int skill, int max_damage, int min_damage, int hate_override, int reuse_time,
 									bool hit_chance) {
 	Lua_Safe_Call_Void();
-	self->DoSpecialAttackDamage(other, static_cast<SkillUseTypes>(skill), max_damage, min_damage, hate_override, reuse_time, hit_chance);
+	self->DoSpecialAttackDamage(other, static_cast<EQEmu::skills::SkillType>(skill), max_damage, min_damage, hate_override, reuse_time, hit_chance);
 }
 
 void Lua_Mob::DoThrowingAttackDmg(Lua_Mob other) {
@@ -1309,22 +1309,22 @@ void Lua_Mob::DoThrowingAttackDmg(Lua_Mob other, Lua_ItemInst range_weapon, Lua_
 
 void Lua_Mob::DoMeleeSkillAttackDmg(Lua_Mob other, int weapon_damage, int skill) {
 	Lua_Safe_Call_Void();
-	self->DoMeleeSkillAttackDmg(other, weapon_damage, static_cast<SkillUseTypes>(skill));
+	self->DoMeleeSkillAttackDmg(other, weapon_damage, static_cast<EQEmu::skills::SkillType>(skill));
 }
 
 void Lua_Mob::DoMeleeSkillAttackDmg(Lua_Mob other, int weapon_damage, int skill, int chance_mod) {
 	Lua_Safe_Call_Void();
-	self->DoMeleeSkillAttackDmg(other, weapon_damage, static_cast<SkillUseTypes>(skill), chance_mod);
+	self->DoMeleeSkillAttackDmg(other, weapon_damage, static_cast<EQEmu::skills::SkillType>(skill), chance_mod);
 }
 
 void Lua_Mob::DoMeleeSkillAttackDmg(Lua_Mob other, int weapon_damage, int skill, int chance_mod, int focus) {
 	Lua_Safe_Call_Void();
-	self->DoMeleeSkillAttackDmg(other, weapon_damage, static_cast<SkillUseTypes>(skill), chance_mod, focus);
+	self->DoMeleeSkillAttackDmg(other, weapon_damage, static_cast<EQEmu::skills::SkillType>(skill), chance_mod, focus);
 }
 
 void Lua_Mob::DoMeleeSkillAttackDmg(Lua_Mob other, int weapon_damage, int skill, int chance_mod, int focus, bool can_riposte) {
 	Lua_Safe_Call_Void();
-	self->DoMeleeSkillAttackDmg(other, weapon_damage, static_cast<SkillUseTypes>(skill), chance_mod, focus, can_riposte);
+	self->DoMeleeSkillAttackDmg(other, weapon_damage, static_cast<EQEmu::skills::SkillType>(skill), chance_mod, focus, can_riposte);
 }
 
 void Lua_Mob::DoArcheryAttackDmg(Lua_Mob other) {
@@ -1713,17 +1713,17 @@ void Lua_Mob::SetTargetable(bool on) {
 
 void Lua_Mob::ModSkillDmgTaken(int skill, int value) {
 	Lua_Safe_Call_Void();
-	self->ModSkillDmgTaken(static_cast<SkillUseTypes>(skill), value);
+	self->ModSkillDmgTaken(static_cast<EQEmu::skills::SkillType>(skill), value);
 }
 
 int Lua_Mob::GetModSkillDmgTaken(int skill) {
 	Lua_Safe_Call_Int();
-	return self->GetModSkillDmgTaken(static_cast<SkillUseTypes>(skill));
+	return self->GetModSkillDmgTaken(static_cast<EQEmu::skills::SkillType>(skill));
 }
 
 int Lua_Mob::GetSkillDmgTaken(int skill) {
 	Lua_Safe_Call_Int();
-	return self->GetSkillDmgTaken(static_cast<SkillUseTypes>(skill));
+	return self->GetSkillDmgTaken(static_cast<EQEmu::skills::SkillType>(skill));
 }
 
 void Lua_Mob::SetAllowBeneficial(bool value) {
@@ -1773,7 +1773,7 @@ int Lua_Mob::GetFlurryChance() {
 
 int Lua_Mob::GetSkill(int skill) {
 	Lua_Safe_Call_Int();
-	return self->GetSkill(static_cast<SkillUseTypes>(skill));
+	return self->GetSkill(static_cast<EQEmu::skills::SkillType>(skill));
 }
 
 int Lua_Mob::GetSpecialAbility(int ability) {

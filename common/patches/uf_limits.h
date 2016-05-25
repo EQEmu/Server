@@ -17,178 +17,285 @@
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
-#ifndef COMMON_UF_CONSTANTS_H
-#define COMMON_UF_CONSTANTS_H
+#ifndef COMMON_UF_LIMITS_H
+#define COMMON_UF_LIMITS_H
 
 #include "../types.h"
+#include "../client_version.h"
+#include "../skills.h"
 
 
 namespace UF
 {
-	namespace inventory {
-		typedef enum : int16 {
-			TypePossessions = 0,
-			TypeBank,
-			TypeSharedBank,
-			TypeTrade,
-			TypeWorld,
-			TypeLimbo,
-			TypeTribute,
-			TypeTrophyTribute,
-			TypeGuildTribute,
-			TypeMerchant,
-			TypeDeleted,
-			TypeCorpse,
-			TypeBazaar,
-			TypeInspect,
-			TypeRealEstate,
-			TypeViewMODPC,
-			TypeViewMODBank,
-			TypeViewMODSharedBank,
-			TypeViewMODLimbo,
-			TypeAltStorage,
-			TypeArchived,
-			TypeMail,
-			TypeGuildTrophyTribute,
-			TypeOther,
-			TypeCount
-		} InventoryTypes;
+	enum : int { Invalid = -1, Null, Safety };
 
-		typedef enum : int16 {
-			SlotCharm = 0,
-			SlotEar1,
-			SlotHead,
-			SlotFace,
-			SlotEar2,
-			SlotNeck,
-			SlotShoulders,
-			SlotArms,
-			SlotBack,
-			SlotWrist1,
-			SlotWrist2,
-			SlotRange,
-			SlotHands,
-			SlotPrimary,
-			SlotSecondary,
-			SlotFinger1,
-			SlotFinger2,
-			SlotChest,
-			SlotLegs,
-			SlotFeet,
-			SlotWaist,
-			SlotPowerSource,
-			SlotAmmo,
-			SlotGeneral1,
-			SlotGeneral2,
-			SlotGeneral3,
-			SlotGeneral4,
-			SlotGeneral5,
-			SlotGeneral6,
-			SlotGeneral7,
-			SlotGeneral8,
-			SlotCursor,
-			SlotCount,
-			SlotEquipmentBegin = SlotCharm,
-			SlotEquipmentEnd = SlotAmmo,
-			SlotEquipmentCount = (SlotEquipmentEnd - SlotEquipmentBegin + 1),
-			SlotGeneralBegin = SlotGeneral1,
-			SlotGeneralEnd = SlotGeneral8,
-			SlotGeneralCount = (SlotGeneralEnd - SlotGeneralBegin + 1)
-		} PossessionsSlots;
-	}
+	enum : bool { False = false, True = true };
 
-	namespace consts {
-		static const size_t CHARACTER_CREATION_LIMIT = 12;
+	// pre-declarations
+	namespace invtype {
+		inline EQEmu::versions::ClientVersion InvTypeRef() { return EQEmu::versions::ClientVersion::UF; }
 
-		static const uint16	TYPE_POSSESSIONS_SIZE = inventory::SlotCount;
-		static const uint16 TYPE_BANK_SIZE = 24;
-		static const uint16 TYPE_SHARED_BANK_SIZE = 2;
-		static const uint16 TYPE_TRADE_SIZE = 8;
-		static const uint16 TYPE_WORLD_SIZE = 10;
-		static const uint16 TYPE_LIMBO_SIZE = 36;
-		static const uint16 TYPE_TRIBUTE_SIZE = 0; //?
-		static const uint16 TYPE_TROPHY_TRIBUTE_SIZE = 0;
-		static const uint16 TYPE_GUILD_TRIBUTE_SIZE = 0;
-		static const uint16 TYPE_MERCHANT_SIZE = 0;
-		static const uint16 TYPE_DELETED_SIZE = 0;
-		static const uint16 TYPE_CORPSE_SIZE = inventory::SlotCount;
-		static const uint16 TYPE_BAZAAR_SIZE = 80;
-		static const uint16 TYPE_INSPECT_SIZE = inventory::SlotEquipmentCount;
-		static const uint16 TYPE_REAL_ESTATE_SIZE = 0;
-		static const uint16 TYPE_VIEW_MOD_PC_SIZE = TYPE_POSSESSIONS_SIZE;
-		static const uint16 TYPE_VIEW_MOD_BANK_SIZE = TYPE_BANK_SIZE;
-		static const uint16 TYPE_VIEW_MOD_SHARED_BANK_SIZE = TYPE_SHARED_BANK_SIZE;
-		static const uint16 TYPE_VIEW_MOD_LIMBO_SIZE = TYPE_LIMBO_SIZE;
-		static const uint16 TYPE_ALT_STORAGE_SIZE = 0;
-		static const uint16 TYPE_ARCHIVED_SIZE = 0;
-		static const uint16 TYPE_MAIL_SIZE = 0;
-		static const uint16 TYPE_GUILD_TROPHY_TRIBUTE_SIZE = 0;
-		static const uint16 TYPE_KRONO_SIZE = NOT_USED;
-		static const uint16 TYPE_OTHER_SIZE = 0;
+		enum : int { InvTypeInvalid = -1, InvTypeBegin };
 
-		static const int16 EQUIPMENT_BEGIN = inventory::SlotCharm;
-		static const int16 EQUIPMENT_END = inventory::SlotAmmo;
-		static const uint16 EQUIPMENT_SIZE = inventory::SlotEquipmentCount;
+		enum InventoryType : int {
+			InvTypePossessions = InvTypeBegin,
+			InvTypeBank,
+			InvTypeSharedBank,
+			InvTypeTrade,
+			InvTypeWorld,
+			InvTypeLimbo,
+			InvTypeTribute,
+			InvTypeGuildTribute,
+			InvTypeMerchant,
+			InvTypeCorpse,
+			InvTypeBazaar,
+			InvTypeInspect,
+			InvTypeViewMODPC,
+			InvTypeViewMODBank,
+			InvTypeViewMODSharedBank,
+			InvTypeViewMODLimbo,
+			InvTypeAltStorage,
+			InvTypeArchived,
+			InvTypeOther,
+			InvTypeCount
+		};
+	
+	} /*invtype*/
 
-		static const int16 GENERAL_BEGIN = inventory::SlotGeneral1;
-		static const int16 GENERAL_END = inventory::SlotGeneral8;
-		static const uint16 GENERAL_SIZE = inventory::SlotGeneralCount;
-		static const int16 GENERAL_BAGS_BEGIN = 262;
-		static const int16 GENERAL_BAGS_END_OFFSET = 79;
-		static const int16 GENERAL_BAGS_END = GENERAL_BAGS_BEGIN + GENERAL_BAGS_END_OFFSET;
+	namespace invslot {
+		inline EQEmu::versions::ClientVersion InvSlotRef() { return EQEmu::versions::ClientVersion::UF; }
 
-		static const int16 CURSOR = inventory::SlotCursor;
-		static const int16 CURSOR_BAG_BEGIN = 342;
-		static const int16 CURSOR_BAG_END_OFFSET = 9;
-		static const int16 CURSOR_BAG_END = CURSOR_BAG_BEGIN + CURSOR_BAG_END_OFFSET;
+		enum : int { InvSlotInvalid = -1, InvSlotBegin };
 
-		static const int16 BANK_BEGIN = 2000;
-		static const int16 BANK_END = 2023;
-		static const int16 BANK_BAGS_BEGIN = 2032;
-		static const int16 BANK_BAGS_END_OFFSET = 239;
-		static const int16 BANK_BAGS_END = BANK_BAGS_BEGIN + BANK_BAGS_END_OFFSET;
+		enum PossessionsSlot : int {
+			PossessionsCharm = InvSlotBegin,
+			PossessionsEar1,
+			PossessionsHead,
+			PossessionsFace,
+			PossessionsEar2,
+			PossessionsNeck,
+			PossessionsShoulders,
+			PossessionsArms,
+			PossessionsBack,
+			PossessionsWrist1,
+			PossessionsWrist2,
+			PossessionsRange,
+			PossessionsHands,
+			PossessionsPrimary,
+			PossessionsSecondary,
+			PossessionsFinger1,
+			PossessionsFinger2,
+			PossessionsChest,
+			PossessionsLegs,
+			PossessionsFeet,
+			PossessionsWaist,
+			PossessionsPowerSource,
+			PossessionsAmmo,
+			PossessionsGeneral1,
+			PossessionsGeneral2,
+			PossessionsGeneral3,
+			PossessionsGeneral4,
+			PossessionsGeneral5,
+			PossessionsGeneral6,
+			PossessionsGeneral7,
+			PossessionsGeneral8,
+			PossessionsCursor,
+			PossessionsCount
+		};
 
-		static const int16 SHARED_BANK_BEGIN = 2500;
-		static const int16 SHARED_BANK_END = 2501;
-		static const int16 SHARED_BANK_BAGS_BEGIN = 2532;
-		static const int16 SHARED_BANK_BAGS_END_OFFSET = 19;
-		static const int16 SHARED_BANK_BAGS_END = SHARED_BANK_BAGS_BEGIN + SHARED_BANK_BAGS_END_OFFSET;
+		const int EquipmentBegin = PossessionsCharm;
+		const int EquipmentEnd = PossessionsAmmo;
+		const int EquipmentCount = (EquipmentEnd - EquipmentBegin + 1);
 
-		static const int16 TRADE_BEGIN = 3000;
-		static const int16 TRADE_END = 3007;
-		static const int16 TRADE_NPC_END = 3003;
-		static const int16 TRADE_BAGS_BEGIN = 3031;
-		static const int16 TRADE_BAGS_END_OFFSET = 79;
-		static const int16 TRADE_BAGS_END = TRADE_BAGS_BEGIN + TRADE_BAGS_END_OFFSET;
+		const int GeneralBegin = PossessionsGeneral1;
+		const int GeneralEnd = PossessionsGeneral8;
+		const int GeneralCount = (GeneralEnd - GeneralBegin + 1);
+	
+	} /*invslot*/
 
-		static const int16 WORLD_BEGIN = 4000;
-		static const int16 WORLD_END = 4009;
+	namespace invbag {
+		inline EQEmu::versions::ClientVersion InvBagRef() { return EQEmu::versions::ClientVersion::UF; }
 
-		static const int16 TRIBUTE_BEGIN = 400;
-		static const int16 TRIBUTE_END = 404;
+		enum : int { InvBagInvalid = -1, InvBagBegin };
+	
+	} /*invbag*/
 
-		static const int16 CORPSE_BEGIN = inventory::SlotGeneral1;
-		static const int16 CORPSE_END = inventory::SlotGeneral1 + inventory::SlotCursor;
+	namespace invaug {
+		inline EQEmu::versions::ClientVersion InvAugRef() { return EQEmu::versions::ClientVersion::UF; }
 
-		static const uint16 ITEM_COMMON_SIZE = 5;
-		static const uint16 ITEM_CONTAINER_SIZE = 10;
+		enum : int { InvAugInvalid = -1, InvAugBegin };
+	
+	} /*invaug*/
 
-		static const size_t BANDOLIERS_SIZE = 20;		// number of bandolier instances
-		static const size_t BANDOLIER_ITEM_COUNT = 4;	// number of equipment slots in bandolier instance
+	namespace item {
+		inline EQEmu::versions::ClientVersion ItemRef() { return EQEmu::versions::ClientVersion::UF; }
 
-		static const size_t POTION_BELT_ITEM_COUNT = 5;
+		enum ItemPacketType : int {
+			ItemPacketMerchant = 100,
+			ItemPacketTradeView = 101,
+			ItemPacketLoot = 102,
+			ItemPacketTrade = 103,
+			ItemPacketCharInventory = 105,
+			ItemPacketLimbo = 106,
+			ItemPacketWorldContainer = 107,
+			ItemPacketTributeItem = 108,
+			ItemPacketGuildTribute = 109,
+			ItemPacketCharmUpdate = 110,
+			ItemPacket11 = 111
+		};
+	
+	} /*item*/
 
-		static const size_t TEXT_LINK_BODY_LENGTH = 50;
+	namespace profile {
+		inline EQEmu::versions::ClientVersion ProfileRef() { return EQEmu::versions::ClientVersion::UF; }
+	
+	} /*profile*/
 
-		static const size_t PLAYER_PROFILE_SKILL_MAX = SkillTripleAttack;
-	}
+	namespace constants {
+		inline EQEmu::versions::ClientVersion ConstantsRef() { return EQEmu::versions::ClientVersion::UF; }
+	
+	} /*constants*/
 
-	namespace limits {
-		static const bool ALLOWS_EMPTY_BAG_IN_BAG = false;
-		static const bool ALLOWS_CLICK_CAST_FROM_BAG = false;
-		static const bool COIN_HAS_WEIGHT = false;
-	}
+	namespace behavior {
+		inline EQEmu::versions::ClientVersion BehaviorRef() { return EQEmu::versions::ClientVersion::UF; }
+	
+	} /*behavior*/
+
+	namespace skills {
+		inline EQEmu::versions::ClientVersion SkillsRef() { return EQEmu::versions::ClientVersion::UF; }
+	
+	} /*skills*/
+
+
+	// declarations
+	namespace invtype {
+		const size_t InvTypePossessionsSize = invslot::PossessionsCount;
+		const size_t InvTypeBankSize = 24;
+		const size_t InvTypeSharedBankSize = 2;
+		const size_t InvTypeTradeSize = 8;
+		const size_t InvTypeWorldSize = 10;
+		const size_t InvTypeLimboSize = 36;
+		const size_t InvTypeTributeSize = 5;
+		const size_t InvTypeGuildTributeSize = 0;//unknown
+		const size_t InvTypeMerchantSize = 80;
+		const size_t InvTypeCorpseSize = InvTypePossessionsSize;
+		const size_t InvTypeBazaarSize = 80;
+		const size_t InvTypeInspectSize = invslot::EquipmentCount;
+		const size_t InvTypeViewMODPCSize = InvTypePossessionsSize;
+		const size_t InvTypeViewMODBankSize = InvTypeBankSize;
+		const size_t InvTypeViewMODSharedBankSize = InvTypeSharedBankSize;
+		const size_t InvTypeViewMODLimboSize = InvTypeLimboSize;
+		const size_t InvTypeAltStorageSize = 0;//unknown - "Shroud Bank"
+		const size_t InvTypeArchivedSize = 0;//unknown
+		const size_t InvTypeOtherSize = 0;//unknown
+
+		const size_t NPCTradeSize = 4;
+
+		extern size_t InvTypeSize(int inv_type);
+		extern const char* InvTypeName(int inv_type);
+	
+	} /*invtype*/
+
+	namespace invslot {
+		const int BankBegin = 2000;
+		const int BankEnd = (BankBegin + invtype::InvTypeBankSize) - 1;
+
+		const int SharedBankBegin = 2500;
+		const int SharedBankEnd = (SharedBankBegin + invtype::InvTypeSharedBankSize) - 1;
+
+		const int TradeBegin = 3000;
+		const int TradeEnd = (TradeBegin + invtype::InvTypeTradeSize) - 1;
+		const int TradeNPCEnd = 3003;
+
+		const int WorldBegin = 4000;
+		const int WorldEnd = (WorldBegin + invtype::InvTypeWorldSize) - 1;
+
+		const int TributeBegin = 400;
+		const int TributeEnd = 404;
+
+		const int CorpseBegin = invslot::PossessionsGeneral1;
+		const int CorpseEnd = invslot::PossessionsGeneral1 + invslot::PossessionsCursor;
+
+		extern const char* InvPossessionsSlotName(int inv_slot);
+		extern const char* InvCorpseSlotName(int inv_slot);
+		extern const char* InvSlotName(int inv_type, int inv_slot);
+	
+	} /*invslot*/
+
+	namespace invbag {
+		const size_t ItemBagSize = 10;
+
+		const int GeneralBagsBegin = 262;
+		const int GeneralBagsSize = invslot::GeneralCount * ItemBagSize;
+		const int GeneralBagsEnd = (GeneralBagsBegin + GeneralBagsSize) - 1;
+
+		const int CursorBagBegin = 342;
+		const int CursorBagSize = ItemBagSize;
+		const int CursorBagEnd = (CursorBagBegin + CursorBagSize) - 1;
+
+		const int BankBagsBegin = 2032;
+		const int BankBagsSize = (invtype::InvTypeBankSize * ItemBagSize);
+		const int BankBagsEnd = (BankBagsBegin + BankBagsSize) - 1;
+
+		const int SharedBankBagsBegin = 2532;
+		const int SharedBankBagsSize = invtype::InvTypeSharedBankSize * ItemBagSize;
+		const int SharedBankBagsEnd = (SharedBankBagsBegin + SharedBankBagsSize) - 1;
+
+		const int TradeBagsBegin = 3031;
+		const int TradeBagsSize = invtype::InvTypeTradeSize * ItemBagSize;
+		const int TradeBagsEnd = (TradeBagsBegin + TradeBagsSize) - 1;
+
+		extern const char* InvBagIndexName(int bag_index);
+	
+	} /*invbag*/
+
+	namespace invaug {
+		const size_t ItemAugSize = 5;
+
+		extern const char* InvAugIndexName(int aug_index);
+	
+	} /*invaug*/
+
+	namespace item {
+
+	} /*item*/
+
+	namespace profile {
+		const size_t TributeSize = invtype::InvTypeTributeSize;
+
+		const size_t BandoliersSize = 20;		// number of bandolier instances
+		const size_t BandolierItemCount = 4;	// number of equipment slots in bandolier instance
+
+		const size_t PotionBeltSize = 5;
+
+		const size_t SkillArraySize = 100;
+	
+	} /*profile*/
+
+	namespace constants {
+		const size_t CharacterCreationLimit = 12;
+
+		const size_t SayLinkBodySize = 50;
+	
+	} /*constants*/
+
+	namespace behavior {
+		const bool ConcatenateInvTypeLimbo = true;
+
+		const bool AllowOverLevelEquipment = true;
+
+		const bool AllowEmptyBagInBag = false;
+		const bool AllowClickCastFromBag = false;
+
+		const bool CoinHasWeight = false;
+	
+	} /*behavior*/
+
+	namespace skills {
+		const size_t LastUsableSkill = EQEmu::skills::SkillTripleAttack;
+	
+	} /*skills*/
 
 }; /*UF*/
 
-#endif /*COMMON_UF_CONSTANTS_H*/
+#endif /*COMMON_UF_LIMITS_H*/

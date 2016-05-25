@@ -211,9 +211,9 @@ void Client::SendMaxCharCreate() {
 	auto outapp = new EQApplicationPacket(OP_SendMaxCharacters, sizeof(MaxCharacters_Struct));
 	MaxCharacters_Struct* mc = (MaxCharacters_Struct*)outapp->pBuffer;
 
-	mc->max_chars = EQEmu::limits::CharacterCreationLimit(m_ClientVersion);
-	if (mc->max_chars > EQEmu::constants::CharacterCreationLimit)
-		mc->max_chars = EQEmu::constants::CharacterCreationLimit;
+	mc->max_chars = EQEmu::constants::CharacterCreationLimit(m_ClientVersion);
+	if (mc->max_chars > EQEmu::constants::CharacterCreationMax)
+		mc->max_chars = EQEmu::constants::CharacterCreationMax;
 
 	QueuePacket(outapp);
 	safe_delete(outapp);
@@ -746,8 +746,8 @@ bool Client::HandleEnterWorldPacket(const EQApplicationPacket *app) {
 	// This can probably be moved outside and have another method return requested info (don't forget to remove the #include "../common/shareddb.h" above)
 	// (This is a literal translation of the original process..I don't see why it can't be changed to a single-target query over account iteration)
 	if (!pZoning) {
-		size_t character_limit = EQEmu::limits::CharacterCreationLimit(eqs->ClientVersion());
-		if (character_limit > EQEmu::constants::CharacterCreationLimit) { character_limit = EQEmu::constants::CharacterCreationLimit; }
+		size_t character_limit = EQEmu::constants::CharacterCreationLimit(eqs->ClientVersion());
+		if (character_limit > EQEmu::constants::CharacterCreationMax) { character_limit = EQEmu::constants::CharacterCreationMax; }
 		if (eqs->ClientVersion() == EQEmu::versions::ClientVersion::Titanium) { character_limit = 8; }
 
 		std::string tgh_query = StringFormat(
@@ -1464,8 +1464,8 @@ bool Client::OPCharCreate(char *name, CharCreate_Struct *cc)
 	SetClassStartingSkills(&pp);
 	SetClassLanguages(&pp);
 
-	pp.skills[SkillSwimming] = RuleI(Skills, SwimmingStartValue);
-	pp.skills[SkillSenseHeading] = RuleI(Skills, SenseHeadingStartValue);
+	pp.skills[EQEmu::skills::SkillSwimming] = RuleI(Skills, SwimmingStartValue);
+	pp.skills[EQEmu::skills::SkillSenseHeading] = RuleI(Skills, SenseHeadingStartValue);
 
 //	strcpy(pp.servername, WorldConfig::get()->ShortName.c_str());
 
@@ -1839,21 +1839,21 @@ bool CheckCharCreateInfoTitanium(CharCreate_Struct *cc)
 
 void Client::SetClassStartingSkills(PlayerProfile_Struct *pp)
 {
-	for (uint32 i = 0; i <= HIGHEST_SKILL; ++i) {
+	for (uint32 i = 0; i <= EQEmu::skills::HIGHEST_SKILL; ++i) {
 		if (pp->skills[i] == 0) {
 			// Skip specialized, tradeskills (fishing excluded), Alcohol Tolerance, and Bind Wound
-			if (EQEmu::IsSpecializedSkill((SkillUseTypes)i) ||
-					(EQEmu::IsTradeskill((SkillUseTypes)i) && i != SkillFishing) ||
-					i == SkillAlcoholTolerance || i == SkillBindWound)
+			if (EQEmu::skills::IsSpecializedSkill((EQEmu::skills::SkillType)i) ||
+				(EQEmu::skills::IsTradeskill((EQEmu::skills::SkillType)i) && i != EQEmu::skills::SkillFishing) ||
+				i == EQEmu::skills::SkillAlcoholTolerance || i == EQEmu::skills::SkillBindWound)
 				continue;
 
-			pp->skills[i] = database.GetSkillCap(pp->class_, (SkillUseTypes)i, 1);
+			pp->skills[i] = database.GetSkillCap(pp->class_, (EQEmu::skills::SkillType)i, 1);
 		}
 	}
 
 	if (cle->GetClientVersion() < static_cast<uint8>(EQEmu::versions::ClientVersion::RoF2) && pp->class_ == BERSERKER) {
-		pp->skills[Skill1HPiercing] = pp->skills[Skill2HPiercing];
-		pp->skills[Skill2HPiercing] = 0;
+		pp->skills[EQEmu::skills::Skill1HPiercing] = pp->skills[EQEmu::skills::Skill2HPiercing];
+		pp->skills[EQEmu::skills::Skill2HPiercing] = 0;
 	}
 }
 
@@ -1876,41 +1876,41 @@ void Client::SetRaceStartingSkills( PlayerProfile_Struct *pp )
 		}
 	case DARK_ELF:
 		{
-			pp->skills[SkillHide] = 50;
+			pp->skills[EQEmu::skills::SkillHide] = 50;
 			break;
 		}
 	case FROGLOK:
 		{
-			pp->skills[SkillSwimming] = 125;
+			pp->skills[EQEmu::skills::SkillSwimming] = 125;
 			break;
 		}
 	case GNOME:
 		{
-			pp->skills[SkillTinkering] = 50;
+			pp->skills[EQEmu::skills::SkillTinkering] = 50;
 			break;
 		}
 	case HALFLING:
 		{
-			pp->skills[SkillHide] = 50;
-			pp->skills[SkillSneak] = 50;
+			pp->skills[EQEmu::skills::SkillHide] = 50;
+			pp->skills[EQEmu::skills::SkillSneak] = 50;
 			break;
 		}
 	case IKSAR:
 		{
-			pp->skills[SkillForage] = 50;
-			pp->skills[SkillSwimming] = 100;
+			pp->skills[EQEmu::skills::SkillForage] = 50;
+			pp->skills[EQEmu::skills::SkillSwimming] = 100;
 			break;
 		}
 	case WOOD_ELF:
 		{
-			pp->skills[SkillForage] = 50;
-			pp->skills[SkillHide] = 50;
+			pp->skills[EQEmu::skills::SkillForage] = 50;
+			pp->skills[EQEmu::skills::SkillHide] = 50;
 			break;
 		}
 	case VAHSHIR:
 		{
-			pp->skills[SkillSafeFall] = 50;
-			pp->skills[SkillSneak] = 50;
+			pp->skills[EQEmu::skills::SkillSafeFall] = 50;
+			pp->skills[EQEmu::skills::SkillSneak] = 50;
 			break;
 		}
 	}

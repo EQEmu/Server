@@ -30,6 +30,7 @@
 #include "../common/item_struct.h"
 #include "../common/linked_list.h"
 #include "../common/servertalk.h"
+#include "../common/say_link.h"
 
 #include "client.h"
 #include "entity.h"
@@ -276,20 +277,20 @@ NPC::NPC(const NPCType* d, Spawn2* in_respawn, const glm::vec4& position, int if
 
 	//give NPCs skill values...
 	int r;
-	for(r = 0; r <= HIGHEST_SKILL; r++) {
-		skills[r] = database.GetSkillCap(GetClass(),(SkillUseTypes)r,moblevel);
+	for (r = 0; r <= EQEmu::skills::HIGHEST_SKILL; r++) {
+		skills[r] = database.GetSkillCap(GetClass(), (EQEmu::skills::SkillType)r, moblevel);
 	}
 	// some overrides -- really we need to be able to set skills for mobs in the DB
 	// There are some known low level SHM/BST pets that do not follow this, which supports
 	// the theory of needing to be able to set skills for each mob separately
 	if (moblevel > 50) {
-		skills[SkillDoubleAttack] = 250;
-		skills[SkillDualWield] = 250;
+		skills[EQEmu::skills::SkillDoubleAttack] = 250;
+		skills[EQEmu::skills::SkillDualWield] = 250;
 	} else if (moblevel > 3) {
-		skills[SkillDoubleAttack] = moblevel * 5;
-		skills[SkillDualWield] = skills[SkillDoubleAttack];
+		skills[EQEmu::skills::SkillDoubleAttack] = moblevel * 5;
+		skills[EQEmu::skills::SkillDualWield] = skills[EQEmu::skills::SkillDoubleAttack];
 	} else {
-		skills[SkillDoubleAttack] = moblevel * 5;
+		skills[EQEmu::skills::SkillDoubleAttack] = moblevel * 5;
 	}
 
 	if(d->trap_template > 0)
@@ -1427,7 +1428,7 @@ uint32 NPC::GetMaxDamage(uint8 tlevel)
 
 void NPC::PickPocket(Client* thief)
 {
-	thief->CheckIncreaseSkill(SkillPickPockets, nullptr, 5);
+	thief->CheckIncreaseSkill(EQEmu::skills::SkillPickPockets, nullptr, 5);
 
 	//make sure were allowed to target them:
 	int over_level = GetLevel();
@@ -1446,7 +1447,7 @@ void NPC::PickPocket(Client* thief)
 		return;
 	}
 
-	int steal_skill = thief->GetSkill(SkillPickPockets);
+	int steal_skill = thief->GetSkill(EQEmu::skills::SkillPickPockets);
 	int steal_chance = steal_skill * 100 / (5 * over_level + 5);
 
 	// Determine whether to steal money or an item.

@@ -52,6 +52,7 @@
 #include "../common/rulesys.h"
 #include "../common/serverinfo.h"
 #include "../common/string_util.h"
+#include "../say_link.h"
 #include "../common/eqemu_logsys.h"
 
 
@@ -2129,7 +2130,7 @@ void command_showskills(Client *c, const Seperator *sep)
 		t=c->GetTarget()->CastToClient();
 
 	c->Message(0, "Skills for %s",  t->GetName());
-	for (SkillUseTypes i=Skill1HBlunt; i <= HIGHEST_SKILL; i=(SkillUseTypes)(i+1))
+	for (EQEmu::skills::SkillType i = EQEmu::skills::Skill1HBlunt; i <= EQEmu::skills::HIGHEST_SKILL; i = (EQEmu::skills::SkillType)(i + 1))
 		c->Message(0, "Skill [%d] is at [%d] - %u",  i, t->GetSkill(i), t->GetRawSkill(i));
 }
 
@@ -2277,20 +2278,20 @@ void command_setskill(Client *c, const Seperator *sep)
 		c->Message(0, "Error: #setskill: Target must be a client.");
 	}
 	else if (
-						!sep->IsNumber(1) || atoi(sep->arg[1]) < 0 || atoi(sep->arg[1]) > HIGHEST_SKILL ||
+		!sep->IsNumber(1) || atoi(sep->arg[1]) < 0 || atoi(sep->arg[1]) > EQEmu::skills::HIGHEST_SKILL ||
 						!sep->IsNumber(2) || atoi(sep->arg[2]) < 0 || atoi(sep->arg[2]) > HIGHEST_CAN_SET_SKILL
 					)
 	{
 		c->Message(0, "Usage: #setskill skill x ");
-		c->Message(0, "       skill = 0 to %d",  HIGHEST_SKILL);
+		c->Message(0, "       skill = 0 to %d", EQEmu::skills::HIGHEST_SKILL);
 		c->Message(0, "       x = 0 to %d",  HIGHEST_CAN_SET_SKILL);
 	}
 	else {
 		Log.Out(Logs::General, Logs::Normal, "Set skill request from %s, target:%s skill_id:%i value:%i",  c->GetName(), c->GetTarget()->GetName(), atoi(sep->arg[1]), atoi(sep->arg[2]) );
 		int skill_num = atoi(sep->arg[1]);
 		uint16 skill_value = atoi(sep->arg[2]);
-		if(skill_num <= HIGHEST_SKILL)
-			c->GetTarget()->CastToClient()->SetSkill((SkillUseTypes)skill_num, skill_value);
+		if (skill_num <= EQEmu::skills::HIGHEST_SKILL)
+			c->GetTarget()->CastToClient()->SetSkill((EQEmu::skills::SkillType)skill_num, skill_value);
 	}
 }
 
@@ -2308,7 +2309,7 @@ void command_setskillall(Client *c, const Seperator *sep)
 		if (c->Admin() >= commandSetSkillsOther || c->GetTarget()==c || c->GetTarget()==0) {
 			Log.Out(Logs::General, Logs::Normal, "Set ALL skill request from %s, target:%s",  c->GetName(), c->GetTarget()->GetName());
 			uint16 level = atoi(sep->arg[1]);
-			for(SkillUseTypes skill_num=Skill1HBlunt;skill_num <= HIGHEST_SKILL;skill_num=(SkillUseTypes)(skill_num+1)) {
+			for (EQEmu::skills::SkillType skill_num = EQEmu::skills::Skill1HBlunt; skill_num <= EQEmu::skills::HIGHEST_SKILL; skill_num = (EQEmu::skills::SkillType)(skill_num + 1)) {
 				c->GetTarget()->CastToClient()->SetSkill(skill_num, level);
 			}
 		}
@@ -4197,7 +4198,7 @@ void command_damage(Client *c, const Seperator *sep)
 		if (nkdmg > 2100000000)
 			c->Message(0, "Enter a value less then 2,100,000,000.");
 		else
-			c->GetTarget()->Damage(c, nkdmg, SPELL_UNKNOWN, SkillHandtoHand, false);
+			c->GetTarget()->Damage(c, nkdmg, SPELL_UNKNOWN, EQEmu::skills::SkillHandtoHand, false);
 	}
 }
 
@@ -9942,16 +9943,16 @@ void command_max_all_skills(Client *c, const Seperator *sep)
 {
 	if(c)
 	{
-		for(int i = 0; i <= HIGHEST_SKILL; ++i)
+		for (int i = 0; i <= EQEmu::skills::HIGHEST_SKILL; ++i)
 		{
-			if(i >= SkillSpecializeAbjure && i <= SkillSpecializeEvocation)
+			if (i >= EQEmu::skills::SkillSpecializeAbjure && i <= EQEmu::skills::SkillSpecializeEvocation)
 			{
-				c->SetSkill((SkillUseTypes)i, 50);
+				c->SetSkill((EQEmu::skills::SkillType)i, 50);
 			}
 			else
 			{
-				int max_skill_level = database.GetSkillCap(c->GetClass(), (SkillUseTypes)i, c->GetLevel());
-				c->SetSkill((SkillUseTypes)i, max_skill_level);
+				int max_skill_level = database.GetSkillCap(c->GetClass(), (EQEmu::skills::SkillType)i, c->GetLevel());
+				c->SetSkill((EQEmu::skills::SkillType)i, max_skill_level);
 			}
 		}
 	}
@@ -10037,14 +10038,14 @@ void command_disarmtrap(Client *c, const Seperator *sep)
 
 	if(target->IsNPC())
 	{
-		if(c->HasSkill(SkillDisarmTraps))
+		if (c->HasSkill(EQEmu::skills::SkillDisarmTraps))
 		{
 			if(DistanceSquaredNoZ(c->GetPosition(), target->GetPosition()) > RuleI(Adventure, LDoNTrapDistanceUse))
 			{
 				c->Message(13, "%s is too far away.",  target->GetCleanName());
 				return;
 			}
-			c->HandleLDoNDisarm(target->CastToNPC(), c->GetSkill(SkillDisarmTraps), LDoNTypeMechanical);
+			c->HandleLDoNDisarm(target->CastToNPC(), c->GetSkill(EQEmu::skills::SkillDisarmTraps), LDoNTypeMechanical);
 		}
 		else
 			c->Message(13, "You do not have the disarm trap skill.");
@@ -10062,14 +10063,14 @@ void command_sensetrap(Client *c, const Seperator *sep)
 
 	if(target->IsNPC())
 	{
-		if(c->HasSkill(SkillSenseTraps))
+		if (c->HasSkill(EQEmu::skills::SkillSenseTraps))
 		{
 			if(DistanceSquaredNoZ(c->GetPosition(), target->GetPosition()) > RuleI(Adventure, LDoNTrapDistanceUse))
 			{
 				c->Message(13, "%s is too far away.",  target->GetCleanName());
 				return;
 			}
-			c->HandleLDoNSenseTraps(target->CastToNPC(), c->GetSkill(SkillSenseTraps), LDoNTypeMechanical);
+			c->HandleLDoNSenseTraps(target->CastToNPC(), c->GetSkill(EQEmu::skills::SkillSenseTraps), LDoNTypeMechanical);
 		}
 		else
 			c->Message(13, "You do not have the sense traps skill.");
@@ -10087,14 +10088,14 @@ void command_picklock(Client *c, const Seperator *sep)
 
 	if(target->IsNPC())
 	{
-		if(c->HasSkill(SkillPickLock))
+		if (c->HasSkill(EQEmu::skills::SkillPickLock))
 		{
 			if(DistanceSquaredNoZ(c->GetPosition(), target->GetPosition()) > RuleI(Adventure, LDoNTrapDistanceUse))
 			{
 				c->Message(13, "%s is too far away.",  target->GetCleanName());
 				return;
 			}
-			c->HandleLDoNPickLock(target->CastToNPC(), c->GetSkill(SkillPickLock), LDoNTypeMechanical);
+			c->HandleLDoNPickLock(target->CastToNPC(), c->GetSkill(EQEmu::skills::SkillPickLock), LDoNTypeMechanical);
 		}
 		else
 			c->Message(13, "You do not have the pick locks skill.");

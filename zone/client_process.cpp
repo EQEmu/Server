@@ -428,7 +428,7 @@ bool Client::Process() {
 				//you can't see your target
 			}
 			else if(auto_attack_target->GetHP() > -10) {
-				CheckIncreaseSkill(SkillDualWield, auto_attack_target, -10);
+				CheckIncreaseSkill(EQEmu::skills::SkillDualWield, auto_attack_target, -10);
 				if (CheckDualWield()) {
 					ItemInst *wpn = GetInv().GetItem(EQEmu::legacy::SlotSecondary);
 					TryWeaponProc(wpn, auto_attack_target, EQEmu::legacy::SlotSecondary);
@@ -1481,19 +1481,19 @@ void Client::OPGMTraining(const EQApplicationPacket *app)
 	// if this for-loop acts up again (crashes linux), try enabling the before and after #pragmas
 //#pragma GCC push_options
 //#pragma GCC optimize ("O0")
-	for (int sk = Skill1HBlunt; sk <= HIGHEST_SKILL; ++sk) {
-		if(sk == SkillTinkering && GetRace() != GNOME) {
+	for (int sk = EQEmu::skills::Skill1HBlunt; sk <= EQEmu::skills::HIGHEST_SKILL; ++sk) {
+		if (sk == EQEmu::skills::SkillTinkering && GetRace() != GNOME) {
 			gmtrain->skills[sk] = 0; //Non gnomes can't tinker!
 		} else {
-			gmtrain->skills[sk] = GetMaxSkillAfterSpecializationRules((SkillUseTypes)sk, MaxSkill((SkillUseTypes)sk, GetClass(), RuleI(Character, MaxLevel)));
+			gmtrain->skills[sk] = GetMaxSkillAfterSpecializationRules((EQEmu::skills::SkillType)sk, MaxSkill((EQEmu::skills::SkillType)sk, GetClass(), RuleI(Character, MaxLevel)));
 			//this is the highest level that the trainer can train you to, this is enforced clientside so we can't just
 			//Set it to 1 with CanHaveSkill or you wont be able to train past 1.
 		}
 	}
 
 	if (ClientVersion() < EQEmu::versions::ClientVersion::RoF2 && GetClass() == BERSERKER) {
-		gmtrain->skills[Skill1HPiercing] = gmtrain->skills[Skill2HPiercing];
-		gmtrain->skills[Skill2HPiercing] = 0;
+		gmtrain->skills[EQEmu::skills::Skill1HPiercing] = gmtrain->skills[EQEmu::skills::Skill2HPiercing];
+		gmtrain->skills[EQEmu::skills::Skill2HPiercing] = 0;
 	}
 //#pragma GCC pop_options
 
@@ -1578,14 +1578,14 @@ void Client::OPGMTrainSkill(const EQApplicationPacket *app)
 	else if (gmskill->skillbank == 0x00)
 	{
 		// normal skills go here
-		if (gmskill->skill_id > HIGHEST_SKILL)
+		if (gmskill->skill_id > EQEmu::skills::HIGHEST_SKILL)
 		{
 			std::cout << "Wrong Training Skill (abilities)" << std::endl;
 			DumpPacket(app);
 			return;
 		}
 
-		SkillUseTypes skill = (SkillUseTypes) gmskill->skill_id;
+		EQEmu::skills::SkillType skill = (EQEmu::skills::SkillType)gmskill->skill_id;
 
 		if(!CanHaveSkill(skill)) {
 			Log.Out(Logs::Detail, Logs::Skills, "Tried to train skill %d, which is not allowed.", skill);
@@ -1610,27 +1610,27 @@ void Client::OPGMTrainSkill(const EQApplicationPacket *app)
 			SetSkill(skill, t_level);
 		} else {
 			switch(skill) {
-			case SkillBrewing:
-			case SkillMakePoison:
-			case SkillTinkering:
-			case SkillResearch:
-			case SkillAlchemy:
-			case SkillBaking:
-			case SkillTailoring:
-			case SkillBlacksmithing:
-			case SkillFletching:
-			case SkillJewelryMaking:
-			case SkillPottery:
+			case EQEmu::skills::SkillBrewing:
+			case EQEmu::skills::SkillMakePoison:
+			case EQEmu::skills::SkillTinkering:
+			case EQEmu::skills::SkillResearch:
+			case EQEmu::skills::SkillAlchemy:
+			case EQEmu::skills::SkillBaking:
+			case EQEmu::skills::SkillTailoring:
+			case EQEmu::skills::SkillBlacksmithing:
+			case EQEmu::skills::SkillFletching:
+			case EQEmu::skills::SkillJewelryMaking:
+			case EQEmu::skills::SkillPottery:
 				if(skilllevel >= RuleI(Skills, MaxTrainTradeskills)) {
 					Message_StringID(13, MORE_SKILLED_THAN_I, pTrainer->GetCleanName());
 					return;
 				}
 				break;
-			case SkillSpecializeAbjure:
-			case SkillSpecializeAlteration:
-			case SkillSpecializeConjuration:
-			case SkillSpecializeDivination:
-			case SkillSpecializeEvocation:
+			case EQEmu::skills::SkillSpecializeAbjure:
+			case EQEmu::skills::SkillSpecializeAlteration:
+			case EQEmu::skills::SkillSpecializeConjuration:
+			case EQEmu::skills::SkillSpecializeDivination:
+			case EQEmu::skills::SkillSpecializeEvocation:
 				if(skilllevel >= RuleI(Skills, MaxTrainSpecializations)) {
 					Message_StringID(13, MORE_SKILLED_THAN_I, pTrainer->GetCleanName());
 					return;
@@ -1647,7 +1647,7 @@ void Client::OPGMTrainSkill(const EQApplicationPacket *app)
 				return;
 			}
 
-			if(gmskill->skill_id >= SkillSpecializeAbjure && gmskill->skill_id <= SkillSpecializeEvocation)
+			if (gmskill->skill_id >= EQEmu::skills::SkillSpecializeAbjure && gmskill->skill_id <= EQEmu::skills::SkillSpecializeEvocation)
 			{
 				int MaxSpecSkill = GetMaxSkillAfterSpecializationRules(skill, MaxSkillValue);
 				if (skilllevel >= MaxSpecSkill)
@@ -1685,7 +1685,7 @@ void Client::OPGMTrainSkill(const EQApplicationPacket *app)
 			gmtsc->SkillID += 100;
 		}
 		else
-			gmtsc->NewSkill = (GetRawSkill((SkillUseTypes)gmtsc->SkillID) == 1);
+			gmtsc->NewSkill = (GetRawSkill((EQEmu::skills::SkillType)gmtsc->SkillID) == 1);
 
 		gmtsc->Cost = Cost;
 

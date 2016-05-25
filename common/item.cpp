@@ -24,6 +24,8 @@
 #include "shareddb.h"
 #include "string_util.h"
 
+#include "../common/light_source.h"
+
 #include <limits.h>
 
 #include <iostream>
@@ -927,7 +929,7 @@ bool Inventory::SupportsClickCasting(int16 slot_id)
 	}
 	else if (slot_id >= EQEmu::legacy::GENERAL_BAGS_BEGIN && slot_id <= EQEmu::legacy::GENERAL_BAGS_END)
 	{
-		if (EQEmu::limits::AllowClickCastFromBag(m_inventory_version))
+		if (EQEmu::inventory::AllowClickCastFromBag(m_inventory_version))
 			return true;
 	}
 

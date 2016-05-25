@@ -1,4 +1,4 @@
-/*	EQEMu: Everquest Server Emulator
+/*	EQEMu:  Everquest Server Emulator
 	
 	Copyright (C) 2001-2016 EQEMu Development Team (http://eqemulator.net)
 
@@ -11,42 +11,8 @@
 	are required to give you total support for your newly bought product;
 	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
 	A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
-
+	
 	You should have received a copy of the GNU General Public License
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
-
-#ifndef COMMON_EMU_CONSTANTS_H
-#define COMMON_EMU_CONSTANTS_H
-
-#include "eq_limits.h"
-#include "emu_legacy.h"
-#include "inventory_version.h"
-//#include "deity.h"
-//#include "say_link.h"
-
-#include <string>
-
-
-namespace EQEmu
-{
-	namespace inventory {
-		//using namespace RoF2::invtype;
-		//using namespace RoF2::invslot;
-		//using namespace RoF2::invbag;
-		//using namespace RoF2::invaug;
-
-	} /*inventory*/
-
-	namespace constants {
-		const EQEmu::versions::ClientVersion CharacterCreationClient = EQEmu::versions::ClientVersion::RoF2;
-		const size_t CharacterCreationMax = RoF2::constants::CharacterCreationLimit;
-
-		const size_t SayLinkBodySize = RoF2::constants::SayLinkBodySize;
-
-	} /*constants*/
-
-} /*EQEmu*/
-
-#endif /*COMMON_EMU_CONSTANTS_H*/

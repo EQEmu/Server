@@ -1940,7 +1940,7 @@ XS(XS_Client_GetSkill)
 		Client *		THIS;
 		uint16		RETVAL;
 		dXSTARG;
-		SkillUseTypes		skill_id = (SkillUseTypes)SvUV(ST(1));
+		EQEmu::skills::SkillType		skill_id = (EQEmu::skills::SkillType)SvUV(ST(1));
 
 		if (sv_derived_from(ST(0), "Client")) {
 			IV tmp = SvIV((SV*)SvRV(ST(0)));
@@ -1967,7 +1967,7 @@ XS(XS_Client_GetRawSkill)
 		Client *		THIS;
 		uint32		RETVAL;
 		dXSTARG;
-		SkillUseTypes		skill_id = (SkillUseTypes)SvUV(ST(1));
+		EQEmu::skills::SkillType		skill_id = (EQEmu::skills::SkillType)SvUV(ST(1));
 
 		if (sv_derived_from(ST(0), "Client")) {
 			IV tmp = SvIV((SV*)SvRV(ST(0)));
@@ -1993,7 +1993,7 @@ XS(XS_Client_HasSkill)
 	{
 		Client *		THIS;
 		bool		RETVAL;
-		SkillUseTypes		skill_id = (SkillUseTypes)SvUV(ST(1));
+		EQEmu::skills::SkillType		skill_id = (EQEmu::skills::SkillType)SvUV(ST(1));
 
 		if (sv_derived_from(ST(0), "Client")) {
 			IV tmp = SvIV((SV*)SvRV(ST(0)));
@@ -2020,7 +2020,7 @@ XS(XS_Client_CanHaveSkill)
 	{
 		Client *		THIS;
 		bool		RETVAL;
-		SkillUseTypes		skill_id = (SkillUseTypes)SvUV(ST(1));
+		EQEmu::skills::SkillType		skill_id = (EQEmu::skills::SkillType)SvUV(ST(1));
 
 		if (sv_derived_from(ST(0), "Client")) {
 			IV tmp = SvIV((SV*)SvRV(ST(0)));
@@ -2046,7 +2046,7 @@ XS(XS_Client_SetSkill)
 		Perl_croak(aTHX_ "Usage: Client::SetSkill(THIS, skill_num, value)");
 	{
 		Client *		THIS;
-		SkillUseTypes		skill_num = (SkillUseTypes)SvUV(ST(1));
+		EQEmu::skills::SkillType		skill_num = (EQEmu::skills::SkillType)SvUV(ST(1));
 		uint16		value = (uint16)SvUV(ST(2));
 
 		if (sv_derived_from(ST(0), "Client")) {
@@ -2071,7 +2071,7 @@ XS(XS_Client_AddSkill)
 		Perl_croak(aTHX_ "Usage: Client::AddSkill(THIS, skillid, value)");
 	{
 		Client *		THIS;
-		SkillUseTypes		skillid = (SkillUseTypes)SvUV(ST(1));
+		EQEmu::skills::SkillType		skillid = (EQEmu::skills::SkillType)SvUV(ST(1));
 		uint16		value = (uint16)SvUV(ST(2));
 
 		if (sv_derived_from(ST(0), "Client")) {
@@ -2121,7 +2121,7 @@ XS(XS_Client_CheckIncreaseSkill)
 	{
 		Client *		THIS;
 		bool		RETVAL;
-		SkillUseTypes		skillid = (SkillUseTypes)SvUV(ST(1));
+		EQEmu::skills::SkillType		skillid = (EQEmu::skills::SkillType)SvUV(ST(1));
 		int		chancemodi;
 
 		if (sv_derived_from(ST(0), "Client")) {
@@ -2180,7 +2180,7 @@ XS(XS_Client_MaxSkill)
 	{
 		Client *		THIS;
 		uint16			RETVAL;
-		SkillUseTypes		skillid = (SkillUseTypes)SvUV(ST(1));
+		EQEmu::skills::SkillType		skillid = (EQEmu::skills::SkillType)SvUV(ST(1));
 		uint16			class_ = 0;
 		uint16			level = 0;
 		dXSTARG;

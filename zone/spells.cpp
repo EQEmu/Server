@@ -556,16 +556,16 @@ bool Mob::DoCastingChecks()
 
 uint16 Mob::GetSpecializeSkillValue(uint16 spell_id) const {
 	switch(spells[spell_id].skill) {
-	case SkillAbjuration:
-		return(GetSkill(SkillSpecializeAbjure));
-	case SkillAlteration:
-		return(GetSkill(SkillSpecializeAlteration));
-	case SkillConjuration:
-		return(GetSkill(SkillSpecializeConjuration));
-	case SkillDivination:
-		return(GetSkill(SkillSpecializeDivination));
-	case SkillEvocation:
-		return(GetSkill(SkillSpecializeEvocation));
+	case EQEmu::skills::SkillAbjuration:
+		return(GetSkill(EQEmu::skills::SkillSpecializeAbjure));
+	case EQEmu::skills::SkillAlteration:
+		return(GetSkill(EQEmu::skills::SkillSpecializeAlteration));
+	case EQEmu::skills::SkillConjuration:
+		return(GetSkill(EQEmu::skills::SkillSpecializeConjuration));
+	case EQEmu::skills::SkillDivination:
+		return(GetSkill(EQEmu::skills::SkillSpecializeDivination));
+	case EQEmu::skills::SkillEvocation:
+		return(GetSkill(EQEmu::skills::SkillSpecializeEvocation));
 	default:
 		//wtf...
 		break;
@@ -584,20 +584,20 @@ void Client::CheckSpecializeIncrease(uint16 spell_id) {
 	*/
 
 	switch(spells[spell_id].skill) {
-	case SkillAbjuration:
-		CheckIncreaseSkill(SkillSpecializeAbjure, nullptr);
+	case EQEmu::skills::SkillAbjuration:
+		CheckIncreaseSkill(EQEmu::skills::SkillSpecializeAbjure, nullptr);
 		break;
-	case SkillAlteration:
-		CheckIncreaseSkill(SkillSpecializeAlteration, nullptr);
+	case EQEmu::skills::SkillAlteration:
+		CheckIncreaseSkill(EQEmu::skills::SkillSpecializeAlteration, nullptr);
 		break;
-	case SkillConjuration:
-		CheckIncreaseSkill(SkillSpecializeConjuration, nullptr);
+	case EQEmu::skills::SkillConjuration:
+		CheckIncreaseSkill(EQEmu::skills::SkillSpecializeConjuration, nullptr);
 		break;
-	case SkillDivination:
-		CheckIncreaseSkill(SkillSpecializeDivination, nullptr);
+	case EQEmu::skills::SkillDivination:
+		CheckIncreaseSkill(EQEmu::skills::SkillSpecializeDivination, nullptr);
 		break;
-	case SkillEvocation:
-		CheckIncreaseSkill(SkillSpecializeEvocation, nullptr);
+	case EQEmu::skills::SkillEvocation:
+		CheckIncreaseSkill(EQEmu::skills::SkillSpecializeEvocation, nullptr);
 		break;
 	default:
 		//wtf...
@@ -617,48 +617,48 @@ void Client::CheckSongSkillIncrease(uint16 spell_id){
 
 	switch(spells[spell_id].skill)
 	{
-	case SkillSinging:
-		CheckIncreaseSkill(SkillSinging, nullptr, -15);
+	case EQEmu::skills::SkillSinging:
+		CheckIncreaseSkill(EQEmu::skills::SkillSinging, nullptr, -15);
 		break;
-	case SkillPercussionInstruments:
+	case EQEmu::skills::SkillPercussionInstruments:
 		if(this->itembonuses.percussionMod > 0) {
-			if(GetRawSkill(SkillPercussionInstruments) > 0)	// no skill increases if not trained in the instrument
-				CheckIncreaseSkill(SkillPercussionInstruments, nullptr, -15);
+			if (GetRawSkill(EQEmu::skills::SkillPercussionInstruments) > 0)	// no skill increases if not trained in the instrument
+				CheckIncreaseSkill(EQEmu::skills::SkillPercussionInstruments, nullptr, -15);
 			else
 				Message_StringID(13,NO_INSTRUMENT_SKILL);	// tell the client that they need instrument training
 		}
 		else
-			CheckIncreaseSkill(SkillSinging, nullptr, -15);
+			CheckIncreaseSkill(EQEmu::skills::SkillSinging, nullptr, -15);
 		break;
-	case SkillStringedInstruments:
+	case EQEmu::skills::SkillStringedInstruments:
 		if(this->itembonuses.stringedMod > 0) {
-			if(GetRawSkill(SkillStringedInstruments) > 0)
-				CheckIncreaseSkill(SkillStringedInstruments, nullptr, -15);
+			if (GetRawSkill(EQEmu::skills::SkillStringedInstruments) > 0)
+				CheckIncreaseSkill(EQEmu::skills::SkillStringedInstruments, nullptr, -15);
 			else
 				Message_StringID(13,NO_INSTRUMENT_SKILL);
 		}
 		else
-			CheckIncreaseSkill(SkillSinging, nullptr, -15);
+			CheckIncreaseSkill(EQEmu::skills::SkillSinging, nullptr, -15);
 		break;
-	case SkillWindInstruments:
+	case EQEmu::skills::SkillWindInstruments:
 		if(this->itembonuses.windMod > 0) {
-			if(GetRawSkill(SkillWindInstruments) > 0)
-				CheckIncreaseSkill(SkillWindInstruments, nullptr, -15);
+			if (GetRawSkill(EQEmu::skills::SkillWindInstruments) > 0)
+				CheckIncreaseSkill(EQEmu::skills::SkillWindInstruments, nullptr, -15);
 			else
 				Message_StringID(13,NO_INSTRUMENT_SKILL);
 		}
 		else
-			CheckIncreaseSkill(SkillSinging, nullptr, -15);
+			CheckIncreaseSkill(EQEmu::skills::SkillSinging, nullptr, -15);
 		break;
-	case SkillBrassInstruments:
+	case EQEmu::skills::SkillBrassInstruments:
 		if(this->itembonuses.brassMod > 0) {
-			if(GetRawSkill(SkillBrassInstruments) > 0)
-				CheckIncreaseSkill(SkillBrassInstruments, nullptr, -15);
+			if (GetRawSkill(EQEmu::skills::SkillBrassInstruments) > 0)
+				CheckIncreaseSkill(EQEmu::skills::SkillBrassInstruments, nullptr, -15);
 			else
 				Message_StringID(13,NO_INSTRUMENT_SKILL);
 		}
 		else
-			CheckIncreaseSkill(SkillSinging, nullptr, -15);
+			CheckIncreaseSkill(EQEmu::skills::SkillSinging, nullptr, -15);
 		break;
 	default:
 		break;
@@ -991,7 +991,7 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, uint16 slot,
 					channelbonuses += spellbonuses.ChannelChanceSpells + itembonuses.ChannelChanceSpells + aabonuses.ChannelChanceSpells;
 
 				// max 93% chance at 252 skill
-				channelchance = 30 + GetSkill(SkillChanneling) / 400.0f * 100;
+				channelchance = 30 + GetSkill(EQEmu::skills::SkillChanneling) / 400.0f * 100;
 				channelchance -= attacked_count * 2;
 				channelchance += channelchance * channelbonuses / 100.0f;
 			}
@@ -1005,7 +1005,7 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, uint16 slot,
 					channelbonuses += spellbonuses.ChannelChanceSpells + itembonuses.ChannelChanceSpells + aabonuses.ChannelChanceSpells;
 
 				// max 93% chance at 252 skill
-				channelchance = 30 + GetSkill(SkillChanneling) / 400.0f * 100;
+				channelchance = 30 + GetSkill(EQEmu::skills::SkillChanneling) / 400.0f * 100;
 				channelchance -= attacked_count * 2;
 				channelchance += channelchance * channelbonuses / 100.0f;
 			}
@@ -1037,7 +1037,7 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, uint16 slot,
 				}
 			}
 
-			Log.Out(Logs::Detail, Logs::Spells, "Checking Interruption: spell x: %f  spell y: %f  cur x: %f  cur y: %f channelchance %f channeling skill %d\n", GetSpellX(), GetSpellY(), GetX(), GetY(), channelchance, GetSkill(SkillChanneling));
+			Log.Out(Logs::Detail, Logs::Spells, "Checking Interruption: spell x: %f  spell y: %f  cur x: %f  cur y: %f channelchance %f channeling skill %d\n", GetSpellX(), GetSpellY(), GetX(), GetY(), channelchance, GetSkill(EQEmu::skills::SkillChanneling));
 
 			if(!spells[spell_id].uninterruptable && zone->random.Real(0, 100) > channelchance) {
 				Log.Out(Logs::Detail, Logs::Spells, "Casting of %d canceled: interrupted.", spell_id);
@@ -1330,7 +1330,7 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, uint16 slot,
 				c->CheckIncreaseSkill(spells[spell_id].skill, nullptr);
 
 				// increased chance of gaining channel skill if you regained concentration
-				c->CheckIncreaseSkill(SkillChanneling, nullptr, regain_conc ? 5 : 0);
+				c->CheckIncreaseSkill(EQEmu::skills::SkillChanneling, nullptr, regain_conc ? 5 : 0);
 
 				c->CheckSpecializeIncrease(spell_id);
 			}

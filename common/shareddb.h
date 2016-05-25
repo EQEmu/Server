@@ -131,8 +131,8 @@ class SharedDatabase : public Database
 
 		void LoadSkillCaps(void *data);
 		bool LoadSkillCaps(const std::string &prefix);
-		uint16 GetSkillCap(uint8 Class_, SkillUseTypes Skill, uint8 Level);
-		uint8 GetTrainLevel(uint8 Class_, SkillUseTypes Skill, uint8 Level);
+		uint16 GetSkillCap(uint8 Class_, EQEmu::skills::SkillType Skill, uint8 Level);
+		uint8 GetTrainLevel(uint8 Class_, EQEmu::skills::SkillType Skill, uint8 Level);
 
 		int GetMaxSpellID();
 		bool LoadSpells(const std::string &prefix, int32 *records, const SPDat_Spell_Struct **sp);

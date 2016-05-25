@@ -427,7 +427,7 @@ Mob::Mob(const char* in_name,
 
 	m_AllowBeneficial = false;
 	m_DisableMelee = false;
-	for (int i = 0; i < HIGHEST_SKILL+2; i++) { SkillDmgTaken_Mod[i] = 0; }
+	for (int i = 0; i < EQEmu::skills::HIGHEST_SKILL + 2; i++) { SkillDmgTaken_Mod[i] = 0; }
 	for (int i = 0; i < HIGHEST_RESIST+2; i++) { Vulnerability_Mod[i] = 0; }
 
 	emoteid = 0;
@@ -2369,14 +2369,14 @@ void Mob::SetZone(uint32 zone_id, uint32 instance_id)
 }
 
 void Mob::Kill() {
-	Death(this, 0, SPELL_UNKNOWN, SkillHandtoHand);
+	Death(this, 0, SPELL_UNKNOWN, EQEmu::skills::SkillHandtoHand);
 }
 
 bool Mob::CanThisClassDualWield(void) const {
 	if(!IsClient()) {
-		return(GetSkill(SkillDualWield) > 0);
+		return(GetSkill(EQEmu::skills::SkillDualWield) > 0);
 	}
-	else if(CastToClient()->HasSkill(SkillDualWield)) {
+	else if (CastToClient()->HasSkill(EQEmu::skills::SkillDualWield)) {
 		const ItemInst* pinst = CastToClient()->GetInv().GetItem(EQEmu::legacy::SlotPrimary);
 		const ItemInst* sinst = CastToClient()->GetInv().GetItem(EQEmu::legacy::SlotSecondary);
 
@@ -2406,12 +2406,12 @@ bool Mob::CanThisClassDualWield(void) const {
 bool Mob::CanThisClassDoubleAttack(void) const
 {
 	if(!IsClient()) {
-		return(GetSkill(SkillDoubleAttack) > 0);
+		return(GetSkill(EQEmu::skills::SkillDoubleAttack) > 0);
 	} else {
 		if(aabonuses.GiveDoubleAttack || itembonuses.GiveDoubleAttack || spellbonuses.GiveDoubleAttack) {
 			return true;
 		}
-		return(CastToClient()->HasSkill(SkillDoubleAttack));
+		return(CastToClient()->HasSkill(EQEmu::skills::SkillDoubleAttack));
 	}
 }
 
@@ -2420,7 +2420,7 @@ bool Mob::CanThisClassTripleAttack() const
 	if (!IsClient())
 		return false; // When they added the real triple attack skill, mobs lost the ability to triple
 	else
-		return CastToClient()->HasSkill(SkillTripleAttack);
+		return CastToClient()->HasSkill(EQEmu::skills::SkillTripleAttack);
 }
 
 bool Mob::IsWarriorClass(void) const
@@ -2459,36 +2459,36 @@ bool Mob::IsWarriorClass(void) const
 bool Mob::CanThisClassParry(void) const
 {
 	if(!IsClient()) {
-		return(GetSkill(SkillParry) > 0);
+		return(GetSkill(EQEmu::skills::SkillParry) > 0);
 	} else {
-		return(CastToClient()->HasSkill(SkillParry));
+		return(CastToClient()->HasSkill(EQEmu::skills::SkillParry));
 	}
 }
 
 bool Mob::CanThisClassDodge(void) const
 {
 	if(!IsClient()) {
-		return(GetSkill(SkillDodge) > 0);
+		return(GetSkill(EQEmu::skills::SkillDodge) > 0);
 	} else {
-		return(CastToClient()->HasSkill(SkillDodge));
+		return(CastToClient()->HasSkill(EQEmu::skills::SkillDodge));
 	}
 }
 
 bool Mob::CanThisClassRiposte(void) const
 {
 	if(!IsClient()) {
-		return(GetSkill(SkillRiposte) > 0);
+		return(GetSkill(EQEmu::skills::SkillRiposte) > 0);
 	} else {
-		return(CastToClient()->HasSkill(SkillRiposte));
+		return(CastToClient()->HasSkill(EQEmu::skills::SkillRiposte));
 	}
 }
 
 bool Mob::CanThisClassBlock(void) const
 {
 	if(!IsClient()) {
-		return(GetSkill(SkillBlock) > 0);
+		return(GetSkill(EQEmu::skills::SkillBlock) > 0);
 	} else {
-		return(CastToClient()->HasSkill(SkillBlock));
+		return(CastToClient()->HasSkill(EQEmu::skills::SkillBlock));
 	}
 }
 /*
@@ -3411,19 +3411,19 @@ void Mob::TriggerDefensiveProcs(Mob *on, uint16 hand, bool FromSkillProc, int da
 		uint16 skillinuse = 0;
 		switch (damage) {
 			case (-1):
-				skillinuse = SkillBlock;
+				skillinuse = EQEmu::skills::SkillBlock;
 			break;
 
 			case (-2):
-				skillinuse = SkillParry;
+				skillinuse = EQEmu::skills::SkillParry;
 			break;
 
 			case (-3):
-				skillinuse = SkillRiposte;
+				skillinuse = EQEmu::skills::SkillRiposte;
 			break;
 
 			case (-4):
-				skillinuse = SkillDodge;
+				skillinuse = EQEmu::skills::SkillDodge;
 			break;
 		}
 
@@ -3784,15 +3784,15 @@ int32 Mob::GetVulnerability(Mob* caster, uint32 spell_id, uint32 ticsremaining)
 	return value;
 }
 
-int16 Mob::GetSkillDmgTaken(const SkillUseTypes skill_used, ExtraAttackOptions *opts)
+int16 Mob::GetSkillDmgTaken(const EQEmu::skills::SkillType skill_used, ExtraAttackOptions *opts)
 {
 	int skilldmg_mod = 0;
 
 	// All skill dmg mod + Skill specific
-	skilldmg_mod += itembonuses.SkillDmgTaken[HIGHEST_SKILL+1] + spellbonuses.SkillDmgTaken[HIGHEST_SKILL+1] +
+	skilldmg_mod += itembonuses.SkillDmgTaken[EQEmu::skills::HIGHEST_SKILL + 1] + spellbonuses.SkillDmgTaken[EQEmu::skills::HIGHEST_SKILL + 1] +
 					itembonuses.SkillDmgTaken[skill_used] + spellbonuses.SkillDmgTaken[skill_used];
 
-	skilldmg_mod += SkillDmgTaken_Mod[skill_used] + SkillDmgTaken_Mod[HIGHEST_SKILL+1];
+	skilldmg_mod += SkillDmgTaken_Mod[skill_used] + SkillDmgTaken_Mod[EQEmu::skills::HIGHEST_SKILL + 1];
 
 	if (opts)
 		skilldmg_mod += opts->skilldmgtaken_bonus_flat;
@@ -4606,7 +4606,7 @@ int16 Mob::GetCritDmgMob(uint16 skill)
 	int critDmg_mod = 0;
 
 	// All skill dmg mod + Skill specific
-	critDmg_mod += itembonuses.CritDmgMob[HIGHEST_SKILL+1] + spellbonuses.CritDmgMob[HIGHEST_SKILL+1] + aabonuses.CritDmgMob[HIGHEST_SKILL+1] +
+	critDmg_mod += itembonuses.CritDmgMob[EQEmu::skills::HIGHEST_SKILL + 1] + spellbonuses.CritDmgMob[EQEmu::skills::HIGHEST_SKILL + 1] + aabonuses.CritDmgMob[EQEmu::skills::HIGHEST_SKILL + 1] +
 					itembonuses.CritDmgMob[skill] + spellbonuses.CritDmgMob[skill] + aabonuses.CritDmgMob[skill];
 
 	if(critDmg_mod < -100)
@@ -4651,7 +4651,7 @@ int16 Mob::GetCriticalChanceBonus(uint16 skill)
 	int critical_chance = 0;
 
 	// All skills + Skill specific
-	critical_chance +=	itembonuses.CriticalHitChance[HIGHEST_SKILL+1] + spellbonuses.CriticalHitChance[HIGHEST_SKILL+1] + aabonuses.CriticalHitChance[HIGHEST_SKILL+1] +
+	critical_chance += itembonuses.CriticalHitChance[EQEmu::skills::HIGHEST_SKILL + 1] + spellbonuses.CriticalHitChance[EQEmu::skills::HIGHEST_SKILL + 1] + aabonuses.CriticalHitChance[EQEmu::skills::HIGHEST_SKILL + 1] +
 						itembonuses.CriticalHitChance[skill] + spellbonuses.CriticalHitChance[skill] + aabonuses.CriticalHitChance[skill];
 
 	if(critical_chance < -100)
@@ -4665,10 +4665,10 @@ int16 Mob::GetMeleeDamageMod_SE(uint16 skill)
 	int dmg_mod = 0;
 
 	// All skill dmg mod + Skill specific
-	dmg_mod += itembonuses.DamageModifier[HIGHEST_SKILL+1] + spellbonuses.DamageModifier[HIGHEST_SKILL+1] + aabonuses.DamageModifier[HIGHEST_SKILL+1] +
+	dmg_mod += itembonuses.DamageModifier[EQEmu::skills::HIGHEST_SKILL + 1] + spellbonuses.DamageModifier[EQEmu::skills::HIGHEST_SKILL + 1] + aabonuses.DamageModifier[EQEmu::skills::HIGHEST_SKILL + 1] +
 				itembonuses.DamageModifier[skill] + spellbonuses.DamageModifier[skill] + aabonuses.DamageModifier[skill];
 
-	dmg_mod += itembonuses.DamageModifier2[HIGHEST_SKILL+1] + spellbonuses.DamageModifier2[HIGHEST_SKILL+1] + aabonuses.DamageModifier2[HIGHEST_SKILL+1] +
+	dmg_mod += itembonuses.DamageModifier2[EQEmu::skills::HIGHEST_SKILL + 1] + spellbonuses.DamageModifier2[EQEmu::skills::HIGHEST_SKILL + 1] + aabonuses.DamageModifier2[EQEmu::skills::HIGHEST_SKILL + 1] +
 				itembonuses.DamageModifier2[skill] + spellbonuses.DamageModifier2[skill] + aabonuses.DamageModifier2[skill];
 
 	if (HasShieldEquiped() && !IsOffHandAtk())
@@ -4685,7 +4685,7 @@ int16 Mob::GetMeleeMinDamageMod_SE(uint16 skill)
 	int dmg_mod = 0;
 
 	dmg_mod = itembonuses.MinDamageModifier[skill] + spellbonuses.MinDamageModifier[skill] +
-				itembonuses.MinDamageModifier[HIGHEST_SKILL+1] + spellbonuses.MinDamageModifier[HIGHEST_SKILL+1];
+		itembonuses.MinDamageModifier[EQEmu::skills::HIGHEST_SKILL + 1] + spellbonuses.MinDamageModifier[EQEmu::skills::HIGHEST_SKILL + 1];
 
 	if(dmg_mod < -100)
 		dmg_mod = -100;
@@ -4717,10 +4717,10 @@ int16 Mob::GetSkillDmgAmt(uint16 skill)
 	int skill_dmg = 0;
 
 	// All skill dmg(only spells do this) + Skill specific
-	skill_dmg += spellbonuses.SkillDamageAmount[HIGHEST_SKILL+1] + itembonuses.SkillDamageAmount[HIGHEST_SKILL+1] + aabonuses.SkillDamageAmount[HIGHEST_SKILL+1]
+	skill_dmg += spellbonuses.SkillDamageAmount[EQEmu::skills::HIGHEST_SKILL + 1] + itembonuses.SkillDamageAmount[EQEmu::skills::HIGHEST_SKILL + 1] + aabonuses.SkillDamageAmount[EQEmu::skills::HIGHEST_SKILL + 1]
 				+ itembonuses.SkillDamageAmount[skill] + spellbonuses.SkillDamageAmount[skill] + aabonuses.SkillDamageAmount[skill];
 
-	skill_dmg += spellbonuses.SkillDamageAmount2[HIGHEST_SKILL+1] + itembonuses.SkillDamageAmount2[HIGHEST_SKILL+1]
+	skill_dmg += spellbonuses.SkillDamageAmount2[EQEmu::skills::HIGHEST_SKILL + 1] + itembonuses.SkillDamageAmount2[EQEmu::skills::HIGHEST_SKILL + 1]
 				+ itembonuses.SkillDamageAmount2[skill] + spellbonuses.SkillDamageAmount2[skill];
 
 	return skill_dmg;
@@ -4740,7 +4740,7 @@ void Mob::MeleeLifeTap(int32 damage) {
 		if (lifetap_amt > 0)
 			HealDamage(lifetap_amt); //Heal self for modified damage amount.
 		else
-			Damage(this, -lifetap_amt,0, SkillEvocation,false); //Dmg self for modified damage amount.
+			Damage(this, -lifetap_amt, 0, EQEmu::skills::SkillEvocation, false); //Dmg self for modified damage amount.
 	}
 }
 
@@ -4914,21 +4914,21 @@ void Mob::SetBodyType(bodyType new_body, bool overwrite_orig) {
 }
 
 
-void Mob::ModSkillDmgTaken(SkillUseTypes skill_num, int value)
+void Mob::ModSkillDmgTaken(EQEmu::skills::SkillType skill_num, int value)
 {
 	if (skill_num == ALL_SKILLS)
-		SkillDmgTaken_Mod[HIGHEST_SKILL+1] = value;
+		SkillDmgTaken_Mod[EQEmu::skills::HIGHEST_SKILL + 1] = value;
 
-	else if (skill_num >= 0 && skill_num <= HIGHEST_SKILL)
+	else if (skill_num >= 0 && skill_num <= EQEmu::skills::HIGHEST_SKILL)
 		SkillDmgTaken_Mod[skill_num] = value;
 }
 
-int16 Mob::GetModSkillDmgTaken(const SkillUseTypes skill_num)
+int16 Mob::GetModSkillDmgTaken(const EQEmu::skills::SkillType skill_num)
 {
 	if (skill_num == ALL_SKILLS)
-		return SkillDmgTaken_Mod[HIGHEST_SKILL+1];
+		return SkillDmgTaken_Mod[EQEmu::skills::HIGHEST_SKILL + 1];
 
-	else if (skill_num >= 0 && skill_num <= HIGHEST_SKILL)
+	else if (skill_num >= 0 && skill_num <= EQEmu::skills::HIGHEST_SKILL)
 		return SkillDmgTaken_Mod[skill_num];
 
 	return 0;
@@ -5021,52 +5021,52 @@ uint16 Mob::GetSkillByItemType(int ItemType)
 {
 	switch (ItemType) {
 	case EQEmu::item::ItemType1HSlash:
-		return Skill1HSlashing;
+		return EQEmu::skills::Skill1HSlashing;
 	case EQEmu::item::ItemType2HSlash:
-		return Skill2HSlashing;
+		return EQEmu::skills::Skill2HSlashing;
 	case EQEmu::item::ItemType1HPiercing:
-		return Skill1HPiercing;
+		return EQEmu::skills::Skill1HPiercing;
 	case EQEmu::item::ItemType1HBlunt:
-		return Skill1HBlunt;
+		return EQEmu::skills::Skill1HBlunt;
 	case EQEmu::item::ItemType2HBlunt:
-		return Skill2HBlunt;
+		return EQEmu::skills::Skill2HBlunt;
 	case EQEmu::item::ItemType2HPiercing:
 		if (IsClient() && CastToClient()->ClientVersion() < EQEmu::versions::ClientVersion::RoF2)
-			return Skill1HPiercing;
+			return EQEmu::skills::Skill1HPiercing;
 		else
-			return Skill2HPiercing;
+			return EQEmu::skills::Skill2HPiercing;
 	case EQEmu::item::ItemTypeBow:
-		return SkillArchery;
+		return EQEmu::skills::SkillArchery;
 	case EQEmu::item::ItemTypeLargeThrowing:
 	case EQEmu::item::ItemTypeSmallThrowing:
-		return SkillThrowing;
+		return EQEmu::skills::SkillThrowing;
 	case EQEmu::item::ItemTypeMartial:
-		return SkillHandtoHand;
+		return EQEmu::skills::SkillHandtoHand;
 	default:
-		return SkillHandtoHand;
+		return EQEmu::skills::SkillHandtoHand;
 	}
  }
 
-uint8 Mob::GetItemTypeBySkill(SkillUseTypes skill)
+uint8 Mob::GetItemTypeBySkill(EQEmu::skills::SkillType skill)
 {
 	switch (skill) {
-	case SkillThrowing:
+	case EQEmu::skills::SkillThrowing:
 		return EQEmu::item::ItemTypeSmallThrowing;
-	case SkillArchery:
+	case EQEmu::skills::SkillArchery:
 		return EQEmu::item::ItemTypeArrow;
-	case Skill1HSlashing:
+	case EQEmu::skills::Skill1HSlashing:
 		return EQEmu::item::ItemType1HSlash;
-	case Skill2HSlashing:
+	case EQEmu::skills::Skill2HSlashing:
 		return EQEmu::item::ItemType2HSlash;
-	case Skill1HPiercing:
+	case EQEmu::skills::Skill1HPiercing:
 		return EQEmu::item::ItemType1HPiercing;
-	case Skill2HPiercing: // watch for undesired client behavior
+	case EQEmu::skills::Skill2HPiercing: // watch for undesired client behavior
 		return EQEmu::item::ItemType2HPiercing;
-	case Skill1HBlunt:
+	case EQEmu::skills::Skill1HBlunt:
 		return EQEmu::item::ItemType1HBlunt;
-	case Skill2HBlunt:
+	case EQEmu::skills::Skill2HBlunt:
 		return EQEmu::item::ItemType2HBlunt;
-	case SkillHandtoHand:
+	case EQEmu::skills::SkillHandtoHand:
 		return EQEmu::item::ItemTypeMartial;
 	default:
 		return EQEmu::item::ItemTypeMartial;

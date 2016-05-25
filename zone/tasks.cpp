@@ -29,6 +29,7 @@ Copyright (C) 2001-2008 EQEMu Development Team (http://eqemulator.net)
 #include "../common/misc_functions.h"
 #include "../common/rulesys.h"
 #include "../common/string_util.h"
+#include "../common/say_link.h"
 
 #include "client.h"
 #include "entity.h"

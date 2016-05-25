@@ -92,7 +92,7 @@ struct DBnpcspellseffects_Struct {
 };
 
 struct DBTradeskillRecipe_Struct {
-	SkillUseTypes tradeskill;
+	EQEmu::skills::SkillType tradeskill;
 	int16 skill_needed;
 	uint16 trivial;
 	bool nofail;

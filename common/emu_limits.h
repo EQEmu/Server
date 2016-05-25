@@ -1,4 +1,4 @@
-/*	EQEMu: Everquest Server Emulator
+/*	EQEMu:  Everquest Server Emulator
 	
 	Copyright (C) 2001-2016 EQEMu Development Team (http://eqemulator.net)
 
@@ -17,36 +17,40 @@
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
-#ifndef COMMON_EMU_CONSTANTS_H
-#define COMMON_EMU_CONSTANTS_H
+#ifndef COMMON_EMU_LIMITS_H
+#define COMMON_EMU_LIMITS_H
 
-#include "eq_limits.h"
-#include "emu_legacy.h"
-#include "inventory_version.h"
-//#include "deity.h"
-//#include "say_link.h"
+#include "types.h"
 
-#include <string>
+#include <stdlib.h>
 
 
-namespace EQEmu
+namespace EntityLimits
 {
-	namespace inventory {
-		//using namespace RoF2::invtype;
-		//using namespace RoF2::invslot;
-		//using namespace RoF2::invbag;
-		//using namespace RoF2::invaug;
+	namespace npc {
+		enum : int { Invalid = -1, Null, Safety };
 
-	} /*inventory*/
+		enum : bool { False = false, True = true };
+	}
 
-	namespace constants {
-		const EQEmu::versions::ClientVersion CharacterCreationClient = EQEmu::versions::ClientVersion::RoF2;
-		const size_t CharacterCreationMax = RoF2::constants::CharacterCreationLimit;
+	namespace merc {
+		enum : int { Invalid = -1, Null, Safety };
 
-		const size_t SayLinkBodySize = RoF2::constants::SayLinkBodySize;
+		enum : bool { False = false, True = true };
+	}
 
-	} /*constants*/
+	namespace bot {
+		enum : int { Invalid = -1, Null, Safety };
 
-} /*EQEmu*/
+		enum : bool { False = false, True = true };
+	}
 
-#endif /*COMMON_EMU_CONSTANTS_H*/
+	namespace pet {
+		enum : int { Invalid = -1, Null, Safety };
+
+		enum : bool { False = false, True = true };
+	}
+
+}; /*EntityLimits*/
+
+#endif /*COMMON_EMU_LIMITS_H*/

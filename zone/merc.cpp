@@ -70,8 +70,8 @@ Merc::Merc(const NPCType* d, float x, float y, float z, float heading)
 	rest_timer.Disable();
 
 	int r;
-	for(r = 0; r <= HIGHEST_SKILL; r++) {
-		skills[r] = database.GetSkillCap(GetClass(),(SkillUseTypes)r,GetLevel());
+	for (r = 0; r <= EQEmu::skills::HIGHEST_SKILL; r++) {
+		skills[r] = database.GetSkillCap(GetClass(), (EQEmu::skills::SkillType)r, GetLevel());
 	}
 
 	size = d->size;
@@ -512,7 +512,7 @@ void Merc::AddItemBonuses(const EQEmu::Item_Struct *item, StatBonuses* newbon) {
 		}
 	}
 
-	if (item->SkillModValue != 0 && item->SkillModType <= HIGHEST_SKILL){
+	if (item->SkillModValue != 0 && item->SkillModType <= EQEmu::skills::HIGHEST_SKILL){
 		if ((item->SkillModValue > 0 && newbon->skillmod[item->SkillModType] < item->SkillModValue) ||
 			(item->SkillModValue < 0 && newbon->skillmod[item->SkillModType] > item->SkillModValue))
 		{
@@ -566,7 +566,7 @@ void Merc::AddItemBonuses(const EQEmu::Item_Struct *item, StatBonuses* newbon) {
 		}
 	}
 
-	if (item->ExtraDmgSkill != 0 && item->ExtraDmgSkill <= HIGHEST_SKILL) {
+	if (item->ExtraDmgSkill != 0 && item->ExtraDmgSkill <= EQEmu::skills::HIGHEST_SKILL) {
 		if((newbon->SkillDamageAmount[item->ExtraDmgSkill] + item->ExtraDmgAmt) > RuleI(Character, ItemExtraDmgCap))
 			newbon->SkillDamageAmount[item->ExtraDmgSkill] = RuleI(Character, ItemExtraDmgCap);
 		else
@@ -931,8 +931,8 @@ int32 Merc::CalcBaseManaRegen()
 	int32 regen = 0;
 	if (IsSitting())
 	{
-		if(HasSkill(SkillMeditate))
-			regen = (((GetSkill(SkillMeditate) / 10) + (clevel - (clevel / 4))) / 4) + 4;
+		if (HasSkill(EQEmu::skills::SkillMeditate))
+			regen = (((GetSkill(EQEmu::skills::SkillMeditate) / 10) + (clevel - (clevel / 4))) / 4) + 4;
 		else
 			regen = 2;
 	}
@@ -948,9 +948,9 @@ int32 Merc::CalcManaRegen()
 	if (IsSitting())
 	{
 		BuffFadeBySitModifier();
-		if(HasSkill(SkillMeditate)) {
+		if (HasSkill(EQEmu::skills::SkillMeditate)) {
 			this->_medding = true;
-			regen = ((GetSkill(SkillMeditate) / 10) + mana_regen);
+			regen = ((GetSkill(EQEmu::skills::SkillMeditate) / 10) + mana_regen);
 			regen += spellbonuses.ManaRegen + itembonuses.ManaRegen;
 		}
 		else
@@ -1179,16 +1179,16 @@ void Merc::CalcRestState() {
 		RestRegenEndurance = (GetMaxEndurance() * RuleI(Character, RestRegenPercent) / 100);
 }
 
-bool Merc::HasSkill(SkillUseTypes skill_id) const {
+bool Merc::HasSkill(EQEmu::skills::SkillType skill_id) const {
 	return((GetSkill(skill_id) > 0) && CanHaveSkill(skill_id));
 }
 
-bool Merc::CanHaveSkill(SkillUseTypes skill_id) const {
+bool Merc::CanHaveSkill(EQEmu::skills::SkillType skill_id) const {
 	return(database.GetSkillCap(GetClass(), skill_id, RuleI(Character, MaxLevel)) > 0);
 	//if you don't have it by max level, then odds are you never will?
 }
 
-uint16 Merc::MaxSkill(SkillUseTypes skillid, uint16 class_, uint16 level) const {
+uint16 Merc::MaxSkill(EQEmu::skills::SkillType skillid, uint16 class_, uint16 level) const {
 	return(database.GetSkillCap(class_, skillid, level));
 }
 
@@ -1627,7 +1627,7 @@ void Merc::AI_Process() {
 						float DualWieldProbability = 0.0f;
 
 						int16 Ambidexterity = aabonuses.Ambidexterity + spellbonuses.Ambidexterity + itembonuses.Ambidexterity;
-						DualWieldProbability = (GetSkill(SkillDualWield) + GetLevel() + Ambidexterity) / 400.0f; // 78.0 max
+						DualWieldProbability = (GetSkill(EQEmu::skills::SkillDualWield) + GetLevel() + Ambidexterity) / 400.0f; // 78.0 max
 						int16 DWBonus = spellbonuses.DualWieldChance + itembonuses.DualWieldChance;
 						DualWieldProbability += DualWieldProbability*float(DWBonus)/ 100.0f;
 
@@ -2318,7 +2318,7 @@ bool Merc::AICastSpell(int8 iChance, int32 iSpellTypes) {
 										continue;
 									}
 
-									if(spells[selectedMercSpell.spellid].skill == SkillBackstab && spells[selectedMercSpell.spellid].targettype == ST_Self) {
+									if (spells[selectedMercSpell.spellid].skill == EQEmu::skills::SkillBackstab && spells[selectedMercSpell.spellid].targettype == ST_Self) {
 										if(!hidden) {
 											continue;
 										}
@@ -4432,7 +4432,7 @@ void Merc::DoClassAttacks(Mob *target) {
 							dmg = -5;
 						}
 						else{
-							if(target->CheckHitChance(this, SkillKick, 0)) {
+							if (target->CheckHitChance(this, EQEmu::skills::SkillKick, 0)) {
 								if(RuleB(Combat, UseIntervalAC))
 									dmg = GetKickDamage();
 								else
@@ -4442,7 +4442,7 @@ void Merc::DoClassAttacks(Mob *target) {
 						}
 
 						reuse = KickReuseTime * 1000;
-						DoSpecialAttackDamage(target, SkillKick, dmg, 1, -1, reuse);
+						DoSpecialAttackDamage(target, EQEmu::skills::SkillKick, dmg, 1, -1, reuse);
 						did_attack = true;
 					}
 					else
@@ -4454,7 +4454,7 @@ void Merc::DoClassAttacks(Mob *target) {
 							dmg = -5;
 						}
 						else{
-							if(target->CheckHitChance(this, SkillBash, 0)) {
+							if (target->CheckHitChance(this, EQEmu::skills::SkillBash, 0)) {
 								if(RuleB(Combat, UseIntervalAC))
 									dmg = GetBashDamage();
 								else
@@ -4463,7 +4463,7 @@ void Merc::DoClassAttacks(Mob *target) {
 						}
 
 						reuse = BashReuseTime * 1000;
-						DoSpecialAttackDamage(target, SkillBash, dmg, 1, -1, reuse);
+						DoSpecialAttackDamage(target, EQEmu::skills::SkillBash, dmg, 1, -1, reuse);
 						did_attack = true;
 					}
 				}
@@ -4485,7 +4485,7 @@ bool Merc::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, boo
 	return NPC::Attack(other, Hand, bRiposte, IsStrikethrough, IsFromSpell, opts);
 }
 
-void Merc::Damage(Mob* other, int32 damage, uint16 spell_id, SkillUseTypes attack_skill, bool avoidable, int8 buffslot, bool iBuffTic, int special)
+void Merc::Damage(Mob* other, int32 damage, uint16 spell_id, EQEmu::skills::SkillType attack_skill, bool avoidable, int8 buffslot, bool iBuffTic, int special)
 {
 	if(IsDead() || IsCorpse())
 		return;
@@ -4526,7 +4526,7 @@ Mob* Merc::GetOwnerOrSelf() {
 	return Result;
 }
 
-bool Merc::Death(Mob* killerMob, int32 damage, uint16 spell, SkillUseTypes attack_skill)
+bool Merc::Death(Mob* killerMob, int32 damage, uint16 spell, EQEmu::skills::SkillType attack_skill)
 {
 	if(!NPC::Death(killerMob, damage, spell, attack_skill))
 	{

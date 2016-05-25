@@ -1517,17 +1517,38 @@ struct ExpUpdate_Struct
 enum ItemPacketType
 {
 	ItemPacketViewLink			= 0x00,
+	ItemPacketMerchant			= 0x64,
 	ItemPacketTradeView			= 0x65,
 	ItemPacketLoot				= 0x66,
 	ItemPacketTrade				= 0x67,
 	ItemPacketCharInventory		= 0x69,
 	ItemPacketSummonItem		= 0x6A,
-	ItemPacketTributeItem		= 0x6C,
-	ItemPacketMerchant			= 0x64,
 	ItemPacketWorldContainer	= 0x6B,
-	ItemPacketCharmUpdate		= 0x6E,
+	ItemPacketTributeItem		= 0x6C,
+	ItemPacketGuildTribute		= 0x6D,
+	ItemPacketCharmUpdate		= 0x6E, // noted as incorrect
 	ItemPacketInvalid			= 0xFF
 };
+
+//enum ItemPacketType
+//{
+//	ItemPacketMerchant			= /*100*/ 0x64, // Titanium+
+//	ItemPacketTradeView			= /*101*/ 0x65,
+//	ItemPacketLoot				= /*102*/ 0x66,
+//	ItemPacketTrade				= /*103*/ 0x67,
+//	ItemPacketCharInventory		= /*105*/ 0x69,
+//	ItemPacketLimbo				= /*106*/ 0x6A, // name change
+//	ItemPacketWorldContainer	= /*107*/ 0x6B,
+//	ItemPacketTributeItem		= /*108*/ 0x6C,
+//	ItemPacketGuildTribute		= /*109*/ 0x6D, // missing from EQEmu
+//	ItemPacket10				= /*110*/ 0x6E,
+//	ItemPacket11				= /*111*/ 0x6F, // UF+ (equipment slots only) (RoF+ checks '(WORD*)slot + 4 != -1' [(WORD*)]slot + 2 would be bag index - if used) (guess)
+//	ItemPacket12				= /*112*/ 0x70, // RoF+ (causes stat update) (could be TrophyTribute and GuildTrophyTribute together - two case methodology - is it checking for GuildID?)
+//	ItemPacketRecovery			= /*113*/ 0x71, (same handler as merchant..exception: parameter is '1' versus merchant '0' looks like tab id)
+//	ItemPacket14				= /*115*/ 0x73, (real estate/moving crate?)
+//	ItemPacket__				= /*xxx*/ 0xXX // switch 'default' - all clients
+//};
+
 struct ItemPacket_Struct
 {
 /*00*/	ItemPacketType	PacketType;

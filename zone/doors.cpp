@@ -284,12 +284,12 @@ void Doors::HandleClick(Client* sender, uint8 trigger)
 		}
 		else if(lockpicks != nullptr)
 		{
-			if(sender->GetSkill(SkillPickLock))
+			if (sender->GetSkill(EQEmu::skills::SkillPickLock))
 			{
 				if(lockpicks->GetItem()->ItemType == EQEmu::item::ItemTypeLockPick)
 				{
-					float modskill=sender->GetSkill(SkillPickLock);
-					sender->CheckIncreaseSkill(SkillPickLock, nullptr, 1);
+					float modskill = sender->GetSkill(EQEmu::skills::SkillPickLock);
+					sender->CheckIncreaseSkill(EQEmu::skills::SkillPickLock, nullptr, 1);
 
 					Log.Out(Logs::General, Logs::Skills, "Client has lockpicks: skill=%f", modskill);
 

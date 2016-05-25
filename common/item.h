@@ -32,6 +32,7 @@ class EvolveInfo;			// Stores information about an evolving item family
 #include "../common/item_struct.h"
 #include "../common/timer.h"
 #include "../common/bodytypes.h"
+#include "../common/deity.h" // aren't we already in '/common'?
 
 #include "string_util.h"
 
@@ -77,6 +78,7 @@ enum {
 	invWhereCursor		= 0x20
 };
 
+class ItemInst;
 
 // ########################################
 // Class: Queue

@@ -2271,18 +2271,15 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 
 				focus = caster->GetFocusEffect(focusFcBaseEffects, spell_id);
 
-				switch(spells[spell_id].skill)
-				{
-					case SkillThrowing:
-						caster->DoThrowingAttackDmg(this, nullptr, nullptr, spells[spell_id].base[i],spells[spell_id].base2[i], focus,  ReuseTime);
+				switch(spells[spell_id].skill) {
+				case EQEmu::skills::SkillThrowing:
+					caster->DoThrowingAttackDmg(this, nullptr, nullptr, spells[spell_id].base[i],spells[spell_id].base2[i], focus,  ReuseTime);
 					break;
-
-					case SkillArchery:
-						caster->DoArcheryAttackDmg(this, nullptr, nullptr, spells[spell_id].base[i],spells[spell_id].base2[i],focus,  ReuseTime);
+				case EQEmu::skills::SkillArchery:
+					caster->DoArcheryAttackDmg(this, nullptr, nullptr, spells[spell_id].base[i],spells[spell_id].base2[i],focus,  ReuseTime);
 					break;
-
-					default:
-						caster->DoMeleeSkillAttackDmg(this, spells[spell_id].base[i], spells[spell_id].skill, spells[spell_id].base2[i], focus, false, ReuseTime);
+				default:
+					caster->DoMeleeSkillAttackDmg(this, spells[spell_id].base[i], spells[spell_id].skill, spells[spell_id].base2[i], focus, false, ReuseTime);
 					break;
 				}
 				break;
@@ -3046,7 +3043,7 @@ int Mob::CalcSpellEffectValue(uint16 spell_id, int effect_id, int caster_level, 
 	effect_value = CalcSpellEffectValue_formula(formula, base, max, caster_level, spell_id, ticsremaining);
 
 	// this doesn't actually need to be a song to get mods, just the right skill
-	if (EQEmu::IsBardInstrumentSkill(spells[spell_id].skill) &&
+	if (EQEmu::skills::IsBardInstrumentSkill(spells[spell_id].skill) &&
 	    spells[spell_id].effectid[effect_id] != SE_AttackSpeed &&
 	    spells[spell_id].effectid[effect_id] != SE_AttackSpeed2 &&
 	    spells[spell_id].effectid[effect_id] != SE_AttackSpeed3 &&
@@ -3613,13 +3610,13 @@ void Mob::DoBuffTic(const Buffs_Struct &buff, int slot, Mob *caster)
 				if (!IsBardSong(buff.spellid)) {
 					double break_chance = 2.0;
 					if (caster) {
-						break_chance -= (2 * (((double)caster->GetSkill(SkillDivination) +
+						break_chance -= (2 * (((double)caster->GetSkill(EQEmu::skills::SkillDivination) +
 								       ((double)caster->GetLevel() * 3.0)) /
 								      650.0));
 					} else {
 						break_chance -=
 						    (2 *
-						     (((double)GetSkill(SkillDivination) + ((double)GetLevel() * 3.0)) /
+							(((double)GetSkill(EQEmu::skills::SkillDivination) + ((double)GetLevel() * 3.0)) /
 						      650.0));
 					}
 
@@ -6564,7 +6561,7 @@ bool Mob::TrySpellProjectile(Mob* spell_target,  uint16 spell_id, float speed){
 		ProjectileAtk[slot].origin_x = GetX();
 		ProjectileAtk[slot].origin_y = GetY();
 		ProjectileAtk[slot].origin_z = GetZ();
-		ProjectileAtk[slot].skill = SkillConjuration;
+		ProjectileAtk[slot].skill = EQEmu::skills::SkillConjuration;
 		ProjectileAtk[slot].speed_mod = speed_mod;
 
 		SetProjectileAttack(true);
@@ -6619,7 +6616,7 @@ void Mob::ResourceTap(int32 damage, uint16 spellid)
 				if (damage > 0)
 					HealDamage(damage);
 				else
-					Damage(this, -damage, 0, SkillEvocation, false);
+					Damage(this, -damage, 0, EQEmu::skills::SkillEvocation, false);
 			}
 
 			if (spells[spellid].base2[i] == 1) // Mana Tap

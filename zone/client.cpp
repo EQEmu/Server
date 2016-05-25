@@ -1433,8 +1433,8 @@ bool Client::UpdateLDoNPoints(int32 points, uint32 theme)
 	return(false);
 }
 
-void Client::SetSkill(SkillUseTypes skillid, uint16 value) {
-	if (skillid > HIGHEST_SKILL)
+void Client::SetSkill(EQEmu::skills::SkillType skillid, uint16 value) {
+	if (skillid > EQEmu::skills::HIGHEST_SKILL)
 		return;
 	m_pp.skills[skillid] = value; // We need to be able to #setskill 254 and 255 to reset skills
 
@@ -1470,8 +1470,8 @@ void Client::IncreaseLanguageSkill(int skill_id, int value) {
 	Message_StringID( MT_Skills, LANG_SKILL_IMPROVED ); //Notify client
 }
 
-void Client::AddSkill(SkillUseTypes skillid, uint16 value) {
-	if (skillid > HIGHEST_SKILL)
+void Client::AddSkill(EQEmu::skills::SkillType skillid, uint16 value) {
+	if (skillid > EQEmu::skills::HIGHEST_SKILL)
 		return;
 	value = GetRawSkill(skillid) + value;
 	uint16 max = GetMaxSkillAfterSpecializationRules(skillid, MaxSkill(skillid));
@@ -2289,12 +2289,12 @@ uint64 Client::GetAllMoney() {
 		(static_cast<uint64>(m_pp.platinum_shared) * 1000)))));
 }
 
-bool Client::CheckIncreaseSkill(SkillUseTypes skillid, Mob *against_who, int chancemodi) {
+bool Client::CheckIncreaseSkill(EQEmu::skills::SkillType skillid, Mob *against_who, int chancemodi) {
 	if (IsDead() || IsUnconscious())
 		return false;
 	if (IsAIControlled()) // no skillups while chamred =p
 		return false;
-	if (skillid > HIGHEST_SKILL)
+	if (skillid > EQEmu::skills::HIGHEST_SKILL)
 		return false;
 	int skillval = GetRawSkill(skillid);
 	int maxskill = GetMaxSkillAfterSpecializationRules(skillid, MaxSkill(skillid));
@@ -2359,34 +2359,34 @@ void Client::CheckLanguageSkillIncrease(uint8 langid, uint8 TeacherSkill) {
 	}
 }
 
-bool Client::HasSkill(SkillUseTypes skill_id) const {
+bool Client::HasSkill(EQEmu::skills::SkillType skill_id) const {
 	return((GetSkill(skill_id) > 0) && CanHaveSkill(skill_id));
 }
 
-bool Client::CanHaveSkill(SkillUseTypes skill_id) const {
-	if (ClientVersion() < EQEmu::versions::ClientVersion::RoF2 && class_ == BERSERKER && skill_id == Skill1HPiercing)
-		skill_id = Skill2HPiercing;
+bool Client::CanHaveSkill(EQEmu::skills::SkillType skill_id) const {
+	if (ClientVersion() < EQEmu::versions::ClientVersion::RoF2 && class_ == BERSERKER && skill_id == EQEmu::skills::Skill1HPiercing)
+		skill_id = EQEmu::skills::Skill2HPiercing;
 
 	return(database.GetSkillCap(GetClass(), skill_id, RuleI(Character, MaxLevel)) > 0);
 	//if you don't have it by max level, then odds are you never will?
 }
 
-uint16 Client::MaxSkill(SkillUseTypes skillid, uint16 class_, uint16 level) const {
-	if (ClientVersion() < EQEmu::versions::ClientVersion::RoF2 && class_ == BERSERKER && skillid == Skill1HPiercing)
-		skillid = Skill2HPiercing;
+uint16 Client::MaxSkill(EQEmu::skills::SkillType skillid, uint16 class_, uint16 level) const {
+	if (ClientVersion() < EQEmu::versions::ClientVersion::RoF2 && class_ == BERSERKER && skillid == EQEmu::skills::Skill1HPiercing)
+		skillid = EQEmu::skills::Skill2HPiercing;
 
 	return(database.GetSkillCap(class_, skillid, level));
 }
 
-uint8 Client::SkillTrainLevel(SkillUseTypes skillid, uint16 class_)
+uint8 Client::SkillTrainLevel(EQEmu::skills::SkillType skillid, uint16 class_)
 {
-	if (ClientVersion() < EQEmu::versions::ClientVersion::RoF2 && class_ == BERSERKER && skillid == Skill1HPiercing)
-		skillid = Skill2HPiercing;
+	if (ClientVersion() < EQEmu::versions::ClientVersion::RoF2 && class_ == BERSERKER && skillid == EQEmu::skills::Skill1HPiercing)
+		skillid = EQEmu::skills::Skill2HPiercing;
 
 	return(database.GetTrainLevel(class_, skillid, RuleI(Character, MaxLevel)));
 }
 
-uint16 Client::GetMaxSkillAfterSpecializationRules(SkillUseTypes skillid, uint16 maxSkill)
+uint16 Client::GetMaxSkillAfterSpecializationRules(EQEmu::skills::SkillType skillid, uint16 maxSkill)
 {
 	uint16 Result = maxSkill;
 
@@ -2396,13 +2396,13 @@ uint16 Client::GetMaxSkillAfterSpecializationRules(SkillUseTypes skillid, uint16
 
 	uint16 MaxSpecializations = GetAA(aaSecondaryForte) ? 2 : 1;
 
-	if(skillid >= SkillSpecializeAbjure && skillid <= SkillSpecializeEvocation)
+	if (skillid >= EQEmu::skills::SkillSpecializeAbjure && skillid <= EQEmu::skills::SkillSpecializeEvocation)
 	{
 		bool HasPrimarySpecSkill = false;
 
 		int NumberOfPrimarySpecSkills = 0;
 
-		for(int i = SkillSpecializeAbjure; i <= SkillSpecializeEvocation; ++i)
+		for (int i = EQEmu::skills::SkillSpecializeAbjure; i <= EQEmu::skills::SkillSpecializeEvocation; ++i)
 		{
 			if(m_pp.skills[i] > 50)
 			{
@@ -2459,8 +2459,8 @@ uint16 Client::GetMaxSkillAfterSpecializationRules(SkillUseTypes skillid, uint16
 				Message(13, "Your spell casting specializations skills have been reset. "
 						"Only %i primary specialization skill is allowed.", MaxSpecializations);
 
-				for(int i = SkillSpecializeAbjure; i <= SkillSpecializeEvocation; ++i)
-					SetSkill((SkillUseTypes)i, 1);
+				for (int i = EQEmu::skills::SkillSpecializeAbjure; i <= EQEmu::skills::SkillSpecializeEvocation; ++i)
+					SetSkill((EQEmu::skills::SkillType)i, 1);
 
 				Save();
 
@@ -2643,14 +2643,14 @@ bool Client::BindWound(Mob *bindmob, bool start, bool fail)
 					bind_out->type = 1; // Done
 					QueuePacket(outapp);
 					bind_out->type = 0;
-					CheckIncreaseSkill(SkillBindWound, nullptr, 5);
+					CheckIncreaseSkill(EQEmu::skills::SkillBindWound, nullptr, 5);
 
 					int maxHPBonus = spellbonuses.MaxBindWound + itembonuses.MaxBindWound +
 							 aabonuses.MaxBindWound;
 
 					int max_percent = 50 + 10 * maxHPBonus;
 
-					if (GetClass() == MONK && GetSkill(SkillBindWound) > 200) {
+					if (GetClass() == MONK && GetSkill(EQEmu::skills::SkillBindWound) > 200) {
 						max_percent = 70 + 10 * maxHPBonus;
 					}
 
@@ -2663,10 +2663,11 @@ bool Client::BindWound(Mob *bindmob, bool start, bool fail)
 						// 0.120 per skill point, 0.60 per skill level, minimum 3 max 30
 						int bindhps = 3;
 
-						if (GetSkill(SkillBindWound) > 200) {
-							bindhps += GetSkill(SkillBindWound) * 4 / 10;
-						} else if (GetSkill(SkillBindWound) >= 10) {
-							bindhps += GetSkill(SkillBindWound) / 4;
+						if (GetSkill(EQEmu::skills::SkillBindWound) > 200) {
+							bindhps += GetSkill(EQEmu::skills::SkillBindWound) * 4 / 10;
+						}
+						else if (GetSkill(EQEmu::skills::SkillBindWound) >= 10) {
+							bindhps += GetSkill(EQEmu::skills::SkillBindWound) / 4;
 						}
 
 						// Implementation of aaMithanielsBinding is a guess (the multiplier)
@@ -3774,7 +3775,7 @@ void Client::SendPickPocketResponse(Mob *from, uint32 amt, int type, const EQEmu
 	pick_out->coin = amt;
 	pick_out->from = GetID();
 	pick_out->to = from->GetID();
-	pick_out->myskill = GetSkill(SkillPickPockets);
+		pick_out->myskill = GetSkill(EQEmu::skills::SkillPickPockets);
 
 	if ((type >= PickPocketPlatinum) && (type <= PickPocketCopper) && (amt == 0))
 		type = PickPocketFailed;
@@ -4196,11 +4197,11 @@ bool Client::GroupFollow(Client* inviter) {
 
 uint16 Client::GetPrimarySkillValue()
 {
-	SkillUseTypes skill = HIGHEST_SKILL; //because nullptr == 0, which is 1H Slashing, & we want it to return 0 from GetSkill
+	EQEmu::skills::SkillType skill = EQEmu::skills::HIGHEST_SKILL; //because nullptr == 0, which is 1H Slashing, & we want it to return 0 from GetSkill
 	bool equiped = m_inv.GetItem(EQEmu::legacy::SlotPrimary);
 
 	if (!equiped)
-		skill = SkillHandtoHand;
+		skill = EQEmu::skills::SkillHandtoHand;
 
 	else {
 
@@ -4208,31 +4209,31 @@ uint16 Client::GetPrimarySkillValue()
 
 		switch (type) {
 		case EQEmu::item::ItemType1HSlash: // 1H Slashing
-			skill = Skill1HSlashing;
+			skill = EQEmu::skills::Skill1HSlashing;
 			break;
 		case EQEmu::item::ItemType2HSlash: // 2H Slashing
-			skill = Skill2HSlashing;
+			skill = EQEmu::skills::Skill2HSlashing;
 			break;
 		case EQEmu::item::ItemType1HPiercing: // Piercing
-			skill = Skill1HPiercing;
+			skill = EQEmu::skills::Skill1HPiercing;
 			break;
 		case EQEmu::item::ItemType1HBlunt: // 1H Blunt
-			skill = Skill1HBlunt;
+			skill = EQEmu::skills::Skill1HBlunt;
 			break;
 		case EQEmu::item::ItemType2HBlunt: // 2H Blunt
-			skill = Skill2HBlunt;
+			skill = EQEmu::skills::Skill2HBlunt;
 			break;
 		case EQEmu::item::ItemType2HPiercing: // 2H Piercing
 			if (IsClient() && CastToClient()->ClientVersion() < EQEmu::versions::ClientVersion::RoF2)
-				skill = Skill1HPiercing;
+				skill = EQEmu::skills::Skill1HPiercing;
 			else
-				skill = Skill2HPiercing;
+				skill = EQEmu::skills::Skill2HPiercing;
 			break;
 		case EQEmu::item::ItemTypeMartial: // Hand to Hand
-			skill = SkillHandtoHand;
+			skill = EQEmu::skills::SkillHandtoHand;
 			break;
 		default: // All other types default to Hand to Hand
-			skill = SkillHandtoHand;
+			skill = EQEmu::skills::SkillHandtoHand;
 			break;
 		}
 	}
@@ -4246,7 +4247,7 @@ uint32 Client::GetTotalATK()
 	uint32 WornCap = itembonuses.ATK;
 
 	if(IsClient()) {
-		AttackRating = ((WornCap * 1.342) + (GetSkill(SkillOffense) * 1.345) + ((GetSTR() - 66) * 0.9) + (GetPrimarySkillValue() * 2.69));
+		AttackRating = ((WornCap * 1.342) + (GetSkill(EQEmu::skills::SkillOffense) * 1.345) + ((GetSTR() - 66) * 0.9) + (GetPrimarySkillValue() * 2.69));
 		AttackRating += aabonuses.ATK + GroupLeadershipAAOffenseEnhancement();
 
 		if (AttackRating < 10)
@@ -4264,7 +4265,7 @@ uint32 Client::GetATKRating()
 {
 	uint32 AttackRating = 0;
 	if(IsClient()) {
-		AttackRating = (GetSkill(SkillOffense) * 1.345) + ((GetSTR() - 66) * 0.9) + (GetPrimarySkillValue() * 2.69);
+		AttackRating = (GetSkill(EQEmu::skills::SkillOffense) * 1.345) + ((GetSTR() - 66) * 0.9) + (GetPrimarySkillValue() * 2.69);
 
 		if (AttackRating < 10)
 			AttackRating = 10;
@@ -4639,7 +4640,7 @@ void Client::HandleLDoNOpen(NPC *target)
 					AddEXP(target->GetLevel()*target->GetLevel()*2625/10, GetLevelCon(target->GetLevel()));
 				}
 			}
-			target->Death(this, 0, SPELL_UNKNOWN, SkillHandtoHand);
+			target->Death(this, 0, SPELL_UNKNOWN, EQEmu::skills::SkillHandtoHand);
 		}
 	}
 }
@@ -4952,14 +4953,14 @@ void Client::ShowSkillsWindow()
 {
 	const char *WindowTitle = "Skills";
 	std::string WindowText;
-	std::map<SkillUseTypes, std::string> Skills = EQEmu::GetSkillUseTypesMap();
+	std::map<EQEmu::skills::SkillType, std::string> Skills = EQEmu::skills::GetSkillTypeMap();
 
 	if (ClientVersion() < EQEmu::versions::ClientVersion::RoF2)
-		Skills[Skill1HPiercing] = "Piercing";
+		Skills[EQEmu::skills::Skill1HPiercing] = "Piercing";
 
 	// print out all available skills
 	for (auto skills_iter : Skills) {
-		if (skills_iter.first == Skill2HPiercing && ClientVersion() < EQEmu::versions::ClientVersion::RoF2)
+		if (skills_iter.first == EQEmu::skills::Skill2HPiercing && ClientVersion() < EQEmu::versions::ClientVersion::RoF2)
 			continue;
 		if (!GetSkill(skills_iter.first) && !MaxSkill(skills_iter.first))
 			continue;
@@ -5721,11 +5722,11 @@ void Client::ProcessInspectRequest(Client* requestee, Client* requester) {
 			if(item) {
 				// we shouldn't do this..but, that's the way it's coded atm...
 				// (this type of action should be handled exclusively in the client translator)
-				strcpy(insr->itemnames[SoF::inventory::SlotPowerSource], item->Name);
-				insr->itemicons[SoF::inventory::SlotPowerSource] = item->Icon;
+				strcpy(insr->itemnames[SoF::invslot::PossessionsPowerSource], item->Name);
+				insr->itemicons[SoF::invslot::PossessionsPowerSource] = item->Icon;
 			}
 			else
-				insr->itemicons[SoF::inventory::SlotPowerSource] = 0xFFFFFFFF;
+				insr->itemicons[SoF::invslot::PossessionsPowerSource] = 0xFFFFFFFF;
 		}
 
 		inst = requestee->GetInv().GetItem(EQEmu::legacy::SlotAmmo);
@@ -5733,11 +5734,11 @@ void Client::ProcessInspectRequest(Client* requestee, Client* requester) {
 		if(inst) {
 			item = inst->GetItem();
 			if(item) {
-				strcpy(insr->itemnames[SoF::inventory::SlotAmmo], item->Name);
-				insr->itemicons[SoF::inventory::SlotAmmo] = item->Icon;
+				strcpy(insr->itemnames[SoF::invslot::PossessionsAmmo], item->Name);
+				insr->itemicons[SoF::invslot::PossessionsAmmo] = item->Icon;
 			}
 			else
-				insr->itemicons[SoF::inventory::SlotAmmo] = 0xFFFFFFFF;
+				insr->itemicons[SoF::invslot::PossessionsAmmo] = 0xFFFFFFFF;
 		}
 
 		strcpy(insr->text, requestee->GetInspectMessage().text);
@@ -6750,7 +6751,7 @@ void Client::SendStatsWindow(Client* client, bool use_window)
 	};
 
 	std::string skill_mods = "";
-	for(int j = 0; j <= HIGHEST_SKILL; j++) {
+	for (int j = 0; j <= EQEmu::skills::HIGHEST_SKILL; j++) {
 		if(itembonuses.skillmod[j] > 0)
 			skill_mods += indP + skill_list[j] + " : +" + itoa(itembonuses.skillmod[j]) + "%<br>";
 		else if(itembonuses.skillmod[j] < 0)
@@ -6758,7 +6759,7 @@ void Client::SendStatsWindow(Client* client, bool use_window)
 	}
 
 	std::string skill_dmgs = "";
-	for(int j = 0; j <= HIGHEST_SKILL; j++) {
+	for (int j = 0; j <= EQEmu::skills::HIGHEST_SKILL; j++) {
 		if((itembonuses.SkillDamageAmount[j] + spellbonuses.SkillDamageAmount[j]) > 0)
 			skill_dmgs += indP + skill_list[j] + " : +" + itoa(itembonuses.SkillDamageAmount[j] + spellbonuses.SkillDamageAmount[j]) + "<br>";
 		else if((itembonuses.SkillDamageAmount[j] + spellbonuses.SkillDamageAmount[j]) < 0)

@@ -22,6 +22,7 @@
 #include "../common/skills.h"
 #include "../common/spdat.h"
 #include "../common/string_util.h"
+#include "../common/say_link.h"
 
 #include "entity.h"
 #include "event_codes.h"
@@ -1152,10 +1153,10 @@ void QuestManager::doanim(int anim_id) {
 
 void QuestManager::addskill(int skill_id, int value) {
 	QuestManagerCurrentQuestVars();
-	if(skill_id < 0 || skill_id > HIGHEST_SKILL)
+	if (skill_id < 0 || skill_id > EQEmu::skills::HIGHEST_SKILL)
 		return;
 	if (initiator && initiator->IsClient())
-		initiator->AddSkill((SkillUseTypes) skill_id, value);
+		initiator->AddSkill((EQEmu::skills::SkillType) skill_id, value);
 }
 
 void QuestManager::setlanguage(int skill_id, int value) {
@@ -1166,10 +1167,10 @@ void QuestManager::setlanguage(int skill_id, int value) {
 
 void QuestManager::setskill(int skill_id, int value) {
 	QuestManagerCurrentQuestVars();
-	if(skill_id < 0 || skill_id > HIGHEST_SKILL)
+	if (skill_id < 0 || skill_id > EQEmu::skills::HIGHEST_SKILL)
 		return;
 	if (initiator && initiator->IsClient())
-		initiator->SetSkill((SkillUseTypes) skill_id, value);
+		initiator->SetSkill((EQEmu::skills::SkillType) skill_id, value);
 }
 
 void QuestManager::setallskill(int value) {
@@ -1177,8 +1178,8 @@ void QuestManager::setallskill(int value) {
 	if (!initiator)
 		return;
 	if (initiator && initiator->IsClient()) {
-		SkillUseTypes sk;
-		for (sk = Skill1HBlunt; sk <= HIGHEST_SKILL; sk = (SkillUseTypes)(sk+1)) {
+		EQEmu::skills::SkillType sk;
+		for (sk = EQEmu::skills::Skill1HBlunt; sk <= EQEmu::skills::HIGHEST_SKILL; sk = (EQEmu::skills::SkillType)(sk + 1)) {
 			initiator->SetSkill(sk, value);
 		}
 	}
@@ -1772,7 +1773,7 @@ void QuestManager::clear_zone_flag(int zone_id) {
 void QuestManager::sethp(int hpperc) {
 	QuestManagerCurrentQuestVars();
 	int newhp = (owner->GetMaxHP() * (100 - hpperc)) / 100;
-	owner->Damage(owner, newhp, SPELL_UNKNOWN, SkillHandtoHand, false, 0, false);
+	owner->Damage(owner, newhp, SPELL_UNKNOWN, EQEmu::skills::SkillHandtoHand, false, 0, false);
 }
 
 bool QuestManager::summonburiedplayercorpse(uint32 char_id, const glm::vec4& position) {

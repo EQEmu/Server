@@ -22,7 +22,7 @@
 
 #include "types.h"
 #include "eq_constants.h"
-#include "inventory_version.h" // inv2 watch
+#include "inventory_version.h"
 #include "../common/patches/titanium_limits.h"
 #include "../common/patches/sof_limits.h"
 #include "../common/patches/sod_limits.h"
@@ -31,35 +31,50 @@
 #include "../common/patches/rof2_limits.h"
 
 
-// *** DO NOT CHANGE without a full understanding of the consequences..the server is set up to use these settings explicitly!! ***
-// *** You will cause compilation failures and corrupt your database if partial or incorrect attempts to change them are made!! ***
-
-// Hard-coded values usually indicate that further research is needed and the values given are from the old (known) system
-
-
 namespace EQEmu
 {
-	namespace limits {
-		// database
+	namespace constants {
 		extern size_t CharacterCreationLimit(versions::ClientVersion client_version);
 
-		// inventory
+	} /*constants*/
+	
+	namespace inventory {
 		extern uint16 InventoryTypeSize(versions::InventoryVersion inventory_version, int16 inv_type);
 		extern uint64 PossessionsBitmask(versions::InventoryVersion inventory_version);
-		extern uint64 EquipmentBitmask(versions::InventoryVersion inventory_version);
-		extern uint64 GeneralBitmask(versions::InventoryVersion inventory_version);
-		extern uint64 CursorBitmask(versions::InventoryVersion inventory_version);
 
 		extern bool AllowEmptyBagInBag(versions::InventoryVersion inventory_version);
 		extern bool AllowClickCastFromBag(versions::InventoryVersion inventory_version);
 
-		// items
-		extern uint16 ItemCommonSize(versions::InventoryVersion inventory_version);
-		extern uint16 ItemContainerSize(versions::InventoryVersion inventory_version);
+		extern uint16 ItemAugSize(versions::InventoryVersion inventory_version);
+		extern uint16 ItemBagSize(versions::InventoryVersion inventory_version);
 
-		// player profile
+		extern bool ConcatenateInvTypeLimbo(versions::InventoryVersion inventory_version);
+
+		extern bool AllowOverLevelEquipment(versions::InventoryVersion inventory_version);
+
+	} /*inventory*/
+	
+	namespace profile {
 		extern bool CoinHasWeight(versions::InventoryVersion inventory_version);
-	}
-}
 
-#endif /* COMMON_EQ_LIMITS_H */
+	} /*profile*/
+
+} /*EQEmu*/
+
+namespace ClientUnknown
+{
+	enum : int { Invalid = -1, Null, Safety };
+
+	enum : bool { False = false, True = true };
+
+} /*ClientUnknown*/
+
+namespace Client62
+{
+	enum : int { Invalid = -1, Null, Safety };
+
+	enum : bool { False = false, True = true };
+
+} /*Client62*/
+
+#endif /*COMMON_EQ_LIMITS_H*/

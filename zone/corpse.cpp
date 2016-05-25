@@ -34,6 +34,7 @@ Child of the Mob class.
 #include "../common/eqemu_logsys.h"
 #include "../common/rulesys.h"
 #include "../common/string_util.h"
+#include "../common/say_link.h"
 
 #include "client.h"
 #include "corpse.h"
@@ -997,7 +998,7 @@ void Corpse::MakeLootRequestPackets(Client* client, const EQApplicationPacket* a
 		cur = itemlist.begin();
 		end = itemlist.end();
 
-		int corpselootlimit = EQEmu::limits::InventoryTypeSize(EQEmu::versions::ConvertClientVersionToInventoryVersion(client->ClientVersion()), EQEmu::legacy::TypeCorpse);
+		int corpselootlimit = EQEmu::inventory::InventoryTypeSize(EQEmu::versions::ConvertClientVersionToInventoryVersion(client->ClientVersion()), EQEmu::legacy::TypeCorpse);
 
 		for(; cur != end; ++cur) {
 			ServerLootItem_Struct* item_data = *cur;
@@ -1291,7 +1292,7 @@ void Corpse::QueryLoot(Client* to) {
 	cur = itemlist.begin();
 	end = itemlist.end();
 
-	int corpselootlimit = EQEmu::limits::InventoryTypeSize(EQEmu::versions::ConvertClientVersionToInventoryVersion(to->ClientVersion()), EQEmu::legacy::TypeCorpse);
+	int corpselootlimit = EQEmu::inventory::InventoryTypeSize(EQEmu::versions::ConvertClientVersionToInventoryVersion(to->ClientVersion()), EQEmu::legacy::TypeCorpse);
 
 	for(; cur != end; ++cur) {
 		ServerLootItem_Struct* sitem = *cur;

@@ -1382,7 +1382,7 @@ bool SharedDatabase::LoadSkillCaps(const std::string &prefix) {
 	skill_caps_mmf.reset(nullptr);
 
 	uint32 class_count = PLAYER_CLASS_COUNT;
-	uint32 skill_count = HIGHEST_SKILL + 1;
+	uint32 skill_count = EQEmu::skills::HIGHEST_SKILL + 1;
 	uint32 level_count = HARD_LEVEL_CAP + 1;
 	uint32 size = (class_count * skill_count * level_count * sizeof(uint16));
 
@@ -1403,7 +1403,7 @@ bool SharedDatabase::LoadSkillCaps(const std::string &prefix) {
 
 void SharedDatabase::LoadSkillCaps(void *data) {
 	uint32 class_count = PLAYER_CLASS_COUNT;
-	uint32 skill_count = HIGHEST_SKILL + 1;
+	uint32 skill_count = EQEmu::skills::HIGHEST_SKILL + 1;
 	uint32 level_count = HARD_LEVEL_CAP + 1;
 	uint16 *skill_caps_table = reinterpret_cast<uint16*>(data);
 
@@ -1428,7 +1428,7 @@ void SharedDatabase::LoadSkillCaps(void *data) {
     }
 }
 
-uint16 SharedDatabase::GetSkillCap(uint8 Class_, SkillUseTypes Skill, uint8 Level) {
+uint16 SharedDatabase::GetSkillCap(uint8 Class_, EQEmu::skills::SkillType Skill, uint8 Level) {
 	if(!skill_caps_mmf) {
 		return 0;
 	}
@@ -1442,7 +1442,7 @@ uint16 SharedDatabase::GetSkillCap(uint8 Class_, SkillUseTypes Skill, uint8 Leve
 	}
 
 	uint32 class_count = PLAYER_CLASS_COUNT;
-	uint32 skill_count = HIGHEST_SKILL + 1;
+	uint32 skill_count = EQEmu::skills::HIGHEST_SKILL + 1;
 	uint32 level_count = HARD_LEVEL_CAP + 1;
 	if(Class_ > class_count || static_cast<uint32>(Skill) > skill_count || Level > level_count) {
 		return 0;
@@ -1457,7 +1457,7 @@ uint16 SharedDatabase::GetSkillCap(uint8 Class_, SkillUseTypes Skill, uint8 Leve
 	return skill_caps_table[index];
 }
 
-uint8 SharedDatabase::GetTrainLevel(uint8 Class_, SkillUseTypes Skill, uint8 Level) {
+uint8 SharedDatabase::GetTrainLevel(uint8 Class_, EQEmu::skills::SkillType Skill, uint8 Level) {
 	if(!skill_caps_mmf) {
 		return 0;
 	}
@@ -1471,7 +1471,7 @@ uint8 SharedDatabase::GetTrainLevel(uint8 Class_, SkillUseTypes Skill, uint8 Lev
 	}
 
 	uint32 class_count = PLAYER_CLASS_COUNT;
-	uint32 skill_count = HIGHEST_SKILL + 1;
+	uint32 skill_count = EQEmu::skills::HIGHEST_SKILL + 1;
 	uint32 level_count = HARD_LEVEL_CAP + 1;
 	if(Class_ > class_count || static_cast<uint32>(Skill) > skill_count || Level > level_count) {
 		return 0;
@@ -1642,10 +1642,10 @@ void SharedDatabase::LoadSpells(void *data, int max_spells) {
 
 		int tmp_skill = atoi(row[100]);;
 
-		if(tmp_skill < 0 || tmp_skill > HIGHEST_SKILL)
-            sp[tempid].skill = SkillBegging; /* not much better we can do. */ // can probably be changed to client-based 'SkillNone' once activated
+		if (tmp_skill < 0 || tmp_skill > EQEmu::skills::HIGHEST_SKILL)
+			sp[tempid].skill = EQEmu::skills::SkillBegging; /* not much better we can do. */ // can probably be changed to client-based 'SkillNone' once activated
         else
-			sp[tempid].skill = (SkillUseTypes) tmp_skill;
+			sp[tempid].skill = (EQEmu::skills::SkillType) tmp_skill;
 
 		sp[tempid].zonetype=atoi(row[101]);
 		sp[tempid].EnvironmentType=atoi(row[102]);

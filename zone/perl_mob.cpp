@@ -619,7 +619,7 @@ XS(XS_Mob_GetSkill)
 		Mob *		THIS;
 		uint32		RETVAL;
 		dXSTARG;
-		SkillUseTypes		skill_num = (SkillUseTypes)SvUV(ST(1));
+		EQEmu::skills::SkillType		skill_num = (EQEmu::skills::SkillType)SvUV(ST(1));
 
 		if (sv_derived_from(ST(0), "Mob")) {
 			IV tmp = SvIV((SV*)SvRV(ST(0)));
@@ -901,7 +901,7 @@ XS(XS_Mob_Damage)
 		Mob*		from;
 		int32		damage = (int32)SvIV(ST(2));
 		uint16		spell_id = (uint16)SvUV(ST(3));
-		SkillUseTypes		attack_skill = (SkillUseTypes)SvUV(ST(4));
+		EQEmu::skills::SkillType		attack_skill = (EQEmu::skills::SkillType)SvUV(ST(4));
 		bool		avoidable;
 		int8		buffslot;
 		bool		iBuffTic;
@@ -6836,7 +6836,7 @@ XS(XS_Mob_DoSpecialAttackDamage)
 	{
 		Mob *		THIS;
 		Mob*		target;
-		SkillUseTypes	attack_skill = (SkillUseTypes)SvUV(ST(2));
+		EQEmu::skills::SkillType	attack_skill = (EQEmu::skills::SkillType)SvUV(ST(2));
 		int32		max_damage = (int32)SvIV(ST(3));
 		int32		min_damage = 1;
 		int32		hate_override = -11;
@@ -7835,7 +7835,7 @@ XS(XS_Mob_ModSkillDmgTaken)
 		Perl_croak(aTHX_ "Usage: Mob::ModSkillDmgTaken(THIS, skill, value)");
 	{
 		Mob *		THIS;
-		SkillUseTypes	skill_num = (SkillUseTypes)SvUV(ST(1));
+		EQEmu::skills::SkillType	skill_num = (EQEmu::skills::SkillType)SvUV(ST(1));
 		int16		value = (int16)SvIV(ST(2));
 
 		if (sv_derived_from(ST(0), "Mob")) {
@@ -7862,7 +7862,7 @@ XS(XS_Mob_GetModSkillDmgTaken)
 		Mob *		THIS;
 		int16		RETVAL;
 		dXSTARG;
-		SkillUseTypes		skill_num = (SkillUseTypes)SvUV(ST(1));
+		EQEmu::skills::SkillType		skill_num = (EQEmu::skills::SkillType)SvUV(ST(1));
 
 		if (sv_derived_from(ST(0), "Mob")) {
 			IV tmp = SvIV((SV*)SvRV(ST(0)));
@@ -7889,7 +7889,7 @@ XS(XS_Mob_GetSkillDmgTaken)
 		Mob *		THIS;
 		int32		RETVAL;
 		dXSTARG;
-		SkillUseTypes		skill_num = (SkillUseTypes)SvUV(ST(1));
+		EQEmu::skills::SkillType		skill_num = (EQEmu::skills::SkillType)SvUV(ST(1));
 
 		if (sv_derived_from(ST(0), "Mob")) {
 			IV tmp = SvIV((SV*)SvRV(ST(0)));
@@ -8055,7 +8055,7 @@ XS(XS_Mob_DoMeleeSkillAttackDmg)
 		Mob *		THIS;
 		Mob*		target;
 		uint16		weapon_damage = (uint16)SvIV(ST(2));
-		SkillUseTypes	skill = (SkillUseTypes)SvUV(ST(3));
+		EQEmu::skills::SkillType	skill = (EQEmu::skills::SkillType)SvUV(ST(3));
 		int16		chance_mod = (int16)SvIV(ST(4));
 		int16		focus = (int16)SvIV(ST(5));
 		uint8		CanRiposte = (uint8)SvIV(ST(6));

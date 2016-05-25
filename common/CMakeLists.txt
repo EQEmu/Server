@@ -15,6 +15,7 @@ SET(common_sources
 	deity.cpp
 	emu_constants.cpp
 	emu_legacy.cpp
+	emu_limits.cpp
 	emu_opcodes.cpp
 	emu_tcp_connection.cpp
 	emu_tcp_server.cpp
@@ -121,6 +122,7 @@ SET(common_headers
 	deity.h
 	emu_constants.h
 	emu_legacy.h
+	emu_limits.h
 	emu_opcodes.h
 	emu_oplist.h
 	emu_tcp_connection.h
