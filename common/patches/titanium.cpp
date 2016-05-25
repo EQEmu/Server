@@ -18,6 +18,7 @@
 */
 
 #include "../global_define.h"
+#include "../eqemu_config.h"
 #include "../eqemu_logsys.h"
 #include "titanium.h"
 #include "../opcodemgr.h"
@@ -30,7 +31,6 @@
 #include "../misc_functions.h"
 #include "../string_util.h"
 #include "../item.h"
-#include "../eqemu_config.h"
 #include "titanium_structs.h"
 
 #include <sstream>
