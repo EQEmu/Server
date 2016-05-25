@@ -16,7 +16,11 @@
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 
+#ifndef EQEMU_CONFIG_EXTERN
+#define EQEMU_CONFIG_EXTERN
+
 #include "eqemu_config.h"
 
 extern const EQEmuConfig *Config;
 
+#endif

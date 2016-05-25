@@ -132,6 +132,7 @@ SET(common_headers
 	eqemu_exception.h
 	eqemu_config.h
 	eqemu_config_elements.h
+	eqemu_config_extern.h
 	eqemu_logsys.h
 	eq_limits.h
 	eq_packet.h
