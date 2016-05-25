@@ -29,8 +29,16 @@
 #include "string_util_test.h"
 #include "data_verification_test.h"
 #include "skills_util_test.h"
+#include "../common/eqemu_config.h"
+
+const EQEmuConfig *Config;
 
 int main() {
+	if(!EQEmuConfig::LoadConfig()) {
+		std::cout << "Problem loading configuration." << std::endl;
+		return 1;
+	}
+        Config = EQEmuConfig::get();
 	try {
 		std::ofstream outfile("test_output.txt");
 		std::unique_ptr<Test::Output> output(new Test::TextOutput(Test::TextOutput::Verbose, outfile));

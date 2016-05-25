@@ -21,6 +21,9 @@
 
 #include "cppunit/cpptest.h"
 #include "../common/ipc_mutex.h"
+#include "../common/eqemu_config.h"
+
+extern const EQEmuConfig *Config;
 
 class IPCMutexTest : public Test::Suite {
 	typedef void(IPCMutexTest::*TestFunction)(void);
