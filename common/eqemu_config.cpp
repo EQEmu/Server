@@ -299,6 +299,13 @@ void EQEmuConfig::do_directories(TiXmlElement *ele)
 		if ( SharedMemDir.back() != '/' )
 			SharedMemDir += '/';
 	}
+	//Not Fully Implemented yet LogDir
+	text = ParseTextBlock(ele, "logs", true);
+	if (text) {
+		LogDir = text;
+		if ( LogDir.back() != '/' )
+			LogDir += '/';
+	}
 }
 
 void EQEmuConfig::do_launcher(TiXmlElement *ele)

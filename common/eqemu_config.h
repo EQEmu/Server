@@ -88,6 +88,7 @@ class EQEmuConfig : public XMLParser
 		std::string LuaModuleDir;
 		std::string PatchDir;
 		std::string SharedMemDir;
+		std::string LogDir;
 
 		// From <launcher/>
 		std::string LogPrefix;
