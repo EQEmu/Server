@@ -169,7 +169,7 @@ class EQEmuConfig : public XMLParser
 			LogDir = "logs/";
 
 			// Launcher
-			LogPrefix = "zone-";
+			LogPrefix = "logs/zone-";
 			LogSuffix = ".log";
 			RestartWait = 10000;		//milliseconds
 			TerminateWait = 10000;		//milliseconds
