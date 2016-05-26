@@ -187,7 +187,7 @@ namespace RoF
 		const size_t InvTypeLimboSize = 36;
 		const size_t InvTypeTributeSize = 5;
 		const size_t InvTypeTrophyTributeSize = 0;//unknown
-		const size_t InvTypeGuildTributeSize = 0;//unknown
+		const size_t InvTypeGuildTributeSize = 2;//unverified
 		const size_t InvTypeMerchantSize = 200;
 		const size_t InvTypeDeletedSize = 0;//unknown - "Recovery Tab"
 		const size_t InvTypeCorpseSize = InvTypePossessionsSize;

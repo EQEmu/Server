@@ -175,7 +175,7 @@ namespace SoF
 		const size_t InvTypeWorldSize = 10;
 		const size_t InvTypeLimboSize = 36;
 		const size_t InvTypeTributeSize = 5;
-		const size_t InvTypeGuildTributeSize = 0;//unknown
+		const size_t InvTypeGuildTributeSize = 2;
 		const size_t InvTypeMerchantSize = 80;
 		const size_t InvTypeCorpseSize = InvTypePossessionsSize;
 		const size_t InvTypeBazaarSize = 80;
