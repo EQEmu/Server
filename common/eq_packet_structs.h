@@ -1544,7 +1544,7 @@ enum ItemPacketType
 //	ItemPacket10				= /*110*/ 0x6E,
 //	ItemPacket11				= /*111*/ 0x6F, // UF+ (equipment slots only) (RoF+ checks '(WORD*)slot + 4 != -1' [(WORD*)]slot + 2 would be bag index - if used) (guess)
 //	ItemPacket12				= /*112*/ 0x70, // RoF+ (causes stat update) (could be TrophyTribute and GuildTrophyTribute together - two case methodology - is it checking for GuildID?)
-//	ItemPacketRecovery			= /*113*/ 0x71, (same handler as merchant..exception: parameter is '1' versus merchant '0' looks like tab id)
+//	ItemPacketMerchantRecovery	= /*113*/ 0x71,
 //	ItemPacket14				= /*115*/ 0x73, (real estate/moving crate?)
 //	ItemPacket__				= /*xxx*/ 0xXX // switch 'default' - all clients
 //};
