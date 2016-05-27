@@ -211,7 +211,10 @@ namespace UF
 		const int WorldEnd = (WorldBegin + invtype::InvTypeWorldSize) - 1;
 
 		const int TributeBegin = 400;
-		const int TributeEnd = 404;
+		const int TributeEnd = (TributeBegin + invtype::InvTypeTributeSize) - 1;
+
+		const int GuildTributeBegin = 450;
+		const int GuildTributeEnd = (GuildTributeBegin + invtype::InvTypeGuildTributeSize) - 1;
 
 		const int CorpseBegin = invslot::PossessionsGeneral1;
 		const int CorpseEnd = invslot::PossessionsGeneral1 + invslot::PossessionsCursor;

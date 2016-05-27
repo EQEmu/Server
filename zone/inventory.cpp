@@ -569,7 +569,7 @@ bool Client::SummonItem(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2,
 	// put item into inventory
 	if (to_slot == EQEmu::legacy::SlotCursor) {
 		PushItemOnCursor(*inst);
-		SendItemPacket(EQEmu::legacy::SlotCursor, inst, ItemPacketSummonItem);
+		SendItemPacket(EQEmu::legacy::SlotCursor, inst, ItemPacketLimbo);
 	}
 	else {
 		PutItemInInventory(to_slot, *inst, true);
@@ -710,7 +710,7 @@ void Client::SendCursorBuffer()
 		SendCursorBuffer();
 	}
 	else {
-		SendItemPacket(EQEmu::legacy::SlotCursor, test_inst, ItemPacketSummonItem);
+		SendItemPacket(EQEmu::legacy::SlotCursor, test_inst, ItemPacketLimbo);
 	}
 }
 
@@ -842,7 +842,7 @@ bool Client::PushItemOnCursor(const ItemInst& inst, bool client_update)
 	m_inv.PushCursor(inst);
 
 	if (client_update) {
-		SendItemPacket(EQEmu::legacy::SlotCursor, &inst, ItemPacketSummonItem);
+		SendItemPacket(EQEmu::legacy::SlotCursor, &inst, ItemPacketLimbo);
 	}
 
 	auto s = m_inv.cursor_cbegin(), e = m_inv.cursor_cend();
@@ -865,7 +865,7 @@ bool Client::PutItemInInventory(int16 slot_id, const ItemInst& inst, bool client
 
 	if (client_update)
 	{
-		SendItemPacket(slot_id, &inst, ((slot_id == EQEmu::legacy::SlotCursor) ? ItemPacketSummonItem : ItemPacketTrade));
+		SendItemPacket(slot_id, &inst, ((slot_id == EQEmu::legacy::SlotCursor) ? ItemPacketLimbo : ItemPacketTrade));
 		//SendWearChange(Inventory::CalcMaterialFromSlot(slot_id));
 	}
 		
@@ -901,7 +901,7 @@ void Client::PutLootInInventory(int16 slot_id, const ItemInst &inst, ServerLootI
 	if (slot_id == EQEmu::legacy::SlotCursor && !cursor_empty) {
 		// RoF+ currently has a specialized cursor handler
 		if (ClientVersion() < EQEmu::versions::ClientVersion::RoF)
-			SendItemPacket(slot_id, &inst, ItemPacketSummonItem);
+			SendItemPacket(slot_id, &inst, ItemPacketLimbo);
 	}
 	else {
 		SendLootItemInPacket(&inst, slot_id);

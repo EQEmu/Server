@@ -317,7 +317,7 @@ void Client::GoFish()
 			else
 			{
 				PushItemOnCursor(*inst);
-				SendItemPacket(EQEmu::legacy::SlotCursor, inst, ItemPacketSummonItem);
+				SendItemPacket(EQEmu::legacy::SlotCursor, inst, ItemPacketLimbo);
 				if(RuleB(TaskSystem, EnableTaskSystem))
 					UpdateTasksForItem(ActivityFish, food_id);
 
@@ -431,7 +431,7 @@ void Client::ForageItem(bool guarantee) {
 			}
 			else {
 				PushItemOnCursor(*inst);
-				SendItemPacket(EQEmu::legacy::SlotCursor, inst, ItemPacketSummonItem);
+				SendItemPacket(EQEmu::legacy::SlotCursor, inst, ItemPacketLimbo);
 				if(RuleB(TaskSystem, EnableTaskSystem))
 					UpdateTasksForItem(ActivityForage, foragedfood);
 

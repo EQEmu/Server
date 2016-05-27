@@ -1522,7 +1522,7 @@ enum ItemPacketType
 	ItemPacketLoot				= 0x66,
 	ItemPacketTrade				= 0x67,
 	ItemPacketCharInventory		= 0x69,
-	ItemPacketSummonItem		= 0x6A,
+	ItemPacketLimbo				= 0x6A,
 	ItemPacketWorldContainer	= 0x6B,
 	ItemPacketTributeItem		= 0x6C,
 	ItemPacketGuildTribute		= 0x6D,
@@ -1536,8 +1536,8 @@ enum ItemPacketType
 //	ItemPacketTradeView			= /*101*/ 0x65,
 //	ItemPacketLoot				= /*102*/ 0x66,
 //	ItemPacketTrade				= /*103*/ 0x67,
-//	ItemPacketCharInventory		= /*105*/ 0x69,
-//	ItemPacketLimbo				= /*106*/ 0x6A, // name change
+//	ItemPacketCharInventory		= /*105*/ 0x69, // 105 looks like raw item packet (no appearance update) thru shared bank..110, possibly possessions with appearance update
+//	ItemPacketLimbo				= /*106*/ 0x6A,
 //	ItemPacketWorldContainer	= /*107*/ 0x6B,
 //	ItemPacketTributeItem		= /*108*/ 0x6C,
 //	ItemPacketGuildTribute		= /*109*/ 0x6D, // missing from EQEmu

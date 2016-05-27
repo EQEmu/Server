@@ -10223,7 +10223,7 @@ void command_zopp(Client *c, const Seperator *sep)
 			packettype = ItemPacketTrade;
 		}
 		else {
-			packettype = ItemPacketSummonItem;
+			packettype = ItemPacketLimbo;
 		}
 
 		int16 slotid = atoi(sep->arg[2]);
