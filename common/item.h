@@ -32,13 +32,11 @@ class EvolveInfo;			// Stores information about an evolving item family
 #include "../common/item_struct.h"
 #include "../common/timer.h"
 #include "../common/bodytypes.h"
-#include "../common/deity.h" // aren't we already in '/common'?
-
-#include "string_util.h"
+#include "../common/deity.h"
+#include "../common/memory_buffer.h"
 
 #include <list>
 #include <map>
-//#include <sstream>
 
 
 namespace ItemField

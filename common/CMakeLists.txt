@@ -41,6 +41,7 @@ SET(common_sources
 	item_struct.cpp
 	light_source.cpp
 	md5.cpp
+	memory_buffer.cpp
 	memory_mapped_file.cpp
 	misc.cpp
 	misc_functions.cpp
@@ -165,6 +166,7 @@ SET(common_headers
 	loottable.h
 	mail_oplist.h
 	md5.h
+	memory_buffer.h
 	memory_mapped_file.h
 	misc.h
 	misc_functions.h
