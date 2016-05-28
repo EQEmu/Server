@@ -72,7 +72,7 @@ void ZoneLaunch::Start() {
 
 	spec->args.push_back(m_launcherName);
 	spec->handler = this;
-	spec->logFile = m_config->LogPrefix + m_zone + m_config->LogSuffix;
+	spec->logFile = m_config->LogDir + m_config->LogPrefix + m_zone + m_config->LogSuffix;
 
 	//spec is consumed, even on failure
 	m_ref = ProcLauncher::get()->Launch(spec);
