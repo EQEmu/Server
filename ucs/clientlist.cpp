@@ -19,6 +19,7 @@
 
 #include "../common/global_define.h"
 #include "../common/string_util.h"
+#include "../common/eqemu_config.h"
 #include "../common/eqemu_logsys.h"
 
 #include "clientlist.h"
@@ -473,7 +474,9 @@ Clientlist::Clientlist(int ChatPort) {
 
 	ChatOpMgr = new RegularOpcodeManager;
 
-	if(!ChatOpMgr->LoadOpcodes("mail_opcodes.conf"))
+	auto Config = EQEmuConfig::get();
+	std::string OpcodeFile = Config->PatchDir + "mail_opcodes.conf";
+	if(!ChatOpMgr->LoadOpcodes(OpcodeFile.c_str()))
 		exit(1);
 
 	if (chatsf->Open())
