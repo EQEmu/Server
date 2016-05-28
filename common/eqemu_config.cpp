@@ -23,6 +23,7 @@
 #include <iostream>
 #include <sstream>
 
+std::string EQEmuConfig::ConfigPath = CONFIG_PATH;
 std::string EQEmuConfig::ConfigFile = "eqemu_config.xml";
 EQEmuConfig *EQEmuConfig::_config = nullptr;
 

@@ -113,6 +113,7 @@ class EQEmuConfig : public XMLParser
 		static EQEmuConfig *_config;
 
 		static std::string ConfigFile;
+		static std::string ConfigPath;
 
 #define ELEMENT(name) \
 	void do_##name(TiXmlElement *ele);
@@ -217,7 +218,14 @@ class EQEmuConfig : public XMLParser
 				delete _config;
 			}
 			_config = new EQEmuConfig;
-			return _config->ParseFile(EQEmuConfig::ConfigFile.c_str(), "server");
+			std::string FullPath = EQEmuConfig::ConfigFile;
+			if (!(EQEmuConfig::ConfigPath.empty())) {
+				if ( EQEmuConfig::ConfigPath.back() != '/' ) 
+					EQEmuConfig::ConfigPath += '/';
+				FullPath = EQEmuConfig::ConfigPath + EQEmuConfig::ConfigFile;
+			}
+
+			return _config->ParseFile(FullPath.c_str(), "server");
 		}
 
 		void Dump() const;
