@@ -8131,7 +8131,7 @@ XS(XS_Mob_DoThrowingAttackDmg)
 		Mob *		THIS;
 		Mob*		target;
 		ItemInst*	RangeWeapon = nullptr;
-		EQEmu::Item_Struct* item = nullptr;
+		EQEmu::ItemBase* item = nullptr;
 		uint16		weapon_damage = (uint16)SvIV(ST(4));
 		int16		chance_mod = (int16)SvIV(ST(5));
 		int16		focus = (int16)SvIV(ST(6));

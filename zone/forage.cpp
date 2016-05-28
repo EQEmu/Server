@@ -304,7 +304,7 @@ void Client::GoFish()
 			food_id = common_fish_ids[index];
 		}
 
-		const EQEmu::Item_Struct* food_item = database.GetItem(food_id);
+		const EQEmu::ItemBase* food_item = database.GetItem(food_id);
 
 		Message_StringID(MT_Skills, FISHING_SUCCESS);
 		ItemInst* inst = database.CreateItem(food_item, 1);
@@ -396,7 +396,7 @@ void Client::ForageItem(bool guarantee) {
 			foragedfood = common_food_ids[index];
 		}
 
-		const EQEmu::Item_Struct* food_item = database.GetItem(foragedfood);
+		const EQEmu::ItemBase* food_item = database.GetItem(foragedfood);
 
 		if(!food_item) {
 			Log.Out(Logs::General, Logs::Error, "nullptr returned from database.GetItem in ClientForageItem");

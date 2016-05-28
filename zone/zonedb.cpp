@@ -629,7 +629,7 @@ ItemInst* ZoneDatabase::LoadSingleTraderItem(uint32 CharID, int SerialNumber) {
 	int Charges = atoi(row[3]);
 	int Cost = atoi(row[4]);
 
-    const EQEmu::Item_Struct *item = database.GetItem(ItemID);
+	const EQEmu::ItemBase *item = database.GetItem(ItemID);
 
 	if(!item) {
 		Log.Out(Logs::Detail, Logs::Trading, "Unable to create item\n");
@@ -684,7 +684,7 @@ void ZoneDatabase::UpdateTraderItemPrice(int CharID, uint32 ItemID, uint32 Charg
 
 	Log.Out(Logs::Detail, Logs::Trading, "ZoneDatabase::UpdateTraderPrice(%i, %i, %i, %i)", CharID, ItemID, Charges, NewPrice);
 
-	const EQEmu::Item_Struct *item = database.GetItem(ItemID);
+	const EQEmu::ItemBase *item = database.GetItem(ItemID);
 
 	if(!item)
 		return;
@@ -1197,7 +1197,7 @@ bool ZoneDatabase::LoadCharacterBandolier(uint32 character_id, PlayerProfile_Str
 		i = atoi(row[r]); /* Bandolier ID */ r++;
 		si = atoi(row[r]); /* Bandolier Slot */ r++;
 
-		const EQEmu::Item_Struct* item_data = database.GetItem(atoi(row[r]));
+		const EQEmu::ItemBase* item_data = database.GetItem(atoi(row[r]));
 		if (item_data) {
 			pp->bandoliers[i].Items[si].ID = item_data->ID; r++;
 			pp->bandoliers[i].Items[si].Icon = atoi(row[r]); r++; // Must use db value in case an Ornamentation is assigned
@@ -1249,7 +1249,7 @@ bool ZoneDatabase::LoadCharacterPotions(uint32 character_id, PlayerProfile_Struc
 
 	for (auto row = results.begin(); row != results.end(); ++row) {
 		i = atoi(row[0]);
-		const EQEmu::Item_Struct *item_data = database.GetItem(atoi(row[1]));
+		const EQEmu::ItemBase *item_data = database.GetItem(atoi(row[1]));
 		if (!item_data)
 			continue;
 		pp->potionbelt.Items[i].ID = item_data->ID;

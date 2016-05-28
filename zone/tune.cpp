@@ -630,7 +630,7 @@ int32 Client::GetMeleeDamage(Mob* other, bool GetMinDamage)
 
 		if (Hand == EQEmu::legacy::SlotPrimary && GetLevel() >= 28 && IsWarriorClass())
 		{
-			ucDamageBonus = GetWeaponDamageBonus( weapon ? weapon->GetItem() : (const EQEmu::Item_Struct*) nullptr );
+			ucDamageBonus = GetWeaponDamageBonus(weapon ? weapon->GetItem() : (const EQEmu::ItemBase*) nullptr);
 
 			min_hit += (int) ucDamageBonus;
 			max_hit += (int) ucDamageBonus;

@@ -22,7 +22,7 @@
 
 #include "string_util.h"
 #include "item.h"
-#include "item_struct.h"
+#include "item_base.h"
 #include "../zone/zonedb.h"
 
 
@@ -99,7 +99,7 @@ void EQEmu::saylink::SayLinkEngine::generate_body()
 
 	memset(&m_LinkBodyStruct, 0, sizeof(SayLinkBody_Struct));
 
-	const EQEmu::Item_Struct* item_data = nullptr;
+	const EQEmu::ItemBase* item_data = nullptr;
 
 	switch (m_LinkType) {
 	case SayLinkBlank:
@@ -202,7 +202,7 @@ void EQEmu::saylink::SayLinkEngine::generate_text()
 		return;
 	}
 
-	const EQEmu::Item_Struct* item_data = nullptr;
+	const EQEmu::ItemBase* item_data = nullptr;
 
 	switch (m_LinkType) {
 	case SayLinkBlank:

@@ -25,7 +25,8 @@
 #include <list>
 #include <time.h>
 #include "../common/version.h"
-//#include "../common/item_struct.h"
+#include "emu_constants.h"
+
 
 static const uint32 BUFF_COUNT = 25;
 static const uint32 MAX_MERC = 100;
@@ -33,7 +34,6 @@ static const uint32 MAX_MERC_GRADES = 10;
 static const uint32 MAX_MERC_STANCES = 10;
 static const uint32 BLOCKED_BUFF_COUNT = 20;
 
-#include "emu_constants.h"
 
 /*
 ** Compiler override to ensure
@@ -2119,7 +2119,7 @@ struct AdventureLeaderboard_Struct
 /*struct Item_Shop_Struct {
 	uint16 merchantid;
 	uint8 itemtype;
-	EQEmu::Item_Struct item;
+	EQEmu::ItemBase item;
 	uint8 iss_unknown001[6];
 };*/
 

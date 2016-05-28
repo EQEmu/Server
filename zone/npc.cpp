@@ -27,7 +27,7 @@
 #include "../common/client_version.h" // inv2 watch
 #include "../common/features.h"
 #include "../common/item.h"
-#include "../common/item_struct.h"
+#include "../common/item_base.h"
 #include "../common/linked_list.h"
 #include "../common/servertalk.h"
 #include "../common/say_link.h"
@@ -524,7 +524,7 @@ void NPC::QueryLoot(Client* to)
 
 	int x = 0;
 	for (auto cur = itemlist.begin(); cur != itemlist.end(); ++cur, ++x) {
-		const EQEmu::Item_Struct* item = database.GetItem((*cur)->item_id);
+		const EQEmu::ItemBase* item = database.GetItem((*cur)->item_id);
 		if (item == nullptr) {
 			Log.Out(Logs::General, Logs::Error, "Database error, invalid item");
 			continue;
@@ -1457,7 +1457,7 @@ void NPC::PickPocket(Client* thief)
 
 	// still needs to have FindFreeSlot vs PutItemInInventory issue worked out
 	while (steal_item) {
-		std::vector<std::pair<const EQEmu::Item_Struct*, uint16>> loot_selection; // <const Item_Struct*, charges>
+		std::vector<std::pair<const EQEmu::ItemBase*, uint16>> loot_selection; // <const ItemBase*, charges>
 		for (auto item_iter : itemlist) {
 			if (!item_iter || !item_iter->item_id)
 				continue;

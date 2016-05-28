@@ -5201,7 +5201,7 @@ namespace RoF
 
 	void SerializeItem(EQEmu::OutBuffer& ob, const ItemInst *inst, int16 slot_id_in, uint8 depth)
 	{
-		const EQEmu::Item_Struct *item = inst->GetUnscaledItem();
+		const EQEmu::ItemBase *item = inst->GetUnscaledItem();
 		
 		RoF::structs::ItemSerializationHeader hdr;
 

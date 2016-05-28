@@ -30,15 +30,14 @@ class ServerPacket;
 
 namespace EQEmu
 {
-	struct Item_Struct;
+	struct ItemBase;
 }
 
 #include "../common/timer.h"
 #include "../common/ptimer.h"
 #include "../common/emu_opcodes.h"
 #include "../common/eq_packet_structs.h"
-//#include "../common/eq_constants.h"
-#include "../common/emu_constants.h" // inv2 watch
+#include "../common/emu_constants.h"
 #include "../common/eq_stream_intf.h"
 #include "../common/eq_packet.h"
 #include "../common/linked_list.h"
@@ -47,8 +46,7 @@ namespace EQEmu
 #include "../common/seperator.h"
 #include "../common/item.h"
 #include "../common/guilds.h"
-#include "../common/item_struct.h"
-//#include "../common/clientversions.h"
+#include "../common/item_base.h"
 
 #include "common.h"
 #include "merc.h"
@@ -294,7 +292,7 @@ public:
 
 	void FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho);
 	virtual bool Process();
-	void LogMerchant(Client* player, Mob* merchant, uint32 quantity, uint32 price, const EQEmu::Item_Struct* item, bool buying);
+	void LogMerchant(Client* player, Mob* merchant, uint32 quantity, uint32 price, const EQEmu::ItemBase* item, bool buying);
 	void SendPacketQueue(bool Block = true);
 	void QueuePacket(const EQApplicationPacket* app, bool ack_req = true, CLIENT_CONN_STATUS = CLIENT_CONNECTINGALL, eqFilterType filter=FilterNone);
 	void FastQueuePacket(EQApplicationPacket** app, bool ack_req = true, CLIENT_CONN_STATUS = CLIENT_CONNECTINGALL);
@@ -402,7 +400,7 @@ public:
 
 	inline uint8 GetLanguageSkill(uint16 n) const { return m_pp.languages[n]; }
 
-	void SendPickPocketResponse(Mob *from, uint32 amt, int type, const EQEmu::Item_Struct* item = nullptr);
+	void SendPickPocketResponse(Mob *from, uint32 amt, int type, const EQEmu::ItemBase* item = nullptr);
 
 	inline const char* GetLastName() const { return lastname; }
 
@@ -598,7 +596,7 @@ public:
 	void AssignToInstance(uint16 instance_id);
 	void RemoveFromInstance(uint16 instance_id);
 	void WhoAll();
-	bool CheckLoreConflict(const EQEmu::Item_Struct* item);
+	bool CheckLoreConflict(const EQEmu::ItemBase* item);
 	void ChangeLastName(const char* in_lastname);
 	void GetGroupAAs(GroupLeadershipAA_Struct *into) const;
 	void GetRaidAAs(RaidLeadershipAA_Struct *into) const;
@@ -823,7 +821,7 @@ public:
 	void IncStats(uint8 type,int16 increase_val);
 	void DropItem(int16 slot_id);
 
-	int GetItemLinkHash(const ItemInst* inst); // move to Item_Struct..or make use of the pre-calculated database field
+	int GetItemLinkHash(const ItemInst* inst); // move to ItemBase..or make use of the pre-calculated database field
 
 	void SendItemLink(const ItemInst* inst, bool sendtoall=false);
 	void SendLootItemInPacket(const ItemInst* inst, int16 slot_id);
@@ -1178,7 +1176,7 @@ public:
 	void SetAccountFlag(std::string flag, std::string val);
 	std::string GetAccountFlag(std::string flag);
 	float GetDamageMultiplier(EQEmu::skills::SkillType how_long_has_this_been_missing);
-	void Consume(const EQEmu::Item_Struct *item, uint8 type, int16 slot, bool auto_consume);
+	void Consume(const EQEmu::ItemBase *item, uint8 type, int16 slot, bool auto_consume);
 	void PlayMP3(const char* fname);
 	void ExpeditionSay(const char *str, int ExpID);
 	int mod_client_damage(int damage, EQEmu::skills::SkillType skillinuse, int hand, const ItemInst* weapon, Mob* other);
@@ -1200,9 +1198,9 @@ public:
 	int32 mod_client_xp(int32 in_exp, NPC *npc);
 	uint32 mod_client_xp_for_level(uint32 xp, uint16 check_level);
 	int mod_client_haste_cap(int cap);
-	int mod_consume(EQEmu::Item_Struct *item, EQEmu::item::ItemType type, int change);
-	int mod_food_value(const EQEmu::Item_Struct *item, int change);
-	int mod_drink_value(const EQEmu::Item_Struct *item, int change);
+	int mod_consume(EQEmu::ItemBase *item, EQEmu::item::ItemType type, int change);
+	int mod_food_value(const EQEmu::ItemBase *item, int change);
+	int mod_drink_value(const EQEmu::ItemBase *item, int change);
 
 	void SetEngagedRaidTarget(bool value) { EngagedRaidTarget = value; }
 	bool GetEngagedRaidTarget() const { return EngagedRaidTarget; }

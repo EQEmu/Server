@@ -2107,7 +2107,7 @@ namespace Titanium
 	void SerializeItem(EQEmu::OutBuffer& ob, const ItemInst *inst, int16 slot_id_in, uint8 depth)
 	{
 		const char* protection = "\\\\\\\\\\";
-		const EQEmu::Item_Struct* item = inst->GetUnscaledItem();
+		const EQEmu::ItemBase* item = inst->GetUnscaledItem();
 
 		ob << StringFormat("%.*s%s", (depth ? (depth - 1) : 0), protection, (depth ? "\"" : "")); // For leading quotes (and protection) if a subitem;
 		

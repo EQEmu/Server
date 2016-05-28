@@ -882,7 +882,7 @@ void PerlembParser::GetQuestPackageName(bool &isPlayerQuest, bool &isGlobalPlaye
 	}
 	else if(isItemQuest) {
 		// need a valid ItemInst pointer check here..unsure how to cancel this process
-		const EQEmu::Item_Struct* item = iteminst->GetItem();
+		const EQEmu::ItemBase* item = iteminst->GetItem();
 		package_name = "qst_item_";
 		package_name += itoa(item->ID);
 	}

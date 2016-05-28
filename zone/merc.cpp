@@ -217,7 +217,7 @@ void Merc::CalcItemBonuses(StatBonuses* newbon) {
 	for (i = 0; i < EQEmu::legacy::SlotAmmo; i++) {
 		if(equipment[i] == 0)
 			continue;
-		const EQEmu::Item_Struct * itm = database.GetItem(equipment[i]);
+		const EQEmu::ItemBase * itm = database.GetItem(equipment[i]);
 		if(itm)
 			AddItemBonuses(itm, newbon);
 	}
@@ -243,7 +243,7 @@ void Merc::CalcItemBonuses(StatBonuses* newbon) {
 	SetAttackTimer();
 }
 
-void Merc::AddItemBonuses(const EQEmu::Item_Struct *item, StatBonuses* newbon) {
+void Merc::AddItemBonuses(const EQEmu::ItemBase *item, StatBonuses* newbon) {
 
 	if(GetLevel() < item->ReqLevel)
 	{
@@ -1221,7 +1221,7 @@ void Merc::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho) {
 			{
 				continue;
 			}
-			const Item_Struct* item = database.GetItem(equipment[i]);
+			const ItemBase* item = database.GetItem(equipment[i]);
 			if(item)
 			{
 				ns->spawn.equipment[i].material = item->Material;
@@ -2547,8 +2547,8 @@ int16 Merc::GetFocusEffect(focusType type, uint16 spell_id) {
 	//Check if item focus effect exists for the client.
 	if (itembonuses.FocusEffects[type]){
 
-		const EQEmu::Item_Struct* TempItem = 0;
-		const EQEmu::Item_Struct* UsedItem = 0;
+		const EQEmu::ItemBase* TempItem = 0;
+		const EQEmu::ItemBase* UsedItem = 0;
 		uint16 UsedFocusID = 0;
 		int16 Total = 0;
 		int16 focus_max = 0;
@@ -4428,7 +4428,7 @@ void Merc::DoClassAttacks(Mob *target) {
 						DoAnim(animKick);
 						int32 dmg = 0;
 
-						if(GetWeaponDamage(target, (const EQEmu::Item_Struct*)nullptr) <= 0){
+						if (GetWeaponDamage(target, (const EQEmu::ItemBase*)nullptr) <= 0){
 							dmg = -5;
 						}
 						else{
@@ -4450,7 +4450,7 @@ void Merc::DoClassAttacks(Mob *target) {
 						DoAnim(animTailRake);
 						int32 dmg = 0;
 
-						if(GetWeaponDamage(target, (const EQEmu::Item_Struct*)nullptr) <= 0){
+						if (GetWeaponDamage(target, (const EQEmu::ItemBase*)nullptr) <= 0){
 							dmg = -5;
 						}
 						else{

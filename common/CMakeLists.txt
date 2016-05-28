@@ -38,7 +38,7 @@ SET(common_sources
 	inventory_version.cpp
 	ipc_mutex.cpp
 	item.cpp
-	item_struct.cpp
+	item_base.cpp
 	light_source.cpp
 	md5.cpp
 	memory_buffer.cpp
@@ -158,8 +158,8 @@ SET(common_headers
 	inventory_version.h
 	ipc_mutex.h
 	item.h
+	item_base.h
 	item_fieldlist.h
-	item_struct.h
 	languages.h
 	light_source.h
 	linked_list.h

@@ -2546,7 +2546,7 @@ void command_peekinv(Client *c, const Seperator *sep)
 	Client* targetClient = c->GetTarget()->CastToClient();
 	const ItemInst* inst_main = nullptr;
 	const ItemInst* inst_sub = nullptr;
-	const EQEmu::Item_Struct* item_data = nullptr;
+	const EQEmu::ItemBase* item_data = nullptr;
 	std::string item_link;
 	EQEmu::saylink::SayLinkEngine linker;
 	linker.SetLinkType(linker.SayLinkItemInst);
@@ -5514,7 +5514,7 @@ void command_summonitem(Client *c, const Seperator *sep)
 	}
 
 	int16 item_status = 0;
-	const EQEmu::Item_Struct* item = database.GetItem(itemid);
+	const EQEmu::ItemBase* item = database.GetItem(itemid);
 	if (item) {
 		item_status = static_cast<int16>(item->MinStatus);
 	}
@@ -5553,7 +5553,7 @@ void command_giveitem(Client *c, const Seperator *sep)
 		Client *t = c->GetTarget()->CastToClient();
 		uint32 itemid = atoi(sep->arg[1]);
 		int16 item_status = 0;
-		const EQEmu::Item_Struct* item = database.GetItem(itemid);
+		const EQEmu::ItemBase* item = database.GetItem(itemid);
 		if(item) {
 			item_status = static_cast<int16>(item->MinStatus);
 		}
@@ -5606,7 +5606,7 @@ void command_itemsearch(Client *c, const Seperator *sep)
 	{
 		const char *search_criteria=sep->argplus[1];
 
-		const EQEmu::Item_Struct* item = nullptr;
+		const EQEmu::ItemBase* item = nullptr;
 		std::string item_link;
 		EQEmu::saylink::SayLinkEngine linker;
 		linker.SetLinkType(linker.SayLinkItemData);
@@ -10230,7 +10230,7 @@ void command_zopp(Client *c, const Seperator *sep)
 		uint32 itemid = atoi(sep->arg[3]);
 		int16 charges = sep->argnum == 4 ? atoi(sep->arg[4]) : 1; // defaults to 1 charge if not specified
 
-		const EQEmu::Item_Struct* FakeItem = database.GetItem(itemid);
+		const EQEmu::ItemBase* FakeItem = database.GetItem(itemid);
 
 		if (!FakeItem) {
 			c->Message(13, "Error: Item [%u] is not a valid item id.",  itemid);
@@ -10238,7 +10238,7 @@ void command_zopp(Client *c, const Seperator *sep)
 		}
 
 		int16 item_status = 0;
-		const EQEmu::Item_Struct* item = database.GetItem(itemid);
+		const EQEmu::ItemBase* item = database.GetItem(itemid);
 		if(item) {
 			item_status = static_cast<int16>(item->MinStatus);
 		}

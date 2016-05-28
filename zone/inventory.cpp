@@ -177,7 +177,7 @@ uint32 Client::NukeItem(uint32 itemnum, uint8 where_to_check) {
 }
 
 
-bool Client::CheckLoreConflict(const EQEmu::Item_Struct* item)
+bool Client::CheckLoreConflict(const EQEmu::ItemBase* item)
 {
 	if (!item) { return false; }
 	if (!item->LoreFlag) { return false; }
@@ -195,7 +195,7 @@ bool Client::SummonItem(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2,
 
 	// TODO: update calling methods and script apis to handle a failure return
 
-	const EQEmu::Item_Struct* item = database.GetItem(item_id);
+	const EQEmu::ItemBase* item = database.GetItem(item_id);
 
 	// make sure the item exists
 	if(item == nullptr) {
@@ -247,7 +247,7 @@ bool Client::SummonItem(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2,
 	bool enforceusable	= RuleB(Inventory, EnforceAugmentUsability);
 	
 	for (int iter = AUG_INDEX_BEGIN; iter < EQEmu::legacy::ITEM_COMMON_SIZE; ++iter) {
-		const EQEmu::Item_Struct* augtest = database.GetItem(augments[iter]);
+		const EQEmu::ItemBase* augtest = database.GetItem(augments[iter]);
 
 		if(augtest == nullptr) {
 			if(augments[iter]) {
@@ -1074,7 +1074,7 @@ void Client::MoveItemCharges(ItemInst &from, int16 to_slot, uint8 type)
 
 #if 0
 // TODO: needs clean-up to save references
-bool MakeItemLink(char* &ret_link, const Item_Struct *item, uint32 aug0, uint32 aug1, uint32 aug2, uint32 aug3, uint32 aug4, uint32 aug5, uint8 evolving, uint8 evolvedlevel) {
+bool MakeItemLink(char* &ret_link, const ItemBase *item, uint32 aug0, uint32 aug1, uint32 aug2, uint32 aug3, uint32 aug4, uint32 aug5, uint8 evolving, uint8 evolvedlevel) {
 	//we're sending back the entire "link", minus the null characters & item name
 	//that way, we can use it for regular links & Task links
 	//note: initiator needs to pass us ret_link
@@ -1189,7 +1189,7 @@ int Client::GetItemLinkHash(const ItemInst* inst) {
 	if (!inst)	//have to have an item to make the hash
 		return 0;
 
-	const EQEmu::Item_Struct* item = inst->GetItem();
+	const EQEmu::ItemBase* item = inst->GetItem();
 	char* hash_str = 0;
 	/*register */int hash = 0;
 
@@ -1283,7 +1283,7 @@ packet with the item number in it, but I cant seem to find it right now
 	if (!inst)
 		return;
 
-	const EQEmu::Item_Struct* item = inst->GetItem();
+	const EQEmu::ItemBase* item = inst->GetItem();
 	const char* name2 = &item->Name[0];
 	auto outapp = new EQApplicationPacket(OP_ItemLinkText, strlen(name2) + 68);
 	char buffer2[135] = {0};
@@ -1555,7 +1555,7 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 		else {
 			auto ndh_item = ndh_inst->GetItem();
 			if (ndh_item == nullptr) {
-				ndh_item_data.append("[nullptr on Item_Struct*]");
+				ndh_item_data.append("[nullptr on ItemBase*]");
 			}
 			else {
 				ndh_item_data.append(StringFormat("name=%s", ndh_item->Name));
@@ -1597,8 +1597,8 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 				m_inv.DeleteItem(src_slot_id);
 			}
 			else {
-				const EQEmu::Item_Struct* world_item = world_inst->GetItem();
-				const EQEmu::Item_Struct* src_item = src_inst->GetItem();
+				const EQEmu::ItemBase* world_item = world_inst->GetItem();
+				const EQEmu::ItemBase* src_item = src_inst->GetItem();
 				if (world_item && src_item) {
 					// Case 2: Same item on cursor, stacks, transfer of charges needed
 					if ((world_item->ID == src_item->ID) && src_inst->IsStackable()) {
@@ -1838,7 +1838,7 @@ void Client::SwapItemResync(MoveItem_Struct* move_slots) {
 		int16 resync_slot = (Inventory::CalcSlotId(move_slots->from_slot) == INVALID_INDEX) ? move_slots->from_slot : Inventory::CalcSlotId(move_slots->from_slot);
 		if (IsValidSlot(resync_slot) && resync_slot != INVALID_INDEX) {
 			// This prevents the client from crashing when closing any 'phantom' bags
-			const EQEmu::Item_Struct* token_struct = database.GetItem(22292); // 'Copper Coin'
+			const EQEmu::ItemBase* token_struct = database.GetItem(22292); // 'Copper Coin'
 			ItemInst* token_inst = database.CreateItem(token_struct, 1);
 
 			SendItemPacket(resync_slot, token_inst, ItemPacketTrade);
@@ -1863,7 +1863,7 @@ void Client::SwapItemResync(MoveItem_Struct* move_slots) {
 		int16 resync_slot = (Inventory::CalcSlotId(move_slots->from_slot) == INVALID_INDEX) ? move_slots->from_slot : Inventory::CalcSlotId(move_slots->from_slot);
 		if (IsValidSlot(resync_slot) && resync_slot != INVALID_INDEX) {
 			if(m_inv[resync_slot]) {
-				const EQEmu::Item_Struct* token_struct = database.GetItem(22292); // 'Copper Coin'
+				const EQEmu::ItemBase* token_struct = database.GetItem(22292); // 'Copper Coin'
 				ItemInst* token_inst = database.CreateItem(token_struct, 1);
 
 				SendItemPacket(resync_slot, token_inst, ItemPacketTrade);
@@ -1880,7 +1880,7 @@ void Client::SwapItemResync(MoveItem_Struct* move_slots) {
 	if ((move_slots->to_slot >= EQEmu::legacy::EQUIPMENT_BEGIN && move_slots->to_slot <= EQEmu::legacy::CURSOR_BAG_END) || move_slots->to_slot == EQEmu::legacy::SlotPowerSource) {
 		int16 resync_slot = (Inventory::CalcSlotId(move_slots->to_slot) == INVALID_INDEX) ? move_slots->to_slot : Inventory::CalcSlotId(move_slots->to_slot);
 		if (IsValidSlot(resync_slot) && resync_slot != INVALID_INDEX) {
-			const EQEmu::Item_Struct* token_struct = database.GetItem(22292); // 'Copper Coin'
+			const EQEmu::ItemBase* token_struct = database.GetItem(22292); // 'Copper Coin'
 			ItemInst* token_inst = database.CreateItem(token_struct, 1);
 
 			SendItemPacket(resync_slot, token_inst, ItemPacketTrade);
@@ -1905,7 +1905,7 @@ void Client::SwapItemResync(MoveItem_Struct* move_slots) {
 		int16 resync_slot = (Inventory::CalcSlotId(move_slots->to_slot) == INVALID_INDEX) ? move_slots->to_slot : Inventory::CalcSlotId(move_slots->to_slot);
 		if (IsValidSlot(resync_slot) && resync_slot != INVALID_INDEX) {
 			if(m_inv[resync_slot]) {
-				const EQEmu::Item_Struct* token_struct = database.GetItem(22292); // 'Copper Coin'
+				const EQEmu::ItemBase* token_struct = database.GetItem(22292); // 'Copper Coin'
 				ItemInst* token_inst = database.CreateItem(token_struct, 1);
 
 				SendItemPacket(resync_slot, token_inst, ItemPacketTrade);
@@ -2057,7 +2057,7 @@ void Client::DyeArmor(DyeStruct* dye){
 
 #if 0
 bool Client::DecreaseByItemType(uint32 type, uint8 amt) {
-	const Item_Struct* TempItem = 0;
+	const ItemBase* TempItem = 0;
 	ItemInst* ins;
 	int x;
 	for(x=EQEmu::legacy::POSSESSIONS_BEGIN; x <= EQEmu::legacy::POSSESSIONS_END; x++)
@@ -2109,7 +2109,7 @@ bool Client::DecreaseByItemType(uint32 type, uint8 amt) {
 #endif
 
 bool Client::DecreaseByID(uint32 type, uint8 amt) {
-	const EQEmu::Item_Struct* TempItem = nullptr;
+	const EQEmu::ItemBase* TempItem = nullptr;
 	ItemInst* ins = nullptr;
 	int x;
 	int num = 0;
@@ -2617,7 +2617,7 @@ uint32 Client::GetEquipment(uint8 material_slot) const
 #if 0
 int32 Client::GetEquipmentMaterial(uint8 material_slot)
 {
-	const Item_Struct *item;
+	const ItemBase *item;
 
 	item = database.GetItem(GetEquipment(material_slot));
 	if(item != 0)
@@ -2634,7 +2634,7 @@ uint32 Client::GetEquipmentColor(uint8 material_slot) const
 	if (material_slot > EQEmu::legacy::MATERIAL_END)
 		return 0;
 
-	const EQEmu::Item_Struct *item = database.GetItem(GetEquipment(material_slot));
+	const EQEmu::ItemBase *item = database.GetItem(GetEquipment(material_slot));
 	if(item != nullptr)
 		return ((m_pp.item_tint[material_slot].RGB.UseTint) ? m_pp.item_tint[material_slot].Color : item->Color);
 
@@ -2718,7 +2718,7 @@ void Client::CreateBandolier(const EQApplicationPacket *app)
 	strcpy(m_pp.bandoliers[bs->Number].Name, bs->Name);
 
 	const ItemInst* InvItem = nullptr; 
-	const EQEmu::Item_Struct *BaseItem = nullptr; 
+	const EQEmu::ItemBase *BaseItem = nullptr;
 	int16 WeaponSlot = 0;
 
 	for(int BandolierSlot = bandolierPrimary; BandolierSlot <= bandolierAmmo; BandolierSlot++) {

@@ -118,7 +118,7 @@ void Mob::DoSpecialAttackDamage(Mob *who, EQEmu::skills::SkillType skill, int32 
 				{
 					hate += item->GetItem()->AC;
 				}
-				const EQEmu::Item_Struct *itm = item->GetItem();
+				const EQEmu::ItemBase *itm = item->GetItem();
 				auto fbash = GetFuriousBash(itm->Focus.Effect);
 				hate = hate * (100 + fbash) / 100;
 				if (fbash)
@@ -463,7 +463,7 @@ int Mob::MonkSpecialAttack(Mob* other, uint8 unchecked_type)
 		}
 	}
 	else{
-		if(GetWeaponDamage(other, (const EQEmu::Item_Struct*)nullptr) <= 0){
+		if (GetWeaponDamage(other, (const EQEmu::ItemBase*)nullptr) <= 0){
 			ndamage = -5;
 		}
 	}
@@ -694,8 +694,8 @@ void Client::RangedAttack(Mob* other, bool CanDoubleAttack) {
 		return;
 	}
 
-	const EQEmu::Item_Struct* RangeItem = RangeWeapon->GetItem();
-	const EQEmu::Item_Struct* AmmoItem = Ammo->GetItem();
+	const EQEmu::ItemBase* RangeItem = RangeWeapon->GetItem();
+	const EQEmu::ItemBase* AmmoItem = Ammo->GetItem();
 
 	if (RangeItem->ItemType != EQEmu::item::ItemTypeBow) {
 		Log.Out(Logs::Detail, Logs::Combat, "Ranged attack canceled. Ranged item is not a bow. type %d.", RangeItem->ItemType);
@@ -719,7 +719,7 @@ void Client::RangedAttack(Mob* other, bool CanDoubleAttack) {
 			const ItemInst *pi = m_inv[r];
 			if (pi == nullptr || !pi->IsClassBag())
 				continue;
-			const EQEmu::Item_Struct* bagitem = pi->GetItem();
+			const EQEmu::ItemBase* bagitem = pi->GetItem();
 			if (!bagitem || bagitem->BagType != EQEmu::item::BagTypeQuiver)
 				continue;
 
@@ -798,7 +798,7 @@ void Client::RangedAttack(Mob* other, bool CanDoubleAttack) {
 }
 
 void Mob::DoArcheryAttackDmg(Mob* other,  const ItemInst* RangeWeapon, const ItemInst* Ammo, uint16 weapon_damage, int16 chance_mod, int16 focus, int ReuseTime,
-							uint32 range_id, uint32 ammo_id, const EQEmu::Item_Struct *AmmoItem, int AmmoSlot, float speed) {
+	uint32 range_id, uint32 ammo_id, const EQEmu::ItemBase *AmmoItem, int AmmoSlot, float speed) {
 
 	if ((other == nullptr ||
 		((IsClient() && CastToClient()->dead) ||
@@ -813,7 +813,7 @@ void Mob::DoArcheryAttackDmg(Mob* other,  const ItemInst* RangeWeapon, const Ite
 
 	const ItemInst* _RangeWeapon = nullptr;
 	const ItemInst* _Ammo = nullptr;
-	const EQEmu::Item_Struct* ammo_lost = nullptr;
+	const EQEmu::ItemBase* ammo_lost = nullptr;
 
 	/*
 	If LaunchProjectile is false this function will do archery damage on target,
@@ -1009,7 +1009,7 @@ void Mob::DoArcheryAttackDmg(Mob* other,  const ItemInst* RangeWeapon, const Ite
 	}
 }
 
-bool Mob::TryProjectileAttack(Mob* other, const EQEmu::Item_Struct *item, EQEmu::skills::SkillType skillInUse, uint16 weapon_dmg, const ItemInst* RangeWeapon, const ItemInst* Ammo, int AmmoSlot, float speed){
+bool Mob::TryProjectileAttack(Mob* other, const EQEmu::ItemBase *item, EQEmu::skills::SkillType skillInUse, uint16 weapon_dmg, const ItemInst* RangeWeapon, const ItemInst* Ammo, int AmmoSlot, float speed){
 
 	if (!other)
 		return false;
@@ -1313,7 +1313,7 @@ void NPC::DoRangedAttackDmg(Mob* other, bool Launch, int16 damage_mod, int16 cha
 
 	//try proc on hits and misses
 	if(other && !other->HasDied())
-		TrySpellProc(nullptr, (const EQEmu::Item_Struct*)nullptr, other, EQEmu::legacy::SlotRange);
+		TrySpellProc(nullptr, (const EQEmu::ItemBase*)nullptr, other, EQEmu::legacy::SlotRange);
 
 	if (HasSkillProcs() && other && !other->HasDied())
 		TrySkillProc(other, skillInUse, 0, false, EQEmu::legacy::SlotRange);
@@ -1367,7 +1367,7 @@ void Client::ThrowingAttack(Mob* other, bool CanDoubleAttack) { //old was 51
 		return;
 	}
 
-	const EQEmu::Item_Struct* item = RangeWeapon->GetItem();
+	const EQEmu::ItemBase* item = RangeWeapon->GetItem();
 	if (item->ItemType != EQEmu::item::ItemTypeLargeThrowing && item->ItemType != EQEmu::item::ItemTypeSmallThrowing) {
 		Log.Out(Logs::Detail, Logs::Combat, "Ranged attack canceled. Ranged item %d is not a throwing weapon. type %d.", item->ItemType);
 		Message(0, "Error: Rangeweapon: GetItem(%i)==0, you have nothing useful to throw!", GetItemIDAt(EQEmu::legacy::SlotRange));
@@ -1428,7 +1428,7 @@ void Client::ThrowingAttack(Mob* other, bool CanDoubleAttack) { //old was 51
 	CommonBreakInvisibleFromCombat();
 }
 
-void Mob::DoThrowingAttackDmg(Mob* other, const ItemInst* RangeWeapon, const EQEmu::Item_Struct* AmmoItem, uint16 weapon_damage, int16 chance_mod,int16 focus, int ReuseTime, uint32 range_id, int AmmoSlot, float speed)
+void Mob::DoThrowingAttackDmg(Mob* other, const ItemInst* RangeWeapon, const EQEmu::ItemBase* AmmoItem, uint16 weapon_damage, int16 chance_mod, int16 focus, int ReuseTime, uint32 range_id, int AmmoSlot, float speed)
 {
 	if ((other == nullptr ||
 		((IsClient() && CastToClient()->dead) ||
@@ -1442,7 +1442,7 @@ void Mob::DoThrowingAttackDmg(Mob* other, const ItemInst* RangeWeapon, const EQE
 	}
 
 	const ItemInst* _RangeWeapon = nullptr;
-	const EQEmu::Item_Struct* ammo_lost = nullptr;
+	const EQEmu::ItemBase* ammo_lost = nullptr;
 
 	/*
 	If LaunchProjectile is false this function will do archery damage on target,
@@ -1566,7 +1566,7 @@ void Mob::DoThrowingAttackDmg(Mob* other, const ItemInst* RangeWeapon, const EQE
 	}
 }
 
-void Mob::SendItemAnimation(Mob *to, const EQEmu::Item_Struct *item, EQEmu::skills::SkillType skillInUse, float velocity) {
+void Mob::SendItemAnimation(Mob *to, const EQEmu::ItemBase *item, EQEmu::skills::SkillType skillInUse, float velocity) {
 	auto outapp = new EQApplicationPacket(OP_SomeItemPacketMaybe, sizeof(Arrow_Struct));
 	Arrow_Struct *as = (Arrow_Struct *) outapp->pBuffer;
 	as->type = 1;
@@ -1616,7 +1616,7 @@ void Mob::ProjectileAnimation(Mob* to, int item_id, bool IsArrow, float speed, f
 	if (!to)
 		return;
 
-	const EQEmu::Item_Struct* item = nullptr;
+	const EQEmu::ItemBase* item = nullptr;
 	uint8 item_type = 0;
 
 	if(!item_id) {
@@ -1757,7 +1757,7 @@ void NPC::DoClassAttacks(Mob *target) {
 					DoAnim(animKick);
 					int32 dmg = 0;
 
-					if(GetWeaponDamage(target, (const EQEmu::Item_Struct*)nullptr) <= 0){
+					if (GetWeaponDamage(target, (const EQEmu::ItemBase*)nullptr) <= 0){
 						dmg = -5;
 					}
 					else{
@@ -1778,7 +1778,7 @@ void NPC::DoClassAttacks(Mob *target) {
 					DoAnim(animTailRake);
 					int32 dmg = 0;
 
-					if(GetWeaponDamage(target, (const EQEmu::Item_Struct*)nullptr) <= 0){
+					if (GetWeaponDamage(target, (const EQEmu::ItemBase*)nullptr) <= 0){
 						dmg = -5;
 					}
 					else{
@@ -1831,7 +1831,7 @@ void NPC::DoClassAttacks(Mob *target) {
 				DoAnim(animKick);
 				int32 dmg = 0;
 
-				if(GetWeaponDamage(target, (const EQEmu::Item_Struct*)nullptr) <= 0){
+				if (GetWeaponDamage(target, (const EQEmu::ItemBase*)nullptr) <= 0){
 					dmg = -5;
 				}
 				else{
@@ -1856,7 +1856,7 @@ void NPC::DoClassAttacks(Mob *target) {
 				DoAnim(animTailRake);
 				int32 dmg = 0;
 
-				if(GetWeaponDamage(target, (const EQEmu::Item_Struct*)nullptr) <= 0){
+				if (GetWeaponDamage(target, (const EQEmu::ItemBase*)nullptr) <= 0){
 					dmg = -5;
 				}
 				else{
@@ -2368,7 +2368,7 @@ void Mob::DoMeleeSkillAttackDmg(Mob* other, uint16 weapon_damage, EQEmu::skills:
 		int32 max_hit = (2 * weapon_damage*GetDamageTable(skillinuse)) / 100;
 
 		if(GetLevel() >= 28 && IsWarriorClass() ) {
-			int ucDamageBonus = GetWeaponDamageBonus((const EQEmu::Item_Struct*) nullptr );
+			int ucDamageBonus = GetWeaponDamageBonus((const EQEmu::ItemBase*) nullptr);
 			min_hit += (int) ucDamageBonus;
 			max_hit += (int) ucDamageBonus;
 			hate += ucDamageBonus;
@@ -2381,7 +2381,7 @@ void Mob::DoMeleeSkillAttackDmg(Mob* other, uint16 weapon_damage, EQEmu::skills:
 					if (item->GetItem()->ItemType == EQEmu::item::ItemTypeShield)	{
 						hate += item->GetItem()->AC;
 					}
-					const EQEmu::Item_Struct *itm = item->GetItem();
+					const EQEmu::ItemBase *itm = item->GetItem();
 					hate = hate * (100 + GetFuriousBash(itm->Focus.Effect)) / 100;
 				}
 			}

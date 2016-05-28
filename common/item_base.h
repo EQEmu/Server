@@ -17,8 +17,8 @@
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  04111-1307  USA
 */
 
-#ifndef COMMON_ITEM_STRUCT_H
-#define COMMON_ITEM_STRUCT_H
+#ifndef COMMON_ITEM_BASE_H
+#define COMMON_ITEM_BASE_H
 
 
 /*
@@ -336,10 +336,10 @@ namespace EQEmu
 		};
 
 		enum ItemDataType : uint8 {
-			ItemDataTypeBase = 0,
-			ItemDataTypeScaling,
-			ItemDataTypeEvolving,
-			ItemDataTypeCount
+			ItemDataBase = 0,
+			ItemDataScaling,
+			ItemDataEvolving,
+			ItemDataCount
 		};
 
 		struct ItemEffect_Struct {
@@ -364,10 +364,10 @@ namespace EQEmu
 		const void * inst;
 	};
 
-	struct Item_Struct {
+	struct ItemBase {
 		// Non packet based fields
 		uint8	MinStatus;
-		//uint8	ItemDataType;
+		uint8	ItemDataType; // memset to item::ItemDataBase ('0') during mmf load
 
 		// Packet based fields
 		uint8	ItemClass;		// Item Type: 0=common, 1=container, 2=book
@@ -551,15 +551,15 @@ namespace EQEmu
 		bool IsType2HWeapon();
 		bool IsTypeShield();
 
-		bool IsEquipable(uint16 Race, uint16 Class) const { return const_cast<Item_Struct*>(this)->IsEquipable(Race, Class); }
-		bool IsClassCommon() const { return const_cast<Item_Struct*>(this)->IsClassCommon(); }
-		bool IsClassBag() const { return const_cast<Item_Struct*>(this)->IsClassBag(); }
-		bool IsClassBook() const { return const_cast<Item_Struct*>(this)->IsClassBook(); }
-		bool IsType1HWeapon() const { return const_cast<Item_Struct*>(this)->IsType1HWeapon(); }
-		bool IsType2HWeapon() const { return const_cast<Item_Struct*>(this)->IsType2HWeapon(); }
-		bool IsTypeShield() const { return const_cast<Item_Struct*>(this)->IsTypeShield(); }
+		bool IsEquipable(uint16 Race, uint16 Class) const { return const_cast<ItemBase*>(this)->IsEquipable(Race, Class); }
+		bool IsClassCommon() const { return const_cast<ItemBase*>(this)->IsClassCommon(); }
+		bool IsClassBag() const { return const_cast<ItemBase*>(this)->IsClassBag(); }
+		bool IsClassBook() const { return const_cast<ItemBase*>(this)->IsClassBook(); }
+		bool IsType1HWeapon() const { return const_cast<ItemBase*>(this)->IsType1HWeapon(); }
+		bool IsType2HWeapon() const { return const_cast<ItemBase*>(this)->IsType2HWeapon(); }
+		bool IsTypeShield() const { return const_cast<ItemBase*>(this)->IsTypeShield(); }
 	};
 
 } /*EQEmu*/
 
-#endif /*COMMON_ITEM_STRUCT_H*/
+#endif /*COMMON_ITEM_BASE_H*/

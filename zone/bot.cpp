@@ -234,8 +234,8 @@ uint32 Bot::GetBotArcheryRange() {
 	if (!range_inst || !ammo_inst)
 		return 0;
 
-	const EQEmu::Item_Struct *range_item = range_inst->GetItem();
-	const EQEmu::Item_Struct *ammo_item = ammo_inst->GetItem();
+	const EQEmu::ItemBase *range_item = range_inst->GetItem();
+	const EQEmu::ItemBase *ammo_item = ammo_inst->GetItem();
 	if (!range_item || !ammo_item || range_item->ItemType != EQEmu::item::ItemTypeBow || ammo_item->ItemType != EQEmu::item::ItemTypeArrow)
 		return 0;
 
@@ -1899,12 +1899,12 @@ void Bot::BotRangedAttack(Mob* other) {
 	}
 
 	ItemInst* rangedItem = GetBotItem(EQEmu::legacy::SlotRange);
-	const EQEmu::Item_Struct* RangeWeapon = 0;
+	const EQEmu::ItemBase* RangeWeapon = 0;
 	if(rangedItem)
 		RangeWeapon = rangedItem->GetItem();
 
 	ItemInst* ammoItem = GetBotItem(EQEmu::legacy::SlotAmmo);
-	const EQEmu::Item_Struct* Ammo = 0;
+	const EQEmu::ItemBase* Ammo = 0;
 	if(ammoItem)
 		Ammo = ammoItem->GetItem();
 
@@ -2013,7 +2013,7 @@ void Bot::DoMeleeSkillAttackDmg(Mob* other, uint16 weapon_damage, EQEmu::skills:
 		int32 min_hit = 1;
 		int32 max_hit = ((2 * weapon_damage * GetDamageTable(skillinuse)) / 100);
 		if(GetLevel() >= 28 && IsWarriorClass()) {
-			int ucDamageBonus = GetWeaponDamageBonus((const EQEmu::Item_Struct*) nullptr);
+			int ucDamageBonus = GetWeaponDamageBonus((const EQEmu::ItemBase*) nullptr);
 			min_hit += (int) ucDamageBonus;
 			max_hit += (int) ucDamageBonus;
 			hate += ucDamageBonus;
@@ -2055,7 +2055,7 @@ void Bot::DoMeleeSkillAttackDmg(Mob* other, uint16 weapon_damage, EQEmu::skills:
 
 	if (skillinuse == EQEmu::skills::SkillBash){
 		const ItemInst* inst = GetBotItem(EQEmu::legacy::SlotSecondary);
-		const EQEmu::Item_Struct* botweapon = 0;
+		const EQEmu::ItemBase* botweapon = 0;
 		if(inst)
 			botweapon = inst->GetItem();
 
@@ -2115,7 +2115,7 @@ void Bot::ApplySpecialAttackMod(EQEmu::skills::SkillType skill, int32 &dmg, int3
 
 	if (item_slot >= EQEmu::legacy::EQUIPMENT_BEGIN){
 		const ItemInst* inst = GetBotItem(item_slot);
-		const EQEmu::Item_Struct* botweapon = 0;
+		const EQEmu::ItemBase* botweapon = 0;
 		if(inst)
 			botweapon = inst->GetItem();
 
@@ -2503,7 +2503,7 @@ void Bot::AI_Process() {
 				//now off hand
 				if(GetTarget() && attack_dw_timer.Check() && CanThisClassDualWield()) {
 					const ItemInst* instweapon = GetBotItem(EQEmu::legacy::SlotSecondary);
-					const EQEmu::Item_Struct* weapon = 0;
+					const EQEmu::ItemBase* weapon = 0;
 					//can only dual wield without a weapon if you're a monk
 					if(instweapon || (botClass == MONK)) {
 						if(instweapon)
@@ -2950,7 +2950,7 @@ void Bot::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho) {
 		ns->spawn.light = m_Light.Type[EQEmu::lightsource::LightActive];
 		ns->spawn.helm = helmtexture; //(GetShowHelm() ? helmtexture : 0); //0xFF;
 		ns->spawn.equip_chest2 = texture; //0xFF;
-		const EQEmu::Item_Struct* item = 0;
+		const EQEmu::ItemBase* item = 0;
 		const ItemInst* inst = 0;
 		uint32 spawnedbotid = 0;
 		spawnedbotid = this->GetBotID();
@@ -3393,7 +3393,7 @@ void Bot::PerformTradeWithClient(int16 beginSlotID, int16 endSlotID, Client* cli
 			//EQoffline: will give the items to the bots and change the bot stats
 			if(inst && (GetBotOwner() == client->CastToMob()) && !IsEngaged()) {
 				std::string TempErrorMessage;
-				const EQEmu::Item_Struct* mWeaponItem = inst->GetItem();
+				const EQEmu::ItemBase* mWeaponItem = inst->GetItem();
 				bool failedLoreCheck = false;
 				for (int m = AUG_INDEX_BEGIN; m < EQEmu::legacy::ITEM_COMMON_SIZE; ++m) {
 					ItemInst *itm = inst->GetAugment(m);
@@ -3572,7 +3572,7 @@ void Bot::PerformTradeWithClient(int16 beginSlotID, int16 endSlotID, Client* cli
 			}
 		}
 
-		const EQEmu::Item_Struct* item2 = 0;
+		const EQEmu::ItemBase* item2 = 0;
 		for(int y = beginSlotID; y <= endSlotID; ++y) {
 			item2 = database.GetItem(items[y]);
 			if(item2) {
@@ -3811,7 +3811,7 @@ bool Bot::Attack(Mob* other, int Hand, bool FromRiposte, bool IsStrikethrough, b
 		if (Hand == EQEmu::legacy::SlotPrimary && GetLevel() >= 28 && IsWarriorClass()) {
 			// Damage bonuses apply only to hits from the main hand (Hand == MainPrimary) by characters level 28 and above
 			// who belong to a melee class. If we're here, then all of these conditions apply.
-			ucDamageBonus = GetWeaponDamageBonus(weapon ? weapon->GetItem() : (const EQEmu::Item_Struct*) nullptr);
+			ucDamageBonus = GetWeaponDamageBonus(weapon ? weapon->GetItem() : (const EQEmu::ItemBase*) nullptr);
 			min_hit += (int) ucDamageBonus;
 			max_hit += (int) ucDamageBonus;
 			hate += ucDamageBonus;
@@ -3820,7 +3820,7 @@ bool Bot::Attack(Mob* other, int Hand, bool FromRiposte, bool IsStrikethrough, b
 		//Live AA - Sinister Strikes *Adds weapon damage bonus to offhand weapon.
 		if (Hand == EQEmu::legacy::SlotSecondary) {
 			if (aabonuses.SecondaryDmgInc || itembonuses.SecondaryDmgInc || spellbonuses.SecondaryDmgInc){
-				ucDamageBonus = GetWeaponDamageBonus(weapon ? weapon->GetItem() : (const EQEmu::Item_Struct*) nullptr);
+				ucDamageBonus = GetWeaponDamageBonus(weapon ? weapon->GetItem() : (const EQEmu::ItemBase*) nullptr);
 				min_hit += (int) ucDamageBonus;
 				max_hit += (int) ucDamageBonus;
 				hate += ucDamageBonus;
@@ -4278,8 +4278,8 @@ int32 Bot::GetBotFocusEffect(BotfocusType bottype, uint16 spell_id) {
 
 	//Check if item focus effect exists for the client.
 	if (itembonuses.FocusEffects[bottype]) {
-		const EQEmu::Item_Struct* TempItem = 0;
-		const EQEmu::Item_Struct* UsedItem = 0;
+		const EQEmu::ItemBase* TempItem = 0;
+		const EQEmu::ItemBase* UsedItem = 0;
 		const ItemInst* TempInst = 0;
 		uint16 UsedFocusID = 0;
 		int32 Total = 0;
@@ -4315,7 +4315,7 @@ int32 Bot::GetBotFocusEffect(BotfocusType bottype, uint16 spell_id) {
 				ItemInst *aug = nullptr;
 				aug = ins->GetAugment(y);
 				if(aug) {
-					const EQEmu::Item_Struct* TempItemAug = aug->GetItem();
+					const EQEmu::ItemBase* TempItemAug = aug->GetItem();
 					if (TempItemAug && TempItemAug->Focus.Effect > 0 && TempItemAug->Focus.Effect != SPELL_UNKNOWN) {
 						if(rand_effectiveness) {
 							focus_max = CalcBotFocusEffect(bottype, TempItemAug->Focus.Effect, spell_id, true);
@@ -4863,7 +4863,7 @@ void Bot::DoSpecialAttackDamage(Mob *who, EQEmu::skills::SkillType skill, int32 
 
 	if (skill == EQEmu::skills::SkillBash) {
 		const ItemInst* inst = GetBotItem(EQEmu::legacy::SlotSecondary);
-		const EQEmu::Item_Struct* botweapon = 0;
+		const EQEmu::ItemBase* botweapon = 0;
 		if(inst)
 			botweapon = inst->GetItem();
 
@@ -4928,7 +4928,7 @@ void Bot::TryBackstab(Mob *other, int ReuseTime) {
 	bool bIsBehind = false;
 	bool bCanFrontalBS = false;
 	const ItemInst* inst = GetBotItem(EQEmu::legacy::SlotPrimary);
-	const EQEmu::Item_Struct* botpiercer = nullptr;
+	const EQEmu::ItemBase* botpiercer = nullptr;
 	if(inst)
 		botpiercer = inst->GetItem();
 
@@ -5365,7 +5365,7 @@ bool Bot::IsBotAttackAllowed(Mob* attacker, Mob* target, bool& hasRuleDefined) {
 void Bot::EquipBot(std::string* errorMessage) {
 	GetBotItems(m_inv, errorMessage);
 	const ItemInst* inst = 0;
-	const EQEmu::Item_Struct* item = 0;
+	const EQEmu::ItemBase* item = 0;
 	for (int i = EQEmu::legacy::EQUIPMENT_BEGIN; i <= EQEmu::legacy::EQUIPMENT_END; ++i) {
 		inst = GetBotItem(i);
 		if(inst) {
@@ -5492,7 +5492,7 @@ void Bot::SetAttackTimer() {
 	float haste_mod = (GetHaste() * 0.01f);
 	attack_timer.SetAtTrigger(4000, true);
 	Timer* TimerToUse = nullptr;
-	const EQEmu::Item_Struct* PrimaryWeapon = nullptr;
+	const EQEmu::ItemBase* PrimaryWeapon = nullptr;
 	for (int i = EQEmu::legacy::SlotRange; i <= EQEmu::legacy::SlotSecondary; i++) {
 		if (i == EQEmu::legacy::SlotPrimary)
 			TimerToUse = &attack_timer;
@@ -5503,7 +5503,7 @@ void Bot::SetAttackTimer() {
 		else
 			continue;
 
-		const EQEmu::Item_Struct* ItemToUse = nullptr;
+		const EQEmu::ItemBase* ItemToUse = nullptr;
 		ItemInst* ci = GetBotItem(i);
 		if (ci)
 			ItemToUse = ci->GetItem();
@@ -7178,7 +7178,7 @@ void Bot::ProcessBotInspectionRequest(Bot* inspectedBot, Client* client) {
 		insr->TargetID = inspectedBot->GetNPCTypeID();
 		insr->playerid = inspectedBot->GetID();
 
-		const EQEmu::Item_Struct* item = 0;
+		const EQEmu::ItemBase* item = 0;
 		const ItemInst* inst = 0;
 
 		// Modded to display power source items (will only show up on SoF+ client inspect windows though.)
@@ -7230,7 +7230,7 @@ void Bot::ProcessBotInspectionRequest(Bot* inspectedBot, Client* client) {
 
 void Bot::CalcItemBonuses(StatBonuses* newbon)
 {
-	const EQEmu::Item_Struct* itemtmp = 0;
+	const EQEmu::ItemBase* itemtmp = 0;
 
 	for (int i = EQEmu::legacy::EQUIPMENT_BEGIN; i <= (EQEmu::legacy::EQUIPMENT_END + 1); ++i) {
 		const ItemInst* item = GetBotItem((i == 22 ? 9999 : i));
@@ -7261,7 +7261,7 @@ void Bot::AddItemBonuses(const ItemInst *inst, StatBonuses* newbon, bool isAug, 
 		return;
 	}
 
-	const EQEmu::Item_Struct *item = inst->GetItem();
+	const EQEmu::ItemBase *item = inst->GetItem();
 
 	if(!isTribute && !inst->IsEquipable(GetBaseRace(),GetClass()))
 	{
@@ -7628,7 +7628,7 @@ void Bot::CalcBotStats(bool showtext) {
 	}
 }
 
-bool Bot::CheckLoreConflict(const EQEmu::Item_Struct* item) {
+bool Bot::CheckLoreConflict(const EQEmu::ItemBase* item) {
 	if (!item || !(item->LoreFlag))
 		return false;
 
@@ -8051,7 +8051,7 @@ int Bot::GetRawACNoShield(int &shield_ac) {
 }
 
 uint32 Bot::CalcCurrentWeight() {
-	const EQEmu::Item_Struct* TempItem = 0;
+	const EQEmu::ItemBase* TempItem = 0;
 	ItemInst* inst;
 	uint32 Total = 0;
 	for (int i = EQEmu::legacy::EQUIPMENT_BEGIN; i <= EQEmu::legacy::EQUIPMENT_END; ++i) {

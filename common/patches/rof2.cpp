@@ -5476,7 +5476,7 @@ namespace RoF2
 
 	void SerializeItem(EQEmu::OutBuffer& ob, const ItemInst *inst, int16 slot_id_in, uint8 depth, ItemPacketType packet_type)
 	{
-		const EQEmu::Item_Struct *item = inst->GetUnscaledItem();
+		const EQEmu::ItemBase *item = inst->GetUnscaledItem();
 		
 		RoF2::structs::ItemSerializationHeader hdr;
 

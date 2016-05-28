@@ -2382,7 +2382,7 @@ bool Mob::CanThisClassDualWield(void) const {
 
 		// 2HS, 2HB, or 2HP
 		if(pinst && pinst->IsWeapon()) {
-			const EQEmu::Item_Struct* item = pinst->GetItem();
+			const EQEmu::ItemBase* item = pinst->GetItem();
 
 			if (item->IsType2HWeapon())
 				return false;
@@ -2754,7 +2754,7 @@ void Mob::SendArmorAppearance(Client *one_client)
 	{
 		if (!IsClient())
 		{
-			const EQEmu::Item_Struct *item;
+			const EQEmu::ItemBase *item;
 			for (int i = 0; i < 7; ++i)
 			{
 				item = database.GetItem(GetEquipment(i));
@@ -2857,7 +2857,7 @@ int32 Mob::GetEquipmentMaterial(uint8 material_slot) const
 {
 	uint32 equipmaterial = 0;
 	int32 ornamentationAugtype = RuleI(Character, OrnamentationAugmentType);
-	const EQEmu::Item_Struct *item;
+	const EQEmu::ItemBase *item;
 	item = database.GetItem(GetEquipment(material_slot));
 
 	if (item != 0)
@@ -2910,7 +2910,7 @@ int32 Mob::GetHerosForgeModel(uint8 material_slot) const
 	if (material_slot >= 0 && material_slot < EQEmu::legacy::MaterialPrimary)
 	{
 		uint32 ornamentationAugtype = RuleI(Character, OrnamentationAugmentType);
-		const EQEmu::Item_Struct *item;
+		const EQEmu::ItemBase *item;
 		item = database.GetItem(GetEquipment(material_slot));
 		int16 invslot = Inventory::CalcSlotFromMaterial(material_slot);
 
@@ -2964,7 +2964,7 @@ int32 Mob::GetHerosForgeModel(uint8 material_slot) const
 
 uint32 Mob::GetEquipmentColor(uint8 material_slot) const
 {
-	const EQEmu::Item_Struct *item;
+	const EQEmu::ItemBase *item;
 
 	if (armor_tint[material_slot])
 	{
@@ -2980,7 +2980,7 @@ uint32 Mob::GetEquipmentColor(uint8 material_slot) const
 
 uint32 Mob::IsEliteMaterialItem(uint8 material_slot) const
 {
-	const EQEmu::Item_Struct *item;
+	const EQEmu::ItemBase *item;
 
 	item = database.GetItem(GetEquipment(material_slot));
 	if(item != 0)
@@ -3896,7 +3896,7 @@ int32 Mob::GetItemStat(uint32 itemid, const char *identifier)
 	if (!inst)
 		return 0;
 
-	const EQEmu::Item_Struct* item = inst->GetItem();
+	const EQEmu::ItemBase* item = inst->GetItem();
 	if (!item)
 		return 0;
 
@@ -5627,7 +5627,7 @@ int32 Mob::GetSpellStat(uint32 spell_id, const char *identifier, uint8 slot)
 
 bool Mob::CanClassEquipItem(uint32 item_id)
 {
-	const EQEmu::Item_Struct* itm = nullptr;
+	const EQEmu::ItemBase* itm = nullptr;
 	itm = database.GetItem(item_id);
 
 	if (!itm)

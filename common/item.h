@@ -29,7 +29,7 @@ class ItemParse;			// Parses item packets
 class EvolveInfo;			// Stores information about an evolving item family
 
 #include "../common/eq_constants.h"
-#include "../common/item_struct.h"
+#include "../common/item_base.h"
 #include "../common/timer.h"
 #include "../common/bodytypes.h"
 #include "../common/deity.h"
@@ -175,7 +175,7 @@ public:
 	ItemInst* PopItem(int16 slot_id);
 
 	// Check whether there is space for the specified number of the specified item.
-	bool HasSpaceForItem(const EQEmu::Item_Struct *ItemToTry, int16 Quantity);
+	bool HasSpaceForItem(const EQEmu::ItemBase *ItemToTry, int16 Quantity);
 
 	// Check whether item exists in inventory
 	// where argument specifies OR'd list of invWhere constants to look
@@ -200,7 +200,7 @@ public:
 	static int16 CalcSlotFromMaterial(uint8 material);
 	static uint8 CalcMaterialFromSlot(int16 equipslot);
 
-	static bool CanItemFitInContainer(const EQEmu::Item_Struct *ItemToTry, const EQEmu::Item_Struct *Container);
+	static bool CanItemFitInContainer(const EQEmu::ItemBase *ItemToTry, const EQEmu::ItemBase *Container);
 
 	//  Test for valid inventory casting slot
 	bool SupportsClickCasting(int16 slot_id);
@@ -277,7 +277,7 @@ public:
 	/////////////////////////
 
 	// Constructors/Destructor
-	ItemInst(const EQEmu::Item_Struct* item = nullptr, int16 charges = 0);
+	ItemInst(const EQEmu::ItemBase* item = nullptr, int16 charges = 0);
 
 	ItemInst(SharedDatabase *db, uint32 item_id, int16 charges = 0);
 
@@ -346,7 +346,7 @@ public:
 	bool IsAugmented();
 	ItemInst* GetOrnamentationAug(int32 ornamentationAugtype) const;
 	bool UpdateOrnamentationInfo();
-	static bool CanTransform(const EQEmu::Item_Struct *ItemToTry, const EQEmu::Item_Struct *Container, bool AllowAll = false);
+	static bool CanTransform(const EQEmu::ItemBase *ItemToTry, const EQEmu::ItemBase *Container, bool AllowAll = false);
 	
 	// Has attack/delay?
 	bool IsWeapon() const;
@@ -355,8 +355,8 @@ public:
 	// Accessors
 	const uint32 GetID() const { return ((m_item) ? m_item->ID : NO_ITEM); }
 	const uint32 GetItemScriptID() const { return ((m_item) ? m_item->ScriptFileID : NO_ITEM); }
-	const EQEmu::Item_Struct* GetItem() const;
-	const EQEmu::Item_Struct* GetUnscaledItem() const;
+	const EQEmu::ItemBase* GetItem() const;
+	const EQEmu::ItemBase* GetUnscaledItem() const;
 
 	int16 GetCharges() const				{ return m_charges; }
 	void SetCharges(int16 charges)			{ m_charges = charges; }
@@ -500,7 +500,7 @@ protected:
 	void _PutItem(uint8 index, ItemInst* inst) { m_contents[index] = inst; }
 
 	ItemInstTypes		m_use_type;	// Usage type for item
-	const EQEmu::Item_Struct*	m_item;		// Ptr to item data
+	const EQEmu::ItemBase*	m_item;		// Ptr to item data
 	int16				m_charges;	// # of charges for chargeable items
 	uint32				m_price;	// Bazaar /trader price
 	uint32				m_color;
@@ -512,7 +512,7 @@ protected:
 	uint32				m_exp;
 	int8				m_evolveLvl;
 	bool				m_activated;
-	EQEmu::Item_Struct*		m_scaledItem;
+	EQEmu::ItemBase*		m_scaledItem;
 	EvolveInfo*			m_evolveInfo;
 	bool				m_scaling;
 	uint32				m_ornamenticon;

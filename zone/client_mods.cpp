@@ -1302,7 +1302,7 @@ int32 Client::CalcManaRegenCap()
 
 uint32 Client::CalcCurrentWeight()
 {
-	const EQEmu::Item_Struct* TempItem = 0;
+	const EQEmu::ItemBase* TempItem = 0;
 	ItemInst* ins;
 	uint32 Total = 0;
 	int x;

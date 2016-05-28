@@ -1136,7 +1136,7 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, uint16 slot,
 							missingreags=true;
 						}
 
-						const EQEmu::Item_Struct *item = database.GetItem(component);
+						const EQEmu::ItemBase *item = database.GetItem(component);
 						if(item) {
 							c->Message_StringID(13, MISSING_SPELL_COMP_ITEM, item->Name);
 							Log.Out(Logs::Detail, Logs::Spells, "Spell %d: Canceled. Missing required reagent %s (%d)", spell_id, item->Name, component);
@@ -1198,7 +1198,7 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, uint16 slot,
 	{
 		bool fromaug = false;
 		const ItemInst* inst = CastToClient()->GetInv()[inventory_slot];
-		EQEmu::Item_Struct* augitem = 0;
+		EQEmu::ItemBase* augitem = 0;
 		uint32 recastdelay = 0;
 		uint32 recasttype = 0;
 
@@ -1211,7 +1211,7 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, uint16 slot,
 
 				if (!aug_i)
 					continue;
-				const EQEmu::Item_Struct* aug = aug_i->GetItem();
+				const EQEmu::ItemBase* aug = aug_i->GetItem();
 				if (!aug)
 					continue;
 
@@ -1247,7 +1247,7 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, uint16 slot,
 
 		if (inst && inst->IsClassCommon() && (inst->GetItem()->Click.Effect == spell_id) && inst->GetCharges() || fromaug)
 		{
-			//const Item_Struct* item = inst->GetItem();
+			//const ItemBase* item = inst->GetItem();
 			int16 charges = inst->GetItem()->MaxCharges;
 
 			if(fromaug) { charges = -1; } //Don't destroy the parent item

@@ -825,12 +825,12 @@ void Client::BulkSendInventoryItems()
 }
 
 void Client::BulkSendMerchantInventory(int merchant_id, int npcid) {
-	const EQEmu::Item_Struct* handyitem = nullptr;
+	const EQEmu::ItemBase* handyitem = nullptr;
 	uint32 numItemSlots = 80; //The max number of items passed in the transaction.
 	if (m_ClientVersionBit & EQEmu::versions::bit_RoFAndLater) { // RoF+ can send 200 items
 		numItemSlots = 200;
 	}
-	const EQEmu::Item_Struct *item;
+	const EQEmu::ItemBase *item;
 	std::list<MerchantList> merlist = zone->merchanttable[merchant_id];
 	std::list<MerchantList>::const_iterator itr;
 	Mob* merch = entity_list.GetMobByNpcTypeID(npcid);
@@ -1088,7 +1088,7 @@ void Client::OPMemorizeSpell(const EQApplicationPacket* app)
 
 			if (inst && inst->IsClassCommon())
 			{
-				const EQEmu::Item_Struct* item = inst->GetItem();
+				const EQEmu::ItemBase* item = inst->GetItem();
 
 				if (RuleB(Character, RestrictSpellScribing) && !item->IsEquipable(GetRace(), GetClass())) {
 					Message_StringID(13, CANNOT_USE_ITEM);

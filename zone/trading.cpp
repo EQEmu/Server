@@ -885,7 +885,7 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 				continue;
 			}
 
-			const EQEmu::Item_Struct* item = inst->GetItem();
+			const EQEmu::ItemBase* item = inst->GetItem();
 			if(item && quest_npc == false) {
 				// if it was not a NO DROP or Attuned item (or if a GM is trading), let the NPC have it
 				if(GetGM() || (item->NoDrop != 0 && inst->IsAttuned() == false)) {
@@ -894,7 +894,7 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 						for (int16 bslot = SUB_INDEX_BEGIN; bslot < item->BagSlots; bslot++) {
 							const ItemInst* baginst = inst->GetItem(bslot);
 							if (baginst) {
-								const EQEmu::Item_Struct* bagitem = baginst->GetItem();
+								const EQEmu::ItemBase* bagitem = baginst->GetItem();
 								if (bagitem && (GetGM() || (bagitem->NoDrop != 0 && baginst->IsAttuned() == false))) {
 									tradingWith->CastToNPC()->AddLootDrop(bagitem, &tradingWith->CastToNPC()->itemlist,
 										baginst->GetCharges(), 1, 127, true, true);
@@ -1158,7 +1158,7 @@ void Client::SendTraderItem(uint32 ItemID, uint16 Quantity) {
 	std::string Packet;
 	int16 FreeSlotID=0;
 
-	const EQEmu::Item_Struct* item = database.GetItem(ItemID);
+	const EQEmu::ItemBase* item = database.GetItem(ItemID);
 
 	if(!item){
 		Log.Out(Logs::Detail, Logs::Trading, "Bogus item deleted in Client::SendTraderItem!\n");
@@ -1192,7 +1192,7 @@ void Client::SendSingleTraderItem(uint32 CharID, int SerialNumber) {
 }
 
 void Client::BulkSendTraderInventory(uint32 char_id) {
-	const EQEmu::Item_Struct *item;
+	const EQEmu::ItemBase *item;
 
 	TraderCharges_Struct* TraderItems = database.LoadTraderItemWithCharges(char_id);
 
@@ -2027,7 +2027,7 @@ static void UpdateTraderCustomerItemsAdded(uint32 CustomerID, TraderCharges_Stru
 
 	if(!Customer) return;
 
-	const EQEmu::Item_Struct *item = database.GetItem(ItemID);
+	const EQEmu::ItemBase *item = database.GetItem(ItemID);
 
 	if(!item) return;
 
@@ -2071,7 +2071,7 @@ static void UpdateTraderCustomerPriceChanged(uint32 CustomerID, TraderCharges_St
 
 	if(!Customer) return;
 
-	const EQEmu::Item_Struct *item = database.GetItem(ItemID);
+	const EQEmu::ItemBase *item = database.GetItem(ItemID);
 
 	if(!item) return;
 
@@ -2230,7 +2230,7 @@ void Client::HandleTraderPriceUpdate(const EQApplicationPacket *app) {
 		}
 
 
-		const EQEmu::Item_Struct *item = 0;
+		const EQEmu::ItemBase *item = 0;
 
 		if(IDOfItemToAdd)
 			item = database.GetItem(IDOfItemToAdd);
@@ -2396,7 +2396,7 @@ void Client::SendBuyerResults(char* searchString, uint32 searchID) {
 
 		char *buf = (char *)outapp->pBuffer;
 
-		const EQEmu::Item_Struct* item = database.GetItem(itemID);
+		const EQEmu::ItemBase* item = database.GetItem(itemID);
 
 		if(!item) {
 			safe_delete(outapp);
@@ -2492,7 +2492,7 @@ void Client::ShowBuyLines(const EQApplicationPacket *app) {
 
 		char *Buf = (char *)outapp->pBuffer;
 
-		const EQEmu::Item_Struct* item = database.GetItem(ItemID);
+		const EQEmu::ItemBase* item = database.GetItem(ItemID);
 
 		if(!item) {
 			safe_delete(outapp);
@@ -2536,7 +2536,7 @@ void Client::SellToBuyer(const EQApplicationPacket *app) {
 	/*uint32	BuyerID2	=*/ VARSTRUCT_SKIP_TYPE(uint32, Buf);	//unused
 	/*uint32	Unknown3	=*/ VARSTRUCT_SKIP_TYPE(uint32, Buf);	//unused
 
-	const EQEmu::Item_Struct *item = database.GetItem(ItemID);
+	const EQEmu::ItemBase *item = database.GetItem(ItemID);
 
 	if(!item || !Quantity || !Price || !QtyBuyerWants) return;
 
@@ -2927,7 +2927,7 @@ void Client::UpdateBuyLine(const EQApplicationPacket *app) {
 	/*uint32 UnknownZ		=*/ VARSTRUCT_SKIP_TYPE(uint32, Buf);	//unused
 	uint32 ItemCount	= VARSTRUCT_DECODE_TYPE(uint32, Buf);
 
-	const EQEmu::Item_Struct *item = database.GetItem(ItemID);
+	const EQEmu::ItemBase *item = database.GetItem(ItemID);
 
 	if(!item) return;
 
@@ -2991,7 +2991,7 @@ void Client::BuyerItemSearch(const EQApplicationPacket *app) {
 
 	BuyerItemSearchResults_Struct* bisr = (BuyerItemSearchResults_Struct*)outapp->pBuffer;
 
-	const EQEmu::Item_Struct* item = 0;
+	const EQEmu::ItemBase* item = 0;
 
 	int Count=0;
 

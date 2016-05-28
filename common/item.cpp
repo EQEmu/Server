@@ -370,7 +370,7 @@ ItemInst* Inventory::PopItem(int16 slot_id)
 	return p;
 }
 
-bool Inventory::HasSpaceForItem(const EQEmu::Item_Struct *ItemToTry, int16 Quantity) {
+bool Inventory::HasSpaceForItem(const EQEmu::ItemBase *ItemToTry, int16 Quantity) {
 
 	if (ItemToTry->Stackable) {
 
@@ -903,7 +903,7 @@ uint8 Inventory::CalcMaterialFromSlot(int16 equipslot)
 	}
 }
 
-bool Inventory::CanItemFitInContainer(const EQEmu::Item_Struct *ItemToTry, const EQEmu::Item_Struct *Container) {
+bool Inventory::CanItemFitInContainer(const EQEmu::ItemBase *ItemToTry, const EQEmu::ItemBase *Container) {
 
 	if (!ItemToTry || !Container)
 		return false;
@@ -1440,10 +1440,10 @@ int16 Inventory::_HasItemByLoreGroup(ItemInstQueue& iqueue, uint32 loregroup)
 //
 // class ItemInst
 //
-ItemInst::ItemInst(const EQEmu::Item_Struct* item, int16 charges) {
+ItemInst::ItemInst(const EQEmu::ItemBase* item, int16 charges) {
 	m_use_type = ItemInstNormal;
 	if(item) {
-		m_item = new EQEmu::Item_Struct(*item);
+		m_item = new EQEmu::ItemBase(*item);
 	} else {
 		m_item = nullptr;
 	}
@@ -1474,7 +1474,7 @@ ItemInst::ItemInst(SharedDatabase *db, uint32 item_id, int16 charges) {
 	m_use_type = ItemInstNormal;
 	m_item = db->GetItem(item_id);
 	if(m_item) {
-		m_item = new EQEmu::Item_Struct(*m_item);
+		m_item = new EQEmu::ItemBase(*m_item);
 	}
 	else {
 		m_item = nullptr;
@@ -1529,7 +1529,7 @@ ItemInst::ItemInst(const ItemInst& copy)
 {
 	m_use_type=copy.m_use_type;
 	if(copy.m_item)
-		m_item = new EQEmu::Item_Struct(*copy.m_item);
+		m_item = new EQEmu::ItemBase(*copy.m_item);
 	else
 		m_item = nullptr;
 
@@ -1565,7 +1565,7 @@ ItemInst::ItemInst(const ItemInst& copy)
 	m_evolveLvl = copy.m_evolveLvl;
 	m_activated = copy.m_activated;
 	if (copy.m_scaledItem)
-		m_scaledItem = new EQEmu::Item_Struct(*copy.m_scaledItem);
+		m_scaledItem = new EQEmu::ItemBase(*copy.m_scaledItem);
 	else
 		m_scaledItem = nullptr;
 
@@ -1800,7 +1800,7 @@ void ItemInst::ClearByFlags(byFlagSetting is_nodrop, byFlagSetting is_norent)
 			continue;
 		}
 
-		const EQEmu::Item_Struct* item = inst->GetItem();
+		const EQEmu::ItemBase* item = inst->GetItem();
 		if (item == nullptr) {
 			cur = m_contents.erase(cur);
 			continue;
@@ -1941,7 +1941,7 @@ bool ItemInst::UpdateOrnamentationInfo() {
 	int32 ornamentationAugtype = RuleI(Character, OrnamentationAugmentType);
 	if (GetOrnamentationAug(ornamentationAugtype))
 	{
-		const EQEmu::Item_Struct* ornamentItem;
+		const EQEmu::ItemBase* ornamentItem;
 		ornamentItem = GetOrnamentationAug(ornamentationAugtype)->GetItem();
 		if (ornamentItem != nullptr)
 		{
@@ -1968,7 +1968,7 @@ bool ItemInst::UpdateOrnamentationInfo() {
 	return ornamentSet;
 }
 
-bool ItemInst::CanTransform(const EQEmu::Item_Struct *ItemToTry, const EQEmu::Item_Struct *Container, bool AllowAll) {
+bool ItemInst::CanTransform(const EQEmu::ItemBase *ItemToTry, const EQEmu::ItemBase *Container, bool AllowAll) {
 	if (!ItemToTry || !Container) return false;
 
 	if (ItemToTry->ItemType == EQEmu::item::ItemTypeArrow || strnlen(Container->CharmFile, 30) == 0)
@@ -2102,7 +2102,7 @@ bool ItemInst::IsAmmo() const
 
 }
 
-const EQEmu::Item_Struct* ItemInst::GetItem() const
+const EQEmu::ItemBase* ItemInst::GetItem() const
 {
 	if (!m_item)
 		return nullptr;
@@ -2113,7 +2113,7 @@ const EQEmu::Item_Struct* ItemInst::GetItem() const
 	return m_item;
 }
 
-const EQEmu::Item_Struct* ItemInst::GetUnscaledItem() const
+const EQEmu::ItemBase* ItemInst::GetUnscaledItem() const
 {
 	// No operator calls and defaults to nullptr
 	return m_item;
@@ -2221,10 +2221,10 @@ void ItemInst::ScaleItem() {
 		return;
 
 	if (m_scaledItem) {
-		memcpy(m_scaledItem, m_item, sizeof(EQEmu::Item_Struct));
+		memcpy(m_scaledItem, m_item, sizeof(EQEmu::ItemBase));
 	}
 	else {
-		m_scaledItem = new EQEmu::Item_Struct(*m_item);
+		m_scaledItem = new EQEmu::ItemBase(*m_item);
 	}
 
 	float Mult = (float)(GetExp()) / 10000;	// scaling is determined by exp, with 10,000 being full stats

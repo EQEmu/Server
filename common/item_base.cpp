@@ -17,7 +17,7 @@
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
-#include "item_struct.h"
+#include "item_base.h"
 #include "classes.h"
 #include "races.h"
 //#include "deity.h"
@@ -167,7 +167,7 @@ uint8 EQEmu::item::ConvertAugTypeBitToAugType(uint32 aug_type_bit)
 	}
 }
 
-bool EQEmu::Item_Struct::IsEquipable(uint16 race_id, uint16 class_id)
+bool EQEmu::ItemBase::IsEquipable(uint16 race_id, uint16 class_id)
 {
 	if (!(Races & GetPlayerRaceBit(race_id)))
 		return false;
@@ -178,32 +178,32 @@ bool EQEmu::Item_Struct::IsEquipable(uint16 race_id, uint16 class_id)
 	return true;
 }
 
-bool EQEmu::Item_Struct::IsClassCommon()
+bool EQEmu::ItemBase::IsClassCommon()
 {
 	return (ItemClass == item::ItemClassCommon);
 }
 
-bool EQEmu::Item_Struct::IsClassBag()
+bool EQEmu::ItemBase::IsClassBag()
 {
 	return (ItemClass == item::ItemClassBag);
 }
 
-bool EQEmu::Item_Struct::IsClassBook()
+bool EQEmu::ItemBase::IsClassBook()
 {
 	return (ItemClass == item::ItemClassBook);
 }
 
-bool EQEmu::Item_Struct::IsType1HWeapon()
+bool EQEmu::ItemBase::IsType1HWeapon()
 {
 	return ((ItemType == item::ItemType1HBlunt) || (ItemType == item::ItemType1HSlash) || (ItemType == item::ItemType1HPiercing));
 }
 
-bool EQEmu::Item_Struct::IsType2HWeapon()
+bool EQEmu::ItemBase::IsType2HWeapon()
 {
 	return ((ItemType == item::ItemType2HBlunt) || (ItemType == item::ItemType2HSlash) || (ItemType == item::ItemType2HPiercing));
 }
 
-bool EQEmu::Item_Struct::IsTypeShield()
+bool EQEmu::ItemBase::IsTypeShield()
 {
 	return (ItemType == item::ItemTypeShield);
 }

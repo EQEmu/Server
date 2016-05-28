@@ -814,7 +814,7 @@ void QuestManager::traindisc(int discipline_tome_item_id) {
 }
 
 bool QuestManager::isdisctome(int item_id) {
-	const EQEmu::Item_Struct *item = database.GetItem(item_id);
+	const EQEmu::ItemBase *item = database.GetItem(item_id);
 	if(item == nullptr) {
 		return(false);
 	}
@@ -1305,7 +1305,7 @@ void QuestManager::settime(uint8 new_hour, uint8 new_min, bool update_world /*= 
 void QuestManager::itemlink(int item_id) {
 	QuestManagerCurrentQuestVars();
 	if (initiator) {
-		const EQEmu::Item_Struct* item = database.GetItem(item_id);
+		const EQEmu::ItemBase* item = database.GetItem(item_id);
 		if (item == nullptr)
 			return;
 
@@ -2497,7 +2497,7 @@ void QuestManager::MerchantSetItem(uint32 NPCid, uint32 itemid, uint32 quantity)
 	if (merchant == 0 || !merchant->IsNPC() || (merchant->GetClass() != MERCHANT))
 		return;	// don't do anything if NPCid isn't a merchant
 
-	const EQEmu::Item_Struct* item = nullptr;
+	const EQEmu::ItemBase* item = nullptr;
 	item = database.GetItem(itemid);
 	if (!item) return;		// if the item id doesn't correspond to a real item, do nothing
 
@@ -2510,7 +2510,7 @@ uint32 QuestManager::MerchantCountItem(uint32 NPCid, uint32 itemid) {
 	if (merchant == 0 || !merchant->IsNPC() || (merchant->GetClass() != MERCHANT))
 		return 0;	// if it isn't a merchant, it doesn't have any items
 
-	const EQEmu::Item_Struct* item = nullptr;
+	const EQEmu::ItemBase* item = nullptr;
 	item = database.GetItem(itemid);
 	if (!item)
 		return 0;	// if it isn't a valid item, the merchant doesn't have any
@@ -2533,7 +2533,7 @@ uint32 QuestManager::MerchantCountItem(uint32 NPCid, uint32 itemid) {
 // Item Link for use in Variables - "my $example_link = quest::varlink(item_id);"
 const char* QuestManager::varlink(char* perltext, int item_id) {
 	QuestManagerCurrentQuestVars();
-	const EQEmu::Item_Struct* item = database.GetItem(item_id);
+	const EQEmu::ItemBase* item = database.GetItem(item_id);
 	if (!item)
 		return "INVALID ITEM ID IN VARLINK";
 

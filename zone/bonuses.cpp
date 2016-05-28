@@ -152,7 +152,7 @@ void Client::CalcItemBonuses(StatBonuses* newbon) {
 		AddItemBonuses(inst, newbon, false, false, 0, (i == EQEmu::legacy::SlotAmmo));
 
 		//These are given special flags due to how often they are checked for various spell effects.
-		const EQEmu::Item_Struct *item = inst->GetItem();
+		const EQEmu::ItemBase *item = inst->GetItem();
 		if (i == EQEmu::legacy::SlotSecondary && (item && item->ItemType == EQEmu::item::ItemTypeShield))
 			SetShieldEquiped(true);
 		else if (i == EQEmu::legacy::SlotPrimary && (item && item->ItemType == EQEmu::item::ItemType2HBlunt)) {
@@ -218,7 +218,7 @@ void Client::AddItemBonuses(const ItemInst *inst, StatBonuses *newbon, bool isAu
 		return;
 	}
 
-	const EQEmu::Item_Struct *item = inst->GetItem();
+	const EQEmu::ItemBase *item = inst->GetItem();
 
 	if (!isTribute && !inst->IsEquipable(GetBaseRace(), GetClass())) {
 		if (item->ItemType != EQEmu::item::ItemTypeFood && item->ItemType != EQEmu::item::ItemTypeDrink)
@@ -550,7 +550,7 @@ void Client::AdditiveWornBonuses(const ItemInst *inst, StatBonuses* newbon, bool
 	if(inst->GetAugmentType()==0 && isAug == true)
 		return;
 
-	const EQEmu::Item_Struct *item = inst->GetItem();
+	const EQEmu::ItemBase *item = inst->GetItem();
 
 	if(!inst->IsEquipable(GetBaseRace(),GetClass()))
 		return;
@@ -582,7 +582,7 @@ void Client::CalcEdibleBonuses(StatBonuses* newbon) {
 			break;
 		const ItemInst* inst = GetInv().GetItem(i);
 		if (inst && inst->GetItem() && inst->IsClassCommon()) {
-			const EQEmu::Item_Struct *item=inst->GetItem();
+			const EQEmu::ItemBase *item = inst->GetItem();
 			if (item->ItemType == EQEmu::item::ItemTypeFood && !food)
 				food = true;
 			else if (item->ItemType == EQEmu::item::ItemTypeDrink && !drink)
@@ -598,7 +598,7 @@ void Client::CalcEdibleBonuses(StatBonuses* newbon) {
 			break;
 		const ItemInst* inst = GetInv().GetItem(i);
 		if (inst && inst->GetItem() && inst->IsClassCommon()) {
-			const EQEmu::Item_Struct *item=inst->GetItem();
+			const EQEmu::ItemBase *item = inst->GetItem();
 			if (item->ItemType == EQEmu::item::ItemTypeFood && !food)
 				food = true;
 			else if (item->ItemType == EQEmu::item::ItemTypeDrink && !drink)
@@ -3203,7 +3203,7 @@ void NPC::CalcItemBonuses(StatBonuses *newbon)
 	if(newbon){
 
 		for (int i = 0; i < EQEmu::legacy::EQUIPMENT_SIZE; i++){
-			const EQEmu::Item_Struct *cur = database.GetItem(equipment[i]);
+			const EQEmu::ItemBase *cur = database.GetItem(equipment[i]);
 			if(cur){
 				//basic stats
 				newbon->AC += cur->AC;

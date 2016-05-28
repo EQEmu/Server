@@ -3841,7 +3841,7 @@ namespace UF
 
 	void SerializeItem(EQEmu::OutBuffer& ob, const ItemInst *inst, int16 slot_id_in, uint8 depth)
 	{
-		const EQEmu::Item_Struct *item = inst->GetUnscaledItem();
+		const EQEmu::ItemBase *item = inst->GetUnscaledItem();
 		
 		UF::structs::ItemSerializationHeader hdr;
 
@@ -3885,7 +3885,7 @@ namespace UF
 		int ornamentationAugtype = RuleI(Character, OrnamentationAugmentType);
 		uint16 ornaIcon = 0;
 		if (inst->GetOrnamentationAug(ornamentationAugtype)) {
-			const EQEmu::Item_Struct *aug_weap = inst->GetOrnamentationAug(ornamentationAugtype)->GetItem();
+			const EQEmu::ItemBase *aug_weap = inst->GetOrnamentationAug(ornamentationAugtype)->GetItem();
 			ornaIcon = aug_weap->Icon;
 
 			ob.write(aug_weap->IDFile, strlen(aug_weap->IDFile));
