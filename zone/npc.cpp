@@ -24,7 +24,7 @@
 #include "../common/seperator.h"
 #include "../common/spdat.h"
 #include "../common/string_util.h"
-#include "../common/client_version.h" // inv2 watch
+#include "../common/emu_versions.h"
 #include "../common/features.h"
 #include "../common/item.h"
 #include "../common/item_base.h"

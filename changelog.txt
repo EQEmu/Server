@@ -1,5 +1,8 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 05/28/2016 ==
+Uleat: Merged client_version and inventory_version into emu_versions files
+
 == 05/27/2016 ==
 Uleat: Renamed EQEmu::Item_Struct to EQEmu::ItemBase (and appropriate files) to coincide with new inventory naming conventions
 

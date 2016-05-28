@@ -4,7 +4,7 @@
 class EQApplicationPacket;
 class EQStream;
 #include "emu_opcodes.h"
-#include "client_version.h" // inv2 watch
+#include "emu_versions.h"
 
 #include <string>
 #include <memory>

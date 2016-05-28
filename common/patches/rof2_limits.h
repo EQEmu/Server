@@ -21,7 +21,7 @@
 #define COMMON_ROF2_LIMITS_H
 
 #include "../types.h"
-#include "../client_version.h"
+#include "../emu_versions.h"
 #include "../skills.h"
 
 

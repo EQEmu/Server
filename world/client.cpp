@@ -32,7 +32,7 @@
 #include "../common/skills.h"
 #include "../common/extprofile.h"
 #include "../common/string_util.h"
-#include "../common/client_version.h" // inv2 watch
+#include "../common/emu_versions.h"
 #include "../common/random.h"
 #include "../common/shareddb.h"
 

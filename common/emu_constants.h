@@ -22,9 +22,7 @@
 
 #include "eq_limits.h"
 #include "emu_legacy.h"
-#include "inventory_version.h"
-//#include "deity.h"
-//#include "say_link.h"
+#include "emu_versions.h"
 
 #include <string>
 

@@ -17,8 +17,8 @@
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
-#ifndef COMMON_CLIENT_VERSION_H
-#define COMMON_CLIENT_VERSION_H
+#ifndef COMMON_EMU_VERSIONS_H
+#define COMMON_EMU_VERSIONS_H
 
 #include "types.h"
 
@@ -61,8 +61,8 @@ namespace EQEmu
 			bit_AllClients = 0xFFFFFFFF
 		};
 
-		static const ClientVersion LastClientVersion = ClientVersion::RoF2;
-		static const size_t ClientVersionCount = (static_cast<size_t>(LastClientVersion) + 1);
+		const ClientVersion LastClientVersion = ClientVersion::RoF2;
+		const size_t ClientVersionCount = (static_cast<size_t>(LastClientVersion) + 1);
 
 		extern bool IsValidClientVersion(ClientVersion client_version);
 		extern ClientVersion ValidateClientVersion(ClientVersion client_version);
@@ -70,9 +70,42 @@ namespace EQEmu
 		extern uint32 ConvertClientVersionToClientVersionBit(ClientVersion client_version);
 		extern ClientVersion ConvertClientVersionBitToClientVersion(uint32 client_version_bit);
 		extern uint32 ConvertClientVersionToExpansion(ClientVersion client_version);
-	
+
+	} /*versions*/
+
+	namespace versions {
+		enum class InventoryVersion {
+			Unknown = 0,
+			Client62,
+			Titanium,
+			SoF,
+			SoD,
+			UF,
+			RoF,
+			RoF2,
+			NPC,
+			Merc,
+			Bot,
+			Pet
+		};
+
+		const InventoryVersion LastInventoryVersion = InventoryVersion::Pet;
+		const InventoryVersion LastPCInventoryVersion = InventoryVersion::RoF2;
+		const InventoryVersion LastNonPCInventoryVersion = InventoryVersion::Pet;
+		const size_t InventoryVersionCount = (static_cast<size_t>(LastInventoryVersion) + 1);
+
+		extern bool IsValidInventoryVersion(InventoryVersion inventory_version);
+		extern bool IsValidPCInventoryVersion(InventoryVersion inventory_version);
+		extern bool IsValidNonPCInventoryVersion(InventoryVersion inventory_version);
+		extern InventoryVersion ValidateInventoryVersion(InventoryVersion inventory_version);
+		extern InventoryVersion ValidatePCInventoryVersion(InventoryVersion inventory_version);
+		extern InventoryVersion ValidateNonPCInventoryVersion(InventoryVersion inventory_version);
+		extern const char* InventoryVersionName(InventoryVersion inventory_version);
+		extern ClientVersion ConvertInventoryVersionToClientVersion(InventoryVersion inventory_version);
+		extern InventoryVersion ConvertClientVersionToInventoryVersion(ClientVersion client_version);
+
 	} /*versions*/
 
 } /*EQEmu*/
 
-#endif /*COMMON_CLIENT_VERSION_H*/
+#endif /*COMMON_EMU_VERSIONS_H*/

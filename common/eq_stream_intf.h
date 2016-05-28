@@ -4,7 +4,7 @@
 //this is the only part of an EQStream that is seen by the application.
 
 #include <string>
-#include "client_version.h" // inv2 watch
+#include "emu_versions.h"
 
 typedef enum {
 	ESTABLISHED,

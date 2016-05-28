@@ -3,7 +3,6 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 SET(common_sources
 	base_packet.cpp
 	classes.cpp
-	client_version.cpp
 	condition.cpp
 	crash.cpp
 	crc16.cpp
@@ -19,6 +18,7 @@ SET(common_sources
 	emu_opcodes.cpp
 	emu_tcp_connection.cpp
 	emu_tcp_server.cpp
+	emu_versions.cpp
 	eqdb.cpp
 	eqdb_res.cpp
 	eqemu_exception.cpp
@@ -35,7 +35,6 @@ SET(common_sources
 	faction.cpp
 	guild_base.cpp
 	guilds.cpp
-	inventory_version.cpp
 	ipc_mutex.cpp
 	item.cpp
 	item_base.cpp
@@ -112,7 +111,6 @@ SET(common_headers
 	base_data.h
 	bodytypes.h
 	classes.h
-	client_version.h
 	condition.h
 	crash.h
 	crc16.h
@@ -128,6 +126,7 @@ SET(common_headers
 	emu_oplist.h
 	emu_tcp_connection.h
 	emu_tcp_server.h
+	emu_versions.h
 	eq_constants.h
 	eq_packet_structs.h
 	eqdb.h
@@ -155,7 +154,6 @@ SET(common_headers
 	global_define.h
 	guild_base.h
 	guilds.h
-	inventory_version.h
 	ipc_mutex.h
 	item.h
 	item_base.h
