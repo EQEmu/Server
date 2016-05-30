@@ -5926,11 +5926,11 @@ namespace RoF2
 	{
 		structs::InventorySlot_Struct RoF2Slot;
 		RoF2Slot.Type = INVALID_INDEX;
-		RoF2Slot.Unknown02 = NOT_USED;
+		RoF2Slot.Unknown02 = 0;
 		RoF2Slot.Slot = INVALID_INDEX;
 		RoF2Slot.SubIndex = INVALID_INDEX;
 		RoF2Slot.AugIndex = INVALID_INDEX;
-		RoF2Slot.Unknown01 = NOT_USED;
+		RoF2Slot.Unknown01 = 0;
 
 		uint32 TempSlot = 0;
 
@@ -6039,7 +6039,7 @@ namespace RoF2
 		RoF2Slot.Slot = INVALID_INDEX;
 		RoF2Slot.SubIndex = INVALID_INDEX;
 		RoF2Slot.AugIndex = INVALID_INDEX;
-		RoF2Slot.Unknown01 = NOT_USED;
+		RoF2Slot.Unknown01 = 0;
 
 		uint32 TempSlot = 0;
 

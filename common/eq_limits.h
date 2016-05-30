@@ -1,4 +1,4 @@
-/*	EQEMu:  Everquest Server Emulator
+/*	EQEMu: Everquest Server Emulator
 	
 	Copyright (C) 2001-2016 EQEMu Development Team (http://eqemulator.net)
 
@@ -10,7 +10,7 @@
 	but WITHOUT ANY WARRANTY except by those people which sell it, which
 	are required to give you total support for your newly bought product;
 	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-	A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+	A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 	
 	You should have received a copy of the GNU General Public License
 	along with this program; if not, write to the Free Software
@@ -34,30 +34,30 @@
 namespace EQEmu
 {
 	namespace constants {
-		extern size_t CharacterCreationLimit(versions::ClientVersion client_version);
+		extern size_t GetCharacterCreationLimit(versions::ClientVersion client_version);
 
 	} /*constants*/
 	
 	namespace inventory {
-		extern uint16 InventoryTypeSize(versions::InventoryVersion inventory_version, int16 inv_type);
-		extern uint64 PossessionsBitmask(versions::InventoryVersion inventory_version);
+		extern size_t GetInventoryTypeSize(versions::InventoryVersion inventory_version, int inv_type);
+		extern uint64 GetPossessionsBitmask(versions::InventoryVersion inventory_version);
 
-		extern bool AllowEmptyBagInBag(versions::InventoryVersion inventory_version);
-		extern bool AllowClickCastFromBag(versions::InventoryVersion inventory_version);
+		extern bool GetAllowEmptyBagInBag(versions::InventoryVersion inventory_version);
+		extern bool GetAllowClickCastFromBag(versions::InventoryVersion inventory_version);
 
-		extern uint16 ItemAugSize(versions::InventoryVersion inventory_version);
-		extern uint16 ItemBagSize(versions::InventoryVersion inventory_version);
+		extern bool GetConcatenateInvTypeLimbo(versions::InventoryVersion inventory_version);
 
-		extern bool ConcatenateInvTypeLimbo(versions::InventoryVersion inventory_version);
+		extern bool GetAllowOverLevelEquipment(versions::InventoryVersion inventory_version);
 
-		extern bool AllowOverLevelEquipment(versions::InventoryVersion inventory_version);
+		extern size_t GetItemAugSize(versions::InventoryVersion inventory_version);
+		extern size_t GetItemBagSize(versions::InventoryVersion inventory_version);
 
 	} /*inventory*/
 	
-	namespace profile {
-		extern bool CoinHasWeight(versions::InventoryVersion inventory_version);
+	namespace behavior {
+		extern bool GetCoinHasWeight(versions::InventoryVersion inventory_version);
 
-	} /*profile*/
+	} /*behavior*/
 
 } /*EQEmu*/
 

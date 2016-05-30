@@ -2759,7 +2759,7 @@ void TaskManager::SendActiveTaskDescription(Client *c, int TaskID, int SequenceN
 				+ sizeof(TaskDescriptionData2_Struct) + 1 + sizeof(TaskDescriptionTrailer_Struct);
 
 	std::string reward_text;
-	int ItemID = NOT_USED;
+	int ItemID = 0;
 
 	// If there is an item make the Reward text into a link to the item (only the first item if a list
 	// is specified). I have been unable to get multiple item links to work.

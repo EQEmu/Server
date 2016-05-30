@@ -5627,13 +5627,13 @@ void command_itemsearch(Client *c, const Seperator *sep)
 			return;
 		}
 
-		int count = NOT_USED;
+		int count = 0;
 		char sName[64];
 		char sCriteria[255];
 		strn0cpy(sCriteria, search_criteria, sizeof(sCriteria));
 		strupr(sCriteria);
 		char* pdest;
-		uint32 it = NOT_USED;
+		uint32 it = 0;
 		while ((item = database.IterateItems(&it))) {
 			strn0cpy(sName, item->Name, sizeof(sName));
 			strupr(sName);

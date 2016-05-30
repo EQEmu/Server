@@ -1,4 +1,4 @@
-/*	EQEMu:  Everquest Server Emulator
+/*	EQEMu: Everquest Server Emulator
 	
 	Copyright (C) 2001-2016 EQEMu Development Team (http://eqemulator.net)
 
@@ -10,7 +10,7 @@
 	but WITHOUT ANY WARRANTY except by those people which sell it, which
 	are required to give you total support for your newly bought product;
 	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-	A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+	A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 	
 	You should have received a copy of the GNU General Public License
 	along with this program; if not, write to the Free Software
@@ -21,7 +21,7 @@
 #include "emu_limits.h"
 
 
-size_t EQEmu::constants::CharacterCreationLimit(versions::ClientVersion client_version)
+size_t EQEmu::constants::GetCharacterCreationLimit(versions::ClientVersion client_version)
 {
 	static const size_t local[versions::ClientVersionCount] = {
 		ClientUnknown::Null,
@@ -37,22 +37,22 @@ size_t EQEmu::constants::CharacterCreationLimit(versions::ClientVersion client_v
 	return local[static_cast<size_t>(versions::ValidateClientVersion(client_version))];
 }
 
-uint16 EQEmu::inventory::InventoryTypeSize(versions::InventoryVersion inventory_version, int16 inv_type)
+size_t EQEmu::inventory::GetInventoryTypeSize(versions::InventoryVersion inventory_version, int inv_type)
 {
-	static const uint16 local[legacy::TypeCount][versions::InventoryVersionCount] = {
+	static const size_t local[legacy::TypeCount][versions::InventoryVersionCount] = {
 		{ // local[TypePossessions]
 			ClientUnknown::Null,
 			Client62::Null,
-			legacy::TYPE_POSSESSIONS_SIZE,
-			legacy::TYPE_POSSESSIONS_SIZE,
-			legacy::TYPE_POSSESSIONS_SIZE,
-			legacy::TYPE_POSSESSIONS_SIZE,
-			legacy::TYPE_POSSESSIONS_SIZE,
-			legacy::TYPE_POSSESSIONS_SIZE,
-			legacy::TYPE_POSSESSIONS_SIZE,
-			legacy::TYPE_POSSESSIONS_SIZE,
-			legacy::TYPE_POSSESSIONS_SIZE,
-			legacy::TYPE_POSSESSIONS_SIZE,
+			legacy::TYPE_POSSESSIONS_SIZE, //Titanium::invtype::InvTypePossessionsSize,
+			legacy::TYPE_POSSESSIONS_SIZE, //SoF::invtype::InvTypePossessionsSize,
+			legacy::TYPE_POSSESSIONS_SIZE, //SoD::invtype::InvTypePossessionsSize,
+			legacy::TYPE_POSSESSIONS_SIZE, //UF::invtype::InvTypePossessionsSize,
+			legacy::TYPE_POSSESSIONS_SIZE, //RoF::invtype::InvTypePossessionsSize,
+			legacy::TYPE_POSSESSIONS_SIZE, //RoF2::invtype::InvTypePossessionsSize,
+			legacy::TYPE_POSSESSIONS_SIZE, //InvTypePossessionsSize,
+			legacy::TYPE_POSSESSIONS_SIZE, //InvTypePossessionsSize,
+			legacy::TYPE_POSSESSIONS_SIZE, //InvTypePossessionsSize,
+			legacy::TYPE_POSSESSIONS_SIZE, //InvTypePossessionsSize,
 			Titanium::Null,
 			SoF::Null,
 			SoD::Null,
@@ -64,11 +64,11 @@ uint16 EQEmu::inventory::InventoryTypeSize(versions::InventoryVersion inventory_
 			ClientUnknown::Null,
 			Client62::Null,
 			Titanium::invtype::InvTypeBankSize,
-			legacy::TYPE_BANK_SIZE,
-			legacy::TYPE_BANK_SIZE,
-			legacy::TYPE_BANK_SIZE,
-			legacy::TYPE_BANK_SIZE,
-			legacy::TYPE_BANK_SIZE,
+			SoF::invtype::InvTypeBankSize,
+			SoD::invtype::InvTypeBankSize,
+			UF::invtype::InvTypeBankSize,
+			RoF::invtype::InvTypeBankSize,
+			RoF2::invtype::InvTypeBankSize,
 			EntityLimits::npc::Null,
 			EntityLimits::merc::Null,
 			EntityLimits::bot::Null,
@@ -83,12 +83,12 @@ uint16 EQEmu::inventory::InventoryTypeSize(versions::InventoryVersion inventory_
 		{ // local[TypeSharedBank]
 			ClientUnknown::Null,
 			Client62::Null,
-			legacy::TYPE_SHARED_BANK_SIZE,
-			legacy::TYPE_SHARED_BANK_SIZE,
-			legacy::TYPE_SHARED_BANK_SIZE,
-			legacy::TYPE_SHARED_BANK_SIZE,
-			legacy::TYPE_SHARED_BANK_SIZE,
-			legacy::TYPE_SHARED_BANK_SIZE,
+			Titanium::invtype::InvTypeSharedBankSize,
+			SoF::invtype::InvTypeSharedBankSize,
+			SoD::invtype::InvTypeSharedBankSize,
+			UF::invtype::InvTypeSharedBankSize,
+			RoF::invtype::InvTypeSharedBankSize,
+			RoF2::invtype::InvTypeSharedBankSize,
 			EntityLimits::npc::Null,
 			EntityLimits::merc::Null,
 			EntityLimits::bot::Null,
@@ -103,32 +103,32 @@ uint16 EQEmu::inventory::InventoryTypeSize(versions::InventoryVersion inventory_
 		{ // local[TypeTrade]
 			ClientUnknown::Null,
 			Client62::Null,
-			legacy::TYPE_TRADE_SIZE,
-			legacy::TYPE_TRADE_SIZE,
-			legacy::TYPE_TRADE_SIZE,
-			legacy::TYPE_TRADE_SIZE,
-			legacy::TYPE_TRADE_SIZE,
-			legacy::TYPE_TRADE_SIZE,
-			4,
-			4,
-			legacy::TYPE_TRADE_SIZE, // client thinks this is another client
-			4,
-			Titanium::Null,
-			SoF::Null,
-			SoD::Null,
-			UF::Null,
-			RoF::Null,
-			RoF2::Null
+			Titanium::invtype::InvTypeTradeSize,
+			SoF::invtype::InvTypeTradeSize,
+			SoD::invtype::InvTypeTradeSize,
+			UF::invtype::InvTypeTradeSize,
+			RoF::invtype::InvTypeTradeSize,
+			RoF2::invtype::InvTypeTradeSize,
+			EntityLimits::npc::InvTypeTradeSize,
+			EntityLimits::merc::InvTypeTradeSize,
+			EntityLimits::bot::InvTypeTradeSize, // client thinks this is another client
+			EntityLimits::pet::InvTypeTradeSize,
+			Titanium::invtype::InvTypeTradeSize,
+			SoF::invtype::InvTypeTradeSize,
+			SoD::invtype::InvTypeTradeSize,
+			UF::invtype::InvTypeTradeSize,
+			RoF::invtype::InvTypeTradeSize,
+			RoF2::invtype::InvTypeTradeSize
 		},
 		{ // local[TypeWorld]
 			ClientUnknown::Null,
 			Client62::Null,
-			legacy::TYPE_WORLD_SIZE,
-			legacy::TYPE_WORLD_SIZE,
-			legacy::TYPE_WORLD_SIZE,
-			legacy::TYPE_WORLD_SIZE,
-			legacy::TYPE_WORLD_SIZE,
-			legacy::TYPE_WORLD_SIZE,
+			Titanium::invtype::InvTypeWorldSize,
+			SoF::invtype::InvTypeWorldSize,
+			SoD::invtype::InvTypeWorldSize,
+			UF::invtype::InvTypeWorldSize,
+			RoF::invtype::InvTypeWorldSize,
+			RoF2::invtype::InvTypeWorldSize,
 			EntityLimits::npc::Null,
 			EntityLimits::merc::Null,
 			EntityLimits::bot::Null,
@@ -143,12 +143,12 @@ uint16 EQEmu::inventory::InventoryTypeSize(versions::InventoryVersion inventory_
 		{ // local[TypeLimbo]
 			ClientUnknown::Null,
 			Client62::Null,
-			legacy::TYPE_LIMBO_SIZE,
-			legacy::TYPE_LIMBO_SIZE,
-			legacy::TYPE_LIMBO_SIZE,
-			legacy::TYPE_LIMBO_SIZE,
-			legacy::TYPE_LIMBO_SIZE,
-			legacy::TYPE_LIMBO_SIZE,
+			Titanium::invtype::InvTypeLimboSize,
+			SoF::invtype::InvTypeLimboSize,
+			SoD::invtype::InvTypeLimboSize,
+			UF::invtype::InvTypeLimboSize,
+			RoF::invtype::InvTypeLimboSize,
+			RoF2::invtype::InvTypeLimboSize,
 			EntityLimits::npc::Null,
 			EntityLimits::merc::Null,
 			EntityLimits::bot::Null,
@@ -163,12 +163,12 @@ uint16 EQEmu::inventory::InventoryTypeSize(versions::InventoryVersion inventory_
 		{ // local[TypeTribute]
 			ClientUnknown::Null,
 			Client62::Null,
-			legacy::TYPE_TRIBUTE_SIZE,
-			legacy::TYPE_TRIBUTE_SIZE,
-			legacy::TYPE_TRIBUTE_SIZE,
-			legacy::TYPE_TRIBUTE_SIZE,
-			legacy::TYPE_TRIBUTE_SIZE,
-			legacy::TYPE_TRIBUTE_SIZE,
+			Titanium::invtype::InvTypeTributeSize,
+			SoF::invtype::InvTypeTributeSize,
+			SoD::invtype::InvTypeTributeSize,
+			UF::invtype::InvTypeTributeSize,
+			RoF::invtype::InvTypeTributeSize,
+			RoF2::invtype::InvTypeTributeSize,
 			EntityLimits::npc::Null,
 			EntityLimits::merc::Null,
 			EntityLimits::bot::Null,
@@ -187,8 +187,8 @@ uint16 EQEmu::inventory::InventoryTypeSize(versions::InventoryVersion inventory_
 			SoF::Null,
 			SoD::Null,
 			UF::Null,
-			legacy::TYPE_TROPHY_TRIBUTE_SIZE,
-			legacy::TYPE_TROPHY_TRIBUTE_SIZE,
+			RoF::Null, //RoF::invtype::InvTypeTrophyTributeSize,
+			RoF2::Null, //RoF2::invtype::InvTypeTrophyTributeSize,
 			EntityLimits::npc::Null,
 			EntityLimits::merc::Null,
 			EntityLimits::bot::Null,
@@ -203,12 +203,12 @@ uint16 EQEmu::inventory::InventoryTypeSize(versions::InventoryVersion inventory_
 		{ // local[TypeGuildTribute]
 			ClientUnknown::Null,
 			Client62::Null,
-			Titanium::Null,
-			SoF::Null,
-			SoD::Null,
-			UF::Null,
-			legacy::TYPE_GUILD_TRIBUTE_SIZE,
-			legacy::TYPE_GUILD_TRIBUTE_SIZE,
+			Titanium::Null, //Titanium::invtype::InvTypeGuildTributeSize,
+			SoF::Null, //SoF::invtype::InvTypeGuildTributeSize,
+			SoD::Null, //SoD::invtype::InvTypeGuildTributeSize,
+			UF::Null, //UF::invtype::InvTypeGuildTributeSize,
+			RoF::Null, //RoF::invtype::InvTypeGuildTributeSize,
+			RoF2::Null, //RoF2::invtype::InvTypeGuildTributeSize,
 			EntityLimits::npc::Null,
 			EntityLimits::merc::Null,
 			EntityLimits::bot::Null,
@@ -223,22 +223,22 @@ uint16 EQEmu::inventory::InventoryTypeSize(versions::InventoryVersion inventory_
 		{ // local[TypeMerchant]
 			ClientUnknown::Null,
 			Client62::Null,
-			Titanium::Null,
-			SoF::Null,
-			SoD::Null,
-			UF::Null,
-			legacy::TYPE_MERCHANT_SIZE,
-			legacy::TYPE_MERCHANT_SIZE,
+			Titanium::invtype::InvTypeMerchantSize,
+			SoF::invtype::InvTypeMerchantSize,
+			SoD::invtype::InvTypeMerchantSize,
+			UF::invtype::InvTypeMerchantSize,
+			RoF::invtype::InvTypeMerchantSize,
+			RoF2::invtype::InvTypeMerchantSize,
 			EntityLimits::npc::Null,
 			EntityLimits::merc::Null,
 			EntityLimits::bot::Null,
 			EntityLimits::pet::Null,
-			Titanium::Null,
-			SoF::Null,
-			SoD::Null,
-			UF::Null,
-			RoF::Null,
-			RoF2::Null
+			Titanium::invtype::InvTypeMerchantSize,
+			SoF::invtype::InvTypeMerchantSize,
+			SoD::invtype::InvTypeMerchantSize,
+			UF::invtype::InvTypeMerchantSize,
+			RoF::invtype::InvTypeMerchantSize,
+			RoF2::invtype::InvTypeMerchantSize
 		},
 		{ // local[TypeDeleted]
 			ClientUnknown::Null,
@@ -247,8 +247,8 @@ uint16 EQEmu::inventory::InventoryTypeSize(versions::InventoryVersion inventory_
 			SoF::Null,
 			SoD::Null,
 			UF::Null,
-			legacy::TYPE_DELETED_SIZE,
-			legacy::TYPE_DELETED_SIZE,
+			RoF::Null, //RoF::invtype::InvTypeDeletedSize,
+			RoF2::Null, //RoF2::invtype::InvTypeDeletedSize,
 			EntityLimits::npc::Null,
 			EntityLimits::merc::Null,
 			EntityLimits::bot::Null,
@@ -269,10 +269,10 @@ uint16 EQEmu::inventory::InventoryTypeSize(versions::InventoryVersion inventory_
 			UF::invtype::InvTypeCorpseSize,
 			RoF::invtype::InvTypeCorpseSize,
 			RoF2::invtype::InvTypeCorpseSize,
-			EntityLimits::npc::Null,
-			EntityLimits::merc::Null,
-			EntityLimits::bot::Null,
-			EntityLimits::pet::Null,
+			EntityLimits::npc::Null, //InvTypeCorpseSize,
+			EntityLimits::merc::Null, //InvTypeCorpseSize,
+			EntityLimits::bot::Null, //InvTypeCorpseSize,
+			EntityLimits::pet::Null, //InvTypeCorpseSize,
 			Titanium::Null,
 			SoF::Null,
 			SoD::Null,
@@ -283,22 +283,22 @@ uint16 EQEmu::inventory::InventoryTypeSize(versions::InventoryVersion inventory_
 		{ // local[TypeBazaar]
 			ClientUnknown::Null,
 			Client62::Null,
-			legacy::TYPE_BAZAAR_SIZE,
-			legacy::TYPE_BAZAAR_SIZE,
-			legacy::TYPE_BAZAAR_SIZE,
-			legacy::TYPE_BAZAAR_SIZE,
-			legacy::TYPE_BAZAAR_SIZE,
-			legacy::TYPE_BAZAAR_SIZE,
+			legacy::TYPE_BAZAAR_SIZE, //Titanium::invtype::InvTypeBazaarSize,
+			legacy::TYPE_BAZAAR_SIZE, //SoF::invtype::InvTypeBazaarSize,
+			legacy::TYPE_BAZAAR_SIZE, //SoD::invtype::InvTypeBazaarSize,
+			legacy::TYPE_BAZAAR_SIZE, //UF::invtype::InvTypeBazaarSize,
+			legacy::TYPE_BAZAAR_SIZE, //RoF::invtype::InvTypeBazaarSize,
+			legacy::TYPE_BAZAAR_SIZE, //RoF2::invtype::InvTypeBazaarSize,
 			EntityLimits::npc::Null,
 			EntityLimits::merc::Null,
 			EntityLimits::bot::Null,
 			EntityLimits::pet::Null,
-			Titanium::Null,
-			SoF::Null,
-			SoD::Null,
-			UF::Null,
-			RoF::Null,
-			RoF2::Null
+			Titanium::Null, //Titanium::invtype::InvTypeBazaarSize,
+			SoF::Null, //SoF::invtype::InvTypeBazaarSize,
+			SoD::Null, //SoD::invtype::InvTypeBazaarSize,
+			UF::Null, //UF::invtype::InvTypeBazaarSize,
+			RoF::Null, //RoF::invtype::InvTypeBazaarSize,
+			RoF2::Null //RoF2::invtype::InvTypeBazaarSize,
 		},
 		{ // local[TypeInspect]
 			ClientUnknown::Null,
@@ -313,12 +313,12 @@ uint16 EQEmu::inventory::InventoryTypeSize(versions::InventoryVersion inventory_
 			EntityLimits::merc::Null,
 			EntityLimits::bot::Null,
 			EntityLimits::pet::Null,
-			Titanium::Null,
-			SoF::Null,
-			SoD::Null,
-			UF::Null,
-			RoF::Null,
-			RoF2::Null
+			Titanium::invtype::InvTypeInspectSize,
+			SoF::invtype::InvTypeInspectSize,
+			SoD::invtype::InvTypeInspectSize,
+			UF::invtype::InvTypeInspectSize,
+			RoF::invtype::InvTypeInspectSize,
+			RoF2::invtype::InvTypeInspectSize
 		},
 		{ // local[TypeRealEstate]
 			ClientUnknown::Null,
@@ -327,8 +327,8 @@ uint16 EQEmu::inventory::InventoryTypeSize(versions::InventoryVersion inventory_
 			SoF::Null,
 			SoD::Null,
 			UF::Null,
-			legacy::TYPE_REAL_ESTATE_SIZE,
-			legacy::TYPE_REAL_ESTATE_SIZE,
+			RoF::Null, //RoF::invtype::InvTypeRealEstateSize,
+			RoF2::Null, //RoF2::invtype::InvTypeRealEstateSize
 			EntityLimits::npc::Null,
 			EntityLimits::merc::Null,
 			EntityLimits::bot::Null,
@@ -343,92 +343,92 @@ uint16 EQEmu::inventory::InventoryTypeSize(versions::InventoryVersion inventory_
 		{ // local[TypeViewMODPC]
 			ClientUnknown::Null,
 			Client62::Null,
-			Titanium::Null,
-			SoF::Null,
-			SoD::Null,
-			UF::Null,
-			legacy::TYPE_VIEW_MOD_PC_SIZE,
-			legacy::TYPE_VIEW_MOD_PC_SIZE,
+			Titanium::invtype::InvTypeViewMODPCSize,
+			SoF::invtype::InvTypeViewMODPCSize,
+			SoD::invtype::InvTypeViewMODPCSize,
+			UF::invtype::InvTypeViewMODPCSize,
+			RoF::invtype::InvTypeViewMODPCSize,
+			RoF2::invtype::InvTypeViewMODPCSize,
 			EntityLimits::npc::Null,
 			EntityLimits::merc::Null,
 			EntityLimits::bot::Null,
 			EntityLimits::pet::Null,
-			Titanium::Null,
-			SoF::Null,
-			SoD::Null,
-			UF::Null,
-			RoF::Null,
-			RoF2::Null
+			Titanium::invtype::InvTypeViewMODPCSize,
+			SoF::invtype::InvTypeViewMODPCSize,
+			SoD::invtype::InvTypeViewMODPCSize,
+			UF::invtype::InvTypeViewMODPCSize,
+			RoF::invtype::InvTypeViewMODPCSize,
+			RoF2::invtype::InvTypeViewMODPCSize
 		},
 		{ // local[TypeViewMODBank]
 			ClientUnknown::Null,
 			Client62::Null,
-			Titanium::Null,
-			SoF::Null,
-			SoD::Null,
-			UF::Null,
-			legacy::TYPE_VIEW_MOD_BANK_SIZE,
-			legacy::TYPE_VIEW_MOD_BANK_SIZE,
+			Titanium::invtype::InvTypeViewMODBankSize,
+			SoF::invtype::InvTypeViewMODBankSize,
+			SoD::invtype::InvTypeViewMODBankSize,
+			UF::invtype::InvTypeViewMODBankSize,
+			RoF::invtype::InvTypeViewMODBankSize,
+			RoF2::invtype::InvTypeViewMODBankSize,
 			EntityLimits::npc::Null,
 			EntityLimits::merc::Null,
 			EntityLimits::bot::Null,
 			EntityLimits::pet::Null,
-			Titanium::Null,
-			SoF::Null,
-			SoD::Null,
-			UF::Null,
-			RoF::Null,
-			RoF2::Null
+			Titanium::invtype::InvTypeViewMODBankSize,
+			SoF::invtype::InvTypeViewMODBankSize,
+			SoD::invtype::InvTypeViewMODBankSize,
+			UF::invtype::InvTypeViewMODBankSize,
+			RoF::invtype::InvTypeViewMODBankSize,
+			RoF2::invtype::InvTypeViewMODBankSize
 		},
 		{ // local[TypeViewMODSharedBank]
 			ClientUnknown::Null,
 			Client62::Null,
-			Titanium::Null,
-			SoF::Null,
-			SoD::Null,
-			UF::Null,
-			legacy::TYPE_VIEW_MOD_SHARED_BANK_SIZE,
-			legacy::TYPE_VIEW_MOD_SHARED_BANK_SIZE,
+			Titanium::invtype::InvTypeViewMODSharedBankSize,
+			SoF::invtype::InvTypeViewMODSharedBankSize,
+			SoD::invtype::InvTypeViewMODSharedBankSize,
+			UF::invtype::InvTypeViewMODSharedBankSize,
+			RoF::invtype::InvTypeViewMODSharedBankSize,
+			RoF2::invtype::InvTypeViewMODSharedBankSize,
 			EntityLimits::npc::Null,
 			EntityLimits::merc::Null,
 			EntityLimits::bot::Null,
 			EntityLimits::pet::Null,
-			Titanium::Null,
-			SoF::Null,
-			SoD::Null,
-			UF::Null,
-			RoF::Null,
-			RoF2::Null
+			Titanium::invtype::InvTypeViewMODSharedBankSize,
+			SoF::invtype::InvTypeViewMODSharedBankSize,
+			SoD::invtype::InvTypeViewMODSharedBankSize,
+			UF::invtype::InvTypeViewMODSharedBankSize,
+			RoF::invtype::InvTypeViewMODSharedBankSize,
+			RoF2::invtype::InvTypeViewMODSharedBankSize
 		},
 		{ // local[TypeViewMODLimbo]
 			ClientUnknown::Null,
 			Client62::Null,
-			Titanium::Null,
-			SoF::Null,
-			SoD::Null,
-			UF::Null,
-			legacy::TYPE_VIEW_MOD_LIMBO_SIZE,
-			legacy::TYPE_VIEW_MOD_LIMBO_SIZE,
+			Titanium::invtype::InvTypeViewMODLimboSize,
+			SoF::invtype::InvTypeViewMODLimboSize,
+			SoD::invtype::InvTypeViewMODLimboSize,
+			UF::invtype::InvTypeViewMODLimboSize,
+			RoF::invtype::InvTypeViewMODLimboSize,
+			RoF2::invtype::InvTypeViewMODLimboSize,
 			EntityLimits::npc::Null,
 			EntityLimits::merc::Null,
 			EntityLimits::bot::Null,
 			EntityLimits::pet::Null,
-			Titanium::Null,
-			SoF::Null,
-			SoD::Null,
-			UF::Null,
-			RoF::Null,
-			RoF2::Null
+			Titanium::invtype::InvTypeViewMODLimboSize,
+			SoF::invtype::InvTypeViewMODLimboSize,
+			SoD::invtype::InvTypeViewMODLimboSize,
+			UF::invtype::InvTypeViewMODLimboSize,
+			RoF::invtype::InvTypeViewMODLimboSize,
+			RoF2::invtype::InvTypeViewMODLimboSize
 		},
 		{ // local[TypeAltStorage]
 			ClientUnknown::Null,
 			Client62::Null,
-			Titanium::Null,
-			SoF::Null,
-			SoD::Null,
-			UF::Null,
-			legacy::TYPE_ALT_STORAGE_SIZE,
-			legacy::TYPE_ALT_STORAGE_SIZE,
+			Titanium::invtype::InvTypeAltStorageSize,
+			SoF::invtype::InvTypeAltStorageSize,
+			SoD::invtype::InvTypeAltStorageSize,
+			UF::invtype::InvTypeAltStorageSize,
+			RoF::invtype::InvTypeAltStorageSize,
+			RoF2::invtype::InvTypeAltStorageSize,
 			EntityLimits::npc::Null,
 			EntityLimits::merc::Null,
 			EntityLimits::bot::Null,
@@ -443,12 +443,12 @@ uint16 EQEmu::inventory::InventoryTypeSize(versions::InventoryVersion inventory_
 		{ // local[TypeArchived]
 			ClientUnknown::Null,
 			Client62::Null,
-			Titanium::Null,
-			SoF::Null,
-			SoD::Null,
-			UF::Null,
-			legacy::TYPE_ARCHIVED_SIZE,
-			legacy::TYPE_ARCHIVED_SIZE,
+			Titanium::invtype::InvTypeArchivedSize,
+			SoF::invtype::InvTypeArchivedSize,
+			SoD::invtype::InvTypeArchivedSize,
+			UF::invtype::InvTypeArchivedSize,
+			RoF::invtype::InvTypeArchivedSize,
+			RoF2::invtype::InvTypeArchivedSize,
 			EntityLimits::npc::Null,
 			EntityLimits::merc::Null,
 			EntityLimits::bot::Null,
@@ -467,8 +467,8 @@ uint16 EQEmu::inventory::InventoryTypeSize(versions::InventoryVersion inventory_
 			SoF::Null,
 			SoD::Null,
 			UF::Null,
-			legacy::TYPE_MAIL_SIZE,
-			legacy::TYPE_MAIL_SIZE,
+			RoF::invtype::InvTypeMailSize,
+			RoF2::invtype::InvTypeMailSize,
 			EntityLimits::npc::Null,
 			EntityLimits::merc::Null,
 			EntityLimits::bot::Null,
@@ -487,8 +487,8 @@ uint16 EQEmu::inventory::InventoryTypeSize(versions::InventoryVersion inventory_
 			SoF::Null,
 			SoD::Null,
 			UF::Null,
-			legacy::TYPE_GUILD_TROPHY_TRIBUTE_SIZE,
-			legacy::TYPE_GUILD_TROPHY_TRIBUTE_SIZE,
+			RoF::invtype::InvTypeGuildTrophyTributeSize,
+			RoF2::invtype::InvTypeGuildTrophyTributeSize,
 			EntityLimits::npc::Null,
 			EntityLimits::merc::Null,
 			EntityLimits::bot::Null,
@@ -507,8 +507,8 @@ uint16 EQEmu::inventory::InventoryTypeSize(versions::InventoryVersion inventory_
 			SoF::Null,
 			SoD::Null,
 			UF::Null,
-			legacy::TYPE_KRONO_SIZE,
-			legacy::TYPE_KRONO_SIZE,
+			RoF::Null,
+			RoF2::invtype::InvTypeKronoSize,
 			EntityLimits::npc::Null,
 			EntityLimits::merc::Null,
 			EntityLimits::bot::Null,
@@ -523,12 +523,12 @@ uint16 EQEmu::inventory::InventoryTypeSize(versions::InventoryVersion inventory_
 		{ // local[TypeOther]
 			ClientUnknown::Null,
 			Client62::Null,
-			Titanium::Null,
-			SoF::Null,
-			SoD::Null,
-			UF::Null,
-			legacy::TYPE_OTHER_SIZE,
-			legacy::TYPE_OTHER_SIZE,
+			Titanium::invtype::InvTypeOtherSize,
+			SoF::invtype::InvTypeOtherSize,
+			SoD::invtype::InvTypeOtherSize,
+			UF::invtype::InvTypeOtherSize,
+			RoF::invtype::InvTypeOtherSize,
+			RoF2::invtype::InvTypeOtherSize,
 			EntityLimits::npc::Null,
 			EntityLimits::merc::Null,
 			EntityLimits::bot::Null,
@@ -542,23 +542,23 @@ uint16 EQEmu::inventory::InventoryTypeSize(versions::InventoryVersion inventory_
 		}
 	};
 
-	if ((uint16)inv_type < legacy::TypeCount)
-		return local[inv_type][static_cast<size_t>(versions::ValidateInventoryVersion(inventory_version))];
+	if (inv_type < 0 || inv_type >= legacy::TypeCount)
+		return 0;
 
-	return NOT_USED;
+	return local[inv_type][static_cast<size_t>(versions::ValidateInventoryVersion(inventory_version))];
 }
 
-uint64 EQEmu::inventory::PossessionsBitmask(versions::InventoryVersion inventory_version)
+uint64 EQEmu::inventory::GetPossessionsBitmask(versions::InventoryVersion inventory_version)
 {
 	static const uint64 local[versions::InventoryVersionCount] = {
 		ClientUnknown::Null,
 		Client62::Null,
-		0x000000027FDFFFFF,
-		0x000000027FFFFFFF,
-		0x000000027FFFFFFF,
-		0x000000027FFFFFFF,
-		0x00000003FFFFFFFF,
-		0x00000003FFFFFFFF,
+		Titanium::Null, //0x000000027FDFFFFF,
+		SoF::Null, //0x000000027FFFFFFF,
+		SoD::Null, //0x000000027FFFFFFF,
+		UF::Null, //0x000000027FFFFFFF,
+		RoF::Null, //0x00000003FFFFFFFF,
+		RoF2::Null, //0x00000003FFFFFFFF,
 		EntityLimits::npc::Null,
 		EntityLimits::merc::Null,
 		EntityLimits::bot::Null,
@@ -571,48 +571,20 @@ uint64 EQEmu::inventory::PossessionsBitmask(versions::InventoryVersion inventory
 		RoF2::Null
 	};
 
-	return NOT_USED;
-	//return local[static_cast<size_t>(versions::ValidateInventoryVersion(inventory_version))];
+	return local[static_cast<size_t>(versions::ValidateInventoryVersion(inventory_version))];
 }
 
-bool EQEmu::inventory::AllowEmptyBagInBag(versions::InventoryVersion inventory_version)
+bool EQEmu::inventory::GetAllowEmptyBagInBag(versions::InventoryVersion inventory_version)
 {
 	static const bool local[versions::InventoryVersionCount] = {
 		ClientUnknown::False,
 		Client62::False,
-		Titanium::behavior::AllowEmptyBagInBag,
-		SoF::behavior::AllowEmptyBagInBag,
-		SoD::behavior::AllowEmptyBagInBag,
-		UF::behavior::AllowEmptyBagInBag,
-		RoF::behavior::AllowEmptyBagInBag,
-		RoF2::behavior::AllowEmptyBagInBag,
-		EntityLimits::npc::False,
-		EntityLimits::merc::False,
-		EntityLimits::bot::False,
-		EntityLimits::pet::False,
-		Titanium::False,
-		SoF::False,
-		SoD::False,
-		UF::False,
-		RoF::False,
-		RoF2::False
-	};
-
-	return false;
-	//return local[static_cast<size_t>(versions::ValidateInventoryVersion(inventory_version))];
-}
-
-bool EQEmu::inventory::AllowClickCastFromBag(versions::InventoryVersion inventory_version)
-{
-	static const bool local[versions::InventoryVersionCount] = {
-		ClientUnknown::False,
-		Client62::False,
-		Titanium::behavior::AllowClickCastFromBag,
-		SoF::behavior::AllowClickCastFromBag,
-		SoD::behavior::AllowClickCastFromBag,
-		UF::behavior::AllowClickCastFromBag,
-		RoF::behavior::AllowClickCastFromBag,
-		RoF2::behavior::AllowClickCastFromBag,
+		Titanium::inventory::AllowEmptyBagInBag,
+		SoF::inventory::AllowEmptyBagInBag,
+		SoD::inventory::AllowEmptyBagInBag,
+		UF::inventory::AllowEmptyBagInBag,
+		RoF::False, //RoF::inventory::AllowEmptyBagInBag,
+		RoF2::False, //RoF2::inventory::AllowEmptyBagInBag,
 		EntityLimits::npc::False,
 		EntityLimits::merc::False,
 		EntityLimits::bot::False,
@@ -628,21 +600,99 @@ bool EQEmu::inventory::AllowClickCastFromBag(versions::InventoryVersion inventor
 	return local[static_cast<size_t>(versions::ValidateInventoryVersion(inventory_version))];
 }
 
-uint16 EQEmu::inventory::ItemAugSize(versions::InventoryVersion inventory_version)
+bool EQEmu::inventory::GetAllowClickCastFromBag(versions::InventoryVersion inventory_version)
 {
-	static const uint16 local[versions::InventoryVersionCount] = {
+	static const bool local[versions::InventoryVersionCount] = {
+		ClientUnknown::False,
+		Client62::False,
+		Titanium::inventory::AllowClickCastFromBag,
+		SoF::inventory::AllowClickCastFromBag,
+		SoD::inventory::AllowClickCastFromBag,
+		UF::inventory::AllowClickCastFromBag,
+		RoF::inventory::AllowClickCastFromBag,
+		RoF2::inventory::AllowClickCastFromBag,
+		EntityLimits::npc::False,
+		EntityLimits::merc::False,
+		EntityLimits::bot::False,
+		EntityLimits::pet::False,
+		Titanium::False,
+		SoF::False,
+		SoD::False,
+		UF::False,
+		RoF::False,
+		RoF2::False
+	};
+
+	return local[static_cast<size_t>(versions::ValidateInventoryVersion(inventory_version))];
+}
+
+bool EQEmu::inventory::GetConcatenateInvTypeLimbo(versions::InventoryVersion inventory_version)
+{
+	static const bool local[versions::InventoryVersionCount] = {
+		ClientUnknown::False,
+		Client62::False,
+		Titanium::inventory::ConcatenateInvTypeLimbo,
+		SoF::inventory::ConcatenateInvTypeLimbo,
+		SoD::inventory::ConcatenateInvTypeLimbo,
+		UF::inventory::ConcatenateInvTypeLimbo,
+		RoF::inventory::ConcatenateInvTypeLimbo,
+		RoF2::inventory::ConcatenateInvTypeLimbo,
+		EntityLimits::npc::False,
+		EntityLimits::merc::False,
+		EntityLimits::bot::False,
+		EntityLimits::pet::False,
+		Titanium::False,
+		SoF::False,
+		SoD::False,
+		UF::False,
+		RoF::False,
+		RoF2::False
+	};
+	
+	return local[static_cast<size_t>(versions::ValidateInventoryVersion(inventory_version))];
+}
+
+bool EQEmu::inventory::GetAllowOverLevelEquipment(versions::InventoryVersion inventory_version)
+{
+	static const bool local[versions::InventoryVersionCount] = {
+		ClientUnknown::False,
+		Client62::False,
+		Titanium::inventory::AllowOverLevelEquipment,
+		SoF::inventory::AllowOverLevelEquipment,
+		SoD::inventory::AllowOverLevelEquipment,
+		UF::inventory::AllowOverLevelEquipment,
+		RoF::inventory::AllowOverLevelEquipment,
+		RoF2::inventory::AllowOverLevelEquipment,
+		EntityLimits::npc::False,
+		EntityLimits::merc::False,
+		EntityLimits::bot::False,
+		EntityLimits::pet::False,
+		Titanium::False,
+		SoF::False,
+		SoD::False,
+		UF::False,
+		RoF::False,
+		RoF2::False
+	};
+	
+	return local[static_cast<size_t>(versions::ValidateInventoryVersion(inventory_version))];
+}
+
+size_t EQEmu::inventory::GetItemAugSize(versions::InventoryVersion inventory_version)
+{
+	static const size_t local[versions::InventoryVersionCount] = {
 		ClientUnknown::Null,
 		Client62::Null,
-		legacy::ITEM_COMMON_SIZE,
-		legacy::ITEM_COMMON_SIZE,
-		legacy::ITEM_COMMON_SIZE,
-		legacy::ITEM_COMMON_SIZE,
-		legacy::ITEM_COMMON_SIZE,
-		legacy::ITEM_COMMON_SIZE,
-		legacy::ITEM_COMMON_SIZE,
-		legacy::ITEM_COMMON_SIZE,
-		legacy::ITEM_COMMON_SIZE,
-		legacy::ITEM_COMMON_SIZE,
+		legacy::ITEM_COMMON_SIZE, //Titanium::invaug::ItemAugSize,
+		legacy::ITEM_COMMON_SIZE, //SoF::invaug::ItemAugSize,
+		legacy::ITEM_COMMON_SIZE, //SoD::invaug::ItemAugSize,
+		legacy::ITEM_COMMON_SIZE, //UF::invaug::ItemAugSize,
+		legacy::ITEM_COMMON_SIZE, //RoF::invaug::ItemAugSize,
+		legacy::ITEM_COMMON_SIZE, //RoF2::invaug::ItemAugSize,
+		legacy::ITEM_COMMON_SIZE, //ItemAugSize,
+		legacy::ITEM_COMMON_SIZE, //ItemAugSize,
+		legacy::ITEM_COMMON_SIZE, //ItemAugSize,
+		legacy::ITEM_COMMON_SIZE, //ItemAugSize,
 		Titanium::Null,
 		SoF::Null,
 		SoD::Null,
@@ -654,33 +704,33 @@ uint16 EQEmu::inventory::ItemAugSize(versions::InventoryVersion inventory_versio
 	return local[static_cast<size_t>(versions::ValidateInventoryVersion(inventory_version))];
 }
 
-uint16 EQEmu::inventory::ItemBagSize(versions::InventoryVersion inventory_version)
+size_t EQEmu::inventory::GetItemBagSize(versions::InventoryVersion inventory_version)
 {
-	static const uint16 local[versions::InventoryVersionCount] = {
+	static const size_t local[versions::InventoryVersionCount] = {
 		ClientUnknown::Null,
 		Client62::Null,
-		legacy::ITEM_CONTAINER_SIZE,
-		legacy::ITEM_CONTAINER_SIZE,
-		legacy::ITEM_CONTAINER_SIZE,
-		legacy::ITEM_CONTAINER_SIZE,
-		legacy::ITEM_CONTAINER_SIZE,
-		legacy::ITEM_CONTAINER_SIZE,
-		legacy::ITEM_CONTAINER_SIZE,
-		legacy::ITEM_CONTAINER_SIZE,
-		legacy::ITEM_CONTAINER_SIZE,
-		legacy::ITEM_CONTAINER_SIZE,
-		Titanium::Null,
-		SoF::Null,
-		SoD::Null,
-		UF::Null,
-		RoF::Null,
-		RoF2::Null
+		legacy::ITEM_CONTAINER_SIZE, //Titanium::invbag::ItemBagSize,
+		legacy::ITEM_CONTAINER_SIZE, //SoF::invbag::ItemBagSize,
+		legacy::ITEM_CONTAINER_SIZE, //SoD::invbag::ItemBagSize,
+		legacy::ITEM_CONTAINER_SIZE, //UF::invbag::ItemBagSize,
+		legacy::ITEM_CONTAINER_SIZE, //RoF::invbag::ItemBagSize,
+		legacy::ITEM_CONTAINER_SIZE, //RoF2::invbag::ItemBagSize,
+		legacy::ITEM_CONTAINER_SIZE, //ItemBagSize,
+		legacy::ITEM_CONTAINER_SIZE, //ItemBagSize,
+		legacy::ITEM_CONTAINER_SIZE, //ItemBagSize,
+		legacy::ITEM_CONTAINER_SIZE, //ItemBagSize,
+		legacy::ITEM_CONTAINER_SIZE, //Titanium::Null,
+		legacy::ITEM_CONTAINER_SIZE, //SoF::Null,
+		legacy::ITEM_CONTAINER_SIZE, //SoD::Null,
+		legacy::ITEM_CONTAINER_SIZE, //UF::Null,
+		legacy::ITEM_CONTAINER_SIZE, //RoF::Null,
+		legacy::ITEM_CONTAINER_SIZE, //RoF2::Null
 	};
 
 	return local[static_cast<size_t>(versions::ValidateInventoryVersion(inventory_version))];
 }
 
-bool EQEmu::profile::CoinHasWeight(versions::InventoryVersion inventory_version)
+bool EQEmu::behavior::GetCoinHasWeight(versions::InventoryVersion inventory_version)
 {
 	static const bool local[versions::InventoryVersionCount] = {
 		ClientUnknown::True,
@@ -691,10 +741,10 @@ bool EQEmu::profile::CoinHasWeight(versions::InventoryVersion inventory_version)
 		UF::behavior::CoinHasWeight,
 		RoF::behavior::CoinHasWeight,
 		RoF::behavior::CoinHasWeight,
-		EntityLimits::npc::True,
-		EntityLimits::merc::True,
-		EntityLimits::bot::True,
-		EntityLimits::pet::True,
+		EntityLimits::npc::True, //CoinHasWeight,
+		EntityLimits::merc::True, //CoinHasWeight,
+		EntityLimits::bot::True, //CoinHasWeight,
+		EntityLimits::pet::True, //CoinHasWeight,
 		Titanium::False,
 		SoF::False,
 		SoD::False,

@@ -37,7 +37,7 @@ void WorldDatabase::GetCharSelectInfo(uint32 accountID, EQApplicationPacket **ou
 {
 	/* Set Character Creation Limit */
 	EQEmu::versions::ClientVersion client_version = EQEmu::versions::ConvertClientVersionBitToClientVersion(clientVersionBit);
-	size_t character_limit = EQEmu::constants::CharacterCreationLimit(client_version);
+	size_t character_limit = EQEmu::constants::GetCharacterCreationLimit(client_version);
 	
 	// Validate against absolute server max
 	if (character_limit > EQEmu::constants::CharacterCreationMax)

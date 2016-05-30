@@ -10,7 +10,7 @@
 	but WITHOUT ANY WARRANTY except by those people which sell it, which
 	are required to give you total support for your newly bought product;
 	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-	A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+	A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
 	You should have received a copy of the GNU General Public License
 	along with this program; if not, write to the Free Software
@@ -32,8 +32,13 @@ namespace UF
 	enum : bool { False = false, True = true };
 
 	// pre-declarations
+	namespace inventory {
+		inline EQEmu::versions::ClientVersion GetInventoryRef() { return EQEmu::versions::ClientVersion::UF; }
+
+	} /*inventory*/
+
 	namespace invtype {
-		inline EQEmu::versions::ClientVersion InvTypeRef() { return EQEmu::versions::ClientVersion::UF; }
+		inline EQEmu::versions::ClientVersion GetInvTypeRef() { return EQEmu::versions::ClientVersion::UF; }
 
 		enum : int { InvTypeInvalid = -1, InvTypeBegin };
 
@@ -63,7 +68,7 @@ namespace UF
 	} /*invtype*/
 
 	namespace invslot {
-		inline EQEmu::versions::ClientVersion InvSlotRef() { return EQEmu::versions::ClientVersion::UF; }
+		inline EQEmu::versions::ClientVersion GetInvSlotRef() { return EQEmu::versions::ClientVersion::UF; }
 
 		enum : int { InvSlotInvalid = -1, InvSlotBegin };
 
@@ -114,21 +119,21 @@ namespace UF
 	} /*invslot*/
 
 	namespace invbag {
-		inline EQEmu::versions::ClientVersion InvBagRef() { return EQEmu::versions::ClientVersion::UF; }
+		inline EQEmu::versions::ClientVersion GetInvBagRef() { return EQEmu::versions::ClientVersion::UF; }
 
 		enum : int { InvBagInvalid = -1, InvBagBegin };
 	
 	} /*invbag*/
 
 	namespace invaug {
-		inline EQEmu::versions::ClientVersion InvAugRef() { return EQEmu::versions::ClientVersion::UF; }
+		inline EQEmu::versions::ClientVersion GetInvAugRef() { return EQEmu::versions::ClientVersion::UF; }
 
 		enum : int { InvAugInvalid = -1, InvAugBegin };
 	
 	} /*invaug*/
 
 	namespace item {
-		inline EQEmu::versions::ClientVersion ItemRef() { return EQEmu::versions::ClientVersion::UF; }
+		inline EQEmu::versions::ClientVersion GetItemRef() { return EQEmu::versions::ClientVersion::UF; }
 
 		enum ItemPacketType : int {
 			ItemPacketMerchant = 100,
@@ -147,27 +152,37 @@ namespace UF
 	} /*item*/
 
 	namespace profile {
-		inline EQEmu::versions::ClientVersion ProfileRef() { return EQEmu::versions::ClientVersion::UF; }
+		inline EQEmu::versions::ClientVersion GetProfileRef() { return EQEmu::versions::ClientVersion::UF; }
 	
 	} /*profile*/
 
 	namespace constants {
-		inline EQEmu::versions::ClientVersion ConstantsRef() { return EQEmu::versions::ClientVersion::UF; }
+		inline EQEmu::versions::ClientVersion GetConstantsRef() { return EQEmu::versions::ClientVersion::UF; }
 	
 	} /*constants*/
 
 	namespace behavior {
-		inline EQEmu::versions::ClientVersion BehaviorRef() { return EQEmu::versions::ClientVersion::UF; }
+		inline EQEmu::versions::ClientVersion GetBehaviorRef() { return EQEmu::versions::ClientVersion::UF; }
 	
 	} /*behavior*/
 
 	namespace skills {
-		inline EQEmu::versions::ClientVersion SkillsRef() { return EQEmu::versions::ClientVersion::UF; }
+		inline EQEmu::versions::ClientVersion GetSkillsRef() { return EQEmu::versions::ClientVersion::UF; }
 	
 	} /*skills*/
 
 
 	// declarations
+	namespace inventory {
+		const bool ConcatenateInvTypeLimbo = true;
+
+		const bool AllowOverLevelEquipment = true;
+
+		const bool AllowEmptyBagInBag = false;
+		const bool AllowClickCastFromBag = false;
+
+	} /*inventory*/
+
 	namespace invtype {
 		const size_t InvTypePossessionsSize = invslot::PossessionsCount;
 		const size_t InvTypeBankSize = 24;
@@ -191,8 +206,8 @@ namespace UF
 
 		const size_t NPCTradeSize = 4;
 
-		extern size_t InvTypeSize(int inv_type);
-		extern const char* InvTypeName(int inv_type);
+		extern size_t GetInvTypeSize(int inv_type);
+		extern const char* GetInvTypeName(int inv_type);
 	
 	} /*invtype*/
 
@@ -219,9 +234,9 @@ namespace UF
 		const int CorpseBegin = invslot::PossessionsGeneral1;
 		const int CorpseEnd = invslot::PossessionsGeneral1 + invslot::PossessionsCursor;
 
-		extern const char* InvPossessionsSlotName(int inv_slot);
-		extern const char* InvCorpseSlotName(int inv_slot);
-		extern const char* InvSlotName(int inv_type, int inv_slot);
+		extern const char* GetInvPossessionsSlotName(int inv_slot);
+		extern const char* GetInvCorpseSlotName(int inv_slot);
+		extern const char* GetInvSlotName(int inv_type, int inv_slot);
 	
 	} /*invslot*/
 
@@ -248,14 +263,14 @@ namespace UF
 		const int TradeBagsSize = invtype::InvTypeTradeSize * ItemBagSize;
 		const int TradeBagsEnd = (TradeBagsBegin + TradeBagsSize) - 1;
 
-		extern const char* InvBagIndexName(int bag_index);
+		extern const char* GetInvBagIndexName(int bag_index);
 	
 	} /*invbag*/
 
 	namespace invaug {
 		const size_t ItemAugSize = 5;
 
-		extern const char* InvAugIndexName(int aug_index);
+		extern const char* GetInvAugIndexName(int aug_index);
 	
 	} /*invaug*/
 
@@ -283,13 +298,6 @@ namespace UF
 	} /*constants*/
 
 	namespace behavior {
-		const bool ConcatenateInvTypeLimbo = true;
-
-		const bool AllowOverLevelEquipment = true;
-
-		const bool AllowEmptyBagInBag = false;
-		const bool AllowClickCastFromBag = false;
-
 		const bool CoinHasWeight = false;
 	
 	} /*behavior*/

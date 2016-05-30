@@ -929,7 +929,7 @@ bool Inventory::SupportsClickCasting(int16 slot_id)
 	}
 	else if (slot_id >= EQEmu::legacy::GENERAL_BAGS_BEGIN && slot_id <= EQEmu::legacy::GENERAL_BAGS_END)
 	{
-		if (EQEmu::inventory::AllowClickCastFromBag(m_inventory_version))
+		if (EQEmu::inventory::GetAllowClickCastFromBag(m_inventory_version))
 			return true;
 	}
 

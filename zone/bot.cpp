@@ -347,7 +347,7 @@ NPCType Bot::FillNPCTypeStruct(uint32 botSpellsID, std::string botName, std::str
 	BotNPCType.hp_regen = 1;
 	BotNPCType.mana_regen = 1;
 	BotNPCType.maxlevel = botLevel;
-	BotNPCType.light = NOT_USED; // due to the way that bots are coded..this is sent post-spawn
+	BotNPCType.light = 0; // due to the way that bots are coded..this is sent post-spawn
 	return BotNPCType;
 }
 

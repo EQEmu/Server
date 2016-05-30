@@ -10,7 +10,7 @@
 	but WITHOUT ANY WARRANTY except by those people which sell it, which
 	are required to give you total support for your newly bought product;
 	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-	A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+	A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
 	You should have received a copy of the GNU General Public License
 	along with this program; if not, write to the Free Software
@@ -22,7 +22,7 @@
 #include "../string_util.h"
 
 
-size_t RoF2::invtype::InvTypeSize(int inv_type)
+size_t RoF2::invtype::GetInvTypeSize(int inv_type)
 {
 	switch (inv_type) {
 	case invtype::InvTypePossessions:
@@ -80,7 +80,7 @@ size_t RoF2::invtype::InvTypeSize(int inv_type)
 	}
 }
 
-const char* RoF2::invtype::InvTypeName(int inv_type)
+const char* RoF2::invtype::GetInvTypeName(int inv_type)
 {
 	switch (inv_type) {
 	case invtype::InvTypeInvalid:
@@ -140,7 +140,7 @@ const char* RoF2::invtype::InvTypeName(int inv_type)
 	}
 }
 
-const char* RoF2::invslot::InvPossessionsSlotName(int inv_slot)
+const char* RoF2::invslot::GetInvPossessionsSlotName(int inv_slot)
 {
 	switch (inv_slot) {
 	case invslot::InvSlotInvalid:
@@ -218,12 +218,12 @@ const char* RoF2::invslot::InvPossessionsSlotName(int inv_slot)
 	}
 }
 
-const char* RoF2::invslot::InvSlotName(int inv_type, int inv_slot)
+const char* RoF2::invslot::GetInvSlotName(int inv_type, int inv_slot)
 {
 	if (inv_type == invtype::InvTypePossessions)
-		return invslot::InvPossessionsSlotName(inv_slot);
+		return invslot::GetInvPossessionsSlotName(inv_slot);
 
-	size_t type_size = invtype::InvTypeSize(inv_type);
+	size_t type_size = invtype::GetInvTypeSize(inv_type);
 
 	if (!type_size || inv_slot == invslot::InvSlotInvalid)
 		return "Invalid Slot";
@@ -237,7 +237,7 @@ const char* RoF2::invslot::InvSlotName(int inv_type, int inv_slot)
 	return ret_str.c_str();
 }
 
-const char* RoF2::invbag::InvBagIndexName(int bag_index)
+const char* RoF2::invbag::GetInvBagIndexName(int bag_index)
 {
 	if (bag_index == invbag::InvBagInvalid)
 		return "Invalid Bag";
@@ -251,7 +251,7 @@ const char* RoF2::invbag::InvBagIndexName(int bag_index)
 	return ret_str.c_str();
 }
 
-const char* RoF2::invaug::InvAugIndexName(int aug_index)
+const char* RoF2::invaug::GetInvAugIndexName(int aug_index)
 {
 	if (aug_index == invaug::InvAugInvalid)
 		return "Invalid Augment";

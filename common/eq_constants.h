@@ -516,7 +516,6 @@ static const uint8 SkillDamageTypes[EQEmu::skills::HIGHEST_SKILL + 1] = // chang
 */
 
 #define INVALID_INDEX	-1
-#define NOT_USED		0
 #define NO_ITEM			0
 
 // yes..these are redundant... but, they help to identify and define what is actually being performed

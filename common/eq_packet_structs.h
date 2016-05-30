@@ -1542,7 +1542,7 @@ enum ItemPacketType
 //	ItemPacketTributeItem		= /*108*/ 0x6C,
 //	ItemPacketGuildTribute		= /*109*/ 0x6D, // missing from EQEmu
 //	ItemPacket10				= /*110*/ 0x6E,
-//	ItemPacket11				= /*111*/ 0x6F, // UF+ (equipment slots only) (RoF+ checks '(WORD*)slot + 4 != -1' [(WORD*)]slot + 2 would be bag index - if used) (guess)
+//	ItemPacket11				= /*111*/ 0x6F, // UF+ (equipment slots only) (RoF+ checks '(WORD*)slot + 4 != -1' [(WORD*)]slot + 2 would be bag index - if used) (guess) (appearance (over-level) items?)
 //	ItemPacket12				= /*112*/ 0x70, // RoF+ (causes stat update) (could be TrophyTribute and GuildTrophyTribute together - two case methodology - is it checking for GuildID?)
 //	ItemPacketMerchantRecovery	= /*113*/ 0x71,
 //	ItemPacket14				= /*115*/ 0x73, (real estate/moving crate?)

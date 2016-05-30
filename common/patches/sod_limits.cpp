@@ -10,7 +10,7 @@
 	but WITHOUT ANY WARRANTY except by those people which sell it, which
 	are required to give you total support for your newly bought product;
 	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-	A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+	A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
 	You should have received a copy of the GNU General Public License
 	along with this program; if not, write to the Free Software
@@ -22,7 +22,7 @@
 #include "../string_util.h"
 
 
-size_t SoD::invtype::InvTypeSize(int inv_type)
+size_t SoD::invtype::GetInvTypeSize(int inv_type)
 {
 	switch (inv_type) {
 	case invtype::InvTypePossessions:
@@ -68,7 +68,7 @@ size_t SoD::invtype::InvTypeSize(int inv_type)
 	}
 }
 
-const char* SoD::invtype::InvTypeName(int inv_type)
+const char* SoD::invtype::GetInvTypeName(int inv_type)
 {
 	switch (inv_type) {
 	case invtype::InvTypeInvalid:
@@ -116,7 +116,7 @@ const char* SoD::invtype::InvTypeName(int inv_type)
 	}
 }
 
-const char* SoD::invslot::InvPossessionsSlotName(int inv_slot)
+const char* SoD::invslot::GetInvPossessionsSlotName(int inv_slot)
 {
 	switch (inv_slot) {
 	case invslot::InvSlotInvalid:
@@ -190,9 +190,9 @@ const char* SoD::invslot::InvPossessionsSlotName(int inv_slot)
 	}
 }
 
-const char* SoD::invslot::InvCorpseSlotName(int inv_slot)
+const char* SoD::invslot::GetInvCorpseSlotName(int inv_slot)
 {
-	if (!invtype::InvTypeSize(invtype::InvTypeCorpse) || inv_slot == invslot::InvSlotInvalid)
+	if (!invtype::GetInvTypeSize(invtype::InvTypeCorpse) || inv_slot == invslot::InvSlotInvalid)
 		return "Invalid Slot";
 
 	// needs work
@@ -205,14 +205,14 @@ const char* SoD::invslot::InvCorpseSlotName(int inv_slot)
 	return ret_str.c_str();
 }
 
-const char* SoD::invslot::InvSlotName(int inv_type, int inv_slot)
+const char* SoD::invslot::GetInvSlotName(int inv_type, int inv_slot)
 {
 	if (inv_type == invtype::InvTypePossessions)
-		return invslot::InvPossessionsSlotName(inv_slot);
+		return invslot::GetInvPossessionsSlotName(inv_slot);
 	else if (inv_type == invtype::InvTypeCorpse)
-		return invslot::InvCorpseSlotName(inv_slot);
+		return invslot::GetInvCorpseSlotName(inv_slot);
 
-	size_t type_size = invtype::InvTypeSize(inv_type);
+	size_t type_size = invtype::GetInvTypeSize(inv_type);
 
 	if (!type_size || inv_slot == invslot::InvSlotInvalid)
 		return "Invalid Slot";
@@ -226,7 +226,7 @@ const char* SoD::invslot::InvSlotName(int inv_type, int inv_slot)
 	return ret_str.c_str();
 }
 
-const char* SoD::invbag::InvBagIndexName(int bag_index)
+const char* SoD::invbag::GetInvBagIndexName(int bag_index)
 {
 	if (bag_index == invbag::InvBagInvalid)
 		return "Invalid Bag";
@@ -240,7 +240,7 @@ const char* SoD::invbag::InvBagIndexName(int bag_index)
 	return ret_str.c_str();
 }
 
-const char* SoD::invaug::InvAugIndexName(int aug_index)
+const char* SoD::invaug::GetInvAugIndexName(int aug_index)
 {
 	if (aug_index == invaug::InvAugInvalid)
 		return "Invalid Augment";
