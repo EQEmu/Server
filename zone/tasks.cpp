@@ -2778,8 +2778,8 @@ void TaskManager::SendActiveTaskDescription(Client *c, int TaskID, int SequenceN
 		if(ItemID) {
 			const EQEmu::ItemBase* reward_item = database.GetItem(ItemID);
 
-			EQEmu::saylink::SayLinkEngine linker;
-			linker.SetLinkType(linker.SayLinkItemData);
+			EQEmu::SayLinkEngine linker;
+			linker.SetLinkType(EQEmu::saylink::SayLinkItemData);
 			linker.SetItemData(reward_item);
 			linker.SetTaskUse();
 			if (strlen(Tasks[TaskID]->Reward) != 0)

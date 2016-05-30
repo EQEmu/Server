@@ -1223,8 +1223,8 @@ void Corpse::LootItem(Client* client, const EQApplicationPacket* app) {
 		}
 
 	/* Send message with item link to groups and such */
-	EQEmu::saylink::SayLinkEngine linker;
-	linker.SetLinkType(linker.SayLinkItemInst);
+	EQEmu::SayLinkEngine linker;
+	linker.SetLinkType(EQEmu::saylink::SayLinkItemInst);
 	linker.SetItemInst(inst);
 
 	auto item_link = linker.GenerateLink();

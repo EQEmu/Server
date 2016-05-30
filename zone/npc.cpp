@@ -530,8 +530,8 @@ void NPC::QueryLoot(Client* to)
 			continue;
 		}
 
-		EQEmu::saylink::SayLinkEngine linker;
-		linker.SetLinkType(linker.SayLinkItemData);
+		EQEmu::SayLinkEngine linker;
+		linker.SetLinkType(EQEmu::saylink::SayLinkItemData);
 		linker.SetItemData(item);
 
 		auto item_link = linker.GenerateLink();

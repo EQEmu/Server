@@ -2548,8 +2548,8 @@ void command_peekinv(Client *c, const Seperator *sep)
 	const ItemInst* inst_sub = nullptr;
 	const EQEmu::ItemBase* item_data = nullptr;
 	std::string item_link;
-	EQEmu::saylink::SayLinkEngine linker;
-	linker.SetLinkType(linker.SayLinkItemInst);
+	EQEmu::SayLinkEngine linker;
+	linker.SetLinkType(EQEmu::saylink::SayLinkItemInst);
 
 	c->Message(0, "Displaying inventory for %s...",  targetClient->GetName());
 
@@ -4346,8 +4346,8 @@ void command_iteminfo(Client *c, const Seperator *sep)
 		c->Message(13, "Error: This item has no data reference");
 	}
 
-	EQEmu::saylink::SayLinkEngine linker;
-	linker.SetLinkType(linker.SayLinkItemInst);
+	EQEmu::SayLinkEngine linker;
+	linker.SetLinkType(EQEmu::saylink::SayLinkItemInst);
 	linker.SetItemInst(inst);
 
 	auto item_link = linker.GenerateLink();
@@ -5497,7 +5497,7 @@ void command_summonitem(Client *c, const Seperator *sep)
 	size_t link_open = cmd_msg.find('\x12');
 	size_t link_close = cmd_msg.find_last_of('\x12');
 	if (link_open != link_close && (cmd_msg.length() - link_open) > EQEmu::legacy::TEXT_LINK_BODY_LENGTH) {
-		EQEmu::saylink::SayLinkBody_Struct link_body;
+		EQEmu::SayLinkBody_Struct link_body;
 		EQEmu::saylink::DegenerateLinkBody(link_body, cmd_msg.substr(link_open + 1, EQEmu::legacy::TEXT_LINK_BODY_LENGTH));
 		itemid = link_body.item_id;
 	}
@@ -5608,8 +5608,8 @@ void command_itemsearch(Client *c, const Seperator *sep)
 
 		const EQEmu::ItemBase* item = nullptr;
 		std::string item_link;
-		EQEmu::saylink::SayLinkEngine linker;
-		linker.SetLinkType(linker.SayLinkItemData);
+		EQEmu::SayLinkEngine linker;
+		linker.SetLinkType(EQEmu::saylink::SayLinkItemData);
 
 		if (Seperator::IsNumber(search_criteria)) {
 			item = database.GetItem(atoi(search_criteria));

@@ -17,7 +17,6 @@
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
-#include "types.h"
 #include "skills.h"
 
 #include <string.h>
@@ -291,142 +290,9 @@ const std::map<EQEmu::skills::SkillType, std::string>& EQEmu::skills::GetSkillTy
 	return skill_type_map;
 }
 
-struct EQEmu::SkillProfile // prototype - not implemented
-{
-	union {
-		struct {
-			uint32 _1HBlunt;
-			uint32 _1HSlashing;
-			uint32 _2HBlunt;
-			uint32 _2HSlashing;
-			uint32 Abjuration;
-			uint32 Alteration;
-			uint32 ApplyPoison;
-			uint32 Archery;
-			uint32 Backstab;
-			uint32 BindWound;
-			uint32 Bash;
-			uint32 Block;
-			uint32 BrassInstruments;
-			uint32 Channeling;
-			uint32 Conjuration;
-			uint32 Defense;
-			uint32 Disarm;
-			uint32 DisarmTraps;
-			uint32 Divination;
-			uint32 Dodge;
-			uint32 DoubleAttack;
-			union {
-				uint32 DragonPunch;
-				uint32 TailRake;
-			};
-			uint32 DualWield;
-			uint32 EagleStrike;
-			uint32 Evocation;
-			uint32 FeignDeath;
-			uint32 FlyingKick;
-			uint32 Forage;
-			uint32 HandtoHand;
-			uint32 Hide;
-			uint32 Kick;
-			uint32 Meditate;
-			uint32 Mend;
-			uint32 Offense;
-			uint32 Parry;
-			uint32 PickLock;
-			uint32 _1HPiercing;
-			uint32 Riposte;
-			uint32 RoundKick;
-			uint32 SafeFall;
-			uint32 SenseHeading;
-			uint32 Singing;
-			uint32 Sneak;
-			uint32 SpecializeAbjure;
-			uint32 SpecializeAlteration;
-			uint32 SpecializeConjuration;
-			uint32 SpecializeDivination;
-			uint32 SpecializeEvocation;
-			uint32 PickPockets;
-			uint32 StringedInstruments;
-			uint32 Swimming;
-			uint32 Throwing;
-			uint32 TigerClaw;
-			uint32 Tracking;
-			uint32 WindInstruments;
-			uint32 Fishing;
-			uint32 MakePoison;
-			uint32 Tinkering;
-			uint32 Research;
-			uint32 Alchemy;
-			uint32 Baking;
-			uint32 Tailoring;
-			uint32 SenseTraps;
-			uint32 Blacksmithing;
-			uint32 Fletching;
-			uint32 Brewing;
-			uint32 AlcoholTolerance;
-			uint32 Begging;
-			uint32 JewelryMaking;
-			uint32 Pottery;
-			uint32 PercussionInstruments;
-			uint32 Intimidation;
-			uint32 Berserking;
-			uint32 Taunt;
-			uint32 Frenzy;
-			uint32 RemoveTraps;
-			uint32 TripleAttack;
-			uint32 _2HPiercing;
-			uint32 unused1;
-			uint32 unused2;
-			uint32 unused3;
-			uint32 unused4;
-			uint32 unused5;
-			uint32 unused6;
-			uint32 unused7;
-			uint32 unused8;
-			uint32 unused9;
-			uint32 unused10;
-			uint32 unused11;
-			uint32 unused12;
-			uint32 unused13;
-			uint32 unused14;
-			uint32 unused15;
-			uint32 unused16;
-			uint32 unused17;
-			uint32 unused18;
-			uint32 unused19;
-			uint32 unused20;
-			uint32 unused21;
-			uint32 unused22;
-		};
-		uint32 skill[PACKET_SKILL_ARRAY_SIZE];
-	};
-
-	SkillProfile();
-
-	uint32* GetSkills() { return reinterpret_cast<uint32*>(&skill); }
-
-	skills::SkillType GetLastUseableSkill() { return EQEmu::skills::Skill2HPiercing; }
-
-	size_t GetSkillsArraySize() { return PACKET_SKILL_ARRAY_SIZE; }
-	uint32 GetSkill(int skill_id);
-	
-	uint32 operator[](int skill_id) { return GetSkill(skill_id); }
-
-	// const
-	uint32* GetSkills() const { return const_cast<SkillProfile*>(this)->GetSkills(); }
-
-	skills::SkillType GetLastUseableSkill() const { return const_cast<SkillProfile*>(this)->GetLastUseableSkill(); }
-
-	size_t GetSkillsArraySize() const { return const_cast<SkillProfile*>(this)->GetSkillsArraySize(); }
-	uint32 GetSkill(int skill_id) const { return const_cast<SkillProfile*>(this)->GetSkill(skill_id); }
-
-	uint32 operator[](int skill_id) const { return const_cast<SkillProfile*>(this)->GetSkill(skill_id); }
-};
-
 EQEmu::SkillProfile::SkillProfile()
 {
-	memset(&skill, 0, (sizeof(uint32) * PACKET_SKILL_ARRAY_SIZE));
+	memset(&Skill, 0, (sizeof(uint32) * PACKET_SKILL_ARRAY_SIZE));
 }
 
 uint32 EQEmu::SkillProfile::GetSkill(int skill_id)
@@ -434,5 +300,5 @@ uint32 EQEmu::SkillProfile::GetSkill(int skill_id)
 	if (skill_id < 0 || skill_id >= PACKET_SKILL_ARRAY_SIZE)
 		return 0;
 
-	return skill[skill_id];
+	return Skill[skill_id];
 }

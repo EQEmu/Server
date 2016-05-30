@@ -10,7 +10,7 @@
 	but WITHOUT ANY WARRANTY except by those people which sell it, which
 	are required to give you total support for your newly bought product;
 	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-	A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+	A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 	
 	You should have received a copy of the GNU General Public License
 	along with this program; if not, write to the Free Software
@@ -33,7 +33,6 @@ namespace EQEmu
 			LightActive,		// Highest value of all light sources
 			LightCount
 		};
-
 
 		enum LightType {
 			LightTypeNone = 0,
@@ -70,20 +69,20 @@ namespace EQEmu
 			LightLevelCount
 		};
 
-		struct Light_Struct {
-			uint8 Slot[LightCount];
-
-			Light_Struct();
-
-			void Clear();
-
-			inline uint8& operator[](LightSlot index) { return Slot[index]; }
-		};
-
 		extern uint8 TypeToLevel(uint8 light_type);
 		extern bool IsLevelGreater(uint8 left_type, uint8 right_type);
 	
 	}; /*lightsource*/
+
+	struct LightSource_Struct {
+		uint8 Slot[lightsource::LightCount];
+
+		LightSource_Struct();
+
+		void Clear();
+
+		inline uint8& operator[](lightsource::LightSlot index) { return Slot[index]; }
+	};
 
 	struct LightSourceProfile {
 		/*
@@ -103,8 +102,8 @@ namespace EQEmu
 		-- The timer-based update cancels out the invalid light source
 		*/
 
-		lightsource::Light_Struct Type; // Light types (classifications)
-		lightsource::Light_Struct Level; // Light levels (intensities) - used to determine which light source should be active
+		LightSource_Struct Type; // Light types (classifications)
+		LightSource_Struct Level; // Light levels (intensities) - used to determine which light source should be active
 
 		LightSourceProfile() { }
 

@@ -8463,8 +8463,8 @@ std::string Bot::CreateSayLink(Client* c, const char* message, const char* name)
 	uint32 saylink_id = database.LoadSaylinkID(escaped_string);
 	safe_delete_array(escaped_string);
 
-	EQEmu::saylink::SayLinkEngine linker;
-	linker.SetLinkType(linker.SayLinkItemData);
+	EQEmu::SayLinkEngine linker;
+	linker.SetLinkType(EQEmu::saylink::SayLinkItemData);
 	linker.SetProxyItemID(SAYLINK_ITEM_ID);
 	linker.SetProxyAugment1ID(saylink_id);
 	linker.SetProxyText(name);

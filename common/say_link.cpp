@@ -1,4 +1,4 @@
-/*	EQEMu:  Everquest Server Emulator
+/*	EQEMu: Everquest Server Emulator
 	
 	Copyright (C) 2001-2016 EQEMu Development Team (http://eqemulator.net)
 
@@ -10,7 +10,7 @@
 	but WITHOUT ANY WARRANTY except by those people which sell it, which
 	are required to give you total support for your newly bought product;
 	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-	A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+	A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 	
 	You should have received a copy of the GNU General Public License
 	along with this program; if not, write to the Free Software
@@ -26,12 +26,60 @@
 #include "../zone/zonedb.h"
 
 
-EQEmu::saylink::SayLinkEngine::SayLinkEngine()
+bool EQEmu::saylink::DegenerateLinkBody(SayLinkBody_Struct& say_link_body_struct, const std::string& say_link_body)
+{
+	memset(&say_link_body_struct, 0, sizeof(say_link_body_struct));
+	if (say_link_body.length() != EQEmu::legacy::TEXT_LINK_BODY_LENGTH)
+		return false;
+
+	say_link_body_struct.unknown_1 = (uint8)strtol(say_link_body.substr(0, 1).c_str(), nullptr, 16);
+	say_link_body_struct.item_id = (uint32)strtol(say_link_body.substr(1, 5).c_str(), nullptr, 16);
+	say_link_body_struct.augment_1 = (uint32)strtol(say_link_body.substr(6, 5).c_str(), nullptr, 16);
+	say_link_body_struct.augment_2 = (uint32)strtol(say_link_body.substr(11, 5).c_str(), nullptr, 16);
+	say_link_body_struct.augment_3 = (uint32)strtol(say_link_body.substr(16, 5).c_str(), nullptr, 16);
+	say_link_body_struct.augment_4 = (uint32)strtol(say_link_body.substr(21, 5).c_str(), nullptr, 16);
+	say_link_body_struct.augment_5 = (uint32)strtol(say_link_body.substr(26, 5).c_str(), nullptr, 16);
+	say_link_body_struct.augment_6 = (uint32)strtol(say_link_body.substr(31, 5).c_str(), nullptr, 16);
+	say_link_body_struct.is_evolving = (uint8)strtol(say_link_body.substr(36, 1).c_str(), nullptr, 16);
+	say_link_body_struct.evolve_group = (uint32)strtol(say_link_body.substr(37, 4).c_str(), nullptr, 16);
+	say_link_body_struct.evolve_level = (uint8)strtol(say_link_body.substr(41, 2).c_str(), nullptr, 16);
+	say_link_body_struct.ornament_icon = (uint32)strtol(say_link_body.substr(43, 5).c_str(), nullptr, 16);
+	say_link_body_struct.hash = (int)strtol(say_link_body.substr(48, 8).c_str(), nullptr, 16);
+
+	return true;
+}
+
+bool EQEmu::saylink::GenerateLinkBody(std::string& say_link_body, const SayLinkBody_Struct& say_link_body_struct)
+{
+	say_link_body = StringFormat(
+		"%1X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%1X" "%04X" "%02X" "%05X" "%08X",
+		(0x0F & say_link_body_struct.unknown_1),
+		(0x000FFFFF & say_link_body_struct.item_id),
+		(0x000FFFFF & say_link_body_struct.augment_1),
+		(0x000FFFFF & say_link_body_struct.augment_2),
+		(0x000FFFFF & say_link_body_struct.augment_3),
+		(0x000FFFFF & say_link_body_struct.augment_4),
+		(0x000FFFFF & say_link_body_struct.augment_5),
+		(0x000FFFFF & say_link_body_struct.augment_6),
+		(0x0F & say_link_body_struct.is_evolving),
+		(0x0000FFFF & say_link_body_struct.evolve_group),
+		(0xFF & say_link_body_struct.evolve_level),
+		(0x000FFFFF & say_link_body_struct.ornament_icon),
+		(0xFFFFFFFF & say_link_body_struct.hash)
+	);
+
+	if (say_link_body.length() != EQEmu::legacy::TEXT_LINK_BODY_LENGTH)
+		return false;
+
+	return true;
+}
+
+EQEmu::SayLinkEngine::SayLinkEngine()
 {
 	Reset();
 }
 
-std::string EQEmu::saylink::SayLinkEngine::GenerateLink()
+std::string EQEmu::SayLinkEngine::GenerateLink()
 {
 	m_Link.clear();
 	m_LinkBody.clear();
@@ -59,9 +107,9 @@ std::string EQEmu::saylink::SayLinkEngine::GenerateLink()
 	return m_Link;
 }
 
-void EQEmu::saylink::SayLinkEngine::Reset()
+void EQEmu::SayLinkEngine::Reset()
 {
-	m_LinkType = SayLinkBlank;
+	m_LinkType = saylink::SayLinkBlank;
 	m_ItemData = nullptr;
 	m_LootData = nullptr;
 	m_ItemInst = nullptr;
@@ -86,7 +134,7 @@ void EQEmu::saylink::SayLinkEngine::Reset()
 	m_Error = false;
 }
 
-void EQEmu::saylink::SayLinkEngine::generate_body()
+void EQEmu::SayLinkEngine::generate_body()
 {
 	/*
 	Current server mask: EQClientRoF2
@@ -102,16 +150,16 @@ void EQEmu::saylink::SayLinkEngine::generate_body()
 	const EQEmu::ItemBase* item_data = nullptr;
 
 	switch (m_LinkType) {
-	case SayLinkBlank:
+	case saylink::SayLinkBlank:
 		break;
-	case SayLinkItemData:
+	case saylink::SayLinkItemData:
 		if (m_ItemData == nullptr) { break; }
 		m_LinkBodyStruct.item_id = m_ItemData->ID;
 		m_LinkBodyStruct.evolve_group = m_ItemData->LoreGroup; // this probably won't work for all items
 		//m_LinkBodyStruct.evolve_level = m_ItemData->EvolvingLevel;
 		// TODO: add hash call
 		break;
-	case SayLinkLootItem:
+	case saylink::SayLinkLootItem:
 		if (m_LootData == nullptr) { break; }
 		item_data = database.GetItem(m_LootData->item_id);
 		if (item_data == nullptr) { break; }
@@ -126,7 +174,7 @@ void EQEmu::saylink::SayLinkEngine::generate_body()
 		//m_LinkBodyStruct.evolve_level = item_data->EvolvingLevel;
 		// TODO: add hash call
 		break;
-	case SayLinkItemInst:
+	case saylink::SayLinkItemInst:
 		if (m_ItemInst == nullptr) { break; }
 		if (m_ItemInst->GetItem() == nullptr) { break; }
 		m_LinkBodyStruct.item_id = m_ItemInst->GetItem()->ID;
@@ -195,7 +243,7 @@ void EQEmu::saylink::SayLinkEngine::generate_body()
 	);
 }
 
-void EQEmu::saylink::SayLinkEngine::generate_text()
+void EQEmu::SayLinkEngine::generate_text()
 {
 	if (m_ProxyText != nullptr) {
 		m_LinkText = m_ProxyText;
@@ -205,19 +253,19 @@ void EQEmu::saylink::SayLinkEngine::generate_text()
 	const EQEmu::ItemBase* item_data = nullptr;
 
 	switch (m_LinkType) {
-	case SayLinkBlank:
+	case saylink::SayLinkBlank:
 		break;
-	case SayLinkItemData:
+	case saylink::SayLinkItemData:
 		if (m_ItemData == nullptr) { break; }
 		m_LinkText = m_ItemData->Name;
 		return;
-	case SayLinkLootItem:
+	case saylink::SayLinkLootItem:
 		if (m_LootData == nullptr) { break; }
 		item_data = database.GetItem(m_LootData->item_id);
 		if (item_data == nullptr) { break; }
 		m_LinkText = item_data->Name;
 		return;
-	case SayLinkItemInst:
+	case saylink::SayLinkItemInst:
 		if (m_ItemInst == nullptr) { break; }
 		if (m_ItemInst->GetItem() == nullptr) { break; }
 		m_LinkText = m_ItemInst->GetItem()->Name;
@@ -227,52 +275,4 @@ void EQEmu::saylink::SayLinkEngine::generate_text()
 	}
 
 	m_LinkText = "null";
-}
-
-bool EQEmu::saylink::DegenerateLinkBody(SayLinkBody_Struct& say_link_body_struct, const std::string& say_link_body)
-{
-	memset(&say_link_body_struct, 0, sizeof(say_link_body_struct));
-	if (say_link_body.length() != EQEmu::legacy::TEXT_LINK_BODY_LENGTH)
-		return false;
-
-	say_link_body_struct.unknown_1 = (uint8)strtol(say_link_body.substr(0, 1).c_str(), nullptr, 16);
-	say_link_body_struct.item_id = (uint32)strtol(say_link_body.substr(1, 5).c_str(), nullptr, 16);
-	say_link_body_struct.augment_1 = (uint32)strtol(say_link_body.substr(6, 5).c_str(), nullptr, 16);
-	say_link_body_struct.augment_2 = (uint32)strtol(say_link_body.substr(11, 5).c_str(), nullptr, 16);
-	say_link_body_struct.augment_3 = (uint32)strtol(say_link_body.substr(16, 5).c_str(), nullptr, 16);
-	say_link_body_struct.augment_4 = (uint32)strtol(say_link_body.substr(21, 5).c_str(), nullptr, 16);
-	say_link_body_struct.augment_5 = (uint32)strtol(say_link_body.substr(26, 5).c_str(), nullptr, 16);
-	say_link_body_struct.augment_6 = (uint32)strtol(say_link_body.substr(31, 5).c_str(), nullptr, 16);
-	say_link_body_struct.is_evolving = (uint8)strtol(say_link_body.substr(36, 1).c_str(), nullptr, 16);
-	say_link_body_struct.evolve_group = (uint32)strtol(say_link_body.substr(37, 4).c_str(), nullptr, 16);
-	say_link_body_struct.evolve_level = (uint8)strtol(say_link_body.substr(41, 2).c_str(), nullptr, 16);
-	say_link_body_struct.ornament_icon = (uint32)strtol(say_link_body.substr(43, 5).c_str(), nullptr, 16);
-	say_link_body_struct.hash = (int)strtol(say_link_body.substr(48, 8).c_str(), nullptr, 16);
-
-	return true;
-}
-
-bool EQEmu::saylink::GenerateLinkBody(std::string& say_link_body, const SayLinkBody_Struct& say_link_body_struct)
-{
-	say_link_body = StringFormat(
-		"%1X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%1X" "%04X" "%02X" "%05X" "%08X",
-		(0x0F & say_link_body_struct.unknown_1),
-		(0x000FFFFF & say_link_body_struct.item_id),
-		(0x000FFFFF & say_link_body_struct.augment_1),
-		(0x000FFFFF & say_link_body_struct.augment_2),
-		(0x000FFFFF & say_link_body_struct.augment_3),
-		(0x000FFFFF & say_link_body_struct.augment_4),
-		(0x000FFFFF & say_link_body_struct.augment_5),
-		(0x000FFFFF & say_link_body_struct.augment_6),
-		(0x0F & say_link_body_struct.is_evolving),
-		(0x0000FFFF & say_link_body_struct.evolve_group),
-		(0xFF & say_link_body_struct.evolve_level),
-		(0x000FFFFF & say_link_body_struct.ornament_icon),
-		(0xFFFFFFFF & say_link_body_struct.hash)
-	);
-
-	if (say_link_body.length() != EQEmu::legacy::TEXT_LINK_BODY_LENGTH)
-		return false;
-
-	return true;
 }
