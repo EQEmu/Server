@@ -151,6 +151,14 @@ bool EQEmu::versions::IsValidNonPCInventoryVersion(InventoryVersion inventory_ve
 	return true;
 }
 
+bool EQEmu::versions::IsValidOfflinePCInventoryVersion(InventoryVersion inventory_version)
+{
+	if (inventory_version <= LastNonPCInventoryVersion || inventory_version > LastOfflinePCInventoryVersion)
+		return false;
+
+	return true;
+}
+
 EQEmu::versions::InventoryVersion EQEmu::versions::ValidateInventoryVersion(InventoryVersion inventory_version)
 {
 	if (inventory_version <= InventoryVersion::Unknown || inventory_version > LastInventoryVersion)
@@ -170,6 +178,14 @@ EQEmu::versions::InventoryVersion EQEmu::versions::ValidatePCInventoryVersion(In
 EQEmu::versions::InventoryVersion EQEmu::versions::ValidateNonPCInventoryVersion(InventoryVersion inventory_version)
 {
 	if (inventory_version <= LastPCInventoryVersion || inventory_version > LastNonPCInventoryVersion)
+		return InventoryVersion::Unknown;
+
+	return inventory_version;
+}
+
+EQEmu::versions::InventoryVersion EQEmu::versions::ValidateOfflinePCInventoryVersion(InventoryVersion inventory_version)
+{
+	if (inventory_version <= LastNonPCInventoryVersion || inventory_version > LastOfflinePCInventoryVersion)
 		return InventoryVersion::Unknown;
 
 	return inventory_version;
@@ -202,6 +218,18 @@ const char* EQEmu::versions::InventoryVersionName(InventoryVersion inventory_ver
 		return "Bot";
 	case InventoryVersion::Pet:
 		return "Pet";
+	case InventoryVersion::OfflineTitanium:
+		return "Offline Titanium";
+	case InventoryVersion::OfflineSoF:
+		return "Offline SoF";
+	case InventoryVersion::OfflineSoD:
+		return "Offline SoD";
+	case InventoryVersion::OfflineUF:
+		return "Offline UF";
+	case InventoryVersion::OfflineRoF:
+		return "Offline RoF";
+	case InventoryVersion::OfflineRoF2:
+		return "Offline RoF2";
 	default:
 		return "Invalid Version";
 	};
@@ -248,6 +276,86 @@ EQEmu::versions::InventoryVersion EQEmu::versions::ConvertClientVersionToInvento
 		return InventoryVersion::RoF;
 	case ClientVersion::RoF2:
 		return InventoryVersion::RoF2;
+	default:
+		return InventoryVersion::Unknown;
+	}
+}
+
+EQEmu::versions::InventoryVersion EQEmu::versions::ConvertPCInventoryVersionToOfflinePCInventoryVersion(InventoryVersion inventory_version)
+{
+	switch (inventory_version) {
+	case InventoryVersion::Titanium:
+		return InventoryVersion::OfflineTitanium;
+	case InventoryVersion::SoF:
+		return InventoryVersion::OfflineSoF;
+	case InventoryVersion::SoD:
+		return InventoryVersion::OfflineSoD;
+	case InventoryVersion::UF:
+		return InventoryVersion::OfflineUF;
+	case InventoryVersion::RoF:
+		return InventoryVersion::OfflineRoF;
+	case InventoryVersion::RoF2:
+		return InventoryVersion::OfflineRoF2;
+	default:
+		return InventoryVersion::Unknown;
+	}
+}
+
+EQEmu::versions::InventoryVersion EQEmu::versions::ConvertOfflinePCInventoryVersionToPCInventoryVersion(InventoryVersion inventory_version)
+{
+	switch (inventory_version) {
+	case InventoryVersion::OfflineTitanium:
+		return InventoryVersion::Titanium;
+	case InventoryVersion::OfflineSoF:
+		return InventoryVersion::SoF;
+	case InventoryVersion::OfflineSoD:
+		return InventoryVersion::SoD;
+	case InventoryVersion::OfflineUF:
+		return InventoryVersion::UF;
+	case InventoryVersion::OfflineRoF:
+		return InventoryVersion::RoF;
+	case InventoryVersion::OfflineRoF2:
+		return InventoryVersion::RoF2;
+	default:
+		return InventoryVersion::Unknown;
+	}
+}
+
+EQEmu::versions::ClientVersion EQEmu::versions::ConvertOfflinePCInventoryVersionToClientVersion(InventoryVersion inventory_version)
+{
+	switch (inventory_version) {
+	case InventoryVersion::OfflineTitanium:
+		return ClientVersion::Titanium;
+	case InventoryVersion::OfflineSoF:
+		return ClientVersion::SoF;
+	case InventoryVersion::OfflineSoD:
+		return ClientVersion::SoD;
+	case InventoryVersion::OfflineUF:
+		return ClientVersion::UF;
+	case InventoryVersion::OfflineRoF:
+		return ClientVersion::RoF;
+	case InventoryVersion::OfflineRoF2:
+		return ClientVersion::RoF2;
+	default:
+		return ClientVersion::Unknown;
+	}
+}
+
+EQEmu::versions::InventoryVersion EQEmu::versions::ConvertClientVersionToOfflinePCInventoryVersion(ClientVersion client_version)
+{
+	switch (client_version) {
+	case ClientVersion::Titanium:
+		return InventoryVersion::OfflineTitanium;
+	case ClientVersion::SoF:
+		return InventoryVersion::OfflineSoF;
+	case ClientVersion::SoD:
+		return InventoryVersion::OfflineSoD;
+	case ClientVersion::UF:
+		return InventoryVersion::OfflineUF;
+	case ClientVersion::RoF:
+		return InventoryVersion::OfflineRoF;
+	case ClientVersion::RoF2:
+		return InventoryVersion::OfflineRoF2;
 	default:
 		return InventoryVersion::Unknown;
 	}

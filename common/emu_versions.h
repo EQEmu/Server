@@ -86,23 +86,38 @@ namespace EQEmu
 			NPC,
 			Merc,
 			Bot,
-			Pet
+			Pet,
+			OfflineTitanium,
+			OfflineSoF,
+			OfflineSoD,
+			OfflineUF,
+			OfflineRoF,
+			OfflineRoF2
 		};
 
-		const InventoryVersion LastInventoryVersion = InventoryVersion::Pet;
+		const InventoryVersion LastInventoryVersion = InventoryVersion::OfflineRoF2;
 		const InventoryVersion LastPCInventoryVersion = InventoryVersion::RoF2;
 		const InventoryVersion LastNonPCInventoryVersion = InventoryVersion::Pet;
+		const InventoryVersion LastOfflinePCInventoryVersion = InventoryVersion::OfflineRoF2;
 		const size_t InventoryVersionCount = (static_cast<size_t>(LastInventoryVersion) + 1);
 
 		extern bool IsValidInventoryVersion(InventoryVersion inventory_version);
 		extern bool IsValidPCInventoryVersion(InventoryVersion inventory_version);
 		extern bool IsValidNonPCInventoryVersion(InventoryVersion inventory_version);
+		extern bool IsValidOfflinePCInventoryVersion(InventoryVersion inventory_version);
+
 		extern InventoryVersion ValidateInventoryVersion(InventoryVersion inventory_version);
 		extern InventoryVersion ValidatePCInventoryVersion(InventoryVersion inventory_version);
 		extern InventoryVersion ValidateNonPCInventoryVersion(InventoryVersion inventory_version);
+		extern InventoryVersion ValidateOfflinePCInventoryVersion(InventoryVersion inventory_version);
+
 		extern const char* InventoryVersionName(InventoryVersion inventory_version);
 		extern ClientVersion ConvertInventoryVersionToClientVersion(InventoryVersion inventory_version);
 		extern InventoryVersion ConvertClientVersionToInventoryVersion(ClientVersion client_version);
+		extern InventoryVersion ConvertPCInventoryVersionToOfflinePCInventoryVersion(InventoryVersion inventory_version);
+		extern InventoryVersion ConvertOfflinePCInventoryVersionToPCInventoryVersion(InventoryVersion inventory_version);
+		extern ClientVersion ConvertOfflinePCInventoryVersionToClientVersion(InventoryVersion inventory_version);
+		extern InventoryVersion ConvertClientVersionToOfflinePCInventoryVersion(ClientVersion client_version);
 
 	} /*versions*/
 
