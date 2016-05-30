@@ -1795,6 +1795,8 @@ bool Bot::DeletePet()
 	NPC* pet_inst = GetPet()->CastToNPC();
 	pet_inst->SetOwnerID(0);
 
+	SetPet(nullptr);
+
 	return true;
 }
 
