@@ -203,8 +203,6 @@ namespace SoD
 		const size_t InvTypeArchivedSize = 0;//unknown
 		const size_t InvTypeOtherSize = 0;//unknown
 
-		const size_t NPCTradeSize = 4;
-
 		extern size_t GetInvTypeSize(int inv_type);
 		extern const char* GetInvTypeName(int inv_type);
 
@@ -279,6 +277,7 @@ namespace SoD
 
 	namespace profile {
 		const size_t TributeSize = invtype::InvTypeTributeSize;
+		const size_t GuildTributeSize = invtype::InvTypeGuildTributeSize;
 
 		const size_t BandoliersSize = 20;		// number of bandolier instances
 		const size_t BandolierItemCount = 4;	// number of equipment slots in bandolier instance

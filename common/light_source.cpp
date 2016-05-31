@@ -89,7 +89,7 @@ EQEmu::LightSource_Struct::LightSource_Struct()
 
 void EQEmu::LightSource_Struct::Clear()
 {
-	memset(&Slot, 0, (sizeof(uint8) * sizeof(Slot)));
+	memset(&Slot, 0, (sizeof(uint8) * lightsource::LightCount));
 }
 
 void EQEmu::LightSourceProfile::Clear()
