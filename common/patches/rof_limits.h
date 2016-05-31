@@ -222,6 +222,8 @@ namespace RoF
 		extern size_t GetInvTypeSize(int inv_type);
 		extern const char* GetInvTypeName(int inv_type);
 
+		extern bool IsInvTypePersistent(int inv_type);
+
 	} /*invtype*/
 
 	namespace invslot {

@@ -116,6 +116,23 @@ const char* SoF::invtype::GetInvTypeName(int inv_type)
 	}
 }
 
+bool SoF::invtype::IsInvTypePersistent(int inv_type)
+{
+	switch (inv_type) {
+	case invtype::InvTypePossessions:
+	case invtype::InvTypeBank:
+	case invtype::InvTypeSharedBank:
+	case invtype::InvTypeTrade:
+	case invtype::InvTypeWorld:
+	case invtype::InvTypeLimbo:
+	case invtype::InvTypeTribute:
+	case invtype::InvTypeGuildTribute:
+		return true;
+	default:
+		return false;
+	}
+}
+
 const char* SoF::invslot::GetInvPossessionsSlotName(int inv_slot)
 {
 	switch (inv_slot) {

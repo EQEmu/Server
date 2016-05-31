@@ -140,6 +140,24 @@ const char* RoF2::invtype::GetInvTypeName(int inv_type)
 	}
 }
 
+bool RoF2::invtype::IsInvTypePersistent(int inv_type)
+{
+	switch (inv_type) {
+	case invtype::InvTypePossessions:
+	case invtype::InvTypeBank:
+	case invtype::InvTypeSharedBank:
+	case invtype::InvTypeTrade:
+	case invtype::InvTypeWorld:
+	case invtype::InvTypeLimbo:
+	case invtype::InvTypeTribute:
+	case invtype::InvTypeTrophyTribute:
+	case invtype::InvTypeGuildTribute:
+		return true;
+	default:
+		return false;
+	}
+}
+
 const char* RoF2::invslot::GetInvPossessionsSlotName(int inv_slot)
 {
 	switch (inv_slot) {
