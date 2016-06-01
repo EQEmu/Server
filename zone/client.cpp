@@ -2730,7 +2730,7 @@ void Client::SetMaterial(int16 in_slot, uint32 item_id) {
 	if (item && item->IsClassCommon())
 	{
 		uint8 matslot = Inventory::CalcMaterialFromSlot(in_slot);
-		if (matslot != EQEmu::legacy::MaterialInvalid)
+		if (matslot != EQEmu::textures::TextureInvalid)
 		{
 			m_pp.item_material[matslot] = GetEquipmentMaterial(matslot);
 		}
@@ -3072,7 +3072,7 @@ void Client::SetTint(int16 in_slot, uint32 color) {
 void Client::SetTint(int16 in_slot, Color_Struct& color) {
 
 	uint8 matslot = Inventory::CalcMaterialFromSlot(in_slot);
-	if (matslot != EQEmu::legacy::MaterialInvalid)
+	if (matslot != EQEmu::textures::TextureInvalid)
 	{
 		m_pp.item_tint[matslot].Color = color.Color;
 		database.SaveCharacterMaterialColor(this->CharacterID(), in_slot, color.Color);
@@ -3151,25 +3151,25 @@ uint8 Client::SlotConvert(uint8 slot,bool bracer){
 	if(bracer)
 		return EQEmu::legacy::SlotWrist2;
 	switch(slot) {
-	case EQEmu::legacy::MaterialHead:
+	case EQEmu::textures::TextureHead:
 		slot2 = EQEmu::legacy::SlotHead;
 		break;
-	case EQEmu::legacy::MaterialChest:
+	case EQEmu::textures::TextureChest:
 		slot2 = EQEmu::legacy::SlotChest;
 		break;
-	case EQEmu::legacy::MaterialArms:
+	case EQEmu::textures::TextureArms:
 		slot2 = EQEmu::legacy::SlotArms;
 		break;
-	case EQEmu::legacy::MaterialWrist:
+	case EQEmu::textures::TextureWrist:
 		slot2 = EQEmu::legacy::SlotWrist1;
 		break;
-	case EQEmu::legacy::MaterialHands:
+	case EQEmu::textures::TextureHands:
 		slot2 = EQEmu::legacy::SlotHands;
 		break;
-	case EQEmu::legacy::MaterialLegs:
+	case EQEmu::textures::TextureLegs:
 		slot2 = EQEmu::legacy::SlotLegs;
 		break;
-	case EQEmu::legacy::MaterialFeet:
+	case EQEmu::textures::TextureFeet:
 		slot2 = EQEmu::legacy::SlotFeet;
 		break;
 	}
@@ -3180,25 +3180,25 @@ uint8 Client::SlotConvert2(uint8 slot){
 	uint8 slot2 = 0; // same as above...
 	switch(slot){
 	case EQEmu::legacy::SlotHead:
-		slot2 = EQEmu::legacy::MaterialHead;
+		slot2 = EQEmu::textures::TextureHead;
 		break;
 	case EQEmu::legacy::SlotChest:
-		slot2 = EQEmu::legacy::MaterialChest;
+		slot2 = EQEmu::textures::TextureChest;
 		break;
 	case EQEmu::legacy::SlotArms:
-		slot2 = EQEmu::legacy::MaterialArms;
+		slot2 = EQEmu::textures::TextureArms;
 		break;
 	case EQEmu::legacy::SlotWrist1:
-		slot2 = EQEmu::legacy::MaterialWrist;
+		slot2 = EQEmu::textures::TextureWrist;
 		break;
 	case EQEmu::legacy::SlotHands:
-		slot2 = EQEmu::legacy::MaterialHands;
+		slot2 = EQEmu::textures::TextureHands;
 		break;
 	case EQEmu::legacy::SlotLegs:
-		slot2 = EQEmu::legacy::MaterialLegs;
+		slot2 = EQEmu::textures::TextureLegs;
 		break;
 	case EQEmu::legacy::SlotFeet:
-		slot2 = EQEmu::legacy::MaterialFeet;
+		slot2 = EQEmu::textures::TextureFeet;
 		break;
 	}
 	return slot2;
@@ -6271,8 +6271,8 @@ void Client::Doppelganger(uint16 spell_id, Mob *target, const char *name_overrid
 	made_npc->Corrup = GetCorrup();
 	made_npc->PhR = GetPhR();
 	// looks
-	made_npc->texture = GetEquipmentMaterial(EQEmu::legacy::MaterialChest);
-	made_npc->helmtexture = GetEquipmentMaterial(EQEmu::legacy::MaterialHead);
+	made_npc->texture = GetEquipmentMaterial(EQEmu::textures::TextureChest);
+	made_npc->helmtexture = GetEquipmentMaterial(EQEmu::textures::TextureHead);
 	made_npc->haircolor = GetHairColor();
 	made_npc->beardcolor = GetBeardColor();
 	made_npc->eyecolor1 = GetEyeColor1();
@@ -6283,9 +6283,9 @@ void Client::Doppelganger(uint16 spell_id, Mob *target, const char *name_overrid
 	made_npc->drakkin_heritage = GetDrakkinHeritage();
 	made_npc->drakkin_tattoo = GetDrakkinTattoo();
 	made_npc->drakkin_details = GetDrakkinDetails();
-	made_npc->d_melee_texture1 = GetEquipmentMaterial(EQEmu::legacy::MaterialPrimary);
-	made_npc->d_melee_texture2 = GetEquipmentMaterial(EQEmu::legacy::MaterialSecondary);
-	for (int i = EQEmu::legacy::MATERIAL_BEGIN; i <= EQEmu::legacy::MATERIAL_END; i++)	{
+	made_npc->d_melee_texture1 = GetEquipmentMaterial(EQEmu::textures::TexturePrimary);
+	made_npc->d_melee_texture2 = GetEquipmentMaterial(EQEmu::textures::TextureSecondary);
+	for (int i = EQEmu::textures::TextureBegin; i <= EQEmu::textures::LastTexture; i++)	{
 		made_npc->armor_tint[i] = GetEquipmentColor(i);
 	}
 	made_npc->loottable_id = 0;

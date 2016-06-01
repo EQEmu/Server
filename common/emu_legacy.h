@@ -163,20 +163,6 @@ namespace EQEmu
 			SlotCount
 		};
 
-		enum MaterialSlots : uint8 {
-			MaterialHead = 0,
-			MaterialChest,
-			MaterialArms,
-			MaterialWrist,
-			MaterialHands,
-			MaterialLegs, // 5
-			MaterialFeet,
-			MaterialPrimary,
-			MaterialSecondary,
-			MaterialCount,
-			MaterialInvalid = 255
-		};
-
 		// these are currently hard-coded for existing inventory system..do not use in place of special client version handlers until ready
 		static const uint16	TYPE_POSSESSIONS_SIZE = SlotCount;
 		static const uint16 TYPE_BANK_SIZE = 24;
@@ -250,11 +236,6 @@ namespace EQEmu
 
 		static const int16 CORPSE_BEGIN = 22;
 		//static const int16 CORPSE_END = RoF::consts::CORPSE_END; // not ready for use
-
-		static const int16 MATERIAL_BEGIN = MaterialHead;
-		static const int16 MATERIAL_END = MaterialSecondary;
-		static const int16 MATERIAL_TINT_END = MaterialFeet;
-		static const int16 MATERIAL_SIZE = MaterialCount;
 
 		// items
 		// common and container sizes will not increase until the new 'location' struct is implemented

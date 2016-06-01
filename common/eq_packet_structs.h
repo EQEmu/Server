@@ -26,6 +26,7 @@
 #include <time.h>
 #include "../common/version.h"
 #include "emu_constants.h"
+#include "textures.h"
 
 
 static const uint32 BUFF_COUNT = 25;
@@ -293,7 +294,7 @@ struct Spawn_Struct {
 		/*0000*/ EquipStruct equip_primary;    // Equipment: Main visual
 		/*0000*/ EquipStruct equip_secondary;  // Equipment: Off visual
 	} equip;
-	/*0000*/ EquipStruct equipment[EQEmu::legacy::MaterialCount];
+	/*0000*/ EquipStruct equipment[EQEmu::textures::TextureCount];
 };
 /*0233*/ float	runspeed;		// Speed when running
 /*0036*/ uint8	afk;			// 0=no, 1=afk
@@ -339,7 +340,7 @@ union
 				/*0376*/ Color_Struct color_primary;	// Color of primary item
 				/*0380*/ Color_Struct color_secondary;	// Color of secondary item
 			} equipment_colors;
-			/*0348*/ Color_Struct colors[EQEmu::legacy::MaterialCount]; // Array elements correspond to struct equipment_colors above
+			/*0348*/ Color_Struct colors[EQEmu::textures::TextureCount]; // Array elements correspond to struct equipment_colors above
 		 };
 /*0384*/ uint8	lfg;			// 0=off, 1=lfg on
 /*0385*/
@@ -881,7 +882,7 @@ struct SuspendedMinion_Struct
 	/*002*/	uint32 HP;
 	/*006*/	uint32 Mana;
 	/*010*/	SpellBuff_Struct Buffs[BUFF_COUNT];
-	/*510*/	uint32 Items[EQEmu::legacy::MaterialCount];
+	/*510*/	uint32 Items[EQEmu::textures::TextureCount];
 	/*546*/	char Name[64];
 	/*610*/
 };
@@ -989,9 +990,9 @@ struct PlayerProfile_Struct
 /*0304*/	uint8				ability_time_minutes;
 /*0305*/	uint8				ability_time_hours;	//place holder
 /*0306*/	uint8				unknown0306[6];		// @bp Spacer/Flag?
-/*0312*/	uint32				item_material[EQEmu::legacy::MaterialCount];	// Item texture/material of worn/held items
+/*0312*/	uint32				item_material[EQEmu::textures::TextureCount];	// Item texture/material of worn/held items
 /*0348*/	uint8				unknown0348[44];
-/*0392*/	Color_Struct		item_tint[EQEmu::legacy::MaterialCount];
+/*0392*/	Color_Struct		item_tint[EQEmu::textures::TextureCount];
 /*0428*/	AA_Array			aa_array[MAX_PP_AA_ARRAY];
 /*2348*/	float				unknown2384;		//seen ~128, ~47
 /*2352*/	char				servername[32];		// length probably not right
@@ -2145,7 +2146,7 @@ struct Illusion_Struct { //size: 256 - SoF
 /*092*/	uint32	drakkin_heritage;	//
 /*096*/	uint32	drakkin_tattoo;		//
 /*100*/	uint32	drakkin_details;	//
-/*104*/	uint32	armor_tint[EQEmu::legacy::MaterialCount];	//
+/*104*/	uint32	armor_tint[EQEmu::textures::TextureCount];	//
 /*140*/	uint8	eyecolor1;		// Field Not Identified in any Illusion Struct
 /*141*/	uint8	eyecolor2;		// Field Not Identified in any Illusion Struct
 /*142*/	uint8	unknown138[114];	//
@@ -3432,7 +3433,7 @@ struct DyeStruct
 			struct Color_Struct secondary;	// or this
 		}
 		dyes;
-		struct Color_Struct dye[EQEmu::legacy::MaterialCount];
+		struct Color_Struct dye[EQEmu::textures::TextureCount];
 	};
 };
 

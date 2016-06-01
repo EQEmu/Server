@@ -1019,7 +1019,7 @@ bool Client::AutoPutLootInInventory(ItemInst& inst, bool try_worn, bool try_curs
 					//send worn to everyone...
 					PutLootInInventory(i, inst);
 					uint8 worn_slot_material = Inventory::CalcMaterialFromSlot(i);
-					if (worn_slot_material != EQEmu::legacy::MaterialInvalid) {
+					if (worn_slot_material != EQEmu::textures::TextureInvalid) {
 						SendWearChange(worn_slot_material);
 					}
 					
@@ -1792,7 +1792,7 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 	}
 
 	int matslot = SlotConvert2(dst_slot_id);
-	if (dst_slot_id <= EQEmu::legacy::EQUIPMENT_END && matslot != EQEmu::legacy::MaterialHead) { // think this is to allow the client to update with /showhelm
+	if (dst_slot_id <= EQEmu::legacy::EQUIPMENT_END && matslot != EQEmu::textures::TextureHead) { // think this is to allow the client to update with /showhelm
 		SendWearChange(matslot);
 	}
 
@@ -2021,7 +2021,7 @@ void Client::QSSwapItemAuditor(MoveItem_Struct* move_in, bool postaction_call) {
 
 void Client::DyeArmor(DyeStruct* dye){
 	int16 slot=0;
-	for (int i = EQEmu::legacy::MATERIAL_BEGIN; i <= EQEmu::legacy::MATERIAL_TINT_END; i++) {
+	for (int i = EQEmu::textures::TextureBegin; i <= EQEmu::textures::LastTintableTexture; i++) {
 		if ((m_pp.item_tint[i].Color & 0x00FFFFFF) != (dye->dye[i].Color & 0x00FFFFFF)) {
 			slot = m_inv.HasItem(32557, 1, invWherePersonal);
 			if (slot != INVALID_INDEX){
@@ -2593,7 +2593,7 @@ uint32 Client::GetEquipment(uint8 material_slot) const
 	int16 invslot;
 	const ItemInst *item;
 
-	if(material_slot > EQEmu::legacy::MATERIAL_END)
+	if(material_slot > EQEmu::textures::LastTexture)
 	{
 		return 0;
 	}
@@ -2631,7 +2631,7 @@ int32 Client::GetEquipmentMaterial(uint8 material_slot)
 
 uint32 Client::GetEquipmentColor(uint8 material_slot) const
 {
-	if (material_slot > EQEmu::legacy::MATERIAL_END)
+	if (material_slot > EQEmu::textures::LastTexture)
 		return 0;
 
 	const EQEmu::ItemBase *item = database.GetItem(GetEquipment(material_slot));

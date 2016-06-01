@@ -5046,12 +5046,12 @@ void Merc::ScaleStats(int scalepercent, bool setmax) {
 void Merc::UpdateMercAppearance() {
 	// Copied from Bot Code:
 	uint32 itemID = NO_ITEM;
-	uint8 materialFromSlot = EQEmu::legacy::MaterialInvalid;
+	uint8 materialFromSlot = EQEmu::textures::TextureInvalid;
 	for (int i = EQEmu::legacy::EQUIPMENT_BEGIN; i <= EQEmu::legacy::EQUIPMENT_END; ++i) {
 		itemID = equipment[i];
 		if(itemID != NO_ITEM) {
 			materialFromSlot = Inventory::CalcMaterialFromSlot(i);
-			if (materialFromSlot != EQEmu::legacy::MaterialInvalid)
+			if (materialFromSlot != EQEmu::textures::TextureInvalid)
 				this->SendWearChange(materialFromSlot);
 		}
 	}

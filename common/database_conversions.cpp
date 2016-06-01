@@ -186,7 +186,7 @@ namespace Convert {
 		/*002*/	uint32 HP;
 		/*006*/	uint32 Mana;
 		/*010*/	Convert::SpellBuff_Struct Buffs[BUFF_COUNT];
-		/*510*/	uint32 Items[EQEmu::legacy::MaterialCount];
+		/*510*/	uint32 Items[EQEmu::textures::TextureCount];
 		/*546*/	char Name[64];
 		/*610*/
 	};
@@ -227,9 +227,9 @@ namespace Convert {
 		/*0304*/	uint8							ability_time_minutes;
 		/*0305*/	uint8							ability_time_hours;	//place holder
 		/*0306*/	uint8							unknown0306[6];		// @bp Spacer/Flag?
-		/*0312*/	uint32							item_material[EQEmu::legacy::MaterialCount];	// Item texture/material of worn/held items
+		/*0312*/	uint32							item_material[EQEmu::textures::TextureCount];	// Item texture/material of worn/held items
 		/*0348*/	uint8							unknown0348[44];
-		/*0392*/	Convert::Color_Struct			item_tint[EQEmu::legacy::MaterialCount];
+		/*0392*/	Convert::Color_Struct			item_tint[EQEmu::textures::TextureCount];
 		/*0428*/	Convert::AA_Array				aa_array[MAX_PP_AA_ARRAY];
 		/*2348*/	float							unknown2384;		//seen ~128, ~47
 		/*2352*/	char							servername[32];		// length probably not right
@@ -1416,7 +1416,7 @@ bool Database::CheckDatabaseConvertPPDeblob(){
 				if (rquery != ""){ results = QueryDatabase(rquery); }
 				/* Run Material Color Convert */
 				first_entry = 0; rquery = "";
-				for (i = 0; i < EQEmu::legacy::MaterialCount; i++){
+				for (i = 0; i < EQEmu::textures::TextureCount; i++){
 					if (pp->item_tint[i].color > 0){
 						if (first_entry != 1){
 							rquery = StringFormat("REPLACE INTO `character_material` (id, slot, blue, green, red, use_tint, color) VALUES (%u, %u, %u, %u, %u, %u, %u)", character_id, i, pp->item_tint[i].rgb.blue, pp->item_tint[i].rgb.green, pp->item_tint[i].rgb.red, pp->item_tint[i].rgb.use_tint, pp->item_tint[i].color);

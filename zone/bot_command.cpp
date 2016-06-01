@@ -4358,7 +4358,7 @@ void bot_subcommand_bot_dye_armor(Client *c, const Seperator *sep)
 	// TODO: Trouble-shoot model update issue
 	
 	const std::string msg_matslot = StringFormat("mat_slot: %c(All), %i(Head), %i(Chest), %i(Arms), %i(Wrists), %i(Hands), %i(Legs), %i(Feet)",
-		'*', EQEmu::legacy::MaterialHead, EQEmu::legacy::MaterialChest, EQEmu::legacy::MaterialArms, EQEmu::legacy::MaterialWrist, EQEmu::legacy::MaterialHands, EQEmu::legacy::MaterialLegs, EQEmu::legacy::MaterialFeet);
+		'*', EQEmu::textures::TextureHead, EQEmu::textures::TextureChest, EQEmu::textures::TextureArms, EQEmu::textures::TextureWrist, EQEmu::textures::TextureHands, EQEmu::textures::TextureLegs, EQEmu::textures::TextureFeet);
 	
 	if (helper_command_alias_fail(c, "bot_subcommand_bot_dye_armor", sep->arg[0], "botdyearmor"))
 		return;
@@ -4369,7 +4369,7 @@ void bot_subcommand_bot_dye_armor(Client *c, const Seperator *sep)
 	}
 	const int ab_mask = ActionableBots::ABM_NoFilter;
 
-	uint8 material_slot = EQEmu::legacy::MaterialInvalid;
+	uint8 material_slot = EQEmu::textures::TextureInvalid;
 	int16 slot_id = INVALID_INDEX;
 
 	bool dye_all = (sep->arg[1][0] == '*');
@@ -4377,7 +4377,7 @@ void bot_subcommand_bot_dye_armor(Client *c, const Seperator *sep)
 		material_slot = atoi(sep->arg[1]);
 		slot_id = Inventory::CalcSlotFromMaterial(material_slot);
 
-		if (!sep->IsNumber(1) || slot_id == INVALID_INDEX || material_slot > EQEmu::legacy::MaterialFeet) {
+		if (!sep->IsNumber(1) || slot_id == INVALID_INDEX || material_slot > EQEmu::textures::TextureFeet) {
 			c->Message(m_fail, "Valid [mat_slot]s for this command are:");
 			c->Message(m_fail, msg_matslot.c_str());
 			return;

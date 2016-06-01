@@ -68,6 +68,7 @@ SET(common_sources
 	struct_strategy.cpp
 	tcp_connection.cpp
 	tcp_server.cpp
+	textures.cpp
 	timeoutmgr.cpp
 	timer.cpp
 	unix.cpp
@@ -199,6 +200,7 @@ SET(common_headers
 	tcp_basic_server.h
 	tcp_connection.h
 	tcp_server.h
+	textures.h
 	timeoutmgr.h
 	timer.h
 	types.h

@@ -1435,7 +1435,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 					}
 				}
 
-				for (int x = EQEmu::legacy::MATERIAL_BEGIN; x <= EQEmu::legacy::MATERIAL_TINT_END; x++)
+				for (int x = EQEmu::textures::TextureBegin; x <= EQEmu::textures::LastTintableTexture; x++)
 					SendWearChange(x);
 
 				if (caster == this &&
@@ -1461,7 +1461,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 						);
 						caster->SendAppearancePacket(AT_Size, static_cast<uint32>(caster->GetTarget()->GetSize()));
 
-						for (int x = EQEmu::legacy::MATERIAL_BEGIN; x <= EQEmu::legacy::MATERIAL_TINT_END; x++)
+						for (int x = EQEmu::textures::TextureBegin; x <= EQEmu::textures::LastTintableTexture; x++)
 							caster->SendWearChange(x);
 				}
 			}
@@ -3813,7 +3813,7 @@ void Mob::BuffFadeBySlot(int slot, bool iRecalcBonuses)
 				else{
 					SendAppearancePacket(AT_Size, 6);
 				}
-				for (int x = EQEmu::legacy::MATERIAL_BEGIN; x <= EQEmu::legacy::MATERIAL_TINT_END; x++){
+				for (int x = EQEmu::textures::TextureBegin; x <= EQEmu::textures::LastTintableTexture; x++){
 					SendWearChange(x);
 				}
 				break;

@@ -1313,7 +1313,7 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	}
 
 	/* Set item material tint */
-	for (int i = EQEmu::legacy::MATERIAL_BEGIN; i <= EQEmu::legacy::MATERIAL_END; i++)
+	for (int i = EQEmu::textures::TextureBegin; i <= EQEmu::textures::LastTexture; i++)
 	{
 		if (m_pp.item_tint[i].RGB.UseTint == 1 || m_pp.item_tint[i].RGB.UseTint == 255)
 		{
@@ -3078,7 +3078,7 @@ void Client::Handle_OP_AugmentItem(const EQApplicationPacket *app)
 
 								CalcBonuses();
 
-								if (mat != EQEmu::legacy::MaterialInvalid)
+								if (mat != EQEmu::textures::TextureInvalid)
 								{
 									SendWearChange(mat); // Visible item augged while equipped. Send WC in case ornamentation changed.
 								}
@@ -3143,7 +3143,7 @@ void Client::Handle_OP_AugmentItem(const EQApplicationPacket *app)
 
 					CalcBonuses();
 					
-					if (mat != EQEmu::legacy::MaterialInvalid)
+					if (mat != EQEmu::textures::TextureInvalid)
 					{
 						SendWearChange(mat); // Visible item augged while equipped. Send WC in case ornamentation changed.
 					}
@@ -3198,7 +3198,7 @@ void Client::Handle_OP_AugmentItem(const EQApplicationPacket *app)
 
 				CalcBonuses();
 
-				if (mat != EQEmu::legacy::MaterialInvalid)
+				if (mat != EQEmu::textures::TextureInvalid)
 				{
 					SendWearChange(mat);
 				}

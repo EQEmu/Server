@@ -331,7 +331,7 @@ void NPC::AddLootDrop(const EQEmu::ItemBase *item2, ItemList* itemlist, int16 ch
 			if (item2->Proc.Effect != 0)
 				CastToMob()->AddProcToWeapon(item2->Proc.Effect, true);
 
-			eslot = EQEmu::legacy::MaterialPrimary;
+			eslot = EQEmu::textures::TexturePrimary;
 			if (item2->Damage > 0)
 				SendAddPlayerState(PlayerState::PrimaryWeaponEquipped);
 			if (item2->IsType2HWeapon())
@@ -344,30 +344,30 @@ void NPC::AddLootDrop(const EQEmu::ItemBase *item2, ItemList* itemlist, int16 ch
 			if (item2->Proc.Effect!=0)
 				CastToMob()->AddProcToWeapon(item2->Proc.Effect, true);
 
-			eslot = EQEmu::legacy::MaterialSecondary;
+			eslot = EQEmu::textures::TextureSecondary;
 			if (item2->Damage > 0)
 				SendAddPlayerState(PlayerState::SecondaryWeaponEquipped);
 		}
 		else if (foundslot == EQEmu::legacy::SlotHead) {
-			eslot = EQEmu::legacy::MaterialHead;
+			eslot = EQEmu::textures::TextureHead;
 		}
 		else if (foundslot == EQEmu::legacy::SlotChest) {
-			eslot = EQEmu::legacy::MaterialChest;
+			eslot = EQEmu::textures::TextureChest;
 		}
 		else if (foundslot == EQEmu::legacy::SlotArms) {
-			eslot = EQEmu::legacy::MaterialArms;
+			eslot = EQEmu::textures::TextureArms;
 		}
 		else if (foundslot == EQEmu::legacy::SlotWrist1 || foundslot == EQEmu::legacy::SlotWrist2) {
-			eslot = EQEmu::legacy::MaterialWrist;
+			eslot = EQEmu::textures::TextureWrist;
 		}
 		else if (foundslot == EQEmu::legacy::SlotHands) {
-			eslot = EQEmu::legacy::MaterialHands;
+			eslot = EQEmu::textures::TextureHands;
 		}
 		else if (foundslot == EQEmu::legacy::SlotLegs) {
-			eslot = EQEmu::legacy::MaterialLegs;
+			eslot = EQEmu::textures::TextureLegs;
 		}
 		else if (foundslot == EQEmu::legacy::SlotFeet) {
-			eslot = EQEmu::legacy::MaterialFeet;
+			eslot = EQEmu::textures::TextureFeet;
 		}
 
 		/*

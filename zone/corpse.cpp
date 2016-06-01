@@ -746,7 +746,7 @@ void Corpse::RemoveItem(ServerLootItem_Struct* item_data)
 		itemlist.erase(iter);
 
 		uint8 material = Inventory::CalcMaterialFromSlot(sitem->equip_slot); // autos to unsigned char
-		if (material != EQEmu::legacy::MaterialInvalid)
+		if (material != EQEmu::textures::TextureInvalid)
 			SendWearChange(material);
 
 		UpdateEquipmentLight();
@@ -1400,7 +1400,7 @@ void Corpse::Spawn() {
 uint32 Corpse::GetEquipment(uint8 material_slot) const {
 	int16 invslot;
 
-	if (material_slot > EQEmu::legacy::MATERIAL_END) {
+	if (material_slot > EQEmu::textures::LastTexture) {
 		return NO_ITEM;
 	}
 
@@ -1414,7 +1414,7 @@ uint32 Corpse::GetEquipment(uint8 material_slot) const {
 uint32 Corpse::GetEquipmentColor(uint8 material_slot) const {
 	const EQEmu::ItemBase *item;
 
-	if (material_slot > EQEmu::legacy::MATERIAL_END) {
+	if (material_slot > EQEmu::textures::LastTexture) {
 		return 0;
 	}
 

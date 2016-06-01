@@ -489,7 +489,7 @@ void NPC::CheckMinMaxLevel(Mob *them)
 		if(themlevel < (*cur)->min_level || themlevel > (*cur)->max_level)
 		{
 			material = Inventory::CalcMaterialFromSlot((*cur)->equip_slot);
-			if (material != EQEmu::legacy::MaterialInvalid)
+			if (material != EQEmu::textures::TextureInvalid)
 				SendWearChange(material);
 
 			cur = itemlist.erase(cur);
@@ -1373,7 +1373,7 @@ uint32 ZoneDatabase::NPCSpawnDB(uint8 command, const char* zone, uint32 zone_ver
 
 int32 NPC::GetEquipmentMaterial(uint8 material_slot) const
 {
-	if (material_slot >= EQEmu::legacy::MaterialCount)
+	if (material_slot >= EQEmu::textures::TextureCount)
 		return 0;
 
 	int16 invslot = Inventory::CalcSlotFromMaterial(material_slot);
@@ -1384,23 +1384,23 @@ int32 NPC::GetEquipmentMaterial(uint8 material_slot) const
 	{
 		switch(material_slot)
 		{
-		case EQEmu::legacy::MaterialHead:
+		case EQEmu::textures::TextureHead:
 			return helmtexture;
-		case EQEmu::legacy::MaterialChest:
+		case EQEmu::textures::TextureChest:
 			return texture;
-		case EQEmu::legacy::MaterialArms:
+		case EQEmu::textures::TextureArms:
 			return armtexture;
-		case EQEmu::legacy::MaterialWrist:
+		case EQEmu::textures::TextureWrist:
 			return bracertexture;
-		case EQEmu::legacy::MaterialHands:
+		case EQEmu::textures::TextureHands:
 			return handtexture;
-		case EQEmu::legacy::MaterialLegs:
+		case EQEmu::textures::TextureLegs:
 			return legtexture;
-		case EQEmu::legacy::MaterialFeet:
+		case EQEmu::textures::TextureFeet:
 			return feettexture;
-		case EQEmu::legacy::MaterialPrimary:
+		case EQEmu::textures::TexturePrimary:
 			return d_melee_texture1;
-		case EQEmu::legacy::MaterialSecondary:
+		case EQEmu::textures::TextureSecondary:
 			return d_melee_texture2;
 		default:
 			//they have nothing in the slot, and its not a special slot... they get nothing.

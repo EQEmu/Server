@@ -73,7 +73,7 @@ Mob::Mob(const char* in_name,
 		uint32		in_drakkin_heritage,
 		uint32		in_drakkin_tattoo,
 		uint32		in_drakkin_details,
-		uint32		in_armor_tint[EQEmu::legacy::MaterialCount],
+		uint32		in_armor_tint[EQEmu::textures::TextureCount],
 
 		uint8		in_aa_title,
 		uint8		in_see_invis, // see through invis/ivu
@@ -278,7 +278,7 @@ Mob::Mob(const char* in_name,
 		RangedProcs[j].level_override = -1;
 	}
 
-	for (i = 0; i < EQEmu::legacy::MaterialCount; i++)
+	for (i = 0; i < EQEmu::textures::TextureCount; i++)
 	{
 		if (in_armor_tint)
 		{
@@ -2863,7 +2863,7 @@ int32 Mob::GetEquipmentMaterial(uint8 material_slot) const
 	if (item != 0)
 	{
 		// For primary and secondary we need the model, not the material
-		if (material_slot == EQEmu::legacy::MaterialPrimary || material_slot == EQEmu::legacy::MaterialSecondary)
+		if (material_slot == EQEmu::textures::TexturePrimary || material_slot == EQEmu::textures::TextureSecondary)
 		{
 			if (this->IsClient())
 			{
@@ -2907,7 +2907,7 @@ int32 Mob::GetEquipmentMaterial(uint8 material_slot) const
 int32 Mob::GetHerosForgeModel(uint8 material_slot) const
 {
 	uint32 HeroModel = 0;
-	if (material_slot >= 0 && material_slot < EQEmu::legacy::MaterialPrimary)
+	if (material_slot >= 0 && material_slot < EQEmu::textures::TexturePrimary)
 	{
 		uint32 ornamentationAugtype = RuleI(Character, OrnamentationAugmentType);
 		const EQEmu::ItemBase *item;

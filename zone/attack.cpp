@@ -4747,7 +4747,7 @@ void Mob::DoOffHandAttackRounds(Mob *target, ExtraAttackOptions *opts, int speci
 	// For now, SPECATK_QUAD means innate DW when Combat:UseLiveCombatRounds is true
 	if ((GetSpecialAbility(SPECATK_INNATE_DW) ||
 	     (RuleB(Combat, UseLiveCombatRounds) && GetSpecialAbility(SPECATK_QUAD))) ||
-		 GetEquipment(EQEmu::legacy::MaterialSecondary) != 0) {
+		 GetEquipment(EQEmu::textures::TextureSecondary) != 0) {
 		if (CheckDualWield()) {
 			Attack(target, EQEmu::legacy::SlotSecondary, false, false, false, opts, special);
 			if (CanThisClassDoubleAttack() && GetLevel() > 35 && CheckDoubleAttack()){

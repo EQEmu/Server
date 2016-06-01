@@ -1223,14 +1223,14 @@ namespace Titanium
 			if (eq->Race[char_index] > 473)
 				eq->Race[char_index] = 1;
 
-			for (int index = 0; index < EQEmu::legacy::MaterialCount; ++index) {
+			for (int index = 0; index < EQEmu::textures::TextureCount; ++index) {
 				eq->CS_Colors[char_index][index].Color = emu_cse->Equip[index].Color.Color;
 			}
 
 			eq->BeardColor[char_index] = emu_cse->BeardColor;
 			eq->HairStyle[char_index] = emu_cse->HairStyle;
 
-			for (int index = 0; index < EQEmu::legacy::MaterialCount; ++index) {
+			for (int index = 0; index < EQEmu::textures::TextureCount; ++index) {
 				eq->Equip[char_index][index] = emu_cse->Equip[index].Material;
 			}
 
@@ -1260,14 +1260,14 @@ namespace Titanium
 		for (; char_index < 10; ++char_index) {
 			eq->Race[char_index] = 0;
 
-			for (int index = 0; index < EQEmu::legacy::MaterialCount; ++index) {
+			for (int index = 0; index < EQEmu::textures::TextureCount; ++index) {
 				eq->CS_Colors[char_index][index].Color = 0;
 			}
 
 			eq->BeardColor[char_index] = 0;
 			eq->HairStyle[char_index] = 0;
 
-			for (int index = 0; index < EQEmu::legacy::MaterialCount; ++index) {
+			for (int index = 0; index < EQEmu::textures::TextureCount; ++index) {
 				eq->Equip[char_index][index] = 0;
 			}
 

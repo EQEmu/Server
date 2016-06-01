@@ -1809,19 +1809,19 @@ luabind::scope lua_register_material() {
 	return luabind::class_<Materials>("Material")
 		.enum_("constants")
 		[
-			luabind::value("Head", static_cast<int>(EQEmu::legacy::MaterialHead)),
-			luabind::value("Chest", static_cast<int>(EQEmu::legacy::MaterialChest)),
-			luabind::value("Arms", static_cast<int>(EQEmu::legacy::MaterialArms)),
-			luabind::value("Bracer", static_cast<int>(EQEmu::legacy::MaterialWrist)), // deprecated
-			luabind::value("Wrist", static_cast<int>(EQEmu::legacy::MaterialWrist)),
-			luabind::value("Hands", static_cast<int>(EQEmu::legacy::MaterialHands)),
-			luabind::value("Legs", static_cast<int>(EQEmu::legacy::MaterialLegs)),
-			luabind::value("Feet", static_cast<int>(EQEmu::legacy::MaterialFeet)),
-			luabind::value("Primary", static_cast<int>(EQEmu::legacy::MaterialPrimary)),
-			luabind::value("Secondary", static_cast<int>(EQEmu::legacy::MaterialSecondary)),
-			luabind::value("Max", static_cast<int>(EQEmu::legacy::MaterialCount)), // deprecated
-			luabind::value("Count", static_cast<int>(EQEmu::legacy::MaterialCount)),
-			luabind::value("Invalid", static_cast<int>(EQEmu::legacy::MaterialInvalid))
+			luabind::value("Head", static_cast<int>(EQEmu::textures::TextureHead)),
+			luabind::value("Chest", static_cast<int>(EQEmu::textures::TextureChest)),
+			luabind::value("Arms", static_cast<int>(EQEmu::textures::TextureArms)),
+			luabind::value("Bracer", static_cast<int>(EQEmu::textures::TextureWrist)), // deprecated
+			luabind::value("Wrist", static_cast<int>(EQEmu::textures::TextureWrist)),
+			luabind::value("Hands", static_cast<int>(EQEmu::textures::TextureHands)),
+			luabind::value("Legs", static_cast<int>(EQEmu::textures::TextureLegs)),
+			luabind::value("Feet", static_cast<int>(EQEmu::textures::TextureFeet)),
+			luabind::value("Primary", static_cast<int>(EQEmu::textures::TexturePrimary)),
+			luabind::value("Secondary", static_cast<int>(EQEmu::textures::TextureSecondary)),
+			luabind::value("Max", static_cast<int>(EQEmu::textures::TextureCount)), // deprecated
+			luabind::value("Count", static_cast<int>(EQEmu::textures::TextureCount)),
+			luabind::value("Invalid", static_cast<int>(EQEmu::textures::TextureInvalid))
 		];
 }
 

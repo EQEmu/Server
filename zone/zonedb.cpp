@@ -2092,7 +2092,7 @@ const NPCType* ZoneDatabase::LoadNPCTypesData(uint32 npc_type_id, bool bulk_load
             else {
                 auto armorTint_row = armortint_results.begin();
 
-				for (int index = EQEmu::legacy::MATERIAL_BEGIN; index <= EQEmu::legacy::MATERIAL_END; index++) {
+				for (int index = EQEmu::textures::TextureBegin; index <= EQEmu::textures::LastTexture; index++) {
                     temp_npctype_data->armor_tint[index] = atoi(armorTint_row[index * 3]) << 16;
 					temp_npctype_data->armor_tint[index] |= atoi(armorTint_row[index * 3 + 1]) << 8;
 					temp_npctype_data->armor_tint[index] |= atoi(armorTint_row[index * 3 + 2]);
@@ -2102,7 +2102,7 @@ const NPCType* ZoneDatabase::LoadNPCTypesData(uint32 npc_type_id, bool bulk_load
         }
 		// Try loading npc_types tint fields if armor tint is 0 or query failed to get results
 		if (armor_tint_id == 0) {
-			for (int index = EQEmu::legacy::MaterialChest; index < EQEmu::legacy::MaterialCount; index++) {
+			for (int index = EQEmu::textures::TextureChest; index < EQEmu::textures::TextureCount; index++) {
 				temp_npctype_data->armor_tint[index] = temp_npctype_data->armor_tint[0];
 			}
 		}
@@ -2307,7 +2307,7 @@ const NPCType* ZoneDatabase::GetMercType(uint32 id, uint16 raceid, uint32 client
 		tmpNPCType->armor_tint[0] |= (tmpNPCType->armor_tint[0]) ? (0xFF << 24) : 0;
 
 		if (armor_tint_id == 0)
-			for (int index = EQEmu::legacy::MaterialChest; index <= EQEmu::legacy::MATERIAL_END; index++)
+			for (int index = EQEmu::textures::TextureChest; index <= EQEmu::textures::LastTexture; index++)
 				tmpNPCType->armor_tint[index] = tmpNPCType->armor_tint[0];
 		else if (tmpNPCType->armor_tint[0] == 0) {
 			std::string armorTint_query = StringFormat("SELECT red1h, grn1h, blu1h, "
@@ -2327,7 +2327,7 @@ const NPCType* ZoneDatabase::GetMercType(uint32 id, uint16 raceid, uint32 client
 			else {
 				auto armorTint_row = results.begin();
 
-				for (int index = EQEmu::legacy::MATERIAL_BEGIN; index <= EQEmu::legacy::MATERIAL_END; index++) {
+				for (int index = EQEmu::textures::TextureBegin; index <= EQEmu::textures::LastTexture; index++) {
 					tmpNPCType->armor_tint[index] = atoi(armorTint_row[index * 3]) << 16;
 					tmpNPCType->armor_tint[index] |= atoi(armorTint_row[index * 3 + 1]) << 8;
 					tmpNPCType->armor_tint[index] |= atoi(armorTint_row[index * 3 + 2]);

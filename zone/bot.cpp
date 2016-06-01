@@ -2956,7 +2956,7 @@ void Bot::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho) {
 		const ItemInst* inst = 0;
 		uint32 spawnedbotid = 0;
 		spawnedbotid = this->GetBotID();
-		for (int i = 0; i < EQEmu::legacy::MaterialPrimary; i++) {
+		for (int i = 0; i < EQEmu::textures::TexturePrimary; i++) {
 			inst = GetBotItem(i);
 			if (inst) {
 				item = inst->GetItem();
@@ -2980,9 +2980,9 @@ void Bot::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho) {
 			item = inst->GetItem();
 			if(item) {
 				if(strlen(item->IDFile) > 2)
-					ns->spawn.equipment[EQEmu::legacy::MaterialPrimary].Material = atoi(&item->IDFile[2]);
+					ns->spawn.equipment[EQEmu::textures::TexturePrimary].Material = atoi(&item->IDFile[2]);
 
-				ns->spawn.colors[EQEmu::legacy::MaterialPrimary].Color = GetEquipmentColor(EQEmu::legacy::MaterialPrimary);
+				ns->spawn.colors[EQEmu::textures::TexturePrimary].Color = GetEquipmentColor(EQEmu::textures::TexturePrimary);
 			}
 		}
 
@@ -2991,9 +2991,9 @@ void Bot::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho) {
 			item = inst->GetItem();
 			if(item) {
 				if(strlen(item->IDFile) > 2)
-					ns->spawn.equipment[EQEmu::legacy::MaterialSecondary].Material = atoi(&item->IDFile[2]);
+					ns->spawn.equipment[EQEmu::textures::TextureSecondary].Material = atoi(&item->IDFile[2]);
 
-				ns->spawn.colors[EQEmu::legacy::MaterialSecondary].Color = GetEquipmentColor(EQEmu::legacy::MaterialSecondary);
+				ns->spawn.colors[EQEmu::textures::TextureSecondary].Color = GetEquipmentColor(EQEmu::textures::TextureSecondary);
 			}
 		}
 	}
@@ -3237,7 +3237,7 @@ void Bot::BotAddEquipItem(int slot, uint32 id) {
 	if(slot > 0 && id > 0) {
 		uint8 materialFromSlot = Inventory::CalcMaterialFromSlot(slot);
 
-		if (materialFromSlot != EQEmu::legacy::MaterialInvalid) {
+		if (materialFromSlot != EQEmu::textures::TextureInvalid) {
 			equipment[slot] = id; // npc has more than just material slots. Valid material should mean valid inventory index
 			SendWearChange(materialFromSlot);
 		}
@@ -3253,11 +3253,11 @@ void Bot::BotRemoveEquipItem(int slot) {
 	if(slot > 0) {
 		uint8 materialFromSlot = Inventory::CalcMaterialFromSlot(slot);
 
-		if (materialFromSlot != EQEmu::legacy::MaterialInvalid) {
+		if (materialFromSlot != EQEmu::textures::TextureInvalid) {
 			equipment[slot] = 0; // npc has more than just material slots. Valid material should mean valid inventory index
 			SendWearChange(materialFromSlot);
-			if (materialFromSlot == EQEmu::legacy::MaterialChest)
-				SendWearChange(EQEmu::legacy::MaterialArms);
+			if (materialFromSlot == EQEmu::textures::TextureChest)
+				SendWearChange(EQEmu::textures::TextureArms);
 		}
 
 		UpdateEquipmentLight();
@@ -4781,7 +4781,7 @@ int Bot::GetHandToHandDamage(void) {
 		// everyone uses this in the revamp!
 		int skill = GetSkill(EQEmu::skills::SkillHandtoHand);
 		int epic = 0;
-		if (CastToNPC()->GetEquipment(EQEmu::legacy::MaterialHands) == 10652 && GetLevel() > 46)
+		if (CastToNPC()->GetEquipment(EQEmu::textures::TextureHands) == 10652 && GetLevel() > 46)
 			epic = 280;
 		if (epic > skill)
 			skill = epic;
@@ -4803,7 +4803,7 @@ int Bot::GetHandToHandDamage(void) {
 				9, 9, 9, 9, 9, 10, 10, 10, 10, 10,   // 31-40
 				10, 11, 11, 11, 11, 11, 11, 12, 12}; // 41-49
 	if (GetClass() == MONK) {
-		if (CastToNPC()->GetEquipment(EQEmu::legacy::MaterialHands) == 10652 && GetLevel() > 50)
+		if (CastToNPC()->GetEquipment(EQEmu::textures::TextureHands) == 10652 && GetLevel() > 50)
 			return 9;
 		if (level > 62)
 			return 15;
@@ -8415,7 +8415,7 @@ bool Bot::DyeArmor(int16 slot_id, uint32 rgb, bool all_flag, bool save_flag)
 		if (slot_id != INVALID_INDEX)
 			return false;
 
-		for (uint8 i = 0; i < EQEmu::legacy::MaterialPrimary; ++i) {
+		for (uint8 i = 0; i < EQEmu::textures::TexturePrimary; ++i) {
 			uint8 inv_slot = Inventory::CalcSlotFromMaterial(i);
 			ItemInst* inst = m_inv.GetItem(inv_slot);
 			if (!inst)
@@ -8427,7 +8427,7 @@ bool Bot::DyeArmor(int16 slot_id, uint32 rgb, bool all_flag, bool save_flag)
 	}
 	else {
 		uint8 mat_slot = Inventory::CalcMaterialFromSlot(slot_id);
-		if (mat_slot == EQEmu::legacy::MaterialInvalid || mat_slot >= EQEmu::legacy::MaterialPrimary)
+		if (mat_slot == EQEmu::textures::TextureInvalid || mat_slot >= EQEmu::textures::TexturePrimary)
 			return false;
 
 		ItemInst* inst = m_inv.GetItem(slot_id);

@@ -852,23 +852,23 @@ int16 Inventory::CalcSlotFromMaterial(uint8 material)
 {
 	switch (material)
 	{
-	case EQEmu::legacy::MaterialHead:
+	case EQEmu::textures::TextureHead:
 		return EQEmu::legacy::SlotHead;
-	case EQEmu::legacy::MaterialChest:
+	case EQEmu::textures::TextureChest:
 		return EQEmu::legacy::SlotChest;
-	case EQEmu::legacy::MaterialArms:
+	case EQEmu::textures::TextureArms:
 		return EQEmu::legacy::SlotArms;
-	case EQEmu::legacy::MaterialWrist:
+	case EQEmu::textures::TextureWrist:
 		return EQEmu::legacy::SlotWrist1;	// there's 2 bracers, only one bracer material
-	case EQEmu::legacy::MaterialHands:
+	case EQEmu::textures::TextureHands:
 		return EQEmu::legacy::SlotHands;
-	case EQEmu::legacy::MaterialLegs:
+	case EQEmu::textures::TextureLegs:
 		return EQEmu::legacy::SlotLegs;
-	case EQEmu::legacy::MaterialFeet:
+	case EQEmu::textures::TextureFeet:
 		return EQEmu::legacy::SlotFeet;
-	case EQEmu::legacy::MaterialPrimary:
+	case EQEmu::textures::TexturePrimary:
 		return EQEmu::legacy::SlotPrimary;
-	case EQEmu::legacy::MaterialSecondary:
+	case EQEmu::textures::TextureSecondary:
 		return EQEmu::legacy::SlotSecondary;
 	default:
 		return INVALID_INDEX;
@@ -880,26 +880,26 @@ uint8 Inventory::CalcMaterialFromSlot(int16 equipslot)
 	switch (equipslot)
 	{
 	case EQEmu::legacy::SlotHead:
-		return EQEmu::legacy::MaterialHead;
+		return EQEmu::textures::TextureHead;
 	case EQEmu::legacy::SlotChest:
-		return EQEmu::legacy::MaterialChest;
+		return EQEmu::textures::TextureChest;
 	case EQEmu::legacy::SlotArms:
-		return EQEmu::legacy::MaterialArms;
+		return EQEmu::textures::TextureArms;
 	case EQEmu::legacy::SlotWrist1:
 	//case SLOT_BRACER02: // non-live behavior
-		return EQEmu::legacy::MaterialWrist;
+		return EQEmu::textures::TextureWrist;
 	case EQEmu::legacy::SlotHands:
-		return EQEmu::legacy::MaterialHands;
+		return EQEmu::textures::TextureHands;
 	case EQEmu::legacy::SlotLegs:
-		return EQEmu::legacy::MaterialLegs;
+		return EQEmu::textures::TextureLegs;
 	case EQEmu::legacy::SlotFeet:
-		return EQEmu::legacy::MaterialFeet;
+		return EQEmu::textures::TextureFeet;
 	case EQEmu::legacy::SlotPrimary:
-		return EQEmu::legacy::MaterialPrimary;
+		return EQEmu::textures::TexturePrimary;
 	case EQEmu::legacy::SlotSecondary:
-		return EQEmu::legacy::MaterialSecondary;
+		return EQEmu::textures::TextureSecondary;
 	default:
-		return EQEmu::legacy::MaterialInvalid;
+		return EQEmu::textures::TextureInvalid;
 	}
 }
 
