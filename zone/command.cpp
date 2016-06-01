@@ -7128,7 +7128,7 @@ void Client::Undye() {
 			database.SaveInventory(CharacterID(), inst, slot2);
 		}
 
-		m_pp.item_tint[cur_slot].Color = 0;
+		m_pp.item_tint.Slot[cur_slot].Color = 0;
 		SendWearChange(cur_slot);
 	}
 

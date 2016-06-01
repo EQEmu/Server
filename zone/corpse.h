@@ -154,7 +154,7 @@ private:
 	Timer		corpse_delay_timer;
 	Timer		corpse_graveyard_timer;
 	Timer		loot_cooldown_timer; /* Delay between loot actions on the corpse entity */
-	Color_Struct item_tint[9];
+	EQEmu::TintProfile item_tint;
 
 };
 

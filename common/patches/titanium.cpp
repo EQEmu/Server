@@ -905,7 +905,7 @@ namespace Titanium
 		//	OUT(unknown00178[10]);
 		for (r = 0; r < 9; r++) {
 			OUT(item_material[r]);
-			OUT(item_tint[r].Color);
+			OUT(item_tint.Slot[r].Color);
 		}
 		//	OUT(unknown00224[48]);
 		for (r = 0; r < structs::MAX_PP_AA_ARRAY; r++) {
@@ -1224,7 +1224,7 @@ namespace Titanium
 				eq->Race[char_index] = 1;
 
 			for (int index = 0; index < EQEmu::textures::TextureCount; ++index) {
-				eq->CS_Colors[char_index][index].Color = emu_cse->Equip[index].Color.Color;
+				eq->CS_Colors[char_index].Slot[index].Color = emu_cse->Equip[index].Color.Color;
 			}
 
 			eq->BeardColor[char_index] = emu_cse->BeardColor;
@@ -1261,7 +1261,7 @@ namespace Titanium
 			eq->Race[char_index] = 0;
 
 			for (int index = 0; index < EQEmu::textures::TextureCount; ++index) {
-				eq->CS_Colors[char_index][index].Color = 0;
+				eq->CS_Colors[char_index].Slot[index].Color = 0;
 			}
 
 			eq->BeardColor[char_index] = 0;
@@ -1601,7 +1601,7 @@ namespace Titanium
 			//		eq->unknown0194[3] = emu->unknown0194[3];
 			for (k = 0; k < 9; k++) {
 				eq->equipment[k] = emu->equipment[k].Material;
-				eq->colors[k].Color = emu->colors[k].Color;
+				eq->equipment_tint.Slot[k].Color = emu->equipment_tint.Slot[k].Color;
 			}
 			for (k = 0; k < 8; k++) {
 				eq->set_to_0xFF[k] = 0xFF;

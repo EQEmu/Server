@@ -54,7 +54,57 @@ namespace EQEmu
 
 	} /*textures*/
 
-	struct TextureProfile;
+	struct TextureProfile {
+		union {
+			struct {
+				uint32 Head;
+				uint32 Chest;
+				uint32 Arms;
+				uint32 Wrist;
+				uint32 Hands;
+				uint32 Legs;
+				uint32 Feet;
+				uint32 Primary;
+				uint32 Secondary;
+			};
+			uint32 Texture[textures::TextureCount];
+		};
+
+		TextureProfile();
+	};
+
+	struct Tint_Struct {
+		union {
+			struct {
+				uint8 Blue;
+				uint8 Green;
+				uint8 Red;
+				uint8 UseTint;	// if there's a tint this is FF
+			};
+			uint32 Color;
+		};
+
+		//Tint_Struct();
+	};
+
+	struct TintProfile {
+		union {
+			struct {
+				Tint_Struct Head;
+				Tint_Struct Chest;
+				Tint_Struct Arms;
+				Tint_Struct Wrist;
+				Tint_Struct Hands;
+				Tint_Struct Legs;
+				Tint_Struct Feet;
+				Tint_Struct Primary;
+				Tint_Struct Secondary;
+			};
+			Tint_Struct Slot[textures::TextureCount];
+		};
+
+		TintProfile();
+	};
 
 } /*EQEmu*/
 

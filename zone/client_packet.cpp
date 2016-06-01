@@ -1315,9 +1315,9 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	/* Set item material tint */
 	for (int i = EQEmu::textures::TextureBegin; i <= EQEmu::textures::LastTexture; i++)
 	{
-		if (m_pp.item_tint[i].RGB.UseTint == 1 || m_pp.item_tint[i].RGB.UseTint == 255)
+		if (m_pp.item_tint.Slot[i].UseTint == 1 || m_pp.item_tint.Slot[i].UseTint == 255)
 		{
-				m_pp.item_tint[i].RGB.UseTint = 0xFF;
+				m_pp.item_tint.Slot[i].UseTint = 0xFF;
 		}
 	}
 
@@ -5379,10 +5379,10 @@ void Client::Handle_OP_DumpName(const EQApplicationPacket *app)
 
 void Client::Handle_OP_Dye(const EQApplicationPacket *app)
 {
-	if (app->size != sizeof(DyeStruct))
-		printf("Wrong size of DyeStruct, Got: %i, Expected: %zu\n", app->size, sizeof(DyeStruct));
+	if (app->size != sizeof(EQEmu::TintProfile))
+		printf("Wrong size of DyeStruct, Got: %i, Expected: %zu\n", app->size, sizeof(EQEmu::TintProfile));
 	else{
-		DyeStruct* dye = (DyeStruct*)app->pBuffer;
+		EQEmu::TintProfile* dye = (EQEmu::TintProfile*)app->pBuffer;
 		DyeArmor(dye);
 	}
 	return;

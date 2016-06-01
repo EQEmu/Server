@@ -169,7 +169,7 @@ struct PlayerCorpse_Struct {
 	uint32	silver;
 	uint32	gold;
 	uint32	plat;
-	Color_Struct item_tint[9];
+	EQEmu::TintProfile item_tint;
 	uint8 haircolor;
 	uint8 beardcolor;
 	uint8 eyecolor1;

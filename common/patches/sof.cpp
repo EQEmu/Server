@@ -1216,7 +1216,7 @@ namespace SoF
 			//eq->colors[r].color = emu->colors[r].color;
 		}
 		for (r = 0; r < 7; r++) {
-			OUT(item_tint[r].Color);
+			OUT(item_tint.Slot[r].Color);
 		}
 		//	OUT(unknown00224[48]);
 		//NOTE: new client supports 300 AAs, our internal rep/PP
@@ -2084,7 +2084,7 @@ namespace SoF
 				eq->equipment[k].Material = emu->equipment[k].Material;
 				eq->equipment[k].Unknown1 = emu->equipment[k].Unknown1;
 				eq->equipment[k].EliteMaterial = emu->equipment[k].EliteMaterial;
-				eq->colors[k].Color = emu->colors[k].Color;
+				eq->equipment_tint.Slot[k].Color = emu->equipment_tint.Slot[k].Color;
 			}
 			eq->StandState = emu->StandState;
 			eq->guildID = emu->guildID;
@@ -2147,7 +2147,7 @@ namespace SoF
 			eq->petOwnerId = emu->petOwnerId;
 			eq->pvp = 0;	// 0 = non-pvp colored name, 1 = red pvp name
 			for (k = 0; k < 9; k++) {
-				eq->colors[k].Color = emu->colors[k].Color;
+				eq->equipment_tint.Slot[k].Color = emu->equipment_tint.Slot[k].Color;
 			}
 			eq->anon = emu->anon;
 			eq->face = emu->face;

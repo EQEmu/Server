@@ -2965,12 +2965,12 @@ void Bot::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho) {
 					ns->spawn.equipment[i].EliteMaterial = item->EliteMaterial;
 					ns->spawn.equipment[i].HeroForgeModel = item->HerosForgeModel;
 					if (armor_tint[i])
-						ns->spawn.colors[i].Color = armor_tint[i];
+						ns->spawn.equipment_tint.Slot[i].Color = armor_tint[i];
 					else
-						ns->spawn.colors[i].Color = item->Color;
+						ns->spawn.equipment_tint.Slot[i].Color = item->Color;
 				} else {
 					if (armor_tint[i])
-						ns->spawn.colors[i].Color = armor_tint[i];
+						ns->spawn.equipment_tint.Slot[i].Color = armor_tint[i];
 				}
 			}
 		}
@@ -2982,7 +2982,7 @@ void Bot::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho) {
 				if(strlen(item->IDFile) > 2)
 					ns->spawn.equipment[EQEmu::textures::TexturePrimary].Material = atoi(&item->IDFile[2]);
 
-				ns->spawn.colors[EQEmu::textures::TexturePrimary].Color = GetEquipmentColor(EQEmu::textures::TexturePrimary);
+				ns->spawn.equipment_tint.Primary.Color = GetEquipmentColor(EQEmu::textures::TexturePrimary);
 			}
 		}
 
@@ -2993,7 +2993,7 @@ void Bot::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho) {
 				if(strlen(item->IDFile) > 2)
 					ns->spawn.equipment[EQEmu::textures::TextureSecondary].Material = atoi(&item->IDFile[2]);
 
-				ns->spawn.colors[EQEmu::textures::TextureSecondary].Color = GetEquipmentColor(EQEmu::textures::TextureSecondary);
+				ns->spawn.equipment_tint.Secondary.Color = GetEquipmentColor(EQEmu::textures::TextureSecondary);
 			}
 		}
 	}

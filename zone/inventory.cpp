@@ -2019,28 +2019,28 @@ void Client::QSSwapItemAuditor(MoveItem_Struct* move_in, bool postaction_call) {
 	safe_delete(qspack);
 }
 
-void Client::DyeArmor(DyeStruct* dye){
+void Client::DyeArmor(EQEmu::TintProfile* dye){
 	int16 slot=0;
 	for (int i = EQEmu::textures::TextureBegin; i <= EQEmu::textures::LastTintableTexture; i++) {
-		if ((m_pp.item_tint[i].Color & 0x00FFFFFF) != (dye->dye[i].Color & 0x00FFFFFF)) {
+		if ((m_pp.item_tint.Slot[i].Color & 0x00FFFFFF) != (dye->Slot[i].Color & 0x00FFFFFF)) {
 			slot = m_inv.HasItem(32557, 1, invWherePersonal);
 			if (slot != INVALID_INDEX){
 				DeleteItemInInventory(slot,1,true);
 				uint8 slot2=SlotConvert(i);
 				ItemInst* inst = this->m_inv.GetItem(slot2);
 				if(inst){
-					uint32 armor_color = ((uint32)dye->dye[i].RGB.Red << 16) | ((uint32)dye->dye[i].RGB.Green << 8) | ((uint32)dye->dye[i].RGB.Blue);
+					uint32 armor_color = ((uint32)dye->Slot[i].Red << 16) | ((uint32)dye->Slot[i].Green << 8) | ((uint32)dye->Slot[i].Blue);
 					inst->SetColor(armor_color); 
 					database.SaveCharacterMaterialColor(this->CharacterID(), i, armor_color);
 					database.SaveInventory(CharacterID(),inst,slot2);
-					if(dye->dye[i].RGB.UseTint)
-						m_pp.item_tint[i].RGB.UseTint = 0xFF;
+					if(dye->Slot[i].UseTint)
+						m_pp.item_tint.Slot[i].UseTint = 0xFF;
 					else
-						m_pp.item_tint[i].RGB.UseTint=0x00;
+						m_pp.item_tint.Slot[i].UseTint=0x00;
 				}
-				m_pp.item_tint[i].RGB.Blue=dye->dye[i].RGB.Blue;
-				m_pp.item_tint[i].RGB.Red=dye->dye[i].RGB.Red;
-				m_pp.item_tint[i].RGB.Green=dye->dye[i].RGB.Green;
+				m_pp.item_tint.Slot[i].Blue=dye->Slot[i].Blue;
+				m_pp.item_tint.Slot[i].Red=dye->Slot[i].Red;
+				m_pp.item_tint.Slot[i].Green=dye->Slot[i].Green;
 				SendWearChange(i);
 			}
 			else{
@@ -2636,7 +2636,7 @@ uint32 Client::GetEquipmentColor(uint8 material_slot) const
 
 	const EQEmu::ItemBase *item = database.GetItem(GetEquipment(material_slot));
 	if(item != nullptr)
-		return ((m_pp.item_tint[material_slot].RGB.UseTint) ? m_pp.item_tint[material_slot].Color : item->Color);
+		return ((m_pp.item_tint.Slot[material_slot].UseTint) ? m_pp.item_tint.Slot[material_slot].Color : item->Color);
 
 	return 0;
 }

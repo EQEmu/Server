@@ -122,7 +122,7 @@ struct AdventureInfo {
 ** Merth: Gave struct a name so gcc 2.96 would compile
 **
 */
-struct Color_Struct
+struct Tint_Struct
 {
 	union {
 		struct {
@@ -130,8 +130,25 @@ struct Color_Struct
 			uint8 Green;
 			uint8 Red;
 			uint8 UseTint;	// if there's a tint this is FF
-		} RGB;
+		};
 		uint32 Color;
+	};
+};
+
+struct TintProfile {
+	union {
+		struct {
+			Tint_Struct Head;
+			Tint_Struct Chest;
+			Tint_Struct Arms;
+			Tint_Struct Wrist;
+			Tint_Struct Hands;
+			Tint_Struct Legs;
+			Tint_Struct Feet;
+			Tint_Struct Primary;
+			Tint_Struct Secondary;
+		};
+		Tint_Struct Slot[EQEmu::textures::TextureCount];
 	};
 };
 
@@ -140,7 +157,7 @@ struct CharSelectEquip
 	uint32 Material;
 	uint32 Unknown1;
 	uint32 EliteMaterial;
-	Color_Struct Color;
+	Tint_Struct Color;
 };
 
 struct CharacterSelectEntry_Struct
@@ -314,22 +331,7 @@ union
 /*0775*/ char	name[64];			// Player's Name
 /*0839*/ uint32 petOwnerId;			// If this is a pet, the spawn id of owner
 /*0843*/ uint8  pvp;				// 0 = normal name color, 2 = PVP name color
-/*0844*/ union
-	 {
-		struct
-		{
-		/*0844*/ Color_Struct color_helmet;    // Color of helmet item
-		/*0848*/ Color_Struct color_chest;     // Color of chest item
-		/*0852*/ Color_Struct color_arms;      // Color of arms item
-		/*0856*/ Color_Struct color_bracers;   // Color of bracers item
-		/*0860*/ Color_Struct color_hands;     // Color of hands item
-		/*0864*/ Color_Struct color_legs;      // Color of legs item
-		/*0868*/ Color_Struct color_feet;      // Color of feet item
-		/*0872*/ Color_Struct color_primary;   // Color of primary item
-		/*0876*/ Color_Struct color_secondary; // Color of secondary item
-		} equipment_colors;
-		/*0844*/ Color_Struct colors[9]; // Array elements correspond to struct equipment_colors above
-	 };
+/*0844*/ TintProfile equipment_tint;
 /*0880*/ uint8  anon;				// 0=normal, 1=anon, 2=roleplay
 /*0881*/ uint8	face;
 /*0882*/ uint8  drakkin_details;		// Face Details (Spikes) on Drakkin 0 - 7
@@ -899,7 +901,7 @@ struct PlayerProfile_Struct //23576 Octets
 		/*00228*/ EquipStruct equipment[9]; //Live Shows [108] for this part
 	 };
 /*00336*/ uint8 unknown00224[156];		// Live Shows [160]
-/*00496*/ Color_Struct item_tint[9];	// RR GG BB 00
+/*00496*/ TintProfile item_tint;		// RR GG BB 00
 /*00544*/ AA_Array  aa_array[MAX_PP_AA_ARRAY];	// [3600] AAs 12 bytes each
 /*04132*/ uint32  points;				// Unspent Practice points - RELOCATED???
 /*04136*/ uint32  mana;					// Current mana
@@ -1155,7 +1157,7 @@ struct WearChange_Struct{
 /*002*/ uint32 material;
 /*006*/ uint32 unknown06;
 /*010*/ uint32 elite_material;	// 1 for Drakkin Elite Material
-/*014*/ Color_Struct color;
+/*014*/ Tint_Struct color;
 /*018*/ uint8 wear_slot_id;
 /*019*/
 };
@@ -2952,27 +2954,6 @@ struct PetitionBug_Struct{
 	uint32	time;
 	uint32	unknown168;
 	char	text[1028];
-};
-
-struct DyeStruct
-{
-	union
-	{
-		struct
-		{
-			struct Color_Struct head;
-			struct Color_Struct chest;
-			struct Color_Struct arms;
-			struct Color_Struct wrists;
-			struct Color_Struct hands;
-			struct Color_Struct legs;
-			struct Color_Struct feet;
-			struct Color_Struct primary;	// you can't actually dye this
-			struct Color_Struct secondary;	// or this
-		}
-		dyes;
-		struct Color_Struct dye[9];
-	};
 };
 
 struct ApproveZone_Struct {

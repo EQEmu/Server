@@ -116,15 +116,15 @@ Corpse* Corpse::LoadCharacterCorpseEntity(uint32 in_dbid, uint32 in_charid, std:
 		pc->Lock();
 
 	/* Load Item Tints */
-	pc->item_tint[0].Color = pcs->item_tint[0].Color;
-	pc->item_tint[1].Color = pcs->item_tint[1].Color;
-	pc->item_tint[2].Color = pcs->item_tint[2].Color;
-	pc->item_tint[3].Color = pcs->item_tint[3].Color;
-	pc->item_tint[4].Color = pcs->item_tint[4].Color;
-	pc->item_tint[5].Color = pcs->item_tint[5].Color;
-	pc->item_tint[6].Color = pcs->item_tint[6].Color;
-	pc->item_tint[7].Color = pcs->item_tint[7].Color;
-	pc->item_tint[8].Color = pcs->item_tint[8].Color;
+	pc->item_tint.Head.Color = pcs->item_tint.Head.Color;
+	pc->item_tint.Chest.Color = pcs->item_tint.Chest.Color;
+	pc->item_tint.Arms.Color = pcs->item_tint.Arms.Color;
+	pc->item_tint.Wrist.Color = pcs->item_tint.Wrist.Color;
+	pc->item_tint.Hands.Color = pcs->item_tint.Hands.Color;
+	pc->item_tint.Legs.Color = pcs->item_tint.Legs.Color;
+	pc->item_tint.Feet.Color = pcs->item_tint.Feet.Color;
+	pc->item_tint.Primary.Color = pcs->item_tint.Primary.Color;
+	pc->item_tint.Secondary.Color = pcs->item_tint.Secondary.Color;
 
 	/* Load Physical Appearance */
 	pc->haircolor = pcs->haircolor;
@@ -162,7 +162,7 @@ Corpse::Corpse(NPC* in_npc, ItemList* in_itemlist, uint32 in_npctypeid, const NP
 {
 	corpse_graveyard_timer.Disable();
 
-	memset(item_tint, 0, sizeof(item_tint));
+	//memset(item_tint, 0, sizeof(item_tint));
 
 	is_corpse_changed = false;
 	is_player_corpse = false;
@@ -277,7 +277,7 @@ Corpse::Corpse(Client* client, int32 in_rezexp) : Mob (
 		corpse_graveyard_timer.Disable();
 	}
 
-	memset(item_tint, 0, sizeof(item_tint));
+	//memset(item_tint, 0, sizeof(item_tint));
 
 	for (i = 0; i < MAX_LOOTERS; i++){
 		allowed_looters[i] = 0;
@@ -321,7 +321,7 @@ Corpse::Corpse(Client* client, int32 in_rezexp) : Mob (
 		}
 
 		// get their tints
-		memcpy(item_tint, &client->GetPP().item_tint, sizeof(item_tint));
+		memcpy(&item_tint.Slot, &client->GetPP().item_tint, sizeof(item_tint));
 
 		// TODO soulbound items need not be added to corpse, but they need
 		// to go into the regular slots on the player, out of bags
@@ -502,7 +502,7 @@ in_helmtexture,
 	if (!zone->HasGraveyard() || wasAtGraveyard)
 		corpse_graveyard_timer.Disable();
 
-	memset(item_tint, 0, sizeof(item_tint));
+	//memset(item_tint, 0, sizeof(item_tint));
 
 	is_corpse_changed = false;
 	is_player_corpse = true;
@@ -591,7 +591,7 @@ bool Corpse::Save() {
 	dbpc->helmtexture = this->helmtexture;
 	dbpc->exp = rez_experience;
 
-	memcpy(dbpc->item_tint, item_tint, sizeof(dbpc->item_tint));
+	memcpy(&dbpc->item_tint.Slot, &item_tint.Slot, sizeof(dbpc->item_tint));
 	dbpc->haircolor = haircolor;
 	dbpc->beardcolor = beardcolor;
 	dbpc->eyecolor2 = eyecolor1;
@@ -1420,9 +1420,7 @@ uint32 Corpse::GetEquipmentColor(uint8 material_slot) const {
 
 	item = database.GetItem(GetEquipment(material_slot));
 	if(item != NO_ITEM) {
-		return item_tint[material_slot].RGB.UseTint ?
-			item_tint[material_slot].Color :
-			item->Color;
+		return (item_tint.Slot[material_slot].UseTint ? item_tint.Slot[material_slot].Color : item->Color);
 	}
 
 	return 0;

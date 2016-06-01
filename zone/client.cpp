@@ -3062,19 +3062,19 @@ void Client::Tell_StringID(uint32 string_id, const char *who, const char *messag
 }
 
 void Client::SetTint(int16 in_slot, uint32 color) {
-	Color_Struct new_color;
+	EQEmu::Tint_Struct new_color;
 	new_color.Color = color;
 	SetTint(in_slot, new_color);
 	database.SaveCharacterMaterialColor(this->CharacterID(), in_slot, color);
 }
 
 // Still need to reconcile bracer01 versus bracer02
-void Client::SetTint(int16 in_slot, Color_Struct& color) {
+void Client::SetTint(int16 in_slot, EQEmu::Tint_Struct& color) {
 
 	uint8 matslot = Inventory::CalcMaterialFromSlot(in_slot);
 	if (matslot != EQEmu::textures::TextureInvalid)
 	{
-		m_pp.item_tint[matslot].Color = color.Color;
+		m_pp.item_tint.Slot[matslot].Color = color.Color;
 		database.SaveCharacterMaterialColor(this->CharacterID(), in_slot, color.Color);
 	}
 

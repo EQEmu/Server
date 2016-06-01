@@ -235,10 +235,10 @@ void WorldDatabase::GetCharSelectInfo(uint32 accountID, EQApplicationPacket **ou
 		auto results_b = database.QueryDatabase(cquery); uint8 slot = 0;
 		for (auto row_b = results_b.begin(); row_b != results_b.end(); ++row_b) {
 			slot = atoi(row_b[0]);
-			pp.item_tint[slot].RGB.Red = atoi(row_b[1]);
-			pp.item_tint[slot].RGB.Green = atoi(row_b[2]);
-			pp.item_tint[slot].RGB.Blue = atoi(row_b[3]);
-			pp.item_tint[slot].RGB.UseTint = atoi(row_b[4]);
+			pp.item_tint.Slot[slot].Red = atoi(row_b[1]);
+			pp.item_tint.Slot[slot].Green = atoi(row_b[2]);
+			pp.item_tint.Slot[slot].Blue = atoi(row_b[3]);
+			pp.item_tint.Slot[slot].UseTint = atoi(row_b[4]);
 		}
 		/* Character Material Data End */
 
@@ -279,8 +279,8 @@ void WorldDatabase::GetCharSelectInfo(uint32 accountID, EQApplicationPacket **ou
 				}
 				else {
 					uint32 color = 0;
-					if (pp.item_tint[matslot].RGB.UseTint) {
-						color = pp.item_tint[matslot].Color;
+					if (pp.item_tint.Slot[matslot].UseTint) {
+						color = pp.item_tint.Slot[matslot].Color;
 					}
 					else {
 						color = inst->GetColor();

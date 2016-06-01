@@ -118,7 +118,7 @@ struct AdventureInfo {
 ** Merth: Gave struct a name so gcc 2.96 would compile
 **
 */
-struct Color_Struct
+struct Tint_Struct
 {
 	union {
 		struct {
@@ -126,8 +126,25 @@ struct Color_Struct
 			uint8 Green;
 			uint8 Red;
 			uint8 UseTint;	// if there's a tint this is FF
-		} RGB;
+		};
 		uint32 Color;
+	};
+};
+
+struct TintProfile {
+	union {
+		struct {
+			Tint_Struct Head;
+			Tint_Struct Chest;
+			Tint_Struct Arms;
+			Tint_Struct Wrist;
+			Tint_Struct Hands;
+			Tint_Struct Legs;
+			Tint_Struct Feet;
+			Tint_Struct Primary;
+			Tint_Struct Secondary;
+		};
+		Tint_Struct Slot[EQEmu::textures::TextureCount];
 	};
 };
 
@@ -139,7 +156,7 @@ struct Color_Struct
 struct CharacterSelect_Struct
 {
 /*0000*/	uint32 Race[10];				// Characters Race
-/*0040*/	Color_Struct CS_Colors[10][9];	// Characters Equipment Colors
+/*0040*/	TintProfile CS_Colors[10];		// Characters Equipment Colors - packet requires length for 10 characters..but, client is limited to 8
 /*0400*/	uint8 BeardColor[10];			// Characters beard Color
 /*0410*/	uint8 HairStyle[10];			// Characters hair style
 /*0420*/	uint32 Equip[10][9];			// 0=helm, 1=chest, 2=arm, 3=bracer, 4=hand, 5=leg, 6=boot, 7=melee1, 8=melee2  (Might not be)
@@ -284,22 +301,7 @@ union
 };
 /*0340*/ uint32 spawnId;        // Spawn Id
 /*0344*/ uint8 unknown0344[4];
-/*0348*/ union
-         {
-             struct
-             {
-                 /*0348*/ Color_Struct color_helmet;    // Color of helmet item
-                 /*0352*/ Color_Struct color_chest;     // Color of chest item
-                 /*0356*/ Color_Struct color_arms;      // Color of arms item
-                 /*0360*/ Color_Struct color_bracers;   // Color of bracers item
-                 /*0364*/ Color_Struct color_hands;     // Color of hands item
-                 /*0368*/ Color_Struct color_legs;      // Color of legs item
-                 /*0372*/ Color_Struct color_feet;      // Color of feet item
-                 /*0376*/ Color_Struct color_primary;   // Color of primary item
-                 /*0380*/ Color_Struct color_secondary; // Color of secondary item
-             } equipment_colors;
-             /*0348*/ Color_Struct colors[9]; // Array elements correspond to struct equipment_colors above
-         };
+/*0348*/ TintProfile equipment_tint;
 /*0384*/ uint8  lfg;            // 0=off, 1=lfg on
 /*0385*/
 
@@ -812,7 +814,7 @@ struct PlayerProfile_Struct
 /*00178*/ uint8 unknown00178[10];
 /*00188*/ uint32  item_material[9];   // Item texture/material of worn items
 /*00224*/ uint8 unknown00224[44];
-/*00268*/ Color_Struct item_tint[9];    // RR GG BB 00
+/*00268*/ TintProfile item_tint;    // RR GG BB 00
 /*00304*/ AA_Array  aa_array[MAX_PP_AA_ARRAY];   // AAs
 /*02224*/ uint32  points;             // Unspent Practice points
 /*02228*/ uint32  mana;               // Current mana
@@ -1035,7 +1037,7 @@ struct SpecialMesg_Struct
 struct WearChange_Struct{
 /*000*/ uint16 spawn_id;
 /*002*/ uint16 material;
-/*004*/ Color_Struct color;
+/*004*/ Tint_Struct color;
 /*009*/ uint8 wear_slot_id;
 };
 
@@ -2589,27 +2591,6 @@ struct PetitionBug_Struct{
 	uint32	time;
 	uint32	unknown168;
 	char	text[1028];
-};
-
-struct DyeStruct
-{
-	union
-	{
-		struct
-		{
-			struct Color_Struct head;
-			struct Color_Struct chest;
-			struct Color_Struct arms;
-			struct Color_Struct wrists;
-			struct Color_Struct hands;
-			struct Color_Struct legs;
-			struct Color_Struct feet;
-			struct Color_Struct primary;	// you can't actually dye this
-			struct Color_Struct secondary;	// or this
-		}
-		dyes;
-		struct Color_Struct dye[9];
-	};
 };
 
 struct ApproveZone_Struct {

@@ -1,5 +1,8 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 06/01/2016 ==
+Uleat: Implemented EQEmu::TintProfile
+
 == 05/31/2016 ==
 Uleat: Converted enumeration MaterialSlots to EQEmu::textures::TextureSlot
 

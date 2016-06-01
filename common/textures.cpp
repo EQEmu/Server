@@ -83,27 +83,12 @@
 //	}
 //}
 
-struct EQEmu::TextureProfile
-{
-	union {
-		struct {
-			uint32 Head;
-			uint32 Chest;
-			uint32 Arms;
-			uint32 Wrist;
-			uint32 Hands;
-			uint32 Legs;
-			uint32 Feet;
-			uint32 Primary;
-			uint32 Secondary;
-		};
-		uint32 Texture[textures::TextureCount];
-	};
-
-	TextureProfile();
-};
-
 EQEmu::TextureProfile::TextureProfile()
 {
 	memset(&Texture, 0, (sizeof(uint32) * textures::TextureCount));
+}
+
+EQEmu::TintProfile::TintProfile()
+{
+	memset(&Slot, 0, (sizeof(uint32) * textures::TextureCount));
 }

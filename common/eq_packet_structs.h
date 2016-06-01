@@ -126,19 +126,6 @@ struct LDoNTrapTemplate
 
 // All clients translate the character select information to some degree
 
-struct Color_Struct
-{
-	union {
-		struct {
-			uint8 Blue;
-			uint8 Green;
-			uint8 Red;
-			uint8 UseTint;	// if there's a tint this is FF
-		} RGB;
-		uint32 Color;
-	};
-};
-
 struct EquipStruct
 {
 	uint32 Material;
@@ -155,7 +142,7 @@ struct CharSelectEquip
 	uint32 EliteMaterial;
 	uint32 HeroForgeModel;
 	uint32 Material2;
-	Color_Struct Color;
+	EQEmu::Tint_Struct Color;
 };
 
 // RoF2-based hybrid struct
@@ -326,22 +313,7 @@ union
 /*0340*/ uint32 spawnId;		// Spawn Id
 /*0344*/ uint8 unknown0344[3];
 /*0347*/ uint8 IsMercenary;
-/*0348*/ union
-		 {
-			struct
-			{
-				/*0348*/ Color_Struct color_helmet;		// Color of helmet item
-				/*0352*/ Color_Struct color_chest;		// Color of chest item
-				/*0356*/ Color_Struct color_arms;		// Color of arms item
-				/*0360*/ Color_Struct color_bracers;	// Color of bracers item
-				/*0364*/ Color_Struct color_hands;		// Color of hands item
-				/*0368*/ Color_Struct color_legs;		// Color of legs item
-				/*0372*/ Color_Struct color_feet;		// Color of feet item
-				/*0376*/ Color_Struct color_primary;	// Color of primary item
-				/*0380*/ Color_Struct color_secondary;	// Color of secondary item
-			} equipment_colors;
-			/*0348*/ Color_Struct colors[EQEmu::textures::TextureCount]; // Array elements correspond to struct equipment_colors above
-		 };
+/*0348*/ EQEmu::TintProfile equipment_tint;
 /*0384*/ uint8	lfg;			// 0=off, 1=lfg on
 /*0385*/
 
@@ -992,7 +964,7 @@ struct PlayerProfile_Struct
 /*0306*/	uint8				unknown0306[6];		// @bp Spacer/Flag?
 /*0312*/	uint32				item_material[EQEmu::textures::TextureCount];	// Item texture/material of worn/held items
 /*0348*/	uint8				unknown0348[44];
-/*0392*/	Color_Struct		item_tint[EQEmu::textures::TextureCount];
+/*0392*/	EQEmu::TintProfile	item_tint;
 /*0428*/	AA_Array			aa_array[MAX_PP_AA_ARRAY];
 /*2348*/	float				unknown2384;		//seen ~128, ~47
 /*2352*/	char				servername[32];		// length probably not right
@@ -1227,7 +1199,7 @@ struct WearChange_Struct{
 /*010*/ uint32 elite_material;	// 1 for Drakkin Elite Material
 /*014*/ uint32 hero_forge_model; // New to VoA
 /*018*/ uint32 unknown18; // New to RoF
-/*022*/ Color_Struct color;
+/*022*/ EQEmu::Tint_Struct color;
 /*026*/ uint8 wear_slot_id;
 /*027*/
 };
@@ -3414,27 +3386,6 @@ struct PetitionBug_Struct{
 	uint32	time;
 	uint32	unknown168;
 	char	text[1028];
-};
-
-struct DyeStruct
-{
-	union
-	{
-		struct
-		{
-			struct Color_Struct head;
-			struct Color_Struct chest;
-			struct Color_Struct arms;
-			struct Color_Struct wrists;
-			struct Color_Struct hands;
-			struct Color_Struct legs;
-			struct Color_Struct feet;
-			struct Color_Struct primary;	// you can't actually dye this
-			struct Color_Struct secondary;	// or this
-		}
-		dyes;
-		struct Color_Struct dye[EQEmu::textures::TextureCount];
-	};
 };
 
 struct ApproveZone_Struct {
