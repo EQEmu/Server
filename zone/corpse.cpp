@@ -162,8 +162,6 @@ Corpse::Corpse(NPC* in_npc, ItemList* in_itemlist, uint32 in_npctypeid, const NP
 {
 	corpse_graveyard_timer.Disable();
 
-	//memset(item_tint, 0, sizeof(item_tint));
-
 	is_corpse_changed = false;
 	is_player_corpse = false;
 	is_locked = false;
@@ -276,8 +274,6 @@ Corpse::Corpse(Client* client, int32 in_rezexp) : Mob (
 	if(!zone->HasGraveyard()) {
 		corpse_graveyard_timer.Disable();
 	}
-
-	//memset(item_tint, 0, sizeof(item_tint));
 
 	for (i = 0; i < MAX_LOOTERS; i++){
 		allowed_looters[i] = 0;
@@ -501,8 +497,6 @@ EQEmu::TintProfile(),
 
 	if (!zone->HasGraveyard() || wasAtGraveyard)
 		corpse_graveyard_timer.Disable();
-
-	//memset(item_tint, 0, sizeof(item_tint));
 
 	is_corpse_changed = false;
 	is_player_corpse = true;

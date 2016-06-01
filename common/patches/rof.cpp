@@ -2068,7 +2068,7 @@ namespace RoF
 
 		outapp->WriteUInt32(22);		// Equipment count
 
-		for (int r = 0; r < 9; r++)
+		for (int r = EQEmu::textures::TextureBegin; r < EQEmu::textures::TextureCount; r++)
 		{
 			outapp->WriteUInt32(emu->item_material.Slot[r].Material);
 			outapp->WriteUInt32(0);
@@ -2088,9 +2088,9 @@ namespace RoF
 			outapp->WriteUInt32(0);
 		}
 
-		outapp->WriteUInt32(9);		// Equipment2 count
+		outapp->WriteUInt32(EQEmu::textures::TextureCount);		// Equipment2 count
 
-		for (int r = 0; r < 9; r++)
+		for (int r = EQEmu::textures::TextureBegin; r < EQEmu::textures::TextureCount; r++)
 		{
 			outapp->WriteUInt32(0);
 			outapp->WriteUInt32(0);
@@ -2099,7 +2099,7 @@ namespace RoF
 			outapp->WriteUInt32(0);
 		}
 
-		outapp->WriteUInt32(9);		// Tint Count
+		outapp->WriteUInt32(EQEmu::textures::TextureCount);		// Tint Count
 
 		for (int r = 0; r < 7; r++)
 		{
@@ -2109,7 +2109,7 @@ namespace RoF
 		outapp->WriteUInt32(0);
 		outapp->WriteUInt32(0);
 
-		outapp->WriteUInt32(9);		// Tint2 Count
+		outapp->WriteUInt32(EQEmu::textures::TextureCount);		// Tint2 Count
 
 		for (int r = 0; r < 7; r++)
 		{
@@ -4083,7 +4083,7 @@ namespace RoF
 
 			if ((emu->NPC == 0) || (emu->race <= 12) || (emu->race == 128) || (emu->race == 130) || (emu->race == 330) || (emu->race == 522))
 			{
-				for (k = 0; k < 9; ++k)
+				for (k = EQEmu::textures::TextureBegin; k < EQEmu::textures::TextureCount; ++k)
 				{
 					{
 						VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->equipment_tint.Slot[k].Color);
@@ -4092,7 +4092,7 @@ namespace RoF
 
 				structs::Texture_Struct *Equipment = (structs::Texture_Struct *)Buffer;
 
-				for (k = 0; k < 9; k++) {
+				for (k = EQEmu::textures::TextureBegin; k < EQEmu::textures::TextureCount; k++) {
 					Equipment[k].Material = emu->equipment.Slot[k].Material;
 					Equipment[k].Unknown1 = emu->equipment.Slot[k].Unknown1;
 					Equipment[k].EliteMaterial = emu->equipment.Slot[k].EliteMaterial;
@@ -4100,7 +4100,7 @@ namespace RoF
 					Equipment[k].Material2 = emu->equipment.Slot[k].Material2;
 				}
 
-				Buffer += (sizeof(structs::Texture_Struct) * 9);
+				Buffer += (sizeof(structs::Texture_Struct) * EQEmu::textures::TextureCount);
 			}
 			else
 			{

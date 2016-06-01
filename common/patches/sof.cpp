@@ -1209,7 +1209,7 @@ namespace SoF
 		OUT(hairstyle);
 		OUT(beard);
 		//	OUT(unknown00178[10]);
-		for (r = 0; r < 9; r++) {
+		for (r = EQEmu::textures::TextureBegin; r < EQEmu::textures::TextureCount; r++) {
 			eq->equipment.Slot[r].Material = emu->item_material.Slot[r].Material;
 			eq->equipment.Slot[r].Unknown1 = 0;
 			eq->equipment.Slot[r].EliteMaterial = 0;
@@ -2080,7 +2080,7 @@ namespace SoF
 			eq->deity = emu->deity;
 			eq->drakkin_heritage = emu->drakkin_heritage;
 			eq->gender = emu->gender;
-			for (k = 0; k < 9; k++) {
+			for (k = EQEmu::textures::TextureBegin; k < EQEmu::textures::TextureCount; k++) {
 				eq->equipment.Slot[k].Material = emu->equipment.Slot[k].Material;
 				eq->equipment.Slot[k].Unknown1 = emu->equipment.Slot[k].Unknown1;
 				eq->equipment.Slot[k].EliteMaterial = emu->equipment.Slot[k].EliteMaterial;
@@ -2146,7 +2146,7 @@ namespace SoF
 			strcpy(eq->name, emu->name);
 			eq->petOwnerId = emu->petOwnerId;
 			eq->pvp = 0;	// 0 = non-pvp colored name, 1 = red pvp name
-			for (k = 0; k < 9; k++) {
+			for (k = EQEmu::textures::TextureBegin; k < EQEmu::textures::TextureCount; k++) {
 				eq->equipment_tint.Slot[k].Color = emu->equipment_tint.Slot[k].Color;
 			}
 			eq->anon = emu->anon;

@@ -1806,7 +1806,7 @@ namespace UF
 		OUT(hairstyle);
 		OUT(beard);
 		//	OUT(unknown00178[10]);
-		for (r = 0; r < 9; r++) {
+		for (r = EQEmu::textures::TextureBegin; r < EQEmu::textures::TextureCount; r++) {
 			eq->equipment.Slot[r].Material = emu->item_material.Slot[r].Material;
 			eq->equipment.Slot[r].Unknown1 = 0;
 			eq->equipment.Slot[r].EliteMaterial = 0;
@@ -2858,7 +2858,7 @@ namespace UF
 			float SpawnSize = emu->size;
 			if (!((emu->NPC == 0) || (emu->race <= 12) || (emu->race == 128) || (emu->race == 130) || (emu->race == 330) || (emu->race == 522)))
 			{
-				PacketSize -= (sizeof(structs::Texture_Struct) * 9);
+				PacketSize -= (sizeof(structs::Texture_Struct) * EQEmu::textures::TextureCount);
 
 				if (emu->size == 0)
 				{
@@ -3057,7 +3057,7 @@ namespace UF
 
 			if ((emu->NPC == 0) || (emu->race <= 12) || (emu->race == 128) || (emu->race == 130) || (emu->race == 330) || (emu->race == 522))
 			{
-				for (k = 0; k < 9; ++k)
+				for (k = EQEmu::textures::TextureBegin; k < EQEmu::textures::TextureCount; ++k)
 				{
 					{
 						VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->equipment_tint.Slot[k].Color);
@@ -3093,7 +3093,7 @@ namespace UF
 			{
 				structs::Texture_Struct *Equipment = (structs::Texture_Struct *)Buffer;
 
-				for (k = 0; k < 9; k++) {
+				for (k = EQEmu::textures::TextureBegin; k < EQEmu::textures::TextureCount; k++) {
 					if (emu->equipment.Slot[k].Material > 99999) {
 						Equipment[k].Material = 63;
 					} else {
@@ -3103,7 +3103,7 @@ namespace UF
 					Equipment[k].EliteMaterial = emu->equipment.Slot[k].EliteMaterial;
 				}
 
-				Buffer += (sizeof(structs::Texture_Struct) * 9);
+				Buffer += (sizeof(structs::Texture_Struct) * EQEmu::textures::TextureCount);
 			}
 			if (strlen(emu->title))
 			{
