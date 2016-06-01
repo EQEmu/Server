@@ -20,7 +20,7 @@
 #include "textures.h"
 //#include "inventory_slot.h"
 
-#include <memory> // temp
+#include <string.h> // temp
 
 
 //int EQEmu::textures::ConvertEquipmentSlotToTextureSlot(int equipment_slot)
