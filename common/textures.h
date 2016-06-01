@@ -29,7 +29,7 @@ namespace EQEmu
 	
 	namespace textures {
 		//enum : int { TextureInvalid = -1, TextureBegin };
-		enum : uint8 { TextureInvalid = -1, TextureBegin };
+		enum : uint8 { TextureInvalid = 255, TextureBegin = 0 };
 
 		//enum TextureSlot : int {
 		enum TextureSlot : uint8 {
