@@ -118,11 +118,11 @@ void WorldDatabase::GetCharSelectInfo(uint32 accountID, EQApplicationPacket **ou
 		cse->Face = (uint8)atoi(row[15]);
 
 		for (uint32 matslot = 0; matslot < EQEmu::textures::TextureCount; matslot++) {	// Processed below
-			cse->Equip[matslot].Material = 0;
-			cse->Equip[matslot].Unknown1 = 0;
-			cse->Equip[matslot].EliteMaterial = 0;
-			cse->Equip[matslot].HeroForgeModel = 0;
-			cse->Equip[matslot].Material2 = 0;
+			cse->Equip[matslot].Textures.Material = 0;
+			cse->Equip[matslot].Textures.Unknown1 = 0;
+			cse->Equip[matslot].Textures.EliteMaterial = 0;
+			cse->Equip[matslot].Textures.HeroForgeModel = 0;
+			cse->Equip[matslot].Textures.Material2 = 0;
 			cse->Equip[matslot].Color.Color = 0;
 		}						
 
@@ -262,12 +262,12 @@ void WorldDatabase::GetCharSelectInfo(uint32 accountID, EQApplicationPacket **ou
 					// Weapon Models 
 					if (inst->GetOrnamentationIDFile() != 0) {
 						idfile = inst->GetOrnamentationIDFile();
-						cse->Equip[matslot].Material = idfile;
+						cse->Equip[matslot].Textures.Material = idfile;
 					}
 					else {
 						if (strlen(item->IDFile) > 2) {
 							idfile = atoi(&item->IDFile[2]);
-							cse->Equip[matslot].Material = idfile;
+							cse->Equip[matslot].Textures.Material = idfile;
 						}
 					}
 					if (matslot == EQEmu::textures::TexturePrimary) {
@@ -287,9 +287,9 @@ void WorldDatabase::GetCharSelectInfo(uint32 accountID, EQApplicationPacket **ou
 					}
 
 					// Armor Materials/Models
-					cse->Equip[matslot].Material = item->Material;
-					cse->Equip[matslot].EliteMaterial = item->EliteMaterial;
-					cse->Equip[matslot].HeroForgeModel = inst->GetOrnamentHeroModel(matslot);
+					cse->Equip[matslot].Textures.Material = item->Material;
+					cse->Equip[matslot].Textures.EliteMaterial = item->EliteMaterial;
+					cse->Equip[matslot].Textures.HeroForgeModel = inst->GetOrnamentHeroModel(matslot);
 					cse->Equip[matslot].Color.Color = color;
 				}
 			}

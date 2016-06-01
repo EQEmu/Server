@@ -1210,9 +1210,9 @@ namespace SoF
 		OUT(beard);
 		//	OUT(unknown00178[10]);
 		for (r = 0; r < 9; r++) {
-			eq->equipment[r].Material = emu->item_material[r];
-			eq->equipment[r].Unknown1 = 0;
-			eq->equipment[r].EliteMaterial = 0;
+			eq->equipment.Slot[r].Material = emu->item_material.Slot[r].Material;
+			eq->equipment.Slot[r].Unknown1 = 0;
+			eq->equipment.Slot[r].EliteMaterial = 0;
 			//eq->colors[r].color = emu->colors[r].color;
 		}
 		for (r = 0; r < 7; r++) {
@@ -1650,9 +1650,9 @@ namespace SoF
 			eq_cse->Face = emu_cse->Face;
 
 			for (int equip_index = 0; equip_index < EQEmu::textures::TextureCount; equip_index++) {
-				eq_cse->Equip[equip_index].Material = emu_cse->Equip[equip_index].Material;
-				eq_cse->Equip[equip_index].Unknown1 = emu_cse->Equip[equip_index].Unknown1;
-				eq_cse->Equip[equip_index].EliteMaterial = emu_cse->Equip[equip_index].EliteMaterial;
+				eq_cse->Equip[equip_index].Textures.Material = emu_cse->Equip[equip_index].Textures.Material;
+				eq_cse->Equip[equip_index].Textures.Unknown1 = emu_cse->Equip[equip_index].Textures.Unknown1;
+				eq_cse->Equip[equip_index].Textures.EliteMaterial = emu_cse->Equip[equip_index].Textures.EliteMaterial;
 				eq_cse->Equip[equip_index].Color.Color = emu_cse->Equip[equip_index].Color.Color;
 			}
 
@@ -2081,9 +2081,9 @@ namespace SoF
 			eq->drakkin_heritage = emu->drakkin_heritage;
 			eq->gender = emu->gender;
 			for (k = 0; k < 9; k++) {
-				eq->equipment[k].Material = emu->equipment[k].Material;
-				eq->equipment[k].Unknown1 = emu->equipment[k].Unknown1;
-				eq->equipment[k].EliteMaterial = emu->equipment[k].EliteMaterial;
+				eq->equipment.Slot[k].Material = emu->equipment.Slot[k].Material;
+				eq->equipment.Slot[k].Unknown1 = emu->equipment.Slot[k].Unknown1;
+				eq->equipment.Slot[k].EliteMaterial = emu->equipment.Slot[k].EliteMaterial;
 				eq->equipment_tint.Slot[k].Color = emu->equipment_tint.Slot[k].Color;
 			}
 			eq->StandState = emu->StandState;

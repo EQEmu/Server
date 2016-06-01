@@ -126,22 +126,9 @@ struct LDoNTrapTemplate
 
 // All clients translate the character select information to some degree
 
-struct EquipStruct
-{
-	uint32 Material;
-	uint32 Unknown1;
-	uint32 EliteMaterial;
-	uint32 HeroForgeModel;
-	uint32 Material2;	// Same as material?
-};
-
 struct CharSelectEquip
 {
-	uint32 Material;
-	uint32 Unknown1;
-	uint32 EliteMaterial;
-	uint32 HeroForgeModel;
-	uint32 Material2;
+	EQEmu::Texture_Struct Textures;
 	EQEmu::Tint_Struct Color;
 };
 
@@ -158,7 +145,7 @@ struct CharacterSelectEntry_Struct
 	uint16 Instance;
 	uint8 Gender;
 	uint8 Face;
-	CharSelectEquip	Equip[9];
+	CharSelectEquip	Equip[EQEmu::textures::TextureCount];
 	uint8 Unknown15;			// Seen FF
 	uint8 Unknown19;			// Seen FF
 	uint32 DrakkinTattoo;
@@ -267,22 +254,7 @@ struct Spawn_Struct {
 /*0189*/ uint32	petOwnerId;			// If this is a pet, the spawn id of owner
 /*0193*/ uint8	guildrank;			// 0=normal, 1=officer, 2=leader
 /*0194*/ uint8	unknown0194[3];
-/*0197*/ union
-{
-	struct
-	{
-		/*0000*/ EquipStruct equip_helmet;     // Equipment: Helmet visual
-		/*0000*/ EquipStruct equip_chest;      // Equipment: Chest visual
-		/*0000*/ EquipStruct equip_arms;       // Equipment: Arms visual
-		/*0000*/ EquipStruct equip_bracers;    // Equipment: Wrist visual
-		/*0000*/ EquipStruct equip_hands;      // Equipment: Hands visual
-		/*0000*/ EquipStruct equip_legs;       // Equipment: Legs visual
-		/*0000*/ EquipStruct equip_feet;       // Equipment: Boots visual
-		/*0000*/ EquipStruct equip_primary;    // Equipment: Main visual
-		/*0000*/ EquipStruct equip_secondary;  // Equipment: Off visual
-	} equip;
-	/*0000*/ EquipStruct equipment[EQEmu::textures::TextureCount];
-};
+/*0197*/ EQEmu::TextureProfile equipment;
 /*0233*/ float	runspeed;		// Speed when running
 /*0036*/ uint8	afk;			// 0=no, 1=afk
 /*0238*/ uint32	guildID;		// Current guild
@@ -854,7 +826,7 @@ struct SuspendedMinion_Struct
 	/*002*/	uint32 HP;
 	/*006*/	uint32 Mana;
 	/*010*/	SpellBuff_Struct Buffs[BUFF_COUNT];
-	/*510*/	uint32 Items[EQEmu::textures::TextureCount];
+	/*510*/	EQEmu::TextureShortProfile Items;
 	/*546*/	char Name[64];
 	/*610*/
 };
@@ -962,7 +934,7 @@ struct PlayerProfile_Struct
 /*0304*/	uint8				ability_time_minutes;
 /*0305*/	uint8				ability_time_hours;	//place holder
 /*0306*/	uint8				unknown0306[6];		// @bp Spacer/Flag?
-/*0312*/	uint32				item_material[EQEmu::textures::TextureCount];	// Item texture/material of worn/held items
+/*0312*/	EQEmu::TextureShortProfile	item_material;	// Item texture/material of worn/held items
 /*0348*/	uint8				unknown0348[44];
 /*0392*/	EQEmu::TintProfile	item_tint;
 /*0428*/	AA_Array			aa_array[MAX_PP_AA_ARRAY];
@@ -2118,7 +2090,7 @@ struct Illusion_Struct { //size: 256 - SoF
 /*092*/	uint32	drakkin_heritage;	//
 /*096*/	uint32	drakkin_tattoo;		//
 /*100*/	uint32	drakkin_details;	//
-/*104*/	uint32	armor_tint[EQEmu::textures::TextureCount];	//
+/*104*/	EQEmu::TintProfile	armor_tint;	//
 /*140*/	uint8	eyecolor1;		// Field Not Identified in any Illusion Struct
 /*141*/	uint8	eyecolor2;		// Field Not Identified in any Illusion Struct
 /*142*/	uint8	unknown138[114];	//

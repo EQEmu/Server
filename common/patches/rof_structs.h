@@ -176,7 +176,8 @@ struct Tint_Struct
 	};
 };
 
-struct TintProfile {
+struct TintProfile
+{
 	union {
 		struct {
 			Tint_Struct Head;
@@ -193,13 +194,43 @@ struct TintProfile {
 	};
 };
 
-struct CharSelectEquip
+/*
+* Visible equiptment.
+* Size: 20 Octets
+*/
+struct Texture_Struct
 {
 	uint32 Material;
 	uint32 Unknown1;
 	uint32 EliteMaterial;
 	uint32 HeroForgeModel;
-	uint32 Material2;
+	uint32 Material2;	// Same as material?
+};
+
+// Needs more research regarding new slots
+//struct TextureProfile
+//{
+//	union {
+//		struct {
+//			Texture_Struct Head;
+//			Texture_Struct Chest;
+//			Texture_Struct Arms;
+//			Texture_Struct Wrist;
+//			Texture_Struct Hands;
+//			Texture_Struct Legs;
+//			Texture_Struct Feet;
+//			Texture_Struct Primary;
+//			Texture_Struct Secondary;
+//		};
+//		Texture_Struct Slot[EQEmu::textures::TextureCount];
+//	};
+//
+//	TextureProfile();
+//};
+
+struct CharSelectEquip
+{
+	Texture_Struct Textures;
 	Tint_Struct Color;
 };
 
@@ -247,21 +278,6 @@ struct CharacterSelect_Struct
 /*000*/	uint32 CharCount;	//number of chars in this packet
 /*004*/	CharacterSelectEntry_Struct Entries[0];
 };
-
-/*
-* Visible equiptment.
-* Size: 20 Octets
-*/
-struct EquipStruct
-{
-	/*00*/ uint32 Material;
-	/*04*/ uint32 Unknown1;
-	/*08*/ uint32 EliteMaterial;
-	/*12*/ uint32 HeroForgeModel;
-	/*16*/ uint32 Material2;	// Same as material?
-	/*20*/
-};
-
 
 struct Membership_Entry_Struct
 {
@@ -465,17 +481,17 @@ struct Spawn_Struct
          {
            struct
            {
-               /*0000*/ EquipStruct equip_helmet;     // Equiptment: Helmet visual
-               /*0000*/ EquipStruct equip_chest;      // Equiptment: Chest visual
-               /*0000*/ EquipStruct equip_arms;       // Equiptment: Arms visual
-               /*0000*/ EquipStruct equip_bracers;    // Equiptment: Wrist visual
-               /*0000*/ EquipStruct equip_hands;      // Equiptment: Hands visual
-               /*0000*/ EquipStruct equip_legs;       // Equiptment: Legs visual
-               /*0000*/ EquipStruct equip_feet;       // Equiptment: Boots visual
-               /*0000*/ EquipStruct equip_primary;    // Equiptment: Main visual
-               /*0000*/ EquipStruct equip_secondary;  // Equiptment: Off visual
+			   /*0000*/ Texture_Struct equip_helmet;     // Equiptment: Helmet visual
+			   /*0000*/ Texture_Struct equip_chest;      // Equiptment: Chest visual
+			   /*0000*/ Texture_Struct equip_arms;       // Equiptment: Arms visual
+			   /*0000*/ Texture_Struct equip_bracers;    // Equiptment: Wrist visual
+			   /*0000*/ Texture_Struct equip_hands;      // Equiptment: Hands visual
+			   /*0000*/ Texture_Struct equip_legs;       // Equiptment: Legs visual
+			   /*0000*/ Texture_Struct equip_feet;       // Equiptment: Boots visual
+			   /*0000*/ Texture_Struct equip_primary;    // Equiptment: Main visual
+			   /*0000*/ Texture_Struct equip_secondary;  // Equiptment: Off visual
            } equip;
-           /*0000*/ EquipStruct equipment[9];
+		   /*0000*/ Texture_Struct equipment[9];
          };
 
 /*0000*/ //char title[0];  // only read if(hasTitleOrSuffix & 4)
@@ -1063,34 +1079,34 @@ union
 {
 	struct
 	{
-		/*00184*/ EquipStruct equip_helmet; // Equiptment: Helmet visual
-		/*00204*/ EquipStruct equip_chest; // Equiptment: Chest visual
-		/*00224*/ EquipStruct equip_arms; // Equiptment: Arms visual
-		/*00244*/ EquipStruct equip_bracers; // Equiptment: Wrist visual
-		/*00264*/ EquipStruct equip_hands; // Equiptment: Hands visual
-		/*00284*/ EquipStruct equip_legs; // Equiptment: Legs visual
-		/*00304*/ EquipStruct equip_feet; // Equiptment: Boots visual
-		/*00324*/ EquipStruct equip_primary; // Equiptment: Main visual
-		/*00344*/ EquipStruct equip_secondary; // Equiptment: Off visual
+		/*00184*/ Texture_Struct equip_helmet; // Equiptment: Helmet visual
+		/*00204*/ Texture_Struct equip_chest; // Equiptment: Chest visual
+		/*00224*/ Texture_Struct equip_arms; // Equiptment: Arms visual
+		/*00244*/ Texture_Struct equip_bracers; // Equiptment: Wrist visual
+		/*00264*/ Texture_Struct equip_hands; // Equiptment: Hands visual
+		/*00284*/ Texture_Struct equip_legs; // Equiptment: Legs visual
+		/*00304*/ Texture_Struct equip_feet; // Equiptment: Boots visual
+		/*00324*/ Texture_Struct equip_primary; // Equiptment: Main visual
+		/*00344*/ Texture_Struct equip_secondary; // Equiptment: Off visual
 		// Below slots are just guesses, but all 0s anyway...
-		/*00364*/ EquipStruct equip_charm; // Equiptment: Non-visual
-		/*00384*/ EquipStruct equip_ear1; // Equiptment: Non-visual
-		/*00404*/ EquipStruct equip_ear2; // Equiptment: Non-visual
-		/*00424*/ EquipStruct equip_face; // Equiptment: Non-visual
-		/*00444*/ EquipStruct equip_neck; // Equiptment: Non-visual
-		/*00464*/ EquipStruct equip_shoulder; // Equiptment: Non-visual
-		/*00484*/ EquipStruct equip_bracer2; // Equiptment: Non-visual
-		/*00504*/ EquipStruct equip_range; // Equiptment: Non-visual
-		/*00524*/ EquipStruct equip_ring1; // Equiptment: Non-visual
-		/*00544*/ EquipStruct equip_ring2; // Equiptment: Non-visual
-		/*00564*/ EquipStruct equip_waist; // Equiptment: Non-visual
-		/*00584*/ EquipStruct equip_powersource; // Equiptment: Non-visual
-		/*00604*/ EquipStruct equip_ammo; // Equiptment: Non-visual
+		/*00364*/ Texture_Struct equip_charm; // Equiptment: Non-visual
+		/*00384*/ Texture_Struct equip_ear1; // Equiptment: Non-visual
+		/*00404*/ Texture_Struct equip_ear2; // Equiptment: Non-visual
+		/*00424*/ Texture_Struct equip_face; // Equiptment: Non-visual
+		/*00444*/ Texture_Struct equip_neck; // Equiptment: Non-visual
+		/*00464*/ Texture_Struct equip_shoulder; // Equiptment: Non-visual
+		/*00484*/ Texture_Struct equip_bracer2; // Equiptment: Non-visual
+		/*00504*/ Texture_Struct equip_range; // Equiptment: Non-visual
+		/*00524*/ Texture_Struct equip_ring1; // Equiptment: Non-visual
+		/*00544*/ Texture_Struct equip_ring2; // Equiptment: Non-visual
+		/*00564*/ Texture_Struct equip_waist; // Equiptment: Non-visual
+		/*00584*/ Texture_Struct equip_powersource; // Equiptment: Non-visual
+		/*00604*/ Texture_Struct equip_ammo; // Equiptment: Non-visual
 	} equip;
-	/*00184*/ EquipStruct equipment[22];
+	/*00184*/ Texture_Struct equipment[22];
 };
 /*00624*/ uint32 equip2_count;			// Seen 9
-/*00628*/ EquipStruct equipment2[9];	// Appears to be Visible slots, but all 0s
+/*00628*/ Texture_Struct equipment2[9];	// Appears to be Visible slots, but all 0s
 /*00808*/ uint32 tint_count;			// Seen 9
 /*00812*/ TintProfile item_tint;		// RR GG BB 00
 /*00848*/ uint32 tint_count2;			// Seen 9

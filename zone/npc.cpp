@@ -94,7 +94,7 @@ NPC::NPC(const NPCType* d, Spawn2* in_respawn, const glm::vec4& position, int if
 		d->drakkin_heritage,
 		d->drakkin_tattoo,
 		d->drakkin_details,
-		(uint32*)d->armor_tint,
+		d->armor_tint,
 		0,
 		d->see_invis,			// pass see_invis/see_ivu flags to mob constructor
 		d->see_invis_undead,

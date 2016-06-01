@@ -148,6 +148,31 @@ struct TintProfile {
 	};
 };
 
+struct Texture_Struct
+{
+	uint32 Material;
+};
+
+struct TextureProfile
+{
+	union {
+		struct {
+			Texture_Struct Head;
+			Texture_Struct Chest;
+			Texture_Struct Arms;
+			Texture_Struct Wrist;
+			Texture_Struct Hands;
+			Texture_Struct Legs;
+			Texture_Struct Feet;
+			Texture_Struct Primary;
+			Texture_Struct Secondary;
+		};
+		Texture_Struct Slot[EQEmu::textures::TextureCount];
+	};
+
+	TextureProfile();
+};
+
 /*
 ** Character Selection Struct
 ** Length: 1704 Bytes
@@ -159,7 +184,7 @@ struct CharacterSelect_Struct
 /*0040*/	TintProfile CS_Colors[10];		// Characters Equipment Colors - packet requires length for 10 characters..but, client is limited to 8
 /*0400*/	uint8 BeardColor[10];			// Characters beard Color
 /*0410*/	uint8 HairStyle[10];			// Characters hair style
-/*0420*/	uint32 Equip[10][9];			// 0=helm, 1=chest, 2=arm, 3=bracer, 4=hand, 5=leg, 6=boot, 7=melee1, 8=melee2  (Might not be)
+/*0420*/	TextureProfile Equip[10];		// Characters texture array
 /*0780*/	uint32 SecondaryIDFile[10];		// Characters secondary IDFile number
 /*0820*/	uint8 Unknown820[10];			// 10x ff
 /*0830*/	uint8 Unknown830[2];			// 2x 00
@@ -256,22 +281,7 @@ struct Spawn_Struct {
 /*0189*/ uint32 petOwnerId;     // If this is a pet, the spawn id of owner
 /*0193*/ uint8   guildrank;      // 0=normal, 1=officer, 2=leader
 /*0194*/ uint8 unknown0194[3];
-/*0197*/ union
-         {
-             struct
-             {
-               /*0197*/ uint32 equip_helmet;    // Equipment: Helmet Visual
-               /*0201*/ uint32 equip_chest;     // Equipment: Chest Visual
-               /*0205*/ uint32 equip_arms;      // Equipment: Arms Visual
-               /*0209*/ uint32 equip_bracers;   // Equipment: Bracers Visual
-               /*0213*/ uint32 equip_hands;     // Equipment: Hands Visual
-               /*0217*/ uint32 equip_legs;      // Equipment: Legs Visual
-               /*0221*/ uint32 equip_feet;      // Equipment: Feet Visual
-               /*0225*/ uint32 equip_primary;   // Equipment: Primary Visual
-               /*0229*/ uint32 equip_secondary; // Equipment: Secondary Visual
-             } equip;
-             /*0197*/ uint32 equipment[9];  // Array elements correspond to struct equipment above
-         };
+/*0197*/ TextureProfile equipment;
 /*0233*/ float    runspeed;       // Speed when running
 /*0036*/ uint8  afk;            // 0=no, 1=afk
 /*0238*/ uint32 guildID;        // Current guild
@@ -812,7 +822,7 @@ struct PlayerProfile_Struct
 /*00176*/ uint8   hairstyle;          // Player hair style
 /*00177*/ uint8   beard;              // Player beard type
 /*00178*/ uint8 unknown00178[10];
-/*00188*/ uint32  item_material[9];   // Item texture/material of worn items
+/*00188*/ TextureProfile  item_material;   // Item texture/material of worn items
 /*00224*/ uint8 unknown00224[44];
 /*00268*/ TintProfile item_tint;    // RR GG BB 00
 /*00304*/ AA_Array  aa_array[MAX_PP_AA_ARRAY];   // AAs

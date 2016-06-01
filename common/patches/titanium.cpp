@@ -904,7 +904,7 @@ namespace Titanium
 		OUT(beard);
 		//	OUT(unknown00178[10]);
 		for (r = 0; r < 9; r++) {
-			OUT(item_material[r]);
+			OUT(item_material.Slot[r].Material);
 			OUT(item_tint.Slot[r].Color);
 		}
 		//	OUT(unknown00224[48]);
@@ -1231,7 +1231,7 @@ namespace Titanium
 			eq->HairStyle[char_index] = emu_cse->HairStyle;
 
 			for (int index = 0; index < EQEmu::textures::TextureCount; ++index) {
-				eq->Equip[char_index][index] = emu_cse->Equip[index].Material;
+				eq->Equip[char_index].Slot[index].Material = emu_cse->Equip[index].Textures.Material;
 			}
 
 			eq->SecondaryIDFile[char_index] = emu_cse->SecondaryIDFile;
@@ -1268,7 +1268,7 @@ namespace Titanium
 			eq->HairStyle[char_index] = 0;
 
 			for (int index = 0; index < EQEmu::textures::TextureCount; ++index) {
-				eq->Equip[char_index][index] = 0;
+				eq->Equip[char_index].Slot[index].Material = 0;
 			}
 
 			eq->SecondaryIDFile[char_index] = 0;
@@ -1600,7 +1600,7 @@ namespace Titanium
 			eq->guildrank = emu->guildrank;
 			//		eq->unknown0194[3] = emu->unknown0194[3];
 			for (k = 0; k < 9; k++) {
-				eq->equipment[k] = emu->equipment[k].Material;
+				eq->equipment.Slot[k].Material = emu->equipment.Slot[k].Material;
 				eq->equipment_tint.Slot[k].Color = emu->equipment_tint.Slot[k].Color;
 			}
 			for (k = 0; k < 8; k++) {

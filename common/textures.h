@@ -54,23 +54,54 @@ namespace EQEmu
 
 	} /*textures*/
 
+	struct Texture_Struct {
+		uint32 Material;
+		uint32 Unknown1;
+		uint32 EliteMaterial;
+		uint32 HeroForgeModel;
+		uint32 Material2;	// Same as material?
+	};
+
 	struct TextureProfile {
 		union {
 			struct {
-				uint32 Head;
-				uint32 Chest;
-				uint32 Arms;
-				uint32 Wrist;
-				uint32 Hands;
-				uint32 Legs;
-				uint32 Feet;
-				uint32 Primary;
-				uint32 Secondary;
+				Texture_Struct Head;
+				Texture_Struct Chest;
+				Texture_Struct Arms;
+				Texture_Struct Wrist;
+				Texture_Struct Hands;
+				Texture_Struct Legs;
+				Texture_Struct Feet;
+				Texture_Struct Primary;
+				Texture_Struct Secondary;
 			};
-			uint32 Texture[textures::TextureCount];
+			Texture_Struct Slot[textures::TextureCount];
 		};
 
 		TextureProfile();
+	};
+
+	struct TextureShort_Struct {
+		uint32 Material;
+	};
+
+	struct TextureShortProfile {
+		union {
+			struct {
+				TextureShort_Struct Head;
+				TextureShort_Struct Chest;
+				TextureShort_Struct Arms;
+				TextureShort_Struct Wrist;
+				TextureShort_Struct Hands;
+				TextureShort_Struct Legs;
+				TextureShort_Struct Feet;
+				TextureShort_Struct Primary;
+				TextureShort_Struct Secondary;
+			};
+			TextureShort_Struct Slot[textures::TextureCount];
+		};
+
+		TextureShortProfile();
 	};
 
 	struct Tint_Struct {

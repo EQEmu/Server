@@ -1554,9 +1554,9 @@ namespace SoD
 		OUT(beard);
 		//	OUT(unknown00178[10]);
 		for (r = 0; r < 9; r++) {
-			eq->equipment[r].Material = emu->item_material[r];
-			eq->equipment[r].Unknown1 = 0;
-			eq->equipment[r].EliteMaterial = 0;
+			eq->equipment.Slot[r].Material = emu->item_material.Slot[r].Material;
+			eq->equipment.Slot[r].Unknown1 = 0;
+			eq->equipment.Slot[r].EliteMaterial = 0;
 			//eq->colors[r].color = emu->colors[r].color;
 		}
 		for (r = 0; r < 7; r++) {
@@ -1994,9 +1994,9 @@ namespace SoD
 			eq_cse->Face = emu_cse->Face;
 
 			for (int equip_index = 0; equip_index < EQEmu::textures::TextureCount; equip_index++) {
-				eq_cse->Equip[equip_index].Material = emu_cse->Equip[equip_index].Material;
-				eq_cse->Equip[equip_index].Unknown1 = emu_cse->Equip[equip_index].Unknown1;
-				eq_cse->Equip[equip_index].EliteMaterial = emu_cse->Equip[equip_index].EliteMaterial;
+				eq_cse->Equip[equip_index].Textures.Material = emu_cse->Equip[equip_index].Textures.Material;
+				eq_cse->Equip[equip_index].Textures.Unknown1 = emu_cse->Equip[equip_index].Textures.Unknown1;
+				eq_cse->Equip[equip_index].Textures.EliteMaterial = emu_cse->Equip[equip_index].Textures.EliteMaterial;
 				eq_cse->Equip[equip_index].Color.Color = emu_cse->Equip[equip_index].Color.Color;
 			}
 
@@ -2563,7 +2563,7 @@ namespace SoD
 			float SpawnSize = emu->size;
 			if (!((emu->NPC == 0) || (emu->race <= 12) || (emu->race == 128) || (emu->race == 130) || (emu->race == 330) || (emu->race == 522)))
 			{
-				PacketSize -= (sizeof(structs::EquipStruct) * 9);
+				PacketSize -= (sizeof(structs::Texture_Struct) * 9);
 
 				if (emu->size == 0)
 				{
@@ -2773,11 +2773,11 @@ namespace SoD
 				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);
 				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);
 
-				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->equipment[EQEmu::textures::TexturePrimary].Material);
+				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->equipment.Primary.Material);
 				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);
 				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);
 
-				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->equipment[EQEmu::textures::TextureSecondary].Material);
+				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->equipment.Secondary.Material);
 				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);
 				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);
 			}
@@ -2785,15 +2785,15 @@ namespace SoD
 
 			if ((emu->NPC == 0) || (emu->race <= 12) || (emu->race == 128) || (emu->race == 130) || (emu->race == 330) || (emu->race == 522))
 			{
-				structs::EquipStruct *Equipment = (structs::EquipStruct *)Buffer;
+				structs::Texture_Struct *Equipment = (structs::Texture_Struct *)Buffer;
 
 				for (k = 0; k < 9; k++) {
-					Equipment[k].Material = emu->equipment[k].Material;
-					Equipment[k].Unknown1 = emu->equipment[k].Unknown1;
-					Equipment[k].EliteMaterial = emu->equipment[k].EliteMaterial;
+					Equipment[k].Material = emu->equipment.Slot[k].Material;
+					Equipment[k].Unknown1 = emu->equipment.Slot[k].Unknown1;
+					Equipment[k].EliteMaterial = emu->equipment.Slot[k].EliteMaterial;
 				}
 
-				Buffer += (sizeof(structs::EquipStruct) * 9);
+				Buffer += (sizeof(structs::Texture_Struct) * 9);
 			}
 			if (strlen(emu->title))
 			{

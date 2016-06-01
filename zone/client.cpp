@@ -100,7 +100,7 @@ Client::Client(EQStreamInterface* ieqs)
 	0,	// Drakkin Heritage
 	0,	// Drakkin Tattoo
 	0,	// Drakkin Details
-	0,	// Armor Tint
+	EQEmu::TintProfile(),	// Armor Tint
 	0xff,	// AA Title
 	0,	// see_invis
 	0,	// see_invis_undead
@@ -2732,7 +2732,7 @@ void Client::SetMaterial(int16 in_slot, uint32 item_id) {
 		uint8 matslot = Inventory::CalcMaterialFromSlot(in_slot);
 		if (matslot != EQEmu::textures::TextureInvalid)
 		{
-			m_pp.item_material[matslot] = GetEquipmentMaterial(matslot);
+			m_pp.item_material.Slot[matslot].Material = GetEquipmentMaterial(matslot);
 		}
 	}
 }
@@ -6286,7 +6286,7 @@ void Client::Doppelganger(uint16 spell_id, Mob *target, const char *name_overrid
 	made_npc->d_melee_texture1 = GetEquipmentMaterial(EQEmu::textures::TexturePrimary);
 	made_npc->d_melee_texture2 = GetEquipmentMaterial(EQEmu::textures::TextureSecondary);
 	for (int i = EQEmu::textures::TextureBegin; i <= EQEmu::textures::LastTexture; i++)	{
-		made_npc->armor_tint[i] = GetEquipmentColor(i);
+		made_npc->armor_tint.Slot[i].Color = GetEquipmentColor(i);
 	}
 	made_npc->loottable_id = 0;
 

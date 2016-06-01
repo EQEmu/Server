@@ -73,7 +73,7 @@ Mob::Mob(const char* in_name,
 		uint32		in_drakkin_heritage,
 		uint32		in_drakkin_tattoo,
 		uint32		in_drakkin_details,
-		uint32		in_armor_tint[EQEmu::textures::TextureCount],
+		EQEmu::TintProfile	in_armor_tint,
 
 		uint8		in_aa_title,
 		uint8		in_see_invis, // see through invis/ivu
@@ -280,14 +280,7 @@ Mob::Mob(const char* in_name,
 
 	for (i = 0; i < EQEmu::textures::TextureCount; i++)
 	{
-		if (in_armor_tint)
-		{
-			armor_tint[i] = in_armor_tint[i];
-		}
-		else
-		{
-			armor_tint[i] = 0;
-		}
+		armor_tint.Slot[i].Color = in_armor_tint.Slot[i].Color;
 	}
 
 	m_Delta = glm::vec4();
@@ -1159,9 +1152,9 @@ void Mob::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho)
 		// Only Player Races Wear Armor
 		if (Mob::IsPlayerRace(race) || i > 6)
 		{
-			ns->spawn.equipment[i].Material = GetEquipmentMaterial(i);
-			ns->spawn.equipment[i].EliteMaterial = IsEliteMaterialItem(i);
-			ns->spawn.equipment[i].HeroForgeModel = GetHerosForgeModel(i);
+			ns->spawn.equipment.Slot[i].Material = GetEquipmentMaterial(i);
+			ns->spawn.equipment.Slot[i].EliteMaterial = IsEliteMaterialItem(i);
+			ns->spawn.equipment.Slot[i].HeroForgeModel = GetHerosForgeModel(i);
 			ns->spawn.equipment_tint.Slot[i].Color = GetEquipmentColor(i);
 		}
 	}
@@ -2821,7 +2814,7 @@ void Mob::SetSlotTint(uint8 material_slot, uint8 red_tint, uint8 green_tint, uin
 	color |= (green_tint & 0xFF) << 8;
 	color |= (blue_tint & 0xFF);
 	color |= (color) ? (0xFF << 24) : 0;
-	armor_tint[material_slot] = color;
+	armor_tint.Slot[material_slot].Color = color;
 
 	auto outapp = new EQApplicationPacket(OP_WearChange, sizeof(WearChange_Struct));
 	WearChange_Struct* wc = (WearChange_Struct*)outapp->pBuffer;
@@ -2838,7 +2831,7 @@ void Mob::SetSlotTint(uint8 material_slot, uint8 red_tint, uint8 green_tint, uin
 
 void Mob::WearChange(uint8 material_slot, uint16 texture, uint32 color, uint32 hero_forge_model)
 {
-	armor_tint[material_slot] = color;
+	armor_tint.Slot[material_slot].Color = color;
 
 	auto outapp = new EQApplicationPacket(OP_WearChange, sizeof(WearChange_Struct));
 	WearChange_Struct* wc = (WearChange_Struct*)outapp->pBuffer;
@@ -2966,9 +2959,9 @@ uint32 Mob::GetEquipmentColor(uint8 material_slot) const
 {
 	const EQEmu::ItemBase *item;
 
-	if (armor_tint[material_slot])
+	if (armor_tint.Slot[material_slot].Color)
 	{
-		return armor_tint[material_slot];
+		return armor_tint.Slot[material_slot].Color;
 	}
 
 	item = database.GetItem(GetEquipment(material_slot));

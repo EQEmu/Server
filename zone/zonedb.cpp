@@ -2068,10 +2068,10 @@ const NPCType* ZoneDatabase::LoadNPCTypesData(uint32 npc_type_id, bool bulk_load
 
 		uint32 armor_tint_id = atoi(row[63]);
 
-		temp_npctype_data->armor_tint[0] = (atoi(row[64]) & 0xFF) << 16;
-        temp_npctype_data->armor_tint[0] |= (atoi(row[65]) & 0xFF) << 8;
-		temp_npctype_data->armor_tint[0] |= (atoi(row[66]) & 0xFF);
-		temp_npctype_data->armor_tint[0] |= (temp_npctype_data->armor_tint[0]) ? (0xFF << 24) : 0;
+		temp_npctype_data->armor_tint.Head.Color = (atoi(row[64]) & 0xFF) << 16;
+        temp_npctype_data->armor_tint.Head.Color |= (atoi(row[65]) & 0xFF) << 8;
+		temp_npctype_data->armor_tint.Head.Color |= (atoi(row[66]) & 0xFF);
+		temp_npctype_data->armor_tint.Head.Color |= (temp_npctype_data->armor_tint.Head.Color) ? (0xFF << 24) : 0;
 
 		if (armor_tint_id != 0) {
 			std::string armortint_query = StringFormat(
@@ -2093,17 +2093,17 @@ const NPCType* ZoneDatabase::LoadNPCTypesData(uint32 npc_type_id, bool bulk_load
                 auto armorTint_row = armortint_results.begin();
 
 				for (int index = EQEmu::textures::TextureBegin; index <= EQEmu::textures::LastTexture; index++) {
-                    temp_npctype_data->armor_tint[index] = atoi(armorTint_row[index * 3]) << 16;
-					temp_npctype_data->armor_tint[index] |= atoi(armorTint_row[index * 3 + 1]) << 8;
-					temp_npctype_data->armor_tint[index] |= atoi(armorTint_row[index * 3 + 2]);
-					temp_npctype_data->armor_tint[index] |= (temp_npctype_data->armor_tint[index]) ? (0xFF << 24) : 0;
+                    temp_npctype_data->armor_tint.Slot[index].Color = atoi(armorTint_row[index * 3]) << 16;
+					temp_npctype_data->armor_tint.Slot[index].Color |= atoi(armorTint_row[index * 3 + 1]) << 8;
+					temp_npctype_data->armor_tint.Slot[index].Color |= atoi(armorTint_row[index * 3 + 2]);
+					temp_npctype_data->armor_tint.Slot[index].Color |= (temp_npctype_data->armor_tint.Slot[index].Color) ? (0xFF << 24) : 0;
                 }
             }
         }
 		// Try loading npc_types tint fields if armor tint is 0 or query failed to get results
 		if (armor_tint_id == 0) {
 			for (int index = EQEmu::textures::TextureChest; index < EQEmu::textures::TextureCount; index++) {
-				temp_npctype_data->armor_tint[index] = temp_npctype_data->armor_tint[0];
+				temp_npctype_data->armor_tint.Slot[index].Color = temp_npctype_data->armor_tint.Slot[0].Color; // odd way to 'zero-out' the array...
 			}
 		}
 
@@ -2301,15 +2301,15 @@ const NPCType* ZoneDatabase::GetMercType(uint32 id, uint16 raceid, uint32 client
 			tmpNPCType->bodytype = 1;
 
 		uint32 armor_tint_id = atoi(row[36]);
-		tmpNPCType->armor_tint[0] = (atoi(row[37]) & 0xFF) << 16;
-		tmpNPCType->armor_tint[0] |= (atoi(row[38]) & 0xFF) << 8;
-		tmpNPCType->armor_tint[0] |= (atoi(row[39]) & 0xFF);
-		tmpNPCType->armor_tint[0] |= (tmpNPCType->armor_tint[0]) ? (0xFF << 24) : 0;
+		tmpNPCType->armor_tint.Slot[0].Color = (atoi(row[37]) & 0xFF) << 16;
+		tmpNPCType->armor_tint.Slot[0].Color |= (atoi(row[38]) & 0xFF) << 8;
+		tmpNPCType->armor_tint.Slot[0].Color |= (atoi(row[39]) & 0xFF);
+		tmpNPCType->armor_tint.Slot[0].Color |= (tmpNPCType->armor_tint.Slot[0].Color) ? (0xFF << 24) : 0;
 
 		if (armor_tint_id == 0)
 			for (int index = EQEmu::textures::TextureChest; index <= EQEmu::textures::LastTexture; index++)
-				tmpNPCType->armor_tint[index] = tmpNPCType->armor_tint[0];
-		else if (tmpNPCType->armor_tint[0] == 0) {
+				tmpNPCType->armor_tint.Slot[index].Color = tmpNPCType->armor_tint.Slot[0].Color;
+		else if (tmpNPCType->armor_tint.Slot[0].Color == 0) {
 			std::string armorTint_query = StringFormat("SELECT red1h, grn1h, blu1h, "
 								   "red2c, grn2c, blu2c, "
 								   "red3a, grn3a, blu3a, "
@@ -2328,10 +2328,10 @@ const NPCType* ZoneDatabase::GetMercType(uint32 id, uint16 raceid, uint32 client
 				auto armorTint_row = results.begin();
 
 				for (int index = EQEmu::textures::TextureBegin; index <= EQEmu::textures::LastTexture; index++) {
-					tmpNPCType->armor_tint[index] = atoi(armorTint_row[index * 3]) << 16;
-					tmpNPCType->armor_tint[index] |= atoi(armorTint_row[index * 3 + 1]) << 8;
-					tmpNPCType->armor_tint[index] |= atoi(armorTint_row[index * 3 + 2]);
-					tmpNPCType->armor_tint[index] |= (tmpNPCType->armor_tint[index]) ? (0xFF << 24) : 0;
+					tmpNPCType->armor_tint.Slot[index].Color = atoi(armorTint_row[index * 3]) << 16;
+					tmpNPCType->armor_tint.Slot[index].Color |= atoi(armorTint_row[index * 3 + 1]) << 8;
+					tmpNPCType->armor_tint.Slot[index].Color |= atoi(armorTint_row[index * 3 + 2]);
+					tmpNPCType->armor_tint.Slot[index].Color |= (tmpNPCType->armor_tint.Slot[index].Color) ? (0xFF << 24) : 0;
 				}
 			}
 		} else

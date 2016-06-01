@@ -86,7 +86,7 @@ struct NPCType
 	uint32	drakkin_heritage;
 	uint32	drakkin_tattoo;
 	uint32	drakkin_details;
-	uint32	armor_tint[EQEmu::textures::TextureCount];
+	EQEmu::TintProfile	armor_tint;
 	uint32	min_dmg;
 	uint32	max_dmg;
 	int16	attack_count;

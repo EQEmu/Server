@@ -2154,7 +2154,7 @@ namespace RoF2
 
 		for (int r = 0; r < 9; r++)
 		{
-			outapp->WriteUInt32(emu->item_material[r]);
+			outapp->WriteUInt32(emu->item_material.Slot[r].Material);
 			outapp->WriteUInt32(0);
 			outapp->WriteUInt32(0);
 			outapp->WriteUInt32(0);
@@ -3140,11 +3140,11 @@ namespace RoF2
 			eq_cse->Face = emu_cse->Face;
 
 			for (int equip_index = 0; equip_index < EQEmu::textures::TextureCount; equip_index++) {
-				eq_cse->Equip[equip_index].Material = emu_cse->Equip[equip_index].Material;
-				eq_cse->Equip[equip_index].Unknown1 = emu_cse->Equip[equip_index].Unknown1;
-				eq_cse->Equip[equip_index].EliteMaterial = emu_cse->Equip[equip_index].EliteMaterial;
-				eq_cse->Equip[equip_index].HeroForgeModel = emu_cse->Equip[equip_index].HeroForgeModel;
-				eq_cse->Equip[equip_index].Material2 = emu_cse->Equip[equip_index].Material2;
+				eq_cse->Equip[equip_index].Textures.Material = emu_cse->Equip[equip_index].Textures.Material;
+				eq_cse->Equip[equip_index].Textures.Unknown1 = emu_cse->Equip[equip_index].Textures.Unknown1;
+				eq_cse->Equip[equip_index].Textures.EliteMaterial = emu_cse->Equip[equip_index].Textures.EliteMaterial;
+				eq_cse->Equip[equip_index].Textures.HeroForgeModel = emu_cse->Equip[equip_index].Textures.HeroForgeModel;
+				eq_cse->Equip[equip_index].Textures.Material2 = emu_cse->Equip[equip_index].Textures.Material2;
 				eq_cse->Equip[equip_index].Color.Color = emu_cse->Equip[equip_index].Color.Color;
 			}
 
@@ -4313,17 +4313,17 @@ namespace RoF2
 					}
 				}
 
-				structs::EquipStruct *Equipment = (structs::EquipStruct *)Buffer;
+				structs::Texture_Struct *Equipment = (structs::Texture_Struct *)Buffer;
 
 				for (k = 0; k < 9; k++) {
-					Equipment[k].Material = emu->equipment[k].Material;
-					Equipment[k].Unknown1 = emu->equipment[k].Unknown1;
-					Equipment[k].EliteMaterial = emu->equipment[k].EliteMaterial;
-					Equipment[k].HeroForgeModel = emu->equipment[k].HeroForgeModel;
-					Equipment[k].Material2 = emu->equipment[k].Material2;
+					Equipment[k].Material = emu->equipment.Slot[k].Material;
+					Equipment[k].Unknown1 = emu->equipment.Slot[k].Unknown1;
+					Equipment[k].EliteMaterial = emu->equipment.Slot[k].EliteMaterial;
+					Equipment[k].HeroForgeModel = emu->equipment.Slot[k].HeroForgeModel;
+					Equipment[k].Material2 = emu->equipment.Slot[k].Material2;
 				}
 
-				Buffer += (sizeof(structs::EquipStruct) * 9);
+				Buffer += (sizeof(structs::Texture_Struct) * 9);
 			}
 			else
 			{
@@ -4333,13 +4333,13 @@ namespace RoF2
 				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);
 				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);
 
-				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->equipment[EQEmu::textures::TexturePrimary].Material);
+				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->equipment.Primary.Material);
 				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);
 				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);
 				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);
 				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);
 
-				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->equipment[EQEmu::textures::TextureSecondary].Material);
+				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->equipment.Secondary.Material);
 				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);
 				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);
 				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);

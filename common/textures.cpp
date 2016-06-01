@@ -85,7 +85,12 @@
 
 EQEmu::TextureProfile::TextureProfile()
 {
-	memset(&Texture, 0, (sizeof(uint32) * textures::TextureCount));
+	memset(&Slot, 0, (sizeof(Texture_Struct) * textures::TextureCount));
+}
+
+EQEmu::TextureShortProfile::TextureShortProfile()
+{
+	memset(&Slot, 0, (sizeof(uint32) * textures::TextureCount));
 }
 
 EQEmu::TintProfile::TintProfile()

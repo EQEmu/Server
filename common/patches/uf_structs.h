@@ -135,7 +135,8 @@ struct Tint_Struct
 	};
 };
 
-struct TintProfile {
+struct TintProfile
+{
 	union {
 		struct {
 			Tint_Struct Head;
@@ -152,11 +153,40 @@ struct TintProfile {
 	};
 };
 
-struct CharSelectEquip
+/*
+* Visible equiptment.
+* Size: 12 Octets
+*/
+struct Texture_Struct
 {
 	uint32 Material;
 	uint32 Unknown1;
 	uint32 EliteMaterial;
+};
+
+struct TextureProfile
+{
+	union {
+		struct {
+			Texture_Struct Head;
+			Texture_Struct Chest;
+			Texture_Struct Arms;
+			Texture_Struct Wrist;
+			Texture_Struct Hands;
+			Texture_Struct Legs;
+			Texture_Struct Feet;
+			Texture_Struct Primary;
+			Texture_Struct Secondary;
+		};
+		Texture_Struct Slot[EQEmu::textures::TextureCount];
+	};
+
+	TextureProfile();
+};
+
+struct CharSelectEquip
+{
+	Texture_Struct Textures;
 	Tint_Struct Color;
 };
 
@@ -169,7 +199,7 @@ struct CharacterSelectEntry_Struct
 /*0000*/	uint8 Beard;				//
 /*0001*/	uint8 HairColor;			//
 /*0000*/	uint8 Face;					//
-/*0000*/	CharSelectEquip	Equip[9];
+/*0000*/	CharSelectEquip	Equip[EQEmu::textures::TextureCount];
 /*0000*/	uint32 PrimaryIDFile;		//
 /*0000*/	uint32 SecondaryIDFile;		//
 /*0000*/	uint8 Unknown15;			// 0xff
@@ -201,19 +231,6 @@ struct CharacterSelect_Struct
 /*0004*/	uint32 TotalChars;	//total number of chars allowed?
 /*0008*/	CharacterSelectEntry_Struct Entries[0];
 };
-
-/*
-* Visible equiptment.
-* Size: 12 Octets
-*/
-struct EquipStruct
-{
-/*00*/ uint32 Material;
-/*04*/ uint32 Unknown1;
-/*08*/ uint32 EliteMaterial;
-/*12*/
-};
-
 
 /*
 ** Generic Spawn Struct
@@ -334,22 +351,7 @@ struct Spawn_Struct
 /*0000*/ TintProfile equipment_tint;
 
 // skip these bytes if not a valid player race
-/*0000*/ union
-         {
-           struct
-           {
-               /*0000*/ EquipStruct equip_helmet;     // Equiptment: Helmet visual
-               /*0000*/ EquipStruct equip_chest;      // Equiptment: Chest visual
-               /*0000*/ EquipStruct equip_arms;       // Equiptment: Arms visual
-               /*0000*/ EquipStruct equip_bracers;    // Equiptment: Wrist visual
-               /*0000*/ EquipStruct equip_hands;      // Equiptment: Hands visual
-               /*0000*/ EquipStruct equip_legs;       // Equiptment: Legs visual
-               /*0000*/ EquipStruct equip_feet;       // Equiptment: Boots visual
-               /*0000*/ EquipStruct equip_primary;    // Equiptment: Main visual
-               /*0000*/ EquipStruct equip_secondary;  // Equiptment: Off visual
-           } equip;
-           /*0000*/ EquipStruct equipment[9];
-         };
+/*0000*/ TextureProfile equipment;
 
 /*0000*/ //char title[0];  // only read if(hasTitleOrSuffix & 4)
 /*0000*/ //char suffix[0]; // only read if(hasTitleOrSuffix & 8)
@@ -954,22 +956,7 @@ struct PlayerProfile_Struct
 /*00230*/ uint8   hairstyle;			// Player hair style
 /*00231*/ uint8   beard;				// Player beard type
 /*00232*/ uint8	  unknown00232[4];		// was 14
-/*00236*/ union
-	 {
-		struct
-		{
-		/*00236*/ EquipStruct equip_helmet; // Equiptment: Helmet visual
-		/*00248*/ EquipStruct equip_chest; // Equiptment: Chest visual
-		/*00260*/ EquipStruct equip_arms; // Equiptment: Arms visual
-		/*00272*/ EquipStruct equip_bracers; // Equiptment: Wrist visual
-		/*00284*/ EquipStruct equip_hands; // Equiptment: Hands visual
-		/*00296*/ EquipStruct equip_legs; // Equiptment: Legs visual
-		/*00308*/ EquipStruct equip_feet; // Equiptment: Boots visual
-		/*00320*/ EquipStruct equip_primary; // Equiptment: Main visual
-		/*00332*/ EquipStruct equip_secondary; // Equiptment: Off visual
-		} equip;
-		/*00236*/ EquipStruct equipment[9]; //Underfoot Shows [108] for this part
-	 };
+/*00236*/ TextureProfile equipment;
 /*00344*/ uint8 unknown00344[168];		// Underfoot Shows [160]
 /*00512*/ TintProfile item_tint;		// RR GG BB 00
 /*00548*/ AA_Array  aa_array[MAX_PP_AA_ARRAY];	// [3600] AAs 12 bytes each
