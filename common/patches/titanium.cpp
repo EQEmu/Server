@@ -1224,14 +1224,14 @@ namespace Titanium
 				eq->Race[char_index] = 1;
 
 			for (int index = 0; index < EQEmu::textures::TextureCount; ++index) {
-				eq->CS_Colors[char_index].Slot[index].Color = emu_cse->Equip[index].Color.Color;
+				eq->CS_Colors[char_index].Slot[index].Color = emu_cse->Equip[index].Color;
 			}
 
 			eq->BeardColor[char_index] = emu_cse->BeardColor;
 			eq->HairStyle[char_index] = emu_cse->HairStyle;
 
 			for (int index = 0; index < EQEmu::textures::TextureCount; ++index) {
-				eq->Equip[char_index].Slot[index].Material = emu_cse->Equip[index].Textures.Material;
+				eq->Equip[char_index].Slot[index].Material = emu_cse->Equip[index].Material;
 			}
 
 			eq->SecondaryIDFile[char_index] = emu_cse->SecondaryIDFile;

@@ -228,11 +228,7 @@ struct Texture_Struct
 //	TextureProfile();
 //};
 
-struct CharSelectEquip
-{
-	Texture_Struct Textures;
-	Tint_Struct Color;
-};
+struct CharSelectEquip : Texture_Struct, Tint_Struct {};
 
 struct CharacterSelectEntry_Struct
 {

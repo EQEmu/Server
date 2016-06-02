@@ -126,11 +126,7 @@ struct LDoNTrapTemplate
 
 // All clients translate the character select information to some degree
 
-struct CharSelectEquip
-{
-	EQEmu::Texture_Struct Textures;
-	EQEmu::Tint_Struct Color;
-};
+struct CharSelectEquip : EQEmu::Texture_Struct, EQEmu::Tint_Struct {};
 
 // RoF2-based hybrid struct
 struct CharacterSelectEntry_Struct

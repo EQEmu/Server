@@ -2291,10 +2291,10 @@ namespace UF
 			eq_cse->Face = emu_cse->Face;
 
 			for (int equip_index = 0; equip_index < EQEmu::textures::TextureCount; equip_index++) {
-				eq_cse->Equip[equip_index].Textures.Material = emu_cse->Equip[equip_index].Textures.Material;
-				eq_cse->Equip[equip_index].Textures.Unknown1 = emu_cse->Equip[equip_index].Textures.Unknown1;
-				eq_cse->Equip[equip_index].Textures.EliteMaterial = emu_cse->Equip[equip_index].Textures.EliteMaterial;
-				eq_cse->Equip[equip_index].Color.Color = emu_cse->Equip[equip_index].Color.Color;
+				eq_cse->Equip[equip_index].Material = emu_cse->Equip[equip_index].Material;
+				eq_cse->Equip[equip_index].Unknown1 = emu_cse->Equip[equip_index].Unknown1;
+				eq_cse->Equip[equip_index].EliteMaterial = emu_cse->Equip[equip_index].EliteMaterial;
+				eq_cse->Equip[equip_index].Color = emu_cse->Equip[equip_index].Color;
 			}
 
 			eq_cse->PrimaryIDFile = emu_cse->PrimaryIDFile;
