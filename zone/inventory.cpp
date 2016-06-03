@@ -2721,6 +2721,8 @@ void Client::CreateBandolier(const EQApplicationPacket *app)
 	const EQEmu::ItemBase *BaseItem = nullptr;
 	int16 WeaponSlot = 0;
 
+	database.DeleteCharacterBandolier(this->CharacterID(), bs->Number);
+
 	for(int BandolierSlot = bandolierPrimary; BandolierSlot <= bandolierAmmo; BandolierSlot++) {
 		WeaponSlot = BandolierSlotToWeaponSlot(BandolierSlot);
 		InvItem = GetInv()[WeaponSlot];
