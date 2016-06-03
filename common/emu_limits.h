@@ -27,41 +27,41 @@
 
 namespace EntityLimits
 {
-	namespace npc {
+	namespace NPC {
 		enum : int { Invalid = -1, Null, Safety };
 
 		enum : bool { False = false, True = true };
 
 		const size_t InvTypeTradeSize = 4;
 
-	} /*npc*/
+	} /*NPC*/
 
-	namespace merc {
+	namespace Merc {
 		enum : int { Invalid = -1, Null, Safety };
 
 		enum : bool { False = false, True = true };
 
 		const size_t InvTypeTradeSize = 4;
 
-	} /*merc*/
+	} /*Merc*/
 
-	namespace bot {
+	namespace Bot {
 		enum : int { Invalid = -1, Null, Safety };
 
 		enum : bool { False = false, True = true };
 
 		const size_t InvTypeTradeSize = 8;
 
-	} /*bot*/
+	} /*Bot*/
 
-	namespace pet {
+	namespace Pet {
 		enum : int { Invalid = -1, Null, Safety };
 
 		enum : bool { False = false, True = true };
 
 		const size_t InvTypeTradeSize = 4;
 
-	} /*pet*/
+	} /*Pet*/
 
 }; /*EntityLimits*/
 
