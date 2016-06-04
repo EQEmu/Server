@@ -86,7 +86,10 @@ namespace EQEmu
 			NPC,
 			Merc,
 			Bot,
-			Pet,
+			ClientPet,
+			NPCPet,
+			MercPet,
+			BotPet,
 			OfflineTitanium,
 			OfflineSoF,
 			OfflineSoD,
@@ -97,7 +100,7 @@ namespace EQEmu
 
 		const InventoryVersion LastInventoryVersion = InventoryVersion::OfflineRoF2;
 		const InventoryVersion LastPCInventoryVersion = InventoryVersion::RoF2;
-		const InventoryVersion LastNonPCInventoryVersion = InventoryVersion::Pet;
+		const InventoryVersion LastNonPCInventoryVersion = InventoryVersion::BotPet;
 		const InventoryVersion LastOfflinePCInventoryVersion = InventoryVersion::OfflineRoF2;
 		const size_t InventoryVersionCount = (static_cast<size_t>(LastInventoryVersion) + 1);
 

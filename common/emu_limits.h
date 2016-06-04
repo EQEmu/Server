@@ -54,7 +54,34 @@ namespace EntityLimits
 
 	} /*Bot*/
 
-	namespace Pet {
+	namespace ClientPet {
+		enum : int { Invalid = -1, Null, Safety };
+
+		enum : bool { False = false, True = true };
+
+		const size_t InvTypeTradeSize = 4;
+
+	} /*Pet*/
+
+	namespace NPCPet {
+		enum : int { Invalid = -1, Null, Safety };
+
+		enum : bool { False = false, True = true };
+
+		const size_t InvTypeTradeSize = 4;
+
+	} /*Pet*/
+
+	namespace MercPet {
+		enum : int { Invalid = -1, Null, Safety };
+
+		enum : bool { False = false, True = true };
+
+		const size_t InvTypeTradeSize = 4;
+
+	} /*Pet*/
+
+	namespace BotPet {
 		enum : int { Invalid = -1, Null, Safety };
 
 		enum : bool { False = false, True = true };

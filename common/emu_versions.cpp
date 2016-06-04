@@ -216,8 +216,14 @@ const char* EQEmu::versions::InventoryVersionName(InventoryVersion inventory_ver
 		return "Merc";
 	case InventoryVersion::Bot:
 		return "Bot";
-	case InventoryVersion::Pet:
-		return "Pet";
+	case InventoryVersion::ClientPet:
+		return "Client Pet";
+	case InventoryVersion::NPCPet:
+		return "NPC Pet";
+	case InventoryVersion::MercPet:
+		return "Merc Pet";
+	case InventoryVersion::BotPet:
+		return "Bot Pet";
 	case InventoryVersion::OfflineTitanium:
 		return "Offline Titanium";
 	case InventoryVersion::OfflineSoF:
