@@ -52,7 +52,7 @@ PathManager* PathManager::LoadPathFile(const char* ZoneName)
 
 	strlwr(LowerCaseZoneName);
 
-	snprintf(ZonePathFileName, 250, "%s/%s.path", Config->MapDir.c_str(),LowerCaseZoneName);
+	snprintf(ZonePathFileName, 250, "%s%s.path", Config->MapDir.c_str(), LowerCaseZoneName);
 
 	if((PathFile = fopen(ZonePathFileName, "rb")))
 	{
