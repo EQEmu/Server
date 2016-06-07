@@ -20,6 +20,7 @@
 #ifndef COMMON_EQ_LIMITS_H
 #define COMMON_EQ_LIMITS_H
 
+#include "emu_legacy.h"
 #include "types.h"
 #include "eq_constants.h"
 #include "emu_versions.h"
@@ -34,28 +35,41 @@
 namespace EQEmu
 {
 	namespace constants {
-		extern size_t GetCharacterCreationLimit(versions::ClientVersion client_version);
+		class LookupEntry {
+		public:
+			size_t CharacterCreationLimit;
+		};
+
+		const LookupEntry* Lookup(versions::ClientVersion client_version);
 
 	} /*constants*/
 	
 	namespace inventory {
-		extern size_t GetInventoryTypeSize(versions::InventoryVersion inventory_version, int inv_type);
-		extern uint64 GetPossessionsBitmask(versions::InventoryVersion inventory_version);
+		class LookupEntry {
+		public:
+			size_t InventoryTypeSize[legacy::TypeCount];
 
-		extern bool GetAllowEmptyBagInBag(versions::InventoryVersion inventory_version);
-		extern bool GetAllowClickCastFromBag(versions::InventoryVersion inventory_version);
+			uint64 PossessionsBitmask;
+			size_t ItemBagSize;
+			size_t ItemAugSize;
 
-		extern bool GetConcatenateInvTypeLimbo(versions::InventoryVersion inventory_version);
+			bool AllowEmptyBagInBag;
+			bool AllowClickCastFromBag;
+			bool ConcatenateInvTypeLimbo;
+			bool AllowOverLevelEquipment;
+		};
 
-		extern bool GetAllowOverLevelEquipment(versions::InventoryVersion inventory_version);
-
-		extern size_t GetItemAugSize(versions::InventoryVersion inventory_version);
-		extern size_t GetItemBagSize(versions::InventoryVersion inventory_version);
+		const LookupEntry* Lookup(versions::InventoryVersion inventory_version);
 
 	} /*inventory*/
 	
 	namespace behavior {
-		extern bool GetCoinHasWeight(versions::InventoryVersion inventory_version);
+		class LookupEntry {
+		public:
+			bool CoinHasWeight;
+		};
+
+		const LookupEntry* Lookup(versions::InventoryVersion inventory_version);
 
 	} /*behavior*/
 

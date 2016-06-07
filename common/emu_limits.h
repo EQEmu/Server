@@ -36,6 +36,15 @@ namespace EntityLimits
 
 	} /*NPC*/
 
+	namespace NPCMerchant {
+		enum : int { Invalid = -1, Null, Safety };
+
+		enum : bool { False = false, True = true };
+
+		const size_t InvTypeTradeSize = 4;
+
+	} /*NPCMerchant*/
+
 	namespace Merc {
 		enum : int { Invalid = -1, Null, Safety };
 

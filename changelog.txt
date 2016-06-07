@@ -1,5 +1,8 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 06/06/2016 ==
+Uleat: Reworked EQEmuDictionary to use class LookupEntry
+
 == 06/01/2016 ==
 Uleat: Implemented EQEmu::TintProfile
 Uleat: Implemented EQEmu::TextureProfile

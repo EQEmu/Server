@@ -211,7 +211,7 @@ void Client::SendMaxCharCreate() {
 	auto outapp = new EQApplicationPacket(OP_SendMaxCharacters, sizeof(MaxCharacters_Struct));
 	MaxCharacters_Struct* mc = (MaxCharacters_Struct*)outapp->pBuffer;
 
-	mc->max_chars = EQEmu::constants::GetCharacterCreationLimit(m_ClientVersion);
+	mc->max_chars = EQEmu::constants::Lookup(m_ClientVersion)->CharacterCreationLimit;
 	if (mc->max_chars > EQEmu::constants::CharacterCreationMax)
 		mc->max_chars = EQEmu::constants::CharacterCreationMax;
 
@@ -746,7 +746,7 @@ bool Client::HandleEnterWorldPacket(const EQApplicationPacket *app) {
 	// This can probably be moved outside and have another method return requested info (don't forget to remove the #include "../common/shareddb.h" above)
 	// (This is a literal translation of the original process..I don't see why it can't be changed to a single-target query over account iteration)
 	if (!pZoning) {
-		size_t character_limit = EQEmu::constants::GetCharacterCreationLimit(eqs->ClientVersion());
+		size_t character_limit = EQEmu::constants::Lookup(eqs->ClientVersion())->CharacterCreationLimit;
 		if (character_limit > EQEmu::constants::CharacterCreationMax) { character_limit = EQEmu::constants::CharacterCreationMax; }
 		if (eqs->ClientVersion() == EQEmu::versions::ClientVersion::Titanium) { character_limit = 8; }
 

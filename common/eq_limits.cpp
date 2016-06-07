@@ -21,836 +21,361 @@
 #include "emu_limits.h"
 
 
-size_t EQEmu::constants::GetCharacterCreationLimit(versions::ClientVersion client_version)
+static const EQEmu::constants::LookupEntry constants_lookup_entries[EQEmu::versions::ClientVersionCount] =
 {
-	static const size_t local[versions::ClientVersionCount] = {
-		ClientUnknown::Null,
-		Client62::Null,
-		Titanium::constants::CharacterCreationLimit,
-		SoF::constants::CharacterCreationLimit,
-		SoD::constants::CharacterCreationLimit,
-		UF::constants::CharacterCreationLimit,
-		RoF::constants::CharacterCreationLimit,
+	{ // Unknown
+		ClientUnknown::Null
+	},
+	{ // Client62
+		Client62::Null
+	},
+	{ // Titanium
+		Titanium::constants::CharacterCreationLimit
+	},
+	{ // SoF
+		SoF::constants::CharacterCreationLimit
+	},
+	{ // SoD
+		SoD::constants::CharacterCreationLimit
+	},
+	{ // UF
+		UF::constants::CharacterCreationLimit
+	},
+	{ // RoF
+		RoF::constants::CharacterCreationLimit
+	},
+	{ // RoF2
 		RoF2::constants::CharacterCreationLimit
-	};
+	}
+};
 
-	return local[static_cast<size_t>(versions::ValidateClientVersion(client_version))];
+const EQEmu::constants::LookupEntry* EQEmu::constants::Lookup(versions::ClientVersion client_version)
+{
+	return &constants_lookup_entries[static_cast<int>(versions::ValidateClientVersion(client_version))];
 }
 
-size_t EQEmu::inventory::GetInventoryTypeSize(versions::InventoryVersion inventory_version, int inv_type)
+static const EQEmu::inventory::LookupEntry inventory_lookup_entries[EQEmu::versions::InventoryVersionCount] =
 {
-	static const size_t local[legacy::TypeCount][versions::InventoryVersionCount] = {
-		{ // local[TypePossessions]
-			ClientUnknown::Null,
-			Client62::Null,
-			legacy::TYPE_POSSESSIONS_SIZE, //Titanium::invtype::InvTypePossessionsSize,
-			legacy::TYPE_POSSESSIONS_SIZE, //SoF::invtype::InvTypePossessionsSize,
-			legacy::TYPE_POSSESSIONS_SIZE, //SoD::invtype::InvTypePossessionsSize,
-			legacy::TYPE_POSSESSIONS_SIZE, //UF::invtype::InvTypePossessionsSize,
-			legacy::TYPE_POSSESSIONS_SIZE, //RoF::invtype::InvTypePossessionsSize,
-			legacy::TYPE_POSSESSIONS_SIZE, //RoF2::invtype::InvTypePossessionsSize,
-			legacy::TYPE_POSSESSIONS_SIZE, //InvTypePossessionsSize,
-			legacy::TYPE_POSSESSIONS_SIZE, //InvTypePossessionsSize,
-			legacy::TYPE_POSSESSIONS_SIZE, //InvTypePossessionsSize,
-			legacy::TYPE_POSSESSIONS_SIZE, //InvTypePossessionsSize,
-			legacy::TYPE_POSSESSIONS_SIZE, //InvTypePossessionsSize,
-			legacy::TYPE_POSSESSIONS_SIZE, //InvTypePossessionsSize,
-			legacy::TYPE_POSSESSIONS_SIZE, //InvTypePossessionsSize,
-			Titanium::Null,
-			SoF::Null,
-			SoD::Null,
-			UF::Null,
-			RoF::Null,
-			RoF2::Null
-		},
-		{ // local[TypeBank]
-			ClientUnknown::Null,
-			Client62::Null,
-			Titanium::invtype::InvTypeBankSize,
-			SoF::invtype::InvTypeBankSize,
-			SoD::invtype::InvTypeBankSize,
-			UF::invtype::InvTypeBankSize,
-			RoF::invtype::InvTypeBankSize,
-			RoF2::invtype::InvTypeBankSize,
-			EntityLimits::NPC::Null,
-			EntityLimits::Merc::Null,
-			EntityLimits::Bot::Null,
-			EntityLimits::ClientPet::Null,
-			EntityLimits::NPCPet::Null,
-			EntityLimits::MercPet::Null,
-			EntityLimits::BotPet::Null,
-			Titanium::Null,
-			SoF::Null,
-			SoD::Null,
-			UF::Null,
-			RoF::Null,
-			RoF2::Null
-		},
-		{ // local[TypeSharedBank]
-			ClientUnknown::Null,
-			Client62::Null,
-			Titanium::invtype::InvTypeSharedBankSize,
-			SoF::invtype::InvTypeSharedBankSize,
-			SoD::invtype::InvTypeSharedBankSize,
-			UF::invtype::InvTypeSharedBankSize,
-			RoF::invtype::InvTypeSharedBankSize,
-			RoF2::invtype::InvTypeSharedBankSize,
-			EntityLimits::NPC::Null,
-			EntityLimits::Merc::Null,
-			EntityLimits::Bot::Null,
-			EntityLimits::ClientPet::Null,
-			EntityLimits::NPCPet::Null,
-			EntityLimits::MercPet::Null,
-			EntityLimits::BotPet::Null,
-			Titanium::Null,
-			SoF::Null,
-			SoD::Null,
-			UF::Null,
-			RoF::Null,
-			RoF2::Null
-		},
-		{ // local[TypeTrade]
-			ClientUnknown::Null,
-			Client62::Null,
-			Titanium::invtype::InvTypeTradeSize,
-			SoF::invtype::InvTypeTradeSize,
-			SoD::invtype::InvTypeTradeSize,
-			UF::invtype::InvTypeTradeSize,
-			RoF::invtype::InvTypeTradeSize,
-			RoF2::invtype::InvTypeTradeSize,
-			EntityLimits::NPC::InvTypeTradeSize,
-			EntityLimits::Merc::InvTypeTradeSize,
-			EntityLimits::Bot::InvTypeTradeSize, // client thinks this is another client
-			EntityLimits::ClientPet::InvTypeTradeSize,
-			EntityLimits::NPCPet::InvTypeTradeSize,
-			EntityLimits::MercPet::InvTypeTradeSize,
-			EntityLimits::BotPet::InvTypeTradeSize,
-			Titanium::invtype::InvTypeTradeSize,
-			SoF::invtype::InvTypeTradeSize,
-			SoD::invtype::InvTypeTradeSize,
-			UF::invtype::InvTypeTradeSize,
-			RoF::invtype::InvTypeTradeSize,
-			RoF2::invtype::InvTypeTradeSize
-		},
-		{ // local[TypeWorld]
-			ClientUnknown::Null,
-			Client62::Null,
-			Titanium::invtype::InvTypeWorldSize,
-			SoF::invtype::InvTypeWorldSize,
-			SoD::invtype::InvTypeWorldSize,
-			UF::invtype::InvTypeWorldSize,
-			RoF::invtype::InvTypeWorldSize,
-			RoF2::invtype::InvTypeWorldSize,
-			EntityLimits::NPC::Null,
-			EntityLimits::Merc::Null,
-			EntityLimits::Bot::Null,
-			EntityLimits::ClientPet::Null,
-			EntityLimits::NPCPet::Null,
-			EntityLimits::MercPet::Null,
-			EntityLimits::BotPet::Null,
-			Titanium::Null,
-			SoF::Null,
-			SoD::Null,
-			UF::Null,
-			RoF::Null,
-			RoF2::Null
-		},
-		{ // local[TypeLimbo]
-			ClientUnknown::Null,
-			Client62::Null,
-			Titanium::invtype::InvTypeLimboSize,
-			SoF::invtype::InvTypeLimboSize,
-			SoD::invtype::InvTypeLimboSize,
-			UF::invtype::InvTypeLimboSize,
-			RoF::invtype::InvTypeLimboSize,
-			RoF2::invtype::InvTypeLimboSize,
-			EntityLimits::NPC::Null,
-			EntityLimits::Merc::Null,
-			EntityLimits::Bot::Null,
-			EntityLimits::ClientPet::Null,
-			EntityLimits::NPCPet::Null,
-			EntityLimits::MercPet::Null,
-			EntityLimits::BotPet::Null,
-			Titanium::Null,
-			SoF::Null,
-			SoD::Null,
-			UF::Null,
-			RoF::Null,
-			RoF2::Null
-		},
-		{ // local[TypeTribute]
-			ClientUnknown::Null,
-			Client62::Null,
-			Titanium::invtype::InvTypeTributeSize,
-			SoF::invtype::InvTypeTributeSize,
-			SoD::invtype::InvTypeTributeSize,
-			UF::invtype::InvTypeTributeSize,
-			RoF::invtype::InvTypeTributeSize,
-			RoF2::invtype::InvTypeTributeSize,
-			EntityLimits::NPC::Null,
-			EntityLimits::Merc::Null,
-			EntityLimits::Bot::Null,
-			EntityLimits::ClientPet::Null,
-			EntityLimits::NPCPet::Null,
-			EntityLimits::MercPet::Null,
-			EntityLimits::BotPet::Null,
-			Titanium::Null,
-			SoF::Null,
-			SoD::Null,
-			UF::Null,
-			RoF::Null,
-			RoF2::Null
-		},
-		{ // local[TypeTrophyTribute]
-			ClientUnknown::Null,
-			Client62::Null,
-			Titanium::Null,
-			SoF::Null,
-			SoD::Null,
-			UF::Null,
-			RoF::Null, //RoF::invtype::InvTypeTrophyTributeSize,
-			RoF2::Null, //RoF2::invtype::InvTypeTrophyTributeSize,
-			EntityLimits::NPC::Null,
-			EntityLimits::Merc::Null,
-			EntityLimits::Bot::Null,
-			EntityLimits::ClientPet::Null,
-			EntityLimits::NPCPet::Null,
-			EntityLimits::MercPet::Null,
-			EntityLimits::BotPet::Null,
-			Titanium::Null,
-			SoF::Null,
-			SoD::Null,
-			UF::Null,
-			RoF::Null,
-			RoF2::Null
-		},
-		{ // local[TypeGuildTribute]
-			ClientUnknown::Null,
-			Client62::Null,
-			Titanium::Null, //Titanium::invtype::InvTypeGuildTributeSize,
-			SoF::Null, //SoF::invtype::InvTypeGuildTributeSize,
-			SoD::Null, //SoD::invtype::InvTypeGuildTributeSize,
-			UF::Null, //UF::invtype::InvTypeGuildTributeSize,
-			RoF::Null, //RoF::invtype::InvTypeGuildTributeSize,
-			RoF2::Null, //RoF2::invtype::InvTypeGuildTributeSize,
-			EntityLimits::NPC::Null,
-			EntityLimits::Merc::Null,
-			EntityLimits::Bot::Null,
-			EntityLimits::ClientPet::Null,
-			EntityLimits::NPCPet::Null,
-			EntityLimits::MercPet::Null,
-			EntityLimits::BotPet::Null,
-			Titanium::Null,
-			SoF::Null,
-			SoD::Null,
-			UF::Null,
-			RoF::Null,
-			RoF2::Null
-		},
-		{ // local[TypeMerchant]
-			ClientUnknown::Null,
-			Client62::Null,
-			Titanium::invtype::InvTypeMerchantSize,
-			SoF::invtype::InvTypeMerchantSize,
-			SoD::invtype::InvTypeMerchantSize,
-			UF::invtype::InvTypeMerchantSize,
-			RoF::invtype::InvTypeMerchantSize,
-			RoF2::invtype::InvTypeMerchantSize,
-			EntityLimits::NPC::Null,
-			EntityLimits::Merc::Null,
-			EntityLimits::Bot::Null,
-			EntityLimits::ClientPet::Null,
-			EntityLimits::NPCPet::Null,
-			EntityLimits::MercPet::Null,
-			EntityLimits::BotPet::Null,
-			Titanium::invtype::InvTypeMerchantSize,
-			SoF::invtype::InvTypeMerchantSize,
-			SoD::invtype::InvTypeMerchantSize,
-			UF::invtype::InvTypeMerchantSize,
-			RoF::invtype::InvTypeMerchantSize,
-			RoF2::invtype::InvTypeMerchantSize
-		},
-		{ // local[TypeDeleted]
-			ClientUnknown::Null,
-			Client62::Null,
-			Titanium::Null,
-			SoF::Null,
-			SoD::Null,
-			UF::Null,
-			RoF::Null, //RoF::invtype::InvTypeDeletedSize,
-			RoF2::Null, //RoF2::invtype::InvTypeDeletedSize,
-			EntityLimits::NPC::Null,
-			EntityLimits::Merc::Null,
-			EntityLimits::Bot::Null,
-			EntityLimits::ClientPet::Null,
-			EntityLimits::NPCPet::Null,
-			EntityLimits::MercPet::Null,
-			EntityLimits::BotPet::Null,
-			Titanium::Null,
-			SoF::Null,
-			SoD::Null,
-			UF::Null,
-			RoF::Null,
-			RoF2::Null
-		},
-		{ // local[TypeCorpse]
-			ClientUnknown::Null,
-			Client62::Null,
-			Titanium::invtype::InvTypeCorpseSize,
-			SoF::invtype::InvTypeCorpseSize,
-			SoD::invtype::InvTypeCorpseSize,
-			UF::invtype::InvTypeCorpseSize,
-			RoF::invtype::InvTypeCorpseSize,
-			RoF2::invtype::InvTypeCorpseSize,
-			EntityLimits::NPC::Null, //InvTypeCorpseSize,
-			EntityLimits::Merc::Null, //InvTypeCorpseSize,
-			EntityLimits::Bot::Null, //InvTypeCorpseSize,
-			EntityLimits::ClientPet::Null, //InvTypeCorpseSize,
-			EntityLimits::NPCPet::Null, //InvTypeCorpseSize,
-			EntityLimits::MercPet::Null, //InvTypeCorpseSize,
-			EntityLimits::BotPet::Null, //InvTypeCorpseSize,
-			Titanium::Null,
-			SoF::Null,
-			SoD::Null,
-			UF::Null,
-			RoF::Null,
-			RoF2::Null
-		},
-		{ // local[TypeBazaar]
-			ClientUnknown::Null,
-			Client62::Null,
-			legacy::TYPE_BAZAAR_SIZE, //Titanium::invtype::InvTypeBazaarSize,
-			legacy::TYPE_BAZAAR_SIZE, //SoF::invtype::InvTypeBazaarSize,
-			legacy::TYPE_BAZAAR_SIZE, //SoD::invtype::InvTypeBazaarSize,
-			legacy::TYPE_BAZAAR_SIZE, //UF::invtype::InvTypeBazaarSize,
-			legacy::TYPE_BAZAAR_SIZE, //RoF::invtype::InvTypeBazaarSize,
-			legacy::TYPE_BAZAAR_SIZE, //RoF2::invtype::InvTypeBazaarSize,
-			EntityLimits::NPC::Null,
-			EntityLimits::Merc::Null,
-			EntityLimits::Bot::Null,
-			EntityLimits::ClientPet::Null,
-			EntityLimits::NPCPet::Null,
-			EntityLimits::MercPet::Null,
-			EntityLimits::BotPet::Null,
-			Titanium::Null, //Titanium::invtype::InvTypeBazaarSize,
-			SoF::Null, //SoF::invtype::InvTypeBazaarSize,
-			SoD::Null, //SoD::invtype::InvTypeBazaarSize,
-			UF::Null, //UF::invtype::InvTypeBazaarSize,
-			RoF::Null, //RoF::invtype::InvTypeBazaarSize,
-			RoF2::Null //RoF2::invtype::InvTypeBazaarSize,
-		},
-		{ // local[TypeInspect]
-			ClientUnknown::Null,
-			Client62::Null,
-			Titanium::invtype::InvTypeInspectSize,
-			SoF::invtype::InvTypeInspectSize,
-			SoD::invtype::InvTypeInspectSize,
-			UF::invtype::InvTypeInspectSize,
-			RoF::invtype::InvTypeInspectSize,
-			RoF2::invtype::InvTypeInspectSize,
-			EntityLimits::NPC::Null,
-			EntityLimits::Merc::Null,
-			EntityLimits::Bot::Null,
-			EntityLimits::ClientPet::Null,
-			EntityLimits::NPCPet::Null,
-			EntityLimits::MercPet::Null,
-			EntityLimits::BotPet::Null,
-			Titanium::invtype::InvTypeInspectSize,
-			SoF::invtype::InvTypeInspectSize,
-			SoD::invtype::InvTypeInspectSize,
-			UF::invtype::InvTypeInspectSize,
-			RoF::invtype::InvTypeInspectSize,
-			RoF2::invtype::InvTypeInspectSize
-		},
-		{ // local[TypeRealEstate]
-			ClientUnknown::Null,
-			Client62::Null,
-			Titanium::Null,
-			SoF::Null,
-			SoD::Null,
-			UF::Null,
-			RoF::Null, //RoF::invtype::InvTypeRealEstateSize,
-			RoF2::Null, //RoF2::invtype::InvTypeRealEstateSize
-			EntityLimits::NPC::Null,
-			EntityLimits::Merc::Null,
-			EntityLimits::Bot::Null,
-			EntityLimits::ClientPet::Null,
-			EntityLimits::NPCPet::Null,
-			EntityLimits::MercPet::Null,
-			EntityLimits::BotPet::Null,
-			Titanium::Null,
-			SoF::Null,
-			SoD::Null,
-			UF::Null,
-			RoF::Null,
-			RoF2::Null
-		},
-		{ // local[TypeViewMODPC]
-			ClientUnknown::Null,
-			Client62::Null,
-			Titanium::invtype::InvTypeViewMODPCSize,
-			SoF::invtype::InvTypeViewMODPCSize,
-			SoD::invtype::InvTypeViewMODPCSize,
-			UF::invtype::InvTypeViewMODPCSize,
-			RoF::invtype::InvTypeViewMODPCSize,
-			RoF2::invtype::InvTypeViewMODPCSize,
-			EntityLimits::NPC::Null,
-			EntityLimits::Merc::Null,
-			EntityLimits::Bot::Null,
-			EntityLimits::ClientPet::Null,
-			EntityLimits::NPCPet::Null,
-			EntityLimits::MercPet::Null,
-			EntityLimits::BotPet::Null,
-			Titanium::invtype::InvTypeViewMODPCSize,
-			SoF::invtype::InvTypeViewMODPCSize,
-			SoD::invtype::InvTypeViewMODPCSize,
-			UF::invtype::InvTypeViewMODPCSize,
-			RoF::invtype::InvTypeViewMODPCSize,
-			RoF2::invtype::InvTypeViewMODPCSize
-		},
-		{ // local[TypeViewMODBank]
-			ClientUnknown::Null,
-			Client62::Null,
-			Titanium::invtype::InvTypeViewMODBankSize,
-			SoF::invtype::InvTypeViewMODBankSize,
-			SoD::invtype::InvTypeViewMODBankSize,
-			UF::invtype::InvTypeViewMODBankSize,
-			RoF::invtype::InvTypeViewMODBankSize,
-			RoF2::invtype::InvTypeViewMODBankSize,
-			EntityLimits::NPC::Null,
-			EntityLimits::Merc::Null,
-			EntityLimits::Bot::Null,
-			EntityLimits::ClientPet::Null,
-			EntityLimits::NPCPet::Null,
-			EntityLimits::MercPet::Null,
-			EntityLimits::BotPet::Null,
-			Titanium::invtype::InvTypeViewMODBankSize,
-			SoF::invtype::InvTypeViewMODBankSize,
-			SoD::invtype::InvTypeViewMODBankSize,
-			UF::invtype::InvTypeViewMODBankSize,
-			RoF::invtype::InvTypeViewMODBankSize,
-			RoF2::invtype::InvTypeViewMODBankSize
-		},
-		{ // local[TypeViewMODSharedBank]
-			ClientUnknown::Null,
-			Client62::Null,
-			Titanium::invtype::InvTypeViewMODSharedBankSize,
-			SoF::invtype::InvTypeViewMODSharedBankSize,
-			SoD::invtype::InvTypeViewMODSharedBankSize,
-			UF::invtype::InvTypeViewMODSharedBankSize,
-			RoF::invtype::InvTypeViewMODSharedBankSize,
-			RoF2::invtype::InvTypeViewMODSharedBankSize,
-			EntityLimits::NPC::Null,
-			EntityLimits::Merc::Null,
-			EntityLimits::Bot::Null,
-			EntityLimits::ClientPet::Null,
-			EntityLimits::NPCPet::Null,
-			EntityLimits::MercPet::Null,
-			EntityLimits::BotPet::Null,
-			Titanium::invtype::InvTypeViewMODSharedBankSize,
-			SoF::invtype::InvTypeViewMODSharedBankSize,
-			SoD::invtype::InvTypeViewMODSharedBankSize,
-			UF::invtype::InvTypeViewMODSharedBankSize,
-			RoF::invtype::InvTypeViewMODSharedBankSize,
-			RoF2::invtype::InvTypeViewMODSharedBankSize
-		},
-		{ // local[TypeViewMODLimbo]
-			ClientUnknown::Null,
-			Client62::Null,
-			Titanium::invtype::InvTypeViewMODLimboSize,
-			SoF::invtype::InvTypeViewMODLimboSize,
-			SoD::invtype::InvTypeViewMODLimboSize,
-			UF::invtype::InvTypeViewMODLimboSize,
-			RoF::invtype::InvTypeViewMODLimboSize,
-			RoF2::invtype::InvTypeViewMODLimboSize,
-			EntityLimits::NPC::Null,
-			EntityLimits::Merc::Null,
-			EntityLimits::Bot::Null,
-			EntityLimits::ClientPet::Null,
-			EntityLimits::NPCPet::Null,
-			EntityLimits::MercPet::Null,
-			EntityLimits::BotPet::Null,
-			Titanium::invtype::InvTypeViewMODLimboSize,
-			SoF::invtype::InvTypeViewMODLimboSize,
-			SoD::invtype::InvTypeViewMODLimboSize,
-			UF::invtype::InvTypeViewMODLimboSize,
-			RoF::invtype::InvTypeViewMODLimboSize,
-			RoF2::invtype::InvTypeViewMODLimboSize
-		},
-		{ // local[TypeAltStorage]
-			ClientUnknown::Null,
-			Client62::Null,
-			Titanium::invtype::InvTypeAltStorageSize,
-			SoF::invtype::InvTypeAltStorageSize,
-			SoD::invtype::InvTypeAltStorageSize,
-			UF::invtype::InvTypeAltStorageSize,
-			RoF::invtype::InvTypeAltStorageSize,
-			RoF2::invtype::InvTypeAltStorageSize,
-			EntityLimits::NPC::Null,
-			EntityLimits::Merc::Null,
-			EntityLimits::Bot::Null,
-			EntityLimits::ClientPet::Null,
-			EntityLimits::NPCPet::Null,
-			EntityLimits::MercPet::Null,
-			EntityLimits::BotPet::Null,
-			Titanium::Null,
-			SoF::Null,
-			SoD::Null,
-			UF::Null,
-			RoF::Null,
-			RoF2::Null
-		},
-		{ // local[TypeArchived]
-			ClientUnknown::Null,
-			Client62::Null,
-			Titanium::invtype::InvTypeArchivedSize,
-			SoF::invtype::InvTypeArchivedSize,
-			SoD::invtype::InvTypeArchivedSize,
-			UF::invtype::InvTypeArchivedSize,
-			RoF::invtype::InvTypeArchivedSize,
-			RoF2::invtype::InvTypeArchivedSize,
-			EntityLimits::NPC::Null,
-			EntityLimits::Merc::Null,
-			EntityLimits::Bot::Null,
-			EntityLimits::ClientPet::Null,
-			EntityLimits::NPCPet::Null,
-			EntityLimits::MercPet::Null,
-			EntityLimits::BotPet::Null,
-			Titanium::Null,
-			SoF::Null,
-			SoD::Null,
-			UF::Null,
-			RoF::Null,
-			RoF2::Null
-		},
-		{ // local[TypeMail]
-			ClientUnknown::Null,
-			Client62::Null,
-			Titanium::Null,
-			SoF::Null,
-			SoD::Null,
-			UF::Null,
-			RoF::invtype::InvTypeMailSize,
-			RoF2::invtype::InvTypeMailSize,
-			EntityLimits::NPC::Null,
-			EntityLimits::Merc::Null,
-			EntityLimits::Bot::Null,
-			EntityLimits::ClientPet::Null,
-			EntityLimits::NPCPet::Null,
-			EntityLimits::MercPet::Null,
-			EntityLimits::BotPet::Null,
-			Titanium::Null,
-			SoF::Null,
-			SoD::Null,
-			UF::Null,
-			RoF::Null,
-			RoF2::Null
-		},
-		{ // local[TypeGuildTrophyTribute]
-			ClientUnknown::Null,
-			Client62::Null,
-			Titanium::Null,
-			SoF::Null,
-			SoD::Null,
-			UF::Null,
-			RoF::invtype::InvTypeGuildTrophyTributeSize,
-			RoF2::invtype::InvTypeGuildTrophyTributeSize,
-			EntityLimits::NPC::Null,
-			EntityLimits::Merc::Null,
-			EntityLimits::Bot::Null,
-			EntityLimits::ClientPet::Null,
-			EntityLimits::NPCPet::Null,
-			EntityLimits::MercPet::Null,
-			EntityLimits::BotPet::Null,
-			Titanium::Null,
-			SoF::Null,
-			SoD::Null,
-			UF::Null,
-			RoF::Null,
-			RoF2::Null
-		},
-		{ // local[TypeKrono]
-			ClientUnknown::Null,
-			Client62::Null,
-			Titanium::Null,
-			SoF::Null,
-			SoD::Null,
-			UF::Null,
-			RoF::Null,
-			RoF2::invtype::InvTypeKronoSize,
-			EntityLimits::NPC::Null,
-			EntityLimits::Merc::Null,
-			EntityLimits::Bot::Null,
-			EntityLimits::ClientPet::Null,
-			EntityLimits::NPCPet::Null,
-			EntityLimits::MercPet::Null,
-			EntityLimits::BotPet::Null,
-			Titanium::Null,
-			SoF::Null,
-			SoD::Null,
-			UF::Null,
-			RoF::Null,
-			RoF2::Null
-		},
-		{ // local[TypeOther]
-			ClientUnknown::Null,
-			Client62::Null,
-			Titanium::invtype::InvTypeOtherSize,
-			SoF::invtype::InvTypeOtherSize,
-			SoD::invtype::InvTypeOtherSize,
-			UF::invtype::InvTypeOtherSize,
-			RoF::invtype::InvTypeOtherSize,
-			RoF2::invtype::InvTypeOtherSize,
-			EntityLimits::NPC::Null,
-			EntityLimits::Merc::Null,
-			EntityLimits::Bot::Null,
-			EntityLimits::ClientPet::Null,
-			EntityLimits::NPCPet::Null,
-			EntityLimits::MercPet::Null,
-			EntityLimits::BotPet::Null,
-			Titanium::Null,
-			SoF::Null,
-			SoD::Null,
-			UF::Null,
-			RoF::Null,
-			RoF2::Null
-		}
-	};
+	{ // Unknown
+		ClientUnknown::Null, ClientUnknown::Null, ClientUnknown::Null, ClientUnknown::Null, ClientUnknown::Null,
+		ClientUnknown::Null, ClientUnknown::Null, ClientUnknown::Null, ClientUnknown::Null, ClientUnknown::Null,
+		ClientUnknown::Null, ClientUnknown::Null, ClientUnknown::Null, ClientUnknown::Null, ClientUnknown::Null,
+		ClientUnknown::Null, ClientUnknown::Null, ClientUnknown::Null, ClientUnknown::Null, ClientUnknown::Null,
+		ClientUnknown::Null, ClientUnknown::Null, ClientUnknown::Null, ClientUnknown::Null, ClientUnknown::Null,
 
-	if (inv_type < 0 || inv_type >= legacy::TypeCount)
-		return 0;
+		ClientUnknown::Null, ClientUnknown::Null, ClientUnknown::Null,
 
-	return local[inv_type][static_cast<size_t>(versions::ValidateInventoryVersion(inventory_version))];
+		ClientUnknown::False, ClientUnknown::False, ClientUnknown::False, ClientUnknown::False
+	},
+	{ // Client62
+		Client62::Null, Client62::Null, Client62::Null, Client62::Null, Client62::Null,
+		Client62::Null, Client62::Null, Client62::Null, Client62::Null, Client62::Null,
+		Client62::Null, Client62::Null, Client62::Null, Client62::Null, Client62::Null,
+		Client62::Null, Client62::Null, Client62::Null, Client62::Null, Client62::Null,
+		Client62::Null, Client62::Null, Client62::Null, Client62::Null, Client62::Null,
+
+		Client62::Null, Client62::Null, Client62::Null,
+
+		Client62::False, Client62::False, Client62::False, Client62::False
+	},
+	{ // Titanium
+		EQEmu::legacy::TYPE_POSSESSIONS_SIZE, /*Titanium::invtype::InvTypePossessionsSize,*/ Titanium::invtype::InvTypeBankSize, Titanium::invtype::InvTypeSharedBankSize, Titanium::invtype::InvTypeTradeSize, Titanium::invtype::InvTypeWorldSize,
+		Titanium::invtype::InvTypeLimboSize, Titanium::invtype::InvTypeTributeSize, Titanium::Null, Titanium::Null, /*Titanium::invtype::InvTypeGuildTributeSize,*/ Titanium::invtype::InvTypeMerchantSize,
+		Titanium::Null, Titanium::invtype::InvTypeCorpseSize, EQEmu::legacy::TYPE_BAZAAR_SIZE, /*Titanium::invtype::InvTypeBazaarSize,*/ Titanium::invtype::InvTypeInspectSize, Titanium::Null,
+		Titanium::invtype::InvTypeViewMODPCSize, Titanium::invtype::InvTypeViewMODBankSize, Titanium::invtype::InvTypeViewMODSharedBankSize, Titanium::invtype::InvTypeViewMODLimboSize, Titanium::invtype::InvTypeAltStorageSize,
+		Titanium::invtype::InvTypeArchivedSize, Titanium::Null, Titanium::Null, Titanium::Null, Titanium::invtype::InvTypeOtherSize,
+
+		Titanium::Null, /*0x000000027FDFFFFF,*/ EQEmu::legacy::ITEM_CONTAINER_SIZE, /*Titanium::invbag::ItemBagSize,*/ EQEmu::legacy::ITEM_COMMON_SIZE, /*Titanium::invaug::ItemAugSize,*/
+
+		Titanium::inventory::AllowEmptyBagInBag, Titanium::inventory::AllowClickCastFromBag, Titanium::inventory::ConcatenateInvTypeLimbo, Titanium::inventory::AllowOverLevelEquipment
+	},
+	{ // SoF
+		EQEmu::legacy::TYPE_POSSESSIONS_SIZE, /*SoF::invtype::InvTypePossessionsSize,*/ SoF::invtype::InvTypeBankSize, SoF::invtype::InvTypeSharedBankSize, SoF::invtype::InvTypeTradeSize, SoF::invtype::InvTypeWorldSize,
+		SoF::invtype::InvTypeLimboSize, SoF::invtype::InvTypeTributeSize, SoF::Null, SoF::Null, /*SoF::invtype::InvTypeGuildTributeSize,*/ SoF::invtype::InvTypeMerchantSize,
+		SoF::Null, SoF::invtype::InvTypeCorpseSize, EQEmu::legacy::TYPE_BAZAAR_SIZE, /*SoF::invtype::InvTypeBazaarSize,*/ SoF::invtype::InvTypeInspectSize, SoF::Null,
+		SoF::invtype::InvTypeViewMODPCSize, SoF::invtype::InvTypeViewMODBankSize, SoF::invtype::InvTypeViewMODSharedBankSize, SoF::invtype::InvTypeViewMODLimboSize, SoF::invtype::InvTypeAltStorageSize,
+		SoF::invtype::InvTypeArchivedSize, SoF::Null, SoF::Null, SoF::Null, SoF::invtype::InvTypeOtherSize,
+
+		SoF::Null, /*0x000000027FFFFFFF,*/ EQEmu::legacy::ITEM_CONTAINER_SIZE, /*SoF::invbag::ItemBagSize,*/ EQEmu::legacy::ITEM_COMMON_SIZE, /*SoF::invaug::ItemAugSize,*/
+
+		SoF::inventory::AllowEmptyBagInBag, SoF::inventory::AllowClickCastFromBag, SoF::inventory::ConcatenateInvTypeLimbo, SoF::inventory::AllowOverLevelEquipment
+	},
+	{ // SoD
+		EQEmu::legacy::TYPE_POSSESSIONS_SIZE, /*SoD::invtype::InvTypePossessionsSize,*/ SoD::invtype::InvTypeBankSize, SoD::invtype::InvTypeSharedBankSize, SoD::invtype::InvTypeTradeSize, SoD::invtype::InvTypeWorldSize,
+		SoD::invtype::InvTypeLimboSize, SoD::invtype::InvTypeTributeSize, SoD::Null, SoD::Null, /*SoD::invtype::InvTypeGuildTributeSize,*/ SoD::invtype::InvTypeMerchantSize,
+		SoD::Null, SoD::invtype::InvTypeCorpseSize, EQEmu::legacy::TYPE_BAZAAR_SIZE, /*SoD::invtype::InvTypeBazaarSize,*/ SoD::invtype::InvTypeInspectSize, SoD::Null,
+		SoD::invtype::InvTypeViewMODPCSize, SoD::invtype::InvTypeViewMODBankSize, SoD::invtype::InvTypeViewMODSharedBankSize, SoD::invtype::InvTypeViewMODLimboSize, SoD::invtype::InvTypeAltStorageSize,
+		SoD::invtype::InvTypeArchivedSize, SoD::Null, SoD::Null, SoD::Null, SoD::invtype::InvTypeOtherSize,
+
+		SoD::Null, /*0x000000027FFFFFFF,*/ EQEmu::legacy::ITEM_CONTAINER_SIZE, /*SoD::invbag::ItemBagSize,*/ EQEmu::legacy::ITEM_COMMON_SIZE, /*SoD::invaug::ItemAugSize,*/
+
+		SoD::inventory::AllowEmptyBagInBag, SoD::inventory::AllowClickCastFromBag, SoD::inventory::ConcatenateInvTypeLimbo, SoD::inventory::AllowOverLevelEquipment
+	},
+	{ // UF
+		EQEmu::legacy::TYPE_POSSESSIONS_SIZE, /*UF::invtype::InvTypePossessionsSize,*/ UF::invtype::InvTypeBankSize, UF::invtype::InvTypeSharedBankSize, UF::invtype::InvTypeTradeSize, UF::invtype::InvTypeWorldSize,
+		UF::invtype::InvTypeLimboSize, UF::invtype::InvTypeTributeSize, UF::Null, UF::Null, /*UF::invtype::InvTypeGuildTributeSize,*/ UF::invtype::InvTypeMerchantSize,
+		UF::Null, UF::invtype::InvTypeCorpseSize, EQEmu::legacy::TYPE_BAZAAR_SIZE, /*UF::invtype::InvTypeBazaarSize,*/ UF::invtype::InvTypeInspectSize, UF::Null,
+		UF::invtype::InvTypeViewMODPCSize, UF::invtype::InvTypeViewMODBankSize, UF::invtype::InvTypeViewMODSharedBankSize, UF::invtype::InvTypeViewMODLimboSize, UF::invtype::InvTypeAltStorageSize,
+		UF::invtype::InvTypeArchivedSize, UF::Null, UF::Null, UF::Null, UF::invtype::InvTypeOtherSize,
+
+		UF::Null, /*0x000000027FFFFFFF,*/ EQEmu::legacy::ITEM_CONTAINER_SIZE, /*UF::invbag::ItemBagSize,*/ EQEmu::legacy::ITEM_COMMON_SIZE, /*UF::invaug::ItemAugSize,*/
+
+		UF::inventory::AllowEmptyBagInBag, UF::inventory::AllowClickCastFromBag, UF::inventory::ConcatenateInvTypeLimbo, UF::inventory::AllowOverLevelEquipment
+	},
+	{ // RoF
+		EQEmu::legacy::TYPE_POSSESSIONS_SIZE, /*RoF::invtype::InvTypePossessionsSize,*/ RoF::invtype::InvTypeBankSize, RoF::invtype::InvTypeSharedBankSize, RoF::invtype::InvTypeTradeSize, RoF::invtype::InvTypeWorldSize,
+		RoF::invtype::InvTypeLimboSize, RoF::invtype::InvTypeTributeSize, RoF::Null, /*RoF::invtype::InvTypeTrophyTributeSize,*/ RoF::Null, /*RoF::invtype::InvTypeGuildTributeSize,*/ RoF::invtype::InvTypeMerchantSize,
+		RoF::Null, /*RoF::invtype::InvTypeDeletedSize,*/ RoF::invtype::InvTypeCorpseSize, EQEmu::legacy::TYPE_BAZAAR_SIZE, /*RoF::invtype::InvTypeBazaarSize,*/ RoF::invtype::InvTypeInspectSize, RoF::Null, /*RoF::invtype::InvTypeRealEstateSize,*/
+		RoF::invtype::InvTypeViewMODPCSize, RoF::invtype::InvTypeViewMODBankSize, RoF::invtype::InvTypeViewMODSharedBankSize, RoF::invtype::InvTypeViewMODLimboSize, RoF::invtype::InvTypeAltStorageSize,
+		RoF::invtype::InvTypeArchivedSize, RoF::invtype::InvTypeMailSize, RoF::invtype::InvTypeGuildTrophyTributeSize, RoF::Null, RoF::invtype::InvTypeOtherSize,
+
+		RoF::Null, /*0x00000003FFFFFFFF,*/ EQEmu::legacy::ITEM_CONTAINER_SIZE, /*RoF::invbag::ItemBagSize,*/ EQEmu::legacy::ITEM_COMMON_SIZE, /*RoF::invaug::ItemAugSize,*/
+
+		RoF::False, /*RoF::inventory::AllowEmptyBagInBag,*/ RoF::inventory::AllowClickCastFromBag, RoF::inventory::ConcatenateInvTypeLimbo, RoF::inventory::AllowOverLevelEquipment
+	},
+	{ // RoF2
+		EQEmu::legacy::TYPE_POSSESSIONS_SIZE, /*RoF2::invtype::InvTypePossessionsSize,*/ RoF2::invtype::InvTypeBankSize, RoF2::invtype::InvTypeSharedBankSize, RoF2::invtype::InvTypeTradeSize, RoF2::invtype::InvTypeWorldSize,
+		RoF2::invtype::InvTypeLimboSize, RoF2::invtype::InvTypeTributeSize, RoF2::Null, /*RoF2::invtype::InvTypeTrophyTributeSize,*/ RoF2::Null, /*RoF2::invtype::InvTypeGuildTributeSize,*/ RoF2::invtype::InvTypeMerchantSize,
+		RoF2::Null, /*RoF2::invtype::InvTypeDeletedSize,*/ RoF2::invtype::InvTypeCorpseSize, EQEmu::legacy::TYPE_BAZAAR_SIZE, /*RoF2::invtype::InvTypeBazaarSize,*/ RoF2::invtype::InvTypeInspectSize, RoF2::Null, /*RoF2::invtype::InvTypeRealEstateSize*/
+		RoF2::invtype::InvTypeViewMODPCSize, RoF2::invtype::InvTypeViewMODBankSize, RoF2::invtype::InvTypeViewMODSharedBankSize, RoF2::invtype::InvTypeViewMODLimboSize, RoF2::invtype::InvTypeAltStorageSize,
+		RoF2::invtype::InvTypeArchivedSize, RoF2::invtype::InvTypeMailSize, RoF2::invtype::InvTypeGuildTrophyTributeSize, RoF2::invtype::InvTypeKronoSize, RoF2::invtype::InvTypeOtherSize,
+
+		RoF2::Null, /*0x00000003FFFFFFFF,*/ EQEmu::legacy::ITEM_CONTAINER_SIZE, /*RoF2::invbag::ItemBagSize,*/ EQEmu::legacy::ITEM_COMMON_SIZE, /*RoF2::invaug::ItemAugSize,*/
+
+		RoF2::False, /*RoF2::inventory::AllowEmptyBagInBag,*/ RoF2::inventory::AllowClickCastFromBag, RoF2::inventory::ConcatenateInvTypeLimbo, RoF2::inventory::AllowOverLevelEquipment
+	},
+	{ // NPC
+		EQEmu::legacy::TYPE_POSSESSIONS_SIZE, /*InvTypePossessionsSize,*/ EntityLimits::NPC::Null, EntityLimits::NPC::Null, EntityLimits::NPC::InvTypeTradeSize, EntityLimits::NPC::Null,
+		EntityLimits::NPC::Null, EntityLimits::NPC::Null, EntityLimits::NPC::Null, EntityLimits::NPC::Null, EntityLimits::NPC::Null,
+		EntityLimits::NPC::Null, EntityLimits::NPC::Null, /*InvTypeCorpseSize,*/ EntityLimits::NPC::Null, EntityLimits::NPC::Null, EntityLimits::NPC::Null,
+		EntityLimits::NPC::Null, EntityLimits::NPC::Null, EntityLimits::NPC::Null, EntityLimits::NPC::Null, EntityLimits::NPC::Null,
+		EntityLimits::NPC::Null, EntityLimits::NPC::Null, EntityLimits::NPC::Null, EntityLimits::NPC::Null, EntityLimits::NPC::Null,
+
+		EntityLimits::NPC::Null, EQEmu::legacy::ITEM_CONTAINER_SIZE, /*ItemBagSize,*/ EQEmu::legacy::ITEM_COMMON_SIZE, /*ItemAugSize,*/
+
+		EntityLimits::NPC::False, EntityLimits::NPC::False, EntityLimits::NPC::False, EntityLimits::NPC::False
+	},
+	{ // NPCMerchant
+		EQEmu::legacy::TYPE_POSSESSIONS_SIZE, /*InvTypePossessionsSize,*/ EntityLimits::NPCMerchant::Null, EntityLimits::NPCMerchant::Null, EntityLimits::NPCMerchant::InvTypeTradeSize, EntityLimits::NPCMerchant::Null,
+		EntityLimits::NPCMerchant::Null, EntityLimits::NPCMerchant::Null, EntityLimits::NPCMerchant::Null, EntityLimits::NPCMerchant::Null, EntityLimits::NPCMerchant::Null,
+		EntityLimits::NPCMerchant::Null, EntityLimits::NPCMerchant::Null, /*InvTypeCorpseSize,*/ EntityLimits::NPCMerchant::Null, EntityLimits::NPCMerchant::Null, EntityLimits::NPCMerchant::Null,
+		EntityLimits::NPCMerchant::Null, EntityLimits::NPCMerchant::Null, EntityLimits::NPCMerchant::Null, EntityLimits::NPCMerchant::Null, EntityLimits::NPCMerchant::Null,
+		EntityLimits::NPCMerchant::Null, EntityLimits::NPCMerchant::Null, EntityLimits::NPCMerchant::Null, EntityLimits::NPCMerchant::Null, EntityLimits::NPCMerchant::Null,
+
+		EntityLimits::NPCMerchant::Null, EQEmu::legacy::ITEM_CONTAINER_SIZE, /*ItemBagSize,*/ EQEmu::legacy::ITEM_COMMON_SIZE, /*ItemAugSize,*/
+
+		EntityLimits::NPCMerchant::False, EntityLimits::NPCMerchant::False, EntityLimits::NPCMerchant::False, EntityLimits::NPCMerchant::False
+	},
+	{ // Merc
+		EQEmu::legacy::TYPE_POSSESSIONS_SIZE, /*InvTypePossessionsSize,*/ EntityLimits::Merc::Null, EntityLimits::Merc::Null, EntityLimits::Merc::InvTypeTradeSize, EntityLimits::Merc::Null,
+		EntityLimits::Merc::Null, EntityLimits::Merc::Null, EntityLimits::Merc::Null, EntityLimits::Merc::Null, EntityLimits::Merc::Null,
+		EntityLimits::Merc::Null, EntityLimits::Merc::Null, /*InvTypeCorpseSize,*/ EntityLimits::Merc::Null, EntityLimits::Merc::Null, EntityLimits::Merc::Null,
+		EntityLimits::Merc::Null, EntityLimits::Merc::Null, EntityLimits::Merc::Null, EntityLimits::Merc::Null, EntityLimits::Merc::Null,
+		EntityLimits::Merc::Null, EntityLimits::Merc::Null, EntityLimits::Merc::Null, EntityLimits::Merc::Null, EntityLimits::Merc::Null,
+
+		EntityLimits::Merc::Null, EQEmu::legacy::ITEM_CONTAINER_SIZE, /*ItemBagSize,*/ EQEmu::legacy::ITEM_COMMON_SIZE, /*ItemAugSize,*/
+
+		EntityLimits::Merc::False, EntityLimits::Merc::False, EntityLimits::Merc::False, EntityLimits::Merc::False
+	},
+	{ // Bot
+		EQEmu::legacy::TYPE_POSSESSIONS_SIZE, /*InvTypePossessionsSize,*/ EntityLimits::Bot::Null, EntityLimits::Bot::Null, EntityLimits::Bot::InvTypeTradeSize, EntityLimits::Bot::Null,
+		EntityLimits::Bot::Null, EntityLimits::Bot::Null, EntityLimits::Bot::Null, EntityLimits::Bot::Null, EntityLimits::Bot::Null, 
+		EntityLimits::Bot::Null, EntityLimits::Bot::Null, /*InvTypeCorpseSize,*/ EntityLimits::Bot::Null, EntityLimits::Bot::Null, EntityLimits::Bot::Null,
+		EntityLimits::Bot::Null, EntityLimits::Bot::Null, EntityLimits::Bot::Null, EntityLimits::Bot::Null, EntityLimits::Bot::Null,
+		EntityLimits::Bot::Null, EntityLimits::Bot::Null, EntityLimits::Bot::Null, EntityLimits::Bot::Null, EntityLimits::Bot::Null,
+
+		EntityLimits::Bot::Null, EQEmu::legacy::ITEM_CONTAINER_SIZE, /*ItemBagSize,*/ EQEmu::legacy::ITEM_COMMON_SIZE, /*ItemAugSize,*/
+
+		EntityLimits::Bot::False, EntityLimits::Bot::False, EntityLimits::Bot::False, EntityLimits::Bot::False
+	},
+	{ // ClientPet
+		EQEmu::legacy::TYPE_POSSESSIONS_SIZE, /*InvTypePossessionsSize,*/ EntityLimits::ClientPet::Null, EntityLimits::ClientPet::Null, EntityLimits::ClientPet::InvTypeTradeSize, EntityLimits::ClientPet::Null,
+		EntityLimits::ClientPet::Null, EntityLimits::ClientPet::Null, EntityLimits::ClientPet::Null, EntityLimits::ClientPet::Null, EntityLimits::ClientPet::Null,
+		EntityLimits::ClientPet::Null, EntityLimits::ClientPet::Null, /*InvTypeCorpseSize,*/ EntityLimits::ClientPet::Null, EntityLimits::ClientPet::Null, EntityLimits::ClientPet::Null,
+		EntityLimits::ClientPet::Null, EntityLimits::ClientPet::Null, EntityLimits::ClientPet::Null, EntityLimits::ClientPet::Null, EntityLimits::ClientPet::Null,
+		EntityLimits::ClientPet::Null, EntityLimits::ClientPet::Null, EntityLimits::ClientPet::Null, EntityLimits::ClientPet::Null, EntityLimits::ClientPet::Null,
+
+		EntityLimits::ClientPet::Null, EQEmu::legacy::ITEM_CONTAINER_SIZE, /*ItemBagSize,*/ EQEmu::legacy::ITEM_COMMON_SIZE, /*ItemAugSize,*/
+
+		EntityLimits::ClientPet::False, EntityLimits::ClientPet::False, EntityLimits::ClientPet::False, EntityLimits::ClientPet::False
+	},
+	{ // NPCPet
+		EQEmu::legacy::TYPE_POSSESSIONS_SIZE, /*InvTypePossessionsSize,*/ EntityLimits::NPCPet::Null, EntityLimits::NPCPet::Null, EntityLimits::NPCPet::InvTypeTradeSize, EntityLimits::NPCPet::Null,
+		EntityLimits::NPCPet::Null, EntityLimits::NPCPet::Null, EntityLimits::NPCPet::Null, EntityLimits::NPCPet::Null, EntityLimits::NPCPet::Null,
+		EntityLimits::NPCPet::Null, EntityLimits::NPCPet::Null, /*InvTypeCorpseSize,*/ EntityLimits::NPCPet::Null, EntityLimits::NPCPet::Null, EntityLimits::NPCPet::Null,
+		EntityLimits::NPCPet::Null, EntityLimits::NPCPet::Null, EntityLimits::NPCPet::Null, EntityLimits::NPCPet::Null, EntityLimits::NPCPet::Null,
+		EntityLimits::NPCPet::Null, EntityLimits::NPCPet::Null, EntityLimits::NPCPet::Null, EntityLimits::NPCPet::Null, EntityLimits::NPCPet::Null,
+
+		EntityLimits::NPCPet::Null, EQEmu::legacy::ITEM_CONTAINER_SIZE, /*ItemBagSize,*/ EQEmu::legacy::ITEM_COMMON_SIZE, /*ItemAugSize,*/
+
+		EntityLimits::NPCPet::False, EntityLimits::NPCPet::False, EntityLimits::NPCPet::False, EntityLimits::NPCPet::False
+	},
+	{ // MercPet
+		EQEmu::legacy::TYPE_POSSESSIONS_SIZE, /*InvTypePossessionsSize,*/ EntityLimits::MercPet::Null, EntityLimits::MercPet::Null, EntityLimits::MercPet::InvTypeTradeSize, EntityLimits::MercPet::Null,
+		EntityLimits::MercPet::Null, EntityLimits::MercPet::Null, EntityLimits::MercPet::Null, EntityLimits::MercPet::Null, EntityLimits::MercPet::Null,
+		EntityLimits::MercPet::Null, EntityLimits::MercPet::Null, /*InvTypeCorpseSize,*/ EntityLimits::MercPet::Null, EntityLimits::MercPet::Null, EntityLimits::MercPet::Null,
+		EntityLimits::MercPet::Null, EntityLimits::MercPet::Null, EntityLimits::MercPet::Null, EntityLimits::MercPet::Null, EntityLimits::MercPet::Null,
+		EntityLimits::MercPet::Null, EntityLimits::MercPet::Null, EntityLimits::MercPet::Null, EntityLimits::MercPet::Null, EntityLimits::MercPet::Null,
+
+		EntityLimits::MercPet::Null, EQEmu::legacy::ITEM_CONTAINER_SIZE, /*ItemBagSize,*/ EQEmu::legacy::ITEM_COMMON_SIZE, /*ItemAugSize,*/
+
+		EntityLimits::MercPet::False, EntityLimits::MercPet::False, EntityLimits::MercPet::False, EntityLimits::MercPet::False
+	},
+	{ // BotPet
+		EQEmu::legacy::TYPE_POSSESSIONS_SIZE, /*InvTypePossessionsSize,*/ EntityLimits::BotPet::Null, EntityLimits::BotPet::Null, EntityLimits::BotPet::InvTypeTradeSize, EntityLimits::BotPet::Null,
+		EntityLimits::BotPet::Null, EntityLimits::BotPet::Null, EntityLimits::BotPet::Null, EntityLimits::BotPet::Null, EntityLimits::BotPet::Null,
+		EntityLimits::BotPet::Null, EntityLimits::BotPet::Null, /*InvTypeCorpseSize,*/ EntityLimits::BotPet::Null, EntityLimits::BotPet::Null, EntityLimits::BotPet::Null,
+		EntityLimits::BotPet::Null, EntityLimits::BotPet::Null, EntityLimits::BotPet::Null, EntityLimits::BotPet::Null, EntityLimits::BotPet::Null,
+		EntityLimits::BotPet::Null, EntityLimits::BotPet::Null, EntityLimits::BotPet::Null, EntityLimits::BotPet::Null, EntityLimits::BotPet::Null,
+
+		EntityLimits::BotPet::Null, EQEmu::legacy::ITEM_CONTAINER_SIZE, /*ItemBagSize,*/ EQEmu::legacy::ITEM_COMMON_SIZE, /*ItemAugSize,*/
+
+		EntityLimits::BotPet::False, EntityLimits::BotPet::False, EntityLimits::BotPet::False, EntityLimits::BotPet::False
+	},
+	{ // OfflineTitanium
+		Titanium::Null, Titanium::Null, Titanium::Null, Titanium::invtype::InvTypeTradeSize, Titanium::Null,
+		Titanium::Null, Titanium::Null, Titanium::Null, Titanium::Null, Titanium::invtype::InvTypeMerchantSize,
+		Titanium::Null, Titanium::Null, Titanium::Null, /*Titanium::invtype::InvTypeBazaarSize,*/ Titanium::invtype::InvTypeInspectSize, Titanium::Null,
+		Titanium::invtype::InvTypeViewMODPCSize, Titanium::invtype::InvTypeViewMODBankSize, Titanium::invtype::InvTypeViewMODSharedBankSize, Titanium::invtype::InvTypeViewMODLimboSize, Titanium::Null,
+		Titanium::Null, Titanium::Null, Titanium::Null, Titanium::Null, Titanium::Null,
+
+		Titanium::Null, EQEmu::legacy::ITEM_CONTAINER_SIZE, /*Titanium::Null,*/ Titanium::Null,
+
+		Titanium::False, Titanium::False, Titanium::False, Titanium::False
+	},
+	{ // OfflineSoF
+		SoF::Null, SoF::Null, SoF::Null, SoF::invtype::InvTypeTradeSize, SoF::Null,
+		SoF::Null, SoF::Null, SoF::Null, SoF::Null, SoF::invtype::InvTypeMerchantSize,
+		SoF::Null, SoF::Null, SoF::Null, /*SoF::invtype::InvTypeBazaarSize,*/ SoF::invtype::InvTypeInspectSize, SoF::Null,
+		SoF::invtype::InvTypeViewMODPCSize, SoF::invtype::InvTypeViewMODBankSize, SoF::invtype::InvTypeViewMODSharedBankSize, SoF::invtype::InvTypeViewMODLimboSize, SoF::Null,
+		SoF::Null, SoF::Null, SoF::Null, SoF::Null, SoF::Null,
+
+		SoF::Null, EQEmu::legacy::ITEM_CONTAINER_SIZE, /*SoF::Null,*/ SoF::Null,
+
+		SoF::False, SoF::False, SoF::False, SoF::False
+	},
+	{ // OfflineSoD
+		SoD::Null, SoD::Null, SoD::Null, SoD::invtype::InvTypeTradeSize, SoD::Null,
+		SoD::Null, SoD::Null, SoD::Null, SoD::Null, SoD::invtype::InvTypeMerchantSize,
+		SoD::Null, SoD::Null, SoD::Null, /*SoD::invtype::InvTypeBazaarSize,*/ SoD::invtype::InvTypeInspectSize, SoD::Null,
+		SoD::invtype::InvTypeViewMODPCSize, SoD::invtype::InvTypeViewMODBankSize, SoD::invtype::InvTypeViewMODSharedBankSize, SoD::invtype::InvTypeViewMODLimboSize, SoD::Null,
+		SoD::Null, SoD::Null, SoD::Null, SoD::Null, SoD::Null,
+
+		SoD::Null, EQEmu::legacy::ITEM_CONTAINER_SIZE, /*SoD::Null,*/ SoD::Null,
+
+		SoD::False, SoD::False, SoD::False, SoD::False
+	},
+	{ // OfflineUF
+		UF::Null, UF::Null, UF::Null, UF::invtype::InvTypeTradeSize, UF::Null,
+		UF::Null, UF::Null, UF::Null, UF::Null, UF::invtype::InvTypeMerchantSize,
+		UF::Null, UF::Null, UF::Null, /*UF::invtype::InvTypeBazaarSize,*/ UF::invtype::InvTypeInspectSize, UF::Null,
+		UF::invtype::InvTypeViewMODPCSize, UF::invtype::InvTypeViewMODBankSize, UF::invtype::InvTypeViewMODSharedBankSize, UF::invtype::InvTypeViewMODLimboSize, UF::Null,
+		UF::Null, UF::Null, UF::Null, UF::Null, UF::Null,
+
+		UF::Null, EQEmu::legacy::ITEM_CONTAINER_SIZE, /*UF::Null,*/ UF::Null,
+
+		UF::False, UF::False, UF::False, UF::False
+	},
+	{ // OfflineRoF
+		RoF::Null, RoF::Null, RoF::Null, RoF::invtype::InvTypeTradeSize, RoF::Null,
+		RoF::Null, RoF::Null, RoF::Null, RoF::Null, RoF::invtype::InvTypeMerchantSize,
+		RoF::Null, RoF::Null, RoF::Null, /*RoF::invtype::InvTypeBazaarSize,*/ RoF::invtype::InvTypeInspectSize, RoF::Null,
+		RoF::invtype::InvTypeViewMODPCSize, RoF::invtype::InvTypeViewMODBankSize, RoF::invtype::InvTypeViewMODSharedBankSize, RoF::invtype::InvTypeViewMODLimboSize, RoF::Null,
+		RoF::Null, RoF::Null, RoF::Null, RoF::Null, RoF::Null,
+
+		RoF::Null, EQEmu::legacy::ITEM_CONTAINER_SIZE, /*RoF::Null,*/ RoF::Null,
+
+		RoF::False, RoF::False, RoF::False, RoF::False
+	},
+	{ // OfflineRoF2
+		RoF2::Null, RoF2::Null, RoF2::Null, RoF2::invtype::InvTypeTradeSize, RoF2::Null,
+		RoF2::Null, RoF2::Null, RoF2::Null, RoF2::Null, RoF2::invtype::InvTypeMerchantSize,
+		RoF2::Null, RoF2::Null, RoF2::Null, /*RoF2::invtype::InvTypeBazaarSize,*/ RoF2::invtype::InvTypeInspectSize, RoF2::Null,
+		RoF2::invtype::InvTypeViewMODPCSize, RoF2::invtype::InvTypeViewMODBankSize, RoF2::invtype::InvTypeViewMODSharedBankSize, RoF2::invtype::InvTypeViewMODLimboSize, RoF2::Null,
+		RoF2::Null, RoF2::Null, RoF2::Null, RoF2::Null, RoF2::Null,
+
+		RoF2::Null, EQEmu::legacy::ITEM_CONTAINER_SIZE, /*RoF2::Null,*/ RoF2::Null,
+
+		RoF2::False, RoF2::False, RoF2::False, RoF2::False
+	}
+};
+
+const EQEmu::inventory::LookupEntry* EQEmu::inventory::Lookup(versions::InventoryVersion inventory_version)
+{
+	return &inventory_lookup_entries[static_cast<int>(versions::ValidateInventoryVersion(inventory_version))];
 }
 
-uint64 EQEmu::inventory::GetPossessionsBitmask(versions::InventoryVersion inventory_version)
+static const EQEmu::behavior::LookupEntry behavior_lookup_entries[EQEmu::versions::InventoryVersionCount] =
 {
-	static const uint64 local[versions::InventoryVersionCount] = {
-		ClientUnknown::Null,
-		Client62::Null,
-		Titanium::Null, //0x000000027FDFFFFF,
-		SoF::Null, //0x000000027FFFFFFF,
-		SoD::Null, //0x000000027FFFFFFF,
-		UF::Null, //0x000000027FFFFFFF,
-		RoF::Null, //0x00000003FFFFFFFF,
-		RoF2::Null, //0x00000003FFFFFFFF,
-		EntityLimits::NPC::Null,
-		EntityLimits::Merc::Null,
-		EntityLimits::Bot::Null,
-		EntityLimits::ClientPet::Null,
-		EntityLimits::NPCPet::Null,
-		EntityLimits::MercPet::Null,
-		EntityLimits::BotPet::Null,
-		Titanium::Null,
-		SoF::Null,
-		SoD::Null,
-		UF::Null,
-		RoF::Null,
-		RoF2::Null
-	};
-
-	return local[static_cast<size_t>(versions::ValidateInventoryVersion(inventory_version))];
-}
-
-bool EQEmu::inventory::GetAllowEmptyBagInBag(versions::InventoryVersion inventory_version)
-{
-	static const bool local[versions::InventoryVersionCount] = {
-		ClientUnknown::False,
-		Client62::False,
-		Titanium::inventory::AllowEmptyBagInBag,
-		SoF::inventory::AllowEmptyBagInBag,
-		SoD::inventory::AllowEmptyBagInBag,
-		UF::inventory::AllowEmptyBagInBag,
-		RoF::False, //RoF::inventory::AllowEmptyBagInBag,
-		RoF2::False, //RoF2::inventory::AllowEmptyBagInBag,
-		EntityLimits::NPC::False,
-		EntityLimits::Merc::False,
-		EntityLimits::Bot::False,
-		EntityLimits::ClientPet::False,
-		EntityLimits::NPCPet::False,
-		EntityLimits::MercPet::False,
-		EntityLimits::BotPet::False,
-		Titanium::False,
-		SoF::False,
-		SoD::False,
-		UF::False,
-		RoF::False,
+	{ // Unknown
+		ClientUnknown::True
+	},
+	{ // Client62
+		Client62::True
+	},
+	{ // Titanium
+		Titanium::behavior::CoinHasWeight
+	},
+	{ // SoF
+		SoF::behavior::CoinHasWeight
+	},
+	{ // SoD
+		SoD::behavior::CoinHasWeight
+	},
+	{ // UF
+		UF::behavior::CoinHasWeight
+	},
+	{ // RoF
+		RoF::behavior::CoinHasWeight
+	},
+	{ // RoF2
+		RoF2::behavior::CoinHasWeight
+	},
+	{ // NPC
+		EntityLimits::NPC::True /*CoinHasWeight*/
+	},
+	{ // NPCMerchant
+		EntityLimits::NPC::True /*CoinHasWeight*/
+	},
+	{ // Merc
+		EntityLimits::Merc::True /*CoinHasWeight*/
+	},
+	{ // Bot
+		EntityLimits::Bot::True /*CoinHasWeight*/
+	},
+	{ // ClientPet
+		EntityLimits::ClientPet::True /*CoinHasWeight*/
+	},
+	{ // NPCPet
+		EntityLimits::NPCPet::True /*CoinHasWeight*/
+	},
+	{ // MercPet
+		EntityLimits::MercPet::True /*CoinHasWeight*/
+	},
+	{ // BotPet
+		EntityLimits::BotPet::True /*CoinHasWeight*/
+	},
+	{ // OfflineTitanium
+		Titanium::False
+	},
+	{ // OfflineSoF
+		SoF::False
+	},
+	{ // OfflineSoD
+		SoD::False
+	},
+	{ // OfflineUF
+		UF::False
+	},
+	{ // OfflineRoF
+		RoF::False
+	},
+	{ // OfflineRoF2
 		RoF2::False
-	};
+	}
+};
 
-	return local[static_cast<size_t>(versions::ValidateInventoryVersion(inventory_version))];
-}
-
-bool EQEmu::inventory::GetAllowClickCastFromBag(versions::InventoryVersion inventory_version)
+const EQEmu::behavior::LookupEntry* EQEmu::behavior::Lookup(versions::InventoryVersion inventory_version)
 {
-	static const bool local[versions::InventoryVersionCount] = {
-		ClientUnknown::False,
-		Client62::False,
-		Titanium::inventory::AllowClickCastFromBag,
-		SoF::inventory::AllowClickCastFromBag,
-		SoD::inventory::AllowClickCastFromBag,
-		UF::inventory::AllowClickCastFromBag,
-		RoF::inventory::AllowClickCastFromBag,
-		RoF2::inventory::AllowClickCastFromBag,
-		EntityLimits::NPC::False,
-		EntityLimits::Merc::False,
-		EntityLimits::Bot::False,
-		EntityLimits::ClientPet::False,
-		EntityLimits::NPCPet::False,
-		EntityLimits::MercPet::False,
-		EntityLimits::BotPet::False,
-		Titanium::False,
-		SoF::False,
-		SoD::False,
-		UF::False,
-		RoF::False,
-		RoF2::False
-	};
-
-	return local[static_cast<size_t>(versions::ValidateInventoryVersion(inventory_version))];
-}
-
-bool EQEmu::inventory::GetConcatenateInvTypeLimbo(versions::InventoryVersion inventory_version)
-{
-	static const bool local[versions::InventoryVersionCount] = {
-		ClientUnknown::False,
-		Client62::False,
-		Titanium::inventory::ConcatenateInvTypeLimbo,
-		SoF::inventory::ConcatenateInvTypeLimbo,
-		SoD::inventory::ConcatenateInvTypeLimbo,
-		UF::inventory::ConcatenateInvTypeLimbo,
-		RoF::inventory::ConcatenateInvTypeLimbo,
-		RoF2::inventory::ConcatenateInvTypeLimbo,
-		EntityLimits::NPC::False,
-		EntityLimits::Merc::False,
-		EntityLimits::Bot::False,
-		EntityLimits::ClientPet::False,
-		EntityLimits::NPCPet::False,
-		EntityLimits::MercPet::False,
-		EntityLimits::BotPet::False,
-		Titanium::False,
-		SoF::False,
-		SoD::False,
-		UF::False,
-		RoF::False,
-		RoF2::False
-	};
-	
-	return local[static_cast<size_t>(versions::ValidateInventoryVersion(inventory_version))];
-}
-
-bool EQEmu::inventory::GetAllowOverLevelEquipment(versions::InventoryVersion inventory_version)
-{
-	static const bool local[versions::InventoryVersionCount] = {
-		ClientUnknown::False,
-		Client62::False,
-		Titanium::inventory::AllowOverLevelEquipment,
-		SoF::inventory::AllowOverLevelEquipment,
-		SoD::inventory::AllowOverLevelEquipment,
-		UF::inventory::AllowOverLevelEquipment,
-		RoF::inventory::AllowOverLevelEquipment,
-		RoF2::inventory::AllowOverLevelEquipment,
-		EntityLimits::NPC::False,
-		EntityLimits::Merc::False,
-		EntityLimits::Bot::False,
-		EntityLimits::ClientPet::False,
-		EntityLimits::NPCPet::False,
-		EntityLimits::MercPet::False,
-		EntityLimits::BotPet::False,
-		Titanium::False,
-		SoF::False,
-		SoD::False,
-		UF::False,
-		RoF::False,
-		RoF2::False
-	};
-	
-	return local[static_cast<size_t>(versions::ValidateInventoryVersion(inventory_version))];
-}
-
-size_t EQEmu::inventory::GetItemAugSize(versions::InventoryVersion inventory_version)
-{
-	static const size_t local[versions::InventoryVersionCount] = {
-		ClientUnknown::Null,
-		Client62::Null,
-		legacy::ITEM_COMMON_SIZE, //Titanium::invaug::ItemAugSize,
-		legacy::ITEM_COMMON_SIZE, //SoF::invaug::ItemAugSize,
-		legacy::ITEM_COMMON_SIZE, //SoD::invaug::ItemAugSize,
-		legacy::ITEM_COMMON_SIZE, //UF::invaug::ItemAugSize,
-		legacy::ITEM_COMMON_SIZE, //RoF::invaug::ItemAugSize,
-		legacy::ITEM_COMMON_SIZE, //RoF2::invaug::ItemAugSize,
-		legacy::ITEM_COMMON_SIZE, //ItemAugSize,
-		legacy::ITEM_COMMON_SIZE, //ItemAugSize,
-		legacy::ITEM_COMMON_SIZE, //ItemAugSize,
-		legacy::ITEM_COMMON_SIZE, //ItemAugSize,
-		legacy::ITEM_COMMON_SIZE, //ItemAugSize,
-		legacy::ITEM_COMMON_SIZE, //ItemAugSize,
-		legacy::ITEM_COMMON_SIZE, //ItemAugSize,
-		Titanium::Null,
-		SoF::Null,
-		SoD::Null,
-		UF::Null,
-		RoF::Null,
-		RoF2::Null
-	};
-
-	return local[static_cast<size_t>(versions::ValidateInventoryVersion(inventory_version))];
-}
-
-size_t EQEmu::inventory::GetItemBagSize(versions::InventoryVersion inventory_version)
-{
-	static const size_t local[versions::InventoryVersionCount] = {
-		ClientUnknown::Null,
-		Client62::Null,
-		legacy::ITEM_CONTAINER_SIZE, //Titanium::invbag::ItemBagSize,
-		legacy::ITEM_CONTAINER_SIZE, //SoF::invbag::ItemBagSize,
-		legacy::ITEM_CONTAINER_SIZE, //SoD::invbag::ItemBagSize,
-		legacy::ITEM_CONTAINER_SIZE, //UF::invbag::ItemBagSize,
-		legacy::ITEM_CONTAINER_SIZE, //RoF::invbag::ItemBagSize,
-		legacy::ITEM_CONTAINER_SIZE, //RoF2::invbag::ItemBagSize,
-		legacy::ITEM_CONTAINER_SIZE, //ItemBagSize,
-		legacy::ITEM_CONTAINER_SIZE, //ItemBagSize,
-		legacy::ITEM_CONTAINER_SIZE, //ItemBagSize,
-		legacy::ITEM_CONTAINER_SIZE, //ItemBagSize,
-		legacy::ITEM_CONTAINER_SIZE, //ItemBagSize,
-		legacy::ITEM_CONTAINER_SIZE, //ItemBagSize,
-		legacy::ITEM_CONTAINER_SIZE, //ItemBagSize,
-		legacy::ITEM_CONTAINER_SIZE, //Titanium::Null,
-		legacy::ITEM_CONTAINER_SIZE, //SoF::Null,
-		legacy::ITEM_CONTAINER_SIZE, //SoD::Null,
-		legacy::ITEM_CONTAINER_SIZE, //UF::Null,
-		legacy::ITEM_CONTAINER_SIZE, //RoF::Null,
-		legacy::ITEM_CONTAINER_SIZE, //RoF2::Null
-	};
-
-	return local[static_cast<size_t>(versions::ValidateInventoryVersion(inventory_version))];
-}
-
-bool EQEmu::behavior::GetCoinHasWeight(versions::InventoryVersion inventory_version)
-{
-	static const bool local[versions::InventoryVersionCount] = {
-		ClientUnknown::True,
-		Client62::True,
-		Titanium::behavior::CoinHasWeight,
-		SoF::behavior::CoinHasWeight,
-		SoD::behavior::CoinHasWeight,
-		UF::behavior::CoinHasWeight,
-		RoF::behavior::CoinHasWeight,
-		RoF::behavior::CoinHasWeight,
-		EntityLimits::NPC::True, //CoinHasWeight,
-		EntityLimits::Merc::True, //CoinHasWeight,
-		EntityLimits::Bot::True, //CoinHasWeight,
-		EntityLimits::ClientPet::True, //CoinHasWeight,
-		EntityLimits::NPCPet::True, //CoinHasWeight,
-		EntityLimits::MercPet::True, //CoinHasWeight,
-		EntityLimits::BotPet::True, //CoinHasWeight,
-		Titanium::False,
-		SoF::False,
-		SoD::False,
-		UF::False,
-		RoF::False,
-		RoF2::False
-	};
-
-	return local[static_cast<size_t>(versions::ValidateInventoryVersion(inventory_version))];
+	return &behavior_lookup_entries[static_cast<int>(versions::ValidateInventoryVersion(inventory_version))];
 }

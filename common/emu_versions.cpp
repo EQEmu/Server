@@ -212,6 +212,8 @@ const char* EQEmu::versions::InventoryVersionName(InventoryVersion inventory_ver
 		return "RoF2";
 	case InventoryVersion::NPC:
 		return "NPC";
+	case InventoryVersion::NPCMerchant:
+		return "NPC Merchant";
 	case InventoryVersion::Merc:
 		return "Merc";
 	case InventoryVersion::Bot:

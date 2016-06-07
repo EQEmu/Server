@@ -84,6 +84,7 @@ namespace EQEmu
 			RoF,
 			RoF2,
 			NPC,
+			NPCMerchant,
 			Merc,
 			Bot,
 			ClientPet,

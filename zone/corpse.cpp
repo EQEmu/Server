@@ -992,7 +992,7 @@ void Corpse::MakeLootRequestPackets(Client* client, const EQApplicationPacket* a
 		cur = itemlist.begin();
 		end = itemlist.end();
 
-		int corpselootlimit = EQEmu::inventory::GetInventoryTypeSize(EQEmu::versions::ConvertClientVersionToInventoryVersion(client->ClientVersion()), EQEmu::legacy::TypeCorpse);
+		int corpselootlimit = EQEmu::inventory::Lookup(EQEmu::versions::ConvertClientVersionToInventoryVersion(client->ClientVersion()))->InventoryTypeSize[EQEmu::legacy::TypeCorpse];
 
 		for(; cur != end; ++cur) {
 			ServerLootItem_Struct* item_data = *cur;
@@ -1286,7 +1286,7 @@ void Corpse::QueryLoot(Client* to) {
 	cur = itemlist.begin();
 	end = itemlist.end();
 
-	int corpselootlimit = EQEmu::inventory::GetInventoryTypeSize(EQEmu::versions::ConvertClientVersionToInventoryVersion(to->ClientVersion()), EQEmu::legacy::TypeCorpse);
+	int corpselootlimit = EQEmu::inventory::Lookup(EQEmu::versions::ConvertClientVersionToInventoryVersion(to->ClientVersion()))->InventoryTypeSize[EQEmu::legacy::TypeCorpse];
 
 	for(; cur != end; ++cur) {
 		ServerLootItem_Struct* sitem = *cur;
