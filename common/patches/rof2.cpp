@@ -4389,6 +4389,19 @@ namespace RoF2
 		delete in;
 	}
 
+	ENCODE(OP_CrystalCountUpdate)
+	{
+		ENCODE_LENGTH_EXACT(CrystalCountUpdate_Struct);
+		SETUP_DIRECT_ENCODE(CrystalCountUpdate_Struct, structs::CrystalCountUpdate_Struct);
+
+		OUT(CurrentRadiantCrystals);
+		OUT(CareerRadiantCrystals);
+		OUT(CurrentEbonCrystals);
+		OUT(CareerEbonCrystals);
+
+		FINISH_ENCODE();
+	}
+
 // DECODE methods
 
 	DECODE(OP_AdventureMerchantSell)
