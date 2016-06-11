@@ -5081,6 +5081,15 @@ struct MercenaryMerchantResponse_Struct {
 /*0004*/
 };
 
+// Sent by Server to update character crystals.
+struct CrystalCountUpdate_Struct
+{
+	/*000*/	uint32	CurrentRadiantCrystals;
+	/*004*/	uint32	CareerRadiantCrystals;
+	/*008*/	uint32	CurrentEbonCrystals;
+	/*012*/	uint32	CareerEbonCrystals;
+};
+
 	}; /*structs*/
 
 }; /*RoF2*/
