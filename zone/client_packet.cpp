@@ -5004,38 +5004,49 @@ void Client::Handle_OP_CrystalCreate(const EQApplicationPacket *app)
 	VERIFY_PACKET_LENGTH(OP_CrystalCreate, app, CrystalReclaim_Struct);
 	CrystalReclaim_Struct *cr = (CrystalReclaim_Struct*)app->pBuffer;
 
-	if (cr->type == 5) {
-		if (cr->amount > GetEbonCrystals()) {
-			SummonItem(RuleI(Zone, EbonCrystalItemID), GetEbonCrystals());
-			m_pp.currentEbonCrystals = 0;
-			m_pp.careerEbonCrystals = 0;
-			SaveCurrency();
-			SendCrystalCounts();
-		}
-		else {
-			SummonItem(RuleI(Zone, EbonCrystalItemID), cr->amount);
-			m_pp.currentEbonCrystals -= cr->amount;
-			m_pp.careerEbonCrystals -= cr->amount;
-			SaveCurrency();
-			SendCrystalCounts();
-		}
+	const uint32 requestQty = cr->amount;
+	const bool isRadiant = cr->type == 4;
+	const bool isEbon = cr->type == 5;
+
+	// Check: Valid type requested.
+	if (!isRadiant && !isEbon) {
+		return;
 	}
-	else if (cr->type == 4) {
-		if (cr->amount > GetRadiantCrystals()) {
-			SummonItem(RuleI(Zone, RadiantCrystalItemID), GetRadiantCrystals());
-			m_pp.currentRadCrystals = 0;
-			m_pp.careerRadCrystals = 0;
-			SaveCurrency();
-			SendCrystalCounts();
-		}
-		else {
-			SummonItem(RuleI(Zone, RadiantCrystalItemID), cr->amount);
-			m_pp.currentRadCrystals -= cr->amount;
-			m_pp.careerRadCrystals -= cr->amount;
-			SaveCurrency();
-			SendCrystalCounts();
-		}
+	// Check: Valid quantity requested.
+	if (requestQty < 1) {
+		return;
 	}
+
+	// Check: Valid client state to make request.
+	// In this situation the client is either desynced or attempting an exploit.
+	const uint32 currentQty = isRadiant ? GetRadiantCrystals() : GetEbonCrystals();
+	if (currentQty == 0) {
+		return;
+	}
+
+	// Prevent the client from creating more than they have.
+	const uint32 amount = EQEmu::ClampUpper(requestQty, currentQty);
+	const uint32 itemID = isRadiant ? RuleI(Zone, RadiantCrystalItemID) : RuleI(Zone, EbonCrystalItemID);
+
+	// Summon crystals for player.
+	const bool success = SummonItem(itemID, amount);
+
+	if (!success) {
+		return;
+	}
+
+	// Deduct crystals from client and update them.
+	if (isRadiant) {
+		m_pp.currentRadCrystals -= amount;
+		m_pp.careerRadCrystals -= amount;
+	}
+	else if (isEbon) {
+		m_pp.currentEbonCrystals -= amount;
+		m_pp.careerEbonCrystals -= amount;
+	}
+
+	SaveCurrency();
+	SendCrystalCounts();
 }
 
 void Client::Handle_OP_CrystalReclaim(const EQApplicationPacket *app)
