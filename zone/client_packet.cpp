@@ -2188,7 +2188,7 @@ void Client::Handle_OP_AdventureMerchantSell(const EQApplicationPacket *app)
 		return;
 	}
 
-	int32 price = item->LDoNPrice * 70 / 100;
+	int32 price = ceil((float)item->LDoNPrice * item->LDoNSellBackRate / 100);
 
 	if (price == 0)
 	{
