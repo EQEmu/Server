@@ -2188,7 +2188,8 @@ void Client::Handle_OP_AdventureMerchantSell(const EQApplicationPacket *app)
 		return;
 	}
 
-	int32 price = item->LDoNPrice * 70 / 100;
+	// 06/11/2016 This formula matches RoF2 client side calculation.
+	int32 price = (item->LDoNPrice + 1) * item->LDoNSellBackRate / 100;
 
 	if (price == 0)
 	{
