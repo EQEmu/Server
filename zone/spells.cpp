@@ -2984,18 +2984,6 @@ int Mob::CheckStackConflict(uint16 spellid1, int caster_level1, uint16 spellid2,
 		}
 
 		/*
-		If the effects are the same and
-		sp1 = beneficial & sp2 = detrimental or
-		sp1 = detrimental & sp2 = beneficial
-		Then this effect should be ignored for stacking purposes.
-		*/
-		if(sp_det_mismatch)
-		{
-			Log.Out(Logs::Detail, Logs::Spells, "The effects are the same but the spell types are not, passing the effect");
-			continue;
-		}
-
-		/*
 		If the spells aren't the same
 		and the effect is a dot we can go ahead and stack it
 		*/
