@@ -213,8 +213,8 @@ enum {	//some random constants
 #define MAX_NPC_FACTIONS 20
 
 //individual faction pool
-#define MAX_PERSONAL_FACTION 1200
-#define MIN_PERSONAL_FACTION -3000
+#define MAX_PERSONAL_FACTION 2000
+#define MIN_PERSONAL_FACTION -2000
 
 //The Level Cap:
 //#define LEVEL_CAP RuleI(Character, MaxLevel)	//hard cap is 127
