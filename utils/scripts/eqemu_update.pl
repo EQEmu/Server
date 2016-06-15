@@ -157,13 +157,7 @@ if($ARGV[0] eq "installer"){
 	get_remote_file("https://raw.githubusercontent.com/Akkadius/EQEmuInstall/master/libmysql.dll", "libmysql.dll", 1);
 	
 	#::: Server scripts
-	get_remote_file("https://raw.githubusercontent.com/Akkadius/EQEmuInstall/master/t_database_backup.bat", "t_database_backup.bat", 1);
-	get_remote_file("https://raw.githubusercontent.com/Akkadius/EQEmuInstall/master/t_server_crash_report.pl", "t_server_crash_report.pl", 1);
-	get_remote_file("https://raw.githubusercontent.com/Akkadius/EQEmuInstall/master/t_start_server.bat", "t_start_server.bat", 1);
-	get_remote_file("https://raw.githubusercontent.com/Akkadius/EQEmuInstall/master/t_start_server_with_login_server.bat", "t_start_server_with_login_server.bat", 1);
-	get_remote_file("https://raw.githubusercontent.com/Akkadius/EQEmuInstall/master/t_stop_server.bat", "t_stop_server.bat", 1);
-	get_remote_file("https://raw.githubusercontent.com/Akkadius/EQEmuInstall/master/win_server_launcher.pl", "win_server_launcher.pl", 1);
-	
+	fetch_utility_scripts();
 	
 	#::: Database Routines
 	print "MariaDB :: Creating Database 'peq'\n";
@@ -269,6 +263,21 @@ sub do_update_self{
 	die "Rerun eqemu_update.pl";
 }
 
+sub fetch_utility_scripts {
+	if($OS eq "Windows"){
+		get_remote_file("https://raw.githubusercontent.com/Akkadius/EQEmuInstall/master/t_database_backup.bat", "t_database_backup.bat", 1);
+		get_remote_file("https://raw.githubusercontent.com/Akkadius/EQEmuInstall/master/t_start_server.bat", "t_start_server.bat", 1);
+		get_remote_file("https://raw.githubusercontent.com/Akkadius/EQEmuInstall/master/t_start_server_with_login_server.bat", "t_start_server_with_login_server.bat", 1);
+		get_remote_file("https://raw.githubusercontent.com/Akkadius/EQEmuInstall/master/t_stop_server.bat", "t_stop_server.bat", 1);
+		get_remote_file("https://raw.githubusercontent.com/Akkadius/EQEmuInstall/master/t_server_crash_report,pl", "t_server_crash_report.pl", 1);
+		get_remote_file("https://raw.githubusercontent.com/Akkadius/EQEmuInstall/master/win_server_launcher,pl", "win_server_launcher.pl", 1);
+		get_remote_file("https://raw.githubusercontent.com/Akkadius/EQEmuInstall/master/t_start_server_with_login_server.bat", "t_start_server_with_login_server.bat", 1);
+	}
+	else {
+		print "No scripts found for OS: " . $OS . "...\n";
+	}
+}
+
 sub show_menu_prompt {
     my %dispatch = (
         1 => \&database_dump,
@@ -285,6 +294,7 @@ sub show_menu_prompt {
 		12 => \&fetch_server_dlls,
 		13 => \&do_windows_login_server_setup,
 		14 => \&remove_duplicate_rule_values,
+		15 => \&fetch_utility_scripts,
 		19 => \&do_bots_db_schema_drop,
         20 => \&do_update_self,
         0 => \&script_exit,
@@ -363,6 +373,7 @@ return <<EO_MENU;
  12) [Windows Server .dll's] :: Download Pre-Requisite Server .dll's
  13) [Windows Server Loginserver Setup] :: Download and install Windows Loginserver
  14) [Remove Duplicate Rule Values] :: Looks for redundant rule_values entries and removes them
+ 15) [Fetch Utility Scripts] :: Fetches server management utility scripts
  19) [EQEmu DB Drop Bots Schema] :: Remove Bots schema and return database to normal state
  20) [Update the updater] Force update this script (Redownload)
  0) Exit
