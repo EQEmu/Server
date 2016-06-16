@@ -265,13 +265,13 @@ sub do_update_self{
 
 sub fetch_utility_scripts {
 	if($OS eq "Windows"){
-		get_remote_file("https://raw.githubusercontent.com/Akkadius/EQEmuInstall/master/t_database_backup.bat", "t_database_backup.bat", 1);
-		get_remote_file("https://raw.githubusercontent.com/Akkadius/EQEmuInstall/master/t_start_server.bat", "t_start_server.bat", 1);
-		get_remote_file("https://raw.githubusercontent.com/Akkadius/EQEmuInstall/master/t_start_server_with_login_server.bat", "t_start_server_with_login_server.bat", 1);
-		get_remote_file("https://raw.githubusercontent.com/Akkadius/EQEmuInstall/master/t_stop_server.bat", "t_stop_server.bat", 1);
-		get_remote_file("https://raw.githubusercontent.com/Akkadius/EQEmuInstall/master/t_server_crash_report,pl", "t_server_crash_report.pl", 1);
-		get_remote_file("https://raw.githubusercontent.com/Akkadius/EQEmuInstall/master/win_server_launcher,pl", "win_server_launcher.pl", 1);
-		get_remote_file("https://raw.githubusercontent.com/Akkadius/EQEmuInstall/master/t_start_server_with_login_server.bat", "t_start_server_with_login_server.bat", 1);
+		get_remote_file("https://raw.githubusercontent.com/Akkadius/EQEmuInstall/master/t_database_backup.bat", "t_database_backup.bat");
+		get_remote_file("https://raw.githubusercontent.com/Akkadius/EQEmuInstall/master/t_start_server.bat", "t_start_server.bat");
+		get_remote_file("https://raw.githubusercontent.com/Akkadius/EQEmuInstall/master/t_start_server_with_login_server.bat", "t_start_server_with_login_server.bat");
+		get_remote_file("https://raw.githubusercontent.com/Akkadius/EQEmuInstall/master/t_stop_server.bat", "t_stop_server.bat");
+		get_remote_file("https://raw.githubusercontent.com/Akkadius/EQEmuInstall/master/t_server_crash_report,pl", "t_server_crash_report.pl");
+		get_remote_file("https://raw.githubusercontent.com/Akkadius/EQEmuInstall/master/win_server_launcher,pl", "win_server_launcher.pl");
+		get_remote_file("https://raw.githubusercontent.com/Akkadius/EQEmuInstall/master/t_start_server_with_login_server.bat", "t_start_server_with_login_server.bat");
 	}
 	else {
 		print "No scripts found for OS: " . $OS . "...\n";
