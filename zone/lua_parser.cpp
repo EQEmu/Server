@@ -849,13 +849,45 @@ void LuaParser::ReloadQuests() {
 
 #endif
 
+	// lua 5.2+ defines these
+#if defined(LUA_VERSION_MAJOR) && defined(LUA_VERSION_MINOR)
+	const char lua_version[] = LUA_VERSION_MAJOR "." LUA_VERSION_MINOR;
+#elif LUA_VERSION_NUM == 501
+	const char lua_version[] = "5.1";
+#else
+#error Incompatible lua version
+#endif
+
+#ifdef WINDOWS
+	const char libext[] = ".dll";
+#else
+	// lua doesn't care OSX doesn't use sonames
+	const char libext[] = ".so";
+#endif
+
 	lua_getglobal(L, "package");
 	lua_getfield(L, -1, "path");
 	std::string module_path = lua_tostring(L,-1);
 	module_path += ";./" + Config->LuaModuleDir + "?.lua;./" + Config->LuaModuleDir + "?/init.lua";
+	// luarock paths using lua_modules as tree
+	// to path it adds foo/share/lua/5.1/?.lua and foo/share/lua/5.1/?/init.lua
+	module_path += ";./" + Config->LuaModuleDir + "share/lua/" + lua_version + "/?.lua";
+	module_path += ";./" + Config->LuaModuleDir + "share/lua/" + lua_version + "/?/init.lua";
 	lua_pop(L, 1);
 	lua_pushstring(L, module_path.c_str());
 	lua_setfield(L, -2, "path");
+	lua_pop(L, 1);
+
+	lua_getglobal(L, "package");
+	lua_getfield(L, -1, "cpath");
+	module_path = lua_tostring(L, -1);
+	module_path += ";./" + Config->LuaModuleDir + "?" + libext;
+	// luarock paths using lua_modules as tree
+	// luarocks adds foo/lib/lua/5.1/?.so for cpath
+	module_path += ";./" + Config->LuaModuleDir + "lib/lua/" + lua_version + "/?" + libext;
+	lua_pop(L, 1);
+	lua_pushstring(L, module_path.c_str());
+	lua_setfield(L, -2, "cpath");
 	lua_pop(L, 1);
 
 	MapFunctions(L);
