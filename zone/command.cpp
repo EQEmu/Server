@@ -10848,8 +10848,13 @@ void command_reloadperlexportsettings(Client *c, const Seperator *sep)
 void command_bot(Client *c, const Seperator *sep)
 {
 	std::string bot_message = sep->msg;
-	bot_message = bot_message.substr(bot_message.find_first_not_of("#bot"));
-	bot_message[0] = BOT_COMMAND_CHAR;
+	if (bot_message.compare("#bot") == 0) {
+		bot_message[0] = BOT_COMMAND_CHAR;
+	}
+	else {
+		bot_message = bot_message.substr(bot_message.find_first_not_of("#bot"));
+		bot_message[0] = BOT_COMMAND_CHAR;
+	}
 	
 	if (bot_command_dispatch(c, bot_message.c_str()) == -2) {
 		if (parse->PlayerHasQuestSub(EVENT_COMMAND)) {
