@@ -1570,8 +1570,9 @@ void NPC::AI_DoMovement() {
 						if (m_CurrentWayPoint.w >= 0.0) {
 							SetHeading(m_CurrentWayPoint.w);
 						}
-						SendPosition();
 					}
+
+					SendPosition();
 
 					//kick off event_waypoint arrive
 					char temp[16];

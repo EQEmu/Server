@@ -669,7 +669,7 @@ void NPC::SetPetState(SpellBuff_Struct *pet_buffs, uint32 *items) {
 		if (item2 && item2->NoDrop != 0) {
 			//dont bother saving item charges for now, NPCs never use them
 			//and nobody should be able to get them off the corpse..?
-			AddLootDrop(item2, &itemlist, 0, 1, 127, true, true);
+			AddLootDrop(item2, &itemlist, 0, 1, 255, true, true);
 		}
 	}
 }
