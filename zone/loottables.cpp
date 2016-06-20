@@ -417,7 +417,7 @@ void NPC::AddLootDrop(const EQEmu::ItemBase *item2, ItemList* itemlist, int16 ch
 
 void NPC::AddItem(const EQEmu::ItemBase* item, uint16 charges, bool equipitem) {
 	//slot isnt needed, its determined from the item.
-	AddLootDrop(item, &itemlist, charges, 1, 127, equipitem, equipitem);
+	AddLootDrop(item, &itemlist, charges, 1, 255, equipitem, equipitem);
 }
 
 void NPC::AddItem(uint32 itemid, uint16 charges, bool equipitem) {
@@ -425,7 +425,7 @@ void NPC::AddItem(uint32 itemid, uint16 charges, bool equipitem) {
 	const EQEmu::ItemBase * i = database.GetItem(itemid);
 	if(i == nullptr)
 		return;
-	AddLootDrop(i, &itemlist, charges, 1, 127, equipitem, equipitem);
+	AddLootDrop(i, &itemlist, charges, 1, 255, equipitem, equipitem);
 }
 
 void NPC::AddLootTable() {
