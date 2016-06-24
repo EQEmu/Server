@@ -1538,7 +1538,7 @@ bool Bot::IsValidName(std::string& name)
 		return false;
 	
 	for (int i = 1; i < name.length(); ++i) {
-		if (!islower(name[i]) && name[i] != '_') {
+		if ((!RuleB(Bots, AllowCamelCaseNames) && !islower(name[i])) && name[i] != '_') {
 			return false;
 		}
 	}

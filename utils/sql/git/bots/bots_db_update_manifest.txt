@@ -5,6 +5,7 @@
 9004|2016_04_07_bots_heal_override_target.sql|SELECT `bot_command` FROM `bot_command_settings` WHERE `bot_command` LIKE 'healrotationclearhot'|empty|
 9005|2016_04_08_bots_heal_rotations.sql|SHOW TABLES LIKE 'bot_heal_rotations'|empty|
 9006|2016_04_12_bots_inventory_window.sql|SELECT `bot_command` FROM `bot_command_settings` WHERE `bot_command` LIKE 'inventorywindow'|empty|
+9007|2016_06_23_bots_camel_case_name_rule.sql|SELECT * FROM `rule_values` WHERE `rule_name` LIKE 'Bots:AllowCamelCaseNames'|empty|
 
 # Upgrade conditions:
 # 	This won't be needed after this system is implemented, but it is used database that are not
