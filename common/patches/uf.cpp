@@ -3845,7 +3845,7 @@ namespace UF
 		
 		UF::structs::ItemSerializationHeader hdr;
 
-		hdr.stacksize = (inst->IsStackable() ? ((inst->GetCharges() > 254) ? 0xFFFFFFFF : inst->GetCharges()) : 1);
+		hdr.stacksize = (inst->IsStackable() ? ((inst->GetCharges() > 1000) ? 0xFFFFFFFF : inst->GetCharges()) : 1);
 		hdr.unknown004 = 0;
 
 		int32 slot_id = ServerToUFSlot(slot_id_in);

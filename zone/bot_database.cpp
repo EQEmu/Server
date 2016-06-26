@@ -86,7 +86,7 @@ bool BotDatabase::LoadBotCommandSettings(std::map<std::string, std::pair<uint8, 
 /* Bot functions   */
 bool BotDatabase::QueryNameAvailablity(const std::string& bot_name, bool& available_flag)
 {
-	if (bot_name.empty() || bot_name.size() > 15 || !database.CheckNameFilter(bot_name.c_str()) || !database.CheckUsedName(bot_name.c_str()))
+	if (bot_name.empty() || bot_name.size() > 60 || !database.CheckUsedName(bot_name.c_str()))
 		return false;
 
 	query = StringFormat("SELECT `id` FROM `vw_bot_character_mobs` WHERE `name` LIKE '%s' LIMIT 1", bot_name.c_str());
