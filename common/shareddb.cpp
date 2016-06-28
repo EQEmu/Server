@@ -595,8 +595,7 @@ bool SharedDatabase::GetInventory(uint32 char_id, Inventory *inv)
 
 		if (charges == 0x7FFF)
 			inst->SetCharges(-1);
-		else if (charges == 0 &&
-			 inst->IsStackable()) // Stackable items need a minimum charge of 1 remain moveable.
+		else if (charges == 0 && inst->IsStackable()) // Stackable items need a minimum charge of 1 remain moveable.
 			inst->SetCharges(1);
 		else
 			inst->SetCharges(charges);

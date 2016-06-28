@@ -1,5 +1,8 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 06/28/2016 ==
+Uleat: Fix for bot inventory save failure involving items with unlimited charges
+
 == 06/13/2016 ==
 Noudess: Changes personal faction earned min/max to -2000/2000 from -3000/1200
 

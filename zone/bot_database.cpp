@@ -1079,8 +1079,10 @@ bool BotDatabase::LoadItems(const uint32 bot_id, Inventory& inventory_inst)
 			continue;
 		}
 
-		if (item_charges == 255)
+		if (item_charges == 0x7FFF)
 			item_inst->SetCharges(-1);
+		else if (item_charges == 0 && item_inst->IsStackable()) // Stackable items need a minimum charge of 1 remain moveable.
+			item_inst->SetCharges(1);
 		else
 			item_inst->SetCharges(item_charges);
 
@@ -1190,6 +1192,12 @@ bool BotDatabase::SaveItemBySlot(Bot* bot_inst, const uint32 slot_id, const Item
 	for (int augment_iter = 0; augment_iter < EQEmu::legacy::ITEM_COMMON_SIZE; ++augment_iter)
 		augment_id[augment_iter] = item_inst->GetAugmentItemID(augment_iter);
 	
+	uint16 item_charges = 0;
+	if (item_inst->GetCharges() >= 0)
+		item_charges = item_inst->GetCharges();
+	else
+		item_charges = 0x7FFF;
+
 	query = StringFormat(
 		"INSERT INTO `bot_inventories` ("
 		"`bot_id`,"
@@ -1230,7 +1238,7 @@ bool BotDatabase::SaveItemBySlot(Bot* bot_inst, const uint32 slot_id, const Item
 		(unsigned long)bot_inst->GetBotID(),
 		(unsigned long)slot_id,
 		(unsigned long)item_inst->GetID(),
-		(unsigned long)item_inst->GetCharges(),
+		(unsigned long)item_charges,
 		(unsigned long)item_inst->GetColor(),
 		(unsigned long)(item_inst->IsAttuned() ? 1 : 0),
 		item_inst->GetCustomDataString().c_str(),
