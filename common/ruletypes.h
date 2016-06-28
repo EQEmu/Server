@@ -665,6 +665,7 @@ RULE_CATEGORY_END()
 
 RULE_CATEGORY(Client)
 RULE_BOOL(Client, UseLiveFactionMessage, false) // Allows players to see faction adjustments like Live
+RULE_BOOL(Client, UseLiveBlockedMessage, false) // Allows players to see faction adjustments like Live
 RULE_CATEGORY_END()
 
 #undef RULE_CATEGORY
