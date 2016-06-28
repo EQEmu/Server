@@ -1,6 +1,9 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
 == 06/28/2016 ==
+Noudess: Resurrection effects now block certain buffs like on live.
+Noudess: Added message about why spells are blocked (rule based)
+Noudess: Added new rule:  Client:UseLiveBlockedMessage
 Uleat: Fix for bot inventory save failure involving items with unlimited charges
 
 == 06/13/2016 ==

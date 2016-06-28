@@ -2775,23 +2775,6 @@ int Mob::CheckStackConflict(uint16 spellid1, int caster_level1, uint16 spellid2,
 	int modval = mod_spell_stack(spellid1, caster_level1, caster1, spellid2, caster_level2, caster2);
 	if(modval < 2) { return(modval); }
 
-	//resurrection effects wont count for overwrite/block stacking
-	switch(spellid1)
-	{
-	case 756:
-	case 757:
-	case 5249:
-		return (0);
-	}
-
-	switch (spellid2)
-	{
-	case 756:
-	case 757:
-	case 5249:
-		return (0);
-	}
-
 	/*
 	One of these is a bard song and one isn't and they're both beneficial so they should stack.
 	*/
@@ -3135,6 +3118,9 @@ int Mob::AddBuff(Mob *caster, uint16 spell_id, int duration, int32 level_overrid
 			if (ret == -1) {	// stop the spell
 				Log.Out(Logs::Detail, Logs::Spells, "Adding buff %d failed: stacking prevented by spell %d in slot %d with caster level %d",
 						spell_id, curbuf.spellid, buffslot, curbuf.casterlevel);
+				if (caster->IsClient() && RuleB(Client, UseLiveBlockedMessage)) {
+					caster->Message(13, "Your %s did not take hold on %s. (Blocked by %s.)", spells[spell_id].name, this->GetName(), spells[curbuf.spellid].name);
+				}
 				return -1;
 			}
 			if (ret == 1) {	// set a flag to indicate that there will be overwriting
@@ -3295,6 +3281,7 @@ int Mob::CanBuffStack(uint16 spellid, uint8 caster_level, bool iFailIfOverwrite)
 				firstfree = i;
 		}
 		if(ret == -1) {
+			
 			Log.Out(Logs::Detail, Logs::AI, "Buff %d would conflict with %d in slot %d, reporting stack failure", spellid, curbuf.spellid, i);
 			return -1;	// stop the spell, can't stack it
 		}
