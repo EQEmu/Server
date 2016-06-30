@@ -4438,9 +4438,6 @@ void Mob::CommonBreakInvisibleFromCombat()
 		invisible_animals = false;
 	}
 
-	if (spellbonuses.NegateIfCombat)
-		BuffFadeByEffect(SE_NegateIfCombat);
-
 	if(hidden || improved_hidden){
 		hidden = false;
 		improved_hidden = false;
