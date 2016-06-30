@@ -37,7 +37,7 @@ class Corpse : public Mob {
 	public:
 
 	static void SendEndLootErrorPacket(Client* client);
-	static void SendLootReqErrorPacket(Client* client, uint8 response = 2);
+	static void SendLootReqErrorPacket(Client* client, LootResponse response = LootResponse::NotAtThisTime);
 
 	Corpse(NPC* in_npc, ItemList* in_itemlist, uint32 in_npctypeid, const NPCType** in_npctypedata, uint32 in_decaytime = 600000);
 	Corpse(Client* client, int32 in_rezexp);

@@ -5854,6 +5854,23 @@ int Mob::CheckBaneDamage(const ItemInst *item)
 	return damage;
 }
 
+void Mob::CommonBreakInvisible()
+{
+	BreakInvisibleSpells();
+
+	if (hidden || improved_hidden) {
+		hidden = false;
+		improved_hidden = false;
+		auto outapp = new EQApplicationPacket(OP_SpawnAppearance, sizeof(SpawnAppearance_Struct));
+		SpawnAppearance_Struct* sa_out = (SpawnAppearance_Struct*)outapp->pBuffer;
+		sa_out->spawn_id = GetID();
+		sa_out->type = 0x03;
+		sa_out->parameter = 0;
+		entity_list.QueueClients(this, outapp, true);
+		safe_delete(outapp);
+	}
+}
+
 #ifdef BOTS
 bool Mob::JoinHealRotationTargetPool(std::shared_ptr<HealRotation>* heal_rotation)
 {

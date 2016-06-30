@@ -9177,39 +9177,7 @@ void Client::Handle_OP_LootRequest(const EQApplicationPacket *app)
 	if (ent->IsCorpse())
 	{
 		SetLooting(ent->GetID()); //store the entity we are looting
-		Corpse *ent_corpse = ent->CastToCorpse();
-		if (DistanceSquaredNoZ(m_Position, ent_corpse->GetPosition())  > 625)
-		{
-			Message(13, "Corpse too far away.");
-			Corpse::SendLootReqErrorPacket(this);
-			return;
-		}
 
-		if (invisible) {
-			BuffFadeByEffect(SE_Invisibility);
-			BuffFadeByEffect(SE_Invisibility2);
-			invisible = false;
-		}
-		if (invisible_undead) {
-			BuffFadeByEffect(SE_InvisVsUndead);
-			BuffFadeByEffect(SE_InvisVsUndead2);
-			invisible_undead = false;
-		}
-		if (invisible_animals){
-			BuffFadeByEffect(SE_InvisVsAnimals);
-			invisible_animals = false;
-		}
-		if (hidden || improved_hidden){
-			hidden = false;
-			improved_hidden = false;
-			auto outapp = new EQApplicationPacket(OP_SpawnAppearance, sizeof(SpawnAppearance_Struct));
-			SpawnAppearance_Struct* sa_out = (SpawnAppearance_Struct*)outapp->pBuffer;
-			sa_out->spawn_id = GetID();
-			sa_out->type = 0x03;
-			sa_out->parameter = 0;
-			entity_list.QueueClients(this, outapp, true);
-			safe_delete(outapp);
-		}
 		ent->CastToCorpse()->MakeLootRequestPackets(this, app);
 		return;
 	}

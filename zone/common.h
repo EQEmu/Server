@@ -189,6 +189,16 @@ enum class PlayerState : uint32 {
 	SecondaryWeaponEquipped = 128
 };
 
+enum class LootResponse : uint8 {
+	SomeoneElse = 0,
+	Normal = 1,
+	NotAtThisTime = 2,
+	Normal2 = 3, // acts exactly the same as Normal, maybe group vs ungroup? No idea
+	Hostiles = 4,
+	TooFar = 5,
+	LootAll = 6 // SoD+
+};
+
 //this is our internal representation of the BUFF struct, can put whatever we want in it
 struct Buffs_Struct {
 	uint16	spellid;

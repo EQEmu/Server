@@ -64,10 +64,10 @@ void Corpse::SendEndLootErrorPacket(Client* client) {
 	safe_delete(outapp);
 }
 
-void Corpse::SendLootReqErrorPacket(Client* client, uint8 response) {
+void Corpse::SendLootReqErrorPacket(Client* client, LootResponse response) {
 	auto outapp = new EQApplicationPacket(OP_MoneyOnCorpse, sizeof(moneyOnCorpseStruct));
 	moneyOnCorpseStruct* d = (moneyOnCorpseStruct*) outapp->pBuffer;
-	d->response		= response;
+	d->response		= static_cast<uint8>(response);
 	d->unknown1		= 0x5a;
 	d->unknown2		= 0x40;
 	client->QueuePacket(outapp);
@@ -876,7 +876,7 @@ void Corpse::AllowPlayerLoot(Mob *them, uint8 slot) {
 void Corpse::MakeLootRequestPackets(Client* client, const EQApplicationPacket* app) {
 	// Added 12/08. Started compressing loot struct on live.
 	if(player_corpse_depop) {
-		SendLootReqErrorPacket(client, 0);
+		SendLootReqErrorPacket(client, LootResponse::SomeoneElse);
 		return;
 	}
 
@@ -888,7 +888,7 @@ void Corpse::MakeLootRequestPackets(Client* client, const EQApplicationPacket* a
 	}
 
 	if(is_locked && client->Admin() < 100) {
-		SendLootReqErrorPacket(client, 0);
+		SendLootReqErrorPacket(client, LootResponse::SomeoneElse);
 		client->Message(13, "Error: Corpse locked by GM.");
 		return;
 	}
@@ -899,7 +899,7 @@ void Corpse::MakeLootRequestPackets(Client* client, const EQApplicationPacket* a
 	if(this->being_looted_by != 0xFFFFFFFF) {
 		// lets double check....
 		Entity* looter = entity_list.GetID(this->being_looted_by);
-		if(looter == 0)
+		if(looter == nullptr)
 			this->being_looted_by = 0xFFFFFFFF;
 	}
 
@@ -909,8 +909,14 @@ void Corpse::MakeLootRequestPackets(Client* client, const EQApplicationPacket* a
 	if(database.GetVariable("LootCoin", tmp))
 		loot_coin = tmp[0] == 1 && tmp[1] == '\0';
 
-	if (this->being_looted_by != 0xFFFFFFFF && this->being_looted_by != client->GetID()) {
-		SendLootReqErrorPacket(client, 0);
+	if (DistanceSquaredNoZ(client->GetPosition(), m_Position) > 625) {
+		SendLootReqErrorPacket(client, LootResponse::TooFar);
+		// not sure if we need to send the packet back in this case? Didn't before!
+		// Will just return for now
+		return;
+	}
+	else if (this->being_looted_by != 0xFFFFFFFF && this->being_looted_by != client->GetID()) {
+		SendLootReqErrorPacket(client, LootResponse::SomeoneElse);
 		Loot_Request_Type = 0;
 	}
 	else if (IsPlayerCorpse() && char_id == client->CharacterID()) {
@@ -931,16 +937,17 @@ void Corpse::MakeLootRequestPackets(Client* client, const EQApplicationPacket* a
 
 	if (Loot_Request_Type == 1) {
 		if (client->Admin() < 100 || !client->GetGM()) {
-			SendLootReqErrorPacket(client, 2);
+			SendLootReqErrorPacket(client, LootResponse::NotAtThisTime);
 		}
 	}
 
 	if(Loot_Request_Type >= 2 || (Loot_Request_Type == 1 && client->Admin() >= 100 && client->GetGM())) {
+		client->CommonBreakInvisible(); // we should be "all good" so lets break invis now instead of earlier before all error checking is done
 		this->being_looted_by = client->GetID();
 		auto outapp = new EQApplicationPacket(OP_MoneyOnCorpse, sizeof(moneyOnCorpseStruct));
 		moneyOnCorpseStruct* d = (moneyOnCorpseStruct*) outapp->pBuffer;
 
-		d->response		= 1;
+		d->response		= static_cast<uint8>(LootResponse::Normal);
 		d->unknown1		= 0x42;
 		d->unknown2		= 0xef;
 
@@ -1052,7 +1059,8 @@ void Corpse::MakeLootRequestPackets(Client* client, const EQApplicationPacket* a
 
 	// This is required for the 'Loot All' feature to work for SoD clients. I expect it is to tell the client that the
 	// server has now sent all the items on the corpse.
-	if (client->ClientVersion() >= EQEmu::versions::ClientVersion::SoD) { SendLootReqErrorPacket(client, 6); }
+	if (client->ClientVersion() >= EQEmu::versions::ClientVersion::SoD)
+		SendLootReqErrorPacket(client, LootResponse::LootAll);
 }
 
 void Corpse::LootItem(Client* client, const EQApplicationPacket* app) {
@@ -1092,7 +1100,7 @@ void Corpse::LootItem(Client* client, const EQApplicationPacket* app) {
 		return;
 	}
 	if (is_locked && client->Admin() < 100) {
-		SendLootReqErrorPacket(client, 0);
+		SendLootReqErrorPacket(client, LootResponse::SomeoneElse);
 		client->Message(13, "Error: Corpse locked by GM.");
 		return;
 	}
