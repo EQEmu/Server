@@ -173,6 +173,7 @@ public:
 	void RogueEvade(Mob *other);
 	void CommonOutgoingHitSuccess(Mob* defender, int32 &damage, EQEmu::skills::SkillType skillInUse, ExtraAttackOptions *opts = nullptr);
 	void BreakInvisibleSpells();
+	virtual void CancelSneakHide();
 	void CommonBreakInvisible();
 	void CommonBreakInvisibleFromCombat();
 	bool HasDied();

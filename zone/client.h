@@ -834,6 +834,7 @@ public:
 	eqFilterMode GetFilter(eqFilterType filter_id) const { return ClientFilters[filter_id]; }
 	void SetFilter(eqFilterType filter_id, eqFilterMode value) { ClientFilters[filter_id]=value; }
 
+	void CancelSneakHide();
 	void BreakInvis();
 	void BreakSneakWhenCastOn(Mob* caster, bool IsResisted);
 	void BreakFeignDeathWhenCastOn(bool IsResisted);

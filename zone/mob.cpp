@@ -5854,10 +5854,8 @@ int Mob::CheckBaneDamage(const ItemInst *item)
 	return damage;
 }
 
-void Mob::CommonBreakInvisible()
+void Mob::CancelSneakHide()
 {
-	BreakInvisibleSpells();
-
 	if (hidden || improved_hidden) {
 		hidden = false;
 		improved_hidden = false;
@@ -5869,6 +5867,12 @@ void Mob::CommonBreakInvisible()
 		entity_list.QueueClients(this, outapp, true);
 		safe_delete(outapp);
 	}
+}
+
+void Mob::CommonBreakInvisible()
+{
+	BreakInvisibleSpells();
+	CancelSneakHide();
 }
 
 #ifdef BOTS

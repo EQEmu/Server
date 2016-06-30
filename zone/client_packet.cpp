@@ -7871,6 +7871,14 @@ void Client::Handle_OP_Heartbeat(const EQApplicationPacket *app)
 
 void Client::Handle_OP_Hide(const EQApplicationPacket *app)
 {
+	// newer client respond to OP_CancelSneakHide with OP_Hide with a size of 4 and 0 data
+	if (app->size == 4) {
+		auto data = app->ReadUInt32(0);
+		if (data)
+			Log.Out(Logs::Detail, Logs::None, "Got OP_Hide with unexpected data %d", data);
+		return;
+	}
+
 	if (!HasSkill(EQEmu::skills::SkillHide) && GetSkill(EQEmu::skills::SkillHide) == 0)
 	{
 		//Can not be able to train hide but still have it from racial though

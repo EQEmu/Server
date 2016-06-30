@@ -1127,6 +1127,21 @@ void Client::OPMemorizeSpell(const EQApplicationPacket* app)
 	Save();
 }
 
+void Client::CancelSneakHide()
+{
+	if (hidden || improved_hidden) {
+		auto app = new EQApplicationPacket(OP_CancelSneakHide, 0);
+		FastQueuePacket(&app);
+		// SoF and Tit send back a OP_SpawnAppearance turning off AT_Invis
+		// so we need to handle our sneaking flag only
+		// The later clients send back a OP_Hide (this has a size but data is 0)
+		// as well as OP_SpawnAppearance with AT_Invis and one with AT_Sneak
+		// So we don't have to handle any of those flags
+		if (ClientVersionBit() & EQEmu::versions::bit_SoFAndEarlier)
+			sneaking = false;
+	}
+}
+
 void Client::BreakInvis()
 {
 	if (invisible)
