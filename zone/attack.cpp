@@ -4438,17 +4438,7 @@ void Mob::CommonBreakInvisibleFromCombat()
 		invisible_animals = false;
 	}
 
-	if(hidden || improved_hidden){
-		hidden = false;
-		improved_hidden = false;
-		auto outapp = new EQApplicationPacket(OP_SpawnAppearance, sizeof(SpawnAppearance_Struct));
-		SpawnAppearance_Struct* sa_out = (SpawnAppearance_Struct*)outapp->pBuffer;
-		sa_out->spawn_id = GetID();
-		sa_out->type = 0x03;
-		sa_out->parameter = 0;
-		entity_list.QueueClients(this, outapp, true);
-		safe_delete(outapp);
-	}
+	CancelSneakHide();
 
 	if (spellbonuses.NegateIfCombat)
 		BuffFadeByEffect(SE_NegateIfCombat);
