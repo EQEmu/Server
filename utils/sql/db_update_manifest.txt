@@ -350,6 +350,7 @@
 9094|2015_12_29_quest_zone_events.sql|SELECT * FROM perl_event_export_settings WHERE event_description = 'EVENT_SPAWN_ZONE'|empty|
 9095|2016_01_08_command_find_aliases.sql|SELECT * FROM `command_settings` WHERE `command` LIKE 'findaliases'|empty|
 9096|2016_03_05_secondary_recall.sql|SHOW COLUMNS FROM `character_bind` LIKE 'slot'|empty|
+9097|2016_07_03_npc_class_as_last_name.sql|SELECT `rule_name` FROM `rule_values` WHERE `rule_name` LIKE 'NPC:UseClassAsLastName'|empty|
 
 # Upgrade conditions:
 # 	This won't be needed after this system is implemented, but it is used database that are not
