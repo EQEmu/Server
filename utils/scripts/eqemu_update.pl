@@ -19,7 +19,7 @@ use Time::HiRes qw(usleep);
 $time_stamp = strftime('%m-%d-%Y', gmtime());
 
 $console_output .= "	Operating System is: $Config{osname}\n";
-if($Config{osname}=~/linux/i){ $OS = "Linux"; }
+if($Config{osname}=~/freebsd|linux/i){ $OS = "Linux"; }
 if($Config{osname}=~/Win|MS/i){ $OS = "Windows"; }
 
 #::: If current version is less than what world is reporting, then download a new one...
