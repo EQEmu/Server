@@ -9,12 +9,17 @@
 $menu_displayed = 0;
 
 use Config;
+use File::Basename;
 use File::Copy qw(copy);
 use POSIX qw(strftime);
 use File::Path;
+use File::Temp;
 use File::Find;
 use URI::Escape;
 use Time::HiRes qw(usleep);
+
+$tmpDir = File::Temp::tempdir(File::Spec->catfile(File::Spec->tmpdir(), 'eqemu-update-XXXX'), CLEANUP => 1);
+print "Using temporary directory: ${tmpDir}\n";
 
 $time_stamp = strftime('%m-%d-%Y', gmtime());
 
@@ -62,6 +67,22 @@ while(<F>) {
 	elsif(/<username>(.*)<\/username>/i) { $user = $1; } 
 	elsif(/<password>(.*)<\/password>/i) { $pass = $1; } 
 	elsif(/<db>(.*)<\/db>/i) { $db = $1; } 
+}
+
+my $mysqlConfigFilePath;
+if ($OS eq "Linux") {
+	$mysqlConfigFilePath = File::Spec->catfile($tmpDir, 'my.cnf');
+	open(my $mysqlConfigFileHandle, ">", $mysqlConfigFilePath) or die "Failed to open ${tmpDir}/my.cnf for writing.";
+	chmod 0600, $mysqlConfigFilePath;
+	print $mysqlConfigFileHandle <<EOF;
+[mysql]
+database=$db
+host=$host
+password=$pass
+user=$user
+EOF
+	close $mysqlConfigFileHandle;
+	print "Using MySQL configuration file: ${mysqlConfigFilePath}\n";
 }
 
 $console_output = 
@@ -118,8 +139,8 @@ if($ARGV[0] eq "install_peq_db"){
 
 	#::: Database Routines
 	print "MariaDB :: Creating Database '" . $db_name . "'\n";
-	print `"$path" --host $host --user $user --password="$pass" -N -B -e "DROP DATABASE IF EXISTS $db_name;"`;
-	print `"$path" --host $host --user $user --password="$pass" -N -B -e "CREATE DATABASE $db_name"`;
+	print get_mysql_result("DROP DATABASE IF EXISTS $db_name", 'information_schema');
+	print get_mysql_result("CREATE DATABASE $db_name", 'information_schema');
 	if($OS eq "Windows"){ @db_version = split(': ', `world db_version`); } 
 	if($OS eq "Linux"){ @db_version = split(': ', `./world db_version`); }  
 	$bin_db_ver = trim($db_version[1]);
@@ -161,8 +182,8 @@ if($ARGV[0] eq "installer"){
 	
 	#::: Database Routines
 	print "MariaDB :: Creating Database 'peq'\n";
-	print `"$path" --host $host --user $user --password="$pass" -N -B -e "DROP DATABASE IF EXISTS peq;"`;
-	print `"$path" --host $host --user $user --password="$pass" -N -B -e "CREATE DATABASE peq"`;
+	print get_mysql_result("DROP DATABASE IF EXISTS peq", 'information_schema');
+	print get_mysql_result("CREATE DATABASE peq", 'information_schema');
 	if($OS eq "Windows"){ @db_version = split(': ', `world db_version`); } 
 	if($OS eq "Linux"){ @db_version = split(': ', `./world db_version`); }  
 	$bin_db_ver = trim($db_version[1]);
@@ -415,21 +436,54 @@ sub script_exit{
 }
 
 #::: Returns Tab Delimited MySQL Result from Command Line
-sub get_mysql_result{
-	my $run_query = $_[0];
-	if(!$db){ return; }
-	if($OS eq "Windows"){ return `"$path" --host $host --user $user --password="$pass" $db -N -B -e "$run_query"`; }
-	if($OS eq "Linux"){ 
-		$run_query =~s/`//g;
-		return `$path --user="$user" --host $host --password="$pass" $db -N -B -e "$run_query"`; 
+sub get_mysql_result {
+	my $query = $_[0];
+	my $_db = $_[1];
+
+	#
+	# If we were given a DB parameter, use that. Otherwise, check
+	# for a global setting. If there is no global setting, explode.
+	#
+	if (!defined($_db)) {
+		if (!$db) {
+			return;
+		} else {
+			$_db = $db;
+		}
+	}
+
+	if ($OS eq "Windows") {
+		return `"${path}" --host $host --user $user --password="$pass" $_db -N -B -e "$query"`;
+	} elsif ($OS eq "Linux") {
+		#
+		# Since ` is a special character on Unix/Linux, we need to get
+		# rid of it. However, it is also a special character in MySQL,
+		# so we don't necessarily want to remove it from the query, in
+		# case it's quoting something that should be quoted. Therefore
+		# we just escape it.
+		#
+		$query =~ s/`/\\`/g;
+
+		if (defined($mysqlConfigFilePath)) {
+			return `"${path}" --defaults-extra-file="${mysqlConfigFilePath}" $_db -N -B -e "$query"`;
+		} else {
+			return `"${path}" --user="$user" --host $host --password="$pass" $_db -N -B -e "$query"`;
+		}
 	}
 }
 
-sub get_mysql_result_from_file{
+sub get_mysql_result_from_file {
 	my $update_file = $_[0];
-	if(!$db){ return; }
-	if($OS eq "Windows"){ return `"$path" --host $host --user $user --password="$pass" --force $db < $update_file`;  }
-	if($OS eq "Linux"){ return `"$path" --host $host --user $user --password="$pass" --force $db < $update_file`;  }
+	if (!$db) { return; }
+	if ($OS eq "Windows") {
+		return `"$path" --host $host --user $user --password="$pass" --force $db < $update_file`;
+	} elsif ($OS eq "Linux") {
+		if (defined($mysqlConfigFilePath)) {
+			return `"${path}" --defaults-extra-file="${mysqlConfigFilePath}" $db -N -B < "${update_file}"`;
+		} else {
+			return `"${path}" --user="$user" --host $host --password="$pass" $db -N -B < "${update_file}"`;
+		}
+	}
 }
 
 #::: Gets Remote File based on URL (1st Arg), and saves to destination file (2nd Arg)
@@ -773,26 +827,25 @@ sub fetch_server_dlls{
 	get_remote_file("https://raw.githubusercontent.com/Akkadius/EQEmuInstall/master/libmysql.dll", "libmysql.dll", 1);
 }
 
-sub fetch_peq_db_full{
+sub fetch_peq_db_full {
+	my $peqDatabaseArchivePath = File::Spec->catfile('updates_staged', 'peq_beta.zip');
+
 	print "Downloading latest PEQ Database... Please wait...\n";
-	get_remote_file("http://edit.peqtgc.com/weekly/peq_beta.zip", "updates_staged/peq_beta.zip", 1);
+	get_remote_file("http://edit.peqtgc.com/weekly/peq_beta.zip", $peqDatabaseArchivePath, 1);
 	print "Downloaded latest PEQ Database... Extracting...\n";
-	unzip('updates_staged/peq_beta.zip', 'updates_staged/peq_db/');
-	my $start_dir = "updates_staged\\peq_db";
-	find( 
-		sub { push @files, $File::Find::name unless -d; }, 
-		$start_dir
-	);
-	for my $file (@files) {
-		$dest_file = $file;
-		$dest_file =~s/updates_staged\\peq_db\///g;
-		if($file=~/peqbeta|player_tables/i){
-			print "MariaDB :: Installing :: " . $dest_file . "\n";
-			get_mysql_result_from_file($file);
-		}
-		if($file=~/eqtime/i){
+
+	my $peqDatabaseStagingPath = File::Spec->catfile('updates_staged', 'peq_db');
+	unzip('updates_staged/peq_beta.zip', $peqDatabaseStagingPath);
+
+	find (sub { push @files, $File::Find::name unless -d; }, $peqDatabaseStagingPath);
+	for my $filePath (@files) {
+		my $fileName = fileparse($filePath);
+		if ($fileName =~ /peqbeta|player_tables/i) {
+			print "MariaDB :: Installing :: ${fileName}\n";
+			get_mysql_result_from_file($filePath);
+		} elsif ($fileName =~ /eqtime/i) {
 			print "Installing eqtime.cfg\n";
-			copy_file($file, "eqtime.cfg");
+			copy_file($filePath, "eqtime.cfg");
 		}
 	}
 }
