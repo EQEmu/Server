@@ -9,6 +9,7 @@
 $menu_displayed = 0;
 
 use Config;
+use File::Basename;
 use File::Copy qw(copy);
 use POSIX qw(strftime);
 use File::Path;
@@ -773,26 +774,25 @@ sub fetch_server_dlls{
 	get_remote_file("https://raw.githubusercontent.com/Akkadius/EQEmuInstall/master/libmysql.dll", "libmysql.dll", 1);
 }
 
-sub fetch_peq_db_full{
+sub fetch_peq_db_full {
+	my $peqDatabaseArchivePath = File::Spec->catfile('updates_staged', 'peq_beta.zip');
+
 	print "Downloading latest PEQ Database... Please wait...\n";
-	get_remote_file("http://edit.peqtgc.com/weekly/peq_beta.zip", "updates_staged/peq_beta.zip", 1);
+	get_remote_file("http://edit.peqtgc.com/weekly/peq_beta.zip", $peqDatabaseArchivePath, 1);
 	print "Downloaded latest PEQ Database... Extracting...\n";
-	unzip('updates_staged/peq_beta.zip', 'updates_staged/peq_db/');
-	my $start_dir = "updates_staged\\peq_db";
-	find( 
-		sub { push @files, $File::Find::name unless -d; }, 
-		$start_dir
-	);
-	for my $file (@files) {
-		$dest_file = $file;
-		$dest_file =~s/updates_staged\\peq_db\///g;
-		if($file=~/peqbeta|player_tables/i){
-			print "MariaDB :: Installing :: " . $dest_file . "\n";
-			get_mysql_result_from_file($file);
-		}
-		if($file=~/eqtime/i){
+
+	my $peqDatabaseStagingPath = File::Spec->catfile('updates_staged', 'peq_db');
+	unzip('updates_staged/peq_beta.zip', $peqDatabaseStagingPath);
+
+	find (sub { push @files, $File::Find::name unless -d; }, $peqDatabaseStagingPath);
+	for my $filePath (@files) {
+		my $fileName = fileparse($filePath);
+		if ($fileName =~ /peqbeta|player_tables/i) {
+			print "MariaDB :: Installing :: ${fileName}\n";
+			get_mysql_result_from_file($filePath);
+		} elsif ($fileName =~ /eqtime/i) {
 			print "Installing eqtime.cfg\n";
-			copy_file($file, "eqtime.cfg");
+			copy_file($filePath, "eqtime.cfg");
 		}
 	}
 }
