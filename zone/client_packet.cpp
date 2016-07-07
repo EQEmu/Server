@@ -606,14 +606,14 @@ void Client::CompleteConnect()
 						gender = 1;
 					SendIllusionPacket(GetRace(), gender, 0xFF, 0xFF);
 				}
-				else if (spell.base[x1] == -2)
+				else if (spell.base[x1] == -2) // WTF IS THIS
 				{
 					if (GetRace() == 128 || GetRace() == 130 || GetRace() <= 12)
-						SendIllusionPacket(GetRace(), GetGender(), spell.max[x1], spell.max[x1]);
+						SendIllusionPacket(GetRace(), GetGender(), spell.base2[x1], spell.max[x1]);
 				}
 				else if (spell.max[x1] > 0)
 				{
-					SendIllusionPacket(spell.base[x1], 0xFF, spell.max[x1], spell.max[x1]);
+					SendIllusionPacket(spell.base[x1], 0xFF, spell.base2[x1], spell.max[x1]);
 				}
 				else
 				{
