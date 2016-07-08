@@ -1057,7 +1057,7 @@ bool Client::Process() {
 	to.sin_addr.s_addr = ip;
 
 	if (autobootup_timeout.Check()) {
-		Log.Out(Logs::Detail, Logs::World_Server, "Zone bootup timer expired, bootup failed or too slow.");
+		Log.Out(Logs::General, Logs::World_Server, "Zone bootup timer expired, bootup failed or too slow.");
 		ZoneUnavail();
 	}
 	if(connect.Check()){
