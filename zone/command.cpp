@@ -7839,7 +7839,7 @@ void command_traindisc(Client *c, const Seperator *sep)
 						break;	//continue the 1st loop
 					} else if(t->GetPP().disciplines.values[r] == 0) {
 						t->GetPP().disciplines.values[r] = curspell;
-						database.SaveCharacterDisc(c->CharacterID(), r, curspell);
+						database.SaveCharacterDisc(t->CharacterID(), r, curspell);
 						t->SendDisciplineUpdate();
 						t->Message(0, "You have learned a new discipline!");
 						count++;	//success counter
