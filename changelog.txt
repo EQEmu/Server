@@ -1,5 +1,11 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 07/09/2016 ==
+Uleat: Important fix for mob pathing
+	- This should fix failed pathing issues (and high cpu usage for zone.exe) for mobs in affect zones
+	- Changed variable 'gridno' type from int16 to int32 to reflect actual return value of fetch (values do exceed 32767 aka int16.max)
+	- Precision loss from int32 to int16 conversion was causing grid id to be changed to quest controlled movement in cases where (gridno & 0x8000 == true) 
+
 == 06/28/2016 ==
 Noudess: Resurrection effects now block certain buffs like on live.
 Noudess: Added message about why spells are blocked (rule based)

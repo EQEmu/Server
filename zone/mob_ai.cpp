@@ -1551,7 +1551,7 @@ void NPC::AI_DoMovement() {
 		}
 
 
-		int16 gridno = CastToNPC()->GetGrid();
+		int32 gridno = CastToNPC()->GetGrid();
 
 		if (gridno > 0 || cur_wp==-2) {
 			if (movetimercompleted==true) { // time to pause at wp is over
