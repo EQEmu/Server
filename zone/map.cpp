@@ -897,18 +897,18 @@ bool Map::LoadV2(FILE *f) {
 void Map::RotateVertex(glm::vec3 &v, float rx, float ry, float rz) {
 	glm::vec3 nv = v;
 
-	nv.y = (cos(rx) * v.y) - (sin(rx) * v.z);
-	nv.z = (sin(rx) * v.y) + (cos(rx) * v.z);
+	nv.y = (std::cos(rx) * v.y) - (std::sin(rx) * v.z);
+	nv.z = (std::sin(rx) * v.y) + (std::cos(rx) * v.z);
 
 	v = nv;
 
-	nv.x = (cos(ry) * v.x) + (sin(ry) * v.z);
-	nv.z = -(sin(ry) * v.x) + (cos(ry) * v.z);
+	nv.x = (std::cos(ry) * v.x) + (std::sin(ry) * v.z);
+	nv.z = -(std::sin(ry) * v.x) + (std::cos(ry) * v.z);
 
 	v = nv;
 
-	nv.x = (cos(rz) * v.x) - (sin(rz) * v.y);
-	nv.y = (sin(rz) * v.x) + (cos(rz) * v.y);
+	nv.x = (std::cos(rz) * v.x) - (std::sin(rz) * v.y);
+	nv.y = (std::sin(rz) * v.x) + (std::cos(rz) * v.y);
 
 	v = nv;
 }
