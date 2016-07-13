@@ -2390,21 +2390,33 @@ bool BotDatabase::LoadBotGroupsListByOwnerID(const uint32 owner_id, std::list<st
 }
 
 
-/* Bot group functions   */
+/* Bot owner group functions   */
 bool BotDatabase::LoadGroupedBotsByGroupID(const uint32 group_id, std::list<uint32>& group_list)
 {
 	if (!group_id)
 		return false;
 
 	query = StringFormat(
-		"SELECT g.`mob_id` AS bot_id"
-		" FROM `vw_groups` AS g"
-		" JOIN `bot_data` AS b"
-		" ON g.`mob_id` = b.`bot_id`"
-		" AND g.`mob_type` = 'B'"
-		" WHERE g.`group_id` = '%u'",
+		"SELECT `charid`"
+		" FROM `group_id`"
+		" WHERE `groupid` = '%u'"
+		" AND `charid` IN ("
+		"  SELECT `bot_id`"
+		"  FROM `bot_data`"
+		"  WHERE `owner_id` IN ("
+		"   SELECT `charid`"
+		"   FROM `group_id`"
+		"   WHERE `groupid` = '%u'"
+		"   AND `name` IN ("
+		"    SELECT `name`"
+		"    FROM `character_data`"
+		"   )"
+		"  )"
+		" )",
+		group_id,
 		group_id
 	);
+
 	auto results = QueryDatabase(query);
 	if (!results.Success())
 		return false;
