@@ -348,18 +348,6 @@ struct ModelEntry
 	std::vector<Poly> polys;
 };
 
-struct PointEntry
-{
-	PointEntry(float x, float y, float z) { x_val = x; y_val = y; z_val = z; }
-	void set(float x, float y, float z) { x_val = x; y_val = y; z_val = z; }
-	bool operator==(const PointEntry& r) const { return (x_val == r.x_val && y_val == r.y_val && z_val == r.z_val); }
-	bool operator<(const PointEntry& r) const { return (x_val < r.x_val && y_val < r.y_val && z_val < r.z_val); }
-
-	float x_val;
-	float y_val;
-	float z_val;
-};
-
 bool Map::LoadV2(FILE *f) {
 	uint32 data_size;
 	if (fread(&data_size, sizeof(data_size), 1, f) != 1) {
@@ -804,7 +792,7 @@ bool Map::LoadV2(FILE *f) {
 			}
 
 			int row_number = -1;
-			std::map<PointEntry, uint32> cur_verts;
+			std::map<std::tuple<float, float, float>, uint32> cur_verts;
 			for (uint32 quad = 0; quad < ter_quad_count; ++quad) {
 				if ((quad % quads_per_tile) == 0) {
 					++row_number;
@@ -830,7 +818,7 @@ bool Map::LoadV2(FILE *f) {
 				float QuadVertex4Z = floats[quad + row_number + 1];
 
 				uint32 i1, i2, i3, i4;
-				PointEntry t(QuadVertex1X, QuadVertex1Y, QuadVertex1Z);
+				std::tuple<float, float, float> t = std::make_tuple(QuadVertex1X, QuadVertex1Y, QuadVertex1Z);
 				auto iter = cur_verts.find(t);
 				if (iter != cur_verts.end()) {
 					i1 = iter->second;
@@ -838,10 +826,10 @@ bool Map::LoadV2(FILE *f) {
 				else {
 					i1 = (uint32)verts.size();
 					verts.push_back(glm::vec3(QuadVertex1X, QuadVertex1Y, QuadVertex1Z));
-					cur_verts[t] = i1;
+					cur_verts[std::make_tuple(QuadVertex1X, QuadVertex1Y, QuadVertex1Z)] = i1;
 				}
 
-				t.set(QuadVertex2X, QuadVertex2Y, QuadVertex2Z);
+				t = std::make_tuple(QuadVertex2X, QuadVertex2Y, QuadVertex2Z);
 				iter = cur_verts.find(t);
 				if (iter != cur_verts.end()) {
 					i2 = iter->second;
@@ -849,10 +837,10 @@ bool Map::LoadV2(FILE *f) {
 				else {
 					i2 = (uint32)verts.size();
 					verts.push_back(glm::vec3(QuadVertex2X, QuadVertex2Y, QuadVertex2Z));
-					cur_verts[t] = i2;
+					cur_verts[std::make_tuple(QuadVertex2X, QuadVertex2Y, QuadVertex2Z)] = i2;
 				}
 
-				t.set(QuadVertex3X, QuadVertex3Y, QuadVertex3Z);
+				t = std::make_tuple(QuadVertex3X, QuadVertex3Y, QuadVertex3Z);
 				iter = cur_verts.find(t);
 				if (iter != cur_verts.end()) {
 					i3 = iter->second;
@@ -860,10 +848,10 @@ bool Map::LoadV2(FILE *f) {
 				else {
 					i3 = (uint32)verts.size();
 					verts.push_back(glm::vec3(QuadVertex3X, QuadVertex3Y, QuadVertex3Z));
-					cur_verts[t] = i3;
+					cur_verts[std::make_tuple(QuadVertex3X, QuadVertex3Y, QuadVertex3Z)] = i3;
 				}
 
-				t.set(QuadVertex4X, QuadVertex4Y, QuadVertex4Z);
+				t = std::make_tuple(QuadVertex4X, QuadVertex4Y, QuadVertex4Z);
 				iter = cur_verts.find(t);
 				if (iter != cur_verts.end()) {
 					i4 = iter->second;
@@ -871,7 +859,7 @@ bool Map::LoadV2(FILE *f) {
 				else {
 					i4 = (uint32)verts.size();
 					verts.push_back(glm::vec3(QuadVertex4X, QuadVertex4Y, QuadVertex4Z));
-					cur_verts[t] = i4;
+					cur_verts[std::make_tuple(QuadVertex4X, QuadVertex4Y, QuadVertex4Z)] = i4;
 				}
 
 				indices.push_back(i4);
