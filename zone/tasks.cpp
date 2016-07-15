@@ -718,9 +718,10 @@ void ClientTaskState::EnableTask(int characterID, int taskCount, int *tasks) {
 	if(tasksEnabled.empty() )
         return;
 
-	std::stringstream queryStream("REPLACE INTO character_enabledtasks (charid, taskid) VALUES ");
+	std::stringstream queryStream;
+	queryStream << "REPLACE INTO character_enabledtasks (charid, taskid) VALUES ";
 	for(unsigned int i=0; i<tasksEnabled.size(); i++)
-		queryStream << ( i ? ", " : "" ) <<  StringFormat("(%i, %i)", characterID, tasksEnabled[i]);
+		queryStream << (i ? ", " : "") <<  StringFormat("(%i, %i)", characterID, tasksEnabled[i]);
 
     std::string query = queryStream.str();
 
@@ -729,7 +730,7 @@ void ClientTaskState::EnableTask(int characterID, int taskCount, int *tasks) {
 		database.QueryDatabase(query);
 	}
 	else {
-		Log.Out(Logs::General, Logs::Tasks, "[UPDATE] EnableTask called for characterID: %u .. but, no tasks exist!", characterID);
+		Log.Out(Logs::General, Logs::Tasks, "[UPDATE] EnableTask called for characterID: %u .. but, no tasks exist", characterID);
 	}
 }
 
@@ -768,10 +769,11 @@ void ClientTaskState::DisableTask(int charID, int taskCount, int *taskList) {
 	if(tasksDisabled.empty())
         return;
 
-	std::stringstream queryStream(StringFormat("DELETE FROM character_enabledtasks WHERE charid = %i AND (", charID));
+	std::stringstream queryStream;
+	queryStream << StringFormat("DELETE FROM character_enabledtasks WHERE charid = %i AND (", charID);
 
 	for(unsigned int i=0; i<tasksDisabled.size(); i++)
-        queryStream << (i ? StringFormat("taskid = %i ", tasksDisabled[i]): StringFormat("OR taskid = %i ", tasksDisabled[i]));
+        queryStream << (i ? StringFormat("taskid = %i ", tasksDisabled[i]) : StringFormat("OR taskid = %i ", tasksDisabled[i]));
 
 	queryStream << ")";
 
@@ -782,7 +784,7 @@ void ClientTaskState::DisableTask(int charID, int taskCount, int *taskList) {
 		database.QueryDatabase(query);
 	}
 	else {
-		Log.Out(Logs::General, Logs::Tasks, "[UPDATE] DisableTask called for characterID: %u .. but, no tasks exist!", charID);
+		Log.Out(Logs::General, Logs::Tasks, "[UPDATE] DisableTask called for characterID: %u .. but, no tasks exist", charID);
 	}
 }
 
