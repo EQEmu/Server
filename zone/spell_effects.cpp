@@ -1438,7 +1438,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 				for (int x = EQEmu::textures::TextureBegin; x <= EQEmu::textures::LastTintableTexture; x++)
 					SendWearChange(x);
 
-				if (caster == this &&
+				if (caster == this && spell.id != 287 && spell.id != 601 &&
 				    (spellbonuses.IllusionPersistence || aabonuses.IllusionPersistence ||
 				     itembonuses.IllusionPersistence))
 					buffs[buffslot].persistant_buff = 1;
