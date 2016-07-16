@@ -2763,7 +2763,7 @@ int Mob::CheckStackConflict(uint16 spellid1, int caster_level1, uint16 spellid2,
 
 	// Same Spells and dot exemption is set to 1 or spell is Manaburn
 	if (spellid1 == spellid2) {
-		if (sp1.dot_stacking_exempt == 1 && caster1 != caster2) { // same caster can refresh
+		if (IsStackableDot(spellid1) && caster1 != caster2) { // same caster can refresh
 			Log.Out(Logs::Detail, Logs::Spells, "Blocking spell due to dot stacking exemption.");
 			return -1;
 		} else if (spellid1 == 2751) {

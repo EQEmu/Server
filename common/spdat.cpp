@@ -1100,6 +1100,17 @@ bool NoDetrimentalSpellAggro(uint16 spell_id)
 	return false;
 }
 
+bool IsStackableDot(uint16 spell_id)
+{
+	// rules according to client
+	if (!IsValidSpell(spell_id))
+		return false;
+	const auto &spell = spells[spell_id];
+	if (spell.dot_stacking_exempt || spell.goodEffect || !spell.buffdurationformula)
+		return false;
+	return IsEffectInSpell(spell_id, SE_CurrentHP) || IsEffectInSpell(spell_id, SE_GravityEffect);
+}
+
 uint32 GetNimbusEffect(uint16 spell_id)
 {
 	if (IsValidSpell(spell_id))
