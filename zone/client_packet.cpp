@@ -11964,7 +11964,7 @@ void Client::Handle_OP_SetStartCity(const EQApplicationPacket *app)
 	if (!results.Success())
 		return;
 
-	Message(15, "Use \"/startcity #\" to choose a home city from the following list:");
+	Message(15, "Use \"/setstartcity #\" to choose a home city from the following list:");
 
 	for (auto row = results.begin(); row != results.end(); ++row) {
 		if (atoi(row[1]) != 0)
