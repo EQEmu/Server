@@ -5359,6 +5359,19 @@ void Client::SendBuffDurationPacket(Buffs_Struct &buff)
 		// level.
 		sbf->effect = 46;
 	}
+	else if (IsEffectInSpell(buff.spellid, SE_MovementSpeed))
+	{
+		index = GetSpellEffectIndex(buff.spellid, SE_MovementSpeed);
+
+		// So MovementSpeed spells react to effect values as follows:
+		// 0- cancels the effect (buff stays up - run speed is normal)
+		// 1-45 - A formula of change where 1-9 yield about a .1 to .9
+		// reduction of the spell effect, 10 yields about the same, and 
+		// 11-45 gets faster very quickly until the effect well exceeds
+		// any intended max.
+		// 46 - seems to do nothing - which is what we need.
+		sbf->effect = 46;
+	}
 	else if (IsEffectInSpell(buff.spellid, SE_CHA))
 	{
 		index = GetSpellEffectIndex(buff.spellid, SE_CHA);
