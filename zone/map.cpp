@@ -360,13 +360,13 @@ bool Map::LoadV2(FILE *f) {
 	}
 
 	std::vector<char> data;
-	data.resize(data_size);
+	data.reserve(data_size);
 	if (fread(&data[0], data_size, 1, f) != 1) {
 		return false;
 	}
 
 	std::vector<char> buffer;
-	buffer.resize(buffer_size);
+	buffer.reserve(buffer_size);
 	uint32 v = InflateData(&data[0], data_size, &buffer[0], buffer_size);
 
 	char *buf = &buffer[0];
@@ -412,7 +412,9 @@ bool Map::LoadV2(FILE *f) {
 	buf += sizeof(float);
 
 	std::vector<glm::vec3> verts;
+	verts.reserve(vert_count);
 	std::vector<uint32> indices;
+	indices.reserve(ind_count);
 
 	for (uint32 i = 0; i < vert_count; ++i) {
 		float x;
@@ -428,16 +430,12 @@ bool Map::LoadV2(FILE *f) {
 		z = *(float*)buf;
 		buf += sizeof(float);
 
-		glm::vec3 vert(x, y, z);
-		verts.push_back(vert);
+		verts.emplace_back(x, y, z);
 	}
 
 	for (uint32 i = 0; i < ind_count; ++i) {
-		uint32 index;
-		index = *(uint32*)buf;
+		indices.emplace_back(*(uint32 *)buf);
 		buf += sizeof(uint32);
-
-		indices.push_back(index);
 	}
 
 	for (uint32 i = 0; i < nc_vert_count; ++i) {
@@ -460,7 +458,7 @@ bool Map::LoadV2(FILE *f) {
 		uint32 poly_count = *(uint32*)buf;
 		buf += sizeof(uint32);
 
-		me->verts.resize(vert_count);
+		me->verts.reserve(vert_count);
 		for (uint32 j = 0; j < vert_count; ++j) {
 			float x = *(float*)buf;
 			buf += sizeof(float);
@@ -469,10 +467,10 @@ bool Map::LoadV2(FILE *f) {
 			float z = *(float*)buf;
 			buf += sizeof(float);
 
-			me->verts[j] = glm::vec3(x, y, z);
+			me->verts.emplace_back(x, y, z);
 		}
 
-		me->polys.resize(poly_count);
+		me->polys.reserve(poly_count);
 		for (uint32 j = 0; j < poly_count; ++j) {
 			uint32 v1 = *(uint32*)buf;
 			buf += sizeof(uint32);
@@ -527,6 +525,8 @@ bool Map::LoadV2(FILE *f) {
 		auto &mod_verts = model->verts;
 		for (uint32 j = 0; j < mod_polys.size(); ++j) {
 			auto &current_poly = mod_polys[j];
+			if (current_poly.vis == 0)
+				continue;
 			auto v1 = mod_verts[current_poly.v1];
 			auto v2 = mod_verts[current_poly.v2];
 			auto v3 = mod_verts[current_poly.v3];
@@ -543,27 +543,13 @@ bool Map::LoadV2(FILE *f) {
 			TranslateVertex(v2, x, y, z);
 			TranslateVertex(v3, x, y, z);
 
-			float t = v1.x;
-			v1.x = v1.y;
-			v1.y = t;
+			verts.emplace_back(v1.y, v1.x, v1.z); // x/y swapped
+			verts.emplace_back(v2.y, v2.x, v2.z);
+			verts.emplace_back(v3.y, v3.x, v3.z);
 
-			t = v2.x;
-			v2.x = v2.y;
-			v2.y = t;
-
-			t = v3.x;
-			v3.x = v3.y;
-			v3.y = t;
-
-			if (current_poly.vis != 0) {
-				verts.push_back(v1);
-				verts.push_back(v2);
-				verts.push_back(v3);
-
-				indices.push_back((uint32)verts.size() - 3);
-				indices.push_back((uint32)verts.size() - 2);
-				indices.push_back((uint32)verts.size() - 1);
-			}
+			indices.emplace_back((uint32)verts.size() - 3);
+			indices.emplace_back((uint32)verts.size() - 2);
+			indices.emplace_back((uint32)verts.size() - 1);
 		}
 	}
 
@@ -631,6 +617,8 @@ bool Map::LoadV2(FILE *f) {
 
 			for (size_t k = 0; k < model->polys.size(); ++k) {
 				auto &poly = model->polys[k];
+				if (poly.vis == 0)
+					continue;
 				glm::vec3 v1, v2, v3;
 
 				v1 = model->verts[poly.v1];
@@ -693,27 +681,13 @@ bool Map::LoadV2(FILE *f) {
 				TranslateVertex(v2, x, y, z);
 				TranslateVertex(v3, x, y, z);
 
-				float t = v1.x;
-				v1.x = v1.y;
-				v1.y = t;
+				verts.emplace_back(v1.y, v1.x, v1.z); // x/y swapped
+				verts.emplace_back(v2.y, v2.x, v2.z);
+				verts.emplace_back(v3.y, v3.x, v3.z);
 
-				t = v2.x;
-				v2.x = v2.y;
-				v2.y = t;
-
-				t = v3.x;
-				v3.x = v3.y;
-				v3.y = t;
-
-				if (poly.vis != 0) {
-					verts.push_back(v1);
-					verts.push_back(v2);
-					verts.push_back(v3);
-
-					indices.push_back((uint32)verts.size() - 3);
-					indices.push_back((uint32)verts.size() - 2);
-					indices.push_back((uint32)verts.size() - 1);
-				}
+				indices.emplace_back((uint32)verts.size() - 3);
+				indices.emplace_back((uint32)verts.size() - 2);
+				indices.emplace_back((uint32)verts.size() - 1);
 			}
 		}
 	}
@@ -722,8 +696,8 @@ bool Map::LoadV2(FILE *f) {
 	uint32 ter_vert_count = ((quads_per_tile + 1) * (quads_per_tile + 1));
 	std::vector<uint8> flags;
 	std::vector<float> floats;
-	flags.resize(ter_quad_count);
-	floats.resize(ter_vert_count);
+	flags.reserve(ter_quad_count);
+	floats.reserve(ter_vert_count);
 	for (uint32 i = 0; i < tile_count; ++i) {
 		bool flat;
 		flat = *(bool*)buf;
@@ -759,18 +733,18 @@ bool Map::LoadV2(FILE *f) {
 			float QuadVertex4Z = QuadVertex1Z;
 
 			uint32 current_vert = (uint32)verts.size() + 3;
-			verts.push_back(glm::vec3(QuadVertex1X, QuadVertex1Y, QuadVertex1Z));
-			verts.push_back(glm::vec3(QuadVertex2X, QuadVertex2Y, QuadVertex2Z));
-			verts.push_back(glm::vec3(QuadVertex3X, QuadVertex3Y, QuadVertex3Z));
-			verts.push_back(glm::vec3(QuadVertex4X, QuadVertex4Y, QuadVertex4Z));
+			verts.emplace_back(QuadVertex1X, QuadVertex1Y, QuadVertex1Z);
+			verts.emplace_back(QuadVertex2X, QuadVertex2Y, QuadVertex2Z);
+			verts.emplace_back(QuadVertex3X, QuadVertex3Y, QuadVertex3Z);
+			verts.emplace_back(QuadVertex4X, QuadVertex4Y, QuadVertex4Z);
 
-			indices.push_back(current_vert);
-			indices.push_back(current_vert - 2);
-			indices.push_back(current_vert - 1);
+			indices.emplace_back(current_vert);
+			indices.emplace_back(current_vert - 2);
+			indices.emplace_back(current_vert - 1);
 
-			indices.push_back(current_vert);
-			indices.push_back(current_vert - 3);
-			indices.push_back(current_vert - 2);
+			indices.emplace_back(current_vert);
+			indices.emplace_back(current_vert - 3);
+			indices.emplace_back(current_vert - 2);
 		}
 		else {
 			//read flags
@@ -825,7 +799,7 @@ bool Map::LoadV2(FILE *f) {
 				}
 				else {
 					i1 = (uint32)verts.size();
-					verts.push_back(glm::vec3(QuadVertex1X, QuadVertex1Y, QuadVertex1Z));
+					verts.emplace_back(QuadVertex1X, QuadVertex1Y, QuadVertex1Z);
 					cur_verts[std::make_tuple(QuadVertex1X, QuadVertex1Y, QuadVertex1Z)] = i1;
 				}
 
@@ -836,7 +810,7 @@ bool Map::LoadV2(FILE *f) {
 				}
 				else {
 					i2 = (uint32)verts.size();
-					verts.push_back(glm::vec3(QuadVertex2X, QuadVertex2Y, QuadVertex2Z));
+					verts.emplace_back(QuadVertex2X, QuadVertex2Y, QuadVertex2Z);
 					cur_verts[std::make_tuple(QuadVertex2X, QuadVertex2Y, QuadVertex2Z)] = i2;
 				}
 
@@ -847,7 +821,7 @@ bool Map::LoadV2(FILE *f) {
 				}
 				else {
 					i3 = (uint32)verts.size();
-					verts.push_back(glm::vec3(QuadVertex3X, QuadVertex3Y, QuadVertex3Z));
+					verts.emplace_back(QuadVertex3X, QuadVertex3Y, QuadVertex3Z);
 					cur_verts[std::make_tuple(QuadVertex3X, QuadVertex3Y, QuadVertex3Z)] = i3;
 				}
 
@@ -858,17 +832,17 @@ bool Map::LoadV2(FILE *f) {
 				}
 				else {
 					i4 = (uint32)verts.size();
-					verts.push_back(glm::vec3(QuadVertex4X, QuadVertex4Y, QuadVertex4Z));
+					verts.emplace_back(QuadVertex4X, QuadVertex4Y, QuadVertex4Z);
 					cur_verts[std::make_tuple(QuadVertex4X, QuadVertex4Y, QuadVertex4Z)] = i4;
 				}
 
-				indices.push_back(i4);
-				indices.push_back(i2);
-				indices.push_back(i3);
+				indices.emplace_back(i4);
+				indices.emplace_back(i2);
+				indices.emplace_back(i3);
 
-				indices.push_back(i4);
-				indices.push_back(i1);
-				indices.push_back(i2);
+				indices.emplace_back(i4);
+				indices.emplace_back(i1);
+				indices.emplace_back(i2);
 			}
 		}
 	}
