@@ -1184,7 +1184,7 @@ void ClientList::ZoneBootup(ZoneServer* zs) {
 				iterator.GetData()->EnterWorld(false);
 			}
 			else if (iterator.GetData()->WaitingForBootup() == zs->GetID()) {
-				iterator.GetData()->ZoneUnavail();
+				iterator.GetData()->TellClientZoneUnavailable();
 			}
 		}
 		iterator.Advance();

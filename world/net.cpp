@@ -426,7 +426,7 @@ int main(int argc, char** argv) {
 			//structures and opcodes for that patch.
 			struct in_addr	in;
 			in.s_addr = eqs->GetRemoteIP();
-			Log.Out(Logs::General, Logs::World_Server, "New connection from %s:%d", inet_ntoa(in),ntohs(eqs->GetRemotePort()));
+			Log.Out(Logs::Detail, Logs::World_Server, "New connection from IP %s:%d", inet_ntoa(in),ntohs(eqs->GetRemotePort()));
 			stream_identifier.AddStream(eqs);	//takes the stream
 		}
 
@@ -441,9 +441,9 @@ int main(int argc, char** argv) {
 			struct in_addr	in;
 			in.s_addr = eqsi->GetRemoteIP();
 			if (RuleB(World, UseBannedIPsTable)){ //Lieka: Check to see if we have the responsibility for blocking IPs.
-				Log.Out(Logs::General, Logs::World_Server, "Checking inbound connection %s against BannedIPs table", inet_ntoa(in));
+				Log.Out(Logs::Detail, Logs::World_Server, "Checking inbound connection %s against BannedIPs table", inet_ntoa(in));
 				if (!database.CheckBannedIPs(inet_ntoa(in))){ //Lieka: Check inbound IP against banned IP table.
-					Log.Out(Logs::General, Logs::World_Server, "Connection %s PASSED banned IPs check. Processing connection.", inet_ntoa(in));
+					Log.Out(Logs::Detail, Logs::World_Server, "Connection %s PASSED banned IPs check. Processing connection.", inet_ntoa(in));
 					auto client = new Client(eqsi);
 					// @merth: client->zoneattempt=0;
 					client_list.Add(client);
@@ -453,7 +453,7 @@ int main(int argc, char** argv) {
 				}
 			}
 			if (!RuleB(World, UseBannedIPsTable)){
-					Log.Out(Logs::General, Logs::World_Server, "New connection from %s:%d, processing connection", inet_ntoa(in), ntohs(eqsi->GetRemotePort()));
+					Log.Out(Logs::Detail, Logs::World_Server, "New connection from %s:%d, processing connection", inet_ntoa(in), ntohs(eqsi->GetRemotePort()));
 					auto client = new Client(eqsi);
 					// @merth: client->zoneattempt=0;
 					client_list.Add(client);
@@ -465,7 +465,26 @@ int main(int argc, char** argv) {
 		while ((tcpc = tcps.NewQueuePop())) {
 			struct in_addr in;
 			in.s_addr = tcpc->GetrIP();
-			Log.Out(Logs::General, Logs::World_Server, "New TCP connection from %s:%d", inet_ntoa(in),tcpc->GetrPort());
+			
+			/* World - Tell what is being connected */
+			if (tcpc->GetMode() == EmuTCPConnection::modePacket) {
+				if (tcpc->GetPacketMode() == EmuTCPConnection::packetModeZone) {
+					Log.Out(Logs::General, Logs::World_Server, "New Zone Server from %s:%d", inet_ntoa(in), tcpc->GetrPort());
+				}
+				else if (tcpc->GetPacketMode() == EmuTCPConnection::packetModeLauncher) {
+					Log.Out(Logs::General, Logs::World_Server, "New Launcher from %s:%d", inet_ntoa(in), tcpc->GetrPort());
+				}
+				else if (tcpc->GetPacketMode() == EmuTCPConnection::packetModeUCS) {
+					Log.Out(Logs::General, Logs::World_Server, "New UCS Connection from %s:%d", inet_ntoa(in), tcpc->GetrPort());
+				}
+				else if (tcpc->GetPacketMode() == EmuTCPConnection::packetModeQueryServ) {
+					Log.Out(Logs::General, Logs::World_Server, "New QS Connection from %s:%d", inet_ntoa(in), tcpc->GetrPort());
+				}
+				else {
+					Log.Out(Logs::General, Logs::World_Server, "Unsupported packet mode from %s:%d", inet_ntoa(in), tcpc->GetrPort());
+				}
+			}
+
 			console_list.Add(new Console(tcpc));
 		}
 

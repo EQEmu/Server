@@ -98,12 +98,12 @@ Client::Client(EQStreamInterface* ieqs)
 
 	autobootup_timeout.Disable();
 	connect.Disable();
-	seencharsel = false;
+	seen_character_select = false;
 	cle = 0;
-	zoneID = 0;
+	zone_id = 0;
 	char_name[0] = 0;
 	charid = 0;
-	pwaitingforbootup = 0;
+	zone_waiting_for_bootup = 0;
 	StartInTutorial = false;
 
 	m_ClientVersion = eqs->ClientVersion();
@@ -113,7 +113,7 @@ Client::Client(EQStreamInterface* ieqs)
 }
 
 Client::~Client() {
-	if (RunLoops && cle && zoneID == 0)
+	if (RunLoops && cle && zone_id == 0)
 		cle->SetOnline(CLE_Status_Offline);
 
 	numclients--;
@@ -152,7 +152,7 @@ void Client::SendLogServer()
 void Client::SendEnterWorld(std::string name)
 {
 	char char_name[64] = { 0 };
-	if (pZoning && database.GetLiveChar(GetAccountID(), char_name)) {
+	if (is_player_zoning && database.GetLiveChar(GetAccountID(), char_name)) {
 		if(database.GetAccountIDByChar(char_name) != GetAccountID()) {
 			eqs->Close();
 			return;
@@ -192,7 +192,7 @@ void Client::SendCharInfo() {
 		SendMembershipSettings();
 	}
 
-	seencharsel = true;
+	seen_character_select = true;
 
 	// Send OP_SendCharInfo
 	EQApplicationPacket *outapp = nullptr;
@@ -411,7 +411,7 @@ bool Client::HandleSendLoginInfoPacket(const EQApplicationPacket *app) {
 		return false;
 	}
 
-	pZoning=(li->zoning==1);
+	is_player_zoning=(li->zoning==1);
 
 #ifdef IPBASED_AUTH_HACK
 	struct in_addr tmpip;
@@ -436,32 +436,33 @@ bool Client::HandleSendLoginInfoPacket(const EQApplicationPacket *app) {
 #ifdef IPBASED_AUTH_HACK
 	if ((cle = zoneserver_list.CheckAuth(inet_ntoa(tmpip), password)))
 #else
-	if (loginserverlist.Connected() == false && !pZoning) {
-		Log.Out(Logs::Detail, Logs::World_Server,"Error: Login server login while not connected to login server.");
+	if (loginserverlist.Connected() == false && !is_player_zoning) {
+		Log.Out(Logs::General, Logs::World_Server,"Error: Login server login while not connected to login server.");
 		return false;
 	}
 	if (((cle = client_list.CheckAuth(name, password)) || (cle = client_list.CheckAuth(id, password))))
 #endif
 	{
 		if (cle->AccountID() == 0 || (!minilogin && cle->LSID()==0)) {
-			Log.Out(Logs::Detail, Logs::World_Server,"ID is 0. Is this server connected to minilogin?");
+			Log.Out(Logs::General, Logs::World_Server,"ID is 0. Is this server connected to minilogin?");
 			if(!minilogin)
-				Log.Out(Logs::Detail, Logs::World_Server,"If so you forget the minilogin variable...");
+				Log.Out(Logs::General, Logs::World_Server,"If so you forget the minilogin variable...");
 			else
-				Log.Out(Logs::Detail, Logs::World_Server,"Could not find a minilogin account, verify ip address logging into minilogin is the same that is in your account table.");
+				Log.Out(Logs::General, Logs::World_Server,"Could not find a minilogin account, verify ip address logging into minilogin is the same that is in your account table.");
 			return false;
 		}
 
 		cle->SetOnline();
 
-		Log.Out(Logs::Detail, Logs::World_Server,"Logged in. Mode=%s",pZoning ? "(Zoning)" : "(CharSel)");
-
 		if(minilogin){
 			WorldConfig::DisableStats();
-			Log.Out(Logs::Detail, Logs::World_Server,"MiniLogin Account #%d",cle->AccountID());
+			Log.Out(Logs::General, Logs::World_Server, "MiniLogin Account #%d",cle->AccountID());
 		}
 		else {
-			Log.Out(Logs::Detail, Logs::World_Server,"LS Account #%d",cle->LSID());
+			if (!is_player_zoning) {
+				Log.Out(Logs::General, Logs::World_Server, 
+					"Account (%s) Logging in :: LSID: %d ", cle->AccountName(), cle->LSID());
+			}
 		}
 
 		const WorldConfig *Config=WorldConfig::get();
@@ -479,13 +480,14 @@ bool Client::HandleSendLoginInfoPacket(const EQApplicationPacket *app) {
 			safe_delete(pack);
 		}
 
-		if (!pZoning)
+		if (!is_player_zoning)
 			SendGuildList();
+
 		SendLogServer();
 		SendApproveWorld();
 		SendEnterWorld(cle->name());
 		SendPostEnterWorld();
-		if (!pZoning) {
+		if (!is_player_zoning) {
 			SendExpansionInfo();
 			SendCharInfo();
 			database.LoginIP(cle->AccountID(), long2ip(GetIP()).c_str());
@@ -729,7 +731,7 @@ bool Client::HandleEnterWorldPacket(const EQApplicationPacket *app) {
 
 	EQApplicationPacket *outapp;
 	uint32 tmpaccid = 0;
-	charid = database.GetCharacterInfo(char_name, &tmpaccid, &zoneID, &instanceID);
+	charid = database.GetCharacterInfo(char_name, &tmpaccid, &zone_id, &instance_id);
 	if (charid == 0 || tmpaccid != GetAccountID()) {
 		Log.Out(Logs::Detail, Logs::World_Server,"Could not get CharInfo for '%s'",char_name);
 		eqs->Close();
@@ -745,7 +747,7 @@ bool Client::HandleEnterWorldPacket(const EQApplicationPacket *app) {
 
 	// This can probably be moved outside and have another method return requested info (don't forget to remove the #include "../common/shareddb.h" above)
 	// (This is a literal translation of the original process..I don't see why it can't be changed to a single-target query over account iteration)
-	if (!pZoning) {
+	if (!is_player_zoning) {
 		size_t character_limit = EQEmu::constants::Lookup(eqs->ClientVersion())->CharacterCreationLimit;
 		if (character_limit > EQEmu::constants::CharacterCreationMax) { character_limit = EQEmu::constants::CharacterCreationMax; }
 		if (eqs->ClientVersion() == EQEmu::versions::ClientVersion::Titanium) { character_limit = 8; }
@@ -777,7 +779,7 @@ bool Client::HandleEnterWorldPacket(const EQApplicationPacket *app) {
 			}
 
 			if (home_enabled) {
-				zoneID = database.MoveCharacterToBind(charid, 4);
+				zone_id = database.MoveCharacterToBind(charid, 4);
 			}
 			else {
 				Log.Out(Logs::Detail, Logs::World_Server, "'%s' is trying to go home before they're able...", char_name);
@@ -800,8 +802,8 @@ bool Client::HandleEnterWorldPacket(const EQApplicationPacket *app) {
 			}
 
 			if (tutorial_enabled) {
-				zoneID = RuleI(World, TutorialZoneID);
-				database.MoveCharacterToZone(charid, database.GetZoneName(zoneID));
+				zone_id = RuleI(World, TutorialZoneID);
+				database.MoveCharacterToZone(charid, database.GetZoneName(zone_id));
 			}
 			else {
 				Log.Out(Logs::Detail, Logs::World_Server, "'%s' is trying to go to tutorial but are not allowed...", char_name);
@@ -812,30 +814,30 @@ bool Client::HandleEnterWorldPacket(const EQApplicationPacket *app) {
 		}
 	}
 
-	if (zoneID == 0 || !database.GetZoneName(zoneID)) {
+	if (zone_id == 0 || !database.GetZoneName(zone_id)) {
 		// This is to save people in an invalid zone, once it's removed from the DB
 		database.MoveCharacterToZone(charid, "arena");
-		Log.Out(Logs::Detail, Logs::World_Server, "Zone not found in database zone_id=%i, moveing char to arena character:%s", zoneID, char_name);
+		Log.Out(Logs::Detail, Logs::World_Server, "Zone not found in database zone_id=%i, moveing char to arena character:%s", zone_id, char_name);
 	}
 
-	if(instanceID > 0)
+	if(instance_id > 0)
 	{
-		if(!database.VerifyInstanceAlive(instanceID, GetCharID()))
+		if(!database.VerifyInstanceAlive(instance_id, GetCharID()))
 		{
-			zoneID = database.MoveCharacterToBind(charid);
-			instanceID = 0;
+			zone_id = database.MoveCharacterToBind(charid);
+			instance_id = 0;
 		}
 		else
 		{
-			if(!database.VerifyZoneInstance(zoneID, instanceID))
+			if(!database.VerifyZoneInstance(zone_id, instance_id))
 			{
-				zoneID = database.MoveCharacterToBind(charid);
-				instanceID = 0;
+				zone_id = database.MoveCharacterToBind(charid);
+				instance_id = 0;
 			}
 		}
 	}
 
-	if(!pZoning) {
+	if(!is_player_zoning) {
 		database.SetGroupID(char_name, 0, charid);
 		database.SetLoginFlags(charid, false, false, 1);
 	}
@@ -1058,7 +1060,7 @@ bool Client::Process() {
 
 	if (autobootup_timeout.Check()) {
 		Log.Out(Logs::General, Logs::World_Server, "Zone bootup timer expired, bootup failed or too slow.");
-		ZoneUnavail();
+		TellClientZoneUnavailable();
 	}
 	if(connect.Check()){
 		SendGuildList();// Send OPCode: OP_GuildsList
@@ -1099,63 +1101,63 @@ bool Client::Process() {
 }
 
 void Client::EnterWorld(bool TryBootup) {
-	if (zoneID == 0)
+	if (zone_id == 0)
 		return;
 
-	ZoneServer* zs = nullptr;
-	if(instanceID > 0)
+	ZoneServer* zone_server = nullptr;
+	if(instance_id > 0)
 	{
-		if(database.VerifyInstanceAlive(instanceID, GetCharID()))
+		if(database.VerifyInstanceAlive(instance_id, GetCharID()))
 		{
-			if(database.VerifyZoneInstance(zoneID, instanceID))
+			if(database.VerifyZoneInstance(zone_id, instance_id))
 			{
-				zs = zoneserver_list.FindByInstanceID(instanceID);
+				zone_server = zoneserver_list.FindByInstanceID(instance_id);
 			}
 			else
 			{
-				instanceID = 0;
-				zs = nullptr;
+				instance_id = 0;
+				zone_server = nullptr;
 				database.MoveCharacterToBind(GetCharID());
-				ZoneUnavail();
+				TellClientZoneUnavailable();
 				return;
 			}
 		}
 		else
 		{
-			instanceID = 0;
-			zs = nullptr;
+			instance_id = 0;
+			zone_server = nullptr;
 			database.MoveCharacterToBind(GetCharID());
-			ZoneUnavail();
+			TellClientZoneUnavailable();
 			return;
 		}
 	}
 	else
-		zs = zoneserver_list.FindByZoneID(zoneID);
+		zone_server = zoneserver_list.FindByZoneID(zone_id);
 
 
-	const char *zone_name=database.GetZoneName(zoneID, true);
-	if (zs) {
+	const char *zone_name = database.GetZoneName(zone_id, true);
+	if (zone_server) {
 		// warn the world we're comming, so it knows not to shutdown
-		zs->IncomingClient(this);
+		zone_server->IncomingClient(this);
 	}
 	else {
 		if (TryBootup) {
-			Log.Out(Logs::Detail, Logs::World_Server,"Attempting autobootup of %s (%d:%d)",zone_name,zoneID,instanceID);
+			Log.Out(Logs::General, Logs::World_Server, "Attempting autobootup of %s (%d:%d)", zone_name, zone_id, instance_id);
 			autobootup_timeout.Start();
-			pwaitingforbootup = zoneserver_list.TriggerBootup(zoneID, instanceID);
-			if (pwaitingforbootup == 0) {
-				Log.Out(Logs::Detail, Logs::World_Server,"No zoneserver available to boot up.");
-				ZoneUnavail();
+			zone_waiting_for_bootup = zoneserver_list.TriggerBootup(zone_id, instance_id);
+			if (zone_waiting_for_bootup == 0) {
+				Log.Out(Logs::General, Logs::World_Server, "No zoneserver available to boot up.");
+				TellClientZoneUnavailable();
 			}
 			return;
 		}
 		else {
-			Log.Out(Logs::Detail, Logs::World_Server,"Requested zone %s is not running.",zone_name);
-			ZoneUnavail();
+			Log.Out(Logs::General, Logs::World_Server, "Requested zone %s is not running.", zone_name);
+			TellClientZoneUnavailable();
 			return;
 		}
 	}
-	pwaitingforbootup = 0;
+	zone_waiting_for_bootup = 0;
 
 	if(!cle) {
 		return;
@@ -1163,12 +1165,20 @@ void Client::EnterWorld(bool TryBootup) {
 
 	cle->SetChar(charid, char_name);
 	database.UpdateLiveChar(char_name, GetAccountID());
-	Log.Out(Logs::Detail, Logs::World_Server,"%s %s (%d:%d)",seencharsel ? "Entering zone" : "Zoning to",zone_name,zoneID,instanceID);
 
-	if (seencharsel) {
-		if (GetAdmin() < 80 && zoneserver_list.IsZoneLocked(zoneID)) {
-			Log.Out(Logs::Detail, Logs::World_Server,"Enter world failed. Zone is locked.");
-			ZoneUnavail();
+	Log.Out(Logs::General, Logs::World_Server, 
+		"(%s) %s %s (Zone ID %d: Instance ID: %d) ", 
+		char_name,
+		(seen_character_select ? "Zoning from character select" : "Zoning to"), 
+		zone_name, 
+		zone_id, 
+		instance_id
+	);
+
+	if (seen_character_select) {
+		if (GetAdmin() < 80 && zoneserver_list.IsZoneLocked(zone_id)) {
+			Log.Out(Logs::General, Logs::World_Server, "Enter world failed. Zone is locked.");
+			TellClientZoneUnavailable();
 			return;
 		}
 
@@ -1180,7 +1190,7 @@ void Client::EnterWorld(bool TryBootup) {
 		WorldToZone_Struct* wtz = (WorldToZone_Struct*) pack->pBuffer;
 		wtz->account_id = GetAccountID();
 		wtz->response = 0;
-		zs->SendPacket(pack);
+		zone_server->SendPacket(pack);
 		delete pack;
 	}
 	else {	// if they havent seen character select screen, we can assume this is a zone
@@ -1192,13 +1202,13 @@ void Client::EnterWorld(bool TryBootup) {
 void Client::Clearance(int8 response)
 {
 	ZoneServer* zs = nullptr;
-	if(instanceID > 0)
+	if(instance_id > 0)
 	{
-		zs = zoneserver_list.FindByInstanceID(instanceID);
+		zs = zoneserver_list.FindByInstanceID(instance_id);
 	}
 	else
 	{
-		zs = zoneserver_list.FindByZoneID(zoneID);
+		zs = zoneserver_list.FindByZoneID(zone_id);
 	}
 
 	if(zs == 0 || response == -1 || response == 0)
@@ -1210,7 +1220,7 @@ void Client::Clearance(int8 response)
 			Log.Out(Logs::Detail, Logs::World_Server, "Invalid response %d in Client::Clearance", response);
 		}
 
-		ZoneUnavail();
+		TellClientZoneUnavailable();
 		return;
 	}
 
@@ -1218,20 +1228,20 @@ void Client::Clearance(int8 response)
 
 	if (zs->GetCAddress() == nullptr) {
 		Log.Out(Logs::Detail, Logs::World_Server, "Unable to do zs->GetCAddress() in Client::Clearance!!");
-		ZoneUnavail();
+		TellClientZoneUnavailable();
 		return;
 	}
 
-	if (zoneID == 0) {
+	if (zone_id == 0) {
 		Log.Out(Logs::Detail, Logs::World_Server, "zoneID is nullptr in Client::Clearance!!");
-		ZoneUnavail();
+		TellClientZoneUnavailable();
 		return;
 	}
 
-	const char* zonename = database.GetZoneName(zoneID);
+	const char* zonename = database.GetZoneName(zone_id);
 	if (zonename == 0) {
 		Log.Out(Logs::Detail, Logs::World_Server, "zonename is nullptr in Client::Clearance!!");
-		ZoneUnavail();
+		TellClientZoneUnavailable();
 		return;
 	}
 
@@ -1270,7 +1280,7 @@ void Client::Clearance(int8 response)
 
 	strcpy(zsi->ip, zs_addr);
 	zsi->port =zs->GetCPort();
-	Log.Out(Logs::Detail, Logs::World_Server,"Sending client to zone %s (%d:%d) at %s:%d",zonename,zoneID,instanceID,zsi->ip,zsi->port);
+	Log.Out(Logs::Detail, Logs::World_Server,"Sending client to zone %s (%d:%d) at %s:%d",zonename,zone_id,instance_id,zsi->ip,zsi->port);
 	QueuePacket(outapp);
 	safe_delete(outapp);
 
@@ -1278,17 +1288,17 @@ void Client::Clearance(int8 response)
 		cle->SetOnline(CLE_Status_Zoning);
 }
 
-void Client::ZoneUnavail() {
+void Client::TellClientZoneUnavailable() {
 	auto outapp = new EQApplicationPacket(OP_ZoneUnavail, sizeof(ZoneUnavail_Struct));
 	ZoneUnavail_Struct* ua = (ZoneUnavail_Struct*)outapp->pBuffer;
-	const char* zonename = database.GetZoneName(zoneID);
+	const char* zonename = database.GetZoneName(zone_id);
 	if (zonename)
 		strcpy(ua->zonename, zonename);
 	QueuePacket(outapp);
 	delete outapp;
 
-	zoneID = 0;
-	pwaitingforbootup = 0;
+	zone_id = 0;
+	zone_waiting_for_bootup = 0;
 	autobootup_timeout.Disable();
 }
 

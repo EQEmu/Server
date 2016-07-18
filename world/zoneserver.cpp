@@ -187,12 +187,14 @@ bool ZoneServer::Process() {
 				if (pack->opcode == ServerOP_ZAAuth && pack->size == 16) {
 					uint8 tmppass[16];
 					MD5::Generate((const uchar*) WorldConfig::get()->SharedKey.c_str(), WorldConfig::get()->SharedKey.length(), tmppass);
-					if (memcmp(pack->pBuffer, tmppass, 16) == 0)
+					if (memcmp(pack->pBuffer, tmppass, 16) == 0) {
 						is_authenticated = true;
+						Log.Out(Logs::Detail, Logs::World_Server, "Zone process connected.");
+					}
 					else {
 						struct in_addr in;
 						in.s_addr = GetIP();
-						Log.Out(Logs::Detail, Logs::World_Server,"Zone authorization failed.");
+						Log.Out(Logs::General, Logs::Error, "Zone authorization failed.");
 						auto pack = new ServerPacket(ServerOP_ZAAuthFailed);
 						SendPacket(pack);
 						safe_delete(pack);
@@ -203,7 +205,7 @@ bool ZoneServer::Process() {
 				else {
 					struct in_addr in;
 					in.s_addr = GetIP();
-					Log.Out(Logs::Detail, Logs::World_Server,"Zone authorization failed.");
+					Log.Out(Logs::General, Logs::Error, "Zone authorization failed.");
 					auto pack = new ServerPacket(ServerOP_ZAAuthFailed);
 					SendPacket(pack);
 					safe_delete(pack);
@@ -213,7 +215,7 @@ bool ZoneServer::Process() {
 			}
 			else
 			{
-				Log.Out(Logs::Detail, Logs::World_Server,"**WARNING** You have not configured a world shared key in your config file. You should add a <key>STRING</key> element to your <world> element to prevent unauthroized zone access.");
+				Log.Out(Logs::General, Logs::Error, "**WARNING** You have not configured a world shared key in your config file. You should add a <key>STRING</key> element to your <world> element to prevent unauthroized zone access.");
 				is_authenticated = true;
 			}
 		}
