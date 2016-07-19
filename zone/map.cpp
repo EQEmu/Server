@@ -360,13 +360,13 @@ bool Map::LoadV2(FILE *f) {
 	}
 
 	std::vector<char> data;
-	data.reserve(data_size);
+	data.resize(data_size);
 	if (fread(&data[0], data_size, 1, f) != 1) {
 		return false;
 	}
 
 	std::vector<char> buffer;
-	buffer.reserve(buffer_size);
+	buffer.resize(buffer_size);
 	uint32 v = InflateData(&data[0], data_size, &buffer[0], buffer_size);
 
 	char *buf = &buffer[0];
@@ -486,7 +486,7 @@ bool Map::LoadV2(FILE *f) {
 			p.v2 = v2;
 			p.v3 = v3;
 			p.vis = vis;
-			me->polys[j] = p;
+			me->polys.push_back(p);
 		}
 
 		models[name] = std::move(me);
@@ -696,8 +696,8 @@ bool Map::LoadV2(FILE *f) {
 	uint32 ter_vert_count = ((quads_per_tile + 1) * (quads_per_tile + 1));
 	std::vector<uint8> flags;
 	std::vector<float> floats;
-	flags.reserve(ter_quad_count);
-	floats.reserve(ter_vert_count);
+	flags.resize(ter_quad_count);
+	floats.resize(ter_vert_count);
 	for (uint32 i = 0; i < tile_count; ++i) {
 		bool flat;
 		flat = *(bool*)buf;
