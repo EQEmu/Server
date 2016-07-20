@@ -295,6 +295,7 @@ sub show_menu_prompt {
 		13 => \&do_windows_login_server_setup,
 		14 => \&remove_duplicate_rule_values,
 		15 => \&fetch_utility_scripts,
+		18 => \&fetch_latest_windows_binaries_bots,
 		19 => \&do_bots_db_schema_drop,
         20 => \&do_update_self,
         0 => \&script_exit,
@@ -374,6 +375,7 @@ return <<EO_MENU;
  13) [Windows Server Loginserver Setup] :: Download and install Windows Loginserver
  14) [Remove Duplicate Rule Values] :: Looks for redundant rule_values entries and removes them
  15) [Fetch Utility Scripts] :: Fetches server management utility scripts
+ 18) [Windows Server Build Bots] :: Download Latest and Stable Server Build with Bots
  19) [EQEmu DB Drop Bots Schema] :: Remove Bots schema and return database to normal state
  20) [Update the updater] Force update this script (Redownload)
  0) Exit
@@ -624,6 +626,29 @@ sub fetch_latest_windows_binaries{
 	print "\n --- Fetched Latest Windows Binaries... --- \n";
 	print "\n --- Extracting... --- \n";
 	unzip('updates_staged/master_windows_build.zip', 'updates_staged/binaries/');
+	my @files;
+	my $start_dir = "updates_staged/binaries";
+	find( 
+		sub { push @files, $File::Find::name unless -d; }, 
+		$start_dir
+	);
+	for my $file (@files) {
+		$dest_file = $file;
+		$dest_file =~s/updates_staged\/binaries\///g;
+		print "Installing :: " . $dest_file . "\n";
+		copy_file($file, $dest_file);
+	}
+	print "\n --- Done... --- \n";
+	
+	rmtree('updates_staged');
+}
+
+sub fetch_latest_windows_binaries_bots{
+	print "\n --- Fetching Latest Windows Binaries with Bots... --- \n";
+	get_remote_file("https://raw.githubusercontent.com/Akkadius/EQEmuInstall/master/master_windows_build_bots.zip", "updates_staged/master_windows_build_bots.zip", 1);
+	print "\n --- Fetched Latest Windows Binaries with Bots... --- \n";
+	print "\n --- Extracting... --- \n";
+	unzip('updates_staged/master_windows_build_bots.zip', 'updates_staged/binaries/');
 	my @files;
 	my $start_dir = "updates_staged/binaries";
 	find( 
