@@ -24,6 +24,7 @@
 #include "../common/rulesys.h"
 #include "../common/skills.h"
 #include "../common/spdat.h"
+#include "../common/data_verification.h"
 
 #include "quest_parser_collection.h"
 #include "string_ids.h"
@@ -6731,9 +6732,11 @@ void Mob::CalcSpellPowerDistanceMod(uint16 spell_id, float range, Mob* caster)
 		else
 			distance = sqrt(range);
 
+		distance = EQEmu::Clamp(distance, spells[spell_id].min_dist, spells[spell_id].max_dist);
+
 		float dm_range = spells[spell_id].max_dist - spells[spell_id].min_dist;
 		float dm_mod_interval = spells[spell_id].max_dist_mod - spells[spell_id].min_dist_mod;
-		float dist_from_min = distance -  spells[spell_id].min_dist;
+		float dist_from_min = distance - spells[spell_id].min_dist;
 		float mod = spells[spell_id].min_dist_mod + (dist_from_min * (dm_mod_interval/dm_range));
 		mod *= 100.0f;
 
