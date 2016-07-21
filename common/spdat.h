@@ -736,7 +736,7 @@ struct SPDat_Spell_Struct
 /* 181 */	//int pvp_duration; // buffdurationformula for PvP -- PVP_DURATION
 /* 182 */	//int pvp_duration_cap; // buffduration for PvP -- PVP_DURATION_CAP
 /* 183 */	//int pcnpc_only_flag; // valid values are 0, 1, and 2 -- PCNPC_ONLY_FLAG
-/* 184 */	//bool cast_not_standing; // this is checked in the client's EQ_Spell::IsCastWhileInvisSpell -- CAST_NOT_STANDING
+/* 184 */	//bool cast_not_standing; // this is checked in the client's EQ_Spell::IsCastWhileInvisSpell, this also blocks SE_InterruptCasting from affecting this spell -- CAST_NOT_STANDING
 /* 185 */	bool can_mgb; // 0=no, -1 or 1 = yes -- CAN_MGB
 /* 186 */	int dispel_flag; // -- NO_DISPELL
 /* 187 */	//int npc_category; // -- NPC_MEM_CATEGORY
