@@ -2996,6 +2996,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 			case SE_PetMeleeMitigation:
 			case SE_SkillProc:
 			case SE_SkillProcSuccess:
+			case SE_SpellResistReduction:
 			{
 				break;
 			}
