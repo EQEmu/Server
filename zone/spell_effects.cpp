@@ -3145,7 +3145,7 @@ snare has both of them negative, yet their range should work the same:
 
 		case 107:
 		{
-			int ticdif = CalcBuffDuration_formula(caster_level, spells[spell_id].buffdurationformula, spells[spell_id].buffduration) - (ticsremaining - 1);
+			int ticdif = CalcBuffDuration_formula(caster_level, spells[spell_id].buffdurationformula, spells[spell_id].buffduration) - std::max((ticsremaining - 1), 0);
 			if (ticdif < 0)
 				ticdif = 0;
 			result = updownsign * (ubase - ticdif);
@@ -3154,7 +3154,7 @@ snare has both of them negative, yet their range should work the same:
 		}
 		case 108:
 		{
-			int ticdif = CalcBuffDuration_formula(caster_level, spells[spell_id].buffdurationformula, spells[spell_id].buffduration) - (ticsremaining - 1);
+			int ticdif = CalcBuffDuration_formula(caster_level, spells[spell_id].buffdurationformula, spells[spell_id].buffduration) - std::max((ticsremaining - 1), 0);
 			if (ticdif < 0)
 				ticdif = 0;
 			result = updownsign * (ubase - (2 * ticdif));
@@ -3207,7 +3207,7 @@ snare has both of them negative, yet their range should work the same:
 			result = ubase + (caster_level / 8); break;
 		case 120:
 		{
-			int ticdif = CalcBuffDuration_formula(caster_level, spells[spell_id].buffdurationformula, spells[spell_id].buffduration) - (ticsremaining - 1);
+			int ticdif = CalcBuffDuration_formula(caster_level, spells[spell_id].buffdurationformula, spells[spell_id].buffduration) - std::max((ticsremaining - 1), 0);
 			if (ticdif < 0)
 				ticdif = 0;
 			result = updownsign * (ubase - (5 * ticdif));
@@ -3218,7 +3218,7 @@ snare has both of them negative, yet their range should work the same:
 			result = ubase + (caster_level / 3); break;
 		case 122:
 		{
-			int ticdif = CalcBuffDuration_formula(caster_level, spells[spell_id].buffdurationformula, spells[spell_id].buffduration) - (ticsremaining - 1);
+			int ticdif = CalcBuffDuration_formula(caster_level, spells[spell_id].buffdurationformula, spells[spell_id].buffduration) - std::max((ticsremaining - 1), 0);
 			if(ticdif < 0)
 				ticdif = 0;
 
@@ -3330,7 +3330,7 @@ snare has both of them negative, yet their range should work the same:
 			{
 				// These work like splurt, accept instead of being hard coded to 12, it is formula - 1000.
 				// Formula 1999 seems to have a slightly different effect, so is not included here
-				int ticdif = CalcBuffDuration_formula(caster_level, spells[spell_id].buffdurationformula, spells[spell_id].buffduration) - (ticsremaining - 1);
+				int ticdif = CalcBuffDuration_formula(caster_level, spells[spell_id].buffdurationformula, spells[spell_id].buffduration) - std::max((ticsremaining - 1), 0);
 				if(ticdif < 0)
 					ticdif = 0;
 
