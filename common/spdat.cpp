@@ -1116,7 +1116,7 @@ bool IsCastWhileInvis(uint16 spell_id)
 	if (!IsValidSpell(spell_id))
 		return false;
 	const auto &spell = spells[spell_id];
-	if (spell.sneak)
+	if (spell.sneak || spell.cast_not_standing)
 		return true;
 	return false;
 }
