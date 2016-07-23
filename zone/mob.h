@@ -1277,6 +1277,7 @@ protected:
 	bool last_los_check;
 	bool pseudo_rooted;
 	bool endur_upkeep;
+	bool degenerating_effects; // true if we have a buff that needs to be recalced every tick
 
 	// Bind wound
 	Timer bindwound_timer;

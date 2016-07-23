@@ -425,6 +425,7 @@ Mob::Mob(const char* in_name,
 
 	emoteid = 0;
 	endur_upkeep = false;
+	degenerating_effects = false;
 	PrimaryAggro = false;
 	AssistAggro = false;
 	npc_assist_cap = 0;

@@ -3144,10 +3144,23 @@ snare has both of them negative, yet their range should work the same:
 			result = updownsign * (ubase + (caster_level * 4)); break;
 
 		case 107:
-			//Used on Reckless Strength, I think it should decay over time
-			result = updownsign * (ubase + (caster_level / 2)); break;
+		{
+			int ticdif = CalcBuffDuration_formula(caster_level, spells[spell_id].buffdurationformula, spells[spell_id].buffduration) - (ticsremaining - 1);
+			if (ticdif < 0)
+				ticdif = 0;
+			result = updownsign * (ubase - ticdif);
+			degenerating_effects = true;
+			break;
+		}
 		case 108:
-			result = updownsign * (ubase + (caster_level / 3)); break;
+		{
+			int ticdif = CalcBuffDuration_formula(caster_level, spells[spell_id].buffdurationformula, spells[spell_id].buffduration) - (ticsremaining - 1);
+			if (ticdif < 0)
+				ticdif = 0;
+			result = updownsign * (ubase - (2 * ticdif));
+			degenerating_effects = true;
+			break;
+		}
 		case 109:	// confirmed 2/6/04
 			result = updownsign * (ubase + (caster_level / 4)); break;
 
@@ -3192,16 +3205,25 @@ snare has both of them negative, yet their range should work the same:
 
 		case 119:	// confirmed 2/6/04
 			result = ubase + (caster_level / 8); break;
+		case 120:
+		{
+			int ticdif = CalcBuffDuration_formula(caster_level, spells[spell_id].buffdurationformula, spells[spell_id].buffduration) - (ticsremaining - 1);
+			if (ticdif < 0)
+				ticdif = 0;
+			result = updownsign * (ubase - (5 * ticdif));
+			degenerating_effects = true;
+			break;
+		}
 		case 121:	// corrected 2/6/04
 			result = ubase + (caster_level / 3); break;
 		case 122:
 		{
-			// May need to account for duration focus effects
-			int ticdif = spells[spell_id].buffduration - (ticsremaining - 1);
+			int ticdif = CalcBuffDuration_formula(caster_level, spells[spell_id].buffdurationformula, spells[spell_id].buffduration) - (ticsremaining - 1);
 			if(ticdif < 0)
 				ticdif = 0;
 
 			result = updownsign * (ubase - (12 * ticdif));
+			degenerating_effects = true;
 			break;
 		}
 		case 123:	// added 2/6/04
@@ -3308,11 +3330,12 @@ snare has both of them negative, yet their range should work the same:
 			{
 				// These work like splurt, accept instead of being hard coded to 12, it is formula - 1000.
 				// Formula 1999 seems to have a slightly different effect, so is not included here
-				int ticdif = spells[spell_id].buffduration - (ticsremaining - 1);
+				int ticdif = CalcBuffDuration_formula(caster_level, spells[spell_id].buffdurationformula, spells[spell_id].buffduration) - (ticsremaining - 1);
 				if(ticdif < 0)
 					ticdif = 0;
 
 				result = updownsign * (ubase - ((formula - 1000) * ticdif));
+				degenerating_effects = true;
 			}
 			else if((formula >= 2000) && (formula <= 2650))
 			{
@@ -3658,16 +3681,6 @@ void Mob::DoBuffTic(const Buffs_Struct &buff, int slot, Mob *caster)
 			if (IsClient() && (CastToClient()->ClientVersionBit() & EQEmu::versions::bit_SoDAndLater))
 				CastToClient()->LocateCorpse();
 		}
-		case SE_TotalHP: {
-			if (spell.formula[i] > 1000 && spell.formula[i] < 1999) {
-				// These formulas can affect Max HP each tick
-				// Maybe there is a more efficient way to recalculate this for just Max HP each tic...
-				// CalcBonuses();
-				CalcSpellBonuses(&spellbonuses);
-				CalcMaxHP();
-			}
-			break;
-		}
 
 		case SE_DistanceRemoval: {
 			if (spellbonuses.DistanceRemoval) {
@@ -3704,6 +3717,14 @@ void Mob::DoBuffTic(const Buffs_Struct &buff, int slot, Mob *caster)
 		if (!IsValidSpell(buff.spellid)) // if we faded we're no longer valid!
 			break;
 	}
+
+	/* Is this the best place for this?
+	 * Ideally we would only recalc spell bonuses
+	 * but we would also have to call all the Calc functions like Max HP
+	 * so lets just call the main CalcBonuses
+	 */
+	if (degenerating_effects)
+		CalcBonuses();
 }
 
 // removes the buff in the buff slot 'slot'
@@ -4139,6 +4160,8 @@ void Mob::BuffFadeBySlot(int slot, bool iRecalcBonuses)
 		CastToClient()->FastQueuePacket(&outapp);
 	}
 
+	// we will eventually call CalcBonuses() even if we skip it right here, so should correct itself if we still have them
+	degenerating_effects = false;
 	if (iRecalcBonuses)
 		CalcBonuses();
 }
