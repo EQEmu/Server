@@ -903,6 +903,7 @@ uint32 GetPartialMeleeRuneAmount(uint32 spell_id);
 uint32 GetPartialMagicRuneAmount(uint32 spell_id);
 bool NoDetrimentalSpellAggro(uint16 spell_id);
 bool IsStackableDot(uint16 spell_id);
+bool IsCastWhileInvis(uint16 spell_id);
 
 int CalcPetHp(int levelb, int classb, int STA = 75);
 const char *GetRandPetName();

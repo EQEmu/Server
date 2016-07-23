@@ -1179,7 +1179,8 @@ void Client::ActivateAlternateAdvancementAbility(int rank_id, int target_id) {
 		cooldown = 0;
 	}
 
-	CommonBreakInvisible();
+	if (!IsCastWhileInvis(rank->spell))
+		CommonBreakInvisible();
 	// Bards can cast instant cast AAs while they are casting another song
 	if(spells[rank->spell].cast_time == 0 && GetClass() == BARD && IsBardSong(casting_spell_id)) {
 		if(!SpellFinished(rank->spell, entity_list.GetMob(target_id), ALTERNATE_ABILITY_SPELL_SLOT, spells[rank->spell].mana, -1, spells[rank->spell].ResistDiff, false)) {

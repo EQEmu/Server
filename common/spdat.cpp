@@ -1111,6 +1111,16 @@ bool IsStackableDot(uint16 spell_id)
 	return IsEffectInSpell(spell_id, SE_CurrentHP) || IsEffectInSpell(spell_id, SE_GravityEffect);
 }
 
+bool IsCastWhileInvis(uint16 spell_id)
+{
+	if (!IsValidSpell(spell_id))
+		return false;
+	const auto &spell = spells[spell_id];
+	if (spell.sneak)
+		return true;
+	return false;
+}
+
 uint32 GetNimbusEffect(uint16 spell_id)
 {
 	if (IsValidSpell(spell_id))

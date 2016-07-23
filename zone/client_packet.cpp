@@ -8550,7 +8550,8 @@ void Client::Handle_OP_ItemVerifyRequest(const EQApplicationPacket *app)
 					}
 
 					if (i == 0) {
-						CommonBreakInvisible(); // client can't do this for us :(
+						if (!IsCastWhileInvis(item->Click.Effect))
+							CommonBreakInvisible(); // client can't do this for us :(
 						CastSpell(item->Click.Effect, target_id, USE_ITEM_SPELL_SLOT, item->CastTime, 0, 0, slot_id);
 					}
 				}
@@ -8578,7 +8579,8 @@ void Client::Handle_OP_ItemVerifyRequest(const EQApplicationPacket *app)
 					}
 
 					if (i == 0) {
-						CommonBreakInvisible(); // client can't do this for us :(
+						if (!IsCastWhileInvis(augitem->Click.Effect))
+							CommonBreakInvisible(); // client can't do this for us :(
 						CastSpell(augitem->Click.Effect, target_id, USE_ITEM_SPELL_SLOT, augitem->CastTime, 0, 0, slot_id);
 					}
 				}
