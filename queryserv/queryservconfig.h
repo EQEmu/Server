@@ -45,8 +45,14 @@ public:
 			delete _chat_config;
 		_chat_config=new queryservconfig;
 		_config=_chat_config;
+		std::string FullPath = EQEmuConfig::ConfigFile;
+		if (!(EQEmuConfig::ConfigPath.empty())) {
+			if ( EQEmuConfig::ConfigPath.back() != '/' )
+				EQEmuConfig::ConfigPath += '/';
+			FullPath = EQEmuConfig::ConfigPath + EQEmuConfig::ConfigFile;
+		}
 
-		return _config->ParseFile(EQEmuConfig::ConfigFile.c_str(),"server");
+		return _config->ParseFile(FullPath.c_str(),"server");
 	}
 
 };

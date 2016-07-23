@@ -22,6 +22,7 @@
 #include "string_util.h"
 #include "database.h"
 #include "misc.h"
+#include "eqemu_config.h"
 
 #include <iostream>
 #include <fstream>
@@ -150,12 +151,13 @@ void EQEmuLogSys::ProcessGMSay(uint16 debug_level, uint16 log_category, const st
 
 void EQEmuLogSys::ProcessLogWrite(uint16 debug_level, uint16 log_category, const std::string &message)
 {
+	auto Config = EQEmuConfig::get();
 	if (log_category == Logs::Crash) {
 		char time_stamp[80];
 		EQEmuLogSys::SetCurrentTimeStamp(time_stamp);
 		std::ofstream crash_log;
-		EQEmuLogSys::MakeDirectory("logs/crashes");
-		crash_log.open(StringFormat("logs/crashes/crash_%s_%i.log", platform_file_name.c_str(), getpid()), std::ios_base::app | std::ios_base::out);
+		EQEmuLogSys::MakeDirectory(Config->LogDir + "crashes");
+		crash_log.open(StringFormat("%scrashes/crash_%s_%i.log", Config->LogDir.c_str(), platform_file_name.c_str(), getpid()), std::ios_base::app | std::ios_base::out);
 		crash_log << time_stamp << " " << message << "\n";
 		crash_log.close();
 	}
@@ -330,22 +332,21 @@ void EQEmuLogSys::StartFileLogs(const std::string &log_name)
 	/* When loading settings, we must have been given a reason in category based logging to output to a file in order to even create or open one... */
 	if (file_logs_enabled == false)
 		return;
-
+	auto Config = EQEmuConfig::get();
 	if (EQEmuLogSys::log_platform == EQEmuExePlatform::ExePlatformZone) {
 		if (!log_name.empty())
 			platform_file_name = log_name;
 
 		if (platform_file_name.empty())
 			return;
-
-		EQEmuLogSys::Out(Logs::General, Logs::Status, "Starting File Log 'logs/%s_%i.log'", platform_file_name.c_str(), getpid());
-		EQEmuLogSys::MakeDirectory("logs/zone");
-		process_log.open(StringFormat("logs/zone/%s_%i.log", platform_file_name.c_str(), getpid()), std::ios_base::app | std::ios_base::out);
+		EQEmuLogSys::Out(Logs::General, Logs::Status, "Starting File Log '%szone/%s_%i.log'", Config->LogDir.c_str(), platform_file_name.c_str(), getpid());
+		EQEmuLogSys::MakeDirectory(Config->LogDir + "zone");
+		process_log.open(StringFormat("%szone/%s_%i.log", Config->LogDir.c_str(), platform_file_name.c_str(), getpid()), std::ios_base::app | std::ios_base::out);
 	} else {
 		if (platform_file_name.empty())
 			return;
 
-		EQEmuLogSys::Out(Logs::General, Logs::Status, "Starting File Log 'logs/%s_%i.log'", platform_file_name.c_str(), getpid());
-		process_log.open(StringFormat("logs/%s_%i.log", platform_file_name.c_str(), getpid()), std::ios_base::app | std::ios_base::out);
+		EQEmuLogSys::Out(Logs::General, Logs::Status, "Starting File Log '%s%s_%i.log'", Config->LogDir.c_str(), platform_file_name.c_str(), getpid());
+		process_log.open(StringFormat("%s%s_%i.log", Config->LogDir.c_str(), platform_file_name.c_str(), getpid()), std::ios_base::app | std::ios_base::out);
 	}
 }

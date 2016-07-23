@@ -51,8 +51,14 @@ public:
 			delete _world_config;
 		_world_config=new WorldConfig;
 		_config=_world_config;
+		std::string FullPath = EQEmuConfig::ConfigFile;
+		if (!(EQEmuConfig::ConfigPath.empty())) {
+			if ( EQEmuConfig::ConfigPath.back() != '/' )
+				EQEmuConfig::ConfigPath += '/';
+			FullPath = EQEmuConfig::ConfigPath + EQEmuConfig::ConfigFile;
+		}
 
-		return _config->ParseFile(EQEmuConfig::ConfigFile.c_str(),"server");
+		return _config->ParseFile(FullPath.c_str(),"server");
 	}
 
 	// Accessors for the static private object
