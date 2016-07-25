@@ -1121,6 +1121,83 @@ bool IsCastWhileInvis(uint16 spell_id)
 	return false;
 }
 
+bool IsEffectIgnoredInStacking(int spa)
+{
+	// this should match RoF2
+	switch (spa) {
+	case SE_SeeInvis:
+	case SE_DiseaseCounter:
+	case SE_PoisonCounter:
+	case SE_Levitate:
+	case SE_InfraVision:
+	case SE_UltraVision:
+	case SE_CurrentHPOnce:
+	case SE_CurseCounter:
+	case SE_ImprovedDamage:
+	case SE_ImprovedHeal:
+	case SE_SpellResistReduction:
+	case SE_IncreaseSpellHaste:
+	case SE_IncreaseSpellDuration:
+	case SE_IncreaseRange:
+	case SE_SpellHateMod:
+	case SE_ReduceReagentCost:
+	case SE_ReduceManaCost:
+	case SE_FcStunTimeMod:
+	case SE_LimitMaxLevel:
+	case SE_LimitResist:
+	case SE_LimitTarget:
+	case SE_LimitEffect:
+	case SE_LimitSpellType:
+	case SE_LimitSpell:
+	case SE_LimitMinDur:
+	case SE_LimitInstant:
+	case SE_LimitMinLevel:
+	case SE_LimitCastTimeMin:
+	case SE_LimitCastTimeMax:
+	case SE_StackingCommand_Block:
+	case SE_StackingCommand_Overwrite:
+	case SE_PetPowerIncrease:
+	case SE_SkillDamageAmount:
+	case SE_ChannelChanceSpells:
+	case SE_Blank:
+	case SE_FcDamageAmt:
+	case SE_SpellDurationIncByTic:
+	case SE_FcSpellVulnerability:
+	case SE_FcDamageAmtIncoming:
+	case SE_FcDamagePctCrit:
+	case SE_FcDamageAmtCrit:
+	case SE_ReduceReuseTimer:
+	case SE_LimitCombatSkills:
+	case SE_BlockNextSpellFocus:
+	case SE_SpellTrigger:
+	case SE_LimitManaMin:
+	case SE_CorruptionCounter:
+	case SE_ApplyEffect:
+	case SE_NegateSpellEffect:
+	case SE_LimitSpellGroup:
+	case SE_LimitManaMax:
+	case SE_FcHealAmt:
+	case SE_FcHealPctIncoming:
+	case SE_FcHealAmtIncoming:
+	case SE_FcHealPctCritIncoming:
+	case SE_FcHealAmtCrit:
+	case SE_LimitClass:
+	case SE_LimitRace:
+	case SE_FcBaseEffects:
+	case 415:
+	case SE_SkillDamageAmount2:
+	case SE_FcLimitUse:
+	case SE_FcIncreaseNumHits:
+	case SE_LimitUseMin:
+	case SE_LimitUseType:
+	case SE_GravityEffect:
+	case 425:
+		return true;
+	default:
+		return false;
+	}
+}
+
 uint32 GetNimbusEffect(uint16 spell_id)
 {
 	if (IsValidSpell(spell_id))

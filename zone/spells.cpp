@@ -2926,28 +2926,8 @@ int Mob::CheckStackConflict(uint16 spellid1, int caster_level1, uint16 spellid2,
 		if(effect1 != effect2)
 			continue;
 
-		//Effects which really aren't going to affect stacking.
-		if(effect1 == SE_CurrentHPOnce ||
-			effect1 == SE_CurseCounter	||
-			effect1 == SE_DiseaseCounter ||
-			effect1 == SE_PoisonCounter){
-			continue;
-			}
-
-		/*
-		Skip check if effect is SE_Limit*
-		skip checking effect2 since we know they are equal
-		*/
-		if(effect1 == SE_LimitMaxLevel ||
-			effect1 == SE_LimitResist ||
-			effect1 == SE_LimitTarget ||
-			effect1 == SE_LimitEffect ||
-			effect1 == SE_LimitSpellType ||
-			effect1 == SE_LimitSpell ||
-			effect1 == SE_LimitMinDur ||
-			effect1 == SE_LimitInstant ||
-			effect1 == SE_LimitMinLevel ||
-			effect1 == SE_LimitCastTimeMin)
+		// big ol' list according to the client, wasn't that nice!
+		if (IsEffectIgnoredInStacking(effect1))
 			continue;
 
 		/*
