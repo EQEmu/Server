@@ -1016,7 +1016,10 @@ void Client::OPRezzAnswer(uint32 Action, uint32 SpellID, uint16 ZoneID, uint16 I
 		if((SpellEffectDescNum == 82) || (SpellEffectDescNum == 39067)) {
 			SetMana(0);
 			SetHP(GetMaxHP()/5);
-			SpellOnTarget(756, this); // Rezz effects
+			int rez_eff = 756;
+			if (GetRace() == BARBARIAN || GetRace() == DWARF || GetRace() == TROLL || GetRace() == OGRE)
+				rez_eff = 757
+			SpellOnTarget(rez_eff, this); // Rezz effects
 		}
 		else {
 			SetMana(GetMaxMana());

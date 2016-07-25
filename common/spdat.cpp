@@ -704,7 +704,7 @@ bool IsCombatSkill(uint16 spell_id)
 bool IsResurrectionEffects(uint16 spell_id)
 {
 	// spell id 756 is Resurrection Effects spell
-	if(IsValidSpell(spell_id) && spell_id == 756)
+	if(IsValidSpell(spell_id) && (spell_id == 756 || spell_id == 757))
 		return true;
 
 	return false;
