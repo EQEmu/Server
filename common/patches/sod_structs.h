@@ -563,32 +563,22 @@ struct SpawnAppearance_Struct
 // this is used inside profile
 struct SpellBuff_Struct
 {
-/*000*/	uint8	slotid;		//badly named... seems to be 2 for a real buff, 0 otherwise
-/*001*/ uint8	level;
-/*002*/	uint8	bard_modifier;
-/*003*/	uint8	effect;			//not real
-/*004*/	uint32	spellid;
-/*008*/ int32	duration;
-/*012*/	uint32   counters;
-/*016*/ uint32  unknown004;    //Might need to be swapped with player_id
-/*020*/ uint32	player_id;	//'global' ID of the caster, for wearoff messages
+/*000*/	uint8 effect_type;		// 0 = no buff, 2 = buff, 4 = inverse affects of buff
+/*001*/	uint8 level;			// Seen 1 for no buff
+/*002*/	uint8 bard_modifier;
+/*003*/	uint8 unknown003;   	// MQ2 used to call this "damage shield" -- don't see client referencing it, so maybe server side DS type tracking?
+/*004*/	uint32 spellid;
+/*008*/	uint32 duration;
+/*012*/	uint32 counters;
+/*016*/	uint32 unknown016;
+/*020*/	uint32 player_id;		// caster ID, pretty sure just zone ID
 /*024*/
-
-
 };
 
 
-struct SpellBuffFade_Struct {
+struct SpellBuffPacket_Struct {
 /*000*/	uint32 entityid;
-/*004*/	uint8 slot;
-/*005*/	uint8 level;
-/*006*/	uint8 effect;
-/*007*/	uint8 unknown7;
-/*008*/	uint32 spellid;
-/*012*/	int32 duration;
-/*016*/	uint32 unknown016;
-/*020*/	uint32 unknown020;	//prolly global player ID
-/*024*/ uint32 playerId;       // Player id who cast the buff
+/*004*/	SpellBuff_Struct buff;
 /*028*/	uint32 slotid;
 /*032*/	uint32 bufffade;
 /*036*/

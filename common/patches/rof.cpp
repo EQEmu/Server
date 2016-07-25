@@ -405,22 +405,31 @@ namespace RoF
 
 	ENCODE(OP_Buff)
 	{
-		ENCODE_LENGTH_EXACT(SpellBuffFade_Struct);
-		SETUP_DIRECT_ENCODE(SpellBuffFade_Struct, structs::SpellBuffFade_Struct_Live);
+		ENCODE_LENGTH_EXACT(SpellBuffPacket_Struct);
+		SETUP_DIRECT_ENCODE(SpellBuffPacket_Struct, structs::SpellBuffPacket_Struct);
 
 		OUT(entityid);
-		eq->unknown004 = 2;
-		//eq->level = 80;
-		//eq->effect = 0;
-		OUT(level);
-		OUT(effect);
-		eq->unknown007 = 0;
-		eq->unknown008 = 1.0f;
-		OUT(spellid);
-		OUT(duration);
-		eq->playerId = 0x7cde;
-		OUT(slotid);
-		OUT(num_hits);
+		OUT(buff.effect_type);
+		OUT(buff.level);
+		// just so we're 100% sure we get a 1.0f ...
+		eq->buff.bard_modifier = emu->buff.bard_modifier == 10 ? 1.0f : emu->buff.bard_modifier / 10.0f;
+		OUT(buff.spellid);
+		OUT(buff.duration);
+		OUT(buff.player_id);
+		OUT(buff.num_hits);
+		OUT(buff.y);
+		OUT(buff.x);
+		OUT(buff.z);
+		uint16 buffslot = emu->slotid;
+		// Not sure if this is needs amending for RoF yet.
+		if (buffslot >= 25)
+		{
+			buffslot += 17;
+		}
+
+		// TODO: implement slot_data stuff
+		eq->slotid = buffslot;
+
 		if (emu->bufffade == 1)
 			eq->bufffade = 1;
 		else
@@ -432,10 +441,10 @@ namespace RoF
 		{
 			outapp = new EQApplicationPacket(OP_BuffCreate, 29);
 			outapp->WriteUInt32(emu->entityid);
-			outapp->WriteUInt32(0x0271);	// Unk
+			outapp->WriteUInt32(0);	// tic timer
 			outapp->WriteUInt8(0);		// Type of OP_BuffCreate packet ?
 			outapp->WriteUInt16(1);		// 1 buff in this packet
-			outapp->WriteUInt32(emu->slotid);
+			outapp->WriteUInt32(buffslot);
 			outapp->WriteUInt32(0xffffffff);		// SpellID (0xffff to remove)
 			outapp->WriteUInt32(0);			// Duration
 			outapp->WriteUInt32(0);			// ?
@@ -2274,31 +2283,32 @@ namespace RoF
 		for (uint32 r = 0; r < BUFF_COUNT; r++)
 		{
 			float instrument_mod = 0.0f;
-			uint8 slotid = emu->buffs[r].slotid;
+			uint8 effect_type = emu->buffs[r].effect_type;
 			uint32 player_id = emu->buffs[r].player_id;;
 
 			if (emu->buffs[r].spellid != 0xFFFF && emu->buffs[r].spellid != 0)
 			{
 				instrument_mod = 1.0f + (emu->buffs[r].bard_modifier - 10) / 10.0f;
-				slotid = 2;
+				effect_type = 2;
 				player_id = 0x000717fd;
 			}
 			else
 			{
-				slotid = 0;
+				effect_type = 0;
 			}
-			outapp->WriteUInt8(0);		// Had this as slot, but always appears to be 0 on live.
+			// this is different than the client struct for some reason :P
+			// missing a few things, shuffled around
+			outapp->WriteUInt8(0);					// this is an unknown
 			outapp->WriteFloat(instrument_mod);
 			outapp->WriteUInt32(player_id);
 			outapp->WriteUInt8(0);
 			outapp->WriteUInt32(emu->buffs[r].counters);
-			//outapp->WriteUInt8(emu->buffs[r].bard_modifier);
 			outapp->WriteUInt32(emu->buffs[r].duration);
 			outapp->WriteUInt8(emu->buffs[r].level);
 			outapp->WriteUInt32(emu->buffs[r].spellid);
-			outapp->WriteUInt32(slotid);			// Only ever seen 2
+			outapp->WriteUInt8(effect_type);			// Only ever seen 2
+			outapp->WriteUInt32(emu->buffs[r].num_hits);
 			outapp->WriteUInt32(0);
-			outapp->WriteUInt8(0);
 			outapp->WriteUInt32(emu->buffs[r].counters);	// Appears twice ?
 
 			for (uint32 j = 0; j < 44; ++j)
@@ -4290,15 +4300,15 @@ namespace RoF
 
 	DECODE(OP_Buff)
 	{
-		DECODE_LENGTH_EXACT(structs::SpellBuffFade_Struct_Live);
-		SETUP_DIRECT_DECODE(SpellBuffFade_Struct, structs::SpellBuffFade_Struct_Live);
+		DECODE_LENGTH_EXACT(structs::SpellBuffPacket_Struct);
+		SETUP_DIRECT_DECODE(SpellBuffPacket_Struct, structs::SpellBuffPacket_Struct);
 
 		IN(entityid);
-		//IN(slot);
-		IN(level);
-		IN(effect);
-		IN(spellid);
-		IN(duration);
+		IN(buff.effect_type);
+		IN(buff.level);
+		IN(buff.unknown003);
+		IN(buff.spellid);
+		IN(buff.duration);
 		IN(slotid);
 		IN(bufffade);
 

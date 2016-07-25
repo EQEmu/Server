@@ -1,5 +1,10 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 07/25/216 ==
+mackal: Fix up the SpellBuff struct
+	- THERE MAYBE BUGS
+	- there shouldn't though, most of the hackery was from badly named fields causing confusion
+
 == 07/09/2016 ==
 Uleat: Important fix for mob pathing
 	- This should fix failed pathing issues (and high cpu usage for zone.exe) for mobs in affect zones

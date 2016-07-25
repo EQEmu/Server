@@ -4797,17 +4797,17 @@ void Client::MakeBuffFadePacket(uint16 spell_id, int slot_id, bool send_message)
 {
 	EQApplicationPacket* outapp;
 
-	outapp = new EQApplicationPacket(OP_Buff, sizeof(SpellBuffFade_Struct));
-	SpellBuffFade_Struct* sbf = (SpellBuffFade_Struct*) outapp->pBuffer;
+	outapp = new EQApplicationPacket(OP_Buff, sizeof(SpellBuffPacket_Struct));
+	SpellBuffPacket_Struct* sbf = (SpellBuffPacket_Struct*) outapp->pBuffer;
 
-	sbf->entityid=GetID();
+	sbf->entityid = GetID();
 	// i dont know why but this works.. for now
-	sbf->slot=2;
+	sbf->buff.effect_type = 2;
 //	sbf->slot=m_pp.buffs[slot_id].slotid;
 //	sbf->level=m_pp.buffs[slot_id].level;
 //	sbf->effect=m_pp.buffs[slot_id].effect;
-	sbf->spellid=spell_id;
-	sbf->slotid=slot_id;
+	sbf->buff.spellid = spell_id;
+	sbf->slotid = slot_id;
 	sbf->bufffade = 1;
 #if EQDEBUG >= 11
 	printf("Sending SBF 1 from server:\n");
@@ -4820,7 +4820,7 @@ void Client::MakeBuffFadePacket(uint16 spell_id, int slot_id, bool send_message)
 	sbf->level=0;
 	sbf->slot=0;
 */
-	sbf->spellid=0xffffffff;
+	sbf->buff.spellid = 0xffffffff;
 #if EQDEBUG >= 11
 	printf("Sending SBF 2 from server:\n");
 	DumpPacket(outapp);
@@ -4838,7 +4838,6 @@ void Client::MakeBuffFadePacket(uint16 spell_id, int slot_id, bool send_message)
 		QueuePacket(outapp);
 		safe_delete(outapp);
 	}
-
 }
 
 void Client::MemSpell(uint16 spell_id, int slot, bool update_client)
@@ -5274,99 +5273,36 @@ void Mob::_StopSong()
 //Thus I use this in the buff process to update the correct duration once after casting
 //this allows AAs and focus effects that increase buff duration to work correctly, but could probably
 //be used for other things as well
-void Client::SendBuffDurationPacket(Buffs_Struct &buff)
+void Client::SendBuffDurationPacket(Buffs_Struct &buff, int slot)
 {
 	EQApplicationPacket* outapp;
-	outapp = new EQApplicationPacket(OP_Buff, sizeof(SpellBuffFade_Struct));
-	SpellBuffFade_Struct* sbf = (SpellBuffFade_Struct*) outapp->pBuffer;
-	int index;
+	outapp = new EQApplicationPacket(OP_Buff, sizeof(SpellBuffPacket_Struct));
+	SpellBuffPacket_Struct* sbf = (SpellBuffPacket_Struct*) outapp->pBuffer;
 
 	sbf->entityid = GetID();
-	sbf->slot = 2;
-	sbf->spellid = buff.spellid;
-	sbf->slotid = 0;
-	sbf->level = buff.casterlevel > 0 ? buff.casterlevel : GetLevel();
 
-	// We really don't know what to send as sbf->effect.
-	// The code used to send level (and still does for cases we don't know)
-	//
-	// The fixes below address known issues with sending level in this field.
-	// Typically, when the packet is sent, or when the user
-	// next does something on the UI that causes an update (like opening a
-	// pack), the stats updated by the spell in question get corrupted.
-	// 
-	// The values were determined by trial and error.  I could not find a 
-	// pattern or find a field in spells_new that would work.
+	sbf->buff.effect_type = 2;
 
-	sbf->effect=sbf->level;
+	sbf->buff.level = buff.casterlevel > 0 ? buff.casterlevel : GetLevel();
+	sbf->buff.bard_modifier = buff.instrument_mod;
+	sbf->buff.spellid = buff.spellid;
+	sbf->buff.duration = buff.ticsremaining;
+	if (buff.dot_rune)
+		sbf->buff.counters = buff.dot_rune;
+	else if (buff.magic_rune)
+		sbf->buff.counters = buff.magic_rune;
+	else if (buff.melee_rune)
+		sbf->buff.counters = buff.melee_rune;
+	else if (buff.counters)
+		sbf->buff.counters = buff.counters;
+	sbf->buff.player_id = buff.casterid;
+	sbf->buff.num_hits = buff.numhits;
+	sbf->buff.y = buff.caston_y;
+	sbf->buff.x = buff.caston_x;
+	sbf->buff.z = buff.caston_z;
 
-	if (IsEffectInSpell(buff.spellid, SE_TotalHP))
-	{
-		// If any of the lower 6 bits are set, the GUI changes MAX_HP AGAIN.
-		// If its set to 0 the effect is cancelled.
-		// 128 seems to work (ie: change only duration).
-		sbf->effect = 128;
-	}
-	else if (IsEffectInSpell(buff.spellid, SE_CurrentHP))
-	{
-		// This is mostly a problem when we try and update duration on a
-		// dot or a hp->mana conversion.  Zero cancels the effect
-		// Sending teh actual change again seems to work.
-		index = GetSpellEffectIndex(buff.spellid, SE_CurrentHP);
-		sbf->effect = abs(spells[buff.spellid].base[index]);
-	}
-	else if (IsEffectInSpell(buff.spellid, SE_SeeInvis))
-	{
-		// 10 seems to not break SeeInvis spells.  Level,
-		// which is what the old client sends breaks the client at at 
-		// least level 9, maybe more.
-		sbf->effect = 10;
-	}
-	else if (IsEffectInSpell(buff.spellid, SE_ArmorClass) ||
-			 IsEffectInSpell(buff.spellid, SE_ResistFire) ||
-			 IsEffectInSpell(buff.spellid, SE_ResistCold) ||
-			 IsEffectInSpell(buff.spellid, SE_ResistPoison) ||
-			 IsEffectInSpell(buff.spellid, SE_ResistDisease) ||
-			 IsEffectInSpell(buff.spellid, SE_ResistMagic) ||
-			 IsEffectInSpell(buff.spellid, SE_STR) ||
-			 IsEffectInSpell(buff.spellid, SE_STA) ||
-			 IsEffectInSpell(buff.spellid, SE_DEX) ||
-			 IsEffectInSpell(buff.spellid, SE_WIS) ||
-			 IsEffectInSpell(buff.spellid, SE_INT) ||
-			 IsEffectInSpell(buff.spellid, SE_AGI))
-	{
-		// This seems to work.  Previosly stats got corrupted when sending
-		// level.
-		sbf->effect = 46;
-	}
-	else if (IsEffectInSpell(buff.spellid, SE_MovementSpeed))
-	{
-		index = GetSpellEffectIndex(buff.spellid, SE_MovementSpeed);
-
-		// So MovementSpeed spells react to effect values as follows:
-		// 0- cancels the effect (buff stays up - run speed is normal)
-		// 1-45 - A formula of change where 1-9 yield about a .1 to .9
-		// reduction of the spell effect, 10 yields about the same, and 
-		// 11-45 gets faster very quickly until the effect well exceeds
-		// any intended max.
-		// 46 - seems to do nothing - which is what we need.
-		sbf->effect = 46;
-	}
-	else if (IsEffectInSpell(buff.spellid, SE_CHA))
-	{
-		index = GetSpellEffectIndex(buff.spellid, SE_CHA);
-		sbf->effect = abs(spells[buff.spellid].base[index]);
-		// Only use this valie if its not a spacer.
-		if (sbf->effect != 0)
-		{
-			// Same as other stats, need this to prevent a double update.
-			sbf->effect = 46;
-		}
-	}
-
+	sbf->slotid = slot;
 	sbf->bufffade = 0;
-	sbf->duration = buff.ticsremaining;
-	sbf->num_hits = buff.numhits;
 	FastQueuePacket(&outapp);
 }
 
@@ -5496,7 +5432,7 @@ void Mob::BuffModifyDurationBySpellID(uint16 spell_id, int32 newDuration)
 			buffs[i].ticsremaining = newDuration;
 			if(IsClient())
 			{
-				CastToClient()->SendBuffDurationPacket(buffs[i]);
+				CastToClient()->SendBuffDurationPacket(buffs[i], i);
 			}
 		}
 	}

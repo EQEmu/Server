@@ -579,10 +579,10 @@ void NPC::GetPetState(SpellBuff_Struct *pet_buffs, uint32 *items, char *name) {
 	for (int i=0; i < GetPetMaxTotalSlots(); i++) {
 		if (buffs[i].spellid != SPELL_UNKNOWN) {
 			pet_buffs[i].spellid = buffs[i].spellid;
-			pet_buffs[i].slotid = i+1;
+			pet_buffs[i].effect_type = i+1;
 			pet_buffs[i].duration = buffs[i].ticsremaining;
 			pet_buffs[i].level = buffs[i].casterlevel;
-			pet_buffs[i].effect = 10;
+			pet_buffs[i].bard_modifier = 10;
 			pet_buffs[i].counters = buffs[i].counters;
 			pet_buffs[i].bard_modifier = buffs[i].instrument_mod;
 		}
@@ -590,7 +590,7 @@ void NPC::GetPetState(SpellBuff_Struct *pet_buffs, uint32 *items, char *name) {
 			pet_buffs[i].spellid = SPELL_UNKNOWN;
 			pet_buffs[i].duration = 0;
 			pet_buffs[i].level = 0;
-			pet_buffs[i].effect = 0;
+			pet_buffs[i].bard_modifier = 10;
 			pet_buffs[i].counters = 0;
 		}
 	}
@@ -623,10 +623,10 @@ void NPC::SetPetState(SpellBuff_Struct *pet_buffs, uint32 *items) {
 		else {
 			buffs[i].spellid = SPELL_UNKNOWN;
 			pet_buffs[i].spellid = 0xFFFFFFFF;
-			pet_buffs[i].slotid = 0;
+			pet_buffs[i].effect_type = 0;
 			pet_buffs[i].level = 0;
 			pet_buffs[i].duration = 0;
-			pet_buffs[i].effect = 0;
+			pet_buffs[i].bard_modifier = 0;
 		}
 	}
 	for (int j1=0; j1 < GetPetMaxTotalSlots(); j1++) {
@@ -648,10 +648,10 @@ void NPC::SetPetState(SpellBuff_Struct *pet_buffs, uint32 *items) {
 					case SE_Illusion:
 						buffs[j1].spellid = SPELL_UNKNOWN;
 						pet_buffs[j1].spellid = SPELLBOOK_UNKNOWN;
-						pet_buffs[j1].slotid = 0;
+						pet_buffs[j1].effect_type = 0;
 						pet_buffs[j1].level = 0;
 						pet_buffs[j1].duration = 0;
-						pet_buffs[j1].effect = 0;
+						pet_buffs[j1].bard_modifier = 0;
 						x1 = EFFECT_COUNT;
 						break;
 					// We can't send appearance packets yet, put down at CompleteConnect

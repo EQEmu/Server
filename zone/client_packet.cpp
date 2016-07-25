@@ -1463,22 +1463,24 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 			if (buffs[i].spellid != SPELL_UNKNOWN) {
 				m_pp.buffs[i].spellid = buffs[i].spellid;
 				m_pp.buffs[i].bard_modifier = buffs[i].instrument_mod;
-				m_pp.buffs[i].slotid = 2;
+				m_pp.buffs[i].effect_type = 2;
 				m_pp.buffs[i].player_id = 0x2211;
 				m_pp.buffs[i].level = buffs[i].casterlevel;
-				m_pp.buffs[i].effect = 0;
+				m_pp.buffs[i].unknown003 = 0;
 				m_pp.buffs[i].duration = buffs[i].ticsremaining;
 				m_pp.buffs[i].counters = buffs[i].counters;
+				m_pp.buffs[i].num_hits = buffs[i].numhits;
 			}
 			else {
 				m_pp.buffs[i].spellid = SPELLBOOK_UNKNOWN;
 				m_pp.buffs[i].bard_modifier = 10;
-				m_pp.buffs[i].slotid = 0;
+				m_pp.buffs[i].effect_type = 0;
 				m_pp.buffs[i].player_id = 0;
 				m_pp.buffs[i].level = 0;
-				m_pp.buffs[i].effect = 0;
+				m_pp.buffs[i].unknown003 = 0;
 				m_pp.buffs[i].duration = 0;
 				m_pp.buffs[i].counters = 0;
+				m_pp.buffs[i].num_hits = 0;
 			}
 		}
 	}
@@ -3833,15 +3835,15 @@ void Client::Handle_OP_BoardBoat(const EQApplicationPacket *app)
 
 void Client::Handle_OP_Buff(const EQApplicationPacket *app)
 {
-	if (app->size != sizeof(SpellBuffFade_Struct))
+	if (app->size != sizeof(SpellBuffPacket_Struct))
 	{
-		Log.Out(Logs::General, Logs::Error, "Size mismatch in OP_Buff. expected %i got %i", sizeof(SpellBuffFade_Struct), app->size);
+		Log.Out(Logs::General, Logs::Error, "Size mismatch in OP_Buff. expected %i got %i", sizeof(SpellBuffPacket_Struct), app->size);
 		DumpPacket(app);
 		return;
 	}
 
-	SpellBuffFade_Struct* sbf = (SpellBuffFade_Struct*)app->pBuffer;
-	uint32 spid = sbf->spellid;
+	SpellBuffPacket_Struct* sbf = (SpellBuffPacket_Struct*)app->pBuffer;
+	uint32 spid = sbf->buff.spellid;
 	Log.Out(Logs::Detail, Logs::Spells, "Client requested that buff with spell id %d be canceled.", spid);
 
 	//something about IsDetrimentalSpell() crashes this portion of code..

@@ -708,67 +708,29 @@ struct SpawnAppearance_Struct
 
 struct SpellBuff_Struct
 {
-/*000*/	uint8 slotid;				// badly named... seems to be 2 for a real buff, 0 otherwise
-/*001*/	float unknown004;			// Seen 1 for no buff
-/*005*/	uint32 player_id;			// 'global' ID of the caster, for wearoff messages
-/*009*/ uint32 unknown016;
-/*013*/	uint8 bard_modifier;
-/*014*/	int32 duration;
-/*018*/ uint8 level;
-/*019*/ uint32 spellid;
-/*023*/ uint32 counters;
-/*027*/ uint8 unknown0028[53];
-/*080*/
-};
-
-struct SpellBuff_Struct_Old
-{
-/*000*/	uint8 slotid;				// badly named... seems to be 2 for a real buff, 0 otherwise
-/*001*/ uint8 level;
-/*002*/	uint8 bard_modifier;
-/*003*/	uint8 effect;				// not real
-/*004*/	float unknown004;			// Seen 1 for no buff
-/*008*/ uint32 spellid;
-/*012*/	int32 duration;
-/*016*/ uint32 unknown016;
-/*020*/	uint32 player_id;			// 'global' ID of the caster, for wearoff messages
-/*024*/ uint32 counters;
-/*028*/ uint8 unknown0028[60];
+/*000*/	uint8 effect_type;		// 0 = no buff, 2 = buff, 4 = inverse affects of buff
+/*001*/	uint8 level;			// Seen 1 for no buff
+/*002*/	uint8 unknown002;		//pretty sure padding now
+/*003*/	uint8 unknown003;   	// MQ2 used to call this "damage shield" -- don't see client referencing it, so maybe server side DS type tracking?
+/*004*/	float bard_modifier;
+/*008*/	uint32 spellid;
+/*012*/	uint32 duration;
+/*016*/	uint32 player_id;		// caster ID, pretty sure just zone ID
+/*020*/	uint32 num_hits;
+/*024*/	float y;				// referenced by SPA 441
+/*028*/	float x;				// unsure if all buffs get them
+/*032*/	float z;				// as valid data
+/*036*/	uint32 unknown036;
+/*040*/	int32 slot_data[12];	// book keeping stuff per slot (counters, rune/vie)
 /*088*/
 };
 
-// Not functional yet, but this is what the packet looks like on Live
-struct SpellBuffFade_Struct_Live {
-/*000*/	uint32 entityid;	// Player id who cast the buff
-/*004*/	uint8 unknown004;
-/*005*/	uint8 level;
-/*006*/	uint8 effect;
-/*007*/	uint8 unknown007;
-/*008*/	float unknown008;
-/*012*/	uint32 spellid;
-/*016*/	int32 duration;
-/*020*/ uint32 playerId;	// Global player ID?
-/*024*/	uint32 num_hits;
-/*028*/ uint8 unknown0028[64];
+struct SpellBuffPacket_Struct {
+/*000*/	uint32 entityid;		// Player id who cast the buff
+/*004*/	SpellBuff_Struct buff;
 /*092*/	uint32 slotid;
 /*096*/	uint32 bufffade;
 /*100*/
-};
-
-struct SpellBuffFade_Struct {
-/*000*/	uint32 entityid;
-/*004*/	uint8 slot;
-/*005*/	uint8 level;
-/*006*/	uint8 effect;
-/*007*/	uint8 unknown7;
-/*008*/	uint32 spellid;
-/*012*/	int32 duration;
-/*016*/	uint32 num_hits;
-/*020*/	uint32 unknown020;		// Global player ID?
-/*024*/ uint32 playerId;		// Player id who cast the buff
-/*028*/	uint32 slotid;
-/*032*/	uint32 bufffade;
-/*036*/
 };
 
 struct BuffRemoveRequest_Struct

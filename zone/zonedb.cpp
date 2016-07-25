@@ -3305,7 +3305,7 @@ void ZoneDatabase::LoadPetInfo(Client *client)
 		pi->Buffs[slot_id].spellid = spell_id;
 		pi->Buffs[slot_id].level = caster_level;
 		pi->Buffs[slot_id].player_id = caster_id;
-		pi->Buffs[slot_id].slotid = 2; // Always 2 in buffs struct for real buffs
+		pi->Buffs[slot_id].effect_type = 2; // Always 2 in buffs struct for real buffs
 
 		pi->Buffs[slot_id].duration = ticsremaining;
 		pi->Buffs[slot_id].counters = counters;

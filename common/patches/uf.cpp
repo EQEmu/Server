@@ -363,20 +363,29 @@ namespace UF
 
 	ENCODE(OP_Buff)
 	{
-		ENCODE_LENGTH_EXACT(SpellBuffFade_Struct);
-		SETUP_DIRECT_ENCODE(SpellBuffFade_Struct, structs::SpellBuffFade_Struct_Underfoot);
+		ENCODE_LENGTH_EXACT(SpellBuffPacket_Struct);
+		SETUP_DIRECT_ENCODE(SpellBuffPacket_Struct, structs::SpellBuffPacket_Struct);
 
 		OUT(entityid);
-		OUT(slot);
-		OUT(level);
-		OUT(effect);
-		//eq->unknown7 = 10;
-		OUT(spellid);
-		OUT(duration);
-		OUT(slotid);
+		OUT(buff.effect_type);
+		OUT(buff.level);
+		// just so we're 100% sure we get a 1.0f ...
+		eq->buff.bard_modifier = emu->buff.bard_modifier == 10 ? 1.0f : emu->buff.bard_modifier / 10.0f;
+		OUT(buff.spellid);
+		OUT(buff.duration);
+		OUT(buff.num_hits);
+		uint16 buffslot = emu->slotid;
+		if (buffslot >= 25 && buffslot < 37)
+		{
+			buffslot += 5;
+		}
+		else if (buffslot >= 37)
+		{
+			buffslot += 14;
+		}
+		// TODO: implement slot_data stuff
+		eq->slotid = buffslot;
 		OUT(bufffade);	// Live (October 2011) sends a 2 rather than 0 when a buff is created, but it doesn't seem to matter.
-		OUT(num_hits);
-		eq->unknown008 = 1.0f;
 
 		FINISH_ENCODE();
 	}
@@ -1862,22 +1871,22 @@ namespace UF
 		{
 			if (emu->buffs[r].spellid != 0xFFFF && emu->buffs[r].spellid != 0)
 			{
-				eq->buffs[r].unknown004 = 0x3f800000;
-				eq->buffs[r].slotid = 2;
+				eq->buffs[r].bard_modifier = 1.0f;
+				eq->buffs[r].effect_type= 2;
 				eq->buffs[r].player_id = 0x000717fd;
 			}
 			else
 			{
-				eq->buffs[r].slotid = 0;
+				eq->buffs[r].effect_type = 0;
 			}
-			//OUT(buffs[r].slotid);
+			OUT(buffs[r].effect_type);
 			OUT(buffs[r].level);
-			//OUT(buffs[r].bard_modifier);
-			//OUT(buffs[r].effect);
+			OUT(buffs[r].bard_modifier);
+			OUT(buffs[r].unknown003);
 			OUT(buffs[r].spellid);
 			OUT(buffs[r].duration);
-			OUT(buffs[r].counters);
-			//OUT(buffs[r].player_id);
+			OUT(buffs[r].num_hits);
+			OUT(buffs[r].player_id);
 		}
 		for (r = 0; r < MAX_PP_DISCIPLINES; r++) {
 			OUT(disciplines.values[r]);
@@ -3216,15 +3225,15 @@ namespace UF
 
 	DECODE(OP_Buff)
 	{
-		DECODE_LENGTH_EXACT(structs::SpellBuffFade_Struct_Underfoot);
-		SETUP_DIRECT_DECODE(SpellBuffFade_Struct, structs::SpellBuffFade_Struct_Underfoot);
+		DECODE_LENGTH_EXACT(structs::SpellBuffPacket_Struct);
+		SETUP_DIRECT_DECODE(SpellBuffPacket_Struct, structs::SpellBuffPacket_Struct);
 
 		IN(entityid);
-		IN(slot);
-		IN(level);
-		IN(effect);
-		IN(spellid);
-		IN(duration);
+		IN(buff.effect_type);
+		IN(buff.level);
+		IN(buff.unknown003);
+		IN(buff.spellid);
+		IN(buff.duration);
 		IN(slotid);
 		IN(bufffade);
 

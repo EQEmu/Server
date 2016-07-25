@@ -254,6 +254,25 @@ namespace Titanium
 		FINISH_ENCODE();
 	}
 
+	ENCODE(OP_Buff)
+	{
+		ENCODE_LENGTH_EXACT(SpellBuffPacket_Struct);
+		SETUP_DIRECT_ENCODE(SpellBuffPacket_Struct, structs::SpellBuffPacket_Struct);
+
+		OUT(entityid);
+		OUT(buff.effect_type);
+		OUT(buff.level);
+		OUT(buff.bard_modifier);
+		OUT(buff.spellid);
+		OUT(buff.duration);
+		OUT(buff.counters);
+		OUT(buff.player_id);
+		OUT(slotid);
+		OUT(bufffade);
+
+		FINISH_ENCODE();
+	}
+
 	ENCODE(OP_ChannelMessage)
 	{
 		EQApplicationPacket *in = *p;
@@ -945,10 +964,10 @@ namespace Titanium
 		OUT(thirst_level);
 		OUT(hunger_level);
 		for (r = 0; r < structs::BUFF_COUNT; r++) {
-			OUT(buffs[r].slotid);
+			OUT(buffs[r].effect_type);
 			OUT(buffs[r].level);
 			OUT(buffs[r].bard_modifier);
-			OUT(buffs[r].effect);
+			OUT(buffs[r].unknown003);
 			OUT(buffs[r].spellid);
 			OUT(buffs[r].duration);
 			OUT(buffs[r].counters);
@@ -1684,6 +1703,25 @@ namespace Titanium
 
 		emu->container_slot = TitaniumToServerSlot(eq->container_slot);
 		emu->augment_slot = eq->augment_slot;
+
+		FINISH_DIRECT_DECODE();
+	}
+
+	DECODE(OP_Buff)
+	{
+		DECODE_LENGTH_EXACT(SpellBuffPacket_Struct);
+		SETUP_DIRECT_DECODE(SpellBuffPacket_Struct, structs::SpellBuffPacket_Struct);
+
+		IN(entityid);
+		IN(buff.effect_type);
+		IN(buff.level);
+		IN(buff.bard_modifier);
+		IN(buff.spellid);
+		IN(buff.duration);
+		IN(buff.counters);
+		IN(buff.player_id);
+		IN(slotid);
+		IN(bufffade);
 
 		FINISH_DIRECT_DECODE();
 	}
