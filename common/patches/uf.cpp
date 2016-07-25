@@ -1871,17 +1871,17 @@ namespace UF
 		{
 			if (emu->buffs[r].spellid != 0xFFFF && emu->buffs[r].spellid != 0)
 			{
-				eq->buffs[r].bard_modifier = 1.0f;
+				eq->buffs[r].bard_modifier = 1.0f + (emu->buffs[r].bard_modifier - 10) / 10.0f;
 				eq->buffs[r].effect_type= 2;
 				eq->buffs[r].player_id = 0x000717fd;
 			}
 			else
 			{
 				eq->buffs[r].effect_type = 0;
+				eq->buffs[r].bard_modifier = 1.0f;
 			}
 			OUT(buffs[r].effect_type);
 			OUT(buffs[r].level);
-			OUT(buffs[r].bard_modifier);
 			OUT(buffs[r].unknown003);
 			OUT(buffs[r].spellid);
 			OUT(buffs[r].duration);
