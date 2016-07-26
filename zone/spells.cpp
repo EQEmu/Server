@@ -2761,16 +2761,8 @@ int Mob::CheckStackConflict(uint16 spellid1, int caster_level1, uint16 spellid2,
 
 	Log.Out(Logs::Detail, Logs::Spells, "Check Stacking on old %s (%d) @ lvl %d (by %s) vs. new %s (%d) @ lvl %d (by %s)", sp1.name, spellid1, caster_level1, (caster1==nullptr)?"Nobody":caster1->GetName(), sp2.name, spellid2, caster_level2, (caster2==nullptr)?"Nobody":caster2->GetName());
 
-	// Same Spells and dot exemption is set to 1 or spell is Manaburn
-	if (spellid1 == spellid2) {
-		bool stackable_dot = IsStackableDot(spellid1);
-		if (stackable_dot && caster1 != caster2) { // same caster can refresh
-			Log.Out(Logs::Detail, Logs::Spells, "Blocking spell due to dot stacking exemption.");
-			return -1;
-		} else if (spellid1 == 2751) {
-			Log.Out(Logs::Detail, Logs::Spells, "Blocking spell because manaburn does not stack with itself.");
-			return -1;
-		} else if (!stackable_dot) {
+	if (spellid1 == spellid2 ) {
+		if (!IsStackableDot(spellid1) && !IsEffectInSpell(spellid1, SE_ManaBurn)) { // mana burn spells we need to use the stacking command blocks live actually checks those first, we should probably rework to that too
 			if (caster_level1 > caster_level2) { // cur buff higher level than new
 				if (IsEffectInSpell(spellid1, SE_ImprovedTaunt)) {
 					Log.Out(Logs::Detail, Logs::Spells, "SE_ImprovedTaunt level exception, overwriting.");
@@ -2780,9 +2772,12 @@ int Mob::CheckStackConflict(uint16 spellid1, int caster_level1, uint16 spellid2,
 					return -1;
 				}
 			} else {
-				Log.Out(Logs::Detail, Logs::Spells, "Spells the same but newer is higher level, overwriting.");
+				Log.Out(Logs::Detail, Logs::Spells, "Spells the same but newer is higher or equal level, overwriting.");
 				return 1;
 			}
+		} else if (spellid1 == 2751) {
+			Log.Out(Logs::Detail, Logs::Spells, "Blocking spell because manaburn does not stack with itself.");
+			return -1;
 		}
 	}
 
