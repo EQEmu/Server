@@ -1709,7 +1709,7 @@ namespace Titanium
 
 	DECODE(OP_Buff)
 	{
-		DECODE_LENGTH_EXACT(SpellBuffPacket_Struct);
+		DECODE_LENGTH_EXACT(structs::SpellBuffPacket_Struct);
 		SETUP_DIRECT_DECODE(SpellBuffPacket_Struct, structs::SpellBuffPacket_Struct);
 
 		IN(entityid);
