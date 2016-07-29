@@ -116,6 +116,27 @@ int main(int argc, char** argv) {
 	Log.LoadLogSettingsDefaults();
 
 	set_exception_handler(); 
+
+#ifdef USE_MAP_MMFS
+	if (argc == 3 && strcasecmp(argv[1], "convert_map") == 0) {
+		if (!ZoneConfig::LoadConfig())
+			return 1;
+		Config = ZoneConfig::get();
+
+		std::string mapfile = argv[2];
+		std::transform(mapfile.begin(), mapfile.end(), mapfile.begin(), ::tolower);
+		std::string filename = Config->MapDir;
+		filename += mapfile;
+
+		auto m = new Map();
+		auto success = m->Load(filename, true);
+		delete m;
+		std::cout << mapfile.c_str() << " conversion " << (success ? "succeeded" : "failed") << std::endl;
+		
+		return 0;
+	}
+#endif /*USE_MAP_MMFS*/
+
 	QServ = new QueryServ;
 
 	Log.Out(Logs::General, Logs::Zone_Server, "Loading server configuration..");

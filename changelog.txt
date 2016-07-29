@@ -1,6 +1,18 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
-== 07/25/216 ==
+== 07/28/2016 ==
+Uleat: Implemented zone memory-mapped file usage
+	- Zone map files are converted to pre-loaded binary files, bypassing the (sometimes) time-consuming raw data transform process
+	- There are three ways to convert files:
+			-- Do nothing! The zone bootup process will check for a mmf file and load it, if found, or create it after the 'normal' transform process is complete
+			-- Use the command line option: zone convert_map <zone_name>.map (for singular conversions)
+			-- Drop the 'convert_maps_to_mmfs.pl' into your server directory and execute it for a batch conversion
+			-- Note: Any zone maps not pre-converted will be processed once a zone is booted up that does not have one
+	- To enable this feature, you must have the 'USE_MAP_MMFS' option checked in cmake and have built binaries on that
+	- To disable this feature, or if you encouter problems, disable the 'USE_MAP_MMFS' option and rebuild your binaries
+	- This feature will test the validity of your zlib library. If you get errors/crashes upon conversion, then your zlib1.dll is most likely suspect (check our forum for solutions)
+
+== 07/25/2016 ==
 mackal: Fix up the SpellBuff struct
 	- THERE MAYBE BUGS
 	- there shouldn't though, most of the hackery was from badly named fields causing confusion
