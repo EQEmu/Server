@@ -6084,7 +6084,7 @@ bool Bot::IsImmuneToSpell(uint16 spell_id, Mob *caster) {
 	return Result;
 }
 
-bool Bot::DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_center, CastAction_type &CastAction) {
+bool Bot::DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_center, CastAction_type &CastAction, uint16 slot) {
 	bool Result = false;
 	SpellTargetType targetType = spells[spell_id].targettype;
 	if(targetType == ST_GroupClientAndPet) {
@@ -6093,7 +6093,7 @@ bool Bot::DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_ce
 			return true;
 		}
 	}
-	Result = Mob::DetermineSpellTargets(spell_id, spell_target, ae_center, CastAction);
+	Result = Mob::DetermineSpellTargets(spell_id, spell_target, ae_center, CastAction, slot);
 	return Result;
 }
 
