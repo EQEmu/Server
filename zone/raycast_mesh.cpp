@@ -3,6 +3,7 @@
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdint.h>
 #include <string.h>
 #include <vector>
 
@@ -1048,7 +1049,7 @@ MyRaycastMesh::MyRaycastMesh(std::vector<char>& rm_buffer)
 	mNodes = new NodeAABB[mMaxNodeCount];
 	mRoot = &mNodes[0];
 
-	for (int index = 0; index < mNodeCount; ++index) {
+	for (RmUint32 index = 0; index < mNodeCount; ++index) {
 		chunk_size = (sizeof(RmReal) * 3);
 		memcpy(&mNodes[index].mBounds.mMin, buf, chunk_size);
 		buf += chunk_size;
@@ -1179,13 +1180,13 @@ void MyRaycastMesh::serialize(std::vector<char>& rm_buffer)
 
 		RmUint32 lNodeIndex = TRI_EOF;
 		if (mNodes[index].mLeft)
-			lNodeIndex = ((RmUint32)mNodes[index].mLeft - (RmUint32)mNodes) / sizeof(NodeAABB);
+			lNodeIndex = ((uintptr_t)mNodes[index].mLeft - (uintptr_t)mNodes) / sizeof(NodeAABB);
 		memcpy(buf, &lNodeIndex, sizeof(RmUint32));
 		buf += sizeof(RmUint32);
 
 		RmUint32 rNodeIndex = TRI_EOF;
 		if (mNodes[index].mRight)
-			rNodeIndex = ((RmUint32)mNodes[index].mRight - (RmUint32)mNodes) / sizeof(NodeAABB);
+			rNodeIndex = ((uintptr_t)mNodes[index].mRight - (uintptr_t)mNodes) / sizeof(NodeAABB);
 		memcpy(buf, &rNodeIndex, sizeof(RmUint32));
 		buf += sizeof(RmUint32);
 	}
