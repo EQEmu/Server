@@ -100,23 +100,23 @@ typedef enum {
 /* 09 */	ST_Animal = 0x09,
 /* 10 */	ST_Undead = 0x0a,
 /* 11 */	ST_Summoned = 0x0b,
-/* 12 */	// NOT USED
+/* 12 */	// NOT USED error is 218 (This spell only works on things that are flying.)
 /* 13 */	ST_Tap = 0x0d,
 /* 14 */	ST_Pet = 0x0e,
 /* 15 */	ST_Corpse = 0x0f,
 /* 16 */	ST_Plant = 0x10,
 /* 17 */	ST_Giant = 0x11, //special giant
 /* 18 */	ST_Dragon = 0x12, //special dragon
-/* 19 */	// NOT USED
+/* 19 */	// NOT USED error is 227 (This spell only works on specific coldain.)
 /* 20 */	ST_TargetAETap = 0x14,
-/* 21 */	// NOT USED
-/* 22 */	// NOT USED
-/* 23 */	// NOT USED
+/* 21 */	// NOT USED same switch case as ST_Undead
+/* 22 */	// NOT USED same switch case as ST_Summoned
+/* 23 */	// NOT USED same switch case as ST_Animal
 /* 24 */	ST_UndeadAE = 0x18,
 /* 25 */	ST_SummonedAE = 0x19,
 /* 26 */	// NOT USED
-/* 27 */	// NOT USED
-/* 28 */	// NOT USED
+/* 27 */	// NOT USED error is 223 (This spell only works on insects.)
+/* 28 */	// NOT USED error is 223 (This spell only works on insects.)
 /* 29 */	// NOT USED
 /* 30 */	// NOT USED
 /* 31 */	// NOT USED
