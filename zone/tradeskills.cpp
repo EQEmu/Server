@@ -1317,7 +1317,7 @@ bool ZoneDatabase::GetTradeRecipe(uint32 recipe_id, uint8 c_type, uint32 some_id
 		return false;
 	}
 
-	if(results.RowCount() < 1) {
+	if(results.RowCount() < 1 && !spec->quest) {
 		Log.Out(Logs::General, Logs::Error, "Error in GetTradeRecept success: no success items returned");
 		return false;
 	}
