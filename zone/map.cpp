@@ -286,8 +286,10 @@ Map *Map::LoadMapFile(std::string file) {
 #ifdef USE_MAP_MMFS
 bool Map::Load(std::string filename, bool force_mmf_overwrite)
 {
-	if (LoadMMF(filename, force_mmf_overwrite))
+	if (LoadMMF(filename, force_mmf_overwrite)) {
+		Log.Out(Logs::General, Logs::Zone_Server, "Zone map mmf found - using it in lieu of '%s'", filename.c_str());
 		return true;
+	}
 #else
 bool Map::Load(std::string filename)
 {
