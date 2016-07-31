@@ -887,7 +887,7 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 {
 	bool IsFromItem = false;
 
-	if(IsClient() && slot != CastingSlot::Item && slot != CastingSlot::Item && spells[spell_id].recast_time > 1000) { // 10 is item
+	if(IsClient() && slot != CastingSlot::Item && slot != CastingSlot::PotionBelt && spells[spell_id].recast_time > 1000) { // 10 is item
 		if(!CastToClient()->GetPTimers().Expired(&database, pTimerSpellStart + spell_id, false)) {
 			//should we issue a message or send them a spell gem packet?
 			Message_StringID(13, SPELL_RECAST);
@@ -3768,7 +3768,7 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob *spelltar, bool reflect, bool use_r
 	}
 
 	if (IsValidSpell(spells[spell_id].RecourseLink) && spells[spell_id].RecourseLink != spell_id)
-		SpellFinished(spells[spell_id].RecourseLink, this, EQEmu::CastingSlot::Item, 0, -1, spells[spells[spell_id].RecourseLink].ResistDiff);
+		SpellFinished(spells[spell_id].RecourseLink, this, CastingSlot::Item, 0, -1, spells[spells[spell_id].RecourseLink].ResistDiff);
 
 	if (IsDetrimentalSpell(spell_id)) {
 
