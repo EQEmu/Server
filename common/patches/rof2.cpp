@@ -2356,12 +2356,13 @@ namespace RoF2
 			outapp->WriteUInt32(0xFFFFFFFFU);
 		}
 
-		outapp->WriteUInt32(13);			// Unknown count
+		outapp->WriteUInt32(13);			// gem refresh counts
 
-		for (uint32 r = 0; r < 13; r++)
+		for (uint32 r = 0; r < MAX_PP_MEMSPELL; r++)
 		{
-			outapp->WriteUInt32(0);			// Unknown
+			outapp->WriteUInt32(emu->spellSlotRefresh[r]);			// spell gem refresh
 		}
+		outapp->WriteUInt32(0);			// also refresh -- historically HT/LoH :P
 
 		outapp->WriteUInt8(0);			// Unknown
 
