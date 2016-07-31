@@ -50,6 +50,24 @@ namespace RoF2
 		#include "rof2_ops.h"
 	};
 
+	enum class CastingSlot : uint32 {
+		Gem1       = 0,
+		Gem2       = 1,
+		Gem3       = 2,
+		Gem4       = 3,
+		Gem5       = 4,
+		Gem6       = 5,
+		Gem7       = 6,
+		Gem8       = 7,
+		Gem9       = 8,
+		Gem10      = 9,
+		Gem11      = 10,
+		Gem12      = 11,
+		Item       = 12,
+		Discipline = 13,
+		AltAbility = 0xFF
+	};
+
 }; /*RoF2*/
 
 #endif /*COMMON_ROF2_H*/

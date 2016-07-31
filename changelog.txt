@@ -1,5 +1,15 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 07/31/2016 ==
+mackal: Implement more spell gems!
+	- There are a few things still left to due like make dealing with losing gems nice (reset AAs, going to an older client etc)
+	- Sadly SoF disc release doesn't support gem 10 like one might expect :(
+	- So changed clients:
+		- SoD = 10
+		- UF = 12
+		- RoF/RoF2 = 12. I know the UI supports 16, but the client does not and can cause client crashes
+	- The quest APIs assume you pass a valid spell gem ...
+
 == 07/28/2016 ==
 Uleat: Implemented zone memory-mapped file usage
 	- Zone map files are converted to pre-loaded binary files, bypassing the (sometimes) time-consuming raw data transform process

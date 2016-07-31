@@ -1483,7 +1483,7 @@ bool Client::OPCharCreate(char *name, CharCreate_Struct *cc)
 	for (i = 0; i < MAX_PP_REF_SPELLBOOK; i++)
 		pp.spell_book[i] = 0xFFFFFFFF;
 
-	for(i = 0; i < MAX_PP_REF_MEMSPELL; i++)
+	for(i = 0; i < MAX_PP_MEMSPELL; i++)
 		pp.mem_spells[i] = 0xFFFFFFFF;
 
 	for(i = 0; i < BUFF_COUNT; i++)

@@ -105,6 +105,7 @@ enum { //Type arguments to the Message* routines.
 
 #define SPELLBAR_UNLOCK 0x2bc
 enum { //scribing argument to MemorizeSpell
+	memSpellUnknown = -1, // this modifies some state data
 	memSpellScribing = 0,
 	memSpellMemorize = 1,
 	memSpellForget = 2,

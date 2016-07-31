@@ -115,7 +115,7 @@ void Trap::Trigger(Mob* trigger)
 				entity_list.MessageClose(trigger,false,100,13,"%s",message.c_str());
 			}
 			if(hiddenTrigger){
-				hiddenTrigger->SpellFinished(effectvalue, trigger, 10, 0, -1, spells[effectvalue].ResistDiff);
+				hiddenTrigger->SpellFinished(effectvalue, trigger, EQEmu::CastingSlot::Item, 0, -1, spells[effectvalue].ResistDiff);
 			}
 			break;
 		case trapTypeAlarm:

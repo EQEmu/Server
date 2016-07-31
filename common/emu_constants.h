@@ -44,6 +44,26 @@ namespace EQEmu
 		const size_t SayLinkBodySize = RoF2::constants::SayLinkBodySize;
 
 	} /*constants*/
+	enum class CastingSlot : uint32 {
+		Gem1       = 0,
+		Gem2       = 1,
+		Gem3       = 2,
+		Gem4       = 3,
+		Gem5       = 4,
+		Gem6       = 5,
+		Gem7       = 6,
+		Gem8       = 7,
+		Gem9       = 8,
+		Gem10      = 9,
+		Gem11      = 10,
+		Gem12      = 11,
+		MaxGems    = 12,
+		Ability    = 20, // HT/LoH for Tit
+		PotionBelt = 21, // Tit uses a different slot for PB
+		Item       = 22,
+		Discipline = 23,
+		AltAbility = 0xFF
+	};
 
 } /*EQEmu*/
 
