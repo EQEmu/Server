@@ -511,6 +511,8 @@ public:
 	virtual int GetMaxSongSlots() const { return 12; }
 	virtual int GetMaxDiscSlots() const { return 1; }
 	virtual int GetMaxTotalSlots() const { return 38; }
+	virtual uint32 GetFirstBuffSlot(bool disc, bool song);
+	virtual uint32 GetLastBuffSlot(bool disc, bool song);
 	virtual void InitializeBuffSlots();
 	virtual void UninitializeBuffSlots();
 

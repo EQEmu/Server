@@ -3046,6 +3046,34 @@ bool Client::CheckSpellLevelRestriction(uint16 spell_id)
 	return true;
 }
 
+uint32 Mob::GetFirstBuffSlot(bool disc, bool song)
+{
+	return 0;
+}
+
+uint32 Mob::GetLastBuffSlot(bool disc, bool song)
+{
+	return GetCurrentBuffSlots();
+}
+
+uint32 Client::GetFirstBuffSlot(bool disc, bool song)
+{
+	if (disc)
+		return GetMaxBuffSlots() + GetMaxSongSlots();
+	if (song)
+		return GetMaxBuffSlots();
+	return 0;
+}
+
+uint32 Client::GetLastBuffSlot(bool disc, bool song)
+{
+	if (disc)
+		return GetMaxBuffSlots() + GetMaxSongSlots() + GetCurrentDiscSlots();
+	if (song)
+		return GetMaxBuffSlots() + GetCurrentSongSlots();
+	return GetCurrentBuffSlots();
+}
+
 // returns the slot the buff was added to, -1 if it wasn't added due to
 // stacking problems, and -2 if this is not a buff
 // if caster is null, the buff will be added with the caster level being
@@ -3083,18 +3111,8 @@ int Mob::AddBuff(Mob *caster, uint16 spell_id, int duration, int32 level_overrid
 	// we also check if overwriting will occur. this is so after this loop
 	// we can determine if there will be room for this buff
 	int buff_count = GetMaxTotalSlots();
-	uint32 start_slot = 0;
-	uint32 end_slot = 0;
-	if (IsDisciplineBuff(spell_id)) {
-		start_slot = GetMaxBuffSlots() + GetMaxSongSlots();
-		end_slot = start_slot + GetCurrentDiscSlots();
-	} else if(spells[spell_id].short_buff_box) {
-		start_slot = GetMaxBuffSlots();
-		end_slot = start_slot + GetCurrentSongSlots();
-	} else {
-		start_slot = 0;
-		end_slot = GetCurrentBuffSlots();
-	}
+	uint32 start_slot = GetFirstBuffSlot(IsDisciplineBuff(spell_id), spells[spell_id].short_buff_box);
+	uint32 end_slot = GetLastBuffSlot(IsDisciplineBuff(spell_id), spells[spell_id].short_buff_box);
 
 	for (buffslot = 0; buffslot < buff_count; buffslot++) {
 		const Buffs_Struct &curbuf = buffs[buffslot];
