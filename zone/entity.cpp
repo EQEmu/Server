@@ -1228,7 +1228,9 @@ void EntityList::SendZoneSpawnsBulk(Client *client)
 		maxspawns = mob_list.size();
 	auto bzsp = new BulkZoneSpawnPacket(client, maxspawns);
 
-	int32 race=-1;
+	bool delaypkt = false;
+	const glm::vec4& cpos = client->GetPosition();
+	const float dmax = 600.0 * 600.0;
 	for (auto it = mob_list.begin(); it != mob_list.end(); ++it) {
 		spawn = it->second;
 		if (spawn && spawn->GetID() > 0 && spawn->Spawned()) {
@@ -1236,8 +1238,30 @@ void EntityList::SendZoneSpawnsBulk(Client *client)
 					spawn->CastToClient()->IsHoveringForRespawn()))
 				continue;
 
-			race = spawn->GetRace();
+#if 1
+			const glm::vec4& spos = spawn->GetPosition();
+			
+			delaypkt = false;
+			if (DistanceSquared(cpos, spos) > dmax || (spawn->IsClient() && (spawn->GetRace() == MINOR_ILL_OBJ || spawn->GetRace() == TREE)))
+				delaypkt = true;
+			
+			if (delaypkt) {
+				app = new EQApplicationPacket;
+				spawn->CreateSpawnPacket(app);
+				client->QueuePacket(app, true, Client::CLIENT_CONNECTED);
+				safe_delete(app);
+			}
+			else {
+				memset(&ns, 0, sizeof(NewSpawn_Struct));
+				spawn->FillSpawnStruct(&ns, client);
+				bzsp->AddSpawn(&ns);
+			}
 
+			spawn->SendArmorAppearance(client);
+#else
+			/* original code kept for spawn packet research */
+			int32 race = spawn->GetRace();
+			
 			// Illusion races on PCs don't work as a mass spawn
 			// But they will work as an add_spawn AFTER CLIENT_CONNECTED.
 			if (spawn->IsClient() && (race == MINOR_ILL_OBJ || race == TREE)) {
@@ -1255,6 +1279,7 @@ void EntityList::SendZoneSpawnsBulk(Client *client)
 			// Despite being sent in the OP_ZoneSpawns packet, the client
 			// does not display worn armor correctly so display it.
 			spawn->SendArmorAppearance(client);
+#endif
 		}
 	}
 	safe_delete(bzsp);

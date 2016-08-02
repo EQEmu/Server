@@ -1,5 +1,11 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 08/02/2016 ==
+Uleat: Changed 'SendZoneSpawnsBulk' behavior to use near/far criteria (live-like) when sending packets.
+	- Zone-to-Zone client loading will see a small decrease in time (less than 10~15%)
+	- World-to-Zone client loading appears to greatly benefit from this (tested 'devastation' - pre-change: ~22 seconds, post-change: 12~15 seconds)
+	- This change does not affect the final spawning of mobs in the client
+
 == 07/31/2016 ==
 mackal: Implement more spell gems!
 	- There are a few things still left to due like make dealing with losing gems nice (reset AAs, going to an older client etc)
