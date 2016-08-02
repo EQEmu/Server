@@ -5466,10 +5466,14 @@ void Mob::BuffModifyDurationBySpellID(uint16 spell_id, int32 newDuration)
 
 int Client::GetCurrentBuffSlots() const
 {
-	if(15 + aabonuses.BuffSlotIncrease > 25)
-		return 25;
-	else
-		return 15 + aabonuses.BuffSlotIncrease;
+	int numbuffs = 15;
+	// client does check spells and items
+	numbuffs += aabonuses.BuffSlotIncrease + spellbonuses.BuffSlotIncrease + itembonuses.BuffSlotIncrease;
+	if (GetLevel() > 70)
+		numbuffs++;
+	if (GetLevel() > 74)
+		numbuffs++;
+	return EQEmu::ClampUpper(numbuffs, GetMaxBuffSlots());
 }
 
 int Client::GetCurrentSongSlots() const
