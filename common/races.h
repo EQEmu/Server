@@ -45,6 +45,7 @@
 #define TIGER 63
 #define ELEMENTAL 75
 #define ALLIGATOR 91
+#define OGGOK_CITIZEN 93
 #define EYE_OF_ZOMM 108
 #define WOLF_ELEMENTAL 120
 #define INVISIBLE_MAN 127
