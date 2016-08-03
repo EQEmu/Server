@@ -5368,8 +5368,8 @@ void Mob::SendPetBuffsToClient()
 
 	int MaxSlots = GetMaxTotalSlots();
 
-	if(MaxSlots > BUFF_COUNT)
-		MaxSlots = BUFF_COUNT;
+	if(MaxSlots > PET_BUFF_COUNT)
+		MaxSlots = PET_BUFF_COUNT;
 
 	for(int buffslot = 0; buffslot < MaxSlots; buffslot++)
 	{

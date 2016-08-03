@@ -30,6 +30,7 @@
 
 
 static const uint32 BUFF_COUNT = 25;
+static const uint32 PET_BUFF_COUNT = 30;
 static const uint32 MAX_MERC = 100;
 static const uint32 MAX_MERC_GRADES = 10;
 static const uint32 MAX_MERC_STANCES = 10;
@@ -522,8 +523,8 @@ struct BuffRemoveRequest_Struct
 
 struct PetBuff_Struct {
 /*000*/ uint32 petid;
-/*004*/ uint32 spellid[BUFF_COUNT+5];
-/*124*/ int32 ticsremaining[BUFF_COUNT+5];
+/*004*/ uint32 spellid[PET_BUFF_COUNT];
+/*124*/ int32 ticsremaining[PET_BUFF_COUNT];
 /*244*/ uint32 buffcount;
 };
 

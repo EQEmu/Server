@@ -1709,8 +1709,8 @@ bool Bot::LoadPet()
 
 	NPC *pet_inst = GetPet()->CastToNPC();
 
-	SpellBuff_Struct pet_buffs[BUFF_COUNT];
-	memset(pet_buffs, 0, (sizeof(SpellBuff_Struct) * BUFF_COUNT));
+	SpellBuff_Struct pet_buffs[PET_BUFF_COUNT];
+	memset(pet_buffs, 0, (sizeof(SpellBuff_Struct) * PET_BUFF_COUNT));
 	if (!botdb.LoadPetBuffs(GetBotID(), pet_buffs))
 		bot_owner->Message(13, "%s for %s's pet", BotDatabase::fail::LoadPetBuffs(), GetCleanName());
 
@@ -1741,11 +1741,11 @@ bool Bot::SavePet()
 		return false;
 
 	char* pet_name = new char[64];
-	SpellBuff_Struct pet_buffs[BUFF_COUNT];
+	SpellBuff_Struct pet_buffs[PET_BUFF_COUNT];
 	uint32 pet_items[EQEmu::legacy::EQUIPMENT_SIZE];
 
 	memset(pet_name, 0, 64);
-	memset(pet_buffs, 0, (sizeof(SpellBuff_Struct) * BUFF_COUNT));
+	memset(pet_buffs, 0, (sizeof(SpellBuff_Struct) * PET_BUFF_COUNT));
 	memset(pet_items, 0, (sizeof(uint32) * EQEmu::legacy::EQUIPMENT_SIZE));
 	
 	pet_inst->GetPetState(pet_buffs, pet_items, pet_name);

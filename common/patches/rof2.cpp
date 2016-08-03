@@ -2099,18 +2099,18 @@ namespace RoF2
 		__packet->WriteUInt8(1);		// 1 indicates all buffs on the pet (0 to add or remove a single buff)
 		__packet->WriteUInt16(emu->buffcount);
 
-		for (uint16 i = 0; i < BUFF_COUNT; ++i)
+		for (uint16 i = 0; i < PET_BUFF_COUNT; ++i)
 		{
 			if (emu->spellid[i])
 			{
 				__packet->WriteUInt32(i);
 				__packet->WriteUInt32(emu->spellid[i]);
 				__packet->WriteUInt32(emu->ticsremaining[i]);
-				__packet->WriteUInt32(0); // Unknown
+				__packet->WriteUInt32(0); // num hits
 				__packet->WriteString("");
 			}
 		}
-		__packet->WriteUInt8(0); // Unknown
+		__packet->WriteUInt8(0); // some sort of type
 
 		FINISH_ENCODE();
 	}

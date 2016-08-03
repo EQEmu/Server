@@ -1502,7 +1502,7 @@ namespace SoD
 		VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->petid);
 		VARSTRUCT_ENCODE_TYPE(uint16, Buffer, emu->buffcount);
 
-		for (unsigned int i = 0; i < BUFF_COUNT; ++i)
+		for (unsigned int i = 0; i < PET_BUFF_COUNT; ++i)
 		{
 			if (emu->spellid[i])
 			{
@@ -1513,7 +1513,7 @@ namespace SoD
 			}
 		}
 
-		VARSTRUCT_ENCODE_TYPE(uint8, Buffer, emu->buffcount);
+		VARSTRUCT_ENCODE_TYPE(uint8, Buffer, emu->buffcount); // I think this is actually some sort of type
 
 		delete[] __emu_buffer;
 		dest->FastQueuePacket(&in, ack_req);

@@ -1764,18 +1764,18 @@ namespace UF
 		VARSTRUCT_ENCODE_TYPE(uint8, Buffer, 1);
 		VARSTRUCT_ENCODE_TYPE(uint16, Buffer, emu->buffcount);
 
-		for (unsigned int i = 0; i < BUFF_COUNT; ++i)
+		for (unsigned int i = 0; i < PET_BUFF_COUNT; ++i)
 		{
 			if (emu->spellid[i])
 			{
 				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, i);
 				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->spellid[i]);
 				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->ticsremaining[i]);
-				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);
+				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0); // numhits
 				VARSTRUCT_ENCODE_TYPE(uint8, Buffer, 0);	// This is a string. Name of the caster of the buff.
 			}
 		}
-		VARSTRUCT_ENCODE_TYPE(uint8, Buffer, emu->buffcount);
+		VARSTRUCT_ENCODE_TYPE(uint8, Buffer, emu->buffcount); /// I think this is actually some sort of type
 
 		delete[] __emu_buffer;
 		dest->FastQueuePacket(&in, ack_req);
