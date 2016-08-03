@@ -1870,7 +1870,7 @@ namespace UF
 		OUT(thirst_level);
 		OUT(hunger_level);
 		//PS this needs to be figured out more; but it was 'good enough'
-		for (r = 0; r < structs::BUFF_COUNT; r++)
+		for (r = 0; r < BUFF_COUNT; r++)
 		{
 			if (emu->buffs[r].spellid != 0xFFFF && emu->buffs[r].spellid != 0)
 			{
