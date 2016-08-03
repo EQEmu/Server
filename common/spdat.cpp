@@ -235,8 +235,11 @@ bool IsBeneficialSpell(uint16 spell_id)
 			// If the resisttype is magic and SpellAffectIndex is Calm/memblur/dispell sight
 			// it's not beneficial
 			if (spells[spell_id].resisttype == RESIST_MAGIC) {
-				if (sai == SAI_Calm || sai == SAI_Dispell_Sight ||
-						sai == SAI_Memory_Blur || sai == SAI_Calm_Song)
+				// checking these SAI cause issues with the rng defensive proc line
+				// So I guess instead of fixing it for real, just a quick hack :P
+				if (spells[spell_id].effectid[0] != SE_DefensiveProc &&
+				    (sai == SAI_Calm || sai == SAI_Dispell_Sight || sai == SAI_Memory_Blur ||
+				     sai == SAI_Calm_Song))
 					return false;
 			} else {
 				// If the resisttype is not magic and spell is Bind Sight or Cast Sight
