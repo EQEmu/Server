@@ -624,7 +624,7 @@ bool Client::Process() {
 	{
 		//client logged out or errored out
 		//ResetTrade();
-		if (client_state != CLIENT_KICKED && !zoning) {
+		if (client_state != CLIENT_KICKED && !zoning && !instalog) {
 			Save();
 		}
 
