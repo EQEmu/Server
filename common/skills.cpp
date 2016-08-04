@@ -116,6 +116,7 @@ bool EQEmu::skills::IsCastingSkill(SkillType skill)
 	case SkillAbjuration:
 	case SkillAlteration:
 	case SkillConjuration:
+	case SkillDivination:
 	case SkillEvocation:
 		return true;
 	default:
