@@ -370,18 +370,15 @@ bool Mob::AvoidDamage(Mob *other, int32 &damage, int hand)
 		counter_dodge = attacker->GetSpecialAbilityParam(COUNTER_AVOID_DAMAGE, 4);
 	}
 
-	//////////////////////////////////////////////////////////
-	// make enrage same as riposte
-	/////////////////////////////////////////////////////////
-	if (IsEnraged() && InFront) {
-		damage = -3;
-		Log.Out(Logs::Detail, Logs::Combat, "I am enraged, riposting frontal attack.");
-	}
-
 	// riposte -- it may seem crazy, but if the attacker has SPA 173 on them, they are immune to Ripo
 	bool ImmuneRipo = attacker->aabonuses.RiposteChance || attacker->spellbonuses.RiposteChance || attacker->itembonuses.RiposteChance;
 	// Need to check if we have something in MainHand to actually attack with (or fists)
 	if (hand != EQEmu::legacy::SlotRange && CanThisClassRiposte() && InFront && !ImmuneRipo) {
+		if (IsEnraged()) {
+			damage = -3;
+			Log.Out(Logs::Detail, Logs::Combat, "I am enraged, riposting frontal attack.");
+			return true;
+		}
 		if (IsClient())
 			CastToClient()->CheckIncreaseSkill(EQEmu::skills::SkillRiposte, other, -10);
 		// check auto discs ... I guess aa/items too :P
