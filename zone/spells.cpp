@@ -1327,12 +1327,14 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 			SetMana(GetMana());
 
 			// skills
-			c->CheckIncreaseSkill(spells[spell_id].skill, nullptr);
+			if (EQEmu::skills::IsCastingSkill(spells[spell_id].skill)) {
+				c->CheckIncreaseSkill(spells[spell_id].skill, nullptr);
 
-			// increased chance of gaining channel skill if you regained concentration
-			c->CheckIncreaseSkill(EQEmu::skills::SkillChanneling, nullptr, regain_conc ? 5 : 0);
+				// increased chance of gaining channel skill if you regained concentration
+				c->CheckIncreaseSkill(EQEmu::skills::SkillChanneling, nullptr, regain_conc ? 5 : 0);
 
-			c->CheckSpecializeIncrease(spell_id);
+				c->CheckSpecializeIncrease(spell_id);
+			}
 		}
 	}
 
