@@ -34,6 +34,7 @@ public:
 	virtual bool InLava(const glm::vec3& location) const = 0;
 	virtual bool InLiquid(const glm::vec3& location) const = 0;
 	virtual bool InPvP(const glm::vec3& location) const = 0;
+	virtual bool InZoneLine(const glm::vec3& location) const = 0;
 
 protected:
 	virtual bool Load(FILE *fp) { return false; }

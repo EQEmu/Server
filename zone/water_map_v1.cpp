@@ -34,6 +34,10 @@ bool WaterMapV1::InPvP(const glm::vec3& location) const {
 	return ReturnRegionType(location) == RegionTypePVP;
 }
 
+bool WaterMapV1::InZoneLine(const glm::vec3& location) const {
+	return ReturnRegionType(location) == RegionTypeZoneLine;
+}
+
 bool WaterMapV1::Load(FILE *fp) {
 	uint32 bsp_tree_size;
 	if (fread(&bsp_tree_size, sizeof(bsp_tree_size), 1, fp) != 1) {

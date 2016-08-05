@@ -18,6 +18,7 @@ public:
 	virtual bool InLava(const glm::vec3& location) const;
 	virtual bool InLiquid(const glm::vec3& location) const;
 	virtual bool InPvP(const glm::vec3& location) const;
+	virtual bool InZoneLine(const glm::vec3& location) const;
 
 protected:
 	virtual bool Load(FILE *fp);
