@@ -2006,44 +2006,90 @@ void NPC::LevelScale() {
 
 	float scaling = (((random_level / (float)level) - 1) * (scalerate / 100.0f));
 
-	// Compensate for scale rates at low levels so they don't add too much
-	uint8 scale_adjust = 1;
-	if(level > 0 && level <= 5)
-		scale_adjust = 10;
-	if(level > 5 && level <= 10)
-		scale_adjust = 5;
-	if(level > 10 && level <= 15)
-		scale_adjust = 3;
-	if(level > 15 && level <= 25)
-		scale_adjust = 2;
+	if (RuleB(NPC, NewLevelScaling)) {
+		if (scalerate == 0 || maxlevel <= 25) {
+			// pre-pop seems to scale by 20 HP increments while newer by 100
+			// We also don't want 100 increments on newer noobie zones, check level
+			if (zone->GetZoneID() < 200 || level < 48) {
+				max_hp += (random_level - level) * 20;
+				base_hp += (random_level - level) * 20;
+			} else {
+				max_hp += (random_level - level) * 100;
+				base_hp += (random_level - level) * 100;
+			}
 
-	base_hp += (int)(base_hp * scaling);
-	max_hp += (int)(max_hp * scaling);
-	cur_hp = max_hp;
-	STR += (int)(STR * scaling / scale_adjust);
-	STA += (int)(STA * scaling / scale_adjust);
-	AGI += (int)(AGI * scaling / scale_adjust);
-	DEX += (int)(DEX * scaling / scale_adjust);
-	INT += (int)(INT * scaling / scale_adjust);
-	WIS += (int)(WIS * scaling / scale_adjust);
-	CHA += (int)(CHA * scaling / scale_adjust);
-	if (MR)
-		MR += (int)(MR * scaling / scale_adjust);
-	if (CR)
-		CR += (int)(CR * scaling / scale_adjust);
-	if (DR)
-		DR += (int)(DR * scaling / scale_adjust);
-	if (FR)
-		FR += (int)(FR * scaling / scale_adjust);
-	if (PR)
-		PR += (int)(PR * scaling / scale_adjust);
+			cur_hp = max_hp;
+			max_dmg += (random_level - level) * 2;
+		} else {
+			uint8 scale_adjust = 1;
 
-	if (max_dmg)
-	{
-		max_dmg += (int)(max_dmg * scaling / scale_adjust);
-		min_dmg += (int)(min_dmg * scaling / scale_adjust);
+			base_hp += (int)(base_hp * scaling);
+			max_hp += (int)(max_hp * scaling);
+			cur_hp = max_hp;
+
+			if (max_dmg) {
+				max_dmg += (int)(max_dmg * scaling / scale_adjust);
+				min_dmg += (int)(min_dmg * scaling / scale_adjust);
+			}
+
+			STR += (int)(STR * scaling / scale_adjust);
+			STA += (int)(STA * scaling / scale_adjust);
+			AGI += (int)(AGI * scaling / scale_adjust);
+			DEX += (int)(DEX * scaling / scale_adjust);
+			INT += (int)(INT * scaling / scale_adjust);
+			WIS += (int)(WIS * scaling / scale_adjust);
+			CHA += (int)(CHA * scaling / scale_adjust);
+			if (MR)
+				MR += (int)(MR * scaling / scale_adjust);
+			if (CR)
+				CR += (int)(CR * scaling / scale_adjust);
+			if (DR)
+				DR += (int)(DR * scaling / scale_adjust);
+			if (FR)
+				FR += (int)(FR * scaling / scale_adjust);
+			if (PR)
+				PR += (int)(PR * scaling / scale_adjust);
+		}
+	} else {
+		// Compensate for scale rates at low levels so they don't add too much
+		uint8 scale_adjust = 1;
+		if(level > 0 && level <= 5)
+			scale_adjust = 10;
+		if(level > 5 && level <= 10)
+			scale_adjust = 5;
+		if(level > 10 && level <= 15)
+			scale_adjust = 3;
+		if(level > 15 && level <= 25)
+			scale_adjust = 2;
+
+		base_hp += (int)(base_hp * scaling);
+		max_hp += (int)(max_hp * scaling);
+		cur_hp = max_hp;
+		STR += (int)(STR * scaling / scale_adjust);
+		STA += (int)(STA * scaling / scale_adjust);
+		AGI += (int)(AGI * scaling / scale_adjust);
+		DEX += (int)(DEX * scaling / scale_adjust);
+		INT += (int)(INT * scaling / scale_adjust);
+		WIS += (int)(WIS * scaling / scale_adjust);
+		CHA += (int)(CHA * scaling / scale_adjust);
+		if (MR)
+			MR += (int)(MR * scaling / scale_adjust);
+		if (CR)
+			CR += (int)(CR * scaling / scale_adjust);
+		if (DR)
+			DR += (int)(DR * scaling / scale_adjust);
+		if (FR)
+			FR += (int)(FR * scaling / scale_adjust);
+		if (PR)
+			PR += (int)(PR * scaling / scale_adjust);
+
+		if (max_dmg)
+		{
+			max_dmg += (int)(max_dmg * scaling / scale_adjust);
+			min_dmg += (int)(min_dmg * scaling / scale_adjust);
+		}
+
 	}
-
 	level = random_level;
 
 	return;

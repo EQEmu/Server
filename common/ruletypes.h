@@ -503,6 +503,7 @@ RULE_BOOL(NPC, EnableMeritBasedFaction, false) // If set to true, faction will g
 RULE_INT(NPC, NPCToNPCAggroTimerMin, 500)
 RULE_INT(NPC, NPCToNPCAggroTimerMax, 6000)
 RULE_BOOL(NPC, UseClassAsLastName, true) // Uses class archetype as LastName for npcs with none
+RULE_BOOL(NPC, NewLevelScaling, true) // Better level scaling, use old if new formulas would break your server
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Aggro)
