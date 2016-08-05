@@ -4576,8 +4576,11 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app)
 		safe_delete(outapp);
 	}
 
-	if(zone->watermap && zone->watermap->InLiquid(glm::vec3(m_Position)))
-		CheckIncreaseSkill(EQEmu::skills::SkillSwimming, nullptr, -17);
+	if (zone->watermap) {
+		if (zone->watermap->InLiquid(glm::vec3(m_Position)))
+			CheckIncreaseSkill(EQEmu::skills::SkillSwimming, nullptr, -17);
+		CheckRegionTypeChanges();
+	}
 
 	return;
 }

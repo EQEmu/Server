@@ -27,6 +27,7 @@ class Object;
 class Raid;
 class Seperator;
 class ServerPacket;
+enum WaterRegionType : int;
 
 namespace EQEmu
 {
@@ -360,9 +361,9 @@ public:
 	int32 LevelRegen();
 	void HPTick();
 	void SetGM(bool toggle);
-	void SetPVP(bool toggle);
+	void SetPVP(bool toggle, bool message = true);
 
-	inline bool GetPVP() const { return zone->GetZoneID() == 77 ? true : (m_pp.pvp != 0); }
+	inline bool GetPVP() const { return m_pp.pvp != 0; }
 	inline bool GetGM() const { return m_pp.gm != 0; }
 
 	inline void SetBaseClass(uint32 i) { m_pp.class_=i; }
@@ -1233,6 +1234,8 @@ public:
 
 	void SendHPUpdateMarquee();
 
+	void CheckRegionTypeChanges();
+
 protected:
 	friend class Mob;
 	void CalcItemBonuses(StatBonuses* newbon);
@@ -1417,6 +1420,7 @@ private:
 	uint8 zonesummon_ignorerestrictions;
 	ZoneMode zone_mode;
 
+	WaterRegionType last_region_type;
 
 	Timer position_timer;
 	uint8 position_timer_counter;

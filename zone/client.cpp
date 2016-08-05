@@ -44,6 +44,7 @@ extern volatile bool RunLoops;
 #include "zonedb.h"
 #include "petitions.h"
 #include "command.h"
+#include "water_map.h"
 #ifdef BOTS
 #include "bot_command.h"
 #endif
@@ -156,7 +157,8 @@ Client::Client(EQStreamInterface* ieqs)
 	m_ZoneSummonLocation(-2.0f,-2.0f,-2.0f),
 	m_AutoAttackPosition(0.0f, 0.0f, 0.0f, 0.0f),
 	m_AutoAttackTargetLocation(0.0f, 0.0f, 0.0f),
-	m_lastsave(-1)
+	m_lastsave(-1),
+	last_region_type(RegionTypeUnsupported)
 {
 	for(int cf=0; cf < _FilterCount; cf++)
 		ClientFilters[cf] = FilterShow;
@@ -2482,13 +2484,15 @@ uint16 Client::GetMaxSkillAfterSpecializationRules(EQEmu::skills::SkillType skil
 	return Result;
 }
 
-void Client::SetPVP(bool toggle) {
+void Client::SetPVP(bool toggle, bool message) {
 	m_pp.pvp = toggle ? 1 : 0;
 
-	if(GetPVP())
-		this->Message_StringID(MT_Shout,PVP_ON);
-	else
-		Message(13, "You no longer follow the ways of discord.");
+	if (message) {
+		if(GetPVP())
+			this->Message_StringID(MT_Shout,PVP_ON);
+		else
+			Message(13, "You no longer follow the ways of discord.");
+	}
 
 	SendAppearancePacket(AT_PVP, GetPVP());
 	Save();
@@ -8532,4 +8536,28 @@ uint32 Client::GetMoney(uint8 type, uint8 subtype) {
 
 int Client::GetAccountAge() {
 	return (time(nullptr) - GetAccountCreation());
+}
+
+void Client::CheckRegionTypeChanges()
+{
+	if (!zone->HasWaterMap())
+		return;
+
+	auto new_region = zone->watermap->ReturnRegionType(glm::vec3(m_Position));
+
+	// still same region, do nothing
+	if (last_region_type == new_region)
+		return;
+
+	// region type changed
+	last_region_type = new_region;
+
+	// PVP is the only state we need to keep track of, so we can just return now for PVP servers
+	if (RuleI(World, PVPSettings) > 0)
+		return;
+
+	if (last_region_type == RegionTypePVP)
+		SetPVP(true, false);
+	else if (GetPVP())
+		SetPVP(false, false);
 }
