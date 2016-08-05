@@ -508,7 +508,7 @@ void EntityList::AIYellForHelp(Mob* sender, Mob* attacker) {
 		{
 			//if they are in range, make sure we are not green...
 			//then jump in if they are our friend
-			if(attacker->GetLevelCon(mob->GetLevel()) != CON_GREEN)
+			if(mob->GetLevel() >= 50 || attacker->GetLevelCon(mob->GetLevel()) != CON_GREEN)
 			{
 				bool useprimfaction = false;
 				if(mob->GetPrimaryFaction() == sender->CastToNPC()->GetPrimaryFaction())
