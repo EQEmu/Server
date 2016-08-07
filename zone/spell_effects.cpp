@@ -3668,10 +3668,11 @@ void Mob::DoBuffTic(const Buffs_Struct &buff, int slot, Mob *caster)
 			break;
 		}
 		// These effects always trigger when they fade.
+		// Should we have this triggered from else where?
 		case SE_CastOnFadeEffect:
 		case SE_CastOnFadeEffectNPC:
 		case SE_CastOnFadeEffectAlways: {
-			if (buff.ticsremaining == 1) {
+			if (buff.ticsremaining == 0) {
 				SpellOnTarget(spells[buff.spellid].base[i], this);
 			}
 			break;
