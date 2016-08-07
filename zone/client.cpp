@@ -568,6 +568,11 @@ bool Client::SaveAA() {
 	return true;
 }
 
+void Client::RemoveExpendedAA(int aa_id)
+{
+	database.QueryDatabase(StringFormat("DELETE from `character_alternate_abilities` WHERE `id` = %d and `aa_id` = %d", character_id, aa_id));
+}
+
 bool Client::Save(uint8 iCommitNow) {
 	if(!ClientDataLoaded())
 		return false;

@@ -1240,6 +1240,10 @@ void Mob::ExpendAlternateAdvancementCharge(uint32 aa_id) {
 							CastToClient()->GetEPP().expended_aa += r->cost;
 						}
 					}
+					if (IsClient()) {
+						auto c = CastToClient();
+						c->RemoveExpendedAA(ability->first_rank_id);
+					}
 					aa_ranks.erase(iter.first);
 				}
 
