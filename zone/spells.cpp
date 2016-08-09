@@ -1683,7 +1683,7 @@ bool Mob::DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_ce
 		case ST_Group:
 		case ST_GroupNoPets:
 		{
-			if(IsClient() && CastToClient()->TGB() && IsTGBCompatibleSpell(spell_id) && slot != CastingSlot::Item) {
+			if(IsClient() && CastToClient()->TGB() && IsTGBCompatibleSpell(spell_id) && (slot != CastingSlot::Item || RuleB(Spells, AllowItemTGB))) {
 				if( (!target) ||
 					(target->IsNPC() && !(target->GetOwner() && target->GetOwner()->IsClient())) ||
 					(target->IsCorpse()) )
