@@ -3060,19 +3060,19 @@ uint32 Mob::GetLastBuffSlot(bool disc, bool song)
 
 uint32 Client::GetFirstBuffSlot(bool disc, bool song)
 {
-	if (disc)
-		return GetMaxBuffSlots() + GetMaxSongSlots();
 	if (song)
 		return GetMaxBuffSlots();
+	if (disc)
+		return GetMaxBuffSlots() + GetMaxSongSlots();
 	return 0;
 }
 
 uint32 Client::GetLastBuffSlot(bool disc, bool song)
 {
-	if (disc)
-		return GetMaxBuffSlots() + GetMaxSongSlots() + GetCurrentDiscSlots();
 	if (song)
 		return GetMaxBuffSlots() + GetCurrentSongSlots();
+	if (disc)
+		return GetMaxBuffSlots() + GetMaxSongSlots() + GetCurrentDiscSlots();
 	return GetCurrentBuffSlots();
 }
 
