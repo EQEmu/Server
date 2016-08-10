@@ -1463,9 +1463,6 @@ private:
 	Timer helm_toggle_timer;
 	Timer light_update_timer;
 
-
-	time_t m_lastsave;
-
     glm::vec3 m_Proximity;
 
 	void BulkSendInventoryItems();

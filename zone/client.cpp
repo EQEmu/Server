@@ -157,7 +157,6 @@ Client::Client(EQStreamInterface* ieqs)
 	m_ZoneSummonLocation(-2.0f,-2.0f,-2.0f),
 	m_AutoAttackPosition(0.0f, 0.0f, 0.0f, 0.0f),
 	m_AutoAttackTargetLocation(0.0f, 0.0f, 0.0f),
-	m_lastsave(-1),
 	last_region_type(RegionTypeUnsupported)
 {
 	for(int cf=0; cf < _FilterCount; cf++)
@@ -577,10 +576,6 @@ bool Client::Save(uint8 iCommitNow) {
 	if(!ClientDataLoaded())
 		return false;
 
-	// saved less than 2 seconds ago, lets just skip for now
-	if ((time(nullptr) - m_lastsave) < 2)
-		return true;
-
 	/* Wrote current basics to PP for saves */
 	m_pp.x = m_Position.x;
 	m_pp.y = m_Position.y;
@@ -670,7 +665,6 @@ bool Client::Save(uint8 iCommitNow) {
 
 	database.SaveCharacterData(this->CharacterID(), this->AccountID(), &m_pp, &m_epp); /* Save Character Data */
 
-	m_lastsave = time(nullptr);
 	return true;
 }
 
