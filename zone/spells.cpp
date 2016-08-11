@@ -1729,7 +1729,9 @@ bool Mob::DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_ce
 					{
 						if(IsGrouped())
 						{
-							group_id_caster = GetGroup()->GetID();
+							if (Group* group = GetGroup()) {
+								group_id_caster = group->GetID();
+							}
 						}
 						else if(IsRaidGrouped())
 						{
@@ -1744,7 +1746,9 @@ bool Mob::DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_ce
 						Mob *owner = GetOwner();
 						if(owner->IsGrouped())
 						{
-							group_id_caster = owner->GetGroup()->GetID();
+							if (Group* group = owner->GetGroup()) {
+								group_id_caster = group->GetID();
+							}
 						}
 						else if(owner->IsRaidGrouped())
 						{
@@ -1773,7 +1777,9 @@ bool Mob::DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_ce
 					{
 						if(spell_target->IsGrouped())
 						{
-							group_id_target = spell_target->GetGroup()->GetID();
+							if (Group* group = spell_target->GetGroup()) {
+								group_id_target = group->GetID();
+							}
 						}
 						else if(spell_target->IsRaidGrouped())
 						{
@@ -1788,7 +1794,9 @@ bool Mob::DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_ce
 						Mob *owner = spell_target->GetOwner();
 						if(owner->IsGrouped())
 						{
-							group_id_target = owner->GetGroup()->GetID();
+							if (Group* group = owner->GetGroup()) {
+								group_id_target = group->GetID();
+							}
 						}
 						else if(owner->IsRaidGrouped())
 						{
