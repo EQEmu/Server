@@ -1736,7 +1736,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 							break;
 						}
 					}
-					else if (client) {
+					else if (caster) {
 						Raid *r = entity_list.GetRaidByClient(caster->CastToClient());
 						if(r)
 						{
