@@ -233,6 +233,7 @@ NPC::NPC(const NPCType* d, Spawn2* in_respawn, const glm::vec4& position, int if
 	npc_spells_id = 0;
 	HasAISpell = false;
 	HasAISpellEffects = false;
+	innate_proc_spell_id = 0;
 
 	if(GetClass() == MERCERNARY_MASTER && RuleB(Mercs, AllowMercs))
 	{

@@ -1349,7 +1349,7 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 
 }
 
-bool Mob::DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_center, CastAction_type &CastAction, CastingSlot slot)
+bool Mob::DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_center, CastAction_type &CastAction, CastingSlot slot, bool isproc)
 {
 /*
 	The basic types of spells:
@@ -1395,6 +1395,11 @@ bool Mob::DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_ce
 			Log.Out(Logs::Detail, Logs::AA, "Project Illusion overwrote target caster: %s spell id: %d was ON", GetName(), spell_id);
 			targetType = ST_GroupClientAndPet;
 	}
+
+	// NPC innate procs override the target type to single target.
+	// Yes. This code will cause issues if they have the proc as innate AND on a weapon. Oh well.
+	if (isproc && IsNPC() && CastToNPC()->GetInnateProcSpellID() == spell_id)
+		targetType = ST_Target;
 
 	if (spell_target && !spell_target->PassCastRestriction(true, spells[spell_id].CastRestriction)){
 		Message_StringID(13,SPELL_NEED_TAR);
@@ -1983,7 +1988,7 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, CastingSlot slot, ui
 
 	//determine the type of spell target we have
 	CastAction_type CastAction;
-	if(!DetermineSpellTargets(spell_id, spell_target, ae_center, CastAction, slot))
+	if(!DetermineSpellTargets(spell_id, spell_target, ae_center, CastAction, slot, isproc))
 		return(false);
 
 	Log.Out(Logs::Detail, Logs::Spells, "Spell %d: target type %d, target %s, AE center %s", spell_id, CastAction, spell_target?spell_target->GetName():"NONE", ae_center?ae_center->GetName():"NONE");
