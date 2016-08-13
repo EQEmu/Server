@@ -357,8 +357,9 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 					break;
 
 				int32 val = 0;
-				val = 7500*effect_value;
-				val = caster->GetActSpellHealing(spell_id, val, this);
+				val = 7500 * effect_value;
+				if (caster)
+					val = caster->GetActSpellHealing(spell_id, val, this);
 
 				if (val > 0)
 					HealDamage(val, caster);
@@ -377,12 +378,14 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 						snprintf(effect_desc, _EDLEN, "Current Mana: %+i", effect_value);
 #endif
 						SetMana(GetMana() + effect_value);
-						caster->SetMana(caster->GetMana() + std::abs(effect_value));
+						if (caster)
+							caster->SetMana(caster->GetMana() + std::abs(effect_value));
 
 						if (effect_value < 0)
 							TryTriggerOnValueAmount(false, true);
 #ifdef SPELL_EFFECT_SPAM
-						caster->Message(0, "You have gained %+i mana!", effect_value);
+						if (caster)
+							caster->Message(0, "You have gained %+i mana!", effect_value);
 #endif
 					}
 				}
@@ -534,7 +537,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 					}
 				}
 
-				if (effect == SE_GateCastersBindpoint && caster->IsClient())
+				if (effect == SE_GateCastersBindpoint && caster && caster->IsClient())
 				{ // Teleport Bind uses caster's bind point
 					int index = spells[spell_id].base[i] - 1;
 					if (index < 0 || index > 4)
@@ -650,7 +653,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 				//Added client messages to give some indication this effect is active.
 				// Is there a message generated? Too disgusted by raids.
 				uint32 time = spell.base[i] * 10 * 1000;
-				if (caster->IsClient()) {
+				if (caster && caster->IsClient()) {
 					if (caster->IsGrouped()) {
 						auto group = caster->GetGroup();
 						for (int i = 0; i < 6; ++i)
@@ -697,7 +700,8 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 						((GetLevel() > max_level) && caster && (!caster->IsNPC() ||
 						(caster->IsNPC() && !RuleB(Spells, NPCIgnoreBaseImmunity))))))
 				{
-					caster->Message_StringID(MT_SpellFailure, IMMUNE_STUN);
+					if (caster)
+						caster->Message_StringID(MT_SpellFailure, IMMUNE_STUN);
 				} else {
 					int stun_resist = itembonuses.StunResist+spellbonuses.StunResist;
 					if (IsClient())
@@ -706,7 +710,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 					if (stun_resist <= 0 || zone->random.Int(0,99) >= stun_resist) {
 						Log.Out(Logs::Detail, Logs::Combat, "Stunned. We had %d percent resist chance.", stun_resist);
 
-						if (caster->IsClient())
+						if (caster && caster->IsClient())
 							effect_value += effect_value*caster->GetFocusEffect(focusFcStunTimeMod, spell_id)/100;
 
 						Stun(effect_value);
@@ -918,11 +922,11 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 						cd->meleepush_xy = action->sequence;
 
 						CastToClient()->QueuePacket(action_packet);
-						if(caster->IsClient() && caster != this)
+						if(caster && caster->IsClient() && caster != this)
 							caster->CastToClient()->QueuePacket(action_packet);
 
 						CastToClient()->QueuePacket(message_packet);
-						if(caster->IsClient() && caster != this)
+						if(caster && caster->IsClient() && caster != this)
 							caster->CastToClient()->QueuePacket(message_packet);
 
 						CastToClient()->SetBindPoint(spells[spell_id].base[i] - 1);
@@ -1033,7 +1037,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 
 					if(zone->random.Roll(effect_value))
 						Gate(spells[spell_id].base2[i] - 1);
-					else
+					else if (caster)
 						caster->Message_StringID(MT_SpellFailure,GATE_FAIL);
 				}
 				break;
@@ -1045,7 +1049,8 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 				snprintf(effect_desc, _EDLEN, "Cancel Magic: %d", effect_value);
 #endif
 				if(GetSpecialAbility(UNDISPELLABLE)){
-					caster->Message_StringID(MT_SpellFailure, SPELL_NO_EFFECT, spells[spell_id].name);
+					if (caster)
+						caster->Message_StringID(MT_SpellFailure, SPELL_NO_EFFECT, spells[spell_id].name);
 					break;
 				}
 
@@ -1055,7 +1060,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 						spells[buffs[slot].spellid].dispel_flag == 0 &&
 						!IsDiscipline(buffs[slot].spellid))
 					{
-						if (TryDispel(caster->GetLevel(),buffs[slot].casterlevel, effect_value)){
+						if (caster && TryDispel(caster->GetLevel(),buffs[slot].casterlevel, effect_value)){
 							BuffFadeBySlot(slot);
 							slot = buff_count;
 						}
@@ -1070,7 +1075,8 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 				snprintf(effect_desc, _EDLEN, "Dispel Detrimental: %d", effect_value);
 #endif
 				if(GetSpecialAbility(UNDISPELLABLE)){
-					caster->Message_StringID(MT_SpellFailure, SPELL_NO_EFFECT, spells[spell_id].name);
+					if (caster)
+						caster->Message_StringID(MT_SpellFailure, SPELL_NO_EFFECT, spells[spell_id].name);
 					break;
 				}
 
@@ -1080,7 +1086,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 						IsDetrimentalSpell(buffs[slot].spellid) &&
 						spells[buffs[slot].spellid].dispel_flag == 0)
 					{
-						if (TryDispel(caster->GetLevel(),buffs[slot].casterlevel, effect_value)){
+						if (caster && TryDispel(caster->GetLevel(),buffs[slot].casterlevel, effect_value)){
 							BuffFadeBySlot(slot);
 							slot = buff_count;
 						}
@@ -1095,7 +1101,8 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 				snprintf(effect_desc, _EDLEN, "Dispel Beneficial: %d", effect_value);
 #endif
 				if(GetSpecialAbility(UNDISPELLABLE)){
-					caster->Message_StringID(MT_SpellFailure, SPELL_NO_EFFECT, spells[spell_id].name);
+					if (caster)
+						caster->Message_StringID(MT_SpellFailure, SPELL_NO_EFFECT, spells[spell_id].name);
 					break;
 				}
 
@@ -1105,7 +1112,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 						IsBeneficialSpell(buffs[slot].spellid) &&
 						spells[buffs[slot].spellid].dispel_flag == 0)
 					{
-						if (TryDispel(caster->GetLevel(),buffs[slot].casterlevel, effect_value)){
+						if (caster && TryDispel(caster->GetLevel(),buffs[slot].casterlevel, effect_value)){
 							BuffFadeBySlot(slot);
 							slot = buff_count;
 						}
@@ -1122,7 +1129,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 					if (buffs[slot].spellid != SPELL_UNKNOWN &&
 						IsDetrimentalSpell(buffs[slot].spellid))
 					{
-						if (TryDispel(caster->GetLevel(),buffs[slot].casterlevel, effect_value)){
+						if (caster && TryDispel(caster->GetLevel(),buffs[slot].casterlevel, effect_value)){
 							BuffFadeBySlot(slot);
 						}
 					}
@@ -1511,7 +1518,8 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 					((GetLevel() > max_level)
 					&& caster && (!caster->IsNPC() || (caster->IsNPC() && !RuleB(Spells, NPCIgnoreBaseImmunity)))))
 				{
-					caster->Message_StringID(MT_Shout, IMMUNE_STUN);
+					if (caster)
+						caster->Message_StringID(MT_Shout, IMMUNE_STUN);
 				}
 				else
 				{
@@ -1728,7 +1736,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 							break;
 						}
 					}
-					else {
+					else if (client) {
 						Raid *r = entity_list.GetRaidByClient(caster->CastToClient());
 						if(r)
 						{
@@ -1768,7 +1776,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 								Message_StringID(4, CORPSE_CANT_SENSE);
 							}
 						}
-						else
+						else if (caster)
 							caster->Message_StringID(MT_SpellFailure, SPELL_LEVEL_REQ);
 					}
 					else {
@@ -2115,7 +2123,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 #ifdef SPELL_EFFECT_SPAM
 				snprintf(effect_desc, _EDLEN, "Sacrifice");
 #endif
-				if(!IsClient() || !caster->IsClient()){
+				if(!caster || !IsClient() || !caster->IsClient()){
 					break;
 				}
 				CastToClient()->SacrificeConfirm(caster->CastToClient());
@@ -2124,12 +2132,15 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 
 			case SE_SummonPC:
 			{
-			if(IsClient()){
-					CastToClient()->MovePC(zone->GetZoneID(), zone->GetInstanceID(), caster->GetX(), caster->GetY(), caster->GetZ(), caster->GetHeading(), 2, SummonPC);
+				if (!caster)
+					break;
+				if (IsClient()) {
+					CastToClient()->MovePC(zone->GetZoneID(), zone->GetInstanceID(), caster->GetX(),
+							       caster->GetY(), caster->GetZ(), caster->GetHeading(), 2,
+							       SummonPC);
 					Message(15, "You have been summoned!");
 					entity_list.ClearAggro(this);
-				}
-				else
+				} else
 					caster->Message(13, "This spell can only be cast on players.");
 
 				break;
@@ -2176,6 +2187,8 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 
 			case SE_TemporaryPets: //Dook- swarms and wards:
 			{
+				if (!caster)
+					break;
 				// this makes necro epic 1.5/2.0 proc work properly
 				if((spell_id != 6882) && (spell_id != 6884)) // Chaotic Jester/Steadfast Servant
 				{
@@ -2271,6 +2284,8 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 				*/
 				int16 focus = 0;
 				int ReuseTime = spells[spell_id].recast_time + spells[spell_id].recovery_time;
+				if (!caster)
+					break;
 
 				focus = caster->GetFocusEffect(focusFcBaseEffects, spell_id);
 
@@ -2294,7 +2309,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 				snprintf(effect_desc, _EDLEN, "Wake The Dead");
 #endif
 				//meh dupe issue with npc casting this
-				if(caster->IsClient()){
+				if(caster && caster->IsClient()){
 					int dur = spells[spell_id].max[i];
 					if (!dur)
 						dur = 60;
@@ -2659,7 +2674,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 
 			case SE_Taunt:
 			{
-				if (IsNPC()){
+				if (caster && IsNPC()){
 					caster->Taunt(this->CastToNPC(), false, static_cast<float>(spell.base[i]), true, spell.base2[i]);
 				}
 				break;
