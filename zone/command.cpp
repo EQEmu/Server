@@ -4347,6 +4347,7 @@ void command_iteminfo(Client *c, const Seperator *sep)
 	if (!item) {
 		Log.Out(Logs::General, Logs::Inventory, "(%s) Command #iteminfo processed an item with no data pointer");
 		c->Message(13, "Error: This item has no data reference");
+		return;
 	}
 
 	EQEmu::SayLinkEngine linker;
