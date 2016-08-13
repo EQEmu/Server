@@ -163,7 +163,7 @@ float Map::FindClosestZ(glm::vec3 &start, glm::vec3 *result) const {
 	to.z = -BEST_Z_INVALID;
 	hit = imp->rm->raycast((const RmReal*)&from, (const RmReal*)&to, (RmReal*)result, nullptr, &hit_distance);
 	if (hit) {
-		if (abs(from.z - result->z) < abs(ClosestZ - from.z))
+		if (std::abs(from.z - result->z) < std::abs(ClosestZ - from.z))
 			return result->z;
 	}
 
