@@ -455,7 +455,7 @@ bool SharedDatabase::GetSharedBank(uint32 id, Inventory *inv, bool is_charid)
 			}
 		}
 
-		if (row[9]) {
+		if (inst && row[9]) {
 			std::string data_str(row[9]);
 			std::string idAsString;
 			std::string value;
@@ -480,6 +480,7 @@ bool SharedDatabase::GetSharedBank(uint32 id, Inventory *inv, bool is_charid)
 			}
 		}
 
+		// theoretically inst can be nullptr ... this would be very bad ...
 		put_slot_id = inv->PutItem(slot_id, *inst);
 		safe_delete(inst);
 
