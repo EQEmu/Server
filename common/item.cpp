@@ -1863,6 +1863,9 @@ uint8 ItemInst::FirstOpenSlot() const
 
 uint8 ItemInst::GetTotalItemCount() const
 {
+	if (!m_item)
+		return 0;
+	
 	uint8 item_count = 1;
 
 	if (m_item && !m_item->IsClassBag()) { return item_count; }
