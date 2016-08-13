@@ -3683,58 +3683,58 @@ void Client::SacrificeConfirm(Client *caster)
 //Essentially a special case death function
 void Client::Sacrifice(Client *caster)
 {
-				if(GetLevel() >= RuleI(Spells, SacrificeMinLevel) && GetLevel() <= RuleI(Spells, SacrificeMaxLevel)){
-					int exploss = (int)(GetLevel() * (GetLevel() / 18.0) * 12000);
-					if(exploss < GetEXP()){
-						SetEXP(GetEXP()-exploss, GetAAXP());
-						SendLogoutPackets();
+	if (GetLevel() >= RuleI(Spells, SacrificeMinLevel) && GetLevel() <= RuleI(Spells, SacrificeMaxLevel)) {
+		int exploss = (int)(GetLevel() * (GetLevel() / 18.0) * 12000);
+		if (exploss < GetEXP()) {
+			SetEXP(GetEXP() - exploss, GetAAXP());
+			SendLogoutPackets();
 
-						//make our become corpse packet, and queue to ourself before OP_Death.
-						EQApplicationPacket app2(OP_BecomeCorpse, sizeof(BecomeCorpse_Struct));
-						BecomeCorpse_Struct* bc = (BecomeCorpse_Struct*)app2.pBuffer;
-						bc->spawn_id = GetID();
-						bc->x = GetX();
-						bc->y = GetY();
-						bc->z = GetZ();
-						QueuePacket(&app2);
+			// make our become corpse packet, and queue to ourself before OP_Death.
+			EQApplicationPacket app2(OP_BecomeCorpse, sizeof(BecomeCorpse_Struct));
+			BecomeCorpse_Struct *bc = (BecomeCorpse_Struct *)app2.pBuffer;
+			bc->spawn_id = GetID();
+			bc->x = GetX();
+			bc->y = GetY();
+			bc->z = GetZ();
+			QueuePacket(&app2);
 
-						// make death packet
-						EQApplicationPacket app(OP_Death, sizeof(Death_Struct));
-						Death_Struct* d = (Death_Struct*)app.pBuffer;
-						d->spawn_id = GetID();
-						d->killer_id = caster ? caster->GetID() : 0;
-						d->bindzoneid = GetPP().binds[0].zoneId;
-						d->spell_id = SPELL_UNKNOWN;
-						d->attack_skill = 0xe7;
-						d->damage = 0;
-						app.priority = 6;
-						entity_list.QueueClients(this, &app);
+			// make death packet
+			EQApplicationPacket app(OP_Death, sizeof(Death_Struct));
+			Death_Struct *d = (Death_Struct *)app.pBuffer;
+			d->spawn_id = GetID();
+			d->killer_id = caster ? caster->GetID() : 0;
+			d->bindzoneid = GetPP().binds[0].zoneId;
+			d->spell_id = SPELL_UNKNOWN;
+			d->attack_skill = 0xe7;
+			d->damage = 0;
+			app.priority = 6;
+			entity_list.QueueClients(this, &app);
 
-						BuffFadeAll();
-						UnmemSpellAll();
-						Group *g = GetGroup();
-						if(g){
-							g->MemberZoned(this);
-						}
-						Raid *r = entity_list.GetRaidByClient(this);
-						if(r){
-							r->MemberZoned(this);
-						}
-						ClearAllProximities();
-						if(RuleB(Character, LeaveCorpses)){
-							auto new_corpse = new Corpse(this, 0);
-							entity_list.AddCorpse(new_corpse, GetID());
-							SetID(0);
-							entity_list.QueueClients(this, &app2, true);
-						}
-						Save();
-						GoToDeath();
-						caster->SummonItem(RuleI(Spells, SacrificeItemID));
-					}
-				}
-				else{
-					caster->Message_StringID(13, SAC_TOO_LOW);	//This being is not a worthy sacrifice.
-				}
+			BuffFadeAll();
+			UnmemSpellAll();
+			Group *g = GetGroup();
+			if (g) {
+				g->MemberZoned(this);
+			}
+			Raid *r = entity_list.GetRaidByClient(this);
+			if (r) {
+				r->MemberZoned(this);
+			}
+			ClearAllProximities();
+			if (RuleB(Character, LeaveCorpses)) {
+				auto new_corpse = new Corpse(this, 0);
+				entity_list.AddCorpse(new_corpse, GetID());
+				SetID(0);
+				entity_list.QueueClients(this, &app2, true);
+			}
+			Save();
+			GoToDeath();
+			if (caster) // I guess it's possible?
+				caster->SummonItem(RuleI(Spells, SacrificeItemID));
+		}
+	} else {
+		caster->Message_StringID(13, SAC_TOO_LOW); // This being is not a worthy sacrifice.
+	}
 }
 
 void Client::SendOPTranslocateConfirm(Mob *Caster, uint16 SpellID) {
