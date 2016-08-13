@@ -3139,7 +3139,7 @@ int Mob::AddBuff(Mob *caster, uint16 spell_id, int duration, int32 level_overrid
 			if (ret == -1) {	// stop the spell
 				Log.Out(Logs::Detail, Logs::Spells, "Adding buff %d failed: stacking prevented by spell %d in slot %d with caster level %d",
 						spell_id, curbuf.spellid, buffslot, curbuf.casterlevel);
-				if (caster->IsClient() && RuleB(Client, UseLiveBlockedMessage)) {
+				if (caster && caster->IsClient() && RuleB(Client, UseLiveBlockedMessage)) {
 					caster->Message(13, "Your %s did not take hold on %s. (Blocked by %s.)", spells[spell_id].name, this->GetName(), spells[curbuf.spellid].name);
 				}
 				return -1;
