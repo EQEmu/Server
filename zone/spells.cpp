@@ -345,7 +345,6 @@ bool Mob::DoCastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 {
 	Mob* pMob = nullptr;
 	int32 orgcasttime;
-	EQApplicationPacket *outapp = nullptr;
 
 	if(!IsValidSpell(spell_id)) {
 		InterruptSpell();
@@ -455,6 +454,18 @@ bool Mob::DoCastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 	Log.Out(Logs::Detail, Logs::Spells, "Spell %d: Casting time %d (orig %d), mana cost %d",
 			spell_id, cast_time, orgcasttime, mana_cost);
 
+	// now tell the people in the area -- we ALWAYS want to send this, even instant cast spells.
+	// The only time this is skipped is for NPC innate procs and weapon procs. Procs from buffs
+	// oddly still send this. Since those cases don't reach here, we don't need to check them
+	auto outapp = new EQApplicationPacket(OP_BeginCast,sizeof(BeginCast_Struct));
+	BeginCast_Struct* begincast = (BeginCast_Struct*)outapp->pBuffer;
+	begincast->caster_id = GetID();
+	begincast->spell_id = spell_id;
+	begincast->cast_time = orgcasttime; // client calculates reduced time by itself
+	outapp->priority = 3;
+	entity_list.QueueCloseClients(this, outapp, false, 200, 0, true); //IsClient() ? FILTER_PCSPELLS : FILTER_NPCSPELLS);
+	safe_delete(outapp);
+
 	// cast time is 0, just finish it right now and be done with it
 	if(cast_time == 0) {
 		CastedSpellFinished(spell_id, target_id, slot, mana_cost, item_slot, resist_adjust);
@@ -477,17 +488,6 @@ bool Mob::DoCastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 	// if we got here we didn't fizzle, and are starting our cast
 	if (oSpellWillFinish)
 		*oSpellWillFinish = Timer::GetCurrentTime() + cast_time + 100;
-
-	// now tell the people in the area
-	outapp = new EQApplicationPacket(OP_BeginCast,sizeof(BeginCast_Struct));
-	BeginCast_Struct* begincast = (BeginCast_Struct*)outapp->pBuffer;
-	begincast->caster_id = GetID();
-	begincast->spell_id = spell_id;
-	begincast->cast_time = orgcasttime; // client calculates reduced time by itself
-	outapp->priority = 3;
-	entity_list.QueueCloseClients(this, outapp, false, 200, 0, true); //IsClient() ? FILTER_PCSPELLS : FILTER_NPCSPELLS);
-	safe_delete(outapp);
-	outapp = nullptr;
 
 	if (IsClient() && slot == CastingSlot::Item && item_slot != 0xFFFFFFFF) {
 		auto item = CastToClient()->GetInv().GetItem(item_slot);
