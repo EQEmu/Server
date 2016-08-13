@@ -4339,7 +4339,10 @@ void command_goto(Client *c, const Seperator *sep)
 void command_iteminfo(Client *c, const Seperator *sep)
 {
 	auto inst = c->GetInv()[EQEmu::legacy::SlotCursor];
-	if (!inst) { c->Message(13, "Error: You need an item on your cursor for this command"); }
+	if (!inst) {
+		c->Message(13, "Error: You need an item on your cursor for this command");
+		return;
+	}
 	auto item = inst->GetItem();
 	if (!item) {
 		Log.Out(Logs::General, Logs::Inventory, "(%s) Command #iteminfo processed an item with no data pointer");
