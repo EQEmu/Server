@@ -142,6 +142,8 @@ RULE_INT(Character, InvSnapshotMinRetryM, 30) // Time (in minutes) to re-attempt
 RULE_INT(Character, InvSnapshotHistoryD, 30) // Time (in days) to keep snapshot entries
 RULE_BOOL(Character, RestrictSpellScribing, false) // Restricts spell scribing to allowable races/classes of spell scroll, if true
 RULE_BOOL(Character, UseStackablePickPocketing, true) // Allows stackable pickpocketed items to stack instead of only being allowed in empty inventory slots
+RULE_BOOL(Character, EnableAvoidanceCap, false)
+RULE_INT(Character, AvoidanceCap, 750) // 750 Is a pretty good value, seen people dodge all attacks beyond 1,000 Avoidance
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Mercs)

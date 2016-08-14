@@ -1,5 +1,12 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 08/13/2016 ==
+Kinglykrab: Implemented optional avoidance cap rules.
+	- Serves to eliminate God-like characters on custom servers with high item stats
+	- Rule Names:
+		- Character:EnableAvoidanceCap (default is false)
+		- Character:AvoidanceCap (default is 750, beyond 1,000 seems to make characters dodge all attacks)
+	
 == 08/02/2016 ==
 Uleat: Changed 'SendZoneSpawnsBulk' behavior to use near/far criteria (live-like) when sending packets.
 	- Zone-to-Zone client loading will see a small decrease in time (less than 10~15%)
