@@ -2995,8 +2995,7 @@ int Mob::CheckStackConflict(uint16 spellid1, int caster_level1, uint16 spellid2,
 		if
 		(
 			effect1 == SE_AttackSpeed ||
-			effect1 == SE_AttackSpeed2 ||
-			effect1 == SE_AttackSpeed3
+			effect1 == SE_AttackSpeed2
 		)
 		{
 			sp1_value -= 100;
