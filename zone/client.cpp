@@ -1794,7 +1794,7 @@ const int32& Client::SetMana(int32 amount) {
 }
 
 void Client::SendManaUpdatePacket() {
-	if (!Connected() || IsCasting())
+	if (!Connected())
 		return;
 
 	if (ClientVersion() >= EQEmu::versions::ClientVersion::SoD) {
@@ -1808,7 +1808,7 @@ void Client::SendManaUpdatePacket() {
 		ManaChange_Struct* manachange = (ManaChange_Struct*)outapp->pBuffer;
 		manachange->new_mana = cur_mana;
 		manachange->stamina = cur_end;
-		manachange->spell_id = casting_spell_id;	//always going to be 0... since we check IsCasting()
+		manachange->spell_id = casting_spell_id;
 		manachange->keepcasting = 1;
 		outapp->priority = 6;
 		QueuePacket(outapp);
