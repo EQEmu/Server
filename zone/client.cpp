@@ -1809,6 +1809,7 @@ void Client::SendManaUpdatePacket() {
 		manachange->new_mana = cur_mana;
 		manachange->stamina = cur_end;
 		manachange->spell_id = casting_spell_id;	//always going to be 0... since we check IsCasting()
+		manachange->keepcasting = 1;
 		outapp->priority = 6;
 		QueuePacket(outapp);
 		safe_delete(outapp);
