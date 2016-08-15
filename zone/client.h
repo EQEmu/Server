@@ -894,6 +894,9 @@ public:
 	void SendDisciplineTimer(uint32 timer_id, uint32 duration);
 	bool UseDiscipline(uint32 spell_id, uint32 target);
 
+	void SetLinkedSpellReuseTimer(uint32 timer_id, uint32 duration);
+	bool IsLinkedSpellReuseTimerReady(uint32 timer_id);
+
 	bool CheckTitle(int titleset);
 	void EnableTitle(int titleset);
 	void RemoveTitle(int titleset);

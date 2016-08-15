@@ -552,6 +552,10 @@ bool Mob::DoCastingChecks()
 		}
 	}
 
+	if (IsClient() && spells[spell_id].EndurTimerIndex > 0 && casting_spell_slot < CastingSlot::MaxGems)
+		if (!CastToClient()->IsLinkedSpellReuseTimerReady(spells[spell_id].EndurTimerIndex))
+			return false;
+
 	casting_spell_checks = true;
 	return true;
 }
@@ -1308,8 +1312,11 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 	{
 		if(IsClient())
 		{
-			this->CastToClient()->CheckSongSkillIncrease(spell_id);
-			this->CastToClient()->MemorizeSpell(static_cast<uint32>(slot), spell_id, memSpellSpellbar);
+			Client *c = CastToClient();
+			c->CheckSongSkillIncrease(spell_id);
+			if (spells[spell_id].EndurTimerIndex > 0 && slot < CastingSlot::MaxGems)
+				c->SetLinkedSpellReuseTimer(spells[spell_id].EndurTimerIndex, spells[spell_id].recast_time / 1000);
+			c->MemorizeSpell(static_cast<uint32>(slot), spell_id, memSpellSpellbar);
 		}
 		Log.Out(Logs::Detail, Logs::Spells, "Bard song %d should be started", spell_id);
 	}
@@ -1321,6 +1328,8 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 			SendSpellBarEnable(spell_id);
 
 			// this causes the delayed refresh of the spell bar gems
+			if (spells[spell_id].EndurTimerIndex > 0 && slot < CastingSlot::MaxGems)
+				c->SetLinkedSpellReuseTimer(spells[spell_id].EndurTimerIndex, spells[spell_id].recast_time / 1000);
 			c->MemorizeSpell(static_cast<uint32>(slot), spell_id, memSpellSpellbar);
 
 			// this tells the client that casting may happen again
@@ -5680,3 +5689,25 @@ void Mob::ConeDirectional(uint16 spell_id, int16 resist_adjust)
 		++iter;
 	}
 }
+
+// duration in seconds
+void Client::SetLinkedSpellReuseTimer(uint32 timer_id, uint32 duration)
+{
+	if (timer_id > 19)
+		return;
+	GetPTimers().Start(pTimerLinkedSpellReuseStart + timer_id, duration);
+	auto outapp = new EQApplicationPacket(OP_LinkedReuse, sizeof(LinkedSpellReuseTimer_Struct));
+	auto lr = (LinkedSpellReuseTimer_Struct *)outapp->pBuffer;
+	lr->timer_id = timer_id;
+	lr->start_time = Timer::GetCurrentTime() / 1000;
+	lr->end_time = lr->start_time + duration;
+	FastQueuePacket(&outapp);
+}
+
+bool Client::IsLinkedSpellReuseTimerReady(uint32 timer_id)
+{
+	if (timer_id > 19)
+		return true;
+	return GetPTimers().Expired(&database, pTimerLinkedSpellReuseStart + timer_id);
+}
+

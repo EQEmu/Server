@@ -1,5 +1,11 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 08/14/2016 ==
+mackal: Implement Linked Spell Reuse Timers
+	- For whatever reason this is a bit unfriendly, but that's how it is on live.
+	- Titanium is especially unfriendly with large differences in reuse times (ex higher canni and the first 4)
+	- Unsure when this went live for spells, but canni was at least linked at OoW launch
+
 == 08/13/2016 ==
 Kinglykrab: Implemented optional avoidance cap rules.
 	- Serves to eliminate God-like characters on custom servers with high item stats

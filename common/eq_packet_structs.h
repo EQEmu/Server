@@ -391,6 +391,18 @@ uint32 reduction;	// lower reuse
 };
 
 /*
+** Linked Spell Reuse Timer
+** Length: 12
+** Comes before the OP_Memorize
+** Live (maybe TDS steam) has an extra DWORD after timer_id
+*/
+struct LinkedSpellReuseTimer_Struct {
+	uint32 timer_id; // Timer ID of the spell
+	uint32 end_time; // timestamp of when it will be ready
+	uint32 start_time; // timestamp of when it started
+};
+
+/*
 ** Make Charmed Pet
 ** Length: 12 Bytes
 **
