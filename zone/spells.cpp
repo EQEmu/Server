@@ -470,6 +470,10 @@ bool Mob::DoCastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 
 	// cast time is 0, just finish it right now and be done with it
 	if(cast_time == 0) {
+		if (!DoCastingChecks()) {
+			StopCasting();
+			return false;
+		}
 		CastedSpellFinished(spell_id, target_id, slot, mana_cost, item_slot, resist_adjust);
 		return(true);
 	}
@@ -498,7 +502,7 @@ bool Mob::DoCastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 	}
 
 	if (!DoCastingChecks()) {
-		InterruptSpell();
+		StopCasting();
 		return false;
 	}
 
@@ -880,6 +884,32 @@ void Mob::InterruptSpell(uint16 message, uint16 color, uint16 spellid)
 	entity_list.QueueCloseClients(this, outapp, true, 200, 0, true, IsClient() ? FilterPCSpells : FilterNPCSpells);
 	safe_delete(outapp);
 
+}
+
+// this is like interrupt, just it doesn't spam interrupt packets to everyone
+// There are a few cases where this is what live does :P
+void Mob::StopCasting()
+{
+	if (casting_spell_id && IsNPC()) {
+		CastToNPC()->AI_Event_SpellCastFinished(false, static_cast<uint16>(casting_spell_slot));
+	}
+
+	if (IsClient()) {
+		auto c = CastToClient();
+		if (casting_spell_aa_id) { //Rest AA Timer on failed cast
+			c->Message_StringID(MT_SpellFailure, ABILITY_FAILED);
+			c->ResetAlternateAdvancementTimer(casting_spell_aa_id);
+		}
+
+		auto outapp = new EQApplicationPacket(OP_ManaChange, sizeof(ManaChange_Struct));
+		auto mc = (ManaChange_Struct *)outapp->pBuffer;
+		mc->new_mana = GetMana();
+		mc->stamina = GetEndurance();
+		mc->spell_id = casting_spell_id;
+		mc->keepcasting = 0;
+		c->FastQueuePacket(&outapp);
+	}
+	ZeroCastingVars();
 }
 
 // this is called after the timer is up and the spell is finished
