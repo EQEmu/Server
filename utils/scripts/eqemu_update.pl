@@ -1,10 +1,10 @@
 #!/usr/bin/perl
 
-###########################################################
+########################################################### 
 #::: Automatic (Database) Upgrade Script
 #::: Author: Akkadius
 #::: Purpose: To upgrade databases with ease and maintain versioning
-########################################################### 
+###########################################################  
 
 $menu_displayed = 0;
 
