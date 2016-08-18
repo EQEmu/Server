@@ -12,7 +12,7 @@
 WaterMap* WaterMap::LoadWaterMapfile(std::string zone_name) {
 	std::transform(zone_name.begin(), zone_name.end(), zone_name.begin(), ::tolower);
 		
-	std::string file_path = MAP_DIR + std::string("/") + zone_name + std::string(".wtr");
+	std::string file_path = Config->MapDir + zone_name + std::string(".wtr");
 	FILE *f = fopen(file_path.c_str(), "rb");
 	if(f) {
 		char magic[10];
@@ -33,7 +33,7 @@ WaterMap* WaterMap::LoadWaterMapfile(std::string zone_name) {
 		}
 		
 		if(version == 1) {
-			WaterMapV1 *wm = new WaterMapV1();
+			auto wm = new WaterMapV1();
 			if(!wm->Load(f)) {
 				delete wm;
 				wm = nullptr;
@@ -42,7 +42,7 @@ WaterMap* WaterMap::LoadWaterMapfile(std::string zone_name) {
 			fclose(f);
 			return wm;
 		} else if(version == 2) {
-			WaterMapV2 *wm = new WaterMapV2();
+			auto wm = new WaterMapV2();
 			if(!wm->Load(f)) {
 				delete wm;
 				wm = nullptr;

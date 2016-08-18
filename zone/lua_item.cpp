@@ -7,7 +7,7 @@
 #include "lua_item.h"
 
 Lua_Item::Lua_Item(uint32 item_id) {
-	const Item_Struct *t = database.GetItem(item_id);
+	const EQEmu::ItemBase *t = database.GetItem(item_id);
 	SetLuaPtrData(t);
 }
 

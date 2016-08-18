@@ -212,7 +212,7 @@ ProcLauncher::ProcRef ProcLauncher::Launch(Spec *&to_launch) {
 #else	//!WIN32
 
 	//build argv
-	char **argv = new char *[it->args.size()+2];
+	auto argv = new char *[it->args.size() + 2];
 	unsigned int r;
 	argv[0] = const_cast<char *>(it->program.c_str());
 	for(r = 1; r <= it->args.size(); r++) {
@@ -276,7 +276,7 @@ ProcLauncher::ProcRef ProcLauncher::Launch(Spec *&to_launch) {
 //if graceful is true, we try to be nice about it if possible
 bool ProcLauncher::Terminate(const ProcRef &proc, bool graceful) {
 	//we are only willing to kill things we started...
-	std::map<ProcRef, Spec *>::iterator res = m_running.find(proc);
+	auto res = m_running.find(proc);
 	if(res == m_running.end())
 		return(false);
 

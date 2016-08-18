@@ -2,6 +2,7 @@
 #define TEMPLATE_H_
 
 #include "../struct_strategy.h"
+#include "../eqemu_config_extern.h"
 
 class EQStreamIdentifier;
 

@@ -5,7 +5,7 @@ if [ -z "$1" ]; then
 	exit 1
 fi
 
-for ext in .cpp .h _ops.h _constants.h _structs.h
+for ext in .cpp _limits.cpp .h _ops.h _limits.h _structs.h
 do
 	cp template$ext $1$ext
 	perl -pi -e "s/TEMPLATE/$1/g" $1$ext

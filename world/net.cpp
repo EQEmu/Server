@@ -107,7 +107,7 @@ volatile bool RunLoops = true;
 uint32 numclients = 0;
 uint32 numzones = 0;
 bool holdzones = false;
-
+const WorldConfig *Config;
 EQEmuLogSys Log;
 
 extern ConsoleList console_list;
@@ -117,14 +117,18 @@ void CatchSignal(int sig_num);
 int main(int argc, char** argv) {
 	RegisterExecutablePlatform(ExePlatformWorld);
 	Log.LoadLogSettingsDefaults();
+
+
+
 	set_exception_handler();
 	register_remote_call_handlers();
 
 	/* Database Version Check */
 	uint32 Database_Version = CURRENT_BINARY_DATABASE_VERSION;
+	uint32 Bots_Database_Version = CURRENT_BINARY_BOTS_DATABASE_VERSION;
 	if (argc >= 2) { 
 		if (strcasecmp(argv[1], "db_version") == 0) {
-			std::cout << "Binary Database Version: " << Database_Version << std::endl;
+			std::cout << "Binary Database Version: " << Database_Version << " : " << Bots_Database_Version << std::endl;
 			return 0;
 		}
 	}
@@ -135,7 +139,7 @@ int main(int argc, char** argv) {
 		Log.Out(Logs::General, Logs::World_Server, "Loading server configuration failed.");
 		return 1;
 	}
-	const WorldConfig *Config=WorldConfig::get();
+	Config=WorldConfig::get();
 
 	Log.Out(Logs::General, Logs::World_Server, "CURRENT_VERSION: %s", CURRENT_VERSION);
 
@@ -193,7 +197,7 @@ int main(int argc, char** argv) {
 
 	bool ignore_db = false;
 	if (argc >= 2) {
-		char tmp[2];
+		std::string tmp;
 		if (strcasecmp(argv[1], "help") == 0 || strcasecmp(argv[1], "?") == 0 || strcasecmp(argv[1], "/?") == 0 || strcasecmp(argv[1], "-?") == 0 || strcasecmp(argv[1], "-h") == 0 || strcasecmp(argv[1], "-help") == 0) {
 			std::cout << "Worldserver command line commands:" << std::endl;
 			std::cout << "adduser username password flag    - adds a user account" << std::endl;
@@ -206,8 +210,8 @@ int main(int argc, char** argv) {
 			std::cout << "Reboot Zones mode ON" << std::endl;
 			holdzones = true;
 		}
-		else if (database.GetVariable("disablecommandline", tmp, 2)) {
-			if (strlen(tmp) == 1) {
+		else if (database.GetVariable("disablecommandline", tmp)) {
+			if (tmp.length() == 1) {
 				if (tmp[0] == '1') {
 					std::cerr << "Command line disabled in database... exiting" << std::endl;
 					return 1;
@@ -298,6 +302,14 @@ int main(int argc, char** argv) {
 	}
 	Log.Out(Logs::General, Logs::World_Server, "Loading variables..");
 	database.LoadVariables();
+
+	std::string hotfix_name;
+	if(database.GetVariable("hotfix_name", hotfix_name)) {
+		if (!hotfix_name.empty()) {
+			Log.Out(Logs::General, Logs::Zone_Server, "Current hotfix in use: '%s'", hotfix_name.c_str());
+		}
+	}
+
 	Log.Out(Logs::General, Logs::World_Server, "Loading zones..");
 	database.LoadZoneNames();
 	Log.Out(Logs::General, Logs::World_Server, "Clearing groups..");
@@ -306,27 +318,29 @@ int main(int argc, char** argv) {
 	database.ClearRaid();
 	database.ClearRaidDetails();
 	database.ClearRaidLeader();
+	Log.Out(Logs::General, Logs::World_Server, "Clearing inventory snapshots..");
+	database.ClearInvSnapshots();
 	Log.Out(Logs::General, Logs::World_Server, "Loading items..");
-	if (!database.LoadItems())
+	if(!database.LoadItems(hotfix_name))
 		Log.Out(Logs::General, Logs::World_Server, "Error: Could not load item data. But ignoring");
 	Log.Out(Logs::General, Logs::World_Server, "Loading skill caps..");
-	if (!database.LoadSkillCaps())
+	if(!database.LoadSkillCaps(std::string(hotfix_name)))
 		Log.Out(Logs::General, Logs::World_Server, "Error: Could not load skill cap data. But ignoring");
 	Log.Out(Logs::General, Logs::World_Server, "Loading guilds..");
 	guild_mgr.LoadGuilds();
 	//rules:
 	{
-		char tmp[64];
-		if (database.GetVariable("RuleSet", tmp, sizeof(tmp)-1)) {
-			Log.Out(Logs::General, Logs::World_Server, "Loading rule set '%s'", tmp);
-			if(!RuleManager::Instance()->LoadRules(&database, tmp)) {
-				Log.Out(Logs::General, Logs::World_Server, "Failed to load ruleset '%s', falling back to defaults.", tmp);
+		std::string tmp;
+		if (database.GetVariable("RuleSet", tmp)) {
+			Log.Out(Logs::General, Logs::World_Server, "Loading rule set '%s'", tmp.c_str());
+			if(!RuleManager::Instance()->LoadRules(&database, tmp.c_str())) {
+				Log.Out(Logs::General, Logs::World_Server, "Failed to load ruleset '%s', falling back to defaults.", tmp.c_str());
 			}
 		} else {
 			if(!RuleManager::Instance()->LoadRules(&database, "default")) {
 				Log.Out(Logs::General, Logs::World_Server, "No rule set configured, using default rules");
 			} else {
-				Log.Out(Logs::General, Logs::World_Server, "Loaded default rule set 'default'", tmp);
+				Log.Out(Logs::General, Logs::World_Server, "Loaded default rule set 'default'", tmp.c_str());
 			}
 		}
 	}
@@ -335,15 +349,19 @@ int main(int argc, char** argv) {
 		database.ClearMerchantTemp();
 	}
 	Log.Out(Logs::General, Logs::World_Server, "Loading EQ time of day..");
-	if (!zoneserver_list.worldclock.loadFile(Config->EQTimeFile.c_str()))
-		Log.Out(Logs::General, Logs::World_Server, "Unable to load %s", Config->EQTimeFile.c_str());
+	TimeOfDay_Struct eqTime;
+	time_t realtime;
+	eqTime = database.LoadTime(realtime);
+	zoneserver_list.worldclock.SetCurrentEQTimeOfDay(eqTime, realtime);
+	Timer EQTimeTimer(600000);
+	EQTimeTimer.Start(600000);
+	
 	Log.Out(Logs::General, Logs::World_Server, "Loading launcher list..");
 	launcher_list.LoadList();
 
-	char tmp[20];
-	tmp[0] = '\0';
-	database.GetVariable("holdzones",tmp, 20);
-	if ((strcasecmp(tmp, "1") == 0)) {
+	std::string tmp;
+	database.GetVariable("holdzones",tmp);
+	if (tmp.length() == 1 && tmp[0] == '1') {
 		holdzones = true;
 	}
 	Log.Out(Logs::General, Logs::World_Server, "Reboot zone modes %s",holdzones ? "ON" : "OFF");
@@ -412,7 +430,7 @@ int main(int argc, char** argv) {
 			//structures and opcodes for that patch.
 			struct in_addr	in;
 			in.s_addr = eqs->GetRemoteIP();
-			Log.Out(Logs::General, Logs::World_Server, "New connection from %s:%d", inet_ntoa(in),ntohs(eqs->GetRemotePort()));
+			Log.Out(Logs::Detail, Logs::World_Server, "New connection from IP %s:%d", inet_ntoa(in),ntohs(eqs->GetRemotePort()));
 			stream_identifier.AddStream(eqs);	//takes the stream
 		}
 
@@ -427,9 +445,9 @@ int main(int argc, char** argv) {
 			struct in_addr	in;
 			in.s_addr = eqsi->GetRemoteIP();
 			if (RuleB(World, UseBannedIPsTable)){ //Lieka: Check to see if we have the responsibility for blocking IPs.
-				Log.Out(Logs::General, Logs::World_Server, "Checking inbound connection %s against BannedIPs table", inet_ntoa(in));
+				Log.Out(Logs::Detail, Logs::World_Server, "Checking inbound connection %s against BannedIPs table", inet_ntoa(in));
 				if (!database.CheckBannedIPs(inet_ntoa(in))){ //Lieka: Check inbound IP against banned IP table.
-					Log.Out(Logs::General, Logs::World_Server, "Connection %s PASSED banned IPs check. Processing connection.", inet_ntoa(in));
+					Log.Out(Logs::Detail, Logs::World_Server, "Connection %s PASSED banned IPs check. Processing connection.", inet_ntoa(in));
 					auto client = new Client(eqsi);
 					// @merth: client->zoneattempt=0;
 					client_list.Add(client);
@@ -439,7 +457,7 @@ int main(int argc, char** argv) {
 				}
 			}
 			if (!RuleB(World, UseBannedIPsTable)){
-					Log.Out(Logs::General, Logs::World_Server, "New connection from %s:%d, processing connection", inet_ntoa(in), ntohs(eqsi->GetRemotePort()));
+					Log.Out(Logs::Detail, Logs::World_Server, "New connection from %s:%d, processing connection", inet_ntoa(in), ntohs(eqsi->GetRemotePort()));
 					auto client = new Client(eqsi);
 					// @merth: client->zoneattempt=0;
 					client_list.Add(client);
@@ -451,7 +469,26 @@ int main(int argc, char** argv) {
 		while ((tcpc = tcps.NewQueuePop())) {
 			struct in_addr in;
 			in.s_addr = tcpc->GetrIP();
-			Log.Out(Logs::General, Logs::World_Server, "New TCP connection from %s:%d", inet_ntoa(in),tcpc->GetrPort());
+			
+			/* World - Tell what is being connected */
+			if (tcpc->GetMode() == EmuTCPConnection::modePacket) {
+				if (tcpc->GetPacketMode() == EmuTCPConnection::packetModeZone) {
+					Log.Out(Logs::General, Logs::World_Server, "New Zone Server from %s:%d", inet_ntoa(in), tcpc->GetrPort());
+				}
+				else if (tcpc->GetPacketMode() == EmuTCPConnection::packetModeLauncher) {
+					Log.Out(Logs::General, Logs::World_Server, "New Launcher from %s:%d", inet_ntoa(in), tcpc->GetrPort());
+				}
+				else if (tcpc->GetPacketMode() == EmuTCPConnection::packetModeUCS) {
+					Log.Out(Logs::General, Logs::World_Server, "New UCS Connection from %s:%d", inet_ntoa(in), tcpc->GetrPort());
+				}
+				else if (tcpc->GetPacketMode() == EmuTCPConnection::packetModeQueryServ) {
+					Log.Out(Logs::General, Logs::World_Server, "New QS Connection from %s:%d", inet_ntoa(in), tcpc->GetrPort());
+				}
+				else {
+					Log.Out(Logs::General, Logs::World_Server, "Unsupported packet mode from %s:%d", inet_ntoa(in), tcpc->GetrPort());
+				}
+			}
+
 			console_list.Add(new Console(tcpc));
 		}
 
@@ -460,6 +497,16 @@ int main(int argc, char** argv) {
 			database.PurgeExpiredInstances();
 		}
 
+		if (EQTimeTimer.Check())
+		{
+			TimeOfDay_Struct tod;
+			zoneserver_list.worldclock.GetCurrentEQTimeOfDay(time(0), &tod);
+			if (!database.SaveTime(tod.minute, tod.hour, tod.day, tod.month, tod.year))
+				Log.Out(Logs::General, Logs::World_Server, "Failed to save eqtime.");
+			else
+				Log.Out(Logs::Detail, Logs::World_Server, "EQTime successfully saved.");
+		}
+		
 		//check for timeouts in other threads
 		timeout_manager.CheckTimeouts();
 		loginserverlist.Process();
@@ -478,19 +525,16 @@ int main(int argc, char** argv) {
 		if (InterserverTimer.Check()) {
 			InterserverTimer.Start();
 			database.ping();
-			// AsyncLoadVariables(dbasync, &database);
-			ReconnectCounter++;
-			if (ReconnectCounter >= 12) { // only create thread to reconnect every 10 minutes. previously we were creating a new thread every 10 seconds
-				ReconnectCounter = 0;
-				if (loginserverlist.AllConnected() == false) {
+
+			if (loginserverlist.AllConnected() == false) {
 #ifdef _WINDOWS
-					_beginthread(AutoInitLoginServer, 0, nullptr);
+				_beginthread(AutoInitLoginServer, 0, nullptr);
 #else
-					pthread_t thread;
-					pthread_create(&thread, nullptr, &AutoInitLoginServer, nullptr);
+				pthread_t thread;
+				pthread_create(&thread, nullptr, &AutoInitLoginServer, nullptr);
 #endif
-				}
 			}
+			
 		}
 		if (numclients == 0) {
 			Sleep(50);
@@ -516,8 +560,6 @@ int main(int argc, char** argv) {
 
 void CatchSignal(int sig_num) {
 	Log.Out(Logs::General, Logs::World_Server,"Caught signal %d",sig_num);
-	if(zoneserver_list.worldclock.saveFile(WorldConfig::get()->EQTimeFile.c_str())==false)
-		Log.Out(Logs::General, Logs::World_Server,"Failed to save time file.");
 	RunLoops = false;
 }
 

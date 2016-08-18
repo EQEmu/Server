@@ -86,7 +86,7 @@ struct NPCType
 	uint32	drakkin_heritage;
 	uint32	drakkin_tattoo;
 	uint32	drakkin_details;
-	uint32	armor_tint[_MaterialCount];
+	EQEmu::TintProfile	armor_tint;
 	uint32	min_dmg;
 	uint32	max_dmg;
 	int16	attack_count;
@@ -127,6 +127,11 @@ struct NPCType
 	bool	no_target_hotkey;
 	bool	raid_target;
 	uint8 	probability;
+	uint8	armtexture;
+	uint8	bracertexture;
+	uint8	handtexture;
+	uint8	legtexture;
+	uint8	feettexture;
 };
 
 namespace player_lootitem {
@@ -164,7 +169,7 @@ struct PlayerCorpse_Struct {
 	uint32	silver;
 	uint32	gold;
 	uint32	plat;
-	Color_Struct item_tint[9];
+	EQEmu::TintProfile item_tint;
 	uint8 haircolor;
 	uint8 beardcolor;
 	uint8 eyecolor1;

@@ -86,7 +86,7 @@ public:
 	/**
 	* Gets whether the server is authorized to show up on the server list or not.
 	*/
-	bool IsAuthorized() const { return authorized; }
+	bool IsAuthorized() const { return is_server_authorized; }
 
 	/**
 	* Gets the local ip of the server.
@@ -106,7 +106,7 @@ public:
 	/**
 	* Gets the status of the server.
 	*/
-	int GetStatus() const { return status; }
+	int GetStatus() const { return server_status; }
 
 	/**
 	* Gets the number of zones online on the server.
@@ -138,7 +138,7 @@ private:
 	EmuTCPConnection *connection;
 	unsigned int zones_booted;
 	unsigned int players_online;
-	int status;
+	int server_status;
 	unsigned int runtime_id;
 	unsigned int server_list_id;
 	unsigned int server_type;
@@ -151,9 +151,9 @@ private:
 	std::string local_ip;
 	std::string protocol;
 	std::string version;
-	bool authorized;
-	bool logged_in;
-	bool trusted;
+	bool is_server_authorized;
+	bool is_server_logged_in;
+	bool is_server_trusted;
 };
 
 #endif

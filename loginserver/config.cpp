@@ -16,10 +16,10 @@
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 #include "../common/global_define.h"
+#include "../common/eqemu_logsys.h"
 #include "config.h"
-#include "error_log.h"
 
-extern ErrorLog *server_log;
+extern EQEmuLogSys Log;
 /**
 * Retrieves the variable we want from our title or theme
 * First gets the map from the title
@@ -48,7 +48,7 @@ void Config::Parse(const char *file_name)
 {
 	if(file_name == nullptr)
 	{
-		server_log->Log(log_error, "Config::Parse(), file_name passed was null.");
+		Log.Out(Logs::General, Logs::Error, "Config::Parse(), file_name passed was null.");
 		return;
 	}
 
@@ -71,7 +71,7 @@ void Config::Parse(const char *file_name)
 				++iter;
 				if(iter == tokens.end())
 				{
-					server_log->Log(log_error, "Config::Parse(), EOF before title done parsing.");
+					Log.Out(Logs::General, Logs::Error, "Config::Parse(), EOF before title done parsing.");
 					fclose(input);
 					vars.clear();
 					return;
@@ -104,7 +104,7 @@ void Config::Parse(const char *file_name)
 				mode++;
 				if((*iter).compare("=") != 0)
 				{
-					server_log->Log(log_error, "Config::Parse(), invalid parse token where = should be.");
+					Log.Out(Logs::General, Logs::Error, "Config::Parse(), invalid parse token where = should be.");
 					fclose(input);
 					vars.clear();
 					return;
@@ -133,7 +133,7 @@ void Config::Parse(const char *file_name)
 	}
 	else
 	{
-		server_log->Log(log_error, "Config::Parse(), file was unable to be opened for parsing.");
+		Log.Out(Logs::General, Logs::Error, "Config::Parse(), file was unable to be opened for parsing.");
 	}
 }
 

@@ -10,6 +10,8 @@ Eglin
 
 #ifdef EMBPERL
 
+#include "zone_config.h"
+
 #include <string>
 #include <vector>
 #include <map>
@@ -52,11 +54,23 @@ extern "C" {	//the perl headers dont do this for us...
 #ifdef Zero
 #undef Zero
 #endif
+//These need to be cleaned up on FreeBSD
+
+#ifdef __FreeBSD__
+#ifdef do_open
+#undef do_open
+#endif
+
+#ifdef do_close
+#undef do_close
+#endif
+#endif
 
 //so embedded scripts can use xs extensions (ala 'use socket;')
 EXTERN_C void boot_DynaLoader(pTHX_ CV* cv);
 EXTERN_C void xs_init(pTHX);
 
+extern const ZoneConfig *Config;
 class Embperl
 {
 private:

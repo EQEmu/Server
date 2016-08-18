@@ -18,7 +18,6 @@
 #ifndef EQEMU_LOGINSERVER_H
 #define EQEMU_LOGINSERVER_H
 
-#include "error_log.h"
 #include "config.h"
 #include "database.h"
 #include "database_mysql.h"
@@ -40,7 +39,7 @@ public:
 	* but it's the most trivial way to do this.
 	*/
 #ifdef WIN32
-	LoginServer() : config(nullptr), db(nullptr), eq_crypto(nullptr), SM(nullptr) { }
+	LoginServer() : config(nullptr), db(nullptr), eq_crypto(nullptr), server_manager(nullptr) { }
 #else
 	LoginServer() : config(nullptr), db(nullptr) { }
 #endif
@@ -48,8 +47,8 @@ public:
 	Config *config;
 	Database *db;
 	Options options;
-	ServerManager *SM;
-	ClientManager *CM;
+	ServerManager *server_manager;
+	ClientManager *client_manager;
 
 #ifdef WIN32
 	Encryption *eq_crypto;

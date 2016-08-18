@@ -21,6 +21,7 @@
 
 #include "../common/types.h"
 
+#include "encounter.h"
 #include "beacon.h"
 #include "client.h"
 #include "corpse.h"
@@ -33,12 +34,15 @@
 
 #include "quest_interface.h"
 
+#include "zone_config.h"
+
 #include <list>
 #include <map>
 
 #define QuestFailedToLoad 0xFFFFFFFF
 #define QuestUnloaded 0x00
 
+extern const ZoneConfig *Config;
 class Client;
 class ItemInst;
 class Mob;
@@ -71,10 +75,31 @@ public:
 		std::vector<EQEmu::Any> *extra_pointers = nullptr);
 	int EventSpell(QuestEventID evt, NPC* npc, Client *client, uint32 spell_id, uint32 extra_data,
 		std::vector<EQEmu::Any> *extra_pointers = nullptr);
-	int EventEncounter(QuestEventID evt, std::string encounter_name, uint32 extra_data,
+	int EventEncounter(QuestEventID evt, std::string encounter_name, std::string data, uint32 extra_data,
 		std::vector<EQEmu::Any> *extra_pointers = nullptr);
 	
 	void GetErrors(std::list<std::string> &err);
+
+	/*
+		Internally used memory reference for all Perl Event Export Settings
+		Some exports are very taxing on CPU given how much an event is called.
+
+		These are loaded via DB and have defaults loaded in PerlEventExportSettingsDefaults.
+
+		Database loaded via Database::LoadPerlEventExportSettings(log_settings)
+	*/
+
+	struct PerlEventExportSettings {
+		uint8 qglobals;
+		uint8 mob;
+		uint8 zone;
+		uint8 item;
+		uint8 event_variables;
+	};
+
+	PerlEventExportSettings perl_event_export_settings[_LargestEventID];
+
+	void LoadPerlEventExportSettings(PerlEventExportSettings* perl_event_export_settings);
 
 private:
 	bool HasQuestSubLocal(uint32 npcid, QuestEventID evt);

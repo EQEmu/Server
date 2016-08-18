@@ -4,7 +4,10 @@
 
 #include "lua_ptr.h"
 
-struct Item_Struct;
+namespace EQEmu
+{
+	struct ItemBase;
+}
 
 namespace luabind {
 	struct scope;
@@ -12,17 +15,17 @@ namespace luabind {
 
 luabind::scope lua_register_item();
 
-class Lua_Item : public Lua_Ptr<const Item_Struct>
+class Lua_Item : public Lua_Ptr<const EQEmu::ItemBase>
 {
-	typedef const Item_Struct NativeType;
+	typedef const EQEmu::ItemBase NativeType;
 public:
 	Lua_Item(uint32 item_id);
 	Lua_Item() : Lua_Ptr(nullptr) { }
-	Lua_Item(const Item_Struct *d) : Lua_Ptr(d) { }
+	Lua_Item(const EQEmu::ItemBase *d) : Lua_Ptr(d) { }
 	virtual ~Lua_Item() { }
 
-	operator const Item_Struct*() {
-		return reinterpret_cast<const Item_Struct*>(GetLuaPtrData());
+	operator const EQEmu::ItemBase*() {
+		return reinterpret_cast<const EQEmu::ItemBase*>(GetLuaPtrData());
 	}
 
 	int GetMinStatus();

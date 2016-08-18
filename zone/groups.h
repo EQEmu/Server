@@ -1,5 +1,5 @@
 /*	EQEMu: Everquest Server Emulator
-	Copyright (C) 2001-2002 EQEMu Development Team (http://eqemu.org)
+	Copyright (C) 2001-2016 EQEMu Development Team (http://eqemu.org)
 
 	This program is free software; you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -59,6 +59,11 @@ public:
 	bool	DelMemberOOZ(const char *Name);
 	bool	DelMember(Mob* oldmember,bool ignoresender = false);
 	void	DisbandGroup();
+	void	GetMemberList(std::list<Mob*>& member_list, bool clear_list = true);
+	void	GetClientList(std::list<Client*>& client_list, bool clear_list = true);
+#ifdef BOTS
+	void	GetBotList(std::list<Bot*>& bot_list, bool clear_list = true);
+#endif
 	bool	IsGroupMember(Mob* client);
 	bool	IsGroupMember(const char *Name);
 	bool	Process();
@@ -123,6 +128,9 @@ public:
 	const char *GetMainTankName() { return MainTankName.c_str(); }
 	const char *GetMainAssistName() { return MainAssistName.c_str(); }
 	const char *GetPullerName() { return PullerName.c_str(); }
+	bool	AmIMainTank(const char *mob_name);
+	bool	AmIMainAssist(const char *mob_name);
+	bool	AmIPuller(const char *mob_name);
 	void	SetNPCMarker(const char *NewNPCMarkerName);
 	void	UnMarkNPC(uint16 ID);
 	void	SendMarkedNPCsToMember(Client *c, bool Clear = false);

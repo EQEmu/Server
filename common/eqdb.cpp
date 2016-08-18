@@ -63,7 +63,7 @@ EQDBRes * EQDB::query(Const_char *q) {
 //NOT THREAD SAFE!
 Const_char *EQDB::escape_string(Const_char *from) {
 	int len = strlen(from);
-	char *res = new char[len*2+1];
+	auto res = new char[len * 2 + 1];
 
 	mysql_real_escape_string(mysql_ref,res,from,len);
 

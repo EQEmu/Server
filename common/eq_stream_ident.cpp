@@ -1,3 +1,5 @@
+#include <utility>
+
 #include "global_define.h"
 #include "eqemu_logsys.h"
 #include "eq_stream_ident.h"
@@ -25,7 +27,7 @@ EQStreamIdentifier::~EQStreamIdentifier() {
 }
 
 void EQStreamIdentifier::RegisterPatch(const EQStream::Signature &sig, const char *name, OpcodeManager ** opcodes, const StructStrategy *structs) {
-	Patch *p = new Patch;
+	auto p = new Patch;
 	p->signature = sig;
 	p->name = name;
 	p->opcodes = opcodes;
@@ -156,7 +158,7 @@ EQStreamInterface *EQStreamIdentifier::PopIdentified() {
 }
 
 EQStreamIdentifier::Record::Record(std::shared_ptr<EQStream> s)
-:	stream(s),
+:	stream(std::move(s)),
 	expire(STREAM_IDENT_WAIT_MS)
 {
 }

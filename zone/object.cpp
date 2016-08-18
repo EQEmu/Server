@@ -117,7 +117,7 @@ Object::Object(Client* client, const ItemInst* inst)
 	m_data.heading = client->GetHeading();
 	m_data.x = client->GetX();
 	m_data.y = client->GetY();
-	if (client->GetClientVersion() >= ClientVersion::RoF2)
+	if (client->ClientVersion() >= EQEmu::versions::ClientVersion::RoF2)
 	{
 		// RoF2 places items at player's Z, which is 0.625 of their height.
 		m_data.z = client->GetZ() - (client->GetSize() * 0.625f);
@@ -138,7 +138,7 @@ Object::Object(Client* client, const ItemInst* inst)
 
 	// Set object name
 	if (inst) {
-		const Item_Struct* item = inst->GetItem();
+		const EQEmu::ItemBase* item = inst->GetItem();
 		if (item && item->IDFile) {
 			if (strlen(item->IDFile) == 0) {
 				strcpy(m_data.object_name, DEFAULT_OBJECT_NAME);
@@ -194,7 +194,7 @@ Object::Object(const ItemInst *inst, float x, float y, float z, float heading, u
 
 	// Set object name
 	if (inst) {
-		const Item_Struct* item = inst->GetItem();
+		const EQEmu::ItemBase* item = inst->GetItem();
 		if (item && item->IDFile) {
 			if (strlen(item->IDFile) == 0) {
 				strcpy(m_data.object_name, DEFAULT_OBJECT_NAME);
@@ -324,7 +324,7 @@ void Object::Delete(bool reset_state)
 }
 
 const ItemInst* Object::GetItem(uint8 index) {
-	if (index < EmuConstants::MAP_WORLD_SIZE) {
+	if (index < EQEmu::legacy::TYPE_WORLD_SIZE) {
 		return m_inst->GetItem(index);
 	}
 
@@ -339,7 +339,7 @@ void Object::PutItem(uint8 index, const ItemInst* inst)
 		return;
 	}
 
-	if (m_inst && m_inst->IsType(ItemClassContainer)) {
+	if (m_inst && m_inst->IsType(EQEmu::item::ItemClassBag)) {
 		if (inst) {
 			m_inst->PutItem(index, *inst);
 		}
@@ -362,7 +362,7 @@ void Object::Close() {
 		ItemInst* container = this->m_inst;
 		if(container != nullptr)
 		{
-			for (uint8 i = SUB_BEGIN; i < EmuConstants::ITEM_CONTAINER_SIZE; i++)
+			for (uint8 i = SUB_INDEX_BEGIN; i < EQEmu::legacy::ITEM_CONTAINER_SIZE; i++)
 			{
 				ItemInst* inst = container->PopItem(i);
 				if(inst != nullptr)
@@ -380,7 +380,7 @@ void Object::Close() {
 // Remove item from container
 void Object::DeleteItem(uint8 index)
 {
-	if (m_inst && m_inst->IsType(ItemClassContainer)) {
+	if (m_inst && m_inst->IsType(EQEmu::item::ItemClassBag)) {
 		m_inst->DeleteItem(index);
 
 		// This is _highly_ inefficient, but for now it will work: Save entire object to database
@@ -393,7 +393,7 @@ ItemInst* Object::PopItem(uint8 index)
 {
 	ItemInst* inst = nullptr;
 
-	if (m_inst && m_inst->IsType(ItemClassContainer)) {
+	if (m_inst && m_inst->IsType(EQEmu::item::ItemClassBag)) {
 		inst = m_inst->PopItem(index);
 
 		// This is _highly_ inefficient, but for now it will work: Save entire object to database
@@ -425,7 +425,7 @@ void Object::CreateDeSpawnPacket(EQApplicationPacket* app)
 bool Object::Process(){
 	if(m_type == OT_DROPPEDITEM && decay_timer.Enabled() && decay_timer.Check()) {
 		// Send click to all clients (removes entity on client)
-		EQApplicationPacket* outapp = new EQApplicationPacket(OP_ClickObject, sizeof(ClickObject_Struct));
+		auto outapp = new EQApplicationPacket(OP_ClickObject, sizeof(ClickObject_Struct));
 		ClickObject_Struct* click_object = (ClickObject_Struct*)outapp->pBuffer;
 		click_object->drop_id = GetID();
 		entity_list.QueueClients(nullptr, outapp, false);
@@ -485,14 +485,29 @@ bool Object::HandleClick(Client* sender, const ClickObject_Struct* click_object)
 			buf[9] = '\0';
 			std::vector<EQEmu::Any> args;
 			args.push_back(m_inst);
-			parse->EventPlayer(EVENT_PLAYER_PICKUP, sender, buf, 0, &args);
+			if(parse->EventPlayer(EVENT_PLAYER_PICKUP, sender, buf, this->GetID(), &args))
+			{
+				auto outapp = new EQApplicationPacket(OP_ClickObject, sizeof(ClickObject_Struct));
+				memcpy(outapp->pBuffer, click_object, sizeof(ClickObject_Struct));
+				ClickObject_Struct* co = (ClickObject_Struct*)outapp->pBuffer;
+				co->drop_id = 0;
+				entity_list.QueueClients(nullptr, outapp, false);
+				safe_delete(outapp);
+				
+				// No longer using a tradeskill object
+				sender->SetTradeskillObject(nullptr);
+				user = nullptr;
+
+				return true;
+			}
+
 
 			// Transfer item to client
-			sender->PutItemInInventory(MainCursor, *m_inst, false);
-			sender->SendItemPacket(MainCursor, m_inst, ItemPacketTrade);
+			sender->PutItemInInventory(EQEmu::legacy::SlotCursor, *m_inst, false);
+			sender->SendItemPacket(EQEmu::legacy::SlotCursor, m_inst, ItemPacketTrade);
 
 			if(cursordelete)	// delete the item if it's a duplicate lore. We have to do this because the client expects the item packet
-				sender->DeleteItemInInventory(MainCursor);
+				sender->DeleteItemInInventory(EQEmu::legacy::SlotCursor);
 
 			if(!m_ground_spawn)
 				safe_delete(m_inst);
@@ -503,7 +518,7 @@ bool Object::HandleClick(Client* sender, const ClickObject_Struct* click_object)
 		}
 
 		// Send click to all clients (removes entity on client)
-		EQApplicationPacket* outapp = new EQApplicationPacket(OP_ClickObject, sizeof(ClickObject_Struct));
+		auto outapp = new EQApplicationPacket(OP_ClickObject, sizeof(ClickObject_Struct));
 		memcpy(outapp->pBuffer, click_object, sizeof(ClickObject_Struct));
 		entity_list.QueueClients(nullptr, outapp, false);
 		safe_delete(outapp);
@@ -514,24 +529,30 @@ bool Object::HandleClick(Client* sender, const ClickObject_Struct* click_object)
 			entity_list.RemoveEntity(this->GetID());
 	} else {
 		// Tradeskill item
-		EQApplicationPacket* outapp = new EQApplicationPacket(OP_ClickObjectAction, sizeof(ClickObjectAction_Struct));
+		auto outapp = new EQApplicationPacket(OP_ClickObjectAction, sizeof(ClickObjectAction_Struct));
 		ClickObjectAction_Struct* coa = (ClickObjectAction_Struct*)outapp->pBuffer;
 
 		//TODO: there is prolly a better way to do this.
-		//if this is not the main user, send them a close and a message
-		if(user == nullptr || user == sender)
-			coa->open		= 0x01;
-		else {
-			coa->open		= 0x00;
-			//sender->Message(13, "Somebody is allready using that container.");
-		}
-		m_inuse			= true;
-		coa->type		= m_type;
-		coa->unknown16	= 0x0a;
+		m_inuse = true;
+		coa->type = m_type;
+		coa->unknown16 = 0x0a;
 
-		coa->drop_id	= click_object->drop_id;
-		coa->player_id	= click_object->player_id;
-		coa->icon		= m_icon;
+		coa->drop_id = click_object->drop_id;
+		coa->player_id = click_object->player_id;
+		coa->icon = m_icon;
+
+		//if this is not the main user, send them a close and a message
+		if (user == nullptr || user == sender) {
+			coa->open = 0x01;
+		}
+		else {
+			coa->open = 0x00;
+
+			if (sender->ClientVersion() >= EQEmu::versions::ClientVersion::RoF) {
+				coa->drop_id = 0xFFFFFFFF;
+				sender->Message(0, "Someone else is using that. Try again later.");
+			}
+		}
 
 		if(sender->IsLooting())
 		{
@@ -553,16 +574,16 @@ bool Object::HandleClick(Client* sender, const ClickObject_Struct* click_object)
 
 		// Send items inside of container
 
-		if (m_inst && m_inst->IsType(ItemClassContainer)) {
+		if (m_inst && m_inst->IsType(EQEmu::item::ItemClassBag)) {
 
 			//Clear out no-drop and no-rent items first if different player opens it
 			if(user != last_user)
 				m_inst->ClearByFlags(byFlagSet, byFlagSet);
 
-			EQApplicationPacket* outapp=new EQApplicationPacket(OP_ClientReady,0);
+			auto outapp = new EQApplicationPacket(OP_ClientReady, 0);
 			sender->QueuePacket(outapp);
 			safe_delete(outapp);
-			for (uint8 i = SUB_BEGIN; i < EmuConstants::ITEM_CONTAINER_SIZE; i++) {
+			for (uint8 i = SUB_INDEX_BEGIN; i < EQEmu::legacy::ITEM_CONTAINER_SIZE; i++) {
 				const ItemInst* inst = m_inst->GetItem(i);
 				if (inst) {
 					//sender->GetInv().PutItem(i+4000,inst);
@@ -589,7 +610,7 @@ uint32 ZoneDatabase::AddObject(uint32 type, uint32 icon, const Object_Struct& ob
 
 	// SQL Escape object_name
 	uint32 len = strlen(object.object_name) * 2 + 1;
-	char* object_name = new char[len];
+	auto object_name = new char[len];
 	DoEscapeString(object_name, object.object_name, strlen(object.object_name));
 
     // Save new record for object
@@ -607,7 +628,7 @@ uint32 ZoneDatabase::AddObject(uint32 type, uint32 icon, const Object_Struct& ob
 	}
 
     // Save container contents, if container
-    if (inst && inst->IsType(ItemClassContainer))
+	if (inst && inst->IsType(EQEmu::item::ItemClassBag))
         SaveWorldContainer(object.zone_id, database_id, inst);
 
 	return database_id;
@@ -626,7 +647,7 @@ void ZoneDatabase::UpdateObject(uint32 id, uint32 type, uint32 icon, const Objec
 
 	// SQL Escape object_name
 	uint32 len = strlen(object.object_name) * 2 + 1;
-	char* object_name = new char[len];
+	auto object_name = new char[len];
 	DoEscapeString(object_name, object.object_name, strlen(object.object_name));
 
 	// Save new record for object
@@ -644,7 +665,7 @@ void ZoneDatabase::UpdateObject(uint32 id, uint32 type, uint32 icon, const Objec
 	}
 
     // Save container contents, if container
-    if (inst && inst->IsType(ItemClassContainer))
+	if (inst && inst->IsType(EQEmu::item::ItemClassBag))
         SaveWorldContainer(object.zone_id, id, inst);
 }
 
@@ -733,8 +754,8 @@ void Object::SetX(float pos)
 {
 	this->m_data.x = pos;
 
-	EQApplicationPacket* app = new EQApplicationPacket();
-	EQApplicationPacket* app2 = new EQApplicationPacket();
+	auto app = new EQApplicationPacket();
+	auto app2 = new EQApplicationPacket();
 	this->CreateDeSpawnPacket(app);
 	this->CreateSpawnPacket(app2);
 	entity_list.QueueClients(0, app);
@@ -747,8 +768,8 @@ void Object::SetY(float pos)
 {
 	this->m_data.y = pos;
 
-	EQApplicationPacket* app = new EQApplicationPacket();
-	EQApplicationPacket* app2 = new EQApplicationPacket();
+	auto app = new EQApplicationPacket();
+	auto app2 = new EQApplicationPacket();
 	this->CreateDeSpawnPacket(app);
 	this->CreateSpawnPacket(app2);
 	entity_list.QueueClients(0, app);
@@ -759,7 +780,7 @@ void Object::SetY(float pos)
 
 void Object::Depop()
 {
-	EQApplicationPacket* app = new EQApplicationPacket();
+	auto app = new EQApplicationPacket();
 	this->CreateDeSpawnPacket(app);
 	entity_list.QueueClients(0, app);
 	safe_delete(app);
@@ -768,8 +789,8 @@ void Object::Depop()
 
 void Object::Repop()
 {
-	EQApplicationPacket* app = new EQApplicationPacket();
-	EQApplicationPacket* app2 = new EQApplicationPacket();
+	auto app = new EQApplicationPacket();
+	auto app2 = new EQApplicationPacket();
 	this->CreateDeSpawnPacket(app);
 	this->CreateSpawnPacket(app2);
 	entity_list.QueueClients(0, app);
@@ -784,8 +805,8 @@ void Object::SetZ(float pos)
 {
 	this->m_data.z = pos;
 
-	EQApplicationPacket* app = new EQApplicationPacket();
-	EQApplicationPacket* app2 = new EQApplicationPacket();
+	auto app = new EQApplicationPacket();
+	auto app2 = new EQApplicationPacket();
 	this->CreateDeSpawnPacket(app);
 	this->CreateSpawnPacket(app2);
 	entity_list.QueueClients(0, app);
@@ -797,8 +818,8 @@ void Object::SetZ(float pos)
 void Object::SetModelName(const char* modelname)
 {
 	strn0cpy(m_data.object_name, modelname, sizeof(m_data.object_name)); // 32 is the max for chars in object_name, this should be safe
-	EQApplicationPacket* app = new EQApplicationPacket();
-	EQApplicationPacket* app2 = new EQApplicationPacket();
+	auto app = new EQApplicationPacket();
+	auto app2 = new EQApplicationPacket();
 	this->CreateDeSpawnPacket(app);
 	this->CreateSpawnPacket(app2);
 	entity_list.QueueClients(0, app);
@@ -809,9 +830,9 @@ void Object::SetModelName(const char* modelname)
 
 void Object::SetSize(uint16 size)
 {
-	m_data.unknown008 = size;
-	EQApplicationPacket* app = new EQApplicationPacket();
-	EQApplicationPacket* app2 = new EQApplicationPacket();
+	m_data.size = size;
+	auto app = new EQApplicationPacket();
+	auto app2 = new EQApplicationPacket();
 	this->CreateDeSpawnPacket(app);
 	this->CreateSpawnPacket(app2);
 	entity_list.QueueClients(0, app);
@@ -822,9 +843,9 @@ void Object::SetSize(uint16 size)
 
 void Object::SetSolidType(uint16 solidtype)
 {
-	m_data.unknown010 = solidtype;
-	EQApplicationPacket* app = new EQApplicationPacket();
-	EQApplicationPacket* app2 = new EQApplicationPacket();
+	m_data.solidtype = solidtype;
+	auto app = new EQApplicationPacket();
+	auto app2 = new EQApplicationPacket();
 	this->CreateDeSpawnPacket(app);
 	this->CreateSpawnPacket(app2);
 	entity_list.QueueClients(0, app);
@@ -835,12 +856,12 @@ void Object::SetSolidType(uint16 solidtype)
 
 uint16 Object::GetSize()
 {
-	return m_data.unknown008;
+	return m_data.size;
 }
 
 uint16 Object::GetSolidType()
 {
-	return m_data.unknown010;
+	return m_data.solidtype;
 }
 
 const char* Object::GetModelName()
@@ -860,7 +881,7 @@ uint32 Object::GetItemID()
 		return 0;
 	}
 
-	const Item_Struct* item = this->m_inst->GetItem();
+	const EQEmu::ItemBase* item = this->m_inst->GetItem();
 
 	if (item == 0)
 	{
@@ -919,8 +940,8 @@ void Object::SetLocation(float x, float y, float z)
 	this->m_data.x = x;
 	this->m_data.y = y;
 	this->m_data.z = z;
-	EQApplicationPacket* app = new EQApplicationPacket();
-	EQApplicationPacket* app2 = new EQApplicationPacket();
+	auto app = new EQApplicationPacket();
+	auto app2 = new EQApplicationPacket();
 	this->CreateDeSpawnPacket(app);
 	this->CreateSpawnPacket(app2);
 	entity_list.QueueClients(0, app);
@@ -940,8 +961,8 @@ void Object::GetHeading(float* heading)
 void Object::SetHeading(float heading)
 {
 	this->m_data.heading = heading;
-	EQApplicationPacket* app = new EQApplicationPacket();
-	EQApplicationPacket* app2 = new EQApplicationPacket();
+	auto app = new EQApplicationPacket();
+	auto app2 = new EQApplicationPacket();
 	this->CreateDeSpawnPacket(app);
 	this->CreateSpawnPacket(app2);
 	entity_list.QueueClients(0, app);
@@ -961,7 +982,7 @@ const char* Object::GetEntityVariable(const char *id)
 	if(!id)
 		return nullptr;
 
-	std::map<std::string, std::string>::iterator iter = o_EntityVariables.find(id);
+	auto iter = o_EntityVariables.find(id);
 	if(iter != o_EntityVariables.end())
 	{
 		return iter->second.c_str();
@@ -974,7 +995,7 @@ bool Object::EntityVariableExists(const char * id)
 	if(!id)
 		return false;
 
-	std::map<std::string, std::string>::iterator iter = o_EntityVariables.find(id);
+	auto iter = o_EntityVariables.find(id);
 	if(iter != o_EntityVariables.end())
 	{
 		return true;

@@ -46,6 +46,16 @@ extern "C" {	//the perl headers dont do this for us...
 #undef THIS
 #endif
 
+//These need to be cleaned up on FreeBSD
+#ifdef __FreeBSD__
+#ifdef do_open
+#undef do_open
+#endif
+
+#ifdef do_close
+#undef do_close
+#endif
+#endif
 
 #endif /*EMU_PERL_H_*/
 

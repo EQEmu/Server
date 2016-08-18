@@ -29,6 +29,7 @@ Copyright (C) 2001-2008 EQEMu Development Team (http://eqemulator.net)
 #include "../common/misc_functions.h"
 #include "../common/rulesys.h"
 #include "../common/string_util.h"
+#include "../common/say_link.h"
 
 #include "client.h"
 #include "entity.h"
@@ -714,16 +715,23 @@ void ClientTaskState::EnableTask(int characterID, int taskCount, int *tasks) {
 	for(unsigned int i=0; i<EnabledTasks.size(); i++)
 		Log.Out(Logs::General, Logs::Tasks, "[UPDATE] %i", EnabledTasks[i]);
 
-	if(tasksEnabled.size() == 0 )
+	if(tasksEnabled.empty() )
         return;
 
-	std::stringstream queryStream("REPLACE INTO character_enabledtasks (charid, taskid) VALUES ");
+	std::stringstream queryStream;
+	queryStream << "REPLACE INTO character_enabledtasks (charid, taskid) VALUES ";
 	for(unsigned int i=0; i<tasksEnabled.size(); i++)
-		queryStream << ( i ? ", " : "" ) <<  StringFormat("(%i, %i)", characterID, tasksEnabled[i]);
+		queryStream << (i ? ", " : "") <<  StringFormat("(%i, %i)", characterID, tasksEnabled[i]);
 
     std::string query = queryStream.str();
-	Log.Out(Logs::General, Logs::Tasks, "[UPDATE] Executing query %s", query.c_str());
-    database.QueryDatabase(query);
+
+	if (tasksEnabled.size()) {
+		Log.Out(Logs::General, Logs::Tasks, "[UPDATE] Executing query %s", query.c_str());
+		database.QueryDatabase(query);
+	}
+	else {
+		Log.Out(Logs::General, Logs::Tasks, "[UPDATE] EnableTask called for characterID: %u .. but, no tasks exist", characterID);
+	}
 }
 
 void ClientTaskState::DisableTask(int charID, int taskCount, int *taskList) {
@@ -758,18 +766,26 @@ void ClientTaskState::DisableTask(int charID, int taskCount, int *taskList) {
 	for(unsigned int i=0; i<EnabledTasks.size(); i++)
 		Log.Out(Logs::General, Logs::Tasks, "[UPDATE] %i", EnabledTasks[i]);
 
-	if(tasksDisabled.size() == 0)
+	if(tasksDisabled.empty())
         return;
 
-	std::stringstream queryStream(StringFormat("DELETE FROM character_enabledtasks WHERE charid = %i AND (", charID));
+	std::stringstream queryStream;
+	queryStream << StringFormat("DELETE FROM character_enabledtasks WHERE charid = %i AND (", charID);
 
 	for(unsigned int i=0; i<tasksDisabled.size(); i++)
-        queryStream << i ? StringFormat("taskid = %i ", tasksDisabled[i]): StringFormat("OR taskid = %i ", tasksDisabled[i]);
+        queryStream << (i ? StringFormat("taskid = %i ", tasksDisabled[i]) : StringFormat("OR taskid = %i ", tasksDisabled[i]));
 
 	queryStream << ")";
+
 	std::string query = queryStream.str();
-	Log.Out(Logs::General, Logs::Tasks, "[UPDATE] Executing query %s", query.c_str());
-    database.QueryDatabase(query);
+
+	if (tasksDisabled.size()) {
+		Log.Out(Logs::General, Logs::Tasks, "[UPDATE] Executing query %s", query.c_str());
+		database.QueryDatabase(query);
+	}
+	else {
+		Log.Out(Logs::General, Logs::Tasks, "[UPDATE] DisableTask called for characterID: %u .. but, no tasks exist", charID);
+	}
 }
 
 bool ClientTaskState::IsTaskEnabled(int TaskID) {
@@ -848,9 +864,9 @@ int TaskManager::FirstTaskInSet(int TaskSetID) {
 
 	if((TaskSetID<=0) || (TaskSetID>=MAXTASKSETS)) return 0;
 
-	if(TaskSets[TaskSetID].size() == 0) return 0;
+	if(TaskSets[TaskSetID].empty()) return 0;
 
-	std::vector<int>::iterator Iterator = TaskSets[TaskSetID].begin();
+	auto Iterator = TaskSets[TaskSetID].begin();
 
 	while(Iterator != TaskSets[TaskSetID].end()) {
 		if((*Iterator) > 0)
@@ -865,7 +881,7 @@ int TaskManager::LastTaskInSet(int TaskSetID) {
 
 	if((TaskSetID<=0) || (TaskSetID>=MAXTASKSETS)) return 0;
 
-	if(TaskSets[TaskSetID].size() == 0) return 0;
+	if(TaskSets[TaskSetID].empty()) return 0;
 
 	return TaskSets[TaskSetID][TaskSets[TaskSetID].size()-1];
 }
@@ -874,7 +890,7 @@ int TaskManager::NextTaskInSet(int TaskSetID, int TaskID) {
 
 	if((TaskSetID<=0) || (TaskSetID>=MAXTASKSETS)) return 0;
 
-	if(TaskSets[TaskSetID].size() == 0) return 0;
+	if(TaskSets[TaskSetID].empty()) return 0;
 
 	for(unsigned int i=0; i<TaskSets[TaskSetID].size(); i++) {
 		if(TaskSets[TaskSetID][i] > TaskID) return TaskSets[TaskSetID][i];
@@ -895,6 +911,26 @@ bool TaskManager::AppropriateLevel(int TaskID, int PlayerLevel) {
 
 }
 
+int TaskManager::GetTaskMinLevel(int TaskID)
+{
+	if (Tasks[TaskID]->MinLevel)
+	{
+		return Tasks[TaskID]->MinLevel;
+	}
+		
+	return -1;
+}
+
+int TaskManager::GetTaskMaxLevel(int TaskID)
+{
+	if (Tasks[TaskID]->MaxLevel)
+	{
+		return Tasks[TaskID]->MaxLevel;
+	}
+
+	return -1;
+}
+
 void TaskManager::TaskSetSelector(Client *c, ClientTaskState *state, Mob *mob, int TaskSetID) {
 
 	unsigned int EnabledTaskIndex = 0;
@@ -907,14 +943,14 @@ void TaskManager::TaskSetSelector(Client *c, ClientTaskState *state, Mob *mob, i
 				state->EnabledTasks.size());
 	if((TaskSetID<=0) || (TaskSetID>=MAXTASKSETS)) return;
 
-	if(TaskSets[TaskSetID].size() > 0) {
+	if(!TaskSets[TaskSetID].empty()) {
 
 		// A TaskID of 0 in a TaskSet indicates that all Tasks in the set are enabled for all players.
 
 		if(TaskSets[TaskSetID][0] == 0) {
 
 			Log.Out(Logs::General, Logs::Tasks, "[UPDATE] TaskSets[%i][0] == 0. All Tasks in Set enabled.", TaskSetID);
-			std::vector<int>::iterator Iterator = TaskSets[TaskSetID].begin();
+			auto Iterator = TaskSets[TaskSetID].begin();
 
 			while((Iterator != TaskSets[TaskSetID].end()) && (TaskListIndex < MAXCHOOSERENTRIES)) {
 				if(AppropriateLevel((*Iterator), PlayerLevel) && !state->IsTaskActive((*Iterator)) &&
@@ -970,7 +1006,7 @@ void TaskManager::TaskSetSelector(Client *c, ClientTaskState *state, Mob *mob, i
 
 void TaskManager::SendTaskSelector(Client *c, Mob *mob, int TaskCount, int *TaskList) {
 
-	if (c->GetClientVersion() >= ClientVersion::RoF)
+	if (c->ClientVersion() >= EQEmu::versions::ClientVersion::RoF)
 	{
 		SendTaskSelectorNew(c, mob, TaskCount, TaskList);
 		return;
@@ -1019,7 +1055,7 @@ void TaskManager::SendTaskSelector(Client *c, Mob *mob, int TaskCount, int *Task
 
 	if(ValidTasks == 0) return;
 
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_OpenNewTasksWindow, PacketLength);
+	auto outapp = new EQApplicationPacket(OP_OpenNewTasksWindow, PacketLength);
 
 	AvailableTaskHeader = (AvailableTaskHeader_Struct*)outapp->pBuffer;
 
@@ -1144,7 +1180,7 @@ void TaskManager::SendTaskSelectorNew(Client *c, Mob *mob, int TaskCount, int *T
 
 	if(ValidTasks == 0) return;
 
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_OpenNewTasksWindow, PacketLength);
+	auto outapp = new EQApplicationPacket(OP_OpenNewTasksWindow, PacketLength);
 
 	outapp->WriteUInt32(ValidTasks);	// TaskCount
 	outapp->WriteUInt32(2);			// Unknown2
@@ -1313,7 +1349,7 @@ bool ClientTaskState::UnlockActivities(int CharID, int TaskIndex) {
 		if(AllActivitiesComplete && RuleB(TaskSystem, RecordCompletedTasks)) {
 			if(RuleB(TasksSystem, KeepOneRecordPerCompletedTask)) {
 				Log.Out(Logs::General, Logs::Tasks, "[UPDATE] KeepOneRecord enabled");
-				std::vector<CompletedTaskInformation>::iterator Iterator = CompletedTasks.begin();
+				auto Iterator = CompletedTasks.begin();
 				int ErasedElements = 0;
 				while(Iterator != CompletedTasks.end()) {
 					int TaskID = (*Iterator).TaskID;
@@ -1386,7 +1422,7 @@ bool ClientTaskState::UnlockActivities(int CharID, int TaskIndex) {
 			// the same task again, erase the previous completed entry for this task.
 			if(RuleB(TasksSystem, KeepOneRecordPerCompletedTask)) {
 				Log.Out(Logs::General, Logs::Tasks, "[UPDATE] KeepOneRecord enabled");
-				std::vector<CompletedTaskInformation>::iterator Iterator = CompletedTasks.begin();
+				auto Iterator = CompletedTasks.begin();
 				int ErasedElements = 0;
 				while(Iterator != CompletedTasks.end()) {
 					int TaskID = (*Iterator).TaskID;
@@ -1672,7 +1708,7 @@ void ClientTaskState::UpdateTasksOnExplore(Client *c, int ExploreID) {
 	return;
 }
 
-bool ClientTaskState::UpdateTasksOnDeliver(Client *c, uint32 *Items, int Cash, int NPCTypeID) {
+bool ClientTaskState::UpdateTasksOnDeliver(Client *c, std::list<ItemInst*>& Items, int Cash, int NPCTypeID) {
 
 	bool Ret = false;
 
@@ -1711,17 +1747,15 @@ bool ClientTaskState::UpdateTasksOnDeliver(Client *c, uint32 *Items, int Cash, i
 				Ret = true;
 			}
 			else {
-				for(int k=0; k<4; k++) {
-					if(Items[k]==0) continue;
+				for(auto& k : Items) {
 					switch(Task->Activity[j].GoalMethod) {
 
 						case METHODSINGLEID:
-							if(Task->Activity[j].GoalID != (int)Items[k]) continue;
+							if(Task->Activity[j].GoalID != k->GetID()) continue;
 							break;
 
 						case METHODLIST:
-							if(!taskmanager->GoalListManager.IsInList(Task->Activity[j].GoalID,
-												Items[k]))
+							if (!taskmanager->GoalListManager.IsInList(Task->Activity[j].GoalID, k->GetID()))
 								continue;
 							break;
 
@@ -1731,7 +1765,7 @@ bool ClientTaskState::UpdateTasksOnDeliver(Client *c, uint32 *Items, int Cash, i
 					}
 					// We found an active task related to this item, so increment the done count
 					Log.Out(Logs::General, Logs::Tasks, "[UPDATE] Increment on GiveItem");
-					IncrementDoneCount(c, Task, i, j, 1);
+					IncrementDoneCount(c, Task, i, j, k->GetCharges() <= 0 ? 1 : k->GetCharges());
 					Ret = true;
 				}
 			}
@@ -1866,7 +1900,7 @@ void ClientTaskState::RewardTask(Client *c, TaskInformation *Task) {
 
 	if(!Task || !c) return;
 
-	const Item_Struct* Item;
+	const EQEmu::ItemBase* Item;
 	std::vector<int> RewardList;
 
 	switch(Task->RewardMethod) {
@@ -2307,9 +2341,7 @@ void ClientTaskState::SendTaskHistory(Client *c, int TaskIndex) {
 		}
 	}
 
-
-
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_TaskHistoryReply, PacketLength);
+	auto outapp = new EQApplicationPacket(OP_TaskHistoryReply, PacketLength);
 
 	ths = (TaskHistoryReplyHeader_Struct*)outapp->pBuffer;
 
@@ -2352,7 +2384,7 @@ void Client::SendTaskActivityComplete(int TaskID, int ActivityID, int TaskIndex,
 
 	TaskActivityComplete_Struct* tac;
 
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_TaskActivityComplete, sizeof(TaskActivityComplete_Struct));
+	auto outapp = new EQApplicationPacket(OP_TaskActivityComplete, sizeof(TaskActivityComplete_Struct));
 
 	tac = (TaskActivityComplete_Struct*)outapp->pBuffer;
 
@@ -2382,7 +2414,7 @@ void Client::SendTaskFailed(int TaskID, int TaskIndex) {
 
 	TaskActivityComplete_Struct* tac;
 
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_TaskActivityComplete, sizeof(TaskActivityComplete_Struct));
+	auto outapp = new EQApplicationPacket(OP_TaskActivityComplete, sizeof(TaskActivityComplete_Struct));
 
 	tac = (TaskActivityComplete_Struct*)outapp->pBuffer;
 
@@ -2432,7 +2464,7 @@ void TaskManager::SendCompletedTasksToClient(Client *c, ClientTaskState *State) 
 		PacketLength = PacketLength + 8 + strlen(Tasks[TaskID]->Title) + 1;
 	}
 
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_CompletedTasks, PacketLength);
+	auto outapp = new EQApplicationPacket(OP_CompletedTasks, PacketLength);
 	char *buf = (char*)outapp->pBuffer;
 
 	//*(uint32 *)buf = State->CompletedTasks.size();
@@ -2467,9 +2499,9 @@ void TaskManager::SendTaskActivityShort(Client *c, int TaskID, int ActivityID, i
 
 	TaskActivityShort_Struct* tass;
 
-	if(c->GetClientVersionBit() & BIT_RoFAndLater)
+	if (c->ClientVersionBit() & EQEmu::versions::bit_RoFAndLater)
 	{
-		EQApplicationPacket* outapp = new EQApplicationPacket(OP_TaskActivity, 25);
+		auto outapp = new EQApplicationPacket(OP_TaskActivity, 25);
 		outapp->WriteUInt32(ClientTaskIndex);
 		outapp->WriteUInt32(2);
 		outapp->WriteUInt32(TaskID);
@@ -2482,7 +2514,7 @@ void TaskManager::SendTaskActivityShort(Client *c, int TaskID, int ActivityID, i
 		return;
 	}
 
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_TaskActivity, sizeof(TaskActivityShort_Struct));
+	auto outapp = new EQApplicationPacket(OP_TaskActivity, sizeof(TaskActivityShort_Struct));
 
 	tass = (TaskActivityShort_Struct*)outapp->pBuffer;
 
@@ -2503,7 +2535,7 @@ void TaskManager::SendTaskActivityShort(Client *c, int TaskID, int ActivityID, i
 
 void TaskManager::SendTaskActivityLong(Client *c, int TaskID, int ActivityID, int ClientTaskIndex, bool Optional, bool TaskComplete) {
 
-	if (c->GetClientVersion() >= ClientVersion::RoF)
+	if (c->ClientVersion() >= EQEmu::versions::ClientVersion::RoF)
 	{
 		SendTaskActivityNew(c, TaskID, ActivityID, ClientTaskIndex, Optional, TaskComplete);
 		return;
@@ -2520,7 +2552,7 @@ void TaskManager::SendTaskActivityLong(Client *c, int TaskID, int ActivityID, in
 				strlen(Tasks[TaskID]->Activity[ActivityID].Text2) + 1 +
 				strlen(Tasks[TaskID]->Activity[ActivityID].Text3) + 1;
 
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_TaskActivity, PacketLength);
+	auto outapp = new EQApplicationPacket(OP_TaskActivity, PacketLength);
 
 	tah = (TaskActivityHeader_Struct*)outapp->pBuffer;
 
@@ -2601,7 +2633,7 @@ void TaskManager::SendTaskActivityNew(Client *c, int TaskID, int ActivityID, int
 				((strlen(itoa(Tasks[TaskID]->Activity[ActivityID].ZoneID)) + 1) * 2) +
 				3 + String2Len;
 
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_TaskActivity, PacketLength);
+	auto outapp = new EQApplicationPacket(OP_TaskActivity, PacketLength);
 
 	outapp->WriteUInt32(ClientTaskIndex);	// TaskSequenceNumber
 	outapp->WriteUInt32(2);		// unknown2
@@ -2742,7 +2774,7 @@ void TaskManager::SendActiveTaskDescription(Client *c, int TaskID, int SequenceN
 				+ sizeof(TaskDescriptionData2_Struct) + 1 + sizeof(TaskDescriptionTrailer_Struct);
 
 	std::string reward_text;
-	int ItemID = NOT_USED;
+	int ItemID = 0;
 
 	// If there is an item make the Reward text into a link to the item (only the first item if a list
 	// is specified). I have been unable to get multiple item links to work.
@@ -2759,10 +2791,10 @@ void TaskManager::SendActiveTaskDescription(Client *c, int TaskID, int SequenceN
 		}
 
 		if(ItemID) {
-			const Item_Struct* reward_item = database.GetItem(ItemID);
+			const EQEmu::ItemBase* reward_item = database.GetItem(ItemID);
 
-			Client::TextLink linker;
-			linker.SetLinkType(linker.linkItemData);
+			EQEmu::SayLinkEngine linker;
+			linker.SetLinkType(EQEmu::saylink::SayLinkItemData);
 			linker.SetItemData(reward_item);
 			linker.SetTaskUse();
 			if (strlen(Tasks[TaskID]->Reward) != 0)
@@ -2787,7 +2819,7 @@ void TaskManager::SendActiveTaskDescription(Client *c, int TaskID, int SequenceN
 	TaskDescriptionData2_Struct* tdd2;
 	TaskDescriptionTrailer_Struct* tdt;
 
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_TaskDescription, PacketLength);
+	auto outapp = new EQApplicationPacket(OP_TaskDescription, PacketLength);
 
 	tdh = (TaskDescriptionHeader_Struct*)outapp->pBuffer;
 
@@ -2906,7 +2938,7 @@ void ClientTaskState::CancelAllTasks(Client *c) {
 }
 void ClientTaskState::CancelTask(Client *c, int SequenceNumber, bool RemoveFromDB) {
 
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_CancelTask, sizeof(CancelTask_Struct));
+	auto outapp = new EQApplicationPacket(OP_CancelTask, sizeof(CancelTask_Struct));
 
 	CancelTask_Struct* cts = (CancelTask_Struct*)outapp->pBuffer;
 	cts->SequenceNumber = SequenceNumber;
@@ -2948,7 +2980,7 @@ void ClientTaskState::RemoveTask(Client *c, int sequenceNumber) {
 }
 
 
-void ClientTaskState::AcceptNewTask(Client *c, int TaskID, int NPCID) {
+void ClientTaskState::AcceptNewTask(Client *c, int TaskID, int NPCID, bool enforce_level_requirement) {
 
 	if(!taskmanager || TaskID<0 || TaskID>=MAXTASKS) {
 		c->Message(13, "Task system not functioning, or TaskID %i out of range.", TaskID);
@@ -2971,6 +3003,12 @@ void ClientTaskState::AcceptNewTask(Client *c, int TaskID, int NPCID) {
 			c->Message(13, "You have already been assigned this task.");
 			return;
 		}
+	}
+
+	if (enforce_level_requirement && !taskmanager->AppropriateLevel(TaskID, c->GetLevel()))
+	{
+		c->Message(13, "You are outside the level range of this task.");
+		return;
 	}
 
 	if(!taskmanager->IsTaskRepeatable(TaskID) && IsTaskCompleted(TaskID)) return;
@@ -3019,7 +3057,7 @@ void ClientTaskState::AcceptNewTask(Client *c, int TaskID, int NPCID) {
 	NPC *npc = entity_list.GetID(NPCID)->CastToNPC();
 	if(!npc) {
 		c->Message(clientMessageYellow, "Task Giver ID is %i", NPCID);
-		c->Message(clientMessageError, "Unable to find NPC to send EVENT_TASKACCEPTD to. Report this bug.");
+		c->Message(clientMessageError, "Unable to find NPC to send EVENT_TASKACCEPTED to. Report this bug.");
 		safe_delete_array(buf);
 		return;
 	}

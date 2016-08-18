@@ -2,13 +2,19 @@
 #define MYSQL_REQUEST_RESULT_H
 
 #ifdef _WINDOWS
-	#include <winsock.h>
+	#include <winsock2.h>
 	#include <windows.h>
 #endif
 
 #include <mysql.h>
 #include "types.h"
 #include "mysql_request_row.h"
+
+#ifdef __FreeBSD__
+	#include <string>
+	#include <sstream>
+	#include <iostream>
+#endif
 
 class MySQLRequestResult {
 private:

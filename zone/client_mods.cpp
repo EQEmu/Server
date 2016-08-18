@@ -1,5 +1,5 @@
-/*	 EQEMu: Everquest Server Emulator
-	Copyright (C) 2001-2003 EQEMu Development Team (http://eqemulator.net)
+/*	EQEMu: Everquest Server Emulator
+	Copyright (C) 2001-2016 EQEMu Development Team (http://eqemulator.net)
 
 	This program is free software; you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -42,7 +42,7 @@ int32 Client::GetMaxStat() const
 	if (level < 61) {
 		base = 255;
 	}
-	else if (GetClientVersion() >= ClientVersion::SoF) {
+	else if (ClientVersion() >= EQEmu::versions::ClientVersion::SoF) {
 		base = 255 + 5 * (level - 60);
 	}
 	else if (level < 71) {
@@ -58,8 +58,8 @@ int32 Client::GetMaxResist() const
 {
 	int level = GetLevel();
 	int32 base = 500;
-	if (level > 60) {
-		base += ((level - 60) * 5);
+	if (level > 65) {
+		base += ((level - 65) * 5);
 	}
 	return base;
 }
@@ -160,7 +160,7 @@ int32 Client::LevelRegen()
 	bool sitting = IsSitting();
 	bool feigned = GetFeigned();
 	int level = GetLevel();
-	bool bonus = GetRaceBitmask(GetBaseRace()) & RuleI(Character, BaseHPRegenBonusRaces);
+	bool bonus = GetPlayerRaceBit(GetBaseRace()) & RuleI(Character, BaseHPRegenBonusRaces);
 	uint8 multiplier1 = bonus ? 2 : 1;
 	int32 hp = 0;
 	//these calculations should match up with the info from Monkly Business, which was last updated ~05/2008: http://www.monkly-business.net/index.php?pageid=abilities
@@ -409,7 +409,7 @@ uint32 Mob::GetClassLevelFactor()
 
 int32 Client::CalcBaseHP()
 {
-	if (GetClientVersion() >= ClientVersion::SoF && RuleB(Character, SoDClientUseSoDHPManaEnd)) {
+	if (ClientVersion() >= EQEmu::versions::ClientVersion::SoF && RuleB(Character, SoDClientUseSoDHPManaEnd)) {
 		int stats = GetSTA();
 		if (stats > 255) {
 			stats = (stats - 255) / 2;
@@ -485,9 +485,9 @@ int32 Client::GetRawItemAC()
 {
 	int32 Total = 0;
 	// this skips MainAmmo..add an '=' conditional if that slot is required (original behavior)
-	for (int16 slot_id = EmuConstants::EQUIPMENT_BEGIN; slot_id < EmuConstants::EQUIPMENT_END; slot_id++) {
+	for (int16 slot_id = EQEmu::legacy::EQUIPMENT_BEGIN; slot_id < EQEmu::legacy::EQUIPMENT_END; slot_id++) {
 		const ItemInst* inst = m_inv[slot_id];
-		if (inst && inst->IsType(ItemClassCommon)) {
+		if (inst && inst->IsClassCommon()) {
 			Total += inst->GetItem()->AC;
 		}
 	}
@@ -1032,21 +1032,28 @@ int32 Client::acmod()
 int32 Client::CalcAC()
 {
 	// new formula
-	int avoidance = (acmod() + ((GetSkill(SkillDefense) + itembonuses.HeroicAGI / 10) * 16) / 9);
+	int avoidance = (acmod() + ((GetSkill(EQEmu::skills::SkillDefense) + itembonuses.HeroicAGI / 10) * 16) / 9);
 	if (avoidance < 0) {
 		avoidance = 0;
 	}
+	
+	if (RuleB(Character, EnableAvoidanceCap)) {
+		if (avoidance > RuleI(Character, AvoidanceCap)) {
+			avoidance = RuleI(Character, AvoidanceCap);
+		}
+	}
+	
 	int mitigation = 0;
 	if (m_pp.class_ == WIZARD || m_pp.class_ == MAGICIAN || m_pp.class_ == NECROMANCER || m_pp.class_ == ENCHANTER) {
 		//something is wrong with this, naked casters have the wrong natural AC
 //		mitigation = (spellbonuses.AC/3) + (GetSkill(DEFENSE)/2) + (itembonuses.AC+1);
-		mitigation = (GetSkill(SkillDefense) + itembonuses.HeroicAGI / 10) / 4 + (itembonuses.AC + 1);
+		mitigation = (GetSkill(EQEmu::skills::SkillDefense) + itembonuses.HeroicAGI / 10) / 4 + (itembonuses.AC + 1);
 		//this might be off by 4..
 		mitigation -= 4;
 	}
 	else {
 //		mitigation = (spellbonuses.AC/4) + (GetSkill(DEFENSE)/3) + ((itembonuses.AC*4)/3);
-		mitigation = (GetSkill(SkillDefense) + itembonuses.HeroicAGI / 10) / 3 + ((itembonuses.AC * 4) / 3);
+		mitigation = (GetSkill(EQEmu::skills::SkillDefense) + itembonuses.HeroicAGI / 10) / 3 + ((itembonuses.AC * 4) / 3);
 		if (m_pp.class_ == MONK) {
 			mitigation += GetLevel() * 13 / 10;    //the 13/10 might be wrong, but it is close...
 		}
@@ -1067,10 +1074,10 @@ int32 Client::CalcAC()
 	}
 	// Shield AC bonus for HeroicSTR
 	if (itembonuses.HeroicSTR) {
-		bool equiped = CastToClient()->m_inv.GetItem(MainSecondary);
+		bool equiped = CastToClient()->m_inv.GetItem(EQEmu::legacy::SlotSecondary);
 		if (equiped) {
-			uint8 shield = CastToClient()->m_inv.GetItem(MainSecondary)->GetItem()->ItemType;
-			if (shield == ItemTypeShield) {
+			uint8 shield = CastToClient()->m_inv.GetItem(EQEmu::legacy::SlotSecondary)->GetItem()->ItemType;
+			if (shield == EQEmu::item::ItemTypeShield) {
 				displayed += itembonuses.HeroicSTR / 2;
 			}
 		}
@@ -1085,21 +1092,21 @@ int32 Client::GetACMit()
 {
 	int mitigation = 0;
 	if (m_pp.class_ == WIZARD || m_pp.class_ == MAGICIAN || m_pp.class_ == NECROMANCER || m_pp.class_ == ENCHANTER) {
-		mitigation = (GetSkill(SkillDefense) + itembonuses.HeroicAGI / 10) / 4 + (itembonuses.AC + 1);
+		mitigation = (GetSkill(EQEmu::skills::SkillDefense) + itembonuses.HeroicAGI / 10) / 4 + (itembonuses.AC + 1);
 		mitigation -= 4;
 	}
 	else {
-		mitigation = (GetSkill(SkillDefense) + itembonuses.HeroicAGI / 10) / 3 + ((itembonuses.AC * 4) / 3);
+		mitigation = (GetSkill(EQEmu::skills::SkillDefense) + itembonuses.HeroicAGI / 10) / 3 + ((itembonuses.AC * 4) / 3);
 		if (m_pp.class_ == MONK) {
 			mitigation += GetLevel() * 13 / 10;    //the 13/10 might be wrong, but it is close...
 		}
 	}
 	// Shield AC bonus for HeroicSTR
 	if (itembonuses.HeroicSTR) {
-		bool equiped = CastToClient()->m_inv.GetItem(MainSecondary);
+		bool equiped = CastToClient()->m_inv.GetItem(EQEmu::legacy::SlotSecondary);
 		if (equiped) {
-			uint8 shield = CastToClient()->m_inv.GetItem(MainSecondary)->GetItem()->ItemType;
-			if (shield == ItemTypeShield) {
+			uint8 shield = CastToClient()->m_inv.GetItem(EQEmu::legacy::SlotSecondary)->GetItem()->ItemType;
+			if (shield == EQEmu::item::ItemTypeShield) {
 				mitigation += itembonuses.HeroicSTR / 2;
 			}
 		}
@@ -1109,10 +1116,17 @@ int32 Client::GetACMit()
 
 int32 Client::GetACAvoid()
 {
-	int32 avoidance = (acmod() + ((GetSkill(SkillDefense) + itembonuses.HeroicAGI / 10) * 16) / 9);
+	int32 avoidance = (acmod() + ((GetSkill(EQEmu::skills::SkillDefense) + itembonuses.HeroicAGI / 10) * 16) / 9);
 	if (avoidance < 0) {
 		avoidance = 0;
 	}
+	
+	if (RuleB(Character, EnableAvoidanceCap)) {
+		if ((avoidance * 1000 / 847) > RuleI(Character, AvoidanceCap)) {
+			return RuleI(Character, AvoidanceCap);
+		}
+	}
+	
 	return (avoidance * 1000 / 847);
 }
 
@@ -1121,7 +1135,7 @@ int32 Client::CalcMaxMana()
 	switch (GetCasterClass()) {
 		case 'I':
 		case 'W': {
-				max_mana = (CalcBaseMana() + itembonuses.Mana + spellbonuses.Mana + GroupLeadershipAAManaEnhancement());
+				max_mana = (CalcBaseMana() + itembonuses.Mana + spellbonuses.Mana + aabonuses.Mana + GroupLeadershipAAManaEnhancement());
 				break;
 			}
 		case 'N': {
@@ -1162,7 +1176,7 @@ int32 Client::CalcBaseMana()
 	switch (GetCasterClass()) {
 		case 'I':
 			WisInt = GetINT();
-			if (GetClientVersion() >= ClientVersion::SoF && RuleB(Character, SoDClientUseSoDHPManaEnd)) {
+			if (ClientVersion() >= EQEmu::versions::ClientVersion::SoF && RuleB(Character, SoDClientUseSoDHPManaEnd)) {
 				if (WisInt > 100) {
 					ConvertedWisInt = (((WisInt - 100) * 5 / 2) + 100);
 					if (WisInt > 201) {
@@ -1195,7 +1209,7 @@ int32 Client::CalcBaseMana()
 			break;
 		case 'W':
 			WisInt = GetWIS();
-			if (GetClientVersion() >= ClientVersion::SoF && RuleB(Character, SoDClientUseSoDHPManaEnd)) {
+			if (ClientVersion() >= EQEmu::versions::ClientVersion::SoF && RuleB(Character, SoDClientUseSoDHPManaEnd)) {
 				if (WisInt > 100) {
 					ConvertedWisInt = (((WisInt - 100) * 5 / 2) + 100);
 					if (WisInt > 201) {
@@ -1247,8 +1261,8 @@ int32 Client::CalcBaseManaRegen()
 	uint8 clevel = GetLevel();
 	int32 regen = 0;
 	if (IsSitting() || (GetHorseId() != 0)) {
-		if (HasSkill(SkillMeditate)) {
-			regen = (((GetSkill(SkillMeditate) / 10) + (clevel - (clevel / 4))) / 4) + 4;
+		if (HasSkill(EQEmu::skills::SkillMeditate)) {
+			regen = (((GetSkill(EQEmu::skills::SkillMeditate) / 10) + (clevel - (clevel / 4))) / 4) + 4;
 		}
 		else {
 			regen = 2;
@@ -1267,11 +1281,11 @@ int32 Client::CalcManaRegen()
 	//this should be changed so we dont med while camping, etc...
 	if (IsSitting() || (GetHorseId() != 0)) {
 		BuffFadeBySitModifier();
-		if (HasSkill(SkillMeditate)) {
+		if (HasSkill(EQEmu::skills::SkillMeditate)) {
 			this->medding = true;
-			regen = (((GetSkill(SkillMeditate) / 10) + (clevel - (clevel / 4))) / 4) + 4;
+			regen = (((GetSkill(EQEmu::skills::SkillMeditate) / 10) + (clevel - (clevel / 4))) / 4) + 4;
 			regen += spellbonuses.ManaRegen + itembonuses.ManaRegen;
-			CheckIncreaseSkill(SkillMeditate, nullptr, -5);
+			CheckIncreaseSkill(EQEmu::skills::SkillMeditate, nullptr, -5);
 		}
 		else {
 			regen = 2 + spellbonuses.ManaRegen + itembonuses.ManaRegen;
@@ -1302,11 +1316,11 @@ int32 Client::CalcManaRegenCap()
 
 uint32 Client::CalcCurrentWeight()
 {
-	const Item_Struct* TempItem = 0;
+	const EQEmu::ItemBase* TempItem = 0;
 	ItemInst* ins;
 	uint32 Total = 0;
 	int x;
-	for (x = EmuConstants::EQUIPMENT_BEGIN; x <= MainCursor; x++) { // include cursor or not?
+	for (x = EQEmu::legacy::EQUIPMENT_BEGIN; x <= EQEmu::legacy::SlotCursor; x++) { // include cursor or not?
 		TempItem = 0;
 		ins = GetInv().GetItem(x);
 		if (ins) {
@@ -1316,7 +1330,7 @@ uint32 Client::CalcCurrentWeight()
 			Total += TempItem->Weight;
 		}
 	}
-	for (x = EmuConstants::GENERAL_BAGS_BEGIN; x <= EmuConstants::GENERAL_BAGS_END; x++) { // include cursor bags or not?
+	for (x = EQEmu::legacy::GENERAL_BAGS_BEGIN; x <= EQEmu::legacy::GENERAL_BAGS_END; x++) { // include cursor bags or not?
 		int TmpWeight = 0;
 		TempItem = 0;
 		ins = GetInv().GetItem(x);
@@ -1329,15 +1343,15 @@ uint32 Client::CalcCurrentWeight()
 		if (TmpWeight > 0) {
 			// this code indicates that weight redux bags can only be in the first general inventory slot to be effective...
 			// is this correct? or can we scan for the highest weight redux and use that? (need client verifications)
-			int bagslot = MainGeneral1;
+			int bagslot = EQEmu::legacy::SlotGeneral1;
 			int reduction = 0;
-			for (int m = EmuConstants::GENERAL_BAGS_BEGIN + 10; m <= EmuConstants::GENERAL_BAGS_END; m += 10) { // include cursor bags or not?
+			for (int m = EQEmu::legacy::GENERAL_BAGS_BEGIN + 10; m <= EQEmu::legacy::GENERAL_BAGS_END; m += 10) { // include cursor bags or not?
 				if (x >= m) {
 					bagslot += 1;
 				}
 			}
 			ItemInst* baginst = GetInv().GetItem(bagslot);
-			if (baginst && baginst->GetItem() && baginst->IsType(ItemClassContainer)) {
+			if (baginst && baginst->GetItem() && baginst->IsClassBag()) {
 				reduction = baginst->GetItem()->BagWR;
 			}
 			if (reduction > 0) {
@@ -1355,7 +1369,7 @@ uint32 Client::CalcCurrentWeight()
 	    This is the ONLY instance I have seen where the client is hard coded to particular Item IDs to set a certain property for an item. It is very odd.
 	*/
 	// SoD+ client has no weight for coin
-	if (EQLimits::CoinHasWeight(GetClientVersion())) {
+	if (EQEmu::behavior::Lookup(EQEmu::versions::ConvertClientVersionToInventoryVersion(ClientVersion()))->CoinHasWeight) {
 		Total += (m_pp.platinum + m_pp.gold + m_pp.silver + m_pp.copper) / 4;
 	}
 	float Packrat = (float)spellbonuses.Packrat + (float)aabonuses.Packrat + (float)itembonuses.Packrat;
@@ -1633,13 +1647,19 @@ int32	Client::CalcMR()
 			MR = 30;
 			break;
 		case DRAKKIN:
-			MR = 35;
+		{
+			MR = 25;
+			if (GetDrakkinHeritage() == 2)
+				MR += 10;
+			else if (GetDrakkinHeritage() == 5)
+				MR += 2;
 			break;
+		}
 		default:
 			MR = 20;
 	}
 	MR += itembonuses.MR + spellbonuses.MR + aabonuses.MR;
-	if (GetClass() == WARRIOR) {
+	if (GetClass() == WARRIOR || GetClass() == BERSERKER) {
 		MR += GetLevel() / 2;
 	}
 	if (MR < 1) {
@@ -1701,14 +1721,27 @@ int32	Client::CalcFR()
 			FR = 25;
 			break;
 		case DRAKKIN:
+		{
 			FR = 25;
+			if (GetDrakkinHeritage() == 0)
+				FR += 10;
+			else if (GetDrakkinHeritage() == 5)
+				FR += 2;
 			break;
+		}
 		default:
 			FR = 20;
 	}
 	int c = GetClass();
 	if (c == RANGER) {
 		FR += 4;
+		int l = GetLevel();
+		if (l > 49) {
+			FR += l - 49;
+		}
+	}
+	if (c == MONK) {
+		FR += 8;
 		int l = GetLevel();
 		if (l > 49) {
 			FR += l - 49;
@@ -1774,12 +1807,24 @@ int32	Client::CalcDR()
 			DR = 15;
 			break;
 		case DRAKKIN:
+		{
 			DR = 15;
+			if (GetDrakkinHeritage() == 1)
+				DR += 10;
+			else if (GetDrakkinHeritage() == 5)
+				DR += 2;
 			break;
+		}
 		default:
 			DR = 15;
 	}
 	int c = GetClass();
+	// the monk one is part of base resist
+	if (c == MONK) {
+		int l = GetLevel();
+		if (l > 50)
+			DR += l - 50;
+	}
 	if (c == PALADIN) {
 		DR += 8;
 		int l = GetLevel();
@@ -1787,7 +1832,7 @@ int32	Client::CalcDR()
 			DR += l - 49;
 		}
 	}
-	else if (c == SHADOWKNIGHT) {
+	else if (c == SHADOWKNIGHT || c == BEASTLORD) {
 		DR += 4;
 		int l = GetLevel();
 		if (l > 49) {
@@ -1854,12 +1899,24 @@ int32	Client::CalcPR()
 			PR = 30;
 			break;
 		case DRAKKIN:
+		{
 			PR = 15;
+			if (GetDrakkinHeritage() == 3)
+				PR += 10;
+			else if (GetDrakkinHeritage() == 5)
+				PR += 2;
 			break;
+		}
 		default:
 			PR = 15;
 	}
 	int c = GetClass();
+	// this monk bonus is part of the base
+	if (c == MONK) {
+		int l = GetLevel();
+		if (l > 50)
+			PR += l - 50;
+	}
 	if (c == ROGUE) {
 		PR += 8;
 		int l = GetLevel();
@@ -1934,13 +1991,19 @@ int32	Client::CalcCR()
 			CR = 25;
 			break;
 		case DRAKKIN:
+		{
 			CR = 25;
+			if (GetDrakkinHeritage() == 4)
+				CR += 10;
+			else if (GetDrakkinHeritage() == 5)
+				CR += 2;
 			break;
+		}
 		default:
 			CR = 25;
 	}
 	int c = GetClass();
-	if (c == RANGER) {
+	if (c == RANGER || c == BEASTLORD) {
 		CR += 4;
 		int l = GetLevel();
 		if (l > 49) {
@@ -1974,101 +2037,99 @@ int32 Client::CalcATK()
 
 uint32 Mob::GetInstrumentMod(uint16 spell_id) const
 {
-	if (GetClass() != BARD) {
+	if (GetClass() != BARD || spells[spell_id].IsDisciplineBuff) // Puretone is Singing but doesn't get any mod
 		return 10;
-	}
+
 	uint32 effectmod = 10;
-	int effectmodcap = RuleI(Character, BaseInstrumentSoftCap);
-	//this should never use spell modifiers...
-	//if a spell grants better modifers, they are copied into the item mods
-	//because the spells are supposed to act just like having the intrument.
-	//item mods are in 10ths of percent increases
+	int effectmodcap = 0;
+	bool nocap = false;
+	if (RuleB(Character, UseSpellFileSongCap)) {
+		effectmodcap = spells[spell_id].songcap / 10;
+		// this looks a bit weird, but easiest way I could think to keep both systems working
+		if (effectmodcap == 0)
+			nocap = true;
+		else
+			effectmodcap += 10;
+	} else {
+		effectmodcap = RuleI(Character, BaseInstrumentSoftCap);
+	}
+	// this should never use spell modifiers...
+	// if a spell grants better modifers, they are copied into the item mods
+	// because the spells are supposed to act just like having the intrument.
+	// item mods are in 10ths of percent increases
+	// clickies (Symphony of Battle) that have a song skill don't get AA bonus for some reason
+	// but clickies that are songs (selo's on Composers Greaves) do get AA mod as well
 	switch (spells[spell_id].skill) {
-		case SkillPercussionInstruments:
-			if (itembonuses.percussionMod == 0 && spellbonuses.percussionMod == 0) {
-				effectmod = 10;
-			}
-			else if (GetSkill(SkillPercussionInstruments) == 0) {
-				effectmod = 10;
-			}
-			else if (itembonuses.percussionMod > spellbonuses.percussionMod) {
-				effectmod = itembonuses.percussionMod;
-			}
-			else {
-				effectmod = spellbonuses.percussionMod;
-			}
-			effectmod += aabonuses.percussionMod;
-			break;
-		case SkillStringedInstruments:
-			if (itembonuses.stringedMod == 0 && spellbonuses.stringedMod == 0) {
-				effectmod = 10;
-			}
-			else if (GetSkill(SkillStringedInstruments) == 0) {
-				effectmod = 10;
-			}
-			else if (itembonuses.stringedMod > spellbonuses.stringedMod) {
-				effectmod = itembonuses.stringedMod;
-			}
-			else {
-				effectmod = spellbonuses.stringedMod;
-			}
-			effectmod += aabonuses.stringedMod;
-			break;
-		case SkillWindInstruments:
-			if (itembonuses.windMod == 0 && spellbonuses.windMod == 0) {
-				effectmod = 10;
-			}
-			else if (GetSkill(SkillWindInstruments) == 0) {
-				effectmod = 10;
-			}
-			else if (itembonuses.windMod > spellbonuses.windMod) {
-				effectmod = itembonuses.windMod;
-			}
-			else {
-				effectmod = spellbonuses.windMod;
-			}
-			effectmod += aabonuses.windMod;
-			break;
-		case SkillBrassInstruments:
-			if (itembonuses.brassMod == 0 && spellbonuses.brassMod == 0) {
-				effectmod = 10;
-			}
-			else if (GetSkill(SkillBrassInstruments) == 0) {
-				effectmod = 10;
-			}
-			else if (itembonuses.brassMod > spellbonuses.brassMod) {
-				effectmod = itembonuses.brassMod;
-			}
-			else {
-				effectmod = spellbonuses.brassMod;
-			}
-			effectmod += aabonuses.brassMod;
-			break;
-		case SkillSinging:
-			if (itembonuses.singingMod == 0 && spellbonuses.singingMod == 0) {
-				effectmod = 10;
-			}
-			else if (itembonuses.singingMod > spellbonuses.singingMod) {
-				effectmod = itembonuses.singingMod;
-			}
-			else {
-				effectmod = spellbonuses.singingMod;
-			}
-			effectmod += aabonuses.singingMod + spellbonuses.Amplification;
-			break;
-		default:
+	case EQEmu::skills::SkillPercussionInstruments:
+		if (itembonuses.percussionMod == 0 && spellbonuses.percussionMod == 0)
 			effectmod = 10;
-			break;
-	}
-	effectmodcap += aabonuses.songModCap + spellbonuses.songModCap + itembonuses.songModCap;
-	if (effectmod < 10) {
+		else if (GetSkill(EQEmu::skills::SkillPercussionInstruments) == 0)
+			effectmod = 10;
+		else if (itembonuses.percussionMod > spellbonuses.percussionMod)
+			effectmod = itembonuses.percussionMod;
+		else
+			effectmod = spellbonuses.percussionMod;
+		if (IsBardSong(spell_id))
+			effectmod += aabonuses.percussionMod;
+		break;
+	case EQEmu::skills::SkillStringedInstruments:
+		if (itembonuses.stringedMod == 0 && spellbonuses.stringedMod == 0)
+			effectmod = 10;
+		else if (GetSkill(EQEmu::skills::SkillStringedInstruments) == 0)
+			effectmod = 10;
+		else if (itembonuses.stringedMod > spellbonuses.stringedMod)
+			effectmod = itembonuses.stringedMod;
+		else
+			effectmod = spellbonuses.stringedMod;
+		if (IsBardSong(spell_id))
+			effectmod += aabonuses.stringedMod;
+		break;
+	case EQEmu::skills::SkillWindInstruments:
+		if (itembonuses.windMod == 0 && spellbonuses.windMod == 0)
+			effectmod = 10;
+		else if (GetSkill(EQEmu::skills::SkillWindInstruments) == 0)
+			effectmod = 10;
+		else if (itembonuses.windMod > spellbonuses.windMod)
+			effectmod = itembonuses.windMod;
+		else
+			effectmod = spellbonuses.windMod;
+		if (IsBardSong(spell_id))
+			effectmod += aabonuses.windMod;
+		break;
+	case EQEmu::skills::SkillBrassInstruments:
+		if (itembonuses.brassMod == 0 && spellbonuses.brassMod == 0)
+			effectmod = 10;
+		else if (GetSkill(EQEmu::skills::SkillBrassInstruments) == 0)
+			effectmod = 10;
+		else if (itembonuses.brassMod > spellbonuses.brassMod)
+			effectmod = itembonuses.brassMod;
+		else
+			effectmod = spellbonuses.brassMod;
+		if (IsBardSong(spell_id))
+			effectmod += aabonuses.brassMod;
+		break;
+	case EQEmu::skills::SkillSinging:
+		if (itembonuses.singingMod == 0 && spellbonuses.singingMod == 0)
+			effectmod = 10;
+		else if (itembonuses.singingMod > spellbonuses.singingMod)
+			effectmod = itembonuses.singingMod;
+		else
+			effectmod = spellbonuses.singingMod;
+		if (IsBardSong(spell_id))
+			effectmod += aabonuses.singingMod + spellbonuses.Amplification;
+		break;
+	default:
 		effectmod = 10;
+		return effectmod;
 	}
-	if (effectmod > effectmodcap) {
+	if (!RuleB(Character, UseSpellFileSongCap))
+		effectmodcap += aabonuses.songModCap + spellbonuses.songModCap + itembonuses.songModCap;
+	if (effectmod < 10)
+		effectmod = 10;
+	if (!nocap && effectmod > effectmodcap) // if the cap is calculated to be 0 using new rules, no cap.
 		effectmod = effectmodcap;
-	}
-	Log.Out(Logs::Detail, Logs::Spells, "%s::GetInstrumentMod() spell=%d mod=%d modcap=%d\n",
-	        GetName(), spell_id, effectmod, effectmodcap);
+	Log.Out(Logs::Detail, Logs::Spells, "%s::GetInstrumentMod() spell=%d mod=%d modcap=%d\n", GetName(), spell_id,
+		effectmod, effectmodcap);
 	return effectmod;
 }
 
@@ -2093,7 +2154,7 @@ void Client::CalcMaxEndurance()
 int32 Client::CalcBaseEndurance()
 {
 	int32 base_end = 0;
-	if (GetClientVersion() >= ClientVersion::SoF && RuleB(Character, SoDClientUseSoDHPManaEnd)) {
+	if (ClientVersion() >= EQEmu::versions::ClientVersion::SoF && RuleB(Character, SoDClientUseSoDHPManaEnd)) {
 		double heroic_stats = (GetHeroicSTR() + GetHeroicSTA() + GetHeroicDEX() + GetHeroicAGI()) / 4.0f;
 		double stats = (GetSTR() + GetSTA() + GetDEX() + GetAGI()) / 4.0f;
 		if (stats > 201.0f) {
@@ -2158,12 +2219,12 @@ int Client::GetRawACNoShield(int &shield_ac) const
 {
 	int ac = itembonuses.AC + spellbonuses.AC + aabonuses.AC;
 	shield_ac = 0;
-	const ItemInst *inst = m_inv.GetItem(MainSecondary);
+	const ItemInst *inst = m_inv.GetItem(EQEmu::legacy::SlotSecondary);
 	if (inst) {
-		if (inst->GetItem()->ItemType == ItemTypeShield) {
+		if (inst->GetItem()->ItemType == EQEmu::item::ItemTypeShield) {
 			ac -= inst->GetItem()->AC;
 			shield_ac = inst->GetItem()->AC;
-			for (uint8 i = AUG_BEGIN; i < EmuConstants::ITEM_COMMON_SIZE; i++) {
+			for (uint8 i = AUG_INDEX_BEGIN; i < EQEmu::legacy::ITEM_COMMON_SIZE; i++) {
 				if (inst->GetAugment(i)) {
 					ac -= inst->GetAugment(i)->GetItem()->AC;
 					shield_ac += inst->GetAugment(i)->GetItem()->AC;

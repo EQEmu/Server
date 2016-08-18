@@ -32,6 +32,7 @@ EQEmuLogSys Log;
 void ExportSpells(SharedDatabase *db);
 void ExportSkillCaps(SharedDatabase *db);
 void ExportBaseData(SharedDatabase *db);
+void ExportDBStrings(SharedDatabase *db);
 
 int main(int argc, char **argv) {
 	RegisterExecutablePlatform(ExePlatformClientExport);
@@ -44,12 +45,12 @@ int main(int argc, char **argv) {
 		return 1;
 	}
 
-	const EQEmuConfig *config = EQEmuConfig::get();
+	auto Config = EQEmuConfig::get();
 
 	SharedDatabase database;
 	Log.Out(Logs::General, Logs::Status, "Connecting to database...");
-	if(!database.Connect(config->DatabaseHost.c_str(), config->DatabaseUsername.c_str(),
-		config->DatabasePassword.c_str(), config->DatabaseDB.c_str(), config->DatabasePort)) {
+	if(!database.Connect(Config->DatabaseHost.c_str(), Config->DatabaseUsername.c_str(),
+		Config->DatabasePassword.c_str(), Config->DatabaseDB.c_str(), Config->DatabasePort)) {
 		Log.Out(Logs::General, Logs::Error, "Unable to connect to the database, cannot continue without a "
 			"database connection");
 		return 1;
@@ -62,6 +63,7 @@ int main(int argc, char **argv) {
 	ExportSpells(&database);
 	ExportSkillCaps(&database);
 	ExportBaseData(&database);
+	ExportDBStrings(&database);
 
 	Log.CloseFileLogs();
 
@@ -194,7 +196,38 @@ void ExportBaseData(SharedDatabase *db) {
 
 			fprintf(f, "%s\n", line.c_str());
 		}
-	} else {
+	}
+
+	fclose(f);
+}
+
+void ExportDBStrings(SharedDatabase *db) {
+	Log.Out(Logs::General, Logs::Status, "Exporting DB Strings...");
+
+	FILE *f = fopen("export/dbstr_us.txt", "w");
+	if(!f) {
+		Log.Out(Logs::General, Logs::Error, "Unable to open export/dbstr_us.txt to write, skipping.");
+		return;
+	}
+
+	fprintf(f, "Major^Minor^String(New)\n");
+	const std::string query = "SELECT * FROM db_str ORDER BY id, type";
+	auto results = db->QueryDatabase(query);
+	if(results.Success()) {
+		for(auto row = results.begin(); row != results.end(); ++row) {
+			std::string line;
+			unsigned int fields = results.ColumnCount();
+			for(unsigned int rowIndex = 0; rowIndex < fields; ++rowIndex) {
+				if(rowIndex != 0)
+					line.push_back('^');
+
+				if(row[rowIndex] != nullptr) {
+					line += row[rowIndex];
+				}
+			}
+
+			fprintf(f, "%s\n", line.c_str());
+		}
 	}
 
 	fclose(f);

@@ -80,7 +80,7 @@ void EQEmuConfig::do_world(TiXmlElement *ele)
 			sprintf(str, "loginserver%i", ++LoginCount);
 			sub_ele = ele->FirstChildElement(str);
 			if (sub_ele) {
-				LoginConfig* loginconfig = new LoginConfig;
+				auto loginconfig = new LoginConfig;
 				text = ParseTextBlock(sub_ele, "host", true);
 				if (text) {
 					loginconfig->LoginHost = text;
@@ -277,9 +277,9 @@ void EQEmuConfig::do_files(TiXmlElement *ele)
 	if (text) {
 		OpCodesFile = text;
 	}
-	text = ParseTextBlock(ele, "eqtime", true);
+	text = ParseTextBlock(ele, "plugin.pl", true);
 	if (text) {
-		EQTimeFile = text;
+		PluginPlFile = text;
 	}
 }
 
@@ -289,14 +289,45 @@ void EQEmuConfig::do_directories(TiXmlElement *ele)
 	text = ParseTextBlock(ele, "maps", true);
 	if (text) {
 		MapDir = text;
+		if ( MapDir.back() != '/' )
+			MapDir += '/';
 	}
 	text = ParseTextBlock(ele, "quests", true);
 	if (text) {
 		QuestDir = text;
+		if ( QuestDir.back() != '/' )
+			QuestDir += '/';
 	}
 	text = ParseTextBlock(ele, "plugins", true);
 	if (text) {
 		PluginDir = text;
+		if ( PluginDir.back() != '/' )
+			PluginDir += '/';
+	}
+	text = ParseTextBlock(ele, "lua_modules", true);
+	if (text) {
+		LuaModuleDir = text;
+		if ( LuaModuleDir.back() != '/' )
+			LuaModuleDir += '/';
+	}
+	text = ParseTextBlock(ele, "patches", true);
+	if (text) {
+		PatchDir = text;
+		if ( PatchDir.back() != '/' )
+			PatchDir += '/';
+	}
+	text = ParseTextBlock(ele, "shared_memory", true);
+	if (text) {
+		SharedMemDir = text;
+		if ( SharedMemDir.back() != '/' )
+			SharedMemDir += '/';
+	}
+	//Not Fully Implemented yet LogDir
+	text = ParseTextBlock(ele, "logs", true);
+	if (text) {
+		LogDir = text;
+		if ( LogDir.back() != '/' )
+			LogDir += '/';
 	}
 }
 
@@ -431,8 +462,8 @@ std::string EQEmuConfig::GetByName(const std::string &var_name) const
 	if (var_name == "OpCodesFile") {
 		return (OpCodesFile);
 	}
-	if (var_name == "EQTimeFile") {
-		return (EQTimeFile);
+	if (var_name == "PluginPlFile") {
+		return (PluginPlFile);
 	}
 	if (var_name == "MapDir") {
 		return (MapDir);
@@ -442,6 +473,18 @@ std::string EQEmuConfig::GetByName(const std::string &var_name) const
 	}
 	if (var_name == "PluginDir") {
 		return (PluginDir);
+	}
+	if (var_name == "LuaModuleDir") {
+		return (LuaModuleDir);
+	}
+	if (var_name == "PatchDir") {
+		return (PatchDir);
+	}
+	if (var_name == "SharedMemDir") {
+		return (SharedMemDir);
+	}
+	if (var_name == "LogDir") {
+		return (LogDir);
 	}
 	if (var_name == "LogPrefix") {
 		return (LogPrefix);
@@ -504,10 +547,14 @@ void EQEmuConfig::Dump() const
 	std::cout << "WebInterfacePrivKey = " << WebInterfacePrivKey << std::endl;
 	std::cout << "SpellsFile = " << SpellsFile << std::endl;
 	std::cout << "OpCodesFile = " << OpCodesFile << std::endl;
-	std::cout << "EQTimeFile = " << EQTimeFile << std::endl;
+	std::cout << "PluginPlFile = " << PluginPlFile << std::endl;
 	std::cout << "MapDir = " << MapDir << std::endl;
 	std::cout << "QuestDir = " << QuestDir << std::endl;
 	std::cout << "PluginDir = " << PluginDir << std::endl;
+	std::cout << "LuaModuleDir = " << LuaModuleDir << std::endl;
+	std::cout << "PatchDir = " << PatchDir << std::endl;
+	std::cout << "SharedMemDir = " << SharedMemDir << std::endl;
+	std::cout << "LogDir = " << LogDir << std::endl;
 	std::cout << "ZonePortLow = " << ZonePortLow << std::endl;
 	std::cout << "ZonePortHigh = " << ZonePortHigh << std::endl;
 	std::cout << "DefaultStatus = " << (int)DefaultStatus << std::endl;

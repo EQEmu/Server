@@ -69,7 +69,7 @@ IT10714_ACTORDEF=Augmentation Sealer
 IT10725_ACTORDEF=Shuriken
 */
 
-#define OT_DROPPEDITEM BagTypeLargeBag
+#define OT_DROPPEDITEM EQEmu::item::BagTypeLargeBag
 
 // Icon values:
 //0x0453 a pie
@@ -108,7 +108,7 @@ public:
 	static void HandleAugmentation(Client* user, const AugmentItem_Struct* in_augment, Object *worldo);
 	static void HandleAutoCombine(Client* user, const RecipeAutoCombine_Struct* rac);
 
-	static SkillUseTypes TypeToSkill(uint32 type);
+	static EQEmu::skills::SkillType TypeToSkill(uint32 type);
 
 	// Packet functions
 	void CreateSpawnPacket(EQApplicationPacket* app);

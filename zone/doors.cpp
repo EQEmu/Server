@@ -115,7 +115,7 @@ bool Doors::Process()
 	{
 		if (opentype == 40 || GetTriggerType() == 1)
 		{
-			EQApplicationPacket* outapp = new EQApplicationPacket(OP_MoveDoor, sizeof(MoveDoor_Struct));
+			auto outapp = new EQApplicationPacket(OP_MoveDoor, sizeof(MoveDoor_Struct));
 			MoveDoor_Struct* md = (MoveDoor_Struct*)outapp->pBuffer;
 			md->doorid = door_id;
 			md->action = invert_state == 0 ? CLOSE_DOOR : CLOSE_INVDOOR;
@@ -137,7 +137,7 @@ void Doors::HandleClick(Client* sender, uint8 trigger)
 	Log.Out(Logs::Detail, Logs::Doors, "  incline %d, opentype %d, lockpick %d, key %d, nokeyring %d, trigger %d type %d, param %d", incline, opentype, lockpick, keyitem, nokeyring, trigger_door, trigger_type, door_param);
 	Log.Out(Logs::Detail, Logs::Doors, "  size %d, invert %d, dest: %s %s", size, invert_state, dest_zone, to_string(m_Destination).c_str());
 
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_MoveDoor, sizeof(MoveDoor_Struct));
+	auto outapp = new EQApplicationPacket(OP_MoveDoor, sizeof(MoveDoor_Struct));
 	MoveDoor_Struct* md = (MoveDoor_Struct*)outapp->pBuffer;
 	md->doorid = door_id;
 	/////////////////////////////////////////////////////////////////
@@ -170,15 +170,16 @@ void Doors::HandleClick(Client* sender, uint8 trigger)
 			if(!sender->GetPendingAdventureDoorClick())
 			{
 				sender->PendingAdventureDoorClick();
-				ServerPacket *pack = new ServerPacket(ServerOP_AdventureClickDoor, sizeof(ServerPlayerClickedAdventureDoor_Struct));
+				auto pack = new ServerPacket(ServerOP_AdventureClickDoor,
+							     sizeof(ServerPlayerClickedAdventureDoor_Struct));
 				ServerPlayerClickedAdventureDoor_Struct *ads = (ServerPlayerClickedAdventureDoor_Struct*)pack->pBuffer;
 				strcpy(ads->player, sender->GetName());
 				ads->zone_id = zone->GetZoneID();
 				ads->id = GetDoorDBID();
 				worldserver.SendPacket(pack);
 				safe_delete(pack);
-				safe_delete(outapp);
 			}
+			safe_delete(outapp);
 			return;
 		}
 	}
@@ -187,7 +188,7 @@ void Doors::HandleClick(Client* sender, uint8 trigger)
 	uint8 keepoffkeyring = GetNoKeyring();
 	uint32 haskey = 0;
 	uint32 playerkey = 0;
-	const ItemInst *lockpicks = sender->GetInv().GetItem(MainCursor);
+	const ItemInst *lockpicks = sender->GetInv().GetItem(EQEmu::legacy::SlotCursor);
 
 	haskey = sender->GetInv().HasItem(keyneeded, 1);
 
@@ -283,12 +284,12 @@ void Doors::HandleClick(Client* sender, uint8 trigger)
 		}
 		else if(lockpicks != nullptr)
 		{
-			if(sender->GetSkill(SkillPickLock))
+			if (sender->GetSkill(EQEmu::skills::SkillPickLock))
 			{
-				if(lockpicks->GetItem()->ItemType == ItemTypeLockPick)
+				if(lockpicks->GetItem()->ItemType == EQEmu::item::ItemTypeLockPick)
 				{
-					float modskill=sender->GetSkill(SkillPickLock);
-					sender->CheckIncreaseSkill(SkillPickLock, nullptr, 1);
+					float modskill = sender->GetSkill(EQEmu::skills::SkillPickLock);
+					sender->CheckIncreaseSkill(EQEmu::skills::SkillPickLock, nullptr, 1);
 
 					Log.Out(Logs::General, Logs::Skills, "Client has lockpicks: skill=%f", modskill);
 
@@ -447,7 +448,7 @@ void Doors::NPCOpen(NPC* sender, bool alt_mode)
 			return;
 		}
 
-		EQApplicationPacket* outapp = new EQApplicationPacket(OP_MoveDoor, sizeof(MoveDoor_Struct));
+		auto outapp = new EQApplicationPacket(OP_MoveDoor, sizeof(MoveDoor_Struct));
 		MoveDoor_Struct* md=(MoveDoor_Struct*)outapp->pBuffer;
 		md->doorid = door_id;
 		md->action = invert_state == 0 ? OPEN_DOOR : OPEN_INVDOOR;
@@ -473,7 +474,7 @@ void Doors::NPCOpen(NPC* sender, bool alt_mode)
 
 void Doors::ForceOpen(Mob *sender, bool alt_mode)
 {
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_MoveDoor, sizeof(MoveDoor_Struct));
+	auto outapp = new EQApplicationPacket(OP_MoveDoor, sizeof(MoveDoor_Struct));
 	MoveDoor_Struct* md=(MoveDoor_Struct*)outapp->pBuffer;
 	md->doorid = door_id;
 	md->action = invert_state == 0 ? OPEN_DOOR : OPEN_INVDOOR;
@@ -498,7 +499,7 @@ void Doors::ForceOpen(Mob *sender, bool alt_mode)
 
 void Doors::ForceClose(Mob *sender, bool alt_mode)
 {
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_MoveDoor, sizeof(MoveDoor_Struct));
+	auto outapp = new EQApplicationPacket(OP_MoveDoor, sizeof(MoveDoor_Struct));
 	MoveDoor_Struct* md=(MoveDoor_Struct*)outapp->pBuffer;
 	md->doorid = door_id;
 	md->action = invert_state == 0 ? CLOSE_DOOR : CLOSE_INVDOOR; // change from original (open to close)
@@ -527,7 +528,7 @@ void Doors::ToggleState(Mob *sender)
 		return;
 	}
 
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_MoveDoor, sizeof(MoveDoor_Struct));
+	auto outapp = new EQApplicationPacket(OP_MoveDoor, sizeof(MoveDoor_Struct));
 	MoveDoor_Struct* md=(MoveDoor_Struct*)outapp->pBuffer;
 	md->doorid = door_id;
 

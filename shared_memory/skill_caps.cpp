@@ -25,15 +25,18 @@
 #include "../common/classes.h"
 #include "../common/features.h"
 
-void LoadSkillCaps(SharedDatabase *database) {
+void LoadSkillCaps(SharedDatabase *database, const std::string &prefix) {
 	EQEmu::IPCMutex mutex("skill_caps");
 	mutex.Lock();
 
 	uint32 class_count = PLAYER_CLASS_COUNT;
-	uint32 skill_count = HIGHEST_SKILL + 1;
+	uint32 skill_count = EQEmu::skills::HIGHEST_SKILL + 1;
 	uint32 level_count = HARD_LEVEL_CAP + 1;
 	uint32 size = (class_count * skill_count * level_count * sizeof(uint16));
-	EQEmu::MemoryMappedFile mmf("shared/skill_caps", size);
+
+	auto Config = EQEmuConfig::get();
+	std::string file_name = Config->SharedMemDir + prefix + std::string("skill_caps");
+	EQEmu::MemoryMappedFile mmf(file_name, size);
 	mmf.ZeroFile();
 
 	void *ptr = mmf.Get();

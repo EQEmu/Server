@@ -36,15 +36,15 @@ extern std::vector<RaceClassCombos> character_create_race_class_combos;
 void WorldDatabase::GetCharSelectInfo(uint32 accountID, EQApplicationPacket **outApp, uint32 clientVersionBit)
 {
 	/* Set Character Creation Limit */
-	ClientVersion client_version = ClientVersionFromBit(clientVersionBit);
-	size_t character_limit = EQLimits::CharacterCreationLimit(client_version);
+	EQEmu::versions::ClientVersion client_version = EQEmu::versions::ConvertClientVersionBitToClientVersion(clientVersionBit);
+	size_t character_limit = EQEmu::constants::Lookup(client_version)->CharacterCreationLimit;
 	
 	// Validate against absolute server max
-	if (character_limit > EmuConstants::CHARACTER_CREATION_LIMIT)
-		character_limit = EmuConstants::CHARACTER_CREATION_LIMIT;
+	if (character_limit > EQEmu::constants::CharacterCreationMax)
+		character_limit = EQEmu::constants::CharacterCreationMax;
 
 	// Force Titanium clients to use '8'
-	if (client_version == ClientVersion::Titanium)
+	if (client_version == EQEmu::versions::ClientVersion::Titanium)
 		character_limit = 8;
 	
 	/* Get Character Info */
@@ -105,6 +105,7 @@ void WorldDatabase::GetCharSelectInfo(uint32 accountID, EQApplicationPacket **ou
 		memset(&pp, 0, sizeof(PlayerProfile_Struct));
 		
 		/* Fill CharacterSelectEntry_Struct */
+		memset(cse->Name, 0, sizeof(cse->Name));
 		strcpy(cse->Name, row[1]);
 		cse->Class = (uint8)atoi(row[4]);
 		cse->Race = (uint32)atoi(row[3]);
@@ -116,13 +117,13 @@ void WorldDatabase::GetCharSelectInfo(uint32 accountID, EQApplicationPacket **ou
 		cse->Gender = (uint8)atoi(row[2]);
 		cse->Face = (uint8)atoi(row[15]);
 
-		for (uint32 matslot = 0; matslot < _MaterialCount; matslot++) {	// Processed below
+		for (uint32 matslot = 0; matslot < EQEmu::textures::TextureCount; matslot++) {	// Processed below
 			cse->Equip[matslot].Material = 0;
 			cse->Equip[matslot].Unknown1 = 0;
 			cse->Equip[matslot].EliteMaterial = 0;
 			cse->Equip[matslot].HeroForgeModel = 0;
 			cse->Equip[matslot].Material2 = 0;
-			cse->Equip[matslot].Color.Color = 0;
+			cse->Equip[matslot].Color = 0;
 		}						
 
 		cse->Unknown15 = 0xFF;
@@ -158,10 +159,22 @@ void WorldDatabase::GetCharSelectInfo(uint32 accountID, EQApplicationPacket **ou
 		}
 
 		/* Set Bind Point Data for any character that may possibly be missing it for any reason */
-		cquery = StringFormat("SELECT `zone_id`, `instance_id`, `x`, `y`, `z`, `heading`, `is_home` FROM `character_bind`  WHERE `id` = %i LIMIT 2", character_id);
+		cquery = StringFormat("SELECT `zone_id`, `instance_id`, `x`, `y`, `z`, `heading`, `slot` FROM `character_bind`  WHERE `id` = %i LIMIT 5", character_id);
 		auto results_bind = database.QueryDatabase(cquery);
+		auto bind_count = results_bind.RowCount();
 		for (auto row_b = results_bind.begin(); row_b != results_bind.end(); ++row_b) {
-			if (row_b[6] && atoi(row_b[6]) == 1){ has_home = 1; }
+			if (row_b[6] && atoi(row_b[6]) == 4) {
+				has_home = 1;
+				// If our bind count is less than 5, we need to actually make use of this data so lets parse it
+				if (bind_count < 5) {
+					pp.binds[4].zoneId = atoi(row_b[0]);
+					pp.binds[4].instance_id = atoi(row_b[1]);
+					pp.binds[4].x = atof(row_b[2]);
+					pp.binds[4].y = atof(row_b[3]);
+					pp.binds[4].z = atof(row_b[4]);
+					pp.binds[4].heading = atof(row_b[5]);
+				}
+			}
 			if (row_b[6] && atoi(row_b[6]) == 0){ has_bind = 1; }
 		}
 
@@ -188,16 +201,30 @@ void WorldDatabase::GetCharSelectInfo(uint32 accountID, EQApplicationPacket **ou
 			pp.binds[0] = pp.binds[4];
 			/* If no home bind set, set it */
 			if (has_home == 0) {
-				std::string query = StringFormat("REPLACE INTO `character_bind` (id, zone_id, instance_id, x, y, z, heading, is_home)"
+				std::string query = StringFormat("REPLACE INTO `character_bind` (id, zone_id, instance_id, x, y, z, heading, slot)"
 					" VALUES (%u, %u, %u, %f, %f, %f, %f, %i)",
-					character_id, pp.binds[4].zoneId, 0, pp.binds[4].x, pp.binds[4].y, pp.binds[4].z, pp.binds[4].heading, 1);
+					character_id, pp.binds[4].zoneId, 0, pp.binds[4].x, pp.binds[4].y, pp.binds[4].z, pp.binds[4].heading, 4);
 				auto results_bset = QueryDatabase(query);
 			}
 			/* If no regular bind set, set it */
 			if (has_bind == 0) {
-				std::string query = StringFormat("REPLACE INTO `character_bind` (id, zone_id, instance_id, x, y, z, heading, is_home)"
+				std::string query = StringFormat("REPLACE INTO `character_bind` (id, zone_id, instance_id, x, y, z, heading, slot)"
 					" VALUES (%u, %u, %u, %f, %f, %f, %f, %i)",
 					character_id, pp.binds[0].zoneId, 0, pp.binds[0].x, pp.binds[0].y, pp.binds[0].z, pp.binds[0].heading, 0);
+				auto results_bset = QueryDatabase(query);
+			}
+		}
+		/* If our bind count is less than 5, then we have null data that needs to be filled in. */
+		if (bind_count < 5) {
+			// we know that home and main bind must be valid here, so we don't check those
+			// we also use home to fill in the null data like live does.
+			for (int i = 1; i < 4;  i++) {
+				if (pp.binds[i].zoneId != 0) // we assume 0 is the only invalid one ...
+					continue;
+
+				std::string query = StringFormat("REPLACE INTO `character_bind` (id, zone_id, instance_id, x, y, z, heading, slot)"
+					" VALUES (%u, %u, %u, %f, %f, %f, %f, %i)",
+					character_id, pp.binds[4].zoneId, 0, pp.binds[4].x, pp.binds[4].y, pp.binds[4].z, pp.binds[4].heading, i);
 				auto results_bset = QueryDatabase(query);
 			}
 		}
@@ -208,21 +235,21 @@ void WorldDatabase::GetCharSelectInfo(uint32 accountID, EQApplicationPacket **ou
 		auto results_b = database.QueryDatabase(cquery); uint8 slot = 0;
 		for (auto row_b = results_b.begin(); row_b != results_b.end(); ++row_b) {
 			slot = atoi(row_b[0]);
-			pp.item_tint[slot].RGB.Red = atoi(row_b[1]);
-			pp.item_tint[slot].RGB.Green = atoi(row_b[2]);
-			pp.item_tint[slot].RGB.Blue = atoi(row_b[3]);
-			pp.item_tint[slot].RGB.UseTint = atoi(row_b[4]);
+			pp.item_tint.Slot[slot].Red = atoi(row_b[1]);
+			pp.item_tint.Slot[slot].Green = atoi(row_b[2]);
+			pp.item_tint.Slot[slot].Blue = atoi(row_b[3]);
+			pp.item_tint.Slot[slot].UseTint = atoi(row_b[4]);
 		}
 		/* Character Material Data End */
 
 		/* Load Inventory */
 		// If we ensure that the material data is updated appropriately, we can do away with inventory loads
 		if (GetInventory(accountID, cse->Name, &inv)) {
-			const Item_Struct* item = nullptr;
+			const EQEmu::ItemBase* item = nullptr;
 			const ItemInst* inst = nullptr;
 			int16 invslot = 0;
 
-			for (uint32 matslot = 0; matslot < _MaterialCount; matslot++) {
+			for (uint32 matslot = 0; matslot < EQEmu::textures::TextureCount; matslot++) {
 				invslot = Inventory::CalcSlotFromMaterial(matslot);
 				if (invslot == INVALID_INDEX) { continue; }
 				inst = inv.GetItem(invslot);
@@ -243,7 +270,7 @@ void WorldDatabase::GetCharSelectInfo(uint32 accountID, EQApplicationPacket **ou
 							cse->Equip[matslot].Material = idfile;
 						}
 					}
-					if (matslot == MaterialPrimary) {
+					if (matslot == EQEmu::textures::TexturePrimary) {
 						cse->PrimaryIDFile = idfile;
 					}
 					else {
@@ -252,8 +279,8 @@ void WorldDatabase::GetCharSelectInfo(uint32 accountID, EQApplicationPacket **ou
 				}
 				else {
 					uint32 color = 0;
-					if (pp.item_tint[matslot].RGB.UseTint) {
-						color = pp.item_tint[matslot].Color;
+					if (pp.item_tint.Slot[matslot].UseTint) {
+						color = pp.item_tint.Slot[matslot].Color;
 					}
 					else {
 						color = inst->GetColor();
@@ -263,7 +290,7 @@ void WorldDatabase::GetCharSelectInfo(uint32 accountID, EQApplicationPacket **ou
 					cse->Equip[matslot].Material = item->Material;
 					cse->Equip[matslot].EliteMaterial = item->EliteMaterial;
 					cse->Equip[matslot].HeroForgeModel = inst->GetOrnamentHeroModel(matslot);
-					cse->Equip[matslot].Color.Color = color;
+					cse->Equip[matslot].Color = color;
 				}
 			}
 		}
@@ -284,7 +311,7 @@ int WorldDatabase::MoveCharacterToBind(int CharID, uint8 bindnum)
 		bindnum = 0;
 	}
 
-	std::string query = StringFormat("SELECT zone_id, instance_id, x, y, z FROM character_bind WHERE id = %u AND is_home = %u LIMIT 1", CharID, bindnum == 4 ? 1 : 0);
+	std::string query = StringFormat("SELECT zone_id, instance_id, x, y, z FROM character_bind WHERE id = %u AND slot = %u LIMIT 1", CharID, bindnum);
 	auto results = database.QueryDatabase(query);
 	if(!results.Success() || results.RowCount() == 0) {
 		return 0;

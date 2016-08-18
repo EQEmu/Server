@@ -18,7 +18,9 @@
 
 #include "ipc_mutex.h"
 #ifdef _WINDOWS
+#define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
+#undef WIN32_LEAN_AND_MEAN
 #else
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -27,7 +29,7 @@
 #endif
 #include "types.h"
 #include "eqemu_exception.h"
-
+#include "eqemu_config.h"
 
 namespace EQEmu {
 	struct IPCMutex::Implementation {
@@ -41,7 +43,8 @@ namespace EQEmu {
 	IPCMutex::IPCMutex(std::string name) : locked_(false) {
 		imp_ = new Implementation;
 #ifdef _WINDOWS
-		std::string final_name = "EQEmuMutex_";
+		auto Config = EQEmuConfig::get();
+		std::string final_name = Config->SharedMemDir + "EQEmuMutex_";
 		final_name += name;
 
 		imp_->mut_ = CreateMutex(nullptr,
@@ -52,7 +55,8 @@ namespace EQEmu {
 			EQ_EXCEPT("IPC Mutex", "Could not create mutex.");
 		}
 #else
-		std::string final_name = name;
+		auto Config = EQEmuConfig::get();
+		std::string final_name = Config->SharedMemDir + name;
 		final_name += ".lock";
 
 #ifdef __DARWIN

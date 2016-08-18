@@ -22,10 +22,10 @@
 #include <stdio.h>
 #include <string.h>
 
-#ifdef WIN32
+#ifdef _WINDOWS
 	#include <time.h>
-	#include <windows.h>
 	#include <winsock2.h>
+	#include <windows.h>
 #else
 	#include <sys/time.h>
 	#include <netinet/in.h>
@@ -67,6 +67,8 @@ public:
 
 	uint8 ReadUInt8() { uint8 value = *(uint8 *)(pBuffer + _rpos); _rpos += sizeof(uint8); return value; }
 	uint8 ReadUInt8(uint32 Offset) const { uint8 value = *(uint8 *)(pBuffer + Offset); return value; }
+	uint16 ReadUInt16() { uint16 value = *(uint16 *)(pBuffer + _rpos); _rpos += sizeof(uint16); return value; }
+	uint16 ReadUInt16(uint32 Offset) const { uint16 value = *(uint16 *)(pBuffer + Offset); return value; }
 	uint32 ReadUInt32() { uint32 value = *(uint32 *)(pBuffer + _rpos); _rpos += sizeof(uint32); return value; }
 	uint32 ReadUInt32(uint32 Offset) const { uint32 value = *(uint32 *)(pBuffer + Offset); return value; }
 	void ReadString(char *str) { uint32 len = static_cast<uint32>(strlen((char *)(pBuffer + _rpos))) + 1; memcpy(str, pBuffer + _rpos, len); _rpos += len; }

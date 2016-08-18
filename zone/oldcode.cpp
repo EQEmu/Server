@@ -1082,11 +1082,11 @@ int32 Client::GenericFocus(uint16 spell_id, uint16 modspellid)
 		switch( spells[modspellid].effectid[i] )
 		{
 			case SE_LimitMaxLevel:
-				if (spell.classes[(GetClass()%16) - 1] > modspell.base[i])
+				if (spell.classes[(GetClass()%17) - 1] > modspell.base[i])
 					return 100;
 				break;
 			case SE_LimitMinLevel:
-				if (spell.classes[(GetClass()%16) - 1] < modspell.base[i])
+				if (spell.classes[(GetClass()%17) - 1] < modspell.base[i])
 					return 100;
 				break;
 			case SE_IncreaseRange:

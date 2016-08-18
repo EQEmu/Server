@@ -16,6 +16,7 @@
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 
+// WHY IS THIS UP HERE
 #if defined(_DEBUG) && defined(WIN32)
 	#ifndef _CRTDBG_MAP_ALLOC
 		#include <stdlib.h>
@@ -26,16 +27,9 @@
 #ifndef EQDEBUG_H
 #define EQDEBUG_H
 
-#define _WINSOCKAPI_	//stupid windows, trying to fix the winsock2 vs. winsock issues
-#if defined(WIN32) && ( defined(PACKETCOLLECTOR) || defined(COLLECTOR) )
-	// Packet Collector on win32 requires winsock.h due to latest pcap.h
-	// winsock.h must come before windows.h
-	#include <winsock.h>
-#endif
-
 #ifdef _WINDOWS
-	#include <windows.h>
 	#include <winsock2.h>
+	#include <windows.h>
 #endif
 
 #endif

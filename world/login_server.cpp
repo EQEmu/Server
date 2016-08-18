@@ -25,8 +25,8 @@
 
 #ifdef _WINDOWS
 	#include <process.h>
+	#include <winsock2.h>
 	#include <windows.h>
-	#include <winsock.h>
 
 	#define snprintf	_snprintf
 	#define strncasecmp	_strnicmp
@@ -145,7 +145,7 @@ bool LoginServer::Process() {
 				break;
 			}
 			case ServerOP_LSClientAuth: {
-				ServerLSClientAuth* slsca = (ServerLSClientAuth*) pack->pBuffer;
+				ClientAuth_Struct* slsca = (ClientAuth_Struct*) pack->pBuffer;
 
 				if (RuleI(World, AccountSessionLimit) >= 0) {
 					// Enforce the limit on the number of characters on the same account that can be
@@ -212,8 +212,8 @@ bool LoginServer::InitLoginServer() {
 }
 
 bool LoginServer::Connect() {
-	char tmp[25];
-	if(database.GetVariable("loginType",tmp,sizeof(tmp)) && strcasecmp(tmp,"MinILogin") == 0){
+	std::string tmp;
+	if(database.GetVariable("loginType", tmp) && strcasecmp(tmp.c_str(), "MinILogin") == 0) {
 		minilogin = true;
 		Log.Out(Logs::Detail, Logs::World_Server, "Setting World to MiniLogin Server type");
 	}

@@ -38,7 +38,7 @@ extern Database database;
 extern std::string WorldShortName;
 extern std::string GetMailPrefix();
 extern ChatChannelList *ChannelList;
-extern Clientlist *CL;
+extern Clientlist *g_Clientlist;
 extern uint32 ChatMessagesSent;
 extern uint32 MailMessagesSent;
 
@@ -572,46 +572,36 @@ void Clientlist::CheckForStaleConnections(Client *c) {
 	}
 }
 
-void Clientlist::Process() {
-
+void Clientlist::Process()
+{
 	std::shared_ptr<EQStream> eqs;
 
-	while((eqs = chatsf->Pop())) {
-
+	while ((eqs = chatsf->Pop())) {
 		struct in_addr in;
-
 		in.s_addr = eqs->GetRemoteIP();
 
-		Log.Out(Logs::Detail, Logs::UCS_Server, "New Client UDP connection from %s:%d", inet_ntoa(in), ntohs(eqs->GetRemotePort()));
+		Log.Out(Logs::Detail, Logs::UCS_Server, "New Client UDP connection from %s:%d", inet_ntoa(in),
+			ntohs(eqs->GetRemotePort()));
 
 		eqs->SetOpcodeManager(&ChatOpMgr);
 
 		auto c = new Client(eqs);
-
 		ClientChatConnections.push_back(c);
 	}
 
-	std::list<Client*>::iterator Iterator;
-
-	for(Iterator = ClientChatConnections.begin(); Iterator != ClientChatConnections.end(); ++Iterator) {
-
-		(*Iterator)->AccountUpdate();
-		if((*Iterator)->ClientStream->CheckClosed()) {
-
+	auto it = ClientChatConnections.begin();
+	while (it != ClientChatConnections.end()) {
+		(*it)->AccountUpdate();
+		if ((*it)->ClientStream->CheckClosed()) {
 			struct in_addr in;
-
-			in.s_addr = (*Iterator)->ClientStream->GetRemoteIP();
+			in.s_addr = (*it)->ClientStream->GetRemoteIP();
 
 			Log.Out(Logs::Detail, Logs::UCS_Server, "Client connection from %s:%d closed.", inet_ntoa(in),
-										ntohs((*Iterator)->ClientStream->GetRemotePort()));
+				ntohs((*it)->ClientStream->GetRemotePort()));
 
-			safe_delete((*Iterator));
+			safe_delete((*it));
 
-			Iterator = ClientChatConnections.erase(Iterator);
-
-			if(Iterator == ClientChatConnections.end())
-				break;
-
+			it = ClientChatConnections.erase(it);
 			continue;
 		}
 
@@ -619,114 +609,95 @@ void Clientlist::Process() {
 
 		bool KeyValid = true;
 
-		while( KeyValid && !(*Iterator)->GetForceDisconnect() &&
-				(app = (EQApplicationPacket *)(*Iterator)->ClientStream->PopPacket())) {
-
-
+		while (KeyValid && !(*it)->GetForceDisconnect() && (app = (*it)->ClientStream->PopPacket())) {
 			EmuOpcode opcode = app->GetOpcode();
 
-			switch(opcode) {
+			switch (opcode) {
+			case OP_MailLogin: {
+				char *PacketBuffer = (char *)app->pBuffer;
+				char MailBox[64];
+				char Key[64];
+				char ConnectionTypeIndicator;
 
-				case OP_MailLogin: {
+				VARSTRUCT_DECODE_STRING(MailBox, PacketBuffer);
 
-					char *PacketBuffer = (char *)app->pBuffer;
+				if (strlen(PacketBuffer) != 9) {
+					Log.Out(Logs::Detail, Logs::UCS_Server,
+						"Mail key is the wrong size. Version of world incompatible with UCS.");
+					KeyValid = false;
+					break;
+				}
+				ConnectionTypeIndicator = VARSTRUCT_DECODE_TYPE(char, PacketBuffer);
 
-					char MailBox[64];
+				(*it)->SetConnectionType(ConnectionTypeIndicator);
 
-					char Key[64];
+				VARSTRUCT_DECODE_STRING(Key, PacketBuffer);
 
-					char ConnectionTypeIndicator;
+				std::string MailBoxString = MailBox, CharacterName;
 
-					VARSTRUCT_DECODE_STRING(MailBox, PacketBuffer);
+				// Strip off the SOE.EQ.<shortname>.
+				//
+				std::string::size_type LastPeriod = MailBoxString.find_last_of(".");
 
-					if(strlen(PacketBuffer) != 9)
-					{
-						Log.Out(Logs::Detail, Logs::UCS_Server, "Mail key is the wrong size. Version of world incompatible with UCS.");
-						KeyValid = false;
-						break;
-					}
-					ConnectionTypeIndicator = VARSTRUCT_DECODE_TYPE(char, PacketBuffer);
+				if (LastPeriod == std::string::npos)
+					CharacterName = MailBoxString;
+				else
+					CharacterName = MailBoxString.substr(LastPeriod + 1);
 
-					(*Iterator)->SetConnectionType(ConnectionTypeIndicator);
+				Log.Out(Logs::Detail, Logs::UCS_Server, "Received login for user %s with key %s",
+					MailBox, Key);
 
-					VARSTRUCT_DECODE_STRING(Key, PacketBuffer);
-
-					std::string MailBoxString = MailBox, CharacterName;
-
-					// Strip off the SOE.EQ.<shortname>.
-					//
-					std::string::size_type LastPeriod = MailBoxString.find_last_of(".");
-
-					if(LastPeriod == std::string::npos)
-						CharacterName = MailBoxString;
-					else
-						CharacterName = MailBoxString.substr(LastPeriod + 1);
-
-					Log.Out(Logs::Detail, Logs::UCS_Server, "Received login for user %s with key %s", MailBox, Key);
-
-					if(!database.VerifyMailKey(CharacterName, (*Iterator)->ClientStream->GetRemoteIP(), Key)) {
-
-						Log.Out(Logs::Detail, Logs::UCS_Server, "Chat Key for %s does not match, closing connection.", MailBox);
-
-						KeyValid = false;
-
-						break;
-					}
-
-					(*Iterator)->SetAccountID(database.FindAccount(CharacterName.c_str(), (*Iterator)));
-
-					database.GetAccountStatus((*Iterator));
-
-					if((*Iterator)->GetConnectionType() == ConnectionTypeCombined)
-						(*Iterator)->SendFriends();
-
-					(*Iterator)->SendMailBoxes();
-
-					CheckForStaleConnections((*Iterator));
-
+				if (!database.VerifyMailKey(CharacterName, (*it)->ClientStream->GetRemoteIP(), Key)) {
+					Log.Out(Logs::Detail, Logs::UCS_Server,
+						"Chat Key for %s does not match, closing connection.", MailBox);
+					KeyValid = false;
 					break;
 				}
 
-				case OP_Mail: {
+				(*it)->SetAccountID(database.FindAccount(CharacterName.c_str(), (*it)));
 
-					std::string CommandString = (const char*)app->pBuffer;
+				database.GetAccountStatus((*it));
 
-					ProcessOPMailCommand((*Iterator), CommandString);
+				if ((*it)->GetConnectionType() == ConnectionTypeCombined)
+					(*it)->SendFriends();
 
-					break;
-				}
+				(*it)->SendMailBoxes();
 
-				default: {
+				CheckForStaleConnections((*it));
+				break;
+			}
 
-					Log.Out(Logs::Detail, Logs::UCS_Server, "Unhandled chat opcode %8X", opcode);
-					break;
-				}
+			case OP_Mail: {
+				std::string CommandString = (const char *)app->pBuffer;
+				ProcessOPMailCommand((*it), CommandString);
+				break;
+			}
+
+			default: {
+				Log.Out(Logs::Detail, Logs::UCS_Server, "Unhandled chat opcode %8X", opcode);
+				break;
+			}
 			}
 			safe_delete(app);
-
 		}
-		if(!KeyValid || (*Iterator)->GetForceDisconnect()) {
-
+		if (!KeyValid || (*it)->GetForceDisconnect()) {
 			struct in_addr in;
+			in.s_addr = (*it)->ClientStream->GetRemoteIP();
 
-			in.s_addr = (*Iterator)->ClientStream->GetRemoteIP();
+			Log.Out(Logs::Detail, Logs::UCS_Server,
+				"Force disconnecting client: %s:%d, KeyValid=%i, GetForceDisconnect()=%i",
+				inet_ntoa(in), ntohs((*it)->ClientStream->GetRemotePort()), KeyValid,
+				(*it)->GetForceDisconnect());
 
-			Log.Out(Logs::Detail, Logs::UCS_Server, "Force disconnecting client: %s:%d, KeyValid=%i, GetForceDisconnect()=%i",
-						inet_ntoa(in), ntohs((*Iterator)->ClientStream->GetRemotePort()),
-						KeyValid, (*Iterator)->GetForceDisconnect());
+			(*it)->ClientStream->Close();
 
-			(*Iterator)->ClientStream->Close();
+			safe_delete((*it));
 
-			safe_delete((*Iterator));
-
-			Iterator = ClientChatConnections.erase(Iterator);
-
-			if(Iterator == ClientChatConnections.end())
-				break;
+			it = ClientChatConnections.erase(it);
+			continue;
 		}
-
+		++it;
 	}
-
 }
 
 void Clientlist::ProcessOPMailCommand(Client *c, std::string CommandString)
@@ -1777,7 +1748,7 @@ void Client::ChannelInvite(std::string CommandString) {
 
 	Log.Out(Logs::Detail, Logs::UCS_Server, "[%s] invites [%s] to channel [%s]", GetName().c_str(), Invitee.c_str(), ChannelName.c_str());
 
-	Client *RequiredClient = CL->FindCharacter(Invitee);
+	Client *RequiredClient = g_Clientlist->FindCharacter(Invitee);
 
 	if(!RequiredClient) {
 
@@ -1905,7 +1876,7 @@ void Client::ChannelGrantModerator(std::string CommandString) {
 
 	Log.Out(Logs::Detail, Logs::UCS_Server, "[%s] gives [%s] moderator rights to channel [%s]", GetName().c_str(), Moderator.c_str(), ChannelName.c_str());
 
-	Client *RequiredClient = CL->FindCharacter(Moderator);
+	Client *RequiredClient = g_Clientlist->FindCharacter(Moderator);
 
 	if(!RequiredClient && (database.FindCharacter(Moderator.c_str()) < 0)) {
 
@@ -1986,7 +1957,7 @@ void Client::ChannelGrantVoice(std::string CommandString) {
 
 	Log.Out(Logs::Detail, Logs::UCS_Server, "[%s] gives [%s] voice to channel [%s]", GetName().c_str(), Voicee.c_str(), ChannelName.c_str());
 
-	Client *RequiredClient = CL->FindCharacter(Voicee);
+	Client *RequiredClient = g_Clientlist->FindCharacter(Voicee);
 
 	if(!RequiredClient && (database.FindCharacter(Voicee.c_str()) < 0)) {
 
@@ -2014,7 +1985,7 @@ void Client::ChannelGrantVoice(std::string CommandString) {
 		return;
 	}
 
-	if(RequiredChannel->IsOwner(RequiredClient->GetName()) || RequiredChannel->IsModerator(RequiredClient->GetName())) {
+	if(RequiredClient && (RequiredChannel->IsOwner(RequiredClient->GetName()) || RequiredChannel->IsModerator(RequiredClient->GetName()))) {
 
 		GeneralChannelMessage("The channel owner and moderators automatically have voice.");
 		return;
@@ -2074,7 +2045,7 @@ void Client::ChannelKick(std::string CommandString) {
 
 	Log.Out(Logs::Detail, Logs::UCS_Server, "[%s] kicks [%s] from channel [%s]", GetName().c_str(), Kickee.c_str(), ChannelName.c_str());
 
-	Client *RequiredClient = CL->FindCharacter(Kickee);
+	Client *RequiredClient = g_Clientlist->FindCharacter(Kickee);
 
 	if(!RequiredClient) {
 
@@ -2281,23 +2252,22 @@ void Client::SendNotification(int MailBoxNumber, std::string Subject, std::strin
 	safe_delete(outapp);
 }
 
-void Client::ChangeMailBox(int NewMailBox) {
-
+void Client::ChangeMailBox(int NewMailBox)
+{
 	Log.Out(Logs::Detail, Logs::UCS_Server, "%s Change to mailbox %i", MailBoxName().c_str(), NewMailBox);
 
 	SetMailBox(NewMailBox);
+	auto id = std::to_string(NewMailBox);
 
 	Log.Out(Logs::Detail, Logs::UCS_Server, "New mailbox is %s", MailBoxName().c_str());
 
-	auto outapp = new EQApplicationPacket(OP_MailboxChange, 2);
+	auto outapp = new EQApplicationPacket(OP_MailboxChange, id.length() + 1);
 
 	char *buf = (char *)outapp->pBuffer;
 
-	VARSTRUCT_ENCODE_INTSTRING(buf, NewMailBox);
-
+	VARSTRUCT_ENCODE_STRING(buf, id.c_str());
 
 	QueuePacket(outapp);
-
 	safe_delete(outapp);
 }
 
@@ -2356,7 +2326,7 @@ void Client::SendFriends() {
 
 std::string Client::MailBoxName() {
 
-	if((Characters.size() == 0) || (CurrentMailBox > (Characters.size() - 1)))
+	if((Characters.empty()) || (CurrentMailBox > (Characters.size() - 1)))
 	{
 		Log.Out(Logs::Detail, Logs::UCS_Server, "MailBoxName() called with CurrentMailBox set to %i and Characters.size() is %i",
 				CurrentMailBox, Characters.size());
@@ -2373,7 +2343,7 @@ std::string Client::MailBoxName() {
 
 int Client::GetCharID() {
 
-	if(Characters.size() == 0)
+	if(Characters.empty())
 		return 0;
 
 	return Characters[0].CharID;

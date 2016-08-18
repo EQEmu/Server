@@ -351,6 +351,112 @@ void Spawn2::DeathReset(bool realdeath)
 	}
 }
 
+bool ZoneDatabase::PopulateZoneSpawnListClose(uint32 zoneid, LinkedList<Spawn2*> &spawn2_list, int16 version, const glm::vec4& client_position, uint32 repop_distance)
+{
+	std::unordered_map<uint32, uint32> spawn_times;
+
+	float mob_distance = 0;
+
+	timeval tv;
+	gettimeofday(&tv, nullptr);
+
+	/* Bulk Load NPC Types Data into the cache */
+	database.LoadNPCTypesData(0, true);
+
+	std::string spawn_query = StringFormat(
+		"SELECT "
+		"respawn_times.id, "
+		"respawn_times.`start`, "
+		"respawn_times.duration "
+		"FROM "
+		"respawn_times "
+		"WHERE instance_id = %u",
+		zone->GetInstanceID()
+		);
+	auto results = QueryDatabase(spawn_query);
+	for (auto row = results.begin(); row != results.end(); ++row) {
+		uint32 start_duration = atoi(row[1]) > 0 ? atoi(row[1]) : 0;
+		uint32 end_duration = atoi(row[2]) > 0 ? atoi(row[2]) : 0;
+
+		/* Our current time was expired */
+		if ((start_duration + end_duration) <= tv.tv_sec) {
+			spawn_times[atoi(row[0])] = 0;
+		}
+		/* We still have time left on this timer */
+		else {
+			spawn_times[atoi(row[0])] = ((start_duration + end_duration) - tv.tv_sec) * 1000;
+		}
+	}
+
+	const char *zone_name = database.GetZoneName(zoneid);
+	std::string query = StringFormat(
+		"SELECT "
+		"id, "
+		"spawngroupID, "
+		"x, "
+		"y, "
+		"z, "
+		"heading, "
+		"respawntime, "
+		"variance, "
+		"pathgrid, "
+		"_condition, "
+		"cond_value, "
+		"enabled, "
+		"animation "
+		"FROM "
+		"spawn2 "
+		"WHERE zone = '%s' AND version = %u",
+		zone_name,
+		version
+		);
+	results = QueryDatabase(query);
+
+	if (!results.Success()) {
+		return false;
+	}
+
+	for (auto row = results.begin(); row != results.end(); ++row) {
+
+		uint32 spawn_time_left = 0;
+		Spawn2* new_spawn = 0;
+		bool perl_enabled = atoi(row[11]) == 1 ? true : false;
+
+		if (spawn_times.count(atoi(row[0])) != 0)
+			spawn_time_left = spawn_times[atoi(row[0])];
+
+		glm::vec4 point;
+		point.x = atof(row[2]);
+		point.y = atof(row[3]);
+
+		mob_distance = DistanceNoZ(client_position, point);
+
+		if (mob_distance > repop_distance)
+			continue;
+
+		new_spawn = new Spawn2(							   // 
+			atoi(row[0]), 								   // uint32 in_spawn2_id
+			atoi(row[1]), 								   // uint32 spawngroup_id
+			atof(row[2]), 								   // float in_x
+			atof(row[3]), 								   // float in_y
+			atof(row[4]),								   // float in_z
+			atof(row[5]), 								   // float in_heading
+			atoi(row[6]), 								   // uint32 respawn
+			atoi(row[7]), 								   // uint32 variance
+			spawn_time_left,							   // uint32 timeleft
+			atoi(row[8]),								   // uint32 grid
+			atoi(row[9]), 								   // uint16 in_cond_id
+			atoi(row[10]), 								   // int16 in_min_value
+			perl_enabled, 								   // bool in_enabled
+			(EmuAppearance)atoi(row[12])				   // EmuAppearance anim
+			);
+
+		spawn2_list.Insert(new_spawn);
+	}
+
+	return true;
+}
+
 bool ZoneDatabase::PopulateZoneSpawnList(uint32 zoneid, LinkedList<Spawn2*> &spawn2_list, int16 version, uint32 repopdelay) {
 
 	std::unordered_map<uint32, uint32> spawn_times;
@@ -443,6 +549,8 @@ bool ZoneDatabase::PopulateZoneSpawnList(uint32 zoneid, LinkedList<Spawn2*> &spa
 		spawn2_list.Insert(new_spawn);
 	}
 
+	NPC::SpawnZoneController();
+
 	return true;
 }
 
@@ -466,9 +574,9 @@ Spawn2* ZoneDatabase::LoadSpawn2(LinkedList<Spawn2*> &spawn2_list, uint32 spawn2
 
     bool perl_enabled = atoi(row[11]) == 1 ? true : false;
 
-	Spawn2* newSpawn = new Spawn2(atoi(row[0]), atoi(row[1]), atof(row[2]), atof(row[3]), atof(row[4]),
-                                    atof(row[5]), atoi(row[6]), atoi(row[7]), timeleft, atoi(row[8]),
-                                    atoi(row[9]), atoi(row[10]), perl_enabled, (EmuAppearance)atoi(row[12]));
+    auto newSpawn = new Spawn2(atoi(row[0]), atoi(row[1]), atof(row[2]), atof(row[3]), atof(row[4]), atof(row[5]),
+			       atoi(row[6]), atoi(row[7]), timeleft, atoi(row[8]), atoi(row[9]), atoi(row[10]),
+			       perl_enabled, (EmuAppearance)atoi(row[12]));
 
     spawn2_list.Insert(newSpawn);
 
@@ -624,7 +732,7 @@ void SpawnConditionManager::Process() {
 
 		//get our current time
 		TimeOfDay_Struct tod;
-		zone->zone_time.getEQTimeOfDay(&tod);
+		zone->zone_time.GetCurrentEQTimeOfDay(&tod);
 
 		//see if time is past our nearest event.
 		if(EQTime::IsTimeBefore(&next_event, &tod))
@@ -673,7 +781,7 @@ void SpawnConditionManager::ExecEvent(SpawnEvent &event, bool send_update) {
 	}
 
 	TimeOfDay_Struct tod;
-	zone->zone_time.getEQTimeOfDay(&tod);
+	zone->zone_time.GetCurrentEQTimeOfDay(&tod);
 	if(event.strict && (event.next.hour != tod.hour || event.next.day != tod.day || event.next.month != tod.month || event.next.year != tod.year))
 	{
 		Log.Out(Logs::Detail, Logs::Spawns, "Event %d: Unable to execute. Condition is strict, and event time has already passed.", event.id);
@@ -871,7 +979,7 @@ bool SpawnConditionManager::LoadSpawnConditions(const char* zone_name, uint32 in
 	//better solution, and I just dont care thats much.
 	//get our current time
 	TimeOfDay_Struct tod;
-	zone->zone_time.getEQTimeOfDay(&tod);
+	zone->zone_time.GetCurrentEQTimeOfDay(&tod);
 
 	for(auto cur = spawn_events.begin(); cur != spawn_events.end(); ++cur) {
 		SpawnEvent &cevent = *cur;
@@ -1020,7 +1128,7 @@ void SpawnConditionManager::SetCondition(const char *zone_short, uint32 instance
 
 		UpdateDBCondition(zone_short, instance_id, condition_id, new_value);
 
-		ServerPacket* pack = new ServerPacket(ServerOP_SpawnCondition, sizeof(ServerSpawnCondition_Struct));
+		auto pack = new ServerPacket(ServerOP_SpawnCondition, sizeof(ServerSpawnCondition_Struct));
 		ServerSpawnCondition_Struct* ssc = (ServerSpawnCondition_Struct*)pack->pBuffer;
 
 		ssc->zoneID = database.GetZoneID(zone_short);
@@ -1096,7 +1204,7 @@ void SpawnConditionManager::ToggleEvent(uint32 event_id, bool enabled, bool stri
 				if(reset_base) {
 					Log.Out(Logs::Detail, Logs::Spawns, "Spawn event %d located in this zone. State set. Trigger time reset (period %d).", event_id, cevent.period);
 					//start with the time now
-					zone->zone_time.getEQTimeOfDay(&cevent.next);
+					zone->zone_time.GetCurrentEQTimeOfDay(&cevent.next);
 					//advance the next time by our period
 					EQTime::AddMinutes(cevent.period, &cevent.next);
 				} else {
@@ -1141,7 +1249,7 @@ void SpawnConditionManager::ToggleEvent(uint32 event_id, bool enabled, bool stri
 	if(reset_base) {
 		Log.Out(Logs::Detail, Logs::Spawns, "Spawn event %d is in zone %s. State set. Trigger time reset (period %d). Notifying world.", event_id, zone_short_name.c_str(), e.period);
 		//start with the time now
-		zone->zone_time.getEQTimeOfDay(&e.next);
+		zone->zone_time.GetCurrentEQTimeOfDay(&e.next);
 		//advance the next time by our period
 		EQTime::AddMinutes(e.period, &e.next);
 	} else {
@@ -1152,7 +1260,7 @@ void SpawnConditionManager::ToggleEvent(uint32 event_id, bool enabled, bool stri
 
 
 	//now notify the zone
-	ServerPacket* pack = new ServerPacket(ServerOP_SpawnEvent, sizeof(ServerSpawnEvent_Struct));
+	auto pack = new ServerPacket(ServerOP_SpawnEvent, sizeof(ServerSpawnEvent_Struct));
 	ServerSpawnEvent_Struct* sse = (ServerSpawnEvent_Struct*)pack->pBuffer;
 
 	sse->zoneID = database.GetZoneID(zone_short_name.c_str());

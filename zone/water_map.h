@@ -3,10 +3,12 @@
 
 #include "../common/types.h"
 #include "position.h"
+#include "zone_config.h"
 #include <string>
 
+extern const ZoneConfig *Config;
 
-enum WaterRegionType {
+enum WaterRegionType : int {
 	RegionTypeUnsupported = -2,
 	RegionTypeUntagged = -1,
 	RegionTypeNormal = 0,
@@ -31,6 +33,8 @@ public:
 	virtual bool InVWater(const glm::vec3& location) const = 0;
 	virtual bool InLava(const glm::vec3& location) const = 0;
 	virtual bool InLiquid(const glm::vec3& location) const = 0;
+	virtual bool InPvP(const glm::vec3& location) const = 0;
+	virtual bool InZoneLine(const glm::vec3& location) const = 0;
 
 protected:
 	virtual bool Load(FILE *fp) { return false; }

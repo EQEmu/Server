@@ -186,7 +186,7 @@ namespace Convert {
 		/*002*/	uint32 HP;
 		/*006*/	uint32 Mana;
 		/*010*/	Convert::SpellBuff_Struct Buffs[BUFF_COUNT];
-		/*510*/	uint32 Items[_MaterialCount];
+		/*510*/	uint32 Items[EQEmu::textures::TextureCount];
 		/*546*/	char Name[64];
 		/*610*/
 	};
@@ -227,9 +227,9 @@ namespace Convert {
 		/*0304*/	uint8							ability_time_minutes;
 		/*0305*/	uint8							ability_time_hours;	//place holder
 		/*0306*/	uint8							unknown0306[6];		// @bp Spacer/Flag?
-		/*0312*/	uint32							item_material[_MaterialCount];	// Item texture/material of worn/held items
+		/*0312*/	uint32							item_material[EQEmu::textures::TextureCount];	// Item texture/material of worn/held items
 		/*0348*/	uint8							unknown0348[44];
-		/*0392*/	Convert::Color_Struct			item_tint[_MaterialCount];
+		/*0392*/	Convert::Color_Struct			item_tint[EQEmu::textures::TextureCount];
 		/*0428*/	Convert::AA_Array				aa_array[MAX_PP_AA_ARRAY];
 		/*2348*/	float							unknown2384;		//seen ~128, ~47
 		/*2352*/	char							servername[32];		// length probably not right
@@ -330,7 +330,7 @@ namespace Convert {
 		/*7212*/	uint32							tribute_points;
 		/*7216*/	uint32							unknown7252;
 		/*7220*/	uint32							tribute_active;		//1=active
-		/*7224*/	Convert::Tribute_Struct			tributes[EmuConstants::TRIBUTE_SIZE];
+		/*7224*/	Convert::Tribute_Struct			tributes[EQEmu::legacy::TRIBUTE_SIZE];
 		/*7264*/	Convert::Disciplines_Struct		disciplines;
 		/*7664*/	uint32							recastTimers[MAX_RECAST_TYPES];	// Timers (GMT of last use)
 		/*7744*/	char							unknown7780[160];
@@ -470,7 +470,6 @@ static inline void loadbar(unsigned int x, unsigned int n, unsigned int w = 50) 
 
 bool Database::CheckDatabaseConversions() {
 	CheckDatabaseConvertPPDeblob();
-	CheckDatabaseConvertBotsPostPPDeblob();
 	CheckDatabaseConvertCorpseDeblob();
 
 	/* Fetch Automatic Upgrade Script */
@@ -494,7 +493,7 @@ bool Database::CheckDatabaseConversions() {
 	/* Check for a new version of this script, the arg passed
 	would have to be higher than the copy they have downloaded
 	locally and they will re fetch */
-	system("perl eqemu_update.pl V 2"); 
+	system("perl eqemu_update.pl V 14"); 
 
 	/* Run Automatic Database Upgrade Script */
 	system("perl eqemu_update.pl ran_from_world");
@@ -1417,7 +1416,7 @@ bool Database::CheckDatabaseConvertPPDeblob(){
 				if (rquery != ""){ results = QueryDatabase(rquery); }
 				/* Run Material Color Convert */
 				first_entry = 0; rquery = "";
-				for (i = 0; i < _MaterialCount; i++){
+				for (i = 0; i < EQEmu::textures::TextureCount; i++){
 					if (pp->item_tint[i].color > 0){
 						if (first_entry != 1){
 							rquery = StringFormat("REPLACE INTO `character_material` (id, slot, blue, green, red, use_tint, color) VALUES (%u, %u, %u, %u, %u, %u, %u)", character_id, i, pp->item_tint[i].rgb.blue, pp->item_tint[i].rgb.green, pp->item_tint[i].rgb.red, pp->item_tint[i].rgb.use_tint, pp->item_tint[i].color);
@@ -1429,7 +1428,7 @@ bool Database::CheckDatabaseConvertPPDeblob(){
 				if (rquery != ""){ results = QueryDatabase(rquery); }
 				/* Run Tribute Convert */
 				first_entry = 0; rquery = "";
-				for (i = 0; i < EmuConstants::TRIBUTE_SIZE; i++){
+				for (i = 0; i < EQEmu::legacy::TRIBUTE_SIZE; i++){
 					if (pp->tributes[i].tribute > 0 && pp->tributes[i].tribute != 4294967295){
 						if (first_entry != 1){
 							rquery = StringFormat("REPLACE INTO `character_tribute` (id, tier, tribute) VALUES (%u, %u, %u)", character_id, pp->tributes[i].tier, pp->tributes[i].tribute);
@@ -1488,163 +1487,6 @@ bool Database::CheckDatabaseConvertPPDeblob(){
 			printf("\n\nCharacter blob conversion complete, continuing world bootup...\n");
 		}
 	}
-	return true;
-}
-
-bool Database::CheckDatabaseConvertBotsPostPPDeblob(){
-#ifdef BOTS
-	int runbotsconvert = 0;
-
-	/* Check For Legacy Bot References */
-	std::string rquery = StringFormat("SHOW CREATE VIEW `vwBotCharacterMobs`");
-	auto results = QueryDatabase(rquery);
-	if (results.RowCount() == 1){
-		auto row = results.begin();
-		std::string table_check = row[1];
-
-		if (table_check.find("character_data") == -1){
-			runbotsconvert = 1;
-			printf("\n\n::: Legacy Bot Views and Function Detected... \n");
-			printf("----------------------------------------------------------\n\n");
-			printf(" Database currently has bot view/function linkage to obselete \n");
-			printf("  table references and will now be converted...\n\n");
-			printf(" It is recommended that you backup your database \n");
-			printf("  before continuing the automatic conversion process...\n\n");
-			printf("----------------------------------------------------------\n\n");
-			std::cout << "Press ENTER to continue....." << std::endl << std::endl;
-			std::cin.ignore(1);
-		}
-	}
-
-	if (runbotsconvert == 1){
-		printf("Running bot views/function database conversion... \n");
-
-		/* Update view `vwbotcharactermobs` */
-		rquery = StringFormat("DROP VIEW `vwBotCharacterMobs`;");
-		results = QueryDatabase(rquery);
-
-		rquery = StringFormat(
-			"CREATE VIEW `vwBotCharacterMobs` AS\n"
-			"SELECT _utf8'C' AS mobtype,\n" // Natedog: '_utf8'
-			"c.`id`,\n"
-			"c.`name`,\n"
-			"c.`class`,\n"
-			"c.`level`,\n"
-			"c.`last_login`,\n"
-			"c.`zone_id`\n"
-			"FROM `character_data` AS c\n"
-			"UNION ALL\n"
-			"SELECT _utf8'B' AS mobtype,\n" // Natedog: '_utf8'
-			"b.`BotID` AS id,\n"
-			"b.`Name` AS name,\n"
-			"b.`Class` AS class,\n"
-			"b.`BotLevel` AS level,\n"
-			"0 AS timelaston,\n"
-			"0 AS zoneid\n"
-			"FROM bots AS b;"
-			);
-		results = QueryDatabase(rquery);
-
-
-		/* Update function `GetMobType` */
-		rquery = StringFormat("DROP FUNCTION IF EXISTS `GetMobType`;");
-		results = QueryDatabase(rquery);
-
-		rquery = StringFormat(
-			"CREATE FUNCTION `GetMobType` (mobname VARCHAR(64)) RETURNS CHAR(1)\n"
-			"BEGIN\n"
-			"	DECLARE Result CHAR(1);\n"
-			"\n"
-			"	SET Result = NULL;\n"
-			"\n"
-			"	IF (SELECT COUNT(*) FROM `character_data` WHERE `name` = mobname) > 0 THEN\n"
-			"		SET Result = 'C';\n"
-			"	ELSEIF (SELECT COUNT(*) FROM `bots` WHERE `Name` = mobname) > 0 THEN\n"
-			"		SET Result = 'B';\n"
-			"	END IF;\n "
-			"\n"
-			"	RETURN Result;\n"
-			"END"
-			);
-		results = QueryDatabase(rquery);
-
-
-		/* Update view `vwgroups` */
-		rquery = StringFormat("DROP VIEW IF EXISTS `vwGroups`;");
-		results = QueryDatabase(rquery);
-
-		rquery = StringFormat(
-			"CREATE VIEW `vwGroups` AS\n"
-			"SELECT g.`groupid` AS groupid,\n"
-			"GetMobType(g.`name`) AS mobtype,\n"
-			"g.`name` AS name,\n"
-			"g.`charid` AS mobid,\n"
-			"IFNULL(c.`level`, b.`BotLevel`) AS level\n"
-			"FROM `group_id` AS g\n"
-			"LEFT JOIN `character_data` AS c ON g.`name` = c.`name`\n"
-			"LEFT JOIN `bots` AS b ON g.`name` = b.`Name`;"
-			);
-		results = QueryDatabase(rquery);
-
-
-		/* Update view `vwbotgroups` */
-		rquery = StringFormat("DROP VIEW IF EXISTS `vwBotGroups`;");
-		results = QueryDatabase(rquery);
-
-		rquery = StringFormat(
-			"CREATE VIEW `vwBotGroups` AS\n"
-			"SELECT g.`BotGroupId`,\n"
-			"g.`BotGroupName`,\n"
-			"g.`BotGroupLeaderBotId`,\n"
-			"b.`Name` AS BotGroupLeaderName,\n"
-			"b.`BotOwnerCharacterId`,\n"
-			"c.`name` AS BotOwnerCharacterName\n"
-			"FROM `botgroup` AS g\n"
-			"JOIN `bots` AS b ON g.`BotGroupLeaderBotId` = b.`BotID`\n"
-			"JOIN `character_data` AS c ON b.`BotOwnerCharacterID` = c.`id`\n"
-			"ORDER BY b.`BotOwnerCharacterId`, g.`BotGroupName`;"
-			);
-		results = QueryDatabase(rquery);
-
-
-		/* Update view `vwguildmembers` */
-		rquery = StringFormat("DROP VIEW IF EXISTS `vwGuildMembers`;");
-		results = QueryDatabase(rquery);
-
-		rquery = StringFormat(
-			"CREATE VIEW `vwGuildMembers` AS\n"
-			"SELECT 'C' AS mobtype,\n"
-			"cm.`char_id`,\n"
-			"cm.`guild_id`,\n"
-			"cm.`rank`,\n"
-			"cm.`tribute_enable`,\n"
-			"cm.`total_tribute`,\n"
-			"cm.`last_tribute`,\n"
-			"cm.`banker`,\n"
-			"cm.`public_note`,\n"
-			"cm.`alt`\n"
-			"FROM `guild_members` AS cm\n"
-			"UNION ALL\n"
-			"SELECT 'B' AS mobtype,\n"
-			"bm.`char_id`,\n"
-			"bm.`guild_id`,\n"
-			"bm.`rank`,\n"
-			"bm.`tribute_enable`,\n"
-			"bm.`total_tribute`,\n"
-			"bm.`last_tribute`,\n"
-			"bm.`banker`,\n"
-			"bm.`public_note`,\n"
-			"bm.`alt`\n"
-			"FROM `botguildmembers` AS bm;"
-			);
-		results = QueryDatabase(rquery);
-	}
-
-	if (runbotsconvert == 1){
-		printf("\n\nBot views/function conversion complete, continuing world bootup...\n");
-	}
-
-#endif
 	return true;
 }
 

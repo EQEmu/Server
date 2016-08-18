@@ -146,6 +146,7 @@ INr(OP_GuildDelete);	//?
 IN(OP_GuildPublicNote, GuildUpdate_PublicNote);
 INz(OP_GetGuildsList);	//?
 IN(OP_SetGuildMOTD, GuildMOTD_Struct);
+IN(OP_SetRunMode, SetRunMode_Struct);
 INz(OP_GuildPeace);		//?
 INz(OP_GuildWar);		//?
 IN(OP_GuildLeader, GuildMakeLeader);
@@ -172,7 +173,7 @@ IN(OP_TradeAcceptClick, TradeAccept_Struct);
 IN(OP_BoardBoat, EntityId_Struct);		//not really the struct, just 4 bytes
 INz(OP_LeaveBoat);		//?
 IN(OP_RandomReq, RandomReq_Struct);
-IN(OP_Buff, SpellBuffFade_Struct);
+IN(OP_Buff, SpellBuffPacket_Struct);
 IN(OP_GMHideMe, SpawnAppearance_Struct);
 IN(OP_GMNameChange, GMName_Struct);
 IN(OP_GMKill, GMKill_Struct);
@@ -414,7 +415,7 @@ OUTv(OP_SendAATable, SendAA_Struct);
 OUT(OP_AAAction, UseAA_Struct);
 OUT(OP_Bazaar, BazaarReturnDone_Struct);
 //alt:OUT(OP_Bazaar, BazaarWelcome_Struct);
-OUT(OP_Buff, SpellBuffFade_Struct);
+OUT(OP_Buff, SpellBuffPacket_Struct);
 OUT(OP_ClickObject, ClickObject_Struct);
 OUT(OP_ClientUpdate, PlayerPositionUpdateServer_Struct);
 OUT(OP_SpawnPositionUpdate, SpawnPositionUpdate_Struct);

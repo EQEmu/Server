@@ -90,12 +90,17 @@ class Client;
 class Group;
 class Raid;
 class Spawn2;
-struct Item_Struct;
+
+namespace EQEmu
+{
+	struct ItemBase;
+}
 
 class NPC : public Mob
 {
 public:
 	static NPC* SpawnNPC(const char* spawncommand, const glm::vec4& position, Client* client = nullptr);
+	static bool	SpawnZoneController();
 	static int8 GetAILevel(bool iForceReRead = false);
 
 	NPC(const NPCType* data, Spawn2* respawn, const glm::vec4& position, int iflymode, bool IsCorpse = false);
@@ -103,10 +108,10 @@ public:
 	virtual ~NPC();
 
 	//abstract virtual function implementations requird by base abstract class
-	virtual bool Death(Mob* killerMob, int32 damage, uint16 spell_id, SkillUseTypes attack_skill);
-	virtual void Damage(Mob* from, int32 damage, uint16 spell_id, SkillUseTypes attack_skill, bool avoidable = true, int8 buffslot = -1, bool iBuffTic = false);
-	virtual bool Attack(Mob* other, int Hand = MainPrimary, bool FromRiposte = false, bool IsStrikethrough = false,
-		bool IsFromSpell = false, ExtraAttackOptions *opts = nullptr);
+	virtual bool Death(Mob* killerMob, int32 damage, uint16 spell_id, EQEmu::skills::SkillType attack_skill);
+	virtual void Damage(Mob* from, int32 damage, uint16 spell_id, EQEmu::skills::SkillType attack_skill, bool avoidable = true, int8 buffslot = -1, bool iBuffTic = false, int special = 0);
+	virtual bool Attack(Mob* other, int Hand = EQEmu::legacy::SlotPrimary, bool FromRiposte = false, bool IsStrikethrough = false,
+		bool IsFromSpell = false, ExtraAttackOptions *opts = nullptr, int special = 0);
 	virtual bool HasRaid() { return false; }
 	virtual bool HasGroup() { return false; }
 	virtual Raid* GetRaid() { return 0; }
@@ -119,6 +124,7 @@ public:
 	virtual void	AI_Start(uint32 iMoveDelay = 0);
 	virtual void	AI_Stop();
 	void			AI_DoMovement();
+	void			AI_SetupNextWaypoint();
 	bool			AI_AddNPCSpells(uint32 iDBSpellsID);
 	bool			AI_AddNPCSpellsEffects(uint32 iDBSpellsEffectsID);
 	virtual bool	AI_EngagedCastCheck();
@@ -136,7 +142,7 @@ public:
 	void CalcNPCDamage();
 
 	virtual void SetTarget(Mob* mob);
-	virtual uint16 GetSkill(SkillUseTypes skill_num) const { if (skill_num <= HIGHEST_SKILL) { return skills[skill_num]; } return 0; }
+	virtual uint16 GetSkill(EQEmu::skills::SkillType skill_num) const { if (skill_num <= EQEmu::skills::HIGHEST_SKILL) { return skills[skill_num]; } return 0; }
 
 	void CalcItemBonuses(StatBonuses *newbon);
 	virtual void CalcBonuses();
@@ -155,7 +161,7 @@ public:
 	virtual void	RangedAttack(Mob* other);
 	virtual void	ThrowingAttack(Mob* other) { }
 	int32 GetNumberOfAttacks() const { return attack_count; }
-	void DoRangedAttackDmg(Mob* other, bool Launch=true, int16 damage_mod=0, int16 chance_mod=0, SkillUseTypes skill=SkillArchery, float speed=4.0f, const char *IDFile = nullptr);
+	void DoRangedAttackDmg(Mob* other, bool Launch = true, int16 damage_mod = 0, int16 chance_mod = 0, EQEmu::skills::SkillType skill = EQEmu::skills::SkillArchery, float speed = 4.0f, const char *IDFile = nullptr);
 
 	bool	DatabaseCastAccepted(int spell_id);
 	bool	IsFactionListAlly(uint32 other_faction);
@@ -163,7 +169,7 @@ public:
 	virtual FACTION_VALUE GetReverseFactionCon(Mob* iOther);
 
 	void	GoToBind(uint8 bindnum = 0)	{ GMMove(m_SpawnPoint.x, m_SpawnPoint.y, m_SpawnPoint.z, m_SpawnPoint.w); }
-	void	Gate();
+	void	Gate(uint8 bindnum = 0);
 
 	void	GetPetState(SpellBuff_Struct *buffs, uint32 *items, char *name);
 	void	SetPetState(SpellBuff_Struct *buffs, uint32 *items);
@@ -172,7 +178,7 @@ public:
 	virtual void SpellProcess();
 	virtual void FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho);
 
-	void	AddItem(const Item_Struct* item, uint16 charges, bool equipitem = true);
+	void	AddItem(const EQEmu::ItemBase* item, uint16 charges, bool equipitem = true);
 	void	AddItem(uint32 itemid, uint16 charges, bool equipitem = true);
 	void	AddLootTable();
 	void	AddLootTable(uint32 ldid);
@@ -264,7 +270,7 @@ public:
 	bool	IsTaunting() const { return taunting; }
 	void	PickPocket(Client* thief);
 	void	StartSwarmTimer(uint32 duration) { swarm_timer.Start(duration); }
-	void	AddLootDrop(const Item_Struct*dbitem, ItemList* itemlistconst, int16 charges, uint8 minlevel, uint8 maxlevel, bool equipit, bool wearchange = false);
+	void	AddLootDrop(const EQEmu::ItemBase*dbitem, ItemList* itemlistconst, int16 charges, uint8 minlevel, uint8 maxlevel, bool equipit, bool wearchange = false);
 	virtual void DoClassAttacks(Mob *target);
 	void	CheckSignal();
 	inline bool IsNotTargetableWithHotkey() const { return no_target_hotkey; }
@@ -397,15 +403,17 @@ public:
 	void	SetMerchantProbability(uint8 amt) { probability = amt; }
 	uint8	GetMerchantProbability() { return probability; }
 	void	mod_prespawn(Spawn2 *sp);
-	int	mod_npc_damage(int damage, SkillUseTypes skillinuse, int hand, const Item_Struct* weapon, Mob* other);
+	int	mod_npc_damage(int damage, EQEmu::skills::SkillType skillinuse, int hand, const EQEmu::ItemBase* weapon, Mob* other);
 	void	mod_npc_killed_merit(Mob* c);
 	void	mod_npc_killed(Mob* oos);
 	void	AISpellsList(Client *c);
+	uint16 GetInnateProcSpellID() const { return innate_proc_spell_id; }
 
 	uint32	GetHeroForgeModel() const { return herosforgemodel; }
 	void	SetHeroForgeModel(uint32 model) { herosforgemodel = model; }
 
 	bool IsRaidTarget() const { return raid_target; };
+	void ResetHPUpdateTimer() { sendhpupdate_timer.Start(); }
 
 protected:
 
@@ -447,6 +455,7 @@ protected:
 	virtual bool AIDoSpellCast(uint8 i, Mob* tar, int32 mana_cost, uint32* oDontDoAgainBefore = 0);
 	AISpellsVar_Struct AISpellVar;
 	int16 GetFocusEffect(focusType type, uint16 spell_id);
+	uint16 innate_proc_spell_id;
 
 	uint32	npc_spells_effects_id;
 	std::vector<AISpellsEffects_Struct> AIspellsEffects;
@@ -490,9 +499,9 @@ protected:
 	uint32 roambox_delay;
 	uint32 roambox_min_delay;
 
-	uint16	skills[HIGHEST_SKILL+1];
+	uint16	skills[EQEmu::skills::HIGHEST_SKILL + 1];
 
-	uint32	equipment[EmuConstants::EQUIPMENT_SIZE];	//this is an array of item IDs
+	uint32	equipment[EQEmu::legacy::EQUIPMENT_SIZE];	//this is an array of item IDs
 
 	uint32	herosforgemodel;			//this is the Hero Forge Armor Model (i.e 63 or 84 or 203)
 	uint16	d_melee_texture1;			//this is an item Material value

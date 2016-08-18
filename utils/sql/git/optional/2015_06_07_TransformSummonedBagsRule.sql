@@ -1,0 +1,1 @@
+INSERT INTO `rule_values` (`ruleset_id`, `rule_name`, `rule_value`, `notes`) VALUES (1, 'Inventory:TransformSummonedBags', 'true', 'Transforms summoned bags into disenchanted ones instead of deleting.');

@@ -87,6 +87,8 @@ public:
 	void depopall(int npc_type = 0);
 	void depopzone(bool StartSpawnTimer = true);
 	void repopzone();
+	void ConnectNodeToNode(int node1, int node2, int teleport, int doorid);
+	void AddNode(float x, float y, float z, float best_z, int32 requested_id);
 	void settarget(const char *type, int target_id);
 	void follow(int entity_id, int distance);
 	void sfollow();
@@ -124,7 +126,7 @@ public:
 	void setsky(uint8 new_sky);
 	void setguild(uint32 new_guild_id, uint8 new_rank);
 	void CreateGuild(const char *guild_name, const char *leader);
-	void settime(uint8 new_hour, uint8 new_min);
+	void settime(uint8 new_hour, uint8 new_min, bool update_world = true);
 	void itemlink(int item_id);
 	void signal(int npc_id, int wait_ms = 0);
 	void signalwith(int npc_id, int signal_id, int wait_ms = 0);
@@ -157,9 +159,9 @@ public:
 	void set_zone_flag(int zone_id);
 	void clear_zone_flag(int zone_id);
 	void sethp(int hpperc);
-	bool summonburriedplayercorpse(uint32 char_id, const glm::vec4& position);
+	bool summonburiedplayercorpse(uint32 char_id, const glm::vec4& position);
 	bool summonallplayercorpses(uint32 char_id, const glm::vec4& position);
-	uint32 getplayerburriedcorpsecount(uint32 char_id);
+	uint32 getplayerburiedcorpsecount(uint32 char_id);
 	bool buryplayercorpse(uint32 char_id);
 	void forcedooropen(uint32 doorid, bool altmode);
 	void forcedoorclose(uint32 doorid, bool altmode);
@@ -186,7 +188,7 @@ public:
 	void updatetaskactivity(int task, int activity, int count, bool ignore_quest_update = false);
 	void resettaskactivity(int task, int activity);
 	void taskexploredarea(int exploreid);
-	void assigntask(int taskid);
+	void assigntask(int taskid, bool enforce_level_requirement = false);
 	void failtask(int taskid);
 	int tasktimeleft(int taskid);
 	int istaskcompleted(int taskid);
@@ -215,6 +217,10 @@ public:
 	void MerchantSetItem(uint32 NPCid, uint32 itemid, uint32 quantity = 0);
 	uint32 MerchantCountItem(uint32 NPCid, uint32 itemid);
 	uint16 CreateInstance(const char *zone, int16 version, uint32 duration);
+	void UpdateInstanceTimer(uint16 instance_id, uint32 new_duration);
+	void UpdateZoneHeader(std::string type, std::string value);
+	uint32 GetInstanceTimer();
+	uint32 GetInstanceTimerByID(uint16 instance_id = 0);
 	void DestroyInstance(uint16 instance_id);
 	uint16 GetInstanceID(const char *zone, int16 version);
 	void AssignToInstance(uint16 instance_id);
@@ -234,7 +240,7 @@ public:
 	bool IsRunning();
 	void FlyMode(uint8 flymode);
 	uint8 FactionValue();
-	void wearchange(uint8 slot, uint16 texture);
+	void wearchange(uint8 slot, uint16 texture, uint32 hero_forge_model = 0, uint32 elite_material = 0);
 	void voicetell(const char *str, int macronum, int racenum, int gendernum);
     void LearnRecipe(uint32 recipe_id);
     void SendMail(const char *to, const char *from, const char *subject, const char *message);
@@ -249,6 +255,7 @@ public:
 	bool EnableRecipe(uint32 recipe_id);
 	bool DisableRecipe(uint32 recipe_id);
 	void ClearNPCTypeCache(int npctype_id);
+	void ReloadZoneStaticData();
 
 	Client *GetInitiator() const;
 	NPC *GetNPC() const;

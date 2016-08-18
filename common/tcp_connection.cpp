@@ -187,7 +187,7 @@ void TCPConnection::ServerSendQueuePushEnd(const uchar* data, int32 size) {
 	}
 	else if (size > (sendbuf_size - sendbuf_used)) {
 		sendbuf_size += size + 1024;
-		uchar* tmp = new uchar[sendbuf_size];
+		auto tmp = new uchar[sendbuf_size];
 		memcpy(tmp, sendbuf, sendbuf_used);
 		safe_delete_array(sendbuf);
 		sendbuf = tmp;
@@ -209,7 +209,7 @@ void TCPConnection::ServerSendQueuePushEnd(uchar** data, int32 size) {
 	}
 	if (size > (sendbuf_size - sendbuf_used)) {
 		sendbuf_size += size;
-		uchar* tmp = new uchar[sendbuf_size];
+		auto tmp = new uchar[sendbuf_size];
 		memcpy(tmp, sendbuf, sendbuf_used);
 		safe_delete_array(sendbuf);
 		sendbuf = tmp;
@@ -229,7 +229,7 @@ void TCPConnection::ServerSendQueuePushFront(uchar* data, int32 size) {
 	}
 	else if (size > (sendbuf_size - sendbuf_used)) {
 		sendbuf_size += size;
-		uchar* tmp = new uchar[sendbuf_size];
+		auto tmp = new uchar[sendbuf_size];
 		memcpy(&tmp[size], sendbuf, sendbuf_used);
 		safe_delete_array(sendbuf);
 		sendbuf = tmp;
@@ -608,7 +608,7 @@ bool TCPConnection::RecvData(char* errbuf) {
 		recvbuf_echo = 0;
 	}
 	else if ((recvbuf_size - recvbuf_used) < 2048) {
-		uchar* tmpbuf = new uchar[recvbuf_size + 5120];
+		auto tmpbuf = new uchar[recvbuf_size + 5120];
 		memcpy(tmpbuf, recvbuf, recvbuf_used);
 		recvbuf_size += 5120;
 		safe_delete_array(recvbuf);

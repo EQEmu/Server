@@ -1,3 +1,21 @@
+/*	EQEMu: Everquest Server Emulator
+	Copyright (C) 2001-2016 EQEMu Development Team (http://eqemulator.org)
+
+	This program is free software; you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation; version 2 of the License.
+
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY except by those people which sell it, which
+	are required to give you total support for your newly bought product;
+	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+	A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+	You should have received a copy of the GNU General Public License
+	along with this program; if not, write to the Free Software
+	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+*/
+
 #ifndef SHAREDDB_H_
 #define SHAREDDB_H_
 
@@ -12,6 +30,7 @@
 
 #include <list>
 #include <map>
+#include <memory>
 
 class EvolveInfo;
 class Inventory;
@@ -20,12 +39,13 @@ struct BaseDataStruct;
 struct InspectMessage_Struct;
 struct PlayerProfile_Struct;
 struct SPDat_Spell_Struct;
-struct Item_Struct;
 struct NPCFactionList;
 struct LootTable_Struct;
 struct LootDrop_Struct;
+
 namespace EQEmu
 {
+	struct ItemBase;
 	class MemoryMappedFile;
 }
 
@@ -50,9 +70,7 @@ class SharedDatabase : public Database
 		int32	DeleteStalePlayerCorpses();
 		void	LoadCharacterInspectMessage(uint32 character_id, InspectMessage_Struct* message);
 		void	SaveCharacterInspectMessage(uint32 character_id, const InspectMessage_Struct* message);
-		void	GetBotInspectMessage(uint32 botid, InspectMessage_Struct* message);
-		void	SetBotInspectMessage(uint32 botid, const InspectMessage_Struct* message);
-		bool	GetCommandSettings(std::map<std::string, uint8> &commands);
+		bool	GetCommandSettings(std::map<std::string, std::pair<uint8, std::vector<std::string>>> &command_settings);
 		uint32	GetTotalTimeEntitledOnAccount(uint32 AccountID);
 
 		/*
@@ -82,8 +100,8 @@ class SharedDatabase : public Database
 		    Item Methods
 		*/
 		ItemInst* CreateItem(uint32 item_id, int16 charges = 0, uint32 aug1 = 0, uint32 aug2 = 0, uint32 aug3 = 0, uint32 aug4 = 0, uint32 aug5 = 0, uint32 aug6 = 0, uint8 attuned = 0);
-		ItemInst* CreateItem(const Item_Struct* item, int16 charges = 0, uint32 aug1 = 0, uint32 aug2 = 0, uint32 aug3 = 0, uint32 aug4 = 0, uint32 aug5 = 0, uint32 aug6 = 0, uint8 attuned = 0);
-		ItemInst* CreateBaseItem(const Item_Struct* item, int16 charges = 0);
+		ItemInst* CreateItem(const EQEmu::ItemBase* item, int16 charges = 0, uint32 aug1 = 0, uint32 aug2 = 0, uint32 aug3 = 0, uint32 aug4 = 0, uint32 aug5 = 0, uint32 aug6 = 0, uint8 attuned = 0);
+		ItemInst* CreateBaseItem(const EQEmu::ItemBase* item, int16 charges = 0);
 
 		// Web Token Verification
 		bool VerifyToken(std::string token, int& status);
@@ -95,52 +113,54 @@ class SharedDatabase : public Database
 		//items
 		void GetItemsCount(int32 &item_count, uint32 &max_id);
 		void LoadItems(void *data, uint32 size, int32 items, uint32 max_item_id);
-		bool LoadItems();
-		const Item_Struct* IterateItems(uint32* id);
-		const Item_Struct* GetItem(uint32 id);
+		bool LoadItems(const std::string &prefix);
+		const EQEmu::ItemBase* IterateItems(uint32* id);
+		const EQEmu::ItemBase* GetItem(uint32 id);
 		const EvolveInfo* GetEvolveInfo(uint32 loregroup);
 
 		//faction lists
 		void GetFactionListInfo(uint32 &list_count, uint32 &max_lists);
 		const NPCFactionList* GetNPCFactionEntry(uint32 id);
 		void LoadNPCFactionLists(void *data, uint32 size, uint32 list_count, uint32 max_lists);
-		bool LoadNPCFactionLists();
+		bool LoadNPCFactionLists(const std::string &prefix);
 
 		//loot
 		void GetLootTableInfo(uint32 &loot_table_count, uint32 &max_loot_table, uint32 &loot_table_entries);
 		void GetLootDropInfo(uint32 &loot_drop_count, uint32 &max_loot_drop, uint32 &loot_drop_entries);
 		void LoadLootTables(void *data, uint32 size);
 		void LoadLootDrops(void *data, uint32 size);
-		bool LoadLoot();
+		bool LoadLoot(const std::string &prefix);
 		const LootTable_Struct* GetLootTable(uint32 loottable_id);
 		const LootDrop_Struct* GetLootDrop(uint32 lootdrop_id);
 
 		void LoadSkillCaps(void *data);
-		bool LoadSkillCaps();
-		uint16 GetSkillCap(uint8 Class_, SkillUseTypes Skill, uint8 Level);
-		uint8 GetTrainLevel(uint8 Class_, SkillUseTypes Skill, uint8 Level);
+		bool LoadSkillCaps(const std::string &prefix);
+		uint16 GetSkillCap(uint8 Class_, EQEmu::skills::SkillType Skill, uint8 Level);
+		uint8 GetTrainLevel(uint8 Class_, EQEmu::skills::SkillType Skill, uint8 Level);
 
 		int GetMaxSpellID();
+		bool LoadSpells(const std::string &prefix, int32 *records, const SPDat_Spell_Struct **sp);
 		void LoadSpells(void *data, int max_spells);
 		void LoadDamageShieldTypes(SPDat_Spell_Struct* sp, int32 iMaxSpellID);
 
 		int GetMaxBaseDataLevel();
-		bool LoadBaseData();
+		bool LoadBaseData(const std::string &prefix);
 		void LoadBaseData(void *data, int max_level);
 		const BaseDataStruct* GetBaseData(int lvl, int cl);
 
 	protected:
 
-		EQEmu::MemoryMappedFile *skill_caps_mmf;
-		EQEmu::MemoryMappedFile *items_mmf;
-		EQEmu::FixedMemoryHashSet<Item_Struct> *items_hash;
-		EQEmu::MemoryMappedFile *faction_mmf;
-		EQEmu::FixedMemoryHashSet<NPCFactionList> *faction_hash;
-		EQEmu::MemoryMappedFile *loot_table_mmf;
-		EQEmu::FixedMemoryVariableHashSet<LootTable_Struct> *loot_table_hash;
-		EQEmu::MemoryMappedFile *loot_drop_mmf;
-		EQEmu::FixedMemoryVariableHashSet<LootDrop_Struct> *loot_drop_hash;
-		EQEmu::MemoryMappedFile *base_data_mmf;
+		std::unique_ptr<EQEmu::MemoryMappedFile> skill_caps_mmf;
+		std::unique_ptr<EQEmu::MemoryMappedFile> items_mmf;
+		std::unique_ptr<EQEmu::FixedMemoryHashSet<EQEmu::ItemBase>> items_hash;
+		std::unique_ptr<EQEmu::MemoryMappedFile> faction_mmf;
+		std::unique_ptr<EQEmu::FixedMemoryHashSet<NPCFactionList>> faction_hash;
+		std::unique_ptr<EQEmu::MemoryMappedFile> loot_table_mmf;
+		std::unique_ptr<EQEmu::FixedMemoryVariableHashSet<LootTable_Struct>> loot_table_hash;
+		std::unique_ptr<EQEmu::MemoryMappedFile> loot_drop_mmf;
+		std::unique_ptr<EQEmu::FixedMemoryVariableHashSet<LootDrop_Struct>> loot_drop_hash;
+		std::unique_ptr<EQEmu::MemoryMappedFile> base_data_mmf;
+		std::unique_ptr<EQEmu::MemoryMappedFile> spells_mmf;
 };
 
 #endif /*SHAREDDB_H_*/

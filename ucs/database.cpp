@@ -48,7 +48,7 @@
 #include "../common/string_util.h"
 #include "chatchannel.h"
 
-extern Clientlist *CL;
+extern Clientlist *g_Clientlist;
 extern std::string GetMailPrefix();
 extern ChatChannelList *ChannelList;
 extern uint32 MailMessagesSent;
@@ -200,19 +200,21 @@ bool Database::VerifyMailKey(std::string characterName, int IPAddress, std::stri
 	return !strcmp(row[0], combinedKey);
 }
 
-int Database::FindCharacter(const char *characterName) {
-
+int Database::FindCharacter(const char *characterName)
+{
 	char *safeCharName = RemoveApostrophes(characterName);
-    std::string query = StringFormat("SELECT `id` FROM `character_data` WHERE `name`='%s' LIMIT 1", safeCharName);
-    auto results = QueryDatabase(query);
+	std::string query = StringFormat("SELECT `id` FROM `character_data` WHERE `name`='%s' LIMIT 1", safeCharName);
+	auto results = QueryDatabase(query);
 	if (!results.Success()) {
-		safe_delete(safeCharName);
+		safe_delete_array(safeCharName);
 		return -1;
 	}
-    safe_delete(safeCharName);
+
+	safe_delete_array(safeCharName);
 
 	if (results.RowCount() != 1) {
-		Log.Out(Logs::Detail, Logs::UCS_Server, "Bad result from FindCharacter query for character %s", characterName);
+		Log.Out(Logs::Detail, Logs::UCS_Server, "Bad result from FindCharacter query for character %s",
+			characterName);
 		return -1;
 	}
 
@@ -461,7 +463,7 @@ bool Database::SendMail(std::string recipient, std::string from, std::string sub
 	Log.Out(Logs::Detail, Logs::UCS_Server, "MessageID %i generated, from %s, to %s", results.LastInsertedID(), from.c_str(), recipient.c_str());
 
 
-	Client *client = CL->IsCharacterOnline(characterName);
+	Client *client = g_Clientlist->IsCharacterOnline(characterName);
 
 	if(client) {
 		std::string FQN = GetMailPrefix() + from;

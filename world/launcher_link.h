@@ -50,6 +50,7 @@ public:
 	void Shutdown();
 	void BootZone(const char *short_name, uint16 port);
 	void StartZone(const char *short_name);
+	void StartZone(const char *short_name, uint16 port);
 	void RestartZone(const char *short_name);
 	void StopZone(const char *short_name);
 	void BootDynamics(uint8 new_total);
