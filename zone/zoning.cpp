@@ -365,7 +365,7 @@ void Client::DoZoneSuccess(ZoneChange_Struct *zc, uint16 zone_id, uint32 instanc
 	if (zone_id == zone->GetZoneID() && instance_id == zone->GetInstanceID()) {
 		// No need to ask worldserver if we're zoning to ourselves (most
 		// likely to a bind point), also fixes a bug since the default response was failure
-		EQApplicationPacket* outapp = new EQApplicationPacket(OP_ZoneChange,sizeof(ZoneChange_Struct));
+		auto outapp = new EQApplicationPacket(OP_ZoneChange, sizeof(ZoneChange_Struct));
 		ZoneChange_Struct* zc2 = (ZoneChange_Struct*) outapp->pBuffer;
 		strcpy(zc2->char_name, GetName());
 		zc2->zoneID = zone_id;
@@ -378,19 +378,19 @@ void Client::DoZoneSuccess(ZoneChange_Struct *zc, uint16 zone_id, uint32 instanc
 	} else {
 	// vesuvias - zoneing to another zone so we need to the let the world server
 	//handle things with the client for a while
-		ServerPacket* pack = new ServerPacket(ServerOP_ZoneToZoneRequest, sizeof(ZoneToZone_Struct));
-		ZoneToZone_Struct* ztz = (ZoneToZone_Struct*) pack->pBuffer;
-		ztz->response = 0;
-		ztz->current_zone_id = zone->GetZoneID();
-		ztz->current_instance_id = zone->GetInstanceID();
-		ztz->requested_zone_id = zone_id;
-		ztz->requested_instance_id = instance_id;
-		ztz->admin = admin;
-		ztz->ignorerestrictions = ignore_r;
-		strcpy(ztz->name, GetName());
-		ztz->guild_id = GuildID();
-		worldserver.SendPacket(pack);
-		safe_delete(pack);
+	auto pack = new ServerPacket(ServerOP_ZoneToZoneRequest, sizeof(ZoneToZone_Struct));
+	ZoneToZone_Struct *ztz = (ZoneToZone_Struct *)pack->pBuffer;
+	ztz->response = 0;
+	ztz->current_zone_id = zone->GetZoneID();
+	ztz->current_instance_id = zone->GetInstanceID();
+	ztz->requested_zone_id = zone_id;
+	ztz->requested_instance_id = instance_id;
+	ztz->admin = admin;
+	ztz->ignorerestrictions = ignore_r;
+	strcpy(ztz->name, GetName());
+	ztz->guild_id = GuildID();
+	worldserver.SendPacket(pack);
+	safe_delete(pack);
 	}
 
 	//reset to unsolicited.
@@ -562,7 +562,7 @@ void Client::ZonePC(uint32 zoneID, uint32 instance_id, float x, float y, float z
 			if (entity == 0)
 			{
 				Message(13, "Error: OP_EndLootRequest: Corpse not found (ent = 0)");
-				if (GetClientVersion() >= ClientVersion::SoD)
+				if (ClientVersion() >= EQEmu::versions::ClientVersion::SoD)
 					Corpse::SendEndLootErrorPacket(this);
 				else
 					Corpse::SendLootReqErrorPacket(this);
@@ -582,13 +582,14 @@ void Client::ZonePC(uint32 zoneID, uint32 instance_id, float x, float y, float z
 
 		zone_mode = zm;
 		if (zm == ZoneToBindPoint) {
-			EQApplicationPacket* outapp = new EQApplicationPacket(OP_ZonePlayerToBind, sizeof(ZonePlayerToBind_Struct) + iZoneNameLength);
+			auto outapp = new EQApplicationPacket(OP_ZonePlayerToBind,
+							      sizeof(ZonePlayerToBind_Struct) + iZoneNameLength);
 			ZonePlayerToBind_Struct* gmg = (ZonePlayerToBind_Struct*) outapp->pBuffer;
 
 			// If we are SoF and later and are respawning from hover, we want the real zone ID, else zero to use the old hack.
 			//
 			if(zone->GetZoneID() == zoneID) {
-				if((GetClientVersionBit() & BIT_SoFAndLater) && (!RuleB(Character, RespawnFromHover) || !IsHoveringForRespawn()))
+				if ((ClientVersionBit() & EQEmu::versions::bit_SoFAndLater) && (!RuleB(Character, RespawnFromHover) || !IsHoveringForRespawn()))
 					gmg->bind_zone_id = 0;
 				else
 					gmg->bind_zone_id = zoneID;
@@ -607,7 +608,8 @@ void Client::ZonePC(uint32 zoneID, uint32 instance_id, float x, float y, float z
 			safe_delete(outapp);
 		}
 		else if(zm == ZoneSolicited || zm == ZoneToSafeCoords) {
-			EQApplicationPacket* outapp = new EQApplicationPacket(OP_RequestClientZoneChange, sizeof(RequestClientZoneChange_Struct));
+			auto outapp =
+			    new EQApplicationPacket(OP_RequestClientZoneChange, sizeof(RequestClientZoneChange_Struct));
 			RequestClientZoneChange_Struct* gmg = (RequestClientZoneChange_Struct*) outapp->pBuffer;
 
 			gmg->zone_id = zoneID;
@@ -623,7 +625,8 @@ void Client::ZonePC(uint32 zoneID, uint32 instance_id, float x, float y, float z
 			safe_delete(outapp);
 		}
 		else if(zm == EvacToSafeCoords) {
-			EQApplicationPacket* outapp = new EQApplicationPacket(OP_RequestClientZoneChange, sizeof(RequestClientZoneChange_Struct));
+			auto outapp =
+			    new EQApplicationPacket(OP_RequestClientZoneChange, sizeof(RequestClientZoneChange_Struct));
 			RequestClientZoneChange_Struct* gmg = (RequestClientZoneChange_Struct*) outapp->pBuffer;
 
 			// if we are in the same zone we want to evac to, client will not send OP_ZoneChange back to do an actual
@@ -665,7 +668,8 @@ void Client::ZonePC(uint32 zoneID, uint32 instance_id, float x, float y, float z
 				SendPosition();
 			}
 
-			EQApplicationPacket* outapp = new EQApplicationPacket(OP_RequestClientZoneChange, sizeof(RequestClientZoneChange_Struct));
+			auto outapp =
+			    new EQApplicationPacket(OP_RequestClientZoneChange, sizeof(RequestClientZoneChange_Struct));
 			RequestClientZoneChange_Struct* gmg = (RequestClientZoneChange_Struct*) outapp->pBuffer;
 
 			gmg->zone_id = zoneID;
@@ -707,37 +711,40 @@ void Client::GoToSafeCoords(uint16 zone_id, uint16 instance_id) {
 }
 
 
-void Mob::Gate() {
-	GoToBind();
+void Mob::Gate(uint8 bindnum) {
+	GoToBind(bindnum);
 }
 
-void Client::Gate() {
-	Mob::Gate();
+void Client::Gate(uint8 bindnum) {
+	Mob::Gate(bindnum);
 }
 
-void NPC::Gate() {
+void NPC::Gate(uint8 bindnum) {
 	entity_list.MessageClose_StringID(this, true, 200, MT_Spells, GATES, GetCleanName());
 
-	Mob::Gate();
+	Mob::Gate(bindnum);
 }
 
-void Client::SetBindPoint(int to_zone, int to_instance, const glm::vec3& location) {
+void Client::SetBindPoint(int bind_num, int to_zone, int to_instance, const glm::vec3 &location)
+{
+	if (bind_num < 0 || bind_num >= 4)
+		bind_num = 0;
+
 	if (to_zone == -1) {
-		m_pp.binds[0].zoneId = zone->GetZoneID();
-		m_pp.binds[0].instance_id = (zone->GetInstanceID() != 0 && zone->IsInstancePersistent()) ? zone->GetInstanceID() : 0;
-		m_pp.binds[0].x = m_Position.x;
-		m_pp.binds[0].y = m_Position.y;
-		m_pp.binds[0].z = m_Position.z;
+		m_pp.binds[bind_num].zoneId = zone->GetZoneID();
+		m_pp.binds[bind_num].instance_id =
+		    (zone->GetInstanceID() != 0 && zone->IsInstancePersistent()) ? zone->GetInstanceID() : 0;
+		m_pp.binds[bind_num].x = m_Position.x;
+		m_pp.binds[bind_num].y = m_Position.y;
+		m_pp.binds[bind_num].z = m_Position.z;
+	} else {
+		m_pp.binds[bind_num].zoneId = to_zone;
+		m_pp.binds[bind_num].instance_id = to_instance;
+		m_pp.binds[bind_num].x = location.x;
+		m_pp.binds[bind_num].y = location.y;
+		m_pp.binds[bind_num].z = location.z;
 	}
-	else {
-		m_pp.binds[0].zoneId = to_zone;
-		m_pp.binds[0].instance_id = to_instance;
-		m_pp.binds[0].x = location.x;
-		m_pp.binds[0].y = location.y;
-		m_pp.binds[0].z = location.z;
-	}
-	auto regularBindPoint = glm::vec4(m_pp.binds[0].x, m_pp.binds[0].y, m_pp.binds[0].z, 0.0f);
-	database.SaveCharacterBindPoint(this->CharacterID(), m_pp.binds[0].zoneId, m_pp.binds[0].instance_id, regularBindPoint, 0);
+	database.SaveCharacterBindPoint(this->CharacterID(), m_pp.binds[bind_num], bind_num);
 }
 
 void Client::GoToBind(uint8 bindnum) {

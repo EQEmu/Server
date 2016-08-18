@@ -84,6 +84,7 @@
 #define ServerOP_QGlobalDelete		0x0064
 #define ServerOP_DepopPlayerCorpse	0x0065
 #define ServerOP_RequestTellQueue	0x0066 // client asks for it's tell queues
+#define ServerOP_ChangeSharedMem	0x0067
 
 #define ServerOP_RaidAdd			0x0100 //in use
 #define ServerOP_RaidRemove			0x0101 //in use
@@ -181,6 +182,7 @@
 #define ServerOP_CZMessagePlayer 0x4008
 #define ServerOP_ReloadWorld 0x4009
 #define ServerOP_ReloadLogs 0x4010
+#define ServerOP_ReloadPerlExportSettings	0x4011
 /* Query Server OP Codes */
 #define ServerOP_QSPlayerLogTrades					0x5010
 #define ServerOP_QSPlayerLogHandins					0x5011
@@ -527,7 +529,7 @@ struct ServerLSPlayerZoneChange_Struct {
 	uint32 from; // 0 = world
 	uint32 to; // 0 = world
 };
-struct ServerLSClientAuth {
+struct ClientAuth_Struct {
 	uint32	lsaccount_id;	// ID# in login server's db
 	char	name[30];		// username in login server's db
 	char	key[30];		// the Key the client will present
@@ -551,7 +553,9 @@ struct ServerLSPeerConnect {
 
 struct ServerConnectInfo {
 	char	address[250];
+	char	local_address[250];
 	uint16	port;
+	uint32  process_id;
 };
 
 struct ServerGMGoto_Struct {
@@ -766,6 +770,7 @@ typedef enum {
 struct LauncherZoneRequest {
 	uint8 command;
 	char short_name[33];
+	uint16 port;
 };
 
 struct LauncherZoneStatus {

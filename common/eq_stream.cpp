@@ -72,8 +72,10 @@ void EQStream::init(bool resetSession) {
 	RateThreshold=RATEBASE/250;
 	DecayRate=DECAYBASE/250;
 	BytesWritten=0;
+	sent_packet_count = 0;
+	received_packet_count = 0;
 	SequencedBase = 0;
-	NextSequencedSend = 0;
+	AverageDelta = 500;
 
 	if(GetExecutablePlatform() == ExePlatformWorld || GetExecutablePlatform() == ExePlatformZone) {
 		retransmittimer = Timer::GetCurrentTime();
@@ -83,10 +85,6 @@ void EQStream::init(bool resetSession) {
 	OpMgr = nullptr;
 	if(uint16(SequencedBase + SequencedQueue.size()) != NextOutSeq) {
 		Log.Out(Logs::Detail, Logs::Netcode, _L "init Invalid Sequenced queue: BS %d + SQ %d != NOS %d" __L, SequencedBase, SequencedQueue.size(), NextOutSeq);
-	}
-	
-	if(NextSequencedSend > SequencedQueue.size()) {
-		Log.Out(Logs::Detail, Logs::Netcode, _L "init Next Send Sequence is beyond the end of the queue NSS %d > SQ %d" __L, NextSequencedSend, SequencedQueue.size());
 	}
 }
 
@@ -290,10 +288,8 @@ void EQStream::ProcessPacket(EQProtocolPacket *p)
 		}
 		break;
 		case OP_KeepAlive: {
-#ifndef COLLECTOR
 			NonSequencedPush(new EQProtocolPacket(p->opcode,p->pBuffer,p->size));
 			Log.Out(Logs::Detail, Logs::Netcode, _L "Received and queued reply to keep alive" __L);
-#endif
 		}
 		break;
 		case OP_Ack: {
@@ -302,14 +298,12 @@ void EQStream::ProcessPacket(EQProtocolPacket *p)
 				Log.Out(Logs::Detail, Logs::Netcode, _L "Received OP_Ack that was of malformed size" __L);
 				break;
 			}
-#ifndef COLLECTOR
 			uint16 seq=ntohs(*(uint16 *)(p->pBuffer));
 			AckPackets(seq);
 
 			if(GetExecutablePlatform() == ExePlatformWorld || GetExecutablePlatform() == ExePlatformZone) {
 				retransmittimer = Timer::GetCurrentTime();
 			}
-#endif
 		}
 		break;
 		case OP_SessionRequest: {
@@ -318,7 +312,6 @@ void EQStream::ProcessPacket(EQProtocolPacket *p)
 				Log.Out(Logs::Detail, Logs::Netcode, _L "Received OP_SessionRequest that was of malformed size" __L);
 				break;
 			}
-#ifndef COLLECTOR
 			if (GetState()==ESTABLISHED) {
 				Log.Out(Logs::Detail, Logs::Netcode, _L "Received OP_SessionRequest in ESTABLISHED state (%d) streamactive (%i) attempt (%i)" __L, GetState(),streamactive,sessionAttempts);
 
@@ -331,7 +324,6 @@ void EQStream::ProcessPacket(EQProtocolPacket *p)
 					break;
 				}
 			}
-#endif
 			sessionAttempts++;
 			// we set established below, so statistics will not be reset for session attempts/stream active.
 			init(GetState()!=ESTABLISHED);
@@ -341,10 +333,8 @@ void EQStream::ProcessPacket(EQProtocolPacket *p)
 			SetMaxLen(ntohl(Request->MaxLength));
 			Log.Out(Logs::Detail, Logs::Netcode, _L "Received OP_SessionRequest: session %lu, maxlen %d" __L, (unsigned long)Session, MaxLen);
 			SetState(ESTABLISHED);
-#ifndef COLLECTOR
 			Key=0x11223344;
 			SendSessionResponse();
-#endif
 		}
 		break;
 		case OP_SessionResponse: {
@@ -410,7 +400,6 @@ void EQStream::ProcessPacket(EQProtocolPacket *p)
 				Log.Out(Logs::Detail, Logs::Netcode, _L "Received OP_OutOfOrderAck that was of malformed size" __L);
 				break;
 			}
-#ifndef COLLECTOR
 			uint16 seq=ntohs(*(uint16 *)(p->pBuffer));
 			MOutboundQueue.lock();
 
@@ -418,36 +407,30 @@ void EQStream::ProcessPacket(EQProtocolPacket *p)
 				Log.Out(Logs::Detail, Logs::Netcode, _L "Pre-OOA Invalid Sequenced queue: BS %d + SQ %d != NOS %d" __L, SequencedBase, SequencedQueue.size(), NextOutSeq);
 			}
 			
-			if(NextSequencedSend > SequencedQueue.size()) {
-				Log.Out(Logs::Detail, Logs::Netcode, _L "Pre-OOA Next Send Sequence is beyond the end of the queue NSS %d > SQ %d" __L, NextSequencedSend, SequencedQueue.size());
-			}
 			//if the packet they got out of order is between our last acked packet and the last sent packet, then its valid.
 			if (CompareSequence(SequencedBase,seq) != SeqPast && CompareSequence(NextOutSeq,seq) == SeqPast) {
 				Log.Out(Logs::Detail, Logs::Netcode, _L "Received OP_OutOfOrderAck for sequence %d, starting retransmit at the start of our unacked buffer (seq %d, was %d)." __L,
-					seq, SequencedBase, SequencedBase+NextSequencedSend);
+					seq, SequencedBase, SequencedBase+SequencedQueue.size());
 
-				bool retransmit_acked_packets = false;
-				if(GetExecutablePlatform() == ExePlatformWorld || GetExecutablePlatform() == ExePlatformZone) {
-					retransmit_acked_packets = RETRANSMIT_ACKED_PACKETS;
-				}
-
-				if(!retransmit_acked_packets) {
-					uint16 sqsize = SequencedQueue.size();
-					uint16 index = seq - SequencedBase;
-					Log.Out(Logs::Detail, Logs::Netcode, _L "OP_OutOfOrderAck marking packet acked in queue (queue index = %d, queue size = %d)." __L, index, sqsize);
-					if (index < sqsize) {
-						std::deque<EQProtocolPacket *>::iterator sitr;
-						sitr = SequencedQueue.begin();
-						sitr += index;
-						(*sitr)->acked = true;
+				uint16 sqsize = SequencedQueue.size();
+				uint16 index = seq - SequencedBase;
+				Log.Out(Logs::Detail, Logs::Netcode, _L "OP_OutOfOrderAck marking packet acked in queue (queue index = %d, queue size = %d)." __L, index, sqsize);
+				if (index < sqsize) {
+					SequencedQueue[index]->acked = true;
+					// flag packets for a resend
+					uint16 count = 0;
+					uint32 timeout = AverageDelta * 2 + 100;
+					for (auto sitr = SequencedQueue.begin(); sitr != SequencedQueue.end() && count < index; ++sitr, ++count) {
+						if (!(*sitr)->acked && (*sitr)->sent_time > 0 && (((*sitr)->sent_time + timeout) < Timer::GetCurrentTime())) {
+							(*sitr)->sent_time = 0;
+							Log.Out(Logs::Detail, Logs::Netcode, _L "OP_OutOfOrderAck Flagging packet %d for retransmission" __L, SequencedBase + count);
+						}
 					}
 				}
 
 				if(RETRANSMIT_TIMEOUT_MULT) {
 					retransmittimer = Timer::GetCurrentTime();
 				}
-
-				NextSequencedSend = 0;
 			} else {
 				Log.Out(Logs::Detail, Logs::Netcode, _L "Received OP_OutOfOrderAck for out-of-window %d. Window (%d->%d)." __L, seq, SequencedBase, NextOutSeq);
 			}
@@ -456,46 +439,49 @@ void EQStream::ProcessPacket(EQProtocolPacket *p)
 				Log.Out(Logs::Detail, Logs::Netcode, _L "Post-OOA Invalid Sequenced queue: BS %d + SQ %d != NOS %d" __L, SequencedBase, SequencedQueue.size(), NextOutSeq);
 			}
 
-			if(NextSequencedSend > SequencedQueue.size()) {
-				Log.Out(Logs::Detail, Logs::Netcode, _L "Post-OOA Next Send Sequence is beyond the end of the queue NSS %d > SQ %d" __L, NextSequencedSend, SequencedQueue.size());
-			}
 			MOutboundQueue.unlock();
-#endif
 		}
 		break;
 		case OP_SessionStatRequest: {
-			if(p->Size() < sizeof(SessionStats))
+			if(p->Size() < sizeof(ClientSessionStats))
 			{
 				Log.Out(Logs::Detail, Logs::Netcode, _L "Received OP_SessionStatRequest that was of malformed size" __L);
 				break;
 			}
-#ifndef COLLECTOR
-			SessionStats *Stats=(SessionStats *)p->pBuffer;
+			ClientSessionStats *ClientStats=(ClientSessionStats *)p->pBuffer;
 			Log.Out(Logs::Detail, Logs::Netcode, _L "Received Stats: %lu packets received, %lu packets sent, Deltas: local %lu, (%lu <- %lu -> %lu) remote %lu" __L,
-				(unsigned long)ntohl(Stats->packets_received), (unsigned long)ntohl(Stats->packets_sent), (unsigned long)ntohl(Stats->last_local_delta),
-				(unsigned long)ntohl(Stats->low_delta), (unsigned long)ntohl(Stats->average_delta),
-				(unsigned long)ntohl(Stats->high_delta), (unsigned long)ntohl(Stats->last_remote_delta));
-			uint64 x=Stats->packets_received;
-			Stats->packets_received=Stats->packets_sent;
-			Stats->packets_sent=x;
-			NonSequencedPush(new EQProtocolPacket(OP_SessionStatResponse,p->pBuffer,p->size));
-			AdjustRates(ntohl(Stats->average_delta));
+				(unsigned long)ntohl(ClientStats->packets_received), (unsigned long)ntohl(ClientStats->packets_sent), (unsigned long)ntohl(ClientStats->last_local_delta),
+				(unsigned long)ntohl(ClientStats->low_delta), (unsigned long)ntohl(ClientStats->average_delta),
+				(unsigned long)ntohl(ClientStats->high_delta), (unsigned long)ntohl(ClientStats->last_remote_delta));
+			
+			AdjustRates(ntohl(ClientStats->average_delta));
 
 			if(GetExecutablePlatform() == ExePlatformWorld || GetExecutablePlatform() == ExePlatformZone) {
-				if(RETRANSMIT_TIMEOUT_MULT && ntohl(Stats->average_delta)) {
+				if (RETRANSMIT_TIMEOUT_MULT && ntohl(ClientStats->average_delta)) {
 					//recalculate retransmittimeout using the larger of the last rtt or average rtt, which is multiplied by the rule value
-					if((ntohl(Stats->last_local_delta) + ntohl(Stats->last_remote_delta)) > (ntohl(Stats->average_delta) * 2)) {
-						retransmittimeout = (ntohl(Stats->last_local_delta) + ntohl(Stats->last_remote_delta)) 
+					if ((ntohl(ClientStats->last_local_delta) + ntohl(ClientStats->last_remote_delta)) > (ntohl(ClientStats->average_delta) * 2)) {
+						retransmittimeout = (ntohl(ClientStats->last_local_delta) + ntohl(ClientStats->last_remote_delta))
 							* RETRANSMIT_TIMEOUT_MULT;
 					} else {
-						retransmittimeout = ntohl(Stats->average_delta) * 2 * RETRANSMIT_TIMEOUT_MULT;
+						retransmittimeout = ntohl(ClientStats->average_delta) * 2 * RETRANSMIT_TIMEOUT_MULT;
 					}
+					retransmittimeout += 300;
 					if(retransmittimeout > RETRANSMIT_TIMEOUT_MAX)
 						retransmittimeout = RETRANSMIT_TIMEOUT_MAX;
 					Log.Out(Logs::Detail, Logs::Netcode, _L "Retransmit timeout recalculated to %dms" __L, retransmittimeout);
 				}
 			}
-#endif
+
+			ServerSessionStats *ServerStats = (ServerSessionStats *)p->pBuffer;
+
+			//ServerStats->RequestID = ClientStats->RequestID; // no change
+			ServerStats->ServerTime = htonl(Timer::GetCurrentTime());
+			ServerStats->packets_sent_echo = ClientStats->packets_sent; // still in htonll format
+			ServerStats->packets_received_echo = ClientStats->packets_received; // still in htonll format
+			ServerStats->packets_sent = htonll(GetPacketsSent());
+			ServerStats->packets_received = htonll(GetPacketsReceived());
+
+			NonSequencedPush(new EQProtocolPacket(OP_SessionStatResponse, p->pBuffer, p->size));
 		}
 		break;
 		case OP_SessionStatResponse: {
@@ -573,16 +559,18 @@ void EQStream::SendPacket(uint16 opcode, EQApplicationPacket *p)
 
 	// Convert the EQApplicationPacket to 1 or more EQProtocolPackets
 	if (p->size>(MaxLen-8)) { // proto-op(2), seq(2), app-op(2) ... data ... crc(2)
-		Log.Out(Logs::Detail, Logs::Netcode, _L "Making oversized packet, len %d" __L, p->size);
+		Log.Out(Logs::Detail, Logs::Netcode, _L "Making oversized packet, len %d" __L, p->Size());
 
-		unsigned char *tmpbuff=new unsigned char[p->size+3];
+		auto tmpbuff = new unsigned char[p->size + 3];
 		length=p->serialize(opcode, tmpbuff);
+		if (length != p->Size())
+			Log.Out(Logs::Detail, Logs::Netcode, _L "Packet adjustment, len %d to %d" __L, p->Size(), length);
 
-		EQProtocolPacket *out=new EQProtocolPacket(OP_Fragment,nullptr,MaxLen-4);
-		*(uint32 *)(out->pBuffer+2)=htonl(p->Size());
+		auto out = new EQProtocolPacket(OP_Fragment, nullptr, MaxLen - 4);
+		*(uint32 *)(out->pBuffer+2)=htonl(length);
 		used=MaxLen-10;
 		memcpy(out->pBuffer+6,tmpbuff,used);
-		Log.Out(Logs::Detail, Logs::Netcode, _L "First fragment: used %d/%d. Put size %d in the packet" __L, used, p->size, p->Size());
+		Log.Out(Logs::Detail, Logs::Netcode, _L "First fragment: used %d/%d. Payload size %d in the packet" __L, used, length, p->size);
 		SequencedPush(out);
 
 
@@ -593,16 +581,16 @@ void EQStream::SendPacket(uint16 opcode, EQApplicationPacket *p)
 			out->size=chunksize+2;
 			SequencedPush(out);
 			used+=chunksize;
-			Log.Out(Logs::Detail, Logs::Netcode, _L "Subsequent fragment: len %d, used %d/%d." __L, chunksize, used, p->size);
+			Log.Out(Logs::Detail, Logs::Netcode, _L "Subsequent fragment: len %d, used %d/%d." __L, chunksize, used, length);
 		}
 		delete p;
 		delete[] tmpbuff;
 	} else {
 
-		unsigned char *tmpbuff=new unsigned char[p->Size()+3];
+		auto tmpbuff = new unsigned char[p->Size() + 3];
 		length=p->serialize(opcode, tmpbuff+2) + 2;
 
-		EQProtocolPacket *out=new EQProtocolPacket(OP_Packet,tmpbuff,length);
+		auto out = new EQProtocolPacket(OP_Packet, tmpbuff, length);
 
 		delete[] tmpbuff;
 		SequencedPush(out);
@@ -612,42 +600,32 @@ void EQStream::SendPacket(uint16 opcode, EQApplicationPacket *p)
 
 void EQStream::SequencedPush(EQProtocolPacket *p)
 {
-#ifdef COLLECTOR
-	delete p;
-#else
 	MOutboundQueue.lock();
-if(uint16(SequencedBase + SequencedQueue.size()) != NextOutSeq) {
-	Log.Out(Logs::Detail, Logs::Netcode, _L "Pre-Push Invalid Sequenced queue: BS %d + SQ %d != NOS %d" __L, SequencedBase, SequencedQueue.size(), NextOutSeq);
-}
-if(NextSequencedSend > SequencedQueue.size()) {
-	Log.Out(Logs::Detail, Logs::Netcode, _L "Pre-Push Next Send Sequence is beyond the end of the queue NSS %d > SQ %d" __L, NextSequencedSend, SequencedQueue.size());
-}
+	if (uint16(SequencedBase + SequencedQueue.size()) != NextOutSeq) {
+		Log.Out(Logs::Detail, Logs::Netcode, _L "Pre-Push Invalid Sequenced queue: BS %d + SQ %d != NOS %d" __L,
+			SequencedBase, SequencedQueue.size(), NextOutSeq);
+	}
 
-	Log.Out(Logs::Detail, Logs::Netcode, _L "Pushing sequenced packet %d of length %d. Base Seq is %d." __L, NextOutSeq, p->size, SequencedBase);
-	*(uint16 *)(p->pBuffer)=htons(NextOutSeq);
+	Log.Out(Logs::Detail, Logs::Netcode, _L "Pushing sequenced packet %d of length %d. Base Seq is %d." __L,
+		NextOutSeq, p->size, SequencedBase);
+	*(uint16 *)(p->pBuffer) = htons(NextOutSeq);
 	SequencedQueue.push_back(p);
 	NextOutSeq++;
 
-if(uint16(SequencedBase + SequencedQueue.size()) != NextOutSeq) {
-	Log.Out(Logs::Detail, Logs::Netcode, _L "Push Invalid Sequenced queue: BS %d + SQ %d != NOS %d" __L, SequencedBase, SequencedQueue.size(), NextOutSeq);
-}
-if(NextSequencedSend > SequencedQueue.size()) {
-	Log.Out(Logs::Detail, Logs::Netcode, _L "Push Next Send Sequence is beyond the end of the queue NSS %d > SQ %d" __L, NextSequencedSend, SequencedQueue.size());
-}
+	if (uint16(SequencedBase + SequencedQueue.size()) != NextOutSeq) {
+		Log.Out(Logs::Detail, Logs::Netcode, _L "Push Invalid Sequenced queue: BS %d + SQ %d != NOS %d" __L,
+			SequencedBase, SequencedQueue.size(), NextOutSeq);
+	}
+
 	MOutboundQueue.unlock();
-#endif
 }
 
 void EQStream::NonSequencedPush(EQProtocolPacket *p)
 {
-#ifdef COLLECTOR
-	delete p;
-#else
 	MOutboundQueue.lock();
 	Log.Out(Logs::Detail, Logs::Netcode, _L "Pushing non-sequenced packet of length %d" __L, p->size);
 	NonSequencedQueue.push(p);
 	MOutboundQueue.unlock();
-#endif
 }
 
 void EQStream::SendAck(uint16 seq)
@@ -691,21 +669,15 @@ void EQStream::Write(int eq_fd)
 	// Place to hold the base packet t combine into
 	EQProtocolPacket *p=nullptr;
 
-	if(GetExecutablePlatform() == ExePlatformWorld || GetExecutablePlatform() == ExePlatformZone) {
-		// if we have a timeout defined and we have not received an ack recently enough, retransmit from beginning of queue
-		if (RETRANSMIT_TIMEOUT_MULT && !SequencedQueue.empty() && NextSequencedSend &&
-			(GetState()==ESTABLISHED) && ((retransmittimer+retransmittimeout) < Timer::GetCurrentTime())) {
-			Log.Out(Logs::Detail, Logs::Netcode, _L "Timeout since last ack received, starting retransmit at the start of our unacked "
-				"buffer (seq %d, was %d)." __L, SequencedBase, SequencedBase+NextSequencedSend);
-			NextSequencedSend = 0;
-			retransmittimer = Timer::GetCurrentTime(); // don't want to endlessly retransmit the first packet
-		}
-	}
-
 	// Find the next sequenced packet to send from the "queue"
 	sitr = SequencedQueue.begin();
-	if (sitr!=SequencedQueue.end())
-	sitr += NextSequencedSend;
+
+	uint16 count = 0;
+	// get to start of packets
+	while (sitr != SequencedQueue.end() && (*sitr)->sent_time > 0) {
+		++sitr;
+		++count;
+	}
 
 	// Loop until both are empty or MaxSends is reached
 	while(!SeqEmpty || !NonSeqEmpty) {
@@ -719,7 +691,7 @@ void EQStream::Write(int eq_fd)
 				Log.Out(Logs::Detail, Logs::Netcode, _L "Starting combined packet with non-seq packet of len %d" __L, p->size);
 				NonSequencedQueue.pop();
 			} else if (!p->combine(NonSequencedQueue.front())) {
-				// Tryint to combine this packet with the base didn't work (too big maybe)
+				// Trying to combine this packet with the base didn't work (too big maybe)
 				// So just send the base packet (we'll try this packet again later)
 				Log.Out(Logs::Detail, Logs::Netcode, _L "Combined packet full at len %d, next non-seq packet is len %d" __L, p->size, (NonSequencedQueue.front())->size);
 				ReadyToSend.push(p);
@@ -742,16 +714,9 @@ void EQStream::Write(int eq_fd)
 			NonSeqEmpty=true;
 		}
 
-		if (sitr!=SequencedQueue.end()) {
-			if(uint16(SequencedBase + SequencedQueue.size()) != NextOutSeq) {
-				Log.Out(Logs::Detail, Logs::Netcode, _L "Pre-Send Seq NSS=%d Invalid Sequenced queue: BS %d + SQ %d != NOS %d" __L, NextSequencedSend, SequencedBase, SequencedQueue.size(), NextOutSeq);
-			}
+		if (sitr != SequencedQueue.end()) {
+			uint16 seq_send = SequencedBase + count;	//just for logging...
 
-			if(NextSequencedSend > SequencedQueue.size()) {
-				Log.Out(Logs::Detail, Logs::Netcode, _L "Pre-Send Next Send Sequence is beyond the end of the queue NSS %d > SQ %d" __L, NextSequencedSend, SequencedQueue.size());
-			}
-			uint16 seq_send = SequencedBase + NextSequencedSend;	//just for logging...
-			
 			if(SequencedQueue.empty()) {
 				Log.Out(Logs::Detail, Logs::Netcode, _L "Tried to write a packet with an empty queue (%d is past next out %d)" __L, seq_send, NextOutSeq);
 				SeqEmpty=true;
@@ -759,26 +724,32 @@ void EQStream::Write(int eq_fd)
 			}
 
 			if(GetExecutablePlatform() == ExePlatformWorld || GetExecutablePlatform() == ExePlatformZone) {
-				if (!RETRANSMIT_ACKED_PACKETS && (*sitr)->acked) {
+				if ((*sitr)->acked || (*sitr)->sent_time != 0) {
+					++sitr;
+					++count;
+					if (p) {
+						Log.Out(Logs::Detail, Logs::Netcode, _L "Final combined packet not full, len %d" __L, p->size);
+						ReadyToSend.push(p);
+						BytesWritten += p->size;
+						p = nullptr;
+					}
 					Log.Out(Logs::Detail, Logs::Netcode, _L "Not retransmitting seq packet %d because already marked as acked" __L, seq_send);
-					sitr++;
-					NextSequencedSend++;
 				} else if (!p) {
 					// If we don't have a packet to try to combine into, use this one as the base
 					// Copy it first as it will still live until it is acked
 					p=(*sitr)->Copy();
 					Log.Out(Logs::Detail, Logs::Netcode, _L "Starting combined packet with seq packet %d of len %d" __L, seq_send, p->size);
+					(*sitr)->sent_time = Timer::GetCurrentTime();
 					++sitr;
-					NextSequencedSend++;
+					++count;
 				} else if (!p->combine(*sitr)) {
 					// Trying to combine this packet with the base didn't work (too big maybe)
 					// So just send the base packet (we'll try this packet again later)
-					Log.Out(Logs::Detail, Logs::Netcode, _L "Combined packet full at len %d, next seq packet %d is len %d" __L, p->size, seq_send, (*sitr)->size);
+					Log.Out(Logs::Detail, Logs::Netcode, _L "Combined packet full at len %d, next seq packet %d is len %d" __L, p->size, seq_send + 1, (*sitr)->size);
 					ReadyToSend.push(p);
 					BytesWritten+=p->size;
 					p=nullptr;
-
-					if (BytesWritten > threshold) {
+					if ((*sitr)->opcode != OP_Fragment && BytesWritten > threshold) {
 						// Sent enough this round, lets stop to be fair
 						Log.Out(Logs::Detail, Logs::Netcode, _L "Exceeded write threshold in seq (%d > %d)" __L, BytesWritten, threshold);
 						break;
@@ -786,17 +757,28 @@ void EQStream::Write(int eq_fd)
 				} else {
 					// Combine worked
 					Log.Out(Logs::Detail, Logs::Netcode, _L "Combined seq packet %d of len %d, yeilding %d combined." __L, seq_send, (*sitr)->size, p->size);
+					(*sitr)->sent_time = Timer::GetCurrentTime();
 					++sitr;
-					NextSequencedSend++;
+					++count;
 				}
 			} else {
-				if (!p) {
+				if ((*sitr)->sent_time != 0) {
+					++sitr;
+					++count;
+					if (p) {
+						Log.Out(Logs::Detail, Logs::Netcode, _L "Final combined packet not full, len %d" __L, p->size);
+						ReadyToSend.push(p);
+						BytesWritten += p->size;
+						p = nullptr;
+					}
+				} else if (!p) {
 					// If we don't have a packet to try to combine into, use this one as the base
 					// Copy it first as it will still live until it is acked
 					p=(*sitr)->Copy();
+					(*sitr)->sent_time = Timer::GetCurrentTime();
 					Log.Out(Logs::Detail, Logs::Netcode, _L "Starting combined packet with seq packet %d of len %d" __L, seq_send, p->size);
 					++sitr;
-					NextSequencedSend++;
+					++count;
 				} else if (!p->combine(*sitr)) {
 					// Trying to combine this packet with the base didn't work (too big maybe)
 					// So just send the base packet (we'll try this packet again later)
@@ -812,17 +794,15 @@ void EQStream::Write(int eq_fd)
 					}
 				} else {
 					// Combine worked
-					Log.Out(Logs::Detail, Logs::Netcode, _L "Combined seq packet %d of len %d, yeilding %d combined." __L, seq_send, (*sitr)->size, p->size);
+					Log.Out(Logs::Detail, Logs::Netcode, _L "Combined seq packet %d of len %d, yielding %d combined." __L, seq_send, (*sitr)->size, p->size);
+					(*sitr)->sent_time = Timer::GetCurrentTime();
 					++sitr;
-					NextSequencedSend++;
+					++count;
 				}
 			}
 
 			if(uint16(SequencedBase + SequencedQueue.size()) != NextOutSeq) {
 				Log.Out(Logs::Detail, Logs::Netcode, _L "Post send Invalid Sequenced queue: BS %d + SQ %d != NOS %d" __L, SequencedBase, SequencedQueue.size(), NextOutSeq);
-			}
-			if(NextSequencedSend > SequencedQueue.size()) {
-				Log.Out(Logs::Detail, Logs::Netcode, _L "Post send Next Send Sequence is beyond the end of the queue NSS %d > SQ %d" __L, NextSequencedSend, SequencedQueue.size());
 			}
 		} else {
 			// No more sequenced packets
@@ -882,9 +862,11 @@ sockaddr_in address;
 	length=p->serialize(buffer);
 	if (p->opcode!=OP_SessionRequest && p->opcode!=OP_SessionResponse) {
 		if (compressed) {
+			BytesWritten -= p->size;
 			uint32 newlen=EQProtocolPacket::Compress(buffer,length, _tempBuffer, 2048);
 			memcpy(buffer,_tempBuffer,newlen);
 			length=newlen;
+			BytesWritten += newlen;
 		}
 		if (encoded) {
 			EQProtocolPacket::ChatEncode(buffer,length,Key);
@@ -900,7 +882,7 @@ sockaddr_in address;
 
 void EQStream::SendSessionResponse()
 {
-EQProtocolPacket *out=new EQProtocolPacket(OP_SessionResponse,nullptr,sizeof(SessionResponse));
+	auto out = new EQProtocolPacket(OP_SessionResponse, nullptr, sizeof(SessionResponse));
 	SessionResponse *Response=(SessionResponse *)out->pBuffer;
 	Response->Session=htonl(Session);
 	Response->MaxLength=htonl(MaxLen);
@@ -922,7 +904,7 @@ EQProtocolPacket *out=new EQProtocolPacket(OP_SessionResponse,nullptr,sizeof(Ses
 
 void EQStream::SendSessionRequest()
 {
-EQProtocolPacket *out=new EQProtocolPacket(OP_SessionRequest,nullptr,sizeof(SessionRequest));
+	auto out = new EQProtocolPacket(OP_SessionRequest, nullptr, sizeof(SessionRequest));
 	SessionRequest *Request=(SessionRequest *)out->pBuffer;
 	memset(Request,0,sizeof(SessionRequest));
 	Request->Session=htonl(time(nullptr));
@@ -938,7 +920,7 @@ void EQStream::_SendDisconnect()
 	if(GetState() == CLOSED)
 		return;
 
-	EQProtocolPacket *out=new EQProtocolPacket(OP_SessionDisconnect,nullptr,sizeof(uint32));
+	auto out = new EQProtocolPacket(OP_SessionDisconnect, nullptr, sizeof(uint32));
 	*(uint32 *)out->pBuffer=htonl(Session);
 	NonSequencedPush(out);
 
@@ -957,8 +939,8 @@ EQApplicationPacket *EQStream::PopPacket()
 EQRawApplicationPacket *p=nullptr;
 
 	MInboundQueue.lock();
-	if (InboundQueue.size()) {
-		std::vector<EQRawApplicationPacket *>::iterator itr=InboundQueue.begin();
+	if (!InboundQueue.empty()) {
+		auto itr = InboundQueue.begin();
 		p=*itr;
 		InboundQueue.erase(itr);
 	}
@@ -982,8 +964,8 @@ EQRawApplicationPacket *EQStream::PopRawPacket()
 EQRawApplicationPacket *p=nullptr;
 
 	MInboundQueue.lock();
-	if (InboundQueue.size()) {
-		std::vector<EQRawApplicationPacket *>::iterator itr=InboundQueue.begin();
+	if (!InboundQueue.empty()) {
+		auto itr = InboundQueue.begin();
 		p=*itr;
 		InboundQueue.erase(itr);
 	}
@@ -1009,8 +991,8 @@ EQRawApplicationPacket *EQStream::PeekPacket()
 EQRawApplicationPacket *p=nullptr;
 
 	MInboundQueue.lock();
-	if (InboundQueue.size()) {
-		std::vector<EQRawApplicationPacket *>::iterator itr=InboundQueue.begin();
+	if (!InboundQueue.empty()) {
+		auto itr = InboundQueue.begin();
 		p=*itr;
 	}
 	MInboundQueue.unlock();
@@ -1101,8 +1083,8 @@ EQProtocolPacket *p=nullptr;
 
 void EQStream::Process(const unsigned char *buffer, const uint32 length)
 {
-static unsigned char newbuffer[2048];
-uint32 newlength=0;
+	static unsigned char newbuffer[2048];
+	uint32 newlength=0;
 	if (EQProtocolPacket::ValidateCRC(buffer,length,Key)) {
 		if (compressed) {
 			newlength=EQProtocolPacket::Decompress(buffer,length,newbuffer,2048);
@@ -1146,13 +1128,6 @@ void EQStream::AckPackets(uint16 seq)
 std::deque<EQProtocolPacket *>::iterator itr, tmp;
 
 	MOutboundQueue.lock();
-//do a bit of sanity checking.
-if(uint16(SequencedBase + SequencedQueue.size()) != NextOutSeq) {
-	Log.Out(Logs::Detail, Logs::Netcode, _L "Pre-Ack Invalid Sequenced queue: BS %d + SQ %d != NOS %d" __L, SequencedBase, SequencedQueue.size(), NextOutSeq);
-}
-if(NextSequencedSend > SequencedQueue.size()) {
-	Log.Out(Logs::Detail, Logs::Netcode, _L "Pre-Ack Next Send Sequence is beyond the end of the queue NSS %d > SQ %d" __L, NextSequencedSend, SequencedQueue.size());
-}
 
 	SeqOrder ord = CompareSequence(SequencedBase, seq);
 	if(ord == SeqInOrder) {
@@ -1168,28 +1143,21 @@ if(NextSequencedSend > SequencedQueue.size()) {
 		//this is a good ack, we get to ack some blocks.
 		seq++;	//we stop at the block right after their ack, counting on the wrap of both numbers.
 		while(SequencedBase != seq) {
-if(SequencedQueue.empty()) {
-Log.Out(Logs::Detail, Logs::Netcode, _L "OUT OF PACKETS acked packet with sequence %lu. Next send is %d before this." __L, (unsigned long)SequencedBase, NextSequencedSend);
-	SequencedBase = NextOutSeq;
-	NextSequencedSend = 0;
-	break;
-}
-			Log.Out(Logs::Detail, Logs::Netcode, _L "Removing acked packet with sequence %lu. Next send is %d before this." __L, (unsigned long)SequencedBase, NextSequencedSend);
+			if(SequencedQueue.empty()) {
+				Log.Out(Logs::Detail, Logs::Netcode, _L "OUT OF PACKETS acked packet with sequence %lu. Next send is %d before this." __L, (unsigned long)SequencedBase, SequencedQueue.size());
+				SequencedBase = NextOutSeq;
+				break;
+			}
+			Log.Out(Logs::Detail, Logs::Netcode, _L "Removing acked packet with sequence %lu." __L, (unsigned long)SequencedBase);
 			//clean out the acked packet
 			delete SequencedQueue.front();
 			SequencedQueue.pop_front();
-			//adjust our "next" pointer
-			if(NextSequencedSend > 0)
-				NextSequencedSend--;
 			//advance the base sequence number to the seq of the block after the one we just got rid of.
 			SequencedBase++;
 		}
-if(uint16(SequencedBase + SequencedQueue.size()) != NextOutSeq) {
-	Log.Out(Logs::Detail, Logs::Netcode, _L "Post-Ack on %d Invalid Sequenced queue: BS %d + SQ %d != NOS %d" __L, seq, SequencedBase, SequencedQueue.size(), NextOutSeq);
-}
-if(NextSequencedSend > SequencedQueue.size()) {
-	Log.Out(Logs::Detail, Logs::Netcode, _L "Post-Ack Next Send Sequence is beyond the end of the queue NSS %d > SQ %d" __L, NextSequencedSend, SequencedQueue.size());
-}
+		if(uint16(SequencedBase + SequencedQueue.size()) != NextOutSeq) {
+			Log.Out(Logs::Detail, Logs::Netcode, _L "Post-Ack on %d Invalid Sequenced queue: BS %d + SQ %d != NOS %d" __L, seq, SequencedBase, SequencedQueue.size(), NextOutSeq);
+		}
 	}
 
 	MOutboundQueue.unlock();
@@ -1367,6 +1335,18 @@ void EQStream::Decay()
 		if (BytesWritten<0)
 			BytesWritten=0;
 	}
+	// check for any timed out acks
+	if ((GetExecutablePlatform() == ExePlatformWorld || GetExecutablePlatform() == ExePlatformZone) && RETRANSMIT_TIMEOUT_MULT && retransmittimeout) {
+		int count = 0;
+		MOutboundQueue.lock();
+		for (auto sitr = SequencedQueue.begin(); sitr != SequencedQueue.end(); ++sitr, count++) {
+			if (!(*sitr)->acked && (*sitr)->sent_time > 0 && ((*sitr)->sent_time + retransmittimeout) < Timer::GetCurrentTime()) {
+				(*sitr)->sent_time = 0;
+				Log.Out(Logs::Detail, Logs::Netcode, _L "Timeout exceeded for seq %d.  Flagging packet for retransmission" __L, SequencedBase + count);
+			}
+		}
+		MOutboundQueue.unlock();
+	}
 }
 
 void EQStream::AdjustRates(uint32 average_delta)
@@ -1374,18 +1354,24 @@ void EQStream::AdjustRates(uint32 average_delta)
 	if(GetExecutablePlatform() == ExePlatformWorld || GetExecutablePlatform() == ExePlatformZone) {
 		if (average_delta && (average_delta <= AVERAGE_DELTA_MAX)) {
 			MRate.lock();
+			AverageDelta = average_delta;
 			RateThreshold=RATEBASE/average_delta;
 			DecayRate=DECAYBASE/average_delta;
+			if (BytesWritten > RateThreshold)
+				BytesWritten = RateThreshold + DecayRate;
 			Log.Out(Logs::Detail, Logs::Netcode, _L "Adjusting data rate to thresh %d, decay %d based on avg delta %d" __L, 
 				RateThreshold, DecayRate, average_delta);
 			MRate.unlock();
 		} else {
 			Log.Out(Logs::Detail, Logs::Netcode, _L "Not adjusting data rate because avg delta over max (%d > %d)" __L, 
 				average_delta, AVERAGE_DELTA_MAX);
+			AverageDelta = AVERAGE_DELTA_MAX;
 		}
 	} else {
 		if (average_delta) {
 			MRate.lock();
+			AverageDelta = average_delta;
+			BytesWritten = 0;
 			RateThreshold=RATEBASE/average_delta;
 			DecayRate=DECAYBASE/average_delta;
 			Log.Out(Logs::Detail, Logs::Netcode, _L "Adjusting data rate to thresh %d, decay %d based on avg delta %d" __L, 

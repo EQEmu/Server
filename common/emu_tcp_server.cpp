@@ -24,7 +24,7 @@ void EmuTCPServer::Process() {
 
 void EmuTCPServer::CreateNewConnection(uint32 ID, SOCKET in_socket, uint32 irIP, uint16 irPort)
 {
-	EmuTCPConnection *conn = new EmuTCPConnection(ID, this, in_socket, irIP, irPort, pOldFormat);
+	auto conn = new EmuTCPConnection(ID, this, in_socket, irIP, irPort, pOldFormat);
 	AddConnection(conn);
 }
 

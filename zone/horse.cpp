@@ -83,35 +83,35 @@ const NPCType *Horse::BuildHorseType(uint16 spell_id) {
 
     auto row = results.begin();
 
-	NPCType* npc_type = new NPCType;
-	memset(npc_type, 0, sizeof(NPCType));
-	strcpy(npc_type->name,"Unclaimed_Mount");	//this should never get used
+    auto npc_type = new NPCType;
+    memset(npc_type, 0, sizeof(NPCType));
+    strcpy(npc_type->name, "Unclaimed_Mount"); // this should never get used
 
-	strcpy(npc_type->special_abilities, "19,1^20,1^24,1");
-	npc_type->cur_hp = 1;
-	npc_type->max_hp = 1;
-	npc_type->race = atoi(row[0]);
-	npc_type->gender = atoi(row[1]); // Drogmor's are female horses. Yuck.
-	npc_type->class_ = 1;
-	npc_type->deity= 1;
-	npc_type->level = 1;
-	npc_type->npc_id = 0;
-	npc_type->loottable_id = 0;
-	npc_type->texture = atoi(row[2]); // mount color
-	npc_type->helmtexture = atoi(row[2]); // mount color
-	npc_type->runspeed = atof(row[3]);
+    strcpy(npc_type->special_abilities, "19,1^20,1^24,1");
+    npc_type->cur_hp = 1;
+    npc_type->max_hp = 1;
+    npc_type->race = atoi(row[0]);
+    npc_type->gender = atoi(row[1]); // Drogmor's are female horses. Yuck.
+    npc_type->class_ = 1;
+    npc_type->deity = 1;
+    npc_type->level = 1;
+    npc_type->npc_id = 0;
+    npc_type->loottable_id = 0;
+    npc_type->texture = atoi(row[2]);     // mount color
+    npc_type->helmtexture = atoi(row[2]); // mount color
+    npc_type->runspeed = atof(row[3]);
 
-	npc_type->light = 0;
-	npc_type->STR = 75;
-	npc_type->STA = 75;
-	npc_type->DEX = 75;
-	npc_type->AGI = 75;
-	npc_type->INT = 75;
-	npc_type->WIS = 75;
-	npc_type->CHA = 75;
-	horses_auto_delete.Insert(npc_type);
+    npc_type->light = 0;
+    npc_type->STR = 75;
+    npc_type->STA = 75;
+    npc_type->DEX = 75;
+    npc_type->AGI = 75;
+    npc_type->INT = 75;
+    npc_type->WIS = 75;
+    npc_type->CHA = 75;
+    horses_auto_delete.Insert(npc_type);
 
-	return npc_type;
+    return npc_type;
 }
 
 void Client::SummonHorse(uint16 spell_id) {
@@ -126,7 +126,7 @@ void Client::SummonHorse(uint16 spell_id) {
 
 	// No Horse, lets get them one.
 
-	Horse* horse = new Horse(this, spell_id, GetPosition());
+	auto horse = new Horse(this, spell_id, GetPosition());
 
 	//we want to manage the spawn packet ourself.
 	//another reason is we dont want quests executing on it.

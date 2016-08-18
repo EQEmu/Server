@@ -8,10 +8,14 @@ class Corpse;
 class Group;
 class Mob;
 class Raid;
-struct Item_Struct;
 struct MercTemplate;
 struct NPCType;
 struct NewSpawn_Struct;
+
+namespace EQEmu
+{
+	struct ItemBase;
+}
 
 #define MAXMERCS 1
 #define TANK 1
@@ -60,10 +64,10 @@ public:
 	virtual ~Merc();
 
 	//abstract virtual function implementations requird by base abstract class
-	virtual bool Death(Mob* killerMob, int32 damage, uint16 spell_id, SkillUseTypes attack_skill);
-	virtual void Damage(Mob* from, int32 damage, uint16 spell_id, SkillUseTypes attack_skill, bool avoidable = true, int8 buffslot = -1, bool iBuffTic = false);
-	virtual bool Attack(Mob* other, int Hand = MainPrimary, bool FromRiposte = false, bool IsStrikethrough = false,
-	bool IsFromSpell = false, ExtraAttackOptions *opts = nullptr);
+	virtual bool Death(Mob* killerMob, int32 damage, uint16 spell_id, EQEmu::skills::SkillType attack_skill);
+	virtual void Damage(Mob* from, int32 damage, uint16 spell_id, EQEmu::skills::SkillType attack_skill, bool avoidable = true, int8 buffslot = -1, bool iBuffTic = false, int special = 0);
+	virtual bool Attack(Mob* other, int Hand = EQEmu::legacy::SlotPrimary, bool FromRiposte = false, bool IsStrikethrough = false,
+	bool IsFromSpell = false, ExtraAttackOptions *opts = nullptr, int special = 0);
 	virtual bool HasRaid() { return false; }
 	virtual bool HasGroup() { return (GetGroup() ? true : false); }
 	virtual Raid* GetRaid() { return 0; }
@@ -177,10 +181,10 @@ public:
 	inline const uint8 GetClientVersion() const { return _OwnerClientVersion; }
 
 	virtual void SetTarget(Mob* mob);
-	bool HasSkill(SkillUseTypes skill_id) const;
-	bool CanHaveSkill(SkillUseTypes skill_id) const;
-	uint16 MaxSkill(SkillUseTypes skillid, uint16 class_, uint16 level) const;
-	inline uint16 MaxSkill(SkillUseTypes skillid) const { return MaxSkill(skillid, GetClass(), GetLevel()); }
+	bool HasSkill(EQEmu::skills::SkillType skill_id) const;
+	bool CanHaveSkill(EQEmu::skills::SkillType skill_id) const;
+	uint16 MaxSkill(EQEmu::skills::SkillType skillid, uint16 class_, uint16 level) const;
+	inline uint16 MaxSkill(EQEmu::skills::SkillType skillid) const { return MaxSkill(skillid, GetClass(), GetLevel()); }
 	virtual void DoClassAttacks(Mob *target);
 	void CheckHateList();
 	bool CheckTaunt();
@@ -192,6 +196,7 @@ public:
 	virtual void ScaleStats(int scalepercent, bool setmax = false);
 	virtual void CalcBonuses();
 	int32 GetEndurance() const {return cur_end;} //This gets our current endurance
+	inline uint8 GetEndurancePercent() { return (uint8)((float)cur_end / (float)max_end * 100.0f); }
 	inline virtual int32 GetAC() const { return AC; }
 	inline virtual int32 GetATK() const { return ATK; }
 	inline virtual int32 GetATKBonus() const { return itembonuses.ATK + spellbonuses.ATK; }
@@ -278,7 +283,7 @@ public:
 
 protected:
 	void CalcItemBonuses(StatBonuses* newbon);
-	void AddItemBonuses(const Item_Struct *item, StatBonuses* newbon);
+	void AddItemBonuses(const EQEmu::ItemBase *item, StatBonuses* newbon);
 	int CalcRecommendedLevelBonus(uint8 level, uint8 reclevel, int basestat);
 
 	int16 GetFocusEffect(focusType type, uint16 spell_id);
@@ -286,8 +291,8 @@ protected:
 	std::vector<MercSpell> merc_spells;
 	std::map<uint32,MercTimer> timers;
 
-	uint16 skills[HIGHEST_SKILL+1];
-	uint32 equipment[EmuConstants::EQUIPMENT_SIZE]; //this is an array of item IDs
+	uint16 skills[EQEmu::skills::HIGHEST_SKILL + 1];
+	uint32 equipment[EQEmu::legacy::EQUIPMENT_SIZE]; //this is an array of item IDs
 	uint16 d_melee_texture1; //this is an item Material value
 	uint16 d_melee_texture2; //this is an item Material value (offhand)
 	uint8 prim_melee_type; //Sets the Primary Weapon attack message and animation

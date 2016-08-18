@@ -2530,6 +2530,32 @@ XS(XS_NPC_ClearLastName)
 	XSRETURN_EMPTY;
 }
 
+XS(XS_NPC_GetCombatState); /* prototype to pass -Wmissing-prototypes */
+XS(XS_NPC_GetCombatState)
+{
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: NPC::GetCombatState(THIS)");
+	{
+		NPC *		THIS;
+		bool		RETVAL;
+
+		if (sv_derived_from(ST(0), "NPC")) {
+			IV tmp = SvIV((SV*)SvRV(ST(0)));
+			THIS = INT2PTR(NPC *,tmp);
+		}
+		else
+			Perl_croak(aTHX_ "THIS is not of type NPC");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
+
+		RETVAL = THIS->GetCombatEvent();
+		ST(0) = boolSV(RETVAL);
+		sv_2mortal(ST(0));
+	}
+	XSRETURN(1);
+}
+
 #ifdef __cplusplus
 extern "C"
 #endif
@@ -2643,6 +2669,7 @@ XS(boot_NPC)
 		newXSproto(strcpy(buf, "RemoveDefensiveProc"), XS_NPC_RemoveDefensiveProc, file, "$$");
 		newXSproto(strcpy(buf, "ChangeLastName"), XS_NPC_ChangeLastName, file, "$:$");
 		newXSproto(strcpy(buf, "ClearLastName"), XS_NPC_ClearLastName, file, "$");
+		newXSproto(strcpy(buf, "GetCombatState"), XS_NPC_GetCombatState, file, "$");
 	XSRETURN_YES;
 }
 

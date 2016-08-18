@@ -2,11 +2,14 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 
 SET(zone_sources
 	aa.cpp
+	aa_ability.cpp
 	aggro.cpp
 	attack.cpp
 	beacon.cpp
 	bonuses.cpp
 	bot.cpp
+	bot_command.cpp
+	bot_database.cpp
 	botspellsai.cpp
 	client.cpp
 	client_mods.cpp
@@ -20,6 +23,7 @@ SET(zone_sources
 	embparser_api.cpp
 	embperl.cpp
 	embxs.cpp
+	encounter.cpp
 	entity.cpp
 	exp.cpp
 	fearpath.cpp
@@ -28,6 +32,7 @@ SET(zone_sources
 	guild.cpp
 	guild_mgr.cpp
 	hate_list.cpp
+	heal_rotation.cpp
 	horse.cpp
 	inventory.cpp
 	loottables.cpp
@@ -35,6 +40,7 @@ SET(zone_sources
 	lua_corpse.cpp
 	lua_client.cpp
 	lua_door.cpp
+	lua_encounter.cpp
 	lua_entity.cpp
 	lua_entity_list.cpp
 	lua_general.cpp
@@ -126,9 +132,12 @@ SET(zone_sources
 
 SET(zone_headers
 	aa.h
+	aa_ability.h
 	basic_functions.h
 	beacon.h
 	bot.h
+	bot_command.h
+	bot_database.h
 	bot_structs.h
 	client.h
 	client_packet.h
@@ -139,6 +148,7 @@ SET(zone_headers
 	embparser.h
 	embperl.h
 	embxs.h
+	encounter.h
 	entity.h
 	errmsg.h
 	event_codes.h
@@ -146,10 +156,12 @@ SET(zone_headers
 	groups.h
 	guild_mgr.h
 	hate_list.h
+	heal_rotation.h
 	horse.h
 	lua_bit.h
 	lua_client.h
 	lua_corpse.h
+	lua_encounter.h
 	lua_entity.h
 	lua_entity_list.h
 	lua_general.h

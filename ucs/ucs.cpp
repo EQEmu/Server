@@ -34,7 +34,7 @@
 #include <signal.h>
 
 ChatChannelList *ChannelList;
-Clientlist *CL;
+Clientlist *g_Clientlist;
 EQEmuLogSys Log;
 TimeoutManager timeout_manager;
 Database database;
@@ -124,7 +124,7 @@ int main() {
 		exit(1);
 	}
 
-	CL = new Clientlist(Config->ChatPort);
+	g_Clientlist = new Clientlist(Config->ChatPort);
 
 	ChannelList = new ChatChannelList();
 
@@ -147,7 +147,7 @@ int main() {
 
 		Timer::SetCurrentTime();
 
-		CL->Process();
+		g_Clientlist->Process();
 
 		if(ChannelListProcessTimer.Check())
 			ChannelList->Process();
@@ -165,7 +165,7 @@ int main() {
 
 	ChannelList->RemoveAllChannels();
 
-	CL->CloseAllConnections();
+	g_Clientlist->CloseAllConnections();
 
 	Log.CloseFileLogs();
 

@@ -1,3 +1,21 @@
+/*	EQEMu: Everquest Server Emulator
+	Copyright (C) 2001-2016 EQEMu Development Team (http://eqemulator.org)
+
+	This program is free software; you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation; version 2 of the License.
+
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY except by those people which sell it, which
+	are required to give you total support for your newly bought product;
+	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+	A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+	You should have received a copy of the GNU General Public License
+	along with this program; if not, write to the Free Software
+	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+*/
+
 #include "../common/global_define.h"
 #include "../common/eq_packet.h"
 #include "../common/eq_stream_intf.h"
@@ -14,7 +32,7 @@
 #include "../common/skills.h"
 #include "../common/extprofile.h"
 #include "../common/string_util.h"
-#include "../common/clientversions.h"
+#include "../common/emu_versions.h"
 #include "../common/random.h"
 #include "../common/shareddb.h"
 
@@ -43,8 +61,8 @@
 
 // Disgrace: for windows compile
 #ifdef _WINDOWS
+	#include <winsock2.h>
 	#include <windows.h>
-	#include <winsock.h>
 #else
 	
 	#ifdef FREEBSD //Timothy Whitman - January 7, 2003
@@ -80,22 +98,22 @@ Client::Client(EQStreamInterface* ieqs)
 
 	autobootup_timeout.Disable();
 	connect.Disable();
-	seencharsel = false;
+	seen_character_select = false;
 	cle = 0;
-	zoneID = 0;
+	zone_id = 0;
 	char_name[0] = 0;
 	charid = 0;
-	pwaitingforbootup = 0;
+	zone_waiting_for_bootup = 0;
 	StartInTutorial = false;
 
-	m_ClientVersion = eqs->GetClientVersion();
-	m_ClientVersionBit = ClientBitFromVersion(m_ClientVersion);
+	m_ClientVersion = eqs->ClientVersion();
+	m_ClientVersionBit = EQEmu::versions::ConvertClientVersionToClientVersionBit(m_ClientVersion);
 	
 	numclients++;
 }
 
 Client::~Client() {
-	if (RunLoops && cle && zoneID == 0)
+	if (RunLoops && cle && zone_id == 0)
 		cle->SetOnline(CLE_Status_Offline);
 
 	numclients--;
@@ -124,7 +142,7 @@ void Client::SendLogServer()
 	if(RuleB(World, IsGMPetitionWindowEnabled))
 		l->enable_petition_wnd = 1;
 
-	if(RuleI(World, FVNoDropFlag) == 1 || RuleI(World, FVNoDropFlag) == 2 && GetAdmin() > RuleI(Character, MinStatusForNoDropExemptions))
+	if((RuleI(World, FVNoDropFlag) == 1 || RuleI(World, FVNoDropFlag) == 2) && GetAdmin() > RuleI(Character, MinStatusForNoDropExemptions))
 		l->enable_FV = 1;
 
 	QueuePacket(outapp);
@@ -134,7 +152,7 @@ void Client::SendLogServer()
 void Client::SendEnterWorld(std::string name)
 {
 	char char_name[64] = { 0 };
-	if (pZoning && database.GetLiveChar(GetAccountID(), char_name)) {
+	if (is_player_zoning && database.GetLiveChar(GetAccountID(), char_name)) {
 		if(database.GetAccountIDByChar(char_name) != GetAccountID()) {
 			eqs->Close();
 			return;
@@ -152,7 +170,13 @@ void Client::SendEnterWorld(std::string name)
 void Client::SendExpansionInfo() {
 	auto outapp = new EQApplicationPacket(OP_ExpansionInfo, sizeof(ExpansionInfo_Struct));
 	ExpansionInfo_Struct *eis = (ExpansionInfo_Struct*)outapp->pBuffer;
-	eis->Expansions = (RuleI(World, ExpansionSettings));
+	if(RuleB(World, UseClientBasedExpansionSettings)) {
+		eis->Expansions = EQEmu::versions::ConvertClientVersionToExpansion(eqs->ClientVersion());
+		//eis->Expansions = ExpansionFromClientVersion(this->GetCLE.
+	} else {
+		eis->Expansions = (RuleI(World, ExpansionSettings));
+	}
+
 	QueuePacket(outapp);
 	safe_delete(outapp);
 }
@@ -162,13 +186,13 @@ void Client::SendCharInfo() {
 		cle->SetOnline(CLE_Status_CharSelect);
 	}
 
-	if (m_ClientVersionBit & BIT_RoFAndLater) {
+	if (m_ClientVersionBit & EQEmu::versions::bit_RoFAndLater) {
 		SendMaxCharCreate();
 		SendMembership();
 		SendMembershipSettings();
 	}
 
-	seencharsel = true;
+	seen_character_select = true;
 
 	// Send OP_SendCharInfo
 	EQApplicationPacket *outapp = nullptr;
@@ -187,9 +211,9 @@ void Client::SendMaxCharCreate() {
 	auto outapp = new EQApplicationPacket(OP_SendMaxCharacters, sizeof(MaxCharacters_Struct));
 	MaxCharacters_Struct* mc = (MaxCharacters_Struct*)outapp->pBuffer;
 
-	mc->max_chars = EQLimits::CharacterCreationLimit(m_ClientVersion);
-	if (mc->max_chars > EmuConstants::CHARACTER_CREATION_LIMIT)
-		mc->max_chars = EmuConstants::CHARACTER_CREATION_LIMIT;
+	mc->max_chars = EQEmu::constants::Lookup(m_ClientVersion)->CharacterCreationLimit;
+	if (mc->max_chars > EQEmu::constants::CharacterCreationMax)
+		mc->max_chars = EQEmu::constants::CharacterCreationMax;
 
 	QueuePacket(outapp);
 	safe_delete(outapp);
@@ -387,7 +411,7 @@ bool Client::HandleSendLoginInfoPacket(const EQApplicationPacket *app) {
 		return false;
 	}
 
-	pZoning=(li->zoning==1);
+	is_player_zoning=(li->zoning==1);
 
 #ifdef IPBASED_AUTH_HACK
 	struct in_addr tmpip;
@@ -412,32 +436,33 @@ bool Client::HandleSendLoginInfoPacket(const EQApplicationPacket *app) {
 #ifdef IPBASED_AUTH_HACK
 	if ((cle = zoneserver_list.CheckAuth(inet_ntoa(tmpip), password)))
 #else
-	if (loginserverlist.Connected() == false && !pZoning) {
-		Log.Out(Logs::Detail, Logs::World_Server,"Error: Login server login while not connected to login server.");
+	if (loginserverlist.Connected() == false && !is_player_zoning) {
+		Log.Out(Logs::General, Logs::World_Server,"Error: Login server login while not connected to login server.");
 		return false;
 	}
 	if (((cle = client_list.CheckAuth(name, password)) || (cle = client_list.CheckAuth(id, password))))
 #endif
 	{
 		if (cle->AccountID() == 0 || (!minilogin && cle->LSID()==0)) {
-			Log.Out(Logs::Detail, Logs::World_Server,"ID is 0. Is this server connected to minilogin?");
+			Log.Out(Logs::General, Logs::World_Server,"ID is 0. Is this server connected to minilogin?");
 			if(!minilogin)
-				Log.Out(Logs::Detail, Logs::World_Server,"If so you forget the minilogin variable...");
+				Log.Out(Logs::General, Logs::World_Server,"If so you forget the minilogin variable...");
 			else
-				Log.Out(Logs::Detail, Logs::World_Server,"Could not find a minilogin account, verify ip address logging into minilogin is the same that is in your account table.");
+				Log.Out(Logs::General, Logs::World_Server,"Could not find a minilogin account, verify ip address logging into minilogin is the same that is in your account table.");
 			return false;
 		}
 
 		cle->SetOnline();
 
-		Log.Out(Logs::Detail, Logs::World_Server,"Logged in. Mode=%s",pZoning ? "(Zoning)" : "(CharSel)");
-
 		if(minilogin){
 			WorldConfig::DisableStats();
-			Log.Out(Logs::Detail, Logs::World_Server,"MiniLogin Account #%d",cle->AccountID());
+			Log.Out(Logs::General, Logs::World_Server, "MiniLogin Account #%d",cle->AccountID());
 		}
 		else {
-			Log.Out(Logs::Detail, Logs::World_Server,"LS Account #%d",cle->LSID());
+			if (!is_player_zoning) {
+				Log.Out(Logs::General, Logs::World_Server, 
+					"Account (%s) Logging in :: LSID: %d ", cle->AccountName(), cle->LSID());
+			}
 		}
 
 		const WorldConfig *Config=WorldConfig::get();
@@ -455,13 +480,14 @@ bool Client::HandleSendLoginInfoPacket(const EQApplicationPacket *app) {
 			safe_delete(pack);
 		}
 
-		if (!pZoning)
+		if (!is_player_zoning)
 			SendGuildList();
+
 		SendLogServer();
 		SendApproveWorld();
 		SendEnterWorld(cle->name());
 		SendPostEnterWorld();
-		if (!pZoning) {
+		if (!is_player_zoning) {
 			SendExpansionInfo();
 			SendCharInfo();
 			database.LoginIP(cle->AccountID(), long2ip(GetIP()).c_str());
@@ -492,7 +518,7 @@ bool Client::HandleNameApprovalPacket(const EQApplicationPacket *app)
 	uchar race = app->pBuffer[64];
 	uchar clas = app->pBuffer[68];
 
-	Log.Out(Logs::Detail, Logs::World_Server, "Name approval request. Name=%s, race=%s, class=%s", char_name, GetRaceName(race), GetEQClassName(clas));
+	Log.Out(Logs::Detail, Logs::World_Server, "Name approval request. Name=%s, race=%s, class=%s", char_name, GetRaceIDName(race), GetClassIDName(clas));
 
 	EQApplicationPacket *outapp;
 	outapp = new EQApplicationPacket;
@@ -674,7 +700,7 @@ bool Client::HandleCharacterCreatePacket(const EQApplicationPacket *app) {
 	}
 	else
 	{
-		if (m_ClientVersionBit & BIT_TitaniumAndEarlier)
+		if (m_ClientVersionBit & EQEmu::versions::bit_TitaniumAndEarlier)
 			StartInTutorial = true;
 		SendCharInfo();
 	}
@@ -705,7 +731,7 @@ bool Client::HandleEnterWorldPacket(const EQApplicationPacket *app) {
 
 	EQApplicationPacket *outapp;
 	uint32 tmpaccid = 0;
-	charid = database.GetCharacterInfo(char_name, &tmpaccid, &zoneID, &instanceID);
+	charid = database.GetCharacterInfo(char_name, &tmpaccid, &zone_id, &instance_id);
 	if (charid == 0 || tmpaccid != GetAccountID()) {
 		Log.Out(Logs::Detail, Logs::World_Server,"Could not get CharInfo for '%s'",char_name);
 		eqs->Close();
@@ -721,10 +747,10 @@ bool Client::HandleEnterWorldPacket(const EQApplicationPacket *app) {
 
 	// This can probably be moved outside and have another method return requested info (don't forget to remove the #include "../common/shareddb.h" above)
 	// (This is a literal translation of the original process..I don't see why it can't be changed to a single-target query over account iteration)
-	if (!pZoning) {
-		size_t character_limit = EQLimits::CharacterCreationLimit(eqs->GetClientVersion());
-		if (character_limit > EmuConstants::CHARACTER_CREATION_LIMIT) { character_limit = EmuConstants::CHARACTER_CREATION_LIMIT; }
-		if (eqs->GetClientVersion() == ClientVersion::Titanium) { character_limit = 8; }
+	if (!is_player_zoning) {
+		size_t character_limit = EQEmu::constants::Lookup(eqs->ClientVersion())->CharacterCreationLimit;
+		if (character_limit > EQEmu::constants::CharacterCreationMax) { character_limit = EQEmu::constants::CharacterCreationMax; }
+		if (eqs->ClientVersion() == EQEmu::versions::ClientVersion::Titanium) { character_limit = 8; }
 
 		std::string tgh_query = StringFormat(
 			"SELECT                     "
@@ -753,7 +779,7 @@ bool Client::HandleEnterWorldPacket(const EQApplicationPacket *app) {
 			}
 
 			if (home_enabled) {
-				zoneID = database.MoveCharacterToBind(charid, 4);
+				zone_id = database.MoveCharacterToBind(charid, 4);
 			}
 			else {
 				Log.Out(Logs::Detail, Logs::World_Server, "'%s' is trying to go home before they're able...", char_name);
@@ -776,8 +802,8 @@ bool Client::HandleEnterWorldPacket(const EQApplicationPacket *app) {
 			}
 
 			if (tutorial_enabled) {
-				zoneID = RuleI(World, TutorialZoneID);
-				database.MoveCharacterToZone(charid, database.GetZoneName(zoneID));
+				zone_id = RuleI(World, TutorialZoneID);
+				database.MoveCharacterToZone(charid, database.GetZoneName(zone_id));
 			}
 			else {
 				Log.Out(Logs::Detail, Logs::World_Server, "'%s' is trying to go to tutorial but are not allowed...", char_name);
@@ -788,30 +814,30 @@ bool Client::HandleEnterWorldPacket(const EQApplicationPacket *app) {
 		}
 	}
 
-	if (zoneID == 0 || !database.GetZoneName(zoneID)) {
+	if (zone_id == 0 || !database.GetZoneName(zone_id)) {
 		// This is to save people in an invalid zone, once it's removed from the DB
 		database.MoveCharacterToZone(charid, "arena");
-		Log.Out(Logs::Detail, Logs::World_Server, "Zone not found in database zone_id=%i, moveing char to arena character:%s", zoneID, char_name);
+		Log.Out(Logs::Detail, Logs::World_Server, "Zone not found in database zone_id=%i, moveing char to arena character:%s", zone_id, char_name);
 	}
 
-	if(instanceID > 0)
+	if(instance_id > 0)
 	{
-		if(!database.VerifyInstanceAlive(instanceID, GetCharID()))
+		if(!database.VerifyInstanceAlive(instance_id, GetCharID()))
 		{
-			zoneID = database.MoveCharacterToBind(charid);
-			instanceID = 0;
+			zone_id = database.MoveCharacterToBind(charid);
+			instance_id = 0;
 		}
 		else
 		{
-			if(!database.VerifyZoneInstance(zoneID, instanceID))
+			if(!database.VerifyZoneInstance(zone_id, instance_id))
 			{
-				zoneID = database.MoveCharacterToBind(charid);
-				instanceID = 0;
+				zone_id = database.MoveCharacterToBind(charid);
+				instance_id = 0;
 			}
 		}
 	}
 
-	if(!pZoning) {
+	if(!is_player_zoning) {
 		database.SetGroupID(char_name, 0, charid);
 		database.SetLoginFlags(charid, false, false, 1);
 	}
@@ -833,12 +859,12 @@ bool Client::HandleEnterWorldPacket(const EQApplicationPacket *app) {
 	}
 
 	outapp = new EQApplicationPacket(OP_MOTD);
-	char tmp[500] = {0};
-	if (database.GetVariable("MOTD", tmp, 500)) {
-		outapp->size = strlen(tmp)+1;
+	std::string tmp;
+	if (database.GetVariable("MOTD", tmp)) {
+		outapp->size = tmp.length() + 1;
 		outapp->pBuffer = new uchar[outapp->size];
 		memset(outapp->pBuffer,0,outapp->size);
-		strcpy((char*)outapp->pBuffer, tmp);
+		strcpy((char*)outapp->pBuffer, tmp.c_str());
 
 	} else {
 		// Null Message of the Day. :)
@@ -855,9 +881,9 @@ bool Client::HandleEnterWorldPacket(const EQApplicationPacket *app) {
 
 	char ConnectionType;
 
-	if (m_ClientVersionBit & BIT_UFAndLater)
+	if (m_ClientVersionBit & EQEmu::versions::bit_UFAndLater)
 		ConnectionType = 'U';
-	else if (m_ClientVersionBit & BIT_SoFAndLater)
+	else if (m_ClientVersionBit & EQEmu::versions::bit_SoFAndLater)
 		ConnectionType = 'S';
 	else
 		ConnectionType = 'C';
@@ -881,7 +907,7 @@ bool Client::HandleEnterWorldPacket(const EQApplicationPacket *app) {
 
 	outapp2 = new EQApplicationPacket(OP_SetChatServer2);
 
-	if (m_ClientVersionBit & BIT_TitaniumAndEarlier)
+	if (m_ClientVersionBit & EQEmu::versions::bit_TitaniumAndEarlier)
 		ConnectionType = 'M';
 
 	sprintf(buffer,"%s,%i,%s.%s,%c%08X",
@@ -915,7 +941,7 @@ bool Client::HandleDeleteCharacterPacket(const EQApplicationPacket *app) {
 
 bool Client::HandleZoneChangePacket(const EQApplicationPacket *app) {
 	// HoT sends this to world while zoning and wants it echoed back.
-	if (m_ClientVersionBit & BIT_RoFAndLater)
+	if (m_ClientVersionBit & EQEmu::versions::bit_RoFAndLater)
 	{
 		QueuePacket(app);
 	}
@@ -1033,8 +1059,8 @@ bool Client::Process() {
 	to.sin_addr.s_addr = ip;
 
 	if (autobootup_timeout.Check()) {
-		Log.Out(Logs::Detail, Logs::World_Server, "Zone bootup timer expired, bootup failed or too slow.");
-		ZoneUnavail();
+		Log.Out(Logs::General, Logs::World_Server, "Zone bootup timer expired, bootup failed or too slow.");
+		TellClientZoneUnavailable();
 	}
 	if(connect.Check()){
 		SendGuildList();// Send OPCode: OP_GuildsList
@@ -1075,63 +1101,63 @@ bool Client::Process() {
 }
 
 void Client::EnterWorld(bool TryBootup) {
-	if (zoneID == 0)
+	if (zone_id == 0)
 		return;
 
-	ZoneServer* zs = nullptr;
-	if(instanceID > 0)
+	ZoneServer* zone_server = nullptr;
+	if(instance_id > 0)
 	{
-		if(database.VerifyInstanceAlive(instanceID, GetCharID()))
+		if(database.VerifyInstanceAlive(instance_id, GetCharID()))
 		{
-			if(database.VerifyZoneInstance(zoneID, instanceID))
+			if(database.VerifyZoneInstance(zone_id, instance_id))
 			{
-				zs = zoneserver_list.FindByInstanceID(instanceID);
+				zone_server = zoneserver_list.FindByInstanceID(instance_id);
 			}
 			else
 			{
-				instanceID = 0;
-				zs = nullptr;
+				instance_id = 0;
+				zone_server = nullptr;
 				database.MoveCharacterToBind(GetCharID());
-				ZoneUnavail();
+				TellClientZoneUnavailable();
 				return;
 			}
 		}
 		else
 		{
-			instanceID = 0;
-			zs = nullptr;
+			instance_id = 0;
+			zone_server = nullptr;
 			database.MoveCharacterToBind(GetCharID());
-			ZoneUnavail();
+			TellClientZoneUnavailable();
 			return;
 		}
 	}
 	else
-		zs = zoneserver_list.FindByZoneID(zoneID);
+		zone_server = zoneserver_list.FindByZoneID(zone_id);
 
 
-	const char *zone_name=database.GetZoneName(zoneID, true);
-	if (zs) {
+	const char *zone_name = database.GetZoneName(zone_id, true);
+	if (zone_server) {
 		// warn the world we're comming, so it knows not to shutdown
-		zs->IncomingClient(this);
+		zone_server->IncomingClient(this);
 	}
 	else {
 		if (TryBootup) {
-			Log.Out(Logs::Detail, Logs::World_Server,"Attempting autobootup of %s (%d:%d)",zone_name,zoneID,instanceID);
+			Log.Out(Logs::General, Logs::World_Server, "Attempting autobootup of %s (%d:%d)", zone_name, zone_id, instance_id);
 			autobootup_timeout.Start();
-			pwaitingforbootup = zoneserver_list.TriggerBootup(zoneID, instanceID);
-			if (pwaitingforbootup == 0) {
-				Log.Out(Logs::Detail, Logs::World_Server,"No zoneserver available to boot up.");
-				ZoneUnavail();
+			zone_waiting_for_bootup = zoneserver_list.TriggerBootup(zone_id, instance_id);
+			if (zone_waiting_for_bootup == 0) {
+				Log.Out(Logs::General, Logs::World_Server, "No zoneserver available to boot up.");
+				TellClientZoneUnavailable();
 			}
 			return;
 		}
 		else {
-			Log.Out(Logs::Detail, Logs::World_Server,"Requested zone %s is not running.",zone_name);
-			ZoneUnavail();
+			Log.Out(Logs::General, Logs::World_Server, "Requested zone %s is not running.", zone_name);
+			TellClientZoneUnavailable();
 			return;
 		}
 	}
-	pwaitingforbootup = 0;
+	zone_waiting_for_bootup = 0;
 
 	if(!cle) {
 		return;
@@ -1139,12 +1165,20 @@ void Client::EnterWorld(bool TryBootup) {
 
 	cle->SetChar(charid, char_name);
 	database.UpdateLiveChar(char_name, GetAccountID());
-	Log.Out(Logs::Detail, Logs::World_Server,"%s %s (%d:%d)",seencharsel ? "Entering zone" : "Zoning to",zone_name,zoneID,instanceID);
 
-	if (seencharsel) {
-		if (GetAdmin() < 80 && zoneserver_list.IsZoneLocked(zoneID)) {
-			Log.Out(Logs::Detail, Logs::World_Server,"Enter world failed. Zone is locked.");
-			ZoneUnavail();
+	Log.Out(Logs::General, Logs::World_Server, 
+		"(%s) %s %s (Zone ID %d: Instance ID: %d) ", 
+		char_name,
+		(seen_character_select ? "Zoning from character select" : "Zoning to"), 
+		zone_name, 
+		zone_id, 
+		instance_id
+	);
+
+	if (seen_character_select) {
+		if (GetAdmin() < 80 && zoneserver_list.IsZoneLocked(zone_id)) {
+			Log.Out(Logs::General, Logs::World_Server, "Enter world failed. Zone is locked.");
+			TellClientZoneUnavailable();
 			return;
 		}
 
@@ -1156,7 +1190,7 @@ void Client::EnterWorld(bool TryBootup) {
 		WorldToZone_Struct* wtz = (WorldToZone_Struct*) pack->pBuffer;
 		wtz->account_id = GetAccountID();
 		wtz->response = 0;
-		zs->SendPacket(pack);
+		zone_server->SendPacket(pack);
 		delete pack;
 	}
 	else {	// if they havent seen character select screen, we can assume this is a zone
@@ -1168,13 +1202,13 @@ void Client::EnterWorld(bool TryBootup) {
 void Client::Clearance(int8 response)
 {
 	ZoneServer* zs = nullptr;
-	if(instanceID > 0)
+	if(instance_id > 0)
 	{
-		zs = zoneserver_list.FindByInstanceID(instanceID);
+		zs = zoneserver_list.FindByInstanceID(instance_id);
 	}
 	else
 	{
-		zs = zoneserver_list.FindByZoneID(zoneID);
+		zs = zoneserver_list.FindByZoneID(zone_id);
 	}
 
 	if(zs == 0 || response == -1 || response == 0)
@@ -1186,7 +1220,7 @@ void Client::Clearance(int8 response)
 			Log.Out(Logs::Detail, Logs::World_Server, "Invalid response %d in Client::Clearance", response);
 		}
 
-		ZoneUnavail();
+		TellClientZoneUnavailable();
 		return;
 	}
 
@@ -1194,50 +1228,59 @@ void Client::Clearance(int8 response)
 
 	if (zs->GetCAddress() == nullptr) {
 		Log.Out(Logs::Detail, Logs::World_Server, "Unable to do zs->GetCAddress() in Client::Clearance!!");
-		ZoneUnavail();
+		TellClientZoneUnavailable();
 		return;
 	}
 
-	if (zoneID == 0) {
+	if (zone_id == 0) {
 		Log.Out(Logs::Detail, Logs::World_Server, "zoneID is nullptr in Client::Clearance!!");
-		ZoneUnavail();
+		TellClientZoneUnavailable();
 		return;
 	}
 
-	const char* zonename = database.GetZoneName(zoneID);
+	const char* zonename = database.GetZoneName(zone_id);
 	if (zonename == 0) {
 		Log.Out(Logs::Detail, Logs::World_Server, "zonename is nullptr in Client::Clearance!!");
-		ZoneUnavail();
+		TellClientZoneUnavailable();
 		return;
 	}
-
-	// @bp This is the chat server
-	/*
-	char packetData[] = "64.37.148.34.9876,MyServer,Testchar,23cd2c95";
-	outapp = new EQApplicationPacket(OP_0x0282, sizeof(packetData));
-	strcpy((char*)outapp->pBuffer, packetData);
-	QueuePacket(outapp);
-	delete outapp;
-	*/
 
 	// Send zone server IP data
 	outapp = new EQApplicationPacket(OP_ZoneServerInfo, sizeof(ZoneServerInfo_Struct));
 	ZoneServerInfo_Struct* zsi = (ZoneServerInfo_Struct*)outapp->pBuffer;
-	const char *zs_addr=zs->GetCAddress();
-	if (!zs_addr[0]) {
-		if (cle->IsLocalClient()) {
+
+	const char *zs_addr = nullptr;
+	if(cle && cle->IsLocalClient()) {
+		const char *local_addr = zs->GetCLocalAddress();
+
+		if(local_addr[0]) {
+			zs_addr = local_addr;
+		} else {
 			struct in_addr in;
 			in.s_addr = zs->GetIP();
-			zs_addr=inet_ntoa(in);
-			if (!strcmp(zs_addr,"127.0.0.1"))
-				zs_addr=WorldConfig::get()->LocalAddress.c_str();
+			zs_addr = inet_ntoa(in);
+
+			if(strcmp(zs_addr, "127.0.0.1") == 0)
+			{
+				Log.Out(Logs::Detail, Logs::World_Server, "Local zone address was %s, setting local address to: %s", zs_addr, WorldConfig::get()->LocalAddress.c_str());
+				zs_addr = WorldConfig::get()->LocalAddress.c_str();
+			} else {
+				Log.Out(Logs::Detail, Logs::World_Server, "Local zone address %s", zs_addr);
+			}
+		}
+
+	} else {
+		const char *addr = zs->GetCAddress();
+		if(addr[0]) {
+			zs_addr = addr;
 		} else {
-			zs_addr=WorldConfig::get()->WorldAddress.c_str();
+			zs_addr = WorldConfig::get()->WorldAddress.c_str();
 		}
 	}
+
 	strcpy(zsi->ip, zs_addr);
 	zsi->port =zs->GetCPort();
-	Log.Out(Logs::Detail, Logs::World_Server,"Sending client to zone %s (%d:%d) at %s:%d",zonename,zoneID,instanceID,zsi->ip,zsi->port);
+	Log.Out(Logs::Detail, Logs::World_Server,"Sending client to zone %s (%d:%d) at %s:%d",zonename,zone_id,instance_id,zsi->ip,zsi->port);
 	QueuePacket(outapp);
 	safe_delete(outapp);
 
@@ -1245,17 +1288,17 @@ void Client::Clearance(int8 response)
 		cle->SetOnline(CLE_Status_Zoning);
 }
 
-void Client::ZoneUnavail() {
+void Client::TellClientZoneUnavailable() {
 	auto outapp = new EQApplicationPacket(OP_ZoneUnavail, sizeof(ZoneUnavail_Struct));
 	ZoneUnavail_Struct* ua = (ZoneUnavail_Struct*)outapp->pBuffer;
-	const char* zonename = database.GetZoneName(zoneID);
+	const char* zonename = database.GetZoneName(zone_id);
 	if (zonename)
 		strcpy(ua->zonename, zonename);
 	QueuePacket(outapp);
 	delete outapp;
 
-	zoneID = 0;
-	pwaitingforbootup = 0;
+	zone_id = 0;
+	zone_waiting_for_bootup = 0;
 	autobootup_timeout.Disable();
 }
 
@@ -1379,7 +1422,7 @@ bool Client::OPCharCreate(char *name, CharCreate_Struct *cc)
 	Log.Out(Logs::Detail, Logs::World_Server, "Beard: %d  Beardcolor: %d", cc->beard, cc->beardcolor);
 
 	/* Validate the char creation struct */
-	if (m_ClientVersionBit & BIT_SoFAndLater) {
+	if (m_ClientVersionBit & EQEmu::versions::bit_SoFAndLater) {
 		if (!CheckCharCreateInfoSoF(cc)) {
 			Log.Out(Logs::Detail, Logs::World_Server,"CheckCharCreateInfo did not validate the request (bad race/class/stats)");
 			return false;
@@ -1431,8 +1474,8 @@ bool Client::OPCharCreate(char *name, CharCreate_Struct *cc)
 	SetClassStartingSkills(&pp);
 	SetClassLanguages(&pp);
 
-	pp.skills[SkillSwimming] = RuleI(Skills, SwimmingStartValue);
-	pp.skills[SkillSenseHeading] = RuleI(Skills, SenseHeadingStartValue);
+	pp.skills[EQEmu::skills::SkillSwimming] = RuleI(Skills, SwimmingStartValue);
+	pp.skills[EQEmu::skills::SkillSenseHeading] = RuleI(Skills, SenseHeadingStartValue);
 
 //	strcpy(pp.servername, WorldConfig::get()->ShortName.c_str());
 
@@ -1440,7 +1483,7 @@ bool Client::OPCharCreate(char *name, CharCreate_Struct *cc)
 	for (i = 0; i < MAX_PP_REF_SPELLBOOK; i++)
 		pp.spell_book[i] = 0xFFFFFFFF;
 
-	for(i = 0; i < MAX_PP_REF_MEMSPELL; i++)
+	for(i = 0; i < MAX_PP_MEMSPELL; i++)
 		pp.mem_spells[i] = 0xFFFFFFFF;
 
 	for(i = 0; i < BUFF_COUNT; i++)
@@ -1450,7 +1493,7 @@ bool Client::OPCharCreate(char *name, CharCreate_Struct *cc)
 	pp.pvp = database.GetServerType() == 1 ? 1 : 0;
 
 	/* If it is an SoF Client and the SoF Start Zone rule is set, send new chars there */
-	if (m_ClientVersionBit & BIT_SoFAndLater) {
+	if (m_ClientVersionBit & EQEmu::versions::bit_SoFAndLater) {
 		Log.Out(Logs::Detail, Logs::World_Server,"Found 'SoFStartZoneID' rule setting: %i", RuleI(World, SoFStartZoneID));
 		if (RuleI(World, SoFStartZoneID) > 0) {
 			pp.zone_id = RuleI(World, SoFStartZoneID);
@@ -1466,7 +1509,7 @@ bool Client::OPCharCreate(char *name, CharCreate_Struct *cc)
 		}
 	} 	
 	/* use normal starting zone logic to either get defaults, or if startzone was set, load that from the db table.*/
-	bool ValidStartZone = database.GetStartZone(&pp, cc, m_ClientVersionBit & BIT_TitaniumAndEarlier);
+	bool ValidStartZone = database.GetStartZone(&pp, cc, m_ClientVersionBit & EQEmu::versions::bit_TitaniumAndEarlier);
 
 	if (!ValidStartZone){
 		return false;
@@ -1478,7 +1521,25 @@ bool Client::OPCharCreate(char *name, CharCreate_Struct *cc)
 		pp.x = pp.y = pp.z = -1;
 	}
 
-	/* Set Home Binds */
+	/* Set Home Binds  -- yep, all of them */
+	pp.binds[1].zoneId = pp.zone_id;
+	pp.binds[1].x = pp.x;
+	pp.binds[1].y = pp.y;
+	pp.binds[1].z = pp.z;
+	pp.binds[1].heading = pp.heading;
+
+	pp.binds[2].zoneId = pp.zone_id;
+	pp.binds[2].x = pp.x;
+	pp.binds[2].y = pp.y;
+	pp.binds[2].z = pp.z;
+	pp.binds[2].heading = pp.heading;
+
+	pp.binds[3].zoneId = pp.zone_id;
+	pp.binds[3].x = pp.x;
+	pp.binds[3].y = pp.y;
+	pp.binds[3].z = pp.z;
+	pp.binds[3].heading = pp.heading;
+
 	pp.binds[4].zoneId = pp.zone_id;
 	pp.binds[4].x = pp.x;
 	pp.binds[4].y = pp.y;
@@ -1788,16 +1849,21 @@ bool CheckCharCreateInfoTitanium(CharCreate_Struct *cc)
 
 void Client::SetClassStartingSkills(PlayerProfile_Struct *pp)
 {
-	for (uint32 i = 0; i <= HIGHEST_SKILL; ++i) {
+	for (uint32 i = 0; i <= EQEmu::skills::HIGHEST_SKILL; ++i) {
 		if (pp->skills[i] == 0) {
 			// Skip specialized, tradeskills (fishing excluded), Alcohol Tolerance, and Bind Wound
-			if (EQEmu::IsSpecializedSkill((SkillUseTypes)i) ||
-					(EQEmu::IsTradeskill((SkillUseTypes)i) && i != SkillFishing) ||
-					i == SkillAlcoholTolerance || i == SkillBindWound)
+			if (EQEmu::skills::IsSpecializedSkill((EQEmu::skills::SkillType)i) ||
+				(EQEmu::skills::IsTradeskill((EQEmu::skills::SkillType)i) && i != EQEmu::skills::SkillFishing) ||
+				i == EQEmu::skills::SkillAlcoholTolerance || i == EQEmu::skills::SkillBindWound)
 				continue;
 
-			pp->skills[i] = database.GetSkillCap(pp->class_, (SkillUseTypes)i, 1);
+			pp->skills[i] = database.GetSkillCap(pp->class_, (EQEmu::skills::SkillType)i, 1);
 		}
+	}
+
+	if (cle->GetClientVersion() < static_cast<uint8>(EQEmu::versions::ClientVersion::RoF2) && pp->class_ == BERSERKER) {
+		pp->skills[EQEmu::skills::Skill1HPiercing] = pp->skills[EQEmu::skills::Skill2HPiercing];
+		pp->skills[EQEmu::skills::Skill2HPiercing] = 0;
 	}
 }
 
@@ -1820,41 +1886,41 @@ void Client::SetRaceStartingSkills( PlayerProfile_Struct *pp )
 		}
 	case DARK_ELF:
 		{
-			pp->skills[SkillHide] = 50;
+			pp->skills[EQEmu::skills::SkillHide] = 50;
 			break;
 		}
 	case FROGLOK:
 		{
-			pp->skills[SkillSwimming] = 125;
+			pp->skills[EQEmu::skills::SkillSwimming] = 125;
 			break;
 		}
 	case GNOME:
 		{
-			pp->skills[SkillTinkering] = 50;
+			pp->skills[EQEmu::skills::SkillTinkering] = 50;
 			break;
 		}
 	case HALFLING:
 		{
-			pp->skills[SkillHide] = 50;
-			pp->skills[SkillSneak] = 50;
+			pp->skills[EQEmu::skills::SkillHide] = 50;
+			pp->skills[EQEmu::skills::SkillSneak] = 50;
 			break;
 		}
 	case IKSAR:
 		{
-			pp->skills[SkillForage] = 50;
-			pp->skills[SkillSwimming] = 100;
+			pp->skills[EQEmu::skills::SkillForage] = 50;
+			pp->skills[EQEmu::skills::SkillSwimming] = 100;
 			break;
 		}
 	case WOOD_ELF:
 		{
-			pp->skills[SkillForage] = 50;
-			pp->skills[SkillHide] = 50;
+			pp->skills[EQEmu::skills::SkillForage] = 50;
+			pp->skills[EQEmu::skills::SkillHide] = 50;
 			break;
 		}
 	case VAHSHIR:
 		{
-			pp->skills[SkillSafeFall] = 50;
-			pp->skills[SkillSneak] = 50;
+			pp->skills[EQEmu::skills::SkillSafeFall] = 50;
+			pp->skills[EQEmu::skills::SkillSneak] = 50;
 			break;
 		}
 	}
@@ -1933,21 +1999,21 @@ void Client::SetRacialLanguages( PlayerProfile_Struct *pp )
 		}
 	case IKSAR:
 		{
-			pp->languages[LANG_COMMON_TONGUE] = 95;
+			pp->languages[LANG_COMMON_TONGUE] = RuleI(Character, IksarCommonTongue);
 			pp->languages[LANG_DARK_SPEECH] = 100;
 			pp->languages[LANG_LIZARDMAN] = 100;
 			break;
 		}
 	case OGRE:
 		{
-			pp->languages[LANG_COMMON_TONGUE] = 95;
+			pp->languages[LANG_COMMON_TONGUE] = RuleI(Character, OgreCommonTongue);
 			pp->languages[LANG_DARK_SPEECH] = 100;
 			pp->languages[LANG_OGRE] = 100;
 			break;
 		}
 	case TROLL:
 		{
-			pp->languages[LANG_COMMON_TONGUE] = 95;
+			pp->languages[LANG_COMMON_TONGUE] = RuleI(Character, TrollCommonTongue);
 			pp->languages[LANG_DARK_SPEECH] = 100;
 			pp->languages[LANG_TROLL] = 100;
 			break;

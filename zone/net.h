@@ -16,8 +16,8 @@
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 #ifdef _WINDOWS
+	#include <winsock2.h>
 	#include <windows.h>
-	#include <winsock.h>
 #else
 	#include <sys/socket.h>
 	#include <netinet/in.h>
@@ -39,20 +39,10 @@ public:
 
 	uint32	GetIP();
 	uint32	GetIP(char* name);
-	void	SaveInfo(char* address, uint32 port, char* waddress,char* filename);
-	char*	GetWorldAddress() { return WorldAddress; }
-	char*	GetZoneAddress() { return ZoneAddress; }
-	char*	GetZoneFileName() { return ZoneFileName; }
-	uint32	GetZonePort() { return ZonePort; }
 	Timer object_timer;
 	Timer door_timer;
 	Timer corpse_timer;
 	Timer group_timer;
 	Timer raid_timer;
 	Timer trap_timer;
-private:
-	uint16 ZonePort;
-	char* ZoneAddress;
-	char* WorldAddress;
-	char ZoneFileName[50];
 };

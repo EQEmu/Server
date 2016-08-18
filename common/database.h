@@ -1,5 +1,5 @@
 /*	EQEMu: Everquest Server Emulator
-	Copyright (C) 2001-2003 EQEMu Development Team (http://eqemulator.net)
+	Copyright (C) 2001-2016 EQEMu Development Team (http://eqemulator.net)
 
 	This program is free software; you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -23,6 +23,7 @@
 
 #include "global_define.h"
 #include "eqemu_logsys.h"
+
 #include "types.h"
 #include "dbcore.h"
 #include "linked_list.h"
@@ -66,8 +67,14 @@ struct npcDecayTimes_Struct {
 
 
 struct VarCache_Struct {
-	char varname[26];	
-	char value[0];
+	std::map<std::string, std::string> m_cache;
+	uint32 last_update;
+	VarCache_Struct() : last_update(0) { }
+	void Add(const std::string &key, const std::string &value) { m_cache[key] = value; }
+	const std::string *Get(const std::string &key) {
+		auto it = m_cache.find(key);
+		return (it != m_cache.end() ? &it->second : nullptr);
+	}
 };
 
 class PTimerList;
@@ -87,7 +94,7 @@ class Database : public DBcore {
 public:
 	Database();
 	Database(const char* host, const char* user, const char* passwd, const char* database,uint32 port);
-	bool Connect(const char* host, const char* user, const char* passwd, const char* database,uint32 port);
+	bool Connect(const char* host, const char* user, const char* passwd, const char* database, uint32 port);
 	~Database();
 
 	/* Character Creation */
@@ -209,17 +216,14 @@ public:
 	/* Database Conversions 'database_conversions.cpp' */
 
 	bool	CheckDatabaseConversions();
-	bool	CheckDatabaseConvertBotsPostPPDeblob();
 	bool	CheckDatabaseConvertCorpseDeblob();
 	bool	CheckDatabaseConvertPPDeblob();
 
 	/* Database Variables */
 
-	bool	GetVariable(const char* varname, char* varvalue, uint16 varvalue_len);
-	bool	SetVariable(const char* varname, const char* varvalue);
+	bool	GetVariable(std::string varname, std::string &varvalue);
+	bool	SetVariable(const std::string varname, const std::string &varvalue);
 	bool	LoadVariables();
-	uint32	LoadVariables_MQ(char** query);
-	bool	LoadVariables_result(MySQLRequestResult results);
 
 	/* General Queries */
 
@@ -241,6 +245,8 @@ public:
 	uint8	GetSkillCap(uint8 skillid, uint8 in_race, uint8 in_class, uint16 in_level);
 
 	void	AddReport(std::string who, std::string against, std::string lines);
+	struct TimeOfDay_Struct		LoadTime(time_t &realtime);
+	bool	SaveTime(int8 minute, int8 hour, int8 day, int8 month, int16 year);
 	void	ClearMerchantTemp();
 	void	ClearPTimers(uint32 charid);
 	void	SetFirstLogon(uint32 CharID, uint8 firstlogon);
@@ -248,18 +254,16 @@ public:
 	void	SetLFP(uint32 CharID, bool LFP);
 	void	SetLoginFlags(uint32 CharID, bool LFP, bool LFG, uint8 firstlogon);
 
+	void	ClearInvSnapshots(bool use_rule = true);
+
 	/* EQEmuLogSys */
 	void	LoadLogSettings(EQEmuLogSys::LogSettings* log_settings);
 
 private:
-	void DBInitVars();
-
 	std::map<uint32,std::string>	zonename_array;
 
-	Mutex				Mvarcache;
-	uint32				varcache_max;
-	VarCache_Struct**	varcache_array;
-	uint32				varcache_lastupdate;
+	Mutex Mvarcache;
+	VarCache_Struct varcache;
 
 	/* Groups, utility methods. */
 	void    ClearAllGroupLeaders();

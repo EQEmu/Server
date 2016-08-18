@@ -1,7 +1,28 @@
-#ifndef ROF_STRUCTS_H_
-#define ROF_STRUCTS_H_
+/*	EQEMu: Everquest Server Emulator
+	
+	Copyright (C) 2001-2016 EQEMu Development Team (http://eqemulator.net)
 
-namespace RoF {
+	This program is free software; you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation; version 2 of the License.
+
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY except by those people which sell it, which
+	are required to give you total support for your newly bought product;
+	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+	A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+
+	You should have received a copy of the GNU General Public License
+	along with this program; if not, write to the Free Software
+	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+*/
+
+#ifndef COMMON_ROF_STRUCTS_H
+#define COMMON_ROF_STRUCTS_H
+
+
+namespace RoF
+{
 	namespace structs {
 
 /*
@@ -29,22 +50,24 @@ struct WorldObjectsSent_Struct {
 };
 
 // New for RoF - Size: 12
-struct ItemSlotStruct {
-/*000*/	int16	SlotType;	// Worn and Normal inventory = 0, Bank = 1, Shared Bank = 2, Delete Item = -1
+struct InventorySlot_Struct
+{
+/*000*/	int16	Type;		// Worn and Normal inventory = 0, Bank = 1, Shared Bank = 2, Delete Item = -1
 /*002*/	int16	Unknown02;
-/*004*/	int16	MainSlot;
-/*006*/	int16	SubSlot;
-/*008*/	int16	AugSlot;	// Guessing - Seen 0xffff
+/*004*/	int16	Slot;
+/*006*/	int16	SubIndex;
+/*008*/	int16	AugIndex;	// Guessing - Seen 0xffff
 /*010*/	int16	Unknown01;	// Normally 0 - Seen 13262 when deleting an item, but didn't match item ID
 /*012*/
 };
 
 // New for RoF - Used for Merchant_Purchase_Struct
 // Can't sellfrom other than main inventory so Slot Type is not needed.
-struct MainInvItemSlotStruct {
-/*000*/	int16	MainSlot;
-/*002*/	int16	SubSlot;
-/*004*/	int16	AugSlot;
+struct TypelessInventorySlot_Struct
+{
+/*000*/	int16	Slot;
+/*002*/	int16	SubIndex;
+/*004*/	int16	AugIndex;
 /*006*/	int16	Unknown01;
 /*008*/
 };
@@ -140,7 +163,7 @@ struct AdventureInfo {
 ** Merth: Gave struct a name so gcc 2.96 would compile
 **
 */
-struct Color_Struct
+struct Tint_Struct
 {
 	union {
 		struct {
@@ -148,20 +171,64 @@ struct Color_Struct
 			uint8 Green;
 			uint8 Red;
 			uint8 UseTint;	// if there's a tint this is FF
-		} RGB;
+		};
 		uint32 Color;
 	};
 };
 
-struct CharSelectEquip
+struct TintProfile
+{
+	union {
+		struct {
+			Tint_Struct Head;
+			Tint_Struct Chest;
+			Tint_Struct Arms;
+			Tint_Struct Wrist;
+			Tint_Struct Hands;
+			Tint_Struct Legs;
+			Tint_Struct Feet;
+			Tint_Struct Primary;
+			Tint_Struct Secondary;
+		};
+		Tint_Struct Slot[EQEmu::textures::TextureCount];
+	};
+};
+
+/*
+* Visible equiptment.
+* Size: 20 Octets
+*/
+struct Texture_Struct
 {
 	uint32 Material;
 	uint32 Unknown1;
 	uint32 EliteMaterial;
 	uint32 HeroForgeModel;
-	uint32 Material2;
-	Color_Struct Color;
+	uint32 Material2;	// Same as material?
 };
+
+// Needs more research regarding new slots
+//struct TextureProfile
+//{
+//	union {
+//		struct {
+//			Texture_Struct Head;
+//			Texture_Struct Chest;
+//			Texture_Struct Arms;
+//			Texture_Struct Wrist;
+//			Texture_Struct Hands;
+//			Texture_Struct Legs;
+//			Texture_Struct Feet;
+//			Texture_Struct Primary;
+//			Texture_Struct Secondary;
+//		};
+//		Texture_Struct Slot[EQEmu::textures::TextureCount];
+//	};
+//
+//	TextureProfile();
+//};
+
+struct CharSelectEquip : Texture_Struct, Tint_Struct {};
 
 struct CharacterSelectEntry_Struct
 {
@@ -207,21 +274,6 @@ struct CharacterSelect_Struct
 /*000*/	uint32 CharCount;	//number of chars in this packet
 /*004*/	CharacterSelectEntry_Struct Entries[0];
 };
-
-/*
-* Visible equiptment.
-* Size: 20 Octets
-*/
-struct EquipStruct
-{
-	/*00*/ uint32 Material;
-	/*04*/ uint32 Unknown1;
-	/*08*/ uint32 EliteMaterial;
-	/*12*/ uint32 HeroForgeModel;
-	/*16*/ uint32 Material2;	// Same as material?
-	/*20*/
-};
-
 
 struct Membership_Entry_Struct
 {
@@ -410,7 +462,7 @@ struct Spawn_Struct
 /*0000*/ uint8  unknown12;
 /*0000*/ uint32 petOwnerId;
 /*0000*/ uint8  unknown13;
-/*0000*/ uint32 unknown14;		// Stance 64 = normal 4 = aggressive 40 = stun/mezzed
+/*0000*/ uint32 PlayerState;		// Stance 64 = normal 4 = aggressive 40 = stun/mezzed
 /*0000*/ uint32 unknown15;
 /*0000*/ uint32 unknown16;
 /*0000*/ uint32 unknown17;
@@ -418,39 +470,24 @@ struct Spawn_Struct
 /*0000*/ uint32 unknown18;
 /*0000*/ uint32 unknown19;
 	 Spawn_Struct_Position Position;
-/*0000*/ union
-         {
-           struct
-           {
-               /*0000*/ Color_Struct color_helmet;    // Color of helmet item
-               /*0000*/ Color_Struct color_chest;     // Color of chest item
-               /*0000*/ Color_Struct color_arms;      // Color of arms item
-               /*0000*/ Color_Struct color_bracers;   // Color of bracers item
-               /*0000*/ Color_Struct color_hands;     // Color of hands item
-               /*0000*/ Color_Struct color_legs;      // Color of legs item
-               /*0000*/ Color_Struct color_feet;      // Color of feet item
-               /*0000*/ Color_Struct color_primary;   // Color of primary item
-               /*0000*/ Color_Struct color_secondary; // Color of secondary item
-           } equipment_colors;
-            /*0000*/ Color_Struct colors[9]; // Array elements correspond to struct equipment_colors above
-         };
+/*0000*/ TintProfile equipment_tint;
 
 // skip these bytes if not a valid player race
 /*0000*/ union
          {
            struct
            {
-               /*0000*/ EquipStruct equip_helmet;     // Equiptment: Helmet visual
-               /*0000*/ EquipStruct equip_chest;      // Equiptment: Chest visual
-               /*0000*/ EquipStruct equip_arms;       // Equiptment: Arms visual
-               /*0000*/ EquipStruct equip_bracers;    // Equiptment: Wrist visual
-               /*0000*/ EquipStruct equip_hands;      // Equiptment: Hands visual
-               /*0000*/ EquipStruct equip_legs;       // Equiptment: Legs visual
-               /*0000*/ EquipStruct equip_feet;       // Equiptment: Boots visual
-               /*0000*/ EquipStruct equip_primary;    // Equiptment: Main visual
-               /*0000*/ EquipStruct equip_secondary;  // Equiptment: Off visual
+			   /*0000*/ Texture_Struct equip_helmet;     // Equiptment: Helmet visual
+			   /*0000*/ Texture_Struct equip_chest;      // Equiptment: Chest visual
+			   /*0000*/ Texture_Struct equip_arms;       // Equiptment: Arms visual
+			   /*0000*/ Texture_Struct equip_bracers;    // Equiptment: Wrist visual
+			   /*0000*/ Texture_Struct equip_hands;      // Equiptment: Hands visual
+			   /*0000*/ Texture_Struct equip_legs;       // Equiptment: Legs visual
+			   /*0000*/ Texture_Struct equip_feet;       // Equiptment: Boots visual
+			   /*0000*/ Texture_Struct equip_primary;    // Equiptment: Main visual
+			   /*0000*/ Texture_Struct equip_secondary;  // Equiptment: Off visual
            } equip;
-           /*0000*/ EquipStruct equipment[9];
+		   /*0000*/ Texture_Struct equipment[9];
          };
 
 /*0000*/ //char title[0];  // only read if(hasTitleOrSuffix & 4)
@@ -587,7 +624,7 @@ struct MemorizeSpell_Struct {
 uint32 slot;     // Spot in the spell book/memorized slot
 uint32 spell_id; // Spell id (200 or c8 is minor healing, etc)
 uint32 scribing; // 1 if memorizing a spell, set to 0 if scribing to book, 2 if un-memming
-uint32 unknown12;
+uint32 reduction; // lowers reuse
 };
 
 /*
@@ -620,11 +657,12 @@ struct DeleteSpell_Struct
 
 struct ManaChange_Struct
 {
-	uint32	new_mana;                  // New Mana AMount
-	uint32	stamina;
-	uint32	spell_id;
-	uint32	unknown12;
-	uint32	unknown16;
+/*00*/	uint32	new_mana;		// New Mana AMount
+/*04*/	uint32	stamina;
+/*08*/	uint32	spell_id;
+/*12*/	uint8	keepcasting;	// won't stop the cast. Change mana while casting?
+/*13*/	uint8	padding[3];		// client doesn't read it, garbage data seems like
+/*16*/	int32	slot;			// -1 for normal usage slot for when we want silent interrupt? I think it does timer stuff or something. Linked Spell Reuse interrupt uses it
 };
 
 struct SwapSpell_Struct
@@ -645,9 +683,12 @@ struct CastSpell_Struct
 {
 /*00*/	uint32	slot;
 /*04*/	uint32	spell_id;
-/*08*/	ItemSlotStruct inventoryslot;  // slot for clicky item, Seen unknown of 131 = normal cast
+/*08*/	InventorySlot_Struct inventory_slot;  // slot for clicky item, Seen unknown of 131 = normal cast
 /*20*/	uint32	target_id;
-/*24*/	uint32	cs_unknown[5];
+/*24*/	uint32	cs_unknown[2];
+/*32*/	float	y_pos;
+/*36*/	float	x_pos;
+/*40*/	float	z_pos;
 /*44*/
 };
 
@@ -668,67 +709,29 @@ struct SpawnAppearance_Struct
 
 struct SpellBuff_Struct
 {
-/*000*/	uint8 slotid;				// badly named... seems to be 2 for a real buff, 0 otherwise
-/*001*/	float unknown004;			// Seen 1 for no buff
-/*005*/	uint32 player_id;			// 'global' ID of the caster, for wearoff messages
-/*009*/ uint32 unknown016;
-/*013*/	uint8 bard_modifier;
-/*014*/	uint32 duration;
-/*018*/ uint8 level;
-/*019*/ uint32 spellid;
-/*023*/ uint32 counters;
-/*027*/ uint8 unknown0028[53];
-/*080*/
-};
-
-struct SpellBuff_Struct_Old
-{
-/*000*/	uint8 slotid;				// badly named... seems to be 2 for a real buff, 0 otherwise
-/*001*/ uint8 level;
-/*002*/	uint8 bard_modifier;
-/*003*/	uint8 effect;				// not real
-/*004*/	float unknown004;			// Seen 1 for no buff
-/*008*/ uint32 spellid;
+/*000*/	uint8 effect_type;		// 0 = no buff, 2 = buff, 4 = inverse affects of buff
+/*001*/	uint8 level;			// Seen 1 for no buff
+/*002*/	uint8 unknown002;		//pretty sure padding now
+/*003*/	uint8 unknown003;   	// MQ2 used to call this "damage shield" -- don't see client referencing it, so maybe server side DS type tracking?
+/*004*/	float bard_modifier;
+/*008*/	uint32 spellid;
 /*012*/	uint32 duration;
-/*016*/ uint32 unknown016;
-/*020*/	uint32 player_id;			// 'global' ID of the caster, for wearoff messages
-/*024*/ uint32 counters;
-/*028*/ uint8 unknown0028[60];
+/*016*/	uint32 player_id;		// caster ID, pretty sure just zone ID
+/*020*/	uint32 num_hits;
+/*024*/	float y;				// referenced by SPA 441
+/*028*/	float x;				// unsure if all buffs get them
+/*032*/	float z;				// as valid data
+/*036*/	uint32 unknown036;
+/*040*/	int32 slot_data[12];	// book keeping stuff per slot (counters, rune/vie)
 /*088*/
 };
 
-// Not functional yet, but this is what the packet looks like on Live
-struct SpellBuffFade_Struct_Live {
-/*000*/	uint32 entityid;	// Player id who cast the buff
-/*004*/	uint8 unknown004;
-/*005*/	uint8 level;
-/*006*/	uint8 effect;
-/*007*/	uint8 unknown007;
-/*008*/	float unknown008;
-/*012*/	uint32 spellid;
-/*016*/	uint32 duration;
-/*020*/ uint32 playerId;	// Global player ID?
-/*024*/	uint32 num_hits;
-/*028*/ uint8 unknown0028[64];
+struct SpellBuffPacket_Struct {
+/*000*/	uint32 entityid;		// Player id who cast the buff
+/*004*/	SpellBuff_Struct buff;
 /*092*/	uint32 slotid;
 /*096*/	uint32 bufffade;
 /*100*/
-};
-
-struct SpellBuffFade_Struct {
-/*000*/	uint32 entityid;
-/*004*/	uint8 slot;
-/*005*/	uint8 level;
-/*006*/	uint8 effect;
-/*007*/	uint8 unknown7;
-/*008*/	uint32 spellid;
-/*012*/	uint32 duration;
-/*016*/	uint32 num_hits;
-/*020*/	uint32 unknown020;		// Global player ID?
-/*024*/ uint32 playerId;		// Player id who cast the buff
-/*028*/	uint32 slotid;
-/*032*/	uint32 bufffade;
-/*036*/
 };
 
 struct BuffRemoveRequest_Struct
@@ -863,7 +866,7 @@ struct AA_Array
 {
 	uint32 AA;
 	uint32 value;
-	uint32 unknown08;	// Looks like AA_Array is now 12 bytes in Live
+	uint32 charges;	// expendable charges
 };
 
 struct Disciplines_Struct {
@@ -905,13 +908,13 @@ struct BandolierItem_Struct_Old
 struct Bandolier_Struct
 {
 	char Name[1];	// Variable Length
-	BandolierItem_Struct Items[consts::BANDOLIER_ITEM_COUNT];
+	BandolierItem_Struct Items[profile::BandolierItemCount];
 };
 
 struct Bandolier_Struct_Old
 {
 	char Name[32];
-	BandolierItem_Struct Items[consts::BANDOLIER_ITEM_COUNT];
+	BandolierItem_Struct Items[profile::BandolierItemCount];
 };
 
 struct PotionBeltItem_Struct
@@ -931,12 +934,12 @@ struct PotionBeltItem_Struct_Old
 
 struct PotionBelt_Struct
 {
-	PotionBeltItem_Struct Items[consts::POTION_BELT_ITEM_COUNT];
+	PotionBeltItem_Struct Items[profile::PotionBeltSize];
 };
 
 struct PotionBelt_Struct_Old
 {
-	PotionBeltItem_Struct_Old Items[consts::POTION_BELT_ITEM_COUNT];
+	PotionBeltItem_Struct_Old Items[profile::PotionBeltSize];
 };
 
 struct GroupLeadershipAA_Struct {
@@ -1035,38 +1038,38 @@ union
 {
 	struct
 	{
-		/*00184*/ EquipStruct equip_helmet; // Equiptment: Helmet visual
-		/*00204*/ EquipStruct equip_chest; // Equiptment: Chest visual
-		/*00224*/ EquipStruct equip_arms; // Equiptment: Arms visual
-		/*00244*/ EquipStruct equip_bracers; // Equiptment: Wrist visual
-		/*00264*/ EquipStruct equip_hands; // Equiptment: Hands visual
-		/*00284*/ EquipStruct equip_legs; // Equiptment: Legs visual
-		/*00304*/ EquipStruct equip_feet; // Equiptment: Boots visual
-		/*00324*/ EquipStruct equip_primary; // Equiptment: Main visual
-		/*00344*/ EquipStruct equip_secondary; // Equiptment: Off visual
+		/*00184*/ Texture_Struct equip_helmet; // Equiptment: Helmet visual
+		/*00204*/ Texture_Struct equip_chest; // Equiptment: Chest visual
+		/*00224*/ Texture_Struct equip_arms; // Equiptment: Arms visual
+		/*00244*/ Texture_Struct equip_bracers; // Equiptment: Wrist visual
+		/*00264*/ Texture_Struct equip_hands; // Equiptment: Hands visual
+		/*00284*/ Texture_Struct equip_legs; // Equiptment: Legs visual
+		/*00304*/ Texture_Struct equip_feet; // Equiptment: Boots visual
+		/*00324*/ Texture_Struct equip_primary; // Equiptment: Main visual
+		/*00344*/ Texture_Struct equip_secondary; // Equiptment: Off visual
 		// Below slots are just guesses, but all 0s anyway...
-		/*00364*/ EquipStruct equip_charm; // Equiptment: Non-visual
-		/*00384*/ EquipStruct equip_ear1; // Equiptment: Non-visual
-		/*00404*/ EquipStruct equip_ear2; // Equiptment: Non-visual
-		/*00424*/ EquipStruct equip_face; // Equiptment: Non-visual
-		/*00444*/ EquipStruct equip_neck; // Equiptment: Non-visual
-		/*00464*/ EquipStruct equip_shoulder; // Equiptment: Non-visual
-		/*00484*/ EquipStruct equip_bracer2; // Equiptment: Non-visual
-		/*00504*/ EquipStruct equip_range; // Equiptment: Non-visual
-		/*00524*/ EquipStruct equip_ring1; // Equiptment: Non-visual
-		/*00544*/ EquipStruct equip_ring2; // Equiptment: Non-visual
-		/*00564*/ EquipStruct equip_waist; // Equiptment: Non-visual
-		/*00584*/ EquipStruct equip_powersource; // Equiptment: Non-visual
-		/*00604*/ EquipStruct equip_ammo; // Equiptment: Non-visual
+		/*00364*/ Texture_Struct equip_charm; // Equiptment: Non-visual
+		/*00384*/ Texture_Struct equip_ear1; // Equiptment: Non-visual
+		/*00404*/ Texture_Struct equip_ear2; // Equiptment: Non-visual
+		/*00424*/ Texture_Struct equip_face; // Equiptment: Non-visual
+		/*00444*/ Texture_Struct equip_neck; // Equiptment: Non-visual
+		/*00464*/ Texture_Struct equip_shoulder; // Equiptment: Non-visual
+		/*00484*/ Texture_Struct equip_bracer2; // Equiptment: Non-visual
+		/*00504*/ Texture_Struct equip_range; // Equiptment: Non-visual
+		/*00524*/ Texture_Struct equip_ring1; // Equiptment: Non-visual
+		/*00544*/ Texture_Struct equip_ring2; // Equiptment: Non-visual
+		/*00564*/ Texture_Struct equip_waist; // Equiptment: Non-visual
+		/*00584*/ Texture_Struct equip_powersource; // Equiptment: Non-visual
+		/*00604*/ Texture_Struct equip_ammo; // Equiptment: Non-visual
 	} equip;
-	/*00184*/ EquipStruct equipment[22];
+	/*00184*/ Texture_Struct equipment[22];
 };
 /*00624*/ uint32 equip2_count;			// Seen 9
-/*00628*/ EquipStruct equipment2[9];	// Appears to be Visible slots, but all 0s
+/*00628*/ Texture_Struct equipment2[9];	// Appears to be Visible slots, but all 0s
 /*00808*/ uint32 tint_count;			// Seen 9
-/*00812*/ Color_Struct item_tint[9];	// RR GG BB 00
+/*00812*/ TintProfile item_tint;		// RR GG BB 00
 /*00848*/ uint32 tint_count2;			// Seen 9
-/*00852*/ Color_Struct item_tint2[9];	// RR GG BB 00
+/*00852*/ TintProfile item_tint2;		// RR GG BB 00
 /*00888*/ uint8   haircolor;			// Player hair color
 /*00889*/ uint8   beardcolor;			// Player beard color
 /*00890*/ uint32 unknown_rof5;			//
@@ -1146,7 +1149,7 @@ union
 /*12949*/ uint32 aapoints;				// Unspent AA points - Seen 1
 /*12953*/ uint16 unknown_rof20;			//
 /*12955*/ uint32 bandolier_count;		// Seen 20
-/*12959*/ Bandolier_Struct bandoliers[consts::BANDOLIERS_SIZE]; // [20] 740 bytes (Variable Name Sizes) - bandolier contents
+/*12959*/ Bandolier_Struct bandoliers[profile::BandoliersSize]; // [20] 740 bytes (Variable Name Sizes) - bandolier contents
 /*13699*/ uint32 potionbelt_count;		// Seen 5
 /*13703*/ PotionBelt_Struct potionbelt;	// [5] 45 bytes potion belt - (Variable Name Sizes)
 /*13748*/ int32 unknown_rof21;			// Seen -1
@@ -1320,7 +1323,7 @@ struct TargetReject_Struct {
 
 struct PetCommand_Struct {
 /*00*/ uint32	command;
-/*04*/ uint32	unknown04;
+/*04*/ uint32	target;
 /*08*/ uint32	unknown08;
 };
 
@@ -1389,7 +1392,7 @@ struct WearChange_Struct{
 /*010*/ uint32 elite_material;	// 1 for Drakkin Elite Material
 /*014*/ uint32 hero_forge_model; // New to VoA
 /*018*/ uint32 unknown18; // New to RoF
-/*022*/ Color_Struct color;
+/*022*/ Tint_Struct color;
 /*026*/ uint8 wear_slot_id;
 /*027*/
 };
@@ -1445,8 +1448,8 @@ struct RequestClientZoneChange_Struct {
 
 struct Animation_Struct {
 /*00*/	uint16 spawnid;
-/*02*/	uint8 value;
-/*03*/	uint8 action;
+/*02*/	uint8 action;
+/*03*/	uint8 speed;
 /*04*/
 };
 
@@ -1511,9 +1514,11 @@ struct CombatDamage_Struct
 /* 04 */	uint8	type;			//slashing, etc.  231 (0xE7) for spells
 /* 05 */	uint32	spellid;
 /* 09 */	int32	damage;
-/* 13 */	float	unknown11;		// cd cc cc 3d
-/* 17 */	float	sequence;		// see above notes in Action_Struct
-/* 21 */	uint8	unknown19[9];	// was [9]
+/* 13 */	float	force;		// cd cc cc 3d
+/* 17 */	float	meleepush_xy;		// see above notes in Action_Struct
+/* 21 */	float	meleepush_z;
+/* 25 */	uint8	unknown25;	// was [9]
+/* 26 */	uint32	special; // 2 = Rampage, 1 = Wild Rampage
 /* 30 */
 };
 
@@ -1772,7 +1777,7 @@ struct BulkItemPacket_Struct
 
 struct Consume_Struct
 {
-/*000*/ ItemSlotStruct	slot;
+/*000*/ InventorySlot_Struct	inventory_slot;
 /*012*/ uint32	auto_consumed;	// 0xffffffff when auto eating e7030000 when right click
 /*016*/ uint32	type;			// 0x01=Food 0x02=Water
 /*020*/ uint32	c_unknown1;		// Seen 2
@@ -1804,17 +1809,19 @@ struct ItemProperties_Struct {
 /*008*/
 };
 
-struct DeleteItem_Struct {
-/*0000*/ ItemSlotStruct	from_slot;
-/*0012*/ ItemSlotStruct	to_slot;
-/*0024*/ uint32			number_in_stack;
+struct DeleteItem_Struct
+{
+/*0000*/ InventorySlot_Struct	from_slot;
+/*0012*/ InventorySlot_Struct	to_slot;
+/*0024*/ uint32		number_in_stack;
 /*0028*/
 };
 
-struct MoveItem_Struct {
-/*0000*/ ItemSlotStruct	from_slot;
-/*0012*/ ItemSlotStruct	to_slot;
-/*0024*/ uint32			number_in_stack;
+struct MoveItem_Struct
+{
+/*0000*/ InventorySlot_Struct	from_slot;
+/*0012*/ InventorySlot_Struct	to_slot;
+/*0024*/ uint32		number_in_stack;
 /*0028*/
 };
 
@@ -1882,6 +1889,114 @@ struct GuildsList_Struct {
 struct GuildUpdate_Struct {
 	uint32	guildID;
 	GuildsListEntry_Struct entry;
+};
+
+struct GuildBankAck_Struct
+{
+/*00*/	uint32	Action;	//	10
+/*04*/	uint32	Unknown04;
+/*08*/	uint32	Unknown08;
+};
+
+struct GuildBankDepositAck_Struct
+{
+/*00*/	uint32	Action;	//	10
+/*04*/	uint32	Unknown04;
+/*08*/	uint32	Unknown08;
+/*08*/	uint32	Fail;	//1 = Fail, 0 = Success
+};
+
+struct GuildBankPromote_Struct
+{
+/*00*/	uint32	Action;	// 3
+/*04*/	uint32	Unknown04;
+/*08*/	uint32	Unknown08;
+/*12*/	uint32	Slot;
+/*16*/	uint32	Slot2;	// Always appears to be the same as Slot for Action code 3
+/*20*/  uint32  unknown20;
+};
+
+struct GuildBankPermissions_Struct
+{
+/*00*/	uint32	Action;	// 6
+/*04*/	uint32	Unknown04;
+/*08*/	uint32	Unknown08;
+/*08*/	uint16	SlotID;
+/*10*/	uint16	Unknown10; // Saw 1, probably indicating it is the main area rather than deposits
+/*12*/	uint32	ItemID;
+/*16*/	uint32	Permissions;
+/*20*/	char	MemberName[64];
+};
+
+struct GuildBankViewItem_Struct
+{
+/*00*/	uint32	Action;
+/*04*/	uint32	Unknown04;
+/*08*/	uint32	Unknown08;
+/*08*/	uint16	SlotID;	// 0 = Deposit area, 1 = Main area
+/*10*/	uint16	Area;
+/*12*/	uint32	Unknown12;
+/*16*/	uint32	Unknown16;
+};
+
+struct GuildBankWithdrawItem_Struct
+{
+/*00*/	uint32	Action;
+/*04*/	uint32	Unknown04;
+/*08*/	uint32	Unknown08;
+/*08*/	uint16	SlotID;
+/*10*/	uint16	Area;
+/*12*/	uint32	Unknown12;
+/*16*/	uint32	Quantity;
+/*20*/
+};
+
+struct GuildBankItemUpdate_Struct
+{
+	void Init(uint32 inAction, uint32 inUnknown004, uint16 inSlotID, uint16 inArea, uint16 inUnknown012, uint32 inItemID, uint32 inIcon, uint32 inQuantity,
+			uint32 inPermissions, uint32 inAllowMerge, bool inUseable)
+	{
+		Action = inAction;
+		Unknown004 = inUnknown004;
+		SlotID = inSlotID;
+		Area = inArea;
+		Unknown012 = inUnknown012;
+		ItemID = inItemID;
+		Icon = inIcon;
+		Quantity = inQuantity;
+		Permissions = inPermissions;
+		AllowMerge = inAllowMerge;
+		Useable = inUseable;
+		ItemName[0] = '\0';
+		Donator[0] = '\0';
+		WhoFor[0] = '\0';
+	};
+
+/*000*/	uint32	Action;
+/*004*/	uint32	Unknown004;
+/*008*/	uint32	Unknown08;
+/*012*/	uint16	SlotID;
+/*014*/	uint16	Area;
+/*016*/	uint32	Unknown012;
+/*020*/	uint32	ItemID;
+/*024*/	uint32	Icon;
+/*028*/	uint32	Quantity;
+/*032*/	uint32	Permissions;
+/*036*/	uint8	AllowMerge;
+/*037*/	uint8	Useable;	// Used in conjunction with the Public-if-useable permission.
+/*038*/	char	ItemName[64];
+/*102*/	char	Donator[64];
+/*166*/ char	WhoFor[64];
+/*230*/	uint16	Unknown226;
+};
+
+struct GuildBankClear_Struct
+{
+/*00*/	uint32	Action;
+/*04*/	uint32	Unknown04;
+/*08*/	uint32	Unknown08;
+/*12*/	uint32	DepositAreaCount;
+/*16*/	uint32	MainAreaCount;
 };
 
 /*
@@ -2139,7 +2254,7 @@ struct Merchant_Sell_Struct {
 
 struct Merchant_Purchase_Struct {
 /*000*/	uint32	npcid;			// Merchant NPC's entity id
-/*004*/	MainInvItemSlotStruct	itemslot;
+/*004*/	TypelessInventorySlot_Struct	inventory_slot;
 /*012*/	uint32	quantity;
 /*016*/	uint32	price;
 /*020*/
@@ -2197,9 +2312,10 @@ struct AltCurrencyUpdate_Struct {
 
 //Client -> Server
 //When an item is selected while the alt currency merchant window is open
-struct AltCurrencySelectItem_Struct {
+struct AltCurrencySelectItem_Struct
+{
 /*000*/ uint32 merchant_entity_id;
-/*004*/ MainInvItemSlotStruct slot_id;
+/*004*/ TypelessInventorySlot_Struct inventory_slot;
 /*008*/ uint32 unknown008;
 /*012*/ uint32 unknown012;
 /*016*/ uint32 unknown016;
@@ -2256,7 +2372,7 @@ struct AltCurrencyReclaim_Struct {
 
 struct AltCurrencySellItem_Struct {
 /*000*/ uint32 merchant_entity_id;
-/*004*/ MainInvItemSlotStruct slot_id;
+/*004*/ TypelessInventorySlot_Struct inventory_slot;
 /*008*/ uint32 charges;
 /*012*/ uint32 cost;
 };
@@ -2271,7 +2387,7 @@ struct Adventure_Purchase_Struct {
 struct Adventure_Sell_Struct {
 /*000*/	uint32	unknown000;	//0x01 - Stack Size/Charges?
 /*004*/	uint32	npcid;
-/*008*/ MainInvItemSlotStruct slot;
+/*008*/ TypelessInventorySlot_Struct inventory_slot;
 /*016*/	uint32	charges;
 /*020*/	uint32	sell_price;
 /*024*/
@@ -2334,7 +2450,7 @@ struct AdventureLeaderboard_Struct
 /*struct Item_Shop_Struct {
 	uint16 merchantid;
 	uint8 itemtype;
-	Item_Struct item;
+	ItemBase item;
 	uint8 iss_unknown001[6];
 };*/
 
@@ -2497,7 +2613,7 @@ struct GroupFollow_Struct { // Live Follow Struct
 
 struct InspectBuffs_Struct {
 /*000*/ uint32 spell_id[BUFF_COUNT];
-/*168*/ uint32 tics_remaining[BUFF_COUNT];
+/*168*/ int32 tics_remaining[BUFF_COUNT];
 };
 
 struct LFG_Struct {
@@ -2617,9 +2733,9 @@ struct Stun_Struct { // 8 bytes total
 struct AugmentItem_Struct {
 /*00*/	uint32	dest_inst_id;			// The unique serial number for the item instance that is being augmented
 /*04*/	uint32	container_index;				// Seen 0
-/*08*/	ItemSlotStruct container_slot;	// Slot of the item being augmented
+/*08*/	InventorySlot_Struct container_slot;	// Slot of the item being augmented
 /*20*/	uint32	augment_index;				// Seen 0
-/*24*/	ItemSlotStruct augment_slot;	// Slot of the distiller to use (if one applies)
+/*24*/	InventorySlot_Struct augment_slot;	// Slot of the distiller to use (if one applies)
 /*36*/	int32	augment_action;			// Guessed - 0 = augment, 1 = remove with distiller, 3 = delete aug
 /*36*/	//int32	augment_slot;
 /*40*/
@@ -2760,7 +2876,8 @@ struct Object_Struct {
 /*00*/	uint32	drop_id;			// Unique object id for zone
 /*00*/	uint32	unknown024;			// 53 9e f9 7e - same for all objects in the zone?
 /*00*/	float	heading;			// heading
-/*00*/	float	unknown032[2];		// 00 00 00 00 00 00 00 00
+/*00*/	float	x_tilt;				//Tilt entire object on X axis
+/*00*/	float	y_tilt;				//Tilt entire object on Y axis
 /*00*/	float	size;				// Size - default 1
 /*00*/	float	z;					// z coord
 /*00*/	float	x;					// x coord
@@ -3494,27 +3611,6 @@ struct PetitionBug_Struct{
 	char	text[1028];
 };
 
-struct DyeStruct
-{
-	union
-	{
-		struct
-		{
-			struct Color_Struct head;
-			struct Color_Struct chest;
-			struct Color_Struct arms;
-			struct Color_Struct wrists;
-			struct Color_Struct hands;
-			struct Color_Struct legs;
-			struct Color_Struct feet;
-			struct Color_Struct primary;	// you can't actually dye this
-			struct Color_Struct secondary;	// or this
-		}
-		dyes;
-		struct Color_Struct dye[9];
-	};
-};
-
 struct ApproveZone_Struct {
 	char	name[64];
 	uint32	zoneid;
@@ -3578,7 +3674,7 @@ struct TributeInfo_Struct {
 
 struct TributeItem_Struct
 {
-/*00*/	ItemSlotStruct	slot;
+/*00*/	InventorySlot_Struct	inventory_slot;
 /*12*/	uint32	quantity;
 /*16*/	uint32	tribute_master_id;
 /*20*/	int32	tribute_points;
@@ -3615,9 +3711,10 @@ struct Split_Struct
 ** Used In: OP_TradeSkillCombine
 ** Last Updated: 01-05-2013
 */
-struct NewCombine_Struct {
-/*00*/	ItemSlotStruct container_slot;
-/*12*/	ItemSlotStruct guildtribute_slot;	// Slot type is 8? (MapGuildTribute = 8)
+struct NewCombine_Struct
+{
+/*00*/	InventorySlot_Struct container_slot;
+/*12*/	InventorySlot_Struct guildtribute_slot;	// Slot type is 8? (MapGuildTribute = 8)
 /*24*/
 };
 
@@ -3653,11 +3750,12 @@ struct RecipeReply_Struct {
 };
 
 //received and sent back as an ACK with different reply_code
-struct RecipeAutoCombine_Struct {
+struct RecipeAutoCombine_Struct
+{
 /*00*/	uint32 object_type;
 /*04*/	uint32 some_id;
-/*08*/	ItemSlotStruct container_slot;		//echoed in reply - Was uint32 unknown1
-/*20*/	ItemSlotStruct unknown_slot;		//echoed in reply
+/*08*/	InventorySlot_Struct container_slot;		//echoed in reply - Was uint32 unknown1
+/*20*/	InventorySlot_Struct unknown_slot;		//echoed in reply
 /*32*/	uint32 recipe_id;
 /*36*/	uint32 reply_code;
 /*40*/
@@ -4248,9 +4346,9 @@ struct SendAA_Struct {
 /*0025*/	uint32 cost;
 /*0029*/	uint32 seq;
 /*0033*/	uint32 current_level; //1s, MQ2 calls this AARankRequired
-/*0037*/	uint32 unknown037;	// Introduced during HoT
+/*0037*/	uint32 prereq_skill_count;	// mutliple prereqs at least 1, even no prereqs
 /*0041*/	uint32 prereq_skill;		//is < 0, abs() is category #
-/*0045*/	uint32 unknown045;	// New Mar 21 2012 - Seen 1
+/*0045*/	uint32 prereq_minpoints_count;	// mutliple prereqs at least 1, even no prereqs
 /*0049*/	uint32 prereq_minpoints; //min points in the prereq
 /*0053*/	uint32 type;
 /*0057*/	uint32 spellid;
@@ -4263,10 +4361,16 @@ struct SendAA_Struct {
 /*0081*/	uint32 last_id;
 /*0085*/	uint32 next_id;
 /*0089*/	uint32 cost2;
-/*0093*/	uint8 unknown80[7];
+/*0093*/	uint8 unknown93;
+/*0094*/	uint8 grant_only; // VetAAs, progression, etc
+/*0095*/	uint8 unknown95; // 1 for skill cap increase AAs, Mystical Attuning, and RNG attack inc, doesn't seem to matter though
+/*0096*/	uint32 expendable_charges; // max charges of the AA
 /*0100*/	uint32 aa_expansion;
 /*0104*/	uint32 special_category;
-/*0108*/	uint32 unknown0096;
+/*0108*/	uint8 shroud;
+/*0109*/	uint8 unknown109;
+/*0110*/	uint8 layonhands; // 1 for lay on hands -- doesn't seem to matter?
+/*0111*/	uint8 unknown111;
 /*0112*/	uint32 total_abilities;
 /*0116*/	AA_Ability abilities[0];
 };
@@ -4278,16 +4382,9 @@ struct AA_List {
 struct AA_Action {
 /*00*/	uint32	action;
 /*04*/	uint32	ability;
-/*08*/	uint32	unknown08;
+/*08*/	uint32	target_id;
 /*12*/	uint32	exp_value;
 /*16*/
-};
-
-struct AA_Skills {		//this should be removed and changed to AA_Array
-/*00*/	uint32	aa_skill;						// Total AAs Spent
-/*04*/  uint32	aa_value;
-/*08*/  uint32	unknown08;
-/*12*/
 };
 
 struct AAExpUpdate_Struct {
@@ -4308,14 +4405,7 @@ struct AltAdvStats_Struct {
 };
 
 struct PlayerAA_Struct {						// Is this still used?
-	AA_Skills aa_list[MAX_PP_AA_ARRAY];
-};
-
-struct AA_Values {
-/*00*/	uint32	aa_skill;
-/*04*/  uint32	aa_value;
-/*08*/  uint32	unknown08;
-/*12*/
+	AA_Array aa_list[MAX_PP_AA_ARRAY];
 };
 
 struct AATable_Struct {
@@ -4325,7 +4415,7 @@ struct AATable_Struct {
 /*12*/ uint32 aa_spent_archetype;	// Seen 40
 /*16*/ uint32 aa_spent_class;		// Seen 103
 /*20*/ uint32 aa_spent_special;		// Seen 0
-/*24*/ AA_Values aa_list[MAX_PP_AA_ARRAY];
+/*24*/ AA_Array aa_list[MAX_PP_AA_ARRAY];
 };
 
 struct Weather_Struct {
@@ -4380,19 +4470,22 @@ struct ExpansionInfo_Struct {
 /*064*/	uint32	Expansions;
 };
 
-struct ApplyPoison_Struct {
-	MainInvItemSlotStruct inventorySlot;
+struct ApplyPoison_Struct
+{
+	TypelessInventorySlot_Struct inventory_slot;
 	uint32 success;
 };
 
-struct ItemVerifyRequest_Struct {
-/*000*/	ItemSlotStruct slot;
+struct ItemVerifyRequest_Struct
+{
+/*000*/	InventorySlot_Struct inventory_slot;
 /*012*/	uint32	target;		// Target Entity ID
 /*016*/
 };
 
-struct ItemVerifyReply_Struct {
-/*000*/	ItemSlotStruct slot;
+struct ItemVerifyReply_Struct
+{
+/*000*/	InventorySlot_Struct inventory_slot;
 /*012*/	uint32	spell;		// Spell ID to cast if different than item effect
 /*016*/	uint32	target;		// Target Entity ID
 /*020*/
@@ -4414,7 +4507,7 @@ struct ItemSerializationHeader
 /*025*/	uint8  slot_type;	// 0 = normal, 1 = bank, 2 = shared bank, 9 = merchant, 20 = ?
 /*026*/	uint16 main_slot;
 /*028*/ uint16 sub_slot;
-/*030*/ uint16 unknown013;	// 0xffff
+/*030*/ uint16 aug_slot;	// 0xffff
 /*032*/	uint32 price;
 /*036*/	uint32 merchant_slot; //1 if not a merchant item
 /*040*/	uint32 scaled_value; //0
@@ -4626,7 +4719,7 @@ struct ClickEffectStruct
 
 struct ProcEffectStruct
 {
-	uint32 effect;
+	int32 effect;
 	uint8 level2;
 	uint32 type;
 	uint8 level;
@@ -4641,7 +4734,7 @@ struct ProcEffectStruct
 
 struct WornEffectStruct //worn, focus and scroll effect
 {
-	uint32 effect;
+	int32 effect;
 	uint8 level2;
 	uint32 type;
 	uint8 level;
@@ -4678,7 +4771,7 @@ struct ItemQuaternaryBodyStruct
 	int32 HeroicSVCorrup;
 	int32 HealAmt;
 	int32 SpellDmg;
-	int32 clairvoyance;
+	int32 Clairvoyance;
 	uint8 unknown18;	//Power Source Capacity or evolve filename?
 	uint32 evolve_string; // Some String, but being evolution related is just a guess
 	uint8 unknown19;
@@ -4705,7 +4798,6 @@ struct ItemQuaternaryBodyStruct
 	uint32 unknown_RoF8;
 	uint8 unknown38;	// 0
 	uint8 unknown39;	// 1
-	uint32 subitem_count;
 };
 
 struct AugmentInfo_Struct
@@ -4940,7 +5032,8 @@ struct MercenaryMerchantResponse_Struct {
 /*0004*/
 };
 
-	};	//end namespace structs
-};	//end namespace RoF
+	}; /*structs*/
 
-#endif /*ROF_STRUCTS_H_*/
+}; /*RoF*/
+
+#endif /*COMMON_ROF_STRUCTS_H*/

@@ -67,8 +67,10 @@ void HateList::WipeHateList()
 		{
 			parse->EventNPC(EVENT_HATE_LIST, hate_owner->CastToNPC(), m, "0", 0);
 
-			if (m->IsClient())
+			if (m->IsClient()) {
 				m->CastToClient()->DecrementAggroCount();
+				m->CastToClient()->RemoveXTarget(hate_owner, true);
+			}
 		}
 		delete (*iterator);
 		iterator = list.erase(iterator);
@@ -535,37 +537,27 @@ int HateList::AreaRampage(Mob *caster, Mob *target, int count, ExtraAttackOption
 	if (!target || !caster)
 		return 0;
 
-	int ret = 0;
-	std::list<uint32> id_list;
-	auto iterator = list.begin();
-	while (iterator != list.end())
-	{
-		struct_HateList *h = (*iterator);
-		++iterator;
-		if (h && h->entity_on_hatelist && h->entity_on_hatelist != caster)
-		{
-			if (caster->CombatRange(h->entity_on_hatelist))
-			{
-				id_list.push_back(h->entity_on_hatelist->GetID());
-				++ret;
-			}
+	int hit_count = 0;
+	// This should prevent crashes if something dies (or mainly more than 1 thing goes away)
+	// This is a temp solution until the hate lists can be rewritten to not have that issue
+	std::vector<uint16> id_list;
+	for (auto &h : list) {
+		if (h->entity_on_hatelist && h->entity_on_hatelist != caster &&
+		    caster->CombatRange(h->entity_on_hatelist))
+			id_list.push_back(h->entity_on_hatelist->GetID());
+		if (count != -1 && id_list.size() > count)
+			break;
+	}
+
+	for (auto &id : id_list) {
+		auto mob = entity_list.GetMobID(id);
+		if (mob) {
+			++hit_count;
+			caster->ProcessAttackRounds(mob, opts, 1);
 		}
 	}
 
-	std::list<uint32>::iterator iter = id_list.begin();
-	while (iter != id_list.end())
-	{
-		Mob *cur = entity_list.GetMobID((*iter));
-		if (cur)
-		{
-			for (int i = 0; i < count; ++i) {
-				caster->Attack(cur, MainPrimary, false, false, false, opts);
-			}
-		}
-		iter++;
-	}
-
-	return ret;
+	return hit_count;
 }
 
 void HateList::SpellCast(Mob *caster, uint32 spell_id, float range, Mob* ae_center)
@@ -607,7 +599,7 @@ void HateList::SpellCast(Mob *caster, uint32 spell_id, float range, Mob* ae_cent
 		++iterator;
 	}
 
-	std::list<uint32>::iterator iter = id_list.begin();
+	auto iter = id_list.begin();
 	while (iter != id_list.end())
 	{
 		Mob *cur = entity_list.GetMobID((*iter));

@@ -1,5 +1,5 @@
 /*	EQEMu: Everquest Server Emulator
-	Copyright (C) 2001-2005 EQEMu Development Team (http://eqemulator.net)
+	Copyright (C) 2001-2016 EQEMu Development Team (http://eqemulator.net)
 
 	This program is free software; you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -15,6 +15,7 @@
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
+
 #include "../common/global_define.h"
 #include "clientlist.h"
 #include "zoneserver.h"
@@ -748,7 +749,7 @@ void ClientList::SendWhoAll(uint32 fromid,const char* to, int16 admin, Who_All_S
 	//zoneserver_list.SendPacket(pack2); // NO NO NO WHY WOULD YOU SEND IT TO EVERY ZONE SERVER?!?
 	SendPacket(to,pack2);
 	safe_delete(pack2);
-	safe_delete(output);
+	safe_delete_array(output);
 	}
 	catch(...){
 		Log.Out(Logs::Detail, Logs::World_Server,"Unknown error in world's SendWhoAll (probably mem error), ignoring...");
@@ -1064,7 +1065,7 @@ void ClientList::ConsoleSendWhoAll(const char* to, int16 admin, Who_All_Struct* 
 
 			if (cle->Anon() == 2) { // Roleplay
 				if (admin >= 100 && admin >= cle->Admin())
-					sprintf(line, "  %s[RolePlay %i %s] %s (%s)%s zone: %s%s%s", tmpgm, cle->level(), GetEQClassName(cle->class_(),cle->level()), cle->name(), GetRaceName(cle->race()), tmpguild, tmpZone, LFG, accinfo);
+					sprintf(line, "  %s[RolePlay %i %s] %s (%s)%s zone: %s%s%s", tmpgm, cle->level(), GetClassIDName(cle->class_(),cle->level()), cle->name(), GetRaceIDName(cle->race()), tmpguild, tmpZone, LFG, accinfo);
 				else if (cle->Admin() >= 80 && admin < 80 && cle->GetGM()) {
 					iterator.Advance();
 					continue;
@@ -1074,7 +1075,7 @@ void ClientList::ConsoleSendWhoAll(const char* to, int16 admin, Who_All_Struct* 
 			}
 			else if (cle->Anon() == 1) { // Anon
 				if (admin >= 100 && admin >= cle->Admin())
-					sprintf(line, "  %s[ANON %i %s] %s (%s)%s zone: %s%s%s", tmpgm, cle->level(), GetEQClassName(cle->class_(),cle->level()), cle->name(), GetRaceName(cle->race()), tmpguild, tmpZone, LFG, accinfo);
+					sprintf(line, "  %s[ANON %i %s] %s (%s)%s zone: %s%s%s", tmpgm, cle->level(), GetClassIDName(cle->class_(),cle->level()), cle->name(), GetRaceIDName(cle->race()), tmpguild, tmpZone, LFG, accinfo);
 				else if (cle->Admin() >= 80 && cle->GetGM()) {
 					iterator.Advance();
 					continue;
@@ -1083,7 +1084,7 @@ void ClientList::ConsoleSendWhoAll(const char* to, int16 admin, Who_All_Struct* 
 					sprintf(line, "  %s[ANONYMOUS] %s%s%s", tmpgm, cle->name(), LFG, accinfo);
 			}
 			else
-				sprintf(line, "  %s[%i %s] %s (%s)%s zone: %s%s%s", tmpgm, cle->level(), GetEQClassName(cle->class_(),cle->level()), cle->name(), GetRaceName(cle->race()), tmpguild, tmpZone, LFG, accinfo);
+				sprintf(line, "  %s[%i %s] %s (%s)%s zone: %s%s%s", tmpgm, cle->level(), GetClassIDName(cle->class_(),cle->level()), cle->name(), GetRaceIDName(cle->race()), tmpguild, tmpZone, LFG, accinfo);
 
 			AppendAnyLenString(&output, &outsize, &outlen, line);
 			if (outlen >= 3584) {
@@ -1183,7 +1184,7 @@ void ClientList::ZoneBootup(ZoneServer* zs) {
 				iterator.GetData()->EnterWorld(false);
 			}
 			else if (iterator.GetData()->WaitingForBootup() == zs->GetID()) {
-				iterator.GetData()->ZoneUnavail();
+				iterator.GetData()->TellClientZoneUnavailable();
 			}
 		}
 		iterator.Advance();

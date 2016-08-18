@@ -27,6 +27,7 @@
 #define GAIN_XP						138		//You gain experience!!
 #define GAIN_GROUPXP				139		//You gain party experience!!
 #define BOW_DOUBLE_DAMAGE			143		//Your bow shot did double dmg.
+#define YOU_ARE_BEING_BANDAGED		147		//Someone is bandaging you.
 #define FORAGE_GRUBS				150		//You have scrounged up some fishing grubs.
 #define FORAGE_WATER				151		//You have scrounged up some water.
 #define FORAGE_FOOD					152		//You have scrounged up some food.
@@ -78,6 +79,7 @@
 #define ONLY_ONE_PET				246		//You cannot have more than one pet at a time.
 #define CANNOT_CHARM_YET			248		//Your target is too high of a level for your charm spell.
 #define CANNOT_AFFECT_NPC			251		//That spell can not affect this target NPC.
+#define FD_CAST_ON					254		//You are no longer feigning death, because a spell hit you.
 #define SUSPEND_MINION_HAS_AGGRO	256		//Your pet is the focus of something's attention.
 #define NO_PET						255		//You do not have a pet.
 #define GATE_FAIL					260		//Your gate is too unstable, and collapses.
@@ -231,6 +233,17 @@
 #define MISSED_NOTE_OTHER			1219	//A missed note brings %1's song to a close!
 #define SPELL_LEVEL_REQ				1226	//This spell only works on people who are level %1 and under.
 #define CORPSE_DECAY_NOW			1227	//This corpse is waiting to expire.
+#define CORPSE_ITEM_LOST			1228	//Your items will no longer stay with you when you respawn on death. You will now need to return to your corpse for your items.
+#define CORPSE_EXP_LOST				1229	//You will now lose experience when you die.
+#define FLICKERS_PALE_LIGHT			1230	//Your %1 flickers with a pale light.
+#define PULSES_WITH_LIGHT			1231	//Your %1 pulses with light as your vision sharpens.
+#define FEEDS_WITH_POWER			1232	//Your %1 feeds you with power.
+#define POWER_DRAIN_INTO			1233	//You feel your power drain into your %1.
+#define SEEMS_DRAINED				1234	//Your %1 seems drained of power.
+#define ALIVE_WITH_POWER			1235	//Your %1 feels alive with power.
+#define SPARKLES					1236	//Your %1 sparkles.
+#define GROWS_DIM					1237	//Your %1 grows dim.
+#define BEGINS_TO_SHINE				1238	//Your %1 begins to shine.
 #define SURNAME_REJECTED			1374	//Your new surname was rejected. Please try a different name.
 #define DUEL_DECLINE				1383	//%1 has declined your challenge to duel to the death.
 #define DUEL_ACCEPTED				1384	//%1 has already accepted a duel with someone else.
@@ -284,6 +297,7 @@
 #define ADVENTURE_COMPLETE			5147	//You received %1 points for successfully completing the adventure.
 #define SUCCOR_FAIL					5169	//The portal collapes before you can escape!
 #define PET_ATTACKING				5501	//%1 tells you, 'Attacking %2 Master.'
+#define AVOID_STUNNING_BLOW			5753	//You avoid the stunning blow.
 #define FATAL_BOW_SHOT				5745	//%1 performs a FATAL BOW SHOT!!
 #define MELEE_SILENCE				5806	//You *CANNOT* use this melee ability, you are suffering from amnesia!
 #define DISCIPLINE_REUSE_MSG		5807	//You can use the ability %1 again in %2 hour(s) %3 minute(s) %4 seconds.
@@ -339,10 +353,13 @@
 #define YOU_HEAL					9068	//You have healed %1 for %2 points of damage.
 #define YOUR_HIT_DOT				9072	//%1 has taken %2 damage from your %3.
 #define HIT_NON_MELEE				9073	//%1 hit %2 for %3 points of non-melee damage.
-#define SHAKE_OFF_STUN				9077
+#define GLOWS_BLUE					9074	//Your %1 glows blue.
+#define GLOWS_RED					9075	//Your %1 glows red.
+#define SHAKE_OFF_STUN				9077	//You shake off the stun effect!
 #define STRIKETHROUGH_STRING		9078	//You strike through your opponent's defenses!
 #define SPELL_REFLECT				9082	//%1's spell has been reflected by %2.
 #define NEW_SPELLS_AVAIL			9149	//You have new spells available to you. Check the merchants near your guild master.
+#define FD_CAST_ON_NO_BREAK			9174	//The strength of your will allows you to resume feigning death.
 #define SNEAK_RESTRICT				9240	//You can not use this ability because you have not been hidden for long enough.
 #define PET_NOW_FOCUSING			9254	//Focusing on one target, Master.
 #define PET_NOT_FOCUSING			9263	//No longer focusing on one target, Master.
@@ -371,8 +388,11 @@
 #define TARGET_PLAYER_FOR_GUILD_STATUS		12260
 #define GROUP_INVITEE_NOT_FOUND		12268	//You must target a player or use /invite <name> to invite someone to your group.
 #define GROUP_INVITEE_SELF			12270	//12270 You cannot invite yourself.
+#define NO_LONGER_HIDDEN			12337   //You are no longer hidden.
+#define STOP_SNEAKING				12338	//You stop sneaking
 #define NOT_IN_CONTROL				12368	//You do not have control of yourself right now.
 #define ALREADY_CASTING				12442	//You are already casting a spell!
+#define SHIMMERS_BRIEFLY			12444	//Your %1 shimmers briefly.
 #define SENSE_CORPSE_NOT_NAME		12446	//You don't sense any corpses of that name.
 #define SENSE_CORPSE_NONE			12447	//You don't sense any corpses.
 #define SCREECH_BUFF_BLOCK			12448	//Your immunity buff protected you from the spell %1!

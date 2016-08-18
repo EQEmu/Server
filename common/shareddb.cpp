@@ -1,5 +1,27 @@
+/*	EQEMu: Everquest Server Emulator
+	Copyright (C) 2001-2016 EQEMu Development Team (http://eqemulator.org)
+
+	This program is free software; you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation; version 2 of the License.
+
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY except by those people which sell it, which
+	are required to give you total support for your newly bought product;
+	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+	A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+	You should have received a copy of the GNU General Public License
+	along with this program; if not, write to the Free Software
+	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+*/
+
 #include <iostream>
 #include <cstring>
+
+#if defined(_MSC_VER) && _MSC_VER >= 1800
+	#include <algorithm>
+#endif
 
 #include "classes.h"
 #include "eq_packet_structs.h"
@@ -14,31 +36,19 @@
 #include "rulesys.h"
 #include "shareddb.h"
 #include "string_util.h"
+#include "eqemu_config.h"
 
 SharedDatabase::SharedDatabase()
-: Database(), skill_caps_mmf(nullptr), items_mmf(nullptr), items_hash(nullptr), faction_mmf(nullptr), faction_hash(nullptr),
-	loot_table_mmf(nullptr), loot_table_hash(nullptr), loot_drop_mmf(nullptr), loot_drop_hash(nullptr), base_data_mmf(nullptr)
+: Database()
 {
 }
 
 SharedDatabase::SharedDatabase(const char* host, const char* user, const char* passwd, const char* database, uint32 port)
-: Database(host, user, passwd, database, port), skill_caps_mmf(nullptr), items_mmf(nullptr), items_hash(nullptr),
-	faction_mmf(nullptr), faction_hash(nullptr), loot_table_mmf(nullptr), loot_table_hash(nullptr), loot_drop_mmf(nullptr),
-	loot_drop_hash(nullptr), base_data_mmf(nullptr)
+: Database(host, user, passwd, database, port)
 {
 }
 
 SharedDatabase::~SharedDatabase() {
-	safe_delete(skill_caps_mmf);
-	safe_delete(items_mmf);
-	safe_delete(items_hash);
-	safe_delete(faction_mmf);
-	safe_delete(faction_hash);
-	safe_delete(loot_table_mmf);
-	safe_delete(loot_drop_mmf);
-	safe_delete(loot_table_hash);
-	safe_delete(loot_drop_hash);
-	safe_delete(base_data_mmf);
 }
 
 bool SharedDatabase::SetHideMe(uint32 account_id, uint8 hideme)
@@ -95,8 +105,8 @@ bool SharedDatabase::SaveCursor(uint32 char_id, std::list<ItemInst*>::const_iter
 	std::string query = StringFormat("DELETE FROM inventory WHERE charid = %i "
                                     "AND ((slotid >= 8000 AND slotid <= 8999) "
                                     "OR slotid = %i OR (slotid >= %i AND slotid <= %i) )",
-                                    char_id, MainCursor,
-                                    EmuConstants::CURSOR_BAG_BEGIN, EmuConstants::CURSOR_BAG_END);
+									char_id, EQEmu::legacy::SlotCursor,
+									EQEmu::legacy::CURSOR_BAG_BEGIN, EQEmu::legacy::CURSOR_BAG_END);
     auto results = QueryDatabase(query);
     if (!results.Success()) {
         std::cout << "Clearing cursor failed: " << results.ErrorMessage() << std::endl;
@@ -107,7 +117,7 @@ bool SharedDatabase::SaveCursor(uint32 char_id, std::list<ItemInst*>::const_iter
     for(auto it = start; it != end; ++it, i++) {
 		if (i > 8999) { break; } // shouldn't be anything in the queue that indexes this high
         ItemInst *inst = *it;
-		int16 use_slot = (i == 8000) ? MainCursor : i;
+		int16 use_slot = (i == 8000) ? EQEmu::legacy::SlotCursor : i;
 		if (!SaveInventory(char_id, inst, use_slot)) {
 			return false;
 		}
@@ -152,10 +162,10 @@ bool SharedDatabase::VerifyInventory(uint32 account_id, int16 slot_id, const Ite
 bool SharedDatabase::SaveInventory(uint32 char_id, const ItemInst* inst, int16 slot_id) {
 
 	//never save tribute slots:
-	if(slot_id >= EmuConstants::TRIBUTE_BEGIN && slot_id <= EmuConstants::TRIBUTE_END)
+	if (slot_id >= EQEmu::legacy::TRIBUTE_BEGIN && slot_id <= EQEmu::legacy::TRIBUTE_END)
 		return true;
 
-	if (slot_id >= EmuConstants::SHARED_BANK_BEGIN && slot_id <= EmuConstants::SHARED_BANK_BAGS_END) {
+	if (slot_id >= EQEmu::legacy::SHARED_BANK_BEGIN && slot_id <= EQEmu::legacy::SHARED_BANK_BAGS_END) {
         // Shared bank inventory
 		if (!inst) {
 			return DeleteSharedBankSlot(char_id, slot_id);
@@ -182,11 +192,11 @@ bool SharedDatabase::SaveInventory(uint32 char_id, const ItemInst* inst, int16 s
 bool SharedDatabase::UpdateInventorySlot(uint32 char_id, const ItemInst* inst, int16 slot_id) {
 	// need to check 'inst' argument for valid pointer
 
-	uint32 augslot[EmuConstants::ITEM_COMMON_SIZE] = { NO_ITEM, NO_ITEM, NO_ITEM, NO_ITEM, NO_ITEM, NO_ITEM };
-	if (inst->IsType(ItemClassCommon)) {
-		for (int i = AUG_BEGIN; i < EmuConstants::ITEM_COMMON_SIZE; i++) {
+	uint32 augslot[EQEmu::legacy::ITEM_COMMON_SIZE] = { 0, 0, 0, 0, 0, 0 };
+	if (inst->IsClassCommon()) {
+		for (int i = AUG_INDEX_BEGIN; i < EQEmu::legacy::ITEM_COMMON_SIZE; i++) {
 			ItemInst *auginst = inst->GetItem(i);
-			augslot[i] = (auginst && auginst->GetItem()) ? auginst->GetItem()->ID : NO_ITEM;
+			augslot[i] = (auginst && auginst->GetItem()) ? auginst->GetItem()->ID : 0;
 		}
 	}
 
@@ -211,10 +221,10 @@ bool SharedDatabase::UpdateInventorySlot(uint32 char_id, const ItemInst* inst, i
 	auto results = QueryDatabase(query);
 
     // Save bag contents, if slot supports bag contents
-	if (inst->IsType(ItemClassContainer) && Inventory::SupportsContainers(slot_id))
+	if (inst->IsClassBag() && Inventory::SupportsContainers(slot_id))
 		// Limiting to bag slot count will get rid of 'hidden' duplicated items and 'Invalid Slot ID'
 		// messages through attrition (and the modded code in SaveInventory)
-		for (uint8 idx = SUB_BEGIN; idx < inst->GetItem()->BagSlots && idx < EmuConstants::ITEM_CONTAINER_SIZE; idx++) {
+		for (uint8 idx = SUB_INDEX_BEGIN; idx < inst->GetItem()->BagSlots && idx < EQEmu::legacy::ITEM_CONTAINER_SIZE; idx++) {
 			const ItemInst* baginst = inst->GetItem(idx);
 			SaveInventory(char_id, baginst, Inventory::CalcSlotId(slot_id, idx));
 		}
@@ -229,11 +239,11 @@ bool SharedDatabase::UpdateInventorySlot(uint32 char_id, const ItemInst* inst, i
 bool SharedDatabase::UpdateSharedBankSlot(uint32 char_id, const ItemInst* inst, int16 slot_id) {
 	// need to check 'inst' argument for valid pointer
 
-	uint32 augslot[EmuConstants::ITEM_COMMON_SIZE] = { NO_ITEM, NO_ITEM, NO_ITEM, NO_ITEM, NO_ITEM, NO_ITEM };
-	if (inst->IsType(ItemClassCommon)) {
-		for (int i = AUG_BEGIN; i < EmuConstants::ITEM_COMMON_SIZE; i++) {
+	uint32 augslot[EQEmu::legacy::ITEM_COMMON_SIZE] = { 0, 0, 0, 0, 0, 0 };
+	if (inst->IsClassCommon()) {
+		for (int i = AUG_INDEX_BEGIN; i < EQEmu::legacy::ITEM_COMMON_SIZE; i++) {
 			ItemInst *auginst = inst->GetItem(i);
-			augslot[i] = (auginst && auginst->GetItem()) ? auginst->GetItem()->ID : NO_ITEM;
+			augslot[i] = (auginst && auginst->GetItem()) ? auginst->GetItem()->ID : 0;
 		}
 	}
 
@@ -257,10 +267,10 @@ bool SharedDatabase::UpdateSharedBankSlot(uint32 char_id, const ItemInst* inst, 
     auto results = QueryDatabase(query);
 
     // Save bag contents, if slot supports bag contents
-	if (inst->IsType(ItemClassContainer) && Inventory::SupportsContainers(slot_id)) {
+	if (inst->IsClassBag() && Inventory::SupportsContainers(slot_id)) {
 		// Limiting to bag slot count will get rid of 'hidden' duplicated items and 'Invalid Slot ID'
 		// messages through attrition (and the modded code in SaveInventory)
-		for (uint8 idx = SUB_BEGIN; idx < inst->GetItem()->BagSlots && idx < EmuConstants::ITEM_CONTAINER_SIZE; idx++) {
+		for (uint8 idx = SUB_INDEX_BEGIN; idx < inst->GetItem()->BagSlots && idx < EQEmu::legacy::ITEM_CONTAINER_SIZE; idx++) {
 			const ItemInst* baginst = inst->GetItem(idx);
 			SaveInventory(char_id, baginst, Inventory::CalcSlotId(slot_id, idx));
 		}
@@ -286,7 +296,7 @@ bool SharedDatabase::DeleteInventorySlot(uint32 char_id, int16 slot_id) {
     if (!Inventory::SupportsContainers(slot_id))
         return true;
 
-    int16 base_slot_id = Inventory::CalcSlotId(slot_id, SUB_BEGIN);
+	int16 base_slot_id = Inventory::CalcSlotId(slot_id, SUB_INDEX_BEGIN);
     query = StringFormat("DELETE FROM inventory WHERE charid = %i AND slotid >= %i AND slotid < %i",
                         char_id, base_slot_id, (base_slot_id+10));
     results = QueryDatabase(query);
@@ -312,7 +322,7 @@ bool SharedDatabase::DeleteSharedBankSlot(uint32 char_id, int16 slot_id) {
 	if (!Inventory::SupportsContainers(slot_id))
         return true;
 
-    int16 base_slot_id = Inventory::CalcSlotId(slot_id, SUB_BEGIN);
+	int16 base_slot_id = Inventory::CalcSlotId(slot_id, SUB_INDEX_BEGIN);
     query = StringFormat("DELETE FROM sharedbank WHERE acctid = %i "
                         "AND slotid >= %i AND slotid < %i",
                         account_id, base_slot_id, (base_slot_id+10));
@@ -354,7 +364,7 @@ bool SharedDatabase::SetSharedPlatinum(uint32 account_id, int32 amount_to_add) {
 
 bool SharedDatabase::SetStartingItems(PlayerProfile_Struct* pp, Inventory* inv, uint32 si_race, uint32 si_class, uint32 si_deity, uint32 si_current_zone, char* si_name, int admin_level) {
 
-	const Item_Struct* myitem;
+	const EQEmu::ItemBase* myitem;
 
     std::string query = StringFormat("SELECT itemid, item_charges, slot FROM starting_items "
                                     "WHERE (race = %i or race = 0) AND (class = %i or class = 0) AND "
@@ -398,13 +408,13 @@ bool SharedDatabase::GetSharedBank(uint32 id, Inventory *inv, bool is_charid)
 				     "sb.augslot1, sb.augslot2, sb.augslot3, "
 				     "sb.augslot4, sb.augslot5, sb.augslot6, sb.custom_data "
 				     "FROM sharedbank sb INNER JOIN character_data ch "
-				     "ON ch.account_id=sb.acctid WHERE ch.id = %i",
+				     "ON ch.account_id=sb.acctid WHERE ch.id = %i ORDER BY sb.slotid",
 				     id);
 	else
 		query = StringFormat("SELECT slotid, itemid, charges, "
 				     "augslot1, augslot2, augslot3, "
 				     "augslot4, augslot5, augslot6, custom_data "
-				     "FROM sharedbank WHERE acctid=%i",
+				     "FROM sharedbank WHERE acctid=%i ORDER BY slotid",
 				     id);
 	auto results = QueryDatabase(query);
 	if (!results.Success()) {
@@ -418,7 +428,7 @@ bool SharedDatabase::GetSharedBank(uint32 id, Inventory *inv, bool is_charid)
 		uint32 item_id = (uint32)atoi(row[1]);
 		int8 charges = (int8)atoi(row[2]);
 
-		uint32 aug[EmuConstants::ITEM_COMMON_SIZE];
+		uint32 aug[EQEmu::legacy::ITEM_COMMON_SIZE];
 		aug[0] = (uint32)atoi(row[3]);
 		aug[1] = (uint32)atoi(row[4]);
 		aug[2] = (uint32)atoi(row[5]);
@@ -426,7 +436,7 @@ bool SharedDatabase::GetSharedBank(uint32 id, Inventory *inv, bool is_charid)
 		aug[4] = (uint32)atoi(row[7]);
 		aug[5] = (uint32)atoi(row[8]);
 
-		const Item_Struct *item = GetItem(item_id);
+		const EQEmu::ItemBase *item = GetItem(item_id);
 
 		if (!item) {
 			Log.Out(Logs::General, Logs::Error,
@@ -438,14 +448,14 @@ bool SharedDatabase::GetSharedBank(uint32 id, Inventory *inv, bool is_charid)
 		int16 put_slot_id = INVALID_INDEX;
 
 		ItemInst *inst = CreateBaseItem(item, charges);
-		if (inst && item->ItemClass == ItemClassCommon) {
-			for (int i = AUG_BEGIN; i < EmuConstants::ITEM_COMMON_SIZE; i++) {
+		if (inst && item->IsClassCommon()) {
+			for (int i = AUG_INDEX_BEGIN; i < EQEmu::legacy::ITEM_COMMON_SIZE; i++) {
 				if (aug[i])
 					inst->PutAugment(this, i, aug[i]);
 			}
 		}
 
-		if (row[9]) {
+		if (inst && row[9]) {
 			std::string data_str(row[9]);
 			std::string idAsString;
 			std::string value;
@@ -470,6 +480,7 @@ bool SharedDatabase::GetSharedBank(uint32 id, Inventory *inv, bool is_charid)
 			}
 		}
 
+		// theoretically inst can be nullptr ... this would be very bad ...
 		put_slot_id = inv->PutItem(slot_id, *inst);
 		safe_delete(inst);
 
@@ -513,7 +524,7 @@ bool SharedDatabase::GetInventory(uint32 char_id, Inventory *inv)
 		uint16 charges = atoi(row[2]);
 		uint32 color = atoul(row[3]);
 
-		uint32 aug[EmuConstants::ITEM_COMMON_SIZE];
+		uint32 aug[EQEmu::legacy::ITEM_COMMON_SIZE];
 
 		aug[0] = (uint32)atoul(row[4]);
 		aug[1] = (uint32)atoul(row[5]);
@@ -528,7 +539,7 @@ bool SharedDatabase::GetInventory(uint32 char_id, Inventory *inv)
 		uint32 ornament_idfile = (uint32)atoul(row[13]);
 		uint32 ornament_hero_model = (uint32)atoul(row[14]);
 
-		const Item_Struct *item = GetItem(item_id);
+		const EQEmu::ItemBase *item = GetItem(item_id);
 
 		if (!item) {
 			Log.Out(Logs::General, Logs::Error,
@@ -575,8 +586,8 @@ bool SharedDatabase::GetInventory(uint32 char_id, Inventory *inv)
 		inst->SetOrnamentHeroModel(ornament_hero_model);
 
 		if (instnodrop ||
-		    (((slot_id >= EmuConstants::EQUIPMENT_BEGIN && slot_id <= EmuConstants::EQUIPMENT_END) ||
-		      slot_id == MainPowerSource) &&
+			(((slot_id >= EQEmu::legacy::EQUIPMENT_BEGIN && slot_id <= EQEmu::legacy::EQUIPMENT_END) ||
+			slot_id == EQEmu::legacy::SlotPowerSource) &&
 		     inst->GetItem()->Attuneable))
 			inst->SetAttuned(true);
 
@@ -585,8 +596,7 @@ bool SharedDatabase::GetInventory(uint32 char_id, Inventory *inv)
 
 		if (charges == 0x7FFF)
 			inst->SetCharges(-1);
-		else if (charges == 0 &&
-			 inst->IsStackable()) // Stackable items need a minimum charge of 1 remain moveable.
+		else if (charges == 0 && inst->IsStackable()) // Stackable items need a minimum charge of 1 remain moveable.
 			inst->SetCharges(1);
 		else
 			inst->SetCharges(charges);
@@ -598,8 +608,8 @@ bool SharedDatabase::GetInventory(uint32 char_id, Inventory *inv)
 				inst->SetRecastTimestamp(0);
 		}
 
-		if (item->ItemClass == ItemClassCommon) {
-			for (int i = AUG_BEGIN; i < EmuConstants::ITEM_COMMON_SIZE; i++) {
+		if (item->IsClassCommon()) {
+			for (int i = AUG_INDEX_BEGIN; i < EQEmu::legacy::ITEM_COMMON_SIZE; i++) {
 				if (aug[i])
 					inst->PutAugment(this, i, aug[i]);
 			}
@@ -656,7 +666,7 @@ bool SharedDatabase::GetInventory(uint32 account_id, char *name, Inventory *inv)
 		int8 charges = atoi(row[2]);
 		uint32 color = atoul(row[3]);
 
-		uint32 aug[EmuConstants::ITEM_COMMON_SIZE];
+		uint32 aug[EQEmu::legacy::ITEM_COMMON_SIZE];
 		aug[0] = (uint32)atoi(row[4]);
 		aug[1] = (uint32)atoi(row[5]);
 		aug[2] = (uint32)atoi(row[6]);
@@ -669,7 +679,7 @@ bool SharedDatabase::GetInventory(uint32 account_id, char *name, Inventory *inv)
 		uint32 ornament_idfile = (uint32)atoul(row[13]);
 		uint32 ornament_hero_model = (uint32)atoul(row[14]);
 
-		const Item_Struct *item = GetItem(item_id);
+		const EQEmu::ItemBase *item = GetItem(item_id);
 		int16 put_slot_id = INVALID_INDEX;
 		if (!item)
 			continue;
@@ -716,8 +726,8 @@ bool SharedDatabase::GetInventory(uint32 account_id, char *name, Inventory *inv)
 
 		inst->SetCharges(charges);
 
-		if (item->ItemClass == ItemClassCommon) {
-			for (int i = AUG_BEGIN; i < EmuConstants::ITEM_COMMON_SIZE; i++) {
+		if (item->IsClassCommon()) {
+			for (int i = AUG_INDEX_BEGIN; i < EQEmu::legacy::ITEM_COMMON_SIZE; i++) {
 				if (aug[i])
 					inst->PutAugment(this, i, aug[i]);
 			}
@@ -797,28 +807,16 @@ void SharedDatabase::GetItemsCount(int32 &item_count, uint32 &max_id)
 		item_count = atoi(row[1]);
 }
 
-bool SharedDatabase::LoadItems() {
-	if(items_mmf) {
-		return true;
-	}
+bool SharedDatabase::LoadItems(const std::string &prefix) {
+	items_mmf.reset(nullptr);
 
 	try {
+		auto Config = EQEmuConfig::get();
 		EQEmu::IPCMutex mutex("items");
 		mutex.Lock();
-		items_mmf = new EQEmu::MemoryMappedFile("shared/items");
-
-		int32 items = -1;
-		uint32 max_item = 0;
-		GetItemsCount(items, max_item);
-		if(items == -1) {
-			EQ_EXCEPT("SharedDatabase", "Database returned no result");
-		}
-		uint32 size = static_cast<uint32>(EQEmu::FixedMemoryHashSet<Item_Struct>::estimated_size(items, max_item));
-		if(items_mmf->Size() != size) {
-			EQ_EXCEPT("SharedDatabase", "Couldn't load items because items_mmf->Size() != size");
-		}
-
-		items_hash = new EQEmu::FixedMemoryHashSet<Item_Struct>(reinterpret_cast<uint8*>(items_mmf->Get()), size);
+		std::string file_name = Config->SharedMemDir + prefix + std::string("items");
+		items_mmf = std::unique_ptr<EQEmu::MemoryMappedFile>(new EQEmu::MemoryMappedFile(file_name));
+		items_hash = std::unique_ptr<EQEmu::FixedMemoryHashSet<EQEmu::ItemBase>>(new EQEmu::FixedMemoryHashSet<EQEmu::ItemBase>(reinterpret_cast<uint8*>(items_mmf->Get()), items_mmf->Size()));
 		mutex.Unlock();
 	} catch(std::exception& ex) {
 		Log.Out(Logs::General, Logs::Error, "Error Loading Items: %s", ex.what());
@@ -828,36 +826,37 @@ bool SharedDatabase::LoadItems() {
 	return true;
 }
 
-void SharedDatabase::LoadItems(void *data, uint32 size, int32 items, uint32 max_item_id) {
-	EQEmu::FixedMemoryHashSet<Item_Struct> hash(reinterpret_cast<uint8*>(data), size, items, max_item_id);
+void SharedDatabase::LoadItems(void *data, uint32 size, int32 items, uint32 max_item_id)
+{
+	EQEmu::FixedMemoryHashSet<EQEmu::ItemBase> hash(reinterpret_cast<uint8 *>(data), size, items, max_item_id);
 
-	char ndbuffer[4];
+	std::string ndbuffer;
 	bool disableNoRent = false;
-	if(GetVariable("disablenorent", ndbuffer, 4)) {
-		if(ndbuffer[0] == '1' && ndbuffer[1] == '\0') {
+	if (GetVariable("disablenorent", ndbuffer)) {
+		if (ndbuffer[0] == '1' && ndbuffer[1] == '\0') {
 			disableNoRent = true;
 		}
 	}
 	bool disableNoDrop = false;
-	if(GetVariable("disablenodrop", ndbuffer, 4)) {
-		if(ndbuffer[0] == '1' && ndbuffer[1] == '\0') {
+	if (GetVariable("disablenodrop", ndbuffer)) {
+		if (ndbuffer[0] == '1' && ndbuffer[1] == '\0') {
 			disableNoDrop = true;
 		}
 	}
 	bool disableLoreGroup = false;
-	if(GetVariable("disablelore", ndbuffer, 4)) {
-		if(ndbuffer[0] == '1' && ndbuffer[1] == '\0') {
+	if (GetVariable("disablelore", ndbuffer)) {
+		if (ndbuffer[0] == '1' && ndbuffer[1] == '\0') {
 			disableLoreGroup = true;
 		}
 	}
 	bool disableNoTransfer = false;
-	if(GetVariable("disablenotransfer", ndbuffer, 4)) {
-		if(ndbuffer[0] == '1' && ndbuffer[1] == '\0') {
+	if (GetVariable("disablenotransfer", ndbuffer)) {
+		if (ndbuffer[0] == '1' && ndbuffer[1] == '\0') {
 			disableNoTransfer = true;
 		}
 	}
 
-    Item_Struct item;
+	EQEmu::ItemBase item;
 
 	const std::string query = "SELECT source,"
 #define F(x) "`"#x"`,"
@@ -865,227 +864,229 @@ void SharedDatabase::LoadItems(void *data, uint32 size, int32 items, uint32 max_
 #undef F
 		"updated FROM items ORDER BY id";
 	auto results = QueryDatabase(query);
-    if (!results.Success()) {
-        return;
-    }
+	if (!results.Success()) {
+		return;
+	}
 
-    for(auto row = results.begin(); row != results.end(); ++row) {
-        memset(&item, 0, sizeof(Item_Struct));
+	for (auto row = results.begin(); row != results.end(); ++row) {
+		memset(&item, 0, sizeof(EQEmu::ItemBase));
 
-        item.ItemClass = (uint8)atoi(row[ItemField::itemclass]);
-        strcpy(item.Name,row[ItemField::name]);
-        strcpy(item.Lore,row[ItemField::lore]);
-        strcpy(item.IDFile,row[ItemField::idfile]);
+		item.ItemClass = (uint8)atoi(row[ItemField::itemclass]);
+		strcpy(item.Name, row[ItemField::name]);
+		strcpy(item.Lore, row[ItemField::lore]);
+		strcpy(item.IDFile, row[ItemField::idfile]);
 
-        item.ID = (uint32)atoul(row[ItemField::id]);
-        item.Weight = (uint8)atoi(row[ItemField::weight]);
-        item.NoRent = disableNoRent ? (uint8)atoi("255") : (uint8)atoi(row[ItemField::norent]);
-        item.NoDrop = disableNoDrop ? (uint8)atoi("255") : (uint8)atoi(row[ItemField::nodrop]);
-        item.Size = (uint8)atoi(row[ItemField::size]);
-        item.Slots = (uint32)atoul(row[ItemField::slots]);
-        item.Price = (uint32)atoul(row[ItemField::price]);
-        item.Icon = (uint32)atoul(row[ItemField::icon]);
-        item.BenefitFlag = (atoul(row[ItemField::benefitflag]) != 0);
-        item.Tradeskills = (atoi(row[ItemField::tradeskills])==0) ? false : true;
-        item.CR = (int8)atoi(row[ItemField::cr]);
-        item.DR = (int8)atoi(row[ItemField::dr]);
-        item.PR = (int8)atoi(row[ItemField::pr]);
-        item.MR = (int8)atoi(row[ItemField::mr]);
-        item.FR = (int8)atoi(row[ItemField::fr]);
-        item.AStr = (int8)atoi(row[ItemField::astr]);
-        item.ASta = (int8)atoi(row[ItemField::asta]);
-        item.AAgi = (int8)atoi(row[ItemField::aagi]);
-        item.ADex = (int8)atoi(row[ItemField::adex]);
-        item.ACha = (int8)atoi(row[ItemField::acha]);
-        item.AInt = (int8)atoi(row[ItemField::aint]);
-        item.AWis = (int8)atoi(row[ItemField::awis]);
-        item.HP = (int32)atoul(row[ItemField::hp]);
-        item.Mana = (int32)atoul(row[ItemField::mana]);
-        item.AC = (int32)atoul(row[ItemField::ac]);
-        item.Deity = (uint32)atoul(row[ItemField::deity]);
-        item.SkillModValue = (int32)atoul(row[ItemField::skillmodvalue]);
+		item.ID = (uint32)atoul(row[ItemField::id]);
+		item.Weight = (int32)atoi(row[ItemField::weight]);
+		item.NoRent = disableNoRent ? (uint8)atoi("255") : (uint8)atoi(row[ItemField::norent]);
+		item.NoDrop = disableNoDrop ? (uint8)atoi("255") : (uint8)atoi(row[ItemField::nodrop]);
+		item.Size = (uint8)atoi(row[ItemField::size]);
+		item.Slots = (uint32)atoul(row[ItemField::slots]);
+		item.Price = (uint32)atoul(row[ItemField::price]);
+		item.Icon = (uint32)atoul(row[ItemField::icon]);
+		item.BenefitFlag = (atoul(row[ItemField::benefitflag]) != 0);
+		item.Tradeskills = (atoi(row[ItemField::tradeskills]) == 0) ? false : true;
+		item.CR = (int8)atoi(row[ItemField::cr]);
+		item.DR = (int8)atoi(row[ItemField::dr]);
+		item.PR = (int8)atoi(row[ItemField::pr]);
+		item.MR = (int8)atoi(row[ItemField::mr]);
+		item.FR = (int8)atoi(row[ItemField::fr]);
+		item.AStr = (int8)atoi(row[ItemField::astr]);
+		item.ASta = (int8)atoi(row[ItemField::asta]);
+		item.AAgi = (int8)atoi(row[ItemField::aagi]);
+		item.ADex = (int8)atoi(row[ItemField::adex]);
+		item.ACha = (int8)atoi(row[ItemField::acha]);
+		item.AInt = (int8)atoi(row[ItemField::aint]);
+		item.AWis = (int8)atoi(row[ItemField::awis]);
+		item.HP = (int32)atoul(row[ItemField::hp]);
+		item.Mana = (int32)atoul(row[ItemField::mana]);
+		item.AC = (int32)atoul(row[ItemField::ac]);
+		item.Deity = (uint32)atoul(row[ItemField::deity]);
+		item.SkillModValue = (int32)atoul(row[ItemField::skillmodvalue]);
+		item.SkillModMax = (int32)atoul(row[ItemField::skillmodmax]);
+		item.SkillModType = (uint32)atoul(row[ItemField::skillmodtype]);
+		item.BaneDmgRace = (uint32)atoul(row[ItemField::banedmgrace]);
+		item.BaneDmgAmt = (int8)atoi(row[ItemField::banedmgamt]);
+		item.BaneDmgBody = (uint32)atoul(row[ItemField::banedmgbody]);
+		item.Magic = (atoi(row[ItemField::magic]) == 0) ? false : true;
+		item.CastTime_ = (int32)atoul(row[ItemField::casttime_]);
+		item.ReqLevel = (uint8)atoi(row[ItemField::reqlevel]);
+		item.BardType = (uint32)atoul(row[ItemField::bardtype]);
+		item.BardValue = (int32)atoul(row[ItemField::bardvalue]);
+		item.Light = (int8)atoi(row[ItemField::light]);
+		item.Delay = (uint8)atoi(row[ItemField::delay]);
+		item.RecLevel = (uint8)atoi(row[ItemField::reclevel]);
+		item.RecSkill = (uint8)atoi(row[ItemField::recskill]);
+		item.ElemDmgType = (uint8)atoi(row[ItemField::elemdmgtype]);
+		item.ElemDmgAmt = (uint8)atoi(row[ItemField::elemdmgamt]);
+		item.Range = (uint8)atoi(row[ItemField::range]);
+		item.Damage = (uint32)atoi(row[ItemField::damage]);
+		item.Color = (uint32)atoul(row[ItemField::color]);
+		item.Classes = (uint32)atoul(row[ItemField::classes]);
+		item.Races = (uint32)atoul(row[ItemField::races]);
 
-        item.SkillModType = (uint32)atoul(row[ItemField::skillmodtype]);
-        item.BaneDmgRace = (uint32)atoul(row[ItemField::banedmgrace]);
-        item.BaneDmgAmt = (int8)atoi(row[ItemField::banedmgamt]);
-        item.BaneDmgBody = (uint32)atoul(row[ItemField::banedmgbody]);
-        item.Magic = (atoi(row[ItemField::magic])==0) ? false : true;
-        item.CastTime_ = (int32)atoul(row[ItemField::casttime_]);
-        item.ReqLevel = (uint8)atoi(row[ItemField::reqlevel]);
-        item.BardType = (uint32)atoul(row[ItemField::bardtype]);
-        item.BardValue = (int32)atoul(row[ItemField::bardvalue]);
-        item.Light = (int8)atoi(row[ItemField::light]);
-        item.Delay = (uint8)atoi(row[ItemField::delay]);
-        item.RecLevel = (uint8)atoi(row[ItemField::reclevel]);
-        item.RecSkill = (uint8)atoi(row[ItemField::recskill]);
-        item.ElemDmgType = (uint8)atoi(row[ItemField::elemdmgtype]);
-        item.ElemDmgAmt = (uint8)atoi(row[ItemField::elemdmgamt]);
-        item.Range = (uint8)atoi(row[ItemField::range]);
-        item.Damage = (uint32)atoi(row[ItemField::damage]);
-        item.Color = (uint32)atoul(row[ItemField::color]);
-        item.Classes = (uint32)atoul(row[ItemField::classes]);
-        item.Races = (uint32)atoul(row[ItemField::races]);
-
-        item.MaxCharges = (int16)atoi(row[ItemField::maxcharges]);
-        item.ItemType = (uint8)atoi(row[ItemField::itemtype]);
+		item.MaxCharges = (int16)atoi(row[ItemField::maxcharges]);
+		item.ItemType = (uint8)atoi(row[ItemField::itemtype]);
 		item.Material = (uint8)atoi(row[ItemField::material]);
 		item.HerosForgeModel = (uint32)atoi(row[ItemField::herosforgemodel]);
-        item.SellRate = (float)atof(row[ItemField::sellrate]);
-        item.CastTime = (uint32)atoul(row[ItemField::casttime]);
-        item.EliteMaterial = (uint32)atoul(row[ItemField::elitematerial]);
-        item.ProcRate = (int32)atoi(row[ItemField::procrate]);
-        item.CombatEffects = (int8)atoi(row[ItemField::combateffects]);
-        item.Shielding = (int8)atoi(row[ItemField::shielding]);
-        item.StunResist = (int8)atoi(row[ItemField::stunresist]);
-        item.StrikeThrough = (int8)atoi(row[ItemField::strikethrough]);
-        item.ExtraDmgSkill = (uint32)atoul(row[ItemField::extradmgskill]);
-        item.ExtraDmgAmt = (uint32)atoul(row[ItemField::extradmgamt]);
-        item.SpellShield = (int8)atoi(row[ItemField::spellshield]);
-        item.Avoidance = (int8)atoi(row[ItemField::avoidance]);
-        item.Accuracy = (int8)atoi(row[ItemField::accuracy]);
-        item.CharmFileID = (uint32)atoul(row[ItemField::charmfileid]);
-        item.FactionMod1 = (int32)atoul(row[ItemField::factionmod1]);
-        item.FactionMod2 = (int32)atoul(row[ItemField::factionmod2]);
-        item.FactionMod3 = (int32)atoul(row[ItemField::factionmod3]);
-        item.FactionMod4 = (int32)atoul(row[ItemField::factionmod4]);
-        item.FactionAmt1 = (int32)atoul(row[ItemField::factionamt1]);
-        item.FactionAmt2 = (int32)atoul(row[ItemField::factionamt2]);
-        item.FactionAmt3 = (int32)atoul(row[ItemField::factionamt3]);
-        item.FactionAmt4 = (int32)atoul(row[ItemField::factionamt4]);
+		item.SellRate = (float)atof(row[ItemField::sellrate]);
+		item.CastTime = (uint32)atoul(row[ItemField::casttime]);
+		item.EliteMaterial = (uint32)atoul(row[ItemField::elitematerial]);
+		item.ProcRate = (int32)atoi(row[ItemField::procrate]);
+		item.CombatEffects = (int8)atoi(row[ItemField::combateffects]);
+		item.Shielding = (int8)atoi(row[ItemField::shielding]);
+		item.StunResist = (int8)atoi(row[ItemField::stunresist]);
+		item.StrikeThrough = (int8)atoi(row[ItemField::strikethrough]);
+		item.ExtraDmgSkill = (uint32)atoul(row[ItemField::extradmgskill]);
+		item.ExtraDmgAmt = (uint32)atoul(row[ItemField::extradmgamt]);
+		item.SpellShield = (int8)atoi(row[ItemField::spellshield]);
+		item.Avoidance = (int8)atoi(row[ItemField::avoidance]);
+		item.Accuracy = (int8)atoi(row[ItemField::accuracy]);
+		item.CharmFileID = (uint32)atoul(row[ItemField::charmfileid]);
+		item.FactionMod1 = (int32)atoul(row[ItemField::factionmod1]);
+		item.FactionMod2 = (int32)atoul(row[ItemField::factionmod2]);
+		item.FactionMod3 = (int32)atoul(row[ItemField::factionmod3]);
+		item.FactionMod4 = (int32)atoul(row[ItemField::factionmod4]);
+		item.FactionAmt1 = (int32)atoul(row[ItemField::factionamt1]);
+		item.FactionAmt2 = (int32)atoul(row[ItemField::factionamt2]);
+		item.FactionAmt3 = (int32)atoul(row[ItemField::factionamt3]);
+		item.FactionAmt4 = (int32)atoul(row[ItemField::factionamt4]);
 
-        strcpy(item.CharmFile,row[ItemField::charmfile]);
+		strcpy(item.CharmFile, row[ItemField::charmfile]);
 
-        item.AugType = (uint32)atoul(row[ItemField::augtype]);
-        item.AugSlotType[0] = (uint8)atoi(row[ItemField::augslot1type]);
-        item.AugSlotVisible[0] = (uint8)atoi(row[ItemField::augslot1visible]);
-        item.AugSlotUnk2[0] = 0;
-        item.AugSlotType[1] = (uint8)atoi(row[ItemField::augslot2type]);
-        item.AugSlotVisible[1] = (uint8)atoi(row[ItemField::augslot2visible]);
-        item.AugSlotUnk2[1] = 0;
-        item.AugSlotType[2] = (uint8)atoi(row[ItemField::augslot3type]);
-        item.AugSlotVisible[2] = (uint8)atoi(row[ItemField::augslot3visible]);
-        item.AugSlotUnk2[2] = 0;
-        item.AugSlotType[3] = (uint8)atoi(row[ItemField::augslot4type]);
-        item.AugSlotVisible[3] = (uint8)atoi(row[ItemField::augslot4visible]);
-        item.AugSlotUnk2[3] = 0;
-        item.AugSlotType[4] = (uint8)atoi(row[ItemField::augslot5type]);
-        item.AugSlotVisible[4] = (uint8)atoi(row[ItemField::augslot5visible]);
-        item.AugSlotUnk2[4] = 0;
+		item.AugType = (uint32)atoul(row[ItemField::augtype]);
+		item.AugSlotType[0] = (uint8)atoi(row[ItemField::augslot1type]);
+		item.AugSlotVisible[0] = (uint8)atoi(row[ItemField::augslot1visible]);
+		item.AugSlotUnk2[0] = 0;
+		item.AugSlotType[1] = (uint8)atoi(row[ItemField::augslot2type]);
+		item.AugSlotVisible[1] = (uint8)atoi(row[ItemField::augslot2visible]);
+		item.AugSlotUnk2[1] = 0;
+		item.AugSlotType[2] = (uint8)atoi(row[ItemField::augslot3type]);
+		item.AugSlotVisible[2] = (uint8)atoi(row[ItemField::augslot3visible]);
+		item.AugSlotUnk2[2] = 0;
+		item.AugSlotType[3] = (uint8)atoi(row[ItemField::augslot4type]);
+		item.AugSlotVisible[3] = (uint8)atoi(row[ItemField::augslot4visible]);
+		item.AugSlotUnk2[3] = 0;
+		item.AugSlotType[4] = (uint8)atoi(row[ItemField::augslot5type]);
+		item.AugSlotVisible[4] = (uint8)atoi(row[ItemField::augslot5visible]);
+		item.AugSlotUnk2[4] = 0;
 		item.AugSlotType[5] = (uint8)atoi(row[ItemField::augslot6type]);
 		item.AugSlotVisible[5] = (uint8)atoi(row[ItemField::augslot6visible]);
 		item.AugSlotUnk2[5] = 0;
 
-        item.LDoNTheme = (uint32)atoul(row[ItemField::ldontheme]);
-        item.LDoNPrice = (uint32)atoul(row[ItemField::ldonprice]);
-        item.LDoNSold = (uint32)atoul(row[ItemField::ldonsold]);
-        item.BagType = (uint8)atoi(row[ItemField::bagtype]);
-        item.BagSlots = (uint8)atoi(row[ItemField::bagslots]);
-        item.BagSize = (uint8)atoi(row[ItemField::bagsize]);
-        item.BagWR = (uint8)atoi(row[ItemField::bagwr]);
-        item.Book = (uint8)atoi(row[ItemField::book]);
-        item.BookType = (uint32)atoul(row[ItemField::booktype]);
+		item.LDoNTheme = (uint32)atoul(row[ItemField::ldontheme]);
+		item.LDoNPrice = (uint32)atoul(row[ItemField::ldonprice]);
+		item.LDoNSold = (uint32)atoul(row[ItemField::ldonsold]);
+		item.BagType = (uint8)atoi(row[ItemField::bagtype]);
+		item.BagSlots = (uint8)std::min(atoi(row[ItemField::bagslots]), 10); // FIXME: remove when big bags supported
+		item.BagSize = (uint8)atoi(row[ItemField::bagsize]);
+		item.BagWR = (uint8)atoi(row[ItemField::bagwr]);
+		item.Book = (uint8)atoi(row[ItemField::book]);
+		item.BookType = (uint32)atoul(row[ItemField::booktype]);
 
-        strcpy(item.Filename,row[ItemField::filename]);
+		strcpy(item.Filename, row[ItemField::filename]);
 
-        item.BaneDmgRaceAmt = (uint32)atoul(row[ItemField::banedmgraceamt]);
-        item.AugRestrict = (uint32)atoul(row[ItemField::augrestrict]);
-        item.LoreGroup = disableLoreGroup ? (uint8)atoi("0") : atoi(row[ItemField::loregroup]);
-        item.LoreFlag = item.LoreGroup!=0;
-        item.PendingLoreFlag = (atoi(row[ItemField::pendingloreflag])==0) ? false : true;
-        item.ArtifactFlag = (atoi(row[ItemField::artifactflag])==0) ? false : true;
-        item.SummonedFlag = (atoi(row[ItemField::summonedflag])==0) ? false : true;
-        item.Favor = (uint32)atoul(row[ItemField::favor]);
-        item.FVNoDrop = (atoi(row[ItemField::fvnodrop])==0) ? false : true;
-        item.Endur = (uint32)atoul(row[ItemField::endur]);
-        item.DotShielding = (uint32)atoul(row[ItemField::dotshielding]);
-        item.Attack = (uint32)atoul(row[ItemField::attack]);
-        item.Regen = (uint32)atoul(row[ItemField::regen]);
-        item.ManaRegen = (uint32)atoul(row[ItemField::manaregen]);
-        item.EnduranceRegen = (uint32)atoul(row[ItemField::enduranceregen]);
-        item.Haste = (uint32)atoul(row[ItemField::haste]);
-        item.DamageShield = (uint32)atoul(row[ItemField::damageshield]);
-        item.RecastDelay = (uint32)atoul(row[ItemField::recastdelay]);
-        item.RecastType = (uint32)atoul(row[ItemField::recasttype]);
-        item.GuildFavor = (uint32)atoul(row[ItemField::guildfavor]);
-        item.AugDistiller = (uint32)atoul(row[ItemField::augdistiller]);
-        item.Attuneable = (atoi(row[ItemField::attuneable])==0) ? false : true;
-        item.NoPet = (atoi(row[ItemField::nopet])==0) ? false : true;
-        item.PointType = (uint32)atoul(row[ItemField::pointtype]);
-        item.PotionBelt = (atoi(row[ItemField::potionbelt])==0) ? false : true;
-        item.PotionBeltSlots = (atoi(row[ItemField::potionbeltslots])==0) ? false : true;
-        item.StackSize = (uint16)atoi(row[ItemField::stacksize]);
-        item.NoTransfer = disableNoTransfer ? false : (atoi(row[ItemField::notransfer])==0) ? false : true;
-        item.Stackable = (atoi(row[ItemField::stackable])==0) ? false : true;
-        item.Click.Effect = (uint32)atoul(row[ItemField::clickeffect]);
-        item.Click.Type = (uint8)atoul(row[ItemField::clicktype]);
-        item.Click.Level = (uint8)atoul(row[ItemField::clicklevel]);
-        item.Click.Level2 = (uint8)atoul(row[ItemField::clicklevel2]);
+		item.BaneDmgRaceAmt = (uint32)atoul(row[ItemField::banedmgraceamt]);
+		item.AugRestrict = (uint32)atoul(row[ItemField::augrestrict]);
+		item.LoreGroup = disableLoreGroup ? (uint8)atoi("0") : atoi(row[ItemField::loregroup]);
+		item.LoreFlag = item.LoreGroup != 0;
+		item.PendingLoreFlag = (atoi(row[ItemField::pendingloreflag]) == 0) ? false : true;
+		item.ArtifactFlag = (atoi(row[ItemField::artifactflag]) == 0) ? false : true;
+		item.SummonedFlag = (atoi(row[ItemField::summonedflag]) == 0) ? false : true;
+		item.Favor = (uint32)atoul(row[ItemField::favor]);
+		item.FVNoDrop = (atoi(row[ItemField::fvnodrop]) == 0) ? false : true;
+		item.Endur = (uint32)atoul(row[ItemField::endur]);
+		item.DotShielding = (uint32)atoul(row[ItemField::dotshielding]);
+		item.Attack = (uint32)atoul(row[ItemField::attack]);
+		item.Regen = (uint32)atoul(row[ItemField::regen]);
+		item.ManaRegen = (uint32)atoul(row[ItemField::manaregen]);
+		item.EnduranceRegen = (uint32)atoul(row[ItemField::enduranceregen]);
+		item.Haste = (uint32)atoul(row[ItemField::haste]);
+		item.DamageShield = (uint32)atoul(row[ItemField::damageshield]);
+		item.RecastDelay = (uint32)atoul(row[ItemField::recastdelay]);
+		item.RecastType = (uint32)atoul(row[ItemField::recasttype]);
+		item.GuildFavor = (uint32)atoul(row[ItemField::guildfavor]);
+		item.AugDistiller = (uint32)atoul(row[ItemField::augdistiller]);
+		item.Attuneable = (atoi(row[ItemField::attuneable]) == 0) ? false : true;
+		item.NoPet = (atoi(row[ItemField::nopet]) == 0) ? false : true;
+		item.PointType = (uint32)atoul(row[ItemField::pointtype]);
+		item.PotionBelt = (atoi(row[ItemField::potionbelt]) == 0) ? false : true;
+		item.PotionBeltSlots = (atoi(row[ItemField::potionbeltslots]) == 0) ? false : true;
+		item.StackSize = (uint16)atoi(row[ItemField::stacksize]);
+		item.NoTransfer = disableNoTransfer ? false : (atoi(row[ItemField::notransfer]) == 0) ? false : true;
+		item.Stackable = (atoi(row[ItemField::stackable]) == 0) ? false : true;
+		item.Click.Effect = (uint32)atoul(row[ItemField::clickeffect]);
+		item.Click.Type = (uint8)atoul(row[ItemField::clicktype]);
+		item.Click.Level = (uint8)atoul(row[ItemField::clicklevel]);
+		item.Click.Level2 = (uint8)atoul(row[ItemField::clicklevel2]);
 
-        strcpy(item.CharmFile,row[ItemField::charmfile]);
+		strcpy(item.CharmFile, row[ItemField::charmfile]);
 
-        item.Proc.Effect = (uint16)atoul(row[ItemField::proceffect]);
-        item.Proc.Type = (uint8)atoul(row[ItemField::proctype]);
-        item.Proc.Level = (uint8)atoul(row[ItemField::proclevel]);
-        item.Proc.Level2 = (uint8)atoul(row[ItemField::proclevel2]);
-        item.Worn.Effect = (uint16)atoul(row[ItemField::worneffect]);
-        item.Worn.Type = (uint8)atoul(row[ItemField::worntype]);
-        item.Worn.Level = (uint8)atoul(row[ItemField::wornlevel]);
-        item.Worn.Level2 = (uint8)atoul(row[ItemField::wornlevel2]);
-        item.Focus.Effect = (uint16)atoul(row[ItemField::focuseffect]);
-        item.Focus.Type = (uint8)atoul(row[ItemField::focustype]);
-        item.Focus.Level = (uint8)atoul(row[ItemField::focuslevel]);
-        item.Focus.Level2 = (uint8)atoul(row[ItemField::focuslevel2]);
-        item.Scroll.Effect = (uint16)atoul(row[ItemField::scrolleffect]);
-        item.Scroll.Type = (uint8)atoul(row[ItemField::scrolltype]);
-        item.Scroll.Level = (uint8)atoul(row[ItemField::scrolllevel]);
-        item.Scroll.Level2 = (uint8)atoul(row[ItemField::scrolllevel2]);
-        item.Bard.Effect = (uint16)atoul(row[ItemField::bardeffect]);
-        item.Bard.Type = (uint8)atoul(row[ItemField::bardtype]);
-        item.Bard.Level = (uint8)atoul(row[ItemField::bardlevel]);
-        item.Bard.Level2 = (uint8)atoul(row[ItemField::bardlevel2]);
-        item.QuestItemFlag = (atoi(row[ItemField::questitemflag])==0) ? false : true;
-        item.SVCorruption = (int32)atoi(row[ItemField::svcorruption]);
-        item.Purity = (uint32)atoul(row[ItemField::purity]);
-        item.EvolvingLevel = (uint8)atoul(row[ItemField::evolvinglevel]);
-        item.BackstabDmg = (uint32)atoul(row[ItemField::backstabdmg]);
-        item.DSMitigation = (uint32)atoul(row[ItemField::dsmitigation]);
-        item.HeroicStr = (int32)atoi(row[ItemField::heroic_str]);
-        item.HeroicInt = (int32)atoi(row[ItemField::heroic_int]);
-        item.HeroicWis = (int32)atoi(row[ItemField::heroic_wis]);
-        item.HeroicAgi = (int32)atoi(row[ItemField::heroic_agi]);
-        item.HeroicDex = (int32)atoi(row[ItemField::heroic_dex]);
-        item.HeroicSta = (int32)atoi(row[ItemField::heroic_sta]);
-        item.HeroicCha = (int32)atoi(row[ItemField::heroic_cha]);
-        item.HeroicMR = (int32)atoi(row[ItemField::heroic_mr]);
-        item.HeroicFR = (int32)atoi(row[ItemField::heroic_fr]);
-        item.HeroicCR = (int32)atoi(row[ItemField::heroic_cr]);
-        item.HeroicDR = (int32)atoi(row[ItemField::heroic_dr]);
-        item.HeroicPR = (int32)atoi(row[ItemField::heroic_pr]);
-        item.HeroicSVCorrup = (int32)atoi(row[ItemField::heroic_svcorrup]);
-        item.HealAmt = (int32)atoi(row[ItemField::healamt]);
-        item.SpellDmg = (int32)atoi(row[ItemField::spelldmg]);
-        item.LDoNSellBackRate = (uint32)atoul(row[ItemField::ldonsellbackrate]);
-        item.ScriptFileID = (uint32)atoul(row[ItemField::scriptfileid]);
-        item.ExpendableArrow = (uint16)atoul(row[ItemField::expendablearrow]);
-        item.Clairvoyance = (uint32)atoul(row[ItemField::clairvoyance]);
+		item.Proc.Effect = (int32)atoul(row[ItemField::proceffect]);
+		item.Proc.Type = (uint8)atoul(row[ItemField::proctype]);
+		item.Proc.Level = (uint8)atoul(row[ItemField::proclevel]);
+		item.Proc.Level2 = (uint8)atoul(row[ItemField::proclevel2]);
+		item.Worn.Effect = (int32)atoul(row[ItemField::worneffect]);
+		item.Worn.Type = (uint8)atoul(row[ItemField::worntype]);
+		item.Worn.Level = (uint8)atoul(row[ItemField::wornlevel]);
+		item.Worn.Level2 = (uint8)atoul(row[ItemField::wornlevel2]);
+		item.Focus.Effect = (int32)atoul(row[ItemField::focuseffect]);
+		item.Focus.Type = (uint8)atoul(row[ItemField::focustype]);
+		item.Focus.Level = (uint8)atoul(row[ItemField::focuslevel]);
+		item.Focus.Level2 = (uint8)atoul(row[ItemField::focuslevel2]);
+		item.Scroll.Effect = (int32)atoul(row[ItemField::scrolleffect]);
+		item.Scroll.Type = (uint8)atoul(row[ItemField::scrolltype]);
+		item.Scroll.Level = (uint8)atoul(row[ItemField::scrolllevel]);
+		item.Scroll.Level2 = (uint8)atoul(row[ItemField::scrolllevel2]);
+		item.Bard.Effect = (int32)atoul(row[ItemField::bardeffect]);
+		item.Bard.Type = (uint8)atoul(row[ItemField::bardtype]);
+		item.Bard.Level = (uint8)atoul(row[ItemField::bardlevel]);
+		item.Bard.Level2 = (uint8)atoul(row[ItemField::bardlevel2]);
+		item.QuestItemFlag = (atoi(row[ItemField::questitemflag]) == 0) ? false : true;
+		item.SVCorruption = (int32)atoi(row[ItemField::svcorruption]);
+		item.Purity = (uint32)atoul(row[ItemField::purity]);
+		item.EvolvingItem = (uint8)atoul(row[ItemField::evoitem]);
+		item.EvolvingID = (uint8)atoul(row[ItemField::evoid]);
+		item.EvolvingLevel = (uint8)atoul(row[ItemField::evolvinglevel]);
+		item.EvolvingMax = (uint8)atoul(row[ItemField::evomax]);
+		item.BackstabDmg = (uint32)atoul(row[ItemField::backstabdmg]);
+		item.DSMitigation = (uint32)atoul(row[ItemField::dsmitigation]);
+		item.HeroicStr = (int32)atoi(row[ItemField::heroic_str]);
+		item.HeroicInt = (int32)atoi(row[ItemField::heroic_int]);
+		item.HeroicWis = (int32)atoi(row[ItemField::heroic_wis]);
+		item.HeroicAgi = (int32)atoi(row[ItemField::heroic_agi]);
+		item.HeroicDex = (int32)atoi(row[ItemField::heroic_dex]);
+		item.HeroicSta = (int32)atoi(row[ItemField::heroic_sta]);
+		item.HeroicCha = (int32)atoi(row[ItemField::heroic_cha]);
+		item.HeroicMR = (int32)atoi(row[ItemField::heroic_mr]);
+		item.HeroicFR = (int32)atoi(row[ItemField::heroic_fr]);
+		item.HeroicCR = (int32)atoi(row[ItemField::heroic_cr]);
+		item.HeroicDR = (int32)atoi(row[ItemField::heroic_dr]);
+		item.HeroicPR = (int32)atoi(row[ItemField::heroic_pr]);
+		item.HeroicSVCorrup = (int32)atoi(row[ItemField::heroic_svcorrup]);
+		item.HealAmt = (int32)atoi(row[ItemField::healamt]);
+		item.SpellDmg = (int32)atoi(row[ItemField::spelldmg]);
+		item.LDoNSellBackRate = (uint32)atoul(row[ItemField::ldonsellbackrate]);
+		item.ScriptFileID = (uint32)atoul(row[ItemField::scriptfileid]);
+		item.ExpendableArrow = (uint16)atoul(row[ItemField::expendablearrow]);
+		item.Clairvoyance = (uint32)atoul(row[ItemField::clairvoyance]);
 
-        strcpy(item.ClickName,row[ItemField::clickname]);
-        strcpy(item.ProcName,row[ItemField::procname]);
-        strcpy(item.WornName,row[ItemField::wornname]);
-        strcpy(item.FocusName,row[ItemField::focusname]);
-        strcpy(item.ScrollName,row[ItemField::scrollname]);
+		strcpy(item.ClickName, row[ItemField::clickname]);
+		strcpy(item.ProcName, row[ItemField::procname]);
+		strcpy(item.WornName, row[ItemField::wornname]);
+		strcpy(item.FocusName, row[ItemField::focusname]);
+		strcpy(item.ScrollName, row[ItemField::scrollname]);
 
-        try {
-            hash.insert(item.ID, item);
-        } catch(std::exception &ex) {
-            Log.Out(Logs::General, Logs::Error, "Database::LoadItems: %s", ex.what());
-            break;
-        }
-    }
-
+		try {
+			hash.insert(item.ID, item);
+		} catch (std::exception &ex) {
+			Log.Out(Logs::General, Logs::Error, "Database::LoadItems: %s", ex.what());
+			break;
+		}
+	}
 }
 
-const Item_Struct* SharedDatabase::GetItem(uint32 id) {
+const EQEmu::ItemBase* SharedDatabase::GetItem(uint32 id) {
 	if (id == 0)
 	{
 		return nullptr;
@@ -1104,7 +1105,7 @@ const Item_Struct* SharedDatabase::GetItem(uint32 id) {
 	return nullptr;
 }
 
-const Item_Struct* SharedDatabase::IterateItems(uint32* id) {
+const EQEmu::ItemBase* SharedDatabase::IterateItems(uint32* id) {
 	if(!items_hash || !id) {
 		return nullptr;
 	}
@@ -1229,27 +1230,17 @@ void SharedDatabase::LoadNPCFactionLists(void *data, uint32 size, uint32 list_co
 
 }
 
-bool SharedDatabase::LoadNPCFactionLists() {
-	if(faction_hash) {
-		return true;
-	}
+bool SharedDatabase::LoadNPCFactionLists(const std::string &prefix) {
+	faction_mmf.reset(nullptr);
+	faction_hash.reset(nullptr);
 
 	try {
+		auto Config = EQEmuConfig::get();
 		EQEmu::IPCMutex mutex("faction");
 		mutex.Lock();
-		faction_mmf = new EQEmu::MemoryMappedFile("shared/faction");
-
-		uint32 list_count = 0;
-		uint32 max_lists = 0;
-		GetFactionListInfo(list_count, max_lists);
-		uint32 size = static_cast<uint32>(EQEmu::FixedMemoryHashSet<NPCFactionList>::estimated_size(
-			list_count, max_lists));
-
-		if(faction_mmf->Size() != size) {
-			EQ_EXCEPT("SharedDatabase", "Couldn't load npc factions because faction_mmf->Size() != size");
-		}
-
-		faction_hash = new EQEmu::FixedMemoryHashSet<NPCFactionList>(reinterpret_cast<uint8*>(faction_mmf->Get()), size);
+		std::string file_name = Config->SharedMemDir + prefix + std::string("faction");
+		faction_mmf = std::unique_ptr<EQEmu::MemoryMappedFile>(new EQEmu::MemoryMappedFile(file_name));
+		faction_hash = std::unique_ptr<EQEmu::FixedMemoryHashSet<NPCFactionList>>(new EQEmu::FixedMemoryHashSet<NPCFactionList>(reinterpret_cast<uint8*>(faction_mmf->Get()), faction_mmf->Size()));
 		mutex.Unlock();
 	} catch(std::exception& ex) {
 		Log.Out(Logs::General, Logs::Error, "Error Loading npc factions: %s", ex.what());
@@ -1262,7 +1253,7 @@ bool SharedDatabase::LoadNPCFactionLists() {
 // Create appropriate ItemInst class
 ItemInst* SharedDatabase::CreateItem(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2, uint32 aug3, uint32 aug4, uint32 aug5, uint32 aug6, uint8 attuned)
 {
-	const Item_Struct* item = nullptr;
+	const EQEmu::ItemBase* item = nullptr;
 	ItemInst* inst = nullptr;
 
 	item = GetItem(item_id);
@@ -1289,7 +1280,7 @@ ItemInst* SharedDatabase::CreateItem(uint32 item_id, int16 charges, uint32 aug1,
 
 
 // Create appropriate ItemInst class
-ItemInst* SharedDatabase::CreateItem(const Item_Struct* item, int16 charges, uint32 aug1, uint32 aug2, uint32 aug3, uint32 aug4, uint32 aug5, uint32 aug6, uint8 attuned)
+ItemInst* SharedDatabase::CreateItem(const EQEmu::ItemBase* item, int16 charges, uint32 aug1, uint32 aug2, uint32 aug3, uint32 aug4, uint32 aug5, uint32 aug6, uint8 attuned)
 {
 	ItemInst* inst = nullptr;
 	if (item) {
@@ -1313,7 +1304,7 @@ ItemInst* SharedDatabase::CreateItem(const Item_Struct* item, int16 charges, uin
 	return inst;
 }
 
-ItemInst* SharedDatabase::CreateBaseItem(const Item_Struct* item, int16 charges) {
+ItemInst* SharedDatabase::CreateBaseItem(const EQEmu::ItemBase* item, int16 charges) {
 	ItemInst* inst = nullptr;
 	if (item) {
 		// if maxcharges is -1 that means it is an unlimited use item.
@@ -1362,39 +1353,45 @@ int32 SharedDatabase::DeleteStalePlayerCorpses() {
     return results.RowsAffected();
 }
 
-bool SharedDatabase::GetCommandSettings(std::map<std::string,uint8> &commands) {
+bool SharedDatabase::GetCommandSettings(std::map<std::string, std::pair<uint8, std::vector<std::string>>> &command_settings)
+{
+	command_settings.clear();
 
-	const std::string query = "SELECT command, access FROM commands";
+	std::string query = "SELECT `command`, `access`, `aliases` FROM `command_settings`";
 	auto results = QueryDatabase(query);
-	if (!results.Success()) {
+	if (!results.Success())
 		return false;
+    
+	for (auto row = results.begin(); row != results.end(); ++row) {
+		command_settings[row[0]].first = atoi(row[1]);
+		if (row[2][0] == 0)
+			continue;
+
+		std::vector<std::string> aliases = SplitString(row[2], '|');
+		for (auto iter = aliases.begin(); iter != aliases.end(); ++iter) {
+			if (iter->empty())
+				continue;
+			command_settings[row[0]].second.push_back(*iter);
+		}
 	}
-
-    commands.clear();
-
-    for (auto row = results.begin(); row != results.end(); ++row)
-        commands[row[0]]=atoi(row[1]);
 
     return true;
 }
 
-bool SharedDatabase::LoadSkillCaps() {
-	if(skill_caps_mmf)
-		return true;
+bool SharedDatabase::LoadSkillCaps(const std::string &prefix) {
+	skill_caps_mmf.reset(nullptr);
 
 	uint32 class_count = PLAYER_CLASS_COUNT;
-	uint32 skill_count = HIGHEST_SKILL + 1;
+	uint32 skill_count = EQEmu::skills::HIGHEST_SKILL + 1;
 	uint32 level_count = HARD_LEVEL_CAP + 1;
 	uint32 size = (class_count * skill_count * level_count * sizeof(uint16));
 
 	try {
+		auto Config = EQEmuConfig::get();
 		EQEmu::IPCMutex mutex("skill_caps");
 		mutex.Lock();
-		skill_caps_mmf = new EQEmu::MemoryMappedFile("shared/skill_caps");
-		if(skill_caps_mmf->Size() != size) {
-			EQ_EXCEPT("SharedDatabase", "Unable to load skill caps: skill_caps_mmf->Size() != size");
-		}
-
+		std::string file_name = Config->SharedMemDir + prefix + std::string("skill_caps");
+		skill_caps_mmf = std::unique_ptr<EQEmu::MemoryMappedFile>(new EQEmu::MemoryMappedFile(file_name));
 		mutex.Unlock();
 	} catch(std::exception &ex) {
 		Log.Out(Logs::General, Logs::Error, "Error loading skill caps: %s", ex.what());
@@ -1406,7 +1403,7 @@ bool SharedDatabase::LoadSkillCaps() {
 
 void SharedDatabase::LoadSkillCaps(void *data) {
 	uint32 class_count = PLAYER_CLASS_COUNT;
-	uint32 skill_count = HIGHEST_SKILL + 1;
+	uint32 skill_count = EQEmu::skills::HIGHEST_SKILL + 1;
 	uint32 level_count = HARD_LEVEL_CAP + 1;
 	uint16 *skill_caps_table = reinterpret_cast<uint16*>(data);
 
@@ -1431,7 +1428,7 @@ void SharedDatabase::LoadSkillCaps(void *data) {
     }
 }
 
-uint16 SharedDatabase::GetSkillCap(uint8 Class_, SkillUseTypes Skill, uint8 Level) {
+uint16 SharedDatabase::GetSkillCap(uint8 Class_, EQEmu::skills::SkillType Skill, uint8 Level) {
 	if(!skill_caps_mmf) {
 		return 0;
 	}
@@ -1445,7 +1442,7 @@ uint16 SharedDatabase::GetSkillCap(uint8 Class_, SkillUseTypes Skill, uint8 Leve
 	}
 
 	uint32 class_count = PLAYER_CLASS_COUNT;
-	uint32 skill_count = HIGHEST_SKILL + 1;
+	uint32 skill_count = EQEmu::skills::HIGHEST_SKILL + 1;
 	uint32 level_count = HARD_LEVEL_CAP + 1;
 	if(Class_ > class_count || static_cast<uint32>(Skill) > skill_count || Level > level_count) {
 		return 0;
@@ -1460,7 +1457,7 @@ uint16 SharedDatabase::GetSkillCap(uint8 Class_, SkillUseTypes Skill, uint8 Leve
 	return skill_caps_table[index];
 }
 
-uint8 SharedDatabase::GetTrainLevel(uint8 Class_, SkillUseTypes Skill, uint8 Level) {
+uint8 SharedDatabase::GetTrainLevel(uint8 Class_, EQEmu::skills::SkillType Skill, uint8 Level) {
 	if(!skill_caps_mmf) {
 		return 0;
 	}
@@ -1474,7 +1471,7 @@ uint8 SharedDatabase::GetTrainLevel(uint8 Class_, SkillUseTypes Skill, uint8 Lev
 	}
 
 	uint32 class_count = PLAYER_CLASS_COUNT;
-	uint32 skill_count = HIGHEST_SKILL + 1;
+	uint32 skill_count = EQEmu::skills::HIGHEST_SKILL + 1;
 	uint32 level_count = HARD_LEVEL_CAP + 1;
 	if(Class_ > class_count || static_cast<uint32>(Skill) > skill_count || Level > level_count) {
 		return 0;
@@ -1542,8 +1539,30 @@ int SharedDatabase::GetMaxSpellID() {
 	return atoi(row[0]);
 }
 
+bool SharedDatabase::LoadSpells(const std::string &prefix, int32 *records, const SPDat_Spell_Struct **sp) {
+	spells_mmf.reset(nullptr);
+
+	try {
+		auto Config = EQEmuConfig::get();
+		EQEmu::IPCMutex mutex("spells");
+		mutex.Lock();
+	
+		std::string file_name = Config->SharedMemDir + prefix + std::string("spells");
+		spells_mmf = std::unique_ptr<EQEmu::MemoryMappedFile>(new EQEmu::MemoryMappedFile(file_name));
+		*records = *reinterpret_cast<uint32*>(spells_mmf->Get());
+		*sp = reinterpret_cast<const SPDat_Spell_Struct*>((char*)spells_mmf->Get() + 4);
+		mutex.Unlock();
+	}
+	catch(std::exception& ex) {
+		Log.Out(Logs::General, Logs::Error, "Error Loading Spells: %s", ex.what());
+		return false;
+	}
+	return true;
+}
+
 void SharedDatabase::LoadSpells(void *data, int max_spells) {
-	SPDat_Spell_Struct *sp = reinterpret_cast<SPDat_Spell_Struct*>(data);
+	*(uint32*)data = max_spells;
+	SPDat_Spell_Struct *sp = reinterpret_cast<SPDat_Spell_Struct*>((char*)data + sizeof(uint32));
 
 	const std::string query = "SELECT * FROM spells_new ORDER BY id ASC";
     auto results = QueryDatabase(query);
@@ -1623,10 +1642,10 @@ void SharedDatabase::LoadSpells(void *data, int max_spells) {
 
 		int tmp_skill = atoi(row[100]);;
 
-		if(tmp_skill < 0 || tmp_skill > HIGHEST_SKILL)
-            sp[tempid].skill = SkillBegging; /* not much better we can do. */ // can probably be changed to client-based 'SkillNone' once activated
+		if (tmp_skill < 0 || tmp_skill > EQEmu::skills::HIGHEST_SKILL)
+			sp[tempid].skill = EQEmu::skills::SkillBegging; /* not much better we can do. */ // can probably be changed to client-based 'SkillNone' once activated
         else
-			sp[tempid].skill = (SkillUseTypes) tmp_skill;
+			sp[tempid].skill = (EQEmu::skills::SkillType) tmp_skill;
 
 		sp[tempid].zonetype=atoi(row[101]);
 		sp[tempid].EnvironmentType=atoi(row[102]);
@@ -1645,12 +1664,13 @@ void SharedDatabase::LoadSpells(void *data, int max_spells) {
 
 		sp[tempid].uninterruptable=atoi(row[146]) != 0;
 		sp[tempid].ResistDiff=atoi(row[147]);
-		sp[tempid].dot_stacking_exempt=atoi(row[148]);
+		sp[tempid].dot_stacking_exempt = atoi(row[148]) != 0;
 		sp[tempid].RecourseLink = atoi(row[150]);
 		sp[tempid].no_partial_resist = atoi(row[151]) != 0;
 
 		sp[tempid].short_buff_box = atoi(row[154]);
 		sp[tempid].descnum = atoi(row[155]);
+		sp[tempid].typedescnum = atoi(row[156]);
 		sp[tempid].effectdescnum = atoi(row[157]);
 
 		sp[tempid].npc_no_los = atoi(row[159]) != 0;
@@ -1669,6 +1689,7 @@ void SharedDatabase::LoadSpells(void *data, int max_spells) {
 		sp[tempid].pvpresistcalc=atoi(row[178]);
 		sp[tempid].pvpresistcap=atoi(row[179]);
 		sp[tempid].spell_category=atoi(row[180]);
+		sp[tempid].cast_not_standing = atoi(row[184]) != 0;
 		sp[tempid].can_mgb=atoi(row[185]);
 		sp[tempid].dispel_flag = atoi(row[186]);
 		sp[tempid].MinResist = atoi(row[189]);
@@ -1679,25 +1700,29 @@ void SharedDatabase::LoadSpells(void *data, int max_spells) {
 		sp[tempid].directional_start = static_cast<float>(atoi(row[194]));
 		sp[tempid].directional_end = static_cast<float>(atoi(row[195]));
 		sp[tempid].sneak = atoi(row[196]) != 0;
-		sp[tempid].not_extendable = atoi(row[197]) != 0;
+		sp[tempid].not_focusable = atoi(row[197]) != 0;
+		sp[tempid].no_detrimental_spell_aggro = atoi(row[198]) != 0;
 		sp[tempid].suspendable = atoi(row[200]) != 0;
 		sp[tempid].viral_range = atoi(row[201]);
+		sp[tempid].songcap = atoi(row[202]);
 		sp[tempid].no_block = atoi(row[205]);
 		sp[tempid].spellgroup=atoi(row[207]);
 		sp[tempid].rank = atoi(row[208]);
-		sp[tempid].powerful_flag=atoi(row[209]);
+		sp[tempid].no_resist=atoi(row[209]);
 		sp[tempid].CastRestriction = atoi(row[211]);
 		sp[tempid].AllowRest = atoi(row[212]) != 0;
 		sp[tempid].InCombat = atoi(row[213]) != 0;
 		sp[tempid].OutofCombat = atoi(row[214]) != 0;
+		sp[tempid].override_crit_chance = atoi(row[217]);
 		sp[tempid].aemaxtargets = atoi(row[218]);
-		sp[tempid].maxtargets = atoi(row[219]);
+		sp[tempid].no_heal_damage_item_mod = atoi(row[219]);
 		sp[tempid].persistdeath = atoi(row[224]) != 0;
 		sp[tempid].min_dist = atof(row[227]);
 		sp[tempid].min_dist_mod = atof(row[228]);
 		sp[tempid].max_dist = atof(row[229]);
 		sp[tempid].max_dist_mod = atof(row[230]);
 		sp[tempid].min_range = static_cast<float>(atoi(row[231]));
+		sp[tempid].no_remove = atoi(row[232]) != 0;
 		sp[tempid].DamageShieldType = 0;
     }
 
@@ -1719,25 +1744,16 @@ int SharedDatabase::GetMaxBaseDataLevel() {
 	return atoi(row[0]);
 }
 
-bool SharedDatabase::LoadBaseData() {
-	if(base_data_mmf) {
-		return true;
-	}
+bool SharedDatabase::LoadBaseData(const std::string &prefix) {
+	base_data_mmf.reset(nullptr);
 
 	try {
+		auto Config = EQEmuConfig::get();
 		EQEmu::IPCMutex mutex("base_data");
 		mutex.Lock();
-		base_data_mmf = new EQEmu::MemoryMappedFile("shared/base_data");
 
-		int size = 16 * (GetMaxBaseDataLevel() + 1) * sizeof(BaseDataStruct);
-		if(size == 0) {
-			EQ_EXCEPT("SharedDatabase", "Base Data size is zero");
-		}
-
-		if(base_data_mmf->Size() != size) {
-			EQ_EXCEPT("SharedDatabase", "Couldn't load base data because base_data_mmf->Size() != size");
-		}
-
+		std::string file_name = Config->SharedMemDir + prefix + std::string("base_data");
+		base_data_mmf = std::unique_ptr<EQEmu::MemoryMappedFile>(new EQEmu::MemoryMappedFile(file_name));
 		mutex.Unlock();
 	} catch(std::exception& ex) {
 		Log.Out(Logs::General, Logs::Error, "Error Loading Base Data: %s", ex.what());
@@ -1793,7 +1809,6 @@ void SharedDatabase::LoadBaseData(void *data, int max_level) {
 		bd->mana_factor = atof(row[8]);
 		bd->endurance_factor = atof(row[9]);
     }
-
 }
 
 const BaseDataStruct* SharedDatabase::GetBaseData(int lvl, int cl) {
@@ -1931,6 +1946,7 @@ void SharedDatabase::LoadLootDrops(void *data, uint32 size) {
                             "ON lootdrop.id = lootdrop_entries.lootdrop_id ORDER BY lootdrop_id";
     auto results = QueryDatabase(query);
     if (!results.Success()) {
+		return;
     }
 
     uint32 current_id = 0;
@@ -1967,21 +1983,24 @@ void SharedDatabase::LoadLootDrops(void *data, uint32 size) {
 
 }
 
-bool SharedDatabase::LoadLoot() {
-	if(loot_table_mmf || loot_drop_mmf)
-		return true;
+bool SharedDatabase::LoadLoot(const std::string &prefix) {
+	loot_table_mmf.reset(nullptr);
+	loot_drop_mmf.reset(nullptr);
 
 	try {
+		auto Config = EQEmuConfig::get();
 		EQEmu::IPCMutex mutex("loot");
 		mutex.Lock();
-		loot_table_mmf = new EQEmu::MemoryMappedFile("shared/loot_table");
-		loot_table_hash = new EQEmu::FixedMemoryVariableHashSet<LootTable_Struct>(
+		std::string file_name_lt = Config->SharedMemDir + prefix + std::string("loot_table");
+		loot_table_mmf = std::unique_ptr<EQEmu::MemoryMappedFile>(new EQEmu::MemoryMappedFile(file_name_lt));
+		loot_table_hash = std::unique_ptr<EQEmu::FixedMemoryVariableHashSet<LootTable_Struct>>(new EQEmu::FixedMemoryVariableHashSet<LootTable_Struct>(
 			reinterpret_cast<uint8*>(loot_table_mmf->Get()),
-			loot_table_mmf->Size());
-		loot_drop_mmf = new EQEmu::MemoryMappedFile("shared/loot_drop");
-		loot_drop_hash = new EQEmu::FixedMemoryVariableHashSet<LootDrop_Struct>(
+			loot_table_mmf->Size()));
+		std::string file_name_ld = Config->SharedMemDir + prefix + std::string("loot_drop");
+		loot_drop_mmf = std::unique_ptr<EQEmu::MemoryMappedFile>(new EQEmu::MemoryMappedFile(file_name_ld));
+		loot_drop_hash = std::unique_ptr<EQEmu::FixedMemoryVariableHashSet<LootDrop_Struct>>(new EQEmu::FixedMemoryVariableHashSet<LootDrop_Struct>(
 			reinterpret_cast<uint8*>(loot_drop_mmf->Get()),
-			loot_drop_mmf->Size());
+			loot_drop_mmf->Size()));
 		mutex.Unlock();
 	} catch(std::exception &ex) {
 		Log.Out(Logs::General, Logs::Error, "Error loading loot: %s", ex.what());
@@ -2021,7 +2040,7 @@ const LootDrop_Struct* SharedDatabase::GetLootDrop(uint32 lootdrop_id) {
 
 void SharedDatabase::LoadCharacterInspectMessage(uint32 character_id, InspectMessage_Struct* message) {
 	std::string query = StringFormat("SELECT `inspect_message` FROM `character_inspect_messages` WHERE `id` = %u LIMIT 1", character_id);
-	auto results = QueryDatabase(query); 
+	auto results = QueryDatabase(query);
 	auto row = results.begin();
 	memset(message, '\0', sizeof(InspectMessage_Struct));
 	for (auto row = results.begin(); row != results.end(); ++row) {
@@ -2031,29 +2050,7 @@ void SharedDatabase::LoadCharacterInspectMessage(uint32 character_id, InspectMes
 
 void SharedDatabase::SaveCharacterInspectMessage(uint32 character_id, const InspectMessage_Struct* message) {
 	std::string query = StringFormat("REPLACE INTO `character_inspect_messages` (id, inspect_message) VALUES (%u, '%s')", character_id, EscapeString(message->text).c_str());
-	auto results = QueryDatabase(query); 
-}
-
-void SharedDatabase::GetBotInspectMessage(uint32 botid, InspectMessage_Struct* message) {
-
-	std::string query = StringFormat("SELECT BotInspectMessage FROM bots WHERE BotID = %i", botid);
 	auto results = QueryDatabase(query);
-	if (!results.Success()) {
-        return;
-	}
-
-    if (results.RowCount() != 1)
-        return;
-
-    auto row = results.begin();
-    memcpy(message, row[0], sizeof(InspectMessage_Struct));
-
-}
-
-void SharedDatabase::SetBotInspectMessage(uint32 botid, const InspectMessage_Struct* message) {
-	std::string msg = EscapeString(message->text);
-	std::string query = StringFormat("UPDATE bots SET BotInspectMessage = '%s' WHERE BotID = %i", msg.c_str(), botid);
-    QueryDatabase(query);
 }
 
 bool SharedDatabase::VerifyToken(std::string token, int& status) {

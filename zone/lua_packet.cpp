@@ -18,7 +18,7 @@ Lua_Packet::Lua_Packet(int opcode, int size, bool raw) {
 	if(raw) {
 		SetLuaPtrData(new EQApplicationPacket(OP_Unknown, size));
 		owned_ = true;
-	
+
 		EQApplicationPacket *self = reinterpret_cast<EQApplicationPacket*>(d_);
 		self->SetOpcodeBypass(opcode);
 	} else {
@@ -692,8 +692,8 @@ luabind::scope lua_register_packet_opcodes() {
 			luabind::value("VetClaimRequest", static_cast<int>(OP_VetClaimRequest)),
 			luabind::value("VetClaimReply", static_cast<int>(OP_VetClaimReply)),
 			luabind::value("WeaponEquip1", static_cast<int>(OP_WeaponEquip1)),
-			luabind::value("WeaponEquip2", static_cast<int>(OP_WeaponEquip2)),
-			luabind::value("WeaponUnequip2", static_cast<int>(OP_WeaponUnequip2)),
+			luabind::value("PlayerStateAdd", static_cast<int>(OP_PlayerStateAdd)),
+			luabind::value("PlayerStateRemove", static_cast<int>(OP_PlayerStateRemove)),
 			luabind::value("WorldLogout", static_cast<int>(OP_WorldLogout)),
 			luabind::value("SessionReady", static_cast<int>(OP_SessionReady)),
 			luabind::value("Login", static_cast<int>(OP_Login)),
@@ -847,7 +847,8 @@ luabind::scope lua_register_packet_opcodes() {
 			luabind::value("OpenContainer", static_cast<int>(OP_OpenContainer)),
 			luabind::value("Marquee", static_cast<int>(OP_Marquee)),
 			luabind::value("ClientTimeStamp", static_cast<int>(OP_ClientTimeStamp)),
-			luabind::value("GuildPromote", static_cast<int>(OP_GuildPromote))
+			luabind::value("GuildPromote", static_cast<int>(OP_GuildPromote)),
+			luabind::value("Fling", static_cast<int>(OP_Fling))
 		];
 }
 

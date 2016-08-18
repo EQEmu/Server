@@ -61,7 +61,6 @@ public:
 private:
 	Timer* deletion_timer;
 	char guild[16];
-	char founders[3];
 	Client* owner;
 	Client* members[6];
 	uint32 refid;

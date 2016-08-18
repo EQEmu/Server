@@ -46,7 +46,7 @@ void WorldConnection::OnConnected() {
 	const EQEmuConfig *Config=EQEmuConfig::get();
 	Log.Out(Logs::General, Logs::Netcode, "[WORLD] Connected to World: %s:%d", Config->WorldIP.c_str(), Config->WorldTCPPort);
 
-	ServerPacket* pack = new ServerPacket(ServerOP_ZAAuth, 16);
+	auto pack = new ServerPacket(ServerOP_ZAAuth, 16);
 	MD5::Generate((const uchar*) m_password.c_str(), m_password.length(), pack->pBuffer);
 	SendPacket(pack);
 	safe_delete(pack);

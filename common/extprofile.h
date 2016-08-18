@@ -40,7 +40,7 @@ struct ExtendedProfile_Struct {
 	uint16				old_pet_hp; /* Not Used */
 	uint16				old_pet_mana; /* Not Used */
 	SpellBuff_Struct	pet_buffs[BUFF_COUNT]; /* Not Used */
-	uint32				pet_items[_MaterialCount]; /* Not Used */
+	EQEmu::TextureShortProfile	pet_items; /* Not Used */
 	char				merc_name[64]; /* Used */
 
 	uint32				aa_effects; /* Used */
@@ -54,6 +54,8 @@ struct ExtendedProfile_Struct {
 	uint32				mercTimerRemaining; /* Not Used */
 	uint8				mercGender; /* Not Used */
 	int32				mercState; /* Not Used */
+	uint32				last_invsnapshot_time; /* Used */
+	uint32				next_invsnapshot_time; /* Used */
 };
 
 #pragma pack()

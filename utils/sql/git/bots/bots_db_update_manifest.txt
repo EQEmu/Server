@@ -1,0 +1,28 @@
+9000|2015_09_30_bots.sql|SHOW TABLES LIKE 'bot_data'|empty|
+9001|2016_03_24_bots_command_settings.sql|SHOW TABLES LIKE 'bot_command_settings'|empty|
+9002|2016_03_24_bots_command_rules.sql|SELECT * FROM `rule_values` WHERE `rule_name` LIKE 'Bots:CommandSpellRank'|empty|
+9003|2016_04_05_bots_pet_spell_id_field.sql|SHOW COLUMNS FROM `bot_pets` LIKE 'pet_id'|not_empty|
+9004|2016_04_07_bots_heal_override_target.sql|SELECT `bot_command` FROM `bot_command_settings` WHERE `bot_command` LIKE 'healrotationclearhot'|empty|
+9005|2016_04_08_bots_heal_rotations.sql|SHOW TABLES LIKE 'bot_heal_rotations'|empty|
+9006|2016_04_12_bots_inventory_window.sql|SELECT `bot_command` FROM `bot_command_settings` WHERE `bot_command` LIKE 'inventorywindow'|empty|
+9007|2016_06_23_bots_camel_case_name_rule.sql|SELECT * FROM `rule_values` WHERE `rule_name` LIKE 'Bots:AllowCamelCaseNames'|empty|
+9008|2016_06_28_bots_inventory_charges_update.sql|SELECT * FROM `information_schema`.`COLUMNS` isc WHERE isc.`TABLE_SCHEMA` = DATABASE() AND isc.`TABLE_NAME` = 'bot_inventories' AND isc.`COLUMN_NAME` = 'inst_charges' AND isc.`DATA_TYPE` = 'tinyint'|not_empty|
+
+# Upgrade conditions:
+# 	This won't be needed after this system is implemented, but it is used database that are not
+#	yet using the versioning system to figure out where the database is schema wise to determine
+#	which updates are necessary to run
+#
+# Example: Version|Filename.sql|Query_to_Check_Condition_For_Needed_Update|match type|text to match
+#	0 = Database Version
+#	1 = Filename.sql
+#	2 = Query_to_Check_Condition_For_Needed_Update
+#	3 = Match Type - If condition from match type to Value 4 is true, update will flag for needing to be ran
+#		contains = If query results contains text from 4th value
+#		match = If query results matches text from 4th value
+#		missing = If query result is missing text from 4th value
+#		empty = If the query results in no results
+#		not_empty = If the query is not empty
+#	4 = Text to match
+#
+#

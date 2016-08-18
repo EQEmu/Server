@@ -1,5 +1,5 @@
 /*	EQEMu: Everquest Server Emulator
-	Copyright (C) 2001-2003 EQEMu Development Team (http://eqemulator.net)
+	Copyright (C) 2001-2016 EQEMu Development Team (http://eqemulator.net)
 
 	This program is free software; you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -23,6 +23,8 @@
 #include "rulesys.h"
 #include "shareddb.h"
 #include "string_util.h"
+
+#include "../common/light_source.h"
 
 #include <limits.h>
 
@@ -156,66 +158,66 @@ ItemInst* Inventory::GetItem(int16 slot_id) const
 	ItemInst* result = nullptr;
 
 	// Cursor
-	if (slot_id == MainCursor) {
+	if (slot_id == EQEmu::legacy::SlotCursor) {
 		// Cursor slot
 		result = m_cursor.peek_front();
 	}
 
 	// Non bag slots
-	else if (slot_id >= EmuConstants::TRADE_BEGIN && slot_id <= EmuConstants::TRADE_END) {
+	else if (slot_id >= EQEmu::legacy::TRADE_BEGIN && slot_id <= EQEmu::legacy::TRADE_END) {
 		result = _GetItem(m_trade, slot_id);
 	}
-	else if (slot_id >= EmuConstants::SHARED_BANK_BEGIN && slot_id <= EmuConstants::SHARED_BANK_END) {
+	else if (slot_id >= EQEmu::legacy::SHARED_BANK_BEGIN && slot_id <= EQEmu::legacy::SHARED_BANK_END) {
 		// Shared Bank slots
 		result = _GetItem(m_shbank, slot_id);
 	}
-	else if (slot_id >= EmuConstants::BANK_BEGIN && slot_id <= EmuConstants::BANK_END) {
+	else if (slot_id >= EQEmu::legacy::BANK_BEGIN && slot_id <= EQEmu::legacy::BANK_END) {
 		// Bank slots
 		result = _GetItem(m_bank, slot_id);
 	}
-	else if ((slot_id >= EmuConstants::GENERAL_BEGIN && slot_id <= EmuConstants::GENERAL_END)) {
+	else if ((slot_id >= EQEmu::legacy::GENERAL_BEGIN && slot_id <= EQEmu::legacy::GENERAL_END)) {
 		// Personal inventory slots
 		result = _GetItem(m_inv, slot_id);
 	}
-	else if ((slot_id >= EmuConstants::EQUIPMENT_BEGIN && slot_id <= EmuConstants::EQUIPMENT_END) ||
-		(slot_id >= EmuConstants::TRIBUTE_BEGIN && slot_id <= EmuConstants::TRIBUTE_END) || (slot_id == MainPowerSource)) {
+	else if ((slot_id >= EQEmu::legacy::EQUIPMENT_BEGIN && slot_id <= EQEmu::legacy::EQUIPMENT_END) ||
+		(slot_id >= EQEmu::legacy::TRIBUTE_BEGIN && slot_id <= EQEmu::legacy::TRIBUTE_END) || (slot_id == EQEmu::legacy::SlotPowerSource)) {
 		// Equippable slots (on body)
 		result = _GetItem(m_worn, slot_id);
 	}
 
 	// Inner bag slots
-	else if (slot_id >= EmuConstants::TRADE_BAGS_BEGIN && slot_id <= EmuConstants::TRADE_BAGS_END) {
+	else if (slot_id >= EQEmu::legacy::TRADE_BAGS_BEGIN && slot_id <= EQEmu::legacy::TRADE_BAGS_END) {
 		// Trade bag slots
 		ItemInst* inst = _GetItem(m_trade, Inventory::CalcSlotId(slot_id));
-		if (inst && inst->IsType(ItemClassContainer)) {
+		if (inst && inst->IsClassBag()) {
 			result = inst->GetItem(Inventory::CalcBagIdx(slot_id));
 		}
 	}
-	else if (slot_id >= EmuConstants::SHARED_BANK_BAGS_BEGIN && slot_id <= EmuConstants::SHARED_BANK_BAGS_END) {
+	else if (slot_id >= EQEmu::legacy::SHARED_BANK_BAGS_BEGIN && slot_id <= EQEmu::legacy::SHARED_BANK_BAGS_END) {
 		// Shared Bank bag slots
 		ItemInst* inst = _GetItem(m_shbank, Inventory::CalcSlotId(slot_id));
-		if (inst && inst->IsType(ItemClassContainer)) {
+		if (inst && inst->IsClassBag()) {
 			result = inst->GetItem(Inventory::CalcBagIdx(slot_id));
 		}
 	}
-	else if (slot_id >= EmuConstants::BANK_BAGS_BEGIN && slot_id <= EmuConstants::BANK_BAGS_END) {
+	else if (slot_id >= EQEmu::legacy::BANK_BAGS_BEGIN && slot_id <= EQEmu::legacy::BANK_BAGS_END) {
 		// Bank bag slots
 		ItemInst* inst = _GetItem(m_bank, Inventory::CalcSlotId(slot_id));
-		if (inst && inst->IsType(ItemClassContainer)) {
+		if (inst && inst->IsClassBag()) {
 			result = inst->GetItem(Inventory::CalcBagIdx(slot_id));
 		}
 	}
-	else if (slot_id >= EmuConstants::CURSOR_BAG_BEGIN && slot_id <= EmuConstants::CURSOR_BAG_END) {
+	else if (slot_id >= EQEmu::legacy::CURSOR_BAG_BEGIN && slot_id <= EQEmu::legacy::CURSOR_BAG_END) {
 		// Cursor bag slots
 		ItemInst* inst = m_cursor.peek_front();
-		if (inst && inst->IsType(ItemClassContainer)) {
+		if (inst && inst->IsClassBag()) {
 			result = inst->GetItem(Inventory::CalcBagIdx(slot_id));
 		}
 	}
-	else if (slot_id >= EmuConstants::GENERAL_BAGS_BEGIN && slot_id <= EmuConstants::GENERAL_BAGS_END) {
+	else if (slot_id >= EQEmu::legacy::GENERAL_BAGS_BEGIN && slot_id <= EQEmu::legacy::GENERAL_BAGS_END) {
 		// Personal inventory bag slots
 		ItemInst* inst = _GetItem(m_inv, Inventory::CalcSlotId(slot_id));
-		if (inst && inst->IsType(ItemClassContainer)) {
+		if (inst && inst->IsClassBag()) {
 			result = inst->GetItem(Inventory::CalcBagIdx(slot_id));
 		}
 	}
@@ -248,7 +250,7 @@ int16 Inventory::PutItem(int16 slot_id, const ItemInst& inst)
 int16 Inventory::PushCursor(const ItemInst& inst)
 {
 	m_cursor.push(inst.Clone());
-	return MainCursor;
+	return EQEmu::legacy::SlotCursor;
 }
 
 ItemInst* Inventory::GetCursorItem()
@@ -314,7 +316,7 @@ bool Inventory::CheckNoDrop(int16 slot_id) {
 	if (!inst) return false;
 	if (!inst->GetItem()->NoDrop) return true;
 	if (inst->GetItem()->ItemClass == 1) {
-		for (uint8 i = SUB_BEGIN; i < EmuConstants::ITEM_CONTAINER_SIZE; i++) {
+		for (uint8 i = SUB_INDEX_BEGIN; i < EQEmu::legacy::ITEM_CONTAINER_SIZE; i++) {
 			ItemInst* bagitem = GetItem(Inventory::CalcSlotId(slot_id, i));
 			if (bagitem && !bagitem->GetItem()->NoDrop)
 				return true;
@@ -329,37 +331,37 @@ ItemInst* Inventory::PopItem(int16 slot_id)
 {
 	ItemInst* p = nullptr;
 
-	if (slot_id == MainCursor) {
+	if (slot_id == EQEmu::legacy::SlotCursor) {
 		p = m_cursor.pop();
 	}
-	else if ((slot_id >= EmuConstants::EQUIPMENT_BEGIN && slot_id <= EmuConstants::EQUIPMENT_END) || (slot_id == MainPowerSource)) {
+	else if ((slot_id >= EQEmu::legacy::EQUIPMENT_BEGIN && slot_id <= EQEmu::legacy::EQUIPMENT_END) || (slot_id == EQEmu::legacy::SlotPowerSource)) {
 		p = m_worn[slot_id];
 		m_worn.erase(slot_id);
 	}
-	else if ((slot_id >= EmuConstants::GENERAL_BEGIN && slot_id <= EmuConstants::GENERAL_END)) {
+	else if ((slot_id >= EQEmu::legacy::GENERAL_BEGIN && slot_id <= EQEmu::legacy::GENERAL_END)) {
 		p = m_inv[slot_id];
 		m_inv.erase(slot_id);
 	}
-	else if (slot_id >= EmuConstants::TRIBUTE_BEGIN && slot_id <= EmuConstants::TRIBUTE_END) {
+	else if (slot_id >= EQEmu::legacy::TRIBUTE_BEGIN && slot_id <= EQEmu::legacy::TRIBUTE_END) {
 		p = m_worn[slot_id];
 		m_worn.erase(slot_id);
 	}
-	else if (slot_id >= EmuConstants::BANK_BEGIN && slot_id <= EmuConstants::BANK_END) {
+	else if (slot_id >= EQEmu::legacy::BANK_BEGIN && slot_id <= EQEmu::legacy::BANK_END) {
 		p = m_bank[slot_id];
 		m_bank.erase(slot_id);
 	}
-	else if (slot_id >= EmuConstants::SHARED_BANK_BEGIN && slot_id <= EmuConstants::SHARED_BANK_END) {
+	else if (slot_id >= EQEmu::legacy::SHARED_BANK_BEGIN && slot_id <= EQEmu::legacy::SHARED_BANK_END) {
 		p = m_shbank[slot_id];
 		m_shbank.erase(slot_id);
 	}
-	else if (slot_id >= EmuConstants::TRADE_BEGIN && slot_id <= EmuConstants::TRADE_END) {
+	else if (slot_id >= EQEmu::legacy::TRADE_BEGIN && slot_id <= EQEmu::legacy::TRADE_END) {
 		p = m_trade[slot_id];
 		m_trade.erase(slot_id);
 	}
 	else {
 		// Is slot inside bag?
 		ItemInst* baginst = GetItem(Inventory::CalcSlotId(slot_id));
-		if (baginst != nullptr && baginst->IsType(ItemClassContainer)) {
+		if (baginst != nullptr && baginst->IsClassBag()) {
 			p = baginst->PopItem(Inventory::CalcBagIdx(slot_id));
 		}
 	}
@@ -368,11 +370,11 @@ ItemInst* Inventory::PopItem(int16 slot_id)
 	return p;
 }
 
-bool Inventory::HasSpaceForItem(const Item_Struct *ItemToTry, int16 Quantity) {
+bool Inventory::HasSpaceForItem(const EQEmu::ItemBase *ItemToTry, int16 Quantity) {
 
 	if (ItemToTry->Stackable) {
 
-		for (int16 i = EmuConstants::GENERAL_BEGIN; i <= EmuConstants::GENERAL_END; i++) {
+		for (int16 i = EQEmu::legacy::GENERAL_BEGIN; i <= EQEmu::legacy::GENERAL_END; i++) {
 
 			ItemInst* InvItem = GetItem(i);
 
@@ -386,11 +388,11 @@ bool Inventory::HasSpaceForItem(const Item_Struct *ItemToTry, int16 Quantity) {
 				Quantity -= ChargeSlotsLeft;
 
 			}
-			if (InvItem && InvItem->IsType(ItemClassContainer)) {
+			if (InvItem && InvItem->IsClassBag()) {
 
-				int16 BaseSlotID = Inventory::CalcSlotId(i, SUB_BEGIN);
+				int16 BaseSlotID = Inventory::CalcSlotId(i, SUB_INDEX_BEGIN);
 				uint8 BagSize = InvItem->GetItem()->BagSlots;
-				for (uint8 BagSlot = SUB_BEGIN; BagSlot < BagSize; BagSlot++) {
+				for (uint8 BagSlot = SUB_INDEX_BEGIN; BagSlot < BagSize; BagSlot++) {
 
 					InvItem = GetItem(BaseSlotID + BagSlot);
 
@@ -409,7 +411,7 @@ bool Inventory::HasSpaceForItem(const Item_Struct *ItemToTry, int16 Quantity) {
 		}
 	}
 
-	for (int16 i = EmuConstants::GENERAL_BEGIN; i <= EmuConstants::GENERAL_END; i++) {
+	for (int16 i = EQEmu::legacy::GENERAL_BEGIN; i <= EQEmu::legacy::GENERAL_END; i++) {
 
 		ItemInst* InvItem = GetItem(i);
 
@@ -430,13 +432,13 @@ bool Inventory::HasSpaceForItem(const Item_Struct *ItemToTry, int16 Quantity) {
 			}
 
 		}
-		else if (InvItem->IsType(ItemClassContainer) && CanItemFitInContainer(ItemToTry, InvItem->GetItem())) {
+		else if (InvItem->IsClassBag() && CanItemFitInContainer(ItemToTry, InvItem->GetItem())) {
 
-			int16 BaseSlotID = Inventory::CalcSlotId(i, SUB_BEGIN);
+			int16 BaseSlotID = Inventory::CalcSlotId(i, SUB_INDEX_BEGIN);
 
 			uint8 BagSize = InvItem->GetItem()->BagSlots;
 
-			for (uint8 BagSlot = SUB_BEGIN; BagSlot<BagSize; BagSlot++) {
+			for (uint8 BagSlot = SUB_INDEX_BEGIN; BagSlot<BagSize; BagSlot++) {
 
 				InvItem = GetItem(BaseSlotID + BagSlot);
 
@@ -615,27 +617,27 @@ int16 Inventory::HasItemByLoreGroup(uint32 loregroup, uint8 where)
 int16 Inventory::FindFreeSlot(bool for_bag, bool try_cursor, uint8 min_size, bool is_arrow)
 {
 	// Check basic inventory
-	for (int16 i = EmuConstants::GENERAL_BEGIN; i <= EmuConstants::GENERAL_END; i++) {
+	for (int16 i = EQEmu::legacy::GENERAL_BEGIN; i <= EQEmu::legacy::GENERAL_END; i++) {
 		if (!GetItem(i))
 			// Found available slot in personal inventory
 			return i;
 	}
 
 	if (!for_bag) {
-		for (int16 i = EmuConstants::GENERAL_BEGIN; i <= EmuConstants::GENERAL_END; i++) {
+		for (int16 i = EQEmu::legacy::GENERAL_BEGIN; i <= EQEmu::legacy::GENERAL_END; i++) {
 			const ItemInst* inst = GetItem(i);
-			if (inst && inst->IsType(ItemClassContainer) && inst->GetItem()->BagSize >= min_size)
+			if (inst && inst->IsClassBag() && inst->GetItem()->BagSize >= min_size)
 			{
-				if (inst->GetItem()->BagType == BagTypeQuiver && inst->GetItem()->ItemType != ItemTypeArrow)
+				if (inst->GetItem()->BagType == EQEmu::item::BagTypeQuiver && inst->GetItem()->ItemType != EQEmu::item::ItemTypeArrow)
 				{
 					continue;
 				}
 
-				int16 base_slot_id = Inventory::CalcSlotId(i, SUB_BEGIN);
+				int16 base_slot_id = Inventory::CalcSlotId(i, SUB_INDEX_BEGIN);
 
 				uint8 slots = inst->GetItem()->BagSlots;
 				uint8 j;
-				for (j = SUB_BEGIN; j<slots; j++) {
+				for (j = SUB_INDEX_BEGIN; j<slots; j++) {
 					if (!GetItem(base_slot_id + j)) {
 						// Found available slot within bag
 						return (base_slot_id + j);
@@ -648,7 +650,7 @@ int16 Inventory::FindFreeSlot(bool for_bag, bool try_cursor, uint8 min_size, boo
 	if (try_cursor) {
 		// Always room on cursor (it's a queue)
 		// (we may wish to cap this in the future)
-		return MainCursor;
+		return EQEmu::legacy::SlotCursor;
 	}
 
 	// No available slots
@@ -666,18 +668,18 @@ int16 Inventory::FindFreeSlotForTradeItem(const ItemInst* inst) {
 		return INVALID_INDEX;
 
 	// step 1: find room for bags (caller should really ask for slots for bags first to avoid sending them to cursor..and bag item loss)
-	if (inst->IsType(ItemClassContainer)) {
-		for (int16 free_slot = EmuConstants::GENERAL_BEGIN; free_slot <= EmuConstants::GENERAL_END; ++free_slot) {
+	if (inst->IsClassBag()) {
+		for (int16 free_slot = EQEmu::legacy::GENERAL_BEGIN; free_slot <= EQEmu::legacy::GENERAL_END; ++free_slot) {
 			if (!m_inv[free_slot])
 				return free_slot;
 		}
 
-		return MainCursor; // return cursor since bags do not stack and will not fit inside other bags..yet...)
+		return EQEmu::legacy::SlotCursor; // return cursor since bags do not stack and will not fit inside other bags..yet...)
 	}
 
 	// step 2: find partial room for stackables
 	if (inst->IsStackable()) {
-		for (int16 free_slot = EmuConstants::GENERAL_BEGIN; free_slot <= EmuConstants::GENERAL_END; ++free_slot) {
+		for (int16 free_slot = EQEmu::legacy::GENERAL_BEGIN; free_slot <= EQEmu::legacy::GENERAL_END; ++free_slot) {
 			const ItemInst* main_inst = m_inv[free_slot];
 
 			if (!main_inst)
@@ -687,14 +689,14 @@ int16 Inventory::FindFreeSlotForTradeItem(const ItemInst* inst) {
 				return free_slot;
 		}
 
-		for (int16 free_slot = EmuConstants::GENERAL_BEGIN; free_slot <= EmuConstants::GENERAL_END; ++free_slot) {
+		for (int16 free_slot = EQEmu::legacy::GENERAL_BEGIN; free_slot <= EQEmu::legacy::GENERAL_END; ++free_slot) {
 			const ItemInst* main_inst = m_inv[free_slot];
 
 			if (!main_inst)
 				continue;
 
-			if (main_inst->IsType(ItemClassContainer)) { // if item-specific containers already have bad items, we won't fix it here...
-				for (uint8 free_bag_slot = SUB_BEGIN; (free_bag_slot < main_inst->GetItem()->BagSlots) && (free_bag_slot < EmuConstants::ITEM_CONTAINER_SIZE); ++free_bag_slot) {
+			if (main_inst->IsClassBag()) { // if item-specific containers already have bad items, we won't fix it here...
+				for (uint8 free_bag_slot = SUB_INDEX_BEGIN; (free_bag_slot < main_inst->GetItem()->BagSlots) && (free_bag_slot < EQEmu::legacy::ITEM_CONTAINER_SIZE); ++free_bag_slot) {
 					const ItemInst* sub_inst = main_inst->GetItem(free_bag_slot);
 
 					if (!sub_inst)
@@ -708,14 +710,14 @@ int16 Inventory::FindFreeSlotForTradeItem(const ItemInst* inst) {
 	}
 
 	// step 3a: find room for container-specific items (ItemClassArrow)
-	if (inst->GetItem()->ItemType == ItemTypeArrow) {
-		for (int16 free_slot = EmuConstants::GENERAL_BEGIN; free_slot <= EmuConstants::GENERAL_END; ++free_slot) {
+	if (inst->GetItem()->ItemType == EQEmu::item::ItemTypeArrow) {
+		for (int16 free_slot = EQEmu::legacy::GENERAL_BEGIN; free_slot <= EQEmu::legacy::GENERAL_END; ++free_slot) {
 			const ItemInst* main_inst = m_inv[free_slot];
 
-			if (!main_inst || (main_inst->GetItem()->BagType != BagTypeQuiver) || !main_inst->IsType(ItemClassContainer))
+			if (!main_inst || (main_inst->GetItem()->BagType != EQEmu::item::BagTypeQuiver) || !main_inst->IsClassBag())
 				continue;
 
-			for (uint8 free_bag_slot = SUB_BEGIN; (free_bag_slot < main_inst->GetItem()->BagSlots) && (free_bag_slot < EmuConstants::ITEM_CONTAINER_SIZE); ++free_bag_slot) {
+			for (uint8 free_bag_slot = SUB_INDEX_BEGIN; (free_bag_slot < main_inst->GetItem()->BagSlots) && (free_bag_slot < EQEmu::legacy::ITEM_CONTAINER_SIZE); ++free_bag_slot) {
 				if (!main_inst->GetItem(free_bag_slot))
 					return Inventory::CalcSlotId(free_slot, free_bag_slot);
 			}
@@ -723,14 +725,14 @@ int16 Inventory::FindFreeSlotForTradeItem(const ItemInst* inst) {
 	}
 
 	// step 3b: find room for container-specific items (ItemClassSmallThrowing)
-	if (inst->GetItem()->ItemType == ItemTypeSmallThrowing) {
-		for (int16 free_slot = EmuConstants::GENERAL_BEGIN; free_slot <= EmuConstants::GENERAL_END; ++free_slot) {
+	if (inst->GetItem()->ItemType == EQEmu::item::ItemTypeSmallThrowing) {
+		for (int16 free_slot = EQEmu::legacy::GENERAL_BEGIN; free_slot <= EQEmu::legacy::GENERAL_END; ++free_slot) {
 			const ItemInst* main_inst = m_inv[free_slot];
 
-			if (!main_inst || (main_inst->GetItem()->BagType != BagTypeBandolier) || !main_inst->IsType(ItemClassContainer))
+			if (!main_inst || (main_inst->GetItem()->BagType != EQEmu::item::BagTypeBandolier) || !main_inst->IsClassBag())
 				continue;
 
-			for (uint8 free_bag_slot = SUB_BEGIN; (free_bag_slot < main_inst->GetItem()->BagSlots) && (free_bag_slot < EmuConstants::ITEM_CONTAINER_SIZE); ++free_bag_slot) {
+			for (uint8 free_bag_slot = SUB_INDEX_BEGIN; (free_bag_slot < main_inst->GetItem()->BagSlots) && (free_bag_slot < EQEmu::legacy::ITEM_CONTAINER_SIZE); ++free_bag_slot) {
 				if (!main_inst->GetItem(free_bag_slot))
 					return Inventory::CalcSlotId(free_slot, free_bag_slot);
 			}
@@ -738,21 +740,21 @@ int16 Inventory::FindFreeSlotForTradeItem(const ItemInst* inst) {
 	}
 
 	// step 4: just find an empty slot
-	for (int16 free_slot = EmuConstants::GENERAL_BEGIN; free_slot <= EmuConstants::GENERAL_END; ++free_slot) {
+	for (int16 free_slot = EQEmu::legacy::GENERAL_BEGIN; free_slot <= EQEmu::legacy::GENERAL_END; ++free_slot) {
 		const ItemInst* main_inst = m_inv[free_slot];
 
 		if (!main_inst)
 			return free_slot;
 	}
 
-	for (int16 free_slot = EmuConstants::GENERAL_BEGIN; free_slot <= EmuConstants::GENERAL_END; ++free_slot) {
+	for (int16 free_slot = EQEmu::legacy::GENERAL_BEGIN; free_slot <= EQEmu::legacy::GENERAL_END; ++free_slot) {
 		const ItemInst* main_inst = m_inv[free_slot];
 
-		if (main_inst && main_inst->IsType(ItemClassContainer)) {
-			if ((main_inst->GetItem()->BagSize < inst->GetItem()->Size) || (main_inst->GetItem()->BagType == BagTypeBandolier) || (main_inst->GetItem()->BagType == BagTypeQuiver))
+		if (main_inst && main_inst->IsClassBag()) {
+			if ((main_inst->GetItem()->BagSize < inst->GetItem()->Size) || (main_inst->GetItem()->BagType == EQEmu::item::BagTypeBandolier) || (main_inst->GetItem()->BagType == EQEmu::item::BagTypeQuiver))
 				continue;
 
-			for (uint8 free_bag_slot = SUB_BEGIN; (free_bag_slot < main_inst->GetItem()->BagSlots) && (free_bag_slot < EmuConstants::ITEM_CONTAINER_SIZE); ++free_bag_slot) {
+			for (uint8 free_bag_slot = SUB_INDEX_BEGIN; (free_bag_slot < main_inst->GetItem()->BagSlots) && (free_bag_slot < EQEmu::legacy::ITEM_CONTAINER_SIZE); ++free_bag_slot) {
 				if (!main_inst->GetItem(free_bag_slot))
 					return Inventory::CalcSlotId(free_slot, free_bag_slot);
 			}
@@ -760,7 +762,7 @@ int16 Inventory::FindFreeSlotForTradeItem(const ItemInst* inst) {
 	}
 
 	//return INVALID_INDEX; // everything else pushes to the cursor
-	return MainCursor;
+	return EQEmu::legacy::SlotCursor;
 }
 
 // Opposite of below: Get parent bag slot_id from a slot inside of bag
@@ -772,20 +774,20 @@ int16 Inventory::CalcSlotId(int16 slot_id) {
 	//	parent_slot_id = EmuConstants::BANK_BEGIN + (slot_id - EmuConstants::BANK_BEGIN) / EmuConstants::ITEM_CONTAINER_SIZE;
 	//else if (slot_id >= 3100 && slot_id <= 3179) should be {3031..3110}..where did this range come from!!? (verified db save range)
 	
-	if (slot_id >= EmuConstants::GENERAL_BAGS_BEGIN && slot_id <= EmuConstants::GENERAL_BAGS_END) {
-		parent_slot_id = EmuConstants::GENERAL_BEGIN + (slot_id - EmuConstants::GENERAL_BAGS_BEGIN) / EmuConstants::ITEM_CONTAINER_SIZE;
+	if (slot_id >= EQEmu::legacy::GENERAL_BAGS_BEGIN && slot_id <= EQEmu::legacy::GENERAL_BAGS_END) {
+		parent_slot_id = EQEmu::legacy::GENERAL_BEGIN + (slot_id - EQEmu::legacy::GENERAL_BAGS_BEGIN) / EQEmu::legacy::ITEM_CONTAINER_SIZE;
 	}
-	else if (slot_id >= EmuConstants::CURSOR_BAG_BEGIN && slot_id <= EmuConstants::CURSOR_BAG_END) {
-		parent_slot_id = MainCursor;
+	else if (slot_id >= EQEmu::legacy::CURSOR_BAG_BEGIN && slot_id <= EQEmu::legacy::CURSOR_BAG_END) {
+		parent_slot_id = EQEmu::legacy::SlotCursor;
 	}
-	else if (slot_id >= EmuConstants::BANK_BAGS_BEGIN && slot_id <= EmuConstants::BANK_BAGS_END) {
-		parent_slot_id = EmuConstants::BANK_BEGIN + (slot_id - EmuConstants::BANK_BAGS_BEGIN) / EmuConstants::ITEM_CONTAINER_SIZE;
+	else if (slot_id >= EQEmu::legacy::BANK_BAGS_BEGIN && slot_id <= EQEmu::legacy::BANK_BAGS_END) {
+		parent_slot_id = EQEmu::legacy::BANK_BEGIN + (slot_id - EQEmu::legacy::BANK_BAGS_BEGIN) / EQEmu::legacy::ITEM_CONTAINER_SIZE;
 	}
-	else if (slot_id >= EmuConstants::SHARED_BANK_BAGS_BEGIN && slot_id <= EmuConstants::SHARED_BANK_BAGS_END) {
-		parent_slot_id = EmuConstants::SHARED_BANK_BEGIN + (slot_id - EmuConstants::SHARED_BANK_BAGS_BEGIN) / EmuConstants::ITEM_CONTAINER_SIZE;
+	else if (slot_id >= EQEmu::legacy::SHARED_BANK_BAGS_BEGIN && slot_id <= EQEmu::legacy::SHARED_BANK_BAGS_END) {
+		parent_slot_id = EQEmu::legacy::SHARED_BANK_BEGIN + (slot_id - EQEmu::legacy::SHARED_BANK_BAGS_BEGIN) / EQEmu::legacy::ITEM_CONTAINER_SIZE;
 	}
-	else if (slot_id >= EmuConstants::TRADE_BAGS_BEGIN && slot_id <= EmuConstants::TRADE_BAGS_END) {
-		parent_slot_id = EmuConstants::TRADE_BEGIN + (slot_id - EmuConstants::TRADE_BAGS_BEGIN) / EmuConstants::ITEM_CONTAINER_SIZE;
+	else if (slot_id >= EQEmu::legacy::TRADE_BAGS_BEGIN && slot_id <= EQEmu::legacy::TRADE_BAGS_END) {
+		parent_slot_id = EQEmu::legacy::TRADE_BEGIN + (slot_id - EQEmu::legacy::TRADE_BAGS_BEGIN) / EQEmu::legacy::ITEM_CONTAINER_SIZE;
 	}
 
 	return parent_slot_id;
@@ -798,20 +800,20 @@ int16 Inventory::CalcSlotId(int16 bagslot_id, uint8 bagidx) {
 
 	int16 slot_id = INVALID_INDEX;
 
-	if (bagslot_id == MainCursor || bagslot_id == 8000) {
-		slot_id = EmuConstants::CURSOR_BAG_BEGIN + bagidx;
+	if (bagslot_id == EQEmu::legacy::SlotCursor || bagslot_id == 8000) {
+		slot_id = EQEmu::legacy::CURSOR_BAG_BEGIN + bagidx;
 	}
-	else if (bagslot_id >= EmuConstants::GENERAL_BEGIN && bagslot_id <= EmuConstants::GENERAL_END) {
-		slot_id = EmuConstants::GENERAL_BAGS_BEGIN + (bagslot_id - EmuConstants::GENERAL_BEGIN) * EmuConstants::ITEM_CONTAINER_SIZE + bagidx;
+	else if (bagslot_id >= EQEmu::legacy::GENERAL_BEGIN && bagslot_id <= EQEmu::legacy::GENERAL_END) {
+		slot_id = EQEmu::legacy::GENERAL_BAGS_BEGIN + (bagslot_id - EQEmu::legacy::GENERAL_BEGIN) * EQEmu::legacy::ITEM_CONTAINER_SIZE + bagidx;
 	}
-	else if (bagslot_id >= EmuConstants::BANK_BEGIN && bagslot_id <= EmuConstants::BANK_END) {
-		slot_id = EmuConstants::BANK_BAGS_BEGIN + (bagslot_id - EmuConstants::BANK_BEGIN) * EmuConstants::ITEM_CONTAINER_SIZE + bagidx;
+	else if (bagslot_id >= EQEmu::legacy::BANK_BEGIN && bagslot_id <= EQEmu::legacy::BANK_END) {
+		slot_id = EQEmu::legacy::BANK_BAGS_BEGIN + (bagslot_id - EQEmu::legacy::BANK_BEGIN) * EQEmu::legacy::ITEM_CONTAINER_SIZE + bagidx;
 	}
-	else if (bagslot_id >= EmuConstants::SHARED_BANK_BEGIN && bagslot_id <= EmuConstants::SHARED_BANK_END) {
-		slot_id = EmuConstants::SHARED_BANK_BAGS_BEGIN + (bagslot_id - EmuConstants::SHARED_BANK_BEGIN) * EmuConstants::ITEM_CONTAINER_SIZE + bagidx;
+	else if (bagslot_id >= EQEmu::legacy::SHARED_BANK_BEGIN && bagslot_id <= EQEmu::legacy::SHARED_BANK_END) {
+		slot_id = EQEmu::legacy::SHARED_BANK_BAGS_BEGIN + (bagslot_id - EQEmu::legacy::SHARED_BANK_BEGIN) * EQEmu::legacy::ITEM_CONTAINER_SIZE + bagidx;
 	}
-	else if (bagslot_id >= EmuConstants::TRADE_BEGIN && bagslot_id <= EmuConstants::TRADE_END) {
-		slot_id = EmuConstants::TRADE_BAGS_BEGIN + (bagslot_id - EmuConstants::TRADE_BEGIN) * EmuConstants::ITEM_CONTAINER_SIZE + bagidx;
+	else if (bagslot_id >= EQEmu::legacy::TRADE_BEGIN && bagslot_id <= EQEmu::legacy::TRADE_END) {
+		slot_id = EQEmu::legacy::TRADE_BAGS_BEGIN + (bagslot_id - EQEmu::legacy::TRADE_BEGIN) * EQEmu::legacy::ITEM_CONTAINER_SIZE + bagidx;
 	}
 
 	return slot_id;
@@ -824,23 +826,23 @@ uint8 Inventory::CalcBagIdx(int16 slot_id) {
 	//else if (slot_id >= EmuConstants::BANK_BEGIN && slot_id <= EmuConstants::BANK_END)
 	//	index = (slot_id - EmuConstants::BANK_BEGIN) % EmuConstants::ITEM_CONTAINER_SIZE;
 
-	if (slot_id >= EmuConstants::GENERAL_BAGS_BEGIN && slot_id <= EmuConstants::GENERAL_BAGS_END) {
-		index = (slot_id - EmuConstants::GENERAL_BAGS_BEGIN) % EmuConstants::ITEM_CONTAINER_SIZE;
+	if (slot_id >= EQEmu::legacy::GENERAL_BAGS_BEGIN && slot_id <= EQEmu::legacy::GENERAL_BAGS_END) {
+		index = (slot_id - EQEmu::legacy::GENERAL_BAGS_BEGIN) % EQEmu::legacy::ITEM_CONTAINER_SIZE;
 	}
-	else if (slot_id >= EmuConstants::CURSOR_BAG_BEGIN && slot_id <= EmuConstants::CURSOR_BAG_END) {
-		index = (slot_id - EmuConstants::CURSOR_BAG_BEGIN); // % EmuConstants::ITEM_CONTAINER_SIZE; - not needed since range is 10 slots
+	else if (slot_id >= EQEmu::legacy::CURSOR_BAG_BEGIN && slot_id <= EQEmu::legacy::CURSOR_BAG_END) {
+		index = (slot_id - EQEmu::legacy::CURSOR_BAG_BEGIN); // % EQEmu::legacy::ITEM_CONTAINER_SIZE; - not needed since range is 10 slots
 	}
-	else if (slot_id >= EmuConstants::BANK_BAGS_BEGIN && slot_id <= EmuConstants::BANK_BAGS_END) {
-		index = (slot_id - EmuConstants::BANK_BAGS_BEGIN) % EmuConstants::ITEM_CONTAINER_SIZE;
+	else if (slot_id >= EQEmu::legacy::BANK_BAGS_BEGIN && slot_id <= EQEmu::legacy::BANK_BAGS_END) {
+		index = (slot_id - EQEmu::legacy::BANK_BAGS_BEGIN) % EQEmu::legacy::ITEM_CONTAINER_SIZE;
 	}
-	else if (slot_id >= EmuConstants::SHARED_BANK_BAGS_BEGIN && slot_id <= EmuConstants::SHARED_BANK_BAGS_END) {
-		index = (slot_id - EmuConstants::SHARED_BANK_BAGS_BEGIN) % EmuConstants::ITEM_CONTAINER_SIZE;
+	else if (slot_id >= EQEmu::legacy::SHARED_BANK_BAGS_BEGIN && slot_id <= EQEmu::legacy::SHARED_BANK_BAGS_END) {
+		index = (slot_id - EQEmu::legacy::SHARED_BANK_BAGS_BEGIN) % EQEmu::legacy::ITEM_CONTAINER_SIZE;
 	}
-	else if (slot_id >= EmuConstants::TRADE_BAGS_BEGIN && slot_id <= EmuConstants::TRADE_BAGS_END) {
-		index = (slot_id - EmuConstants::TRADE_BAGS_BEGIN) % EmuConstants::ITEM_CONTAINER_SIZE;
+	else if (slot_id >= EQEmu::legacy::TRADE_BAGS_BEGIN && slot_id <= EQEmu::legacy::TRADE_BAGS_END) {
+		index = (slot_id - EQEmu::legacy::TRADE_BAGS_BEGIN) % EQEmu::legacy::ITEM_CONTAINER_SIZE;
 	}
-	else if (slot_id >= EmuConstants::WORLD_BEGIN && slot_id <= EmuConstants::WORLD_END) {
-		index = (slot_id - EmuConstants::WORLD_BEGIN); // % EmuConstants::ITEM_CONTAINER_SIZE; - not needed since range is 10 slots
+	else if (slot_id >= EQEmu::legacy::WORLD_BEGIN && slot_id <= EQEmu::legacy::WORLD_END) {
+		index = (slot_id - EQEmu::legacy::WORLD_BEGIN); // % EQEmu::legacy::ITEM_CONTAINER_SIZE; - not needed since range is 10 slots
 	}
 
 	return index;
@@ -850,24 +852,24 @@ int16 Inventory::CalcSlotFromMaterial(uint8 material)
 {
 	switch (material)
 	{
-	case MaterialHead:
-		return MainHead;
-	case MaterialChest:
-		return MainChest;
-	case MaterialArms:
-		return MainArms;
-	case MaterialWrist:
-		return MainWrist1;	// there's 2 bracers, only one bracer material
-	case MaterialHands:
-		return MainHands;
-	case MaterialLegs:
-		return MainLegs;
-	case MaterialFeet:
-		return MainFeet;
-	case MaterialPrimary:
-		return MainPrimary;
-	case MaterialSecondary:
-		return MainSecondary;
+	case EQEmu::textures::TextureHead:
+		return EQEmu::legacy::SlotHead;
+	case EQEmu::textures::TextureChest:
+		return EQEmu::legacy::SlotChest;
+	case EQEmu::textures::TextureArms:
+		return EQEmu::legacy::SlotArms;
+	case EQEmu::textures::TextureWrist:
+		return EQEmu::legacy::SlotWrist1;	// there's 2 bracers, only one bracer material
+	case EQEmu::textures::TextureHands:
+		return EQEmu::legacy::SlotHands;
+	case EQEmu::textures::TextureLegs:
+		return EQEmu::legacy::SlotLegs;
+	case EQEmu::textures::TextureFeet:
+		return EQEmu::legacy::SlotFeet;
+	case EQEmu::textures::TexturePrimary:
+		return EQEmu::legacy::SlotPrimary;
+	case EQEmu::textures::TextureSecondary:
+		return EQEmu::legacy::SlotSecondary;
 	default:
 		return INVALID_INDEX;
 	}
@@ -877,31 +879,31 @@ uint8 Inventory::CalcMaterialFromSlot(int16 equipslot)
 {
 	switch (equipslot)
 	{
-	case MainHead:
-		return MaterialHead;
-	case MainChest:
-		return MaterialChest;
-	case MainArms:
-		return MaterialArms;
-	case MainWrist1:
+	case EQEmu::legacy::SlotHead:
+		return EQEmu::textures::TextureHead;
+	case EQEmu::legacy::SlotChest:
+		return EQEmu::textures::TextureChest;
+	case EQEmu::legacy::SlotArms:
+		return EQEmu::textures::TextureArms;
+	case EQEmu::legacy::SlotWrist1:
 	//case SLOT_BRACER02: // non-live behavior
-		return MaterialWrist;
-	case MainHands:
-		return MaterialHands;
-	case MainLegs:
-		return MaterialLegs;
-	case MainFeet:
-		return MaterialFeet;
-	case MainPrimary:
-		return MaterialPrimary;
-	case MainSecondary:
-		return MaterialSecondary;
+		return EQEmu::textures::TextureWrist;
+	case EQEmu::legacy::SlotHands:
+		return EQEmu::textures::TextureHands;
+	case EQEmu::legacy::SlotLegs:
+		return EQEmu::textures::TextureLegs;
+	case EQEmu::legacy::SlotFeet:
+		return EQEmu::textures::TextureFeet;
+	case EQEmu::legacy::SlotPrimary:
+		return EQEmu::textures::TexturePrimary;
+	case EQEmu::legacy::SlotSecondary:
+		return EQEmu::textures::TextureSecondary;
 	default:
-		return _MaterialInvalid;
+		return EQEmu::textures::TextureInvalid;
 	}
 }
 
-bool Inventory::CanItemFitInContainer(const Item_Struct *ItemToTry, const Item_Struct *Container) {
+bool Inventory::CanItemFitInContainer(const EQEmu::ItemBase *ItemToTry, const EQEmu::ItemBase *Container) {
 
 	if (!ItemToTry || !Container)
 		return false;
@@ -909,10 +911,10 @@ bool Inventory::CanItemFitInContainer(const Item_Struct *ItemToTry, const Item_S
 	if (ItemToTry->Size > Container->BagSize)
 		return false;
 
-	if ((Container->BagType == BagTypeQuiver) && (ItemToTry->ItemType != ItemTypeArrow))
+	if ((Container->BagType == EQEmu::item::BagTypeQuiver) && (ItemToTry->ItemType != EQEmu::item::ItemTypeArrow))
 		return false;
 
-	if ((Container->BagType == BagTypeBandolier) && (ItemToTry->ItemType != ItemTypeSmallThrowing))
+	if ((Container->BagType == EQEmu::item::BagTypeBandolier) && (ItemToTry->ItemType != EQEmu::item::ItemTypeSmallThrowing))
 		return false;
 
 	return true;
@@ -921,13 +923,13 @@ bool Inventory::CanItemFitInContainer(const Item_Struct *ItemToTry, const Item_S
 bool Inventory::SupportsClickCasting(int16 slot_id)
 {
 	// there are a few non-potion items that identify as ItemTypePotion..so, we still need to ubiquitously include the equipment range
-	if ((uint16)slot_id <= EmuConstants::GENERAL_END || slot_id == MainPowerSource)
+	if ((uint16)slot_id <= EQEmu::legacy::GENERAL_END || slot_id == EQEmu::legacy::SlotPowerSource)
 	{
 		return true;
 	}
-	else if (slot_id >= EmuConstants::GENERAL_BAGS_BEGIN && slot_id <= EmuConstants::GENERAL_BAGS_END)
+	else if (slot_id >= EQEmu::legacy::GENERAL_BAGS_BEGIN && slot_id <= EQEmu::legacy::GENERAL_BAGS_END)
 	{
-		if (EQLimits::AllowsClickCastFromBag(m_version))
+		if (EQEmu::inventory::Lookup(m_inventory_version)->AllowClickCastFromBag)
 			return true;
 	}
 
@@ -936,7 +938,7 @@ bool Inventory::SupportsClickCasting(int16 slot_id)
 
 bool Inventory::SupportsPotionBeltCasting(int16 slot_id)
 {
-	if ((uint16)slot_id <= EmuConstants::GENERAL_END || slot_id == MainPowerSource || (slot_id >= EmuConstants::GENERAL_BAGS_BEGIN && slot_id <= EmuConstants::GENERAL_BAGS_END))
+	if ((uint16)slot_id <= EQEmu::legacy::GENERAL_END || slot_id == EQEmu::legacy::SlotPowerSource || (slot_id >= EQEmu::legacy::GENERAL_BAGS_BEGIN && slot_id <= EQEmu::legacy::GENERAL_BAGS_END))
 		return true;
 
 	return false;
@@ -945,11 +947,11 @@ bool Inventory::SupportsPotionBeltCasting(int16 slot_id)
 // Test whether a given slot can support a container item
 bool Inventory::SupportsContainers(int16 slot_id)
 {
-	if ((slot_id == MainCursor) ||
-		(slot_id >= EmuConstants::GENERAL_BEGIN && slot_id <= EmuConstants::GENERAL_END) ||
-		(slot_id >= EmuConstants::BANK_BEGIN && slot_id <= EmuConstants::BANK_END) ||
-		(slot_id >= EmuConstants::SHARED_BANK_BEGIN && slot_id <= EmuConstants::SHARED_BANK_END) ||
-		(slot_id >= EmuConstants::TRADE_BEGIN && slot_id <= EmuConstants::TRADE_END)
+	if ((slot_id == EQEmu::legacy::SlotCursor) ||
+		(slot_id >= EQEmu::legacy::GENERAL_BEGIN && slot_id <= EQEmu::legacy::GENERAL_END) ||
+		(slot_id >= EQEmu::legacy::BANK_BEGIN && slot_id <= EQEmu::legacy::BANK_END) ||
+		(slot_id >= EQEmu::legacy::SHARED_BANK_BEGIN && slot_id <= EQEmu::legacy::SHARED_BANK_END) ||
+		(slot_id >= EQEmu::legacy::TRADE_BEGIN && slot_id <= EQEmu::legacy::TRADE_END)
 		) {
 		return true;
 	}
@@ -987,7 +989,7 @@ int Inventory::GetSlotByItemInst(ItemInst *inst) {
 	}
 
 	if (m_cursor.peek_front() == inst) {
-		return MainCursor;
+		return EQEmu::legacy::SlotCursor;
 	}
 
 	return INVALID_INDEX;
@@ -998,35 +1000,35 @@ uint8 Inventory::FindBrightestLightType()
 	uint8 brightest_light_type = 0;
 
 	for (auto iter = m_worn.begin(); iter != m_worn.end(); ++iter) {
-		if ((iter->first < EmuConstants::EQUIPMENT_BEGIN || iter->first > EmuConstants::EQUIPMENT_END) && iter->first != MainPowerSource) { continue; }
-		if (iter->first == MainAmmo) { continue; }
+		if ((iter->first < EQEmu::legacy::EQUIPMENT_BEGIN || iter->first > EQEmu::legacy::EQUIPMENT_END) && iter->first != EQEmu::legacy::SlotPowerSource) { continue; }
+		if (iter->first == EQEmu::legacy::SlotAmmo) { continue; }
 
 		auto inst = iter->second;
 		if (inst == nullptr) { continue; }
 		auto item = inst->GetItem();
 		if (item == nullptr) { continue; }
 
-		if (LightProfile_Struct::IsLevelGreater(item->Light, brightest_light_type))
+		if (EQEmu::lightsource::IsLevelGreater(item->Light, brightest_light_type))
 			brightest_light_type = item->Light;
 	}
 
 	uint8 general_light_type = 0;
 	for (auto iter = m_inv.begin(); iter != m_inv.end(); ++iter) {
-		if (iter->first < EmuConstants::GENERAL_BEGIN || iter->first > EmuConstants::GENERAL_END) { continue; }
+		if (iter->first < EQEmu::legacy::GENERAL_BEGIN || iter->first > EQEmu::legacy::GENERAL_END) { continue; }
 
 		auto inst = iter->second;
 		if (inst == nullptr) { continue; }
 		auto item = inst->GetItem();
 		if (item == nullptr) { continue; }
 
-		if (item->ItemClass != ItemClassCommon) { continue; }
+		if (!item->IsClassCommon()) { continue; }
 		if (item->Light < 9 || item->Light > 13) { continue; }
 
-		if (LightProfile_Struct::TypeToLevel(item->Light))
+		if (EQEmu::lightsource::TypeToLevel(item->Light))
 			general_light_type = item->Light;
 	}
 
-	if (LightProfile_Struct::IsLevelGreater(general_light_type, brightest_light_type))
+	if (EQEmu::lightsource::IsLevelGreater(general_light_type, brightest_light_type))
 		brightest_light_type = general_light_type;
 
 	return brightest_light_type;
@@ -1071,7 +1073,7 @@ int Inventory::GetSlotByItemInstCollection(const std::map<int16, ItemInst*> &col
 			return iter->first;
 		}
 
-		if (t_inst && !t_inst->IsType(ItemClassContainer)) {
+		if (t_inst && !t_inst->IsClassBag()) {
 			for (auto b_iter = t_inst->_cbegin(); b_iter != t_inst->_cend(); ++b_iter) {
 				if (b_iter->second == inst) {
 					return Inventory::CalcSlotId(iter->first, b_iter->first);
@@ -1099,7 +1101,7 @@ void Inventory::dumpItemCollection(const std::map<int16, ItemInst*> &collection)
 
 void Inventory::dumpBagContents(ItemInst *inst, std::map<int16, ItemInst*>::const_iterator *it)
 {
-	if (!inst || !inst->IsType(ItemClassContainer))
+	if (!inst || !inst->IsClassBag())
 		return;
 
 	// Go through bag, if bag
@@ -1143,33 +1145,33 @@ int16 Inventory::_PutItem(int16 slot_id, ItemInst* inst)
 	int16 result = INVALID_INDEX;
 	int16 parentSlot = INVALID_INDEX;
 
-	if (slot_id == MainCursor) {
+	if (slot_id == EQEmu::legacy::SlotCursor) {
 		// Replace current item on cursor, if exists
 		m_cursor.pop(); // no memory delete, clients of this function know what they are doing
 		m_cursor.push_front(inst);
 		result = slot_id;
 	}
-	else if ((slot_id >= EmuConstants::EQUIPMENT_BEGIN && slot_id <= EmuConstants::EQUIPMENT_END) || (slot_id == MainPowerSource)) {
+	else if ((slot_id >= EQEmu::legacy::EQUIPMENT_BEGIN && slot_id <= EQEmu::legacy::EQUIPMENT_END) || (slot_id == EQEmu::legacy::SlotPowerSource)) {
 		m_worn[slot_id] = inst;
 		result = slot_id;
 	}
-	else if ((slot_id >= EmuConstants::GENERAL_BEGIN && slot_id <= EmuConstants::GENERAL_END)) {
+	else if ((slot_id >= EQEmu::legacy::GENERAL_BEGIN && slot_id <= EQEmu::legacy::GENERAL_END)) {
 		m_inv[slot_id] = inst;
 		result = slot_id;
 	}
-	else if (slot_id >= EmuConstants::TRIBUTE_BEGIN && slot_id <= EmuConstants::TRIBUTE_END) {
+	else if (slot_id >= EQEmu::legacy::TRIBUTE_BEGIN && slot_id <= EQEmu::legacy::TRIBUTE_END) {
 		m_worn[slot_id] = inst;
 		result = slot_id;
 	}
-	else if (slot_id >= EmuConstants::BANK_BEGIN && slot_id <= EmuConstants::BANK_END) {
+	else if (slot_id >= EQEmu::legacy::BANK_BEGIN && slot_id <= EQEmu::legacy::BANK_END) {
 		m_bank[slot_id] = inst;
 		result = slot_id;
 	}
-	else if (slot_id >= EmuConstants::SHARED_BANK_BEGIN && slot_id <= EmuConstants::SHARED_BANK_END) {
+	else if (slot_id >= EQEmu::legacy::SHARED_BANK_BEGIN && slot_id <= EQEmu::legacy::SHARED_BANK_END) {
 		m_shbank[slot_id] = inst;
 		result = slot_id;
 	}
-	else if (slot_id >= EmuConstants::TRADE_BEGIN && slot_id <= EmuConstants::TRADE_END) {
+	else if (slot_id >= EQEmu::legacy::TRADE_BEGIN && slot_id <= EQEmu::legacy::TRADE_END) {
 		m_trade[slot_id] = inst;
 		result = slot_id;
 	}
@@ -1177,7 +1179,7 @@ int16 Inventory::_PutItem(int16 slot_id, ItemInst* inst)
 		// Slot must be within a bag
 		parentSlot = Inventory::CalcSlotId(slot_id);
 		ItemInst* baginst = GetItem(parentSlot); // Get parent bag
-		if (baginst && baginst->IsType(ItemClassContainer))
+		if (baginst && baginst->IsClassBag())
 		{
 			baginst->_PutItem(Inventory::CalcBagIdx(slot_id), inst);
 			result = slot_id;
@@ -1195,7 +1197,7 @@ int16 Inventory::_PutItem(int16 slot_id, ItemInst* inst)
 // Internal Method: Checks an inventory bucket for a particular item
 int16 Inventory::_HasItem(std::map<int16, ItemInst*>& bucket, uint32 item_id, uint8 quantity)
 {
-	uint8 quantity_found = 0;
+	uint32 quantity_found = 0;
 
 	for (auto iter = bucket.begin(); iter != bucket.end(); ++iter) {
 		auto inst = iter->second;
@@ -1207,12 +1209,12 @@ int16 Inventory::_HasItem(std::map<int16, ItemInst*>& bucket, uint32 item_id, ui
 				return iter->first;
 		}
 
-		for (int index = AUG_BEGIN; index < EmuConstants::ITEM_COMMON_SIZE; ++index) {
+		for (int index = AUG_INDEX_BEGIN; index < EQEmu::legacy::ITEM_COMMON_SIZE; ++index) {
 			if (inst->GetAugmentItemID(index) == item_id && quantity <= 1)
-				return legacy::SLOT_AUGMENT;
+				return EQEmu::legacy::SLOT_AUGMENT;
 		}
 		
-		if (!inst->IsType(ItemClassContainer)) { continue; }
+		if (!inst->IsClassBag()) { continue; }
 
 		for (auto bag_iter = inst->_cbegin(); bag_iter != inst->_cend(); ++bag_iter) {
 			auto bag_inst = bag_iter->second;
@@ -1224,9 +1226,9 @@ int16 Inventory::_HasItem(std::map<int16, ItemInst*>& bucket, uint32 item_id, ui
 					return Inventory::CalcSlotId(iter->first, bag_iter->first);
 			}
 
-			for (int index = AUG_BEGIN; index < EmuConstants::ITEM_COMMON_SIZE; ++index) {
+			for (int index = AUG_INDEX_BEGIN; index < EQEmu::legacy::ITEM_COMMON_SIZE; ++index) {
 				if (bag_inst->GetAugmentItemID(index) == item_id && quantity <= 1)
-					return legacy::SLOT_AUGMENT;
+					return EQEmu::legacy::SLOT_AUGMENT;
 			}
 		}
 	}
@@ -1243,7 +1245,7 @@ int16 Inventory::_HasItem(ItemInstQueue& iqueue, uint32 item_id, uint8 quantity)
 	// to unintended results. Funtionality should be observed when referencing the return value
 	// of this query
 	
-	uint8 quantity_found = 0;
+	uint32 quantity_found = 0;
 
 	for (auto iter = iqueue.cbegin(); iter != iqueue.cend(); ++iter) {
 		auto inst = *iter;
@@ -1252,15 +1254,15 @@ int16 Inventory::_HasItem(ItemInstQueue& iqueue, uint32 item_id, uint8 quantity)
 		if (inst->GetID() == item_id) {
 			quantity_found += (inst->GetCharges() <= 0) ? 1 : inst->GetCharges();
 			if (quantity_found >= quantity)
-				return MainCursor;
+				return EQEmu::legacy::SlotCursor;
 		}
 
-		for (int index = AUG_BEGIN; index < EmuConstants::ITEM_COMMON_SIZE; ++index) {
+		for (int index = AUG_INDEX_BEGIN; index < EQEmu::legacy::ITEM_COMMON_SIZE; ++index) {
 			if (inst->GetAugmentItemID(index) == item_id && quantity <= 1)
-				return legacy::SLOT_AUGMENT;
+				return EQEmu::legacy::SLOT_AUGMENT;
 		}
 
-		if (!inst->IsType(ItemClassContainer)) { continue; }
+		if (!inst->IsClassBag()) { continue; }
 
 		for (auto bag_iter = inst->_cbegin(); bag_iter != inst->_cend(); ++bag_iter) {
 			auto bag_inst = bag_iter->second;
@@ -1269,12 +1271,12 @@ int16 Inventory::_HasItem(ItemInstQueue& iqueue, uint32 item_id, uint8 quantity)
 			if (bag_inst->GetID() == item_id) {
 				quantity_found += (bag_inst->GetCharges() <= 0) ? 1 : bag_inst->GetCharges();
 				if (quantity_found >= quantity)
-					return Inventory::CalcSlotId(MainCursor, bag_iter->first);
+					return Inventory::CalcSlotId(EQEmu::legacy::SlotCursor, bag_iter->first);
 			}
 
-			for (int index = AUG_BEGIN; index < EmuConstants::ITEM_COMMON_SIZE; ++index) {
+			for (int index = AUG_INDEX_BEGIN; index < EQEmu::legacy::ITEM_COMMON_SIZE; ++index) {
 				if (bag_inst->GetAugmentItemID(index) == item_id && quantity <= 1)
-					return legacy::SLOT_AUGMENT;
+					return EQEmu::legacy::SLOT_AUGMENT;
 			}
 		}
 
@@ -1288,25 +1290,25 @@ int16 Inventory::_HasItem(ItemInstQueue& iqueue, uint32 item_id, uint8 quantity)
 // Internal Method: Checks an inventory bucket for a particular item
 int16 Inventory::_HasItemByUse(std::map<int16, ItemInst*>& bucket, uint8 use, uint8 quantity)
 {
-	uint8 quantity_found = 0;
+	uint32 quantity_found = 0;
 
 	for (auto iter = bucket.begin(); iter != bucket.end(); ++iter) {
 		auto inst = iter->second;
 		if (inst == nullptr) { continue; }
 
-		if (inst->IsType(ItemClassCommon) && inst->GetItem()->ItemType == use) {
+		if (inst->IsClassCommon() && inst->GetItem()->ItemType == use) {
 			quantity_found += (inst->GetCharges() <= 0) ? 1 : inst->GetCharges();
 			if (quantity_found >= quantity)
 				return iter->first;
 		}
 
-		if (!inst->IsType(ItemClassContainer)) { continue; }
+		if (!inst->IsClassBag()) { continue; }
 
 		for (auto bag_iter = inst->_cbegin(); bag_iter != inst->_cend(); ++bag_iter) {
 			auto bag_inst = bag_iter->second;
 			if (bag_inst == nullptr) { continue; }
 
-			if (bag_inst->IsType(ItemClassCommon) && bag_inst->GetItem()->ItemType == use) {
+			if (bag_inst->IsClassCommon() && bag_inst->GetItem()->ItemType == use) {
 				quantity_found += (bag_inst->GetCharges() <= 0) ? 1 : bag_inst->GetCharges();
 				if (quantity_found >= quantity)
 					return Inventory::CalcSlotId(iter->first, bag_iter->first);
@@ -1320,28 +1322,28 @@ int16 Inventory::_HasItemByUse(std::map<int16, ItemInst*>& bucket, uint8 use, ui
 // Internal Method: Checks an inventory queue type bucket for a particular item
 int16 Inventory::_HasItemByUse(ItemInstQueue& iqueue, uint8 use, uint8 quantity)
 {
-	uint8 quantity_found = 0;
+	uint32 quantity_found = 0;
 
 	for (auto iter = iqueue.cbegin(); iter != iqueue.cend(); ++iter) {
 		auto inst = *iter;
 		if (inst == nullptr) { continue; }
 
-		if (inst->IsType(ItemClassCommon) && inst->GetItem()->ItemType == use) {
+		if (inst->IsClassCommon() && inst->GetItem()->ItemType == use) {
 			quantity_found += (inst->GetCharges() <= 0) ? 1 : inst->GetCharges();
 			if (quantity_found >= quantity)
-				return MainCursor;
+				return EQEmu::legacy::SlotCursor;
 		}
 
-		if (!inst->IsType(ItemClassContainer)) { continue; }
+		if (!inst->IsClassBag()) { continue; }
 
 		for (auto bag_iter = inst->_cbegin(); bag_iter != inst->_cend(); ++bag_iter) {
 			auto bag_inst = bag_iter->second;
 			if (bag_inst == nullptr) { continue; }
 
-			if (bag_inst->IsType(ItemClassCommon) && bag_inst->GetItem()->ItemType == use) {
+			if (bag_inst->IsClassCommon() && bag_inst->GetItem()->ItemType == use) {
 				quantity_found += (bag_inst->GetCharges() <= 0) ? 1 : bag_inst->GetCharges();
 				if (quantity_found >= quantity)
-					return Inventory::CalcSlotId(MainCursor, bag_iter->first);
+					return Inventory::CalcSlotId(EQEmu::legacy::SlotCursor, bag_iter->first);
 			}
 		}
 
@@ -1361,29 +1363,29 @@ int16 Inventory::_HasItemByLoreGroup(std::map<int16, ItemInst*>& bucket, uint32 
 		if (inst->GetItem()->LoreGroup == loregroup)
 			return iter->first;
 
-		for (int index = AUG_BEGIN; index < EmuConstants::ITEM_COMMON_SIZE; ++index) {
+		for (int index = AUG_INDEX_BEGIN; index < EQEmu::legacy::ITEM_COMMON_SIZE; ++index) {
 			auto aug_inst = inst->GetAugment(index);
 			if (aug_inst == nullptr) { continue; }
 
 			if (aug_inst->GetItem()->LoreGroup == loregroup)
-				return legacy::SLOT_AUGMENT;
+				return EQEmu::legacy::SLOT_AUGMENT;
 		}
 
-		if (!inst->IsType(ItemClassContainer)) { continue; }
+		if (!inst->IsClassBag()) { continue; }
 
 		for (auto bag_iter = inst->_cbegin(); bag_iter != inst->_cend(); ++bag_iter) {
 			auto bag_inst = bag_iter->second;
 			if (bag_inst == nullptr) { continue; }
 
-			if (bag_inst->IsType(ItemClassCommon) && bag_inst->GetItem()->LoreGroup == loregroup)
+			if (bag_inst->IsClassCommon() && bag_inst->GetItem()->LoreGroup == loregroup)
 				return Inventory::CalcSlotId(iter->first, bag_iter->first);
 
-			for (int index = AUG_BEGIN; index < EmuConstants::ITEM_COMMON_SIZE; ++index) {
+			for (int index = AUG_INDEX_BEGIN; index < EQEmu::legacy::ITEM_COMMON_SIZE; ++index) {
 				auto aug_inst = bag_inst->GetAugment(index);
 				if (aug_inst == nullptr) { continue; }
 
 				if (aug_inst->GetItem()->LoreGroup == loregroup)
-					return legacy::SLOT_AUGMENT;
+					return EQEmu::legacy::SLOT_AUGMENT;
 			}
 		}
 	}
@@ -1399,31 +1401,31 @@ int16 Inventory::_HasItemByLoreGroup(ItemInstQueue& iqueue, uint32 loregroup)
 		if (inst == nullptr) { continue; }
 
 		if (inst->GetItem()->LoreGroup == loregroup)
-			return MainCursor;
+			return EQEmu::legacy::SlotCursor;
 
-		for (int index = AUG_BEGIN; index < EmuConstants::ITEM_COMMON_SIZE; ++index) {
+		for (int index = AUG_INDEX_BEGIN; index < EQEmu::legacy::ITEM_COMMON_SIZE; ++index) {
 			auto aug_inst = inst->GetAugment(index);
 			if (aug_inst == nullptr) { continue; }
 
 			if (aug_inst->GetItem()->LoreGroup == loregroup)
-				return legacy::SLOT_AUGMENT;
+				return EQEmu::legacy::SLOT_AUGMENT;
 		}
 
-		if (!inst->IsType(ItemClassContainer)) { continue; }
+		if (!inst->IsClassBag()) { continue; }
 
 		for (auto bag_iter = inst->_cbegin(); bag_iter != inst->_cend(); ++bag_iter) {
 			auto bag_inst = bag_iter->second;
 			if (bag_inst == nullptr) { continue; }
 
-			if (bag_inst->IsType(ItemClassCommon) && bag_inst->GetItem()->LoreGroup == loregroup)
-				return Inventory::CalcSlotId(MainCursor, bag_iter->first);
+			if (bag_inst->IsClassCommon() && bag_inst->GetItem()->LoreGroup == loregroup)
+				return Inventory::CalcSlotId(EQEmu::legacy::SlotCursor, bag_iter->first);
 
-			for (int index = AUG_BEGIN; index < EmuConstants::ITEM_COMMON_SIZE; ++index) {
+			for (int index = AUG_INDEX_BEGIN; index < EQEmu::legacy::ITEM_COMMON_SIZE; ++index) {
 				auto aug_inst = bag_inst->GetAugment(index);
 				if (aug_inst == nullptr) { continue; }
 
 				if (aug_inst->GetItem()->LoreGroup == loregroup)
-					return legacy::SLOT_AUGMENT;
+					return EQEmu::legacy::SLOT_AUGMENT;
 			}
 		}
 
@@ -1438,14 +1440,18 @@ int16 Inventory::_HasItemByLoreGroup(ItemInstQueue& iqueue, uint32 loregroup)
 //
 // class ItemInst
 //
-ItemInst::ItemInst(const Item_Struct* item, int16 charges) {
+ItemInst::ItemInst(const EQEmu::ItemBase* item, int16 charges) {
 	m_use_type = ItemInstNormal;
-	m_item = item;
+	if(item) {
+		m_item = new EQEmu::ItemBase(*item);
+	} else {
+		m_item = nullptr;
+	}
 	m_charges = charges;
 	m_price = 0;
 	m_attuned = false;
 	m_merchantslot = 0;
-	if(m_item &&m_item->ItemClass == ItemClassCommon)
+	if (m_item && m_item->IsClassCommon())
 		m_color = m_item->Color;
 	else
 		m_color = 0;
@@ -1467,11 +1473,18 @@ ItemInst::ItemInst(const Item_Struct* item, int16 charges) {
 ItemInst::ItemInst(SharedDatabase *db, uint32 item_id, int16 charges) {
 	m_use_type = ItemInstNormal;
 	m_item = db->GetItem(item_id);
+	if(m_item) {
+		m_item = new EQEmu::ItemBase(*m_item);
+	}
+	else {
+		m_item = nullptr;
+	}
+
 	m_charges = charges;
 	m_price = 0;
 	m_merchantslot = 0;
 	m_attuned=false;
-	if(m_item && m_item->ItemClass == ItemClassCommon)
+	if (m_item && m_item->IsClassCommon())
 		m_color = m_item->Color;
 	else
 		m_color = 0;
@@ -1515,7 +1528,11 @@ ItemInst::ItemInst(ItemInstTypes use_type) {
 ItemInst::ItemInst(const ItemInst& copy)
 {
 	m_use_type=copy.m_use_type;
-	m_item=copy.m_item;
+	if(copy.m_item)
+		m_item = new EQEmu::ItemBase(*copy.m_item);
+	else
+		m_item = nullptr;
+
 	m_charges=copy.m_charges;
 	m_price=copy.m_price;
 	m_color=copy.m_color;
@@ -1548,7 +1565,7 @@ ItemInst::ItemInst(const ItemInst& copy)
 	m_evolveLvl = copy.m_evolveLvl;
 	m_activated = copy.m_activated;
 	if (copy.m_scaledItem)
-		m_scaledItem = new Item_Struct(*copy.m_scaledItem);
+		m_scaledItem = new EQEmu::ItemBase(*copy.m_scaledItem);
 	else
 		m_scaledItem = nullptr;
 
@@ -1568,23 +1585,39 @@ ItemInst::ItemInst(const ItemInst& copy)
 ItemInst::~ItemInst()
 {
 	Clear();
+	safe_delete(m_item);
 	safe_delete(m_scaledItem);
 	safe_delete(m_evolveInfo);
 }
 
 // Query item type
-bool ItemInst::IsType(ItemClassTypes item_class) const
+bool ItemInst::IsType(EQEmu::item::ItemClass item_class) const
 {
 	// IsType(<ItemClassTypes>) does not protect against 'm_item = nullptr'
 	
 	// Check usage type
-	if ((m_use_type == ItemInstWorldContainer) && (item_class == ItemClassContainer))
+	if ((m_use_type == ItemInstWorldContainer) && (item_class == EQEmu::item::ItemClassBag))
 		return true;
 
 	if (!m_item)
 		return false;
 
 	return (m_item->ItemClass == item_class);
+}
+
+bool ItemInst::IsClassCommon()
+{
+	return (m_item && m_item->IsClassCommon());
+}
+
+bool ItemInst::IsClassBag()
+{
+	return (m_item && m_item->IsClassBag());
+}
+
+bool ItemInst::IsClassBook()
+{
+	return (m_item && m_item->IsClassBook());
 }
 
 // Is item stackable?
@@ -1624,8 +1657,8 @@ bool ItemInst::IsEquipable(int16 slot_id) const
 
 	// another "shouldn't do" fix..will be fixed in future updates (requires code and database work)
 	int16 use_slot = INVALID_INDEX;
-	if (slot_id == MainPowerSource) { use_slot = MainGeneral1; }
-	if ((uint16)slot_id <= EmuConstants::EQUIPMENT_END) { use_slot = slot_id; }
+	if (slot_id == EQEmu::legacy::SlotPowerSource) { use_slot = EQEmu::legacy::SlotGeneral1; }
+	if ((uint16)slot_id <= EQEmu::legacy::EQUIPMENT_END) { use_slot = slot_id; }
 
 	if (use_slot != INVALID_INDEX) {
 		if (m_item->Slots & (1 << use_slot))
@@ -1640,7 +1673,7 @@ bool ItemInst::IsAugmentable() const
 	if (!m_item)
 		return false;
 
-	for (int index = 0; index < EmuConstants::ITEM_COMMON_SIZE; ++index) {
+	for (int index = 0; index < EQEmu::legacy::ITEM_COMMON_SIZE; ++index) {
 		if (m_item->AugSlotType[index] != NO_ITEM)
 			return true;
 	}
@@ -1651,11 +1684,11 @@ bool ItemInst::IsAugmentable() const
 bool ItemInst::AvailableWearSlot(uint32 aug_wear_slots) const {
 	// TODO: check to see if incoming 'aug_wear_slots' "switches" bit assignments like above...
 	// (if wrong, would only affect MainAmmo and MainPowerSource augments)
-	if (!m_item || m_item->ItemClass != ItemClassCommon)
+	if (!m_item || !m_item->IsClassCommon())
 		return false;
 
-	int index = EmuConstants::EQUIPMENT_BEGIN;
-	for (; index <= MainGeneral1; ++index) { // MainGeneral1 should be EmuConstants::EQUIPMENT_END
+	int index = EQEmu::legacy::EQUIPMENT_BEGIN;
+	for (; index <= EQEmu::legacy::SlotGeneral1; ++index) { // MainGeneral1 should be EQEmu::legacy::EQUIPMENT_END
 		if (m_item->Slots & (1 << index)) {
 			if (aug_wear_slots & (1 << index))
 				break;
@@ -1667,22 +1700,22 @@ bool ItemInst::AvailableWearSlot(uint32 aug_wear_slots) const {
 
 int8 ItemInst::AvailableAugmentSlot(int32 augtype) const
 {
-	if (!m_item || m_item->ItemClass != ItemClassCommon)
+	if (!m_item || !m_item->IsClassCommon())
 		return INVALID_INDEX;
 
-	int index = AUG_BEGIN;
-	for (; index < EmuConstants::ITEM_COMMON_SIZE; ++index) {
+	int index = AUG_INDEX_BEGIN;
+	for (; index < EQEmu::legacy::ITEM_COMMON_SIZE; ++index) {
 		if (GetItem(index)) { continue; }
 		if (augtype == -1 || (m_item->AugSlotType[index] && ((1 << (m_item->AugSlotType[index] - 1)) & augtype)))
 			break;
 	}
 
-	return (index < EmuConstants::ITEM_COMMON_SIZE) ? index : INVALID_INDEX;
+	return (index < EQEmu::legacy::ITEM_COMMON_SIZE) ? index : INVALID_INDEX;
 }
 
 bool ItemInst::IsAugmentSlotAvailable(int32 augtype, uint8 slot) const
 {
-	if (!m_item || m_item->ItemClass != ItemClassCommon)
+	if (!m_item || !m_item->IsClassCommon())
 		 return false;
 
 	if ((!GetItem(slot) && m_item->AugSlotVisible[slot]) && augtype == -1 || (m_item->AugSlotType[slot] && ((1 << (m_item->AugSlotType[slot] - 1)) & augtype))) {
@@ -1767,7 +1800,7 @@ void ItemInst::ClearByFlags(byFlagSetting is_nodrop, byFlagSetting is_norent)
 			continue;
 		}
 
-		const Item_Struct* item = inst->GetItem();
+		const EQEmu::ItemBase* item = inst->GetItem();
 		if (item == nullptr) {
 			cur = m_contents.erase(cur);
 			continue;
@@ -1820,7 +1853,7 @@ uint8 ItemInst::FirstOpenSlot() const
 		return INVALID_INDEX;
 
 	uint8 slots = m_item->BagSlots, i;
-	for (i = SUB_BEGIN; i < slots; i++) {
+	for (i = SUB_INDEX_BEGIN; i < slots; i++) {
 		if (!GetItem(i))
 			break;
 	}
@@ -1830,21 +1863,24 @@ uint8 ItemInst::FirstOpenSlot() const
 
 uint8 ItemInst::GetTotalItemCount() const
 {
+	if (!m_item)
+		return 0;
+	
 	uint8 item_count = 1;
 
-	if (m_item && m_item->ItemClass != ItemClassContainer) { return item_count; }
+	if (m_item && !m_item->IsClassBag()) { return item_count; }
 
-	for (int index = SUB_BEGIN; index < m_item->BagSlots; ++index) { if (GetItem(index)) { ++item_count; } }
+	for (int index = SUB_INDEX_BEGIN; index < m_item->BagSlots; ++index) { if (GetItem(index)) { ++item_count; } }
 
 	return item_count;
 }
 
 bool ItemInst::IsNoneEmptyContainer()
 {
-	if (!m_item || m_item->ItemClass != ItemClassContainer)
+	if (!m_item || !m_item->IsClassBag())
 		return false;
 
-	for (int index = SUB_BEGIN; index < m_item->BagSlots; ++index) {
+	for (int index = SUB_INDEX_BEGIN; index < m_item->BagSlots; ++index) {
 		if (GetItem(index))
 			return true;
 	}
@@ -1855,7 +1891,7 @@ bool ItemInst::IsNoneEmptyContainer()
 // Retrieve augment inside item
 ItemInst* ItemInst::GetAugment(uint8 slot) const
 {
-	if (m_item && m_item->ItemClass == ItemClassCommon)
+	if (m_item && m_item->IsClassCommon())
 		return GetItem(slot);
 
 	return nullptr;
@@ -1863,10 +1899,10 @@ ItemInst* ItemInst::GetAugment(uint8 slot) const
 
 ItemInst* ItemInst::GetOrnamentationAug(int32 ornamentationAugtype) const
 {
-	if (!m_item || m_item->ItemClass != ItemClassCommon) { return nullptr; }
+	if (!m_item || !m_item->IsClassCommon()) { return nullptr; }
 	if (ornamentationAugtype == 0) { return nullptr; }
 
-	for (int i = AUG_BEGIN; i < EmuConstants::ITEM_COMMON_SIZE; i++)
+	for (int i = AUG_INDEX_BEGIN; i < EQEmu::legacy::ITEM_COMMON_SIZE; i++)
 	{
 		if (GetAugment(i) && m_item->AugSlotType[i] == ornamentationAugtype)
 		{
@@ -1900,7 +1936,7 @@ uint32 ItemInst::GetOrnamentHeroModel(int32 material_slot) const {
 }
 
 bool ItemInst::UpdateOrnamentationInfo() {
-	if (!m_item || m_item->ItemClass != ItemClassCommon)
+	if (!m_item || !m_item->IsClassCommon())
 		return false;
 	
 	bool ornamentSet = false;
@@ -1908,7 +1944,7 @@ bool ItemInst::UpdateOrnamentationInfo() {
 	int32 ornamentationAugtype = RuleI(Character, OrnamentationAugmentType);
 	if (GetOrnamentationAug(ornamentationAugtype))
 	{
-		const Item_Struct* ornamentItem;
+		const EQEmu::ItemBase* ornamentItem;
 		ornamentItem = GetOrnamentationAug(ornamentationAugtype)->GetItem();
 		if (ornamentItem != nullptr)
 		{
@@ -1935,10 +1971,10 @@ bool ItemInst::UpdateOrnamentationInfo() {
 	return ornamentSet;
 }
 
-bool ItemInst::CanTransform(const Item_Struct *ItemToTry, const Item_Struct *Container, bool AllowAll) {
+bool ItemInst::CanTransform(const EQEmu::ItemBase *ItemToTry, const EQEmu::ItemBase *Container, bool AllowAll) {
 	if (!ItemToTry || !Container) return false;
 
-	if (ItemToTry->ItemType == ItemTypeArrow || strnlen(Container->CharmFile, 30) == 0)
+	if (ItemToTry->ItemType == EQEmu::item::ItemTypeArrow || strnlen(Container->CharmFile, 30) == 0)
 		return false;
 
 	if (AllowAll && strncasecmp(Container->CharmFile, "ITEMTRANSFIGSHIELD", 18) && strncasecmp(Container->CharmFile, "ITEMTransfigBow", 15)) {
@@ -1983,7 +2019,7 @@ bool ItemInst::CanTransform(const Item_Struct *ItemToTry, const Item_Struct *Con
 
 uint32 ItemInst::GetAugmentItemID(uint8 slot) const
 {
-	if (!m_item || m_item->ItemClass != ItemClassCommon)
+	if (!m_item || !m_item->IsClassCommon())
 		return NO_ITEM;
 
 	return GetItemID(slot);
@@ -1992,7 +2028,7 @@ uint32 ItemInst::GetAugmentItemID(uint8 slot) const
 // Add an augment to the item
 void ItemInst::PutAugment(uint8 slot, const ItemInst& augment)
 {
-	if (!m_item || m_item->ItemClass != ItemClassCommon)
+	if (!m_item || !m_item->IsClassCommon())
 		return;
 	
 	PutItem(slot, augment);
@@ -2013,7 +2049,7 @@ void ItemInst::PutAugment(SharedDatabase *db, uint8 slot, uint32 item_id)
 // Remove augment from item and destroy it
 void ItemInst::DeleteAugment(uint8 index)
 {
-	if (!m_item || m_item->ItemClass != ItemClassCommon)
+	if (!m_item || !m_item->IsClassCommon())
 		return;
 	
 	DeleteItem(index);
@@ -2022,7 +2058,7 @@ void ItemInst::DeleteAugment(uint8 index)
 // Remove augment from item and return it
 ItemInst* ItemInst::RemoveAugment(uint8 index)
 {
-	if (!m_item || m_item->ItemClass != ItemClassCommon)
+	if (!m_item || !m_item->IsClassCommon())
 		return nullptr;
 	
 	return PopItem(index);
@@ -2030,10 +2066,10 @@ ItemInst* ItemInst::RemoveAugment(uint8 index)
 
 bool ItemInst::IsAugmented()
 {
-	if (!m_item || m_item->ItemClass != ItemClassCommon)
+	if (!m_item || !m_item->IsClassCommon())
 		return false;
 	
-	for (int index = AUG_BEGIN; index < EmuConstants::ITEM_COMMON_SIZE; ++index) {
+	for (int index = AUG_INDEX_BEGIN; index < EQEmu::legacy::ITEM_COMMON_SIZE; ++index) {
 		if (GetAugmentItemID(index))
 			return true;
 	}
@@ -2044,10 +2080,10 @@ bool ItemInst::IsAugmented()
 // Has attack/delay?
 bool ItemInst::IsWeapon() const
 {
-	if (!m_item || m_item->ItemClass != ItemClassCommon)
+	if (!m_item || !m_item->IsClassCommon())
 		return false;
 
-	if (m_item->ItemType == ItemTypeArrow && m_item->Damage != 0)
+	if (m_item->ItemType == EQEmu::item::ItemTypeArrow && m_item->Damage != 0)
 		return true;
 	else
 		return ((m_item->Damage != 0) && (m_item->Delay != 0));
@@ -2058,9 +2094,9 @@ bool ItemInst::IsAmmo() const
 	if (!m_item)
 		return false;
 
-	if ((m_item->ItemType == ItemTypeArrow) ||
-		(m_item->ItemType == ItemTypeLargeThrowing) ||
-		(m_item->ItemType == ItemTypeSmallThrowing)
+	if ((m_item->ItemType == EQEmu::item::ItemTypeArrow) ||
+		(m_item->ItemType == EQEmu::item::ItemTypeLargeThrowing) ||
+		(m_item->ItemType == EQEmu::item::ItemTypeSmallThrowing)
 		) {
 		return true;
 	}
@@ -2069,7 +2105,7 @@ bool ItemInst::IsAmmo() const
 
 }
 
-const Item_Struct* ItemInst::GetItem() const
+const EQEmu::ItemBase* ItemInst::GetItem() const
 {
 	if (!m_item)
 		return nullptr;
@@ -2080,7 +2116,7 @@ const Item_Struct* ItemInst::GetItem() const
 	return m_item;
 }
 
-const Item_Struct* ItemInst::GetUnscaledItem() const
+const EQEmu::ItemBase* ItemInst::GetUnscaledItem() const
 {
 	// No operator calls and defaults to nullptr
 	return m_item;
@@ -2088,7 +2124,7 @@ const Item_Struct* ItemInst::GetUnscaledItem() const
 
 std::string ItemInst::GetCustomDataString() const {
 	std::string ret_val;
-	std::map<std::string, std::string>::const_iterator iter = m_custom_data.begin();
+	auto iter = m_custom_data.begin();
 	while (iter != m_custom_data.end()) {
 		if (ret_val.length() > 0) {
 			ret_val += "^";
@@ -2141,7 +2177,7 @@ void ItemInst::SetCustomData(std::string identifier, bool value) {
 }
 
 void ItemInst::DeleteCustomData(std::string identifier) {
-	std::map<std::string, std::string>::iterator iter = m_custom_data.find(identifier);
+	auto iter = m_custom_data.find(identifier);
 	if (iter != m_custom_data.end()) {
 		m_custom_data.erase(iter);
 	}
@@ -2161,8 +2197,8 @@ bool ItemInst::IsSlotAllowed(int16 slot_id) const {
 	if (!m_item) { return false; }
 	else if (Inventory::SupportsContainers(slot_id)) { return true; }
 	else if (m_item->Slots & (1 << slot_id)) { return true; }
-	else if (slot_id == MainPowerSource && (m_item->Slots & (1 << 22))) { return true; } // got lazy... <watch>
-	else if (slot_id != MainPowerSource && slot_id > EmuConstants::EQUIPMENT_END) { return true; }
+	else if (slot_id == EQEmu::legacy::SlotPowerSource && (m_item->Slots & (1 << 22))) { return true; } // got lazy... <watch>
+	else if (slot_id != EQEmu::legacy::SlotPowerSource && slot_id > EQEmu::legacy::EQUIPMENT_END) { return true; }
 	else { return false; }
 }
 
@@ -2188,10 +2224,10 @@ void ItemInst::ScaleItem() {
 		return;
 
 	if (m_scaledItem) {
-		memcpy(m_scaledItem, m_item, sizeof(Item_Struct));
+		memcpy(m_scaledItem, m_item, sizeof(EQEmu::ItemBase));
 	}
 	else {
-		m_scaledItem = new Item_Struct(*m_item);
+		m_scaledItem = new EQEmu::ItemBase(*m_item);
 	}
 
 	float Mult = (float)(GetExp()) / 10000;	// scaling is determined by exp, with 10,000 being full stats
@@ -2214,11 +2250,12 @@ void ItemInst::ScaleItem() {
 	m_scaledItem->Mana = (int32)((float)m_item->Mana*Mult);
 	m_scaledItem->AC = (int32)((float)m_item->AC*Mult);
 
-	m_scaledItem->SkillModValue = (int32)((float)m_item->SkillModValue*Mult);
-	m_scaledItem->BaneDmgAmt = (int8)((float)m_item->BaneDmgAmt*Mult);
-	m_scaledItem->BardValue = (int32)((float)m_item->BardValue*Mult);
-	m_scaledItem->ElemDmgAmt = (uint8)((float)m_item->ElemDmgAmt*Mult);
-	m_scaledItem->Damage = (uint32)((float)m_item->Damage*Mult);
+	// check these..some may not need to be modified (really need to check all stats/bonuses)
+	//m_scaledItem->SkillModValue = (int32)((float)m_item->SkillModValue*Mult);
+	//m_scaledItem->BaneDmgAmt = (int8)((float)m_item->BaneDmgAmt*Mult);	// watch (10 entries with charmfileid)
+	m_scaledItem->BardValue = (int32)((float)m_item->BardValue*Mult);		// watch (no entries with charmfileid)
+	m_scaledItem->ElemDmgAmt = (uint8)((float)m_item->ElemDmgAmt*Mult);		// watch (no entries with charmfileid)
+	m_scaledItem->Damage = (uint32)((float)m_item->Damage*Mult);			// watch
 
 	m_scaledItem->CombatEffects = (int8)((float)m_item->CombatEffects*Mult);
 	m_scaledItem->Shielding = (int8)((float)m_item->Shielding*Mult);
@@ -2306,6 +2343,708 @@ void ItemInst::ClearTimers() {
 	m_timers.clear();
 }
 
+int ItemInst::GetItemArmorClass(bool augments) const
+{
+	int ac = 0;
+	const auto item = GetItem();
+	if (item) {
+		ac = item->AC;
+		if (augments)
+			for (int i = AUG_INDEX_BEGIN; i < EQEmu::legacy::ITEM_COMMON_SIZE; ++i)
+				if (GetAugment(i))
+					ac += GetAugment(i)->GetItemArmorClass();
+	}
+	return ac;
+}
+
+int ItemInst::GetItemElementalDamage(int &magic, int &fire, int &cold, int &poison, int &disease, int &chromatic, int &prismatic, int &physical, int &corruption, bool augments) const
+{
+	const auto item = GetItem();
+	if (item) {
+		switch (item->ElemDmgType) {
+		case RESIST_MAGIC:
+			magic += item->ElemDmgAmt;
+			break;
+		case RESIST_FIRE:
+			fire += item->ElemDmgAmt;
+			break;
+		case RESIST_COLD:
+			cold += item->ElemDmgAmt;
+			break;
+		case RESIST_POISON:
+			poison += item->ElemDmgAmt;
+			break;
+		case RESIST_DISEASE:
+			disease += item->ElemDmgAmt;
+			break;
+		case RESIST_CHROMATIC:
+			chromatic += item->ElemDmgAmt;
+			break;
+		case RESIST_PRISMATIC:
+			prismatic += item->ElemDmgAmt;
+			break;
+		case RESIST_PHYSICAL:
+			physical += item->ElemDmgAmt;
+			break;
+		case RESIST_CORRUPTION:
+			corruption += item->ElemDmgAmt;
+			break;
+		}
+
+		if (augments)
+			for (int i = AUG_INDEX_BEGIN; i < EQEmu::legacy::ITEM_COMMON_SIZE; ++i)
+				if (GetAugment(i))
+					GetAugment(i)->GetItemElementalDamage(magic, fire, cold, poison, disease, chromatic, prismatic, physical, corruption);
+	}
+	return magic + fire + cold + poison + disease + chromatic + prismatic + physical + corruption;
+}
+
+int ItemInst::GetItemElementalFlag(bool augments) const
+{
+	int flag = 0;
+	const auto item = GetItem();
+	if (item) {
+		flag = item->ElemDmgType;
+		if (flag)
+			return flag;
+
+		if (augments) {
+			for (int i = AUG_INDEX_BEGIN; i < EQEmu::legacy::ITEM_COMMON_SIZE; ++i) {
+				if (GetAugment(i))
+					flag = GetAugment(i)->GetItemElementalFlag();
+				if (flag)
+					return flag;
+			}
+		}
+	}
+	return flag;
+}
+
+int ItemInst::GetItemElementalDamage(bool augments) const
+{
+	int damage = 0;
+	const auto item = GetItem();
+	if (item) {
+		damage = item->ElemDmgAmt;
+		if (damage)
+			return damage;
+
+		if (augments) {
+			for (int i = AUG_INDEX_BEGIN; i < EQEmu::legacy::ITEM_COMMON_SIZE; ++i) {
+				if (GetAugment(i))
+					damage = GetAugment(i)->GetItemElementalDamage();
+				if (damage)
+					return damage;
+			}
+		}
+	}
+	return damage;
+}
+
+int ItemInst::GetItemRecommendedLevel(bool augments) const
+{
+	int level = 0;
+	const auto item = GetItem();
+	if (item) {
+		level = item->RecLevel;
+
+		if (augments) {
+			for (int i = AUG_INDEX_BEGIN; i < EQEmu::legacy::ITEM_COMMON_SIZE; ++i) {
+				int temp = 0;
+				if (GetAugment(i)) {
+					temp = GetAugment(i)->GetItemRecommendedLevel();
+					if (temp > level)
+						level = temp;
+				}
+			}
+		}
+	}
+
+	return level;
+}
+
+int ItemInst::GetItemRequiredLevel(bool augments) const
+{
+	int level = 0;
+	const auto item = GetItem();
+	if (item) {
+		level = item->ReqLevel;
+
+		if (augments) {
+			for (int i = AUG_INDEX_BEGIN; i < EQEmu::legacy::ITEM_COMMON_SIZE; ++i) {
+				int temp = 0;
+				if (GetAugment(i)) {
+					temp = GetAugment(i)->GetItemRequiredLevel();
+					if (temp > level)
+						level = temp;
+				}
+			}
+		}
+	}
+
+	return level;
+}
+
+int ItemInst::GetItemWeaponDamage(bool augments) const
+{
+	int damage = 0;
+	const auto item = GetItem();
+	if (item) {
+		damage = item->Damage;
+
+		if (augments) {
+			for (int i = AUG_INDEX_BEGIN; i < EQEmu::legacy::ITEM_COMMON_SIZE; ++i)
+				if (GetAugment(i))
+					damage += GetAugment(i)->GetItemWeaponDamage();
+		}
+	}
+	return damage;
+}
+
+int ItemInst::GetItemBackstabDamage(bool augments) const
+{
+	int damage = 0;
+	const auto item = GetItem();
+	if (item) {
+		damage = item->BackstabDmg;
+
+		if (augments) {
+			for (int i = AUG_INDEX_BEGIN; i < EQEmu::legacy::ITEM_COMMON_SIZE; ++i)
+				if (GetAugment(i))
+					damage += GetAugment(i)->GetItemBackstabDamage();
+		}
+	}
+	return damage;
+}
+
+int ItemInst::GetItemBaneDamageBody(bool augments) const
+{
+	int body = 0;
+	const auto item = GetItem();
+	if (item) {
+		body = item->BaneDmgBody;
+		if (body)
+			return body;
+
+		if (augments) {
+			for (int i = AUG_INDEX_BEGIN; i < EQEmu::legacy::ITEM_COMMON_SIZE; ++i)
+				if (GetAugment(i)) {
+					body = GetAugment(i)->GetItemBaneDamageBody();
+					if (body)
+						return body;
+				}
+		}
+	}
+	return body;
+}
+
+int ItemInst::GetItemBaneDamageRace(bool augments) const
+{
+	int race = 0;
+	const auto item = GetItem();
+	if (item) {
+		race = item->BaneDmgRace;
+		if (race)
+			return race;
+
+		if (augments) {
+			for (int i = AUG_INDEX_BEGIN; i < EQEmu::legacy::ITEM_COMMON_SIZE; ++i)
+				if (GetAugment(i)) {
+					race = GetAugment(i)->GetItemBaneDamageRace();
+					if (race)
+						return race;
+				}
+		}
+	}
+	return race;
+}
+
+int ItemInst::GetItemBaneDamageBody(bodyType against, bool augments) const
+{
+	int damage = 0;
+	const auto item = GetItem();
+	if (item) {
+		if (item->BaneDmgBody == against)
+			damage += item->BaneDmgAmt;
+
+		if (augments) {
+			for (int i = AUG_INDEX_BEGIN; i < EQEmu::legacy::ITEM_COMMON_SIZE; ++i)
+				if (GetAugment(i))
+					damage += GetAugment(i)->GetItemBaneDamageBody(against);
+		}
+	}
+	return damage;
+}
+
+int ItemInst::GetItemBaneDamageRace(uint16 against, bool augments) const
+{
+	int damage = 0;
+	const auto item = GetItem();
+	if (item) {
+		if (item->BaneDmgRace == against)
+			damage += item->BaneDmgRaceAmt;
+
+		if (augments) {
+			for (int i = AUG_INDEX_BEGIN; i < EQEmu::legacy::ITEM_COMMON_SIZE; ++i)
+				if (GetAugment(i))
+					damage += GetAugment(i)->GetItemBaneDamageRace(against);
+		}
+	}
+	return damage;
+}
+
+int ItemInst::GetItemMagical(bool augments) const
+{
+	const auto item = GetItem();
+	if (item) {
+		if (item->Magic)
+			return 1;
+
+		if (augments) {
+			for (int i = AUG_INDEX_BEGIN; i < EQEmu::legacy::ITEM_COMMON_SIZE; ++i)
+				if (GetAugment(i) && GetAugment(i)->GetItemMagical())
+					return 1;
+		}
+	}
+	return 0;
+}
+
+int ItemInst::GetItemHP(bool augments) const
+{
+	int hp = 0;
+	const auto item = GetItem();
+	if (item) {
+		hp = item->HP;
+		if (augments)
+			for (int i = AUG_INDEX_BEGIN; i < EQEmu::legacy::ITEM_COMMON_SIZE; ++i)
+				if (GetAugment(i))
+					hp += GetAugment(i)->GetItemHP();
+	}
+	return hp;
+}
+
+int ItemInst::GetItemMana(bool augments) const
+{
+	int mana = 0;
+	const auto item = GetItem();
+	if (item) {
+		mana = item->Mana;
+		if (augments)
+			for (int i = AUG_INDEX_BEGIN; i < EQEmu::legacy::ITEM_COMMON_SIZE; ++i)
+				if (GetAugment(i))
+					mana += GetAugment(i)->GetItemMana();
+	}
+	return mana;
+}
+
+int ItemInst::GetItemEndur(bool augments) const
+{
+	int endur = 0;
+	const auto item = GetItem();
+	if (item) {
+		endur = item->Endur;
+		if (augments)
+			for (int i = AUG_INDEX_BEGIN; i < EQEmu::legacy::ITEM_COMMON_SIZE; ++i)
+				if (GetAugment(i))
+					endur += GetAugment(i)->GetItemEndur();
+	}
+	return endur;
+}
+
+int ItemInst::GetItemAttack(bool augments) const
+{
+	int atk = 0;
+	const auto item = GetItem();
+	if (item) {
+		atk = item->Attack;
+		if (augments)
+			for (int i = AUG_INDEX_BEGIN; i < EQEmu::legacy::ITEM_COMMON_SIZE; ++i)
+				if (GetAugment(i))
+					atk += GetAugment(i)->GetItemAttack();
+	}
+	return atk;
+}
+
+int ItemInst::GetItemStr(bool augments) const
+{
+	int str = 0;
+	const auto item = GetItem();
+	if (item) {
+		str = item->AStr;
+		if (augments)
+			for (int i = AUG_INDEX_BEGIN; i < EQEmu::legacy::ITEM_COMMON_SIZE; ++i)
+				if (GetAugment(i))
+					str += GetAugment(i)->GetItemStr();
+	}
+	return str;
+}
+
+int ItemInst::GetItemSta(bool augments) const
+{
+	int sta = 0;
+	const auto item = GetItem();
+	if (item) {
+		sta = item->ASta;
+		if (augments)
+			for (int i = AUG_INDEX_BEGIN; i < EQEmu::legacy::ITEM_COMMON_SIZE; ++i)
+				if (GetAugment(i))
+					sta += GetAugment(i)->GetItemSta();
+	}
+	return sta;
+}
+
+int ItemInst::GetItemDex(bool augments) const
+{
+	int total = 0;
+	const auto item = GetItem();
+	if (item) {
+		total = item->ADex;
+		if (augments)
+			for (int i = AUG_INDEX_BEGIN; i < EQEmu::legacy::ITEM_COMMON_SIZE; ++i)
+				if (GetAugment(i))
+					total += GetAugment(i)->GetItemDex();
+	}
+	return total;
+}
+
+int ItemInst::GetItemAgi(bool augments) const
+{
+	int total = 0;
+	const auto item = GetItem();
+	if (item) {
+		total = item->AAgi;
+		if (augments)
+			for (int i = AUG_INDEX_BEGIN; i < EQEmu::legacy::ITEM_COMMON_SIZE; ++i)
+				if (GetAugment(i))
+					total += GetAugment(i)->GetItemAgi();
+	}
+	return total;
+}
+
+int ItemInst::GetItemInt(bool augments) const
+{
+	int total = 0;
+	const auto item = GetItem();
+	if (item) {
+		total = item->AInt;
+		if (augments)
+			for (int i = AUG_INDEX_BEGIN; i < EQEmu::legacy::ITEM_COMMON_SIZE; ++i)
+				if (GetAugment(i))
+					total += GetAugment(i)->GetItemInt();
+	}
+	return total;
+}
+
+int ItemInst::GetItemWis(bool augments) const
+{
+	int total = 0;
+	const auto item = GetItem();
+	if (item) {
+		total = item->AWis;
+		if (augments)
+			for (int i = AUG_INDEX_BEGIN; i < EQEmu::legacy::ITEM_COMMON_SIZE; ++i)
+				if (GetAugment(i))
+					total += GetAugment(i)->GetItemWis();
+	}
+	return total;
+}
+
+int ItemInst::GetItemCha(bool augments) const
+{
+	int total = 0;
+	const auto item = GetItem();
+	if (item) {
+		total = item->ACha;
+		if (augments)
+			for (int i = AUG_INDEX_BEGIN; i < EQEmu::legacy::ITEM_COMMON_SIZE; ++i)
+				if (GetAugment(i))
+					total += GetAugment(i)->GetItemCha();
+	}
+	return total;
+}
+
+int ItemInst::GetItemMR(bool augments) const
+{
+	int total = 0;
+	const auto item = GetItem();
+	if (item) {
+		total = item->MR;
+		if (augments)
+			for (int i = AUG_INDEX_BEGIN; i < EQEmu::legacy::ITEM_COMMON_SIZE; ++i)
+				if (GetAugment(i))
+					total += GetAugment(i)->GetItemMR();
+	}
+	return total;
+}
+
+int ItemInst::GetItemFR(bool augments) const
+{
+	int total = 0;
+	const auto item = GetItem();
+	if (item) {
+		total = item->FR;
+		if (augments)
+			for (int i = AUG_INDEX_BEGIN; i < EQEmu::legacy::ITEM_COMMON_SIZE; ++i)
+				if (GetAugment(i))
+					total += GetAugment(i)->GetItemFR();
+	}
+	return total;
+}
+
+int ItemInst::GetItemCR(bool augments) const
+{
+	int total = 0;
+	const auto item = GetItem();
+	if (item) {
+		total = item->CR;
+		if (augments)
+			for (int i = AUG_INDEX_BEGIN; i < EQEmu::legacy::ITEM_COMMON_SIZE; ++i)
+				if (GetAugment(i))
+					total += GetAugment(i)->GetItemCR();
+	}
+	return total;
+}
+
+int ItemInst::GetItemPR(bool augments) const
+{
+	int total = 0;
+	const auto item = GetItem();
+	if (item) {
+		total = item->PR;
+		if (augments)
+			for (int i = AUG_INDEX_BEGIN; i < EQEmu::legacy::ITEM_COMMON_SIZE; ++i)
+				if (GetAugment(i))
+					total += GetAugment(i)->GetItemPR();
+	}
+	return total;
+}
+
+int ItemInst::GetItemDR(bool augments) const
+{
+	int total = 0;
+	const auto item = GetItem();
+	if (item) {
+		total = item->DR;
+		if (augments)
+			for (int i = AUG_INDEX_BEGIN; i < EQEmu::legacy::ITEM_COMMON_SIZE; ++i)
+				if (GetAugment(i))
+					total += GetAugment(i)->GetItemDR();
+	}
+	return total;
+}
+
+int ItemInst::GetItemCorrup(bool augments) const
+{
+	int total = 0;
+	const auto item = GetItem();
+	if (item) {
+		total = item->SVCorruption;
+		if (augments)
+			for (int i = AUG_INDEX_BEGIN; i < EQEmu::legacy::ITEM_COMMON_SIZE; ++i)
+				if (GetAugment(i))
+					total += GetAugment(i)->GetItemCorrup();
+	}
+	return total;
+}
+
+int ItemInst::GetItemHeroicStr(bool augments) const
+{
+	int total = 0;
+	const auto item = GetItem();
+	if (item) {
+		total = item->HeroicStr;
+		if (augments)
+			for (int i = AUG_INDEX_BEGIN; i < EQEmu::legacy::ITEM_COMMON_SIZE; ++i)
+				if (GetAugment(i))
+					total += GetAugment(i)->GetItemHeroicStr();
+	}
+	return total;
+}
+
+int ItemInst::GetItemHeroicSta(bool augments) const
+{
+	int total = 0;
+	const auto item = GetItem();
+	if (item) {
+		total = item->HeroicSta;
+		if (augments)
+			for (int i = AUG_INDEX_BEGIN; i < EQEmu::legacy::ITEM_COMMON_SIZE; ++i)
+				if (GetAugment(i))
+					total += GetAugment(i)->GetItemHeroicSta();
+	}
+	return total;
+}
+
+int ItemInst::GetItemHeroicDex(bool augments) const
+{
+	int total = 0;
+	const auto item = GetItem();
+	if (item) {
+		total = item->HeroicDex;
+		if (augments)
+			for (int i = AUG_INDEX_BEGIN; i < EQEmu::legacy::ITEM_COMMON_SIZE; ++i)
+				if (GetAugment(i))
+					total += GetAugment(i)->GetItemHeroicDex();
+	}
+	return total;
+}
+
+int ItemInst::GetItemHeroicAgi(bool augments) const
+{
+	int total = 0;
+	const auto item = GetItem();
+	if (item) {
+		total = item->HeroicAgi;
+		if (augments)
+			for (int i = AUG_INDEX_BEGIN; i < EQEmu::legacy::ITEM_COMMON_SIZE; ++i)
+				if (GetAugment(i))
+					total += GetAugment(i)->GetItemHeroicAgi();
+	}
+	return total;
+}
+
+int ItemInst::GetItemHeroicInt(bool augments) const
+{
+	int total = 0;
+	const auto item = GetItem();
+	if (item) {
+		total = item->HeroicInt;
+		if (augments)
+			for (int i = AUG_INDEX_BEGIN; i < EQEmu::legacy::ITEM_COMMON_SIZE; ++i)
+				if (GetAugment(i))
+					total += GetAugment(i)->GetItemHeroicInt();
+	}
+	return total;
+}
+
+int ItemInst::GetItemHeroicWis(bool augments) const
+{
+	int total = 0;
+	const auto item = GetItem();
+	if (item) {
+		total = item->HeroicWis;
+		if (augments)
+			for (int i = AUG_INDEX_BEGIN; i < EQEmu::legacy::ITEM_COMMON_SIZE; ++i)
+				if (GetAugment(i))
+					total += GetAugment(i)->GetItemHeroicWis();
+	}
+	return total;
+}
+
+int ItemInst::GetItemHeroicCha(bool augments) const
+{
+	int total = 0;
+	const auto item = GetItem();
+	if (item) {
+		total = item->HeroicCha;
+		if (augments)
+			for (int i = AUG_INDEX_BEGIN; i < EQEmu::legacy::ITEM_COMMON_SIZE; ++i)
+				if (GetAugment(i))
+					total += GetAugment(i)->GetItemHeroicCha();
+	}
+	return total;
+}
+
+int ItemInst::GetItemHeroicMR(bool augments) const
+{
+	int total = 0;
+	const auto item = GetItem();
+	if (item) {
+		total = item->HeroicMR;
+		if (augments)
+			for (int i = AUG_INDEX_BEGIN; i < EQEmu::legacy::ITEM_COMMON_SIZE; ++i)
+				if (GetAugment(i))
+					total += GetAugment(i)->GetItemHeroicMR();
+	}
+	return total;
+}
+
+int ItemInst::GetItemHeroicFR(bool augments) const
+{
+	int total = 0;
+	const auto item = GetItem();
+	if (item) {
+		total = item->HeroicFR;
+		if (augments)
+			for (int i = AUG_INDEX_BEGIN; i < EQEmu::legacy::ITEM_COMMON_SIZE; ++i)
+				if (GetAugment(i))
+					total += GetAugment(i)->GetItemHeroicFR();
+	}
+	return total;
+}
+
+int ItemInst::GetItemHeroicCR(bool augments) const
+{
+	int total = 0;
+	const auto item = GetItem();
+	if (item) {
+		total = item->HeroicCR;
+		if (augments)
+			for (int i = AUG_INDEX_BEGIN; i < EQEmu::legacy::ITEM_COMMON_SIZE; ++i)
+				if (GetAugment(i))
+					total += GetAugment(i)->GetItemHeroicCR();
+	}
+	return total;
+}
+
+int ItemInst::GetItemHeroicPR(bool augments) const
+{
+	int total = 0;
+	const auto item = GetItem();
+	if (item) {
+		total = item->HeroicPR;
+		if (augments)
+			for (int i = AUG_INDEX_BEGIN; i < EQEmu::legacy::ITEM_COMMON_SIZE; ++i)
+				if (GetAugment(i))
+					total += GetAugment(i)->GetItemHeroicPR();
+	}
+	return total;
+}
+
+int ItemInst::GetItemHeroicDR(bool augments) const
+{
+	int total = 0;
+	const auto item = GetItem();
+	if (item) {
+		total = item->HeroicDR;
+		if (augments)
+			for (int i = AUG_INDEX_BEGIN; i < EQEmu::legacy::ITEM_COMMON_SIZE; ++i)
+				if (GetAugment(i))
+					total += GetAugment(i)->GetItemHeroicDR();
+	}
+	return total;
+}
+
+int ItemInst::GetItemHeroicCorrup(bool augments) const
+{
+	int total = 0;
+	const auto item = GetItem();
+	if (item) {
+		total = item->HeroicSVCorrup;
+		if (augments)
+			for (int i = AUG_INDEX_BEGIN; i < EQEmu::legacy::ITEM_COMMON_SIZE; ++i)
+				if (GetAugment(i))
+					total += GetAugment(i)->GetItemHeroicCorrup();
+	}
+	return total;
+}
+
+int ItemInst::GetItemHaste(bool augments) const
+{
+	int total = 0;
+	const auto item = GetItem();
+	if (item) {
+		total = item->Haste;
+		if (augments)
+			for (int i = AUG_INDEX_BEGIN; i < EQEmu::legacy::ITEM_COMMON_SIZE; ++i)
+				if (GetAugment(i)) {
+					int temp = GetAugment(i)->GetItemHaste();
+					if (temp > total)
+						total = temp;
+				}
+	}
+	return total;
+}
 
 //
 // class EvolveInfo
@@ -2331,105 +3070,4 @@ EvolveInfo::EvolveInfo(uint32 first, uint8 max, bool allkills, uint32 L2, uint32
 
 EvolveInfo::~EvolveInfo() {
 
-}
-
-
-//
-// struct Item_Struct
-//
-bool Item_Struct::IsEquipable(uint16 Race, uint16 Class_) const
-{
-	bool IsRace = false;
-	bool IsClass = false;
-
-	uint32 Classes_ = Classes;
-	uint32 Races_ = Races;
-	uint32 Race_ = GetArrayRace(Race);
-
-	for (int CurrentClass = 1; CurrentClass <= PLAYER_CLASS_COUNT; ++CurrentClass) {
-		if (Classes_ & 1) {
-			if (CurrentClass == Class_) {
-				IsClass = true;
-				break;
-			}
-		}
-		Classes_ >>= 1;
-	}
-
-	Race_ = (Race_ == 18 ? 16 : Race_);
-
-	for (unsigned int CurrentRace = 1; CurrentRace <= PLAYER_RACE_COUNT; ++CurrentRace) {
-		if (Races_ & 1) {
-			if (CurrentRace == Race_) {
-				IsRace = true;
-				break;
-			}
-		}
-		Races_ >>= 1;
-	}
-
-	return (IsRace && IsClass);
-}
-
-//
-// struct LightProfile_Struct
-//
-uint8 LightProfile_Struct::TypeToLevel(uint8 lightType)
-{
-	switch (lightType) {
-	case lightTypeGlobeOfStars:
-		return lightLevelBrilliant;		// 10
-	case lightTypeFlamelessLantern:
-	case lightTypeGreaterLightstone:
-		return lightLevelLargeMagic;	// 9
-	case lightTypeLargeLantern:
-		return lightLevelLargeLantern;	// 8
-	case lightTypeSteinOfMoggok:
-	case lightTypeLightstone:
-		return lightLevelMagicLantern;	// 7
-	case lightTypeSmallLantern:
-		return lightLevelSmallLantern;	// 6
-	case lightTypeColdlight:
-	case lightTypeUnknown2:
-		return lightLevelBlueLight;		// 5
-	case lightTypeFireBeetleEye:
-	case lightTypeUnknown1:
-		return lightLevelRedLight;		// 4
-	case lightTypeTinyGlowingSkull:
-	case lightTypeLightGlobe:
-		return lightLevelSmallMagic;	// 3
-	case lightTypeTorch:
-		return lightLevelTorch;			// 2
-	case lightLevelCandle:
-		return lightLevelCandle;		// 1
-	default:
-		return lightLevelUnlit;			// 0
-	}
-}
-
-bool LightProfile_Struct::IsLevelGreater(uint8 leftType, uint8 rightType)
-{
-	static const uint8 light_levels[LIGHT_TYPES_COUNT] = {
-		lightLevelUnlit,			/* lightTypeNone */
-		lightLevelCandle,			/* lightTypeCandle */
-		lightLevelTorch,			/* lightTypeTorch */
-		lightLevelSmallMagic,		/* lightTypeTinyGlowingSkull */
-		lightLevelSmallLantern,		/* lightTypeSmallLantern */
-		lightLevelMagicLantern,		/* lightTypeSteinOfMoggok */
-		lightLevelLargeLantern,		/* lightTypeLargeLantern */
-		lightLevelLargeMagic,		/* lightTypeFlamelessLantern */
-		lightLevelBrilliant,		/* lightTypeGlobeOfStars */
-		lightLevelSmallMagic,		/* lightTypeLightGlobe */
-		lightLevelMagicLantern,		/* lightTypeLightstone */
-		lightLevelLargeMagic,		/* lightTypeGreaterLightstone */
-		lightLevelRedLight,			/* lightTypeFireBeetleEye */
-		lightLevelBlueLight,		/* lightTypeColdlight */
-		lightLevelRedLight,			/* lightTypeUnknown1 */
-		lightLevelBlueLight			/* lightTypeUnknown2 */
-	};
-
-	if (leftType >= LIGHT_TYPES_COUNT) { leftType = lightTypeNone; }
-	if (rightType >= LIGHT_TYPES_COUNT) { rightType = lightTypeNone; }
-
-	return (light_levels[leftType] > light_levels[rightType]);
 }

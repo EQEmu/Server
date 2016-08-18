@@ -41,7 +41,7 @@ public:
 		std::vector<EQEmu::Any> *extra_pointers) { return 0; }
 	virtual int EventSpell(QuestEventID evt, NPC* npc, Client *client, uint32 spell_id, uint32 extra_data,
 		std::vector<EQEmu::Any> *extra_pointers) { return 0; }
-	virtual int EventEncounter(QuestEventID evt, std::string encounter_name, uint32 extra_data,
+	virtual int EventEncounter(QuestEventID evt, std::string encounter_name, std::string data, uint32 extra_data,
 		std::vector<EQEmu::Any> *extra_pointers) { return 0; }
 	
 	virtual bool HasQuestSub(uint32 npcid, QuestEventID evt) { return false; }

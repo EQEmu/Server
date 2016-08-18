@@ -1,11 +1,31 @@
-#ifndef TITANIUM_H_
-#define TITANIUM_H_
+/*	EQEMu: Everquest Server Emulator
+	
+	Copyright (C) 2001-2016 EQEMu Development Team (http://eqemulator.net)
+
+	This program is free software; you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation; version 2 of the License.
+
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY except by those people which sell it, which
+	are required to give you total support for your newly bought product;
+	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+	A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+
+	You should have received a copy of the GNU General Public License
+	along with this program; if not, write to the Free Software
+	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+*/
+
+#ifndef COMMON_TITANIUM_H
+#define COMMON_TITANIUM_H
 
 #include "../struct_strategy.h"
 
 class EQStreamIdentifier;
 
-namespace Titanium {
+namespace Titanium
+{
 
 	//these are the only public member of this namespace.
 	extern void Register(EQStreamIdentifier &into);
@@ -23,13 +43,30 @@ namespace Titanium {
 	protected:
 
 		virtual std::string Describe() const;
-		virtual const ClientVersion GetClientVersion() const;
+		virtual const EQEmu::versions::ClientVersion ClientVersion() const;
 
 		//magic macro to declare our opcode processors
 		#include "ss_declare.h"
 		#include "titanium_ops.h"
 	};
 
-};
+	enum class CastingSlot : uint32 {
+		Gem1       = 0,
+		Gem2       = 1,
+		Gem3       = 2,
+		Gem4       = 3,
+		Gem5       = 4,
+		Gem6       = 5,
+		Gem7       = 6,
+		Gem8       = 7,
+		Gem9       = 8,
+		Ability    = 9,
+		Item       = 10,
+		Discipline = 10,
+		PotionBelt = 11,
+		AltAbility = 0xFF
+	};
 
-#endif /*TITANIUM_H_*/
+}; /*Titanium*/
+
+#endif /*COMMON_TITANIUM_H*/

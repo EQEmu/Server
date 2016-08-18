@@ -27,6 +27,7 @@
 #include "qglobals.h"
 #include "spawn2.h"
 #include "spawngroup.h"
+#include "aa_ability.h"
 
 struct ZonePoint
 {
@@ -43,6 +44,7 @@ struct ZonePoint
 	int32 target_zone_instance;
 	uint32 client_version_mask;
 };
+
 struct ZoneClientAuth_Struct {
 	uint32	ip;			// client's IP address
 	uint32	wid;		// client's WorldID#
@@ -85,6 +87,10 @@ public:
 
 	Zone(uint32 in_zoneid, uint32 in_instanceid, const char* in_short_name);
 	~Zone();
+
+	/* When zone has its own version of time */
+	bool is_zone_time_localized;
+
 	bool	Init(bool iStaticZone);
 	bool	LoadZoneCFG(const char* filename, uint16 instance_id, bool DontLoadDefault = false);
 	bool	SaveZoneCFG();
@@ -108,11 +114,13 @@ public:
 
 	inline const uint32& GetMaxClients() { return pMaxClients; }
 
-	void	LoadAAs();
-	int		GetTotalAAs() { return totalAAs; }
-	SendAA_Struct*	GetAABySequence(uint32 seq) { return aas[seq]; }
-	SendAA_Struct*	FindAA(uint32 id);
-	uint8	GetTotalAALevels(uint32 skill_id);
+	//new AA
+	void LoadAlternateAdvancement();
+	AA::Ability *GetAlternateAdvancementAbility(int id);
+	AA::Ability *GetAlternateAdvancementAbilityByRank(int rank_id);
+	AA::Rank *GetAlternateAdvancementRank(int rank_id);
+	std::pair<AA::Ability*, AA::Rank*> GetAlternateAdvancementAbilityAndRank(int id, int points_spent);
+
 	void	LoadZoneDoors(const char* zone, int16 version);
 	bool	LoadZoneObjects();
 	bool	LoadGroundSpawns();
@@ -132,6 +140,7 @@ public:
 
 	bool	Depop(bool StartSpawnTimer = false);
 	void	Repop(uint32 delay = 0);
+	void	RepopClose(const glm::vec4& client_position, uint32 repop_distance);
 	void	ClearNPCTypeCache(int id);
 	void	SpawnStatus(Mob* client);
 	void	ShowEnabledSpawnStatus(Mob* client);
@@ -153,7 +162,7 @@ public:
 	inline bool InstantGrids()			{ return(!initgrids_timer.Enabled()); }
 	void		SetStaticZone(bool sz)	{ staticzone = sz; }
 	inline bool	IsStaticZone()			{ return staticzone; }
-	inline void	GotCurTime(bool time)	{ gottime = time; }
+	inline void	SetZoneHasCurrentTime(bool time)	{ zone_has_current_time = time; }
 
 	void	SpawnConditionChanged(const SpawnCondition &c, int16 old_value);
 
@@ -188,6 +197,10 @@ public:
 	char *adv_data;
 	bool did_adventure_actions;
 
+	//new AA
+	std::unordered_map<int, std::unique_ptr<AA::Ability>> aa_abilities;
+	std::unordered_map<int, std::unique_ptr<AA::Rank>> aa_ranks;
+
 	void	DoAdventureCountIncrease();
 	void	DoAdventureAssassinationCountIncrease();
 	void	DoAdventureActions();
@@ -206,7 +219,7 @@ public:
 	EQTime	zone_time;
 	void	GetTimeSync();
 	void	SetDate(uint16 year, uint8 month, uint8 day, uint8 hour, uint8 minute);
-	void	SetTime(uint8 hour, uint8 minute);
+	void SetTime(uint8 hour, uint8 minute, bool update_world = true);
 
 	void	weatherSend();
 	bool	CanBind() const { return(can_bind); }
@@ -308,9 +321,6 @@ private:
 	int	totalBS;
 	ZoneSpellsBlocked *blocked_spells;
 
-	int		totalAAs;
-	SendAA_Struct **aas;	//array of AA structs
-
 	/*
 		Spawn related things
 	*/
@@ -319,7 +329,7 @@ private:
 
 
 	bool	staticzone;
-	bool	gottime;
+	bool	zone_has_current_time;
 
 	uint32 pQueuedMerchantsWorkID;
 	uint32 pQueuedTempMerchantsWorkID;

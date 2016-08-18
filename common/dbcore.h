@@ -2,7 +2,7 @@
 #define DBCORE_H
 
 #ifdef _WINDOWS
-	#include <winsock.h>
+	#include <winsock2.h>
 	#include <windows.h>
 #endif
 

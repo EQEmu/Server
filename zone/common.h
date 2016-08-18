@@ -17,12 +17,6 @@
 #define _NPCPET(x) (x && x->IsNPC() && x->CastToMob()->GetOwner() && x->CastToMob()->GetOwner()->IsNPC())
 #define _BECOMENPCPET(x) (x && x->CastToMob()->GetOwner() && x->CastToMob()->GetOwner()->IsClient() && x->CastToMob()->GetOwner()->CastToClient()->IsBecomeNPC())
 
-#define USE_ITEM_SPELL_SLOT 10
-#define POTION_BELT_SPELL_SLOT 11
-#define TARGET_RING_SPELL_SLOT 12
-#define DISCIPLINE_SPELL_SLOT 10
-#define ABILITY_SPELL_SLOT 9
-
 //LOS Parameters:
 #define HEAD_POSITION 0.9f	//ratio of GetSize() where NPCs see from
 #define SEE_POSITION 0.5f	//ratio of GetSize() where NPCs try to see for LOS
@@ -61,6 +55,7 @@ typedef enum {	//focus types
 	focusManaCost,
 	focusImprovedHeal,
 	focusImprovedDamage,
+	focusImprovedDamage2,
 	focusImprovedDOT,		//i dont know about this...
 	focusFcDamagePctCrit,
 	focusImprovedUndeadDamage,
@@ -72,6 +67,7 @@ typedef enum {	//focus types
 	focusTwincast,
 	focusSympatheticProc,
 	focusFcDamageAmt,
+	focusFcDamageAmt2,
 	focusFcDamageAmtCrit,
 	focusSpellDurByTic,
 	focusSwarmPetDuration,
@@ -137,7 +133,8 @@ enum {
 	IGNORE_ROOT_AGGRO_RULES = 42,
 	CASTING_RESIST_DIFF = 43,
 	COUNTER_AVOID_DAMAGE = 44,
-	MAX_SPECIAL_ATTACK = 45
+	PROX_AGGRO = 45,
+	MAX_SPECIAL_ATTACK = 46
 };
 
 typedef enum {	//fear states
@@ -173,6 +170,28 @@ enum class NumHit {		  // Numhits type
 	OffensiveSpellProcs = 11  // Offensive buff procs
 };
 
+enum class PlayerState : uint32 {
+	None = 0,
+	Open = 1,
+	WeaponSheathed = 2,
+	Aggressive = 4,
+	ForcedAggressive = 8,
+	InstrumentEquipped = 16,
+	Stunned = 32,
+	PrimaryWeaponEquipped = 64,
+	SecondaryWeaponEquipped = 128
+};
+
+enum class LootResponse : uint8 {
+	SomeoneElse = 0,
+	Normal = 1,
+	NotAtThisTime = 2,
+	Normal2 = 3, // acts exactly the same as Normal, maybe group vs ungroup? No idea
+	Hostiles = 4,
+	TooFar = 5,
+	LootAll = 6 // SoD+
+};
+
 //this is our internal representation of the BUFF struct, can put whatever we want in it
 struct Buffs_Struct {
 	uint16	spellid;
@@ -190,6 +209,7 @@ struct Buffs_Struct {
 	int32	caston_z;
 	int32	ExtraDIChance;
 	int16	RootBreakChance; //Not saved to dbase
+	uint32	instrument_mod;
 	bool	persistant_buff;
 	bool	client; //True if the caster is a client
 	bool	UpdateClient;
@@ -260,7 +280,8 @@ struct StatBonuses {
 	int32	inhibitmelee;
 	float	AggroRange;							// when calculate just replace original value with this
 	float	AssistRange;
-	int32	skillmod[HIGHEST_SKILL+1];
+	int32	skillmod[EQEmu::skills::HIGHEST_SKILL + 1];
+	int32	skillmodmax[EQEmu::skills::HIGHEST_SKILL + 1];
 	int		effective_casting_level;
 	int		reflect_chance;						// chance to reflect incoming spell
 	uint32	singingMod;
@@ -276,7 +297,7 @@ struct StatBonuses {
 	int32	StrikeThrough;						// PoP: Strike Through %
 	int32	MeleeMitigation;					//i = Shielding
 	int32	MeleeMitigationEffect;				//i = Spell Effect Melee Mitigation
-	int32	CriticalHitChance[HIGHEST_SKILL+2];	//i
+	int32	CriticalHitChance[EQEmu::skills::HIGHEST_SKILL + 2];	//i
 	int32	CriticalSpellChance;				//i
 	int32	SpellCritDmgIncrease;				//i
 	int32	SpellCritDmgIncNoStack;				// increase
@@ -303,10 +324,10 @@ struct StatBonuses {
 	int32	MeleeSkillCheck;					//i
 	uint8	MeleeSkillCheckSkill;
 	int32	HitChance;							//HitChance/15 == % increase i = Accuracy (Item: Accuracy)
-	int32	HitChanceEffect[HIGHEST_SKILL+2];	//Spell effect Chance to Hit, straight percent increase
-	int32	DamageModifier[HIGHEST_SKILL+2];	//i
-	int32	DamageModifier2[HIGHEST_SKILL+2];	//i
-	int32	MinDamageModifier[HIGHEST_SKILL+2]; //i
+	int32	HitChanceEffect[EQEmu::skills::HIGHEST_SKILL + 2];	//Spell effect Chance to Hit, straight percent increase
+	int32	DamageModifier[EQEmu::skills::HIGHEST_SKILL + 2];	//i
+	int32	DamageModifier2[EQEmu::skills::HIGHEST_SKILL + 2];	//i
+	int32	MinDamageModifier[EQEmu::skills::HIGHEST_SKILL + 2]; //i
 	int32	ProcChance;							// ProcChance/10 == % increase i = CombatEffects
 	int32	ProcChanceSPA;						// ProcChance from spell effects
 	int32	ExtraAttackChance;
@@ -314,13 +335,13 @@ struct StatBonuses {
 	int32	DivineSaveChance[2];				// Second Chance (base1 = chance, base2 = spell on trigger)
 	uint32	DeathSave[4];						// Death Pact [0](value = 1 partial 2 = full) [1]=slot [2]=LvLimit [3]=HealAmt
 	int32	FlurryChance;
-	int32	Accuracy[HIGHEST_SKILL+2];			//Accuracy/15 == % increase	[Spell Effect: Accuracy)
+	int32	Accuracy[EQEmu::skills::HIGHEST_SKILL + 2];			//Accuracy/15 == % increase	[Spell Effect: Accuracy)
 	int32	HundredHands;						//extra haste, stacks with all other haste	i
 	int32	MeleeLifetap;						//i
 	int32	Vampirism;							//i
 	int32	HealRate;							// Spell effect that influences effectiveness of heals
 	int32	MaxHPChange;						// Spell Effect
-	int16	SkillDmgTaken[HIGHEST_SKILL+2];		// All Skills + -1
+	int16	SkillDmgTaken[EQEmu::skills::HIGHEST_SKILL + 2];		// All Skills + -1
 	int32	HealAmt;							// Item Effect
 	int32	SpellDmg;							// Item Effect
 	int32	Clairvoyance;						// Item Effect
@@ -329,9 +350,9 @@ struct StatBonuses {
 	uint32	SpellTriggers[MAX_SPELL_TRIGGER];	// Innate/Spell/Item Spells that trigger when you cast
 	uint32	SpellOnKill[MAX_SPELL_TRIGGER*3];	// Chance to proc after killing a mob
 	uint32	SpellOnDeath[MAX_SPELL_TRIGGER*2];	// Chance to have effect cast when you die
-	int32	CritDmgMob[HIGHEST_SKILL+2];		// All Skills + -1
-	int32	SkillReuseTime[HIGHEST_SKILL+1];	// Reduces skill timers
-	int32	SkillDamageAmount[HIGHEST_SKILL+2];	// All Skills + -1
+	int32	CritDmgMob[EQEmu::skills::HIGHEST_SKILL + 2];		// All Skills + -1
+	int32	SkillReuseTime[EQEmu::skills::HIGHEST_SKILL + 1];	// Reduces skill timers
+	int32	SkillDamageAmount[EQEmu::skills::HIGHEST_SKILL + 2];	// All Skills + -1
 	int32	TwoHandBluntBlock;					// chance to block when wielding two hand blunt weapon
 	uint32	ItemManaRegenCap;					// Increases the amount of mana you have can over the cap(aa effect)
 	int32	GravityEffect;						// Indictor of spell effect
@@ -354,7 +375,7 @@ struct StatBonuses {
 	uint8	FocusEffects[HIGHEST_FOCUS+1];		// Stores the focus effectid for each focustype you have.
 	int16	FocusEffectsWorn[HIGHEST_FOCUS+1];	// Optional to allow focus effects to be applied additively from worn slot
 	bool	NegateEffects;						// Check if you contain a buff with negate effect. (only spellbonuses)
-	int32	SkillDamageAmount2[HIGHEST_SKILL+2];	// Adds skill specific damage
+	int32	SkillDamageAmount2[EQEmu::skills::HIGHEST_SKILL + 2];	// Adds skill specific damage
 	uint32	NegateAttacks[3];					// 0 = bool HasEffect 1 = Buff Slot 2 = Max damage absorbed per hit
 	uint32	MitigateMeleeRune[4];				// 0 = Mitigation value 1 = Buff Slot 2 = Max mitigation per hit 3 = Rune Amt
 	uint32	MeleeThresholdGuard[3];				// 0 = Mitigation value 1 = Buff Slot 2 = Min damage to trigger.
@@ -387,10 +408,11 @@ struct StatBonuses {
 	int32	Metabolism;							// Food/drink consumption rates.
 	bool	Sanctuary;							// Sanctuary effect, lowers place on hate list until cast on others.
 	int32   FactionModPct;						// Modifies amount of faction gained.
-	int32	MeleeVulnerability;					// Weakness/mitigation to melee damage
-	bool	LimitToSkill[HIGHEST_SKILL+2];		// Determines if we need to search for a skill proc.
+	bool	LimitToSkill[EQEmu::skills::HIGHEST_SKILL + 2];		// Determines if we need to search for a skill proc.
 	uint32  SkillProc[MAX_SKILL_PROCS];			// Max number of spells containing skill_procs.
 	uint32  SkillProcSuccess[MAX_SKILL_PROCS];	// Max number of spells containing skill_procs_success.
+	uint32  PC_Pet_Rampage[2];					// 0= % chance to rampage, 1=damage modifier
+	uint32  PC_Pet_Flurry;						// Percent chance flurry from double attack
 
 	// AAs
 	int8	Packrat;							//weight reduction for items, 1 point = 10%
@@ -399,7 +421,7 @@ struct StatBonuses {
 	int8	BaseMovementSpeed;					// Adjust base run speed, does not stack with other movement bonuses.
 	uint8	IncreaseRunSpeedCap;				// Increase max run speed above cap.
 	int32	DoubleSpecialAttack;				// Chance to to perform a double special attack (ie flying kick 2x)
-	int32	SpecialAttackKBProc[2];				// Chance to to do a knockback from special attacks. (0 = chance 1 = Skill)
+	int32	SkillAttackProc[3];					// [0] chance to proc [2] spell on [1] skill usage
 	uint8	FrontalStunResist;					// Chance to resist a frontal stun
 	int32	BindWound;							// Increase amount of HP by percent.
 	int32	MaxBindWound;						// Increase max amount of HP you can bind wound.
@@ -421,7 +443,7 @@ struct StatBonuses {
 	int32	CombatStability;					// Melee damage mitigation.
 	int32	DoubleRiposte;						// Chance to double riposte
 	int32	GiveDoubleRiposte[3];				// 0=Regular Chance, 1=Skill Attack Chance, 2=Skill
-	uint32	RaiseSkillCap[2];					// Raise a specific skill cap (1 = value, 2=skill)
+	uint32	RaiseSkillCap[EQEmu::skills::HIGHEST_SKILL + 1];		// Raise a specific skill cap (base1= value, base2=skill)
 	int32	Ambidexterity;						// Increase chance to duel wield by adding bonus 'skill'.
 	int32	PetMaxHP;							// Increase the max hp of your pet.
 	int32	PetFlurry;							// Chance for pet to flurry.
@@ -438,7 +460,7 @@ struct StatBonuses {
 	int32	ShieldEquipHateMod;					// Hate mod when shield equiped.
 	int32	ShieldEquipDmgMod[2];				// Damage mod when shield equiped. 0 = damage modifier 1 = Unknown
 	bool	TriggerOnValueAmount;				// Triggers off various different conditions, bool to check if client has effect.
-	int8	StunBashChance;						// chance to stun with bash.	
+	int8	StunBashChance;						// chance to stun with bash.
 	int8	IncreaseChanceMemwipe;				// increases chance to memory wipe
 	int8	CriticalMend;						// chance critical monk mend
 	int32	ImprovedReclaimEnergy;				// Modifies amount of mana returned from reclaim energy
@@ -448,6 +470,13 @@ struct StatBonuses {
 	uint8	AssassinateLevel;					// Max Level Assassinate will be effective at.
 	int32	PetMeleeMitigation;					// Add AC to owner's pet.
 	bool	IllusionPersistence;				// Causes illusions not to fade.
+	uint16	extra_xtargets;						// extra xtarget entries
+	bool	ShroudofStealth;					// rogue improved invisiblity
+	uint16  ReduceFallDamage;					// reduce fall damage by percent
+	int32	ReduceTradeskillFail[EQEmu::skills::HIGHEST_SKILL + 1]; // Reduces chance for trade skills to fail by percent.
+	uint8	TradeSkillMastery;					// Allow number of tradeskills to exceed 200 skill.
+	int16	NoBreakAESneak;						// Percent value
+	int16	FeignedCastOnChance;				// Percent Value
 };
 
 typedef struct
@@ -455,6 +484,7 @@ typedef struct
 	uint16 spellID;
 	uint16 chance;
 	uint16 base_spellID;
+	int level_override;
 } tProc;
 
 struct Shielders_Struct {
@@ -484,7 +514,7 @@ typedef struct
 //make DoAnim take it instead of int, to enforce its use.
 enum {	//type arguments to DoAnim
 	animKick				= 1,
-	animPiercing			= 2,	//might be piercing?
+	anim1HPiercing			= 2,	//might be piercing?
 	anim2HSlashing			= 3,
 	anim2HWeapon			= 4,
 	anim1HWeapon			= 5,
@@ -507,7 +537,8 @@ typedef enum {
 	petOther,
 	petCharmed,
 	petNPCFollow,
-	petTargetLock			//remain active as long something is on the hatelist. Don't listen to any commands
+	petTargetLock,			//remain active as long something is on the hatelist. Don't listen to any commands
+	petNone = 0xFF // not a pet
 } PetType;
 
 typedef enum {
@@ -586,7 +617,8 @@ struct ExtraAttackOptions {
 		: damage_percent(1.0f), damage_flat(0),
 		armor_pen_percent(0.0f), armor_pen_flat(0),
 		crit_percent(1.0f), crit_flat(0.0f),
-		hate_percent(1.0f), hate_flat(0), hit_chance(0)
+		hate_percent(1.0f), hate_flat(0), hit_chance(0),
+		melee_damage_bonus_flat(0), skilldmgtaken_bonus_flat(0)
 	{ }
 
 	float damage_percent;
@@ -598,6 +630,9 @@ struct ExtraAttackOptions {
 	float hate_percent;
 	int hate_flat;
 	int hit_chance;
+	int melee_damage_bonus_flat;
+	int skilldmgtaken_bonus_flat;
+
 };
 
 #endif

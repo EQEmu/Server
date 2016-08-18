@@ -22,6 +22,7 @@
 #include "../common/skills.h"
 #include "../common/spdat.h"
 #include "../common/string_util.h"
+#include "../common/say_link.h"
 
 #include "entity.h"
 #include "event_codes.h"
@@ -84,6 +85,8 @@ void QuestManager::Process() {
 			if(entity_list.IsMobInZone(cur->mob)) {
 				if(cur->mob->IsNPC()) {
 					parse->EventNPC(EVENT_TIMER, cur->mob->CastToNPC(), nullptr, cur->name, 0);
+				} else if (cur->mob->IsEncounter()) {
+					parse->EventEncounter(EVENT_TIMER, cur->mob->CastToEncounter()->GetEncounterName(), cur->name, 0, nullptr);
 				} else {
 					//this is inheriently unsafe if we ever make it so more than npc/client start timers
 					parse->EventPlayer(EVENT_TIMER, cur->mob->CastToClient(), cur->name, 0);
@@ -205,7 +208,7 @@ Mob* QuestManager::spawn2(int npc_type, int grid, int unused, const glm::vec4& p
 	const NPCType* tmp = 0;
 	if (tmp = database.LoadNPCTypesData(npc_type))
 	{
-		NPC* npc = new NPC(tmp, nullptr, position, FlyMode3);
+		auto npc = new NPC(tmp, nullptr, position, FlyMode3);
 		npc->AddLootTable();
 		entity_list.AddNPC(npc,true,true);
 		if(grid > 0)
@@ -227,7 +230,7 @@ Mob* QuestManager::unique_spawn(int npc_type, int grid, int unused, const glm::v
 	const NPCType* tmp = 0;
 	if (tmp = database.LoadNPCTypesData(npc_type))
 	{
-		NPC* npc = new NPC(tmp, nullptr, position, FlyMode3);
+		auto npc = new NPC(tmp, nullptr, position, FlyMode3);
 		npc->AddLootTable();
 		entity_list.AddNPC(npc,true,true);
 		if(grid > 0)
@@ -301,19 +304,20 @@ Mob* QuestManager::spawn_from_spawn2(uint32 spawn2_id)
 		found_spawn->SetCurrentNPCID(npcid);
 
         auto position = glm::vec4(found_spawn->GetX(), found_spawn->GetY(), found_spawn->GetZ(), found_spawn->GetHeading());
-		NPC* npc = new NPC(tmp, found_spawn, position, FlyMode3);
+	auto npc = new NPC(tmp, found_spawn, position, FlyMode3);
 
-		found_spawn->SetNPCPointer(npc);
-		npc->AddLootTable();
-		npc->SetSp2(found_spawn->SpawnGroupID());
-		entity_list.AddNPC(npc);
-		entity_list.LimitAddNPC(npc);
+	found_spawn->SetNPCPointer(npc);
+	npc->AddLootTable();
+	npc->SetSp2(found_spawn->SpawnGroupID());
+	entity_list.AddNPC(npc);
+	entity_list.LimitAddNPC(npc);
 
-		if(sg->roamdist && sg->roambox[0] && sg->roambox[1] && sg->roambox[2] && sg->roambox[3] && sg->delay && sg->min_delay)
-			npc->AI_SetRoambox(sg->roamdist,sg->roambox[0],sg->roambox[1],sg->roambox[2],sg->roambox[3],sg->delay,sg->min_delay);
-		if(zone->InstantGrids())
-		{
-			found_spawn->LoadGrid();
+	if (sg->roamdist && sg->roambox[0] && sg->roambox[1] && sg->roambox[2] && sg->roambox[3] && sg->delay &&
+	    sg->min_delay)
+		npc->AI_SetRoambox(sg->roamdist, sg->roambox[0], sg->roambox[1], sg->roambox[2], sg->roambox[3],
+				   sg->delay, sg->min_delay);
+	if (zone->InstantGrids()) {
+		found_spawn->LoadGrid();
 		}
 
 		return npc;
@@ -325,7 +329,7 @@ Mob* QuestManager::spawn_from_spawn2(uint32 spawn2_id)
 void QuestManager::enable_spawn2(uint32 spawn2_id)
 {
 	database.UpdateSpawn2Status(spawn2_id, 1);
-	ServerPacket* pack = new ServerPacket(ServerOP_SpawnStatusChange, sizeof(ServerSpawnStatusChange_Struct));
+	auto pack = new ServerPacket(ServerOP_SpawnStatusChange, sizeof(ServerSpawnStatusChange_Struct));
 	ServerSpawnStatusChange_Struct* ssc = (ServerSpawnStatusChange_Struct*) pack->pBuffer;
 	ssc->id = spawn2_id;
 	ssc->new_status = 1;
@@ -336,7 +340,7 @@ void QuestManager::enable_spawn2(uint32 spawn2_id)
 void QuestManager::disable_spawn2(uint32 spawn2_id)
 {
 	database.UpdateSpawn2Status(spawn2_id, 0);
-	ServerPacket* pack = new ServerPacket(ServerOP_SpawnStatusChange, sizeof(ServerSpawnStatusChange_Struct));
+	auto pack = new ServerPacket(ServerOP_SpawnStatusChange, sizeof(ServerSpawnStatusChange_Struct));
 	ServerSpawnStatusChange_Struct* ssc = (ServerSpawnStatusChange_Struct*) pack->pBuffer;
 	ssc->id = spawn2_id;
 	ssc->new_status = 0;
@@ -361,14 +365,14 @@ void QuestManager::castspell(int spell_id, int target_id) {
 	if (owner) {
 		Mob *tgt = entity_list.GetMob(target_id);
 		if(tgt != nullptr)
-			owner->SpellFinished(spell_id, tgt, 10, 0, -1, spells[spell_id].ResistDiff);
+			owner->SpellFinished(spell_id, tgt, EQEmu::CastingSlot::Item, 0, -1, spells[spell_id].ResistDiff);
 	}
 }
 
 void QuestManager::selfcast(int spell_id) {
 	QuestManagerCurrentQuestVars();
 	if (initiator)
-		initiator->SpellFinished(spell_id, initiator, 10, 0, -1, spells[spell_id].ResistDiff);
+		initiator->SpellFinished(spell_id, initiator, EQEmu::CastingSlot::Item, 0, -1, spells[spell_id].ResistDiff);
 }
 
 void QuestManager::addloot(int item_id, int charges, bool equipitem) {
@@ -383,7 +387,7 @@ void QuestManager::Zone(const char *zone_name) {
 	QuestManagerCurrentQuestVars();
 	if (initiator && initiator->IsClient())
 	{
-		ServerPacket* pack = new ServerPacket(ServerOP_ZoneToZoneRequest, sizeof(ZoneToZone_Struct));
+		auto pack = new ServerPacket(ServerOP_ZoneToZoneRequest, sizeof(ZoneToZone_Struct));
 		ZoneToZone_Struct* ztz = (ZoneToZone_Struct*) pack->pBuffer;
 		ztz->response = 0;
 		ztz->current_zone_id = zone->GetZoneID();
@@ -668,6 +672,79 @@ void QuestManager::repopzone() {
 	}
 }
 
+void QuestManager::ConnectNodeToNode(int node1, int node2, int teleport, int doorid) {
+	if (!node1 || !node2)
+	{
+		Log.Out(Logs::General, Logs::Quests, "QuestManager::ConnectNodeToNode called without node1 or node2. Probably syntax error in quest file.");
+	}
+	else
+	{
+		if (!teleport)
+		{
+			teleport = 0;
+		}
+		else if (teleport == 1 || teleport == -1)
+		{
+			teleport = -1;
+		}
+
+		if (!doorid)
+		{
+			doorid = 0;
+		}
+
+		if (!zone->pathing)
+		{
+			// if no pathing bits available, make them available.
+			zone->pathing = new PathManager();
+		}
+
+		if (zone->pathing)
+		{
+			zone->pathing->ConnectNodeToNode(node1, node2, teleport, doorid);
+			Log.Out(Logs::Moderate, Logs::Quests, "QuestManager::ConnectNodeToNode connecting node %i to node %i.", node1, node2);
+		}
+	}
+}
+
+void QuestManager::AddNode(float x, float y, float z, float best_z, int32 requested_id)
+{
+	if (!x || !y || !z)
+	{
+		Log.Out(Logs::General, Logs::Quests, "QuestManager::AddNode called without x, y, z. Probably syntax error in quest file.");
+	}
+
+	if (!best_z || best_z == 0)
+	{
+		if (zone->zonemap)
+		{
+			glm::vec3 loc(x, y, z);
+			best_z = zone->zonemap->FindBestZ(loc, nullptr);
+		}
+		else
+		{
+			best_z = z;
+		}
+	}
+
+	if (!requested_id)
+	{
+		requested_id = 0;
+	}
+
+	if (!zone->pathing)
+	{
+		// if no pathing bits available, make them available.
+		zone->pathing = new PathManager();
+	}
+
+	if (zone->pathing)
+	{
+		zone->pathing->AddNode(x, y, z, best_z, requested_id);
+		Log.Out(Logs::Moderate, Logs::Quests, "QuestManager::AddNode adding node at (%i, %i, %i).", x, y, z);
+	}
+}
+
 void QuestManager::settarget(const char *type, int target_id) {
 	QuestManagerCurrentQuestVars();
 	if (!owner || !owner->IsNPC())
@@ -737,12 +814,12 @@ void QuestManager::traindisc(int discipline_tome_item_id) {
 }
 
 bool QuestManager::isdisctome(int item_id) {
-	const Item_Struct *item = database.GetItem(item_id);
+	const EQEmu::ItemBase *item = database.GetItem(item_id);
 	if(item == nullptr) {
 		return(false);
 	}
 
-	if(item->ItemClass != ItemClassCommon || item->ItemType != ItemTypeSpell) {
+	if (!item->IsClassCommon() || item->ItemType != EQEmu::item::ItemTypeSpell) {
 		return(false);
 	}
 
@@ -799,13 +876,13 @@ bool QuestManager::isdisctome(int item_id) {
 void QuestManager::safemove() {
 	QuestManagerCurrentQuestVars();
 	if (initiator && initiator->IsClient())
-		initiator->GoToSafeCoords(zone->GetZoneID(), 0);
+		initiator->GoToSafeCoords(zone->GetZoneID(), zone->GetInstanceID());
 }
 
 void QuestManager::rain(int weather) {
 	QuestManagerCurrentQuestVars();
 	zone->zone_weather = weather;
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_Weather, 8);
+	auto outapp = new EQApplicationPacket(OP_Weather, 8);
 	*((uint32*) &outapp->pBuffer[4]) = (uint32) weather; // Why not just use 0x01/2/3?
 	entity_list.QueueClients(owner, outapp);
 	safe_delete(outapp);
@@ -814,7 +891,7 @@ void QuestManager::rain(int weather) {
 void QuestManager::snow(int weather) {
 	QuestManagerCurrentQuestVars();
 	zone->zone_weather = weather + 1;
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_Weather, 8);
+	auto outapp = new EQApplicationPacket(OP_Weather, 8);
 	outapp->pBuffer[0] = 0x01;
 	*((uint32*) &outapp->pBuffer[4]) = (uint32)weather;
 	entity_list.QueueClients(initiator, outapp);
@@ -1076,10 +1153,10 @@ void QuestManager::doanim(int anim_id) {
 
 void QuestManager::addskill(int skill_id, int value) {
 	QuestManagerCurrentQuestVars();
-	if(skill_id < 0 || skill_id > HIGHEST_SKILL)
+	if (skill_id < 0 || skill_id > EQEmu::skills::HIGHEST_SKILL)
 		return;
 	if (initiator && initiator->IsClient())
-		initiator->AddSkill((SkillUseTypes) skill_id, value);
+		initiator->AddSkill((EQEmu::skills::SkillType) skill_id, value);
 }
 
 void QuestManager::setlanguage(int skill_id, int value) {
@@ -1090,10 +1167,10 @@ void QuestManager::setlanguage(int skill_id, int value) {
 
 void QuestManager::setskill(int skill_id, int value) {
 	QuestManagerCurrentQuestVars();
-	if(skill_id < 0 || skill_id > HIGHEST_SKILL)
+	if (skill_id < 0 || skill_id > EQEmu::skills::HIGHEST_SKILL)
 		return;
 	if (initiator && initiator->IsClient())
-		initiator->SetSkill((SkillUseTypes) skill_id, value);
+		initiator->SetSkill((EQEmu::skills::SkillType) skill_id, value);
 }
 
 void QuestManager::setallskill(int value) {
@@ -1101,8 +1178,8 @@ void QuestManager::setallskill(int value) {
 	if (!initiator)
 		return;
 	if (initiator && initiator->IsClient()) {
-		SkillUseTypes sk;
-		for (sk = Skill1HBlunt; sk <= HIGHEST_SKILL; sk = (SkillUseTypes)(sk+1)) {
+		EQEmu::skills::SkillType sk;
+		for (sk = EQEmu::skills::Skill1HBlunt; sk <= EQEmu::skills::HIGHEST_SKILL; sk = (EQEmu::skills::SkillType)(sk + 1)) {
 			initiator->SetSkill(sk, value);
 		}
 	}
@@ -1178,7 +1255,7 @@ void QuestManager::setsky(uint8 new_sky) {
 	QuestManagerCurrentQuestVars();
 	if (zone)
 		zone->newzone_data.sky = new_sky;
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_NewZone, sizeof(NewZone_Struct));
+	auto outapp = new EQApplicationPacket(OP_NewZone, sizeof(NewZone_Struct));
 	memcpy(outapp->pBuffer, &zone->newzone_data, outapp->size);
 	entity_list.QueueClients(initiator, outapp);
 	safe_delete(outapp);
@@ -1219,20 +1296,21 @@ void QuestManager::CreateGuild(const char *guild_name, const char *leader) {
 			}
 }
 
-void QuestManager::settime(uint8 new_hour, uint8 new_min) {
+void QuestManager::settime(uint8 new_hour, uint8 new_min, bool update_world /*= true*/)
+{
 	if (zone)
-		zone->SetTime(new_hour + 1, new_min);
+		zone->SetTime(new_hour + 1, new_min, update_world);
 }
 
 void QuestManager::itemlink(int item_id) {
 	QuestManagerCurrentQuestVars();
 	if (initiator) {
-		const Item_Struct* item = database.GetItem(item_id);
+		const EQEmu::ItemBase* item = database.GetItem(item_id);
 		if (item == nullptr)
 			return;
 
-		Client::TextLink linker;
-		linker.SetLinkType(linker.linkItemData);
+		EQEmu::SayLinkEngine linker;
+		linker.SetLinkType(EQEmu::saylink::SayLinkItemData);
 		linker.SetItemData(item);
 
 		auto item_link = linker.GenerateLink();
@@ -1325,23 +1403,23 @@ int QuestManager::InsertQuestGlobal(int charid, int npcid, int zoneid, const cha
         return 0;
 
     /* Delete existing qglobal data and update zone processes */
-    ServerPacket* pack = new ServerPacket(ServerOP_QGlobalDelete, sizeof(ServerQGlobalDelete_Struct));
-    ServerQGlobalDelete_Struct *qgd = (ServerQGlobalDelete_Struct*)pack->pBuffer;
-    qgd->npc_id = npcid;
-    qgd->char_id = charid;
-    qgd->zone_id = zoneid;
-    qgd->from_zone_id = zone->GetZoneID();
-    qgd->from_instance_id = zone->GetInstanceID();
-    strcpy(qgd->name, varname);
+	auto pack = new ServerPacket(ServerOP_QGlobalDelete, sizeof(ServerQGlobalDelete_Struct));
+	ServerQGlobalDelete_Struct *qgd = (ServerQGlobalDelete_Struct *)pack->pBuffer;
+	qgd->npc_id = npcid;
+	qgd->char_id = charid;
+	qgd->zone_id = zoneid;
+	qgd->from_zone_id = zone->GetZoneID();
+	qgd->from_instance_id = zone->GetInstanceID();
+	strcpy(qgd->name, varname);
 
-    entity_list.DeleteQGlobal(std::string((char*)qgd->name), qgd->npc_id, qgd->char_id, qgd->zone_id);
-    zone->DeleteQGlobal(std::string((char*)qgd->name), qgd->npc_id, qgd->char_id, qgd->zone_id);
+	entity_list.DeleteQGlobal(std::string((char *)qgd->name), qgd->npc_id, qgd->char_id, qgd->zone_id);
+	zone->DeleteQGlobal(std::string((char *)qgd->name), qgd->npc_id, qgd->char_id, qgd->zone_id);
 
-    worldserver.SendPacket(pack);
-    safe_delete(pack);
+	worldserver.SendPacket(pack);
+	safe_delete(pack);
 
-    /* Create new qglobal data and update zone processes */
-    pack = new ServerPacket(ServerOP_QGlobalUpdate, sizeof(ServerQGlobalUpdate_Struct));
+	/* Create new qglobal data and update zone processes */
+	pack = new ServerPacket(ServerOP_QGlobalUpdate, sizeof(ServerQGlobalUpdate_Struct));
 	ServerQGlobalUpdate_Struct *qgu = (ServerQGlobalUpdate_Struct*)pack->pBuffer;
 	qgu->npc_id = npcid;
 	qgu->char_id = charid;
@@ -1405,19 +1483,19 @@ void QuestManager::delglobal(const char *varname) {
 	if(!zone)
         return;
 
-    ServerPacket* pack = new ServerPacket(ServerOP_QGlobalDelete, sizeof(ServerQGlobalDelete_Struct));
-    ServerQGlobalDelete_Struct *qgu = (ServerQGlobalDelete_Struct*)pack->pBuffer;
+	auto pack = new ServerPacket(ServerOP_QGlobalDelete, sizeof(ServerQGlobalDelete_Struct));
+	ServerQGlobalDelete_Struct *qgu = (ServerQGlobalDelete_Struct *)pack->pBuffer;
 
-    qgu->npc_id = qgNpcid;
-    qgu->char_id = qgCharid;
-    qgu->zone_id = qgZoneid;
-    strcpy(qgu->name, varname);
+	qgu->npc_id = qgNpcid;
+	qgu->char_id = qgCharid;
+	qgu->zone_id = qgZoneid;
+	strcpy(qgu->name, varname);
 
-    entity_list.DeleteQGlobal(std::string((char*)qgu->name), qgu->npc_id, qgu->char_id, qgu->zone_id);
-    zone->DeleteQGlobal(std::string((char*)qgu->name), qgu->npc_id, qgu->char_id, qgu->zone_id);
+	entity_list.DeleteQGlobal(std::string((char *)qgu->name), qgu->npc_id, qgu->char_id, qgu->zone_id);
+	zone->DeleteQGlobal(std::string((char *)qgu->name), qgu->npc_id, qgu->char_id, qgu->zone_id);
 
-    worldserver.SendPacket(pack);
-    safe_delete(pack);
+	worldserver.SendPacket(pack);
+	safe_delete(pack);
 }
 
 // Converts duration string to duration value (in seconds)
@@ -1489,7 +1567,7 @@ void QuestManager::ding() {
 void QuestManager::rebind(int zoneid, const glm::vec3& location) {
 	QuestManagerCurrentQuestVars();
 	if(initiator && initiator->IsClient()) {
-		initiator->SetBindPoint(zoneid, 0, location);
+		initiator->SetBindPoint(0, zoneid, 0, location);
 	}
 }
 
@@ -1695,10 +1773,10 @@ void QuestManager::clear_zone_flag(int zone_id) {
 void QuestManager::sethp(int hpperc) {
 	QuestManagerCurrentQuestVars();
 	int newhp = (owner->GetMaxHP() * (100 - hpperc)) / 100;
-	owner->Damage(owner, newhp, SPELL_UNKNOWN, SkillHandtoHand, false, 0, false);
+	owner->Damage(owner, newhp, SPELL_UNKNOWN, EQEmu::skills::SkillHandtoHand, false, 0, false);
 }
 
-bool QuestManager::summonburriedplayercorpse(uint32 char_id, const glm::vec4& position) {
+bool QuestManager::summonburiedplayercorpse(uint32 char_id, const glm::vec4& position) {
 	bool Result = false;
 
 	if(char_id <= 0)
@@ -1722,7 +1800,7 @@ bool QuestManager::summonallplayercorpses(uint32 char_id, const glm::vec4& posit
 	return true;
 }
 
-uint32 QuestManager::getplayerburriedcorpsecount(uint32 char_id) {
+uint32 QuestManager::getplayerburiedcorpsecount(uint32 char_id) {
 	uint32 Result = 0;
 
 	if(char_id > 0) {
@@ -1965,35 +2043,39 @@ void QuestManager::popup(const char *title, const char *text, uint32 popupid, ui
 #ifdef BOTS
 
 int QuestManager::createbotcount() {
-	return RuleI(Bots, CreateBotCount);
+	return RuleI(Bots, CreationLimit);
 }
 
 int QuestManager::spawnbotcount() {
-	return RuleI(Bots, SpawnBotCount);
+	return RuleI(Bots, SpawnLimit);
 }
 
 bool QuestManager::botquest()
 {
-	return RuleB(Bots, BotQuest);
+	return RuleB(Bots, QuestableSpawnLimit);
 }
 
 bool QuestManager::createBot(const char *name, const char *lastname, uint8 level, uint16 race, uint8 botclass, uint8 gender)
 {
 	QuestManagerCurrentQuestVars();
-	std::string TempErrorMessage;
-	uint32 MaxBotCreate = RuleI(Bots, CreateBotCount);
+	uint32 MaxBotCreate = RuleI(Bots, CreationLimit);
 
 	if (initiator && initiator->IsClient())
 	{
-		if(Bot::SpawnedBotCount(initiator->CharacterID(), &TempErrorMessage) >= MaxBotCreate)
+		if(Bot::SpawnedBotCount(initiator->CharacterID()) >= MaxBotCreate)
 		{
 			initiator->Message(15,"You have the maximum number of bots allowed.");
 			return false;
 		}
 
-		if(!TempErrorMessage.empty())
-		{
-			initiator->Message(13, "Database Error: %s", TempErrorMessage.c_str());
+		std::string test_name = name;
+		bool available_flag = false;
+		if(!botdb.QueryNameAvailablity(test_name, available_flag)) {
+			initiator->Message(0, "%s for '%s'", BotDatabase::fail::QueryNameAvailablity(), (char*)name);
+			return false;
+		}
+		if (!available_flag) {
+			initiator->Message(0, "The name %s is already being used or is invalid. Please choose a different name.", (char*)name);
 			return false;
 		}
 
@@ -2009,16 +2091,6 @@ bool QuestManager::createBot(const char *name, const char *lastname, uint8 level
 
 			if(!NewBot->IsValidName()) {
 				initiator->Message(0, "%s has invalid characters. You can use only the A-Z, a-z and _ characters in a bot name.", NewBot->GetCleanName());
-				return false;
-			}
-
-			if(!NewBot->IsBotNameAvailable(&TempErrorMessage)) {
-				initiator->Message(0, "The name %s is already being used. Please choose a different name.", NewBot->GetCleanName());
-				return false;
-			}
-
-			if(!TempErrorMessage.empty()) {
-				initiator->Message(13, "Database Error: %s", TempErrorMessage.c_str());
 				return false;
 			}
 
@@ -2124,11 +2196,11 @@ void QuestManager::taskexploredarea(int exploreid) {
 		initiator->UpdateTasksOnExplore(exploreid);
 }
 
-void QuestManager::assigntask(int taskid) {
+void QuestManager::assigntask(int taskid, bool enforce_level_requirement) {
 	QuestManagerCurrentQuestVars();
 
-	if(RuleB(TaskSystem, EnableTaskSystem) && initiator && owner)
-		initiator->AssignTask(taskid, owner->GetID());
+	if (RuleB(TaskSystem, EnableTaskSystem) && initiator && owner)
+		initiator->AssignTask(taskid, owner->GetID(), enforce_level_requirement);
 }
 
 void QuestManager::failtask(int taskid) {
@@ -2371,12 +2443,12 @@ int QuestManager::collectitems(uint32 item_id, bool remove)
 	int quantity = 0;
 	int slot_id;
 
-	for (slot_id = EmuConstants::GENERAL_BEGIN; slot_id <= EmuConstants::GENERAL_END; ++slot_id)
+	for (slot_id = EQEmu::legacy::GENERAL_BEGIN; slot_id <= EQEmu::legacy::GENERAL_END; ++slot_id)
 	{
 		quantity += collectitems_processSlot(slot_id, item_id, remove);
 	}
 
-	for (slot_id = EmuConstants::GENERAL_BAGS_BEGIN; slot_id <= EmuConstants::GENERAL_BAGS_END; ++slot_id)
+	for (slot_id = EQEmu::legacy::GENERAL_BAGS_BEGIN; slot_id <= EQEmu::legacy::GENERAL_BAGS_END; ++slot_id)
 	{
 		quantity += collectitems_processSlot(slot_id, item_id, remove);
 	}
@@ -2409,7 +2481,7 @@ void QuestManager::UpdateSpawnTimer(uint32 id, uint32 newTime)
 	{
 		//Spawn wasn't in this zone...
 		//Tell the other zones to update their spawn time for this spawn point
-		ServerPacket *pack = new ServerPacket(ServerOP_UpdateSpawn, sizeof(UpdateSpawnTimer_Struct));
+		auto pack = new ServerPacket(ServerOP_UpdateSpawn, sizeof(UpdateSpawnTimer_Struct));
 		UpdateSpawnTimer_Struct *ust = (UpdateSpawnTimer_Struct*)pack->pBuffer;
 		ust->id = id;
 		ust->duration = newTime;
@@ -2425,7 +2497,7 @@ void QuestManager::MerchantSetItem(uint32 NPCid, uint32 itemid, uint32 quantity)
 	if (merchant == 0 || !merchant->IsNPC() || (merchant->GetClass() != MERCHANT))
 		return;	// don't do anything if NPCid isn't a merchant
 
-	const Item_Struct* item = nullptr;
+	const EQEmu::ItemBase* item = nullptr;
 	item = database.GetItem(itemid);
 	if (!item) return;		// if the item id doesn't correspond to a real item, do nothing
 
@@ -2438,7 +2510,7 @@ uint32 QuestManager::MerchantCountItem(uint32 NPCid, uint32 itemid) {
 	if (merchant == 0 || !merchant->IsNPC() || (merchant->GetClass() != MERCHANT))
 		return 0;	// if it isn't a merchant, it doesn't have any items
 
-	const Item_Struct* item = nullptr;
+	const EQEmu::ItemBase* item = nullptr;
 	item = database.GetItem(itemid);
 	if (!item)
 		return 0;	// if it isn't a valid item, the merchant doesn't have any
@@ -2461,12 +2533,12 @@ uint32 QuestManager::MerchantCountItem(uint32 NPCid, uint32 itemid) {
 // Item Link for use in Variables - "my $example_link = quest::varlink(item_id);"
 const char* QuestManager::varlink(char* perltext, int item_id) {
 	QuestManagerCurrentQuestVars();
-	const Item_Struct* item = database.GetItem(item_id);
+	const EQEmu::ItemBase* item = database.GetItem(item_id);
 	if (!item)
 		return "INVALID ITEM ID IN VARLINK";
 
-	Client::TextLink linker;
-	linker.SetLinkType(linker.linkItemData);
+	EQEmu::SayLinkEngine linker;
+	linker.SetLinkType(EQEmu::saylink::SayLinkItemData);
 	linker.SetItemData(item);
 
 	auto item_link = linker.GenerateLink();
@@ -2504,6 +2576,45 @@ uint16 QuestManager::CreateInstance(const char *zone, int16 version, uint32 dura
 void QuestManager::DestroyInstance(uint16 instance_id)
 {
 	database.DeleteInstance(instance_id);
+}
+
+void QuestManager::UpdateInstanceTimer(uint16 instance_id, uint32 new_duration)
+{
+	std::string query = StringFormat("UPDATE instance_list SET duration = %lu, start_time = UNIX_TIMESTAMP() WHERE id = %lu",
+		(unsigned long)new_duration, (unsigned long)instance_id);
+	auto results = database.QueryDatabase(query);
+
+	if (results.Success()) {
+		auto pack = new ServerPacket(ServerOP_InstanceUpdateTime, sizeof(ServerInstanceUpdateTime_Struct));
+		ServerInstanceUpdateTime_Struct *ut = (ServerInstanceUpdateTime_Struct*)pack->pBuffer;
+		ut->instance_id = instance_id;
+		ut->new_duration = new_duration;
+		worldserver.SendPacket(pack);
+		safe_delete(pack);
+	}
+}
+
+uint32 QuestManager::GetInstanceTimer() {
+	if (zone && zone->GetInstanceID() > 0 && zone->GetInstanceTimer()) {
+		uint32 ttime = zone->GetInstanceTimer()->GetRemainingTime();
+		return ttime;
+	}
+	return 0;
+}
+
+uint32 QuestManager::GetInstanceTimerByID(uint16 instance_id) {
+	if (instance_id == 0)
+		return 0;
+	
+	std::string query = StringFormat("SELECT ((start_time + duration) - UNIX_TIMESTAMP()) AS `remaining` FROM `instance_list` WHERE `id` = %lu", (unsigned long)instance_id);
+	auto results = database.QueryDatabase(query);
+	
+	if (results.Success()) {
+		auto row = results.begin();
+		uint32 timer = atoi(row[0]);
+		return timer;
+	}
+	return 0;
 }
 
 uint16 QuestManager::GetInstanceID(const char *zone, int16 version)
@@ -2622,7 +2733,7 @@ const char* QuestManager::saylink(char* Phrase, bool silent, const char* LinkNam
 	int sayid = 0;
 
 	int sz = strlen(Phrase);
-	char *escaped_string = new char[sz * 2];
+	auto escaped_string = new char[sz * 2];
 	database.DoEscapeString(escaped_string, Phrase, sz);
 
 	// Query for an existing phrase and id in the saylink table
@@ -2651,14 +2762,13 @@ const char* QuestManager::saylink(char* Phrase, bool silent, const char* LinkNam
 	}
 	safe_delete_array(escaped_string);
 
-	if (silent)
-		sayid = sayid + 750000;
-	else
-		sayid = sayid + 500000;
-
 	//Create the say link as an item link hash
-	Client::TextLink linker;
-	linker.SetProxyItemID(sayid);
+	EQEmu::SayLinkEngine linker;
+	linker.SetProxyItemID(SAYLINK_ITEM_ID);
+	if (silent)
+		linker.SetProxyAugment2ID(sayid);
+	else
+		linker.SetProxyAugment1ID(sayid);
 	linker.SetProxyText(LinkName);
 
 	auto say_link = linker.GenerateLink();
@@ -2767,11 +2877,11 @@ void QuestManager::removetitle(int titleset) {
 	initiator->RemoveTitle(titleset);
 }
 
-void QuestManager::wearchange(uint8 slot, uint16 texture)
+void QuestManager::wearchange(uint8 slot, uint16 texture, uint32 hero_forge_model /*= 0*/, uint32 elite_material /*= 0*/)
 {
 	QuestManagerCurrentQuestVars();
 	if(owner){
-		owner->SendTextureWC(slot, texture);
+		owner->SendTextureWC(slot, texture, hero_forge_model, elite_material);
 		if(owner->IsNPC()) {
 			owner->CastToNPC()->NPCSlotTexture(slot, texture);
 		}
@@ -2787,7 +2897,7 @@ void QuestManager::voicetell(const char *str, int macronum, int racenum, int gen
 
 		if(c)
 		{
-			EQApplicationPacket* outapp = new EQApplicationPacket(OP_VoiceMacroOut, sizeof(VoiceMacroOut_Struct));
+			auto outapp = new EQApplicationPacket(OP_VoiceMacroOut, sizeof(VoiceMacroOut_Struct));
 
 			VoiceMacroOut_Struct* vmo = (VoiceMacroOut_Struct*)outapp->pBuffer;
 
@@ -2821,7 +2931,7 @@ void QuestManager::SendMail(const char *to, const char *from, const char *subjec
 	}
 
 	uint32 message_len = strlen(message) + 1;
-	ServerPacket* pack = new ServerPacket(ServerOP_UCSMailMessage, sizeof(ServerMailMessageHeader_Struct) + message_len);
+	auto pack = new ServerPacket(ServerOP_UCSMailMessage, sizeof(ServerMailMessageHeader_Struct) + message_len);
 	ServerMailMessageHeader_Struct* mail = (ServerMailMessageHeader_Struct*) pack->pBuffer;
 
 	strn0cpy(mail->to, to, 64);
@@ -2854,7 +2964,7 @@ const char* QuestManager::GetZoneLongName(const char *zone) {
 }
 
 void QuestManager::CrossZoneSignalNPCByNPCTypeID(uint32 npctype_id, uint32 data){
-	ServerPacket* pack = new ServerPacket(ServerOP_CZSignalNPC, sizeof(CZNPCSignal_Struct));
+	auto pack = new ServerPacket(ServerOP_CZSignalNPC, sizeof(CZNPCSignal_Struct));
 	CZNPCSignal_Struct* CZSN = (CZNPCSignal_Struct*)pack->pBuffer;
 	CZSN->npctype_id = npctype_id;
 	CZSN->data = data;
@@ -2863,7 +2973,7 @@ void QuestManager::CrossZoneSignalNPCByNPCTypeID(uint32 npctype_id, uint32 data)
 }
 
 void QuestManager::CrossZoneSignalPlayerByCharID(int charid, uint32 data){
-	ServerPacket* pack = new ServerPacket(ServerOP_CZSignalClient, sizeof(CZClientSignal_Struct));
+	auto pack = new ServerPacket(ServerOP_CZSignalClient, sizeof(CZClientSignal_Struct));
 	CZClientSignal_Struct* CZSC = (CZClientSignal_Struct*) pack->pBuffer;
 	CZSC->charid = charid;
 	CZSC->data = data;
@@ -2873,7 +2983,7 @@ void QuestManager::CrossZoneSignalPlayerByCharID(int charid, uint32 data){
 
 void QuestManager::CrossZoneSignalPlayerByName(const char *CharName, uint32 data){
 	uint32 message_len = strlen(CharName) + 1;
-	ServerPacket* pack = new ServerPacket(ServerOP_CZSignalClientByName, sizeof(CZClientSignalByName_Struct) + message_len);
+	auto pack = new ServerPacket(ServerOP_CZSignalClientByName, sizeof(CZClientSignalByName_Struct) + message_len);
 	CZClientSignalByName_Struct* CZSC = (CZClientSignalByName_Struct*) pack->pBuffer;
 	strn0cpy(CZSC->Name, CharName, 64);
 	CZSC->data = data;
@@ -2884,7 +2994,8 @@ void QuestManager::CrossZoneSignalPlayerByName(const char *CharName, uint32 data
 void QuestManager::CrossZoneMessagePlayerByName(uint32 Type, const char *CharName, const char *Message){
 	uint32 message_len = strlen(CharName) + 1;
 	uint32 message_len2 = strlen(Message) + 1;
-	ServerPacket* pack = new ServerPacket(ServerOP_CZMessagePlayer, sizeof(CZMessagePlayer_Struct) + message_len + message_len2);
+	auto pack =
+	    new ServerPacket(ServerOP_CZMessagePlayer, sizeof(CZMessagePlayer_Struct) + message_len + message_len2);
 	CZMessagePlayer_Struct* CZSC = (CZMessagePlayer_Struct*) pack->pBuffer;
 	CZSC->Type = Type;
 	strn0cpy(CZSC->CharName, CharName, 64);
@@ -2896,7 +3007,8 @@ void QuestManager::CrossZoneMessagePlayerByName(uint32 Type, const char *CharNam
 void QuestManager::CrossZoneSetEntityVariableByNPCTypeID(uint32 npctype_id, const char *id, const char *m_var){
 	uint32 message_len = strlen(id) + 1;
 	uint32 message_len2 = strlen(m_var) + 1;
-	ServerPacket* pack = new ServerPacket(ServerOP_CZSetEntityVariableByNPCTypeID, sizeof(CZSetEntVarByNPCTypeID_Struct) + message_len + message_len2);
+	auto pack = new ServerPacket(ServerOP_CZSetEntityVariableByNPCTypeID,
+				     sizeof(CZSetEntVarByNPCTypeID_Struct) + message_len + message_len2);
 	CZSetEntVarByNPCTypeID_Struct* CZSNBYNID = (CZSetEntVarByNPCTypeID_Struct*)pack->pBuffer;
 	CZSNBYNID->npctype_id = npctype_id;
 	strn0cpy(CZSNBYNID->id, id, 256);
@@ -2924,6 +3036,13 @@ bool QuestManager::DisableRecipe(uint32 recipe_id)
 void QuestManager::ClearNPCTypeCache(int npctype_id) {
 	if (zone) {
 		zone->ClearNPCTypeCache(npctype_id);
+	}
+}
+
+void QuestManager::ReloadZoneStaticData()
+{
+	if (zone) {
+		zone->ReloadStaticData();
 	}
 }
 
@@ -2970,4 +3089,76 @@ std::string QuestManager::GetEncounter() const {
 	}
 
 	return "";
+}
+
+void QuestManager::UpdateZoneHeader(std::string type, std::string value) {
+	if (strcasecmp(type.c_str(), "ztype") == 0)
+		zone->newzone_data.ztype = atoi(value.c_str());
+	else if (strcasecmp(type.c_str(), "fog_red") == 0) {
+		for (int i = 0; i < 4; i++) {
+			zone->newzone_data.fog_red[i] = atoi(value.c_str());
+		}
+	} else if (strcasecmp(type.c_str(), "fog_green") == 0) {
+		for (int i = 0; i < 4; i++) {
+			zone->newzone_data.fog_green[i] = atoi(value.c_str());
+		}
+	} else if (strcasecmp(type.c_str(), "fog_blue") == 0) {
+		for (int i = 0; i < 4; i++) {
+			zone->newzone_data.fog_blue[i] = atoi(value.c_str());
+		}
+	} else if (strcasecmp(type.c_str(), "fog_minclip") == 0) {
+		for (int i = 0; i < 4; i++) {
+			zone->newzone_data.fog_minclip[i] = atof(value.c_str());
+		}
+	} else if (strcasecmp(type.c_str(), "fog_maxclip") == 0) {
+		for (int i = 0; i < 4; i++) {
+			zone->newzone_data.fog_maxclip[i] = atof(value.c_str());
+		}
+	}
+	else if (strcasecmp(type.c_str(), "gravity") == 0)
+		zone->newzone_data.gravity = atof(value.c_str());
+	else if (strcasecmp(type.c_str(), "time_type") == 0)
+		zone->newzone_data.time_type = atoi(value.c_str());
+	else if (strcasecmp(type.c_str(), "rain_chance") == 0) {
+		for (int i = 0; i < 4; i++) {
+			zone->newzone_data.rain_chance[i] = atoi(value.c_str());
+		}
+	} else if (strcasecmp(type.c_str(), "rain_duration") == 0) {
+		for (int i = 0; i < 4; i++) {
+			zone->newzone_data.rain_duration[i] = atoi(value.c_str());
+		}
+	} else if (strcasecmp(type.c_str(), "snow_chance") == 0) {
+		for (int i = 0; i < 4; i++) {
+			zone->newzone_data.snow_chance[i] = atoi(value.c_str());
+		}
+	} else if (strcasecmp(type.c_str(), "snow_duration") == 0) {
+		for (int i = 0; i < 4; i++) {
+			zone->newzone_data.snow_duration[i] = atoi(value.c_str());
+		}
+	}
+	else if (strcasecmp(type.c_str(), "sky") == 0)
+		zone->newzone_data.sky = atoi(value.c_str());
+	else if (strcasecmp(type.c_str(), "safe_x") == 0)
+		zone->newzone_data.safe_x = atof(value.c_str());
+	else if (strcasecmp(type.c_str(), "safe_y") == 0)
+		zone->newzone_data.safe_y = atof(value.c_str());
+	else if (strcasecmp(type.c_str(), "safe_z") == 0)
+		zone->newzone_data.safe_z = atof(value.c_str());
+	else if (strcasecmp(type.c_str(), "max_z") == 0)
+		zone->newzone_data.max_z = atof(value.c_str());
+	else if (strcasecmp(type.c_str(), "underworld") == 0)
+		zone->newzone_data.underworld = atof(value.c_str());
+	else if (strcasecmp(type.c_str(), "minclip") == 0)
+		zone->newzone_data.minclip = atof(value.c_str());
+	else if (strcasecmp(type.c_str(), "maxclip") == 0)
+		zone->newzone_data.maxclip = atof(value.c_str());
+	else if (strcasecmp(type.c_str(), "fog_density") == 0)
+		zone->newzone_data.fog_density = atof(value.c_str());
+	else if (strcasecmp(type.c_str(), "suspendbuffs") == 0)
+		zone->newzone_data.SuspendBuffs = atoi(value.c_str());
+
+	auto outapp = new EQApplicationPacket(OP_NewZone, sizeof(NewZone_Struct));
+	memcpy(outapp->pBuffer, &zone->newzone_data, outapp->size);
+	entity_list.QueueClients(0, outapp);
+	safe_delete(outapp);
 }

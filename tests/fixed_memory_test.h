@@ -27,7 +27,7 @@ class FixedMemoryHashTest : public Test::Suite {
 	typedef void(FixedMemoryHashTest::*TestFunction)(void);
 public:
 	FixedMemoryHashTest() {
-		size_ = EQEmu::FixedMemoryHashSet<Item_Struct>::estimated_size(72000, 190000);
+		size_ = EQEmu::FixedMemoryHashSet<EQEmu::ItemBase>::estimated_size(72000, 190000);
 		data_ = new uint8[size_];
 		memset(data_, 0, size_);
 		TEST_ADD(FixedMemoryHashTest::InitTest);
@@ -49,7 +49,7 @@ public:
 
 	private:
 	void InitTest() {
-		EQEmu::FixedMemoryHashSet<Item_Struct> hash(data_, size_, 72000, 190000);
+		EQEmu::FixedMemoryHashSet<EQEmu::ItemBase> hash(data_, size_, 72000, 190000);
 		TEST_ASSERT(!hash.exists(1001));
 		TEST_ASSERT(hash.size() == 0);
 		TEST_ASSERT(hash.max_size() == 72000);
@@ -57,7 +57,7 @@ public:
 	}
 
 	void LoadTest() {
-		EQEmu::FixedMemoryHashSet<Item_Struct> hash(data_, size_);
+		EQEmu::FixedMemoryHashSet<EQEmu::ItemBase> hash(data_, size_);
 		TEST_ASSERT(!hash.exists(1001));
 		TEST_ASSERT(hash.size() == 0);
 		TEST_ASSERT(hash.max_size() == 72000);
@@ -65,8 +65,8 @@ public:
 	}
 
 	void InsertTest() {
-		EQEmu::FixedMemoryHashSet<Item_Struct> hash(data_, size_);
-		Item_Struct item;
+		EQEmu::FixedMemoryHashSet<EQEmu::ItemBase> hash(data_, size_);
+		EQEmu::ItemBase item;
 		memset(&item, 0, sizeof(item));
 		strcpy(item.Name, "Iron Sword");
 		item.ID = 1001;
@@ -79,20 +79,20 @@ public:
 	}
 
 	void RetrieveTest() {
-		EQEmu::FixedMemoryHashSet<Item_Struct> hash(data_, size_);
+		EQEmu::FixedMemoryHashSet<EQEmu::ItemBase> hash(data_, size_);
 		TEST_ASSERT(hash.exists(1001));
 		TEST_ASSERT(hash.size() == 1);
 		TEST_ASSERT(hash.max_size() == 72000);
 		TEST_ASSERT(!hash.empty());
 
-		Item_Struct item = hash[1001];
+		EQEmu::ItemBase item = hash[1001];
 		TEST_ASSERT(strcmp(item.Name, "Iron Sword") == 0);
 		TEST_ASSERT(item.ID == 1001);
 	}
 
 	void OverwriteTest() {
-		EQEmu::FixedMemoryHashSet<Item_Struct> hash(data_, size_);
-		Item_Struct item;
+		EQEmu::FixedMemoryHashSet<EQEmu::ItemBase> hash(data_, size_);
+		EQEmu::ItemBase item;
 		memset(&item, 0, sizeof(item));
 		strcpy(item.Name, "Steel Sword");
 		item.ID = 1001;
@@ -105,20 +105,20 @@ public:
 	}
 
 	void OverwriteRetrieveTest() {
-		EQEmu::FixedMemoryHashSet<Item_Struct> hash(data_, size_);
+		EQEmu::FixedMemoryHashSet<EQEmu::ItemBase> hash(data_, size_);
 		TEST_ASSERT(hash.exists(1001));
 		TEST_ASSERT(hash.size() == 1);
 		TEST_ASSERT((hash.max_size() == 72000));
 		TEST_ASSERT(!hash.empty());
 
-		Item_Struct item = hash[1001];
+		EQEmu::ItemBase item = hash[1001];
 		TEST_ASSERT(strcmp(item.Name, "Steel Sword") == 0);
 		TEST_ASSERT(item.ID == 1001);
 	}
 
 	void InsertAgainTest() {
-		EQEmu::FixedMemoryHashSet<Item_Struct> hash(data_, size_);
-		Item_Struct item;
+		EQEmu::FixedMemoryHashSet<EQEmu::ItemBase> hash(data_, size_);
+		EQEmu::ItemBase item;
 		memset(&item, 0, sizeof(item));
 		strcpy(item.Name, "Iron Sword");
 		item.ID = 1000;
@@ -132,14 +132,14 @@ public:
 	}
 
 	void RetrieveAgainTest() {
-		EQEmu::FixedMemoryHashSet<Item_Struct> hash(data_, size_);
+		EQEmu::FixedMemoryHashSet<EQEmu::ItemBase> hash(data_, size_);
 		TEST_ASSERT(hash.exists(1000));
 		TEST_ASSERT(hash.exists(1001));
 		TEST_ASSERT(hash.size() == 2);
 		TEST_ASSERT(hash.max_size() == 72000);
 		TEST_ASSERT(!hash.empty());
 
-		Item_Struct item = hash[1000];
+		EQEmu::ItemBase item = hash[1000];
 		TEST_ASSERT(strcmp(item.Name, "Iron Sword") == 0);
 		TEST_ASSERT(item.ID == 1000);
 
@@ -149,8 +149,8 @@ public:
 	}
 
 	void InsertBeginTest() {
-		EQEmu::FixedMemoryHashSet<Item_Struct> hash(data_, size_);
-		Item_Struct item;
+		EQEmu::FixedMemoryHashSet<EQEmu::ItemBase> hash(data_, size_);
+		EQEmu::ItemBase item;
 		memset(&item, 0, sizeof(item));
 		strcpy(item.Name, "Bronze Sword");
 		item.ID = 0;
@@ -165,7 +165,7 @@ public:
 	}
 
 	void RetrieveBeginTest() {
-		EQEmu::FixedMemoryHashSet<Item_Struct> hash(data_, size_);
+		EQEmu::FixedMemoryHashSet<EQEmu::ItemBase> hash(data_, size_);
 		TEST_ASSERT(hash.exists(1000));
 		TEST_ASSERT(hash.exists(1001));
 		TEST_ASSERT(hash.exists(0));
@@ -173,7 +173,7 @@ public:
 		TEST_ASSERT(hash.max_size() == 72000);
 		TEST_ASSERT(!hash.empty());
 
-		Item_Struct item = hash[1000];
+		EQEmu::ItemBase item = hash[1000];
 		TEST_ASSERT(strcmp(item.Name, "Iron Sword") == 0);
 		TEST_ASSERT(item.ID == 1000);
 
@@ -187,8 +187,8 @@ public:
 	}
 
 	void InsertEndTest() {
-		EQEmu::FixedMemoryHashSet<Item_Struct> hash(data_, size_);
-		Item_Struct item;
+		EQEmu::FixedMemoryHashSet<EQEmu::ItemBase> hash(data_, size_);
+		EQEmu::ItemBase item;
 		memset(&item, 0, sizeof(item));
 		strcpy(item.Name, "Jade Sword");
 		item.ID = 190000;
@@ -204,7 +204,7 @@ public:
 	}
 
 	void RetrieveEndTest() {
-		EQEmu::FixedMemoryHashSet<Item_Struct> hash(data_, size_);
+		EQEmu::FixedMemoryHashSet<EQEmu::ItemBase> hash(data_, size_);
 		TEST_ASSERT(hash.exists(1000));
 		TEST_ASSERT(hash.exists(1001));
 		TEST_ASSERT(hash.exists(0));
@@ -213,7 +213,7 @@ public:
 		TEST_ASSERT(hash.max_size() == 72000);
 		TEST_ASSERT(!hash.empty());
 
-		Item_Struct item = hash[1000];
+		EQEmu::ItemBase item = hash[1000];
 		TEST_ASSERT(strcmp(item.Name, "Iron Sword") == 0);
 		TEST_ASSERT(item.ID == 1000);
 

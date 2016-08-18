@@ -98,14 +98,14 @@ MySQLRequestResult DBcore::QueryDatabase(const char* query, uint32 querylen, boo
 
 			pStatus = Error;
 
-			char *errorBuffer = new char[MYSQL_ERRMSG_SIZE];
+			auto errorBuffer = new char[MYSQL_ERRMSG_SIZE];
 
 			snprintf(errorBuffer, MYSQL_ERRMSG_SIZE, "#%i: %s", mysql_errno(&mysql), mysql_error(&mysql));
 
 			return MySQLRequestResult(nullptr, 0, 0, 0, 0, (uint32)mysql_errno(&mysql), errorBuffer);
 		}
 
-		char *errorBuffer = new char[MYSQL_ERRMSG_SIZE];
+		auto errorBuffer = new char[MYSQL_ERRMSG_SIZE];
 		snprintf(errorBuffer, MYSQL_ERRMSG_SIZE, "#%i: %s", mysql_errno(&mysql), mysql_error(&mysql));
 
 		/* Implement Logging at the Root */
@@ -128,7 +128,12 @@ MySQLRequestResult DBcore::QueryDatabase(const char* query, uint32 querylen, boo
 	MySQLRequestResult requestResult(res, (uint32)mysql_affected_rows(&mysql), rowCount, (uint32)mysql_field_count(&mysql), (uint32)mysql_insert_id(&mysql));
 	
 	if (Log.log_settings[Logs::MySQLQuery].is_category_enabled == 1)
-		Log.Out(Logs::General, Logs::MySQLQuery, "%s (%u rows returned)", query, rowCount, requestResult.RowCount());
+	{
+		if ((strncasecmp(query, "select", 6) == 0))
+			Log.Out(Logs::General, Logs::MySQLQuery, "%s (%u row%s returned)", query, requestResult.RowCount(), requestResult.RowCount() == 1 ? "" : "s");
+		else
+			Log.Out(Logs::General, Logs::MySQLQuery, "%s (%u row%s affected)", query, requestResult.RowsAffected(), requestResult.RowsAffected() == 1 ? "" : "s");
+	}
 
 	return requestResult;
 }

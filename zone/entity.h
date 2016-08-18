@@ -1,5 +1,5 @@
 /*	EQEMu: Everquest Server Emulator
-	Copyright (C) 2001-2003 EQEMu Development Team (http://eqemulator.net)
+	Copyright (C) 2001-2016 EQEMu Development Team (http://eqemulator.net)
 
 	This program is free software; you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -30,6 +30,7 @@
 #include "position.h"
 #include "zonedump.h"
 
+class Encounter;
 class Beacon;
 class Client;
 class Corpse;
@@ -40,7 +41,7 @@ class EntityList;
 class Group;
 class Merc;
 class Mob;
-class NPC; 
+class NPC;
 class Object;
 class Petition;
 class Raid;
@@ -77,6 +78,7 @@ public:
 	virtual bool IsDoor()			const { return false; }
 	virtual bool IsTrap()			const { return false; }
 	virtual bool IsBeacon()			const { return false; }
+	virtual bool IsEncounter()		const { return false; }
 
 	virtual bool Process() { return false; }
 	virtual bool Save() { return true; }
@@ -91,6 +93,7 @@ public:
 	Doors	*CastToDoors();
 	Trap	*CastToTrap();
 	Beacon	*CastToBeacon();
+	Encounter *CastToEncounter();
 
 	const Client	*CastToClient() const;
 	const NPC		*CastToNPC() const;
@@ -101,6 +104,7 @@ public:
 	const Doors		*CastToDoors() const;
 	const Trap		*CastToTrap() const;
 	const Beacon	*CastToBeacon() const;
+	const Encounter *CastToEncounter() const;
 
 	inline const uint16& GetID() const { return id; }
 	inline const time_t& GetSpawnTimeStamp() const { return spawn_timestamp; }
@@ -144,14 +148,29 @@ public:
 	bool IsMobSpawnedByNpcTypeID(uint32 get_id);
 	Mob *GetTargetForVirus(Mob* spreader, int range);
 	inline NPC *GetNPCByID(uint16 id)
-		{ return npc_list.count(id) ? npc_list.at(id) : nullptr; }
+	{
+		auto it = npc_list.find(id);
+		if (it != npc_list.end())
+			return it->second;
+		return nullptr;
+	}
 	NPC *GetNPCByNPCTypeID(uint32 npc_id);
 	inline Merc *GetMercByID(uint16 id)
-		{ return merc_list.count(id) ? merc_list.at(id) : nullptr; }
+	{
+		auto it = merc_list.find(id);
+		if (it != merc_list.end())
+			return it->second;
+		return nullptr;
+	}
 	Client *GetClientByName(const char *name);
 	Client *GetClientByAccID(uint32 accid);
 	inline Client *GetClientByID(uint16 id)
-		{ return client_list.count(id) ? client_list.at(id) : nullptr; }
+	{
+		auto it = client_list.find(id);
+		if (it != client_list.end())
+			return it->second;
+		return nullptr;
+	}
 	Client *GetClientByCharID(uint32 iCharID);
 	Client *GetClientByWID(uint32 iWID);
 	Client *GetClient(uint32 ip, uint16 port);
@@ -168,7 +187,12 @@ public:
 	Corpse *GetCorpseByOwner(Client* client);
 	Corpse *GetCorpseByOwnerWithinRange(Client* client, Mob* center, int range);
 	inline Corpse *GetCorpseByID(uint16 id)
-		{ return corpse_list.count(id) ? corpse_list.at(id) : nullptr; }
+	{
+		auto it = corpse_list.find(id);
+		if (it != corpse_list.end())
+			return it->second;
+		return nullptr;
+	}
 	Corpse *GetCorpseByDBID(uint32 dbid);
 	Corpse *GetCorpseByName(const char* name);
 
@@ -177,10 +201,20 @@ public:
 	Client* FindCorpseDragger(uint16 CorpseID);
 
 	inline Object *GetObjectByID(uint16 id)
-		{ return object_list.count(id) ? object_list.at(id) : nullptr; }
+	{
+		auto it = object_list.find(id);
+		if (it != object_list.end())
+			return it->second;
+		return nullptr;
+	}
 	Object *GetObjectByDBID(uint32 id);
 	inline Doors *GetDoorsByID(uint16 id)
-		{ return door_list.count(id) ? door_list.at(id) : nullptr; }
+	{
+		auto it = door_list.find(id);
+		if (it != door_list.end())
+			return it->second;
+		return nullptr;
+	}
 	Doors *GetDoorsByDoorID(uint32 id);
 	Doors *GetDoorsByDBID(uint32 id);
 	void RemoveAllCorpsesByCharID(uint32 charid);
@@ -203,6 +237,7 @@ public:
 	void	MobProcess();
 	void	TrapProcess();
 	void	BeaconProcess();
+	void	EncounterProcess();
 	void	ProcessMove(Client *c, const glm::vec3& location);
 	void	ProcessMove(NPC *n, float x, float y, float z);
 	void	AddArea(int id, int type, float min_x, float max_x, float min_y, float max_y, float min_z, float max_z);
@@ -228,6 +263,7 @@ public:
 	void	AddDoor(Doors* door);
 	void	AddTrap(Trap* trap);
 	void	AddBeacon(Beacon *beacon);
+	void	AddEncounter(Encounter *encounter);
 	void	AddProximity(NPC *proximity_for);
 	void	Clear();
 	bool	RemoveMob(uint16 delete_id);
@@ -266,6 +302,7 @@ public:
 	Entity *GetEntityCorpse(uint16 id);
 	Entity *GetEntityTrap(uint16 id);
 	Entity *GetEntityBeacon(uint16 id);
+	Entity *GetEntityEncounter(uint16 id);
 	Entity *GetEntityMob(const char *name);
 	Entity *GetEntityCorpse(const char *name);
 
@@ -315,8 +352,8 @@ public:
 	void	QueueToGroupsForNPCHealthAA(Mob* sender, const EQApplicationPacket* app);
 	void	QueueManaged(Mob* sender, const EQApplicationPacket* app, bool ignore_sender=false, bool ackreq = true);
 
-	void	AEAttack(Mob *attacker, float dist, int Hand = MainPrimary, int count = 0, bool IsFromSpell = false);
-	void	AETaunt(Client *caster, float range = 0);
+	void	AEAttack(Mob *attacker, float dist, int Hand = EQEmu::legacy::SlotPrimary, int count = 0, bool IsFromSpell = false);
+	void	AETaunt(Client *caster, float range=0, int32 bonus_hate=0);
 	void	AESpell(Mob *caster, Mob *center, uint16 spell_id, bool affect_caster = true, int16 resist_adjust = 0);
 	void	MassGroupBuff(Mob *caster, Mob *center, uint16 spell_id, bool affect_caster = true);
 	void	AEBardPulse(Mob *caster, Mob *center, uint16 spell_id, bool affect_caster = true);
@@ -326,7 +363,7 @@ public:
 	void	SendAlarm(Trap* trap, Mob* currenttarget, uint8 kos);
 	Trap*	FindNearbyTrap(Mob* searcher, float max_dist);
 
-	void	AddHealAggro(Mob* target, Mob* caster, uint16 thedam);
+	void	AddHealAggro(Mob* target, Mob* caster, uint16 hate);
 	Mob*	FindDefenseNPC(uint32 npcid);
 	void	OpenDoorsNear(NPC* opener);
 	void	UpdateWho(bool iSendFullUpdate = false);
@@ -391,7 +428,6 @@ public:
 
 	void	SaveAllClientsTaskState();
 	void	ReloadAllClientsTaskState(int TaskID=0);
-
 	uint16	CreateGroundObject(uint32 itemid, const glm::vec4& position, uint32 decay_time = 300000);
 	uint16	CreateGroundObjectFromModel(const char *model, const glm::vec4& position, uint8 type = 0x00, uint32 decay_time = 0);
 	uint16	CreateDoor(const char *model, const glm::vec4& position, uint8 type = 0, uint16 size = 100);
@@ -422,6 +458,7 @@ public:
 	uint16 GetFreeID();
 	void RefreshAutoXTargets(Client *c);
 	void RefreshClientXTargets(Client *c);
+	void SendAlternateAdvancementStats();
 
 protected:
 	friend class Zone;
@@ -448,6 +485,7 @@ private:
 	std::unordered_map<uint16, Doors *> door_list;
 	std::unordered_map<uint16, Trap *> trap_list;
 	std::unordered_map<uint16, Beacon *> beacon_list;
+	std::unordered_map<uint16, Encounter *> encounter_list;
 	std::list<NPC *> proximity_list;
 	std::list<Group *> group_list;
 	std::list<Raid *> raid_list;
@@ -458,7 +496,6 @@ private:
 #ifdef BOTS
 	public:
 		void AddBot(Bot* newBot, bool SendSpawnPacket = true, bool dontqueue = false);
-		void BotPickLock(Bot* rogue);
 		bool RemoveBot(uint16 entityID);
 		Mob* GetMobByBotID(uint32 botID);
 		Bot* GetBotByBotID(uint32 botID);

@@ -1072,7 +1072,7 @@ XS(XS_Client_SetBindPoint)
 			new_z = (float)SvNV(ST(5));
 		}
 
-		THIS->SetBindPoint(to_zone, to_instance, glm::vec3(new_x, new_y, new_z));
+		THIS->SetBindPoint(0, to_zone, to_instance, glm::vec3(new_x, new_y, new_z));
 	}
 	XSRETURN_EMPTY;
 }
@@ -1940,7 +1940,7 @@ XS(XS_Client_GetSkill)
 		Client *		THIS;
 		uint16		RETVAL;
 		dXSTARG;
-		SkillUseTypes		skill_id = (SkillUseTypes)SvUV(ST(1));
+		EQEmu::skills::SkillType		skill_id = (EQEmu::skills::SkillType)SvUV(ST(1));
 
 		if (sv_derived_from(ST(0), "Client")) {
 			IV tmp = SvIV((SV*)SvRV(ST(0)));
@@ -1967,7 +1967,7 @@ XS(XS_Client_GetRawSkill)
 		Client *		THIS;
 		uint32		RETVAL;
 		dXSTARG;
-		SkillUseTypes		skill_id = (SkillUseTypes)SvUV(ST(1));
+		EQEmu::skills::SkillType		skill_id = (EQEmu::skills::SkillType)SvUV(ST(1));
 
 		if (sv_derived_from(ST(0), "Client")) {
 			IV tmp = SvIV((SV*)SvRV(ST(0)));
@@ -1993,7 +1993,7 @@ XS(XS_Client_HasSkill)
 	{
 		Client *		THIS;
 		bool		RETVAL;
-		SkillUseTypes		skill_id = (SkillUseTypes)SvUV(ST(1));
+		EQEmu::skills::SkillType		skill_id = (EQEmu::skills::SkillType)SvUV(ST(1));
 
 		if (sv_derived_from(ST(0), "Client")) {
 			IV tmp = SvIV((SV*)SvRV(ST(0)));
@@ -2020,7 +2020,7 @@ XS(XS_Client_CanHaveSkill)
 	{
 		Client *		THIS;
 		bool		RETVAL;
-		SkillUseTypes		skill_id = (SkillUseTypes)SvUV(ST(1));
+		EQEmu::skills::SkillType		skill_id = (EQEmu::skills::SkillType)SvUV(ST(1));
 
 		if (sv_derived_from(ST(0), "Client")) {
 			IV tmp = SvIV((SV*)SvRV(ST(0)));
@@ -2046,7 +2046,7 @@ XS(XS_Client_SetSkill)
 		Perl_croak(aTHX_ "Usage: Client::SetSkill(THIS, skill_num, value)");
 	{
 		Client *		THIS;
-		SkillUseTypes		skill_num = (SkillUseTypes)SvUV(ST(1));
+		EQEmu::skills::SkillType		skill_num = (EQEmu::skills::SkillType)SvUV(ST(1));
 		uint16		value = (uint16)SvUV(ST(2));
 
 		if (sv_derived_from(ST(0), "Client")) {
@@ -2071,7 +2071,7 @@ XS(XS_Client_AddSkill)
 		Perl_croak(aTHX_ "Usage: Client::AddSkill(THIS, skillid, value)");
 	{
 		Client *		THIS;
-		SkillUseTypes		skillid = (SkillUseTypes)SvUV(ST(1));
+		EQEmu::skills::SkillType		skillid = (EQEmu::skills::SkillType)SvUV(ST(1));
 		uint16		value = (uint16)SvUV(ST(2));
 
 		if (sv_derived_from(ST(0), "Client")) {
@@ -2121,7 +2121,7 @@ XS(XS_Client_CheckIncreaseSkill)
 	{
 		Client *		THIS;
 		bool		RETVAL;
-		SkillUseTypes		skillid = (SkillUseTypes)SvUV(ST(1));
+		EQEmu::skills::SkillType		skillid = (EQEmu::skills::SkillType)SvUV(ST(1));
 		int		chancemodi;
 
 		if (sv_derived_from(ST(0), "Client")) {
@@ -2180,7 +2180,7 @@ XS(XS_Client_MaxSkill)
 	{
 		Client *		THIS;
 		uint16			RETVAL;
-		SkillUseTypes		skillid = (SkillUseTypes)SvUV(ST(1));
+		EQEmu::skills::SkillType		skillid = (EQEmu::skills::SkillType)SvUV(ST(1));
 		uint16			class_ = 0;
 		uint16			level = 0;
 		dXSTARG;
@@ -2445,6 +2445,30 @@ XS(XS_Client_UnmemSpell)
 	XSRETURN_EMPTY;
 }
 
+XS(XS_Client_UnmemSpellBySpellID); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Client_UnmemSpellBySpellID)
+{
+	dXSARGS;
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: Client::UnmemSpellBySpellID(THIS, spell_id)");
+	{
+		Client *		THIS;
+		int32		spell_id = (int32)SvIV(ST(1));
+
+		if (sv_derived_from(ST(0), "Client")) {
+			IV tmp = SvIV((SV*)SvRV(ST(0)));
+			THIS = INT2PTR(Client *,tmp);
+		}
+		else
+			Perl_croak(aTHX_ "THIS is not of type Client");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
+
+		THIS->UnmemSpellBySpellID(spell_id);
+	}
+	XSRETURN_EMPTY;
+}
+
 XS(XS_Client_UnmemSpellAll); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_UnmemSpellAll)
 {
@@ -2566,6 +2590,57 @@ XS(XS_Client_UnscribeSpellAll)
 		THIS->UnscribeSpellAll(update_client);
 	}
 	XSRETURN_EMPTY;
+}
+
+XS(XS_Client_TrainDiscBySpellID); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Client_TrainDiscBySpellID)
+{
+	dXSARGS;
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: Client::TrainDiscBySpellID(THIS, spell_id)");
+	{
+		Client *		THIS;
+		int32		spell_id = (int32)SvIV(ST(1));
+
+		if (sv_derived_from(ST(0), "Client")) {
+			IV tmp = SvIV((SV*)SvRV(ST(0)));
+			THIS = INT2PTR(Client *,tmp);
+		}
+		else
+			Perl_croak(aTHX_ "THIS is not of type Client");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
+
+		THIS->TrainDiscBySpellID(spell_id);
+	}
+	XSRETURN_EMPTY;
+}
+
+XS(XS_Client_GetDiscSlotBySpellID); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Client_GetDiscSlotBySpellID)
+{
+	dXSARGS;
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: Client::GetDiscSlotBySpellID(THIS, spell_id)");
+	{
+		Client *	THIS;
+		int			RETVAL;
+		int32		spell_id = (int32)SvIV(ST(1));
+		dXSTARG;
+
+		if (sv_derived_from(ST(0), "Client")) {
+			IV tmp = SvIV((SV*)SvRV(ST(0)));
+			THIS = INT2PTR(Client *,tmp);
+		}
+		else
+			Perl_croak(aTHX_ "THIS is not of type Client");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
+
+		RETVAL = THIS->GetDiscSlotBySpellID(spell_id);
+		XSprePUSH; PUSHi((IV)RETVAL);
+	}
+	XSRETURN(1);
 }
 
 XS(XS_Client_UntrainDisc); /* prototype to pass -Wmissing-prototypes */
@@ -3899,7 +3974,7 @@ XS(XS_Client_GetClientVersion)
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		RETVAL = static_cast<unsigned int>(THIS->GetClientVersion());
+		RETVAL = static_cast<unsigned int>(THIS->ClientVersion());
 		XSprePUSH; PUSHu((UV)RETVAL);
 	}
 	XSRETURN(1);
@@ -3925,7 +4000,7 @@ XS(XS_Client_GetClientVersionBit)
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		RETVAL = THIS->GetClientVersionBit();
+		RETVAL = THIS->ClientVersionBit();
 		XSprePUSH; PUSHu((UV)RETVAL);
 	}
 	XSRETURN(1);
@@ -4077,33 +4152,7 @@ XS(XS_Client_RefundAA) {
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		int curpt = 0;
-		bool refunded = false;
-
-		for(int x1=0;x1<aaHighestID;x1++){
-			curpt = THIS->GetAA(x1);
-			if(curpt > 0){
-				SendAA_Struct* curaa = zone->FindAA(x1);
-				if(curaa){
-					THIS->SetAA(x1, 0);
-					for(int x2=0;x2<curpt;x2++){ //add up all the AA points pt by pt to get the correct cost
-						THIS->GetPP().aapoints += curaa->cost + (curaa->cost_inc * x2);
-						refunded = true;
-					}
-				}
-				else //aa doesn't exist.. but if they bought it then it had at least a cost of 1 point each
-				{ //so give back what we can
-					THIS->GetPP().aapoints += curpt;
-					THIS->SetAA(x1, 0);
-					refunded = true;
-				}
-			}
-		}
-
-		if(refunded){
-			THIS->Save(); //save of course
-			THIS->Kick(); //client gets all buggy if we don't immediatly relog so just force it on them
-		}
+		THIS->RefundAA();
 	}
 	XSRETURN_EMPTY;
 }
@@ -4915,9 +4964,42 @@ XS(XS_Client_IncrementAA)
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		THIS->IncrementAA(aaskillid);
+		THIS->IncrementAlternateAdvancementRank(aaskillid);
 	}
 	XSRETURN_EMPTY;
+}
+
+XS(XS_Client_GrantAlternateAdvancementAbility); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Client_GrantAlternateAdvancementAbility)
+{
+	dXSARGS;
+	if(items < 3 || items > 4)
+		Perl_croak(aTHX_ "Usage: Client::GrantAlternateAdvancementAbility(THIS, aa_id, points, [ignore_cost])");
+	{
+		Client *		THIS;
+		bool			RETVAL;
+		int			aa_id = (int)SvIV(ST(1));
+		int			points = (int)SvIV(ST(2));
+		bool		ignore_cost = false;
+
+		if(sv_derived_from(ST(0), "Client")) {
+			IV tmp = SvIV((SV*)SvRV(ST(0)));
+			THIS = INT2PTR(Client *, tmp);
+		}
+		else
+			Perl_croak(aTHX_ "THIS is not of type Client");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
+
+		if(items > 3) {
+			ignore_cost = (bool)SvTRUE(ST(3));
+		}
+
+		RETVAL = THIS->GrantAlternateAdvancementAbility(aa_id, points, ignore_cost);
+		ST(0) = boolSV(RETVAL);
+		sv_2mortal(ST(0));
+	}
+	XSRETURN(1);
 }
 
 XS(XS_Client_GetAALevel);
@@ -5119,13 +5201,20 @@ XS(XS_Client_AssignTask); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_AssignTask)
 {
 	dXSARGS;
-	if (items != 3)
-		Perl_croak(aTHX_ "Usage: Client::AssignTask(THIS, TaskID, NPCID)");
+	if (items != 3 && items != 4)
+		Perl_croak(aTHX_ "Usage: Client::AssignTask(THIS, TaskID, NPCID, enforce_level_requirement)");
 	{
 		Client *	THIS;
 		int		TaskID = (int)SvIV(ST(1));
 		int		NPCID = (int)SvIV(ST(2));
-
+		bool	enforce_level_requirement = false;
+		if (items == 4)
+		{
+			if ((int)SvIV(ST(3)) == 1)
+			{
+				enforce_level_requirement = true;
+			}
+		}
 		if (sv_derived_from(ST(0), "Client")) {
 			IV tmp = SvIV((SV*)SvRV(ST(0)));
 			THIS = INT2PTR(Client *,tmp);
@@ -5135,7 +5224,7 @@ XS(XS_Client_AssignTask)
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		THIS->AssignTask(TaskID, NPCID);
+		THIS->AssignTask(TaskID, NPCID, enforce_level_requirement);
 	}
 	XSRETURN_EMPTY;
 }
@@ -6110,6 +6199,218 @@ XS(XS_Client_SendSpellAnim)
 	XSRETURN_EMPTY;
 }
 
+XS(XS_Client_GetTargetRingX); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Client_GetTargetRingX)
+{
+   dXSARGS;
+   if (items != 1)
+       Perl_croak(aTHX_ "Usage: Client::GetTargetRingX(THIS)");
+   {
+       Client *        THIS;
+       float           RETVAL;
+       dXSTARG;
+
+       if (sv_derived_from(ST(0), "Client")) {
+           IV tmp = SvIV((SV*)SvRV(ST(0)));
+           THIS = INT2PTR(Client *,tmp);
+       }
+       else
+           Perl_croak(aTHX_ "THIS is not of type Client");
+       if(THIS == nullptr)
+           Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
+
+		RETVAL = THIS->GetTargetRingX();
+		XSprePUSH; PUSHn((double)RETVAL);
+   }
+   XSRETURN(1);
+}
+
+XS(XS_Client_GetTargetRingY); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Client_GetTargetRingY)
+{
+   dXSARGS;
+   if (items != 1)
+       Perl_croak(aTHX_ "Usage: Client::GetTargetRingY(THIS)");
+   {
+       Client *        THIS;
+       float           RETVAL;
+       dXSTARG;
+
+       if (sv_derived_from(ST(0), "Client")) {
+           IV tmp = SvIV((SV*)SvRV(ST(0)));
+           THIS = INT2PTR(Client *,tmp);
+       }
+       else
+           Perl_croak(aTHX_ "THIS is not of type Client");
+       if(THIS == nullptr)
+           Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
+
+		RETVAL = THIS->GetTargetRingY();
+		XSprePUSH; PUSHn((double)RETVAL);
+   }
+   XSRETURN(1);
+}
+
+XS(XS_Client_GetTargetRingZ); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Client_GetTargetRingZ)
+{
+   dXSARGS;
+   if (items != 1)
+       Perl_croak(aTHX_ "Usage: Client::GetTargetRingZ(THIS)");
+   {
+       Client *        THIS;
+       float           RETVAL;
+       dXSTARG;
+
+       if (sv_derived_from(ST(0), "Client")) {
+           IV tmp = SvIV((SV*)SvRV(ST(0)));
+           THIS = INT2PTR(Client *,tmp);
+       }
+       else
+           Perl_croak(aTHX_ "THIS is not of type Client");
+       if(THIS == nullptr)
+           Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
+
+		RETVAL = THIS->GetTargetRingZ();
+		XSprePUSH; PUSHn((double)RETVAL);
+   }
+   XSRETURN(1);
+}
+
+XS(XS_Client_CalcEXP); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Client_CalcEXP)
+{
+	dXSARGS;
+	if (items < 1 || items > 2)
+		Perl_croak(aTHX_ "Usage: CalcEXP(THIS, uint8 conlevel)");
+	{
+		Client *		THIS;
+		uint8 conlevel = 0xFF;
+		uint32 RETVAL;
+		if(items == 2)
+			conlevel = (uint16)SvUV(ST(1));
+		dXSTARG;
+
+		if (sv_derived_from(ST(0), "Client")) {
+			IV tmp = SvIV((SV*)SvRV(ST(0)));
+			THIS = INT2PTR(Client *,tmp);
+		}
+		else
+			Perl_croak(aTHX_ "THIS is not of type Client");
+		if(THIS == NULL)
+			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+
+		RETVAL = THIS->CalcEXP(conlevel);
+		XSprePUSH; PUSHi((IV)RETVAL);
+	}
+	XSRETURN(1);
+}
+
+XS(XS_Client_QuestReward); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Client_QuestReward)
+{
+	dXSARGS;
+	if (items < 1 || items > 9)
+		Perl_croak(aTHX_ "Usage: Client::QuestReward(THIS, mob, copper, silver, gold, platinum, itemid, exp, faction)");
+	{
+		Client*		THIS;
+		Mob *		mob = nullptr;
+		int32		copper = 0;
+		int32		silver = 0;
+		int32		gold = 0;
+		int32		platinum = 0;
+		int32		itemid = 0;
+		int32		exp = 0;
+		bool		faction = false;
+
+		if (sv_derived_from(ST(0), "THIS")) {
+			IV tmp = SvIV((SV*)SvRV(ST(0)));
+			THIS = INT2PTR(Client *, tmp);
+		}
+		else
+			Perl_croak(aTHX_ "THIS is not of type client");
+		if (THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
+
+		if (items > 1)	{
+			if (sv_derived_from(ST(1), "mob")) {
+				IV tmp = SvIV((SV*)SvRV(ST(1)));
+				mob = INT2PTR(Mob *, tmp);
+			}
+			else
+				Perl_croak(aTHX_ "mob is not of type Mob");
+			if (mob == nullptr)
+				Perl_croak(aTHX_ "mob is nullptr, avoiding crash.");
+		}
+		if (items > 2)	{ copper = (int32)SvIV(ST(2)); }
+		if (items > 3)	{ silver = (int32)SvIV(ST(3)); }
+		if (items > 4)	{ gold = (int32)SvIV(ST(4)); }
+		if (items > 5)	{ platinum = (int32)SvIV(ST(5)); }
+		if (items > 6)	{ itemid = (int32)SvIV(ST(6)); }
+		if (items > 7)	{ exp = (int32)SvIV(ST(7)); }
+		if (items > 8)	{ faction = (bool)SvIV(ST(8)); }
+
+		THIS->QuestReward(mob, copper, silver, gold, platinum, itemid, exp, faction);
+	}
+	XSRETURN_EMPTY;
+}
+
+XS(XS_Client_GetMoney);
+XS(XS_Client_GetMoney)
+{
+	dXSARGS;
+	if (items != 3)
+		Perl_croak(aTHX_ "Usage: GetMoney(THIS, type, subtype)");
+	{
+		Client* THIS;
+		uint32 RETVAL;
+		uint8 type = (uint8)SvUV(ST(1));
+		uint8 subtype = (uint8)SvUV(ST(2));
+		dXSTARG;
+
+		if (sv_derived_from(ST(0), "Client")) {
+			IV tmp = SvIV((SV*)SvRV(ST(0)));
+			THIS = INT2PTR(Client *,tmp);
+		}
+		else
+			Perl_croak(aTHX_ "THIS is not of type Client");
+		
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
+
+		RETVAL = THIS->GetMoney(type, subtype);
+		XSprePUSH; PUSHn((uint32)RETVAL);
+	}
+	XSRETURN(1);
+}
+
+XS(XS_Client_GetAccountAge);
+XS(XS_Client_GetAccountAge) {
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: GetAccountAge(THIS)");
+	{
+		Client* THIS;
+		int RETVAL;
+		dXSTARG;
+
+		if (sv_derived_from(ST(0), "Client")) {
+			IV tmp = SvIV((SV*)SvRV(ST(0)));
+			THIS = INT2PTR(Client *,tmp);
+		}
+		else
+			Perl_croak(aTHX_ "THIS is not of type Client");
+		
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
+
+		RETVAL = THIS->GetAccountAge();
+		XSprePUSH; PUSHn((int)RETVAL);		
+	}
+	XSRETURN(1);
+}
+
+
 #ifdef __cplusplus
 extern "C"
 #endif
@@ -6217,10 +6518,13 @@ XS(boot_Client)
 		newXSproto(strcpy(buf, "ResetAA"), XS_Client_ResetAA, file, "$");
 		newXSproto(strcpy(buf, "MemSpell"), XS_Client_MemSpell, file, "$$$;$");
 		newXSproto(strcpy(buf, "UnmemSpell"), XS_Client_UnmemSpell, file, "$$;$");
+		newXSproto(strcpy(buf, "UnmemSpellBySpellID"), XS_Client_UnmemSpellBySpellID, file, "$$");
 		newXSproto(strcpy(buf, "UnmemSpellAll"), XS_Client_UnmemSpellAll, file, "$;$");
 		newXSproto(strcpy(buf, "ScribeSpell"), XS_Client_ScribeSpell, file, "$$$;$");
 		newXSproto(strcpy(buf, "UnscribeSpell"), XS_Client_UnscribeSpell, file, "$$;$");
 		newXSproto(strcpy(buf, "UnscribeSpellAll"), XS_Client_UnscribeSpellAll, file, "$;$");
+		newXSproto(strcpy(buf, "TrainDiscBySpellID"), XS_Client_TrainDiscBySpellID, file, "$$");
+		newXSproto(strcpy(buf, "GetDiscSlotBySpellID"), XS_Client_GetDiscSlotBySpellID, file, "$$");
 		newXSproto(strcpy(buf, "UntrainDisc"), XS_Client_UntrainDisc, file, "$$;$");
 		newXSproto(strcpy(buf, "UntrainDiscAll"), XS_Client_UntrainDiscAll, file, "$;$");
 		newXSproto(strcpy(buf, "IsSitting"), XS_Client_IsSitting, file, "$");
@@ -6307,13 +6611,14 @@ XS(boot_Client)
 		newXSproto(strcpy(buf, "GetIP"), XS_Client_GetIP, file, "$");
 		newXSproto(strcpy(buf, "AddLevelBasedExp"), XS_Client_AddLevelBasedExp, file, "$$;$");
 		newXSproto(strcpy(buf, "IncrementAA"), XS_Client_IncrementAA, file, "$$");
+		newXSproto(strcpy(buf, "GrantAlternateAdvancementAbility"), XS_Client_GrantAlternateAdvancementAbility, file, "$$$;$");
 		newXSproto(strcpy(buf, "GetAALevel"), XS_Client_GetAALevel, file, "$$");
 		newXSproto(strcpy(buf, "MarkCompassLoc"), XS_Client_MarkCompassLoc, file, "$$$$");
 		newXSproto(strcpy(buf, "ClearCompassMark"), XS_Client_ClearCompassMark, file, "$");
 		newXSproto(strcpy(buf, "GetFreeSpellBookSlot"), XS_Client_GetFreeSpellBookSlot, file, "$;$");
 		newXSproto(strcpy(buf, "GetSpellBookSlotBySpellID"), XS_Client_GetSpellBookSlotBySpellID, file, "$$");
 		newXSproto(strcpy(buf, "UpdateTaskActivity"), XS_Client_UpdateTaskActivity, file, "$$$$;$");
-		newXSproto(strcpy(buf, "AssignTask"), XS_Client_AssignTask, file, "$$$");
+		newXSproto(strcpy(buf, "AssignTask"), XS_Client_AssignTask, file, "$$$;$");
 		newXSproto(strcpy(buf, "FailTask"), XS_Client_FailTask, file, "$$");
 		newXSproto(strcpy(buf, "IsTaskCompleted"), XS_Client_IsTaskCompleted, file, "$$");
 		newXSproto(strcpy(buf, "IsTaskActive"), XS_Client_IsTaskActive, file, "$$");
@@ -6351,7 +6656,13 @@ XS(boot_Client)
 		newXSproto(strcpy(buf, "SendMarqueeMessage"), XS_Client_SendMarqueeMessage, file, "$$$$$$$");
 		newXSproto(strcpy(buf, "SendColoredText"), XS_Client_SendColoredText, file, "$$$");
 		newXSproto(strcpy(buf, "SendSpellAnim"), XS_Client_SendSpellAnim, file, "$$$");
-
+		newXSproto(strcpy(buf, "GetTargetRingX"), XS_Client_GetTargetRingX, file, "$$");
+		newXSproto(strcpy(buf, "GetTargetRingY"), XS_Client_GetTargetRingY, file, "$$");
+		newXSproto(strcpy(buf, "GetTargetRingZ"), XS_Client_GetTargetRingZ, file, "$$");
+		newXSproto(strcpy(buf, "QuestReward"), XS_Client_QuestReward, file, "$$;$$$$$$$");
+		newXSproto(strcpy(buf, "CalcEXP"), XS_Client_CalcEXP, file, "$");
+		newXSproto(strcpy(buf, "GetMoney"), XS_Client_GetMoney, file, "$$$");
+		newXSproto(strcpy(buf, "GetAccountAge"), XS_Client_GetAccountAge, file, "$");
 		XSRETURN_YES;
 }
 

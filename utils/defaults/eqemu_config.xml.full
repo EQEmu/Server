@@ -68,7 +68,7 @@
 
 	<!-- Launcher Configuration -->
 	<launcher>
-		<!-- <logprefix>logs/zone-</logprefix> -->
+		<!-- <logprefix>zone-</logprefix> -->
 		<!-- <logsuffix>.log</logsuffix> -->
 		<!-- <exe>zone.exe or ./zone</exe> -->
 		<!-- <timers restart="10000" reterminate="10000"> -->
@@ -80,11 +80,16 @@
 		<!-- <opcodes>opcodes.conf</opcodes> -->
 		<!-- <logsettings>log.ini</logsettings> -->
 		<!-- <eqtime>eqtime.cfg</eqtime> -->
+		<!-- <plugin.pl>plugin.pl</plugin.pl> -->
 	</files>
 	<!-- Directory locations.  Defaults shown -->
 	<directories>
-		<!-- <maps>Maps</maps> -->
-		<!-- <quests>quests</quests> -->
-		<!-- <plugins>plugins</plugins> -->
+		<!-- <maps>Maps/</maps> -->
+		<!-- <quests>quests/</quests> -->
+		<!-- <plugins>plugins/</plugins> -->
+		<!-- <lua_modules>lua_modules/</lua_modules> -->
+		<!-- <patches>./</patches> -->
+		<!-- <shared_memory>shared/</shared_memory> -->
+		<!-- <logs>logs/</logs> -->
 	</directories>
 </server>

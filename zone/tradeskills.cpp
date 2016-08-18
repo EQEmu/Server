@@ -36,7 +36,7 @@
 
 extern QueryServ* QServ;
 
-static const SkillUseTypes TradeskillUnknown = Skill1HBlunt; /* an arbitrary non-tradeskill */
+static const EQEmu::skills::SkillType TradeskillUnknown = EQEmu::skills::Skill1HBlunt; /* an arbitrary non-tradeskill */
 
 void Object::HandleAugmentation(Client* user, const AugmentItem_Struct* in_augment, Object *worldo)
 {
@@ -61,15 +61,15 @@ void Object::HandleAugmentation(Client* user, const AugmentItem_Struct* in_augme
 		inst = user_inv.GetItem(in_augment->container_slot);
 		if (inst)
 		{
-			const Item_Struct* item = inst->GetItem();
-			if (item && inst->IsType(ItemClassContainer) && item->BagType == 53)
+			const EQEmu::ItemBase* item = inst->GetItem();
+			if (item && inst->IsType(EQEmu::item::ItemClassBag) && item->BagType == 53)
 			{
 				// We have found an appropriate inventory augmentation sealer
 				container = inst;
 
 				// Verify that no more than two items are in container to guarantee no inadvertant wipes.
 				uint8 itemsFound = 0;
-				for (uint8 i = MAIN_BEGIN; i < EmuConstants::MAP_WORLD_SIZE; i++)
+				for (uint8 i = SLOT_BEGIN; i < EQEmu::legacy::TYPE_WORLD_SIZE; i++)
 				{
 					const ItemInst* inst = container->GetItem(i);
 					if (inst)
@@ -166,25 +166,34 @@ void Object::HandleAugmentation(Client* user, const AugmentItem_Struct* in_augme
 	else
 	{
 		ItemInst *old_aug = nullptr;
-		const uint32 id = auged_with->GetID();
+		bool isSolvent = auged_with->GetItem()->ItemType == EQEmu::item::ItemTypeAugmentationSolvent;
+		if (!isSolvent && auged_with->GetItem()->ItemType != EQEmu::item::ItemTypeAugmentationDistiller)
+		{
+			Log.Out(Logs::General, Logs::Error, "Player tried to remove an augment without a solvent or distiller.");
+			user->Message(13, "Error: Missing an augmentation solvent or distiller for removing this augment.");
+
+			return;
+		}
+
 		ItemInst *aug = tobe_auged->GetAugment(in_augment->augment_slot);
-		if(aug) {
+		if (aug) {
+			if (!isSolvent && auged_with->GetItem()->ID != aug->GetItem()->AugDistiller)
+			{
+				Log.Out(Logs::General, Logs::Error, "Player tried to safely remove an augment with the wrong distiller (item %u vs expected %u).", auged_with->GetItem()->ID, aug->GetItem()->AugDistiller);
+				user->Message(13, "Error: Wrong augmentation distiller for safely removing this augment.");
+				return;
+			}
 			std::vector<EQEmu::Any> args;
 			args.push_back(aug);
 			parse->EventItem(EVENT_UNAUGMENT_ITEM, user, tobe_auged, nullptr, "", slot, &args);
 
 			args.assign(1, tobe_auged);
-			bool destroyed = false;
-			if(id == 40408 || id == 40409 || id == 40410) {
-				destroyed = true;
-			}
-
-			args.push_back(&destroyed);
+			args.push_back(&isSolvent);
 
 			parse->EventItem(EVENT_AUGMENT_REMOVE, user, aug, nullptr, "", slot, &args);
 		}
 
-		if(id == 40408 || id == 40409 || id == 40410)
+		if (isSolvent)
 			tobe_auged->DeleteAugment(in_augment->augment_slot);
 		else
 			old_aug = tobe_auged->RemoveAugment(in_augment->augment_slot);
@@ -203,7 +212,7 @@ void Object::HandleAugmentation(Client* user, const AugmentItem_Struct* in_augme
 		if (worldo)
 		{
 			container->Clear();
-			EQApplicationPacket* outapp = new EQApplicationPacket(OP_ClearObject, sizeof(ClearObject_Struct));
+			auto outapp = new EQApplicationPacket(OP_ClearObject, sizeof(ClearObject_Struct));
 			ClearObject_Struct *cos = (ClearObject_Struct *)outapp->pBuffer;
 			cos->Clear = 1;
 			user->QueuePacket(outapp);
@@ -213,7 +222,7 @@ void Object::HandleAugmentation(Client* user, const AugmentItem_Struct* in_augme
 		else
 		{
 			// Delete items in our inventory container...
-			for (uint8 i = MAIN_BEGIN; i < EmuConstants::MAP_WORLD_SIZE; i++)
+			for (uint8 i = SLOT_BEGIN; i < EQEmu::legacy::TYPE_WORLD_SIZE; i++)
 			{
 				const ItemInst* inst = container->GetItem(i);
 				if (inst)
@@ -255,7 +264,7 @@ void Object::HandleCombine(Client* user, const NewCombine_Struct* in_combine, Ob
 	uint32 some_id = 0;
 	bool worldcontainer=false;
 
-	if (in_combine->container_slot == legacy::SLOT_TRADESKILL) {
+	if (in_combine->container_slot == EQEmu::legacy::SLOT_TRADESKILL) {
 		if(!worldo) {
 			user->Message(13, "Error: Server is not aware of the tradeskill container you are attempting to use");
 			return;
@@ -267,28 +276,28 @@ void Object::HandleCombine(Client* user, const NewCombine_Struct* in_combine, Ob
 	else {
 		inst = user_inv.GetItem(in_combine->container_slot);
 		if (inst) {
-			const Item_Struct* item = inst->GetItem();
-			if (item && inst->IsType(ItemClassContainer)) {
+			const EQEmu::ItemBase* item = inst->GetItem();
+			if (item && inst->IsType(EQEmu::item::ItemClassBag)) {
 				c_type = item->BagType;
 				some_id = item->ID;
 			}
 		}
 	}
 
-	if (!inst || !inst->IsType(ItemClassContainer)) {
+	if (!inst || !inst->IsType(EQEmu::item::ItemClassBag)) {
 		user->Message(13, "Error: Server does not recognize specified tradeskill container");
 		return;
 	}
 
 	container = inst;
-	if (container->GetItem() && container->GetItem()->BagType == BagTypeTransformationmold) {
+	if (container->GetItem() && container->GetItem()->BagType == EQEmu::item::BagTypeTransformationmold) {
 		const ItemInst* inst = container->GetItem(0);
 		bool AllowAll = RuleB(Inventory, AllowAnyWeaponTransformation);
 		if (inst && ItemInst::CanTransform(inst->GetItem(), container->GetItem(), AllowAll)) {
-			const Item_Struct* new_weapon = inst->GetItem();
+			const EQEmu::ItemBase* new_weapon = inst->GetItem();
 			user->DeleteItemInInventory(Inventory::CalcSlotId(in_combine->container_slot, 0), 0, true);
 			container->Clear();
-			user->SummonItem(new_weapon->ID, inst->GetCharges(), inst->GetAugmentItemID(0), inst->GetAugmentItemID(1), inst->GetAugmentItemID(2), inst->GetAugmentItemID(3), inst->GetAugmentItemID(4), inst->GetAugmentItemID(5), inst->IsAttuned(), MainCursor, container->GetItem()->Icon, atoi(container->GetItem()->IDFile + 2));
+			user->SummonItem(new_weapon->ID, inst->GetCharges(), inst->GetAugmentItemID(0), inst->GetAugmentItemID(1), inst->GetAugmentItemID(2), inst->GetAugmentItemID(3), inst->GetAugmentItemID(4), inst->GetAugmentItemID(5), inst->IsAttuned(), EQEmu::legacy::SlotCursor, container->GetItem()->Icon, atoi(container->GetItem()->IDFile + 2));
 			user->Message_StringID(4, TRANSFORM_COMPLETE, inst->GetItem()->Name);
 			if (RuleB(Inventory, DeleteTransformationMold))
 				user->DeleteItemInInventory(in_combine->container_slot, 0, true);
@@ -296,25 +305,25 @@ void Object::HandleCombine(Client* user, const NewCombine_Struct* in_combine, Ob
 		else if (inst) {
 			user->Message_StringID(4, TRANSFORM_FAILED, inst->GetItem()->Name);
 		}
-		EQApplicationPacket* outapp = new EQApplicationPacket(OP_TradeSkillCombine, 0);
+		auto outapp = new EQApplicationPacket(OP_TradeSkillCombine, 0);
 		user->QueuePacket(outapp);
 		safe_delete(outapp);
 		return;
 	}
 
-	if (container->GetItem() && container->GetItem()->BagType == BagTypeDetransformationmold) {
+	if (container->GetItem() && container->GetItem()->BagType == EQEmu::item::BagTypeDetransformationmold) {
 		const ItemInst* inst = container->GetItem(0);
 		if (inst && inst->GetOrnamentationIcon() && inst->GetOrnamentationIcon()) {
-			const Item_Struct* new_weapon = inst->GetItem();
+			const EQEmu::ItemBase* new_weapon = inst->GetItem();
 			user->DeleteItemInInventory(Inventory::CalcSlotId(in_combine->container_slot, 0), 0, true);
 			container->Clear();
-			user->SummonItem(new_weapon->ID, inst->GetCharges(), inst->GetAugmentItemID(0), inst->GetAugmentItemID(1), inst->GetAugmentItemID(2), inst->GetAugmentItemID(3), inst->GetAugmentItemID(4), inst->GetAugmentItemID(5), inst->IsAttuned(), MainCursor, 0, 0);
+			user->SummonItem(new_weapon->ID, inst->GetCharges(), inst->GetAugmentItemID(0), inst->GetAugmentItemID(1), inst->GetAugmentItemID(2), inst->GetAugmentItemID(3), inst->GetAugmentItemID(4), inst->GetAugmentItemID(5), inst->IsAttuned(), EQEmu::legacy::SlotCursor, 0, 0);
 			user->Message_StringID(4, TRANSFORM_COMPLETE, inst->GetItem()->Name);
 		}
 		else if (inst) {
 			user->Message_StringID(4, DETRANSFORM_FAILED, inst->GetItem()->Name);
 		}
-		EQApplicationPacket* outapp = new EQApplicationPacket(OP_TradeSkillCombine, 0);
+		auto outapp = new EQApplicationPacket(OP_TradeSkillCombine, 0);
 		user->QueuePacket(outapp);
 		safe_delete(outapp);
 		return;
@@ -323,7 +332,7 @@ void Object::HandleCombine(Client* user, const NewCombine_Struct* in_combine, Ob
 	DBTradeskillRecipe_Struct spec;
 	if (!database.GetTradeRecipe(container, c_type, some_id, user->CharacterID(), &spec)) {
 		user->Message_StringID(MT_Emote,TRADESKILL_NOCOMBINE);
-		EQApplicationPacket* outapp = new EQApplicationPacket(OP_TradeSkillCombine, 0);
+		auto outapp = new EQApplicationPacket(OP_TradeSkillCombine, 0);
 		user->QueuePacket(outapp);
 		safe_delete(outapp);
 		return;
@@ -338,7 +347,7 @@ void Object::HandleCombine(Client* user, const NewCombine_Struct* in_combine, Ob
 	if ((spec.must_learn&0xF) == 1 && !spec.has_learnt) {
 		// Made up message for the client. Just giving a DNC is the other option.
 		user->Message(4, "You need to learn how to combine these first.");
-		EQApplicationPacket* outapp = new EQApplicationPacket(OP_TradeSkillCombine, 0);
+		auto outapp = new EQApplicationPacket(OP_TradeSkillCombine, 0);
 		user->QueuePacket(outapp);
 		safe_delete(outapp);
 		return;
@@ -347,14 +356,14 @@ void Object::HandleCombine(Client* user, const NewCombine_Struct* in_combine, Ob
 	if(spec.skill_needed > 0 && user->GetSkill(spec.tradeskill) < spec.skill_needed ) {
 		// Notify client.
 		user->Message(4, "You are not skilled enough.");
-		EQApplicationPacket* outapp = new EQApplicationPacket(OP_TradeSkillCombine, 0);
+		auto outapp = new EQApplicationPacket(OP_TradeSkillCombine, 0);
 		user->QueuePacket(outapp);
 		safe_delete(outapp);
 		return;
 	}
 
 	//changing from a switch to string of if's since we don't need to iterate through all of the skills in the SkillType enum
-	if (spec.tradeskill == SkillAlchemy) {
+	if (spec.tradeskill == EQEmu::skills::SkillAlchemy) {
 		if (user_pp.class_ != SHAMAN) {
 			user->Message(13, "This tradeskill can only be performed by a shaman.");
 			return;
@@ -364,13 +373,13 @@ void Object::HandleCombine(Client* user, const NewCombine_Struct* in_combine, Ob
 			return;
 		}
 	}
-	else if (spec.tradeskill == SkillTinkering) {
+	else if (spec.tradeskill == EQEmu::skills::SkillTinkering) {
 		if (user_pp.race != GNOME) {
 			user->Message(13, "Only gnomes can tinker.");
 			return;
 		}
 	}
-	else if (spec.tradeskill == SkillMakePoison) {
+	else if (spec.tradeskill == EQEmu::skills::SkillMakePoison) {
 		if (user_pp.class_ != ROGUE) {
 			user->Message(13, "Only rogues can mix poisons.");
 			return;
@@ -378,7 +387,7 @@ void Object::HandleCombine(Client* user, const NewCombine_Struct* in_combine, Ob
 	}
 
 	// Send acknowledgement packets to client
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_TradeSkillCombine, 0);
+	auto outapp = new EQApplicationPacket(OP_TradeSkillCombine, 0);
 	user->QueuePacket(outapp);
 	safe_delete(outapp);
 
@@ -392,7 +401,7 @@ void Object::HandleCombine(Client* user, const NewCombine_Struct* in_combine, Ob
 		safe_delete(outapp);
 		database.DeleteWorldContainer(worldo->m_id, zone->GetZoneID());
 	} else{
-		for (uint8 i = MAIN_BEGIN; i < EmuConstants::MAP_WORLD_SIZE; i++) {
+		for (uint8 i = SLOT_BEGIN; i < EQEmu::legacy::TYPE_WORLD_SIZE; i++) {
 			const ItemInst* inst = container->GetItem(i);
 			if (inst) {
 				user->DeleteItemInInventory(Inventory::CalcSlotId(in_combine->container_slot,i),0,true);
@@ -432,7 +441,7 @@ void Object::HandleCombine(Client* user, const NewCombine_Struct* in_combine, Ob
 void Object::HandleAutoCombine(Client* user, const RecipeAutoCombine_Struct* rac) {
 
 	//get our packet ready, gotta send one no matter what...
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_RecipeAutoCombine, sizeof(RecipeAutoCombine_Struct));
+	auto outapp = new EQApplicationPacket(OP_RecipeAutoCombine, sizeof(RecipeAutoCombine_Struct));
 	RecipeAutoCombine_Struct *outp = (RecipeAutoCombine_Struct *)outapp->pBuffer;
 	outp->object_type = rac->object_type;
 	outp->some_id = rac->some_id;
@@ -527,9 +536,8 @@ void Object::HandleAutoCombine(Client* user, const RecipeAutoCombine_Struct* rac
 
 		user->Message_StringID(MT_Skills, TRADESKILL_MISSING_COMPONENTS);
 
-		for(std::list<int>::iterator it = MissingItems.begin(); it != MissingItems.end(); ++it)
-		{
-			const Item_Struct* item = database.GetItem(*it);
+		for (auto it = MissingItems.begin(); it != MissingItems.end(); ++it) {
+			const EQEmu::ItemBase* item = database.GetItem(*it);
 
 			if(item)
 				user->Message_StringID(MT_Skills, TRADESKILL_MISSING_ITEM, item->Name);
@@ -596,82 +604,92 @@ void Object::HandleAutoCombine(Client* user, const RecipeAutoCombine_Struct* rac
 		parse->EventPlayer(EVENT_COMBINE_FAILURE, user, spec.name.c_str(), spec.recipe_id);
 }
 
-SkillUseTypes Object::TypeToSkill(uint32 type)
+EQEmu::skills::SkillType Object::TypeToSkill(uint32 type)
 {
-	switch(type) // grouped and ordered by SkillUseTypes name - new types need to be verified for proper SkillUseTypes and use
-	{
+	switch(type) { // grouped and ordered by SkillUseTypes name - new types need to be verified for proper SkillUseTypes and use
 /*SkillAlchemy*/
-		case BagTypeMedicineBag: { return SkillAlchemy; }
+	case EQEmu::item::BagTypeMedicineBag:
+		return EQEmu::skills::SkillAlchemy;
 
 /*SkillBaking*/
-		// case BagTypeMixingBowl: // No idea...
-		case BagTypeOven: { return SkillBaking; }
+	//case EQEmu::item::BagTypeMixingBowl: // No idea...
+	case EQEmu::item::BagTypeOven:
+		return EQEmu::skills::SkillBaking;
 
 /*SkillBlacksmithing*/
-		case BagTypeForge:
-		// case BagTypeKoadaDalForge:
-		case BagTypeTeirDalForge:
-		case BagTypeOggokForge:
-		case BagTypeStormguardForge:
-		// case BagTypeAkanonForge:
-		// case BagTypeNorthmanForge:
-		// case BagTypeCabilisForge:
-		// case BagTypeFreeportForge:
-		// case BagTypeRoyalQeynosForge:
-		// case BagTypeTrollForge:
-		case BagTypeFierDalForge:
-		case BagTypeValeForge: { return SkillBlacksmithing; } // Delete return if BagTypeGuktaForge enabled
-		// case BagTypeErudForge:
-		// case BagTypeGuktaForge: { return SkillBlacksmithing; }
+	case EQEmu::item::BagTypeForge:
+	//case EQEmu::item::BagTypeKoadaDalForge:
+	case EQEmu::item::BagTypeTeirDalForge:
+	case EQEmu::item::BagTypeOggokForge:
+	case EQEmu::item::BagTypeStormguardForge:
+	//case EQEmu::item::BagTypeAkanonForge:
+	//case EQEmu::item::BagTypeNorthmanForge:
+	//case EQEmu::item::BagTypeCabilisForge:
+	//case EQEmu::item::BagTypeFreeportForge:
+	//case EQEmu::item::BagTypeRoyalQeynosForge:
+	//case EQEmu::item::BagTypeTrollForge:
+	case EQEmu::item::BagTypeFierDalForge:
+	case EQEmu::item::BagTypeValeForge:
+	//case EQEmu::item::BagTypeErudForge:
+	//case EQEmu::item::BagTypeGuktaForge:
+		return EQEmu::skills::SkillBlacksmithing;
 
 /*SkillBrewing*/
-		// case BagTypeIceCreamChurn: // No idea...
-		case BagTypeBrewBarrel: { return SkillBrewing; }
+	//case EQEmu::item::BagTypeIceCreamChurn: // No idea...
+	case EQEmu::item::BagTypeBrewBarrel:
+		return EQEmu::skills::SkillBrewing;
 
 /*SkillFishing*/
-		case BagTypeTackleBox: { return SkillFishing; }
+	case EQEmu::item::BagTypeTackleBox:
+		return EQEmu::skills::SkillFishing;
 
 /*SkillFletching*/
-		case BagTypeFletchingKit: { return SkillFletching; } // Delete return if BagTypeFierDalFletchingKit enabled
-		// case BagTypeFierDalFletchingKit: { return SkillFletching; }
+	case EQEmu::item::BagTypeFletchingKit:
+	//case EQEmu::item::BagTypeFierDalFletchingKit:
+		return EQEmu::skills::SkillFletching;
 
 /*SkillJewelryMaking*/
-		case BagTypeJewelersKit: { return SkillJewelryMaking; }
+	case EQEmu::item::BagTypeJewelersKit:
+		return EQEmu::skills::SkillJewelryMaking;
 
 /*SkillMakePoison*/
-		// This is a guess and needs to be verified... (Could be SkillAlchemy)
-		// case BagTypeMortar: { return SkillMakePoison; }
+	// This is a guess and needs to be verified... (Could be SkillAlchemy)
+	//case EQEmu::item::BagTypeMortar:
+		// return SkillMakePoison;
 
 /*SkillPottery*/
-		case BagTypePotteryWheel:
-		case BagTypeKiln: { return SkillPottery; } // Delete return if BagTypeIksarPotteryWheel enabled
-		// case BagTypeIksarPotteryWheel: { return SkillPottery; }
+	case EQEmu::item::BagTypePotteryWheel:
+	case EQEmu::item::BagTypeKiln:
+	//case EQEmu::item::BagTypeIksarPotteryWheel:
+		return EQEmu::skills::SkillPottery;
 
 /*SkillResearch*/
-		// case BagTypeLexicon:
-		case BagTypeWizardsLexicon:
-		case BagTypeMagesLexicon:
-		case BagTypeNecromancersLexicon:
-		case BagTypeEnchantersLexicon: { return SkillResearch; } // Delete return if BagTypeConcordanceofResearch enabled
-		// case BagTypeConcordanceofResearch: { return SkillResearch; }
+	//case EQEmu::item::BagTypeLexicon:
+	case EQEmu::item::BagTypeWizardsLexicon:
+	case EQEmu::item::BagTypeMagesLexicon:
+	case EQEmu::item::BagTypeNecromancersLexicon:
+	case EQEmu::item::BagTypeEnchantersLexicon:
+	//case EQEmu::item::BagTypeConcordanceofResearch:
+		return EQEmu::skills::SkillResearch;
 
 /*SkillTailoring*/
-		case BagTypeSewingKit: { return SkillTailoring; } // Delete return if BagTypeFierDalTailoringKit enabled
-		// case BagTypeHalflingTailoringKit:
-		// case BagTypeErudTailoringKit:
-		// case BagTypeFierDalTailoringKit: { return SkillTailoring; }
+	case EQEmu::item::BagTypeSewingKit:
+	//case EQEmu::item::BagTypeHalflingTailoringKit:
+	//case EQEmu::item::BagTypeErudTailoringKit:
+	//case EQEmu::item::BagTypeFierDalTailoringKit:
+		return EQEmu::skills::SkillTailoring;
 
 /*SkillTinkering*/
-		case BagTypeToolBox: { return SkillTinkering; }
+	case EQEmu::item::BagTypeToolBox:
+		return EQEmu::skills::SkillTinkering;
 
 /*Undefined*/
-		default: { break; }
+	default:
+		return TradeskillUnknown;
 	}
-
-	return TradeskillUnknown;
 }
 
-void Client::TradeskillSearchResults(const std::string query, unsigned long objtype, unsigned long someid) {
+void Client::TradeskillSearchResults(const std::string &query, unsigned long objtype, unsigned long someid) {
 
     auto results = database.QueryDatabase(query);
 	if (!results.Success()) {
@@ -700,11 +718,11 @@ void Client::TradeskillSearchResults(const std::string query, unsigned long objt
 		// Recipes that have either been made before or were
 		// explicitly learned are excempt from that limit
 		if (RuleB(Skills, UseLimitTradeskillSearchSkillDiff)
-            && ((int32)trivial - (int32)GetSkill((SkillUseTypes)tradeskill)) > RuleI(Skills, MaxTradeskillSearchSkillDiff)
+			&& ((int32)trivial - (int32)GetSkill((EQEmu::skills::SkillType)tradeskill)) > RuleI(Skills, MaxTradeskillSearchSkillDiff)
             && row[4] == nullptr)
 				continue;
 
-		EQApplicationPacket* outapp = new EQApplicationPacket(OP_RecipeReply, sizeof(RecipeReply_Struct));
+		auto outapp = new EQApplicationPacket(OP_RecipeReply, sizeof(RecipeReply_Struct));
 		RecipeReply_Struct *reply = (RecipeReply_Struct *) outapp->pBuffer;
 
 		reply->object_type = objtype;
@@ -743,7 +761,7 @@ void Client::SendTradeskillDetails(uint32 recipe_id) {
 
 	//biggest this packet can ever be:
 	// 64 * 10 + 8 * 10 + 4 + 4 * 10 = 764
-	char *buf = new char[775];	//dynamic so we can just give it to EQApplicationPacket
+	auto buf = new char[775]; // dynamic so we can just give it to EQApplicationPacket
 	uint8 r,k;
 
 	uint32 *header = (uint32 *) buf;
@@ -816,7 +834,7 @@ void Client::SendTradeskillDetails(uint32 recipe_id) {
 
 	uint32 total = sizeof(uint32) + dist + datalen;
 
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_RecipeDetails);
+	auto outapp = new EQApplicationPacket(OP_RecipeDetails);
 	outapp->size = total;
 	outapp->pBuffer = (uchar*) buf;
 	QueuePacket(outapp);
@@ -849,18 +867,35 @@ bool Client::TradeskillExecute(DBTradeskillRecipe_Struct *spec) {
 	// If you want to customize the stage1 success rate do it here.
 	// Remember: skillup_modifier is (float). Lower is better
 	switch(spec->tradeskill) {
-	case SkillFletching:
-	case SkillAlchemy:
-	case SkillJewelryMaking:
-	case SkillPottery:
-		skillup_modifier = 4;
+	case EQEmu::skills::SkillFletching:
+		skillup_modifier = RuleI(Character, TradeskillUpFletching);
 		break;
-	case SkillBaking:
-	case SkillBrewing:
-		skillup_modifier = 3;
+	case EQEmu::skills::SkillAlchemy:
+		skillup_modifier = RuleI(Character, TradeskillUpAlchemy);
 		break;
-	case SkillResearch:
-		skillup_modifier = 1;
+	case EQEmu::skills::SkillJewelryMaking:
+		skillup_modifier = RuleI(Character, TradeskillUpJewelcrafting);
+		break;
+	case EQEmu::skills::SkillPottery:
+		skillup_modifier = RuleI(Character, TradeskillUpPottery);
+		break;
+	case EQEmu::skills::SkillBaking:
+		skillup_modifier = RuleI(Character, TradeskillUpBaking);
+		break;
+	case EQEmu::skills::SkillBrewing:
+		skillup_modifier = RuleI(Character, TradeskillUpBrewing);
+		break;
+	case EQEmu::skills::SkillBlacksmithing:
+		skillup_modifier = RuleI(Character, TradeskillUpBlacksmithing);
+		break;
+	case EQEmu::skills::SkillResearch:
+		skillup_modifier = RuleI(Character, TradeskillUpResearch);
+		break;
+	case EQEmu::skills::SkillMakePoison:
+		skillup_modifier = RuleI(Character, TradeskillUpMakePoison);
+		break;
+	case EQEmu::skills::SkillTinkering:
+		skillup_modifier = RuleI(Character, TradeskillUpTinkering);
 		break;
 	default:
 		skillup_modifier = 2;
@@ -870,10 +905,11 @@ bool Client::TradeskillExecute(DBTradeskillRecipe_Struct *spec) {
 	// Some tradeskills take the higher of one additional stat beside INT and WIS
 	// to determine the skillup rate. Additionally these tradeskills do not have an
 	// -15 modifier on their statbonus.
-	if (spec->tradeskill == SkillFletching || spec->tradeskill == SkillMakePoison) {
+	if (spec->tradeskill == EQEmu::skills::SkillFletching || spec->tradeskill == EQEmu::skills::SkillMakePoison) {
 		thirdstat = GetDEX();
 		stat_modifier = 0;
-	} else if (spec->tradeskill == SkillBlacksmithing) {
+	}
+	else if (spec->tradeskill == EQEmu::skills::SkillBlacksmithing) {
 		thirdstat = GetSTR();
 		stat_modifier = 0;
 	}
@@ -924,135 +960,10 @@ bool Client::TradeskillExecute(DBTradeskillRecipe_Struct *spec) {
 	float res = zone->random.Real(0, 99);
 	int aa_chance = 0;
 
-	//AA modifiers
-	//can we do this with nested switches?
-	if(spec->tradeskill == SkillAlchemy){
-		switch(GetAA(aaAlchemyMastery)){
-		case 1:
-			aa_chance = 10;
-			break;
-		case 2:
-			aa_chance = 25;
-			break;
-		case 3:
-			aa_chance = 50;
-			break;
-		}
-	}
+	aa_chance = spellbonuses.ReduceTradeskillFail[spec->tradeskill] + itembonuses.ReduceTradeskillFail[spec->tradeskill] + aabonuses.ReduceTradeskillFail[spec->tradeskill];
 
-	if(spec->tradeskill == SkillJewelryMaking){
-		switch(GetAA(aaJewelCraftMastery)){
-		case 1:
-			aa_chance = 10;
-			break;
-		case 2:
-			aa_chance = 25;
-			break;
-		case 3:
-			aa_chance = 50;
-			break;
-		}
-	}
-	const Item_Struct* item = nullptr;
-
-	if (spec->tradeskill == SkillBlacksmithing) {
-		switch(GetAA(aaBlacksmithingMastery)) {
-		case 1:
-			aa_chance = 10;
-			break;
-		case 2:
-			aa_chance = 25;
-			break;
-		case 3:
-			aa_chance = 50;
-			break;
-		}
-	}
-
-	if (spec->tradeskill == SkillBaking) {
-		switch(GetAA(aaBakingMastery)) {
-		case 1:
-			aa_chance = 10;
-			break;
-		case 2:
-			aa_chance = 25;
-			break;
-		case 3:
-			aa_chance = 50;
-			break;
-		}
-	}
-
-	if (spec->tradeskill == SkillBrewing) {
-		switch(GetAA(aaBrewingMastery)) {
-		case 1:
-			aa_chance = 10;
-			break;
-		case 2:
-			aa_chance = 25;
-			break;
-		case 3:
-			aa_chance = 50;
-			break;
-		}
-	}
-
-	if (spec->tradeskill == SkillFletching) {
-		switch(GetAA(aaFletchingMastery2)) {
-		case 1:
-			aa_chance = 10;
-			break;
-		case 2:
-			aa_chance = 25;
-			break;
-		case 3:
-			aa_chance = 50;
-			break;
-		}
-	}
-
-	if (spec->tradeskill == SkillPottery) {
-		switch(GetAA(aaPotteryMastery)) {
-		case 1:
-			aa_chance = 10;
-			break;
-		case 2:
-			aa_chance = 25;
-			break;
-		case 3:
-			aa_chance = 50;
-			break;
-		}
-	}
-
-	if (spec->tradeskill == SkillTailoring) {
-		switch(GetAA(aaTailoringMastery)) {
-		case 1:
-			aa_chance = 10;
-			break;
-		case 2:
-			aa_chance = 25;
-			break;
-		case 3:
-			aa_chance = 50;
-			break;
-		}
-	}
-
-	if (spec->tradeskill == SkillResearch) {
-		switch(GetAA(aaArcaneTongues)) {
-		case 1:
-			aa_chance = 10;
-			break;
-		case 2:
-			aa_chance = 25;
-			break;
-		case 3:
-			aa_chance = 50;
-			break;
-		}
-	}
-
+	const EQEmu::ItemBase* item = nullptr;
+	
 	chance = mod_tradeskill_chance(chance, spec);
 
 	if (((spec->tradeskill==75) || GetGM() || (chance > res)) || zone->random.Roll(aa_chance)) {
@@ -1135,7 +1046,7 @@ bool Client::TradeskillExecute(DBTradeskillRecipe_Struct *spec) {
 	return(false);
 }
 
-void Client::CheckIncreaseTradeskill(int16 bonusstat, int16 stat_modifier, float skillup_modifier, uint16 success_modifier, SkillUseTypes tradeskill)
+void Client::CheckIncreaseTradeskill(int16 bonusstat, int16 stat_modifier, float skillup_modifier, uint16 success_modifier, EQEmu::skills::SkillType tradeskill)
 {
 	uint16 current_raw_skill = GetRawSkill(tradeskill);
 
@@ -1202,7 +1113,7 @@ bool ZoneDatabase::GetTradeRecipe(const ItemInst* container, uint8 c_type, uint3
 		if (!inst)
             continue;
 
-        const Item_Struct* item = GetItem(inst->GetItem()->ID);
+		const EQEmu::ItemBase* item = GetItem(inst->GetItem()->ID);
         if (!item)
             continue;
 
@@ -1326,12 +1237,12 @@ bool ZoneDatabase::GetTradeRecipe(const ItemInst* container, uint8 c_type, uint3
 	for (auto row = results.begin(); row != results.end(); ++row) {
         int ccnt = 0;
 
-        for(int x = MAIN_BEGIN; x < EmuConstants::MAP_WORLD_SIZE; x++) {
+		for (int x = SLOT_BEGIN; x < EQEmu::legacy::TYPE_WORLD_SIZE; x++) {
             const ItemInst* inst = container->GetItem(x);
             if(!inst)
                 continue;
 
-            const Item_Struct* item = GetItem(inst->GetItem()->ID);
+			const EQEmu::ItemBase* item = GetItem(inst->GetItem()->ID);
             if (!item)
                 continue;
 
@@ -1380,7 +1291,7 @@ bool ZoneDatabase::GetTradeRecipe(uint32 recipe_id, uint8 c_type, uint32 some_id
 		return false;//just not found i guess..
 
 	auto row = results.begin();
-	spec->tradeskill = (SkillUseTypes)atoi(row[1]);
+	spec->tradeskill = (EQEmu::skills::SkillType)atoi(row[1]);
 	spec->skill_needed	= (int16)atoi(row[2]);
 	spec->trivial = (uint16)atoi(row[3]);
 	spec->nofail = atoi(row[4]) ? true : false;
@@ -1406,7 +1317,7 @@ bool ZoneDatabase::GetTradeRecipe(uint32 recipe_id, uint8 c_type, uint32 some_id
 		return false;
 	}
 
-	if(results.RowCount() < 1) {
+	if(results.RowCount() < 1 && !spec->quest) {
 		Log.Out(Logs::General, Logs::Error, "Error in GetTradeRecept success: no success items returned");
 		return false;
 	}
@@ -1496,42 +1407,43 @@ void Client::LearnRecipe(uint32 recipeID)
     results = database.QueryDatabase(query);
 }
 
-bool Client::CanIncreaseTradeskill(SkillUseTypes tradeskill) {
+bool Client::CanIncreaseTradeskill(EQEmu::skills::SkillType tradeskill) {
 	uint32 rawskill = GetRawSkill(tradeskill);
 	uint16 maxskill = MaxSkill(tradeskill);
 
 	if (rawskill >= maxskill) //Max skill sanity check
 		return false;
 
-	uint8 Baking	= (GetRawSkill(SkillBaking) > 200) ? 1 : 0;
-	uint8 Smithing	= (GetRawSkill(SkillBlacksmithing) > 200) ? 1 : 0;
-	uint8 Brewing	= (GetRawSkill(SkillBrewing) > 200) ? 1 : 0;
-	uint8 Fletching	= (GetRawSkill(SkillFletching) > 200) ? 1 : 0;
-	uint8 Jewelry	= (GetRawSkill(SkillJewelryMaking) > 200) ? 1 : 0;
-	uint8 Pottery	= (GetRawSkill(SkillPottery) > 200) ? 1 : 0;
-	uint8 Tailoring	= (GetRawSkill(SkillTailoring) > 200) ? 1 : 0;
+	uint8 Baking = (GetRawSkill(EQEmu::skills::SkillBaking) > 200) ? 1 : 0;
+	uint8 Smithing = (GetRawSkill(EQEmu::skills::SkillBlacksmithing) > 200) ? 1 : 0;
+	uint8 Brewing = (GetRawSkill(EQEmu::skills::SkillBrewing) > 200) ? 1 : 0;
+	uint8 Fletching = (GetRawSkill(EQEmu::skills::SkillFletching) > 200) ? 1 : 0;
+	uint8 Jewelry = (GetRawSkill(EQEmu::skills::SkillJewelryMaking) > 200) ? 1 : 0;
+	uint8 Pottery = (GetRawSkill(EQEmu::skills::SkillPottery) > 200) ? 1 : 0;
+	uint8 Tailoring = (GetRawSkill(EQEmu::skills::SkillTailoring) > 200) ? 1 : 0;
 	uint8 SkillTotal = Baking + Smithing + Brewing + Fletching + Jewelry + Pottery + Tailoring; //Tradeskills above 200
-	uint32 aaLevel	= GetAA(aaNewTanaanCraftingMastery); //New Tanaan AA: Each level allows an additional tradeskill above 200 (first one is free)
-
+	//New Tanaan AA: Each level allows an additional tradeskill above 200 (first one is free)
+	uint8 aaLevel = spellbonuses.TradeSkillMastery + itembonuses.TradeSkillMastery + aabonuses.TradeSkillMastery; 
+	
 	switch (tradeskill) {
-		case SkillBaking:
-		case SkillBlacksmithing:
-		case SkillBrewing:
-		case SkillFletching:
-		case SkillJewelryMaking:
-		case SkillPottery:
-		case SkillTailoring:
-			if (aaLevel == 6)
-				break; //Maxed AA
-			if (SkillTotal == 0)
-				break; //First tradeskill freebie
-			if ((SkillTotal == (aaLevel + 1)) && (rawskill > 200))
-				break; //One of the tradeskills already allowed to go over 200
-			if ((SkillTotal >= (aaLevel + 1)) && (rawskill >= 200))
-				return false; //One or more tradeskills already at or beyond limit
-				break;
-		default:
-			break; //Other skills unchecked and ability to increase assumed true
+	case EQEmu::skills::SkillBaking:
+	case EQEmu::skills::SkillBlacksmithing:
+	case EQEmu::skills::SkillBrewing:
+	case EQEmu::skills::SkillFletching:
+	case EQEmu::skills::SkillJewelryMaking:
+	case EQEmu::skills::SkillPottery:
+	case EQEmu::skills::SkillTailoring:
+		if (aaLevel == 6)
+			break; //Maxed AA
+		if (SkillTotal == 0)
+			break; //First tradeskill freebie
+		if ((SkillTotal == (aaLevel + 1)) && (rawskill > 200))
+			break; //One of the tradeskills already allowed to go over 200
+		if ((SkillTotal >= (aaLevel + 1)) && (rawskill >= 200))
+			return false; //One or more tradeskills already at or beyond limit
+			break;
+	default:
+		break; //Other skills unchecked and ability to increase assumed true
 	}
 	return true;
 }
@@ -1544,6 +1456,8 @@ bool ZoneDatabase::EnableRecipe(uint32 recipe_id)
 	if (!results.Success())
 
 	return results.RowsAffected() > 0;
+
+	return false;
 }
 
 bool ZoneDatabase::DisableRecipe(uint32 recipe_id)
@@ -1554,4 +1468,6 @@ bool ZoneDatabase::DisableRecipe(uint32 recipe_id)
 	if (!results.Success())
 
 	return results.RowsAffected() > 0;
+
+	return false;
 }
