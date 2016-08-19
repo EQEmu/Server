@@ -5741,6 +5741,6 @@ bool Client::IsLinkedSpellReuseTimerReady(uint32 timer_id)
 {
 	if (timer_id > 19)
 		return true;
-	return GetPTimers().Expired(&database, pTimerLinkedSpellReuseStart + timer_id);
+	return GetPTimers().Expired(&database, pTimerLinkedSpellReuseStart + timer_id, false);
 }
 
