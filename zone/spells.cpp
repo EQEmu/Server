@@ -5727,6 +5727,7 @@ void Client::SetLinkedSpellReuseTimer(uint32 timer_id, uint32 duration)
 {
 	if (timer_id > 19)
 		return;
+	Log.Out(Logs::Detail, Logs::Spells, "Setting Linked Spell Reuse %d for %d", timer_id, duration);
 	GetPTimers().Start(pTimerLinkedSpellReuseStart + timer_id, duration);
 	auto outapp = new EQApplicationPacket(OP_LinkedReuse, sizeof(LinkedSpellReuseTimer_Struct));
 	auto lr = (LinkedSpellReuseTimer_Struct *)outapp->pBuffer;
