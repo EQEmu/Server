@@ -194,6 +194,8 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 
 	bool SE_SpellTrigger_HasCast = false;
 
+	// if buff slot, use instrument mod there, otherwise calc it
+	uint32 instrument_mod = buffslot > -1 ? buffs[buffslot].instrument_mod : caster ? caster->GetInstrumentMod(spell_id) : 10;
 	// iterate through the effects in the spell
 	for (i = 0; i < EFFECT_COUNT; i++)
 	{
@@ -201,9 +203,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 			continue;
 
 		effect = spell.effectid[i];
-		// if buff slot, use instrument mod there, otherwise calc it
-		uint32 inst = buffslot > -1 ? buffs[buffslot].instrument_mod : caster ? caster->GetInstrumentMod(spell_id) : 10;
-		effect_value = CalcSpellEffectValue(spell_id, i, caster_level, inst, caster ? caster : this);
+		effect_value = CalcSpellEffectValue(spell_id, i, caster_level, instrument_mod, caster ? caster : this);
 
 		if(spell_id == SPELL_LAY_ON_HANDS && caster && caster->GetAA(aaImprovedLayOnHands))
 			effect_value = GetMaxHP();
