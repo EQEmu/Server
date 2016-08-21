@@ -32,6 +32,7 @@ if(!$ARGV[0]){
 	print "	database=\"dbname\" 	- Manually specify databasename, default is database in eqemu_config.xml\n";
 	print "	tables=\"table1,table2,table3\" 	- Manually specify tables, default is to dump all tables from database\n";
 	print "	compress 		- Compress Database with 7-ZIP, will fallback to WinRAR depending on what is installed (Must be installed to default program dir)...\n";
+	print "	nolock 		- Does not lock tables, meant for backuping while the server is running..\n";
 	print '	Example: perl DB_Dumper.pl Loc="E:\Backups"' . "\n\n";
 	print "######################################################\n";
 	exit;
@@ -59,6 +60,9 @@ print "Arguments\n" if $Debug;
 $n = 0;
 while($ARGV[$n]){
 	print $n . ': ' . $ARGV[$n] . "\n" if $Debug;
+	if($ARGV[$n]=~/nolock/i){ 
+		$no_lock = 1;
+	}
 	if($ARGV[$n]=~/compress/i){ 
 		print "Compression SET\n"; 
 		$Compress = 1;
@@ -109,7 +113,10 @@ if($t_tables ne ""){
 	print "Performing table based backup...\n";
 	#::: Backup Database... 
 	print "Backing up Database " . $db . "... \n\n"; 
-	$cmd = 'mysqldump -u' . $user . ' --host ' . $host . ' --max_allowed_packet=512M --password="' . $pass . '" ' . $db . ' ' . $t_tables . ' > "' . $B_LOC[1] . '' . $file_app . '' . $target_file . '.sql"'; 
+	if($no_lock == 1){
+		$added_parameters .= " --skip-lock-tables ";
+	}
+	$cmd = 'mysqldump -u' . $user . ' --host ' . $host . ' ' . $added_parameters . ' --max_allowed_packet=512M --password="' . $pass . '" ' . $db . ' ' . $t_tables . ' > "' . $B_LOC[1] . '' . $file_app . '' . $target_file . '.sql"'; 
 	printcmd($cmd);
 	system($cmd); 
 }
@@ -117,7 +124,10 @@ else{ #::: Entire DB Backup
 	$target_file = '' . $db . '_' . $date . ''; 
 	#::: Backup Database... 
 	print "Backing up Database " . $db . "... \n\n";  
-	$cmd = 'mysqldump -u' . $user . ' --host ' . $host . ' --max_allowed_packet=512M --password="' . $pass . '" ' . $db . ' > "' . $B_LOC[1] . '' . $file_app . '' . $target_file . '.sql"'; 
+	if($no_lock == 1){
+		$added_parameters .= " --skip-lock-tables ";
+	}
+	$cmd = 'mysqldump -u' . $user . ' --host ' . $host . ' ' . $added_parameters . ' --max_allowed_packet=512M --password="' . $pass . '" ' . $db . ' > "' . $B_LOC[1] . '' . $file_app . '' . $target_file . '.sql"'; 
 	printcmd($cmd);
 	system($cmd);
 }
