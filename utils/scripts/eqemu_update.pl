@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 
-########################################################### 
+###########################################################
 #::: Automatic (Database) Upgrade Script
 #::: Author: Akkadius
 #::: Purpose: To upgrade databases with ease and maintain versioning
@@ -295,9 +295,10 @@ sub show_menu_prompt {
 		13 => \&do_windows_login_server_setup,
 		14 => \&remove_duplicate_rule_values,
 		15 => \&fetch_utility_scripts,
-		18 => \&fetch_latest_windows_binaries_bots,
+		16 => \&fetch_latest_windows_binaries_bots,
 		19 => \&do_bots_db_schema_drop,
         20 => \&do_update_self,
+		21 => \&database_dump_player_tables,
         0 => \&script_exit,
     );
 
@@ -378,6 +379,7 @@ return <<EO_MENU;
  18) [Windows Server Build Bots] :: Download Latest and Stable Server Build with Bots
  19) [EQEmu DB Drop Bots Schema] :: Remove Bots schema and return database to normal state
  20) [Update the updater] Force update this script (Redownload)
+ 21) [DB :: Backup Player Tables] :: Backs up player tables
  0) Exit
  
  Enter numbered option and press enter...	
@@ -404,6 +406,30 @@ sub database_dump {
 	print "Performing database backup....\n";
 	print `perl db_dumper.pl database="$db" loc="backups"`;
 }
+
+sub database_dump_player_tables { 
+	check_for_database_dump_script();
+	print "Performing database backup of player tables....\n";
+	get_remote_file("https://raw.githubusercontent.com/EQEmu/Server/master/utils/sql/character_table_list.txt", "backups/character_table_list.txt");
+	
+	$tables = "";
+	open (FILE, "backups/character_table_list.txt");
+	$i = 0;
+	while (<FILE>){
+		chomp;
+		$o = $_;
+		$tables .= $o . ",";
+	}
+	$tables = substr($tables, 0, -1);
+
+	print `perl db_dumper.pl database="$db" loc="backups" tables="$tables" backup_name="player_tables_export" nolock`;
+	
+	print "\nPress any key to continue...\n";
+	
+	<>; #Read from STDIN
+	
+}
+
 sub database_dump_compress { 
 	check_for_database_dump_script();
 	print "Performing database backup....\n";
