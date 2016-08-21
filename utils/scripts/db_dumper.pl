@@ -33,6 +33,7 @@ if(!$ARGV[0]){
 	print "	tables=\"table1,table2,table3\" 	- Manually specify tables, default is to dump all tables from database\n";
 	print "	compress 		- Compress Database with 7-ZIP, will fallback to WinRAR depending on what is installed (Must be installed to default program dir)...\n";
 	print "	nolock 		- Does not lock tables, meant for backuping while the server is running..\n";
+	print "	backup_name=\"name\" - Sets database backup prefix name\n";
 	print '	Example: perl DB_Dumper.pl Loc="E:\Backups"' . "\n\n";
 	print "######################################################\n";
 	exit;
@@ -72,6 +73,11 @@ while($ARGV[$n]){
 		print "Database is " . $DB_NAME[1] . "\n"; 
 		$db = $DB_NAME[1];
 	}
+	if($ARGV[$n]=~/backup_name=/i){ 
+		@data = split('=', $ARGV[$n]); 
+		print "Backup Name is " . $data[1] . "\n"; 
+		$backup_name = $data[1];
+	}
 	if($ARGV[$n]=~/loc=/i){ 
 		@B_LOC = split('=', $ARGV[$n]); 
 		print "Backup Directory: " . $B_LOC[1] . "\n"; 
@@ -109,7 +115,13 @@ else {
 
 if($t_tables ne ""){
 	$tables_f_l = substr($t_tables_l, 0, 20) . '-';
-	$target_file = '' . $tables_f_l . '_' . $date . ''; 
+	if($backup_name){
+		$target_file = $backup_name . '_' . $date . ''; 
+	}
+	else {
+		$target_file = '' . $tables_f_l . '_' . $date . ''; 
+	}
+	
 	print "Performing table based backup...\n";
 	#::: Backup Database... 
 	print "Backing up Database " . $db . "... \n\n"; 
@@ -121,7 +133,14 @@ if($t_tables ne ""){
 	system($cmd); 
 }
 else{ #::: Entire DB Backup
-	$target_file = '' . $db . '_' . $date . ''; 
+	
+	if($backup_name){
+		$target_file = $backup_name . '_' . $db . '_' . $date . ''; 
+	}
+	else {
+		$target_file = '' . $db . '_' . $date . ''; 
+	}
+	
 	#::: Backup Database... 
 	print "Backing up Database " . $db . "... \n\n";  
 	if($no_lock == 1){
@@ -194,6 +213,9 @@ if($Compress == 1){
 		system($cmd); 
 		$final_file = $target_file . ".tar.gz";
 	}
+}
+else {
+	$final_file = $target_file . ".sql";
 }
 
 #::: Get Final File Location for display
