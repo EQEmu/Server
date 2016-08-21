@@ -295,7 +295,7 @@ sub show_menu_prompt {
 		13 => \&do_windows_login_server_setup,
 		14 => \&remove_duplicate_rule_values,
 		15 => \&fetch_utility_scripts,
-		16 => \&fetch_latest_windows_binaries_bots,
+		18 => \&fetch_latest_windows_binaries_bots,
 		19 => \&do_bots_db_schema_drop,
         20 => \&do_update_self,
 		21 => \&database_dump_player_tables,
