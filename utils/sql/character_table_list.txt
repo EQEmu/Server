@@ -7,7 +7,6 @@ character_bandolier
 character_bind
 character_currency
 character_data
-character_data
 character_disciplines
 character_enabledtasks
 character_inspect_messages
