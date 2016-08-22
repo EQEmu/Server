@@ -1800,7 +1800,7 @@ void NPC::Damage(Mob* other, int32 damage, uint16 spell_id, EQEmu::skills::Skill
 	//handle EVENT_ATTACK. Resets after we have not been attacked for 12 seconds
 	if(attacked_timer.Check())
 	{
-		Log.Out(Logs::Detail, Logs::Combat, "Triggering EVENT_ATTACK due to attack by %s", other->GetName());
+		Log.Out(Logs::Detail, Logs::Combat, "Triggering EVENT_ATTACK due to attack by %s", other ? other->GetName() : "nullptr");
 		parse->EventNPC(EVENT_ATTACK, this, other, "", 0);
 	}
 	attacked_timer.Start(CombatEventTimer_expire);
