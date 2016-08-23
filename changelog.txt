@@ -1,5 +1,12 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 08/23/2016 ==
+noudess: Force mobs on a depop @ end pathgrid to still do this on idle zones.
+This makes them be more random after a zone is idle, rather than always showing
+up at start point when 1st person logs into an idle zone.  Much more like live.
+I dion't think this will be much of a performance problem.  Once they path and
+depop, no mkore cpu usage.
+
 == 08/14/2016 ==
 mackal: Implement Linked Spell Reuse Timers
 	- For whatever reason this is a bit unfriendly, but that's how it is on live.
