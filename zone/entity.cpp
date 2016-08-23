@@ -478,13 +478,17 @@ void EntityList::MobProcess()
 		size_t sz = mob_list.size();
 
 #ifdef IDLE_WHEN_EMPTY
-		// spawn_events can cause spawns and deaths while zone empty.
-		// At the very least, process that.
-		if (numclients < 1) {
-			mob_dead = mob->CastToNPC()->GetDepop();
-		}	
-		else {
+		if (numclients > 0 || 
+			mob->GetWanderType() == 4 || mob->GetWanderType() == 6) {
+			// Normal processing, or assuring that spawns that should
+			// path and depop do that.  Otherwise all of these type mobs
+			// will be up and at starting positions when idle zone wakes up.
 			mob_dead = !mob->Process();
+		}
+		else {
+			// spawn_events can cause spawns and deaths while zone empty.
+			// At the very least, process that.
+			mob_dead = mob->CastToNPC()->GetDepop();
 		}
 #else
 		mob_dead = !mob->Process();

@@ -843,6 +843,7 @@ public:
 	inline void SetFocused(bool nState) { focused = nState; }
 	inline const bool IsFocused() const { return focused; }
 	inline const bool IsRoamer() const { return roamer; }
+	inline const int GetWanderType() const { return wandertype; }
 	inline const bool IsRooted() const { return rooted || permarooted; }
 	inline const bool HasVirus() const { return has_virus; }
 	int GetSnaredAmount();
