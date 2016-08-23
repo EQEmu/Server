@@ -149,7 +149,7 @@ void Mob::DoSpecialAttackDamage(Mob *who, EQEmu::skills::SkillType skill, int32 
 	    IsValidSpell(aabonuses.SkillAttackProc[2])) {
 		float chance = aabonuses.SkillAttackProc[0] / 1000.0f;
 		if (zone->random.Roll(chance))
-			SpellFinished(aabonuses.SkillAttackProc[2], who, 10, 0, -1,
+			SpellFinished(aabonuses.SkillAttackProc[2], who, EQEmu::CastingSlot::Item, 0, -1,
 				      spells[aabonuses.SkillAttackProc[2]].ResistDiff);
 	}
 	who->Damage(this, max_damage, SPELL_UNKNOWN, skill, false);
@@ -786,7 +786,7 @@ void Client::RangedAttack(Mob* other, bool CanDoubleAttack) {
 	//EndlessQuiver AA base1 = 100% Chance to avoid consumption arrow.
 	int ChanceAvoidConsume = aabonuses.ConsumeProjectile + itembonuses.ConsumeProjectile + spellbonuses.ConsumeProjectile;
 
-	if (!ChanceAvoidConsume || (ChanceAvoidConsume < 100 && zone->random.Int(0,99) > ChanceAvoidConsume)){
+	if (RangeItem->ExpendableArrow || !ChanceAvoidConsume || (ChanceAvoidConsume < 100 && zone->random.Int(0,99) > ChanceAvoidConsume)){
 		DeleteItemInInventory(ammo_slot, 1, true);
 		Log.Out(Logs::Detail, Logs::Combat, "Consumed one arrow from slot %d", ammo_slot);
 	} else {
@@ -2429,7 +2429,7 @@ void Mob::DoMeleeSkillAttackDmg(Mob* other, uint16 weapon_damage, EQEmu::skills:
 	    IsValidSpell(aabonuses.SkillAttackProc[2])) {
 		float chance = aabonuses.SkillAttackProc[0] / 1000.0f;
 		if (zone->random.Roll(chance))
-			SpellFinished(aabonuses.SkillAttackProc[2], other, 10, 0, -1,
+			SpellFinished(aabonuses.SkillAttackProc[2], other, EQEmu::CastingSlot::Item, 0, -1,
 				      spells[aabonuses.SkillAttackProc[2]].ResistDiff);
 	}
 	other->Damage(this, damage, SPELL_UNKNOWN, skillinuse);

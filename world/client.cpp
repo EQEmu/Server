@@ -142,7 +142,7 @@ void Client::SendLogServer()
 	if(RuleB(World, IsGMPetitionWindowEnabled))
 		l->enable_petition_wnd = 1;
 
-	if(RuleI(World, FVNoDropFlag) == 1 || RuleI(World, FVNoDropFlag) == 2 && GetAdmin() > RuleI(Character, MinStatusForNoDropExemptions))
+	if((RuleI(World, FVNoDropFlag) == 1 || RuleI(World, FVNoDropFlag) == 2) && GetAdmin() > RuleI(Character, MinStatusForNoDropExemptions))
 		l->enable_FV = 1;
 
 	QueuePacket(outapp);
@@ -1483,7 +1483,7 @@ bool Client::OPCharCreate(char *name, CharCreate_Struct *cc)
 	for (i = 0; i < MAX_PP_REF_SPELLBOOK; i++)
 		pp.spell_book[i] = 0xFFFFFFFF;
 
-	for(i = 0; i < MAX_PP_REF_MEMSPELL; i++)
+	for(i = 0; i < MAX_PP_MEMSPELL; i++)
 		pp.mem_spells[i] = 0xFFFFFFFF;
 
 	for(i = 0; i < BUFF_COUNT; i++)

@@ -390,7 +390,7 @@ struct MemorizeSpell_Struct {
 uint32 slot;     // Spot in the spell book/memorized slot
 uint32 spell_id; // Spell id (200 or c8 is minor healing, etc)
 uint32 scribing; // 1 if memorizing a spell, set to 0 if scribing to book, 2 if un-memming
-uint32 unknown12;
+uint32 reduction; // lowers reuse
 };
 
 /*
@@ -420,13 +420,13 @@ struct DeleteSpell_Struct
 /*005*/uint8	unknowndss006[3];
 /*008*/
 };
-
 struct ManaChange_Struct
 {
-	uint32	new_mana;                  // New Mana AMount
-	uint32	stamina;
-	uint32	spell_id;
-	uint32	unknown12;
+/*00*/	uint32	new_mana;		// New Mana AMount
+/*04*/	uint32	stamina;
+/*08*/	uint32	spell_id;
+/*12*/	uint8	keepcasting;	// won't stop the cast. Change mana while casting?
+/*13*/	uint8	padding[3];		// client doesn't read it, garbage data seems like
 };
 
 struct SwapSpell_Struct

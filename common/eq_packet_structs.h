@@ -30,6 +30,7 @@
 
 
 static const uint32 BUFF_COUNT = 25;
+static const uint32 PET_BUFF_COUNT = 30;
 static const uint32 MAX_MERC = 100;
 static const uint32 MAX_MERC_GRADES = 10;
 static const uint32 MAX_MERC_STANCES = 10;
@@ -386,7 +387,19 @@ struct MemorizeSpell_Struct {
 uint32 slot;		// Spot in the spell book/memorized slot
 uint32 spell_id;	// Spell id (200 or c8 is minor healing, etc)
 uint32 scribing;	// 1 if memorizing a spell, set to 0 if scribing to book, 2 if un-memming
-uint32 unknown12;
+uint32 reduction;	// lower reuse
+};
+
+/*
+** Linked Spell Reuse Timer
+** Length: 12
+** Comes before the OP_Memorize
+** Live (maybe TDS steam) has an extra DWORD after timer_id
+*/
+struct LinkedSpellReuseTimer_Struct {
+	uint32 timer_id; // Timer ID of the spell
+	uint32 end_time; // timestamp of when it will be ready
+	uint32 start_time; // timestamp of when it started
 };
 
 /*
@@ -419,10 +432,11 @@ struct DeleteSpell_Struct
 
 struct ManaChange_Struct
 {
-	uint32	new_mana; // New Mana AMount
-	uint32	stamina;
-	uint32	spell_id;
-	uint32	unknown12;
+/*00*/	uint32	new_mana;		// New Mana AMount
+/*04*/	uint32	stamina;
+/*08*/	uint32	spell_id;
+/*12*/	uint8	keepcasting;	// won't stop the cast. Change mana while casting?
+/*13*/	uint8	padding[3];		// client doesn't read it, garbage data seems like
 };
 
 struct SwapSpell_Struct
@@ -522,8 +536,8 @@ struct BuffRemoveRequest_Struct
 
 struct PetBuff_Struct {
 /*000*/ uint32 petid;
-/*004*/ uint32 spellid[BUFF_COUNT+5];
-/*124*/ int32 ticsremaining[BUFF_COUNT+5];
+/*004*/ uint32 spellid[PET_BUFF_COUNT];
+/*124*/ int32 ticsremaining[PET_BUFF_COUNT];
 /*244*/ uint32 buffcount;
 };
 
@@ -834,7 +848,7 @@ struct SuspendedMinion_Struct
  */
 static const uint32 MAX_PP_LANGUAGE = 28;
 static const uint32 MAX_PP_SPELLBOOK = 480;	// Set for all functions
-static const uint32 MAX_PP_MEMSPELL = 9; // Set to latest client so functions can work right
+static const uint32 MAX_PP_MEMSPELL = static_cast<uint32>(EQEmu::CastingSlot::MaxGems); // Set to latest client so functions can work right -- 12
 static const uint32 MAX_PP_REF_SPELLBOOK = 480;	// Set for Player Profile size retain
 static const uint32 MAX_PP_REF_MEMSPELL = 9; // Set for Player Profile size retain
 
@@ -915,7 +929,7 @@ struct PlayerProfile_Struct
 /*0245*/	uint8				guildbanker;
 /*0246*/	uint8				unknown0246[6];		//
 /*0252*/	uint32				intoxication;
-/*0256*/	uint32				spellSlotRefresh[MAX_PP_REF_MEMSPELL];	//in ms
+/*0256*/	uint32				spellSlotRefresh[MAX_PP_MEMSPELL];	//in ms
 /*0292*/	uint32				abilitySlotRefresh;
 /*0296*/	uint8				haircolor;			// Player hair color
 /*0297*/	uint8				beardcolor;			// Player beard color
@@ -956,7 +970,7 @@ struct PlayerProfile_Struct
 /*2580*/	uint8				unknown2616[4];
 /*2584*/	uint32				spell_book[MAX_PP_REF_SPELLBOOK];
 /*4504*/	uint8				unknown4540[128];	// Was [428] all 0xff
-/*4632*/	uint32				mem_spells[MAX_PP_REF_MEMSPELL];
+/*4632*/	uint32				mem_spells[MAX_PP_MEMSPELL];
 /*4668*/	uint8				unknown4704[32];	//
 /*4700*/	float				y;					// Player y position
 /*4704*/	float				x;					// Player x position

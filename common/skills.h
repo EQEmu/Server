@@ -161,10 +161,11 @@ namespace EQEmu
 	// server profile does not reflect this yet..so, prefixed with 'PACKET_'
 #define PACKET_SKILL_ARRAY_SIZE 100
 
-		extern bool IsTradeskill(SkillType skill);
-		extern bool IsSpecializedSkill(SkillType skill);
-		extern float GetSkillMeleePushForce(SkillType skill);
-		extern bool IsBardInstrumentSkill(SkillType skill);
+		bool IsTradeskill(SkillType skill);
+		bool IsSpecializedSkill(SkillType skill);
+		float GetSkillMeleePushForce(SkillType skill);
+		bool IsBardInstrumentSkill(SkillType skill);
+		bool IsCastingSkill(SkillType skill);
 
 		extern const std::map<SkillType, std::string>& GetSkillTypeMap();
 

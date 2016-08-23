@@ -1472,7 +1472,7 @@ bool BotDatabase::LoadPetBuffs(const uint32 bot_id, SpellBuff_Struct* pet_buffs)
 		return true;
 
 	int buff_index = 0;
-	for (auto row = results.begin(); row != results.end() && buff_index < BUFF_COUNT; ++row) {
+	for (auto row = results.begin(); row != results.end() && buff_index < PET_BUFF_COUNT; ++row) {
 		pet_buffs[buff_index].spellid = atoi(row[0]);
 		pet_buffs[buff_index].level = atoi(row[1]);
 		pet_buffs[buff_index].duration = atoi(row[2]);
@@ -1509,7 +1509,7 @@ bool BotDatabase::SavePetBuffs(const uint32 bot_id, const SpellBuff_Struct* pet_
 	if (!saved_pet_index)
 		return true;
 
-	for (int buff_index = 0; buff_index < BUFF_COUNT; ++buff_index) {
+	for (int buff_index = 0; buff_index < PET_BUFF_COUNT; ++buff_index) {
 		if (!pet_buffs[buff_index].spellid || pet_buffs[buff_index].spellid == SPELL_UNKNOWN)
 			continue;
 

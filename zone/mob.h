@@ -26,6 +26,7 @@
 #include "aa_ability.h"
 #include "aa.h"
 #include "../common/light_source.h"
+#include "../common/emu_constants.h"
 #include <set>
 #include <vector>
 #include <memory>
@@ -218,7 +219,7 @@ public:
 
 	//Song
 	bool UseBardSpellLogic(uint16 spell_id = 0xffff, int slot = -1);
-	bool ApplyNextBardPulse(uint16 spell_id, Mob *spell_target, uint16 slot);
+	bool ApplyNextBardPulse(uint16 spell_id, Mob *spell_target, EQEmu::CastingSlot slot);
 	void BardPulse(uint16 spell_id, Mob *caster);
 
 	//Spell
@@ -248,29 +249,30 @@ public:
 	void SendSpellBarEnable(uint16 spellid);
 	void ZeroCastingVars();
 	virtual void SpellProcess();
-	virtual bool CastSpell(uint16 spell_id, uint16 target_id, uint16 slot = USE_ITEM_SPELL_SLOT, int32 casttime = -1,
+	virtual bool CastSpell(uint16 spell_id, uint16 target_id, EQEmu::CastingSlot slot = EQEmu::CastingSlot::Item, int32 casttime = -1,
 		int32 mana_cost = -1, uint32* oSpellWillFinish = 0, uint32 item_slot = 0xFFFFFFFF,
 		uint32 timer = 0xFFFFFFFF, uint32 timer_duration = 0, int16 *resist_adjust = nullptr,
 		uint32 aa_id = 0);
-	virtual bool DoCastSpell(uint16 spell_id, uint16 target_id, uint16 slot = 10, int32 casttime = -1,
+	virtual bool DoCastSpell(uint16 spell_id, uint16 target_id, EQEmu::CastingSlot slot = EQEmu::CastingSlot::Item, int32 casttime = -1,
 		int32 mana_cost = -1, uint32* oSpellWillFinish = 0, uint32 item_slot = 0xFFFFFFFF,
 		uint32 timer = 0xFFFFFFFF, uint32 timer_duration = 0, int16 resist_adjust = 0,
 		uint32 aa_id = 0);
-	void CastedSpellFinished(uint16 spell_id, uint32 target_id, uint16 slot, uint16 mana_used,
+	void CastedSpellFinished(uint16 spell_id, uint32 target_id, EQEmu::CastingSlot slot, uint16 mana_used,
 		uint32 inventory_slot = 0xFFFFFFFF, int16 resist_adjust = 0);
-	bool SpellFinished(uint16 spell_id, Mob *target, uint16 slot = 10, uint16 mana_used = 0,
+	bool SpellFinished(uint16 spell_id, Mob *target, EQEmu::CastingSlot slot = EQEmu::CastingSlot::Item, uint16 mana_used = 0,
 		uint32 inventory_slot = 0xFFFFFFFF, int16 resist_adjust = 0, bool isproc = false, int level_override = -1);
 	virtual bool SpellOnTarget(uint16 spell_id, Mob* spelltar, bool reflect = false,
 		bool use_resist_adjust = false, int16 resist_adjust = 0, bool isproc = false, int level_override = -1);
 	virtual bool SpellEffect(Mob* caster, uint16 spell_id, float partial = 100, int level_override = -1);
 	virtual bool DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_center,
-		CastAction_type &CastAction, uint16 slot);
+		CastAction_type &CastAction, EQEmu::CastingSlot slot, bool isproc = false);
 	virtual bool CheckFizzle(uint16 spell_id);
 	virtual bool CheckSpellLevelRestriction(uint16 spell_id);
 	virtual bool IsImmuneToSpell(uint16 spell_id, Mob *caster);
 	virtual float GetAOERange(uint16 spell_id);
 	void InterruptSpell(uint16 spellid = SPELL_UNKNOWN);
 	void InterruptSpell(uint16, uint16, uint16 spellid = SPELL_UNKNOWN);
+	void StopCasting();
 	inline bool IsCasting() const { return((casting_spell_id != 0)); }
 	uint16 CastingSpellID() const { return casting_spell_id; }
 	bool DoCastingChecks();
@@ -306,6 +308,8 @@ public:
 	virtual int GetMaxSongSlots() const { return 0; }
 	virtual int GetMaxDiscSlots() const { return 0; }
 	virtual int GetMaxTotalSlots() const { return 0; }
+	virtual uint32 GetFirstBuffSlot(bool disc, bool song);
+	virtual uint32 GetLastBuffSlot(bool disc, bool song);
 	virtual void InitializeBuffSlots() { buffs = nullptr; current_buff_count = 0; }
 	virtual void UninitializeBuffSlots() { }
 	EQApplicationPacket *MakeBuffsPacket(bool for_target = true);
@@ -1216,7 +1220,7 @@ protected:
 	int attacked_count;
 	bool delaytimer;
 	uint16 casting_spell_targetid;
-	uint16 casting_spell_slot;
+	EQEmu::CastingSlot casting_spell_slot;
 	uint16 casting_spell_mana;
 	uint32 casting_spell_inventory_slot;
 	uint32 casting_spell_timer;
@@ -1226,7 +1230,7 @@ protected:
 	uint32 casting_spell_aa_id;
 	bool casting_spell_checks;
 	uint16 bardsong;
-	uint8 bardsong_slot;
+	EQEmu::CastingSlot bardsong_slot;
 	uint32 bardsong_target_id;
 
 	bool ActiveProjectileATK;

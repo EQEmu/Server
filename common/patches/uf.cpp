@@ -59,6 +59,9 @@ namespace UF
 	// client to server text link converter
 	static inline void UFToServerTextLink(std::string& serverTextLink, const std::string& ufTextLink);
 
+	static inline CastingSlot ServerToUFCastingSlot(EQEmu::CastingSlot slot);
+	static inline EQEmu::CastingSlot UFToServerCastingSlot(CastingSlot slot);
+
 	void Register(EQStreamIdentifier &into)
 	{
 		//create our opcode manager if we havent already
@@ -1383,7 +1386,8 @@ namespace UF
 		OUT(new_mana);
 		OUT(stamina);
 		OUT(spell_id);
-		eq->unknown16 = -1; // Self Interrupt/Success = -1, Fizzle = 1, Other Interrupt = 2?
+		OUT(keepcasting);
+		eq->slot = -1; // this is spell gem slot. It's -1 in normal operation
 
 		FINISH_ENCODE();
 	}
@@ -1761,18 +1765,18 @@ namespace UF
 		VARSTRUCT_ENCODE_TYPE(uint8, Buffer, 1);
 		VARSTRUCT_ENCODE_TYPE(uint16, Buffer, emu->buffcount);
 
-		for (unsigned int i = 0; i < BUFF_COUNT; ++i)
+		for (unsigned int i = 0; i < PET_BUFF_COUNT; ++i)
 		{
 			if (emu->spellid[i])
 			{
 				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, i);
 				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->spellid[i]);
 				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->ticsremaining[i]);
-				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);
+				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0); // numhits
 				VARSTRUCT_ENCODE_TYPE(uint8, Buffer, 0);	// This is a string. Name of the caster of the buff.
 			}
 		}
-		VARSTRUCT_ENCODE_TYPE(uint8, Buffer, emu->buffcount);
+		VARSTRUCT_ENCODE_TYPE(uint8, Buffer, emu->buffcount); /// I think this is actually some sort of type
 
 		delete[] __emu_buffer;
 		dest->FastQueuePacket(&in, ack_req);
@@ -1867,7 +1871,7 @@ namespace UF
 		OUT(thirst_level);
 		OUT(hunger_level);
 		//PS this needs to be figured out more; but it was 'good enough'
-		for (r = 0; r < structs::BUFF_COUNT; r++)
+		for (r = 0; r < BUFF_COUNT; r++)
 		{
 			if (emu->buffs[r].spellid != 0xFFFF && emu->buffs[r].spellid != 0)
 			{
@@ -3259,10 +3263,7 @@ namespace UF
 		DECODE_LENGTH_EXACT(structs::CastSpell_Struct);
 		SETUP_DIRECT_DECODE(CastSpell_Struct, structs::CastSpell_Struct);
 
-		if (eq->slot == 13)
-			emu->slot = 10;
-		else
-			IN(slot);
+		emu->slot = static_cast<uint32>(UFToServerCastingSlot(static_cast<CastingSlot>(eq->slot)));
 
 		IN(spell_id);
 		emu->inventoryslot = UFToServerSlot(eq->inventoryslot);
@@ -4378,4 +4379,80 @@ namespace UF
 		}
 	}
 
+	static inline CastingSlot ServerToUFCastingSlot(EQEmu::CastingSlot slot)
+	{
+		switch (slot) {
+		case EQEmu::CastingSlot::Gem1:
+			return CastingSlot::Gem1;
+		case EQEmu::CastingSlot::Gem2:
+			return CastingSlot::Gem2;
+		case EQEmu::CastingSlot::Gem3:
+			return CastingSlot::Gem3;
+		case EQEmu::CastingSlot::Gem4:
+			return CastingSlot::Gem4;
+		case EQEmu::CastingSlot::Gem5:
+			return CastingSlot::Gem5;
+		case EQEmu::CastingSlot::Gem6:
+			return CastingSlot::Gem6;
+		case EQEmu::CastingSlot::Gem7:
+			return CastingSlot::Gem7;
+		case EQEmu::CastingSlot::Gem8:
+			return CastingSlot::Gem8;
+		case EQEmu::CastingSlot::Gem9:
+			return CastingSlot::Gem9;
+		case EQEmu::CastingSlot::Gem10:
+			return CastingSlot::Gem10;
+		case EQEmu::CastingSlot::Gem11:
+			return CastingSlot::Gem11;
+		case EQEmu::CastingSlot::Gem12:
+			return CastingSlot::Gem12;
+		case EQEmu::CastingSlot::Item:
+		case EQEmu::CastingSlot::PotionBelt:
+			return CastingSlot::Item;
+		case EQEmu::CastingSlot::Discipline:
+			return CastingSlot::Discipline;
+		case EQEmu::CastingSlot::AltAbility:
+			return CastingSlot::AltAbility;
+		default: // we shouldn't have any issues with other slots ... just return something
+			return CastingSlot::Discipline;
+		}
+	}
+
+	static inline EQEmu::CastingSlot UFToServerCastingSlot(CastingSlot slot)
+	{
+		switch (slot) {
+		case CastingSlot::Gem1:
+			return EQEmu::CastingSlot::Gem1;
+		case CastingSlot::Gem2:
+			return EQEmu::CastingSlot::Gem2;
+		case CastingSlot::Gem3:
+			return EQEmu::CastingSlot::Gem3;
+		case CastingSlot::Gem4:
+			return EQEmu::CastingSlot::Gem4;
+		case CastingSlot::Gem5:
+			return EQEmu::CastingSlot::Gem5;
+		case CastingSlot::Gem6:
+			return EQEmu::CastingSlot::Gem6;
+		case CastingSlot::Gem7:
+			return EQEmu::CastingSlot::Gem7;
+		case CastingSlot::Gem8:
+			return EQEmu::CastingSlot::Gem8;
+		case CastingSlot::Gem9:
+			return EQEmu::CastingSlot::Gem9;
+		case CastingSlot::Gem10:
+			return EQEmu::CastingSlot::Gem10;
+		case CastingSlot::Gem11:
+			return EQEmu::CastingSlot::Gem11;
+		case CastingSlot::Gem12:
+			return EQEmu::CastingSlot::Gem12;
+		case CastingSlot::Discipline:
+			return EQEmu::CastingSlot::Discipline;
+		case CastingSlot::Item:
+			return EQEmu::CastingSlot::Item;
+		case CastingSlot::AltAbility:
+			return EQEmu::CastingSlot::AltAbility;
+		default: // we shouldn't have any issues with other slots ... just return something
+			return EQEmu::CastingSlot::Discipline;
+		}
+	}
 } /*UF*/

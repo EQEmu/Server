@@ -104,6 +104,8 @@ extern Zone* zone;
 extern volatile bool is_zone_loaded;
 extern WorldServer worldserver;
 
+using EQEmu::CastingSlot;
+
 // this is run constantly for every mob
 void Mob::SpellProcess()
 {
@@ -145,13 +147,13 @@ void NPC::SpellProcess()
 // the rule is you can cast one triggered (usually timed) spell at a time
 // but things like SpellFinished() can run concurrent with a triggered cast
 // to allow procs to work
-bool Mob::CastSpell(uint16 spell_id, uint16 target_id, uint16 slot,
+bool Mob::CastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 	int32 cast_time, int32 mana_cost, uint32* oSpellWillFinish, uint32 item_slot,
 	uint32 timer, uint32 timer_duration, int16 *resist_adjust,
 	uint32 aa_id)
 {
 	Log.Out(Logs::Detail, Logs::Spells, "CastSpell called for spell %s (%d) on entity %d, slot %d, time %d, mana %d, from item slot %d",
-		(IsValidSpell(spell_id))?spells[spell_id].name:"UNKNOWN SPELL", spell_id, target_id, slot, cast_time, mana_cost, (item_slot==0xFFFFFFFF)?999:item_slot);
+		(IsValidSpell(spell_id))?spells[spell_id].name:"UNKNOWN SPELL", spell_id, target_id, static_cast<int>(slot), cast_time, mana_cost, (item_slot==0xFFFFFFFF)?999:item_slot);
 
 	if(casting_spell_id == spell_id)
 		ZeroCastingVars();
@@ -178,7 +180,7 @@ bool Mob::CastSpell(uint16 spell_id, uint16 target_id, uint16 slot,
 		if(IsClient())
 			CastToClient()->SendSpellBarEnable(spell_id);
 		if(casting_spell_id && IsNPC())
-			CastToNPC()->AI_Event_SpellCastFinished(false, casting_spell_slot);
+			CastToNPC()->AI_Event_SpellCastFinished(false, static_cast<uint16>(casting_spell_slot));
 		return(false);
 	}
 	//It appears that the Sanctuary effect is removed by a check on the client side (keep this however for redundancy)
@@ -201,7 +203,7 @@ bool Mob::CastSpell(uint16 spell_id, uint16 target_id, uint16 slot,
 		if(IsClient())
 			CastToClient()->SendSpellBarEnable(spell_id);
 		if(casting_spell_id && IsNPC())
-			CastToNPC()->AI_Event_SpellCastFinished(false, casting_spell_slot);
+			CastToNPC()->AI_Event_SpellCastFinished(false, static_cast<uint16>(casting_spell_slot));
 		return(false);
 	}
 
@@ -231,7 +233,7 @@ bool Mob::CastSpell(uint16 spell_id, uint16 target_id, uint16 slot,
 	// check for fizzle
 	// note that CheckFizzle itself doesn't let NPCs fizzle,
 	// but this code allows for it.
-	if(slot < MAX_PP_MEMSPELL && !CheckFizzle(spell_id))
+	if(slot < CastingSlot::MaxGems && !CheckFizzle(spell_id))
 	{
 		int fizzle_msg = IsBardSong(spell_id) ? MISS_NOTE : SPELL_FIZZLE;
 		InterruptSpell(fizzle_msg, 0x121, spell_id);
@@ -252,7 +254,7 @@ bool Mob::CastSpell(uint16 spell_id, uint16 target_id, uint16 slot,
 	}
 
 	//Added to prevent MQ2 exploitation of equipping normally-unequippable/clickable items with effects and clicking them for benefits.
-	if(item_slot && IsClient() && ((slot == USE_ITEM_SPELL_SLOT) || (slot == POTION_BELT_SPELL_SLOT) || (slot == TARGET_RING_SPELL_SLOT)))
+	if(item_slot && IsClient() && (slot == CastingSlot::Item || slot == CastingSlot::PotionBelt))
 	{
 		ItemInst *itm = CastToClient()->GetInv().GetItem(item_slot);
 		int bitmask = 1;
@@ -336,14 +338,13 @@ bool Mob::CastSpell(uint16 spell_id, uint16 target_id, uint16 slot,
 // this is the 2nd phase of CastSpell, broken up like this to make it easier
 // to repeat a spell for bard songs
 //
-bool Mob::DoCastSpell(uint16 spell_id, uint16 target_id, uint16 slot,
+bool Mob::DoCastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 					int32 cast_time, int32 mana_cost, uint32* oSpellWillFinish,
 					uint32 item_slot, uint32 timer, uint32 timer_duration,
 					int16 resist_adjust, uint32 aa_id)
 {
 	Mob* pMob = nullptr;
 	int32 orgcasttime;
-	EQApplicationPacket *outapp = nullptr;
 
 	if(!IsValidSpell(spell_id)) {
 		InterruptSpell();
@@ -353,7 +354,7 @@ bool Mob::DoCastSpell(uint16 spell_id, uint16 target_id, uint16 slot,
 	const SPDat_Spell_Struct &spell = spells[spell_id];
 
 	Log.Out(Logs::Detail, Logs::Spells, "DoCastSpell called for spell %s (%d) on entity %d, slot %d, time %d, mana %d, from item %d",
-		spell.name, spell_id, target_id, slot, cast_time, mana_cost, item_slot==0xFFFFFFFF?999:item_slot);
+		spell.name, spell_id, target_id, static_cast<int>(slot), cast_time, mana_cost, item_slot==0xFFFFFFFF?999:item_slot);
 
 	casting_spell_id = spell_id;
 	casting_spell_slot = slot;
@@ -418,7 +419,7 @@ bool Mob::DoCastSpell(uint16 spell_id, uint16 target_id, uint16 slot,
 	// If you're at full mana, let it cast even if you dont have enough mana
 
 	// we calculated this above, now enforce it
-	if(mana_cost > 0 && slot != USE_ITEM_SPELL_SLOT)
+	if(mana_cost > 0 && slot != CastingSlot::Item)
 	{
 		int my_curmana = GetMana();
 		int my_maxmana = GetMaxMana();
@@ -453,8 +454,26 @@ bool Mob::DoCastSpell(uint16 spell_id, uint16 target_id, uint16 slot,
 	Log.Out(Logs::Detail, Logs::Spells, "Spell %d: Casting time %d (orig %d), mana cost %d",
 			spell_id, cast_time, orgcasttime, mana_cost);
 
+	// now tell the people in the area -- we ALWAYS want to send this, even instant cast spells.
+	// The only time this is skipped is for NPC innate procs and weapon procs. Procs from buffs
+	// oddly still send this. Since those cases don't reach here, we don't need to check them
+	if (slot != CastingSlot::Discipline) {
+		auto outapp = new EQApplicationPacket(OP_BeginCast,sizeof(BeginCast_Struct));
+		BeginCast_Struct* begincast = (BeginCast_Struct*)outapp->pBuffer;
+		begincast->caster_id = GetID();
+		begincast->spell_id = spell_id;
+		begincast->cast_time = orgcasttime; // client calculates reduced time by itself
+		outapp->priority = 3;
+		entity_list.QueueCloseClients(this, outapp, false, 200, 0, true); //IsClient() ? FILTER_PCSPELLS : FILTER_NPCSPELLS);
+		safe_delete(outapp);
+	}
+
 	// cast time is 0, just finish it right now and be done with it
 	if(cast_time == 0) {
+		if (!DoCastingChecks()) {
+			StopCasting();
+			return false;
+		}
 		CastedSpellFinished(spell_id, target_id, slot, mana_cost, item_slot, resist_adjust);
 		return(true);
 	}
@@ -476,25 +495,14 @@ bool Mob::DoCastSpell(uint16 spell_id, uint16 target_id, uint16 slot,
 	if (oSpellWillFinish)
 		*oSpellWillFinish = Timer::GetCurrentTime() + cast_time + 100;
 
-	// now tell the people in the area
-	outapp = new EQApplicationPacket(OP_BeginCast,sizeof(BeginCast_Struct));
-	BeginCast_Struct* begincast = (BeginCast_Struct*)outapp->pBuffer;
-	begincast->caster_id = GetID();
-	begincast->spell_id = spell_id;
-	begincast->cast_time = orgcasttime; // client calculates reduced time by itself
-	outapp->priority = 3;
-	entity_list.QueueCloseClients(this, outapp, false, 200, 0, true); //IsClient() ? FILTER_PCSPELLS : FILTER_NPCSPELLS);
-	safe_delete(outapp);
-	outapp = nullptr;
-
-	if (IsClient() && slot == USE_ITEM_SPELL_SLOT &&item_slot != 0xFFFFFFFF) {
+	if (IsClient() && slot == CastingSlot::Item && item_slot != 0xFFFFFFFF) {
 		auto item = CastToClient()->GetInv().GetItem(item_slot);
 		if (item && item->GetItem())
 			Message_StringID(MT_Spells, BEGINS_TO_GLOW, item->GetItem()->Name);
 	}
 
 	if (!DoCastingChecks()) {
-		InterruptSpell();
+		StopCasting();
 		return false;
 	}
 
@@ -549,6 +557,10 @@ bool Mob::DoCastingChecks()
 			return false;
 		}
 	}
+
+	if (IsClient() && spells[spell_id].EndurTimerIndex > 0 && casting_spell_slot < CastingSlot::MaxGems)
+		if (!CastToClient()->IsLinkedSpellReuseTimerReady(spells[spell_id].EndurTimerIndex))
+			return false;
 
 	casting_spell_checks = true;
 	return true;
@@ -767,7 +779,7 @@ void Mob::ZeroCastingVars()
 	spellend_timer.Disable();
 	casting_spell_id = 0;
 	casting_spell_targetid = 0;
-	casting_spell_slot = 0;
+	casting_spell_slot = CastingSlot::Gem1;
 	casting_spell_mana = 0;
 	casting_spell_inventory_slot = 0;
 	casting_spell_timer = 0;
@@ -802,7 +814,7 @@ void Mob::InterruptSpell(uint16 message, uint16 color, uint16 spellid)
 	}
 
 	if(casting_spell_id && IsNPC()) {
-		CastToNPC()->AI_Event_SpellCastFinished(false, casting_spell_slot);
+		CastToNPC()->AI_Event_SpellCastFinished(false, static_cast<uint16>(casting_spell_slot));
 	}
 
 	if(casting_spell_aa_id && IsClient()) { //Rest AA Timer on failed cast
@@ -874,18 +886,44 @@ void Mob::InterruptSpell(uint16 message, uint16 color, uint16 spellid)
 
 }
 
+// this is like interrupt, just it doesn't spam interrupt packets to everyone
+// There are a few cases where this is what live does :P
+void Mob::StopCasting()
+{
+	if (casting_spell_id && IsNPC()) {
+		CastToNPC()->AI_Event_SpellCastFinished(false, static_cast<uint16>(casting_spell_slot));
+	}
+
+	if (IsClient()) {
+		auto c = CastToClient();
+		if (casting_spell_aa_id) { //Rest AA Timer on failed cast
+			c->Message_StringID(MT_SpellFailure, ABILITY_FAILED);
+			c->ResetAlternateAdvancementTimer(casting_spell_aa_id);
+		}
+
+		auto outapp = new EQApplicationPacket(OP_ManaChange, sizeof(ManaChange_Struct));
+		auto mc = (ManaChange_Struct *)outapp->pBuffer;
+		mc->new_mana = GetMana();
+		mc->stamina = GetEndurance();
+		mc->spell_id = casting_spell_id;
+		mc->keepcasting = 0;
+		c->FastQueuePacket(&outapp);
+	}
+	ZeroCastingVars();
+}
+
 // this is called after the timer is up and the spell is finished
 // casting. everything goes through here, including items with zero cast time
 // only to be used from SpellProcess
 // NOTE: do not put range checking, etc into this function. this should
 // just check timed spell specific things before passing off to SpellFinished
 // which figures out proper targets etc
-void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, uint16 slot,
+void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slot,
 							uint16 mana_used, uint32 inventory_slot, int16 resist_adjust)
 {
 	bool IsFromItem = false;
 
-	if(IsClient() && slot != USE_ITEM_SPELL_SLOT && slot != POTION_BELT_SPELL_SLOT && slot != TARGET_RING_SPELL_SLOT && spells[spell_id].recast_time > 1000) { // 10 is item
+	if(IsClient() && slot != CastingSlot::Item && slot != CastingSlot::PotionBelt && spells[spell_id].recast_time > 1000) { // 10 is item
 		if(!CastToClient()->GetPTimers().Expired(&database, pTimerSpellStart + spell_id, false)) {
 			//should we issue a message or send them a spell gem packet?
 			Message_StringID(13, SPELL_RECAST);
@@ -895,7 +933,7 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, uint16 slot,
 		}
 	}
 
-	if(IsClient() && ((slot == USE_ITEM_SPELL_SLOT) || (slot == POTION_BELT_SPELL_SLOT) || (slot == TARGET_RING_SPELL_SLOT)))
+	if(IsClient() && (slot == CastingSlot::Item || slot == CastingSlot::PotionBelt))
 	{
 		IsFromItem = true;
 		ItemInst *itm = CastToClient()->GetInv().GetItem(inventory_slot);
@@ -1193,7 +1231,7 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, uint16 slot,
 
 	int16 DeleteChargeFromSlot = -1;
 
-	if(IsClient() && ((slot == USE_ITEM_SPELL_SLOT) || (slot == POTION_BELT_SPELL_SLOT) || (slot == TARGET_RING_SPELL_SLOT))
+	if(IsClient() && (slot == CastingSlot::Item || slot == CastingSlot::PotionBelt)
 		&& inventory_slot != 0xFFFFFFFF)	// 10 is an item
 	{
 		bool fromaug = false;
@@ -1306,8 +1344,11 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, uint16 slot,
 	{
 		if(IsClient())
 		{
-			this->CastToClient()->CheckSongSkillIncrease(spell_id);
-			this->CastToClient()->MemorizeSpell(slot, spell_id, memSpellSpellbar);
+			Client *c = CastToClient();
+			c->CheckSongSkillIncrease(spell_id);
+			if (spells[spell_id].EndurTimerIndex > 0 && slot < CastingSlot::MaxGems)
+				c->SetLinkedSpellReuseTimer(spells[spell_id].EndurTimerIndex, spells[spell_id].recast_time / 1000);
+			c->MemorizeSpell(static_cast<uint32>(slot), spell_id, memSpellSpellbar);
 		}
 		Log.Out(Logs::Detail, Logs::Spells, "Bard song %d should be started", spell_id);
 	}
@@ -1319,14 +1360,15 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, uint16 slot,
 			SendSpellBarEnable(spell_id);
 
 			// this causes the delayed refresh of the spell bar gems
-			c->MemorizeSpell(slot, spell_id, memSpellSpellbar);
+			if (spells[spell_id].EndurTimerIndex > 0 && slot < CastingSlot::MaxGems)
+				c->SetLinkedSpellReuseTimer(spells[spell_id].EndurTimerIndex, spells[spell_id].recast_time / 1000);
+			c->MemorizeSpell(static_cast<uint32>(slot), spell_id, memSpellSpellbar);
 
 			// this tells the client that casting may happen again
 			SetMana(GetMana());
 
 			// skills
-			if(slot < MAX_PP_MEMSPELL)
-			{
+			if (EQEmu::skills::IsCastingSkill(spells[spell_id].skill)) {
 				c->CheckIncreaseSkill(spells[spell_id].skill, nullptr);
 
 				// increased chance of gaining channel skill if you regained concentration
@@ -1348,8 +1390,8 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, uint16 slot,
 
 }
 
-bool Mob::DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_center, CastAction_type &CastAction, uint16 slot) {
-
+bool Mob::DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_center, CastAction_type &CastAction, CastingSlot slot, bool isproc)
+{
 /*
 	The basic types of spells:
 
@@ -1394,6 +1436,11 @@ bool Mob::DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_ce
 			Log.Out(Logs::Detail, Logs::AA, "Project Illusion overwrote target caster: %s spell id: %d was ON", GetName(), spell_id);
 			targetType = ST_GroupClientAndPet;
 	}
+
+	// NPC innate procs override the target type to single target.
+	// Yes. This code will cause issues if they have the proc as innate AND on a weapon. Oh well.
+	if (isproc && IsNPC() && CastToNPC()->GetInnateProcSpellID() == spell_id)
+		targetType = ST_Target;
 
 	if (spell_target && !spell_target->PassCastRestriction(true, spells[spell_id].CastRestriction)){
 		Message_StringID(13,SPELL_NEED_TAR);
@@ -1682,7 +1729,7 @@ bool Mob::DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_ce
 		case ST_Group:
 		case ST_GroupNoPets:
 		{
-			if(IsClient() && CastToClient()->TGB() && IsTGBCompatibleSpell(spell_id) && slot != USE_ITEM_SPELL_SLOT) {
+			if(IsClient() && CastToClient()->TGB() && IsTGBCompatibleSpell(spell_id) && (slot != CastingSlot::Item || RuleB(Spells, AllowItemTGB))) {
 				if( (!target) ||
 					(target->IsNPC() && !(target->GetOwner() && target->GetOwner()->IsClient())) ||
 					(target->IsCorpse()) )
@@ -1728,7 +1775,9 @@ bool Mob::DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_ce
 					{
 						if(IsGrouped())
 						{
-							group_id_caster = GetGroup()->GetID();
+							if (Group* group = GetGroup()) {
+								group_id_caster = group->GetID();
+							}
 						}
 						else if(IsRaidGrouped())
 						{
@@ -1743,7 +1792,9 @@ bool Mob::DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_ce
 						Mob *owner = GetOwner();
 						if(owner->IsGrouped())
 						{
-							group_id_caster = owner->GetGroup()->GetID();
+							if (Group* group = owner->GetGroup()) {
+								group_id_caster = group->GetID();
+							}
 						}
 						else if(owner->IsRaidGrouped())
 						{
@@ -1772,7 +1823,9 @@ bool Mob::DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_ce
 					{
 						if(spell_target->IsGrouped())
 						{
-							group_id_target = spell_target->GetGroup()->GetID();
+							if (Group* group = spell_target->GetGroup()) {
+								group_id_target = group->GetID();
+							}
 						}
 						else if(spell_target->IsRaidGrouped())
 						{
@@ -1787,7 +1840,9 @@ bool Mob::DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_ce
 						Mob *owner = spell_target->GetOwner();
 						if(owner->IsGrouped())
 						{
-							group_id_target = owner->GetGroup()->GetID();
+							if (Group* group = owner->GetGroup()) {
+								group_id_target = group->GetID();
+							}
 						}
 						else if(owner->IsRaidGrouped())
 						{
@@ -1904,7 +1959,7 @@ bool Mob::DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_ce
 // only used from CastedSpellFinished, and procs
 // we can't interrupt in this, or anything called from this!
 // if you need to abort the casting, return false
-bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, uint16 slot, uint16 mana_used,
+bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, CastingSlot slot, uint16 mana_used,
 						uint32 inventory_slot, int16 resist_adjust, bool isproc, int level_override)
 {
 	//EQApplicationPacket *outapp = nullptr;
@@ -1974,7 +2029,7 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, uint16 slot, uint16 
 
 	//determine the type of spell target we have
 	CastAction_type CastAction;
-	if(!DetermineSpellTargets(spell_id, spell_target, ae_center, CastAction, slot))
+	if(!DetermineSpellTargets(spell_id, spell_target, ae_center, CastAction, slot, isproc))
 		return(false);
 
 	Log.Out(Logs::Detail, Logs::Spells, "Spell %d: target type %d, target %s, AE center %s", spell_id, CastAction, spell_target?spell_target->GetName():"NONE", ae_center?ae_center->GetName():"NONE");
@@ -2263,7 +2318,7 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, uint16 slot, uint16 
 
 	bool mgb = HasMGB() && spells[spell_id].can_mgb;
 	// if this was a spell slot or an ability use up the mana for it
-	if(slot != USE_ITEM_SPELL_SLOT && slot != POTION_BELT_SPELL_SLOT && slot != TARGET_RING_SPELL_SLOT && mana_used > 0)
+	if(slot != CastingSlot::Item && slot != CastingSlot::PotionBelt && mana_used > 0)
 	{
 		mana_used = GetActSpellCost(spell_id, mana_used);
 		if (mgb) {
@@ -2326,7 +2381,7 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, uint16 slot, uint16 
 		}
 	}
 
-	if(IsClient() && ((slot == USE_ITEM_SPELL_SLOT) || (slot == POTION_BELT_SPELL_SLOT) || (slot == TARGET_RING_SPELL_SLOT)))
+	if(IsClient() && (slot == CastingSlot::Item || slot == CastingSlot::PotionBelt))
 	{
 		ItemInst *itm = CastToClient()->GetInv().GetItem(inventory_slot);
 		if(itm && itm->GetItem()->RecastDelay > 0){
@@ -2345,7 +2400,7 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, uint16 slot, uint16 
 	}
 
 	if(IsNPC())
-		CastToNPC()->AI_Event_SpellCastFinished(true, slot);
+		CastToNPC()->AI_Event_SpellCastFinished(true, static_cast<uint16>(slot));
 
 	return true;
 }
@@ -2360,8 +2415,8 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, uint16 slot, uint16 
  *
  * return false to stop the song
  */
-bool Mob::ApplyNextBardPulse(uint16 spell_id, Mob *spell_target, uint16 slot) {
-	if(slot == USE_ITEM_SPELL_SLOT) {
+bool Mob::ApplyNextBardPulse(uint16 spell_id, Mob *spell_target, CastingSlot slot) {
+	if(slot == CastingSlot::Item) {
 		//bard songs should never come from items...
 		Log.Out(Logs::Detail, Logs::Spells, "Bard Song Pulse %d: Supposidly cast from an item. Killing song.", spell_id);
 		return(false);
@@ -2972,8 +3027,7 @@ int Mob::CheckStackConflict(uint16 spellid1, int caster_level1, uint16 spellid2,
 		if
 		(
 			effect1 == SE_AttackSpeed ||
-			effect1 == SE_AttackSpeed2 ||
-			effect1 == SE_AttackSpeed3
+			effect1 == SE_AttackSpeed2
 		)
 		{
 			sp1_value -= 100;
@@ -3047,6 +3101,34 @@ bool Client::CheckSpellLevelRestriction(uint16 spell_id)
 	return true;
 }
 
+uint32 Mob::GetFirstBuffSlot(bool disc, bool song)
+{
+	return 0;
+}
+
+uint32 Mob::GetLastBuffSlot(bool disc, bool song)
+{
+	return GetCurrentBuffSlots();
+}
+
+uint32 Client::GetFirstBuffSlot(bool disc, bool song)
+{
+	if (song)
+		return GetMaxBuffSlots();
+	if (disc)
+		return GetMaxBuffSlots() + GetMaxSongSlots();
+	return 0;
+}
+
+uint32 Client::GetLastBuffSlot(bool disc, bool song)
+{
+	if (song)
+		return GetMaxBuffSlots() + GetCurrentSongSlots();
+	if (disc)
+		return GetMaxBuffSlots() + GetMaxSongSlots() + GetCurrentDiscSlots();
+	return GetCurrentBuffSlots();
+}
+
 // returns the slot the buff was added to, -1 if it wasn't added due to
 // stacking problems, and -2 if this is not a buff
 // if caster is null, the buff will be added with the caster level being
@@ -3084,18 +3166,8 @@ int Mob::AddBuff(Mob *caster, uint16 spell_id, int duration, int32 level_overrid
 	// we also check if overwriting will occur. this is so after this loop
 	// we can determine if there will be room for this buff
 	int buff_count = GetMaxTotalSlots();
-	uint32 start_slot = 0;
-	uint32 end_slot = 0;
-	if (IsDisciplineBuff(spell_id)) {
-		start_slot = GetMaxBuffSlots() + GetMaxSongSlots();
-		end_slot = start_slot + GetCurrentDiscSlots();
-	} else if(spells[spell_id].short_buff_box) {
-		start_slot = GetMaxBuffSlots();
-		end_slot = start_slot + GetCurrentSongSlots();
-	} else {
-		start_slot = 0;
-		end_slot = GetCurrentBuffSlots();
-	}
+	uint32 start_slot = GetFirstBuffSlot(IsDisciplineBuff(spell_id), spells[spell_id].short_buff_box);
+	uint32 end_slot = GetLastBuffSlot(IsDisciplineBuff(spell_id), spells[spell_id].short_buff_box);
 
 	for (buffslot = 0; buffslot < buff_count; buffslot++) {
 		const Buffs_Struct &curbuf = buffs[buffslot];
@@ -3107,7 +3179,7 @@ int Mob::AddBuff(Mob *caster, uint16 spell_id, int duration, int32 level_overrid
 			if (ret == -1) {	// stop the spell
 				Log.Out(Logs::Detail, Logs::Spells, "Adding buff %d failed: stacking prevented by spell %d in slot %d with caster level %d",
 						spell_id, curbuf.spellid, buffslot, curbuf.casterlevel);
-				if (caster->IsClient() && RuleB(Client, UseLiveBlockedMessage)) {
+				if (caster && caster->IsClient() && RuleB(Client, UseLiveBlockedMessage)) {
 					caster->Message(13, "Your %s did not take hold on %s. (Blocked by %s.)", spells[spell_id].name, this->GetName(), spells[curbuf.spellid].name);
 				}
 				return -1;
@@ -3769,7 +3841,7 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob *spelltar, bool reflect, bool use_r
 	}
 
 	if (IsValidSpell(spells[spell_id].RecourseLink) && spells[spell_id].RecourseLink != spell_id)
-		SpellFinished(spells[spell_id].RecourseLink, this, 10, 0, -1, spells[spells[spell_id].RecourseLink].ResistDiff);
+		SpellFinished(spells[spell_id].RecourseLink, this, CastingSlot::Item, 0, -1, spells[spells[spell_id].RecourseLink].ResistDiff);
 
 	if (IsDetrimentalSpell(spell_id)) {
 
@@ -4713,6 +4785,7 @@ void Mob::SendSpellBarEnable(uint16 spell_id)
 	manachange->new_mana = GetMana();
 	manachange->spell_id = spell_id;
 	manachange->stamina = CastToClient()->GetEndurance();
+	manachange->keepcasting = 0;
 	outapp->priority = 6;
 	CastToClient()->QueuePacket(outapp);
 	safe_delete(outapp);
@@ -5245,7 +5318,7 @@ bool Mob::UseBardSpellLogic(uint16 spell_id, int slot)
 		spell_id = casting_spell_id;
 
 	if(slot == -1)
-		slot = casting_spell_slot;
+		slot = static_cast<int>(casting_spell_slot);
 
 	// should we treat this as a bard singing?
 	return
@@ -5273,7 +5346,7 @@ void Mob::_StopSong()
 {
 	bardsong = 0;
 	bardsong_target_id = 0;
-	bardsong_slot = 0;
+	bardsong_slot = CastingSlot::Gem1;
 	bardsong_timer.Disable();
 }
 
@@ -5351,8 +5424,8 @@ void Mob::SendPetBuffsToClient()
 
 	int MaxSlots = GetMaxTotalSlots();
 
-	if(MaxSlots > BUFF_COUNT)
-		MaxSlots = BUFF_COUNT;
+	if(MaxSlots > PET_BUFF_COUNT)
+		MaxSlots = PET_BUFF_COUNT;
 
 	for(int buffslot = 0; buffslot < MaxSlots; buffslot++)
 	{
@@ -5449,10 +5522,14 @@ void Mob::BuffModifyDurationBySpellID(uint16 spell_id, int32 newDuration)
 
 int Client::GetCurrentBuffSlots() const
 {
-	if(15 + aabonuses.BuffSlotIncrease > 25)
-		return 25;
-	else
-		return 15 + aabonuses.BuffSlotIncrease;
+	int numbuffs = 15;
+	// client does check spells and items
+	numbuffs += aabonuses.BuffSlotIncrease + spellbonuses.BuffSlotIncrease + itembonuses.BuffSlotIncrease;
+	if (GetLevel() > 70)
+		numbuffs++;
+	if (GetLevel() > 74)
+		numbuffs++;
+	return EQEmu::ClampUpper(numbuffs, GetMaxBuffSlots());
 }
 
 int Client::GetCurrentSongSlots() const
@@ -5644,3 +5721,26 @@ void Mob::ConeDirectional(uint16 spell_id, int16 resist_adjust)
 		++iter;
 	}
 }
+
+// duration in seconds
+void Client::SetLinkedSpellReuseTimer(uint32 timer_id, uint32 duration)
+{
+	if (timer_id > 19)
+		return;
+	Log.Out(Logs::Detail, Logs::Spells, "Setting Linked Spell Reuse %d for %d", timer_id, duration);
+	GetPTimers().Start(pTimerLinkedSpellReuseStart + timer_id, duration);
+	auto outapp = new EQApplicationPacket(OP_LinkedReuse, sizeof(LinkedSpellReuseTimer_Struct));
+	auto lr = (LinkedSpellReuseTimer_Struct *)outapp->pBuffer;
+	lr->timer_id = timer_id;
+	lr->start_time = Timer::GetCurrentTime() / 1000;
+	lr->end_time = lr->start_time + duration;
+	FastQueuePacket(&outapp);
+}
+
+bool Client::IsLinkedSpellReuseTimerReady(uint32 timer_id)
+{
+	if (timer_id > 19)
+		return true;
+	return GetPTimers().Expired(&database, pTimerLinkedSpellReuseStart + timer_id, false);
+}
+

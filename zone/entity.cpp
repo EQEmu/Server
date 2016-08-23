@@ -927,12 +927,18 @@ bool EntityList::MakeDoorSpawnPacket(EQApplicationPacket *app, Client *client)
 
 Entity *EntityList::GetEntityMob(uint16 id)
 {
-	return mob_list.count(id) ? mob_list.at(id) : nullptr;
+	auto it = mob_list.find(id);
+	if (it != mob_list.end())
+		return it->second;
+	return nullptr;
 }
 
 Entity *EntityList::GetEntityMerc(uint16 id)
 {
-	return merc_list.count(id) ? merc_list.at(id) : nullptr;
+	auto it = merc_list.find(id);
+	if (it != merc_list.end())
+		return it->second;
+	return nullptr;
 }
 
 Entity *EntityList::GetEntityMob(const char *name)
@@ -952,12 +958,18 @@ Entity *EntityList::GetEntityMob(const char *name)
 
 Entity *EntityList::GetEntityDoor(uint16 id)
 {
-	return door_list.count(id) ? door_list.at(id) : nullptr;
+	auto it = door_list.find(id);
+	if (it != door_list.end())
+		return it->second;
+	return nullptr;
 }
 
 Entity *EntityList::GetEntityCorpse(uint16 id)
 {
-	return corpse_list.count(id) ? corpse_list.at(id) : nullptr;
+	auto it = corpse_list.find(id);
+	if (it != corpse_list.end())
+		return it->second;
+	return nullptr;
 }
 
 Entity *EntityList::GetEntityCorpse(const char *name)
@@ -977,22 +989,34 @@ Entity *EntityList::GetEntityCorpse(const char *name)
 
 Entity *EntityList::GetEntityTrap(uint16 id)
 {
-	return trap_list.count(id) ? trap_list.at(id) : nullptr;
+	auto it = trap_list.find(id);
+	if (it != trap_list.end())
+		return it->second;
+	return nullptr;
 }
 
 Entity *EntityList::GetEntityObject(uint16 id)
 {
-	return object_list.count(id) ? object_list.at(id) : nullptr;
+	auto it = object_list.find(id);
+	if (it != object_list.end())
+		return it->second;
+	return nullptr;
 }
 
 Entity *EntityList::GetEntityBeacon(uint16 id)
 {
-	return beacon_list.count(id) ? beacon_list.at(id) : nullptr;
+	auto it = beacon_list.find(id);
+	if (it != beacon_list.end())
+		return it->second;
+	return nullptr;
 }
 
 Entity *EntityList::GetEntityEncounter(uint16 id)
 {
-	return encounter_list.count(id) ? encounter_list.at(id) : nullptr;
+	auto it = encounter_list.find(id);
+	if (it != encounter_list.end())
+		return it->second;
+	return nullptr;
 }
 
 Entity *EntityList::GetID(uint16 get_id)
@@ -1188,6 +1212,8 @@ void EntityList::ChannelMessage(Mob *from, uint8 chan_num, uint8 language,
 
 void EntityList::ChannelMessageSend(Mob *to, uint8 chan_num, uint8 language, const char *message, ...)
 {
+	if (!to->IsClient())
+		return;
 	va_list argptr;
 	char buffer[4096];
 
@@ -1195,8 +1221,7 @@ void EntityList::ChannelMessageSend(Mob *to, uint8 chan_num, uint8 language, con
 	vsnprintf(buffer, 4096, message, argptr);
 	va_end(argptr);
 
-	if (client_list.count(to->GetID()))
-		client_list.at(to->GetID())->ChannelMessageSend(0, 0, chan_num, language, buffer);
+	to->CastToClient()->ChannelMessageSend(0, 0, chan_num, language, buffer);
 }
 
 void EntityList::SendZoneSpawns(Client *client)
@@ -1232,7 +1257,9 @@ void EntityList::SendZoneSpawnsBulk(Client *client)
 		maxspawns = mob_list.size();
 	auto bzsp = new BulkZoneSpawnPacket(client, maxspawns);
 
-	int32 race=-1;
+	bool delaypkt = false;
+	const glm::vec4& cpos = client->GetPosition();
+	const float dmax = 600.0 * 600.0;
 	for (auto it = mob_list.begin(); it != mob_list.end(); ++it) {
 		spawn = it->second;
 		if (spawn && spawn->GetID() > 0 && spawn->Spawned()) {
@@ -1240,8 +1267,30 @@ void EntityList::SendZoneSpawnsBulk(Client *client)
 					spawn->CastToClient()->IsHoveringForRespawn()))
 				continue;
 
-			race = spawn->GetRace();
+#if 1
+			const glm::vec4& spos = spawn->GetPosition();
+			
+			delaypkt = false;
+			if (DistanceSquared(cpos, spos) > dmax || (spawn->IsClient() && (spawn->GetRace() == MINOR_ILL_OBJ || spawn->GetRace() == TREE)))
+				delaypkt = true;
+			
+			if (delaypkt) {
+				app = new EQApplicationPacket;
+				spawn->CreateSpawnPacket(app);
+				client->QueuePacket(app, true, Client::CLIENT_CONNECTED);
+				safe_delete(app);
+			}
+			else {
+				memset(&ns, 0, sizeof(NewSpawn_Struct));
+				spawn->FillSpawnStruct(&ns, client);
+				bzsp->AddSpawn(&ns);
+			}
 
+			spawn->SendArmorAppearance(client);
+#else
+			/* original code kept for spawn packet research */
+			int32 race = spawn->GetRace();
+			
 			// Illusion races on PCs don't work as a mass spawn
 			// But they will work as an add_spawn AFTER CLIENT_CONNECTED.
 			if (spawn->IsClient() && (race == MINOR_ILL_OBJ || race == TREE)) {
@@ -1259,6 +1308,7 @@ void EntityList::SendZoneSpawnsBulk(Client *client)
 			// Despite being sent in the OP_ZoneSpawns packet, the client
 			// does not display worn armor correctly so display it.
 			spawn->SendArmorAppearance(client);
+#endif
 		}
 	}
 	safe_delete(bzsp);

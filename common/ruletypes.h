@@ -142,6 +142,8 @@ RULE_INT(Character, InvSnapshotMinRetryM, 30) // Time (in minutes) to re-attempt
 RULE_INT(Character, InvSnapshotHistoryD, 30) // Time (in days) to keep snapshot entries
 RULE_BOOL(Character, RestrictSpellScribing, false) // Restricts spell scribing to allowable races/classes of spell scroll, if true
 RULE_BOOL(Character, UseStackablePickPocketing, true) // Allows stackable pickpocketed items to stack instead of only being allowed in empty inventory slots
+RULE_BOOL(Character, EnableAvoidanceCap, false)
+RULE_INT(Character, AvoidanceCap, 750) // 750 Is a pretty good value, seen people dodge all attacks beyond 1,000 Avoidance
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Mercs)
@@ -329,7 +331,7 @@ RULE_INT(Spells, MaxBuffSlotsNPC, 25)
 RULE_INT(Spells, MaxSongSlotsNPC, 10)
 RULE_INT(Spells, MaxDiscSlotsNPC, 1)
 RULE_INT(Spells, MaxTotalSlotsNPC, 36)
-RULE_INT(Spells, MaxTotalSlotsPET, 25)	// do not set this higher than 25 until the player profile is removed from the blob
+RULE_INT(Spells, MaxTotalSlotsPET, 30)	// do not set this higher than 25 until the player profile is removed from the blob
 RULE_BOOL (Spells, EnableBlockedBuffs, true)
 RULE_INT(Spells, ReflectType, 1) //0 = disabled, 1 = single target player spells only, 2 = all player spells, 3 = all single target spells, 4 = all spells
 RULE_INT(Spells, VirusSpreadDistance, 30) // The distance a viral spell will jump to its next victim
@@ -379,6 +381,7 @@ RULE_BOOL(Spells, UseAdditiveFocusFromWornSlot, false) // Allows an additive foc
 RULE_BOOL(Spells, AlwaysSendTargetsBuffs, false) // ignore LAA level if true
 RULE_BOOL(Spells, FlatItemExtraSpellAmt, false) // allow SpellDmg stat to affect all spells, regardless of cast time/cooldown/etc
 RULE_BOOL(Spells, IgnoreSpellDmgLvlRestriction, false) // ignore the 5 level spread on applying SpellDmg
+RULE_BOOL(Spells, AllowItemTGB, false) // TGB doesn't work with items on live, custom servers want it though
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Combat)
@@ -503,6 +506,7 @@ RULE_BOOL(NPC, EnableMeritBasedFaction, false) // If set to true, faction will g
 RULE_INT(NPC, NPCToNPCAggroTimerMin, 500)
 RULE_INT(NPC, NPCToNPCAggroTimerMax, 6000)
 RULE_BOOL(NPC, UseClassAsLastName, true) // Uses class archetype as LastName for npcs with none
+RULE_BOOL(NPC, NewLevelScaling, true) // Better level scaling, use old if new formulas would break your server
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Aggro)
@@ -518,6 +522,7 @@ RULE_REAL(Aggro, TunnelVisionAggroMod, 0.75) //people not currently the top hate
 RULE_INT(Aggro, MaxScalingProcAggro, 400) // Set to -1 for no limit. Maxmimum amount of aggro that HP scaling SPA effect in a proc will add.
 RULE_INT(Aggro, IntAggroThreshold, 75) // Int <= this will aggro regardless of level difference.
 RULE_BOOL(Aggro, AllowTickPulling, false) // tick pulling is an exploit in an NPC's call for help fixed sometime in 2006 on live
+RULE_BOOL(Aggro, UseLevelAggro, true) // Level 18+ and Undead will aggro regardless of level difference. (this will disabled Rule:IntAggroThreshold if set to true)
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(TaskSystem)

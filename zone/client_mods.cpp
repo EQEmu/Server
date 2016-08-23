@@ -1036,6 +1036,13 @@ int32 Client::CalcAC()
 	if (avoidance < 0) {
 		avoidance = 0;
 	}
+	
+	if (RuleB(Character, EnableAvoidanceCap)) {
+		if (avoidance > RuleI(Character, AvoidanceCap)) {
+			avoidance = RuleI(Character, AvoidanceCap);
+		}
+	}
+	
 	int mitigation = 0;
 	if (m_pp.class_ == WIZARD || m_pp.class_ == MAGICIAN || m_pp.class_ == NECROMANCER || m_pp.class_ == ENCHANTER) {
 		//something is wrong with this, naked casters have the wrong natural AC
@@ -1113,6 +1120,13 @@ int32 Client::GetACAvoid()
 	if (avoidance < 0) {
 		avoidance = 0;
 	}
+	
+	if (RuleB(Character, EnableAvoidanceCap)) {
+		if ((avoidance * 1000 / 847) > RuleI(Character, AvoidanceCap)) {
+			return RuleI(Character, AvoidanceCap);
+		}
+	}
+	
 	return (avoidance * 1000 / 847);
 }
 

@@ -59,6 +59,9 @@ namespace SoF
 	// client to server text link converter
 	static inline void SoFToServerTextLink(std::string& serverTextLink, const std::string& sofTextLink);
 
+	static inline CastingSlot ServerToSoFCastingSlot(EQEmu::CastingSlot slot);
+	static inline EQEmu::CastingSlot SoFToServerCastingSlot(CastingSlot slot, uint32 itemlocation);
+
 	void Register(EQStreamIdentifier &into)
 	{
 		//create our opcode manager if we havent already
@@ -933,7 +936,24 @@ namespace SoF
 		OUT(new_mana);
 		OUT(stamina);
 		OUT(spell_id);
-		eq->unknown16 = -1; // Self Interrupt/Success = -1, Fizzle = 1, Other Interrupt = 2?
+		OUT(keepcasting);
+		eq->slot = -1; // this is spell gem slot. It's -1 in normal operation
+
+		FINISH_ENCODE();
+	}
+
+	ENCODE(OP_MemorizeSpell)
+	{
+		ENCODE_LENGTH_EXACT(MemorizeSpell_Struct);
+		SETUP_DIRECT_ENCODE(MemorizeSpell_Struct, structs::MemorizeSpell_Struct);
+
+		// Since HT/LoH are translated up, we need to translate down only for memSpellSpellbar case
+		if (emu->scribing == 3)
+			eq->slot = static_cast<uint32>(ServerToSoFCastingSlot(static_cast<EQEmu::CastingSlot>(emu->slot)));
+		else
+			OUT(slot);
+		OUT(spell_id);
+		OUT(scribing);
 
 		FINISH_ENCODE();
 	}
@@ -1158,9 +1178,9 @@ namespace SoF
 		OUT(petid);
 		OUT(buffcount);
 
-		int EQBuffSlot = 0;
+		int EQBuffSlot = 0; // do we really want to shuffle them around like this?
 
-		for (uint32 EmuBuffSlot = 0; EmuBuffSlot < BUFF_COUNT; ++EmuBuffSlot)
+		for (uint32 EmuBuffSlot = 0; EmuBuffSlot < PET_BUFF_COUNT; ++EmuBuffSlot)
 		{
 			if (emu->spellid[EmuBuffSlot])
 			{
@@ -2366,7 +2386,7 @@ namespace SoF
 		DECODE_LENGTH_EXACT(structs::CastSpell_Struct);
 		SETUP_DIRECT_DECODE(CastSpell_Struct, structs::CastSpell_Struct);
 
-		IN(slot);
+		emu->slot = static_cast<uint32>(SoFToServerCastingSlot(static_cast<CastingSlot>(eq->slot), eq->inventoryslot));
 		IN(spell_id);
 		emu->inventoryslot = SoFToServerSlot(eq->inventoryslot);
 		IN(target_id);
@@ -3355,4 +3375,75 @@ namespace SoF
 		}
 	}
 
+	static inline CastingSlot ServerToSoFCastingSlot(EQEmu::CastingSlot slot)
+	{
+		switch (slot) {
+		case EQEmu::CastingSlot::Gem1:
+			return CastingSlot::Gem1;
+		case EQEmu::CastingSlot::Gem2:
+			return CastingSlot::Gem2;
+		case EQEmu::CastingSlot::Gem3:
+			return CastingSlot::Gem3;
+		case EQEmu::CastingSlot::Gem4:
+			return CastingSlot::Gem4;
+		case EQEmu::CastingSlot::Gem5:
+			return CastingSlot::Gem5;
+		case EQEmu::CastingSlot::Gem6:
+			return CastingSlot::Gem6;
+		case EQEmu::CastingSlot::Gem7:
+			return CastingSlot::Gem7;
+		case EQEmu::CastingSlot::Gem8:
+			return CastingSlot::Gem8;
+		case EQEmu::CastingSlot::Gem9:
+			return CastingSlot::Gem9;
+		case EQEmu::CastingSlot::Item:
+			return CastingSlot::Item;
+		case EQEmu::CastingSlot::PotionBelt:
+			return CastingSlot::PotionBelt;
+		case EQEmu::CastingSlot::Discipline:
+			return CastingSlot::Discipline;
+		case EQEmu::CastingSlot::AltAbility:
+			return CastingSlot::AltAbility;
+		default: // we shouldn't have any issues with other slots ... just return something
+			return CastingSlot::Discipline;
+		}
+	}
+
+	static inline EQEmu::CastingSlot SoFToServerCastingSlot(CastingSlot slot, uint32 itemlocation)
+	{
+		switch (slot) {
+		case CastingSlot::Gem1:
+			return EQEmu::CastingSlot::Gem1;
+		case CastingSlot::Gem2:
+			return EQEmu::CastingSlot::Gem2;
+		case CastingSlot::Gem3:
+			return EQEmu::CastingSlot::Gem3;
+		case CastingSlot::Gem4:
+			return EQEmu::CastingSlot::Gem4;
+		case CastingSlot::Gem5:
+			return EQEmu::CastingSlot::Gem5;
+		case CastingSlot::Gem6:
+			return EQEmu::CastingSlot::Gem6;
+		case CastingSlot::Gem7:
+			return EQEmu::CastingSlot::Gem7;
+		case CastingSlot::Gem8:
+			return EQEmu::CastingSlot::Gem8;
+		case CastingSlot::Gem9:
+			return EQEmu::CastingSlot::Gem9;
+		case CastingSlot::Ability:
+			return EQEmu::CastingSlot::Ability;
+		// Tit uses 10 for item and discipline casting, but items have a valid location
+		case CastingSlot::Item:
+			if (itemlocation == INVALID_INDEX)
+				return EQEmu::CastingSlot::Discipline;
+			else
+				return EQEmu::CastingSlot::Item;
+		case CastingSlot::PotionBelt:
+			return EQEmu::CastingSlot::PotionBelt;
+		case CastingSlot::AltAbility:
+			return EQEmu::CastingSlot::AltAbility;
+		default: // we shouldn't have any issues with other slots ... just return something
+			return EQEmu::CastingSlot::Discipline;
+		}
+	}
 } /*SoF*/

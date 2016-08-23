@@ -765,7 +765,7 @@ void WorldServer::Process() {
 				zone->SetZoneHasCurrentTime(true);
 
 			}
-			if (zone->is_zone_time_localized){
+			if (zone && zone->is_zone_time_localized){
 				Log.Out(Logs::General, Logs::Zone_Server, "Received request to sync time from world, but our time is localized currently");
 			}
 			break;

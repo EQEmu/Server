@@ -3178,7 +3178,8 @@ void ZoneDatabase::SavePetInfo(Client *client)
 		query.clear();
 
 		// pet buffs!
-		for (int index = 0; index < RuleI(Spells, MaxTotalSlotsPET); index++) {
+		int max_slots = RuleI(Spells, MaxTotalSlotsPET);
+		for (int index = 0; index < max_slots; index++) {
 			if (petinfo->Buffs[index].spellid == SPELL_UNKNOWN || petinfo->Buffs[index].spellid == 0)
 				continue;
 			if (query.length() == 0)

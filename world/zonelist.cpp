@@ -88,7 +88,7 @@ void ZSList::Process() {
 		Process();
 		CatchSignal(2);
 	}
-	if(reminder && reminder->Check()){
+	if(reminder && reminder->Check() && shutdowntimer){
 		SendEmoteMessage(0,0,0,15,"<SYSTEMWIDE MESSAGE>:SYSTEM MSG:World coming down, everyone log out now. World will shut down in %i minutes...", ((shutdowntimer->GetRemainingTime()/1000) / 60));
 	}
 	LinkedListIterator<ZoneServer*> iterator(list);

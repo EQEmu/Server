@@ -1,5 +1,34 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 08/14/2016 ==
+mackal: Implement Linked Spell Reuse Timers
+	- For whatever reason this is a bit unfriendly, but that's how it is on live.
+	- Titanium is especially unfriendly with large differences in reuse times (ex higher canni and the first 4)
+	- Unsure when this went live for spells, but canni was at least linked at OoW launch
+
+== 08/13/2016 ==
+Kinglykrab: Implemented optional avoidance cap rules.
+	- Serves to eliminate God-like characters on custom servers with high item stats
+	- Rule Names:
+		- Character:EnableAvoidanceCap (default is false)
+		- Character:AvoidanceCap (default is 750, beyond 1,000 seems to make characters dodge all attacks)
+	
+== 08/02/2016 ==
+Uleat: Changed 'SendZoneSpawnsBulk' behavior to use near/far criteria (live-like) when sending packets.
+	- Zone-to-Zone client loading will see a small decrease in time (less than 10~15%)
+	- World-to-Zone client loading appears to greatly benefit from this (tested 'devastation' - pre-change: ~22 seconds, post-change: 12~15 seconds)
+	- This change does not affect the final spawning of mobs in the client
+
+== 07/31/2016 ==
+mackal: Implement more spell gems!
+	- There are a few things still left to due like make dealing with losing gems nice (reset AAs, going to an older client etc)
+	- Sadly SoF disc release doesn't support gem 10 like one might expect :(
+	- So changed clients:
+		- SoD = 10
+		- UF = 12
+		- RoF/RoF2 = 12. I know the UI supports 16, but the client does not and can cause client crashes
+	- The quest APIs assume you pass a valid spell gem ...
+
 == 07/28/2016 ==
 Uleat: Implemented zone memory-mapped file usage
 	- Zone map files are converted to pre-loaded binary files, bypassing the (sometimes) time-consuming raw data transform process

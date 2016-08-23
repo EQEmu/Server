@@ -1985,7 +1985,7 @@ void Client::ChannelGrantVoice(std::string CommandString) {
 		return;
 	}
 
-	if(RequiredChannel->IsOwner(RequiredClient->GetName()) || RequiredChannel->IsModerator(RequiredClient->GetName())) {
+	if(RequiredClient && (RequiredChannel->IsOwner(RequiredClient->GetName()) || RequiredChannel->IsModerator(RequiredClient->GetName()))) {
 
 		GeneralChannelMessage("The channel owner and moderators automatically have voice.");
 		return;

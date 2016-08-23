@@ -502,6 +502,27 @@ void Client::CompleteConnect()
 	SetDuelTarget(0);
 	SetDueling(false);
 
+	database.LoadPetInfo(this);
+	/*
+	This was moved before the spawn packets are sent
+	in hopes that it adds more consistency...
+	Remake pet
+	*/
+	if (m_petinfo.SpellID > 1 && !GetPet() && m_petinfo.SpellID <= SPDAT_RECORDS) {
+		MakePoweredPet(m_petinfo.SpellID, spells[m_petinfo.SpellID].teleport_zone, m_petinfo.petpower, m_petinfo.Name, m_petinfo.size);
+		if (GetPet() && GetPet()->IsNPC()) {
+			NPC *pet = GetPet()->CastToNPC();
+			pet->SetPetState(m_petinfo.Buffs, m_petinfo.Items);
+			pet->CalcBonuses();
+			pet->SetHP(m_petinfo.HP);
+			pet->SetMana(m_petinfo.Mana);
+		}
+		m_petinfo.SpellID = 0;
+	}
+	/* Moved here so it's after where we load the pet data. */
+	if (!GetAA(aaPersistentMinion))
+		memset(&m_suspendedminion, 0, sizeof(PetInfo));
+
 	EnteringMessages(this);
 	LoadZoneFlags();
 
@@ -1627,27 +1648,6 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 
 	if (m_pp.RestTimer)
 		rest_timer.Start(m_pp.RestTimer * 1000);
-
-	database.LoadPetInfo(this);
-	/*
-		This was moved before the spawn packets are sent
-		in hopes that it adds more consistency...
-		Remake pet
-	*/
-	if (m_petinfo.SpellID > 1 && !GetPet() && m_petinfo.SpellID <= SPDAT_RECORDS) {
-		MakePoweredPet(m_petinfo.SpellID, spells[m_petinfo.SpellID].teleport_zone, m_petinfo.petpower, m_petinfo.Name, m_petinfo.size);
-		if (GetPet() && GetPet()->IsNPC()) {
-			NPC *pet = GetPet()->CastToNPC();
-			pet->SetPetState(m_petinfo.Buffs, m_petinfo.Items);
-			pet->CalcBonuses();
-			pet->SetHP(m_petinfo.HP);
-			pet->SetMana(m_petinfo.Mana);
-		}
-		m_petinfo.SpellID = 0;
-	}
-	/* Moved here so it's after where we load the pet data. */
-	if (!GetAA(aaPersistentMinion))
-		memset(&m_suspendedminion, 0, sizeof(PetInfo));
 
 	/* Server Zone Entry Packet */
 	outapp = new EQApplicationPacket(OP_ZoneEntry, sizeof(ServerZoneEntry_Struct));
@@ -3966,6 +3966,7 @@ void Client::Handle_OP_CancelTrade(const EQApplicationPacket *app)
 
 void Client::Handle_OP_CastSpell(const EQApplicationPacket *app)
 {
+	using EQEmu::CastingSlot;
 	if (app->size != sizeof(CastSpell_Struct)) {
 		std::cout << "Wrong size: OP_CastSpell, size=" << app->size << ", expected " << sizeof(CastSpell_Struct) << std::endl;
 		return;
@@ -3978,13 +3979,13 @@ void Client::Handle_OP_CastSpell(const EQApplicationPacket *app)
 
 	CastSpell_Struct* castspell = (CastSpell_Struct*)app->pBuffer;
 
-    m_TargetRing = glm::vec3(castspell->x_pos, castspell->y_pos, castspell->z_pos);
+	m_TargetRing = glm::vec3(castspell->x_pos, castspell->y_pos, castspell->z_pos);
 
 	Log.Out(Logs::General, Logs::Spells, "OP CastSpell: slot=%d, spell=%d, target=%d, inv=%lx", castspell->slot, castspell->spell_id, castspell->target_id, (unsigned long)castspell->inventoryslot);
+	CastingSlot slot = static_cast<CastingSlot>(castspell->slot);
 
 	/* Memorized Spell */
-	if (m_pp.mem_spells[castspell->slot] && m_pp.mem_spells[castspell->slot] == castspell->spell_id){
-
+	if (m_pp.mem_spells[castspell->slot] && m_pp.mem_spells[castspell->slot] == castspell->spell_id) {
 		uint16 spell_to_cast = 0;
 		if (castspell->slot < MAX_PP_MEMSPELL) {
 			spell_to_cast = m_pp.mem_spells[castspell->slot];
@@ -3998,20 +3999,12 @@ void Client::Handle_OP_CastSpell(const EQApplicationPacket *app)
 			return;
 		}
 
-		CastSpell(spell_to_cast, castspell->target_id, castspell->slot);
+		CastSpell(spell_to_cast, castspell->target_id, slot);
 	}
 	/* Spell Slot or Potion Belt Slot */
-	else if ((castspell->slot == USE_ITEM_SPELL_SLOT) || (castspell->slot == POTION_BELT_SPELL_SLOT)|| (castspell->slot == TARGET_RING_SPELL_SLOT))	// ITEM or POTION cast
+	else if (slot == CastingSlot::Item || slot == CastingSlot::PotionBelt)	// ITEM or POTION cast
 	{
-		//discipline, using the item spell slot
-		if (castspell->inventoryslot == INVALID_INDEX) {
-			if (!UseDiscipline(castspell->spell_id, castspell->target_id)) {
-				Log.Out(Logs::General, Logs::Spells, "Unknown ability being used by %s, spell being cast is: %i\n", GetName(), castspell->spell_id);
-				InterruptSpell(castspell->spell_id);
-			}
-			return;
-		}
-		else if (m_inv.SupportsClickCasting(castspell->inventoryslot) || (castspell->slot == POTION_BELT_SPELL_SLOT) || (castspell->slot == TARGET_RING_SPELL_SLOT))	// sanity check
+		if (m_inv.SupportsClickCasting(castspell->inventoryslot) || slot == CastingSlot::PotionBelt)	// sanity check
 		{
 			// packet field types will be reviewed as packet transistions occur
 			const ItemInst* inst = m_inv[castspell->inventoryslot]; //slot values are int16, need to check packet on this field
@@ -4036,7 +4029,7 @@ void Client::Handle_OP_CastSpell(const EQApplicationPacket *app)
 							int i = parse->EventItem(EVENT_ITEM_CLICK_CAST, this, p_inst, nullptr, "", castspell->inventoryslot);
 
 							if (i == 0) {
-								CastSpell(item->Click.Effect, castspell->target_id, castspell->slot, item->CastTime, 0, 0, castspell->inventoryslot);
+								CastSpell(item->Click.Effect, castspell->target_id, slot, item->CastTime, 0, 0, castspell->inventoryslot);
 							}
 							else {
 								InterruptSpell(castspell->spell_id);
@@ -4056,7 +4049,7 @@ void Client::Handle_OP_CastSpell(const EQApplicationPacket *app)
 						int i = parse->EventItem(EVENT_ITEM_CLICK_CAST, this, p_inst, nullptr, "", castspell->inventoryslot);
 
 						if (i == 0) {
-							CastSpell(item->Click.Effect, castspell->target_id, castspell->slot, item->CastTime, 0, 0, castspell->inventoryslot);
+							CastSpell(item->Click.Effect, castspell->target_id, slot, item->CastTime, 0, 0, castspell->inventoryslot);
 						}
 						else {
 							InterruptSpell(castspell->spell_id);
@@ -4081,8 +4074,8 @@ void Client::Handle_OP_CastSpell(const EQApplicationPacket *app)
 			InterruptSpell(castspell->spell_id);
 		}
 	}
-	/* Discipline */
-	else if (castspell->slot == DISCIPLINE_SPELL_SLOT) {
+	/* Discipline -- older clients use the same slot as items, but we translate to it's own */
+	else if (slot == CastingSlot::Discipline) {
 		if (!UseDiscipline(castspell->spell_id, castspell->target_id)) {
 			Log.Out(Logs::General, Logs::Spells, "Unknown ability being used by %s, spell being cast is: %i\n", GetName(), castspell->spell_id);
 			InterruptSpell(castspell->spell_id);
@@ -4090,7 +4083,7 @@ void Client::Handle_OP_CastSpell(const EQApplicationPacket *app)
 		}
 	}
 	/* ABILITY cast (LoH and Harm Touch) */
-	else if (castspell->slot == ABILITY_SPELL_SLOT) {
+	else if (slot == CastingSlot::Ability) {
 		uint16 spell_to_cast = 0;
 
 		if (castspell->spell_id == SPELL_LAY_ON_HANDS && GetClass() == PALADIN) {
@@ -4120,7 +4113,7 @@ void Client::Handle_OP_CastSpell(const EQApplicationPacket *app)
 		}
 
 		if (spell_to_cast > 0)	// if we've matched LoH or HT, cast now
-			CastSpell(spell_to_cast, castspell->target_id, castspell->slot);
+			CastSpell(spell_to_cast, castspell->target_id, slot);
 	}
 	return;
 }
@@ -4583,8 +4576,11 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app)
 		safe_delete(outapp);
 	}
 
-	if(zone->watermap && zone->watermap->InLiquid(glm::vec3(m_Position)))
-		CheckIncreaseSkill(EQEmu::skills::SkillSwimming, nullptr, -17);
+	if (zone->watermap) {
+		if (zone->watermap->InLiquid(glm::vec3(m_Position)))
+			CheckIncreaseSkill(EQEmu::skills::SkillSwimming, nullptr, -17);
+		CheckRegionTypeChanges();
+	}
 
 	return;
 }
@@ -8410,6 +8406,7 @@ void Client::Handle_OP_ItemPreview(const EQApplicationPacket *app)
 
 void Client::Handle_OP_ItemVerifyRequest(const EQApplicationPacket *app)
 {
+	using EQEmu::CastingSlot;
 	if (app->size != sizeof(ItemVerifyRequest_Struct))
 	{
 		Log.Out(Logs::General, Logs::Error, "OP size error: OP_ItemVerifyRequest expected:%i got:%i", sizeof(ItemVerifyRequest_Struct), app->size);
@@ -8554,7 +8551,7 @@ void Client::Handle_OP_ItemVerifyRequest(const EQApplicationPacket *app)
 					if (i == 0) {
 						if (!IsCastWhileInvis(item->Click.Effect))
 							CommonBreakInvisible(); // client can't do this for us :(
-						CastSpell(item->Click.Effect, target_id, USE_ITEM_SPELL_SLOT, item->CastTime, 0, 0, slot_id);
+						CastSpell(item->Click.Effect, target_id, CastingSlot::Item, item->CastTime, 0, 0, slot_id);
 					}
 				}
 				else
@@ -8583,7 +8580,7 @@ void Client::Handle_OP_ItemVerifyRequest(const EQApplicationPacket *app)
 					if (i == 0) {
 						if (!IsCastWhileInvis(augitem->Click.Effect))
 							CommonBreakInvisible(); // client can't do this for us :(
-						CastSpell(augitem->Click.Effect, target_id, USE_ITEM_SPELL_SLOT, augitem->CastTime, 0, 0, slot_id);
+						CastSpell(augitem->Click.Effect, target_id, CastingSlot::Item, augitem->CastTime, 0, 0, slot_id);
 					}
 				}
 				else

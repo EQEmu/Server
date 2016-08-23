@@ -50,6 +50,23 @@ namespace SoF
 		#include "sof_ops.h"
 	};
 
+	enum class CastingSlot : uint32 {
+		Gem1       = 0,
+		Gem2       = 1,
+		Gem3       = 2,
+		Gem4       = 3,
+		Gem5       = 4,
+		Gem6       = 5,
+		Gem7       = 6,
+		Gem8       = 7,
+		Gem9       = 8,
+		Ability    = 9,
+		Item       = 10,
+		Discipline = 10,
+		PotionBelt = 11,
+		AltAbility = 0xFF
+	};
+
 }; /*SoF*/
 
 #endif /*COMMON_SOF_H*/

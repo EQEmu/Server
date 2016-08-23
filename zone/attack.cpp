@@ -23,6 +23,7 @@
 #include "../common/skills.h"
 #include "../common/spdat.h"
 #include "../common/string_util.h"
+#include "../common/data_verification.h"
 #include "queryserv.h"
 #include "quest_parser_collection.h"
 #include "string_ids.h"
@@ -369,18 +370,15 @@ bool Mob::AvoidDamage(Mob *other, int32 &damage, int hand)
 		counter_dodge = attacker->GetSpecialAbilityParam(COUNTER_AVOID_DAMAGE, 4);
 	}
 
-	//////////////////////////////////////////////////////////
-	// make enrage same as riposte
-	/////////////////////////////////////////////////////////
-	if (IsEnraged() && InFront) {
-		damage = -3;
-		Log.Out(Logs::Detail, Logs::Combat, "I am enraged, riposting frontal attack.");
-	}
-
 	// riposte -- it may seem crazy, but if the attacker has SPA 173 on them, they are immune to Ripo
 	bool ImmuneRipo = attacker->aabonuses.RiposteChance || attacker->spellbonuses.RiposteChance || attacker->itembonuses.RiposteChance;
 	// Need to check if we have something in MainHand to actually attack with (or fists)
 	if (hand != EQEmu::legacy::SlotRange && CanThisClassRiposte() && InFront && !ImmuneRipo) {
+		if (IsEnraged()) {
+			damage = -3;
+			Log.Out(Logs::Detail, Logs::Combat, "I am enraged, riposting frontal attack.");
+			return true;
+		}
 		if (IsClient())
 			CastToClient()->CheckIncreaseSkill(EQEmu::skills::SkillRiposte, other, -10);
 		// check auto discs ... I guess aa/items too :P
@@ -1205,7 +1203,7 @@ bool Client::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, b
 	    IsValidSpell(aabonuses.SkillAttackProc[2])) {
 		float chance = aabonuses.SkillAttackProc[0] / 1000.0f;
 		if (zone->random.Roll(chance))
-			SpellFinished(aabonuses.SkillAttackProc[2], other, 10, 0, -1,
+			SpellFinished(aabonuses.SkillAttackProc[2], other, EQEmu::CastingSlot::Item, 0, -1,
 				      spells[aabonuses.SkillAttackProc[2]].ResistDiff);
 	}
 	other->Damage(this, damage, SPELL_UNKNOWN, skillinuse, true, -1, false, special);
@@ -1802,7 +1800,7 @@ void NPC::Damage(Mob* other, int32 damage, uint16 spell_id, EQEmu::skills::Skill
 	//handle EVENT_ATTACK. Resets after we have not been attacked for 12 seconds
 	if(attacked_timer.Check())
 	{
-		Log.Out(Logs::Detail, Logs::Combat, "Triggering EVENT_ATTACK due to attack by %s", other->GetName());
+		Log.Out(Logs::Detail, Logs::Combat, "Triggering EVENT_ATTACK due to attack by %s", other ? other->GetName() : "nullptr");
 		parse->EventNPC(EVENT_ATTACK, this, other, "", 0);
 	}
 	attacked_timer.Start(CombatEventTimer_expire);
@@ -1821,7 +1819,7 @@ void NPC::Damage(Mob* other, int32 damage, uint16 spell_id, EQEmu::skills::Skill
 			if(IsLDoNTrapped())
 			{
 				Message_StringID(13, LDON_ACCIDENT_SETOFF2);
-				SpellFinished(GetLDoNTrapSpellID(), other, 10, 0, -1, spells[GetLDoNTrapSpellID()].ResistDiff, false);
+				SpellFinished(GetLDoNTrapSpellID(), other, EQEmu::CastingSlot::Item, 0, -1, spells[GetLDoNTrapSpellID()].ResistDiff, false);
 				SetLDoNTrapSpellID(0);
 				SetLDoNTrapped(false);
 				SetLDoNTrapDetected(false);
@@ -3169,68 +3167,63 @@ void Mob::CommonDamage(Mob* attacker, int32 &damage, const uint16 spell_id, cons
 			BuffFadeByEffect(SE_Mez);
 		}
 
-		//check stun chances if bashing
-		if (damage > 0 && ((skill_used == EQEmu::skills::SkillBash || skill_used == EQEmu::skills::SkillKick) && attacker)) {
-			// NPCs can stun with their bash/kick as soon as they receive it.
-			// Clients can stun mobs under level 56 with their kick when they get level 55 or greater.
-			// Clients have a chance to stun if the mob is 56+
-
-			// Calculate the chance to stun
-			int stun_chance = 0;
-			if (!GetSpecialAbility(UNSTUNABLE)) {
-				if (attacker->IsNPC()) {
-					stun_chance = RuleI(Combat, NPCBashKickStunChance);
-				} else if (attacker->IsClient()) {
-					// Less than base immunity
-					// Client vs. Client always uses the chance
-					if (!IsClient() && GetLevel() <= RuleI(Spells, BaseImmunityLevel)) {
-						if (skill_used == EQEmu::skills::SkillBash) // Bash always will
-							stun_chance = 100;
-						else if (attacker->GetLevel() >= RuleI(Combat, ClientStunLevel))
-							stun_chance = 100; // only if you're over level 55 and using kick
-					} else { // higher than base immunity or Client vs. Client
-						// not sure on this number, use same as NPC for now
-						if (skill_used == EQEmu::skills::SkillKick && attacker->GetLevel() < RuleI(Combat, ClientStunLevel))
-							stun_chance = RuleI(Combat, NPCBashKickStunChance);
-						else if (skill_used == EQEmu::skills::SkillBash)
-							stun_chance = RuleI(Combat, NPCBashKickStunChance) +
-								attacker->spellbonuses.StunBashChance +
-								attacker->itembonuses.StunBashChance +
-								attacker->aabonuses.StunBashChance;
-					}
-				}
+		// broken up for readability
+		// This is based on what the client is doing
+		// We had a bunch of stuff like BaseImmunityLevel checks, which I think is suppose to just be for spells
+		// This is missing some merc checks, but those mostly just skipped the spell bonuses I think ...
+		bool can_stun = false;
+		int stunbash_chance = 0; // bonus
+		if (attacker) {
+			if (skill_used == EQEmu::skills::SkillBash) {
+				can_stun = true;
+				if (attacker->IsClient())
+					stunbash_chance = attacker->spellbonuses.StunBashChance +
+							  attacker->itembonuses.StunBashChance +
+							  attacker->aabonuses.StunBashChance;
+			} else if (skill_used == EQEmu::skills::SkillKick &&
+				   (attacker->GetLevel() > 55 || attacker->IsNPC()) && GetClass() == WARRIOR) {
+				can_stun = true;
 			}
 
-			if (stun_chance && zone->random.Roll(stun_chance)) {
-				// Passed stun, try to resist now
-				int stun_resist = itembonuses.StunResist + spellbonuses.StunResist;
-				int frontal_stun_resist = itembonuses.FrontalStunResist + spellbonuses.FrontalStunResist;
-
-				Log.Out(Logs::Detail, Logs::Combat, "Stun passed, checking resists. Was %d chance.", stun_chance);
-				if (IsClient()) {
-					stun_resist += aabonuses.StunResist;
-					frontal_stun_resist += aabonuses.FrontalStunResist;
-				}
-
-				// frontal stun check for ogres/bonuses
-				if (((GetBaseRace() == OGRE && IsClient()) ||
-						(frontal_stun_resist && zone->random.Roll(frontal_stun_resist))) &&
-						!attacker->BehindMob(this, attacker->GetX(), attacker->GetY())) {
-					Log.Out(Logs::Detail, Logs::Combat, "Frontal stun resisted. %d chance.", frontal_stun_resist);
-
-				} else {
-					// Normal stun resist check.
-					if (stun_resist && zone->random.Roll(stun_resist)) {
+			if ((GetBaseRace() == OGRE || GetBaseRace() == OGGOK_CITIZEN) &&
+			    !attacker->BehindMob(this, attacker->GetX(), attacker->GetY()))
+				can_stun = false;
+			if (GetSpecialAbility(UNSTUNABLE))
+				can_stun = false;
+		}
+		if (can_stun) {
+			int bashsave_roll = zone->random.Int(0, 100);
+			if (bashsave_roll > 98 || bashsave_roll > (55 - stunbash_chance)) {
+				// did stun -- roll other resists
+				// SE_FrontalStunResist description says any angle now a days
+				int stun_resist2 = spellbonuses.FrontalStunResist + itembonuses.FrontalStunResist +
+						   aabonuses.FrontalStunResist;
+				if (zone->random.Int(1, 100) > stun_resist2) {
+					// stun resist 2 failed
+					// time to check SE_StunResist and mod2 stun resist
+					int stun_resist =
+					    spellbonuses.StunResist + itembonuses.StunResist + aabonuses.StunResist;
+					if (zone->random.Int(0, 100) >= stun_resist) {
+						// did stun
+						// nothing else to check!
+						Stun(2000); // straight 2 seconds every time
+					} else {
+						// stun resist passed!
 						if (IsClient())
 							Message_StringID(MT_Stun, SHAKE_OFF_STUN);
-						Log.Out(Logs::Detail, Logs::Combat, "Stun Resisted. %d chance.", stun_resist);
-					} else {
-						Log.Out(Logs::Detail, Logs::Combat, "Stunned. %d resist chance.", stun_resist);
-						Stun(zone->random.Int(0, 2) * 1000); // 0-2 seconds
 					}
+				} else {
+					// stun resist 2 passed!
+					if (IsClient())
+						Message_StringID(MT_Stun, AVOID_STUNNING_BLOW);
 				}
 			} else {
-				Log.Out(Logs::Detail, Logs::Combat, "Stun failed. %d chance.", stun_chance);
+				// main stun failed -- extra interrupt roll
+				if (IsCasting() &&
+				    !EQEmu::ValueWithin(casting_spell_id, 859, 1023)) // these spells are excluded
+					// 90% chance >< -- stun immune won't reach this branch though :(
+					if (zone->random.Int(0, 9) > 1)
+						InterruptSpell();
 			}
 		}
 
@@ -3268,7 +3261,7 @@ void Mob::CommonDamage(Mob* attacker, int32 &damage, const uint16 spell_id, cons
 		a->damage = damage;
 		a->spellid = spell_id;
 		a->special = special;
-		a->meleepush_xy = attacker->GetHeading() * 2.0f;
+		a->meleepush_xy = attacker ? attacker->GetHeading() * 2.0f : 0.0f;
 		if (RuleB(Combat, MeleePush) && damage > 0 && !IsRooted() &&
 		    (IsClient() || zone->random.Roll(RuleI(Combat, MeleePushChance)))) {
 			a->force = EQEmu::skills::GetSkillMeleePushForce(skill_used);
@@ -3805,7 +3798,7 @@ void Mob::TryPetCriticalHit(Mob *defender, uint16 skill, int32 &damage)
 
 void Mob::TryCriticalHit(Mob *defender, uint16 skill, int32 &damage, ExtraAttackOptions *opts)
 {
-	if(damage < 1)
+	if(damage < 1 || !defender)
 		return;
 
 	// decided to branch this into it's own function since it's going to be duplicating a lot of the
@@ -3826,8 +3819,8 @@ void Mob::TryCriticalHit(Mob *defender, uint16 skill, int32 &damage, ExtraAttack
 	bool IsBerskerSPA = false;
 
 	//1: Try Slay Undead
-	if (defender && (defender->GetBodyType() == BT_Undead ||
-				defender->GetBodyType() == BT_SummonedUndead || defender->GetBodyType() == BT_Vampire)) {
+	if (defender->GetBodyType() == BT_Undead ||
+				defender->GetBodyType() == BT_SummonedUndead || defender->GetBodyType() == BT_Vampire) {
 		int32 SlayRateBonus = aabonuses.SlayUndead[0] + itembonuses.SlayUndead[0] + spellbonuses.SlayUndead[0];
 		if (SlayRateBonus) {
 			float slayChance = static_cast<float>(SlayRateBonus) / 10000.0f;

@@ -37,10 +37,12 @@ enum {	//values for pTimerType
 	pTimerSenseTraps = 12,
 	pTimerDisarmTraps = 13,
 	pTimerDisciplineReuseStart = 14,
-	pTimerDisciplineReuseEnd = 24,
+	pTimerDisciplineReuseEnd = 24, // client actually has 20 ids, but still no disc go that high even on live
 	pTimerCombatAbility = 25,
 	pTimerCombatAbility2 = 26, // RoF2+ Tiger Claw is unlinked from other monk skills, generic in case other classes ever need it
 	pTimerBeggingPickPocket = 27,
+	pTimerLinkedSpellReuseStart = 28,
+	pTimerLinkedSpellReuseEnd = 48,
 
 	pTimerLayHands = 87,		//these IDs are used by client too
 	pTimerHarmTouch = 89,		//so dont change them

@@ -148,14 +148,29 @@ public:
 	bool IsMobSpawnedByNpcTypeID(uint32 get_id);
 	Mob *GetTargetForVirus(Mob* spreader, int range);
 	inline NPC *GetNPCByID(uint16 id)
-		{ return npc_list.count(id) ? npc_list.at(id) : nullptr; }
+	{
+		auto it = npc_list.find(id);
+		if (it != npc_list.end())
+			return it->second;
+		return nullptr;
+	}
 	NPC *GetNPCByNPCTypeID(uint32 npc_id);
 	inline Merc *GetMercByID(uint16 id)
-		{ return merc_list.count(id) ? merc_list.at(id) : nullptr; }
+	{
+		auto it = merc_list.find(id);
+		if (it != merc_list.end())
+			return it->second;
+		return nullptr;
+	}
 	Client *GetClientByName(const char *name);
 	Client *GetClientByAccID(uint32 accid);
 	inline Client *GetClientByID(uint16 id)
-		{ return client_list.count(id) ? client_list.at(id) : nullptr; }
+	{
+		auto it = client_list.find(id);
+		if (it != client_list.end())
+			return it->second;
+		return nullptr;
+	}
 	Client *GetClientByCharID(uint32 iCharID);
 	Client *GetClientByWID(uint32 iWID);
 	Client *GetClient(uint32 ip, uint16 port);
@@ -172,7 +187,12 @@ public:
 	Corpse *GetCorpseByOwner(Client* client);
 	Corpse *GetCorpseByOwnerWithinRange(Client* client, Mob* center, int range);
 	inline Corpse *GetCorpseByID(uint16 id)
-		{ return corpse_list.count(id) ? corpse_list.at(id) : nullptr; }
+	{
+		auto it = corpse_list.find(id);
+		if (it != corpse_list.end())
+			return it->second;
+		return nullptr;
+	}
 	Corpse *GetCorpseByDBID(uint32 dbid);
 	Corpse *GetCorpseByName(const char* name);
 
@@ -181,10 +201,20 @@ public:
 	Client* FindCorpseDragger(uint16 CorpseID);
 
 	inline Object *GetObjectByID(uint16 id)
-		{ return object_list.count(id) ? object_list.at(id) : nullptr; }
+	{
+		auto it = object_list.find(id);
+		if (it != object_list.end())
+			return it->second;
+		return nullptr;
+	}
 	Object *GetObjectByDBID(uint32 id);
 	inline Doors *GetDoorsByID(uint16 id)
-		{ return door_list.count(id) ? door_list.at(id) : nullptr; }
+	{
+		auto it = door_list.find(id);
+		if (it != door_list.end())
+			return it->second;
+		return nullptr;
+	}
 	Doors *GetDoorsByDoorID(uint32 id);
 	Doors *GetDoorsByDBID(uint32 id);
 	void RemoveAllCorpsesByCharID(uint32 charid);

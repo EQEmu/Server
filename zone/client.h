@@ -27,6 +27,7 @@ class Object;
 class Raid;
 class Seperator;
 class ServerPacket;
+enum WaterRegionType : int;
 
 namespace EQEmu
 {
@@ -105,6 +106,7 @@ enum { //Type arguments to the Message* routines.
 
 #define SPELLBAR_UNLOCK 0x2bc
 enum { //scribing argument to MemorizeSpell
+	memSpellUnknown = -1, // this modifies some state data
 	memSpellScribing = 0,
 	memSpellMemorize = 1,
 	memSpellForget = 2,
@@ -326,6 +328,7 @@ public:
 	/* New PP Save Functions */
 	bool SaveCurrency(){ return database.SaveCharacterCurrency(this->CharacterID(), &m_pp); }
 	bool SaveAA();
+	void RemoveExpendedAA(int aa_id);
 
 	inline bool ClientDataLoaded() const { return client_data_loaded; }
 	inline bool Connected() const { return (client_state == CLIENT_CONNECTED); }
@@ -359,9 +362,9 @@ public:
 	int32 LevelRegen();
 	void HPTick();
 	void SetGM(bool toggle);
-	void SetPVP(bool toggle);
+	void SetPVP(bool toggle, bool message = true);
 
-	inline bool GetPVP() const { return zone->GetZoneID() == 77 ? true : (m_pp.pvp != 0); }
+	inline bool GetPVP() const { return m_pp.pvp != 0; }
 	inline bool GetGM() const { return m_pp.gm != 0; }
 
 	inline void SetBaseClass(uint32 i) { m_pp.class_=i; }
@@ -510,6 +513,8 @@ public:
 	virtual int GetMaxSongSlots() const { return 12; }
 	virtual int GetMaxDiscSlots() const { return 1; }
 	virtual int GetMaxTotalSlots() const { return 38; }
+	virtual uint32 GetFirstBuffSlot(bool disc, bool song);
+	virtual uint32 GetLastBuffSlot(bool disc, bool song);
 	virtual void InitializeBuffSlots();
 	virtual void UninitializeBuffSlots();
 
@@ -889,6 +894,9 @@ public:
 	void SendDisciplineTimer(uint32 timer_id, uint32 duration);
 	bool UseDiscipline(uint32 spell_id, uint32 target);
 
+	void SetLinkedSpellReuseTimer(uint32 timer_id, uint32 duration);
+	bool IsLinkedSpellReuseTimerReady(uint32 timer_id);
+
 	bool CheckTitle(int titleset);
 	void EnableTitle(int titleset);
 	void RemoveTitle(int titleset);
@@ -1230,6 +1238,8 @@ public:
 
 	void SendHPUpdateMarquee();
 
+	void CheckRegionTypeChanges();
+
 protected:
 	friend class Mob;
 	void CalcItemBonuses(StatBonuses* newbon);
@@ -1414,6 +1424,7 @@ private:
 	uint8 zonesummon_ignorerestrictions;
 	ZoneMode zone_mode;
 
+	WaterRegionType last_region_type;
 
 	Timer position_timer;
 	uint8 position_timer_counter;

@@ -63,6 +63,9 @@ namespace RoF
 	// client to server text link converter
 	static inline void RoFToServerTextLink(std::string& serverTextLink, const std::string& rofTextLink);
 
+	static inline CastingSlot ServerToRoFCastingSlot(EQEmu::CastingSlot slot);
+	static inline EQEmu::CastingSlot RoFToServerCastingSlot(CastingSlot slot);
+
 	void Register(EQStreamIdentifier &into)
 	{
 		//create our opcode manager if we havent already
@@ -507,10 +510,7 @@ namespace RoF
 		ENCODE_LENGTH_EXACT(CastSpell_Struct);
 		SETUP_DIRECT_ENCODE(CastSpell_Struct, structs::CastSpell_Struct);
 
-		if (emu->slot == 10)
-			eq->slot = 13;
-		else
-			OUT(slot);
+		eq->slot = static_cast<uint32>(ServerToRoFCastingSlot(static_cast<EQEmu::CastingSlot>(emu->slot)));
 
 		OUT(spell_id);
 		eq->inventory_slot = ServerToRoFSlot(emu->inventoryslot);
@@ -1623,7 +1623,8 @@ namespace RoF
 		OUT(new_mana);
 		OUT(stamina);
 		OUT(spell_id);
-		eq->unknown16 = -1; // Self Interrupt/Success = -1, Fizzle = 1, Other Interrupt = 2?
+		OUT(keepcasting);
+		eq->slot = -1; // this is spell gem slot. It's -1 in normal operation
 
 		FINISH_ENCODE();
 	}
@@ -2012,18 +2013,18 @@ namespace RoF
 		__packet->WriteUInt8(1);		// 1 indicates all buffs on the pet (0 to add or remove a single buff)
 		__packet->WriteUInt16(emu->buffcount);
 
-		for (uint16 i = 0; i < BUFF_COUNT; ++i)
+		for (uint16 i = 0; i < PET_BUFF_COUNT; ++i)
 		{
 			if (emu->spellid[i])
 			{
 				__packet->WriteUInt32(i);
 				__packet->WriteUInt32(emu->spellid[i]);
 				__packet->WriteUInt32(emu->ticsremaining[i]);
-				__packet->WriteUInt32(0); // Unknown
+				__packet->WriteUInt32(0); // numhits
 				__packet->WriteString("");
 			}
 		}
-		__packet->WriteUInt8(0); // Unknown
+		__packet->WriteUInt8(0); // some sort of type
 
 		FINISH_ENCODE();
 	}
@@ -2259,22 +2260,23 @@ namespace RoF
 
 		outapp->WriteUInt32(structs::MAX_PP_MEMSPELL);		// Memorised spell slots
 
-		for (uint32 r = 0; r < MAX_PP_MEMSPELL; r++)
+		for (uint32 r = 0; r < MAX_PP_MEMSPELL; r++) // first 12
 		{
 			outapp->WriteUInt32(emu->mem_spells[r]);
 		}
-		// zeroes for the rest of the slots
+		// zeroes for the rest of the slots -- the other 4 which don't work at all!
 		for (uint32 r = 0; r < structs::MAX_PP_MEMSPELL - MAX_PP_MEMSPELL; r++)
 		{
 			outapp->WriteUInt32(0xFFFFFFFFU);
 		}
 
-		outapp->WriteUInt32(13);			// Unknown count
+		outapp->WriteUInt32(13);			// gem refresh count
 
-		for (uint32 r = 0; r < 13; r++)
+		for (uint32 r = 0; r < MAX_PP_MEMSPELL; r++)
 		{
-			outapp->WriteUInt32(0);			// Unknown
+			outapp->WriteUInt32(emu->spellSlotRefresh[r]);			// spell gem refresh
 		}
+		outapp->WriteUInt32(0);			// also refresh -- historically HT/LoH :P
 
 		outapp->WriteUInt8(0);			// Unknown
 
@@ -4334,10 +4336,7 @@ namespace RoF
 		DECODE_LENGTH_EXACT(structs::CastSpell_Struct);
 		SETUP_DIRECT_DECODE(CastSpell_Struct, structs::CastSpell_Struct);
 
-		if (eq->slot == 13)
-			emu->slot = 10;
-		else
-			IN(slot);
+		emu->slot = static_cast<uint32>(RoFToServerCastingSlot(static_cast<CastingSlot>(eq->slot)));
 
 		IN(spell_id);
 		emu->inventoryslot = RoFToServerSlot(eq->inventory_slot);
@@ -6009,4 +6008,80 @@ namespace RoF
 		}
 	}
 
+	static inline CastingSlot ServerToRoFCastingSlot(EQEmu::CastingSlot slot)
+	{
+		switch (slot) {
+		case EQEmu::CastingSlot::Gem1:
+			return CastingSlot::Gem1;
+		case EQEmu::CastingSlot::Gem2:
+			return CastingSlot::Gem2;
+		case EQEmu::CastingSlot::Gem3:
+			return CastingSlot::Gem3;
+		case EQEmu::CastingSlot::Gem4:
+			return CastingSlot::Gem4;
+		case EQEmu::CastingSlot::Gem5:
+			return CastingSlot::Gem5;
+		case EQEmu::CastingSlot::Gem6:
+			return CastingSlot::Gem6;
+		case EQEmu::CastingSlot::Gem7:
+			return CastingSlot::Gem7;
+		case EQEmu::CastingSlot::Gem8:
+			return CastingSlot::Gem8;
+		case EQEmu::CastingSlot::Gem9:
+			return CastingSlot::Gem9;
+		case EQEmu::CastingSlot::Gem10:
+			return CastingSlot::Gem10;
+		case EQEmu::CastingSlot::Gem11:
+			return CastingSlot::Gem11;
+		case EQEmu::CastingSlot::Gem12:
+			return CastingSlot::Gem12;
+		case EQEmu::CastingSlot::Item:
+		case EQEmu::CastingSlot::PotionBelt:
+			return CastingSlot::Item;
+		case EQEmu::CastingSlot::Discipline:
+			return CastingSlot::Discipline;
+		case EQEmu::CastingSlot::AltAbility:
+			return CastingSlot::AltAbility;
+		default: // we shouldn't have any issues with other slots ... just return something
+			return CastingSlot::Discipline;
+		}
+	}
+
+	static inline EQEmu::CastingSlot RoFToServerCastingSlot(CastingSlot slot)
+	{
+		switch (slot) {
+		case CastingSlot::Gem1:
+			return EQEmu::CastingSlot::Gem1;
+		case CastingSlot::Gem2:
+			return EQEmu::CastingSlot::Gem2;
+		case CastingSlot::Gem3:
+			return EQEmu::CastingSlot::Gem3;
+		case CastingSlot::Gem4:
+			return EQEmu::CastingSlot::Gem4;
+		case CastingSlot::Gem5:
+			return EQEmu::CastingSlot::Gem5;
+		case CastingSlot::Gem6:
+			return EQEmu::CastingSlot::Gem6;
+		case CastingSlot::Gem7:
+			return EQEmu::CastingSlot::Gem7;
+		case CastingSlot::Gem8:
+			return EQEmu::CastingSlot::Gem8;
+		case CastingSlot::Gem9:
+			return EQEmu::CastingSlot::Gem9;
+		case CastingSlot::Gem10:
+			return EQEmu::CastingSlot::Gem10;
+		case CastingSlot::Gem11:
+			return EQEmu::CastingSlot::Gem11;
+		case CastingSlot::Gem12:
+			return EQEmu::CastingSlot::Gem12;
+		case CastingSlot::Discipline:
+			return EQEmu::CastingSlot::Discipline;
+		case CastingSlot::Item:
+			return EQEmu::CastingSlot::Item;
+		case CastingSlot::AltAbility:
+			return EQEmu::CastingSlot::AltAbility;
+		default: // we shouldn't have any issues with other slots ... just return something
+			return EQEmu::CastingSlot::Discipline;
+		}
+	}
 } /*RoF*/

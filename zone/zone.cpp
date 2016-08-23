@@ -1594,7 +1594,9 @@ ZonePoint* Zone::GetClosestZonePoint(const glm::vec3& location, uint32 to, Clien
 		iterator.Advance();
 	}
 
-	if(closest_dist > 400.0f && closest_dist < max_distance2)
+	// if we have a water map and it says we're in a zoneline, lets assume it's just a really big zone line
+	// this shouldn't open up any exploits since those situations are detected later on
+	if ((zone->HasWaterMap() && !zone->watermap->InZoneLine(glm::vec3(client->GetPosition()))) || (!zone->HasWaterMap() && closest_dist > 400.0f && closest_dist < max_distance2))
 	{
 		if(client)
 			client->CheatDetected(MQZoneUnknownDest, location.x, location.y, location.z); // Someone is trying to use /zone

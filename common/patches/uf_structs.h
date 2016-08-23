@@ -26,7 +26,7 @@ namespace UF
 	namespace structs {
 
 
-static const uint32 BUFF_COUNT = 25;
+static const uint32 BUFF_COUNT = 30;
 
 /*
 ** Compiler override to ensure
@@ -479,7 +479,7 @@ struct MemorizeSpell_Struct {
 uint32 slot;     // Spot in the spell book/memorized slot
 uint32 spell_id; // Spell id (200 or c8 is minor healing, etc)
 uint32 scribing; // 1 if memorizing a spell, set to 0 if scribing to book, 2 if un-memming
-//uint32 unknown12;
+uint32 reduction; // lowers reuse
 };
 
 /*
@@ -512,11 +512,12 @@ struct DeleteSpell_Struct
 
 struct ManaChange_Struct
 {
-	uint32	new_mana;                  // New Mana AMount
-	uint32	stamina;
-	uint32	spell_id;
-	uint32	unknown12;
-	uint32	unknown16;
+/*00*/	uint32	new_mana;		// New Mana AMount
+/*04*/	uint32	stamina;
+/*08*/	uint32	spell_id;
+/*12*/	uint8	keepcasting;	// won't stop the cast. Change mana while casting?
+/*13*/	uint8	padding[3];		// client doesn't read it, garbage data seems like
+/*16*/	int32	slot;			// -1 for normal usage slot for when we want silent interrupt? I think it does timer stuff or something. Linked Spell Reuse interrupt uses it
 };
 
 struct SwapSpell_Struct
@@ -958,8 +959,7 @@ struct PlayerProfile_Struct
 /*07880*/ uint32  toxicity;				// Potion Toxicity (15=too toxic, each potion adds 3)
 /*07884*/ uint32  thirst_level;			// Drink (ticks till next drink)
 /*07888*/ uint32  hunger_level;			// Food (ticks till next eat)
-/*07892*/ SpellBuff_Struct buffs[BUFF_COUNT];	// [1900] Buffs currently on the player (30 Max) - (Each Size 76)
-/*09792*/ uint8   unknown09792[380];		// BUFF_COUNT has been left at 25. These are the extra 5 buffs in Underfoot
+/*07892*/ SpellBuff_Struct buffs[BUFF_COUNT];	// [2280] Buffs currently on the player (30 Max) - (Each Size 76)
 /*10172*/ Disciplines_Struct  disciplines;	// [400] Known disciplines
 /*10972*/ uint32  recastTimers[MAX_RECAST_TYPES]; // Timers (UNIX Time of last use)
 /*11052*/ uint8   unknown11052[160];		// Some type of Timers
@@ -2167,9 +2167,7 @@ struct GroupFollow_Struct { // Underfoot Follow Struct
 
 struct InspectBuffs_Struct {
 /*000*/ uint32 spell_id[BUFF_COUNT];
-/*100*/ uint32 filler100[5];	// BUFF_COUNT is really 30...
 /*120*/ int32 tics_remaining[BUFF_COUNT];
-/*220*/ uint32 filler220[5];	// BUFF_COUNT is really 30...
 };
 
 

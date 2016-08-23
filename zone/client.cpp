@@ -44,6 +44,7 @@ extern volatile bool RunLoops;
 #include "zonedb.h"
 #include "petitions.h"
 #include "command.h"
+#include "water_map.h"
 #ifdef BOTS
 #include "bot_command.h"
 #endif
@@ -155,7 +156,8 @@ Client::Client(EQStreamInterface* ieqs)
 	m_Proximity(FLT_MAX, FLT_MAX, FLT_MAX), //arbitrary large number
 	m_ZoneSummonLocation(-2.0f,-2.0f,-2.0f),
 	m_AutoAttackPosition(0.0f, 0.0f, 0.0f, 0.0f),
-	m_AutoAttackTargetLocation(0.0f, 0.0f, 0.0f)
+	m_AutoAttackTargetLocation(0.0f, 0.0f, 0.0f),
+	last_region_type(RegionTypeUnsupported)
 {
 	for(int cf=0; cf < _FilterCount; cf++)
 		ClientFilters[cf] = FilterShow;
@@ -563,6 +565,11 @@ bool Client::SaveAA() {
 	}
 
 	return true;
+}
+
+void Client::RemoveExpendedAA(int aa_id)
+{
+	database.QueryDatabase(StringFormat("DELETE from `character_alternate_abilities` WHERE `id` = %d and `aa_id` = %d", character_id, aa_id));
 }
 
 bool Client::Save(uint8 iCommitNow) {
@@ -1787,7 +1794,7 @@ const int32& Client::SetMana(int32 amount) {
 }
 
 void Client::SendManaUpdatePacket() {
-	if (!Connected() || IsCasting())
+	if (!Connected())
 		return;
 
 	if (ClientVersion() >= EQEmu::versions::ClientVersion::SoD) {
@@ -1801,7 +1808,8 @@ void Client::SendManaUpdatePacket() {
 		ManaChange_Struct* manachange = (ManaChange_Struct*)outapp->pBuffer;
 		manachange->new_mana = cur_mana;
 		manachange->stamina = cur_end;
-		manachange->spell_id = casting_spell_id;	//always going to be 0... since we check IsCasting()
+		manachange->spell_id = casting_spell_id;
+		manachange->keepcasting = 1;
 		outapp->priority = 6;
 		QueuePacket(outapp);
 		safe_delete(outapp);
@@ -2476,13 +2484,15 @@ uint16 Client::GetMaxSkillAfterSpecializationRules(EQEmu::skills::SkillType skil
 	return Result;
 }
 
-void Client::SetPVP(bool toggle) {
+void Client::SetPVP(bool toggle, bool message) {
 	m_pp.pvp = toggle ? 1 : 0;
 
-	if(GetPVP())
-		this->Message_StringID(MT_Shout,PVP_ON);
-	else
-		Message(13, "You no longer follow the ways of discord.");
+	if (message) {
+		if(GetPVP())
+			this->Message_StringID(MT_Shout,PVP_ON);
+		else
+			Message(13, "You no longer follow the ways of discord.");
+	}
 
 	SendAppearancePacket(AT_PVP, GetPVP());
 	Save();
@@ -3674,58 +3684,58 @@ void Client::SacrificeConfirm(Client *caster)
 //Essentially a special case death function
 void Client::Sacrifice(Client *caster)
 {
-				if(GetLevel() >= RuleI(Spells, SacrificeMinLevel) && GetLevel() <= RuleI(Spells, SacrificeMaxLevel)){
-					int exploss = (int)(GetLevel() * (GetLevel() / 18.0) * 12000);
-					if(exploss < GetEXP()){
-						SetEXP(GetEXP()-exploss, GetAAXP());
-						SendLogoutPackets();
+	if (GetLevel() >= RuleI(Spells, SacrificeMinLevel) && GetLevel() <= RuleI(Spells, SacrificeMaxLevel)) {
+		int exploss = (int)(GetLevel() * (GetLevel() / 18.0) * 12000);
+		if (exploss < GetEXP()) {
+			SetEXP(GetEXP() - exploss, GetAAXP());
+			SendLogoutPackets();
 
-						//make our become corpse packet, and queue to ourself before OP_Death.
-						EQApplicationPacket app2(OP_BecomeCorpse, sizeof(BecomeCorpse_Struct));
-						BecomeCorpse_Struct* bc = (BecomeCorpse_Struct*)app2.pBuffer;
-						bc->spawn_id = GetID();
-						bc->x = GetX();
-						bc->y = GetY();
-						bc->z = GetZ();
-						QueuePacket(&app2);
+			// make our become corpse packet, and queue to ourself before OP_Death.
+			EQApplicationPacket app2(OP_BecomeCorpse, sizeof(BecomeCorpse_Struct));
+			BecomeCorpse_Struct *bc = (BecomeCorpse_Struct *)app2.pBuffer;
+			bc->spawn_id = GetID();
+			bc->x = GetX();
+			bc->y = GetY();
+			bc->z = GetZ();
+			QueuePacket(&app2);
 
-						// make death packet
-						EQApplicationPacket app(OP_Death, sizeof(Death_Struct));
-						Death_Struct* d = (Death_Struct*)app.pBuffer;
-						d->spawn_id = GetID();
-						d->killer_id = caster ? caster->GetID() : 0;
-						d->bindzoneid = GetPP().binds[0].zoneId;
-						d->spell_id = SPELL_UNKNOWN;
-						d->attack_skill = 0xe7;
-						d->damage = 0;
-						app.priority = 6;
-						entity_list.QueueClients(this, &app);
+			// make death packet
+			EQApplicationPacket app(OP_Death, sizeof(Death_Struct));
+			Death_Struct *d = (Death_Struct *)app.pBuffer;
+			d->spawn_id = GetID();
+			d->killer_id = caster ? caster->GetID() : 0;
+			d->bindzoneid = GetPP().binds[0].zoneId;
+			d->spell_id = SPELL_UNKNOWN;
+			d->attack_skill = 0xe7;
+			d->damage = 0;
+			app.priority = 6;
+			entity_list.QueueClients(this, &app);
 
-						BuffFadeAll();
-						UnmemSpellAll();
-						Group *g = GetGroup();
-						if(g){
-							g->MemberZoned(this);
-						}
-						Raid *r = entity_list.GetRaidByClient(this);
-						if(r){
-							r->MemberZoned(this);
-						}
-						ClearAllProximities();
-						if(RuleB(Character, LeaveCorpses)){
-							auto new_corpse = new Corpse(this, 0);
-							entity_list.AddCorpse(new_corpse, GetID());
-							SetID(0);
-							entity_list.QueueClients(this, &app2, true);
-						}
-						Save();
-						GoToDeath();
-						caster->SummonItem(RuleI(Spells, SacrificeItemID));
-					}
-				}
-				else{
-					caster->Message_StringID(13, SAC_TOO_LOW);	//This being is not a worthy sacrifice.
-				}
+			BuffFadeAll();
+			UnmemSpellAll();
+			Group *g = GetGroup();
+			if (g) {
+				g->MemberZoned(this);
+			}
+			Raid *r = entity_list.GetRaidByClient(this);
+			if (r) {
+				r->MemberZoned(this);
+			}
+			ClearAllProximities();
+			if (RuleB(Character, LeaveCorpses)) {
+				auto new_corpse = new Corpse(this, 0);
+				entity_list.AddCorpse(new_corpse, GetID());
+				SetID(0);
+				entity_list.QueueClients(this, &app2, true);
+			}
+			Save();
+			GoToDeath();
+			if (caster) // I guess it's possible?
+				caster->SummonItem(RuleI(Spells, SacrificeItemID));
+		}
+	} else {
+		caster->Message_StringID(13, SAC_TOO_LOW); // This being is not a worthy sacrifice.
+	}
 }
 
 void Client::SendOPTranslocateConfirm(Mob *Caster, uint16 SpellID) {
@@ -4604,7 +4614,7 @@ void Client::HandleLDoNOpen(NPC *target)
 			if(target->GetLDoNTrapSpellID() != 0)
 			{
 				Message_StringID(13, LDON_ACCIDENT_SETOFF2);
-				target->SpellFinished(target->GetLDoNTrapSpellID(), this, 10, 0, -1, spells[target->GetLDoNTrapSpellID()].ResistDiff);
+				target->SpellFinished(target->GetLDoNTrapSpellID(), this, EQEmu::CastingSlot::Item, 0, -1, spells[target->GetLDoNTrapSpellID()].ResistDiff);
 				target->SetLDoNTrapSpellID(0);
 				target->SetLDoNTrapped(false);
 				target->SetLDoNTrapDetected(false);
@@ -4726,7 +4736,7 @@ void Client::HandleLDoNDisarm(NPC *target, uint16 skill, uint8 type)
 				break;
 			case -1:
 				Message_StringID(13, LDON_ACCIDENT_SETOFF2);
-				target->SpellFinished(target->GetLDoNTrapSpellID(), this, 10, 0, -1, spells[target->GetLDoNTrapSpellID()].ResistDiff);
+				target->SpellFinished(target->GetLDoNTrapSpellID(), this, EQEmu::CastingSlot::Item, 0, -1, spells[target->GetLDoNTrapSpellID()].ResistDiff);
 				target->SetLDoNTrapSpellID(0);
 				target->SetLDoNTrapped(false);
 				target->SetLDoNTrapDetected(false);
@@ -4745,7 +4755,7 @@ void Client::HandleLDoNPickLock(NPC *target, uint16 skill, uint8 type)
 			if(target->IsLDoNTrapped())
 			{
 				Message_StringID(13, LDON_ACCIDENT_SETOFF2);
-				target->SpellFinished(target->GetLDoNTrapSpellID(), this, 10, 0, -1, spells[target->GetLDoNTrapSpellID()].ResistDiff);
+				target->SpellFinished(target->GetLDoNTrapSpellID(), this, EQEmu::CastingSlot::Item, 0, -1, spells[target->GetLDoNTrapSpellID()].ResistDiff);
 				target->SetLDoNTrapSpellID(0);
 				target->SetLDoNTrapped(false);
 				target->SetLDoNTrapDetected(false);
@@ -8396,7 +8406,7 @@ void Client::SendColoredText(uint32 color, std::string message)
 void Client::QuestReward(Mob* target, uint32 copper, uint32 silver, uint32 gold, uint32 platinum, uint32 itemid, uint32 exp, bool faction) {
 
 	auto outapp = new EQApplicationPacket(OP_Sound, sizeof(QuestReward_Struct));
-	memset(outapp->pBuffer, 0, sizeof(outapp->pBuffer));
+	memset(outapp->pBuffer, 0, sizeof(QuestReward_Struct));
 	QuestReward_Struct* qr = (QuestReward_Struct*)outapp->pBuffer;
 
 	qr->mob_id = target->GetID();		// Entity ID for the from mob name
@@ -8526,4 +8536,28 @@ uint32 Client::GetMoney(uint8 type, uint8 subtype) {
 
 int Client::GetAccountAge() {
 	return (time(nullptr) - GetAccountCreation());
+}
+
+void Client::CheckRegionTypeChanges()
+{
+	if (!zone->HasWaterMap())
+		return;
+
+	auto new_region = zone->watermap->ReturnRegionType(glm::vec3(m_Position));
+
+	// still same region, do nothing
+	if (last_region_type == new_region)
+		return;
+
+	// region type changed
+	last_region_type = new_region;
+
+	// PVP is the only state we need to keep track of, so we can just return now for PVP servers
+	if (RuleI(World, PVPSettings) > 0)
+		return;
+
+	if (last_region_type == RegionTypePVP)
+		SetPVP(true, false);
+	else if (GetPVP())
+		SetPVP(false, false);
 }

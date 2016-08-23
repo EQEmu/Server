@@ -110,6 +110,20 @@ bool EQEmu::skills::IsBardInstrumentSkill(SkillType skill)
 	}
 }
 
+bool EQEmu::skills::IsCastingSkill(SkillType skill)
+{
+	switch (skill) {
+	case SkillAbjuration:
+	case SkillAlteration:
+	case SkillConjuration:
+	case SkillDivination:
+	case SkillEvocation:
+		return true;
+	default:
+		return false;
+	}
+}
+
 const std::map<EQEmu::skills::SkillType, std::string>& EQEmu::skills::GetSkillTypeMap()
 {
 	/* VS2013 code
