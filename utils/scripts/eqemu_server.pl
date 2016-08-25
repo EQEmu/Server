@@ -279,9 +279,7 @@ sub do_self_update_check_routine {
 			}
 
 			unlink("updates_staged/eqemu_server.pl");
-		} 
-	
-		exit;
+		}
 	}
 }
 
