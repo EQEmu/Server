@@ -549,16 +549,15 @@ namespace RoF2
 		for (uint16 i = 0; i < emu->count; ++i)
 		{
 			uint16 buffslot = emu->entries[i].buff_slot;
-			// Not sure if this is needs amending for RoF2 yet.
-			if (emu->entries[i].buff_slot >= 25)
-			{
-				buffslot += 17;
+			if (emu->type == 0) { // only correct for self packets
+				if (emu->entries[i].buff_slot >= 25)
+					buffslot += 17;
+				// TODO: We should really just deal with these "server side"
+				// so we can have clients not limited to other clients.
+				// This fixes discs, songs were changed to 20
+				if (buffslot == 54)
+					buffslot = 62;
 			}
-			// TODO: We should really just deal with these "server side"
-			// so we can have clients not limited to other clients.
-			// This fixes discs, songs were changed to 20
-			if (buffslot == 54)
-				buffslot = 62;
 
 			__packet->WriteUInt32(buffslot);
 			__packet->WriteUInt32(emu->entries[i].spell_id);

@@ -410,13 +410,11 @@ namespace UF
 		for (uint16 i = 0; i < emu->count; ++i)
 		{
 			uint16 buffslot = emu->entries[i].buff_slot;
-			if (emu->entries[i].buff_slot >= 25 && emu->entries[i].buff_slot < 37)
-			{
-				buffslot += 5;
-			}
-			else if (emu->entries[i].buff_slot >= 37)
-			{
-				buffslot += 14;
+			if (emu->type == 0) { // only correct for self packets
+				if (emu->entries[i].buff_slot >= 25 && emu->entries[i].buff_slot < 37)
+					buffslot += 5;
+				else if (emu->entries[i].buff_slot >= 37)
+					buffslot += 14;
 			}
 
 			__packet->WriteUInt32(buffslot);
