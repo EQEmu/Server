@@ -202,6 +202,8 @@ if($ARGV[0] eq "installer"){
 	lua_modules_fetch();
 	fetch_utility_scripts();
 	
+	
+	
 	#::: Database Routines
 	print "[Database] Creating Database '" . $db_name . "'\n";
 	print `"$path" --host $host --user $user --password="$pass" -N -B -e "DROP DATABASE IF EXISTS $db_name;"`;
@@ -313,7 +315,12 @@ sub do_self_update_check_routine {
 
 sub get_installation_variables{
 	#::: Fetch installation variables before building the config
-	open (INSTALL_VARS, "../install_variables.txt");
+	if($OS eq "Linux"){
+		open (INSTALL_VARS, "../install_variables.txt");
+	}
+	if($OS eq "Windows"){
+		open (INSTALL_VARS, "install_variables.txt");
+	}
 	while (<INSTALL_VARS>){
 		chomp;
 		$o = $_;
@@ -440,14 +447,14 @@ sub show_menu_prompt {
 			print " [lua_modules]		Download latest lua_modules\n";
 			print " [utility_scripts]	Download utility scripts to run and operate the EQEmu Server\n";
 			if($OS eq "Windows"){
-				print "--- Windows\n";
-				print " windows_server_download	Updates server code from latest stable\n";
-				print " windows_server_download_bots	Updates server code (bots enabled) from latest\n";
-				print " fetch_dlls			Grabs dll's needed to run windows binaries\n";
-				print " setup_loginserver		Sets up loginserver for Windows\n";
+				print ">>> Windows\n";
+				print " [windows_server_download]	Updates server code from latest stable\n";
+				print " [windows_server_download_bots]	Updates server code (bots enabled) from latest\n";
+				print " [fetch_dlls]			Grabs dll's needed to run windows binaries\n";
+				print " [setup_loginserver]		Sets up loginserver for Windows\n";
 			}
 			print " \n> main - go back to main menu\n";
-			print "Enter a command #> ";
+			print "Enter a command #> "; 
 			$last_menu = trim($input);
 		}
 		elsif($input eq "backup_database"){ database_dump(); $dc = 1; }
