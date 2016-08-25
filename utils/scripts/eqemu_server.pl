@@ -218,6 +218,11 @@ if($ARGV[0] eq "map_files_fetch_bulk"){
 	exit;
 }
 
+if($ARGV[0] eq "loginserver_install_linux"){
+	do_linux_login_server_setup();
+	exit;
+}
+
 if($ARGV[0] eq "installer"){
 	print "Running EQEmu Server installer routines...\n";
 	mkdir('logs');
@@ -272,6 +277,10 @@ if($ARGV[0] eq "installer"){
 		check_windows_firewall_rules();
 		do_windows_login_server_setup();
 	}
+	if($OS eq "Linux"){
+		do_linux_login_server_setup();
+	}
+	
 	exit;
 }
 
@@ -846,16 +855,7 @@ sub do_windows_login_server_setup {
 }
 
 sub do_linux_login_server_setup {
-	print "\n --- Fetching Loginserver... --- \n";
-	get_remote_file($install_repository_request_url . "login_server.zip", "updates_staged/login_server.zip", 1);
-	print "\n --- Extracting... --- \n";
-	unzip('updates_staged/login_server.zip', 'updates_staged/login_server/');
-	my @files;
-	my $start_dir = "updates_staged/login_server";
-	find( 
-		sub { push @files, $File::Find::name unless -d; }, 
-		$start_dir
-	);
+	
 	for my $file (@files) {
 		$destination_file = $file;
 		$destination_file =~s/updates_staged\/login_server\///g;
@@ -870,10 +870,38 @@ sub do_linux_login_server_setup {
 	print get_mysql_result_from_file("db_update/login_server_tables.sql");
 	print "\nDone...\n\n";
 	
-	add_login_server_firewall_rules();
-	
 	rmtree('updates_staged');
 	rmtree('db_update');
+	
+	get_remote_file($install_repository_request_url . "linux/login.ini", "login_template.ini");
+	get_remote_file($install_repository_request_url . "linux/login_opcodes.conf", "login_opcodes.conf");
+	get_remote_file($install_repository_request_url . "linux/login_opcodes.conf", "login_opcodes_sod.conf");
+	
+	get_installation_variables();
+	
+	my $db_name = $installation_variables{"mysql_eqemu_db_name"};
+	my $db_user = $installation_variables{"mysql_eqemu_user"};
+	my $db_password = $installation_variables{"mysql_eqemu_password"};
+	
+	#::: Open new config file
+	open (NEW_CONFIG, '>', 'login.ini');
+
+	#::: Iterate through template and replace variables...
+	open (FILE_TEMPLATE, "login_template.ini");
+	while (<FILE_TEMPLATE>){
+		chomp;
+		$o = $_;
+		#::: Find replace variables
+		if($o=~/db/i){ $o = "db = " . $db_name; }
+		if($o=~/user/i){ $o = "user = " . $db_user; }
+		if($o=~/password/i){ $o = "password = " . $db_password; }
+		
+		print NEW_CONFIG $o . "\n";
+	}
+	
+	close(FILE_TEMPLATE);
+	close(NEW_CONFIG);
+	unlink("login_template.ini");
 	
 	print "\nPress any key to continue...\n";
 	
@@ -1699,6 +1727,7 @@ sub print_match_debug{
 	print "	Query Check: '" . $query_check . "'\n";
 	print "	Result: '" . trim(get_mysql_result($query_check)) . "'\n";
 }
+
 sub print_break{ 
 	if(!$debug){ return; } 
 	print "\n==============================================\n"; 
