@@ -390,28 +390,6 @@ sub fetch_utility_scripts {
 }
 
 sub show_menu_prompt {
-    my %dispatch = (
-		# "backup_database" => \&database_dump,
-		# 2 => \&database_dump_compress,
-		3 => \&main_db_management,
-		4 => \&bots_db_management,
-		# 5 => \&opcodes_fetch,
-		# 6 => \&map_files_fetch,
-		#7 => \&plugins_fetch,
-		#8 => \&quest_files_fetch,
-		# 9 => \&lua_modules_fetch,
-		# 10 => \&aa_fetch,
-		# 11 => \&fetch_latest_windows_binaries,
-		# 12 => \&fetch_server_dlls,
-		# 13 => \&do_windows_login_server_setup,
-		# 14 => \&remove_duplicate_rule_values,
-		# 15 => \&fetch_utility_scripts,
-		# 18 => \&fetch_latest_windows_binaries_bots,
-		# 19 => \&do_bots_db_schema_drop,
-		20 => \&do_update_self,
-		# 21 => \&database_dump_player_tables,
-		0 => \&script_exit,
-    );
 
 	$dc = 0;
     while (1) {
@@ -472,6 +450,7 @@ sub show_menu_prompt {
 		elsif($input eq "check_db_updates"){ main_db_management(); $dc = 1; }
 		elsif($input eq "check_bot_db_updates"){ bots_db_management(); $dc = 1; }
 		elsif($input eq "setup_loginserver"){ do_windows_login_server_setup(); $dc = 1; }
+		elsif($input eq "update_script"){ do_update_self(); $dc = 1; }
 		elsif($input eq "exit"){
 			exit;
 		}
@@ -509,59 +488,9 @@ sub print_main_menu {
 	print "====================================================\n"; 
 	print " database	Enter database management menu \n";
 	print " server_assets	Manage server assets \n";
+	print " update_script	Updates this management script \n";
 	print " exit \n";
 	print "\n"; 
-}
-
-sub menu_options {
-	if(@total_updates){ 
-		if($bots_db_management == 1){
-			$option[3] = "Check and stage pending REQUIRED Database updates";
-			$bots_management = "Run pending REQUIRED updates... (" . scalar (@total_updates) . ")";
-		}
-		else{
-			$option[3] = "Run pending REQUIRED updates... (" . scalar (@total_updates) . ")";
-			if(get_mysql_result("SHOW TABLES LIKE 'bots'") eq ""){
-				$bots_management = "Install bots database pre-requisites (Requires bots server binaries)";
-			}
-			else{
-				$bots_management = "Check for Bot pending REQUIRED database updates... (Must have bots enabled)";
-			}
-		}
-	}
-	else{
-		$option[3] = "Check and stage pending REQUIRED Database updates";
-		$bots_management = "Check for Bot REQUIRED database updates... (Must have bots enabled)";
-	}
-
-return <<EO_MENU;
-====================================================
-#::: EQEmu Update Utility Menu: (eqemu_server.pl)
-====================================================
- 1) [Backup Database] :: (Saves to Backups folder)
- 2) [Backup Database Compressed] :: (Saves to Backups folder)
- 3) [EQEmu DB Schema] :: $option[3]
- 4) [EQEmu DB Bots Schema] $bots_management
- 5) [OPCodes] :: Download latest opcodes for each EQ Client
- 6) [Maps] :: Download latest map and water files
- 7) [Plugins (Perl)] :: Download latest Perl plugins
- 8) [Quests (Perl/LUA)] :: Download latest PEQ quests and stage updates
- 9) [LUA Modules] :: Download latest LUA Modules (Required for Lua)
- 10) [DB Data : Alternate Advancement] :: Download Latest AA's from PEQ (This overwrites existing data)
- 11) [Windows Server Build] :: Download Latest and Stable Server Build (Overwrites existing .exe's, includes .dll's)
- 12) [Windows Server .dll's] :: Download Pre-Requisite Server .dll's
- 13) [Windows Server Loginserver Setup] :: Download and install Windows Loginserver
- 14) [Remove Duplicate Rule Values] :: Looks for redundant rule_values entries and removes them
- 15) [Fetch Utility Scripts] :: Fetches server management utility scripts
- 18) [Windows Server Build Bots] :: Download Latest and Stable Server Build with Bots
- 19) [EQEmu DB Drop Bots Schema] :: Remove Bots schema and return database to normal state
- 20) [Update the updater] Force update this script (Redownload)
- 21) [DB :: Backup Player Tables] :: Backs up player tables
- 0) Exit
- 
- Enter numbered option and press enter...	
-	
-EO_MENU
 }
 
 sub check_for_database_dump_script{
