@@ -10,8 +10,6 @@
 #::: Purpose: To upgrade databases with ease and maintain versioning
 ###########################################################
 
-$menu_displayed = 0;
-
 use Config;
 use File::Copy qw(copy);
 use POSIX qw(strftime);
@@ -33,6 +31,7 @@ if($Config{osname}=~/Win|MS/i){ $OS = "Windows"; }
 #::: Check for script self update
 do_self_update_check_routine();
 
+#::: Check Perl version
 $perl_version = $^V;
 $perl_version =~s/v//g;
 print "[Update] Perl Version is " . $perl_version . "\n";
@@ -45,8 +44,6 @@ no warnings;
 
 read_eqemu_config_xml();
 
-$console_output = "[Update] EQEmu: Automatic Database Upgrade Check\n";
-
 if($OS eq "Windows"){
 	$has_mysql_path = `echo %PATH%`;
 	if($has_mysql_path=~/MySQL|MariaDB/i){ 
@@ -58,8 +55,6 @@ if($OS eq "Windows"){
 				last;
 			}
 		}
-		$console_output .= "[Update] (Windows) MySQL is in system path \n";
-		$console_output .= "[Update] Path = " . $path . "\n";
 	}
 }
 
@@ -70,15 +65,11 @@ if($OS eq "Linux"){
 		$path = `which mariadb`; 
 	}
 	$path =~s/\n//g; 
-	
-	$console_output .= "[Update] (Linux) MySQL is in system path \n";
-	$console_output .= "[Update] Path = " . $path . "\n";
 }
 
 #::: Path not found, error and exit
 if($path eq ""){
-	print "MySQL path not found, please add the path for automatic database upgrading to continue... \n\n";
-	print "script_exiting...\n";
+	print "[Error:eqemu_server.pl] MySQL path not found, please add the path for automatic database upgrading to continue... \n\n";
 	exit;
 }
 
@@ -138,6 +129,7 @@ else {
 }
 
 if($db){
+	print "[Update] MySQL Path/Location: " . $path . "\n";
 	print "[Update] Binary Revision / Local: (" . $bin_db_ver . " / " . $local_db_ver . ")\n";
 	
 	#::: Bots
@@ -149,14 +141,12 @@ if($db){
 		}
 	}
 
-	#::: If World ran this script, and our version is up to date, continue...
+	#::: If World ran this script, and our version is up to date, continue... 
 	if($bin_db_ver <= $local_db_ver && $ARGV[0] eq "ran_from_world"){  
 		print "[Update] Database up to Date: Continuing World Bootup...\n";
 		exit; 
 	}
-
 } 
-
 
 if($ARGV[0] eq "install_peq_db"){
 	
@@ -301,6 +291,7 @@ sub do_self_update_check_routine {
 						if($OS eq "Linux"){
 							system("chmod 755 eqemu_server.pl");
 							system("chown eqemu eqemu_server.pl");
+							system("perl eqemu_server.pl");
 						}
 					}
 				}
@@ -459,6 +450,7 @@ sub show_menu_prompt {
 		elsif($input eq "backup_database"){ database_dump(); $dc = 1; }
 		elsif($input eq "backup_player_tables"){ database_dump_player_tables(); $dc = 1; }
 		elsif($input eq "backup_database_compressed"){ database_dump_compress(); $dc = 1; }
+		elsif($input eq "drop_bots_db_schema"){ do_bots_db_schema_drop(); $dc = 1; }
 		elsif($input eq "aa_tables"){ aa_fetch(); $dc = 1; }
 		elsif($input eq "remove_duplicate_rules"){ remove_duplicate_rule_values(); $dc = 1; }
 		elsif($input eq "maps"){ map_files_fetch_bulk(); $dc = 1; }
@@ -713,16 +705,16 @@ sub aa_fetch{
 		return;
 	}
 
-	print "Pulling down PEQ AA Tables...\n";
+	print "[Install] Pulling down PEQ AA Tables...\n";
 	get_remote_file($eqemu_repository_request_url . "utils/sql/peq_aa_tables_post_rework.sql", "db_update/peq_aa_tables_post_rework.sql");
-	print "\n\n[Install] Installing AA Tables...\n";
+	print "[Install] Installing AA Tables...\n";
 	print get_mysql_result_from_file("db_update/peq_aa_tables_post_rework.sql");
-	print "\nDone...\n\n";
+	print "[Install] Done...\n\n";
 }
 
 #::: Fetch Latest Opcodes
 sub opcodes_fetch{
-	print "Pulling down latest opcodes...\n"; 
+	print "[Update] Pulling down latest opcodes...\n"; 
 	%opcodes = (
 		1 => ["opcodes", $eqemu_repository_request_url . "utils/patches/opcodes.conf"],
 		2 => ["mail_opcodes", $eqemu_repository_request_url . "utils/patches/mail_opcodes.conf"],
@@ -746,14 +738,15 @@ sub opcodes_fetch{
 		get_remote_file($opcodes{$loop}[1], $file_name);
 		$loop++; 
 	}
-	print "\nDone...\n\n";
+	print "[Update] Done...\n"; 
 }
 
 sub remove_duplicate_rule_values {
 	$ruleset_id = trim(get_mysql_result("SELECT `ruleset_id` FROM `rule_sets` WHERE `name` = 'default'"));
-	print "Default Ruleset ID: " . $ruleset_id . "\n";
+	print "[Database] Default Ruleset ID: " . $ruleset_id . "\n";
 	
 	$total_removed = 0;
+	
 	#::: Store Default values...
 	$mysql_result = get_mysql_result("SELECT * FROM `rule_values` WHERE `ruleset_id` = " . $ruleset_id);
 	my @lines = split("\n", $mysql_result);
@@ -761,19 +754,20 @@ sub remove_duplicate_rule_values {
 		my @values = split("\t", $val);
 		$rule_set_values{$values[1]}[0] = $values[2];
 	}
+	
 	#::: Compare default values against other rulesets to check for duplicates...
 	$mysql_result = get_mysql_result("SELECT * FROM `rule_values` WHERE `ruleset_id` != " . $ruleset_id);
 	my @lines = split("\n", $mysql_result);
 	foreach my $val (@lines){
 		my @values = split("\t", $val);
 		if($values[2] == $rule_set_values{$values[1]}[0]){
-			print "DUPLICATE : " . $values[1] . " (Ruleset (" . $values[0] . ")) matches default value of : " . $values[2] . ", removing...\n";
+			print "[Database] Removing duplicate : " . $values[1] . " (Ruleset (" . $values[0] . ")) matches default value of : " . $values[2] . "\n";
 			get_mysql_result("DELETE FROM `rule_values` WHERE `ruleset_id` = " .  $values[0] . " AND `rule_name` = '" . $values[1] . "'");
 			$total_removed++;
 		}
 	}
 	
-	print "Total duplicate rules removed... " . $total_removed . "\n";
+	print "[Database] Total duplicate rules removed... " . $total_removed . "\n";
 }
 
 sub copy_file {
@@ -801,10 +795,10 @@ sub copy_file {
 }
 
 sub fetch_latest_windows_binaries {
-	print "\n --- Fetching Latest Windows Binaries... --- \n";
+	print "[Update] Fetching Latest Windows Binaries... \n";
 	get_remote_file($install_repository_request_url . "master_windows_build.zip", "updates_staged/master_windows_build.zip", 1);
-	print "\n --- Fetched Latest Windows Binaries... --- \n";
-	print "\n --- Extracting... --- \n";
+	print "[Update] Fetched Latest Windows Binaries... \n";
+	print "[Update] Extracting... --- \n";
 	unzip('updates_staged/master_windows_build.zip', 'updates_staged/binaries/');
 	my @files;
 	my $start_dir = "updates_staged/binaries";
@@ -815,19 +809,19 @@ sub fetch_latest_windows_binaries {
 	for my $file (@files) {
 		$destination_file = $file;
 		$destination_file =~s/updates_staged\/binaries\///g;
-		print "[Install] Installing :: " . $destination_file . "\n";
+		print "[Update] Installing :: " . $destination_file . "\n";
 		copy_file($file, $destination_file);
 	}
-	print "\n --- Done... --- \n";
+	print "[Update] Done\n";
 	
 	rmtree('updates_staged');
 }
 
 sub fetch_latest_windows_binaries_bots {
-	print "\n --- Fetching Latest Windows Binaries with Bots... --- \n";
+	print "[Update] Fetching Latest Windows Binaries with Bots...\n";
 	get_remote_file($install_repository_request_url . "master_windows_build_bots.zip", "updates_staged/master_windows_build_bots.zip", 1);
-	print "\n --- Fetched Latest Windows Binaries with Bots... --- \n";
-	print "\n --- Extracting... --- \n";
+	print "[Update] Fetched Latest Windows Binaries with Bots...\n";
+	print "[Update] Extracting...\n";
 	unzip('updates_staged/master_windows_build_bots.zip', 'updates_staged/binaries/');
 	my @files;
 	my $start_dir = "updates_staged/binaries";
@@ -841,15 +835,15 @@ sub fetch_latest_windows_binaries_bots {
 		print "[Install] Installing :: " . $destination_file . "\n";
 		copy_file($file, $destination_file);
 	}
-	print "\n --- Done... --- \n";
+	print "[Update] Done...\n";
 	
 	rmtree('updates_staged');
 }
 
 sub do_windows_login_server_setup {
-	print "\n --- Fetching Loginserver... --- \n";
+	print "[Install] Fetching Loginserver... \n";
 	get_remote_file($install_repository_request_url . "login_server.zip", "updates_staged/login_server.zip", 1);
-	print "\n --- Extracting... --- \n";
+	print "[Install] Extracting... \n";
 	unzip('updates_staged/login_server.zip', 'updates_staged/login_server/');
 	my @files;
 	my $start_dir = "updates_staged/login_server";
@@ -863,20 +857,20 @@ sub do_windows_login_server_setup {
 		print "[Install] Installing :: " . $destination_file . "\n";
 		copy_file($file, $destination_file);
 	}
-	print "\n Done... \n";
+	print "[Install] Done... \n";
 	
-	print "Pulling down Loginserver database tables...\n";
+	print "[Install] Pulling down Loginserver database tables...\n";
 	get_remote_file($install_repository_request_url . "login_server_tables.sql", "db_update/login_server_tables.sql");
-	print "\n\n[Install] Installing Loginserver tables...\n";
+	print "[Install] Installing Loginserver tables...\n";
 	print get_mysql_result_from_file("db_update/login_server_tables.sql");
-	print "\nDone...\n\n";
+	print "[Install] Done...\n";
 	
 	add_login_server_firewall_rules();
 	
 	rmtree('updates_staged');
 	rmtree('db_update');
 	
-	print "\nPress any key to continue...\n";
+	print "[Install] Press any key to continue...\n";
 	
 	<>; #Read from STDIN 
 	
@@ -892,9 +886,9 @@ sub do_linux_login_server_setup {
 	}
 	print "\n Done... \n";
 	
-	print "Pulling down Loginserver database tables...\n";
+	print "[Install] Pulling down Loginserver database tables...\n";
 	get_remote_file($install_repository_request_url . "login_server_tables.sql", "db_update/login_server_tables.sql");
-	print "\n\n[Install] Installing Loginserver tables...\n";
+	print "[Install] Installing Loginserver tables...\n";
 	print get_mysql_result_from_file("db_update/login_server_tables.sql");
 	print "\nDone...\n\n";
 	
@@ -906,7 +900,6 @@ sub do_linux_login_server_setup {
 	get_remote_file($install_repository_request_url . "linux/login_opcodes.conf", "login_opcodes_sod.conf");
 	
 	get_installation_variables();
-	
 	my $db_name = $installation_variables{"mysql_eqemu_db_name"};
 	my $db_user = $installation_variables{"mysql_eqemu_user"};
 	my $db_password = $installation_variables{"mysql_eqemu_password"};
@@ -931,7 +924,7 @@ sub do_linux_login_server_setup {
 	close(NEW_CONFIG);
 	unlink("login_template.ini");
 	
-	print "\nPress any key to continue...\n";
+	print "[Install] Press any key to continue...\n";
 	
 	<>; #Read from STDIN
 	
@@ -1034,9 +1027,9 @@ sub fetch_server_dlls{
 }
 
 sub fetch_peq_db_full{
-	print "Downloading latest PEQ Database... Please wait...\n";
+	print "[Install] Downloading latest PEQ Database... Please wait...\n";
 	get_remote_file("http://edit.peqtgc.com/weekly/peq_beta.zip", "updates_staged/peq_beta.zip", 1);
-	print "Downloaded latest PEQ Database... Extracting...\n";
+	print "[Install] Downloaded latest PEQ Database... Extracting...\n";
 	unzip('updates_staged/peq_beta.zip', 'updates_staged/peq_db/');
 	my $start_dir = "updates_staged/peq_db";
 	find( 
@@ -1047,7 +1040,7 @@ sub fetch_peq_db_full{
 		$destination_file = $file;
 		$destination_file =~s/updates_staged\/peq_db\///g;
 		if($file=~/peqbeta|player_tables/i){
-			print "MariaDB :: Installing :: maps/" . $destination_file . "\n";
+			print "[Install] DB :: Installing :: " . $destination_file . "\n";
 			get_mysql_result_from_file($file);
 		}
 		if($file=~/eqtime/i){
@@ -1058,7 +1051,7 @@ sub fetch_peq_db_full{
 }
 
 sub map_files_fetch_bulk{
-	print "\n --- Fetching Latest Maps... (This could take a few minutes...) --- \n";
+	print "[Install] Fetching Latest Maps... (This could take a few minutes...)\n";
 	get_remote_file("http://github.com/Akkadius/EQEmuMaps/archive/master.zip", "maps/maps.zip", 1);
 	unzip('maps/maps.zip', 'maps/');
 	my @files;
@@ -1073,7 +1066,7 @@ sub map_files_fetch_bulk{
 		print "[Install] Installing :: " . $destination_file . "\n";
 		copy_file($file, "maps/" . $new_file);
 	}
-	print "\n --- Fetched Latest Maps... --- \n";
+	print "[Install] Fetched Latest Maps\n";
 	
 	rmtree('maps/EQEmuMaps-master');
 	unlink('maps/maps.zip');
@@ -1332,11 +1325,11 @@ sub are_file_sizes_different{
 
 sub do_bots_db_schema_drop{
 	#"drop_bots.sql" is run before reverting database back to 'normal'
-	print "Fetching drop_bots.sql...\n";
+	print "[Database] Fetching drop_bots.sql...\n";
 	get_remote_file($eqemu_repository_request_url . "utils/sql/git/bots/drop_bots.sql", "db_update/drop_bots.sql");
 	print get_mysql_result_from_file("db_update/drop_bots.sql");
 	
-	print "Restoring normality...\n";
+	print "[Database] Removing bot database tables...\n";
 	print get_mysql_result("DELETE FROM `rule_values` WHERE `rule_name` LIKE 'Bots:%';");
 	
 	if(get_mysql_result("SHOW TABLES LIKE 'commands'") ne "" && $db){
@@ -1362,11 +1355,12 @@ sub do_bots_db_schema_drop{
 	if(get_mysql_result("SHOW COLUMNS FROM `db_version` LIKE 'bots_version'") ne "" && $db){
 		print get_mysql_result("UPDATE `db_version` SET `bots_version` = 0;");
 	}
+	print "[Database] Done...\n";
 }
 
 sub modify_db_for_bots{
 	#Called after the db bots schema (2015_09_30_bots.sql) has been loaded
-	print "Modifying database for bots...\n";
+	print "[Database] Modifying database for bots...\n";
 	print get_mysql_result("UPDATE `spawn2` SET `enabled` = 1 WHERE `id` IN (59297,59298);");
 	
 	if(get_mysql_result("SHOW KEYS FROM `guild_members` WHERE `Key_name` LIKE 'PRIMARY'") ne "" && $db){
@@ -1447,7 +1441,7 @@ sub modify_db_for_bots{
 
 sub convert_existing_bot_data{
 	if(get_mysql_result("SHOW TABLES LIKE 'bots'") ne "" && $db){
-		print "Converting existing bot data...\n";
+		print "[Database] Converting existing bot data...\n";
 		print get_mysql_result("INSERT INTO `bot_data` (`bot_id`, `owner_id`, `spells_id`, `name`, `last_name`, `zone_id`, `gender`, `race`, `class`, `level`, `creation_day`, `last_spawn`, `time_spawned`, `size`, `face`, `hair_color`, `hair_style`, `beard`, `beard_color`, `eye_color_1`, `eye_color_2`, `drakkin_heritage`, `drakkin_tattoo`, `drakkin_details`, `ac`, `atk`, `hp`, `mana`, `str`, `sta`, `cha`, `dex`, `int`, `agi`, `wis`, `fire`, `cold`, `magic`, `poison`, `disease`, `corruption`) SELECT `BotID`, `BotOwnerCharacterID`, `BotSpellsID`, `Name`, `LastName`, `LastZoneId`, `Gender`, `Race`, `Class`, `BotLevel`, UNIX_TIMESTAMP(`BotCreateDate`), UNIX_TIMESTAMP(`LastSpawnDate`), `TotalPlayTime`, `Size`, `Face`, `LuclinHairColor`, `LuclinHairStyle`, `LuclinBeard`, `LuclinBeardColor`, `LuclinEyeColor`, `LuclinEyeColor2`, `DrakkinHeritage`, `DrakkinTattoo`, `DrakkinDetails`, `AC`, `ATK`, `HP`, `Mana`, `STR`, `STA`, `CHA`, `DEX`, `_INT`, `AGI`, `WIS`, `FR`, `CR`, `MR`, `PR`, `DR`, `Corrup` FROM `bots`;");
 		
 		print get_mysql_result("INSERT INTO `bot_inspect_messages` (`bot_id`, `inspect_message`) SELECT `BotID`, `BotInspectMessage` FROM `bots`;");
@@ -1606,12 +1600,12 @@ sub run_database_check{
 	if(!@total_updates){
 		#::: Pull down bots database manifest
 		if($bots_db_management == 1){
-			print "Retrieving latest bots database manifest...\n";
+			print "[Database] Retrieving latest bots database manifest...\n";
 			get_remote_file($eqemu_repository_request_url . "utils/sql/git/bots/bots_db_update_manifest.txt", "db_update/db_update_manifest.txt"); 
 		}
 		#::: Pull down mainstream database manifest
 		else{
-			print "Retrieving latest database manifest...\n";
+			print "[Database] Retrieving latest database manifest...\n";
 			get_remote_file($eqemu_repository_request_url . "utils/sql/db_update_manifest.txt", "db_update/db_update_manifest.txt");
 		}
 	}
@@ -1621,7 +1615,7 @@ sub run_database_check{
 		@total_updates = sort @total_updates;
 		foreach my $val (@total_updates){
 			$file_name 		= trim($m_d{$val}[1]);
-			print "Running Update: " . $val . " - " . $file_name . "\n";
+			print "[Database] Running Update: " . $val . " - " . $file_name . "\n";
 			print get_mysql_result_from_file("db_update/$file_name");
 			print get_mysql_result("UPDATE db_version SET version = $val WHERE version < $val");
 			
@@ -1633,7 +1627,7 @@ sub run_database_check{
 	}
 	#::: Run 1 - Initial checking of needed updates...
 	else{
-		print "Reading manifest...\n\n";
+		print "[Database] Reading manifest...\n";
 		use Data::Dumper;
 		open (FILE, "db_update/db_update_manifest.txt");
 		while (<FILE>) { 
@@ -1667,23 +1661,23 @@ sub run_database_check{
 		#::: Match type update
 		if($match_type eq "contains"){
 			if(trim(get_mysql_result($query_check))=~/$match_text/i){
-				print "Missing DB Update " . $i . " '" . $file_name . "' \n";
+				print "[Database] missing update: " . $i . " '" . $file_name . "' \n";
 				fetch_missing_db_update($i, $file_name);
 				push(@total_updates, $i);
 			}
 			else{
-				print "DB up to date with: " . $i . " - '" . $file_name . "' \n";
+				print "[Database] has update: " . $i . " - '" . $file_name . "' \n";
 			}
 			print_match_debug();
 			print_break();
 		}
 		if($match_type eq "missing"){
 			if(get_mysql_result($query_check)=~/$match_text/i){  
-				print "DB up to date with: " . $i . " - '" . $file_name . "' \n";
+				print "[Database] has update: " . $i . " - '" . $file_name . "' \n";
 				next; 
 			}
 			else{
-				print "Missing DB Update " . $i . " '" . $file_name . "' \n";
+				print "[Database] missing update: " . $i . " '" . $file_name . "' \n";
 				fetch_missing_db_update($i, $file_name);
 				push(@total_updates, $i);
 			}
@@ -1692,24 +1686,24 @@ sub run_database_check{
 		}
 		if($match_type eq "empty"){
 			if(get_mysql_result($query_check) eq ""){
-				print "Missing DB Update " . $i . " '" . $file_name . "' \n";
+				print "[Database] missing update: " . $i . " '" . $file_name . "' \n";
 				fetch_missing_db_update($i, $file_name);
 				push(@total_updates, $i);
 			}
 			else{
-				print "DB up to date with: " . $i . " - '" . $file_name . "' \n";
+				print "[Database] has update: " . $i . " - '" . $file_name . "' \n";
 			}
 			print_match_debug();
 			print_break();
 		}
 		if($match_type eq "not_empty"){
 			if(get_mysql_result($query_check) ne ""){
-				print "Missing DB Update " . $i . " '" . $file_name . "' \n";
+				print "[Database] missing update: " . $i . " '" . $file_name . "' \n";
 				fetch_missing_db_update($i, $file_name);
 				push(@total_updates, $i);
 			}
 			else{
-				print "DB up to date with: " . $i . " - '" . $file_name . "' \n";
+				print "[Database] has update: " . $i . " - '" . $file_name . "' \n";
 			}
 			print_match_debug();
 			print_break();
@@ -1718,13 +1712,13 @@ sub run_database_check{
 	print "\n"; 
 	
 	if(scalar (@total_updates) == 0 && $db_run_stage == 2){
-		print "No updates need to be run...\n";
+		print "[Database] No updates need to be run...\n";
 		if($bots_db_management == 1){
-			print "Setting Database to Bots Binary Version (" . $bin_db_ver . ") if not already...\n\n";
+			print "[Database] Setting Database to Bots Binary Version (" . $bin_db_ver . ") if not already...\n\n";
 			get_mysql_result("UPDATE db_version SET bots_version = $bin_db_ver"); 
 		}
 		else{ 
-			print "Setting Database to Binary Version (" . $bin_db_ver . ") if not already...\n\n";
+			print "[Database] Setting Database to Binary Version (" . $bin_db_ver . ") if not already...\n\n";
 			get_mysql_result("UPDATE db_version SET version = $bin_db_ver"); 
 		}
 		
