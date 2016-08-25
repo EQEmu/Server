@@ -292,12 +292,16 @@ sub do_self_update_check_routine {
 					$start_dir
 				);
 				for my $file (@files) {
-					if($file=~/eqemu_server/i){
+					if($file=~/eqemu_server/i){ 
 						$destination_file = $file;
 						$destination_file =~s/updates_staged\///g;
 						print "[Install] Installing :: " . $destination_file . "\n";
 						unlink($destination_file);
 						copy_file($file, $destination_file); 
+						if($OS eq "Linux"){
+							system("chmod 755 eqemu_server.pl");
+							system("chown eqemu eqemu_server.pl");
+						}
 					}
 				}
 				print "[Install] Done\n";
