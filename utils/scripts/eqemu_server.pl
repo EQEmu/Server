@@ -26,7 +26,7 @@ $eqemu_repository_request_url = "https://raw.githubusercontent.com/EQEmu/Server/
 
 #::: Globals
 $time_stamp = strftime('%m-%d-%Y', gmtime());
-
+$db_run_stage = 0; #::: Sets database run stage check 
 $console_output .= "	Operating System is: $Config{osname}\n";
 if($Config{osname}=~/freebsd|linux/i){ $OS = "Linux"; }
 if($Config{osname}=~/Win|MS/i){ $OS = "Windows"; }
@@ -34,22 +34,7 @@ if($Config{osname}=~/Win|MS/i){ $OS = "Windows"; }
 #::: If current version is less than what world is reporting, then download a new one...
 $current_version = 14;
 
-if($ARGV[0] eq "V"){
-	if($ARGV[1] > $current_version){ 
-		print "[Update] eqemu_server.pl Automatic Database Upgrade Needs updating...\n";
-		print "[Update] Current version: " . $current_version . "\n"; 
-		print "[Update] New version: " . $ARGV[1] . "\n";  
-		get_remote_file($eqemu_repository_request_url . "utils/scripts/eqemu_server.pl", "eqemu_server.pl");
-		exit;
-	}
-	else{
-		print "[Update] No script update necessary \n";
-	}
-	exit;
-}
-
-#::: Sets database run stage check 
-$db_run_stage = 0;
+do_self_update_check_routine();
 
 $perl_version = $^V;
 $perl_version =~s/v//g;
@@ -290,6 +275,46 @@ if($ARGV[0] eq "login_server_setup"){
 	exit;
 }
 
+sub do_self_update_check_routine {
+	#::: Check Version passed from world to update script
+	if($ARGV[0] eq "V") {
+		get_remote_file($eqemu_repository_request_url . "utils/scripts/eqemu_server.pl", "updates_staged/eqemu_server.pl", 0, 1);
+	
+		if(-e "updates_staged/eqemu_server.pl") { 
+		
+			my $remote_script_size = -s "updates_staged/eqemu_server.pl";
+			my $local_script_size = -s "eqemu_server.pl";
+		
+			if($remote_script_size != $local_script_size){
+				print "[Update] Script has been updated, updating...\n";
+				
+				my @files;
+				my $start_dir = "updates_staged/";
+				find( 
+					sub { push @files, $File::Find::name unless -d; }, 
+					$start_dir
+				);
+				for my $file (@files) {
+					if($file=~/eqemu_server/i){
+						$destination_file = $file;
+						$destination_file =~s/updates_staged\///g;
+						print "[Install] Installing :: " . $destination_file . "\n";
+						copy_file($file, $destination_file);
+					}
+				}
+				print "[Install] Done\n";
+			}
+			else {
+				print "[Update] No script update necessary...\n";
+			}
+
+			unlink("updates_staged/eqemu_server.pl");
+		} 
+	
+		exit;
+	}
+}
+
 sub get_installation_variables{
 	#::: Fetch installation variables before building the config
 	open (INSTALL_VARS, "../install_variables.txt");
@@ -364,11 +389,6 @@ sub do_install_config_xml {
 	close(FILE_TEMPLATE);
 	close(NEW_CONFIG);
 	unlink("eqemu_config_template.xml");
-}
-
-sub do_update_self{
-	get_remote_file($eqemu_repository_request_url . "utils/scripts/eqemu_server.pl", "eqemu_server.pl");
-	die "Rerun eqemu_server.pl";
 }
 
 sub fetch_utility_scripts {
@@ -451,7 +471,6 @@ sub show_menu_prompt {
 		elsif($input eq "check_db_updates"){ main_db_management(); $dc = 1; }
 		elsif($input eq "check_bot_db_updates"){ bots_db_management(); $dc = 1; }
 		elsif($input eq "setup_loginserver"){ do_windows_login_server_setup(); $dc = 1; }
-		elsif($input eq "update_script"){ do_update_self(); $dc = 1; }
 		elsif($input eq "exit"){
 			exit;
 		}
@@ -489,7 +508,6 @@ sub print_main_menu {
 	print "====================================================\n"; 
 	print " database	Enter database management menu \n";
 	print " server_assets	Manage server assets \n";
-	print " update_script	Updates this management script \n";
 	print " exit \n";
 	print "\n"; 
 }
@@ -573,9 +591,9 @@ sub get_remote_file{
 	my $request_url = $_[0];
 	my $destination_file = $_[1];
 	my $content_type = $_[2];
+	my $no_retry = $_[3];
 	
 	#::: Build file path of the destination file so that we may check for the folder's existence and make it if necessary
-	# print "destination file is " . $destination_file . "\n";
 	
 	if($destination_file=~/\//i){
 		my @directory_path = split('/', $destination_file);
@@ -614,9 +632,13 @@ sub get_remote_file{
 				#::: Make sure the file exists before continuing...
 				if(-e $destination_file) { 
 					$break = 1;
-					print " Saved: (" . $destination_file . ") from " . $request_url . "\n";
+					print "[Download] Saved: (" . $destination_file . ") from " . $request_url . "\n";
 				} else { $break = 0; }
 				usleep(500);
+				
+				if($no_retry){
+					$break = 1;
+				}
 			}
 		}
 		else{
@@ -633,21 +655,25 @@ sub get_remote_file{
 					close (FILE); 
 				}
 				else {
-					# print "Error, no connection or failed request...\n\n";
+					print "Error, no connection or failed request...\n\n";
 				}
 				if(-e $destination_file) { 
 					$break = 1;
-					print " Saved: (" . $destination_file . ") from " . $request_url . "\n";
+					print "[Download] Saved: (" . $destination_file . ") from " . $request_url . "\n";
 				} else { $break = 0; }
 				usleep(500);
+				
+				if($no_retry){
+					$break = 1;
+				}
 			}
 		}
 	}
 	if($OS eq "Linux"){
 		#::: wget -O db_update/db_update_manifest.txt https://raw.githubusercontent.com/EQEmu/Server/master/utils/sql/db_update_manifest.txt
 		$wget = `wget --no-check-certificate --quiet -O $destination_file $request_url`;
-		print " Saved: (" . $destination_file . ") from " . $request_url . "\n";
-		if($wget=~/unable to resolve/i){
+		print "[Download] Saved: (" . $destination_file . ") from " . $request_url . "\n";
+		if($wget=~/unable to resolve/i){ 
 			print "Error, no connection or failed request...\n\n";
 			#die;
 		}
@@ -687,7 +713,7 @@ sub aa_fetch{
 
 	print "Pulling down PEQ AA Tables...\n";
 	get_remote_file($eqemu_repository_request_url . "utils/sql/peq_aa_tables_post_rework.sql", "db_update/peq_aa_tables_post_rework.sql");
-	print "\n\nInstalling AA Tables...\n";
+	print "\n\n[Install] Installing AA Tables...\n";
 	print get_mysql_result_from_file("db_update/peq_aa_tables_post_rework.sql");
 	print "\nDone...\n\n";
 }
@@ -787,7 +813,7 @@ sub fetch_latest_windows_binaries {
 	for my $file (@files) {
 		$destination_file = $file;
 		$destination_file =~s/updates_staged\/binaries\///g;
-		print "Installing :: " . $destination_file . "\n";
+		print "[Install] Installing :: " . $destination_file . "\n";
 		copy_file($file, $destination_file);
 	}
 	print "\n --- Done... --- \n";
@@ -810,7 +836,7 @@ sub fetch_latest_windows_binaries_bots {
 	for my $file (@files) {
 		$destination_file = $file;
 		$destination_file =~s/updates_staged\/binaries\///g;
-		print "Installing :: " . $destination_file . "\n";
+		print "[Install] Installing :: " . $destination_file . "\n";
 		copy_file($file, $destination_file);
 	}
 	print "\n --- Done... --- \n";
@@ -832,14 +858,14 @@ sub do_windows_login_server_setup {
 	for my $file (@files) {
 		$destination_file = $file;
 		$destination_file =~s/updates_staged\/login_server\///g;
-		print "Installing :: " . $destination_file . "\n";
+		print "[Install] Installing :: " . $destination_file . "\n";
 		copy_file($file, $destination_file);
 	}
 	print "\n Done... \n";
 	
 	print "Pulling down Loginserver database tables...\n";
 	get_remote_file($install_repository_request_url . "login_server_tables.sql", "db_update/login_server_tables.sql");
-	print "\n\nInstalling Loginserver tables...\n";
+	print "\n\n[Install] Installing Loginserver tables...\n";
 	print get_mysql_result_from_file("db_update/login_server_tables.sql");
 	print "\nDone...\n\n";
 	
@@ -859,14 +885,14 @@ sub do_linux_login_server_setup {
 	for my $file (@files) {
 		$destination_file = $file;
 		$destination_file =~s/updates_staged\/login_server\///g;
-		print "Installing :: " . $destination_file . "\n";
+		print "[Install] Installing :: " . $destination_file . "\n";
 		copy_file($file, $destination_file);
 	}
 	print "\n Done... \n";
 	
 	print "Pulling down Loginserver database tables...\n";
 	get_remote_file($install_repository_request_url . "login_server_tables.sql", "db_update/login_server_tables.sql");
-	print "\n\nInstalling Loginserver tables...\n";
+	print "\n\n[Install] Installing Loginserver tables...\n";
 	print get_mysql_result_from_file("db_update/login_server_tables.sql");
 	print "\nDone...\n\n";
 	
@@ -1023,7 +1049,7 @@ sub fetch_peq_db_full{
 			get_mysql_result_from_file($file);
 		}
 		if($file=~/eqtime/i){
-			print "Installing eqtime.cfg\n";
+			print "[Install] Installing eqtime.cfg\n";
 			copy_file($file, "eqtime.cfg");
 		}
 	}
@@ -1042,7 +1068,7 @@ sub map_files_fetch_bulk{
 	for my $file (@files) {
 		$destination_file = $file;
 		$destination_file =~s/maps\/EQEmuMaps-master\/maps\///g;
-		print "Installing :: " . $destination_file . "\n";
+		print "[Install] Installing :: " . $destination_file . "\n";
 		copy_file($file, "maps/" . $new_file);
 	}
 	print "\n --- Fetched Latest Maps... --- \n";
@@ -1113,7 +1139,7 @@ sub quest_files_fetch{
 			
 			if (!-e $destination_file) {
 				copy_file($staged_file, $destination_file);
-				print "Installing :: '" . $destination_file . "'\n";
+				print "[Install] Installing :: '" . $destination_file . "'\n";
 				$fc++;
 			}
 			else{
@@ -1131,7 +1157,7 @@ sub quest_files_fetch{
 						copy_file($destination_file, $backup_dest);
 						#::: Copy staged to running
 						copy($staged_file, $destination_file);
-						print "Installing :: '" . $destination_file . "'\n\n";
+						print "[Install] Installing :: '" . $destination_file . "'\n\n";
 					}
 					$fc++;
 				}
@@ -1172,7 +1198,7 @@ sub lua_modules_fetch{
 			
 			if (!-e $destination_file) {
 				copy_file($staged_file, $destination_file);
-				print "Installing :: '" . $destination_file . "'\n";
+				print "[Install] Installing :: '" . $destination_file . "'\n";
 				$fc++;
 			}
 			else{
@@ -1189,7 +1215,7 @@ sub lua_modules_fetch{
 						copy_file($destination_file, $backup_dest);
 						#::: Copy staged to running
 						copy($staged_file, $destination_file);
-						print "Installing :: '" . $destination_file . "'\n\n";
+						print "[Install] Installing :: '" . $destination_file . "'\n\n";
 					}
 					$fc++;
 				}
@@ -1228,7 +1254,7 @@ sub plugins_fetch{
 			
 			if (!-e $destination_file) {
 				copy_file($staged_file, $destination_file);
-				print "Installing :: '" . $destination_file . "'\n";
+				print "[Install] Installing :: '" . $destination_file . "'\n";
 				$fc++;
 			}
 			else{
@@ -1245,7 +1271,7 @@ sub plugins_fetch{
 						copy_file($destination_file, $backup_dest);
 						#::: Copy staged to running
 						copy($staged_file, $destination_file);
-						print "Installing :: '" . $destination_file . "'\n\n";
+						print "[Install] Installing :: '" . $destination_file . "'\n\n";
 					}
 					$fc++;
 				}
