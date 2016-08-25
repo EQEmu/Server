@@ -27,6 +27,7 @@ $db_run_stage = 0; #::: Sets database run stage check
 $console_output .= "	Operating System is: $Config{osname}\n";
 if($Config{osname}=~/freebsd|linux/i){ $OS = "Linux"; }
 if($Config{osname}=~/Win|MS/i){ $OS = "Windows"; }
+$has_internet_connection = check_internet_connection();
 
 #::: Check for script self update
 do_self_update_check_routine();
@@ -86,7 +87,7 @@ mkdir('db_update');
 #::: Check if db_version table exists... 
 if(trim(get_mysql_result("SHOW COLUMNS FROM db_version LIKE 'Revision'")) ne "" && $db){
 	print get_mysql_result("DROP TABLE db_version");
-	print "Old db_version table present, dropping...\n\n";
+	print "[Database] Old db_version table present, dropping...\n\n";
 }
 
 sub check_db_version_table{
@@ -96,7 +97,7 @@ sub check_db_version_table{
 			  version int(11) DEFAULT '0'
 			) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 			INSERT INTO db_version (version) VALUES ('1000');");
-		print "Table 'db_version' does not exists.... Creating...\n\n";
+		print "[Database] Table 'db_version' does not exists.... Creating...\n\n";
 	}
 }
 
@@ -241,10 +242,37 @@ if($ARGV[0] eq "login_server_setup"){
 	exit;
 }     
 
+sub check_internet_connection {
+	if($OS eq "Linux"){
+		$count = "c";
+	}
+	if($OS eq "Windows"){
+		$count = "n";
+	}
+	
+	if (`ping 8.8.8.8 -$count 1 -w 500`=~/Reply from|1 received/i) { 
+		# print "[Update] We have a connection to the internet, continuing...\n";
+		return 1;
+	}
+	elsif (`ping 4.2.2.2 -$count 1 -w 500`=~/Reply from|1 received/i) { 
+		# print "[Update] We have a connection to the internet, continuing...\n";
+		return 1;
+	}
+	else{
+		print "[Update] No connection to the internet, can't check update\n";
+		return;
+	}
+}
+
 sub do_self_update_check_routine {
 	#::: Check Version passed from world to update script
-	get_remote_file($eqemu_repository_request_url . "utils/scripts/eqemu_server.pl", "updates_staged/eqemu_server.pl", 0, 1);
+	get_remote_file($eqemu_repository_request_url . "utils/scripts/eqemu_server.pl", "updates_staged/eqemu_server.pl", 0, 1, 1);
 
+	if(!$has_internet_connection){
+		print "[Update] Cannot check update without internet connection...\n";
+		return;
+	}
+	
 	if(-e "updates_staged/eqemu_server.pl") { 
 	
 		my $remote_script_size = -s "updates_staged/eqemu_server.pl";
@@ -560,6 +588,12 @@ sub get_remote_file{
 	my $destination_file = $_[1];
 	my $content_type = $_[2];
 	my $no_retry = $_[3];
+	my $silent_download = $_[4];
+	
+	if(!$has_internet_connection){
+		print "[Download] Cannot download without internet connection...\n";
+		return;
+	}
 	
 	#::: Build file path of the destination file so that we may check for the folder's existence and make it if necessary
 	
@@ -600,7 +634,7 @@ sub get_remote_file{
 				#::: Make sure the file exists before continuing...
 				if(-e $destination_file) { 
 					$break = 1;
-					print "[Download] Saved: (" . $destination_file . ") from " . $request_url . "\n";
+					print "[Download] Saved: (" . $destination_file . ") from " . $request_url . "\n" if !$silent_download;
 				} else { $break = 0; }
 				usleep(500);
 				
@@ -613,7 +647,7 @@ sub get_remote_file{
 			$break = 0;
 			while($break == 0) {
 				require LWP::UserAgent; 
-				my $ua = LWP::UserAgent->new;
+				my $ua = LWP::UserAgent->new; 
 				$ua->timeout(10);
 				$ua->env_proxy; 
 				my $response = $ua->get($request_url);
@@ -627,7 +661,7 @@ sub get_remote_file{
 				}
 				if(-e $destination_file) { 
 					$break = 1;
-					print "[Download] Saved: (" . $destination_file . ") from " . $request_url . "\n";
+					print "[Download] Saved: (" . $destination_file . ") from " . $request_url . "\n" if !$silent_download;
 				} else { $break = 0; }
 				usleep(500);
 				
@@ -640,7 +674,7 @@ sub get_remote_file{
 	if($OS eq "Linux"){
 		#::: wget -O db_update/db_update_manifest.txt https://raw.githubusercontent.com/EQEmu/Server/master/utils/sql/db_update_manifest.txt
 		$wget = `wget --no-check-certificate --quiet -O $destination_file $request_url`;
-		print "[Download] Saved: (" . $destination_file . ") from " . $request_url . "\n";
+		print "[Download] Saved: (" . $destination_file . ") from " . $request_url . "\n" if !$silent_download;
 		if($wget=~/unable to resolve/i){ 
 			print "Error, no connection or failed request...\n\n";
 			#die;
@@ -853,7 +887,7 @@ sub do_windows_login_server_setup {
 sub do_linux_login_server_setup {
 	
 	for my $file (@files) {
-		$destination_file = $file;
+		$destination_file = $file; 
 		$destination_file =~s/updates_staged\/login_server\///g;
 		print "[Install] Installing :: " . $destination_file . "\n";
 		copy_file($file, $destination_file);
@@ -1277,7 +1311,7 @@ sub unzip {
 		unless ( $zip->read($archive_to_unzip) == AZ_OK ) {
 			die 'read error';
 		}
-		print "Extracting...\n";
+		print "[Unzip] Extracting...\n";
 		$zip->extractTree('', $dest_folder);
 	}
 	if($OS eq "Linux"){
@@ -1512,7 +1546,7 @@ sub get_bots_db_version{
 	#::: Check if bots_version column exists...
 	if(get_mysql_result("SHOW COLUMNS FROM db_version LIKE 'bots_version'") eq "" && $db){
 	   print get_mysql_result("ALTER TABLE db_version ADD bots_version int(11) DEFAULT '0' AFTER version;");
-	   print "\nColumn 'bots_version' does not exists.... Adding to 'db_version' table...\n\n";
+	   print "[Database] Column 'bots_version' does not exists.... Adding to 'db_version' table...\n\n";
 	}
 	$bots_local_db_version = trim(get_mysql_result("SELECT bots_version FROM db_version LIMIT 1"));
 	return $bots_local_db_version;
@@ -1528,7 +1562,7 @@ sub bots_db_management{
 	}
 
 	if($bin_db_ver == 0){
-		print "Your server binaries (world/zone) are not compiled for bots...\n\n";
+		print "[Database] Your server binaries (world/zone) are not compiled for bots...\n\n";
 		return;
 	}
 	
