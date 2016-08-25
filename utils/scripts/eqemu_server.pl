@@ -20,7 +20,6 @@ use File::Find;
 use Time::HiRes qw(usleep); 
 
 #::: Variables
-
 $install_repository_request_url = "https://raw.githubusercontent.com/Akkadius/EQEmuInstall/master/";
 $eqemu_repository_request_url = "https://raw.githubusercontent.com/EQEmu/Server/master/";
 
@@ -31,9 +30,7 @@ $console_output .= "	Operating System is: $Config{osname}\n";
 if($Config{osname}=~/freebsd|linux/i){ $OS = "Linux"; }
 if($Config{osname}=~/Win|MS/i){ $OS = "Windows"; }
 
-#::: If current version is less than what world is reporting, then download a new one...
-$current_version = 14;
-
+#::: Check for script self update
 do_self_update_check_routine();
 
 $perl_version = $^V;
@@ -70,7 +67,7 @@ if($OS eq "Windows"){
 if($OS eq "Linux"){
 	$path = `which mysql`; 
 	if ($path eq "") {
-		$path = `which mariadb`;
+		$path = `which mariadb`; 
 	}
 	$path =~s/\n//g; 
 	
@@ -299,7 +296,8 @@ sub do_self_update_check_routine {
 						$destination_file = $file;
 						$destination_file =~s/updates_staged\///g;
 						print "[Install] Installing :: " . $destination_file . "\n";
-						copy_file($file, $destination_file);
+						unlink($destination_file);
+						copy_file($file, $destination_file); 
 					}
 				}
 				print "[Install] Done\n";
