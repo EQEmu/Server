@@ -237,49 +237,47 @@ if($ARGV[0] eq "db_dump_compress"){ database_dump_compress(); exit; }
 if($ARGV[0] eq "login_server_setup"){
 	do_windows_login_server_setup();	
 	exit;
-}
+}     
 
 sub do_self_update_check_routine {
 	#::: Check Version passed from world to update script
-	if($ARGV[0] eq "ran_from_world") {
-		get_remote_file($eqemu_repository_request_url . "utils/scripts/eqemu_server.pl", "updates_staged/eqemu_server.pl", 0, 1);
+	get_remote_file($eqemu_repository_request_url . "utils/scripts/eqemu_server.pl", "updates_staged/eqemu_server.pl", 0, 1);
+
+	if(-e "updates_staged/eqemu_server.pl") { 
 	
-		if(-e "updates_staged/eqemu_server.pl") { 
-		
-			my $remote_script_size = -s "updates_staged/eqemu_server.pl";
-			my $local_script_size = -s "eqemu_server.pl";
-		
-			if($remote_script_size != $local_script_size){
-				print "[Update] Script has been updated, updating...\n";
-				
-				my @files;
-				my $start_dir = "updates_staged/";
-				find( 
-					sub { push @files, $File::Find::name unless -d; }, 
-					$start_dir
-				);
-				for my $file (@files) {
-					if($file=~/eqemu_server/i){ 
-						$destination_file = $file;
-						$destination_file =~s/updates_staged\///g;
-						print "[Install] Installing :: " . $destination_file . "\n";
-						unlink($destination_file);
-						copy_file($file, $destination_file); 
-						if($OS eq "Linux"){
-							system("chmod 755 eqemu_server.pl");
-							system("chown eqemu eqemu_server.pl");
-							system("perl eqemu_server.pl");
-						}
+		my $remote_script_size = -s "updates_staged/eqemu_server.pl";
+		my $local_script_size = -s "eqemu_server.pl";
+	
+		if($remote_script_size != $local_script_size){
+			print "[Update] Script has been updated, updating...\n";
+			
+			my @files;
+			my $start_dir = "updates_staged/";
+			find( 
+				sub { push @files, $File::Find::name unless -d; }, 
+				$start_dir
+			);
+			for my $file (@files) {
+				if($file=~/eqemu_server/i){ 
+					$destination_file = $file;
+					$destination_file =~s/updates_staged\///g;
+					print "[Install] Installing :: " . $destination_file . "\n";
+					unlink($destination_file);
+					copy_file($file, $destination_file); 
+					if($OS eq "Linux"){
+						system("chmod 755 eqemu_server.pl");
+						system("chown eqemu eqemu_server.pl");
+						system("perl eqemu_server.pl");
 					}
 				}
-				print "[Install] Done\n";
 			}
-			else {
-				print "[Update] No script update necessary...\n";
-			}
-
-			unlink("updates_staged/eqemu_server.pl");
+			print "[Install] Done\n";
 		}
+		else {
+			print "[Update] No script update necessary...\n";
+		}
+
+		unlink("updates_staged/eqemu_server.pl");
 	}
 }
 
