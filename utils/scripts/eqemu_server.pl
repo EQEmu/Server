@@ -31,6 +31,8 @@ if($Config{osname}=~/Win|MS/i){ $OS = "Windows"; }
 #::: Check for script self update
 do_self_update_check_routine();
 
+print "[Info] For EQEmu Server management utilities - run eqemu_server.pl\n";
+
 #::: Check Perl version
 $perl_version = $^V;
 $perl_version =~s/v//g;
@@ -268,7 +270,7 @@ sub do_self_update_check_routine {
 						system("chmod 755 eqemu_server.pl");
 						system("chown eqemu eqemu_server.pl");
 					}
-					system("perl eqemu_server.pl");
+					system("perl eqemu_server.pl start_from_world");
 				}
 			}
 			print "[Install] Done\n";
