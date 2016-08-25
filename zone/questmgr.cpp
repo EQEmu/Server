@@ -3162,3 +3162,13 @@ void QuestManager::UpdateZoneHeader(std::string type, std::string value) {
 	entity_list.QueueClients(0, outapp);
 	safe_delete(outapp);
 }
+
+void QuestManager::camerashake(int duration, int intensity) {
+        auto pack = new ServerPacket(ServerOP_CameraShake, sizeof(ServerCameraShake_Struct));
+        ServerCameraShake_Struct* scss = (ServerCameraShake_Struct*) pack->pBuffer;
+        scss->duration = duration;
+        scss->intensity = intensity;
+        worldserver.SendPacket(pack);
+        safe_delete(pack);
+        Log.Out(Logs::General, Logs::Quests, "QuestManager::camerashake(%d, %d);", duration, intensity);
+}
