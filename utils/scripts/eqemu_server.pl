@@ -267,8 +267,8 @@ sub do_self_update_check_routine {
 					if($OS eq "Linux"){
 						system("chmod 755 eqemu_server.pl");
 						system("chown eqemu eqemu_server.pl");
-						system("perl eqemu_server.pl");
 					}
+					system("perl eqemu_server.pl");
 				}
 			}
 			print "[Install] Done\n";
