@@ -61,19 +61,7 @@ no warnings;
 
 ($sec, $min, $hour, $mday, $mon, $year, $wday, $yday, $isdst) = localtime();
 
-my $confile = "eqemu_config.xml"; #default
-open(F, "<$confile");
-my $indb = 0;
-while(<F>) {
-	s/\r//g;
-	if(/<database>/i) { $indb = 1; }
-	next unless($indb == 1);
-	if(/<\/database>/i) { $indb = 0; last; }
-	if(/<host>(.*)<\/host>/i) { $host = $1; } 
-	elsif(/<username>(.*)<\/username>/i) { $user = $1; } 
-	elsif(/<password>(.*)<\/password>/i) { $pass = $1; } 
-	elsif(/<db>(.*)<\/db>/i) { $db = $1; } 
-}
+read_eqemu_config_xml();
 
 $console_output = "[Update] EQEmu: Automatic Database Upgrade Check\n";
 
@@ -111,7 +99,6 @@ if($path eq ""){
 	print "script_exiting...\n";
 	exit;
 }
-
 
 #::: Create db_update working directory if not created
 mkdir('db_update'); 
@@ -161,8 +148,11 @@ else {
 		exit;
 	}
 
-	if(!$db){ print "[eqemu_server.pl] No database connection found... Running without\n"; }
-	show_menu_prompt();
+	#::: Make sure that we didn't pass any arugments to the script
+	if(!$ARGV[0]){
+		if(!$db){ print "[eqemu_server.pl] No database connection found... Running without\n"; }
+		show_menu_prompt();
+	}
 }
 
 if($db){
@@ -184,6 +174,112 @@ if($db){
 	}
 
 } 
+
+
+if($ARGV[0] eq "install_peq_db"){
+	
+	get_installation_variables();
+	
+	$db_name = "peq";
+	if($ARGV[1]){
+		$db_name = $ARGV[1];
+	}
+	elsif($installation_variables{"mysql_eqemu_db_name"}){
+		$db_name = $installation_variables{"mysql_eqemu_db_name"};
+	}
+	
+	$db = $db_name;
+
+	#::: Database Routines
+	print "MariaDB :: Creating Database '" . $db_name . "'\n";
+	print `"$path" --host $host --user $user --password="$pass" -N -B -e "DROP DATABASE IF EXISTS $db_name;"`;
+	print `"$path" --host $host --user $user --password="$pass" -N -B -e "CREATE DATABASE $db_name"`;
+	if($OS eq "Windows"){ @db_version = split(': ', `world db_version`); } 
+	if($OS eq "Linux"){ @db_version = split(': ', `./world db_version`); }  
+	$bin_db_ver = trim($db_version[1]);
+	check_db_version_table();
+	$local_db_ver = trim(get_mysql_result("SELECT version FROM db_version LIMIT 1"));
+	fetch_peq_db_full();
+	print "\nFetching Latest Database Updates...\n";
+	main_db_management();
+	print "\nApplying Latest Database Updates...\n";
+	main_db_management();
+	
+	print get_mysql_result("UPDATE `launcher` SET `dynamics` = 30 WHERE `name` = 'zone'");
+}
+
+if($ARGV[0] eq "remove_duplicate_rules"){
+	remove_duplicate_rule_values();	
+	exit;
+}
+
+if($ARGV[0] eq "map_files_fetch_bulk"){
+	map_files_fetch_bulk();
+	exit;
+}
+
+if($ARGV[0] eq "installer"){
+	print "Running EQEmu Server installer routines...\n";
+	mkdir('logs');
+	mkdir('updates_staged');
+	mkdir('shared');
+	
+	do_install_config_xml();
+	read_eqemu_config_xml();
+	
+	get_installation_variables();
+	
+	$db_name = "peq";
+	if($installation_variables{"mysql_eqemu_db_name"}){
+		$db_name = $installation_variables{"mysql_eqemu_db_name"};
+	}
+	
+	if($OS eq "Windows"){
+		#::: Binary dll's
+		fetch_latest_windows_binaries();
+		get_remote_file($install_repository_request_url . "lua51.dll", "lua51.dll", 1);
+		get_remote_file($install_repository_request_url . "zlib1.dll", "zlib1.dll", 1);
+		get_remote_file($install_repository_request_url . "libmysql.dll", "libmysql.dll", 1);
+	}
+	
+	map_files_fetch_bulk();
+	opcodes_fetch();
+	plugins_fetch();
+	quest_files_fetch();
+	lua_modules_fetch();
+	
+	#::: Server scripts
+	fetch_utility_scripts();
+	
+	#::: Database Routines
+	print "MariaDB :: Creating Database '" . $db_name . "'\n";
+	print `"$path" --host $host --user $user --password="$pass" -N -B -e "DROP DATABASE IF EXISTS $db_name;"`;
+	print `"$path" --host $host --user $user --password="$pass" -N -B -e "CREATE DATABASE $db_name"`;
+	if($OS eq "Windows"){ @db_version = split(': ', `world db_version`); } 
+	if($OS eq "Linux"){ @db_version = split(': ', `./world db_version`); }  
+	$bin_db_ver = trim($db_version[1]);
+	check_db_version_table();
+	$local_db_ver = trim(get_mysql_result("SELECT version FROM db_version LIMIT 1"));
+	fetch_peq_db_full();
+	print "\nFetching Latest Database Updates...\n";
+	main_db_management();
+	print "\nApplying Latest Database Updates...\n";
+	main_db_management();
+	
+	print get_mysql_result("UPDATE `launcher` SET `dynamics` = 30 WHERE `name` = 'zone'");
+	
+	if($OS eq "Windows"){
+		check_windows_firewall_rules();
+		do_windows_login_server_setup();
+	}
+	exit;
+}
+
+if($ARGV[0] eq "db_dump_compress"){ database_dump_compress(); exit; }
+if($ARGV[0] eq "login_server_setup"){
+	do_windows_login_server_setup();	
+	exit;
+}
 
 sub get_installation_variables{
 	#::: Fetch installation variables before building the config
@@ -259,110 +355,6 @@ sub do_install_config_xml {
 	close(FILE_TEMPLATE);
 	close(NEW_CONFIG);
 	unlink("eqemu_config_template.xml");
-}
-
-if($ARGV[0] eq "install_peq_db"){
-	
-	get_installation_variables();
-	
-	$db_name = "peq";
-	if($ARGV[1]){
-		$db_name = $ARGV[1];
-	}
-	elsif($installation_variables{"mysql_eqemu_db_name"}){
-		$db_name = $installation_variables{"mysql_eqemu_db_name"};
-	}
-	
-	$db = $db_name;
-
-	#::: Database Routines
-	print "MariaDB :: Creating Database '" . $db_name . "'\n";
-	print `"$path" --host $host --user $user --password="$pass" -N -B -e "DROP DATABASE IF EXISTS $db_name;"`;
-	print `"$path" --host $host --user $user --password="$pass" -N -B -e "CREATE DATABASE $db_name"`;
-	if($OS eq "Windows"){ @db_version = split(': ', `world db_version`); } 
-	if($OS eq "Linux"){ @db_version = split(': ', `./world db_version`); }  
-	$bin_db_ver = trim($db_version[1]);
-	check_db_version_table();
-	$local_db_ver = trim(get_mysql_result("SELECT version FROM db_version LIMIT 1"));
-	fetch_peq_db_full();
-	print "\nFetching Latest Database Updates...\n";
-	main_db_management();
-	print "\nApplying Latest Database Updates...\n";
-	main_db_management();
-	
-	print get_mysql_result("UPDATE `launcher` SET `dynamics` = 30 WHERE `name` = 'zone'");
-}
-
-if($ARGV[0] eq "remove_duplicate_rules"){
-	remove_duplicate_rule_values();	
-	exit;
-}
-
-if($ARGV[0] eq "map_files_fetch_bulk"){
-	map_files_fetch_bulk();
-	exit;
-}
-
-if($ARGV[0] eq "installer"){
-	print "Running EQEmu Server installer routines...\n";
-	mkdir('logs');
-	mkdir('updates_staged');
-	mkdir('shared');
-	
-	do_install_config_xml();
-	
-	get_installation_variables();
-	
-	$db_name = "peq";
-	if($installation_variables{"mysql_eqemu_db_name"}){
-		$db_name = $installation_variables{"mysql_eqemu_db_name"};
-	}
-	
-	if($OS eq "Windows"){
-		#::: Binary dll's
-		fetch_latest_windows_binaries();
-		get_remote_file($install_repository_request_url . "lua51.dll", "lua51.dll", 1);
-		get_remote_file($install_repository_request_url . "zlib1.dll", "zlib1.dll", 1);
-		get_remote_file($install_repository_request_url . "libmysql.dll", "libmysql.dll", 1);
-	}
-	
-	map_files_fetch_bulk();
-	opcodes_fetch();
-	plugins_fetch();
-	quest_files_fetch();
-	lua_modules_fetch();
-	
-	#::: Server scripts
-	fetch_utility_scripts();
-	
-	#::: Database Routines
-	print "MariaDB :: Creating Database '" . $db_name . "'\n";
-	print `"$path" --host $host --user $user --password="$pass" -N -B -e "DROP DATABASE IF EXISTS $db_name;"`;
-	print `"$path" --host $host --user $user --password="$pass" -N -B -e "CREATE DATABASE $db_name"`;
-	if($OS eq "Windows"){ @db_version = split(': ', `world db_version`); } 
-	if($OS eq "Linux"){ @db_version = split(': ', `./world db_version`); }  
-	$bin_db_ver = trim($db_version[1]);
-	check_db_version_table();
-	$local_db_ver = trim(get_mysql_result("SELECT version FROM db_version LIMIT 1"));
-	fetch_peq_db_full();
-	print "\nFetching Latest Database Updates...\n";
-	main_db_management();
-	print "\nApplying Latest Database Updates...\n";
-	main_db_management();
-	
-	print get_mysql_result("UPDATE `launcher` SET `dynamics` = 30 WHERE `name` = 'zone'");
-	
-	if($OS eq "Windows"){
-		check_windows_firewall_rules();
-		do_windows_login_server_setup();
-	}
-	exit;
-}
-
-if($ARGV[0] eq "db_dump_compress"){ database_dump_compress(); exit; }
-if($ARGV[0] eq "login_server_setup"){
-	do_windows_login_server_setup();	
-	exit;
 }
 
 sub do_update_self{
@@ -661,6 +653,22 @@ sub trim {
 	return $string; 
 }
 
+sub read_eqemu_config_xml {
+	my $confile = "eqemu_config.xml"; #default
+	open(F, "<$confile");
+	my $indb = 0;
+	while(<F>) {
+		s/\r//g;
+		if(/<database>/i) { $indb = 1; }
+		next unless($indb == 1);
+		if(/<\/database>/i) { $indb = 0; last; }
+		if(/<host>(.*)<\/host>/i) { $host = $1; } 
+		elsif(/<username>(.*)<\/username>/i) { $user = $1; } 
+		elsif(/<password>(.*)<\/password>/i) { $pass = $1; } 
+		elsif(/<db>(.*)<\/db>/i) { $db = $1; } 
+	}
+}
+
 #::: Fetch Latest PEQ AA's
 sub aa_fetch{
 	if(!$db){
@@ -735,16 +743,16 @@ sub copy_file {
 	$l_source_file = $_[0];
 	$l_destination_file = $_[1];
 	if($l_destination_file=~/\//i){
-		my @dir_path = split('/', $l_destination_file);
+		my @directory_path = split('/', $l_destination_file);
 		$build_path = "";
 		$directory_index = 0;
-		while($directory_indexr_path[$directory_index]){
-			$build_path .= $directory_indexr_path[$directory_index] . "/";	
+		while($directory_path[$directory_index]){
+			$build_path .= $directory_path[$directory_index] . "/";
 			#::: If path does not exist, create the directory...
 			if (!-d $build_path) {
 				mkdir($build_path);
 			}
-			if(!$directory_indexr_path[$directory_index + 2] && $directory_indexr_path[$directory_index + 1]){
+			if(!$directory_path[$directory_index + 2] && $directory_path[$directory_index + 1]){
 				# print $actual_path . "\n";
 				$actual_path = $build_path;
 				last;
@@ -802,6 +810,42 @@ sub fetch_latest_windows_binaries_bots {
 }
 
 sub do_windows_login_server_setup {
+	print "\n --- Fetching Loginserver... --- \n";
+	get_remote_file($install_repository_request_url . "login_server.zip", "updates_staged/login_server.zip", 1);
+	print "\n --- Extracting... --- \n";
+	unzip('updates_staged/login_server.zip', 'updates_staged/login_server/');
+	my @files;
+	my $start_dir = "updates_staged/login_server";
+	find( 
+		sub { push @files, $File::Find::name unless -d; }, 
+		$start_dir
+	);
+	for my $file (@files) {
+		$destination_file = $file;
+		$destination_file =~s/updates_staged\/login_server\///g;
+		print "Installing :: " . $destination_file . "\n";
+		copy_file($file, $destination_file);
+	}
+	print "\n Done... \n";
+	
+	print "Pulling down Loginserver database tables...\n";
+	get_remote_file($install_repository_request_url . "login_server_tables.sql", "db_update/login_server_tables.sql");
+	print "\n\nInstalling Loginserver tables...\n";
+	print get_mysql_result_from_file("db_update/login_server_tables.sql");
+	print "\nDone...\n\n";
+	
+	add_login_server_firewall_rules();
+	
+	rmtree('updates_staged');
+	rmtree('db_update');
+	
+	print "\nPress any key to continue...\n";
+	
+	<>; #Read from STDIN 
+	
+}
+
+sub do_linux_login_server_setup {
 	print "\n --- Fetching Loginserver... --- \n";
 	get_remote_file($install_repository_request_url . "login_server.zip", "updates_staged/login_server.zip", 1);
 	print "\n --- Extracting... --- \n";
