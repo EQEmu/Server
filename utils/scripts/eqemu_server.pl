@@ -86,7 +86,7 @@ mkdir('db_update');
 #::: Check if db_version table exists... 
 if(trim(get_mysql_result("SHOW COLUMNS FROM db_version LIKE 'Revision'")) ne "" && $db){
 	print get_mysql_result("DROP TABLE db_version");
-	print "Old db_version table present, dropping...\n\n";
+	print "[Database] Old db_version table present, dropping...\n\n";
 }
 
 sub check_db_version_table{
@@ -96,7 +96,7 @@ sub check_db_version_table{
 			  version int(11) DEFAULT '0'
 			) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 			INSERT INTO db_version (version) VALUES ('1000');");
-		print "Table 'db_version' does not exists.... Creating...\n\n";
+		print "[Database] Table 'db_version' does not exists.... Creating...\n\n";
 	}
 }
 
@@ -853,7 +853,7 @@ sub do_windows_login_server_setup {
 sub do_linux_login_server_setup {
 	
 	for my $file (@files) {
-		$destination_file = $file;
+		$destination_file = $file; 
 		$destination_file =~s/updates_staged\/login_server\///g;
 		print "[Install] Installing :: " . $destination_file . "\n";
 		copy_file($file, $destination_file);
@@ -1277,7 +1277,7 @@ sub unzip {
 		unless ( $zip->read($archive_to_unzip) == AZ_OK ) {
 			die 'read error';
 		}
-		print "Extracting...\n";
+		print "[Unzip] Extracting...\n";
 		$zip->extractTree('', $dest_folder);
 	}
 	if($OS eq "Linux"){
@@ -1512,7 +1512,7 @@ sub get_bots_db_version{
 	#::: Check if bots_version column exists...
 	if(get_mysql_result("SHOW COLUMNS FROM db_version LIKE 'bots_version'") eq "" && $db){
 	   print get_mysql_result("ALTER TABLE db_version ADD bots_version int(11) DEFAULT '0' AFTER version;");
-	   print "\nColumn 'bots_version' does not exists.... Adding to 'db_version' table...\n\n";
+	   print "[Database] Column 'bots_version' does not exists.... Adding to 'db_version' table...\n\n";
 	}
 	$bots_local_db_version = trim(get_mysql_result("SELECT bots_version FROM db_version LIMIT 1"));
 	return $bots_local_db_version;
@@ -1528,7 +1528,7 @@ sub bots_db_management{
 	}
 
 	if($bin_db_ver == 0){
-		print "Your server binaries (world/zone) are not compiled for bots...\n\n";
+		print "[Database] Your server binaries (world/zone) are not compiled for bots...\n\n";
 		return;
 	}
 	
