@@ -161,7 +161,8 @@ bool Zone::LoadZoneObjects() {
 
 	std::string query = StringFormat("SELECT id, zoneid, xpos, ypos, zpos, heading, "
                                     "itemid, charges, objectname, type, icon, unknown08, "
-                                    "unknown10, unknown20, unknown24, unknown76 fROM object "
+                                    "unknown10, unknown20, unknown24, unknown76, size, tilt_x, " 
+									"tilt_y FROM object "
                                     "WHERE zoneid = %i AND (version = %u OR version = -1)",
                                     zoneid, instanceversion);
     auto results = database.QueryDatabase(query);
@@ -241,11 +242,14 @@ bool Zone::LoadZoneObjects() {
 		data.object_type = type;
 		data.linked_list_addr[0] = 0;
         data.linked_list_addr[1] = 0;
-        data.size	= (uint32)atoi(row[11]);
+        
 		data.solidtype	= (uint32)atoi(row[12]);
         data.unknown020	= (uint32)atoi(row[13]);
         data.unknown024	= (uint32)atoi(row[14]);
         data.unknown076	= (uint32)atoi(row[15]);
+		data.size	= atof(row[16]);
+		data.tilt_x = atof(row[17]);
+		data.tilt_y = atof(row[18]);
         data.unknown084	= 0;
 
         ItemInst* inst = nullptr;

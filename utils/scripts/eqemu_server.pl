@@ -27,6 +27,7 @@ $db_run_stage = 0; #::: Sets database run stage check
 $console_output .= "	Operating System is: $Config{osname}\n";
 if($Config{osname}=~/freebsd|linux/i){ $OS = "Linux"; }
 if($Config{osname}=~/Win|MS/i){ $OS = "Windows"; }
+$has_internet_connection = check_internet_connection();
 
 #::: Check for script self update
 do_self_update_check_routine();
@@ -201,6 +202,8 @@ if($ARGV[0] eq "installer"){
 	lua_modules_fetch();
 	fetch_utility_scripts();
 	
+	
+	
 	#::: Database Routines
 	print "[Database] Creating Database '" . $db_name . "'\n";
 	print `"$path" --host $host --user $user --password="$pass" -N -B -e "DROP DATABASE IF EXISTS $db_name;"`;
@@ -241,10 +244,37 @@ if($ARGV[0] eq "login_server_setup"){
 	exit;
 }     
 
+sub check_internet_connection {
+	if($OS eq "Linux"){
+		$count = "c";
+	}
+	if($OS eq "Windows"){
+		$count = "n";
+	}
+	
+	if (`ping 8.8.8.8 -$count 1 -w 500`=~/Reply from|1 received/i) { 
+		# print "[Update] We have a connection to the internet, continuing...\n";
+		return 1;
+	}
+	elsif (`ping 4.2.2.2 -$count 1 -w 500`=~/Reply from|1 received/i) { 
+		# print "[Update] We have a connection to the internet, continuing...\n";
+		return 1;
+	}
+	else{
+		print "[Update] No connection to the internet, can't check update\n";
+		return;
+	}
+}
+
 sub do_self_update_check_routine {
 	#::: Check Version passed from world to update script
-	get_remote_file($eqemu_repository_request_url . "utils/scripts/eqemu_server.pl", "updates_staged/eqemu_server.pl", 0, 1);
+	get_remote_file($eqemu_repository_request_url . "utils/scripts/eqemu_server.pl", "updates_staged/eqemu_server.pl", 0, 1, 1);
 
+	if(!$has_internet_connection){
+		print "[Update] Cannot check update without internet connection...\n";
+		return;
+	}
+	
 	if(-e "updates_staged/eqemu_server.pl") { 
 	
 		my $remote_script_size = -s "updates_staged/eqemu_server.pl";
@@ -285,7 +315,12 @@ sub do_self_update_check_routine {
 
 sub get_installation_variables{
 	#::: Fetch installation variables before building the config
-	open (INSTALL_VARS, "../install_variables.txt");
+	if($OS eq "Linux"){
+		open (INSTALL_VARS, "../install_variables.txt");
+	}
+	if($OS eq "Windows"){
+		open (INSTALL_VARS, "install_variables.txt");
+	}
 	while (<INSTALL_VARS>){
 		chomp;
 		$o = $_;
@@ -412,14 +447,14 @@ sub show_menu_prompt {
 			print " [lua_modules]		Download latest lua_modules\n";
 			print " [utility_scripts]	Download utility scripts to run and operate the EQEmu Server\n";
 			if($OS eq "Windows"){
-				print "--- Windows\n";
-				print " windows_server_download	Updates server code from latest stable\n";
-				print " windows_server_download_bots	Updates server code (bots enabled) from latest\n";
-				print " fetch_dlls			Grabs dll's needed to run windows binaries\n";
-				print " setup_loginserver		Sets up loginserver for Windows\n";
+				print ">>> Windows\n";
+				print " [windows_server_download]	Updates server code from latest stable\n";
+				print " [windows_server_download_bots]	Updates server code (bots enabled) from latest\n";
+				print " [fetch_dlls]			Grabs dll's needed to run windows binaries\n";
+				print " [setup_loginserver]		Sets up loginserver for Windows\n";
 			}
 			print " \n> main - go back to main menu\n";
-			print "Enter a command #> ";
+			print "Enter a command #> "; 
 			$last_menu = trim($input);
 		}
 		elsif($input eq "backup_database"){ database_dump(); $dc = 1; }
@@ -560,6 +595,12 @@ sub get_remote_file{
 	my $destination_file = $_[1];
 	my $content_type = $_[2];
 	my $no_retry = $_[3];
+	my $silent_download = $_[4];
+	
+	if(!$has_internet_connection){
+		print "[Download] Cannot download without internet connection...\n";
+		return;
+	}
 	
 	#::: Build file path of the destination file so that we may check for the folder's existence and make it if necessary
 	
@@ -600,7 +641,7 @@ sub get_remote_file{
 				#::: Make sure the file exists before continuing...
 				if(-e $destination_file) { 
 					$break = 1;
-					print "[Download] Saved: (" . $destination_file . ") from " . $request_url . "\n";
+					print "[Download] Saved: (" . $destination_file . ") from " . $request_url . "\n" if !$silent_download;
 				} else { $break = 0; }
 				usleep(500);
 				
@@ -613,7 +654,7 @@ sub get_remote_file{
 			$break = 0;
 			while($break == 0) {
 				require LWP::UserAgent; 
-				my $ua = LWP::UserAgent->new;
+				my $ua = LWP::UserAgent->new; 
 				$ua->timeout(10);
 				$ua->env_proxy; 
 				my $response = $ua->get($request_url);
@@ -627,7 +668,7 @@ sub get_remote_file{
 				}
 				if(-e $destination_file) { 
 					$break = 1;
-					print "[Download] Saved: (" . $destination_file . ") from " . $request_url . "\n";
+					print "[Download] Saved: (" . $destination_file . ") from " . $request_url . "\n" if !$silent_download;
 				} else { $break = 0; }
 				usleep(500);
 				
@@ -640,7 +681,7 @@ sub get_remote_file{
 	if($OS eq "Linux"){
 		#::: wget -O db_update/db_update_manifest.txt https://raw.githubusercontent.com/EQEmu/Server/master/utils/sql/db_update_manifest.txt
 		$wget = `wget --no-check-certificate --quiet -O $destination_file $request_url`;
-		print "[Download] Saved: (" . $destination_file . ") from " . $request_url . "\n";
+		print "[Download] Saved: (" . $destination_file . ") from " . $request_url . "\n" if !$silent_download;
 		if($wget=~/unable to resolve/i){ 
 			print "Error, no connection or failed request...\n\n";
 			#die;

@@ -63,6 +63,9 @@ Object::Object(uint32 id, uint32 type, uint32 icon, const Object_Struct& object,
 
 	// Set drop_id to zero - it will be set when added to zone with SetID()
 	m_data.drop_id = 0;
+	m_data.size = object.size;
+	m_data.tilt_x = object.tilt_x;
+	m_data.tilt_y = object.tilt_y;
 }
 
 //creating a re-ocurring ground spawn.
@@ -653,10 +656,12 @@ void ZoneDatabase::UpdateObject(uint32 id, uint32 type, uint32 icon, const Objec
 	// Save new record for object
 	std::string query = StringFormat("UPDATE object SET "
                                     "zoneid = %i, xpos = %f, ypos = %f, zpos = %f, heading = %f, "
-                                    "itemid = %i, charges = %i, objectname = '%s', type = %i, icon = %i "
+                                    "itemid = %i, charges = %i, objectname = '%s', type = %i, icon = %i, "
+									"size = %f, tilt_x = %f, tilt_y = %f "
                                     "WHERE id = %i",
                                     object.zone_id, object.x, object.y, object.z, object.heading,
-                                    item_id, charges, object_name, type, icon, id);
+                                    item_id, charges, object_name, type, icon, 
+									object.size, object.tilt_x, object.tilt_y, id);
     safe_delete_array(object_name);
     auto results = QueryDatabase(query);
 	if (!results.Success()) {
@@ -750,6 +755,16 @@ float Object::GetHeadingData()
 	return this->m_data.heading;
 }
 
+float Object::GetTiltX()
+{
+	return this->m_data.tilt_x;
+}
+
+float Object::GetTiltY()
+{
+	return this->m_data.tilt_y;
+}
+
 void Object::SetX(float pos)
 {
 	this->m_data.x = pos;
@@ -767,6 +782,34 @@ void Object::SetX(float pos)
 void Object::SetY(float pos)
 {
 	this->m_data.y = pos;
+
+	auto app = new EQApplicationPacket();
+	auto app2 = new EQApplicationPacket();
+	this->CreateDeSpawnPacket(app);
+	this->CreateSpawnPacket(app2);
+	entity_list.QueueClients(0, app);
+	entity_list.QueueClients(0, app2);
+	safe_delete(app);
+	safe_delete(app2);
+}
+
+void Object::SetTiltX(float pos)
+{
+	this->m_data.tilt_x = pos;
+
+	auto app = new EQApplicationPacket();
+	auto app2 = new EQApplicationPacket();
+	this->CreateDeSpawnPacket(app);
+	this->CreateSpawnPacket(app2);
+	entity_list.QueueClients(0, app);
+	entity_list.QueueClients(0, app2);
+	safe_delete(app);
+	safe_delete(app2);
+}
+
+void Object::SetTiltY(float pos)
+{
+	this->m_data.tilt_y = pos;
 
 	auto app = new EQApplicationPacket();
 	auto app2 = new EQApplicationPacket();
@@ -828,7 +871,7 @@ void Object::SetModelName(const char* modelname)
 	safe_delete(app2);
 }
 
-void Object::SetSize(uint16 size)
+void Object::SetSize(float size)
 {
 	m_data.size = size;
 	auto app = new EQApplicationPacket();
@@ -854,7 +897,7 @@ void Object::SetSolidType(uint16 solidtype)
 	safe_delete(app2);
 }
 
-uint16 Object::GetSize()
+float Object::GetSize()
 {
 	return m_data.size;
 }

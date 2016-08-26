@@ -595,6 +595,46 @@ namespace Titanium
 		dest->FastQueuePacket(&in, ack_req);
 	}
 
+	ENCODE(OP_GroundSpawn)
+	{
+		// We are not encoding the spawn_id field here, but it doesn't appear to matter.
+		//
+		EQApplicationPacket *in = *p;
+		*p = nullptr;
+
+		//store away the emu struct
+		unsigned char *__emu_buffer = in->pBuffer;
+		Object_Struct *emu = (Object_Struct *)__emu_buffer;
+
+		in->size = strlen(emu->object_name) + sizeof(structs::Object_Struct) - 1;
+		in->pBuffer = new unsigned char[in->size];
+
+		structs::Object_Struct *eq = (structs::Object_Struct *) in->pBuffer;
+
+		eq->drop_id = emu->drop_id;
+		eq->heading = emu->heading;
+		eq->linked_list_addr[0] = 0;
+		eq->linked_list_addr[1] = 0;
+		strcpy(eq->object_name, emu->object_name);
+		eq->object_type = emu->object_type;
+		eq->spawn_id = 0;
+		eq->unknown008[0] = 0;
+		eq->unknown008[1] = 0;
+		eq->unknown020 = 0;
+		eq->unknown024 = 0;
+		eq->unknown076 = 0;
+		eq->unknown084 = 0xffffffff;
+		eq->z = emu->z;
+		eq->x = emu->x;
+		eq->y = emu->y;
+		eq->zone_id = emu->zone_id;
+		eq->zone_instance = emu->zone_instance;
+
+
+		delete[] __emu_buffer;
+		dest->FastQueuePacket(&in, ack_req);
+	}
+
 	ENCODE(OP_GuildMemberList)
 	{
 		//consume the packet

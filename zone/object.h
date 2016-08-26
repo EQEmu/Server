@@ -154,10 +154,14 @@ public:
 	void SetX(float pos);
 	void SetY(float pos);
 	void SetZ(float pos);
+	void SetTiltX(float pos);
+	void SetTiltY(float pos);
+	float GetTiltX();
+	float GetTiltY();
 	void SetModelName(const char* modelname);
 	const char* GetModelName();
-	uint16 GetSize();
-	void SetSize(uint16 size);
+	float GetSize();
+	void SetSize(float size);
 	uint16 GetSolidType();
 	void SetSolidType(uint16 size);
 
