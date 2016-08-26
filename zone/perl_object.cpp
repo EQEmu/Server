@@ -968,7 +968,7 @@ XS(XS_Object_GetSize)
 		Perl_croak(aTHX_ "Usage: Object::GetSize(THIS)");
 	{
 		Object *		THIS;
-		uint16		RETVAL;
+		float		RETVAL;
 		dXSTARG;
 
 		if (sv_derived_from(ST(0), "Object")) {
@@ -981,7 +981,7 @@ XS(XS_Object_GetSize)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetSize();
-		XSprePUSH; PUSHu((UV)RETVAL);
+		XSprePUSH; PUSHn((double)RETVAL);
 	}
 	XSRETURN(1);
 }
@@ -995,7 +995,7 @@ XS(XS_Object_SetSize)
 		Perl_croak(aTHX_ "Usage: Object::SetSize(THIS, type)");
 	{
 		Object *		THIS;
-		uint16		size = (uint16)SvUV(ST(1));
+		float		size = (float)SvNV(ST(1));
 
 		if (sv_derived_from(ST(0), "Object")) {
 			IV tmp = SvIV((SV*)SvRV(ST(0)));
@@ -1009,6 +1009,106 @@ XS(XS_Object_SetSize)
 		THIS->SetSize(size);
 	}
 	XSRETURN_EMPTY;
+}
+
+XS(XS_Object_SetTiltX); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Object_SetTiltX)
+{
+	dXSARGS;
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: Object::SetTiltX(THIS, pos)");
+	{
+		Object *		THIS;
+		float		pos = (float)SvNV(ST(1));
+
+		if (sv_derived_from(ST(0), "Object")) {
+			IV tmp = SvIV((SV*)SvRV(ST(0)));
+			THIS = INT2PTR(Object *,tmp);
+		}
+		else
+			Perl_croak(aTHX_ "THIS is not of type Object");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
+
+		THIS->SetTiltX(pos);
+	}
+	XSRETURN_EMPTY;
+}
+
+XS(XS_Object_SetTiltY); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Object_SetTiltY)
+{
+	dXSARGS;
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: Object::SetTiltY(THIS, pos)");
+	{
+		Object *		THIS;
+		float		pos = (float)SvNV(ST(1));
+
+		if (sv_derived_from(ST(0), "Object")) {
+			IV tmp = SvIV((SV*)SvRV(ST(0)));
+			THIS = INT2PTR(Object *,tmp);
+		}
+		else
+			Perl_croak(aTHX_ "THIS is not of type Object");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
+
+		THIS->SetTiltY(pos);
+	}
+	XSRETURN_EMPTY;
+}
+
+XS(XS_Object_GetTiltX); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Object_GetTiltX)
+{
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: Object::GetSize(THIS)");
+	{
+		Object *		THIS;
+		float		RETVAL;
+		dXSTARG;
+
+		if (sv_derived_from(ST(0), "Object")) {
+			IV tmp = SvIV((SV*)SvRV(ST(0)));
+			THIS = INT2PTR(Object *,tmp);
+		}
+		else
+			Perl_croak(aTHX_ "THIS is not of type Object");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
+
+		RETVAL = THIS->GetTiltX();
+		XSprePUSH; PUSHn((double)RETVAL);
+	}
+	XSRETURN(1);
+}
+
+XS(XS_Object_GetTiltY); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Object_GetTiltY)
+{
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: Object::GetSize(THIS)");
+	{
+		Object *		THIS;
+		float		RETVAL;
+		dXSTARG;
+
+		if (sv_derived_from(ST(0), "Object")) {
+			IV tmp = SvIV((SV*)SvRV(ST(0)));
+			THIS = INT2PTR(Object *,tmp);
+		}
+		else
+			Perl_croak(aTHX_ "THIS is not of type Object");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
+
+		RETVAL = THIS->GetTiltY();
+		XSprePUSH; PUSHn((double)RETVAL);
+	}
+	XSRETURN(1);
 }
 
 #ifdef __cplusplus
@@ -1066,6 +1166,10 @@ XS(boot_Object)
 		newXSproto(strcpy(buf, "GetSolidType"),XS_Object_GetSolidType, file, "$");
 		newXSproto(strcpy(buf, "SetSize"),XS_Object_SetSize, file, "$$");
 		newXSproto(strcpy(buf, "GetSize"),XS_Object_GetSize, file, "$");
+		newXSproto(strcpy(buf, "SetTiltX"),XS_Object_SetTiltX, file, "$$");
+		newXSproto(strcpy(buf, "SetTiltY"),XS_Object_SetTiltY, file, "$");
+		newXSproto(strcpy(buf, "GetTiltX"),XS_Object_GetTiltX, file, "$$");
+		newXSproto(strcpy(buf, "GetTiltY"),XS_Object_GetTiltY, file, "$");
 	XSRETURN_YES;
 }
 #endif //EMBPERL_XS_CLASSES

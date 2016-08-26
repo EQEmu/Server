@@ -2509,23 +2509,25 @@ struct BookRequest_Struct {
 */
 struct Object_Struct {
 /*00*/	uint32	linked_list_addr[2];// They are, get this, prev and next, ala linked list
-/*08*/	uint16	size;				//
+/*08*/	float	size;				//
 /*10*/	uint16	solidtype;			//
 /*12*/	uint32	drop_id;			// Unique object id for zone
 /*16*/	uint16	zone_id;			// Redudant, but: Zone the object appears in
 /*18*/	uint16	zone_instance;		//
 /*20*/	uint32	unknown020;			//
 /*24*/	uint32	unknown024;			//
-/*28*/	float	heading;			// heading
-/*32*/	float	z;					// z coord
-/*36*/	float	x;					// x coord
-/*40*/	float	y;					// y coord
-/*44*/	char	object_name[32];	// Name of object, usually something like IT63_ACTORDEF
-/*76*/	uint32	unknown076;			//
-/*80*/	uint32	object_type;		// Type of object, not directly translated to OP_OpenObject
-/*84*/	uint32	unknown084;			//set to 0xFF
-/*88*/	uint32	spawn_id;			// Spawn Id of client interacting with object
-/*92*/
+/*28*/	float	tilt_x;
+/*32*/	float	tilt_y;
+/*36*/	float	heading;			// heading
+/*40*/	float	z;					// z coord
+/*44*/	float	x;					// x coord
+/*76*/	float	y;					// y coord
+/*80*/	char	object_name[32];	// Name of object, usually something like IT63_ACTORDEF
+/*84*/	uint32	unknown076;			//
+/*88*/	uint32	object_type;		// Type of object, not directly translated to OP_OpenObject
+/*92*/	uint32	unknown084;			//set to 0xFF
+		uint32	spawn_id;			// Spawn Id of client interacting with object
+
 };
 // 01 = generic drop, 02 = armor, 19 = weapon
 //[13:40] and 0xff seems to be indicative of the tradeskill/openable items that end up returning the old style item type in the OP_OpenObject
