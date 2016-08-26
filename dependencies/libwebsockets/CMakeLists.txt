@@ -1,5 +1,12 @@
 cmake_minimum_required(VERSION 2.6)
 
+if(POLICY CMP0046)
+	cmake_policy(VERSION 2.8)
+	# The new policy for add_dependencies is to now error if a dependency target
+	# is not found. The old policy didn't care and continued through configuration
+	cmake_policy(SET CMP0046 OLD)
+endif()
+
 project(libwebsockets)
 
 set(PACKAGE "libwebsockets")
@@ -453,6 +460,12 @@ if (NOT LWS_WITHOUT_EXTENSIONS)
 
 		# Set the same variables as find_package would.
 		set(ZLIB_INCLUDE_DIRS ${WIN32_ZLIB_PATH})
+		if(POLICY CMP0026)
+			cmake_policy(VERSION 2.8)
+			# The new policy for add_dependencies is to now error if a dependency target
+			# is not found. The old policy didn't care and continued through configuration
+			cmake_policy(SET CMP0026 OLD)
+		endif()
 		get_property(ZLIB_LIBRARIES TARGET ZLIB PROPERTY LOCATION)
 		set(ZLIB_FOUND 1)
 	else()
@@ -464,8 +477,8 @@ if (NOT LWS_WITHOUT_EXTENSIONS)
 		add_dependencies(${lib} ZLIB)
 	endforeach()
 
-	message("ZLib include dirs: ${ZLIB_INCLUDE_DIRS}")
-	message("ZLib libraries: ${ZLIB_LIBRARIES}")
+	message(STATUS "ZLib include dirs: ${ZLIB_INCLUDE_DIRS}")
+	message(STATUS "ZLib libraries: ${ZLIB_LIBRARIES}")
 	include_directories(${ZLIB_INCLUDE_DIRS})
 	list(APPEND LIB_LIST ${ZLIB_LIBRARIES})
 endif(NOT LWS_WITHOUT_EXTENSIONS)
