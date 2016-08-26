@@ -1880,8 +1880,7 @@ struct Merchant_Sell_Struct {
 /*004*/	uint32	playerid;		// Player's entity id
 /*008*/	uint32	itemslot;
 /*012*/	uint32	unknown12;
-/*016*/	uint8	quantity;		// Already sold
-/*017*/ uint8	Unknown017[3];
+/*016*/	uint32	quantity;
 /*020*/	uint32	Unknown020;
 /*024*/	uint32	price;
 /*028*/	uint32	pricehighorderbits;	// It appears the price is 64 bits in SoD+
