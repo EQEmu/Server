@@ -1405,6 +1405,8 @@ protected:
 	std::unordered_map<uint32, std::pair<uint32, uint32>> aa_ranks;
 	Timer aa_timers[aaTimerMax];
 
+	bool is_horse;
+
 private:
 	void _StopSong(); //this is not what you think it is
 	Mob* target;

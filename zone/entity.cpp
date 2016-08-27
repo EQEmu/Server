@@ -2510,6 +2510,9 @@ void EntityList::Depop(bool StartSpawnTimer)
 			if (own && own->IsClient())
 				continue;
 
+			if (pnpc->IsHorse)
+				continue;
+
 			if (pnpc->IsFindable())
 				UpdateFindableNPCState(pnpc, true);
 
