@@ -1,5 +1,11 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 08/27/2016 ==
+Kinglykrab: Added optional IP-based account exemptions.
+	- To use this system simply set World:EnableIPExemptions to true and create an entry in the ip_exemptions table.
+	- Example: exemption_ip of IP 192.168.1.4 in ip_exemptions with exemption_amount of 1 will allow only 1 account to login from IP 192.168.1.4.
+	- Note: If there is no exemption, the amount of accounts logged in from a singular IP will default to World:MaxClientsPerIP
+
 == 08/23/2016 ==
 noudess: Force mobs on a depop @ end pathgrid to still do this on idle zones.
 This makes them be more random after a zone is idle, rather than always showing

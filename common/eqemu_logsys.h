@@ -83,6 +83,7 @@ namespace Logs {
 		Server_Client_Packet_With_Dump,
 		Client_Server_Packet_With_Dump,
 		Login_Server,
+		Client_Login,
 		MaxCategoryID	/* Don't Remove this*/
 	};
 
@@ -131,7 +132,8 @@ namespace Logs {
 		"Packet :: Client -> Server Unhandled",
 		"Packet :: Server -> Client (Dump)",
 		"Packet :: Client -> Server (Dump)",
-		"Login Server"
+		"Login Server",
+		"Client Login"
 	};
 }
 
