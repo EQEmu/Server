@@ -722,7 +722,7 @@ bool Client::HandleEnterWorldPacket(const EQApplicationPacket *app) {
 		return true;
 	}
 
-	if (RuleI(World, MaxClientsPerIP) >= 0) {
+	if (RuleB(World, EnableIPExemptions) || RuleI(World, MaxClientsPerIP) >= 0) {
 		client_list.GetCLEIP(this->GetIP()); //Check current CLE Entry IPs against incoming connection
 	}
 

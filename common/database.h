@@ -186,6 +186,8 @@ public:
 
 	void	GetAccountFromID(uint32 id, char* oAccountName, int16* oStatus);
 	void	SetAgreementFlag(uint32 acctid);
+	
+	int		GetIPExemption(std::string account_ip);
 
 
 	/* Groups */

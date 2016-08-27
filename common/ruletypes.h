@@ -205,6 +205,7 @@ RULE_INT(World, ExemptMaxClientsStatus, -1) // Exempt accounts from the MaxClien
 RULE_INT(World, AddMaxClientsPerIP, -1) // Maximum number of clients allowed to connect per IP address if account status is < ExemptMaxClientsStatus. Default value: -1 (feature disabled)
 RULE_INT(World, AddMaxClientsStatus, -1) // Accounts with status >= this rule will be allowed to use the amount of accounts defined in the AddMaxClientsPerIP. Default value: -1 (feature disabled)
 RULE_BOOL(World, MaxClientsSetByStatus, false) // If True, IP Limiting will be set to the status on the account as long as the status is > MaxClientsPerIP
+RULE_BOOL(World, EnableIPExemptions, false) // If True, ip_exemptions table is used, if there is no entry for the IP it will default to RuleI(World, MaxClientsPerIP)
 RULE_BOOL(World, ClearTempMerchantlist, true) // Clears temp merchant items when world boots.
 RULE_BOOL(World, DeleteStaleCorpeBackups, true) // Deletes stale corpse backups older than 2 weeks.
 RULE_INT(World, AccountSessionLimit, -1) //Max number of characters allowed on at once from a single account (-1 is disabled)

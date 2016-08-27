@@ -2136,3 +2136,15 @@ bool Database::SaveTime(int8 minute, int8 hour, int8 day, int8 month, int16 year
 	return results.Success();
 
 }
+
+int Database::GetIPExemption(std::string account_ip) {
+	std::string query = StringFormat("SELECT `exemption_amount` FROM `ip_exemptions` WHERE `exemption_ip` = '%s'", account_ip.c_str());
+	auto results = QueryDatabase(query);
+	
+	if (results.Success() && results.RowCount() > 0) {
+		auto row = results.begin();
+		return atoi(row[0]);
+	}
+	
+	return RuleI(World, MaxClientsPerIP);
+}
