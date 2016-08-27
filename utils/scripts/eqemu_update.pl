@@ -1,185 +1,156 @@
 #!/usr/bin/perl
 
 ###########################################################
-#::: Automatic (Database) Upgrade Script
-#::: Author: Akkadius
+#::: General EQEmu Server Administration Script
+#::: Purpose - Handles:
+#::: 	Automatic database versioning (bots and normal DB)
+#::: 	Updating server assets (binary, opcodes, maps, configuration files)
+#::: Original Author: Akkadius
+#::: 	Contributors: Uleat
 #::: Purpose: To upgrade databases with ease and maintain versioning
 ###########################################################
-
-$menu_displayed = 0;
 
 use Config;
 use File::Copy qw(copy);
 use POSIX qw(strftime);
 use File::Path;
 use File::Find;
-use URI::Escape;
-use Time::HiRes qw(usleep);
+use Time::HiRes qw(usleep); 
 
+#::: Variables
+$install_repository_request_url = "https://raw.githubusercontent.com/Akkadius/EQEmuInstall/master/";
+$eqemu_repository_request_url = "https://raw.githubusercontent.com/EQEmu/Server/master/";
+
+#::: Globals
 $time_stamp = strftime('%m-%d-%Y', gmtime());
-
-$console_output .= "	Operating System is: $Config{osname}\n";
+$db_run_stage = 0; #::: Sets database run stage check
 if($Config{osname}=~/freebsd|linux/i){ $OS = "Linux"; }
 if($Config{osname}=~/Win|MS/i){ $OS = "Windows"; }
-
-#::: If current version is less than what world is reporting, then download a new one...
-$current_version = 14;
-
-if($ARGV[0] eq "V"){
-	if($ARGV[1] > $current_version){ 
-		print "eqemu_update.pl Automatic Database Upgrade Needs updating...\n";
-		print "	Current version: " . $current_version . "\n"; 
-		print "	New version: " . $ARGV[1] . "\n";  
-		get_remote_file("https://raw.githubusercontent.com/EQEmu/Server/master/utils/scripts/eqemu_update.pl", "eqemu_update.pl");
-		exit;
-	}
-	else{
-		print "[Upgrade Script] No script update necessary \n";
-	}
-	exit;
-}
-
-#::: Sets database run stage check 
-$db_run_stage = 0;
-
-$perl_version = $^V;
-$perl_version =~s/v//g;
-print "Perl Version is " . $perl_version . "\n";
-if($perl_version > 5.12){ no warnings 'uninitialized';  }
-no warnings;
-
+$has_internet_connection = check_internet_connection();
 ($sec, $min, $hour, $mday, $mon, $year, $wday, $yday, $isdst) = localtime();
 
-my $confile = "eqemu_config.xml"; #default
-open(F, "<$confile");
-my $indb = 0;
-while(<F>) {
-	s/\r//g;
-	if(/<database>/i) { $indb = 1; }
-	next unless($indb == 1);
-	if(/<\/database>/i) { $indb = 0; last; }
-	if(/<host>(.*)<\/host>/i) { $host = $1; } 
-	elsif(/<username>(.*)<\/username>/i) { $user = $1; } 
-	elsif(/<password>(.*)<\/password>/i) { $pass = $1; } 
-	elsif(/<db>(.*)<\/db>/i) { $db = $1; } 
+#::: Check for script self update
+do_self_update_check_routine();
+get_perl_version();
+read_eqemu_config_xml();
+get_mysql_path();
+
+#::: Remove old eqemu_update.pl
+if(-e "eqemu_update.pl"){
+	unlink("eqemu_update.pl");
+}
+#::: Create db_update working directory if not created
+mkdir('db_update'); 
+
+print "[Info] For EQEmu Server management utilities - run eqemu_server.pl\n";
+
+#::: Check if db_version table exists... 
+if(trim(get_mysql_result("SHOW COLUMNS FROM db_version LIKE 'Revision'")) ne "" && $db){
+	print get_mysql_result("DROP TABLE db_version");
+	print "[Database] Old db_version table present, dropping...\n\n";
 }
 
-$console_output = 
-"============================================================
-           EQEmu: Automatic Upgrade Check         
-============================================================
-";
+check_db_version_table();
 
-if($OS eq "Windows"){
-	$has_mysql_path = `echo %PATH%`;
-	if($has_mysql_path=~/MySQL|MariaDB/i){ 
-		@mysql = split(';', $has_mysql_path);
-		foreach my $v (@mysql){
-			if($v=~/MySQL|MariaDB/i){ 
-				$v =~s/\n//g; 
-				$path = trim($v) . "/mysql";
-				last;
-			}
+check_for_world_bootup_database_update();
+
+if($db){
+	print "[Update] MySQL Path/Location: " . $path . "\n";
+	print "[Update] Binary Revision / Local: (" . $binary_database_version  . " / " . $local_database_version . ")\n";
+	
+	#::: Bots
+	#::: Make sure we're running a bots binary to begin with
+	if(trim($db_version[2]) > 0){
+		$bots_local_db_version = get_bots_db_version();
+		if($bots_local_db_version > 0){
+			print "[Update] (Bots) Binary Revision / Local: (" . trim($db_version[2]) . " / " . $bots_local_db_version . ")\n";
 		}
-		$console_output .= "	(Windows) MySQL is in system path \n";
-		$console_output .= "	Path = " . $path . "\n";
-		$console_output .= "============================================================\n";
 	}
-}
 
-#::: Linux Check
-if($OS eq "Linux"){
-	$path = `which mysql`; 
-	if ($path eq "") {
-		$path = `which mariadb`;
+	#::: If World ran this script, and our version is up to date, continue... 
+	if($binary_database_version  <= $local_database_version && $ARGV[0] eq "ran_from_world"){  
+		print "[Update] Database up to Date: Continuing World Bootup...\n";
+		exit; 
 	}
-	$path =~s/\n//g; 
-	
-	$console_output .= "	(Linux) MySQL is in system path \n";
-	$console_output .= "	Path = " . $path . "\n";
-	$console_output .= "============================================================\n";
-}
-
-#::: Path not found, error and exit
-if($path eq ""){
-	print "MySQL path not found, please add the path for automatic database upgrading to continue... \n\n";
-	print "script_exiting...\n";
-	exit;
-}
-
-if($ARGV[0] eq "install_peq_db"){
-	
-	$db_name = "peq";
-	if($ARGV[1]){
-		$db_name = $ARGV[1];
-	}
-	
-	$db = $db_name;
-
-	#::: Database Routines
-	print "MariaDB :: Creating Database '" . $db_name . "'\n";
-	print `"$path" --host $host --user $user --password="$pass" -N -B -e "DROP DATABASE IF EXISTS $db_name;"`;
-	print `"$path" --host $host --user $user --password="$pass" -N -B -e "CREATE DATABASE $db_name"`;
-	if($OS eq "Windows"){ @db_version = split(': ', `world db_version`); } 
-	if($OS eq "Linux"){ @db_version = split(': ', `./world db_version`); }  
-	$bin_db_ver = trim($db_version[1]);
-	check_db_version_table();
-	$local_db_ver = trim(get_mysql_result("SELECT version FROM db_version LIMIT 1"));
-	fetch_peq_db_full();
-	print "\nFetching Latest Database Updates...\n";
-	main_db_management();
-	print "\nApplying Latest Database Updates...\n";
-	main_db_management();
-	
-	print get_mysql_result("UPDATE `launcher` SET `dynamics` = 30 WHERE `name` = 'zone'");
-}
+} 
 
 if($ARGV[0] eq "remove_duplicate_rules"){
 	remove_duplicate_rule_values();	
 	exit;
 }
 
+if($ARGV[0] eq "map_files_fetch_bulk"){
+	map_files_fetch_bulk();
+	exit;
+}
+
+if($ARGV[0] eq "loginserver_install_linux"){
+	do_linux_login_server_setup();
+	exit;
+}
+
 if($ARGV[0] eq "installer"){
-	print "Running EQEmu Server installer routines...\n";
+	print "[Install] Running EQEmu Server installer routines...\n";
+	
+	#::: Make some local server directories...
 	mkdir('logs');
 	mkdir('updates_staged');
 	mkdir('shared');
-	fetch_latest_windows_binaries();
+	
+	do_install_config_xml();
+	read_eqemu_config_xml();
+	get_installation_variables();
+	
+	$db_name = "peq";
+	if($installation_variables{"mysql_eqemu_db_name"}){
+		$db_name = $installation_variables{"mysql_eqemu_db_name"};
+	}
+	
+	#::: Download assets
+	if($OS eq "Windows"){
+		fetch_latest_windows_binaries();
+		get_remote_file($install_repository_request_url . "lua51.dll", "lua51.dll", 1);
+		get_remote_file($install_repository_request_url . "zlib1.dll", "zlib1.dll", 1);
+		get_remote_file($install_repository_request_url . "libmysql.dll", "libmysql.dll", 1);
+	}
 	map_files_fetch_bulk();
 	opcodes_fetch();
 	plugins_fetch();
 	quest_files_fetch();
 	lua_modules_fetch();
-	
-	#::: Binary dll's
-	get_remote_file("https://raw.githubusercontent.com/Akkadius/EQEmuInstall/master/lua51.dll", "lua51.dll", 1);
-	get_remote_file("https://raw.githubusercontent.com/Akkadius/EQEmuInstall/master/zlib1.dll", "zlib1.dll", 1);
-	get_remote_file("https://raw.githubusercontent.com/Akkadius/EQEmuInstall/master/libmysql.dll", "libmysql.dll", 1);
-	
-	#::: Server scripts
 	fetch_utility_scripts();
 	
 	#::: Database Routines
-	print "MariaDB :: Creating Database 'peq'\n";
-	print `"$path" --host $host --user $user --password="$pass" -N -B -e "DROP DATABASE IF EXISTS peq;"`;
-	print `"$path" --host $host --user $user --password="$pass" -N -B -e "CREATE DATABASE peq"`;
+	print "[Database] Creating Database '" . $db_name . "'\n";
+	print `"$path" --host $host --user $user --password="$pass" -N -B -e "DROP DATABASE IF EXISTS $db_name;"`;
+	print `"$path" --host $host --user $user --password="$pass" -N -B -e "CREATE DATABASE $db_name"`;
+	
+	#::: Get Binary DB version
 	if($OS eq "Windows"){ @db_version = split(': ', `world db_version`); } 
 	if($OS eq "Linux"){ @db_version = split(': ', `./world db_version`); }  
-	$bin_db_ver = trim($db_version[1]);
-	check_db_version_table();
-	$local_db_ver = trim(get_mysql_result("SELECT version FROM db_version LIMIT 1"));
-	fetch_peq_db_full();
-	print "\nFetching Latest Database Updates...\n";
-	main_db_management();
-	print "\nApplying Latest Database Updates...\n";
-	main_db_management();
+	$binary_database_version  = trim($db_version[1]);
 	
-	print get_mysql_result("UPDATE `launcher` SET `dynamics` = 30 WHERE `name` = 'zone'");
+	#::: Local DB Version
+	check_db_version_table();
+	$local_database_version = trim(get_mysql_result("SELECT version FROM db_version LIMIT 1"));
+	
+	#::: Download PEQ latest
+	fetch_peq_db_full();
+	print "[Database] Fetching Latest Database Updates...\n";
+	main_db_management();
+	print "[Database] Applying Latest Database Updates...\n";
+	main_db_management();
 	
 	if($OS eq "Windows"){
 		check_windows_firewall_rules();
 		do_windows_login_server_setup();
 	}
+	if($OS eq "Linux"){
+		do_linux_login_server_setup();
+		
+		print "[Install] Installation complete!\n";
+	}
+	
 	exit;
 }
 
@@ -187,204 +158,358 @@ if($ARGV[0] eq "db_dump_compress"){ database_dump_compress(); exit; }
 if($ARGV[0] eq "login_server_setup"){
 	do_windows_login_server_setup();	
 	exit;
-}
+}     
 
-#::: Create db_update working directory if not created
-mkdir('db_update'); 
-
-#::: Check if db_version table exists... 
-if(trim(get_mysql_result("SHOW COLUMNS FROM db_version LIKE 'Revision'")) ne "" && $db){
-	print get_mysql_result("DROP TABLE db_version");
-	print "Old db_version table present, dropping...\n\n";
-}
-
-sub check_db_version_table{
-	if(get_mysql_result("SHOW TABLES LIKE 'db_version'") eq "" && $db){
-		print get_mysql_result("
-			CREATE TABLE db_version (
-			  version int(11) DEFAULT '0'
-			) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-			INSERT INTO db_version (version) VALUES ('1000');");
-		print "Table 'db_version' does not exists.... Creating...\n\n";
+sub check_for_world_bootup_database_update {
+	if($OS eq "Windows"){ 
+		@db_version = split(': ', `world db_version`); 
 	}
-}
+	if($OS eq "Linux"){ 
+		@db_version = split(': ', `./world db_version`); 
+	}  
 
-check_db_version_table();
+	$binary_database_version  = trim($db_version[1]);
+	$local_database_version = trim(get_mysql_result("SELECT version FROM db_version LIMIT 1"));
 
-if($OS eq "Windows"){ @db_version = split(': ', `world db_version`); }
-if($OS eq "Linux"){ @db_version = split(': ', `./world db_version`); }  
-
-$bin_db_ver = trim($db_version[1]);
-$local_db_ver = trim(get_mysql_result("SELECT version FROM db_version LIMIT 1"));
-
-#::: If ran from Linux startup script, supress output
-if($bin_db_ver == $local_db_ver && $ARGV[0] eq "ran_from_start"){ 
-	print "Database up to date...\n"; 
-	exit; 
-}
-else{ 
-	print $console_output if $db; 
-}
-
-if($db){
-	print "	Binary Revision / Local: (" . $bin_db_ver . " / " . $local_db_ver . ")\n";
-	
-	#::: Bots
-	#::: Make sure we're running a bots binary to begin with
-	if(trim($db_version[2]) > 0){
-		$bots_local_db_version = get_bots_db_version();
-		if($bots_local_db_version > 0){
-			print "	(Bots) Binary Revision / Local: (" . trim($db_version[2]) . " / " . $bots_local_db_version . ")\n";
-		}
-	}
-
-	#::: If World ran this script, and our version is up to date, continue...
-	if($bin_db_ver <= $local_db_ver && $ARGV[0] eq "ran_from_world"){  
-		print "	Database up to Date: Continuing World Bootup...\n";
-		print "============================================================\n";
+	if($binary_database_version  == $local_database_version && $ARGV[0] eq "ran_from_world"){ 
+		print "[Update] Database up to date...\n"; 
 		exit; 
 	}
+	else {
 
+		#::: We ran world - Database needs to update, lets backup and run updates and continue world bootup
+		if($local_database_version < $binary_database_version  && $ARGV[0] eq "ran_from_world"){
+			print "[Update] Database not up to date with binaries... Automatically updating...\n";
+			print "[Update] Issuing database backup first...\n";
+			database_dump_compress();
+			print "[Update] Updating database...\n";
+			sleep(1);
+			main_db_management();
+			main_db_management();
+			print "[Update] Continuing bootup\n";
+			exit;
+		}
+
+		#::: Make sure that we didn't pass any arugments to the script
+		if(!$ARGV[0]){
+			if(!$db){ print "[eqemu_server.pl] No database connection found... Running without\n"; }
+			show_menu_prompt();
+		}
+	}
 }
 
-if($local_db_ver < $bin_db_ver && $ARGV[0] eq "ran_from_world"){
-	print "You have missing database updates, type 1 or 2 to backup your database before running them as recommended...\n\n";
-	#::: Display Menu 
-	show_menu_prompt();
-}
-else{
-	#::: Most likely ran standalone
-	print "\n";
-	show_menu_prompt();
+sub check_internet_connection {
+	if($OS eq "Linux"){
+		$count = "c";
+	}
+	if($OS eq "Windows"){
+		$count = "n";
+	}
+	
+	if (`ping 8.8.8.8 -$count 1 -w 500`=~/Reply from|1 received/i) { 
+		# print "[Update] We have a connection to the internet, continuing...\n";
+		return 1;
+	}
+	elsif (`ping 4.2.2.2 -$count 1 -w 500`=~/Reply from|1 received/i) { 
+		# print "[Update] We have a connection to the internet, continuing...\n";
+		return 1;
+	}
+	else{
+		print "[Update] No connection to the internet, can't check update\n";
+		return;
+	}
 }
 
-sub do_update_self{
-	get_remote_file("https://raw.githubusercontent.com/EQEmu/Server/master/utils/scripts/eqemu_update.pl", "eqemu_update.pl");
-	die "Rerun eqemu_update.pl";
+sub get_perl_version {
+	#::: Check Perl version
+	$perl_version = $^V;
+	$perl_version =~s/v//g;
+	print "[Update] Perl Version is " . $perl_version . "\n";
+	if($perl_version > 5.12){ 
+		no warnings 'uninitialized';  
+	}
+	no warnings;
+}
+
+sub do_self_update_check_routine {
+	#::: Check Version passed from world to update script
+	get_remote_file($eqemu_repository_request_url . "utils/scripts/eqemu_server.pl", "updates_staged/eqemu_server.pl", 0, 1, 1);
+
+	if(!$has_internet_connection){
+		print "[Update] Cannot check update without internet connection...\n";
+		return;
+	}
+	
+	if(-e "updates_staged/eqemu_server.pl") { 
+	
+		my $remote_script_size = -s "updates_staged/eqemu_server.pl";
+		my $local_script_size = -s "eqemu_server.pl";
+	
+		if($remote_script_size != $local_script_size){
+			print "[Update] Script has been updated, updating...\n";
+			
+			my @files;
+			my $start_dir = "updates_staged/";
+			find( 
+				sub { push @files, $File::Find::name unless -d; }, 
+				$start_dir
+			);
+			for my $file (@files) {
+				if($file=~/eqemu_server/i){ 
+					$destination_file = $file;
+					$destination_file =~s/updates_staged\///g;
+					print "[Install] Installing :: " . $destination_file . "\n";
+					unlink($destination_file);
+					copy_file($file, $destination_file); 
+					if($OS eq "Linux"){
+						system("chmod 755 eqemu_server.pl");
+					}
+					system("perl eqemu_server.pl start_from_world");
+				}
+			}
+			print "[Install] Done\n";
+		}
+		else {
+			print "[Update] No script update necessary...\n";
+		}
+
+		unlink("updates_staged/eqemu_server.pl");
+	}
+}
+
+sub get_installation_variables{
+	#::: Fetch installation variables before building the config
+	if($OS eq "Linux"){
+		open (INSTALL_VARS, "../install_variables.txt");
+	}
+	if($OS eq "Windows"){
+		open (INSTALL_VARS, "install_variables.txt");
+	}
+	while (<INSTALL_VARS>){
+		chomp;
+		$o = $_;
+		@data = split(":", $o);
+		$installation_variables{trim($data[0])} = trim($data[1]);
+	}
+	close (INSTALL_VARS);
+}
+
+sub do_install_config_xml {
+	get_installation_variables();
+	
+	#::: Fetch XML template
+	get_remote_file($install_repository_request_url . "eqemu_config.xml", "eqemu_config_template.xml");
+	
+	#::: Open new config file
+	open (NEW_CONFIG, '>', 'eqemu_config.xml');
+	
+	$in_database_tag = 0;
+	
+	#::: Iterate through template and replace variables...
+	open (FILE_TEMPLATE, "eqemu_config_template.xml");
+	while (<FILE_TEMPLATE>){
+		chomp;
+		$o = $_;
+		
+		#::: Find replace variables
+		
+		if($o=~/\<\!--/i){
+			next; 
+		}
+		
+		if($o=~/database/i && $o=~/\<\//i){
+			$in_database_tag = 0;
+		}
+		if($o=~/database/i){
+			$in_database_tag = 1;
+		}
+		
+		if($o=~/key/i){ 
+			my($replace_key) = $o =~ />(\w+)</;
+			$new_key = generate_random_password(30);
+			$o =~ s/$replace_key/$new_key/g;
+		}
+		if($o=~/\<username\>/i && $in_database_tag){
+			my($replace_username) = $o =~ />(\w+)</;
+			$o =~ s/$replace_username/$installation_variables{"mysql_eqemu_user"}/g;
+		}
+		if($o=~/\<password\>/i && $in_database_tag){
+			my($replace_password) = $o =~ />(\w+)</;
+			$o =~ s/$replace_password/$installation_variables{"mysql_eqemu_password"}/g;
+		}
+		if($o=~/\<db\>/i){
+			my($replace_db_name) = $o =~ />(\w+)</;
+			
+			#::: There is really no reason why this shouldn't be set
+			if($installation_variables{"mysql_eqemu_db_name"}){
+				$db_name = $installation_variables{"mysql_eqemu_db_name"};
+			}
+			else {
+				$db_name = "peq";
+			}
+			
+			$o =~ s/$replace_db_name/$db_name/g;
+		}
+		print NEW_CONFIG $o . "\n";
+	}
+	
+	close(FILE_TEMPLATE);
+	close(NEW_CONFIG);
+	unlink("eqemu_config_template.xml");
 }
 
 sub fetch_utility_scripts {
 	if($OS eq "Windows"){
-		get_remote_file("https://raw.githubusercontent.com/Akkadius/EQEmuInstall/master/t_database_backup.bat", "t_database_backup.bat");
-		get_remote_file("https://raw.githubusercontent.com/Akkadius/EQEmuInstall/master/t_start_server.bat", "t_start_server.bat");
-		get_remote_file("https://raw.githubusercontent.com/Akkadius/EQEmuInstall/master/t_start_server_with_login_server.bat", "t_start_server_with_login_server.bat");
-		get_remote_file("https://raw.githubusercontent.com/Akkadius/EQEmuInstall/master/t_stop_server.bat", "t_stop_server.bat");
-		get_remote_file("https://raw.githubusercontent.com/Akkadius/EQEmuInstall/master/t_server_crash_report.pl", "t_server_crash_report.pl");
-		get_remote_file("https://raw.githubusercontent.com/Akkadius/EQEmuInstall/master/win_server_launcher.pl", "win_server_launcher.pl");
-		get_remote_file("https://raw.githubusercontent.com/Akkadius/EQEmuInstall/master/t_start_server_with_login_server.bat", "t_start_server_with_login_server.bat");
+		get_remote_file($install_repository_request_url . "t_database_backup.bat", "t_database_backup.bat");
+		get_remote_file($install_repository_request_url . "t_start_server.bat", "t_start_server.bat");
+		get_remote_file($install_repository_request_url . "t_start_server_with_login_server.bat", "t_start_server_with_login_server.bat");
+		get_remote_file($install_repository_request_url . "t_stop_server.bat", "t_stop_server.bat");
+		get_remote_file($install_repository_request_url . "t_server_crash_report.pl", "t_server_crash_report.pl");
+		get_remote_file($install_repository_request_url . "win_server_launcher.pl", "win_server_launcher.pl");
+		get_remote_file($install_repository_request_url . "t_start_server_with_login_server.bat", "t_start_server_with_login_server.bat");
 	}
 	else {
-		print "No scripts found for OS: " . $OS . "...\n";
+		get_remote_file($install_repository_request_url . "linux/server_launcher.pl", "server_launcher.pl");
+		get_remote_file($install_repository_request_url . "linux/server_start.sh", "server_start.sh");
+		get_remote_file($install_repository_request_url . "linux/server_start_dev.sh", "server_start_dev.sh");
+		get_remote_file($install_repository_request_url . "linux/server_status.sh", "server_status.sh");
+		get_remote_file($install_repository_request_url . "linux/server_stop.sh", "server_stop.sh");
 	}
 }
 
 sub show_menu_prompt {
-    my %dispatch = (
-        1 => \&database_dump,
-        2 => \&database_dump_compress,
-        3 => \&main_db_management,
-        4 => \&bots_db_management,
-        5 => \&opcodes_fetch,
-        6 => \&map_files_fetch,
-        7 => \&plugins_fetch,
-        8 => \&quest_files_fetch,
-        9 => \&lua_modules_fetch,
-		10 => \&aa_fetch,
-		11 => \&fetch_latest_windows_binaries,
-		12 => \&fetch_server_dlls,
-		13 => \&do_windows_login_server_setup,
-		14 => \&remove_duplicate_rule_values,
-		15 => \&fetch_utility_scripts,
-		18 => \&fetch_latest_windows_binaries_bots,
-		19 => \&do_bots_db_schema_drop,
-        20 => \&do_update_self,
-		21 => \&database_dump_player_tables,
-        0 => \&script_exit,
-    );
 
-    while (1) { 
-		{
-			local $| = 1;
-			if(!$menu_show && ($ARGV[0] eq "ran_from_world" || $ARGV[0] eq "ran_from_start")){ 
-				$menu_show++;
-				next;
-			}
-			print menu_options(), '> ';
-			$menu_displayed++;
-			if($menu_displayed > 50){
-				print "Safety: Menu looping too many times, exiting...\n"; 
-				exit;
-			}
+	$dc = 0;
+    while (1) {
+		$input = trim($input);
+		
+		$errored_command = 0;
+		
+		if($input eq "database"){
+			print "\n>>> Database Menu\n\n";
+			print " [backup_database]		Back up database to backups/ directory\n";
+			print " [backup_player_tables]		Back up player tables to backups/ directory\n";
+			print " [backup_database_compressed]	Back up database compressed to backups/ directory\n";
+			print " \n";
+			print " [check_db_updates]		Checks for database updates manually\n";
+			print " [check_bot_db_updates]		Checks for bot database updates\n";
+			print " \n";
+			print " [aa_tables]			Downloads and installs clean slate AA data from PEQ\n";
+			print " [remove_duplicate_rules]	Removes duplicate rules from rule_values table\n";
+			print " [drop_bots_db_schema]		Removes bot database schema\n";
+			
+			print " \n> main - go back to main menu\n";
+			print "Enter a command #> ";
+			$last_menu = trim($input);
 		}
-
-		my $choice = <>;
-
-		$choice =~ s/\A\s+//;
-		$choice =~ s/\s+\z//;
-
-		if (defined(my $handler = $dispatch{$choice})) {
-			my $result = $handler->();
-			unless (defined $result) {
-				exit 0;
+		elsif($input eq "assets"){
+			print "\n>>> Server Assets Menu\n\n";
+			print " [maps]			Download latest maps\n";
+			print " [opcodes]		Download opcodes (Patches for eq clients)\n";
+			print " [quests]		Download latest quests\n";
+			print " [plugins]		Download latest plugins\n";
+			print " [lua_modules]		Download latest lua_modules\n";
+			print " [utility_scripts]	Download utility scripts to run and operate the EQEmu Server\n";
+			if($OS eq "Windows"){
+				print ">>> Windows\n";
+				print " [windows_server_download]	Updates server code from latest stable\n";
+				print " [windows_server_download_bots]	Updates server code (bots enabled) from latest\n";
+				print " [fetch_dlls]			Grabs dll's needed to run windows binaries\n";
+				print " [setup_loginserver]		Sets up loginserver for Windows\n";
 			}
+			print " \n> main - go back to main menu\n";
+			print "Enter a command #> "; 
+			$last_menu = trim($input);
+		}
+		elsif($input eq "backup_database"){ database_dump(); $dc = 1; }
+		elsif($input eq "backup_player_tables"){ database_dump_player_tables(); $dc = 1; }
+		elsif($input eq "backup_database_compressed"){ database_dump_compress(); $dc = 1; }
+		elsif($input eq "drop_bots_db_schema"){ do_bots_db_schema_drop(); $dc = 1; }
+		elsif($input eq "aa_tables"){ aa_fetch(); $dc = 1; }
+		elsif($input eq "remove_duplicate_rules"){ remove_duplicate_rule_values(); $dc = 1; }
+		elsif($input eq "maps"){ map_files_fetch_bulk(); $dc = 1; }
+		elsif($input eq "opcodes"){ opcodes_fetch(); $dc = 1; }
+		elsif($input eq "plugins"){ plugins_fetch(); $dc = 1; }
+		elsif($input eq "quests"){ quest_files_fetch(); $dc = 1; }
+		elsif($input eq "lua_modules"){ lua_modules_fetch(); $dc = 1; }
+		elsif($input eq "windows_server_download"){ fetch_latest_windows_binaries(); $dc = 1; }
+		elsif($input eq "windows_server_download_bots"){ fetch_latest_windows_binaries_bots(); $dc = 1; }
+		elsif($input eq "fetch_dlls"){ fetch_server_dlls(); $dc = 1; }
+		elsif($input eq "utility_scripts"){ fetch_utility_scripts(); $dc = 1; }
+		elsif($input eq "check_db_updates"){ main_db_management(); $dc = 1; }
+		elsif($input eq "check_bot_db_updates"){ bots_db_management(); $dc = 1; }
+		elsif($input eq "setup_loginserver"){ do_windows_login_server_setup(); $dc = 1; }
+		elsif($input eq "exit"){
+			exit;
+		}
+		elsif($input eq "main"){
+			print "Returning to main menu...\n";
+			print_main_menu();
+			$last_menu = trim($input);
+		}
+		elsif($input eq "" && $last_menu ne ""){
+			$errored_command = 1;
+		}
+		elsif($input ne ""){
+			print "Invalid command '" . $input . "'\n";
+			$errored_command = 1;
 		}
 		else {
-			if($ARGV[0] ne "ran_from_world"){
-				# warn "\n\nInvalid selection\n\n";
-			}
+			print_main_menu();
+		}
+		
+		#::: Errored command checking
+		if($errored_command == 1){
+			$input = $last_menu;
+		}
+		elsif($dc == 1){ 
+			$dc = 0; 
+			$input = "";
+		}
+		else {
+			$input = <>;
 		}
 	}
 }
 
-sub menu_options {
-	if(@total_updates){ 
-		if($bots_db_management == 1){
-			$option[3] = "Check and stage pending REQUIRED Database updates";
-			$bots_management = "Run pending REQUIRED updates... (" . scalar (@total_updates) . ")";
-		}
-		else{
-			$option[3] = "Run pending REQUIRED updates... (" . scalar (@total_updates) . ")";
-			if(get_mysql_result("SHOW TABLES LIKE 'bots'") eq ""){
-				$bots_management = "Install bots database pre-requisites (Requires bots server binaries)";
-			}
-			else{
-				$bots_management = "Check for Bot pending REQUIRED database updates... (Must have bots enabled)";
-			}
-		}
-	}
-	else{
-		$option[3] = "Check and stage pending REQUIRED Database updates";
-		$bots_management = "Check for Bot REQUIRED database updates... (Must have bots enabled)";
-	}
+sub print_main_menu {
+	print "\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n";
+	print ">>> EQEmu Server Main Menu >>>>>>>>>>>>\n";
+	print ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n\n";
+	print " [database]	Enter database management menu \n";
+	print " [assets]	Manage server assets \n\n";
+	print " exit \n";
+	print "\n"; 
+	print "Enter a command #> ";
+}
 
-return <<EO_MENU;
-============================================================
-#::: EQEmu Update Utility Menu: (eqemu_update.pl)
-============================================================
- 1) [Backup Database] :: (Saves to Backups folder)
- 2) [Backup Database Compressed] :: (Saves to Backups folder)
- 3) [EQEmu DB Schema] :: $option[3]
- 4) [EQEmu DB Bots Schema] $bots_management
- 5) [OPCodes] :: Download latest opcodes for each EQ Client
- 6) [Maps] :: Download latest map and water files
- 7) [Plugins (Perl)] :: Download latest Perl plugins
- 8) [Quests (Perl/LUA)] :: Download latest PEQ quests and stage updates
- 9) [LUA Modules] :: Download latest LUA Modules (Required for Lua)
- 10) [DB Data : Alternate Advancement] :: Download Latest AA's from PEQ (This overwrites existing data)
- 11) [Windows Server Build] :: Download Latest and Stable Server Build (Overwrites existing .exe's, includes .dll's)
- 12) [Windows Server .dll's] :: Download Pre-Requisite Server .dll's
- 13) [Windows Server Loginserver Setup] :: Download and install Windows Loginserver
- 14) [Remove Duplicate Rule Values] :: Looks for redundant rule_values entries and removes them
- 15) [Fetch Utility Scripts] :: Fetches server management utility scripts
- 18) [Windows Server Build Bots] :: Download Latest and Stable Server Build with Bots
- 19) [EQEmu DB Drop Bots Schema] :: Remove Bots schema and return database to normal state
- 20) [Update the updater] Force update this script (Redownload)
- 21) [DB :: Backup Player Tables] :: Backs up player tables
- 0) Exit
- 
- Enter numbered option and press enter...	
+sub get_mysql_path {
+	if($OS eq "Windows"){
+		$has_mysql_path = `echo %PATH%`;
+		if($has_mysql_path=~/MySQL|MariaDB/i){ 
+			@mysql = split(';', $has_mysql_path);
+			foreach my $v (@mysql){
+				if($v=~/MySQL|MariaDB/i){ 
+					$v =~s/\n//g; 
+					$path = trim($v) . "/mysql";
+					last;
+				}
+			}
+		}
+	}
+	if($OS eq "Linux"){
+		$path = `which mysql`; 
+		if ($path eq "") {
+			$path = `which mariadb`; 
+		}
+		$path =~s/\n//g; 
+	}
 	
-EO_MENU
+	#::: Path not found, error and exit
+	if($path eq ""){
+		print "[Error:eqemu_server.pl] MySQL path not found, please add the path for automatic database upgrading to continue... \n\n";
+		exit;
+	}
 }
 
 sub check_for_database_dump_script{
@@ -392,25 +517,21 @@ sub check_for_database_dump_script{
 		return; 
 	}
 	else{
-		print "db_dumper.pl not found... retrieving...\n\n";
-		get_remote_file("https://raw.githubusercontent.com/EQEmu/Server/master/utils/scripts/db_dumper.pl", "db_dumper.pl");
+		print "[Database] db_dumper.pl not found... retrieving...\n";
+		get_remote_file($eqemu_repository_request_url . "utils/scripts/db_dumper.pl", "db_dumper.pl");
 	}
-}
-
-sub ran_from_world { 
-	print "Running from world...\n";
 }
 
 sub database_dump { 
 	check_for_database_dump_script();
-	print "Performing database backup....\n";
+	print "[Database] Performing database backup....\n";
 	print `perl db_dumper.pl database="$db" loc="backups"`;
 }
 
 sub database_dump_player_tables { 
 	check_for_database_dump_script();
-	print "Performing database backup of player tables....\n";
-	get_remote_file("https://raw.githubusercontent.com/EQEmu/Server/master/utils/sql/character_table_list.txt", "backups/character_table_list.txt");
+	print "[Database] Performing database backup of player tables....\n";
+	get_remote_file($eqemu_repository_request_url . "utils/sql/character_table_list.txt", "backups/character_table_list.txt");
 	
 	$tables = "";
 	open (FILE, "backups/character_table_list.txt");
@@ -424,7 +545,7 @@ sub database_dump_player_tables {
 
 	print `perl db_dumper.pl database="$db" loc="backups" tables="$tables" backup_name="player_tables_export" nolock`;
 	
-	print "\nPress any key to continue...\n";
+	print "[Database] Press any key to continue...\n";
 	
 	<>; #Read from STDIN
 	
@@ -432,7 +553,7 @@ sub database_dump_player_tables {
 
 sub database_dump_compress { 
 	check_for_database_dump_script();
-	print "Performing database backup....\n";
+	print "[Database] Performing database backup....\n";
 	print `perl db_dumper.pl database="$db"  loc="backups" compress`;
 }
 
@@ -440,6 +561,17 @@ sub script_exit{
 	#::: Cleanup staged folder...
 	rmtree("updates_staged/");
 	exit;
+}
+
+sub check_db_version_table{
+	if(get_mysql_result("SHOW TABLES LIKE 'db_version'") eq "" && $db){
+		print get_mysql_result("
+			CREATE TABLE db_version (
+			  version int(11) DEFAULT '0'
+			) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+			INSERT INTO db_version (version) VALUES ('1000');");
+		print "[Database] Table 'db_version' does not exists.... Creating...\n\n";
+	}
 }
 
 #::: Returns Tab Delimited MySQL Result from Command Line
@@ -460,30 +592,40 @@ sub get_mysql_result_from_file{
 	if($OS eq "Linux"){ return `"$path" --host $host --user $user --password="$pass" --force $db < $update_file`;  }
 }
 
-#::: Gets Remote File based on URL (1st Arg), and saves to destination file (2nd Arg)
-#::: Example: get_remote_file("https://raw.githubusercontent.com/EQEmu/Server/master/utils/sql/db_update_manifest.txt", "db_update/db_update_manifest.txt");
+#::: Gets Remote File based on request_url (1st Arg), and saves to destination file (2nd Arg)
+#::: Example: get_remote_file($eqemu_repository_request_url . "utils/sql/db_update_manifest.txt", "db_update/db_update_manifest.txt");
 sub get_remote_file{
-	my $URL = $_[0];
-	my $Dest_File = $_[1];
+	my $request_url = $_[0];
+	my $destination_file = $_[1];
 	my $content_type = $_[2];
+	my $no_retry = $_[3];
+	my $silent_download = $_[4];
+	
+	if(!$has_internet_connection){
+		print "[Download] Cannot download without internet connection...\n";
+		return;
+	}
 	
 	#::: Build file path of the destination file so that we may check for the folder's existence and make it if necessary
-	if($Dest_File=~/\//i){
-		my @dir_path = split('/', $Dest_File);
+	
+	if($destination_file=~/\//i){
+		my @directory_path = split('/', $destination_file);
 		$build_path = "";
-		$di = 0;
-		while($dir_path[$di]){
-			$build_path .= $dir_path[$di] . "/";	
+		$directory_index = 0;
+		while($directory_path[$directory_index] && $directory_path[$directory_index + 1]){
+			$build_path .= $directory_path[$directory_index] . "/";	
+			# print "checking '" . $build_path . "'\n";
 			#::: If path does not exist, create the directory...
-			if (!-d $build_path) {
+			if (!-d $build_path) { 
+				print "[Copy] folder doesn't exist, creating '" . $build_path . "'\n";
 				mkdir($build_path);
 			}
-			if(!$dir_path[$di + 2] && $dir_path[$di + 1]){
+			if(!$directory_indexr_path[$directory_index + 2] && $directory_indexr_path[$directory_index + 1]){
 				# print $actual_path . "\n";
 				$actual_path = $build_path;
 				last;
 			}
-			$di++;
+			$directory_index++;
 		}
 	}
 	
@@ -492,51 +634,59 @@ sub get_remote_file{
 		if($content_type == 1){
 			$break = 0;
 			while($break == 0) {
-				use LWP::Simple qw(getstore);
-				if(!getstore($URL, $Dest_File)){
-					# print "Error, no connection or failed request...\n\n";
+				eval "use LWP::Simple qw(getstore);"; 
+				# use LWP::Simple qw(getstore);
+				# print "request is " . $request_url . "\n";
+				# print "destination file is supposed to be " . $destination_file . "\n";
+				if(!getstore($request_url, $destination_file)){
+					print "[Download] Error, no connection or failed request...\n\n";
 				}
 				# sleep(1);
 				#::: Make sure the file exists before continuing...
-				if(-e $Dest_File) { 
+				if(-e $destination_file) { 
 					$break = 1;
-					print " [URL] :: " . $URL . "\n";
-					print "	[Saved] :: " . $Dest_File . "\n";
+					print "[Download] Saved: (" . $destination_file . ") from " . $request_url . "\n" if !$silent_download;
 				} else { $break = 0; }
 				usleep(500);
+				
+				if($no_retry){
+					$break = 1;
+				}
 			}
 		}
 		else{
 			$break = 0;
 			while($break == 0) {
 				require LWP::UserAgent; 
-				my $ua = LWP::UserAgent->new;
+				my $ua = LWP::UserAgent->new; 
 				$ua->timeout(10);
 				$ua->env_proxy; 
-				my $response = $ua->get($URL);
+				my $response = $ua->get($request_url);
 				if ($response->is_success){
-					open (FILE, '> ' . $Dest_File . '');
+					open (FILE, '> ' . $destination_file . '');
 					print FILE $response->decoded_content;
 					close (FILE); 
 				}
 				else {
-					# print "Error, no connection or failed request...\n\n";
+					print "[Download] Error, no connection or failed request...\n\n";
 				}
-				if(-e $Dest_File) { 
+				if(-e $destination_file) { 
 					$break = 1;
-					print " [URL] :: " . $URL . "\n";
-					print "	[Saved] :: " . $Dest_File . "\n";
+					print "[Download] Saved: (" . $destination_file . ") from " . $request_url . "\n" if !$silent_download;
 				} else { $break = 0; }
 				usleep(500);
+				
+				if($no_retry){
+					$break = 1;
+				}
 			}
 		}
 	}
 	if($OS eq "Linux"){
 		#::: wget -O db_update/db_update_manifest.txt https://raw.githubusercontent.com/EQEmu/Server/master/utils/sql/db_update_manifest.txt
-		$wget = `wget --no-check-certificate --quiet -O $Dest_File $URL`;
-		print " o URL: (" . $URL . ")\n";
-		print " o Saved: (" . $Dest_File . ") \n";
-		if($wget=~/unable to resolve/i){
+		$wget = `wget --no-check-certificate --quiet -O $destination_file $request_url`;
+		print "[Download] Saved: (" . $destination_file . ") from " . $request_url . "\n" if !$silent_download;
+		if($wget=~/unable to resolve/i){ 
 			print "Error, no connection or failed request...\n\n";
 			#die;
 		}
@@ -551,6 +701,22 @@ sub trim {
 	return $string; 
 }
 
+sub read_eqemu_config_xml {
+	my $confile = "eqemu_config.xml"; #default
+	open(F, "<$confile");
+	my $indb = 0;
+	while(<F>) {
+		s/\r//g;
+		if(/<database>/i) { $indb = 1; }
+		next unless($indb == 1);
+		if(/<\/database>/i) { $indb = 0; last; }
+		if(/<host>(.*)<\/host>/i) { $host = $1; } 
+		elsif(/<username>(.*)<\/username>/i) { $user = $1; } 
+		elsif(/<password>(.*)<\/password>/i) { $pass = $1; } 
+		elsif(/<db>(.*)<\/db>/i) { $db = $1; } 
+	}
+}
+
 #::: Fetch Latest PEQ AA's
 sub aa_fetch{
 	if(!$db){
@@ -558,48 +724,48 @@ sub aa_fetch{
 		return;
 	}
 
-	print "Pulling down PEQ AA Tables...\n";
-	get_remote_file("https://raw.githubusercontent.com/EQEmu/Server/master/utils/sql/peq_aa_tables_post_rework.sql", "db_update/peq_aa_tables_post_rework.sql");
-	print "\n\nInstalling AA Tables...\n";
+	print "[Install] Pulling down PEQ AA Tables...\n";
+	get_remote_file($eqemu_repository_request_url . "utils/sql/peq_aa_tables_post_rework.sql", "db_update/peq_aa_tables_post_rework.sql");
+	print "[Install] Installing AA Tables...\n";
 	print get_mysql_result_from_file("db_update/peq_aa_tables_post_rework.sql");
-	print "\nDone...\n\n";
+	print "[Install] Done...\n\n";
 }
 
 #::: Fetch Latest Opcodes
 sub opcodes_fetch{
-	print "Pulling down latest opcodes...\n"; 
+	print "[Update] Pulling down latest opcodes...\n"; 
 	%opcodes = (
-		1 => ["opcodes", "https://raw.githubusercontent.com/EQEmu/Server/master/utils/patches/opcodes.conf"],
-		2 => ["mail_opcodes", "https://raw.githubusercontent.com/EQEmu/Server/master/utils/patches/mail_opcodes.conf"],
-		3 => ["Titanium", "https://raw.githubusercontent.com/EQEmu/Server/master/utils/patches/patch_Titanium.conf"],
-		4 => ["Secrets of Faydwer", "https://raw.githubusercontent.com/EQEmu/Server/master/utils/patches/patch_SoF.conf"],
-		5 => ["Seeds of Destruction", "https://raw.githubusercontent.com/EQEmu/Server/master/utils/patches/patch_SoD.conf"],
-		6 => ["Underfoot", "https://raw.githubusercontent.com/EQEmu/Server/master/utils/patches/patch_UF.conf"],
-		7 => ["Rain of Fear", "https://raw.githubusercontent.com/EQEmu/Server/master/utils/patches/patch_RoF.conf"],
-		8 => ["Rain of Fear 2", "https://raw.githubusercontent.com/EQEmu/Server/master/utils/patches/patch_RoF2.conf"],
+		1 => ["opcodes", $eqemu_repository_request_url . "utils/patches/opcodes.conf"],
+		2 => ["mail_opcodes", $eqemu_repository_request_url . "utils/patches/mail_opcodes.conf"],
+		3 => ["Titanium", $eqemu_repository_request_url . "utils/patches/patch_Titanium.conf"],
+		4 => ["Secrets of Faydwer", $eqemu_repository_request_url . "utils/patches/patch_SoF.conf"],
+		5 => ["Seeds of Destruction", $eqemu_repository_request_url . "utils/patches/patch_SoD.conf"],
+		6 => ["Underfoot", $eqemu_repository_request_url . "utils/patches/patch_UF.conf"],
+		7 => ["Rain of Fear", $eqemu_repository_request_url . "utils/patches/patch_RoF.conf"],
+		8 => ["Rain of Fear 2", $eqemu_repository_request_url . "utils/patches/patch_RoF2.conf"],
 	);
 	$loop = 1;
 	while($opcodes{$loop}[0]){ 
-		#::: Split the URL by the patches folder to get the file name from URL
+		#::: Split the request_url by the patches folder to get the file name from request_url
 		@real_file = split("patches/", $opcodes{$loop}[1]);
 		$find = 0;
 		while($real_file[$find]){
 			$file_name = $real_file[$find]; 
 			$find++;
 		}
-		
-		print "\nDownloading (" . $opcodes{$loop}[0] . ") File: '" . $file_name . "'...\n\n"; 
+
 		get_remote_file($opcodes{$loop}[1], $file_name);
 		$loop++; 
 	}
-	print "\nDone...\n\n";
+	print "[Update] Done...\n"; 
 }
 
-sub remove_duplicate_rule_values{
+sub remove_duplicate_rule_values {
 	$ruleset_id = trim(get_mysql_result("SELECT `ruleset_id` FROM `rule_sets` WHERE `name` = 'default'"));
-	print "Default Ruleset ID: " . $ruleset_id . "\n";
+	print "[Database] Default Ruleset ID: " . $ruleset_id . "\n";
 	
 	$total_removed = 0;
+	
 	#::: Store Default values...
 	$mysql_result = get_mysql_result("SELECT * FROM `rule_values` WHERE `ruleset_id` = " . $ruleset_id);
 	my @lines = split("\n", $mysql_result);
@@ -607,50 +773,51 @@ sub remove_duplicate_rule_values{
 		my @values = split("\t", $val);
 		$rule_set_values{$values[1]}[0] = $values[2];
 	}
+	
 	#::: Compare default values against other rulesets to check for duplicates...
 	$mysql_result = get_mysql_result("SELECT * FROM `rule_values` WHERE `ruleset_id` != " . $ruleset_id);
 	my @lines = split("\n", $mysql_result);
 	foreach my $val (@lines){
 		my @values = split("\t", $val);
 		if($values[2] == $rule_set_values{$values[1]}[0]){
-			print "DUPLICATE : " . $values[1] . " (Ruleset (" . $values[0] . ")) matches default value of : " . $values[2] . ", removing...\n";
+			print "[Database] Removing duplicate : " . $values[1] . " (Ruleset (" . $values[0] . ")) matches default value of : " . $values[2] . "\n";
 			get_mysql_result("DELETE FROM `rule_values` WHERE `ruleset_id` = " .  $values[0] . " AND `rule_name` = '" . $values[1] . "'");
 			$total_removed++;
 		}
 	}
 	
-	print "Total duplicate rules removed... " . $total_removed . "\n";
+	print "[Database] Total duplicate rules removed... " . $total_removed . "\n";
 }
 
-sub copy_file{
+sub copy_file {
 	$l_source_file = $_[0];
-	$l_dest_file = $_[1];
-	if($l_dest_file=~/\//i){
-		my @dir_path = split('/', $l_dest_file);
+	$l_destination_file = $_[1];
+	if($l_destination_file=~/\//i){
+		my @directory_path = split('/', $l_destination_file);
 		$build_path = "";
-		$di = 0;
-		while($dir_path[$di]){
-			$build_path .= $dir_path[$di] . "/";	
+		$directory_index = 0;
+		while($directory_path[$directory_index]){
+			$build_path .= $directory_path[$directory_index] . "/";
 			#::: If path does not exist, create the directory...
 			if (!-d $build_path) {
 				mkdir($build_path);
 			}
-			if(!$dir_path[$di + 2] && $dir_path[$di + 1]){
+			if(!$directory_path[$directory_index + 2] && $directory_path[$directory_index + 1]){
 				# print $actual_path . "\n";
 				$actual_path = $build_path;
 				last;
 			}
-			$di++;
+			$directory_index++;
 		}
 	}
-	copy $l_source_file, $l_dest_file;
+	copy $l_source_file, $l_destination_file;
 }
 
-sub fetch_latest_windows_binaries{
-	print "\n --- Fetching Latest Windows Binaries... --- \n";
-	get_remote_file("https://raw.githubusercontent.com/Akkadius/EQEmuInstall/master/master_windows_build.zip", "updates_staged/master_windows_build.zip", 1);
-	print "\n --- Fetched Latest Windows Binaries... --- \n";
-	print "\n --- Extracting... --- \n";
+sub fetch_latest_windows_binaries {
+	print "[Update] Fetching Latest Windows Binaries... \n";
+	get_remote_file($install_repository_request_url . "master_windows_build.zip", "updates_staged/master_windows_build.zip", 1);
+	print "[Update] Fetched Latest Windows Binaries... \n";
+	print "[Update] Extracting... --- \n";
 	unzip('updates_staged/master_windows_build.zip', 'updates_staged/binaries/');
 	my @files;
 	my $start_dir = "updates_staged/binaries";
@@ -659,21 +826,21 @@ sub fetch_latest_windows_binaries{
 		$start_dir
 	);
 	for my $file (@files) {
-		$dest_file = $file;
-		$dest_file =~s/updates_staged\/binaries\///g;
-		print "Installing :: " . $dest_file . "\n";
-		copy_file($file, $dest_file);
+		$destination_file = $file;
+		$destination_file =~s/updates_staged\/binaries\///g;
+		print "[Update] Installing :: " . $destination_file . "\n";
+		copy_file($file, $destination_file);
 	}
-	print "\n --- Done... --- \n";
+	print "[Update] Done\n";
 	
 	rmtree('updates_staged');
 }
 
-sub fetch_latest_windows_binaries_bots{
-	print "\n --- Fetching Latest Windows Binaries with Bots... --- \n";
-	get_remote_file("https://raw.githubusercontent.com/Akkadius/EQEmuInstall/master/master_windows_build_bots.zip", "updates_staged/master_windows_build_bots.zip", 1);
-	print "\n --- Fetched Latest Windows Binaries with Bots... --- \n";
-	print "\n --- Extracting... --- \n";
+sub fetch_latest_windows_binaries_bots {
+	print "[Update] Fetching Latest Windows Binaries with Bots...\n";
+	get_remote_file($install_repository_request_url . "master_windows_build_bots.zip", "updates_staged/master_windows_build_bots.zip", 1);
+	print "[Update] Fetched Latest Windows Binaries with Bots...\n";
+	print "[Update] Extracting...\n";
 	unzip('updates_staged/master_windows_build_bots.zip', 'updates_staged/binaries/');
 	my @files;
 	my $start_dir = "updates_staged/binaries";
@@ -682,20 +849,20 @@ sub fetch_latest_windows_binaries_bots{
 		$start_dir
 	);
 	for my $file (@files) {
-		$dest_file = $file;
-		$dest_file =~s/updates_staged\/binaries\///g;
-		print "Installing :: " . $dest_file . "\n";
-		copy_file($file, $dest_file);
+		$destination_file = $file;
+		$destination_file =~s/updates_staged\/binaries\///g;
+		print "[Install] Installing :: " . $destination_file . "\n";
+		copy_file($file, $destination_file);
 	}
-	print "\n --- Done... --- \n";
+	print "[Update] Done...\n";
 	
 	rmtree('updates_staged');
 }
 
-sub do_windows_login_server_setup{
-	print "\n --- Fetching Loginserver... --- \n";
-	get_remote_file("https://raw.githubusercontent.com/Akkadius/EQEmuInstall/master/login_server.zip", "updates_staged/login_server.zip", 1);
-	print "\n --- Extracting... --- \n";
+sub do_windows_login_server_setup {
+	print "[Install] Fetching Loginserver... \n";
+	get_remote_file($install_repository_request_url . "login_server.zip", "updates_staged/login_server.zip", 1);
+	print "[Install] Extracting... \n";
 	unzip('updates_staged/login_server.zip', 'updates_staged/login_server/');
 	my @files;
 	my $start_dir = "updates_staged/login_server";
@@ -704,31 +871,85 @@ sub do_windows_login_server_setup{
 		$start_dir
 	);
 	for my $file (@files) {
-		$dest_file = $file;
-		$dest_file =~s/updates_staged\/login_server\///g;
-		print "Installing :: " . $dest_file . "\n";
-		copy_file($file, $dest_file);
+		$destination_file = $file;
+		$destination_file =~s/updates_staged\/login_server\///g;
+		print "[Install] Installing :: " . $destination_file . "\n";
+		copy_file($file, $destination_file);
 	}
-	print "\n Done... \n";
+	print "[Install] Done... \n";
 	
-	print "Pulling down Loginserver database tables...\n";
-	get_remote_file("https://raw.githubusercontent.com/Akkadius/EQEmuInstall/master/login_server_tables.sql", "db_update/login_server_tables.sql");
-	print "\n\nInstalling Loginserver tables...\n";
+	print "[Install] Pulling down Loginserver database tables...\n";
+	get_remote_file($install_repository_request_url . "login_server_tables.sql", "db_update/login_server_tables.sql");
+	print "[Install] Installing Loginserver tables...\n";
 	print get_mysql_result_from_file("db_update/login_server_tables.sql");
-	print "\nDone...\n\n";
+	print "[Install] Done...\n";
 	
 	add_login_server_firewall_rules();
 	
 	rmtree('updates_staged');
 	rmtree('db_update');
 	
-	print "\nPress any key to continue...\n";
+	print "[Install] Press any key to continue...\n";
+	
+	<>; #Read from STDIN 
+	
+}
+
+sub do_linux_login_server_setup {
+	
+	for my $file (@files) {
+		$destination_file = $file; 
+		$destination_file =~s/updates_staged\/login_server\///g;
+		print "[Install] Installing :: " . $destination_file . "\n";
+		copy_file($file, $destination_file);
+	}
+	print "\n Done... \n";
+	
+	print "[Install] Pulling down Loginserver database tables...\n";
+	get_remote_file($install_repository_request_url . "login_server_tables.sql", "db_update/login_server_tables.sql");
+	print "[Install] Installing Loginserver tables...\n";
+	print get_mysql_result_from_file("db_update/login_server_tables.sql");
+	print "[Install] Done...\n\n";
+	
+	rmtree('updates_staged');
+	rmtree('db_update');
+	
+	get_remote_file($install_repository_request_url . "linux/login.ini", "login_template.ini");
+	get_remote_file($install_repository_request_url . "linux/login_opcodes.conf", "login_opcodes.conf");
+	get_remote_file($install_repository_request_url . "linux/login_opcodes.conf", "login_opcodes_sod.conf");
+	
+	get_installation_variables();
+	my $db_name = $installation_variables{"mysql_eqemu_db_name"};
+	my $db_user = $installation_variables{"mysql_eqemu_user"};
+	my $db_password = $installation_variables{"mysql_eqemu_password"};
+	
+	#::: Open new config file
+	open (NEW_CONFIG, '>', 'login.ini');
+
+	#::: Iterate through template and replace variables...
+	open (FILE_TEMPLATE, "login_template.ini");
+	while (<FILE_TEMPLATE>){
+		chomp;
+		$o = $_;
+		#::: Find replace variables
+		if($o=~/db/i){ $o = "db = " . $db_name; }
+		if($o=~/user/i){ $o = "user = " . $db_user; }
+		if($o=~/password/i){ $o = "password = " . $db_password; }
+		
+		print NEW_CONFIG $o . "\n";
+	}
+	
+	close(FILE_TEMPLATE);
+	close(NEW_CONFIG);
+	unlink("login_template.ini");
+	
+	print "[Install] Press any key to continue...\n";
 	
 	<>; #Read from STDIN
 	
 }
 
-sub add_login_server_firewall_rules{
+sub add_login_server_firewall_rules {
 	#::: Check Loginserver Firewall install for Windows
 	if($OS eq "Windows"){
 		$output = `netsh advfirewall firewall show rule name=all`;
@@ -750,22 +971,22 @@ sub add_login_server_firewall_rules{
 		}
 		
 		if($has_loginserver_rules_titanium == 0){
-			print "Attempting to add EQEmu Loginserver Firewall Rules (Titanium) (TCP) port 5998 \n";
+			print "[Install] Attempting to add EQEmu Loginserver Firewall Rules (Titanium) (TCP) port 5998 \n";
 			print `netsh advfirewall firewall add rule name="EQEmu Loginserver (Titanium) (5998) TCP" dir=in action=allow protocol=TCP localport=5998`;
-			print "Attempting to add EQEmu Loginserver Firewall Rules (Titanium) (UDP) port 5998 \n";
+			print "[Install] Attempting to add EQEmu Loginserver Firewall Rules (Titanium) (UDP) port 5998 \n";
 			print `netsh advfirewall firewall add rule name="EQEmu Loginserver (Titanium) (5998) UDP" dir=in action=allow protocol=UDP localport=5998`;
 		}
 		if($has_loginserver_rules_sod == 0){
-			print "Attempting to add EQEmu Loginserver Firewall Rules (SOD+) (TCP) port 5999 \n";
+			print "[Install] Attempting to add EQEmu Loginserver Firewall Rules (SOD+) (TCP) port 5999 \n";
 			print `netsh advfirewall firewall add rule name="EQEmu Loginserver (SOD+) (5999) TCP" dir=in action=allow protocol=TCP localport=5999`;
-			print "Attempting to add EQEmu Loginserver Firewall Rules (SOD+) (UDP) port 5999 \n";
+			print "[Install] Attempting to add EQEmu Loginserver Firewall Rules (SOD+) (UDP) port 5999 \n";
 			print `netsh advfirewall firewall add rule name="EQEmu Loginserver (SOD+) (5999) UDP" dir=in action=allow protocol=UDP localport=5999`;
 		}
 		
-		print "If firewall rules don't add you must run this script (eqemu_update.pl) as administrator\n";
+		print "If firewall rules don't add you must run this script (eqemu_server.pl) as administrator\n";
 		print "\n";
-		print "#::: Instructions \n";
-		print "In order to connect your server to the loginserver you must point your eqemu_config.xml to your local server similar to the following:\n";
+		print "[Install] Instructions \n";
+		print "[Install] In order to connect your server to the loginserver you must point your eqemu_config.xml to your local server similar to the following:\n";
 		print "
 	<loginserver1>
 		<host>login.eqemulator.net</host>
@@ -780,7 +1001,7 @@ sub add_login_server_firewall_rules{
 		<password></password>
 	</loginserver2>
 		";
-		print "\nWhen done, make sure your EverQuest client points to your loginserver's IP (In this case it would be 127.0.0.1) in the eqhosts.txt file\n";
+		print "[Install] When done, make sure your EverQuest client points to your loginserver's IP (In this case it would be 127.0.0.1) in the eqhosts.txt file\n";
 	}
 }
 
@@ -794,84 +1015,84 @@ sub check_windows_firewall_rules{
 			$val=~s/Rule Name://g;
 			if($val=~/EQEmu World/i){
 				$has_world_rules = 1;
-				print "Found existing rule :: " . trim($val) . "\n";
+				print "[Install] Found existing rule :: " . trim($val) . "\n";
 			}
 			if($val=~/EQEmu Zone/i){
 				$has_zone_rules = 1;
-				print "Found existing rule :: " . trim($val) . "\n";
+				print "[Install] Found existing rule :: " . trim($val) . "\n";
 			}
 		}
 	}
 	
 	if($has_world_rules == 0){
-		print "Attempting to add EQEmu World Firewall Rules (TCP) port 9000 \n";
+		print "[Install] Attempting to add EQEmu World Firewall Rules (TCP) port 9000 \n";
 		print `netsh advfirewall firewall add rule name="EQEmu World (9000) TCP" dir=in action=allow protocol=TCP localport=9000`;
-		print "Attempting to add EQEmu World Firewall Rules (UDP) port 9000 \n";
+		print "[Install] Attempting to add EQEmu World Firewall Rules (UDP) port 9000 \n";
 		print `netsh advfirewall firewall add rule name="EQEmu World (9000) UDP" dir=in action=allow protocol=UDP localport=9000`;
 	}
 	if($has_zone_rules == 0){
-		print "Attempting to add EQEmu Zones (7000-7500) TCP \n";
+		print "[Install] Attempting to add EQEmu Zones (7000-7500) TCP \n";
 		print `netsh advfirewall firewall add rule name="EQEmu Zones (7000-7500) TCP" dir=in action=allow protocol=TCP localport=7000-7500`;
-		print "Attempting to add EQEmu Zones (7000-7500) UDP \n";
+		print "[Install] Attempting to add EQEmu Zones (7000-7500) UDP \n";
 		print `netsh advfirewall firewall add rule name="EQEmu Zones (7000-7500) UDP" dir=in action=allow protocol=UDP localport=7000-7500`;
 	}
 }
 
 sub fetch_server_dlls{
-	print "Fetching lua51.dll, zlib1.dll, libmysql.dll...\n";
-	get_remote_file("https://raw.githubusercontent.com/Akkadius/EQEmuInstall/master/lua51.dll", "lua51.dll", 1);
-	get_remote_file("https://raw.githubusercontent.com/Akkadius/EQEmuInstall/master/zlib1.dll", "zlib1.dll", 1);
-	get_remote_file("https://raw.githubusercontent.com/Akkadius/EQEmuInstall/master/libmysql.dll", "libmysql.dll", 1);
+	print "[Download] Fetching lua51.dll, zlib1.dll, libmysql.dll...\n";
+	get_remote_file($install_repository_request_url . "lua51.dll", "lua51.dll", 1);
+	get_remote_file($install_repository_request_url . "zlib1.dll", "zlib1.dll", 1);
+	get_remote_file($install_repository_request_url . "libmysql.dll", "libmysql.dll", 1);
 }
 
 sub fetch_peq_db_full{
-	print "Downloading latest PEQ Database... Please wait...\n";
+	print "[Install] Downloading latest PEQ Database... Please wait...\n";
 	get_remote_file("http://edit.peqtgc.com/weekly/peq_beta.zip", "updates_staged/peq_beta.zip", 1);
-	print "Downloaded latest PEQ Database... Extracting...\n";
+	print "[Install] Downloaded latest PEQ Database... Extracting...\n";
 	unzip('updates_staged/peq_beta.zip', 'updates_staged/peq_db/');
-	my $start_dir = "updates_staged\\peq_db";
+	my $start_dir = "updates_staged/peq_db";
 	find( 
 		sub { push @files, $File::Find::name unless -d; }, 
 		$start_dir
 	);
 	for my $file (@files) {
-		$dest_file = $file;
-		$dest_file =~s/updates_staged\\peq_db\///g;
+		$destination_file = $file;
+		$destination_file =~s/updates_staged\/peq_db\///g;
 		if($file=~/peqbeta|player_tables/i){
-			print "MariaDB :: Installing :: " . $dest_file . "\n";
+			print "[Install] DB :: Installing :: " . $destination_file . "\n";
 			get_mysql_result_from_file($file);
 		}
 		if($file=~/eqtime/i){
-			print "Installing eqtime.cfg\n";
+			print "[Install] Installing eqtime.cfg\n";
 			copy_file($file, "eqtime.cfg");
 		}
 	}
 }
 
 sub map_files_fetch_bulk{
-	print "\n --- Fetching Latest Maps... (This could take a few minutes...) --- \n";
+	print "[Install] Fetching Latest Maps... (This could take a few minutes...)\n";
 	get_remote_file("http://github.com/Akkadius/EQEmuMaps/archive/master.zip", "maps/maps.zip", 1);
 	unzip('maps/maps.zip', 'maps/');
 	my @files;
-	my $start_dir = "maps\\EQEmuMaps-master\\maps";
+	my $start_dir = "maps/EQEmuMaps-master/maps";
 	find( 
 		sub { push @files, $File::Find::name unless -d; }, 
 		$start_dir
 	);
 	for my $file (@files) {
-		$dest_file = $file;
-		$dest_file =~s/maps\\EQEmuMaps-master\\maps\///g;
-		print "Installing :: " . $dest_file . "\n";
+		$destination_file = $file;
+		$destination_file =~s/maps\/EQEmuMaps-master\/maps\///g;
+		print "[Install] Installing :: " . $destination_file . "\n";
 		copy_file($file, "maps/" . $new_file);
 	}
-	print "\n --- Fetched Latest Maps... --- \n";
+	print "[Install] Fetched Latest Maps\n";
 	
 	rmtree('maps/EQEmuMaps-master');
 	unlink('maps/maps.zip');
 }
 
 sub map_files_fetch{
-	print "\n --- Fetching Latest Maps --- \n";
+	print "[Install] Fetching Latest Maps --- \n";
 	
 	get_remote_file("https://raw.githubusercontent.com/Akkadius/EQEmuMaps/master/!eqemu_maps_manifest.txt", "updates_staged/eqemu_maps_manifest.txt");
 	
@@ -894,22 +1115,22 @@ sub map_files_fetch{
 		my $file_existing = $maps_manifest[$m][0];
 		my $file_existing_size = (stat $file_existing)[7];
 		if($file_existing_size != $maps_manifest[$m][1]){
-			print "Updating: '" . $maps_manifest[$m][0] . "'\n";
+			print "[Install] Updating: '" . $maps_manifest[$m][0] . "'\n";
 			get_remote_file("https://raw.githubusercontent.com/Akkadius/EQEmuMaps/master/" .  $maps_manifest[$m][0], $maps_manifest[$m][0], 1);
 			$fc++;
 		}
 	}
 	
 	if($fc == 0){
-		print "\nNo Map Updates found... \n\n";
+		print "[Install] No Map Updates found... \n\n";
 	}
 }
 
 sub quest_files_fetch{
 	if (!-e "updates_staged/Quests-Plugins-master/quests/") {
-		print "\n --- Fetching Latest Quests --- \n";
+		print "[Update] Fetching Latest Quests --- \n";
 		get_remote_file("https://github.com/EQEmu/Quests-Plugins/archive/master.zip", "updates_staged/Quests-Plugins-master.zip", 1);
-		print "\nFetched latest quests...\n";
+		print "[Install] Fetched latest quests...\n";
 		mkdir('updates_staged');
 		unzip('updates_staged/Quests-Plugins-master.zip', 'updates_staged/');
 	}
@@ -927,30 +1148,30 @@ sub quest_files_fetch{
 	for my $file (@files) {
 		if($file=~/\.pl|\.lua|\.ext/i){
 			$staged_file = $file;
-			$dest_file = $file;
-			$dest_file =~s/updates_staged\/Quests-Plugins-master\///g;
+			$destination_file = $file;
+			$destination_file =~s/updates_staged\/Quests-Plugins-master\///g;
 			
-			if (!-e $dest_file) {
-				copy_file($staged_file, $dest_file);
-				print "Installing :: '" . $dest_file . "'\n";
+			if (!-e $destination_file) {
+				copy_file($staged_file, $destination_file);
+				print "[Install] Installing :: '" . $destination_file . "'\n";
 				$fc++;
 			}
 			else{
-				$diff = do_file_diff($dest_file, $staged_file);
-				if($diff ne ""){
-					$backup_dest = "updates_backups/" . $time_stamp . "/" . $dest_file;
+				$directory_indexff = do_file_diff($destination_file, $staged_file);
+				if($directory_indexff ne ""){
+					$backup_dest = "updates_backups/" . $time_stamp . "/" . $destination_file;
 				
-					print $diff . "\n";
-					print "\nFile Different :: '" . $dest_file . "'\n";
-					print "\nDo you wish to update this Quest? '" . $dest_file . "' [Yes (Enter) - No (N)] \nA backup will be found in '" . $backup_dest . "'\n";
+					print $directory_indexff . "\n";
+					print "[Update] File Different :: '" . $destination_file . "'\n";
+					print "[Update] Do you wish to update this Quest? '" . $destination_file . "' [Yes (Enter) - No (N)] \nA backup will be found in '" . $backup_dest . "'\n";
 					my $input = <STDIN>;
 					if($input=~/N/i){}
 					else{
 						#::: Make a backup
-						copy_file($dest_file, $backup_dest);
+						copy_file($destination_file, $backup_dest);
 						#::: Copy staged to running
-						copy($staged_file, $dest_file);
-						print "Installing :: '" . $dest_file . "'\n\n";
+						copy($staged_file, $destination_file);
+						print "[Install] Installing :: '" . $destination_file . "'\n\n";
 					}
 					$fc++;
 				}
@@ -961,15 +1182,15 @@ sub quest_files_fetch{
 	rmtree('updates_staged');
 	
 	if($fc == 0){
-		print "\nNo Quest Updates found... \n\n";
+		print "[Update] No Quest Updates found... \n\n";
 	}
 }
 
-sub lua_modules_fetch{
+sub lua_modules_fetch {
 	if (!-e "updates_staged/Quests-Plugins-master/quests/lua_modules/") {
-		print "\n --- Fetching Latest LUA Modules --- \n";
+		print "[Update] Fetching Latest LUA Modules --- \n";
 		get_remote_file("https://github.com/EQEmu/Quests-Plugins/archive/master.zip", "updates_staged/Quests-Plugins-master.zip", 1);
-		print "\nFetched latest LUA Modules...\n";
+		print "[Update] Fetched latest LUA Modules...\n";
 		unzip('updates_staged/Quests-Plugins-master.zip', 'updates_staged/');
 	}
 	
@@ -986,29 +1207,29 @@ sub lua_modules_fetch{
 	for my $file (@files) {
 		if($file=~/\.pl|\.lua|\.ext/i){
 			$staged_file = $file;
-			$dest_file = $file;
-			$dest_file =~s/updates_staged\/Quests-Plugins-master\/quests\///g;
+			$destination_file = $file;
+			$destination_file =~s/updates_staged\/Quests-Plugins-master\/quests\///g;
 			
-			if (!-e $dest_file) {
-				copy_file($staged_file, $dest_file);
-				print "Installing :: '" . $dest_file . "'\n";
+			if (!-e $destination_file) {
+				copy_file($staged_file, $destination_file);
+				print "[Install] Installing :: '" . $destination_file . "'\n";
 				$fc++;
 			}
 			else{
-				$diff = do_file_diff($dest_file, $staged_file);
-				if($diff ne ""){
-					$backup_dest = "updates_backups/" . $time_stamp . "/" . $dest_file;
-					print $diff . "\n";
-					print "\nFile Different :: '" . $dest_file . "'\n";
-					print "\nDo you wish to update this LUA Module? '" . $dest_file . "' [Yes (Enter) - No (N)] \nA backup will be found in '" . $backup_dest . "'\n";
+				$directory_indexff = do_file_diff($destination_file, $staged_file);
+				if($directory_indexff ne ""){
+					$backup_dest = "updates_backups/" . $time_stamp . "/" . $destination_file;
+					print $directory_indexff . "\n";
+					print "[Update] File Different :: '" . $destination_file . "'\n";
+					print "[Update] Do you wish to update this LUA Module? '" . $destination_file . "' [Yes (Enter) - No (N)] \nA backup will be found in '" . $backup_dest . "'\n";
 					my $input = <STDIN>;
 					if($input=~/N/i){}
 					else{
 						#::: Make a backup
-						copy_file($dest_file, $backup_dest);
+						copy_file($destination_file, $backup_dest);
 						#::: Copy staged to running
-						copy($staged_file, $dest_file);
-						print "Installing :: '" . $dest_file . "'\n\n";
+						copy($staged_file, $destination_file);
+						print "[Install] Installing :: '" . $destination_file . "'\n\n";
 					}
 					$fc++;
 				}
@@ -1017,15 +1238,15 @@ sub lua_modules_fetch{
 	}
 	
 	if($fc == 0){
-		print "\nNo LUA Modules Updates found... \n\n";
+		print "[Update] No LUA Modules Updates found... \n\n";
 	}	
 }
 
 sub plugins_fetch{
 	if (!-e "updates_staged/Quests-Plugins-master/plugins/") {
-		print "\n --- Fetching Latest Plugins --- \n";
+		print "[Update] Fetching Latest Plugins\n";
 		get_remote_file("https://github.com/EQEmu/Quests-Plugins/archive/master.zip", "updates_staged/Quests-Plugins-master.zip", 1);
-		print "\nFetched latest plugins...\n";
+		print "[Update] Fetched latest plugins\n";
 		unzip('updates_staged/Quests-Plugins-master.zip', 'updates_staged/');
 	}
 	
@@ -1042,29 +1263,29 @@ sub plugins_fetch{
 	for my $file (@files) {
 		if($file=~/\.pl|\.lua|\.ext/i){
 			$staged_file = $file;
-			$dest_file = $file;
-			$dest_file =~s/updates_staged\/Quests-Plugins-master\///g;
+			$destination_file = $file;
+			$destination_file =~s/updates_staged\/Quests-Plugins-master\///g;
 			
-			if (!-e $dest_file) {
-				copy_file($staged_file, $dest_file);
-				print "Installing :: '" . $dest_file . "'\n";
+			if (!-e $destination_file) {
+				copy_file($staged_file, $destination_file);
+				print "[Install] Installing :: '" . $destination_file . "'\n";
 				$fc++;
 			}
 			else{
-				$diff = do_file_diff($dest_file, $staged_file);
-				if($diff ne ""){
-					$backup_dest = "updates_backups/" . $time_stamp . "/" . $dest_file;
-					print $diff . "\n";
-					print "\nFile Different :: '" . $dest_file . "'\n";
-					print "\nDo you wish to update this Plugin? '" . $dest_file . "' [Yes (Enter) - No (N)] \nA backup will be found in '" . $backup_dest . "'\n";
+				$directory_indexff = do_file_diff($destination_file, $staged_file);
+				if($directory_indexff ne ""){
+					$backup_dest = "updates_backups/" . $time_stamp . "/" . $destination_file;
+					print $directory_indexff . "\n";
+					print "[Update] File Different :: '" . $destination_file . "'\n";
+					print "[Update] Do you wish to update this Plugin? '" . $destination_file . "' [Yes (Enter) - No (N)] \nA backup will be found in '" . $backup_dest . "'\n";
 					my $input = <STDIN>;
 					if($input=~/N/i){}
 					else{
 						#::: Make a backup
-						copy_file($dest_file, $backup_dest);
+						copy_file($destination_file, $backup_dest);
 						#::: Copy staged to running
-						copy($staged_file, $dest_file);
-						print "Installing :: '" . $dest_file . "'\n\n";
+						copy($staged_file, $destination_file);
+						print "[Install] Installing :: '" . $destination_file . "'\n\n";
 					}
 					$fc++;
 				}
@@ -1073,7 +1294,7 @@ sub plugins_fetch{
 	}
 
 	if($fc == 0){
-		print "\nNo Plugin Updates found... \n\n";
+		print "[Update] No Plugin Updates found... \n\n";
 	}	
 }
 
@@ -1082,8 +1303,8 @@ sub do_file_diff{
 	$file_2 = $_[1];
 	if($OS eq "Windows"){
 		eval "use Text::Diff";
-		$diff = diff($file_1, $file_2, { STYLE => "Unified" });
-		return $diff;
+		$directory_indexff = diff($file_1, $file_2, { STYLE => "Unified" });
+		return $directory_indexff;
 	}
 	if($OS eq "Linux"){
 		# print 'diff -u "$file_1" "$file_2"' . "\n";
@@ -1091,7 +1312,7 @@ sub do_file_diff{
 	}
 }
 
-sub unzip{
+sub unzip {
 	$archive_to_unzip = $_[0];
 	$dest_folder = $_[1];
 	
@@ -1101,11 +1322,11 @@ sub unzip{
 		unless ( $zip->read($archive_to_unzip) == AZ_OK ) {
 			die 'read error';
 		}
-		print "Extracting...\n";
+		print "[Unzip] Extracting...\n";
 		$zip->extractTree('', $dest_folder);
 	}
 	if($OS eq "Linux"){
-		print `unzip -o "$archive_to_unzip" -d "$dest_folder"`;
+		print `unzip -o -q "$archive_to_unzip" -d "$dest_folder"`;
 	}
 }
 
@@ -1123,11 +1344,11 @@ sub are_file_sizes_different{
 
 sub do_bots_db_schema_drop{
 	#"drop_bots.sql" is run before reverting database back to 'normal'
-	print "Fetching drop_bots.sql...\n";
-	get_remote_file("https://raw.githubusercontent.com/EQEmu/Server/master/utils/sql/git/bots/drop_bots.sql", "db_update/drop_bots.sql");
+	print "[Database] Fetching drop_bots.sql...\n";
+	get_remote_file($eqemu_repository_request_url . "utils/sql/git/bots/drop_bots.sql", "db_update/drop_bots.sql");
 	print get_mysql_result_from_file("db_update/drop_bots.sql");
 	
-	print "Restoring normality...\n";
+	print "[Database] Removing bot database tables...\n";
 	print get_mysql_result("DELETE FROM `rule_values` WHERE `rule_name` LIKE 'Bots:%';");
 	
 	if(get_mysql_result("SHOW TABLES LIKE 'commands'") ne "" && $db){
@@ -1153,11 +1374,12 @@ sub do_bots_db_schema_drop{
 	if(get_mysql_result("SHOW COLUMNS FROM `db_version` LIKE 'bots_version'") ne "" && $db){
 		print get_mysql_result("UPDATE `db_version` SET `bots_version` = 0;");
 	}
+	print "[Database] Done...\n";
 }
 
 sub modify_db_for_bots{
 	#Called after the db bots schema (2015_09_30_bots.sql) has been loaded
-	print "Modifying database for bots...\n";
+	print "[Database] Modifying database for bots...\n";
 	print get_mysql_result("UPDATE `spawn2` SET `enabled` = 1 WHERE `id` IN (59297,59298);");
 	
 	if(get_mysql_result("SHOW KEYS FROM `guild_members` WHERE `Key_name` LIKE 'PRIMARY'") ne "" && $db){
@@ -1238,7 +1460,7 @@ sub modify_db_for_bots{
 
 sub convert_existing_bot_data{
 	if(get_mysql_result("SHOW TABLES LIKE 'bots'") ne "" && $db){
-		print "Converting existing bot data...\n";
+		print "[Database] Converting existing bot data...\n";
 		print get_mysql_result("INSERT INTO `bot_data` (`bot_id`, `owner_id`, `spells_id`, `name`, `last_name`, `zone_id`, `gender`, `race`, `class`, `level`, `creation_day`, `last_spawn`, `time_spawned`, `size`, `face`, `hair_color`, `hair_style`, `beard`, `beard_color`, `eye_color_1`, `eye_color_2`, `drakkin_heritage`, `drakkin_tattoo`, `drakkin_details`, `ac`, `atk`, `hp`, `mana`, `str`, `sta`, `cha`, `dex`, `int`, `agi`, `wis`, `fire`, `cold`, `magic`, `poison`, `disease`, `corruption`) SELECT `BotID`, `BotOwnerCharacterID`, `BotSpellsID`, `Name`, `LastName`, `LastZoneId`, `Gender`, `Race`, `Class`, `BotLevel`, UNIX_TIMESTAMP(`BotCreateDate`), UNIX_TIMESTAMP(`LastSpawnDate`), `TotalPlayTime`, `Size`, `Face`, `LuclinHairColor`, `LuclinHairStyle`, `LuclinBeard`, `LuclinBeardColor`, `LuclinEyeColor`, `LuclinEyeColor2`, `DrakkinHeritage`, `DrakkinTattoo`, `DrakkinDetails`, `AC`, `ATK`, `HP`, `Mana`, `STR`, `STA`, `CHA`, `DEX`, `_INT`, `AGI`, `WIS`, `FR`, `CR`, `MR`, `PR`, `DR`, `Corrup` FROM `bots`;");
 		
 		print get_mysql_result("INSERT INTO `bot_inspect_messages` (`bot_id`, `inspect_message`) SELECT `BotID`, `BotInspectMessage` FROM `bots`;");
@@ -1335,7 +1557,7 @@ sub get_bots_db_version{
 	#::: Check if bots_version column exists...
 	if(get_mysql_result("SHOW COLUMNS FROM db_version LIKE 'bots_version'") eq "" && $db){
 	   print get_mysql_result("ALTER TABLE db_version ADD bots_version int(11) DEFAULT '0' AFTER version;");
-	   print "\nColumn 'bots_version' does not exists.... Adding to 'db_version' table...\n\n";
+	   print "[Database] Column 'bots_version' does not exists.... Adding to 'db_version' table...\n\n";
 	}
 	$bots_local_db_version = trim(get_mysql_result("SELECT bots_version FROM db_version LIMIT 1"));
 	return $bots_local_db_version;
@@ -1343,15 +1565,15 @@ sub get_bots_db_version{
 
 sub bots_db_management{
 	#::: Main Binary Database version
-	$bin_db_ver = trim($db_version[2]);
+	$binary_database_version  = trim($db_version[2]);
 	
 	#::: If we have stale data from main db run
 	if($db_run_stage > 0 && $bots_db_management == 0){
 		clear_database_runs();
 	}
 
-	if($bin_db_ver == 0){
-		print "Your server binaries (world/zone) are not compiled for bots...\n";
+	if($binary_database_version  == 0){
+		print "[Database] Your server binaries (world/zone) are not compiled for bots...\n\n";
 		return;
 	}
 	
@@ -1370,7 +1592,7 @@ sub main_db_management{
 	}
 
 	#::: Main Binary Database version
-	$bin_db_ver = trim($db_version[1]);
+	$binary_database_version  = trim($db_version[1]);
 	
 	$bots_db_management = 0;
 	run_database_check();
@@ -1397,22 +1619,22 @@ sub run_database_check{
 	if(!@total_updates){
 		#::: Pull down bots database manifest
 		if($bots_db_management == 1){
-			print "Retrieving latest bots database manifest...\n";
-			get_remote_file("https://raw.githubusercontent.com/EQEmu/Server/master/utils/sql/git/bots/bots_db_update_manifest.txt", "db_update/db_update_manifest.txt"); 
+			print "[Database] Retrieving latest bots database manifest...\n";
+			get_remote_file($eqemu_repository_request_url . "utils/sql/git/bots/bots_db_update_manifest.txt", "db_update/db_update_manifest.txt"); 
 		}
 		#::: Pull down mainstream database manifest
 		else{
-			print "Retrieving latest database manifest...\n";
-			get_remote_file("https://raw.githubusercontent.com/EQEmu/Server/master/utils/sql/db_update_manifest.txt", "db_update/db_update_manifest.txt");
+			print "[Database] Retrieving latest database manifest...\n";
+			get_remote_file($eqemu_repository_request_url . "utils/sql/db_update_manifest.txt", "db_update/db_update_manifest.txt");
 		}
 	}
 
 	#::: Run 2 - Running pending updates...
-	if(@total_updates){
+	if(@total_updates || $db_run_stage == 1){
 		@total_updates = sort @total_updates;
 		foreach my $val (@total_updates){
 			$file_name 		= trim($m_d{$val}[1]);
-			print "Running Update: " . $val . " - " . $file_name . "\n";
+			print "[Database] Running Update: " . $val . " - " . $file_name . "\n";
 			print get_mysql_result_from_file("db_update/$file_name");
 			print get_mysql_result("UPDATE db_version SET version = $val WHERE version < $val");
 			
@@ -1424,7 +1646,7 @@ sub run_database_check{
 	}
 	#::: Run 1 - Initial checking of needed updates...
 	else{
-		print "Reading manifest...\n\n";
+		print "[Database] Reading manifest...\n";
 		use Data::Dumper;
 		open (FILE, "db_update/db_update_manifest.txt");
 		while (<FILE>) { 
@@ -1441,13 +1663,18 @@ sub run_database_check{
 	@total_updates = ();
 	
 	#::: This is where we set checkpoints for where a database might be so we don't check so far back in the manifest...
-	$revision_check = 1000;
-	if(get_mysql_result("SHOW TABLES LIKE 'character_data'") ne ""){
-		$revision_check = 9000;
+	if($local_database_version){
+		$revision_check = $local_database_version;
+	}
+	else {
+		$revision_check = 1000;
+		if(get_mysql_result("SHOW TABLES LIKE 'character_data'") ne ""){
+			$revision_check = 9000;
+		}
 	}
 	
 	#::: Iterate through Manifest backwards from binary version down to local version...
-	for($i = $bin_db_ver; $i > $revision_check; $i--){ 
+	for($i = $binary_database_version ; $i > $revision_check; $i--){ 
 		if(!defined($m_d{$i}[0])){ next; } 
 		
 		$file_name 		= trim($m_d{$i}[1]);
@@ -1458,23 +1685,23 @@ sub run_database_check{
 		#::: Match type update
 		if($match_type eq "contains"){
 			if(trim(get_mysql_result($query_check))=~/$match_text/i){
-				print "Missing DB Update " . $i . " '" . $file_name . "' \n";
+				print "[Database] missing update: " . $i . " '" . $file_name . "' \n";
 				fetch_missing_db_update($i, $file_name);
 				push(@total_updates, $i);
 			}
 			else{
-				print "DB up to date with: " . $i . " - '" . $file_name . "' \n";
+				print "[Database] has update: " . $i . " - '" . $file_name . "' \n";
 			}
 			print_match_debug();
 			print_break();
 		}
 		if($match_type eq "missing"){
 			if(get_mysql_result($query_check)=~/$match_text/i){  
-				print "DB up to date with: " . $i . " - '" . $file_name . "' \n";
+				print "[Database] has update: " . $i . " - '" . $file_name . "' \n";
 				next; 
 			}
 			else{
-				print "Missing DB Update " . $i . " '" . $file_name . "' \n";
+				print "[Database] missing update: " . $i . " '" . $file_name . "' \n";
 				fetch_missing_db_update($i, $file_name);
 				push(@total_updates, $i);
 			}
@@ -1483,24 +1710,24 @@ sub run_database_check{
 		}
 		if($match_type eq "empty"){
 			if(get_mysql_result($query_check) eq ""){
-				print "Missing DB Update " . $i . " '" . $file_name . "' \n";
+				print "[Database] missing update: " . $i . " '" . $file_name . "' \n";
 				fetch_missing_db_update($i, $file_name);
 				push(@total_updates, $i);
 			}
 			else{
-				print "DB up to date with: " . $i . " - '" . $file_name . "' \n";
+				print "[Database] has update: " . $i . " - '" . $file_name . "' \n";
 			}
 			print_match_debug();
 			print_break();
 		}
 		if($match_type eq "not_empty"){
 			if(get_mysql_result($query_check) ne ""){
-				print "Missing DB Update " . $i . " '" . $file_name . "' \n";
+				print "[Database] missing update: " . $i . " '" . $file_name . "' \n";
 				fetch_missing_db_update($i, $file_name);
 				push(@total_updates, $i);
 			}
 			else{
-				print "DB up to date with: " . $i . " - '" . $file_name . "' \n";
+				print "[Database] has update: " . $i . " - '" . $file_name . "' \n";
 			}
 			print_match_debug();
 			print_break();
@@ -1509,14 +1736,14 @@ sub run_database_check{
 	print "\n"; 
 	
 	if(scalar (@total_updates) == 0 && $db_run_stage == 2){
-		print "No updates need to be run...\n";
+		print "[Database] No updates need to be run...\n";
 		if($bots_db_management == 1){
-			print "Setting Database to Bots Binary Version (" . $bin_db_ver . ") if not already...\n\n";
-			get_mysql_result("UPDATE db_version SET bots_version = $bin_db_ver"); 
+			print "[Database] Setting Database to Bots Binary Version (" . $binary_database_version  . ") if not already...\n\n";
+			get_mysql_result("UPDATE db_version SET bots_version = $binary_database_version "); 
 		}
-		else{
-			print "Setting Database to Binary Version (" . $bin_db_ver . ") if not already...\n\n";
-			get_mysql_result("UPDATE db_version SET version = $bin_db_ver"); 
+		else{ 
+			print "[Database] Setting Database to Binary Version (" . $binary_database_version  . ") if not already...\n\n";
+			get_mysql_result("UPDATE db_version SET version = $binary_database_version "); 
 		}
 		
 		clear_database_runs();
@@ -1528,14 +1755,14 @@ sub fetch_missing_db_update{
 	$update_file = $_[1];
 	if($db_update >= 9000){
 		if($bots_db_management == 1){
-			get_remote_file("https://raw.githubusercontent.com/EQEmu/Server/master/utils/sql/git/bots/required/" . $update_file, "db_update/" . $update_file . "");
+			get_remote_file($eqemu_repository_request_url . "utils/sql/git/bots/required/" . $update_file, "db_update/" . $update_file . "");
 		}
 		else{
-			get_remote_file("https://raw.githubusercontent.com/EQEmu/Server/master/utils/sql/git/required/" . $update_file, "db_update/" . $update_file . "");
+			get_remote_file($eqemu_repository_request_url . "utils/sql/git/required/" . $update_file, "db_update/" . $update_file . "");
 		}
 	}
 	elsif($db_update >= 5000 && $db_update <= 9000){
-		get_remote_file("https://raw.githubusercontent.com/EQEmu/Server/master/utils/sql/svn/" . $update_file, "db_update/" . $update_file . "");
+		get_remote_file($eqemu_repository_request_url . "utils/sql/svn/" . $update_file, "db_update/" . $update_file . "");
 	}
 }
 
@@ -1546,7 +1773,17 @@ sub print_match_debug{
 	print "	Query Check: '" . $query_check . "'\n";
 	print "	Result: '" . trim(get_mysql_result($query_check)) . "'\n";
 }
+
 sub print_break{ 
 	if(!$debug){ return; } 
 	print "\n==============================================\n"; 
+}
+
+sub generate_random_password {
+    my $passwordsize = shift;
+    my @alphanumeric = ('a'..'z', 'A'..'Z', 0..9);
+    my $randpassword = join '', 
+           map $alphanumeric[rand @alphanumeric], 0..$passwordsize;
+
+    return $randpassword;
 }
