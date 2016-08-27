@@ -23,66 +23,26 @@ $eqemu_repository_request_url = "https://raw.githubusercontent.com/EQEmu/Server/
 
 #::: Globals
 $time_stamp = strftime('%m-%d-%Y', gmtime());
-$db_run_stage = 0; #::: Sets database run stage check 
-$console_output .= "	Operating System is: $Config{osname}\n";
+$db_run_stage = 0; #::: Sets database run stage check
 if($Config{osname}=~/freebsd|linux/i){ $OS = "Linux"; }
 if($Config{osname}=~/Win|MS/i){ $OS = "Windows"; }
 $has_internet_connection = check_internet_connection();
+($sec, $min, $hour, $mday, $mon, $year, $wday, $yday, $isdst) = localtime();
 
 #::: Check for script self update
 do_self_update_check_routine();
-
-print "[Info] For EQEmu Server management utilities - run eqemu_server.pl\n";
-
-#::: Check Perl version
-$perl_version = $^V;
-$perl_version =~s/v//g;
-print "[Update] Perl Version is " . $perl_version . "\n";
-if($perl_version > 5.12){ 
-	no warnings 'uninitialized';  
-}
-no warnings;
+get_perl_version();
+read_eqemu_config_xml();
+get_mysql_path();
 
 #::: Remove old eqemu_update.pl
 if(-e "eqemu_update.pl"){
 	unlink("eqemu_update.pl");
 }
-
-($sec, $min, $hour, $mday, $mon, $year, $wday, $yday, $isdst) = localtime();
-
-read_eqemu_config_xml();
-
-if($OS eq "Windows"){
-	$has_mysql_path = `echo %PATH%`;
-	if($has_mysql_path=~/MySQL|MariaDB/i){ 
-		@mysql = split(';', $has_mysql_path);
-		foreach my $v (@mysql){
-			if($v=~/MySQL|MariaDB/i){ 
-				$v =~s/\n//g; 
-				$path = trim($v) . "/mysql";
-				last;
-			}
-		}
-	}
-}
-
-#::: Linux Check
-if($OS eq "Linux"){
-	$path = `which mysql`; 
-	if ($path eq "") {
-		$path = `which mariadb`; 
-	}
-	$path =~s/\n//g; 
-}
-
-#::: Path not found, error and exit
-if($path eq ""){
-	print "[Error:eqemu_server.pl] MySQL path not found, please add the path for automatic database upgrading to continue... \n\n";
-	exit;
-}
-
 #::: Create db_update working directory if not created
 mkdir('db_update'); 
+
+print "[Info] For EQEmu Server management utilities - run eqemu_server.pl\n";
 
 #::: Check if db_version table exists... 
 if(trim(get_mysql_result("SHOW COLUMNS FROM db_version LIKE 'Revision'")) ne "" && $db){
@@ -90,55 +50,13 @@ if(trim(get_mysql_result("SHOW COLUMNS FROM db_version LIKE 'Revision'")) ne "" 
 	print "[Database] Old db_version table present, dropping...\n\n";
 }
 
-sub check_db_version_table{
-	if(get_mysql_result("SHOW TABLES LIKE 'db_version'") eq "" && $db){
-		print get_mysql_result("
-			CREATE TABLE db_version (
-			  version int(11) DEFAULT '0'
-			) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-			INSERT INTO db_version (version) VALUES ('1000');");
-		print "[Database] Table 'db_version' does not exists.... Creating...\n\n";
-	}
-}
-
 check_db_version_table();
 
-if($OS eq "Windows"){ @db_version = split(': ', `world db_version`); }
-if($OS eq "Linux"){ @db_version = split(': ', `./world db_version`); }  
-
-$bin_db_ver = trim($db_version[1]);
-$local_db_ver = trim(get_mysql_result("SELECT version FROM db_version LIMIT 1"));
-
-#::: If ran from Linux startup script, supress output
-if($bin_db_ver == $local_db_ver && $ARGV[0] eq "ran_from_world"){ 
-	print "[Update] Database up to date...\n"; 
-	exit; 
-}
-else {
-
-	#::: We ran world - Database needs to update, lets backup and run updates and continue world bootup
-	if($local_db_ver < $bin_db_ver && $ARGV[0] eq "ran_from_world"){
-		print "[Update] Database not up to date with binaries... Automatically updating...\n";
-		print "[Update] Issuing database backup first...\n";
-		database_dump_compress();
-		print "[Update] Updating database...\n";
-		sleep(1);
-		main_db_management();
-		main_db_management();
-		print "[Update] Continuing bootup\n";
-		exit;
-	}
-
-	#::: Make sure that we didn't pass any arugments to the script
-	if(!$ARGV[0]){
-		if(!$db){ print "[eqemu_server.pl] No database connection found... Running without\n"; }
-		show_menu_prompt();
-	}
-}
+check_for_world_bootup_database_update();
 
 if($db){
 	print "[Update] MySQL Path/Location: " . $path . "\n";
-	print "[Update] Binary Revision / Local: (" . $bin_db_ver . " / " . $local_db_ver . ")\n";
+	print "[Update] Binary Revision / Local: (" . $binary_database_version  . " / " . $local_database_version . ")\n";
 	
 	#::: Bots
 	#::: Make sure we're running a bots binary to begin with
@@ -150,7 +68,7 @@ if($db){
 	}
 
 	#::: If World ran this script, and our version is up to date, continue... 
-	if($bin_db_ver <= $local_db_ver && $ARGV[0] eq "ran_from_world"){  
+	if($binary_database_version  <= $local_database_version && $ARGV[0] eq "ran_from_world"){  
 		print "[Update] Database up to Date: Continuing World Bootup...\n";
 		exit; 
 	}
@@ -202,8 +120,6 @@ if($ARGV[0] eq "installer"){
 	lua_modules_fetch();
 	fetch_utility_scripts();
 	
-	
-	
 	#::: Database Routines
 	print "[Database] Creating Database '" . $db_name . "'\n";
 	print `"$path" --host $host --user $user --password="$pass" -N -B -e "DROP DATABASE IF EXISTS $db_name;"`;
@@ -212,11 +128,11 @@ if($ARGV[0] eq "installer"){
 	#::: Get Binary DB version
 	if($OS eq "Windows"){ @db_version = split(': ', `world db_version`); } 
 	if($OS eq "Linux"){ @db_version = split(': ', `./world db_version`); }  
-	$bin_db_ver = trim($db_version[1]);
+	$binary_database_version  = trim($db_version[1]);
 	
 	#::: Local DB Version
 	check_db_version_table();
-	$local_db_ver = trim(get_mysql_result("SELECT version FROM db_version LIMIT 1"));
+	$local_database_version = trim(get_mysql_result("SELECT version FROM db_version LIMIT 1"));
 	
 	#::: Download PEQ latest
 	fetch_peq_db_full();
@@ -244,6 +160,44 @@ if($ARGV[0] eq "login_server_setup"){
 	exit;
 }     
 
+sub check_for_world_bootup_database_update {
+	if($OS eq "Windows"){ 
+		@db_version = split(': ', `world db_version`); 
+	}
+	if($OS eq "Linux"){ 
+		@db_version = split(': ', `./world db_version`); 
+	}  
+
+	$binary_database_version  = trim($db_version[1]);
+	$local_database_version = trim(get_mysql_result("SELECT version FROM db_version LIMIT 1"));
+
+	if($binary_database_version  == $local_database_version && $ARGV[0] eq "ran_from_world"){ 
+		print "[Update] Database up to date...\n"; 
+		exit; 
+	}
+	else {
+
+		#::: We ran world - Database needs to update, lets backup and run updates and continue world bootup
+		if($local_database_version < $binary_database_version  && $ARGV[0] eq "ran_from_world"){
+			print "[Update] Database not up to date with binaries... Automatically updating...\n";
+			print "[Update] Issuing database backup first...\n";
+			database_dump_compress();
+			print "[Update] Updating database...\n";
+			sleep(1);
+			main_db_management();
+			main_db_management();
+			print "[Update] Continuing bootup\n";
+			exit;
+		}
+
+		#::: Make sure that we didn't pass any arugments to the script
+		if(!$ARGV[0]){
+			if(!$db){ print "[eqemu_server.pl] No database connection found... Running without\n"; }
+			show_menu_prompt();
+		}
+	}
+}
+
 sub check_internet_connection {
 	if($OS eq "Linux"){
 		$count = "c";
@@ -264,6 +218,17 @@ sub check_internet_connection {
 		print "[Update] No connection to the internet, can't check update\n";
 		return;
 	}
+}
+
+sub get_perl_version {
+	#::: Check Perl version
+	$perl_version = $^V;
+	$perl_version =~s/v//g;
+	print "[Update] Perl Version is " . $perl_version . "\n";
+	if($perl_version > 5.12){ 
+		no warnings 'uninitialized';  
+	}
+	no warnings;
 }
 
 sub do_self_update_check_routine {
@@ -518,6 +483,35 @@ sub print_main_menu {
 	print "Enter a command #> ";
 }
 
+sub get_mysql_path {
+	if($OS eq "Windows"){
+		$has_mysql_path = `echo %PATH%`;
+		if($has_mysql_path=~/MySQL|MariaDB/i){ 
+			@mysql = split(';', $has_mysql_path);
+			foreach my $v (@mysql){
+				if($v=~/MySQL|MariaDB/i){ 
+					$v =~s/\n//g; 
+					$path = trim($v) . "/mysql";
+					last;
+				}
+			}
+		}
+	}
+	if($OS eq "Linux"){
+		$path = `which mysql`; 
+		if ($path eq "") {
+			$path = `which mariadb`; 
+		}
+		$path =~s/\n//g; 
+	}
+	
+	#::: Path not found, error and exit
+	if($path eq ""){
+		print "[Error:eqemu_server.pl] MySQL path not found, please add the path for automatic database upgrading to continue... \n\n";
+		exit;
+	}
+}
+
 sub check_for_database_dump_script{
 	if(`perl db_dumper.pl`=~/Need arguments/i){
 		return; 
@@ -567,6 +561,17 @@ sub script_exit{
 	#::: Cleanup staged folder...
 	rmtree("updates_staged/");
 	exit;
+}
+
+sub check_db_version_table{
+	if(get_mysql_result("SHOW TABLES LIKE 'db_version'") eq "" && $db){
+		print get_mysql_result("
+			CREATE TABLE db_version (
+			  version int(11) DEFAULT '0'
+			) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+			INSERT INTO db_version (version) VALUES ('1000');");
+		print "[Database] Table 'db_version' does not exists.... Creating...\n\n";
+	}
 }
 
 #::: Returns Tab Delimited MySQL Result from Command Line
@@ -1560,14 +1565,14 @@ sub get_bots_db_version{
 
 sub bots_db_management{
 	#::: Main Binary Database version
-	$bin_db_ver = trim($db_version[2]);
+	$binary_database_version  = trim($db_version[2]);
 	
 	#::: If we have stale data from main db run
 	if($db_run_stage > 0 && $bots_db_management == 0){
 		clear_database_runs();
 	}
 
-	if($bin_db_ver == 0){
+	if($binary_database_version  == 0){
 		print "[Database] Your server binaries (world/zone) are not compiled for bots...\n\n";
 		return;
 	}
@@ -1587,7 +1592,7 @@ sub main_db_management{
 	}
 
 	#::: Main Binary Database version
-	$bin_db_ver = trim($db_version[1]);
+	$binary_database_version  = trim($db_version[1]);
 	
 	$bots_db_management = 0;
 	run_database_check();
@@ -1658,13 +1663,18 @@ sub run_database_check{
 	@total_updates = ();
 	
 	#::: This is where we set checkpoints for where a database might be so we don't check so far back in the manifest...
-	$revision_check = 1000;
-	if(get_mysql_result("SHOW TABLES LIKE 'character_data'") ne ""){
-		$revision_check = 9000;
+	if($local_database_version){
+		$revision_check = $local_database_version;
+	}
+	else {
+		$revision_check = 1000;
+		if(get_mysql_result("SHOW TABLES LIKE 'character_data'") ne ""){
+			$revision_check = 9000;
+		}
 	}
 	
 	#::: Iterate through Manifest backwards from binary version down to local version...
-	for($i = $bin_db_ver; $i > $revision_check; $i--){ 
+	for($i = $binary_database_version ; $i > $revision_check; $i--){ 
 		if(!defined($m_d{$i}[0])){ next; } 
 		
 		$file_name 		= trim($m_d{$i}[1]);
@@ -1728,12 +1738,12 @@ sub run_database_check{
 	if(scalar (@total_updates) == 0 && $db_run_stage == 2){
 		print "[Database] No updates need to be run...\n";
 		if($bots_db_management == 1){
-			print "[Database] Setting Database to Bots Binary Version (" . $bin_db_ver . ") if not already...\n\n";
-			get_mysql_result("UPDATE db_version SET bots_version = $bin_db_ver"); 
+			print "[Database] Setting Database to Bots Binary Version (" . $binary_database_version  . ") if not already...\n\n";
+			get_mysql_result("UPDATE db_version SET bots_version = $binary_database_version "); 
 		}
 		else{ 
-			print "[Database] Setting Database to Binary Version (" . $bin_db_ver . ") if not already...\n\n";
-			get_mysql_result("UPDATE db_version SET version = $bin_db_ver"); 
+			print "[Database] Setting Database to Binary Version (" . $binary_database_version  . ") if not already...\n\n";
+			get_mysql_result("UPDATE db_version SET version = $binary_database_version "); 
 		}
 		
 		clear_database_runs();
