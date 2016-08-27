@@ -30,7 +30,7 @@ $has_internet_connection = check_internet_connection();
 ($sec, $min, $hour, $mday, $mon, $year, $wday, $yday, $isdst) = localtime();
 
 #::: Check for script self update
-do_self_update_check_routine();
+do_self_update_check_routine() if $check;
 get_perl_version();
 read_eqemu_config_xml();
 get_mysql_path();
@@ -42,7 +42,7 @@ if(-e "eqemu_update.pl"){
 #::: Create db_update working directory if not created
 mkdir('db_update'); 
 
-print "[Info] For EQEmu Server management utilities - run eqemu_server.pl\n";
+print "[Info] For EQEmu Server management utilities - run eqemu_server.pl\n" if $ARGV[0] eq "ran_from_world";
 
 #::: Check if db_version table exists... 
 if(trim(get_mysql_result("SHOW COLUMNS FROM db_version LIKE 'Revision'")) ne "" && $db){
@@ -89,7 +89,64 @@ if($ARGV[0] eq "loginserver_install_linux"){
 	exit;
 }
 
+if($ARGV[0] eq "new_server"){
+	while(1){
+		print "For a new server folder install, we assume Perl and MySQL are configured\n";
+		print "This will install a fresh PEQ Database, with all server assets\n";
+		print "You will need to supply database credentials to get started...\n";
+		
+		check_for_input("MySQL User: "); 
+		$database_user = trim($input);
+
+		check_for_input("MySQL Password: "); 
+		$database_password = trim($input);
+		
+		$check_connection = `mysql -u $database_user -p$database_password -N -B -e "SHOW PROCESSLIST" > mysqlcheck.txt`;
+		$mysql_pass = 0;
+		open (MYSQL_CHECK, "mysqlcheck.txt");		
+		while (<MYSQL_CHECK>){
+			chomp;
+			$o = $_;
+			if($o=~/Error/i){ $mysql_pass = 0;}
+			if($o=~/SHOW PROCESSLIST/i){ $mysql_pass = 1; }
+		}
+		close (MYSQL_CHECK);
+		unlink("mysqlcheck.txt");
+		
+		if($mysql_pass == 1){
+			print "Success! We have a database connection\n";
+			
+			check_for_input("Specify a database name: "); 
+			$database_name = trim($input);
+			
+			#::: Write install vars
+			open (INSTALL_VARS, '>', 'install_variables.txt');
+			print INSTALL_VARS "";
+			print INSTALL_VARS "mysql_eqemu_db_name:" . $database_name . "\n";
+			print INSTALL_VARS "mysql_eqemu_user:" . $database_user . "\n";
+			print INSTALL_VARS "mysql_eqemu_password:" . $database_password . "\n";
+			close (INSTALL_VARS);
+			
+			do_installer_routines();
+		}
+		else {
+			print "Authorization failed\n";
+		}
+	}
+}
+
 if($ARGV[0] eq "installer"){
+	do_installer_routines();
+	exit;
+}
+
+if($ARGV[0] eq "db_dump_compress"){ database_dump_compress(); exit; }
+if($ARGV[0] eq "login_server_setup"){
+	do_windows_login_server_setup();	
+	exit;
+}     
+
+sub do_installer_routines {
 	print "[Install] Running EQEmu Server installer routines...\n";
 	
 	#::: Make some local server directories...
@@ -150,15 +207,13 @@ if($ARGV[0] eq "installer"){
 		
 		print "[Install] Installation complete!\n";
 	}
-	
-	exit;
 }
 
-if($ARGV[0] eq "db_dump_compress"){ database_dump_compress(); exit; }
-if($ARGV[0] eq "login_server_setup"){
-	do_windows_login_server_setup();	
-	exit;
-}     
+sub check_for_input {
+	print $_[0];
+	$input = <STDIN>;
+	chomp $input;
+}
 
 sub check_for_world_bootup_database_update {
 	if($OS eq "Windows"){ 
@@ -1663,7 +1718,7 @@ sub run_database_check{
 	@total_updates = ();
 	
 	#::: This is where we set checkpoints for where a database might be so we don't check so far back in the manifest...
-	if($local_database_version){
+	if($local_database_version > 9000){
 		$revision_check = $local_database_version;
 	}
 	else {
