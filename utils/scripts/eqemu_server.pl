@@ -298,7 +298,6 @@ sub do_self_update_check_routine {
 					copy_file($file, $destination_file); 
 					if($OS eq "Linux"){
 						system("chmod 755 eqemu_server.pl");
-						system("chown eqemu eqemu_server.pl");
 					}
 					system("perl eqemu_server.pl start_from_world");
 				}
