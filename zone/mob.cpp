@@ -289,6 +289,9 @@ Mob::Mob(const char* in_name,
 	logging_enabled = false;
 	isgrouped = false;
 	israidgrouped = false;
+	
+	IsHorse = false;
+
 	entity_id_being_looted = 0;
 	_appearance = eaStanding;
 	pRunAnimSpeed = 0;
