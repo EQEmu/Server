@@ -30,7 +30,7 @@ $has_internet_connection = check_internet_connection();
 ($sec, $min, $hour, $mday, $mon, $year, $wday, $yday, $isdst) = localtime();
 
 #::: Check for script self update
-do_self_update_check_routine() if $check;
+do_self_update_check_routine();
 get_perl_version();
 read_eqemu_config_xml();
 get_mysql_path();
