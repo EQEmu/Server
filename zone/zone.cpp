@@ -162,7 +162,7 @@ bool Zone::LoadZoneObjects() {
 	std::string query = StringFormat("SELECT id, zoneid, xpos, ypos, zpos, heading, "
                                     "itemid, charges, objectname, type, icon, unknown08, "
                                     "unknown10, unknown20, unknown24, unknown76, size, tilt_x, " 
-									"tilt_y FROM object "
+									"tilt_y, display_name FROM object "
                                     "WHERE zoneid = %i AND (version = %u OR version = -1)",
                                     zoneid, instanceversion);
     auto results = database.QueryDatabase(query);
@@ -275,6 +275,7 @@ bool Zone::LoadZoneObjects() {
         }
 
 	auto object = new Object(id, type, icon, data, inst);
+	object->SetDisplayName(row[19]);
 	entity_list.AddObject(object, false);
 	if (type == OT_DROPPEDITEM && itemid != 0)
 		entity_list.RemoveObject(object->GetID());

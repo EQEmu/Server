@@ -543,6 +543,7 @@ bool Object::HandleClick(Client* sender, const ClickObject_Struct* click_object)
 		coa->drop_id = click_object->drop_id;
 		coa->player_id = click_object->player_id;
 		coa->icon = m_icon;
+		strn0cpy(coa->object_name, m_display_name, 64);
 
 		//if this is not the main user, send them a close and a message
 		if (user == nullptr || user == sender) {
@@ -819,6 +820,11 @@ void Object::SetTiltY(float pos)
 	entity_list.QueueClients(0, app2);
 	safe_delete(app);
 	safe_delete(app2);
+}
+
+void Object::SetDisplayName(const char *in_name)
+{
+	strn0cpy(m_display_name, in_name, 64);
 }
 
 void Object::Depop()

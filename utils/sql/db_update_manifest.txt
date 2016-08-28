@@ -353,6 +353,7 @@
 9097|2016_07_03_npc_class_as_last_name.sql|SELECT `rule_name` FROM `rule_values` WHERE `rule_name` LIKE 'NPC:UseClassAsLastName'|empty|
 9098|2016_08_26_object_size_tilt.sql|SHOW COLUMNS FROM `object` LIKE 'size'|empty|
 9099|2016_08_27_ip_exemptions.sql|SHOW TABLES LIKE 'ip_exemptions'|empty|
+9100|2016_08_27_object_display_name.sql|SHOW COLUMNS FROM `object` LIKE 'display_name'|empty|
 
 # Upgrade conditions:
 # 	This won't be needed after this system is implemented, but it is used database that are not

@@ -164,6 +164,8 @@ public:
 	void SetSize(float size);
 	uint16 GetSolidType();
 	void SetSolidType(uint16 size);
+	void SetDisplayName(const char *in_name);
+	const char *GetDisplayName() const { return m_display_name; }
 
 	const char* GetEntityVariable(const char *id);
 	void SetEntityVariable(const char *id, const char *m_var);
@@ -186,6 +188,7 @@ protected:
 	float			m_z;
 	float			m_heading;
 	bool			m_ground_spawn;
+	char			m_display_name[64];
 
 	std::map<std::string, std::string> o_EntityVariables;
 
