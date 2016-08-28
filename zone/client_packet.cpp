@@ -13093,6 +13093,11 @@ void Client::Handle_OP_TargetCommand(const EQApplicationPacket *app)
 				GetTarget()->IsTargeted(1);
 				return;
 			}
+			else if (RuleB(Character, AllowMQTarget))
+			{
+ 				GetTarget()->IsTargeted(1);
+ 				return;
+ 			}
 			else if (IsAssistExempted())
 			{
 				GetTarget()->IsTargeted(1);
