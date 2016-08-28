@@ -8,7 +8,7 @@ CREATE TABLE `ip_exemptions` (
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=latin1;
 
 -- Rule Value Entry, Default to false
-INSERT INTO `rule_values` (`ruleset_id`, `rule_name`, `rule_value`, `notes`) VALUES ('1', 'World:EnableIPExemptions', 'true', 'notation');
+INSERT INTO `rule_values` (`ruleset_id`, `rule_name`, `rule_value`, `notes`) VALUES ('1', 'World:EnableIPExemptions', 'false', 'notation');
 
 -- Logging Category Entry
 INSERT INTO `logsys_categories` (`log_category_id`, `log_category_description`, `log_to_console`, `log_to_file`, `log_to_gmsay`) VALUES ('44', 'Client Login', '1', '1', '1');
