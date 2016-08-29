@@ -928,7 +928,7 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 			//should we issue a message or send them a spell gem packet?
 			Message_StringID(13, SPELL_RECAST);
 			Log.Out(Logs::Detail, Logs::Spells, "Casting of %d canceled: spell reuse timer not expired", spell_id);
-			InterruptSpell();
+			StopCasting();
 			return;
 		}
 	}
@@ -942,7 +942,7 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 			if(!CastToClient()->GetPTimers().Expired(&database, (pTimerItemStart + itm->GetItem()->RecastType), false)) {
 				Message_StringID(13, SPELL_RECAST);
 				Log.Out(Logs::Detail, Logs::Spells, "Casting of %d canceled: item spell reuse timer not expired", spell_id);
-				InterruptSpell();
+				StopCasting();
 				return;
 			}
 		}
@@ -1271,7 +1271,7 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 			if(!CastToClient()->GetPTimers().Expired(&database, (pTimerItemStart + recasttype), false)) {
 				Message_StringID(13, SPELL_RECAST);
 				Log.Out(Logs::Detail, Logs::Spells, "Casting of %d canceled: item spell reuse timer not expired", spell_id);
-				InterruptSpell();
+				StopCasting();
 				return;
 			}
 			else
