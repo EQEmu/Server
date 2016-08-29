@@ -1310,7 +1310,9 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 	if( !SpellFinished(spell_id, spell_target, slot, mana_used, inventory_slot, resist_adjust) )
 	{
 		Log.Out(Logs::Detail, Logs::Spells, "Casting of %d canceled: SpellFinished returned false.", spell_id);
-		InterruptSpell();
+		// most of the cases we return false have a message already or are logic errors that shouldn't happen
+		// if there are issues I guess we can do something else, but this should work
+		StopCasting();
 		return;
 	}
 
