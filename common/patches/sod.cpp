@@ -3246,8 +3246,10 @@ namespace SoD
 		DECODE_LENGTH_EXACT(structs::LoadSpellSet_Struct);
 		SETUP_DIRECT_DECODE(LoadSpellSet_Struct, structs::LoadSpellSet_Struct);
 
-		for (uint32 i = 0; i < MAX_PP_MEMSPELL; ++i)
+		for (int i = 0; i < structs::MAX_PP_MEMSPELL; ++i)
 			emu->spell[i] = eq->spell[i];
+		for (int i = structs::MAX_PP_MEMSPELL; i < MAX_PP_MEMSPELL; ++i)
+			emu->spell[i] = 0xFFFFFFFF;
 
 		FINISH_DIRECT_DECODE();
 	}

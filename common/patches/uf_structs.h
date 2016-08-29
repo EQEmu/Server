@@ -847,7 +847,7 @@ struct BindStruct {
  */
 static const uint32 MAX_PP_LANGUAGE		= 25; //
 static const uint32 MAX_PP_SPELLBOOK	= 720; // Confirmed 60 pages on Underfoot now
-static const uint32 MAX_PP_MEMSPELL		= 10; //was 9 now 10 on Underfoot
+static const uint32 MAX_PP_MEMSPELL		= 12; //was 9 now 10 on Underfoot
 static const uint32 MAX_PP_SKILL		= PACKET_SKILL_ARRAY_SIZE;	// 100 - actual skills buffer size
 static const uint32 MAX_PP_AA_ARRAY		= 300; //was 299
 static const uint32 MAX_GROUP_MEMBERS	= 6;
@@ -917,7 +917,7 @@ struct PlayerProfile_Struct
 /*00160*/ uint32  deity;				// deity
 /*00164*/ uint32  intoxication;			// Alcohol level (in ticks till sober?)
 /*00168*/ uint32  spellSlotRefresh[MAX_PP_MEMSPELL]; // Refresh time (millis) - 4 Octets Each
-/*00208*/ uint8   unknown00208[14];		// Seen 00 00 00 00 00 00 00 00 00 00 00 00 02 01
+/*00208*/ uint8   unknown00208[6];		// Seen 00 00 00 00 00 00 00 00 00 00 00 00 02 01
 /*00222*/ uint32  abilitySlotRefresh;
 /*00226*/ uint8   haircolor;			// Player hair color
 /*00227*/ uint8   beardcolor;			// Player beard color
@@ -945,7 +945,7 @@ struct PlayerProfile_Struct
 /*04217*/ uint8   unknown04217[147];		// was [175]
 /*04364*/ uint32   spell_book[MAX_PP_SPELLBOOK];	// List of the Spells in spellbook 720 = 90 pages [2880] was [1920]
 /*07244*/ uint32   mem_spells[MAX_PP_MEMSPELL]; // List of spells memorized
-/*07284*/ uint8   unknown07284[28];		//#### uint8 unknown04396[32]; in Titanium ####[28]
+/*07284*/ uint8   unknown07284[20];		//#### uint8 unknown04396[32]; in Titanium ####[28]
 /*07312*/ uint32  platinum;				// Platinum Pieces on player
 /*07316*/ uint32  gold;					// Gold Pieces on player
 /*07320*/ uint32  silver;				// Silver Pieces on player
@@ -3928,7 +3928,6 @@ struct AnnoyingZoneUnknown_Struct {
 
 struct LoadSpellSet_Struct {
       uint8  spell[MAX_PP_MEMSPELL];      // 0 if no action
-      uint16 unknown2;	// is this two more spell gems?
       uint32 unknown;	// there seems to be an extra field in this packet...
 };
 

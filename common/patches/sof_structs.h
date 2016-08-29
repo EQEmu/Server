@@ -3728,6 +3728,11 @@ struct AnnoyingZoneUnknown_Struct {
 	uint32	value;		//always 4
 };
 
+struct LoadSpellSet_Struct {
+	uint32 spell[MAX_PP_MEMSPELL];
+	uint32 unknown;
+};
+
 struct BlockedBuffs_Struct {
 /*000*/	uint8	unknown000[80];
 /*080*/	uint8	unknown081;
