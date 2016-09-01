@@ -1317,8 +1317,8 @@ bool BotDatabase::SaveEquipmentColor(const uint32 bot_id, const int16 slot_id, c
 		" WHERE `bot_id` = '%u'"
 		" %s",
 		rgb,
-		where_clause.c_str(),
-		bot_id
+		bot_id,
+		where_clause.c_str()
 	);
 	auto results = QueryDatabase(query);
 	if (!results.Success())
