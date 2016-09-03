@@ -2655,60 +2655,120 @@ bool Client::BindWound(Mob *bindmob, bool start, bool fail)
 					bind_out->type = 0;
 					CheckIncreaseSkill(EQEmu::skills::SkillBindWound, nullptr, 5);
 
-					int maxHPBonus = spellbonuses.MaxBindWound + itembonuses.MaxBindWound +
-							 aabonuses.MaxBindWound;
+					if (RuleB(Character, UseOldBindWound)) {
+						int maxHPBonus = spellbonuses.MaxBindWound + itembonuses.MaxBindWound +
+							aabonuses.MaxBindWound;
 
-					int max_percent = 50 + 10 * maxHPBonus;
+						int max_percent = 50 + maxHPBonus;
 
-					if (GetClass() == MONK && GetSkill(EQEmu::skills::SkillBindWound) > 200) {
-						max_percent = 70 + 10 * maxHPBonus;
-					}
-
-					max_percent = mod_bindwound_percent(max_percent, bindmob);
-
-					int max_hp = bindmob->GetMaxHP() * max_percent / 100;
-
-					// send bindmob new hp's
-					if (bindmob->GetHP() < bindmob->GetMaxHP() && bindmob->GetHP() <= (max_hp)-1) {
-						// 0.120 per skill point, 0.60 per skill level, minimum 3 max 30
-						int bindhps = 3;
-
-						if (GetSkill(EQEmu::skills::SkillBindWound) > 200) {
-							bindhps += GetSkill(EQEmu::skills::SkillBindWound) * 4 / 10;
-						}
-						else if (GetSkill(EQEmu::skills::SkillBindWound) >= 10) {
-							bindhps += GetSkill(EQEmu::skills::SkillBindWound) / 4;
+						if (GetClass() == MONK && GetSkill(EQEmu::skills::SkillBindWound) > 200) {
+							max_percent = 70 + maxHPBonus;
 						}
 
-						// Implementation of aaMithanielsBinding is a guess (the multiplier)
-						int bindBonus = spellbonuses.BindWound + itembonuses.BindWound +
+						max_percent = mod_bindwound_percent(max_percent, bindmob);
+
+						int max_hp = bindmob->GetMaxHP() * max_percent / 100;
+
+						// send bindmob new hp's
+						if (bindmob->GetHP() < bindmob->GetMaxHP() && bindmob->GetHP() <= (max_hp)-1) {
+							// 0.120 per skill point, 0.60 per skill level, minimum 3 max 30
+							int bindhps = 3;
+
+							if (GetSkill(EQEmu::skills::SkillBindWound) > 200) {
+								bindhps += GetSkill(EQEmu::skills::SkillBindWound) * 4 / 10;
+							}
+							else if (GetSkill(EQEmu::skills::SkillBindWound) >= 10) {
+								bindhps += GetSkill(EQEmu::skills::SkillBindWound) / 4;
+							}
+
+							// Implementation of aaMithanielsBinding is a guess (the multiplier)
+							int bindBonus = spellbonuses.BindWound + itembonuses.BindWound +
 								aabonuses.BindWound;
 
-						bindhps += bindhps * bindBonus / 100;
+							bindhps += bindhps * bindBonus / 100;
 
-						bindhps = mod_bindwound_hp(bindhps, bindmob);
+							bindhps = mod_bindwound_hp(bindhps, bindmob);
 
-						// if the bind takes them above the max bindable
-						// cap it at that value. Dont know if live does it this way
-						// but it makes sense to me.
-						int chp = bindmob->GetHP() + bindhps;
-						if (chp > max_hp)
-							chp = max_hp;
+							// if the bind takes them above the max bindable
+							// cap it at that value. Dont know if live does it this way
+							// but it makes sense to me.
+							int chp = bindmob->GetHP() + bindhps;
+							if (chp > max_hp)
+								chp = max_hp;
 
-						bindmob->SetHP(chp);
-						bindmob->SendHPUpdate();
-					} else {
-						// I dont have the real, live
-						Message(15, "You cannot bind wounds above %d%% hitpoints.",
-							max_percent);
-						if (bindmob != this && bindmob->IsClient())
-							bindmob->CastToClient()->Message(
-							    15,
-							    "You cannot have your wounds bound above %d%% hitpoints.",
-							    max_percent);
-						// Too many hp message goes here.
+							bindmob->SetHP(chp);
+							bindmob->SendHPUpdate();
+						}
+						else {
+							// I dont have the real, live
+							Message(15, "You cannot bind wounds above %d%% hitpoints.",
+								max_percent);
+							if (bindmob != this && bindmob->IsClient())
+								bindmob->CastToClient()->Message(
+								15,
+								"You cannot have your wounds bound above %d%% hitpoints.",
+								max_percent);
+							// Too many hp message goes here.
+						}
 					}
-				} else {
+					else {
+						int percent_base = 50;
+						if (GetRawSkill(EQEmu::skills::SkillBindWound) > 200) {
+							if ((GetClass() == MONK) || (GetClass() == BEASTLORD))
+								percent_base = 70;
+							else if ((GetLevel() > 50) && ((GetClass() == WARRIOR) || (GetClass() == ROGUE) || (GetClass() == CLERIC)))
+								percent_base = 70;
+						}
+
+						int percent_bonus = 0;
+						if (percent_base >= 70)
+							percent_bonus = spellbonuses.MaxBindWound + itembonuses.MaxBindWound + aabonuses.MaxBindWound;
+
+						int max_percent = percent_base + percent_bonus;
+						if (max_percent < 0)
+							max_percent = 0;
+						if (max_percent > 100)
+							max_percent = 100;
+
+						max_percent = mod_bindwound_percent(max_percent, bindmob);
+
+						int max_hp = (bindmob->GetMaxHP() * max_percent) / 100;
+						if (max_hp > bindmob->GetMaxHP())
+							max_hp = bindmob->GetMaxHP();
+
+						if (bindmob->GetHP() < bindmob->GetMaxHP() && bindmob->GetHP() < max_hp) {
+							int bindhps = 3; // base bind hp
+							if (percent_base >= 70)
+								bindhps = (GetSkill(EQEmu::skills::SkillBindWound) * 4) / 10; // 8:5 skill-to-hp ratio
+							else if (GetSkill(EQEmu::skills::SkillBindWound) >= 12)
+								bindhps = GetSkill(EQEmu::skills::SkillBindWound) / 4; // 4:1 skill-to-hp ratio
+
+							int bonus_hp_percent = 0;
+							if (percent_base >= 70)
+								bonus_hp_percent = spellbonuses.BindWound + itembonuses.BindWound + aabonuses.BindWound;
+
+							bindhps += (bindhps * bonus_hp_percent) / 100;
+
+							if (bindhps < 3)
+								bindhps = 3;
+
+							bindhps = mod_bindwound_hp(bindhps, bindmob);
+
+							bindhps += bindmob->GetHP();
+							if (bindhps > max_hp)
+								bindhps = max_hp;
+
+							bindmob->SetHP(bindhps);
+							bindmob->SendHPUpdate();
+						}
+						else {
+							Message(15, "You cannot bind wounds above %d%% hitpoints", max_percent);
+							if (bindmob != this && bindmob->IsClient())
+								bindmob->CastToClient()->Message(15, "You cannot have your wounds bound above %d%% hitpoints", max_percent);
+						}
+					}
+				}
+				else {
 					// Send client bind failed
 					if (bindmob != this)
 						bind_out->type = 6; // They moved
