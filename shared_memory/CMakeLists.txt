@@ -21,7 +21,7 @@ SET(shared_memory_headers
 
 ADD_EXECUTABLE(shared_memory ${shared_memory_sources} ${shared_memory_headers})
 
-INSTALL(TARGETS shared_memory RUNTIME DESTINATION ${CMAKE_INSTALL_PREFIX})
+INSTALL(TARGETS shared_memory RUNTIME DESTINATION ${CMAKE_INSTALL_PREFIX}/bin)
 
 TARGET_LINK_LIBRARIES(shared_memory common debug ${MySQL_LIBRARY_DEBUG} optimized ${MySQL_LIBRARY_RELEASE} ${ZLIB_LIBRARY})
 
@@ -42,7 +42,6 @@ IF(UNIX)
 		TARGET_LINK_LIBRARIES(shared_memory "rt")
 	ENDIF(NOT DARWIN)
 	TARGET_LINK_LIBRARIES(shared_memory "pthread")
-	ADD_DEFINITIONS(-fPIC)
 ENDIF(UNIX)
 
 SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin)

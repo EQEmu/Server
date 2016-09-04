@@ -210,6 +210,9 @@ SET(common_headers
 	worldconn.h
 	xml_parser.h
 	zone_numbers.h
+	event/background_task.h
+	event/event_loop.h
+	event/timer.h
 	patches/patches.h
 	patches/sod.h
 #	patches/sod_itemfields.h
@@ -262,6 +265,13 @@ SET(common_headers
 	tinyxml/tinystr.h
 	tinyxml/tinyxml.h
 )
+
+SOURCE_GROUP(Event FILES
+	event/background_task.h
+	event/event_loop.h
+	event/timer.h
+)
+
 
 SOURCE_GROUP(Patches FILES
 	patches/patches.h
@@ -360,7 +370,6 @@ INCLUDE_DIRECTORIES(Patches SocketLib StackWalker TinyXML)
 ADD_LIBRARY(common ${common_sources} ${common_headers})
 
 IF(UNIX)
-	ADD_DEFINITIONS(-fPIC)
 	SET_SOURCE_FILES_PROPERTIES("SocketLib/Mime.cpp" PROPERTY COMPILE_FLAGS -Wno-unused-result)
 	SET_SOURCE_FILES_PROPERTIES("patches/sod.cpp" "patches/sof.cpp" "patches/rof.cpp"  "patches/rof2.cpp" "patches/uf.cpp" PROPERTIES COMPILE_FLAGS -O0)
 ENDIF(UNIX)

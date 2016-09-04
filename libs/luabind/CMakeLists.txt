@@ -28,7 +28,6 @@ ADD_LIBRARY(luabind ${lb_sources} ${lb_headers})
 
 
 IF(UNIX)
-    ADD_DEFINITIONS(-fPIC)
     set_source_files_properties(${lb_sources} PROPERTY COMPILE_FLAGS -Wno-deprecated-declarations)
 ENDIF(UNIX)
 

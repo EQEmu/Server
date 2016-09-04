@@ -15,19 +15,21 @@
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
-#include "../common/global_define.h"
-#include "../common/types.h"
-#include "../common/opcodemgr.h"
-#include "../common/eq_stream_factory.h"
-#include "../common/timer.h"
-#include "../common/platform.h"
-#include "../common/crash.h"
-#include "../common/eqemu_logsys.h"
+#include <global_define.h>
+#include <types.h>
+#include <opcodemgr.h>
+#include <eq_stream_factory.h>
+#include <timer.h>
+#include <platform.h>
+#include <crash.h>
+#include <eqemu_logsys.h>
+#include <event/timer.h>
 #include "login_server.h"
 #include <time.h>
 #include <stdlib.h>
 #include <string>
 #include <sstream>
+#include <thread>
 
 TimeoutManager timeout_manager;
 LoginServer server;
@@ -195,12 +197,17 @@ int main()
 #endif
 
 	Log.Out(Logs::General, Logs::Login_Server, "Server Started.");
-	while (run_server) {
+	EQ::Timer timer(10, true, []() {
 		Timer::SetCurrentTime();
 		server.client_manager->Process();
 		server.server_manager->Process();
 		timeout_manager.CheckTimeouts();
-		Sleep(100);
+	});
+	
+	auto &loop = EQ::EventLoop::Get();
+	while (run_server) {
+		loop.Process();
+		std::this_thread::sleep_for(std::chrono::microseconds(1));
 	}
 
 	Log.Out(Logs::General, Logs::Login_Server, "Server Shutdown.");

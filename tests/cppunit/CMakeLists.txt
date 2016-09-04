@@ -30,9 +30,4 @@ SET(cppunit_headers
 
 ADD_LIBRARY(cppunit ${cppunit_sources} ${cppunit_headers})
 
-
-IF(UNIX)
-	ADD_DEFINITIONS(-fPIC)
-ENDIF(UNIX)
-
 SET(LIBRARY_OUTPUT_PATH ../../Bin)
