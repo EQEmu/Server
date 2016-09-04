@@ -5458,8 +5458,10 @@ void Mob::SendBuffsToClient(Client *c)
 EQApplicationPacket *Mob::MakeBuffsPacket(bool for_target)
 {
 	uint32 count = 0;
-	uint32 buff_count = GetMaxTotalSlots();
-	for(unsigned int i = 0; i < buff_count; ++i)
+	// for self we want all buffs, for target, we want to skip song window buffs
+	// since NPCs and pets don't have a song window, we still see it for them :P
+	uint32 buff_count = for_target ? GetMaxBuffSlots() : GetMaxTotalSlots();
+	for(int i = 0; i < buff_count; ++i)
 	{
 		if(buffs[i].spellid != SPELL_UNKNOWN)
 		{
@@ -5491,7 +5493,7 @@ EQApplicationPacket *Mob::MakeBuffsPacket(bool for_target)
 		buff->type = 0;
 
 	uint32 index = 0;
-	for(unsigned int i = 0; i < buff_count; ++i)
+	for(int i = 0; i < buff_count; ++i)
 	{
 		if(buffs[i].spellid != SPELL_UNKNOWN)
 		{
