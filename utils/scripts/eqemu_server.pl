@@ -30,10 +30,10 @@ if($Config{osname}=~/freebsd|linux/i){
 	if(-e "/etc/debian_version"){
 		$os_flavor = "debian";
 	}
-	if(-e "/etc/fedora-release"){
+	elsif(-e "/etc/fedora-release"){
 		$os_flavor = "fedora_core";
 	}
-	if(-e "/etc/redhat-release"){
+	elsif(-e "/etc/redhat-release"){
 		$os_flavor = "red_hat";
 	}
 }
