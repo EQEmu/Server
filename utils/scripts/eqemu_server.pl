@@ -24,8 +24,22 @@ $eqemu_repository_request_url = "https://raw.githubusercontent.com/EQEmu/Server/
 #::: Globals
 $time_stamp = strftime('%m-%d-%Y', gmtime());
 $db_run_stage = 0; #::: Sets database run stage check
-if($Config{osname}=~/freebsd|linux/i){ $OS = "Linux"; }
-if($Config{osname}=~/Win|MS/i){ $OS = "Windows"; }
+if($Config{osname}=~/freebsd|linux/i){ 
+	$OS = "Linux";
+	$os_flavor = "";
+	if(-e "/etc/debian_version"){
+		$os_flavor = "debian";
+	}
+	if(-e "/etc/fedora-release"){
+		$os_flavor = "fedora_core";
+	}
+	if(-e "/etc/redhat-release"){
+		$os_flavor = "red_hat";
+	}
+}
+if($Config{osname}=~/Win|MS/i){ 
+	$OS = "Windows"; 
+}
 $has_internet_connection = check_internet_connection();
 ($sec, $min, $hour, $mday, $mon, $year, $wday, $yday, $isdst) = localtime();
 
@@ -38,9 +52,7 @@ get_mysql_path();
 #::: Remove old eqemu_update.pl
 if(-e "eqemu_update.pl"){
 	unlink("eqemu_update.pl");
-}
-#::: Create db_update working directory if not created
-mkdir('db_update'); 
+} 
 
 print "[Info] For EQEmu Server management utilities - run eqemu_server.pl\n" if $ARGV[0] eq "ran_from_world";
 
@@ -51,12 +63,11 @@ if(trim(get_mysql_result("SHOW COLUMNS FROM db_version LIKE 'Revision'")) ne "" 
 }
 
 check_db_version_table();
-
 check_for_world_bootup_database_update();
 
 if($db){
 	print "[Update] MySQL Path/Location: " . $path . "\n";
-	print "[Update] Binary Revision / Local: (" . $binary_database_version  . " / " . $local_database_version . ")\n";
+	print "[Update] Binary DB Version / Local DB Version :: " . $binary_database_version  . " / " . $local_database_version . "\n";
 	
 	#::: Bots
 	#::: Make sure we're running a bots binary to begin with
@@ -73,81 +84,318 @@ if($db){
 		exit; 
 	}
 } 
-
-if($ARGV[0] eq "remove_duplicate_rules"){
-	remove_duplicate_rule_values();	
-	exit;
+ 
+sub urlencode {
+	my ($rv) = @_;
+	$rv =~ s/([^A-Za-z0-9])/sprintf("%%%2.2X", ord($1))/ge;
+	return $rv;
 }
 
+sub urldecode {
+	my ($rv) = @_;
+	$rv =~ s/\+/ /g;
+	$rv =~ s/%(..)/pack("c",hex($1))/ge;
+	return $rv;
+}
+
+sub analytics_insertion {
+	$event_name = urlencode($_[0]);
+	$event_data = urlencode($_[1]);
+	
+	#::: Check for internet connection before doing analytics
+	if(!$has_internet_connection || $can_see_analytics_server == -1){
+		return;
+	}
+	
+	#::: Check for analytics server connectivity so that the script doesn't break when its offline
+	if(!$can_see_analytics_server){
+		if($OS eq "Linux"){
+			$count = "c";
+		}
+		if($OS eq "Windows"){
+			$count = "n";
+		}
+		
+		if (`ping analytics.akkadius.com -$count 1 -w 500`=~/Reply from|1 received/i) {
+			$can_see_analytics_server = 1;
+		}
+		else {
+			$can_see_analytics_server = -1;
+		}
+	}
+	
+	$server_name = "";
+	if($long_name){
+		$server_name = "&server_name=" . urlencode($long_name); 
+	}
+	
+	if(!$extended_os){
+		if($OS eq "Linux"){
+			$extended_os = `cat /proc/version`;
+			$extended_os = trim($extended_os);
+		}
+		if($OS eq "Windows"){
+			my $output = `ver`;
+			my @os_version = split("\n", $output);
+			foreach my $val (@os_version){
+				if($val=~/Windows/i){
+					$extended_os = trim($val);
+				}
+			}
+		}
+	}
+	
+	$url = "http://analytics.akkadius.com/";
+	$url .= "?api_key=24a0bde2e5bacd65bcab06a9ac40b62c";
+	$url .= "&event=" . $event_name;
+	$url .= "&event_data=" . $event_data;
+	$url .= "&OS=" . urlencode($OS);
+	$url .= "&extended_os=" . urlencode($extended_os);
+	$url .= $server_name;
+	
+	# print "Calling url :: '" . $url . "'\n";  
+	
+	if($OS eq "Windows"){
+		eval('require LWP::UserAgent;');
+		my $ua = LWP::UserAgent->new; 
+		$ua->timeout(1);
+		$ua->env_proxy; 
+		my $response = $ua->get($url);
+	}
+	if($OS eq "Linux"){
+		$api_call = `curl -s "$url"`;
+	}
+}
+
+#::: Command line argument calls
+if($ARGV[0]){
+	analytics_insertion("cli", trim($ARGV[0]));
+}
+if($ARGV[0] eq "do_install_config_xml"){
+	do_install_config_xml();
+	exit;
+}
+if($ARGV[0] eq "show_install_summary_info"){
+	show_install_summary_info();
+}
+if($ARGV[0] eq "remove_duplicate_rules"){
+	remove_duplicate_rule_values();
+	exit;
+}
 if($ARGV[0] eq "map_files_fetch_bulk"){
 	map_files_fetch_bulk();
 	exit;
 }
-
 if($ARGV[0] eq "loginserver_install_linux"){
 	do_linux_login_server_setup();
 	exit;
 }
-
 if($ARGV[0] eq "new_server"){
-	while(1){
-		print "For a new server folder install, we assume Perl and MySQL are configured\n";
-		print "This will install a fresh PEQ Database, with all server assets\n";
-		print "You will need to supply database credentials to get started...\n";
-		
-		check_for_input("MySQL User: "); 
-		$database_user = trim($input);
+	new_server();
+	show_install_summary_info();
+	exit;
+}
+if($ARGV[0] eq "installer"){
+	analytics_insertion("full_install", "Binary DB Version / Local DB Version :: " . $binary_database_version  . " / " . $local_database_version);
+	do_installer_routines();
+	show_install_summary_info();
+	exit;
+}
+if($ARGV[0] eq "db_dump_compress"){ 
+	database_dump_compress(); 
+	exit; 
+}
+if($ARGV[0] eq "login_server_setup"){
+	do_windows_login_server_setup();	
+	exit;
+}
 
-		check_for_input("MySQL Password: "); 
-		$database_password = trim($input);
+sub show_install_summary_info {
+	print "[Install] Installation complete...\n";
+	print "[Install] Server Info (Save somewhere if needed):\n";
+
+	if (-e "install_variables.txt") {
+		$file_to_open = "install_variables.txt";
+	}
+	elsif(-e "../install_variables.txt"){
+		$file_to_open = "../install_variables.txt";
+	}
+	open (INSTALL_VARS, $file_to_open);
+	while (<INSTALL_VARS>){
+		chomp;
+		$o = $_;
+		@data = split(":", $o);
+		print " - " . $data[0] . "\t" . $data[1] . "\n";
+	}
+	close (INSTALL_VARS);
+	
+	if($OS eq "Windows"){
+		print "[Install] Windows Utility Scripts:\n";
+		print " - t_start_server.bat			Starts EQEmu server with 30 dynamic zones, UCS & Queryserv, dynamic zones\n";
+		print " - t_start_server_with_loginserver.bat	Starts EQEmu server with 30 zones with loginserver\n";
+		print " - t_stop_server.bat			Stops EQEmu Server (No warning)\n";
+		print " - t_database_backup.bat		Backs up the Database to backups/ folder - do not run during server is online\n";
+		print " - t_server_crash_report.pl 		Will parse any zone crashes for reporting to developers\n";
+	}
+	if($OS eq "Linux"){
+		print "[Install] Linux Utility Scripts:\n";
+		print " - server_start.sh			Starts EQEmu server (Quiet) with 30 dynamic zones, UCS & Queryserv, dynamic zones\n";
+		print " - server_start_dev.sh			Starts EQEmu server with 10 dynamic zones, UCS & Queryserv, dynamic zones all verbose\n";
+		print " - server_stop.sh			Stops EQEmu Server (No warning)\n";
+		print " - server_status.sh			Prints the status of the EQEmu Server processes\n";
+	}
+	
+	print "[Configure] eqemu_config.xml 		Edit to change server settings and name\n";
+	
+	analytics_insertion("install_complete", "null");
+}
+
+sub new_server {
+	$file_count = 0;
+	opendir(DIR, ".") or die $!;
+	while (my $file = readdir(DIR)) {
+		next if ($file =~ m/^\./);
+		$file_count++;
+	}
+	closedir(DIR);
+	
+	if($file_count > 1 && !-e "install_variables.txt"){
+		print "[New Server] ERROR: You must run eqemu_server.pl in an empty directory\n";
+		<>;
+		exit;
+	}
+
+	if(-e "install_variables.txt"){ 
+		get_installation_variables();
+	}
+
+	while(1){
 		
-		$check_connection = `mysql -u $database_user -p$database_password -N -B -e "SHOW PROCESSLIST" > mysqlcheck.txt`;
-		$mysql_pass = 0;
-		open (MYSQL_CHECK, "mysqlcheck.txt");		
-		while (<MYSQL_CHECK>){
-			chomp;
-			$o = $_;
-			if($o=~/Error/i){ $mysql_pass = 0;}
-			if($o=~/SHOW PROCESSLIST/i){ $mysql_pass = 1; }
-		}
-		close (MYSQL_CHECK);
-		unlink("mysqlcheck.txt");
+		$database_name = $installation_variables{"mysql_eqemu_db_name"};
+		$database_user = $installation_variables{"mysql_eqemu_user"};
+		$database_password = $installation_variables{"mysql_eqemu_password"};
 		
-		if($mysql_pass == 1){
-			print "Success! We have a database connection\n";
-			
-			check_for_input("Specify a database name: "); 
-			$database_name = trim($input);
-			
-			#::: Write install vars
-			open (INSTALL_VARS, '>', 'install_variables.txt');
-			print INSTALL_VARS "";
-			print INSTALL_VARS "mysql_eqemu_db_name:" . $database_name . "\n";
-			print INSTALL_VARS "mysql_eqemu_user:" . $database_user . "\n";
-			print INSTALL_VARS "mysql_eqemu_password:" . $database_password . "\n";
-			close (INSTALL_VARS);
-			
-			do_installer_routines();
+		if($database_name ne ""){
+			$mysql_pass = 1;
 		}
 		else {
-			print "Authorization failed\n";
+	
+			print "\n";
+			print "[New Server] For a new server folder install, we assume Perl and MySQL are configured\n";
+			print "[New Server] This will install a fresh PEQ Database, with all server assets\n";
+			print "[New Server] You will need to supply database credentials to get started...\n\n";
+			
+			check_for_input("MySQL User: "); 
+			$database_user = trim($input);
+
+			check_for_input("MySQL Password: "); 
+			$database_password = trim($input);
+			
+			$check_connection = `mysql -u $database_user -p$database_password -N -B -e "SHOW PROCESSLIST" > mysqlcheck.txt`;
+			$mysql_pass = 0;
+			open (MYSQL_CHECK, "mysqlcheck.txt");		
+			while (<MYSQL_CHECK>){
+				chomp;
+				$o = $_;
+				if($o=~/Error/i){ $mysql_pass = 0;}
+				if($o=~/SHOW PROCESSLIST/i){ $mysql_pass = 1; }
+			}
+			close (MYSQL_CHECK);
+			unlink("mysqlcheck.txt");
+		}
+		
+		if($mysql_pass == 1){
+			
+			if(!-e "install_variables.txt"){ 
+				print "[New Server] Success! We have a database connection\n";
+				
+				check_for_input("Specify a NEW database name that PEQ will be installed to: "); 
+				$database_name = trim($input);
+				
+				#::: Write install vars
+				open (INSTALL_VARS, '>', 'install_variables.txt');
+				print INSTALL_VARS "";
+				print INSTALL_VARS "mysql_eqemu_db_name:" . $database_name . "\n";
+				print INSTALL_VARS "mysql_eqemu_user:" . $database_user . "\n";
+				print INSTALL_VARS "mysql_eqemu_password:" . $database_password . "\n";
+				close (INSTALL_VARS);
+			}
+			analytics_insertion("new_server::install", $database_name);
+			
+			if($OS eq "Linux"){
+				$current_directory = `pwd`;
+				@directories = split('/', $current_directory);
+				foreach my $val (@directories){
+					if(trim($val) ne ""){
+						$last_directory = trim($val);
+					}
+				}
+				my $eqemu_server_directory = "/home/eqemu";
+				my $source_dir = $eqemu_server_directory . '/' . $last_directory . '_source';
+				
+				$current_directory = trim($current_directory);
+				
+				mkdir($source_dir) if (!-e $source_dir);
+				
+				# print 'server_dir: ' . $eqemu_server_directory . "\n";
+				# print 'source_dir: ' . $source_dir . "\n";
+				# print 'current_dir: \'' . $current_directory . "'\n";
+
+				chdir($source_dir);
+
+				print `git clone https://github.com/EQEmu/Server.git`;
+				
+				mkdir ($source_dir . "/Server/build")  if (!-e $source_dir . "/Server/build");
+				chdir ($source_dir . "/Server/build");
+
+				print "Generating CMake build files...\n";
+				if($os_flavor eq "fedora_core"){
+					print `cmake -DEQEMU_BUILD_LUA=ON -DLUA_INCLUDE_DIR=/usr/include/lua-5.1/ -G "Unix Makefiles" ..`;
+				}
+				else { 
+					print `cmake -DEQEMU_BUILD_LUA=ON -G "Unix Makefiles" ..`;
+				}
+				print "Building EQEmu Server code. This will take a while.";
+
+				#::: Build 
+				print `make`;
+				
+				chdir ($current_directory);
+											
+				print `ln -s $source_dir/Server/build/bin/eqlaunch .`;
+				print `ln -s $source_dir/Server/build/bin/export_client_files .`;
+				print `ln -s $source_dir/Server/build/bin/import_client_files .`;
+				print `ln -s $source_dir/Server/build/bin/libcommon.a .`;
+				print `ln -s $source_dir/Server/build/bin/libluabind.a .`;
+				print `ln -s $source_dir/Server/build/bin/queryserv .`;
+				print `ln -s $source_dir/Server/build/bin/shared_memory .`;
+				print `ln -s $source_dir/Server/build/bin/ucs .`;
+				print `ln -s $source_dir/Server/build/bin/world .`;
+				print `ln -s $source_dir/Server/build/bin/zone .`;
+
+			}
+			
+			do_installer_routines();
+			
+			if($OS eq "Linux"){
+				print `chmod 755 *.sh`;
+			}
+			
+			analytics_insertion("new_server::install_complete", $database_name . " :: Binary DB Version / Local DB Version :: " . $binary_database_version  . " / " . $local_database_version);
+			
+			print "[New Server] New server folder install complete\n";
+			print "[New Server] Below is your installation info:\n";
+			
+			return;
+		}
+		else {
+			print "[New Server] MySQL authorization failed or no MySQL installed\n";
 		}
 	}
 }
 
-if($ARGV[0] eq "installer"){
-	do_installer_routines();
-	exit;
-}
-
-if($ARGV[0] eq "db_dump_compress"){ database_dump_compress(); exit; }
-if($ARGV[0] eq "login_server_setup"){
-	do_windows_login_server_setup();	
-	exit;
-}     
-
 sub do_installer_routines {
-	print "[Install] Running EQEmu Server installer routines...\n";
+	print "[Install] EQEmu Server Installer... LOADING... PLEASE WAIT...\n";
 	
 	#::: Make some local server directories...
 	mkdir('logs');
@@ -170,6 +418,7 @@ sub do_installer_routines {
 		get_remote_file($install_repository_request_url . "zlib1.dll", "zlib1.dll", 1);
 		get_remote_file($install_repository_request_url . "libmysql.dll", "libmysql.dll", 1);
 	}
+
 	map_files_fetch_bulk();
 	opcodes_fetch();
 	plugins_fetch();
@@ -204,13 +453,11 @@ sub do_installer_routines {
 	}
 	if($OS eq "Linux"){
 		do_linux_login_server_setup();
-		
-		print "[Install] Installation complete!\n";
 	}
 }
 
 sub check_for_input {
-	print $_[0];
+	print "[Input] " . $_[0];
 	$input = <STDIN>;
 	chomp $input;
 }
@@ -242,6 +489,8 @@ sub check_for_world_bootup_database_update {
 			main_db_management();
 			main_db_management();
 			print "[Update] Continuing bootup\n";
+			analytics_insertion("auto database upgrade world", $db . " :: Binary DB Version / Local DB Version :: " . $binary_database_version  . " / " . $local_database_version);
+			
 			exit;
 		}
 
@@ -260,7 +509,7 @@ sub check_internet_connection {
 	if($OS eq "Windows"){
 		$count = "n";
 	}
-	
+
 	if (`ping 8.8.8.8 -$count 1 -w 500`=~/Reply from|1 received/i) { 
 		# print "[Update] We have a connection to the internet, continuing...\n";
 		return 1;
@@ -287,13 +536,15 @@ sub get_perl_version {
 }
 
 sub do_self_update_check_routine {
-	#::: Check Version passed from world to update script
-	get_remote_file($eqemu_repository_request_url . "utils/scripts/eqemu_server.pl", "updates_staged/eqemu_server.pl", 0, 1, 1);
-
+	
+	#::: Check for internet connection before updating
 	if(!$has_internet_connection){
 		print "[Update] Cannot check update without internet connection...\n";
 		return;
 	}
+
+	#::: Check for script changes :: eqemu_server.pl
+	get_remote_file($eqemu_repository_request_url . "utils/scripts/eqemu_server.pl", "updates_staged/eqemu_server.pl", 0, 1, 1);
 	
 	if(-e "updates_staged/eqemu_server.pl") { 
 	
@@ -383,6 +634,11 @@ sub do_install_config_xml {
 			my($replace_key) = $o =~ />(\w+)</;
 			$new_key = generate_random_password(30);
 			$o =~ s/$replace_key/$new_key/g;
+		} 
+		if($o=~/\<longname\>/i){ 
+			my($replace_name) = $o =~ /<longname>(.*)<\/longname>/;
+			$append = '(' . generate_random_password(5) . ')';
+			$o =~ s/$replace_name/Akkas $OS PEQ Installer $append/g;
 		}
 		if($o=~/\<username\>/i && $in_database_tag){
 			my($replace_username) = $o =~ />(\w+)</;
@@ -492,8 +748,9 @@ sub show_menu_prompt {
 		elsif($input eq "fetch_dlls"){ fetch_server_dlls(); $dc = 1; }
 		elsif($input eq "utility_scripts"){ fetch_utility_scripts(); $dc = 1; }
 		elsif($input eq "check_db_updates"){ main_db_management(); $dc = 1; }
-		elsif($input eq "check_bot_db_updates"){ bots_db_management(); $dc = 1; }
+		elsif($input eq "check_bot_db_updates"){ bots_db_management(); run_database_check(); $dc = 1; }
 		elsif($input eq "setup_loginserver"){ do_windows_login_server_setup(); $dc = 1; }
+		elsif($input eq "new_server"){ new_server(); $dc = 1; }
 		elsif($input eq "exit"){
 			exit;
 		}
@@ -517,14 +774,15 @@ sub show_menu_prompt {
 		if($errored_command == 1){
 			$input = $last_menu;
 		}
-		elsif($dc == 1){ 
+		elsif($dc == 1){
+			analytics_insertion("menu", trim($input));
 			$dc = 0; 
 			$input = "";
 		}
 		else {
 			$input = <>;
 		}
-	}
+	} 
 }
 
 sub print_main_menu {
@@ -532,7 +790,9 @@ sub print_main_menu {
 	print ">>> EQEmu Server Main Menu >>>>>>>>>>>>\n";
 	print ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n\n";
 	print " [database]	Enter database management menu \n";
-	print " [assets]	Manage server assets \n\n";
+	print " [assets]	Manage server assets \n";
+	print " [new_server]	New folder EQEmu/PEQ install - Assumes MySQL/Perl installed \n";
+	print "\n";
 	print " exit \n";
 	print "\n"; 
 	print "Enter a command #> ";
@@ -568,13 +828,52 @@ sub get_mysql_path {
 }
 
 sub check_for_database_dump_script{
-	if(`perl db_dumper.pl`=~/Need arguments/i){
-		return; 
+	#::: Check for internet connection before updating
+	if(!$has_internet_connection){
+		print "[Update] Cannot check update without internet connection...\n";
+		return;
 	}
-	else{
-		print "[Database] db_dumper.pl not found... retrieving...\n";
-		get_remote_file($eqemu_repository_request_url . "utils/scripts/db_dumper.pl", "db_dumper.pl");
+
+	#::: Check for script changes :: db_dumper.pl
+	get_remote_file($eqemu_repository_request_url . "utils/scripts/db_dumper.pl", "updates_staged/db_dumper.pl", 0, 1, 1);
+	
+	if(-e "updates_staged/db_dumper.pl") { 
+	
+		my $remote_script_size = -s "updates_staged/db_dumper.pl";
+		my $local_script_size = -s "db_dumper.pl";
+	
+		if($remote_script_size != $local_script_size){
+			print "[Update] Script has been updated, updating...\n";
+			
+			my @files;
+			my $start_dir = "updates_staged/";
+			find( 
+				sub { push @files, $File::Find::name unless -d; }, 
+				$start_dir
+			);
+			for my $file (@files) {
+				if($file=~/db_dumper/i){ 
+					$destination_file = $file;
+					$destination_file =~s/updates_staged\///g;
+					print "[Install] Installing :: " . $destination_file . "\n";
+					unlink($destination_file);
+					copy_file($file, $destination_file); 
+					if($OS eq "Linux"){
+						system("chmod 755 db_dumper.pl");
+					}
+				}
+			}
+			print "[Install] Done\n";
+		}
+		else {
+			print "[Update] No script update necessary...\n";
+		}
+
+		unlink("updates_staged/db_dumper.pl");
 	}
+	
+	return;
+	
 }
 
 sub database_dump { 
@@ -601,7 +900,7 @@ sub database_dump_player_tables {
 	print `perl db_dumper.pl database="$db" loc="backups" tables="$tables" backup_name="player_tables_export" nolock`;
 	
 	print "[Database] Press any key to continue...\n";
-	
+
 	<>; #Read from STDIN
 	
 }
@@ -762,13 +1061,11 @@ sub read_eqemu_config_xml {
 	my $indb = 0;
 	while(<F>) {
 		s/\r//g;
-		if(/<database>/i) { $indb = 1; }
-		next unless($indb == 1);
-		if(/<\/database>/i) { $indb = 0; last; }
 		if(/<host>(.*)<\/host>/i) { $host = $1; } 
 		elsif(/<username>(.*)<\/username>/i) { $user = $1; } 
 		elsif(/<password>(.*)<\/password>/i) { $pass = $1; } 
 		elsif(/<db>(.*)<\/db>/i) { $db = $1; } 
+		if(/<longname>(.*)<\/longname>/i) { $long_name = $1; } 
 	}
 }
 
@@ -1016,11 +1313,11 @@ sub add_login_server_firewall_rules {
 				$val=~s/Rule Name://g;
 				if($val=~/EQEmu Loginserver/i && $val=~/Titanium/i){
 					$has_loginserver_rules_titanium = 1;
-					print "Found existing rule :: " . trim($val) . "\n";
+					print "[Install] Found existing rule :: " . trim($val) . "\n";
 				}
 				if($val=~/EQEmu Loginserver/i && $val=~/SOD/i){
 					$has_loginserver_rules_sod = 1;
-					print "Found existing rule :: " . trim($val) . "\n";
+					print "[Install] Found existing rule :: " . trim($val) . "\n";
 				}
 			}
 		}
@@ -1619,6 +1916,13 @@ sub get_bots_db_version{
 }
 
 sub bots_db_management{
+	if($OS eq "Windows"){ 
+		@db_version = split(': ', `world db_version`); 
+	}
+	if($OS eq "Linux"){ 
+		@db_version = split(': ', `./world db_version`); 
+	} 
+
 	#::: Main Binary Database version
 	$binary_database_version  = trim($db_version[2]);
 	
@@ -1636,6 +1940,8 @@ sub bots_db_management{
 	$bots_db_management = 1;
 	
 	$bots_local_db_version = get_bots_db_version();
+	
+	$local_database_version = $bots_local_db_version;
 	
 	run_database_check();
 }
@@ -1718,13 +2024,13 @@ sub run_database_check{
 	@total_updates = ();
 	
 	#::: This is where we set checkpoints for where a database might be so we don't check so far back in the manifest...
-	if($local_database_version > 9000){
+	if($local_database_version >= 9000){
 		$revision_check = $local_database_version;
 	}
 	else {
 		$revision_check = 1000;
 		if(get_mysql_result("SHOW TABLES LIKE 'character_data'") ne ""){
-			$revision_check = 9000;
+			$revision_check = 8999;
 		}
 	}
 	
