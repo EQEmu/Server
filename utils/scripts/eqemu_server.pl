@@ -171,20 +171,8 @@ sub analytics_insertion {
 if($ARGV[0]){
 	analytics_insertion("cli", trim($ARGV[0]));
 }
-if($ARGV[0] eq "do_install_config_xml"){
-	do_install_config_xml();
-	exit;
-}
 if($ARGV[0] eq "show_install_summary_info"){
 	show_install_summary_info();
-}
-if($ARGV[0] eq "remove_duplicate_rules"){
-	remove_duplicate_rule_values();
-	exit;
-}
-if($ARGV[0] eq "map_files_fetch_bulk"){
-	map_files_fetch_bulk();
-	exit;
 }
 if($ARGV[0] eq "loginserver_install_linux"){
 	do_linux_login_server_setup();
@@ -204,10 +192,6 @@ if($ARGV[0] eq "installer"){
 if($ARGV[0] eq "db_dump_compress"){ 
 	database_dump_compress(); 
 	exit; 
-}
-if($ARGV[0] eq "login_server_setup"){
-	do_windows_login_server_setup();	
-	exit;
 }
 
 sub show_install_summary_info {
@@ -323,56 +307,7 @@ sub new_server {
 			analytics_insertion("new_server::install", $database_name);
 			
 			if($OS eq "Linux"){
-				$current_directory = `pwd`;
-				@directories = split('/', $current_directory);
-				foreach my $val (@directories){
-					if(trim($val) ne ""){
-						$last_directory = trim($val);
-					}
-				}
-				my $eqemu_server_directory = "/home/eqemu";
-				my $source_dir = $eqemu_server_directory . '/' . $last_directory . '_source';
-				
-				$current_directory = trim($current_directory);
-				
-				mkdir($source_dir) if (!-e $source_dir);
-				
-				# print 'server_dir: ' . $eqemu_server_directory . "\n";
-				# print 'source_dir: ' . $source_dir . "\n";
-				# print 'current_dir: \'' . $current_directory . "'\n";
-
-				chdir($source_dir);
-
-				print `git clone https://github.com/EQEmu/Server.git`;
-				
-				mkdir ($source_dir . "/Server/build")  if (!-e $source_dir . "/Server/build");
-				chdir ($source_dir . "/Server/build");
-
-				print "Generating CMake build files...\n";
-				if($os_flavor eq "fedora_core"){
-					print `cmake -DEQEMU_BUILD_LUA=ON -DLUA_INCLUDE_DIR=/usr/include/lua-5.1/ -G "Unix Makefiles" ..`;
-				}
-				else { 
-					print `cmake -DEQEMU_BUILD_LUA=ON -G "Unix Makefiles" ..`;
-				}
-				print "Building EQEmu Server code. This will take a while.";
-
-				#::: Build 
-				print `make`;
-				
-				chdir ($current_directory);
-											
-				print `ln -s $source_dir/Server/build/bin/eqlaunch .`;
-				print `ln -s $source_dir/Server/build/bin/export_client_files .`;
-				print `ln -s $source_dir/Server/build/bin/import_client_files .`;
-				print `ln -s $source_dir/Server/build/bin/libcommon.a .`;
-				print `ln -s $source_dir/Server/build/bin/libluabind.a .`;
-				print `ln -s $source_dir/Server/build/bin/queryserv .`;
-				print `ln -s $source_dir/Server/build/bin/shared_memory .`;
-				print `ln -s $source_dir/Server/build/bin/ucs .`;
-				print `ln -s $source_dir/Server/build/bin/world .`;
-				print `ln -s $source_dir/Server/build/bin/zone .`;
-
+				build_linux_source();
 			}
 			
 			do_installer_routines();
@@ -392,6 +327,69 @@ sub new_server {
 			print "[New Server] MySQL authorization failed or no MySQL installed\n";
 		}
 	}
+}
+
+sub build_linux_source {
+	
+	$build_options = $_[0];
+	
+	$cmake_options = "";
+	$source_folder_post_fix = "";
+	
+	if($build_options =~/bots/i){
+		$cmake_options .= " -DEQEMU_ENABLE_BOTS=ON";
+		$source_folder_post_fix = "_bots";
+	}
+
+	$current_directory = `pwd`;
+	@directories = split('/', $current_directory);
+	foreach my $val (@directories){
+		if(trim($val) ne ""){
+			$last_directory = trim($val);
+		}
+	}
+	my $eqemu_server_directory = "/home/eqemu";
+	my $source_dir = $eqemu_server_directory . '/' . $last_directory . '_source' . $source_folder_post_fix;
+	
+	$current_directory = trim($current_directory);
+	
+	mkdir($source_dir) if (!-e $source_dir);
+	
+	# print 'server_dir: ' . $eqemu_server_directory . "\n";
+	# print 'source_dir: ' . $source_dir . "\n";
+	# print 'current_dir: \'' . $current_directory . "'\n";
+
+	chdir($source_dir);
+
+	print `git clone https://github.com/EQEmu/Server.git`;
+	
+	mkdir ($source_dir . "/Server/build")  if (!-e $source_dir . "/Server/build");
+	chdir ($source_dir . "/Server/build");
+
+	print "Generating CMake build files...\n";
+	if($os_flavor eq "fedora_core"){
+		print `cmake $cmake_options -DEQEMU_BUILD_LUA=ON -DLUA_INCLUDE_DIR=/usr/include/lua-5.1/ -G "Unix Makefiles" ..`;
+	}
+	else { 
+		print `cmake $cmake_options -DEQEMU_BUILD_LUA=ON -G "Unix Makefiles" ..`;
+	}
+	print "Building EQEmu Server code. This will take a while.";
+
+	#::: Build 
+	print `make`;
+	
+	chdir ($current_directory);
+	
+	print `ln -s -f $source_dir/Server/build/bin/eqlaunch .`;
+	print `ln -s -f $source_dir/Server/build/bin/export_client_files .`;
+	print `ln -s -f $source_dir/Server/build/bin/import_client_files .`;
+	print `ln -s -f $source_dir/Server/build/bin/libcommon.a .`;
+	print `ln -s -f $source_dir/Server/build/bin/libluabind.a .`;
+	print `ln -s -f $source_dir/Server/build/bin/queryserv .`;
+	print `ln -s -f $source_dir/Server/build/bin/shared_memory .`;
+	print `ln -s -f $source_dir/Server/build/bin/ucs .`;
+	print `ln -s -f $source_dir/Server/build/bin/world .`;
+	print `ln -s -f $source_dir/Server/build/bin/zone .`;
 }
 
 sub do_installer_routines {
@@ -495,7 +493,7 @@ sub check_for_world_bootup_database_update {
 		}
 
 		#::: Make sure that we didn't pass any arugments to the script
-		if(!$ARGV[0]){
+		else {
 			if(!$db){ print "[eqemu_server.pl] No database connection found... Running without\n"; }
 			show_menu_prompt();
 		}
@@ -528,7 +526,7 @@ sub get_perl_version {
 	#::: Check Perl version
 	$perl_version = $^V;
 	$perl_version =~s/v//g;
-	print "[Update] Perl Version is " . $perl_version . "\n";
+	print "[Update] Perl Version is " . $perl_version . "\n" if $debug;
 	if($perl_version > 5.12){ 
 		no warnings 'uninitialized';  
 	}
@@ -688,18 +686,37 @@ sub fetch_utility_scripts {
 	}
 }
 
+sub setup_bots {
+	if($OS eq "Windows"){
+		fetch_latest_windows_binaries_bots(); 
+	}
+	if($OS eq "Linux"){
+		build_linux_source("bots");
+	}
+	bots_db_management(); 
+	run_database_check();
+	
+	print "Bots should be setup, run your server and the #bot command should be available in-game\n";
+}
+
 sub show_menu_prompt {
 
 	$dc = 0;
     while (1) {
-		$input = trim($input);
+		
+		if($ARGV[0] ne ""){
+			$input = trim($ARGV[0]);
+		}
+		else {
+			$input = trim($input);
+		}
 		
 		$errored_command = 0;
 		
 		if($input eq "database"){
 			print "\n>>> Database Menu\n\n";
 			print " [backup_database]		Back up database to backups/ directory\n";
-			print " [backup_player_tables]		Back up player tables to backups/ directory\n";
+			print " [backup_player_tables]		Back up player tables to backups/ directory\n"; 
 			print " [backup_database_compressed]	Back up database compressed to backups/ directory\n";
 			print " \n";
 			print " [check_db_updates]		Checks for database updates manually\n";
@@ -747,10 +764,11 @@ sub show_menu_prompt {
 		elsif($input eq "windows_server_download_bots"){ fetch_latest_windows_binaries_bots(); $dc = 1; }
 		elsif($input eq "fetch_dlls"){ fetch_server_dlls(); $dc = 1; }
 		elsif($input eq "utility_scripts"){ fetch_utility_scripts(); $dc = 1; }
-		elsif($input eq "check_db_updates"){ main_db_management(); $dc = 1; }
+		elsif($input eq "check_db_updates"){ main_db_management(); main_db_management(); $dc = 1; }
 		elsif($input eq "check_bot_db_updates"){ bots_db_management(); run_database_check(); $dc = 1; }
 		elsif($input eq "setup_loginserver"){ do_windows_login_server_setup(); $dc = 1; }
 		elsif($input eq "new_server"){ new_server(); $dc = 1; }
+		elsif($input eq "setup_bots"){ setup_bots(); $dc = 1; }
 		elsif($input eq "exit"){
 			exit;
 		}
@@ -782,6 +800,13 @@ sub show_menu_prompt {
 		else {
 			$input = <>;
 		}
+		
+		#::: If we're processing a CLI command, kill the loop
+		if($ARGV[0] ne ""){
+			$input = "";
+			$ARGV[0] = "";
+			exit;
+		}
 	} 
 }
 
@@ -792,6 +817,7 @@ sub print_main_menu {
 	print " [database]	Enter database management menu \n";
 	print " [assets]	Manage server assets \n";
 	print " [new_server]	New folder EQEmu/PEQ install - Assumes MySQL/Perl installed \n";
+	print " [setup_bots]	Enables bots on server - builds code and database requirements \n";
 	print "\n";
 	print " exit \n";
 	print "\n"; 
