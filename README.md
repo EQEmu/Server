@@ -13,6 +13,9 @@
  * Hundreds of Quests/events created and maintained by Project EQ
 
 ## Server Installs
+||Windows|Linux|
+|:---:|:---:|:---:|
+|**Install Count**|![Windows Install Count](http://analytics.akkadius.com/?install_count&windows_count)|![Linux Install Count](http://analytics.akkadius.com/?install_count&linux_count)| 
 ### > Windows 
 * [Easy Install](http://wiki.eqemulator.org/p?Akkas_PEQ_Server_Installer&frm=Main#from-scratch-installation-instructions-windows)
 * [Advanced Setup](http://wiki.eqemulator.org/p?Complete_Windows-based_Server_Setup_Guide)
