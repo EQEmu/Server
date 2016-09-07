@@ -172,59 +172,25 @@ mkdir $eqemu_server_directory/server/logs
 mkdir $eqemu_server_directory/server/shared
 mkdir $eqemu_server_directory/server/maps
 
-#::: Pull down needed files for the installer from the Install repo 
-
-cd $eqemu_server_directory/source
-git clone https://github.com/EQEmu/Server.git
-mkdir $eqemu_server_directory/source/Server/build
-cd $eqemu_server_directory/source/Server/build
-
-echo "Generating CMake build files..."
-if [[ "$OS" == "fedora_core" ]]; then
-	cmake -DEQEMU_BUILD_LOGIN=ON -DEQEMU_BUILD_LUA=ON -DLUA_INCLUDE_DIR=/usr/include/lua-5.1/ -G "Unix Makefiles" ..
-else
-	cmake -DEQEMU_BUILD_LOGIN=ON -DEQEMU_BUILD_LUA=ON -G "Unix Makefiles" ..
-fi
-echo "Building EQEmu Server code. This will take a while."
-
 #::: Grab loginserver dependencies
-cd $eqemu_server_directory/source/Server/dependencies
-if [[ "$OS" == "Debian" ]]; then
-	wget http://eqemu.github.io/downloads/ubuntu_LoginServerCrypto_x64.zip
-	unzip ubuntu_LoginServerCrypto_x64.zip
-	rm ubuntu_LoginServerCrypto_x64.zip
-elif [[ "$OS" == "fedora_core" ]] || [[ "$OS" == "red_hat" ]]; then
-	wget http://eqemu.github.io/downloads/fedora12_LoginServerCrypto_x64.zip
-	unzip fedora12_LoginServerCrypto_x64.zip
-	rm fedora12_LoginServerCrypto_x64.zip
-fi
-cd $eqemu_server_directory/source/Server/build
-
-#::: Build 
-make
+# cd $eqemu_server_directory/source/Server/dependencies
+# if [[ "$OS" == "Debian" ]]; then
+# 	wget http://eqemu.github.io/downloads/ubuntu_LoginServerCrypto_x64.zip
+# 	unzip ubuntu_LoginServerCrypto_x64.zip
+# 	rm ubuntu_LoginServerCrypto_x64.zip
+# elif [[ "$OS" == "fedora_core" ]] || [[ "$OS" == "red_hat" ]]; then
+# 	wget http://eqemu.github.io/downloads/fedora12_LoginServerCrypto_x64.zip
+# 	unzip fedora12_LoginServerCrypto_x64.zip
+# 	rm fedora12_LoginServerCrypto_x64.zip
+# fi
+# cd $eqemu_server_directory/source/Server/build
 
 #::: Back to server directory
 cd $eqemu_server_directory/server
 wget https://raw.githubusercontent.com/EQEmu/Server/master/utils/scripts/eqemu_server.pl
 
-#::: Link build files
-
-cd $eqemu_server_directory/server
-
 #::: Map lowercase to uppercase to avoid issues
 ln -s maps Maps
-
-ln -s $eqemu_server_directory/source/Server/build/bin/loginserver
-ln -s $eqemu_server_directory/source/Server/build/bin/eqlaunch
-ln -s $eqemu_server_directory/source/Server/build/bin/export_client_files
-ln -s $eqemu_server_directory/source/Server/build/bin/import_client_files
-ln -s $eqemu_server_directory/source/Server/build/bin/libcommon.a
-ln -s $eqemu_server_directory/source/Server/build/bin/libluabind.a
-ln -s $eqemu_server_directory/source/Server/build/bin/queryserv
-ln -s $eqemu_server_directory/source/Server/build/bin/shared_memory
-ln -s $eqemu_server_directory/source/Server/build/bin/ucs
-ln -s $eqemu_server_directory/source/Server/build/bin/world
-ln -s $eqemu_server_directory/source/Server/build/bin/zone
 
 #::: Notes
 
