@@ -65,26 +65,6 @@ if(trim(get_mysql_result("SHOW COLUMNS FROM db_version LIKE 'Revision'")) ne "" 
 check_db_version_table();
 check_for_world_bootup_database_update();
 
-if($db){
-	print "[Update] MySQL Path/Location: " . $path . "\n";
-	print "[Update] Binary DB Version / Local DB Version :: " . $binary_database_version  . " / " . $local_database_version . "\n";
-	
-	#::: Bots
-	#::: Make sure we're running a bots binary to begin with
-	if(trim($db_version[2]) > 0){
-		$bots_local_db_version = get_bots_db_version();
-		if($bots_local_db_version > 0){
-			print "[Update] (Bots) Binary Revision / Local: (" . trim($db_version[2]) . " / " . $bots_local_db_version . ")\n";
-		}
-	}
-
-	#::: If World ran this script, and our version is up to date, continue... 
-	if($binary_database_version  <= $local_database_version && $ARGV[0] eq "ran_from_world"){  
-		print "[Update] Database up to Date: Continuing World Bootup...\n";
-		exit; 
-	}
-} 
- 
 sub urlencode {
 	my ($rv) = @_;
 	$rv =~ s/([^A-Za-z0-9])/sprintf("%%%2.2X", ord($1))/ge;
@@ -165,15 +145,6 @@ sub analytics_insertion {
 	if($OS eq "Linux"){
 		$api_call = `curl -s "$url"`;
 	}
-}
-
-#::: Command line argument calls
-if($ARGV[0] eq "installer"){
-	print "Hi\n";
-	analytics_insertion("full_install", "Binary DB Version / Local DB Version :: " . $binary_database_version  . " / " . $local_database_version);
-	new_server(); 
-	show_install_summary_info();
-	exit;
 }
 
 sub show_install_summary_info {
@@ -429,6 +400,8 @@ sub do_installer_routines {
 	print "[Database] Applying Latest Database Updates...\n";
 	main_db_management();
 	
+	remove_duplicate_rule_values();
+	
 	if($OS eq "Windows"){
 		check_windows_firewall_rules();
 		do_windows_login_server_setup();
@@ -455,12 +428,35 @@ sub check_for_world_bootup_database_update {
 	$binary_database_version  = trim($db_version[1]);
 	$local_database_version = trim(get_mysql_result("SELECT version FROM db_version LIMIT 1"));
 
+	#::: Bots
+	$bots_binary_version = trim($db_version[2]);
+	if($bots_binary_version > 0){
+		$bots_local_db_version = get_bots_db_version();
+		#::: We ran world - Database needs to update, lets backup and run updates and continue world bootup
+
+		if($bots_local_db_version < $bots_binary_version  && $ARGV[0] eq "ran_from_world"){
+			print "[Update] Bots Database not up to date with binaries... Automatically updating...\n";
+			print "[Update] Issuing database backup first...\n";
+			database_dump_compress();
+			print "[Update] Updating bots database...\n";
+			sleep(1);
+			bots_db_management(); 
+			run_database_check();
+			print "[Update] Continuing bootup\n";
+			analytics_insertion("auto database bots upgrade world", $db . " :: Binary DB Version / Local DB Version :: " . $binary_database_version  . " / " . $local_database_version);
+			
+			exit;
+		}
+		else {
+			print "[Update] Bots database up to Date: Continuing World Bootup...\n";
+		}
+	}
+	
 	if($binary_database_version  == $local_database_version && $ARGV[0] eq "ran_from_world"){ 
 		print "[Update] Database up to date...\n"; 
 		exit; 
 	}
 	else {
-
 		#::: We ran world - Database needs to update, lets backup and run updates and continue world bootup
 		if($local_database_version < $binary_database_version  && $ARGV[0] eq "ran_from_world"){
 			print "[Update] Database not up to date with binaries... Automatically updating...\n";
@@ -485,7 +481,7 @@ sub check_for_world_bootup_database_update {
 }
 
 sub check_internet_connection {
-	if($OS eq "Linux"){
+	if($OS eq "Linux"){  
 		$count = "c";
 	}
 	if($OS eq "Windows"){
