@@ -168,30 +168,12 @@ sub analytics_insertion {
 }
 
 #::: Command line argument calls
-if($ARGV[0]){
-	analytics_insertion("cli", trim($ARGV[0]));
-}
-if($ARGV[0] eq "show_install_summary_info"){
-	show_install_summary_info();
-}
-if($ARGV[0] eq "loginserver_install_linux"){
-	do_linux_login_server_setup();
-	exit;
-}
-if($ARGV[0] eq "new_server"){
-	new_server();
-	show_install_summary_info();
-	exit;
-}
 if($ARGV[0] eq "installer"){
+	print "Hi\n";
 	analytics_insertion("full_install", "Binary DB Version / Local DB Version :: " . $binary_database_version  . " / " . $local_database_version);
-	do_installer_routines();
+	new_server(); 
 	show_install_summary_info();
 	exit;
-}
-if($ARGV[0] eq "db_dump_compress"){ 
-	database_dump_compress(); 
-	exit; 
 }
 
 sub show_install_summary_info {
@@ -320,6 +302,8 @@ sub new_server {
 			
 			print "[New Server] New server folder install complete\n";
 			print "[New Server] Below is your installation info:\n";
+			
+			show_install_summary_info();
 			
 			return;
 		}
