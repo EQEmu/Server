@@ -196,13 +196,13 @@ sub new_server {
 	}
 	closedir(DIR);
 	
-	if($file_count > 1 && !-e "install_variables.txt"){
+	if($file_count > 1 && (!-e "install_variables.txt" || !-e "../install_variables.txt")){
 		print "[New Server] ERROR: You must run eqemu_server.pl in an empty directory\n";
 		<>;
 		exit;
 	}
 
-	if(-e "install_variables.txt"){ 
+	if(-e "install_variables.txt" || -e "../install_variables.txt"){ 
 		get_installation_variables();
 	}
 

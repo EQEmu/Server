@@ -205,7 +205,7 @@ make
 
 #::: Back to server directory
 cd $eqemu_server_directory/server
-wget https://dl.dropboxusercontent.com/u/50023467/dl/eqemu/eqemu_server.pl
+wget https://raw.githubusercontent.com/EQEmu/Server/master/utils/scripts/eqemu_server.pl
 
 #::: Link build files
 
