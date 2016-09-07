@@ -196,7 +196,7 @@ sub new_server {
 	}
 	closedir(DIR);
 	
-	if($file_count > 1 && (!-e "install_variables.txt" || !-e "../install_variables.txt")){
+	if($file_count > 1 && (!-e "install_variables.txt" && !-e "../install_variables.txt")){ 
 		print "[New Server] ERROR: You must run eqemu_server.pl in an empty directory\n";
 		<>;
 		exit;
@@ -243,7 +243,7 @@ sub new_server {
 		
 		if($mysql_pass == 1){
 			
-			if(!-e "install_variables.txt"){ 
+			if((!-e "install_variables.txt" && !-e "../install_variables.txt")){ 
 				print "[New Server] Success! We have a database connection\n";
 				
 				check_for_input("Specify a NEW database name that PEQ will be installed to: "); 
@@ -783,6 +783,7 @@ sub show_menu_prompt {
 		
 		#::: If we're processing a CLI command, kill the loop
 		if($ARGV[0] ne ""){
+			analytics_insertion("cli", trim($input));
 			$input = "";
 			$ARGV[0] = "";
 			exit;
