@@ -871,6 +871,32 @@ XS(XS_Client_GetAAExp)
 	XSRETURN(1);
 }
 
+XS(XS_Client_GetAAPercent);
+XS(XS_Client_GetAAPercent)
+{
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: Client::GetAAPercent(THIS)");
+	{
+		Client* THIS;
+		uint32 RETVAL;
+		dXSTARG;
+
+		if (sv_derived_from(ST(0), "Client")) {
+			IV tmp = SvIV((SV*)SvRV(ST(0)));
+			THIS = INT2PTR(Client *,tmp);
+		}
+		else
+			Perl_croak(aTHX_ "THIS is not of type Client");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
+
+		RETVAL = THIS->GetAAPercent();
+		XSprePUSH; PUSHu((UV)RETVAL);
+	}
+	XSRETURN(1);
+}
+
 XS(XS_Client_GetTotalSecondsPlayed); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GetTotalSecondsPlayed)
 {
@@ -6465,6 +6491,7 @@ XS(boot_Client)
 		newXSproto(strcpy(buf, "GetWeight"), XS_Client_GetWeight, file, "$");
 		newXSproto(strcpy(buf, "GetEXP"), XS_Client_GetEXP, file, "$");
 		newXSproto(strcpy(buf, "GetAAExp"), XS_Client_GetAAExp, file, "$");
+		newXSproto(strcpy(buf, "GetAAPercent"), XS_Client_GetAAPercent, file, "$");
 		newXSproto(strcpy(buf, "GetTotalSecondsPlayed"), XS_Client_GetTotalSecondsPlayed, file, "$");
 		newXSproto(strcpy(buf, "UpdateLDoNPoints"), XS_Client_UpdateLDoNPoints, file, "$$$");
 		newXSproto(strcpy(buf, "SetDeity"), XS_Client_SetDeity, file, "$$");
