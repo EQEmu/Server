@@ -3616,6 +3616,26 @@ XS(XS__crosszonesignalnpcbynpctypeid)
 	XSRETURN_EMPTY;
 }
 
+XS(XS__worldwidemarquee);
+XS(XS__worldwidemarquee)
+{
+	dXSARGS;
+	if (items != 6)
+		Perl_croak(aTHX_ "Usage: worldwidemarquee(type, priority, fadein, fadeout, duration, message)");
+	
+	if (items == 6) {
+		uint32 type = (uint32)SvIV(ST(0));
+		uint32 priority = (uint32)SvIV(ST(1));
+		uint32 fadein = (uint32)SvIV(ST(2));
+		uint32 fadeout = (uint32)SvIV(ST(3));
+		uint32 duration = (uint32)SvIV(ST(4));
+		char* message = (char *)SvPV_nolen(ST(5));
+		quest_manager.WorldWideMarquee(type, priority, fadein, fadeout, duration, message);
+	}
+	
+	XSRETURN_EMPTY;
+}
+
 XS(XS__debug);
 XS(XS__debug)
 {
@@ -3749,6 +3769,7 @@ EXTERN_C XS(boot_quest)
 		newXS(strcpy(buf, "crosszonesignalclientbycharid"), XS__crosszonesignalclientbycharid, file);
 		newXS(strcpy(buf, "crosszonesignalclientbyname"), XS__crosszonesignalclientbyname, file);
 		newXS(strcpy(buf, "crosszonesignalnpcbynpctypeid"), XS__crosszonesignalnpcbynpctypeid, file);
+		newXS(strcpy(buf, "worldwidemarquee"), XS__worldwidemarquee, file);
 		newXS(strcpy(buf, "debug"), XS__debug, file);
 		newXS(strcpy(buf, "delglobal"), XS__delglobal, file);
 		newXS(strcpy(buf, "depop"), XS__depop, file);

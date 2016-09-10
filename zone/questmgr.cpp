@@ -3017,6 +3017,20 @@ void QuestManager::CrossZoneSetEntityVariableByNPCTypeID(uint32 npctype_id, cons
 	safe_delete(pack);
 }
 
+void QuestManager::WorldWideMarquee(uint32 Type, uint32 Priority, uint32 FadeIn, uint32 FadeOut, uint32 Duration, const char *Message) {
+	uint32 message_len = strlen(Message) + 1;
+	auto pack = new ServerPacket(ServerOP_WWMarquee, sizeof(WWMarquee_Struct) + message_len);
+	WWMarquee_Struct* WWMS = (WWMarquee_Struct*) pack->pBuffer;
+	WWMS->Type = Type;
+	WWMS->Priority = Priority;
+	WWMS->FadeIn = FadeIn;
+	WWMS->FadeOut = FadeOut;
+	WWMS->Duration = Duration;
+	strn0cpy(WWMS->Message, Message, 512);
+	worldserver.SendPacket(pack);
+	safe_delete(pack);
+}
+
 bool QuestManager::EnableRecipe(uint32 recipe_id)
 {
 	bool success = false;
