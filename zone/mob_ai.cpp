@@ -2364,7 +2364,9 @@ bool NPC::AI_AddNPCSpells(uint32 iDBSpellsID) {
 
 	if (IsValidSpell(attack_proc_spell)) {
 		AddProcToWeapon(attack_proc_spell, true, proc_chance);
-		innate_proc_spell_id = attack_proc_spell;
+
+		if(RuleB(Spells, NPCInnateProcOverride))
+			innate_proc_spell_id = attack_proc_spell;
 	}
 
 	if (IsValidSpell(range_proc_spell))

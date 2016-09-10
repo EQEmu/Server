@@ -1,54 +1,59 @@
-EQEmu
-===
+# EQEmulator Core Server
+|Travis CI (Linux)|Appveyor (Windows)   |
+|:---:|:---:|
+|[![Linux CI](https://travis-ci.org/EQEmu/Server.svg?branch=master)](https://travis-ci.org/EQEmu/Server)   |[![Windows CI](https://ci.appveyor.com/api/projects/status/d0cvokm7u732v8vl/branch/master?svg=true)](https://ci.appveyor.com/project/KimLS/server/branch/master)   |
 
-[![Linux CI](https://travis-ci.org/EQEmu/Server.svg?branch=master)](https://travis-ci.org/EQEmu/Server)
-[![Windows CI](https://ci.appveyor.com/api/projects/status/d0cvokm7u732v8vl/branch/master?svg=true)](https://ci.appveyor.com/project/KimLS/server/branch/master)
+***
 
-Overview
----
+**EQEmulator is a custom completely from-scratch open source server implementation for EverQuest built mostly on C++**
+ * MySQL/MariaDB is used as the database engine (over 200+ tables)
+ * Perl and LUA are both supported scripting languages for NPC/Player/Quest oriented events
+ * Open source database (Project EQ) has content up to expansion GoD (included in server installs)
+  * Game server environments and databases can be heavily customized to create all new experiences
+ * Hundreds of Quests/events created and maintained by Project EQ
 
-EQEmu is a custom server implementation for EverQuest
+## Server Installs
+||Windows|Linux|
+|:---:|:---:|:---:|
+|**Install Count**|![Windows Install Count](http://analytics.akkadius.com/?install_count&windows_count)|![Linux Install Count](http://analytics.akkadius.com/?install_count&linux_count)| 
+### > Windows 
+* [Easy Install](http://wiki.eqemulator.org/p?Akkas_PEQ_Server_Installer&frm=Main#from-scratch-installation-instructions-windows)
+* [Advanced Setup](http://wiki.eqemulator.org/p?Complete_Windows-based_Server_Setup_Guide)
 
-Dependencies
----
+### > Debian/Ubuntu
 
-For Windows: http://eqemu.github.io
+> wget --no-check-certificate https://raw.githubusercontent.com/EQEmu/Server/master/utils/scripts/linux_installer/install.sh -O install.sh && chmod 755 install.sh && ./install.sh
 
-Login Server dependencies for Windows/Linux/OSX: http://eqemu.github.io
+### > CentOS/Fedora
 
-For Debian based distros (adjust to your local flavor):
+> curl -O https://raw.githubusercontent.com/EQEmu/Server/master/utils/scripts/linux_installer/install.sh install.sh && chmod 755 install.sh && ./install.sh
 
-- libmysqlclient-dev
-- libperl-dev
-- liblua5.1-0-dev (5.2 should work as well)
-- libboost-dev
+## Supported Clients
 
-Further instructions on building the source can be found on the
-[wiki](http://wiki.eqemulator.org/i?M=Wiki).
+|Titanium Edition|Secrets of Faydwer|Seeds of Destruction|Underfoot|Rain of Fear|
+|:---:|:---:|:---:|:---:|:---:|
+|<img src="http://i.imgur.com/hrwDxoM.jpg" height="150">|<img src="http://i.imgur.com/cRDW5tn.png" height="150">|<img src="http://i.imgur.com/V48kuVn.jpg" height="150">|<img src="http://i.imgur.com/IJQ0XMa.jpg" height="150">|<img src="http://i.imgur.com/OMpHkKa.png" height="100">|
 
-Bug reports
----
-
-Please use the [issue tracker](https://github.com/EQEmu/Server/issues) provided by GitHub to send us bug
+## Bug Reports <img src="http://i.imgur.com/daf1Vjw.png" height="20">
+* Please use the [issue tracker](https://github.com/EQEmu/Server/issues) provided by GitHub to send us bug
 reports or feature requests.
+* The [EQEmu Forums](http://www.eqemulator.org/forums/) are also a place to submit and get help with bugs.
 
-The [EQEmu Forums](http://www.eqemulator.org/forums/) also have forums to submit
-bugs/get help with bugs.
+## Contributions <img src="http://image.flaticon.com/icons/png/512/25/25231.png" width="20">
 
-Contributions
----
-
-The preferred way to contribute is to fork the repo and submit a pull request on
+* The preferred way to contribute is to fork the repo and submit a pull request on
 GitHub. If you need help with your changes, you can always post on the forums or
-try IRC. You can also post unified diffs (`git diff` should do the trick) on the
+try Discord. You can also post unified diffs (`git diff` should do the trick) on the
 [Server Code Submissions](http://www.eqemulator.org/forums/forumdisplay.php?f=669)
 forum, although pull requests will be much quicker and easier on all parties.
 
-Contact
----
- - **User IRC Channel**: `#eqemu` on `irc.eqemulator.net`
- - **Developer IRC Channel**: `#eqemucoders` on `irc.eqemulator.net`
+## Contact <img src="http://gamerescape.com/wp-content/uploads/2015/06/discord.png" height="20">
 
+ - Discord Channel: https://discord.gg/QHsm7CD
+ - **User Discord Channel**: `#general`
+ - **Developer Discord Channel**: `#eqemucoders`
+
+Resources
+---
 - [EQEmulator Forums](http://www.eqemulator.org/forums)
 - [EQEmulator Wiki](http://wiki.eqemulator.org/i?M=Wiki)
-

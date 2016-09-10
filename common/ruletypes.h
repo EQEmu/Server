@@ -145,6 +145,8 @@ RULE_BOOL(Character, UseStackablePickPocketing, true) // Allows stackable pickpo
 RULE_BOOL(Character, EnableAvoidanceCap, false)
 RULE_INT(Character, AvoidanceCap, 750) // 750 Is a pretty good value, seen people dodge all attacks beyond 1,000 Avoidance
 RULE_BOOL(Character, AllowMQTarget, false) // Disables putting players in the 'hackers' list for targeting beyond the clip plane or attempting to target something untargetable
+RULE_BOOL(Character, UseOldBindWound, false) // Uses the original bind wound behavior
+
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Mercs)
@@ -384,6 +386,7 @@ RULE_BOOL(Spells, AlwaysSendTargetsBuffs, false) // ignore LAA level if true
 RULE_BOOL(Spells, FlatItemExtraSpellAmt, false) // allow SpellDmg stat to affect all spells, regardless of cast time/cooldown/etc
 RULE_BOOL(Spells, IgnoreSpellDmgLvlRestriction, false) // ignore the 5 level spread on applying SpellDmg
 RULE_BOOL(Spells, AllowItemTGB, false) // TGB doesn't work with items on live, custom servers want it though
+RULE_BOOL(Spells, NPCInnateProcOverride, true) //  NPC innate procs override the target type to single target.
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Combat)

@@ -193,6 +193,7 @@
 #define ServerOP_QSSendQuery						0x5016
 #define ServerOP_CZSignalNPC						0x5017
 #define ServerOP_CZSetEntityVariableByNPCTypeID		0x5018
+#define ServerOP_WWMarquee							0x5019
 
 /* Query Serv Generic Packet Flag/Type Enumeration */
 enum { QSG_LFGuild = 0 }; 
@@ -1252,6 +1253,15 @@ struct CZMessagePlayer_Struct {
 	uint32	Type;
 	char	CharName[64];
 	char	Message[512];
+};
+
+struct WWMarquee_Struct {
+	uint32 Type;
+	uint32 Priority;
+	uint32 FadeIn;
+	uint32 FadeOut;
+	uint32 Duration;
+	char Message[512];
 };
 
 struct CZSetEntVarByNPCTypeID_Struct {

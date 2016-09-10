@@ -1838,6 +1838,19 @@ void WorldServer::Process() {
 			}
 			break;
 		}
+		case ServerOP_WWMarquee:
+		{
+			WWMarquee_Struct* WWMS = (WWMarquee_Struct*) pack->pBuffer;
+			std::list<Client*> client_list;
+			entity_list.GetClientList(client_list);
+			auto iter = client_list.begin();
+			std::string Message = WWMS->Message;
+			while (iter != client_list.end()) {
+				Client* client = (*iter);
+				client->SendMarqueeMessage(WWMS->Type, WWMS->Priority, WWMS->FadeIn, WWMS->FadeOut, WWMS->Duration, Message);
+				iter++;
+			}
+		}
 		case ServerOP_ReloadWorld:
 		{
 			ReloadWorld_Struct* RW = (ReloadWorld_Struct*) pack->pBuffer;
