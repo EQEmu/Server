@@ -71,7 +71,7 @@ void ServerManager::Process()
 		}
 	}
 
-	list<WorldServer*>::iterator iter = world_servers.begin();
+	auto iter = world_servers.begin();
 	while (iter != world_servers.end()) {
 		if ((*iter)->Process() == false) {
 			Log.Out(Logs::General, Logs::World_Server, "World server %s had a fatal error and had to be removed from the login.", (*iter)->GetLongName().c_str());
@@ -86,7 +86,7 @@ void ServerManager::Process()
 
 void ServerManager::ProcessDisconnect()
 {
-	list<WorldServer*>::iterator iter = world_servers.begin();
+	auto iter = world_servers.begin();
 	while (iter != world_servers.end()) {
 		EmuTCPConnection *connection = (*iter)->GetConnection();
 		if (!connection->Connected()) {
@@ -105,7 +105,7 @@ void ServerManager::ProcessDisconnect()
 
 WorldServer* ServerManager::GetServerByAddress(unsigned int address)
 {
-	list<WorldServer*>::iterator iter = world_servers.begin();
+	auto iter = world_servers.begin();
 	while (iter != world_servers.end()) {
 		if ((*iter)->GetConnection()->GetrIP() == address) {
 			return (*iter);
@@ -120,24 +120,23 @@ EQApplicationPacket *ServerManager::CreateServerListPacket(Client *c)
 {
 	unsigned int packet_size = sizeof(ServerListHeader_Struct);
 	unsigned int server_count = 0;
-	in_addr in;
-	in.s_addr = c->GetConnection()->GetRemoteIP();
-	string client_ip = inet_ntoa(in);
+	std::string client_ip = c->GetConnection()->RemoteEndpoint();
 
-	list<WorldServer*>::iterator iter = world_servers.begin();
+	auto iter = world_servers.begin();
 	while (iter != world_servers.end()) {
 		if ((*iter)->IsAuthorized() == false) {
 			++iter;
 			continue;
 		}
 
+		in_addr in;
 		in.s_addr = (*iter)->GetConnection()->GetrIP();
-		string world_ip = inet_ntoa(in);
+		std::string world_ip = inet_ntoa(in);
 
 		if (world_ip.compare(client_ip) == 0) {
 			packet_size += (*iter)->GetLongName().size() + (*iter)->GetLocalIP().size() + 24;
 		}
-		else if (client_ip.find(server.options.GetLocalNetwork()) != string::npos) {
+		else if (client_ip.find(server.options.GetLocalNetwork()) != std::string::npos) {
 			packet_size += (*iter)->GetLongName().size() + (*iter)->GetLocalIP().size() + 24;
 		}
 		else {
@@ -171,13 +170,14 @@ EQApplicationPacket *ServerManager::CreateServerListPacket(Client *c)
 			continue;
 		}
 
+		in_addr in;
 		in.s_addr = (*iter)->GetConnection()->GetrIP();
-		string world_ip = inet_ntoa(in);
+		std::string world_ip = inet_ntoa(in);
 		if (world_ip.compare(client_ip) == 0) {
 			memcpy(data_pointer, (*iter)->GetLocalIP().c_str(), (*iter)->GetLocalIP().size());
 			data_pointer += ((*iter)->GetLocalIP().size() + 1);
 		}
-		else if (client_ip.find(server.options.GetLocalNetwork()) != string::npos) {
+		else if (client_ip.find(server.options.GetLocalNetwork()) != std::string::npos) {
 			memcpy(data_pointer, (*iter)->GetLocalIP().c_str(), (*iter)->GetLocalIP().size());
 			data_pointer += ((*iter)->GetLocalIP().size() + 1);
 		}
@@ -239,7 +239,7 @@ EQApplicationPacket *ServerManager::CreateServerListPacket(Client *c)
 
 void ServerManager::SendUserToWorldRequest(unsigned int server_id, unsigned int client_account_id)
 {
-	list<WorldServer*>::iterator iter = world_servers.begin();
+	auto iter = world_servers.begin();
 	bool found = false;
 	while (iter != world_servers.end()) {
 		if ((*iter)->GetRuntimeID() == server_id) {
@@ -263,9 +263,9 @@ void ServerManager::SendUserToWorldRequest(unsigned int server_id, unsigned int 
 	}
 }
 
-bool ServerManager::ServerExists(string l_name, string s_name, WorldServer *ignore)
+bool ServerManager::ServerExists(std::string l_name, std::string s_name, WorldServer *ignore)
 {
-	list<WorldServer*>::iterator iter = world_servers.begin();
+	auto iter = world_servers.begin();
 	while (iter != world_servers.end()) {
 		if ((*iter) == ignore) {
 			++iter;
@@ -281,9 +281,9 @@ bool ServerManager::ServerExists(string l_name, string s_name, WorldServer *igno
 	return false;
 }
 
-void ServerManager::DestroyServerByName(string l_name, string s_name, WorldServer *ignore)
+void ServerManager::DestroyServerByName(std::string l_name, std::string s_name, WorldServer *ignore)
 {
-	list<WorldServer*>::iterator iter = world_servers.begin();
+	auto iter = world_servers.begin();
 	while (iter != world_servers.end()) {
 		if ((*iter) == ignore) {
 			++iter;

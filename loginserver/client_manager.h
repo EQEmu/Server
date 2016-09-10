@@ -18,14 +18,13 @@
 #ifndef EQEMU_CLIENTMANAGER_H
 #define EQEMU_CLIENTMANAGER_H
 
-#include "../common/global_define.h"
-#include "../common/opcodemgr.h"
-#include "../common/eq_stream_type.h"
-#include "../common/eq_stream_factory.h"
+#include <global_define.h>
+#include <net/eqstream.h>
+#include <patch/login_sod.h>
+#include <patch/login_titanium.h>
 #include "client.h"
 #include <list>
-
-using namespace std;
+#include <memory>
 
 /**
 * Client manager class, holds all the client objects and does basic processing.
@@ -44,11 +43,6 @@ public:
 	~ClientManager();
 
 	/**
-	* Processes every client in the internal list, removes them if necessary.
-	*/
-	void Process();
-
-	/**
 	* Sends a new server list to every client.
 	*/
 	void UpdateServerList();
@@ -63,17 +57,16 @@ public:
 	*/
 	Client *GetClient(unsigned int account_id);
 private:
+	void HandleNewConnectionTitanium(std::shared_ptr<EQ::Net::EQStream> connection);
+	void HandleNewConnectionSod(std::shared_ptr<EQ::Net::EQStream> connection);
+	void HandleConnectionChange(std::shared_ptr<EQ::Net::EQStream> connection, EQ::Net::DbProtocolStatus old_status, EQ::Net::DbProtocolStatus new_status);
+	void HandlePacket(std::shared_ptr<EQ::Net::EQStream> connection, EmuOpcode opcode, EQ::Net::Packet &p);
 
-	/**
-	* Processes disconnected clients, removes them if necessary.
-	*/
-	void ProcessDisconnect();
-
-	list<Client*> clients;
-	OpcodeManager *titanium_ops;
-	EQStreamFactory *titanium_stream;
-	OpcodeManager *sod_ops;
-	EQStreamFactory *sod_stream;
+	std::list<std::unique_ptr<Client>> clients;
+	std::unique_ptr<EQ::Net::EQStreamManager> titanium_stream;
+	std::unique_ptr<EQ::Net::EQStreamManager> sod_stream;
+	std::unique_ptr<EQ::Patches::LoginTitaniumPatch> titanium_patch;
+	std::unique_ptr<EQ::Patches::LoginSoDPatch> sod_patch;
 };
 
 #endif

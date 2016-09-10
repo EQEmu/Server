@@ -1327,7 +1327,7 @@ bool Database::CheckDatabaseConvertPPDeblob(){
 				if (rquery != ""){ results = QueryDatabase(rquery); }
 
 				/* Run Bind Home Convert */
-				if (pp->binds[4].zoneId < 999 && !_ISNAN_(pp->binds[4].x) && !_ISNAN_(pp->binds[4].y) && !_ISNAN_(pp->binds[4].z) && !_ISNAN_(pp->binds[4].heading)) {
+				if (pp->binds[4].zoneId < 999 && !std::isnan(pp->binds[4].x) && !std::isnan(pp->binds[4].y) && !std::isnan(pp->binds[4].z) && !std::isnan(pp->binds[4].heading)) {
 					rquery = StringFormat("REPLACE INTO `character_bind` (id, zone_id, instance_id, x, y, z, heading, is_home)"
 						" VALUES (%u, %u, %u, %f, %f, %f, %f, 1)",
 						character_id, pp->binds[4].zoneId, 0, pp->binds[4].x, pp->binds[4].y, pp->binds[4].z, pp->binds[4].heading);
@@ -1335,7 +1335,7 @@ bool Database::CheckDatabaseConvertPPDeblob(){
 				}
 
 				/* Run Bind Convert */
-				if (pp->binds[0].zoneId < 999 && !_ISNAN_(pp->binds[0].x) && !_ISNAN_(pp->binds[0].y) && !_ISNAN_(pp->binds[0].z) && !_ISNAN_(pp->binds[0].heading)) {
+				if (pp->binds[0].zoneId < 999 && !std::isnan(pp->binds[0].x) && !std::isnan(pp->binds[0].y) && !std::isnan(pp->binds[0].z) && !std::isnan(pp->binds[0].heading)) {
 					rquery = StringFormat("REPLACE INTO `character_bind` (id, zone_id, instance_id, x, y, z, heading, is_home)"
 						" VALUES (%u, %u, %u, %f, %f, %f, %f, 0)",
 						character_id, pp->binds[0].zoneId, 0, pp->binds[0].x, pp->binds[0].y, pp->binds[0].z, pp->binds[0].heading);

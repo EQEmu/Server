@@ -18,17 +18,13 @@
 #ifndef EQEMU_CLIENT_H
 #define EQEMU_CLIENT_H
 
-#include "../common/global_define.h"
-#include "../common/opcodemgr.h"
-#include "../common/eq_stream_type.h"
-#include "../common/eq_stream_factory.h"
-#include "../common/random.h"
+#include <global_define.h>
+#include <net/eqstream.h>
+#include <random.h>
 #ifndef WIN32
 #include "eq_crypto_api.h"
 #endif
 #include <string>
-
-using namespace std;
 
 enum LSClientVersion
 {
@@ -59,7 +55,7 @@ public:
 	/**
 	* Constructor, sets our connection to c and version to v
 	*/
-	Client(std::shared_ptr<EQStream> c, LSClientVersion v);
+	Client(std::shared_ptr<EQ::Net::EQStream> c, LSClientVersion v);
 
 	/**
 	* Destructor.
@@ -69,7 +65,7 @@ public:
 	/**
 	* Processes the client's connection and does various actions.
 	*/
-	bool Process();
+	void Process(EQApplicationPacket *app);
 
 	/**
 	* Sends our reply to session ready packet.
@@ -109,12 +105,12 @@ public:
 	/**
 	* Gets the account name of this client.
 	*/
-	string GetAccountName() const { return account_name; }
+	std::string GetAccountName() const { return account_name; }
 
 	/**
 	* Gets the key generated at login for this client.
 	*/
-	string GetKey() const { return key; }
+	std::string GetKey() const { return key; }
 
 	/**
 	* Gets the server selected to be played on for this client.
@@ -129,19 +125,19 @@ public:
 	/**
 	* Gets the connection for this client.
 	*/
-	std::shared_ptr<EQStream> GetConnection() { return connection; }
+	std::shared_ptr<EQ::Net::EQStream> GetConnection() { return connection; }
 
 	EQEmu::Random random;
 private:
-	std::shared_ptr<EQStream> connection;
+	std::shared_ptr<EQ::Net::EQStream> connection;
 	LSClientVersion version;
 	LSClientStatus status;
 
-	string account_name;
+	std::string account_name;
 	unsigned int account_id;
 	unsigned int play_server_id;
 	unsigned int play_sequence_id;
-	string key;
+	std::string key;
 };
 
 #endif

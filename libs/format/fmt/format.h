@@ -297,7 +297,9 @@ inline DummyInt _ecvt_s(...) { return DummyInt(); }
 inline DummyInt isinf(...) { return DummyInt(); }
 inline DummyInt _finite(...) { return DummyInt(); }
 inline DummyInt isnan(...) { return DummyInt(); }
-//inline DummyInt _isnan(...) { return DummyInt(); }
+#ifndef _MSC_VER
+inline DummyInt _isnan(...) { return DummyInt(); }
+#endif
 
 // A helper function to suppress bogus "conditional expression is constant"
 // warnings.

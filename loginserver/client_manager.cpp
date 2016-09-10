@@ -17,148 +17,89 @@
 */
 #include "client_manager.h"
 #include "login_server.h"
+#include <eqemu_logsys.h>
 
 extern LoginServer server;
 extern bool run_server;
 
-#include "../common/eqemu_logsys.h"
-extern EQEmuLogSys Log;
-
 ClientManager::ClientManager()
 {
-	int titanium_port = atoi(server.config->GetVariable("Titanium", "port").c_str());
-	titanium_stream = new EQStreamFactory(LoginStream, titanium_port);
-	titanium_ops = new RegularOpcodeManager;
-	if(!titanium_ops->LoadOpcodes(server.config->GetVariable("Titanium", "opcodes").c_str()))
-	{
-		Log.Out(Logs::General, Logs::Error, "ClientManager fatal error: couldn't load opcodes for Titanium file %s.",
-			server.config->GetVariable("Titanium", "opcodes").c_str());
-		run_server = false;
-	}
+	EQ::Net::EQStreamManagerOptions titanium_opts;
+	titanium_opts.daybreak_options.port = atoi(server.config->GetVariable("Titanium", "port").c_str());
+	titanium_stream.reset(new EQ::Net::EQStreamManager(titanium_opts));
+	titanium_patch.reset(new EQ::Patches::LoginTitaniumPatch());
+	titanium_stream->RegisterPotentialPatch(titanium_patch.get());
 
-	if(titanium_stream->Open())
-	{
-		Log.Out(Logs::General, Logs::Login_Server, "ClientManager listening on Titanium stream.");
-	}
-	else
-	{
-		Log.Out(Logs::General, Logs::Error, "ClientManager fatal error: couldn't open Titanium stream.");
-		run_server = false;
-	}
+	titanium_stream->OnNewConnection(std::bind(&ClientManager::HandleNewConnectionSod, this, std::placeholders::_1));
+	titanium_stream->OnNewConnection(std::bind(&ClientManager::HandleNewConnectionTitanium, this, std::placeholders::_1));
+	titanium_stream->OnConnectionStateChange(std::bind(&ClientManager::HandleConnectionChange, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
+	titanium_stream->OnPacketRecv(std::bind(&ClientManager::HandlePacket, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
+	
+	EQ::Net::EQStreamManagerOptions sod_opts;
+	sod_opts.daybreak_options.port = atoi(server.config->GetVariable("SoD", "port").c_str());
+	sod_stream.reset(new EQ::Net::EQStreamManager(sod_opts));
+	sod_patch.reset(new EQ::Patches::LoginSoDPatch());
+	sod_stream->RegisterPotentialPatch(sod_patch.get());
 
-	int sod_port = atoi(server.config->GetVariable("SoD", "port").c_str());
-	sod_stream = new EQStreamFactory(LoginStream, sod_port);
-	sod_ops = new RegularOpcodeManager;
-	if(!sod_ops->LoadOpcodes(server.config->GetVariable("SoD", "opcodes").c_str()))
-	{
-		Log.Out(Logs::General, Logs::Error, "ClientManager fatal error: couldn't load opcodes for SoD file %s.",
-			server.config->GetVariable("SoD", "opcodes").c_str());
-		run_server = false;
-	}
+	sod_stream->OnNewConnection(std::bind(&ClientManager::HandleNewConnectionSod, this, std::placeholders::_1));
+	sod_stream->OnNewConnection(std::bind(&ClientManager::HandleNewConnectionSod, this, std::placeholders::_1));
+	sod_stream->OnConnectionStateChange(std::bind(&ClientManager::HandleConnectionChange, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
+	sod_stream->OnPacketRecv(std::bind(&ClientManager::HandlePacket, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 
-	if(sod_stream->Open())
-	{
-		Log.Out(Logs::General, Logs::Login_Server, "ClientManager listening on SoD stream.");
-	}
-	else
-	{
-		Log.Out(Logs::General, Logs::Error, "ClientManager fatal error: couldn't open SoD stream.");
-		run_server = false;
-	}
+
 }
 
 ClientManager::~ClientManager()
 {
-	if(titanium_stream)
-	{
-		titanium_stream->Close();
-		delete titanium_stream;
-	}
 
-	if(titanium_ops)
-	{
-		delete titanium_ops;
-	}
-
-	if(sod_stream)
-	{
-		sod_stream->Close();
-		delete sod_stream;
-	}
-
-	if(sod_ops)
-	{
-		delete sod_ops;
-	}
 }
 
-void ClientManager::Process()
+void ClientManager::HandleNewConnectionTitanium(std::shared_ptr<EQ::Net::EQStream> connection)
 {
-	ProcessDisconnect();
-	std::shared_ptr<EQStream> cur = titanium_stream->Pop();
-	while(cur)
-	{
-		struct in_addr in;
-		in.s_addr = cur->GetRemoteIP();
-		Log.Out(Logs::General, Logs::Login_Server, "New Titanium client connection from %s:%d", inet_ntoa(in), ntohs(cur->GetRemotePort()));
+	Log.OutF(Logs::General, Logs::Login_Server, "New Titanium client from {0}:{1}", connection->RemoteEndpoint(), connection->RemotePort());
+	Client *c = new Client(connection, cv_titanium);
+	clients.push_back(std::unique_ptr<Client>(c));
+}
 
-		cur->SetOpcodeManager(&titanium_ops);
-		Client *c = new Client(cur, cv_titanium);
-		clients.push_back(c);
-		cur = titanium_stream->Pop();
-	}
+void ClientManager::HandleNewConnectionSod(std::shared_ptr<EQ::Net::EQStream> connection)
+{
+	Log.OutF(Logs::General, Logs::Login_Server, "New SoD client from {0}:{1}", connection->RemoteEndpoint(), connection->RemotePort());
+	Client *c = new Client(connection, cv_sod);
+	clients.push_back(std::unique_ptr<Client>(c));
+}
 
-	cur = sod_stream->Pop();
-	while(cur)
-	{
-		struct in_addr in;
-		in.s_addr = cur->GetRemoteIP();
-		Log.Out(Logs::General, Logs::Login_Server, "New SoD client connection from %s:%d", inet_ntoa(in), ntohs(cur->GetRemotePort()));
-
-		cur->SetOpcodeManager(&sod_ops);
-		Client *c = new Client(cur, cv_sod);
-		clients.push_back(c);
-		cur = sod_stream->Pop();
-	}
-
-	list<Client*>::iterator iter = clients.begin();
-	while(iter != clients.end())
-	{
-		if((*iter)->Process() == false)
-		{
-			Log.Out(Logs::General, Logs::Debug, "Client had a fatal error and had to be removed from the login.");
-			delete (*iter);
-			iter = clients.erase(iter);
-		}
-		else
-		{
+void ClientManager::HandleConnectionChange(std::shared_ptr<EQ::Net::EQStream> connection, EQ::Net::DbProtocolStatus old_status, EQ::Net::DbProtocolStatus new_status)
+{
+	if (new_status == EQ::Net::DbProtocolStatus::StatusDisconnected) {
+		Log.OutF(Logs::General, Logs::Login_Server, "Client has been disconnected, removing {0}:{1}", connection->RemoteEndpoint(), connection->RemotePort());
+		auto iter = clients.begin();
+		while (iter != clients.end()) {
+			if ((*iter)->GetConnection() == connection) {
+				clients.erase(iter);
+				break;
+			}
 			++iter;
 		}
 	}
 }
 
-void ClientManager::ProcessDisconnect()
+void ClientManager::HandlePacket(std::shared_ptr<EQ::Net::EQStream> connection, EmuOpcode opcode, EQ::Net::Packet &p)
 {
-	list<Client*>::iterator iter = clients.begin();
-	while(iter != clients.end())
-	{
-		std::shared_ptr<EQStream> c = (*iter)->GetConnection();
-		if(c->CheckClosed())
-		{
-			Log.Out(Logs::General, Logs::Login_Server, "Client disconnected from the server, removing client.");
-			delete (*iter);
-			iter = clients.erase(iter);
+	auto iter = clients.begin();
+	while (iter != clients.end()) {
+		if ((*iter)->GetConnection() == connection) {
+			EQApplicationPacket app(opcode, (unsigned char*)p.Data(), (uint32)p.Length());
+			(*iter)->Process(&app);
+			return;
 		}
-		else
-		{
-			++iter;
-		}
+
+		++iter;
 	}
 }
 
 void ClientManager::UpdateServerList()
 {
-	list<Client*>::iterator iter = clients.begin();
+	auto iter = clients.begin();
 	while(iter != clients.end())
 	{
 		(*iter)->SendServerListPacket();
@@ -168,13 +109,12 @@ void ClientManager::UpdateServerList()
 
 void ClientManager::RemoveExistingClient(unsigned int account_id)
 {
-	list<Client*>::iterator iter = clients.begin();
+	auto iter = clients.begin();
 	while(iter != clients.end())
 	{
 		if((*iter)->GetAccountID() == account_id)
 		{
 			Log.Out(Logs::General, Logs::Login_Server, "Client attempting to log in and existing client already logged in, removing existing client.");
-			delete (*iter);
 			iter = clients.erase(iter);
 		}
 		else
@@ -188,12 +128,12 @@ Client *ClientManager::GetClient(unsigned int account_id)
 {
 	Client *cur = nullptr;
 	int count = 0;
-	list<Client*>::iterator iter = clients.begin();
+	auto iter = clients.begin();
 	while(iter != clients.end())
 	{
 		if((*iter)->GetAccountID() == account_id)
 		{
-			cur = (*iter);
+			cur = (*iter).get();
 			count++;
 		}
 		++iter;

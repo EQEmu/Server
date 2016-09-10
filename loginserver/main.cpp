@@ -199,7 +199,6 @@ int main()
 	Log.Out(Logs::General, Logs::Login_Server, "Server Started.");
 	EQ::Timer timer(10, true, []() {
 		Timer::SetCurrentTime();
-		server.client_manager->Process();
 		server.server_manager->Process();
 		timeout_manager.CheckTimeouts();
 	});

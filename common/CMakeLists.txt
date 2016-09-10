@@ -77,7 +77,11 @@ SET(common_sources
 	platform.cpp
 	net/crc32.cpp
 	net/daybreak_connection.cpp
+	net/eqstream.cpp
 	net/packet.cpp
+	patch/login_sod.cpp
+	patch/login_titanium.cpp
+	patch/patch.cpp
 	patches/patches.cpp
 	patches/sod.cpp
 	patches/sod_limits.cpp
@@ -220,7 +224,11 @@ SET(common_headers
 	net/daybreak_connection.h
 	net/daybreak_structs.h
 	net/endian.h
+	net/eqstream.h
 	net/packet.h
+	patch/login_sod.h
+	patch/login_titanium.h
+	patch/patch.h
 	patches/patches.h
 	patches/sod.h
 #	patches/sod_itemfields.h
@@ -275,13 +283,6 @@ SET(common_headers
 	util/memory_stream.h
 )
 
-INCLUDE(CheckSymbolExists)
-IF(WIN32)
-  check_symbol_exists(open io.h HAVE_OPEN)
-ELSE()
-  check_symbol_exists(open fcntl.h HAVE_OPEN)
-ENDIF()
-
 SOURCE_GROUP(Event FILES
 	event/background_task.h
 	event/event_loop.h
@@ -295,8 +296,19 @@ SOURCE_GROUP(Net FILES
 	net/daybreak_connection.h
 	net/daybreak_structs.h
 	net/endian.h
+	net/eqstream.h
+	net/eqstream.cpp
 	net/packet.cpp
 	net/packet.h
+)
+
+SOURCE_GROUP(Patch FILES
+	patch/login_sod.cpp
+	patch/login_sod.h
+	patch/login_titanium.cpp
+	patch/login_titanium.h
+	patch/patch.cpp
+	patch/patch.h
 )
 
 SOURCE_GROUP(Patches FILES

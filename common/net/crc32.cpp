@@ -1,7 +1,7 @@
 #include "crc32.h"
 #include <memory.h>
 
-unsigned int CRC32Table[256] =
+unsigned int CRC32EncodeTable[256] =
 {
 	0x00000000, 0x77073096, 0xEE0E612C, 0x990951BA,
 	0x076DC419, 0x706AF48F, 0xE963A535, 0x9E6495A3,
@@ -74,7 +74,7 @@ int EQ::Crc32(const void * data, int size)
 	int crc = 0xffffffff;
 	auto buffer = (const uint8_t *)data;
 	for (int i = 0; i < size; ++i) {
-		crc = ((crc >> 8) & 0x00FFFFFFL) ^ CRC32Table[(crc ^ *&buffer[i]) & 0x000000FFL];
+		crc = ((crc >> 8) & 0x00FFFFFFL) ^ CRC32EncodeTable[(crc ^ *&buffer[i]) & 0x000000FFL];
 	}
 
 	return ~crc;
@@ -84,12 +84,12 @@ int EQ::Crc32(const void * data, int size, int key)
 {
 	int crc = 0xffffffff;
 	for (int i = 0; i < 4; ++i) {
-		crc = ((crc >> 8) & 0x00FFFFFFL) ^ CRC32Table[(crc ^ ((key >> (i * 8)) & 0xff)) & 0x000000FFL];
+		crc = ((crc >> 8) & 0x00FFFFFFL) ^ CRC32EncodeTable[(crc ^ ((key >> (i * 8)) & 0xff)) & 0x000000FFL];
 	}
 
 	auto buffer = (const uint8_t *)data;
 	for (int i = 0; i < size; ++i) {
-		crc = ((crc >> 8) & 0x00FFFFFFL) ^ CRC32Table[(crc ^ *&buffer[i]) & 0x000000FFL];
+		crc = ((crc >> 8) & 0x00FFFFFFL) ^ CRC32EncodeTable[(crc ^ *&buffer[i]) & 0x000000FFL];
 	}
 
 	return ~crc;

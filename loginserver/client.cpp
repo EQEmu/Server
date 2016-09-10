@@ -18,13 +18,13 @@
 #include "client.h"
 #include "login_server.h"
 #include "login_structures.h"
-#include "../common/misc_functions.h"
-#include "../common/eqemu_logsys.h"
+#include <misc_functions.h>
+#include <eqemu_logsys.h>
 
 extern EQEmuLogSys Log;
 extern LoginServer server;
 
-Client::Client(std::shared_ptr<EQStream> c, LSClientVersion v)
+Client::Client(std::shared_ptr<EQ::Net::EQStream> c, LSClientVersion v)
 {
 	connection = c;
 	version = v;
@@ -34,82 +34,73 @@ Client::Client(std::shared_ptr<EQStream> c, LSClientVersion v)
 	play_sequence_id = 0;
 }
 
-bool Client::Process()
+void Client::Process(EQApplicationPacket *app)
 {
-	EQApplicationPacket *app = connection->PopPacket();
-	while(app)
+	if(server.options.IsTraceOn())
 	{
-		if(server.options.IsTraceOn())
-		{
-			Log.Out(Logs::General, Logs::Login_Server, "Application packet received from client (size %u)", app->Size());
-		}
-
-		if(server.options.IsDumpInPacketsOn())
-		{
-			DumpPacket(app);
-		}
-
-		switch(app->GetOpcode())
-		{
-		case OP_SessionReady:
-			{
-				if(server.options.IsTraceOn())
-				{
-					Log.Out(Logs::General, Logs::Login_Server, "Session ready received from client.");
-				}
-				Handle_SessionReady((const char*)app->pBuffer, app->Size());
-				break;
-			}
-		case OP_Login:
-			{
-				if(app->Size() < 20)
-				{
-					Log.Out(Logs::General, Logs::Error, "Login received but it is too small, discarding.");
-					break;
-				}
-
-				if(server.options.IsTraceOn())
-				{
-					Log.Out(Logs::General, Logs::Login_Server, "Login received from client.");
-				}
-
-				Handle_Login((const char*)app->pBuffer, app->Size());
-				break;
-			}
-		case OP_ServerListRequest:
-			{
-				if(server.options.IsTraceOn())
-				{
-					Log.Out(Logs::General, Logs::Login_Server, "Server list request received from client.");
-				}
-
-				SendServerListPacket();
-				break;
-			}
-		case OP_PlayEverquestRequest:
-			{
-				if(app->Size() < sizeof(PlayEverquestRequest_Struct))
-				{
-					Log.Out(Logs::General, Logs::Error, "Play received but it is too small, discarding.");
-					break;
-				}
-
-				Handle_Play((const char*)app->pBuffer);
-				break;
-			}
-		default:
-			{
-				char dump[64];
-				app->build_header_dump(dump);
-				Log.Out(Logs::General, Logs::Error, "Recieved unhandled application packet from the client: %s.", dump);
-			}
-		}
-
-		delete app;
-		app = connection->PopPacket();
+		Log.Out(Logs::General, Logs::Login_Server, "Application packet received from client (size %u)", app->Size());
 	}
-
-	return true;
+	
+	if(server.options.IsDumpInPacketsOn())
+	{
+		DumpPacket(app);
+	}
+	
+	switch(app->GetOpcode())
+	{
+	case OP_SessionReady:
+		{
+			if(server.options.IsTraceOn())
+			{
+				Log.Out(Logs::General, Logs::Login_Server, "Session ready received from client.");
+			}
+			Handle_SessionReady((const char*)app->pBuffer, app->Size());
+			break;
+		}
+	case OP_Login:
+		{
+			if(app->Size() < 20)
+			{
+				Log.Out(Logs::General, Logs::Error, "Login received but it is too small, discarding.");
+				break;
+			}
+	
+			if(server.options.IsTraceOn())
+			{
+				Log.Out(Logs::General, Logs::Login_Server, "Login received from client.");
+			}
+	
+			Handle_Login((const char*)app->pBuffer, app->Size());
+			break;
+		}
+	case OP_ServerListRequest:
+		{
+			if(server.options.IsTraceOn())
+			{
+				Log.Out(Logs::General, Logs::Login_Server, "Server list request received from client.");
+			}
+	
+			SendServerListPacket();
+			break;
+		}
+	case OP_PlayEverquestRequest:
+		{
+			if(app->Size() < sizeof(PlayEverquestRequest_Struct))
+			{
+				Log.Out(Logs::General, Logs::Error, "Play received but it is too small, discarding.");
+				break;
+			}
+	
+			Handle_Play((const char*)app->pBuffer);
+			break;
+		}
+	default:
+		{
+			char dump[64];
+			app->build_header_dump(dump);
+			Log.Out(Logs::General, Logs::Error, "Recieved unhandled application packet from the client: %s.", dump);
+		}
+	}
 }
 
 void Client::Handle_SessionReady(const char* data, unsigned int size)
@@ -187,13 +178,13 @@ void Client::Handle_Login(const char* data, unsigned int size)
 
 	status = cs_logged_in;
 
-	string entered_username;
-	string entered_password_hash_result;
+	std::string entered_username;
+	std::string entered_password_hash_result;
 
 	char *login_packet_buffer = nullptr;
 
 	unsigned int db_account_id = 0;
-	string db_account_password_hash;
+	std::string db_account_password_hash;
 
 #ifdef WIN32
 	login_packet_buffer = server.eq_crypto->DecryptUsernamePassword(data, size, server.options.GetEncryptionMode());
@@ -252,10 +243,8 @@ void Client::Handle_Login(const char* data, unsigned int size)
 
 		server.client_manager->RemoveExistingClient(db_account_id);
 
-		in_addr in;
-		in.s_addr = connection->GetRemoteIP();
 
-		server.db->UpdateLSAccountData(db_account_id, string(inet_ntoa(in)));
+		server.db->UpdateLSAccountData(db_account_id, connection->RemoteEndpoint());
 		GenerateKey();
 
 		account_id = db_account_id;

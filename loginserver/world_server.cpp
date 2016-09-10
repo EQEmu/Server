@@ -158,7 +158,9 @@ bool WorldServer::Process()
 					if(utwr->response > 0)
 					{
 						per->Allowed = 1;
-						SendClientAuth(c->GetConnection()->GetRemoteIP(), c->GetAccountName(), c->GetKey(), c->GetAccountID());
+
+						std::string remote_ip = c->GetConnection()->RemoteEndpoint();
+						SendClientAuth((unsigned int)inet_addr(remote_ip.c_str()), c->GetAccountName(), c->GetKey(), c->GetAccountID());
 					}
 
 					switch(utwr->response)
@@ -215,9 +217,9 @@ bool WorldServer::Process()
 				if(is_server_trusted)
 				{
 					Log.Out(Logs::General, Logs::Netcode, "ServerOP_LSAccountUpdate update processed for: %s", lsau->useraccount);
-					string name;
-					string password;
-					string email;
+					std::string name;
+					std::string password;
+					std::string email;
 					name.assign(lsau->useraccount);
 					password.assign(lsau->userpassword);
 					email.assign(lsau->useremail);
@@ -372,10 +374,10 @@ void WorldServer::Handle_NewLSInfo(ServerNewLSInfo_Struct* i)
 			unsigned int s_id = 0;
 			unsigned int s_list_type = 0;
 			unsigned int s_trusted = 0;
-			string s_desc;
-			string s_list_desc;
-			string s_acct_name;
-			string s_acct_pass;
+			std::string s_desc;
+			std::string s_list_desc;
+			std::string s_acct_name;
+			std::string s_acct_pass;
 			if(server.db->GetWorldRegistration(long_name, short_name, s_id, s_desc, s_list_type, s_trusted, s_list_desc, s_acct_name, s_acct_pass))
 			{
 				if(s_acct_name.size() == 0 || s_acct_pass.size() == 0)
@@ -424,10 +426,10 @@ void WorldServer::Handle_NewLSInfo(ServerNewLSInfo_Struct* i)
 		unsigned int server_id = 0;
 		unsigned int server_list_type = 0;
 		unsigned int is_server_trusted = 0;
-		string server_description;
-		string server_list_description;
-		string server_account_name;
-		string server_account_password;
+		std::string server_description;
+		std::string server_list_description;
+		std::string server_account_name;
+		std::string server_account_password;
 
 
 		if(server.db->GetWorldRegistration(
@@ -493,7 +495,7 @@ void WorldServer::Handle_NewLSInfo(ServerNewLSInfo_Struct* i)
 
 	in_addr in;
 	in.s_addr = connection->GetrIP();
-	server.db->UpdateWorldRegistration(GetRuntimeID(), long_name, string(inet_ntoa(in)));
+	server.db->UpdateWorldRegistration(GetRuntimeID(), long_name, std::string(inet_ntoa(in)));
 
 	if(is_server_authorized)
 	{
@@ -508,7 +510,7 @@ void WorldServer::Handle_LSStatus(ServerLSStatus_Struct *s)
 	server_status = s->status;
 }
 
-void WorldServer::SendClientAuth(unsigned int ip, string account, string key, unsigned int account_id)
+void WorldServer::SendClientAuth(unsigned int ip, std::string account, std::string key, unsigned int account_id)
 {
 	ServerPacket *outapp = new ServerPacket(ServerOP_LSClientAuth, sizeof(ClientAuth_Struct));
 	ClientAuth_Struct* client_auth = (ClientAuth_Struct*)outapp->pBuffer;
@@ -522,14 +524,14 @@ void WorldServer::SendClientAuth(unsigned int ip, string account, string key, un
 
 	in_addr in;
 	in.s_addr = ip; connection->GetrIP();
-	string client_address(inet_ntoa(in));
+	std::string client_address(inet_ntoa(in));
 	in.s_addr = connection->GetrIP();
-	string world_address(inet_ntoa(in));
+	std::string world_address(inet_ntoa(in));
 
 	if (client_address.compare(world_address) == 0) {
 		client_auth->local = 1;
 	}
-	else if (client_address.find(server.options.GetLocalNetwork()) != string::npos) {
+	else if (client_address.find(server.options.GetLocalNetwork()) != std::string::npos) {
 		client_auth->local = 1;
 	}
 	else {

@@ -64,7 +64,6 @@ namespace EQEmu
 	#undef max
 #endif
 
-#include <float.h>
 #include <set>
 #include <algorithm>
 #include <memory>
