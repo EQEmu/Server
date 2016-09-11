@@ -2529,6 +2529,8 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 
 			case SE_ImmuneFleeing:
 				new_bonus->ImmuneToFlee = true;
+				if (currently_fleeing) // lets update shit now instead of next tick
+					ProcessFlee();
 				break;
 
 			case SE_DelayDeath:

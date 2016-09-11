@@ -1312,6 +1312,7 @@ bool ZoneServer::Process() {
 			case ServerOP_CZSignalNPC:
 			case ServerOP_CZSetEntityVariableByNPCTypeID:
 			case ServerOP_CZSignalClient:
+			case ServerOP_WWMarquee:
 			case ServerOP_DepopAllPlayersCorpses:
 			case ServerOP_DepopPlayerCorpse:
 			case ServerOP_ReloadTitles:

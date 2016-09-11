@@ -185,6 +185,11 @@ uint32 Lua_Client::GetAAExp() {
 	return self->GetAAXP();
 }
 
+uint32 Lua_Client::GetAAPercent() {
+	Lua_Safe_Call_Int();
+	return self->GetAAPercent();
+}
+
 uint32 Lua_Client::GetTotalSecondsPlayed() {
 	Lua_Safe_Call_Int();
 	return self->GetTotalSecondsPlayed();
@@ -1377,6 +1382,7 @@ luabind::scope lua_register_client() {
 		.def("GetWeight", (int(Lua_Client::*)(void))&Lua_Client::GetWeight)
 		.def("GetEXP", (uint32(Lua_Client::*)(void))&Lua_Client::GetEXP)
 		.def("GetAAExp", (uint32(Lua_Client::*)(void))&Lua_Client::GetAAExp)
+		.def("GetAAPercent", (uint32(Lua_Client::*)(void))&Lua_Client::GetAAPercent)
 		.def("GetTotalSecondsPlayed", (uint32(Lua_Client::*)(void))&Lua_Client::GetTotalSecondsPlayed)
 		.def("UpdateLDoNPoints", (void(Lua_Client::*)(int,uint32))&Lua_Client::UpdateLDoNPoints)
 		.def("SetDeity", (void(Lua_Client::*)(int))&Lua_Client::SetDeity)
