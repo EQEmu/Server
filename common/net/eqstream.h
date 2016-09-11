@@ -12,11 +12,25 @@ namespace EQ
 		struct EQStreamManagerOptions
 		{
 			EQStreamManagerOptions() {
-				compressed = false;
+				
+			}
+
+			EQStreamManagerOptions(bool encoded, bool compressed) {
+				if (encoded) {
+					daybreak_options.encode_passes[0] = EncodeXOR;
+
+					if (compressed) {
+						daybreak_options.encode_passes[1] = EncodeCompression;
+					}
+				}
+				else {
+					if (compressed) {
+						daybreak_options.encode_passes[0] = EncodeCompression;
+					}
+				}
 			}
 
 			DaybreakConnectionManagerOptions daybreak_options;
-			bool compressed;
 		};
 
 		class EQStream;
@@ -55,13 +69,13 @@ namespace EQ
 			const std::string& RemoteEndpoint() const { return m_connection->RemoteEndpoint(); }
 			int RemotePort() const { return m_connection->RemotePort(); }
 
-			void QueuePacket(EmuOpcode type, Packet &p);
+			void QueuePacket(EmuOpcode type, const Packet &p);
 			const DaybreakConnectionStats& GetStats() const { return m_connection->GetStats(); }
 			void ResetStats();
 			size_t GetRollingPing() const { return m_connection->GetRollingPing(); }
 			void Close();
-			void QueuePacket(EQApplicationPacket *p);
-			void FastQueuePacket(EQApplicationPacket **p);
+			void QueuePacket(const EQApplicationPacket *p);
+			void FastQueuePacket(const EQApplicationPacket **p);
 
 			void RegisterPatch(EQ::Patches::BasePatch *p) { m_patch = p; }
 			EQ::Patches::BasePatch *GetRegisteredPatch() { return m_patch; }

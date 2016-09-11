@@ -17,15 +17,14 @@
 
 */
 
-#include "../common/global_define.h"
-#include "../common/string_util.h"
-#include "../common/eqemu_logsys.h"
+#include <global_define.h>
+#include <string_util.h>
+#include <eqemu_logsys.h>
 
 #include "clientlist.h"
 #include "database.h"
 #include "chatchannel.h"
 
-#include "../common/eq_stream_factory.h"
 #include "../common/emu_tcp_connection.h"
 #include "../common/emu_tcp_server.h"
 #include <list>
@@ -468,24 +467,20 @@ static void ProcessCommandIgnore(Client *c, std::string Ignoree) {
 
 }
 Clientlist::Clientlist(int ChatPort) {
+	EQ::Net::EQStreamManagerOptions opts(true, false);
+	opts.daybreak_options.port = ChatPort;
 
-	chatsf = new EQStreamFactory(ChatStream, ChatPort, 45000);
+	chatsf.reset(new EQ::Net::EQStreamManager(opts));
+	chat_patch.reset(new EQ::Patches::ChatPatch());
+	chatsf->RegisterPotentialPatch(chat_patch.get());
 
-	ChatOpMgr = new RegularOpcodeManager;
-
-	if(!ChatOpMgr->LoadOpcodes("mail_opcodes.conf"))
-		exit(1);
-
-	if (chatsf->Open())
-		Log.Out(Logs::Detail, Logs::UCS_Server,"Client (UDP) Chat listener started on port %i.", ChatPort);
-	else {
-		Log.Out(Logs::Detail, Logs::UCS_Server,"Failed to start client (UDP) listener (port %-4i)", ChatPort);
-
-		exit(1);
-	}
+	chatsf->OnNewConnection(std::bind(&Clientlist::HandleNewConnection, this, std::placeholders::_1));
+	chatsf->OnConnectionStateChange(std::bind(&Clientlist::HandleConnectionChange, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
+	chatsf->OnPacketRecv(std::bind(&Clientlist::HandlePacket, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 }
 
-Client::Client(std::shared_ptr<EQStream> eqs) {
+Client::Client(std::shared_ptr<EQ::Net::EQStream> eqs) :
+	AccountGrabUpdateTimer(60000, true, std::bind(&Client::AccountUpdate, this)) {
 
 	ClientStream = eqs;
 
@@ -509,7 +504,6 @@ Client::Client(std::shared_ptr<EQStream> eqs) {
 	AttemptedMessages = 0;
 	ForceDisconnect = false;
 
-	AccountGrabUpdateTimer = new Timer(60000); //check every minute
 	GlobalChatLimiterTimer = new Timer(RuleI(Chat, IntervalDurationMS));
 
 	TypeOfConnection = ConnectionTypeUnknown;
@@ -523,12 +517,6 @@ Client::~Client() {
 
 	LeaveAllChannels(false);
 
-	if(AccountGrabUpdateTimer)
-	{
-		delete AccountGrabUpdateTimer;
-		AccountGrabUpdateTimer = nullptr;
-	}
-
 	if(GlobalChatLimiterTimer)
 	{
 		delete GlobalChatLimiterTimer;
@@ -537,166 +525,96 @@ Client::~Client() {
 }
 
 void Client::CloseConnection() {
-
-	ClientStream->RemoveData();
-
 	ClientStream->Close();
-
-	ClientStream->ReleaseFromUse();
 }
 
 void Clientlist::CheckForStaleConnections(Client *c) {
 
-	if(!c) return;
+	if(!c) 
+		return;
 
-	std::list<Client*>::iterator Iterator;
+	for(auto Iterator = ClientChatConnections.begin(); Iterator != ClientChatConnections.end(); ++Iterator) {
 
-	for(Iterator = ClientChatConnections.begin(); Iterator != ClientChatConnections.end(); ++Iterator) {
-
-		if(((*Iterator) != c) && ((c->GetName() == (*Iterator)->GetName())
+		if(((*Iterator).get() != c) && ((c->GetName() == (*Iterator)->GetName())
 				&& (c->GetConnectionType() == (*Iterator)->GetConnectionType()))) {
 
 			Log.Out(Logs::Detail, Logs::UCS_Server, "Removing old connection for %s", c->GetName().c_str());
 
-			struct in_addr in;
-
-			in.s_addr = (*Iterator)->ClientStream->GetRemoteIP();
-
-			Log.Out(Logs::Detail, Logs::UCS_Server, "Client connection from %s:%d closed.", inet_ntoa(in),
-									ntohs((*Iterator)->ClientStream->GetRemotePort()));
-
-			safe_delete((*Iterator));
+			Log.Out(Logs::Detail, Logs::UCS_Server, "Client connection from %s:%d closed.", (*Iterator)->ClientStream->RemoteEndpoint().c_str(),
+				(*Iterator)->ClientStream->RemotePort());
 
 			Iterator = ClientChatConnections.erase(Iterator);
 		}
 	}
 }
 
-void Clientlist::Process()
+void Clientlist::Process(Client *c, const EQApplicationPacket *app)
 {
-	std::shared_ptr<EQStream> eqs;
-
-	while ((eqs = chatsf->Pop())) {
-		struct in_addr in;
-		in.s_addr = eqs->GetRemoteIP();
-
-		Log.Out(Logs::Detail, Logs::UCS_Server, "New Client UDP connection from %s:%d", inet_ntoa(in),
-			ntohs(eqs->GetRemotePort()));
-
-		eqs->SetOpcodeManager(&ChatOpMgr);
-
-		auto c = new Client(eqs);
-		ClientChatConnections.push_back(c);
-	}
-
-	auto it = ClientChatConnections.begin();
-	while (it != ClientChatConnections.end()) {
-		(*it)->AccountUpdate();
-		if ((*it)->ClientStream->CheckClosed()) {
-			struct in_addr in;
-			in.s_addr = (*it)->ClientStream->GetRemoteIP();
-
-			Log.Out(Logs::Detail, Logs::UCS_Server, "Client connection from %s:%d closed.", inet_ntoa(in),
-				ntohs((*it)->ClientStream->GetRemotePort()));
-
-			safe_delete((*it));
-
-			it = ClientChatConnections.erase(it);
-			continue;
-		}
-
-		EQApplicationPacket *app = nullptr;
-
-		bool KeyValid = true;
-
-		while (KeyValid && !(*it)->GetForceDisconnect() && (app = (*it)->ClientStream->PopPacket())) {
-			EmuOpcode opcode = app->GetOpcode();
-
-			switch (opcode) {
-			case OP_MailLogin: {
-				char *PacketBuffer = (char *)app->pBuffer;
-				char MailBox[64];
-				char Key[64];
-				char ConnectionTypeIndicator;
-
-				VARSTRUCT_DECODE_STRING(MailBox, PacketBuffer);
-
-				if (strlen(PacketBuffer) != 9) {
-					Log.Out(Logs::Detail, Logs::UCS_Server,
-						"Mail key is the wrong size. Version of world incompatible with UCS.");
-					KeyValid = false;
-					break;
-				}
-				ConnectionTypeIndicator = VARSTRUCT_DECODE_TYPE(char, PacketBuffer);
-
-				(*it)->SetConnectionType(ConnectionTypeIndicator);
-
-				VARSTRUCT_DECODE_STRING(Key, PacketBuffer);
-
-				std::string MailBoxString = MailBox, CharacterName;
-
-				// Strip off the SOE.EQ.<shortname>.
-				//
-				std::string::size_type LastPeriod = MailBoxString.find_last_of(".");
-
-				if (LastPeriod == std::string::npos)
-					CharacterName = MailBoxString;
-				else
-					CharacterName = MailBoxString.substr(LastPeriod + 1);
-
-				Log.Out(Logs::Detail, Logs::UCS_Server, "Received login for user %s with key %s",
-					MailBox, Key);
-
-				if (!database.VerifyMailKey(CharacterName, (*it)->ClientStream->GetRemoteIP(), Key)) {
-					Log.Out(Logs::Detail, Logs::UCS_Server,
-						"Chat Key for %s does not match, closing connection.", MailBox);
-					KeyValid = false;
-					break;
-				}
-
-				(*it)->SetAccountID(database.FindAccount(CharacterName.c_str(), (*it)));
-
-				database.GetAccountStatus((*it));
-
-				if ((*it)->GetConnectionType() == ConnectionTypeCombined)
-					(*it)->SendFriends();
-
-				(*it)->SendMailBoxes();
-
-				CheckForStaleConnections((*it));
-				break;
-			}
-
-			case OP_Mail: {
-				std::string CommandString = (const char *)app->pBuffer;
-				ProcessOPMailCommand((*it), CommandString);
-				break;
-			}
-
-			default: {
-				Log.Out(Logs::Detail, Logs::UCS_Server, "Unhandled chat opcode %8X", opcode);
-				break;
-			}
-			}
-			safe_delete(app);
-		}
-		if (!KeyValid || (*it)->GetForceDisconnect()) {
-			struct in_addr in;
-			in.s_addr = (*it)->ClientStream->GetRemoteIP();
-
+	EmuOpcode opcode = app->GetOpcode();
+	
+	switch (opcode) {
+	case OP_MailLogin: {
+		char *PacketBuffer = (char *)app->pBuffer + 1;
+		char MailBox[64];
+		char Key[64];
+		char ConnectionTypeIndicator;
+	
+		VARSTRUCT_DECODE_STRING(MailBox, PacketBuffer);
+	
+		if (strlen(PacketBuffer) != 9) {
 			Log.Out(Logs::Detail, Logs::UCS_Server,
-				"Force disconnecting client: %s:%d, KeyValid=%i, GetForceDisconnect()=%i",
-				inet_ntoa(in), ntohs((*it)->ClientStream->GetRemotePort()), KeyValid,
-				(*it)->GetForceDisconnect());
-
-			(*it)->ClientStream->Close();
-
-			safe_delete((*it));
-
-			it = ClientChatConnections.erase(it);
-			continue;
+				"Mail key is the wrong size. Version of world incompatible with UCS.");
+			break;
 		}
-		++it;
+		ConnectionTypeIndicator = VARSTRUCT_DECODE_TYPE(char, PacketBuffer);
+	
+		c->SetConnectionType(ConnectionTypeIndicator);
+	
+		VARSTRUCT_DECODE_STRING(Key, PacketBuffer);
+	
+		std::string MailBoxString = MailBox, CharacterName;
+	
+		// Strip off the SOE.EQ.<shortname>.
+		//
+		std::string::size_type LastPeriod = MailBoxString.find_last_of(".");
+	
+		if (LastPeriod == std::string::npos)
+			CharacterName = MailBoxString;
+		else
+			CharacterName = MailBoxString.substr(LastPeriod + 1);
+	
+		Log.Out(Logs::Detail, Logs::UCS_Server, "Received login for user %s with key %s",
+			MailBox, Key);
+	
+		if (!database.VerifyMailKey(CharacterName, inet_addr(c->ClientStream->RemoteEndpoint().c_str()), Key)) {
+			Log.Out(Logs::Detail, Logs::UCS_Server,
+				"Chat Key for %s does not match, closing connection.", MailBox);
+			break;
+		}
+	
+		c->SetAccountID(database.FindAccount(CharacterName.c_str(), c));
+	
+		database.GetAccountStatus(c);
+	
+		if (c->GetConnectionType() == ConnectionTypeCombined)
+			c->SendFriends();
+	
+		c->SendMailBoxes();
+	
+		CheckForStaleConnections(c);
+		break;
+	}
+	
+	case OP_Mail: {
+		std::string CommandString = (const char *)app->pBuffer + 1;
+		ProcessOPMailCommand(c, CommandString);
+		break;
+	}
+	
+	default: {
+		Log.Out(Logs::Detail, Logs::UCS_Server, "Unhandled chat opcode %8X", opcode);
+		break;
+	}
 	}
 }
 
@@ -857,10 +775,7 @@ void Clientlist::ProcessOPMailCommand(Client *c, std::string CommandString)
 
 void Clientlist::CloseAllConnections() {
 
-
-	std::list<Client*>::iterator Iterator;
-
-	for(Iterator = ClientChatConnections.begin(); Iterator != ClientChatConnections.end(); ++Iterator) {
+	for(auto Iterator = ClientChatConnections.begin(); Iterator != ClientChatConnections.end(); ++Iterator) {
 
 		Log.Out(Logs::Detail, Logs::UCS_Server, "Removing client %s", (*Iterator)->GetName().c_str());
 
@@ -916,13 +831,10 @@ void Client::SendMailBoxes() {
 }
 
 Client *Clientlist::FindCharacter(std::string CharacterName) {
-
-	std::list<Client*>::iterator Iterator;
-
-	for(Iterator = ClientChatConnections.begin(); Iterator != ClientChatConnections.end(); ++Iterator) {
+	for(auto Iterator = ClientChatConnections.begin(); Iterator != ClientChatConnections.end(); ++Iterator) {
 
 		if((*Iterator)->GetName() == CharacterName)
-			return ((*Iterator));
+			return ((*Iterator).get());
 
 	}
 
@@ -1198,7 +1110,10 @@ void Client::ProcessChannelList(std::string Input) {
 		GeneralChannelMessage("Channel " + Input + " not found.");
 }
 
-
+void Client::AccountUpdate()
+{
+	database.GetAccountStatus(this);
+}
 
 void Client::SendChannelList() {
 
@@ -2133,18 +2048,6 @@ void Client::SendHelp() {
 	GeneralChannelMessage(";setowner, ;toggleinvites");
 }
 
-void Client::AccountUpdate()
-{
-	if(AccountGrabUpdateTimer)
-	{
-		if(AccountGrabUpdateTimer->Check(false))
-		{
-			AccountGrabUpdateTimer->Start(60000);
-			database.GetAccountStatus(this);
-		}
-	}
-}
-
 void Client::SetConnectionType(char c) {
 
 	switch(c)
@@ -2191,9 +2094,8 @@ Client *Clientlist::IsCharacterOnline(std::string CharacterName) {
 	// i.e. for the character they are logged in as, or for the character whose mailbox they have selected in the
 	// mail window.
 	//
-	std::list<Client*>::iterator Iterator;
 
-	for(Iterator = ClientChatConnections.begin(); Iterator != ClientChatConnections.end(); ++Iterator) {
+	for(auto Iterator = ClientChatConnections.begin(); Iterator != ClientChatConnections.end(); ++Iterator) {
 
 		if(!(*Iterator)->IsMailConnection())
 			continue;
@@ -2203,11 +2105,48 @@ Client *Clientlist::IsCharacterOnline(std::string CharacterName) {
 		// If the mail is destined for the primary mailbox for this character, or the one they have selected
 		//
 		if((MailBoxNumber == 0) || (MailBoxNumber == (*Iterator)->GetMailBoxNumber()))
-				return (*Iterator);
+				return (*Iterator).get();
 
 	}
 
 	return nullptr;
+}
+
+void Clientlist::HandleNewConnection(std::shared_ptr<EQ::Net::EQStream> connection)
+{
+	Log.OutF(Logs::Detail, Logs::UCS_Server, "New Client UDP connection from {0}:{1}", connection->RemoteEndpoint(), connection->RemotePort());
+	Client *c = new Client(connection);
+	ClientChatConnections.push_back(std::unique_ptr<Client>(c));
+}
+
+void Clientlist::HandleConnectionChange(std::shared_ptr<EQ::Net::EQStream> connection, EQ::Net::DbProtocolStatus old_status, EQ::Net::DbProtocolStatus new_status)
+{
+	if (new_status == EQ::Net::DbProtocolStatus::StatusDisconnected) {
+		Log.OutF(Logs::Detail, Logs::UCS_Server, "Client connection from {0}:{1} closed.", connection->RemoteEndpoint(), connection->RemotePort());
+		auto iter = ClientChatConnections.begin();
+		while (iter != ClientChatConnections.end()) {
+			if ((*iter)->ClientStream == connection) {
+				ClientChatConnections.erase(iter);
+				break;
+			}
+			++iter;
+		}
+	}
+}
+
+void Clientlist::HandlePacket(std::shared_ptr<EQ::Net::EQStream> connection, EmuOpcode opcode, EQ::Net::Packet &p)
+{
+	auto iter = ClientChatConnections.begin();
+	while (iter != ClientChatConnections.end()) {
+		if ((*iter)->ClientStream == connection) {
+			Log.OutF(Logs::General, Logs::UCS_Server, "{0}", p.ToString());
+			EQApplicationPacket app(opcode, (unsigned char*)p.Data(), (uint32)p.Length());
+			Process((*iter).get(), &app);
+			return;
+		}
+	
+		++iter;
+	}
 }
 
 int Client::GetMailBoxNumber(std::string CharacterName) {

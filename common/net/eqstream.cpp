@@ -84,7 +84,7 @@ EQ::Net::EQStream::~EQStream()
 {
 }
 
-void EQ::Net::EQStream::QueuePacket(EmuOpcode type, Packet &p)
+void EQ::Net::EQStream::QueuePacket(EmuOpcode type, const Packet &p)
 {
 	if (m_patch) {
 		EQ::Net::WritablePacket trans;
@@ -101,14 +101,14 @@ void EQ::Net::EQStream::Close()
 {
 }
 
-void EQ::Net::EQStream::QueuePacket(EQApplicationPacket *p)
+void EQ::Net::EQStream::QueuePacket(const EQApplicationPacket *p)
 {
 	EQ::Net::ReadOnlyPacket out(p->pBuffer, p->size);
 	QueuePacket(p->GetOpcode(), out);
 
 }
 
-void EQ::Net::EQStream::FastQueuePacket(EQApplicationPacket **p)
+void EQ::Net::EQStream::FastQueuePacket(const EQApplicationPacket **p)
 {
 	QueuePacket(*p);
 	delete *p;

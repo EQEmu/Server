@@ -3,7 +3,7 @@
 EQ::Patches::LoginTitaniumPatch::LoginTitaniumPatch()
 {
 	m_opcode_manager.reset(new RegularOpcodeManager());
-	if (!m_opcode_manager->LoadOpcodes("login_opcodes_titanium.conf")) {
+	if (!m_opcode_manager->LoadOpcodes("login_opcodes.conf")) {
 		m_opcode_manager.release();
 	}
 

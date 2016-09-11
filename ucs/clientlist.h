@@ -20,13 +20,14 @@
 #ifndef CHATSERVER_CLIENTLIST_H
 #define CHATSERVER_CLIENTLIST_H
 
-#include "../common/opcodemgr.h"
-#include "../common/eq_stream_type.h"
-#include "../common/eq_stream_factory.h"
-#include "../common/rulesys.h"
+#include <net/eqstream.h>
+#include <rulesys.h>
+#include <patch/chat.h>
+#include <event/timer.h>
 #include "chatchannel.h"
 #include <list>
 #include <vector>
+#include <memory>
 
 #define MAX_JOINED_CHANNELS 10
 
@@ -84,14 +85,14 @@ struct CharacterEntry {
 class Client {
 
 public:
-	Client(std::shared_ptr<EQStream> eqs);
+	Client(std::shared_ptr<EQ::Net::EQStream> eqs);
 	~Client();
 
-	std::shared_ptr<EQStream> ClientStream;
+	std::shared_ptr<EQ::Net::EQStream> ClientStream;
 	void AddCharacter(int CharID, const char *CharacterName, int Level);
 	void ClearCharacters() { Characters.clear(); }
 	void SendMailBoxes();
-	inline void QueuePacket(const EQApplicationPacket *p, bool ack_req=true) { ClientStream->QueuePacket(p, ack_req); }
+	inline void QueuePacket(const EQApplicationPacket *p) { ClientStream->QueuePacket(p); }
 	std::string GetName() { if(Characters.size()) return Characters[0].Name; else return ""; }
 	void JoinChannels(std::string ChannelList);
 	void LeaveChannels(std::string ChannelList);
@@ -162,10 +163,10 @@ private:
 	bool Revoked;
 
 	//Anti Spam Stuff
-	Timer *AccountGrabUpdateTimer;
 	uint32 TotalKarma;
 
 	Timer *GlobalChatLimiterTimer; //60 seconds
+	EQ::Timer AccountGrabUpdateTimer;
 	int AttemptedMessages;
 	bool ForceDisconnect;
 	ConnectionType TypeOfConnection;
@@ -176,7 +177,7 @@ class Clientlist {
 
 public:
 	Clientlist(int MailPort);
-	void	Process();
+	void	Process(Client *c, const EQApplicationPacket *app);
 	void	CloseAllConnections();
 	Client *FindCharacter(std::string CharacterName);
 	void	CheckForStaleConnections(Client *c);
@@ -184,12 +185,13 @@ public:
 	void ProcessOPMailCommand(Client *c, std::string CommandString);
 
 private:
+	void HandleNewConnection(std::shared_ptr<EQ::Net::EQStream> connection);
+	void HandleConnectionChange(std::shared_ptr<EQ::Net::EQStream> connection, EQ::Net::DbProtocolStatus old_status, EQ::Net::DbProtocolStatus new_status);
+	void HandlePacket(std::shared_ptr<EQ::Net::EQStream> connection, EmuOpcode opcode, EQ::Net::Packet &p);
 
-	EQStreamFactory *chatsf;
-
-	std::list<Client*> ClientChatConnections;
-
-	OpcodeManager *ChatOpMgr;
+	std::unique_ptr<EQ::Net::EQStreamManager> chatsf;
+	std::unique_ptr<EQ::Patches::BasePatch> chat_patch;
+	std::list<std::unique_ptr<Client>> ClientChatConnections;
 };
 
 #endif

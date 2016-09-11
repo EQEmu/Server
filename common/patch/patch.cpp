@@ -19,7 +19,7 @@ EQ::Patches::IdentityMatchStatus EQ::Patches::BasePatch::TryIdentityMatch(const 
 		return IdentityMatchFailure;
 	}
 
-	if (m_signature.match_message_opcode != raw_opcode) {
+	if (m_signature.match_message_opcode != 0 && m_signature.match_message_opcode != raw_opcode) {
 		return IdentityMatchFailure;
 	}
 

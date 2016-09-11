@@ -17,15 +17,15 @@
 
 */
 
-#include "../common/eqemu_logsys.h"
-#include "../common/global_define.h"
+#include <eqemu_logsys.h>
+#include <global_define.h>
+#include <timeoutmgr.h>
 #include "clientlist.h"
-#include "../common/opcodemgr.h"
-#include "../common/eq_stream_factory.h"
-#include "../common/rulesys.h"
-#include "../common/servertalk.h"
-#include "../common/platform.h"
-#include "../common/crash.h"
+#include <rulesys.h>
+#include <servertalk.h>
+#include <platform.h>
+#include <crash.h>
+#include <event/event_loop.h>
 #include "database.h"
 #include "ucsconfig.h"
 #include "chatchannel.h"
@@ -143,11 +143,10 @@ int main() {
 
 	worldserver->Connect();
 
+	auto &loop = EQ::EventLoop::Get();
 	while(RunLoops) {
 
 		Timer::SetCurrentTime();
-
-		g_Clientlist->Process();
 
 		if(ChannelListProcessTimer.Check())
 			ChannelList->Process();
@@ -160,7 +159,9 @@ int main() {
 
 		timeout_manager.CheckTimeouts();
 
-		Sleep(100);
+		loop.Process();
+
+		Sleep(1);
 	}
 
 	ChannelList->RemoveAllChannels();

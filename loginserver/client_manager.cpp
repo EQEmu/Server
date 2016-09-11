@@ -30,7 +30,6 @@ ClientManager::ClientManager()
 	titanium_patch.reset(new EQ::Patches::LoginTitaniumPatch());
 	titanium_stream->RegisterPotentialPatch(titanium_patch.get());
 
-	titanium_stream->OnNewConnection(std::bind(&ClientManager::HandleNewConnectionSod, this, std::placeholders::_1));
 	titanium_stream->OnNewConnection(std::bind(&ClientManager::HandleNewConnectionTitanium, this, std::placeholders::_1));
 	titanium_stream->OnConnectionStateChange(std::bind(&ClientManager::HandleConnectionChange, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 	titanium_stream->OnPacketRecv(std::bind(&ClientManager::HandlePacket, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
@@ -42,11 +41,8 @@ ClientManager::ClientManager()
 	sod_stream->RegisterPotentialPatch(sod_patch.get());
 
 	sod_stream->OnNewConnection(std::bind(&ClientManager::HandleNewConnectionSod, this, std::placeholders::_1));
-	sod_stream->OnNewConnection(std::bind(&ClientManager::HandleNewConnectionSod, this, std::placeholders::_1));
 	sod_stream->OnConnectionStateChange(std::bind(&ClientManager::HandleConnectionChange, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 	sod_stream->OnPacketRecv(std::bind(&ClientManager::HandlePacket, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
-
-
 }
 
 ClientManager::~ClientManager()

@@ -79,6 +79,7 @@ SET(common_sources
 	net/daybreak_connection.cpp
 	net/eqstream.cpp
 	net/packet.cpp
+	patch/chat.cpp
 	patch/login_sod.cpp
 	patch/login_titanium.cpp
 	patch/patch.cpp
@@ -226,6 +227,7 @@ SET(common_headers
 	net/endian.h
 	net/eqstream.h
 	net/packet.h
+	patch/chat.h
 	patch/login_sod.h
 	patch/login_titanium.h
 	patch/patch.h
@@ -303,6 +305,8 @@ SOURCE_GROUP(Net FILES
 )
 
 SOURCE_GROUP(Patch FILES
+	patch/chat.cpp
+	patch/chat.h
 	patch/login_sod.cpp
 	patch/login_sod.h
 	patch/login_titanium.cpp
