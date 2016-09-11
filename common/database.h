@@ -189,6 +189,8 @@ public:
 	
 	int		GetIPExemption(std::string account_ip);
 
+	int		GetInstanceID(uint32 char_id, uint32 zone_id);
+
 
 	/* Groups */
 	

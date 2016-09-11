@@ -1007,6 +1007,7 @@ void command_summon(Client *c, const Seperator *sep)
 				szp->x_pos = c->GetX(); // May need to add a factor of 8 in here..
 				szp->y_pos = c->GetY();
 				szp->z_pos = c->GetZ();
+				szp->instance_id = zone->GetInstanceID();
 				worldserver.SendPacket(pack);
 				safe_delete(pack);
 			}

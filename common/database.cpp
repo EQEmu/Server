@@ -2148,3 +2148,15 @@ int Database::GetIPExemption(std::string account_ip) {
 	
 	return RuleI(World, MaxClientsPerIP);
 }
+
+int Database::GetInstanceID(uint32 char_id, uint32 zone_id) {
+	std::string query = StringFormat("SELECT instance_list.id FROM instance_list INNER JOIN instance_list_player ON instance_list.id = instance_list_player.id WHERE instance_list.zone = '%i' AND instance_list_player.charid = '%i'", zone_id, char_id);
+	auto results = QueryDatabase(query);
+
+	if (results.Success() && results.RowCount() > 0) {
+		auto row = results.begin();
+		return atoi(row[0]);;
+	}
+
+	return 0;
+}
