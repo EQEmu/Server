@@ -14,33 +14,12 @@ if (FMT_CPPFORMAT)
   add_library(cppformat ${FMT_SOURCES} ${FMT_HEADERS})
 endif ()
 
-target_include_directories(fmt INTERFACE
+include_directories(fmt INTERFACE
   $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}>
   $<INSTALL_INTERFACE:include>)
 
 set_target_properties(fmt PROPERTIES
   VERSION ${FMT_VERSION} SOVERSION ${CPACK_PACKAGE_VERSION_MAJOR})
-
-if (BUILD_SHARED_LIBS)
-  if (UNIX AND NOT APPLE)
-    # Fix rpmlint warning:
-    # unused-direct-shlib-dependency /usr/lib/libformat.so.1.1.0 /lib/libm.so.6.
-    target_link_libraries(fmt -Wl,--as-needed)
-  endif ()
-  target_compile_definitions(fmt PRIVATE FMT_EXPORT INTERFACE FMT_SHARED)
-endif ()
-
-#------------------------------------------------------------------------------
-# additionally define a header only library when cmake is new enough
-if (CMAKE_VERSION VERSION_GREATER 3.1.0 OR CMAKE_VERSION VERSION_EQUAL 3.1.0)
-  add_library(fmt-header-only INTERFACE)
-
-  target_compile_definitions(fmt-header-only INTERFACE FMT_HEADER_ONLY=1)
-
-  target_include_directories(fmt-header-only INTERFACE
-    $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}>
-    $<INSTALL_INTERFACE:include>)
-endif ()
 
 # Install targets.
 if (FMT_INSTALL)
