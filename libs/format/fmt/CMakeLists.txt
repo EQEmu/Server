@@ -15,7 +15,7 @@ if (FMT_CPPFORMAT)
 endif ()
 
 # Starting with cmake 3.1 the CXX_STANDARD property can be used instead.
-target_compile_options(fmt PUBLIC ${CPP11_FLAG})
+add_compile_options(${CPP11_FLAG})
 if (FMT_PEDANTIC)
   target_compile_options(fmt PRIVATE ${PEDANTIC_COMPILE_FLAGS})
 endif ()
