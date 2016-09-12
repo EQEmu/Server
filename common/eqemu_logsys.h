@@ -19,6 +19,7 @@
 #ifndef EQEMU_LOGSYS_H
 #define EQEMU_LOGSYS_H
 
+#include <fmt/format.h>
 #include <iostream>
 #include <fstream>
 #include <stdio.h>
@@ -156,6 +157,13 @@ public:
 	void Out(Logs::DebugLevel debug_level, uint16 log_category, std::string message, ...);
 	void SetCurrentTimeStamp(char* time_stamp); /* Used in file logs to prepend a timestamp entry for logs */ 
 	void StartFileLogs(const std::string &log_name = ""); /* Used to declare the processes file log and to keep it open for later use */
+
+	template <typename... Args>
+	void OutF(Logs::DebugLevel debug_level, uint16 log_category, const char *fmt, const Args&... args)
+	{
+		std::string log_str = fmt::format(fmt, args...);
+		Out(debug_level, log_category, log_str);
+	}
 
 	/*
 		LogSettings Struct

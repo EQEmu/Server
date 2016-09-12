@@ -2114,7 +2114,7 @@ Client *Clientlist::IsCharacterOnline(std::string CharacterName) {
 
 void Clientlist::HandleNewConnection(std::shared_ptr<EQ::Net::EQStream> connection)
 {
-	Log.Out(Logs::Detail, Logs::UCS_Server, "New Client UDP connection from %s:%d", connection->RemoteEndpoint().c_str(), connection->RemotePort());
+	Log.OutF(Logs::Detail, Logs::UCS_Server, "New Client UDP connection from {0}:{1}", connection->RemoteEndpoint(), connection->RemotePort());
 	Client *c = new Client(connection);
 	ClientChatConnections.push_back(std::unique_ptr<Client>(c));
 }
@@ -2122,7 +2122,7 @@ void Clientlist::HandleNewConnection(std::shared_ptr<EQ::Net::EQStream> connecti
 void Clientlist::HandleConnectionChange(std::shared_ptr<EQ::Net::EQStream> connection, EQ::Net::DbProtocolStatus old_status, EQ::Net::DbProtocolStatus new_status)
 {
 	if (new_status == EQ::Net::DbProtocolStatus::StatusDisconnected) {
-		Log.Out(Logs::Detail, Logs::UCS_Server, "Client connection from %s:%d closed.", connection->RemoteEndpoint().c_str(), connection->RemotePort());
+		Log.OutF(Logs::Detail, Logs::UCS_Server, "Client connection from {0}:{1} closed.", connection->RemoteEndpoint(), connection->RemotePort());
 		auto iter = ClientChatConnections.begin();
 		while (iter != ClientChatConnections.end()) {
 			if ((*iter)->ClientStream == connection) {
@@ -2139,6 +2139,7 @@ void Clientlist::HandlePacket(std::shared_ptr<EQ::Net::EQStream> connection, Emu
 	auto iter = ClientChatConnections.begin();
 	while (iter != ClientChatConnections.end()) {
 		if ((*iter)->ClientStream == connection) {
+			Log.OutF(Logs::General, Logs::UCS_Server, "{0}", p.ToString());
 			EQApplicationPacket app(opcode, (unsigned char*)p.Data(), (uint32)p.Length());
 			Process((*iter).get(), &app);
 			return;
