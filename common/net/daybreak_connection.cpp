@@ -250,7 +250,7 @@ EQ::Net::DaybreakConnection::DaybreakConnection(DaybreakConnectionManager *owner
 	m_hold_time = Clock::now();
 	m_buffered_packets_length = 0;
 	m_resend_delay = m_owner->m_options.resend_delay_ms;
-	m_rolling_ping = 1000;
+	m_rolling_ping = 100;
 }
 
 //new connection made as client
@@ -269,7 +269,7 @@ EQ::Net::DaybreakConnection::DaybreakConnection(DaybreakConnectionManager *owner
 	m_hold_time = Clock::now();
 	m_buffered_packets_length = 0;
 	m_resend_delay = m_owner->m_options.resend_delay_ms;
-	m_rolling_ping = 1000;
+	m_rolling_ping = 100;
 }
 
 EQ::Net::DaybreakConnection::~DaybreakConnection()

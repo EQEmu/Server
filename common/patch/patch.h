@@ -26,7 +26,7 @@ namespace EQ
 		class BasePatch
 		{
 		public:
-			typedef std::function<void(const EQ::Net::Packet*, EmuOpcode&, EQ::Net::WritablePacket&)> DecodeStructFunction;
+			typedef std::function<void(const EQ::Net::Packet*, EmuOpcode, EQ::Net::WritablePacket&)> DecodeStructFunction;
 			typedef std::function<void(std::shared_ptr<EQ::Net::DaybreakConnection>, EmuOpcode, const EQ::Net::Packet*)> EncodeStructFunction;
 
 			BasePatch() { }
