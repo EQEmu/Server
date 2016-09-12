@@ -15,15 +15,15 @@
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
-#include <global_define.h>
-#include <types.h>
-#include <opcodemgr.h>
-#include <eq_stream_factory.h>
-#include <timer.h>
-#include <platform.h>
-#include <crash.h>
-#include <eqemu_logsys.h>
-#include <event/timer.h>
+#include "../common/global_define.h"
+#include "../common/types.h"
+#include "../common/opcodemgr.h"
+#include "../common/eq_stream_factory.h"
+#include "../common/timer.h"
+#include "../common/platform.h"
+#include "../common/crash.h"
+#include "../common/eqemu_logsys.h"
+#include "../common/event/timer.h"
 #include "login_server.h"
 #include <time.h>
 #include <stdlib.h>

@@ -1,8 +1,8 @@
 #pragma once
 
-#include <random.h>
-#include <net/packet.h>
-#include <net/daybreak_structs.h>
+#include "../random.h"
+#include "packet.h"
+#include "daybreak_structs.h"
 #include <uv.h>
 #include <chrono>
 #include <functional>

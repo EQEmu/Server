@@ -1,7 +1,7 @@
 #include "daybreak_connection.h"
-#include <event/event_loop.h>
-#include <eqemu_logsys.h>
-#include <net/crc32.h>
+#include "../event/event_loop.h"
+#include "../eqemu_logsys.h"
+#include "crc32.h"
 #include <zlib.h>
 #include <sstream>
 

@@ -1,8 +1,8 @@
 #pragma once
 
-#include <opcodemgr.h>
-#include <net/packet.h>
-#include <net/daybreak_connection.h>
+#include "../opcodemgr.h"
+#include "../net/packet.h"
+#include "../net/daybreak_connection.h"
 #include <functional>
 #include <memory>
 #include <map>

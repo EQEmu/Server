@@ -1,5 +1,5 @@
 #include "eqstream.h"
-#include <eqemu_logsys.h>
+#include "../eqemu_logsys.h"
 
 EQ::Net::EQStreamManager::EQStreamManager(EQStreamManagerOptions &options) : m_daybreak(options.daybreak_options)
 {

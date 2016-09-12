@@ -4,7 +4,7 @@
 #include <string>
 #include <stdexcept>
 #include <cstring>
-#include <util/memory_stream.h>
+#include "../util/memory_stream.h"
 #include <cereal/cereal.hpp>
 #include <cereal/archives/binary.hpp>
 

@@ -2,7 +2,7 @@
 
 #include <cereal/cereal.hpp>
 #include <cstdint>
-#include <net/endian.h>
+#include "endian.h"
 
 namespace EQ
 {

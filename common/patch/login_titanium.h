@@ -1,4 +1,4 @@
-#include <patch/patch.h>
+#include "../patch/patch.h"
 
 namespace EQ
 {

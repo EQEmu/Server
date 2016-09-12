@@ -17,15 +17,15 @@
 
 */
 
-#include <eqemu_logsys.h>
-#include <global_define.h>
-#include <timeoutmgr.h>
+#include "../common/eqemu_logsys.h"
+#include "../common/global_define.h"
+#include "../common/timeoutmgr.h"
 #include "clientlist.h"
-#include <rulesys.h>
-#include <servertalk.h>
-#include <platform.h>
-#include <crash.h>
-#include <event/event_loop.h>
+#include "../common/rulesys.h"
+#include "../common/servertalk.h"
+#include "../common/platform.h"
+#include "../common/crash.h"
+#include "../common/event/event_loop.h"
 #include "database.h"
 #include "ucsconfig.h"
 #include "chatchannel.h"

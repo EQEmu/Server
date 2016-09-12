@@ -1,5 +1,5 @@
 #include "patch.h"
-#include <eqemu_logsys.h>
+#include "../eqemu_logsys.h"
 
 EQ::Patches::IdentityMatchStatus EQ::Patches::BasePatch::TryIdentityMatch(const EQ::Net::Packet &p) const
 {

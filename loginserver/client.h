@@ -18,9 +18,9 @@
 #ifndef EQEMU_CLIENT_H
 #define EQEMU_CLIENT_H
 
-#include <global_define.h>
-#include <net/eqstream.h>
-#include <random.h>
+#include "../common/global_define.h"
+#include "../common/net/eqstream.h"
+#include "../common/random.h"
 #ifndef WIN32
 #include "eq_crypto_api.h"
 #endif

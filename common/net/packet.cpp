@@ -1,5 +1,5 @@
 #include "packet.h"
-#include <net/endian.h>
+#include "endian.h"
 #include <fmt/format.h>
 #include <cctype>
 

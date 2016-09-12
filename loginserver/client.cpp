@@ -18,8 +18,8 @@
 #include "client.h"
 #include "login_server.h"
 #include "login_structures.h"
-#include <misc_functions.h>
-#include <eqemu_logsys.h>
+#include "../common/misc_functions.h"
+#include "../common/eqemu_logsys.h"
 
 extern EQEmuLogSys Log;
 extern LoginServer server;

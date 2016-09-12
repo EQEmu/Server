@@ -18,10 +18,10 @@
 #ifndef EQEMU_CLIENTMANAGER_H
 #define EQEMU_CLIENTMANAGER_H
 
-#include <global_define.h>
-#include <net/eqstream.h>
-#include <patch/login_sod.h>
-#include <patch/login_titanium.h>
+#include "../common/global_define.h"
+#include "../common/net/eqstream.h"
+#include "../common/patch/login_sod.h"
+#include "../common/patch/login_titanium.h"
 #include "client.h"
 #include <list>
 #include <memory>

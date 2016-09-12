@@ -20,10 +20,10 @@
 #ifndef CHATSERVER_CLIENTLIST_H
 #define CHATSERVER_CLIENTLIST_H
 
-#include <net/eqstream.h>
-#include <rulesys.h>
-#include <patch/chat.h>
-#include <event/timer.h>
+#include "../common/net/eqstream.h"
+#include "../common/rulesys.h"
+#include "../common/patch/chat.h"
+#include "../common/event/timer.h"
 #include "chatchannel.h"
 #include <list>
 #include <vector>

@@ -1,7 +1,7 @@
 #pragma once
 
-#include <patch/patch.h>
-#include <eq_packet.h>
+#include "../patch/patch.h"
+#include "../eq_packet.h"
 #include "daybreak_connection.h"
 #include <vector>
 

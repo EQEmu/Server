@@ -17,9 +17,9 @@
 
 */
 
-#include <global_define.h>
-#include <string_util.h>
-#include <eqemu_logsys.h>
+#include "../common/global_define.h"
+#include "../common/string_util.h"
+#include "../common/eqemu_logsys.h"
 
 #include "clientlist.h"
 #include "database.h"
