@@ -14,12 +14,6 @@ if (FMT_CPPFORMAT)
   add_library(cppformat ${FMT_SOURCES} ${FMT_HEADERS})
 endif ()
 
-# Starting with cmake 3.1 the CXX_STANDARD property can be used instead.
-add_compile_options(${CPP11_FLAG})
-if (FMT_PEDANTIC)
-  target_compile_options(fmt PRIVATE ${PEDANTIC_COMPILE_FLAGS})
-endif ()
-
 target_include_directories(fmt INTERFACE
   $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}>
   $<INSTALL_INTERFACE:include>)
