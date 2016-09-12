@@ -543,7 +543,18 @@ void WorldServer::Process() {
 				else {
 					SendEmoteMessage(szp->adminname, 0, 0, "Summoning %s to %s %1.1f, %1.1f, %1.1f", szp->name, szp->zone, szp->x_pos, szp->y_pos, szp->z_pos);
 				}
-				client->MovePC(database.GetZoneID(szp->zone), szp->instance_id, szp->x_pos, szp->y_pos, szp->z_pos, client->GetHeading(), szp->ignorerestrictions, GMSummon);
+				if (!szp->instance_id) {
+					client->MovePC(database.GetZoneID(szp->zone), szp->instance_id, szp->x_pos, szp->y_pos, szp->z_pos, client->GetHeading(), szp->ignorerestrictions, GMSummon);
+				} else {
+					if (database.GetInstanceID(client->CharacterID(), database.GetZoneID(szp->zone)) == 0) {
+						client->AssignToInstance(szp->instance_id);
+						client->MovePC(database.GetZoneID(szp->zone), szp->instance_id, szp->x_pos, szp->y_pos, szp->z_pos, client->GetHeading(), szp->ignorerestrictions, GMSummon);
+					} else {
+						client->RemoveFromInstance(database.GetInstanceID(client->CharacterID(), database.GetZoneID(szp->zone)));
+						client->AssignToInstance(szp->instance_id);
+						client->MovePC(database.GetZoneID(szp->zone), szp->instance_id, szp->x_pos, szp->y_pos, szp->z_pos, client->GetHeading(), szp->ignorerestrictions, GMSummon);
+					}
+				}
 			}
 			break;
 		}
