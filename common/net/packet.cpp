@@ -1,6 +1,6 @@
 #include "packet.h"
 #include <net/endian.h>
-#include <fmt/format.h>
+#include <string_util.h>
 #include <cctype>
 
 void EQ::Net::Packet::PutInt8(size_t offset, int8_t value)
@@ -290,12 +290,12 @@ std::string EQ::Net::Packet::ToString(size_t line_length) const
 	char *data = (char*)Data();
 
 	for (i = 0; i < lines; ++i) {
-		ret += fmt::format("{:0>5x} |", i * line_length);
+		ret += StringFormat("%.5x |", i * line_length);
 		std::string hex;
 		std::string ascii;
 		for (size_t j = 0; j < line_length; ++j) {
-			hex += fmt::format(" {:0>2x}", (uint8_t)data[(i * line_length) + j]);
-			ascii += fmt::format("{}", ToSafePrint(data[(i * line_length) + j]));
+			hex += StringFormat(" %.2x", (uint8_t)data[(i * line_length) + j]);
+			ascii += StringFormat("%c", ToSafePrint(data[(i * line_length) + j]));
 		}
 
 		ret += hex;
@@ -305,7 +305,7 @@ std::string EQ::Net::Packet::ToString(size_t line_length) const
 	}
 
 	if (Length() % line_length > 0) {
-		ret += fmt::format("{:0>5x} |", i * line_length);
+		ret += StringFormat("%.5x |", i * line_length);
 
 		size_t non_blank_count = Length() % line_length;
 		size_t blank_count = line_length - non_blank_count;
@@ -313,8 +313,8 @@ std::string EQ::Net::Packet::ToString(size_t line_length) const
 		std::string ascii;
 
 		for (size_t j = 0; j < non_blank_count; ++j) {
-			hex += fmt::format(" {:0>2x}", (uint8_t)data[(i * line_length) + j]);
-			ascii += fmt::format("{}", ToSafePrint(data[(i * line_length) + j]));
+			hex += StringFormat(" %.2x", (uint8_t)data[(i * line_length) + j]);
+			ascii += StringFormat("%x", ToSafePrint(data[(i * line_length) + j]));
 		}
 
 		for (size_t j = 0; j < blank_count; ++j) {

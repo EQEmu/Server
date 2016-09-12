@@ -52,14 +52,14 @@ ClientManager::~ClientManager()
 
 void ClientManager::HandleNewConnectionTitanium(std::shared_ptr<EQ::Net::EQStream> connection)
 {
-	Log.OutF(Logs::General, Logs::Login_Server, "New Titanium client from {0}:{1}", connection->RemoteEndpoint(), connection->RemotePort());
+	Log.Out(Logs::General, Logs::Login_Server, "New Titanium client from %s:%d", connection->RemoteEndpoint().c_str(), connection->RemotePort());
 	Client *c = new Client(connection, cv_titanium);
 	clients.push_back(std::unique_ptr<Client>(c));
 }
 
 void ClientManager::HandleNewConnectionSod(std::shared_ptr<EQ::Net::EQStream> connection)
 {
-	Log.OutF(Logs::General, Logs::Login_Server, "New SoD client from {0}:{1}", connection->RemoteEndpoint(), connection->RemotePort());
+	Log.Out(Logs::General, Logs::Login_Server, "New SoD client from %s:%d", connection->RemoteEndpoint().c_str(), connection->RemotePort());
 	Client *c = new Client(connection, cv_sod);
 	clients.push_back(std::unique_ptr<Client>(c));
 }
@@ -67,7 +67,7 @@ void ClientManager::HandleNewConnectionSod(std::shared_ptr<EQ::Net::EQStream> co
 void ClientManager::HandleConnectionChange(std::shared_ptr<EQ::Net::EQStream> connection, EQ::Net::DbProtocolStatus old_status, EQ::Net::DbProtocolStatus new_status)
 {
 	if (new_status == EQ::Net::DbProtocolStatus::StatusDisconnected) {
-		Log.OutF(Logs::General, Logs::Login_Server, "Client has been disconnected, removing {0}:{1}", connection->RemoteEndpoint(), connection->RemotePort());
+		Log.Out(Logs::General, Logs::Login_Server, "Client has been disconnected, removing %s:%d", connection->RemoteEndpoint().c_str(), connection->RemotePort());
 		auto iter = clients.begin();
 		while (iter != clients.end()) {
 			if ((*iter)->GetConnection() == connection) {

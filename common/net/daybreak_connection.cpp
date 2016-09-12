@@ -165,7 +165,7 @@ void EQ::Net::DaybreakConnectionManager::ProcessResend()
 void EQ::Net::DaybreakConnectionManager::ProcessPacket(const std::string &endpoint, int port, const char *data, size_t size)
 {
 	if (size < DaybreakHeader::size()) {
-		Log.OutF(Logs::Detail, Logs::Netcode, "Packet of size {0} which is less than {1}", size, DaybreakHeader::size());
+		Log.Out(Logs::Detail, Logs::Netcode, "Packet of size %u which is less than %u", size, DaybreakHeader::size());
 		return;
 	}
 
@@ -195,7 +195,7 @@ void EQ::Net::DaybreakConnectionManager::ProcessPacket(const std::string &endpoi
 		}
 	}
 	catch (std::exception &ex) {
-		Log.OutF(Logs::Detail, Logs::Netcode, "Error processing packet: {0}", ex.what());
+		Log.Out(Logs::Detail, Logs::Netcode, "Error processing packet: %s", ex.what());
 	}
 }
 
@@ -341,7 +341,7 @@ void EQ::Net::DaybreakConnection::ProcessPacket(Packet &p)
 	}
 
 	if (p.GetInt8(0) != 0) {
-		Log.OutF(Logs::Detail, Logs::Netcode, "Error parsing packet, did not start with a 0 frame, not a valid protocol packet.");
+		Log.Out(Logs::Detail, Logs::Netcode, "Error parsing packet, did not start with a 0 frame, not a valid protocol packet.");
 		return;
 	}
 	
@@ -352,7 +352,7 @@ void EQ::Net::DaybreakConnection::ProcessPacket(Packet &p)
 
 	if (PacketCanBeEncoded(p)) {
 		if (!ValidateCRC(p)) {
-			Log.OutF(Logs::Detail, Logs::Netcode, "Tossed packet that failed CRC of type {0:#x}", p.Length() >= 2 ? p.GetInt8(1) : 0);
+			Log.Out(Logs::Detail, Logs::Netcode, "Tossed packet that failed CRC of type 0x%x", p.Length() >= 2 ? p.GetInt8(1) : 0);
 			return;
 		}
 
@@ -664,7 +664,7 @@ void EQ::Net::DaybreakConnection::ProcessDecodedPacket(Packet &p)
 			break;
 		}
 		default:
-			Log.OutF(Logs::Detail, Logs::Netcode, "Unhandled opcode {0:#x}", p.GetInt8(1));
+			Log.Out(Logs::Detail, Logs::Netcode, "Unhandled opcode 0x%x", p.GetInt8(1));
 			break;
 		}
 	}

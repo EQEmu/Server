@@ -48,7 +48,7 @@ void EQ::Net::EQStreamManager::DaybreakPacketRecv(std::shared_ptr<DaybreakConnec
 				if (match == EQ::Patches::IdentityMatchSuccess) {
 					iter->second->RegisterPatch(pt.get());
 					patch = pt.get();
-					Log.OutF(Logs::General, Logs::Debug, "Identified patch with name {0}", pt->GetName());
+					Log.Out(Logs::General, Logs::Debug, "Identified patch with name %s", pt->GetName().c_str());
 				}
 			}
 		}
@@ -59,7 +59,7 @@ void EQ::Net::EQStreamManager::DaybreakPacketRecv(std::shared_ptr<DaybreakConnec
 			patch->Decode(&p, opcode, out);
 
 			if (opcode == OP_Unknown) {
-				Log.OutF(Logs::General, Logs::Netcode, "Incoming packet was not handled because the opcode was not found.\n{0}", p.ToString());
+				Log.Out(Logs::General, Logs::Netcode, "Incoming packet was not handled because the opcode was not found.\n%s", p.ToString().c_str());
 			}
 			else {
 				if (m_on_packet_recv) {
@@ -68,7 +68,7 @@ void EQ::Net::EQStreamManager::DaybreakPacketRecv(std::shared_ptr<DaybreakConnec
 			}
 		}
 		else {
-			Log.OutF(Logs::General, Logs::Netcode, "Incoming packet was not handled because we don't have a patch set.\n{0}", p.ToString());
+			Log.Out(Logs::General, Logs::Netcode, "Incoming packet was not handled because we don't have a patch set.\n%s", p.ToString().c_str());
 		}
 	}
 }
