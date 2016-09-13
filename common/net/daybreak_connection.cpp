@@ -202,7 +202,7 @@ void EQ::Net::DaybreakConnectionManager::ProcessPacket(const std::string &endpoi
 std::shared_ptr<EQ::Net::DaybreakConnection> EQ::Net::DaybreakConnectionManager::FindConnectionByEndpoint(std::string addr, int port)
 {
 	auto p = std::make_pair(addr, port);
-	auto &iter = m_connections.find(p);
+	auto iter = m_connections.find(p);
 	if (iter != m_connections.end()) {
 		return iter->second;
 	}
