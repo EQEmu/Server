@@ -167,8 +167,6 @@ namespace EQ
 					CEREAL_NVP(our_timestamp),
 					CEREAL_NVP(client_sent),
 					CEREAL_NVP(client_recv),
-					CEREAL_NVP(max_ping),
-					CEREAL_NVP(last_ping),
 					CEREAL_NVP(server_sent),
 					CEREAL_NVP(server_recv));
 			}

@@ -173,7 +173,7 @@ namespace EQ
 			void ProcessQueue();
 			void RemoveFromQueue(int stream, uint16_t seq);
 			void AddToQueue(int stream, uint16_t seq, const Packet &p);
-			void ProcessDecodedPacket(Packet &p);
+			void ProcessDecodedPacket(const Packet &p);
 			void ChangeStatus(DbProtocolStatus new_status);
 			bool ValidateCRC(Packet &p);
 			void AppendCRC(Packet &p);
@@ -245,7 +245,7 @@ namespace EQ
 			void ProcessResend();
 			void OnNewConnection(std::function<void(std::shared_ptr<DaybreakConnection>)> func) { m_on_new_connection = func; }
 			void OnConnectionStateChange(std::function<void(std::shared_ptr<DaybreakConnection>, DbProtocolStatus, DbProtocolStatus)> func) { m_on_connection_state_change = func; }
-			void OnPacketRecv(std::function<void(std::shared_ptr<DaybreakConnection>, Packet &)> func) { m_on_packet_recv = func; }
+			void OnPacketRecv(std::function<void(std::shared_ptr<DaybreakConnection>, const Packet &)> func) { m_on_packet_recv = func; }
 		private:
 			void Attach(uv_loop_t *loop);
 			void Detach();
@@ -258,7 +258,7 @@ namespace EQ
 			DaybreakConnectionManagerOptions m_options;
 			std::function<void(std::shared_ptr<DaybreakConnection>)> m_on_new_connection;
 			std::function<void(std::shared_ptr<DaybreakConnection>, DbProtocolStatus, DbProtocolStatus)> m_on_connection_state_change;
-			std::function<void(std::shared_ptr<DaybreakConnection>, Packet&)> m_on_packet_recv;
+			std::function<void(std::shared_ptr<DaybreakConnection>, const Packet&)> m_on_packet_recv;
 			std::map<std::pair<std::string, int>, std::shared_ptr<DaybreakConnection>> m_connections;
 
 			void ProcessPacket(const std::string &endpoint, int port, const char *data, size_t size);

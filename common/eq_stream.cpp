@@ -41,7 +41,6 @@
 	#include <netdb.h>
 	#include <fcntl.h>
 	#include <arpa/inet.h>
-#include "net\eqstream.h"
 #endif
 
 //for logsys

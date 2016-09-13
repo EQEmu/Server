@@ -42,7 +42,7 @@ namespace EQ
 
 			void OnNewConnection(std::function<void(std::shared_ptr<EQStream>)> func) { m_on_new_connection = func; }
 			void OnConnectionStateChange(std::function<void(std::shared_ptr<EQStream>, DbProtocolStatus, DbProtocolStatus)> func) { m_on_connection_state_change = func; }
-			void OnPacketRecv(std::function<void(std::shared_ptr<EQStream>, EmuOpcode, Packet &)> func) { m_on_packet_recv = func; }
+			void OnPacketRecv(std::function<void(std::shared_ptr<EQStream>, EmuOpcode, const Packet &)> func) { m_on_packet_recv = func; }
 
 			void RegisterPotentialPatch(EQ::Patches::BasePatch *patch) { m_possible_patches.push_back(std::unique_ptr<EQ::Patches::BasePatch>(patch)); }
 		private:
@@ -50,13 +50,13 @@ namespace EQ
 			DaybreakConnectionManager m_daybreak;
 			std::function<void(std::shared_ptr<EQStream>)> m_on_new_connection;
 			std::function<void(std::shared_ptr<EQStream>, DbProtocolStatus, DbProtocolStatus)> m_on_connection_state_change;
-			std::function<void(std::shared_ptr<EQStream>, EmuOpcode, Packet &)> m_on_packet_recv;
+			std::function<void(std::shared_ptr<EQStream>, EmuOpcode, const Packet &)> m_on_packet_recv;
 			std::map<std::shared_ptr<DaybreakConnection>, std::shared_ptr<EQStream>> m_streams;
 			std::vector<std::unique_ptr<EQ::Patches::BasePatch>> m_possible_patches;
 
 			void DaybreakNewConnection(std::shared_ptr<DaybreakConnection> connection);
 			void DaybreakConnectionStateChange(std::shared_ptr<DaybreakConnection> connection, DbProtocolStatus from, DbProtocolStatus to);
-			void DaybreakPacketRecv(std::shared_ptr<DaybreakConnection> connection, Packet &p);
+			void DaybreakPacketRecv(std::shared_ptr<DaybreakConnection> connection, const Packet &p);
 			friend class EQStream;
 		};
 

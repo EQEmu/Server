@@ -37,7 +37,7 @@ void EQ::Net::EQStreamManager::DaybreakConnectionStateChange(std::shared_ptr<Day
 	}
 }
 
-void EQ::Net::EQStreamManager::DaybreakPacketRecv(std::shared_ptr<DaybreakConnection> connection, Packet &p)
+void EQ::Net::EQStreamManager::DaybreakPacketRecv(std::shared_ptr<DaybreakConnection> connection, const Packet &p)
 {
 	auto iter = m_streams.find(connection);
 	if (iter != m_streams.end()) {

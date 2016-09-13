@@ -79,7 +79,7 @@ void ClientManager::HandleConnectionChange(std::shared_ptr<EQ::Net::EQStream> co
 	}
 }
 
-void ClientManager::HandlePacket(std::shared_ptr<EQ::Net::EQStream> connection, EmuOpcode opcode, EQ::Net::Packet &p)
+void ClientManager::HandlePacket(std::shared_ptr<EQ::Net::EQStream> connection, EmuOpcode opcode, const EQ::Net::Packet &p)
 {
 	auto iter = clients.begin();
 	while (iter != clients.end()) {

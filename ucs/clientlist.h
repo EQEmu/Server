@@ -187,7 +187,7 @@ public:
 private:
 	void HandleNewConnection(std::shared_ptr<EQ::Net::EQStream> connection);
 	void HandleConnectionChange(std::shared_ptr<EQ::Net::EQStream> connection, EQ::Net::DbProtocolStatus old_status, EQ::Net::DbProtocolStatus new_status);
-	void HandlePacket(std::shared_ptr<EQ::Net::EQStream> connection, EmuOpcode opcode, EQ::Net::Packet &p);
+	void HandlePacket(std::shared_ptr<EQ::Net::EQStream> connection, EmuOpcode opcode, const EQ::Net::Packet &p);
 
 	std::unique_ptr<EQ::Net::EQStreamManager> chatsf;
 	std::unique_ptr<EQ::Patches::BasePatch> chat_patch;

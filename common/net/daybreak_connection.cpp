@@ -57,7 +57,7 @@ void EQ::Net::DaybreakConnectionManager::Attach(uv_loop_t *loop)
 		rc = uv_udp_recv_start(&m_socket,
 			[](uv_handle_t* handle, size_t suggested_size, uv_buf_t* buf) {
 			buf->base = new char[suggested_size];
-			buf->len = (ULONG)suggested_size;
+			buf->len = suggested_size;
 		},
 			[](uv_udp_t* handle, ssize_t nread, const uv_buf_t* buf, const struct sockaddr* addr, unsigned flags) {
 			DaybreakConnectionManager *c = (DaybreakConnectionManager*)handle->data;
@@ -82,7 +82,7 @@ void EQ::Net::DaybreakConnectionManager::Detach()
 	if (m_attached) {
 		uv_udp_recv_stop(&m_socket);
 		uv_timer_stop(&m_timer);
-		m_attached = false;
+		m_attached = nullptr;
 	}
 }
 
@@ -201,7 +201,8 @@ void EQ::Net::DaybreakConnectionManager::ProcessPacket(const std::string &endpoi
 
 std::shared_ptr<EQ::Net::DaybreakConnection> EQ::Net::DaybreakConnectionManager::FindConnectionByEndpoint(std::string addr, int port)
 {
-	auto &iter = m_connections.find(std::make_pair(addr, port));
+	auto p = std::make_pair(addr, port);
+	auto &iter = m_connections.find(p);
 	if (iter != m_connections.end()) {
 		return iter->second;
 	}
@@ -224,7 +225,7 @@ void EQ::Net::DaybreakConnectionManager::SendSessionLost(const std::string &addr
 	uv_buf_t send_buffers[1];
 	
 	send_buffers[0].base = (char*)out.Data();
-	send_buffers[0].len = (ULONG)out.Length();
+	send_buffers[0].len = out.Length();
 	
 	int ret = uv_udp_send(send_req, &m_socket, send_buffers, 1, (sockaddr*)&send_addr,
 		[](uv_udp_send_t* req, int status) {
@@ -436,7 +437,7 @@ void EQ::Net::DaybreakConnection::AddToQueue(int stream, uint16_t seq, const Pac
 	}
 }
 
-void EQ::Net::DaybreakConnection::ProcessDecodedPacket(Packet &p)
+void EQ::Net::DaybreakConnection::ProcessDecodedPacket(const Packet &p)
 {
 	if (p.GetInt8(0) == 0) {
 		if (p.Length() < 2) {
@@ -1078,7 +1079,7 @@ void EQ::Net::DaybreakConnection::InternalSend(Packet &p)
 		uv_buf_t send_buffers[1];
 
 		send_buffers[0].base = (char*)out.Data();
-		send_buffers[0].len = (ULONG)out.Length();
+		send_buffers[0].len = out.Length();
 
 		uv_udp_send(send_req, &m_owner->m_socket, send_buffers, 1, (sockaddr*)&send_addr, send_func);
 		m_stats.sent_bytes += out.Length();
@@ -1092,7 +1093,7 @@ void EQ::Net::DaybreakConnection::InternalSend(Packet &p)
 	uv_buf_t send_buffers[1];
 	
 	send_buffers[0].base = (char*)p.Data();
-	send_buffers[0].len = (ULONG)p.Length();
+	send_buffers[0].len = p.Length();
 	
 	uv_udp_send(send_req, &m_owner->m_socket, send_buffers, 1, (sockaddr*)&send_addr, send_func);
 	m_stats.sent_bytes += p.Length();

@@ -60,7 +60,7 @@ private:
 	void HandleNewConnectionTitanium(std::shared_ptr<EQ::Net::EQStream> connection);
 	void HandleNewConnectionSod(std::shared_ptr<EQ::Net::EQStream> connection);
 	void HandleConnectionChange(std::shared_ptr<EQ::Net::EQStream> connection, EQ::Net::DbProtocolStatus old_status, EQ::Net::DbProtocolStatus new_status);
-	void HandlePacket(std::shared_ptr<EQ::Net::EQStream> connection, EmuOpcode opcode, EQ::Net::Packet &p);
+	void HandlePacket(std::shared_ptr<EQ::Net::EQStream> connection, EmuOpcode opcode, const EQ::Net::Packet &p);
 
 	std::list<std::unique_ptr<Client>> clients;
 	std::unique_ptr<EQ::Net::EQStreamManager> titanium_stream;
