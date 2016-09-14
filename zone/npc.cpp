@@ -872,6 +872,10 @@ bool NPC::SpawnZoneController(){
 	npc_type->merchanttype = 0;
 	npc_type->bodytype = 11;
 
+	if (RuleB(Zone, EnableZoneControllerGlobals)) {
+		npc_type->qglobal = true;
+	}
+
 	npc_type->prim_melee_type = 28;
 	npc_type->sec_melee_type = 28;
 
