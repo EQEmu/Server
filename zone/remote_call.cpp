@@ -78,13 +78,13 @@ void RemoteCall(const std::string &connection_id, const std::string &method, con
 
 /* Zone: register_remote_call_handlers */
 void register_remote_call_handlers() {
-	remote_call_methods["Zone.Subscribe"] = handle_rc_subscribe;
-	remote_call_methods["Zone.Unsubscribe"] = handle_rc_unsubscribe;
+	remote_call_methods["Zone.Action"] = handle_rc_zone_action;
+	remote_call_methods["Zone.GetEntityAttributes"] = handle_rc_get_entity_attributes;
 	remote_call_methods["Zone.GetInitialEntityPositions"] = handle_rc_get_initial_entity_positions;
 	remote_call_methods["Zone.MoveEntity"] = handle_rc_move_entity;
-	remote_call_methods["Zone.GetEntityAttributes"] = handle_rc_get_entity_attributes;
 	remote_call_methods["Zone.SetEntityAttribute"] = handle_rc_set_entity_attribute;
-	remote_call_methods["Zone.Action"] = handle_rc_zone_action;
+	remote_call_methods["Zone.Subscribe"] = handle_rc_subscribe;
+	remote_call_methods["Zone.Unsubscribe"] = handle_rc_unsubscribe;
 }
 
 void handle_rc_subscribe(const std::string &method, const std::string &connection_id, const std::string &request_id, const std::vector<std::string> &params) {
@@ -231,7 +231,21 @@ void handle_rc_zone_action(const std::string &method, const std::string &connect
 	std::map<std::string, std::string> res;
 
 	/* Zone Reload Functions */
-	if (params[0] == "Repop"){ zone->Repop(); } 
+	if (params[0] == "Repop") { zone->Repop(); }
+	if (params[0] == "RepopForce") {
+		zone->Repop();
+		//LinkedListIterator<Spawn2*> iterator(zone->spawn2_list);
+		//iterator.Reset();
+		//while (iterator.MoreElements()) {
+		//	std::string query = StringFormat(
+		//		"DELETE FROM respawn_times WHERE id = %lu AND instance_id = %lu",
+		//		(unsigned long)iterator.GetData()->GetID(),
+		//		(unsigned long)zone->GetInstanceID()
+		//	);
+		//	auto results = database.QueryDatabase(query);
+		//	iterator.Advance();
+		//}
+	}
 	if (params[0] == "ReloadQuests"){ parse->ReloadQuests(); }
 
 	/* Zone Visuals Functions */
@@ -278,6 +292,28 @@ void handle_rc_zone_action(const std::string &method, const std::string &connect
 	if (params[0] == "Kill"){
 		Mob *ent = entity_list.GetMob(atoi(params[1].c_str()));
 		if (ent){ ent->Kill(); }
+	}
+
+	if (params[0] == "Broadcast") {
+		worldserver.SendEmoteMessage(0, 0, 15, "God Broadcasts: %s", params[1].c_str());
+	}
+
+	if (params[0] == "Shout") {
+		entity_list.Message(0, 13, "God shouts, '%s'", params[1].c_str());
+	}
+
+	if (params[0] == "EntitySay") {
+		Mob *ent = entity_list.GetMob(atoi(params[1].c_str()));
+		if (ent) {
+			ent->Say(params[2].c_str());
+		}
+	}
+
+	if (params[0] == "EntityShout") {
+		Mob *ent = entity_list.GetMob(atoi(params[1].c_str()));
+		if (ent) {
+			ent->Shout(params[2].c_str());
+		}
 	}
 }
 

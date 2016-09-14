@@ -48,17 +48,18 @@ void RemoteCallResponse(const std::string &connection_id, const std::string &req
 
 /* World:register_remote_call_handlers */
 void register_remote_call_handlers() {
-	remote_call_methods["World.ListZones"] = handle_rc_list_zones;
+	remote_call_methods["World.GetFileContents"] = handle_rc_get_file_contents;
 	remote_call_methods["World.GetZoneDetails"] = handle_rc_get_zone_info;
-	remote_call_methods["Zone.Subscribe"] = handle_rc_relay;
-	remote_call_methods["Zone.Unsubscribe"] = handle_rc_relay;
-	remote_call_methods["Zone.GetInitialEntityPositions"] = handle_rc_relay;
-	remote_call_methods["Zone.MoveEntity"] = handle_rc_relay;
+	remote_call_methods["World.ListZones"] = handle_rc_list_zones;
+	remote_call_methods["World.SaveFileContents"] = handle_rc_save_file_contents;
+
 	remote_call_methods["Zone.Action"] = handle_rc_relay;
 	remote_call_methods["Zone.GetEntityAttributes"] = handle_rc_relay;
+	remote_call_methods["Zone.GetInitialEntityPositions"] = handle_rc_relay;
+	remote_call_methods["Zone.MoveEntity"] = handle_rc_relay;
 	remote_call_methods["Zone.SetEntityAttribute"] = handle_rc_relay;
-	remote_call_methods["World.GetFileContents"] = handle_rc_get_file_contents;
-	remote_call_methods["World.SaveFileContents"] = handle_rc_save_file_contents;
+	remote_call_methods["Zone.Subscribe"] = handle_rc_relay;
+	remote_call_methods["Zone.Unsubscribe"] = handle_rc_relay;
 }
 
 void handle_rc_list_zones(const std::string &method, const std::string &connection_id, const std::string &request_id, const std::vector<std::string> &params) {

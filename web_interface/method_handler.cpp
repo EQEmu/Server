@@ -10,17 +10,19 @@ extern std::map<std::string, MethodHandler> unauthorized_methods;
 void register_authorized_methods()
 {
 	authorized_methods["WebInterface.Authorize"] = std::make_pair(0, handle_method_token_auth);
-	authorized_methods["World.ListZones"] = std::make_pair(10, handle_method_world);
+
+	authorized_methods["World.GetFileContents"] = std::make_pair(10, handle_method_world);
 	authorized_methods["World.GetZoneDetails"] = std::make_pair(10, handle_method_world);
-	authorized_methods["Zone.Subscribe"] = std::make_pair(10, handle_method_zone);
-	authorized_methods["Zone.Unsubscribe"] = std::make_pair(10, handle_method_zone);
-	authorized_methods["Zone.GetInitialEntityPositions"] = std::make_pair(10, handle_method_zone);
-	authorized_methods["Zone.MoveEntity"] = std::make_pair(10, handle_method_zone); 
+	authorized_methods["World.ListZones"] = std::make_pair(10, handle_method_world);
+	authorized_methods["World.SaveFileContents"] = std::make_pair(10, handle_method_world);
+
 	authorized_methods["Zone.Action"] = std::make_pair(10, handle_method_zone);
 	authorized_methods["Zone.GetEntityAttributes"] = std::make_pair(10, handle_method_zone);
+	authorized_methods["Zone.GetInitialEntityPositions"] = std::make_pair(10, handle_method_zone);
+	authorized_methods["Zone.MoveEntity"] = std::make_pair(10, handle_method_zone);
 	authorized_methods["Zone.SetEntityAttribute"] = std::make_pair(10, handle_method_zone);
-	authorized_methods["World.GetFileContents"] = std::make_pair(10, handle_method_world);
-	authorized_methods["World.SaveFileContents"] = std::make_pair(10, handle_method_world);
+	authorized_methods["Zone.Subscribe"] = std::make_pair(10, handle_method_zone);
+	authorized_methods["Zone.Unsubscribe"] = std::make_pair(10, handle_method_zone);
 }
 
 void register_unauthorized_methods()
