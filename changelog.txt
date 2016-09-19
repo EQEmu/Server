@@ -53,6 +53,9 @@ Akkadius: Massive overhaul of the update system and EQEmu Server management util
 				installing a PEQ database with the name the server operator gives the prompts in the 
 				script
 	
+== 09/10/2016 ==
+noudess: Task system experience based on a % of a level did not take into
+account the hell levels rule.  Now it does.
 
 == 09/04/2016 (Changes over past few months) ==
 Akkadius: Fixed an issue where clients would crash with health marquee's
@@ -73,6 +76,7 @@ mackal: Instant spells now have instrument mods
 mackal: Rate limit character saves
 mackal: Made it so items no longer do TGB (Live-like) Rule implemented to disable
 mackal: Set pet buffs limit to 30
+>>>>>>> upstream/master
 
 == 09/03/2016 ==
 Uleat: Changed 'Bind Wound' behavior to match the best references that I could find for post-2004 era.

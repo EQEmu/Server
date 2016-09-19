@@ -705,10 +705,33 @@ uint32 Client::GetEXPForLevel(uint16 check_level)
 	return finalxp;
 }
 
-void Client::AddLevelBasedExp(uint8 exp_percentage, uint8 max_level) { 
-	if (exp_percentage > 100) { exp_percentage = 100; } 
-	if (!max_level || GetLevel() < max_level) { max_level = GetLevel(); } 
-	uint32 newexp = GetEXP() + ((GetEXPForLevel(max_level + 1) - GetEXPForLevel(max_level)) * exp_percentage / 100); 
+void Client::AddLevelBasedExp(uint8 exp_percentage, uint8 max_level) 
+{ 
+	uint32	award;
+	uint32	xp_for_level;
+
+	if (exp_percentage > 100) 
+	{ 
+		exp_percentage = 100; 
+	} 
+
+	if (!max_level || GetLevel() < max_level)
+	{ 
+		max_level = GetLevel(); 
+	} 
+
+	xp_for_level = GetEXPForLevel(max_level + 1) - GetEXPForLevel(max_level);
+	award = xp_for_level * exp_percentage / 100; 
+
+	if(RuleB(Zone, LevelBasedEXPMods))
+	{
+		if(zone->level_exp_mod[GetLevel()].ExpMod)
+		{
+			award *= zone->level_exp_mod[GetLevel()].ExpMod;
+		}
+	}
+
+	uint32 newexp = GetEXP() + award;
 	SetEXP(newexp, GetAAXP());
 }
 
