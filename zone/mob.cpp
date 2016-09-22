@@ -2584,14 +2584,12 @@ bool Mob::PlotPositionAroundTarget(Mob* target, float &x_dest, float &y_dest, fl
 bool Mob::HateSummon() {
 	// check if mob has ability to summon
 	// 97% is the offical % that summoning starts on live, not 94
-	// if the mob can summon and is charmed, it can only summon mobs it has LoS to
-	Mob* mob_owner = nullptr;
-	if(GetOwnerID())
-		mob_owner = entity_list.GetMob(GetOwnerID());
+	if (IsCharmed())
+		return false;
 
 	int summon_level = GetSpecialAbility(SPECATK_SUMMON);
 	if(summon_level == 1 || summon_level == 2) {
-		if(!GetTarget() || (mob_owner && mob_owner->IsClient() && !CheckLosFN(GetTarget()))) {
+		if(!GetTarget()) {
 			return false;
 		}
 	} else {
