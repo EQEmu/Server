@@ -76,7 +76,6 @@ mackal: Instant spells now have instrument mods
 mackal: Rate limit character saves
 mackal: Made it so items no longer do TGB (Live-like) Rule implemented to disable
 mackal: Set pet buffs limit to 30
->>>>>>> upstream/master
 
 == 09/03/2016 ==
 Uleat: Changed 'Bind Wound' behavior to match the best references that I could find for post-2004 era.
