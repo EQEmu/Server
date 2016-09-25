@@ -13,7 +13,7 @@ SET(eqlaunch_headers
 
 ADD_EXECUTABLE(eqlaunch ${eqlaunch_sources} ${eqlaunch_headers})
 
-INSTALL(TARGETS eqlaunch RUNTIME DESTINATION ${CMAKE_INSTALL_PREFIX})
+INSTALL(TARGETS eqlaunch RUNTIME DESTINATION ${CMAKE_INSTALL_PREFIX}/bin)
 
 TARGET_LINK_LIBRARIES(eqlaunch common debug ${MySQL_LIBRARY_DEBUG} optimized ${MySQL_LIBRARY_RELEASE} ${ZLIB_LIBRARY})
 

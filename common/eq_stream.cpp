@@ -529,7 +529,7 @@ void EQStream::FastQueuePacket(EQApplicationPacket **p, bool ack_req)
 	if(pack->GetOpcodeBypass() != 0) {
 		opcode = pack->GetOpcodeBypass();
 	} else {
-		opcode = (*OpMgr)->EmuToEQ(pack->emu_opcode);
+		opcode = (*OpMgr)->EmuToEQ(pack->GetOpcode());
 	}
 
 	if (!ack_req) {

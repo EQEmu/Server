@@ -1,0 +1,64 @@
+# Define the fmt library, its includes and the needed defines.
+# format.cc is added to FMT_HEADERS for the header-only configuration.
+set(FMT_HEADERS format.h format.cc ostream.h ostream.cc time.h)
+if (HAVE_OPEN)
+  set(FMT_HEADERS ${FMT_HEADERS} posix.h)
+  set(FMT_SOURCES ${FMT_SOURCES} posix.cc)
+endif ()
+
+add_library(fmt ${FMT_SOURCES} ${FMT_HEADERS} ../ChangeLog.rst)
+
+option(FMT_CPPFORMAT "Build cppformat library for backward compatibility." OFF)
+if (FMT_CPPFORMAT)
+  message(WARNING "The cppformat library is deprecated, use fmt instead.")
+  add_library(cppformat ${FMT_SOURCES} ${FMT_HEADERS})
+endif ()
+
+include_directories(fmt INTERFACE
+  $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}>
+  $<INSTALL_INTERFACE:include>)
+
+set_target_properties(fmt PROPERTIES
+  VERSION ${FMT_VERSION} SOVERSION ${CPACK_PACKAGE_VERSION_MAJOR})
+
+# Install targets.
+if (FMT_INSTALL)
+  include(CMakePackageConfigHelpers)
+  set(FMT_CMAKE_DIR lib/cmake/fmt CACHE STRING
+    "Installation directory for cmake files, relative to ${CMAKE_INSTALL_PREFIX}.")
+  set(version_config ${PROJECT_BINARY_DIR}/fmt-config-version.cmake)
+  set(project_config ${PROJECT_BINARY_DIR}/fmt-config.cmake)
+  set(targets_export_name fmt-targets)
+
+  set (INSTALL_TARGETS fmt)
+  if (TARGET fmt-header-only)
+    set(INSTALL_TARGETS ${INSTALL_TARGETS} fmt-header-only)
+  endif ()
+
+  set(FMT_LIB_DIR lib CACHE STRING
+    "Installation directory for libraries, relative to ${CMAKE_INSTALL_PREFIX}.")
+
+  # Generate the version, config and target files into the build directory.
+  write_basic_package_version_file(
+    ${version_config}
+    VERSION ${FMT_VERSION}
+    COMPATIBILITY AnyNewerVersion)
+  configure_package_config_file(
+    ${PROJECT_SOURCE_DIR}/support/cmake/fmt-config.cmake.in
+    ${project_config}
+    INSTALL_DESTINATION ${FMT_CMAKE_DIR})
+  export(TARGETS ${INSTALL_TARGETS} FILE ${PROJECT_BINARY_DIR}/${targets_export_name}.cmake)
+
+  # Install version, config and target files.
+  install(
+    FILES ${project_config} ${version_config}
+    DESTINATION ${FMT_CMAKE_DIR})
+  install(EXPORT ${targets_export_name} DESTINATION ${FMT_CMAKE_DIR})
+
+  # Install the library and headers.
+  install(TARGETS ${INSTALL_TARGETS} EXPORT ${targets_export_name} DESTINATION ${FMT_LIB_DIR})
+  install(FILES ${FMT_HEADERS} DESTINATION include/fmt)
+  if (FMT_CPPFORMAT)
+    install(TARGETS cppformat DESTINATION ${FMT_LIB_DIR})
+  endif ()
+endif ()

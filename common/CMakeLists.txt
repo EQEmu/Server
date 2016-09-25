@@ -75,6 +75,10 @@ SET(common_sources
 	worldconn.cpp
 	xml_parser.cpp
 	platform.cpp
+	net/crc32.cpp
+	net/daybreak_connection.cpp
+	net/eqstream.cpp
+	net/packet.cpp
 	patches/patches.cpp
 	patches/sod.cpp
 	patches/sod_limits.cpp
@@ -210,6 +214,15 @@ SET(common_headers
 	worldconn.h
 	xml_parser.h
 	zone_numbers.h
+	event/background_task.h
+	event/event_loop.h
+	event/timer.h
+	net/crc32.h
+	net/daybreak_connection.h
+	net/daybreak_structs.h
+	net/endian.h
+	net/eqstream.h
+	net/packet.h
 	patches/patches.h
 	patches/sod.h
 #	patches/sod_itemfields.h
@@ -261,6 +274,26 @@ SET(common_headers
 	StackWalker/StackWalker.h
 	tinyxml/tinystr.h
 	tinyxml/tinyxml.h
+	util/memory_stream.h
+)
+
+SOURCE_GROUP(Event FILES
+	event/background_task.h
+	event/event_loop.h
+	event/timer.h
+)
+
+SOURCE_GROUP(Net FILES
+	net/crc32.cpp
+	net/crc32.h
+	net/daybreak_connection.cpp
+	net/daybreak_connection.h
+	net/daybreak_structs.h
+	net/endian.h
+	net/eqstream.h
+	net/eqstream.cpp
+	net/packet.cpp
+	net/packet.h
 )
 
 SOURCE_GROUP(Patches FILES
@@ -353,6 +386,10 @@ SOURCE_GROUP(TinyXML FILES
 	tinyxml/tinyxml.cpp
 	tinyxml/tinyxmlerror.cpp
 	tinyxml/tinyxmlparser.cpp
+)
+
+SOURCE_GROUP(Util FILES
+	util/memory_stream.h
 )
 
 INCLUDE_DIRECTORIES(Patches SocketLib StackWalker TinyXML)
