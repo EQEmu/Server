@@ -425,7 +425,7 @@ int main(int argc, char** argv) {
 	Timer quest_timers(100);
 	UpdateWindowTitle();
 	bool worldwasconnected = worldserver.Connected();
-	std::shared_ptr<EQStream> eqss;
+	std::shared_ptr<EQStreamInterface> eqss;
 	EQStreamInterface *eqsi;
 	uint8 IDLEZONEUPDATE = 200;
 	uint8 ZONEUPDATE = 10;

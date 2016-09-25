@@ -84,10 +84,10 @@ struct CharacterEntry {
 class Client {
 
 public:
-	Client(std::shared_ptr<EQStream> eqs);
+	Client(std::shared_ptr<EQStreamInterface> eqs);
 	~Client();
 
-	std::shared_ptr<EQStream> ClientStream;
+	std::shared_ptr<EQStreamInterface> ClientStream;
 	void AddCharacter(int CharID, const char *CharacterName, int Level);
 	void ClearCharacters() { Characters.clear(); }
 	void SendMailBoxes();

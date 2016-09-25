@@ -26,7 +26,7 @@ EQStreamIdentifier::~EQStreamIdentifier() {
 	}
 }
 
-void EQStreamIdentifier::RegisterPatch(const EQStream::Signature &sig, const char *name, OpcodeManager ** opcodes, const StructStrategy *structs) {
+void EQStreamIdentifier::RegisterPatch(const EQStreamInterface::Signature &sig, const char *name, OpcodeManager ** opcodes, const StructStrategy *structs) {
 	auto p = new Patch;
 	p->signature = sig;
 	p->name = name;
@@ -144,7 +144,7 @@ void EQStreamIdentifier::Process() {
 	}	//end foreach stream
 }
 
-void EQStreamIdentifier::AddStream(std::shared_ptr<EQStream> &eqs) {
+void EQStreamIdentifier::AddStream(std::shared_ptr<EQStreamInterface> &eqs) {
 	m_streams.push_back(Record(eqs));
 	eqs = nullptr;
 }
@@ -157,7 +157,7 @@ EQStreamInterface *EQStreamIdentifier::PopIdentified() {
 	return(res);
 }
 
-EQStreamIdentifier::Record::Record(std::shared_ptr<EQStream> s)
+EQStreamIdentifier::Record::Record(std::shared_ptr<EQStreamInterface> s)
 :	stream(std::move(s)),
 	expire(STREAM_IDENT_WAIT_MS)
 {

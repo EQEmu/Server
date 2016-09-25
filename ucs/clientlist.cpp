@@ -485,7 +485,7 @@ Clientlist::Clientlist(int ChatPort) {
 	}
 }
 
-Client::Client(std::shared_ptr<EQStream> eqs) {
+Client::Client(std::shared_ptr<EQStreamInterface> eqs) {
 
 	ClientStream = eqs;
 
@@ -574,7 +574,7 @@ void Clientlist::CheckForStaleConnections(Client *c) {
 
 void Clientlist::Process()
 {
-	std::shared_ptr<EQStream> eqs;
+	std::shared_ptr<EQStreamInterface> eqs;
 
 	while ((eqs = chatsf->Pop())) {
 		struct in_addr in;
@@ -592,7 +592,7 @@ void Clientlist::Process()
 	auto it = ClientChatConnections.begin();
 	while (it != ClientChatConnections.end()) {
 		(*it)->AccountUpdate();
-		if ((*it)->ClientStream->CheckClosed()) {
+		if ((*it)->ClientStream->CheckState(CLOSED)) {
 			struct in_addr in;
 			in.s_addr = (*it)->ClientStream->GetRemoteIP();
 

@@ -15,10 +15,24 @@ typedef enum {
 } EQStreamState;
 
 class EQApplicationPacket;
+class OpcodeManager;
 
 class EQStreamInterface {
 public:
 	virtual ~EQStreamInterface() {}
+
+	class Signature {
+	public:
+		//this object could get more complicated if needed...
+		uint16 ignore_eq_opcode;		//0=dont ignore
+		uint16 first_eq_opcode;
+		uint32 first_length;			//0=dont check length
+	};
+	typedef enum {
+		MatchNotReady,
+		MatchSuccessful,
+		MatchFailed
+	} MatchState;
 
 	virtual void QueuePacket(const EQApplicationPacket *p, bool ack_req=true) = 0;
 	virtual void FastQueuePacket(EQApplicationPacket **p, bool ack_req=true) = 0;
@@ -30,6 +44,10 @@ public:
 	virtual uint16 GetRemotePort() const = 0;
 	virtual bool CheckState(EQStreamState state) = 0;
 	virtual std::string Describe() const = 0;
+	virtual void SetActive(bool val) { }
+	virtual MatchState CheckSignature(const Signature *sig) { return MatchFailed; }
+	virtual EQStreamState GetState() = 0;
+	virtual void SetOpcodeManager(OpcodeManager **opm) = 0;
 
 	virtual const uint32 GetBytesSent() const { return 0; }
 	virtual const uint32 GetBytesRecieved() const { return 0; }

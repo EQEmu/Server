@@ -95,7 +95,7 @@ ClientManager::~ClientManager()
 void ClientManager::Process()
 {
 	ProcessDisconnect();
-	std::shared_ptr<EQStream> cur = titanium_stream->Pop();
+	std::shared_ptr<EQStreamInterface> cur = titanium_stream->Pop();
 	while(cur)
 	{
 		struct in_addr in;
@@ -142,8 +142,8 @@ void ClientManager::ProcessDisconnect()
 	list<Client*>::iterator iter = clients.begin();
 	while(iter != clients.end())
 	{
-		std::shared_ptr<EQStream> c = (*iter)->GetConnection();
-		if(c->CheckClosed())
+		std::shared_ptr<EQStreamInterface> c = (*iter)->GetConnection();
+		if(c->CheckState(CLOSED))
 		{
 			Log.Out(Logs::General, Logs::Login_Server, "Client disconnected from the server, removing client.");
 			delete (*iter);
