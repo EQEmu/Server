@@ -350,19 +350,50 @@ void Client::SetEXP(uint32 set_exp, uint32 set_aaxp, bool isrezzexp) {
 	}
 
 	if ((set_exp + set_aaxp) > (m_pp.exp+m_pp.expAA)) {
-		if (isrezzexp)
-			this->Message_StringID(MT_Experience, REZ_REGAIN);
-		else{
-			if(membercount > 1)
-				this->Message_StringID(MT_Experience, GAIN_GROUPXP);
-			else if(IsRaidGrouped())
-				Message_StringID(MT_Experience, GAIN_RAIDEXP);
-			else
-				this->Message_StringID(MT_Experience, GAIN_XP);
+
+		uint32 exp_gained = set_exp - m_pp.exp;
+		uint32 aaxp_gained = set_aaxp - m_pp.expAA;
+		float exp_percent = (float)((float)exp_gained / (float)(GetEXPForLevel(GetLevel() + 1) - GetEXPForLevel(GetLevel())))*(float)100; //EXP needed for level
+		float aaxp_percent = (float)((float)aaxp_gained / (float)(RuleI(AA, ExpPerPoint)))*(float)100; //AAEXP needed for level
+		std::string exp_amount_message = "";
+		if (RuleI(Character, ShowExpValues) >= 1) {
+			if (exp_gained > 0 && aaxp_gained > 0) exp_amount_message = StringFormat("%u, %u AA", exp_gained, aaxp_gained);
+			else if (exp_gained > 0) exp_amount_message = StringFormat("%u", exp_gained);
+			else exp_amount_message = StringFormat("%u AA", aaxp_gained);
+		}
+
+		std::string exp_percent_message = "";
+		if (RuleI(Character, ShowExpValues) >= 2) {
+			if (exp_gained > 0 && aaxp_gained > 0) exp_percent_message = StringFormat("(%.3f%%, %.3f%%AA)", exp_percent, aaxp_percent);
+			else if (exp_gained > 0) exp_percent_message = StringFormat("(%.3f%%)", exp_percent);
+			else exp_percent_message = StringFormat("(%.3f%%AA)", aaxp_percent);
+		}
+
+		if (isrezzexp) {
+			if (RuleI(Character, ShowExpValues) > 0) Message(MT_Experience, "You regain %s experience from resurrection. %s", exp_amount_message.c_str(), exp_percent_message.c_str());
+			else Message_StringID(MT_Experience, REZ_REGAIN);
+		} else {
+			if (membercount > 1) {
+				if (RuleI(Character, ShowExpValues) > 0) Message(MT_Experience, "You have gained %s party experience! %s", exp_amount_message.c_str(), exp_percent_message.c_str());
+				else Message_StringID(MT_Experience, GAIN_GROUPXP);
+			}
+			else if (IsRaidGrouped()) {
+				if (RuleI(Character, ShowExpValues) > 0) Message(MT_Experience, "You have gained %s raid experience! %s", exp_amount_message.c_str(), exp_percent_message.c_str());
+				else Message_StringID(MT_Experience, GAIN_RAIDEXP);
+			} 
+			else {
+				if (RuleI(Character, ShowExpValues) > 0) Message(MT_Experience, "You have gained %s experience! %s", exp_amount_message.c_str(), exp_percent_message.c_str());
+				else Message_StringID(MT_Experience, GAIN_XP);				
+			}
 		}
 	}
 	else if((set_exp + set_aaxp) < (m_pp.exp+m_pp.expAA)){ //only loss message if you lose exp, no message if you gained/lost nothing.
-		Message(15, "You have lost experience.");
+		uint32 exp_lost = m_pp.exp - set_exp;
+		float exp_percent = (float)((float)exp_lost / (float)(GetEXPForLevel(GetLevel() + 1) - GetEXPForLevel(GetLevel())))*(float)100;
+
+		if (RuleI(Character, ShowExpValues) == 1 && exp_lost > 0) Message(13, "You have lost %i experience.", exp_lost);
+		else if (RuleI(Character, ShowExpValues) == 2 && exp_lost > 0) Message(13, "You have lost %i experience. (%.3f%%)", exp_lost, exp_percent);
+		else Message(15, "You have lost experience.");		
 	}
 
 	//check_level represents the level we should be when we have
