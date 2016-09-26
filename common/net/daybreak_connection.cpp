@@ -383,7 +383,9 @@ void EQ::Net::DaybreakConnection::ProcessPacket(Packet &p)
 			for (int i = 0; i < 2; ++i) {
 				switch (m_encode_passes[i]) {
 				case EncodeCompression:
+					Log.OutF(Logs::General, Logs::Debug, "Decompressing packet on pass {1}\n{0}", temp.ToString(), i);
 					Decompress(temp, DaybreakHeader::size(), temp.Length() - DaybreakHeader::size() - m_crc_bytes);
+					Log.OutF(Logs::General, Logs::Debug, "Decompressed packet on pass {1}\n{0}", temp.ToString(), i);
 					break;
 				case EncodeXOR:
 					Decode(temp, DaybreakHeader::size(), temp.Length() - DaybreakHeader::size() - m_crc_bytes);
@@ -887,7 +889,7 @@ void EQ::Net::DaybreakConnection::Decompress(Packet &p, size_t offset, size_t le
 	if (length < 2) {
 		return;
 	}
-	
+
 	static uint8_t new_buffer[4096];
 	uint8_t *buffer = (uint8_t*)p.Data() + offset;
 	uint32_t new_length = 0;
@@ -900,8 +902,7 @@ void EQ::Net::DaybreakConnection::Decompress(Packet &p, size_t offset, size_t le
 		new_length = (uint32_t)length - 1;
 	}
 	else {
-		memcpy(new_buffer, buffer, length);
-		new_length = length;
+		return;
 	}
 
 	p.Resize(offset);

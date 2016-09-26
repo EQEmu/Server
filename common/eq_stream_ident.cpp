@@ -45,13 +45,13 @@ void EQStreamIdentifier::Process() {
 		Record &r = *cur;
 
 		//first see if this stream has expired
-		if(r.expire.Check(false)) {
-			//this stream has failed to match any pattern in our timeframe.
-			Log.Out(Logs::General, Logs::Netcode, "[IDENTIFY] Unable to identify stream from %s:%d before timeout.", long2ip(r.stream->GetRemoteIP()).c_str(), ntohs(r.stream->GetRemotePort()));
-			r.stream->ReleaseFromUse();
-			cur = m_streams.erase(cur);
-			continue;
-		}
+		//if(r.expire.Check(false)) {
+		//	//this stream has failed to match any pattern in our timeframe.
+		//	Log.Out(Logs::General, Logs::Netcode, "[IDENTIFY] Unable to identify stream from %s:%d before timeout.", long2ip(r.stream->GetRemoteIP()).c_str(), ntohs(r.stream->GetRemotePort()));
+		//	r.stream->ReleaseFromUse();
+		//	cur = m_streams.erase(cur);
+		//	continue;
+		//}
 
 		//then make sure the stream is still active
 		//if stream hasn't finished initializing then continue;

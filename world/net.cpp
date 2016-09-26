@@ -398,7 +398,7 @@ int main(int argc, char** argv) {
 		return 1;
 	}
 
-	EQ::Net::EQStreamManagerOptions opts(true, false);
+	EQ::Net::EQStreamManagerOptions opts(false, true);
 	opts.daybreak_options.port = 9000;
 	opts.opcode_size = 2;
 
