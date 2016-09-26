@@ -900,7 +900,8 @@ void EQ::Net::DaybreakConnection::Decompress(Packet &p, size_t offset, size_t le
 		new_length = (uint32_t)length - 1;
 	}
 	else {
-		return;
+		memcpy(new_buffer, buffer, length);
+		new_length = length;
 	}
 
 	p.Resize(offset);

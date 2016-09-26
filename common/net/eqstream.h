@@ -75,8 +75,7 @@ namespace EQ
 			virtual void ReleaseFromUse() { };
 			virtual void RemoveData() { };
 			virtual uint32 GetRemoteIP() const;
-			//the code is dumb and assumes this is in network order...
-			virtual uint16 GetRemotePort() const { return EQ::Net::HostToNetwork(m_connection->RemotePort()); }
+			virtual uint16 GetRemotePort() const { return m_connection->RemotePort(); }
 			virtual bool CheckState(EQStreamState state);
 			virtual std::string Describe() const { return "Direct EQStream"; }
 			virtual void SetActive(bool val) { }

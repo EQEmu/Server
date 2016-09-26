@@ -35,6 +35,9 @@
 #include "../common/eqtime.h"
 #include "../common/timeoutmgr.h"
 
+#include "../common/event/event_loop.h"
+#include "../common/net/eqstream.h"
+
 #include "../common/opcodemgr.h"
 #include "../common/guilds.h"
 #include "../common/eq_stream_ident.h"
@@ -88,7 +91,6 @@
 #include "queryserv.h"
 
 TimeoutManager timeout_manager;
-EQStreamFactory eqsf(WorldStream,9000);
 EmuTCPServer tcps;
 ClientList client_list;
 GroupLFPList LFPGroupList;
@@ -395,12 +397,12 @@ int main(int argc, char** argv) {
 		Log.Out(Logs::General, Logs::World_Server,"        %s",errbuf);
 		return 1;
 	}
-	if (eqsf.Open()) {
-		Log.Out(Logs::General, Logs::World_Server,"Client (UDP) listener started.");
-	} else {
-		Log.Out(Logs::General, Logs::World_Server,"Failed to start client (UDP) listener (port 9000)");
-		return 1;
-	}
+
+	EQ::Net::EQStreamManagerOptions opts(true, false);
+	opts.daybreak_options.port = 9000;
+	opts.opcode_size = 2;
+
+	EQ::Net::EQStreamManager eqsm(opts);
 
 	//register all the patches we have avaliable with the stream identifier.
 	EQStreamIdentifier stream_identifier;
@@ -416,20 +418,13 @@ int main(int argc, char** argv) {
 	EmuTCPConnection* tcpc;
 	EQStreamInterface *eqsi;
 
+	eqsm.OnNewConnection([&stream_identifier](std::shared_ptr<EQ::Net::EQStream> stream) {
+		stream_identifier.AddStream(stream);
+		Log.OutF(Logs::Detail, Logs::World_Server, "New connection from IP {0}:{1}", stream->RemoteEndpoint(), ntohs(stream->GetRemotePort()));
+	});
+
 	while(RunLoops) {
 		Timer::SetCurrentTime();
-
-		//check the factory for any new incoming streams.
-		while ((eqs = eqsf.Pop())) {
-			//pull the stream out of the factory and give it to the stream identifier
-			//which will figure out what patch they are running, and set up the dynamic
-			//structures and opcodes for that patch.
-			struct in_addr	in;
-			in.s_addr = eqs->GetRemoteIP();
-			Log.Out(Logs::Detail, Logs::World_Server, "New connection from IP %s:%d", inet_ntoa(in),ntohs(eqs->GetRemotePort()));
-			stream_identifier.AddStream(eqs);	//takes the stream
-		}
-
 		eqs = nullptr;
 
 		//give the stream identifier a chance to do its work....
@@ -528,11 +523,9 @@ int main(int argc, char** argv) {
 			}
 			
 		}
-		if (numclients == 0) {
-			Sleep(50);
-			continue;
-		}
-		Sleep(20);
+		
+		EQ::EventLoop::Get().Process();
+		Sleep(1);
 	}
 	Log.Out(Logs::General, Logs::World_Server, "World main loop completed.");
 	Log.Out(Logs::General, Logs::World_Server, "Shutting down console connections (if any).");
@@ -541,8 +534,6 @@ int main(int argc, char** argv) {
 	zoneserver_list.KillAll();
 	Log.Out(Logs::General, Logs::World_Server, "Zone (TCP) listener stopped.");
 	tcps.Close();
-	Log.Out(Logs::General, Logs::World_Server, "Client (UDP) listener stopped.");
-	eqsf.Close();
 	Log.Out(Logs::General, Logs::World_Server, "Signaling HTTP service to stop...");
 	http_server.Stop();
 	Log.CloseFileLogs();

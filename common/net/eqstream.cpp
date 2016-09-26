@@ -120,7 +120,7 @@ EQApplicationPacket *EQ::Net::EQStream::PopPacket() {
 		}
 
 		EmuOpcode emu_op = (*m_opcode_manager)->EQToEmu(opcode);
-		EQApplicationPacket *ret = new EQApplicationPacket(emu_op, (unsigned char*)p->Data(), p->Length() - m_owner->m_options.opcode_size);
+		EQApplicationPacket *ret = new EQApplicationPacket(emu_op, (unsigned char*)p->Data() + m_owner->m_options.opcode_size, p->Length() - m_owner->m_options.opcode_size);
 		m_packet_queue.pop_front();
 		return ret;
 	}

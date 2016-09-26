@@ -22,7 +22,7 @@ public:
 
 	//main processing interface
 	void Process();
-	void AddStream(std::shared_ptr<EQStreamInterface> &eqs);
+	void AddStream(std::shared_ptr<EQStreamInterface> eqs);
 	EQStreamInterface *PopIdentified();
 
 protected:
