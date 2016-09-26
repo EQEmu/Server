@@ -391,8 +391,8 @@ void Client::SetEXP(uint32 set_exp, uint32 set_aaxp, bool isrezzexp) {
 		uint32 exp_lost = m_pp.exp - set_exp;
 		float exp_percent = (float)((float)exp_lost / (float)(GetEXPForLevel(GetLevel() + 1) - GetEXPForLevel(GetLevel())))*(float)100;
 
-		if (RuleI(Character, ShowExpValues) == 1 && exp_lost > 0) Message(13, "You have lost %i experience.", exp_lost);
-		else if (RuleI(Character, ShowExpValues) == 2 && exp_lost > 0) Message(13, "You have lost %i experience. (%.3f%%)", exp_lost, exp_percent);
+		if (RuleI(Character, ShowExpValues) == 1 && exp_lost > 0) Message(15, "You have lost %i experience.", exp_lost);
+		else if (RuleI(Character, ShowExpValues) == 2 && exp_lost > 0) Message(15, "You have lost %i experience. (%.3f%%)", exp_lost, exp_percent);
 		else Message(15, "You have lost experience.");		
 	}
 
