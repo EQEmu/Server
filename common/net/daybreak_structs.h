@@ -74,15 +74,13 @@ namespace EQ
 			uint8_t zero;
 			uint8_t opcode;
 			uint32_t connect_code;
-			uint16_t disconnect_code;
 
 			template <class Archive>
 			void serialize(Archive & archive)
 			{
 				archive(CEREAL_NVP(zero),
 					CEREAL_NVP(opcode),
-					CEREAL_NVP(connect_code),
-					CEREAL_NVP(disconnect_code));
+					CEREAL_NVP(connect_code));
 			}
 		};
 
@@ -116,7 +114,7 @@ namespace EQ
 			}
 		};
 
-		struct DaybreakSessionStatRequestHeader
+		struct DaybreakSessionStatRequest
 		{
 			static size_t size() { return 40; }
 			uint8_t zero;
@@ -146,7 +144,7 @@ namespace EQ
 			}
 		};
 
-		struct DaybreakSessionStatResponseHeader
+		struct DaybreakSessionStatResponse
 		{
 			static size_t size() { return 40; }
 			uint8_t zero;

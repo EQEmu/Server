@@ -65,6 +65,10 @@
 #include "lua_parser.h"
 #include "questmgr.h"
 
+#include "../common/event/event_loop.h"
+#include "../common/event/timer.h"
+#include "../common/net/eqstream.h"
+
 #include <iostream>
 #include <string>
 #include <fstream>
@@ -73,6 +77,7 @@
 #include <signal.h>
 #include <time.h>
 #include <ctime>
+#include <thread>
 
 #ifdef _CRTDBG_MAP_ALLOC
 	#undef new
@@ -97,7 +102,6 @@ WorldServer worldserver;
 uint32 numclients = 0;
 char errorname[32];
 extern Zone* zone;
-EQStreamFactory eqsf(ZoneStream);
 npcDecayTimes_Struct npcCorpseDecayTimes[100];
 TitleManager title_manager;
 QueryServ *QServ = 0;
@@ -431,122 +435,111 @@ int main(int argc, char** argv) {
 	uint8 ZONEUPDATE = 10;
 	Timer zoneupdate_timer(ZONEUPDATE);
 	zoneupdate_timer.Start();
-	while(RunLoops) {
-		{	//profiler block to omit the sleep from times
+	bool eqsf_open = false;
+	std::unique_ptr<EQ::Net::EQStreamManager> eqsm;
 
-		//Advance the timer to our current point in time
-		Timer::SetCurrentTime();
-
-		worldserver.Process();
-
-		if (!eqsf.IsOpen() && Config->ZonePort != 0) {
-			Log.Out(Logs::General, Logs::Zone_Server, "Starting EQ Network server on port %d", Config->ZonePort);
-			if (!eqsf.Open(Config->ZonePort)) {
-				Log.Out(Logs::General, Logs::Error, "Failed to open port %d", Config->ZonePort);
-				ZoneConfig::SetZonePort(0);
-				worldserver.Disconnect();
+	EQ::Timer process_timer(33, true, [&eqsf_open, &eqsm, &stream_identifier, &eqsi, &worldwasconnected,
+		&zoneupdate_timer, &IDLEZONEUPDATE, &ZONEUPDATE, &quest_timers, &InterserverTimer]() {
+			//Advance the timer to our current point in time
+			Timer::SetCurrentTime();
+		
+			worldserver.Process();
+		
+			if (!eqsf_open && Config->ZonePort != 0) {
+				Log.Out(Logs::General, Logs::Zone_Server, "Starting EQ Network server on port %d", Config->ZonePort);
+				
+				EQ::Net::EQStreamManagerOptions opts(Config->ZonePort, false, true);
+				eqsm.reset(new EQ::Net::EQStreamManager(opts));
+				eqsf_open = true;
+		
+				eqsm->OnNewConnection([&stream_identifier](std::shared_ptr<EQ::Net::EQStream> stream) {
+					stream_identifier.AddStream(stream);
+					Log.OutF(Logs::Detail, Logs::World_Server, "New connection from IP {0}:{1}", stream->RemoteEndpoint(), ntohs(stream->GetRemotePort()));
+				});
+			}
+		
+			//give the stream identifier a chance to do its work....
+			stream_identifier.Process();
+		
+			//check the stream identifier for any now-identified streams
+			while((eqsi = stream_identifier.PopIdentified())) {
+				//now that we know what patch they are running, start up their client object
+				struct in_addr	in;
+				in.s_addr = eqsi->GetRemoteIP();
+				Log.Out(Logs::Detail, Logs::World_Server, "New client from %s:%d", inet_ntoa(in), ntohs(eqsi->GetRemotePort()));
+				auto client = new Client(eqsi);
+				entity_list.AddClient(client);
+			}
+		
+			if ( numclients < 1 && zoneupdate_timer.GetDuration() != IDLEZONEUPDATE )
+				zoneupdate_timer.SetTimer(IDLEZONEUPDATE);
+			else if ( numclients > 0 && zoneupdate_timer.GetDuration() == IDLEZONEUPDATE )
+			{
+				zoneupdate_timer.SetTimer(ZONEUPDATE);
+				zoneupdate_timer.Trigger();
+			}
+		
+			//check for timeouts in other threads
+			timeout_manager.CheckTimeouts();
+		
+			if (worldserver.Connected()) {
+				worldwasconnected = true;
+			}
+			else {
+				if (worldwasconnected && is_zone_loaded)
+					entity_list.ChannelMessageFromWorld(0, 0, 6, 0, 0, "WARNING: World server connection lost");
 				worldwasconnected = false;
 			}
-		}
-
-		//check the factory for any new incoming streams.
-		while ((eqss = eqsf.Pop())) {
-			//pull the stream out of the factory and give it to the stream identifier
-			//which will figure out what patch they are running, and set up the dynamic
-			//structures and opcodes for that patch.
-			struct in_addr	in;
-			in.s_addr = eqss->GetRemoteIP();
-			Log.Out(Logs::Detail, Logs::World_Server, "New connection from %s:%d", inet_ntoa(in), ntohs(eqss->GetRemotePort()));
-			stream_identifier.AddStream(eqss);	//takes the stream
-		}
-
-		//give the stream identifier a chance to do its work....
-		stream_identifier.Process();
-
-		//check the stream identifier for any now-identified streams
-		while((eqsi = stream_identifier.PopIdentified())) {
-			//now that we know what patch they are running, start up their client object
-			struct in_addr	in;
-			in.s_addr = eqsi->GetRemoteIP();
-			Log.Out(Logs::Detail, Logs::World_Server, "New client from %s:%d", inet_ntoa(in), ntohs(eqsi->GetRemotePort()));
-			auto client = new Client(eqsi);
-			entity_list.AddClient(client);
-		}
-
-		if ( numclients < 1 && zoneupdate_timer.GetDuration() != IDLEZONEUPDATE )
-			zoneupdate_timer.SetTimer(IDLEZONEUPDATE);
-		else if ( numclients > 0 && zoneupdate_timer.GetDuration() == IDLEZONEUPDATE )
-		{
-			zoneupdate_timer.SetTimer(ZONEUPDATE);
-			zoneupdate_timer.Trigger();
-		}
-
-		//check for timeouts in other threads
-		timeout_manager.CheckTimeouts();
-
-		if (worldserver.Connected()) {
-			worldwasconnected = true;
-		}
-		else {
-			if (worldwasconnected && is_zone_loaded)
-				entity_list.ChannelMessageFromWorld(0, 0, 6, 0, 0, "WARNING: World server connection lost");
-			worldwasconnected = false;
-		}
-
-		if (is_zone_loaded && zoneupdate_timer.Check()) {
-			{
-				if(net.group_timer.Enabled() && net.group_timer.Check())
-					entity_list.GroupProcess();
-
-				if(net.door_timer.Enabled() && net.door_timer.Check())
-					entity_list.DoorProcess();
-
-				if(net.object_timer.Enabled() && net.object_timer.Check())
-					entity_list.ObjectProcess();
-
-				if(net.corpse_timer.Enabled() && net.corpse_timer.Check())
-					entity_list.CorpseProcess();
-
-				if(net.trap_timer.Enabled() && net.trap_timer.Check())
-					entity_list.TrapProcess();
-
-				if(net.raid_timer.Enabled() && net.raid_timer.Check())
-					entity_list.RaidProcess();
-
-				entity_list.Process(); 
-				entity_list.MobProcess(); 
-				entity_list.BeaconProcess();
-				entity_list.EncounterProcess();
-
-				if (zone) {
-					if(!zone->Process()) {
-						Zone::Shutdown();
+		
+			if (is_zone_loaded && zoneupdate_timer.Check()) {
+				{
+					if(net.group_timer.Enabled() && net.group_timer.Check())
+						entity_list.GroupProcess();
+		
+					if(net.door_timer.Enabled() && net.door_timer.Check())
+						entity_list.DoorProcess();
+		
+					if(net.object_timer.Enabled() && net.object_timer.Check())
+						entity_list.ObjectProcess();
+		
+					if(net.corpse_timer.Enabled() && net.corpse_timer.Check())
+						entity_list.CorpseProcess();
+		
+					if(net.trap_timer.Enabled() && net.trap_timer.Check())
+						entity_list.TrapProcess();
+		
+					if(net.raid_timer.Enabled() && net.raid_timer.Check())
+						entity_list.RaidProcess();
+		
+					entity_list.Process(); 
+					entity_list.MobProcess(); 
+					entity_list.BeaconProcess();
+					entity_list.EncounterProcess();
+		
+					if (zone) {
+						if(!zone->Process()) {
+							Zone::Shutdown();
+						}
 					}
+		
+					if(quest_timers.Check())
+						quest_manager.Process();
+		
 				}
-
-				if(quest_timers.Check())
-					quest_manager.Process();
-
 			}
-		}
-		if (InterserverTimer.Check()) {
-			InterserverTimer.Start();
-			database.ping();
-			// AsyncLoadVariables(dbasync, &database);
-			entity_list.UpdateWho();
-			if (worldserver.TryReconnect() && (!worldserver.Connected()))
-				worldserver.AsyncConnect();
-		}
-
-#ifdef EQPROFILE
-#ifdef PROFILE_DUMP_TIME
-		if(profile_dump_timer.Check()) {
-			DumpZoneProfile();
-		}
-#endif
-#endif
-		}	//end extra profiler block 
-		Sleep(ZoneTimerResolution);
+			if (InterserverTimer.Check()) {
+				InterserverTimer.Start();
+				database.ping();
+				// AsyncLoadVariables(dbasync, &database);
+				entity_list.UpdateWho();
+				if (worldserver.TryReconnect() && (!worldserver.Connected()))
+					worldserver.AsyncConnect();
+			}
+	});
+	
+	while(RunLoops) {
+		EQ::EventLoop::Get().Process();
+		Sleep(1);
 	}
 
 	entity_list.Clear();
@@ -566,7 +559,6 @@ int main(int argc, char** argv) {
 	if (zone != 0)
 		Zone::Shutdown(true);
 	//Fix for Linux world server problem.
-	eqsf.Close();
 	worldserver.Disconnect();
 	safe_delete(taskmanager);
 	command_deinit();

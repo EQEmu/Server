@@ -17,20 +17,21 @@ namespace EQ
 				opcode_size = 2;
 			}
 
-			EQStreamManagerOptions(bool encoded, bool compressed) {
+			EQStreamManagerOptions(int port, bool encoded, bool compressed) {
 				opcode_size = 2;
-				if (encoded) {
-					daybreak_options.encode_passes[0] = EncodeXOR;
 
-					if (compressed) {
-						daybreak_options.encode_passes[1] = EncodeCompression;
-					}
+				//World seems to support both compression and xor zone supports one or the others.
+				//Enforce one or the other in the convienence construct
+				//Login I had trouble getting to recognize compression at all 
+				//but that might be because it was still a bit buggy when i was testing that.
+				if (compressed) {
+					daybreak_options.encode_passes[0] = EncodeCompression;
 				}
-				else {
-					if (compressed) {
-						daybreak_options.encode_passes[0] = EncodeCompression;
-					}
+				else if (encoded) {
+					daybreak_options.encode_passes[0] = EncodeXOR;
 				}
+
+				daybreak_options.port = port;
 			}
 
 			int opcode_size;

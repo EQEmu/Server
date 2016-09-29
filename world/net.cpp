@@ -116,9 +116,6 @@ void CatchSignal(int sig_num);
 int main(int argc, char** argv) {
 	RegisterExecutablePlatform(ExePlatformWorld);
 	Log.LoadLogSettingsDefaults();
-
-
-
 	set_exception_handler();
 
 	/* Database Version Check */
@@ -398,10 +395,7 @@ int main(int argc, char** argv) {
 		return 1;
 	}
 
-	EQ::Net::EQStreamManagerOptions opts(false, true);
-	opts.daybreak_options.port = 9000;
-	opts.opcode_size = 2;
-
+	EQ::Net::EQStreamManagerOptions opts(9000, false, true);
 	EQ::Net::EQStreamManager eqsm(opts);
 
 	//register all the patches we have avaliable with the stream identifier.

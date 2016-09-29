@@ -82,6 +82,11 @@ namespace EQ
 				total_acks = 0;
 				min_ping = 0xFFFFFFFFFFFFFFFFUL;
 				max_ping = 0;
+				total_stat_ping = 0;
+				total_stat_count = 0;
+				min_stat_ping = 0xFFFFFFFFFFFFFFFFUL;
+				max_stat_ping = 0;
+				last_stat_ping = 0;
 				created = Clock::now();
 			}
 
@@ -93,6 +98,11 @@ namespace EQ
 			uint64_t total_acks;
 			uint64_t min_ping;
 			uint64_t max_ping;
+			uint64_t total_stat_ping;
+			uint64_t total_stat_count;
+			uint64_t min_stat_ping;
+			uint64_t max_stat_ping;
+			uint64_t last_stat_ping;
 			Timestamp created;
 		};
 
@@ -135,7 +145,6 @@ namespace EQ
 			Timestamp m_last_stats;
 			DaybreakConnectionStats m_stats;
 			Timestamp m_last_session_stats;
-			uint64_t m_last_session_stats_ping;
 			size_t m_resend_delay;
 			size_t m_rolling_ping;
 
@@ -209,7 +218,7 @@ namespace EQ
 				max_connection_count = 0;
 				keepalive_delay_ms = 0;
 				resend_delay_ms = 1000;
-				stats_delay_ms = 10000;
+				stats_delay_ms = 0;
 				connect_delay_ms = 1000;
 				stale_connection_ms = 60000;
 				crc_length = 2;
