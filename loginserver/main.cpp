@@ -18,7 +18,7 @@
 #include "../common/global_define.h"
 #include "../common/types.h"
 #include "../common/opcodemgr.h"
-#include "../common/eq_stream_factory.h"
+#include "../common/event/event_loop.h"
 #include "../common/timer.h"
 #include "../common/platform.h"
 #include "../common/crash.h"
@@ -29,7 +29,6 @@
 #include <string>
 #include <sstream>
 
-TimeoutManager timeout_manager;
 LoginServer server;
 EQEmuLogSys Log;
 bool run_server = true;
@@ -199,8 +198,8 @@ int main()
 		Timer::SetCurrentTime();
 		server.client_manager->Process();
 		server.server_manager->Process();
-		timeout_manager.CheckTimeouts();
-		Sleep(100);
+		EQ::EventLoop::Get().Process();
+		Sleep(1);
 	}
 
 	Log.Out(Logs::General, Logs::Login_Server, "Server Shutdown.");

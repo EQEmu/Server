@@ -4,7 +4,6 @@
 
 #include "types.h"
 #include "eq_stream_intf.h"
-#include "eq_stream.h"
 #include <memory>
 
 class StructStrategy;

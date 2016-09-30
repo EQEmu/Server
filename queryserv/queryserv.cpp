@@ -20,7 +20,6 @@
 #include "../common/global_define.h"
 #include "../common/eqemu_logsys.h"
 #include "../common/opcodemgr.h"
-#include "../common/eq_stream_factory.h"
 #include "../common/rulesys.h"
 #include "../common/servertalk.h"
 #include "../common/platform.h"
@@ -34,7 +33,6 @@
 
 volatile bool RunLoops = true;
 
-TimeoutManager timeout_manager;
 Database database;
 LFGuildManager lfguildmanager;
 std::string WorldShortName;
@@ -117,8 +115,7 @@ int main() {
 				worldserver->AsyncConnect();
 		}
 		worldserver->Process(); 
-		timeout_manager.CheckTimeouts(); 
-		Sleep(100);
+		Sleep(1);
 	}
 	Log.CloseFileLogs();
 }

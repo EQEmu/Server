@@ -41,16 +41,12 @@ ADD_EXECUTABLE(loginserver ${eqlogin_sources} ${eqlogin_headers})
 
 INSTALL(TARGETS loginserver RUNTIME DESTINATION ${CMAKE_INSTALL_PREFIX}/bin)
 
-TARGET_LINK_LIBRARIES(loginserver common debug ${MySQL_LIBRARY_DEBUG} optimized ${MySQL_LIBRARY_RELEASE} ${ZLIB_LIBRARY})
+TARGET_LINK_LIBRARIES(loginserver common debug ${MySQL_LIBRARY_DEBUG} optimized ${MySQL_LIBRARY_RELEASE} ${ZLIB_LIBRARY} libuv fmt)
 
-IF(MSVC)
-	SET_TARGET_PROPERTIES(loginserver PROPERTIES LINK_FLAGS_RELEASE "/OPT:REF /OPT:ICF")
-	TARGET_LINK_LIBRARIES(loginserver "Ws2_32.lib")
-ENDIF(MSVC)
+IF(WIN32)
+	TARGET_LINK_LIBRARIES(loginserver "ws2_32" "psapi" "iphlpapi" "userenv")
+ENDIF(WIN32)
 
-IF(MINGW)
-	TARGET_LINK_LIBRARIES(loginserver "WS2_32")
-ENDIF(MINGW)
 
 IF(UNIX)
 	TARGET_LINK_LIBRARIES(loginserver "${CMAKE_DL_LIBS}")

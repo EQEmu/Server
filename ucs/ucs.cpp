@@ -21,11 +21,11 @@
 #include "../common/global_define.h"
 #include "clientlist.h"
 #include "../common/opcodemgr.h"
-#include "../common/eq_stream_factory.h"
 #include "../common/rulesys.h"
 #include "../common/servertalk.h"
 #include "../common/platform.h"
 #include "../common/crash.h"
+#include "../common/event/event_loop.h"
 #include "database.h"
 #include "ucsconfig.h"
 #include "chatchannel.h"
@@ -36,7 +36,6 @@
 ChatChannelList *ChannelList;
 Clientlist *g_Clientlist;
 EQEmuLogSys Log;
-TimeoutManager timeout_manager;
 Database database;
 WorldServer *worldserver = nullptr;
 
@@ -158,9 +157,9 @@ int main() {
 		}
 		worldserver->Process();
 
-		timeout_manager.CheckTimeouts();
+		EQ::EventLoop::Get().Process();
 
-		Sleep(100);
+		Sleep(1);
 	}
 
 	ChannelList->RemoveAllChannels();

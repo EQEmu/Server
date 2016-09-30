@@ -19,7 +19,6 @@
 #define EQEMU_WORLDSERVER_H
 
 #include "../common/global_define.h"
-#include "../common/eq_stream_factory.h"
 #include "../common/emu_tcp_connection.h"
 #include "../common/emu_tcp_server.h"
 #include "../common/servertalk.h"

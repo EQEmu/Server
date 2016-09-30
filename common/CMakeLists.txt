@@ -26,8 +26,6 @@ SET(common_sources
 	eqemu_logsys.cpp
 	eq_limits.cpp
 	eq_packet.cpp
-	eq_stream.cpp
-	eq_stream_factory.cpp
 	eq_stream_ident.cpp
 	eq_stream_proxy.cpp
 	eqtime.cpp
@@ -69,7 +67,6 @@ SET(common_sources
 	tcp_connection.cpp
 	tcp_server.cpp
 	textures.cpp
-	timeoutmgr.cpp
 	timer.cpp
 	unix.cpp
 	worldconn.cpp
@@ -142,13 +139,10 @@ SET(common_headers
 	eqemu_logsys.h
 	eq_limits.h
 	eq_packet.h
-	eq_stream.h
-	eq_stream_factory.h
 	eq_stream_ident.h
 	eq_stream_intf.h
 	eq_stream_locator.h
 	eq_stream_proxy.h
-	eq_stream_type.h
 	eqtime.h
 	errmsg.h
 	extprofile.h
@@ -205,7 +199,6 @@ SET(common_headers
 	tcp_connection.h
 	tcp_server.h
 	textures.h
-	timeoutmgr.h
 	timer.h
 	types.h
 	unix.h

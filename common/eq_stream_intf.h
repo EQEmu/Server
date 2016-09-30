@@ -5,6 +5,7 @@
 
 #include <string>
 #include "emu_versions.h"
+#include "eq_packet.h"
 
 typedef enum {
 	ESTABLISHED,

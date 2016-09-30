@@ -1,7 +1,7 @@
 #ifndef EQSTREAMIDENT_H_
 #define EQSTREAMIDENT_H_
 
-#include "eq_stream.h"
+#include "eq_stream_intf.h"
 #include "timer.h"
 #include <vector>
 #include <queue>

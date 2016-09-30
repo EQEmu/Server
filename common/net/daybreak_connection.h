@@ -217,10 +217,11 @@ namespace EQ
 			DaybreakConnectionManagerOptions() {
 				max_connection_count = 0;
 				keepalive_delay_ms = 0;
-				resend_delay_ms = 1000;
+				resend_delay_ms = 10;
+				resend_delay_factor = 1.25;
 				stats_delay_ms = 0;
 				connect_delay_ms = 1000;
-				stale_connection_ms = 60000;
+				stale_connection_ms = 135000;
 				crc_length = 2;
 				max_packet_size = 512;
 				encode_passes[0] = DaybreakEncodeType::EncodeNone;
@@ -228,11 +229,14 @@ namespace EQ
 				port = 0;
 				hold_size = 384;
 				hold_length_ms = 50;
+				simulated_in_packet_loss = 0;
+				simulated_out_packet_loss = 0;
 			}
 
 			size_t max_packet_size;
 			size_t max_connection_count;
 			size_t keepalive_delay_ms;
+			double resend_delay_factor;
 			size_t resend_delay_ms;
 			size_t stats_delay_ms;
 			size_t connect_delay_ms;
@@ -240,6 +244,8 @@ namespace EQ
 			size_t crc_length;
 			size_t hold_size;
 			size_t hold_length_ms;
+			size_t simulated_in_packet_loss;
+			size_t simulated_out_packet_loss;
 			DaybreakEncodeType encode_passes[2];
 			int port;
 		};
@@ -274,7 +280,7 @@ namespace EQ
 
 			void ProcessPacket(const std::string &endpoint, int port, const char *data, size_t size);
 			std::shared_ptr<DaybreakConnection> FindConnectionByEndpoint(std::string addr, int port);
-			void SendSessionLost(const std::string &addr, int port);
+			void SendDisconnect(const std::string &addr, int port);
 
 			friend class DaybreakConnection;
 		};

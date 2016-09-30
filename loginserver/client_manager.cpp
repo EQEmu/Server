@@ -27,7 +27,8 @@ extern EQEmuLogSys Log;
 ClientManager::ClientManager()
 {
 	int titanium_port = atoi(server.config->GetVariable("Titanium", "port").c_str());
-	titanium_stream = new EQStreamFactory(LoginStream, titanium_port);
+	EQ::Net::EQStreamManagerOptions titanium_opts(titanium_port, false, false);
+	titanium_stream = new EQ::Net::EQStreamManager(titanium_opts);
 	titanium_ops = new RegularOpcodeManager;
 	if(!titanium_ops->LoadOpcodes(server.config->GetVariable("Titanium", "opcodes").c_str()))
 	{
@@ -36,18 +37,16 @@ ClientManager::ClientManager()
 		run_server = false;
 	}
 
-	if(titanium_stream->Open())
-	{
-		Log.Out(Logs::General, Logs::Login_Server, "ClientManager listening on Titanium stream.");
-	}
-	else
-	{
-		Log.Out(Logs::General, Logs::Error, "ClientManager fatal error: couldn't open Titanium stream.");
-		run_server = false;
-	}
+	titanium_stream->OnNewConnection([this](std::shared_ptr<EQ::Net::EQStream> stream) {
+		Log.OutF(Logs::General, Logs::Login_Server, "New Titanium client connection from {0}:{1}", stream->RemoteEndpoint(), stream->GetRemotePort());
+		stream->SetOpcodeManager(&titanium_ops);
+		Client *c = new Client(stream, cv_titanium);
+		clients.push_back(c);
+	});
 
 	int sod_port = atoi(server.config->GetVariable("SoD", "port").c_str());
-	sod_stream = new EQStreamFactory(LoginStream, sod_port);
+	EQ::Net::EQStreamManagerOptions sod_opts(sod_port, false, false);
+	sod_stream = new EQ::Net::EQStreamManager(sod_opts);
 	sod_ops = new RegularOpcodeManager;
 	if(!sod_ops->LoadOpcodes(server.config->GetVariable("SoD", "opcodes").c_str()))
 	{
@@ -56,22 +55,18 @@ ClientManager::ClientManager()
 		run_server = false;
 	}
 
-	if(sod_stream->Open())
-	{
-		Log.Out(Logs::General, Logs::Login_Server, "ClientManager listening on SoD stream.");
-	}
-	else
-	{
-		Log.Out(Logs::General, Logs::Error, "ClientManager fatal error: couldn't open SoD stream.");
-		run_server = false;
-	}
+	sod_stream->OnNewConnection([this](std::shared_ptr<EQ::Net::EQStream> stream) {
+		Log.OutF(Logs::General, Logs::Login_Server, "New SoD client connection from {0}:{1}", stream->RemoteEndpoint(), stream->GetRemotePort());
+		stream->SetOpcodeManager(&sod_ops);
+		Client *c = new Client(stream, cv_sod);
+		clients.push_back(c);
+	});
 }
 
 ClientManager::~ClientManager()
 {
 	if(titanium_stream)
 	{
-		titanium_stream->Close();
 		delete titanium_stream;
 	}
 
@@ -82,7 +77,6 @@ ClientManager::~ClientManager()
 
 	if(sod_stream)
 	{
-		sod_stream->Close();
 		delete sod_stream;
 	}
 
@@ -95,31 +89,6 @@ ClientManager::~ClientManager()
 void ClientManager::Process()
 {
 	ProcessDisconnect();
-	std::shared_ptr<EQStreamInterface> cur = titanium_stream->Pop();
-	while(cur)
-	{
-		struct in_addr in;
-		in.s_addr = cur->GetRemoteIP();
-		Log.Out(Logs::General, Logs::Login_Server, "New Titanium client connection from %s:%d", inet_ntoa(in), ntohs(cur->GetRemotePort()));
-
-		cur->SetOpcodeManager(&titanium_ops);
-		Client *c = new Client(cur, cv_titanium);
-		clients.push_back(c);
-		cur = titanium_stream->Pop();
-	}
-
-	cur = sod_stream->Pop();
-	while(cur)
-	{
-		struct in_addr in;
-		in.s_addr = cur->GetRemoteIP();
-		Log.Out(Logs::General, Logs::Login_Server, "New SoD client connection from %s:%d", inet_ntoa(in), ntohs(cur->GetRemotePort()));
-
-		cur->SetOpcodeManager(&sod_ops);
-		Client *c = new Client(cur, cv_sod);
-		clients.push_back(c);
-		cur = sod_stream->Pop();
-	}
 
 	list<Client*>::iterator iter = clients.begin();
 	while(iter != clients.end())

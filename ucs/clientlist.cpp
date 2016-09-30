@@ -25,7 +25,6 @@
 #include "database.h"
 #include "chatchannel.h"
 
-#include "../common/eq_stream_factory.h"
 #include "../common/emu_tcp_connection.h"
 #include "../common/emu_tcp_server.h"
 #include <list>
@@ -468,21 +467,22 @@ static void ProcessCommandIgnore(Client *c, std::string Ignoree) {
 
 }
 Clientlist::Clientlist(int ChatPort) {
-
-	chatsf = new EQStreamFactory(ChatStream, ChatPort, 45000);
+	EQ::Net::EQStreamManagerOptions chat_opts(ChatPort, false, false);
+	chat_opts.opcode_size = 1;
+	chatsf = new EQ::Net::EQStreamManager(chat_opts);
 
 	ChatOpMgr = new RegularOpcodeManager;
 
 	if(!ChatOpMgr->LoadOpcodes("mail_opcodes.conf"))
 		exit(1);
 
-	if (chatsf->Open())
-		Log.Out(Logs::Detail, Logs::UCS_Server,"Client (UDP) Chat listener started on port %i.", ChatPort);
-	else {
-		Log.Out(Logs::Detail, Logs::UCS_Server,"Failed to start client (UDP) listener (port %-4i)", ChatPort);
+	chatsf->OnNewConnection([this](std::shared_ptr<EQ::Net::EQStream> stream) {
+		Log.OutF(Logs::General, Logs::Login_Server, "New Client UDP connection from {0}:{1}", stream->RemoteEndpoint(), stream->GetRemotePort());
+		stream->SetOpcodeManager(&ChatOpMgr);
 
-		exit(1);
-	}
+		auto c = new Client(stream);
+		ClientChatConnections.push_back(c);
+	});
 }
 
 Client::Client(std::shared_ptr<EQStreamInterface> eqs) {
@@ -574,21 +574,6 @@ void Clientlist::CheckForStaleConnections(Client *c) {
 
 void Clientlist::Process()
 {
-	std::shared_ptr<EQStreamInterface> eqs;
-
-	while ((eqs = chatsf->Pop())) {
-		struct in_addr in;
-		in.s_addr = eqs->GetRemoteIP();
-
-		Log.Out(Logs::Detail, Logs::UCS_Server, "New Client UDP connection from %s:%d", inet_ntoa(in),
-			ntohs(eqs->GetRemotePort()));
-
-		eqs->SetOpcodeManager(&ChatOpMgr);
-
-		auto c = new Client(eqs);
-		ClientChatConnections.push_back(c);
-	}
-
 	auto it = ClientChatConnections.begin();
 	while (it != ClientChatConnections.end()) {
 		(*it)->AccountUpdate();
@@ -614,7 +599,7 @@ void Clientlist::Process()
 
 			switch (opcode) {
 			case OP_MailLogin: {
-				char *PacketBuffer = (char *)app->pBuffer;
+				char *PacketBuffer = (char *)app->pBuffer + 1;
 				char MailBox[64];
 				char Key[64];
 				char ConnectionTypeIndicator;
@@ -668,7 +653,7 @@ void Clientlist::Process()
 			}
 
 			case OP_Mail: {
-				std::string CommandString = (const char *)app->pBuffer;
+				std::string CommandString = (const char *)app->pBuffer + 1;
 				ProcessOPMailCommand((*it), CommandString);
 				break;
 			}

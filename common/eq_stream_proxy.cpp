@@ -1,7 +1,6 @@
 
 #include "global_define.h"
 #include "eq_stream_proxy.h"
-#include "eq_stream.h"
 #include "struct_strategy.h"
 
 

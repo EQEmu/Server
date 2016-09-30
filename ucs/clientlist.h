@@ -21,8 +21,7 @@
 #define CHATSERVER_CLIENTLIST_H
 
 #include "../common/opcodemgr.h"
-#include "../common/eq_stream_type.h"
-#include "../common/eq_stream_factory.h"
+#include "../common/net/eqstream.h"
 #include "../common/rulesys.h"
 #include "chatchannel.h"
 #include <list>
@@ -185,7 +184,7 @@ public:
 
 private:
 
-	EQStreamFactory *chatsf;
+	EQ::Net::EQStreamManager *chatsf;
 
 	std::list<Client*> ClientChatConnections;
 

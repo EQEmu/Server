@@ -3,7 +3,8 @@
 #include "eqemu_logsys.h"
 #include "struct_strategy.h"
 
-#include "eq_stream.h"
+#include "eq_stream_intf.h"
+#include "opcodemgr.h"
 #include <map>
 #include <memory>
 

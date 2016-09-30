@@ -23,8 +23,6 @@
 #include "../common/features.h"
 #include "../common/queue.h"
 #include "../common/timer.h"
-#include "../common/eq_stream.h"
-#include "../common/eq_stream_factory.h"
 #include "../common/eq_packet_structs.h"
 #include "../common/mutex.h"
 #include "../common/version.h"
@@ -95,7 +93,6 @@
 volatile bool RunLoops = true;
 extern volatile bool is_zone_loaded;
 
-TimeoutManager timeout_manager;
 NetConnection net;
 EntityList entity_list;
 WorldServer worldserver;
@@ -448,7 +445,7 @@ int main(int argc, char** argv) {
 			if (!eqsf_open && Config->ZonePort != 0) {
 				Log.Out(Logs::General, Logs::Zone_Server, "Starting EQ Network server on port %d", Config->ZonePort);
 				
-				EQ::Net::EQStreamManagerOptions opts(Config->ZonePort, false, true);
+				EQ::Net::EQStreamManagerOptions opts(Config->ZonePort, false, false);
 				eqsm.reset(new EQ::Net::EQStreamManager(opts));
 				eqsf_open = true;
 		
@@ -478,9 +475,6 @@ int main(int argc, char** argv) {
 				zoneupdate_timer.SetTimer(ZONEUPDATE);
 				zoneupdate_timer.Trigger();
 			}
-		
-			//check for timeouts in other threads
-			timeout_manager.CheckTimeouts();
 		
 			if (worldserver.Connected()) {
 				worldwasconnected = true;

@@ -28,16 +28,12 @@
 #include "../common/eqemu_logsys.h"
 #include "../common/queue.h"
 #include "../common/timer.h"
-#include "../common/eq_stream_factory.h"
 #include "../common/eq_packet.h"
 #include "../common/seperator.h"
 #include "../common/version.h"
 #include "../common/eqtime.h"
-#include "../common/timeoutmgr.h"
-
 #include "../common/event/event_loop.h"
 #include "../common/net/eqstream.h"
-
 #include "../common/opcodemgr.h"
 #include "../common/guilds.h"
 #include "../common/eq_stream_ident.h"
@@ -90,7 +86,6 @@
 #include "ucs.h"
 #include "queryserv.h"
 
-TimeoutManager timeout_manager;
 EmuTCPServer tcps;
 ClientList client_list;
 GroupLFPList LFPGroupList;
@@ -395,7 +390,7 @@ int main(int argc, char** argv) {
 		return 1;
 	}
 
-	EQ::Net::EQStreamManagerOptions opts(9000, false, true);
+	EQ::Net::EQStreamManagerOptions opts(9000, false, false);
 	EQ::Net::EQStreamManager eqsm(opts);
 
 	//register all the patches we have avaliable with the stream identifier.
@@ -492,8 +487,6 @@ int main(int argc, char** argv) {
 				Log.Out(Logs::Detail, Logs::World_Server, "EQTime successfully saved.");
 		}
 		
-		//check for timeouts in other threads
-		timeout_manager.CheckTimeouts();
 		loginserverlist.Process();
 		console_list.Process();
 		zoneserver_list.Process();

@@ -20,8 +20,7 @@
 
 #include "../common/global_define.h"
 #include "../common/opcodemgr.h"
-#include "../common/eq_stream_type.h"
-#include "../common/eq_stream_factory.h"
+#include "../common/net/eqstream.h"
 #include "client.h"
 #include <list>
 
@@ -71,9 +70,9 @@ private:
 
 	list<Client*> clients;
 	OpcodeManager *titanium_ops;
-	EQStreamFactory *titanium_stream;
+	EQ::Net::EQStreamManager *titanium_stream;
 	OpcodeManager *sod_ops;
-	EQStreamFactory *sod_stream;
+	EQ::Net::EQStreamManager *sod_stream;
 };
 
 #endif
