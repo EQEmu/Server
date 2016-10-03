@@ -365,6 +365,7 @@ Mob::Mob(const char* in_name,
 	patrol=0;
 	follow=0;
 	follow_dist = 100;	// Default Distance for Follow
+	no_target_hotkey = false;
 	flee_mode = false;
 	currently_fleeing = false;
 	flee_timer.Start();
