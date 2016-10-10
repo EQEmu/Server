@@ -460,7 +460,7 @@ void Object::RandomSpawn(bool send_packet) {
 		glm::vec3 hit;
 		float best_z = zone->zonemap->FindClosestZ(me, &hit);
 		if (best_z != BEST_Z_INVALID) {
-			m_data.z = best_z;
+			m_data.z = best_z + 0.1f;
 		} 
 	}
 
