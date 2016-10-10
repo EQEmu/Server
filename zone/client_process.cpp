@@ -1776,7 +1776,11 @@ void Client::OPGMSummon(const EQApplicationPacket *app)
 }
 
 void Client::DoHPRegen() {
-	SetHP(GetHP() + CalcHPRegen() + RestRegenHP);
+	if ((GetHP() + CalcHPRegen() + RestRegenHP) < GetMaxHP()) {
+		SetHP(GetHP() + CalcHPRegen() + RestRegenHP);
+	} else {
+		SetHP(GetMaxHP());
+	}
 	SendHPUpdate();
 }
 
@@ -1784,7 +1788,11 @@ void Client::DoManaRegen() {
 	if (GetMana() >= max_mana && spellbonuses.ManaRegen >= 0)
 		return;
 
-	SetMana(GetMana() + CalcManaRegen() + RestRegenMana);
+	if ((GetMana() + CalcManaRegen() + RestRegenMana) < GetMaxMana()) {
+		SetMana(GetMana() + CalcManaRegen() + RestRegenMana);
+	} else {
+		SetMana(GetMaxMana());
+	}
 	SendManaUpdatePacket();
 }
 
@@ -1818,7 +1826,11 @@ void Client::DoEnduranceRegen()
 	if(GetEndurance() >= GetMaxEndurance())
 		return;
 
-	SetEndurance(GetEndurance() + CalcEnduranceRegen() + RestRegenEndurance);
+	if ((GetEndurance() + CalcEnduranceRegen() + RestRegenEndurance) < GetMaxEndurance()) {
+		SetEndurance(GetEndurance() + CalcEnduranceRegen() + RestRegenEndurance);
+	} else {
+		SetEndurance(GetMaxEndurance());
+	}
 }
 
 void Client::DoEnduranceUpkeep() {
