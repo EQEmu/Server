@@ -1,6 +1,6 @@
 #include "uuid.h"
 
-#include <core/logsys.h>
+#include <fmt/format.h>
 
 #ifdef _WIN32
 #include <objbase.h>

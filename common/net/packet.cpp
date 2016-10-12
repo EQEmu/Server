@@ -255,7 +255,7 @@ std::string EQ::Net::Packet::GetString(size_t offset, size_t length) const
 		throw std::out_of_range("Packet read out of range.");
 	}
 
-	return std::string((char*)Data(), (char*)Data() + length);
+	return std::string((char*)Data() + offset, (char*)Data() + offset + length);
 }
 
 std::string EQ::Net::Packet::GetCString(size_t offset) const

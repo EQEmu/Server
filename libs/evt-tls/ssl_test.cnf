@@ -1,0 +1,10 @@
+[ req ]
+distinguished_name     = req_distinguished_name
+prompt                 = no
+[ req_distinguished_name ]
+C                      = IN
+ST                     = KT
+L                      = BL
+O                      = evt
+OU                     = evt
+CN                     = DONT USE - test cert for evt-tls

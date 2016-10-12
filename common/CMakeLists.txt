@@ -76,6 +76,10 @@ SET(common_sources
 	net/daybreak_connection.cpp
 	net/eqstream.cpp
 	net/packet.cpp
+	net/relay.cpp
+	net/relay_link.cpp
+	net/tcp_connection.cpp
+	net/tcp_server.cpp
 	patches/patches.cpp
 	patches/sod.cpp
 	patches/sod_limits.cpp
@@ -105,6 +109,7 @@ SET(common_sources
 	tinyxml/tinyxml.cpp
 	tinyxml/tinyxmlerror.cpp
 	tinyxml/tinyxmlparser.cpp
+	util/uuid.cpp
 )
 
 SET(common_headers
@@ -213,9 +218,14 @@ SET(common_headers
 	net/crc32.h
 	net/daybreak_connection.h
 	net/daybreak_structs.h
+	net/dns.h
 	net/endian.h
 	net/eqstream.h
 	net/packet.h
+	net/relay.h
+	net/relay_link.h
+	net/tcp_connection.h
+	net/tcp_server.h
 	patches/patches.h
 	patches/sod.h
 #	patches/sod_itemfields.h
@@ -268,6 +278,7 @@ SET(common_headers
 	tinyxml/tinystr.h
 	tinyxml/tinyxml.h
 	util/memory_stream.h
+	util/uuid.h
 )
 
 SOURCE_GROUP(Event FILES
@@ -282,11 +293,22 @@ SOURCE_GROUP(Net FILES
 	net/daybreak_connection.cpp
 	net/daybreak_connection.h
 	net/daybreak_structs.h
+	net/dns.h
 	net/endian.h
+	net/eqmq.cpp
+	net/eqmq.h
 	net/eqstream.h
 	net/eqstream.cpp
 	net/packet.cpp
 	net/packet.h
+	net/relay.cpp
+	net/relay.h
+	net/relay_link.cpp
+	net/relay_link.h
+	net/tcp_connection.cpp
+	net/tcp_connection.h
+	net/tcp_server.cpp
+	net/tcp_server.h
 )
 
 SOURCE_GROUP(Patches FILES
@@ -383,6 +405,8 @@ SOURCE_GROUP(TinyXML FILES
 
 SOURCE_GROUP(Util FILES
 	util/memory_stream.h
+	util/uuid.cpp
+	util/uuid.h
 )
 
 INCLUDE_DIRECTORIES(Patches SocketLib StackWalker TinyXML)

@@ -6,58 +6,62 @@ namespace EQ {
 	class Timer
 	{
 	public:
-		Timer(uint64_t duration_ms, bool repeats, std::function<void(void)> cb)
+		Timer(std::function<void(Timer *)> cb)
 		{
-			memset(&m_timer, 0, sizeof(uv_timer_t));
+			m_timer = nullptr;
 			m_cb = cb;
-			m_duration_ms = duration_ms;
-			m_repeats = repeats;
-			m_attached = nullptr;
-			Attach(EventLoop::Get().Handle());
 		}
 
+		Timer(uint64_t duration_ms, bool repeats, std::function<void(Timer *)> cb)
+		{
+			m_timer = nullptr;
+			m_cb = cb;
+			Start(duration_ms, repeats);
+		}
+	
 		~Timer()
 		{
-			Detach();
+			Stop();
+		}
+
+		void Start(uint64_t duration_ms, bool repeats) {
+			auto loop = EventLoop::Get().Handle();
+			if (!m_timer) {
+				m_timer = new uv_timer_t;
+				memset(m_timer, 0, sizeof(uv_timer_t));
+				uv_timer_init(loop, m_timer);
+				m_timer->data = this;
+
+				if (repeats) {
+					uv_timer_start(m_timer, [](uv_timer_t *handle) {
+						Timer *t = (Timer*)handle->data;
+						t->Execute();
+					}, duration_ms, duration_ms);
+				}
+				else {
+					uv_timer_start(m_timer, [](uv_timer_t *handle) {
+						Timer *t = (Timer*)handle->data;
+						t->Stop();
+						t->Execute();
+					}, duration_ms, 0);
+				}
+			}
+		}
+
+		void Stop() {
+			if (m_timer) {
+				uv_close((uv_handle_t*)m_timer, [](uv_handle_t* handle) {
+					delete handle;
+				});
+				m_timer = nullptr;
+			}
 		}
 	private:
 		void Execute() {
-			m_cb();
+			m_cb(this);
 		}
-
-		virtual void Attach(uv_loop_t *loop) {
-			if (!m_attached) {
-				uv_timer_init(loop, &m_timer);
-				m_timer.data = this;
-
-				if (m_repeats) {
-					uv_timer_start(&m_timer, [](uv_timer_t *handle) {
-						Timer *t = (Timer*)handle->data;
-						t->Execute();
-					}, m_duration_ms, m_duration_ms);
-				}
-				else {
-					uv_timer_start(&m_timer, [](uv_timer_t *handle) {
-						Timer *t = (Timer*)handle->data;
-						t->Execute();
-					}, m_duration_ms, 0);
-				}
-
-				m_attached = loop;
-			}
-		}
-
-		virtual void Detach() {
-			if (m_attached) {
-				uv_timer_stop(&m_timer);
-				m_attached = nullptr;
-			}
-		}
-
-		uv_timer_t m_timer;
-		std::function<void(void)> m_cb;
-		uint64_t m_duration_ms;
-		bool m_repeats;
-		uv_loop_t *m_attached;
+	
+		uv_timer_t *m_timer;
+		std::function<void(Timer*)> m_cb;
 	};
 }
