@@ -576,33 +576,30 @@ void Mob::RogueBackstab(Mob* other, bool min_damage, int ReuseTime)
 	int32 primaryweapondamage = 0;
 	int32 backstab_dmg = 0;
 
-	if(IsClient()){
-		const ItemInst *wpn = nullptr;
-		wpn = CastToClient()->GetInv().GetItem(EQEmu::legacy::SlotPrimary);
-		if(wpn) {
+	if (IsClient()) {
+		const ItemInst *wpn = CastToClient()->GetInv().GetItem(EQEmu::legacy::SlotPrimary);
+		if (wpn) {
 			primaryweapondamage = GetWeaponDamage(other, wpn);
-			backstab_dmg = wpn->GetItem()->BackstabDmg;
-			for (int i = 0; i < EQEmu::legacy::ITEM_COMMON_SIZE; ++i)
-			{
-				ItemInst *aug = wpn->GetAugment(i);
-				if(aug)
-				{
-					backstab_dmg += aug->GetItem()->BackstabDmg;
-				}
+			if (primaryweapondamage) {
+				backstab_dmg = wpn->GetItemBackstabDamage(true);
+				backstab_dmg += other->ResistElementalWeaponDmg(wpn);
+				if (wpn->GetItemBaneDamageBody(true) || wpn->GetItemBaneDamageRace(true))
+					backstab_dmg += other->CheckBaneDamage(wpn);
 			}
 		}
-	}
-	else{
-		primaryweapondamage = (GetLevel()/7)+1; // fallback incase it's a npc without a weapon, 2 dmg at 10, 10 dmg at 65
+	} else {
+		primaryweapondamage =
+		    (GetLevel() / 7) + 1; // fallback incase it's a npc without a weapon, 2 dmg at 10, 10 dmg at 65
 		backstab_dmg = primaryweapondamage;
 	}
 
-	if(primaryweapondamage > 0){
-		if(level > 25){
+	// ex. bane can make this false
+	if (primaryweapondamage > 0) {
+		// this is very wrong but not worth it until we fix the full dmg
+		if (level > 25) {
 			max_hit = (((((2 * backstab_dmg) * GetDamageTable(EQEmu::skills::SkillBackstab) / 100) * 10 * GetSkill(EQEmu::skills::SkillBackstab) / 355) + ((level - 25) / 3) + 1) * ((100 + RuleI(Combat, BackstabBonus)) / 100));
 			hate = 20 * backstab_dmg * GetSkill(EQEmu::skills::SkillBackstab) / 355;
-		}
-		else{
+		} else {
 			max_hit = (((((2 * backstab_dmg) * GetDamageTable(EQEmu::skills::SkillBackstab) / 100) * 10 * GetSkill(EQEmu::skills::SkillBackstab) / 355) + 1) * ((100 + RuleI(Combat, BackstabBonus)) / 100));
 			hate = 20 * backstab_dmg * GetSkill(EQEmu::skills::SkillBackstab) / 355;
 		}
@@ -610,31 +607,27 @@ void Mob::RogueBackstab(Mob* other, bool min_damage, int ReuseTime)
 		// determine minimum hits
 		if (level < 51) {
 			min_hit = (level*15/10);
-		}
-		else {
+		} else {
 			// Trumpcard: Replaced switch statement with formula calc. This will give minhit increases all the way to 65.
 			min_hit = (level * ( level*5 - 105)) / 100;
 		}
 
-		if (!other->CheckHitChance(this, EQEmu::skills::SkillBackstab, 0))	{
+		if (!other->CheckHitChance(this, EQEmu::skills::SkillBackstab, 0)) {
 			ndamage = 0;
-		}
-		else{
-			if(min_damage){
+		} else {
+			if (min_damage) {
 				ndamage = min_hit;
-			}
-			else {
+			} else {
 				if (max_hit < min_hit)
 					max_hit = min_hit;
 
-				if(RuleB(Combat, UseIntervalAC))
+				if (RuleB(Combat, UseIntervalAC))
 					ndamage = max_hit;
 				else
 					ndamage = zone->random.Int(min_hit, max_hit);
 			}
 		}
-	}
-	else{
+	} else {
 		ndamage = -5;
 	}
 
