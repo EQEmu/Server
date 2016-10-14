@@ -5673,45 +5673,45 @@ void Mob::ConeDirectional(uint16 spell_id, int16 resist_adjust)
 	float angle_start = spells[spell_id].directional_start + (GetHeading() * 360.0f / 256.0f);
 	float angle_end = spells[spell_id].directional_end + (GetHeading() * 360.0f / 256.0f);
 
-	while(angle_start > 360.0f)
+	while (angle_start > 360.0f)
 		angle_start -= 360.0f;
 
-	while(angle_end > 360.0f)
+	while (angle_end > 360.0f)
 		angle_end -= 360.0f;
 
-	std::list<Mob*> targets_in_range;
-	std::list<Mob*>::iterator iter;
+	std::list<Mob *> targets_in_range;
 
-	entity_list.GetTargetsForConeArea(this, spells[spell_id].min_range, spells[spell_id].aoerange, spells[spell_id].aoerange / 2, targets_in_range);
-	iter = targets_in_range.begin();
+	entity_list.GetTargetsForConeArea(this, spells[spell_id].min_range, spells[spell_id].aoerange,
+					  spells[spell_id].aoerange / 2, targets_in_range);
+	auto iter = targets_in_range.begin();
 
-	while(iter != targets_in_range.end()){
-
-		if (!(*iter) || (beneficial_targets && ((*iter)->IsNPC() && !(*iter)->IsPetOwnerClient()))){
-		    ++iter;
+	while (iter != targets_in_range.end()) {
+		if (!(*iter) || (beneficial_targets && ((*iter)->IsNPC() && !(*iter)->IsPetOwnerClient()))) {
+			++iter;
 			continue;
 		}
 
-		float heading_to_target = (CalculateHeadingToTarget((*iter)->GetX(), (*iter)->GetY()) * 360.0f / 256.0f);
+		float heading_to_target =
+		    (CalculateHeadingToTarget((*iter)->GetX(), (*iter)->GetY()) * 360.0f / 256.0f);
 
-		while(heading_to_target < 0.0f)
+		while (heading_to_target < 0.0f)
 			heading_to_target += 360.0f;
 
-		while(heading_to_target > 360.0f)
+		while (heading_to_target > 360.0f)
 			heading_to_target -= 360.0f;
 
-		if(angle_start > angle_end){
-			if((heading_to_target >= angle_start && heading_to_target <= 360.0f) ||	(heading_to_target >= 0.0f && heading_to_target <= angle_end)){
-				if(CheckLosFN((*iter)) || spells[spell_id].npc_no_los){
+		if (angle_start > angle_end) {
+			if ((heading_to_target >= angle_start && heading_to_target <= 360.0f) ||
+			    (heading_to_target >= 0.0f && heading_to_target <= angle_end)) {
+				if (CheckLosFN((*iter)) || spells[spell_id].npc_no_los) {
 					(*iter)->CalcSpellPowerDistanceMod(spell_id, 0, this);
-					SpellOnTarget(spell_id,(*iter), false, true, resist_adjust);
+					SpellOnTarget(spell_id, (*iter), false, true, resist_adjust);
 					maxtarget_count++;
 				}
 			}
-		}
-		else{
-			if(heading_to_target >= angle_start && heading_to_target <= angle_end){
-				if(CheckLosFN((*iter)) || spells[spell_id].npc_no_los) {
+		} else {
+			if (heading_to_target >= angle_start && heading_to_target <= angle_end) {
+				if (CheckLosFN((*iter)) || spells[spell_id].npc_no_los) {
 					(*iter)->CalcSpellPowerDistanceMod(spell_id, 0, this);
 					SpellOnTarget(spell_id, (*iter), false, true, resist_adjust);
 					maxtarget_count++;
