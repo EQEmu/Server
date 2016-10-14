@@ -858,7 +858,7 @@ int Mob::GetWeaponDamage(Mob *against, const EQEmu::ItemBase *weapon_item) {
 			}
 		}
 
-		if(!eledmg && !banedmg){
+		if(!banedmg){
 			if(!GetSpecialAbility(SPECATK_BANE))
 				return 0;
 			else
@@ -979,7 +979,7 @@ int Mob::GetWeaponDamage(Mob *against, const ItemInst *weapon_item, uint32 *hate
 		banedmg = against->CheckBaneDamage(weapon_item);
 
 	if (against->GetSpecialAbility(IMMUNE_MELEE_EXCEPT_BANE)) {
-		if (!eledmg && !banedmg) {
+		if (!banedmg) {
 			if (!GetSpecialAbility(SPECATK_BANE))
 				return 0;
 			else
