@@ -5643,6 +5643,19 @@ void Mob::BeamDirectional(uint16 spell_id, int16 resist_adjust)
 			continue;
 		}
 
+		if (IsNPC() && (*iter)->IsNPC()) {
+			auto fac = (*iter)->GetReverseFactionCon(this);
+			if (beneficial_targets) {
+				// only affect mobs we would assist.
+				if (!(fac <= FACTION_AMIABLE))
+					continue;
+			} else {
+				// affect mobs that are on our hate list, or which have bad faction with us
+				if (!(CheckAggro(*iter) || fac == FACTION_THREATENLY || fac == FACTION_SCOWLS))
+					continue;
+			}
+		}
+
 		//# shortest distance from line to target point
 		float d = std::abs((*iter)->GetY() - m * (*iter)->GetX() - b) / sqrt(m * m + 1);
 
