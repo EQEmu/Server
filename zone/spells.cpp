@@ -5700,6 +5700,19 @@ void Mob::ConeDirectional(uint16 spell_id, int16 resist_adjust)
 		while (heading_to_target > 360.0f)
 			heading_to_target -= 360.0f;
 
+		if (IsNPC() && (*iter)->IsNPC()) {
+			auto fac = (*iter)->GetReverseFactionCon(this);
+			if (beneficial_targets) {
+				// only affect mobs we would assist.
+				if (!(fac <= FACTION_AMIABLE))
+					continue;
+			} else {
+				// affect mobs that are on our hate list, or which have bad faction with us
+				if (!(CheckAggro(*iter) || fac == FACTION_THREATENLY || fac == FACTION_SCOWLS))
+					continue;
+			}
+		}
+
 		if (angle_start > angle_end) {
 			if ((heading_to_target >= angle_start && heading_to_target <= 360.0f) ||
 			    (heading_to_target >= 0.0f && heading_to_target <= angle_end)) {
