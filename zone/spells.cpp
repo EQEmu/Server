@@ -5619,11 +5619,11 @@ void Mob::BeamDirectional(uint16 spell_id, int16 resist_adjust)
 	if (IsBeneficialSpell(spell_id) && IsClient())
 		beneficial_targets = true;
 
-	std::list<Mob*> targets_in_range;
-	std::list<Mob*>::iterator iter;
+	std::list<Mob *> targets_in_range;
 
-	entity_list.GetTargetsForConeArea(this, spells[spell_id].min_range, spells[spell_id].range, spells[spell_id].range / 2, targets_in_range);
-	iter = targets_in_range.begin();
+	entity_list.GetTargetsForConeArea(this, spells[spell_id].min_range, spells[spell_id].range,
+					  spells[spell_id].range / 2, targets_in_range);
+	auto iter = targets_in_range.begin();
 
 	float dX = 0;
 	float dY = 0;
@@ -5632,24 +5632,22 @@ void Mob::BeamDirectional(uint16 spell_id, int16 resist_adjust)
 	CalcDestFromHeading(GetHeading(), spells[spell_id].range, 5, GetX(), GetY(), dX, dY, dZ);
 	dZ = GetZ();
 
-	//FIND SLOPE: Put it into the form y = mx + b
+	// FIND SLOPE: Put it into the form y = mx + b
 	float m = (dY - GetY()) / (dX - GetX());
 	float b = (GetY() * dX - dY * GetX()) / (dX - GetX());
 
-	while(iter != targets_in_range.end())
-	{
-		if (!(*iter) || (beneficial_targets && ((*iter)->IsNPC() && !(*iter)->IsPetOwnerClient()))
-			|| (*iter)->BehindMob(this, (*iter)->GetX(),(*iter)->GetY())){
-		    ++iter;
+	while (iter != targets_in_range.end()) {
+		if (!(*iter) || (beneficial_targets && ((*iter)->IsNPC() && !(*iter)->IsPetOwnerClient())) ||
+		    (*iter)->BehindMob(this, (*iter)->GetX(), (*iter)->GetY())) {
+			++iter;
 			continue;
 		}
 
 		//# shortest distance from line to target point
 		float d = std::abs((*iter)->GetY() - m * (*iter)->GetX() - b) / sqrt(m * m + 1);
 
-		if (d <= spells[spell_id].aoerange)
-		{
-			if(CheckLosFN((*iter)) || spells[spell_id].npc_no_los) {
+		if (d <= spells[spell_id].aoerange) {
+			if (CheckLosFN((*iter)) || spells[spell_id].npc_no_los) {
 				(*iter)->CalcSpellPowerDistanceMod(spell_id, 0, this);
 				SpellOnTarget(spell_id, (*iter), false, true, resist_adjust);
 				maxtarget_count++;
