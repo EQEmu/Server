@@ -488,11 +488,11 @@ sub check_internet_connection {
 		$count = "n";
 	}
 
-	if (`ping 8.8.8.8 -$count 1 -w 500`=~/Reply from|1 received/i) { 
+	if (`ping 8.8.8.8 -$count 1 -w 500`=~/TTL|1 received/i) { 
 		# print "[Update] We have a connection to the internet, continuing...\n";
 		return 1;
 	}
-	elsif (`ping 4.2.2.2 -$count 1 -w 500`=~/Reply from|1 received/i) { 
+	elsif (`ping 4.2.2.2 -$count 1 -w 500`=~/TTL|1 received/i) { 
 		# print "[Update] We have a connection to the internet, continuing...\n";
 		return 1;
 	}
