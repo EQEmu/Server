@@ -15,6 +15,12 @@ namespace EQ
 				bool ipv6;
 			};
 
+			addrinfo hints;
+			memset(&hints, 0, sizeof(addrinfo));
+			hints.ai_family = PF_INET;
+			hints.ai_socktype = SOCK_STREAM;
+			hints.ai_protocol = IPPROTO_TCP;
+
 			auto loop = EQ::EventLoop::Get().Handle();
 			uv_getaddrinfo_t *resolver = new uv_getaddrinfo_t();
 			memset(resolver, 0, sizeof(uv_getaddrinfo_t));
@@ -47,8 +53,9 @@ namespace EQ
 				delete baton;
 				delete req;
 				uv_freeaddrinfo(res);
+
 				cb(addr);
-			}, addr.c_str(), port_str.c_str(), nullptr);
+			}, addr.c_str(), port_str.c_str(), &hints);
 		}
 	}
 }

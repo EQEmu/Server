@@ -283,6 +283,10 @@ std::string EQ::Net::Packet::ToString() const
 
 std::string EQ::Net::Packet::ToString(size_t line_length) const
 {
+	if (Length() == 0) {
+		return fmt::format("{:0>5x} |", 0);
+	}
+
 	std::string ret;
 	size_t lines = Length() / line_length;
 	size_t i;

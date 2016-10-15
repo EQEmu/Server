@@ -283,7 +283,6 @@ bool EmuTCPConnection::LineOutQueuePush(char* line) {
 		}
 	#endif
 	if(line[0] == '*') {
-		printf("LineOutQueuePush %s\n", line);
 		if (strcmp(line, "**PACKETMODE**") == 0) {
 			MSendQueue.lock();
 			safe_delete_array(sendbuf);

@@ -436,8 +436,6 @@ int main(int argc, char** argv) {
 	bool eqsf_open = false;
 	std::unique_ptr<EQ::Net::EQStreamManager> eqsm;
 
-	EQ::Net::RelayLink world_link("127.0.0.1", Config->WorldTCPPort, "QS");
-
 	EQ::Timer process_timer(33, true, [&eqsf_open, &eqsm, &stream_identifier, &eqsi, &worldwasconnected,
 		&zoneupdate_timer, &IDLEZONEUPDATE, &ZONEUPDATE, &quest_timers, &InterserverTimer](EQ::Timer* t) {
 			//Advance the timer to our current point in time

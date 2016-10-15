@@ -24,10 +24,13 @@
 #include "../common/servertalk.h"
 #include "../common/platform.h"
 #include "../common/crash.h"
+#include "../common/event/event_loop.h"
+#include "../common/net/relay_link.h"
+#include "../common/timer.h"
 #include "database.h"
 #include "queryservconfig.h"
-#include "worldserver.h"
 #include "lfguild.h"
+#include "worldserver.h"
 #include <list>
 #include <signal.h>
 
@@ -42,8 +45,6 @@ EQEmuLogSys Log;
 
 void CatchSignal(int sig_num) { 
 	RunLoops = false; 
-	if(worldserver)
-		worldserver->Disconnect();
 }
 
 int main() {
@@ -51,17 +52,6 @@ int main() {
 	Log.LoadLogSettingsDefaults();
 	set_exception_handler(); 
 	Timer LFGuildExpireTimer(60000);  
-	Timer InterserverTimer(INTERSERVER_TIMER); // does auto-reconnect
-
-	/* Load XML from eqemu_config.xml 
-		<qsdatabase>
-			<host>127.0.0.1</host>
-			<port>3306</port>
-			<username>user</username>
-			<password>password</password>
-			<db>dbname</db>
-		</qsdatabase>
-	*/
 
 	Log.Out(Logs::General, Logs::QS_Server, "Starting EQEmu QueryServ.");
 	if (!queryservconfig::LoadConfig()) {
@@ -110,11 +100,7 @@ int main() {
 		if(LFGuildExpireTimer.Check())
 			lfguildmanager.ExpireEntries();
 
-		if (InterserverTimer.Check()) {
-			if (worldserver->TryReconnect() && (!worldserver->Connected()))
-				worldserver->AsyncConnect();
-		}
-		worldserver->Process(); 
+		EQ::EventLoop::Get().Process();
 		Sleep(1);
 	}
 	Log.CloseFileLogs();
