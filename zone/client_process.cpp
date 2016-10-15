@@ -858,14 +858,12 @@ void Client::BulkSendMerchantInventory(int merchant_id, int npcid) {
 
 		int32 fac = merch ? merch->GetPrimaryFaction() : 0;
 		int32 cur_fac_level;
-		if (fac == 0 || sneaking)
-			{
+		if (fac == 0 || sneaking) {
 			cur_fac_level = 0;
-			}
-		else
-			{
+		}
+		else {
 			cur_fac_level = GetModCharacterFactionLevel(fac);
-			}
+		}
 			
 		if (cur_fac_level < ml.faction_required)
 			continue;
