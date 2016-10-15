@@ -32,8 +32,10 @@ namespace EQ
 			void SendInternal(const EQ::Net::Packet &p);
 			void SendPassword();
 			void OnAuthFailed(const EQ::Net::Packet &p);
+			void SendKeepAlive();
 
 			std::unique_ptr<EQ::Timer> m_timer;
+			std::unique_ptr<EQ::Timer> m_keepalive;
 			std::string m_addr; 
 			std::string m_identifier;
 			std::string m_password;

@@ -69,7 +69,7 @@ bool QueryServConnection::Process()
 				{
 					struct in_addr in;
 					in.s_addr = GetIP();
-					Log.Out(Logs::Detail, Logs::QS_Server, "QueryServ authorization failed.");
+					Log.Out(Logs::General, Logs::QS_Server, "QueryServ authorization failed.");
 					auto pack = new ServerPacket(ServerOP_ZAAuthFailed);
 					SendPacket(pack);
 					delete pack;
@@ -82,6 +82,7 @@ bool QueryServConnection::Process()
 				Log.Out(Logs::Detail, Logs::QS_Server,"**WARNING** You have not configured a world shared key in your config file. You should add a <key>STRING</key> element to your <world> element to prevent unauthroized zone access.");
 				authenticated = true;
 			}
+
 			delete pack;
 			continue;
 		}

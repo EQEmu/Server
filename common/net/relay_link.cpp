@@ -5,7 +5,8 @@
 #include "../servertalk.h"
 
 EQ::Net::RelayLink::RelayLink(const std::string &addr, int port, const std::string &identifier, const std::string &password)
-	: m_timer(std::unique_ptr<EQ::Timer>(new EQ::Timer(250, true, std::bind(&EQ::Net::RelayLink::Connect, this))))
+	: m_timer(std::unique_ptr<EQ::Timer>(new EQ::Timer(250, true, std::bind(&EQ::Net::RelayLink::Connect, this)))),
+	m_keepalive(std::unique_ptr<EQ::Timer>(new EQ::Timer(5000, true, std::bind(&EQ::Net::RelayLink::SendKeepAlive, this))))
 {
 	m_established = false;
 	m_connecting = false;
@@ -223,4 +224,13 @@ void EQ::Net::RelayLink::OnAuthFailed(const EQ::Net::Packet &p)
 		Log.OutF(Logs::General, Logs::Debug, "Authorization failed for server type {0}", m_identifier);
 		m_connection->Disconnect();
 	}
+}
+
+void EQ::Net::RelayLink::SendKeepAlive()
+{
+	if (!m_connection)
+		return;
+
+	EQ::Net::WritablePacket p;
+	SendPacket(0, p);
 }
