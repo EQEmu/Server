@@ -638,6 +638,13 @@ bool Database::SaveCharacterCreate(uint32 character_id, uint32 account_id, Playe
 		character_id, pp->binds[4].zoneId, 0, pp->binds[4].x, pp->binds[4].y, pp->binds[4].z, pp->binds[4].heading, 4
 	); results = QueryDatabase(query);
 
+	/* HoTT Ability */
+	if(RuleB(Character, GrantHoTTOnCreate))
+	{
+	        query = StringFormat("INSERT INTO `character_leadership_abilities` (id, slot, rank) VALUES (%u, %i, %i)", character_id, 14, 1);
+	        results = QueryDatabase(query);
+	}
+	
 	/* Save Skills */
 	int firstquery = 0;
 	for (int i = 0; i < MAX_PP_SKILL; i++){
