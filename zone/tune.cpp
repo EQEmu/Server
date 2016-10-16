@@ -587,7 +587,7 @@ int32 Client::GetMeleeDamage(Mob* other, bool GetMinDamage)
 	if (!other) 
 		return 0;
 	
-	ItemInst* weapon;
+	EQEmu::ItemInstance* weapon;
 	weapon = GetInv().GetItem(EQEmu::legacy::SlotPrimary);
 	
 	if(weapon != nullptr) {
@@ -630,7 +630,7 @@ int32 Client::GetMeleeDamage(Mob* other, bool GetMinDamage)
 
 		if (Hand == EQEmu::legacy::SlotPrimary && GetLevel() >= 28 && IsWarriorClass())
 		{
-			ucDamageBonus = GetWeaponDamageBonus(weapon ? weapon->GetItem() : (const EQEmu::ItemBase*) nullptr);
+			ucDamageBonus = GetWeaponDamageBonus(weapon ? weapon->GetItem() : (const EQEmu::ItemData*) nullptr);
 
 			min_hit += (int) ucDamageBonus;
 			max_hit += (int) ucDamageBonus;
@@ -661,7 +661,7 @@ void Mob::Tune_FindAccuaryByHitChance(Mob* defender, Mob *attacker, float hit_ch
 	EQEmu::skills::SkillType skillinuse = EQEmu::skills::SkillHandtoHand;
 	if (attacker->IsClient())
 	{//Will check first equiped weapon for skill. Ie. remove wepaons to assess bow.
-		ItemInst* weapon;
+		EQEmu::ItemInstance* weapon;
 		weapon = attacker->CastToClient()->GetInv().GetItem(EQEmu::legacy::SlotPrimary);
 			
 		if(weapon && weapon->IsWeapon()){
@@ -741,7 +741,7 @@ void Mob::Tune_FindAvoidanceByHitChance(Mob* defender, Mob *attacker, float hit_
 	EQEmu::skills::SkillType skillinuse = EQEmu::skills::SkillHandtoHand;
 	if (attacker->IsClient())
 	{//Will check first equiped weapon for skill. Ie. remove wepaons to assess bow.
-		ItemInst* weapon;
+		EQEmu::ItemInstance* weapon;
 		weapon = attacker->CastToClient()->GetInv().GetItem(EQEmu::legacy::SlotPrimary);
 			
 		if(weapon && weapon->IsWeapon()){

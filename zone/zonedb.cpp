@@ -468,7 +468,7 @@ void ZoneDatabase::GetEventLogs(const char* name,char* target,uint32 account_id,
 }
 
 // Load child objects for a world container (i.e., forge, bag dropped to ground, etc)
-void ZoneDatabase::LoadWorldContainer(uint32 parentid, ItemInst* container)
+void ZoneDatabase::LoadWorldContainer(uint32 parentid, EQEmu::ItemInstance* container)
 {
 	if (!container) {
 		Log.Out(Logs::General, Logs::Error, "Programming error: LoadWorldContainer passed nullptr pointer");
@@ -495,7 +495,7 @@ void ZoneDatabase::LoadWorldContainer(uint32 parentid, ItemInst* container)
         aug[4] = (uint32)atoi(row[7]);
 		aug[5] = (uint32)atoi(row[8]);
 
-        ItemInst* inst = database.CreateItem(item_id, charges);
+        EQEmu::ItemInstance* inst = database.CreateItem(item_id, charges);
 		if (inst && inst->GetItem()->IsClassCommon()) {
 			for (int i = AUG_INDEX_BEGIN; i < EQEmu::legacy::ITEM_COMMON_SIZE; i++)
                 if (aug[i])
@@ -509,7 +509,7 @@ void ZoneDatabase::LoadWorldContainer(uint32 parentid, ItemInst* container)
 }
 
 // Save child objects for a world container (i.e., forge, bag dropped to ground, etc)
-void ZoneDatabase::SaveWorldContainer(uint32 zone_id, uint32 parent_id, const ItemInst* container)
+void ZoneDatabase::SaveWorldContainer(uint32 zone_id, uint32 parent_id, const EQEmu::ItemInstance* container)
 {
 	// Since state is not saved for each world container action, we'll just delete
 	// all and save from scratch .. we may come back later to optimize
@@ -522,7 +522,7 @@ void ZoneDatabase::SaveWorldContainer(uint32 zone_id, uint32 parent_id, const It
 	// Save all 10 items, if they exist
 	for (uint8 index = SUB_INDEX_BEGIN; index < EQEmu::legacy::ITEM_CONTAINER_SIZE; index++) {
 
-		ItemInst* inst = container->GetItem(index);
+		EQEmu::ItemInstance* inst = container->GetItem(index);
 		if (!inst)
             continue;
 
@@ -531,7 +531,7 @@ void ZoneDatabase::SaveWorldContainer(uint32 zone_id, uint32 parent_id, const It
 
 		if (inst->IsType(EQEmu::item::ItemClassCommon)) {
 			for (int i = AUG_INDEX_BEGIN; i < EQEmu::legacy::ITEM_COMMON_SIZE; i++) {
-                ItemInst *auginst=inst->GetAugment(i);
+                EQEmu::ItemInstance *auginst=inst->GetAugment(i);
                 augslot[i]=(auginst && auginst->GetItem()) ? auginst->GetItem()->ID : 0;
             }
         }
@@ -611,7 +611,7 @@ TraderCharges_Struct* ZoneDatabase::LoadTraderItemWithCharges(uint32 char_id)
 	return loadti;
 }
 
-ItemInst* ZoneDatabase::LoadSingleTraderItem(uint32 CharID, int SerialNumber) {
+EQEmu::ItemInstance* ZoneDatabase::LoadSingleTraderItem(uint32 CharID, int SerialNumber) {
 	std::string query = StringFormat("SELECT * FROM trader WHERE char_id = %i AND serialnumber = %i "
                                     "ORDER BY slot_id LIMIT 80", CharID, SerialNumber);
     auto results = QueryDatabase(query);
@@ -629,7 +629,7 @@ ItemInst* ZoneDatabase::LoadSingleTraderItem(uint32 CharID, int SerialNumber) {
 	int Charges = atoi(row[3]);
 	int Cost = atoi(row[4]);
 
-	const EQEmu::ItemBase *item = database.GetItem(ItemID);
+	const EQEmu::ItemData *item = database.GetItem(ItemID);
 
 	if(!item) {
 		Log.Out(Logs::Detail, Logs::Trading, "Unable to create item\n");
@@ -640,7 +640,7 @@ ItemInst* ZoneDatabase::LoadSingleTraderItem(uint32 CharID, int SerialNumber) {
     if (item->NoDrop == 0)
         return nullptr;
 
-    ItemInst* inst = database.CreateItem(item);
+    EQEmu::ItemInstance* inst = database.CreateItem(item);
 	if(!inst) {
 		Log.Out(Logs::Detail, Logs::Trading, "Unable to create item instance\n");
 		fflush(stdout);
@@ -684,7 +684,7 @@ void ZoneDatabase::UpdateTraderItemPrice(int CharID, uint32 ItemID, uint32 Charg
 
 	Log.Out(Logs::Detail, Logs::Trading, "ZoneDatabase::UpdateTraderPrice(%i, %i, %i, %i)", CharID, ItemID, Charges, NewPrice);
 
-	const EQEmu::ItemBase *item = database.GetItem(ItemID);
+	const EQEmu::ItemData *item = database.GetItem(ItemID);
 
 	if(!item)
 		return;
@@ -1197,7 +1197,7 @@ bool ZoneDatabase::LoadCharacterBandolier(uint32 character_id, PlayerProfile_Str
 		i = atoi(row[r]); /* Bandolier ID */ r++;
 		si = atoi(row[r]); /* Bandolier Slot */ r++;
 
-		const EQEmu::ItemBase* item_data = database.GetItem(atoi(row[r]));
+		const EQEmu::ItemData* item_data = database.GetItem(atoi(row[r]));
 		if (item_data) {
 			pp->bandoliers[i].Items[si].ID = item_data->ID; r++;
 			pp->bandoliers[i].Items[si].Icon = atoi(row[r]); r++; // Must use db value in case an Ornamentation is assigned
@@ -1249,7 +1249,7 @@ bool ZoneDatabase::LoadCharacterPotions(uint32 character_id, PlayerProfile_Struc
 
 	for (auto row = results.begin(); row != results.end(); ++row) {
 		i = atoi(row[0]);
-		const EQEmu::ItemBase *item_data = database.GetItem(atoi(row[1]));
+		const EQEmu::ItemData *item_data = database.GetItem(atoi(row[1]));
 		if (!item_data)
 			continue;
 		pp->potionbelt.Items[i].ID = item_data->ID;

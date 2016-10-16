@@ -4324,7 +4324,7 @@ XS(XS_Client_GetItemAt)
 		Perl_croak(aTHX_ "Usage: Client::GetItemAt(THIS, slot)");
 	{
 		Client *		THIS;
-		ItemInst *		RETVAL;
+		EQEmu::ItemInstance *		RETVAL;
 		uint32 slot = (int32)SvIV(ST(1));
 
 		if (sv_derived_from(ST(0), "Client")) {
@@ -4351,7 +4351,7 @@ XS(XS_Client_GetAugmentAt)
 		Perl_croak(aTHX_ "Usage: Client::GetAugmentAt(THIS, slot, aug_slot)");
 	{
 		Client *		THIS;
-		ItemInst *		RETVAL;
+		EQEmu::ItemInstance *		RETVAL;
 		uint32 slot = (int32)SvIV(ST(1));
 		uint32 aug_slot = (int32)SvIV(ST(1));
 
@@ -4364,7 +4364,7 @@ XS(XS_Client_GetAugmentAt)
 		if(THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		ItemInst * inst = THIS->GetInv().GetItem(slot);
+		EQEmu::ItemInstance * inst = THIS->GetInv().GetItem(slot);
 		if(inst)
 		{
 			RETVAL = inst->GetAugment(aug_slot);
@@ -5627,7 +5627,7 @@ XS(XS_Client_GetItemInInventory)
 	{
 		Client *	THIS;
 		int16		slot_id = (int16)SvIV(ST(1));
-		ItemInst	*RETVAL = nullptr;
+		EQEmu::ItemInstance	*RETVAL = nullptr;
 
 		if (sv_derived_from(ST(0), "Client")) {
 			IV tmp = SvIV((SV*)SvRV(ST(0)));

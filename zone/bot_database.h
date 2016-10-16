@@ -31,9 +31,13 @@
 
 
 class Bot;
-class ItemInst;
 class Inventory;
 struct BotsAvailableList;
+
+namespace EQEmu
+{
+	class ItemInstance;
+}
 
 
 class BotDatabase : public DBcore
@@ -91,7 +95,7 @@ public:
 
 	bool LoadItemBySlot(Bot* bot_inst);
 	bool LoadItemBySlot(const uint32 bot_id, const uint32 slot_id, uint32& item_id);
-	bool SaveItemBySlot(Bot* bot_inst, const uint32 slot_id, const ItemInst* item_inst);
+	bool SaveItemBySlot(Bot* bot_inst, const uint32 slot_id, const EQEmu::ItemInstance* item_inst);
 	bool DeleteItemBySlot(const uint32 bot_id, const uint32 slot_id);
 
 	bool LoadEquipmentColor(const uint32 bot_id, const uint8 material_slot_id, uint32& rgb);

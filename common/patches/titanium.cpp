@@ -42,7 +42,7 @@ namespace Titanium
 	static OpcodeManager *opcodes = nullptr;
 	static Strategy struct_strategy;
 
-	void SerializeItem(EQEmu::OutBuffer& ob, const ItemInst *inst, int16 slot_id_in, uint8 depth);
+	void SerializeItem(EQEmu::OutBuffer& ob, const EQEmu::ItemInstance *inst, int16 slot_id_in, uint8 depth);
 
 	// server to client inventory location converters
 	static inline int16 ServerToTitaniumSlot(uint32 serverSlot);
@@ -329,7 +329,7 @@ namespace Titanium
 		EQEmu::OutBuffer::pos_type last_pos = ob.tellp();
 
 		for (int r = 0; r < itemcount; r++, eq++) {
-			SerializeItem(ob, (const ItemInst*)eq->inst, eq->slot_id, 0);
+			SerializeItem(ob, (const EQEmu::ItemInstance*)eq->inst, eq->slot_id, 0);
 			if (ob.tellp() == last_pos)
 				Log.Out(Logs::General, Logs::Netcode, "[STRUCTS] Serialization failed on item slot %d during OP_CharInventory.  Item skipped.", eq->slot_id);
 			
@@ -815,7 +815,7 @@ namespace Titanium
 
 		ob.write((const char*)__emu_buffer, 4);
 
-		SerializeItem(ob, (const ItemInst*)int_struct->inst, int_struct->slot_id, 0);
+		SerializeItem(ob, (const EQEmu::ItemInstance*)int_struct->inst, int_struct->slot_id, 0);
 		if (ob.tellp() == last_pos) {
 			Log.Out(Logs::General, Logs::Netcode, "[STRUCTS] Serialization failed on item slot %d.", int_struct->slot_id);
 			delete in;
@@ -2216,10 +2216,10 @@ namespace Titanium
 	}
 
 // file scope helper methods
-	void SerializeItem(EQEmu::OutBuffer& ob, const ItemInst *inst, int16 slot_id_in, uint8 depth)
+	void SerializeItem(EQEmu::OutBuffer& ob, const EQEmu::ItemInstance *inst, int16 slot_id_in, uint8 depth)
 	{
 		const char* protection = "\\\\\\\\\\";
-		const EQEmu::ItemBase* item = inst->GetUnscaledItem();
+		const EQEmu::ItemData* item = inst->GetUnscaledItem();
 
 		ob << StringFormat("%.*s%s", (depth ? (depth - 1) : 0), protection, (depth ? "\"" : "")); // For leading quotes (and protection) if a subitem;
 		
@@ -2440,7 +2440,7 @@ namespace Titanium
 		for (int index = SUB_INDEX_BEGIN; index < invbag::ItemBagSize; ++index) {
 			ob << '|';
 
-			ItemInst* sub = inst->GetItem(index);
+			EQEmu::ItemInstance* sub = inst->GetItem(index);
 			if (!sub)
 				continue;
 			

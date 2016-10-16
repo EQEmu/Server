@@ -45,7 +45,7 @@ namespace RoF2
 	static OpcodeManager *opcodes = nullptr;
 	static Strategy struct_strategy;
 
-	void SerializeItem(EQEmu::OutBuffer& ob, const ItemInst *inst, int16 slot_id, uint8 depth, ItemPacketType packet_type);
+	void SerializeItem(EQEmu::OutBuffer& ob, const EQEmu::ItemInstance *inst, int16 slot_id, uint8 depth, ItemPacketType packet_type);
 
 	// server to client inventory location converters
 	static inline structs::InventorySlot_Struct ServerToRoF2Slot(uint32 serverSlot, ItemPacketType PacketType = ItemPacketInvalid);
@@ -671,7 +671,7 @@ namespace RoF2
 		ob.write((const char*)&item_count, sizeof(uint32));
 
 		for (int index = 0; index < item_count; ++index, ++eq) {
-			SerializeItem(ob, (const ItemInst*)eq->inst, eq->slot_id, 0, ItemPacketCharInventory);
+			SerializeItem(ob, (const EQEmu::ItemInstance*)eq->inst, eq->slot_id, 0, ItemPacketCharInventory);
 			if (ob.tellp() == last_pos)
 				Log.Out(Logs::General, Logs::Netcode, "[STRUCTS] Serialization failed on item slot %d during OP_CharInventory.  Item skipped.", eq->slot_id);
 
@@ -1609,7 +1609,7 @@ namespace RoF2
 
 		ob.write((const char*)__emu_buffer, 4);
 
-		SerializeItem(ob, (const ItemInst*)int_struct->inst, int_struct->slot_id, 0, old_item_pkt->PacketType);
+		SerializeItem(ob, (const EQEmu::ItemInstance*)int_struct->inst, int_struct->slot_id, 0, old_item_pkt->PacketType);
 		if (ob.tellp() == last_pos) {
 			Log.Out(Logs::General, Logs::Netcode, "[STRUCTS] Serialization failed on item slot %d.", int_struct->slot_id);
 			delete in;
@@ -5499,9 +5499,9 @@ namespace RoF2
 		return NextItemInstSerialNumber;
 	}
 
-	void SerializeItem(EQEmu::OutBuffer& ob, const ItemInst *inst, int16 slot_id_in, uint8 depth, ItemPacketType packet_type)
+	void SerializeItem(EQEmu::OutBuffer& ob, const EQEmu::ItemInstance *inst, int16 slot_id_in, uint8 depth, ItemPacketType packet_type)
 	{
-		const EQEmu::ItemBase *item = inst->GetUnscaledItem();
+		const EQEmu::ItemData *item = inst->GetUnscaledItem();
 		
 		RoF2::structs::ItemSerializationHeader hdr;
 
@@ -5923,7 +5923,7 @@ namespace RoF2
 		ob.write((const char*)&subitem_count, sizeof(uint32));
 
 		for (uint32 index = SUB_INDEX_BEGIN; index < EQEmu::legacy::ITEM_CONTAINER_SIZE; ++index) {
-			ItemInst* sub = inst->GetItem(index);
+			EQEmu::ItemInstance* sub = inst->GetItem(index);
 			if (!sub)
 				continue;
 

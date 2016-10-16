@@ -2545,9 +2545,9 @@ void command_peekinv(Client *c, const Seperator *sep)
 	}
 
 	Client* targetClient = c->GetTarget()->CastToClient();
-	const ItemInst* inst_main = nullptr;
-	const ItemInst* inst_sub = nullptr;
-	const EQEmu::ItemBase* item_data = nullptr;
+	const EQEmu::ItemInstance* inst_main = nullptr;
+	const EQEmu::ItemInstance* inst_sub = nullptr;
+	const EQEmu::ItemData* item_data = nullptr;
 	std::string item_link;
 	EQEmu::SayLinkEngine linker;
 	linker.SetLinkType(EQEmu::saylink::SayLinkItemInst);
@@ -2780,7 +2780,7 @@ void command_interrogateinv(Client *c, const Seperator *sep)
 	}
 
 	Client* target = nullptr;
-	std::map<int16, const ItemInst*> instmap;
+	std::map<int16, const EQEmu::ItemInstance*> instmap;
 	bool log = false;
 	bool silent = false;
 	bool error = false;
@@ -3146,8 +3146,8 @@ void command_equipitem(Client *c, const Seperator *sep)
 {
 	uint32 slot_id = atoi(sep->arg[1]);
 	if (sep->IsNumber(1) && ((slot_id >= EQEmu::legacy::EQUIPMENT_BEGIN) && (slot_id <= EQEmu::legacy::EQUIPMENT_END) || (slot_id == EQEmu::legacy::SlotPowerSource))) {
-		const ItemInst* from_inst = c->GetInv().GetItem(EQEmu::legacy::SlotCursor);
-		const ItemInst* to_inst = c->GetInv().GetItem(slot_id); // added (desync issue when forcing stack to stack)
+		const EQEmu::ItemInstance* from_inst = c->GetInv().GetItem(EQEmu::legacy::SlotCursor);
+		const EQEmu::ItemInstance* to_inst = c->GetInv().GetItem(slot_id); // added (desync issue when forcing stack to stack)
 		bool partialmove = false;
 		int16 movecount;
 
@@ -5519,7 +5519,7 @@ void command_summonitem(Client *c, const Seperator *sep)
 	}
 
 	int16 item_status = 0;
-	const EQEmu::ItemBase* item = database.GetItem(itemid);
+	const EQEmu::ItemData* item = database.GetItem(itemid);
 	if (item) {
 		item_status = static_cast<int16>(item->MinStatus);
 	}
@@ -5558,7 +5558,7 @@ void command_giveitem(Client *c, const Seperator *sep)
 		Client *t = c->GetTarget()->CastToClient();
 		uint32 itemid = atoi(sep->arg[1]);
 		int16 item_status = 0;
-		const EQEmu::ItemBase* item = database.GetItem(itemid);
+		const EQEmu::ItemData* item = database.GetItem(itemid);
 		if(item) {
 			item_status = static_cast<int16>(item->MinStatus);
 		}
@@ -5611,7 +5611,7 @@ void command_itemsearch(Client *c, const Seperator *sep)
 	{
 		const char *search_criteria=sep->argplus[1];
 
-		const EQEmu::ItemBase* item = nullptr;
+		const EQEmu::ItemData* item = nullptr;
 		std::string item_link;
 		EQEmu::SayLinkEngine linker;
 		linker.SetLinkType(EQEmu::saylink::SayLinkItemData);
@@ -7126,7 +7126,7 @@ void command_path(Client *c, const Seperator *sep)
 void Client::Undye() {
 	for (int cur_slot = EQEmu::textures::TextureBegin; cur_slot <= EQEmu::textures::LastTexture; cur_slot++) {
 		uint8 slot2=SlotConvert(cur_slot);
-		ItemInst* inst = m_inv.GetItem(slot2);
+		EQEmu::ItemInstance* inst = m_inv.GetItem(slot2);
 
 		if(inst != nullptr) {
 			inst->SetColor(inst->GetItem()->Color);
@@ -10235,7 +10235,7 @@ void command_zopp(Client *c, const Seperator *sep)
 		uint32 itemid = atoi(sep->arg[3]);
 		int16 charges = sep->argnum == 4 ? atoi(sep->arg[4]) : 1; // defaults to 1 charge if not specified
 
-		const EQEmu::ItemBase* FakeItem = database.GetItem(itemid);
+		const EQEmu::ItemData* FakeItem = database.GetItem(itemid);
 
 		if (!FakeItem) {
 			c->Message(13, "Error: Item [%u] is not a valid item id.",  itemid);
@@ -10243,7 +10243,7 @@ void command_zopp(Client *c, const Seperator *sep)
 		}
 
 		int16 item_status = 0;
-		const EQEmu::ItemBase* item = database.GetItem(itemid);
+		const EQEmu::ItemData* item = database.GetItem(itemid);
 		if(item) {
 			item_status = static_cast<int16>(item->MinStatus);
 		}
@@ -10257,7 +10257,7 @@ void command_zopp(Client *c, const Seperator *sep)
 			c->Message(0, "Processing request..results may cause unpredictable behavior.");
 		}
 
-		ItemInst* FakeItemInst = database.CreateItem(FakeItem, charges);
+		EQEmu::ItemInstance* FakeItemInst = database.CreateItem(FakeItem, charges);
 		c->SendItemPacket(slotid, FakeItemInst, packettype);
 		c->Message(0, "Sending zephyr op packet to client - [%s] %s (%u) with %i %s to slot %i.",
 			   packettype == ItemPacketTrade ? "Trade" : "Summon",  FakeItem->Name, itemid, charges,

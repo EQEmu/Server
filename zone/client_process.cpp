@@ -296,7 +296,7 @@ bool Client::Process() {
 		}
 
 		if(AutoFireEnabled()){
-			ItemInst *ranged = GetInv().GetItem(EQEmu::legacy::SlotRange);
+			EQEmu::ItemInstance *ranged = GetInv().GetItem(EQEmu::legacy::SlotRange);
 			if(ranged)
 			{
 				if (ranged->GetItem() && ranged->GetItem()->ItemType == EQEmu::item::ItemTypeBow){
@@ -391,7 +391,7 @@ bool Client::Process() {
 			}
 			else if (auto_attack_target->GetHP() > -10) // -10 so we can watch people bleed in PvP
 			{
-				ItemInst *wpn = GetInv().GetItem(EQEmu::legacy::SlotPrimary);
+				EQEmu::ItemInstance *wpn = GetInv().GetItem(EQEmu::legacy::SlotPrimary);
 				TryWeaponProc(wpn, auto_attack_target, EQEmu::legacy::SlotPrimary);
 
 				DoAttackRounds(auto_attack_target, EQEmu::legacy::SlotPrimary);
@@ -430,7 +430,7 @@ bool Client::Process() {
 			else if(auto_attack_target->GetHP() > -10) {
 				CheckIncreaseSkill(EQEmu::skills::SkillDualWield, auto_attack_target, -10);
 				if (CheckDualWield()) {
-					ItemInst *wpn = GetInv().GetItem(EQEmu::legacy::SlotSecondary);
+					EQEmu::ItemInstance *wpn = GetInv().GetItem(EQEmu::legacy::SlotSecondary);
 					TryWeaponProc(wpn, auto_attack_target, EQEmu::legacy::SlotSecondary);
 
 					DoAttackRounds(auto_attack_target, EQEmu::legacy::SlotSecondary);
@@ -738,7 +738,7 @@ void Client::BulkSendInventoryItems()
 	// LINKDEAD TRADE ITEMS
 	// Move trade slot items back into normal inventory..need them there now for the proceeding validity checks
 	for (int16 slot_id = EQEmu::legacy::TRADE_BEGIN; slot_id <= EQEmu::legacy::TRADE_END; slot_id++) {
-		ItemInst* inst = m_inv.PopItem(slot_id);
+		EQEmu::ItemInstance* inst = m_inv.PopItem(slot_id);
 		if(inst) {
 			bool is_arrow = (inst->GetItem()->ItemType == EQEmu::item::ItemTypeArrow) ? true : false;
 			int16 free_slot_id = m_inv.FindFreeSlot(inst->IsClassBag(), true, inst->GetItem()->Size, is_arrow);
@@ -764,7 +764,7 @@ void Client::BulkSendInventoryItems()
 
 	// Possessions items
 	for (int16 slot_id = SLOT_BEGIN; slot_id < EQEmu::legacy::TYPE_POSSESSIONS_SIZE; slot_id++) {
-		const ItemInst* inst = m_inv[slot_id];
+		const EQEmu::ItemInstance* inst = m_inv[slot_id];
 		if (!inst)
 			continue;
 
@@ -778,7 +778,7 @@ void Client::BulkSendInventoryItems()
 
 	// PowerSource item
 	if (ClientVersion() >= EQEmu::versions::ClientVersion::SoF) {
-		const ItemInst* inst = m_inv[EQEmu::legacy::SlotPowerSource];
+		const EQEmu::ItemInstance* inst = m_inv[EQEmu::legacy::SlotPowerSource];
 		if (inst) {
 			inst->Serialize(ob, EQEmu::legacy::SlotPowerSource);
 
@@ -791,7 +791,7 @@ void Client::BulkSendInventoryItems()
 
 	// Bank items
 	for (int16 slot_id = EQEmu::legacy::BANK_BEGIN; slot_id <= EQEmu::legacy::BANK_END; slot_id++) {
-		const ItemInst* inst = m_inv[slot_id];
+		const EQEmu::ItemInstance* inst = m_inv[slot_id];
 		if (!inst)
 			continue;
 
@@ -805,7 +805,7 @@ void Client::BulkSendInventoryItems()
 
 	// SharedBank items
 	for (int16 slot_id = EQEmu::legacy::SHARED_BANK_BEGIN; slot_id <= EQEmu::legacy::SHARED_BANK_END; slot_id++) {
-		const ItemInst* inst = m_inv[slot_id];
+		const EQEmu::ItemInstance* inst = m_inv[slot_id];
 		if (!inst)
 			continue;
 
@@ -825,12 +825,12 @@ void Client::BulkSendInventoryItems()
 }
 
 void Client::BulkSendMerchantInventory(int merchant_id, int npcid) {
-	const EQEmu::ItemBase* handyitem = nullptr;
+	const EQEmu::ItemData* handyitem = nullptr;
 	uint32 numItemSlots = 80; //The max number of items passed in the transaction.
 	if (m_ClientVersionBit & EQEmu::versions::bit_RoFAndLater) { // RoF+ can send 200 items
 		numItemSlots = 200;
 	}
-	const EQEmu::ItemBase *item;
+	const EQEmu::ItemData *item;
 	std::list<MerchantList> merlist = zone->merchanttable[merchant_id];
 	std::list<MerchantList>::const_iterator itr;
 	Mob* merch = entity_list.GetMobByNpcTypeID(npcid);
@@ -879,7 +879,7 @@ void Client::BulkSendMerchantInventory(int merchant_id, int npcid) {
 			int charges = 1;
 			if (item->IsClassCommon())
 				charges = item->MaxCharges;
-			ItemInst* inst = database.CreateItem(item, charges);
+			EQEmu::ItemInstance* inst = database.CreateItem(item, charges);
 			if (inst) {
 				if (RuleB(Merchant, UsePriceMod)) {
 					inst->SetPrice((item->Price * (RuleR(Merchant, SellCostMod)) * item->SellRate * Client::CalcPriceMod(merch, false)));
@@ -920,7 +920,7 @@ void Client::BulkSendMerchantInventory(int merchant_id, int npcid) {
 			//	charges=ml.charges;
 			//else
 			charges = item->MaxCharges;
-			ItemInst* inst = database.CreateItem(item, charges);
+			EQEmu::ItemInstance* inst = database.CreateItem(item, charges);
 			if (inst) {
 				if (RuleB(Merchant, UsePriceMod)) {
 					inst->SetPrice((item->Price * (RuleR(Merchant, SellCostMod)) * item->SellRate * Client::CalcPriceMod(merch, false)));
@@ -1095,11 +1095,11 @@ void Client::OPMemorizeSpell(const EQApplicationPacket* app)
 	switch(memspell->scribing)
 	{
 		case memSpellScribing:	{	// scribing spell to book
-			const ItemInst* inst = m_inv[EQEmu::legacy::SlotCursor];
+			const EQEmu::ItemInstance* inst = m_inv[EQEmu::legacy::SlotCursor];
 
 			if (inst && inst->IsClassCommon())
 			{
-				const EQEmu::ItemBase* item = inst->GetItem();
+				const EQEmu::ItemData* item = inst->GetItem();
 
 				if (RuleB(Character, RestrictSpellScribing) && !item->IsEquipable(GetRace(), GetClass())) {
 					Message_StringID(13, CANNOT_USE_ITEM);

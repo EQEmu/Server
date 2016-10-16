@@ -2402,7 +2402,7 @@ namespace ActionableBots
 
 			mod_skill_value = base_skill_value;
 			for (int16 index = EQEmu::legacy::EQUIPMENT_BEGIN; index <= EQEmu::legacy::EQUIPMENT_END; ++index) {
-				const ItemInst* indexed_item = bot_iter->GetBotItem(index);
+				const EQEmu::ItemInstance* indexed_item = bot_iter->GetBotItem(index);
 				if (indexed_item && indexed_item->GetItem()->SkillModType == skill_type)
 					mod_skill_value += (base_skill_value * (((float)indexed_item->GetItem()->SkillModValue) / 100.0f));
 			}
@@ -7062,8 +7062,8 @@ void bot_subcommand_inventory_list(Client *c, const Seperator *sep)
 		return;
 	}
 
-	const ItemInst* inst = nullptr;
-	const EQEmu::ItemBase* item = nullptr;
+	const EQEmu::ItemInstance* inst = nullptr;
+	const EQEmu::ItemData* item = nullptr;
 	bool is2Hweapon = false;
 
 	std::string item_link;
@@ -7132,8 +7132,8 @@ void bot_subcommand_inventory_remove(Client *c, const Seperator *sep)
 		return;
 	}
 
-	const EQEmu::ItemBase* itm = nullptr;
-	const ItemInst* itminst = my_bot->GetBotItem(slotId);
+	const EQEmu::ItemData* itm = nullptr;
+	const EQEmu::ItemInstance* itminst = my_bot->GetBotItem(slotId);
 	if (itminst)
 		itm = itminst->GetItem();
 
@@ -7146,7 +7146,7 @@ void bot_subcommand_inventory_remove(Client *c, const Seperator *sep)
 		if (!itminst)
 			break;
 
-		ItemInst *itma = itminst->GetAugment(m);
+		EQEmu::ItemInstance *itma = itminst->GetAugment(m);
 		if (!itma)
 			continue;
 		if (!c->CheckLoreConflict(itma->GetItem()))
@@ -7235,8 +7235,8 @@ void bot_subcommand_inventory_window(Client *c, const Seperator *sep)
 	//linker.SetLinkType(linker.linkItemInst);
 
 	for (int i = EQEmu::legacy::EQUIPMENT_BEGIN; i <= (EQEmu::legacy::EQUIPMENT_END + 1); ++i) {
-		const EQEmu::ItemBase* item = nullptr;
-		const ItemInst* inst = my_bot->CastToBot()->GetBotItem(i == 22 ? EQEmu::legacy::SlotPowerSource : i);
+		const EQEmu::ItemData* item = nullptr;
+		const EQEmu::ItemInstance* inst = my_bot->CastToBot()->GetBotItem(i == 22 ? EQEmu::legacy::SlotPowerSource : i);
 		if (inst)
 			item = inst->GetItem();
 

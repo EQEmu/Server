@@ -217,7 +217,7 @@ void Merc::CalcItemBonuses(StatBonuses* newbon) {
 	for (i = 0; i < EQEmu::legacy::SlotAmmo; i++) {
 		if(equipment[i] == 0)
 			continue;
-		const EQEmu::ItemBase * itm = database.GetItem(equipment[i]);
+		const EQEmu::ItemData * itm = database.GetItem(equipment[i]);
 		if(itm)
 			AddItemBonuses(itm, newbon);
 	}
@@ -225,7 +225,7 @@ void Merc::CalcItemBonuses(StatBonuses* newbon) {
 	//Power Source Slot
 	/*if (GetClientVersion() >= EQClientSoF)
 	{
-	const ItemInst* inst = m_inv[MainPowerSource];
+	const EQEmu::ItemInstance* inst = m_inv[MainPowerSource];
 	if(inst)
 	AddItemBonuses(inst, newbon);
 	}*/
@@ -243,7 +243,7 @@ void Merc::CalcItemBonuses(StatBonuses* newbon) {
 	SetAttackTimer();
 }
 
-void Merc::AddItemBonuses(const EQEmu::ItemBase *item, StatBonuses* newbon) {
+void Merc::AddItemBonuses(const EQEmu::ItemData *item, StatBonuses* newbon) {
 
 	if(GetLevel() < item->ReqLevel)
 	{
@@ -1221,7 +1221,7 @@ void Merc::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho) {
 			{
 				continue;
 			}
-			const ItemBase* item = database.GetItem(equipment[i]);
+			const ItemData* item = database.GetItem(equipment[i]);
 			if(item)
 			{
 				ns->spawn.equipment[i].material = item->Material;
@@ -2547,8 +2547,8 @@ int16 Merc::GetFocusEffect(focusType type, uint16 spell_id) {
 	//Check if item focus effect exists for the client.
 	if (itembonuses.FocusEffects[type]){
 
-		const EQEmu::ItemBase* TempItem = 0;
-		const EQEmu::ItemBase* UsedItem = 0;
+		const EQEmu::ItemData* TempItem = 0;
+		const EQEmu::ItemData* UsedItem = 0;
 		uint16 UsedFocusID = 0;
 		int16 Total = 0;
 		int16 focus_max = 0;
@@ -4428,7 +4428,7 @@ void Merc::DoClassAttacks(Mob *target) {
 						DoAnim(animKick);
 						int32 dmg = 0;
 
-						if (GetWeaponDamage(target, (const EQEmu::ItemBase*)nullptr) <= 0){
+						if (GetWeaponDamage(target, (const EQEmu::ItemData*)nullptr) <= 0){
 							dmg = -5;
 						}
 						else{
@@ -4450,7 +4450,7 @@ void Merc::DoClassAttacks(Mob *target) {
 						DoAnim(animTailRake);
 						int32 dmg = 0;
 
-						if (GetWeaponDamage(target, (const EQEmu::ItemBase*)nullptr) <= 0){
+						if (GetWeaponDamage(target, (const EQEmu::ItemData*)nullptr) <= 0){
 							dmg = -5;
 						}
 						else{

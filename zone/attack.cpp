@@ -51,12 +51,12 @@ extern WorldServer worldserver;
 extern EntityList entity_list;
 extern Zone* zone;
 
-bool Mob::AttackAnimation(EQEmu::skills::SkillType &skillinuse, int Hand, const ItemInst* weapon)
+bool Mob::AttackAnimation(EQEmu::skills::SkillType &skillinuse, int Hand, const EQEmu::ItemInstance* weapon)
 {
 	// Determine animation
 	int type = 0;
 	if (weapon && weapon->IsClassCommon()) {
-		const EQEmu::ItemBase* item = weapon->GetItem();
+		const EQEmu::ItemData* item = weapon->GetItem();
 
 		Log.Out(Logs::Detail, Logs::Attack, "Weapon skill : %i", item->ItemType);
 
@@ -786,9 +786,9 @@ int32 Client::GetMeleeMitDmg(Mob *attacker, int32 damage, int32 minhit,
 //Returns the weapon damage against the input mob
 //if we cannot hit the mob with the current weapon we will get a value less than or equal to zero
 //Else we know we can hit.
-//GetWeaponDamage(mob*, const ItemBase*) is intended to be used for mobs or any other situation where we do not have a client inventory item
-//GetWeaponDamage(mob*, const ItemInst*) is intended to be used for situations where we have a client inventory item
-int Mob::GetWeaponDamage(Mob *against, const EQEmu::ItemBase *weapon_item) {
+//GetWeaponDamage(mob*, const EQEmu::ItemData*) is intended to be used for mobs or any other situation where we do not have a client inventory item
+//GetWeaponDamage(mob*, const EQEmu::ItemInstance*) is intended to be used for situations where we have a client inventory item
+int Mob::GetWeaponDamage(Mob *against, const EQEmu::ItemData *weapon_item) {
 	int dmg = 0;
 	int banedmg = 0;
 
@@ -888,7 +888,7 @@ int Mob::GetWeaponDamage(Mob *against, const EQEmu::ItemBase *weapon_item) {
 		return dmg;
 }
 
-int Mob::GetWeaponDamage(Mob *against, const ItemInst *weapon_item, uint32 *hate)
+int Mob::GetWeaponDamage(Mob *against, const EQEmu::ItemInstance *weapon_item, uint32 *hate)
 {
 	int dmg = 0;
 	int banedmg = 0;
@@ -927,7 +927,7 @@ int Mob::GetWeaponDamage(Mob *against, const ItemInst *weapon_item, uint32 *hate
 		} else {
 			bool MagicGloves = false;
 			if (IsClient()) {
-				const ItemInst *gloves = CastToClient()->GetInv().GetItem(EQEmu::legacy::SlotHands);
+				const EQEmu::ItemInstance *gloves = CastToClient()->GetInv().GetItem(EQEmu::legacy::SlotHands);
 				if (gloves)
 					MagicGloves = gloves->GetItemMagical(true);
 			}
@@ -1035,7 +1035,7 @@ bool Client::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, b
 	if (GetFeigned())
 		return false; // Rogean: How can you attack while feigned? Moved up from Aggro Code.
 
-	ItemInst* weapon;
+	EQEmu::ItemInstance* weapon;
 	if (Hand == EQEmu::legacy::SlotSecondary){	// Kaiyodo - Pick weapon from the attacking hand
 		weapon = GetInv().GetItem(EQEmu::legacy::SlotSecondary);
 		OffHandAtk(true);
@@ -1114,7 +1114,7 @@ bool Client::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, b
 			// Damage bonuses apply only to hits from the main hand (Hand == MainPrimary) by characters level 28 and above
 			// who belong to a melee class. If we're here, then all of these conditions apply.
 
-			ucDamageBonus = GetWeaponDamageBonus(weapon ? weapon->GetItem() : (const EQEmu::ItemBase*) nullptr);
+			ucDamageBonus = GetWeaponDamageBonus(weapon ? weapon->GetItem() : (const EQEmu::ItemData*) nullptr);
 
 			min_hit += (int) ucDamageBonus;
 			max_hit += (int) ucDamageBonus;
@@ -1125,7 +1125,7 @@ bool Client::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, b
 		if (Hand == EQEmu::legacy::SlotSecondary) {
 			if (aabonuses.SecondaryDmgInc || itembonuses.SecondaryDmgInc || spellbonuses.SecondaryDmgInc){
 
-				ucDamageBonus = GetWeaponDamageBonus(weapon ? weapon->GetItem() : (const EQEmu::ItemBase*) nullptr, true);
+				ucDamageBonus = GetWeaponDamageBonus(weapon ? weapon->GetItem() : (const EQEmu::ItemData*) nullptr, true);
 
 				min_hit += (int) ucDamageBonus;
 				max_hit += (int) ucDamageBonus;
@@ -1593,7 +1593,7 @@ bool NPC::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool
 	}
 
 	//figure out what weapon they are using, if any
-	const EQEmu::ItemBase* weapon = nullptr;
+	const EQEmu::ItemData* weapon = nullptr;
 	if (Hand == EQEmu::legacy::SlotPrimary && equipment[EQEmu::legacy::SlotPrimary] > 0)
 		weapon = database.GetItem(equipment[EQEmu::legacy::SlotPrimary]);
 	else if (equipment[EQEmu::legacy::SlotSecondary])
@@ -1645,7 +1645,7 @@ bool NPC::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool
 
 	//do attack animation regardless of whether or not we can hit below
 	int16 charges = 0;
-	ItemInst weapon_inst(weapon, charges);
+	EQEmu::ItemInstance weapon_inst(weapon, charges);
 	AttackAnimation(skillinuse, Hand, &weapon_inst);
 
 	//basically "if not immune" then do the attack
@@ -2515,7 +2515,7 @@ void Mob::DamageShield(Mob* attacker, bool spell_ds) {
 	}
 }
 
-uint8 Mob::GetWeaponDamageBonus(const EQEmu::ItemBase *weapon, bool offhand)
+uint8 Mob::GetWeaponDamageBonus(const EQEmu::ItemData *weapon, bool offhand)
 {
 	// dev quote with old and new formulas
 	// https://forums.daybreakgames.com/eq/index.php?threads/test-update-09-17-15.226618/page-5#post-3326194
@@ -3526,7 +3526,7 @@ void Mob::TryDefensiveProc(Mob *on, uint16 hand) {
 	}
 }
 
-void Mob::TryWeaponProc(const ItemInst* weapon_g, Mob *on, uint16 hand) {
+void Mob::TryWeaponProc(const EQEmu::ItemInstance* weapon_g, Mob *on, uint16 hand) {
 	if(!on) {
 		SetTarget(nullptr);
 		Log.Out(Logs::General, Logs::Error, "A null Mob object was passed to Mob::TryWeaponProc for evaluation!");
@@ -3544,12 +3544,12 @@ void Mob::TryWeaponProc(const ItemInst* weapon_g, Mob *on, uint16 hand) {
 	}
 
 	if(!weapon_g) {
-		TrySpellProc(nullptr, (const EQEmu::ItemBase*)nullptr, on);
+		TrySpellProc(nullptr, (const EQEmu::ItemData*)nullptr, on);
 		return;
 	}
 
 	if (!weapon_g->IsClassCommon()) {
-		TrySpellProc(nullptr, (const EQEmu::ItemBase*)nullptr, on);
+		TrySpellProc(nullptr, (const EQEmu::ItemData*)nullptr, on);
 		return;
 	}
 
@@ -3562,7 +3562,7 @@ void Mob::TryWeaponProc(const ItemInst* weapon_g, Mob *on, uint16 hand) {
 	return;
 }
 
-void Mob::TryWeaponProc(const ItemInst *inst, const EQEmu::ItemBase *weapon, Mob *on, uint16 hand)
+void Mob::TryWeaponProc(const EQEmu::ItemInstance *inst, const EQEmu::ItemData *weapon, Mob *on, uint16 hand)
 {
 
 	if (!weapon)
@@ -3612,10 +3612,10 @@ void Mob::TryWeaponProc(const ItemInst *inst, const EQEmu::ItemBase *weapon, Mob
 
 	if (!proced && inst) {
 		for (int r = 0; r < EQEmu::legacy::ITEM_COMMON_SIZE; r++) {
-			const ItemInst *aug_i = inst->GetAugment(r);
+			const EQEmu::ItemInstance *aug_i = inst->GetAugment(r);
 			if (!aug_i) // no aug, try next slot!
 				continue;
-			const EQEmu::ItemBase *aug = aug_i->GetItem();
+			const EQEmu::ItemData *aug = aug_i->GetItem();
 			if (!aug)
 				continue;
 
@@ -3645,7 +3645,7 @@ void Mob::TryWeaponProc(const ItemInst *inst, const EQEmu::ItemBase *weapon, Mob
 	return;
 }
 
-void Mob::TrySpellProc(const ItemInst *inst, const EQEmu::ItemBase *weapon, Mob *on, uint16 hand)
+void Mob::TrySpellProc(const EQEmu::ItemInstance *inst, const EQEmu::ItemData *weapon, Mob *on, uint16 hand)
 {
 	float ProcBonus = static_cast<float>(spellbonuses.SpellProcChance +
 			itembonuses.SpellProcChance + aabonuses.SpellProcChance);
@@ -4489,10 +4489,10 @@ void Client::SetAttackTimer()
 		else	//invalid slot (hands will always hit this)
 			continue;
 
-		const EQEmu::ItemBase *ItemToUse = nullptr;
+		const EQEmu::ItemData *ItemToUse = nullptr;
 
 		//find our item
-		ItemInst *ci = GetInv().GetItem(i);
+		EQEmu::ItemInstance *ci = GetInv().GetItem(i);
 		if (ci)
 			ItemToUse = ci->GetItem();
 

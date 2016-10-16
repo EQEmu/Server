@@ -248,12 +248,12 @@ bool Zone::LoadZoneObjects()
 		data.tilt_y = atof(row[18]);
 		data.unknown084 = 0;
 
-		ItemInst *inst = nullptr;
+		EQEmu::ItemInstance *inst = nullptr;
 		// FatherNitwit: this dosent seem to work...
 		// tradeskill containers do not have an itemid of 0... at least what I am seeing
 		if (itemid == 0) {
 			// Generic tradeskill container
-			inst = new ItemInst(ItemInstWorldContainer);
+			inst = new EQEmu::ItemInstance(ItemInstWorldContainer);
 		} else {
 			// Groundspawn object
 			inst = database.CreateItem(itemid);
@@ -261,7 +261,7 @@ bool Zone::LoadZoneObjects()
 
 		// Father Nitwit's fix... not perfect...
 		if (inst == nullptr && type != OT_DROPPEDITEM) {
-			inst = new ItemInst(ItemInstWorldContainer);
+			inst = new EQEmu::ItemInstance(ItemInstWorldContainer);
 		}
 
 		// Load child objects if container
@@ -294,7 +294,7 @@ bool Zone::LoadGroundSpawns() {
 	uint32 gsnumber=0;
 	for(gsindex=0;gsindex<50;gsindex++){
 		if(groundspawn.spawn[gsindex].item>0 && groundspawn.spawn[gsindex].item<SAYLINK_ITEM_ID){
-			ItemInst* inst = nullptr;
+			EQEmu::ItemInstance* inst = nullptr;
 			inst = database.CreateItem(groundspawn.spawn[gsindex].item);
 			gsnumber=groundspawn.spawn[gsindex].max_allowed;
 			ix=0;

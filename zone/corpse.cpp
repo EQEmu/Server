@@ -268,7 +268,7 @@ Corpse::Corpse(Client* client, int32 in_rezexp) : Mob (
 	int i;
 
 	PlayerProfile_Struct *pp = &client->GetPP();
-	ItemInst *item;
+	EQEmu::ItemInstance *item;
 
 	/* Check if Zone has Graveyard First */
 	if(!zone->HasGraveyard()) {
@@ -387,7 +387,7 @@ Corpse::Corpse(Client* client, int32 in_rezexp) : Mob (
 	Save();
 }
 
-void Corpse::MoveItemToCorpse(Client *client, ItemInst *inst, int16 equipSlot, std::list<uint32> &removedList)
+void Corpse::MoveItemToCorpse(Client *client, EQEmu::ItemInstance *inst, int16 equipSlot, std::list<uint32> &removedList)
 {
 	AddItem(
 		inst->GetItem()->ID,
@@ -979,8 +979,8 @@ void Corpse::MakeLootRequestPackets(Client* client, const EQApplicationPacket* a
 		safe_delete(outapp);
 		if(Loot_Request_Type == 5) {
 			int pkitem = GetPlayerKillItem();
-			const EQEmu::ItemBase* item = database.GetItem(pkitem);
-			ItemInst* inst = database.CreateItem(item, item->MaxCharges);
+			const EQEmu::ItemData* item = database.GetItem(pkitem);
+			EQEmu::ItemInstance* inst = database.CreateItem(item, item->MaxCharges);
 			if(inst) {
 				if (item->RecastDelay)
 					inst->SetRecastTimestamp(timestamps.count(item->RecastType) ? timestamps.at(item->RecastType) : 0);
@@ -994,7 +994,7 @@ void Corpse::MakeLootRequestPackets(Client* client, const EQApplicationPacket* a
 		}
 
 		int i = 0;
-		const EQEmu::ItemBase* item = 0;
+		const EQEmu::ItemData* item = 0;
 		ItemList::iterator cur,end;
 		cur = itemlist.begin();
 		end = itemlist.end();
@@ -1013,7 +1013,7 @@ void Corpse::MakeLootRequestPackets(Client* client, const EQApplicationPacket* a
 				if(i < corpselootlimit) {
 					item = database.GetItem(item_data->item_id);
 					if(client && item) {
-						ItemInst* inst = database.CreateItem(item, item_data->charges, item_data->aug_1, item_data->aug_2, item_data->aug_3, item_data->aug_4, item_data->aug_5, item_data->aug_6, item_data->attuned);
+						EQEmu::ItemInstance* inst = database.CreateItem(item, item_data->charges, item_data->aug_1, item_data->aug_2, item_data->aug_3, item_data->aug_4, item_data->aug_5, item_data->aug_6, item_data->attuned);
 						if(inst) {
 							if (item->RecastDelay)
 								inst->SetRecastTimestamp(timestamps.count(item->RecastType) ? timestamps.at(item->RecastType) : 0);
@@ -1110,8 +1110,8 @@ void Corpse::LootItem(Client* client, const EQApplicationPacket* app) {
 		being_looted_by = 0xFFFFFFFF;
 		return;
 	}
-	const EQEmu::ItemBase* item = 0;
-	ItemInst *inst = 0;
+	const EQEmu::ItemData* item = 0;
+	EQEmu::ItemInstance *inst = 0;
 	ServerLootItem_Struct* item_data = nullptr, *bag_item_data[10];
 
 	memset(bag_item_data, 0, sizeof(bag_item_data));
@@ -1149,7 +1149,7 @@ void Corpse::LootItem(Client* client, const EQApplicationPacket* app) {
 
 		if (inst->IsAugmented()) {
 			for (int i = AUG_INDEX_BEGIN; i < EQEmu::legacy::ITEM_COMMON_SIZE; i++) {
-				ItemInst *itm = inst->GetAugment(i);
+				EQEmu::ItemInstance *itm = inst->GetAugment(i);
 				if (itm) {
 					if (client->CheckLoreConflict(itm->GetItem())) {
 						client->Message_StringID(0, LOOT_LORE_ERROR);
@@ -1305,7 +1305,7 @@ void Corpse::QueryLoot(Client* to) {
 			else
 				x < corpselootlimit ? sitem->lootslot = x : sitem->lootslot = 0xFFFF;
 
-			const EQEmu::ItemBase* item = database.GetItem(sitem->item_id);
+			const EQEmu::ItemData* item = database.GetItem(sitem->item_id);
 
 			if (item)
 				to->Message((sitem->lootslot == 0xFFFF), "LootSlot: %i (EquipSlot: %i) Item: %s (%d), Count: %i", static_cast<int16>(sitem->lootslot), sitem->equip_slot, item->Name, item->ID, sitem->charges);
@@ -1319,7 +1319,7 @@ void Corpse::QueryLoot(Client* to) {
 		}
 		else {
 			sitem->lootslot=y;
-			const EQEmu::ItemBase* item = database.GetItem(sitem->item_id);
+			const EQEmu::ItemData* item = database.GetItem(sitem->item_id);
 
 			if (item)
 				to->Message(0, "LootSlot: %i Item: %s (%d), Count: %i", sitem->lootslot, item->Name, item->ID, sitem->charges);
@@ -1414,7 +1414,7 @@ uint32 Corpse::GetEquipment(uint8 material_slot) const {
 }
 
 uint32 Corpse::GetEquipmentColor(uint8 material_slot) const {
-	const EQEmu::ItemBase *item;
+	const EQEmu::ItemData *item;
 
 	if (material_slot > EQEmu::textures::LastTexture) {
 		return 0;

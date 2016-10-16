@@ -2374,12 +2374,12 @@ bool Mob::CanThisClassDualWield(void) const {
 		return(GetSkill(EQEmu::skills::SkillDualWield) > 0);
 	}
 	else if (CastToClient()->HasSkill(EQEmu::skills::SkillDualWield)) {
-		const ItemInst* pinst = CastToClient()->GetInv().GetItem(EQEmu::legacy::SlotPrimary);
-		const ItemInst* sinst = CastToClient()->GetInv().GetItem(EQEmu::legacy::SlotSecondary);
+		const EQEmu::ItemInstance* pinst = CastToClient()->GetInv().GetItem(EQEmu::legacy::SlotPrimary);
+		const EQEmu::ItemInstance* sinst = CastToClient()->GetInv().GetItem(EQEmu::legacy::SlotSecondary);
 
 		// 2HS, 2HB, or 2HP
 		if(pinst && pinst->IsWeapon()) {
-			const EQEmu::ItemBase* item = pinst->GetItem();
+			const EQEmu::ItemData* item = pinst->GetItem();
 
 			if (item->IsType2HWeapon())
 				return false;
@@ -2749,7 +2749,7 @@ void Mob::SendArmorAppearance(Client *one_client)
 	{
 		if (!IsClient())
 		{
-			const EQEmu::ItemBase *item;
+			const EQEmu::ItemData *item;
 			for (int i = 0; i < 7; ++i)
 			{
 				item = database.GetItem(GetEquipment(i));
@@ -2852,7 +2852,7 @@ int32 Mob::GetEquipmentMaterial(uint8 material_slot) const
 {
 	uint32 equipmaterial = 0;
 	int32 ornamentationAugtype = RuleI(Character, OrnamentationAugmentType);
-	const EQEmu::ItemBase *item;
+	const EQEmu::ItemData *item;
 	item = database.GetItem(GetEquipment(material_slot));
 
 	if (item != 0)
@@ -2867,7 +2867,7 @@ int32 Mob::GetEquipmentMaterial(uint8 material_slot) const
 				{
 					return 0;
 				}
-				const ItemInst* inst = CastToClient()->m_inv[invslot];
+				const EQEmu::ItemInstance* inst = CastToClient()->m_inv[invslot];
 				if (inst)
 				{
 					if (inst->GetOrnamentationAug(ornamentationAugtype))
@@ -2905,7 +2905,7 @@ int32 Mob::GetHerosForgeModel(uint8 material_slot) const
 	if (material_slot >= 0 && material_slot < EQEmu::textures::TexturePrimary)
 	{
 		uint32 ornamentationAugtype = RuleI(Character, OrnamentationAugmentType);
-		const EQEmu::ItemBase *item;
+		const EQEmu::ItemData *item;
 		item = database.GetItem(GetEquipment(material_slot));
 		int16 invslot = Inventory::CalcSlotFromMaterial(material_slot);
 
@@ -2913,7 +2913,7 @@ int32 Mob::GetHerosForgeModel(uint8 material_slot) const
 		{
 			if (IsClient())
 			{
-				const ItemInst* inst = CastToClient()->m_inv[invslot];
+				const EQEmu::ItemInstance* inst = CastToClient()->m_inv[invslot];
 				if (inst)
 				{
 					if (inst->GetOrnamentationAug(ornamentationAugtype))
@@ -2959,7 +2959,7 @@ int32 Mob::GetHerosForgeModel(uint8 material_slot) const
 
 uint32 Mob::GetEquipmentColor(uint8 material_slot) const
 {
-	const EQEmu::ItemBase *item;
+	const EQEmu::ItemData *item;
 
 	if (armor_tint.Slot[material_slot].Color)
 	{
@@ -2975,7 +2975,7 @@ uint32 Mob::GetEquipmentColor(uint8 material_slot) const
 
 uint32 Mob::IsEliteMaterialItem(uint8 material_slot) const
 {
-	const EQEmu::ItemBase *item;
+	const EQEmu::ItemData *item;
 
 	item = database.GetItem(GetEquipment(material_slot));
 	if(item != 0)
@@ -3187,7 +3187,7 @@ int32 Mob::GetActSpellCasttime(uint16 spell_id, int32 casttime) {
 	return casttime;
 }
 
-void Mob::ExecWeaponProc(const ItemInst *inst, uint16 spell_id, Mob *on, int level_override) {
+void Mob::ExecWeaponProc(const EQEmu::ItemInstance *inst, uint16 spell_id, Mob *on, int level_override) {
 	// Changed proc targets to look up based on the spells goodEffect flag.
 	// This should work for the majority of weapons.
 	if(spell_id == SPELL_UNKNOWN || on->GetSpecialAbility(NO_HARM_FROM_CLIENT)) {
@@ -3208,9 +3208,9 @@ void Mob::ExecWeaponProc(const ItemInst *inst, uint16 spell_id, Mob *on, int lev
 
 	if(inst && IsClient()) {
 		//const cast is dirty but it would require redoing a ton of interfaces at this point
-		//It should be safe as we don't have any truly const ItemInst floating around anywhere.
+		//It should be safe as we don't have any truly const EQEmu::ItemInstance floating around anywhere.
 		//So we'll live with it for now
-		int i = parse->EventItem(EVENT_WEAPON_PROC, CastToClient(), const_cast<ItemInst*>(inst), on, "", spell_id);
+		int i = parse->EventItem(EVENT_WEAPON_PROC, CastToClient(), const_cast<EQEmu::ItemInstance*>(inst), on, "", spell_id);
 		if(i != 0) {
 			return;
 		}
@@ -3888,11 +3888,11 @@ void Mob::TrySympatheticProc(Mob *target, uint32 spell_id)
 
 int32 Mob::GetItemStat(uint32 itemid, const char *identifier)
 {
-	const ItemInst* inst = database.CreateItem(itemid);
+	const EQEmu::ItemInstance* inst = database.CreateItem(itemid);
 	if (!inst)
 		return 0;
 
-	const EQEmu::ItemBase* item = inst->GetItem();
+	const EQEmu::ItemData* item = inst->GetItem();
 	if (!item)
 		return 0;
 
@@ -5623,7 +5623,7 @@ int32 Mob::GetSpellStat(uint32 spell_id, const char *identifier, uint8 slot)
 
 bool Mob::CanClassEquipItem(uint32 item_id)
 {
-	const EQEmu::ItemBase* itm = nullptr;
+	const EQEmu::ItemData* itm = nullptr;
 	itm = database.GetItem(item_id);
 
 	if (!itm)
@@ -5692,9 +5692,9 @@ int32 Mob::GetMeleeMitigation() {
 }
 
 /* this is the mob being attacked.
- * Pass in the weapon's ItemInst
+ * Pass in the weapon's EQEmu::ItemInstance
  */
-int Mob::ResistElementalWeaponDmg(const ItemInst *item)
+int Mob::ResistElementalWeaponDmg(const EQEmu::ItemInstance *item)
 {
 	if (!item)
 		return 0;
@@ -5844,9 +5844,9 @@ int Mob::ResistElementalWeaponDmg(const ItemInst *item)
 }
 
 /* this is the mob being attacked.
- * Pass in the weapon's ItemInst
+ * Pass in the weapon's EQEmu::ItemInstance
  */
-int Mob::CheckBaneDamage(const ItemInst *item)
+int Mob::CheckBaneDamage(const EQEmu::ItemInstance *item)
 {
 	if (!item)
 		return 0;

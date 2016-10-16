@@ -701,7 +701,7 @@ bool Database::StoreCharacter(uint32 account_id, PlayerProfile_Struct* pp, Inven
 	/* Insert starting inventory... */
 	std::string invquery;
 	for (int16 i = EQEmu::legacy::EQUIPMENT_BEGIN; i <= EQEmu::legacy::BANK_BAGS_END;) {
-		const ItemInst* newinv = inv->GetItem(i);
+		const EQEmu::ItemInstance* newinv = inv->GetItem(i);
 		if (newinv) {
 			invquery = StringFormat("INSERT INTO `inventory` (charid, slotid, itemid, charges, color) VALUES (%u, %i, %u, %i, %u)",
 				charid, i, newinv->GetItem()->ID, newinv->GetCharges(), newinv->GetColor()); 

@@ -6,7 +6,7 @@
 
 namespace EQEmu
 {
-	struct ItemBase;
+	struct ItemData;
 }
 
 namespace luabind {
@@ -15,17 +15,17 @@ namespace luabind {
 
 luabind::scope lua_register_item();
 
-class Lua_Item : public Lua_Ptr<const EQEmu::ItemBase>
+class Lua_Item : public Lua_Ptr<const EQEmu::ItemData>
 {
-	typedef const EQEmu::ItemBase NativeType;
+	typedef const EQEmu::ItemData NativeType;
 public:
 	Lua_Item(uint32 item_id);
 	Lua_Item() : Lua_Ptr(nullptr) { }
-	Lua_Item(const EQEmu::ItemBase *d) : Lua_Ptr(d) { }
+	Lua_Item(const EQEmu::ItemData *d) : Lua_Ptr(d) { }
 	virtual ~Lua_Item() { }
 
-	operator const EQEmu::ItemBase*() {
-		return reinterpret_cast<const EQEmu::ItemBase*>(GetLuaPtrData());
+	operator const EQEmu::ItemData*() {
+		return reinterpret_cast<const EQEmu::ItemData*>(GetLuaPtrData());
 	}
 
 	int GetMinStatus();

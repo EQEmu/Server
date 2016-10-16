@@ -21,8 +21,8 @@
 // These classes could be optimized with database reads/writes by storing
 // a status flag indicating how object needs to interact with database
 
-#ifndef COMMON_ITEM_H
-#define COMMON_ITEM_H
+#ifndef COMMON_ITEM_INSTANCE_H
+#define COMMON_ITEM_INSTANCE_H
 
 
 class ItemParse;			// Parses item packets
@@ -51,7 +51,7 @@ namespace ItemField
 	};
 };
 
-// Specifies usage type for item inside ItemInst
+// Specifies usage type for item inside EQEmu::ItemInstance
 enum ItemInstTypes
 {
 	ItemInstNormal = 0,
@@ -76,7 +76,10 @@ enum {
 	invWhereCursor		= 0x20
 };
 
-class ItemInst;
+namespace EQEmu
+{
+	class ItemInstance;
+}
 
 // ########################################
 // Class: Queue
@@ -89,24 +92,24 @@ public:
 	// Public Methods
 	/////////////////////////
 
-	inline std::list<ItemInst*>::const_iterator cbegin() { return m_list.cbegin(); }
-	inline std::list<ItemInst*>::const_iterator cend() { return m_list.cend(); }
+	inline std::list<EQEmu::ItemInstance*>::const_iterator cbegin() { return m_list.cbegin(); }
+	inline std::list<EQEmu::ItemInstance*>::const_iterator cend() { return m_list.cend(); }
 
 	inline int size() { return static_cast<int>(m_list.size()); } // TODO: change to size_t
 	inline bool empty() { return m_list.empty(); }
 
-	void push(ItemInst* inst);
-	void push_front(ItemInst* inst);
-	ItemInst* pop();
-	ItemInst* pop_back();
-	ItemInst* peek_front() const;
+	void push(EQEmu::ItemInstance* inst);
+	void push_front(EQEmu::ItemInstance* inst);
+	EQEmu::ItemInstance* pop();
+	EQEmu::ItemInstance* pop_back();
+	EQEmu::ItemInstance* peek_front() const;
 
 protected:
 	/////////////////////////
 	// Protected Members
 	/////////////////////////
 
-	std::list<ItemInst*> m_list;
+	std::list<EQEmu::ItemInstance*> m_list;
 };
 
 // ########################################
@@ -114,7 +117,7 @@ protected:
 //	Character inventory
 class Inventory
 {
-	friend class ItemInst;
+	friend class EQEmu::ItemInstance;
 public:
 	///////////////////////////////
 	// Public Methods
@@ -138,29 +141,29 @@ public:
 	EQEmu::versions::InventoryVersion InventoryVersion() { return m_inventory_version; }
 
 	static void CleanDirty();
-	static void MarkDirty(ItemInst *inst);
+	static void MarkDirty(EQEmu::ItemInstance *inst);
 
 	// Retrieve a writeable item at specified slot
-	ItemInst* GetItem(int16 slot_id) const;
-	ItemInst* GetItem(int16 slot_id, uint8 bagidx) const;
+	EQEmu::ItemInstance* GetItem(int16 slot_id) const;
+	EQEmu::ItemInstance* GetItem(int16 slot_id, uint8 bagidx) const;
 
-	inline std::list<ItemInst*>::const_iterator cursor_cbegin() { return m_cursor.cbegin(); }
-	inline std::list<ItemInst*>::const_iterator cursor_cend() { return m_cursor.cend(); }
+	inline std::list<EQEmu::ItemInstance*>::const_iterator cursor_cbegin() { return m_cursor.cbegin(); }
+	inline std::list<EQEmu::ItemInstance*>::const_iterator cursor_cend() { return m_cursor.cend(); }
 
 	inline int CursorSize() { return m_cursor.size(); }
 	inline bool CursorEmpty() { return m_cursor.empty(); }
 
 	// Retrieve a read-only item from inventory
-	inline const ItemInst* operator[](int16 slot_id) const { return GetItem(slot_id); }
+	inline const EQEmu::ItemInstance* operator[](int16 slot_id) const { return GetItem(slot_id); }
 
 	// Add item to inventory
-	int16 PutItem(int16 slot_id, const ItemInst& inst);
+	int16 PutItem(int16 slot_id, const EQEmu::ItemInstance& inst);
 
 	// Add item to cursor queue
-	int16 PushCursor(const ItemInst& inst);
+	int16 PushCursor(const EQEmu::ItemInstance& inst);
 
 	// Get cursor item in front of queue
-	ItemInst* GetCursorItem();
+	EQEmu::ItemInstance* GetCursorItem();
 
 	// Swap items in inventory
 	bool SwapItem(int16 slot_a, int16 slot_b);
@@ -172,10 +175,10 @@ public:
 	bool CheckNoDrop(int16 slot_id);
 
 	// Remove item from inventory (and take control of memory)
-	ItemInst* PopItem(int16 slot_id);
+	EQEmu::ItemInstance* PopItem(int16 slot_id);
 
 	// Check whether there is space for the specified number of the specified item.
-	bool HasSpaceForItem(const EQEmu::ItemBase *ItemToTry, int16 Quantity);
+	bool HasSpaceForItem(const EQEmu::ItemData *ItemToTry, int16 Quantity);
 
 	// Check whether item exists in inventory
 	// where argument specifies OR'd list of invWhere constants to look
@@ -191,7 +194,7 @@ public:
 
 	// Locate an available inventory slot
 	int16 FindFreeSlot(bool for_bag, bool try_cursor, uint8 min_size = 0, bool is_arrow = false);
-	int16 FindFreeSlotForTradeItem(const ItemInst* inst);
+	int16 FindFreeSlotForTradeItem(const EQEmu::ItemInstance* inst);
 
 	// Calculate slot_id for an item within a bag
 	static int16 CalcSlotId(int16 slot_id); // Calc parent bag's slot_id
@@ -200,7 +203,7 @@ public:
 	static int16 CalcSlotFromMaterial(uint8 material);
 	static uint8 CalcMaterialFromSlot(int16 equipslot);
 
-	static bool CanItemFitInContainer(const EQEmu::ItemBase *ItemToTry, const EQEmu::ItemBase *Container);
+	static bool CanItemFitInContainer(const EQEmu::ItemData *ItemToTry, const EQEmu::ItemData *Container);
 
 	//  Test for valid inventory casting slot
 	bool SupportsClickCasting(int16 slot_id);
@@ -209,7 +212,7 @@ public:
 	// Test whether a given slot can support a container item
 	static bool SupportsContainers(int16 slot_id);
 
-	int GetSlotByItemInst(ItemInst *inst);
+	int GetSlotByItemInst(EQEmu::ItemInstance *inst);
 
 	uint8 FindBrightestLightType();
 
@@ -229,31 +232,31 @@ protected:
 	// Protected Methods
 	///////////////////////////////
 
-	int GetSlotByItemInstCollection(const std::map<int16, ItemInst*> &collection, ItemInst *inst);
-	void dumpItemCollection(const std::map<int16, ItemInst*> &collection);
-	void dumpBagContents(ItemInst *inst, std::map<int16, ItemInst*>::const_iterator *it);
+	int GetSlotByItemInstCollection(const std::map<int16, EQEmu::ItemInstance*> &collection, EQEmu::ItemInstance *inst);
+	void dumpItemCollection(const std::map<int16, EQEmu::ItemInstance*> &collection);
+	void dumpBagContents(EQEmu::ItemInstance *inst, std::map<int16, EQEmu::ItemInstance*>::const_iterator *it);
 
 	// Retrieves item within an inventory bucket
-	ItemInst* _GetItem(const std::map<int16, ItemInst*>& bucket, int16 slot_id) const;
+	EQEmu::ItemInstance* _GetItem(const std::map<int16, EQEmu::ItemInstance*>& bucket, int16 slot_id) const;
 
 	// Private "put" item into bucket, without regard for what is currently in bucket
-	int16 _PutItem(int16 slot_id, ItemInst* inst);
+	int16 _PutItem(int16 slot_id, EQEmu::ItemInstance* inst);
 
 	// Checks an inventory bucket for a particular item
-	int16 _HasItem(std::map<int16, ItemInst*>& bucket, uint32 item_id, uint8 quantity);
+	int16 _HasItem(std::map<int16, EQEmu::ItemInstance*>& bucket, uint32 item_id, uint8 quantity);
 	int16 _HasItem(ItemInstQueue& iqueue, uint32 item_id, uint8 quantity);
-	int16 _HasItemByUse(std::map<int16, ItemInst*>& bucket, uint8 use, uint8 quantity);
+	int16 _HasItemByUse(std::map<int16, EQEmu::ItemInstance*>& bucket, uint8 use, uint8 quantity);
 	int16 _HasItemByUse(ItemInstQueue& iqueue, uint8 use, uint8 quantity);
-	int16 _HasItemByLoreGroup(std::map<int16, ItemInst*>& bucket, uint32 loregroup);
+	int16 _HasItemByLoreGroup(std::map<int16, EQEmu::ItemInstance*>& bucket, uint32 loregroup);
 	int16 _HasItemByLoreGroup(ItemInstQueue& iqueue, uint32 loregroup);
 
 
 	// Player inventory
-	std::map<int16, ItemInst*>	m_worn;		// Items worn by character
-	std::map<int16, ItemInst*>	m_inv;		// Items in character personal inventory
-	std::map<int16, ItemInst*>	m_bank;		// Items in character bank
-	std::map<int16, ItemInst*>	m_shbank;	// Items in character shared bank
-	std::map<int16, ItemInst*>	m_trade;	// Items in a trade session
+	std::map<int16, EQEmu::ItemInstance*>	m_worn;		// Items worn by character
+	std::map<int16, EQEmu::ItemInstance*>	m_inv;		// Items in character personal inventory
+	std::map<int16, EQEmu::ItemInstance*>	m_bank;		// Items in character bank
+	std::map<int16, EQEmu::ItemInstance*>	m_shbank;	// Items in character shared bank
+	std::map<int16, EQEmu::ItemInstance*>	m_trade;	// Items in a trade session
 	ItemInstQueue				m_cursor;	// Items on cursor: FIFO
 
 private:
@@ -265,271 +268,269 @@ private:
 class SharedDatabase;
 
 // ########################################
-// Class: ItemInst
+// Class: EQEmu::ItemInstance
 //	Base class for an instance of an item
 //	An item instance encapsulates item data + data specific
 //	to an item instance (includes dye, augments, charges, etc)
-class ItemInst
+namespace EQEmu
 {
-public:
-	/////////////////////////
-	// Methods
-	/////////////////////////
+	class ItemInstance {
+	public:
+		/////////////////////////
+		// Methods
+		/////////////////////////
 
-	// Constructors/Destructor
-	ItemInst(const EQEmu::ItemBase* item = nullptr, int16 charges = 0);
+		// Constructors/Destructor
+		ItemInstance(const ItemData* item = nullptr, int16 charges = 0);
 
-	ItemInst(SharedDatabase *db, uint32 item_id, int16 charges = 0);
+		ItemInstance(SharedDatabase *db, uint32 item_id, int16 charges = 0);
 
-	ItemInst(ItemInstTypes use_type);
+		ItemInstance(ItemInstTypes use_type);
 
-	ItemInst(const ItemInst& copy);
+		ItemInstance(const ItemInstance& copy);
 
-	~ItemInst();
+		~ItemInstance();
 
-	// Query item type
-	bool IsType(EQEmu::item::ItemClass item_class) const;
+		// Query item type
+		bool IsType(EQEmu::item::ItemClass item_class) const;
 
-	bool IsClassCommon();
-	bool IsClassBag();
-	bool IsClassBook();
+		bool IsClassCommon() const;
+		bool IsClassBag() const;
+		bool IsClassBook() const;
 
-	bool IsClassCommon() const { return const_cast<ItemInst*>(this)->IsClassCommon(); }
-	bool IsClassBag() const { return const_cast<ItemInst*>(this)->IsClassBag(); }
-	bool IsClassBook() const { return const_cast<ItemInst*>(this)->IsClassBook(); }
+		// Can item be stacked?
+		bool IsStackable() const;
+		bool IsCharged() const;
 
-	// Can item be stacked?
-	bool IsStackable() const;
-	bool IsCharged() const;
+		// Can item be equipped by/at?
+		bool IsEquipable(uint16 race, uint16 class_) const;
+		bool IsEquipable(int16 slot_id) const;
 
-	// Can item be equipped by/at?
-	bool IsEquipable(uint16 race, uint16 class_) const;
-	bool IsEquipable(int16 slot_id) const;
+		//
+		// Augments
+		//
+		bool IsAugmentable() const;
+		bool AvailableWearSlot(uint32 aug_wear_slots) const;
+		int8 AvailableAugmentSlot(int32 augtype) const;
+		bool IsAugmentSlotAvailable(int32 augtype, uint8 slot) const;
+		inline int32 GetAugmentType() const { return ((m_item) ? m_item->AugType : NO_ITEM); }
 
-	//
-	// Augments
-	//
-	bool IsAugmentable() const;
-	bool AvailableWearSlot(uint32 aug_wear_slots) const;
-	int8 AvailableAugmentSlot(int32 augtype) const;
-	bool IsAugmentSlotAvailable(int32 augtype, uint8 slot) const;
-	inline int32 GetAugmentType() const { return ((m_item) ? m_item->AugType : NO_ITEM); }
+		inline bool IsExpendable() const { return ((m_item) ? ((m_item->Click.Type == EQEmu::item::ItemEffectExpendable) || (m_item->ItemType == EQEmu::item::ItemTypePotion)) : false); }
 
-	inline bool IsExpendable() const { return ((m_item) ? ((m_item->Click.Type == EQEmu::item::ItemEffectExpendable) || (m_item->ItemType == EQEmu::item::ItemTypePotion)) : false); }
+		//
+		// Contents
+		//
+		ItemInstance* GetItem(uint8 slot) const;
+		uint32 GetItemID(uint8 slot) const;
+		inline const ItemInstance* operator[](uint8 slot) const { return GetItem(slot); }
+		void PutItem(uint8 slot, const ItemInstance& inst);
+		void PutItem(SharedDatabase *db, uint8 slot, uint32 item_id) { return; } // not defined anywhere...
+		void DeleteItem(uint8 slot);
+		ItemInstance* PopItem(uint8 index);
+		void Clear();
+		void ClearByFlags(byFlagSetting is_nodrop, byFlagSetting is_norent);
+		uint8 FirstOpenSlot() const;
+		uint8 GetTotalItemCount() const;
+		bool IsNoneEmptyContainer();
+		std::map<uint8, ItemInstance*>* GetContents() { return &m_contents; }
 
-	//
-	// Contents
-	//
-	ItemInst* GetItem(uint8 slot) const;
-	uint32 GetItemID(uint8 slot) const;
-	inline const ItemInst* operator[](uint8 slot) const { return GetItem(slot); }
-	void PutItem(uint8 slot, const ItemInst& inst);
-	void PutItem(SharedDatabase *db, uint8 slot, uint32 item_id) { return; } // not defined anywhere...
-	void DeleteItem(uint8 slot);
-	ItemInst* PopItem(uint8 index);
-	void Clear();
-	void ClearByFlags(byFlagSetting is_nodrop, byFlagSetting is_norent);
-	uint8 FirstOpenSlot() const;
-	uint8 GetTotalItemCount() const;
-	bool IsNoneEmptyContainer();
-	std::map<uint8, ItemInst*>* GetContents() { return &m_contents; }
+		//
+		// Augments
+		//
+		ItemInstance* GetAugment(uint8 slot) const;
+		uint32 GetAugmentItemID(uint8 slot) const;
+		void PutAugment(uint8 slot, const ItemInstance& inst);
+		void PutAugment(SharedDatabase *db, uint8 slot, uint32 item_id);
+		void DeleteAugment(uint8 slot);
+		ItemInstance* RemoveAugment(uint8 index);
+		bool IsAugmented();
+		ItemInstance* GetOrnamentationAug(int32 ornamentationAugtype) const;
+		bool UpdateOrnamentationInfo();
+		static bool CanTransform(const EQEmu::ItemData *ItemToTry, const EQEmu::ItemData *Container, bool AllowAll = false);
 
-	//
-	// Augments
-	//
-	ItemInst* GetAugment(uint8 slot) const;
-	uint32 GetAugmentItemID(uint8 slot) const;
-	void PutAugment(uint8 slot, const ItemInst& inst);
-	void PutAugment(SharedDatabase *db, uint8 slot, uint32 item_id);
-	void DeleteAugment(uint8 slot);
-	ItemInst* RemoveAugment(uint8 index);
-	bool IsAugmented();
-	ItemInst* GetOrnamentationAug(int32 ornamentationAugtype) const;
-	bool UpdateOrnamentationInfo();
-	static bool CanTransform(const EQEmu::ItemBase *ItemToTry, const EQEmu::ItemBase *Container, bool AllowAll = false);
-	
-	// Has attack/delay?
-	bool IsWeapon() const;
-	bool IsAmmo() const;
+		// Has attack/delay?
+		bool IsWeapon() const;
+		bool IsAmmo() const;
 
-	// Accessors
-	const uint32 GetID() const { return ((m_item) ? m_item->ID : NO_ITEM); }
-	const uint32 GetItemScriptID() const { return ((m_item) ? m_item->ScriptFileID : NO_ITEM); }
-	const EQEmu::ItemBase* GetItem() const;
-	const EQEmu::ItemBase* GetUnscaledItem() const;
+		// Accessors
+		const uint32 GetID() const { return ((m_item) ? m_item->ID : NO_ITEM); }
+		const uint32 GetItemScriptID() const { return ((m_item) ? m_item->ScriptFileID : NO_ITEM); }
+		const ItemData* GetItem() const;
+		const ItemData* GetUnscaledItem() const;
 
-	int16 GetCharges() const				{ return m_charges; }
-	void SetCharges(int16 charges)			{ m_charges = charges; }
+		int16 GetCharges() const				{ return m_charges; }
+		void SetCharges(int16 charges)			{ m_charges = charges; }
 
-	uint32 GetPrice() const					{ return m_price; }
-	void SetPrice(uint32 price)				{ m_price = price; }
+		uint32 GetPrice() const					{ return m_price; }
+		void SetPrice(uint32 price)				{ m_price = price; }
 
-	void SetColor(uint32 color)				{ m_color = color; }
-	uint32 GetColor() const					{ return m_color; }
+		void SetColor(uint32 color)				{ m_color = color; }
+		uint32 GetColor() const					{ return m_color; }
 
-	uint32 GetMerchantSlot() const			{ return m_merchantslot; }
-	void SetMerchantSlot(uint32 slot)		{ m_merchantslot = slot; }
+		uint32 GetMerchantSlot() const			{ return m_merchantslot; }
+		void SetMerchantSlot(uint32 slot)		{ m_merchantslot = slot; }
 
-	int32 GetMerchantCount() const			{ return m_merchantcount; }
-	void SetMerchantCount(int32 count)		{ m_merchantcount = count; }
+		int32 GetMerchantCount() const			{ return m_merchantcount; }
+		void SetMerchantCount(int32 count)		{ m_merchantcount = count; }
 
-	int16 GetCurrentSlot() const			{ return m_currentslot; }
-	void SetCurrentSlot(int16 curr_slot)	{ m_currentslot = curr_slot; }
+		int16 GetCurrentSlot() const			{ return m_currentslot; }
+		void SetCurrentSlot(int16 curr_slot)	{ m_currentslot = curr_slot; }
 
-	// Is this item already attuned?
-	bool IsAttuned() const					{ return m_attuned; }
-	void SetAttuned(bool flag)				{ m_attuned=flag; }
+		// Is this item already attuned?
+		bool IsAttuned() const					{ return m_attuned; }
+		void SetAttuned(bool flag)				{ m_attuned = flag; }
 
-	std::string GetCustomDataString() const;
-	std::string GetCustomData(std::string identifier);
-	void SetCustomData(std::string identifier, std::string value);
-	void SetCustomData(std::string identifier, int value);
-	void SetCustomData(std::string identifier, float value);
-	void SetCustomData(std::string identifier, bool value);
-	void DeleteCustomData(std::string identifier);
+		std::string GetCustomDataString() const;
+		std::string GetCustomData(std::string identifier);
+		void SetCustomData(std::string identifier, std::string value);
+		void SetCustomData(std::string identifier, int value);
+		void SetCustomData(std::string identifier, float value);
+		void SetCustomData(std::string identifier, bool value);
+		void DeleteCustomData(std::string identifier);
 
-	// Allows treatment of this object as though it were a pointer to m_item
-	operator bool() const { return (m_item != nullptr); }
+		// Allows treatment of this object as though it were a pointer to m_item
+		operator bool() const { return (m_item != nullptr); }
 
-	// Compare inner Item_Struct of two ItemInst objects
-	bool operator==(const ItemInst& right) const { return (this->m_item == right.m_item); }
-	bool operator!=(const ItemInst& right) const { return (this->m_item != right.m_item); }
+		// Compare inner Item_Struct of two ItemInstance objects
+		bool operator==(const ItemInstance& right) const { return (this->m_item == right.m_item); }
+		bool operator!=(const ItemInstance& right) const { return (this->m_item != right.m_item); }
 
-	// Clone current item
-	ItemInst* Clone() const;
+		// Clone current item
+		ItemInstance* Clone() const;
 
-	bool IsSlotAllowed(int16 slot_id) const;
+		bool IsSlotAllowed(int16 slot_id) const;
 
-	bool IsScaling() const				{ return m_scaling; }
-	bool IsEvolving() const				{ return (m_evolveLvl >= 1); }
-	uint32 GetExp() const				{ return m_exp; }
-	void SetExp(uint32 exp)				{ m_exp = exp; }
-	void AddExp(uint32 exp)				{ m_exp += exp; }
-	bool IsActivated()					{ return m_activated; }
-	void SetActivated(bool activated)	{ m_activated = activated; }
-	int8 GetEvolveLvl() const			{ return m_evolveLvl; }
-	void SetScaling(bool v)				{ m_scaling = v; }
-	uint32 GetOrnamentationIcon() const							{ return m_ornamenticon; }
-	void SetOrnamentIcon(uint32 ornament_icon)					{ m_ornamenticon = ornament_icon; }
-	uint32 GetOrnamentationIDFile() const						{ return m_ornamentidfile; }
-	void SetOrnamentationIDFile(uint32 ornament_idfile)			{ m_ornamentidfile = ornament_idfile; }
-	uint32 GetOrnamentHeroModel(int32 material_slot = -1) const;
-	void SetOrnamentHeroModel(uint32 ornament_hero_model)		{ m_ornament_hero_model = ornament_hero_model; }
-	uint32 GetRecastTimestamp() const							{ return m_recast_timestamp; }
-	void SetRecastTimestamp(uint32 in)							{ m_recast_timestamp = in; }
+		bool IsScaling() const				{ return m_scaling; }
+		bool IsEvolving() const				{ return (m_evolveLvl >= 1); }
+		uint32 GetExp() const				{ return m_exp; }
+		void SetExp(uint32 exp)				{ m_exp = exp; }
+		void AddExp(uint32 exp)				{ m_exp += exp; }
+		bool IsActivated()					{ return m_activated; }
+		void SetActivated(bool activated)	{ m_activated = activated; }
+		int8 GetEvolveLvl() const			{ return m_evolveLvl; }
+		void SetScaling(bool v)				{ m_scaling = v; }
+		uint32 GetOrnamentationIcon() const							{ return m_ornamenticon; }
+		void SetOrnamentIcon(uint32 ornament_icon)					{ m_ornamenticon = ornament_icon; }
+		uint32 GetOrnamentationIDFile() const						{ return m_ornamentidfile; }
+		void SetOrnamentationIDFile(uint32 ornament_idfile)			{ m_ornamentidfile = ornament_idfile; }
+		uint32 GetOrnamentHeroModel(int32 material_slot = -1) const;
+		void SetOrnamentHeroModel(uint32 ornament_hero_model)		{ m_ornament_hero_model = ornament_hero_model; }
+		uint32 GetRecastTimestamp() const							{ return m_recast_timestamp; }
+		void SetRecastTimestamp(uint32 in)							{ m_recast_timestamp = in; }
 
-	void Initialize(SharedDatabase *db = nullptr);
-	void ScaleItem();
-	bool EvolveOnAllKills() const;
-	int8 GetMaxEvolveLvl() const;
-	uint32 GetKillsNeeded(uint8 currentlevel);
+		void Initialize(SharedDatabase *db = nullptr);
+		void ScaleItem();
+		bool EvolveOnAllKills() const;
+		int8 GetMaxEvolveLvl() const;
+		uint32 GetKillsNeeded(uint8 currentlevel);
 
-	std::string Serialize(int16 slot_id) const { EQEmu::InternalSerializedItem_Struct s; s.slot_id = slot_id; s.inst = (const void*)this; std::string ser; ser.assign((char*)&s, sizeof(EQEmu::InternalSerializedItem_Struct)); return ser; }
-	void Serialize(EQEmu::OutBuffer& ob, int16 slot_id) const { EQEmu::InternalSerializedItem_Struct isi; isi.slot_id = slot_id; isi.inst = (const void*)this; ob.write((const char*)&isi, sizeof(isi)); }
-	
-	inline int32 GetSerialNumber() const { return m_SerialNumber; }
-	inline void SetSerialNumber(int32 id) { m_SerialNumber = id; }
+		std::string Serialize(int16 slot_id) const { EQEmu::InternalSerializedItem_Struct s; s.slot_id = slot_id; s.inst = (const void*)this; std::string ser; ser.assign((char*)&s, sizeof(EQEmu::InternalSerializedItem_Struct)); return ser; }
+		void Serialize(EQEmu::OutBuffer& ob, int16 slot_id) const { EQEmu::InternalSerializedItem_Struct isi; isi.slot_id = slot_id; isi.inst = (const void*)this; ob.write((const char*)&isi, sizeof(isi)); }
 
-	std::map<std::string, Timer>& GetTimers() { return m_timers; }
-	void SetTimer(std::string name, uint32 time);
-	void StopTimer(std::string name);
-	void ClearTimers();
+		inline int32 GetSerialNumber() const { return m_SerialNumber; }
+		inline void SetSerialNumber(int32 id) { m_SerialNumber = id; }
 
-	// Get a total of a stat, including augs
-	// These functions should be used in place of other code manually totaling
-	// to centralize where it is done to make future changes easier (ex. whenever powersources come around)
-	// and to minimize errors. CalcItemBonuses however doesn't use these in interest of performance
-	// by default these do not recurse into augs
-	int GetItemArmorClass(bool augments = false) const;
-	int GetItemElementalDamage(int &magic, int &fire, int &cold, int &poison, int &disease, int &chromatic, int &prismatic, int &physical, int &corruption, bool augments = false) const;
-	// These two differ in the fact that they're quick checks (they are checked BEFORE the one above
-	int GetItemElementalFlag(bool augments = false) const;
-	int GetItemElementalDamage(bool augments = false) const;
-	int GetItemRecommendedLevel(bool augments = false) const;
-	int GetItemRequiredLevel(bool augments = false) const;
-	int GetItemWeaponDamage(bool augments = false) const;
-	int GetItemBackstabDamage(bool augments = false) const;
-	// these two are just quick checks
-	int GetItemBaneDamageBody(bool augments = false) const;
-	int GetItemBaneDamageRace(bool augments = false) const;
-	int GetItemBaneDamageBody(bodyType against, bool augments = false) const;
-	int GetItemBaneDamageRace(uint16 against, bool augments = false) const;
-	int GetItemMagical(bool augments = false) const;
-	int GetItemHP(bool augments = false) const;
-	int GetItemMana(bool augments = false) const;
-	int GetItemEndur(bool augments = false) const;
-	int GetItemAttack(bool augments = false) const;
-	int GetItemStr(bool augments = false) const;
-	int GetItemSta(bool augments = false) const;
-	int GetItemDex(bool augments = false) const;
-	int GetItemAgi(bool augments = false) const;
-	int GetItemInt(bool augments = false) const;
-	int GetItemWis(bool augments = false) const;
-	int GetItemCha(bool augments = false) const;
-	int GetItemMR(bool augments = false) const;
-	int GetItemFR(bool augments = false) const;
-	int GetItemCR(bool augments = false) const;
-	int GetItemPR(bool augments = false) const;
-	int GetItemDR(bool augments = false) const;
-	int GetItemCorrup(bool augments = false) const;
-	int GetItemHeroicStr(bool augments = false) const;
-	int GetItemHeroicSta(bool augments = false) const;
-	int GetItemHeroicDex(bool augments = false) const;
-	int GetItemHeroicAgi(bool augments = false) const;
-	int GetItemHeroicInt(bool augments = false) const;
-	int GetItemHeroicWis(bool augments = false) const;
-	int GetItemHeroicCha(bool augments = false) const;
-	int GetItemHeroicMR(bool augments = false) const;
-	int GetItemHeroicFR(bool augments = false) const;
-	int GetItemHeroicCR(bool augments = false) const;
-	int GetItemHeroicPR(bool augments = false) const;
-	int GetItemHeroicDR(bool augments = false) const;
-	int GetItemHeroicCorrup(bool augments = false) const;
-	int GetItemHaste(bool augments = false) const;
+		std::map<std::string, Timer>& GetTimers() { return m_timers; }
+		void SetTimer(std::string name, uint32 time);
+		void StopTimer(std::string name);
+		void ClearTimers();
 
-protected:
-	//////////////////////////
-	// Protected Members
-	//////////////////////////
-	std::map<uint8, ItemInst*>::const_iterator _cbegin() { return m_contents.cbegin(); }
-	std::map<uint8, ItemInst*>::const_iterator _cend() { return m_contents.cend(); }
+		// Get a total of a stat, including augs
+		// These functions should be used in place of other code manually totaling
+		// to centralize where it is done to make future changes easier (ex. whenever powersources come around)
+		// and to minimize errors. CalcItemBonuses however doesn't use these in interest of performance
+		// by default these do not recurse into augs
+		int GetItemArmorClass(bool augments = false) const;
+		int GetItemElementalDamage(int &magic, int &fire, int &cold, int &poison, int &disease, int &chromatic, int &prismatic, int &physical, int &corruption, bool augments = false) const;
+		// These two differ in the fact that they're quick checks (they are checked BEFORE the one above
+		int GetItemElementalFlag(bool augments = false) const;
+		int GetItemElementalDamage(bool augments = false) const;
+		int GetItemRecommendedLevel(bool augments = false) const;
+		int GetItemRequiredLevel(bool augments = false) const;
+		int GetItemWeaponDamage(bool augments = false) const;
+		int GetItemBackstabDamage(bool augments = false) const;
+		// these two are just quick checks
+		int GetItemBaneDamageBody(bool augments = false) const;
+		int GetItemBaneDamageRace(bool augments = false) const;
+		int GetItemBaneDamageBody(bodyType against, bool augments = false) const;
+		int GetItemBaneDamageRace(uint16 against, bool augments = false) const;
+		int GetItemMagical(bool augments = false) const;
+		int GetItemHP(bool augments = false) const;
+		int GetItemMana(bool augments = false) const;
+		int GetItemEndur(bool augments = false) const;
+		int GetItemAttack(bool augments = false) const;
+		int GetItemStr(bool augments = false) const;
+		int GetItemSta(bool augments = false) const;
+		int GetItemDex(bool augments = false) const;
+		int GetItemAgi(bool augments = false) const;
+		int GetItemInt(bool augments = false) const;
+		int GetItemWis(bool augments = false) const;
+		int GetItemCha(bool augments = false) const;
+		int GetItemMR(bool augments = false) const;
+		int GetItemFR(bool augments = false) const;
+		int GetItemCR(bool augments = false) const;
+		int GetItemPR(bool augments = false) const;
+		int GetItemDR(bool augments = false) const;
+		int GetItemCorrup(bool augments = false) const;
+		int GetItemHeroicStr(bool augments = false) const;
+		int GetItemHeroicSta(bool augments = false) const;
+		int GetItemHeroicDex(bool augments = false) const;
+		int GetItemHeroicAgi(bool augments = false) const;
+		int GetItemHeroicInt(bool augments = false) const;
+		int GetItemHeroicWis(bool augments = false) const;
+		int GetItemHeroicCha(bool augments = false) const;
+		int GetItemHeroicMR(bool augments = false) const;
+		int GetItemHeroicFR(bool augments = false) const;
+		int GetItemHeroicCR(bool augments = false) const;
+		int GetItemHeroicPR(bool augments = false) const;
+		int GetItemHeroicDR(bool augments = false) const;
+		int GetItemHeroicCorrup(bool augments = false) const;
+		int GetItemHaste(bool augments = false) const;
 
-	friend class Inventory;
+	protected:
+		//////////////////////////
+		// Protected Members
+		//////////////////////////
+		std::map<uint8, ItemInstance*>::const_iterator _cbegin() { return m_contents.cbegin(); }
+		std::map<uint8, ItemInstance*>::const_iterator _cend() { return m_contents.cend(); }
+
+		friend class Inventory;
 
 
-	void _PutItem(uint8 index, ItemInst* inst) { m_contents[index] = inst; }
+		void _PutItem(uint8 index, ItemInstance* inst) { m_contents[index] = inst; }
 
-	ItemInstTypes		m_use_type;	// Usage type for item
-	const EQEmu::ItemBase*	m_item;		// Ptr to item data
-	int16				m_charges;	// # of charges for chargeable items
-	uint32				m_price;	// Bazaar /trader price
-	uint32				m_color;
-	uint32				m_merchantslot;
-	int16				m_currentslot;
-	bool				m_attuned;
-	int32				m_merchantcount;		//number avaliable on the merchant, -1=unlimited
-	int32				m_SerialNumber;	// Unique identifier for this instance of an item. Needed for Bazaar.
-	uint32				m_exp;
-	int8				m_evolveLvl;
-	bool				m_activated;
-	EQEmu::ItemBase*		m_scaledItem;
-	EvolveInfo*			m_evolveInfo;
-	bool				m_scaling;
-	uint32				m_ornamenticon;
-	uint32				m_ornamentidfile;
-	uint32				m_ornament_hero_model;
-	uint32				m_recast_timestamp;
+		ItemInstTypes		m_use_type;	// Usage type for item
+		const ItemData*		m_item;		// Ptr to item data
+		int16				m_charges;	// # of charges for chargeable items
+		uint32				m_price;	// Bazaar /trader price
+		uint32				m_color;
+		uint32				m_merchantslot;
+		int16				m_currentslot;
+		bool				m_attuned;
+		int32				m_merchantcount;		//number avaliable on the merchant, -1=unlimited
+		int32				m_SerialNumber;	// Unique identifier for this instance of an item. Needed for Bazaar.
+		uint32				m_exp;
+		int8				m_evolveLvl;
+		bool				m_activated;
+		ItemData*			m_scaledItem;
+		EvolveInfo*			m_evolveInfo;
+		bool				m_scaling;
+		uint32				m_ornamenticon;
+		uint32				m_ornamentidfile;
+		uint32				m_ornament_hero_model;
+		uint32				m_recast_timestamp;
 
-	//
-	// Items inside of this item (augs or contents);
-	std::map<uint8, ItemInst*>			m_contents; // Zero-based index: min=0, max=9
-	std::map<std::string, std::string>	m_custom_data;
-	std::map<std::string, Timer>		m_timers;
-};
+		//
+		// Items inside of this item (augs or contents);
+		std::map<uint8, ItemInstance*>		m_contents; // Zero-based index: min=0, max=9
+		std::map<std::string, std::string>	m_custom_data;
+		std::map<std::string, Timer>		m_timers;
+	};
+}
 
 class EvolveInfo {
 public:
-	friend class ItemInst;
+	friend class EQEmu::ItemInstance;
 	//temporary
 	uint16				LvlKills[9];
 	uint32				FirstItem;
@@ -541,4 +542,4 @@ public:
 	~EvolveInfo();
 };
 
-#endif /*COMMON_ITEM_H*/
+#endif /*COMMON_ITEM_INSTANCE_H*/

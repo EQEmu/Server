@@ -256,7 +256,7 @@ bool Mob::CastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 	//Added to prevent MQ2 exploitation of equipping normally-unequippable/clickable items with effects and clicking them for benefits.
 	if(item_slot && IsClient() && (slot == CastingSlot::Item || slot == CastingSlot::PotionBelt))
 	{
-		ItemInst *itm = CastToClient()->GetInv().GetItem(item_slot);
+		EQEmu::ItemInstance *itm = CastToClient()->GetInv().GetItem(item_slot);
 		int bitmask = 1;
 		bitmask = bitmask << (CastToClient()->GetClass() - 1);
 		if( itm && itm->GetItem()->Classes != 65535 ) {
@@ -936,7 +936,7 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 	if(IsClient() && (slot == CastingSlot::Item || slot == CastingSlot::PotionBelt))
 	{
 		IsFromItem = true;
-		ItemInst *itm = CastToClient()->GetInv().GetItem(inventory_slot);
+		EQEmu::ItemInstance *itm = CastToClient()->GetInv().GetItem(inventory_slot);
 		if(itm && itm->GetItem()->RecastDelay > 0)
 		{
 			if(!CastToClient()->GetPTimers().Expired(&database, (pTimerItemStart + itm->GetItem()->RecastType), false)) {
@@ -1174,7 +1174,7 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 							missingreags=true;
 						}
 
-						const EQEmu::ItemBase *item = database.GetItem(component);
+						const EQEmu::ItemData *item = database.GetItem(component);
 						if(item) {
 							c->Message_StringID(13, MISSING_SPELL_COMP_ITEM, item->Name);
 							Log.Out(Logs::Detail, Logs::Spells, "Spell %d: Canceled. Missing required reagent %s (%d)", spell_id, item->Name, component);
@@ -1235,8 +1235,8 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 		&& inventory_slot != 0xFFFFFFFF)	// 10 is an item
 	{
 		bool fromaug = false;
-		const ItemInst* inst = CastToClient()->GetInv()[inventory_slot];
-		EQEmu::ItemBase* augitem = 0;
+		const EQEmu::ItemInstance* inst = CastToClient()->GetInv()[inventory_slot];
+		EQEmu::ItemData* augitem = 0;
 		uint32 recastdelay = 0;
 		uint32 recasttype = 0;
 
@@ -1245,11 +1245,11 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 				break;
 
 			for (int r = AUG_INDEX_BEGIN; r < EQEmu::legacy::ITEM_COMMON_SIZE; r++) {
-				const ItemInst* aug_i = inst->GetAugment(r);
+				const EQEmu::ItemInstance* aug_i = inst->GetAugment(r);
 
 				if (!aug_i)
 					continue;
-				const EQEmu::ItemBase* aug = aug_i->GetItem();
+				const EQEmu::ItemData* aug = aug_i->GetItem();
 				if (!aug)
 					continue;
 
@@ -1285,7 +1285,7 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 
 		if (inst && inst->IsClassCommon() && (inst->GetItem()->Click.Effect == spell_id) && inst->GetCharges() || fromaug)
 		{
-			//const ItemBase* item = inst->GetItem();
+			//const ItemData* item = inst->GetItem();
 			int16 charges = inst->GetItem()->MaxCharges;
 
 			if(fromaug) { charges = -1; } //Don't destroy the parent item
@@ -2385,7 +2385,7 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, CastingSlot slot, ui
 
 	if(IsClient() && (slot == CastingSlot::Item || slot == CastingSlot::PotionBelt))
 	{
-		ItemInst *itm = CastToClient()->GetInv().GetItem(inventory_slot);
+		EQEmu::ItemInstance *itm = CastToClient()->GetInv().GetItem(inventory_slot);
 		if(itm && itm->GetItem()->RecastDelay > 0){
 			auto recast_type = itm->GetItem()->RecastType;
 			CastToClient()->GetPTimers().Start((pTimerItemStart + recast_type), itm->GetItem()->RecastDelay);

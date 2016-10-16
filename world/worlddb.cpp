@@ -245,8 +245,8 @@ void WorldDatabase::GetCharSelectInfo(uint32 accountID, EQApplicationPacket **ou
 		/* Load Inventory */
 		// If we ensure that the material data is updated appropriately, we can do away with inventory loads
 		if (GetInventory(accountID, cse->Name, &inv)) {
-			const EQEmu::ItemBase* item = nullptr;
-			const ItemInst* inst = nullptr;
+			const EQEmu::ItemData* item = nullptr;
+			const EQEmu::ItemInstance* inst = nullptr;
 			int16 invslot = 0;
 
 			for (uint32 matslot = 0; matslot < EQEmu::textures::TextureCount; matslot++) {

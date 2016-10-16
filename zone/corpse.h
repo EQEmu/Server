@@ -24,12 +24,16 @@
 class Client;
 class EQApplicationPacket;
 class Group;
-class ItemInst;
 class NPC;
 class Raid;
 
 struct ExtraAttackOptions;
 struct NPCType;
+
+namespace EQEmu
+{
+	class ItemInstance;
+}
 
 #define MAX_LOOTERS 72
 
@@ -128,7 +132,7 @@ class Corpse : public Mob {
 	virtual void UpdateEquipmentLight();
 
 protected:
-	void MoveItemToCorpse(Client *client, ItemInst *inst, int16 equipSlot, std::list<uint32> &removedList);
+	void MoveItemToCorpse(Client *client, EQEmu::ItemInstance *inst, int16 equipSlot, std::list<uint32> &removedList);
 
 private:
 	bool		is_player_corpse; /* Determines if Player Corpse or not */

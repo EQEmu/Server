@@ -153,9 +153,9 @@ uint32 ZoneDatabase::GetZoneFishing(uint32 ZoneID, uint8 skill, uint32 &npc_id, 
 //we need this function to immediately determine, after we receive OP_Fishing, if we can even try to fish, otherwise we have to wait a while to get the failure
 bool Client::CanFish() {
 	//make sure we still have a fishing pole on:
-	const ItemInst* Pole = m_inv[EQEmu::legacy::SlotPrimary];
+	const EQEmu::ItemInstance* Pole = m_inv[EQEmu::legacy::SlotPrimary];
 	int32 bslot = m_inv.HasItemByUse(EQEmu::item::ItemTypeFishingBait, 1, invWhereWorn | invWherePersonal);
-	const ItemInst* Bait = nullptr;
+	const EQEmu::ItemInstance* Bait = nullptr;
 	if (bslot != INVALID_INDEX)
 		Bait = m_inv.GetItem(bslot);
 
@@ -253,7 +253,7 @@ void Client::GoFish()
 
 	//make sure we still have a fishing pole on:
 	int32 bslot = m_inv.HasItemByUse(EQEmu::item::ItemTypeFishingBait, 1, invWhereWorn | invWherePersonal);
-	const ItemInst* Bait = nullptr;
+	const EQEmu::ItemInstance* Bait = nullptr;
 	if (bslot != INVALID_INDEX)
 		Bait = m_inv.GetItem(bslot);
 
@@ -304,10 +304,10 @@ void Client::GoFish()
 			food_id = common_fish_ids[index];
 		}
 
-		const EQEmu::ItemBase* food_item = database.GetItem(food_id);
+		const EQEmu::ItemData* food_item = database.GetItem(food_id);
 
 		Message_StringID(MT_Skills, FISHING_SUCCESS);
-		ItemInst* inst = database.CreateItem(food_item, 1);
+		EQEmu::ItemInstance* inst = database.CreateItem(food_item, 1);
 		if(inst != nullptr) {
 			if(CheckLoreConflict(inst->GetItem()))
 			{
@@ -396,7 +396,7 @@ void Client::ForageItem(bool guarantee) {
 			foragedfood = common_food_ids[index];
 		}
 
-		const EQEmu::ItemBase* food_item = database.GetItem(foragedfood);
+		const EQEmu::ItemData* food_item = database.GetItem(foragedfood);
 
 		if(!food_item) {
 			Log.Out(Logs::General, Logs::Error, "nullptr returned from database.GetItem in ClientForageItem");
@@ -421,7 +421,7 @@ void Client::ForageItem(bool guarantee) {
 			}
 
 		Message_StringID(MT_Skills, stringid);
-		ItemInst* inst = database.CreateItem(food_item, 1);
+		EQEmu::ItemInstance* inst = database.CreateItem(food_item, 1);
 		if(inst != nullptr) {
 			// check to make sure it isn't a foraged lore item
 			if(CheckLoreConflict(inst->GetItem()))

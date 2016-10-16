@@ -14,7 +14,7 @@ struct NewSpawn_Struct;
 
 namespace EQEmu
 {
-	struct ItemBase;
+	struct ItemData;
 }
 
 #define MAXMERCS 1
@@ -283,7 +283,7 @@ public:
 
 protected:
 	void CalcItemBonuses(StatBonuses* newbon);
-	void AddItemBonuses(const EQEmu::ItemBase *item, StatBonuses* newbon);
+	void AddItemBonuses(const EQEmu::ItemData *item, StatBonuses* newbon);
 	int CalcRecommendedLevelBonus(uint8 level, uint8 reclevel, int basestat);
 
 	int16 GetFocusEffect(focusType type, uint16 spell_id);

@@ -486,7 +486,7 @@ int32 Client::GetRawItemAC()
 	int32 Total = 0;
 	// this skips MainAmmo..add an '=' conditional if that slot is required (original behavior)
 	for (int16 slot_id = EQEmu::legacy::EQUIPMENT_BEGIN; slot_id < EQEmu::legacy::EQUIPMENT_END; slot_id++) {
-		const ItemInst* inst = m_inv[slot_id];
+		const EQEmu::ItemInstance* inst = m_inv[slot_id];
 		if (inst && inst->IsClassCommon()) {
 			Total += inst->GetItem()->AC;
 		}
@@ -1316,8 +1316,8 @@ int32 Client::CalcManaRegenCap()
 
 uint32 Client::CalcCurrentWeight()
 {
-	const EQEmu::ItemBase* TempItem = 0;
-	ItemInst* ins;
+	const EQEmu::ItemData* TempItem = 0;
+	EQEmu::ItemInstance* ins;
 	uint32 Total = 0;
 	int x;
 	for (x = EQEmu::legacy::EQUIPMENT_BEGIN; x <= EQEmu::legacy::SlotCursor; x++) { // include cursor or not?
@@ -1350,7 +1350,7 @@ uint32 Client::CalcCurrentWeight()
 					bagslot += 1;
 				}
 			}
-			ItemInst* baginst = GetInv().GetItem(bagslot);
+			EQEmu::ItemInstance* baginst = GetInv().GetItem(bagslot);
 			if (baginst && baginst->GetItem() && baginst->IsClassBag()) {
 				reduction = baginst->GetItem()->BagWR;
 			}
@@ -2219,7 +2219,7 @@ int Client::GetRawACNoShield(int &shield_ac) const
 {
 	int ac = itembonuses.AC + spellbonuses.AC + aabonuses.AC;
 	shield_ac = 0;
-	const ItemInst *inst = m_inv.GetItem(EQEmu::legacy::SlotSecondary);
+	const EQEmu::ItemInstance *inst = m_inv.GetItem(EQEmu::legacy::SlotSecondary);
 	if (inst) {
 		if (inst->GetItem()->ItemType == EQEmu::item::ItemTypeShield) {
 			ac -= inst->GetItem()->AC;

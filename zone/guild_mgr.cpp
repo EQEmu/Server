@@ -694,7 +694,7 @@ void GuildBankManager::SendGuildBank(Client *c)
 	if (c->ClientVersionBit() & EQEmu::versions::bit_RoFAndLater) {
 		auto outapp = new EQApplicationPacket(OP_GuildBankItemList, sizeof(GuildBankItemListEntry_Struct) * 240);
 		for (int i = 0; i < GUILD_BANK_DEPOSIT_AREA_SIZE; ++i) {
-			const EQEmu::ItemBase *Item = database.GetItem(guild_bank->Items.DepositArea[i].ItemID);
+			const EQEmu::ItemData *Item = database.GetItem(guild_bank->Items.DepositArea[i].ItemID);
 			if (Item) {
 				outapp->WriteUInt8(1);
 				outapp->WriteUInt32(guild_bank->Items.DepositArea[i].Permissions);
@@ -718,7 +718,7 @@ void GuildBankManager::SendGuildBank(Client *c)
 		outapp->SetWritePosition(outapp->GetWritePosition() + 20); // newer clients have 40 deposit slots, keep them 0 for now
 
 		for (int i = 0; i < GUILD_BANK_MAIN_AREA_SIZE; ++i) {
-			const EQEmu::ItemBase *Item = database.GetItem(guild_bank->Items.MainArea[i].ItemID);
+			const EQEmu::ItemData *Item = database.GetItem(guild_bank->Items.MainArea[i].ItemID);
 			if (Item) {
 				outapp->WriteUInt8(1);
 				outapp->WriteUInt32(guild_bank->Items.MainArea[i].Permissions);
@@ -749,7 +749,7 @@ void GuildBankManager::SendGuildBank(Client *c)
 	{
 		if(guild_bank->Items.DepositArea[i].ItemID > 0)
 		{
-			const EQEmu::ItemBase *Item = database.GetItem(guild_bank->Items.DepositArea[i].ItemID);
+			const EQEmu::ItemData *Item = database.GetItem(guild_bank->Items.DepositArea[i].ItemID);
 
 			if(!Item)
 				continue;
@@ -785,7 +785,7 @@ void GuildBankManager::SendGuildBank(Client *c)
 	{
 		if(guild_bank->Items.MainArea[i].ItemID > 0)
 		{
-			const EQEmu::ItemBase *Item = database.GetItem(guild_bank->Items.MainArea[i].ItemID);
+			const EQEmu::ItemData *Item = database.GetItem(guild_bank->Items.MainArea[i].ItemID);
 
 			if(!Item)
 				continue;
@@ -916,7 +916,7 @@ bool GuildBankManager::AddItem(uint32 GuildID, uint8 Area, uint32 ItemID, int32 
 		return false;
 	}
 
-	const EQEmu::ItemBase *Item = database.GetItem(ItemID);
+	const EQEmu::ItemData *Item = database.GetItem(ItemID);
 
 	GuildBankItemUpdate_Struct gbius;
 
@@ -982,7 +982,7 @@ int GuildBankManager::Promote(uint32 guildID, int slotID)
 
 	(*iter)->Items.DepositArea[slotID].ItemID = 0;
 
-	const EQEmu::ItemBase *Item = database.GetItem((*iter)->Items.MainArea[mainSlot].ItemID);
+	const EQEmu::ItemData *Item = database.GetItem((*iter)->Items.MainArea[mainSlot].ItemID);
 
 	GuildBankItemUpdate_Struct gbius;
 
@@ -1038,7 +1038,7 @@ void GuildBankManager::SetPermissions(uint32 guildID, uint16 slotID, uint32 perm
 	else
 		(*iter)->Items.MainArea[slotID].WhoFor[0] = '\0';
 
-	const EQEmu::ItemBase *Item = database.GetItem((*iter)->Items.MainArea[slotID].ItemID);
+	const EQEmu::ItemData *Item = database.GetItem((*iter)->Items.MainArea[slotID].ItemID);
 
 	GuildBankItemUpdate_Struct gbius;
 
@@ -1062,7 +1062,7 @@ void GuildBankManager::SetPermissions(uint32 guildID, uint16 slotID, uint32 perm
 	entity_list.QueueClientsGuildBankItemUpdate(&gbius, guildID);
 }
 
-ItemInst* GuildBankManager::GetItem(uint32 GuildID, uint16 Area, uint16 SlotID, uint32 Quantity)
+EQEmu::ItemInstance* GuildBankManager::GetItem(uint32 GuildID, uint16 Area, uint16 SlotID, uint32 Quantity)
 {
 	auto Iterator = GetGuildBank(GuildID);
 
@@ -1071,7 +1071,7 @@ ItemInst* GuildBankManager::GetItem(uint32 GuildID, uint16 Area, uint16 SlotID, 
 
 	GuildBankItem* BankArea = nullptr;
 
-	ItemInst* inst = nullptr;
+	EQEmu::ItemInstance* inst = nullptr;
 
 	if(Area == GuildBankDepositArea)
 	{
@@ -1169,7 +1169,7 @@ bool GuildBankManager::DeleteItem(uint32 guildID, uint16 area, uint16 slotID, ui
 
 	bool deleted = true;
 
-	const EQEmu::ItemBase *Item = database.GetItem(BankArea[slotID].ItemID);
+	const EQEmu::ItemData *Item = database.GetItem(BankArea[slotID].ItemID);
 
 	if(!Item->Stackable || (quantity >= BankArea[slotID].Quantity)) {
         std::string query = StringFormat("DELETE FROM `guild_bank` WHERE `guildid` = %i "
@@ -1230,7 +1230,7 @@ bool GuildBankManager::MergeStacks(uint32 GuildID, uint16 SlotID)
 	if(BankArea[SlotID].ItemID == 0)
 		return false;
 
-	const EQEmu::ItemBase *Item = database.GetItem(BankArea[SlotID].ItemID);
+	const EQEmu::ItemData *Item = database.GetItem(BankArea[SlotID].ItemID);
 
 	if(!Item->Stackable)
 		return false;
@@ -1328,7 +1328,7 @@ bool GuildBankManager::SplitStack(uint32 GuildID, uint16 SlotID, uint32 Quantity
 	if(BankArea[SlotID].Quantity <= Quantity || Quantity == 0)
 		return false;
 
-	const EQEmu::ItemBase *Item = database.GetItem(BankArea[SlotID].ItemID);
+	const EQEmu::ItemData *Item = database.GetItem(BankArea[SlotID].ItemID);
 
 	if(!Item->Stackable)
 		return false;

@@ -99,7 +99,7 @@ uint32 SharedDatabase::GetTotalTimeEntitledOnAccount(uint32 AccountID) {
 	return EntitledTime;
 }
 
-bool SharedDatabase::SaveCursor(uint32 char_id, std::list<ItemInst*>::const_iterator &start, std::list<ItemInst*>::const_iterator &end)
+bool SharedDatabase::SaveCursor(uint32 char_id, std::list<EQEmu::ItemInstance*>::const_iterator &start, std::list<EQEmu::ItemInstance*>::const_iterator &end)
 {
 	// Delete cursor items
 	std::string query = StringFormat("DELETE FROM inventory WHERE charid = %i "
@@ -116,7 +116,7 @@ bool SharedDatabase::SaveCursor(uint32 char_id, std::list<ItemInst*>::const_iter
     int i = 8000;
     for(auto it = start; it != end; ++it, i++) {
 		if (i > 8999) { break; } // shouldn't be anything in the queue that indexes this high
-        ItemInst *inst = *it;
+        EQEmu::ItemInstance *inst = *it;
 		int16 use_slot = (i == 8000) ? EQEmu::legacy::SlotCursor : i;
 		if (!SaveInventory(char_id, inst, use_slot)) {
 			return false;
@@ -126,7 +126,7 @@ bool SharedDatabase::SaveCursor(uint32 char_id, std::list<ItemInst*>::const_iter
 	return true;
 }
 
-bool SharedDatabase::VerifyInventory(uint32 account_id, int16 slot_id, const ItemInst* inst)
+bool SharedDatabase::VerifyInventory(uint32 account_id, int16 slot_id, const EQEmu::ItemInstance* inst)
 {
 	// Delete cursor items
 	std::string query = StringFormat("SELECT itemid, charges FROM sharedbank "
@@ -159,7 +159,7 @@ bool SharedDatabase::VerifyInventory(uint32 account_id, int16 slot_id, const Ite
 	return true;
 }
 
-bool SharedDatabase::SaveInventory(uint32 char_id, const ItemInst* inst, int16 slot_id) {
+bool SharedDatabase::SaveInventory(uint32 char_id, const EQEmu::ItemInstance* inst, int16 slot_id) {
 
 	//never save tribute slots:
 	if (slot_id >= EQEmu::legacy::TRIBUTE_BEGIN && slot_id <= EQEmu::legacy::TRIBUTE_END)
@@ -189,13 +189,13 @@ bool SharedDatabase::SaveInventory(uint32 char_id, const ItemInst* inst, int16 s
     return UpdateInventorySlot(char_id, inst, slot_id);
 }
 
-bool SharedDatabase::UpdateInventorySlot(uint32 char_id, const ItemInst* inst, int16 slot_id) {
+bool SharedDatabase::UpdateInventorySlot(uint32 char_id, const EQEmu::ItemInstance* inst, int16 slot_id) {
 	// need to check 'inst' argument for valid pointer
 
 	uint32 augslot[EQEmu::legacy::ITEM_COMMON_SIZE] = { 0, 0, 0, 0, 0, 0 };
 	if (inst->IsClassCommon()) {
 		for (int i = AUG_INDEX_BEGIN; i < EQEmu::legacy::ITEM_COMMON_SIZE; i++) {
-			ItemInst *auginst = inst->GetItem(i);
+			EQEmu::ItemInstance *auginst = inst->GetItem(i);
 			augslot[i] = (auginst && auginst->GetItem()) ? auginst->GetItem()->ID : 0;
 		}
 	}
@@ -225,7 +225,7 @@ bool SharedDatabase::UpdateInventorySlot(uint32 char_id, const ItemInst* inst, i
 		// Limiting to bag slot count will get rid of 'hidden' duplicated items and 'Invalid Slot ID'
 		// messages through attrition (and the modded code in SaveInventory)
 		for (uint8 idx = SUB_INDEX_BEGIN; idx < inst->GetItem()->BagSlots && idx < EQEmu::legacy::ITEM_CONTAINER_SIZE; idx++) {
-			const ItemInst* baginst = inst->GetItem(idx);
+			const EQEmu::ItemInstance* baginst = inst->GetItem(idx);
 			SaveInventory(char_id, baginst, Inventory::CalcSlotId(slot_id, idx));
 		}
 
@@ -236,13 +236,13 @@ bool SharedDatabase::UpdateInventorySlot(uint32 char_id, const ItemInst* inst, i
 	return true;
 }
 
-bool SharedDatabase::UpdateSharedBankSlot(uint32 char_id, const ItemInst* inst, int16 slot_id) {
+bool SharedDatabase::UpdateSharedBankSlot(uint32 char_id, const EQEmu::ItemInstance* inst, int16 slot_id) {
 	// need to check 'inst' argument for valid pointer
 
 	uint32 augslot[EQEmu::legacy::ITEM_COMMON_SIZE] = { 0, 0, 0, 0, 0, 0 };
 	if (inst->IsClassCommon()) {
 		for (int i = AUG_INDEX_BEGIN; i < EQEmu::legacy::ITEM_COMMON_SIZE; i++) {
-			ItemInst *auginst = inst->GetItem(i);
+			EQEmu::ItemInstance *auginst = inst->GetItem(i);
 			augslot[i] = (auginst && auginst->GetItem()) ? auginst->GetItem()->ID : 0;
 		}
 	}
@@ -271,7 +271,7 @@ bool SharedDatabase::UpdateSharedBankSlot(uint32 char_id, const ItemInst* inst, 
 		// Limiting to bag slot count will get rid of 'hidden' duplicated items and 'Invalid Slot ID'
 		// messages through attrition (and the modded code in SaveInventory)
 		for (uint8 idx = SUB_INDEX_BEGIN; idx < inst->GetItem()->BagSlots && idx < EQEmu::legacy::ITEM_CONTAINER_SIZE; idx++) {
-			const ItemInst* baginst = inst->GetItem(idx);
+			const EQEmu::ItemInstance* baginst = inst->GetItem(idx);
 			SaveInventory(char_id, baginst, Inventory::CalcSlotId(slot_id, idx));
 		}
 	}
@@ -364,7 +364,7 @@ bool SharedDatabase::SetSharedPlatinum(uint32 account_id, int32 amount_to_add) {
 
 bool SharedDatabase::SetStartingItems(PlayerProfile_Struct* pp, Inventory* inv, uint32 si_race, uint32 si_class, uint32 si_deity, uint32 si_current_zone, char* si_name, int admin_level) {
 
-	const EQEmu::ItemBase* myitem;
+	const EQEmu::ItemData* myitem;
 
     std::string query = StringFormat("SELECT itemid, item_charges, slot FROM starting_items "
                                     "WHERE (race = %i or race = 0) AND (class = %i or class = 0) AND "
@@ -385,7 +385,7 @@ bool SharedDatabase::SetStartingItems(PlayerProfile_Struct* pp, Inventory* inv, 
 		if(!myitem)
 			continue;
 
-		ItemInst* myinst = CreateBaseItem(myitem, charges);
+		EQEmu::ItemInstance* myinst = CreateBaseItem(myitem, charges);
 
 		if(slot < 0)
 			slot = inv->FindFreeSlot(0, 0);
@@ -436,7 +436,7 @@ bool SharedDatabase::GetSharedBank(uint32 id, Inventory *inv, bool is_charid)
 		aug[4] = (uint32)atoi(row[7]);
 		aug[5] = (uint32)atoi(row[8]);
 
-		const EQEmu::ItemBase *item = GetItem(item_id);
+		const EQEmu::ItemData *item = GetItem(item_id);
 
 		if (!item) {
 			Log.Out(Logs::General, Logs::Error,
@@ -447,7 +447,7 @@ bool SharedDatabase::GetSharedBank(uint32 id, Inventory *inv, bool is_charid)
 
 		int16 put_slot_id = INVALID_INDEX;
 
-		ItemInst *inst = CreateBaseItem(item, charges);
+		EQEmu::ItemInstance *inst = CreateBaseItem(item, charges);
 		if (inst && item->IsClassCommon()) {
 			for (int i = AUG_INDEX_BEGIN; i < EQEmu::legacy::ITEM_COMMON_SIZE; i++) {
 				if (aug[i])
@@ -539,7 +539,7 @@ bool SharedDatabase::GetInventory(uint32 char_id, Inventory *inv)
 		uint32 ornament_idfile = (uint32)atoul(row[13]);
 		uint32 ornament_hero_model = (uint32)atoul(row[14]);
 
-		const EQEmu::ItemBase *item = GetItem(item_id);
+		const EQEmu::ItemData *item = GetItem(item_id);
 
 		if (!item) {
 			Log.Out(Logs::General, Logs::Error,
@@ -550,7 +550,7 @@ bool SharedDatabase::GetInventory(uint32 char_id, Inventory *inv)
 
 		int16 put_slot_id = INVALID_INDEX;
 
-		ItemInst *inst = CreateBaseItem(item, charges);
+		EQEmu::ItemInstance *inst = CreateBaseItem(item, charges);
 
 		if (inst == nullptr)
 			continue;
@@ -679,12 +679,12 @@ bool SharedDatabase::GetInventory(uint32 account_id, char *name, Inventory *inv)
 		uint32 ornament_idfile = (uint32)atoul(row[13]);
 		uint32 ornament_hero_model = (uint32)atoul(row[14]);
 
-		const EQEmu::ItemBase *item = GetItem(item_id);
+		const EQEmu::ItemData *item = GetItem(item_id);
 		int16 put_slot_id = INVALID_INDEX;
 		if (!item)
 			continue;
 
-		ItemInst *inst = CreateBaseItem(item, charges);
+		EQEmu::ItemInstance *inst = CreateBaseItem(item, charges);
 
 		if (inst == nullptr)
 			continue;
@@ -816,7 +816,7 @@ bool SharedDatabase::LoadItems(const std::string &prefix) {
 		mutex.Lock();
 		std::string file_name = Config->SharedMemDir + prefix + std::string("items");
 		items_mmf = std::unique_ptr<EQEmu::MemoryMappedFile>(new EQEmu::MemoryMappedFile(file_name));
-		items_hash = std::unique_ptr<EQEmu::FixedMemoryHashSet<EQEmu::ItemBase>>(new EQEmu::FixedMemoryHashSet<EQEmu::ItemBase>(reinterpret_cast<uint8*>(items_mmf->Get()), items_mmf->Size()));
+		items_hash = std::unique_ptr<EQEmu::FixedMemoryHashSet<EQEmu::ItemData>>(new EQEmu::FixedMemoryHashSet<EQEmu::ItemData>(reinterpret_cast<uint8*>(items_mmf->Get()), items_mmf->Size()));
 		mutex.Unlock();
 	} catch(std::exception& ex) {
 		Log.Out(Logs::General, Logs::Error, "Error Loading Items: %s", ex.what());
@@ -828,7 +828,7 @@ bool SharedDatabase::LoadItems(const std::string &prefix) {
 
 void SharedDatabase::LoadItems(void *data, uint32 size, int32 items, uint32 max_item_id)
 {
-	EQEmu::FixedMemoryHashSet<EQEmu::ItemBase> hash(reinterpret_cast<uint8 *>(data), size, items, max_item_id);
+	EQEmu::FixedMemoryHashSet<EQEmu::ItemData> hash(reinterpret_cast<uint8 *>(data), size, items, max_item_id);
 
 	std::string ndbuffer;
 	bool disableNoRent = false;
@@ -856,7 +856,7 @@ void SharedDatabase::LoadItems(void *data, uint32 size, int32 items, uint32 max_
 		}
 	}
 
-	EQEmu::ItemBase item;
+	EQEmu::ItemData item;
 
 	const std::string query = "SELECT source,"
 #define F(x) "`"#x"`,"
@@ -869,7 +869,7 @@ void SharedDatabase::LoadItems(void *data, uint32 size, int32 items, uint32 max_
 	}
 
 	for (auto row = results.begin(); row != results.end(); ++row) {
-		memset(&item, 0, sizeof(EQEmu::ItemBase));
+		memset(&item, 0, sizeof(EQEmu::ItemData));
 
 		item.ItemClass = (uint8)atoi(row[ItemField::itemclass]);
 		strcpy(item.Name, row[ItemField::name]);
@@ -1086,7 +1086,7 @@ void SharedDatabase::LoadItems(void *data, uint32 size, int32 items, uint32 max_
 	}
 }
 
-const EQEmu::ItemBase* SharedDatabase::GetItem(uint32 id) {
+const EQEmu::ItemData* SharedDatabase::GetItem(uint32 id) {
 	if (id == 0)
 	{
 		return nullptr;
@@ -1105,7 +1105,7 @@ const EQEmu::ItemBase* SharedDatabase::GetItem(uint32 id) {
 	return nullptr;
 }
 
-const EQEmu::ItemBase* SharedDatabase::IterateItems(uint32* id) {
+const EQEmu::ItemData* SharedDatabase::IterateItems(uint32* id) {
 	if(!items_hash || !id) {
 		return nullptr;
 	}
@@ -1250,18 +1250,18 @@ bool SharedDatabase::LoadNPCFactionLists(const std::string &prefix) {
 	return true;
 }
 
-// Create appropriate ItemInst class
-ItemInst* SharedDatabase::CreateItem(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2, uint32 aug3, uint32 aug4, uint32 aug5, uint32 aug6, uint8 attuned)
+// Create appropriate EQEmu::ItemInstance class
+EQEmu::ItemInstance* SharedDatabase::CreateItem(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2, uint32 aug3, uint32 aug4, uint32 aug5, uint32 aug6, uint8 attuned)
 {
-	const EQEmu::ItemBase* item = nullptr;
-	ItemInst* inst = nullptr;
+	const EQEmu::ItemData* item = nullptr;
+	EQEmu::ItemInstance* inst = nullptr;
 
 	item = GetItem(item_id);
 	if (item) {
 		inst = CreateBaseItem(item, charges);
 
 		if (inst == nullptr) {
-			Log.Out(Logs::General, Logs::Error, "Error: valid item data returned a null reference for ItemInst creation in SharedDatabase::CreateItem()");
+			Log.Out(Logs::General, Logs::Error, "Error: valid item data returned a null reference for EQEmu::ItemInstance creation in SharedDatabase::CreateItem()");
 			Log.Out(Logs::General, Logs::Error, "Item Data = ID: %u, Name: %s, Charges: %i", item->ID, item->Name, charges);
 			return nullptr;
 		}
@@ -1279,15 +1279,15 @@ ItemInst* SharedDatabase::CreateItem(uint32 item_id, int16 charges, uint32 aug1,
 }
 
 
-// Create appropriate ItemInst class
-ItemInst* SharedDatabase::CreateItem(const EQEmu::ItemBase* item, int16 charges, uint32 aug1, uint32 aug2, uint32 aug3, uint32 aug4, uint32 aug5, uint32 aug6, uint8 attuned)
+// Create appropriate EQEmu::ItemInstance class
+EQEmu::ItemInstance* SharedDatabase::CreateItem(const EQEmu::ItemData* item, int16 charges, uint32 aug1, uint32 aug2, uint32 aug3, uint32 aug4, uint32 aug5, uint32 aug6, uint8 attuned)
 {
-	ItemInst* inst = nullptr;
+	EQEmu::ItemInstance* inst = nullptr;
 	if (item) {
 		inst = CreateBaseItem(item, charges);
 
 		if (inst == nullptr) {
-			Log.Out(Logs::General, Logs::Error, "Error: valid item data returned a null reference for ItemInst creation in SharedDatabase::CreateItem()");
+			Log.Out(Logs::General, Logs::Error, "Error: valid item data returned a null reference for EQEmu::ItemInstance creation in SharedDatabase::CreateItem()");
 			Log.Out(Logs::General, Logs::Error, "Item Data = ID: %u, Name: %s, Charges: %i", item->ID, item->Name, charges);
 			return nullptr;
 		}
@@ -1304,8 +1304,8 @@ ItemInst* SharedDatabase::CreateItem(const EQEmu::ItemBase* item, int16 charges,
 	return inst;
 }
 
-ItemInst* SharedDatabase::CreateBaseItem(const EQEmu::ItemBase* item, int16 charges) {
-	ItemInst* inst = nullptr;
+EQEmu::ItemInstance* SharedDatabase::CreateBaseItem(const EQEmu::ItemData* item, int16 charges) {
+	EQEmu::ItemInstance* inst = nullptr;
 	if (item) {
 		// if maxcharges is -1 that means it is an unlimited use item.
 		// set it to 1 charge so that it is usable on creation
@@ -1315,10 +1315,10 @@ ItemInst* SharedDatabase::CreateBaseItem(const EQEmu::ItemBase* item, int16 char
 		if(charges <= 0 && item->Stackable)
 			charges = 1;
 
-		inst = new ItemInst(item, charges);
+		inst = new EQEmu::ItemInstance(item, charges);
 
 		if (inst == nullptr) {
-			Log.Out(Logs::General, Logs::Error, "Error: valid item data returned a null reference for ItemInst creation in SharedDatabase::CreateBaseItem()");
+			Log.Out(Logs::General, Logs::Error, "Error: valid item data returned a null reference for EQEmu::ItemInstance creation in SharedDatabase::CreateBaseItem()");
 			Log.Out(Logs::General, Logs::Error, "Item Data = ID: %u, Name: %s, Charges: %i", item->ID, item->Name, charges);
 			return nullptr;
 		}

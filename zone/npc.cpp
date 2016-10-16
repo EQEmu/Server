@@ -525,7 +525,7 @@ void NPC::QueryLoot(Client* to)
 
 	int x = 0;
 	for (auto cur = itemlist.begin(); cur != itemlist.end(); ++cur, ++x) {
-		const EQEmu::ItemBase* item = database.GetItem((*cur)->item_id);
+		const EQEmu::ItemData* item = database.GetItem((*cur)->item_id);
 		if (item == nullptr) {
 			Log.Out(Logs::General, Logs::Error, "Database error, invalid item");
 			continue;
@@ -1462,7 +1462,7 @@ void NPC::PickPocket(Client* thief)
 
 	// still needs to have FindFreeSlot vs PutItemInInventory issue worked out
 	while (steal_item) {
-		std::vector<std::pair<const EQEmu::ItemBase*, uint16>> loot_selection; // <const ItemBase*, charges>
+		std::vector<std::pair<const EQEmu::ItemData*, uint16>> loot_selection; // <const ItemData*, charges>
 		for (auto item_iter : itemlist) {
 			if (!item_iter || !item_iter->item_id)
 				continue;

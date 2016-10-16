@@ -34,7 +34,6 @@
 
 class EvolveInfo;
 class Inventory;
-class ItemInst;
 struct BaseDataStruct;
 struct InspectMessage_Struct;
 struct PlayerProfile_Struct;
@@ -45,7 +44,8 @@ struct LootDrop_Struct;
 
 namespace EQEmu
 {
-	struct ItemBase;
+	struct ItemData;
+	class ItemInstance;
 	class MemoryMappedFile;
 }
 
@@ -76,13 +76,13 @@ class SharedDatabase : public Database
 		/*
 		    Character Inventory
 		*/
-		bool	SaveCursor(uint32 char_id, std::list<ItemInst*>::const_iterator &start, std::list<ItemInst*>::const_iterator &end);
-		bool	SaveInventory(uint32 char_id, const ItemInst* inst, int16 slot_id);
+		bool	SaveCursor(uint32 char_id, std::list<EQEmu::ItemInstance*>::const_iterator &start, std::list<EQEmu::ItemInstance*>::const_iterator &end);
+		bool	SaveInventory(uint32 char_id, const EQEmu::ItemInstance* inst, int16 slot_id);
 		bool    DeleteSharedBankSlot(uint32 char_id, int16 slot_id);
 		bool    DeleteInventorySlot(uint32 char_id, int16 slot_id);
-		bool    UpdateInventorySlot(uint32 char_id, const ItemInst* inst, int16 slot_id);
-		bool    UpdateSharedBankSlot(uint32 char_id, const ItemInst* inst, int16 slot_id);
-		bool	VerifyInventory(uint32 account_id, int16 slot_id, const ItemInst* inst);
+		bool    UpdateInventorySlot(uint32 char_id, const EQEmu::ItemInstance* inst, int16 slot_id);
+		bool    UpdateSharedBankSlot(uint32 char_id, const EQEmu::ItemInstance* inst, int16 slot_id);
+		bool	VerifyInventory(uint32 account_id, int16 slot_id, const EQEmu::ItemInstance* inst);
 		bool	GetSharedBank(uint32 id, Inventory* inv, bool is_charid);
 		int32	GetSharedPlatinum(uint32 account_id);
 		bool	SetSharedPlatinum(uint32 account_id, int32 amount_to_add);
@@ -99,9 +99,9 @@ class SharedDatabase : public Database
 		/*
 		    Item Methods
 		*/
-		ItemInst* CreateItem(uint32 item_id, int16 charges = 0, uint32 aug1 = 0, uint32 aug2 = 0, uint32 aug3 = 0, uint32 aug4 = 0, uint32 aug5 = 0, uint32 aug6 = 0, uint8 attuned = 0);
-		ItemInst* CreateItem(const EQEmu::ItemBase* item, int16 charges = 0, uint32 aug1 = 0, uint32 aug2 = 0, uint32 aug3 = 0, uint32 aug4 = 0, uint32 aug5 = 0, uint32 aug6 = 0, uint8 attuned = 0);
-		ItemInst* CreateBaseItem(const EQEmu::ItemBase* item, int16 charges = 0);
+		EQEmu::ItemInstance* CreateItem(uint32 item_id, int16 charges = 0, uint32 aug1 = 0, uint32 aug2 = 0, uint32 aug3 = 0, uint32 aug4 = 0, uint32 aug5 = 0, uint32 aug6 = 0, uint8 attuned = 0);
+		EQEmu::ItemInstance* CreateItem(const EQEmu::ItemData* item, int16 charges = 0, uint32 aug1 = 0, uint32 aug2 = 0, uint32 aug3 = 0, uint32 aug4 = 0, uint32 aug5 = 0, uint32 aug6 = 0, uint8 attuned = 0);
+		EQEmu::ItemInstance* CreateBaseItem(const EQEmu::ItemData* item, int16 charges = 0);
 
 		/*
 		    Shared Memory crap
@@ -111,8 +111,8 @@ class SharedDatabase : public Database
 		void GetItemsCount(int32 &item_count, uint32 &max_id);
 		void LoadItems(void *data, uint32 size, int32 items, uint32 max_item_id);
 		bool LoadItems(const std::string &prefix);
-		const EQEmu::ItemBase* IterateItems(uint32* id);
-		const EQEmu::ItemBase* GetItem(uint32 id);
+		const EQEmu::ItemData* IterateItems(uint32* id);
+		const EQEmu::ItemData* GetItem(uint32 id);
 		const EvolveInfo* GetEvolveInfo(uint32 loregroup);
 
 		//faction lists
@@ -149,7 +149,7 @@ class SharedDatabase : public Database
 
 		std::unique_ptr<EQEmu::MemoryMappedFile> skill_caps_mmf;
 		std::unique_ptr<EQEmu::MemoryMappedFile> items_mmf;
-		std::unique_ptr<EQEmu::FixedMemoryHashSet<EQEmu::ItemBase>> items_hash;
+		std::unique_ptr<EQEmu::FixedMemoryHashSet<EQEmu::ItemData>> items_hash;
 		std::unique_ptr<EQEmu::MemoryMappedFile> faction_mmf;
 		std::unique_ptr<EQEmu::FixedMemoryHashSet<NPCFactionList>> faction_hash;
 		std::unique_ptr<EQEmu::MemoryMappedFile> loot_table_mmf;

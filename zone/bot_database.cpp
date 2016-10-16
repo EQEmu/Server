@@ -1064,7 +1064,7 @@ bool BotDatabase::LoadItems(const uint32 bot_id, Inventory& inventory_inst)
 		uint32 item_id = atoi(row[1]);
 		uint16 item_charges = (uint16)atoi(row[2]);
 
-		ItemInst* item_inst = database.CreateItem(
+		EQEmu::ItemInstance* item_inst = database.CreateItem(
 			item_id,
 			item_charges,
 			(uint32)atoul(row[9]),
@@ -1177,7 +1177,7 @@ bool BotDatabase::LoadItemBySlot(const uint32 bot_id, const uint32 slot_id, uint
 	return true;
 }
 
-bool BotDatabase::SaveItemBySlot(Bot* bot_inst, const uint32 slot_id, const ItemInst* item_inst)
+bool BotDatabase::SaveItemBySlot(Bot* bot_inst, const uint32 slot_id, const EQEmu::ItemInstance* item_inst)
 {
 	if (!bot_inst || !bot_inst->GetBotID() || (slot_id > EQEmu::legacy::EQUIPMENT_END && slot_id != EQEmu::legacy::SlotPowerSource))
 		return false;
