@@ -12134,11 +12134,6 @@ void Client::Handle_OP_ShopPlayerBuy(const EQApplicationPacket *app)
 			continue;
 		}
 
-		int32 fac = tmp->GetPrimaryFaction();
-		if (fac != 0 && GetModCharacterFactionLevel(fac) < ml.faction_required) {
-			continue;
-		}
-
 		if (mp->itemslot == ml.slot){
 			item_id = ml.item;
 			break;

@@ -3,6 +3,12 @@ EQEMu Changelog (Started on Sept 24, 2003 15:50)
 == 10/15/2016 ==
 Uleat: Changed filenames to facilitate future inventory naming conventions
 
+== 10/09/2016 ==
+Noudess: Rogue usage of merchants while utilizing sneak was limited to
+temporary items, as the code that checked faction per item sold did not
+take into account that rogue was sneaking.  Now sneaking rogues can see full
+inventory on merchants (well, unless an item requires a + faction value).
+
 == 09/12/2016 ==
 Akkadius: Massive overhaul of the update system and EQEmu Server management utility framework 
 	(known as eqemu_update.pl) now known as eqemu_server.pl

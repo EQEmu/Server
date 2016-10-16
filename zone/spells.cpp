@@ -5619,11 +5619,11 @@ void Mob::BeamDirectional(uint16 spell_id, int16 resist_adjust)
 	if (IsBeneficialSpell(spell_id) && IsClient())
 		beneficial_targets = true;
 
-	std::list<Mob*> targets_in_range;
-	std::list<Mob*>::iterator iter;
+	std::list<Mob *> targets_in_range;
 
-	entity_list.GetTargetsForConeArea(this, spells[spell_id].min_range, spells[spell_id].range, spells[spell_id].range / 2, targets_in_range);
-	iter = targets_in_range.begin();
+	entity_list.GetTargetsForConeArea(this, spells[spell_id].min_range, spells[spell_id].range,
+					  spells[spell_id].range / 2, targets_in_range);
+	auto iter = targets_in_range.begin();
 
 	float dX = 0;
 	float dY = 0;
@@ -5632,24 +5632,35 @@ void Mob::BeamDirectional(uint16 spell_id, int16 resist_adjust)
 	CalcDestFromHeading(GetHeading(), spells[spell_id].range, 5, GetX(), GetY(), dX, dY, dZ);
 	dZ = GetZ();
 
-	//FIND SLOPE: Put it into the form y = mx + b
+	// FIND SLOPE: Put it into the form y = mx + b
 	float m = (dY - GetY()) / (dX - GetX());
 	float b = (GetY() * dX - dY * GetX()) / (dX - GetX());
 
-	while(iter != targets_in_range.end())
-	{
-		if (!(*iter) || (beneficial_targets && ((*iter)->IsNPC() && !(*iter)->IsPetOwnerClient()))
-			|| (*iter)->BehindMob(this, (*iter)->GetX(),(*iter)->GetY())){
-		    ++iter;
+	while (iter != targets_in_range.end()) {
+		if (!(*iter) || (beneficial_targets && ((*iter)->IsNPC() && !(*iter)->IsPetOwnerClient())) ||
+		    (*iter)->BehindMob(this, (*iter)->GetX(), (*iter)->GetY())) {
+			++iter;
 			continue;
+		}
+
+		if (IsNPC() && (*iter)->IsNPC()) {
+			auto fac = (*iter)->GetReverseFactionCon(this);
+			if (beneficial_targets) {
+				// only affect mobs we would assist.
+				if (!(fac <= FACTION_AMIABLE))
+					continue;
+			} else {
+				// affect mobs that are on our hate list, or which have bad faction with us
+				if (!(CheckAggro(*iter) || fac == FACTION_THREATENLY || fac == FACTION_SCOWLS))
+					continue;
+			}
 		}
 
 		//# shortest distance from line to target point
 		float d = std::abs((*iter)->GetY() - m * (*iter)->GetX() - b) / sqrt(m * m + 1);
 
-		if (d <= spells[spell_id].aoerange)
-		{
-			if(CheckLosFN((*iter)) || spells[spell_id].npc_no_los) {
+		if (d <= spells[spell_id].aoerange) {
+			if (CheckLosFN((*iter)) || spells[spell_id].npc_no_los) {
 				(*iter)->CalcSpellPowerDistanceMod(spell_id, 0, this);
 				SpellOnTarget(spell_id, (*iter), false, true, resist_adjust);
 				maxtarget_count++;
@@ -5673,45 +5684,58 @@ void Mob::ConeDirectional(uint16 spell_id, int16 resist_adjust)
 	float angle_start = spells[spell_id].directional_start + (GetHeading() * 360.0f / 256.0f);
 	float angle_end = spells[spell_id].directional_end + (GetHeading() * 360.0f / 256.0f);
 
-	while(angle_start > 360.0f)
+	while (angle_start > 360.0f)
 		angle_start -= 360.0f;
 
-	while(angle_end > 360.0f)
+	while (angle_end > 360.0f)
 		angle_end -= 360.0f;
 
-	std::list<Mob*> targets_in_range;
-	std::list<Mob*>::iterator iter;
+	std::list<Mob *> targets_in_range;
 
-	entity_list.GetTargetsForConeArea(this, spells[spell_id].min_range, spells[spell_id].aoerange, spells[spell_id].aoerange / 2, targets_in_range);
-	iter = targets_in_range.begin();
+	entity_list.GetTargetsForConeArea(this, spells[spell_id].min_range, spells[spell_id].aoerange,
+					  spells[spell_id].aoerange / 2, targets_in_range);
+	auto iter = targets_in_range.begin();
 
-	while(iter != targets_in_range.end()){
-
-		if (!(*iter) || (beneficial_targets && ((*iter)->IsNPC() && !(*iter)->IsPetOwnerClient()))){
-		    ++iter;
+	while (iter != targets_in_range.end()) {
+		if (!(*iter) || (beneficial_targets && ((*iter)->IsNPC() && !(*iter)->IsPetOwnerClient()))) {
+			++iter;
 			continue;
 		}
 
-		float heading_to_target = (CalculateHeadingToTarget((*iter)->GetX(), (*iter)->GetY()) * 360.0f / 256.0f);
+		float heading_to_target =
+		    (CalculateHeadingToTarget((*iter)->GetX(), (*iter)->GetY()) * 360.0f / 256.0f);
 
-		while(heading_to_target < 0.0f)
+		while (heading_to_target < 0.0f)
 			heading_to_target += 360.0f;
 
-		while(heading_to_target > 360.0f)
+		while (heading_to_target > 360.0f)
 			heading_to_target -= 360.0f;
 
-		if(angle_start > angle_end){
-			if((heading_to_target >= angle_start && heading_to_target <= 360.0f) ||	(heading_to_target >= 0.0f && heading_to_target <= angle_end)){
-				if(CheckLosFN((*iter)) || spells[spell_id].npc_no_los){
+		if (IsNPC() && (*iter)->IsNPC()) {
+			auto fac = (*iter)->GetReverseFactionCon(this);
+			if (beneficial_targets) {
+				// only affect mobs we would assist.
+				if (!(fac <= FACTION_AMIABLE))
+					continue;
+			} else {
+				// affect mobs that are on our hate list, or which have bad faction with us
+				if (!(CheckAggro(*iter) || fac == FACTION_THREATENLY || fac == FACTION_SCOWLS))
+					continue;
+			}
+		}
+
+		if (angle_start > angle_end) {
+			if ((heading_to_target >= angle_start && heading_to_target <= 360.0f) ||
+			    (heading_to_target >= 0.0f && heading_to_target <= angle_end)) {
+				if (CheckLosFN((*iter)) || spells[spell_id].npc_no_los) {
 					(*iter)->CalcSpellPowerDistanceMod(spell_id, 0, this);
-					SpellOnTarget(spell_id,(*iter), false, true, resist_adjust);
+					SpellOnTarget(spell_id, (*iter), false, true, resist_adjust);
 					maxtarget_count++;
 				}
 			}
-		}
-		else{
-			if(heading_to_target >= angle_start && heading_to_target <= angle_end){
-				if(CheckLosFN((*iter)) || spells[spell_id].npc_no_los) {
+		} else {
+			if (heading_to_target >= angle_start && heading_to_target <= angle_end) {
+				if (CheckLosFN((*iter)) || spells[spell_id].npc_no_los) {
 					(*iter)->CalcSpellPowerDistanceMod(spell_id, 0, this);
 					SpellOnTarget(spell_id, (*iter), false, true, resist_adjust);
 					maxtarget_count++;

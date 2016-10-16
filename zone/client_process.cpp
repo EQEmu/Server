@@ -857,7 +857,15 @@ void Client::BulkSendMerchantInventory(int merchant_id, int npcid) {
 			continue;
 
 		int32 fac = merch ? merch->GetPrimaryFaction() : 0;
-		if (fac != 0 && GetModCharacterFactionLevel(fac) < ml.faction_required)
+		int32 cur_fac_level;
+		if (fac == 0 || sneaking) {
+			cur_fac_level = 0;
+		}
+		else {
+			cur_fac_level = GetModCharacterFactionLevel(fac);
+		}
+			
+		if (cur_fac_level < ml.faction_required)
 			continue;
 
 		handychance = zone->random.Int(0, merlist.size() + tmp_merlist.size() - 1);

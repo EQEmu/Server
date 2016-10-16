@@ -55,6 +55,7 @@ RULE_REAL(Character, AAExpMultiplier, 0.5)
 RULE_REAL(Character, GroupExpMultiplier, 0.5)
 RULE_REAL(Character, RaidExpMultiplier, 0.2)
 RULE_BOOL(Character, UseXPConScaling, true)
+RULE_INT(Character, ShowExpValues, 0) //0 - normal, 1 - Show raw experience values, 2 - Show raw experience values AND percent.
 RULE_INT(Character, LightBlueModifier, 40)
 RULE_INT(Character, BlueModifier, 90)
 RULE_INT(Character, WhiteModifier, 100)
