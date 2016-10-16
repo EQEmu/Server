@@ -1,5 +1,8 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 10/15/2016 ==
+Uleat: Changed filenames to facilitate future inventory naming conventions
+
 == 09/12/2016 ==
 Akkadius: Massive overhaul of the update system and EQEmu Server management utility framework 
 	(known as eqemu_update.pl) now known as eqemu_server.pl

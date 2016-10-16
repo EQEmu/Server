@@ -18,7 +18,7 @@
 
 #include "classes.h"
 #include "global_define.h"
-#include "item.h"
+#include "item_instance.h"
 #include "races.h"
 #include "rulesys.h"
 #include "shareddb.h"

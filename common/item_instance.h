@@ -29,7 +29,7 @@ class ItemParse;			// Parses item packets
 class EvolveInfo;			// Stores information about an evolving item family
 
 #include "../common/eq_constants.h"
-#include "../common/item_base.h"
+#include "../common/item_data.h"
 #include "../common/timer.h"
 #include "../common/bodytypes.h"
 #include "../common/deity.h"

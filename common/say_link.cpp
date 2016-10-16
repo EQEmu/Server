@@ -21,8 +21,8 @@
 #include "emu_constants.h"
 
 #include "string_util.h"
-#include "item.h"
-#include "item_base.h"
+#include "item_instance.h"
+#include "item_data.h"
 #include "../zone/zonedb.h"
 
 

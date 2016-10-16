@@ -22,7 +22,7 @@
 #include "../common/ipc_mutex.h"
 #include "../common/memory_mapped_file.h"
 #include "../common/eqemu_exception.h"
-#include "../common/item_base.h"
+#include "../common/item_data.h"
 
 void LoadItems(SharedDatabase *database, const std::string &prefix) {
 	EQEmu::IPCMutex mutex("items");

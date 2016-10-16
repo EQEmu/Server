@@ -45,9 +45,9 @@ namespace EQEmu
 #include "../common/extprofile.h"
 #include "../common/races.h"
 #include "../common/seperator.h"
-#include "../common/item.h"
+#include "../common/item_instance.h"
 #include "../common/guilds.h"
-#include "../common/item_base.h"
+#include "../common/item_data.h"
 
 #include "common.h"
 #include "merc.h"
