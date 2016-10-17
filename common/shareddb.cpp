@@ -184,7 +184,7 @@ bool SharedDatabase::SaveInventory(uint32 char_id, const EQEmu::ItemInstance* in
 		else {
 			// Needed to clear out bag slots that 'REPLACE' in UpdateSharedBankSlot does not overwrite..otherwise, duplication occurs
 			// (This requires that parent then child items be sent..which should be how they are currently passed)
-			if (Inventory::SupportsContainers(slot_id))
+			if (EQEmu::InventoryProfile::SupportsContainers(slot_id))
 				DeleteSharedBankSlot(char_id, slot_id);
 			return UpdateSharedBankSlot(char_id, inst, slot_id);
 		}
@@ -195,7 +195,7 @@ bool SharedDatabase::SaveInventory(uint32 char_id, const EQEmu::ItemInstance* in
 
 	// Needed to clear out bag slots that 'REPLACE' in UpdateInventorySlot does not overwrite..otherwise, duplication occurs
 	// (This requires that parent then child items be sent..which should be how they are currently passed)
-	if (Inventory::SupportsContainers(slot_id))
+	if (EQEmu::InventoryProfile::SupportsContainers(slot_id))
 		DeleteInventorySlot(char_id, slot_id);
     return UpdateInventorySlot(char_id, inst, slot_id);
 }
@@ -232,12 +232,12 @@ bool SharedDatabase::UpdateInventorySlot(uint32 char_id, const EQEmu::ItemInstan
 	auto results = QueryDatabase(query);
 
     // Save bag contents, if slot supports bag contents
-	if (inst->IsClassBag() && Inventory::SupportsContainers(slot_id))
+	if (inst->IsClassBag() && EQEmu::InventoryProfile::SupportsContainers(slot_id))
 		// Limiting to bag slot count will get rid of 'hidden' duplicated items and 'Invalid Slot ID'
 		// messages through attrition (and the modded code in SaveInventory)
 		for (uint8 idx = EQEmu::inventory::containerBegin; idx < inst->GetItem()->BagSlots && idx < EQEmu::inventory::ContainerCount; idx++) {
 			const EQEmu::ItemInstance* baginst = inst->GetItem(idx);
-			SaveInventory(char_id, baginst, Inventory::CalcSlotId(slot_id, idx));
+			SaveInventory(char_id, baginst, EQEmu::InventoryProfile::CalcSlotId(slot_id, idx));
 		}
 
     if (!results.Success()) {
@@ -278,12 +278,12 @@ bool SharedDatabase::UpdateSharedBankSlot(uint32 char_id, const EQEmu::ItemInsta
     auto results = QueryDatabase(query);
 
     // Save bag contents, if slot supports bag contents
-	if (inst->IsClassBag() && Inventory::SupportsContainers(slot_id)) {
+	if (inst->IsClassBag() && EQEmu::InventoryProfile::SupportsContainers(slot_id)) {
 		// Limiting to bag slot count will get rid of 'hidden' duplicated items and 'Invalid Slot ID'
 		// messages through attrition (and the modded code in SaveInventory)
 		for (uint8 idx = EQEmu::inventory::containerBegin; idx < inst->GetItem()->BagSlots && idx < EQEmu::inventory::ContainerCount; idx++) {
 			const EQEmu::ItemInstance* baginst = inst->GetItem(idx);
-			SaveInventory(char_id, baginst, Inventory::CalcSlotId(slot_id, idx));
+			SaveInventory(char_id, baginst, EQEmu::InventoryProfile::CalcSlotId(slot_id, idx));
 		}
 	}
 
@@ -304,10 +304,10 @@ bool SharedDatabase::DeleteInventorySlot(uint32 char_id, int16 slot_id) {
     }
 
     // Delete bag slots, if need be
-    if (!Inventory::SupportsContainers(slot_id))
+	if (!EQEmu::InventoryProfile::SupportsContainers(slot_id))
         return true;
 
-	int16 base_slot_id = Inventory::CalcSlotId(slot_id, EQEmu::inventory::containerBegin);
+	int16 base_slot_id = EQEmu::InventoryProfile::CalcSlotId(slot_id, EQEmu::inventory::containerBegin);
     query = StringFormat("DELETE FROM inventory WHERE charid = %i AND slotid >= %i AND slotid < %i",
                         char_id, base_slot_id, (base_slot_id+10));
     results = QueryDatabase(query);
@@ -330,10 +330,10 @@ bool SharedDatabase::DeleteSharedBankSlot(uint32 char_id, int16 slot_id) {
     }
 
 	// Delete bag slots, if need be
-	if (!Inventory::SupportsContainers(slot_id))
+	if (!EQEmu::InventoryProfile::SupportsContainers(slot_id))
         return true;
 
-	int16 base_slot_id = Inventory::CalcSlotId(slot_id, EQEmu::inventory::containerBegin);
+	int16 base_slot_id = EQEmu::InventoryProfile::CalcSlotId(slot_id, EQEmu::inventory::containerBegin);
     query = StringFormat("DELETE FROM sharedbank WHERE acctid = %i "
                         "AND slotid >= %i AND slotid < %i",
                         account_id, base_slot_id, (base_slot_id+10));
@@ -373,7 +373,7 @@ bool SharedDatabase::SetSharedPlatinum(uint32 account_id, int32 amount_to_add) {
 	return true;
 }
 
-bool SharedDatabase::SetStartingItems(PlayerProfile_Struct* pp, Inventory* inv, uint32 si_race, uint32 si_class, uint32 si_deity, uint32 si_current_zone, char* si_name, int admin_level) {
+bool SharedDatabase::SetStartingItems(PlayerProfile_Struct* pp, EQEmu::InventoryProfile* inv, uint32 si_race, uint32 si_class, uint32 si_deity, uint32 si_current_zone, char* si_name, int admin_level) {
 
 	const EQEmu::ItemData* myitem;
 
@@ -410,7 +410,7 @@ bool SharedDatabase::SetStartingItems(PlayerProfile_Struct* pp, Inventory* inv, 
 
 
 // Retrieve shared bank inventory based on either account or character
-bool SharedDatabase::GetSharedBank(uint32 id, Inventory *inv, bool is_charid)
+bool SharedDatabase::GetSharedBank(uint32 id, EQEmu::InventoryProfile *inv, bool is_charid)
 {
 	std::string query;
 
@@ -511,7 +511,7 @@ bool SharedDatabase::GetSharedBank(uint32 id, Inventory *inv, bool is_charid)
 }
 
 // Overloaded: Retrieve character inventory based on character id
-bool SharedDatabase::GetInventory(uint32 char_id, Inventory *inv)
+bool SharedDatabase::GetInventory(uint32 char_id, EQEmu::InventoryProfile *inv)
 {
 	// Retrieve character inventory
 	std::string query =
@@ -653,7 +653,7 @@ bool SharedDatabase::GetInventory(uint32 char_id, Inventory *inv)
 }
 
 // Overloaded: Retrieve character inventory based on account_id and character name
-bool SharedDatabase::GetInventory(uint32 account_id, char *name, Inventory *inv)
+bool SharedDatabase::GetInventory(uint32 account_id, char *name, EQEmu::InventoryProfile *inv)
 {
 	// Retrieve character inventory
 	std::string query =

@@ -386,7 +386,7 @@ private:
 	uint8 _OwnerClientVersion;
 	uint32 _currentStance;
 
-	Inventory m_inv;
+	EQEmu::InventoryProfile m_inv;
 	int32 max_end;
 	int32 cur_end;
 	bool _medding;

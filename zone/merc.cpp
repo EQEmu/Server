@@ -5050,7 +5050,7 @@ void Merc::UpdateMercAppearance() {
 	for (int i = EQEmu::legacy::EQUIPMENT_BEGIN; i <= EQEmu::legacy::EQUIPMENT_END; ++i) {
 		itemID = equipment[i];
 		if(itemID != 0) {
-			materialFromSlot = Inventory::CalcMaterialFromSlot(i);
+			materialFromSlot = EQEmu::InventoryProfile::CalcMaterialFromSlot(i);
 			if (materialFromSlot != EQEmu::textures::materialInvalid)
 				this->SendWearChange(materialFromSlot);
 		}

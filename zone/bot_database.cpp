@@ -1023,7 +1023,7 @@ bool BotDatabase::QueryInventoryCount(const uint32 bot_id, uint32& item_count)
 	return true;
 }
 
-bool BotDatabase::LoadItems(const uint32 bot_id, Inventory& inventory_inst)
+bool BotDatabase::LoadItems(const uint32 bot_id, EQEmu::InventoryProfile& inventory_inst)
 {
 	if (!bot_id)
 		return false;
@@ -1279,7 +1279,7 @@ bool BotDatabase::LoadEquipmentColor(const uint32 bot_id, const uint8 material_s
 	if (!bot_id)
 		return false;
 
-	int16 slot_id = Inventory::CalcSlotFromMaterial(material_slot_id);
+	int16 slot_id = EQEmu::InventoryProfile::CalcSlotFromMaterial(material_slot_id);
 	if (slot_id == INVALID_INDEX)
 		return false;
 	

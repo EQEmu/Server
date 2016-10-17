@@ -2799,7 +2799,7 @@ void Client::SetMaterial(int16 in_slot, uint32 item_id) {
 	const EQEmu::ItemData* item = database.GetItem(item_id);
 	if (item && item->IsClassCommon())
 	{
-		uint8 matslot = Inventory::CalcMaterialFromSlot(in_slot);
+		uint8 matslot = EQEmu::InventoryProfile::CalcMaterialFromSlot(in_slot);
 		if (matslot != EQEmu::textures::materialInvalid)
 		{
 			m_pp.item_material.Slot[matslot].Material = GetEquipmentMaterial(matslot);
@@ -3141,7 +3141,7 @@ void Client::SetTint(int16 in_slot, uint32 color) {
 // Still need to reconcile bracer01 versus bracer02
 void Client::SetTint(int16 in_slot, EQEmu::textures::Tint_Struct& color) {
 
-	uint8 matslot = Inventory::CalcMaterialFromSlot(in_slot);
+	uint8 matslot = EQEmu::InventoryProfile::CalcMaterialFromSlot(in_slot);
 	if (matslot != EQEmu::textures::materialInvalid)
 	{
 		m_pp.item_tint.Slot[matslot].Color = color.Color;

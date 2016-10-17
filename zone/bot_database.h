@@ -31,12 +31,12 @@
 
 
 class Bot;
-class Inventory;
 struct BotsAvailableList;
 
 namespace EQEmu
 {
 	class ItemInstance;
+	class InventoryProfile;
 }
 
 
@@ -89,7 +89,7 @@ public:
 	/* Bot inventory functions   */
 	bool QueryInventoryCount(const uint32 bot_id, uint32& item_count);
 
-	bool LoadItems(const uint32 bot_id, Inventory &inventory_inst);
+	bool LoadItems(const uint32 bot_id, EQEmu::InventoryProfile &inventory_inst);
 	bool SaveItems(Bot* bot_inst);
 	bool DeleteItems(const uint32 bot_id);
 

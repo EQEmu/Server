@@ -33,7 +33,6 @@
 #include <memory>
 
 class EvolveInfo;
-class Inventory;
 struct BaseDataStruct;
 struct InspectMessage_Struct;
 struct PlayerProfile_Struct;
@@ -46,6 +45,7 @@ namespace EQEmu
 {
 	struct ItemData;
 	class ItemInstance;
+	class InventoryProfile;
 	class MemoryMappedFile;
 }
 
@@ -74,7 +74,7 @@ class SharedDatabase : public Database
 		uint32	GetTotalTimeEntitledOnAccount(uint32 AccountID);
 
 		/*
-		    Character Inventory
+		    Character InventoryProfile
 		*/
 		bool	SaveCursor(uint32 char_id, std::list<EQEmu::ItemInstance*>::const_iterator &start, std::list<EQEmu::ItemInstance*>::const_iterator &end);
 		bool	SaveInventory(uint32 char_id, const EQEmu::ItemInstance* inst, int16 slot_id);
@@ -83,15 +83,15 @@ class SharedDatabase : public Database
 		bool    UpdateInventorySlot(uint32 char_id, const EQEmu::ItemInstance* inst, int16 slot_id);
 		bool    UpdateSharedBankSlot(uint32 char_id, const EQEmu::ItemInstance* inst, int16 slot_id);
 		bool	VerifyInventory(uint32 account_id, int16 slot_id, const EQEmu::ItemInstance* inst);
-		bool	GetSharedBank(uint32 id, Inventory* inv, bool is_charid);
+		bool	GetSharedBank(uint32 id, EQEmu::InventoryProfile* inv, bool is_charid);
 		int32	GetSharedPlatinum(uint32 account_id);
 		bool	SetSharedPlatinum(uint32 account_id, int32 amount_to_add);
-		bool	GetInventory(uint32 char_id, Inventory* inv);
-		bool	GetInventory(uint32 account_id, char* name, Inventory* inv);
+		bool	GetInventory(uint32 char_id, EQEmu::InventoryProfile* inv);
+		bool	GetInventory(uint32 account_id, char* name, EQEmu::InventoryProfile* inv);
 		std::map<uint32, uint32> GetItemRecastTimestamps(uint32 char_id);
 		uint32	GetItemRecastTimestamp(uint32 char_id, uint32 recast_type);
 		void	ClearOldRecastTimestamps(uint32 char_id);
-		bool	SetStartingItems(PlayerProfile_Struct* pp, Inventory* inv, uint32 si_race, uint32 si_class, uint32 si_deity, uint32 si_current_zone, char* si_name, int admin);
+		bool	SetStartingItems(PlayerProfile_Struct* pp, EQEmu::InventoryProfile* inv, uint32 si_race, uint32 si_class, uint32 si_deity, uint32 si_current_zone, char* si_name, int admin);
 
 
 		std::string	GetBook(const char *txtfile);

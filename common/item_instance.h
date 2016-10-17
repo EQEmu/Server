@@ -52,7 +52,6 @@ typedef enum {
 } byFlagSetting;
 
 class SharedDatabase;
-class Inventory;
 
 // ########################################
 // Class: EQEmu::ItemInstance
@@ -61,6 +60,8 @@ class Inventory;
 //	to an item instance (includes dye, augments, charges, etc)
 namespace EQEmu
 {
+	class InventoryProfile;
+	
 	class ItemInstance {
 	public:
 		/////////////////////////
@@ -79,7 +80,7 @@ namespace EQEmu
 		~ItemInstance();
 
 		// Query item type
-		bool IsType(EQEmu::item::ItemClass item_class) const;
+		bool IsType(item::ItemClass item_class) const;
 
 		bool IsClassCommon() const;
 		bool IsClassBag() const;
@@ -102,7 +103,7 @@ namespace EQEmu
 		bool IsAugmentSlotAvailable(int32 augtype, uint8 slot) const;
 		inline int32 GetAugmentType() const { return ((m_item) ? m_item->AugType : 0); }
 
-		inline bool IsExpendable() const { return ((m_item) ? ((m_item->Click.Type == EQEmu::item::ItemEffectExpendable) || (m_item->ItemType == EQEmu::item::ItemTypePotion)) : false); }
+		inline bool IsExpendable() const { return ((m_item) ? ((m_item->Click.Type == item::ItemEffectExpendable) || (m_item->ItemType == item::ItemTypePotion)) : false); }
 
 		//
 		// Contents
@@ -133,7 +134,7 @@ namespace EQEmu
 		bool IsAugmented();
 		ItemInstance* GetOrnamentationAug(int32 ornamentationAugtype) const;
 		bool UpdateOrnamentationInfo();
-		static bool CanTransform(const EQEmu::ItemData *ItemToTry, const EQEmu::ItemData *Container, bool AllowAll = false);
+		static bool CanTransform(const ItemData *ItemToTry, const ItemData *Container, bool AllowAll = false);
 
 		// Has attack/delay?
 		bool IsWeapon() const;
@@ -211,8 +212,8 @@ namespace EQEmu
 		int8 GetMaxEvolveLvl() const;
 		uint32 GetKillsNeeded(uint8 currentlevel);
 
-		std::string Serialize(int16 slot_id) const { EQEmu::InternalSerializedItem_Struct s; s.slot_id = slot_id; s.inst = (const void*)this; std::string ser; ser.assign((char*)&s, sizeof(EQEmu::InternalSerializedItem_Struct)); return ser; }
-		void Serialize(EQEmu::OutBuffer& ob, int16 slot_id) const { EQEmu::InternalSerializedItem_Struct isi; isi.slot_id = slot_id; isi.inst = (const void*)this; ob.write((const char*)&isi, sizeof(isi)); }
+		std::string Serialize(int16 slot_id) const { InternalSerializedItem_Struct s; s.slot_id = slot_id; s.inst = (const void*)this; std::string ser; ser.assign((char*)&s, sizeof(InternalSerializedItem_Struct)); return ser; }
+		void Serialize(OutBuffer& ob, int16 slot_id) const { InternalSerializedItem_Struct isi; isi.slot_id = slot_id; isi.inst = (const void*)this; ob.write((const char*)&isi, sizeof(isi)); }
 
 		inline int32 GetSerialNumber() const { return m_SerialNumber; }
 		inline void SetSerialNumber(int32 id) { m_SerialNumber = id; }
@@ -278,7 +279,7 @@ namespace EQEmu
 		//////////////////////////
 		// Protected Members
 		//////////////////////////
-		friend class ::Inventory;
+		friend class InventoryProfile;
 
 		std::map<uint8, ItemInstance*>::const_iterator _cbegin() { return m_contents.cbegin(); }
 		std::map<uint8, ItemInstance*>::const_iterator _cend() { return m_contents.cend(); }
@@ -299,7 +300,7 @@ namespace EQEmu
 		int8				m_evolveLvl;
 		bool				m_activated;
 		ItemData*			m_scaledItem;
-		EvolveInfo*			m_evolveInfo;
+		::EvolveInfo*		m_evolveInfo;
 		bool				m_scaling;
 		uint32				m_ornamenticon;
 		uint32				m_ornamentidfile;

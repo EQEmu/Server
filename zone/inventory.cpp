@@ -767,7 +767,7 @@ void Client::DeleteItemInInventory(int16 slot_id, int8 quantity, bool client_upd
 				EQEmu::ItemInstance* bagitem = m_inv[slot_id]->GetItem(bag_idx);
 
 				if(bagitem) {
-					int16 bagslot_id = Inventory::CalcSlotId(slot_id, bag_idx);
+					int16 bagslot_id = EQEmu::InventoryProfile::CalcSlotId(slot_id, bag_idx);
 
 					qsaudit->items[++parent_offset].char_slot	= bagslot_id;
 					qsaudit->items[parent_offset].item_id		= bagitem->GetID();
@@ -866,7 +866,7 @@ bool Client::PutItemInInventory(int16 slot_id, const EQEmu::ItemInstance& inst, 
 	if (client_update)
 	{
 		SendItemPacket(slot_id, &inst, ((slot_id == EQEmu::inventory::slotCursor) ? ItemPacketLimbo : ItemPacketTrade));
-		//SendWearChange(Inventory::CalcMaterialFromSlot(slot_id));
+		//SendWearChange(EQEmu::InventoryProfile::CalcMaterialFromSlot(slot_id));
 	}
 		
 	if (slot_id == EQEmu::inventory::slotCursor) {
@@ -934,7 +934,7 @@ void Client::PutLootInInventory(int16 slot_id, const EQEmu::ItemInstance &inst, 
 				PutLootInInventory(EQEmu::inventory::slotCursor, *bagitem);
 			}
 			else {
-				auto bag_slot = Inventory::CalcSlotId(slot_id, index);
+				auto bag_slot = EQEmu::InventoryProfile::CalcSlotId(slot_id, index);
 
 				Log.Out(Logs::Detail, Logs::Inventory,
 					"Putting bag loot item %s (%d) into slot %d (bag slot %d)",
@@ -966,7 +966,7 @@ bool Client::TryStacking(EQEmu::ItemInstance* item, uint8 type, bool try_worn, b
 	}
 	for (i = EQEmu::legacy::GENERAL_BEGIN; i <= EQEmu::legacy::GENERAL_END; i++) {
 		for (uint8 j = EQEmu::inventory::containerBegin; j < EQEmu::inventory::ContainerCount; j++) {
-			uint16 slotid = Inventory::CalcSlotId(i, j);
+			uint16 slotid = EQEmu::InventoryProfile::CalcSlotId(i, j);
 			EQEmu::ItemInstance* tmp_inst = m_inv.GetItem(slotid);
 
 			if(tmp_inst && tmp_inst->GetItem()->ID == item_id && tmp_inst->GetCharges() < tmp_inst->GetItem()->StackSize) {
@@ -1018,7 +1018,7 @@ bool Client::AutoPutLootInInventory(EQEmu::ItemInstance& inst, bool try_worn, bo
 				if (inst.IsEquipable(i)) { // Equippable at this slot?
 					//send worn to everyone...
 					PutLootInInventory(i, inst);
-					uint8 worn_slot_material = Inventory::CalcMaterialFromSlot(i);
+					uint8 worn_slot_material = EQEmu::InventoryProfile::CalcMaterialFromSlot(i);
 					if (worn_slot_material != EQEmu::textures::materialInvalid) {
 						SendWearChange(worn_slot_material);
 					}
@@ -1518,8 +1518,8 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 		if (src_slot_id >= EQEmu::legacy::SHARED_BANK_BEGIN && src_slot_id <= EQEmu::legacy::SHARED_BANK_END && src_inst->IsClassBag()){
 			for (uint8 idx = EQEmu::inventory::containerBegin; idx < EQEmu::inventory::ContainerCount; idx++) {
 				const EQEmu::ItemInstance* baginst = src_inst->GetItem(idx);
-				if(baginst && !database.VerifyInventory(account_id, Inventory::CalcSlotId(src_slot_id, idx), baginst)){
-					DeleteItemInInventory(Inventory::CalcSlotId(src_slot_id, idx),0,false);
+				if (baginst && !database.VerifyInventory(account_id, EQEmu::InventoryProfile::CalcSlotId(src_slot_id, idx), baginst)){
+					DeleteItemInInventory(EQEmu::InventoryProfile::CalcSlotId(src_slot_id, idx), 0, false);
 				}
 			}
 		}
@@ -1533,8 +1533,8 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 		if (dst_slot_id >= EQEmu::legacy::SHARED_BANK_BEGIN && dst_slot_id <= EQEmu::legacy::SHARED_BANK_END && dst_inst->IsClassBag()){
 			for (uint8 idx = EQEmu::inventory::containerBegin; idx < EQEmu::inventory::ContainerCount; idx++) {
 				const EQEmu::ItemInstance* baginst = dst_inst->GetItem(idx);
-				if(baginst && !database.VerifyInventory(account_id, Inventory::CalcSlotId(dst_slot_id, idx), baginst)){
-					DeleteItemInInventory(Inventory::CalcSlotId(dst_slot_id, idx),0,false);
+				if (baginst && !database.VerifyInventory(account_id, EQEmu::InventoryProfile::CalcSlotId(dst_slot_id, idx), baginst)){
+					DeleteItemInInventory(EQEmu::InventoryProfile::CalcSlotId(dst_slot_id, idx), 0, false);
 				}
 			}
 		}
@@ -1576,7 +1576,7 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 	if(m_tradeskill_object != nullptr) {
 		if (src_slot_id >= EQEmu::legacy::WORLD_BEGIN && src_slot_id <= EQEmu::legacy::WORLD_END) {
 			// Picking up item from world container
-			EQEmu::ItemInstance* inst = m_tradeskill_object->PopItem(Inventory::CalcBagIdx(src_slot_id));
+			EQEmu::ItemInstance* inst = m_tradeskill_object->PopItem(EQEmu::InventoryProfile::CalcBagIdx(src_slot_id));
 			if (inst) {
 				PutItemInInventory(dst_slot_id, *inst, false);
 				safe_delete(inst);
@@ -1588,7 +1588,7 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 		}
 		else if (dst_slot_id >= EQEmu::legacy::WORLD_BEGIN && dst_slot_id <= EQEmu::legacy::WORLD_END) {
 			// Putting item into world container, which may swap (or pile onto) with existing item
-			uint8 world_idx = Inventory::CalcBagIdx(dst_slot_id);
+			uint8 world_idx = EQEmu::InventoryProfile::CalcBagIdx(dst_slot_id);
 			EQEmu::ItemInstance* world_inst = m_tradeskill_object->PopItem(world_idx);
 
 			// Case 1: No item in container, unidirectional "Put"
@@ -1835,7 +1835,7 @@ void Client::SwapItemResync(MoveItem_Struct* move_slots) {
 	Message(15, "Inventory Desyncronization detected: Resending slot data...");
 
 	if ((move_slots->from_slot >= EQEmu::legacy::EQUIPMENT_BEGIN && move_slots->from_slot <= EQEmu::legacy::CURSOR_BAG_END) || move_slots->from_slot == EQEmu::inventory::slotPowerSource) {
-		int16 resync_slot = (Inventory::CalcSlotId(move_slots->from_slot) == INVALID_INDEX) ? move_slots->from_slot : Inventory::CalcSlotId(move_slots->from_slot);
+		int16 resync_slot = (EQEmu::InventoryProfile::CalcSlotId(move_slots->from_slot) == INVALID_INDEX) ? move_slots->from_slot : EQEmu::InventoryProfile::CalcSlotId(move_slots->from_slot);
 		if (IsValidSlot(resync_slot) && resync_slot != INVALID_INDEX) {
 			// This prevents the client from crashing when closing any 'phantom' bags
 			const EQEmu::ItemData* token_struct = database.GetItem(22292); // 'Copper Coin'
@@ -1860,7 +1860,7 @@ void Client::SwapItemResync(MoveItem_Struct* move_slots) {
 		else { Message(13, "Could not resyncronize source slot %i.", move_slots->from_slot); }
 	}
 	else {
-		int16 resync_slot = (Inventory::CalcSlotId(move_slots->from_slot) == INVALID_INDEX) ? move_slots->from_slot : Inventory::CalcSlotId(move_slots->from_slot);
+		int16 resync_slot = (EQEmu::InventoryProfile::CalcSlotId(move_slots->from_slot) == INVALID_INDEX) ? move_slots->from_slot : EQEmu::InventoryProfile::CalcSlotId(move_slots->from_slot);
 		if (IsValidSlot(resync_slot) && resync_slot != INVALID_INDEX) {
 			if(m_inv[resync_slot]) {
 				const EQEmu::ItemData* token_struct = database.GetItem(22292); // 'Copper Coin'
@@ -1878,7 +1878,7 @@ void Client::SwapItemResync(MoveItem_Struct* move_slots) {
 	}
 
 	if ((move_slots->to_slot >= EQEmu::legacy::EQUIPMENT_BEGIN && move_slots->to_slot <= EQEmu::legacy::CURSOR_BAG_END) || move_slots->to_slot == EQEmu::inventory::slotPowerSource) {
-		int16 resync_slot = (Inventory::CalcSlotId(move_slots->to_slot) == INVALID_INDEX) ? move_slots->to_slot : Inventory::CalcSlotId(move_slots->to_slot);
+		int16 resync_slot = (EQEmu::InventoryProfile::CalcSlotId(move_slots->to_slot) == INVALID_INDEX) ? move_slots->to_slot : EQEmu::InventoryProfile::CalcSlotId(move_slots->to_slot);
 		if (IsValidSlot(resync_slot) && resync_slot != INVALID_INDEX) {
 			const EQEmu::ItemData* token_struct = database.GetItem(22292); // 'Copper Coin'
 			EQEmu::ItemInstance* token_inst = database.CreateItem(token_struct, 1);
@@ -1902,7 +1902,7 @@ void Client::SwapItemResync(MoveItem_Struct* move_slots) {
 		else { Message(13, "Could not resyncronize destination slot %i.", move_slots->to_slot); }
 	}
 	else {
-		int16 resync_slot = (Inventory::CalcSlotId(move_slots->to_slot) == INVALID_INDEX) ? move_slots->to_slot : Inventory::CalcSlotId(move_slots->to_slot);
+		int16 resync_slot = (EQEmu::InventoryProfile::CalcSlotId(move_slots->to_slot) == INVALID_INDEX) ? move_slots->to_slot : EQEmu::InventoryProfile::CalcSlotId(move_slots->to_slot);
 		if (IsValidSlot(resync_slot) && resync_slot != INVALID_INDEX) {
 			if(m_inv[resync_slot]) {
 				const EQEmu::ItemData* token_struct = database.GetItem(22292); // 'Copper Coin'
@@ -1963,8 +1963,8 @@ void Client::QSSwapItemAuditor(MoveItem_Struct* move_in, bool postaction_call) {
 				const EQEmu::ItemInstance* from_baginst = from_inst->GetItem(bag_idx);
 
 				if(from_baginst) {
-					qsaudit->items[move_count].from_slot	= Inventory::CalcSlotId(from_slot_id, bag_idx);
-					qsaudit->items[move_count].to_slot		= Inventory::CalcSlotId(to_slot_id, bag_idx);
+					qsaudit->items[move_count].from_slot	= EQEmu::InventoryProfile::CalcSlotId(from_slot_id, bag_idx);
+					qsaudit->items[move_count].to_slot		= EQEmu::InventoryProfile::CalcSlotId(to_slot_id, bag_idx);
 					qsaudit->items[move_count].item_id		= from_baginst->GetID();
 					qsaudit->items[move_count].charges		= from_baginst->GetCharges();
 					qsaudit->items[move_count].aug_1		= from_baginst->GetAugmentItemID(1);
@@ -1996,8 +1996,8 @@ void Client::QSSwapItemAuditor(MoveItem_Struct* move_in, bool postaction_call) {
 					const EQEmu::ItemInstance* to_baginst = to_inst->GetItem(bag_idx);
 
 					if(to_baginst) {
-						qsaudit->items[move_count].from_slot	= Inventory::CalcSlotId(to_slot_id, bag_idx);
-						qsaudit->items[move_count].to_slot		= Inventory::CalcSlotId(from_slot_id, bag_idx);
+						qsaudit->items[move_count].from_slot	= EQEmu::InventoryProfile::CalcSlotId(to_slot_id, bag_idx);
+						qsaudit->items[move_count].to_slot		= EQEmu::InventoryProfile::CalcSlotId(from_slot_id, bag_idx);
 						qsaudit->items[move_count].item_id		= to_baginst->GetID();
 						qsaudit->items[move_count].charges		= to_baginst->GetCharges();
 						qsaudit->items[move_count].aug_1		= to_baginst->GetAugmentItemID(1);
@@ -2598,7 +2598,7 @@ uint32 Client::GetEquipment(uint8 material_slot) const
 		return 0;
 	}
 
-	invslot = Inventory::CalcSlotFromMaterial(material_slot);
+	invslot = EQEmu::InventoryProfile::CalcSlotFromMaterial(material_slot);
 	if (invslot == INVALID_INDEX)
 	{
 		return 0;
@@ -2956,7 +2956,7 @@ bool Client::MoveItemToInventory(EQEmu::ItemInstance *ItemToReturn, bool UpdateC
 			//
 			if (InvItem && InvItem->IsClassBag()) {
 
-				int16 BaseSlotID = Inventory::CalcSlotId(i, EQEmu::inventory::containerBegin);
+				int16 BaseSlotID = EQEmu::InventoryProfile::CalcSlotId(i, EQEmu::inventory::containerBegin);
 
 				uint8 BagSize=InvItem->GetItem()->BagSlots;
 
@@ -3006,9 +3006,9 @@ bool Client::MoveItemToInventory(EQEmu::ItemInstance *ItemToReturn, bool UpdateC
 
 			return true;
 		}
-		if (InvItem->IsClassBag() && Inventory::CanItemFitInContainer(ItemToReturn->GetItem(), InvItem->GetItem())) {
+		if (InvItem->IsClassBag() && EQEmu::InventoryProfile::CanItemFitInContainer(ItemToReturn->GetItem(), InvItem->GetItem())) {
 
-			int16 BaseSlotID = Inventory::CalcSlotId(i, EQEmu::inventory::containerBegin);
+			int16 BaseSlotID = EQEmu::InventoryProfile::CalcSlotId(i, EQEmu::inventory::containerBegin);
 
 			uint8 BagSize=InvItem->GetItem()->BagSlots;
 
@@ -3272,7 +3272,7 @@ bool Client::InterrogateInventory_error(int16 head, int16 index, const EQEmu::It
 	return false;
 }
 
-void Inventory::SetCustomItemData(uint32 character_id, int16 slot_id, std::string identifier, std::string value) {
+void EQEmu::InventoryProfile::SetCustomItemData(uint32 character_id, int16 slot_id, std::string identifier, std::string value) {
 	EQEmu::ItemInstance *inst = GetItem(slot_id);
 	if(inst) {
 		inst->SetCustomData(identifier, value);
@@ -3280,7 +3280,7 @@ void Inventory::SetCustomItemData(uint32 character_id, int16 slot_id, std::strin
 	}
 }
 
-void Inventory::SetCustomItemData(uint32 character_id, int16 slot_id, std::string identifier, int value) {
+void EQEmu::InventoryProfile::SetCustomItemData(uint32 character_id, int16 slot_id, std::string identifier, int value) {
 	EQEmu::ItemInstance *inst = GetItem(slot_id);
 	if(inst) {
 		inst->SetCustomData(identifier, value);
@@ -3288,7 +3288,7 @@ void Inventory::SetCustomItemData(uint32 character_id, int16 slot_id, std::strin
 	}
 }
 
-void Inventory::SetCustomItemData(uint32 character_id, int16 slot_id, std::string identifier, float value) {
+void EQEmu::InventoryProfile::SetCustomItemData(uint32 character_id, int16 slot_id, std::string identifier, float value) {
 	EQEmu::ItemInstance *inst = GetItem(slot_id);
 	if(inst) {
 		inst->SetCustomData(identifier, value);
@@ -3296,7 +3296,7 @@ void Inventory::SetCustomItemData(uint32 character_id, int16 slot_id, std::strin
 	}
 }
 
-void Inventory::SetCustomItemData(uint32 character_id, int16 slot_id, std::string identifier, bool value) {
+void EQEmu::InventoryProfile::SetCustomItemData(uint32 character_id, int16 slot_id, std::string identifier, bool value) {
 	EQEmu::ItemInstance *inst = GetItem(slot_id);
 	if(inst) {
 		inst->SetCustomData(identifier, value);
@@ -3304,7 +3304,7 @@ void Inventory::SetCustomItemData(uint32 character_id, int16 slot_id, std::strin
 	}
 }
 
-std::string Inventory::GetCustomItemData(int16 slot_id, std::string identifier) {
+std::string EQEmu::InventoryProfile::GetCustomItemData(int16 slot_id, std::string identifier) {
 	EQEmu::ItemInstance *inst = GetItem(slot_id);
 	if(inst) {
 		return inst->GetCustomData(identifier);

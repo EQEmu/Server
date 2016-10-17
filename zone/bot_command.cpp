@@ -4375,7 +4375,7 @@ void bot_subcommand_bot_dye_armor(Client *c, const Seperator *sep)
 	bool dye_all = (sep->arg[1][0] == '*');
 	if (!dye_all) {
 		material_slot = atoi(sep->arg[1]);
-		slot_id = Inventory::CalcSlotFromMaterial(material_slot);
+		slot_id = EQEmu::InventoryProfile::CalcSlotFromMaterial(material_slot);
 
 		if (!sep->IsNumber(1) || slot_id == INVALID_INDEX || material_slot > EQEmu::textures::LastTintableTexture) {
 			c->Message(m_fail, "Valid [mat_slot]s for this command are:");

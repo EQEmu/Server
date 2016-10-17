@@ -489,7 +489,7 @@ void NPC::CheckMinMaxLevel(Mob *them)
 
 		if(themlevel < (*cur)->min_level || themlevel > (*cur)->max_level)
 		{
-			material = Inventory::CalcMaterialFromSlot((*cur)->equip_slot);
+			material = EQEmu::InventoryProfile::CalcMaterialFromSlot((*cur)->equip_slot);
 			if (material != EQEmu::textures::materialInvalid)
 				SendWearChange(material);
 
@@ -1381,7 +1381,7 @@ int32 NPC::GetEquipmentMaterial(uint8 material_slot) const
 	if (material_slot >= EQEmu::textures::materialCount)
 		return 0;
 
-	int16 invslot = Inventory::CalcSlotFromMaterial(material_slot);
+	int16 invslot = EQEmu::InventoryProfile::CalcSlotFromMaterial(material_slot);
 	if (invslot == INVALID_INDEX)
 		return 0;
 

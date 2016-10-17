@@ -408,7 +408,7 @@ void Corpse::MoveItemToCorpse(Client *client, EQEmu::ItemInstance *inst, int16 e
 		if (equipSlot < EQEmu::legacy::GENERAL_BEGIN || equipSlot > EQEmu::inventory::slotCursor) { break; }
 
 		for (int16 sub_index = EQEmu::inventory::containerBegin; sub_index < EQEmu::inventory::ContainerCount; ++sub_index) {
-			int16 real_bag_slot = Inventory::CalcSlotId(equipSlot, sub_index);
+			int16 real_bag_slot = EQEmu::InventoryProfile::CalcSlotId(equipSlot, sub_index);
 			auto bag_inst = client->GetInv().GetItem(real_bag_slot);
 			if (bag_inst == nullptr) { continue; }
 
@@ -684,8 +684,8 @@ ServerLootItem_Struct* Corpse::GetItem(uint16 lootslot, ServerLootItem_Struct** 
 		}
 	}
 
-	if (sitem && bag_item_data && Inventory::SupportsContainers(sitem->equip_slot)) {
-		int16 bagstart = Inventory::CalcSlotId(sitem->equip_slot, EQEmu::inventory::containerBegin);
+	if (sitem && bag_item_data && EQEmu::InventoryProfile::SupportsContainers(sitem->equip_slot)) {
+		int16 bagstart = EQEmu::InventoryProfile::CalcSlotId(sitem->equip_slot, EQEmu::inventory::containerBegin);
 
 		cur = itemlist.begin();
 		end = itemlist.end();
@@ -739,7 +739,7 @@ void Corpse::RemoveItem(ServerLootItem_Struct* item_data)
 		is_corpse_changed = true;
 		itemlist.erase(iter);
 
-		uint8 material = Inventory::CalcMaterialFromSlot(sitem->equip_slot); // autos to unsigned char
+		uint8 material = EQEmu::InventoryProfile::CalcMaterialFromSlot(sitem->equip_slot); // autos to unsigned char
 		if (material != EQEmu::textures::materialInvalid)
 			SendWearChange(material);
 
@@ -1406,7 +1406,7 @@ uint32 Corpse::GetEquipment(uint8 material_slot) const {
 		return 0;
 	}
 
-	invslot = Inventory::CalcSlotFromMaterial(material_slot);
+	invslot = EQEmu::InventoryProfile::CalcSlotFromMaterial(material_slot);
 	if(invslot == INVALID_INDEX) // GetWornItem() should be returning a 0 for any invalid index...
 		return 0;
 

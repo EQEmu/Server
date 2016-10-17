@@ -1399,7 +1399,7 @@ bool Client::OPCharCreate(char *name, CharCreate_Struct *cc)
 {
 	PlayerProfile_Struct pp;
 	ExtendedProfile_Struct ext;
-	Inventory inv;
+	EQEmu::InventoryProfile inv;
 	time_t bday = time(nullptr);
 	char startzone[50]={0};
 	uint32 i;

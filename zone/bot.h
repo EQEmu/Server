@@ -647,7 +647,7 @@ private:
 	bool _petChooser;
 	uint8 _petChooserID;
 	bool berserk;
-	Inventory m_inv;
+	EQEmu::InventoryProfile m_inv;
 	double _lastTotalPlayTime;
 	time_t _startTotalPlayTime;
 	Mob* _previousTarget;
@@ -711,7 +711,7 @@ private:
 	void SetBotID(uint32 botID);
 
 	// Private "Inventory" Methods
-	void GetBotItems(Inventory &inv, std::string* errorMessage);
+	void GetBotItems(EQEmu::InventoryProfile &inv, std::string* errorMessage);
 	void BotAddEquipItem(int slot, uint32 id);
 	uint32 GetBotItemBySlot(uint32 slotID);
 

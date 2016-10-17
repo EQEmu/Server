@@ -2875,7 +2875,7 @@ void Bot::Spawn(Client* botCharacterOwner) {
 		for (int i = EQEmu::legacy::EQUIPMENT_BEGIN; i <= EQEmu::legacy::EQUIPMENT_END; ++i) {
 			itemID = GetBotItemBySlot(i);
 			if(itemID != 0) {
-				materialFromSlot = Inventory::CalcMaterialFromSlot(i);
+				materialFromSlot = EQEmu::InventoryProfile::CalcMaterialFromSlot(i);
 				if(materialFromSlot != 0xFF)
 					this->SendWearChange(materialFromSlot);
 			}
@@ -2897,7 +2897,7 @@ void Bot::RemoveBotItemBySlot(uint32 slotID, std::string *errorMessage)
 }
 
 // Retrieves all the inventory records from the database for this bot.
-void Bot::GetBotItems(Inventory &inv, std::string* errorMessage)
+void Bot::GetBotItems(EQEmu::InventoryProfile &inv, std::string* errorMessage)
 {
 	if(!GetBotID())
 		return;
@@ -3235,7 +3235,7 @@ EQEmu::ItemInstance* Bot::GetBotItem(uint32 slotID) {
 // Adds the specified item it bot to the NPC equipment array and to the bot inventory collection.
 void Bot::BotAddEquipItem(int slot, uint32 id) {
 	if(slot > 0 && id > 0) {
-		uint8 materialFromSlot = Inventory::CalcMaterialFromSlot(slot);
+		uint8 materialFromSlot = EQEmu::InventoryProfile::CalcMaterialFromSlot(slot);
 
 		if (materialFromSlot != EQEmu::textures::materialInvalid) {
 			equipment[slot] = id; // npc has more than just material slots. Valid material should mean valid inventory index
@@ -3251,7 +3251,7 @@ void Bot::BotAddEquipItem(int slot, uint32 id) {
 // Erases the specified item from bot the NPC equipment array and from the bot inventory collection.
 void Bot::BotRemoveEquipItem(int slot) {
 	if(slot > 0) {
-		uint8 materialFromSlot = Inventory::CalcMaterialFromSlot(slot);
+		uint8 materialFromSlot = EQEmu::InventoryProfile::CalcMaterialFromSlot(slot);
 
 		if (materialFromSlot != EQEmu::textures::materialInvalid) {
 			equipment[slot] = 0; // npc has more than just material slots. Valid material should mean valid inventory index
@@ -3382,7 +3382,7 @@ void Bot::PerformTradeWithClient(int16 beginSlotID, int16 endSlotID, Client* cli
 			bool UpdateClient = false;
 			bool already_returned = false;
 
-			Inventory& clientInventory = client->GetInv();
+			EQEmu::InventoryProfile& clientInventory = client->GetInv();
 			const EQEmu::ItemInstance* inst = clientInventory[i];
 			if(inst) {
 				items[i] = inst->GetItem()->ID;
@@ -8434,7 +8434,7 @@ bool Bot::DyeArmor(int16 slot_id, uint32 rgb, bool all_flag, bool save_flag)
 			return false;
 
 		for (uint8 i = EQEmu::textures::textureBegin; i < EQEmu::textures::weaponPrimary; ++i) {
-			uint8 inv_slot = Inventory::CalcSlotFromMaterial(i);
+			uint8 inv_slot = EQEmu::InventoryProfile::CalcSlotFromMaterial(i);
 			EQEmu::ItemInstance* inst = m_inv.GetItem(inv_slot);
 			if (!inst)
 				continue;
@@ -8444,7 +8444,7 @@ bool Bot::DyeArmor(int16 slot_id, uint32 rgb, bool all_flag, bool save_flag)
 		}
 	}
 	else {
-		uint8 mat_slot = Inventory::CalcMaterialFromSlot(slot_id);
+		uint8 mat_slot = EQEmu::InventoryProfile::CalcMaterialFromSlot(slot_id);
 		if (mat_slot == EQEmu::textures::materialInvalid || mat_slot >= EQEmu::textures::weaponPrimary)
 			return false;
 

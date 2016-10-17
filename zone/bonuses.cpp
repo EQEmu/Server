@@ -3325,7 +3325,7 @@ bool Client::CalcItemScale(uint32 slot_x, uint32 slot_y) {
 		// TEST CODE: test for bazaar trader crashing with charm items
 		if (Trader)
 			if (i >= EQEmu::legacy::GENERAL_BAGS_BEGIN && i <= EQEmu::legacy::GENERAL_BAGS_END) {
-				EQEmu::ItemInstance* parent_item = m_inv.GetItem(Inventory::CalcSlotId(i));
+				EQEmu::ItemInstance* parent_item = m_inv.GetItem(EQEmu::InventoryProfile::CalcSlotId(i));
 				if (parent_item && parent_item->GetItem()->ID == 17899) // trader satchel
 					continue;
 			}
@@ -3418,7 +3418,7 @@ bool Client::DoItemEnterZone(uint32 slot_x, uint32 slot_y) {
 		// TEST CODE: test for bazaar trader crashing with charm items
 		if (Trader)
 			if (i >= EQEmu::legacy::GENERAL_BAGS_BEGIN && i <= EQEmu::legacy::GENERAL_BAGS_END) {
-				EQEmu::ItemInstance* parent_item = m_inv.GetItem(Inventory::CalcSlotId(i));
+				EQEmu::ItemInstance* parent_item = m_inv.GetItem(EQEmu::InventoryProfile::CalcSlotId(i));
 				if (parent_item && parent_item->GetItem()->ID == 17899) // trader satchel
 					continue;
 			}
