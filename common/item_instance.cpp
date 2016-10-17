@@ -27,7 +27,7 @@
 
 //#include "../common/light_source.h"
 
-//#include <limits.h>
+#include <limits.h>
 
 //#include <iostream>
 
