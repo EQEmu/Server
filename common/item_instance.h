@@ -491,11 +491,10 @@ namespace EQEmu
 		//////////////////////////
 		// Protected Members
 		//////////////////////////
-		std::map<uint8, ItemInstance*>::const_iterator _cbegin() { return m_contents.cbegin(); }
-		std::map<uint8, ItemInstance*>::const_iterator _cend() { return m_contents.cend(); }
-
 		friend class Inventory;
 
+		std::map<uint8, ItemInstance*>::const_iterator _cbegin() { return m_contents.cbegin(); }
+		std::map<uint8, ItemInstance*>::const_iterator _cend() { return m_contents.cend(); }
 
 		void _PutItem(uint8 index, ItemInstance* inst) { m_contents[index] = inst; }
 
