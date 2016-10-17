@@ -1063,17 +1063,46 @@ sub trim {
 }
 
 sub read_eqemu_config_xml {
-	my $confile = "eqemu_config.xml"; #default
-	open(F, "<$confile");
-	my $indb = 0;
-	while(<F>) {
-		s/\r//g;
-		if(/<host>(.*)<\/host>/i) { $host = $1; } 
-		elsif(/<username>(.*)<\/username>/i) { $user = $1; } 
-		elsif(/<password>(.*)<\/password>/i) { $pass = $1; } 
-		elsif(/<db>(.*)<\/db>/i) { $db = $1; } 
-		if(/<longname>(.*)<\/longname>/i) { $long_name = $1; } 
+	open (CONFIG, "eqemu_config.xml");
+	while (<CONFIG>){
+		chomp;
+		$o = $_;
+		
+		if($o=~/\<\!--/i){
+			next; 
+		}
+		
+		if($o=~/database/i && $o=~/\<\//i){
+			$in_database_tag = 0;
+		}
+		if($o=~/\<database\>/i){
+			print "IN DATABASE TAG\n" if $debug;
+			$in_database_tag = 1;
+		}
+		if($o=~/\<longname\>/i){ 
+			($long_name) = $o =~ /<longname>(.*)<\/longname>/;
+			print "Long Name: " . $long_name . "\n" if $debug;
+		}
+		if($in_database_tag == 1){
+			if($o=~/\<username\>/i && $in_database_tag){
+				($user) = $o =~ />(\w+)</;
+				print "Database User: " . $user . "\n" if $debug;
+			}
+			if($o=~/\<password\>/i && $in_database_tag){
+				($pass) = $o =~ />(\w+)</;
+				print "Database Pass: " . $pass . "\n" if $debug;
+			}
+			if($o=~/\<db\>/i){
+				($db) = $o =~ />(\w+)</;
+				print "Database Name: " . $db . "\n" if $debug;
+			}
+			if($o=~/\<host\>/i){
+				($host) = $o =~ />(\w+)</;
+				print "Database Host: " . $host . "\n" if $debug;
+			}
+		}
 	}
+	close(CONFIG);
 }
 
 #::: Fetch Latest PEQ AA's
