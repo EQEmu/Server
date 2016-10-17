@@ -33,6 +33,8 @@
 #include <list>
 #include <signal.h>
 
+#include "../common/net/tcp_server.h"
+
 ChatChannelList *ChannelList;
 Clientlist *g_Clientlist;
 EQEmuLogSys Log;
@@ -142,6 +144,32 @@ int main() {
 
 	worldserver->Connect();
 
+	EQ::Net::TCPServer server;
+	std::vector<std::shared_ptr<EQ::Net::TCPConnection>> connections;
+	server.Listen(5999, true, [&](std::shared_ptr<EQ::Net::TCPConnection> connection) {
+		Log.OutF(Logs::General, Logs::Debug, "New connection found.");
+		connections.push_back(connection);
+
+		connection->OnRead([](EQ::Net::TCPConnection *connection, const unsigned char *data, size_t length) {
+			EQ::Net::ReadOnlyPacket p((void*)data, length);
+			Log.OutF(Logs::General, Logs::Debug, "{0}", p.ToString());
+		});
+
+		connection->OnDisconnect([&](EQ::Net::TCPConnection *connection) {
+			auto iter = connections.begin();
+			while (iter != connections.end()) {
+				if ((*iter).get() == connection) {
+					Log.OutF(Logs::General, Logs::Debug, "Removing connection");
+					connections.erase(iter);
+					return;
+				}
+				iter++;
+			}
+		});
+
+		connection->Start();
+	});
+	
 	while(RunLoops) {
 
 		Timer::SetCurrentTime();

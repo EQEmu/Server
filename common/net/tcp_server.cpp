@@ -27,16 +27,18 @@ void EQ::Net::TCPServer::Listen(int port, bool ipv6, std::function<void(std::sha
 	memset(m_socket, 0, sizeof(uv_tcp_t));
 	uv_tcp_init(loop, m_socket);
 
-	sockaddr iaddr;
 	if (ipv6) {
-		uv_ip6_addr("::", port, (sockaddr_in6*)&iaddr);
+		sockaddr_in6 iaddr;
+		uv_ip6_addr("::", port, &iaddr);
+		uv_tcp_bind(m_socket, (sockaddr*)&iaddr, 0);
 	}
 	else {
-		uv_ip4_addr("0.0.0.0", port, (sockaddr_in*)&iaddr);
+		sockaddr_in iaddr;
+		uv_ip4_addr("0.0.0.0", port, &iaddr);
+		uv_tcp_bind(m_socket, (sockaddr*)&iaddr, 0);
 	}
 
 	m_socket->data = this;
-	uv_tcp_bind(m_socket, &iaddr, 0);
 
 	uv_listen((uv_stream_t*)m_socket, 128, [](uv_stream_t* server, int status) {
 		if (status < 0) {
