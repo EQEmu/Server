@@ -29,7 +29,7 @@
 #include "../eq_packet_structs.h"
 #include "../misc_functions.h"
 #include "../string_util.h"
-#include "../item_instance.h"
+#include "../inventory_profile.h"
 #include "rof_structs.h"
 #include "../rulesys.h"
 

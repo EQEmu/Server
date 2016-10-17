@@ -2,6 +2,7 @@ EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
 == 10/17/2016 ==
 Uleat: Moved namespace ItemField from item_instance.h to shareddb.cpp - the only place it is used
+Uleat: Separated class Inventory from item_instance files into inventory_profile files
 
 == 10/16/2016 ==
 Uleat: Renamed struct EQEmu::ItemBase to EQEmu::ItemData and class ItemInst to EQEmu::ItemInstance

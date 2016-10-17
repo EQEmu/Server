@@ -25,7 +25,7 @@
 #include "../common/eq_packet_structs.h"
 #include "../common/packet_dump.h"
 #include "../common/eq_stream_intf.h"
-#include "../common/item_instance.h"
+#include "../common/inventory_profile.h"
 #include "../common/races.h"
 #include "../common/classes.h"
 #include "../common/languages.h"

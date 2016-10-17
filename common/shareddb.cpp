@@ -29,7 +29,7 @@
 #include "faction.h"
 #include "features.h"
 #include "ipc_mutex.h"
-#include "item_instance.h"
+#include "inventory_profile.h"
 #include "loottable.h"
 #include "memory_mapped_file.h"
 #include "mysql.h"
