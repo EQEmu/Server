@@ -911,7 +911,7 @@ bool EQEmu::InventoryProfile::SupportsClickCasting(int16 slot_id)
 	}
 	else if (slot_id >= legacy::GENERAL_BAGS_BEGIN && slot_id <= legacy::GENERAL_BAGS_END)
 	{
-		if (inventory::Lookup(m_inventory_version)->AllowClickCastFromBag)
+		if (inventory::Lookup(m_mob_version)->AllowClickCastFromBag)
 			return true;
 	}
 

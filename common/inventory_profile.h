@@ -85,22 +85,21 @@ namespace EQEmu
 		// Public Methods
 		///////////////////////////////
 
-		InventoryProfile() { m_inventory_version = versions::InventoryVersion::Unknown; m_inventory_version_set = false; }
+		InventoryProfile() { m_mob_version = versions::MobVersion::Unknown; m_mob_version_set = false; }
 		~InventoryProfile();
 
-		// inv2 creep
-		bool SetInventoryVersion(versions::InventoryVersion inventory_version) {
-			if (!m_inventory_version_set) {
-				m_inventory_version = versions::ValidateInventoryVersion(inventory_version);
-				return (m_inventory_version_set = true);
+		bool SetInventoryVersion(versions::MobVersion inventory_version) {
+			if (!m_mob_version_set) {
+				m_mob_version = versions::ValidateMobVersion(inventory_version);
+				return (m_mob_version_set = true);
 			}
 			else {
 				return false;
 			}
 		}
-		bool SetInventoryVersion(versions::ClientVersion client_version) { return SetInventoryVersion(versions::ConvertClientVersionToInventoryVersion(client_version)); }
+		bool SetInventoryVersion(versions::ClientVersion client_version) { return SetInventoryVersion(versions::ConvertClientVersionToMobVersion(client_version)); }
 
-		versions::InventoryVersion InventoryVersion() { return m_inventory_version; }
+		versions::MobVersion InventoryVersion() { return m_mob_version; }
 
 		static void CleanDirty();
 		static void MarkDirty(ItemInstance *inst);
@@ -222,9 +221,9 @@ namespace EQEmu
 		::ItemInstQueue					m_cursor;	// Items on cursor: FIFO
 
 	private:
-		// Active inventory version
-		versions::InventoryVersion m_inventory_version;
-		bool m_inventory_version_set;
+		// Active mob version
+		versions::MobVersion m_mob_version;
+		bool m_mob_version_set;
 	};
 }
 

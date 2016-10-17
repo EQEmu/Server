@@ -59,7 +59,7 @@ namespace EQEmu
 			bool AllowOverLevelEquipment;
 		};
 
-		const LookupEntry* Lookup(versions::InventoryVersion inventory_version);
+		const LookupEntry* Lookup(versions::MobVersion mob_version);
 
 	} /*inventory*/
 	
@@ -69,7 +69,7 @@ namespace EQEmu
 			bool CoinHasWeight;
 		};
 
-		const LookupEntry* Lookup(versions::InventoryVersion inventory_version);
+		const LookupEntry* Lookup(versions::MobVersion mob_version);
 
 	} /*behavior*/
 
