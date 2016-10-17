@@ -38,6 +38,17 @@
 #include "string_util.h"
 #include "eqemu_config.h"
 
+namespace ItemField
+{
+	enum {
+		source = 0,
+#define F(x) x,
+#include "item_fieldlist.h"
+#undef F
+		updated
+	};
+}
+
 SharedDatabase::SharedDatabase()
 : Database()
 {

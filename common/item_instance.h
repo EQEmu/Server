@@ -39,18 +39,6 @@ class EvolveInfo;			// Stores information about an evolving item family
 #include <map>
 
 
-namespace ItemField
-{
-	enum
-	{
-		source = 0,
-#define F(x) x,
-#include "item_fieldlist.h"
-#undef F
-		updated
-	};
-};
-
 // Specifies usage type for item inside EQEmu::ItemInstance
 enum ItemInstTypes
 {
