@@ -278,7 +278,7 @@ Mob::Mob(const char* in_name,
 		RangedProcs[j].level_override = -1;
 	}
 
-	for (i = 0; i < EQEmu::textures::TextureCount; i++)
+	for (i = EQEmu::textures::textureBegin; i < EQEmu::textures::materialCount; i++)
 	{
 		armor_tint.Slot[i].Color = in_armor_tint.Slot[i].Color;
 	}
@@ -1158,8 +1158,8 @@ void Mob::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho)
 		if (Mob::IsPlayerRace(race) || i > 6)
 		{
 			ns->spawn.equipment.Slot[i].Material = GetEquipmentMaterial(i);
-			ns->spawn.equipment.Slot[i].EliteMaterial = IsEliteMaterialItem(i);
-			ns->spawn.equipment.Slot[i].HeroForgeModel = GetHerosForgeModel(i);
+			ns->spawn.equipment.Slot[i].EliteModel = IsEliteMaterialItem(i);
+			ns->spawn.equipment.Slot[i].HeroicModel = GetHerosForgeModel(i);
 			ns->spawn.equipment_tint.Slot[i].Color = GetEquipmentColor(i);
 		}
 	}
@@ -2374,8 +2374,8 @@ bool Mob::CanThisClassDualWield(void) const {
 		return(GetSkill(EQEmu::skills::SkillDualWield) > 0);
 	}
 	else if (CastToClient()->HasSkill(EQEmu::skills::SkillDualWield)) {
-		const EQEmu::ItemInstance* pinst = CastToClient()->GetInv().GetItem(EQEmu::legacy::SlotPrimary);
-		const EQEmu::ItemInstance* sinst = CastToClient()->GetInv().GetItem(EQEmu::legacy::SlotSecondary);
+		const EQEmu::ItemInstance* pinst = CastToClient()->GetInv().GetItem(EQEmu::inventory::slotPrimary);
+		const EQEmu::ItemInstance* sinst = CastToClient()->GetInv().GetItem(EQEmu::inventory::slotSecondary);
 
 		// 2HS, 2HB, or 2HP
 		if(pinst && pinst->IsWeapon()) {
@@ -2858,7 +2858,7 @@ int32 Mob::GetEquipmentMaterial(uint8 material_slot) const
 	if (item != 0)
 	{
 		// For primary and secondary we need the model, not the material
-		if (material_slot == EQEmu::textures::TexturePrimary || material_slot == EQEmu::textures::TextureSecondary)
+		if (material_slot == EQEmu::textures::weaponPrimary || material_slot == EQEmu::textures::weaponSecondary)
 		{
 			if (this->IsClient())
 			{
@@ -2902,7 +2902,7 @@ int32 Mob::GetEquipmentMaterial(uint8 material_slot) const
 int32 Mob::GetHerosForgeModel(uint8 material_slot) const
 {
 	uint32 HeroModel = 0;
-	if (material_slot >= 0 && material_slot < EQEmu::textures::TexturePrimary)
+	if (material_slot >= 0 && material_slot < EQEmu::textures::weaponPrimary)
 	{
 		uint32 ornamentationAugtype = RuleI(Character, OrnamentationAugmentType);
 		const EQEmu::ItemData *item;

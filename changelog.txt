@@ -1,7 +1,8 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
 == 10/16/2016 ==
-Uleat: Renamed struct EQEmu::ItemBase to EQEmu::ItemData and class ItemInst to EQEmu::ItemInstance.
+Uleat: Renamed struct EQEmu::ItemBase to EQEmu::ItemData and class ItemInst to EQEmu::ItemInstance
+Uleat: Added class EQEmu::InventorySlot. Re-attached pertinent inventory token references to EQDictionary
 
 == 10/15/2016 ==
 Uleat: Changed filenames to facilitate future inventory naming conventions

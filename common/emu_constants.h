@@ -35,6 +35,79 @@ namespace EQEmu
 		//using namespace RoF2::invbag;
 		//using namespace RoF2::invaug;
 
+		enum : int16 { typeInvalid = -1, slotInvalid = -1, containerInvalid = -1, socketInvalid = -1 }; // temporary
+		enum : int16 { typeBegin = 0, slotBegin = 0, containerBegin = 0, socketBegin = 0 }; // temporary
+
+		enum PossessionsSlots : int16 { // temporary
+			slotCharm = 0,
+			slotEar1,
+			slotHead,
+			slotFace,
+			slotEar2,
+			slotNeck, // 5
+			slotShoulders,
+			slotArms,
+			slotBack,
+			slotWrist1,
+			slotWrist2, // 10
+			slotRange,
+			slotHands,
+			slotPrimary,
+			slotSecondary,
+			slotFinger1, // 15
+			slotFinger2,
+			slotChest,
+			slotLegs,
+			slotFeet,
+			slotWaist, // 20
+			slotPowerSource = 9999,
+			slotAmmo = 21,
+			slotGeneral1,
+			slotGeneral2,
+			slotGeneral3,
+			slotGeneral4, // 25
+			slotGeneral5,
+			slotGeneral6,
+			slotGeneral7,
+			slotGeneral8,
+			slotCursor, // 30
+			slotCount
+		};
+
+		enum InventoryTypes : int16 { // temporary
+			typePossessions = 0,
+			typeBank,
+			typeSharedBank,
+			typeTrade,
+			typeWorld,
+			typeLimbo, // 5
+			typeTribute,
+			typeTrophyTribute,
+			typeGuildTribute,
+			typeMerchant,
+			typeDeleted, // 10
+			typeCorpse,
+			typeBazaar,
+			typeInspect,
+			typeRealEstate,
+			typeViewMODPC, // 15
+			typeViewMODBank,
+			typeViewMODSharedBank,
+			typeViewMODLimbo,
+			typeAltStorage,
+			typeArchived, // 20
+			typeMail,
+			typeGuildTrophyTribute,
+			typeKrono,
+			typeOther,
+			typeCount
+		};
+
+		static int16 SlotCount(int16 type_index) { return 0; } // temporary
+
+		const int16 ContainerCount = 10; // temporary
+		const int16 SocketCount = 6; // temporary
+
 	} /*inventory*/
 
 	namespace constants {
@@ -44,6 +117,7 @@ namespace EQEmu
 		const size_t SayLinkBodySize = RoF2::constants::SayLinkBodySize;
 
 	} /*constants*/
+
 	enum class CastingSlot : uint32 {
 		Gem1       = 0,
 		Gem2       = 1,
@@ -68,3 +142,9 @@ namespace EQEmu
 } /*EQEmu*/
 
 #endif /*COMMON_EMU_CONSTANTS_H*/
+
+/*	hack list to prevent circular references
+	
+	eq_limits.h:EQEmu::inventory::LookupEntry::InventoryTypeSize[n];
+
+*/

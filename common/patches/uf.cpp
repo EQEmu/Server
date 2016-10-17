@@ -1817,7 +1817,7 @@ namespace UF
 		OUT(hairstyle);
 		OUT(beard);
 		//	OUT(unknown00178[10]);
-		for (r = EQEmu::textures::TextureBegin; r < EQEmu::textures::TextureCount; r++) {
+		for (r = EQEmu::textures::textureBegin; r < EQEmu::textures::materialCount; r++) {
 			eq->equipment.Slot[r].Material = emu->item_material.Slot[r].Material;
 			eq->equipment.Slot[r].Unknown1 = 0;
 			eq->equipment.Slot[r].EliteMaterial = 0;
@@ -2301,10 +2301,10 @@ namespace UF
 			eq_cse->HairColor = emu_cse->HairColor;
 			eq_cse->Face = emu_cse->Face;
 
-			for (int equip_index = 0; equip_index < EQEmu::textures::TextureCount; equip_index++) {
+			for (int equip_index = EQEmu::textures::textureBegin; equip_index < EQEmu::textures::materialCount; equip_index++) {
 				eq_cse->Equip[equip_index].Material = emu_cse->Equip[equip_index].Material;
 				eq_cse->Equip[equip_index].Unknown1 = emu_cse->Equip[equip_index].Unknown1;
-				eq_cse->Equip[equip_index].EliteMaterial = emu_cse->Equip[equip_index].EliteMaterial;
+				eq_cse->Equip[equip_index].EliteMaterial = emu_cse->Equip[equip_index].EliteModel;
 				eq_cse->Equip[equip_index].Color = emu_cse->Equip[equip_index].Color;
 			}
 
@@ -2869,7 +2869,7 @@ namespace UF
 			float SpawnSize = emu->size;
 			if (!((emu->NPC == 0) || (emu->race <= 12) || (emu->race == 128) || (emu->race == 130) || (emu->race == 330) || (emu->race == 522)))
 			{
-				PacketSize -= (sizeof(structs::Texture_Struct) * EQEmu::textures::TextureCount);
+				PacketSize -= (sizeof(structs::Texture_Struct) * EQEmu::textures::materialCount);
 
 				if (emu->size == 0)
 				{
@@ -3068,7 +3068,7 @@ namespace UF
 
 			if ((emu->NPC == 0) || (emu->race <= 12) || (emu->race == 128) || (emu->race == 130) || (emu->race == 330) || (emu->race == 522))
 			{
-				for (k = EQEmu::textures::TextureBegin; k < EQEmu::textures::TextureCount; ++k)
+				for (k = EQEmu::textures::textureBegin; k < EQEmu::textures::materialCount; ++k)
 				{
 					{
 						VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->equipment_tint.Slot[k].Color);
@@ -3104,17 +3104,17 @@ namespace UF
 			{
 				structs::Texture_Struct *Equipment = (structs::Texture_Struct *)Buffer;
 
-				for (k = EQEmu::textures::TextureBegin; k < EQEmu::textures::TextureCount; k++) {
+				for (k = EQEmu::textures::textureBegin; k < EQEmu::textures::materialCount; k++) {
 					if (emu->equipment.Slot[k].Material > 99999) {
 						Equipment[k].Material = 63;
 					} else {
 						Equipment[k].Material = emu->equipment.Slot[k].Material;
 					}
 					Equipment[k].Unknown1 = emu->equipment.Slot[k].Unknown1;
-					Equipment[k].EliteMaterial = emu->equipment.Slot[k].EliteMaterial;
+					Equipment[k].EliteMaterial = emu->equipment.Slot[k].EliteModel;
 				}
 
-				Buffer += (sizeof(structs::Texture_Struct) * EQEmu::textures::TextureCount);
+				Buffer += (sizeof(structs::Texture_Struct) * EQEmu::textures::materialCount);
 			}
 			if (strlen(emu->title))
 			{
@@ -4224,18 +4224,18 @@ namespace UF
 
 		ob.write((const char*)&subitem_count, sizeof(uint32));
 
-		for (uint32 index = SUB_INDEX_BEGIN; index < EQEmu::legacy::ITEM_CONTAINER_SIZE; ++index) {
+		for (uint32 index = EQEmu::inventory::containerBegin; index < EQEmu::inventory::ContainerCount; ++index) {
 			EQEmu::ItemInstance* sub = inst->GetItem(index);
 			if (!sub)
 				continue;
 
 			int SubSlotNumber = INVALID_INDEX;
 			if (slot_id_in >= EQEmu::legacy::GENERAL_BEGIN && slot_id_in <= EQEmu::legacy::GENERAL_END)
-				SubSlotNumber = (((slot_id_in + 3) * EQEmu::legacy::ITEM_CONTAINER_SIZE) + index + 1);
+				SubSlotNumber = (((slot_id_in + 3) * EQEmu::inventory::ContainerCount) + index + 1);
 			else if (slot_id_in >= EQEmu::legacy::BANK_BEGIN && slot_id_in <= EQEmu::legacy::BANK_END)
-				SubSlotNumber = (((slot_id_in - EQEmu::legacy::BANK_BEGIN) * EQEmu::legacy::ITEM_CONTAINER_SIZE) + EQEmu::legacy::BANK_BAGS_BEGIN + index);
+				SubSlotNumber = (((slot_id_in - EQEmu::legacy::BANK_BEGIN) * EQEmu::inventory::ContainerCount) + EQEmu::legacy::BANK_BAGS_BEGIN + index);
 			else if (slot_id_in >= EQEmu::legacy::SHARED_BANK_BEGIN && slot_id_in <= EQEmu::legacy::SHARED_BANK_END)
-				SubSlotNumber = (((slot_id_in - EQEmu::legacy::SHARED_BANK_BEGIN) * EQEmu::legacy::ITEM_CONTAINER_SIZE) + EQEmu::legacy::SHARED_BANK_BAGS_BEGIN + index);
+				SubSlotNumber = (((slot_id_in - EQEmu::legacy::SHARED_BANK_BEGIN) * EQEmu::inventory::ContainerCount) + EQEmu::legacy::SHARED_BANK_BAGS_BEGIN + index);
 			else
 				SubSlotNumber = slot_id_in;
 
@@ -4253,7 +4253,7 @@ namespace UF
 	{
 		uint32 UnderfootSlot = 0;
 
-		if (serverSlot >= EQEmu::legacy::SlotAmmo && serverSlot <= 53) // Cursor/Ammo/Power Source and Normal Inventory Slots
+		if (serverSlot >= EQEmu::inventory::slotAmmo && serverSlot <= 53) // Cursor/Ammo/Power Source and Normal Inventory Slots
 			UnderfootSlot = serverSlot + 1;
 		else if (serverSlot >= EQEmu::legacy::GENERAL_BAGS_BEGIN && serverSlot <= EQEmu::legacy::CURSOR_BAG_END)
 			UnderfootSlot = serverSlot + 11;
@@ -4261,7 +4261,7 @@ namespace UF
 			UnderfootSlot = serverSlot + 1;
 		else if (serverSlot >= EQEmu::legacy::SHARED_BANK_BAGS_BEGIN && serverSlot <= EQEmu::legacy::SHARED_BANK_BAGS_END)
 			UnderfootSlot = serverSlot + 1;
-		else if (serverSlot == EQEmu::legacy::SlotPowerSource)
+		else if (serverSlot == EQEmu::inventory::slotPowerSource)
 			UnderfootSlot = invslot::PossessionsPowerSource;
 		else
 			UnderfootSlot = serverSlot;
@@ -4288,7 +4288,7 @@ namespace UF
 		else if (ufSlot >= invbag::SharedBankBagsBegin && ufSlot <= invbag::SharedBankBagsEnd)
 			ServerSlot = ufSlot - 1;
 		else if (ufSlot == invslot::PossessionsPowerSource)
-			ServerSlot = EQEmu::legacy::SlotPowerSource;
+			ServerSlot = EQEmu::inventory::slotPowerSource;
 		else
 			ServerSlot = ufSlot;
 

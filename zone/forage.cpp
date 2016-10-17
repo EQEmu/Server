@@ -153,7 +153,7 @@ uint32 ZoneDatabase::GetZoneFishing(uint32 ZoneID, uint8 skill, uint32 &npc_id, 
 //we need this function to immediately determine, after we receive OP_Fishing, if we can even try to fish, otherwise we have to wait a while to get the failure
 bool Client::CanFish() {
 	//make sure we still have a fishing pole on:
-	const EQEmu::ItemInstance* Pole = m_inv[EQEmu::legacy::SlotPrimary];
+	const EQEmu::ItemInstance* Pole = m_inv[EQEmu::inventory::slotPrimary];
 	int32 bslot = m_inv.HasItemByUse(EQEmu::item::ItemTypeFishingBait, 1, invWhereWorn | invWherePersonal);
 	const EQEmu::ItemInstance* Bait = nullptr;
 	if (bslot != INVALID_INDEX)
@@ -317,12 +317,12 @@ void Client::GoFish()
 			else
 			{
 				PushItemOnCursor(*inst);
-				SendItemPacket(EQEmu::legacy::SlotCursor, inst, ItemPacketLimbo);
+				SendItemPacket(EQEmu::inventory::slotCursor, inst, ItemPacketLimbo);
 				if(RuleB(TaskSystem, EnableTaskSystem))
 					UpdateTasksForItem(ActivityFish, food_id);
 
 				safe_delete(inst);
-				inst = m_inv.GetItem(EQEmu::legacy::SlotCursor);
+				inst = m_inv.GetItem(EQEmu::inventory::slotCursor);
 			}
 
 			if(inst) {
@@ -354,7 +354,7 @@ void Client::GoFish()
 	//and then swap out items in primary slot... too lazy to fix right now
 	if (zone->random.Int(0, 49) == 1) {
 		Message_StringID(MT_Skills, FISHING_POLE_BROKE);	//Your fishing pole broke!
-		DeleteItemInInventory(EQEmu::legacy::SlotPrimary, 0, true);
+		DeleteItemInInventory(EQEmu::inventory::slotPrimary, 0, true);
 	}
 
 	if (CheckIncreaseSkill(EQEmu::skills::SkillFishing, nullptr, 5))
@@ -431,12 +431,12 @@ void Client::ForageItem(bool guarantee) {
 			}
 			else {
 				PushItemOnCursor(*inst);
-				SendItemPacket(EQEmu::legacy::SlotCursor, inst, ItemPacketLimbo);
+				SendItemPacket(EQEmu::inventory::slotCursor, inst, ItemPacketLimbo);
 				if(RuleB(TaskSystem, EnableTaskSystem))
 					UpdateTasksForItem(ActivityForage, foragedfood);
 
 				safe_delete(inst);
-				inst = m_inv.GetItem(EQEmu::legacy::SlotCursor);
+				inst = m_inv.GetItem(EQEmu::inventory::slotCursor);
 			}
 
 			if(inst) {

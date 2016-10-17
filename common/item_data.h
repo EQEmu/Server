@@ -464,9 +464,9 @@ namespace EQEmu
 		int32	FactionAmt4;	// Faction Amt 4
 		char	CharmFile[32];	// ?
 		uint32	AugType;
-		uint8	AugSlotType[EQEmu::legacy::ITEM_COMMON_SIZE];	// RoF: Augment Slot 1-6 Type
-		uint8	AugSlotVisible[EQEmu::legacy::ITEM_COMMON_SIZE];	// RoF: Augment Slot 1-6 Visible
-		uint8	AugSlotUnk2[EQEmu::legacy::ITEM_COMMON_SIZE];	// RoF: Augment Slot 1-6 Unknown Most likely Powersource related
+		uint8	AugSlotType[inventory::SocketCount];	// RoF: Augment Slot 1-6 Type
+		uint8	AugSlotVisible[inventory::SocketCount];	// RoF: Augment Slot 1-6 Visible
+		uint8	AugSlotUnk2[inventory::SocketCount];	// RoF: Augment Slot 1-6 Unknown Most likely Powersource related
 		uint32	LDoNTheme;
 		uint32	LDoNPrice;
 		uint32	LDoNSold;

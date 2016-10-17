@@ -981,7 +981,7 @@ namespace Titanium
 		OUT(hairstyle);
 		OUT(beard);
 		//	OUT(unknown00178[10]);
-		for (r = EQEmu::textures::TextureBegin; r < EQEmu::textures::TextureCount; r++) {
+		for (r = EQEmu::textures::textureBegin; r < EQEmu::textures::materialCount; r++) {
 			OUT(item_material.Slot[r].Material);
 			OUT(item_tint.Slot[r].Color);
 		}
@@ -1301,14 +1301,14 @@ namespace Titanium
 			if (eq->Race[char_index] > 473)
 				eq->Race[char_index] = 1;
 
-			for (int index = 0; index < EQEmu::textures::TextureCount; ++index) {
+			for (int index = 0; index < EQEmu::textures::materialCount; ++index) {
 				eq->CS_Colors[char_index].Slot[index].Color = emu_cse->Equip[index].Color;
 			}
 
 			eq->BeardColor[char_index] = emu_cse->BeardColor;
 			eq->HairStyle[char_index] = emu_cse->HairStyle;
 
-			for (int index = 0; index < EQEmu::textures::TextureCount; ++index) {
+			for (int index = 0; index < EQEmu::textures::materialCount; ++index) {
 				eq->Equip[char_index].Slot[index].Material = emu_cse->Equip[index].Material;
 			}
 
@@ -1338,14 +1338,14 @@ namespace Titanium
 		for (; char_index < 10; ++char_index) {
 			eq->Race[char_index] = 0;
 
-			for (int index = 0; index < EQEmu::textures::TextureCount; ++index) {
+			for (int index = 0; index < EQEmu::textures::materialCount; ++index) {
 				eq->CS_Colors[char_index].Slot[index].Color = 0;
 			}
 
 			eq->BeardColor[char_index] = 0;
 			eq->HairStyle[char_index] = 0;
 
-			for (int index = 0; index < EQEmu::textures::TextureCount; ++index) {
+			for (int index = 0; index < EQEmu::textures::materialCount; ++index) {
 				eq->Equip[char_index].Slot[index].Material = 0;
 			}
 
@@ -1677,7 +1677,7 @@ namespace Titanium
 			eq->petOwnerId = emu->petOwnerId;
 			eq->guildrank = emu->guildrank;
 			//		eq->unknown0194[3] = emu->unknown0194[3];
-			for (k = EQEmu::textures::TextureBegin; k < EQEmu::textures::TextureCount; k++) {
+			for (k = EQEmu::textures::textureBegin; k < EQEmu::textures::materialCount; k++) {
 				eq->equipment.Slot[k].Material = emu->equipment.Slot[k].Material;
 				eq->equipment_tint.Slot[k].Color = emu->equipment_tint.Slot[k].Color;
 			}
@@ -2437,7 +2437,7 @@ namespace Titanium
 		ob << StringFormat("%.*s\"", depth, protection); // Quotes (and protection, if needed) around static data
 
 		// Sub data
-		for (int index = SUB_INDEX_BEGIN; index < invbag::ItemBagSize; ++index) {
+		for (int index = EQEmu::inventory::containerBegin; index < invbag::ItemBagSize; ++index) {
 			ob << '|';
 
 			EQEmu::ItemInstance* sub = inst->GetItem(index);

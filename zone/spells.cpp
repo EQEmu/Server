@@ -293,7 +293,7 @@ bool Mob::CastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 				return(false);
 			}
 		}
-		if (itm && (itm->GetItem()->Click.Type == EQEmu::item::ItemEffectEquipClick) && !(item_slot <= EQEmu::legacy::SlotAmmo || item_slot == EQEmu::legacy::SlotPowerSource)){
+		if (itm && (itm->GetItem()->Click.Type == EQEmu::item::ItemEffectEquipClick) && !(item_slot <= EQEmu::inventory::slotAmmo || item_slot == EQEmu::inventory::slotPowerSource)){
 			if (CastToClient()->ClientVersion() < EQEmu::versions::ClientVersion::SoF) {
 				// They are attempting to cast a must equip clicky without having it equipped
 				Log.Out(Logs::General, Logs::Error, "HACKER: %s (account: %s) attempted to click an equip-only effect on item %s (id: %d) without equiping it!", CastToClient()->GetCleanName(), CastToClient()->AccountName(), itm->GetItem()->Name, itm->GetItem()->ID);
@@ -1244,7 +1244,7 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 			if (inst == nullptr)
 				break;
 
-			for (int r = AUG_INDEX_BEGIN; r < EQEmu::legacy::ITEM_COMMON_SIZE; r++) {
+			for (int r = EQEmu::inventory::socketBegin; r < EQEmu::inventory::SocketCount; r++) {
 				const EQEmu::ItemInstance* aug_i = inst->GetAugment(r);
 
 				if (!aug_i)

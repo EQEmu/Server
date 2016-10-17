@@ -709,7 +709,7 @@ bool Database::StoreCharacter(uint32 account_id, PlayerProfile_Struct* pp, Inven
 			auto results = QueryDatabase(invquery); 
 		}
 
-		if (i == EQEmu::legacy::SlotCursor) {
+		if (i == EQEmu::inventory::slotCursor) {
 			i = EQEmu::legacy::GENERAL_BAGS_BEGIN; 
 			continue;
 		}

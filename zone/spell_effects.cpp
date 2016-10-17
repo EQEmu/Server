@@ -622,7 +622,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 				snprintf(effect_desc, _EDLEN, "Flesh To Bone");
 #endif
 				if(IsClient()){
-					EQEmu::ItemInstance* transI = CastToClient()->GetInv().GetItem(EQEmu::legacy::SlotCursor);
+					EQEmu::ItemInstance* transI = CastToClient()->GetInv().GetItem(EQEmu::inventory::slotCursor);
 					if (transI && transI->IsClassCommon() && transI->IsStackable()){
 						uint32 fcharges = transI->GetCharges();
 							//Does it sound like meat... maybe should check if it looks like meat too...
@@ -632,7 +632,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 								strstr(transI->GetItem()->Name, "Flesh") ||
 								strstr(transI->GetItem()->Name, "parts") ||
 								strstr(transI->GetItem()->Name, "Parts")){
-								CastToClient()->DeleteItemInInventory(EQEmu::legacy::SlotCursor, fcharges, true);
+								CastToClient()->DeleteItemInInventory(EQEmu::inventory::slotCursor, fcharges, true);
 								CastToClient()->SummonItem(13073, fcharges);
 							}
 							else{
@@ -1173,7 +1173,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 
 						if (SummonedItem) {
 							c->PushItemOnCursor(*SummonedItem);
-							c->SendItemPacket(EQEmu::legacy::SlotCursor, SummonedItem, ItemPacketLimbo);
+							c->SendItemPacket(EQEmu::inventory::slotCursor, SummonedItem, ItemPacketLimbo);
 							safe_delete(SummonedItem);
 						}
 						SummonedItem = database.CreateItem(spell.base[i], charges);
@@ -1445,7 +1445,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 					}
 				}
 
-				for (int x = EQEmu::textures::TextureBegin; x <= EQEmu::textures::LastTintableTexture; x++)
+				for (int x = EQEmu::textures::textureBegin; x <= EQEmu::textures::LastTintableTexture; x++)
 					SendWearChange(x);
 
 				if (caster == this && spell.id != 287 && spell.id != 601 &&
@@ -1471,7 +1471,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 						);
 						caster->SendAppearancePacket(AT_Size, static_cast<uint32>(caster->GetTarget()->GetSize()));
 
-						for (int x = EQEmu::textures::TextureBegin; x <= EQEmu::textures::LastTintableTexture; x++)
+						for (int x = EQEmu::textures::textureBegin; x <= EQEmu::textures::LastTintableTexture; x++)
 							caster->SendWearChange(x);
 				}
 			}
@@ -2239,7 +2239,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 				snprintf(effect_desc, _EDLEN, "Rampage");
 #endif
 				if(caster)
-					entity_list.AEAttack(caster, 30, EQEmu::legacy::SlotPrimary, 0, true); // on live wars dont get a duration ramp, its a one shot deal
+					entity_list.AEAttack(caster, 30, EQEmu::inventory::slotPrimary, 0, true); // on live wars dont get a duration ramp, its a one shot deal
 
 				break;
 			}
@@ -3037,7 +3037,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 	if (SummonedItem) {
 		Client *c=CastToClient();
 		c->PushItemOnCursor(*SummonedItem);
-		c->SendItemPacket(EQEmu::legacy::SlotCursor, SummonedItem, ItemPacketLimbo);
+		c->SendItemPacket(EQEmu::inventory::slotCursor, SummonedItem, ItemPacketLimbo);
 		safe_delete(SummonedItem);
 	}
 
@@ -3855,7 +3855,7 @@ void Mob::BuffFadeBySlot(int slot, bool iRecalcBonuses)
 				else{
 					SendAppearancePacket(AT_Size, 6);
 				}
-				for (int x = EQEmu::textures::TextureBegin; x <= EQEmu::textures::LastTintableTexture; x++){
+				for (int x = EQEmu::textures::textureBegin; x <= EQEmu::textures::LastTintableTexture; x++){
 					SendWearChange(x);
 				}
 				break;
@@ -5194,7 +5194,7 @@ uint16 Client::GetSympatheticFocusEffect(focusType type, uint16 spell_id) {
 				}
 			}
 
-			for (int y = AUG_INDEX_BEGIN; y < EQEmu::legacy::ITEM_COMMON_SIZE; ++y)
+			for (int y = EQEmu::inventory::socketBegin; y < EQEmu::inventory::SocketCount; ++y)
 			{
 				if (SympatheticProcList.size() > MAX_SYMPATHETIC_PROCS)
 					continue;
@@ -5343,7 +5343,7 @@ int16 Client::GetFocusEffect(focusType type, uint16 spell_id)
 				}
 			}
 
-			for (int y = AUG_INDEX_BEGIN; y < EQEmu::legacy::ITEM_COMMON_SIZE; ++y)
+			for (int y = EQEmu::inventory::socketBegin; y < EQEmu::inventory::SocketCount; ++y)
 			{
 				EQEmu::ItemInstance *aug = nullptr;
 				aug = ins->GetAugment(y);

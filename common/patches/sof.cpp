@@ -1230,7 +1230,7 @@ namespace SoF
 		OUT(hairstyle);
 		OUT(beard);
 		//	OUT(unknown00178[10]);
-		for (r = EQEmu::textures::TextureBegin; r < EQEmu::textures::TextureCount; r++) {
+		for (r = EQEmu::textures::textureBegin; r < EQEmu::textures::materialCount; r++) {
 			eq->equipment.Slot[r].Material = emu->item_material.Slot[r].Material;
 			eq->equipment.Slot[r].Unknown1 = 0;
 			eq->equipment.Slot[r].EliteMaterial = 0;
@@ -1670,10 +1670,10 @@ namespace SoF
 			eq_cse->HairColor = emu_cse->HairColor;
 			eq_cse->Face = emu_cse->Face;
 
-			for (int equip_index = 0; equip_index < EQEmu::textures::TextureCount; equip_index++) {
+			for (int equip_index = EQEmu::textures::textureBegin; equip_index < EQEmu::textures::materialCount; equip_index++) {
 				eq_cse->Equip[equip_index].Material = emu_cse->Equip[equip_index].Material;
 				eq_cse->Equip[equip_index].Unknown1 = emu_cse->Equip[equip_index].Unknown1;
-				eq_cse->Equip[equip_index].EliteMaterial = emu_cse->Equip[equip_index].EliteMaterial;
+				eq_cse->Equip[equip_index].EliteMaterial = emu_cse->Equip[equip_index].EliteModel;
 				eq_cse->Equip[equip_index].Color = emu_cse->Equip[equip_index].Color;
 			}
 
@@ -2101,10 +2101,10 @@ namespace SoF
 			eq->deity = emu->deity;
 			eq->drakkin_heritage = emu->drakkin_heritage;
 			eq->gender = emu->gender;
-			for (k = EQEmu::textures::TextureBegin; k < EQEmu::textures::TextureCount; k++) {
+			for (k = EQEmu::textures::textureBegin; k < EQEmu::textures::materialCount; k++) {
 				eq->equipment.Slot[k].Material = emu->equipment.Slot[k].Material;
 				eq->equipment.Slot[k].Unknown1 = emu->equipment.Slot[k].Unknown1;
-				eq->equipment.Slot[k].EliteMaterial = emu->equipment.Slot[k].EliteMaterial;
+				eq->equipment.Slot[k].EliteMaterial = emu->equipment.Slot[k].EliteModel;
 				eq->equipment_tint.Slot[k].Color = emu->equipment_tint.Slot[k].Color;
 			}
 			eq->StandState = emu->StandState;
@@ -2167,7 +2167,7 @@ namespace SoF
 			strcpy(eq->name, emu->name);
 			eq->petOwnerId = emu->petOwnerId;
 			eq->pvp = 0;	// 0 = non-pvp colored name, 1 = red pvp name
-			for (k = EQEmu::textures::TextureBegin; k < EQEmu::textures::TextureCount; k++) {
+			for (k = EQEmu::textures::textureBegin; k < EQEmu::textures::materialCount; k++) {
 				eq->equipment_tint.Slot[k].Color = emu->equipment_tint.Slot[k].Color;
 			}
 			eq->anon = emu->anon;
@@ -3237,18 +3237,18 @@ namespace SoF
 
 		ob.write((const char*)&subitem_count, sizeof(uint32));
 
-		for (uint32 index = SUB_INDEX_BEGIN; index < EQEmu::legacy::ITEM_CONTAINER_SIZE; ++index) {
+		for (uint32 index = EQEmu::inventory::containerBegin; index < EQEmu::inventory::ContainerCount; ++index) {
 			EQEmu::ItemInstance* sub = inst->GetItem(index);
 			if (!sub)
 				continue;
 
 			int SubSlotNumber = INVALID_INDEX;
 			if (slot_id_in >= EQEmu::legacy::GENERAL_BEGIN && slot_id_in <= EQEmu::legacy::GENERAL_END)
-				SubSlotNumber = (((slot_id_in + 3) * EQEmu::legacy::ITEM_CONTAINER_SIZE) + index + 1);
+				SubSlotNumber = (((slot_id_in + 3) * EQEmu::inventory::ContainerCount) + index + 1);
 			else if (slot_id_in >= EQEmu::legacy::BANK_BEGIN && slot_id_in <= EQEmu::legacy::BANK_END)
-				SubSlotNumber = (((slot_id_in - EQEmu::legacy::BANK_BEGIN) * EQEmu::legacy::ITEM_CONTAINER_SIZE) + EQEmu::legacy::BANK_BAGS_BEGIN + index);
+				SubSlotNumber = (((slot_id_in - EQEmu::legacy::BANK_BEGIN) * EQEmu::inventory::ContainerCount) + EQEmu::legacy::BANK_BAGS_BEGIN + index);
 			else if (slot_id_in >= EQEmu::legacy::SHARED_BANK_BEGIN && slot_id_in <= EQEmu::legacy::SHARED_BANK_END)
-				SubSlotNumber = (((slot_id_in - EQEmu::legacy::SHARED_BANK_BEGIN) * EQEmu::legacy::ITEM_CONTAINER_SIZE) + EQEmu::legacy::SHARED_BANK_BAGS_BEGIN + index);
+				SubSlotNumber = (((slot_id_in - EQEmu::legacy::SHARED_BANK_BEGIN) * EQEmu::inventory::ContainerCount) + EQEmu::legacy::SHARED_BANK_BAGS_BEGIN + index);
 			else
 				SubSlotNumber = slot_id_in;
 
@@ -3266,7 +3266,7 @@ namespace SoF
 	{
 		uint32 SoFSlot = 0;
 
-		if (serverSlot >= EQEmu::legacy::SlotAmmo && serverSlot <= 53) // Cursor/Ammo/Power Source and Normal Inventory Slots
+		if (serverSlot >= EQEmu::inventory::slotAmmo && serverSlot <= 53) // Cursor/Ammo/Power Source and Normal Inventory Slots
 			SoFSlot = serverSlot + 1;
 		else if (serverSlot >= EQEmu::legacy::GENERAL_BAGS_BEGIN && serverSlot <= EQEmu::legacy::CURSOR_BAG_END)
 			SoFSlot = serverSlot + 11;
@@ -3274,7 +3274,7 @@ namespace SoF
 			SoFSlot = serverSlot + 1;
 		else if (serverSlot >= EQEmu::legacy::SHARED_BANK_BAGS_BEGIN && serverSlot <= EQEmu::legacy::SHARED_BANK_BAGS_END)
 			SoFSlot = serverSlot + 1;
-		else if (serverSlot == EQEmu::legacy::SlotPowerSource)
+		else if (serverSlot == EQEmu::inventory::slotPowerSource)
 			SoFSlot = invslot::PossessionsPowerSource;
 		else
 			SoFSlot = serverSlot;
@@ -3301,7 +3301,7 @@ namespace SoF
 		else if (sofSlot >= invbag::SharedBankBagsBegin && sofSlot <= invbag::SharedBankBagsEnd)
 			ServerSlot = sofSlot - 1;
 		else if (sofSlot == invslot::PossessionsPowerSource)
-			ServerSlot = EQEmu::legacy::SlotPowerSource;
+			ServerSlot = EQEmu::inventory::slotPowerSource;
 		else
 			ServerSlot = sofSlot;
 

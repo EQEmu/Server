@@ -313,7 +313,7 @@ namespace EQEmu
 		bool AvailableWearSlot(uint32 aug_wear_slots) const;
 		int8 AvailableAugmentSlot(int32 augtype) const;
 		bool IsAugmentSlotAvailable(int32 augtype, uint8 slot) const;
-		inline int32 GetAugmentType() const { return ((m_item) ? m_item->AugType : NO_ITEM); }
+		inline int32 GetAugmentType() const { return ((m_item) ? m_item->AugType : 0); }
 
 		inline bool IsExpendable() const { return ((m_item) ? ((m_item->Click.Type == EQEmu::item::ItemEffectExpendable) || (m_item->ItemType == EQEmu::item::ItemTypePotion)) : false); }
 
@@ -353,8 +353,8 @@ namespace EQEmu
 		bool IsAmmo() const;
 
 		// Accessors
-		const uint32 GetID() const { return ((m_item) ? m_item->ID : NO_ITEM); }
-		const uint32 GetItemScriptID() const { return ((m_item) ? m_item->ScriptFileID : NO_ITEM); }
+		const uint32 GetID() const { return ((m_item) ? m_item->ID : 0); }
+		const uint32 GetItemScriptID() const { return ((m_item) ? m_item->ScriptFileID : 0); }
 		const ItemData* GetItem() const;
 		const ItemData* GetUnscaledItem() const;
 

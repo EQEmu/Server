@@ -145,28 +145,28 @@ void Client::CalcItemBonuses(StatBonuses* newbon) {
 
 	unsigned int i;
 	// Update: MainAmmo should only calc skill mods (TODO: Check for other cases)
-	for (i = EQEmu::legacy::SlotCharm; i <= EQEmu::legacy::SlotAmmo; i++) {
+	for (i = EQEmu::inventory::slotCharm; i <= EQEmu::inventory::slotAmmo; i++) {
 		const EQEmu::ItemInstance* inst = m_inv[i];
 		if(inst == 0)
 			continue;
-		AddItemBonuses(inst, newbon, false, false, 0, (i == EQEmu::legacy::SlotAmmo));
+		AddItemBonuses(inst, newbon, false, false, 0, (i == EQEmu::inventory::slotAmmo));
 
 		//These are given special flags due to how often they are checked for various spell effects.
 		const EQEmu::ItemData *item = inst->GetItem();
-		if (i == EQEmu::legacy::SlotSecondary && (item && item->ItemType == EQEmu::item::ItemTypeShield))
+		if (i == EQEmu::inventory::slotSecondary && (item && item->ItemType == EQEmu::item::ItemTypeShield))
 			SetShieldEquiped(true);
-		else if (i == EQEmu::legacy::SlotPrimary && (item && item->ItemType == EQEmu::item::ItemType2HBlunt)) {
+		else if (i == EQEmu::inventory::slotPrimary && (item && item->ItemType == EQEmu::item::ItemType2HBlunt)) {
 			SetTwoHandBluntEquiped(true);
 			SetTwoHanderEquipped(true);
 		}
-		else if (i == EQEmu::legacy::SlotPrimary && (item && (item->ItemType == EQEmu::item::ItemType2HSlash || item->ItemType == EQEmu::item::ItemType2HPiercing)))
+		else if (i == EQEmu::inventory::slotPrimary && (item && (item->ItemType == EQEmu::item::ItemType2HSlash || item->ItemType == EQEmu::item::ItemType2HPiercing)))
 			SetTwoHanderEquipped(true);
 	}
 
 	//Power Source Slot
 	if (ClientVersion() >= EQEmu::versions::ClientVersion::SoF)
 	{
-		const EQEmu::ItemInstance* inst = m_inv[EQEmu::legacy::SlotPowerSource];
+		const EQEmu::ItemInstance* inst = m_inv[EQEmu::inventory::slotPowerSource];
 		if(inst)
 			AddItemBonuses(inst, newbon);
 	}
@@ -181,7 +181,7 @@ void Client::CalcItemBonuses(StatBonuses* newbon) {
 
 	//Optional ability to have worn effects calculate as an addititive bonus instead of highest value
 	if (RuleI(Spells, AdditiveBonusWornType) && RuleI(Spells, AdditiveBonusWornType) != EQEmu::item::ItemEffectWorn){
-		for (i = EQEmu::legacy::SlotCharm; i < EQEmu::legacy::SlotAmmo; i++) {
+		for (i = EQEmu::inventory::slotCharm; i < EQEmu::inventory::slotAmmo; i++) {
 			const EQEmu::ItemInstance* inst = m_inv[i];
 			if(inst == 0)
 				continue;
@@ -527,7 +527,7 @@ void Client::AddItemBonuses(const EQEmu::ItemInstance *inst, StatBonuses *newbon
 	}
 
 	if (!isAug) {
-		for (int i = 0; i < EQEmu::legacy::ITEM_COMMON_SIZE; i++)
+		for (int i = EQEmu::inventory::socketBegin; i < EQEmu::inventory::SocketCount; i++)
 			AddItemBonuses(inst->GetAugment(i), newbon, true, false, rec_level, ammo_slot_item);
 	}
 }
@@ -565,7 +565,7 @@ void Client::AdditiveWornBonuses(const EQEmu::ItemInstance *inst, StatBonuses* n
 	if (!isAug)
 	{
 		int i;
-		for (i = 0; i < EQEmu::legacy::ITEM_COMMON_SIZE; i++) {
+		for (i = EQEmu::inventory::socketBegin; i < EQEmu::inventory::SocketCount; i++) {
 			AdditiveWornBonuses(inst->GetAugment(i),newbon,true);
 		}
 	}
@@ -3299,7 +3299,7 @@ void Client::CalcItemScale() {
 	//Power Source Slot
 	if (ClientVersion() >= EQEmu::versions::ClientVersion::SoF)
 	{
-		if (CalcItemScale(EQEmu::legacy::SlotPowerSource, EQEmu::legacy::SlotPowerSource))
+		if (CalcItemScale(EQEmu::inventory::slotPowerSource, EQEmu::inventory::slotPowerSource))
 			changed = true;
 	}
 
@@ -3314,7 +3314,7 @@ bool Client::CalcItemScale(uint32 slot_x, uint32 slot_y) {
 	bool changed = false;
 	uint32 i;
 	for (i = slot_x; i <= slot_y; i++) {
-		if (i == EQEmu::legacy::SlotAmmo) // moved here from calling procedure to facilitate future range changes where MainAmmo may not be the last slot
+		if (i == EQEmu::inventory::slotAmmo) // moved here from calling procedure to facilitate future range changes where MainAmmo may not be the last slot
 			continue;
 
 		EQEmu::ItemInstance* inst = m_inv.GetItem(i);
@@ -3344,7 +3344,7 @@ bool Client::CalcItemScale(uint32 slot_x, uint32 slot_y) {
 		}
 
 		//iterate all augments
-		for (int x = AUG_INDEX_BEGIN; x < EQEmu::legacy::ITEM_COMMON_SIZE; ++x)
+		for (int x = EQEmu::inventory::socketBegin; x < EQEmu::inventory::SocketCount; ++x)
 		{
 			EQEmu::ItemInstance * a_inst = inst->GetAugment(x);
 			if(!a_inst)
@@ -3393,7 +3393,7 @@ void Client::DoItemEnterZone() {
 	//Power Source Slot
 	if (ClientVersion() >= EQEmu::versions::ClientVersion::SoF)
 	{
-		if (DoItemEnterZone(EQEmu::legacy::SlotPowerSource, EQEmu::legacy::SlotPowerSource))
+		if (DoItemEnterZone(EQEmu::inventory::slotPowerSource, EQEmu::inventory::slotPowerSource))
 			changed = true;
 	}
 
@@ -3407,7 +3407,7 @@ bool Client::DoItemEnterZone(uint32 slot_x, uint32 slot_y) {
 	// behavior change: 'slot_y' is now [RANGE]_END and not [RANGE]_END + 1
 	bool changed = false;
 	for(uint32 i = slot_x; i <= slot_y; i++) {
-		if (i == EQEmu::legacy::SlotAmmo) // moved here from calling procedure to facilitate future range changes where MainAmmo may not be the last slot
+		if (i == EQEmu::inventory::slotAmmo) // moved here from calling procedure to facilitate future range changes where MainAmmo may not be the last slot
 			continue;
 
 		EQEmu::ItemInstance* inst = m_inv.GetItem(i);
@@ -3429,7 +3429,7 @@ bool Client::DoItemEnterZone(uint32 slot_x, uint32 slot_y) {
 			uint16 oldexp = inst->GetExp();
 
 			parse->EventItem(EVENT_ITEM_ENTER_ZONE, this, inst, nullptr, "", 0);
-			if (i <= EQEmu::legacy::SlotAmmo || i == EQEmu::legacy::SlotPowerSource) {
+			if (i <= EQEmu::inventory::slotAmmo || i == EQEmu::inventory::slotPowerSource) {
 				parse->EventItem(EVENT_EQUIP_ITEM, this, inst, nullptr, "", i);
 			}
 
@@ -3439,7 +3439,7 @@ bool Client::DoItemEnterZone(uint32 slot_x, uint32 slot_y) {
 				update_slot = true;
 			}
 		} else {
-			if (i <= EQEmu::legacy::SlotAmmo || i == EQEmu::legacy::SlotPowerSource) {
+			if (i <= EQEmu::inventory::slotAmmo || i == EQEmu::inventory::slotPowerSource) {
 				parse->EventItem(EVENT_EQUIP_ITEM, this, inst, nullptr, "", i);
 			}
 
@@ -3447,7 +3447,7 @@ bool Client::DoItemEnterZone(uint32 slot_x, uint32 slot_y) {
 		}
 
 		//iterate all augments
-		for (int x = AUG_INDEX_BEGIN; x < EQEmu::legacy::ITEM_COMMON_SIZE; ++x)
+		for (int x = EQEmu::inventory::socketBegin; x < EQEmu::inventory::SocketCount; ++x)
 		{
 			EQEmu::ItemInstance *a_inst = inst->GetAugment(x);
 			if(!a_inst)

@@ -490,7 +490,7 @@ void NPC::CheckMinMaxLevel(Mob *them)
 		if(themlevel < (*cur)->min_level || themlevel > (*cur)->max_level)
 		{
 			material = Inventory::CalcMaterialFromSlot((*cur)->equip_slot);
-			if (material != EQEmu::textures::TextureInvalid)
+			if (material != EQEmu::textures::materialInvalid)
 				SendWearChange(material);
 
 			cur = itemlist.erase(cur);
@@ -750,8 +750,8 @@ void NPC::UpdateEquipmentLight()
 	m_Light.Type[EQEmu::lightsource::LightEquipment] = 0;
 	m_Light.Level[EQEmu::lightsource::LightEquipment] = 0;
 
-	for (int index = SLOT_BEGIN; index < EQEmu::legacy::EQUIPMENT_SIZE; ++index) {
-		if (index == EQEmu::legacy::SlotAmmo) { continue; }
+	for (int index = EQEmu::inventory::slotBegin; index < EQEmu::legacy::EQUIPMENT_SIZE; ++index) {
+		if (index == EQEmu::inventory::slotAmmo) { continue; }
 
 		auto item = database.GetItem(equipment[index]);
 		if (item == nullptr) { continue; }
@@ -1378,7 +1378,7 @@ uint32 ZoneDatabase::NPCSpawnDB(uint8 command, const char* zone, uint32 zone_ver
 
 int32 NPC::GetEquipmentMaterial(uint8 material_slot) const
 {
-	if (material_slot >= EQEmu::textures::TextureCount)
+	if (material_slot >= EQEmu::textures::materialCount)
 		return 0;
 
 	int16 invslot = Inventory::CalcSlotFromMaterial(material_slot);
@@ -1389,23 +1389,23 @@ int32 NPC::GetEquipmentMaterial(uint8 material_slot) const
 	{
 		switch(material_slot)
 		{
-		case EQEmu::textures::TextureHead:
+		case EQEmu::textures::armorHead:
 			return helmtexture;
-		case EQEmu::textures::TextureChest:
+		case EQEmu::textures::armorChest:
 			return texture;
-		case EQEmu::textures::TextureArms:
+		case EQEmu::textures::armorArms:
 			return armtexture;
-		case EQEmu::textures::TextureWrist:
+		case EQEmu::textures::armorWrist:
 			return bracertexture;
-		case EQEmu::textures::TextureHands:
+		case EQEmu::textures::armorHands:
 			return handtexture;
-		case EQEmu::textures::TextureLegs:
+		case EQEmu::textures::armorLegs:
 			return legtexture;
-		case EQEmu::textures::TextureFeet:
+		case EQEmu::textures::armorFeet:
 			return feettexture;
-		case EQEmu::textures::TexturePrimary:
+		case EQEmu::textures::weaponPrimary:
 			return d_melee_texture1;
-		case EQEmu::textures::TextureSecondary:
+		case EQEmu::textures::weaponSecondary:
 			return d_melee_texture2;
 		default:
 			//they have nothing in the slot, and its not a special slot... they get nothing.

@@ -47,7 +47,7 @@ namespace EQEmu
 	namespace inventory {
 		class LookupEntry {
 		public:
-			size_t InventoryTypeSize[legacy::TypeCount];
+			size_t InventoryTypeSize[25]; // should reflect EQEmu::inventory::typeCount referenced in emu_constants.h
 
 			uint64 PossessionsBitmask;
 			size_t ItemBagSize;

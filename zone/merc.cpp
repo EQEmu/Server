@@ -214,7 +214,7 @@ void Merc::CalcItemBonuses(StatBonuses* newbon) {
 
 	unsigned int i;
 	//should not include 21 (SLOT_AMMO)
-	for (i = 0; i < EQEmu::legacy::SlotAmmo; i++) {
+	for (i = 0; i < EQEmu::inventory::slotAmmo; i++) {
 		if(equipment[i] == 0)
 			continue;
 		const EQEmu::ItemData * itm = database.GetItem(equipment[i]);
@@ -1559,24 +1559,24 @@ void Merc::AI_Process() {
 				//try main hand first
 				if(attack_timer.Check())
 				{
-					Attack(GetTarget(), EQEmu::legacy::SlotPrimary);
+					Attack(GetTarget(), EQEmu::inventory::slotPrimary);
 
 					bool tripleSuccess = false;
 
 					if(GetOwner() && GetTarget() && CanThisClassDoubleAttack())
 					{
 						if(GetOwner()) {
-							Attack(GetTarget(), EQEmu::legacy::SlotPrimary, true);
+							Attack(GetTarget(), EQEmu::inventory::slotPrimary, true);
 						}
 
 						if(GetOwner() && GetTarget() && GetSpecialAbility(SPECATK_TRIPLE)) {
 							tripleSuccess = true;
-							Attack(GetTarget(), EQEmu::legacy::SlotPrimary, true);
+							Attack(GetTarget(), EQEmu::inventory::slotPrimary, true);
 						}
 
 						//quad attack, does this belong here??
 						if(GetOwner() && GetTarget() && GetSpecialAbility(SPECATK_QUAD)) {
-							Attack(GetTarget(), EQEmu::legacy::SlotPrimary, true);
+							Attack(GetTarget(), EQEmu::inventory::slotPrimary, true);
 						}
 					}
 
@@ -1588,8 +1588,8 @@ void Merc::AI_Process() {
 						if(zone->random.Roll(flurrychance))
 						{
 							Message_StringID(MT_NPCFlurry, YOU_FLURRY);
-							Attack(GetTarget(), EQEmu::legacy::SlotPrimary, false);
-							Attack(GetTarget(), EQEmu::legacy::SlotPrimary, false);
+							Attack(GetTarget(), EQEmu::inventory::slotPrimary, false);
+							Attack(GetTarget(), EQEmu::inventory::slotPrimary, false);
 						}
 					}
 
@@ -1598,7 +1598,7 @@ void Merc::AI_Process() {
 					if (GetTarget() && ExtraAttackChanceBonus) {
 						if(zone->random.Roll(ExtraAttackChanceBonus))
 						{
-							Attack(GetTarget(), EQEmu::legacy::SlotPrimary, false);
+							Attack(GetTarget(), EQEmu::inventory::slotPrimary, false);
 						}
 					}
 				}
@@ -1634,11 +1634,11 @@ void Merc::AI_Process() {
 						// Max 78% of DW
 						if (zone->random.Roll(DualWieldProbability))
 						{
-							Attack(GetTarget(), EQEmu::legacy::SlotSecondary);     // Single attack with offhand
+							Attack(GetTarget(), EQEmu::inventory::slotSecondary);     // Single attack with offhand
 
 							if(CanThisClassDoubleAttack()) {
 								if(GetTarget() && GetTarget()->GetHP() > -10)
-									Attack(GetTarget(), EQEmu::legacy::SlotSecondary);     // Single attack with offhand
+									Attack(GetTarget(), EQEmu::inventory::slotSecondary);     // Single attack with offhand
 							}
 						}
 					}
@@ -5045,13 +5045,13 @@ void Merc::ScaleStats(int scalepercent, bool setmax) {
 
 void Merc::UpdateMercAppearance() {
 	// Copied from Bot Code:
-	uint32 itemID = NO_ITEM;
-	uint8 materialFromSlot = EQEmu::textures::TextureInvalid;
+	uint32 itemID = 0;
+	uint8 materialFromSlot = EQEmu::textures::materialInvalid;
 	for (int i = EQEmu::legacy::EQUIPMENT_BEGIN; i <= EQEmu::legacy::EQUIPMENT_END; ++i) {
 		itemID = equipment[i];
-		if(itemID != NO_ITEM) {
+		if(itemID != 0) {
 			materialFromSlot = Inventory::CalcMaterialFromSlot(i);
-			if (materialFromSlot != EQEmu::textures::TextureInvalid)
+			if (materialFromSlot != EQEmu::textures::materialInvalid)
 				this->SendWearChange(materialFromSlot);
 		}
 	}
@@ -5065,8 +5065,8 @@ void Merc::UpdateEquipmentLight()
 	m_Light.Type[EQEmu::lightsource::LightEquipment] = 0;
 	m_Light.Level[EQEmu::lightsource::LightEquipment] = 0;
 
-	for (int index = SLOT_BEGIN; index < EQEmu::legacy::EQUIPMENT_SIZE; ++index) {
-		if (index == EQEmu::legacy::SlotAmmo) { continue; }
+	for (int index = EQEmu::inventory::slotBegin; index < EQEmu::legacy::EQUIPMENT_SIZE; ++index) {
+		if (index == EQEmu::inventory::slotAmmo) { continue; }
 
 		auto item = database.GetItem(equipment[index]);
 		if (item == nullptr) { continue; }

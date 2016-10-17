@@ -487,7 +487,7 @@ void ZoneDatabase::LoadWorldContainer(uint32 parentid, EQEmu::ItemInstance* cont
         uint8 index = (uint8)atoi(row[0]);
         uint32 item_id = (uint32)atoi(row[1]);
         int8 charges = (int8)atoi(row[2]);
-		uint32 aug[EQEmu::legacy::ITEM_COMMON_SIZE];
+		uint32 aug[EQEmu::inventory::SocketCount];
         aug[0] = (uint32)atoi(row[3]);
         aug[1] = (uint32)atoi(row[4]);
         aug[2] = (uint32)atoi(row[5]);
@@ -497,7 +497,7 @@ void ZoneDatabase::LoadWorldContainer(uint32 parentid, EQEmu::ItemInstance* cont
 
         EQEmu::ItemInstance* inst = database.CreateItem(item_id, charges);
 		if (inst && inst->GetItem()->IsClassCommon()) {
-			for (int i = AUG_INDEX_BEGIN; i < EQEmu::legacy::ITEM_COMMON_SIZE; i++)
+			for (int i = EQEmu::inventory::socketBegin; i < EQEmu::inventory::SocketCount; i++)
                 if (aug[i])
                     inst->PutAugment(&database, i, aug[i]);
             // Put item inside world container
@@ -520,17 +520,17 @@ void ZoneDatabase::SaveWorldContainer(uint32 zone_id, uint32 parent_id, const EQ
 	DeleteWorldContainer(parent_id,zone_id);
 
 	// Save all 10 items, if they exist
-	for (uint8 index = SUB_INDEX_BEGIN; index < EQEmu::legacy::ITEM_CONTAINER_SIZE; index++) {
+	for (uint8 index = EQEmu::inventory::containerBegin; index < EQEmu::inventory::ContainerCount; index++) {
 
 		EQEmu::ItemInstance* inst = container->GetItem(index);
 		if (!inst)
             continue;
 
         uint32 item_id = inst->GetItem()->ID;
-		uint32 augslot[EQEmu::legacy::ITEM_COMMON_SIZE] = { NO_ITEM, NO_ITEM, NO_ITEM, NO_ITEM, NO_ITEM, NO_ITEM };
+		uint32 augslot[EQEmu::inventory::SocketCount] = { 0, 0, 0, 0, 0, 0 };
 
 		if (inst->IsType(EQEmu::item::ItemClassCommon)) {
-			for (int i = AUG_INDEX_BEGIN; i < EQEmu::legacy::ITEM_COMMON_SIZE; i++) {
+			for (int i = EQEmu::inventory::socketBegin; i < EQEmu::inventory::SocketCount; i++) {
                 EQEmu::ItemInstance *auginst=inst->GetAugment(i);
                 augslot[i]=(auginst && auginst->GetItem()) ? auginst->GetItem()->ID : 0;
             }
@@ -2092,7 +2092,7 @@ const NPCType* ZoneDatabase::LoadNPCTypesData(uint32 npc_type_id, bool bulk_load
             else {
                 auto armorTint_row = armortint_results.begin();
 
-				for (int index = EQEmu::textures::TextureBegin; index <= EQEmu::textures::LastTexture; index++) {
+				for (int index = EQEmu::textures::textureBegin; index <= EQEmu::textures::LastTexture; index++) {
                     temp_npctype_data->armor_tint.Slot[index].Color = atoi(armorTint_row[index * 3]) << 16;
 					temp_npctype_data->armor_tint.Slot[index].Color |= atoi(armorTint_row[index * 3 + 1]) << 8;
 					temp_npctype_data->armor_tint.Slot[index].Color |= atoi(armorTint_row[index * 3 + 2]);
@@ -2102,7 +2102,7 @@ const NPCType* ZoneDatabase::LoadNPCTypesData(uint32 npc_type_id, bool bulk_load
         }
 		// Try loading npc_types tint fields if armor tint is 0 or query failed to get results
 		if (armor_tint_id == 0) {
-			for (int index = EQEmu::textures::TextureChest; index < EQEmu::textures::TextureCount; index++) {
+			for (int index = EQEmu::textures::armorChest; index < EQEmu::textures::materialCount; index++) {
 				temp_npctype_data->armor_tint.Slot[index].Color = temp_npctype_data->armor_tint.Slot[0].Color; // odd way to 'zero-out' the array...
 			}
 		}
@@ -2307,7 +2307,7 @@ const NPCType* ZoneDatabase::GetMercType(uint32 id, uint16 raceid, uint32 client
 		tmpNPCType->armor_tint.Slot[0].Color |= (tmpNPCType->armor_tint.Slot[0].Color) ? (0xFF << 24) : 0;
 
 		if (armor_tint_id == 0)
-			for (int index = EQEmu::textures::TextureChest; index <= EQEmu::textures::LastTexture; index++)
+			for (int index = EQEmu::textures::armorChest; index <= EQEmu::textures::LastTexture; index++)
 				tmpNPCType->armor_tint.Slot[index].Color = tmpNPCType->armor_tint.Slot[0].Color;
 		else if (tmpNPCType->armor_tint.Slot[0].Color == 0) {
 			std::string armorTint_query = StringFormat("SELECT red1h, grn1h, blu1h, "
@@ -2327,7 +2327,7 @@ const NPCType* ZoneDatabase::GetMercType(uint32 id, uint16 raceid, uint32 client
 			else {
 				auto armorTint_row = results.begin();
 
-				for (int index = EQEmu::textures::TextureBegin; index <= EQEmu::textures::LastTexture; index++) {
+				for (int index = EQEmu::textures::textureBegin; index <= EQEmu::textures::LastTexture; index++) {
 					tmpNPCType->armor_tint.Slot[index].Color = atoi(armorTint_row[index * 3]) << 16;
 					tmpNPCType->armor_tint.Slot[index].Color |= atoi(armorTint_row[index * 3 + 1]) << 8;
 					tmpNPCType->armor_tint.Slot[index].Color |= atoi(armorTint_row[index * 3 + 2]);

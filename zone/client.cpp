@@ -2800,7 +2800,7 @@ void Client::SetMaterial(int16 in_slot, uint32 item_id) {
 	if (item && item->IsClassCommon())
 	{
 		uint8 matslot = Inventory::CalcMaterialFromSlot(in_slot);
-		if (matslot != EQEmu::textures::TextureInvalid)
+		if (matslot != EQEmu::textures::materialInvalid)
 		{
 			m_pp.item_material.Slot[matslot].Material = GetEquipmentMaterial(matslot);
 		}
@@ -3132,17 +3132,17 @@ void Client::Tell_StringID(uint32 string_id, const char *who, const char *messag
 }
 
 void Client::SetTint(int16 in_slot, uint32 color) {
-	EQEmu::Tint_Struct new_color;
+	EQEmu::textures::Tint_Struct new_color;
 	new_color.Color = color;
 	SetTint(in_slot, new_color);
 	database.SaveCharacterMaterialColor(this->CharacterID(), in_slot, color);
 }
 
 // Still need to reconcile bracer01 versus bracer02
-void Client::SetTint(int16 in_slot, EQEmu::Tint_Struct& color) {
+void Client::SetTint(int16 in_slot, EQEmu::textures::Tint_Struct& color) {
 
 	uint8 matslot = Inventory::CalcMaterialFromSlot(in_slot);
-	if (matslot != EQEmu::textures::TextureInvalid)
+	if (matslot != EQEmu::textures::materialInvalid)
 	{
 		m_pp.item_tint.Slot[matslot].Color = color.Color;
 		database.SaveCharacterMaterialColor(this->CharacterID(), in_slot, color.Color);
@@ -3219,28 +3219,28 @@ void Client::LinkDead()
 uint8 Client::SlotConvert(uint8 slot,bool bracer){
 	uint8 slot2 = 0; // why are we returning MainCharm instead of INVALID_INDEX? (must be a pre-charm segment...)
 	if(bracer)
-		return EQEmu::legacy::SlotWrist2;
+		return EQEmu::inventory::slotWrist2;
 	switch(slot) {
-	case EQEmu::textures::TextureHead:
-		slot2 = EQEmu::legacy::SlotHead;
+	case EQEmu::textures::armorHead:
+		slot2 = EQEmu::inventory::slotHead;
 		break;
-	case EQEmu::textures::TextureChest:
-		slot2 = EQEmu::legacy::SlotChest;
+	case EQEmu::textures::armorChest:
+		slot2 = EQEmu::inventory::slotChest;
 		break;
-	case EQEmu::textures::TextureArms:
-		slot2 = EQEmu::legacy::SlotArms;
+	case EQEmu::textures::armorArms:
+		slot2 = EQEmu::inventory::slotArms;
 		break;
-	case EQEmu::textures::TextureWrist:
-		slot2 = EQEmu::legacy::SlotWrist1;
+	case EQEmu::textures::armorWrist:
+		slot2 = EQEmu::inventory::slotWrist1;
 		break;
-	case EQEmu::textures::TextureHands:
-		slot2 = EQEmu::legacy::SlotHands;
+	case EQEmu::textures::armorHands:
+		slot2 = EQEmu::inventory::slotHands;
 		break;
-	case EQEmu::textures::TextureLegs:
-		slot2 = EQEmu::legacy::SlotLegs;
+	case EQEmu::textures::armorLegs:
+		slot2 = EQEmu::inventory::slotLegs;
 		break;
-	case EQEmu::textures::TextureFeet:
-		slot2 = EQEmu::legacy::SlotFeet;
+	case EQEmu::textures::armorFeet:
+		slot2 = EQEmu::inventory::slotFeet;
 		break;
 	}
 	return slot2;
@@ -3249,26 +3249,26 @@ uint8 Client::SlotConvert(uint8 slot,bool bracer){
 uint8 Client::SlotConvert2(uint8 slot){
 	uint8 slot2 = 0; // same as above...
 	switch(slot){
-	case EQEmu::legacy::SlotHead:
-		slot2 = EQEmu::textures::TextureHead;
+	case EQEmu::inventory::slotHead:
+		slot2 = EQEmu::textures::armorHead;
 		break;
-	case EQEmu::legacy::SlotChest:
-		slot2 = EQEmu::textures::TextureChest;
+	case EQEmu::inventory::slotChest:
+		slot2 = EQEmu::textures::armorChest;
 		break;
-	case EQEmu::legacy::SlotArms:
-		slot2 = EQEmu::textures::TextureArms;
+	case EQEmu::inventory::slotArms:
+		slot2 = EQEmu::textures::armorArms;
 		break;
-	case EQEmu::legacy::SlotWrist1:
-		slot2 = EQEmu::textures::TextureWrist;
+	case EQEmu::inventory::slotWrist1:
+		slot2 = EQEmu::textures::armorWrist;
 		break;
-	case EQEmu::legacy::SlotHands:
-		slot2 = EQEmu::textures::TextureHands;
+	case EQEmu::inventory::slotHands:
+		slot2 = EQEmu::textures::armorHands;
 		break;
-	case EQEmu::legacy::SlotLegs:
-		slot2 = EQEmu::textures::TextureLegs;
+	case EQEmu::inventory::slotLegs:
+		slot2 = EQEmu::textures::armorLegs;
 		break;
-	case EQEmu::legacy::SlotFeet:
-		slot2 = EQEmu::textures::TextureFeet;
+	case EQEmu::inventory::slotFeet:
+		slot2 = EQEmu::textures::armorFeet;
 		break;
 	}
 	return slot2;
@@ -4268,14 +4268,14 @@ bool Client::GroupFollow(Client* inviter) {
 uint16 Client::GetPrimarySkillValue()
 {
 	EQEmu::skills::SkillType skill = EQEmu::skills::HIGHEST_SKILL; //because nullptr == 0, which is 1H Slashing, & we want it to return 0 from GetSkill
-	bool equiped = m_inv.GetItem(EQEmu::legacy::SlotPrimary);
+	bool equiped = m_inv.GetItem(EQEmu::inventory::slotPrimary);
 
 	if (!equiped)
 		skill = EQEmu::skills::SkillHandtoHand;
 
 	else {
 
-		uint8 type = m_inv.GetItem(EQEmu::legacy::SlotPrimary)->GetItem()->ItemType; //is this the best way to do this?
+		uint8 type = m_inv.GetItem(EQEmu::inventory::slotPrimary)->GetItem()->ItemType; //is this the best way to do this?
 
 		switch (type) {
 		case EQEmu::item::ItemType1HSlash: // 1H Slashing
@@ -5785,7 +5785,7 @@ void Client::ProcessInspectRequest(Client* requestee, Client* requester) {
 			}
 		}
 
-		inst = requestee->GetInv().GetItem(EQEmu::legacy::SlotPowerSource);
+		inst = requestee->GetInv().GetItem(EQEmu::inventory::slotPowerSource);
 
 		if(inst) {
 			item = inst->GetItem();
@@ -5799,7 +5799,7 @@ void Client::ProcessInspectRequest(Client* requestee, Client* requester) {
 				insr->itemicons[SoF::invslot::PossessionsPowerSource] = 0xFFFFFFFF;
 		}
 
-		inst = requestee->GetInv().GetItem(EQEmu::legacy::SlotAmmo);
+		inst = requestee->GetInv().GetItem(EQEmu::inventory::slotAmmo);
 
 		if(inst) {
 			item = inst->GetItem();
@@ -6341,8 +6341,8 @@ void Client::Doppelganger(uint16 spell_id, Mob *target, const char *name_overrid
 	made_npc->Corrup = GetCorrup();
 	made_npc->PhR = GetPhR();
 	// looks
-	made_npc->texture = GetEquipmentMaterial(EQEmu::textures::TextureChest);
-	made_npc->helmtexture = GetEquipmentMaterial(EQEmu::textures::TextureHead);
+	made_npc->texture = GetEquipmentMaterial(EQEmu::textures::armorChest);
+	made_npc->helmtexture = GetEquipmentMaterial(EQEmu::textures::armorHead);
 	made_npc->haircolor = GetHairColor();
 	made_npc->beardcolor = GetBeardColor();
 	made_npc->eyecolor1 = GetEyeColor1();
@@ -6353,9 +6353,9 @@ void Client::Doppelganger(uint16 spell_id, Mob *target, const char *name_overrid
 	made_npc->drakkin_heritage = GetDrakkinHeritage();
 	made_npc->drakkin_tattoo = GetDrakkinTattoo();
 	made_npc->drakkin_details = GetDrakkinDetails();
-	made_npc->d_melee_texture1 = GetEquipmentMaterial(EQEmu::textures::TexturePrimary);
-	made_npc->d_melee_texture2 = GetEquipmentMaterial(EQEmu::textures::TextureSecondary);
-	for (int i = EQEmu::textures::TextureBegin; i <= EQEmu::textures::LastTexture; i++)	{
+	made_npc->d_melee_texture1 = GetEquipmentMaterial(EQEmu::textures::weaponPrimary);
+	made_npc->d_melee_texture2 = GetEquipmentMaterial(EQEmu::textures::weaponSecondary);
+	for (int i = EQEmu::textures::textureBegin; i <= EQEmu::textures::LastTexture; i++)	{
 		made_npc->armor_tint.Slot[i].Color = GetEquipmentColor(i);
 	}
 	made_npc->loottable_id = 0;
@@ -8061,7 +8061,7 @@ void Client::TickItemCheck()
 		TryItemTick(i);
 	}
 	//Scan main inventory + cursor
-	for (i = EQEmu::legacy::GENERAL_BEGIN; i <= EQEmu::legacy::SlotCursor; i++)
+	for (i = EQEmu::legacy::GENERAL_BEGIN; i <= EQEmu::inventory::slotCursor; i++)
 	{
 		TryItemTick(i);
 	}
@@ -8092,7 +8092,7 @@ void Client::TryItemTick(int slot)
 	//Only look at augs in main inventory
 	if (slot > EQEmu::legacy::EQUIPMENT_END) { return; }
 
-	for (int x = AUG_INDEX_BEGIN; x < EQEmu::legacy::ITEM_COMMON_SIZE; ++x)
+	for (int x = EQEmu::inventory::socketBegin; x < EQEmu::inventory::SocketCount; ++x)
 	{
 		EQEmu::ItemInstance * a_inst = inst->GetAugment(x);
 		if(!a_inst) { continue; }
@@ -8118,7 +8118,7 @@ void Client::ItemTimerCheck()
 		TryItemTimer(i);
 	}
 
-	for (i = EQEmu::legacy::GENERAL_BEGIN; i <= EQEmu::legacy::SlotCursor; i++)
+	for (i = EQEmu::legacy::GENERAL_BEGIN; i <= EQEmu::inventory::slotCursor; i++)
 	{
 		TryItemTimer(i);
 	}
@@ -8149,7 +8149,7 @@ void Client::TryItemTimer(int slot)
 		return;
 	}
 
-	for (int x = AUG_INDEX_BEGIN; x < EQEmu::legacy::ITEM_COMMON_SIZE; ++x)
+	for (int x = EQEmu::inventory::socketBegin; x < EQEmu::inventory::SocketCount; ++x)
 	{
 		EQEmu::ItemInstance * a_inst = inst->GetAugment(x);
 		if(!a_inst) {
@@ -8482,7 +8482,7 @@ void Client::QuestReward(Mob* target, uint32 copper, uint32 silver, uint32 gold,
 		AddMoneyToPP(copper, silver, gold, platinum, false);
 
 	if (itemid > 0)
-		SummonItem(itemid, 0, 0, 0, 0, 0, 0, false, EQEmu::legacy::SlotPowerSource);
+		SummonItem(itemid, 0, 0, 0, 0, 0, 0, false, EQEmu::inventory::slotPowerSource);
 
 	if (faction)
 	{

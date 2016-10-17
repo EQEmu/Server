@@ -4358,7 +4358,7 @@ void bot_subcommand_bot_dye_armor(Client *c, const Seperator *sep)
 	// TODO: Trouble-shoot model update issue
 	
 	const std::string msg_matslot = StringFormat("mat_slot: %c(All), %i(Head), %i(Chest), %i(Arms), %i(Wrists), %i(Hands), %i(Legs), %i(Feet)",
-		'*', EQEmu::textures::TextureHead, EQEmu::textures::TextureChest, EQEmu::textures::TextureArms, EQEmu::textures::TextureWrist, EQEmu::textures::TextureHands, EQEmu::textures::TextureLegs, EQEmu::textures::TextureFeet);
+		'*', EQEmu::textures::armorHead, EQEmu::textures::armorChest, EQEmu::textures::armorArms, EQEmu::textures::armorWrist, EQEmu::textures::armorHands, EQEmu::textures::armorLegs, EQEmu::textures::armorFeet);
 	
 	if (helper_command_alias_fail(c, "bot_subcommand_bot_dye_armor", sep->arg[0], "botdyearmor"))
 		return;
@@ -4369,7 +4369,7 @@ void bot_subcommand_bot_dye_armor(Client *c, const Seperator *sep)
 	}
 	const int ab_mask = ActionableBots::ABM_NoFilter;
 
-	uint8 material_slot = EQEmu::textures::TextureInvalid;
+	uint8 material_slot = EQEmu::textures::materialInvalid;
 	int16 slot_id = INVALID_INDEX;
 
 	bool dye_all = (sep->arg[1][0] == '*');
@@ -4377,7 +4377,7 @@ void bot_subcommand_bot_dye_armor(Client *c, const Seperator *sep)
 		material_slot = atoi(sep->arg[1]);
 		slot_id = Inventory::CalcSlotFromMaterial(material_slot);
 
-		if (!sep->IsNumber(1) || slot_id == INVALID_INDEX || material_slot > EQEmu::textures::TextureFeet) {
+		if (!sep->IsNumber(1) || slot_id == INVALID_INDEX || material_slot > EQEmu::textures::LastTintableTexture) {
 			c->Message(m_fail, "Valid [mat_slot]s for this command are:");
 			c->Message(m_fail, msg_matslot.c_str());
 			return;
@@ -7072,23 +7072,23 @@ void bot_subcommand_inventory_list(Client *c, const Seperator *sep)
 
 	uint32 inventory_count = 0;
 	for (int i = EQEmu::legacy::EQUIPMENT_BEGIN; i <= (EQEmu::legacy::EQUIPMENT_END + 1); ++i) {
-		if ((i == EQEmu::legacy::SlotSecondary) && is2Hweapon)
+		if ((i == EQEmu::inventory::slotSecondary) && is2Hweapon)
 			continue;
 
-		inst = my_bot->CastToBot()->GetBotItem(i == 22 ? EQEmu::legacy::SlotPowerSource : i);
+		inst = my_bot->CastToBot()->GetBotItem(i == 22 ? EQEmu::inventory::slotPowerSource : i);
 		if (!inst || !inst->GetItem()) {
-			c->Message(m_message, "I need something for my %s (slot %i)", GetBotEquipSlotName(i), (i == 22 ? EQEmu::legacy::SlotPowerSource : i));
+			c->Message(m_message, "I need something for my %s (slot %i)", GetBotEquipSlotName(i), (i == 22 ? EQEmu::inventory::slotPowerSource : i));
 			continue;
 		}
 		
 		item = inst->GetItem();
-		if ((i == EQEmu::legacy::SlotPrimary) && item->IsType2HWeapon()) {
+		if ((i == EQEmu::inventory::slotPrimary) && item->IsType2HWeapon()) {
 			is2Hweapon = true;
 		}
 
 		linker.SetItemInst(inst);
 		item_link = linker.GenerateLink();
-		c->Message(m_message, "Using %s in my %s (slot %i)", item_link.c_str(), GetBotEquipSlotName(i), (i == 22 ? EQEmu::legacy::SlotPowerSource : i));
+		c->Message(m_message, "Using %s in my %s (slot %i)", item_link.c_str(), GetBotEquipSlotName(i), (i == 22 ? EQEmu::inventory::slotPowerSource : i));
 
 		++inventory_count;
 	}
@@ -7127,7 +7127,7 @@ void bot_subcommand_inventory_remove(Client *c, const Seperator *sep)
 	}
 
 	int slotId = atoi(sep->arg[1]);
-	if (!sep->IsNumber(1) || ((slotId > EQEmu::legacy::EQUIPMENT_END || slotId < EQEmu::legacy::EQUIPMENT_BEGIN) && slotId != EQEmu::legacy::SlotPowerSource)) {
+	if (!sep->IsNumber(1) || ((slotId > EQEmu::legacy::EQUIPMENT_END || slotId < EQEmu::legacy::EQUIPMENT_BEGIN) && slotId != EQEmu::inventory::slotPowerSource)) {
 		c->Message(m_fail, "Valid slots are 0-21 or 9999");
 		return;
 	}
@@ -7142,7 +7142,7 @@ void bot_subcommand_inventory_remove(Client *c, const Seperator *sep)
 		return;
 	}
 
-	for (int m = AUG_INDEX_BEGIN; m < EQEmu::legacy::ITEM_COMMON_SIZE; ++m) {
+	for (int m = EQEmu::inventory::socketBegin; m < EQEmu::inventory::SocketCount; ++m) {
 		if (!itminst)
 			break;
 
@@ -7159,7 +7159,7 @@ void bot_subcommand_inventory_remove(Client *c, const Seperator *sep)
 	std::string error_message;
 	if (itm) {
 		c->PushItemOnCursor(*itminst, true);
-		if ((slotId == EQEmu::legacy::SlotRange) || (slotId == EQEmu::legacy::SlotAmmo) || (slotId == EQEmu::legacy::SlotPrimary) || (slotId == EQEmu::legacy::SlotSecondary))
+		if ((slotId == EQEmu::inventory::slotRange) || (slotId == EQEmu::inventory::slotAmmo) || (slotId == EQEmu::inventory::slotPrimary) || (slotId == EQEmu::inventory::slotSecondary))
 			my_bot->SetBotArcher(false);
 
 		my_bot->RemoveBotItemBySlot(slotId, &error_message);
@@ -7173,31 +7173,31 @@ void bot_subcommand_inventory_remove(Client *c, const Seperator *sep)
 	}
 
 	switch (slotId) {
-	case EQEmu::legacy::SlotCharm:
-	case EQEmu::legacy::SlotEar1:
-	case EQEmu::legacy::SlotHead:
-	case EQEmu::legacy::SlotFace:
-	case EQEmu::legacy::SlotEar2:
-	case EQEmu::legacy::SlotNeck:
-	case EQEmu::legacy::SlotBack:
-	case EQEmu::legacy::SlotWrist1:
-	case EQEmu::legacy::SlotWrist2:
-	case EQEmu::legacy::SlotRange:
-	case EQEmu::legacy::SlotPrimary:
-	case EQEmu::legacy::SlotSecondary:
-	case EQEmu::legacy::SlotFinger1:
-	case EQEmu::legacy::SlotFinger2:
-	case EQEmu::legacy::SlotChest:
-	case EQEmu::legacy::SlotWaist:
-	case EQEmu::legacy::SlotPowerSource:
-	case EQEmu::legacy::SlotAmmo:
+	case EQEmu::inventory::slotCharm:
+	case EQEmu::inventory::slotEar1:
+	case EQEmu::inventory::slotHead:
+	case EQEmu::inventory::slotFace:
+	case EQEmu::inventory::slotEar2:
+	case EQEmu::inventory::slotNeck:
+	case EQEmu::inventory::slotBack:
+	case EQEmu::inventory::slotWrist1:
+	case EQEmu::inventory::slotWrist2:
+	case EQEmu::inventory::slotRange:
+	case EQEmu::inventory::slotPrimary:
+	case EQEmu::inventory::slotSecondary:
+	case EQEmu::inventory::slotFinger1:
+	case EQEmu::inventory::slotFinger2:
+	case EQEmu::inventory::slotChest:
+	case EQEmu::inventory::slotWaist:
+	case EQEmu::inventory::slotPowerSource:
+	case EQEmu::inventory::slotAmmo:
 		c->Message(m_message, "My %s is %s unequipped", GetBotEquipSlotName(slotId), ((itm) ? ("now") : ("already")));
 		break;
-	case EQEmu::legacy::SlotShoulders:
-	case EQEmu::legacy::SlotArms:
-	case EQEmu::legacy::SlotHands:
-	case EQEmu::legacy::SlotLegs:
-	case EQEmu::legacy::SlotFeet:
+	case EQEmu::inventory::slotShoulders:
+	case EQEmu::inventory::slotArms:
+	case EQEmu::inventory::slotHands:
+	case EQEmu::inventory::slotLegs:
+	case EQEmu::inventory::slotFeet:
 		c->Message(m_message, "My %s are %s unequipped", GetBotEquipSlotName(slotId), ((itm) ? ("now") : ("already")));
 		break;
 	default:
@@ -7236,12 +7236,12 @@ void bot_subcommand_inventory_window(Client *c, const Seperator *sep)
 
 	for (int i = EQEmu::legacy::EQUIPMENT_BEGIN; i <= (EQEmu::legacy::EQUIPMENT_END + 1); ++i) {
 		const EQEmu::ItemData* item = nullptr;
-		const EQEmu::ItemInstance* inst = my_bot->CastToBot()->GetBotItem(i == 22 ? EQEmu::legacy::SlotPowerSource : i);
+		const EQEmu::ItemInstance* inst = my_bot->CastToBot()->GetBotItem(i == 22 ? EQEmu::inventory::slotPowerSource : i);
 		if (inst)
 			item = inst->GetItem();
 
 		window_text.append("<c \"#FFFFFF\">");
-		window_text.append(GetBotEquipSlotName(i == 22 ? EQEmu::legacy::SlotPowerSource : i));
+		window_text.append(GetBotEquipSlotName(i == 22 ? EQEmu::inventory::slotPowerSource : i));
 		window_text.append(": ");
 		if (item) {
 			//window_text.append("</c>");

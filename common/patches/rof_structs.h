@@ -190,7 +190,7 @@ struct TintProfile
 			Tint_Struct Primary;
 			Tint_Struct Secondary;
 		};
-		Tint_Struct Slot[EQEmu::textures::TextureCount];
+		Tint_Struct Slot[EQEmu::textures::materialCount];
 	};
 };
 

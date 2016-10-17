@@ -296,7 +296,7 @@ bool Client::Process() {
 		}
 
 		if(AutoFireEnabled()){
-			EQEmu::ItemInstance *ranged = GetInv().GetItem(EQEmu::legacy::SlotRange);
+			EQEmu::ItemInstance *ranged = GetInv().GetItem(EQEmu::inventory::slotRange);
 			if(ranged)
 			{
 				if (ranged->GetItem() && ranged->GetItem()->ItemType == EQEmu::item::ItemTypeBow){
@@ -391,10 +391,10 @@ bool Client::Process() {
 			}
 			else if (auto_attack_target->GetHP() > -10) // -10 so we can watch people bleed in PvP
 			{
-				EQEmu::ItemInstance *wpn = GetInv().GetItem(EQEmu::legacy::SlotPrimary);
-				TryWeaponProc(wpn, auto_attack_target, EQEmu::legacy::SlotPrimary);
+				EQEmu::ItemInstance *wpn = GetInv().GetItem(EQEmu::inventory::slotPrimary);
+				TryWeaponProc(wpn, auto_attack_target, EQEmu::inventory::slotPrimary);
 
-				DoAttackRounds(auto_attack_target, EQEmu::legacy::SlotPrimary);
+				DoAttackRounds(auto_attack_target, EQEmu::inventory::slotPrimary);
 				if (CheckAATimer(aaTimerRampage))
 					entity_list.AEAttack(this, 30);
 			}
@@ -430,10 +430,10 @@ bool Client::Process() {
 			else if(auto_attack_target->GetHP() > -10) {
 				CheckIncreaseSkill(EQEmu::skills::SkillDualWield, auto_attack_target, -10);
 				if (CheckDualWield()) {
-					EQEmu::ItemInstance *wpn = GetInv().GetItem(EQEmu::legacy::SlotSecondary);
-					TryWeaponProc(wpn, auto_attack_target, EQEmu::legacy::SlotSecondary);
+					EQEmu::ItemInstance *wpn = GetInv().GetItem(EQEmu::inventory::slotSecondary);
+					TryWeaponProc(wpn, auto_attack_target, EQEmu::inventory::slotSecondary);
 
-					DoAttackRounds(auto_attack_target, EQEmu::legacy::SlotSecondary);
+					DoAttackRounds(auto_attack_target, EQEmu::inventory::slotSecondary);
 				}
 			}
 		}
@@ -763,7 +763,7 @@ void Client::BulkSendInventoryItems()
 	EQEmu::OutBuffer::pos_type last_pos = ob.tellp();
 
 	// Possessions items
-	for (int16 slot_id = SLOT_BEGIN; slot_id < EQEmu::legacy::TYPE_POSSESSIONS_SIZE; slot_id++) {
+	for (int16 slot_id = EQEmu::inventory::slotBegin; slot_id < EQEmu::legacy::TYPE_POSSESSIONS_SIZE; slot_id++) {
 		const EQEmu::ItemInstance* inst = m_inv[slot_id];
 		if (!inst)
 			continue;
@@ -778,12 +778,12 @@ void Client::BulkSendInventoryItems()
 
 	// PowerSource item
 	if (ClientVersion() >= EQEmu::versions::ClientVersion::SoF) {
-		const EQEmu::ItemInstance* inst = m_inv[EQEmu::legacy::SlotPowerSource];
+		const EQEmu::ItemInstance* inst = m_inv[EQEmu::inventory::slotPowerSource];
 		if (inst) {
-			inst->Serialize(ob, EQEmu::legacy::SlotPowerSource);
+			inst->Serialize(ob, EQEmu::inventory::slotPowerSource);
 
 			if (ob.tellp() == last_pos)
-				Log.Out(Logs::General, Logs::Inventory, "Serialization failed on item slot %d during BulkSendInventoryItems.  Item skipped.", EQEmu::legacy::SlotPowerSource);
+				Log.Out(Logs::General, Logs::Inventory, "Serialization failed on item slot %d during BulkSendInventoryItems.  Item skipped.", EQEmu::inventory::slotPowerSource);
 
 			last_pos = ob.tellp();
 		}
@@ -1095,7 +1095,7 @@ void Client::OPMemorizeSpell(const EQApplicationPacket* app)
 	switch(memspell->scribing)
 	{
 		case memSpellScribing:	{	// scribing spell to book
-			const EQEmu::ItemInstance* inst = m_inv[EQEmu::legacy::SlotCursor];
+			const EQEmu::ItemInstance* inst = m_inv[EQEmu::inventory::slotCursor];
 
 			if (inst && inst->IsClassCommon())
 			{
@@ -1109,7 +1109,7 @@ void Client::OPMemorizeSpell(const EQApplicationPacket* app)
 				if(item && item->Scroll.Effect == (int32)(memspell->spell_id))
 				{
 					ScribeSpell(memspell->spell_id, memspell->slot);
-					DeleteItemInInventory(EQEmu::legacy::SlotCursor, 1, true);
+					DeleteItemInInventory(EQEmu::inventory::slotCursor, 1, true);
 				}
 				else
 					Message(0,"Scribing spell: inst exists but item does not or spell ids do not match.");

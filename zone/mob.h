@@ -154,7 +154,7 @@ public:
 	virtual void ThrowingAttack(Mob* other) { }
 	uint16 GetThrownDamage(int16 wDmg, int32& TotalDmg, int& minDmg);
 	// 13 = Primary (default), 14 = secondary
-	virtual bool Attack(Mob* other, int Hand = EQEmu::legacy::SlotPrimary, bool FromRiposte = false, bool IsStrikethrough = false,
+	virtual bool Attack(Mob* other, int Hand = EQEmu::inventory::slotPrimary, bool FromRiposte = false, bool IsStrikethrough = false,
 		bool IsFromSpell = false, ExtraAttackOptions *opts = nullptr, int special = 0) = 0;
 	int MonkSpecialAttack(Mob* other, uint8 skill_used);
 	virtual void TryBackstab(Mob *other,int ReuseTime = 10);
@@ -390,7 +390,7 @@ public:
 	inline uint8 GetDrakkinHeritage() const { return drakkin_heritage; }
 	inline uint8 GetDrakkinTattoo() const { return drakkin_tattoo; }
 	inline uint8 GetDrakkinDetails() const { return drakkin_details; }
-	inline uint32 GetArmorTint(uint8 i) const { return armor_tint.Slot[(i < EQEmu::textures::TextureCount) ? i : 0].Color; }
+	inline uint32 GetArmorTint(uint8 i) const { return armor_tint.Slot[(i < EQEmu::textures::materialCount) ? i : 0].Color; }
 	inline uint8 GetClass() const { return class_; }
 	inline uint8 GetLevel() const { return level; }
 	inline uint8 GetOrigLevel() const { return orig_level; }
@@ -577,7 +577,7 @@ public:
 		bool lookForAftArc = true);
 
 	//Procs
-	void TriggerDefensiveProcs(Mob *on, uint16 hand = EQEmu::legacy::SlotPrimary, bool FromSkillProc = false, int damage = 0);
+	void TriggerDefensiveProcs(Mob *on, uint16 hand = EQEmu::inventory::slotPrimary, bool FromSkillProc = false, int damage = 0);
 	bool AddRangedProc(uint16 spell_id, uint16 iChance = 3, uint16 base_spell_id = SPELL_UNKNOWN);
 	bool RemoveRangedProc(uint16 spell_id, bool bAll = false);
 	bool HasRangedProcs() const;
@@ -1158,13 +1158,13 @@ protected:
 	void TrySkillProc(Mob *on, uint16 skill, uint16 ReuseTime, bool Success = false, uint16 hand = 0, bool IsDefensive = false); // hand = SlotCharm?
 	bool PassLimitToSkill(uint16 spell_id, uint16 skill);
 	bool PassLimitClass(uint32 Classes_, uint16 Class_);
-	void TryDefensiveProc(Mob *on, uint16 hand = EQEmu::legacy::SlotPrimary);
-	void TryWeaponProc(const EQEmu::ItemInstance* inst, const EQEmu::ItemData* weapon, Mob *on, uint16 hand = EQEmu::legacy::SlotPrimary);
-	void TrySpellProc(const EQEmu::ItemInstance* inst, const EQEmu::ItemData* weapon, Mob *on, uint16 hand = EQEmu::legacy::SlotPrimary);
-	void TryWeaponProc(const EQEmu::ItemInstance* weapon, Mob *on, uint16 hand = EQEmu::legacy::SlotPrimary);
+	void TryDefensiveProc(Mob *on, uint16 hand = EQEmu::inventory::slotPrimary);
+	void TryWeaponProc(const EQEmu::ItemInstance* inst, const EQEmu::ItemData* weapon, Mob *on, uint16 hand = EQEmu::inventory::slotPrimary);
+	void TrySpellProc(const EQEmu::ItemInstance* inst, const EQEmu::ItemData* weapon, Mob *on, uint16 hand = EQEmu::inventory::slotPrimary);
+	void TryWeaponProc(const EQEmu::ItemInstance* weapon, Mob *on, uint16 hand = EQEmu::inventory::slotPrimary);
 	void ExecWeaponProc(const EQEmu::ItemInstance* weapon, uint16 spell_id, Mob *on, int level_override = -1);
-	virtual float GetProcChances(float ProcBonus, uint16 hand = EQEmu::legacy::SlotPrimary);
-	virtual float GetDefensiveProcChances(float &ProcBonus, float &ProcChance, uint16 hand = EQEmu::legacy::SlotPrimary, Mob *on = nullptr);
+	virtual float GetProcChances(float ProcBonus, uint16 hand = EQEmu::inventory::slotPrimary);
+	virtual float GetDefensiveProcChances(float &ProcBonus, float &ProcChance, uint16 hand = EQEmu::inventory::slotPrimary, Mob *on = nullptr);
 	virtual float GetSpecialProcChances(uint16 hand);
 	virtual float GetAssassinateProcChances(uint16 ReuseTime);
 	virtual float GetSkillProcChances(uint16 ReuseTime, uint16 hand = 0); // hand = MainCharm?

@@ -117,12 +117,12 @@ void WorldDatabase::GetCharSelectInfo(uint32 accountID, EQApplicationPacket **ou
 		cse->Gender = (uint8)atoi(row[2]);
 		cse->Face = (uint8)atoi(row[15]);
 
-		for (uint32 matslot = 0; matslot < EQEmu::textures::TextureCount; matslot++) {	// Processed below
+		for (uint32 matslot = 0; matslot < EQEmu::textures::materialCount; matslot++) {	// Processed below
 			cse->Equip[matslot].Material = 0;
 			cse->Equip[matslot].Unknown1 = 0;
-			cse->Equip[matslot].EliteMaterial = 0;
-			cse->Equip[matslot].HeroForgeModel = 0;
-			cse->Equip[matslot].Material2 = 0;
+			cse->Equip[matslot].EliteModel = 0;
+			cse->Equip[matslot].HeroicModel = 0;
+			cse->Equip[matslot].Unknown2 = 0;
 			cse->Equip[matslot].Color = 0;
 		}						
 
@@ -249,7 +249,7 @@ void WorldDatabase::GetCharSelectInfo(uint32 accountID, EQApplicationPacket **ou
 			const EQEmu::ItemInstance* inst = nullptr;
 			int16 invslot = 0;
 
-			for (uint32 matslot = 0; matslot < EQEmu::textures::TextureCount; matslot++) {
+			for (uint32 matslot = EQEmu::textures::textureBegin; matslot < EQEmu::textures::materialCount; matslot++) {
 				invslot = Inventory::CalcSlotFromMaterial(matslot);
 				if (invslot == INVALID_INDEX) { continue; }
 				inst = inv.GetItem(invslot);
@@ -270,7 +270,7 @@ void WorldDatabase::GetCharSelectInfo(uint32 accountID, EQApplicationPacket **ou
 							cse->Equip[matslot].Material = idfile;
 						}
 					}
-					if (matslot == EQEmu::textures::TexturePrimary) {
+					if (matslot == EQEmu::textures::weaponPrimary) {
 						cse->PrimaryIDFile = idfile;
 					}
 					else {
@@ -288,8 +288,8 @@ void WorldDatabase::GetCharSelectInfo(uint32 accountID, EQApplicationPacket **ou
 
 					// Armor Materials/Models
 					cse->Equip[matslot].Material = item->Material;
-					cse->Equip[matslot].EliteMaterial = item->EliteMaterial;
-					cse->Equip[matslot].HeroForgeModel = inst->GetOrnamentHeroModel(matslot);
+					cse->Equip[matslot].EliteModel = item->EliteMaterial;
+					cse->Equip[matslot].HeroicModel = inst->GetOrnamentHeroModel(matslot);
 					cse->Equip[matslot].Color = color;
 				}
 			}

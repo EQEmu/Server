@@ -1074,9 +1074,9 @@ int32 Client::CalcAC()
 	}
 	// Shield AC bonus for HeroicSTR
 	if (itembonuses.HeroicSTR) {
-		bool equiped = CastToClient()->m_inv.GetItem(EQEmu::legacy::SlotSecondary);
+		bool equiped = CastToClient()->m_inv.GetItem(EQEmu::inventory::slotSecondary);
 		if (equiped) {
-			uint8 shield = CastToClient()->m_inv.GetItem(EQEmu::legacy::SlotSecondary)->GetItem()->ItemType;
+			uint8 shield = CastToClient()->m_inv.GetItem(EQEmu::inventory::slotSecondary)->GetItem()->ItemType;
 			if (shield == EQEmu::item::ItemTypeShield) {
 				displayed += itembonuses.HeroicSTR / 2;
 			}
@@ -1103,9 +1103,9 @@ int32 Client::GetACMit()
 	}
 	// Shield AC bonus for HeroicSTR
 	if (itembonuses.HeroicSTR) {
-		bool equiped = CastToClient()->m_inv.GetItem(EQEmu::legacy::SlotSecondary);
+		bool equiped = CastToClient()->m_inv.GetItem(EQEmu::inventory::slotSecondary);
 		if (equiped) {
-			uint8 shield = CastToClient()->m_inv.GetItem(EQEmu::legacy::SlotSecondary)->GetItem()->ItemType;
+			uint8 shield = CastToClient()->m_inv.GetItem(EQEmu::inventory::slotSecondary)->GetItem()->ItemType;
 			if (shield == EQEmu::item::ItemTypeShield) {
 				mitigation += itembonuses.HeroicSTR / 2;
 			}
@@ -1320,7 +1320,7 @@ uint32 Client::CalcCurrentWeight()
 	EQEmu::ItemInstance* ins;
 	uint32 Total = 0;
 	int x;
-	for (x = EQEmu::legacy::EQUIPMENT_BEGIN; x <= EQEmu::legacy::SlotCursor; x++) { // include cursor or not?
+	for (x = EQEmu::legacy::EQUIPMENT_BEGIN; x <= EQEmu::inventory::slotCursor; x++) { // include cursor or not?
 		TempItem = 0;
 		ins = GetInv().GetItem(x);
 		if (ins) {
@@ -1343,7 +1343,7 @@ uint32 Client::CalcCurrentWeight()
 		if (TmpWeight > 0) {
 			// this code indicates that weight redux bags can only be in the first general inventory slot to be effective...
 			// is this correct? or can we scan for the highest weight redux and use that? (need client verifications)
-			int bagslot = EQEmu::legacy::SlotGeneral1;
+			int bagslot = EQEmu::inventory::slotGeneral1;
 			int reduction = 0;
 			for (int m = EQEmu::legacy::GENERAL_BAGS_BEGIN + 10; m <= EQEmu::legacy::GENERAL_BAGS_END; m += 10) { // include cursor bags or not?
 				if (x >= m) {
@@ -2219,12 +2219,12 @@ int Client::GetRawACNoShield(int &shield_ac) const
 {
 	int ac = itembonuses.AC + spellbonuses.AC + aabonuses.AC;
 	shield_ac = 0;
-	const EQEmu::ItemInstance *inst = m_inv.GetItem(EQEmu::legacy::SlotSecondary);
+	const EQEmu::ItemInstance *inst = m_inv.GetItem(EQEmu::inventory::slotSecondary);
 	if (inst) {
 		if (inst->GetItem()->ItemType == EQEmu::item::ItemTypeShield) {
 			ac -= inst->GetItem()->AC;
 			shield_ac = inst->GetItem()->AC;
-			for (uint8 i = AUG_INDEX_BEGIN; i < EQEmu::legacy::ITEM_COMMON_SIZE; i++) {
+			for (uint8 i = EQEmu::inventory::socketBegin; i < EQEmu::inventory::SocketCount; i++) {
 				if (inst->GetAugment(i)) {
 					ac -= inst->GetAugment(i)->GetItem()->AC;
 					shield_ac += inst->GetAugment(i)->GetItem()->AC;

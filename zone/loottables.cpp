@@ -313,7 +313,7 @@ void NPC::AddLootDrop(const EQEmu::ItemData *item2, ItemList* itemlist, int16 ch
 		// @merth: IDFile size has been increased, this needs to change
 		uint16 emat;
 		if(item2->Material <= 0
-			|| item2->Slots & (1 << EQEmu::legacy::SlotPrimary | 1 << EQEmu::legacy::SlotSecondary)) {
+			|| item2->Slots & (1 << EQEmu::inventory::slotPrimary | 1 << EQEmu::inventory::slotSecondary)) {
 			memset(newid, 0, sizeof(newid));
 			for(int i=0;i<7;i++){
 				if (!isalpha(item2->IDFile[i])){
@@ -327,47 +327,47 @@ void NPC::AddLootDrop(const EQEmu::ItemData *item2, ItemList* itemlist, int16 ch
 			emat = item2->Material;
 		}
 
-		if (foundslot == EQEmu::legacy::SlotPrimary) {
+		if (foundslot == EQEmu::inventory::slotPrimary) {
 			if (item2->Proc.Effect != 0)
 				CastToMob()->AddProcToWeapon(item2->Proc.Effect, true);
 
-			eslot = EQEmu::textures::TexturePrimary;
+			eslot = EQEmu::textures::weaponPrimary;
 			if (item2->Damage > 0)
 				SendAddPlayerState(PlayerState::PrimaryWeaponEquipped);
 			if (item2->IsType2HWeapon())
 				SetTwoHanderEquipped(true);
 		}
-		else if (foundslot == EQEmu::legacy::SlotSecondary
+		else if (foundslot == EQEmu::inventory::slotSecondary
 			&& (GetOwner() != nullptr || (CanThisClassDualWield() && zone->random.Roll(NPC_DW_CHANCE)) || (item2->Damage==0)) &&
 			(item2->IsType1HWeapon() || item2->ItemType == EQEmu::item::ItemTypeShield))
 		{
 			if (item2->Proc.Effect!=0)
 				CastToMob()->AddProcToWeapon(item2->Proc.Effect, true);
 
-			eslot = EQEmu::textures::TextureSecondary;
+			eslot = EQEmu::textures::weaponSecondary;
 			if (item2->Damage > 0)
 				SendAddPlayerState(PlayerState::SecondaryWeaponEquipped);
 		}
-		else if (foundslot == EQEmu::legacy::SlotHead) {
-			eslot = EQEmu::textures::TextureHead;
+		else if (foundslot == EQEmu::inventory::slotHead) {
+			eslot = EQEmu::textures::armorHead;
 		}
-		else if (foundslot == EQEmu::legacy::SlotChest) {
-			eslot = EQEmu::textures::TextureChest;
+		else if (foundslot == EQEmu::inventory::slotChest) {
+			eslot = EQEmu::textures::armorChest;
 		}
-		else if (foundslot == EQEmu::legacy::SlotArms) {
-			eslot = EQEmu::textures::TextureArms;
+		else if (foundslot == EQEmu::inventory::slotArms) {
+			eslot = EQEmu::textures::armorArms;
 		}
-		else if (foundslot == EQEmu::legacy::SlotWrist1 || foundslot == EQEmu::legacy::SlotWrist2) {
-			eslot = EQEmu::textures::TextureWrist;
+		else if (foundslot == EQEmu::inventory::slotWrist1 || foundslot == EQEmu::inventory::slotWrist2) {
+			eslot = EQEmu::textures::armorWrist;
 		}
-		else if (foundslot == EQEmu::legacy::SlotHands) {
-			eslot = EQEmu::textures::TextureHands;
+		else if (foundslot == EQEmu::inventory::slotHands) {
+			eslot = EQEmu::textures::armorHands;
 		}
-		else if (foundslot == EQEmu::legacy::SlotLegs) {
-			eslot = EQEmu::textures::TextureLegs;
+		else if (foundslot == EQEmu::inventory::slotLegs) {
+			eslot = EQEmu::textures::armorLegs;
 		}
-		else if (foundslot == EQEmu::legacy::SlotFeet) {
-			eslot = EQEmu::textures::TextureFeet;
+		else if (foundslot == EQEmu::inventory::slotFeet) {
+			eslot = EQEmu::textures::armorFeet;
 		}
 
 		/*

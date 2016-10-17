@@ -35,7 +35,7 @@ SET(common_sources
 	faction.cpp
 	guild_base.cpp
 	guilds.cpp
-#	inventory_slot.cpp
+	inventory_slot.cpp
 	ipc_mutex.cpp
 	item_data.cpp
 	item_instance.cpp
@@ -156,7 +156,7 @@ SET(common_headers
 	global_define.h
 	guild_base.h
 	guilds.h
-#	inventory_slot.h
+	inventory_slot.h
 	ipc_mutex.h
 	item_data.h
 	item_fieldlist.h
