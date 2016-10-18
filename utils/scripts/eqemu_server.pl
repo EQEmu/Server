@@ -1076,21 +1076,21 @@ sub read_eqemu_config_xml {
             $in_database_tag = 0;
         }
         if($o=~/<database>/i){
-            print "IN DATABASE TAG\n" if $debug;
-            $in_database_tag = 1;
+			print "IN DATABASE TAG\n" if $debug;
+			$in_database_tag = 1;
         }
         if($o=~/<longname>/i){ 
-            ($long_name) = $o =~ /<longname>(.*)<\/longname>/;
-            print "Long Name: '" . $long_name . "'\n" if $debug;
+			($long_name) = $o =~ /<longname>(.*)<\/longname>/;
+			print "Long Name: '" . $long_name . "'\n" if $debug;
         }
         if($in_database_tag == 1){
-		@left = split (">", $o); 
-		@right = split("<", $left[1]);
-		$tag_data = trim($right[0]);
+			@left = split (">", $o); 
+			@right = split("<", $left[1]);
+			$tag_data = trim($right[0]);
 		
             if($o=~/<username>/i && $in_database_tag){
-                $user = $tag_data;
-                print "Database User: '" . $user . "'\n" if $debug;
+				$user = $tag_data;
+				print "Database User: '" . $user . "'\n" if $debug;
             }
             if($o=~/<password>/i && $in_database_tag){
 				$pass = $tag_data;
@@ -1101,8 +1101,8 @@ sub read_eqemu_config_xml {
                 print "Database Name: '" . $db . "'\n" if $debug;
             }
             if($o=~/<host>/i){
-		$host = $tag_data;
-                print "Database Host: '" . $host . "'\n" if $debug;
+				$host = $tag_data;
+				print "Database Host: '" . $host . "'\n" if $debug;
             }
         }
     }
