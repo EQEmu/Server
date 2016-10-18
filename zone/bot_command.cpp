@@ -3397,15 +3397,18 @@ void bot_command_movement_speed(Client *c, const Seperator *sep)
 	if (helper_spell_list_fail(c, local_list, BCEnum::SpT_MovementSpeed) || helper_command_alias_fail(c, "bot_command_movement_speed", sep->arg[0], "movementspeed"))
 		return;
 	if (helper_is_help_or_usage(sep->arg[1])) {
-		c->Message(m_usage, "usage: (<friendly_target>) %s ([group])", sep->arg[0]);
+		c->Message(m_usage, "usage: (<friendly_target>) %s ([group | sow])", sep->arg[0]);
 		helper_send_usage_required_bots(c, BCEnum::SpT_MovementSpeed);
 		return;
 	}
 
 	bool group = false;
-	std::string group_arg = sep->arg[1];
-	if (!group_arg.compare("group"))
+	bool sow = false;
+	std::string arg1 = sep->arg[1];
+	if (!arg1.compare("group"))
 		group = true;
+	else if (!arg1.compare("sow"))
+		sow = true;
 
 	ActionableTarget::Types actionable_targets;
 	Bot* my_bot = nullptr;
@@ -3417,7 +3420,9 @@ void bot_command_movement_speed(Client *c, const Seperator *sep)
 		auto local_entry = list_iter->SafeCastToMovementSpeed();
 		if (helper_spell_check_fail(local_entry))
 			continue;
-		if (local_entry->group != group)
+		if (!sow && (local_entry->group != group))
+			continue;
+		if (sow && (local_entry->spell_id != 278)) // '278' = single-target "Spirit of Wolf"
 			continue;
 
 		auto target_mob = actionable_targets.Select(c, local_entry->target_type, FRIENDLY);
