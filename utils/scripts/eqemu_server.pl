@@ -939,18 +939,18 @@ sub check_db_version_table{
 sub get_mysql_result{
 	my $run_query = $_[0];
 	if(!$db){ return; }
-	if($OS eq "Windows"){ return `"$path" --host $host --user $user --password="$pass" $db -N -B -e "$run_query"`; }
+	if($OS eq "Windows"){ return `"$path" --host "$host" --user "$user" --password="$pass" $db -N -B -e "$run_query"`; }
 	if($OS eq "Linux"){ 
 		$run_query =~s/`//g;
-		return `$path --user="$user" --host $host --password="$pass" $db -N -B -e "$run_query"`; 
+		return `$path --user="$user" --host "$host" --password="$pass" $db -N -B -e "$run_query"`; 
 	}
 }
 
 sub get_mysql_result_from_file{
 	my $update_file = $_[0];
 	if(!$db){ return; }
-	if($OS eq "Windows"){ return `"$path" --host $host --user $user --password="$pass" --force $db < $update_file`;  }
-	if($OS eq "Linux"){ return `"$path" --host $host --user $user --password="$pass" --force $db < $update_file`;  }
+	if($OS eq "Windows"){ return `"$path" --host "$host" --user "$user" --password="$pass" --force $db < $update_file`;  }
+	if($OS eq "Linux"){ return `"$path" --host "$host" --user "$user" --password="$pass" --force $db < $update_file`;  }
 }
 
 #::: Gets Remote File based on request_url (1st Arg), and saves to destination file (2nd Arg)
