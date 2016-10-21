@@ -297,8 +297,8 @@ SOURCE_GROUP(Net FILES
 	net/endian.h
 	net/eqmq.cpp
 	net/eqmq.h
-	net/eqstream.h
 	net/eqstream.cpp
+	net/eqstream.h
 	net/packet.cpp
 	net/packet.h
 	net/relay.cpp

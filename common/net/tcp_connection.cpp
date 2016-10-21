@@ -28,68 +28,40 @@ void EQ::Net::TCPConnection::Connect(const std::string &addr, int port, bool ipv
 	memset(socket, 0, sizeof(uv_tcp_t));
 	uv_tcp_init(loop, socket);
 
+	sockaddr_storage iaddr;
 	if (ipv6) {
-		sockaddr_in6 iaddr;
-		uv_ip6_addr(addr.c_str(), port, &iaddr);
-
-		uv_connect_t *connect = new uv_connect_t;
-		memset(connect, 0, sizeof(uv_connect_t));
-
-		EQTCPConnectBaton *baton = new EQTCPConnectBaton;
-		baton->cb = cb;
-		baton->socket = socket;
-		connect->data = baton;
-		uv_tcp_connect(connect, socket, (sockaddr*)&iaddr,
-			[](uv_connect_t* req, int status) {
-			EQTCPConnectBaton *baton = (EQTCPConnectBaton*)req->data;
-			auto socket = baton->socket;
-			auto cb = baton->cb;
-
-			delete baton;
-
-			if (status < 0) {
-				uv_close((uv_handle_t*)socket, on_close_handle);
-				delete req;
-				cb(nullptr);
-			}
-			else {
-				delete req;
-				std::shared_ptr<EQ::Net::TCPConnection> connection(new EQ::Net::TCPConnection(socket));
-				cb(connection);
-			}
-		});
+		uv_ip6_addr(addr.c_str(), port, (sockaddr_in6*)&iaddr);
 	}
 	else {
-		sockaddr_in iaddr;
-		uv_ip4_addr(addr.c_str(), port, &iaddr);
-
-		uv_connect_t *connect = new uv_connect_t;
-		memset(connect, 0, sizeof(uv_connect_t));
-
-		EQTCPConnectBaton *baton = new EQTCPConnectBaton;
-		baton->cb = cb;
-		baton->socket = socket;
-		connect->data = baton;
-		uv_tcp_connect(connect, socket, (sockaddr*)&iaddr,
-			[](uv_connect_t* req, int status) {
-			EQTCPConnectBaton *baton = (EQTCPConnectBaton*)req->data;
-			auto socket = baton->socket;
-			auto cb = baton->cb;
-
-			delete baton;
-
-			if (status < 0) {
-				uv_close((uv_handle_t*)socket, on_close_handle);
-				delete req;
-				cb(nullptr);
-			}
-			else {
-				delete req;
-				std::shared_ptr<EQ::Net::TCPConnection> connection(new EQ::Net::TCPConnection(socket));
-				cb(connection);
-			}
-		});
+		uv_ip4_addr(addr.c_str(), port, (sockaddr_in*)&iaddr);
 	}
+
+	uv_connect_t *connect = new uv_connect_t;
+	memset(connect, 0, sizeof(uv_connect_t));
+
+	EQTCPConnectBaton *baton = new EQTCPConnectBaton;
+	baton->cb = cb;
+	baton->socket = socket;
+	connect->data = baton;
+	uv_tcp_connect(connect, socket, (sockaddr*)&iaddr,
+		[](uv_connect_t* req, int status) {
+		EQTCPConnectBaton *baton = (EQTCPConnectBaton*)req->data;
+		auto socket = baton->socket;
+		auto cb = baton->cb;
+
+		delete baton;
+
+		if (status < 0) {
+			uv_close((uv_handle_t*)socket, on_close_handle);
+			delete req;
+			cb(nullptr);
+		}
+		else {
+			delete req;
+			std::shared_ptr<EQ::Net::TCPConnection> connection(new EQ::Net::TCPConnection(socket));
+			cb(connection);
+		}
+	});
 }
 
 void EQ::Net::TCPConnection::Start() {
@@ -172,4 +144,40 @@ void EQ::Net::TCPConnection::Write(const char *data, size_t count)
 			connection->Disconnect();
 		}
 	});
+}
+
+std::string EQ::Net::TCPConnection::RemoteIP() const
+{
+	sockaddr_storage addr;
+	int addr_len = sizeof(addr);
+	uv_tcp_getpeername(m_socket, (sockaddr*)&addr, &addr_len);
+
+	char endpoint[64] = { 0 };
+	if (addr.ss_family == AF_INET) {
+		uv_ip4_name((const sockaddr_in*)&addr, endpoint, 64);
+	}
+	else if(addr.ss_family == AF_INET6) {
+		uv_ip6_name((const sockaddr_in6*)&addr, endpoint, 64);
+	}
+
+	return endpoint;
+}
+
+int EQ::Net::TCPConnection::RemotePort() const
+{
+	sockaddr_storage addr;
+	int addr_len = sizeof(addr);
+	uv_tcp_getpeername(m_socket, (sockaddr*)&addr, &addr_len);
+
+	char endpoint[64] = { 0 };
+	if (addr.ss_family == AF_INET) {
+		sockaddr_in *s = (sockaddr_in*)&addr;
+		return ntohs(s->sin_port);
+	}
+	else if (addr.ss_family == AF_INET6) {
+		sockaddr_in6 *s = (sockaddr_in6*)&addr;
+		return ntohs(s->sin6_port);
+	}
+
+	return 0;
 }

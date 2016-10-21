@@ -1,10 +1,9 @@
 #pragma once
 
-#include <uv.h>
 #include <functional>
 #include <string>
 #include <memory>
-#include <evt_tls.h>
+#include <uv.h>
 
 namespace EQ
 {
@@ -24,6 +23,8 @@ namespace EQ
 			void Disconnect();
 			void Read(const char *data, size_t count);
 			void Write(const char *data, size_t count);
+			std::string RemoteIP() const;
+			int RemotePort() const;
 		private:
 			TCPConnection();
 

@@ -14,7 +14,8 @@
 	#include <arpa/inet.h>
 	#include <errno.h>
 	#include <fcntl.h>
-	#define INVALID_SOCKET -1
+#include "net\tcp_server.h"
+#define INVALID_SOCKET -1
 	#define SOCKET_ERROR -1
 #endif
 
@@ -228,4 +229,3 @@ bool BaseTCPServer::IsOpen() {
 	MSock.unlock();
 	return ret;
 }
-
