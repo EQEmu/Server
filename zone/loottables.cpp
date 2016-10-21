@@ -221,7 +221,7 @@ void ZoneDatabase::AddLootDropToNPC(NPC* npc,uint32 lootdrop_id, ItemList* iteml
 }
 
 //if itemlist is null, just send wear changes
-void NPC::AddLootDrop(const EQEmu::ItemData *item2, ItemList* itemlist, int16 charges, uint8 minlevel, uint8 maxlevel, bool equipit, bool wearchange) {
+void NPC::AddLootDrop(const EQEmu::ItemData *item2, ItemList* itemlist, int16 charges, uint8 minlevel, uint8 maxlevel, bool equipit, bool wearchange, uint32 aug1, uint32 aug2, uint32 aug3, uint32 aug4, uint32 aug5, uint32 aug6) {
 	if(item2 == nullptr)
 		return;
 
@@ -245,12 +245,12 @@ void NPC::AddLootDrop(const EQEmu::ItemData *item2, ItemList* itemlist, int16 ch
 
 	item->item_id = item2->ID;
 	item->charges = charges;
-	item->aug_1 = 0;
-	item->aug_2 = 0;
-	item->aug_3 = 0;
-	item->aug_4 = 0;
-	item->aug_5 = 0;
-	item->aug_6 = 0;
+	item->aug_1 = aug1;
+	item->aug_2 = aug2;
+	item->aug_3 = aug3;
+	item->aug_4 = aug4;
+	item->aug_5 = aug5;
+	item->aug_6 = aug6;
 	item->attuned = 0;
 	item->min_level = minlevel;
 	item->max_level = maxlevel;
@@ -420,12 +420,12 @@ void NPC::AddItem(const EQEmu::ItemData* item, uint16 charges, bool equipitem) {
 	AddLootDrop(item, &itemlist, charges, 1, 255, equipitem, equipitem);
 }
 
-void NPC::AddItem(uint32 itemid, uint16 charges, bool equipitem) {
+void NPC::AddItem(uint32 itemid, uint16 charges, bool equipitem, uint32 aug1, uint32 aug2, uint32 aug3, uint32 aug4, uint32 aug5, uint32 aug6) {
 	//slot isnt needed, its determined from the item.
 	const EQEmu::ItemData * i = database.GetItem(itemid);
 	if(i == nullptr)
 		return;
-	AddLootDrop(i, &itemlist, charges, 1, 255, equipitem, equipitem);
+	AddLootDrop(i, &itemlist, charges, 1, 255, equipitem, equipitem, aug1, aug2, aug3, aug4, aug5, aug6);
 }
 
 void NPC::AddLootTable() {
