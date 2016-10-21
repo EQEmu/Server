@@ -70,7 +70,7 @@ public:
 	void incstat(int stat, int value);
 	void castspell(int spell_id, int target_id);
 	void selfcast(int spell_id);
-	void addloot(int item_id, int charges = 0, bool equipitem = true);
+	void addloot(int item_id, int charges = 0, bool equipitem = true, int aug1 = 0, int aug2 = 0, int aug3 = 0, int aug4 = 0, int aug5 = 0, int aug6 = 0);
 	void Zone(const char *zone_name);
 	void settimer(const char *timer_name, int seconds);
 	void settimerMS(const char *timer_name, int milliseconds);
