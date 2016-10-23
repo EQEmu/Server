@@ -985,17 +985,23 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 	if(GetClass() == BARD) // bard's can move when casting any spell...
 	{
 		if (IsBardSong(spell_id)) {
-			if(spells[spell_id].buffduration == 0xFFFF || spells[spell_id].recast_time != 0) {
-				Log.Out(Logs::Detail, Logs::Spells, "Bard song %d not applying bard logic because duration or recast is wrong: dur=%d, recast=%d", spells[spell_id].buffduration, spells[spell_id].recast_time);
+			if(spells[spell_id].buffduration == 0xFFFF) {
+				Log.Out(Logs::Detail, Logs::Spells, "Bard song %d not applying bard logic because duration. dur=%d, recast=%d", spells[spell_id].buffduration);
 			} else {
-				bardsong = spell_id;
-				bardsong_slot = slot;
-				//NOTE: theres a lot more target types than this to think about...
-				if (spell_target == nullptr || (spells[spell_id].targettype != ST_Target && spells[spell_id].targettype != ST_AETarget))
-					bardsong_target_id = GetID();
-				else
-					bardsong_target_id = spell_target->GetID();
-				bardsong_timer.Start(6000);
+				// So long recast bard songs need special bard logic, although the effects don't repulse like other songs
+				// This is basically a hack to get that effect
+				// You can hold down the long recast spells, but you only get the effects once
+				// TODO fuck bards.
+				if (spells[spell_id].recast_time == 0) {
+					bardsong = spell_id;
+					bardsong_slot = slot;
+					//NOTE: theres a lot more target types than this to think about...
+					if (spell_target == nullptr || (spells[spell_id].targettype != ST_Target && spells[spell_id].targettype != ST_AETarget))
+						bardsong_target_id = GetID();
+					else
+						bardsong_target_id = spell_target->GetID();
+					bardsong_timer.Start(6000);
+				}
 				Log.Out(Logs::Detail, Logs::Spells, "Bard song %d started: slot %d, target id %d", bardsong, bardsong_slot, bardsong_target_id);
 				bard_song_mode = true;
 			}
