@@ -58,27 +58,11 @@ namespace EQEmu
 		const int8 LastTintableTexture = tintFeet;
 
 		struct Texture_Struct {
-			union {
-				struct {
-					struct {
-						struct {
-							uint32 _material;
-						} _1_field;
-
-						uint32 _unknown1;
-						uint32 _elite_model;
-					} _3_fields;
-
-					uint32 _heroic_model;
-					uint32 _unknown2;
-				} _5_fields;
-
-				uint32 Material;
-				uint32 Unknown1;
-				uint32 EliteModel;
-				uint32 HeroicModel;
-				uint32 Unknown2; // same as material?
-			};
+			uint32 Material;
+			uint32 Unknown1;
+			uint32 EliteModel;
+			uint32 HerosForgeModel;
+			uint32 Unknown2; // same as material?
 		};
 
 		struct TextureMaterial_Struct {

@@ -3158,7 +3158,7 @@ namespace RoF2
 				eq_cse->Equip[equip_index].Material = emu_cse->Equip[equip_index].Material;
 				eq_cse->Equip[equip_index].Unknown1 = emu_cse->Equip[equip_index].Unknown1;
 				eq_cse->Equip[equip_index].EliteMaterial = emu_cse->Equip[equip_index].EliteModel;
-				eq_cse->Equip[equip_index].HeroForgeModel = emu_cse->Equip[equip_index].HeroicModel;
+				eq_cse->Equip[equip_index].HeroForgeModel = emu_cse->Equip[equip_index].HerosForgeModel;
 				eq_cse->Equip[equip_index].Material2 = emu_cse->Equip[equip_index].Unknown2;
 				eq_cse->Equip[equip_index].Color = emu_cse->Equip[equip_index].Color;
 			}
@@ -4334,7 +4334,7 @@ namespace RoF2
 					Equipment[k].Material = emu->equipment.Slot[k].Material;
 					Equipment[k].Unknown1 = emu->equipment.Slot[k].Unknown1;
 					Equipment[k].EliteMaterial = emu->equipment.Slot[k].EliteModel;
-					Equipment[k].HeroForgeModel = emu->equipment.Slot[k].HeroicModel;
+					Equipment[k].HeroForgeModel = emu->equipment.Slot[k].HerosForgeModel;
 					Equipment[k].Material2 = emu->equipment.Slot[k].Unknown2;
 				}
 

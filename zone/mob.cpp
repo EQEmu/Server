@@ -1159,7 +1159,7 @@ void Mob::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho)
 		{
 			ns->spawn.equipment.Slot[i].Material = GetEquipmentMaterial(i);
 			ns->spawn.equipment.Slot[i].EliteModel = IsEliteMaterialItem(i);
-			ns->spawn.equipment.Slot[i].HeroicModel = GetHerosForgeModel(i);
+			ns->spawn.equipment.Slot[i].HerosForgeModel = GetHerosForgeModel(i);
 			ns->spawn.equipment_tint.Slot[i].Color = GetEquipmentColor(i);
 		}
 	}
