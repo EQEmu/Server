@@ -66,7 +66,6 @@
 #include "../common/event/event_loop.h"
 #include "../common/event/timer.h"
 #include "../common/net/eqstream.h"
-#include "../common/net/relay_link.h"
 
 #include <iostream>
 #include <string>

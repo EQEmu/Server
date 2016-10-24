@@ -107,12 +107,17 @@ void EQ::Net::TCPConnection::OnDisconnect(std::function<void(TCPConnection*)> cb
 void EQ::Net::TCPConnection::Disconnect()
 {
 	if (m_socket) {
-		uv_close((uv_handle_t*)m_socket, on_close_handle);
+		m_socket->data = this;
+		uv_close((uv_handle_t*)m_socket, [](uv_handle_t* handle) {
+			TCPConnection *connection = (TCPConnection*)handle->data;
+
+			if (connection->m_on_disconnect_cb) {
+				connection->m_on_disconnect_cb(connection);
+			}
+
+			delete handle;
+		});
 		m_socket = nullptr;
-	
-		if (m_on_disconnect_cb) {
-			m_on_disconnect_cb(this);
-		}
 	}
 }
 

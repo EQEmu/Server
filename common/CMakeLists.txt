@@ -76,8 +76,9 @@ SET(common_sources
 	net/daybreak_connection.cpp
 	net/eqstream.cpp
 	net/packet.cpp
-	net/relay.cpp
-	net/relay_link.cpp
+	net/servertalk_client_connection.cpp
+	net/servertalk_server.cpp
+	net/servertalk_server_connection.cpp
 	net/tcp_connection.cpp
 	net/tcp_server.cpp
 	patches/patches.cpp
@@ -222,8 +223,10 @@ SET(common_headers
 	net/endian.h
 	net/eqstream.h
 	net/packet.h
-	net/relay.h
-	net/relay_link.h
+	net/servertalk_client_connection.h
+	net/servertalk_common.h
+	net/servertalk_server.h
+	net/servertalk_server_connection.h
 	net/tcp_connection.h
 	net/tcp_server.h
 	patches/patches.h
@@ -301,10 +304,13 @@ SOURCE_GROUP(Net FILES
 	net/eqstream.h
 	net/packet.cpp
 	net/packet.h
-	net/relay.cpp
-	net/relay.h
-	net/relay_link.cpp
-	net/relay_link.h
+	net/servertalk_client_connection.cpp
+	net/servertalk_client_connection.h
+	net/servertalk_common.h
+	net/servertalk_server.cpp
+	net/servertalk_server.h
+	net/servertalk_server_connection.cpp
+	net/servertalk_server_connection.h
 	net/tcp_connection.cpp
 	net/tcp_connection.h
 	net/tcp_server.cpp
@@ -414,7 +420,6 @@ INCLUDE_DIRECTORIES(Patches SocketLib StackWalker TinyXML)
 ADD_LIBRARY(common ${common_sources} ${common_headers})
 
 IF(UNIX)
-	ADD_DEFINITIONS(-fPIC)
 	SET_SOURCE_FILES_PROPERTIES("SocketLib/Mime.cpp" PROPERTY COMPILE_FLAGS -Wno-unused-result)
 	SET_SOURCE_FILES_PROPERTIES("patches/sod.cpp" "patches/sof.cpp" "patches/rof.cpp"  "patches/rof2.cpp" "patches/uf.cpp" PROPERTIES COMPILE_FLAGS -O0)
 ENDIF(UNIX)

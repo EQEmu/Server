@@ -34,6 +34,8 @@
 #include <signal.h>
 
 #include "../common/net/tcp_server.h"
+#include "../common/net/servertalk_server.h"
+#include "../common/net/servertalk_client_connection.h"
 
 ChatChannelList *ChannelList;
 Clientlist *g_Clientlist;
@@ -143,6 +145,21 @@ int main() {
 	worldserver = new WorldServer;
 
 	worldserver->Connect();
+
+	EQ::Net::ServertalkServer server;
+	EQ::Net::ServertalkServerOptions opts;
+	opts.port = 5999;
+	server.Listen(opts);
+
+	server.OnConnectionIdentified("QueryServ", [](std::shared_ptr<EQ::Net::ServertalkServerConnection> conn) {
+		Log.Out(Logs::General, Logs::Debug, "New QueryServ Connection....");
+	});
+
+	server.OnConnectionRemoved("QueryServ", [](std::shared_ptr<EQ::Net::ServertalkServerConnection> conn) {
+		Log.Out(Logs::General, Logs::Debug, "Lost QueryServ connection.");
+	});
+
+	EQ::Net::ServertalkClient client("127.0.0.1", 5999, false, "QueryServ", "User:Root;Password:1234567890");
 
 	while(RunLoops) {
 
