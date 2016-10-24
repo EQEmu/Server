@@ -525,19 +525,22 @@ void NPC::QueryLoot(Client* to)
 
 	int x = 0;
 	for (auto cur = itemlist.begin(); cur != itemlist.end(); ++cur, ++x) {
-		const EQEmu::ItemData* item = database.GetItem((*cur)->item_id);
-		if (item == nullptr) {
-			Log.Out(Logs::General, Logs::Error, "Database error, invalid item");
+		if (!(*cur)) {
+			Log.Out(Logs::General, Logs::Error, "NPC::QueryLoot() - ItemList error, null item");
+			continue;
+		}
+		if (!(*cur)->item_id || !database.GetItem((*cur)->item_id)) {
+			Log.Out(Logs::General, Logs::Error, "NPC::QueryLoot() - Database error, invalid item");
 			continue;
 		}
 
 		EQEmu::SayLinkEngine linker;
-		linker.SetLinkType(EQEmu::saylink::SayLinkItemData);
-		linker.SetItemData(item);
+		linker.SetLinkType(EQEmu::saylink::SayLinkLootItem);
+		linker.SetLootData(*cur);
 
 		auto item_link = linker.GenerateLink();
 
-		to->Message(0, "%s, ID: %u, Level: (min: %u, max: %u)", item_link.c_str(), item->ID, (*cur)->min_level, (*cur)->max_level);
+		to->Message(0, "%s, ID: %u, Level: (min: %u, max: %u)", item_link.c_str(), (*cur)->item_id, (*cur)->min_level, (*cur)->max_level);
 	}
 
 	to->Message(0, "%i items on %s.", x, GetName());
