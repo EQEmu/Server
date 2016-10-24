@@ -149,6 +149,7 @@ int main() {
 	EQ::Net::ServertalkServer server;
 	EQ::Net::ServertalkServerOptions opts;
 	opts.port = 5999;
+	opts.credentials = "User:Root;Password:1234567890";
 	server.Listen(opts);
 
 	server.OnConnectionIdentified("QueryServ", [](std::shared_ptr<EQ::Net::ServertalkServerConnection> conn) {
