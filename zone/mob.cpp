@@ -108,7 +108,8 @@ Mob::Mob(const char* in_name,
 		m_TargetLocation(glm::vec3()),
 		m_TargetV(glm::vec3()),
 		flee_timer(FLEE_CHECK_TIMER),
-		m_Position(position)
+		m_Position(position),
+		tmHidden(-1)
 {
 	targeted = 0;
 	tar_ndx=0;

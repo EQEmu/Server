@@ -1181,6 +1181,11 @@ void Client::ActivateAlternateAdvancementAbility(int rank_id, int target_id) {
 
 	if (!IsCastWhileInvis(rank->spell))
 		CommonBreakInvisible();
+
+	if (spells[rank->spell].sneak && (!hidden || (hidden && (Timer::GetCurrentTime() - tmHidden) < 4000))) {
+		Message_StringID(13, SNEAK_RESTRICT);
+		return;
+	}
 	// Bards can cast instant cast AAs while they are casting another song
 	if(spells[rank->spell].cast_time == 0 && GetClass() == BARD && IsBardSong(casting_spell_id)) {
 		if(!SpellFinished(rank->spell, entity_list.GetMob(target_id), EQEmu::CastingSlot::AltAbility, spells[rank->spell].mana, -1, spells[rank->spell].ResistDiff, false)) {

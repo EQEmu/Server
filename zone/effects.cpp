@@ -630,17 +630,6 @@ bool Client::UseDiscipline(uint32 spell_id, uint32 target) {
 	if(r == MAX_PP_DISCIPLINES)
 		return(false);	//not found.
 
-	//Check the disc timer
-	pTimerType DiscTimer = pTimerDisciplineReuseStart + spells[spell_id].EndurTimerIndex;
-	if(!p_timers.Expired(&database, DiscTimer)) {
-		/*char val1[20]={0};*/	//unused
-		/*char val2[20]={0};*/	//unused
-		uint32 remain = p_timers.GetRemainingTime(DiscTimer);
-		//Message_StringID(0, DISCIPLINE_CANUSEIN, ConvertArray((remain)/60,val1), ConvertArray(remain%60,val2));
-		Message(0, "You can use this discipline in %d minutes %d seconds.", ((remain)/60), (remain%60));
-		return(false);
-	}
-
 	//make sure we can use it..
 	if(!IsValidSpell(spell_id)) {
 		Message(13, "This tome contains invalid knowledge.");
@@ -664,6 +653,23 @@ bool Client::UseDiscipline(uint32 spell_id, uint32 target) {
 
 	if(GetEndurance() < spell.EndurCost) {
 		Message(11, "You are too fatigued to use this skill right now.");
+		return(false);
+	}
+
+	// sneak attack discs require you to be hidden for 4 seconds before use
+	if (spell.sneak && (!hidden || (hidden && (Timer::GetCurrentTime() - tmHidden) < 4000))) {
+		Message_StringID(13, SNEAK_RESTRICT);
+		return false;
+	}
+
+	//Check the disc timer
+	pTimerType DiscTimer = pTimerDisciplineReuseStart + spell.EndurTimerIndex;
+	if(!p_timers.Expired(&database, DiscTimer)) {
+		/*char val1[20]={0};*/	//unused
+		/*char val2[20]={0};*/	//unused
+		uint32 remain = p_timers.GetRemainingTime(DiscTimer);
+		//Message_StringID(0, DISCIPLINE_CANUSEIN, ConvertArray((remain)/60,val1), ConvertArray(remain%60,val2));
+		Message(0, "You can use this discipline in %d minutes %d seconds.", ((remain)/60), (remain%60));
 		return(false);
 	}
 

@@ -3392,11 +3392,6 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob *spelltar, bool reflect, bool use_r
 	if(spelltar->IsClient() && spelltar->CastToClient()->IsHoveringForRespawn())
 		return false;
 
-	if (spells[spell_id].sneak && IsClient() && !CastToClient()->sneaking){
-		Message_StringID(13, SNEAK_RESTRICT);
-		return false;//Fail Safe, this can cause a zone crash certain situations if you try to apply sneak effects when not sneaking.
-	}
-
 	if(IsDetrimentalSpell(spell_id) && !IsAttackAllowed(spelltar) && !IsResurrectionEffects(spell_id)) {
 		if(!IsClient() || !CastToClient()->GetGM()) {
 			Message_StringID(MT_SpellFailure, SPELL_NO_HOLD);

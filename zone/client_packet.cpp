@@ -7911,6 +7911,7 @@ void Client::Handle_OP_Hide(const EQApplicationPacket *app)
 		}
 		else
 			hidden = true;
+		tmHidden = Timer::GetCurrentTime();
 	}
 	if (GetClass() == ROGUE){
 		auto outapp = new EQApplicationPacket(OP_SimpleMessage, sizeof(SimpleMessage_Struct));
