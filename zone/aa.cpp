@@ -1183,7 +1183,7 @@ void Client::ActivateAlternateAdvancementAbility(int rank_id, int target_id) {
 		CommonBreakInvisible();
 
 	if (spells[rank->spell].sneak && (!hidden || (hidden && (Timer::GetCurrentTime() - tmHidden) < 4000))) {
-		Message_StringID(13, SNEAK_RESTRICT);
+		Message_StringID(MT_SpellFailure, SNEAK_RESTRICT);
 		return;
 	}
 	// Bards can cast instant cast AAs while they are casting another song

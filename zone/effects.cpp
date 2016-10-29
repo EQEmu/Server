@@ -658,7 +658,7 @@ bool Client::UseDiscipline(uint32 spell_id, uint32 target) {
 
 	// sneak attack discs require you to be hidden for 4 seconds before use
 	if (spell.sneak && (!hidden || (hidden && (Timer::GetCurrentTime() - tmHidden) < 4000))) {
-		Message_StringID(13, SNEAK_RESTRICT);
+		Message_StringID(MT_SpellFailure, SNEAK_RESTRICT);
 		return false;
 	}
 
