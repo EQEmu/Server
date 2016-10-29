@@ -41,24 +41,6 @@ ADD_EXECUTABLE(loginserver ${eqlogin_sources} ${eqlogin_headers})
 
 INSTALL(TARGETS loginserver RUNTIME DESTINATION ${CMAKE_INSTALL_PREFIX}/bin)
 
-TARGET_LINK_LIBRARIES(loginserver common debug ${MySQL_LIBRARY_DEBUG} optimized ${MySQL_LIBRARY_RELEASE} ${ZLIB_LIBRARY} libuv fmt)
-
-IF(WIN32)
-	TARGET_LINK_LIBRARIES(loginserver "ws2_32" "psapi" "iphlpapi" "userenv")
-ENDIF(WIN32)
-
-
-IF(UNIX)
-	TARGET_LINK_LIBRARIES(loginserver "${CMAKE_DL_LIBS}")
-	TARGET_LINK_LIBRARIES(loginserver "z")
-	TARGET_LINK_LIBRARIES(loginserver "m")
-	IF(NOT DARWIN)
-		TARGET_LINK_LIBRARIES(loginserver "rt")
-	ENDIF(NOT DARWIN)
-	TARGET_LINK_LIBRARIES(loginserver "pthread")
-	TARGET_LINK_LIBRARIES(loginserver "EQEmuAuthCrypto")
-	TARGET_LINK_LIBRARIES(loginserver "cryptopp")
-	ADD_DEFINITIONS(-fPIC)
-ENDIF(UNIX)
+TARGET_LINK_LIBRARIES(loginserver ${SERVER_LIBS})
 
 SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin)

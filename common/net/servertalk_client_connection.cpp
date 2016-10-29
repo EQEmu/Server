@@ -19,6 +19,45 @@ EQ::Net::ServertalkClient::~ServertalkClient()
 {
 }
 
+void EQ::Net::ServertalkClient::Send(uint16_t opcode, EQ::Net::Packet & p)
+{
+	EQ::Net::WritablePacket out;
+#ifdef ENABLE_SECURITY
+	if (m_encrypted) {
+		out.PutUInt32(0, p.Length() + crypto_secretbox_MACBYTES);
+		out.PutUInt16(4, opcode);
+		unsigned char *cipher = new unsigned char[p.Length() + crypto_secretbox_MACBYTES];
+
+		crypto_box_easy_afternm(cipher, (unsigned char*)p.Data(), p.Length(), m_nonce_ours, m_shared_key);
+		(*(uint64_t*)&m_nonce_ours[0])++;
+		out.PutData(6, cipher, p.Length() + crypto_secretbox_MACBYTES);
+
+		delete[] cipher;
+	}
+	else {
+		out.PutUInt32(0, p.Length());
+		out.PutUInt16(4, opcode);
+		out.PutPacket(6, p);
+	}
+#else
+	out.PutUInt32(0, p.Length());
+	out.PutUInt16(4, opcode);
+	out.PutPacket(6, p);
+#endif
+	InternalSend(ServertalkMessage, out);
+}
+
+void EQ::Net::ServertalkClient::SendPacket(ServerPacket *p)
+{
+	EQ::Net::ReadOnlyPacket pout(p->pBuffer, p->size);
+	Send(p->opcode, pout);
+}
+
+void EQ::Net::ServertalkClient::OnMessage(uint16_t opcode, std::function<void(uint16_t, EQ::Net::Packet&)> cb)
+{
+	m_message_callbacks.insert(std::make_pair(opcode, cb));
+}
+
 void EQ::Net::ServertalkClient::Connect()
 {
 	if (m_addr.length() == 0 || m_port == 0 || m_connection || m_connecting) {
@@ -37,8 +76,8 @@ void EQ::Net::ServertalkClient::Connect()
 		m_connection = connection;
 		m_connection->OnDisconnect([this](EQ::Net::TCPConnection *c) {
 			Log.OutF(Logs::General, Logs::TCP_Connection, "Connection lost to {0}:{1}, attempting to reconnect...", m_addr, m_port);
-			m_connection.reset();
 			m_encrypted = false;
+			m_connection.reset();
 		});
 
 		m_connection->OnRead(std::bind(&EQ::Net::ServertalkClient::ProcessData, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
@@ -98,7 +137,7 @@ void EQ::Net::ServertalkClient::ProcessReadBuffer()
 		length = *(uint32_t*)&m_buffer[current];
 		type = *(uint8_t*)&m_buffer[current + 4];
 
-		if (current + 5 + length < total) {
+		if (current + 5 + length > total) {
 			break;
 		}
 
@@ -144,6 +183,7 @@ void EQ::Net::ServertalkClient::ProcessHello(EQ::Net::Packet &p)
 	memset(m_private_key_ours, 0, crypto_box_SECRETKEYBYTES);
 	memset(m_nonce_ours, 0, crypto_box_NONCEBYTES);
 	memset(m_nonce_theirs, 0, crypto_box_NONCEBYTES);
+	memset(m_shared_key, 0, crypto_box_BEFORENMBYTES);
 	m_encrypted = false;
 
 	try {
@@ -156,6 +196,10 @@ void EQ::Net::ServertalkClient::ProcessHello(EQ::Net::Packet &p)
 				m_encrypted = true;
 
 				SendHandshake();
+
+				if (m_on_connect_cb) {
+					m_on_connect_cb(this);
+				}
 			}
 			else {
 				Log.OutF(Logs::General, Logs::Error, "Could not process hello, size != {0}", 1 + crypto_box_PUBLICKEYBYTES + crypto_box_NONCEBYTES);
@@ -163,37 +207,104 @@ void EQ::Net::ServertalkClient::ProcessHello(EQ::Net::Packet &p)
 		}
 		else {
 			SendHandshake();
+
+			if (m_on_connect_cb) {
+				m_on_connect_cb(this);
+			}
 		}
 	}
 	catch (std::exception &ex) {
 		Log.OutF(Logs::General, Logs::Error, "Error parsing hello from server: {0}", ex.what());
 		m_connection->Disconnect();
+
+		if (m_on_connect_cb) {
+			m_on_connect_cb(nullptr);
+		}
 	}
 #else
 	try {
 		bool enc = p.GetInt8(0) == 1 ? true : false;
 
 		if (enc) {
-			Log.OutF(Logs::General, Logs::Error, "Server requested encryption but we do not support encryption.");
-			m_connection->Disconnect();
-			return;
+			SendHandshake(true);
+
+			if (m_on_connect_cb) {
+				m_on_connect_cb(this);
+			}
 		}
 		else {
 			SendHandshake();
+
+			if (m_on_connect_cb) {
+				m_on_connect_cb(this);
+			}
 		}
 }
 	catch (std::exception &ex) {
 		Log.OutF(Logs::General, Logs::Error, "Error parsing hello from server: {0}", ex.what());
 		m_connection->Disconnect();
+
+		if (m_on_connect_cb) {
+			m_on_connect_cb(nullptr);
+		}
 	}
 #endif
 }
 
 void EQ::Net::ServertalkClient::ProcessMessage(EQ::Net::Packet &p)
 {
+	try {
+		auto length = p.GetUInt32(0);
+		auto opcode = p.GetUInt16(4);
+		if (length > 0) {
+			auto data = p.GetString(6, length);
+#ifdef ENABLE_SECURITY
+			if (m_encrypted) {
+				size_t message_len = length - crypto_secretbox_MACBYTES;
+				std::unique_ptr<unsigned char[]> decrypted_text(new unsigned char[message_len]);
+				if (crypto_box_open_easy_afternm(&decrypted_text[0], (unsigned char*)&data[0], length, m_nonce_theirs, m_shared_key))
+				{
+					Log.OutF(Logs::General, Logs::Error, "Error decrypting message from server");
+					(*(uint64_t*)&m_nonce_theirs[0])++;
+					return;
+				}
+
+				EQ::Net::ReadOnlyPacket decrypted_packet(&decrypted_text[0], message_len);
+
+				(*(uint64_t*)&m_nonce_theirs[0])++;
+
+				auto cb = m_message_callbacks.find(opcode);
+				if (cb != m_message_callbacks.end()) {
+					cb->second(opcode, decrypted_packet);
+				}
+			}
+			else {
+				size_t message_len = length;
+				EQ::Net::ReadOnlyPacket packet(&data[0], message_len);
+
+				auto cb = m_message_callbacks.find(opcode);
+				if (cb != m_message_callbacks.end()) {
+					cb->second(opcode, packet);
+				}
+			}
+
+#else
+			size_t message_len = length;
+			EQ::Net::ReadOnlyPacket packet(&data[0], message_len);
+
+			auto cb = m_message_callbacks.find(opcode);
+			if (cb != m_message_callbacks.end()) {
+				cb->second(opcode, packet);
+			}
+#endif
+		}
+	}
+	catch (std::exception &ex) {
+		Log.OutF(Logs::General, Logs::Error, "Error parsing message from server: {0}", ex.what());
+	}
 }
 
-void EQ::Net::ServertalkClient::SendHandshake()
+void EQ::Net::ServertalkClient::SendHandshake(bool downgrade)
 {
 	EQ::Net::WritablePacket handshake;
 #ifdef ENABLE_SECURITY
@@ -206,30 +317,41 @@ void EQ::Net::ServertalkClient::SendHandshake()
 		handshake.PutData(0, m_public_key_ours, crypto_box_PUBLICKEYBYTES);
 		handshake.PutData(crypto_box_PUBLICKEYBYTES, m_nonce_ours, crypto_box_NONCEBYTES);
 
+		memset(m_public_key_ours, 0, crypto_box_PUBLICKEYBYTES);
+		memset(m_public_key_theirs, 0, crypto_box_PUBLICKEYBYTES);
+		memset(m_private_key_ours, 0, crypto_box_SECRETKEYBYTES);
+
 		size_t cipher_length = m_identifier.length() + 1 + m_credentials.length() + 1 + crypto_secretbox_MACBYTES;
 		size_t data_length = m_identifier.length() + 1 + m_credentials.length() + 1;
-		unsigned char *signed_buffer = new unsigned char[cipher_length];
-		unsigned char *data_buffer = new unsigned char[data_length];
-		memset(data_buffer, 0, data_length);
+		
+		std::unique_ptr<unsigned char[]> signed_buffer(new unsigned char[cipher_length]);
+		std::unique_ptr<unsigned char[]> data_buffer(new unsigned char[data_length]);
+
+		memset(&data_buffer[0], 0, data_length);
 		memcpy(&data_buffer[0], m_identifier.c_str(), m_identifier.length());
 		memcpy(&data_buffer[1 + m_identifier.length()], m_credentials.c_str(), m_credentials.length());
 		
-		crypto_box_easy_afternm(signed_buffer, data_buffer, data_length, m_nonce_ours, m_shared_key);
+		crypto_box_easy_afternm(&signed_buffer[0], &data_buffer[0], data_length, m_nonce_ours, m_shared_key);
 
 		(*(uint64_t*)&m_nonce_ours[0])++;
 
-		handshake.PutData(crypto_box_PUBLICKEYBYTES + crypto_box_NONCEBYTES, signed_buffer, cipher_length);
-
-		Log.OutF(Logs::General, Logs::Debug, "Sending {1} bytes handshake:\n{0}", handshake.ToString(), handshake.Length());
-
-		delete[] signed_buffer;
-		delete[] data_buffer;
+		handshake.PutData(crypto_box_PUBLICKEYBYTES + crypto_box_NONCEBYTES, &signed_buffer[0], cipher_length);
 	}
 	else {
 		handshake.PutString(0, m_identifier);
+		handshake.PutString(m_identifier.length() + 1, m_credentials);
+		handshake.PutUInt8(m_identifier.length() + 1 + m_credentials.length(), 0);
 	}
 #else
 	handshake.PutString(0, m_identifier);
+	handshake.PutString(m_identifier.length() + 1, m_credentials);
+	handshake.PutUInt8(m_identifier.length() + 1 + m_credentials.length(), 0);
 #endif
-	InternalSend(ServertalkClientHandshake, handshake);
+
+	if (downgrade) {
+		InternalSend(ServertalkClientDowngradeSecurityHandshake, handshake);
+	}
+	else {
+		InternalSend(ServertalkClientHandshake, handshake);
+	}
 }

@@ -41,6 +41,7 @@ public:
 	virtual void Close() = 0;
 	virtual void ReleaseFromUse() = 0;
 	virtual void RemoveData() = 0;
+	virtual std::string GetRemoteAddr() const = 0;
 	virtual uint32 GetRemoteIP() const = 0;
 	virtual uint16 GetRemotePort() const = 0;
 	virtual bool CheckState(EQStreamState state) = 0;

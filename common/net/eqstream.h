@@ -75,6 +75,7 @@ namespace EQ
 			virtual void Close();
 			virtual void ReleaseFromUse() { };
 			virtual void RemoveData() { };
+			virtual std::string GetRemoteAddr() const;
 			virtual uint32 GetRemoteIP() const;
 			virtual uint16 GetRemotePort() const { return m_connection->RemotePort(); }
 			virtual bool CheckState(EQStreamState state);

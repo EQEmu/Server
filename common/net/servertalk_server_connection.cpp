@@ -2,11 +2,12 @@
 #include "servertalk_server.h"
 #include "../eqemu_logsys.h"
 
-EQ::Net::ServertalkServerConnection::ServertalkServerConnection(std::shared_ptr<EQ::Net::TCPConnection> c, EQ::Net::ServertalkServer *parent, bool encrypted)
+EQ::Net::ServertalkServerConnection::ServertalkServerConnection(std::shared_ptr<EQ::Net::TCPConnection> c, EQ::Net::ServertalkServer *parent, bool encrypted, bool allow_downgrade)
 {
 	m_connection = c;
 	m_parent = parent;
 	m_encrypted = encrypted;
+	m_allow_downgrade = allow_downgrade;
 	m_connection->OnRead(std::bind(&ServertalkServerConnection::OnRead, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 	m_connection->OnDisconnect(std::bind(&ServertalkServerConnection::OnDisconnect, this, std::placeholders::_1));
 	m_connection->Start();
@@ -14,6 +15,43 @@ EQ::Net::ServertalkServerConnection::ServertalkServerConnection(std::shared_ptr<
 
 EQ::Net::ServertalkServerConnection::~ServertalkServerConnection()
 {
+}
+
+void EQ::Net::ServertalkServerConnection::Send(uint16_t opcode, EQ::Net::Packet & p)
+{
+	EQ::Net::WritablePacket out;
+#ifdef ENABLE_SECURITY
+	if (m_encrypted) {
+		out.PutUInt32(0, p.Length() + crypto_secretbox_MACBYTES);
+		out.PutUInt16(4, opcode);
+		std::unique_ptr<unsigned char[]> cipher(new unsigned char[p.Length() + crypto_secretbox_MACBYTES]);
+
+		crypto_box_easy_afternm(&cipher[0], (unsigned char*)p.Data(), p.Length(), m_nonce_ours, m_shared_key);
+		(*(uint64_t*)&m_nonce_ours[0])++;
+		out.PutData(6, &cipher[0], p.Length() + crypto_secretbox_MACBYTES);
+	}
+	else {
+		out.PutUInt32(0, p.Length());
+		out.PutUInt16(4, opcode);
+		out.PutPacket(6, p);
+	}
+#else
+	out.PutUInt32(0, p.Length());
+	out.PutUInt16(4, opcode);
+	out.PutPacket(6, p);
+#endif
+	InternalSend(ServertalkMessage, out);
+}
+
+void EQ::Net::ServertalkServerConnection::SendPacket(ServerPacket * p)
+{
+	EQ::Net::ReadOnlyPacket pout(p->pBuffer, p->size);
+	Send(p->opcode, pout);
+}
+
+void EQ::Net::ServertalkServerConnection::OnMessage(uint16_t opcode, std::function<void(uint16_t, EQ::Net::Packet&)> cb)
+{
+	m_message_callbacks.insert(std::make_pair(opcode, cb));
 }
 
 void EQ::Net::ServertalkServerConnection::OnRead(TCPConnection *c, const unsigned char *data, size_t sz)
@@ -44,7 +82,7 @@ void EQ::Net::ServertalkServerConnection::ProcessReadBuffer()
 		length = *(uint32_t*)&m_buffer[current];
 		type = *(uint8_t*)&m_buffer[current + 4];
 
-		if (current + 5 + length < total) {
+		if (current + 5 + length > total) {
 			break;
 		}
 
@@ -74,6 +112,9 @@ void EQ::Net::ServertalkServerConnection::ProcessReadBuffer()
 			break;
 			case ServertalkClientHandshake:
 				ProcessHandshake(p);
+				break;
+			case ServertalkClientDowngradeSecurityHandshake:
+				ProcessHandshake(p, true);
 				break;
 			case ServertalkMessage:
 				ProcessMessage(p);
@@ -142,9 +183,15 @@ void EQ::Net::ServertalkServerConnection::InternalSend(ServertalkPacketType type
 	m_connection->Write((const char*)out.Data(), out.Length());
 }
 
-void EQ::Net::ServertalkServerConnection::ProcessHandshake(EQ::Net::Packet &p)
+void EQ::Net::ServertalkServerConnection::ProcessHandshake(EQ::Net::Packet &p, bool downgrade_security)
 {
 #ifdef ENABLE_SECURITY
+	if (downgrade_security && m_allow_downgrade && m_encrypted) {
+		Log.OutF(Logs::General, Logs::TCP_Connection, "Downgraded encrypted connection to plaintext because otherside didn't support encryption {0}:{1}", 
+			m_connection->RemoteIP(), m_connection->RemotePort());
+		m_encrypted = false;
+	}
+
 	if (m_encrypted) {
 		try {
 			if (p.Length() > (crypto_box_PUBLICKEYBYTES + crypto_box_NONCEBYTES)) {
@@ -155,16 +202,16 @@ void EQ::Net::ServertalkServerConnection::ProcessHandshake(EQ::Net::Packet &p)
 
 				size_t cipher_len = p.Length() - crypto_box_PUBLICKEYBYTES - crypto_box_NONCEBYTES;
 				size_t message_len = cipher_len - crypto_secretbox_MACBYTES;
-				unsigned char *decrypted_text = new unsigned char[message_len];
-				if (crypto_box_open_easy_afternm(decrypted_text, (unsigned char*)p.Data() + crypto_box_PUBLICKEYBYTES + crypto_box_NONCEBYTES, cipher_len, m_nonce_theirs, m_shared_key))
+				std::unique_ptr<unsigned char[]> decrypted_text(new unsigned char[message_len]);
+				if (crypto_box_open_easy_afternm(&decrypted_text[0], (unsigned char*)p.Data() + crypto_box_PUBLICKEYBYTES + crypto_box_NONCEBYTES, cipher_len, m_nonce_theirs, m_shared_key))
 				{
 					Log.OutF(Logs::General, Logs::Error, "Error decrypting handshake from client, dropping connection.");
 					m_connection->Disconnect();
 					return;
 				}
 				
-				m_identifier = (const char*)decrypted_text;
-				std::string credentials = (const char*)decrypted_text + (m_identifier.length() + 1);
+				m_identifier = (const char*)&decrypted_text[0];
+				std::string credentials = (const char*)&decrypted_text[0] + (m_identifier.length() + 1);
 
 				if (!m_parent->CheckCredentials(credentials)) {
 					Log.OutF(Logs::General, Logs::Error, "Got incoming connection with invalid credentials during handshake, dropping connection.");
@@ -175,7 +222,6 @@ void EQ::Net::ServertalkServerConnection::ProcessHandshake(EQ::Net::Packet &p)
 				m_parent->ConnectionIdentified(this);
 
 				(*(uint64_t*)&m_nonce_theirs[0])++;
-				delete[] decrypted_text;
 			}
 		}
 		catch (std::exception &ex) {
@@ -184,13 +230,92 @@ void EQ::Net::ServertalkServerConnection::ProcessHandshake(EQ::Net::Packet &p)
 		}
 	}
 	else {
-		m_identifier.assign((char*)p.Data(), p.Length());
+		try {
+			m_identifier = p.GetCString(0);
+			auto credentials = p.GetCString(m_identifier.length() + 1);
+
+			if (!m_parent->CheckCredentials(credentials)) {
+				Log.OutF(Logs::General, Logs::Error, "Got incoming connection with invalid credentials during handshake, dropping connection.");
+				m_connection->Disconnect();
+				return;
+			}
+
+			m_parent->ConnectionIdentified(this);
+		}
+		catch (std::exception &ex) {
+			Log.OutF(Logs::General, Logs::Error, "Error parsing handshake from client: {0}", ex.what());
+			m_connection->Disconnect();
+		}
 	}
 #else
-	m_identifier.assign((char*)p.Data(), p.Length());
+	try {
+		m_identifier = p.GetCString(0);
+		auto credentials = p.GetCString(m_identifier.length() + 1);
+
+		if (!m_parent->CheckCredentials(credentials)) {
+			Log.OutF(Logs::General, Logs::Error, "Got incoming connection with invalid credentials during handshake, dropping connection.");
+			m_connection->Disconnect();
+			return;
+		}
+
+		m_parent->ConnectionIdentified(this);
+	}
+	catch (std::exception &ex) {
+		Log.OutF(Logs::General, Logs::Error, "Error parsing handshake from client: {0}", ex.what());
+		m_connection->Disconnect();
+	}
 #endif
 }
 
 void EQ::Net::ServertalkServerConnection::ProcessMessage(EQ::Net::Packet &p)
 {
+	try {
+		auto length = p.GetUInt32(0);
+		auto opcode = p.GetUInt16(4);
+		if (length > 0) {
+			auto data = p.GetString(6, length);
+#ifdef ENABLE_SECURITY
+			if (m_encrypted) {
+				size_t message_len = length - crypto_secretbox_MACBYTES;
+				std::unique_ptr<unsigned char[]> decrypted_text(new unsigned char[message_len]);
+				if (crypto_box_open_easy_afternm(&decrypted_text[0], (unsigned char*)&data[0], length, m_nonce_theirs, m_shared_key))
+				{
+					Log.OutF(Logs::General, Logs::Error, "Error decrypting message from client");
+					(*(uint64_t*)&m_nonce_theirs[0])++;
+					return;
+				}
+
+				EQ::Net::ReadOnlyPacket decrypted_packet(&decrypted_text[0], message_len);
+
+				(*(uint64_t*)&m_nonce_theirs[0])++;
+
+				auto cb = m_message_callbacks.find(opcode);
+				if (cb != m_message_callbacks.end()) {
+					cb->second(opcode, decrypted_packet);
+				}
+			}
+			else {
+				size_t message_len = length;
+				EQ::Net::ReadOnlyPacket packet(&data[0], message_len);
+
+				auto cb = m_message_callbacks.find(opcode);
+				if (cb != m_message_callbacks.end()) {
+					cb->second(opcode, packet);
+				}
+			}
+
+#else
+			size_t message_len = length;
+			EQ::Net::ReadOnlyPacket packet(&data[0], message_len);
+
+			auto cb = m_message_callbacks.find(opcode);
+			if (cb != m_message_callbacks.end()) {
+				cb->second(opcode, packet);
+			}
+#endif
+		}
+	}
+	catch (std::exception &ex) {
+		Log.OutF(Logs::General, Logs::Error, "Error parsing message from client: {0}", ex.what());
+	}
 }

@@ -1,5 +1,7 @@
 #pragma once
 
+#include "../servertalk.h"
+
 namespace EQ
 {
 	namespace Net
@@ -9,6 +11,7 @@ namespace EQ
 			ServertalkClientHello = 1,
 			ServertalkServerHello,
 			ServertalkClientHandshake,
+			ServertalkClientDowngradeSecurityHandshake,
 			ServertalkMessage,
 		};
 	}

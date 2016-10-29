@@ -18,11 +18,16 @@ namespace EQ
 			int port;
 			bool ipv6;
 			bool encrypted;
+			bool allow_downgrade;
 			std::string credentials;
 
 			ServertalkServerOptions() {
 #ifdef ENABLE_SECURITY
 				encrypted = true;
+				allow_downgrade = true;
+#else
+				encrypted = false;
+				allow_downgrade = true;
 #endif
 				ipv6 = false;
 			}
@@ -50,6 +55,7 @@ namespace EQ
 			std::map<std::string, std::function<void(std::shared_ptr<ServertalkServerConnection>)>> m_on_ident;
 			std::map<std::string, std::function<void(std::shared_ptr<ServertalkServerConnection>)>> m_on_disc;
 			bool m_encrypted;
+			bool m_allow_downgrade;
 			std::string m_credentials;
 
 			friend class ServertalkServerConnection;

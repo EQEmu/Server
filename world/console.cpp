@@ -467,7 +467,6 @@ void Console::ProcessCommand(const char* command) {
 					SendMessage(1, "  IPLookup [name]");
 				}
 				if (admin >= 100) {
-					SendMessage(1, "  LSReconnect");
 					SendMessage(1, "  signalcharbyname charname ID");
 					SendMessage(1, "  reloadworld");
 				}
@@ -793,17 +792,6 @@ void Console::ProcessCommand(const char* command) {
 			}
 			else if (strcasecmp(sep.arg[0], "IPLookup") == 0 && admin >= 201) {
 				client_list.SendCLEList(admin, 0, this, sep.argplus[1]);
-			}
-			else if (strcasecmp(sep.arg[0], "LSReconnect") == 0 && admin >= 100) {
-				#ifdef _WINDOWS
-					_beginthread(AutoInitLoginServer, 0, nullptr);
-				#else
-					pthread_t thread;
-					pthread_create(&thread, nullptr, &AutoInitLoginServer, nullptr);
-				#endif
-				RunLoops = true;
-				SendMessage(1, "  Login Server Reconnect manually restarted by Console");
-				Log.Out(Logs::Detail, Logs::World_Server,"Login Server Reconnect manually restarted by Console");
 			}
 			else if (strcasecmp(sep.arg[0], "zonelock") == 0 && admin >= consoleZoneStatus) {
 				if (strcasecmp(sep.arg[1], "list") == 0) {

@@ -9,12 +9,6 @@
 #include "../common/mutex.h"
 #include "../common/emu_tcp_connection.h"
 
-#ifdef _WINDOWS
-	void AutoInitLoginServer(void *tmp);
-#else
-	void *AutoInitLoginServer(void *tmp);
-#endif
-
 class LoginServer;
 
 class LoginServerList{
@@ -23,9 +17,6 @@ public:
 	~LoginServerList();
 
 	void	Add(const char*, uint16, const char*, const char*);
-	void	InitLoginServer();
-
-	bool	Process();
 
 	bool	SendInfo();
 	bool	SendNewInfo();

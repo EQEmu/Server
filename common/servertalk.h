@@ -530,7 +530,7 @@ struct ClientAuth_Struct {
 	char	key[30];		// the Key the client will present
 	uint8	lsadmin;		// login server admin level
 	int16	worldadmin;		// login's suggested worldadmin level setting for this user, up to the world if they want to obey it
-	uint32	ip;
+	char    ip[64];
 	uint8	local;			// 1 if the client is from the local network
 };
 

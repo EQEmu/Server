@@ -12,9 +12,10 @@ void EQ::Net::ServertalkServer::Listen(const ServertalkServerOptions& opts)
 {
 	m_encrypted = opts.encrypted;
 	m_credentials = opts.credentials;
+	m_allow_downgrade = opts.allow_downgrade;
 	m_server.reset(new EQ::Net::TCPServer());
 	m_server->Listen(opts.port, opts.ipv6, [this](std::shared_ptr<EQ::Net::TCPConnection> connection) {
-		m_unident_connections.push_back(std::make_shared<ServertalkServerConnection>(connection, this, m_encrypted));
+		m_unident_connections.push_back(std::make_shared<ServertalkServerConnection>(connection, this, m_encrypted, m_allow_downgrade));
 	});
 }
 

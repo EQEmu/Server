@@ -22,35 +22,6 @@
 #include <iomanip>
 #include <stdlib.h>
 #include "../common/version.h"
-
-#ifdef _WINDOWS
-	#include <process.h>
-	#include <winsock2.h>
-	#include <windows.h>
-
-	#define snprintf	_snprintf
-	#define strncasecmp	_strnicmp
-	#define strcasecmp	_stricmp
-#else // Pyro: fix for linux
-	#include <sys/socket.h>
-#ifdef FREEBSD //Timothy Whitman - January 7, 2003
-	#include <sys/types.h>
-#endif
-	#include <netinet/in.h>
-	#include <arpa/inet.h>
-	#include <pthread.h>
-	#include <unistd.h>
-	#include <errno.h>
-
-	#include "../common/unix.h"
-
-	#define SOCKET_ERROR -1
-	#define INVALID_SOCKET -1
-	extern int errno;
-#endif
-
-#define IGNORE_LS_FATAL_ERROR
-
 #include "../common/servertalk.h"
 #include "login_server.h"
 #include "login_server_list.h"
@@ -70,145 +41,107 @@ extern uint32 numplayers;
 extern volatile bool	RunLoops;
 
 LoginServer::LoginServer(const char* iAddress, uint16 iPort, const char* Account, const char* Password)
-: statusupdate_timer(LoginServer_StatusUpdateInterval)
 {
 	strn0cpy(LoginServerAddress,iAddress,256);
 	LoginServerPort = iPort;
 	strn0cpy(LoginAccount,Account,31);
 	strn0cpy(LoginPassword,Password,31);
 	CanAccountUpdate = false;
-	tcpc = new EmuTCPConnection(true);
-	tcpc->SetPacketMode(EmuTCPConnection::packetModeLogin);
+	Connect();
 }
 
 LoginServer::~LoginServer() {
-	delete tcpc;
 }
 
-bool LoginServer::Process() {
+void LoginServer::ProcessPacket(uint16_t opcode, EQ::Net::Packet &p) {
 	const WorldConfig *Config=WorldConfig::get();
 
-	if (statusupdate_timer.Check()) {
-		this->SendStatus();
-	}
-
 	/************ Get all packets from packet manager out queue and process them ************/
-	ServerPacket *pack = 0;
-	while((pack = tcpc->PopPacket()))
-	{
-		Log.Out(Logs::Detail, Logs::World_Server,"Recevied ServerPacket from LS OpCode 0x04x",pack->opcode);
+	Log.Out(Logs::Detail, Logs::World_Server,"Recevied ServerPacket from LS OpCode 0x04x", opcode);
 
-		switch(pack->opcode) {
-			case 0:
-				break;
-			case ServerOP_KeepAlive: {
-				// ignore this
-				break;
-			}
-			case ServerOP_UsertoWorldReq: {
-				UsertoWorldRequest_Struct* utwr = (UsertoWorldRequest_Struct*) pack->pBuffer;
-				uint32 id = database.GetAccountIDFromLSID(utwr->lsaccountid);
-				int16 status = database.CheckStatus(id);
+	switch(opcode) {
+		case ServerOP_UsertoWorldReq: {
+			UsertoWorldRequest_Struct* utwr = (UsertoWorldRequest_Struct*)p.Data();
+			uint32 id = database.GetAccountIDFromLSID(utwr->lsaccountid);
+			int16 status = database.CheckStatus(id);
 
-				auto outpack = new ServerPacket;
-				outpack->opcode = ServerOP_UsertoWorldResp;
-				outpack->size = sizeof(UsertoWorldResponse_Struct);
-				outpack->pBuffer = new uchar[outpack->size];
-				memset(outpack->pBuffer, 0, outpack->size);
-				UsertoWorldResponse_Struct* utwrs = (UsertoWorldResponse_Struct*) outpack->pBuffer;
-				utwrs->lsaccountid = utwr->lsaccountid;
-				utwrs->ToID = utwr->FromID;
+			auto outpack = new ServerPacket;
+			outpack->opcode = ServerOP_UsertoWorldResp;
+			outpack->size = sizeof(UsertoWorldResponse_Struct);
+			outpack->pBuffer = new uchar[outpack->size];
+			memset(outpack->pBuffer, 0, outpack->size);
+			UsertoWorldResponse_Struct* utwrs = (UsertoWorldResponse_Struct*) outpack->pBuffer;
+			utwrs->lsaccountid = utwr->lsaccountid;
+			utwrs->ToID = utwr->FromID;
 
-				if(Config->Locked == true)
-				{
-					if((status == 0 || status < 100) && (status != -2 || status != -1))
-						utwrs->response = 0;
-					if(status >= 100)
-						utwrs->response = 1;
-				}
-				else {
-					utwrs->response = 1;
-				}
-
-				int32 x = Config->MaxClients;
-				if( (int32)numplayers >= x && x != -1 && x != 255 && status < 80)
-					utwrs->response = -3;
-
-				if(status == -1)
-					utwrs->response = -1;
-				if(status == -2)
-					utwrs->response = -2;
-
-				utwrs->worldid = utwr->worldid;
-				SendPacket(outpack);
-				delete outpack;
-				break;
-			}
-			case ServerOP_LSClientAuth: {
-				ClientAuth_Struct* slsca = (ClientAuth_Struct*) pack->pBuffer;
-
-				if (RuleI(World, AccountSessionLimit) >= 0) {
-					// Enforce the limit on the number of characters on the same account that can be
-					// online at the same time.
-					client_list.EnforceSessionLimit(slsca->lsaccount_id);
-				}
-
-				client_list.CLEAdd(slsca->lsaccount_id, slsca->name, slsca->key, slsca->worldadmin, slsca->ip, slsca->local);
-				break;
-			}
-			case ServerOP_LSFatalError: {
-	#ifndef IGNORE_LS_FATAL_ERROR
-				WorldConfig::DisableLoginserver();
-				Log.Out(Logs::Detail, Logs::World_Server, "Login server responded with FatalError. Disabling reconnect.");
-	#else
-			Log.Out(Logs::Detail, Logs::World_Server, "Login server responded with FatalError.");
-	#endif
-				if (pack->size > 1) {
-					Log.Out(Logs::Detail, Logs::World_Server, "     %s",pack->pBuffer);
-				}
-				break;
-			}
-			case ServerOP_SystemwideMessage: {
-				ServerSystemwideMessage* swm = (ServerSystemwideMessage*) pack->pBuffer;
-				zoneserver_list.SendEmoteMessageRaw(0, 0, 0, swm->type, swm->message);
-				break;
-			}
-			case ServerOP_LSRemoteAddr: {
-				if (!Config->WorldAddress.length()) {
-					WorldConfig::SetWorldAddress((char *)pack->pBuffer);
-					Log.Out(Logs::Detail, Logs::World_Server, "Loginserver provided %s as world address",pack->pBuffer);
-				}
-				break;
-			}
-			case ServerOP_LSAccountUpdate: {
-				Log.Out(Logs::Detail, Logs::World_Server, "Received ServerOP_LSAccountUpdate packet from loginserver");
-				CanAccountUpdate = true;
-				break;
-			}
-			default:
+			if(Config->Locked == true)
 			{
-				Log.Out(Logs::Detail, Logs::World_Server, "Unknown LSOpCode: 0x%04x size=%d",(int)pack->opcode,pack->size);
-	DumpPacket(pack->pBuffer, pack->size);
-				break;
+				if((status == 0 || status < 100) && (status != -2 || status != -1))
+					utwrs->response = 0;
+				if(status >= 100)
+					utwrs->response = 1;
 			}
-		}
-		delete pack;
-	}
+			else {
+				utwrs->response = 1;
+			}
 
-	return true;
-}
+			int32 x = Config->MaxClients;
+			if( (int32)numplayers >= x && x != -1 && x != 255 && status < 80)
+				utwrs->response = -3;
 
-bool LoginServer::InitLoginServer() {
-	if(Connected() == false) {
-		if(ConnectReady()) {
-			Log.Out(Logs::Detail, Logs::World_Server, "Connecting to login server: %s:%d",LoginServerAddress,LoginServerPort);
-			Connect();
-		} else {
-			Log.Out(Logs::Detail, Logs::World_Server, "Not connected but not ready to connect, this is bad: %s:%d",
-				LoginServerAddress,LoginServerPort);
+			if(status == -1)
+				utwrs->response = -1;
+			if(status == -2)
+				utwrs->response = -2;
+
+			utwrs->worldid = utwr->worldid;
+			SendPacket(outpack);
+			delete outpack;
+			break;
+		}
+		case ServerOP_LSClientAuth: {
+			ClientAuth_Struct* slsca = (ClientAuth_Struct*)p.Data();
+
+			if (RuleI(World, AccountSessionLimit) >= 0) {
+				// Enforce the limit on the number of characters on the same account that can be
+				// online at the same time.
+				client_list.EnforceSessionLimit(slsca->lsaccount_id);
+			}
+
+			client_list.CLEAdd(slsca->lsaccount_id, slsca->name, slsca->key, slsca->worldadmin, inet_addr(slsca->ip), slsca->local);
+			break;
+		}
+		case ServerOP_LSFatalError: {
+			Log.Out(Logs::Detail, Logs::World_Server, "Login server responded with FatalError.");
+			if (p.Length() > 1) {
+				Log.Out(Logs::Detail, Logs::World_Server, "     %s", (const char*)p.Data());
+			}
+			break;
+		}
+		case ServerOP_SystemwideMessage: {
+			ServerSystemwideMessage* swm = (ServerSystemwideMessage*)p.Data();
+			zoneserver_list.SendEmoteMessageRaw(0, 0, 0, swm->type, swm->message);
+			break;
+		}
+		case ServerOP_LSRemoteAddr: {
+			if (!Config->WorldAddress.length()) {
+				WorldConfig::SetWorldAddress((char *)p.Data());
+				Log.Out(Logs::Detail, Logs::World_Server, "Loginserver provided %s as world address", (const char*)p.Data());
+			}
+			break;
+		}
+		case ServerOP_LSAccountUpdate: {
+			Log.Out(Logs::Detail, Logs::World_Server, "Received ServerOP_LSAccountUpdate packet from loginserver");
+			CanAccountUpdate = true;
+			break;
+		}
+		default:
+		{
+			Log.Out(Logs::Detail, Logs::World_Server, "Unknown LSOpCode: 0x%04x size=%d",(int)opcode, p.Length());
+			Log.OutF(Logs::General, Logs::Login_Server, "{0}", p.ToString());
+			break;
 		}
 	}
-	return true;
 }
 
 bool LoginServer::Connect() {
@@ -236,20 +169,32 @@ bool LoginServer::Connect() {
 		return false;
 	}
 
-	if (tcpc->ConnectIP(LoginServerIP, LoginServerPort, errbuf)) {
-		Log.Out(Logs::Detail, Logs::World_Server, "Connected to Loginserver: %s:%d",LoginServerAddress,LoginServerPort);
-		if (minilogin)
-			SendInfo();
-		else
-			SendNewInfo();
-		SendStatus();
-		zoneserver_list.SendLSZones();
-		return true;
-	}
-	else {
-		Log.Out(Logs::Detail, Logs::World_Server, "Could not connect to login server: %s:%d %s",LoginServerAddress,LoginServerPort,errbuf);
-		return false;
-	}
+	client.reset(new EQ::Net::ServertalkClient(LoginServerAddress, LoginServerPort, false, "World", ""));
+	client->OnConnect([this](EQ::Net::ServertalkClient *client) {
+		if (client) {
+			Log.Out(Logs::Detail, Logs::World_Server, "Connected to Loginserver: %s:%d", LoginServerAddress, LoginServerPort);
+			if (minilogin)
+				SendInfo();
+			else
+				SendNewInfo();
+			SendStatus();
+			zoneserver_list.SendLSZones();
+	
+			statusupdate_timer.reset(new EQ::Timer(LoginServer_StatusUpdateInterval, true, [this](EQ::Timer *t) {
+				SendStatus();
+			}));
+		}
+		else {
+			Log.Out(Logs::Detail, Logs::World_Server, "Could not connect to Loginserver: %s:%d", LoginServerAddress, LoginServerPort);
+		}
+	});
+
+	client->OnMessage(ServerOP_UsertoWorldReq, std::bind(&LoginServer::ProcessPacket, this, std::placeholders::_1, std::placeholders::_2));
+	client->OnMessage(ServerOP_LSClientAuth, std::bind(&LoginServer::ProcessPacket, this, std::placeholders::_1, std::placeholders::_2));
+	client->OnMessage(ServerOP_LSFatalError, std::bind(&LoginServer::ProcessPacket, this, std::placeholders::_1, std::placeholders::_2));
+	client->OnMessage(ServerOP_SystemwideMessage, std::bind(&LoginServer::ProcessPacket, this, std::placeholders::_1, std::placeholders::_2));
+	client->OnMessage(ServerOP_LSRemoteAddr, std::bind(&LoginServer::ProcessPacket, this, std::placeholders::_1, std::placeholders::_2));
+	client->OnMessage(ServerOP_LSAccountUpdate, std::bind(&LoginServer::ProcessPacket, this, std::placeholders::_1, std::placeholders::_2));
 }
 void LoginServer::SendInfo() {
 	const WorldConfig *Config=WorldConfig::get();
@@ -291,15 +236,13 @@ void LoginServer::SendNewInfo() {
 	if (Config->LocalAddress.length())
 		strcpy(lsi->local_address, Config->LocalAddress.c_str());
 	else {
-		tcpc->GetSockName(lsi->local_address,&port);
-		WorldConfig::SetLocalAddress(lsi->local_address);
+		WorldConfig::SetLocalAddress(client->Handle()->LocalIP());
 	}
 	SendPacket(pack);
 	delete pack;
 }
 
 void LoginServer::SendStatus() {
-	statusupdate_timer.Start();
 	auto pack = new ServerPacket;
 	pack->opcode = ServerOP_LSStatus;
 	pack->size = sizeof(ServerLSStatus_Struct);

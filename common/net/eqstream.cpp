@@ -132,6 +132,11 @@ void EQ::Net::EQStream::Close() {
 	m_connection->Close();
 }
 
+std::string EQ::Net::EQStream::GetRemoteAddr() const
+{
+	return RemoteEndpoint();
+}
+
 uint32 EQ::Net::EQStream::GetRemoteIP() const {
 	return inet_addr(RemoteEndpoint().c_str());
 }

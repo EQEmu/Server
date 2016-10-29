@@ -25,7 +25,7 @@
 extern EQEmuLogSys Log;
 extern LoginServer server;
 
-WorldServer::WorldServer(EmuTCPConnection *c)
+WorldServer::WorldServer(std::shared_ptr<EQ::Net::ServertalkServerConnection> c)
 {
 	connection = c;
 	zones_booted = 0;
@@ -37,13 +37,16 @@ WorldServer::WorldServer(EmuTCPConnection *c)
 	is_server_authorized = false;
 	is_server_trusted = false;
 	is_server_logged_in = false;
+
+	c->OnMessage(ServerOP_NewLSInfo, std::bind(&WorldServer::ProcessPacket, this, std::placeholders::_1, std::placeholders::_2));
+	c->OnMessage(ServerOP_LSStatus, std::bind(&WorldServer::ProcessPacket, this, std::placeholders::_1, std::placeholders::_2));
+	c->OnMessage(ServerOP_UsertoWorldResp, std::bind(&WorldServer::ProcessPacket, this, std::placeholders::_1, std::placeholders::_2));
+	c->OnMessage(ServerOP_LSAccountUpdate, std::bind(&WorldServer::ProcessPacket, this, std::placeholders::_1, std::placeholders::_2));
 }
 
 WorldServer::~WorldServer()
 {
-	if(connection) {
-		connection->Free();
-	}
+	
 }
 
 void WorldServer::Reset()
@@ -58,183 +61,162 @@ void WorldServer::Reset()
 	is_server_logged_in = false;
 }
 
-bool WorldServer::Process()
+void WorldServer::ProcessPacket(uint16_t opcode, const EQ::Net::Packet &p)
 {
-	ServerPacket *app = nullptr;
-	while(app = connection->PopPacket())
+	if(server.options.IsWorldTraceOn())
 	{
-		if(server.options.IsWorldTraceOn())
+		Log.Out(Logs::General, Logs::Netcode, "Application packet received from server: 0x%.4X, (size %u)", opcode, p.Length());
+	}
+	
+	if(server.options.IsDumpInPacketsOn())
+	{
+		Log.OutF(Logs::General, Logs::Login_Server, "{0}", p.ToString());
+	}
+	
+	switch(opcode)
+	{
+	case ServerOP_NewLSInfo:
 		{
-			Log.Out(Logs::General, Logs::Netcode, "Application packet received from server: 0x%.4X, (size %u)", app->opcode, app->size);
+			if(p.Length() < sizeof(ServerNewLSInfo_Struct))
+			{
+				Log.Out(Logs::General, Logs::Error, "Received application packet from server that had opcode ServerOP_NewLSInfo, "
+					"but was too small. Discarded to avoid buffer overrun.");
+				break;
+			}
+	
+			if(server.options.IsWorldTraceOn())
+			{
+				Log.Out(Logs::General, Logs::Netcode, "New Login Info Recieved.");
+			}
+	
+			ServerNewLSInfo_Struct *info = (ServerNewLSInfo_Struct*)p.Data();
+			Handle_NewLSInfo(info);
+			break;
 		}
-
-		if(server.options.IsDumpInPacketsOn())
+	case ServerOP_LSStatus:
 		{
-			DumpPacket(app);
+			if(p.Length() < sizeof(ServerLSStatus_Struct))
+			{
+				Log.Out(Logs::General, Logs::Error, "Recieved application packet from server that had opcode ServerOP_LSStatus, "
+					"but was too small. Discarded to avoid buffer overrun.");
+				break;
+			}
+	
+			if(server.options.IsWorldTraceOn())
+			{
+				Log.Out(Logs::General, Logs::Netcode, "World Server Status Recieved.");
+			}
+	
+			ServerLSStatus_Struct *ls_status = (ServerLSStatus_Struct*)p.Data();
+			Handle_LSStatus(ls_status);
+			break;
 		}
-
-		switch(app->opcode)
+	case ServerOP_UsertoWorldResp:
 		{
-		case ServerOP_NewLSInfo:
+			if(p.Length() < sizeof(UsertoWorldResponse_Struct))
 			{
-				if(app->size < sizeof(ServerNewLSInfo_Struct))
-				{
-					Log.Out(Logs::General, Logs::Error, "Received application packet from server that had opcode ServerOP_NewLSInfo, "
-						"but was too small. Discarded to avoid buffer overrun.");
-					break;
-				}
-
-				if(server.options.IsWorldTraceOn())
-				{
-					Log.Out(Logs::General, Logs::Netcode, "New Login Info Recieved.");
-				}
-
-				ServerNewLSInfo_Struct *info = (ServerNewLSInfo_Struct*)app->pBuffer;
-				Handle_NewLSInfo(info);
+				Log.Out(Logs::General, Logs::Error, "Recieved application packet from server that had opcode ServerOP_UsertoWorldResp, "
+					"but was too small. Discarded to avoid buffer overrun.");
 				break;
 			}
-		case ServerOP_LSStatus:
+	
+			//I don't use world trace for this and here is why:
+			//Because this is a part of the client login procedure it makes tracking client errors
+			//While keeping world server spam with multiple servers connected almost impossible.
+			if(server.options.IsTraceOn())
 			{
-				if(app->size < sizeof(ServerLSStatus_Struct))
+				Log.Out(Logs::General, Logs::Netcode, "User-To-World Response received.");
+			}
+	
+			UsertoWorldResponse_Struct *utwr = (UsertoWorldResponse_Struct*)p.Data();
+			Log.Out(Logs::General, Logs::Debug, "Trying to find client with user id of %u.", utwr->lsaccountid);
+			Client *c = server.client_manager->GetClient(utwr->lsaccountid);
+			if(c)
+			{
+				Log.Out(Logs::General, Logs::Debug, "Found client with user id of %u and account name of %s.", utwr->lsaccountid, c->GetAccountName().c_str());
+				EQApplicationPacket *outapp = new EQApplicationPacket(OP_PlayEverquestResponse, sizeof(PlayEverquestResponse_Struct));
+				PlayEverquestResponse_Struct *per = (PlayEverquestResponse_Struct*)outapp->pBuffer;
+				per->Sequence = c->GetPlaySequence();
+				per->ServerNumber = c->GetPlayServerID();
+				Log.Out(Logs::General, Logs::Debug, "Found sequence and play of %u %u", c->GetPlaySequence(), c->GetPlayServerID());
+	
+				Log.Out(Logs::General, Logs::Netcode, "[Size: %u] %s", outapp->size, DumpPacketToString(outapp).c_str());
+	
+				if(utwr->response > 0)
 				{
-					Log.Out(Logs::General, Logs::Error, "Recieved application packet from server that had opcode ServerOP_LSStatus, "
-						"but was too small. Discarded to avoid buffer overrun.");
+					per->Allowed = 1;
+					SendClientAuth(c->GetConnection()->GetRemoteAddr(), c->GetAccountName(), c->GetKey(), c->GetAccountID());
+				}
+	
+				switch(utwr->response)
+				{
+				case 1:
+					per->Message = 101;
+					break;
+				case 0:
+					per->Message = 326;
+					break;
+				case -1:
+					per->Message = 337;
+					break;
+				case -2:
+					per->Message = 338;
+					break;
+				case -3:
+					per->Message = 303;
 					break;
 				}
-
-				if(server.options.IsWorldTraceOn())
-				{
-					Log.Out(Logs::General, Logs::Netcode, "World Server Status Recieved.");
-				}
-
-				ServerLSStatus_Struct *ls_status = (ServerLSStatus_Struct*)app->pBuffer;
-				Handle_LSStatus(ls_status);
-				break;
-			}
-		case ServerOP_LSZoneInfo:
-		case ServerOP_LSZoneShutdown:
-		case ServerOP_LSZoneStart:
-		case ServerOP_LSZoneBoot:
-		case ServerOP_LSZoneSleep:
-		case ServerOP_LSPlayerLeftWorld:
-		case ServerOP_LSPlayerJoinWorld:
-		case ServerOP_LSPlayerZoneChange:
-			{
-				//Not logging these to cut down on spam until we implement them
-				break;
-			}
-
-		case ServerOP_UsertoWorldResp:
-			{
-				if(app->size < sizeof(UsertoWorldResponse_Struct))
-				{
-					Log.Out(Logs::General, Logs::Error, "Recieved application packet from server that had opcode ServerOP_UsertoWorldResp, "
-						"but was too small. Discarded to avoid buffer overrun.");
-					break;
-				}
-
-				//I don't use world trace for this and here is why:
-				//Because this is a part of the client login procedure it makes tracking client errors
-				//While keeping world server spam with multiple servers connected almost impossible.
+	
 				if(server.options.IsTraceOn())
 				{
-					Log.Out(Logs::General, Logs::Netcode, "User-To-World Response received.");
-				}
-
-				UsertoWorldResponse_Struct *utwr = (UsertoWorldResponse_Struct*)app->pBuffer;
-				Log.Out(Logs::General, Logs::Debug, "Trying to find client with user id of %u.", utwr->lsaccountid);
-				Client *c = server.client_manager->GetClient(utwr->lsaccountid);
-				if(c)
-				{
-					Log.Out(Logs::General, Logs::Debug, "Found client with user id of %u and account name of %s.", utwr->lsaccountid, c->GetAccountName().c_str());
-					EQApplicationPacket *outapp = new EQApplicationPacket(OP_PlayEverquestResponse, sizeof(PlayEverquestResponse_Struct));
-					PlayEverquestResponse_Struct *per = (PlayEverquestResponse_Struct*)outapp->pBuffer;
-					per->Sequence = c->GetPlaySequence();
-					per->ServerNumber = c->GetPlayServerID();
-					Log.Out(Logs::General, Logs::Debug, "Found sequence and play of %u %u", c->GetPlaySequence(), c->GetPlayServerID());
-
+					Log.Out(Logs::General, Logs::Netcode, "Sending play response with following data, allowed %u, sequence %u, server number %u, message %u",
+						per->Allowed, per->Sequence, per->ServerNumber, per->Message);
 					Log.Out(Logs::General, Logs::Netcode, "[Size: %u] %s", outapp->size, DumpPacketToString(outapp).c_str());
-
-					if(utwr->response > 0)
-					{
-						per->Allowed = 1;
-						SendClientAuth(c->GetConnection()->GetRemoteIP(), c->GetAccountName(), c->GetKey(), c->GetAccountID());
-					}
-
-					switch(utwr->response)
-					{
-					case 1:
-						per->Message = 101;
-						break;
-					case 0:
-						per->Message = 326;
-						break;
-					case -1:
-						per->Message = 337;
-						break;
-					case -2:
-						per->Message = 338;
-						break;
-					case -3:
-						per->Message = 303;
-						break;
-					}
-
-					if(server.options.IsTraceOn())
-					{
-						Log.Out(Logs::General, Logs::Netcode, "Sending play response with following data, allowed %u, sequence %u, server number %u, message %u",
-							per->Allowed, per->Sequence, per->ServerNumber, per->Message);
-						Log.Out(Logs::General, Logs::Netcode, "[Size: %u] %s", outapp->size, DumpPacketToString(outapp).c_str());
-					}
-
-					if(server.options.IsDumpOutPacketsOn())
-					{
-						DumpPacket(outapp);
-					}
-
-					c->SendPlayResponse(outapp);
-					delete outapp;
 				}
-				else
+	
+				if(server.options.IsDumpOutPacketsOn())
 				{
-					Log.Out(Logs::General, Logs::Error, "Recieved User-To-World Response for %u but could not find the client referenced!.", utwr->lsaccountid);
+					DumpPacket(outapp);
 				}
-				break;
+	
+				c->SendPlayResponse(outapp);
+				delete outapp;
 			}
-		case ServerOP_LSAccountUpdate:
+			else
 			{
-				if(app->size < sizeof(ServerLSAccountUpdate_Struct))
-				{
-					Log.Out(Logs::General, Logs::Error, "Recieved application packet from server that had opcode ServerLSAccountUpdate_Struct, "
-						"but was too small. Discarded to avoid buffer overrun.");
-					break;
-				}
-			
-				Log.Out(Logs::General, Logs::Netcode, "ServerOP_LSAccountUpdate packet received from: %s", short_name.c_str());
-				ServerLSAccountUpdate_Struct *lsau = (ServerLSAccountUpdate_Struct*)app->pBuffer;
-				if(is_server_trusted)
-				{
-					Log.Out(Logs::General, Logs::Netcode, "ServerOP_LSAccountUpdate update processed for: %s", lsau->useraccount);
-					string name;
-					string password;
-					string email;
-					name.assign(lsau->useraccount);
-					password.assign(lsau->userpassword);
-					email.assign(lsau->useremail);
-					server.db->UpdateLSAccountInfo(lsau->useraccountid, name, password, email);
-				}
-				break;
+				Log.Out(Logs::General, Logs::Error, "Recieved User-To-World Response for %u but could not find the client referenced!.", utwr->lsaccountid);
 			}
-		default:
-			{
-				Log.Out(Logs::General, Logs::Error, "Recieved application packet from server that had an unknown operation code 0x%.4X.", app->opcode);
-			}
+			break;
 		}
-
-		delete app;
-		app = nullptr;
+	case ServerOP_LSAccountUpdate:
+		{
+			if(p.Length() < sizeof(ServerLSAccountUpdate_Struct))
+			{
+				Log.Out(Logs::General, Logs::Error, "Recieved application packet from server that had opcode ServerLSAccountUpdate_Struct, "
+					"but was too small. Discarded to avoid buffer overrun.");
+				break;
+			}
+		
+			Log.Out(Logs::General, Logs::Netcode, "ServerOP_LSAccountUpdate packet received from: %s", short_name.c_str());
+			ServerLSAccountUpdate_Struct *lsau = (ServerLSAccountUpdate_Struct*)p.Data();
+			if(is_server_trusted)
+			{
+				Log.Out(Logs::General, Logs::Netcode, "ServerOP_LSAccountUpdate update processed for: %s", lsau->useraccount);
+				string name;
+				string password;
+				string email;
+				name.assign(lsau->useraccount);
+				password.assign(lsau->userpassword);
+				email.assign(lsau->useremail);
+				server.db->UpdateLSAccountInfo(lsau->useraccountid, name, password, email);
+			}
+			break;
+		}
+	default:
+		{
+			Log.Out(Logs::General, Logs::Error, "Recieved application packet from server that had an unknown operation code 0x%.4X.", opcode);
+		}
 	}
-	return true;
 }
 
 void WorldServer::Handle_NewLSInfo(ServerNewLSInfo_Struct* i)
@@ -308,8 +290,7 @@ void WorldServer::Handle_NewLSInfo(ServerNewLSInfo_Struct* i)
 		if(strlen(i->remote_address) == 0)
 		{
 			in_addr in;
-			in.s_addr = GetConnection()->GetrIP();
-			remote_ip = inet_ntoa(in);
+			remote_ip = GetConnection()->Handle()->RemoteIP();
 			Log.Out(Logs::General, Logs::Error, "Handle_NewLSInfo error, remote address was null, defaulting to stream address %s.", remote_ip.c_str());
 		}
 		else
@@ -320,8 +301,7 @@ void WorldServer::Handle_NewLSInfo(ServerNewLSInfo_Struct* i)
 	else
 	{
 		in_addr in;
-		in.s_addr = GetConnection()->GetrIP();
-		remote_ip = inet_ntoa(in);
+		remote_ip = GetConnection()->Handle()->RemoteIP();
 		Log.Out(Logs::General, Logs::Error, "Handle_NewLSInfo error, remote address was too long, defaulting to stream address %s.", remote_ip.c_str());
 	}
 
@@ -491,9 +471,7 @@ void WorldServer::Handle_NewLSInfo(ServerNewLSInfo_Struct* i)
 		}
 	}
 
-	in_addr in;
-	in.s_addr = connection->GetrIP();
-	server.db->UpdateWorldRegistration(GetRuntimeID(), long_name, string(inet_ntoa(in)));
+	server.db->UpdateWorldRegistration(GetRuntimeID(), long_name, GetConnection()->Handle()->RemoteIP());
 
 	if(is_server_authorized)
 	{
@@ -508,7 +486,7 @@ void WorldServer::Handle_LSStatus(ServerLSStatus_Struct *s)
 	server_status = s->status;
 }
 
-void WorldServer::SendClientAuth(unsigned int ip, string account, string key, unsigned int account_id)
+void WorldServer::SendClientAuth(std::string ip, string account, string key, unsigned int account_id)
 {
 	ServerPacket *outapp = new ServerPacket(ServerOP_LSClientAuth, sizeof(ClientAuth_Struct));
 	ClientAuth_Struct* client_auth = (ClientAuth_Struct*)outapp->pBuffer;
@@ -518,13 +496,10 @@ void WorldServer::SendClientAuth(unsigned int ip, string account, string key, un
 	strncpy(client_auth->key, key.c_str(), 10);
 	client_auth->lsadmin = 0;
 	client_auth->worldadmin = 0;
-	client_auth->ip = ip;
+	strcpy(client_auth->ip, ip.c_str());
 
-	in_addr in;
-	in.s_addr = ip; connection->GetrIP();
-	string client_address(inet_ntoa(in));
-	in.s_addr = connection->GetrIP();
-	string world_address(inet_ntoa(in));
+	string client_address(ip);
+	string world_address(connection->Handle()->RemoteIP());
 
 	if (client_address.compare(world_address) == 0) {
 		client_auth->local = 1;

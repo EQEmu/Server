@@ -23,6 +23,9 @@ namespace EQ
 			void Disconnect();
 			void Read(const char *data, size_t count);
 			void Write(const char *data, size_t count);
+
+			std::string LocalIP() const;
+			int LocalPort() const;
 			std::string RemoteIP() const;
 			int RemotePort() const;
 		private:

@@ -21,6 +21,7 @@ public:
 	virtual void FastQueuePacket(EQApplicationPacket **p, bool ack_req=true);
 	virtual EQApplicationPacket *PopPacket();
 	virtual void Close();
+	virtual std::string GetRemoteAddr() const;
 	virtual uint32 GetRemoteIP() const;
 	virtual uint16 GetRemotePort() const;
 	virtual void ReleaseFromUse();

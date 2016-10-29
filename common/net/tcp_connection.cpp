@@ -151,6 +151,42 @@ void EQ::Net::TCPConnection::Write(const char *data, size_t count)
 	});
 }
 
+std::string EQ::Net::TCPConnection::LocalIP() const
+{
+	sockaddr_storage addr;
+	int addr_len = sizeof(addr);
+	uv_tcp_getsockname(m_socket, (sockaddr*)&addr, &addr_len);
+
+	char endpoint[64] = { 0 };
+	if (addr.ss_family == AF_INET) {
+		uv_ip4_name((const sockaddr_in*)&addr, endpoint, 64);
+	}
+	else if (addr.ss_family == AF_INET6) {
+		uv_ip6_name((const sockaddr_in6*)&addr, endpoint, 64);
+	}
+
+	return endpoint;
+}
+
+int EQ::Net::TCPConnection::LocalPort() const
+{
+	sockaddr_storage addr;
+	int addr_len = sizeof(addr);
+	uv_tcp_getsockname(m_socket, (sockaddr*)&addr, &addr_len);
+
+	char endpoint[64] = { 0 };
+	if (addr.ss_family == AF_INET) {
+		sockaddr_in *s = (sockaddr_in*)&addr;
+		return ntohs(s->sin_port);
+	}
+	else if (addr.ss_family == AF_INET6) {
+		sockaddr_in6 *s = (sockaddr_in6*)&addr;
+		return ntohs(s->sin6_port);
+	}
+
+	return 0;
+}
+
 std::string EQ::Net::TCPConnection::RemoteIP() const
 {
 	sockaddr_storage addr;

@@ -63,6 +63,10 @@ void EQStreamProxy::Close() {
 	m_stream->Close();
 }
 
+std::string EQStreamProxy::GetRemoteAddr() const {
+	return(m_stream->GetRemoteAddr());
+}
+
 uint32 EQStreamProxy::GetRemoteIP() const {
 	return(m_stream->GetRemoteIP());
 }
