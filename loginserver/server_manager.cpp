@@ -89,7 +89,7 @@ EQApplicationPacket *ServerManager::CreateServerListPacket(Client *c)
 	unsigned int server_count = 0;
 	in_addr in;
 	in.s_addr = c->GetConnection()->GetRemoteIP();
-	string client_ip = inet_ntoa(in);
+	std::string client_ip = inet_ntoa(in);
 
 	auto iter = world_servers.begin();
 	while (iter != world_servers.end()) {
@@ -103,7 +103,7 @@ EQApplicationPacket *ServerManager::CreateServerListPacket(Client *c)
 		if (world_ip.compare(client_ip) == 0) {
 			packet_size += (*iter)->GetLongName().size() + (*iter)->GetLocalIP().size() + 24;
 		}
-		else if (client_ip.find(server.options.GetLocalNetwork()) != string::npos) {
+		else if (client_ip.find(server.options.GetLocalNetwork()) != std::string::npos) {
 			packet_size += (*iter)->GetLongName().size() + (*iter)->GetLocalIP().size() + 24;
 		}
 		else {
@@ -142,7 +142,7 @@ EQApplicationPacket *ServerManager::CreateServerListPacket(Client *c)
 			memcpy(data_pointer, (*iter)->GetLocalIP().c_str(), (*iter)->GetLocalIP().size());
 			data_pointer += ((*iter)->GetLocalIP().size() + 1);
 		}
-		else if (client_ip.find(server.options.GetLocalNetwork()) != string::npos) {
+		else if (client_ip.find(server.options.GetLocalNetwork()) != std::string::npos) {
 			memcpy(data_pointer, (*iter)->GetLocalIP().c_str(), (*iter)->GetLocalIP().size());
 			data_pointer += ((*iter)->GetLocalIP().size() + 1);
 		}
@@ -228,7 +228,7 @@ void ServerManager::SendUserToWorldRequest(unsigned int server_id, unsigned int 
 	}
 }
 
-bool ServerManager::ServerExists(string l_name, string s_name, WorldServer *ignore)
+bool ServerManager::ServerExists(std::string l_name, std::string s_name, WorldServer *ignore)
 {
 	auto iter = world_servers.begin();
 	while (iter != world_servers.end()) {
@@ -246,7 +246,7 @@ bool ServerManager::ServerExists(string l_name, string s_name, WorldServer *igno
 	return false;
 }
 
-void ServerManager::DestroyServerByName(string l_name, string s_name, WorldServer *ignore)
+void ServerManager::DestroyServerByName(std::string l_name, std::string s_name, WorldServer *ignore)
 {
 	auto iter = world_servers.begin();
 	while (iter != world_servers.end()) {

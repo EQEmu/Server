@@ -28,8 +28,6 @@
 #include <memory>
 #include "../common/eq_stream_intf.h"
 
-using namespace std;
-
 enum LSClientVersion
 {
 	cv_titanium,
@@ -109,12 +107,12 @@ public:
 	/**
 	* Gets the account name of this client.
 	*/
-	string GetAccountName() const { return account_name; }
+	std::string GetAccountName() const { return account_name; }
 
 	/**
 	* Gets the key generated at login for this client.
 	*/
-	string GetKey() const { return key; }
+	std::string GetKey() const { return key; }
 
 	/**
 	* Gets the server selected to be played on for this client.
@@ -137,11 +135,11 @@ private:
 	LSClientVersion version;
 	LSClientStatus status;
 
-	string account_name;
+	std::string account_name;
 	unsigned int account_id;
 	unsigned int play_server_id;
 	unsigned int play_sequence_id;
-	string key;
+	std::string key;
 };
 
 #endif

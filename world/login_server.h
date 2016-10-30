@@ -33,7 +33,6 @@ public:
 	LoginServer(const char*, uint16, const char*, const char*);
 	~LoginServer();
 
-	void ProcessPacket(uint16_t opcode, EQ::Net::Packet &p);
 	bool Connect();
 
 	void SendInfo();
@@ -47,6 +46,13 @@ public:
 	bool CanUpdate() { return CanAccountUpdate; }
 
 private:
+	void ProcessUsertoWorldReq(uint16_t opcode, EQ::Net::Packet &p);
+	void ProcessLSClientAuth(uint16_t opcode, EQ::Net::Packet &p);
+	void ProcessLSFatalError(uint16_t opcode, EQ::Net::Packet &p);
+	void ProcessSystemwideMessage(uint16_t opcode, EQ::Net::Packet &p);
+	void ProcessLSRemoteAddr(uint16_t opcode, EQ::Net::Packet &p);
+	void ProcessLSAccountUpdate(uint16_t opcode, EQ::Net::Packet &p);
+
 	bool minilogin;
 	std::unique_ptr<EQ::Net::ServertalkClient> client;
 	std::unique_ptr<EQ::Timer> statusupdate_timer;

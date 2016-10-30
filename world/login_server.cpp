@@ -53,95 +53,102 @@ LoginServer::LoginServer(const char* iAddress, uint16 iPort, const char* Account
 LoginServer::~LoginServer() {
 }
 
-void LoginServer::ProcessPacket(uint16_t opcode, EQ::Net::Packet &p) {
-	const WorldConfig *Config=WorldConfig::get();
+void LoginServer::ProcessUsertoWorldReq(uint16_t opcode, EQ::Net::Packet &p) {
+	const WorldConfig *Config = WorldConfig::get();
+	Log.Out(Logs::Detail, Logs::World_Server, "Recevied ServerPacket from LS OpCode 0x04x", opcode);
 
-	/************ Get all packets from packet manager out queue and process them ************/
-	Log.Out(Logs::Detail, Logs::World_Server,"Recevied ServerPacket from LS OpCode 0x04x", opcode);
+	UsertoWorldRequest_Struct* utwr = (UsertoWorldRequest_Struct*)p.Data();
+	uint32 id = database.GetAccountIDFromLSID(utwr->lsaccountid);
+	int16 status = database.CheckStatus(id);
 
-	switch(opcode) {
-		case ServerOP_UsertoWorldReq: {
-			UsertoWorldRequest_Struct* utwr = (UsertoWorldRequest_Struct*)p.Data();
-			uint32 id = database.GetAccountIDFromLSID(utwr->lsaccountid);
-			int16 status = database.CheckStatus(id);
+	auto outpack = new ServerPacket;
+	outpack->opcode = ServerOP_UsertoWorldResp;
+	outpack->size = sizeof(UsertoWorldResponse_Struct);
+	outpack->pBuffer = new uchar[outpack->size];
+	memset(outpack->pBuffer, 0, outpack->size);
+	UsertoWorldResponse_Struct* utwrs = (UsertoWorldResponse_Struct*)outpack->pBuffer;
+	utwrs->lsaccountid = utwr->lsaccountid;
+	utwrs->ToID = utwr->FromID;
 
-			auto outpack = new ServerPacket;
-			outpack->opcode = ServerOP_UsertoWorldResp;
-			outpack->size = sizeof(UsertoWorldResponse_Struct);
-			outpack->pBuffer = new uchar[outpack->size];
-			memset(outpack->pBuffer, 0, outpack->size);
-			UsertoWorldResponse_Struct* utwrs = (UsertoWorldResponse_Struct*) outpack->pBuffer;
-			utwrs->lsaccountid = utwr->lsaccountid;
-			utwrs->ToID = utwr->FromID;
-
-			if(Config->Locked == true)
-			{
-				if((status == 0 || status < 100) && (status != -2 || status != -1))
-					utwrs->response = 0;
-				if(status >= 100)
-					utwrs->response = 1;
-			}
-			else {
-				utwrs->response = 1;
-			}
-
-			int32 x = Config->MaxClients;
-			if( (int32)numplayers >= x && x != -1 && x != 255 && status < 80)
-				utwrs->response = -3;
-
-			if(status == -1)
-				utwrs->response = -1;
-			if(status == -2)
-				utwrs->response = -2;
-
-			utwrs->worldid = utwr->worldid;
-			SendPacket(outpack);
-			delete outpack;
-			break;
-		}
-		case ServerOP_LSClientAuth: {
-			ClientAuth_Struct* slsca = (ClientAuth_Struct*)p.Data();
-
-			if (RuleI(World, AccountSessionLimit) >= 0) {
-				// Enforce the limit on the number of characters on the same account that can be
-				// online at the same time.
-				client_list.EnforceSessionLimit(slsca->lsaccount_id);
-			}
-
-			client_list.CLEAdd(slsca->lsaccount_id, slsca->name, slsca->key, slsca->worldadmin, inet_addr(slsca->ip), slsca->local);
-			break;
-		}
-		case ServerOP_LSFatalError: {
-			Log.Out(Logs::Detail, Logs::World_Server, "Login server responded with FatalError.");
-			if (p.Length() > 1) {
-				Log.Out(Logs::Detail, Logs::World_Server, "     %s", (const char*)p.Data());
-			}
-			break;
-		}
-		case ServerOP_SystemwideMessage: {
-			ServerSystemwideMessage* swm = (ServerSystemwideMessage*)p.Data();
-			zoneserver_list.SendEmoteMessageRaw(0, 0, 0, swm->type, swm->message);
-			break;
-		}
-		case ServerOP_LSRemoteAddr: {
-			if (!Config->WorldAddress.length()) {
-				WorldConfig::SetWorldAddress((char *)p.Data());
-				Log.Out(Logs::Detail, Logs::World_Server, "Loginserver provided %s as world address", (const char*)p.Data());
-			}
-			break;
-		}
-		case ServerOP_LSAccountUpdate: {
-			Log.Out(Logs::Detail, Logs::World_Server, "Received ServerOP_LSAccountUpdate packet from loginserver");
-			CanAccountUpdate = true;
-			break;
-		}
-		default:
-		{
-			Log.Out(Logs::Detail, Logs::World_Server, "Unknown LSOpCode: 0x%04x size=%d",(int)opcode, p.Length());
-			Log.OutF(Logs::General, Logs::Login_Server, "{0}", p.ToString());
-			break;
-		}
+	if (Config->Locked == true)
+	{
+		if ((status == 0 || status < 100) && (status != -2 || status != -1))
+			utwrs->response = 0;
+		if (status >= 100)
+			utwrs->response = 1;
 	}
+	else {
+		utwrs->response = 1;
+	}
+
+	int32 x = Config->MaxClients;
+	if ((int32)numplayers >= x && x != -1 && x != 255 && status < 80)
+		utwrs->response = -3;
+
+	if (status == -1)
+		utwrs->response = -1;
+	if (status == -2)
+		utwrs->response = -2;
+
+	utwrs->worldid = utwr->worldid;
+	SendPacket(outpack);
+	delete outpack;
+}
+
+void LoginServer::ProcessLSClientAuth(uint16_t opcode, EQ::Net::Packet &p) {
+	const WorldConfig *Config = WorldConfig::get();
+	Log.Out(Logs::Detail, Logs::World_Server, "Recevied ServerPacket from LS OpCode 0x04x", opcode);
+	
+	try {
+		auto slsca = p.GetSerialize<ClientAuth_Struct>(0);
+
+		if (RuleI(World, AccountSessionLimit) >= 0) {
+			// Enforce the limit on the number of characters on the same account that can be
+			// online at the same time.
+			client_list.EnforceSessionLimit(slsca.lsaccount_id);
+		}
+		
+		client_list.CLEAdd(slsca.lsaccount_id, slsca.name.c_str(), slsca.key.c_str(), slsca.worldadmin, inet_addr(slsca.ip.c_str()), slsca.local);
+	}
+	catch (std::exception &ex) {
+		Log.OutF(Logs::General, Logs::Error, "Error parsing LSClientAuth packet from world.\n{0}", ex.what());
+	}
+}
+
+void LoginServer::ProcessLSFatalError(uint16_t opcode, EQ::Net::Packet &p) {
+	const WorldConfig *Config = WorldConfig::get();
+	Log.Out(Logs::Detail, Logs::World_Server, "Recevied ServerPacket from LS OpCode 0x04x", opcode);
+
+	Log.Out(Logs::Detail, Logs::World_Server, "Login server responded with FatalError.");
+	if (p.Length() > 1) {
+		Log.Out(Logs::Detail, Logs::World_Server, "     %s", (const char*)p.Data());
+	}
+}
+
+void LoginServer::ProcessSystemwideMessage(uint16_t opcode, EQ::Net::Packet &p) {
+	const WorldConfig *Config = WorldConfig::get();
+	Log.Out(Logs::Detail, Logs::World_Server, "Recevied ServerPacket from LS OpCode 0x04x", opcode);
+
+	ServerSystemwideMessage* swm = (ServerSystemwideMessage*)p.Data();
+	zoneserver_list.SendEmoteMessageRaw(0, 0, 0, swm->type, swm->message);
+}
+
+void LoginServer::ProcessLSRemoteAddr(uint16_t opcode, EQ::Net::Packet &p) {
+	const WorldConfig *Config = WorldConfig::get();
+	Log.Out(Logs::Detail, Logs::World_Server, "Recevied ServerPacket from LS OpCode 0x04x", opcode);
+
+	if (!Config->WorldAddress.length()) {
+		WorldConfig::SetWorldAddress((char *)p.Data());
+		Log.Out(Logs::Detail, Logs::World_Server, "Loginserver provided %s as world address", (const char*)p.Data());
+	}
+}
+
+void LoginServer::ProcessLSAccountUpdate(uint16_t opcode, EQ::Net::Packet &p) {
+	const WorldConfig *Config = WorldConfig::get();
+	Log.Out(Logs::Detail, Logs::World_Server, "Recevied ServerPacket from LS OpCode 0x04x", opcode);
+
+	Log.Out(Logs::Detail, Logs::World_Server, "Received ServerOP_LSAccountUpdate packet from loginserver");
+	CanAccountUpdate = true;
 }
 
 bool LoginServer::Connect() {
@@ -189,12 +196,12 @@ bool LoginServer::Connect() {
 		}
 	});
 
-	client->OnMessage(ServerOP_UsertoWorldReq, std::bind(&LoginServer::ProcessPacket, this, std::placeholders::_1, std::placeholders::_2));
-	client->OnMessage(ServerOP_LSClientAuth, std::bind(&LoginServer::ProcessPacket, this, std::placeholders::_1, std::placeholders::_2));
-	client->OnMessage(ServerOP_LSFatalError, std::bind(&LoginServer::ProcessPacket, this, std::placeholders::_1, std::placeholders::_2));
-	client->OnMessage(ServerOP_SystemwideMessage, std::bind(&LoginServer::ProcessPacket, this, std::placeholders::_1, std::placeholders::_2));
-	client->OnMessage(ServerOP_LSRemoteAddr, std::bind(&LoginServer::ProcessPacket, this, std::placeholders::_1, std::placeholders::_2));
-	client->OnMessage(ServerOP_LSAccountUpdate, std::bind(&LoginServer::ProcessPacket, this, std::placeholders::_1, std::placeholders::_2));
+	client->OnMessage(ServerOP_UsertoWorldReq, std::bind(&LoginServer::ProcessUsertoWorldReq, this, std::placeholders::_1, std::placeholders::_2));
+	client->OnMessage(ServerOP_LSClientAuth, std::bind(&LoginServer::ProcessLSClientAuth, this, std::placeholders::_1, std::placeholders::_2));
+	client->OnMessage(ServerOP_LSFatalError, std::bind(&LoginServer::ProcessLSFatalError, this, std::placeholders::_1, std::placeholders::_2));
+	client->OnMessage(ServerOP_SystemwideMessage, std::bind(&LoginServer::ProcessSystemwideMessage, this, std::placeholders::_1, std::placeholders::_2));
+	client->OnMessage(ServerOP_LSRemoteAddr, std::bind(&LoginServer::ProcessLSRemoteAddr, this, std::placeholders::_1, std::placeholders::_2));
+	client->OnMessage(ServerOP_LSAccountUpdate, std::bind(&LoginServer::ProcessLSAccountUpdate, this, std::placeholders::_1, std::placeholders::_2));
 }
 void LoginServer::SendInfo() {
 	const WorldConfig *Config=WorldConfig::get();

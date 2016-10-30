@@ -187,13 +187,13 @@ void Client::Handle_Login(const char* data, unsigned int size)
 
 	status = cs_logged_in;
 
-	string entered_username;
-	string entered_password_hash_result;
+	std::string entered_username;
+	std::string entered_password_hash_result;
 
 	char *login_packet_buffer = nullptr;
 
 	unsigned int db_account_id = 0;
-	string db_account_password_hash;
+	std::string db_account_password_hash;
 
 #ifdef WIN32
 	login_packet_buffer = server.eq_crypto->DecryptUsernamePassword(data, size, server.options.GetEncryptionMode());
@@ -255,7 +255,7 @@ void Client::Handle_Login(const char* data, unsigned int size)
 		in_addr in;
 		in.s_addr = connection->GetRemoteIP();
 
-		server.db->UpdateLSAccountData(db_account_id, string(inet_ntoa(in)));
+		server.db->UpdateLSAccountData(db_account_id, std::string(inet_ntoa(in)));
 		GenerateKey();
 
 		account_id = db_account_id;

@@ -17,8 +17,8 @@ namespace EQ
 			template <class Archive>
 			void serialize(Archive & archive)
 			{
-				archive(CEREAL_NVP(zero),
-					CEREAL_NVP(opcode));
+				archive(zero,
+					opcode);
 			}
 		};
 
@@ -34,11 +34,11 @@ namespace EQ
 			template <class Archive>
 			void serialize(Archive & archive)
 			{
-				archive(CEREAL_NVP(zero),
-					CEREAL_NVP(opcode),
-					CEREAL_NVP(protocol_version),
-					CEREAL_NVP(connect_code),
-					CEREAL_NVP(max_packet_size));
+				archive(zero,
+					opcode,
+					protocol_version,
+					connect_code,
+					max_packet_size);
 			}
 		};
 
@@ -57,14 +57,14 @@ namespace EQ
 			template <class Archive>
 			void serialize(Archive & archive)
 			{
-				archive(CEREAL_NVP(zero),
-					CEREAL_NVP(opcode),
-					CEREAL_NVP(connect_code),
-					CEREAL_NVP(encode_key),
-					CEREAL_NVP(crc_bytes),
-					CEREAL_NVP(encode_pass1),
-					CEREAL_NVP(encode_pass2),
-					CEREAL_NVP(max_packet_size));
+				archive(zero,
+					opcode,
+					connect_code,
+					encode_key,
+					crc_bytes,
+					encode_pass1,
+					encode_pass2,
+					max_packet_size);
 			}
 		};
 
@@ -78,9 +78,9 @@ namespace EQ
 			template <class Archive>
 			void serialize(Archive & archive)
 			{
-				archive(CEREAL_NVP(zero),
-					CEREAL_NVP(opcode),
-					CEREAL_NVP(connect_code));
+				archive(zero,
+					opcode,
+					connect_code);
 			}
 		};
 
@@ -94,9 +94,9 @@ namespace EQ
 			template <class Archive>
 			void serialize(Archive & archive)
 			{
-				archive(CEREAL_NVP(zero),
-					CEREAL_NVP(opcode),
-					CEREAL_NVP(sequence));
+				archive(zero,
+					opcode,
+					sequence);
 			}
 		};
 
@@ -109,8 +109,8 @@ namespace EQ
 			template <class Archive>
 			void serialize(Archive & archive)
 			{
-				archive(CEREAL_NVP(reliable),
-					CEREAL_NVP(total_size));
+				archive(reliable,
+					total_size);
 			}
 		};
 
@@ -131,16 +131,16 @@ namespace EQ
 			template <class Archive>
 			void serialize(Archive & archive)
 			{
-				archive(CEREAL_NVP(zero),
-					CEREAL_NVP(opcode),
-					CEREAL_NVP(timestamp),
-					CEREAL_NVP(stat_ping),
-					CEREAL_NVP(avg_ping),
-					CEREAL_NVP(min_ping),
-					CEREAL_NVP(max_ping),
-					CEREAL_NVP(last_ping),
-					CEREAL_NVP(packets_sent),
-					CEREAL_NVP(packets_recv));
+				archive(zero,
+					opcode,
+					timestamp,
+					stat_ping,
+					avg_ping,
+					min_ping,
+					max_ping,
+					last_ping,
+					packets_sent,
+					packets_recv);
 			}
 		};
 
@@ -159,14 +159,14 @@ namespace EQ
 			template <class Archive>
 			void serialize(Archive & archive)
 			{
-				archive(CEREAL_NVP(zero),
-					CEREAL_NVP(opcode),
-					CEREAL_NVP(timestamp),
-					CEREAL_NVP(our_timestamp),
-					CEREAL_NVP(client_sent),
-					CEREAL_NVP(client_recv),
-					CEREAL_NVP(server_sent),
-					CEREAL_NVP(server_recv));
+				archive(zero,
+					opcode,
+					timestamp,
+					our_timestamp,
+					client_sent,
+					client_recv,
+					server_sent,
+					server_recv);
 			}
 		};
 	}

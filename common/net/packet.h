@@ -26,11 +26,7 @@ namespace EQ {
 
 			template<typename T>
 			T GetSerialize(size_t offset) const
-			{
-				if (T::size() > (Length() - offset)) {
-					throw std::out_of_range("Packet::GetSerialize(), packet not large enough to cast to type.");
-				}
-			
+			{		
 				T ret;
 				Util::MemoryStreamReader reader(((char*)Data() + offset), Length());
 				cereal::BinaryInputArchive input(reader);

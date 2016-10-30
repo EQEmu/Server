@@ -415,28 +415,6 @@ int main(int argc, char** argv) {
 		Log.OutF(Logs::Detail, Logs::World_Server, "New connection from IP {0}:{1}", stream->RemoteEndpoint(), ntohs(stream->GetRemotePort()));
 	});
 
-	EQ::Net::ServertalkServer server;
-	EQ::Net::ServertalkServerOptions stopts;
-	stopts.port = 5999;
-	stopts.credentials = "User:Root;Password:1234567890";
-	stopts.encrypted = true;
-	server.Listen(stopts);
-
-	server.OnConnectionIdentified("QueryServ", [](std::shared_ptr<EQ::Net::ServertalkServerConnection> conn) {
-		Log.Out(Logs::General, Logs::Debug, "New QueryServ Connection....");
-		EQ::Net::WritablePacket out;
-		out.PutCString(0, "Hello");
-		conn->Send(1, out);
-
-		conn->OnMessage(2, [&](uint16_t opcode, EQ::Net::Packet &p) {
-			Log.OutF(Logs::General, Logs::Debug, "Server got message of type {0}\n{1}", opcode, p.ToString());
-		});
-	});
-
-	server.OnConnectionRemoved("QueryServ", [](std::shared_ptr<EQ::Net::ServertalkServerConnection> conn) {
-		Log.Out(Logs::General, Logs::Debug, "Lost QueryServ connection.");
-	});
-
 	while(RunLoops) {
 		Timer::SetCurrentTime();
 		eqs = nullptr;

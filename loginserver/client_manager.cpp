@@ -90,7 +90,7 @@ void ClientManager::Process()
 {
 	ProcessDisconnect();
 
-	list<Client*>::iterator iter = clients.begin();
+	auto iter = clients.begin();
 	while(iter != clients.end())
 	{
 		if((*iter)->Process() == false)
@@ -108,7 +108,7 @@ void ClientManager::Process()
 
 void ClientManager::ProcessDisconnect()
 {
-	list<Client*>::iterator iter = clients.begin();
+	auto iter = clients.begin();
 	while(iter != clients.end())
 	{
 		std::shared_ptr<EQStreamInterface> c = (*iter)->GetConnection();
@@ -127,7 +127,7 @@ void ClientManager::ProcessDisconnect()
 
 void ClientManager::UpdateServerList()
 {
-	list<Client*>::iterator iter = clients.begin();
+	auto iter = clients.begin();
 	while(iter != clients.end())
 	{
 		(*iter)->SendServerListPacket();
@@ -137,7 +137,7 @@ void ClientManager::UpdateServerList()
 
 void ClientManager::RemoveExistingClient(unsigned int account_id)
 {
-	list<Client*>::iterator iter = clients.begin();
+	auto iter = clients.begin();
 	while(iter != clients.end())
 	{
 		if((*iter)->GetAccountID() == account_id)
@@ -157,7 +157,7 @@ Client *ClientManager::GetClient(unsigned int account_id)
 {
 	Client *cur = nullptr;
 	int count = 0;
-	list<Client*>::iterator iter = clients.begin();
+	auto iter = clients.begin();
 	while(iter != clients.end())
 	{
 		if((*iter)->GetAccountID() == account_id)

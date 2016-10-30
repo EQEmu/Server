@@ -24,8 +24,6 @@
 #include "client.h"
 #include <list>
 
-using namespace std;
-
 /**
 * Client manager class, holds all the client objects and does basic processing.
 */
@@ -68,7 +66,7 @@ private:
 	*/
 	void ProcessDisconnect();
 
-	list<Client*> clients;
+	std::list<Client*> clients;
 	OpcodeManager *titanium_ops;
 	EQ::Net::EQStreamManager *titanium_stream;
 	OpcodeManager *sod_ops;

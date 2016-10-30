@@ -22,8 +22,13 @@ void EQ::Net::ServertalkServerConnection::Send(uint16_t opcode, EQ::Net::Packet 
 	EQ::Net::WritablePacket out;
 #ifdef ENABLE_SECURITY
 	if (m_encrypted) {
+		if (p.Length() == 0) {
+			p.PutUInt8(0, 0);
+		}
+
 		out.PutUInt32(0, p.Length() + crypto_secretbox_MACBYTES);
 		out.PutUInt16(4, opcode);
+
 		std::unique_ptr<unsigned char[]> cipher(new unsigned char[p.Length() + crypto_secretbox_MACBYTES]);
 
 		crypto_box_easy_afternm(&cipher[0], (unsigned char*)p.Data(), p.Length(), m_nonce_ours, m_shared_key);

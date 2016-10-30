@@ -47,11 +47,6 @@ public:
 	void Reset();
 
 	/**
-	* Does processing of all the packets in for this world.
-	*/
-	void ProcessPacket(uint16_t opcode, const EQ::Net::Packet &p);
-
-	/**
 	* Accesses connection, it is intentional that this is not const (trust me).
 	*/
 	std::shared_ptr<EQ::Net::ServertalkServerConnection> GetConnection() { return connection; }
@@ -132,6 +127,14 @@ public:
 	void SendClientAuth(std::string ip, std::string account, std::string key, unsigned int account_id);
 
 private:
+
+	/**
+	* Packet processing functions:
+	*/
+	void ProcessNewLSInfo(uint16_t opcode, const EQ::Net::Packet &p);
+	void ProcessLSStatus(uint16_t opcode, const EQ::Net::Packet &p);
+	void ProcessUsertoWorldResp(uint16_t opcode, const EQ::Net::Packet &p);
+	void ProcessLSAccountUpdate(uint16_t opcode, const EQ::Net::Packet &p);
 
 	std::shared_ptr<EQ::Net::ServertalkServerConnection> connection;
 	unsigned int zones_booted;

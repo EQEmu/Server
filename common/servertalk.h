@@ -4,6 +4,8 @@
 #include "../common/types.h"
 #include "../common/packet_functions.h"
 #include "../common/eq_packet_structs.h"
+#include <cereal/cereal.hpp>
+#include <cereal/types/string.hpp>
 
 #define SERVER_TIMEOUT	45000	// how often keepalive gets sent
 #define INTERSERVER_TIMER					10000
@@ -524,14 +526,21 @@ struct ServerLSPlayerZoneChange_Struct {
 	uint32 from; // 0 = world
 	uint32 to; // 0 = world
 };
+
 struct ClientAuth_Struct {
-	uint32	lsaccount_id;	// ID# in login server's db
-	char	name[30];		// username in login server's db
-	char	key[30];		// the Key the client will present
-	uint8	lsadmin;		// login server admin level
-	int16	worldadmin;		// login's suggested worldadmin level setting for this user, up to the world if they want to obey it
-	char    ip[64];
-	uint8	local;			// 1 if the client is from the local network
+	int lsaccount_id; // ID# in login server's db
+	std::string name; // username in login server's db
+	std::string key; // the Key the client will present
+	int lsadmin; // login server admin level
+	int worldadmin; // login's suggested worldadmin level setting for this user, up to the world if they want to obey it
+	std::string ip;
+	int local; // 1 if the client is from the local network
+
+	template <class Archive>
+	void serialize(Archive &ar)
+	{
+		ar(lsaccount_id, name, key, lsadmin, worldadmin, ip, local);
+	}
 };
 
 struct ServerSystemwideMessage {
