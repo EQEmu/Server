@@ -48,7 +48,7 @@ ServerManager::ServerManager()
 			server_entity->Reset();
 		}
 		else {
-			world_servers.push_back(std::make_unique<WorldServer>(c));
+			world_servers.push_back(std::unique_ptr<WorldServer>(new WorldServer(c)));
 		}
 
 	});

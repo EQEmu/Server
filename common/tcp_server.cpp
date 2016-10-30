@@ -14,7 +14,7 @@
 	#include <arpa/inet.h>
 	#include <errno.h>
 	#include <fcntl.h>
-#include "net\tcp_server.h"
+
 #define INVALID_SOCKET -1
 	#define SOCKET_ERROR -1
 #endif

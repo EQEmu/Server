@@ -967,7 +967,7 @@ void EQ::Net::DaybreakConnection::ProcessResend(int stream)
 			}
 		}
 		else {
-			if ((size_t)time_since_last_send.count() > std::min(m_resend_delay / (entry.second.times_resent + 1), 5ULL)) {
+			if ((size_t)time_since_last_send.count() > std::min(m_resend_delay / (entry.second.times_resent + 1), (size_t)5ULL)) {
 				InternalBufferedSend(entry.second.packet);
 				entry.second.last_sent = now;
 				entry.second.times_resent++;

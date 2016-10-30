@@ -1,6 +1,7 @@
 #pragma once
 #include <functional>
 #include <uv.h>
+#include <cstring>
 
 namespace EQ
 {
