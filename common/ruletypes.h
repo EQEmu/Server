@@ -491,6 +491,7 @@ RULE_BOOL(Combat, UseLiveCombatRounds, true) // turn this false if you don't wan
 RULE_INT(Combat, NPCAssistCap, 5) // Maxiumium number of NPCs that will assist another NPC at once
 RULE_INT(Combat, NPCAssistCapTimer, 6000) // Time in milliseconds a NPC will take to clear assist aggro cap space
 RULE_BOOL(Combat, UseRevampHandToHand, false) // use h2h revamped dmg/delays I believe this was implemented during SoF
+RULE_BOOL(Combat, ClassicMasterWu, false) // classic master wu uses a random special, modern doesn't
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(NPC)
