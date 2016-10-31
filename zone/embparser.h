@@ -17,7 +17,7 @@
 */
 
 #ifndef EQEMU_EMBPARSER_H
-#define EQMEU_EMBPARSER_H
+#define EQEMU_EMBPARSER_H
 #ifdef EMBPERL
 
 #include "quest_parser_collection.h"
