@@ -3,7 +3,7 @@
 
 	This program is free software; you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
-	the Free Software Foundation; version 2 of the License.
+	the Free Software Foundation; version 2 of the License.f
 
 	This program is distributed in the hope that it will be useful,
 	but WITHOUT ANY WARRANTY except by those people which sell it, which
@@ -1194,6 +1194,12 @@ void Client::OPMoveCoin(const EQApplicationPacket* app)
 	int32 *from_bucket = 0, *to_bucket = 0;
 	Mob* trader = trade->With();
 
+	// if amount < 0, client is sending a malicious packet
+	if (mc->amount < 0)
+	{
+		return;
+	}
+	
 	// could just do a range, but this is clearer and explicit
 	if
 	(
