@@ -232,7 +232,7 @@ void Client::Handle_Login(const char* data, unsigned int size)
 					result = true;
 				}
 				else {
-					Log.OutF(Logs::General, Logs::Error, "Error logging in, user %s does not exist in the database.", user);
+					Log.OutF(Logs::General, Logs::Error, "Error logging in, user {0} does not exist in the database.", user);
 					result = false;
 				}
 			}

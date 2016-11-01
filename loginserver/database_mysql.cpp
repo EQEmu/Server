@@ -76,7 +76,7 @@ bool DatabaseMySQL::GetLoginDataFromAccountName(std::string name, std::string &p
 
 	if (mysql_query(database, query.str().c_str()) != 0)
 	{
-		Log.Out(Logs::General, Logs::Error, "Mysql query failed: %s", query.str().c_str());
+		Log.OutF(Logs::General, Logs::Error, "Mysql query failed: {0}", query.str());
 		return false;
 	}
 
