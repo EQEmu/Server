@@ -125,16 +125,6 @@ void ClientManager::ProcessDisconnect()
 	}
 }
 
-void ClientManager::UpdateServerList()
-{
-	auto iter = clients.begin();
-	while(iter != clients.end())
-	{
-		(*iter)->SendServerListPacket();
-		++iter;
-	}
-}
-
 void ClientManager::RemoveExistingClient(unsigned int account_id)
 {
 	auto iter = clients.begin();

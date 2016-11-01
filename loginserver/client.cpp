@@ -78,12 +78,17 @@ bool Client::Process()
 			}
 		case OP_ServerListRequest:
 			{
+				if (app->Size() < 4) {
+					Log.Out(Logs::General, Logs::Error, "Server List Request received but it is too small, discarding.");
+					break;
+				}
+
 				if(server.options.IsTraceOn())
 				{
 					Log.Out(Logs::General, Logs::Login_Server, "Server list request received from client.");
 				}
 
-				SendServerListPacket();
+				SendServerListPacket(*(uint32_t*)app->pBuffer);
 				break;
 			}
 		case OP_PlayEverquestRequest:
@@ -123,14 +128,6 @@ void Client::Handle_SessionReady(const char* data, unsigned int size)
 	if(size < sizeof(unsigned int))
 	{
 		Log.Out(Logs::General, Logs::Error, "Session ready was too small.");
-		return;
-	}
-
-	unsigned int mode = *((unsigned int*)data);
-	if(mode == (unsigned int)lm_from_world)
-	{
-		Log.Out(Logs::General, Logs::Login_Server, "Session ready indicated logged in from world(unsupported feature), disconnecting.");
-		connection->Close();
 		return;
 	}
 
@@ -175,6 +172,8 @@ void Client::Handle_SessionReady(const char* data, unsigned int size)
 
 void Client::Handle_Login(const char* data, unsigned int size)
 {
+	auto mode = server.options.GetEncryptionMode();
+
 	if(status != cs_waiting_for_login) {
 		Log.Out(Logs::General, Logs::Error, "Login received after already having logged in.");
 		return;
@@ -187,68 +186,69 @@ void Client::Handle_Login(const char* data, unsigned int size)
 
 	status = cs_logged_in;
 
-	std::string entered_username;
-	std::string entered_password_hash_result;
-
 	char *login_packet_buffer = nullptr;
 
 	unsigned int db_account_id = 0;
 	std::string db_account_password_hash;
 
-#ifdef WIN32
-	login_packet_buffer = server.eq_crypto->DecryptUsernamePassword(data, size, server.options.GetEncryptionMode());
-
-	int login_packet_buffer_length = strlen(login_packet_buffer);
-	entered_password_hash_result.assign(login_packet_buffer, login_packet_buffer_length);
-	entered_username.assign((login_packet_buffer + login_packet_buffer_length + 1), strlen(login_packet_buffer + login_packet_buffer_length + 1));
-
-	if(server.options.IsTraceOn()) {
-		Log.Out(Logs::General, Logs::Debug, "User: %s", entered_username.c_str());
-		Log.Out(Logs::General, Logs::Debug, "Hash: %s", entered_password_hash_result.c_str());
+	std::string outbuffer;
+	outbuffer.resize(size - 12);
+	if (outbuffer.length() == 0) {
+		Log.OutF(Logs::General, Logs::Debug, "Corrupt buffer sent to server, no length.");
+		return;
 	}
 
-	server.eq_crypto->DeleteHeap(login_packet_buffer);
-#else
-	login_packet_buffer = DecryptUsernamePassword(data, size, server.options.GetEncryptionMode());
-
-	int login_packet_buffer_length = strlen(login_packet_buffer);
-	entered_password_hash_result.assign(login_packet_buffer, login_packet_buffer_length);
-	entered_username.assign((login_packet_buffer + login_packet_buffer_length + 1), strlen(login_packet_buffer + login_packet_buffer_length + 1));
-
-	if(server.options.IsTraceOn()) {
-		Log.Out(Logs::General, Logs::Debug, "User: %s", entered_username.c_str());
-		Log.Out(Logs::General, Logs::Debug, "Hash: %s", entered_password_hash_result.c_str());
+	auto r = eqcrypt_block(data + 10, size - 12, &outbuffer[0], 0);
+	if (r == nullptr) {
+		Log.OutF(Logs::General, Logs::Debug, "Failed to decrypt eqcrypt block");
+		return;
 	}
 
-	_HeapDeleteCharBuffer(login_packet_buffer);
-#endif
+	std::string cred;
 
-	bool result;
-	if(server.db->GetLoginDataFromAccountName(entered_username, db_account_password_hash, db_account_id) == false) {
-		/* If we have auto_create_accounts enabled in the login.ini, we will process the creation of an account on our own*/
-		if (
-			server.config->GetVariable("options", "auto_create_accounts").compare("TRUE") == 0 && 
-			server.db->CreateLoginData(entered_username, entered_password_hash_result, db_account_id) == true
-		){
-			Log.Out(Logs::General, Logs::Error, "User %s does not exist in the database, so we created it...", entered_username.c_str());
-			result = true;
-		}
-		else{
-			Log.Out(Logs::General, Logs::Error, "Error logging in, user %s does not exist in the database.", entered_username.c_str());
-			result = false;
+	std::string user(&outbuffer[0]);
+	if (user.length() >= outbuffer.length()) {
+		Log.OutF(Logs::General, Logs::Debug, "Corrupt buffer sent to server, preventing buffer overflow.");
+		return;
+	}
+
+	bool result = false;
+	if(outbuffer[0] == 0 && outbuffer[1] == 0) {
+		if (server.options.IsTokenLoginAllowed()) {
+			cred = (&outbuffer[2 + user.length()]);
+			result = server.db->GetLoginTokenDataFromToken(cred, connection->GetRemoteAddr(), db_account_id, user);
 		}
 	}
 	else {
-		if(db_account_password_hash.compare(entered_password_hash_result) == 0) {
-			result = true;
-		}
-		else {
-			result = false;
+		if (server.options.IsPasswordLoginAllowed()) {
+			cred = (&outbuffer[1 + user.length()]);
+			if (server.db->GetLoginDataFromAccountName(user, db_account_password_hash, db_account_id) == false) {
+				/* If we have auto_create_accounts enabled in the login.ini, we will process the creation of an account on our own*/
+				if (
+					server.options.CanAutoCreateAccounts() &&
+					server.db->CreateLoginData(user, eqcrypt_hash(user, cred, mode), db_account_id) == true
+					) {
+					Log.OutF(Logs::General, Logs::Error, "User {0} does not exist in the database, so we created it...", user);
+					result = true;
+				}
+				else {
+					Log.OutF(Logs::General, Logs::Error, "Error logging in, user %s does not exist in the database.", user);
+					result = false;
+				}
+			}
+			else {
+				if (eqcrypt_verify_hash(user, cred, db_account_password_hash, mode)) {
+					result = true;
+				}
+				else {
+					result = false;
+				}
+			}
 		}
 	}
 
 	/* Login Accepted */
-	if(result) {
+	if (result) {
 
 		server.client_manager->RemoveExistingClient(db_account_id);
 
@@ -259,7 +259,7 @@ void Client::Handle_Login(const char* data, unsigned int size)
 		GenerateKey();
 
 		account_id = db_account_id;
-		account_name = entered_username;
+		account_name = user;
 
 		EQApplicationPacket *outapp = new EQApplicationPacket(OP_LoginAccepted, 10 + 80);
 		const LoginLoginRequest_Struct* llrs = (const LoginLoginRequest_Struct *)data;
@@ -293,19 +293,15 @@ void Client::Handle_Login(const char* data, unsigned int size)
 		login_failed_attempts->unknown12[0] = 0x01;
 		memcpy(login_failed_attempts->key, key.c_str(), key.size());
 
-#ifdef WIN32
-		unsigned int e_size;
-		char *encrypted_buffer = server.eq_crypto->Encrypt((const char*)login_failed_attempts, 75, e_size);
-		memcpy(login_accepted->encrypt, encrypted_buffer, 80);
-		server.eq_crypto->DeleteHeap(encrypted_buffer);
-#else
-		unsigned int e_size;
-		char *encrypted_buffer = Encrypt((const char*)login_failed_attempts, 75, e_size);
-		memcpy(login_accepted->encrypt, encrypted_buffer, 80);
-		_HeapDeleteCharBuffer(encrypted_buffer);
-#endif
+		char encrypted_buffer[80] = { 0 };
+		auto rc = eqcrypt_block((const char*)login_failed_attempts, 75, encrypted_buffer, 1);
+		if (rc == nullptr) {
+			Log.OutF(Logs::General, Logs::Debug, "Failed to encrypt eqcrypt block");
+		}
 
-		if(server.options.IsDumpOutPacketsOn()) {
+		memcpy(login_accepted->encrypt, encrypted_buffer, 80);
+
+		if (server.options.IsDumpOutPacketsOn()) {
 			DumpPacket(outapp);
 		}
 
@@ -323,7 +319,7 @@ void Client::Handle_Login(const char* data, unsigned int size)
 		llas->unknown5 = llrs->unknown5;
 		memcpy(llas->unknown6, FailedLoginResponseData, sizeof(FailedLoginResponseData));
 
-		if(server.options.IsDumpOutPacketsOn()) {
+		if (server.options.IsDumpOutPacketsOn()) {
 			DumpPacket(outapp);
 		}
 
@@ -355,9 +351,9 @@ void Client::Handle_Play(const char* data)
 	server.server_manager->SendUserToWorldRequest(server_id_in, account_id);
 }
 
-void Client::SendServerListPacket()
+void Client::SendServerListPacket(uint32 seq)
 {
-	EQApplicationPacket *outapp = server.server_manager->CreateServerListPacket(this);
+	EQApplicationPacket *outapp = server.server_manager->CreateServerListPacket(this, seq);
 
 	if(server.options.IsDumpOutPacketsOn())
 	{

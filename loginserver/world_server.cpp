@@ -490,11 +490,6 @@ void WorldServer::Handle_NewLSInfo(ServerNewLSInfo_Struct* i)
 	}
 
 	server.db->UpdateWorldRegistration(GetRuntimeID(), long_name, GetConnection()->Handle()->RemoteIP());
-
-	if(is_server_authorized)
-	{
-		server.client_manager->UpdateServerList();
-	}
 }
 
 void WorldServer::Handle_LSStatus(ServerLSStatus_Struct *s)

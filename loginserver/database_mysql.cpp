@@ -22,6 +22,7 @@
 #include "database_mysql.h"
 #include "login_server.h"
 #include "../common/eqemu_logsys.h"
+#include "../common/string_util.h"
 
 extern EQEmuLogSys Log;
 extern LoginServer server;
@@ -96,6 +97,52 @@ bool DatabaseMySQL::GetLoginDataFromAccountName(std::string name, std::string &p
 	return false;
 }
 
+bool DatabaseMySQL::GetLoginTokenDataFromToken(const std::string &token, const std::string &ip, unsigned int &db_account_id, std::string &user)
+{
+	if (!database)
+	{
+		return false;
+	}
+
+	MYSQL_RES *res;
+	MYSQL_ROW row;
+	std::stringstream query(std::stringstream::in | std::stringstream::out);
+	query << "SELECT tbllogintokens.Id, tbllogintokens.IpAddress, tbllogintokenclaims.Name, tbllogintokenclaims.Value FROM tbllogintokens ";
+	query << "JOIN tbllogintokenclaims ON tbllogintokens.Id = tbllogintokenclaims.TokenId WHERE tbllogintokens.Expires > NOW() AND tbllogintokens.Id='";
+	query << EscapeString(token) << "' AND tbllogintokens.IpAddress='" << EscapeString(ip) << "'";
+
+	if (mysql_query(database, query.str().c_str()) != 0)
+	{
+		Log.Out(Logs::General, Logs::Error, "Mysql query failed: %s", query.str().c_str());
+		return false;
+	}
+
+	res = mysql_use_result(database);
+
+	bool found_username = false;
+	bool found_login_id = false;
+	if (res)
+	{
+		while ((row = mysql_fetch_row(res)) != nullptr)
+		{
+			if (strcmp(row[2], "username") == 0) {
+				user = row[3];
+				found_username = true;
+				continue;
+			}
+
+			if (strcmp(row[2], "login_server_id") == 0) {
+				db_account_id = atoi(row[3]);
+				found_login_id = true;
+				continue;
+			}
+		}
+
+		mysql_free_result(res);
+	}
+
+	return found_username && found_login_id;
+}
 
 bool DatabaseMySQL::CreateLoginData(std::string name, std::string &password, unsigned int &id)
 {

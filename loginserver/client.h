@@ -21,9 +21,6 @@
 #include "../common/global_define.h"
 #include "../common/opcodemgr.h"
 #include "../common/random.h"
-#ifndef WIN32
-#include "eq_crypto_api.h"
-#endif
 
 #include <memory>
 #include "../common/eq_stream_intf.h"
@@ -39,12 +36,6 @@ enum LSClientStatus
 	cs_not_sent_session_ready,
 	cs_waiting_for_login,
 	cs_logged_in
-};
-
-enum LoginMode
-{
-	lm_initial = 2,
-	lm_from_world = 3
 };
 
 /**
@@ -87,7 +78,7 @@ public:
 	/**
 	* Sends a server list packet to the client.
 	*/
-	void SendServerListPacket();
+	void SendServerListPacket(uint32 seq);
 
 	/**
 	* Sends the input packet to the client and clears our play response states.

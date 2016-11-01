@@ -67,6 +67,15 @@ int main()
 	if (server.config->GetVariable("options", "dump_packets_out").compare("TRUE") == 0)
 		server.options.DumpOutPackets(true);
 
+	if (server.config->GetVariable("security", "allow_token_login").compare("TRUE") == 0)
+		server.options.AllowTokenLogin(true);
+
+	if (server.config->GetVariable("security", "allow_password_login").compare("FALSE") == 0)
+		server.options.AllowPasswordLogin(false);
+
+	if (server.config->GetVariable("options", "auto_create_accounts").compare("TRUE") == 0)
+		server.options.AutoCreateAccounts(true);
+
 	std::string mode = server.config->GetVariable("security", "mode");
 	if (mode.size() > 0)
 		server.options.EncryptionMode(atoi(mode.c_str()));
@@ -127,35 +136,12 @@ int main()
 		return 1;
 	}
 
-#if WIN32
-	//initialize our encryption.
-	Log.Out(Logs::General, Logs::Login_Server, "Encryption Initialize.");
-	server.eq_crypto = new Encryption();
-	if (server.eq_crypto->LoadCrypto(server.config->GetVariable("security", "plugin"))) {
-		Log.Out(Logs::General, Logs::Login_Server, "Encryption Loaded Successfully.");
-	}
-	else {
-		//We can't run without encryption, cleanup and exit.
-		Log.Out(Logs::General, Logs::Error, "Encryption Failed to Load.");
-		Log.Out(Logs::General, Logs::Login_Server, "Database System Shutdown.");
-		delete server.db;
-		Log.Out(Logs::General, Logs::Login_Server, "Config System Shutdown.");
-		delete server.config;
-		return 1;
-	}
-#endif
-
 	//create our server manager.
 	Log.Out(Logs::General, Logs::Login_Server, "Server Manager Initialize.");
 	server.server_manager = new ServerManager();
 	if (!server.server_manager) {
 		//We can't run without a server manager, cleanup and exit.
 		Log.Out(Logs::General, Logs::Error, "Server Manager Failed to Start.");
-
-#ifdef WIN32
-		Log.Out(Logs::General, Logs::Login_Server, "Encryption System Shutdown.");
-		delete server.eq_crypto;
-#endif
 
 		Log.Out(Logs::General, Logs::Login_Server, "Database System Shutdown.");
 		delete server.db;
@@ -172,11 +158,6 @@ int main()
 		Log.Out(Logs::General, Logs::Error, "Client Manager Failed to Start.");
 		Log.Out(Logs::General, Logs::Login_Server, "Server Manager Shutdown.");
 		delete server.server_manager;
-
-#ifdef WIN32
-		Log.Out(Logs::General, Logs::Login_Server, "Encryption System Shutdown.");
-		delete server.eq_crypto;
-#endif
 
 		Log.Out(Logs::General, Logs::Login_Server, "Database System Shutdown.");
 		delete server.db;
@@ -206,11 +187,6 @@ int main()
 	delete server.client_manager;
 	Log.Out(Logs::General, Logs::Login_Server, "Server Manager Shutdown.");
 	delete server.server_manager;
-
-#ifdef WIN32
-	Log.Out(Logs::General, Logs::Login_Server, "Encryption System Shutdown.");
-	delete server.eq_crypto;
-#endif
 
 	Log.Out(Logs::General, Logs::Login_Server, "Database System Shutdown.");
 	delete server.db;

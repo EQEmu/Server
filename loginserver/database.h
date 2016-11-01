@@ -44,6 +44,8 @@ public:
 	*/
 	virtual bool GetLoginDataFromAccountName(std::string name, std::string &password, unsigned int &id) { return false; }
 
+	virtual bool GetLoginTokenDataFromToken(const std::string &token, const std::string &ip, unsigned int &db_account_id, std::string &user) { return false; }
+
 	virtual bool CreateLoginData(std::string name, std::string &password, unsigned int &id) { return false; }
 
 	/**

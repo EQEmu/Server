@@ -9,8 +9,10 @@ addons:
     - libboost-dev
     - liblua5.1-0-dev
     - zlib1g-dev
+    - uuid-dev
+    - libssl-dev
 script:
-  - cmake -G "Unix Makefiles" -DEQEMU_BUILD_TESTS=ON -DEQEMU_ENABLE_BOTS=ON
+  - cmake -G "Unix Makefiles" -DEQEMU_BUILD_TESTS=ON -DEQEMU_ENABLE_BOTS=ON -DEQEMU_BUILD_LOGIN=ON
   - make -j8
   - ./bin/tests
 branches:

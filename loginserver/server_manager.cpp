@@ -83,7 +83,7 @@ WorldServer* ServerManager::GetServerByAddress(const std::string &addr, int port
 	return nullptr;
 }
 
-EQApplicationPacket *ServerManager::CreateServerListPacket(Client *c)
+EQApplicationPacket *ServerManager::CreateServerListPacket(Client *c, uint32 seq)
 {
 	unsigned int packet_size = sizeof(ServerListHeader_Struct);
 	unsigned int server_count = 0;
@@ -116,7 +116,7 @@ EQApplicationPacket *ServerManager::CreateServerListPacket(Client *c)
 
 	EQApplicationPacket *outapp = new EQApplicationPacket(OP_ServerListResponse, packet_size);
 	ServerListHeader_Struct *server_list = (ServerListHeader_Struct*)outapp->pBuffer;
-	server_list->Unknown1 = 0x00000004;
+	server_list->Unknown1 = seq;
 	server_list->Unknown2 = 0x00000000;
 	server_list->Unknown3 = 0x01650000;
 

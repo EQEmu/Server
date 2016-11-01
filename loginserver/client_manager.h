@@ -46,11 +46,6 @@ public:
 	void Process();
 
 	/**
-	* Sends a new server list to every client.
-	*/
-	void UpdateServerList();
-
-	/**
 	* Removes a client with a certain account id.
 	*/
 	void RemoveExistingClient(unsigned int account_id);

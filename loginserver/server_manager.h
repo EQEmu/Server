@@ -52,7 +52,7 @@ public:
 	/**
 	* Creates a server list packet for the client.
 	*/
-	EQApplicationPacket *CreateServerListPacket(Client *c);
+	EQApplicationPacket *CreateServerListPacket(Client *c, uint32 seq);
 
 	/**
 	* Checks to see if there is a server exists with this name, ignoring option.
