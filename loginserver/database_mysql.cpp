@@ -144,7 +144,7 @@ bool DatabaseMySQL::GetLoginTokenDataFromToken(const std::string &token, const s
 	return found_username && found_login_id;
 }
 
-bool DatabaseMySQL::CreateLoginData(std::string name, std::string &password, unsigned int &id)
+bool DatabaseMySQL::CreateLoginData(const std::string &name, const std::string &password, unsigned int &id)
 {
 	if (!database) {
 		return false;
