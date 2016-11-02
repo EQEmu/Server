@@ -613,6 +613,7 @@ bool EQEmu::ItemInstance::CanTransform(const ItemData *ItemToTry, const ItemData
 	types["itemtransfig2hp"] = 35;
 	types["itemtransfig2hs"] = 1;
 	types["itemtransfigblunt"] = 3;
+	types["itemtransfig1hb"] = 3;
 	types["itemtransfigbow"] = 5;
 	types["itemtransfighth"] = 45;
 	types["itemtransfigshield"] = 8;
