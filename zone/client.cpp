@@ -7272,7 +7272,8 @@ void Client::SendXTargetUpdates()
 	for (int i = 0; i < GetMaxXTargets(); ++i) {
 		if (XTargets[i].dirty) {
 			outapp->WriteUInt32(i);
-			outapp->WriteUInt8(0); // no idea what this is
+			// MQ2 checks this for valid mobs, so 0 is bad here at least ...
+			outapp->WriteUInt8(XTargets[i].ID ? 1 : 0);
 			outapp->WriteUInt32(XTargets[i].ID);
 			outapp->WriteString(XTargets[i].Name);
 			count++;
