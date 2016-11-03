@@ -138,11 +138,15 @@ void EQ::Net::TCPConnection::Write(const char *data, size_t count)
 	memset(write_req, 0, sizeof(uv_write_t));
 	write_req->data = this;
 	uv_buf_t send_buffers[1];
-	send_buffers[0].base = (char*)data;
-	send_buffers[0].len = count;
+
+	char *data_out = new char[count];
+	memcpy(data_out, data, count);
+	send_buffers[0] = uv_buf_init(data_out, count);
+	write_req->data = send_buffers[0].base;
 
 	uv_write(write_req, (uv_stream_t*)m_socket, send_buffers, 1, [](uv_write_t* req, int status) {
 		EQ::Net::TCPConnection *connection = (EQ::Net::TCPConnection*)req->data;
+		delete[] (char*)req->data;
 		delete req;
 
 		if (status < 0) {

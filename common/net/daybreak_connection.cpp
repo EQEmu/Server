@@ -238,12 +238,14 @@ void EQ::Net::DaybreakConnectionManager::SendDisconnect(const std::string &addr,
 	sockaddr_in send_addr;
 	uv_ip4_addr(addr.c_str(), port, &send_addr);
 	uv_buf_t send_buffers[1];
-	
-	send_buffers[0].base = (char*)out.Data();
-	send_buffers[0].len = out.Length();
-	
+
+	char *data = new char[out.Length()];
+	memcpy(data, out.Data(), out.Length());
+	send_buffers[0] = uv_buf_init(data, out.Length());
+	send_req->data = send_buffers[0].base;
 	int ret = uv_udp_send(send_req, &m_socket, send_buffers, 1, (sockaddr*)&send_addr,
 		[](uv_udp_send_t* req, int status) {
+		delete[] (char*)req->data;
 		delete req;
 	});
 }
@@ -928,7 +930,7 @@ void EQ::Net::DaybreakConnection::Decompress(Packet &p, size_t offset, size_t le
 
 void EQ::Net::DaybreakConnection::Compress(Packet &p, size_t offset, size_t length)
 {
-	uint8_t new_buffer[2048];
+	uint8_t new_buffer[2048] = { 0 };
 	uint8_t *buffer = (uint8_t*)p.Data() + offset;
 	uint32_t new_length = 0;
 
@@ -1115,6 +1117,7 @@ void EQ::Net::DaybreakConnection::InternalSend(Packet &p)
 	m_last_send = Clock::now();
 
 	auto send_func = [](uv_udp_send_t* req, int status) {
+		delete[](char*)req->data;
 		delete req;
 	};
 
@@ -1138,16 +1141,20 @@ void EQ::Net::DaybreakConnection::InternalSend(Packet &p)
 		AppendCRC(out);
 
 		uv_udp_send_t *send_req = new uv_udp_send_t;
+		memset(send_req, 0, sizeof(*send_req));
 		sockaddr_in send_addr;
 		uv_ip4_addr(m_endpoint.c_str(), m_port, &send_addr);
 		uv_buf_t send_buffers[1];
 
-		send_buffers[0].base = (char*)out.Data();
-		send_buffers[0].len = out.Length();
+		char *data = new char[out.Length()];
+		memcpy(data, out.Data(), out.Length());
+		send_buffers[0] = uv_buf_init(data, out.Length());
+		send_req->data = send_buffers[0].base;
 
 		m_stats.sent_bytes += out.Length();
 		m_stats.sent_packets++;
 		if (m_owner->m_options.simulated_out_packet_loss && m_owner->m_options.simulated_out_packet_loss >= m_owner->m_rand.Int(0, 100)) {
+			delete[] (char*)send_req->data;
 			delete send_req;
 			return;
 		}
@@ -1161,13 +1168,16 @@ void EQ::Net::DaybreakConnection::InternalSend(Packet &p)
 	uv_ip4_addr(m_endpoint.c_str(), m_port, &send_addr);
 	uv_buf_t send_buffers[1];
 	
-	send_buffers[0].base = (char*)p.Data();
-	send_buffers[0].len = p.Length();
+	char *data = new char[p.Length()];
+	memcpy(data, p.Data(), p.Length());
+	send_buffers[0] = uv_buf_init(data, p.Length());
+	send_req->data = send_buffers[0].base;
 	
 	m_stats.sent_bytes += p.Length();
 	m_stats.sent_packets++;
 
 	if (m_owner->m_options.simulated_out_packet_loss && m_owner->m_options.simulated_out_packet_loss >= m_owner->m_rand.Int(0, 100)) {
+		delete[] (char*)send_req->data;
 		delete send_req;
 		return;
 	}

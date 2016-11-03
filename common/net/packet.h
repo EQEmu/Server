@@ -118,7 +118,7 @@ namespace EQ {
 			virtual size_t Length() const { return m_data.size(); }
 			virtual size_t Length() { return m_data.size(); }
 			virtual bool Clear() { m_data.clear(); return true; }
-			virtual bool Resize(size_t new_size) { m_data.resize(new_size); return true; }
+			virtual bool Resize(size_t new_size) { m_data.resize(new_size, 0); return true; }
 			virtual void Reserve(size_t new_size) { m_data.reserve(new_size); }
 		protected:
 			std::vector<char> m_data;
