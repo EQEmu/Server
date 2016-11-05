@@ -56,6 +56,7 @@ EQ::Net::EQStream::EQStream(EQStreamManager *owner, std::shared_ptr<DaybreakConn
 {
 	m_owner = owner;
 	m_connection = connection;
+	m_opcode_manager = nullptr;
 }
 
 EQ::Net::EQStream::~EQStream()
