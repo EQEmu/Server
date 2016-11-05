@@ -42,14 +42,12 @@ void EQ::Net::EQStreamManager::DaybreakPacketRecv(std::shared_ptr<DaybreakConnec
 	auto iter = m_streams.find(connection);
 	if (iter != m_streams.end()) {
 		auto &stream = iter->second;
-		if (stream->m_opcode_manager && stream->m_opcode_manager) {
-			std::unique_ptr<EQ::Net::Packet> t(new EQ::Net::WritablePacket());
-			t->PutPacket(0, p);
-			stream->m_packet_queue.push_back(std::move(t));
+		std::unique_ptr<EQ::Net::Packet> t(new EQ::Net::WritablePacket());
+		t->PutPacket(0, p);
+		stream->m_packet_queue.push_back(std::move(t));
 
-			if (m_on_data_avail) {
-				m_on_data_avail(stream);
-			}
+		if (m_on_data_avail) {
+			m_on_data_avail(stream);
 		}
 	}
 }

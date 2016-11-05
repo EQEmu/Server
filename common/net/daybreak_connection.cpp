@@ -57,6 +57,7 @@ void EQ::Net::DaybreakConnectionManager::Attach(uv_loop_t *loop)
 		rc = uv_udp_recv_start(&m_socket,
 			[](uv_handle_t* handle, size_t suggested_size, uv_buf_t* buf) {
 			buf->base = new char[suggested_size];
+			memset(buf->base, 0, suggested_size);
 			buf->len = suggested_size;
 		},
 			[](uv_udp_t* handle, ssize_t nread, const uv_buf_t* buf, const struct sockaddr* addr, unsigned flags) {
