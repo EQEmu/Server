@@ -1650,6 +1650,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 				break;
 			}
 
+			case SE_SummonToCorpse:
 			case SE_Revive:
 			{
 #ifdef SPELL_EFFECT_SPAM
