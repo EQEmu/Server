@@ -134,24 +134,34 @@ void EQ::Net::TCPConnection::Write(const char *data, size_t count)
 		return;
 	}
 
+	struct WriteBaton
+	{
+		TCPConnection *connection;
+		char *buffer;
+	};
+
+	WriteBaton *baton = new WriteBaton;
+	baton->connection = this;
+	baton->buffer = new char[count];;
+
 	uv_write_t *write_req = new uv_write_t;
 	memset(write_req, 0, sizeof(uv_write_t));
-	write_req->data = this;
+	write_req->data = baton;
 	uv_buf_t send_buffers[1];
 
-	char *data_out = new char[count];
-	memcpy(data_out, data, count);
-	send_buffers[0] = uv_buf_init(data_out, count);
-	write_req->data = send_buffers[0].base;
+	memcpy(baton->buffer, data, count);
+	send_buffers[0] = uv_buf_init(baton->buffer, count);
 
 	uv_write(write_req, (uv_stream_t*)m_socket, send_buffers, 1, [](uv_write_t* req, int status) {
-		EQ::Net::TCPConnection *connection = (EQ::Net::TCPConnection*)req->data;
-		delete[] (char*)req->data;
+		WriteBaton *baton = (WriteBaton*)req->data;
+		delete[] baton->buffer;
 		delete req;
 
 		if (status < 0) {
-			connection->Disconnect();
+			baton->connection->Disconnect();
 		}
+
+		delete baton;
 	});
 }
 
