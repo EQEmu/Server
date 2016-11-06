@@ -39,18 +39,21 @@ ServerManager::ServerManager()
 	server_connection->OnConnectionIdentified("World", [this](std::shared_ptr<EQ::Net::ServertalkServerConnection> c) {
 		Log.OutF(Logs::General, Logs::Login_Server, "New world server connection from {0}:{1}", c->Handle()->RemoteIP(), c->Handle()->RemotePort());
 		
-		WorldServer *server_entity = GetServerByAddress(c->Handle()->RemoteIP(), c->Handle()->RemotePort());
-		if (server_entity) {
-			Log.OutF(Logs::General, Logs::Login_Server, "World server already existed for {0}:{1}, removing existing connection and updating current.", 
-				c->Handle()->RemoteIP(), c->Handle()->RemotePort());
+		auto iter = world_servers.begin();
+		while (iter != world_servers.end()) {
+			if ((*iter)->GetConnection()->Handle()->RemoteIP().compare(c->Handle()->RemoteIP()) == 0 && 
+				(*iter)->GetConnection()->Handle()->RemotePort() == c->Handle()->RemotePort()) {
+				Log.OutF(Logs::General, Logs::Login_Server, "World server already existed for {0}:{1}, removing existing connection.", 
+					c->Handle()->RemoteIP(), c->Handle()->RemotePort());
+				
+				world_servers.erase(iter);
+				break;
+			}
 
-			server_entity->SetConnection(c);
-			server_entity->Reset();
-		}
-		else {
-			world_servers.push_back(std::unique_ptr<WorldServer>(new WorldServer(c)));
+			++iter;
 		}
 
+		world_servers.push_back(std::unique_ptr<WorldServer>(new WorldServer(c)));
 	});
 
 	server_connection->OnConnectionRemoved("World", [this](std::shared_ptr<EQ::Net::ServertalkServerConnection> c) {
