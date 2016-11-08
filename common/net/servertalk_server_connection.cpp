@@ -19,7 +19,7 @@ EQ::Net::ServertalkServerConnection::~ServertalkServerConnection()
 
 void EQ::Net::ServertalkServerConnection::Send(uint16_t opcode, EQ::Net::Packet & p)
 {
-	EQ::Net::WritablePacket out;
+	EQ::Net::DynamicPacket out;
 #ifdef ENABLE_SECURITY
 	if (m_encrypted) {
 		if (p.Length() == 0) {
@@ -50,7 +50,7 @@ void EQ::Net::ServertalkServerConnection::Send(uint16_t opcode, EQ::Net::Packet 
 
 void EQ::Net::ServertalkServerConnection::SendPacket(ServerPacket * p)
 {
-	EQ::Net::ReadOnlyPacket pout(p->pBuffer, p->size);
+	EQ::Net::StaticPacket pout(p->pBuffer, p->size);
 	Send(p->opcode, pout);
 }
 
@@ -92,7 +92,7 @@ void EQ::Net::ServertalkServerConnection::ProcessReadBuffer()
 		}
 
 		if (length == 0) {
-			EQ::Net::WritablePacket p;
+			EQ::Net::DynamicPacket p;
 			switch (type) {
 			case ServertalkClientHello:
 			{
@@ -108,7 +108,7 @@ void EQ::Net::ServertalkServerConnection::ProcessReadBuffer()
 			}
 		}
 		else {
-			EQ::Net::ReadOnlyPacket p(&m_buffer[current + 5], length);
+			EQ::Net::StaticPacket p(&m_buffer[current + 5], length);
 			switch (type) {
 			case ServertalkClientHello:
 			{
@@ -145,7 +145,7 @@ void EQ::Net::ServertalkServerConnection::OnDisconnect(TCPConnection *c)
 
 void EQ::Net::ServertalkServerConnection::SendHello()
 {
-	EQ::Net::WritablePacket hello;
+	EQ::Net::DynamicPacket hello;
 
 #ifdef ENABLE_SECURITY
 	memset(m_public_key_ours, 0, crypto_box_PUBLICKEYBYTES);
@@ -178,7 +178,7 @@ void EQ::Net::ServertalkServerConnection::InternalSend(ServertalkPacketType type
 	if (!m_connection)
 		return;
 
-	EQ::Net::WritablePacket out;
+	EQ::Net::DynamicPacket out;
 	out.PutUInt32(0, (uint32_t)p.Length());
 	out.PutUInt8(4, (uint8_t)type);
 	if (p.Length() > 0) {
@@ -290,7 +290,7 @@ void EQ::Net::ServertalkServerConnection::ProcessMessage(EQ::Net::Packet &p)
 					return;
 				}
 
-				EQ::Net::ReadOnlyPacket decrypted_packet(&decrypted_text[0], message_len);
+				EQ::Net::StaticPacket decrypted_packet(&decrypted_text[0], message_len);
 
 				(*(uint64_t*)&m_nonce_theirs[0])++;
 
@@ -301,7 +301,7 @@ void EQ::Net::ServertalkServerConnection::ProcessMessage(EQ::Net::Packet &p)
 			}
 			else {
 				size_t message_len = length;
-				EQ::Net::ReadOnlyPacket packet(&data[0], message_len);
+				EQ::Net::StaticPacket packet(&data[0], message_len);
 
 				auto cb = m_message_callbacks.find(opcode);
 				if (cb != m_message_callbacks.end()) {

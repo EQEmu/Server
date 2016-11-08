@@ -140,8 +140,9 @@ namespace EQ
 			Timestamp m_last_recv;
 			DbProtocolStatus m_status;
 			Timestamp m_hold_time;
-			std::list<WritablePacket> m_buffered_packets;
+			std::list<DynamicPacket> m_buffered_packets;
 			size_t m_buffered_packets_length;
+			std::unique_ptr<char[]> m_combined;
 			Timestamp m_last_stats;
 			DaybreakConnectionStats m_stats;
 			Timestamp m_last_session_stats;
@@ -150,7 +151,7 @@ namespace EQ
 
 			struct DaybreakSentPacket
 			{
-				WritablePacket packet;
+				DynamicPacket packet;
 				Timestamp last_sent;
 				Timestamp first_sent;
 				size_t times_resent;
@@ -169,7 +170,7 @@ namespace EQ
 				uint16_t sequence_out;
 				std::map<uint16_t, Packet*> packet_queue;
 				
-				WritablePacket fragment_packet;
+				DynamicPacket fragment_packet;
 				uint32_t fragment_current_bytes;
 				uint32_t fragment_total_bytes;
 
@@ -216,12 +217,12 @@ namespace EQ
 		{
 			DaybreakConnectionManagerOptions() {
 				max_connection_count = 0;
-				keepalive_delay_ms = 0;
-				resend_delay_ms = 10;
-				resend_delay_factor = 1.25;
-				stats_delay_ms = 0;
+				keepalive_delay_ms = 9000;
+				resend_delay_ms = 25;
+				resend_delay_factor = 1.5;
+				stats_delay_ms = 9000;
 				connect_delay_ms = 1000;
-				stale_connection_ms = 135000;
+				stale_connection_ms = 30000;
 				crc_length = 2;
 				max_packet_size = 512;
 				encode_passes[0] = DaybreakEncodeType::EncodeNone;
@@ -231,6 +232,7 @@ namespace EQ
 				hold_length_ms = 50;
 				simulated_in_packet_loss = 0;
 				simulated_out_packet_loss = 0;
+				tic_rate_hertz = 20.0;
 			}
 
 			size_t max_packet_size;
@@ -246,6 +248,7 @@ namespace EQ
 			size_t hold_length_ms;
 			size_t simulated_in_packet_loss;
 			size_t simulated_out_packet_loss;
+			double tic_rate_hertz;
 			DaybreakEncodeType encode_passes[2];
 			int port;
 		};
@@ -269,7 +272,6 @@ namespace EQ
 
 			EQEmu::Random m_rand;
 			uv_timer_t m_timer;
-			uv_timer_t m_resend_timer;
 			uv_udp_t m_socket;
 			uv_loop_t *m_attached;
 			DaybreakConnectionManagerOptions m_options;

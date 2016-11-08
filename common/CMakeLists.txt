@@ -72,11 +72,13 @@ SET(common_sources
 	worldconn.cpp
 	xml_parser.cpp
 	platform.cpp
+	event/event_loop.cpp
 	net/crc32.cpp
 	net/daybreak_connection.cpp
 	net/eqstream.cpp
 	net/packet.cpp
 	net/servertalk_client_connection.cpp
+	net/servertalk_legacy_client_connection.cpp
 	net/servertalk_server.cpp
 	net/servertalk_server_connection.cpp
 	net/tcp_connection.cpp
@@ -224,6 +226,7 @@ SET(common_headers
 	net/eqstream.h
 	net/packet.h
 	net/servertalk_client_connection.h
+	net/servertalk_legacy_client_connection.h
 	net/servertalk_common.h
 	net/servertalk_server.h
 	net/servertalk_server_connection.h
@@ -286,6 +289,7 @@ SET(common_headers
 
 SOURCE_GROUP(Event FILES
 	event/background_task.h
+	event/event_loop.cpp
 	event/event_loop.h
 	event/timer.h
 )
@@ -306,6 +310,8 @@ SOURCE_GROUP(Net FILES
 	net/packet.h
 	net/servertalk_client_connection.cpp
 	net/servertalk_client_connection.h
+	net/servertalk_legacy_client_connection.cpp
+	net/servertalk_legacy_client_connection.h
 	net/servertalk_common.h
 	net/servertalk_server.cpp
 	net/servertalk_server.h

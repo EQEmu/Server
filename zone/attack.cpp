@@ -3029,11 +3029,7 @@ void Mob::CommonDamage(Mob* attacker, int32 &damage, const uint16 spell_id, cons
 	if (IsValidSpell(spell_id))
 		ignore_invul = spell_id == 982 || spells[spell_id].cast_not_standing; // cazic touch
 
-	Log.Out(Logs::Detail, Logs::Combat, "Applying damage %d done by %s with skill %d and spell %d, avoidable? %s, is %sa buff tic in slot %d",
-		damage, attacker?attacker->GetName():"NOBODY", skill_used, spell_id, avoidable?"yes":"no", iBuffTic?"":"not ", buffslot);
-
 	if (!ignore_invul && (GetInvul() || DivineAura())) {
-		Log.Out(Logs::Detail, Logs::Combat, "Avoiding %d damage due to invulnerability.", damage);
 		damage = -5;
 	}
 

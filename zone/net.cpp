@@ -435,7 +435,7 @@ int main(int argc, char** argv) {
 	bool eqsf_open = false;
 	std::unique_ptr<EQ::Net::EQStreamManager> eqsm;
 
-	EQ::Timer process_timer(33, true, [&eqsf_open, &eqsm, &stream_identifier, &eqsi, &worldwasconnected,
+	EQ::Timer process_timer(50, true, [&eqsf_open, &eqsm, &stream_identifier, &eqsi, &worldwasconnected,
 		&zoneupdate_timer, &IDLEZONEUPDATE, &ZONEUPDATE, &quest_timers, &InterserverTimer](EQ::Timer* t) {
 			//Advance the timer to our current point in time
 			Timer::SetCurrentTime();
@@ -445,7 +445,7 @@ int main(int argc, char** argv) {
 			if (!eqsf_open && Config->ZonePort != 0) {
 				Log.Out(Logs::General, Logs::Zone_Server, "Starting EQ Network server on port %d", Config->ZonePort);
 				
-				EQ::Net::EQStreamManagerOptions opts(Config->ZonePort, false, true);
+				EQ::Net::EQStreamManagerOptions opts(Config->ZonePort, false, false);
 				eqsm.reset(new EQ::Net::EQStreamManager(opts));
 				eqsf_open = true;
 		

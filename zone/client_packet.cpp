@@ -2934,10 +2934,6 @@ void Client::Handle_OP_AugmentItem(const EQApplicationPacket *app)
 	if (ClientVersion() >= EQEmu::versions::ClientVersion::RoF)
 	{
 		ItemInst *itemOneToPush = nullptr, *itemTwoToPush = nullptr;
-
-		//Log.Out(Logs::DebugLevel::Moderate, Logs::Debug, "cslot: %i aslot: %i cidx: %i aidx: %i act: %i dest: %i",
-		//	in_augment->container_slot, in_augment->augment_slot, in_augment->container_index, in_augment->augment_index, in_augment->augment_action, in_augment->dest_inst_id);
-
 		ItemInst *tobe_auged = nullptr, *old_aug = nullptr, *new_aug = nullptr, *aug = nullptr, *solvent = nullptr;
 		Inventory& user_inv = GetInv();
 

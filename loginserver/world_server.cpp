@@ -396,7 +396,7 @@ void WorldServer::Handle_NewLSInfo(ServerNewLSInfo_Struct* i)
 						Log.Out(Logs::General, Logs::Netcode, "ServerOP_LSAccountUpdate sent to world");
 						is_server_trusted = true;
 
-						EQ::Net::WritablePacket outapp;
+						EQ::Net::DynamicPacket outapp;
 						connection->Send(ServerOP_LSAccountUpdate, outapp);
 					}
 				}
@@ -452,7 +452,7 @@ void WorldServer::Handle_NewLSInfo(ServerNewLSInfo_Struct* i)
 					if(is_server_trusted) {
 						Log.Out(Logs::General, Logs::Netcode, "ServerOP_LSAccountUpdate sent to world");
 						is_server_trusted = true;
-						EQ::Net::WritablePacket outapp;
+						EQ::Net::DynamicPacket outapp;
 						connection->Send(ServerOP_LSAccountUpdate, outapp);
 					}
 				}
@@ -501,7 +501,7 @@ void WorldServer::Handle_LSStatus(ServerLSStatus_Struct *s)
 
 void WorldServer::SendClientAuth(std::string ip, std::string account, std::string key, unsigned int account_id)
 {
-	EQ::Net::WritablePacket outapp;
+	EQ::Net::DynamicPacket outapp;
 	ClientAuth_Struct client_auth;
 	client_auth.lsaccount_id = account_id;
 	client_auth.name = account;

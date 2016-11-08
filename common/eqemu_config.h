@@ -26,6 +26,7 @@ struct LoginConfig {
 	std::string LoginAccount;
 	std::string LoginPassword;
 	uint16 LoginPort;
+	bool LoginLegacy;
 };
 
 class EQEmuConfig : public XMLParser
@@ -42,6 +43,7 @@ class EQEmuConfig : public XMLParser
 		std::string LoginAccount;
 		std::string LoginPassword;
 		uint16 LoginPort;
+		bool LoginLegacy;
 		uint32 LoginCount;
 		LinkedList<LoginConfig*> loginlist;
 		bool Locked;
@@ -127,8 +129,9 @@ class EQEmuConfig : public XMLParser
 #include "eqemu_config_elements.h"
 			// Set sane defaults
 			// Login server
-			LoginHost = "eqemulator.net";
+			LoginHost = "login.eqemulator.net";
 			LoginPort = 5998;
+			LoginLegacy = true;
 			// World
 			Locked = false;
 			WorldTCPPort = 9000;

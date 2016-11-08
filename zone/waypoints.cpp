@@ -484,11 +484,8 @@ bool Mob::MakeNewPositionAndSendUpdate(float x, float y, float z, int speed, boo
 			Log.Out(Logs::Detail, Logs::AI, "Calc Position2 (%.3f, %.3f, %.3f): Jumping pure Z.", x, y, z);
 			return true;
 		}
-		// Log.Out(Logs::Detail, Logs::AI, "Calc Position2 (%.3f, %.3f, %.3f) inWater=%d: We are there.", x, y, z, inWater);
 		return false;
 	} else if ((std::abs(m_Position.x - x) < 0.1) && (std::abs(m_Position.y - y) < 0.1)) {
-		Log.Out(Logs::Detail, Logs::AI, "Calc Position2 (%.3f, %.3f, %.3f): X/Y difference <0.1, Jumping to target.", x, y, z);
-
 		if(IsNPC()) {
 			entity_list.ProcessMove(CastToNPC(), x, y, z);
 		}
@@ -514,8 +511,6 @@ bool Mob::MakeNewPositionAndSendUpdate(float x, float y, float z, int speed, boo
 		m_Position.y = new_y;
 		m_Position.z = new_z;
 
-		Log.Out(Logs::Detail, Logs::AI, "Calculating new position2 to (%.3f, %.3f, %.3f), old vector (%.3f, %.3f, %.3f)", x, y, z, m_TargetV.x, m_TargetV.y, m_TargetV.z);
-
 		uint8 NPCFlyMode = 0;
 
 		if(IsNPC()) {
@@ -532,8 +527,6 @@ bool Mob::MakeNewPositionAndSendUpdate(float x, float y, float z, int speed, boo
 				glm::vec3 dest(m_Position.x, m_Position.y, m_Position.z);
 
 				float newz = zone->zonemap->FindBestZ(dest, nullptr) + 2.0f;
-
-				Log.Out(Logs::Detail, Logs::AI, "BestZ returned %4.3f at %4.3f, %4.3f, %4.3f", newz,m_Position.x,m_Position.y,m_Position.z);
 
 				if ((newz > -2000) &&
 				    std::abs(newz - dest.z) < RuleR(Map, FixPathingZMaxDeltaMoving)) // Sanity check.
@@ -578,11 +571,7 @@ bool Mob::MakeNewPositionAndSendUpdate(float x, float y, float z, int speed, boo
 	{
 		animation = speed / 2;
 	}
-	//pRunAnimSpeed = (int8)(speed*NPC_RUNANIM_RATIO);
-	//speed *= NPC_SPEED_MULTIPLIER;
-
-	Log.Out(Logs::Detail, Logs::AI, "Calculating new position2 to (%.3f, %.3f, %.3f), new vector (%.3f, %.3f, %.3f) rate %.3f, RAS %d", x, y, z, m_TargetV.x, m_TargetV.y, m_TargetV.z, speed, pRunAnimSpeed);
-
+	
 	// --------------------------------------------------------------------------
 	// 2: get unit vector
 	// --------------------------------------------------------------------------
@@ -616,7 +605,6 @@ bool Mob::MakeNewPositionAndSendUpdate(float x, float y, float z, int speed, boo
 			m_Position.z = new_z;
 			m_Position.w = CalculateHeadingToTarget(x, y);
 			tar_ndx = 20 - numsteps;
-			Log.Out(Logs::Detail, Logs::AI, "Next position2 (%.3f, %.3f, %.3f) (%d steps)", m_Position.x, m_Position.y, m_Position.z, numsteps);
 		}
 		else
 		{
@@ -627,9 +615,6 @@ bool Mob::MakeNewPositionAndSendUpdate(float x, float y, float z, int speed, boo
 			m_Position.x = x;
 			m_Position.y = y;
 			m_Position.z = z;
-
-			Log.Out(Logs::Detail, Logs::AI, "Only a single step to get there... jumping.");
-
 		}
 	}
 
@@ -652,7 +637,6 @@ bool Mob::MakeNewPositionAndSendUpdate(float x, float y, float z, int speed, boo
 		m_Position.y = new_y;
 		m_Position.z = new_z;
 		m_Position.w = CalculateHeadingToTarget(x, y);
-		Log.Out(Logs::Detail, Logs::AI, "Next position2 (%.3f, %.3f, %.3f) (%d steps)", m_Position.x, m_Position.y, m_Position.z, numsteps);
 	}
 
 	uint8 NPCFlyMode = 0;
@@ -671,8 +655,6 @@ bool Mob::MakeNewPositionAndSendUpdate(float x, float y, float z, int speed, boo
 			glm::vec3 dest(m_Position.x, m_Position.y, m_Position.z);
 
 			float newz = zone->zonemap->FindBestZ(dest, nullptr);
-
-			Log.Out(Logs::Detail, Logs::AI, "BestZ returned %4.3f at %4.3f, %4.3f, %4.3f", newz,m_Position.x, m_Position.y, m_Position.z);
 
 			if ((newz > -2000) &&
 			    std::abs(newz - dest.z) < RuleR(Map, FixPathingZMaxDeltaMoving)) // Sanity check.

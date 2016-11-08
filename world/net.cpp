@@ -158,7 +158,7 @@ int main(int argc, char** argv) {
 	// add login server config to list
 	if (Config->LoginCount == 0) {
 		if (Config->LoginHost.length()) {
-			loginserverlist.Add(Config->LoginHost.c_str(), Config->LoginPort, Config->LoginAccount.c_str(), Config->LoginPassword.c_str());
+			loginserverlist.Add(Config->LoginHost.c_str(), Config->LoginPort, Config->LoginAccount.c_str(), Config->LoginPassword.c_str(), Config->LoginLegacy);
 			Log.Out(Logs::General, Logs::World_Server, "Added loginserver %s:%i", Config->LoginHost.c_str(), Config->LoginPort);
 		}
 	} else {
@@ -166,7 +166,8 @@ int main(int argc, char** argv) {
 		LinkedListIterator<LoginConfig*> iterator(loginlist);
 		iterator.Reset();
 		while(iterator.MoreElements()) {
-			loginserverlist.Add(iterator.GetData()->LoginHost.c_str(), iterator.GetData()->LoginPort, iterator.GetData()->LoginAccount.c_str(), iterator.GetData()->LoginPassword.c_str());
+			loginserverlist.Add(iterator.GetData()->LoginHost.c_str(), iterator.GetData()->LoginPort, iterator.GetData()->LoginAccount.c_str(), iterator.GetData()->LoginPassword.c_str(),
+				iterator.GetData()->LoginLegacy);
 			Log.Out(Logs::General, Logs::World_Server, "Added loginserver %s:%i", iterator.GetData()->LoginHost.c_str(), iterator.GetData()->LoginPort);
 			iterator.Advance();
 		}

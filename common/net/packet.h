@@ -13,7 +13,7 @@ namespace EQ {
 		class Packet
 		{
 		public:
-			Packet() { }
+			Packet() : m_stream(std::ios::out | std::ios::binary) { }
 			virtual ~Packet() { }
 
 			virtual const void *Data() const = 0;
@@ -36,11 +36,11 @@ namespace EQ {
 
 			template<typename T>
 			void PutSerialize(size_t offset, const T &value) {
-				std::stringstream buffer(std::ios::in | std::ios::out | std::ios::binary);
-				cereal::BinaryOutputArchive output(buffer);
+				m_stream.clear();
+				cereal::BinaryOutputArchive output(m_stream);
 				output(value);
 			
-				auto str = buffer.str();
+				auto &str = m_stream.str();
 				if (Length() < offset + str.length()) {
 					if (!Resize(offset + str.length())) {
 						throw std::out_of_range("Packet::PutSerialize(), could not resize packet and would of written past the end.");
@@ -80,38 +80,41 @@ namespace EQ {
 			
 			std::string ToString() const;
 			std::string ToString(size_t line_length) const;
+		protected:
+			std::stringstream m_stream;
 		};
 
-		class ReadOnlyPacket : public Packet
+		class StaticPacket : public Packet
 		{
 		public:
-			ReadOnlyPacket(void *data, size_t size) { m_data = data; m_data_length = size; }
-			virtual ~ReadOnlyPacket() { }
-			ReadOnlyPacket(const ReadOnlyPacket &o) { m_data = o.m_data; m_data_length = o.m_data_length; }
-			ReadOnlyPacket& operator=(const ReadOnlyPacket &o) { m_data = o.m_data; m_data_length = o.m_data_length; return *this; }
-			ReadOnlyPacket(ReadOnlyPacket &&o) { m_data = o.m_data; m_data_length = o.m_data_length; }
+			StaticPacket(void *data, size_t size) { m_data = data; m_data_length = size; m_max_data_length = size; }
+			virtual ~StaticPacket() { }
+			StaticPacket(const StaticPacket &o) { m_data = o.m_data; m_data_length = o.m_data_length; }
+			StaticPacket& operator=(const StaticPacket &o) { m_data = o.m_data; m_data_length = o.m_data_length; return *this; }
+			StaticPacket(StaticPacket &&o) { m_data = o.m_data; m_data_length = o.m_data_length; }
 
 			virtual const void *Data() const { return m_data; }
 			virtual void *Data() { return m_data; }
 			virtual size_t Length() const { return m_data_length; }
 			virtual size_t Length() { return m_data_length; }
 			virtual bool Clear() { return false; }
-			virtual bool Resize(size_t new_size) { return false; }
+			virtual bool Resize(size_t new_size);
 			virtual void Reserve(size_t new_size) { }
 
 		protected:
 			void *m_data;
 			size_t m_data_length;
+			size_t m_max_data_length;
 		};
 
-		class WritablePacket : public Packet
+		class DynamicPacket : public Packet
 		{
 		public:
-			WritablePacket() { }
-			virtual ~WritablePacket() { }
-			WritablePacket(WritablePacket &&o) { m_data = std::move(o.m_data); }
-			WritablePacket(const WritablePacket &o) { m_data = o.m_data; }
-			WritablePacket& operator=(const WritablePacket &o) { m_data = o.m_data; return *this; }
+			DynamicPacket() { }
+			virtual ~DynamicPacket() { }
+			DynamicPacket(DynamicPacket &&o) { m_data = std::move(o.m_data); }
+			DynamicPacket(const DynamicPacket &o) { m_data = o.m_data; }
+			DynamicPacket& operator=(const DynamicPacket &o) { m_data = o.m_data; return *this; }
 
 			virtual const void *Data() const { return &m_data[0]; }
 			virtual void *Data() { return &m_data[0]; }

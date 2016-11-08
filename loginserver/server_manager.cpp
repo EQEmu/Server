@@ -211,7 +211,7 @@ void ServerManager::SendUserToWorldRequest(unsigned int server_id, unsigned int 
 	bool found = false;
 	while (iter != world_servers.end()) {
 		if ((*iter)->GetRuntimeID() == server_id) {
-			EQ::Net::WritablePacket outapp;
+			EQ::Net::DynamicPacket outapp;
 			outapp.Resize(sizeof(UsertoWorldRequest_Struct));
 			UsertoWorldRequest_Struct *utwr = (UsertoWorldRequest_Struct*)outapp.Data();			
 			utwr->worldid = server_id;

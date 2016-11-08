@@ -334,3 +334,12 @@ std::string EQ::Net::Packet::ToString(size_t line_length) const
 
 	return ret;
 }
+
+bool EQ::Net::StaticPacket::Resize(size_t new_size)
+{
+	if (new_size > m_max_data_length) {
+		return false;
+	}
+
+	m_data_length = new_size;
+}

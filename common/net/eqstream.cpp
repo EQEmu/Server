@@ -42,7 +42,7 @@ void EQ::Net::EQStreamManager::DaybreakPacketRecv(std::shared_ptr<DaybreakConnec
 	auto iter = m_streams.find(connection);
 	if (iter != m_streams.end()) {
 		auto &stream = iter->second;
-		std::unique_ptr<EQ::Net::Packet> t(new EQ::Net::WritablePacket());
+		std::unique_ptr<EQ::Net::Packet> t(new EQ::Net::DynamicPacket());
 		t->PutPacket(0, p);
 		stream->m_packet_queue.push_back(std::move(t));
 
@@ -73,7 +73,7 @@ void EQ::Net::EQStream::QueuePacket(const EQApplicationPacket *p, bool ack_req) 
 			opcode = (*m_opcode_manager)->EmuToEQ(p->GetOpcode());
 		}
 
-		EQ::Net::WritablePacket out;
+		EQ::Net::DynamicPacket out;
 		switch (m_owner->m_options.opcode_size) {
 		case 1:
 			out.PutUInt8(0, opcode);

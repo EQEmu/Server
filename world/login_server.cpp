@@ -40,13 +40,14 @@ extern uint32 numzones;
 extern uint32 numplayers;
 extern volatile bool	RunLoops;
 
-LoginServer::LoginServer(const char* iAddress, uint16 iPort, const char* Account, const char* Password)
+LoginServer::LoginServer(const char* iAddress, uint16 iPort, const char* Account, const char* Password, bool legacy)
 {
 	strn0cpy(LoginServerAddress,iAddress,256);
 	LoginServerPort = iPort;
 	strn0cpy(LoginAccount,Account,31);
 	strn0cpy(LoginPassword,Password,31);
 	CanAccountUpdate = false;
+	IsLegacy = legacy;
 	Connect();
 }
 
@@ -176,32 +177,65 @@ bool LoginServer::Connect() {
 		return false;
 	}
 
-	client.reset(new EQ::Net::ServertalkClient(LoginServerAddress, LoginServerPort, false, "World", ""));
-	client->OnConnect([this](EQ::Net::ServertalkClient *client) {
-		if (client) {
-			Log.Out(Logs::Detail, Logs::World_Server, "Connected to Loginserver: %s:%d", LoginServerAddress, LoginServerPort);
-			if (minilogin)
-				SendInfo();
-			else
-				SendNewInfo();
-			SendStatus();
-			zoneserver_list.SendLSZones();
-	
-			statusupdate_timer.reset(new EQ::Timer(LoginServer_StatusUpdateInterval, true, [this](EQ::Timer *t) {
+	if (IsLegacy) {
+		legacy_client.reset(new EQ::Net::ServertalkLegacyClient(LoginServerAddress, LoginServerPort, false));
+		legacy_client->OnConnect([this](EQ::Net::ServertalkLegacyClient *client) {
+			if (client) {
+				Log.Out(Logs::Detail, Logs::World_Server, "Connected to Legacy Loginserver: %s:%d", LoginServerAddress, LoginServerPort);
+				if (minilogin)
+					SendInfo();
+				else
+					SendNewInfo();
 				SendStatus();
-			}));
-		}
-		else {
-			Log.Out(Logs::Detail, Logs::World_Server, "Could not connect to Loginserver: %s:%d", LoginServerAddress, LoginServerPort);
-		}
-	});
+				zoneserver_list.SendLSZones();
 
-	client->OnMessage(ServerOP_UsertoWorldReq, std::bind(&LoginServer::ProcessUsertoWorldReq, this, std::placeholders::_1, std::placeholders::_2));
-	client->OnMessage(ServerOP_LSClientAuth, std::bind(&LoginServer::ProcessLSClientAuth, this, std::placeholders::_1, std::placeholders::_2));
-	client->OnMessage(ServerOP_LSFatalError, std::bind(&LoginServer::ProcessLSFatalError, this, std::placeholders::_1, std::placeholders::_2));
-	client->OnMessage(ServerOP_SystemwideMessage, std::bind(&LoginServer::ProcessSystemwideMessage, this, std::placeholders::_1, std::placeholders::_2));
-	client->OnMessage(ServerOP_LSRemoteAddr, std::bind(&LoginServer::ProcessLSRemoteAddr, this, std::placeholders::_1, std::placeholders::_2));
-	client->OnMessage(ServerOP_LSAccountUpdate, std::bind(&LoginServer::ProcessLSAccountUpdate, this, std::placeholders::_1, std::placeholders::_2));
+				statusupdate_timer.reset(new EQ::Timer(LoginServer_StatusUpdateInterval, true, [this](EQ::Timer *t) {
+					SendStatus();
+				}));
+			}
+			else {
+				Log.Out(Logs::Detail, Logs::World_Server, "Could not connect to Legacy Loginserver: %s:%d", LoginServerAddress, LoginServerPort);
+			}
+		});
+
+		legacy_client->OnMessage(ServerOP_UsertoWorldReq, std::bind(&LoginServer::ProcessUsertoWorldReq, this, std::placeholders::_1, std::placeholders::_2));
+		legacy_client->OnMessage(ServerOP_LSClientAuth, std::bind(&LoginServer::ProcessLSClientAuth, this, std::placeholders::_1, std::placeholders::_2));
+		legacy_client->OnMessage(ServerOP_LSFatalError, std::bind(&LoginServer::ProcessLSFatalError, this, std::placeholders::_1, std::placeholders::_2));
+		legacy_client->OnMessage(ServerOP_SystemwideMessage, std::bind(&LoginServer::ProcessSystemwideMessage, this, std::placeholders::_1, std::placeholders::_2));
+		legacy_client->OnMessage(ServerOP_LSRemoteAddr, std::bind(&LoginServer::ProcessLSRemoteAddr, this, std::placeholders::_1, std::placeholders::_2));
+		legacy_client->OnMessage(ServerOP_LSAccountUpdate, std::bind(&LoginServer::ProcessLSAccountUpdate, this, std::placeholders::_1, std::placeholders::_2));
+
+	}
+	else {
+		client.reset(new EQ::Net::ServertalkClient(LoginServerAddress, LoginServerPort, false, "World", ""));
+		client->OnConnect([this](EQ::Net::ServertalkClient *client) {
+			if (client) {
+				Log.Out(Logs::Detail, Logs::World_Server, "Connected to Loginserver: %s:%d", LoginServerAddress, LoginServerPort);
+				if (minilogin)
+					SendInfo();
+				else
+					SendNewInfo();
+				SendStatus();
+				zoneserver_list.SendLSZones();
+
+				statusupdate_timer.reset(new EQ::Timer(LoginServer_StatusUpdateInterval, true, [this](EQ::Timer *t) {
+					SendStatus();
+				}));
+			}
+			else {
+				Log.Out(Logs::Detail, Logs::World_Server, "Could not connect to Loginserver: %s:%d", LoginServerAddress, LoginServerPort);
+			}
+		});
+
+		client->OnMessage(ServerOP_UsertoWorldReq, std::bind(&LoginServer::ProcessUsertoWorldReq, this, std::placeholders::_1, std::placeholders::_2));
+		client->OnMessage(ServerOP_LSClientAuth, std::bind(&LoginServer::ProcessLSClientAuth, this, std::placeholders::_1, std::placeholders::_2));
+		client->OnMessage(ServerOP_LSFatalError, std::bind(&LoginServer::ProcessLSFatalError, this, std::placeholders::_1, std::placeholders::_2));
+		client->OnMessage(ServerOP_SystemwideMessage, std::bind(&LoginServer::ProcessSystemwideMessage, this, std::placeholders::_1, std::placeholders::_2));
+		client->OnMessage(ServerOP_LSRemoteAddr, std::bind(&LoginServer::ProcessLSRemoteAddr, this, std::placeholders::_1, std::placeholders::_2));
+		client->OnMessage(ServerOP_LSAccountUpdate, std::bind(&LoginServer::ProcessLSAccountUpdate, this, std::placeholders::_1, std::placeholders::_2));
+	}
+
+	return true;
 }
 void LoginServer::SendInfo() {
 	const WorldConfig *Config=WorldConfig::get();
@@ -223,7 +257,6 @@ void LoginServer::SendInfo() {
 }
 
 void LoginServer::SendNewInfo() {
-	uint16 port;
 	const WorldConfig *Config=WorldConfig::get();
 
 	auto pack = new ServerPacket;
@@ -243,7 +276,7 @@ void LoginServer::SendNewInfo() {
 	if (Config->LocalAddress.length())
 		strcpy(lsi->local_address, Config->LocalAddress.c_str());
 	else {
-		WorldConfig::SetLocalAddress(client->Handle()->LocalIP());
+		WorldConfig::SetLocalAddress(IsLegacy ? legacy_client->Handle()->LocalIP() : client->Handle()->LocalIP());
 	}
 	SendPacket(pack);
 	delete pack;

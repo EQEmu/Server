@@ -145,15 +145,6 @@ int main() {
 
 	worldserver->Connect();
 
-	EQ::Net::ServertalkClient client("127.0.0.1", 5999, false, "QueryServ", "User:Root;Password:1234567890");
-	client.OnMessage(1, [&](uint16_t opcode, EQ::Net::Packet &p) {
-		Log.OutF(Logs::General, Logs::Debug, "Client got message of type {0}\n{1}", opcode, p.ToString());
-
-		EQ::Net::WritablePacket out;
-		out.PutCString(0, "Why Hello");
-		client.Send(2, out);
-	});
-
 	while(RunLoops) {
 
 		Timer::SetCurrentTime();

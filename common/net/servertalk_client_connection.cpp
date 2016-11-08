@@ -21,7 +21,7 @@ EQ::Net::ServertalkClient::~ServertalkClient()
 
 void EQ::Net::ServertalkClient::Send(uint16_t opcode, EQ::Net::Packet &p)
 {
-	EQ::Net::WritablePacket out;
+	EQ::Net::DynamicPacket out;
 #ifdef ENABLE_SECURITY
 	if (m_encrypted) {
 		if (p.Length() == 0) {
@@ -52,7 +52,7 @@ void EQ::Net::ServertalkClient::Send(uint16_t opcode, EQ::Net::Packet &p)
 
 void EQ::Net::ServertalkClient::SendPacket(ServerPacket *p)
 {
-	EQ::Net::ReadOnlyPacket pout(p->pBuffer, p->size);
+	EQ::Net::StaticPacket pout(p->pBuffer, p->size);
 	Send(p->opcode, pout);
 }
 
@@ -99,7 +99,7 @@ void EQ::Net::ServertalkClient::ProcessData(EQ::Net::TCPConnection *c, const uns
 
 void EQ::Net::ServertalkClient::SendHello()
 {
-	EQ::Net::WritablePacket p;
+	EQ::Net::DynamicPacket p;
 	InternalSend(ServertalkClientHello, p);
 }
 
@@ -108,7 +108,7 @@ void EQ::Net::ServertalkClient::InternalSend(ServertalkPacketType type, EQ::Net:
 	if (!m_connection)
 		return;
 
-	EQ::Net::WritablePacket out;
+	EQ::Net::DynamicPacket out;
 	out.PutUInt32(0, (uint32_t)p.Length());
 	out.PutUInt8(4, (uint8_t)type);
 	if (p.Length() > 0) {
@@ -145,7 +145,7 @@ void EQ::Net::ServertalkClient::ProcessReadBuffer()
 		}
 
 		if (length == 0) {
-			EQ::Net::WritablePacket p;
+			EQ::Net::DynamicPacket p;
 			switch (type) {
 			case ServertalkServerHello:
 				ProcessHello(p);
@@ -156,7 +156,7 @@ void EQ::Net::ServertalkClient::ProcessReadBuffer()
 			}
 		}
 		else {
-			EQ::Net::ReadOnlyPacket p(&m_buffer[current + 5], length);
+			EQ::Net::StaticPacket p(&m_buffer[current + 5], length);
 			switch (type) {
 			case ServertalkServerHello:
 				ProcessHello(p);
@@ -272,7 +272,7 @@ void EQ::Net::ServertalkClient::ProcessMessage(EQ::Net::Packet &p)
 					return;
 				}
 
-				EQ::Net::ReadOnlyPacket decrypted_packet(&decrypted_text[0], message_len);
+				EQ::Net::StaticPacket decrypted_packet(&decrypted_text[0], message_len);
 
 				(*(uint64_t*)&m_nonce_theirs[0])++;
 
@@ -283,7 +283,7 @@ void EQ::Net::ServertalkClient::ProcessMessage(EQ::Net::Packet &p)
 			}
 			else {
 				size_t message_len = length;
-				EQ::Net::ReadOnlyPacket packet(&data[0], message_len);
+				EQ::Net::StaticPacket packet(&data[0], message_len);
 
 				auto cb = m_message_callbacks.find(opcode);
 				if (cb != m_message_callbacks.end()) {
@@ -309,7 +309,7 @@ void EQ::Net::ServertalkClient::ProcessMessage(EQ::Net::Packet &p)
 
 void EQ::Net::ServertalkClient::SendHandshake(bool downgrade)
 {
-	EQ::Net::WritablePacket handshake;
+	EQ::Net::DynamicPacket handshake;
 #ifdef ENABLE_SECURITY
 	if (m_encrypted) {
 		crypto_box_keypair(m_public_key_ours, m_private_key_ours);
