@@ -83,8 +83,8 @@ int Lua_Group::GetHighestLevel() {
 }
 
 int Lua_Group::GetLowestLevel() {
-  Lua_Safe_Call_Int();
-  return self->GetLowestLevel();
+	Lua_Safe_Call_Int();
+	return self->GetLowestLevel();
 }
 
 void Lua_Group::TeleportGroup(Lua_Mob sender, uint32 zone_id, uint32 instance_id, float x, float y, float z, float h) {
