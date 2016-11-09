@@ -126,6 +126,7 @@ luabind::scope lua_register_group() {
 		.def("IsLeader", (bool(Lua_Group::*)(Lua_Mob))&Lua_Group::IsLeader)
 		.def("GroupCount", (int(Lua_Group::*)(void))&Lua_Group::GroupCount)
 		.def("GetHighestLevel", (int(Lua_Group::*)(void))&Lua_Group::GetHighestLevel)
+		.def("GetLowestLevel", (int(Lua_Group::*)(void))&Lua_Group::GetLowestLevel)
 		.def("TeleportGroup", (void(Lua_Group::*)(Lua_Mob,uint32,uint32,float,float,float,float))&Lua_Group::TeleportGroup)
 		.def("GetID", (int(Lua_Group::*)(void))&Lua_Group::GetID)
 		.def("GetMember", (Lua_Mob(Lua_Group::*)(int))&Lua_Group::GetMember);
