@@ -268,8 +268,23 @@ bool Map::CheckLoS(glm::vec3 myloc, glm::vec3 oloc) const {
 	return !imp->rm->raycast((const RmReal*)&myloc, (const RmReal*)&oloc, nullptr, nullptr, nullptr);
 }
 
+inline bool file_exists(const std::string& name) {
+	std::ifstream f(name.c_str());
+	return f.good();
+}
+
 Map *Map::LoadMapFile(std::string file) {
-	std::string filename = Config->MapDir;
+
+	std::string filename = "";
+	if (file_exists("maps")) {
+		filename = "maps";
+	}
+	else if (file_exists("Maps")) {
+		filename = "Maps";
+	}
+	else {
+		filename = Config->MapDir;
+	}
 	std::transform(file.begin(), file.end(), file.begin(), ::tolower);
 	filename += file;
 	filename += ".map";
@@ -287,7 +302,7 @@ Map *Map::LoadMapFile(std::string file) {
 bool Map::Load(std::string filename, bool force_mmf_overwrite)
 {
 	if (LoadMMF(filename, force_mmf_overwrite)) {
-		Log.Out(Logs::General, Logs::Zone_Server, "Zone map mmf found - using it in lieu of '%s'", filename.c_str());
+		Log.Out(Logs::General, Logs::Zone_Server, "Loaded .MMF Map File in place of '%s'", filename.c_str());
 		return true;
 	}
 #else
@@ -304,6 +319,7 @@ bool Map::Load(std::string filename)
 		}
 		
 		if(version == 0x01000000) {
+			Log.Out(Logs::General, Logs::Zone_Server, "Loaded V1 Map File :: '%s'", filename.c_str());
 			bool v = LoadV1(f);
 			fclose(f);
 
@@ -314,6 +330,7 @@ bool Map::Load(std::string filename)
 
 			return v;
 		} else if(version == 0x02000000) {
+			Log.Out(Logs::General, Logs::Zone_Server, "Loaded V2 Map File :: '%s'", filename.c_str());
 			bool v = LoadV2(f);
 			fclose(f);
 
