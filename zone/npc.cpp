@@ -1213,12 +1213,13 @@ uint32 ZoneDatabase::AddNewNPCSpawnGroupCommand(const char *zone, uint32 zone_ve
 uint32 ZoneDatabase::UpdateNPCTypeAppearance(Client *client, NPC *spawn)
 {
 	std::string query =
-	    StringFormat("UPDATE npc_types SET name = \"%s\", level = %i, race = %i, class = %i, "
-			 "hp = %i, gender = %i, texture = %i, helmtexture = %i, size = %i, "
-			 "loottable_id = %i, merchant_id = %i, face = %i, WHERE id = %i",
+	    StringFormat("UPDATE npc_types SET name = '%s', level = '%i', race = '%i', class = '%i', "
+			 "hp = '%i', gender = '%i', texture = '%i', helmtexture = '%i', size = '%i', "
+			 "loottable_id = '%i', merchant_id = '%i', face = '%i' "
+			 "WHERE id = '%i'",
 			 spawn->GetName(), spawn->GetLevel(), spawn->GetRace(), spawn->GetClass(), spawn->GetMaxHP(),
 			 spawn->GetGender(), spawn->GetTexture(), spawn->GetHelmTexture(), spawn->GetSize(),
-			 spawn->GetLoottableID(), spawn->MerchantType, spawn->GetNPCTypeID());
+			 spawn->GetLoottableID(), spawn->MerchantType, spawn->GetLuclinFace(), spawn->GetNPCTypeID());
 	auto results = QueryDatabase(query);
 	return results.Success() == true ? 1 : 0;
 }
