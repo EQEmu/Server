@@ -176,6 +176,7 @@ namespace EQEmu
 
 		static const size_t TEXT_LINK_BODY_LENGTH = 56;
 	}
+
 }
 
 #endif /* COMMON_EMU_LEGACY_H */

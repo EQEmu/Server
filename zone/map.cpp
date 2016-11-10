@@ -302,7 +302,7 @@ Map *Map::LoadMapFile(std::string file) {
 bool Map::Load(std::string filename, bool force_mmf_overwrite)
 {
 	if (LoadMMF(filename, force_mmf_overwrite)) {
-		Log.Out(Logs::General, Logs::Zone_Server, "Loaded .MMF Map File in place of '%s'", filename.c_str());
+		Log.Out(Logs::General, Logs::Status, "Loaded .MMF Map File in place of '%s'", filename.c_str());
 		return true;
 	}
 #else
@@ -319,7 +319,7 @@ bool Map::Load(std::string filename)
 		}
 		
 		if(version == 0x01000000) {
-			Log.Out(Logs::General, Logs::Zone_Server, "Loaded V1 Map File :: '%s'", filename.c_str());
+			Log.Out(Logs::General, Logs::Status, "Loaded V1 Map File :: '%s'", filename.c_str());
 			bool v = LoadV1(f);
 			fclose(f);
 
@@ -330,7 +330,7 @@ bool Map::Load(std::string filename)
 
 			return v;
 		} else if(version == 0x02000000) {
-			Log.Out(Logs::General, Logs::Zone_Server, "Loaded V2 Map File :: '%s'", filename.c_str());
+			Log.Out(Logs::General, Logs::Status, "Loaded V2 Map File :: '%s'", filename.c_str());
 			bool v = LoadV2(f);
 			fclose(f);
 
