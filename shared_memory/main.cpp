@@ -40,8 +40,8 @@ EQEmuLogSys Log;
 #include <direct.h>
 #else
 #include <unistd.h>
-#include <sys/stat.h>
 #endif
+#include <sys/stat.h>
 
 inline bool MakeDirectory(const std::string &directory_name)
 {
