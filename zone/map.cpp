@@ -286,6 +286,7 @@ Map *Map::LoadMapFile(std::string file) {
 		filename = Config->MapDir;
 	}
 	std::transform(file.begin(), file.end(), file.begin(), ::tolower);
+	filename += "/";
 	filename += file;
 	filename += ".map";
 
