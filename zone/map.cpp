@@ -289,6 +289,8 @@ Map *Map::LoadMapFile(std::string file) {
 	filename += file;
 	filename += ".map";
 
+	Log.Out(Logs::General, Logs::Status, "Attempting to load Map File :: '%s'", filename.c_str());
+
 	auto m = new Map();
 	if (m->Load(filename)) {
 		return m;
