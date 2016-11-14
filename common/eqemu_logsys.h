@@ -84,6 +84,7 @@ namespace Logs {
 		Client_Server_Packet_With_Dump,
 		Login_Server,
 		Client_Login,
+		Headless_Client,
 		MaxCategoryID	/* Don't Remove this*/
 	};
 

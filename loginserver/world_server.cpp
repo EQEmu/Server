@@ -504,11 +504,11 @@ void WorldServer::SendClientAuth(std::string ip, std::string account, std::strin
 	EQ::Net::DynamicPacket outapp;
 	ClientAuth_Struct client_auth;
 	client_auth.lsaccount_id = account_id;
-	client_auth.name = account;
-	client_auth.key = key;
+	strncpy(client_auth.name, account.c_str(), 30);
+	strncpy(client_auth.key, key.c_str(), 30);
 	client_auth.lsadmin = 0;
 	client_auth.worldadmin = 0;
-	client_auth.ip = ip;
+	client_auth.ip = inet_addr(ip.c_str());
 	
 	std::string client_address(ip);
 	std::string world_address(connection->Handle()->RemoteIP());

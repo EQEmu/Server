@@ -528,13 +528,13 @@ struct ServerLSPlayerZoneChange_Struct {
 };
 
 struct ClientAuth_Struct {
-	int lsaccount_id; // ID# in login server's db
-	std::string name; // username in login server's db
-	std::string key; // the Key the client will present
-	int lsadmin; // login server admin level
-	int worldadmin; // login's suggested worldadmin level setting for this user, up to the world if they want to obey it
-	std::string ip;
-	int local; // 1 if the client is from the local network
+	uint32 lsaccount_id; // ID# in login server's db
+	char name[30]; // username in login server's db
+	char key[30]; // the Key the client will present
+	uint8 lsadmin; // login server admin level
+	int16 worldadmin; // login's suggested worldadmin level setting for this user, up to the world if they want to obey it
+	uint32 ip;
+	uint8 local; // 1 if the client is from the local network
 
 	template <class Archive>
 	void serialize(Archive &ar)

@@ -105,16 +105,23 @@ void EQ::Net::DaybreakConnectionManager::Process()
 		auto status = connection->m_status;
 
 		if (status == StatusDisconnecting) {
-			connection->ChangeStatus(StatusDisconnected);
 			iter = m_connections.erase(iter);
+			connection->ChangeStatus(StatusDisconnected);
 			continue;
 		}
 
-		if (status == StatusConnecting || status == StatusConnected) {
+		if (status == StatusConnecting) {
+			auto time_since_last_recv = std::chrono::duration_cast<std::chrono::milliseconds>(now - connection->m_last_recv);
+			if ((size_t)time_since_last_recv.count() > m_options.connect_stale_ms) {
+				iter = m_connections.erase(iter);
+				connection->ChangeStatus(StatusDisconnected);
+				continue;
+			}
+		} else if (status == StatusConnected) {
 			auto time_since_last_recv = std::chrono::duration_cast<std::chrono::milliseconds>(now - connection->m_last_recv);
 			if ((size_t)time_since_last_recv.count() > m_options.stale_connection_ms) {
-				connection->ChangeStatus(StatusDisconnected);
 				iter = m_connections.erase(iter);
+				connection->ChangeStatus(StatusDisconnected);
 				continue;
 			}
 		}
@@ -288,6 +295,9 @@ EQ::Net::DaybreakConnection::DaybreakConnection(DaybreakConnectionManager *owner
 	m_buffered_packets_length = 0;
 	m_resend_delay = m_owner->m_options.resend_delay_ms;
 	m_rolling_ping = 100;
+	m_combined.reset(new char[512]);
+	m_combined[0] = 0;
+	m_combined[1] = OP_Combined;
 	m_last_session_stats = Clock::now();
 }
 
@@ -551,6 +561,23 @@ void EQ::Net::DaybreakConnection::ProcessDecodedPacket(const Packet &p)
 				InternalSend(p);
 			}
 
+			break;
+		}
+
+		case OP_SessionResponse:
+		{
+			if (m_status == StatusConnecting) {
+				auto reply = p.GetSerialize<DaybreakConnectReply>(0);
+
+				if (m_connect_code == reply.connect_code) {
+					m_encode_key = reply.encode_key;
+					m_crc_bytes = reply.crc_bytes;
+					m_encode_passes[0] = (DaybreakEncodeType)reply.encode_pass1;
+					m_encode_passes[1] = (DaybreakEncodeType)reply.encode_pass2;
+					m_max_packet_size = reply.max_packet_size;
+					ChangeStatus(StatusConnected);
+				}
+			}
 			break;
 		}
 

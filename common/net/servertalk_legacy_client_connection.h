@@ -25,7 +25,6 @@ namespace EQ
 		private:
 			void Connect();
 			void ProcessData(EQ::Net::TCPConnection *c, const unsigned char *data, size_t length);
-			void InternalSend(ServertalkPacketType type, EQ::Net::Packet &p);
 			void ProcessReadBuffer();
 
 			std::unique_ptr<EQ::Timer> m_timer;

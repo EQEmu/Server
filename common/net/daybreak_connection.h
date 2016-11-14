@@ -221,8 +221,9 @@ namespace EQ
 				resend_delay_ms = 25;
 				resend_delay_factor = 1.5;
 				stats_delay_ms = 9000;
-				connect_delay_ms = 1000;
+				connect_delay_ms = 250;
 				stale_connection_ms = 30000;
+				connect_stale_ms = 5000;
 				crc_length = 2;
 				max_packet_size = 512;
 				encode_passes[0] = DaybreakEncodeType::EncodeNone;
@@ -242,6 +243,7 @@ namespace EQ
 			size_t resend_delay_ms;
 			size_t stats_delay_ms;
 			size_t connect_delay_ms;
+			size_t connect_stale_ms;
 			size_t stale_connection_ms;
 			size_t crc_length;
 			size_t hold_size;

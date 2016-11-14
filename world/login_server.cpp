@@ -109,7 +109,7 @@ void LoginServer::ProcessLSClientAuth(uint16_t opcode, EQ::Net::Packet &p) {
 			client_list.EnforceSessionLimit(slsca.lsaccount_id);
 		}
 		
-		client_list.CLEAdd(slsca.lsaccount_id, slsca.name.c_str(), slsca.key.c_str(), slsca.worldadmin, inet_addr(slsca.ip.c_str()), slsca.local);
+		client_list.CLEAdd(slsca.lsaccount_id, slsca.name, slsca.key, slsca.worldadmin, slsca.ip, slsca.local);
 	}
 	catch (std::exception &ex) {
 		Log.OutF(Logs::General, Logs::Error, "Error parsing LSClientAuth packet from world.\n{0}", ex.what());

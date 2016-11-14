@@ -184,8 +184,6 @@ void Client::Handle_Login(const char* data, unsigned int size)
 		return;
 	}
 
-	status = cs_logged_in;
-
 	char *login_packet_buffer = nullptr;
 
 	unsigned int db_account_id = 0;
@@ -307,6 +305,8 @@ void Client::Handle_Login(const char* data, unsigned int size)
 
 		connection->QueuePacket(outapp);
 		delete outapp;
+
+		status = cs_logged_in;
 	}
 	else {
 		EQApplicationPacket *outapp = new EQApplicationPacket(OP_LoginAccepted, sizeof(LoginLoginFailed_Struct));
@@ -332,7 +332,7 @@ void Client::Handle_Play(const char* data)
 {
 	if(status != cs_logged_in)
 	{
-		Log.Out(Logs::General, Logs::Error, "Client sent a play request when they either were not logged in, discarding.");
+		Log.Out(Logs::General, Logs::Error, "Client sent a play request when they were not logged in, discarding.");
 		return;
 	}
 
@@ -372,7 +372,6 @@ void Client::SendPlayResponse(EQApplicationPacket *outapp)
 		// server_log->LogPacket(log_network_trace, (const char*)outapp->pBuffer, outapp->size);
 	}
 	connection->QueuePacket(outapp);
-	status = cs_logged_in;
 }
 
 void Client::GenerateKey()

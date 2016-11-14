@@ -19,12 +19,15 @@ EQ::Net::ServertalkLegacyClient::~ServertalkLegacyClient()
 
 void EQ::Net::ServertalkLegacyClient::Send(uint16_t opcode, EQ::Net::Packet &p)
 {
+	if (!m_connection)
+		return;
+
 	EQ::Net::DynamicPacket out;
 	out.PutUInt16(0, opcode);
-	out.PutUInt16(2, p.Length());
+	out.PutUInt16(2, p.Length() + 4);
 	out.PutPacket(4, p);
 
-	InternalSend(ServertalkMessage, out);
+	m_connection->Write((const char*)out.Data(), out.Length());
 }
 
 void EQ::Net::ServertalkLegacyClient::SendPacket(ServerPacket *p)
@@ -75,21 +78,6 @@ void EQ::Net::ServertalkLegacyClient::ProcessData(EQ::Net::TCPConnection *c, con
 	ProcessReadBuffer();
 }
 
-void EQ::Net::ServertalkLegacyClient::InternalSend(ServertalkPacketType type, EQ::Net::Packet &p)
-{
-	if (!m_connection)
-		return;
-
-	EQ::Net::DynamicPacket out;
-	out.PutUInt32(0, (uint32_t)p.Length());
-	out.PutUInt8(4, (uint8_t)type);
-	if (p.Length() > 0) {
-		out.PutPacket(5, p);
-	}
-
-	m_connection->Write((const char*)out.Data(), out.Length());
-}
-
 void EQ::Net::ServertalkLegacyClient::ProcessReadBuffer()
 {
 	size_t current = 0;
@@ -110,7 +98,12 @@ void EQ::Net::ServertalkLegacyClient::ProcessReadBuffer()
 		}
 
 		opcode = *(uint16_t*)&m_buffer[current];
-		length = *(uint16_t*)&m_buffer[current + 2] - 4;
+		length = *(uint16_t*)&m_buffer[current + 2];
+		if (length < 4) {
+			break;
+		}
+
+		length -= 4;
 
 		if (current + 4 + length > total) {
 			break;
