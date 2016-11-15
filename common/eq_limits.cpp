@@ -24,28 +24,84 @@
 static const EQEmu::constants::LookupEntry constants_lookup_entries[EQEmu::versions::ClientVersionCount] =
 {
 	{
+		ClientUnknown::Null,
+		ClientUnknown::Null,
+		ClientUnknown::Null,
+		ClientUnknown::Null,
+		ClientUnknown::Null,
+		ClientUnknown::Null,
+		ClientUnknown::Null,
 		ClientUnknown::Null
 	},
 	{
+		Client62::Null,
+		Client62::Null,
+		Client62::Null,
+		Client62::Null,
+		Client62::Null,
+		Client62::Null,
+		Client62::Null,
 		Client62::Null
 	},
 	{
-		Titanium::constants::CharacterCreationLimit
+		Titanium::constants::CharacterCreationLimit,
+		Titanium::constants::LongBuffs,
+		Titanium::constants::ShortBuffs,
+		Titanium::constants::DiscBuffs,
+		Titanium::constants::TotalBuffs,
+		Titanium::constants::NPCBuffs,
+		Titanium::constants::PetBuffs,
+		Titanium::constants::MercBuffs
 	},
 	{
-		SoF::constants::CharacterCreationLimit
+		SoF::constants::CharacterCreationLimit,
+		SoF::constants::LongBuffs,
+		SoF::constants::ShortBuffs,
+		SoF::constants::DiscBuffs,
+		SoF::constants::TotalBuffs,
+		SoF::constants::NPCBuffs,
+		SoF::constants::PetBuffs,
+		SoF::constants::MercBuffs
 	},
 	{
-		SoD::constants::CharacterCreationLimit
+		SoD::constants::CharacterCreationLimit,
+		SoD::constants::LongBuffs,
+		SoD::constants::ShortBuffs,
+		SoD::constants::DiscBuffs,
+		SoD::constants::TotalBuffs,
+		SoD::constants::NPCBuffs,
+		SoD::constants::PetBuffs,
+		SoD::constants::MercBuffs
 	},
 	{
-		UF::constants::CharacterCreationLimit
+		UF::constants::CharacterCreationLimit,
+		UF::constants::LongBuffs,
+		UF::constants::ShortBuffs,
+		UF::constants::DiscBuffs,
+		UF::constants::TotalBuffs,
+		UF::constants::NPCBuffs,
+		UF::constants::PetBuffs,
+		UF::constants::MercBuffs
 	},
 	{
-		RoF::constants::CharacterCreationLimit
+		RoF::constants::CharacterCreationLimit,
+		RoF::constants::LongBuffs,
+		RoF::constants::ShortBuffs,
+		RoF::constants::DiscBuffs,
+		RoF::constants::TotalBuffs,
+		RoF::constants::NPCBuffs,
+		RoF::constants::PetBuffs,
+		RoF::constants::MercBuffs
 	},
 	{
-		RoF2::constants::CharacterCreationLimit
+		RoF2::constants::CharacterCreationLimit,
+		RoF2::constants::LongBuffs,
+		RoF2::constants::ShortBuffs,
+		RoF2::constants::DiscBuffs,
+		RoF2::constants::TotalBuffs,
+		RoF2::constants::NPCBuffs,
+		RoF2::constants::PetBuffs,
+		RoF2::constants::MercBuffs
 	}
 };
 

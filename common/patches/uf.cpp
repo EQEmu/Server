@@ -62,6 +62,9 @@ namespace UF
 	static inline CastingSlot ServerToUFCastingSlot(EQEmu::CastingSlot slot);
 	static inline EQEmu::CastingSlot UFToServerCastingSlot(CastingSlot slot);
 
+	static inline int ServerToUFBuffSlot(int index);
+	static inline int UFToServerBuffSlot(int index);
+
 	void Register(EQStreamIdentifier &into)
 	{
 		//create our opcode manager if we havent already
@@ -377,17 +380,8 @@ namespace UF
 		OUT(buff.spellid);
 		OUT(buff.duration);
 		OUT(buff.num_hits);
-		uint16 buffslot = emu->slotid;
-		if (buffslot >= 25 && buffslot < 37)
-		{
-			buffslot += 5;
-		}
-		else if (buffslot >= 37)
-		{
-			buffslot += 14;
-		}
 		// TODO: implement slot_data stuff
-		eq->slotid = buffslot;
+		eq->slotid = ServerToUFBuffSlot(emu->slotid);
 		OUT(bufffade);	// Live (October 2011) sends a 2 rather than 0 when a buff is created, but it doesn't seem to matter.
 
 		FINISH_ENCODE();
@@ -407,17 +401,9 @@ namespace UF
 		__packet->WriteUInt8(emu->all_buffs); // 1 = all buffs, 0 = 1 buff
 		__packet->WriteUInt16(emu->count);
 
-		for (uint16 i = 0; i < emu->count; ++i)
+		for (int i = 0; i < emu->count; ++i)
 		{
-			uint16 buffslot = emu->entries[i].buff_slot;
-			if (emu->type == 0) { // only correct for self packets
-				if (emu->entries[i].buff_slot >= 25 && emu->entries[i].buff_slot < 37)
-					buffslot += 5;
-				else if (emu->entries[i].buff_slot >= 37)
-					buffslot += 14;
-			}
-
-			__packet->WriteUInt32(buffslot);
+			__packet->WriteUInt32(emu->type == 0 ? ServerToUFBuffSlot(emu->entries[i].buff_slot) : emu->entries[i].buff_slot);
 			__packet->WriteUInt32(emu->entries[i].spell_id);
 			__packet->WriteUInt32(emu->entries[i].tics_remaining);
 			__packet->WriteUInt32(emu->entries[i].num_hits);
@@ -3236,6 +3222,7 @@ namespace UF
 		IN(buff.unknown003);
 		IN(buff.spellid);
 		IN(buff.duration);
+		emu->slotid = UFToServerBuffSlot(eq->slotid);
 		IN(slotid);
 		IN(bufffade);
 
@@ -3249,7 +3236,7 @@ namespace UF
 		DECODE_LENGTH_EXACT(structs::BuffRemoveRequest_Struct);
 		SETUP_DIRECT_DECODE(BuffRemoveRequest_Struct, structs::BuffRemoveRequest_Struct);
 
-		emu->SlotID = (eq->SlotID < 30) ? eq->SlotID : (eq->SlotID - 5);
+		emu->SlotID = UFToServerBuffSlot(eq->SlotID);
 
 		IN(EntityID);
 
@@ -4452,5 +4439,31 @@ namespace UF
 		default: // we shouldn't have any issues with other slots ... just return something
 			return EQEmu::CastingSlot::Discipline;
 		}
+	}
+
+	static inline int ServerToUFBuffSlot(int index)
+	{
+		// we're a disc
+		if (index >= EQEmu::constants::LongBuffs + EQEmu::constants::ShortBuffs)
+			return index - EQEmu::constants::LongBuffs - EQEmu::constants::ShortBuffs +
+			       constants::LongBuffs + constants::ShortBuffs;
+		// we're a song
+		if (index >= EQEmu::constants::LongBuffs)
+			return index - EQEmu::constants::LongBuffs + constants::LongBuffs;
+		// we're a normal buff
+		return index; // as long as we guard against bad slots server side, we should be fine
+	}
+
+	static inline int UFToServerBuffSlot(int index)
+	{
+		// we're a disc
+		if (index >= constants::LongBuffs + constants::ShortBuffs)
+			return index - constants::LongBuffs - constants::ShortBuffs + EQEmu::constants::LongBuffs +
+			       EQEmu::constants::ShortBuffs;
+		// we're a song
+		if (index >= constants::LongBuffs)
+			return index - constants::LongBuffs + EQEmu::constants::LongBuffs;
+		// we're a normal buff
+		return index; // as long as we guard against bad slots server side, we should be fine
 	}
 } /*UF*/

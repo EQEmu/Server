@@ -116,6 +116,14 @@ namespace EQEmu
 
 		const size_t SayLinkBodySize = RoF2::constants::SayLinkBodySize;
 
+		const int LongBuffs = RoF2::constants::LongBuffs;
+		const int ShortBuffs = RoF2::constants::ShortBuffs;
+		const int DiscBuffs = RoF2::constants::DiscBuffs;
+		const int TotalBuffs = RoF2::constants::TotalBuffs;
+		const int NPCBuffs = RoF2::constants::NPCBuffs;
+		const int PetBuffs = RoF2::constants::PetBuffs;
+		const int MercBuffs = RoF2::constants::MercBuffs;
+
 	} /*constants*/
 
 	enum class CastingSlot : uint32 {

@@ -62,6 +62,9 @@ namespace SoD
 	static inline CastingSlot ServerToSoDCastingSlot(EQEmu::CastingSlot slot);
 	static inline EQEmu::CastingSlot SoDToServerCastingSlot(CastingSlot slot);
 
+	static inline int ServerToSoDBuffSlot(int index);
+	static inline int SoDToServerBuffSlot(int index);
+
 	void Register(EQStreamIdentifier &into)
 	{
 		//create our opcode manager if we havent already
@@ -315,7 +318,7 @@ namespace SoD
 		OUT(buff.duration);
 		OUT(buff.counters);
 		OUT(buff.player_id);
-		OUT(slotid);
+		eq->slotid = ServerToSoDBuffSlot(emu->slotid);
 		OUT(bufffade);
 
 		FINISH_ENCODE();
@@ -2921,8 +2924,8 @@ namespace SoD
 		IN(buff.bard_modifier);
 		IN(buff.spellid);
 		IN(buff.duration);
-		IN(buff.counters)
-		IN(slotid);
+		IN(buff.counters);
+		emu->slotid = SoDToServerBuffSlot(eq->slotid);
 		IN(bufffade);
 
 		FINISH_DIRECT_DECODE();
@@ -4087,5 +4090,31 @@ namespace SoD
 		default: // we shouldn't have any issues with other slots ... just return something
 			return EQEmu::CastingSlot::Discipline;
 		}
+	}
+
+	static inline int ServerToSoDBuffSlot(int index)
+	{
+		// we're a disc
+		if (index >= EQEmu::constants::LongBuffs + EQEmu::constants::ShortBuffs)
+			return index - EQEmu::constants::LongBuffs - EQEmu::constants::ShortBuffs +
+			       constants::LongBuffs + constants::ShortBuffs;
+		// we're a song
+		if (index >= EQEmu::constants::LongBuffs)
+			return index - EQEmu::constants::LongBuffs + constants::LongBuffs;
+		// we're a normal buff
+		return index; // as long as we guard against bad slots server side, we should be fine
+	}
+
+	static inline int SoDToServerBuffSlot(int index)
+	{
+		// we're a disc
+		if (index >= constants::LongBuffs + constants::ShortBuffs)
+			return index - constants::LongBuffs - constants::ShortBuffs + EQEmu::constants::LongBuffs +
+			       EQEmu::constants::ShortBuffs;
+		// we're a song
+		if (index >= constants::LongBuffs)
+			return index - constants::LongBuffs + EQEmu::constants::LongBuffs;
+		// we're a normal buff
+		return index; // as long as we guard against bad slots server side, we should be fine
 	}
 } /*SoD*/

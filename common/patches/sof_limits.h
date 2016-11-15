@@ -295,6 +295,14 @@ namespace SoF
 
 		const size_t SayLinkBodySize = 50;
 
+		const int LongBuffs = 25;
+		const int ShortBuffs = 15;
+		const int DiscBuffs = 1;
+		const int TotalBuffs = LongBuffs + ShortBuffs + DiscBuffs;
+		const int NPCBuffs = 60;
+		const int PetBuffs = 30;
+		const int MercBuffs = 0;
+
 	} /*constants*/
 
 	namespace behavior {

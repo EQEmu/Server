@@ -61,6 +61,9 @@ namespace Titanium
 	static inline CastingSlot ServerToTitaniumCastingSlot(EQEmu::CastingSlot slot);
 	static inline EQEmu::CastingSlot TitaniumToServerCastingSlot(CastingSlot slot, uint32 itemlocation);
 
+	static inline int ServerToTitaniumBuffSlot(int index);
+	static inline int TitaniumToServerBuffSlot(int index);
+
 	void Register(EQStreamIdentifier &into)
 	{
 		auto Config = EQEmuConfig::get();
@@ -270,7 +273,7 @@ namespace Titanium
 		OUT(buff.duration);
 		OUT(buff.counters);
 		OUT(buff.player_id);
-		OUT(slotid);
+		eq->slotid = ServerToTitaniumBuffSlot(emu->slotid);
 		OUT(bufffade);
 
 		FINISH_ENCODE();
@@ -1779,7 +1782,7 @@ namespace Titanium
 		IN(buff.duration);
 		IN(buff.counters);
 		IN(buff.player_id);
-		IN(slotid);
+		emu->slotid = TitaniumToServerBuffSlot(eq->slotid);
 		IN(bufffade);
 
 		FINISH_DIRECT_DECODE();
@@ -2631,5 +2634,31 @@ namespace Titanium
 		default: // we shouldn't have any issues with other slots ... just return something
 			return EQEmu::CastingSlot::Discipline;
 		}
+	}
+
+	static inline int ServerToTitaniumBuffSlot(int index)
+	{
+		// we're a disc
+		if (index >= EQEmu::constants::LongBuffs + EQEmu::constants::ShortBuffs)
+			return index - EQEmu::constants::LongBuffs - EQEmu::constants::ShortBuffs +
+			       constants::LongBuffs + constants::ShortBuffs;
+		// we're a song
+		if (index >= EQEmu::constants::LongBuffs)
+			return index - EQEmu::constants::LongBuffs + constants::LongBuffs;
+		// we're a normal buff
+		return index; // as long as we guard against bad slots server side, we should be fine
+	}
+
+	static inline int TitaniumToServerBuffSlot(int index)
+	{
+		// we're a disc
+		if (index >= constants::LongBuffs + constants::ShortBuffs)
+			return index - constants::LongBuffs - constants::ShortBuffs + EQEmu::constants::LongBuffs +
+			       EQEmu::constants::ShortBuffs;
+		// we're a song
+		if (index >= constants::LongBuffs)
+			return index - constants::LongBuffs + EQEmu::constants::LongBuffs;
+		// we're a normal buff
+		return index; // as long as we guard against bad slots server side, we should be fine
 	}
 } /*Titanium*/

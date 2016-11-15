@@ -509,10 +509,10 @@ public:
 	virtual int GetCurrentBuffSlots() const;
 	virtual int GetCurrentSongSlots() const;
 	virtual int GetCurrentDiscSlots() const { return 1; }
-	virtual int GetMaxBuffSlots() const { return 25; }
-	virtual int GetMaxSongSlots() const { return 12; }
-	virtual int GetMaxDiscSlots() const { return 1; }
-	virtual int GetMaxTotalSlots() const { return 38; }
+	virtual int GetMaxBuffSlots() const { return EQEmu::constants::LongBuffs; }
+	virtual int GetMaxSongSlots() const { return EQEmu::constants::ShortBuffs; }
+	virtual int GetMaxDiscSlots() const { return EQEmu::constants::DiscBuffs; }
+	virtual int GetMaxTotalSlots() const { return EQEmu::constants::TotalBuffs; }
 	virtual uint32 GetFirstBuffSlot(bool disc, bool song);
 	virtual uint32 GetLastBuffSlot(bool disc, bool song);
 	virtual void InitializeBuffSlots();

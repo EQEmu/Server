@@ -66,6 +66,9 @@ namespace RoF2
 	static inline CastingSlot ServerToRoF2CastingSlot(EQEmu::CastingSlot slot);
 	static inline EQEmu::CastingSlot RoF2ToServerCastingSlot(CastingSlot slot);
 
+	static inline int ServerToRoF2BuffSlot(int index);
+	static inline int RoF2ToServerBuffSlot(int index);
+
 	void Register(EQStreamIdentifier &into)
 	{
 		//create our opcode manager if we havent already
@@ -492,18 +495,7 @@ namespace RoF2
 		OUT(buff.y);
 		OUT(buff.x);
 		OUT(buff.z);
-		uint16 buffslot = emu->slotid;
-		// Not sure if this is needs amending for RoF2 yet.
-		if (buffslot >= 25)
-		{
-			buffslot += 17;
-		}
-		// TODO: We should really just deal with these "server side"
-		// so we can have clients not limited to other clients.
-		// This fixes discs, songs were changed to 20
-		if (buffslot == 54)
-			buffslot = 62;
-		eq->slotid = buffslot;
+		eq->slotid = ServerToRoF2BuffSlot(emu->slotid);
 		// TODO: implement slot_data stuff
 		if (emu->bufffade == 1)
 			eq->bufffade = 1;
@@ -519,10 +511,10 @@ namespace RoF2
 			outapp->WriteUInt32(0);	// tic timer
 			outapp->WriteUInt8(0);		// Type of OP_BuffCreate packet ?
 			outapp->WriteUInt16(1);		// 1 buff in this packet
-			outapp->WriteUInt32(buffslot);
+			outapp->WriteUInt32(eq->slotid);
 			outapp->WriteUInt32(0xffffffff);		// SpellID (0xffff to remove)
 			outapp->WriteUInt32(0);			// Duration
-			outapp->WriteUInt32(0);			// ?
+			outapp->WriteUInt32(0);			// numhits
 			outapp->WriteUInt8(0);		// Caster name
 			outapp->WriteUInt8(0);		// Type
 		}
@@ -546,20 +538,9 @@ namespace RoF2
 		__packet->WriteUInt8(emu->all_buffs);			// 1 indicates all buffs on the player (0 to add or remove a single buff)
 		__packet->WriteUInt16(emu->count);
 
-		for (uint16 i = 0; i < emu->count; ++i)
+		for (int i = 0; i < emu->count; ++i)
 		{
-			uint16 buffslot = emu->entries[i].buff_slot;
-			if (emu->type == 0) { // only correct for self packets
-				if (emu->entries[i].buff_slot >= 25)
-					buffslot += 17;
-				// TODO: We should really just deal with these "server side"
-				// so we can have clients not limited to other clients.
-				// This fixes discs, songs were changed to 20
-				if (buffslot == 54)
-					buffslot = 62;
-			}
-
-			__packet->WriteUInt32(buffslot);
+			__packet->WriteUInt32(emu->type == 0 ? ServerToRoF2BuffSlot(emu->entries[i].buff_slot) : emu->entries[i].buff_slot);
 			__packet->WriteUInt32(emu->entries[i].spell_id);
 			__packet->WriteUInt32(emu->entries[i].tics_remaining);
 			__packet->WriteUInt32(emu->entries[i].num_hits); // Unknown
@@ -4550,7 +4531,7 @@ namespace RoF2
 		IN(buff.unknown003);
 		IN(buff.spellid);
 		IN(buff.duration);
-		IN(slotid);
+		emu->slotid = RoF2ToServerBuffSlot(eq->slotid);
 		IN(bufffade);
 
 		FINISH_DIRECT_DECODE();
@@ -4563,7 +4544,7 @@ namespace RoF2
 		DECODE_LENGTH_EXACT(structs::BuffRemoveRequest_Struct);
 		SETUP_DIRECT_DECODE(BuffRemoveRequest_Struct, structs::BuffRemoveRequest_Struct);
 
-		emu->SlotID = (eq->SlotID < 42) ? eq->SlotID : (eq->SlotID - 17);
+		emu->SlotID = RoF2ToServerBuffSlot(eq->SlotID);
 
 		IN(EntityID);
 
@@ -6387,5 +6368,33 @@ namespace RoF2
 		default: // we shouldn't have any issues with other slots ... just return something
 			return EQEmu::CastingSlot::Discipline;
 		}
+	}
+
+	// these should be optimized out for RoF2 since they should all boil down to return index :P
+	// but lets leave it here for future proofing
+	static inline int ServerToRoF2BuffSlot(int index)
+	{
+		// we're a disc
+		if (index >= EQEmu::constants::LongBuffs + EQEmu::constants::ShortBuffs)
+			return index - EQEmu::constants::LongBuffs - EQEmu::constants::ShortBuffs +
+			       constants::LongBuffs + constants::ShortBuffs;
+		// we're a song
+		if (index >= EQEmu::constants::LongBuffs)
+			return index - EQEmu::constants::LongBuffs + constants::LongBuffs;
+		// we're a normal buff
+		return index; // as long as we guard against bad slots server side, we should be fine
+	}
+
+	static inline int RoF2ToServerBuffSlot(int index)
+	{
+		// we're a disc
+		if (index >= constants::LongBuffs + constants::ShortBuffs)
+			return index - constants::LongBuffs - constants::ShortBuffs + EQEmu::constants::LongBuffs +
+			       EQEmu::constants::ShortBuffs;
+		// we're a song
+		if (index >= constants::LongBuffs)
+			return index - constants::LongBuffs + EQEmu::constants::LongBuffs;
+		// we're a normal buff
+		return index; // as long as we guard against bad slots server side, we should be fine
 	}
 } /*RoF2*/

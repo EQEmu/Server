@@ -38,6 +38,13 @@ namespace EQEmu
 		class LookupEntry {
 		public:
 			size_t CharacterCreationLimit;
+			int LongBuffs;
+			int ShortBuffs;
+			int DiscBuffs;
+			int TotalBuffs;
+			int NPCBuffs;
+			int PetBuffs;
+			int MercBuffs;
 		};
 
 		const LookupEntry* Lookup(versions::ClientVersion client_version);

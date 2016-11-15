@@ -64,7 +64,7 @@ namespace UF
 			InvTypeOther,
 			InvTypeCount
 		};
-	
+
 	} /*invtype*/
 
 	namespace invslot {
@@ -115,21 +115,21 @@ namespace UF
 		const int GeneralBegin = PossessionsGeneral1;
 		const int GeneralEnd = PossessionsGeneral8;
 		const int GeneralCount = (GeneralEnd - GeneralBegin + 1);
-	
+
 	} /*invslot*/
 
 	namespace invbag {
 		inline EQEmu::versions::ClientVersion GetInvBagRef() { return EQEmu::versions::ClientVersion::UF; }
 
 		enum : int { InvBagInvalid = -1, InvBagBegin };
-	
+
 	} /*invbag*/
 
 	namespace invaug {
 		inline EQEmu::versions::ClientVersion GetInvAugRef() { return EQEmu::versions::ClientVersion::UF; }
 
 		enum : int { InvAugInvalid = -1, InvAugBegin };
-	
+
 	} /*invaug*/
 
 	namespace item {
@@ -148,27 +148,27 @@ namespace UF
 			ItemPacketCharmUpdate = 110,
 			ItemPacket11 = 111
 		};
-	
+
 	} /*item*/
 
 	namespace profile {
 		inline EQEmu::versions::ClientVersion GetProfileRef() { return EQEmu::versions::ClientVersion::UF; }
-	
+
 	} /*profile*/
 
 	namespace constants {
 		inline EQEmu::versions::ClientVersion GetConstantsRef() { return EQEmu::versions::ClientVersion::UF; }
-	
+
 	} /*constants*/
 
 	namespace behavior {
 		inline EQEmu::versions::ClientVersion GetBehaviorRef() { return EQEmu::versions::ClientVersion::UF; }
-	
+
 	} /*behavior*/
 
 	namespace skills {
 		inline EQEmu::versions::ClientVersion GetSkillsRef() { return EQEmu::versions::ClientVersion::UF; }
-	
+
 	} /*skills*/
 
 
@@ -208,7 +208,7 @@ namespace UF
 		extern const char* GetInvTypeName(int inv_type);
 
 		extern bool IsInvTypePersistent(int inv_type);
-	
+
 	} /*invtype*/
 
 	namespace invslot {
@@ -237,7 +237,7 @@ namespace UF
 		extern const char* GetInvPossessionsSlotName(int inv_slot);
 		extern const char* GetInvCorpseSlotName(int inv_slot);
 		extern const char* GetInvSlotName(int inv_type, int inv_slot);
-	
+
 	} /*invslot*/
 
 	namespace invbag {
@@ -264,7 +264,7 @@ namespace UF
 		const int TradeBagsEnd = (TradeBagsBegin + TradeBagsSize) - 1;
 
 		extern const char* GetInvBagIndexName(int bag_index);
-	
+
 	} /*invbag*/
 
 	namespace invaug {
@@ -288,24 +288,32 @@ namespace UF
 		const size_t PotionBeltSize = 5;
 
 		const size_t SkillArraySize = 100;
-	
+
 	} /*profile*/
 
 	namespace constants {
 		const size_t CharacterCreationLimit = 12;
 
 		const size_t SayLinkBodySize = 50;
-	
+
+		const int LongBuffs = 30;
+		const int ShortBuffs = 20;
+		const int DiscBuffs = 1;
+		const int TotalBuffs = LongBuffs + ShortBuffs + DiscBuffs;
+		const int NPCBuffs = 85;
+		const int PetBuffs = NPCBuffs;
+		const int MercBuffs = LongBuffs;
+
 	} /*constants*/
 
 	namespace behavior {
 		const bool CoinHasWeight = false;
-	
+
 	} /*behavior*/
 
 	namespace skills {
 		const size_t LastUsableSkill = EQEmu::skills::SkillTripleAttack;
-	
+
 	} /*skills*/
 
 }; /*UF*/
