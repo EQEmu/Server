@@ -36,6 +36,7 @@ SET(common_sources
 	ipc_mutex.cpp
 	item.cpp
 	item_base.cpp
+	json_config.cpp
 	light_source.cpp
 	md5.cpp
 	memory_buffer.cpp
@@ -73,6 +74,7 @@ SET(common_sources
 	xml_parser.cpp
 	platform.cpp
 	event/event_loop.cpp
+	json/jsoncpp.cpp
 	net/crc32.cpp
 	net/daybreak_connection.cpp
 	net/eqstream.cpp
@@ -165,6 +167,7 @@ SET(common_headers
 	item.h
 	item_base.h
 	item_fieldlist.h
+	json_config.h
 	languages.h
 	light_source.h
 	linked_list.h
@@ -218,6 +221,8 @@ SET(common_headers
 	event/background_task.h
 	event/event_loop.h
 	event/timer.h
+	json/json.h
+	json/json-forwards.h
 	net/crc32.h
 	net/daybreak_connection.h
 	net/daybreak_structs.h
@@ -292,6 +297,12 @@ SOURCE_GROUP(Event FILES
 	event/event_loop.cpp
 	event/event_loop.h
 	event/timer.h
+)
+
+SOURCE_GROUP(Json FILES
+	json/json.h
+	json/jsoncpp.cpp
+	json/json-forwards.h
 )
 
 SOURCE_GROUP(Net FILES

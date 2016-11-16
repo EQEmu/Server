@@ -106,6 +106,7 @@ void EQ::Net::DaybreakConnectionManager::Process()
 
 		if (status == StatusDisconnecting) {
 			iter = m_connections.erase(iter);
+			connection->FlushBuffer();
 			connection->ChangeStatus(StatusDisconnected);
 			continue;
 		}
@@ -114,14 +115,14 @@ void EQ::Net::DaybreakConnectionManager::Process()
 			auto time_since_last_recv = std::chrono::duration_cast<std::chrono::milliseconds>(now - connection->m_last_recv);
 			if ((size_t)time_since_last_recv.count() > m_options.connect_stale_ms) {
 				iter = m_connections.erase(iter);
-				connection->ChangeStatus(StatusDisconnected);
+				connection->ChangeStatus(StatusDisconnecting);
 				continue;
 			}
 		} else if (status == StatusConnected) {
 			auto time_since_last_recv = std::chrono::duration_cast<std::chrono::milliseconds>(now - connection->m_last_recv);
 			if ((size_t)time_since_last_recv.count() > m_options.stale_connection_ms) {
 				iter = m_connections.erase(iter);
-				connection->ChangeStatus(StatusDisconnected);
+				connection->ChangeStatus(StatusDisconnecting);
 				continue;
 			}
 		}
@@ -319,7 +320,7 @@ void EQ::Net::DaybreakConnection::Close()
 		ChangeStatus(StatusDisconnecting);
 	}
 	else {
-		ChangeStatus(StatusDisconnected);
+		ChangeStatus(StatusDisconnecting);
 	}
 }
 
@@ -700,7 +701,7 @@ void EQ::Net::DaybreakConnection::ProcessDecodedPacket(const Packet &p)
 				InternalSend(out);
 			}
 
-			ChangeStatus(StatusDisconnected);
+			ChangeStatus(StatusDisconnecting);
 			break;
 		}
 

@@ -35,6 +35,7 @@ enum LSClientStatus
 {
 	cs_not_sent_session_ready,
 	cs_waiting_for_login,
+	cs_failed_to_login,
 	cs_logged_in
 };
 

@@ -49,6 +49,12 @@ bool Client::Process()
 			DumpPacket(app);
 		}
 
+		if (status == cs_failed_to_login) {
+			delete app;
+			app = connection->PopPacket();
+			continue;
+		}
+
 		switch(app->GetOpcode())
 		{
 		case OP_SessionReady:
@@ -325,6 +331,8 @@ void Client::Handle_Login(const char* data, unsigned int size)
 
 		connection->QueuePacket(outapp);
 		delete outapp;
+
+		status = cs_failed_to_login;
 	}
 }
 

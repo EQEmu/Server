@@ -1,12 +1,14 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 
 SET(hc_sources
+	eq.cpp
 	main.cpp
 	login.cpp
 	world.cpp
 )
 
 SET(hc_headers
+	eq.h
 	login.h
 	world.h
 )

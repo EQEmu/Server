@@ -1,4 +1,4 @@
-#include "login.h"
+/*#include "login.h"
 #include "../common/eqemu_logsys.h"
 #include <openssl/des.h>
 
@@ -252,3 +252,4 @@ void LoginConnection::ProcessServerPlayResponse(const EQ::Net::Packet &p)
 		Kill();
 	}
 }
+*/
