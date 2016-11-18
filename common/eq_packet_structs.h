@@ -3517,6 +3517,20 @@ struct RecipeAutoCombine_Struct {
 								// f5 ff ff ff in 'you dont have all the stuff' reply
 };
 
+// this is the "value#a" data
+enum EParticlePoint {
+	eDefault,
+	eChest,
+	eHead,
+	eLeftHand,
+	eRigthHand,
+	eLeftFoot,
+	eRightFood,
+	eLeftEye,
+	eRightEye,
+	eMouth
+};
+
 struct LevelAppearance_Struct { //Sends a little graphic on level up
 	uint32	spawn_id;
 	uint32	parm1;
