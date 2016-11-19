@@ -287,41 +287,14 @@ void EverQuest::WorldOnStatusChangeReconnectDisabled(std::shared_ptr<EQ::Net::Da
 
 void EverQuest::WorldOnPacketRecv(std::shared_ptr<EQ::Net::DaybreakConnection> conn, const EQ::Net::Packet & p)
 {
-	Log.OutF(Logs::General, Logs::Headless_Client, "Packet in:\n{0}", p.ToString());
 	auto opcode = p.GetUInt16(0);
 	switch (opcode) {
-	case 0x7499:
-		Log.OutF(Logs::General, Logs::Headless_Client, "OP_ApproveWorld");
-		break;
-	case 0x7ceb:
-		Log.OutF(Logs::General, Logs::Headless_Client, "OP_LogServer");
-		break;
-	case 0x578f:
-		Log.OutF(Logs::General, Logs::Headless_Client, "OP_EnterWorld");
-		break;
-	case 0x6259:
-		Log.OutF(Logs::General, Logs::Headless_Client, "OP_PostEnterWorld");
-		break;
-	case 0x590d:
-		Log.OutF(Logs::General, Logs::Headless_Client, "OP_ExpansionInfo");
-		break;
-	case 0x507a:
-		Log.OutF(Logs::General, Logs::Headless_Client, "OP_GuildsList");
-		break;
-	case 0x5475:
-		Log.OutF(Logs::General, Logs::Headless_Client, "OP_SendMaxCharacters");
-		break;
-	case 0x7acc:
-		Log.OutF(Logs::General, Logs::Headless_Client, "OP_SendMembership");
-		break;
-	case 0x057b:
-		Log.OutF(Logs::General, Logs::Headless_Client, "OP_SendMembershipDetails");
-		break;
 	case 0x00d2:
-		Log.OutF(Logs::General, Logs::Headless_Client, "OP_SendCharInfo");
+		WorldProcessCharacterSelect(p);
 		break;
 	default:
-		Log.OutF(Logs::General, Logs::Headless_Client, "Ignored packet: {0:#x}", opcode);
+		Log.OutF(Logs::General, Logs::Headless_Client, "Unhandled opcode: {0:#x}", opcode);
+		break;
 	}
 }
 
@@ -338,3 +311,40 @@ void EverQuest::WorldSendClientAuth()
 
 	m_world_connection->QueuePacket(p);
 }
+
+void EverQuest::WorldSendEnterWorld(const std::string &character)
+{
+	EQ::Net::DynamicPacket p;
+	p.PutUInt16(0, 0x578f);
+	p.PutString(2, character);
+	p.PutUInt32(66, 0);
+	p.PutUInt32(70, 0);
+
+	m_world_connection->QueuePacket(p);
+}
+
+void EverQuest::WorldProcessCharacterSelect(const EQ::Net::Packet &p)
+{
+	auto char_count = p.GetUInt32(2);
+	size_t idx = 6;
+
+	//Log.OutF(Logs::General, Logs::Headless_Client, "{0} characters", char_count);
+	for (uint32_t i = 0; i < char_count; ++i) {
+		auto name = p.GetCString(idx);
+		idx += name.length() + 1;
+
+		auto pclass = p.GetUInt8(idx);
+		auto prace = p.GetUInt32(idx + 1);
+		auto plevel = p.GetUInt8(idx + 5);
+
+		idx += 274;
+		if (m_character.compare(name) == 0) {
+			Log.OutF(Logs::General, Logs::Headless_Client, "Found {0}, would attempt to login here.", m_character);
+			WorldSendEnterWorld(m_character);
+			return;
+		}
+	}
+
+	Log.OutF(Logs::General, Logs::Headless_Client, "Could not find {0}, cannot continue to login.", m_character);
+}
+ 

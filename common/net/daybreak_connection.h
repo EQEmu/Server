@@ -222,7 +222,7 @@ namespace EQ
 				resend_delay_factor = 1.5;
 				stats_delay_ms = 9000;
 				connect_delay_ms = 250;
-				stale_connection_ms = 30000;
+				stale_connection_ms = 60000;
 				connect_stale_ms = 5000;
 				crc_length = 2;
 				max_packet_size = 512;

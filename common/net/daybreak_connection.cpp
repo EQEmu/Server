@@ -731,6 +731,8 @@ void EQ::Net::DaybreakConnection::ProcessDecodedPacket(const Packet &p)
 			InternalSend(out);
 			break;
 		}
+		case OP_SessionStatResponse:
+			break;
 		default:
 			Log.OutF(Logs::Detail, Logs::Netcode, "Unhandled opcode {0:#x}", p.GetInt8(1));
 			break;

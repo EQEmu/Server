@@ -54,6 +54,9 @@ private:
 	void WorldOnPacketRecv(std::shared_ptr<EQ::Net::DaybreakConnection> conn, const EQ::Net::Packet &p);
 
 	void WorldSendClientAuth();
+	void WorldSendEnterWorld(const std::string &character);
+
+	void WorldProcessCharacterSelect(const EQ::Net::Packet &p);
 
 	std::unique_ptr<EQ::Net::DaybreakConnectionManager> m_world_connection_manager;
 	std::shared_ptr<EQ::Net::DaybreakConnection> m_world_connection;
