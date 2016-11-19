@@ -25,116 +25,113 @@
 
 namespace EQEmu
 {
-	//class InventorySlot;
-	
 	namespace textures {
-		//enum : int { TextureInvalid = -1, TextureBegin };
-		enum : uint8 { TextureInvalid = 255, TextureBegin = 0 };
+		enum : int8 { textureInvalid = -1, textureBegin };
 
-		//enum TextureSlot : int {
-		enum TextureSlot : uint8 {
-			TextureHead = TextureBegin,
-			TextureChest,
-			TextureArms,
-			TextureWrist,
-			TextureHands,
-			TextureLegs,
-			TextureFeet,
-			TexturePrimary,
-			TextureSecondary,
-			TextureCount
+		enum TextureSlot : int8 {
+			armorHead = textureBegin,
+			armorChest,
+			armorArms,
+			armorWrist,
+			armorHands,
+			armorLegs,
+			armorFeet,
+			weaponPrimary,
+			weaponSecondary,
+			materialCount,
+			materialInvalid = textureInvalid
 		};
 
-		const int LastTexture = TextureSecondary;
-		const int LastTintableTexture = TextureFeet;
+		enum TintSlot : int8 {
+			tintHead = textureBegin,
+			tintChest,
+			tintArms,
+			tintWrist,
+			tintHands,
+			tintLegs,
+			tintFeet,
+			tintCount,
+			tintInvalid = textureInvalid
+		};
 
-		//extern int ConvertEquipmentSlotToTextureSlot(int equipment_slot);
-		//extern int ConvertEquipmentSlotToTextureSlot(const InventorySlot &equipment_slot);
-		//extern InventorySlot ConvertTextureSlotToEquipmentSlot(int texture_slot);
+		const int8 LastTexture = weaponSecondary;
+		const int8 LastTintableTexture = tintFeet;
+
+		struct Texture_Struct {
+			uint32 Material;
+			uint32 Unknown1;
+			uint32 EliteModel;
+			uint32 HerosForgeModel;
+			uint32 Unknown2; // same as material?
+		};
+
+		struct TextureMaterial_Struct {
+			uint32 Material;
+		};
+
+		struct Tint_Struct {
+			union {
+				struct {
+					uint8 Blue;
+					uint8 Green;
+					uint8 Red;
+					uint8 UseTint; // if there's a tint, this is FF
+				};
+				uint32 Color;
+			};
+		};
 
 	} /*textures*/
-
-	struct Texture_Struct {
-		uint32 Material;
-		uint32 Unknown1;
-		uint32 EliteMaterial;
-		uint32 HeroForgeModel;
-		uint32 Material2;	// Same as material?
-	};
 
 	struct TextureProfile {
 		union {
 			struct {
-				Texture_Struct Head;
-				Texture_Struct Chest;
-				Texture_Struct Arms;
-				Texture_Struct Wrist;
-				Texture_Struct Hands;
-				Texture_Struct Legs;
-				Texture_Struct Feet;
-				Texture_Struct Primary;
-				Texture_Struct Secondary;
+				textures::Texture_Struct Head;
+				textures::Texture_Struct Chest;
+				textures::Texture_Struct Arms;
+				textures::Texture_Struct Wrist;
+				textures::Texture_Struct Hands;
+				textures::Texture_Struct Legs;
+				textures::Texture_Struct Feet;
+				textures::Texture_Struct Primary;
+				textures::Texture_Struct Secondary;
 			};
-			Texture_Struct Slot[textures::TextureCount];
+			textures::Texture_Struct Slot[textures::materialCount];
 		};
-
-		TextureProfile();
 	};
 
-	struct TextureShort_Struct {
-		uint32 Material;
-	};
-
-	struct TextureShortProfile {
+	struct TextureMaterialProfile {
 		union {
 			struct {
-				TextureShort_Struct Head;
-				TextureShort_Struct Chest;
-				TextureShort_Struct Arms;
-				TextureShort_Struct Wrist;
-				TextureShort_Struct Hands;
-				TextureShort_Struct Legs;
-				TextureShort_Struct Feet;
-				TextureShort_Struct Primary;
-				TextureShort_Struct Secondary;
+				textures::TextureMaterial_Struct Head;
+				textures::TextureMaterial_Struct Chest;
+				textures::TextureMaterial_Struct Arms;
+				textures::TextureMaterial_Struct Wrist;
+				textures::TextureMaterial_Struct Hands;
+				textures::TextureMaterial_Struct Legs;
+				textures::TextureMaterial_Struct Feet;
+				textures::TextureMaterial_Struct Primary;
+				textures::TextureMaterial_Struct Secondary;
 			};
-			TextureShort_Struct Slot[textures::TextureCount];
+			textures::TextureMaterial_Struct Slot[textures::materialCount];
 		};
-
-		TextureShortProfile();
-	};
-
-	struct Tint_Struct {
-		union {
-			struct {
-				uint8 Blue;
-				uint8 Green;
-				uint8 Red;
-				uint8 UseTint;	// if there's a tint this is FF
-			};
-			uint32 Color;
-		};
-
-		//Tint_Struct();
 	};
 
 	struct TintProfile {
 		union {
 			struct {
-				Tint_Struct Head;
-				Tint_Struct Chest;
-				Tint_Struct Arms;
-				Tint_Struct Wrist;
-				Tint_Struct Hands;
-				Tint_Struct Legs;
-				Tint_Struct Feet;
-				Tint_Struct Primary;
-				Tint_Struct Secondary;
+				textures::Tint_Struct Head;
+				textures::Tint_Struct Chest;
+				textures::Tint_Struct Arms;
+				textures::Tint_Struct Wrist;
+				textures::Tint_Struct Hands;
+				textures::Tint_Struct Legs;
+				textures::Tint_Struct Feet;
+				textures::Tint_Struct Primary;
+				textures::Tint_Struct Secondary;
 			};
-			Tint_Struct Slot[textures::TextureCount];
+			textures::Tint_Struct Slot[textures::materialCount]; // materialCount is correct..but, {[weaponPrimary],[weaponSecondary]} are not tintable...
 		};
-
-		TintProfile();
 	};
 
 } /*EQEmu*/

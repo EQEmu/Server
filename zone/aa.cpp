@@ -423,7 +423,7 @@ void Mob::WakeTheDead(uint16 spell_id, Mob *target, uint32 duration)
 		uint32 sitem = 0;
 		sitem = CorpseToUse->GetWornItem(x);
 		if(sitem){
-			const EQEmu::ItemBase * itm = database.GetItem(sitem);
+			const EQEmu::ItemData * itm = database.GetItem(sitem);
 			npca->AddLootDrop(itm, &npca->itemlist, 1, 1, 255, true, true);
 		}
 	}
@@ -1181,6 +1181,11 @@ void Client::ActivateAlternateAdvancementAbility(int rank_id, int target_id) {
 
 	if (!IsCastWhileInvis(rank->spell))
 		CommonBreakInvisible();
+
+	if (spells[rank->spell].sneak && (!hidden || (hidden && (Timer::GetCurrentTime() - tmHidden) < 4000))) {
+		Message_StringID(MT_SpellFailure, SNEAK_RESTRICT);
+		return;
+	}
 	// Bards can cast instant cast AAs while they are casting another song
 	if(spells[rank->spell].cast_time == 0 && GetClass() == BARD && IsBardSong(casting_spell_id)) {
 		if(!SpellFinished(rank->spell, entity_list.GetMob(target_id), EQEmu::CastingSlot::AltAbility, spells[rank->spell].mana, -1, spells[rank->spell].ResistDiff, false)) {

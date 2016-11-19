@@ -2017,7 +2017,7 @@ void Client::ReadBook(BookRequest_Struct *book) {
 		out->window = book->window;
 		if (ClientVersion() >= EQEmu::versions::ClientVersion::SoF)
 		{
-			const ItemInst *inst = m_inv[book->invslot];
+			const EQEmu::ItemInstance *inst = m_inv[book->invslot];
 			if(inst)
 				out->type = inst->GetItem()->Book;
 			else
@@ -2549,7 +2549,7 @@ void Client::SetFeigned(bool in_feigned) {
 	feigned=in_feigned;
  }
 
-void Client::LogMerchant(Client* player, Mob* merchant, uint32 quantity, uint32 price, const EQEmu::ItemBase* item, bool buying)
+void Client::LogMerchant(Client* player, Mob* merchant, uint32 quantity, uint32 price, const EQEmu::ItemData* item, bool buying)
 {
 	if(!player || !merchant || !item)
 		return;
@@ -2796,11 +2796,11 @@ bool Client::BindWound(Mob *bindmob, bool start, bool fail)
 }
 
 void Client::SetMaterial(int16 in_slot, uint32 item_id) {
-	const EQEmu::ItemBase* item = database.GetItem(item_id);
+	const EQEmu::ItemData* item = database.GetItem(item_id);
 	if (item && item->IsClassCommon())
 	{
-		uint8 matslot = Inventory::CalcMaterialFromSlot(in_slot);
-		if (matslot != EQEmu::textures::TextureInvalid)
+		uint8 matslot = EQEmu::InventoryProfile::CalcMaterialFromSlot(in_slot);
+		if (matslot != EQEmu::textures::materialInvalid)
 		{
 			m_pp.item_material.Slot[matslot].Material = GetEquipmentMaterial(matslot);
 		}
@@ -3132,17 +3132,17 @@ void Client::Tell_StringID(uint32 string_id, const char *who, const char *messag
 }
 
 void Client::SetTint(int16 in_slot, uint32 color) {
-	EQEmu::Tint_Struct new_color;
+	EQEmu::textures::Tint_Struct new_color;
 	new_color.Color = color;
 	SetTint(in_slot, new_color);
 	database.SaveCharacterMaterialColor(this->CharacterID(), in_slot, color);
 }
 
 // Still need to reconcile bracer01 versus bracer02
-void Client::SetTint(int16 in_slot, EQEmu::Tint_Struct& color) {
+void Client::SetTint(int16 in_slot, EQEmu::textures::Tint_Struct& color) {
 
-	uint8 matslot = Inventory::CalcMaterialFromSlot(in_slot);
-	if (matslot != EQEmu::textures::TextureInvalid)
+	uint8 matslot = EQEmu::InventoryProfile::CalcMaterialFromSlot(in_slot);
+	if (matslot != EQEmu::textures::materialInvalid)
 	{
 		m_pp.item_tint.Slot[matslot].Color = color.Color;
 		database.SaveCharacterMaterialColor(this->CharacterID(), in_slot, color.Color);
@@ -3219,28 +3219,28 @@ void Client::LinkDead()
 uint8 Client::SlotConvert(uint8 slot,bool bracer){
 	uint8 slot2 = 0; // why are we returning MainCharm instead of INVALID_INDEX? (must be a pre-charm segment...)
 	if(bracer)
-		return EQEmu::legacy::SlotWrist2;
+		return EQEmu::inventory::slotWrist2;
 	switch(slot) {
-	case EQEmu::textures::TextureHead:
-		slot2 = EQEmu::legacy::SlotHead;
+	case EQEmu::textures::armorHead:
+		slot2 = EQEmu::inventory::slotHead;
 		break;
-	case EQEmu::textures::TextureChest:
-		slot2 = EQEmu::legacy::SlotChest;
+	case EQEmu::textures::armorChest:
+		slot2 = EQEmu::inventory::slotChest;
 		break;
-	case EQEmu::textures::TextureArms:
-		slot2 = EQEmu::legacy::SlotArms;
+	case EQEmu::textures::armorArms:
+		slot2 = EQEmu::inventory::slotArms;
 		break;
-	case EQEmu::textures::TextureWrist:
-		slot2 = EQEmu::legacy::SlotWrist1;
+	case EQEmu::textures::armorWrist:
+		slot2 = EQEmu::inventory::slotWrist1;
 		break;
-	case EQEmu::textures::TextureHands:
-		slot2 = EQEmu::legacy::SlotHands;
+	case EQEmu::textures::armorHands:
+		slot2 = EQEmu::inventory::slotHands;
 		break;
-	case EQEmu::textures::TextureLegs:
-		slot2 = EQEmu::legacy::SlotLegs;
+	case EQEmu::textures::armorLegs:
+		slot2 = EQEmu::inventory::slotLegs;
 		break;
-	case EQEmu::textures::TextureFeet:
-		slot2 = EQEmu::legacy::SlotFeet;
+	case EQEmu::textures::armorFeet:
+		slot2 = EQEmu::inventory::slotFeet;
 		break;
 	}
 	return slot2;
@@ -3249,26 +3249,26 @@ uint8 Client::SlotConvert(uint8 slot,bool bracer){
 uint8 Client::SlotConvert2(uint8 slot){
 	uint8 slot2 = 0; // same as above...
 	switch(slot){
-	case EQEmu::legacy::SlotHead:
-		slot2 = EQEmu::textures::TextureHead;
+	case EQEmu::inventory::slotHead:
+		slot2 = EQEmu::textures::armorHead;
 		break;
-	case EQEmu::legacy::SlotChest:
-		slot2 = EQEmu::textures::TextureChest;
+	case EQEmu::inventory::slotChest:
+		slot2 = EQEmu::textures::armorChest;
 		break;
-	case EQEmu::legacy::SlotArms:
-		slot2 = EQEmu::textures::TextureArms;
+	case EQEmu::inventory::slotArms:
+		slot2 = EQEmu::textures::armorArms;
 		break;
-	case EQEmu::legacy::SlotWrist1:
-		slot2 = EQEmu::textures::TextureWrist;
+	case EQEmu::inventory::slotWrist1:
+		slot2 = EQEmu::textures::armorWrist;
 		break;
-	case EQEmu::legacy::SlotHands:
-		slot2 = EQEmu::textures::TextureHands;
+	case EQEmu::inventory::slotHands:
+		slot2 = EQEmu::textures::armorHands;
 		break;
-	case EQEmu::legacy::SlotLegs:
-		slot2 = EQEmu::textures::TextureLegs;
+	case EQEmu::inventory::slotLegs:
+		slot2 = EQEmu::textures::armorLegs;
 		break;
-	case EQEmu::legacy::SlotFeet:
-		slot2 = EQEmu::textures::TextureFeet;
+	case EQEmu::inventory::slotFeet:
+		slot2 = EQEmu::textures::armorFeet;
 		break;
 	}
 	return slot2;
@@ -3839,7 +3839,7 @@ void Client::SendOPTranslocateConfirm(Mob *Caster, uint16 SpellID) {
 
 	return;
 }
-void Client::SendPickPocketResponse(Mob *from, uint32 amt, int type, const EQEmu::ItemBase* item){
+void Client::SendPickPocketResponse(Mob *from, uint32 amt, int type, const EQEmu::ItemData* item){
 	auto outapp = new EQApplicationPacket(OP_PickPocket, sizeof(sPickPocket_Struct));
 	sPickPocket_Struct *pick_out = (sPickPocket_Struct *)outapp->pBuffer;
 	pick_out->coin = amt;
@@ -4013,7 +4013,7 @@ bool Client::KeyRingCheck(uint32 item_id)
 void Client::KeyRingList()
 {
 	Message(4,"Keys on Keyring:");
-	const EQEmu::ItemBase *item = 0;
+	const EQEmu::ItemData *item = 0;
 	for (auto iter = keyring.begin(); iter != keyring.end(); ++iter) {
 		if ((item = database.GetItem(*iter))!=nullptr) {
 			Message(4,item->Name);
@@ -4268,14 +4268,14 @@ bool Client::GroupFollow(Client* inviter) {
 uint16 Client::GetPrimarySkillValue()
 {
 	EQEmu::skills::SkillType skill = EQEmu::skills::HIGHEST_SKILL; //because nullptr == 0, which is 1H Slashing, & we want it to return 0 from GetSkill
-	bool equiped = m_inv.GetItem(EQEmu::legacy::SlotPrimary);
+	bool equiped = m_inv.GetItem(EQEmu::inventory::slotPrimary);
 
 	if (!equiped)
 		skill = EQEmu::skills::SkillHandtoHand;
 
 	else {
 
-		uint8 type = m_inv.GetItem(EQEmu::legacy::SlotPrimary)->GetItem()->ItemType; //is this the best way to do this?
+		uint8 type = m_inv.GetItem(EQEmu::inventory::slotPrimary)->GetItem()->ItemType; //is this the best way to do this?
 
 		switch (type) {
 		case EQEmu::item::ItemType1HSlash: // 1H Slashing
@@ -5440,7 +5440,7 @@ bool Client::TryReward(uint32 claim_id)
 	uint32 free_slot = 0xFFFFFFFF;
 
 	for (int i = EQEmu::legacy::GENERAL_BEGIN; i <= EQEmu::legacy::GENERAL_END; ++i) {
-		ItemInst *item = GetInv().GetItem(i);
+		EQEmu::ItemInstance *item = GetInv().GetItem(i);
 		if (!item) {
 			free_slot = i;
 			break;
@@ -5486,7 +5486,7 @@ bool Client::TryReward(uint32 claim_id)
 	}
 
 	auto &ivr = (*iter);
-	ItemInst *claim = database.CreateItem(ivr.items[0].item_id, ivr.items[0].charges);
+	EQEmu::ItemInstance *claim = database.CreateItem(ivr.items[0].item_id, ivr.items[0].charges);
 	if (!claim) {
 		Save();
 		return true;
@@ -5496,7 +5496,7 @@ bool Client::TryReward(uint32 claim_id)
 
 	for (int y = 1; y < 8; y++)
 		if (ivr.items[y].item_id && claim->GetItem()->ItemClass == 1) {
-			ItemInst *item_temp = database.CreateItem(ivr.items[y].item_id, ivr.items[y].charges);
+			EQEmu::ItemInstance *item_temp = database.CreateItem(ivr.items[y].item_id, ivr.items[y].charges);
 			if (item_temp) {
 				if (CheckLoreConflict(item_temp->GetItem())) {
 					lore_conflict = true;
@@ -5756,8 +5756,8 @@ void Client::ProcessInspectRequest(Client* requestee, Client* requester) {
 		insr->TargetID = requester->GetID();
 		insr->playerid = requestee->GetID();
 
-		const EQEmu::ItemBase* item = nullptr;
-		const ItemInst* inst = nullptr;
+		const EQEmu::ItemData* item = nullptr;
+		const EQEmu::ItemInstance* inst = nullptr;
 		int ornamentationAugtype = RuleI(Character, OrnamentationAugmentType);
 		for(int16 L = 0; L <= 20; L++) {
 			inst = requestee->GetInv().GetItem(L);
@@ -5768,7 +5768,7 @@ void Client::ProcessInspectRequest(Client* requestee, Client* requester) {
 					strcpy(insr->itemnames[L], item->Name);
 					if (inst && inst->GetOrnamentationAug(ornamentationAugtype))
 					{
-						const EQEmu::ItemBase *aug_item = inst->GetOrnamentationAug(ornamentationAugtype)->GetItem();
+						const EQEmu::ItemData *aug_item = inst->GetOrnamentationAug(ornamentationAugtype)->GetItem();
 						insr->itemicons[L] = aug_item->Icon;
 					}
 					else if (inst && inst->GetOrnamentationIcon())
@@ -5785,7 +5785,7 @@ void Client::ProcessInspectRequest(Client* requestee, Client* requester) {
 			}
 		}
 
-		inst = requestee->GetInv().GetItem(EQEmu::legacy::SlotPowerSource);
+		inst = requestee->GetInv().GetItem(EQEmu::inventory::slotPowerSource);
 
 		if(inst) {
 			item = inst->GetItem();
@@ -5799,7 +5799,7 @@ void Client::ProcessInspectRequest(Client* requestee, Client* requester) {
 				insr->itemicons[SoF::invslot::PossessionsPowerSource] = 0xFFFFFFFF;
 		}
 
-		inst = requestee->GetInv().GetItem(EQEmu::legacy::SlotAmmo);
+		inst = requestee->GetInv().GetItem(EQEmu::inventory::slotAmmo);
 
 		if(inst) {
 			item = inst->GetItem();
@@ -6341,8 +6341,8 @@ void Client::Doppelganger(uint16 spell_id, Mob *target, const char *name_overrid
 	made_npc->Corrup = GetCorrup();
 	made_npc->PhR = GetPhR();
 	// looks
-	made_npc->texture = GetEquipmentMaterial(EQEmu::textures::TextureChest);
-	made_npc->helmtexture = GetEquipmentMaterial(EQEmu::textures::TextureHead);
+	made_npc->texture = GetEquipmentMaterial(EQEmu::textures::armorChest);
+	made_npc->helmtexture = GetEquipmentMaterial(EQEmu::textures::armorHead);
 	made_npc->haircolor = GetHairColor();
 	made_npc->beardcolor = GetBeardColor();
 	made_npc->eyecolor1 = GetEyeColor1();
@@ -6353,9 +6353,9 @@ void Client::Doppelganger(uint16 spell_id, Mob *target, const char *name_overrid
 	made_npc->drakkin_heritage = GetDrakkinHeritage();
 	made_npc->drakkin_tattoo = GetDrakkinTattoo();
 	made_npc->drakkin_details = GetDrakkinDetails();
-	made_npc->d_melee_texture1 = GetEquipmentMaterial(EQEmu::textures::TexturePrimary);
-	made_npc->d_melee_texture2 = GetEquipmentMaterial(EQEmu::textures::TextureSecondary);
-	for (int i = EQEmu::textures::TextureBegin; i <= EQEmu::textures::LastTexture; i++)	{
+	made_npc->d_melee_texture1 = GetEquipmentMaterial(EQEmu::textures::weaponPrimary);
+	made_npc->d_melee_texture2 = GetEquipmentMaterial(EQEmu::textures::weaponSecondary);
+	for (int i = EQEmu::textures::textureBegin; i <= EQEmu::textures::LastTexture; i++)	{
 		made_npc->armor_tint.Slot[i].Color = GetEquipmentColor(i);
 	}
 	made_npc->loottable_id = 0;
@@ -6949,7 +6949,7 @@ void Client::SendAltCurrencies() {
 		uint32 i = 0;
 		auto iter = zone->AlternateCurrencies.begin();
 		while(iter != zone->AlternateCurrencies.end()) {
-			const EQEmu::ItemBase* item = database.GetItem((*iter).item_id);
+			const EQEmu::ItemData* item = database.GetItem((*iter).item_id);
 			altc->entries[i].currency_number = (*iter).id;
 			altc->entries[i].unknown00 = 1;
 			altc->entries[i].currency_number2 = (*iter).id;
@@ -7272,7 +7272,8 @@ void Client::SendXTargetUpdates()
 	for (int i = 0; i < GetMaxXTargets(); ++i) {
 		if (XTargets[i].dirty) {
 			outapp->WriteUInt32(i);
-			outapp->WriteUInt8(0); // no idea what this is
+			// MQ2 checks this for valid mobs, so 0 is bad here at least ...
+			outapp->WriteUInt8(XTargets[i].ID ? 1 : 0);
 			outapp->WriteUInt32(XTargets[i].ID);
 			outapp->WriteString(XTargets[i].Name);
 			count++;
@@ -7604,7 +7605,7 @@ void Client::DuplicateLoreMessage(uint32 ItemID)
 		return;
 	}
 
-	const EQEmu::ItemBase *item = database.GetItem(ItemID);
+	const EQEmu::ItemData *item = database.GetItem(ItemID);
 
 	if(!item)
 		return;
@@ -8061,7 +8062,7 @@ void Client::TickItemCheck()
 		TryItemTick(i);
 	}
 	//Scan main inventory + cursor
-	for (i = EQEmu::legacy::GENERAL_BEGIN; i <= EQEmu::legacy::SlotCursor; i++)
+	for (i = EQEmu::legacy::GENERAL_BEGIN; i <= EQEmu::inventory::slotCursor; i++)
 	{
 		TryItemTick(i);
 	}
@@ -8075,7 +8076,7 @@ void Client::TickItemCheck()
 void Client::TryItemTick(int slot)
 {
 	int iid = 0;
-	const ItemInst* inst = m_inv[slot];
+	const EQEmu::ItemInstance* inst = m_inv[slot];
 	if(inst == 0) { return; }
 
 	iid = inst->GetID();
@@ -8084,7 +8085,7 @@ void Client::TryItemTick(int slot)
 	{
 		if (GetLevel() >= zone->tick_items[iid].level && zone->random.Int(0, 100) >= (100 - zone->tick_items[iid].chance) && (zone->tick_items[iid].bagslot || slot <= EQEmu::legacy::EQUIPMENT_END))
 		{
-			ItemInst* e_inst = (ItemInst*)inst;
+			EQEmu::ItemInstance* e_inst = (EQEmu::ItemInstance*)inst;
 			parse->EventItem(EVENT_ITEM_TICK, this, e_inst, nullptr, "", slot);
 		}
 	}
@@ -8092,9 +8093,9 @@ void Client::TryItemTick(int slot)
 	//Only look at augs in main inventory
 	if (slot > EQEmu::legacy::EQUIPMENT_END) { return; }
 
-	for (int x = AUG_INDEX_BEGIN; x < EQEmu::legacy::ITEM_COMMON_SIZE; ++x)
+	for (int x = EQEmu::inventory::socketBegin; x < EQEmu::inventory::SocketCount; ++x)
 	{
-		ItemInst * a_inst = inst->GetAugment(x);
+		EQEmu::ItemInstance * a_inst = inst->GetAugment(x);
 		if(!a_inst) { continue; }
 
 		iid = a_inst->GetID();
@@ -8103,7 +8104,7 @@ void Client::TryItemTick(int slot)
 		{
 			if( GetLevel() >= zone->tick_items[iid].level && zone->random.Int(0, 100) >= (100 - zone->tick_items[iid].chance) )
 			{
-				ItemInst* e_inst = (ItemInst*)a_inst;
+				EQEmu::ItemInstance* e_inst = (EQEmu::ItemInstance*)a_inst;
 				parse->EventItem(EVENT_ITEM_TICK, this, e_inst, nullptr, "", slot);
 			}
 		}
@@ -8118,7 +8119,7 @@ void Client::ItemTimerCheck()
 		TryItemTimer(i);
 	}
 
-	for (i = EQEmu::legacy::GENERAL_BEGIN; i <= EQEmu::legacy::SlotCursor; i++)
+	for (i = EQEmu::legacy::GENERAL_BEGIN; i <= EQEmu::inventory::slotCursor; i++)
 	{
 		TryItemTimer(i);
 	}
@@ -8131,7 +8132,7 @@ void Client::ItemTimerCheck()
 
 void Client::TryItemTimer(int slot)
 {
-	ItemInst* inst = m_inv.GetItem(slot);
+	EQEmu::ItemInstance* inst = m_inv.GetItem(slot);
 	if(!inst) {
 		return;
 	}
@@ -8149,9 +8150,9 @@ void Client::TryItemTimer(int slot)
 		return;
 	}
 
-	for (int x = AUG_INDEX_BEGIN; x < EQEmu::legacy::ITEM_COMMON_SIZE; ++x)
+	for (int x = EQEmu::inventory::socketBegin; x < EQEmu::inventory::SocketCount; ++x)
 	{
-		ItemInst * a_inst = inst->GetAugment(x);
+		EQEmu::ItemInstance * a_inst = inst->GetAugment(x);
 		if(!a_inst) {
 			continue;
 		}
@@ -8167,7 +8168,7 @@ void Client::TryItemTimer(int slot)
 	}
 }
 
-void Client::SendItemScale(ItemInst *inst) {
+void Client::SendItemScale(EQEmu::ItemInstance *inst) {
 	int slot = m_inv.GetSlotByItemInst(inst);
 	if(slot != -1) {
 		inst->ScaleItem();
@@ -8321,7 +8322,7 @@ void Client::SetConsumption(int32 in_hunger, int32 in_thirst)
 	safe_delete(outapp);
 }
 
-void Client::Consume(const EQEmu::ItemBase *item, uint8 type, int16 slot, bool auto_consume)
+void Client::Consume(const EQEmu::ItemData *item, uint8 type, int16 slot, bool auto_consume)
 {
    if(!item) { return; }
 
@@ -8436,7 +8437,7 @@ void Client::ShowNumHits()
 
 int Client::GetQuiverHaste(int delay)
 {
-	const ItemInst *pi = nullptr;
+	const EQEmu::ItemInstance *pi = nullptr;
 	for (int r = EQEmu::legacy::GENERAL_BEGIN; r <= EQEmu::legacy::GENERAL_END; r++) {
 		pi = GetInv().GetItem(r);
 		if (pi && pi->IsClassBag() && pi->GetItem()->BagType == EQEmu::item::BagTypeQuiver &&
@@ -8482,7 +8483,7 @@ void Client::QuestReward(Mob* target, uint32 copper, uint32 silver, uint32 gold,
 		AddMoneyToPP(copper, silver, gold, platinum, false);
 
 	if (itemid > 0)
-		SummonItem(itemid, 0, 0, 0, 0, 0, 0, false, EQEmu::legacy::SlotPowerSource);
+		SummonItem(itemid, 0, 0, 0, 0, 0, 0, false, EQEmu::inventory::slotPowerSource);
 
 	if (faction)
 	{

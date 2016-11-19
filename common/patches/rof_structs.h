@@ -190,7 +190,7 @@ struct TintProfile
 			Tint_Struct Primary;
 			Tint_Struct Secondary;
 		};
-		Tint_Struct Slot[EQEmu::textures::TextureCount];
+		Tint_Struct Slot[EQEmu::textures::materialCount];
 	};
 };
 
@@ -2450,7 +2450,7 @@ struct AdventureLeaderboard_Struct
 /*struct Item_Shop_Struct {
 	uint16 merchantid;
 	uint8 itemtype;
-	ItemBase item;
+	ItemData item;
 	uint8 iss_unknown001[6];
 };*/
 

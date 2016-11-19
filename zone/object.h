@@ -29,7 +29,11 @@
 
 class Client;
 class EQApplicationPacket;
-class ItemInst;
+
+namespace EQEmu
+{
+	class ItemInstance;
+}
 
 /*
 item icon numbers (showeq)
@@ -89,11 +93,11 @@ class Object: public Entity
 {
 public:
 	// Loading object from database
-	Object(uint32 id, uint32 type, uint32 icon, const Object_Struct& data, const ItemInst* inst);
-	Object(const ItemInst* inst, char* name,float max_x,float min_x,float max_y,float min_y,float z,float heading,uint32 respawntimer);
+	Object(uint32 id, uint32 type, uint32 icon, const Object_Struct& data, const EQEmu::ItemInstance* inst);
+	Object(const EQEmu::ItemInstance* inst, char* name,float max_x,float min_x,float max_y,float min_y,float z,float heading,uint32 respawntimer);
 	// Loading object from client dropping item on ground
-	Object(Client* client, const ItemInst* inst);
-	Object(const ItemInst *inst, float x, float y, float z, float heading, uint32 decay_time = 300000);
+	Object(Client* client, const EQEmu::ItemInstance* inst);
+	Object(const EQEmu::ItemInstance *inst, float x, float y, float z, float heading, uint32 decay_time = 300000);
 	Object(const char *model, float x, float y, float z, float heading, uint8 type, uint32 decay_time = 0);
 
 	// Destructor
@@ -120,10 +124,10 @@ public:
 	void StartDecay() {decay_timer.Start();}
 
 	// Container functions
-	const ItemInst* GetItem(uint8 index);
-	void PutItem(uint8 index, const ItemInst* inst);
+	const EQEmu::ItemInstance* GetItem(uint8 index);
+	void PutItem(uint8 index, const EQEmu::ItemInstance* inst);
 	void DeleteItem(uint8 index); // Item inside container
-	ItemInst* PopItem(uint8 index); // Pop item out of container
+	EQEmu::ItemInstance* PopItem(uint8 index); // Pop item out of container
 
 	// Override base class implementations
 	virtual bool IsObject()	const { return true; }
@@ -176,7 +180,7 @@ protected:
 	void	RandomSpawn(bool send_packet = false);		//spawn this ground spawn at a random place
 
 	Object_Struct	m_data;		// Packet data
-	ItemInst*		m_inst;		// Item representing object
+	EQEmu::ItemInstance*		m_inst;		// Item representing object
 	bool			m_inuse;	// Currently in use by a client?
 	uint32			m_id;		// Database key, different than drop_id
 	uint32			m_type;		// Object Type, ie, forge, oven, dropped item, etc (ref: ContainerUseTypes)

@@ -1762,43 +1762,43 @@ luabind::scope lua_register_slot() {
 	return luabind::class_<Slots>("Slot")
 		.enum_("constants")
 		[
-			luabind::value("Charm", static_cast<int>(EQEmu::legacy::SlotCharm)),
-			luabind::value("Ear1", static_cast<int>(EQEmu::legacy::SlotEar1)),
-			luabind::value("Head", static_cast<int>(EQEmu::legacy::SlotHead)),
-			luabind::value("Face", static_cast<int>(EQEmu::legacy::SlotFace)),
-			luabind::value("Ear2", static_cast<int>(EQEmu::legacy::SlotEar2)),
-			luabind::value("Neck", static_cast<int>(EQEmu::legacy::SlotNeck)),
-			luabind::value("Shoulder", static_cast<int>(EQEmu::legacy::SlotShoulders)), // deprecated
-			luabind::value("Shoulders", static_cast<int>(EQEmu::legacy::SlotShoulders)),
-			luabind::value("Arms", static_cast<int>(EQEmu::legacy::SlotArms)),
-			luabind::value("Back", static_cast<int>(EQEmu::legacy::SlotBack)),
-			luabind::value("Bracer1", static_cast<int>(EQEmu::legacy::SlotWrist1)), // deprecated
-			luabind::value("Wrist1", static_cast<int>(EQEmu::legacy::SlotWrist1)),
-			luabind::value("Bracer2", static_cast<int>(EQEmu::legacy::SlotWrist2)), // deprecated
-			luabind::value("Wrist2", static_cast<int>(EQEmu::legacy::SlotWrist2)),
-			luabind::value("Range", static_cast<int>(EQEmu::legacy::SlotRange)),
-			luabind::value("Hands", static_cast<int>(EQEmu::legacy::SlotHands)),
-			luabind::value("Primary", static_cast<int>(EQEmu::legacy::SlotPrimary)),
-			luabind::value("Secondary", static_cast<int>(EQEmu::legacy::SlotSecondary)),
-			luabind::value("Ring1", static_cast<int>(EQEmu::legacy::SlotFinger1)), // deprecated
-			luabind::value("Finger1", static_cast<int>(EQEmu::legacy::SlotFinger1)),
-			luabind::value("Ring2", static_cast<int>(EQEmu::legacy::SlotFinger2)), // deprecated
-			luabind::value("Finger2", static_cast<int>(EQEmu::legacy::SlotFinger2)),
-			luabind::value("Chest", static_cast<int>(EQEmu::legacy::SlotChest)),
-			luabind::value("Legs", static_cast<int>(EQEmu::legacy::SlotLegs)),
-			luabind::value("Feet", static_cast<int>(EQEmu::legacy::SlotFeet)),
-			luabind::value("Waist", static_cast<int>(EQEmu::legacy::SlotWaist)),
-			luabind::value("PowerSource", static_cast<int>(EQEmu::legacy::SlotPowerSource)),
-			luabind::value("Ammo", static_cast<int>(EQEmu::legacy::SlotAmmo)),
-			luabind::value("General1", static_cast<int>(EQEmu::legacy::SlotGeneral1)),
-			luabind::value("General2", static_cast<int>(EQEmu::legacy::SlotGeneral2)),
-			luabind::value("General3", static_cast<int>(EQEmu::legacy::SlotGeneral3)),
-			luabind::value("General4", static_cast<int>(EQEmu::legacy::SlotGeneral4)),
-			luabind::value("General5", static_cast<int>(EQEmu::legacy::SlotGeneral5)),
-			luabind::value("General6", static_cast<int>(EQEmu::legacy::SlotGeneral6)),
-			luabind::value("General7", static_cast<int>(EQEmu::legacy::SlotGeneral7)),
-			luabind::value("General8", static_cast<int>(EQEmu::legacy::SlotGeneral8)),
-			luabind::value("Cursor", static_cast<int>(EQEmu::legacy::SlotCursor)),
+			luabind::value("Charm", static_cast<int>(EQEmu::inventory::slotCharm)),
+			luabind::value("Ear1", static_cast<int>(EQEmu::inventory::slotEar1)),
+			luabind::value("Head", static_cast<int>(EQEmu::inventory::slotHead)),
+			luabind::value("Face", static_cast<int>(EQEmu::inventory::slotFace)),
+			luabind::value("Ear2", static_cast<int>(EQEmu::inventory::slotEar2)),
+			luabind::value("Neck", static_cast<int>(EQEmu::inventory::slotNeck)),
+			luabind::value("Shoulder", static_cast<int>(EQEmu::inventory::slotShoulders)), // deprecated
+			luabind::value("Shoulders", static_cast<int>(EQEmu::inventory::slotShoulders)),
+			luabind::value("Arms", static_cast<int>(EQEmu::inventory::slotArms)),
+			luabind::value("Back", static_cast<int>(EQEmu::inventory::slotBack)),
+			luabind::value("Bracer1", static_cast<int>(EQEmu::inventory::slotWrist1)), // deprecated
+			luabind::value("Wrist1", static_cast<int>(EQEmu::inventory::slotWrist1)),
+			luabind::value("Bracer2", static_cast<int>(EQEmu::inventory::slotWrist2)), // deprecated
+			luabind::value("Wrist2", static_cast<int>(EQEmu::inventory::slotWrist2)),
+			luabind::value("Range", static_cast<int>(EQEmu::inventory::slotRange)),
+			luabind::value("Hands", static_cast<int>(EQEmu::inventory::slotHands)),
+			luabind::value("Primary", static_cast<int>(EQEmu::inventory::slotPrimary)),
+			luabind::value("Secondary", static_cast<int>(EQEmu::inventory::slotSecondary)),
+			luabind::value("Ring1", static_cast<int>(EQEmu::inventory::slotFinger1)), // deprecated
+			luabind::value("Finger1", static_cast<int>(EQEmu::inventory::slotFinger1)),
+			luabind::value("Ring2", static_cast<int>(EQEmu::inventory::slotFinger2)), // deprecated
+			luabind::value("Finger2", static_cast<int>(EQEmu::inventory::slotFinger2)),
+			luabind::value("Chest", static_cast<int>(EQEmu::inventory::slotChest)),
+			luabind::value("Legs", static_cast<int>(EQEmu::inventory::slotLegs)),
+			luabind::value("Feet", static_cast<int>(EQEmu::inventory::slotFeet)),
+			luabind::value("Waist", static_cast<int>(EQEmu::inventory::slotWaist)),
+			luabind::value("PowerSource", static_cast<int>(EQEmu::inventory::slotPowerSource)),
+			luabind::value("Ammo", static_cast<int>(EQEmu::inventory::slotAmmo)),
+			luabind::value("General1", static_cast<int>(EQEmu::inventory::slotGeneral1)),
+			luabind::value("General2", static_cast<int>(EQEmu::inventory::slotGeneral2)),
+			luabind::value("General3", static_cast<int>(EQEmu::inventory::slotGeneral3)),
+			luabind::value("General4", static_cast<int>(EQEmu::inventory::slotGeneral4)),
+			luabind::value("General5", static_cast<int>(EQEmu::inventory::slotGeneral5)),
+			luabind::value("General6", static_cast<int>(EQEmu::inventory::slotGeneral6)),
+			luabind::value("General7", static_cast<int>(EQEmu::inventory::slotGeneral7)),
+			luabind::value("General8", static_cast<int>(EQEmu::inventory::slotGeneral8)),
+			luabind::value("Cursor", static_cast<int>(EQEmu::inventory::slotCursor)),
 			luabind::value("PersonalBegin", static_cast<int>(EQEmu::legacy::GENERAL_BEGIN)), // deprecated
 			luabind::value("GeneralBegin", static_cast<int>(EQEmu::legacy::GENERAL_BEGIN)),
 			luabind::value("PersonalEnd", static_cast<int>(EQEmu::legacy::GENERAL_END)), // deprecated
@@ -1814,19 +1814,19 @@ luabind::scope lua_register_material() {
 	return luabind::class_<Materials>("Material")
 		.enum_("constants")
 		[
-			luabind::value("Head", static_cast<int>(EQEmu::textures::TextureHead)),
-			luabind::value("Chest", static_cast<int>(EQEmu::textures::TextureChest)),
-			luabind::value("Arms", static_cast<int>(EQEmu::textures::TextureArms)),
-			luabind::value("Bracer", static_cast<int>(EQEmu::textures::TextureWrist)), // deprecated
-			luabind::value("Wrist", static_cast<int>(EQEmu::textures::TextureWrist)),
-			luabind::value("Hands", static_cast<int>(EQEmu::textures::TextureHands)),
-			luabind::value("Legs", static_cast<int>(EQEmu::textures::TextureLegs)),
-			luabind::value("Feet", static_cast<int>(EQEmu::textures::TextureFeet)),
-			luabind::value("Primary", static_cast<int>(EQEmu::textures::TexturePrimary)),
-			luabind::value("Secondary", static_cast<int>(EQEmu::textures::TextureSecondary)),
-			luabind::value("Max", static_cast<int>(EQEmu::textures::TextureCount)), // deprecated
-			luabind::value("Count", static_cast<int>(EQEmu::textures::TextureCount)),
-			luabind::value("Invalid", static_cast<int>(EQEmu::textures::TextureInvalid))
+			luabind::value("Head", static_cast<int>(EQEmu::textures::armorHead)),
+			luabind::value("Chest", static_cast<int>(EQEmu::textures::armorChest)),
+			luabind::value("Arms", static_cast<int>(EQEmu::textures::armorArms)),
+			luabind::value("Bracer", static_cast<int>(EQEmu::textures::armorWrist)), // deprecated
+			luabind::value("Wrist", static_cast<int>(EQEmu::textures::armorWrist)),
+			luabind::value("Hands", static_cast<int>(EQEmu::textures::armorHands)),
+			luabind::value("Legs", static_cast<int>(EQEmu::textures::armorLegs)),
+			luabind::value("Feet", static_cast<int>(EQEmu::textures::armorFeet)),
+			luabind::value("Primary", static_cast<int>(EQEmu::textures::weaponPrimary)),
+			luabind::value("Secondary", static_cast<int>(EQEmu::textures::weaponSecondary)),
+			luabind::value("Max", static_cast<int>(EQEmu::textures::materialCount)), // deprecated
+			luabind::value("Count", static_cast<int>(EQEmu::textures::materialCount)),
+			luabind::value("Invalid", static_cast<int>(EQEmu::textures::materialInvalid))
 		];
 }
 

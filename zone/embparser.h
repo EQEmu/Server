@@ -17,7 +17,7 @@
 */
 
 #ifndef EQEMU_EMBPARSER_H
-#define EQMEU_EMBPARSER_H
+#define EQEMU_EMBPARSER_H
 #ifdef EMBPERL
 
 #include "quest_parser_collection.h"
@@ -27,10 +27,14 @@
 #include <map>
 #include "embperl.h"
 
-class ItemInst;
 class Mob;
 class Client;
 class NPC;
+
+namespace EQEmu
+{
+	class ItemInstance;
+}
 
 typedef enum 
 {
@@ -52,7 +56,7 @@ public:
 		std::vector<EQEmu::Any> *extra_pointers);
 	virtual int EventGlobalPlayer(QuestEventID evt, Client *client, std::string data, uint32 extra_data,
 		std::vector<EQEmu::Any> *extra_pointers);
-	virtual int EventItem(QuestEventID evt, Client *client, ItemInst *item, Mob *mob, std::string data, uint32 extra_data,
+	virtual int EventItem(QuestEventID evt, Client *client, EQEmu::ItemInstance *item, Mob *mob, std::string data, uint32 extra_data,
 		std::vector<EQEmu::Any> *extra_pointers);
 	virtual int EventSpell(QuestEventID evt, NPC* npc, Client *client, uint32 spell_id, uint32 extra_data,
 		std::vector<EQEmu::Any> *extra_pointers);
@@ -62,13 +66,13 @@ public:
 	virtual bool PlayerHasQuestSub(QuestEventID evt);
 	virtual bool GlobalPlayerHasQuestSub(QuestEventID evt);
 	virtual bool SpellHasQuestSub(uint32 spell_id, QuestEventID evt);
-	virtual bool ItemHasQuestSub(ItemInst *itm, QuestEventID evt);
+	virtual bool ItemHasQuestSub(EQEmu::ItemInstance *itm, QuestEventID evt);
 
 	virtual void LoadNPCScript(std::string filename, int npc_id);
 	virtual void LoadGlobalNPCScript(std::string filename);
 	virtual void LoadPlayerScript(std::string filename);
 	virtual void LoadGlobalPlayerScript(std::string filename);
-	virtual void LoadItemScript(std::string filename, ItemInst *item);
+	virtual void LoadItemScript(std::string filename, EQEmu::ItemInstance *item);
 	virtual void LoadSpellScript(std::string filename, uint32 spell_id);
 
 	virtual void AddVar(std::string name, std::string val);
@@ -86,16 +90,16 @@ private:
 	void ExportVar(const char *pkgprefix, const char *varname, float value);
 	void ExportVarComplex(const char *pkgprefix, const char *varname, const char *value);
 
-	int EventCommon(QuestEventID event, uint32 objid, const char * data, NPC* npcmob, ItemInst* iteminst, Mob* mob, 
+	int EventCommon(QuestEventID event, uint32 objid, const char * data, NPC* npcmob, EQEmu::ItemInstance* item_inst, Mob* mob, 
 		uint32 extradata, bool global, std::vector<EQEmu::Any> *extra_pointers);
-	int SendCommands(const char *pkgprefix, const char *event, uint32 npcid, Mob* other, Mob* mob, ItemInst *iteminst);
+	int SendCommands(const char *pkgprefix, const char *event, uint32 npcid, Mob* other, Mob* mob, EQEmu::ItemInstance *item_inst);
 	void MapFunctions();
 
 	void GetQuestTypes(bool &isPlayerQuest, bool &isGlobalPlayerQuest, bool &isGlobalNPC, bool &isItemQuest, 
-		bool &isSpellQuest, QuestEventID event, NPC* npcmob, ItemInst* iteminst, Mob* mob, bool global);
+		bool &isSpellQuest, QuestEventID event, NPC* npcmob, EQEmu::ItemInstance* item_inst, Mob* mob, bool global);
 	void GetQuestPackageName(bool &isPlayerQuest, bool &isGlobalPlayerQuest, bool &isGlobalNPC, bool &isItemQuest, 
 		bool &isSpellQuest, std::string &package_name, QuestEventID event, uint32 objid, const char * data, 
-		NPC* npcmob, ItemInst* iteminst, bool global);
+		NPC* npcmob, EQEmu::ItemInstance* item_inst, bool global);
 	void ExportCharID(const std::string &package_name, int &char_id, NPC *npcmob, Mob *mob);
 	void ExportQGlobals(bool isPlayerQuest, bool isGlobalPlayerQuest, bool isGlobalNPC, bool isItemQuest, 
 		bool isSpellQuest, std::string &package_name, NPC *npcmob, Mob *mob, int char_id);
@@ -104,7 +108,7 @@ private:
 	void ExportZoneVariables(std::string &package_name);
 	void ExportItemVariables(std::string &package_name, Mob *mob);
 	void ExportEventVariables(std::string &package_name, QuestEventID event, uint32 objid, const char * data, 
-		NPC* npcmob, ItemInst* iteminst, Mob* mob, uint32 extradata, std::vector<EQEmu::Any> *extra_pointers);
+		NPC* npcmob, EQEmu::ItemInstance* item_inst, Mob* mob, uint32 extradata, std::vector<EQEmu::Any> *extra_pointers);
 	
 	std::map<uint32, PerlQuestStatus> npc_quest_status_;
 	PerlQuestStatus global_npc_quest_status_;

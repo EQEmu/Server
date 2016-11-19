@@ -1023,7 +1023,7 @@ bool BotDatabase::QueryInventoryCount(const uint32 bot_id, uint32& item_count)
 	return true;
 }
 
-bool BotDatabase::LoadItems(const uint32 bot_id, Inventory& inventory_inst)
+bool BotDatabase::LoadItems(const uint32 bot_id, EQEmu::InventoryProfile& inventory_inst)
 {
 	if (!bot_id)
 		return false;
@@ -1058,13 +1058,13 @@ bool BotDatabase::LoadItems(const uint32 bot_id, Inventory& inventory_inst)
 	
 	for (auto row = results.begin(); row != results.end(); ++row) {
 		int16 slot_id = atoi(row[0]);
-		if ((slot_id < EQEmu::legacy::EQUIPMENT_BEGIN || slot_id > EQEmu::legacy::EQUIPMENT_END) && slot_id != EQEmu::legacy::SlotPowerSource)
+		if ((slot_id < EQEmu::legacy::EQUIPMENT_BEGIN || slot_id > EQEmu::legacy::EQUIPMENT_END) && slot_id != EQEmu::inventory::slotPowerSource)
 			continue;
 
 		uint32 item_id = atoi(row[1]);
 		uint16 item_charges = (uint16)atoi(row[2]);
 
-		ItemInst* item_inst = database.CreateItem(
+		EQEmu::ItemInstance* item_inst = database.CreateItem(
 			item_id,
 			item_charges,
 			(uint32)atoul(row[9]),
@@ -1093,7 +1093,7 @@ bool BotDatabase::LoadItems(const uint32 bot_id, Inventory& inventory_inst)
 		if (item_inst->GetItem()->Attuneable) {
 			if (atoi(row[4]))
 				item_inst->SetAttuned(true);
-			else if (((slot_id >= EQEmu::legacy::EQUIPMENT_BEGIN) && (slot_id <= EQEmu::legacy::EQUIPMENT_END) || slot_id == EQEmu::legacy::SlotPowerSource))
+			else if (((slot_id >= EQEmu::legacy::EQUIPMENT_BEGIN) && (slot_id <= EQEmu::legacy::EQUIPMENT_END) || slot_id == EQEmu::inventory::slotPowerSource))
 				item_inst->SetAttuned(true);
 		}
 
@@ -1161,7 +1161,7 @@ bool BotDatabase::LoadItemBySlot(Bot* bot_inst)
 
 bool BotDatabase::LoadItemBySlot(const uint32 bot_id, const uint32 slot_id, uint32& item_id)
 {
-	if (!bot_id || (slot_id > EQEmu::legacy::EQUIPMENT_END && slot_id != EQEmu::legacy::SlotPowerSource))
+	if (!bot_id || (slot_id > EQEmu::legacy::EQUIPMENT_END && slot_id != EQEmu::inventory::slotPowerSource))
 		return false;
 	
 	query = StringFormat("SELECT `item_id` FROM `bot_inventories` WHERE `bot_id` = '%i' AND `slot_id` = '%i' LIMIT 1", bot_id, slot_id);
@@ -1177,9 +1177,9 @@ bool BotDatabase::LoadItemBySlot(const uint32 bot_id, const uint32 slot_id, uint
 	return true;
 }
 
-bool BotDatabase::SaveItemBySlot(Bot* bot_inst, const uint32 slot_id, const ItemInst* item_inst)
+bool BotDatabase::SaveItemBySlot(Bot* bot_inst, const uint32 slot_id, const EQEmu::ItemInstance* item_inst)
 {
-	if (!bot_inst || !bot_inst->GetBotID() || (slot_id > EQEmu::legacy::EQUIPMENT_END && slot_id != EQEmu::legacy::SlotPowerSource))
+	if (!bot_inst || !bot_inst->GetBotID() || (slot_id > EQEmu::legacy::EQUIPMENT_END && slot_id != EQEmu::inventory::slotPowerSource))
 		return false;
 
 	if (!DeleteItemBySlot(bot_inst->GetBotID(), slot_id))
@@ -1188,8 +1188,8 @@ bool BotDatabase::SaveItemBySlot(Bot* bot_inst, const uint32 slot_id, const Item
 	if (!item_inst || !item_inst->GetID())
 		return true;
 	
-	uint32 augment_id[] = { 0, 0, 0, 0, 0, 0 };
-	for (int augment_iter = 0; augment_iter < EQEmu::legacy::ITEM_COMMON_SIZE; ++augment_iter)
+	uint32 augment_id[EQEmu::inventory::SocketCount] = { 0, 0, 0, 0, 0, 0 };
+	for (int augment_iter = EQEmu::inventory::socketBegin; augment_iter < EQEmu::inventory::SocketCount; ++augment_iter)
 		augment_id[augment_iter] = item_inst->GetAugmentItemID(augment_iter);
 	
 	uint16 item_charges = 0;
@@ -1263,7 +1263,7 @@ bool BotDatabase::SaveItemBySlot(Bot* bot_inst, const uint32 slot_id, const Item
 
 bool BotDatabase::DeleteItemBySlot(const uint32 bot_id, const uint32 slot_id)
 {
-	if (!bot_id || (slot_id > EQEmu::legacy::EQUIPMENT_END && slot_id != EQEmu::legacy::SlotPowerSource))
+	if (!bot_id || (slot_id > EQEmu::legacy::EQUIPMENT_END && slot_id != EQEmu::inventory::slotPowerSource))
 		return false;
 
 	query = StringFormat("DELETE FROM `bot_inventories` WHERE `bot_id` = '%u' AND `slot_id` = '%u'", bot_id, slot_id);
@@ -1279,7 +1279,7 @@ bool BotDatabase::LoadEquipmentColor(const uint32 bot_id, const uint8 material_s
 	if (!bot_id)
 		return false;
 
-	int16 slot_id = Inventory::CalcSlotFromMaterial(material_slot_id);
+	int16 slot_id = EQEmu::InventoryProfile::CalcSlotFromMaterial(material_slot_id);
 	if (slot_id == INVALID_INDEX)
 		return false;
 	
@@ -1302,12 +1302,12 @@ bool BotDatabase::SaveEquipmentColor(const uint32 bot_id, const int16 slot_id, c
 		return false;
 
 	bool all_flag = (slot_id == -2);
-	if ((slot_id < EQEmu::legacy::EQUIPMENT_BEGIN || slot_id > EQEmu::legacy::EQUIPMENT_END) && slot_id != EQEmu::legacy::SlotPowerSource && !all_flag)
+	if ((slot_id < EQEmu::legacy::EQUIPMENT_BEGIN || slot_id > EQEmu::legacy::EQUIPMENT_END) && slot_id != EQEmu::inventory::slotPowerSource && !all_flag)
 		return false;
 
 	std::string where_clause;
 	if (all_flag)
-		where_clause = StringFormat(" AND `slot_id` IN ('%u', '%u', '%u', '%u', '%u', '%u', '%u')", EQEmu::legacy::SlotHead, EQEmu::legacy::SlotArms, EQEmu::legacy::SlotWrist1, EQEmu::legacy::SlotHands, EQEmu::legacy::SlotChest, EQEmu::legacy::SlotLegs, EQEmu::legacy::SlotFeet);
+		where_clause = StringFormat(" AND `slot_id` IN ('%u', '%u', '%u', '%u', '%u', '%u', '%u')", EQEmu::inventory::slotHead, EQEmu::inventory::slotArms, EQEmu::inventory::slotWrist1, EQEmu::inventory::slotHands, EQEmu::inventory::slotChest, EQEmu::inventory::slotLegs, EQEmu::inventory::slotFeet);
 	else
 		where_clause = StringFormat(" AND `slot_id` = '%u'", slot_id);
 
@@ -1752,7 +1752,7 @@ bool BotDatabase::SaveAllArmorColorBySlot(const uint32 owner_id, const int16 slo
 		" AND bi.`slot_id` = '%i'",
 		owner_id,
 		rgb_value,
-		EQEmu::legacy::SlotHead, EQEmu::legacy::SlotChest, EQEmu::legacy::SlotArms, EQEmu::legacy::SlotWrist1, EQEmu::legacy::SlotWrist2, EQEmu::legacy::SlotHands, EQEmu::legacy::SlotLegs, EQEmu::legacy::SlotFeet,
+		EQEmu::inventory::slotHead, EQEmu::inventory::slotChest, EQEmu::inventory::slotArms, EQEmu::inventory::slotWrist1, EQEmu::inventory::slotWrist2, EQEmu::inventory::slotHands, EQEmu::inventory::slotLegs, EQEmu::inventory::slotFeet,
 		slot_id
 	);
 	auto results = QueryDatabase(query);
@@ -1776,7 +1776,7 @@ bool BotDatabase::SaveAllArmorColors(const uint32 owner_id, const uint32 rgb_val
 		" AND bi.`slot_id` IN ('%u', '%u', '%u', '%u', '%u', '%u', '%u', '%u')",
 		owner_id,
 		rgb_value,
-		EQEmu::legacy::SlotHead, EQEmu::legacy::SlotChest, EQEmu::legacy::SlotArms, EQEmu::legacy::SlotWrist1, EQEmu::legacy::SlotWrist2, EQEmu::legacy::SlotHands, EQEmu::legacy::SlotLegs, EQEmu::legacy::SlotFeet
+		EQEmu::inventory::slotHead, EQEmu::inventory::slotChest, EQEmu::inventory::slotArms, EQEmu::inventory::slotWrist1, EQEmu::inventory::slotWrist2, EQEmu::inventory::slotHands, EQEmu::inventory::slotLegs, EQEmu::inventory::slotFeet
 	);
 	auto results = QueryDatabase(query);
 	if (!results.Success())

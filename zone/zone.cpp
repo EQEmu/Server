@@ -100,9 +100,6 @@ bool Zone::Bootup(uint32 iZoneID, uint32 iInstanceID, bool iStaticZone) {
 		worldserver.SetZoneData(0);
 		return false;
 	}
-	zone->zonemap = Map::LoadMapFile(zone->map_name);
-	zone->watermap = WaterMap::LoadWaterMapfile(zone->map_name);
-	zone->pathing = PathManager::LoadPathFile(zone->map_name);
 
 	std::string tmp;
 	if (database.GetVariable("loglevel", tmp)) {
@@ -251,12 +248,12 @@ bool Zone::LoadZoneObjects()
 		data.tilt_y = atof(row[18]);
 		data.unknown084 = 0;
 
-		ItemInst *inst = nullptr;
+		EQEmu::ItemInstance *inst = nullptr;
 		// FatherNitwit: this dosent seem to work...
 		// tradeskill containers do not have an itemid of 0... at least what I am seeing
 		if (itemid == 0) {
 			// Generic tradeskill container
-			inst = new ItemInst(ItemInstWorldContainer);
+			inst = new EQEmu::ItemInstance(ItemInstWorldContainer);
 		} else {
 			// Groundspawn object
 			inst = database.CreateItem(itemid);
@@ -264,7 +261,7 @@ bool Zone::LoadZoneObjects()
 
 		// Father Nitwit's fix... not perfect...
 		if (inst == nullptr && type != OT_DROPPEDITEM) {
-			inst = new ItemInst(ItemInstWorldContainer);
+			inst = new EQEmu::ItemInstance(ItemInstWorldContainer);
 		}
 
 		// Load child objects if container
@@ -297,7 +294,7 @@ bool Zone::LoadGroundSpawns() {
 	uint32 gsnumber=0;
 	for(gsindex=0;gsindex<50;gsindex++){
 		if(groundspawn.spawn[gsindex].item>0 && groundspawn.spawn[gsindex].item<SAYLINK_ITEM_ID){
-			ItemInst* inst = nullptr;
+			EQEmu::ItemInstance* inst = nullptr;
 			inst = database.CreateItem(groundspawn.spawn[gsindex].item);
 			gsnumber=groundspawn.spawn[gsindex].max_allowed;
 			ix=0;
@@ -877,6 +874,23 @@ Zone::~Zone() {
 //Modified for timezones.
 bool Zone::Init(bool iStaticZone) {
 	SetStaticZone(iStaticZone);
+	
+	//load the zone config file.
+	if (!LoadZoneCFG(zone->GetShortName(), zone->GetInstanceVersion(), true)) // try loading the zone name...
+		LoadZoneCFG(zone->GetFileName(), zone->GetInstanceVersion()); // if that fails, try the file name, then load defaults
+
+	if(RuleManager::Instance()->GetActiveRulesetID() != default_ruleset)
+	{
+		std::string r_name = RuleManager::Instance()->GetRulesetName(&database, default_ruleset);
+		if(r_name.size() > 0)
+		{
+			RuleManager::Instance()->LoadRules(&database, r_name.c_str());
+		}
+	}
+	
+	zone->zonemap = Map::LoadMapFile(zone->map_name);
+	zone->watermap = WaterMap::LoadWaterMapfile(zone->map_name);
+	zone->pathing = PathManager::LoadPathFile(zone->map_name);
 
 	Log.Out(Logs::General, Logs::Status, "Loading spawn conditions...");
 	if(!spawn_conditions.LoadSpawnConditions(short_name, instanceid)) {
@@ -968,19 +982,6 @@ bool Zone::Init(bool iStaticZone) {
 
 	petition_list.ClearPetitions();
 	petition_list.ReadDatabase();
-
-	//load the zone config file.
-	if (!LoadZoneCFG(zone->GetShortName(), zone->GetInstanceVersion(), true)) // try loading the zone name...
-		LoadZoneCFG(zone->GetFileName(), zone->GetInstanceVersion()); // if that fails, try the file name, then load defaults
-
-	if(RuleManager::Instance()->GetActiveRulesetID() != default_ruleset)
-	{
-		std::string r_name = RuleManager::Instance()->GetRulesetName(&database, default_ruleset);
-		if(r_name.size() > 0)
-		{
-			RuleManager::Instance()->LoadRules(&database, r_name.c_str());
-		}
-	}
 
 	Log.Out(Logs::General, Logs::Status, "Loading timezone data...");
 	zone->zone_time.setEQTimeZone(database.GetZoneTZ(zoneid, GetInstanceVersion()));
@@ -1166,7 +1167,7 @@ bool Zone::Process() {
 	if(spawn2_timer.Check()) {
 		LinkedListIterator<Spawn2*> iterator(spawn2_list);
 
-		Inventory::CleanDirty();
+		EQEmu::InventoryProfile::CleanDirty();
 
 		iterator.Reset();
 		while (iterator.MoreElements()) {

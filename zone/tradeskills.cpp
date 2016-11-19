@@ -46,7 +46,7 @@ void Object::HandleAugmentation(Client* user, const AugmentItem_Struct* in_augme
 		return;
 	}
 
-	ItemInst* container = nullptr;
+	EQEmu::ItemInstance* container = nullptr;
 
 	if (worldo)
 	{
@@ -55,13 +55,13 @@ void Object::HandleAugmentation(Client* user, const AugmentItem_Struct* in_augme
 	else
 	{
 		// Check to see if they have an inventory container type 53 that is used for this.
-		Inventory& user_inv = user->GetInv();
-		ItemInst* inst = nullptr;
+		EQEmu::InventoryProfile& user_inv = user->GetInv();
+		EQEmu::ItemInstance* inst = nullptr;
 
 		inst = user_inv.GetItem(in_augment->container_slot);
 		if (inst)
 		{
-			const EQEmu::ItemBase* item = inst->GetItem();
+			const EQEmu::ItemData* item = inst->GetItem();
 			if (item && inst->IsType(EQEmu::item::ItemClassBag) && item->BagType == 53)
 			{
 				// We have found an appropriate inventory augmentation sealer
@@ -69,9 +69,9 @@ void Object::HandleAugmentation(Client* user, const AugmentItem_Struct* in_augme
 
 				// Verify that no more than two items are in container to guarantee no inadvertant wipes.
 				uint8 itemsFound = 0;
-				for (uint8 i = SLOT_BEGIN; i < EQEmu::legacy::TYPE_WORLD_SIZE; i++)
+				for (uint8 i = EQEmu::inventory::slotBegin; i < EQEmu::legacy::TYPE_WORLD_SIZE; i++)
 				{
-					const ItemInst* inst = container->GetItem(i);
+					const EQEmu::ItemInstance* inst = container->GetItem(i);
 					if (inst)
 					{
 						itemsFound++;
@@ -94,7 +94,7 @@ void Object::HandleAugmentation(Client* user, const AugmentItem_Struct* in_augme
 		return;
 	}
 
-	ItemInst *tobe_auged = nullptr, *auged_with = nullptr;
+	EQEmu::ItemInstance *tobe_auged = nullptr, *auged_with = nullptr;
 	int8 slot=-1;
 
 	// Verify 2 items in the augmentation device
@@ -135,7 +135,7 @@ void Object::HandleAugmentation(Client* user, const AugmentItem_Struct* in_augme
 
 	bool deleteItems = false;
 
-	ItemInst *itemOneToPush = nullptr, *itemTwoToPush = nullptr;
+	EQEmu::ItemInstance *itemOneToPush = nullptr, *itemTwoToPush = nullptr;
 
 	// Adding augment
 	if (in_augment->augment_slot == -1)
@@ -145,7 +145,7 @@ void Object::HandleAugmentation(Client* user, const AugmentItem_Struct* in_augme
 		{
 			tobe_auged->PutAugment(slot, *auged_with);
 
-			ItemInst *aug = tobe_auged->GetAugment(slot);
+			EQEmu::ItemInstance *aug = tobe_auged->GetAugment(slot);
 			if(aug) {
 				std::vector<EQEmu::Any> args;
 				args.push_back(aug);
@@ -165,7 +165,7 @@ void Object::HandleAugmentation(Client* user, const AugmentItem_Struct* in_augme
 	}
 	else
 	{
-		ItemInst *old_aug = nullptr;
+		EQEmu::ItemInstance *old_aug = nullptr;
 		bool isSolvent = auged_with->GetItem()->ItemType == EQEmu::item::ItemTypeAugmentationSolvent;
 		if (!isSolvent && auged_with->GetItem()->ItemType != EQEmu::item::ItemTypeAugmentationDistiller)
 		{
@@ -175,7 +175,7 @@ void Object::HandleAugmentation(Client* user, const AugmentItem_Struct* in_augme
 			return;
 		}
 
-		ItemInst *aug = tobe_auged->GetAugment(in_augment->augment_slot);
+		EQEmu::ItemInstance *aug = tobe_auged->GetAugment(in_augment->augment_slot);
 		if (aug) {
 			if (!isSolvent && auged_with->GetItem()->ID != aug->GetItem()->AugDistiller)
 			{
@@ -222,12 +222,12 @@ void Object::HandleAugmentation(Client* user, const AugmentItem_Struct* in_augme
 		else
 		{
 			// Delete items in our inventory container...
-			for (uint8 i = SLOT_BEGIN; i < EQEmu::legacy::TYPE_WORLD_SIZE; i++)
+			for (uint8 i = EQEmu::inventory::slotBegin; i < EQEmu::legacy::TYPE_WORLD_SIZE; i++)
 			{
-				const ItemInst* inst = container->GetItem(i);
+				const EQEmu::ItemInstance* inst = container->GetItem(i);
 				if (inst)
 				{
-					user->DeleteItemInInventory(Inventory::CalcSlotId(in_augment->container_slot,i),0,true);
+					user->DeleteItemInInventory(EQEmu::InventoryProfile::CalcSlotId(in_augment->container_slot, i), 0, true);
 				}
 			}
 			// Explicitly mark container as cleared.
@@ -256,10 +256,10 @@ void Object::HandleCombine(Client* user, const NewCombine_Struct* in_combine, Ob
 		return;
 	}
 
-	Inventory& user_inv = user->GetInv();
+	EQEmu::InventoryProfile& user_inv = user->GetInv();
 	PlayerProfile_Struct& user_pp = user->GetPP();
-	ItemInst* container = nullptr;
-	ItemInst* inst = nullptr;
+	EQEmu::ItemInstance* container = nullptr;
+	EQEmu::ItemInstance* inst = nullptr;
 	uint8 c_type = 0xE8;
 	uint32 some_id = 0;
 	bool worldcontainer=false;
@@ -276,7 +276,7 @@ void Object::HandleCombine(Client* user, const NewCombine_Struct* in_combine, Ob
 	else {
 		inst = user_inv.GetItem(in_combine->container_slot);
 		if (inst) {
-			const EQEmu::ItemBase* item = inst->GetItem();
+			const EQEmu::ItemData* item = inst->GetItem();
 			if (item && inst->IsType(EQEmu::item::ItemClassBag)) {
 				c_type = item->BagType;
 				some_id = item->ID;
@@ -291,13 +291,13 @@ void Object::HandleCombine(Client* user, const NewCombine_Struct* in_combine, Ob
 
 	container = inst;
 	if (container->GetItem() && container->GetItem()->BagType == EQEmu::item::BagTypeTransformationmold) {
-		const ItemInst* inst = container->GetItem(0);
+		const EQEmu::ItemInstance* inst = container->GetItem(0);
 		bool AllowAll = RuleB(Inventory, AllowAnyWeaponTransformation);
-		if (inst && ItemInst::CanTransform(inst->GetItem(), container->GetItem(), AllowAll)) {
-			const EQEmu::ItemBase* new_weapon = inst->GetItem();
-			user->DeleteItemInInventory(Inventory::CalcSlotId(in_combine->container_slot, 0), 0, true);
+		if (inst && EQEmu::ItemInstance::CanTransform(inst->GetItem(), container->GetItem(), AllowAll)) {
+			const EQEmu::ItemData* new_weapon = inst->GetItem();
+			user->DeleteItemInInventory(EQEmu::InventoryProfile::CalcSlotId(in_combine->container_slot, 0), 0, true);
 			container->Clear();
-			user->SummonItem(new_weapon->ID, inst->GetCharges(), inst->GetAugmentItemID(0), inst->GetAugmentItemID(1), inst->GetAugmentItemID(2), inst->GetAugmentItemID(3), inst->GetAugmentItemID(4), inst->GetAugmentItemID(5), inst->IsAttuned(), EQEmu::legacy::SlotCursor, container->GetItem()->Icon, atoi(container->GetItem()->IDFile + 2));
+			user->SummonItem(new_weapon->ID, inst->GetCharges(), inst->GetAugmentItemID(0), inst->GetAugmentItemID(1), inst->GetAugmentItemID(2), inst->GetAugmentItemID(3), inst->GetAugmentItemID(4), inst->GetAugmentItemID(5), inst->IsAttuned(), EQEmu::inventory::slotCursor, container->GetItem()->Icon, atoi(container->GetItem()->IDFile + 2));
 			user->Message_StringID(4, TRANSFORM_COMPLETE, inst->GetItem()->Name);
 			if (RuleB(Inventory, DeleteTransformationMold))
 				user->DeleteItemInInventory(in_combine->container_slot, 0, true);
@@ -312,12 +312,12 @@ void Object::HandleCombine(Client* user, const NewCombine_Struct* in_combine, Ob
 	}
 
 	if (container->GetItem() && container->GetItem()->BagType == EQEmu::item::BagTypeDetransformationmold) {
-		const ItemInst* inst = container->GetItem(0);
+		const EQEmu::ItemInstance* inst = container->GetItem(0);
 		if (inst && inst->GetOrnamentationIcon() && inst->GetOrnamentationIcon()) {
-			const EQEmu::ItemBase* new_weapon = inst->GetItem();
-			user->DeleteItemInInventory(Inventory::CalcSlotId(in_combine->container_slot, 0), 0, true);
+			const EQEmu::ItemData* new_weapon = inst->GetItem();
+			user->DeleteItemInInventory(EQEmu::InventoryProfile::CalcSlotId(in_combine->container_slot, 0), 0, true);
 			container->Clear();
-			user->SummonItem(new_weapon->ID, inst->GetCharges(), inst->GetAugmentItemID(0), inst->GetAugmentItemID(1), inst->GetAugmentItemID(2), inst->GetAugmentItemID(3), inst->GetAugmentItemID(4), inst->GetAugmentItemID(5), inst->IsAttuned(), EQEmu::legacy::SlotCursor, 0, 0);
+			user->SummonItem(new_weapon->ID, inst->GetCharges(), inst->GetAugmentItemID(0), inst->GetAugmentItemID(1), inst->GetAugmentItemID(2), inst->GetAugmentItemID(3), inst->GetAugmentItemID(4), inst->GetAugmentItemID(5), inst->IsAttuned(), EQEmu::inventory::slotCursor, 0, 0);
 			user->Message_StringID(4, TRANSFORM_COMPLETE, inst->GetItem()->Name);
 		}
 		else if (inst) {
@@ -401,10 +401,10 @@ void Object::HandleCombine(Client* user, const NewCombine_Struct* in_combine, Ob
 		safe_delete(outapp);
 		database.DeleteWorldContainer(worldo->m_id, zone->GetZoneID());
 	} else{
-		for (uint8 i = SLOT_BEGIN; i < EQEmu::legacy::TYPE_WORLD_SIZE; i++) {
-			const ItemInst* inst = container->GetItem(i);
+		for (uint8 i = EQEmu::inventory::slotBegin; i < EQEmu::legacy::TYPE_WORLD_SIZE; i++) {
+			const EQEmu::ItemInstance* inst = container->GetItem(i);
 			if (inst) {
-				user->DeleteItemInInventory(Inventory::CalcSlotId(in_combine->container_slot,i),0,true);
+				user->DeleteItemInInventory(EQEmu::InventoryProfile::CalcSlotId(in_combine->container_slot, i), 0, true);
 			}
 		}
 		container->Clear();
@@ -501,7 +501,7 @@ void Object::HandleAutoCombine(Client* user, const RecipeAutoCombine_Struct* rac
 	memset(counts, 0, sizeof(counts));
 
 	//search for all the items in their inventory
-	Inventory& user_inv = user->GetInv();
+	EQEmu::InventoryProfile& user_inv = user->GetInv();
 	uint8 count = 0;
 	uint8 needcount = 0;
 
@@ -537,7 +537,7 @@ void Object::HandleAutoCombine(Client* user, const RecipeAutoCombine_Struct* rac
 		user->Message_StringID(MT_Skills, TRADESKILL_MISSING_COMPONENTS);
 
 		for (auto it = MissingItems.begin(); it != MissingItems.end(); ++it) {
-			const EQEmu::ItemBase* item = database.GetItem(*it);
+			const EQEmu::ItemData* item = database.GetItem(*it);
 
 			if(item)
 				user->Message_StringID(MT_Skills, TRADESKILL_MISSING_ITEM, item->Name);
@@ -566,7 +566,7 @@ void Object::HandleAutoCombine(Client* user, const RecipeAutoCombine_Struct* rac
 				return;
 			}
 
-			const ItemInst* inst = user_inv.GetItem(slot);
+			const EQEmu::ItemInstance* inst = user_inv.GetItem(slot);
 
 			if (inst && !inst->IsStackable())
 				user->DeleteItemInInventory(slot, 0, true);
@@ -962,7 +962,7 @@ bool Client::TradeskillExecute(DBTradeskillRecipe_Struct *spec) {
 
 	aa_chance = spellbonuses.ReduceTradeskillFail[spec->tradeskill] + itembonuses.ReduceTradeskillFail[spec->tradeskill] + aabonuses.ReduceTradeskillFail[spec->tradeskill];
 
-	const EQEmu::ItemBase* item = nullptr;
+	const EQEmu::ItemData* item = nullptr;
 	
 	chance = mod_tradeskill_chance(chance, spec);
 
@@ -1090,7 +1090,7 @@ void Client::CheckIncreaseTradeskill(int16 bonusstat, int16 stat_modifier, float
 	Log.Out(Logs::Detail, Logs::Tradeskills, "...Stage2 chance was: %f percent. 0 percent means stage1 failed", chance_stage2);
 }
 
-bool ZoneDatabase::GetTradeRecipe(const ItemInst* container, uint8 c_type, uint32 some_id,
+bool ZoneDatabase::GetTradeRecipe(const EQEmu::ItemInstance* container, uint8 c_type, uint32 some_id,
 	uint32 char_id, DBTradeskillRecipe_Struct *spec)
 {
 	if (container == nullptr)
@@ -1109,11 +1109,11 @@ bool ZoneDatabase::GetTradeRecipe(const ItemInst* container, uint8 c_type, uint3
 	uint32 count = 0;
 	uint32 sum = 0;
 	for (uint8 i = 0; i < 10; i++) { // <watch> TODO: need to determine if this is bound to world/item container size
-		const ItemInst* inst = container->GetItem(i);
+		const EQEmu::ItemInstance* inst = container->GetItem(i);
 		if (!inst)
             continue;
 
-		const EQEmu::ItemBase* item = GetItem(inst->GetItem()->ID);
+		const EQEmu::ItemData* item = GetItem(inst->GetItem()->ID);
         if (!item)
             continue;
 
@@ -1237,12 +1237,12 @@ bool ZoneDatabase::GetTradeRecipe(const ItemInst* container, uint8 c_type, uint3
 	for (auto row = results.begin(); row != results.end(); ++row) {
         int ccnt = 0;
 
-		for (int x = SLOT_BEGIN; x < EQEmu::legacy::TYPE_WORLD_SIZE; x++) {
-            const ItemInst* inst = container->GetItem(x);
+		for (int x = EQEmu::inventory::slotBegin; x < EQEmu::legacy::TYPE_WORLD_SIZE; x++) {
+            const EQEmu::ItemInstance* inst = container->GetItem(x);
             if(!inst)
                 continue;
 
-			const EQEmu::ItemBase* item = GetItem(inst->GetItem()->ID);
+			const EQEmu::ItemData* item = GetItem(inst->GetItem()->ID);
             if (!item)
                 continue;
 

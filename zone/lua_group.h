@@ -40,6 +40,7 @@ public:
 	bool IsLeader(Lua_Mob leader);
 	int GroupCount();
 	int GetHighestLevel();
+	int GetLowestLevel();
 	void TeleportGroup(Lua_Mob sender, uint32 zone_id, uint32 instance_id, float x, float y, float z, float h);
 	int GetID();
 	Lua_Mob GetMember(int index);

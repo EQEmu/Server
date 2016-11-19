@@ -23,9 +23,13 @@
 #include "../common/any.h"
 #include "event_codes.h"
 
-class ItemInst;
 class Client;
 class NPC;
+
+namespace EQEmu
+{
+	class ItemInstance;
+}
 
 class QuestInterface {
 public:
@@ -37,7 +41,7 @@ public:
 		std::vector<EQEmu::Any> *extra_pointers) { return 0; }
 	virtual int EventGlobalPlayer(QuestEventID evt, Client *client, std::string data, uint32 extra_data,
 		std::vector<EQEmu::Any> *extra_pointers) { return 0; }
-	virtual int EventItem(QuestEventID evt, Client *client, ItemInst *item, Mob *mob, std::string data, uint32 extra_data,
+	virtual int EventItem(QuestEventID evt, Client *client, EQEmu::ItemInstance *item, Mob *mob, std::string data, uint32 extra_data,
 		std::vector<EQEmu::Any> *extra_pointers) { return 0; }
 	virtual int EventSpell(QuestEventID evt, NPC* npc, Client *client, uint32 spell_id, uint32 extra_data,
 		std::vector<EQEmu::Any> *extra_pointers) { return 0; }
@@ -49,14 +53,14 @@ public:
 	virtual bool PlayerHasQuestSub(QuestEventID evt) { return false; }
 	virtual bool GlobalPlayerHasQuestSub(QuestEventID evt) { return false; }
 	virtual bool SpellHasQuestSub(uint32 spell_id, QuestEventID evt) { return false; }
-	virtual bool ItemHasQuestSub(ItemInst *itm, QuestEventID evt) { return false; }
+	virtual bool ItemHasQuestSub(EQEmu::ItemInstance *itm, QuestEventID evt) { return false; }
 	virtual bool EncounterHasQuestSub(std::string encounter_name, QuestEventID evt) { return false; }
 
 	virtual void LoadNPCScript(std::string filename, int npc_id) { }
 	virtual void LoadGlobalNPCScript(std::string filename) { }
 	virtual void LoadPlayerScript(std::string filename) { }
 	virtual void LoadGlobalPlayerScript(std::string filename) { }
-	virtual void LoadItemScript(std::string filename, ItemInst *item) { }
+	virtual void LoadItemScript(std::string filename, EQEmu::ItemInstance *item) { }
 	virtual void LoadSpellScript(std::string filename, uint32 spell_id) { }
 	virtual void LoadEncounterScript(std::string filename, std::string encounter_name) { }
 
@@ -64,7 +68,7 @@ public:
 		std::vector<EQEmu::Any> *extra_pointers) { return 0; }
 	virtual int DispatchEventPlayer(QuestEventID evt, Client *client, std::string data, uint32 extra_data,
 		std::vector<EQEmu::Any> *extra_pointers) { return 0; }
-	virtual int DispatchEventItem(QuestEventID evt, Client *client, ItemInst *item, Mob *mob, std::string data, uint32 extra_data,
+	virtual int DispatchEventItem(QuestEventID evt, Client *client, EQEmu::ItemInstance *item, Mob *mob, std::string data, uint32 extra_data,
 		std::vector<EQEmu::Any> *extra_pointers) { return 0; }
 	virtual int DispatchEventSpell(QuestEventID evt, NPC* npc, Client *client, uint32 spell_id, uint32 extra_data,
 		std::vector<EQEmu::Any> *extra_pointers) { return 0; }

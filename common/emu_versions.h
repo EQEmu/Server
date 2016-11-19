@@ -64,17 +64,15 @@ namespace EQEmu
 		const ClientVersion LastClientVersion = ClientVersion::RoF2;
 		const size_t ClientVersionCount = (static_cast<size_t>(LastClientVersion) + 1);
 
-		extern bool IsValidClientVersion(ClientVersion client_version);
-		extern ClientVersion ValidateClientVersion(ClientVersion client_version);
-		extern const char* ClientVersionName(ClientVersion client_version);
-		extern uint32 ConvertClientVersionToClientVersionBit(ClientVersion client_version);
-		extern ClientVersion ConvertClientVersionBitToClientVersion(uint32 client_version_bit);
-		extern uint32 ConvertClientVersionToExpansion(ClientVersion client_version);
+		bool IsValidClientVersion(ClientVersion client_version);
+		ClientVersion ValidateClientVersion(ClientVersion client_version);
+		const char* ClientVersionName(ClientVersion client_version);
+		uint32 ConvertClientVersionToClientVersionBit(ClientVersion client_version);
+		ClientVersion ConvertClientVersionBitToClientVersion(uint32 client_version_bit);
+		uint32 ConvertClientVersionToExpansion(ClientVersion client_version);
 
-	} /*versions*/
 
-	namespace versions {
-		enum class InventoryVersion {
+		enum class MobVersion {
 			Unknown = 0,
 			Client62,
 			Titanium,
@@ -99,29 +97,29 @@ namespace EQEmu
 			OfflineRoF2
 		};
 
-		const InventoryVersion LastInventoryVersion = InventoryVersion::OfflineRoF2;
-		const InventoryVersion LastPCInventoryVersion = InventoryVersion::RoF2;
-		const InventoryVersion LastNonPCInventoryVersion = InventoryVersion::BotPet;
-		const InventoryVersion LastOfflinePCInventoryVersion = InventoryVersion::OfflineRoF2;
-		const size_t InventoryVersionCount = (static_cast<size_t>(LastInventoryVersion) + 1);
+		const MobVersion LastMobVersion = MobVersion::OfflineRoF2;
+		const MobVersion LastPCMobVersion = MobVersion::RoF2;
+		const MobVersion LastNonPCMobVersion = MobVersion::BotPet;
+		const MobVersion LastOfflinePCMobVersion = MobVersion::OfflineRoF2;
+		const size_t MobVersionCount = (static_cast<size_t>(LastMobVersion) + 1);
 
-		extern bool IsValidInventoryVersion(InventoryVersion inventory_version);
-		extern bool IsValidPCInventoryVersion(InventoryVersion inventory_version);
-		extern bool IsValidNonPCInventoryVersion(InventoryVersion inventory_version);
-		extern bool IsValidOfflinePCInventoryVersion(InventoryVersion inventory_version);
+		bool IsValidMobVersion(MobVersion mob_version);
+		bool IsValidPCMobVersion(MobVersion mob_version);
+		bool IsValidNonPCMobVersion(MobVersion mob_version);
+		bool IsValidOfflinePCMobVersion(MobVersion mob_version);
 
-		extern InventoryVersion ValidateInventoryVersion(InventoryVersion inventory_version);
-		extern InventoryVersion ValidatePCInventoryVersion(InventoryVersion inventory_version);
-		extern InventoryVersion ValidateNonPCInventoryVersion(InventoryVersion inventory_version);
-		extern InventoryVersion ValidateOfflinePCInventoryVersion(InventoryVersion inventory_version);
+		MobVersion ValidateMobVersion(MobVersion mob_version);
+		MobVersion ValidatePCMobVersion(MobVersion mob_version);
+		MobVersion ValidateNonPCMobVersion(MobVersion mob_version);
+		MobVersion ValidateOfflinePCMobVersion(MobVersion mob_version);
 
-		extern const char* InventoryVersionName(InventoryVersion inventory_version);
-		extern ClientVersion ConvertInventoryVersionToClientVersion(InventoryVersion inventory_version);
-		extern InventoryVersion ConvertClientVersionToInventoryVersion(ClientVersion client_version);
-		extern InventoryVersion ConvertPCInventoryVersionToOfflinePCInventoryVersion(InventoryVersion inventory_version);
-		extern InventoryVersion ConvertOfflinePCInventoryVersionToPCInventoryVersion(InventoryVersion inventory_version);
-		extern ClientVersion ConvertOfflinePCInventoryVersionToClientVersion(InventoryVersion inventory_version);
-		extern InventoryVersion ConvertClientVersionToOfflinePCInventoryVersion(ClientVersion client_version);
+		const char* MobVersionName(MobVersion mob_version);
+		ClientVersion ConvertMobVersionToClientVersion(MobVersion mob_version);
+		MobVersion ConvertClientVersionToMobVersion(ClientVersion client_version);
+		MobVersion ConvertPCMobVersionToOfflinePCMobVersion(MobVersion mob_version);
+		MobVersion ConvertOfflinePCMobVersionToPCMobVersion(MobVersion mob_version);
+		ClientVersion ConvertOfflinePCMobVersionToClientVersion(MobVersion mob_version);
+		MobVersion ConvertClientVersionToOfflinePCMobVersion(ClientVersion client_version);
 
 	} /*versions*/
 

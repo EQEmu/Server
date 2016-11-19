@@ -14,7 +14,7 @@ struct NewSpawn_Struct;
 
 namespace EQEmu
 {
-	struct ItemBase;
+	struct ItemData;
 }
 
 #define MAXMERCS 1
@@ -66,7 +66,7 @@ public:
 	//abstract virtual function implementations requird by base abstract class
 	virtual bool Death(Mob* killerMob, int32 damage, uint16 spell_id, EQEmu::skills::SkillType attack_skill);
 	virtual void Damage(Mob* from, int32 damage, uint16 spell_id, EQEmu::skills::SkillType attack_skill, bool avoidable = true, int8 buffslot = -1, bool iBuffTic = false, int special = 0);
-	virtual bool Attack(Mob* other, int Hand = EQEmu::legacy::SlotPrimary, bool FromRiposte = false, bool IsStrikethrough = false,
+	virtual bool Attack(Mob* other, int Hand = EQEmu::inventory::slotPrimary, bool FromRiposte = false, bool IsStrikethrough = false,
 	bool IsFromSpell = false, ExtraAttackOptions *opts = nullptr, int special = 0);
 	virtual bool HasRaid() { return false; }
 	virtual bool HasGroup() { return (GetGroup() ? true : false); }
@@ -283,7 +283,7 @@ public:
 
 protected:
 	void CalcItemBonuses(StatBonuses* newbon);
-	void AddItemBonuses(const EQEmu::ItemBase *item, StatBonuses* newbon);
+	void AddItemBonuses(const EQEmu::ItemData *item, StatBonuses* newbon);
 	int CalcRecommendedLevelBonus(uint8 level, uint8 reclevel, int basestat);
 
 	int16 GetFocusEffect(focusType type, uint16 spell_id);
@@ -386,7 +386,7 @@ private:
 	uint8 _OwnerClientVersion;
 	uint32 _currentStance;
 
-	Inventory m_inv;
+	EQEmu::InventoryProfile m_inv;
 	int32 max_end;
 	int32 cur_end;
 	bool _medding;

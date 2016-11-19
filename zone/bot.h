@@ -77,7 +77,7 @@ static const std::string bot_stance_name[BOT_STANCE_COUNT] = {
 
 static const char* GetBotStanceName(int stance_id) { return bot_stance_name[VALIDBOTSTANCE(stance_id)].c_str(); }
 
-#define VALIDBOTEQUIPSLOT(x) ((x >= EQEmu::legacy::EQUIPMENT_BEGIN && x <= EQEmu::legacy::EQUIPMENT_END) ? (x) : ((x == EQEmu::legacy::SlotPowerSource) ? (22) : (23)))
+#define VALIDBOTEQUIPSLOT(x) ((x >= EQEmu::legacy::EQUIPMENT_BEGIN && x <= EQEmu::legacy::EQUIPMENT_END) ? (x) : ((x == EQEmu::inventory::slotPowerSource) ? (22) : (23)))
 
 static std::string bot_equip_slot_name[EQEmu::legacy::EQUIPMENT_SIZE + 2] =
 {
@@ -207,7 +207,7 @@ public:
 	//abstract virtual function implementations requird by base abstract class
 	virtual bool Death(Mob* killerMob, int32 damage, uint16 spell_id, EQEmu::skills::SkillType attack_skill);
 	virtual void Damage(Mob* from, int32 damage, uint16 spell_id, EQEmu::skills::SkillType attack_skill, bool avoidable = true, int8 buffslot = -1, bool iBuffTic = false, int special = 0);
-	virtual bool Attack(Mob* other, int Hand = EQEmu::legacy::SlotPrimary, bool FromRiposte = false, bool IsStrikethrough = false, bool IsFromSpell = false,
+	virtual bool Attack(Mob* other, int Hand = EQEmu::inventory::slotPrimary, bool FromRiposte = false, bool IsStrikethrough = false, bool IsFromSpell = false,
 		ExtraAttackOptions *opts = nullptr, int special = 0);
 	virtual bool HasRaid() { return (GetRaid() ? true : false); }
 	virtual bool HasGroup() { return (GetGroup() ? true : false); }
@@ -260,7 +260,7 @@ public:
 	virtual int32 CheckAggroAmount(uint16 spellid);
 	virtual void CalcBonuses();
 	void CalcItemBonuses(StatBonuses* newbon);
-	void AddItemBonuses(const ItemInst *inst, StatBonuses* newbon, bool isAug = false, bool isTribute = false, int rec_override = 0);
+	void AddItemBonuses(const EQEmu::ItemInstance *inst, StatBonuses* newbon, bool isAug = false, bool isTribute = false, int rec_override = 0);
 	int CalcRecommendedLevelBonus(uint8 level, uint8 reclevel, int basestat);
 	virtual void MakePet(uint16 spell_id, const char* pettype, const char *petname = nullptr);
 	virtual FACTION_VALUE GetReverseFactionCon(Mob* iOther);
@@ -382,10 +382,10 @@ public:
 	virtual bool DoCastSpell(uint16 spell_id, uint16 target_id, EQEmu::CastingSlot slot = EQEmu::CastingSlot::Item, int32 casttime = -1, int32 mana_cost = -1, uint32* oSpellWillFinish = 0, uint32 item_slot = 0xFFFFFFFF, uint32 aa_id = 0);
 
 	// Bot Equipment & Inventory Class Methods
-	void BotTradeSwapItem(Client* client, int16 lootSlot, const ItemInst* inst, const ItemInst* inst_swap, uint32 equipableSlots, std::string* errorMessage, bool swap = true);
-	void BotTradeAddItem(uint32 id, const ItemInst* inst, int16 charges, uint32 equipableSlots, uint16 lootSlot, std::string* errorMessage, bool addToDb = true);
+	void BotTradeSwapItem(Client* client, int16 lootSlot, const EQEmu::ItemInstance* inst, const EQEmu::ItemInstance* inst_swap, uint32 equipableSlots, std::string* errorMessage, bool swap = true);
+	void BotTradeAddItem(uint32 id, const EQEmu::ItemInstance* inst, int16 charges, uint32 equipableSlots, uint16 lootSlot, std::string* errorMessage, bool addToDb = true);
 	void EquipBot(std::string* errorMessage);
-	bool CheckLoreConflict(const EQEmu::ItemBase* item);
+	bool CheckLoreConflict(const EQEmu::ItemData* item);
 	virtual void UpdateEquipmentLight() { m_Light.Type[EQEmu::lightsource::LightEquipment] = m_inv.FindBrightestLightType(); m_Light.Level[EQEmu::lightsource::LightEquipment] = EQEmu::lightsource::TypeToLevel(m_Light.Type[EQEmu::lightsource::LightEquipment]); }
 
 	// Static Class Methods	
@@ -457,7 +457,7 @@ public:
 	uint32 GetBotSpellID() { return npc_spells_id; }
 	Mob* GetBotOwner() { return this->_botOwner; }
 	uint32 GetBotArcheryRange();
-	ItemInst* GetBotItem(uint32 slotID);
+	EQEmu::ItemInstance* GetBotItem(uint32 slotID);
 	virtual bool GetSpawnStatus() { return _spawnStatus; }
 	uint8 GetPetChooserID() { return _petChooserID; }
 	bool IsPetChooser() { return _petChooser; }
@@ -647,7 +647,7 @@ private:
 	bool _petChooser;
 	uint8 _petChooserID;
 	bool berserk;
-	Inventory m_inv;
+	EQEmu::InventoryProfile m_inv;
 	double _lastTotalPlayTime;
 	time_t _startTotalPlayTime;
 	Mob* _previousTarget;
@@ -711,7 +711,7 @@ private:
 	void SetBotID(uint32 botID);
 
 	// Private "Inventory" Methods
-	void GetBotItems(Inventory &inv, std::string* errorMessage);
+	void GetBotItems(EQEmu::InventoryProfile &inv, std::string* errorMessage);
 	void BotAddEquipItem(int slot, uint32 id);
 	uint32 GetBotItemBySlot(uint32 slotID);
 

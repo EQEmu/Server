@@ -20,7 +20,7 @@
 #include "../common/bodytypes.h"
 #include "../common/classes.h"
 #include "../common/global_define.h"
-#include "../common/item.h"
+#include "../common/item_instance.h"
 #include "../common/rulesys.h"
 #include "../common/skills.h"
 #include "../common/spdat.h"
@@ -48,7 +48,7 @@ extern WorldServer worldserver;
 bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_override)
 {
 	int caster_level, buffslot, effect, effect_value, i;
-	ItemInst *SummonedItem=nullptr;
+	EQEmu::ItemInstance *SummonedItem=nullptr;
 #ifdef SPELL_EFFECT_SPAM
 #define _EDLEN	200
 	char effect_desc[_EDLEN];
@@ -61,7 +61,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 
 	bool c_override = false;
 	if (caster && caster->IsClient() && GetCastedSpellInvSlot() > 0) {
-		const ItemInst *inst = caster->CastToClient()->GetInv().GetItem(GetCastedSpellInvSlot());
+		const EQEmu::ItemInstance *inst = caster->CastToClient()->GetInv().GetItem(GetCastedSpellInvSlot());
 		if (inst) {
 			if (inst->GetItem()->Click.Level > 0) {
 				caster_level = inst->GetItem()->Click.Level;
@@ -622,7 +622,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 				snprintf(effect_desc, _EDLEN, "Flesh To Bone");
 #endif
 				if(IsClient()){
-					ItemInst* transI = CastToClient()->GetInv().GetItem(EQEmu::legacy::SlotCursor);
+					EQEmu::ItemInstance* transI = CastToClient()->GetInv().GetItem(EQEmu::inventory::slotCursor);
 					if (transI && transI->IsClassCommon() && transI->IsStackable()){
 						uint32 fcharges = transI->GetCharges();
 							//Does it sound like meat... maybe should check if it looks like meat too...
@@ -632,7 +632,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 								strstr(transI->GetItem()->Name, "Flesh") ||
 								strstr(transI->GetItem()->Name, "parts") ||
 								strstr(transI->GetItem()->Name, "Parts")){
-								CastToClient()->DeleteItemInInventory(EQEmu::legacy::SlotCursor, fcharges, true);
+								CastToClient()->DeleteItemInInventory(EQEmu::inventory::slotCursor, fcharges, true);
 								CastToClient()->SummonItem(13073, fcharges);
 							}
 							else{
@@ -1148,7 +1148,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 
 			case SE_SummonItem:
 			{
-				const EQEmu::ItemBase *item = database.GetItem(spell.base[i]);
+				const EQEmu::ItemData *item = database.GetItem(spell.base[i]);
 #ifdef SPELL_EFFECT_SPAM
 				const char *itemname = item ? item->Name : "*Unknown Item*";
 				snprintf(effect_desc, _EDLEN, "Summon Item: %s (id %d)", itemname, spell.base[i]);
@@ -1173,7 +1173,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 
 						if (SummonedItem) {
 							c->PushItemOnCursor(*SummonedItem);
-							c->SendItemPacket(EQEmu::legacy::SlotCursor, SummonedItem, ItemPacketLimbo);
+							c->SendItemPacket(EQEmu::inventory::slotCursor, SummonedItem, ItemPacketLimbo);
 							safe_delete(SummonedItem);
 						}
 						SummonedItem = database.CreateItem(spell.base[i], charges);
@@ -1184,7 +1184,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 			}
 			case SE_SummonItemIntoBag:
 			{
-				const EQEmu::ItemBase *item = database.GetItem(spell.base[i]);
+				const EQEmu::ItemData *item = database.GetItem(spell.base[i]);
 #ifdef SPELL_EFFECT_SPAM
 				const char *itemname = item ? item->Name : "*Unknown Item*";
 				snprintf(effect_desc, _EDLEN, "Summon Item In Bag: %s (id %d)", itemname, spell.base[i]);
@@ -1213,7 +1213,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 						if (charges < 1)
 							charges = 1;
 
-						ItemInst *SubItem = database.CreateItem(spell.base[i], charges);
+						EQEmu::ItemInstance *SubItem = database.CreateItem(spell.base[i], charges);
 						if (SubItem != nullptr) {
 							SummonedItem->PutItem(slot, *SubItem);
 							safe_delete(SubItem);
@@ -1445,7 +1445,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 					}
 				}
 
-				for (int x = EQEmu::textures::TextureBegin; x <= EQEmu::textures::LastTintableTexture; x++)
+				for (int x = EQEmu::textures::textureBegin; x <= EQEmu::textures::LastTintableTexture; x++)
 					SendWearChange(x);
 
 				if (caster == this && spell.id != 287 && spell.id != 601 &&
@@ -1471,7 +1471,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 						);
 						caster->SendAppearancePacket(AT_Size, static_cast<uint32>(caster->GetTarget()->GetSize()));
 
-						for (int x = EQEmu::textures::TextureBegin; x <= EQEmu::textures::LastTintableTexture; x++)
+						for (int x = EQEmu::textures::textureBegin; x <= EQEmu::textures::LastTintableTexture; x++)
 							caster->SendWearChange(x);
 				}
 			}
@@ -1650,6 +1650,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 				break;
 			}
 
+			case SE_SummonToCorpse:
 			case SE_Revive:
 			{
 #ifdef SPELL_EFFECT_SPAM
@@ -2239,7 +2240,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 				snprintf(effect_desc, _EDLEN, "Rampage");
 #endif
 				if(caster)
-					entity_list.AEAttack(caster, 30, EQEmu::legacy::SlotPrimary, 0, true); // on live wars dont get a duration ramp, its a one shot deal
+					entity_list.AEAttack(caster, 30, EQEmu::inventory::slotPrimary, 0, true); // on live wars dont get a duration ramp, its a one shot deal
 
 				break;
 			}
@@ -3037,7 +3038,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 	if (SummonedItem) {
 		Client *c=CastToClient();
 		c->PushItemOnCursor(*SummonedItem);
-		c->SendItemPacket(EQEmu::legacy::SlotCursor, SummonedItem, ItemPacketLimbo);
+		c->SendItemPacket(EQEmu::inventory::slotCursor, SummonedItem, ItemPacketLimbo);
 		safe_delete(SummonedItem);
 	}
 
@@ -3855,7 +3856,7 @@ void Mob::BuffFadeBySlot(int slot, bool iRecalcBonuses)
 				else{
 					SendAppearancePacket(AT_Size, 6);
 				}
-				for (int x = EQEmu::textures::TextureBegin; x <= EQEmu::textures::LastTintableTexture; x++){
+				for (int x = EQEmu::textures::textureBegin; x <= EQEmu::textures::LastTintableTexture; x++){
 					SendWearChange(x);
 				}
 				break;
@@ -5172,7 +5173,7 @@ uint16 Client::GetSympatheticFocusEffect(focusType type, uint16 spell_id) {
 	//item focus
 	if (itembonuses.FocusEffects[type]){
 
-		const EQEmu::ItemBase* TempItem = 0;
+		const EQEmu::ItemData* TempItem = 0;
 
 		for (int x = EQEmu::legacy::EQUIPMENT_BEGIN; x <= EQEmu::legacy::EQUIPMENT_END; x++)
 		{
@@ -5180,7 +5181,7 @@ uint16 Client::GetSympatheticFocusEffect(focusType type, uint16 spell_id) {
 				continue;
 
 			TempItem = nullptr;
-			ItemInst* ins = GetInv().GetItem(x);
+			EQEmu::ItemInstance* ins = GetInv().GetItem(x);
 			if (!ins)
 				continue;
 			TempItem = ins->GetItem();
@@ -5194,16 +5195,16 @@ uint16 Client::GetSympatheticFocusEffect(focusType type, uint16 spell_id) {
 				}
 			}
 
-			for (int y = AUG_INDEX_BEGIN; y < EQEmu::legacy::ITEM_COMMON_SIZE; ++y)
+			for (int y = EQEmu::inventory::socketBegin; y < EQEmu::inventory::SocketCount; ++y)
 			{
 				if (SympatheticProcList.size() > MAX_SYMPATHETIC_PROCS)
 					continue;
 
-				ItemInst *aug = nullptr;
+				EQEmu::ItemInstance *aug = nullptr;
 				aug = ins->GetAugment(y);
 				if(aug)
 				{
-					const EQEmu::ItemBase* TempItemAug = aug->GetItem();
+					const EQEmu::ItemData* TempItemAug = aug->GetItem();
 					if (TempItemAug && TempItemAug->Focus.Effect > 0 && IsValidSpell(TempItemAug->Focus.Effect)) {
 						proc_spellid = CalcFocusEffect(type, TempItemAug->Focus.Effect, spell_id);
 						if (IsValidSpell(proc_spellid)){
@@ -5301,8 +5302,8 @@ int16 Client::GetFocusEffect(focusType type, uint16 spell_id)
 	//Check if item focus effect exists for the client.
 	if (itembonuses.FocusEffects[type]){
 
-		const EQEmu::ItemBase* TempItem = 0;
-		const EQEmu::ItemBase* UsedItem = 0;
+		const EQEmu::ItemData* TempItem = 0;
+		const EQEmu::ItemData* UsedItem = 0;
 		uint16 UsedFocusID = 0;
 		int16 Total = 0;
 		int16 focus_max = 0;
@@ -5312,7 +5313,7 @@ int16 Client::GetFocusEffect(focusType type, uint16 spell_id)
 		for (int x = EQEmu::legacy::EQUIPMENT_BEGIN; x <= EQEmu::legacy::EQUIPMENT_END; x++)
 		{
 			TempItem = nullptr;
-			ItemInst* ins = GetInv().GetItem(x);
+			EQEmu::ItemInstance* ins = GetInv().GetItem(x);
 			if (!ins)
 				continue;
 			TempItem = ins->GetItem();
@@ -5343,13 +5344,13 @@ int16 Client::GetFocusEffect(focusType type, uint16 spell_id)
 				}
 			}
 
-			for (int y = AUG_INDEX_BEGIN; y < EQEmu::legacy::ITEM_COMMON_SIZE; ++y)
+			for (int y = EQEmu::inventory::socketBegin; y < EQEmu::inventory::SocketCount; ++y)
 			{
-				ItemInst *aug = nullptr;
+				EQEmu::ItemInstance *aug = nullptr;
 				aug = ins->GetAugment(y);
 				if(aug)
 				{
-					const EQEmu::ItemBase* TempItemAug = aug->GetItem();
+					const EQEmu::ItemData* TempItemAug = aug->GetItem();
 					if (TempItemAug && TempItemAug->Focus.Effect > 0 && TempItemAug->Focus.Effect != SPELL_UNKNOWN) {
 						if(rand_effectiveness) {
 							focus_max = CalcFocusEffect(type, TempItemAug->Focus.Effect, spell_id, true);
@@ -5384,7 +5385,7 @@ int16 Client::GetFocusEffect(focusType type, uint16 spell_id)
 		for (int x = EQEmu::legacy::TRIBUTE_BEGIN; x <= EQEmu::legacy::TRIBUTE_END; ++x)
 		{
 			TempItem = nullptr;
-			ItemInst* ins = GetInv().GetItem(x);
+			EQEmu::ItemInstance* ins = GetInv().GetItem(x);
 			if (!ins)
 				continue;
 			TempItem = ins->GetItem();
@@ -5573,8 +5574,8 @@ int16 NPC::GetFocusEffect(focusType type, uint16 spell_id) {
 
 	if (RuleB(Spells, NPC_UseFocusFromItems) && itembonuses.FocusEffects[type]){
 
-		const EQEmu::ItemBase* TempItem = 0;
-		const EQEmu::ItemBase* UsedItem = 0;
+		const EQEmu::ItemData* TempItem = 0;
+		const EQEmu::ItemData* UsedItem = 0;
 		uint16 UsedFocusID = 0;
 		int16 Total = 0;
 		int16 focus_max = 0;
@@ -5582,7 +5583,7 @@ int16 NPC::GetFocusEffect(focusType type, uint16 spell_id) {
 
 		//item focus
 		for (int i = 0; i < EQEmu::legacy::EQUIPMENT_SIZE; i++){
-			const EQEmu::ItemBase *cur = database.GetItem(equipment[i]);
+			const EQEmu::ItemData *cur = database.GetItem(equipment[i]);
 
 			if(!cur)
 				continue;

@@ -422,7 +422,7 @@ int LuaParser::_EventPlayer(std::string package_name, QuestEventID evt, Client *
 	return 0;
 }
 
-int LuaParser::EventItem(QuestEventID evt, Client *client, ItemInst *item, Mob *mob, std::string data, uint32 extra_data,
+int LuaParser::EventItem(QuestEventID evt, Client *client, EQEmu::ItemInstance *item, Mob *mob, std::string data, uint32 extra_data,
 		std::vector<EQEmu::Any> *extra_pointers) {
 	evt = ConvertLuaEvent(evt);
 	if(evt >= _LargestEventID) {
@@ -442,7 +442,7 @@ int LuaParser::EventItem(QuestEventID evt, Client *client, ItemInst *item, Mob *
 	return _EventItem(package_name, evt, client, item, mob, data, extra_data, extra_pointers);
 }
 
-int LuaParser::_EventItem(std::string package_name, QuestEventID evt, Client *client, ItemInst *item, Mob *mob,
+int LuaParser::_EventItem(std::string package_name, QuestEventID evt, Client *client, EQEmu::ItemInstance *item, Mob *mob,
 						  std::string data, uint32 extra_data, std::vector<EQEmu::Any> *extra_pointers, luabind::adl::object *l_func) {
 	const char *sub_name = LuaEvents[evt];
 
@@ -706,7 +706,7 @@ bool LuaParser::SpellHasQuestSub(uint32 spell_id, QuestEventID evt) {
 	return HasFunction(subname, package_name);
 }
 
-bool LuaParser::ItemHasQuestSub(ItemInst *itm, QuestEventID evt) {
+bool LuaParser::ItemHasQuestSub(EQEmu::ItemInstance *itm, QuestEventID evt) {
 	if (itm == nullptr) {
 		return false;
 	}
@@ -752,7 +752,7 @@ void LuaParser::LoadGlobalPlayerScript(std::string filename) {
 	LoadScript(filename, "global_player");
 }
 
-void LuaParser::LoadItemScript(std::string filename, ItemInst *item) {
+void LuaParser::LoadItemScript(std::string filename, EQEmu::ItemInstance *item) {
 	if (item == nullptr)
 		return;
 	std::string package_name = "item_";
@@ -1129,7 +1129,7 @@ int LuaParser::DispatchEventPlayer(QuestEventID evt, Client *client, std::string
     return ret;
 }
 
-int LuaParser::DispatchEventItem(QuestEventID evt, Client *client, ItemInst *item, Mob *mob, std::string data, uint32 extra_data,
+int LuaParser::DispatchEventItem(QuestEventID evt, Client *client, EQEmu::ItemInstance *item, Mob *mob, std::string data, uint32 extra_data,
 								  std::vector<EQEmu::Any> *extra_pointers) {
 	evt = ConvertLuaEvent(evt);
 	if(evt >= _LargestEventID) {

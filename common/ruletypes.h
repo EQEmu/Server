@@ -55,6 +55,7 @@ RULE_REAL(Character, AAExpMultiplier, 0.5)
 RULE_REAL(Character, GroupExpMultiplier, 0.5)
 RULE_REAL(Character, RaidExpMultiplier, 0.2)
 RULE_BOOL(Character, UseXPConScaling, true)
+RULE_INT(Character, ShowExpValues, 0) //0 - normal, 1 - Show raw experience values, 2 - Show raw experience values AND percent.
 RULE_INT(Character, LightBlueModifier, 40)
 RULE_INT(Character, BlueModifier, 90)
 RULE_INT(Character, WhiteModifier, 100)
@@ -146,7 +147,7 @@ RULE_BOOL(Character, EnableAvoidanceCap, false)
 RULE_INT(Character, AvoidanceCap, 750) // 750 Is a pretty good value, seen people dodge all attacks beyond 1,000 Avoidance
 RULE_BOOL(Character, AllowMQTarget, false) // Disables putting players in the 'hackers' list for targeting beyond the clip plane or attempting to target something untargetable
 RULE_BOOL(Character, UseOldBindWound, false) // Uses the original bind wound behavior
-
+RULE_BOOL(Character, GrantHoTTOnCreate, false) // Grant Health of Target's Target leadership AA on character creation
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Mercs)
@@ -332,11 +333,11 @@ RULE_INT(Spells, SacrificeMinLevel, 46)	//first level Sacrifice will work on
 RULE_INT(Spells, SacrificeMaxLevel, 69)	//last level Sacrifice will work on
 RULE_INT(Spells, SacrificeItemID, 9963)	//Item ID of the item Sacrifice will return (defaults to an EE)
 RULE_BOOL(Spells, EnableSpellGlobals, false)	// If Enabled, spells check the spell_globals table and compare character data from the quest globals before allowing that spell to scribe with scribespells
-RULE_INT(Spells, MaxBuffSlotsNPC, 25)
-RULE_INT(Spells, MaxSongSlotsNPC, 10)
-RULE_INT(Spells, MaxDiscSlotsNPC, 1)
-RULE_INT(Spells, MaxTotalSlotsNPC, 36)
-RULE_INT(Spells, MaxTotalSlotsPET, 30)	// do not set this higher than 25 until the player profile is removed from the blob
+RULE_INT(Spells, MaxBuffSlotsNPC, 60)	// default to Tit's limit
+RULE_INT(Spells, MaxSongSlotsNPC, 0)	// NPCs don't have songs ...
+RULE_INT(Spells, MaxDiscSlotsNPC, 0)	// NPCs don't have discs ...
+RULE_INT(Spells, MaxTotalSlotsNPC, 60)	// default to Tit's limit
+RULE_INT(Spells, MaxTotalSlotsPET, 30)	// default to Tit's limit
 RULE_BOOL (Spells, EnableBlockedBuffs, true)
 RULE_INT(Spells, ReflectType, 1) //0 = disabled, 1 = single target player spells only, 2 = all player spells, 3 = all single target spells, 4 = all spells
 RULE_INT(Spells, VirusSpreadDistance, 30) // The distance a viral spell will jump to its next victim
@@ -490,6 +491,7 @@ RULE_BOOL(Combat, UseLiveCombatRounds, true) // turn this false if you don't wan
 RULE_INT(Combat, NPCAssistCap, 5) // Maxiumium number of NPCs that will assist another NPC at once
 RULE_INT(Combat, NPCAssistCapTimer, 6000) // Time in milliseconds a NPC will take to clear assist aggro cap space
 RULE_BOOL(Combat, UseRevampHandToHand, false) // use h2h revamped dmg/delays I believe this was implemented during SoF
+RULE_BOOL(Combat, ClassicMasterWu, false) // classic master wu uses a random special, modern doesn't
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(NPC)

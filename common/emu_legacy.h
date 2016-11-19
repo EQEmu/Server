@@ -61,8 +61,6 @@ namespace EQEmu
 			SLOT_GENERAL_6 = 27,
 			SLOT_GENERAL_7 = 28,
 			SLOT_GENERAL_8 = 29,
-			//SLOT_GENERAL_9 = not supported
-			//SLOT_GENERAL_10 = not supported
 			SLOT_CURSOR = 30,
 			SLOT_CURSOR_END = (int16)0xFFFE, // I hope no one is using this...
 			SLOT_TRADESKILL = 1000,
@@ -96,75 +94,8 @@ namespace EQEmu
 			SLOT_WORLD_END = 4009
 		};
 
-		enum InventoryTypes : int16 {
-			TypePossessions = 0,
-			TypeBank,
-			TypeSharedBank,
-			TypeTrade,
-			TypeWorld,
-			TypeLimbo, // 5
-			TypeTribute,
-			TypeTrophyTribute,
-			TypeGuildTribute,
-			TypeMerchant,
-			TypeDeleted, // 10
-			TypeCorpse,
-			TypeBazaar,
-			TypeInspect,
-			TypeRealEstate,
-			TypeViewMODPC, // 15
-			TypeViewMODBank,
-			TypeViewMODSharedBank,
-			TypeViewMODLimbo,
-			TypeAltStorage,
-			TypeArchived, // 20
-			TypeMail,
-			TypeGuildTrophyTribute,
-			TypeKrono,
-			TypeOther,
-			TypeCount
-		};
-
-		enum PossessionsSlots : int16 {
-			SlotCharm = 0,
-			SlotEar1,
-			SlotHead,
-			SlotFace,
-			SlotEar2,
-			SlotNeck, // 5
-			SlotShoulders,
-			SlotArms,
-			SlotBack,
-			SlotWrist1,
-			SlotWrist2, // 10
-			SlotRange,
-			SlotHands,
-			SlotPrimary,
-			SlotSecondary,
-			SlotFinger1, // 15
-			SlotFinger2,
-			SlotChest,
-			SlotLegs,
-			SlotFeet,
-			SlotWaist, // 20
-			SlotPowerSource = 9999, // temp
-			SlotAmmo = 21, // temp
-			SlotGeneral1,
-			SlotGeneral2,
-			SlotGeneral3,
-			SlotGeneral4, // 25
-			SlotGeneral5,
-			SlotGeneral6,
-			SlotGeneral7,
-			SlotGeneral8,
-			//SlotGeneral9,
-			//SlotGeneral10,
-			SlotCursor, // 30
-			SlotCount
-		};
-
 		// these are currently hard-coded for existing inventory system..do not use in place of special client version handlers until ready
-		static const uint16	TYPE_POSSESSIONS_SIZE = SlotCount;
+		static const uint16	TYPE_POSSESSIONS_SIZE = 31;
 		static const uint16 TYPE_BANK_SIZE = 24;
 		static const uint16 TYPE_SHARED_BANK_SIZE = 2;
 		static const uint16 TYPE_TRADE_SIZE = 8;
@@ -175,14 +106,14 @@ namespace EQEmu
 		static const uint16 TYPE_GUILD_TRIBUTE_SIZE = 0;
 		static const uint16 TYPE_MERCHANT_SIZE = 0;
 		static const uint16 TYPE_DELETED_SIZE = 0;
-		static const uint16 TYPE_CORPSE_SIZE = SlotCount; // no bitmask use..limits to size of client corpse window (see EQLimits::InventoryMapSize(MapCorpse, <EQClientVersion))
+		static const uint16 TYPE_CORPSE_SIZE = 31; // no bitmask use..limits to size of client corpse window (see EQLimits::InventoryMapSize(MapCorpse, <EQClientVersion))
 		static const uint16 TYPE_BAZAAR_SIZE = 80;
 		static const uint16 TYPE_INSPECT_SIZE = 22;
 		static const uint16 TYPE_REAL_ESTATE_SIZE = 0;
-		static const uint16 TYPE_VIEW_MOD_PC_SIZE = 0;//NOT_USED;
-		static const uint16 TYPE_VIEW_MOD_BANK_SIZE = 0;//NOT_USED;
-		static const uint16 TYPE_VIEW_MOD_SHARED_BANK_SIZE = 0;//NOT_USED;
-		static const uint16 TYPE_VIEW_MOD_LIMBO_SIZE = 0;//NOT_USED;
+		static const uint16 TYPE_VIEW_MOD_PC_SIZE = 0;
+		static const uint16 TYPE_VIEW_MOD_BANK_SIZE = 0;
+		static const uint16 TYPE_VIEW_MOD_SHARED_BANK_SIZE = 0;
+		static const uint16 TYPE_VIEW_MOD_LIMBO_SIZE = 0;
 		static const uint16 TYPE_ALT_STORAGE_SIZE = 0;
 		static const uint16 TYPE_ARCHIVED_SIZE = 0;
 		static const uint16 TYPE_MAIL_SIZE = 0;
@@ -192,12 +123,12 @@ namespace EQEmu
 
 		// most of these definitions will go away with the structure-based system..this maintains compatibility for now
 		// (these are mainly to assign specific values to constants used in conversions and to identify per-client ranges/offsets)
-		static const int16 EQUIPMENT_BEGIN = SlotCharm;
-		static const int16 EQUIPMENT_END = SlotAmmo;
+		static const int16 EQUIPMENT_BEGIN = 0;
+		static const int16 EQUIPMENT_END = 21;
 		static const uint16 EQUIPMENT_SIZE = 22; // does not account for 'Power Source' - used mainly for npc equipment arrays
 
-		static const int16 GENERAL_BEGIN = SlotGeneral1;
-		static const int16 GENERAL_END = SlotGeneral8;
+		static const int16 GENERAL_BEGIN = 22;
+		static const int16 GENERAL_END = 29;
 		static const uint16 GENERAL_SIZE = 8;
 		static const int16 GENERAL_BAGS_BEGIN = 251;
 		static const int16 GENERAL_BAGS_END_OFFSET = 79;
@@ -235,22 +166,17 @@ namespace EQEmu
 		static const int16 TRIBUTE_SIZE = TYPE_TRIBUTE_SIZE;
 
 		static const int16 CORPSE_BEGIN = 22;
-		//static const int16 CORPSE_END = RoF::consts::CORPSE_END; // not ready for use
-
-		// items
-		// common and container sizes will not increase until the new 'location' struct is implemented
-		static const uint16 ITEM_COMMON_SIZE = 6;//RoF::consts::ITEM_COMMON_SIZE;
-		static const uint16 ITEM_CONTAINER_SIZE = 10;//Titanium::consts::ITEM_CONTAINER_SIZE;
 
 		// BANDOLIERS_SIZE sets maximum limit..active limit will need to be handled by the appropriate AA or spell (or item?)
-		static const size_t BANDOLIERS_SIZE = 20;//RoF2::consts::BANDOLIERS_SIZE;			// number of bandolier instances
-		static const size_t BANDOLIER_ITEM_COUNT = 4;//RoF2::consts::BANDOLIER_ITEM_COUNT;	// number of equipment slots in bandolier instance
+		static const size_t BANDOLIERS_SIZE = 20;		// number of bandolier instances
+		static const size_t BANDOLIER_ITEM_COUNT = 4;	// number of equipment slots in bandolier instance
 
 		// POTION_BELT_SIZE sets maximum limit..active limit will need to be handled by the appropriate AA or spell (or item?)
-		static const size_t POTION_BELT_ITEM_COUNT = 5;//RoF2::consts::POTION_BELT_ITEM_COUNT;
+		static const size_t POTION_BELT_ITEM_COUNT = 5;
 
-		static const size_t TEXT_LINK_BODY_LENGTH = 56;//RoF2::consts::TEXT_LINK_BODY_LENGTH;
+		static const size_t TEXT_LINK_BODY_LENGTH = 56;
 	}
+
 }
 
 #endif /* COMMON_EMU_LEGACY_H */
