@@ -568,7 +568,11 @@ struct MercData {
 	uint32	NPCID;
 };
 
-class ItemInst;
+namespace EQEmu
+{
+	class ItemInstance;
+}
+
 class Mob;
 // All data associated with a single trade
 class Trade
@@ -606,7 +610,7 @@ public:
 
 private:
 	// Send item data for trade item to other person involved in trade
-	void SendItemData(const ItemInst* inst, int16 dest_slot_id);
+	void SendItemData(const EQEmu::ItemInstance* inst, int16 dest_slot_id);
 
 	uint32 with_id;
 	Mob* owner;

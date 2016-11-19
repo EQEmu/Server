@@ -200,7 +200,7 @@ bool QuestParserCollection::SpellHasQuestSub(uint32 spell_id, QuestEventID evt) 
 	return false;
 }
 
-bool QuestParserCollection::ItemHasQuestSub(ItemInst *itm, QuestEventID evt) {
+bool QuestParserCollection::ItemHasQuestSub(EQEmu::ItemInstance *itm, QuestEventID evt) {
 	if (itm == nullptr)
 		return false;
 
@@ -352,7 +352,7 @@ int QuestParserCollection::EventPlayerGlobal(QuestEventID evt, Client *client, s
 	return 0;
 }
 
-int QuestParserCollection::EventItem(QuestEventID evt, Client *client, ItemInst *item, Mob *mob, std::string data, uint32 extra_data,
+int QuestParserCollection::EventItem(QuestEventID evt, Client *client, EQEmu::ItemInstance *item, Mob *mob, std::string data, uint32 extra_data,
 									 std::vector<EQEmu::Any> *extra_pointers) {
 	// needs pointer validation check on 'item' argument
 	
@@ -1013,7 +1013,7 @@ int QuestParserCollection::DispatchEventPlayer(QuestEventID evt, Client *client,
     return ret;
 }
 
-int QuestParserCollection::DispatchEventItem(QuestEventID evt, Client *client, ItemInst *item, Mob *mob, std::string data,
+int QuestParserCollection::DispatchEventItem(QuestEventID evt, Client *client, EQEmu::ItemInstance *item, Mob *mob, std::string data,
 											  uint32 extra_data, std::vector<EQEmu::Any> *extra_pointers) {
     int ret = 0;
 	auto iter = _load_precedence.begin();

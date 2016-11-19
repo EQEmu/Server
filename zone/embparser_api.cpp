@@ -110,7 +110,7 @@ XS(XS_QuestItem_new)
 	if (items != 1)
 		Perl_croak(aTHX_ "Usage: QuestItem::new()");
 
-	ItemInst* RETVAL;
+	EQEmu::ItemInstance* RETVAL;
 
 	RETVAL = quest_manager.GetQuestItem();
 	ST(0) = sv_newmortal();

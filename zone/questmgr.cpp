@@ -54,7 +54,7 @@ QuestManager quest_manager;
 #define QuestManagerCurrentQuestVars() \
 	Mob *owner = nullptr; \
 	Client *initiator = nullptr; \
-	ItemInst* questitem = nullptr; \
+	EQEmu::ItemInstance* questitem = nullptr; \
 	bool depop_npc = false; \
 	std::string encounter; \
 	do { \
@@ -116,7 +116,7 @@ void QuestManager::Process() {
 	}
 }
 
-void QuestManager::StartQuest(Mob *_owner, Client *_initiator, ItemInst* _questitem, std::string encounter) {
+void QuestManager::StartQuest(Mob *_owner, Client *_initiator, EQEmu::ItemInstance* _questitem, std::string encounter) {
 	running_quest run;
 	run.owner = _owner;
 	run.initiator = _initiator;
@@ -375,11 +375,11 @@ void QuestManager::selfcast(int spell_id) {
 		initiator->SpellFinished(spell_id, initiator, EQEmu::CastingSlot::Item, 0, -1, spells[spell_id].ResistDiff);
 }
 
-void QuestManager::addloot(int item_id, int charges, bool equipitem) {
+void QuestManager::addloot(int item_id, int charges, bool equipitem, int aug1, int aug2, int aug3, int aug4, int aug5, int aug6) {
 	QuestManagerCurrentQuestVars();
 	if(item_id != 0){
 		if(owner->IsNPC())
-			owner->CastToNPC()->AddItem(item_id, charges, equipitem);
+			owner->CastToNPC()->AddItem(item_id, charges, equipitem, aug1, aug2, aug3, aug4, aug5, aug6);
 	}
 }
 
@@ -450,7 +450,7 @@ void QuestManager::settimerMS(const char *timer_name, int milliseconds) {
 	QTimerList.push_back(QuestTimer(milliseconds, owner, timer_name));
 }
 
-void QuestManager::settimerMS(const char *timer_name, int milliseconds, ItemInst *inst) {
+void QuestManager::settimerMS(const char *timer_name, int milliseconds, EQEmu::ItemInstance *inst) {
 	if (inst) {
 		inst->SetTimer(timer_name, milliseconds);
 	}
@@ -493,7 +493,7 @@ void QuestManager::stoptimer(const char *timer_name) {
 	}
 }
 
-void QuestManager::stoptimer(const char *timer_name, ItemInst *inst) {
+void QuestManager::stoptimer(const char *timer_name, EQEmu::ItemInstance *inst) {
 	if (inst) {
 		inst->StopTimer(timer_name);
 	}
@@ -531,7 +531,7 @@ void QuestManager::stopalltimers() {
 	}
 }
 
-void QuestManager::stopalltimers(ItemInst *inst) {
+void QuestManager::stopalltimers(EQEmu::ItemInstance *inst) {
 	if (inst) {
 		inst->ClearTimers();
 	}
@@ -814,7 +814,7 @@ void QuestManager::traindisc(int discipline_tome_item_id) {
 }
 
 bool QuestManager::isdisctome(int item_id) {
-	const EQEmu::ItemBase *item = database.GetItem(item_id);
+	const EQEmu::ItemData *item = database.GetItem(item_id);
 	if(item == nullptr) {
 		return(false);
 	}
@@ -1305,7 +1305,7 @@ void QuestManager::settime(uint8 new_hour, uint8 new_min, bool update_world /*= 
 void QuestManager::itemlink(int item_id) {
 	QuestManagerCurrentQuestVars();
 	if (initiator) {
-		const EQEmu::ItemBase* item = database.GetItem(item_id);
+		const EQEmu::ItemData* item = database.GetItem(item_id);
 		if (item == nullptr)
 			return;
 
@@ -2408,7 +2408,7 @@ int QuestManager::collectitems_processSlot(int16 slot_id, uint32 item_id,
 	bool remove)
 {
 	QuestManagerCurrentQuestVars();
-	ItemInst *item = nullptr;
+	EQEmu::ItemInstance *item = nullptr;
 	int quantity = 0;
 
 	item = initiator->GetInv().GetItem(slot_id);
@@ -2497,7 +2497,7 @@ void QuestManager::MerchantSetItem(uint32 NPCid, uint32 itemid, uint32 quantity)
 	if (merchant == 0 || !merchant->IsNPC() || (merchant->GetClass() != MERCHANT))
 		return;	// don't do anything if NPCid isn't a merchant
 
-	const EQEmu::ItemBase* item = nullptr;
+	const EQEmu::ItemData* item = nullptr;
 	item = database.GetItem(itemid);
 	if (!item) return;		// if the item id doesn't correspond to a real item, do nothing
 
@@ -2510,7 +2510,7 @@ uint32 QuestManager::MerchantCountItem(uint32 NPCid, uint32 itemid) {
 	if (merchant == 0 || !merchant->IsNPC() || (merchant->GetClass() != MERCHANT))
 		return 0;	// if it isn't a merchant, it doesn't have any items
 
-	const EQEmu::ItemBase* item = nullptr;
+	const EQEmu::ItemData* item = nullptr;
 	item = database.GetItem(itemid);
 	if (!item)
 		return 0;	// if it isn't a valid item, the merchant doesn't have any
@@ -2533,7 +2533,7 @@ uint32 QuestManager::MerchantCountItem(uint32 NPCid, uint32 itemid) {
 // Item Link for use in Variables - "my $example_link = quest::varlink(item_id);"
 const char* QuestManager::varlink(char* perltext, int item_id) {
 	QuestManagerCurrentQuestVars();
-	const EQEmu::ItemBase* item = database.GetItem(item_id);
+	const EQEmu::ItemData* item = database.GetItem(item_id);
 	if (!item)
 		return "INVALID ITEM ID IN VARLINK";
 
@@ -3087,7 +3087,7 @@ Mob *QuestManager::GetOwner() const {
 	return nullptr;
 }
 
-ItemInst *QuestManager::GetQuestItem() const {
+EQEmu::ItemInstance *QuestManager::GetQuestItem() const {
 	if(!quests_running_.empty()) {
 		running_quest e = quests_running_.top();
 		return e.questitem;

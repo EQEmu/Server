@@ -1,6 +1,6 @@
 # EQEmulator Core Server
 |Travis CI (Linux)|Appveyor (Windows)   |
-|:---:|:---:|
+|:---:|:---:| 
 |[![Linux CI](https://travis-ci.org/EQEmu/Server.svg?branch=master)](https://travis-ci.org/EQEmu/Server)   |[![Windows CI](https://ci.appveyor.com/api/projects/status/d0cvokm7u732v8vl/branch/master?svg=true)](https://ci.appveyor.com/project/KimLS/server/branch/master)   |
 
 ***

@@ -638,6 +638,13 @@ bool Database::SaveCharacterCreate(uint32 character_id, uint32 account_id, Playe
 		character_id, pp->binds[4].zoneId, 0, pp->binds[4].x, pp->binds[4].y, pp->binds[4].z, pp->binds[4].heading, 4
 	); results = QueryDatabase(query);
 
+        /* HoTT Ability */
+        if(RuleB(Character, GrantHoTTOnCreate))
+        {
+                query = StringFormat("INSERT INTO `character_leadership_abilities` (id, slot, rank) VALUES (%u, %i, %i)", character_id, 14, 1);
+                results = QueryDatabase(query);
+        }
+
 	/* Save Skills */
 	int firstquery = 0;
 	for (int i = 0; i < MAX_PP_SKILL; i++){
@@ -672,7 +679,7 @@ bool Database::SaveCharacterCreate(uint32 character_id, uint32 account_id, Playe
 }
 
 /* This only for new Character creation storing */
-bool Database::StoreCharacter(uint32 account_id, PlayerProfile_Struct* pp, Inventory* inv) {
+bool Database::StoreCharacter(uint32 account_id, PlayerProfile_Struct* pp, EQEmu::InventoryProfile* inv) {
 	uint32 charid = 0; 
 	char zone[50]; 
 	float x, y, z; 
@@ -701,7 +708,7 @@ bool Database::StoreCharacter(uint32 account_id, PlayerProfile_Struct* pp, Inven
 	/* Insert starting inventory... */
 	std::string invquery;
 	for (int16 i = EQEmu::legacy::EQUIPMENT_BEGIN; i <= EQEmu::legacy::BANK_BAGS_END;) {
-		const ItemInst* newinv = inv->GetItem(i);
+		const EQEmu::ItemInstance* newinv = inv->GetItem(i);
 		if (newinv) {
 			invquery = StringFormat("INSERT INTO `inventory` (charid, slotid, itemid, charges, color) VALUES (%u, %i, %u, %i, %u)",
 				charid, i, newinv->GetItem()->ID, newinv->GetCharges(), newinv->GetColor()); 
@@ -709,7 +716,7 @@ bool Database::StoreCharacter(uint32 account_id, PlayerProfile_Struct* pp, Inven
 			auto results = QueryDatabase(invquery); 
 		}
 
-		if (i == EQEmu::legacy::SlotCursor) {
+		if (i == EQEmu::inventory::slotCursor) {
 			i = EQEmu::legacy::GENERAL_BAGS_BEGIN; 
 			continue;
 		}

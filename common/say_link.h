@@ -26,11 +26,11 @@
 
 
 struct ServerLootItem_Struct;
-class ItemInst;
 
 namespace EQEmu
 {
-	struct ItemBase;
+	struct ItemData;
+	class ItemInstance;
 	struct SayLinkBody_Struct;
 
 	namespace saylink {
@@ -67,9 +67,9 @@ namespace EQEmu
 		SayLinkEngine();
 
 		void SetLinkType(saylink::SayLinkType link_type) { m_LinkType = link_type; }
-		void SetItemData(const EQEmu::ItemBase* item_data) { m_ItemData = item_data; }
+		void SetItemData(const EQEmu::ItemData* item_data) { m_ItemData = item_data; }
 		void SetLootData(const ServerLootItem_Struct* loot_data) { m_LootData = loot_data; }
-		void SetItemInst(const ItemInst* item_inst) { m_ItemInst = item_inst; }
+		void SetItemInst(const ItemInstance* item_inst) { m_ItemInst = item_inst; }
 
 		// mainly for saylinks..but, not limited to
 		void SetProxyUnknown1(uint8 proxy_unknown_1) { m_Proxy_unknown_1 = proxy_unknown_1; }
@@ -103,9 +103,9 @@ namespace EQEmu
 		void generate_text();
 
 		int m_LinkType;
-		const ItemBase* m_ItemData;
+		const ItemData* m_ItemData;
 		const ServerLootItem_Struct* m_LootData;
-		const ItemInst* m_ItemInst;
+		const ItemInstance* m_ItemInst;
 
 		uint8 m_Proxy_unknown_1;
 		uint32 m_ProxyItemID;

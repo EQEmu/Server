@@ -93,7 +93,7 @@ class Spawn2;
 
 namespace EQEmu
 {
-	struct ItemBase;
+	struct ItemData;
 }
 
 class NPC : public Mob
@@ -110,7 +110,7 @@ public:
 	//abstract virtual function implementations requird by base abstract class
 	virtual bool Death(Mob* killerMob, int32 damage, uint16 spell_id, EQEmu::skills::SkillType attack_skill);
 	virtual void Damage(Mob* from, int32 damage, uint16 spell_id, EQEmu::skills::SkillType attack_skill, bool avoidable = true, int8 buffslot = -1, bool iBuffTic = false, int special = 0);
-	virtual bool Attack(Mob* other, int Hand = EQEmu::legacy::SlotPrimary, bool FromRiposte = false, bool IsStrikethrough = false,
+	virtual bool Attack(Mob* other, int Hand = EQEmu::inventory::slotPrimary, bool FromRiposte = false, bool IsStrikethrough = false,
 		bool IsFromSpell = false, ExtraAttackOptions *opts = nullptr, int special = 0);
 	virtual bool HasRaid() { return false; }
 	virtual bool HasGroup() { return false; }
@@ -178,8 +178,8 @@ public:
 	virtual void SpellProcess();
 	virtual void FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho);
 
-	void	AddItem(const EQEmu::ItemBase* item, uint16 charges, bool equipitem = true);
-	void	AddItem(uint32 itemid, uint16 charges, bool equipitem = true);
+	void	AddItem(const EQEmu::ItemData* item, uint16 charges, bool equipitem = true);
+	void	AddItem(uint32 itemid, uint16 charges, bool equipitem = true, uint32 aug1 = 0, uint32 aug2 = 0, uint32 aug3 = 0, uint32 aug4 = 0, uint32 aug5 = 0, uint32 aug6 = 0);
 	void	AddLootTable();
 	void	AddLootTable(uint32 ldid);
 	void	DescribeAggro(Client *towho, Mob *mob, bool verbose);
@@ -270,7 +270,7 @@ public:
 	bool	IsTaunting() const { return taunting; }
 	void	PickPocket(Client* thief);
 	void	StartSwarmTimer(uint32 duration) { swarm_timer.Start(duration); }
-	void	AddLootDrop(const EQEmu::ItemBase*dbitem, ItemList* itemlistconst, int16 charges, uint8 minlevel, uint8 maxlevel, bool equipit, bool wearchange = false);
+	void	AddLootDrop(const EQEmu::ItemData*dbitem, ItemList* itemlistconst, int16 charges, uint8 minlevel, uint8 maxlevel, bool equipit, bool wearchange = false, uint32 aug1 = 0, uint32 aug2 = 0, uint32 aug3 = 0, uint32 aug4 = 0, uint32 aug5 = 0, uint32 aug6 = 0);
 	virtual void DoClassAttacks(Mob *target);
 	void	CheckSignal();
 	inline bool IsNotTargetableWithHotkey() const { return no_target_hotkey; }
@@ -403,7 +403,7 @@ public:
 	void	SetMerchantProbability(uint8 amt) { probability = amt; }
 	uint8	GetMerchantProbability() { return probability; }
 	void	mod_prespawn(Spawn2 *sp);
-	int	mod_npc_damage(int damage, EQEmu::skills::SkillType skillinuse, int hand, const EQEmu::ItemBase* weapon, Mob* other);
+	int	mod_npc_damage(int damage, EQEmu::skills::SkillType skillinuse, int hand, const EQEmu::ItemData* weapon, Mob* other);
 	void	mod_npc_killed_merit(Mob* c);
 	void	mod_npc_killed(Mob* oos);
 	void	AISpellsList(Client *c);

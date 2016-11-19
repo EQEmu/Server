@@ -722,10 +722,12 @@ void WorldServer::Process() {
 					Log.Out(Logs::Detail, Logs::Spells, "OP_RezzComplete received in zone %s for corpse %s",
 								zone->GetShortName(), srs->rez.corpse_name);
 
-					Log.Out(Logs::Detail, Logs::Spells, "Found corpse. Marking corpse as rezzed.");
+					Log.Out(Logs::Detail, Logs::Spells, "Found corpse. Marking corpse as rezzed if needed.");
 					// I don't know why Rezzed is not set to true in CompleteRezz().
-					corpse->IsRezzed(true);
-					corpse->CompleteResurrection();
+					if (!IsEffectInSpell(srs->rez.spellid, SE_SummonToCorpse)) {
+						corpse->IsRezzed(true);
+						corpse->CompleteResurrection();
+					}
 				}
 			}
 

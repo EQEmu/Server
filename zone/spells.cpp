@@ -70,7 +70,7 @@ Copyright (C) 2001-2002 EQEMu Development Team (http://eqemu.org)
 #include "../common/classes.h"
 #include "../common/global_define.h"
 #include "../common/eqemu_logsys.h"
-#include "../common/item.h"
+#include "../common/item_instance.h"
 #include "../common/rulesys.h"
 #include "../common/skills.h"
 #include "../common/spdat.h"
@@ -256,7 +256,7 @@ bool Mob::CastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 	//Added to prevent MQ2 exploitation of equipping normally-unequippable/clickable items with effects and clicking them for benefits.
 	if(item_slot && IsClient() && (slot == CastingSlot::Item || slot == CastingSlot::PotionBelt))
 	{
-		ItemInst *itm = CastToClient()->GetInv().GetItem(item_slot);
+		EQEmu::ItemInstance *itm = CastToClient()->GetInv().GetItem(item_slot);
 		int bitmask = 1;
 		bitmask = bitmask << (CastToClient()->GetClass() - 1);
 		if( itm && itm->GetItem()->Classes != 65535 ) {
@@ -293,7 +293,7 @@ bool Mob::CastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 				return(false);
 			}
 		}
-		if (itm && (itm->GetItem()->Click.Type == EQEmu::item::ItemEffectEquipClick) && !(item_slot <= EQEmu::legacy::SlotAmmo || item_slot == EQEmu::legacy::SlotPowerSource)){
+		if (itm && (itm->GetItem()->Click.Type == EQEmu::item::ItemEffectEquipClick) && !(item_slot <= EQEmu::inventory::slotAmmo || item_slot == EQEmu::inventory::slotPowerSource)){
 			if (CastToClient()->ClientVersion() < EQEmu::versions::ClientVersion::SoF) {
 				// They are attempting to cast a must equip clicky without having it equipped
 				Log.Out(Logs::General, Logs::Error, "HACKER: %s (account: %s) attempted to click an equip-only effect on item %s (id: %d) without equiping it!", CastToClient()->GetCleanName(), CastToClient()->AccountName(), itm->GetItem()->Name, itm->GetItem()->ID);
@@ -936,7 +936,7 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 	if(IsClient() && (slot == CastingSlot::Item || slot == CastingSlot::PotionBelt))
 	{
 		IsFromItem = true;
-		ItemInst *itm = CastToClient()->GetInv().GetItem(inventory_slot);
+		EQEmu::ItemInstance *itm = CastToClient()->GetInv().GetItem(inventory_slot);
 		if(itm && itm->GetItem()->RecastDelay > 0)
 		{
 			if(!CastToClient()->GetPTimers().Expired(&database, (pTimerItemStart + itm->GetItem()->RecastType), false)) {
@@ -985,17 +985,23 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 	if(GetClass() == BARD) // bard's can move when casting any spell...
 	{
 		if (IsBardSong(spell_id)) {
-			if(spells[spell_id].buffduration == 0xFFFF || spells[spell_id].recast_time != 0) {
-				Log.Out(Logs::Detail, Logs::Spells, "Bard song %d not applying bard logic because duration or recast is wrong: dur=%d, recast=%d", spells[spell_id].buffduration, spells[spell_id].recast_time);
+			if(spells[spell_id].buffduration == 0xFFFF) {
+				Log.Out(Logs::Detail, Logs::Spells, "Bard song %d not applying bard logic because duration. dur=%d, recast=%d", spells[spell_id].buffduration);
 			} else {
-				bardsong = spell_id;
-				bardsong_slot = slot;
-				//NOTE: theres a lot more target types than this to think about...
-				if (spell_target == nullptr || (spells[spell_id].targettype != ST_Target && spells[spell_id].targettype != ST_AETarget))
-					bardsong_target_id = GetID();
-				else
-					bardsong_target_id = spell_target->GetID();
-				bardsong_timer.Start(6000);
+				// So long recast bard songs need special bard logic, although the effects don't repulse like other songs
+				// This is basically a hack to get that effect
+				// You can hold down the long recast spells, but you only get the effects once
+				// TODO fuck bards.
+				if (spells[spell_id].recast_time == 0) {
+					bardsong = spell_id;
+					bardsong_slot = slot;
+					//NOTE: theres a lot more target types than this to think about...
+					if (spell_target == nullptr || (spells[spell_id].targettype != ST_Target && spells[spell_id].targettype != ST_AETarget))
+						bardsong_target_id = GetID();
+					else
+						bardsong_target_id = spell_target->GetID();
+					bardsong_timer.Start(6000);
+				}
 				Log.Out(Logs::Detail, Logs::Spells, "Bard song %d started: slot %d, target id %d", bardsong, bardsong_slot, bardsong_target_id);
 				bard_song_mode = true;
 			}
@@ -1174,7 +1180,7 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 							missingreags=true;
 						}
 
-						const EQEmu::ItemBase *item = database.GetItem(component);
+						const EQEmu::ItemData *item = database.GetItem(component);
 						if(item) {
 							c->Message_StringID(13, MISSING_SPELL_COMP_ITEM, item->Name);
 							Log.Out(Logs::Detail, Logs::Spells, "Spell %d: Canceled. Missing required reagent %s (%d)", spell_id, item->Name, component);
@@ -1235,8 +1241,8 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 		&& inventory_slot != 0xFFFFFFFF)	// 10 is an item
 	{
 		bool fromaug = false;
-		const ItemInst* inst = CastToClient()->GetInv()[inventory_slot];
-		EQEmu::ItemBase* augitem = 0;
+		const EQEmu::ItemInstance* inst = CastToClient()->GetInv()[inventory_slot];
+		EQEmu::ItemData* augitem = 0;
 		uint32 recastdelay = 0;
 		uint32 recasttype = 0;
 
@@ -1244,12 +1250,12 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 			if (inst == nullptr)
 				break;
 
-			for (int r = AUG_INDEX_BEGIN; r < EQEmu::legacy::ITEM_COMMON_SIZE; r++) {
-				const ItemInst* aug_i = inst->GetAugment(r);
+			for (int r = EQEmu::inventory::socketBegin; r < EQEmu::inventory::SocketCount; r++) {
+				const EQEmu::ItemInstance* aug_i = inst->GetAugment(r);
 
 				if (!aug_i)
 					continue;
-				const EQEmu::ItemBase* aug = aug_i->GetItem();
+				const EQEmu::ItemData* aug = aug_i->GetItem();
 				if (!aug)
 					continue;
 
@@ -1285,7 +1291,7 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 
 		if (inst && inst->IsClassCommon() && (inst->GetItem()->Click.Effect == spell_id) && inst->GetCharges() || fromaug)
 		{
-			//const ItemBase* item = inst->GetItem();
+			//const ItemData* item = inst->GetItem();
 			int16 charges = inst->GetItem()->MaxCharges;
 
 			if(fromaug) { charges = -1; } //Don't destroy the parent item
@@ -2385,7 +2391,7 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, CastingSlot slot, ui
 
 	if(IsClient() && (slot == CastingSlot::Item || slot == CastingSlot::PotionBelt))
 	{
-		ItemInst *itm = CastToClient()->GetInv().GetItem(inventory_slot);
+		EQEmu::ItemInstance *itm = CastToClient()->GetInv().GetItem(inventory_slot);
 		if(itm && itm->GetItem()->RecastDelay > 0){
 			auto recast_type = itm->GetItem()->RecastType;
 			CastToClient()->GetPTimers().Start((pTimerItemStart + recast_type), itm->GetItem()->RecastDelay);
@@ -3385,11 +3391,6 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob *spelltar, bool reflect, bool use_r
 
 	if(spelltar->IsClient() && spelltar->CastToClient()->IsHoveringForRespawn())
 		return false;
-
-	if (spells[spell_id].sneak && IsClient() && !CastToClient()->sneaking){
-		Message_StringID(13, SNEAK_RESTRICT);
-		return false;//Fail Safe, this can cause a zone crash certain situations if you try to apply sneak effects when not sneaking.
-	}
 
 	if(IsDetrimentalSpell(spell_id) && !IsAttackAllowed(spelltar) && !IsResurrectionEffects(spell_id)) {
 		if(!IsClient() || !CastToClient()->GetGM()) {
@@ -5533,12 +5534,12 @@ int Client::GetCurrentBuffSlots() const
 		numbuffs++;
 	if (GetLevel() > 74)
 		numbuffs++;
-	return EQEmu::ClampUpper(numbuffs, GetMaxBuffSlots());
+	return EQEmu::ClampUpper(numbuffs, EQEmu::constants::Lookup(m_ClientVersion)->LongBuffs);
 }
 
 int Client::GetCurrentSongSlots() const
 {
-	return 12; // AAs dont affect this
+	return EQEmu::constants::Lookup(m_ClientVersion)->ShortBuffs; // AAs dont affect this
 }
 
 void Client::InitializeBuffSlots()
@@ -5647,12 +5648,16 @@ void Mob::BeamDirectional(uint16 spell_id, int16 resist_adjust)
 			auto fac = (*iter)->GetReverseFactionCon(this);
 			if (beneficial_targets) {
 				// only affect mobs we would assist.
-				if (!(fac <= FACTION_AMIABLE))
+				if (!(fac <= FACTION_AMIABLE)) {
+					++iter;
 					continue;
+				}
 			} else {
 				// affect mobs that are on our hate list, or which have bad faction with us
-				if (!(CheckAggro(*iter) || fac == FACTION_THREATENLY || fac == FACTION_SCOWLS))
+				if (!(CheckAggro(*iter) || fac == FACTION_THREATENLY || fac == FACTION_SCOWLS)) {
+					++iter;
 					continue;
+				}
 			}
 		}
 
@@ -5715,12 +5720,16 @@ void Mob::ConeDirectional(uint16 spell_id, int16 resist_adjust)
 			auto fac = (*iter)->GetReverseFactionCon(this);
 			if (beneficial_targets) {
 				// only affect mobs we would assist.
-				if (!(fac <= FACTION_AMIABLE))
+				if (!(fac <= FACTION_AMIABLE)) {
+					++iter;
 					continue;
+				}
 			} else {
 				// affect mobs that are on our hate list, or which have bad faction with us
-				if (!(CheckAggro(*iter) || fac == FACTION_THREATENLY || fac == FACTION_SCOWLS))
+				if (!(CheckAggro(*iter) || fac == FACTION_THREATENLY || fac == FACTION_SCOWLS)) {
+					++iter;
 					continue;
+				}
 			}
 		}
 

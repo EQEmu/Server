@@ -8092,8 +8092,8 @@ XS(XS_Mob_DoArcheryAttackDmg)
 	{
 		Mob *		THIS;
 		Mob*		target;
-		ItemInst*	RangeWeapon = nullptr;
-		ItemInst*	Ammo = nullptr;
+		EQEmu::ItemInstance*	RangeWeapon = nullptr;
+		EQEmu::ItemInstance*	Ammo = nullptr;
 		uint16		weapon_damage = (uint16)SvIV(ST(4));
 		int16		chance_mod = (int16)SvIV(ST(5));
 		int16		focus = (int16)SvIV(ST(6));
@@ -8130,8 +8130,8 @@ XS(XS_Mob_DoThrowingAttackDmg)
 	{
 		Mob *		THIS;
 		Mob*		target;
-		ItemInst*	RangeWeapon = nullptr;
-		EQEmu::ItemBase* item = nullptr;
+		EQEmu::ItemInstance*	RangeWeapon = nullptr;
+		EQEmu::ItemData* item = nullptr;
 		uint16		weapon_damage = (uint16)SvIV(ST(4));
 		int16		chance_mod = (int16)SvIV(ST(5));
 		int16		focus = (int16)SvIV(ST(6));

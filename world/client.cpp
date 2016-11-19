@@ -25,7 +25,7 @@
 #include "../common/eq_packet_structs.h"
 #include "../common/packet_dump.h"
 #include "../common/eq_stream_intf.h"
-#include "../common/item.h"
+#include "../common/inventory_profile.h"
 #include "../common/races.h"
 #include "../common/classes.h"
 #include "../common/languages.h"
@@ -1399,7 +1399,7 @@ bool Client::OPCharCreate(char *name, CharCreate_Struct *cc)
 {
 	PlayerProfile_Struct pp;
 	ExtendedProfile_Struct ext;
-	Inventory inv;
+	EQEmu::InventoryProfile inv;
 	time_t bday = time(nullptr);
 	char startzone[50]={0};
 	uint32 i;

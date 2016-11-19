@@ -36,6 +36,39 @@
 
 EQEmuLogSys Log;
 
+#ifdef _WINDOWS
+#include <direct.h>
+#else
+#include <unistd.h>
+#endif
+#include <sys/stat.h>
+
+inline bool MakeDirectory(const std::string &directory_name)
+{
+#ifdef _WINDOWS
+	struct _stat st;
+	if (_stat(directory_name.c_str(), &st) == 0) {
+		return false;
+	}
+	else {
+		_mkdir(directory_name.c_str());
+		return true;
+	}
+	
+#else
+	struct stat st;
+	if (stat(directory_name.c_str(), &st) == 0) {
+		return false;
+	}
+	else {
+		mkdir(directory_name.c_str(), 0755);
+		return true;
+	}
+
+#endif
+	return false;
+}
+
 int main(int argc, char **argv) {
 	RegisterExecutablePlatform(ExePlatformSharedMemory);
 	Log.LoadLogSettingsDefaults();
@@ -61,6 +94,11 @@ int main(int argc, char **argv) {
 	/* Register Log System and Settings */
 	database.LoadLogSettings(Log.log_settings);
 	Log.StartFileLogs();
+
+	std::string shared_mem_directory = Config->SharedMemDir;
+	if (MakeDirectory(shared_mem_directory)) {
+		Log.Out(Logs::General, Logs::Status, "Shared Memory folder doesn't exist, so we created it... '%s'", shared_mem_directory.c_str());
+	}
 
 	database.LoadVariables();
 

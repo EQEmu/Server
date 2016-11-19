@@ -190,7 +190,7 @@ struct TintProfile
 			Tint_Struct Primary;
 			Tint_Struct Secondary;
 		};
-		Tint_Struct Slot[EQEmu::textures::TextureCount];
+		Tint_Struct Slot[EQEmu::textures::materialCount];
 	};
 };
 
@@ -1082,7 +1082,7 @@ union
 	/*00184*/ Texture_Struct equipment[22];		// Total Slots
 };
 /*00624*/ uint32 equip2_count;			// Seen 9
-/*00628*/ Texture_Struct equipment2[EQEmu::textures::TextureCount];	// Appears to be Visible slots, but all 0s
+/*00628*/ Texture_Struct equipment2[EQEmu::textures::materialCount];	// Appears to be Visible slots, but all 0s
 /*00808*/ uint32 tint_count;			// Seen 9
 /*00812*/ TintProfile item_tint;		// RR GG BB 00
 /*00848*/ uint32 tint_count2;			// Seen 9
@@ -2423,7 +2423,7 @@ struct AdventureLeaderboard_Struct
 /*struct Item_Shop_Struct {
 	uint16 merchantid;
 	uint8 itemtype;
-	ItemBase item;
+	ItemData item;
 	uint8 iss_unknown001[6];
 };*/
 

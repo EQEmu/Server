@@ -127,7 +127,7 @@ struct LDoNTrapTemplate
 
 // All clients translate the character select information to some degree
 
-struct CharSelectEquip : EQEmu::Texture_Struct, EQEmu::Tint_Struct {};
+struct CharSelectEquip : EQEmu::textures::Texture_Struct, EQEmu::textures::Tint_Struct {};
 
 // RoF2-based hybrid struct
 struct CharacterSelectEntry_Struct
@@ -142,7 +142,7 @@ struct CharacterSelectEntry_Struct
 	uint16 Instance;
 	uint8 Gender;
 	uint8 Face;
-	CharSelectEquip	Equip[EQEmu::textures::TextureCount];
+	CharSelectEquip	Equip[EQEmu::textures::materialCount];
 	uint8 Unknown15;			// Seen FF
 	uint8 Unknown19;			// Seen FF
 	uint32 DrakkinTattoo;
@@ -834,7 +834,7 @@ struct SuspendedMinion_Struct
 	/*002*/	uint32 HP;
 	/*006*/	uint32 Mana;
 	/*010*/	SpellBuff_Struct Buffs[BUFF_COUNT];
-	/*510*/	EQEmu::TextureShortProfile Items;
+	/*510*/	EQEmu::TextureMaterialProfile Items;
 	/*546*/	char Name[64];
 	/*610*/
 };
@@ -942,7 +942,7 @@ struct PlayerProfile_Struct
 /*0304*/	uint8				ability_time_minutes;
 /*0305*/	uint8				ability_time_hours;	//place holder
 /*0306*/	uint8				unknown0306[6];		// @bp Spacer/Flag?
-/*0312*/	EQEmu::TextureShortProfile	item_material;	// Item texture/material of worn/held items
+/*0312*/	EQEmu::TextureMaterialProfile	item_material;	// Item texture/material of worn/held items
 /*0348*/	uint8				unknown0348[44];
 /*0392*/	EQEmu::TintProfile	item_tint;
 /*0428*/	AA_Array			aa_array[MAX_PP_AA_ARRAY];
@@ -1179,7 +1179,7 @@ struct WearChange_Struct{
 /*010*/ uint32 elite_material;	// 1 for Drakkin Elite Material
 /*014*/ uint32 hero_forge_model; // New to VoA
 /*018*/ uint32 unknown18; // New to RoF
-/*022*/ EQEmu::Tint_Struct color;
+/*022*/ EQEmu::textures::Tint_Struct color;
 /*026*/ uint8 wear_slot_id;
 /*027*/
 };
@@ -2071,7 +2071,7 @@ struct AdventureLeaderboard_Struct
 /*struct Item_Shop_Struct {
 	uint16 merchantid;
 	uint8 itemtype;
-	EQEmu::ItemBase item;
+	EQEmu::ItemData item;
 	uint8 iss_unknown001[6];
 };*/
 
@@ -3515,6 +3515,20 @@ struct RecipeAutoCombine_Struct {
 	uint32 reply_code;		// 93 64 e1 00 (junk) in request
 								// 00 00 00 00 in successful reply
 								// f5 ff ff ff in 'you dont have all the stuff' reply
+};
+
+// this is the "value#a" data
+enum EParticlePoint {
+	eDefault,
+	eChest,
+	eHead,
+	eLeftHand,
+	eRigthHand,
+	eLeftFoot,
+	eRightFood,
+	eLeftEye,
+	eRightEye,
+	eMouth
 };
 
 struct LevelAppearance_Struct { //Sends a little graphic on level up

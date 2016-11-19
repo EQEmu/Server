@@ -25,15 +25,19 @@
 #include <stack>
 
 class Client;
-class ItemInst;
 class Mob;
 class NPC;
+
+namespace EQEmu
+{
+	class ItemInstance;
+}
 
 class QuestManager {
 	struct running_quest {
 		Mob *owner;
 		Client *initiator;
-		ItemInst* questitem;
+		EQEmu::ItemInstance* questitem;
 		bool depop_npc;
 		std::string encounter;
 	};
@@ -41,7 +45,7 @@ public:
 	QuestManager();
 	virtual ~QuestManager();
 
-	void StartQuest(Mob *_owner, Client *_initiator = nullptr, ItemInst* _questitem = nullptr, std::string encounter = "");
+	void StartQuest(Mob *_owner, Client *_initiator = nullptr, EQEmu::ItemInstance* _questitem = nullptr, std::string encounter = "");
 	void EndQuest();
 	bool QuestsRunning() { return !quests_running_.empty(); }
 
@@ -66,17 +70,17 @@ public:
 	void incstat(int stat, int value);
 	void castspell(int spell_id, int target_id);
 	void selfcast(int spell_id);
-	void addloot(int item_id, int charges = 0, bool equipitem = true);
+	void addloot(int item_id, int charges = 0, bool equipitem = true, int aug1 = 0, int aug2 = 0, int aug3 = 0, int aug4 = 0, int aug5 = 0, int aug6 = 0);
 	void Zone(const char *zone_name);
 	void settimer(const char *timer_name, int seconds);
 	void settimerMS(const char *timer_name, int milliseconds);
-	void settimerMS(const char *timer_name, int milliseconds, ItemInst *inst);
+	void settimerMS(const char *timer_name, int milliseconds, EQEmu::ItemInstance *inst);
 	void settimerMS(const char *timer_name, int milliseconds, Mob *mob);
 	void stoptimer(const char *timer_name);
-	void stoptimer(const char *timer_name, ItemInst *inst);
+	void stoptimer(const char *timer_name, EQEmu::ItemInstance *inst);
 	void stoptimer(const char *timer_name, Mob *mob);
 	void stopalltimers();
-	void stopalltimers(ItemInst *inst);
+	void stopalltimers(EQEmu::ItemInstance *inst);
 	void stopalltimers(Mob *mob);
 	void emote(const char *str);
 	void shout(const char *str);
@@ -261,7 +265,7 @@ public:
 	Client *GetInitiator() const;
 	NPC *GetNPC() const;
 	Mob *GetOwner() const;
-	ItemInst *GetQuestItem() const;
+	EQEmu::ItemInstance *GetQuestItem() const;
 	std::string GetEncounter() const;
 	inline bool ProximitySayInUse() { return HaveProximitySays; }
 

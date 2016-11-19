@@ -5,10 +5,14 @@
 #include "worldserver.h"
 #include "zone.h"
 
-class ItemInst;
 class Spawn2;
 struct Consider_Struct;
 struct DBTradeskillRecipe_Struct;
+
+namespace EQEmu
+{
+	class ItemInstance;
+}
 
 extern EntityList entity_list;
 extern Zone* zone;
@@ -25,7 +29,7 @@ void Zone::mod_repop() { return; }
 void NPC::mod_prespawn(Spawn2 *sp) { return; }
 
 //Base damage from NPC::Attack
-int NPC::mod_npc_damage(int damage, EQEmu::skills::SkillType skillinuse, int hand, const EQEmu::ItemBase* weapon, Mob* other) { return(damage); }
+int NPC::mod_npc_damage(int damage, EQEmu::skills::SkillType skillinuse, int hand, const EQEmu::ItemData* weapon, Mob* other) { return(damage); }
 
 //Mob c has been given credit for a kill.  This is called after the regular EVENT_KILLED_MERIT event.
 void NPC::mod_npc_killed_merit(Mob* c) { return; }
@@ -34,7 +38,7 @@ void NPC::mod_npc_killed_merit(Mob* c) { return; }
 void NPC::mod_npc_killed(Mob* oos) { return; }
 
 //Base damage from Client::Attack - can cover myriad skill types
-int Client::mod_client_damage(int damage, EQEmu::skills::SkillType skillinuse, int hand, const ItemInst* weapon, Mob* other) { return(damage); }
+int Client::mod_client_damage(int damage, EQEmu::skills::SkillType skillinuse, int hand, const EQEmu::ItemInstance* weapon, Mob* other) { return(damage); }
 
 //message is char[4096], don't screw it up. Return true for normal behavior, false to return immediately.
 // Channels:
@@ -87,7 +91,7 @@ float Client::mod_tradeskill_chance(float chance, DBTradeskillRecipe_Struct *spe
 float Client::mod_tradeskill_skillup(float chance_stage2) { return(chance_stage2); }
 
 //Tribute value override
-int32 Client::mod_tribute_item_value(int32 pts, const ItemInst* item) { return(pts); }
+int32 Client::mod_tribute_item_value(int32 pts, const EQEmu::ItemInstance* item) { return(pts); }
 
 //Death reporting
 void Client::mod_client_death_npc(Mob* killerMob) { return; }
@@ -103,8 +107,8 @@ int32 Client::mod_client_xp(int32 in_xp, NPC *npc) { return(in_xp); }
 uint32 Client::mod_client_xp_for_level(uint32 xp, uint16 check_level) { return(xp); }
 
 //Food and drink values as computed by consume requests.  Return < 0 to abort the request.
-int Client::mod_food_value(const EQEmu::ItemBase *item, int change) { return(change); }
-int Client::mod_drink_value(const EQEmu::ItemBase *item, int change) { return(change); }
+int Client::mod_food_value(const EQEmu::ItemData *item, int change) { return(change); }
+int Client::mod_drink_value(const EQEmu::ItemData *item, int change) { return(change); }
 
 //effect_vallue - Spell effect value as calculated by default formulas.  You will want to ignore effects that don't lend themselves to scaling - pet ID's, gate coords, etc.
 int Mob::mod_effect_value(int effect_value, uint16 spell_id, int effect_type, Mob* caster, uint16 caster_id) { return(effect_value); }
@@ -148,13 +152,13 @@ int32 Mob::mod_monk_special_damage(int32 ndamage, EQEmu::skills::SkillType skill
 int32 Mob::mod_backstab_damage(int32 ndamage) { return(ndamage); }
 
 //Chance for 50+ archery bonus damage if Combat:UseArcheryBonusRoll is true.  Base is Combat:ArcheryBonusChance
-int Mob::mod_archery_bonus_chance(int bonuschance, const ItemInst* RangeWeapon) { return(bonuschance); }
+int Mob::mod_archery_bonus_chance(int bonuschance, const EQEmu::ItemInstance* RangeWeapon) { return(bonuschance); }
 
 //Archery bonus damage
-uint32 Mob::mod_archery_bonus_damage(uint32 MaxDmg, const ItemInst* RangeWeapon) { return(MaxDmg); }
+uint32 Mob::mod_archery_bonus_damage(uint32 MaxDmg, const EQEmu::ItemInstance* RangeWeapon) { return(MaxDmg); }
 
 //Final archery damage including bonus if it was applied.
-int32 Mob::mod_archery_damage(int32 TotalDmg, bool hasbonus, const ItemInst* RangeWeapon) { return(TotalDmg); }
+int32 Mob::mod_archery_damage(int32 TotalDmg, bool hasbonus, const EQEmu::ItemInstance* RangeWeapon) { return(TotalDmg); }
 
 //Thrown weapon damage after all other calcs
 uint16 Mob::mod_throwing_damage(uint16 MaxDmg) { return(MaxDmg); }

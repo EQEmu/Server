@@ -127,244 +127,244 @@ uint32 EQEmu::versions::ConvertClientVersionToExpansion(ClientVersion client_ver
 	}
 }
 
-bool EQEmu::versions::IsValidInventoryVersion(InventoryVersion inventory_version)
+bool EQEmu::versions::IsValidMobVersion(MobVersion mob_version)
 {
-	if (inventory_version <= InventoryVersion::Unknown || inventory_version > LastInventoryVersion)
+	if (mob_version <= MobVersion::Unknown || mob_version > LastMobVersion)
 		return false;
 
 	return true;
 }
 
-bool EQEmu::versions::IsValidPCInventoryVersion(InventoryVersion inventory_version)
+bool EQEmu::versions::IsValidPCMobVersion(MobVersion mob_version)
 {
-	if (inventory_version <= InventoryVersion::Unknown || inventory_version > LastPCInventoryVersion)
+	if (mob_version <= MobVersion::Unknown || mob_version > LastPCMobVersion)
 		return false;
 
 	return true;
 }
 
-bool EQEmu::versions::IsValidNonPCInventoryVersion(InventoryVersion inventory_version)
+bool EQEmu::versions::IsValidNonPCMobVersion(MobVersion mob_version)
 {
-	if (inventory_version <= LastPCInventoryVersion || inventory_version > LastNonPCInventoryVersion)
+	if (mob_version <= LastPCMobVersion || mob_version > LastNonPCMobVersion)
 		return false;
 
 	return true;
 }
 
-bool EQEmu::versions::IsValidOfflinePCInventoryVersion(InventoryVersion inventory_version)
+bool EQEmu::versions::IsValidOfflinePCMobVersion(MobVersion mob_version)
 {
-	if (inventory_version <= LastNonPCInventoryVersion || inventory_version > LastOfflinePCInventoryVersion)
+	if (mob_version <= LastNonPCMobVersion || mob_version > LastOfflinePCMobVersion)
 		return false;
 
 	return true;
 }
 
-EQEmu::versions::InventoryVersion EQEmu::versions::ValidateInventoryVersion(InventoryVersion inventory_version)
+EQEmu::versions::MobVersion EQEmu::versions::ValidateMobVersion(MobVersion mob_version)
 {
-	if (inventory_version <= InventoryVersion::Unknown || inventory_version > LastInventoryVersion)
-		return InventoryVersion::Unknown;
+	if (mob_version <= MobVersion::Unknown || mob_version > LastMobVersion)
+		return MobVersion::Unknown;
 
-	return inventory_version;
+	return mob_version;
 }
 
-EQEmu::versions::InventoryVersion EQEmu::versions::ValidatePCInventoryVersion(InventoryVersion inventory_version)
+EQEmu::versions::MobVersion EQEmu::versions::ValidatePCMobVersion(MobVersion mob_version)
 {
-	if (inventory_version <= InventoryVersion::Unknown || inventory_version > LastPCInventoryVersion)
-		return InventoryVersion::Unknown;
+	if (mob_version <= MobVersion::Unknown || mob_version > LastPCMobVersion)
+		return MobVersion::Unknown;
 
-	return inventory_version;
+	return mob_version;
 }
 
-EQEmu::versions::InventoryVersion EQEmu::versions::ValidateNonPCInventoryVersion(InventoryVersion inventory_version)
+EQEmu::versions::MobVersion EQEmu::versions::ValidateNonPCMobVersion(MobVersion mob_version)
 {
-	if (inventory_version <= LastPCInventoryVersion || inventory_version > LastNonPCInventoryVersion)
-		return InventoryVersion::Unknown;
+	if (mob_version <= LastPCMobVersion || mob_version > LastNonPCMobVersion)
+		return MobVersion::Unknown;
 
-	return inventory_version;
+	return mob_version;
 }
 
-EQEmu::versions::InventoryVersion EQEmu::versions::ValidateOfflinePCInventoryVersion(InventoryVersion inventory_version)
+EQEmu::versions::MobVersion EQEmu::versions::ValidateOfflinePCMobVersion(MobVersion mob_version)
 {
-	if (inventory_version <= LastNonPCInventoryVersion || inventory_version > LastOfflinePCInventoryVersion)
-		return InventoryVersion::Unknown;
+	if (mob_version <= LastNonPCMobVersion || mob_version > LastOfflinePCMobVersion)
+		return MobVersion::Unknown;
 
-	return inventory_version;
+	return mob_version;
 }
 
-const char* EQEmu::versions::InventoryVersionName(InventoryVersion inventory_version)
+const char* EQEmu::versions::MobVersionName(MobVersion mob_version)
 {
-	switch (inventory_version) {
-	case InventoryVersion::Unknown:
+	switch (mob_version) {
+	case MobVersion::Unknown:
 		return "Unknown Version";
-	case InventoryVersion::Client62:
+	case MobVersion::Client62:
 		return "Client 6.2";
-	case InventoryVersion::Titanium:
+	case MobVersion::Titanium:
 		return "Titanium";
-	case InventoryVersion::SoF:
+	case MobVersion::SoF:
 		return "SoF";
-	case InventoryVersion::SoD:
+	case MobVersion::SoD:
 		return "SoD";
-	case InventoryVersion::UF:
+	case MobVersion::UF:
 		return "UF";
-	case InventoryVersion::RoF:
+	case MobVersion::RoF:
 		return "RoF";
-	case InventoryVersion::RoF2:
+	case MobVersion::RoF2:
 		return "RoF2";
-	case InventoryVersion::NPC:
+	case MobVersion::NPC:
 		return "NPC";
-	case InventoryVersion::NPCMerchant:
+	case MobVersion::NPCMerchant:
 		return "NPC Merchant";
-	case InventoryVersion::Merc:
+	case MobVersion::Merc:
 		return "Merc";
-	case InventoryVersion::Bot:
+	case MobVersion::Bot:
 		return "Bot";
-	case InventoryVersion::ClientPet:
+	case MobVersion::ClientPet:
 		return "Client Pet";
-	case InventoryVersion::NPCPet:
+	case MobVersion::NPCPet:
 		return "NPC Pet";
-	case InventoryVersion::MercPet:
+	case MobVersion::MercPet:
 		return "Merc Pet";
-	case InventoryVersion::BotPet:
+	case MobVersion::BotPet:
 		return "Bot Pet";
-	case InventoryVersion::OfflineTitanium:
+	case MobVersion::OfflineTitanium:
 		return "Offline Titanium";
-	case InventoryVersion::OfflineSoF:
+	case MobVersion::OfflineSoF:
 		return "Offline SoF";
-	case InventoryVersion::OfflineSoD:
+	case MobVersion::OfflineSoD:
 		return "Offline SoD";
-	case InventoryVersion::OfflineUF:
+	case MobVersion::OfflineUF:
 		return "Offline UF";
-	case InventoryVersion::OfflineRoF:
+	case MobVersion::OfflineRoF:
 		return "Offline RoF";
-	case InventoryVersion::OfflineRoF2:
+	case MobVersion::OfflineRoF2:
 		return "Offline RoF2";
 	default:
 		return "Invalid Version";
 	};
 }
 
-EQEmu::versions::ClientVersion EQEmu::versions::ConvertInventoryVersionToClientVersion(InventoryVersion inventory_version)
+EQEmu::versions::ClientVersion EQEmu::versions::ConvertMobVersionToClientVersion(MobVersion mob_version)
 {
-	switch (inventory_version) {
-	case InventoryVersion::Unknown:
-	case InventoryVersion::Client62:
+	switch (mob_version) {
+	case MobVersion::Unknown:
+	case MobVersion::Client62:
 		return ClientVersion::Unknown;
-	case InventoryVersion::Titanium:
+	case MobVersion::Titanium:
 		return ClientVersion::Titanium;
-	case InventoryVersion::SoF:
+	case MobVersion::SoF:
 		return ClientVersion::SoF;
-	case InventoryVersion::SoD:
+	case MobVersion::SoD:
 		return ClientVersion::SoD;
-	case InventoryVersion::UF:
+	case MobVersion::UF:
 		return ClientVersion::UF;
-	case InventoryVersion::RoF:
+	case MobVersion::RoF:
 		return ClientVersion::RoF;
-	case InventoryVersion::RoF2:
+	case MobVersion::RoF2:
 		return ClientVersion::RoF2;
 	default:
 		return ClientVersion::Unknown;
 	}
 }
 
-EQEmu::versions::InventoryVersion EQEmu::versions::ConvertClientVersionToInventoryVersion(ClientVersion client_version)
+EQEmu::versions::MobVersion EQEmu::versions::ConvertClientVersionToMobVersion(ClientVersion client_version)
 {
 	switch (client_version) {
 	case ClientVersion::Unknown:
 	case ClientVersion::Client62:
-		return InventoryVersion::Unknown;
+		return MobVersion::Unknown;
 	case ClientVersion::Titanium:
-		return InventoryVersion::Titanium;
+		return MobVersion::Titanium;
 	case ClientVersion::SoF:
-		return InventoryVersion::SoF;
+		return MobVersion::SoF;
 	case ClientVersion::SoD:
-		return InventoryVersion::SoD;
+		return MobVersion::SoD;
 	case ClientVersion::UF:
-		return InventoryVersion::UF;
+		return MobVersion::UF;
 	case ClientVersion::RoF:
-		return InventoryVersion::RoF;
+		return MobVersion::RoF;
 	case ClientVersion::RoF2:
-		return InventoryVersion::RoF2;
+		return MobVersion::RoF2;
 	default:
-		return InventoryVersion::Unknown;
+		return MobVersion::Unknown;
 	}
 }
 
-EQEmu::versions::InventoryVersion EQEmu::versions::ConvertPCInventoryVersionToOfflinePCInventoryVersion(InventoryVersion inventory_version)
+EQEmu::versions::MobVersion EQEmu::versions::ConvertPCMobVersionToOfflinePCMobVersion(MobVersion mob_version)
 {
-	switch (inventory_version) {
-	case InventoryVersion::Titanium:
-		return InventoryVersion::OfflineTitanium;
-	case InventoryVersion::SoF:
-		return InventoryVersion::OfflineSoF;
-	case InventoryVersion::SoD:
-		return InventoryVersion::OfflineSoD;
-	case InventoryVersion::UF:
-		return InventoryVersion::OfflineUF;
-	case InventoryVersion::RoF:
-		return InventoryVersion::OfflineRoF;
-	case InventoryVersion::RoF2:
-		return InventoryVersion::OfflineRoF2;
+	switch (mob_version) {
+	case MobVersion::Titanium:
+		return MobVersion::OfflineTitanium;
+	case MobVersion::SoF:
+		return MobVersion::OfflineSoF;
+	case MobVersion::SoD:
+		return MobVersion::OfflineSoD;
+	case MobVersion::UF:
+		return MobVersion::OfflineUF;
+	case MobVersion::RoF:
+		return MobVersion::OfflineRoF;
+	case MobVersion::RoF2:
+		return MobVersion::OfflineRoF2;
 	default:
-		return InventoryVersion::Unknown;
+		return MobVersion::Unknown;
 	}
 }
 
-EQEmu::versions::InventoryVersion EQEmu::versions::ConvertOfflinePCInventoryVersionToPCInventoryVersion(InventoryVersion inventory_version)
+EQEmu::versions::MobVersion EQEmu::versions::ConvertOfflinePCMobVersionToPCMobVersion(MobVersion mob_version)
 {
-	switch (inventory_version) {
-	case InventoryVersion::OfflineTitanium:
-		return InventoryVersion::Titanium;
-	case InventoryVersion::OfflineSoF:
-		return InventoryVersion::SoF;
-	case InventoryVersion::OfflineSoD:
-		return InventoryVersion::SoD;
-	case InventoryVersion::OfflineUF:
-		return InventoryVersion::UF;
-	case InventoryVersion::OfflineRoF:
-		return InventoryVersion::RoF;
-	case InventoryVersion::OfflineRoF2:
-		return InventoryVersion::RoF2;
+	switch (mob_version) {
+	case MobVersion::OfflineTitanium:
+		return MobVersion::Titanium;
+	case MobVersion::OfflineSoF:
+		return MobVersion::SoF;
+	case MobVersion::OfflineSoD:
+		return MobVersion::SoD;
+	case MobVersion::OfflineUF:
+		return MobVersion::UF;
+	case MobVersion::OfflineRoF:
+		return MobVersion::RoF;
+	case MobVersion::OfflineRoF2:
+		return MobVersion::RoF2;
 	default:
-		return InventoryVersion::Unknown;
+		return MobVersion::Unknown;
 	}
 }
 
-EQEmu::versions::ClientVersion EQEmu::versions::ConvertOfflinePCInventoryVersionToClientVersion(InventoryVersion inventory_version)
+EQEmu::versions::ClientVersion EQEmu::versions::ConvertOfflinePCMobVersionToClientVersion(MobVersion mob_version)
 {
-	switch (inventory_version) {
-	case InventoryVersion::OfflineTitanium:
+	switch (mob_version) {
+	case MobVersion::OfflineTitanium:
 		return ClientVersion::Titanium;
-	case InventoryVersion::OfflineSoF:
+	case MobVersion::OfflineSoF:
 		return ClientVersion::SoF;
-	case InventoryVersion::OfflineSoD:
+	case MobVersion::OfflineSoD:
 		return ClientVersion::SoD;
-	case InventoryVersion::OfflineUF:
+	case MobVersion::OfflineUF:
 		return ClientVersion::UF;
-	case InventoryVersion::OfflineRoF:
+	case MobVersion::OfflineRoF:
 		return ClientVersion::RoF;
-	case InventoryVersion::OfflineRoF2:
+	case MobVersion::OfflineRoF2:
 		return ClientVersion::RoF2;
 	default:
 		return ClientVersion::Unknown;
 	}
 }
 
-EQEmu::versions::InventoryVersion EQEmu::versions::ConvertClientVersionToOfflinePCInventoryVersion(ClientVersion client_version)
+EQEmu::versions::MobVersion EQEmu::versions::ConvertClientVersionToOfflinePCMobVersion(ClientVersion client_version)
 {
 	switch (client_version) {
 	case ClientVersion::Titanium:
-		return InventoryVersion::OfflineTitanium;
+		return MobVersion::OfflineTitanium;
 	case ClientVersion::SoF:
-		return InventoryVersion::OfflineSoF;
+		return MobVersion::OfflineSoF;
 	case ClientVersion::SoD:
-		return InventoryVersion::OfflineSoD;
+		return MobVersion::OfflineSoD;
 	case ClientVersion::UF:
-		return InventoryVersion::OfflineUF;
+		return MobVersion::OfflineUF;
 	case ClientVersion::RoF:
-		return InventoryVersion::OfflineRoF;
+		return MobVersion::OfflineRoF;
 	case ClientVersion::RoF2:
-		return InventoryVersion::OfflineRoF2;
+		return MobVersion::OfflineRoF2;
 	default:
-		return InventoryVersion::Unknown;
+		return MobVersion::Unknown;
 	}
 }
