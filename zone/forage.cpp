@@ -221,8 +221,6 @@ bool Client::CanFish() {
 void Client::GoFish()
 {
 
-	bool junk=false;
-
 	//TODO: generate a message if we're already fishing
 	/*if (!fishing_timer.Check()) {	//this isn't the right check, may need to add something to the Client class like 'bool is_fishing'
 		Message_StringID(0, ALREADY_FISHING);	//You are already fishing!
@@ -304,15 +302,13 @@ void Client::GoFish()
 		if(food_id == 0) {
 			int index = zone->random.Int(0, MAX_COMMON_FISH_IDS-1);
 			food_id = common_fish_ids[index];
-			if (food_id != 13019) {
-				junk=true; // Alters the message to "caught something..."
 			}
 			
 		}
 
 		const EQEmu::ItemData* food_item = database.GetItem(food_id);
 
-		if (junk == true) {
+		if (food_item->ItemType  != ItemTypeFood) { // non-fish oddity
 			Message_StringID(MT_Skills, FISHING_SUCCESS);
 		}
 		else {
