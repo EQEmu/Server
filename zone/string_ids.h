@@ -46,6 +46,7 @@
 #define FISHING_FAILED				168		//You didn't catch anything.
 #define FISHING_POLE_BROKE			169		//Your fishing pole broke!
 #define FISHING_SUCCESS				170		//You caught, something...
+#define FISHING_SUCCESS_FISH_NAME	421		//You caught %1!
 #define FISHING_SPILL_BEER			171		//You spill your beer while bringing in your line.
 #define FISHING_LOST_BAIT			172		//You lost your bait!
 #define SPELL_FIZZLE				173		//Your spell fizzles!
