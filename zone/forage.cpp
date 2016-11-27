@@ -303,12 +303,10 @@ void Client::GoFish()
 			int index = zone->random.Int(0, MAX_COMMON_FISH_IDS-1);
 			food_id = common_fish_ids[index];
 			}
-			
-		}
 
 		const EQEmu::ItemData* food_item = database.GetItem(food_id);
 
-		if (food_item->ItemType  != ItemTypeFood) { // non-fish oddity
+		if (food_item->ItemType  != EQEmu::item::ItemTypeFood) {
 			Message_StringID(MT_Skills, FISHING_SUCCESS);
 		}
 		else {
