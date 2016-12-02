@@ -424,6 +424,7 @@ Client::~Client() {
 
 void Client::SendZoneInPackets()
 {
+
 	//////////////////////////////////////////////////////
 	// Spawn Appearance Packet
 	auto outapp = new EQApplicationPacket(OP_SpawnAppearance, sizeof(SpawnAppearance_Struct));
