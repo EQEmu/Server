@@ -1,8 +1,9 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 21/01/2016 ==
+Uleat: Disabled RoF+ clients from augmentation items not in their possessions slots (0-29, 9999, 251-330) to abate an exploit in the current code
 == 11/19/2016 ==
 Noudess: Added code to support defensive procs for mobs as per npc_spells.
-
 == 10/17/2016 ==
 Uleat: Moved namespace ItemField from item_instance.h to shareddb.cpp - the only place it is used
 Uleat: Separated class Inventory from item_instance files into inventory_profile files

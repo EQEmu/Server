@@ -493,6 +493,7 @@ int Client::HandlePacket(const EQApplicationPacket *app)
 // Finish client connecting state
 void Client::CompleteConnect()
 {
+
 	UpdateWho();
 	client_state = CLIENT_CONNECTED;
 	SendAllPackets();
@@ -501,27 +502,6 @@ void Client::CompleteConnect()
 	autosave_timer.Start();
 	SetDuelTarget(0);
 	SetDueling(false);
-
-	database.LoadPetInfo(this);
-	/*
-	This was moved before the spawn packets are sent
-	in hopes that it adds more consistency...
-	Remake pet
-	*/
-	if (m_petinfo.SpellID > 1 && !GetPet() && m_petinfo.SpellID <= SPDAT_RECORDS) {
-		MakePoweredPet(m_petinfo.SpellID, spells[m_petinfo.SpellID].teleport_zone, m_petinfo.petpower, m_petinfo.Name, m_petinfo.size);
-		if (GetPet() && GetPet()->IsNPC()) {
-			NPC *pet = GetPet()->CastToNPC();
-			pet->SetPetState(m_petinfo.Buffs, m_petinfo.Items);
-			pet->CalcBonuses();
-			pet->SetHP(m_petinfo.HP);
-			pet->SetMana(m_petinfo.Mana);
-		}
-		m_petinfo.SpellID = 0;
-	}
-	/* Moved here so it's after where we load the pet data. */
-	if (!GetAA(aaPersistentMinion))
-		memset(&m_suspendedminion, 0, sizeof(PetInfo));
 
 	EnteringMessages(this);
 	LoadZoneFlags();
@@ -1480,7 +1460,7 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 
 		database.LoadBuffs(this);
 		uint32 max_slots = GetMaxBuffSlots();
-		for (int i = 0; i < max_slots; i++) {
+		for (int i = 0; i < BUFF_COUNT; i++) {
 			if (buffs[i].spellid != SPELL_UNKNOWN) {
 				m_pp.buffs[i].spellid = buffs[i].spellid;
 				m_pp.buffs[i].bard_modifier = buffs[i].instrument_mod;
@@ -1648,6 +1628,23 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 
 	if (m_pp.RestTimer)
 		rest_timer.Start(m_pp.RestTimer * 1000);
+
+	/* Load Pet */
+	database.LoadPetInfo(this);
+	if (m_petinfo.SpellID > 1 && !GetPet() && m_petinfo.SpellID <= SPDAT_RECORDS) {
+		MakePoweredPet(m_petinfo.SpellID, spells[m_petinfo.SpellID].teleport_zone, m_petinfo.petpower, m_petinfo.Name, m_petinfo.size);
+		if (GetPet() && GetPet()->IsNPC()) {
+			NPC *pet = GetPet()->CastToNPC();
+			pet->SetPetState(m_petinfo.Buffs, m_petinfo.Items);
+			pet->CalcBonuses();
+			pet->SetHP(m_petinfo.HP);
+			pet->SetMana(m_petinfo.Mana);
+		}
+		m_petinfo.SpellID = 0;
+	}
+	/* Moved here so it's after where we load the pet data. */
+	if (!GetAA(aaPersistentMinion))
+		memset(&m_suspendedminion, 0, sizeof(PetInfo));
 
 	/* Server Zone Entry Packet */
 	outapp = new EQApplicationPacket(OP_ZoneEntry, sizeof(ServerZoneEntry_Struct));
@@ -2933,6 +2930,19 @@ void Client::Handle_OP_AugmentItem(const EQApplicationPacket *app)
 	bool deleteItems = false;
 	if (ClientVersion() >= EQEmu::versions::ClientVersion::RoF)
 	{
+		if ((in_augment->container_slot < 0 || in_augment->container_slot >= EQEmu::legacy::SLOT_CURSOR) &&
+			in_augment->container_slot != EQEmu::legacy::SLOT_POWER_SOURCE &&
+			(in_augment->container_slot < EQEmu::legacy::SLOT_PERSONAL_BAGS_BEGIN || in_augment->container_slot > EQEmu::legacy::SLOT_PERSONAL_BAGS_END))
+		{
+			Message(13, "The server does not allow augmentation actions from this slot.");
+			auto cursor_item = m_inv[EQEmu::legacy::SLOT_CURSOR];
+			auto augmented_item = m_inv[in_augment->container_slot];
+			SendItemPacket(EQEmu::legacy::SLOT_CURSOR, cursor_item, ItemPacketCharInventory);
+			// this may crash clients on certain slots
+			SendItemPacket(in_augment->container_slot, augmented_item, ItemPacketCharInventory);
+			return;
+		}
+
 		EQEmu::ItemInstance *itemOneToPush = nullptr, *itemTwoToPush = nullptr;
 
 		//Log.Out(Logs::DebugLevel::Moderate, Logs::Debug, "cslot: %i aslot: %i cidx: %i aidx: %i act: %i dest: %i",

@@ -348,6 +348,7 @@ public:
 	void ClearSpecialAbilities();
 	void ProcessSpecialAbilities(std::string str);
 	void SetAppearance(int app);
+	uint32 GetAppearance();
 	void SetAppearance(int app, bool ignore_self);
 	void SetDestructibleObject(bool set);
 	bool IsImmuneToSpell(int spell_id, Lua_Mob caster);
