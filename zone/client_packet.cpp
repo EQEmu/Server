@@ -1460,7 +1460,7 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 
 		database.LoadBuffs(this);
 		uint32 max_slots = GetMaxBuffSlots();
-		for (int i = 0; i < max_slots; i++) {
+		for (int i = 0; i < BUFF_COUNT; i++) {
 			if (buffs[i].spellid != SPELL_UNKNOWN) {
 				m_pp.buffs[i].spellid = buffs[i].spellid;
 				m_pp.buffs[i].bard_modifier = buffs[i].instrument_mod;
