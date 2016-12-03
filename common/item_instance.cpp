@@ -819,6 +819,32 @@ bool EQEmu::ItemInstance::IsSlotAllowed(int16 slot_id) const {
 	else { return false; }
 }
 
+bool EQEmu::ItemInstance::IsDroppable(bool recurse) const
+{
+	if (!m_item)
+		return false;
+	/*if (m_ornamentidfile) // not implemented
+		return false;*/
+	if (m_attuned)
+		return false;
+	/*if (m_item->FVNoDrop != 0) // not implemented
+		return false;*/
+	if (m_item->NoDrop == 0)
+		return false;
+
+	if (recurse) {
+		for (auto iter : m_contents) {
+			if (!iter.second)
+				continue;
+
+			if (!iter.second->IsDroppable(recurse))
+				return false;
+		}
+	}
+	
+	return true;
+}
+
 void EQEmu::ItemInstance::Initialize(SharedDatabase *db) {
 	// if there's no actual item, don't do anything
 	if (!m_item)
