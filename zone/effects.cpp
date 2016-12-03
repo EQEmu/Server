@@ -778,6 +778,11 @@ void EntityList::AESpell(Mob *caster, Mob *center, uint16 spell_id, bool affect_
 			continue;
 		if (spells[spell_id].targettype == ST_AreaNPCOnly && !curmob->IsNPC())
 			continue;
+		// check PC/NPC only flag 1 = PCs, 2 = NPCs
+		if (spells[spell_id].pcnpc_only_flag == 1 && !curmob->IsClient() && !curmob->IsMerc())
+			continue;
+		if (spells[spell_id].pcnpc_only_flag == 2 && (curmob->IsClient() || curmob->IsMerc()))
+			continue;
 
 		if (spells[spell_id].targettype == ST_Ring) {
 			dist_targ = DistanceSquared(static_cast<glm::vec3>(curmob->GetPosition()), caster->GetTargetRingLocation());

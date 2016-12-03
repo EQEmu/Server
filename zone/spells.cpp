@@ -3405,6 +3405,17 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob *spelltar, bool reflect, bool use_r
 	if(!IsValidSpell(spell_id))
 		return false;
 
+	// these target types skip pcnpc only check (according to dev quotes)
+	// other AE spells this is redundant, oh well
+	// 1 = PCs, 2 = NPCs
+	if (spells[spell_id].pcnpc_only_flag && spells[spell_id].targettype != ST_AETargetHateList &&
+	    spells[spell_id].targettype != ST_HateList) {
+		if (spells[spell_id].pcnpc_only_flag == 1 && !spelltar->IsClient() && !spelltar->IsMerc())
+			return false;
+		else if (spells[spell_id].pcnpc_only_flag == 2 && (spelltar->IsClient() || spelltar->IsMerc()))
+			return false;
+	}
+
 	uint16 caster_level = level_override > 0 ? level_override : GetCasterLevel(spell_id);
 
 	Log.Out(Logs::Detail, Logs::Spells, "Casting spell %d on %s with effective caster level %d", spell_id, spelltar->GetName(), caster_level);
@@ -5623,7 +5634,7 @@ void Mob::BeamDirectional(uint16 spell_id, int16 resist_adjust)
 	std::list<Mob *> targets_in_range;
 
 	entity_list.GetTargetsForConeArea(this, spells[spell_id].min_range, spells[spell_id].range,
-					  spells[spell_id].range / 2, targets_in_range);
+					  spells[spell_id].range / 2, spells[spell_id].pcnpc_only_flag, targets_in_range);
 	auto iter = targets_in_range.begin();
 
 	float dX = 0;
@@ -5698,7 +5709,7 @@ void Mob::ConeDirectional(uint16 spell_id, int16 resist_adjust)
 	std::list<Mob *> targets_in_range;
 
 	entity_list.GetTargetsForConeArea(this, spells[spell_id].min_range, spells[spell_id].aoerange,
-					  spells[spell_id].aoerange / 2, targets_in_range);
+					  spells[spell_id].aoerange / 2, spells[spell_id].pcnpc_only_flag, targets_in_range);
 	auto iter = targets_in_range.begin();
 
 	while (iter != targets_in_range.end()) {

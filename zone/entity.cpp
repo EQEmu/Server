@@ -4655,12 +4655,20 @@ Mob *EntityList::GetClosestMobByBodyType(Mob *sender, bodyType BodyType)
 	return ClosestMob;
 }
 
-void EntityList::GetTargetsForConeArea(Mob *start, float min_radius, float radius, float height, std::list<Mob*> &m_list)
+void EntityList::GetTargetsForConeArea(Mob *start, float min_radius, float radius, float height, int pcnpc, std::list<Mob*> &m_list)
 {
 	auto it = mob_list.begin();
 	while (it !=  mob_list.end()) {
 		Mob *ptr = it->second;
 		if (ptr == start) {
+			++it;
+			continue;
+		}
+		// check PC/NPC only flag 1 = PCs, 2 = NPCs
+		if (pcnpc == 1 && !ptr->IsClient() && !ptr->IsMerc()) {
+			++it;
+			continue;
+		} else if (pcnpc == 2 && (ptr->IsClient() || ptr->IsMerc())) {
 			++it;
 			continue;
 		}
