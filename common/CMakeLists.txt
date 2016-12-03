@@ -36,8 +36,6 @@ SET(common_sources
 	inventory_profile.cpp
 	inventory_slot.cpp
 	ipc_mutex.cpp
-	item.cpp
-	item_base.cpp
 	item_data.cpp
 	item_instance.cpp
 	json_config.cpp
