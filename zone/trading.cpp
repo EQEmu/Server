@@ -967,23 +967,37 @@ bool Client::CheckTradeLoreConflict(Client* other)
 {
 	if (!other)
 		return true;
-	// Move each trade slot into free inventory slot
-	for (int16 i = EQEmu::legacy::TRADE_BEGIN; i <= EQEmu::legacy::TRADE_END; i++){
-		const EQEmu::ItemInstance* inst = m_inv[i];
 
-		if (inst && inst->GetItem()) {
-			if (other->CheckLoreConflict(inst->GetItem()))
-				return true;
-		}
+	for (int16 index = EQEmu::legacy::TRADE_BEGIN; index <= EQEmu::legacy::TRADE_END; ++index) {
+		const EQEmu::ItemInstance* inst = m_inv[index];
+		if (!inst || !inst->GetItem())
+			continue;
+
+		if (other->CheckLoreConflict(inst->GetItem()))
+			return true;
 	}
 
-	for (int16 i = EQEmu::legacy::TRADE_BAGS_BEGIN; i <= EQEmu::legacy::TRADE_BAGS_END; i++){
-		const EQEmu::ItemInstance* inst = m_inv[i];
+	for (int16 index = EQEmu::legacy::TRADE_BAGS_BEGIN; index <= EQEmu::legacy::TRADE_BAGS_END; ++index) {
+		const EQEmu::ItemInstance* inst = m_inv[index];
+		if (!inst || !inst->GetItem())
+			continue;
 
-		if (inst && inst->GetItem()) {
-			if (other->CheckLoreConflict(inst->GetItem()))
-				return true;
-		}
+		if (other->CheckLoreConflict(inst->GetItem()))
+			return true;
+	}
+
+	return false;
+}
+
+bool Client::CheckTradeNonDroppable()
+{
+	for (int16 index = EQEmu::legacy::TRADE_BEGIN; index <= EQEmu::legacy::TRADE_END; ++index){
+		const EQEmu::ItemInstance* inst = m_inv[index];
+		if (!inst)
+			continue;
+
+		if (!inst->IsDroppable())
+			return true;
 	}
 
 	return false;

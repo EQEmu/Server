@@ -188,6 +188,8 @@ namespace EQEmu
 
 		bool IsSlotAllowed(int16 slot_id) const;
 
+		bool IsDroppable(bool recurse = true) const;
+
 		bool IsScaling() const				{ return m_scaling; }
 		bool IsEvolving() const				{ return (m_evolveLvl >= 1); }
 		uint32 GetExp() const				{ return m_exp; }

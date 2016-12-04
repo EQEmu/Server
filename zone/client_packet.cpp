@@ -13287,7 +13287,6 @@ void Client::Handle_OP_TradeAcceptClick(const EQApplicationPacket *app)
 			other->trade->state = TradeCompleting;
 			trade->state = TradeCompleting;
 
-			// should we do this for NoDrop items as well?
 			if (CheckTradeLoreConflict(other) || other->CheckTradeLoreConflict(this)) {
 				Message_StringID(13, TRADE_CANCEL_LORE);
 				other->Message_StringID(13, TRADE_CANCEL_LORE);
@@ -13295,6 +13294,26 @@ void Client::Handle_OP_TradeAcceptClick(const EQApplicationPacket *app)
 				other->FinishTrade(other);
 				other->trade->Reset();
 				trade->Reset();
+			}
+			else if (CheckTradeNonDroppable()) {
+				Message_StringID(13, TRADE_HAS_BEEN_CANCELLED);
+				other->Message_StringID(13, TRADE_HAS_BEEN_CANCELLED);
+				this->FinishTrade(this);
+				other->FinishTrade(other);
+				other->trade->Reset();
+				trade->Reset();
+				Message(15, "Hacking activity detected in trade transaction.");
+				// TODO: query (this) as a hacker
+			}
+			else if (other->CheckTradeNonDroppable()) {
+				Message_StringID(13, TRADE_HAS_BEEN_CANCELLED);
+				other->Message_StringID(13, TRADE_HAS_BEEN_CANCELLED);
+				this->FinishTrade(this);
+				other->FinishTrade(other);
+				other->trade->Reset();
+				trade->Reset();
+				other->Message(15, "Hacking activity detected in trade transaction.");
+				// TODO: query (other) as a hacker
 			}
 			else {
 				// Audit trade to database for both trade streams
