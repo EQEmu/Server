@@ -302,7 +302,7 @@ void Client::GoFish()
 		if(food_id == 0) {
 			int index = zone->random.Int(0, MAX_COMMON_FISH_IDS-1);
 			food_id = common_fish_ids[index];
-			}
+		}
 
 		const EQEmu::ItemData* food_item = database.GetItem(food_id);
 
