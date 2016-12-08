@@ -1223,7 +1223,6 @@ bool Client::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, b
 	if(GetTarget())
 		{
 		TriggerDefensiveProcs(other, Hand, true, damage);
-		TriggerDefensiveProcs(other, Hand, false);
 		}
 
 	if (damage > 0)
@@ -1795,7 +1794,6 @@ bool NPC::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool
 	if(GetHP() > 0 && !other->HasDied())
 		{
 		TriggerDefensiveProcs(other, Hand, true, damage);
-		TriggerDefensiveProcs(other, Hand, false);
 		}
 
 	if (damage > 0)
