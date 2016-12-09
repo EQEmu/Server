@@ -409,8 +409,19 @@ bool IsPartialCapableSpell(uint16 spell_id)
 	if (spells[spell_id].no_partial_resist)
 		return false;
 
-	if (IsPureNukeSpell(spell_id))
-		return true;
+	// spell uses 600 (partial) scale if first effect is damage, else it uses 200 scale.
+	// this includes DoTs.  no_partial_resist excludes spells like necro snares
+	for (int o = 0; o < EFFECT_COUNT; o++) {
+		auto tid = spells[spell_id].effectid[o];
+
+		if (IsBlankSpellEffect(spell_id, o))
+			continue;
+
+		if ((tid == SE_CurrentHPOnce || tid == SE_CurrentHP) && spells[spell_id].base[o] < 0)
+			return true;
+
+		return false;
+	}
 
 	return false;
 }
