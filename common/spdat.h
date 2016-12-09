@@ -502,7 +502,7 @@ typedef enum {
 #define SE_HeadShotLevel				346	// implemented[AA] - HeadShot max level to kill
 #define SE_DoubleRangedAttack			347	// implemented - chance at an additional archery attack (consumes arrow)
 #define SE_LimitManaMin					348	// implemented
-#define SE_ShieldEquipHateMod			349	// implemented[AA] Increase melee hate when wearing a shield.
+#define SE_ShieldEquipDmgMod			349	// implemented[AA] Increase melee base damage (indirectly increasing hate) when wearing a shield.
 #define SE_ManaBurn						350	// implemented - Drains mana for damage/heal at a defined ratio up to a defined maximum amount of mana.
 //#define SE_PersistentEffect			351	// *not implemented. creates a trap/totem that casts a spell (spell id + base1?) when anything comes near it. can probably make a beacon for this
 //#define SE_IncreaseTrapCount			352	// *not implemented - looks to be some type of invulnerability? Test ITC (8755)
@@ -519,7 +519,7 @@ typedef enum {
 #define SE_BandolierSlots				363	// *not implemented[AA] 'Battle Ready' expands the bandolier by one additional save slot per rank.
 #define SE_TripleAttackChance			364	// implemented
 #define SE_ProcOnSpellKillShot			365	// implemented - chance to trigger a spell on kill when the kill is caused by a specific spell with this effect in it (10470 Venin)
-#define SE_ShieldEquipDmgMod			366	// implemented[AA] Damage modifier to melee if shield equiped. (base1 = dmg mod , base2 = ?) ie Shield Specialist AA
+#define SE_GroupShielding				366	// *not implemented[AA] This gives you /shieldgroup
 #define SE_SetBodyType					367	// implemented - set body type of base1 so it can be affected by spells that are limited to that type (Plant, Animal, Undead, etc)
 //#define SE_FactionMod					368	// *not implemented - increases faction with base1 (faction id, live won't match up w/ ours) by base2
 #define SE_CorruptionCounter			369	// implemented
