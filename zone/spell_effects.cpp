@@ -2038,7 +2038,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 #endif
 				if(IsNPC()) {
 					if(GetLevel() <= 52)
-						CastToNPC()->Depop();
+						CastToNPC()->Depop(true);
 					else
 						Message(13, "Your target is too high level to be affected by this spell.");
 				}
