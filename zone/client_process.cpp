@@ -393,6 +393,7 @@ bool Client::Process() {
 			{
 				EQEmu::ItemInstance *wpn = GetInv().GetItem(EQEmu::inventory::slotPrimary);
 				TryWeaponProc(wpn, auto_attack_target, EQEmu::inventory::slotPrimary);
+				TriggerDefensiveProcs(auto_attack_target, EQEmu::inventory::slotPrimary, false);
 
 				DoAttackRounds(auto_attack_target, EQEmu::inventory::slotPrimary);
 				if (CheckAATimer(aaTimerRampage))
