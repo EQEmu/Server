@@ -1170,7 +1170,15 @@ void Corpse::LootItem(Client* client, const EQApplicationPacket* app) {
 		std::vector<EQEmu::Any> args;
 		args.push_back(inst);
 		args.push_back(this);
-		parse->EventPlayer(EVENT_LOOT, client, buf, 0, &args);
+		if (parse->EventPlayer(EVENT_LOOT, client, buf, 0, &args) != 0) {
+			lootitem->auto_loot = 0xFFFFFFFF;
+			client->Message_StringID(CC_Red, LOOT_NOT_ALLOWED, inst->GetItem()->Name);
+			client->QueuePacket(app);
+			SendEndLootErrorPacket(client); // shouldn't need this, but it will work for now
+			being_looted_by = 0;
+			delete inst;
+			return;
+		}
 		parse->EventItem(EVENT_LOOT, client, inst, this, buf, 0);
 
 		if (!IsPlayerCorpse() && RuleB(Character, EnableDiscoveredItems)) {
