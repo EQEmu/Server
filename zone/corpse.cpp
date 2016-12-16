@@ -1064,10 +1064,10 @@ void Corpse::MakeLootRequestPackets(Client* client, const EQApplicationPacket* a
 
 void Corpse::LootItem(Client *client, const EQApplicationPacket *app)
 {
-	/* This gets sent no matter what as a sort of ACK */
-	client->QueuePacket(app);
+	auto lootitem = (LootingItem_Struct *)app->pBuffer;
 
 	if (!loot_cooldown_timer.Check()) {
+		client->QueuePacket(app);
 		SendEndLootErrorPacket(client);
 		// unlock corpse for others
 		if (IsBeingLootedBy(client))
@@ -1078,6 +1078,7 @@ void Corpse::LootItem(Client *client, const EQApplicationPacket *app)
 	/* To prevent item loss for a player using 'Loot All' who doesn't have inventory space for all their items. */
 	if (RuleB(Character, CheckCursorEmptyWhenLooting) && !client->GetInv().CursorEmpty()) {
 		client->Message(13, "You may not loot an item while you have an item on your cursor.");
+		client->QueuePacket(app);
 		SendEndLootErrorPacket(client);
 		/* Unlock corpse for others */
 		if (IsBeingLootedBy(client))
@@ -1085,27 +1086,32 @@ void Corpse::LootItem(Client *client, const EQApplicationPacket *app)
 		return;
 	}
 
-	LootingItem_Struct *lootitem = (LootingItem_Struct *)app->pBuffer;
-
 	if (!IsBeingLootedBy(client)) {
 		client->Message(13, "Error: Corpse::LootItem: BeingLootedBy != client");
+		client->QueuePacket(app);
 		SendEndLootErrorPacket(client);
 		return;
 	}
+
 	if (IsPlayerCorpse() && !CanPlayerLoot(client->CharacterID()) && !become_npc &&
 	    (char_id != client->CharacterID() && client->Admin() < 150)) {
 		client->Message(13, "Error: This is a player corpse and you dont own it.");
+		client->QueuePacket(app);
 		SendEndLootErrorPacket(client);
 		return;
 	}
+
 	if (is_locked && client->Admin() < 100) {
+		client->QueuePacket(app);
 		SendLootReqErrorPacket(client, LootResponse::SomeoneElse);
 		client->Message(13, "Error: Corpse locked by GM.");
 		return;
 	}
+
 	if (IsPlayerCorpse() && (char_id != client->CharacterID()) && CanPlayerLoot(client->CharacterID()) &&
 	    GetPlayerKillItem() == 0) {
 		client->Message(13, "Error: You cannot loot any more items from this corpse.");
+		client->QueuePacket(app);
 		SendEndLootErrorPacket(client);
 		ResetLooter();
 		return;
@@ -1143,6 +1149,7 @@ void Corpse::LootItem(Client *client, const EQApplicationPacket *app)
 	if (client && inst) {
 		if (client->CheckLoreConflict(item)) {
 			client->Message_StringID(0, LOOT_LORE_ERROR);
+			client->QueuePacket(app);
 			SendEndLootErrorPacket(client);
 			ResetLooter();
 			delete inst;
@@ -1155,6 +1162,7 @@ void Corpse::LootItem(Client *client, const EQApplicationPacket *app)
 				if (itm) {
 					if (client->CheckLoreConflict(itm->GetItem())) {
 						client->Message_StringID(0, LOOT_LORE_ERROR);
+						client->QueuePacket(app);
 						SendEndLootErrorPacket(client);
 						ResetLooter();
 						delete inst;
@@ -1177,12 +1185,14 @@ void Corpse::LootItem(Client *client, const EQApplicationPacket *app)
 			lootitem->auto_loot = -1;
 			client->Message_StringID(CC_Red, LOOT_NOT_ALLOWED, inst->GetItem()->Name);
 			client->QueuePacket(app);
-			SendEndLootErrorPacket(client); // shouldn't need this, but it will work for now
-			ResetLooter();
 			delete inst;
 			return;
 		}
+		// do we want this to have a fail option too?
 		parse->EventItem(EVENT_LOOT, client, inst, this, buf, 0);
+
+		// safe to ACK now
+		client->QueuePacket(app);
 
 		if (!IsPlayerCorpse() && RuleB(Character, EnableDiscoveredItems)) {
 			if (client && !client->GetGM() && !client->IsDiscovered(inst->GetItem()->ID))
