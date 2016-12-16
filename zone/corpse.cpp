@@ -1174,7 +1174,7 @@ void Corpse::LootItem(Client *client, const EQApplicationPacket *app)
 		args.push_back(inst);
 		args.push_back(this);
 		if (parse->EventPlayer(EVENT_LOOT, client, buf, 0, &args) != 0) {
-			lootitem->auto_loot = 0xFFFFFFFF;
+			lootitem->auto_loot = -1;
 			client->Message_StringID(CC_Red, LOOT_NOT_ALLOWED, inst->GetItem()->Name);
 			client->QueuePacket(app);
 			SendEndLootErrorPacket(client); // shouldn't need this, but it will work for now
@@ -1199,7 +1199,7 @@ void Corpse::LootItem(Client *client, const EQApplicationPacket *app)
 		}
 
 		/* First add it to the looter - this will do the bag contents too */
-		if (lootitem->auto_loot) {
+		if (lootitem->auto_loot > 0) {
 			if (!client->AutoPutLootInInventory(*inst, true, true, bag_item_data))
 				client->PutLootInInventory(EQEmu::inventory::slotCursor, *inst, bag_item_data);
 		} else {
