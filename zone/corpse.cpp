@@ -1062,13 +1062,14 @@ void Corpse::MakeLootRequestPackets(Client* client, const EQApplicationPacket* a
 		SendLootReqErrorPacket(client, LootResponse::LootAll);
 }
 
-void Corpse::LootItem(Client* client, const EQApplicationPacket* app) {
+void Corpse::LootItem(Client *client, const EQApplicationPacket *app)
+{
 	/* This gets sent no matter what as a sort of ACK */
 	client->QueuePacket(app);
 
 	if (!loot_cooldown_timer.Check()) {
 		SendEndLootErrorPacket(client);
-		//unlock corpse for others
+		// unlock corpse for others
 		if (IsBeingLootedBy(client))
 			ResetLooter();
 		return;
@@ -1084,14 +1085,15 @@ void Corpse::LootItem(Client* client, const EQApplicationPacket* app) {
 		return;
 	}
 
-	LootingItem_Struct* lootitem = (LootingItem_Struct*)app->pBuffer;
+	LootingItem_Struct *lootitem = (LootingItem_Struct *)app->pBuffer;
 
 	if (!IsBeingLootedBy(client)) {
 		client->Message(13, "Error: Corpse::LootItem: BeingLootedBy != client");
 		SendEndLootErrorPacket(client);
 		return;
 	}
-	if (IsPlayerCorpse() && !CanPlayerLoot(client->CharacterID()) && !become_npc && (char_id != client->CharacterID() && client->Admin() < 150)) {
+	if (IsPlayerCorpse() && !CanPlayerLoot(client->CharacterID()) && !become_npc &&
+	    (char_id != client->CharacterID() && client->Admin() < 150)) {
 		client->Message(13, "Error: This is a player corpse and you dont own it.");
 		SendEndLootErrorPacket(client);
 		return;
@@ -1101,37 +1103,39 @@ void Corpse::LootItem(Client* client, const EQApplicationPacket* app) {
 		client->Message(13, "Error: Corpse locked by GM.");
 		return;
 	}
-	if (IsPlayerCorpse() && (char_id != client->CharacterID()) && CanPlayerLoot(client->CharacterID()) && GetPlayerKillItem() == 0){
+	if (IsPlayerCorpse() && (char_id != client->CharacterID()) && CanPlayerLoot(client->CharacterID()) &&
+	    GetPlayerKillItem() == 0) {
 		client->Message(13, "Error: You cannot loot any more items from this corpse.");
 		SendEndLootErrorPacket(client);
 		ResetLooter();
 		return;
 	}
 
-	const EQEmu::ItemData* item = 0;
+	const EQEmu::ItemData *item = 0;
 	EQEmu::ItemInstance *inst = 0;
-	ServerLootItem_Struct* item_data = nullptr, *bag_item_data[10];
+	ServerLootItem_Struct *item_data = nullptr, *bag_item_data[10];
 
 	memset(bag_item_data, 0, sizeof(bag_item_data));
-	if (GetPlayerKillItem() > 1){
+	if (GetPlayerKillItem() > 1) {
 		item = database.GetItem(GetPlayerKillItem());
-	}
-	else if (GetPlayerKillItem() == -1 || GetPlayerKillItem() == 1){
-		item_data = GetItem(lootitem->slot_id - EQEmu::legacy::CORPSE_BEGIN); //dont allow them to loot entire bags of items as pvp reward
-	}
-	else{
+	} else if (GetPlayerKillItem() == -1 || GetPlayerKillItem() == 1) {
+		item_data =
+		    GetItem(lootitem->slot_id -
+			    EQEmu::legacy::CORPSE_BEGIN); // dont allow them to loot entire bags of items as pvp reward
+	} else {
 		item_data = GetItem(lootitem->slot_id - EQEmu::legacy::CORPSE_BEGIN, bag_item_data);
 	}
 
-	if (GetPlayerKillItem()<=1 && item_data != 0) {
+	if (GetPlayerKillItem() <= 1 && item_data != 0) {
 		item = database.GetItem(item_data->item_id);
 	}
 
 	if (item != 0) {
-		if (item_data){ 
-			inst = database.CreateItem(item, item_data ? item_data->charges : 0, item_data->aug_1, item_data->aug_2, item_data->aug_3, item_data->aug_4, item_data->aug_5, item_data->aug_6, item_data->attuned);
-		}
-		else {
+		if (item_data) {
+			inst = database.CreateItem(item, item_data ? item_data->charges : 0, item_data->aug_1,
+						   item_data->aug_2, item_data->aug_3, item_data->aug_4,
+						   item_data->aug_5, item_data->aug_6, item_data->attuned);
+		} else {
 			inst = database.CreateItem(item);
 		}
 	}
@@ -1163,7 +1167,8 @@ void Corpse::LootItem(Client* client, const EQApplicationPacket* app) {
 		char buf[88];
 		char q_corpse_name[64];
 		strcpy(q_corpse_name, corpse_name);
-		snprintf(buf, 87, "%d %d %s", inst->GetItem()->ID, inst->GetCharges(), EntityList::RemoveNumbers(q_corpse_name));
+		snprintf(buf, 87, "%d %d %s", inst->GetItem()->ID, inst->GetCharges(),
+			 EntityList::RemoveNumbers(q_corpse_name));
 		buf[87] = '\0';
 		std::vector<EQEmu::Any> args;
 		args.push_back(inst);
@@ -1185,7 +1190,7 @@ void Corpse::LootItem(Client* client, const EQApplicationPacket* app) {
 		}
 
 		if (zone->adv_data) {
-			ServerZoneAdventureDataReply_Struct *ad = (ServerZoneAdventureDataReply_Struct*)zone->adv_data;
+			ServerZoneAdventureDataReply_Struct *ad = (ServerZoneAdventureDataReply_Struct *)zone->adv_data;
 			if (ad->type == Adventure_Collect && !IsPlayerCorpse()) {
 				if (ad->data_id == inst->GetItem()->ID) {
 					zone->DoAdventureCountIncrease();
@@ -1197,8 +1202,7 @@ void Corpse::LootItem(Client* client, const EQApplicationPacket* app) {
 		if (lootitem->auto_loot) {
 			if (!client->AutoPutLootInInventory(*inst, true, true, bag_item_data))
 				client->PutLootInInventory(EQEmu::inventory::slotCursor, *inst, bag_item_data);
-		}
-		else {
+		} else {
 			client->PutLootInInventory(EQEmu::inventory::slotCursor, *inst, bag_item_data);
 		}
 
@@ -1207,9 +1211,11 @@ void Corpse::LootItem(Client* client, const EQApplicationPacket* app) {
 			client->UpdateTasksForItem(ActivityLoot, item->ID);
 
 		/* Remove it from Corpse */
-		if (item_data){
-			/* Delete needs to be before RemoveItem because its deletes the pointer for item_data/bag_item_data */
-			database.DeleteItemOffCharacterCorpse(this->corpse_db_id, item_data->equip_slot, item_data->item_id);
+		if (item_data) {
+			/* Delete needs to be before RemoveItem because its deletes the pointer for
+			 * item_data/bag_item_data */
+			database.DeleteItemOffCharacterCorpse(this->corpse_db_id, item_data->equip_slot,
+							      item_data->item_id);
 			/* Delete Item Instance */
 			RemoveItem(item_data->lootslot);
 		}
@@ -1218,8 +1224,11 @@ void Corpse::LootItem(Client* client, const EQApplicationPacket* app) {
 		if (item->IsClassBag() && (GetPlayerKillItem() != -1 || GetPlayerKillItem() != 1)) {
 			for (int i = EQEmu::inventory::containerBegin; i < EQEmu::inventory::ContainerCount; i++) {
 				if (bag_item_data[i]) {
-					/* Delete needs to be before RemoveItem because its deletes the pointer for item_data/bag_item_data */
-					database.DeleteItemOffCharacterCorpse(this->corpse_db_id, bag_item_data[i]->equip_slot, bag_item_data[i]->item_id);
+					/* Delete needs to be before RemoveItem because its deletes the pointer for
+					 * item_data/bag_item_data */
+					database.DeleteItemOffCharacterCorpse(this->corpse_db_id,
+									      bag_item_data[i]->equip_slot,
+									      bag_item_data[i]->item_id);
 					/* Delete Item Instance */
 					RemoveItem(bag_item_data[i]);
 				}
@@ -1230,38 +1239,37 @@ void Corpse::LootItem(Client* client, const EQApplicationPacket* app) {
 			SetPlayerKillItemID(0);
 		}
 
-	/* Send message with item link to groups and such */
-	EQEmu::SayLinkEngine linker;
-	linker.SetLinkType(EQEmu::saylink::SayLinkItemInst);
-	linker.SetItemInst(inst);
+		/* Send message with item link to groups and such */
+		EQEmu::SayLinkEngine linker;
+		linker.SetLinkType(EQEmu::saylink::SayLinkItemInst);
+		linker.SetItemInst(inst);
 
-	auto item_link = linker.GenerateLink();
+		auto item_link = linker.GenerateLink();
 
-	client->Message_StringID(MT_LootMessages, LOOTED_MESSAGE, item_link.c_str());
+		client->Message_StringID(MT_LootMessages, LOOTED_MESSAGE, item_link.c_str());
 
-	if (!IsPlayerCorpse()) {
+		if (!IsPlayerCorpse()) {
 			Group *g = client->GetGroup();
-			if(g != nullptr) {
-				g->GroupMessage_StringID(client, MT_LootMessages, OTHER_LOOTED_MESSAGE, client->GetName(), item_link.c_str());
-			}
-			else {
+			if (g != nullptr) {
+				g->GroupMessage_StringID(client, MT_LootMessages, OTHER_LOOTED_MESSAGE,
+							 client->GetName(), item_link.c_str());
+			} else {
 				Raid *r = client->GetRaid();
-				if(r != nullptr) {
-					r->RaidMessage_StringID(client, MT_LootMessages, OTHER_LOOTED_MESSAGE, client->GetName(), item_link.c_str());
+				if (r != nullptr) {
+					r->RaidMessage_StringID(client, MT_LootMessages, OTHER_LOOTED_MESSAGE,
+								client->GetName(), item_link.c_str());
 				}
 			}
 		}
-	}
-	else {
+	} else {
 		SendEndLootErrorPacket(client);
 		safe_delete(inst);
 		return;
 	}
 
-	if (IsPlayerCorpse()){
+	if (IsPlayerCorpse()) {
 		client->SendItemLink(inst);
-	}
-	else{
+	} else {
 		client->SendItemLink(inst, true);
 	}
 
