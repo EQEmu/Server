@@ -36,7 +36,6 @@ Child of the Mob class.
 #include "../common/string_util.h"
 #include "../common/say_link.h"
 
-#include "client.h"
 #include "corpse.h"
 #include "entity.h"
 #include "groups.h"
@@ -1070,9 +1069,8 @@ void Corpse::LootItem(Client* client, const EQApplicationPacket* app) {
 	if (!loot_cooldown_timer.Check()) {
 		SendEndLootErrorPacket(client);
 		//unlock corpse for others
-		if (this->being_looted_by = client->GetID()) {
-			being_looted_by = 0xFFFFFFFF;
-		}
+		if (IsBeingLootedBy(client))
+			ResetLooter();
 		return;
 	}
 
@@ -1081,15 +1079,14 @@ void Corpse::LootItem(Client* client, const EQApplicationPacket* app) {
 		client->Message(13, "You may not loot an item while you have an item on your cursor.");
 		SendEndLootErrorPacket(client);
 		/* Unlock corpse for others */
-		if (this->being_looted_by = client->GetID()) {
-			being_looted_by = 0xFFFFFFFF;
-		}
+		if (IsBeingLootedBy(client))
+			ResetLooter();
 		return;
 	}
 
 	LootingItem_Struct* lootitem = (LootingItem_Struct*)app->pBuffer;
 
-	if (this->being_looted_by != client->GetID()) {
+	if (!IsBeingLootedBy(client)) {
 		client->Message(13, "Error: Corpse::LootItem: BeingLootedBy != client");
 		SendEndLootErrorPacket(client);
 		return;
@@ -1107,9 +1104,10 @@ void Corpse::LootItem(Client* client, const EQApplicationPacket* app) {
 	if (IsPlayerCorpse() && (char_id != client->CharacterID()) && CanPlayerLoot(client->CharacterID()) && GetPlayerKillItem() == 0){
 		client->Message(13, "Error: You cannot loot any more items from this corpse.");
 		SendEndLootErrorPacket(client);
-		being_looted_by = 0xFFFFFFFF;
+		ResetLooter();
 		return;
 	}
+
 	const EQEmu::ItemData* item = 0;
 	EQEmu::ItemInstance *inst = 0;
 	ServerLootItem_Struct* item_data = nullptr, *bag_item_data[10];
@@ -1142,7 +1140,7 @@ void Corpse::LootItem(Client* client, const EQApplicationPacket* app) {
 		if (client->CheckLoreConflict(item)) {
 			client->Message_StringID(0, LOOT_LORE_ERROR);
 			SendEndLootErrorPacket(client);
-			being_looted_by = 0;
+			ResetLooter();
 			delete inst;
 			return;
 		}
@@ -1154,7 +1152,7 @@ void Corpse::LootItem(Client* client, const EQApplicationPacket* app) {
 					if (client->CheckLoreConflict(itm->GetItem())) {
 						client->Message_StringID(0, LOOT_LORE_ERROR);
 						SendEndLootErrorPacket(client);
-						being_looted_by = 0;
+						ResetLooter();
 						delete inst;
 						return;
 					}
@@ -1175,7 +1173,7 @@ void Corpse::LootItem(Client* client, const EQApplicationPacket* app) {
 			client->Message_StringID(CC_Red, LOOT_NOT_ALLOWED, inst->GetItem()->Name);
 			client->QueuePacket(app);
 			SendEndLootErrorPacket(client); // shouldn't need this, but it will work for now
-			being_looted_by = 0;
+			ResetLooter();
 			delete inst;
 			return;
 		}

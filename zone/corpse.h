@@ -20,8 +20,8 @@
 #define CORPSE_H
 
 #include "mob.h"
+#include "client.h"
 
-class Client;
 class EQApplicationPacket;
 class Group;
 class NPC;
@@ -118,6 +118,7 @@ class Corpse : public Mob {
 	inline bool	IsLocked()			{ return is_locked; }
 	inline void	ResetLooter()		{ being_looted_by = 0xFFFFFFFF; }
 	inline bool	IsBeingLooted()		{ return (being_looted_by != 0xFFFFFFFF); }
+	inline bool	IsBeingLootedBy(Client *c) { return being_looted_by == c->GetID(); }
 
 	/* Mob */
 	void FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho);
