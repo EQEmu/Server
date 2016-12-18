@@ -594,7 +594,7 @@ bool SharedDatabase::GetInventory(uint32 char_id, EQEmu::InventoryProfile *inv)
 
 		inst->SetOrnamentIcon(ornament_icon);
 		inst->SetOrnamentationIDFile(ornament_idfile);
-		inst->SetOrnamentHeroModel(ornament_hero_model);
+		inst->SetOrnamentHeroModel(item->HerosForgeModel);
 
 		if (instnodrop ||
 			(((slot_id >= EQEmu::legacy::EQUIPMENT_BEGIN && slot_id <= EQEmu::legacy::EQUIPMENT_END) ||
@@ -730,7 +730,7 @@ bool SharedDatabase::GetInventory(uint32 account_id, char *name, EQEmu::Inventor
 
 		inst->SetOrnamentIcon(ornament_icon);
 		inst->SetOrnamentationIDFile(ornament_idfile);
-		inst->SetOrnamentHeroModel(ornament_hero_model);
+		inst->SetOrnamentHeroModel(item->HerosForgeModel);
 
 		if (color > 0)
 			inst->SetColor(color);
