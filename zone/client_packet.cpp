@@ -14049,6 +14049,10 @@ void Client::Handle_OP_WearChange(const EQApplicationPacket *app)
 	if (wc->spawn_id != GetID())
 		return;
 
+	// Hero Forge ID needs to be fixed here as RoF2 appears to send an incorrect value.
+	if (wc->hero_forge_model != 0 && wc->wear_slot_id >= 0 && wc->wear_slot_id < EQEmu::textures::weaponPrimary)
+		wc->hero_forge_model = GetHerosForgeModel(wc->wear_slot_id);
+
 	// we could maybe ignore this and just send our own from moveitem
 	entity_list.QueueClients(this, app, true);
 	return;
