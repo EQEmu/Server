@@ -293,18 +293,13 @@ bool EQEmu::InventoryProfile::DeleteItem(int16 slot_id, uint8 quantity)
 }
 
 // Checks All items in a bag for No Drop
-bool EQEmu::InventoryProfile::CheckNoDrop(int16 slot_id) {
+bool EQEmu::InventoryProfile::CheckNoDrop(int16 slot_id, bool recurse)
+{
 	ItemInstance* inst = GetItem(slot_id);
-	if (!inst) return false;
-	if (!inst->GetItem()->NoDrop) return true;
-	if (inst->GetItem()->ItemClass == 1) {
-		for (uint8 i = inventory::containerBegin; i < inventory::ContainerCount; i++) {
-			ItemInstance* bagitem = GetItem(InventoryProfile::CalcSlotId(slot_id, i));
-			if (bagitem && !bagitem->GetItem()->NoDrop)
-				return true;
-		}
-	}
-	return false;
+	if (!inst)
+		return false;
+
+	return (!inst->IsDroppable(recurse));
 }
 
 // Remove item from bucket without memory delete
