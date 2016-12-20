@@ -5003,6 +5003,9 @@ void Client::Handle_OP_CrashDump(const EQApplicationPacket *app)
 
 void Client::Handle_OP_CreateObject(const EQApplicationPacket *app)
 {
+	if (Log.log_settings[Logs::Inventory].is_category_enabled)
+		Log.Out(Logs::Detail, Logs::Inventory, "Handle_OP_CreateObject() [psize: %u] %s", app->size, DumpPacketToString(app).c_str());
+
 	DropItem(EQEmu::inventory::slotCursor);
 	return;
 }
