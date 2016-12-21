@@ -23,6 +23,7 @@
 #include "../common/packet_dump.h"
 #include "../common/packet_functions.h"
 #include "../common/servertalk.h"
+#include "../common/net/packet.h"
 
 #include "database.h"
 #include "lfguild.h"
@@ -51,7 +52,9 @@ WorldServer::~WorldServer()
 
 void WorldServer::Connect()
 {
-	m_link.reset(new EQ::Net::RelayLink(Config->WorldIP, Config->WorldTCPPort, "QS", Config->SharedKey));
+	m_server.reset(new EQ::Net::ServertalkServer());
+	//Config->WorldIP, Config->WorldTCPPort, "QS", Config->SharedKey
+
 	m_link->OnMessageType(ServerOP_Speech, std::bind(&WorldServer::HandleMessage, this, ServerOP_Speech, std::placeholders::_1));
 	m_link->OnMessageType(ServerOP_QSPlayerLogTrades, std::bind(&WorldServer::HandleMessage, this, ServerOP_QSPlayerLogTrades, std::placeholders::_1));
 	m_link->OnMessageType(ServerOP_QSPlayerLogHandins, std::bind(&WorldServer::HandleMessage, this, ServerOP_QSPlayerLogHandins, std::placeholders::_1));
@@ -66,7 +69,7 @@ void WorldServer::Connect()
 bool WorldServer::SendPacket(ServerPacket *pack)
 {
 	EQ::Net::ReadOnlyPacket p(pack->pBuffer, pack->size);
-	m_link->SendPacket(pack->opcode, p);
+	->SendPacket(pack->opcode, p);
 	return true;
 }
 

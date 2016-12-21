@@ -19,7 +19,7 @@
 #define WORLDSERVER_H
 
 #include "../common/eq_packet_structs.h"
-#include "../common/net/relay_link.h"
+#include "../common/net/servertalk_server.h"
 
 class WorldServer
 {
@@ -35,7 +35,7 @@ class WorldServer
 
 		void HandleMessage(uint16 opcode, const EQ::Net::Packet &p);
 	private:
-		std::unique_ptr<EQ::Net::RelayLink> m_link;
+		std::unique_ptr<EQ::Net::ServertalkServer> m_server;
 };
 #endif
 

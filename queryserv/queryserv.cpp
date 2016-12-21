@@ -25,7 +25,6 @@
 #include "../common/platform.h"
 #include "../common/crash.h"
 #include "../common/event/event_loop.h"
-#include "../common/net/relay_link.h"
 #include "../common/timer.h"
 #include "database.h"
 #include "queryservconfig.h"
