@@ -540,7 +540,7 @@ EQEmu::ItemInstance* EQEmu::ItemInstance::GetOrnamentationAug(int32 ornamentatio
 
 uint32 EQEmu::ItemInstance::GetOrnamentHeroModel(int32 material_slot) const {
 	// Not a Hero Forge item.
-	if (m_ornament_hero_model == 0)
+	if (m_ornament_hero_model == 0 || material_slot < 0)
 		return 0;
 
 	// Item is using an explicit Hero Forge ID
