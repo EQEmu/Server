@@ -940,12 +940,8 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 		case SE_ShieldBlock:
 			newbon->ShieldBlock += base1;
 			break;
-		case SE_ShieldEquipHateMod:
-			newbon->ShieldEquipHateMod += base1;
-			break;
 		case SE_ShieldEquipDmgMod:
-			newbon->ShieldEquipDmgMod[0] += base1;
-			newbon->ShieldEquipDmgMod[1] += base2;
+			newbon->ShieldEquipDmgMod += base1;
 			break;
 		case SE_SecondaryDmgInc:
 			newbon->SecondaryDmgInc = true;
@@ -2655,13 +2651,8 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 				new_bonus->ShieldBlock += effect_value;
 				break;
 
-			case SE_ShieldEquipHateMod:
-				new_bonus->ShieldEquipHateMod += effect_value;
-				break;
-
 			case SE_ShieldEquipDmgMod:
-				new_bonus->ShieldEquipDmgMod[0] += effect_value;
-				new_bonus->ShieldEquipDmgMod[1] += base2;
+				new_bonus->ShieldEquipDmgMod += effect_value;
 				break;
 
 			case SE_BlockBehind:
@@ -4555,19 +4546,10 @@ void Mob::NegateSpellsBonuses(uint16 spell_id)
 					itembonuses.DoubleRangedAttack = effect_value;
 					break;
 
-				case SE_ShieldEquipHateMod:
-					spellbonuses.ShieldEquipHateMod = effect_value;
-					aabonuses.ShieldEquipHateMod = effect_value;
-					itembonuses.ShieldEquipHateMod = effect_value;
-					break;
-
 				case SE_ShieldEquipDmgMod:
-					spellbonuses.ShieldEquipDmgMod[0] = effect_value;
-					spellbonuses.ShieldEquipDmgMod[1] = effect_value;
-					aabonuses.ShieldEquipDmgMod[0] = effect_value;
-					aabonuses.ShieldEquipDmgMod[1] = effect_value;
-					itembonuses.ShieldEquipDmgMod[0] = effect_value;
-					itembonuses.ShieldEquipDmgMod[1] = effect_value;
+					spellbonuses.ShieldEquipDmgMod = effect_value;
+					aabonuses.ShieldEquipDmgMod = effect_value;
+					itembonuses.ShieldEquipDmgMod = effect_value;
 					break;
 
 				case SE_TriggerMeleeThreshold:

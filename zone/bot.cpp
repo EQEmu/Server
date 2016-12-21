@@ -2391,7 +2391,7 @@ void Bot::AI_Process() {
 				}
 			}
 			atCombatRange = true;
-		} else if(IsBotCaster() && GetLevel() > 12) {
+		} else if(IsBotCaster() && GetLevel() >= RuleI(Bots, CasterStopMeleeLevel)) {
 			if(IsBotCasterCombatRange(GetTarget()))
 				atCombatRange = true;
 		}
@@ -2440,7 +2440,7 @@ void Bot::AI_Process() {
 				if(GetTarget()->GetHPRatio() <= 99.0f)
 					BotRangedAttack(GetTarget());
 			}
-			else if(!IsBotArcher() && (!(IsBotCaster() && GetLevel() > 12)) && GetTarget() && !IsStunned() && !IsMezzed() && (GetAppearance() != eaDead)) {
+			else if(!IsBotArcher() && (!(IsBotCaster() && GetLevel() >= RuleI(Bots, CasterStopMeleeLevel))) && GetTarget() && !IsStunned() && !IsMezzed() && (GetAppearance() != eaDead)) {
 				// we can't fight if we don't have a target, are stun/mezzed or dead..
 				// Stop attacking if the target is enraged
 				if((IsEngaged() && !BehindMob(GetTarget(), GetX(), GetY()) && GetTarget()->IsEnraged()) || GetBotStance() == BotStancePassive)

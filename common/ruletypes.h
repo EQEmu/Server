@@ -556,12 +556,13 @@ RULE_REAL(Bots, ManaRegen, 2.0) // Adjust mana regen for bots, 1 is fast and hig
 RULE_BOOL(Bots, PreferNoManaCommandSpells, true) // Give sorting priority to newer no-mana spells (i.e., 'Bind Affinity')
 RULE_BOOL(Bots, QuestableSpawnLimit, false) // Optional quest method to manage bot spawn limits using the quest_globals name bot_spawn_limit, see: /bazaar/Aediles_Thrall.pl
 RULE_BOOL(Bots, QuestableSpells, false) // Anita Thrall's (Anita_Thrall.pl) Bot Spell Scriber quests.
-RULE_INT(Bots, SpawnLimit, 71) // Number of bots a character can have spawned at one time, You + 71 bots is a 12 group raid
+RULE_INT(Bots, SpawnLimit, 71) // Number of bots a character can have spawned at one time, You + 71 bots is a 12 group pseudo-raid (bots are not raidable at this time)
 RULE_BOOL(Bots, BotGroupXP, false) // Determines whether client gets xp for bots outside their group.
 RULE_BOOL(Bots, BotBardUseOutOfCombatSongs, true) // Determines whether bard bots use additional out of combat songs (optional script)
 RULE_BOOL(Bots, BotLevelsWithOwner, false) // Auto-updates spawned bots as owner levels/de-levels (false is original behavior)
 RULE_BOOL(Bots, BotCharacterLevelEnabled, false) // Enables required level to spawn bots
 RULE_INT(Bots, BotCharacterLevel, 0) // 0 as default (if level > this value you can spawn bots if BotCharacterLevelEnabled is true)
+RULE_INT(Bots, CasterStopMeleeLevel, 13) // Level at which caster bots stop melee attacks
 RULE_CATEGORY_END()
 #endif
 

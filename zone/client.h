@@ -825,7 +825,7 @@ public:
 	bool SummonItem(uint32 item_id, int16 charges = -1, uint32 aug1 = 0, uint32 aug2 = 0, uint32 aug3 = 0, uint32 aug4 = 0, uint32 aug5 = 0, uint32 aug6 = 0, bool attuned = false, uint16 to_slot = EQEmu::inventory::slotCursor, uint32 ornament_icon = 0, uint32 ornament_idfile = 0, uint32 ornament_hero_model = 0);
 	void SetStats(uint8 type,int16 set_val);
 	void IncStats(uint8 type,int16 increase_val);
-	void DropItem(int16 slot_id);
+	void DropItem(int16 slot_id, bool recurse = true);
 
 	int GetItemLinkHash(const EQEmu::ItemInstance* inst); // move to ItemData..or make use of the pre-calculated database field
 
@@ -855,6 +855,7 @@ public:
 	void SetConsumption(int32 in_hunger, int32 in_thirst);
 
 	bool CheckTradeLoreConflict(Client* other);
+	bool CheckTradeNonDroppable();
 	void LinkDead();
 	void Insight(uint32 t_id);
 	bool CheckDoubleAttack();

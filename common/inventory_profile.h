@@ -133,7 +133,7 @@ namespace EQEmu
 		bool DeleteItem(int16 slot_id, uint8 quantity = 0);
 
 		// Checks All items in a bag for No Drop
-		bool CheckNoDrop(int16 slot_id);
+		bool CheckNoDrop(int16 slot_id, bool recurse = true);
 
 		// Remove item from inventory (and take control of memory)
 		ItemInstance* PopItem(int16 slot_id);

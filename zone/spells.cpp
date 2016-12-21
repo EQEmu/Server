@@ -230,23 +230,6 @@ bool Mob::CastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 		}
 	}
 
-	// check for fizzle
-	// note that CheckFizzle itself doesn't let NPCs fizzle,
-	// but this code allows for it.
-	if(slot < CastingSlot::MaxGems && !CheckFizzle(spell_id))
-	{
-		int fizzle_msg = IsBardSong(spell_id) ? MISS_NOTE : SPELL_FIZZLE;
-		InterruptSpell(fizzle_msg, 0x121, spell_id);
-
-		uint32 use_mana = ((spells[spell_id].mana) / 4);
-		Log.Out(Logs::Detail, Logs::Spells, "Spell casting canceled: fizzled. %d mana has been consumed", use_mana);
-
-		// fizzle 1/4 the mana away
-		SetMana(GetMana() - use_mana);
-		TryTriggerOnValueAmount(false, true);
-		return(false);
-	}
-
 	if (HasActiveSong() && IsBardSong(spell_id)) {
 		Log.Out(Logs::Detail, Logs::Spells, "Casting a new song while singing a song. Killing old song %d.", bardsong);
 		//Note: this does NOT tell the client
@@ -365,6 +348,28 @@ bool Mob::DoCastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 		casting_spell_timer_duration = timer_duration;
 	}
 	casting_spell_aa_id = aa_id;
+
+	// check for fizzle
+	// note that CheckFizzle itself doesn't let NPCs fizzle,
+	// but this code allows for it.
+	if (slot < CastingSlot::MaxGems && !CheckFizzle(spell_id)) {
+		int fizzle_msg = IsBardSong(spell_id) ? MISS_NOTE : SPELL_FIZZLE;
+
+		uint32 use_mana = ((spells[spell_id].mana) / 4);
+		Log.Out(Logs::Detail, Logs::Spells, "Spell casting canceled: fizzled. %d mana has been consumed", use_mana);
+
+		// fizzle 1/4 the mana away
+		Mob::SetMana(GetMana() - use_mana); // We send StopCasting which will update mana
+		StopCasting();
+
+		Message_StringID(MT_SpellFailure, fizzle_msg);
+		entity_list.FilteredMessageClose_StringID(
+		    this, true, 200, MT_SpellFailure, IsClient() ? FilterPCSpells : FilterNPCSpells,
+		    fizzle_msg == MISS_NOTE ? MISSED_NOTE_OTHER : SPELL_FIZZLE_OTHER, GetName());
+
+		TryTriggerOnValueAmount(false, true);
+		return(false);
+	}
 
 	SaveSpellLoc();
 	Log.Out(Logs::Detail, Logs::Spells, "Casting %d Started at (%.3f,%.3f,%.3f)", spell_id, m_SpellLocation.x, m_SpellLocation.y, m_SpellLocation.z);

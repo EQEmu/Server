@@ -306,7 +306,13 @@ void Client::GoFish()
 
 		const EQEmu::ItemData* food_item = database.GetItem(food_id);
 
-		Message_StringID(MT_Skills, FISHING_SUCCESS);
+		if (food_item->ItemType  != EQEmu::item::ItemTypeFood) {
+			Message_StringID(MT_Skills, FISHING_SUCCESS);
+		}
+		else {
+			Message_StringID(MT_Skills, FISHING_SUCCESS_FISH_NAME, food_item->Name);
+		}
+
 		EQEmu::ItemInstance* inst = database.CreateItem(food_item, 1);
 		if(inst != nullptr) {
 			if(CheckLoreConflict(inst->GetItem()))

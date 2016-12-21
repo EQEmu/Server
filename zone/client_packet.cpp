@@ -5003,6 +5003,9 @@ void Client::Handle_OP_CrashDump(const EQApplicationPacket *app)
 
 void Client::Handle_OP_CreateObject(const EQApplicationPacket *app)
 {
+	if (Log.log_settings[Logs::Inventory].is_category_enabled)
+		Log.Out(Logs::Detail, Logs::Inventory, "Handle_OP_CreateObject() [psize: %u] %s", app->size, DumpPacketToString(app).c_str());
+
 	DropItem(EQEmu::inventory::slotCursor);
 	return;
 }
@@ -13287,7 +13290,6 @@ void Client::Handle_OP_TradeAcceptClick(const EQApplicationPacket *app)
 			other->trade->state = TradeCompleting;
 			trade->state = TradeCompleting;
 
-			// should we do this for NoDrop items as well?
 			if (CheckTradeLoreConflict(other) || other->CheckTradeLoreConflict(this)) {
 				Message_StringID(13, TRADE_CANCEL_LORE);
 				other->Message_StringID(13, TRADE_CANCEL_LORE);
@@ -13295,6 +13297,26 @@ void Client::Handle_OP_TradeAcceptClick(const EQApplicationPacket *app)
 				other->FinishTrade(other);
 				other->trade->Reset();
 				trade->Reset();
+			}
+			else if (CheckTradeNonDroppable()) {
+				Message_StringID(13, TRADE_HAS_BEEN_CANCELLED);
+				other->Message_StringID(13, TRADE_HAS_BEEN_CANCELLED);
+				this->FinishTrade(this);
+				other->FinishTrade(other);
+				other->trade->Reset();
+				trade->Reset();
+				Message(15, "Hacking activity detected in trade transaction.");
+				// TODO: query (this) as a hacker
+			}
+			else if (other->CheckTradeNonDroppable()) {
+				Message_StringID(13, TRADE_HAS_BEEN_CANCELLED);
+				other->Message_StringID(13, TRADE_HAS_BEEN_CANCELLED);
+				this->FinishTrade(this);
+				other->FinishTrade(other);
+				other->trade->Reset();
+				trade->Reset();
+				other->Message(15, "Hacking activity detected in trade transaction.");
+				// TODO: query (other) as a hacker
 			}
 			else {
 				// Audit trade to database for both trade streams
@@ -14029,6 +14051,10 @@ void Client::Handle_OP_WearChange(const EQApplicationPacket *app)
 	WearChange_Struct* wc = (WearChange_Struct*)app->pBuffer;
 	if (wc->spawn_id != GetID())
 		return;
+
+	// Hero Forge ID needs to be fixed here as RoF2 appears to send an incorrect value.
+	if (wc->hero_forge_model != 0 && wc->wear_slot_id >= 0 && wc->wear_slot_id < EQEmu::textures::weaponPrimary)
+		wc->hero_forge_model = GetHerosForgeModel(wc->wear_slot_id);
 
 	// we could maybe ignore this and just send our own from moveitem
 	entity_list.QueueClients(this, app, true);

@@ -539,16 +539,16 @@ EQEmu::ItemInstance* EQEmu::ItemInstance::GetOrnamentationAug(int32 ornamentatio
 }
 
 uint32 EQEmu::ItemInstance::GetOrnamentHeroModel(int32 material_slot) const {
-	uint32 HeroModel = 0;
-	if (m_ornament_hero_model > 0)
-	{
-		HeroModel = m_ornament_hero_model;
-		if (material_slot >= 0)
-		{
-			HeroModel = (m_ornament_hero_model * 100) + material_slot;
-		}
-	}
-	return HeroModel;
+	// Not a Hero Forge item.
+	if (m_ornament_hero_model == 0 || material_slot < 0)
+		return 0;
+
+	// Item is using an explicit Hero Forge ID
+	if (m_ornament_hero_model >= 1000)
+		return m_ornament_hero_model;
+
+	// Item is using a shorthand ID
+	return (m_ornament_hero_model * 100) + material_slot;
 }
 
 bool EQEmu::ItemInstance::UpdateOrnamentationInfo() {
@@ -817,6 +817,32 @@ bool EQEmu::ItemInstance::IsSlotAllowed(int16 slot_id) const {
 	else if (slot_id == inventory::slotPowerSource && (m_item->Slots & (1 << 22))) { return true; } // got lazy... <watch>
 	else if (slot_id != inventory::slotPowerSource && slot_id > legacy::EQUIPMENT_END) { return true; }
 	else { return false; }
+}
+
+bool EQEmu::ItemInstance::IsDroppable(bool recurse) const
+{
+	if (!m_item)
+		return false;
+	/*if (m_ornamentidfile) // not implemented
+		return false;*/
+	if (m_attuned)
+		return false;
+	/*if (m_item->FVNoDrop != 0) // not implemented
+		return false;*/
+	if (m_item->NoDrop == 0)
+		return false;
+
+	if (recurse) {
+		for (auto iter : m_contents) {
+			if (!iter.second)
+				continue;
+
+			if (!iter.second->IsDroppable(recurse))
+				return false;
+		}
+	}
+	
+	return true;
 }
 
 void EQEmu::ItemInstance::Initialize(SharedDatabase *db) {

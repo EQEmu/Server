@@ -594,10 +594,37 @@ bool Client::SummonItem(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2,
 }
 
 // Drop item from inventory to ground (generally only dropped from SLOT_CURSOR)
-void Client::DropItem(int16 slot_id)
+void Client::DropItem(int16 slot_id, bool recurse)
 {
-	if(GetInv().CheckNoDrop(slot_id) && RuleI(World, FVNoDropFlag) == 0 ||
-		RuleI(Character, MinStatusForNoDropExemptions) < Admin() && RuleI(World, FVNoDropFlag) == 2) {
+	Log.Out(Logs::General, Logs::Inventory, "'%s' (char_id: %u) Attempting to drop item from slot %i on the ground",
+		GetCleanName(), CharacterID(), slot_id);
+	
+	if(GetInv().CheckNoDrop(slot_id, recurse) && RuleI(World, FVNoDropFlag) == 0 ||
+		RuleI(Character, MinStatusForNoDropExemptions) < Admin() && RuleI(World, FVNoDropFlag) == 2)
+	{
+		auto invalid_drop = m_inv.GetItem(slot_id);
+		if (!invalid_drop) {
+			Log.Out(Logs::General, Logs::Inventory, "Error in InventoryProfile::CheckNoDrop() - returned 'true' for empty slot");
+		}
+		else {
+			if (Log.log_settings[Logs::Inventory].is_category_enabled) {
+				Log.Out(Logs::General, Logs::Inventory, "DropItem() Hack detected - full item parse:");
+				Log.Out(Logs::General, Logs::Inventory, "depth: 0, Item: '%s' (id: %u), IsDroppable: %s",
+					(invalid_drop->GetItem() ? invalid_drop->GetItem()->Name : "null data"), invalid_drop->GetID(), invalid_drop->IsDroppable(false));
+
+				for (auto iter1 : *invalid_drop->GetContents()) { // depth 1
+					Log.Out(Logs::General, Logs::Inventory, "-depth: 1, Item: '%s' (id: %u), IsDroppable: %s",
+						(iter1.second->GetItem() ? iter1.second->GetItem()->Name : "null data"), iter1.second->GetID(), iter1.second->IsDroppable(false));
+
+					for (auto iter2 : *iter1.second->GetContents()) { // depth 2
+						Log.Out(Logs::General, Logs::Inventory, "--depth: 2, Item: '%s' (id: %u), IsDroppable: %s",
+							(iter2.second->GetItem() ? iter2.second->GetItem()->Name : "null data"), iter2.second->GetID(), iter2.second->IsDroppable(false));
+					}
+				}
+			}
+		}
+		invalid_drop = nullptr;
+
 		database.SetHackerFlag(this->AccountName(), this->GetCleanName(), "Tried to drop an item on the ground that was nodrop!");
 		GetInv().DeleteItem(slot_id);
 		return;
@@ -606,12 +633,39 @@ void Client::DropItem(int16 slot_id)
 	// Take control of item in client inventory
 	EQEmu::ItemInstance *inst = m_inv.PopItem(slot_id);
 	if(inst) {
+		if (Log.log_settings[Logs::Inventory].is_category_enabled) {
+			Log.Out(Logs::General, Logs::Inventory, "DropItem() Processing - full item parse:");
+			Log.Out(Logs::General, Logs::Inventory, "depth: 0, Item: '%s' (id: %u), IsDroppable: %s",
+				(inst->GetItem() ? inst->GetItem()->Name : "null data"), inst->GetID(), inst->IsDroppable(false));
+
+			if (!inst->IsDroppable(false))
+				Log.Out(Logs::General, Logs::Error, "Non-droppable item being processed for drop by '%s'", GetCleanName());
+
+			for (auto iter1 : *inst->GetContents()) { // depth 1
+				Log.Out(Logs::General, Logs::Inventory, "-depth: 1, Item: '%s' (id: %u), IsDroppable: %s",
+					(iter1.second->GetItem() ? iter1.second->GetItem()->Name : "null data"), iter1.second->GetID(), iter1.second->IsDroppable(false));
+
+				if (!iter1.second->IsDroppable(false))
+					Log.Out(Logs::General, Logs::Error, "Non-droppable item being processed for drop by '%s'", GetCleanName());
+
+				for (auto iter2 : *iter1.second->GetContents()) { // depth 2
+					Log.Out(Logs::General, Logs::Inventory, "--depth: 2, Item: '%s' (id: %u), IsDroppable: %s",
+						(iter2.second->GetItem() ? iter2.second->GetItem()->Name : "null data"), iter2.second->GetID(), iter2.second->IsDroppable(false));
+
+					if (!iter2.second->IsDroppable(false))
+						Log.Out(Logs::General, Logs::Error, "Non-droppable item being processed for drop by '%s'", GetCleanName());
+				}
+			}
+		}
+
 		int i = parse->EventItem(EVENT_DROP_ITEM, this, inst, nullptr, "", slot_id);
 		if(i != 0) {
+			Log.Out(Logs::General, Logs::Inventory, "Item drop handled by [EVENT_DROP_ITEM]");
 			safe_delete(inst);
 		}
 	} else {
 		// Item doesn't exist in inventory!
+		Log.Out(Logs::General, Logs::Inventory, "DropItem() - No item found in slot %i", slot_id);
 		Message(13, "Error: Item not found in slot %i", slot_id);
 		return;
 	}
@@ -632,6 +686,8 @@ void Client::DropItem(int16 slot_id)
 	auto object = new Object(this, inst);
 	entity_list.AddObject(object, true);
 	object->StartDecay();
+
+	Log.Out(Logs::General, Logs::Inventory, "Item drop handled ut assolet");
 
 	safe_delete(inst);
 }

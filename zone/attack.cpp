@@ -1072,6 +1072,11 @@ bool Client::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, b
 	//if weapon damage > 0 then we know we can hit the target with this weapon
 	//otherwise we cannot and we set the damage to -5 later on
 	if(weapon_damage > 0){
+		auto shield_inc = spellbonuses.ShieldEquipDmgMod + itembonuses.ShieldEquipDmgMod + aabonuses.ShieldEquipDmgMod;
+		if (shield_inc > 0 && HasShieldEquiped() && Hand == EQEmu::inventory::slotPrimary) {
+			weapon_damage = weapon_damage * (100 + shield_inc) / 100;
+			hate = hate * (100 + shield_inc) / 100;
+		}
 
 		//Berserker Berserk damage bonus
 		if(IsBerserk() && GetClass() == BERSERKER){
@@ -2290,11 +2295,6 @@ void Mob::AddToHateList(Mob* other, uint32 hate /*= 0*/, int32 damage /*= 0*/, b
 		if (on_hatelist) { // odd reason, if you're not on the hate list, subtlety etc don't apply!
 			// Spell Casting Subtlety etc
 			int hatemod = 100 + other->spellbonuses.hatemod + other->itembonuses.hatemod + other->aabonuses.hatemod;
-
-			int32 shieldhatemod = other->spellbonuses.ShieldEquipHateMod + other->itembonuses.ShieldEquipHateMod + other->aabonuses.ShieldEquipHateMod;
-
-			if (shieldhatemod && other->HasShieldEquiped())
-				hatemod += shieldhatemod;
 
 			if(hatemod < 1)
 				hatemod = 1;
