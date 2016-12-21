@@ -745,24 +745,15 @@ void command_wc(Client *c, const Seperator *sep)
 		uint32 hero_forge_model = 0;
 		uint32 wearslot = atoi(sep->arg[1]);
 
+		// Hero Forge
 		if (sep->argnum > 2)
 		{
 			hero_forge_model = atoi(sep->arg[3]);
-			if (hero_forge_model > 0)
-			{
-				// Conversion to simplify the command arguments
-				// Hero's Forge model is actually model * 1000 + texture * 100 + wearslot
-				hero_forge_model *= 1000;
-				hero_forge_model += (atoi(sep->arg[2]) * 100);
-				hero_forge_model += wearslot;
 
-				// For Hero's Forge, slot 7 is actually for Robes, but it still needs to use slot 1 in the packet
-				if (wearslot == 7)
-				{
-					wearslot = 1;
-				}
+			if (hero_forge_model != 0 && hero_forge_model < 1000) {
+				// Shorthand Hero Forge ID. Otherwise use the value the user entered.
+				hero_forge_model = (hero_forge_model * 100) + wearslot;
 			}
-
 		}
 		/*
 		// Leaving here to add color option to the #wc command eventually

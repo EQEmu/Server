@@ -539,16 +539,16 @@ EQEmu::ItemInstance* EQEmu::ItemInstance::GetOrnamentationAug(int32 ornamentatio
 }
 
 uint32 EQEmu::ItemInstance::GetOrnamentHeroModel(int32 material_slot) const {
-	uint32 HeroModel = 0;
-	if (m_ornament_hero_model > 0)
-	{
-		HeroModel = m_ornament_hero_model;
-		if (material_slot >= 0)
-		{
-			HeroModel = (m_ornament_hero_model * 100) + material_slot;
-		}
-	}
-	return HeroModel;
+	// Not a Hero Forge item.
+	if (m_ornament_hero_model == 0)
+		return 0;
+
+	// Item is using an explicit Hero Forge ID
+	if (m_ornament_hero_model >= 1000)
+		return m_ornament_hero_model;
+
+	// Item is using a shorthand ID
+	return (m_ornament_hero_model * 100) + material_slot;
 }
 
 bool EQEmu::ItemInstance::UpdateOrnamentationInfo() {
