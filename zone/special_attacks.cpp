@@ -136,7 +136,7 @@ void Mob::DoSpecialAttackDamage(Mob *who, EQEmu::skills::SkillType skill, int32 
 		if (max_damage == -3)
 			DoRiposte(who);
 	} else {
-		if (!CheckHitChance || (CheckHitChance && who->CheckHitChance(this, skill, EQEmu::inventory::slotPrimary))) {
+		if (!CheckHitChance || (CheckHitChance && who->CheckHitChance(this, skill))) {
 			who->MeleeMitigation(this, max_damage, min_damage);
 			CommonOutgoingHitSuccess(who, max_damage, skill);
 		} else {
@@ -855,7 +855,7 @@ void Mob::DoArcheryAttackDmg(Mob* other,  const EQEmu::ItemInstance* RangeWeapon
 	else if (AmmoItem)
 		SendItemAnimation(other, AmmoItem, EQEmu::skills::SkillArchery);
 
-	if (ProjectileMiss || (!ProjectileImpact && !other->CheckHitChance(this, EQEmu::skills::SkillArchery, EQEmu::inventory::slotPrimary, chance_mod))) {
+	if (ProjectileMiss || (!ProjectileImpact && !other->CheckHitChance(this, EQEmu::skills::SkillArchery, chance_mod))) {
 		Log.Out(Logs::Detail, Logs::Combat, "Ranged attack missed %s.", other->GetName());
 
 		if (LaunchProjectile){
@@ -1265,7 +1265,7 @@ void NPC::DoRangedAttackDmg(Mob* other, bool Launch, int16 damage_mod, int16 cha
 	if (!chance_mod)
 		chance_mod = GetSpecialAbilityParam(SPECATK_RANGED_ATK, 2);
 
-	if (!other->CheckHitChance(this, skillInUse, EQEmu::inventory::slotRange, chance_mod))
+	if (!other->CheckHitChance(this, skillInUse, chance_mod))
 	{
 		other->Damage(this, 0, SPELL_UNKNOWN, skillInUse);
 	}
@@ -1473,7 +1473,7 @@ void Mob::DoThrowingAttackDmg(Mob* other, const EQEmu::ItemInstance* RangeWeapon
 	else if (AmmoItem)
 		SendItemAnimation(other, AmmoItem, EQEmu::skills::SkillThrowing);
 
-	if (ProjectileMiss || (!ProjectileImpact && !other->CheckHitChance(this, EQEmu::skills::SkillThrowing, EQEmu::inventory::slotPrimary, chance_mod))){
+	if (ProjectileMiss || (!ProjectileImpact && !other->CheckHitChance(this, EQEmu::skills::SkillThrowing, chance_mod))){
 		Log.Out(Logs::Detail, Logs::Combat, "Ranged attack missed %s.", other->GetName());
 		if (LaunchProjectile){
 			TryProjectileAttack(other, AmmoItem, EQEmu::skills::SkillThrowing, 0, RangeWeapon, nullptr, AmmoSlot, speed);
@@ -2399,7 +2399,7 @@ void Mob::DoMeleeSkillAttackDmg(Mob* other, uint16 weapon_damage, EQEmu::skills:
 					return;
 			}
 		} else {
-			if (other->CheckHitChance(this, skillinuse, Hand, chance_mod)) {
+			if (other->CheckHitChance(this, skillinuse, chance_mod)) {
 				other->MeleeMitigation(this, damage, min_hit);
 				CommonOutgoingHitSuccess(other, damage, skillinuse);
 			} else {

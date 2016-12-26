@@ -111,8 +111,8 @@ struct NPCType
 	uint8	mount_color;	//only used by horse class
 	float	attack_speed;	//%+- on attack delay of the mob.
 	uint8	attack_delay;	//delay between attacks in 10ths of a second
-	int		accuracy_rating;	//10 = 1% accuracy
-	int		avoidance_rating;	//10 = 1% avoidance
+	int		accuracy_rating;	// flat bonus before mods
+	int		avoidance_rating;	// flat bonus before mods
 	bool	findable;		//can be found with find command
 	bool	trackable;
 	int16	slow_mitigation;	
