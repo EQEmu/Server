@@ -216,7 +216,6 @@ int main(int argc, char** argv) {
 		worldserver.SetLauncherName("NONE");
 	}
 
-	worldserver.SetPassword(Config->SharedKey.c_str());
 	
 	Log.Out(Logs::General, Logs::Zone_Server, "Connecting to MySQL...");
 	if (!database.Connect(
@@ -397,9 +396,7 @@ int main(int argc, char** argv) {
 	Log.Out(Logs::General, Logs::Zone_Server, "Loading quests");
 	parse->ReloadQuests();
 
-	if (!worldserver.Connect()) {
-		Log.Out(Logs::General, Logs::Error, "Worldserver Connection Failed :: worldserver.Connect()");
-	}
+	worldserver.Connect();
 
 	Timer InterserverTimer(INTERSERVER_TIMER); // does MySQL pings and auto-reconnect
 #ifdef EQPROFILE
@@ -439,8 +436,6 @@ int main(int argc, char** argv) {
 		&zoneupdate_timer, &IDLEZONEUPDATE, &ZONEUPDATE, &quest_timers, &InterserverTimer](EQ::Timer* t) {
 			//Advance the timer to our current point in time
 			Timer::SetCurrentTime();
-		
-			worldserver.Process();
 		
 			if (!eqsf_open && Config->ZonePort != 0) {
 				Log.Out(Logs::General, Logs::Zone_Server, "Starting EQ Network server on port %d", Config->ZonePort);
@@ -524,10 +519,7 @@ int main(int argc, char** argv) {
 			if (InterserverTimer.Check()) {
 				InterserverTimer.Start();
 				database.ping();
-				// AsyncLoadVariables(dbasync, &database);
 				entity_list.UpdateWho();
-				if (worldserver.TryReconnect() && (!worldserver.Connected()))
-					worldserver.AsyncConnect();
 			}
 	});
 	
@@ -553,7 +545,6 @@ int main(int argc, char** argv) {
 	if (zone != 0)
 		Zone::Shutdown(true);
 	//Fix for Linux world server problem.
-	worldserver.Disconnect();
 	safe_delete(taskmanager);
 	command_deinit();
 #ifdef BOTS
@@ -576,7 +567,6 @@ void Shutdown()
 {
 	Zone::Shutdown(true);
 	RunLoops = false;
-	worldserver.Disconnect(); 
 	Log.Out(Logs::General, Logs::Zone_Server, "Shutting down...");
 	Log.CloseFileLogs();
 }

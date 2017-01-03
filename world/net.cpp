@@ -107,8 +107,6 @@ bool holdzones = false;
 const WorldConfig *Config;
 EQEmuLogSys Log;
 
-extern ConsoleList console_list;
-
 void CatchSignal(int sig_num);
 
 int main(int argc, char** argv) {
@@ -338,10 +336,12 @@ int main(int argc, char** argv) {
 			}
 		}
 	}
+
 	if(RuleB(World, ClearTempMerchantlist)){
 		Log.Out(Logs::General, Logs::World_Server, "Clearing temporary merchant lists..");
 		database.ClearMerchantTemp();
 	}
+
 	Log.Out(Logs::General, Logs::World_Server, "Loading EQ time of day..");
 	TimeOfDay_Struct eqTime;
 	time_t realtime;
@@ -385,14 +385,43 @@ int main(int argc, char** argv) {
 	database.LoadCharacterCreateAllocations();
 	database.LoadCharacterCreateCombos();
 
-	char errbuf[TCPConnection_ErrorBufferSize];
-	if (tcps.Open(Config->WorldTCPPort, errbuf)) {
-		Log.Out(Logs::General, Logs::World_Server,"Zone (TCP) listener started.");
-	} else {
-		Log.Out(Logs::General, Logs::World_Server,"Failed to start zone (TCP) listener on port %d:",Config->WorldTCPPort);
-		Log.Out(Logs::General, Logs::World_Server,"        %s",errbuf);
-		return 1;
-	}
+	std::unique_ptr<EQ::Net::ServertalkServer> server_connection;
+	server_connection.reset(new EQ::Net::ServertalkServer());
+
+	EQ::Net::ServertalkServerOptions server_opts;
+	server_opts.port = Config->WorldTCPPort;
+	server_opts.ipv6 = false;
+	server_opts.credentials = Config->SharedKey;
+	server_connection->Listen(server_opts);
+	Log.Out(Logs::General, Logs::World_Server, "Server (TCP) listener started.");
+
+	server_connection->OnConnectionIdentified("Zone", [](std::shared_ptr<EQ::Net::ServertalkServerConnection> connection) {
+		Log.OutF(Logs::General, Logs::World_Server, "New Zone Server connection from {2} at {0}:{1}",
+			connection->Handle()->RemoteIP(), connection->Handle()->RemotePort(), connection->GetUUID());
+
+		zoneserver_list.Add(new ZoneServer(connection));
+	});
+
+	server_connection->OnConnectionRemoved("Zone", [](std::shared_ptr<EQ::Net::ServertalkServerConnection> connection) {
+		Log.OutF(Logs::General, Logs::World_Server, "Removed Zone Server connection from {0}",
+			connection->GetUUID());
+
+		zoneserver_list.Remove(connection->GetUUID());
+	});
+
+	server_connection->OnConnectionIdentified("QueryServ", [](std::shared_ptr<EQ::Net::ServertalkServerConnection> connection) {
+		Log.OutF(Logs::General, Logs::World_Server, "New Query Server connection from {2} at {0}:{1}", 
+			connection->Handle()->RemoteIP(), connection->Handle()->RemotePort(), connection->GetUUID());
+
+		QSLink.AddConnection(connection);
+	});
+
+	server_connection->OnConnectionRemoved("QueryServ", [](std::shared_ptr<EQ::Net::ServertalkServerConnection> connection) {
+		Log.OutF(Logs::General, Logs::World_Server, "Removed Query Server connection from {0}", 
+			connection->GetUUID());
+
+		QSLink.RemoveConnection(connection);
+	});
 
 	EQ::Net::EQStreamManagerOptions opts(9000, false, false);
 	EQ::Net::EQStreamManager eqsm(opts);
@@ -450,31 +479,31 @@ int main(int argc, char** argv) {
 
 		client_list.Process();
 
-		while ((tcpc = tcps.NewQueuePop())) {
-			struct in_addr in;
-			in.s_addr = tcpc->GetrIP();
-			
-			/* World - Tell what is being connected */
-			if (tcpc->GetMode() == EmuTCPConnection::modePacket) {
-				if (tcpc->GetPacketMode() == EmuTCPConnection::packetModeZone) {
-					Log.Out(Logs::General, Logs::World_Server, "New Zone Server from %s:%d", inet_ntoa(in), tcpc->GetrPort());
-				}
-				else if (tcpc->GetPacketMode() == EmuTCPConnection::packetModeLauncher) {
-					Log.Out(Logs::General, Logs::World_Server, "New Launcher from %s:%d", inet_ntoa(in), tcpc->GetrPort());
-				}
-				else if (tcpc->GetPacketMode() == EmuTCPConnection::packetModeUCS) {
-					Log.Out(Logs::General, Logs::World_Server, "New UCS Connection from %s:%d", inet_ntoa(in), tcpc->GetrPort());
-				}
-				else if (tcpc->GetPacketMode() == EmuTCPConnection::packetModeQueryServ) {
-					Log.Out(Logs::General, Logs::World_Server, "New QS Connection from %s:%d", inet_ntoa(in), tcpc->GetrPort());
-				}
-				else {
-					Log.Out(Logs::General, Logs::World_Server, "Unsupported packet mode from %s:%d", inet_ntoa(in), tcpc->GetrPort());
-				}
-			}
-
-			console_list.Add(new Console(tcpc));
-		}
+		//while ((tcpc = tcps.NewQueuePop())) {
+		//	struct in_addr in;
+		//	in.s_addr = tcpc->GetrIP();
+		//	
+		//	/* World - Tell what is being connected */
+		//	if (tcpc->GetMode() == EmuTCPConnection::modePacket) {
+		//		if (tcpc->GetPacketMode() == EmuTCPConnection::packetModeZone) {
+		//			Log.Out(Logs::General, Logs::World_Server, "New Zone Server from %s:%d", inet_ntoa(in), tcpc->GetrPort());
+		//		}
+		//		else if (tcpc->GetPacketMode() == EmuTCPConnection::packetModeLauncher) {
+		//			Log.Out(Logs::General, Logs::World_Server, "New Launcher from %s:%d", inet_ntoa(in), tcpc->GetrPort());
+		//		}
+		//		else if (tcpc->GetPacketMode() == EmuTCPConnection::packetModeUCS) {
+		//			Log.Out(Logs::General, Logs::World_Server, "New UCS Connection from %s:%d", inet_ntoa(in), tcpc->GetrPort());
+		//		}
+		//		else if (tcpc->GetPacketMode() == EmuTCPConnection::packetModeQueryServ) {
+		//			Log.Out(Logs::General, Logs::World_Server, "New QS Connection from %s:%d", inet_ntoa(in), tcpc->GetrPort());
+		//		}
+		//		else {
+		//			Log.Out(Logs::General, Logs::World_Server, "Unsupported packet mode from %s:%d", inet_ntoa(in), tcpc->GetrPort());
+		//		}
+		//	}
+		//
+		//	console_list.Add(new Console(tcpc));
+		//}
 
 		if(PurgeInstanceTimer.Check())
 		{
@@ -491,11 +520,9 @@ int main(int argc, char** argv) {
 				Log.Out(Logs::Detail, Logs::World_Server, "EQTime successfully saved.");
 		}
 		
-		console_list.Process();
 		zoneserver_list.Process();
 		launcher_list.Process();
 		UCSLink.Process();
-		QSLink.Process();
 		LFPGroupList.Process(); 
 		adventure_manager.Process();
 
@@ -508,12 +535,10 @@ int main(int argc, char** argv) {
 		Sleep(1);
 	}
 	Log.Out(Logs::General, Logs::World_Server, "World main loop completed.");
-	Log.Out(Logs::General, Logs::World_Server, "Shutting down console connections (if any).");
-	console_list.KillAll();
 	Log.Out(Logs::General, Logs::World_Server, "Shutting down zone connections (if any).");
 	zoneserver_list.KillAll();
 	Log.Out(Logs::General, Logs::World_Server, "Zone (TCP) listener stopped.");
-	tcps.Close();
+	//tcps.Close();
 	Log.Out(Logs::General, Logs::World_Server, "Signaling HTTP service to stop...");
 	http_server.Stop();
 	Log.CloseFileLogs();

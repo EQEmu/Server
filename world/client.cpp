@@ -432,15 +432,11 @@ bool Client::HandleSendLoginInfoPacket(const EQApplicationPacket *app) {
 	}
 	else
 		id=atoi(name);
-#ifdef IPBASED_AUTH_HACK
-	if ((cle = zoneserver_list.CheckAuth(inet_ntoa(tmpip), password)))
-#else
 	if (loginserverlist.Connected() == false && !is_player_zoning) {
 		Log.Out(Logs::General, Logs::World_Server,"Error: Login server login while not connected to login server.");
 		return false;
 	}
 	if (((cle = client_list.CheckAuth(name, password)) || (cle = client_list.CheckAuth(id, password))))
-#endif
 	{
 		if (cle->AccountID() == 0 || (!minilogin && cle->LSID()==0)) {
 			Log.Out(Logs::General, Logs::World_Server,"ID is 0. Is this server connected to minilogin?");
@@ -1255,11 +1251,7 @@ void Client::Clearance(int8 response)
 		if(local_addr[0]) {
 			zs_addr = local_addr;
 		} else {
-			struct in_addr in;
-			in.s_addr = zs->GetIP();
-			zs_addr = inet_ntoa(in);
-
-			if(strcmp(zs_addr, "127.0.0.1") == 0)
+			if(strcmp(zs->GetIP().c_str(), "127.0.0.1") == 0)
 			{
 				Log.Out(Logs::Detail, Logs::World_Server, "Local zone address was %s, setting local address to: %s", zs_addr, WorldConfig::get()->LocalAddress.c_str());
 				zs_addr = WorldConfig::get()->LocalAddress.c_str();

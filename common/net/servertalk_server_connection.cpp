@@ -1,6 +1,7 @@
 #include "servertalk_server_connection.h"
 #include "servertalk_server.h"
 #include "../eqemu_logsys.h"
+#include "../util/uuid.h"
 
 EQ::Net::ServertalkServerConnection::ServertalkServerConnection(std::shared_ptr<EQ::Net::TCPConnection> c, EQ::Net::ServertalkServer *parent, bool encrypted, bool allow_downgrade)
 {
@@ -8,6 +9,7 @@ EQ::Net::ServertalkServerConnection::ServertalkServerConnection(std::shared_ptr<
 	m_parent = parent;
 	m_encrypted = encrypted;
 	m_allow_downgrade = allow_downgrade;
+	m_uuid = EQ::Util::UUID::Generate().ToString();
 	m_connection->OnRead(std::bind(&ServertalkServerConnection::OnRead, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 	m_connection->OnDisconnect(std::bind(&ServertalkServerConnection::OnDisconnect, this, std::placeholders::_1));
 	m_connection->Start();

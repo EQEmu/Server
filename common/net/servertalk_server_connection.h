@@ -25,6 +25,7 @@ namespace EQ
 
 			std::string GetIdentifier() const { return m_identifier; }
 			std::shared_ptr<EQ::Net::TCPConnection> Handle() { return m_connection; }
+			std::string GetUUID() const { return m_uuid; }
 		private:
 			void OnRead(TCPConnection* c, const unsigned char* data, size_t sz);
 			void ProcessReadBuffer();
@@ -41,6 +42,7 @@ namespace EQ
 			std::vector<char> m_buffer;
 			std::unordered_map<uint16_t, std::function<void(uint16_t, EQ::Net::Packet&)>> m_message_callbacks;
 			std::string m_identifier;
+			std::string m_uuid;
 
 			bool m_encrypted;
 			bool m_allow_downgrade;

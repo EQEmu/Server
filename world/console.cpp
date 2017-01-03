@@ -241,32 +241,26 @@ bool Console::Process() {
 	if (tcpc->GetMode() == EmuTCPConnection::modePacket) {
 		struct in_addr	in;
 		in.s_addr = GetIP();
-		if(tcpc->GetPacketMode() == EmuTCPConnection::packetModeZone) {
-			auto zs = new ZoneServer(tcpc);
-			Log.Out(Logs::Detail, Logs::World_Server,"New zoneserver #%d from %s:%d", zs->GetID(), inet_ntoa(in), GetPort());
-			zoneserver_list.Add(zs);
-			numzones++;
-			tcpc = 0;
-		} else if(tcpc->GetPacketMode() == EmuTCPConnection::packetModeLauncher) {
-			Log.Out(Logs::Detail, Logs::World_Server,"New launcher from %s:%d", inet_ntoa(in), GetPort());
-			launcher_list.Add(tcpc);
-			tcpc = 0;
-		} 
-		else if(tcpc->GetPacketMode() == EmuTCPConnection::packetModeUCS)
-		{
-			Log.Out(Logs::Detail, Logs::World_Server,"New UCS Connection from %s:%d", inet_ntoa(in), GetPort());
-			UCSLink.SetConnection(tcpc);
-			tcpc = 0;
-		}
-		else if(tcpc->GetPacketMode() == EmuTCPConnection::packetModeQueryServ)
-		{
-			Log.Out(Logs::Detail, Logs::World_Server,"New QS Connection from %s:%d", inet_ntoa(in), GetPort());
-			QSLink.SetConnection(tcpc);
-			tcpc = 0;
-		}  
-		else {
-			Log.Out(Logs::Detail, Logs::World_Server,"Unsupported packet mode from %s:%d", inet_ntoa(in), GetPort());
-		}
+		//if(tcpc->GetPacketMode() == EmuTCPConnection::packetModeZone) {
+		//	auto zs = new ZoneServer(tcpc);
+		//	Log.Out(Logs::Detail, Logs::World_Server,"New zoneserver #%d from %s:%d", zs->GetID(), inet_ntoa(in), GetPort());
+		//	zoneserver_list.Add(zs);
+		//	numzones++;
+		//	tcpc = 0;
+		//} else if(tcpc->GetPacketMode() == EmuTCPConnection::packetModeLauncher) {
+		//	Log.Out(Logs::Detail, Logs::World_Server,"New launcher from %s:%d", inet_ntoa(in), GetPort());
+		//	launcher_list.Add(tcpc);
+		//	tcpc = 0;
+		//} 
+		//else if(tcpc->GetPacketMode() == EmuTCPConnection::packetModeUCS)
+		//{
+		//	Log.Out(Logs::Detail, Logs::World_Server,"New UCS Connection from %s:%d", inet_ntoa(in), GetPort());
+		//	UCSLink.SetConnection(tcpc);
+		//	tcpc = 0;
+		//}
+		//else {
+		//	Log.Out(Logs::Detail, Logs::World_Server,"Unsupported packet mode from %s:%d", inet_ntoa(in), GetPort());
+		//}
 		return false;
 	}
 	char* command = 0;

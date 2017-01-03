@@ -297,7 +297,7 @@ void EQ::Net::ServertalkClient::ProcessMessage(EQ::Net::Packet &p)
 
 			auto cb = m_message_callbacks.find(opcode);
 			if (cb != m_message_callbacks.end()) {
-				cb->second(opcode, packet);
+				m_message_callback_any(opcode, packet);
 			}
 #endif
 		}

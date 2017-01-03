@@ -33,7 +33,6 @@
 
 #include <set>
 
-extern ConsoleList		console_list;
 extern ZSList			zoneserver_list;
 uint32 numplayers = 0;	//this really wants to be a member variable of ClientList...
 
@@ -1113,7 +1112,6 @@ void ClientList::ConsoleSendWhoAll(const char* to, int16 admin, Who_All_Struct* 
 			AppendAnyLenString(&output, &outsize, &outlen, "\r\n");
 		else
 			AppendAnyLenString(&output, &outsize, &outlen, "\n");
-		console_list.SendConsoleWho(connection, to, admin, &output, &outsize, &outlen);
 	}
 	if (output)
 		connection->SendEmoteMessageRaw(to, 0, 0, 10, output);

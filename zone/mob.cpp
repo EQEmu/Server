@@ -18,6 +18,7 @@
 
 #include "../common/spdat.h"
 #include "../common/string_util.h"
+#include "../common/misc_functions.h"
 
 #include "quest_parser_collection.h"
 #include "string_ids.h"

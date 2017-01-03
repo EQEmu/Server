@@ -7,7 +7,6 @@ SET(world_sources
 	cliententry.cpp
 	clientlist.cpp
 	CMakeLists.txt
-	console.cpp
 	eql_config.cpp
 	eqw.cpp
 	eqw_http_handler.cpp
@@ -39,7 +38,6 @@ SET(world_headers
 	cliententry.h
 	clientlist.h
 	CMakeLists.txt
-	console.h
 	eql_config.h
 	eqw.h
 	eqw_http_handler.h

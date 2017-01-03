@@ -52,40 +52,38 @@ WorldServer::~WorldServer()
 
 void WorldServer::Connect()
 {
-	m_server.reset(new EQ::Net::ServertalkServer());
-	//Config->WorldIP, Config->WorldTCPPort, "QS", Config->SharedKey
+	m_connection.reset(new EQ::Net::ServertalkClient(Config->WorldIP, Config->WorldTCPPort, false, "QueryServ", Config->SharedKey));
 
-	m_link->OnMessageType(ServerOP_Speech, std::bind(&WorldServer::HandleMessage, this, ServerOP_Speech, std::placeholders::_1));
-	m_link->OnMessageType(ServerOP_QSPlayerLogTrades, std::bind(&WorldServer::HandleMessage, this, ServerOP_QSPlayerLogTrades, std::placeholders::_1));
-	m_link->OnMessageType(ServerOP_QSPlayerLogHandins, std::bind(&WorldServer::HandleMessage, this, ServerOP_QSPlayerLogHandins, std::placeholders::_1));
-	m_link->OnMessageType(ServerOP_QSPlayerLogNPCKills, std::bind(&WorldServer::HandleMessage, this, ServerOP_QSPlayerLogNPCKills, std::placeholders::_1));
-	m_link->OnMessageType(ServerOP_QSPlayerLogDeletes, std::bind(&WorldServer::HandleMessage, this, ServerOP_QSPlayerLogDeletes, std::placeholders::_1));
-	m_link->OnMessageType(ServerOP_QSPlayerLogMoves, std::bind(&WorldServer::HandleMessage, this, ServerOP_QSPlayerLogMoves, std::placeholders::_1));
-	m_link->OnMessageType(ServerOP_QSPlayerLogMerchantTransactions, std::bind(&WorldServer::HandleMessage, this, ServerOP_QSPlayerLogMerchantTransactions, std::placeholders::_1));
-	m_link->OnMessageType(ServerOP_QueryServGeneric, std::bind(&WorldServer::HandleMessage, this, ServerOP_QueryServGeneric, std::placeholders::_1));
-	m_link->OnMessageType(ServerOP_QSSendQuery, std::bind(&WorldServer::HandleMessage, this, ServerOP_QSSendQuery, std::placeholders::_1));
+	m_connection->OnMessage(ServerOP_Speech, std::bind(&WorldServer::HandleMessage, this, std::placeholders::_1, std::placeholders::_2));
+	m_connection->OnMessage(ServerOP_QSPlayerLogTrades, std::bind(&WorldServer::HandleMessage, this, std::placeholders::_1, std::placeholders::_2));
+	m_connection->OnMessage(ServerOP_QSPlayerLogHandins, std::bind(&WorldServer::HandleMessage, this, std::placeholders::_1, std::placeholders::_2));
+	m_connection->OnMessage(ServerOP_QSPlayerLogNPCKills, std::bind(&WorldServer::HandleMessage, this, std::placeholders::_1, std::placeholders::_2));
+	m_connection->OnMessage(ServerOP_QSPlayerLogDeletes, std::bind(&WorldServer::HandleMessage, this, std::placeholders::_1, std::placeholders::_2));
+	m_connection->OnMessage(ServerOP_QSPlayerLogMoves, std::bind(&WorldServer::HandleMessage, this, std::placeholders::_1, std::placeholders::_2));
+	m_connection->OnMessage(ServerOP_QSPlayerLogMerchantTransactions, std::bind(&WorldServer::HandleMessage, this, std::placeholders::_1, std::placeholders::_2));
+	m_connection->OnMessage(ServerOP_QueryServGeneric, std::bind(&WorldServer::HandleMessage, this, std::placeholders::_1, std::placeholders::_2));
+	m_connection->OnMessage(ServerOP_QSSendQuery, std::bind(&WorldServer::HandleMessage, this, std::placeholders::_1, std::placeholders::_2));
 }
 
 bool WorldServer::SendPacket(ServerPacket *pack)
 {
-	EQ::Net::ReadOnlyPacket p(pack->pBuffer, pack->size);
-	->SendPacket(pack->opcode, p);
+	m_connection->SendPacket(pack);
 	return true;
 }
 
 std::string WorldServer::GetIP() const
 {
-	return m_link->GetIP();
+	return m_connection->Handle()->RemoteIP();
 }
 
 uint16 WorldServer::GetPort() const
 {
-	return m_link->GetPort();
+	return m_connection->Handle()->RemotePort();
 }
 
 bool WorldServer::Connected() const
 {
-	return m_link->Connected();
+	return m_connection->Connected();
 }
 
 void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
@@ -118,7 +116,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		}
 		case ServerOP_QSPlayerLogNPCKills: {
 			QSPlayerLogNPCKill_Struct *QS = (QSPlayerLogNPCKill_Struct*)p.Data();
-			uint32 Members = p.Length() - sizeof(QSPlayerLogNPCKill_Struct);
+			uint32 Members = (uint32)(p.Length() - sizeof(QSPlayerLogNPCKill_Struct));
 			if (Members > 0) Members = Members / sizeof(QSPlayerLogNPCKillsPlayers_Struct);
 			database.LogPlayerNPCKill(QS, Members);
 			break;
@@ -170,7 +168,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 					ServerPacket pack;
 					pack.pBuffer = (uchar*)p.Data();
 					pack.opcode = opcode;
-					pack.size = p.Length();
+					pack.size = (uint32)p.Length();
 					lfguildmanager.HandlePacket(&pack);
 					pack.pBuffer = nullptr;
 					break;
@@ -186,7 +184,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 			ServerPacket pack;
 			pack.pBuffer = (uchar*)p.Data();
 			pack.opcode = opcode;
-			pack.size = p.Length();
+			pack.size = (uint32)p.Length();
 
 			database.GeneralQueryReceive(&pack);
 			pack.pBuffer = nullptr;

@@ -4,6 +4,7 @@
 #include "../common/types.h"
 #include "../common/packet_functions.h"
 #include "../common/eq_packet_structs.h"
+#include "../net/packet.h"
 #include <cereal/cereal.hpp>
 #include <cereal/types/string.hpp>
 
@@ -223,6 +224,22 @@ public:
 		_wpos = 0;
 		_rpos = 0;
 	}
+
+	ServerPacket(uint16 in_opcode, const EQ::Net::Packet &p) {
+		this->compressed = false;
+		size = p.Length();
+		opcode = in_opcode;
+		if (size == 0) {
+			pBuffer = 0;
+		}
+		else {
+			pBuffer = new uchar[size];
+			memcpy(pBuffer, p.Data(), size);
+		}
+		_wpos = 0;
+		_rpos = 0;
+	}
+
 	ServerPacket* Copy() {
 		if (this == 0) {
 			return 0;

@@ -6,6 +6,7 @@
 #include "../common/timer.h"
 #include "../common/linked_list.h"
 #include <vector>
+#include <memory>
 
 class WorldTCPConnection;
 class ServerPacket;
@@ -35,6 +36,7 @@ public:
 
 	void	SendTimeSync();
 	void	Add(ZoneServer* zoneserver);
+	void	Remove(const std::string &uuid);
 	void	Process();
 	void	KillAll();
 	bool	SendPacket(ServerPacket* pack);
@@ -60,7 +62,7 @@ public:
 
 protected:
 	uint32 NextID;
-	LinkedList<ZoneServer*> list;
+	std::list<std::unique_ptr<ZoneServer>> list;
 	uint16	pLockedZones[MaxLockedZones];
 	uint32 CurGroupID;
 	uint16 LastAllocatedPort;

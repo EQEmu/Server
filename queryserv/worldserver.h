@@ -19,7 +19,7 @@
 #define WORLDSERVER_H
 
 #include "../common/eq_packet_structs.h"
-#include "../common/net/servertalk_server.h"
+#include "../common/net/servertalk_client_connection.h"
 
 class WorldServer
 {
@@ -35,7 +35,7 @@ class WorldServer
 
 		void HandleMessage(uint16 opcode, const EQ::Net::Packet &p);
 	private:
-		std::unique_ptr<EQ::Net::ServertalkServer> m_server;
+		std::unique_ptr<EQ::Net::ServertalkClient> m_connection;
 };
 #endif
 
