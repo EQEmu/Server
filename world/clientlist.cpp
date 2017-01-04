@@ -742,7 +742,6 @@ void ClientList::SendWhoAll(uint32 fromid,const char* to, int16 admin, Who_All_S
 		}
 		iterator.Advance();
 	}
-	pack2->Deflate();
 	//zoneserver_list.SendPacket(pack2); // NO NO NO WHY WOULD YOU SEND IT TO EVERY ZONE SERVER?!?
 	SendPacket(to,pack2);
 	safe_delete(pack2);
@@ -888,7 +887,6 @@ void ClientList::SendFriendsWho(ServerFriendsWho_Struct *FriendsWho, WorldTCPCon
 			bufptr += sizeof(WhoAllPlayerPart4);
 
 		}
-		pack2->Deflate();
 		SendPacket(FriendsWho->FromName,pack2);
 		safe_delete(pack2);
 	}
@@ -963,7 +961,6 @@ void ClientList::SendLFGMatches(ServerLFGMatchesRequest_Struct *smrs) {
 			}
 			Iterator.Advance();
 		}
-		Pack->Deflate();
 	}
 	SendPacket(smrs->FromName,Pack);
 	safe_delete(Pack);

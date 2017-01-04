@@ -82,8 +82,7 @@ void WorldServer::Connect()
 		OnConnected();
 	});
 
-	//TODO FIX MKAY
-	//m_connection->OnAnyMessage(std::bind(&WorldServer::HandleMessage, this, std::placeholders::_1, std::placeholders::_2));
+	m_connection->OnMessage(std::bind(&WorldServer::HandleMessage, this, std::placeholders::_1, std::placeholders::_2));
 }
 
 bool WorldServer::SendPacket(ServerPacket *pack)
@@ -176,6 +175,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 {
 	ServerPacket tpack(opcode, p);
 	ServerPacket *pack = &tpack;
+
 	switch(opcode) {
 	case 0: {
 		break;
@@ -217,7 +217,6 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 						scm->chan_num = 14;
 						memset(scm->deliverto, 0, sizeof(scm->deliverto));
 						strcpy(scm->deliverto, scm->from);
-						pack->Deflate();
 						SendPacket(pack);
 					}
 				}
@@ -1949,7 +1948,6 @@ bool WorldServer::SendChannelMessage(Client* from, const char* to, uint8 chan_nu
 	scm->queued = 0;
 	strcpy(scm->message, buffer);
 
-	pack->Deflate();
 	bool ret = SendPacket(pack);
 	safe_delete(pack);
 	return ret;
@@ -1988,7 +1986,6 @@ bool WorldServer::SendEmoteMessage(const char* to, uint32 to_guilddbid, int16 to
 	sem->minstatus = to_minstatus;
 	strcpy(sem->message, buffer);
 
-	pack->Deflate();
 	bool ret = SendPacket(pack);
 	safe_delete(pack);
 	return ret;
@@ -2025,8 +2022,6 @@ bool WorldServer::SendVoiceMacro(Client* From, uint32 Type, char* Target, uint32
 	svm->Voice = (GetPlayerRaceValue(From->GetRace()) * 2) + From->GetGender();
 
 	svm->MacroNumber = MacroNumber;
-
-	pack->Deflate();
 
 	bool Ret = SendPacket(pack);
 

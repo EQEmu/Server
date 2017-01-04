@@ -846,7 +846,6 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 		if(GetName() != 0)
 			strcpy(sem->from, GetName());
 
-		pack->Deflate();
 		if(worldserver.Connected())
 			worldserver.SendPacket(pack);
 		safe_delete(pack);
@@ -6009,7 +6008,6 @@ void Client::LeaveAdventure()
 		PendingAdventureLeave();
 		auto pack = new ServerPacket(ServerOP_AdventureLeave, 64);
 		strcpy((char*)pack->pBuffer, GetName());
-		pack->Deflate();
 		worldserver.SendPacket(pack);
 		delete pack;
 	}

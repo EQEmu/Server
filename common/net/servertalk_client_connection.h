@@ -22,6 +22,7 @@ namespace EQ
 			void SendPacket(ServerPacket *p);
 			void OnConnect(std::function<void(ServertalkClient*)> cb) { m_on_connect_cb = cb; }
 			void OnMessage(uint16_t opcode, std::function<void(uint16_t, EQ::Net::Packet&)> cb);
+			void OnMessage(std::function<void(uint16_t, EQ::Net::Packet&)> cb);
 			bool Connected() const { return m_connecting != true; }
 
 			std::shared_ptr<EQ::Net::TCPConnection> Handle() { return m_connection; }
@@ -48,6 +49,7 @@ namespace EQ
 			std::shared_ptr<EQ::Net::TCPConnection> m_connection;
 			std::vector<char> m_buffer;
 			std::unordered_map<uint16_t, std::function<void(uint16_t, EQ::Net::Packet&)>> m_message_callbacks;
+			std::function<void(uint16_t, EQ::Net::Packet&)> m_message_callback;
 			std::function<void(ServertalkClient*)> m_on_connect_cb;
 
 #ifdef ENABLE_SECURITY

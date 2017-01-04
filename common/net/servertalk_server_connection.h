@@ -22,6 +22,7 @@ namespace EQ
 			void Send(uint16_t opcode, EQ::Net::Packet &p);
 			void SendPacket(ServerPacket *p);
 			void OnMessage(uint16_t opcode, std::function<void(uint16_t, EQ::Net::Packet&)> cb);
+			void OnMessage(std::function<void(uint16_t, EQ::Net::Packet&)> cb);
 
 			std::string GetIdentifier() const { return m_identifier; }
 			std::shared_ptr<EQ::Net::TCPConnection> Handle() { return m_connection; }
@@ -41,6 +42,7 @@ namespace EQ
 
 			std::vector<char> m_buffer;
 			std::unordered_map<uint16_t, std::function<void(uint16_t, EQ::Net::Packet&)>> m_message_callbacks;
+			std::function<void(uint16_t, EQ::Net::Packet&)> m_message_callback;
 			std::string m_identifier;
 			std::string m_uuid;
 

@@ -251,43 +251,6 @@ public:
 		ret->InflatedSize = this->InflatedSize;
 		return ret;
 	}
-	bool Deflate() {
-		if (compressed)
-			return false;
-		if ((!this->pBuffer) || (!this->size))
-			return false;
-		uchar* tmp = new uchar[this->size + 128];
-		uint32 tmpsize = DeflatePacket(this->pBuffer, this->size, tmp, this->size + 128);
-		if (!tmpsize) {
-			safe_delete_array(tmp);
-			return false;
-		}
-		this->compressed = true;
-		this->InflatedSize = this->size;
-		this->size = tmpsize;
-		uchar* tmpdel = this->pBuffer;
-		this->pBuffer = tmp;
-		safe_delete_array(tmpdel);
-		return true;
-	}
-	bool Inflate() {
-		if (!compressed)
-			return false;
-		if ((!this->pBuffer) || (!this->size))
-			return false;
-		uchar* tmp = new uchar[InflatedSize];
-		uint32 tmpsize = InflatePacket(this->pBuffer, this->size, tmp, InflatedSize);
-		if (!tmpsize) {
-			safe_delete_array(tmp);
-			return false;
-		}
-		compressed = false;
-		this->size = tmpsize;
-		uchar* tmpdel = this->pBuffer;
-		this->pBuffer = tmp;
-		safe_delete_array(tmpdel);
-		return true;
-	}
 
 	void WriteUInt8(uint8 value) { *(uint8 *)(pBuffer + _wpos) = value; _wpos += sizeof(uint8); }
 	void WriteUInt32(uint32 value) { *(uint32 *)(pBuffer + _wpos) = value; _wpos += sizeof(uint32); }

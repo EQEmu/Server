@@ -2361,7 +2361,6 @@ void Client::Handle_OP_AdventureRequest(const EQApplicationPacket *app)
 		}
 	}
 
-	packet->Deflate();
 	worldserver.SendPacket(packet);
 	delete packet;
 	p_timers.Start(pTimerStartAdventureTimer, 5);
@@ -8709,7 +8708,6 @@ void Client::Handle_OP_LDoNButton(const EQApplicationPacket *app)
 		sac->theme = adv_requested_theme;
 		sac->member_count = adv_requested_member_count;
 		memcpy((pack->pBuffer + sizeof(ServerAdventureRequestCreate_Struct)), adv_requested_data, (64 * adv_requested_member_count));
-		pack->Deflate();
 		worldserver.SendPacket(pack);
 		delete pack;
 		PendingAdventureCreate();
@@ -12359,7 +12357,6 @@ void Client::Handle_OP_ShopPlayerBuy(const EQApplicationPacket *app)
 
 		audit_inst = nullptr;
 
-		qspack->Deflate();
 		if (worldserver.Connected()) { worldserver.SendPacket(qspack); }
 		safe_delete(qspack);
 	}
@@ -12504,7 +12501,6 @@ void Client::Handle_OP_ShopPlayerSell(const EQApplicationPacket *app)
 		qsaudit->items[0].aug_4 = m_inv[mp->itemslot]->GetAugmentItemID(4);
 		qsaudit->items[0].aug_5 = m_inv[mp->itemslot]->GetAugmentItemID(5);
 
-		qspack->Deflate();
 		if (worldserver.Connected()) { worldserver.SendPacket(qspack); }
 		safe_delete(qspack);
 	}
@@ -13355,8 +13351,6 @@ void Client::Handle_OP_TradeAcceptClick(const EQApplicationPacket *app)
 
 					event_details.clear();
 
-					qs_pack->Deflate();
-
 					if (worldserver.Connected())
 						worldserver.SendPacket(qs_pack);
 
@@ -13411,8 +13405,6 @@ void Client::Handle_OP_TradeAcceptClick(const EQApplicationPacket *app)
 				}
 
 				event_details.clear();
-
-				qs_pack->Deflate();
 
 				if (worldserver.Connected())
 					worldserver.SendPacket(qs_pack);

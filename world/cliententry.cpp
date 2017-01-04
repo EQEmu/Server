@@ -311,7 +311,6 @@ void ClientListEntry::ProcessTellQueue()
 	while (it != tell_queue.end()) {
 		pack = new ServerPacket(ServerOP_ChannelMessage, sizeof(ServerChannelMessage_Struct) + strlen((*it)->message) + 1);
 		memcpy(pack->pBuffer, *it, pack->size);
-		pack->Deflate();
 		Server()->SendPacket(pack);
 		safe_delete(pack);
 		safe_delete_array(*it);

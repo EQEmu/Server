@@ -52,13 +52,21 @@ void EQ::Net::ServertalkClient::Send(uint16_t opcode, EQ::Net::Packet &p)
 
 void EQ::Net::ServertalkClient::SendPacket(ServerPacket *p)
 {
-	EQ::Net::StaticPacket pout(p->pBuffer, p->size);
+	EQ::Net::DynamicPacket pout;
+	if (p->pBuffer) {
+		pout.PutData(0, p->pBuffer, p->size);
+	}
 	Send(p->opcode, pout);
 }
 
 void EQ::Net::ServertalkClient::OnMessage(uint16_t opcode, std::function<void(uint16_t, EQ::Net::Packet&)> cb)
 {
 	m_message_callbacks.insert(std::make_pair(opcode, cb));
+}
+
+void EQ::Net::ServertalkClient::OnMessage(std::function<void(uint16_t, EQ::Net::Packet&)> cb)
+{
+	m_message_callback = cb;
 }
 
 void EQ::Net::ServertalkClient::Connect()
@@ -280,6 +288,10 @@ void EQ::Net::ServertalkClient::ProcessMessage(EQ::Net::Packet &p)
 				if (cb != m_message_callbacks.end()) {
 					cb->second(opcode, decrypted_packet);
 				}
+
+				if (m_message_callback) {
+					m_message_callback(opcode, decrypted_packet);
+				}
 			}
 			else {
 				size_t message_len = length;
@@ -288,6 +300,10 @@ void EQ::Net::ServertalkClient::ProcessMessage(EQ::Net::Packet &p)
 				auto cb = m_message_callbacks.find(opcode);
 				if (cb != m_message_callbacks.end()) {
 					cb->second(opcode, packet);
+				}
+
+				if (m_message_callback) {
+					m_message_callback(opcode, packet);
 				}
 			}
 
@@ -298,6 +314,10 @@ void EQ::Net::ServertalkClient::ProcessMessage(EQ::Net::Packet &p)
 			auto cb = m_message_callbacks.find(opcode);
 			if (cb != m_message_callbacks.end()) {
 				m_message_callback_any(opcode, packet);
+			}
+
+			if (m_message_callback) {
+				m_message_callback(opcode, packet);
 			}
 #endif
 		}

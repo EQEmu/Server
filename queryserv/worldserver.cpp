@@ -53,16 +53,7 @@ WorldServer::~WorldServer()
 void WorldServer::Connect()
 {
 	m_connection.reset(new EQ::Net::ServertalkClient(Config->WorldIP, Config->WorldTCPPort, false, "QueryServ", Config->SharedKey));
-
-	m_connection->OnMessage(ServerOP_Speech, std::bind(&WorldServer::HandleMessage, this, std::placeholders::_1, std::placeholders::_2));
-	m_connection->OnMessage(ServerOP_QSPlayerLogTrades, std::bind(&WorldServer::HandleMessage, this, std::placeholders::_1, std::placeholders::_2));
-	m_connection->OnMessage(ServerOP_QSPlayerLogHandins, std::bind(&WorldServer::HandleMessage, this, std::placeholders::_1, std::placeholders::_2));
-	m_connection->OnMessage(ServerOP_QSPlayerLogNPCKills, std::bind(&WorldServer::HandleMessage, this, std::placeholders::_1, std::placeholders::_2));
-	m_connection->OnMessage(ServerOP_QSPlayerLogDeletes, std::bind(&WorldServer::HandleMessage, this, std::placeholders::_1, std::placeholders::_2));
-	m_connection->OnMessage(ServerOP_QSPlayerLogMoves, std::bind(&WorldServer::HandleMessage, this, std::placeholders::_1, std::placeholders::_2));
-	m_connection->OnMessage(ServerOP_QSPlayerLogMerchantTransactions, std::bind(&WorldServer::HandleMessage, this, std::placeholders::_1, std::placeholders::_2));
-	m_connection->OnMessage(ServerOP_QueryServGeneric, std::bind(&WorldServer::HandleMessage, this, std::placeholders::_1, std::placeholders::_2));
-	m_connection->OnMessage(ServerOP_QSSendQuery, std::bind(&WorldServer::HandleMessage, this, std::placeholders::_1, std::placeholders::_2));
+	m_connection->OnMessage(std::bind(&WorldServer::HandleMessage, this, std::placeholders::_1, std::placeholders::_2));
 }
 
 bool WorldServer::SendPacket(ServerPacket *pack)

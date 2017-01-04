@@ -429,7 +429,6 @@ void ZSList::SendChannelMessageRaw(const char* from, const char* to, uint8 chan_
 	scm->chan_num = chan_num;
 	strcpy(&scm->message[0], message);
 
-	pack->Deflate();
 	SendPacket(pack);
 	delete pack;
 }
@@ -473,7 +472,7 @@ void ZSList::SendEmoteMessageRaw(const char* to, uint32 to_guilddbid, int16 to_m
 	char tempto[64]={0};
 	if(to)
 		strn0cpy(tempto,to,64);
-	pack->Deflate();
+
 	if (tempto[0] == 0) {
 		SendPacket(pack);
 	}
