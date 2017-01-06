@@ -54,9 +54,6 @@ volatile bool RunLoops = true;
 void CatchSignal(int sig_num) {
 
 	RunLoops = false;
-
-	if(worldserver)
-		worldserver->Disconnect();
 }
 
 std::string GetMailPrefix() {
@@ -143,8 +140,6 @@ int main() {
 
 	worldserver = new WorldServer;
 
-	worldserver->Connect();
-
 	while(RunLoops) {
 
 		Timer::SetCurrentTime();
@@ -153,12 +148,6 @@ int main() {
 
 		if(ChannelListProcessTimer.Check())
 			ChannelList->Process();
-
-		if (InterserverTimer.Check()) {
-			if (worldserver->TryReconnect() && (!worldserver->Connected()))
-				worldserver->AsyncConnect();
-		}
-		worldserver->Process();
 
 		EQ::EventLoop::Get().Process();
 

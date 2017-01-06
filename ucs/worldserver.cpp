@@ -17,6 +17,15 @@
 */
 #include "../common/global_define.h"
 #include "../common/eqemu_logsys.h"
+#include "../common/servertalk.h"
+#include "../common/misc_functions.h"
+#include "../common/packet_functions.h"
+#include "../common/md5.h"
+#include "worldserver.h"
+#include "clientlist.h"
+#include "ucsconfig.h"
+#include "database.h"
+
 #include <iostream>
 #include <string.h>
 #include <stdio.h>
@@ -24,14 +33,6 @@
 #include <time.h>
 #include <stdlib.h>
 #include <stdarg.h>
-
-#include "../common/servertalk.h"
-#include "worldserver.h"
-#include "clientlist.h"
-#include "ucsconfig.h"
-#include "database.h"
-#include "../common/packet_functions.h"
-#include "../common/md5.h"
 
 extern WorldServer worldserver;
 extern Clientlist *g_Clientlist;
@@ -41,94 +42,78 @@ extern Database database;
 void ProcessMailTo(Client *c, std::string from, std::string subject, std::string message);
 
 WorldServer::WorldServer()
-: WorldConnection(EmuTCPConnection::packetModeUCS, Config->SharedKey.c_str())
 {
-	pTryReconnect = true;
+	m_connection.reset(new EQ::Net::ServertalkClient(Config->WorldIP, Config->WorldTCPPort, false, "UCS", Config->SharedKey));
+	m_connection->OnMessage(std::bind(&WorldServer::ProcessMessage, this, std::placeholders::_1, std::placeholders::_2));
 }
 
 WorldServer::~WorldServer()
 {
 }
 
-void WorldServer::OnConnected()
+void WorldServer::ProcessMessage(uint16 opcode, EQ::Net::Packet &p)
 {
-	Log.Out(Logs::Detail, Logs::UCS_Server, "Connected to World.");
-	WorldConnection::OnConnected();
-}
+	ServerPacket tpack(opcode, p);
+	ServerPacket *pack = &tpack;
 
-void WorldServer::Process()
-{
-	WorldConnection::Process();
+	Log.Out(Logs::Detail, Logs::UCS_Server, "Received Opcode: %4X", opcode);
 
-	if (!Connected())
-		return;
-
-	ServerPacket *pack = nullptr;
-
-	while((pack = tcpc.PopPacket()))
+	switch(opcode)
 	{
-		Log.Out(Logs::Detail, Logs::UCS_Server, "Received Opcode: %4X", pack->opcode);
-
-		switch(pack->opcode)
+		case 0: {
+			break;
+		}
+		case ServerOP_KeepAlive:
 		{
-			case 0: {
+			break;
+		}
+		case ServerOP_UCSMessage:
+		{
+			char *Buffer = (char *)pack->pBuffer;
+
+			auto From = new char[strlen(Buffer) + 1];
+
+			VARSTRUCT_DECODE_STRING(From, Buffer);
+
+			std::string Message = Buffer;
+
+			Log.Out(Logs::Detail, Logs::UCS_Server, "Player: %s, Sent Message: %s", From, Message.c_str());
+
+			Client *c = g_Clientlist->FindCharacter(From);
+
+			safe_delete_array(From);
+
+			if(Message.length() < 2)
 				break;
-			}
-			case ServerOP_KeepAlive:
+
+			if(!c)
 			{
+				Log.Out(Logs::Detail, Logs::UCS_Server, "Client not found.");
 				break;
 			}
-			case ServerOP_UCSMessage:
+
+			if(Message[0] == ';')
 			{
-				char *Buffer = (char *)pack->pBuffer;
-
-				auto From = new char[strlen(Buffer) + 1];
-
-				VARSTRUCT_DECODE_STRING(From, Buffer);
-
-				std::string Message = Buffer;
-
-				Log.Out(Logs::Detail, Logs::UCS_Server, "Player: %s, Sent Message: %s", From, Message.c_str());
-
-				Client *c = g_Clientlist->FindCharacter(From);
-
-				safe_delete_array(From);
-
-				if(Message.length() < 2)
-					break;
-
-				if(!c)
-				{
-					Log.Out(Logs::Detail, Logs::UCS_Server, "Client not found.");
-					break;
-				}
-
-				if(Message[0] == ';')
-				{
-					c->SendChannelMessageByNumber(Message.substr(1, std::string::npos));
-				}
-				else if(Message[0] == '[')
-				{
-					g_Clientlist->ProcessOPMailCommand(c, Message.substr(1, std::string::npos));
-				}
-
-				break;
+				c->SendChannelMessageByNumber(Message.substr(1, std::string::npos));
 			}
-
-			case ServerOP_UCSMailMessage:
+			else if(Message[0] == '[')
 			{
-				ServerMailMessageHeader_Struct *mail = (ServerMailMessageHeader_Struct*)pack->pBuffer;
-				database.SendMail(std::string("SOE.EQ.") + Config->ShortName + std::string(".") + std::string(mail->to),
-					std::string(mail->from),
-					mail->subject,
-					mail->message,
-					std::string());
-				break;
+				g_Clientlist->ProcessOPMailCommand(c, Message.substr(1, std::string::npos));
 			}
+
+			break;
+		}
+
+		case ServerOP_UCSMailMessage:
+		{
+			ServerMailMessageHeader_Struct *mail = (ServerMailMessageHeader_Struct*)pack->pBuffer;
+			database.SendMail(std::string("SOE.EQ.") + Config->ShortName + std::string(".") + std::string(mail->to),
+				std::string(mail->from),
+				mail->subject,
+				mail->message,
+				std::string());
+			break;
 		}
 	}
-
-	safe_delete(pack);
-	return;
 }
 

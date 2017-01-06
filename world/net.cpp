@@ -437,6 +437,20 @@ int main(int argc, char** argv) {
 		QSLink.RemoveConnection(connection);
 	});
 
+	server_connection->OnConnectionIdentified("UCS", [](std::shared_ptr<EQ::Net::ServertalkServerConnection> connection) {
+		Log.OutF(Logs::General, Logs::World_Server, "New UCS Server connection from {2} at {0}:{1}",
+			connection->Handle()->RemoteIP(), connection->Handle()->RemotePort(), connection->GetUUID());
+
+		UCSLink.SetConnection(connection);
+	});
+
+	server_connection->OnConnectionRemoved("UCS", [](std::shared_ptr<EQ::Net::ServertalkServerConnection> connection) {
+		Log.OutF(Logs::General, Logs::World_Server, "UCS Query Server connection from {0}",
+			connection->GetUUID());
+
+		UCSLink.SetConnection(nullptr);
+	});
+
 	EQ::Net::EQStreamManagerOptions opts(9000, false, false);
 	EQ::Net::EQStreamManager eqsm(opts);
 
@@ -451,7 +465,6 @@ int main(int argc, char** argv) {
 	InterserverTimer.Trigger();
 	uint8 ReconnectCounter = 100;
 	std::shared_ptr<EQStreamInterface> eqs;
-	EmuTCPConnection* tcpc;
 	EQStreamInterface *eqsi;
 
 	eqsm.OnNewConnection([&stream_identifier](std::shared_ptr<EQ::Net::EQStream> stream) {
@@ -510,7 +523,6 @@ int main(int argc, char** argv) {
 		
 		zoneserver_list.Process();
 		launcher_list.Process();
-		UCSLink.Process();
 		LFPGroupList.Process(); 
 		adventure_manager.Process();
 
