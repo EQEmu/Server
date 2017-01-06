@@ -1,5 +1,8 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 21/01/2016 ==
+Uleat: Disabled RoF+ clients from augmentation items not in their possessions slots (0-29, 9999, 251-330) to abate an exploit in the current code
+
 == 12/03/2016 ==
 Uleat: Added hack detection to trade code
 	- If illegal items are found in trade slots when the 'trade' button is clicked, the trade is cancelled and a message is sent to the offending player
@@ -8,6 +11,7 @@ Uleat: Added hack detection to trade code
 == 12/01/2016 ==
 Uleat: Disabled RoF+ clients from augmenting items not in their possessions slots (0-29, 9999, 251-330) to abate an exploit in the current code
 
+>>>>>>> upstream/master
 == 10/17/2016 ==
 Uleat: Moved namespace ItemField from item_instance.h to shareddb.cpp - the only place it is used
 Uleat: Separated class Inventory from item_instance files into inventory_profile files

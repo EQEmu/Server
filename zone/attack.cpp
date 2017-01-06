@@ -1188,8 +1188,14 @@ bool Client::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, b
 
 	CommonBreakInvisibleFromCombat();
 
+	// Defensive procs from opponent happen here.
+	// We, the attacker check for them and make them happen.
+	// Added 2nd check for spell based defensive procs on opponent.
 	if(GetTarget())
+		{
 		TriggerDefensiveProcs(other, Hand, true, damage);
+		TriggerDefensiveProcs(other, Hand, false);
+		}
 
 	if (damage > 0)
 		return true;
@@ -1754,8 +1760,14 @@ bool NPC::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool
 			TrySkillProc(other, skillinuse, 0, true, Hand);
 	}
 
+	// Defensive procs from opponent happen here.
+	// We, the attacker check for them and make them happen.
+	// Added 2nd check for spell based defensive procs on opponent.
 	if(GetHP() > 0 && !other->HasDied())
+		{
 		TriggerDefensiveProcs(other, Hand, true, damage);
+		TriggerDefensiveProcs(other, Hand, false);
+		}
 
 	if (damage > 0)
 		return true;
