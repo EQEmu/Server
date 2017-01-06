@@ -409,6 +409,20 @@ int main(int argc, char** argv) {
 		zoneserver_list.Remove(connection->GetUUID());
 	});
 
+	server_connection->OnConnectionIdentified("Launcher", [](std::shared_ptr<EQ::Net::ServertalkServerConnection> connection) {
+		Log.OutF(Logs::General, Logs::World_Server, "New Launcher connection from {2} at {0}:{1}",
+			connection->Handle()->RemoteIP(), connection->Handle()->RemotePort(), connection->GetUUID());
+
+		launcher_list.Add(connection);
+	});
+
+	server_connection->OnConnectionRemoved("Launcher", [](std::shared_ptr<EQ::Net::ServertalkServerConnection> connection) {
+		Log.OutF(Logs::General, Logs::World_Server, "Removed Launcher connection from {0}",
+			connection->GetUUID());
+
+		launcher_list.Remove(connection);
+	});
+
 	server_connection->OnConnectionIdentified("QueryServ", [](std::shared_ptr<EQ::Net::ServertalkServerConnection> connection) {
 		Log.OutF(Logs::General, Logs::World_Server, "New Query Server connection from {2} at {0}:{1}", 
 			connection->Handle()->RemoteIP(), connection->Handle()->RemotePort(), connection->GetUUID());
@@ -478,32 +492,6 @@ int main(int argc, char** argv) {
 		}
 
 		client_list.Process();
-
-		//while ((tcpc = tcps.NewQueuePop())) {
-		//	struct in_addr in;
-		//	in.s_addr = tcpc->GetrIP();
-		//	
-		//	/* World - Tell what is being connected */
-		//	if (tcpc->GetMode() == EmuTCPConnection::modePacket) {
-		//		if (tcpc->GetPacketMode() == EmuTCPConnection::packetModeZone) {
-		//			Log.Out(Logs::General, Logs::World_Server, "New Zone Server from %s:%d", inet_ntoa(in), tcpc->GetrPort());
-		//		}
-		//		else if (tcpc->GetPacketMode() == EmuTCPConnection::packetModeLauncher) {
-		//			Log.Out(Logs::General, Logs::World_Server, "New Launcher from %s:%d", inet_ntoa(in), tcpc->GetrPort());
-		//		}
-		//		else if (tcpc->GetPacketMode() == EmuTCPConnection::packetModeUCS) {
-		//			Log.Out(Logs::General, Logs::World_Server, "New UCS Connection from %s:%d", inet_ntoa(in), tcpc->GetrPort());
-		//		}
-		//		else if (tcpc->GetPacketMode() == EmuTCPConnection::packetModeQueryServ) {
-		//			Log.Out(Logs::General, Logs::World_Server, "New QS Connection from %s:%d", inet_ntoa(in), tcpc->GetrPort());
-		//		}
-		//		else {
-		//			Log.Out(Logs::General, Logs::World_Server, "Unsupported packet mode from %s:%d", inet_ntoa(in), tcpc->GetrPort());
-		//		}
-		//	}
-		//
-		//	console_list.Add(new Console(tcpc));
-		//}
 
 		if(PurgeInstanceTimer.Check())
 		{

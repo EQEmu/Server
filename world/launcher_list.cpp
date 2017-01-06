@@ -52,17 +52,11 @@ LauncherList::~LauncherList() {
 }
 
 void LauncherList::Process() {
-	//process pending launchers..
 	std::vector<LauncherLink *>::iterator cur;
 	cur = m_pendingLaunchers.begin();
 	while(cur != m_pendingLaunchers.end()) {
 		LauncherLink *l = *cur;
-		if(!l->Process()) {
-			//launcher has died before it identified itself.
-			Log.Out(Logs::Detail, Logs::World_Server, "Removing pending launcher %d", l->GetID());
-			cur = m_pendingLaunchers.erase(cur);
-			delete l;
-		} else if(l->HasName()) {
+		if(l->HasName()) {
 			//launcher has identified itself now.
 			//remove ourself from the pending list
 			cur = m_pendingLaunchers.erase(cur);
@@ -81,21 +75,6 @@ void LauncherList::Process() {
 			++cur;
 		}
 	}
-
-	//process active launchers.
-	std::map<std::string, LauncherLink *>::iterator curl;
-	curl = m_launchers.begin();
-	while(curl != m_launchers.end()) {
-		LauncherLink *l = curl->second;
-		if(!l->Process()) {
-			//launcher has died before it identified itself.
-			Log.Out(Logs::Detail, Logs::World_Server, "Removing launcher %s (%d)", l->GetName(), l->GetID());
-			curl = m_launchers.erase(curl);
-			delete l;
-		} else {
-			++curl;
-		}
-	}
 }
 
 LauncherLink *LauncherList::Get(const char *name) {
@@ -104,16 +83,6 @@ LauncherLink *LauncherList::Get(const char *name) {
 	if(res == m_launchers.end())
 		return(nullptr);
 	return(res->second);
-/*	std::string goal(name);
-
-	std::vector<LauncherLink *>::iterator cur, end;
-	cur = m_launchers.begin();
-	end = m_launchers.end();
-	for(; cur != end; cur++) {
-		if(goal == (*cur)->GetName())
-			return(*cur);
-	}
-	return(nullptr);*/
 }
 
 LauncherLink *LauncherList::FindByZone(const char *short_name) {
@@ -127,10 +96,31 @@ LauncherLink *LauncherList::FindByZone(const char *short_name) {
 	return(nullptr);
 }
 
-void LauncherList::Add(EmuTCPConnection *conn) {
+void LauncherList::Add(std::shared_ptr<EQ::Net::ServertalkServerConnection> conn) {
 	auto it = new LauncherLink(nextID++, conn);
 	Log.Out(Logs::Detail, Logs::World_Server, "Adding pending launcher %d", it->GetID());
 	m_pendingLaunchers.push_back(it);
+}
+
+void LauncherList::Remove(std::shared_ptr<EQ::Net::ServertalkServerConnection> conn)
+{
+	auto pendingLauncherIter = m_pendingLaunchers.begin();
+	while (pendingLauncherIter != m_pendingLaunchers.end()) {
+		if ((*pendingLauncherIter)->GetUUID() == conn->GetUUID()) {
+			m_pendingLaunchers.erase(pendingLauncherIter);
+			break;
+		}
+		++pendingLauncherIter;
+	}
+
+	auto launcherIter = m_launchers.begin();
+	while (launcherIter != m_launchers.end()) {
+		if (launcherIter->second->GetUUID() == conn->GetUUID()) {
+			m_launchers.erase(launcherIter);
+			break;
+		}
+		++launcherIter;
+	}
 }
 
 

@@ -34,7 +34,7 @@
 
 extern LauncherList launcher_list;
 
-LauncherLink::LauncherLink(int id, EmuTCPConnection *c)
+LauncherLink::LauncherLink(int id, std::shared_ptr<EQ::Net::ServertalkServerConnection> c)
 : ID(id),
 	tcpc(c),
 	authenticated(false),
@@ -43,143 +43,105 @@ LauncherLink::LauncherLink(int id, EmuTCPConnection *c)
 {
 	m_dynamicCount = 0;
 	m_bootTimer.Disable();
+
+	tcpc->OnMessage(std::bind(&LauncherLink::ProcessMessage, this, std::placeholders::_1, std::placeholders::_2));
+	m_process_timer.reset(new EQ::Timer(100, true, std::bind(&LauncherLink::Process, this, std::placeholders::_1)));
 }
 
 LauncherLink::~LauncherLink() {
-	tcpc->Free();
 }
 
-bool LauncherLink::Process() {
-	if (!tcpc->Connected())
-		return false;
-
-	if(m_bootTimer.Check(false)) {
+void LauncherLink::Process(EQ::Timer *t) {
+	if (m_bootTimer.Check(false)) {
 		//force a boot on any zone which isnt running.
 		std::map<std::string, ZoneState>::iterator cur, end;
 		cur = m_states.begin();
 		end = m_states.end();
-		for(; cur != end; ++cur) {
-			if(!cur->second.up) {
+		for (; cur != end; ++cur) {
+			if (!cur->second.up) {
 				StartZone(cur->first.c_str(), cur->second.port);
 			}
 		}
 		m_bootTimer.Disable();
 	}
+}
 
-	ServerPacket *pack = 0;
-	while((pack = tcpc->PopPacket())) {
-		if (!authenticated) {
-			if (WorldConfig::get()->SharedKey.length() > 0) {
-				if (pack->opcode == ServerOP_ZAAuth && pack->size == 16) {
-					uint8 tmppass[16];
-					MD5::Generate((const uchar*) WorldConfig::get()->SharedKey.c_str(), WorldConfig::get()->SharedKey.length(), tmppass);
-					if (memcmp(pack->pBuffer, tmppass, 16) == 0)
-						authenticated = true;
-					else {
-						struct in_addr in;
-						in.s_addr = GetIP();
-						Log.Out(Logs::Detail, Logs::World_Server, "Launcher authorization failed.");
-						auto pack = new ServerPacket(ServerOP_ZAAuthFailed);
-						SendPacket(pack);
-						delete pack;
-						Disconnect();
-						return false;
-					}
-				}
-				else {
-					struct in_addr in;
-					in.s_addr = GetIP();
-					Log.Out(Logs::Detail, Logs::World_Server, "Launcher authorization failed.");
-					auto pack = new ServerPacket(ServerOP_ZAAuthFailed);
-					SendPacket(pack);
-					delete pack;
-					Disconnect();
-					return false;
-				}
-			}
-			else
-			{
-				Log.Out(Logs::Detail, Logs::World_Server,"**WARNING** You have not configured a world shared key in your config file. You should add a <key>STRING</key> element to your <world> element to prevent unauthroized zone access.");
-				authenticated = true;
-			}
-			delete pack;
-			continue;
-		}
-		switch(pack->opcode) {
-		case 0:
-			break;
-		case ServerOP_KeepAlive: {
-			// ignore this
-			break;
-		}
-		case ServerOP_ZAAuth: {
-			Log.Out(Logs::Detail, Logs::World_Server, "Got authentication from %s when they are already authenticated.", m_name.c_str());
-			break;
-		}
-		case ServerOP_LauncherConnectInfo: {
-			const LauncherConnectInfo *it = (const LauncherConnectInfo *) pack->pBuffer;
-			if(HasName()) {
-				Log.Out(Logs::Detail, Logs::World_Server, "Launcher '%s' received an additional connect packet with name '%s'. Ignoring.", m_name.c_str(), it->name);
-				break;
-			}
-			m_name = it->name;
+void LauncherLink::ProcessMessage(uint16 opcode, EQ::Net::Packet &p)
+{
+	ServerPacket tpack(opcode, p);
+	ServerPacket *pack = &tpack;
 
-			EQLConfig *config = launcher_list.GetConfig(m_name.c_str());
-			if(config == nullptr) {
-				Log.Out(Logs::Detail, Logs::World_Server, "Unknown launcher '%s' connected. Disconnecting.", it->name);
-				Disconnect();
-				break;
-			}
-
-			Log.Out(Logs::Detail, Logs::World_Server, "Launcher Identified itself as '%s'. Loading zone list.", it->name);
-
-			std::vector<LauncherZone> result;
-			//database.GetLauncherZones(it->name, result);
-			config->GetZones(result);
-
-			std::vector<LauncherZone>::iterator cur, end;
-			cur = result.begin();
-			end = result.end();
-			ZoneState zs;
-			for(; cur != end; cur++) {
-				zs.port = cur->port;
-				zs.up = false;
-				zs.starts = 0;
-				Log.Out(Logs::Detail, Logs::World_Server, "%s: Loaded zone '%s' on port %d", m_name.c_str(), cur->name.c_str(), zs.port);
-				m_states[cur->name] = zs;
-			}
-
-			//now we add all the dynamics.
-			BootDynamics(config->GetDynamicCount());
-
-			m_bootTimer.Start();
-
-			break;
-		}
-		case ServerOP_LauncherZoneStatus: {
-			const LauncherZoneStatus *it = (const LauncherZoneStatus *) pack->pBuffer;
-			std::map<std::string, ZoneState>::iterator res;
-			res = m_states.find(it->short_name);
-			if(res == m_states.end()) {
-				Log.Out(Logs::Detail, Logs::World_Server, "%s: reported state for zone %s which it does not have.", m_name.c_str(), it->short_name);
-				break;
-			}
-			Log.Out(Logs::Detail, Logs::World_Server, "%s: %s reported state %s (%d starts)", m_name.c_str(), it->short_name, it->running?"STARTED":"STOPPED", it->start_count);
-			res->second.up = it->running;
-			res->second.starts = it->start_count;
-			break;
-		}
-		default:
-		{
-			Log.Out(Logs::Detail, Logs::World_Server, "Unknown ServerOPcode from launcher 0x%04x, size %d",pack->opcode,pack->size);
-			DumpPacket(pack->pBuffer, pack->size);
-			break;
-		}
-		}
-
-		delete pack;
+	switch(opcode) {
+	case 0:
+		break;
+	case ServerOP_KeepAlive: {
+		// ignore this
+		break;
 	}
-	return(true);
+	case ServerOP_ZAAuth: {
+		Log.Out(Logs::Detail, Logs::World_Server, "Got authentication from %s when they are already authenticated.", m_name.c_str());
+		break;
+	}
+	case ServerOP_LauncherConnectInfo: {
+		const LauncherConnectInfo *it = (const LauncherConnectInfo *) pack->pBuffer;
+		if(HasName()) {
+			Log.Out(Logs::Detail, Logs::World_Server, "Launcher '%s' received an additional connect packet with name '%s'. Ignoring.", m_name.c_str(), it->name);
+			break;
+		}
+		m_name = it->name;
+	
+		EQLConfig *config = launcher_list.GetConfig(m_name.c_str());
+		if(config == nullptr) {
+			Log.Out(Logs::Detail, Logs::World_Server, "Unknown launcher '%s' connected. Disconnecting.", it->name);
+			Disconnect();
+			break;
+		}
+	
+		Log.Out(Logs::Detail, Logs::World_Server, "Launcher Identified itself as '%s'. Loading zone list.", it->name);
+	
+		std::vector<LauncherZone> result;
+		//database.GetLauncherZones(it->name, result);
+		config->GetZones(result);
+	
+		std::vector<LauncherZone>::iterator cur, end;
+		cur = result.begin();
+		end = result.end();
+		ZoneState zs;
+		for(; cur != end; cur++) {
+			zs.port = cur->port;
+			zs.up = false;
+			zs.starts = 0;
+			Log.Out(Logs::Detail, Logs::World_Server, "%s: Loaded zone '%s' on port %d", m_name.c_str(), cur->name.c_str(), zs.port);
+			m_states[cur->name] = zs;
+		}
+	
+		//now we add all the dynamics.
+		BootDynamics(config->GetDynamicCount());
+	
+		m_bootTimer.Start();
+	
+		break;
+	}
+	case ServerOP_LauncherZoneStatus: {
+		const LauncherZoneStatus *it = (const LauncherZoneStatus *) pack->pBuffer;
+		std::map<std::string, ZoneState>::iterator res;
+		res = m_states.find(it->short_name);
+		if(res == m_states.end()) {
+			Log.Out(Logs::Detail, Logs::World_Server, "%s: reported state for zone %s which it does not have.", m_name.c_str(), it->short_name);
+			break;
+		}
+		Log.Out(Logs::Detail, Logs::World_Server, "%s: %s reported state %s (%d starts)", m_name.c_str(), it->short_name, it->running?"STARTED":"STOPPED", it->start_count);
+		res->second.up = it->running;
+		res->second.starts = it->start_count;
+		break;
+	}
+	default:
+	{
+		Log.Out(Logs::Detail, Logs::World_Server, "Unknown ServerOPcode from launcher 0x%04x, size %d",pack->opcode,pack->size);
+		DumpPacket(pack->pBuffer, pack->size);
+		break;
+	}
+	}
 }
 
 bool LauncherLink::ContainsZone(const char *short_name) const {

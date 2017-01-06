@@ -25,25 +25,27 @@
 #include "zone_launch.h"
 
 WorldServer::WorldServer(std::map<std::string, ZoneLaunch *> &zones, const char *name, const EQEmuConfig *config)
-: WorldConnection(EmuTCPConnection::packetModeLauncher, config->SharedKey.c_str()),
-	m_name(name),
+: m_name(name),
 	m_config(config),
 	m_zones(zones)
 {
+	m_connection.reset(new EQ::Net::ServertalkClient(config->WorldIP, config->WorldTCPPort, false, "Launcher", config->SharedKey));
+	m_connection->OnConnect([this](EQ::Net::ServertalkClient *client) {
+		OnConnected();
+	});
+
+	m_connection->OnMessage(std::bind(&WorldServer::HandleMessage, this, std::placeholders::_1, std::placeholders::_2));
 }
 
 WorldServer::~WorldServer() {
 }
 
 void WorldServer::OnConnected() {
-	WorldConnection::OnConnected();
 
 	auto pack = new ServerPacket(ServerOP_LauncherConnectInfo, sizeof(LauncherConnectInfo));
 	LauncherConnectInfo* sci = (LauncherConnectInfo*) pack->pBuffer;
 	strn0cpy(sci->name, m_name, sizeof(sci->name));
-//	sci->port = net.GetZonePort();
-//	strcpy(sci->address, net.GetZoneAddress());
-	SendPacket(pack);
+	m_connection->SendPacket(pack);
 	safe_delete(pack);
 
 	//send status for all zones...
@@ -55,82 +57,69 @@ void WorldServer::OnConnected() {
 	}
 }
 
-void WorldServer::Process() {
+void WorldServer::HandleMessage(uint16 opcode, EQ::Net::Packet &p) {
+	ServerPacket tpack(opcode, p);
+	ServerPacket *pack = &tpack;
 
-	WorldConnection::Process();
-
-	if (!Connected())
-		return;
-
-	ServerPacket *pack = 0;
-	while((pack = tcpc.PopPacket())) {
-		switch(pack->opcode) {
-		case 0: {
+	switch(opcode) {
+	case 0: {
+		break;
+	}
+	case ServerOP_EmoteMessage:
+	case ServerOP_KeepAlive: {
+		// ignore this
+		break;
+	}
+	case ServerOP_LauncherZoneRequest: {
+		if(pack->size != sizeof(LauncherZoneRequest)) {
+			Log.Out(Logs::Detail, Logs::Launcher, "Invalid size of LauncherZoneRequest: %d", pack->size);
 			break;
 		}
-		case ServerOP_EmoteMessage:
-		case ServerOP_KeepAlive: {
-			// ignore this
-			break;
-		}
-		case ServerOP_ZAAuthFailed: {
-			Log.Out(Logs::Detail, Logs::Launcher, "World server responded 'Not Authorized', disabling reconnect");
-			pTryReconnect = false;
-			Disconnect();
-			break;
-		}
-		case ServerOP_LauncherZoneRequest: {
-			if(pack->size != sizeof(LauncherZoneRequest)) {
-				Log.Out(Logs::Detail, Logs::Launcher, "Invalid size of LauncherZoneRequest: %d", pack->size);
-				break;
-			}
-			const LauncherZoneRequest *lzr = (const LauncherZoneRequest *) pack->pBuffer;
-
-			switch(ZoneRequestCommands(lzr->command)) {
-			case ZR_Start: {
-				if(m_zones.find(lzr->short_name) != m_zones.end()) {
-					Log.Out(Logs::Detail, Logs::Launcher, "World told us to start zone %s, but it is already running.", lzr->short_name);
-				} else {
-					Log.Out(Logs::Detail, Logs::Launcher, "World told us to start zone %s.", lzr->short_name);
-					auto l = new ZoneLaunch(this, m_name, lzr->short_name, lzr->port, m_config);
-					m_zones[lzr->short_name] = l;
-				}
-				break;
-			}
-			case ZR_Restart: {
-				auto res = m_zones.find(lzr->short_name);
-				if(res == m_zones.end()) {
-					Log.Out(Logs::Detail, Logs::Launcher, "World told us to restart zone %s, but it is not running.", lzr->short_name);
-				} else {
-					Log.Out(Logs::Detail, Logs::Launcher, "World told us to restart zone %s.", lzr->short_name);
-					res->second->Restart();
-				}
-				break;
-			}
-			case ZR_Stop: {
-				auto res = m_zones.find(lzr->short_name);
-				if(res == m_zones.end()) {
-					Log.Out(Logs::Detail, Logs::Launcher, "World told us to stop zone %s, but it is not running.", lzr->short_name);
-				} else {
-					Log.Out(Logs::Detail, Logs::Launcher, "World told us to stop zone %s.", lzr->short_name);
-					res->second->Stop();
-				}
-				break;
-			}
+		const LauncherZoneRequest *lzr = (const LauncherZoneRequest *) pack->pBuffer;
+	
+		switch(ZoneRequestCommands(lzr->command)) {
+		case ZR_Start: {
+			if(m_zones.find(lzr->short_name) != m_zones.end()) {
+				Log.Out(Logs::Detail, Logs::Launcher, "World told us to start zone %s, but it is already running.", lzr->short_name);
+			} else {
+				Log.Out(Logs::Detail, Logs::Launcher, "World told us to start zone %s.", lzr->short_name);
+				auto l = new ZoneLaunch(this, m_name, lzr->short_name, lzr->port, m_config);
+				m_zones[lzr->short_name] = l;
 			}
 			break;
 		}
-		case ServerOP_GroupIDReply: {
-			//ignore this, world is still being dumb
+		case ZR_Restart: {
+			auto res = m_zones.find(lzr->short_name);
+			if(res == m_zones.end()) {
+				Log.Out(Logs::Detail, Logs::Launcher, "World told us to restart zone %s, but it is not running.", lzr->short_name);
+			} else {
+				Log.Out(Logs::Detail, Logs::Launcher, "World told us to restart zone %s.", lzr->short_name);
+				res->second->Restart();
+			}
 			break;
 		}
-
-		default: {
-			Log.Out(Logs::Detail, Logs::Launcher, "Unknown opcode 0x%x from World of len %d", pack->opcode, pack->size);
+		case ZR_Stop: {
+			auto res = m_zones.find(lzr->short_name);
+			if(res == m_zones.end()) {
+				Log.Out(Logs::Detail, Logs::Launcher, "World told us to stop zone %s, but it is not running.", lzr->short_name);
+			} else {
+				Log.Out(Logs::Detail, Logs::Launcher, "World told us to stop zone %s.", lzr->short_name);
+				res->second->Stop();
+			}
 			break;
 		}
 		}
-		safe_delete(pack);
+		break;
+	}
+	case ServerOP_GroupIDReply: {
+		//ignore this, world is still being dumb
+		break;
+	}
+	
+	default: {
+		Log.Out(Logs::Detail, Logs::Launcher, "Unknown opcode 0x%x from World of len %d", pack->opcode, pack->size);
+		break;
+	}
 	}
 }
 
@@ -144,12 +133,6 @@ void WorldServer::SendStatus(const char *short_name, uint32 start_count, bool ru
 	it->start_count = start_count;
 	it->running = running?1:0;
 
-	SendPacket(pack);
+	m_connection->SendPacket(pack);
 	safe_delete(pack);
 }
-
-
-
-
-
-

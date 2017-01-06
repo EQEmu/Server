@@ -9,7 +9,7 @@ namespace EQ
 	namespace Net
 	{
 		inline bool IsLittleEndian() {
-			static int32_t v = 1;
+			const int32_t v = 1;
 			return 1 == *(int8_t*)&v;
 		}
 
