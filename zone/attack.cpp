@@ -140,175 +140,141 @@ bool Mob::AttackAnimation(EQEmu::skills::SkillType &skillinuse, int Hand, const 
 	return true;
 }
 
+int Mob::compute_tohit(EQEmu::skills::SkillType skillinuse)
+{
+	int tohit = GetSkill(EQEmu::skills::SkillOffense) + 7;
+	tohit += GetSkill(skillinuse);
+	if (IsNPC())
+		tohit += CastToNPC()->GetAccuracyRating();
+	if (IsClient()) {
+		double reduction = CastToClient()->m_pp.intoxication / 2.0;
+		if (reduction > 20.0) {
+			reduction = std::min((110 - reduction) / 100.0, 1.0);
+			tohit = reduction * static_cast<double>(tohit);
+		} else if (IsBerserk()) {
+			tohit += (GetLevel() * 2) / 5;
+		}
+	}
+	return std::max(tohit, 1);
+}
+
+// based on dev quotes
+// the AGI bonus has actually drastically changed from classic
+int Mob::compute_defense()
+{
+	int defense = GetSkill(EQEmu::skills::SkillDefense) * 400 / 225;
+	defense += (8000 * (GetAGI() - 40)) / 36000;
+	if (IsClient())
+		defense += CastToClient()->GetHeroicAGI() / 10;
+
+	defense += itembonuses.AvoidMeleeChance; // item mod2
+	if (IsNPC())
+		defense += CastToNPC()->GetAvoidanceRating();
+
+	if (IsClient()) {
+		double reduction = CastToClient()->m_pp.intoxication / 2.0;
+		if (reduction > 20.0) {
+			reduction = std::min((110 - reduction) / 100.0, 1.0);
+			defense = reduction * static_cast<double>(defense);
+		}
+	}
+
+	return std::max(1, defense);
+}
+
 // called when a mob is attacked, does the checks to see if it's a hit
 // and does other mitigation checks. 'this' is the mob being attacked.
-bool Mob::CheckHitChance(Mob* other, EQEmu::skills::SkillType skillinuse, int Hand, int16 chance_mod)
+bool Mob::CheckHitChance(Mob* other, EQEmu::skills::SkillType skillinuse, int chance_mod)
 {
-/*/
-		//Reworked a lot of this code to achieve better balance at higher levels.
-		//The old code basically meant that any in high level (50+) combat,
-		//both parties always had 95% chance to hit the other one.
-/*/
-
-	Mob *attacker=other;
-	Mob *defender=this;
-	float chancetohit = RuleR(Combat, BaseHitChance);
-
-	if(attacker->IsNPC() && !attacker->IsPet())
-		chancetohit += RuleR(Combat, NPCBonusHitChance);
-
+	Mob *attacker = other;
+	Mob *defender = this;
 	Log.Out(Logs::Detail, Logs::Attack, "CheckHitChance(%s) attacked by %s", defender->GetName(), attacker->GetName());
 
-	bool pvpmode = false;
-	if(IsClient() && other->IsClient())
-		pvpmode = true;
-
-	if (chance_mod >= 10000)
+	// calculate defender's avoidance
+	auto avoidance = defender->compute_defense() + 10; // add 10 in case the NPC's stats are fucked
+	auto evasion_bonus = defender->spellbonuses.AvoidMeleeChanceEffect; // we check this first since it has a special case
+	if (evasion_bonus <= -100)
 		return true;
-
-	float avoidanceBonus = 0;
-	float hitBonus = 0;
-
-	////////////////////////////////////////////////////////
-	// To hit calcs go here
-	////////////////////////////////////////////////////////
-
-	uint8 attacker_level = attacker->GetLevel() ? attacker->GetLevel() : 1;
-	uint8 defender_level = defender->GetLevel() ? defender->GetLevel() : 1;
-
-	//Calculate the level difference
-
-	Log.Out(Logs::Detail, Logs::Attack, "Chance to hit before level diff calc %.2f", chancetohit);
-
-	double level_difference = attacker_level - defender_level;
-	double range = defender->GetLevel();
-	range = ((range / 4) + 3);
-
-	if(level_difference < 0)
-	{
-		if(level_difference >= -range)
-		{
-			chancetohit += (level_difference / range) * RuleR(Combat,HitFalloffMinor); //5
-		}
-		else if (level_difference >= -(range+3.0))
-		{
-			chancetohit -= RuleR(Combat,HitFalloffMinor);
-			chancetohit += ((level_difference+range) / (3.0)) * RuleR(Combat,HitFalloffModerate); //7
-		}
-		else
-		{
-			chancetohit -= (RuleR(Combat,HitFalloffMinor) + RuleR(Combat,HitFalloffModerate));
-			chancetohit += ((level_difference+range+3.0)/12.0) * RuleR(Combat,HitFalloffMajor); //50
-		}
-	}
-	else
-	{
-		chancetohit += (RuleR(Combat,HitBonusPerLevel) * level_difference);
-	}
-
-	Log.Out(Logs::Detail, Logs::Attack, "Chance to hit after level diff calc %.2f", chancetohit);
-
-	chancetohit -= ((float)defender->GetAGI() * RuleR(Combat, AgiHitFactor));
-
-	Log.Out(Logs::Detail, Logs::Attack, "Chance to hit after Agility calc %.2f", chancetohit);
-
-	if(attacker->IsClient())
-	{
-		chancetohit -= (RuleR(Combat,WeaponSkillFalloff) * (attacker->CastToClient()->MaxSkill(skillinuse) - attacker->GetSkill(skillinuse)));
-		Log.Out(Logs::Detail, Logs::Attack, "Chance to hit after agil calc %.2f", "Chance to hit after weapon falloff calc (attack) %.2f", chancetohit);
-	}
-
-	if(defender->IsClient())
-	{
-		chancetohit += (RuleR(Combat, WeaponSkillFalloff) * (defender->CastToClient()->MaxSkill(EQEmu::skills::SkillDefense) - defender->GetSkill(EQEmu::skills::SkillDefense)));
-		Log.Out(Logs::Detail, Logs::Attack, "Chance to hit after weapon falloff calc (defense) %.2f", chancetohit);
-	}
-
-	//I dont think this is 100% correct, but at least it does something...
-	if(attacker->spellbonuses.MeleeSkillCheckSkill == skillinuse || attacker->spellbonuses.MeleeSkillCheckSkill == 255) {
-		chancetohit += attacker->spellbonuses.MeleeSkillCheck;
-		Log.Out(Logs::Detail, Logs::Attack, "Applied spell melee skill bonus %d, yeilding %.2f", attacker->spellbonuses.MeleeSkillCheck, chancetohit);
-	}
-	if(attacker->itembonuses.MeleeSkillCheckSkill == skillinuse || attacker->itembonuses.MeleeSkillCheckSkill == 255) {
-		chancetohit += attacker->itembonuses.MeleeSkillCheck;
-		Log.Out(Logs::Detail, Logs::Attack, "Applied item melee skill bonus %d, yeilding %.2f", attacker->spellbonuses.MeleeSkillCheck, chancetohit);
-	}
-
-	//Avoidance Bonuses on defender decreases baseline hit chance by percent.
-	avoidanceBonus = defender->spellbonuses.AvoidMeleeChanceEffect +
-				defender->itembonuses.AvoidMeleeChanceEffect +
-				defender->aabonuses.AvoidMeleeChanceEffect +
-				(defender->itembonuses.AvoidMeleeChance / 10.0f); //Item Mod 'Avoidence'
+	if (evasion_bonus >= 10000) // some sort of auto avoid disc
+		return false;
+	// 172 Evasion aka SE_AvoidMeleeChance
+	evasion_bonus += defender->itembonuses.AvoidMeleeChanceEffect + defender->aabonuses.AvoidMeleeChanceEffect; // item bonus here isn't mod2 avoidance
 
 	Mob *owner = nullptr;
 	if (defender->IsPet())
 		owner = defender->GetOwner();
-	else if ((defender->IsNPC() && defender->CastToNPC()->GetSwarmOwner()))
+	else if (defender->IsNPC() && defender->CastToNPC()->GetSwarmOwner())
 		owner = entity_list.GetMobID(defender->CastToNPC()->GetSwarmOwner());
 
-	if (owner)
-		avoidanceBonus += owner->aabonuses.PetAvoidance + owner->spellbonuses.PetAvoidance + owner->itembonuses.PetAvoidance;
+	if (owner) // 215 Pet Avoidance % aka SE_PetAvoidance
+		evasion_bonus += owner->aabonuses.PetAvoidance + owner->spellbonuses.PetAvoidance + owner->itembonuses.PetAvoidance;
 
-	if(defender->IsNPC())
-		avoidanceBonus += (defender->CastToNPC()->GetAvoidanceRating() / 10.0f); //Modifier from database
+	// Evasion is a percentage bonus according to AA descriptions
+	if (evasion_bonus)
+		avoidance = (avoidance * (100 + evasion_bonus)) / 100;
 
-	//Hit Chance Bonuses on attacker increases baseline hit chance by percent.
-	hitBonus +=	attacker->itembonuses.HitChanceEffect[skillinuse] +
-				attacker->spellbonuses.HitChanceEffect[skillinuse]+
-				attacker->aabonuses.HitChanceEffect[skillinuse]+
-				attacker->itembonuses.HitChanceEffect[EQEmu::skills::HIGHEST_SKILL + 1] +
-				attacker->spellbonuses.HitChanceEffect[EQEmu::skills::HIGHEST_SKILL + 1] +
-				attacker->aabonuses.HitChanceEffect[EQEmu::skills::HIGHEST_SKILL + 1];
+	if (chance_mod >= 10000) // override for stuff like SE_SkillAttack
+		return true;
 
-	//Accuracy = Spell Effect , HitChance = 'Accuracy' from Item Effect
-	//Only AA derived accuracy can be skill limited. ie (Precision of the Pathfinder, Dead Aim)
-	hitBonus += (attacker->itembonuses.Accuracy[EQEmu::skills::HIGHEST_SKILL + 1] +
-				attacker->spellbonuses.Accuracy[EQEmu::skills::HIGHEST_SKILL + 1] +
+	// calculate attacker's accuracy
+	auto accuracy = attacker->compute_tohit(skillinuse) + 10; // add 10 in case the NPC's stats are fucked
+	if (chance_mod > 0) // multiplier
+		accuracy *= chance_mod;
+
+	// Torven parsed an apparent constant of 1.2 somewhere in here * 6 / 5 looks eqmathy to me!
+	accuracy = accuracy * 6 / 5;
+
+	// unsure on the stacking order of these effects, rather hard to parse
+	// item mod2 accuracy isn't applied to range? Theory crafting and parses back it up I guess
+	// mod2 accuracy -- flat bonus
+	if (skillinuse != EQEmu::skills::SkillArchery && skillinuse != EQEmu::skills::SkillThrowing)
+		accuracy += attacker->itembonuses.HitChance;
+
+	// 216 Melee Accuracy Amt aka SE_Accuracy -- flat bonus
+	accuracy += attacker->itembonuses.Accuracy[EQEmu::skills::HIGHEST_SKILL + 1] +
 				attacker->aabonuses.Accuracy[EQEmu::skills::HIGHEST_SKILL + 1] +
+				attacker->spellbonuses.Accuracy[EQEmu::skills::HIGHEST_SKILL + 1] +
+				attacker->itembonuses.Accuracy[skillinuse] +
 				attacker->aabonuses.Accuracy[skillinuse] +
-				attacker->itembonuses.HitChance) / 15.0f; //Item Mod 'Accuracy'
+				attacker->spellbonuses.Accuracy[skillinuse];
 
-	hitBonus += chance_mod; //Modifier applied from casted/disc skill attacks.
+	// auto hit discs (and looks like there are some autohit AAs)
+	if (attacker->spellbonuses.HitChanceEffect[skillinuse] >= 10000 || attacker->aabonuses.HitChanceEffect[skillinuse] >= 10000)
+		return true;
 
-	if(attacker->IsNPC())
-		hitBonus += (attacker->CastToNPC()->GetAccuracyRating() / 10.0f); //Modifier from database
+	if (attacker->spellbonuses.HitChanceEffect[EQEmu::skills::HIGHEST_SKILL + 1] >= 10000)
+		return true;
 
-	if (skillinuse == EQEmu::skills::SkillArchery)
-		hitBonus -= hitBonus*RuleR(Combat, ArcheryHitPenalty);
+	// 184 Accuracy % aka SE_HitChance -- percentage increase
+	auto hit_bonus = attacker->itembonuses.HitChanceEffect[EQEmu::skills::HIGHEST_SKILL + 1] +
+					 attacker->aabonuses.HitChanceEffect[EQEmu::skills::HIGHEST_SKILL + 1] +
+					 attacker->spellbonuses.HitChanceEffect[EQEmu::skills::HIGHEST_SKILL + 1] +
+					 attacker->itembonuses.HitChanceEffect[skillinuse] +
+					 attacker->aabonuses.HitChanceEffect[skillinuse] +
+					 attacker->spellbonuses.HitChanceEffect[skillinuse];
 
-	//Calculate final chance to hit
-	chancetohit += ((chancetohit * (hitBonus - avoidanceBonus)) / 100.0f);
-	Log.Out(Logs::Detail, Logs::Attack, "Chance to hit %.2f after accuracy calc %.2f and avoidance calc %.2f", chancetohit, hitBonus, avoidanceBonus);
+	accuracy = (accuracy * (100 + hit_bonus)) / 100;
 
-	chancetohit = mod_hit_chance(chancetohit, skillinuse, attacker);
+	// TODO: April 2003 added an archery/throwing PVP accuracy penalty while moving, should be in here some where,
+	// but PVP is less important so I haven't tried parsing it at all
 
-	// Chance to hit;   Max 95%, Min 5% DEFAULTS
-	if(chancetohit > 1000 || chancetohit < -1000) {
-		//if chance to hit is crazy high, that means a discipline is in use, and let it stay there
-	}
-	else if(chancetohit > RuleR(Combat,MaxChancetoHit)) {
-		chancetohit = RuleR(Combat,MaxChancetoHit);
-	}
-	else if(chancetohit < RuleR(Combat,MinChancetoHit)) {
-		chancetohit = RuleR(Combat,MinChancetoHit);
-	}
+	// There is also 110 Ranger Archery Accuracy % which should probably be in here some where, but it's not in any spells/aas
+	// Name implies it's a percentage increase, if one wishes to implement, do it like the hit_bonus above but limited to ranger archery
 
-	//I dont know the best way to handle a garunteed hit discipline being used
-	//agains a garunteed riposte (for example) discipline... for now, garunteed hit wins
+	// There is also 183 UNUSED - Skill Increase Chance which devs say isn't used at all in code, but some spells reference it
+	// I do not recommend implementing this once since there are spells that use it which would make this not live-like with default spell files
 
+	// so now we roll!
+	// relevant dev quote:
+	// Then your chance to simply avoid the attack is checked (defender's avoidance roll beat the attacker's accuracy roll.)
+	int tohit_roll = zone->random.Roll0(accuracy);
+	int avoid_roll = zone->random.Roll0(avoidance);
+	Log.Out(Logs::Detail, Logs::Attack, "CheckHitChance accuracy(%d => %d) avoidance(%d => %d)", accuracy, tohit_roll, avoidance, avoid_roll);
 
-	Log.Out(Logs::Detail, Logs::Attack, "3 FINAL calculated chance to hit is: %5.2f", chancetohit);
-
-
-	//
-	// Did we hit?
-	//
-
-	float tohit_roll = zone->random.Real(0, 100);
-
-	Log.Out(Logs::Detail, Logs::Attack, "Final hit chance: %.2f%%. Hit roll %.2f", chancetohit, tohit_roll);
-
-	return(tohit_roll <= chancetohit);
+	// tie breaker? Don't want to be biased any one way
+	if (tohit_roll == avoid_roll)
+		return zone->random.Roll(50);
+	return tohit_roll > avoid_roll;
 }
 
 bool Mob::AvoidDamage(Mob *other, int32 &damage, int hand)
@@ -1183,7 +1149,7 @@ bool Client::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, b
 			}
 			Log.Out(Logs::Detail, Logs::Combat, "Avoided damage with code %d", damage);
 		} else {
-			if (other->CheckHitChance(this, skillinuse, Hand, hit_chance_bonus)) {
+			if (other->CheckHitChance(this, skillinuse, hit_chance_bonus)) {
 				other->MeleeMitigation(this, damage, min_hit, opts);
 				if (damage > 0)
 					CommonOutgoingHitSuccess(other, damage, skillinuse,opts);
@@ -1743,7 +1709,7 @@ bool NPC::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool
 				if (!bRiposte && damage == -3)
 					DoRiposte(other);
 			} else {
-				if (other->CheckHitChance(this, skillinuse, Hand, hit_chance_bonus)) {
+				if (other->CheckHitChance(this, skillinuse, hit_chance_bonus)) {
 					other->MeleeMitigation(this, damage, min_dmg+eleBane, opts);
 					CommonOutgoingHitSuccess(other, damage, skillinuse, opts);
 				} else {

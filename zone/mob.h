@@ -159,7 +159,9 @@ public:
 	int MonkSpecialAttack(Mob* other, uint8 skill_used);
 	virtual void TryBackstab(Mob *other,int ReuseTime = 10);
 	bool AvoidDamage(Mob* attacker, int32 &damage, int hand);
-	virtual bool CheckHitChance(Mob* attacker, EQEmu::skills::SkillType skillinuse, int Hand, int16 chance_mod = 0);
+	int compute_tohit(EQEmu::skills::SkillType skillinuse);
+	int compute_defense();
+	virtual bool CheckHitChance(Mob* attacker, EQEmu::skills::SkillType skillinuse, int chance_mod = 0);
 	virtual void TryCriticalHit(Mob *defender, uint16 skill, int32 &damage, ExtraAttackOptions *opts = nullptr);
 	void TryPetCriticalHit(Mob *defender, uint16 skill, int32 &damage);
 	virtual bool TryFinishingBlow(Mob *defender, EQEmu::skills::SkillType skillinuse);

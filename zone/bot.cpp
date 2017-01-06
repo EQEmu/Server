@@ -2038,7 +2038,7 @@ void Bot::DoMeleeSkillAttackDmg(Mob* other, uint16 weapon_damage, EQEmu::skills:
 					return;
 			}
 		} else {
-			if (other->CheckHitChance(this, skillinuse, Hand, chance_mod)) {
+			if (other->CheckHitChance(this, skillinuse, chance_mod)) {
 				other->MeleeMitigation(this, damage, min_hit);
 				if (damage > 0) {
 					damage += damage*focus/100;
@@ -3865,7 +3865,7 @@ bool Bot::Attack(Mob* other, int Hand, bool FromRiposte, bool IsStrikethrough, b
 				}
 			}
 		} else {
-			if (other->CheckHitChance(this, skillinuse, Hand)) {
+			if (other->CheckHitChance(this, skillinuse)) {
 				other->MeleeMitigation(this, damage, min_hit, opts);
 				ApplyMeleeDamageBonus(skillinuse, damage);
 				damage += ((itembonuses.HeroicSTR / 10) + (damage * other->GetSkillDmgTaken(skillinuse) / 100) + GetSkillDmgAmt(skillinuse));
@@ -4885,7 +4885,7 @@ void Bot::DoSpecialAttackDamage(Mob *who, EQEmu::skills::SkillType skill, int32 
 		if (max_damage == -3)
 			DoRiposte(who);
 	} else {
-		if (HitChance || who->CheckHitChance(this, skill, EQEmu::inventory::slotPrimary)) {
+		if (HitChance || who->CheckHitChance(this, skill)) {
 			who->MeleeMitigation(this, max_damage, min_damage);
 			ApplyMeleeDamageBonus(skill, max_damage);
 			max_damage += who->GetFcDamageAmtIncoming(this, 0, true, skill);
