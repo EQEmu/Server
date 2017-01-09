@@ -22,7 +22,6 @@
 #include "login_server_list.h"
 #include "zonelist.h"
 #include "worlddb.h"
-#include "console.h"
 #include "client.h"
 #include "../common/md5.h"
 #include "world_config.h"

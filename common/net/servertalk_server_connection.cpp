@@ -32,7 +32,6 @@ void EQ::Net::ServertalkServerConnection::Send(uint16_t opcode, EQ::Net::Packet 
 		out.PutUInt16(4, opcode);
 
 		std::unique_ptr<unsigned char[]> cipher(new unsigned char[p.Length() + crypto_secretbox_MACBYTES]);
-
 		crypto_box_easy_afternm(&cipher[0], (unsigned char*)p.Data(), p.Length(), m_nonce_ours, m_shared_key);
 		(*(uint64_t*)&m_nonce_ours[0])++;
 		out.PutData(6, &cipher[0], p.Length() + crypto_secretbox_MACBYTES);
@@ -218,6 +217,7 @@ void EQ::Net::ServertalkServerConnection::ProcessHandshake(EQ::Net::Packet &p, b
 				size_t cipher_len = p.Length() - crypto_box_PUBLICKEYBYTES - crypto_box_NONCEBYTES;
 				size_t message_len = cipher_len - crypto_secretbox_MACBYTES;
 				std::unique_ptr<unsigned char[]> decrypted_text(new unsigned char[message_len]);
+
 				if (crypto_box_open_easy_afternm(&decrypted_text[0], (unsigned char*)p.Data() + crypto_box_PUBLICKEYBYTES + crypto_box_NONCEBYTES, cipher_len, m_nonce_theirs, m_shared_key))
 				{
 					Log.OutF(Logs::General, Logs::Error, "Error decrypting handshake from client, dropping connection.");
@@ -235,7 +235,6 @@ void EQ::Net::ServertalkServerConnection::ProcessHandshake(EQ::Net::Packet &p, b
 				}
 
 				m_parent->ConnectionIdentified(this);
-
 				(*(uint64_t*)&m_nonce_theirs[0])++;
 			}
 		}
@@ -293,6 +292,7 @@ void EQ::Net::ServertalkServerConnection::ProcessMessage(EQ::Net::Packet &p)
 			if (m_encrypted) {
 				size_t message_len = length - crypto_secretbox_MACBYTES;
 				std::unique_ptr<unsigned char[]> decrypted_text(new unsigned char[message_len]);
+
 				if (crypto_box_open_easy_afternm(&decrypted_text[0], (unsigned char*)&data[0], length, m_nonce_theirs, m_shared_key))
 				{
 					Log.OutF(Logs::General, Logs::Error, "Error decrypting message from client");

@@ -24,8 +24,8 @@
 #include "../common/md5.h"
 #include "../common/packet_dump.h"
 #include "../common/servertalk.h"
-#include "../common/emu_tcp_connection.h"
 #include "../common/string_util.h"
+#include "../common/misc_functions.h"
 #include "worlddb.h"
 #include "eql_config.h"
 

@@ -7,7 +7,6 @@
 
 
 #include "../common/md5.h"
-#include "../common/emu_tcp_connection.h"
 #include "../common/packet_dump.h"
 
 extern ClientList client_list;

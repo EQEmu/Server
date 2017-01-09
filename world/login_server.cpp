@@ -23,6 +23,7 @@
 #include <stdlib.h>
 #include "../common/version.h"
 #include "../common/servertalk.h"
+#include "../common/misc_functions.h"
 #include "login_server.h"
 #include "login_server_list.h"
 #include "../common/eq_packet_structs.h"
@@ -166,7 +167,7 @@ bool LoginServer::Connect() {
 		return false;
 	}
 
-	char errbuf[TCPConnection_ErrorBufferSize];
+	char errbuf[1024];
 	if ((LoginServerIP = ResolveIP(LoginServerAddress, errbuf)) == 0) {
 		Log.Out(Logs::Detail, Logs::World_Server, "Unable to resolve '%s' to an IP.",LoginServerAddress);
 		return false;

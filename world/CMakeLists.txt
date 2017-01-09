@@ -6,23 +6,17 @@ SET(world_sources
 	client.cpp
 	cliententry.cpp
 	clientlist.cpp
-	CMakeLists.txt
 	eql_config.cpp
-	eqw.cpp
-	eqw_http_handler.cpp
-	eqw_parser.cpp
-	http_request.cpp
 	launcher_link.cpp
 	launcher_list.cpp
 	lfplist.cpp
 	login_server.cpp
 	login_server_list.cpp
 	net.cpp
-	perl_eql_config.cpp
-	perl_eqw.cpp
-	perl_http_request.cpp
 	queryserv.cpp
 	ucs.cpp
+	web_interface.cpp
+	web_interface_eqw.cpp
 	wguild_mgr.cpp
 	world_config.cpp
 	worlddb.cpp
@@ -37,12 +31,7 @@ SET(world_headers
 	client.h
 	cliententry.h
 	clientlist.h
-	CMakeLists.txt
 	eql_config.h
-	eqw.h
-	eqw_http_handler.h
-	eqw_parser.h
-	http_request.h
 	launcher_link.h
 	launcher_list.h
 	lfplist.h
@@ -52,10 +41,11 @@ SET(world_headers
 	queryserv.h
 	sof_char_create_data.h
 	ucs.h
+	web_interface.h
+	web_interface_eqw.h
 	wguild_mgr.h
 	world_config.h
 	worlddb.h
-	world_tcp_connection.h
 	zonelist.h
 	zoneserver.h
 )

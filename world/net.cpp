@@ -21,10 +21,8 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
-
 #include <signal.h>
 
-#include "../common/global_define.h"
 #include "../common/eqemu_logsys.h"
 #include "../common/queue.h"
 #include "../common/timer.h"
@@ -67,14 +65,11 @@
 
 #endif
 
-#include "../common/emu_tcp_server.h"
 #include "../common/patches/patches.h"
 #include "../common/random.h"
 #include "zoneserver.h"
-#include "console.h"
 #include "login_server.h"
 #include "login_server_list.h"
-#include "eqw_http_handler.h"
 #include "world_config.h"
 #include "zoneserver.h"
 #include "zonelist.h"
@@ -85,16 +80,15 @@
 #include "adventure_manager.h"
 #include "ucs.h"
 #include "queryserv.h"
+#include "web_interface.h"
 
 #include "../common/net/tcp_server.h"
 #include "../common/net/servertalk_server.h"
 
-EmuTCPServer tcps;
 ClientList client_list;
 GroupLFPList LFPGroupList;
 ZSList zoneserver_list;
 LoginServerList loginserverlist;
-EQWHTTPServer http_server;
 UCSConnection UCSLink;
 QueryServConnection QSLink;
 LauncherList launcher_list; 
@@ -106,6 +100,7 @@ uint32 numzones = 0;
 bool holdzones = false;
 const WorldConfig *Config;
 EQEmuLogSys Log;
+WebInterfaceList web_interface;
 
 void CatchSignal(int sig_num);
 
@@ -130,22 +125,21 @@ int main(int argc, char** argv) {
 		Log.Out(Logs::General, Logs::World_Server, "Loading server configuration failed.");
 		return 1;
 	}
-	Config=WorldConfig::get();
+
+	Config = WorldConfig::get();
 
 	Log.Out(Logs::General, Logs::World_Server, "CURRENT_VERSION: %s", CURRENT_VERSION);
-
-	#ifdef _DEBUG
-		_CrtSetDbgFlag( _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
-	#endif
 
 	if (signal(SIGINT, CatchSignal) == SIG_ERR)	{
 		Log.Out(Logs::General, Logs::World_Server, "Could not set signal handler");
 		return 1;
 	}
+
 	if (signal(SIGTERM, CatchSignal) == SIG_ERR)	{
 		Log.Out(Logs::General, Logs::World_Server, "Could not set signal handler");
 		return 1;
 	}
+
 	#ifndef WIN32
 	if (signal(SIGPIPE, SIG_IGN) == SIG_ERR)	{
 		Log.Out(Logs::General, Logs::World_Server, "Could not set signal handler");
@@ -279,13 +273,6 @@ int main(int argc, char** argv) {
 			std::cerr << "Error, unknown command line option" << std::endl;
 			return 1;
 		}
-	}
-
-	if(Config->WorldHTTPEnabled) {
-		Log.Out(Logs::General, Logs::World_Server, "Starting HTTP world service...");
-		http_server.Start(Config->WorldHTTPPort, Config->WorldHTTPMimeFile.c_str());
-	} else {
-		Log.Out(Logs::General, Logs::World_Server, "HTTP world service disabled.");
 	}
 
 	if(!ignore_db) {
@@ -445,10 +432,24 @@ int main(int argc, char** argv) {
 	});
 
 	server_connection->OnConnectionRemoved("UCS", [](std::shared_ptr<EQ::Net::ServertalkServerConnection> connection) {
-		Log.OutF(Logs::General, Logs::World_Server, "UCS Query Server connection from {0}",
+		Log.OutF(Logs::General, Logs::World_Server, "Removed Query Server connection from {0}",
 			connection->GetUUID());
 
 		UCSLink.SetConnection(nullptr);
+	});
+
+	server_connection->OnConnectionIdentified("WebInterface", [](std::shared_ptr<EQ::Net::ServertalkServerConnection> connection) {
+		Log.OutF(Logs::General, Logs::World_Server, "New WebInterface Server connection from {2} at {0}:{1}",
+			connection->Handle()->RemoteIP(), connection->Handle()->RemotePort(), connection->GetUUID());
+
+		web_interface.AddConnection(connection);
+	});
+
+	server_connection->OnConnectionRemoved("WebInterface", [](std::shared_ptr<EQ::Net::ServertalkServerConnection> connection) {
+		Log.OutF(Logs::General, Logs::World_Server, "Removed WebInterface Server connection from {0}",
+			connection->GetUUID());
+
+		web_interface.RemoveConnection(connection);
 	});
 
 	EQ::Net::EQStreamManagerOptions opts(9000, false, false);
@@ -538,9 +539,7 @@ int main(int argc, char** argv) {
 	Log.Out(Logs::General, Logs::World_Server, "Shutting down zone connections (if any).");
 	zoneserver_list.KillAll();
 	Log.Out(Logs::General, Logs::World_Server, "Zone (TCP) listener stopped.");
-	//tcps.Close();
 	Log.Out(Logs::General, Logs::World_Server, "Signaling HTTP service to stop...");
-	http_server.Stop();
 	Log.CloseFileLogs();
 
 	return 0;

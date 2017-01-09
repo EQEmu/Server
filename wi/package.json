@@ -1,0 +1,15 @@
+{
+  "name": "wi",
+  "version": "1.0.0",
+  "description": "Web interface connection for EQEmu",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "KimLS",
+  "license": "GPL-3.0",
+  "dependencies": {
+    "libsodium": "^0.4.8",
+    "libsodium-wrappers": "^0.4.8"
+  }
+}

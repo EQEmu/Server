@@ -62,7 +62,7 @@
 #define ServerOP_ItemStatus			0x002C
 #define ServerOP_OOCMute			0x002D
 #define ServerOP_Revoke				0x002E
-//#define			0x002F
+#define	ServerOP_WebInterfaceCall   0x002F
 #define ServerOP_GroupIDReq			0x0030
 #define ServerOP_GroupIDReply		0x0031
 #define ServerOP_GroupLeave			0x0032	// for disbanding out of zone folks
@@ -227,7 +227,7 @@ public:
 
 	ServerPacket(uint16 in_opcode, const EQ::Net::Packet &p) {
 		this->compressed = false;
-		size = p.Length();
+		size = (uint32)p.Length();
 		opcode = in_opcode;
 		if (size == 0) {
 			pBuffer = 0;

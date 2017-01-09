@@ -3,9 +3,8 @@
 #include "ucs.h"
 #include "world_config.h"
 
-
+#include "../common/misc_functions.h"
 #include "../common/md5.h"
-#include "../common/emu_tcp_connection.h"
 #include "../common/packet_dump.h"
 
 UCSConnection::UCSConnection()

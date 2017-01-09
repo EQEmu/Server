@@ -16,8 +16,6 @@ SET(common_sources
 	emu_legacy.cpp
 	emu_limits.cpp
 	emu_opcodes.cpp
-	emu_tcp_connection.cpp
-	emu_tcp_server.cpp
 	emu_versions.cpp
 	eqdb.cpp
 	eqdb_res.cpp
@@ -67,12 +65,9 @@ SET(common_sources
 	spdat.cpp
 	string_util.cpp
 	struct_strategy.cpp
-	tcp_connection.cpp
-	tcp_server.cpp
 	textures.cpp
 	timer.cpp
 	unix.cpp
-	worldconn.cpp
 	xml_parser.cpp
 	platform.cpp
 	event/event_loop.cpp
@@ -100,17 +95,6 @@ SET(common_sources
 	patches/titanium_limits.cpp
 	patches/uf.cpp
 	patches/uf_limits.cpp
-	SocketLib/Base64.cpp
-	SocketLib/File.cpp
-	SocketLib/HttpdCookies.cpp
-	SocketLib/HttpdForm.cpp
-	SocketLib/HttpdSocket.cpp
-	SocketLib/HTTPSocket.cpp
-	SocketLib/MemFile.cpp
-	SocketLib/Mime.cpp
-	SocketLib/Parse.cpp
-	SocketLib/socket_include.cpp
-	SocketLib/Utility.cpp
 	StackWalker/StackWalker.cpp
 	tinyxml/tinystr.cpp
 	tinyxml/tinyxml.cpp
@@ -138,8 +122,6 @@ SET(common_headers
 	emu_limits.h
 	emu_opcodes.h
 	emu_oplist.h
-	emu_tcp_connection.h
-	emu_tcp_server.h
 	emu_versions.h
 	eq_constants.h
 	eq_packet_structs.h
@@ -210,16 +192,12 @@ SET(common_headers
 	spdat.h
     string_util.h
 	struct_strategy.h
-	tcp_basic_server.h
-	tcp_connection.h
-	tcp_server.h
 	textures.h
 	timer.h
 	types.h
 	unix.h
 	useperl.h
 	version.h
-	worldconn.h
 	xml_parser.h
 	zone_numbers.h
 	event/background_task.h
@@ -269,18 +247,6 @@ SET(common_headers
 	patches/uf_limits.h
 	patches/uf_ops.h
 	patches/uf_structs.h
-	SocketLib/Base64.h
-	SocketLib/File.h
-	SocketLib/HttpdCookies.h
-	SocketLib/HttpdForm.h
-	SocketLib/HttpdSocket.h
-	SocketLib/HTTPSocket.h
-	SocketLib/IFile.h
-	SocketLib/MemFile.h
-	SocketLib/Mime.h
-	SocketLib/Parse.h
-	SocketLib/socket_include.h
-	SocketLib/Utility.h
 	StackWalker/StackWalker.h
 	tinyxml/tinystr.h
 	tinyxml/tinyxml.h
@@ -372,32 +338,6 @@ SOURCE_GROUP(Patches FILES
 	patches/titanium_limits.cpp
 	patches/uf.cpp
 	patches/uf_limits.cpp
-)
-
-SOURCE_GROUP(SocketLib FILES
-	SocketLib/Base64.h
-	SocketLib/File.h
-	SocketLib/HttpdCookies.h
-	SocketLib/HttpdForm.h
-	SocketLib/HttpdSocket.h
-	SocketLib/HTTPSocket.h
-	SocketLib/IFile.h
-	SocketLib/MemFile.h
-	SocketLib/Mime.h
-	SocketLib/Parse.h
-	SocketLib/socket_include.h
-	SocketLib/Utility.h
-	SocketLib/Base64.cpp
-	SocketLib/File.cpp
-	SocketLib/HttpdCookies.cpp
-	SocketLib/HttpdForm.cpp
-	SocketLib/HttpdSocket.cpp
-	SocketLib/HTTPSocket.cpp
-	SocketLib/MemFile.cpp
-	SocketLib/Mime.cpp
-	SocketLib/Parse.cpp
-	SocketLib/socket_include.cpp
-	SocketLib/Utility.cpp
 )
 
 SOURCE_GROUP(StackWalker FILES

@@ -21,15 +21,15 @@
 #include "zoneserver.h"
 #include "zonelist.h"
 #include "client.h"
-#include "console.h"
 #include "worlddb.h"
 #include "../common/string_util.h"
 #include "../common/guilds.h"
 #include "../common/races.h"
 #include "../common/classes.h"
 #include "../common/packet_dump.h"
-#include "wguild_mgr.h"
 #include "../common/misc.h"
+#include "../common/misc_functions.h"
+#include "wguild_mgr.h"
 
 #include <set>
 

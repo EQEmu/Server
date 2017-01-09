@@ -20,13 +20,12 @@
 #include "../common/global_define.h"
 #include "../common/string_util.h"
 #include "../common/eqemu_logsys.h"
+#include "../common/misc_functions.h"
 
 #include "clientlist.h"
 #include "database.h"
 #include "chatchannel.h"
 
-#include "../common/emu_tcp_connection.h"
-#include "../common/emu_tcp_server.h"
 #include <list>
 #include <vector>
 #include <string>
