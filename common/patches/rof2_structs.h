@@ -2826,7 +2826,8 @@ struct BookText_Struct {
 struct BookRequest_Struct {
 /*0000*/	uint32 window;		// where to display the text (0xFFFFFFFF means new window).
 /*0004*/	uint16 invslot;		// Is the slot, but the RoF2 conversion causes it to fail.  Turned to 0 since it isnt required anyway.
-/*0008*/	uint32 unknown006;	// Seen FFFFFFFF
+/*0006*/	int16 subslot;		// Inventory sub-slot (0-x)
+/*0008*/	uint16 unknown006;	// Seen FFFF
 /*0010*/	uint16 unknown008;	// seen 0000
 /*0012*/	uint32 type;		// 0 = Scroll, 1 = Book, 2 = Item Info. Possibly others
 /*0016*/	uint32 unknown0012;

@@ -5154,6 +5154,7 @@ namespace RoF2
 
 		IN(type);
 		IN(invslot);
+		IN(subslot);
 		emu->window = (uint8)eq->window;
 		strn0cpy(emu->txtfile, eq->txtfile, sizeof(emu->txtfile));
 
