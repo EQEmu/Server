@@ -14,6 +14,7 @@ addons:
     - libboost-dev
     - liblua5.1-0-dev
     - zlib1g-dev
+env: COMPILER=g++-5
 script:
   - cmake -G "Unix Makefiles" -DEQEMU_BUILD_TESTS=ON -DEQEMU_ENABLE_BOTS=ON
   - make -j8
