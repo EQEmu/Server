@@ -1,33 +1,51 @@
-var servertalk = require('./servertalk_client.js');
-var fs = require('fs');
-var settings = JSON.parse(fs.readFileSync('settings.json', 'utf8'));
+const fs = require('fs');
+const settings = JSON.parse(fs.readFileSync('settings.json', 'utf8'));
+const key = fs.readFileSync(settings.key, 'utf8');
 
-var client = new servertalk.client();
+var server;
+if(settings.https.enabled) {
+	const options = {
+		key: fs.readFileSync(settings.https.key),
+		cert: fs.readFileSync(settings.https.cert)
+	};
 
-client.Init(settings.addr, settings.port, false, 'WebInterface', settings.key);
+	server = require('https').createServer();
+} else {
+	server = require('http').createServer();
+}
 
-client.on('connecting', function(){
-	console.log('Connecting...');
+const servertalk = require('./network/servertalk_api.js');
+const websocket_iterface = require('./ws/ws_interface.js');
+const express = require('express');
+const app = express();
+const bodyParser = require('body-parser');
+const uuid = require('node-uuid');
+const jwt = require('jsonwebtoken');
+var mysql = require('mysql').createPool(settings.db);
+
+var wsi = new websocket_iterface.wsi(server, key);
+var api = new servertalk.api();
+api.Init(settings.servertalk.addr, settings.servertalk.port, false, settings.servertalk.key);
+
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+
+//make sure all routes can see our injected dependencies
+app.use(function (req, res, next) {
+	req.servertalk = api;
+	req.mysql = mysql;
+	req.key = key;
+	next();
 });
 
-client.on('connect', function(){
-	console.log('Connected...');
-		
-	this.Send(47, Buffer.from(JSON.stringify({ method: 'IsLocked', params: [], id: '12345' })));
-	this.Send(47, Buffer.from(JSON.stringify({ method: 'Lock', params: [] })));
-	this.Send(47, Buffer.from(JSON.stringify({ method: 'IsLocked', params: [], id: '12346' })));
-	this.Send(47, Buffer.from(JSON.stringify({ method: 'Unlock', params: [] })));
-	this.Send(47, Buffer.from(JSON.stringify({ method: 'IsLocked', params: [], id: '12347' })));
+app.get('/', function (req, res) {
+	res.send({ status: "online" });
 });
 
-client.on('close', function(){
-	console.log('Closed');
-});
+require('./http/token.js').Register(app);
+require('./http/eqw.js').Register(app, api);
+//require('./ws/token.js').Register(app);
+require('./ws/eqw.js').Register(wsi, api);
 
-client.on('error', function(err){
-	console.log(err);
-});
-
-client.on('message', function(opcode, packet) {
-	console.log(Buffer.from(packet).toString('utf8'));
-});
+server.on('request', app);
+server.listen(settings.port, function () { console.log('Listening on ' + server.address().port) });

@@ -34,7 +34,7 @@ void EQW__Unlock(WebInterface *i, const std::string& method, const std::string& 
 
 void RegisterEQW(WebInterface *i)
 {
-	i->AddCall("IsLocked", std::bind(EQW__IsLocked, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
-	i->AddCall("Lock", std::bind(EQW__Lock, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
-	i->AddCall("Unlock", std::bind(EQW__Unlock, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
+	i->AddCall("EQW::IsLocked", std::bind(EQW__IsLocked, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
+	i->AddCall("EQW::Lock", std::bind(EQW__Lock, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
+	i->AddCall("EQW::Unlock", std::bind(EQW__Unlock, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
 }
