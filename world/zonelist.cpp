@@ -40,7 +40,7 @@ ZSList::ZSList()
 	LastAllocatedPort=0;
 	memset(pLockedZones, 0, sizeof(pLockedZones));
 
-	m_tick.reset(new EQ::Timer(1000, true, std::bind(&ZSList::OnTick, this, std::placeholders::_1)));
+	m_tick.reset(new EQ::Timer(5000, true, std::bind(&ZSList::OnTick, this, std::placeholders::_1)));
 }
 
 ZSList::~ZSList() {
