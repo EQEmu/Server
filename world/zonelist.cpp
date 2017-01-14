@@ -699,7 +699,7 @@ void ZSList::WorldShutDown(uint32 time, uint32 interval)
 void ZSList::OnTick(EQ::Timer *t)
 {
 	Json::Value out;
-	out["event"] = "WorldZoneUpdate";
+	out["event"] = "EQW::ZoneUpdate";
 	out["data"] = Json::Value();
 
 	for (auto &zone : list)

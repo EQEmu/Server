@@ -11,12 +11,12 @@ function Register(name, wsi, api) {
 		}, true);
 }
 
-function RegisterSubscription(namespace, event, wsi, api) {
-	wsi.Register(namespace + '::Subscribe::' + event, function(request) {
+function RegisterSubscription(event, wsi, api) {
+	wsi.Register(event + '::Subscribe', function(request) {
 		api.Subscribe(event, request.ws);
 	});
 	
-	wsi.Register(namespace + '::Unsubscribe::' + event, function(request) {
+	wsi.Register(event + '::Unsubscribe', function(request) {
 		api.Unsubscribe(event, request.ws);
 	});
 }
