@@ -88,6 +88,7 @@
 #define ServerOP_DepopPlayerCorpse	0x0065
 #define ServerOP_RequestTellQueue	0x0066 // client asks for it's tell queues
 #define ServerOP_ChangeSharedMem	0x0067
+#define	ServerOP_WebInterfaceEvent  0x0068
 
 #define ServerOP_RaidAdd			0x0100 //in use
 #define ServerOP_RaidRemove			0x0101 //in use

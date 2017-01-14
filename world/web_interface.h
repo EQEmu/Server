@@ -19,6 +19,7 @@ public:
 	void SendResponse(const std::string &id, const Json::Value &response);
 	void SendError(const std::string &message);
 	void SendError(const std::string &message, const std::string &id);
+	void SendEvent(const Json::Value &value);
 	void AddCall(const std::string &method, WebInterfaceCall call);
 private:
 	void OnCall(uint16 opcode, EQ::Net::Packet &p);
@@ -37,6 +38,7 @@ public:
 	void AddConnection(std::shared_ptr<EQ::Net::ServertalkServerConnection> connection);
 	void RemoveConnection(std::shared_ptr<EQ::Net::ServertalkServerConnection> connection);
 	void SendResponse(const std::string &uuid, std::string &id, const Json::Value &response);
+	void SendEvent(const Json::Value &value);
 	void SendError(const std::string &uuid, const std::string &message);
 	void SendError(const std::string &uuid, const std::string &message, const std::string &id);
 

@@ -1,20 +1,10 @@
-function Register(name, wsi, api) {
-	wsi.Register(name, 
-		function(request) {
-			api.Call(name, request.params)
-				.then(function(value) {
-					wsi.Send(request, value);
-				})
-				.catch(function(reason) {
-					wsi.SendError(request, reason);
-				});
-		}, true);
-}
+const common = require('./wi_common.js');
 
 var RegisterEQW = function(wsi, api) {
-	Register('EQW::IsLocked', wsi, api);
-	Register('EQW::Lock', wsi, api);
-	Register('EQW::Unlock', wsi, api);
+	common.Register('EQW::IsLocked', wsi, api);
+	common.Register('EQW::Lock', wsi, api);
+	common.Register('EQW::Unlock', wsi, api);
+	common.RegisterSubscription('EQW', 'WorldZoneUpdate', wsi, api);
 };
 
 module.exports = {

@@ -214,8 +214,8 @@ class ServertalkClient extends EventEmitter
 	
 	ProcessMessage(p) {
 		try {
-			var length = this.m_buffer.readUInt32LE(0);
-			var opcode = this.m_buffer.readUInt16LE(4);
+			var length = p.readUInt32LE(0);
+			var opcode = p.readUInt16LE(4);
 			if(length > 0) {
 				var data = p.slice(6);
 				

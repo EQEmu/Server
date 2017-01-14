@@ -105,6 +105,21 @@ void WebInterface::SendError(const std::string &message, const std::string &id)
 	Send(error);
 }
 
+void WebInterface::SendEvent(const Json::Value &value)
+{
+	try {
+		std::stringstream ss;
+		ss << value;
+
+		EQ::Net::DynamicPacket p;
+		p.PutString(0, ss.str());
+		m_connection->Send(ServerOP_WebInterfaceEvent, p);
+	}
+	catch (std::exception) {
+		//Log error
+	}
+}
+
 void WebInterface::AddCall(const std::string &method, WebInterfaceCall call)
 {
 	m_calls.insert(std::make_pair(method, call));
@@ -146,6 +161,12 @@ void WebInterfaceList::SendResponse(const std::string &uuid, std::string &id, co
 	auto iter = m_interfaces.find(uuid);
 	if (iter != m_interfaces.end()) {
 		iter->second->SendResponse(id, response);
+	}
+}
+
+void WebInterfaceList::SendEvent(const Json::Value &value) {
+	for (auto &i : m_interfaces) {
+		i.second->SendEvent(value);
 	}
 }
 

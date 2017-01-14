@@ -23,8 +23,8 @@ const uuid = require('node-uuid');
 const jwt = require('jsonwebtoken');
 var mysql = require('mysql').createPool(settings.db);
 
-var wsi = new websocket_iterface.wsi(server, key);
 var api = new servertalk.api();
+var wsi = new websocket_iterface.wsi(server, key, api);
 api.Init(settings.servertalk.addr, settings.servertalk.port, false, settings.servertalk.key);
 
 app.use(bodyParser.json());

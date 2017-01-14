@@ -7,6 +7,7 @@ class ServertalkAPI
 		this.client = new servertalk.client();
 		this.client.Init(addr, port, ipv6, 'WebInterface', credentials);
 		this.pending_calls = {};
+		this.subscriptions = {};
 		var self = this;
 		
 		this.client.on('connecting', function() {
@@ -25,28 +26,51 @@ class ServertalkAPI
 		});
 
 		this.client.on('message', function(opcode, packet) {
-			var response = Buffer.from(packet).toString('utf8');
-			try {
-				var res = JSON.parse(response);
-				
-				if(res.id) {
-					if(self.pending_calls.hasOwnProperty(res.id)) {
-						var entry = self.pending_calls[res.id];
-						
-						if(res.error) {
-							var reject = entry[1];
-							reject(res.error);
-						} else {
-							var resolve = entry[0];
-							resolve(res.response);
+			if(opcode == 47) {
+				var response = Buffer.from(packet).toString('utf8');
+				try {
+					var res = JSON.parse(response);
+					
+					if(res.id) {
+						if(self.pending_calls.hasOwnProperty(res.id)) {
+							var entry = self.pending_calls[res.id];
+							
+							if(res.error) {
+								var reject = entry[1];
+								reject(res.error);
+							} else {
+								var resolve = entry[0];
+								resolve(res.response);
+							}
+							
+							delete self.pending_calls[res.id];
 						}
-						
-						delete self.pending_calls[res.id];
 					}
+				} catch(ex) {
+					console.log('Error processing response from server:\n', ex);
 				}
-				
-			} catch(ex) {
-				console.log('Error processing response from server:\n', ex);
+			} else if(opcode == 104) {
+				var message = Buffer.from(packet).toString('utf8');
+				try {
+					var msg = JSON.parse(message);
+					
+					if(msg.event) {
+						if(self.subscriptions.hasOwnProperty(msg.event)) {
+							var subs = self.subscriptions[msg.event];
+						
+							for(var idx in subs) {
+								try {
+									var sub = subs[idx];
+									sub.emit('subscriptionMessage', msg);
+								} catch(ex) {
+									console.log('Error dispatching subscription message', ex);
+								}
+							}
+						}
+					}
+				} catch(ex) {
+					console.log('Error processing response from server:\n', ex);
+				}
 			}
 		});
 	}
@@ -82,6 +106,34 @@ class ServertalkAPI
 	Notify(method, args) {
 		var c = { method: method, params: args };
 		client.Send(47, Buffer.from(JSON.stringify(c)));
+	}
+	
+	Subscribe(event_id, who) {
+		this.Unsubscribe(event_id, who);
+		
+		var subs = this.subscriptions[event_id];
+		if(subs) {
+			console.log('Subscribe', who.uuid, 'to', event_id);
+			subs[who.uuid] = who;
+		} else {
+			console.log('Subscribe', who.uuid, 'to', event_id);
+			this.subscriptions[event_id] = { };
+			this.subscriptions[event_id][who.uuid] = who;
+		}
+	}
+	
+	Unsubscribe(event_id, who) {
+		var subs = this.subscriptions[event_id];
+		if(subs) {
+			console.log('Unsubscribe', who.uuid, 'from', event_id);
+			delete subs[who.uuid];
+		}
+	}
+	
+	UnsubscribeAll(who) {
+		for(var sub_idx in this.subscriptions) {
+			this.Unsubscribe(sub_idx, who);
+		}
 	}
 }
 

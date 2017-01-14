@@ -24,10 +24,13 @@
 #include "../common/servertalk.h"
 #include "../common/string_util.h"
 #include "../common/random.h"
+#include "../common/json/json.h"
+#include "web_interface.h"
 
 extern uint32 numzones;
 extern bool holdzones;
 extern EQEmu::Random emu_random;
+extern WebInterfaceList web_interface;
 void CatchSignal(int sig_num);
 
 ZSList::ZSList()
@@ -36,6 +39,8 @@ ZSList::ZSList()
 	CurGroupID = 1;
 	LastAllocatedPort=0;
 	memset(pLockedZones, 0, sizeof(pLockedZones));
+
+	m_tick.reset(new EQ::Timer(1000, true, std::bind(&ZSList::OnTick, this, std::placeholders::_1)));
 }
 
 ZSList::~ZSList() {
@@ -689,4 +694,40 @@ void ZSList::WorldShutDown(uint32 time, uint32 interval)
 		Process();
 		CatchSignal(2);
 	}
+}
+
+void ZSList::OnTick(EQ::Timer *t)
+{
+	Json::Value out;
+	out["event"] = "WorldZoneUpdate";
+	out["data"] = Json::Value();
+
+	for (auto &zone : list)
+	{
+		Json::Value outzone;
+		
+		outzone["CAddress"] = zone->GetCAddress();
+		outzone["CLocalAddress"] = zone->GetCLocalAddress();
+		outzone["CompileTime"] = zone->GetCompileTime();
+		outzone["CPort"] = zone->GetCPort();
+		outzone["ID"] = zone->GetID();
+		outzone["InstanceID"] = zone->GetInstanceID();
+		outzone["IP"] = zone->GetIP();
+		outzone["LaunchedName"] = zone->GetLaunchedName();
+		outzone["LaunchName"] = zone->GetLaunchName();
+		outzone["Port"] = zone->GetPort();
+		outzone["PrevZoneID"] = zone->GetPrevZoneID();
+		outzone["UUID"] = zone->GetUUID();
+		outzone["ZoneID"] = zone->GetZoneID();
+		outzone["ZoneLongName"] = zone->GetZoneLongName();
+		outzone["ZoneName"] = zone->GetZoneName();
+		outzone["ZoneOSProcessID"] = zone->GetZoneOSProcessID();
+		outzone["NumPlayers"] = zone->NumPlayers();
+		outzone["BootingUp"] = zone->IsBootingUp();
+		outzone["StaticZone"] = zone->IsStaticZone();
+
+		out["data"].append(outzone);
+	}
+
+	web_interface.SendEvent(out);
 }
