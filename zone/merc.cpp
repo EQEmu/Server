@@ -4432,13 +4432,8 @@ void Merc::DoClassAttacks(Mob *target) {
 							dmg = -5;
 						}
 						else{
-							if (target->CheckHitChance(this, EQEmu::skills::SkillKick, 0)) {
-								if(RuleB(Combat, UseIntervalAC))
-									dmg = GetKickDamage();
-								else
-									dmg = zone->random.Int(1, GetKickDamage());
-
-							}
+							if (target->CheckHitChance(this, EQEmu::skills::SkillKick, 0))
+								dmg = GetBaseSkillDamage(EQEmu::skills::SkillKick, GetTarget());
 						}
 
 						reuse = KickReuseTime * 1000;
@@ -4454,12 +4449,8 @@ void Merc::DoClassAttacks(Mob *target) {
 							dmg = -5;
 						}
 						else{
-							if (target->CheckHitChance(this, EQEmu::skills::SkillBash, 0)) {
-								if(RuleB(Combat, UseIntervalAC))
-									dmg = GetBashDamage();
-								else
-									dmg = zone->random.Int(1, GetBashDamage());
-							}
+							if (target->CheckHitChance(this, EQEmu::skills::SkillBash, 0))
+								dmg = GetBaseSkillDamage(EQEmu::skills::SkillBash, GetTarget());
 						}
 
 						reuse = BashReuseTime * 1000;
@@ -4474,7 +4465,7 @@ void Merc::DoClassAttacks(Mob *target) {
 	classattack_timer.Start(reuse / HasteModifier);
 }
 
-bool Merc::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool IsFromSpell, ExtraAttackOptions *opts, int special)
+bool Merc::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool IsFromSpell, ExtraAttackOptions *opts)
 {
 	if (!other) {
 		SetTarget(nullptr);
@@ -4485,7 +4476,7 @@ bool Merc::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, boo
 	return NPC::Attack(other, Hand, bRiposte, IsStrikethrough, IsFromSpell, opts);
 }
 
-void Merc::Damage(Mob* other, int32 damage, uint16 spell_id, EQEmu::skills::SkillType attack_skill, bool avoidable, int8 buffslot, bool iBuffTic, int special)
+void Merc::Damage(Mob* other, int32 damage, uint16 spell_id, EQEmu::skills::SkillType attack_skill, bool avoidable, int8 buffslot, bool iBuffTic, eSpecialAttacks special)
 {
 	if(IsDead() || IsCorpse())
 		return;

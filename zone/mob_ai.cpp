@@ -1160,11 +1160,8 @@ void Mob::AI_Process() {
 					if ((IsPet() || IsTempPet()) && IsPetOwnerClient()){
 						if (spellbonuses.PC_Pet_Rampage[0] || itembonuses.PC_Pet_Rampage[0] || aabonuses.PC_Pet_Rampage[0]){
 							int chance = spellbonuses.PC_Pet_Rampage[0] + itembonuses.PC_Pet_Rampage[0] + aabonuses.PC_Pet_Rampage[0];
-							int dmg_mod = spellbonuses.PC_Pet_Rampage[1] + itembonuses.PC_Pet_Rampage[1] + aabonuses.PC_Pet_Rampage[1];
 							if(zone->random.Roll(chance)) {
-								ExtraAttackOptions opts;
-								opts.damage_percent = dmg_mod / 100.0f;
-								Rampage(&opts);
+								Rampage(nullptr);
 							}
 						}
 					}
@@ -1175,12 +1172,7 @@ void Mob::AI_Process() {
 						rampage_chance = rampage_chance > 0 ? rampage_chance : 20;
 						if(zone->random.Roll(rampage_chance)) {
 							ExtraAttackOptions opts;
-							int cur = GetSpecialAbilityParam(SPECATK_RAMPAGE, 2);
-							if(cur > 0) {
-								opts.damage_percent = cur / 100.0f;
-							}
-
-							cur = GetSpecialAbilityParam(SPECATK_RAMPAGE, 3);
+							int cur = GetSpecialAbilityParam(SPECATK_RAMPAGE, 3);
 							if(cur > 0) {
 								opts.damage_flat = cur;
 							}
@@ -1215,12 +1207,7 @@ void Mob::AI_Process() {
 						rampage_chance = rampage_chance > 0 ? rampage_chance : 20;
 						if(zone->random.Roll(rampage_chance)) {
 							ExtraAttackOptions opts;
-							int cur = GetSpecialAbilityParam(SPECATK_AREA_RAMPAGE, 2);
-							if(cur > 0) {
-								opts.damage_percent = cur / 100.0f;
-							}
-
-							cur = GetSpecialAbilityParam(SPECATK_AREA_RAMPAGE, 3);
+							int cur = GetSpecialAbilityParam(SPECATK_AREA_RAMPAGE, 3);
 							if(cur > 0) {
 								opts.damage_flat = cur;
 							}
@@ -1992,6 +1979,8 @@ bool Mob::Rampage(ExtraAttackOptions *opts)
 		rampage_targets = RuleI(Combat, DefaultRampageTargets);
 	if (rampage_targets > RuleI(Combat, MaxRampageTargets))
 		rampage_targets = RuleI(Combat, MaxRampageTargets);
+
+	m_specialattacks = eSpecialAttacks::Rampage;
 	for (int i = 0; i < RampageArray.size(); i++) {
 		if (index_hit >= rampage_targets)
 			break;
@@ -2001,14 +1990,16 @@ bool Mob::Rampage(ExtraAttackOptions *opts)
 			if (m_target == GetTarget())
 				continue;
 			if (CombatRange(m_target)) {
-				ProcessAttackRounds(m_target, opts, 2);
+				ProcessAttackRounds(m_target, opts);
 				index_hit++;
 			}
 		}
 	}
 
 	if (RuleB(Combat, RampageHitsTarget) && index_hit < rampage_targets)
-		ProcessAttackRounds(GetTarget(), opts, 2);
+		ProcessAttackRounds(GetTarget(), opts);
+
+	m_specialattacks = eSpecialAttacks::None;
 
 	return true;
 }
@@ -2024,10 +2015,12 @@ void Mob::AreaRampage(ExtraAttackOptions *opts)
 
 	int rampage_targets = GetSpecialAbilityParam(SPECATK_AREA_RAMPAGE, 1);
 	rampage_targets = rampage_targets > 0 ? rampage_targets : -1;
+	m_specialattacks = eSpecialAttacks::AERampage;
 	index_hit = hate_list.AreaRampage(this, GetTarget(), rampage_targets, opts);
 
 	if(index_hit == 0)
-		ProcessAttackRounds(GetTarget(), opts, 1);
+		ProcessAttackRounds(GetTarget(), opts);
+	m_specialattacks = eSpecialAttacks::None;
 }
 
 uint32 Mob::GetLevelCon(uint8 mylevel, uint8 iOtherLevel) {

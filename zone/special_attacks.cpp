@@ -26,96 +26,138 @@
 
 #include <string.h>
 
-
-int Mob::GetKickDamage() {
-	int multiple=(GetLevel()*100/5);
-	multiple += 100;
-	int32 dmg = (((GetSkill(EQEmu::skills::SkillKick) + GetSTR() + GetLevel()) * 100 / 9000) * multiple) + 600;	//Set a base of 6 damage, 1 seemed too low at the sub level 30 level.
-	if(GetClass() == WARRIOR || GetClass() == WARRIORGM ||GetClass() == BERSERKER || GetClass() == BERSERKERGM) {
-		dmg*=12/10;//small increase for warriors
-	}
-	dmg /= 100;
-
-	int32 mindmg = 1;
-	ApplySpecialAttackMod(EQEmu::skills::SkillKick, dmg, mindmg);
-
-	dmg = mod_kick_damage(dmg);
-
-	return(dmg);
-}
-
-int Mob::GetBashDamage() {
-	int multiple=(GetLevel()*100/5);
-	multiple += 100;
-
-	//this is complete shite
-	int32 dmg = ((((GetSkill(EQEmu::skills::SkillBash) + GetSTR()) * 100 + GetLevel() * 100 / 2) / 10000) * multiple) + 600;	//Set a base of 6 damage, 1 seemed too low at the sub level 30 level.
-	dmg /= 100;
-
-	int32 mindmg = 1;
-	ApplySpecialAttackMod(EQEmu::skills::SkillBash, dmg, mindmg);
-
-	dmg = mod_bash_damage(dmg);
-
-	return(dmg);
-}
-
-void Mob::ApplySpecialAttackMod(EQEmu::skills::SkillType skill, int32 &dmg, int32 &mindmg) {
-	int item_slot = -1;
-	//1: Apply bonus from AC (BOOT/SHIELD/HANDS) est. 40AC=6dmg
-	if (IsClient()){
-		switch (skill) {
-		case EQEmu::skills::SkillFlyingKick:
-		case EQEmu::skills::SkillRoundKick:
-		case EQEmu::skills::SkillKick:
-			item_slot = EQEmu::inventory::slotFeet;
-			break;
-		case EQEmu::skills::SkillBash:
-			item_slot = EQEmu::inventory::slotSecondary;
-			break;
-		case EQEmu::skills::SkillDragonPunch:
-		case EQEmu::skills::SkillEagleStrike:
-		case EQEmu::skills::SkillTigerClaw:
-			item_slot = EQEmu::inventory::slotHands;
-			break;
-		default:
-			break;
+int Mob::GetBaseSkillDamage(EQEmu::skills::SkillType skill, Mob *target)
+{
+	int base = EQEmu::skills::GetBaseDamage(skill);
+	auto skill_level = GetSkill(skill);
+	switch (skill) {
+	case EQEmu::skills::SkillDragonPunch:
+	case EQEmu::skills::SkillEagleStrike:
+	case EQEmu::skills::SkillTigerClaw:
+		if (skill_level >= 25)
+			base++;
+		if (skill_level >= 75)
+			base++;
+		if (skill_level >= 125)
+			base++;
+		if (skill_level >= 175)
+			base++;
+		return base;
+	case EQEmu::skills::SkillFrenzy:
+		if (IsClient() && CastToClient()->GetInv().GetItem(EQEmu::inventory::slotPrimary)) {
+			if (GetLevel() > 15)
+				base += GetLevel() - 15;
+			if (base > 23)
+				base = 23;
+			if (GetLevel() > 50)
+				base += 2;
+			if (GetLevel() > 54)
+				base++;
+			if (GetLevel() > 59)
+				base++;
 		}
-
-		if (item_slot >= 0){
-			const EQEmu::ItemInstance* itm = nullptr;
-			itm = CastToClient()->GetInv().GetItem(item_slot);
-			if(itm)
-				dmg += itm->GetItem()->AC * (RuleI(Combat, SpecialAttackACBonus))/100;
+		return base;
+	case EQEmu::skills::SkillFlyingKick: {
+		float skill_bonus = skill_level / 9.0f;
+		float ac_bonus = 0.0f;
+		if (IsClient()) {
+			auto inst = CastToClient()->GetInv().GetItem(EQEmu::inventory::slotFeet);
+			if (inst)
+				ac_bonus = inst->GetItemArmorClass(true) / 25.0f;
 		}
+		if (ac_bonus > skill_bonus)
+			ac_bonus = skill_bonus;
+		return static_cast<int>(ac_bonus + skill_bonus);
+	}
+	case EQEmu::skills::SkillKick: {
+		// there is some base *= 4 case in here?
+		float skill_bonus = skill_level / 10.0f;
+		float ac_bonus = 0.0f;
+		if (IsClient()) {
+			auto inst = CastToClient()->GetInv().GetItem(EQEmu::inventory::slotFeet);
+			if (inst)
+				ac_bonus = inst->GetItemArmorClass(true) / 25.0f;
+		}
+		if (ac_bonus > skill_bonus)
+			ac_bonus = skill_bonus;
+		return static_cast<int>(ac_bonus + skill_bonus);
+	}
+	case EQEmu::skills::SkillBash: {
+		float skill_bonus = skill_level / 10.0f;
+		float ac_bonus = 0.0f;
+		const EQEmu::ItemInstance *inst = nullptr;
+		if (IsClient()) {
+			if (HasShieldEquiped())
+				inst = CastToClient()->GetInv().GetItem(EQEmu::inventory::slotSecondary);
+			else if (HasTwoHanderEquipped())
+				inst = CastToClient()->GetInv().GetItem(EQEmu::inventory::slotPrimary);
+		}
+		if (inst)
+			ac_bonus = inst->GetItemArmorClass(true) / 25.0f;
+		if (ac_bonus > skill_bonus)
+			ac_bonus = skill_bonus;
+		return static_cast<int>(ac_bonus + skill_bonus);
+	}
+	case EQEmu::skills::SkillBackstab: {
+		float skill_bonus = static_cast<float>(skill_level) * 0.02f;
+		base = 3; // There seems to be a base 3 for NPCs or some how BS w/o weapon?
+		// until we get a better inv system for NPCs they get nerfed!
+		if (IsClient()) {
+			auto *inst = CastToClient()->GetInv().GetItem(EQEmu::inventory::slotPrimary);
+			if (inst && inst->GetItem() && inst->GetItem()->ItemType == EQEmu::item::ItemType1HPiercing) {
+				base = inst->GetItemBackstabDamage(true);
+				if (!inst->GetItemBackstabDamage())
+					base += inst->GetItemWeaponDamage(true);
+				if (target) {
+					if (inst->GetItemElementalFlag(true) && inst->GetItemElementalDamage(true))
+						base += target->ResistElementalWeaponDmg(inst);
+					if (inst->GetItemBaneDamageBody(true) || inst->GetItemBaneDamageRace(true))
+						base += target->CheckBaneDamage(inst);
+				}
+			}
+		} else if (IsNPC()) {
+			auto *npc = CastToNPC();
+			base = std::max(base, npc->GetBaseDamage());
+			// parses show relatively low BS mods from lots of NPCs, so either their BS skill is super low
+			// or their mod is divided again, this is probably not the right mod, but it's better
+			skill_bonus /= 3.0f;
+		}
+		// ahh lets make sure everything is casted right :P ugly but w/e
+		return static_cast<int>(static_cast<float>(base) * (skill_bonus + 2.0f));
+	}
+	default:
+		return 0;
 	}
 }
 
-void Mob::DoSpecialAttackDamage(Mob *who, EQEmu::skills::SkillType skill, int32 max_damage, int32 min_damage, int32 hate_override, int ReuseTime,
-								bool CheckHitChance, bool CanAvoid) {
-	//this really should go through the same code as normal melee damage to
-	//pick up all the special behavior there
+void Mob::DoSpecialAttackDamage(Mob *who, EQEmu::skills::SkillType skill, int32 base_damage, int32 min_damage,
+				int32 hate_override, int ReuseTime, bool CheckHitChance, bool CanAvoid)
+{
+	// this really should go through the same code as normal melee damage to
+	// pick up all the special behavior there
 
-	if ((who == nullptr || ((IsClient() && CastToClient()->dead) || (who->IsClient() && who->CastToClient()->dead)) || HasDied() || (!IsAttackAllowed(who))))
+	if ((who == nullptr ||
+	     ((IsClient() && CastToClient()->dead) || (who->IsClient() && who->CastToClient()->dead)) || HasDied() ||
+	     (!IsAttackAllowed(who))))
 		return;
-	
-	if(who->GetInvul() || who->GetSpecialAbility(IMMUNE_MELEE))
-		max_damage = -5;
+
+	int damage = 0;
+
+	if (who->GetInvul() || who->GetSpecialAbility(IMMUNE_MELEE))
+		damage = -5;
 
 	if (who->GetSpecialAbility(IMMUNE_MELEE_EXCEPT_BANE) && skill != EQEmu::skills::SkillBackstab)
-		max_damage = -5;
+		damage = -5;
 
-	uint32 hate = max_damage;
-	if(hate_override > -1)
+	uint32 hate = base_damage;
+	if (hate_override > -1)
 		hate = hate_override;
 
-	if (skill == EQEmu::skills::SkillBash){
-		if(IsClient()){
+	if (skill == EQEmu::skills::SkillBash) {
+		if (IsClient()) {
 			EQEmu::ItemInstance *item = CastToClient()->GetInv().GetItem(EQEmu::inventory::slotSecondary);
-			if(item)
-			{
-				if (item->GetItem()->ItemType == EQEmu::item::ItemTypeShield)
-				{
+			if (item) {
+				if (item->GetItem()->ItemType == EQEmu::item::ItemTypeShield) {
 					hate += item->GetItem()->AC;
 				}
 				const EQEmu::ItemData *itm = item->GetItem();
@@ -127,46 +169,54 @@ void Mob::DoSpecialAttackDamage(Mob *who, EQEmu::skills::SkillType skill, int32 
 		}
 	}
 
-	min_damage += min_damage * GetMeleeMinDamageMod_SE(skill) / 100;
+	int min_cap = base_damage * GetMeleeMinDamageMod_SE(skill) / 100;
 
-	int hand = EQEmu::inventory::slotPrimary; // Avoid checks hand for throwing/archery exclusion, primary should work for most
+	auto offense = this->offense(skill);
+
+	int hand = EQEmu::inventory::slotPrimary; // Avoid checks hand for throwing/archery exclusion, primary should
+						  // work for most
 	if (skill == EQEmu::skills::SkillThrowing || skill == EQEmu::skills::SkillArchery)
 		hand = EQEmu::inventory::slotRange;
-	if (who->AvoidDamage(this, max_damage, hand)) {
-		if (max_damage == -3)
+	if (who->AvoidDamage(this, damage, hand)) {
+		if (damage == -3)
 			DoRiposte(who);
 	} else {
-		if (!CheckHitChance || (CheckHitChance && who->CheckHitChance(this, skill))) {
-			who->MeleeMitigation(this, max_damage, min_damage);
-			CommonOutgoingHitSuccess(who, max_damage, skill);
+		if (!CheckHitChance || who->CheckHitChance(this, skill)) {
+			if (base_damage > 0) // we do this weird, so we have to check it first :(
+				who->MeleeMitigation(this, damage, base_damage, offense, skill);
+			if (damage > 0) {
+				ApplyDamageTable(damage, offense);
+				CommonOutgoingHitSuccess(who, damage, min_damage, min_cap, skill);
+			}
 		} else {
-			max_damage = 0;
+			damage = 0;
 		}
 	}
 
 	who->AddToHateList(this, hate, 0, false);
-	if (max_damage > 0 && aabonuses.SkillAttackProc[0] && aabonuses.SkillAttackProc[1] == skill &&
+	if (damage > 0 && aabonuses.SkillAttackProc[0] && aabonuses.SkillAttackProc[1] == skill &&
 	    IsValidSpell(aabonuses.SkillAttackProc[2])) {
 		float chance = aabonuses.SkillAttackProc[0] / 1000.0f;
 		if (zone->random.Roll(chance))
 			SpellFinished(aabonuses.SkillAttackProc[2], who, EQEmu::CastingSlot::Item, 0, -1,
 				      spells[aabonuses.SkillAttackProc[2]].ResistDiff);
 	}
-	who->Damage(this, max_damage, SPELL_UNKNOWN, skill, false);
+	who->Damage(this, damage, SPELL_UNKNOWN, skill, false);
 
-	//Make sure 'this' has not killed the target and 'this' is not dead (Damage shield ect).
-	if(!GetTarget())return;
-	if (HasDied())	return;
+	// Make sure 'this' has not killed the target and 'this' is not dead (Damage shield ect).
+	if (!GetTarget())
+		return;
+	if (HasDied())
+		return;
 
 	if (HasSkillProcs())
-		TrySkillProc(who, skill, ReuseTime*1000);
+		TrySkillProc(who, skill, ReuseTime * 1000);
 
-	if (max_damage > 0 && HasSkillProcSuccess())
-		TrySkillProc(who, skill, ReuseTime*1000, true);
-
+	if (damage > 0 && HasSkillProcSuccess())
+		TrySkillProc(who, skill, ReuseTime * 1000, true);
 }
 
-
+// We should probably refactor this to take the struct not the packet
 void Client::OPCombatAbility(const EQApplicationPacket *app) {
 	if(!GetTarget())
 		return;
@@ -251,20 +301,16 @@ void Client::OPCombatAbility(const EQApplicationPacket *app) {
 			else{
 				if (!GetTarget()->CheckHitChance(this, EQEmu::skills::SkillBash, 0)) {
 					dmg = 0;
-					ht = GetBashDamage();
+					ht = GetBaseSkillDamage(EQEmu::skills::SkillBash, GetTarget());
 				}
 				else{
-					if(RuleB(Combat, UseIntervalAC))
-						ht = dmg = GetBashDamage();
-					else
-						ht = dmg = zone->random.Int(1, GetBashDamage());
-
+					ht = dmg = GetBaseSkillDamage(EQEmu::skills::SkillBash, GetTarget());
 				}
 			}
 
 			ReuseTime = BashReuseTime-1-skill_reduction;
 			ReuseTime = (ReuseTime*HasteMod)/100;
-			DoSpecialAttackDamage(GetTarget(), EQEmu::skills::SkillBash, dmg, 1, ht, ReuseTime);
+			DoSpecialAttackDamage(GetTarget(), EQEmu::skills::SkillBash, dmg, 0, ht, ReuseTime);
 			if(ReuseTime > 0)
 			{
 				p_timers.Start(timer, ReuseTime);
@@ -276,20 +322,10 @@ void Client::OPCombatAbility(const EQApplicationPacket *app) {
 	if ((ca_atk->m_atk == 100) && (ca_atk->m_skill == EQEmu::skills::SkillFrenzy)){
 		CheckIncreaseSkill(EQEmu::skills::SkillFrenzy, GetTarget(), 10);
 		int AtkRounds = 3;
-		int skillmod = 100 * GetSkill(EQEmu::skills::SkillFrenzy) / MaxSkill(EQEmu::skills::SkillFrenzy);
-		int32 max_dmg = (26 + ((((GetLevel()-6) * 2)*skillmod)/100)) * ((100+RuleI(Combat, FrenzyBonus))/100);
-		int32 min_dmg = 0;
+		int32 max_dmg = GetBaseSkillDamage(EQEmu::skills::SkillFrenzy, GetTarget());
 		DoAnim(anim2HSlashing);
 
 		max_dmg = mod_frenzy_damage(max_dmg);
-
-		if (GetLevel() < 51)
-			min_dmg = 1;
-		else
-			min_dmg = GetLevel()*8/10;
-
-		if (min_dmg > max_dmg)
-			max_dmg = min_dmg;
 
 		ReuseTime = FrenzyReuseTime-1-skill_reduction;
 		ReuseTime = (ReuseTime*HasteMod)/100;
@@ -297,7 +333,7 @@ void Client::OPCombatAbility(const EQApplicationPacket *app) {
 		//Live parses show around 55% Triple 35% Double 10% Single, you will always get first hit.
 		while(AtkRounds > 0) {
 			if (GetTarget() && (AtkRounds == 1 || zone->random.Roll(75))) {
-				DoSpecialAttackDamage(GetTarget(), EQEmu::skills::SkillFrenzy, max_dmg, min_dmg, max_dmg, ReuseTime, true);
+				DoSpecialAttackDamage(GetTarget(), EQEmu::skills::SkillFrenzy, max_dmg, 0, max_dmg, ReuseTime, true);
 			}
 			AtkRounds--;
 		}
@@ -327,18 +363,15 @@ void Client::OPCombatAbility(const EQApplicationPacket *app) {
 				else{
 					if (!GetTarget()->CheckHitChance(this, EQEmu::skills::SkillKick, 0)) {
 						dmg = 0;
-						ht = GetKickDamage();
+						ht = GetBaseSkillDamage(EQEmu::skills::SkillKick, GetTarget());
 					}
 					else{
-						if(RuleB(Combat, UseIntervalAC))
-							ht = dmg = GetKickDamage();
-						else
-							ht = dmg = zone->random.Int(1, GetKickDamage());
+						ht = dmg = GetBaseSkillDamage(EQEmu::skills::SkillKick, GetTarget());
 					}
 				}
 
 				ReuseTime = KickReuseTime-1-skill_reduction;
-				DoSpecialAttackDamage(GetTarget(), EQEmu::skills::SkillKick, dmg, 1, ht, ReuseTime);
+				DoSpecialAttackDamage(GetTarget(), EQEmu::skills::SkillKick, dmg, 0, ht, ReuseTime);
 
 			}
 			break;
@@ -395,99 +428,91 @@ void Client::OPCombatAbility(const EQApplicationPacket *app) {
 }
 
 //returns the reuse time in sec for the special attack used.
-int Mob::MonkSpecialAttack(Mob* other, uint8 unchecked_type)
+int Mob::MonkSpecialAttack(Mob *other, uint8 unchecked_type)
 {
-	if(!other)
+	if (!other)
 		return 0;
 
 	int32 ndamage = 0;
 	int32 max_dmg = 0;
-	int32 min_dmg = 1;
+	int32 min_dmg = 0;
 	int reuse = 0;
-	EQEmu::skills::SkillType skill_type;	//to avoid casting... even though it "would work"
+	EQEmu::skills::SkillType skill_type; // to avoid casting... even though it "would work"
 	uint8 itemslot = EQEmu::inventory::slotFeet;
+	if (IsNPC()) {
+		auto *npc = CastToNPC();
+		min_dmg = npc->GetMinDamage();
+	}
 
-	switch(unchecked_type) {
+	switch (unchecked_type) {
 	case EQEmu::skills::SkillFlyingKick:
 		skill_type = EQEmu::skills::SkillFlyingKick;
-		max_dmg = ((GetSTR()+GetSkill(skill_type)) * RuleI(Combat, FlyingKickBonus) / 100) + 35;
-		min_dmg = ((level*8)/10);
-		ApplySpecialAttackMod(skill_type, max_dmg, min_dmg);
+		max_dmg = GetBaseSkillDamage(skill_type);
+		min_dmg = 0; // revamped FK formula is missing the min mod?
 		DoAnim(animFlyingKick);
 		reuse = FlyingKickReuseTime;
 		break;
 	case EQEmu::skills::SkillDragonPunch:
 		skill_type = EQEmu::skills::SkillDragonPunch;
-		max_dmg = ((GetSTR()+GetSkill(skill_type)) * RuleI(Combat, DragonPunchBonus) / 100) + 26;
+		max_dmg = GetBaseSkillDamage(skill_type);
 		itemslot = EQEmu::inventory::slotHands;
-		ApplySpecialAttackMod(skill_type, max_dmg, min_dmg);
 		DoAnim(animTailRake);
 		reuse = TailRakeReuseTime;
 		break;
 	case EQEmu::skills::SkillEagleStrike:
 		skill_type = EQEmu::skills::SkillEagleStrike;
-		max_dmg = ((GetSTR()+GetSkill(skill_type)) * RuleI(Combat, EagleStrikeBonus) / 100) + 19;
+		max_dmg = GetBaseSkillDamage(skill_type);
 		itemslot = EQEmu::inventory::slotHands;
-		ApplySpecialAttackMod(skill_type, max_dmg, min_dmg);
 		DoAnim(animEagleStrike);
 		reuse = EagleStrikeReuseTime;
 		break;
 	case EQEmu::skills::SkillTigerClaw:
 		skill_type = EQEmu::skills::SkillTigerClaw;
-		max_dmg = ((GetSTR()+GetSkill(skill_type)) * RuleI(Combat, TigerClawBonus) / 100) + 12;
+		max_dmg = GetBaseSkillDamage(skill_type);
 		itemslot = EQEmu::inventory::slotHands;
-		ApplySpecialAttackMod(skill_type, max_dmg, min_dmg);
 		DoAnim(animTigerClaw);
 		reuse = TigerClawReuseTime;
 		break;
 	case EQEmu::skills::SkillRoundKick:
 		skill_type = EQEmu::skills::SkillRoundKick;
-		max_dmg = ((GetSTR()+GetSkill(skill_type)) * RuleI(Combat, RoundKickBonus) / 100) + 10;
-		ApplySpecialAttackMod(skill_type, max_dmg, min_dmg);
+		max_dmg = GetBaseSkillDamage(skill_type);
 		DoAnim(animRoundKick);
 		reuse = RoundKickReuseTime;
 		break;
 	case EQEmu::skills::SkillKick:
 		skill_type = EQEmu::skills::SkillKick;
-		max_dmg = GetKickDamage();
+		max_dmg = GetBaseSkillDamage(skill_type);
 		DoAnim(animKick);
 		reuse = KickReuseTime;
 		break;
 	default:
 		Log.Out(Logs::Detail, Logs::Attack, "Invalid special attack type %d attempted", unchecked_type);
-		return(1000); /* nice long delay for them, the caller depends on this! */
+		return (1000); /* nice long delay for them, the caller depends on this! */
 	}
 
-	if(IsClient()){
-		if(GetWeaponDamage(other, CastToClient()->GetInv().GetItem(itemslot)) <= 0){
+	if (IsClient()) {
+		if (GetWeaponDamage(other, CastToClient()->GetInv().GetItem(itemslot)) <= 0) {
 			ndamage = -5;
 		}
-	}
-	else{
-		if (GetWeaponDamage(other, (const EQEmu::ItemData*)nullptr) <= 0){
+	} else {
+		if (GetWeaponDamage(other, (const EQEmu::ItemData *)nullptr) <= 0) {
 			ndamage = -5;
 		}
 	}
 
 	int32 ht = 0;
-	if(ndamage == 0){
-		if(other->CheckHitChance(this, skill_type, 0)){
-			if(RuleB(Combat, UseIntervalAC))
-				ht = ndamage = max_dmg;
-			else
-				ht = ndamage = zone->random.Int(min_dmg, max_dmg);
-		}
-		else{
-			ht = max_dmg;
-		}
+	if (ndamage == 0) {
+		ht = max_dmg;
+		if (other->CheckHitChance(this, skill_type, 0))
+			ndamage = max_dmg;
 	}
 
-	//This can potentially stack with changes to kick damage
+	// This can potentially stack with changes to kick damage
 	ht = ndamage = mod_monk_special_damage(ndamage, skill_type);
 
 	DoSpecialAttackDamage(other, skill_type, ndamage, min_dmg, ht, reuse);
 
-	return(reuse);
+	return (reuse);
 }
 
 void Mob::TryBackstab(Mob *other, int ReuseTime) {
@@ -542,22 +567,15 @@ void Mob::TryBackstab(Mob *other, int ReuseTime) {
 	}
 	//Live AA - Chaotic Backstab
 	else if(aabonuses.FrontalBackstabMinDmg || itembonuses.FrontalBackstabMinDmg || spellbonuses.FrontalBackstabMinDmg) {
+		m_specialattacks = eSpecialAttacks::ChaoticStab;
 
 		//we can stab from any angle, we do min damage though.
+		// chaotic backstab can't double etc Seized can, but that's because it's a chance to do normal BS
+		// Live actually added SPA 473 which grants chance to double here when they revamped chaotic/seized
 		RogueBackstab(other, true, ReuseTime);
-		if (level > 54) {
-
-			// Check for double attack with main hand assuming maxed DA Skill (MS)
-			if(IsClient() && CastToClient()->CheckDoubleAttack())
-				if(other->GetHP() > 0)
-					RogueBackstab(other,true, ReuseTime);
-
-			if (tripleChance && other->GetHP() > 0 && zone->random.Roll(tripleChance))
-					RogueBackstab(other,false,ReuseTime);
-		}
-
 		if(IsClient())
 			CastToClient()->CheckIncreaseSkill(EQEmu::skills::SkillBackstab, other, 10);
+		m_specialattacks = eSpecialAttacks::None;
 	}
 	else { //We do a single regular attack if we attack from the front without chaotic stab
 		Attack(other, EQEmu::inventory::slotPrimary);
@@ -570,79 +588,21 @@ void Mob::RogueBackstab(Mob* other, bool min_damage, int ReuseTime)
 	if (!other)
 		return;
 
-	int32 ndamage = 0;
-	int32 max_hit = 0;
-	int32 min_hit = 0;
 	uint32 hate = 0;
-	int32 primaryweapondamage = 0;
-	int32 backstab_dmg = 0;
 
+	// make sure we can hit (bane, magical, etc)
 	if (IsClient()) {
 		const EQEmu::ItemInstance *wpn = CastToClient()->GetInv().GetItem(EQEmu::inventory::slotPrimary);
-		if (wpn) {
-			primaryweapondamage = GetWeaponDamage(other, wpn);
-			if (primaryweapondamage) {
-				backstab_dmg = wpn->GetItemBackstabDamage(true);
-				backstab_dmg += other->ResistElementalWeaponDmg(wpn);
-				if (wpn->GetItemBaneDamageBody(true) || wpn->GetItemBaneDamageRace(true))
-					backstab_dmg += other->CheckBaneDamage(wpn);
-			}
-		}
-	} else {
-		primaryweapondamage =
-		    (GetLevel() / 7) + 1; // fallback incase it's a npc without a weapon, 2 dmg at 10, 10 dmg at 65
-		backstab_dmg = primaryweapondamage;
+		if (!GetWeaponDamage(other, wpn))
+			return;
+	} else if (!GetWeaponDamage(other, (const EQEmu::ItemData*)nullptr)){
+		return;
 	}
 
-	// ex. bane can make this false
-	if (primaryweapondamage > 0) {
-		// this is very wrong but not worth it until we fix the full dmg
-		if (level > 25) {
-			max_hit = (((((2 * backstab_dmg) * GetDamageTable(EQEmu::skills::SkillBackstab) / 100) * 10 * GetSkill(EQEmu::skills::SkillBackstab) / 355) + ((level - 25) / 3) + 1) * ((100 + RuleI(Combat, BackstabBonus)) / 100));
-			hate = 20 * backstab_dmg * GetSkill(EQEmu::skills::SkillBackstab) / 355;
-		} else {
-			max_hit = (((((2 * backstab_dmg) * GetDamageTable(EQEmu::skills::SkillBackstab) / 100) * 10 * GetSkill(EQEmu::skills::SkillBackstab) / 355) + 1) * ((100 + RuleI(Combat, BackstabBonus)) / 100));
-			hate = 20 * backstab_dmg * GetSkill(EQEmu::skills::SkillBackstab) / 355;
-		}
+	int base_damage = GetBaseSkillDamage(EQEmu::skills::SkillBackstab, other);
+	hate = base_damage;
 
-		// determine minimum hits
-		if (level < 51) {
-			min_hit = (level*15/10);
-		} else {
-			// Trumpcard: Replaced switch statement with formula calc. This will give minhit increases all the way to 65.
-			min_hit = (level * ( level*5 - 105)) / 100;
-		}
-
-		if (!other->CheckHitChance(this, EQEmu::skills::SkillBackstab, 0)) {
-			ndamage = 0;
-		} else {
-			if (min_damage) {
-				ndamage = min_hit;
-			} else {
-				if (max_hit < min_hit)
-					max_hit = min_hit;
-
-				if (RuleB(Combat, UseIntervalAC))
-					ndamage = max_hit;
-				else
-					ndamage = zone->random.Int(min_hit, max_hit);
-			}
-		}
-	} else {
-		ndamage = -5;
-	}
-
-	ndamage = mod_backstab_damage(ndamage);
-
-	uint32 Assassinate_Dmg = 0;
-	Assassinate_Dmg = TryAssassinate(other, EQEmu::skills::SkillBackstab, ReuseTime);
-
-	if (Assassinate_Dmg) {
-		ndamage = Assassinate_Dmg;
-		entity_list.MessageClose_StringID(this, false, 200, MT_CritMelee, ASSASSINATES, GetName());
-	}
-
-	DoSpecialAttackDamage(other, EQEmu::skills::SkillBackstab, ndamage, min_hit, hate, ReuseTime, false, false);
+	DoSpecialAttackDamage(other, EQEmu::skills::SkillBackstab, base_damage, 0, hate, ReuseTime, true, false);
 	DoAnim(anim1HPiercing);
 }
 
@@ -867,11 +827,6 @@ void Mob::DoArcheryAttackDmg(Mob* other,  const EQEmu::ItemInstance* RangeWeapon
 	} else {
 		Log.Out(Logs::Detail, Logs::Combat, "Ranged attack hit %s.", other->GetName());
 
-		bool HeadShot = false;
-		uint32 HeadShot_Dmg = TryHeadShot(other, EQEmu::skills::SkillArchery);
-		if (HeadShot_Dmg)
-			HeadShot = true;
-
 		uint32 hate = 0;
 		int32 TotalDmg = 0;
 		int16 WDmg = 0;
@@ -888,84 +843,41 @@ void Mob::DoArcheryAttackDmg(Mob* other,  const EQEmu::ItemInstance* RangeWeapon
 			return;
 		}
 
+		// unsure when this should happen
 		if (focus) //From FcBaseEffects
-			WDmg += WDmg*focus/100;
+			WDmg += WDmg * focus / 100;
 
 		if((WDmg > 0) || (ADmg > 0)) {
 			if(WDmg < 0)
 				WDmg = 0;
 			if(ADmg < 0)
 				ADmg = 0;
-			uint32 MaxDmg = (RuleR(Combat, ArcheryBaseDamageBonus)*(WDmg + ADmg)*GetDamageTable(EQEmu::skills::SkillArchery)) / 100;
+			uint32 MaxDmg = WDmg + ADmg;
 			hate = ((WDmg+ADmg));
-
-			if (HeadShot)
-				MaxDmg = HeadShot_Dmg;
-
-			uint16 bonusArcheryDamageModifier = aabonuses.ArcheryDamageModifier + itembonuses.ArcheryDamageModifier + spellbonuses.ArcheryDamageModifier;
-
-			MaxDmg += MaxDmg*bonusArcheryDamageModifier / 100;
 
 			if (RuleB(Combat, ProjectileDmgOnImpact))
 				Log.Out(Logs::Detail, Logs::Combat, "Bow and Arrow DMG %d, Max Damage %d.", WDmg, MaxDmg);
 			else
 				Log.Out(Logs::Detail, Logs::Combat, "Bow DMG %d, Arrow DMG %d, Max Damage %d.", WDmg, ADmg, MaxDmg);
 
-			bool dobonus = false;
-			if(GetClass() == RANGER && GetLevel() > 50){
-				int bonuschance = RuleI(Combat, ArcheryBonusChance);
-				bonuschance = mod_archery_bonus_chance(bonuschance, RangeWeapon);
-
-				if( !RuleB(Combat, UseArcheryBonusRoll) || zone->random.Roll(bonuschance)){
-					if(RuleB(Combat, ArcheryBonusRequiresStationary)){
-						if(other->IsNPC() && !other->IsMoving() && !other->IsRooted())
-							dobonus = true;
-					}
-					else
-						dobonus = true;
-				}
-
-				if(dobonus){
-					MaxDmg *= 2;
-					hate *= 2;
-					MaxDmg = mod_archery_bonus_damage(MaxDmg, RangeWeapon);
-
-					Log.Out(Logs::Detail, Logs::Combat, "Ranger. Double damage success roll, doubling damage to %d", MaxDmg);
-					Message_StringID(MT_CritMelee, BOW_DOUBLE_DAMAGE);
-				}
-			}
-
 			if (MaxDmg == 0)
 				MaxDmg = 1;
 
-			if(RuleB(Combat, UseIntervalAC))
-				TotalDmg = MaxDmg;
-			else
-				TotalDmg = zone->random.Int(1, MaxDmg);
+			int min_cap = MaxDmg * GetMeleeMinDamageMod_SE(EQEmu::skills::SkillArchery) / 100;
+			auto offense = this->offense(EQEmu::skills::SkillArchery);
 
-			int minDmg = 1;
-			if(GetLevel() > 25){
-				//twice, for ammo and weapon
-				TotalDmg += (2*((GetLevel()-25)/3));
-				minDmg += (2*((GetLevel()-25)/3));
-				minDmg += minDmg * GetMeleeMinDamageMod_SE(EQEmu::skills::SkillArchery) / 100;
-				hate += (2*((GetLevel()-25)/3));
-			}
+			other->AvoidDamage(this, TotalDmg, EQEmu::inventory::slotRange);
 
-			if (!HeadShot)
-				other->AvoidDamage(this, TotalDmg, EQEmu::inventory::slotRange);
-
-			other->MeleeMitigation(this, TotalDmg, minDmg);
+			other->MeleeMitigation(this, TotalDmg, MaxDmg, offense, EQEmu::skills::SkillArchery);
 			if(TotalDmg > 0){
-				CommonOutgoingHitSuccess(other, TotalDmg, EQEmu::skills::SkillArchery);
-				TotalDmg = mod_archery_damage(TotalDmg, dobonus, RangeWeapon);
+				if (IsClient())
+					ApplyDamageTable(TotalDmg, offense);
+				CommonOutgoingHitSuccess(other, TotalDmg, 0, min_cap, EQEmu::skills::SkillArchery);
+				//TotalDmg = mod_archery_damage(TotalDmg, dobonus, RangeWeapon);
 			}
 		}
 		else
 			TotalDmg = -5;
-
-		if (HeadShot)
-			entity_list.MessageClose_StringID(this, false, 200, MT_CritMelee, FATAL_BOW_SHOT, GetName());
 
 		if (IsClient() && !CastToClient()->GetFeigned())
 			other->AddToHateList(this, hate, 0, false);
@@ -1227,8 +1139,8 @@ void NPC::RangedAttack(Mob* other)
 	}
 }
 
-void NPC::DoRangedAttackDmg(Mob* other, bool Launch, int16 damage_mod, int16 chance_mod, EQEmu::skills::SkillType skill, float speed, const char *IDFile) {
-
+void NPC::DoRangedAttackDmg(Mob* other, bool Launch, int16 damage_mod, int16 chance_mod, EQEmu::skills::SkillType skill, float speed, const char *IDFile)
+{
 	if ((other == nullptr ||
 		(other->HasDied())) ||
 		HasDied() ||
@@ -1271,15 +1183,9 @@ void NPC::DoRangedAttackDmg(Mob* other, bool Launch, int16 damage_mod, int16 cha
 	}
 	else
 	{
-		int32 TotalDmg = 0;
-		int32 MaxDmg = max_dmg * RuleR(Combat, ArcheryNPCMultiplier); // should add a field to npc_types
-		int32 MinDmg = min_dmg * RuleR(Combat, ArcheryNPCMultiplier);
-
-		if(RuleB(Combat, UseIntervalAC))
-			TotalDmg = MaxDmg;
-		else
-			TotalDmg = zone->random.Int(MinDmg, MaxDmg);
-
+		int TotalDmg = 0;
+		int MaxDmg = GetBaseDamage() * RuleR(Combat, ArcheryNPCMultiplier); // should add a field to npc_types
+		int MinDmg = GetMinDamage() * RuleR(Combat, ArcheryNPCMultiplier);
 
 		if (!damage_mod)
 			 damage_mod = GetSpecialAbilityParam(SPECATK_RANGED_ATK, 3);//Damage modifier
@@ -1287,10 +1193,10 @@ void NPC::DoRangedAttackDmg(Mob* other, bool Launch, int16 damage_mod, int16 cha
 		TotalDmg += TotalDmg *  damage_mod / 100;
 
 		other->AvoidDamage(this, TotalDmg, EQEmu::inventory::slotRange);
-		other->MeleeMitigation(this, TotalDmg, MinDmg);
+		other->MeleeMitigation(this, TotalDmg, MaxDmg, offense(skillInUse), skillInUse);
 
 		if (TotalDmg > 0)
-			CommonOutgoingHitSuccess(other, TotalDmg, skillInUse);
+			CommonOutgoingHitSuccess(other, TotalDmg, MinDmg, 0, skillInUse);
 		else if (TotalDmg < -4)
 			TotalDmg = -5;
 
@@ -1311,32 +1217,6 @@ void NPC::DoRangedAttackDmg(Mob* other, bool Launch, int16 damage_mod, int16 cha
 
 	if (HasSkillProcs() && other && !other->HasDied())
 		TrySkillProc(other, skillInUse, 0, false, EQEmu::inventory::slotRange);
-}
-
-uint16 Mob::GetThrownDamage(int16 wDmg, int32& TotalDmg, int& minDmg) {
-	uint16 MaxDmg = (((2 * wDmg) * GetDamageTable(EQEmu::skills::SkillThrowing)) / 100);
-
-	if (MaxDmg == 0)
-		MaxDmg = 1;
-
-	if(RuleB(Combat, UseIntervalAC))
-		TotalDmg = MaxDmg;
-	else
-		TotalDmg = zone->random.Int(1, MaxDmg);
-
-	minDmg = 1;
-	if(GetLevel() > 25){
-		TotalDmg += ((GetLevel()-25)/3);
-		minDmg += ((GetLevel()-25)/3);
-		minDmg += minDmg * GetMeleeMinDamageMod_SE(EQEmu::skills::SkillThrowing) / 100;
-	}
-
-	if(MaxDmg < minDmg)
-		MaxDmg = minDmg;
-
-	MaxDmg = mod_throwing_damage(MaxDmg);
-
-	return MaxDmg;
 }
 
 void Client::ThrowingAttack(Mob* other, bool CanDoubleAttack) { //old was 51
@@ -1422,21 +1302,18 @@ void Client::ThrowingAttack(Mob* other, bool CanDoubleAttack) { //old was 51
 	CommonBreakInvisibleFromCombat();
 }
 
-void Mob::DoThrowingAttackDmg(Mob* other, const EQEmu::ItemInstance* RangeWeapon, const EQEmu::ItemData* AmmoItem, uint16 weapon_damage, int16 chance_mod, int16 focus, int ReuseTime, uint32 range_id, int AmmoSlot, float speed)
+void Mob::DoThrowingAttackDmg(Mob *other, const EQEmu::ItemInstance *RangeWeapon, const EQEmu::ItemData *AmmoItem,
+			      uint16 weapon_damage, int16 chance_mod, int16 focus, int ReuseTime, uint32 range_id,
+			      int AmmoSlot, float speed)
 {
 	if ((other == nullptr ||
-		((IsClient() && CastToClient()->dead) ||
-		(other->IsClient() && other->CastToClient()->dead)) ||
-		HasDied() ||
-		(!IsAttackAllowed(other)) ||
-		(other->GetInvul() ||
-		other->GetSpecialAbility(IMMUNE_MELEE))))
-	{
+	     ((IsClient() && CastToClient()->dead) || (other->IsClient() && other->CastToClient()->dead)) ||
+	     HasDied() || (!IsAttackAllowed(other)) || (other->GetInvul() || other->GetSpecialAbility(IMMUNE_MELEE)))) {
 		return;
 	}
 
-	const EQEmu::ItemInstance* _RangeWeapon = nullptr;
-	const EQEmu::ItemData* ammo_lost = nullptr;
+	const EQEmu::ItemInstance *_RangeWeapon = nullptr;
+	const EQEmu::ItemData *ammo_lost = nullptr;
 
 	/*
 	If LaunchProjectile is false this function will do archery damage on target,
@@ -1447,95 +1324,97 @@ void Mob::DoThrowingAttackDmg(Mob* other, const EQEmu::ItemInstance* RangeWeapon
 	bool ProjectileImpact = false;
 	bool ProjectileMiss = false;
 
-	if (RuleB(Combat, ProjectileDmgOnImpact)){
+	if (RuleB(Combat, ProjectileDmgOnImpact)) {
 
 		if (AmmoItem)
 			LaunchProjectile = true;
-		else{
-			if (!RangeWeapon && range_id){
+		else {
+			if (!RangeWeapon && range_id) {
 
 				ProjectileImpact = true;
 
 				if (weapon_damage == 0)
-					ProjectileMiss = true; //This indicates that MISS was originally calculated.
+					ProjectileMiss = true; // This indicates that MISS was originally calculated.
 
-				if (IsClient()){
+				if (IsClient()) {
 
 					_RangeWeapon = CastToClient()->m_inv[AmmoSlot];
-					if (_RangeWeapon && _RangeWeapon->GetItem() && _RangeWeapon->GetItem()->ID != range_id)
+					if (_RangeWeapon && _RangeWeapon->GetItem() &&
+					    _RangeWeapon->GetItem()->ID != range_id)
 						RangeWeapon = _RangeWeapon;
 					else
 						ammo_lost = database.GetItem(range_id);
 				}
 			}
 		}
-	}
-	else if (AmmoItem)
+	} else if (AmmoItem)
 		SendItemAnimation(other, AmmoItem, EQEmu::skills::SkillThrowing);
 
-	if (ProjectileMiss || (!ProjectileImpact && !other->CheckHitChance(this, EQEmu::skills::SkillThrowing, chance_mod))){
+	if (ProjectileMiss ||
+	    (!ProjectileImpact && !other->CheckHitChance(this, EQEmu::skills::SkillThrowing, chance_mod))) {
 		Log.Out(Logs::Detail, Logs::Combat, "Ranged attack missed %s.", other->GetName());
-		if (LaunchProjectile){
-			TryProjectileAttack(other, AmmoItem, EQEmu::skills::SkillThrowing, 0, RangeWeapon, nullptr, AmmoSlot, speed);
+		if (LaunchProjectile) {
+			TryProjectileAttack(other, AmmoItem, EQEmu::skills::SkillThrowing, 0, RangeWeapon, nullptr,
+					    AmmoSlot, speed);
 			return;
-		}
-		else
+		} else
 			other->Damage(this, 0, SPELL_UNKNOWN, EQEmu::skills::SkillThrowing);
 	} else {
 		Log.Out(Logs::Detail, Logs::Combat, "Throwing attack hit %s.", other->GetName());
 
 		int16 WDmg = 0;
 
-		if (!weapon_damage){
+		if (!weapon_damage) {
 			if (IsClient() && RangeWeapon)
 				WDmg = GetWeaponDamage(other, RangeWeapon);
 			else if (AmmoItem)
 				WDmg = GetWeaponDamage(other, AmmoItem);
 
-			if (LaunchProjectile){
-				TryProjectileAttack(other, AmmoItem, EQEmu::skills::SkillThrowing, WDmg, RangeWeapon, nullptr, AmmoSlot, speed);
+			if (LaunchProjectile) {
+				TryProjectileAttack(other, AmmoItem, EQEmu::skills::SkillThrowing, WDmg, RangeWeapon,
+						    nullptr, AmmoSlot, speed);
 				return;
 			}
-		}
-		else
+		} else
 			WDmg = weapon_damage;
 
-		if (focus) //From FcBaseEffects
-			WDmg += WDmg*focus/100;
+		if (focus) // From FcBaseEffects
+			WDmg += WDmg * focus / 100;
 
 		int32 TotalDmg = 0;
 
 		uint32 Assassinate_Dmg = 0;
 		if (GetClass() == ROGUE && (BehindMob(other, GetX(), GetY())))
-			Assassinate_Dmg = TryAssassinate(other, EQEmu::skills::SkillThrowing, ranged_timer.GetDuration());
+			Assassinate_Dmg =
+			    TryAssassinate(other, EQEmu::skills::SkillThrowing, ranged_timer.GetDuration());
 
-		if(WDmg > 0){
-			int minDmg = 1;
-			uint16 MaxDmg = GetThrownDamage(WDmg, TotalDmg, minDmg);
-
+		if (WDmg > 0) {
+			int min_cap = WDmg * GetMeleeMinDamageMod_SE(EQEmu::skills::SkillThrowing) / 100;
+			auto offense = this->offense(EQEmu::skills::SkillThrowing);
 			if (Assassinate_Dmg) {
 				TotalDmg = Assassinate_Dmg;
-				entity_list.MessageClose_StringID(this, false, 200, MT_CritMelee, ASSASSINATES, GetName());
 			}
 
-			Log.Out(Logs::Detail, Logs::Combat, "Item DMG %d. Max Damage %d. Hit for damage %d", WDmg, MaxDmg, TotalDmg);
+			Log.Out(Logs::Detail, Logs::Combat, "Item DMG %d. Hit for damage %d", WDmg, TotalDmg);
 			if (!Assassinate_Dmg)
 				other->AvoidDamage(this, TotalDmg, EQEmu::inventory::slotRange);
 
-			other->MeleeMitigation(this, TotalDmg, minDmg);
-			if(TotalDmg > 0)
-				CommonOutgoingHitSuccess(other, TotalDmg, EQEmu::skills::SkillThrowing);
+			other->MeleeMitigation(this, TotalDmg, WDmg, offense, EQEmu::skills::SkillThrowing);
+			if (TotalDmg > 0)
+				if (IsClient())
+					ApplyDamageTable(TotalDmg, offense);
+				CommonOutgoingHitSuccess(other, TotalDmg, 0, min_cap, EQEmu::skills::SkillThrowing);
 		}
 
 		else
 			TotalDmg = -5;
 
 		if (IsClient() && !CastToClient()->GetFeigned())
-			other->AddToHateList(this, 2*WDmg, 0, false);
+			other->AddToHateList(this, 2 * WDmg, 0, false);
 
 		other->Damage(this, TotalDmg, SPELL_UNKNOWN, EQEmu::skills::SkillThrowing);
 
-		if (TotalDmg > 0 && HasSkillProcSuccess() && other && !other->HasDied()){
+		if (TotalDmg > 0 && HasSkillProcSuccess() && other && !other->HasDied()) {
 			if (ReuseTime)
 				TrySkillProc(other, EQEmu::skills::SkillThrowing, ReuseTime);
 			else
@@ -1546,13 +1425,13 @@ void Mob::DoThrowingAttackDmg(Mob* other, const EQEmu::ItemInstance* RangeWeapon
 	if (LaunchProjectile)
 		return;
 
-	//Throwing item Proc
+	// Throwing item Proc
 	if (ammo_lost)
 		TryWeaponProc(nullptr, ammo_lost, other, EQEmu::inventory::slotRange);
-	else if(RangeWeapon && other && !other->HasDied())
+	else if (RangeWeapon && other && !other->HasDied())
 		TryWeaponProc(RangeWeapon, other, EQEmu::inventory::slotRange);
 
-	if (HasSkillProcs() && other && !other->HasDied()){
+	if (HasSkillProcs() && other && !other->HasDied()) {
 		if (ReuseTime)
 			TrySkillProc(other, EQEmu::skills::SkillThrowing, ReuseTime);
 		else
@@ -1755,17 +1634,12 @@ void NPC::DoClassAttacks(Mob *target) {
 						dmg = -5;
 					}
 					else{
-						if (target->CheckHitChance(this, EQEmu::skills::SkillKick, 0)) {
-							if(RuleB(Combat, UseIntervalAC))
-								dmg = GetKickDamage();
-							else
-								dmg = zone->random.Int(1, GetKickDamage());
-
-						}
+						if (target->CheckHitChance(this, EQEmu::skills::SkillKick, 0))
+							dmg = GetBaseSkillDamage(EQEmu::skills::SkillKick);
 					}
 
 					reuse = (KickReuseTime + 3) * 1000;
-					DoSpecialAttackDamage(target, EQEmu::skills::SkillKick, dmg, 1, -1, reuse);
+					DoSpecialAttackDamage(target, EQEmu::skills::SkillKick, dmg, GetMinDamage(), -1, reuse);
 					did_attack = true;
 				}
 				else {
@@ -1776,16 +1650,12 @@ void NPC::DoClassAttacks(Mob *target) {
 						dmg = -5;
 					}
 					else{
-						if (target->CheckHitChance(this, EQEmu::skills::SkillBash, 0)) {
-							if(RuleB(Combat, UseIntervalAC))
-								dmg = GetBashDamage();
-							else
-								dmg = zone->random.Int(1, GetBashDamage());
-						}
+						if (target->CheckHitChance(this, EQEmu::skills::SkillBash, 0))
+							dmg = GetBaseSkillDamage(EQEmu::skills::SkillBash);
 					}
 
 					reuse = (BashReuseTime + 3) * 1000;
-					DoSpecialAttackDamage(target, EQEmu::skills::SkillBash, dmg, 1, -1, reuse);
+					DoSpecialAttackDamage(target, EQEmu::skills::SkillBash, dmg, GetMinDamage(), -1, reuse);
 					did_attack = true;
 				}
 			}
@@ -1793,27 +1663,15 @@ void NPC::DoClassAttacks(Mob *target) {
 		}
 		case BERSERKER: case BERSERKERGM:{
 			int AtkRounds = 3;
-			int32 max_dmg = 26 + ((GetLevel()-6) * 2);
-			int32 min_dmg = 0;
+			int32 max_dmg = GetBaseSkillDamage(EQEmu::skills::SkillFrenzy);
 			DoAnim(anim2HSlashing);
-
-			if (GetLevel() < 51)
-				min_dmg = 1;
-			else
-				min_dmg = GetLevel()*8/10;
-
-			if (min_dmg > max_dmg)
-				max_dmg = min_dmg;
-
-			reuse = FrenzyReuseTime * 1000;
 
 			while(AtkRounds > 0) {
 				if (GetTarget() && (AtkRounds == 1 || zone->random.Roll(75))) {
-					DoSpecialAttackDamage(GetTarget(), EQEmu::skills::SkillFrenzy, max_dmg, min_dmg, -1, reuse, true);
+					DoSpecialAttackDamage(GetTarget(), EQEmu::skills::SkillFrenzy, max_dmg, GetMinDamage(), -1, reuse, true);
 				}
 				AtkRounds--;
 			}
-
 
 			did_attack = true;
 			break;
@@ -1829,16 +1687,12 @@ void NPC::DoClassAttacks(Mob *target) {
 					dmg = -5;
 				}
 				else{
-					if (target->CheckHitChance(this, EQEmu::skills::SkillKick, 0)) {
-						if(RuleB(Combat, UseIntervalAC))
-							dmg = GetKickDamage();
-						else
-							dmg = zone->random.Int(1, GetKickDamage());
-					}
+					if (target->CheckHitChance(this, EQEmu::skills::SkillKick, 0))
+						dmg = GetBaseSkillDamage(EQEmu::skills::SkillKick);
 				}
 
 				reuse = (KickReuseTime + 3) * 1000;
-				DoSpecialAttackDamage(target, EQEmu::skills::SkillKick, dmg, 1, -1, reuse);
+				DoSpecialAttackDamage(target, EQEmu::skills::SkillKick, dmg, GetMinDamage(), -1, reuse);
 				did_attack = true;
 			}
 			break;
@@ -1854,16 +1708,12 @@ void NPC::DoClassAttacks(Mob *target) {
 					dmg = -5;
 				}
 				else{
-					if (target->CheckHitChance(this, EQEmu::skills::SkillBash, 0)) {
-						if(RuleB(Combat, UseIntervalAC))
-							dmg = GetBashDamage();
-						else
-							dmg = zone->random.Int(1, GetBashDamage());
-					}
+					if (target->CheckHitChance(this, EQEmu::skills::SkillBash, 0))
+						dmg = GetBaseSkillDamage(EQEmu::skills::SkillBash);
 				}
 
 				reuse = (BashReuseTime + 3) * 1000;
-				DoSpecialAttackDamage(target, EQEmu::skills::SkillBash, dmg, 1, -1, reuse);
+				DoSpecialAttackDamage(target, EQEmu::skills::SkillBash, dmg, GetMinDamage(), -1, reuse);
 				did_attack = true;
 			}
 			break;
@@ -1873,6 +1723,7 @@ void NPC::DoClassAttacks(Mob *target) {
 	classattack_timer.Start(reuse / HasteModifier);
 }
 
+// this should be refactored to generate an OP_CombatAbility struct and call OPCombatAbility
 void Client::DoClassAttacks(Mob *ca_target, uint16 skill, bool IsRiposte)
 {
 	if(!ca_target)
@@ -1964,17 +1815,13 @@ void Client::DoClassAttacks(Mob *ca_target, uint16 skill, bool IsRiposte)
 					dmg = 0;
 				}
 				else{
-					if(RuleB(Combat, UseIntervalAC))
-						dmg = GetBashDamage();
-					else
-						dmg = zone->random.Int(1, GetBashDamage());
-
+					dmg = GetBaseSkillDamage(EQEmu::skills::SkillBash, ca_target);
 				}
 			}
 
 			ReuseTime = (BashReuseTime - 1) / HasteMod;
 
-			DoSpecialAttackDamage(ca_target, EQEmu::skills::SkillBash, dmg, 1, -1, ReuseTime);
+			DoSpecialAttackDamage(ca_target, EQEmu::skills::SkillBash, dmg, 0, -1, ReuseTime);
 
 			if(ReuseTime > 0 && !IsRiposte) {
 				p_timers.Start(pTimerCombatAbility, ReuseTime);
@@ -1986,18 +1833,8 @@ void Client::DoClassAttacks(Mob *ca_target, uint16 skill, bool IsRiposte)
 	if (skill_to_use == EQEmu::skills::SkillFrenzy){
 		CheckIncreaseSkill(EQEmu::skills::SkillFrenzy, GetTarget(), 10);
 		int AtkRounds = 3;
-		int skillmod = 100 * GetSkill(EQEmu::skills::SkillFrenzy) / MaxSkill(EQEmu::skills::SkillFrenzy);
-		int32 max_dmg = (26 + ((((GetLevel()-6) * 2)*skillmod)/100)) * ((100+RuleI(Combat, FrenzyBonus))/100);
-		int32 min_dmg = 0;
+		int32 max_dmg = GetBaseSkillDamage(EQEmu::skills::SkillBash, GetTarget());
 		DoAnim(anim2HSlashing);
-
-		if (GetLevel() < 51)
-			min_dmg = 1;
-		else
-			min_dmg = GetLevel()*8/10;
-
-		if (min_dmg > max_dmg)
-			max_dmg = min_dmg;
 
 		ReuseTime = (FrenzyReuseTime - 1) / HasteMod;
 
@@ -2005,7 +1842,7 @@ void Client::DoClassAttacks(Mob *ca_target, uint16 skill, bool IsRiposte)
 		while(AtkRounds > 0) {
 
 			if (GetTarget() && (AtkRounds == 1 || zone->random.Roll(75))) {
-				DoSpecialAttackDamage(GetTarget(), EQEmu::skills::SkillFrenzy, max_dmg, min_dmg, max_dmg, ReuseTime, true);
+				DoSpecialAttackDamage(GetTarget(), EQEmu::skills::SkillFrenzy, max_dmg, 0, max_dmg, ReuseTime, true);
 			}
 			AtkRounds--;
 		}
@@ -2028,16 +1865,13 @@ void Client::DoClassAttacks(Mob *ca_target, uint16 skill, bool IsRiposte)
 					dmg = 0;
 				}
 				else{
-					if(RuleB(Combat, UseIntervalAC))
-						dmg = GetKickDamage();
-					else
-						dmg = zone->random.Int(1, GetKickDamage());
+					dmg = GetBaseSkillDamage(EQEmu::skills::SkillKick, ca_target);
 				}
 			}
 
 			ReuseTime = KickReuseTime-1;
 
-			DoSpecialAttackDamage(ca_target, EQEmu::skills::SkillKick, dmg, 1, -1, ReuseTime);
+			DoSpecialAttackDamage(ca_target, EQEmu::skills::SkillKick, dmg, 0, -1, ReuseTime);
 		}
 	}
 
@@ -2218,7 +2052,7 @@ void Mob::InstillDoubt(Mob *who) {
 	}
 }
 
-uint32 Mob::TryHeadShot(Mob* defender, EQEmu::skills::SkillType skillInUse) {
+int Mob::TryHeadShot(Mob* defender, EQEmu::skills::SkillType skillInUse) {
 	//Only works on YOUR target.
 	if(defender && (defender->GetBodyType() == BT_Humanoid) && !defender->IsClient()
 		&& (skillInUse == EQEmu::skills::SkillArchery) && (GetTarget() == defender)) {
@@ -2233,8 +2067,10 @@ uint32 Mob::TryHeadShot(Mob* defender, EQEmu::skills::SkillType skillInUse) {
 
 		if(HeadShot_Dmg && HeadShot_Level && (defender->GetLevel() <= HeadShot_Level)){
 			float ProcChance = GetSpecialProcChances(EQEmu::inventory::slotRange);
-			if(zone->random.Roll(ProcChance))
+			if(zone->random.Roll(ProcChance)) {
+				entity_list.MessageClose_StringID(this, false, 200, MT_CritMelee, FATAL_BOW_SHOT, GetName());
 				return HeadShot_Dmg;
+			}
 		}
 	}
 
@@ -2269,9 +2105,9 @@ float Mob::GetSpecialProcChances(uint16 hand)
 	return ProcChance;
 }
 
-uint32 Mob::TryAssassinate(Mob* defender, EQEmu::skills::SkillType skillInUse, uint16 ReuseTime) {
+int Mob::TryAssassinate(Mob* defender, EQEmu::skills::SkillType skillInUse, uint16 ReuseTime) {
 
-	if(defender && (defender->GetBodyType() == BT_Humanoid) && !defender->IsClient() &&
+	if(defender && (defender->GetBodyType() == BT_Humanoid) && !defender->IsClient() && GetLevel() >= 60 &&
 		(skillInUse == EQEmu::skills::SkillBackstab || skillInUse == EQEmu::skills::SkillThrowing)) {
 
 		uint32 Assassinate_Dmg = aabonuses.Assassinate[1] + spellbonuses.Assassinate[1] + itembonuses.Assassinate[1];
@@ -2283,13 +2119,9 @@ uint32 Mob::TryAssassinate(Mob* defender, EQEmu::skills::SkillType skillInUse, u
 		else if (Assassinate_Level < itembonuses.AssassinateLevel)
 			Assassinate_Level = itembonuses.AssassinateLevel;
 
-		if (GetLevel() >= 60){ //Innate Assassinate Ability if client as no bonuses.
-			if (!Assassinate_Level)
-				Assassinate_Level = 45;
-
-			if (!Assassinate_Dmg)
-				Assassinate_Dmg = 32000;
-		}
+		// revamped AAs require AA line I believe?
+		if (!Assassinate_Level)
+			return 0;
 
 		if(Assassinate_Dmg && Assassinate_Level && (defender->GetLevel() <= Assassinate_Level)){
 			float ProcChance = 0.0f;
@@ -2299,8 +2131,11 @@ uint32 Mob::TryAssassinate(Mob* defender, EQEmu::skills::SkillType skillInUse, u
 			else
 				ProcChance = GetAssassinateProcChances(ReuseTime);
 
-			if(zone->random.Roll(ProcChance))
+			if(zone->random.Roll(ProcChance)) {
+				entity_list.MessageClose_StringID(this, false, 200, MT_CritMelee, ASSASSINATES,
+								  GetName());
 				return Assassinate_Dmg;
+			}
 		}
 	}
 
@@ -2340,33 +2175,19 @@ void Mob::DoMeleeSkillAttackDmg(Mob* other, uint16 weapon_damage, EQEmu::skills:
 	/*
 		For spells using skill value 98 (feral swipe ect) server sets this to 67 automatically.
 		Kayen: This is unlikely to be completely accurate but use OFFENSE skill value for these effects.
+		TODO: We need to stop moving skill 98, it's suppose to just be a dummy skill AFAIK
+		Spells using offense should use the skill of your primary, if you can use it, otherwise h2h
 	*/
 	if (skillinuse == EQEmu::skills::SkillBegging)
 		skillinuse = EQEmu::skills::SkillOffense;
 
 	int damage = 0;
 	uint32 hate = 0;
-	int Hand = EQEmu::inventory::slotPrimary;
 	if (hate == 0 && weapon_damage > 1) hate = weapon_damage;
 
 	if(weapon_damage > 0){
 		if (focus) //From FcBaseEffects
 			weapon_damage += weapon_damage*focus/100;
-
-		if(GetClass() == BERSERKER){
-			int bonus = 3 + GetLevel()/10;
-			weapon_damage = weapon_damage * (100+bonus) / 100;
-		}
-
-		int32 min_hit = 1;
-		int32 max_hit = (2 * weapon_damage*GetDamageTable(skillinuse)) / 100;
-
-		if(GetLevel() >= 28 && IsWarriorClass() ) {
-			int ucDamageBonus = GetWeaponDamageBonus((const EQEmu::ItemData*) nullptr);
-			min_hit += (int) ucDamageBonus;
-			max_hit += (int) ucDamageBonus;
-			hate += ucDamageBonus;
-		}
 
 		if (skillinuse == EQEmu::skills::SkillBash){
 			if(IsClient()){
@@ -2381,16 +2202,11 @@ void Mob::DoMeleeSkillAttackDmg(Mob* other, uint16 weapon_damage, EQEmu::skills:
 			}
 		}
 
-		ApplySpecialAttackMod(skillinuse, max_hit, min_hit);
-		min_hit += min_hit * GetMeleeMinDamageMod_SE(skillinuse) / 100;
-
-		if(max_hit < min_hit)
-			max_hit = min_hit;
-
-		if(RuleB(Combat, UseIntervalAC))
-			damage = max_hit;
-		else
-			damage = zone->random.Int(min_hit, max_hit);
+		int min_cap = weapon_damage * GetMeleeMinDamageMod_SE(skillinuse) / 100;
+		auto offense = this->offense(skillinuse);
+		int min_damage = 0;
+		if (IsNPC())
+			min_damage = CastToNPC()->GetMinDamage();
 
 		if (other->AvoidDamage(this, damage, CanRiposte ? EQEmu::inventory::slotRange : EQEmu::inventory::slotPrimary)) { // SlotRange excludes ripo, primary doesn't have any extra behavior
 			if (damage == -3) {
@@ -2400,8 +2216,9 @@ void Mob::DoMeleeSkillAttackDmg(Mob* other, uint16 weapon_damage, EQEmu::skills:
 			}
 		} else {
 			if (other->CheckHitChance(this, skillinuse, chance_mod)) {
-				other->MeleeMitigation(this, damage, min_hit);
-				CommonOutgoingHitSuccess(other, damage, skillinuse);
+				other->MeleeMitigation(this, damage, weapon_damage, offense, skillinuse);
+				ApplyDamageTable(damage, offense);
+				CommonOutgoingHitSuccess(other, damage, min_damage, min_cap, skillinuse);
 			} else {
 				damage = 0;
 			}

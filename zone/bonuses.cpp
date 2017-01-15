@@ -46,6 +46,7 @@ void Mob::CalcBonuses()
 	CalcMaxHP();
 	CalcMaxMana();
 	SetAttackTimer();
+	CalcAC();
 
 	rooted = FindType(SE_Root);
 }
@@ -669,6 +670,10 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 		}
 
 		switch (effect) {
+		case SE_ACv2:
+		case SE_ArmorClass:
+			newbon->AC += base1;
+			break;
 		// Note: AA effects that use accuracy are skill limited, while spell effect is not.
 		case SE_Accuracy:
 			// Bad data or unsupported new skill
@@ -1527,9 +1532,6 @@ void Mob::CalcSpellBonuses(StatBonuses* newbon)
 		}
 	}
 
-	// THIS IS WRONG, leaving for now
-	//this prolly suffer from roundoff error slightly...
-	newbon->AC = newbon->AC * 10 / 34;      //ratio determined impirically from client.
 	if (GetClass() == BARD)
 		newbon->ManaRegen = 0; // Bards do not get mana regen from spells.
 }

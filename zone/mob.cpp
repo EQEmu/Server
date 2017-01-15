@@ -109,7 +109,9 @@ Mob::Mob(const char* in_name,
 		m_TargetV(glm::vec3()),
 		flee_timer(FLEE_CHECK_TIMER),
 		m_Position(position),
-		tmHidden(-1)
+		tmHidden(-1),
+		mitigation_ac(0),
+		m_specialattacks(eSpecialAttacks::None)
 {
 	targeted = 0;
 	tar_ndx=0;
@@ -4643,7 +4645,7 @@ void Mob::SetRaidGrouped(bool v)
 	}
 }
 
-int16 Mob::GetCriticalChanceBonus(uint16 skill)
+int Mob::GetCriticalChanceBonus(uint16 skill)
 {
 	int critical_chance = 0;
 

@@ -201,6 +201,9 @@ NPC::NPC(const NPCType* d, Spawn2* in_respawn, const glm::vec4& position, int if
 		CalcNPCDamage();
 	}
 
+	base_damage = round((max_dmg - min_dmg) / 1.9);
+	min_damage = min_dmg - round(base_damage / 10.0);
+
 	accuracy_rating = d->accuracy_rating;
 	avoidance_rating = d->avoidance_rating;
 	ATK = d->ATK;
@@ -1054,7 +1057,7 @@ NPC* NPC::SpawnNPC(const char* spawncommand, const glm::vec4& position, Client* 
 		npc_type->WIS = 150;
 		npc_type->CHA = 150;
 
-		npc_type->attack_delay = 30;
+		npc_type->attack_delay = 3000;
 
 		npc_type->prim_melee_type = 28;
 		npc_type->sec_melee_type = 28;
@@ -1984,13 +1987,25 @@ void NPC::ModifyNPCStat(const char *identifier, const char *newValue)
 	else if(id == "special_attacks") { NPCSpecialAttacks(val.c_str(), 0, 1); return; }
 	else if(id == "special_abilities") { ProcessSpecialAbilities(val.c_str()); return; }
 	else if(id == "attack_speed") { attack_speed = (float)atof(val.c_str()); CalcBonuses(); return; }
-	else if(id == "attack_delay") { attack_delay = atoi(val.c_str()); CalcBonuses(); return; }
+	else if(id == "attack_delay") { /* TODO: fix DB */attack_delay = atoi(val.c_str()) * 100; CalcBonuses(); return; }
 	else if(id == "atk") { ATK = atoi(val.c_str()); return; }
 	else if(id == "accuracy") { accuracy_rating = atoi(val.c_str()); return; }
 	else if(id == "avoidance") { avoidance_rating = atoi(val.c_str()); return; }
 	else if(id == "trackable") { trackable = atoi(val.c_str()); return; }
-	else if(id == "min_hit") { min_dmg = atoi(val.c_str()); return; }
-	else if(id == "max_hit") { max_dmg = atoi(val.c_str()); return; }
+	else if(id == "min_hit") {
+		min_dmg = atoi(val.c_str());
+		// TODO: fix DB
+		base_damage = round((max_dmg - min_dmg) / 1.9);
+		min_damage = min_dmg - round(base_damage / 10.0);
+		return;
+	}
+	else if(id == "max_hit") {
+		max_dmg = atoi(val.c_str());
+		// TODO: fix DB
+		base_damage = round((max_dmg - min_dmg) / 1.9);
+		min_damage = min_dmg - round(base_damage / 10.0);
+		return;
+	}
 	else if(id == "attack_count") { attack_count = atoi(val.c_str()); return; }
 	else if(id == "see_invis") { see_invis = atoi(val.c_str()); return; }
 	else if(id == "see_invis_undead") { see_invis_undead = atoi(val.c_str()); return; }

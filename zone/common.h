@@ -638,5 +638,11 @@ struct ExtraAttackOptions {
 
 };
 
+struct DamageTable {
+	int32 max_extra; // max extra damage
+	int32 chance; // chance not to apply?
+	int32 minusfactor; // difficulty of rolling
+};
+
 #endif
 
