@@ -40,7 +40,7 @@ namespace EQ {
 				cereal::BinaryOutputArchive output(m_stream);
 				output(value);
 			
-				auto &str = m_stream.str();
+				auto str = m_stream.str();
 				if (Length() < offset + str.length()) {
 					if (!Resize(offset + str.length())) {
 						throw std::out_of_range("Packet::PutSerialize(), could not resize packet and would of written past the end.");
