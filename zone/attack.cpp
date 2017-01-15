@@ -735,7 +735,7 @@ int Mob::ACSum()
 	// EQ math
 	ac = (ac * 4) / 3;
 	// anti-twink
-	if (GetLevel() < 50)
+	if (IsClient() && GetLevel() < 50)
 		ac = std::min(ac, 25 + 6 * GetLevel());
 	ac = std::max(0, ac + GetClassRaceACBonus());
 	if (IsNPC()) {
@@ -751,12 +751,19 @@ int Mob::ACSum()
 			owner = entity_list.GetMobID(CastToNPC()->GetSwarmOwner());
 		if (owner)
 			ac += owner->aabonuses.PetAvoidance + owner->spellbonuses.PetAvoidance + owner->itembonuses.PetAvoidance;
+		auto spell_aa_ac = aabonuses.AC + spellbonuses.AC;
+		ac += GetSkill(EQEmu::skills::SkillDefense) / 5;
+		if (EQEmu::ValueWithin(static_cast<int>(GetClass()), NECROMANCER, ENCHANTER))
+			ac += spell_aa_ac / 3;
+		else
+			ac += spell_aa_ac / 4;
+	} else { // TODO: so we can't set NPC skills ... so the skill bonus ends up being HUGE so lets nerf them a bit
+		auto spell_aa_ac = aabonuses.AC + spellbonuses.AC;
+		if (EQEmu::ValueWithin(static_cast<int>(GetClass()), NECROMANCER, ENCHANTER))
+			ac += GetSkill(EQEmu::skills::SkillDefense) / 2 + spell_aa_ac / 3;
+		else
+			ac += GetSkill(EQEmu::skills::SkillDefense) / 3 + spell_aa_ac / 4;
 	}
-	auto spell_aa_ac = aabonuses.AC + spellbonuses.AC;
-	if (EQEmu::ValueWithin(static_cast<int>(GetClass()), NECROMANCER, ENCHANTER))
-		ac += GetSkill(EQEmu::skills::SkillDefense) / 2 + spell_aa_ac / 3;
-	else
-		ac += GetSkill(EQEmu::skills::SkillDefense) / 3 + spell_aa_ac / 4;
 
 	if (GetAGI() > 70)
 		ac += GetAGI() / 20;
