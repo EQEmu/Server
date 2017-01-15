@@ -19,8 +19,6 @@
 #define EQEMU_SERVERMANAGER_H
 
 #include "../common/global_define.h"
-#include "../common/emu_tcp_connection.h"
-#include "../common/emu_tcp_server.h"
 #include "../common/servertalk.h"
 #include "../common/packet_dump.h"
 #include "../common/net/servertalk_server.h"
