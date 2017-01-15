@@ -166,7 +166,9 @@ public:
 	virtual void TryBackstab(Mob *other,int ReuseTime = 10);
 	bool AvoidDamage(Mob* attacker, int &damage, int hand);
 	int compute_tohit(EQEmu::skills::SkillType skillinuse);
+	int GetTotalToHit(EQEmu::skills::SkillType skill, int chance_mod); // compute_tohit + spell bonuses
 	int compute_defense();
+	int GetTotalDefense(); // compute_defense + spell bonuses
 	bool CheckHitChance(Mob* attacker, EQEmu::skills::SkillType skillinuse, int chance_mod = 0);
 	virtual void TryCriticalHit(Mob *defender, uint16 skill, int &damage, int min_damage, ExtraAttackOptions *opts = nullptr);
 	void TryPetCriticalHit(Mob *defender, uint16 skill, int &damage);

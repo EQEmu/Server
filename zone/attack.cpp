@@ -157,6 +157,62 @@ int Mob::compute_tohit(EQEmu::skills::SkillType skillinuse)
 	return std::max(tohit, 1);
 }
 
+// return -1 in cases that always hit
+int Mob::GetTotalToHit(EQEmu::skills::SkillType skill, int chance_mod)
+{
+	if (chance_mod >= 10000) // override for stuff like SE_SkillAttack
+		return -1;
+
+	// calculate attacker's accuracy
+	auto accuracy = compute_tohit(skill) + 10; // add 10 in case the NPC's stats are fucked
+	if (chance_mod > 0) // multiplier
+		accuracy *= chance_mod;
+
+	// Torven parsed an apparent constant of 1.2 somewhere in here * 6 / 5 looks eqmathy to me!
+	accuracy = accuracy * 6 / 5;
+
+	// unsure on the stacking order of these effects, rather hard to parse
+	// item mod2 accuracy isn't applied to range? Theory crafting and parses back it up I guess
+	// mod2 accuracy -- flat bonus
+	if (skill != EQEmu::skills::SkillArchery && skill != EQEmu::skills::SkillThrowing)
+		accuracy += itembonuses.HitChance;
+
+	// 216 Melee Accuracy Amt aka SE_Accuracy -- flat bonus
+	accuracy += itembonuses.Accuracy[EQEmu::skills::HIGHEST_SKILL + 1] +
+				aabonuses.Accuracy[EQEmu::skills::HIGHEST_SKILL + 1] +
+				spellbonuses.Accuracy[EQEmu::skills::HIGHEST_SKILL + 1] +
+				itembonuses.Accuracy[skill] +
+				aabonuses.Accuracy[skill] +
+				spellbonuses.Accuracy[skill];
+
+	// auto hit discs (and looks like there are some autohit AAs)
+	if (spellbonuses.HitChanceEffect[skill] >= 10000 || aabonuses.HitChanceEffect[skill] >= 10000)
+		return -1;
+
+	if (spellbonuses.HitChanceEffect[EQEmu::skills::HIGHEST_SKILL + 1] >= 10000)
+		return -1;
+
+	// 184 Accuracy % aka SE_HitChance -- percentage increase
+	auto hit_bonus = itembonuses.HitChanceEffect[EQEmu::skills::HIGHEST_SKILL + 1] +
+					 aabonuses.HitChanceEffect[EQEmu::skills::HIGHEST_SKILL + 1] +
+					 spellbonuses.HitChanceEffect[EQEmu::skills::HIGHEST_SKILL + 1] +
+					 itembonuses.HitChanceEffect[skill] +
+					 aabonuses.HitChanceEffect[skill] +
+					 spellbonuses.HitChanceEffect[skill];
+
+	accuracy = (accuracy * (100 + hit_bonus)) / 100;
+
+	// TODO: April 2003 added an archery/throwing PVP accuracy penalty while moving, should be in here some where,
+	// but PVP is less important so I haven't tried parsing it at all
+
+	// There is also 110 Ranger Archery Accuracy % which should probably be in here some where, but it's not in any spells/aas
+	// Name implies it's a percentage increase, if one wishes to implement, do it like the hit_bonus above but limited to ranger archery
+
+	// There is also 183 UNUSED - Skill Increase Chance which devs say isn't used at all in code, but some spells reference it
+	// I do not recommend implementing this once since there are spells that use it which would make this not live-like with default spell files
+	return accuracy;
+}
+
 // based on dev quotes
 // the AGI bonus has actually drastically changed from classic
 int Mob::compute_defense()
@@ -181,6 +237,33 @@ int Mob::compute_defense()
 	return std::max(1, defense);
 }
 
+// return -1 in cases that always miss
+int Mob::GetTotalDefense()
+{
+	auto avoidance = compute_defense() + 10; // add 10 in case the NPC's stats are fucked
+	auto evasion_bonus = spellbonuses.AvoidMeleeChanceEffect; // we check this first since it has a special case
+	if (evasion_bonus >= 10000)
+		return -1;
+	//
+	// 172 Evasion aka SE_AvoidMeleeChance
+	evasion_bonus += itembonuses.AvoidMeleeChanceEffect + aabonuses.AvoidMeleeChanceEffect; // item bonus here isn't mod2 avoidance
+
+	Mob *owner = nullptr;
+	if (IsPet())
+		owner = GetOwner();
+	else if (IsNPC() && CastToNPC()->GetSwarmOwner())
+		owner = entity_list.GetMobID(CastToNPC()->GetSwarmOwner());
+
+	if (owner) // 215 Pet Avoidance % aka SE_PetAvoidance
+		evasion_bonus += owner->aabonuses.PetAvoidance + owner->spellbonuses.PetAvoidance + owner->itembonuses.PetAvoidance;
+
+	// Evasion is a percentage bonus according to AA descriptions
+	if (evasion_bonus)
+		avoidance = (avoidance * (100 + evasion_bonus)) / 100;
+
+	return avoidance;
+}
+
 // called when a mob is attacked, does the checks to see if it's a hit
 // and does other mitigation checks. 'this' is the mob being attacked.
 bool Mob::CheckHitChance(Mob* other, EQEmu::skills::SkillType skillinuse, int chance_mod)
@@ -192,79 +275,13 @@ bool Mob::CheckHitChance(Mob* other, EQEmu::skills::SkillType skillinuse, int ch
 	if (defender->IsClient() && defender->CastToClient()->IsSitting())
 		return true;
 
-	// calculate defender's avoidance
-	auto avoidance = defender->compute_defense() + 10; // add 10 in case the NPC's stats are fucked
-	auto evasion_bonus = defender->spellbonuses.AvoidMeleeChanceEffect; // we check this first since it has a special case
-	if (evasion_bonus <= -100)
-		return true;
-	if (evasion_bonus >= 10000) // some sort of auto avoid disc
+	auto avoidance = defender->GetTotalDefense();
+	if (avoidance == -1) // some sort of auto avoid disc
 		return false;
-	// 172 Evasion aka SE_AvoidMeleeChance
-	evasion_bonus += defender->itembonuses.AvoidMeleeChanceEffect + defender->aabonuses.AvoidMeleeChanceEffect; // item bonus here isn't mod2 avoidance
 
-	Mob *owner = nullptr;
-	if (defender->IsPet())
-		owner = defender->GetOwner();
-	else if (defender->IsNPC() && defender->CastToNPC()->GetSwarmOwner())
-		owner = entity_list.GetMobID(defender->CastToNPC()->GetSwarmOwner());
-
-	if (owner) // 215 Pet Avoidance % aka SE_PetAvoidance
-		evasion_bonus += owner->aabonuses.PetAvoidance + owner->spellbonuses.PetAvoidance + owner->itembonuses.PetAvoidance;
-
-	// Evasion is a percentage bonus according to AA descriptions
-	if (evasion_bonus)
-		avoidance = (avoidance * (100 + evasion_bonus)) / 100;
-
-	if (chance_mod >= 10000) // override for stuff like SE_SkillAttack
+	auto accuracy = attacker->GetTotalToHit(skillinuse, chance_mod);
+	if (accuracy == -1)
 		return true;
-
-	// calculate attacker's accuracy
-	auto accuracy = attacker->compute_tohit(skillinuse) + 10; // add 10 in case the NPC's stats are fucked
-	if (chance_mod > 0) // multiplier
-		accuracy *= chance_mod;
-
-	// Torven parsed an apparent constant of 1.2 somewhere in here * 6 / 5 looks eqmathy to me!
-	accuracy = accuracy * 6 / 5;
-
-	// unsure on the stacking order of these effects, rather hard to parse
-	// item mod2 accuracy isn't applied to range? Theory crafting and parses back it up I guess
-	// mod2 accuracy -- flat bonus
-	if (skillinuse != EQEmu::skills::SkillArchery && skillinuse != EQEmu::skills::SkillThrowing)
-		accuracy += attacker->itembonuses.HitChance;
-
-	// 216 Melee Accuracy Amt aka SE_Accuracy -- flat bonus
-	accuracy += attacker->itembonuses.Accuracy[EQEmu::skills::HIGHEST_SKILL + 1] +
-				attacker->aabonuses.Accuracy[EQEmu::skills::HIGHEST_SKILL + 1] +
-				attacker->spellbonuses.Accuracy[EQEmu::skills::HIGHEST_SKILL + 1] +
-				attacker->itembonuses.Accuracy[skillinuse] +
-				attacker->aabonuses.Accuracy[skillinuse] +
-				attacker->spellbonuses.Accuracy[skillinuse];
-
-	// auto hit discs (and looks like there are some autohit AAs)
-	if (attacker->spellbonuses.HitChanceEffect[skillinuse] >= 10000 || attacker->aabonuses.HitChanceEffect[skillinuse] >= 10000)
-		return true;
-
-	if (attacker->spellbonuses.HitChanceEffect[EQEmu::skills::HIGHEST_SKILL + 1] >= 10000)
-		return true;
-
-	// 184 Accuracy % aka SE_HitChance -- percentage increase
-	auto hit_bonus = attacker->itembonuses.HitChanceEffect[EQEmu::skills::HIGHEST_SKILL + 1] +
-					 attacker->aabonuses.HitChanceEffect[EQEmu::skills::HIGHEST_SKILL + 1] +
-					 attacker->spellbonuses.HitChanceEffect[EQEmu::skills::HIGHEST_SKILL + 1] +
-					 attacker->itembonuses.HitChanceEffect[skillinuse] +
-					 attacker->aabonuses.HitChanceEffect[skillinuse] +
-					 attacker->spellbonuses.HitChanceEffect[skillinuse];
-
-	accuracy = (accuracy * (100 + hit_bonus)) / 100;
-
-	// TODO: April 2003 added an archery/throwing PVP accuracy penalty while moving, should be in here some where,
-	// but PVP is less important so I haven't tried parsing it at all
-
-	// There is also 110 Ranger Archery Accuracy % which should probably be in here some where, but it's not in any spells/aas
-	// Name implies it's a percentage increase, if one wishes to implement, do it like the hit_bonus above but limited to ranger archery
-
-	// There is also 183 UNUSED - Skill Increase Chance which devs say isn't used at all in code, but some spells reference it
-	// I do not recommend implementing this once since there are spells that use it which would make this not live-like with default spell files
 
 	// so now we roll!
 	// relevant dev quote:
