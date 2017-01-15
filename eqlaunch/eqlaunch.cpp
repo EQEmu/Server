@@ -31,6 +31,10 @@
 #include <signal.h>
 #include <time.h>
 
+#ifndef _WINDOWS
+#include "../common/unix.h"
+#endif
+
 EQEmuLogSys Log;
 
 bool RunLoops = false;
