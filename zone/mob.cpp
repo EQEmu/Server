@@ -1493,6 +1493,9 @@ void Mob::ShowStats(Client* client)
 				spawngroupid = n->respawn2->SpawnGroupID();
 			client->Message(0, "  NPCID: %u  SpawnGroupID: %u Grid: %i LootTable: %u FactionID: %i SpellsID: %u ", GetNPCTypeID(),spawngroupid, n->GetGrid(), n->GetLoottableID(), n->GetNPCFactionID(), n->GetNPCSpellsID());
 			client->Message(0, "  Accuracy: %i MerchantID: %i EmoteID: %i Runspeed: %.3f Walkspeed: %.3f", n->GetAccuracyRating(), n->MerchantType, n->GetEmoteID(), static_cast<float>(0.025f * n->GetRunspeed()), static_cast<float>(0.025f * n->GetWalkspeed()));
+			client->Message(0, "  compute_tohit: %i TotalToHit: %i", n->compute_tohit(EQEmu::skills::SkillHandtoHand), n->GetTotalToHit(EQEmu::skills::SkillHandtoHand, 0));
+			client->Message(0, "  compute_defense: %i TotalDefense: %i", n->compute_defense(), n->GetTotalDefense());
+			client->Message(0, "  offense: %i mitigation ac: %i", n->offense(EQEmu::skills::SkillHandtoHand), n->GetMitigationAC());
 			n->QueryLoot(client);
 		}
 		if (IsAIControlled()) {
