@@ -492,6 +492,7 @@ RULE_INT(Combat, NPCAssistCap, 5) // Maxiumium number of NPCs that will assist a
 RULE_INT(Combat, NPCAssistCapTimer, 6000) // Time in milliseconds a NPC will take to clear assist aggro cap space
 RULE_BOOL(Combat, UseRevampHandToHand, false) // use h2h revamped dmg/delays I believe this was implemented during SoF
 RULE_BOOL(Combat, ClassicMasterWu, false) // classic master wu uses a random special, modern doesn't
+RULE_INT(Combat, LevelToStopDamageCaps, 0) // 1 will effectively disable them, 20 should give basically same results as old incorrect system
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(NPC)

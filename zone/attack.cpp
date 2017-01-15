@@ -1107,6 +1107,9 @@ int Client::DoDamageCaps(int base_damage)
 {
 	// this is based on a client function that caps melee base_damage
 	auto level = GetLevel();
+	auto stop_level = RuleI(Combat, LevelToStopDamageCaps);
+	if (stop_level && stop_level <= level)
+		return base_damage;
 	int cap = 0;
 	if (level >= 125) {
 		cap = 7 * level;
