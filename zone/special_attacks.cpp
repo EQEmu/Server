@@ -217,14 +217,14 @@ void Mob::DoSpecialAttackDamage(Mob *who, EQEmu::skills::SkillType skill, int32 
 }
 
 // We should probably refactor this to take the struct not the packet
-void Client::OPCombatAbility(const EQApplicationPacket *app) {
-	if(!GetTarget())
+void Client::OPCombatAbility(const CombatAbility_Struct *ca_atk)
+{
+	if (!GetTarget())
 		return;
-	//make sure were actually able to use such an attack.
-	if(spellend_timer.Enabled() || IsFeared() || IsStunned() || IsMezzed() || DivineAura() || dead)
+	// make sure were actually able to use such an attack.
+	if (spellend_timer.Enabled() || IsFeared() || IsStunned() || IsMezzed() || DivineAura() || dead)
 		return;
 
-	CombatAbility_Struct* ca_atk = (CombatAbility_Struct*) app->pBuffer;
 	pTimerType timer = pTimerCombatAbility;
 	// RoF2+ Tiger Claw is unlinked from other monk skills, if they ever do that for other classes there will need
 	// to be more checks here
@@ -235,15 +235,15 @@ void Client::OPCombatAbility(const EQApplicationPacket *app) {
 	if (!MaxSkill(static_cast<EQEmu::skills::SkillType>(ca_atk->m_skill)))
 		return;
 
-	if(GetTarget()->GetID() != ca_atk->m_target)
-		return;	//invalid packet.
+	if (GetTarget()->GetID() != ca_atk->m_target)
+		return; // invalid packet.
 
-	if(!IsAttackAllowed(GetTarget()))
+	if (!IsAttackAllowed(GetTarget()))
 		return;
 
-	//These two are not subject to the combat ability timer, as they
-	//allready do their checking in conjunction with the attack timer
-	//throwing weapons
+	// These two are not subject to the combat ability timer, as they
+	// allready do their checking in conjunction with the attack timer
+	// throwing weapons
 	if (ca_atk->m_atk == EQEmu::inventory::slotRange) {
 		if (ca_atk->m_skill == EQEmu::skills::SkillThrowing) {
 			SetAttackTimer();
@@ -252,7 +252,7 @@ void Client::OPCombatAbility(const EQApplicationPacket *app) {
 				ThrowingAttack(GetTarget(), true);
 			return;
 		}
-		//ranged attack (archery)
+		// ranged attack (archery)
 		if (ca_atk->m_skill == EQEmu::skills::SkillArchery) {
 			SetAttackTimer();
 			RangedAttack(GetTarget());
@@ -260,15 +260,15 @@ void Client::OPCombatAbility(const EQApplicationPacket *app) {
 				RangedAttack(GetTarget(), true);
 			return;
 		}
-		//could we return here? Im not sure is m_atk 11 is used for real specials
+		// could we return here? Im not sure is m_atk 11 is used for real specials
 	}
 
-	//check range for all these abilities, they are all close combat stuff
-	if(!CombatRange(GetTarget()))
+	// check range for all these abilities, they are all close combat stuff
+	if (!CombatRange(GetTarget()))
 		return;
 
-	if(!p_timers.Expired(&database, timer, false)) {
-		Message(13,"Ability recovery time not yet met.");
+	if (!p_timers.Expired(&database, timer, false)) {
+		Message(13, "Ability recovery time not yet met.");
 		return;
 	}
 
@@ -276,18 +276,18 @@ void Client::OPCombatAbility(const EQApplicationPacket *app) {
 	int ClientHaste = GetHaste();
 	int HasteMod = 0;
 
-	if(ClientHaste >= 0){
-		HasteMod = (10000/(100+ClientHaste)); //+100% haste = 2x as many attacks
-	}
-	else{
-		HasteMod = (100-ClientHaste); //-100% haste = 1/2 as many attacks
-	}
+	if (ClientHaste >= 0)
+		HasteMod = (10000 / (100 + ClientHaste)); //+100% haste = 2x as many attacks
+	else
+		HasteMod = (100 - ClientHaste); //-100% haste = 1/2 as many attacks
+
 	int32 dmg = 0;
 
 	int32 skill_reduction = this->GetSkillReuseTime(ca_atk->m_skill);
 
 	// not sure what the '100' indicates..if ->m_atk is not used as 'slot' reference, then change SlotRange above back to '11'
-	if ((ca_atk->m_atk == 100) && (ca_atk->m_skill == EQEmu::skills::SkillBash)) { // SLAM - Bash without a shield equipped
+	if (ca_atk->m_atk == 100 &&
+	    ca_atk->m_skill == EQEmu::skills::SkillBash) { // SLAM - Bash without a shield equipped
 		if (GetTarget() != this) {
 
 			CheckIncreaseSkill(EQEmu::skills::SkillBash, GetTarget(), 10);
@@ -295,31 +295,21 @@ void Client::OPCombatAbility(const EQApplicationPacket *app) {
 
 			int32 ht = 0;
 			if (GetWeaponDamage(GetTarget(), GetInv().GetItem(EQEmu::inventory::slotSecondary)) <= 0 &&
-				GetWeaponDamage(GetTarget(), GetInv().GetItem(EQEmu::inventory::slotShoulders)) <= 0){
+			    GetWeaponDamage(GetTarget(), GetInv().GetItem(EQEmu::inventory::slotShoulders)) <= 0)
 				dmg = -5;
-			}
-			else{
-				if (!GetTarget()->CheckHitChance(this, EQEmu::skills::SkillBash, 0)) {
-					dmg = 0;
-					ht = GetBaseSkillDamage(EQEmu::skills::SkillBash, GetTarget());
-				}
-				else{
-					ht = dmg = GetBaseSkillDamage(EQEmu::skills::SkillBash, GetTarget());
-				}
-			}
+			else
+				ht = dmg = GetBaseSkillDamage(EQEmu::skills::SkillBash, GetTarget());
 
-			ReuseTime = BashReuseTime-1-skill_reduction;
-			ReuseTime = (ReuseTime*HasteMod)/100;
-			DoSpecialAttackDamage(GetTarget(), EQEmu::skills::SkillBash, dmg, 0, ht, ReuseTime);
-			if(ReuseTime > 0)
-			{
+			ReuseTime = BashReuseTime - 1 - skill_reduction;
+			ReuseTime = (ReuseTime * HasteMod) / 100;
+			DoSpecialAttackDamage(GetTarget(), EQEmu::skills::SkillBash, dmg, 0, ht, ReuseTime, true);
+			if (ReuseTime > 0)
 				p_timers.Start(timer, ReuseTime);
-			}
 		}
 		return;
 	}
 
-	if ((ca_atk->m_atk == 100) && (ca_atk->m_skill == EQEmu::skills::SkillFrenzy)){
+	if (ca_atk->m_atk == 100 && ca_atk->m_skill == EQEmu::skills::SkillFrenzy) {
 		CheckIncreaseSkill(EQEmu::skills::SkillFrenzy, GetTarget(), 10);
 		int AtkRounds = 3;
 		int32 max_dmg = GetBaseSkillDamage(EQEmu::skills::SkillFrenzy, GetTarget());
@@ -327,102 +317,96 @@ void Client::OPCombatAbility(const EQApplicationPacket *app) {
 
 		max_dmg = mod_frenzy_damage(max_dmg);
 
-		ReuseTime = FrenzyReuseTime-1-skill_reduction;
-		ReuseTime = (ReuseTime*HasteMod)/100;
+		ReuseTime = FrenzyReuseTime - 1 - skill_reduction;
+		ReuseTime = (ReuseTime * HasteMod) / 100;
 
-		//Live parses show around 55% Triple 35% Double 10% Single, you will always get first hit.
-		while(AtkRounds > 0) {
+		// Live parses show around 55% Triple 35% Double 10% Single, you will always get first hit.
+		while (AtkRounds > 0) {
 			if (GetTarget() && (AtkRounds == 1 || zone->random.Roll(75))) {
-				DoSpecialAttackDamage(GetTarget(), EQEmu::skills::SkillFrenzy, max_dmg, 0, max_dmg, ReuseTime, true);
+				DoSpecialAttackDamage(GetTarget(), EQEmu::skills::SkillFrenzy, max_dmg, 0, max_dmg,
+						      ReuseTime, true);
 			}
 			AtkRounds--;
 		}
 
-		if(ReuseTime > 0) {
+		if (ReuseTime > 0)
 			p_timers.Start(timer, ReuseTime);
-		}
 		return;
 	}
 
-	switch(GetClass()){
-		case BERSERKER:
-		case WARRIOR:
-		case RANGER:
-		case BEASTLORD:
-			if (ca_atk->m_atk != 100 || ca_atk->m_skill != EQEmu::skills::SkillKick) {
-				break;
-			}
-			if (GetTarget() != this) {
-				CheckIncreaseSkill(EQEmu::skills::SkillKick, GetTarget(), 10);
-				DoAnim(animKick);
-
-				int32 ht = 0;
-				if (GetWeaponDamage(GetTarget(), GetInv().GetItem(EQEmu::inventory::slotFeet)) <= 0){
-					dmg = -5;
-				}
-				else{
-					if (!GetTarget()->CheckHitChance(this, EQEmu::skills::SkillKick, 0)) {
-						dmg = 0;
-						ht = GetBaseSkillDamage(EQEmu::skills::SkillKick, GetTarget());
-					}
-					else{
-						ht = dmg = GetBaseSkillDamage(EQEmu::skills::SkillKick, GetTarget());
-					}
-				}
-
-				ReuseTime = KickReuseTime-1-skill_reduction;
-				DoSpecialAttackDamage(GetTarget(), EQEmu::skills::SkillKick, dmg, 0, ht, ReuseTime);
-
-			}
+	switch (GetClass()) {
+	case BERSERKER:
+	case WARRIOR:
+	case RANGER:
+	case BEASTLORD:
+		if (ca_atk->m_atk != 100 || ca_atk->m_skill != EQEmu::skills::SkillKick)
 			break;
-		case MONK: {
-			ReuseTime = MonkSpecialAttack(GetTarget(), ca_atk->m_skill) - 1 - skill_reduction;
+		if (GetTarget() != this) {
+			CheckIncreaseSkill(EQEmu::skills::SkillKick, GetTarget(), 10);
+			DoAnim(animKick);
 
-			//Live AA - Technique of Master Wu
-			int wuchance = itembonuses.DoubleSpecialAttack + spellbonuses.DoubleSpecialAttack + aabonuses.DoubleSpecialAttack;
-			if (wuchance) {
-				if (wuchance >= 100 || zone->random.Roll(wuchance)) {
-					const int MonkSPA[5] = { EQEmu::skills::SkillFlyingKick, EQEmu::skills::SkillDragonPunch, EQEmu::skills::SkillEagleStrike, EQEmu::skills::SkillTigerClaw, EQEmu::skills::SkillRoundKick };
-					int extra = 1;
-					// always 1/4 of the double attack chance, 25% at rank 5 (100/4)
-					if (zone->random.Roll(wuchance / 4))
-						extra++;
-					// They didn't add a string ID for this.
-					std::string msg = StringFormat("The spirit of Master Wu fills you!  You gain %d additional attack(s).", extra);
-					// live uses 400 here -- not sure if it's the best for all clients though
-					SendColoredText(400, msg);
-					auto classic = RuleB(Combat, ClassicMasterWu);
-					while (extra) {
-						MonkSpecialAttack(GetTarget(), classic ? MonkSPA[zone->random.Int(0, 4)] : ca_atk->m_skill);
-						extra--;
-					}
-				}
-			}
+			int32 ht = 0;
+			if (GetWeaponDamage(GetTarget(), GetInv().GetItem(EQEmu::inventory::slotFeet)) <= 0)
+				dmg = -5;
+			else
+				ht = dmg = GetBaseSkillDamage(EQEmu::skills::SkillKick, GetTarget());
 
-			if(ReuseTime < 100) {
-				//hackish... but we return a huge reuse time if this is an
-				// invalid skill, otherwise, we can safely assume it is a
-				// valid monk skill and just cast it to a SkillType
-				CheckIncreaseSkill((EQEmu::skills::SkillType) ca_atk->m_skill, GetTarget(), 10);
-			}
-			break;
+			ReuseTime = KickReuseTime - 1 - skill_reduction;
+			DoSpecialAttackDamage(GetTarget(), EQEmu::skills::SkillKick, dmg, 0, ht, ReuseTime, true);
 		}
-		case ROGUE: {
-			if (ca_atk->m_atk != 100 || ca_atk->m_skill != EQEmu::skills::SkillBackstab) {
-				break;
+		break;
+	case MONK: {
+		ReuseTime = MonkSpecialAttack(GetTarget(), ca_atk->m_skill) - 1 - skill_reduction;
+
+		// Live AA - Technique of Master Wu
+		int wuchance =
+		    itembonuses.DoubleSpecialAttack + spellbonuses.DoubleSpecialAttack + aabonuses.DoubleSpecialAttack;
+		if (wuchance) {
+			if (wuchance >= 100 || zone->random.Roll(wuchance)) {
+				const int MonkSPA[5] = {EQEmu::skills::SkillFlyingKick, EQEmu::skills::SkillDragonPunch,
+							EQEmu::skills::SkillEagleStrike, EQEmu::skills::SkillTigerClaw,
+							EQEmu::skills::SkillRoundKick};
+				int extra = 1;
+				// always 1/4 of the double attack chance, 25% at rank 5 (100/4)
+				if (zone->random.Roll(wuchance / 4))
+					extra++;
+				// They didn't add a string ID for this.
+				std::string msg = StringFormat(
+				    "The spirit of Master Wu fills you!  You gain %d additional attack(s).", extra);
+				// live uses 400 here -- not sure if it's the best for all clients though
+				SendColoredText(400, msg);
+				auto classic = RuleB(Combat, ClassicMasterWu);
+				while (extra) {
+					MonkSpecialAttack(GetTarget(),
+							  classic ? MonkSPA[zone->random.Int(0, 4)] : ca_atk->m_skill);
+					extra--;
+				}
 			}
-			ReuseTime = BackstabReuseTime-1 - skill_reduction;
-			TryBackstab(GetTarget(), ReuseTime);
-			break;
 		}
-		default:
-			//they have no abilities... wtf? make em wait a bit
-			ReuseTime = 9 - skill_reduction;
+
+		if (ReuseTime < 100) {
+			// hackish... but we return a huge reuse time if this is an
+			// invalid skill, otherwise, we can safely assume it is a
+			// valid monk skill and just cast it to a SkillType
+			CheckIncreaseSkill((EQEmu::skills::SkillType)ca_atk->m_skill, GetTarget(), 10);
+		}
+		break;
+	}
+	case ROGUE: {
+		if (ca_atk->m_atk != 100 || ca_atk->m_skill != EQEmu::skills::SkillBackstab)
 			break;
+		ReuseTime = BackstabReuseTime-1 - skill_reduction;
+		TryBackstab(GetTarget(), ReuseTime);
+		break;
+	}
+	default:
+		//they have no abilities... wtf? make em wait a bit
+		ReuseTime = 9 - skill_reduction;
+		break;
 	}
 
-	ReuseTime = (ReuseTime*HasteMod)/100;
-	if(ReuseTime > 0){
+	ReuseTime = (ReuseTime * HasteMod) / 100;
+	if (ReuseTime > 0) {
 		p_timers.Start(timer, ReuseTime);
 	}
 }
