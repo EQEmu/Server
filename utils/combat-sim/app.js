@@ -32,7 +32,7 @@ app.controller('MainCtrl', function($scope, $interval) {
     };
 
     $scope.offense = 100;
-    $scope.defense = 100;
+    $scope.mitigation = 100;
 
     $scope.data = [{
         key: "Cumulative Return",
@@ -95,18 +95,18 @@ app.controller('MainCtrl', function($scope, $interval) {
 
     function doCombatRound() {
         var offense = $scope.offense;
-        var defense = $scope.defense;
-        defense = defense - ((defense - offense) / 2.0);
-        var diff = offense - defense;
+        var mitigation = $scope.mitigation;
+        mitigation = mitigation - ((mitigation - offense) / 2.0);
+        var diff = offense - mitigation;
         var mean = 0.0;
         var mult1 = 0.0;
         var mult2 = 0.0;
 
         if (offense > 30.0) {
             mult1 = offense / 200.0 + 25.75;
-            if ((defense / offense) < 0.35) {
+            if ((mitigation / offense) < 0.35) {
                 mult1 = mult1 + 1.0;
-            } else if ((defense / offense) > 0.65) {
+            } else if ((mitigation / offense) > 0.65) {
                 mult1 = mult1 - 1.0;
             }
             mult2 = offense / 140 + 18.5;
@@ -115,10 +115,10 @@ app.controller('MainCtrl', function($scope, $interval) {
             mult2 = 14.0 + offense / 6.0;
         }
 
-        if (offense > defense) {
+        if (offense > mitigation) {
             mean = diff / offense * mult1;
-        } else if (defense > offense) {
-            mean = diff / defense * mult2;
+        } else if (mitigation > offense) {
+            mean = diff / mitigation * mult2;
         }
 
         var stddev = 8.8;
