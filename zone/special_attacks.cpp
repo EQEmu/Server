@@ -476,27 +476,24 @@ int Mob::MonkSpecialAttack(Mob *other, uint8 unchecked_type)
 
 	if (IsClient()) {
 		if (GetWeaponDamage(other, CastToClient()->GetInv().GetItem(itemslot)) <= 0) {
-			ndamage = -5;
+			max_dmg = -5;
 		}
 	} else {
 		if (GetWeaponDamage(other, (const EQEmu::ItemData *)nullptr) <= 0) {
-			ndamage = -5;
+			max_dmg = -5;
 		}
 	}
 
 	int32 ht = 0;
-	if (ndamage == 0) {
+	if (max_dmg > 0)
 		ht = max_dmg;
-		if (other->CheckHitChance(this, skill_type, 0))
-			ndamage = max_dmg;
-	}
 
 	// This can potentially stack with changes to kick damage
 	ht = ndamage = mod_monk_special_damage(ndamage, skill_type);
 
-	DoSpecialAttackDamage(other, skill_type, ndamage, min_dmg, ht, reuse);
+	DoSpecialAttackDamage(other, skill_type, max_dmg, min_dmg, ht, reuse, true);
 
-	return (reuse);
+	return reuse;
 }
 
 void Mob::TryBackstab(Mob *other, int ReuseTime) {
