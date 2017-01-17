@@ -1,10 +1,10 @@
 update npc_types set attack_speed=0, atk=ceil(1.7*level), accuracy=ceil(1.7*level) where (name like 'Swarm%' or name like '%skel%' or name like 'BLpet%' or name like 'Sum%') 
 and id >510 and id <860;
 update npc_types set attack_speed=0, atk=ceil(0.5*level), accuracy=ceil(0.5*level) where name like 'SumFire%';
-update npc_types set attack_speed=0, atk=ceil(1.8*level), accuracy=ceil(1.8*level) where name like 'SumAir%';
-update npc_types set attack_speed=0, atk=ceil(1.8*level), accuracy=ceil(1.8*level) where name like 'SumEarth%';
-update npc_types set attack_speed=0, atk=ceil(2.4*level), accuracy=ceil(2.4*level),gender=2,size=3 where name like 'BestialAid%';
-update npc_types set attack_speed=0, atk=ceil(2.4*level), accuracy=ceil(2.4*level),gender=2,size=3 where name like 'RagingServant%';
+update npc_types set attack_speed=0, atk=ceil(1.775*level), accuracy=ceil(1.775*level) where name like 'SumAir%';
+update npc_types set attack_speed=0, atk=ceil(1.775*level), accuracy=ceil(1.775*level) where name like 'SumEarth%';
+update npc_types set attack_speed=0, atk=ceil(2.26*level), accuracy=ceil(2.26*level),gender=2,size=3 where name like 'BestialAid%';
+update npc_types set attack_speed=0, atk=ceil(2.26*level), accuracy=ceil(2.26*level),gender=2,size=3 where name like 'RagingServant%';
 
 
 update npc_types n
