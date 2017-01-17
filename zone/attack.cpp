@@ -169,7 +169,8 @@ int Mob::GetTotalToHit(EQEmu::skills::SkillType skill, int chance_mod)
 		accuracy *= chance_mod;
 
 	// Torven parsed an apparent constant of 1.2 somewhere in here * 6 / 5 looks eqmathy to me!
-	accuracy = accuracy * 6 / 5;
+	// new test clients have 121 / 100
+	accuracy = (accuracy * 121) / 100;
 
 	// unsure on the stacking order of these effects, rather hard to parse
 	// item mod2 accuracy isn't applied to range? Theory crafting and parses back it up I guess
