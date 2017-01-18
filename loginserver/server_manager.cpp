@@ -59,11 +59,13 @@ ServerManager::ServerManager()
 	server_connection->OnConnectionRemoved("World", [this](std::shared_ptr<EQ::Net::ServertalkServerConnection> c) {
 		auto iter = world_servers.begin();
 		while (iter != world_servers.end()) {
-			if ((*iter)->GetConnection()->Handle() == c->Handle()) {
+			if ((*iter)->GetConnection()->GetUUID() == c->GetUUID()) {
 				Log.OutF(Logs::General, Logs::World_Server, "World server {0} has been disconnected, removing.", (*iter)->GetLongName().c_str());
 				world_servers.erase(iter);
 				return;
 			}
+
+			++iter;
 		}
 	});
 }

@@ -131,7 +131,7 @@ class EQEmuConfig : public XMLParser
 			// Login server
 			LoginHost = "login.eqemulator.net";
 			LoginPort = 5998;
-			LoginLegacy = true;
+			LoginLegacy = false;
 			// World
 			Locked = false;
 			WorldTCPPort = 9000;
