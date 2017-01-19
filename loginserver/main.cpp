@@ -179,7 +179,7 @@ int main()
 		Timer::SetCurrentTime();
 		server.client_manager->Process();
 		EQ::EventLoop::Get().Process();
-		Sleep(1);
+		Sleep(5);
 	}
 
 	Log.Out(Logs::General, Logs::Login_Server, "Server Shutdown.");

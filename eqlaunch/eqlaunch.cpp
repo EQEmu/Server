@@ -140,7 +140,7 @@ int main(int argc, char *argv[]) {
 		}
 
 		EQ::EventLoop::Get().Process();
-		Sleep(1);
+		Sleep(5);
 	}
 
 	//try to be semi-nice about this... without waiting too long

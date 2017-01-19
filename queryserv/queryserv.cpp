@@ -100,7 +100,7 @@ int main() {
 			lfguildmanager.ExpireEntries();
 
 		EQ::EventLoop::Get().Process();
-		Sleep(1);
+		Sleep(5);
 	}
 	Log.CloseFileLogs();
 }

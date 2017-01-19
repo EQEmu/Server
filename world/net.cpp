@@ -533,7 +533,7 @@ int main(int argc, char** argv) {
 		}
 		
 		EQ::EventLoop::Get().Process();
-		Sleep(1);
+		Sleep(5);
 	}
 	Log.Out(Logs::General, Logs::World_Server, "World main loop completed.");
 	Log.Out(Logs::General, Logs::World_Server, "Shutting down zone connections (if any).");

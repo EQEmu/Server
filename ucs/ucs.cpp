@@ -151,7 +151,7 @@ int main() {
 
 		EQ::EventLoop::Get().Process();
 
-		Sleep(1);
+		Sleep(5);
 	}
 
 	ChannelList->RemoveAllChannels();
