@@ -1959,10 +1959,10 @@ void NPC::ModifyNPCStat(const char *identifier, const char *newValue)
 		id[i] = std::tolower(id[i]);
 	}
 
-	if(id == "ac") { AC = atoi(val.c_str()); return; }
+	if(id == "ac") { AC = atoi(val.c_str()); CalcAC(); return; }
 	else if(id == "str") { STR = atoi(val.c_str()); return; }
 	else if(id == "sta") { STA = atoi(val.c_str()); return; }
-	else if(id == "agi") { AGI = atoi(val.c_str()); return; }
+	else if(id == "agi") { AGI = atoi(val.c_str()); CalcAC(); return; }
 	else if(id == "dex") { DEX = atoi(val.c_str()); return; }
 	else if(id == "wis") { WIS = atoi(val.c_str()); CalcMaxMana(); return; }
 	else if(id == "int" || id == "_int") { INT = atoi(val.c_str()); CalcMaxMana(); return; }
