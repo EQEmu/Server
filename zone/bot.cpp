@@ -3705,16 +3705,16 @@ bool Bot::Attack(Mob* other, int Hand, bool FromRiposte, bool IsStrikethrough, b
 			}
 		}
 
-		int min_cap = (base_damage * GetMeleeMinDamageMod_SE(skillinuse) / 100);
+		int min_cap = (weapon_damage * GetMeleeMinDamageMod_SE(skillinuse) / 100);
 
 		Log.Out(Logs::Detail, Logs::Combat, "Damage calculated to %d (bonus %d, base %d, str %d, skill %d, DMG %d, lv %d)",
-				damage, min_damage, base_damage, GetSTR(), GetSkill(skillinuse), weapon_damage, mylevel);
+				damage, min_damage, weapon_damage, GetSTR(), GetSkill(skillinuse), weapon_damage, mylevel);
 
 		auto offense = this->offense(skillinuse);
 
 		if(opts) {
-			base_damage *= opts->damage_percent;
-			base_damage += opts->damage_flat;
+			weapon_damage *= opts->damage_percent;
+			weapon_damage += opts->damage_flat;
 			hate *= opts->hate_percent;
 			hate += opts->hate_flat;
 		}
@@ -3736,7 +3736,7 @@ bool Bot::Attack(Mob* other, int Hand, bool FromRiposte, bool IsStrikethrough, b
 			}
 		} else {
 			if (other->CheckHitChance(this, skillinuse)) {
-				other->MeleeMitigation(this, damage, base_damage, offense, skillinuse, opts);
+				other->MeleeMitigation(this, damage, weapon_damage, offense, skillinuse, opts);
 				if (damage > 0) {
 					ApplyDamageTable(damage, offense);
 					CommonOutgoingHitSuccess(other, damage, min_damage, min_cap, skillinuse, opts);
