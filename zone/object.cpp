@@ -225,8 +225,7 @@ Object::Object(const char *model, float x, float y, float z, float heading, uint
 {
 	user = nullptr;
 	last_user = nullptr;
-	EQEmu::ItemInstance* inst = nullptr;
-	inst = new EQEmu::ItemInstance(ItemInstWorldContainer);
+	EQEmu::ItemInstance* inst = new EQEmu::ItemInstance(ItemInstWorldContainer);
 
 	// Initialize members
 	m_id	= 0;
@@ -257,6 +256,8 @@ Object::Object(const char *model, float x, float y, float z, float heading, uint
 		strcpy(m_data.object_name, model);
 	else
 		strcpy(m_data.object_name, "IT64_ACTORDEF"); //default object name if model isn't specified for some unknown reason
+
+	safe_delete(inst);
 }
 
 Object::~Object()
