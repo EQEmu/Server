@@ -8008,29 +8008,11 @@ bool Bot::GetNeedsCured(Mob *tar) {
 	bool needCured = false;
 	if(tar) {
 		if(tar->FindType(SE_PoisonCounter) || tar->FindType(SE_DiseaseCounter) || tar->FindType(SE_CurseCounter) || tar->FindType(SE_CorruptionCounter)) {
-			uint32 buff_count = GetMaxTotalSlots();
+			uint32 buff_count = tar->GetMaxTotalSlots();
 			int buffsWithCounters = 0;
 			needCured = true;
 			for (unsigned int j = 0; j < buff_count; j++) {
-				// this should prevent crashes until the cause can be found
-				if (!tar->GetBuffs()) {
-					std::string mob_type = "Unknown";
-					if (tar->IsClient())
-						mob_type = "Client";
-					else if (tar->IsBot())
-						mob_type = "Bot";
-					else if (tar->IsMerc())
-						mob_type = "Merc";
-					else if (tar->IsPet())
-						mob_type = "Pet";
-					else if (tar->IsNPC())
-						mob_type = "NPC";
-
-					Log.Out(Logs::General, Logs::Error, "Bot::GetNeedsCured() processed mob type '%s' with a null buffs pointer (mob: '%s')", mob_type.c_str(), tar->GetName());
-
-					continue;
-				}
-				else if(tar->GetBuffs()[j].spellid != SPELL_UNKNOWN) {
+				if(tar->GetBuffs()[j].spellid != SPELL_UNKNOWN) {
 					if(CalculateCounters(tar->GetBuffs()[j].spellid) > 0) {
 						buffsWithCounters++;
 						if(buffsWithCounters == 1 && (tar->GetBuffs()[j].ticsremaining < 2 || (int32)((tar->GetBuffs()[j].ticsremaining * 6) / tar->GetBuffs()[j].counters) < 2)) {
