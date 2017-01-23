@@ -2,6 +2,10 @@ var auth = require('../../core/jwt_auth.js').auth;
 var sql = require('./sql.js');
 
 var RegisterEndpoint = function(app, api, single_name, plural_name, pkey, skeys) {
+	app.get('/api/data/' + single_name, auth, function (req, res) {		
+		sql.RetrieveAll(req, res, plural_name, pkey);
+	});
+	
 	app.get('/api/data/' + single_name + '/:' + pkey, auth, function (req, res) {		
 		sql.Retrieve(req, res, plural_name, pkey);
 	});

@@ -104,6 +104,48 @@ function CreateUpdate(req, res, table, pkey) {
 	});
 }
 
+function RetrieveAll(req, res, table, pkey) {
+	req.mysql.getConnection(function(err, connection) {
+		try {
+			if(err) {
+				console.log(err);
+				connection.release();
+				res.sendStatus(500);
+				return;
+			}
+			
+			connection.query('SELECT * FROM ' + table + ' ORDER BY ' + pkey + ' ASC LIMIT 1000', [], function (error, results, fields) {
+				try {
+					var ret = [];
+					
+					for(var idx in results) {
+						var result = results[idx];
+						var obj = { };
+						
+						for(var i in result) {
+							var value = result[i];
+							obj[i] = value;
+						}
+						
+						ret.push(obj);
+					}
+					
+					connection.release();
+					res.json(ret);
+				} catch(ex) {
+					console.log(ex);
+					connection.release();
+					res.sendStatus(500);
+				}
+			});
+		} catch(ex) {
+			console.log(ex);
+			connection.release();
+			res.sendStatus(500);
+		}
+	});
+}
+
 function Retrieve(req, res, table, pkey) {
 	req.mysql.getConnection(function(err, connection) {
 		try {
@@ -266,6 +308,7 @@ function Search(req, res, table, pkey, skeys) {
 module.exports = {
 	'CreateUpdate': CreateUpdate,
 	'Retrieve': Retrieve,
+	'RetrieveAll': RetrieveAll,
 	'Delete': Delete,
 	'Search': Search,
 }
