@@ -181,13 +181,8 @@ function Delete(req, res, table, pkey) {
 	});
 }
 
-function Search(req, res, table, pkey) {
+function Search(req, res, table, pkey, skeys) {
 	//Verify incoming model
-	if(!req.body.hasOwnProperty('draw')) {
-		res.sendStatus(400);
-		return;
-	}
-	
 	if(!req.body.hasOwnProperty('start')) {
 		res.sendStatus(400);
 		return;
@@ -203,16 +198,6 @@ function Search(req, res, table, pkey) {
 		return;
 	}
 	
-	if(!req.body.hasOwnProperty('columns')) {
-		res.sendStatus(400);
-		return;
-	}
-	
-	if(!req.body.hasOwnProperty('order')) {
-		res.sendStatus(400);
-		return;
-	}
-
 	req.mysql.getConnection(function(err, connection) {
 		try {
 			if(err) {
@@ -222,99 +207,45 @@ function Search(req, res, table, pkey) {
 				return;
 			}
 			
-			var ret = { };
-			ret.draw = req.body['draw'];
-			ret.data = [];
-			
-			var query = 'SELECT ';
+			var query = 'SELECT * FROM ' + table;
+			var first = true;
 			var idx;
 			var args = [];
-			var first = true;
-			for(idx in req.body['columns']) {
-				var column = req.body['columns'][idx];
+			var searchTerm = '%' + req.body['search'] + '%';
+			for(idx in skeys) {
+				var skey = skeys[idx];
 				if(first) {
 					first = false;
+					query +=  ' WHERE ';
 				} else {
-					query += ', ';
+					query += ' OR ';
 				}
 				
-				query += connection.escapeId(column.data);
+				query += skey;
+				query += ' LIKE ?';
+				args.push(searchTerm);
 			}
 			
-			query += ' FROM ' + table;
+			query += ' ORDER BY ' + pkey + ' ASC';
+			query += ' LIMIT ?, ?';
+			args.push(req.body['start']);
+			args.push(req.body['length']);
 			
-			first = true;
-			for(idx in req.body['order']) {
-				var order = req.body['order'][idx];
-				if(first) {
-					query += ' ORDER BY ';
-					first = false;
-				} else {
-					query += ', ';
-				}
-				
-				var column = req.body['columns'][order.column];
-				
-				query += connection.escapeId(column.data);
-				
-				if(order.dir === 'asc') {
-					query += ' ASC';
-				} else {
-					query += ' DESC';
-				}
-			}
-						
 			connection.query(query, args, function (error, results, fields) {
 				try {
-					if(error) {
-						console.log(error);
-						connection.release();
-						res.sendStatus(400);
-						return;
-					}
+					var ret = [];
 					
-					ret.recordsTotal = results.length;
-							
-					for(var result_idx in results) {
-						var result = results[result_idx];
-						if(req.body['search'].value && req.body['search'].value.length > 0) {
-							var found = false;
-							
-							for(idx in req.body['columns']) {
-								var column = req.body['columns'][idx];
-								
-								if(column.searchable) {
-									if(String(result[column.data]).toLowerCase().includes(String(req.body['search'].value).toLowerCase())) {
-										found = true;
-										break;
-									}
-								}
-							}
-							
-							if(found) {
-								var obj = { };
-					
-								for(var i in result) {
-									var value = result[i];
-									obj[i] = value;
-								}
-							
-								ret.data.push(obj);
-							}
-						} else {
-							var obj = { };
-					
-							for(var i in result) {
-								var value = result[i];
-								obj[i] = value;
-							}
-							
-							ret.data.push(obj);
+					for(idx in results) {
+						var result = results[idx];
+						var obj = { };
+						
+						for(var i in result) {
+							var value = result[i];
+							obj[i] = value;
 						}
+						
+						ret.push(obj);
 					}
-					
-					ret.recordsFiltered = ret.data.length;				
-					ret.data = ret.data.slice(req.body['start'], req.body['start'] + req.body['length']);
 					
 					connection.release();
 					res.json(ret);
