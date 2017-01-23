@@ -118,8 +118,11 @@ public:
 	uint16 GetOpcodeBypass() const { return opcode_bypass; }
 	void SetOpcodeBypass(uint16 v) { opcode_bypass = v; }
 
+	uint16 GetProtocolOpcode() const { return protocol_opcode; }
+	void SetProtocolOpcode(uint16 v) { protocol_opcode = v; }
 protected:
 
+	uint16 protocol_opcode;
 	uint8 app_opcode_size;
 	uint16 opcode_bypass;
 private:

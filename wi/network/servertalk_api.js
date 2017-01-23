@@ -11,15 +11,15 @@ class ServertalkAPI
 		var self = this;
 		
 		this.client.on('connecting', function() {
-			console.log('Connecting...');
+			//console.log('Connecting...');
 		});
 		
 		this.client.on('connect', function(){
-			console.log('Connected');
+			//console.log('Connected');
 		});
 		
 		this.client.on('close', function(){
-			console.log('Closed');
+			//console.log('Closed');
 		});
 
 		this.client.on('error', function(err){

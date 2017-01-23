@@ -30,6 +30,12 @@ api.Init(settings.servertalk.addr, settings.servertalk.port, false, settings.ser
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
+app.use(function(req, res, next) {
+	res.header("Access-Control-Allow-Origin", "*");
+	res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+	next();
+});
+
 //make sure all routes can see our injected dependencies
 app.use(function (req, res, next) {
 	req.servertalk = api;
@@ -42,10 +48,8 @@ app.get('/', function (req, res) {
 	res.send({ status: "online" });
 });
 
-require('./http/token.js').Register(app);
-require('./http/eqw.js').Register(app, api);
-//require('./ws/token.js').Register(app);
-require('./ws/eqw.js').Register(wsi, api);
+require('./http').Register(app, api);
+require('./ws').Register(wsi, api);
 
 server.on('request', app);
 server.listen(settings.port, function () { console.log('Listening on ' + server.address().port) });

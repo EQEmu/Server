@@ -1,0 +1,26 @@
+<md-content layout-fill>
+    <md-toolbar class="md-hue-2">
+        <div class="md-toolbar-tools">
+            <md-button class="md-icon-button" aria-label="menu">
+                <md-icon class="mdi mdi-menu mdi-24px"></md-icon>
+            </md-button>
+            <h2>
+                <span>EQEmu WI Portal</span>
+            </h2>
+            <span flex></span>
+            <md-menu md-offset="-20 -20">
+                <md-button class="md-icon-button" aria-label="More" ng-click="$ctrl.openMenu($mdOpenMenu, $event)">
+                    <md-icon md-menu-origin class="mdi mdi-dots-vertical mdi-24px"></md-icon>
+                </md-button>
+                <md-menu-content width="4">
+                    <md-menu-item>
+                        <md-button ng-click="$ctrl.logout($event)">
+                            <md-iconclass="mdi mdi-power mdi-24px" md-menu-align-target></md-icon>
+                            Logout
+                        </md-button>
+                    </md-menu-item>
+                </md-menu-content>
+            </md-menu>
+        </div>
+    </md-toolbar>
+</md-content>

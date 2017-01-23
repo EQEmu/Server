@@ -466,7 +466,7 @@ int Client::HandlePacket(const EQApplicationPacket *app)
 			args.push_back(const_cast<EQApplicationPacket*>(app));
 			parse->EventPlayer(EVENT_UNHANDLED_OPCODE, this, "", 0, &args);
 
-			if (Log.log_settings[Logs::Client_Server_Packet_Unhandled].is_category_enabled == 1){
+			if (Log.log_settings[Logs::Client_Server_Packet_Unhandled].is_category_enabled == 1) {
 				char buffer[64];
 				app->build_header_dump(buffer);
 				Log.Out(Logs::General, Logs::Client_Server_Packet_Unhandled, "%s %s", buffer, DumpPacketToString(app).c_str());

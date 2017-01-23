@@ -1,0 +1,24 @@
+<md-content layout-fill layout="column" layout-align="start center">
+    <h2 class="login-title">Login</h2>
+    <form layout="column" class="md-whiteframe-4dp login-panel" ng-submit="$ctrl.doLogin()">
+        <md-input-container class="md-block">
+            <label>Username</label>
+            <input name="username" required ng-model="$ctrl.username" ng-disabled="$ctrl.loggingIn" aria-label="Username">
+        </md-input-container>
+
+        <md-input-container class="md-block">
+            <label>Password</label>
+            <input type="password" name="password" required ng-model="$ctrl.password" ng-disabled="$ctrl.loggingIn" aria-label="Password">
+        </md-input-container>
+
+        <div layout="row">
+            <md-checkbox ng-model="$ctrl.rememberMe" ng-disabled="$ctrl.loggingIn" aria-label="Remember Me">Remember Me</md-checkbox>
+        </div>
+
+        <span class="login-error-message" ng-show="$ctrl.error">
+            Unauthorized login.
+        </span>
+
+        <md-button type="submit" class="md-raised md-primary" ng-disabled="!$ctrl.canLogin()">Login</md-button>
+    </form>
+</md-content>
