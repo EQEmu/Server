@@ -104,48 +104,6 @@ function CreateUpdate(req, res, table, pkey) {
 	});
 }
 
-function RetrieveAll(req, res, table, pkey) {
-	req.mysql.getConnection(function(err, connection) {
-		try {
-			if(err) {
-				console.log(err);
-				connection.release();
-				res.sendStatus(500);
-				return;
-			}
-			
-			connection.query('SELECT * FROM ' + table + ' ORDER BY ' + pkey + ' ASC LIMIT 1000', [], function (error, results, fields) {
-				try {
-					var ret = [];
-					
-					for(var idx in results) {
-						var result = results[idx];
-						var obj = { };
-						
-						for(var i in result) {
-							var value = result[i];
-							obj[i] = value;
-						}
-						
-						ret.push(obj);
-					}
-					
-					connection.release();
-					res.json(ret);
-				} catch(ex) {
-					console.log(ex);
-					connection.release();
-					res.sendStatus(500);
-				}
-			});
-		} catch(ex) {
-			console.log(ex);
-			connection.release();
-			res.sendStatus(500);
-		}
-	});
-}
-
 function Retrieve(req, res, table, pkey) {
 	req.mysql.getConnection(function(err, connection) {
 		try {
@@ -223,22 +181,94 @@ function Delete(req, res, table, pkey) {
 	});
 }
 
-function Search(req, res, table, pkey, skeys) {
-	//Verify incoming model
-	if(!req.body.hasOwnProperty('start')) {
-		res.sendStatus(400);
-		return;
+function getLimit(req, columns) {
+	var limit = '';
+	
+	var len = parseInt(req.body['length']);
+	if(len > 100) {
+		len = 100;
 	}
 	
-	if(!req.body.hasOwnProperty('length')) {
-		res.sendStatus(400);
-		return;
+	if(req.body.hasOwnProperty('start') && len != -1) {
+		limit = 'LIMIT ' + req.body['start'] + ', ' + req.body['length'];
 	}
 	
-	if(!req.body.hasOwnProperty('search')) {
-		res.sendStatus(400);
-		return;
+	return limit;
+}
+
+function getOrder(req, columns) {
+	var order = '';
+	
+	if (req.body.hasOwnProperty('order') && req.body['order'].length) {
+		var orderBy = [];
+		for(var i = 0; i < req.body['order'].length; ++i) {
+			var columnIdx = parseInt(req.body['order'][i].column);
+			var column = req.body['columns'][columnIdx];
+			var columnId = column.data;
+			var dir = req.body['order'][i].dir === 'asc' ? 'ASC' : 'DESC';			
+			orderBy.push(req.mysql.escapeId(columnId) + ' ' + dir);
+		}
+		
+		order = 'ORDER BY ' + orderBy.join(',');
 	}
+	
+	return order;
+}
+
+function filter(req, columns, args) {
+	var where = '';
+	var globalSearch = [];
+	var columnSearch = [];
+	
+	if (req.body.hasOwnProperty('search') && req.body['search'].value.length) {
+		var searchTerm = req.body['search'].value;
+		for(var i = 0; i < req.body['columns'].length; ++i) {
+			var column = req.body['columns'][i];
+			
+			if(column.searchable) {
+				globalSearch.push(req.mysql.escapeId(column.data) + ' LIKE ?');
+				args.push('%' + searchTerm + '%');
+			}
+		}
+	}
+	
+	for(var i = 0; i < req.body['columns'].length; ++i) {
+		var column = req.body['columns'][i];
+		var searchTerm = column.search.value;
+		
+		if(searchTerm !== '' && column.searchable) {
+			columnSearch.push(req.mysql.escapeId(column.data) + ' LIKE ?');
+			args.push('%' + searchTerm + '%');
+		}
+	}
+	
+	if(globalSearch.length) {
+		where = globalSearch.join(' OR ');
+	}
+	
+	if(columnSearch.length) {
+		if(where === '') {
+			where = columnSearch.join(' AND ');
+		} else {
+			where += ' AND ';
+			where += columnSearch.join(' AND ');
+		}
+	}
+	
+	if(where !== '') {
+		where = 'WHERE ' + where;
+	}
+	
+	return where;
+}
+
+function Search(req, res, table, pkey, columns) {
+	var args = [];
+	var limit = getLimit(req, columns);
+	var order = getOrder(req, columns);
+	var where = filter(req, columns, args);
+
+	var query = 'SELECT ' + columns.join(', ') + ' FROM ' + table + ' ' + where + ' ' + order + ' ' + limit;
 	
 	req.mysql.getConnection(function(err, connection) {
 		try {
@@ -249,41 +279,17 @@ function Search(req, res, table, pkey, skeys) {
 				return;
 			}
 			
-			var query = 'SELECT * FROM ' + table;
-			var first = true;
-			var idx;
-			var args = [];
-			var searchTerm = '%' + req.body['search'] + '%';
-			for(idx in skeys) {
-				var skey = skeys[idx];
-				if(first) {
-					first = false;
-					query +=  ' WHERE ';
-				} else {
-					query += ' OR ';
-				}
-				
-				query += skey;
-				query += ' LIKE ?';
-				args.push(searchTerm);
-			}
-			
-			query += ' ORDER BY ' + pkey + ' ASC';
-			query += ' LIMIT ?, ?';
-			args.push(req.body['start']);
-			args.push(req.body['length']);
-			
 			connection.query(query, args, function (error, results, fields) {
 				try {
 					var ret = [];
 					
-					for(idx in results) {
-						var result = results[idx];
-						var obj = { };
+					for(var i in results) {
+						var result = results[i];
 						
-						for(var i in result) {
-							var value = result[i];
-							obj[i] = value;
+						var obj = { };
+						for(var idx in result) {
+							var value = result[idx];
+							obj[idx] = value;
 						}
 						
 						ret.push(obj);
@@ -303,12 +309,11 @@ function Search(req, res, table, pkey, skeys) {
 			res.sendStatus(500);
 		}
 	});
-}
+};
 
 module.exports = {
 	'CreateUpdate': CreateUpdate,
 	'Retrieve': Retrieve,
-	'RetrieveAll': RetrieveAll,
 	'Delete': Delete,
 	'Search': Search,
 }

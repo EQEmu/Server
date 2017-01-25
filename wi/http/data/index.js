@@ -1,7 +1,6 @@
-var endpoint = require('./endpoint.js');
-
 var RegisterAPI = function(app, api) {
-	endpoint.Register(app, api, 'item', 'items', 'id', ['name']);
+	require('./account.js').Register(app, api);
+	require('./item.js').Register(app, api);
 };
 
 module.exports = {
