@@ -74,7 +74,9 @@ gulp.task('javascript:prod', ['app:javascript:prod']);
 var vendor_css = [
 	'node_modules/angular-material/angular-material.min.css',
 	'node_modules/angular-loading-bar/build/loading-bar.min.css',
-	'node_modules/mdi/css/materialdesignicons.min.css'
+	'node_modules/mdi/css/materialdesignicons.min.css',
+	'node_modules/datatables.net-dt/css/jquery.dataTables.css',
+	'node_modules/angular-datatables/dist/css/angular-datatables.min.css'
 ];
 
 gulp.task('vendor:css:prod', function() {

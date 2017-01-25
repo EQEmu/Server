@@ -1,11 +1,16 @@
+'use strict';
+var $ = global.jQuery = require('jquery');
+require('datatables.net')(jQuery);
+
 var angular = require('angular');
 require('angular-material');
 require('angular-ui-router');
 require('angular-loading-bar');
 require('angular-animate');
 require('ngstorage');
+require('angular-datatables');
 
-var app = angular.module('app', ['ngMaterial', 'ui.router', 'angular-loading-bar', 'ngAnimate' ,'ngStorage', 'templates']);
+var app = angular.module('app', ['ngMaterial', 'ui.router', 'angular-loading-bar', 'ngAnimate' ,'ngStorage', 'templates', 'datatables']);
 
 app.config(['$sceDelegateProvider', 'cfpLoadingBarProvider', '$animateProvider', '$compileProvider', '$localStorageProvider', '$sessionStorageProvider', '$httpProvider', 
     function($sceDelegateProvider, cfpLoadingBarProvider, $animateProvider, $compileProvider, $localStorageProvider, $sessionStorageProvider, $httpProvider) {

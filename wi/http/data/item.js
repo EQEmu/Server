@@ -7,7 +7,7 @@ var RegisterAPI = function(app, api) {
 	
 	//Can register custom controller actions here.
 	app.post('/api/data/item/search', auth, function (req, res) {
-		sql.Search(req, res, 'items', 'id', ['id', 'name']);
+		sql.Search(req, res, 'items', 'id', ['id', 'name', 'icon']);
 	});
 };
 
