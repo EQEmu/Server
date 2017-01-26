@@ -4718,7 +4718,7 @@ int Bot::GetBaseSkillDamage(EQEmu::skills::SkillType skill, Mob *target)
 			base++;
 		return base;
 	case EQEmu::skills::SkillFrenzy:
-		if (GetBotItem(EQEmu::inventory::slotSecondary)) {
+		if (GetBotItem(EQEmu::inventory::slotPrimary)) {
 			if (GetLevel() > 15)
 				base += GetLevel() - 15;
 			if (base > 23)
