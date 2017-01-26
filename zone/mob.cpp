@@ -286,6 +286,8 @@ Mob::Mob(const char* in_name,
 		armor_tint.Slot[i].Color = in_armor_tint.Slot[i].Color;
 	}
 
+	std::fill(std::begin(m_spellHitsLeft), std::end(m_spellHitsLeft), 0);
+
 	m_Delta = glm::vec4();
 	animation = 0;
 
