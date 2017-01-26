@@ -1,5 +1,8 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 01/26/2017 ==
+Uleat: Change rogue bot behavior to eliminate twirling combat. They will only get behind the mob if they are not the mob's target or if the mob is feared or fleeing. This may lower rogue bot dps a small fraction..but, is more in-line with realistic game mechanics.
+
 == 01/17/2017 ==
 Mackal: Combat Revamp
 	- This change brings melee combat into line with how combat is done on live.

@@ -2305,24 +2305,26 @@ void Bot::AI_Process() {
 			}
 
 			if(AI_movement_timer->Check()) {
-				if(!IsMoving() && GetClass() == ROGUE && !BehindMob(GetTarget(), GetX(), GetY())) {
-					// Move the rogue to behind the mob
-					float newX = 0;
-					float newY = 0;
-					float newZ = 0;
-					if(PlotPositionAroundTarget(GetTarget(), newX, newY, newZ)) {
-						CalculateNewPosition2(newX, newY, newZ, GetRunspeed());
-						return;
+				if (!IsMoving()) {
+					if (GetClass() == ROGUE && (GetTarget() != this || GetTarget()->IsFeared()) && !BehindMob(GetTarget(), GetX(), GetY())) {
+						// Move the rogue to behind the mob
+						float newX = 0;
+						float newY = 0;
+						float newZ = 0;
+						if (PlotPositionAroundTarget(GetTarget(), newX, newY, newZ)) {
+							CalculateNewPosition2(newX, newY, newZ, GetRunspeed());
+							return;
+						}
 					}
-				}
-				else if(!IsMoving() && GetClass() != ROGUE && (DistanceSquaredNoZ(m_Position, GetTarget()->GetPosition()) < GetTarget()->GetSize())) {
-					// If we are not a rogue trying to backstab, let's try to adjust our melee range so we don't appear to be bunched up
-					float newX = 0;
-					float newY = 0;
-					float newZ = 0;
-					if(PlotPositionAroundTarget(GetTarget(), newX, newY, newZ, false) && GetArchetype() != ARCHETYPE_CASTER) {
-						CalculateNewPosition2(newX, newY, newZ, GetRunspeed());
-						return;
+					else if (GetClass() != ROGUE && (DistanceSquaredNoZ(m_Position, GetTarget()->GetPosition()) < GetTarget()->GetSize())) {
+						// If we are not a rogue trying to backstab, let's try to adjust our melee range so we don't appear to be bunched up
+						float newX = 0;
+						float newY = 0;
+						float newZ = 0;
+						if (PlotPositionAroundTarget(GetTarget(), newX, newY, newZ, false) && GetArchetype() != ARCHETYPE_CASTER) {
+							CalculateNewPosition2(newX, newY, newZ, GetRunspeed());
+							return;
+						}
 					}
 				}
 
