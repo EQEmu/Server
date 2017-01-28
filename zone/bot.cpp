@@ -176,6 +176,9 @@ Bot::Bot(uint32 botID, uint32 botOwnerCharacterID, uint32 botSpellsID, double to
 	for (int i = 0; i < MaxTimer; i++)
 		timers[i] = 0;
 
+	if (GetClass() == ROGUE)
+		evade_timer.Start();
+
 	GenerateBaseStats();
 
 	if (!botdb.LoadTimers(this) && bot_owner)
@@ -2306,14 +2309,36 @@ void Bot::AI_Process() {
 
 			if(AI_movement_timer->Check()) {
 				if (!IsMoving()) {
-					if (GetClass() == ROGUE && (GetTarget() != this || GetTarget()->IsFeared()) && !BehindMob(GetTarget(), GetX(), GetY())) {
-						// Move the rogue to behind the mob
-						float newX = 0;
-						float newY = 0;
-						float newZ = 0;
-						if (PlotPositionAroundTarget(GetTarget(), newX, newY, newZ)) {
-							CalculateNewPosition2(newX, newY, newZ, GetRunspeed());
-							return;
+					if (GetClass() == ROGUE) {
+						if ((GetTarget()->GetTarget() == this) && !GetTarget()->IsFeared() && !GetTarget()->IsStunned()) {
+							if (evade_timer.Check(false)) {
+								// Hate redux actions
+								uint32 timer_duration = (HideReuseTime * 1000);
+								evade_timer.Start(timer_duration);
+
+								Bot::BotGroupSay(this, "Attempting to evade %s", GetTarget()->GetCleanName());
+								if (zone->random.Int(0, 260) < (int)GetSkill(EQEmu::skills::SkillHide))
+									RogueEvade(GetTarget());
+
+								return;
+							}
+							//else if (GetTarget()->IsRooted()) {
+								// Should move rogue backwards, out of combat range
+							//}
+
+							// Could add a bot accessor like..
+							// bool NeedsHateRedux() { return (GetClass() == Rogue && evade_timer.check(false)); } - or something like this
+							// ..then add hate redux spells to caster combat repertoires
+						}
+						else if (!BehindMob(GetTarget(), GetX(), GetY())) {
+							// Move the rogue to behind the mob
+							float newX = 0;
+							float newY = 0;
+							float newZ = 0;
+							if (PlotPositionAroundTarget(GetTarget(), newX, newY, newZ)) {
+								CalculateNewPosition2(newX, newY, newZ, GetRunspeed());
+								return;
+							}
 						}
 					}
 					else if (GetClass() != ROGUE && (DistanceSquaredNoZ(m_Position, GetTarget()->GetPosition()) < GetTarget()->GetSize())) {

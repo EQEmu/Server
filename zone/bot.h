@@ -670,6 +670,8 @@ private:
 	glm::vec3 m_PreSummonLocation;
 	uint8 _spellCastingChances[MaxStances][MaxSpellTypes];
 
+	Timer evade_timer;
+
 	std::shared_ptr<HealRotation> m_member_of_heal_rotation;
 
 	std::map<uint32, BotAA> botAAs;
