@@ -94,7 +94,7 @@ class SharedDatabase : public Database
 		bool	SetStartingItems(PlayerProfile_Struct* pp, EQEmu::InventoryProfile* inv, uint32 si_race, uint32 si_class, uint32 si_deity, uint32 si_current_zone, char* si_name, int admin);
 
 
-		std::string	GetBook(const char *txtfile);
+		std::string	GetBook(const char *txtfile, int16 *language);
 
 		/*
 		    Item Methods

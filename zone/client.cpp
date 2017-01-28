@@ -33,6 +33,7 @@ extern volatile bool RunLoops;
 
 #include "../common/eqemu_logsys.h"
 #include "../common/features.h"
+#include "../common/emu_legacy.h"
 #include "../common/spdat.h"
 #include "../common/guilds.h"
 #include "../common/rulesys.h"
@@ -1998,6 +1999,7 @@ void Client::SetGM(bool toggle) {
 }
 
 void Client::ReadBook(BookRequest_Struct *book) {
+	int16 book_language=0;
 	char *txtfile = book->txtfile;
 
 	if(txtfile[0] == '0' && txtfile[1] == '\0') {
@@ -2005,7 +2007,7 @@ void Client::ReadBook(BookRequest_Struct *book) {
 		return;
 	}
 
-	std::string booktxt2 = database.GetBook(txtfile);
+	std::string booktxt2 = database.GetBook(txtfile, &book_language);
 	int length = booktxt2.length();
 
 	if (booktxt2[0] != '\0') {
@@ -2016,20 +2018,46 @@ void Client::ReadBook(BookRequest_Struct *book) {
 
 		BookText_Struct *out = (BookText_Struct *) outapp->pBuffer;
 		out->window = book->window;
-		if (ClientVersion() >= EQEmu::versions::ClientVersion::SoF)
-		{
-			const EQEmu::ItemInstance *inst = m_inv[book->invslot];
+
+
+		if (ClientVersion() >= EQEmu::versions::ClientVersion::SoF) {
+			// Find out what slot the book was read from.
+			// SoF+ need to look up book type for the output message.
+			int16	read_from_slot;
+
+			if (book->subslot >= 0) {
+				uint16 offset;
+				offset = (book->invslot-23) * 10;	// How many packs to skip.
+				read_from_slot = 251 + offset + book->subslot;
+			}
+			else {
+				read_from_slot = book->invslot -1;
+			}
+
+			const EQEmu::ItemInstance *inst = 0;
+
+			if (read_from_slot <= EQEmu::legacy::SLOT_PERSONAL_BAGS_END)
+				{
+				inst = m_inv[read_from_slot];
+				}
+
 			if(inst)
 				out->type = inst->GetItem()->Book;
 			else
 				out->type = book->type;
 		}
-		else
-		{
+		else {
 			out->type = book->type;
 		}
 		out->invslot = book->invslot;
+
 		memcpy(out->booktext, booktxt2.c_str(), length);
+
+		if (book_language > 0 && book_language < MAX_PP_LANGUAGE) {
+			if (m_pp.languages[book_language] < 100) {
+				GarbleMessage(out->booktext, (100 - m_pp.languages[book_language]));
+			}
+		}
 
 		QueuePacket(outapp);
 		safe_delete(outapp);
