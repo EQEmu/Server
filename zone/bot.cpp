@@ -2311,9 +2311,12 @@ void Bot::AI_Process() {
 				if (!IsMoving()) {
 					if (GetClass() == ROGUE) {
 						if ((GetTarget()->GetTarget() == this) && !GetTarget()->IsFeared() && !GetTarget()->IsStunned()) {
+							// Hate redux actions
 							if (evade_timer.Check(false)) {
-								// Hate redux actions
-								uint32 timer_duration = (HideReuseTime * 1000);
+								// Attempt to evade
+								int timer_duration = (HideReuseTime - GetSkillReuseTime(EQEmu::skills::SkillHide)) * 1000;
+								if (timer_duration < 0)
+									timer_duration = 0;
 								evade_timer.Start(timer_duration);
 
 								Bot::BotGroupSay(this, "Attempting to evade %s", GetTarget()->GetCleanName());
@@ -2322,9 +2325,23 @@ void Bot::AI_Process() {
 
 								return;
 							}
-							//else if (GetTarget()->IsRooted()) {
-								// Should move rogue backwards, out of combat range
-							//}
+							else if (GetTarget()->IsRooted()) {
+								// Move rogue back from rooted mob - out of combat range, if necessary
+								float melee_distance = GetMaxMeleeRangeToTarget(GetTarget());
+								float current_distance = DistanceSquared(static_cast<glm::vec3>(m_Position), static_cast<glm::vec3>(GetTarget()->GetPosition()));
+								
+								if (current_distance <= melee_distance) {
+									float newX = 0;
+									float newY = 0;
+									float newZ = 0;
+									FaceTarget(GetTarget());
+									if (PlotPositionAroundTarget(this, newX, newY, newZ)) {
+										Bot::BotGroupSay(this, "Backing off of %s", GetTarget()->GetCleanName());
+										CalculateNewPosition2(newX, newY, newZ, GetRunspeed());
+										return;
+									}
+								}
+							}
 
 							// Could add a bot accessor like..
 							// bool NeedsHateRedux() { return (GetClass() == Rogue && evade_timer.check(false)); } - or something like this
