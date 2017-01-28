@@ -1,6 +1,6 @@
 alter table books add language int default 0;
 
-drop table reading_is_fundamental;
+drop table if exists reading_is_fundamental;
 
 create table reading_is_fundamental
 (
