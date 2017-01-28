@@ -1414,7 +1414,8 @@ protected:
 
 	glm::vec3 m_TargetRing;
 
-	uint32 m_spellHitsLeft[38]; // Used to track which spells will have their numhits incremented when spell finishes casting, 38 Buffslots
+	// we might want to do this differently, we gotta do max NPC buffs ... which is 97
+	uint32 m_spellHitsLeft[EQEmu::constants::TotalBuffs]; // Used to track which spells will have their numhits incremented when spell finishes casting
 	int flymode;
 	bool m_targetable;
 	int QGVarDuration(const char *fmt);
