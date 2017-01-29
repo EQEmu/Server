@@ -4426,15 +4426,10 @@ void Merc::DoClassAttacks(Mob *target) {
 					if(zone->random.Int(0, 100) > 25) //tested on live, warrior mobs both kick and bash, kick about 75% of the time, casting doesn't seem to make a difference.
 					{
 						DoAnim(animKick);
-						int32 dmg = 0;
+						int32 dmg = GetBaseSkillDamage(EQEmu::skills::SkillKick);
 
-						if (GetWeaponDamage(target, (const EQEmu::ItemData*)nullptr) <= 0){
-							dmg = -5;
-						}
-						else{
-							if (target->CheckHitChance(this, EQEmu::skills::SkillKick, 0))
-								dmg = GetBaseSkillDamage(EQEmu::skills::SkillKick, GetTarget());
-						}
+						if (GetWeaponDamage(target, (const EQEmu::ItemData*)nullptr) <= 0)
+							dmg = DMG_INVULNERABLE;
 
 						reuse = KickReuseTime * 1000;
 						DoSpecialAttackDamage(target, EQEmu::skills::SkillKick, dmg, 1, -1, reuse);
@@ -4443,15 +4438,10 @@ void Merc::DoClassAttacks(Mob *target) {
 					else
 					{
 						DoAnim(animTailRake);
-						int32 dmg = 0;
+						int32 dmg = GetBaseSkillDamage(EQEmu::skills::SkillBash);
 
-						if (GetWeaponDamage(target, (const EQEmu::ItemData*)nullptr) <= 0){
-							dmg = -5;
-						}
-						else{
-							if (target->CheckHitChance(this, EQEmu::skills::SkillBash, 0))
-								dmg = GetBaseSkillDamage(EQEmu::skills::SkillBash, GetTarget());
-						}
+						if (GetWeaponDamage(target, (const EQEmu::ItemData*)nullptr) <= 0)
+							dmg = DMG_INVULNERABLE;
 
 						reuse = BashReuseTime * 1000;
 						DoSpecialAttackDamage(target, EQEmu::skills::SkillBash, dmg, 1, -1, reuse);

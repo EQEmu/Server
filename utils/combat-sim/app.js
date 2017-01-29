@@ -77,6 +77,8 @@ app.controller('MainCtrl', function($scope, $interval) {
         $scope.stop();
     });
 
+    var damage_mods = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20];
+
     function getRandomInt(min, max) {
         min = Math.ceil(min);
         max = Math.floor(max);
@@ -94,45 +96,20 @@ app.controller('MainCtrl', function($scope, $interval) {
     }
 
     function doCombatRound() {
-        var offense = $scope.offense;
-        var mitigation = $scope.mitigation;
-        mitigation = mitigation - ((mitigation - offense) / 2.0);
-        var diff = offense - mitigation;
-        var mean = 0.0;
-        var mult1 = 0.0;
-        var mult2 = 0.0;
-
-        if (offense > 30.0) {
-            mult1 = offense / 200.0 + 25.75;
-            if ((mitigation / offense) < 0.35) {
-                mult1 = mult1 + 1.0;
-            } else if ((mitigation / offense) > 0.65) {
-                mult1 = mult1 - 1.0;
-            }
-            mult2 = offense / 140 + 18.5;
-        } else {
-            mult1 = 11.5 + offense / 2.0;
-            mult2 = 14.0 + offense / 6.0;
+        var offense = getRandomInt(0, $scope.offense + 5);
+        var mitigation = getRandomInt(0, $scope.mitigation + 5);
+        var avg = parseInt(($scope.offense + $scope.mitigation + 10) / 2);
+        var index = parseInt((offense - mitigation) + (avg / 2));
+        if (index < 0) {
+            index = 0;
         }
-
-        if (offense > mitigation) {
-            mean = diff / offense * mult1;
-        } else if (mitigation > offense) {
-            mean = diff / mitigation * mult2;
-        }
-
-        var stddev = 8.8;
-        var theta = 2 * Math.PI * getRandom(0.0, 1.0);
-        var rho = Math.sqrt(-2 * Math.log(1 - getRandom(0.0, 1.0)));
-        var d = mean + stddev * rho * Math.cos(theta);
-
-        if (d < -9.5) {
-            d = -9.5;
-        } else if (d > 9.5) {
-            d = 9.5;
-        }
-        d = d + 11;
-        addRoll(parseInt(d));
+        index = parseInt((index * 20) / avg);
+        if (index >= 20)
+            index = 19;
+        if (index < 0)
+            index = 0;
+        var roll = damage_mods[index];
+        addRoll(roll);
     };
 });
 

@@ -267,7 +267,7 @@ int Mob::GetTotalDefense()
 
 // called when a mob is attacked, does the checks to see if it's a hit
 // and does other mitigation checks. 'this' is the mob being attacked.
-bool Mob::CheckHitChance(Mob* other, EQEmu::skills::SkillType skillinuse, int chance_mod)
+bool Mob::CheckHitChance(Mob* other, DamageHitInfo &hit)
 {
 	Mob *attacker = other;
 	Mob *defender = this;
@@ -280,7 +280,7 @@ bool Mob::CheckHitChance(Mob* other, EQEmu::skills::SkillType skillinuse, int ch
 	if (avoidance == -1) // some sort of auto avoid disc
 		return false;
 
-	auto accuracy = attacker->GetTotalToHit(skillinuse, chance_mod);
+	auto accuracy = hit.tohit;
 	if (accuracy == -1)
 		return true;
 
@@ -297,7 +297,7 @@ bool Mob::CheckHitChance(Mob* other, EQEmu::skills::SkillType skillinuse, int ch
 	return tohit_roll > avoid_roll;
 }
 
-bool Mob::AvoidDamage(Mob *other, int &damage, int hand)
+bool Mob::AvoidDamage(Mob *other, DamageHitInfo &hit)
 {
 	/* called when a mob is attacked, does the checks to see if it's a hit
 	* and does other mitigation checks. 'this' is the mob being attacked.
@@ -360,9 +360,9 @@ bool Mob::AvoidDamage(Mob *other, int &damage, int hand)
 	// riposte -- it may seem crazy, but if the attacker has SPA 173 on them, they are immune to Ripo
 	bool ImmuneRipo = attacker->aabonuses.RiposteChance || attacker->spellbonuses.RiposteChance || attacker->itembonuses.RiposteChance;
 	// Need to check if we have something in MainHand to actually attack with (or fists)
-	if (hand != EQEmu::inventory::slotRange && (CanThisClassRiposte() || IsEnraged()) && InFront && !ImmuneRipo) {
+	if (hit.hand != EQEmu::inventory::slotRange && (CanThisClassRiposte() || IsEnraged()) && InFront && !ImmuneRipo) {
 		if (IsEnraged()) {
-			damage = -3;
+			hit.damage_done = DMG_RIPOSTED;
 			Log.Out(Logs::Detail, Logs::Combat, "I am enraged, riposting frontal attack.");
 			return true;
 		}
@@ -370,7 +370,7 @@ bool Mob::AvoidDamage(Mob *other, int &damage, int hand)
 			CastToClient()->CheckIncreaseSkill(EQEmu::skills::SkillRiposte, other, -10);
 		// check auto discs ... I guess aa/items too :P
 		if (spellbonuses.RiposteChance == 10000 || aabonuses.RiposteChance == 10000 || itembonuses.RiposteChance == 10000) {
-			damage = -3;
+			hit.damage_done = DMG_RIPOSTED;
 			return true;
 		}
 		int chance = GetSkill(EQEmu::skills::SkillRiposte) + 100;
@@ -382,12 +382,12 @@ bool Mob::AvoidDamage(Mob *other, int &damage, int hand)
 			chance -= chance * counter;
 		}
 		// AA Slippery Attacks
-		if (hand == EQEmu::inventory::slotSecondary) {
+		if (hit.hand == EQEmu::inventory::slotSecondary) {
 			int slip = aabonuses.OffhandRiposteFail + itembonuses.OffhandRiposteFail + spellbonuses.OffhandRiposteFail;
 			chance += chance * slip / 100;
 		}
 		if (chance > 0 && zone->random.Roll(chance)) { // could be <0 from offhand stuff
-			damage = -3;
+			hit.damage_done = DMG_RIPOSTED;
 			return true;
 		}
 	}
@@ -409,7 +409,7 @@ bool Mob::AvoidDamage(Mob *other, int &damage, int hand)
 		// check auto discs ... I guess aa/items too :P
 		if (spellbonuses.IncreaseBlockChance == 10000 || aabonuses.IncreaseBlockChance == 10000 ||
 		    itembonuses.IncreaseBlockChance == 10000) {
-			damage = -1;
+			hit.damage_done = DMG_BLOCKED;
 			return true;
 		}
 		int chance = GetSkill(EQEmu::skills::SkillBlock) + 100;
@@ -421,18 +421,18 @@ bool Mob::AvoidDamage(Mob *other, int &damage, int hand)
 			chance -= chance * counter;
 		}
 		if (zone->random.Roll(chance)) {
-			damage = -1;
+			hit.damage_done = DMG_BLOCKED;
 			return true;
 		}
 	}
 
 	// parry
-	if (CanThisClassParry() && InFront && hand != EQEmu::inventory::slotRange) {
+	if (CanThisClassParry() && InFront && hit.hand != EQEmu::inventory::slotRange) {
 		if (IsClient())
 			CastToClient()->CheckIncreaseSkill(EQEmu::skills::SkillParry, other, -10);
 		// check auto discs ... I guess aa/items too :P
 		if (spellbonuses.ParryChance == 10000 || aabonuses.ParryChance == 10000 || itembonuses.ParryChance == 10000) {
-			damage = -2;
+			hit.damage_done = DMG_PARRIED;
 			return true;
 		}
 		int chance = GetSkill(EQEmu::skills::SkillParry) + 100;
@@ -444,7 +444,7 @@ bool Mob::AvoidDamage(Mob *other, int &damage, int hand)
 			chance -= chance * counter;
 		}
 		if (zone->random.Roll(chance)) {
-			damage = -2;
+			hit.damage_done = DMG_PARRIED;
 			return true;
 		}
 	}
@@ -455,7 +455,7 @@ bool Mob::AvoidDamage(Mob *other, int &damage, int hand)
 			CastToClient()->CheckIncreaseSkill(EQEmu::skills::SkillDodge, other, -10);
 		// check auto discs ... I guess aa/items too :P
 		if (spellbonuses.DodgeChance == 10000 || aabonuses.DodgeChance == 10000 || itembonuses.DodgeChance == 10000) {
-			damage = -4;
+			hit.damage_done = DMG_DODGED;
 			return true;
 		}
 		int chance = GetSkill(EQEmu::skills::SkillDodge) + 100;
@@ -467,7 +467,7 @@ bool Mob::AvoidDamage(Mob *other, int &damage, int hand)
 			chance -= chance * counter;
 		}
 		if (zone->random.Roll(chance)) {
-			damage = -4;
+			hit.damage_done = DMG_DODGED;
 			return true;
 		}
 	}
@@ -480,7 +480,7 @@ bool Mob::AvoidDamage(Mob *other, int &damage, int hand)
 			chance -= chance * counter;
 		}
 		if (zone->random.Roll(chance)) {
-			damage = -1;
+			hit.damage_done = DMG_BLOCKED;
 			return true;
 		}
 	}
@@ -492,7 +492,7 @@ bool Mob::AvoidDamage(Mob *other, int &damage, int hand)
 			chance -= chance * counter;
 		}
 		if (zone->random.Roll(chance)) {
-			damage = -1;
+			hit.damage_done = DMG_BLOCKED;
 			return true;
 		}
 	}
@@ -826,54 +826,32 @@ int Mob::offense(EQEmu::skills::SkillType skill)
 
 // this assumes "this" is the defender
 // this returns between 0.1 to 2.0
-double Mob::RollD20(double offense, double mitigation)
+double Mob::RollD20(int offense, int mitigation)
 {
+	static double mods[] = {
+		0.1, 0.2, 0.3, 0.4, 0.5,
+		0.6, 0.7, 0.8, 0.9, 1.0,
+		1.1, 1.2, 1.3, 1.4, 1.5,
+		1.6, 1.7, 1.8, 1.9, 2.0
+	};
+
 	if (IsClient() && CastToClient()->IsSitting())
-		return 2.0;
+		return mods[19];
 
-	// this works pretty good. From Torven's implementation for TAKP
-	mitigation -= (mitigation - offense) / 2.0;
-	double diff = offense - mitigation;
-	double mean = 0;
-	double mult1, mult2;
+	auto atk_roll = zone->random.Roll0(offense + 5);
+	auto def_roll = zone->random.Roll0(mitigation + 5);
 
-	if (offense > 30.0) {
-		mult1 = offense / 200.0 + 25.75;
-		if (mitigation / offense < 0.35)
-			mult1 = mult1 + 1.0;
-		else if (mitigation / offense > 0.65)
-			mult1 = mult1 - 1.0;
-		mult2 = offense / 140 + 18.5;
-	} else {
-		mult1 = 11.5 + offense / 2.0;
-		mult2 = 14.0 + offense / 6.0;
-	}
+	int avg = (offense + mitigation + 10) / 2;
+	int index = std::max(0, (atk_roll - def_roll) + (avg / 2));
 
-	// changing the mean shifts the bell curve
-	// this was mostly determined by trial and error to find what fit best
-	if (offense > mitigation)
-		mean = diff / offense * mult1;
-	else if (mitigation > offense)
-		mean = diff / mitigation * mult2;
+	index = EQEmu::Clamp((index * 20) / avg, 0, 19);
 
-	double stddev = 8.8;	// standard deviation adjusts the height of the bell
-							// again, trial and error to find what fit best
-	double theta = 2 * M_PI * zone->random.Real(0.0, 1.0);
-	double rho = std::sqrt(-2 * std::log(1 - zone->random.Real(0.0, 1.0)));
-	double d = mean + stddev * rho * std::cos(theta);
-
-	// this combined with the stddev will produce ~15% DI1 and ~15% DI20 when mitigation == offens
-	d = EQEmu::Clamp(d, -9.5, 9.5);
-	d += 11.0;
-	int roll = static_cast<int>(d);
-
-	// the client has an array called damage_factor that is set to this value, so probably what they do
-	return roll * 0.1;
+	return mods[index];
 }
 
-void Mob::MeleeMitigation(Mob *attacker, int &damage, int base_damage, int offense, EQEmu::skills::SkillType skill, ExtraAttackOptions *opts)
+void Mob::MeleeMitigation(Mob *attacker, DamageHitInfo &hit, ExtraAttackOptions *opts)
 {
-	if (damage < 0 || base_damage == 0)
+	if (hit.damage_done < 0 || hit.base_damage == 0)
 		return;
 
 	Mob* defender = this;
@@ -886,24 +864,14 @@ void Mob::MeleeMitigation(Mob *attacker, int &damage, int base_damage, int offen
 		mitigation -= opts->armor_pen_flat;
 	}
 
-	auto roll = RollD20(offense, mitigation);
-
-	// 168 Defensive -- TODO: I think this is suppose to happen after damage table
-	// It happening after damage table also means it acts more like negative 185, which might explain
-	// why the spell has a negative value :P
-	auto meleemitspell = spellbonuses.MeleeMitigationEffect + itembonuses.MeleeMitigationEffect + aabonuses.MeleeMitigationEffect;
-	if (GetClass() == WARRIOR && IsClient())
-		meleemitspell += 5;
+	auto roll = RollD20(hit.offense, mitigation);
 
 	// +0.5 for rounding
-	damage = static_cast<int>(roll * static_cast<double>(base_damage) + 0.5);
+	hit.damage_done = static_cast<int>(roll * static_cast<double>(hit.base_damage) + 0.5);
 
-	if (meleemitspell)
-		damage = (damage * (100 - meleemitspell)) / 100;
-
-	if (damage < 0)
-		damage = 0;
-	Log.Out(Logs::Detail, Logs::Attack, "mitigation %d vs offense %d. base %d defensive SPA %d rolled %f damage %d", mitigation, offense, base_damage, meleemitspell, roll, damage);
+	if (hit.damage_done < 0)
+		hit.damage_done = 0;
+	Log.Out(Logs::Detail, Logs::Attack, "mitigation %d vs offense %d. base %d rolled %f damage %d", mitigation, hit.offense, hit.base_damage, roll, hit.damage_done);
 }
 
 //Returns the weapon damage against the input mob
@@ -1227,6 +1195,44 @@ int Client::DoDamageCaps(int base_damage)
 	return std::min(cap, base_damage);
 }
 
+void Mob::DoAttack(Mob *other, DamageHitInfo &hit, ExtraAttackOptions *opts)
+{
+	if (!other)
+		return;
+	Log.Out(Logs::Detail, Logs::Combat, "%s::DoAttack vs %s base %d min %d offense %d tohit %d skill %d", GetName(),
+		other->GetName(), hit.base_damage, hit.min_damage, hit.offense, hit.tohit, hit.skill);
+	// check to see if we hit..
+	if (other->AvoidDamage(this, hit)) {
+		int strike_through = itembonuses.StrikeThrough + spellbonuses.StrikeThrough + aabonuses.StrikeThrough;
+		if (strike_through && zone->random.Roll(strike_through)) {
+			Message_StringID(MT_StrikeThrough,
+					 STRIKETHROUGH_STRING); // You strike through your opponents defenses!
+			hit.damage_done = 0;			// set to zero, we will check this to continue
+		}
+		// I'm pretty sure you can riposte a riposte
+		if (hit.damage_done == DMG_RIPOSTED) {
+			DoRiposte(other);
+			//if (IsDead())
+			return;
+		}
+		Log.Out(Logs::Detail, Logs::Combat, "Avoided/strikethrough damage with code %d", hit.damage_done);
+	}
+
+	if (hit.damage_done == 0) {
+		if (other->CheckHitChance(this, hit)) {
+			other->MeleeMitigation(this, hit, opts);
+			if (hit.damage_done > 0) {
+				ApplyDamageTable(hit);
+				CommonOutgoingHitSuccess(other, hit, opts);
+			}
+			Log.Out(Logs::Detail, Logs::Combat, "Final damage after all reductions: %d", hit.damage_done);
+		} else {
+			Log.Out(Logs::Detail, Logs::Combat, "Attack missed. Damage set to 0.");
+			hit.damage_done = 0;
+		}
+	}
+}
+
 //note: throughout this method, setting `damage` to a negative is a way to
 //stop the attack calculations
 // IsFromSpell added to allow spell effects to use Attack. (Mainly for the Rampage AA right now.)
@@ -1284,37 +1290,34 @@ bool Client::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, b
 		Log.Out(Logs::Detail, Logs::Combat, "Attacking without a weapon.");
 	}
 
+	DamageHitInfo my_hit;
 	// calculate attack_skill and skillinuse depending on hand and weapon
 	// also send Packet to near clients
-	EQEmu::skills::SkillType skillinuse;
-	AttackAnimation(skillinuse, Hand, weapon);
-	Log.Out(Logs::Detail, Logs::Combat, "Attacking with %s in slot %d using skill %d", weapon?weapon->GetItem()->Name:"Fist", Hand, skillinuse);
+	AttackAnimation(my_hit.skill, Hand, weapon);
+	Log.Out(Logs::Detail, Logs::Combat, "Attacking with %s in slot %d using skill %d", weapon?weapon->GetItem()->Name:"Fist", Hand, my_hit.skill);
 
 	// Now figure out damage
-	int damage = 0;
+	my_hit.damage_done = 0;
 	uint8 mylevel = GetLevel() ? GetLevel() : 1;
 	uint32 hate = 0;
 	if (weapon) hate = weapon->GetItem()->Damage + weapon->GetItem()->ElemDmgAmt;
-	int weapon_damage = GetWeaponDamage(other, weapon, &hate);
-	if (hate == 0 && weapon_damage > 1) hate = weapon_damage;
+	my_hit.base_damage = GetWeaponDamage(other, weapon, &hate);
+	if (hate == 0 && my_hit.base_damage > 1) hate = my_hit.base_damage;
 
 	//if weapon damage > 0 then we know we can hit the target with this weapon
 	//otherwise we cannot and we set the damage to -5 later on
-	if(weapon_damage > 0){
+	if (my_hit.base_damage > 0) {
 		// if we revamp this function be more general, we will have to make sure this isn't
 		// executed for anything BUT normal melee damage weapons from auto attack
 		if (Hand == EQEmu::inventory::slotPrimary || Hand == EQEmu::inventory::slotSecondary)
-			weapon_damage = DoDamageCaps(weapon_damage);
+			my_hit.base_damage = DoDamageCaps(my_hit.base_damage);
 		auto shield_inc = spellbonuses.ShieldEquipDmgMod + itembonuses.ShieldEquipDmgMod + aabonuses.ShieldEquipDmgMod;
 		if (shield_inc > 0 && HasShieldEquiped() && Hand == EQEmu::inventory::slotPrimary) {
-			weapon_damage = weapon_damage * (100 + shield_inc) / 100;
+			my_hit.base_damage = my_hit.base_damage * (100 + shield_inc) / 100;
 			hate = hate * (100 + shield_inc) / 100;
 		}
 
-		int base_damage = weapon_damage;
-		int min_damage = 0; // damage bonus
-
-		CheckIncreaseSkill(skillinuse, other, -15);
+		CheckIncreaseSkill(my_hit.skill, other, -15);
 		CheckIncreaseSkill(EQEmu::skills::SkillOffense, other, -15);
 
 		// ***************************************************************
@@ -1338,7 +1341,7 @@ bool Client::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, b
 
 			ucDamageBonus = GetWeaponDamageBonus(weapon ? weapon->GetItem() : (const EQEmu::ItemData*) nullptr);
 
-			min_damage = ucDamageBonus;
+			my_hit.min_damage = ucDamageBonus;
 			hate += ucDamageBonus;
 		}
 #endif
@@ -1348,62 +1351,32 @@ bool Client::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, b
 
 				ucDamageBonus = GetWeaponDamageBonus(weapon ? weapon->GetItem() : (const EQEmu::ItemData*) nullptr, true);
 
-				min_damage = ucDamageBonus;
+				my_hit.min_damage = ucDamageBonus;
 				hate += ucDamageBonus;
 			}
 		}
 
-		// this effect is actually a min cap that happens after the final damage is calculated
-		int min_cap = base_damage * GetMeleeMinDamageMod_SE(skillinuse) / 100;
-
 		// damage = mod_client_damage(damage, skillinuse, Hand, weapon, other);
 
-		Log.Out(Logs::Detail, Logs::Combat, "Damage calculated to %d (bonus %d, base %d, str %d, skill %d, DMG %d, lv %d)",
-			damage, min_damage, base_damage, GetSTR(), GetSkill(skillinuse), weapon_damage, mylevel);
+		Log.Out(Logs::Detail, Logs::Combat, "Damage calculated: base %d min damage %d skill %d", my_hit.base_damage, my_hit.min_damage, my_hit.skill);
 
 		int hit_chance_bonus = 0;
-		auto offense = this->offense(skillinuse); // we need this a few times
+		my_hit.offense = offense(my_hit.skill); // we need this a few times
+		my_hit.hand = Hand;
 
 		if(opts) {
-			base_damage *= opts->damage_percent;
-			base_damage += opts->damage_flat;
+			my_hit.base_damage *= opts->damage_percent;
+			my_hit.base_damage += opts->damage_flat;
 			hate *= opts->hate_percent;
 			hate += opts->hate_flat;
 			hit_chance_bonus += opts->hit_chance;
 		}
 
-		//check to see if we hit..
-		if (other->AvoidDamage(this, damage, Hand)) {
-			if (!bRiposte && !IsStrikethrough) {
-				int strike_through = itembonuses.StrikeThrough + spellbonuses.StrikeThrough + aabonuses.StrikeThrough;
-				if(strike_through && zone->random.Roll(strike_through)) {
-					Message_StringID(MT_StrikeThrough, STRIKETHROUGH_STRING); // You strike through your opponents defenses!
-					Attack(other, Hand, false, true); // Strikethrough only gives another attempted hit
-					return false;
-				}
-				// I'm pretty sure you can riposte a riposte
-				if (damage == -3 && !bRiposte) {
-					DoRiposte(other);
-					if (IsDead())
-						return false;
-				}
-			}
-			Log.Out(Logs::Detail, Logs::Combat, "Avoided damage with code %d", damage);
-		} else {
-			if (other->CheckHitChance(this, skillinuse, hit_chance_bonus)) {
-				other->MeleeMitigation(this, damage, base_damage, offense, skillinuse, opts);
-				if (damage > 0) {
-					ApplyDamageTable(damage, offense);
-					CommonOutgoingHitSuccess(other, damage, min_damage, min_cap, skillinuse, opts);
-				}
-				Log.Out(Logs::Detail, Logs::Combat, "Final damage after all reductions: %d", damage);
-			} else {
-				Log.Out(Logs::Detail, Logs::Combat, "Attack missed. Damage set to 0.");
-				damage = 0;
-			}
-		}
+		my_hit.tohit = GetTotalToHit(my_hit.skill, hit_chance_bonus);
+
+		DoAttack(other, my_hit, opts);
 	} else {
-		damage = -5;
+		my_hit.damage_done = DMG_INVULNERABLE;
 	}
 
 	// Hate Generation is on a per swing basis, regardless of a hit, miss, or block, its always the same.
@@ -1414,28 +1387,28 @@ bool Client::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, b
 	///////////////////////////////////////////////////////////
 	////// Send Attack Damage
 	///////////////////////////////////////////////////////////
-	if (damage > 0 && aabonuses.SkillAttackProc[0] && aabonuses.SkillAttackProc[1] == skillinuse &&
+	if (my_hit.damage_done > 0 && aabonuses.SkillAttackProc[0] && aabonuses.SkillAttackProc[1] == my_hit.skill &&
 	    IsValidSpell(aabonuses.SkillAttackProc[2])) {
 		float chance = aabonuses.SkillAttackProc[0] / 1000.0f;
 		if (zone->random.Roll(chance))
 			SpellFinished(aabonuses.SkillAttackProc[2], other, EQEmu::CastingSlot::Item, 0, -1,
 				      spells[aabonuses.SkillAttackProc[2]].ResistDiff);
 	}
-	other->Damage(this, damage, SPELL_UNKNOWN, skillinuse, true, -1, false, m_specialattacks);
+	other->Damage(this, my_hit.damage_done, SPELL_UNKNOWN, my_hit.skill, true, -1, false, m_specialattacks);
 
 	if (IsDead()) return false;
 
-	MeleeLifeTap(damage);
+	MeleeLifeTap(my_hit.damage_done);
 
-	if (damage > 0 && HasSkillProcSuccess() && other && other->GetHP() > 0)
-		TrySkillProc(other, skillinuse, 0, true, Hand);
+	if (my_hit.damage_done > 0 && HasSkillProcSuccess() && other && other->GetHP() > 0)
+		TrySkillProc(other, my_hit.skill, 0, true, Hand);
 
 	CommonBreakInvisibleFromCombat();
 
 	if(GetTarget())
-		TriggerDefensiveProcs(other, Hand, true, damage);
+		TriggerDefensiveProcs(other, Hand, true, my_hit.damage_done);
 
-	if (damage > 0)
+	if (my_hit.damage_done > 0)
 		return true;
 
 	else
@@ -1768,8 +1741,6 @@ bool Client::Death(Mob* killerMob, int32 damage, uint16 spell, EQEmu::skills::Sk
 
 bool NPC::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool IsFromSpell, ExtraAttackOptions *opts)
 {
-	int damage = 0;
-
 	if (!other) {
 		SetTarget(nullptr);
 		Log.Out(Logs::General, Logs::Error, "A null Mob object was passed to NPC::Attack() for evaluation!");
@@ -1797,13 +1768,16 @@ bool NPC::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool
 
 	FaceTarget(GetTarget());
 
-	EQEmu::skills::SkillType skillinuse = EQEmu::skills::SkillHandtoHand;
+	DamageHitInfo my_hit;
+	my_hit.skill = EQEmu::skills::SkillHandtoHand;
+	my_hit.hand = Hand;
+	my_hit.damage_done = 0;
 	if (Hand == EQEmu::inventory::slotPrimary) {
-		skillinuse = static_cast<EQEmu::skills::SkillType>(GetPrimSkill());
+		my_hit.skill = static_cast<EQEmu::skills::SkillType>(GetPrimSkill());
 		OffHandAtk(false);
 	}
 	if (Hand == EQEmu::inventory::slotSecondary) {
-		skillinuse = static_cast<EQEmu::skills::SkillType>(GetSecSkill());
+		my_hit.skill = static_cast<EQEmu::skills::SkillType>(GetSecSkill());
 		OffHandAtk(true);
 	}
 
@@ -1826,32 +1800,32 @@ bool NPC::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool
 
 		switch(weapon->ItemType) {
 		case EQEmu::item::ItemType1HSlash:
-			skillinuse = EQEmu::skills::Skill1HSlashing;
+			my_hit.skill = EQEmu::skills::Skill1HSlashing;
 			break;
 		case EQEmu::item::ItemType2HSlash:
-			skillinuse = EQEmu::skills::Skill2HSlashing;
+			my_hit.skill = EQEmu::skills::Skill2HSlashing;
 			break;
 		case EQEmu::item::ItemType1HPiercing:
-			skillinuse = EQEmu::skills::Skill1HPiercing;
+			my_hit.skill = EQEmu::skills::Skill1HPiercing;
 			break;
 		case EQEmu::item::ItemType2HPiercing:
-			skillinuse = EQEmu::skills::Skill2HPiercing;
+			my_hit.skill = EQEmu::skills::Skill2HPiercing;
 			break;
 		case EQEmu::item::ItemType1HBlunt:
-			skillinuse = EQEmu::skills::Skill1HBlunt;
+			my_hit.skill = EQEmu::skills::Skill1HBlunt;
 			break;
 		case EQEmu::item::ItemType2HBlunt:
-			skillinuse = EQEmu::skills::Skill2HBlunt;
+			my_hit.skill = EQEmu::skills::Skill2HBlunt;
 			break;
 		case EQEmu::item::ItemTypeBow:
-			skillinuse = EQEmu::skills::SkillArchery;
+			my_hit.skill = EQEmu::skills::SkillArchery;
 			break;
 		case EQEmu::item::ItemTypeLargeThrowing:
 		case EQEmu::item::ItemTypeSmallThrowing:
-			skillinuse = EQEmu::skills::SkillThrowing;
+			my_hit.skill = EQEmu::skills::SkillThrowing;
 			break;
 		default:
-			skillinuse = EQEmu::skills::SkillHandtoHand;
+			my_hit.skill = EQEmu::skills::SkillHandtoHand;
 			break;
 		}
 	}
@@ -1861,7 +1835,7 @@ bool NPC::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool
 	//do attack animation regardless of whether or not we can hit below
 	int16 charges = 0;
 	EQEmu::ItemInstance weapon_inst(weapon, charges);
-	AttackAnimation(skillinuse, Hand, &weapon_inst);
+	AttackAnimation(my_hit.skill, Hand, &weapon_inst);
 
 	//basically "if not immune" then do the attack
 	if(weapon_damage > 0) {
@@ -1898,54 +1872,48 @@ bool NPC::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool
 
 		//damage = mod_npc_damage(damage, skillinuse, Hand, weapon, other);
 
-		int lbase_damage = this->base_damage + eleBane;
-		int lmin_damage = this->min_damage;
-		int32 hate = lbase_damage + lmin_damage;
-
-		int min_cap = lbase_damage * GetMeleeMinDamageMod_SE(skillinuse) / 100;
+		my_hit.base_damage = GetBaseDamage() + eleBane;
+		my_hit.min_damage = GetMinDamage();
+		int32 hate = my_hit.base_damage + my_hit.min_damage;
 
 		int hit_chance_bonus = 0;
 
-		if(opts) {
-			lbase_damage *= opts->damage_percent;
-			lbase_damage += opts->damage_flat;
+		if (opts) {
+			my_hit.base_damage *= opts->damage_percent;
+			my_hit.base_damage += opts->damage_flat;
 			hate *= opts->hate_percent;
 			hate += opts->hate_flat;
 			hit_chance_bonus += opts->hit_chance;
 		}
 
-		if (other->AvoidDamage(this, damage, Hand)) {
-			if (!bRiposte && damage == -3)
-				DoRiposte(other);
-		} else {
-			if (other->CheckHitChance(this, skillinuse, hit_chance_bonus)) {
-				other->MeleeMitigation(this, damage, lbase_damage, this->offense(skillinuse), skillinuse, opts);
-				CommonOutgoingHitSuccess(other, damage, lmin_damage, min_cap, skillinuse, opts);
-			} else {
-				damage = 0;
-			}
-		}
+		my_hit.offense = offense(my_hit.skill);
+		my_hit.tohit = GetTotalToHit(my_hit.skill, hit_chance_bonus);
+
+		DoAttack(other, my_hit, opts);
+
 		other->AddToHateList(this, hate);
 
-		Log.Out(Logs::Detail, Logs::Combat, "Final damage against %s: %d", other->GetName(), damage);
+		Log.Out(Logs::Detail, Logs::Combat, "Final damage against %s: %d", other->GetName(), my_hit.damage_done);
 
 		if(other->IsClient() && IsPet() && GetOwner()->IsClient()) {
 			//pets do half damage to clients in pvp
-			damage=damage/2;
+			my_hit.damage_done /= 2;
+			if (my_hit.damage_done < 1)
+				my_hit.damage_done = 1;
 		}
+	} else {
+		my_hit.damage_done = DMG_INVULNERABLE;
 	}
-	else
-		damage = -5;
 
 	if(GetHP() > 0 && !other->HasDied()) {
-		other->Damage(this, damage, SPELL_UNKNOWN, skillinuse, true, -1, false, m_specialattacks); // Not avoidable client already had thier chance to Avoid
+		other->Damage(this, my_hit.damage_done, SPELL_UNKNOWN, my_hit.skill, true, -1, false, m_specialattacks); // Not avoidable client already had thier chance to Avoid
 	} else
 		return false;
 
 	if (HasDied()) //killed by damage shield ect
 		return false;
 
-	MeleeLifeTap(damage);
+	MeleeLifeTap(my_hit.damage_done);
 
 	CommonBreakInvisibleFromCombat();
 
@@ -1959,14 +1927,14 @@ bool NPC::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool
 		if (!other->HasDied())
 			TrySpellProc(nullptr, weapon, other, Hand);
 
-		if (damage > 0 && HasSkillProcSuccess() && !other->HasDied())
-			TrySkillProc(other, skillinuse, 0, true, Hand);
+		if (my_hit.damage_done > 0 && HasSkillProcSuccess() && !other->HasDied())
+			TrySkillProc(other, my_hit.skill, 0, true, Hand);
 	}
 
 	if(GetHP() > 0 && !other->HasDied())
-		TriggerDefensiveProcs(other, Hand, true, damage);
+		TriggerDefensiveProcs(other, Hand, true, my_hit.damage_done);
 
-	if (damage > 0)
+	if (my_hit.damage_done > 0)
 		return true;
 
 	else
@@ -2874,7 +2842,7 @@ int32 Mob::ReduceDamage(int32 damage)
 			if (spellbonuses.NegateAttacks[2] && (damage > spellbonuses.NegateAttacks[2]))
 				damage -= spellbonuses.NegateAttacks[2];
 			else
-				return -6;
+				return DMG_RUNE;
 		}
 	}
 
@@ -2935,13 +2903,13 @@ int32 Mob::ReduceDamage(int32 damage)
 	}
 
 	if(damage < 1)
-		return -6;
+		return DMG_RUNE;
 
 	if (spellbonuses.MeleeRune[0] && spellbonuses.MeleeRune[1] >= 0)
 		damage = RuneAbsorb(damage, SE_Rune);
 
 	if(damage < 1)
-		return -6;
+		return DMG_RUNE;
 
 	return(damage);
 }
@@ -3166,11 +3134,11 @@ bool Client::CheckTripleAttack()
 	if (chance < 1)
 		return false;
 
-	int per_inc = aabonuses.TripleAttackChance + spellbonuses.TripleAttackChance + itembonuses.TripleAttackChance;
-	if (per_inc)
-		chance += chance * per_inc / 100;
+	int inc = aabonuses.TripleAttackChance + spellbonuses.TripleAttackChance + itembonuses.TripleAttackChance;
+	chance = static_cast<int>(chance * (1 + inc / 100.0f));
+	chance = (chance * 100) / (chance + 800);
 
-	return zone->random.Int(1, 1000) <= chance;
+	return zone->random.Int(1, 100) <= chance;
 }
 
 bool Client::CheckDoubleRangedAttack() {
@@ -3923,9 +3891,9 @@ void Mob::TrySpellProc(const EQEmu::ItemInstance *inst, const EQEmu::ItemData *w
 	return;
 }
 
-void Mob::TryPetCriticalHit(Mob *defender, uint16 skill, int &damage)
+void Mob::TryPetCriticalHit(Mob *defender, DamageHitInfo &hit)
 {
-	if (damage < 1)
+	if (hit.damage_done < 1)
 		return;
 
 	// Allows pets to perform critical hits.
@@ -3935,11 +3903,8 @@ void Mob::TryPetCriticalHit(Mob *defender, uint16 skill, int &damage)
 
 	Mob *owner = nullptr;
 	int critChance = 0;
-	critChance += RuleI(Combat, MeleeBaseCritChance);
+	critChance += RuleI(Combat, PetBaseCritChance); // 0 by default
 	int critMod = 170;
-
-	if (damage < 1) // We can't critical hit if we don't hit.
-		return;
 
 	if (IsPet())
 		owner = GetOwner();
@@ -3954,182 +3919,170 @@ void Mob::TryPetCriticalHit(Mob *defender, uint16 skill, int &damage)
 	int CritPetChance =
 	    owner->aabonuses.PetCriticalHit + owner->itembonuses.PetCriticalHit + owner->spellbonuses.PetCriticalHit;
 
-	if (CritPetChance || critChance) {
-
+	if (CritPetChance || critChance)
 		// For pets use PetCriticalHit for base chance, pets do not innately critical with without it
 		critChance += CritPetChance;
-	}
 
 	if (critChance > 0) {
 		if (zone->random.Roll(critChance)) {
-			critMod += GetCritDmgMob(skill);
-			damage += 5;
-			damage = (damage * critMod) / 100;
+			critMod += GetCritDmgMob(hit.skill);
+			hit.damage_done += 5;
+			hit.damage_done = (hit.damage_done * critMod) / 100;
 			entity_list.FilteredMessageClose_StringID(this, false, 200, MT_CritMelee, FilterMeleeCrits,
-								  CRITICAL_HIT, GetCleanName(), itoa(damage));
+								  CRITICAL_HIT, GetCleanName(), itoa(hit.damage_done + hit.min_damage));
 		}
 	}
 }
 
-void Mob::TryCriticalHit(Mob *defender, uint16 skill, int &damage, int min_damage, ExtraAttackOptions *opts)
+void Mob::TryCriticalHit(Mob *defender, DamageHitInfo &hit, ExtraAttackOptions *opts)
 {
-	if (damage < 1 || !defender)
+	if (hit.damage_done < 1 || !defender)
 		return;
 
 	// decided to branch this into it's own function since it's going to be duplicating a lot of the
 	// code in here, but could lead to some confusion otherwise
 	if ((IsPet() && GetOwner()->IsClient()) || (IsNPC() && CastToNPC()->GetSwarmOwner())) {
-		TryPetCriticalHit(defender, skill, damage);
+		TryPetCriticalHit(defender, hit);
 		return;
 	}
 
 #ifdef BOTS
 	if (this->IsPet() && this->GetOwner() && this->GetOwner()->IsBot()) {
-		this->TryPetCriticalHit(defender, skill, damage);
+		this->TryPetCriticalHit(defender, hit);
 		return;
 	}
 #endif // BOTS
 
-	float critChance = 0.0f;
-	bool IsBerskerSPA = false;
-
 	// 1: Try Slay Undead
 	if (defender->GetBodyType() == BT_Undead || defender->GetBodyType() == BT_SummonedUndead ||
 	    defender->GetBodyType() == BT_Vampire) {
-		int32 SlayRateBonus = aabonuses.SlayUndead[0] + itembonuses.SlayUndead[0] + spellbonuses.SlayUndead[0];
+		int SlayRateBonus = aabonuses.SlayUndead[0] + itembonuses.SlayUndead[0] + spellbonuses.SlayUndead[0];
 		if (SlayRateBonus) {
 			float slayChance = static_cast<float>(SlayRateBonus) / 10000.0f;
 			if (zone->random.Roll(slayChance)) {
-				int32 SlayDmgBonus =
-				    aabonuses.SlayUndead[1] + itembonuses.SlayUndead[1] + spellbonuses.SlayUndead[1];
-				damage += 5;
-				damage = (damage * SlayDmgBonus) / 100;
+				int SlayDmgBonus = std::max(
+				    {aabonuses.SlayUndead[1], itembonuses.SlayUndead[1], spellbonuses.SlayUndead[1]});
+				hit.damage_done = std::max(hit.damage_done, hit.base_damage) + 5;
+				hit.damage_done = (hit.damage_done * SlayDmgBonus) / 100;
 				if (GetGender() == 1) // female
 					entity_list.FilteredMessageClose_StringID(
 					    this, false, 200, MT_CritMelee, FilterMeleeCrits, FEMALE_SLAYUNDEAD,
-					    GetCleanName(), itoa(damage + min_damage));
+					    GetCleanName(), itoa(hit.damage_done + hit.min_damage));
 				else // males and neuter I guess
 					entity_list.FilteredMessageClose_StringID(
 					    this, false, 200, MT_CritMelee, FilterMeleeCrits, MALE_SLAYUNDEAD,
-					    GetCleanName(), itoa(damage + min_damage));
+					    GetCleanName(), itoa(hit.damage_done + hit.min_damage));
 				return;
 			}
 		}
 	}
 
 	// 2: Try Melee Critical
+	// a lot of good info: http://giline.versus.jp/shiden/damage_e.htm, http://giline.versus.jp/shiden/su.htm
 
-	// Base critical rate for all classes is dervived from DEX stat, this rate is then augmented
-	// by item,spell and AA bonuses allowing you a chance to critical hit. If the following rules
-	// are defined you will have an innate chance to hit at Level 1 regardless of bonuses.
-	// Warning: Do not define these rules if you want live like critical hits.
-	critChance += RuleI(Combat, MeleeBaseCritChance);
-
+	// We either require an innate crit chance or some SPA 169 to crit
+	bool innate_crit = false;
+	int crit_chance = GetCriticalChanceBonus(hit.skill);
 	if (IsClient()) {
-		critChance += RuleI(Combat, ClientBaseCritChance);
-
-		if (spellbonuses.BerserkSPA || itembonuses.BerserkSPA || aabonuses.BerserkSPA)
-			IsBerskerSPA = true;
-
-		if (((GetClass() == WARRIOR || GetClass() == BERSERKER) && GetLevel() >= 12) || IsBerskerSPA) {
-			if (IsBerserk() || IsBerskerSPA)
-				critChance += RuleI(Combat, BerserkBaseCritChance);
-			else
-				critChance += RuleI(Combat, WarBerBaseCritChance);
-		}
+		if ((GetClass() == WARRIOR || GetClass() == BERSERKER) && GetLevel() >= 12)
+			innate_crit = true;
+		else if (GetClass() == RANGER && GetLevel() >= 12 && hit.skill == EQEmu::skills::SkillArchery)
+			innate_crit = true;
+		else if (GetClass() == ROGUE && GetLevel() >= 12 && hit.skill == EQEmu::skills::SkillThrowing)
+			innate_crit = true;
 	}
 
-	int deadlyChance = 0;
-	int deadlyMod = 0;
-	if (skill == EQEmu::skills::SkillArchery && GetClass() == RANGER && GetSkill(EQEmu::skills::SkillArchery) >= 65)
-		critChance += 6;
+	// we have a chance to crit!
+	if (innate_crit || crit_chance) {
+		int difficulty = 0;
+		if (hit.skill == EQEmu::skills::SkillArchery)
+			difficulty = RuleI(Combat, ArcheryCritDifficulty);
+		else if (hit.skill == EQEmu::skills::SkillThrowing)
+			difficulty = RuleI(Combat, ThrowingCritDifficulty);
+		else
+			difficulty = RuleI(Combat, MeleeCritDifficulty);
+		int roll = zone->random.Int(1, difficulty);
 
-	if (skill == EQEmu::skills::SkillThrowing && GetClass() == ROGUE &&
-	    GetSkill(EQEmu::skills::SkillThrowing) >= 65) {
-		critChance += RuleI(Combat, RogueCritThrowingChance);
-		deadlyChance = RuleI(Combat, RogueDeadlyStrikeChance);
-		deadlyMod = RuleI(Combat, RogueDeadlyStrikeMod);
-	}
+		int dex_bonus = GetDEX();
+		if (dex_bonus > 255)
+			dex_bonus = 255 + ((dex_bonus - 255) / 5);
+		dex_bonus += 45; // chances did not match live without a small boost
 
-	int CritChanceBonus = GetCriticalChanceBonus(skill);
+		// so if we have an innate crit we have a better chance, except for ber throwing
+		if (!innate_crit || (GetClass() == BERSERKER && hit.skill == EQEmu::skills::SkillThrowing))
+			dex_bonus = dex_bonus * 3 / 5;
 
-	if (CritChanceBonus || critChance) {
+		if (crit_chance)
+			dex_bonus += dex_bonus * crit_chance / 100;
 
-		// Get Base CritChance from Dex. (200 = ~1.6%, 255 = ~2.0%, 355 = ~2.20%) Fall off rate > 255
-		// http://giline.versus.jp/shiden/su.htm , http://giline.versus.jp/shiden/damage_e.htm
-		if (GetDEX() <= 255)
-			critChance += (float(GetDEX()) / 125.0f);
-		else if (GetDEX() > 255)
-			critChance += (float(GetDEX() - 255) / 500.0f) + 2.0f;
-		critChance += critChance * (float)CritChanceBonus / 100.0f;
-	}
-
-	if (opts) {
-		critChance *= opts->crit_percent;
-		critChance += opts->crit_flat;
-	}
-
-	if (critChance > 0) {
-
-		critChance /= 100;
-
-		if (zone->random.Roll(critChance)) {
-			if (TryFinishingBlow(defender, static_cast<EQEmu::skills::SkillType>(skill), damage))
+		// check if we crited
+		if (roll < dex_bonus) {
+			// step 1: check for finishing blow
+			if (TryFinishingBlow(defender, hit.damage_done))
 				return;
-			int critMod = 170;
-			bool crip_success = false;
-			int32 CripplingBlowChance = GetCrippBlowChance();
 
-			// Crippling Blow Chance: The percent value of the effect is applied
-			// to the your Chance to Critical. (ie You have 10% chance to critical and you
-			// have a 200% Chance to Critical Blow effect, therefore you have a 20% Chance to Critical Blow.
-			if (CripplingBlowChance || (IsBerserk() || IsBerskerSPA)) {
-				if (!IsBerserk() && !IsBerskerSPA)
-					critChance *= float(CripplingBlowChance) / 100.0f;
+			// step 2: calculate damage
+			hit.damage_done = std::max(hit.damage_done, hit.base_damage) + 5;
+			int og_damage = hit.damage_done;
+			int crit_mod = 170 + GetCritDmgMob(hit.skill);
+			hit.damage_done = hit.damage_done * crit_mod / 100;
+			Log.Out(Logs::Detail, Logs::Combat,
+				"Crit success roll %d dex chance %d og dmg %d crit_mod %d new dmg %d", roll, dex_bonus,
+				og_damage, crit_mod, hit.damage_done);
 
-				if ((IsBerserk() || IsBerskerSPA) || zone->random.Roll(critChance))
-					crip_success = true;
-			}
-
-			critMod += GetCritDmgMob(skill);
-			damage += 5;
-			int ogdmg = damage;
-			damage = damage * critMod / 100;
-
-			bool deadlySuccess = false;
-			if (deadlyChance && zone->random.Roll(static_cast<float>(deadlyChance) / 100.0f)) {
+			// step 3: check deadly strike
+			if (GetClass() == ROGUE && hit.skill == EQEmu::skills::SkillThrowing) {
 				if (BehindMob(defender, GetX(), GetY())) {
-					damage *= deadlyMod;
-					deadlySuccess = true;
+					int chance = GetLevel() * 12;
+					if (zone->random.Int(1, 1000) < chance) {
+						// step 3a: check assassinate
+						int assdmg = TryAssassinate(defender, hit.skill); // I don't think this is right
+						if (assdmg) {
+							hit.damage_done = assdmg;
+							return;
+						}
+						hit.damage_done = hit.damage_done * 200 / 100;
+						entity_list.FilteredMessageClose_StringID(
+						    this, false, 200, MT_CritMelee, FilterMeleeCrits, DEADLY_STRIKE,
+						    GetCleanName(), itoa(hit.damage_done + hit.min_damage));
+						return;
+					}
 				}
 			}
 
-			if (crip_success) {
-				damage += ogdmg * 119 / 100; // the damage_e page says it's a ~1.192 increase of dmg before mod
-				entity_list.FilteredMessageClose_StringID(this, false, 200, MT_CritMelee,
-									  FilterMeleeCrits, CRIPPLING_BLOW,
-									  GetCleanName(), itoa(damage + min_damage));
+			// step 4: check crips
+			// this SPA was reused on live ...
+			bool berserk = spellbonuses.BerserkSPA || itembonuses.BerserkSPA || aabonuses.BerserkSPA;
+			if (!berserk) {
+				if (zone->random.Roll(GetCrippBlowChance())) {
+					berserk = true;
+				} // TODO: Holyforge is suppose to have an innate extra undead chance? 1/5 which matches the SPA crip though ...
+			}
+
+			if (IsBerserk() || berserk) {
+				hit.damage_done += og_damage * 119 / 100;
+				Log.Out(Logs::Detail, Logs::Combat, "Crip damage %d", hit.damage_done);
+				entity_list.FilteredMessageClose_StringID(
+				    this, false, 200, MT_CritMelee, FilterMeleeCrits, CRIPPLING_BLOW, GetCleanName(),
+				    itoa(hit.damage_done + hit.min_damage));
 				// Crippling blows also have a chance to stun
 				// Kayen: Crippling Blow would cause a chance to interrupt for npcs < 55, with a
 				// staggers message.
 				if (defender->GetLevel() <= 55 && !defender->GetSpecialAbility(IMMUNE_STUN)) {
 					defender->Emote("staggers.");
-					defender->Stun(0);
+					defender->Stun(2000);
 				}
-			} else if (deadlySuccess) {
-				entity_list.FilteredMessageClose_StringID(this, false, 200, MT_CritMelee,
-									  FilterMeleeCrits, DEADLY_STRIKE,
-									  GetCleanName(), itoa(damage + min_damage));
-			} else {
-				entity_list.FilteredMessageClose_StringID(this, false, 200, MT_CritMelee,
-									  FilterMeleeCrits, CRITICAL_HIT,
-									  GetCleanName(), itoa(damage + min_damage));
+				return;
 			}
+			// okay, critted but didn't do anything else, just normal message now
+			entity_list.FilteredMessageClose_StringID(this, false, 200, MT_CritMelee, FilterMeleeCrits,
+								  CRITICAL_HIT, GetCleanName(),
+								  itoa(hit.damage_done + hit.min_damage));
 		}
 	}
 }
 
-bool Mob::TryFinishingBlow(Mob *defender, EQEmu::skills::SkillType skillinuse, int &damage)
+bool Mob::TryFinishingBlow(Mob *defender, int &damage)
 {
 	// base2 of FinishingBlowLvl is the HP limit (cur / max) * 1000, 10% is listed as 100
 	if (defender && !defender->IsClient() && defender->GetHPRatio() < 10) {
@@ -4144,12 +4097,12 @@ bool Mob::TryFinishingBlow(Mob *defender, EQEmu::skills::SkillType skillinuse, i
 		else if (FB_Level < itembonuses.FinishingBlowLvl[0])
 			FB_Level = itembonuses.FinishingBlowLvl[0];
 
-		// Proc Chance value of 500 = 5%
-		uint32 ProcChance =
-		    (aabonuses.FinishingBlow[0] + spellbonuses.FinishingBlow[0] + spellbonuses.FinishingBlow[0]) / 10;
+		// modern AA description says rank 1 (500) is 50% chance
+		int ProcChance =
+		    aabonuses.FinishingBlow[0] + spellbonuses.FinishingBlow[0] + spellbonuses.FinishingBlow[0];
 
 		if (FB_Level && FB_Dmg && (defender->GetLevel() <= FB_Level) &&
-		    (ProcChance >= zone->random.Int(0, 1000))) {
+		    (ProcChance >= zone->random.Int(1, 1000))) {
 			entity_list.MessageClose_StringID(this, false, 200, MT_CritMelee, FINISHING_BLOW, GetName());
 			damage = FB_Dmg;
 			return true;
@@ -4205,18 +4158,25 @@ void Mob::DoRiposte(Mob *defender)
 
 		if (defender->GetClass() == MONK)
 			defender->MonkSpecialAttack(this, defender->aabonuses.GiveDoubleRiposte[2]);
-		else if (defender->IsClient() && defender->CastToClient()->HasSkill((EQEmu::skills::SkillType)defender->aabonuses.GiveDoubleRiposte[2]))
+		else if (defender->IsClient()) // so yeah, even if you don't have the skill you can still do the attack :P (and we don't crash anymore)
 			defender->CastToClient()->DoClassAttacks(this, defender->aabonuses.GiveDoubleRiposte[2], true);
 	}
 }
 
-void Mob::ApplyMeleeDamageBonus(uint16 skill, int &damage, ExtraAttackOptions *opts)
+void Mob::ApplyMeleeDamageMods(uint16 skill, int &damage, Mob *defender, ExtraAttackOptions *opts)
 {
 	int dmgbonusmod = 0;
 
 	dmgbonusmod += GetMeleeDamageMod_SE(skill);
 	if (opts)
 		dmgbonusmod += opts->melee_damage_bonus_flat;
+
+	if (defender) {
+		if (defender->IsClient() && defender->GetClass() == WARRIOR)
+			dmgbonusmod -= 5;
+		// 168 defensive
+		dmgbonusmod += (defender->spellbonuses.MeleeMitigationEffect + itembonuses.MeleeMitigationEffect + aabonuses.MeleeMitigationEffect);
+	}
 
 	damage += damage * dmgbonusmod / 100;
 }
@@ -4368,7 +4328,7 @@ const DamageTable &Mob::GetDamageTable() const
 	return which[level - 50];
 }
 
-void Mob::ApplyDamageTable(int &damage, int offense)
+void Mob::ApplyDamageTable(DamageHitInfo &hit)
 {
 	// someone may want to add this to custom servers, can remove this if that's the case
 	if (!IsClient()
@@ -4378,7 +4338,7 @@ void Mob::ApplyDamageTable(int &damage, int offense)
 			)
 		return;
 	// this was parsed, but we do see the min of 10 and the normal minus factor is 105, so makes sense
-	if (offense < 115)
+	if (hit.offense < 115)
 		return;
 
 	auto &damage_table = GetDamageTable();
@@ -4386,14 +4346,14 @@ void Mob::ApplyDamageTable(int &damage, int offense)
 	if (zone->random.Roll(damage_table.chance))
 		return;
 
-	int basebonus = offense - damage_table.minusfactor;
+	int basebonus = hit.offense - damage_table.minusfactor;
 	basebonus = std::max(10, basebonus / 2);
 	int extrapercent = zone->random.Roll0(basebonus);
 	int percent = std::min(100 + extrapercent, damage_table.max_extra);
-	damage = (damage * percent) / 100;
+	hit.damage_done = (hit.damage_done * percent) / 100;
 
 	if (IsWarriorClass() && GetLevel() > 54)
-		damage++;
+		hit.damage_done++;
 	Log.Out(Logs::Detail, Logs::Attack, "Damage table applied %d (max %d)", percent, damage_table.max_extra);
 }
 
@@ -4696,52 +4656,49 @@ int32 Mob::RuneAbsorb(int32 damage, uint16 type)
 	return damage;
 }
 
-// min_damage is the damage bonus, we need to pass it along for a bit
-// min_mod is the min hit cap, which needs to be calculated before we call this, but applied here
-void Mob::CommonOutgoingHitSuccess(Mob* defender, int &damage, int min_damage, int min_mod, EQEmu::skills::SkillType skillInUse, ExtraAttackOptions *opts)
+void Mob::CommonOutgoingHitSuccess(Mob* defender, DamageHitInfo &hit, ExtraAttackOptions *opts)
 {
 	if (!defender)
 		return;
 
 	// BER weren't parsing the halving
-	if (skillInUse == EQEmu::skills::SkillArchery ||
-	    (skillInUse == EQEmu::skills::SkillThrowing && GetClass() != BERSERKER))
-		damage /= 2;
+	if (hit.skill == EQEmu::skills::SkillArchery ||
+	    (hit.skill == EQEmu::skills::SkillThrowing && GetClass() != BERSERKER))
+		hit.damage_done /= 2;
 
-	if (damage < 1)
-		damage = 1;
+	if (hit.damage_done < 1)
+		hit.damage_done = 1;
 
-	if (skillInUse == EQEmu::skills::SkillArchery) {
+	if (hit.skill == EQEmu::skills::SkillArchery) {
 		int bonus = aabonuses.ArcheryDamageModifier + itembonuses.ArcheryDamageModifier + spellbonuses.ArcheryDamageModifier;
-		damage += damage * bonus / 100;
-		int headshot = TryHeadShot(defender, skillInUse);
-		if (headshot > 0)
-			damage = headshot;
-	}
-
-	// this parses after damage table
-	if (skillInUse == EQEmu::skills::SkillArchery && GetClass() == RANGER && GetLevel() > 50) {
-		if (defender->IsNPC() && !defender->IsMoving() && !defender->IsRooted()) {
-			damage *= 2;
-			Message_StringID(MT_CritMelee, BOW_DOUBLE_DAMAGE);
+		hit.damage_done += hit.damage_done * bonus / 100;
+		int headshot = TryHeadShot(defender, hit.skill);
+		if (headshot > 0) {
+			hit.damage_done = headshot;
+		} else if (GetClass() == RANGER && GetLevel() > 50) { // no double dmg on headshot
+			if (defender->IsNPC() && !defender->IsMoving() && !defender->IsRooted()) {
+				hit.damage_done *= 2;
+				Message_StringID(MT_CritMelee, BOW_DOUBLE_DAMAGE);
+			}
 		}
 	}
 
 	int extra_mincap = 0;
-	if (skillInUse == EQEmu::skills::SkillBackstab) {
+	int min_mod = hit.base_damage * GetMeleeMinDamageMod_SE(hit.skill) / 100;
+	if (hit.skill == EQEmu::skills::SkillBackstab) {
 		extra_mincap = GetLevel() < 7 ? 7 : GetLevel();
 		if (GetLevel() >= 60)
 			extra_mincap = GetLevel() * 2;
 		else if (GetLevel() > 50)
 			extra_mincap = GetLevel() * 3 / 2;
 		if (IsSpecialAttack(eSpecialAttacks::ChaoticStab)) {
-			damage = extra_mincap;
+			hit.damage_done = extra_mincap;
 		} else {
-			int ass = TryAssassinate(defender, skillInUse, 10000); // reusetime shouldn't have an effect ....
+			int ass = TryAssassinate(defender, hit.skill);
 			if (ass > 0)
-				damage = ass;
+				hit.damage_done = ass;
 		}
-	} else if (skillInUse == EQEmu::skills::SkillFrenzy && GetClass() == BERSERKER && GetLevel() > 50) {
+	} else if (hit.skill == EQEmu::skills::SkillFrenzy && GetClass() == BERSERKER && GetLevel() > 50) {
 		extra_mincap = 4 * GetLevel() / 5;
 	}
 
@@ -4749,23 +4706,23 @@ void Mob::CommonOutgoingHitSuccess(Mob* defender, int &damage, int min_damage, i
 	// Seems the crit message is generated before some of them :P
 
 	// worn item +skill dmg, SPA 220, 418. Live has a normalized version that should be here too
-	min_damage += GetSkillDmgAmt(skillInUse);
+	hit.min_damage += GetSkillDmgAmt(hit.skill);
 
 	// shielding mod2
 	if (defender->itembonuses.MeleeMitigation)
-		min_damage -= min_damage * defender->itembonuses.MeleeMitigation / 100;
+		hit.min_damage -= hit.min_damage * defender->itembonuses.MeleeMitigation / 100;
 
-	ApplyMeleeDamageBonus(skillInUse, damage, opts);
+	ApplyMeleeDamageMods(hit.skill, hit.damage_done, defender, opts);
 	min_mod = std::max(min_mod, extra_mincap);
-	if (min_mod && damage < min_mod) // SPA 186
-		damage = min_mod;
+	if (min_mod && hit.damage_done < min_mod) // SPA 186
+		hit.damage_done = min_mod;
 
-	TryCriticalHit(defender, skillInUse, damage, min_damage, opts);
+	TryCriticalHit(defender, hit, opts);
 
-	damage += min_damage;
+	hit.damage_done += hit.min_damage;
 	if (IsClient()) {
 		int extra = 0;
-		switch (skillInUse) {
+		switch (hit.skill) {
 		case EQEmu::skills::SkillThrowing:
 		case EQEmu::skills::SkillArchery:
 			extra = CastToClient()->GetHeroicDEX() / 10;
@@ -4774,7 +4731,7 @@ void Mob::CommonOutgoingHitSuccess(Mob* defender, int &damage, int min_damage, i
 			extra = CastToClient()->GetHeroicSTR() / 10;
 			break;
 		}
-		damage += extra;
+		hit.damage_done += extra;
 	}
 
 	// this appears where they do special attack dmg mods
@@ -4794,9 +4751,9 @@ void Mob::CommonOutgoingHitSuccess(Mob* defender, int &damage, int min_damage, i
 			spec_mod = mod;
 	}
 	if (spec_mod > 0)
-		damage = (damage * spec_mod) / 100;
+		hit.damage_done = (hit.damage_done * spec_mod) / 100;
 
-	damage += (damage * defender->GetSkillDmgTaken(skillInUse, opts) / 100) + (defender->GetFcDamageAmtIncoming(this, 0, true, skillInUse));
+	hit.damage_done += (hit.damage_done * defender->GetSkillDmgTaken(hit.skill, opts) / 100) + (defender->GetFcDamageAmtIncoming(this, 0, true, hit.skill));
 
 	CheckNumHitsRemaining(NumHit::OutgoingHitSuccess);
 }
@@ -5003,23 +4960,22 @@ void Client::DoAttackRounds(Mob *target, int hand, bool IsFromSpell)
 			// you can only triple from the main hand
 			if (hand == EQEmu::inventory::slotPrimary && CanThisClassTripleAttack()) {
 				CheckIncreaseSkill(EQEmu::skills::SkillTripleAttack, target, -10);
-				if (CheckTripleAttack())
+				if (CheckTripleAttack()) {
 					Attack(target, hand, false, false, IsFromSpell);
+					auto flurrychance = aabonuses.FlurryChance + spellbonuses.FlurryChance +
+							    itembonuses.FlurryChance;
+					if (flurrychance && zone->random.Roll(flurrychance)) {
+						Attack(target, hand, false, false, IsFromSpell);
+						if (zone->random.Roll(flurrychance))
+							Attack(target, hand, false, false, IsFromSpell);
+						Message_StringID(MT_NPCFlurry, YOU_FLURRY);
+					}
+				}
 			}
 		}
 	}
 
 	if (hand == EQEmu::inventory::slotPrimary) {
-		// According to http://www.monkly-business.net/forums/showpost.php?p=312095&postcount=168 a dev told them flurry isn't dependant on triple attack
-		// the parses kind of back that up and all of my parses seemed to be 4 or 5 attacks in the round which would work out to be
-		// doubles or triples with 2 from flurries or triple with 1 or 2 flurries ... Going with the "dev quote" I guess like we've always had it
-		auto flurrychance = aabonuses.FlurryChance + spellbonuses.FlurryChance + itembonuses.FlurryChance;
-		if (flurrychance && zone->random.Roll(flurrychance)) {
-			Attack(target, hand, false, false, IsFromSpell);
-			Attack(target, hand, false, false, IsFromSpell);
-			Message_StringID(MT_NPCFlurry, YOU_FLURRY);
-		}
-		// I haven't parsed where this guy happens, but it's not part of the normal chain above so this is fine
 		auto extraattackchance = aabonuses.ExtraAttackChance + spellbonuses.ExtraAttackChance + itembonuses.ExtraAttackChance;
 		if (extraattackchance && HasTwoHanderEquipped() && zone->random.Roll(extraattackchance))
 			Attack(target, hand, false, false, IsFromSpell);

@@ -162,21 +162,22 @@ public:
 	// 13 = Primary (default), 14 = secondary
 	virtual bool Attack(Mob* other, int Hand = EQEmu::inventory::slotPrimary, bool FromRiposte = false, bool IsStrikethrough = false,
 		bool IsFromSpell = false, ExtraAttackOptions *opts = nullptr) = 0;
+	void DoAttack(Mob *other, DamageHitInfo &hit, ExtraAttackOptions *opts = nullptr);
 	int MonkSpecialAttack(Mob* other, uint8 skill_used);
 	virtual void TryBackstab(Mob *other,int ReuseTime = 10);
-	bool AvoidDamage(Mob* attacker, int &damage, int hand);
+	bool AvoidDamage(Mob *attacker, DamageHitInfo &hit);
 	int compute_tohit(EQEmu::skills::SkillType skillinuse);
 	int GetTotalToHit(EQEmu::skills::SkillType skill, int chance_mod); // compute_tohit + spell bonuses
 	int compute_defense();
 	int GetTotalDefense(); // compute_defense + spell bonuses
-	bool CheckHitChance(Mob* attacker, EQEmu::skills::SkillType skillinuse, int chance_mod = 0);
-	virtual void TryCriticalHit(Mob *defender, uint16 skill, int &damage, int min_damage, ExtraAttackOptions *opts = nullptr);
-	void TryPetCriticalHit(Mob *defender, uint16 skill, int &damage);
-	virtual bool TryFinishingBlow(Mob *defender, EQEmu::skills::SkillType skillinuse, int &damage);
+	bool CheckHitChance(Mob* attacker, DamageHitInfo &hit);
+	void TryCriticalHit(Mob *defender, DamageHitInfo &hit, ExtraAttackOptions *opts = nullptr);
+	void TryPetCriticalHit(Mob *defender, DamageHitInfo &hit);
+	virtual bool TryFinishingBlow(Mob *defender, int &damage);
 	int TryHeadShot(Mob* defender, EQEmu::skills::SkillType skillInUse);
-	int TryAssassinate(Mob* defender, EQEmu::skills::SkillType skillInUse, uint16 ReuseTime);
+	int TryAssassinate(Mob* defender, EQEmu::skills::SkillType skillInUse);
 	virtual void DoRiposte(Mob* defender);
-	void ApplyMeleeDamageBonus(uint16 skill, int &damage,ExtraAttackOptions *opts = nullptr);
+	void ApplyMeleeDamageMods(uint16 skill, int &damage, Mob * defender = nullptr, ExtraAttackOptions *opts = nullptr);
 	int ACSum();
 	int offense(EQEmu::skills::SkillType skill);
 	void CalcAC() { mitigation_ac = ACSum(); }
@@ -184,12 +185,12 @@ public:
 	double GetSoftcapReturns();
 	int GetClassRaceACBonus();
 	inline int GetMitigationAC() { return mitigation_ac; }
-	void MeleeMitigation(Mob *attacker, int &damage, int base_damage, int offense, EQEmu::skills::SkillType, ExtraAttackOptions *opts = nullptr);
-	double RollD20(double offense, double mitigation); // CALL THIS FROM THE DEFENDER
+	void MeleeMitigation(Mob *attacker, DamageHitInfo &hit, ExtraAttackOptions *opts = nullptr);
+	double RollD20(int offense, int mitigation); // CALL THIS FROM THE DEFENDER
 	bool CombatRange(Mob* other);
 	virtual inline bool IsBerserk() { return false; } // only clients
 	void RogueEvade(Mob *other);
-	void CommonOutgoingHitSuccess(Mob* defender, int &damage, int min_damage, int min_mod, EQEmu::skills::SkillType skillInUse, ExtraAttackOptions *opts = nullptr);
+	void CommonOutgoingHitSuccess(Mob *defender, DamageHitInfo &hit, ExtraAttackOptions *opts = nullptr);
 	void BreakInvisibleSpells();
 	virtual void CancelSneakHide();
 	void CommonBreakInvisible();
@@ -794,7 +795,7 @@ public:
 
 	uint8 GetWeaponDamageBonus(const EQEmu::ItemData* weapon, bool offhand = false);
 	const DamageTable &GetDamageTable() const;
-	void ApplyDamageTable(int &damage, int offense);
+	void ApplyDamageTable(DamageHitInfo &hit);
 	virtual int GetHandToHandDamage(void);
 
 	bool CanThisClassDoubleAttack(void) const;
@@ -817,7 +818,7 @@ public:
 	int32 AffectMagicalDamage(int32 damage, uint16 spell_id, const bool iBuffTic, Mob* attacker);
 	int32 ReduceAllDamage(int32 damage);
 
-	void DoSpecialAttackDamage(Mob *who, EQEmu::skills::SkillType skill, int base_damage, int min_damage = 0, int32 hate_override = -1, int ReuseTime = 10, bool CheckHitChance = false, bool CanAvoid = true);
+	void DoSpecialAttackDamage(Mob *who, EQEmu::skills::SkillType skill, int base_damage, int min_damage = 0, int32 hate_override = -1, int ReuseTime = 10);
 	virtual void DoThrowingAttackDmg(Mob* other, const EQEmu::ItemInstance* RangeWeapon = nullptr, const EQEmu::ItemData* AmmoItem = nullptr, uint16 weapon_damage = 0, int16 chance_mod = 0, int16 focus = 0, int ReuseTime = 0, uint32 range_id = 0, int AmmoSlot = 0, float speed = 4.0f);
 	void DoMeleeSkillAttackDmg(Mob* other, uint16 weapon_damage, EQEmu::skills::SkillType skillinuse, int16 chance_mod = 0, int16 focus = 0, bool CanRiposte = false, int ReuseTime = 0);
 	virtual void DoArcheryAttackDmg(Mob* other, const EQEmu::ItemInstance* RangeWeapon = nullptr, const EQEmu::ItemInstance* Ammo = nullptr, uint16 weapon_damage = 0, int16 chance_mod = 0, int16 focus = 0, int ReuseTime = 0, uint32 range_id = 0, uint32 ammo_id = 0, const EQEmu::ItemData *AmmoItem = nullptr, int AmmoSlot = 0, float speed = 4.0f);
@@ -1187,8 +1188,6 @@ protected:
 	void ExecWeaponProc(const EQEmu::ItemInstance* weapon, uint16 spell_id, Mob *on, int level_override = -1);
 	virtual float GetProcChances(float ProcBonus, uint16 hand = EQEmu::inventory::slotPrimary);
 	virtual float GetDefensiveProcChances(float &ProcBonus, float &ProcChance, uint16 hand = EQEmu::inventory::slotPrimary, Mob *on = nullptr);
-	virtual float GetSpecialProcChances(uint16 hand);
-	virtual float GetAssassinateProcChances(uint16 ReuseTime);
 	virtual float GetSkillProcChances(uint16 ReuseTime, uint16 hand = 0); // hand = MainCharm?
 	uint16 GetWeaponSpeedbyHand(uint16 hand);
 	int GetWeaponDamage(Mob *against, const EQEmu::ItemData *weapon_item);
