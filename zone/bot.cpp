@@ -82,7 +82,6 @@ Bot::Bot(NPCType npcTypeData, Client* botOwner) : NPC(&npcTypeData, nullptr, glm
 	// Do this once and only in this constructor
 	GenerateAppearance();
 	GenerateBaseStats();
-	GenerateArmorClass();
 	// Calculate HitPoints Last As It Uses Base Stats
 	cur_hp = GenerateBaseHitPoints();
 	cur_mana = GenerateBaseManaPoints();
@@ -1138,42 +1137,6 @@ int32 Bot::acmod() {
 	Log.Out(Logs::General, Logs::Error, "Error in Bot::acmod(): Agility: %i, Level: %i",agility,level);
 #endif
 	return 0;
-}
-
-void Bot::GenerateArmorClass() {
-	/// new formula
-	int avoidance = 0;
-	avoidance = (acmod() + ((GetSkill(EQEmu::skills::SkillDefense) * 16) / 9));
-	if(avoidance < 0)
-		avoidance = 0;
-
-	int mitigation = 0;
-	if(GetClass() == WIZARD || GetClass() == MAGICIAN || GetClass() == NECROMANCER || GetClass() == ENCHANTER) {
-		mitigation = (GetSkill(EQEmu::skills::SkillDefense) / 4 + (itembonuses.AC + 1));
-		mitigation -= 4;
-	} else {
-		mitigation = (GetSkill(EQEmu::skills::SkillDefense) / 3 + ((itembonuses.AC * 4) / 3));
-		if(GetClass() == MONK)
-			mitigation += (GetLevel() * 13 / 10);	//the 13/10 might be wrong, but it is close...
-	}
-	int displayed = 0;
-	displayed += (((avoidance + mitigation) * 1000) / 847);	//natural AC
-
-	//Iksar AC, untested
-	if(GetRace() == IKSAR) {
-		displayed += 12;
-		int iksarlevel = GetLevel();
-		iksarlevel -= 10;
-		if(iksarlevel > 25)
-			iksarlevel = 25;
-
-		if(iksarlevel > 0)
-			displayed += (iksarlevel * 12 / 10);
-	}
-
-	//spell AC bonuses are added directly to natural total
-	displayed += spellbonuses.AC;
-	this->AC = displayed;
 }
 
 uint16 Bot::GetPrimarySkillValue() {
@@ -6157,7 +6120,7 @@ void Bot::CalcBonuses() {
 	CalcPR();
 	CalcCR();
 	CalcCorrup();
-	GenerateArmorClass();
+	CalcAC();
 	CalcMaxHP();
 	CalcMaxMana();
 	CalcMaxEndurance();
