@@ -1501,9 +1501,9 @@ void Mob::ShowStats(Client* client)
 			client->Message(0, "  AggroRange: %1.0f  AssistRange: %1.0f", GetAggroRange(), GetAssistRange());
 		}
 
-		client->Message(0, "  compute_tohit: %i TotalToHit: %i", n->compute_tohit(EQEmu::skills::SkillHandtoHand), n->GetTotalToHit(EQEmu::skills::SkillHandtoHand, 0));
-		client->Message(0, "  compute_defense: %i TotalDefense: %i", n->compute_defense(), n->GetTotalDefense());
-		client->Message(0, "  offense: %i mitigation ac: %i", n->offense(EQEmu::skills::SkillHandtoHand), n->GetMitigationAC());
+		client->Message(0, "  compute_tohit: %i TotalToHit: %i", compute_tohit(EQEmu::skills::SkillHandtoHand), GetTotalToHit(EQEmu::skills::SkillHandtoHand, 0));
+		client->Message(0, "  compute_defense: %i TotalDefense: %i", compute_defense(), GetTotalDefense());
+		client->Message(0, "  offense: %i mitigation ac: %i", offense(EQEmu::skills::SkillHandtoHand), GetMitigationAC());
 	}
 }
 
