@@ -2780,7 +2780,22 @@ void Mob::SendWearChange(uint8 material_slot, Client *one_client)
 	wc->material = GetEquipmentMaterial(material_slot);
 	wc->elite_material = IsEliteMaterialItem(material_slot);
 	wc->hero_forge_model = GetHerosForgeModel(material_slot);
+
+#ifdef BOTS
+	if (IsBot()) {
+		auto item_inst = CastToBot()->GetBotItem(EQEmu::InventoryProfile::CalcSlotFromMaterial(material_slot));
+		if (item_inst)
+			wc->color.Color = item_inst->GetColor();
+		else
+			wc->color.Color = 0;
+	}
+	else {
+		wc->color.Color = GetEquipmentColor(material_slot);
+	}
+#else
 	wc->color.Color = GetEquipmentColor(material_slot);
+#endif
+
 	wc->wear_slot_id = material_slot;
 
 	if (!one_client)
