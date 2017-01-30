@@ -2273,7 +2273,7 @@ void Bot::AI_Process() {
 			if(AI_movement_timer->Check()) {
 				if (!IsMoving()) {
 					if (GetClass() == ROGUE) {
-						if ((GetTarget()->GetTarget() == this) && !GetTarget()->IsFeared() && !GetTarget()->IsStunned()) {
+						if (HasTargetReflection() && !GetTarget()->IsFeared() && !GetTarget()->IsStunned()) {
 							// Hate redux actions
 							if (evade_timer.Check(false)) {
 								// Attempt to evade
@@ -2299,7 +2299,7 @@ void Bot::AI_Process() {
 									float newZ = 0;
 									FaceTarget(GetTarget());
 									if (PlotPositionAroundTarget(this, newX, newY, newZ)) {
-										Bot::BotGroupSay(this, "Backing off of %s", GetTarget()->GetCleanName());
+										Emote("steps back from %s", GetTarget()->GetCleanName());
 										CalculateNewPosition2(newX, newY, newZ, GetRunspeed());
 										return;
 									}
