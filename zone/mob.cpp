@@ -213,6 +213,7 @@ Mob::Mob(const char* in_name,
 	has_shieldequiped = false;
 	has_twohandbluntequiped = false;
 	has_twohanderequipped = false;
+	can_facestab = false;
 	has_numhits = false;
 	has_MGB = false;
 	has_ProjectIllusion = false;
