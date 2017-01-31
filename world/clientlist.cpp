@@ -30,6 +30,7 @@
 #include "../common/misc.h"
 #include "../common/misc_functions.h"
 #include "../common/json/json.h"
+#include "../common/event_sub.h"
 #include "web_interface.h"
 #include "wguild_mgr.h"
 #include <set>
@@ -1365,6 +1366,10 @@ void ClientList::SendClientVersionSummary(const char *Name)
 
 void ClientList::OnTick(EQ::Timer *t)
 {
+	if (!EventSubscriptionWatcher::Get()->IsSubscribed("EQW::ClientUpdate")) {
+		return;
+	}
+
 	Json::Value out;
 	out["event"] = "EQW::ClientUpdate";
 	out["data"] = Json::Value();

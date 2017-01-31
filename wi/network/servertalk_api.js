@@ -113,20 +113,26 @@ class ServertalkAPI
 		
 		var subs = this.subscriptions[event_id];
 		if(subs) {
-			console.log('Subscribe', who.uuid, 'to', event_id);
+			//console.log('Subscribe', who.uuid, 'to', event_id);
 			subs[who.uuid] = who;
 		} else {
-			console.log('Subscribe', who.uuid, 'to', event_id);
+			//console.log('Subscribe', who.uuid, 'to', event_id);
 			this.subscriptions[event_id] = { };
 			this.subscriptions[event_id][who.uuid] = who;
+			//Tell our server we have a subscription for event_id
 		}
 	}
 	
 	Unsubscribe(event_id, who) {
 		var subs = this.subscriptions[event_id];
 		if(subs) {
-			console.log('Unsubscribe', who.uuid, 'from', event_id);
+			//console.log('Unsubscribe', who.uuid, 'from', event_id);
 			delete subs[who.uuid];
+			
+			if(Object.keys(subs).length === 0) {
+				delete this.subscriptions[event_id];
+				//Tell our server we no longer have a subscription for event_id
+			}
 		}
 	}
 	

@@ -27,6 +27,7 @@ SET(common_sources
 	eq_stream_ident.cpp
 	eq_stream_proxy.cpp
 	eqtime.cpp
+	event_sub.cpp
 	extprofile.cpp
 	faction.cpp
 	guild_base.cpp
@@ -139,6 +140,7 @@ SET(common_headers
 	eq_stream_proxy.h
 	eqtime.h
 	errmsg.h
+	event_sub.h
 	extprofile.h
 	faction.h
 	features.h

@@ -1,35 +1,14 @@
-var auth = require('../core/jwt_auth.js').auth;
+const common = require('./common.js');
 
 var RegisterEQW = function(app, api) {
-	app.post('/api/eqw/islocked', auth, function (req, res) {
-		api.Call('EQW::IsLocked', [])
-			.then(function(value) {
-				res.send({ response: value });
-			})
-			.catch(function(reason) {
-				res.sendStatus(500);
-			});
-	});
-	
-	app.post('/api/eqw/lock', auth, function (req, res) {
-		api.Call('EQW::Lock', [])
-			.then(function(value) {
-				res.send({ response: value });
-			})
-			.catch(function(reason) {
-				res.sendStatus(500);
-			});
-	});
-	
-	app.post('/api/eqw/unlock', auth, function (req, res) {
-		api.Call('EQW::Unlock', [])
-			.then(function(value) {
-				res.send({ response: value });
-			})
-			.catch(function(reason) {
-				res.sendStatus(500);
-			});
-	});
+	common.Register('/api/eqw/getconfig', 'EQW::GetConfig', app, api);
+	common.Register('/api/eqw/islocked', 'EQW::IsLocked', app, api);
+	common.Register('/api/eqw/lock', 'EQW::Lock', app, api);
+	common.Register('/api/eqw/unlock', 'EQW::Unlock', app, api);
+	common.Register('/api/eqw/getplayercount', 'EQW::GetPlayerCount', app, api);
+	common.Register('/api/eqw/getzonecount', 'EQW::GetZoneCount', app, api);
+	common.Register('/api/eqw/getlaunchercount', 'EQW::GetLauncherCount', app, api);
+	common.Register('/api/eqw/getloginservercount', 'EQW::GetLoginServerCount', app, api);
 };
 
 module.exports = {

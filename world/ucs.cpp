@@ -21,7 +21,9 @@ void UCSConnection::SetConnection(std::shared_ptr<EQ::Net::ServertalkServerConne
 	}
 
 	Stream = inStream;
-	Stream->OnMessage(std::bind(&UCSConnection::ProcessPacket, this, std::placeholders::_1, std::placeholders::_2));
+	if (Stream) {
+		Stream->OnMessage(std::bind(&UCSConnection::ProcessPacket, this, std::placeholders::_1, std::placeholders::_2));
+	}
 }
 
 void UCSConnection::ProcessPacket(uint16 opcode, EQ::Net::Packet &p)

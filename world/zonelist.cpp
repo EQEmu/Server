@@ -25,6 +25,7 @@
 #include "../common/string_util.h"
 #include "../common/random.h"
 #include "../common/json/json.h"
+#include "../common/event_sub.h"
 #include "web_interface.h"
 
 extern uint32 numzones;
@@ -657,7 +658,7 @@ void ZSList::SendLSZones(){
 }
 
 int ZSList::GetZoneCount() {
-	return(numzones);
+	return(list.size());
 }
 
 void ZSList::GetZoneIDList(std::vector<uint32> &zones) {
@@ -698,6 +699,10 @@ void ZSList::WorldShutDown(uint32 time, uint32 interval)
 
 void ZSList::OnTick(EQ::Timer *t)
 {
+	if (!EventSubscriptionWatcher::Get()->IsSubscribed("EQW::ZoneUpdate")) {
+		return;
+	}
+
 	Json::Value out;
 	out["event"] = "EQW::ZoneUpdate";
 	out["data"] = Json::Value();

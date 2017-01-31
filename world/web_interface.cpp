@@ -65,7 +65,7 @@ void WebInterface::OnCall(uint16 opcode, EQ::Net::Packet &p)
 	auto iter = m_calls.find(method);
 	if (iter == m_calls.end()) {
 		//if not exist then error
-		SendError("Invalid request: method not found");
+		SendError("Invalid request: method not found", id);
 		return;
 	}
 
@@ -99,6 +99,7 @@ void WebInterface::SendError(const std::string &message)
 void WebInterface::SendError(const std::string &message, const std::string &id)
 {
 	Json::Value error;
+	error["id"] = id;
 	error["error"] = Json::Value();
 	error["error"]["message"] = message;
 
