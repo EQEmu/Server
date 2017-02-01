@@ -293,6 +293,7 @@ public:
 	bool UseDiscipline(uint32 spell_id, uint32 target);
 	uint8 GetNumberNeedingHealedInGroup(uint8 hpr, bool includePets);
 	bool GetNeedsCured(Mob *tar);
+	bool GetNeedsHateRedux(Mob *tar);
 	bool HasOrMayGetAggro();
 	void SetDefaultBotStance();
 	void CalcChanceToCast();

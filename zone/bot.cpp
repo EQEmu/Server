@@ -2305,10 +2305,6 @@ void Bot::AI_Process() {
 									}
 								}
 							}
-
-							// Could add a bot accessor like..
-							// bool NeedsHateRedux() { return (GetClass() == Rogue && evade_timer.check(false)); } - or something like this
-							// ..then add hate redux spells to caster combat repertoires
 						}
 						else if (!BehindMob(GetTarget(), GetX(), GetY())) {
 							// Move the rogue to behind the mob
@@ -2472,40 +2468,65 @@ void Bot::AI_Process() {
 				BotMeditate(true);
 		}
 	} else {
-		SetTarget(0);
+		SetTarget(nullptr);
 		if (m_PlayerState & static_cast<uint32>(PlayerState::Aggressive))
 			SendRemovePlayerState(PlayerState::Aggressive);
 
-		if(!IsMoving() && AI_think_timer->Check() && !spellend_timer.Enabled()) {
-			if(GetBotStance() != BotStancePassive) {
-				if(!AI_IdleCastCheck() && !IsCasting())
-					BotMeditate(true);
-			}
-			else
-				BotMeditate(true);
-		}
+		Mob* follow = entity_list.GetMob(GetFollowID());
+		if (!follow)
+			return;
 
-		if(AI_movement_timer->Check()) {
-			if(GetFollowID()) {
-				Mob* follow = entity_list.GetMob(GetFollowID());
-				if(follow) {
-					float dist = DistanceSquared(m_Position, follow->GetPosition());
-					int speed = follow->GetRunspeed();
-					if(dist < GetFollowDistance() + 1000)
-						speed = follow->GetWalkspeed();
+		float cur_dist = DistanceSquared(m_Position, follow->GetPosition());
 
-					if(dist > GetFollowDistance()) {
-						CalculateNewPosition2(follow->GetX(), follow->GetY(), follow->GetZ(), speed);
-						if(rest_timer.Enabled())
-							rest_timer.Disable();
-						return;
-					} else {
-						if(moved) {
-							moved = false;
-							SetCurrentSpeed(0);
-						}
+		if (!IsMoving() && cur_dist <= GetFollowDistance()) {
+			if (AI_think_timer->Check()) {
+				if (!spellend_timer.Enabled()) {
+					if (GetBotStance() != BotStancePassive) {
+						if (!AI_IdleCastCheck() && !IsCasting() && GetClass() != BARD)
+							BotMeditate(true);
+					}
+					else {
+						if (GetClass() != BARD)
+							BotMeditate(true);
 					}
 				}
+			}
+		}
+		else if(AI_movement_timer->Check()) {
+			int speed = GetRunspeed();
+			if (cur_dist < GetFollowDistance() + 1000) {
+				speed = GetWalkspeed();
+			}
+			else if (cur_dist >= GetFollowDistance() + 8000) {
+				auto leader = follow;
+				while (leader->GetFollowID()) {
+					leader = entity_list.GetMob(leader->GetFollowID());
+					if (!leader || leader == this)
+						break;
+				}
+				if (leader && leader != this && leader->GetRunspeed() > speed)
+					speed = leader->GetRunspeed();
+				speed = (float)speed * 1.8f; // special bot sprint mod
+			}
+
+			// this needs work..
+			// could probably eliminate the sprint mod with the correct logic
+			if (cur_dist > GetFollowDistance()) {
+				CalculateNewPosition2(follow->GetX(), follow->GetY(), follow->GetZ(), speed);
+				if (rest_timer.Enabled())
+					rest_timer.Disable();
+				return;
+			}
+			else {
+				if (moved) {
+					moved = false;
+					SetCurrentSpeed(0);
+				}
+			}
+		}
+		else if (IsMoving()) {
+			if (GetBotStance() != BotStancePassive && GetClass() == BARD && !spellend_timer.Enabled() && AI_think_timer->Check()) {
+				AI_IdleCastCheck();
 			}
 		}
 	}
@@ -7987,6 +8008,42 @@ bool Bot::GetNeedsCured(Mob *tar) {
 		}
 	}
 	return needCured;
+}
+
+bool Bot::GetNeedsHateRedux(Mob *tar) {
+	// This really should be a scalar function based in class Mob that returns 'this' state..but, is inline with current Bot coding...
+	// TODO: Good starting point..but, can be refined..
+	// TODO: Still awaiting bot spell rework..
+	if (!tar || !tar->HasTargetReflection())
+		return false;
+	
+	if (tar->IsClient()) {
+		switch (tar->GetClass()) {
+			// TODO: figure out affectable classes..
+			// Might need flag to allow player to determine redux req...
+		default:
+			return false;
+		}
+	}
+	else if (tar->IsBot()) {
+		switch (tar->GetClass()) {
+		case ROGUE:
+			if (tar->CastToBot()->evade_timer.Check(false))
+				return false;
+		case CLERIC:
+		case DRUID:
+		case SHAMAN:
+		case NECROMANCER:
+		case WIZARD:
+		case MAGICIAN:
+		case ENCHANTER:
+			return true;
+		default:
+			return false;
+		}
+	}
+
+	return false;
 }
 
 bool Bot::HasOrMayGetAggro() {

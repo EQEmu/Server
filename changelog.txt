@@ -1,5 +1,8 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 01/31/2017 ==
+Uleat: Modifed bot movement behavior in an attempt to 'normalize' it. This is a hack fix and will be revisited at some point. (Probably just need a follow function rather than use movement, when the leader of the follow chain is moving.)
+
 == 01/26/2017 ==
 Uleat: Change rogue bot behavior to eliminate twirling combat. They will only get behind the mob if they are not the mob's target or if the mob is feared or fleeing. This may lower rogue bot dps a small fraction..but, is more in-line with realistic game mechanics.
 
