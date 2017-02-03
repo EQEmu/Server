@@ -617,7 +617,8 @@ bool BotDatabase::LoadBuffs(Bot* bot_inst)
 		" `caston_x`,"
 		" `caston_y`,"
 		" `caston_z`,"
-		" `extra_di_chance`"
+		" `extra_di_chance`,"
+		" `instrument_mod`"
 		" FROM `bot_buffs`"
 		" WHERE `bot_id` = '%u'",
 		bot_inst->GetBotID()
@@ -657,6 +658,7 @@ bool BotDatabase::LoadBuffs(Bot* bot_inst)
 		bot_buffs[buff_count].caston_y = atoi(row[14]);
 		bot_buffs[buff_count].caston_z = atoi(row[15]);
 		bot_buffs[buff_count].ExtraDIChance = atoi(row[16]);
+		bot_buffs[buff_count].instrument_mod = atoi(row[17]);
 		bot_buffs[buff_count].casterid = 0;
 		++buff_count;
 	}

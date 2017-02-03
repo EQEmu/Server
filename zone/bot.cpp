@@ -2299,7 +2299,6 @@ void Bot::AI_Process() {
 									float newZ = 0;
 									FaceTarget(GetTarget());
 									if (PlotPositionAroundTarget(this, newX, newY, newZ)) {
-										Emote("steps back from %s", GetTarget()->GetCleanName());
 										CalculateNewPosition2(newX, newY, newZ, GetRunspeed());
 										return;
 									}
@@ -2493,24 +2492,28 @@ void Bot::AI_Process() {
 			}
 		}
 		else if(AI_movement_timer->Check()) {
+			// something is wrong with bot movement spell bonuses - based on logging..
+			// ..this code won't need to be so complex once fixed...
 			int speed = GetRunspeed();
-			if (cur_dist < GetFollowDistance() + 1000) {
+			if (cur_dist < GetFollowDistance() + 2000) {
 				speed = GetWalkspeed();
 			}
-			else if (cur_dist >= GetFollowDistance() + 8000) {
-				auto leader = follow;
-				while (leader->GetFollowID()) {
-					leader = entity_list.GetMob(leader->GetFollowID());
-					if (!leader || leader == this)
-						break;
+			else if (cur_dist >= GetFollowDistance() + 10000) { // 100
+				if (cur_dist >= 22500) { // 150
+					auto leader = follow;
+					while (leader->GetFollowID()) {
+						leader = entity_list.GetMob(leader->GetFollowID());
+						if (!leader || leader == this)
+							break;
+						if (leader->GetRunspeed() > speed)
+							speed = leader->GetRunspeed();
+						if (leader->IsClient())
+							break;
+					}
 				}
-				if (leader && leader != this && leader->GetRunspeed() > speed)
-					speed = leader->GetRunspeed();
-				speed = (float)speed * 1.8f; // special bot sprint mod
+				speed = (float)speed * (1.0f + ((float)speed * 0.03125f)); // 1/32 - special bot sprint mod
 			}
 
-			// this needs work..
-			// could probably eliminate the sprint mod with the correct logic
 			if (cur_dist > GetFollowDistance()) {
 				CalculateNewPosition2(follow->GetX(), follow->GetY(), follow->GetZ(), speed);
 				if (rest_timer.Enabled())
