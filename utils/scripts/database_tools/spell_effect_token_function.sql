@@ -5,7 +5,7 @@ DROP FUNCTION IF EXISTS `GetSpellEffectToken`;
 -- This function converts a numeric spell effect id to a string label based on server code designations
 --
 -- example:
--- SELECT `id`, `name`, GetSpellEffectToken(`effectid1`), GetSpellEffectToken(`effectid2`) FROM `spells_new` WHERE `id` IN ('1011', '1602');
+-- SELECT `id`, `name`, GetSpellEffectToken(`effectid1`), GetSpellEffectToken(`effectid2`) FROM `spells_new` WHERE `id` IN ('1011', '1602', '11091');
 CREATE FUNCTION `GetSpellEffectToken` (`effect_id` INT(11)) RETURNS VARCHAR(64)
 BEGIN
 	DECLARE `token` VARCHAR(64) DEFAULT '';
