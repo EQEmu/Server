@@ -3953,6 +3953,9 @@ void Mob::TryCriticalHit(Mob *defender, DamageHitInfo &hit, ExtraAttackOptions *
 	}
 #endif // BOTS
 
+	if (IsNPC() && !RuleB(Combat, NPCCanCrit))
+		return;
+
 	// 1: Try Slay Undead
 	if (defender->GetBodyType() == BT_Undead || defender->GetBodyType() == BT_SummonedUndead ||
 	    defender->GetBodyType() == BT_Vampire) {
@@ -3983,14 +3986,12 @@ void Mob::TryCriticalHit(Mob *defender, DamageHitInfo &hit, ExtraAttackOptions *
 	// We either require an innate crit chance or some SPA 169 to crit
 	bool innate_crit = false;
 	int crit_chance = GetCriticalChanceBonus(hit.skill);
-	if (IsClient()) {
-		if ((GetClass() == WARRIOR || GetClass() == BERSERKER) && GetLevel() >= 12)
-			innate_crit = true;
-		else if (GetClass() == RANGER && GetLevel() >= 12 && hit.skill == EQEmu::skills::SkillArchery)
-			innate_crit = true;
-		else if (GetClass() == ROGUE && GetLevel() >= 12 && hit.skill == EQEmu::skills::SkillThrowing)
-			innate_crit = true;
-	}
+	if ((GetClass() == WARRIOR || GetClass() == BERSERKER) && GetLevel() >= 12)
+		innate_crit = true;
+	else if (GetClass() == RANGER && GetLevel() >= 12 && hit.skill == EQEmu::skills::SkillArchery)
+		innate_crit = true;
+	else if (GetClass() == ROGUE && GetLevel() >= 12 && hit.skill == EQEmu::skills::SkillThrowing)
+		innate_crit = true;
 
 	// we have a chance to crit!
 	if (innate_crit || crit_chance) {
