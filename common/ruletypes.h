@@ -398,6 +398,7 @@ RULE_INT(Combat, NPCBashKickStunChance, 15) //Percent chance that a bash/kick wi
 RULE_INT(Combat, MeleeCritDifficulty, 8900) // lower is easier
 RULE_INT(Combat, ArcheryCritDifficulty, 3400) // lower is easier
 RULE_INT(Combat, ThrowingCritDifficulty, 1100) // lower is easier
+RULE_BOOL(Combat, NPCCanCrit, false) // true allows non PC pet NPCs to crit
 RULE_BOOL(Combat, UseIntervalAC, true)
 RULE_INT(Combat, PetAttackMagicLevel, 30)
 RULE_BOOL(Combat, EnableFearPathing, true)
