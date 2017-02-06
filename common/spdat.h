@@ -67,11 +67,58 @@ const int SpellTypes_Beneficial = SpellType_Heal|SpellType_Buff|SpellType_Escape
 
 #define SpellType_Any		0xFFFF
 
+// These don't appear to be consistent either through us or soe..
+// Use for generalization rather than validation
 enum SpellAffectIndex {
-	SAI_Calm			= 12, // Lull and Alliance Spells
-	SAI_Dispell_Sight	= 14, // Dispells and Spells like Bind Sight
-	SAI_Memory_Blur		= 27,
-	SAI_Calm_Song		= 43 // Lull and Alliance Songs
+	SAI_Summon_Mount_Unclass	= -1,
+	SAI_Direct_Damage			= 0,
+	SAI_Heal_Cure				= 1,
+	SAI_AC_Buff					= 2,
+	SAI_AE_Damage				= 3,
+	SAI_Summon					= 4,	// Summoned Pets and Items
+	SAI_Sight					= 5,
+	SAI_Mana_Regen_Resist_Song	= 6,
+	SAI_Stat_Buff				= 7,
+	SAI_Vanish					= 9,	// Invisibility and Gate/Port
+	SAI_Appearance				= 10,	// Illusion and Size
+	SAI_Enchanter_Pet			= 11,
+	SAI_Calm					= 12,	// Lull and Alliance Spells
+	SAI_Fear					= 13,
+	SAI_Dispell_Sight			= 14,	// Dispells and Spells like Bind Sight
+	SAI_Stun					= 15,
+	SAI_Haste_Runspeed			= 16,	// Haste and SoW
+	SAI_Combat_Slow				= 17,
+	SAI_Damage_Shield			= 18,
+	SAI_Cannibalize_Weapon_Proc	= 19,
+	SAI_Weaken					= 20,
+	SAI_Banish					= 21,
+	SAI_Blind_Poison			= 22,
+	SAI_Cold_DD					= 23,
+	SAI_Poison_Disease_DD		= 24,
+	SAI_Fire_DD					= 25,
+	SAI_Memory_Blur				= 27,
+	SAI_Gravity_Fling			= 28,
+	SAI_Suffocate				= 29,
+	SAI_Lifetap_Over_Time		= 30,
+	SAI_Fire_AE					= 31,
+	SAI_Cold_AE					= 33,
+	SAI_Poison_Disease_AE		= 34,
+	SAI_Teleport				= 40,
+	SAI_Direct_Damage_Song		= 41,
+	SAI_Combat_Buff_Song		= 42,
+	SAI_Calm_Song				= 43,	// Lull and Alliance Songs
+	SAI_Firework				= 45,
+	SAI_Firework_AE				= 46,
+	SAI_Weather_Rocket			= 47,
+	SAI_Convert_Vitals			= 50,
+	SAI_NPC_Special_60			= 60,
+	SAI_NPC_Special_61			= 61,
+	SAI_NPC_Special_62			= 62,
+	SAI_NPC_Special_63			= 63,
+	SAI_NPC_Special_70			= 70,
+	SAI_NPC_Special_71			= 71,
+	SAI_NPC_Special_80			= 80,
+	SAI_Trap_Lock				= 88
 };
 enum RESISTTYPE
 {

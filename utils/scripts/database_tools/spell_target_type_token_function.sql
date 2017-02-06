@@ -7,9 +7,9 @@ DROP FUNCTION IF EXISTS `GetSpellTargetTypeToken`;
 --
 -- example:
 -- SELECT `id`, `name`, GetSpellTargetTypeToken(`targettype`, `CastRestriction`) FROM `spells_new` WHERE `id` IN ('6836', '10763', '25039');
-CREATE FUNCTION `GetSpellTargetTypeToken` (`target_type` INT(11), `cast_restriction` INT(11)) RETURNS VARCHAR(64)
+CREATE FUNCTION `GetSpellTargetTypeToken` (`target_type` INT(11), `cast_restriction` INT(11)) RETURNS VARCHAR(128)
 BEGIN
-	DECLARE `token` VARCHAR(64) DEFAULT '';
+	DECLARE `token` VARCHAR(128) DEFAULT '';
 	DECLARE `token2` VARCHAR(64) DEFAULT '';
 	
 	CASE `target_type`
@@ -56,7 +56,6 @@ BEGIN
 	
 	CASE `cast_restriction`
 		WHEN '0' THEN SET `token2` = 'None';
-	--	WHEN '1' THEN SET `token2` = '---';
 		WHEN '100' THEN SET `token2` = 'Only works on Animal or Humanoid';
 		WHEN '101' THEN SET `token2` = 'Only works on Dragon';
 		WHEN '102' THEN SET `token2` = 'Only works on Animal or Insect';
@@ -81,11 +80,6 @@ BEGIN
 		WHEN '124' THEN SET `token2` = 'Undead HP Less Than 10%';
 		WHEN '125' THEN SET `token2` = 'Clockwork HP Less Than 45%';
 		WHEN '126' THEN SET `token2` = 'Wisp HP Less Than 10%';
-	--	WHEN '127' THEN SET `token2` = '---';
-	--	WHEN '128' THEN SET `token2` = '---';
-	--	WHEN '129' THEN SET `token2` = '---';
-	--	WHEN '130' THEN SET `token2` = '---';
-	--	WHEN '150' THEN SET `token2` = '---';
 		WHEN '190' THEN SET `token2` = 'Doesn\'t work on Raid Bosses';
 		WHEN '191' THEN SET `token2` = 'Only works on Raid Bosses';
 		WHEN '201' THEN SET `token2` = 'HP Above 75%';
@@ -120,8 +114,6 @@ BEGIN
 		WHEN '402' THEN SET `token2` = 'HP Between 35 and 45%';
 		WHEN '403' THEN SET `token2` = 'HP Between 45 and 55%';
 		WHEN '404' THEN SET `token2` = 'HP Between 55 and 65%';
-	--	WHEN '410' THEN SET `token2` = '---';
-	--	WHEN '411' THEN SET `token2` = '---';
 		WHEN '412' THEN SET `token2` = 'HP Above 99%';
 		WHEN '501' THEN SET `token2` = 'HP Below 5%';
 		WHEN '502' THEN SET `token2` = 'HP Below 10%';
@@ -145,24 +137,12 @@ BEGIN
 		WHEN '521' THEN SET `token2` = 'Mana Below X%';
 		WHEN '522' THEN SET `token2` = 'End Below 40%';
 		WHEN '523' THEN SET `token2` = 'Mana Below 40%';
-	--	WHEN '601' THEN SET `token2` = '---';
 		WHEN '603' THEN SET `token2` = 'Only works on Undead2';
 		WHEN '608' THEN SET `token2` = 'Only works on Undead3';
 		WHEN '624' THEN SET `token2` = 'Only works on Summoned2';
-	--	WHEN '626' THEN SET `token2` = '---';
-	--	WHEN '700' THEN SET `token2` = '---';
 		WHEN '701' THEN SET `token2` = 'Doesn\'t work on Pets';
-	--	WHEN '800' THEN SET `token2` = '---';
-	--	WHEN '812' THEN SET `token2` = '---';
-	--	WHEN '814' THEN SET `token2` = '---';
-	--	WHEN '815' THEN SET `token2` = '---';
-	--	WHEN '816' THEN SET `token2` = '---';
-	--	WHEN '817' THEN SET `token2` = '---';
 		WHEN '818' THEN SET `token2` = 'Only works on Undead4';
 		WHEN '819' THEN SET `token2` = 'Doesn\'t work on Undead4';
-	--	WHEN '820' THEN SET `token2` = '---';
-	--	WHEN '821' THEN SET `token2` = '---';
-	--	WHEN '822' THEN SET `token2` = '---';
 		WHEN '825' THEN SET `token2` = 'End Below 21%';
 		WHEN '826' THEN SET `token2` = 'End Below 25%';
 		WHEN '827' THEN SET `token2` = 'End Below 29%';
@@ -171,15 +151,6 @@ BEGIN
 		WHEN '842' THEN SET `token2` = 'Only works on Humanoid Level 84 Max';
 		WHEN '843' THEN SET `token2` = 'Only works on Humanoid Level 86 Max';
 		WHEN '844' THEN SET `token2` = 'Only works on Humanoid Level 88 Max';
-	--	WHEN '845' THEN SET `token2` = '---';
-	--	WHEN '846' THEN SET `token2` = '---';
-	--	WHEN '847' THEN SET `token2` = '---';
-	--	WHEN '860' THEN SET `token2` = '---';
-	--	WHEN '861' THEN SET `token2` = '---';
-	--	WHEN '862' THEN SET `token2` = '---';
-	--	WHEN '863' THEN SET `token2` = '---';
-	--	WHEN '864' THEN SET `token2` = '---';
-	--	WHEN '865' THEN SET `token2` = '---';
 		WHEN '1000' THEN SET `token2` = 'Between Level 1 and 75';
 		WHEN '1001' THEN SET `token2` = 'Between Level 76 and 85';
 		WHEN '1002' THEN SET `token2` = 'Between Level 86 and 95';
