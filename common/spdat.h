@@ -67,8 +67,9 @@ const int SpellTypes_Beneficial = SpellType_Heal|SpellType_Buff|SpellType_Escape
 
 #define SpellType_Any		0xFFFF
 
-// These don't appear to be consistent either through us or soe..
-// Use for generalization rather than validation
+// These should not be used to determine spell category..
+// They are a graphical affects (effects?) index only
+// TODO: import sai list
 enum SpellAffectIndex {
 	SAI_Summon_Mount_Unclass	= -1,
 	SAI_Direct_Damage			= 0,
