@@ -20,7 +20,7 @@ public:
 		return inst;
 	}
 private:
-	EventSubscriptionWatcher();
+	EventSubscriptionWatcher() { }
 	EventSubscriptionWatcher(const EventSubscriptionWatcher&);
 	EventSubscriptionWatcher& operator=(const EventSubscriptionWatcher&);
 	
