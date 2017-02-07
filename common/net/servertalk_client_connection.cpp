@@ -309,7 +309,7 @@ void EQ::Net::ServertalkClient::ProcessMessage(EQ::Net::Packet &p)
 
 #else
 			size_t message_len = length;
-			EQ::Net::ReadOnlyPacket packet(&data[0], message_len);
+			EQ::Net::StaticPacket packet(&data[0], message_len);
 
 			auto cb = m_message_callbacks.find(opcode);
 			if (cb != m_message_callbacks.end()) {
