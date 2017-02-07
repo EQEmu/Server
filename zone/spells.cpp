@@ -5566,6 +5566,7 @@ void Client::InitializeBuffSlots()
 	for(int x = 0; x < max_slots; ++x)
 	{
 		buffs[x].spellid = SPELL_UNKNOWN;
+		buffs[x].UpdateClient = false;
 	}
 	current_buff_count = 0;
 }
@@ -5582,6 +5583,7 @@ void NPC::InitializeBuffSlots()
 	for(int x = 0; x < max_slots; ++x)
 	{
 		buffs[x].spellid = SPELL_UNKNOWN;
+		buffs[x].UpdateClient = false;
 	}
 	current_buff_count = 0;
 }

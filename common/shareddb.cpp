@@ -1136,13 +1136,13 @@ const EQEmu::ItemData* SharedDatabase::IterateItems(uint32* id) {
 	return nullptr;
 }
 
-std::string SharedDatabase::GetBook(const char *txtfile)
+std::string SharedDatabase::GetBook(const char *txtfile, int16 *language)
 {
 	char txtfile2[20];
 	std::string txtout;
 	strcpy(txtfile2, txtfile);
 
-	std::string query = StringFormat("SELECT txtfile FROM books WHERE name = '%s'", txtfile2);
+	std::string query = StringFormat("SELECT txtfile, language FROM books WHERE name = '%s'", txtfile2);
 	auto results = QueryDatabase(query);
 	if (!results.Success()) {
 		txtout.assign(" ",1);
@@ -1157,6 +1157,7 @@ std::string SharedDatabase::GetBook(const char *txtfile)
 
     auto row = results.begin();
     txtout.assign(row[0],strlen(row[0]));
+    *language = static_cast<int16>(atoi(row[1]));
 
     return txtout;
 }

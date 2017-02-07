@@ -46,6 +46,7 @@ void Mob::CalcBonuses()
 	CalcMaxHP();
 	CalcMaxMana();
 	SetAttackTimer();
+	CalcAC();
 
 	rooted = FindType(SE_Root);
 }
@@ -669,6 +670,10 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 		}
 
 		switch (effect) {
+		case SE_ACv2:
+		case SE_ArmorClass:
+			newbon->AC += base1;
+			break;
 		// Note: AA effects that use accuracy are skill limited, while spell effect is not.
 		case SE_Accuracy:
 			// Bad data or unsupported new skill
@@ -1308,8 +1313,9 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 		}
 
 		case SE_HeadShotLevel: {
-			if (newbon->HSLevel < base1)
-				newbon->HSLevel = base1;
+			if (newbon->HSLevel[0] < base1)
+				newbon->HSLevel[0] = base1;
+				newbon->HSLevel[1] = base2;
 			break;
 		}
 
@@ -1322,8 +1328,10 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 		}
 
 		case SE_AssassinateLevel: {
-			if (newbon->AssassinateLevel < base1)
-				newbon->AssassinateLevel = base1;
+			if (newbon->AssassinateLevel[0] < base1) {
+				newbon->AssassinateLevel[0] = base1;
+				newbon->AssassinateLevel[1] = base2;
+			}
 			break;
 		}
 
@@ -1381,7 +1389,7 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 		}
 
 		case SE_MeleeMitigation:
-			newbon->MeleeMitigationEffect -= base1;
+			newbon->MeleeMitigationEffect += base1;
 			break;
 
 		case SE_ATK:
@@ -1527,9 +1535,6 @@ void Mob::CalcSpellBonuses(StatBonuses* newbon)
 		}
 	}
 
-	// THIS IS WRONG, leaving for now
-	//this prolly suffer from roundoff error slightly...
-	newbon->AC = newbon->AC * 10 / 34;      //ratio determined impirically from client.
 	if (GetClass() == BARD)
 		newbon->ManaRegen = 0; // Bards do not get mana regen from spells.
 }
@@ -1927,8 +1932,8 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 				break;
 
 			case SE_MeleeMitigation:
-				//for some reason... this value is negative for increased mitigation
-				new_bonus->MeleeMitigationEffect -= effect_value;
+				// This value is negative because it counteracts another SPA :P
+				new_bonus->MeleeMitigationEffect += effect_value;
 				break;
 
 			case SE_CriticalHitChance:
@@ -3024,8 +3029,10 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 
 			case SE_HeadShotLevel:
 			{
-				if(new_bonus->HSLevel < effect_value)
-					new_bonus->HSLevel = effect_value;
+				if(new_bonus->HSLevel[0] < effect_value) {
+					new_bonus->HSLevel[0] = effect_value;
+					new_bonus->HSLevel[1] = base2;
+				}
 				break;
 			}
 
@@ -3040,8 +3047,10 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 
 			case SE_AssassinateLevel:
 			{
-				if(new_bonus->AssassinateLevel < effect_value)
-					new_bonus->AssassinateLevel = effect_value;
+				if(new_bonus->AssassinateLevel[0] < effect_value) {
+					new_bonus->AssassinateLevel[0] = effect_value;
+					new_bonus->AssassinateLevel[1] = base2;
+				}
 				break;
 			}
 
@@ -4647,9 +4656,12 @@ void Mob::NegateSpellsBonuses(uint16 spell_id)
 					break;
 
 				case SE_HeadShotLevel:
-					spellbonuses.HSLevel = effect_value;
-					aabonuses.HSLevel = effect_value;
-					itembonuses.HSLevel = effect_value;
+					spellbonuses.HSLevel[0] = effect_value;
+					aabonuses.HSLevel[0] = effect_value;
+					itembonuses.HSLevel[0] = effect_value;
+					spellbonuses.HSLevel[1] = effect_value;
+					aabonuses.HSLevel[1] = effect_value;
+					itembonuses.HSLevel[1] = effect_value;
 					break;
 
 				case SE_Assassinate:
@@ -4662,9 +4674,12 @@ void Mob::NegateSpellsBonuses(uint16 spell_id)
 					break;
 
 				case SE_AssassinateLevel:
-					spellbonuses.AssassinateLevel = effect_value;
-					aabonuses.AssassinateLevel = effect_value;
-					itembonuses.AssassinateLevel = effect_value;
+					spellbonuses.AssassinateLevel[0] = effect_value;
+					aabonuses.AssassinateLevel[0] = effect_value;
+					itembonuses.AssassinateLevel[0] = effect_value;
+					spellbonuses.AssassinateLevel[1] = effect_value;
+					aabonuses.AssassinateLevel[1] = effect_value;
+					itembonuses.AssassinateLevel[1] = effect_value;
 					break;
 
 				case SE_FinishingBlow:

@@ -436,6 +436,8 @@ public:
 				case 10:
 					if (spells[spell_id].effectdescnum != 65)
 						break;
+					if (IsEffectInSpell(spell_id, SE_NegateIfCombat))
+						break;
 					entry_prototype = new STMovementSpeedEntry();
 					entry_prototype->SafeCastToMovementSpeed()->group = BCSpells::IsGroupType(target_type);
 					break;

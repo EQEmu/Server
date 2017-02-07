@@ -4621,7 +4621,8 @@ void Client::Handle_OP_CombatAbility(const EQApplicationPacket *app)
 		std::cout << "Wrong size on OP_CombatAbility. Got: " << app->size << ", Expected: " << sizeof(CombatAbility_Struct) << std::endl;
 		return;
 	}
-	OPCombatAbility(app);
+	auto ca_atk = (CombatAbility_Struct *)app->pBuffer;
+	OPCombatAbility(ca_atk);
 	return;
 }
 

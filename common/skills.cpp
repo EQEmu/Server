@@ -124,6 +124,30 @@ bool EQEmu::skills::IsCastingSkill(SkillType skill)
 	}
 }
 
+int32 EQEmu::skills::GetBaseDamage(SkillType skill)
+{
+	switch (skill) {
+	case SkillBash:
+		return 2;
+	case SkillDragonPunch:
+		return 12;
+	case SkillEagleStrike:
+		return 7;
+	case SkillFlyingKick:
+		return 25;
+	case SkillKick:
+		return 3;
+	case SkillRoundKick:
+		return 5;
+	case SkillTigerClaw:
+		return 4;
+	case SkillFrenzy:
+		return 10;
+	default:
+		return 0;
+	}
+}
+
 const std::map<EQEmu::skills::SkillType, std::string>& EQEmu::skills::GetSkillTypeMap()
 {
 	/* VS2013 code

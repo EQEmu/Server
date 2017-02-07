@@ -33,6 +33,7 @@ extern volatile bool RunLoops;
 
 #include "../common/eqemu_logsys.h"
 #include "../common/features.h"
+#include "../common/emu_legacy.h"
 #include "../common/spdat.h"
 #include "../common/guilds.h"
 #include "../common/rulesys.h"
@@ -1997,6 +1998,7 @@ void Client::SetGM(bool toggle) {
 }
 
 void Client::ReadBook(BookRequest_Struct *book) {
+	int16 book_language=0;
 	char *txtfile = book->txtfile;
 
 	if(txtfile[0] == '0' && txtfile[1] == '\0') {
@@ -2004,7 +2006,7 @@ void Client::ReadBook(BookRequest_Struct *book) {
 		return;
 	}
 
-	std::string booktxt2 = database.GetBook(txtfile);
+	std::string booktxt2 = database.GetBook(txtfile, &book_language);
 	int length = booktxt2.length();
 
 	if (booktxt2[0] != '\0') {
@@ -2015,20 +2017,46 @@ void Client::ReadBook(BookRequest_Struct *book) {
 
 		BookText_Struct *out = (BookText_Struct *) outapp->pBuffer;
 		out->window = book->window;
-		if (ClientVersion() >= EQEmu::versions::ClientVersion::SoF)
-		{
-			const EQEmu::ItemInstance *inst = m_inv[book->invslot];
+
+
+		if (ClientVersion() >= EQEmu::versions::ClientVersion::SoF) {
+			// Find out what slot the book was read from.
+			// SoF+ need to look up book type for the output message.
+			int16	read_from_slot;
+
+			if (book->subslot >= 0) {
+				uint16 offset;
+				offset = (book->invslot-23) * 10;	// How many packs to skip.
+				read_from_slot = 251 + offset + book->subslot;
+			}
+			else {
+				read_from_slot = book->invslot -1;
+			}
+
+			const EQEmu::ItemInstance *inst = 0;
+
+			if (read_from_slot <= EQEmu::legacy::SLOT_PERSONAL_BAGS_END)
+				{
+				inst = m_inv[read_from_slot];
+				}
+
 			if(inst)
 				out->type = inst->GetItem()->Book;
 			else
 				out->type = book->type;
 		}
-		else
-		{
+		else {
 			out->type = book->type;
 		}
 		out->invslot = book->invslot;
+
 		memcpy(out->booktext, booktxt2.c_str(), length);
+
+		if (book_language > 0 && book_language < MAX_PP_LANGUAGE) {
+			if (m_pp.languages[book_language] < 100) {
+				GarbleMessage(out->booktext, (100 - m_pp.languages[book_language]));
+			}
+		}
 
 		QueuePacket(outapp);
 		safe_delete(outapp);
@@ -6861,16 +6889,46 @@ void Client::SendStatsWindow(Client* client, bool use_window)
 					indP + "Wind: " + itoa(GetWindMod()) + "<br>";
 	}
 
+	EQEmu::skills::SkillType skill = EQEmu::skills::SkillHandtoHand;
+	auto *inst = GetInv().GetItem(EQEmu::inventory::slotPrimary);
+	if (inst && inst->IsClassCommon()) {
+		switch (inst->GetItem()->ItemType) {
+		case EQEmu::item::ItemType1HSlash:
+			skill = EQEmu::skills::Skill1HSlashing;
+			break;
+		case EQEmu::item::ItemType2HSlash:
+			skill = EQEmu::skills::Skill2HSlashing;
+			break;
+		case EQEmu::item::ItemType1HPiercing:
+			skill = EQEmu::skills::Skill1HPiercing;
+			break;
+		case EQEmu::item::ItemType1HBlunt:
+			skill = EQEmu::skills::Skill1HBlunt;
+			break;
+		case EQEmu::item::ItemType2HBlunt:
+			skill = EQEmu::skills::Skill2HBlunt;
+			break;
+		case EQEmu::item::ItemType2HPiercing:
+			if (ClientVersion() < EQEmu::versions::ClientVersion::RoF2)
+				skill = EQEmu::skills::Skill1HPiercing;
+			else
+				skill = EQEmu::skills::Skill2HPiercing;
+			break;
+		default:
+			break;
+		}
+	}
+
 	std::ostringstream final_string;
 					final_string <<
 	/*	C/L/R	*/	indP << "Class: " << class_Name << indS << "Level: " << static_cast<int>(GetLevel()) << indS << "Race: " << race_Name << "<br>" <<
 	/*	Runes	*/	indP << "Rune: " << rune_number << indL << indS << "Spell Rune: " << magic_rune_number << "<br>" <<
 	/*	HP/M/E	*/	HME_row <<
 	/*	DS		*/	indP << "DS: " << (itembonuses.DamageShield + spellbonuses.DamageShield*-1) << " (Spell: " << (spellbonuses.DamageShield*-1) << " + Item: " << itembonuses.DamageShield << " / " << RuleI(Character, ItemDamageShieldCap) << ")<br>" <<
-	/*	Atk		*/	indP << "<c \"#CCFF00\">ATK: " << GetTotalATK() << "</c><br>" <<
-	/*	Atk2	*/	indP << "- Base: " << GetATKRating() << " | Item: " << itembonuses.ATK << " (" << RuleI(Character, ItemATKCap) << ")~Used: " << (itembonuses.ATK * 1.342) << " | Spell: " << spellbonuses.ATK << "<br>" <<
-	/*	AC		*/	indP << "<c \"#CCFF00\">AC: " << CalcAC() << "</c><br>" <<
-	/*	AC2		*/	indP << "- Mit: " << GetACMit() << " | Avoid: " << GetACAvoid() << " | Spell: " << spellbonuses.AC << " | Shield: " << shield_ac << "<br>" <<
+	/*	Atk		*/	indP << "<c \"#CCFF00\">tohit: " << compute_tohit(skill) << " / " << GetTotalToHit(skill, 0) << "</c><br>" <<
+	/*	Atk2	*/	indP << "- Offense: " << offense(skill) << " | Item: " << itembonuses.ATK << " (" << RuleI(Character, ItemATKCap) << ")~Used: " << (itembonuses.ATK * 1.342) << " | Spell: " << spellbonuses.ATK << "<br>" <<
+	/*	AC		*/	indP << "<c \"#CCFF00\">mitigation AC: " << GetMitigationAC() << "</c><br>" <<
+	/*	AC2		*/	indP << "- defense: " << compute_defense() << " / " << GetTotalDefense() << " | Spell: " << spellbonuses.AC << " | Shield: " << shield_ac << "<br>" <<
 	/*	Haste	*/	indP << "<c \"#CCFF00\">Haste: " << GetHaste() << "</c><br>" <<
 	/*	Haste2	*/	indP << " - Item: " << itembonuses.haste << " + Spell: " << (spellbonuses.haste + spellbonuses.hastetype2) << " (Cap: " << RuleI(Character, HasteCap) << ") | Over: " << (spellbonuses.hastetype3 + ExtraHaste) << "<br>" <<
 	/*	RunSpeed*/	indP << "<c \"#CCFF00\">Runspeed: " << GetRunspeed() << "</c><br>" <<
@@ -6908,7 +6966,9 @@ void Client::SendStatsWindow(Client* client, bool use_window)
 	client->Message(15, "~~~~~ %s %s ~~~~~", GetCleanName(), GetLastName());
 	client->Message(0, " Level: %i Class: %i Race: %i DS: %i/%i Size: %1.1f  Weight: %.1f/%d  ", GetLevel(), GetClass(), GetRace(), GetDS(), RuleI(Character, ItemDamageShieldCap), GetSize(), (float)CalcCurrentWeight() / 10.0f, GetSTR());
 	client->Message(0, " HP: %i/%i  HP Regen: %i/%i",GetHP(), GetMaxHP(), CalcHPRegen(), CalcHPRegenCap());
-	client->Message(0, " AC: %i ( Mit.: %i + Avoid.: %i + Spell: %i ) | Shield AC: %i", CalcAC(), GetACMit(), GetACAvoid(), spellbonuses.AC, shield_ac);
+	client->Message(0, " compute_tohit: %i TotalToHit: %i", compute_tohit(skill), GetTotalToHit(skill, 0));
+	client->Message(0, " compute_defense: %i TotalDefense: %i", compute_defense(), GetTotalDefense());
+	client->Message(0, " offense: %i mitigation ac: %i", offense(skill), GetMitigationAC());
 	if(CalcMaxMana() > 0)
 		client->Message(0, " Mana: %i/%i  Mana Regen: %i/%i", GetMana(), GetMaxMana(), CalcManaRegen(), CalcManaRegenCap());
 	client->Message(0, " End.: %i/%i  End. Regen: %i/%i",GetEndurance(), GetMaxEndurance(), CalcEnduranceRegen(), CalcEnduranceRegenCap());

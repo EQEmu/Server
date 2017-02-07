@@ -110,7 +110,9 @@ Mob::Mob(const char* in_name,
 		m_TargetV(glm::vec3()),
 		flee_timer(FLEE_CHECK_TIMER),
 		m_Position(position),
-		tmHidden(-1)
+		tmHidden(-1),
+		mitigation_ac(0),
+		m_specialattacks(eSpecialAttacks::None)
 {
 	targeted = 0;
 	tar_ndx=0;
@@ -212,6 +214,7 @@ Mob::Mob(const char* in_name,
 	has_shieldequiped = false;
 	has_twohandbluntequiped = false;
 	has_twohanderequipped = false;
+	can_facestab = false;
 	has_numhits = false;
 	has_MGB = false;
 	has_ProjectIllusion = false;
@@ -284,6 +287,8 @@ Mob::Mob(const char* in_name,
 	{
 		armor_tint.Slot[i].Color = in_armor_tint.Slot[i].Color;
 	}
+
+	std::fill(std::begin(m_spellHitsLeft), std::end(m_spellHitsLeft), 0);
 
 	m_Delta = glm::vec4();
 	animation = 0;
@@ -1497,6 +1502,10 @@ void Mob::ShowStats(Client* client)
 		if (IsAIControlled()) {
 			client->Message(0, "  AggroRange: %1.0f  AssistRange: %1.0f", GetAggroRange(), GetAssistRange());
 		}
+
+		client->Message(0, "  compute_tohit: %i TotalToHit: %i", compute_tohit(EQEmu::skills::SkillHandtoHand), GetTotalToHit(EQEmu::skills::SkillHandtoHand, 0));
+		client->Message(0, "  compute_defense: %i TotalDefense: %i", compute_defense(), GetTotalDefense());
+		client->Message(0, "  offense: %i mitigation ac: %i", offense(EQEmu::skills::SkillHandtoHand), GetMitigationAC());
 	}
 }
 
@@ -2773,7 +2782,22 @@ void Mob::SendWearChange(uint8 material_slot, Client *one_client)
 	wc->material = GetEquipmentMaterial(material_slot);
 	wc->elite_material = IsEliteMaterialItem(material_slot);
 	wc->hero_forge_model = GetHerosForgeModel(material_slot);
+
+#ifdef BOTS
+	if (IsBot()) {
+		auto item_inst = CastToBot()->GetBotItem(EQEmu::InventoryProfile::CalcSlotFromMaterial(material_slot));
+		if (item_inst)
+			wc->color.Color = item_inst->GetColor();
+		else
+			wc->color.Color = 0;
+	}
+	else {
+		wc->color.Color = GetEquipmentColor(material_slot);
+	}
+#else
 	wc->color.Color = GetEquipmentColor(material_slot);
+#endif
+
 	wc->wear_slot_id = material_slot;
 
 	if (!one_client)
@@ -4644,7 +4668,7 @@ void Mob::SetRaidGrouped(bool v)
 	}
 }
 
-int16 Mob::GetCriticalChanceBonus(uint16 skill)
+int Mob::GetCriticalChanceBonus(uint16 skill)
 {
 	int critical_chance = 0;
 

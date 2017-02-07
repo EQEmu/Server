@@ -392,15 +392,13 @@ RULE_BOOL(Spells, NPCInnateProcOverride, true) //  NPC innate procs override the
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Combat)
-RULE_INT(Combat, MeleeBaseCritChance, 0) //The base crit chance for non warriors, NOTE: This will apply to NPCs as well
-RULE_INT(Combat, WarBerBaseCritChance, 3) //The base crit chance for warriors and berserkers, only applies to clients
-RULE_INT(Combat, BerserkBaseCritChance, 6) //The bonus base crit chance you get when you're berserk
+RULE_INT(Combat, PetBaseCritChance, 0) // Pet Base crit chance
 RULE_INT(Combat, NPCBashKickLevel, 6) //The level that npcs can KICK/BASH
 RULE_INT(Combat, NPCBashKickStunChance, 15) //Percent chance that a bash/kick will stun
-RULE_INT(Combat, RogueCritThrowingChance, 25) //Rogue throwing crit bonus
-RULE_INT(Combat, RogueDeadlyStrikeChance, 80) //Rogue chance throwing from behind crit becomes a deadly strike
-RULE_INT(Combat, RogueDeadlyStrikeMod, 2) //Deadly strike modifier to crit damage
-RULE_INT(Combat, ClientBaseCritChance, 0) //The base crit chance for all clients, this will stack with warrior's/zerker's crit chance.
+RULE_INT(Combat, MeleeCritDifficulty, 8900) // lower is easier
+RULE_INT(Combat, ArcheryCritDifficulty, 3400) // lower is easier
+RULE_INT(Combat, ThrowingCritDifficulty, 1100) // lower is easier
+RULE_BOOL(Combat, NPCCanCrit, false) // true allows non PC pet NPCs to crit
 RULE_BOOL(Combat, UseIntervalAC, true)
 RULE_INT(Combat, PetAttackMagicLevel, 30)
 RULE_BOOL(Combat, EnableFearPathing, true)
@@ -492,6 +490,7 @@ RULE_INT(Combat, NPCAssistCap, 5) // Maxiumium number of NPCs that will assist a
 RULE_INT(Combat, NPCAssistCapTimer, 6000) // Time in milliseconds a NPC will take to clear assist aggro cap space
 RULE_BOOL(Combat, UseRevampHandToHand, false) // use h2h revamped dmg/delays I believe this was implemented during SoF
 RULE_BOOL(Combat, ClassicMasterWu, false) // classic master wu uses a random special, modern doesn't
+RULE_INT(Combat, LevelToStopDamageCaps, 0) // 1 will effectively disable them, 20 should give basically same results as old incorrect system
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(NPC)

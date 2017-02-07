@@ -35,6 +35,13 @@
 #define CON_YELLOW		15
 #define CON_RED			13
 
+#define DMG_BLOCKED		-1
+#define DMG_PARRIED		-2
+#define DMG_RIPOSTED		-3
+#define DMG_DODGED		-4
+#define DMG_INVULNERABLE	-5
+#define DMG_RUNE		-6
+
 //Spell specialization parameters, not sure of a better place for them
 #define SPECIALIZE_FIZZLE 11		//% fizzle chance reduce at 200 specialized
 #define SPECIALIZE_MANA_REDUCE 12	//% mana cost reduction at 200 specialized
@@ -464,9 +471,9 @@ struct StatBonuses {
 	int8	CriticalMend;						// chance critical monk mend
 	int32	ImprovedReclaimEnergy;				// Modifies amount of mana returned from reclaim energy
 	uint32	HeadShot[2];						// Headshot AA (Massive dmg vs humaniod w/ archery) 0= ? 1= Dmg
-	uint8	HSLevel;							// Max Level Headshot will be effective at.
+	uint8	HSLevel[2];							// Max Level Headshot will be effective at. and chance mod
 	uint32	Assassinate[2];						// Assassinate AA (Massive dmg vs humaniod w/ assassinate) 0= ? 1= Dmg
-	uint8	AssassinateLevel;					// Max Level Assassinate will be effective at.
+	uint8	AssassinateLevel[2];				// Max Level Assassinate will be effective at.
 	int32	PetMeleeMitigation;					// Add AC to owner's pet.
 	bool	IllusionPersistence;				// Causes illusions not to fade.
 	uint16	extra_xtargets;						// extra xtarget entries
@@ -636,6 +643,24 @@ struct ExtraAttackOptions {
 	int melee_damage_bonus_flat;
 	int skilldmgtaken_bonus_flat;
 
+};
+
+struct DamageTable {
+	int32 max_extra; // max extra damage
+	int32 chance; // chance not to apply?
+	int32 minusfactor; // difficulty of rolling
+};
+
+struct DamageHitInfo {
+	//uint16 attacker; // id
+	//uint16 defender; // id
+	int base_damage;
+	int min_damage;
+	int damage_done;
+	int offense;
+	int tohit;
+	int hand;
+	EQEmu::skills::SkillType skill;
 };
 
 #endif

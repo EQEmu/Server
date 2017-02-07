@@ -82,7 +82,6 @@ Bot::Bot(NPCType npcTypeData, Client* botOwner) : NPC(&npcTypeData, nullptr, glm
 	// Do this once and only in this constructor
 	GenerateAppearance();
 	GenerateBaseStats();
-	GenerateArmorClass();
 	// Calculate HitPoints Last As It Uses Base Stats
 	cur_hp = GenerateBaseHitPoints();
 	cur_mana = GenerateBaseManaPoints();
@@ -175,6 +174,9 @@ Bot::Bot(uint32 botID, uint32 botOwnerCharacterID, uint32 botSpellsID, double to
 
 	for (int i = 0; i < MaxTimer; i++)
 		timers[i] = 0;
+
+	if (GetClass() == ROGUE)
+		evade_timer.Start();
 
 	GenerateBaseStats();
 
@@ -1137,42 +1139,6 @@ int32 Bot::acmod() {
 	return 0;
 }
 
-void Bot::GenerateArmorClass() {
-	/// new formula
-	int avoidance = 0;
-	avoidance = (acmod() + ((GetSkill(EQEmu::skills::SkillDefense) * 16) / 9));
-	if(avoidance < 0)
-		avoidance = 0;
-
-	int mitigation = 0;
-	if(GetClass() == WIZARD || GetClass() == MAGICIAN || GetClass() == NECROMANCER || GetClass() == ENCHANTER) {
-		mitigation = (GetSkill(EQEmu::skills::SkillDefense) / 4 + (itembonuses.AC + 1));
-		mitigation -= 4;
-	} else {
-		mitigation = (GetSkill(EQEmu::skills::SkillDefense) / 3 + ((itembonuses.AC * 4) / 3));
-		if(GetClass() == MONK)
-			mitigation += (GetLevel() * 13 / 10);	//the 13/10 might be wrong, but it is close...
-	}
-	int displayed = 0;
-	displayed += (((avoidance + mitigation) * 1000) / 847);	//natural AC
-
-	//Iksar AC, untested
-	if(GetRace() == IKSAR) {
-		displayed += 12;
-		int iksarlevel = GetLevel();
-		iksarlevel -= 10;
-		if(iksarlevel > 25)
-			iksarlevel = 25;
-
-		if(iksarlevel > 0)
-			displayed += (iksarlevel * 12 / 10);
-	}
-
-	//spell AC bonuses are added directly to natural total
-	displayed += spellbonuses.AC;
-	this->AC = displayed;
-}
-
 uint16 Bot::GetPrimarySkillValue() {
 	EQEmu::skills::SkillType skill = EQEmu::skills::HIGHEST_SKILL; //because nullptr == 0, which is 1H Slashing, & we want it to return 0 from GetSkill
 	bool equiped = m_inv.GetItem(EQEmu::inventory::slotPrimary);
@@ -1992,110 +1958,6 @@ bool Bot::CheckBotDoubleAttack(bool tripleAttack) {
 	return false;
 }
 
-void Bot::DoMeleeSkillAttackDmg(Mob* other, uint16 weapon_damage, EQEmu::skills::SkillType skillinuse, int16 chance_mod, int16 focus, bool CanRiposte, int ReuseTime) {
-	if (!CanDoSpecialAttack(other))
-		return;
-
-	//For spells using skill value 98 (feral swipe ect) server sets this to 67 automatically.
-	if (skillinuse == EQEmu::skills::SkillBegging)
-		skillinuse = EQEmu::skills::SkillOffense;
-
-	int damage = 0;
-	uint32 hate = 0;
-	int Hand = EQEmu::inventory::slotPrimary;
-	if (hate == 0 && weapon_damage > 1)
-		hate = weapon_damage;
-
-	if(weapon_damage > 0) {
-		if(GetClass() == BERSERKER) {
-			int bonus = (3 + GetLevel( )/ 10);
-			weapon_damage = (weapon_damage * (100 + bonus) / 100);
-		}
-
-		int32 min_hit = 1;
-		int32 max_hit = ((2 * weapon_damage * GetDamageTable(skillinuse)) / 100);
-		if(GetLevel() >= 28 && IsWarriorClass()) {
-			int ucDamageBonus = GetWeaponDamageBonus((const EQEmu::ItemData*) nullptr);
-			min_hit += (int) ucDamageBonus;
-			max_hit += (int) ucDamageBonus;
-			hate += ucDamageBonus;
-		}
-
-		ApplySpecialAttackMod(skillinuse, max_hit, min_hit);
-		min_hit += (min_hit * GetMeleeMinDamageMod_SE(skillinuse) / 100);
-		if(max_hit < min_hit)
-			max_hit = min_hit;
-
-		if(RuleB(Combat, UseIntervalAC))
-			damage = max_hit;
-		else
-			damage = zone->random.Int(min_hit, max_hit);
-
-		if (other->AvoidDamage(this, damage, CanRiposte ? EQEmu::inventory::slotRange : EQEmu::inventory::slotPrimary)) { // MainRange excludes ripo, primary doesn't have any extra behavior
-			if (damage == -3) {
-				DoRiposte(other);
-				if (HasDied())
-					return;
-			}
-		} else {
-			if (other->CheckHitChance(this, skillinuse, chance_mod)) {
-				other->MeleeMitigation(this, damage, min_hit);
-				if (damage > 0) {
-					damage += damage*focus/100;
-					ApplyMeleeDamageBonus(skillinuse, damage);
-					damage += other->GetFcDamageAmtIncoming(this, 0, true, skillinuse);
-					damage += ((itembonuses.HeroicSTR / 10) + (damage * other->GetSkillDmgTaken(skillinuse) / 100) + GetSkillDmgAmt(skillinuse));
-					TryCriticalHit(other, skillinuse, damage, nullptr);
-				}
-			} else {
-				damage = 0;
-			}
-		}
-	}
-	else
-		damage = -5;
-
-	if (skillinuse == EQEmu::skills::SkillBash){
-		const EQEmu::ItemInstance* inst = GetBotItem(EQEmu::inventory::slotSecondary);
-		const EQEmu::ItemData* botweapon = 0;
-		if(inst)
-			botweapon = inst->GetItem();
-
-		if(botweapon) {
-			if (botweapon->ItemType == EQEmu::item::ItemTypeShield)
-				hate += botweapon->AC;
-
-			hate = (hate * (100 + GetFuriousBash(botweapon->Focus.Effect)) / 100);
-		}
-	}
-
-	other->AddToHateList(this, hate);
-
-	bool CanSkillProc = true;
-	if (skillinuse == EQEmu::skills::SkillOffense){ //Hack to allow damage to display.
-		skillinuse = EQEmu::skills::SkillTigerClaw; //'strike' your opponent - Arbitrary choice for message.
-		CanSkillProc = false; //Disable skill procs
-	}
-
-	other->Damage(this, damage, SPELL_UNKNOWN, skillinuse);
-	if (HasDied())
-		return;
-
-	if (damage > 0)
-		CheckNumHitsRemaining(NumHit::OutgoingHitSuccess);
-
-	if ((skillinuse == EQEmu::skills::SkillDragonPunch) && GetAA(aaDragonPunch) && zone->random.Int(0, 99) < 25){
-		SpellFinished(904, other, EQEmu::CastingSlot::Item, 0, -1, spells[904].ResistDiff);
-		other->Stun(100);
-	}
-
-	if (CanSkillProc && HasSkillProcs())
-		TrySkillProc(other, skillinuse, ReuseTime);
-
-	if (CanSkillProc && (damage > 0) && HasSkillProcSuccess())
-		TrySkillProc(other, skillinuse, ReuseTime, true);
-}
-
 void Bot::ApplySpecialAttackMod(EQEmu::skills::SkillType skill, int32 &dmg, int32 &mindmg) {
 	int item_slot = -1;
 	//1: Apply bonus from AC (BOOT/SHIELD/HANDS) est. 40AC=6dmg
@@ -2409,24 +2271,60 @@ void Bot::AI_Process() {
 			}
 
 			if(AI_movement_timer->Check()) {
-				if(!IsMoving() && GetClass() == ROGUE && !BehindMob(GetTarget(), GetX(), GetY())) {
-					// Move the rogue to behind the mob
-					float newX = 0;
-					float newY = 0;
-					float newZ = 0;
-					if(PlotPositionAroundTarget(GetTarget(), newX, newY, newZ)) {
-						CalculateNewPosition2(newX, newY, newZ, GetRunspeed());
-						return;
+				if (!IsMoving()) {
+					if (GetClass() == ROGUE) {
+						if (HasTargetReflection() && !GetTarget()->IsFeared() && !GetTarget()->IsStunned()) {
+							// Hate redux actions
+							if (evade_timer.Check(false)) {
+								// Attempt to evade
+								int timer_duration = (HideReuseTime - GetSkillReuseTime(EQEmu::skills::SkillHide)) * 1000;
+								if (timer_duration < 0)
+									timer_duration = 0;
+								evade_timer.Start(timer_duration);
+
+								Bot::BotGroupSay(this, "Attempting to evade %s", GetTarget()->GetCleanName());
+								if (zone->random.Int(0, 260) < (int)GetSkill(EQEmu::skills::SkillHide))
+									RogueEvade(GetTarget());
+
+								return;
+							}
+							else if (GetTarget()->IsRooted()) {
+								// Move rogue back from rooted mob - out of combat range, if necessary
+								float melee_distance = GetMaxMeleeRangeToTarget(GetTarget());
+								float current_distance = DistanceSquared(static_cast<glm::vec3>(m_Position), static_cast<glm::vec3>(GetTarget()->GetPosition()));
+								
+								if (current_distance <= melee_distance) {
+									float newX = 0;
+									float newY = 0;
+									float newZ = 0;
+									FaceTarget(GetTarget());
+									if (PlotPositionAroundTarget(this, newX, newY, newZ)) {
+										CalculateNewPosition2(newX, newY, newZ, GetRunspeed());
+										return;
+									}
+								}
+							}
+						}
+						else if (!BehindMob(GetTarget(), GetX(), GetY())) {
+							// Move the rogue to behind the mob
+							float newX = 0;
+							float newY = 0;
+							float newZ = 0;
+							if (PlotPositionAroundTarget(GetTarget(), newX, newY, newZ)) {
+								CalculateNewPosition2(newX, newY, newZ, GetRunspeed());
+								return;
+							}
+						}
 					}
-				}
-				else if(!IsMoving() && GetClass() != ROGUE && (DistanceSquaredNoZ(m_Position, GetTarget()->GetPosition()) < GetTarget()->GetSize())) {
-					// If we are not a rogue trying to backstab, let's try to adjust our melee range so we don't appear to be bunched up
-					float newX = 0;
-					float newY = 0;
-					float newZ = 0;
-					if(PlotPositionAroundTarget(GetTarget(), newX, newY, newZ, false) && GetArchetype() != ARCHETYPE_CASTER) {
-						CalculateNewPosition2(newX, newY, newZ, GetRunspeed());
-						return;
+					else if (GetClass() != ROGUE && (DistanceSquaredNoZ(m_Position, GetTarget()->GetPosition()) < GetTarget()->GetSize())) {
+						// If we are not a rogue trying to backstab, let's try to adjust our melee range so we don't appear to be bunched up
+						float newX = 0;
+						float newY = 0;
+						float newZ = 0;
+						if (PlotPositionAroundTarget(GetTarget(), newX, newY, newZ, false) && GetArchetype() != ARCHETYPE_CASTER) {
+							CalculateNewPosition2(newX, newY, newZ, GetRunspeed());
+							return;
+						}
 					}
 				}
 
@@ -2569,40 +2467,69 @@ void Bot::AI_Process() {
 				BotMeditate(true);
 		}
 	} else {
-		SetTarget(0);
+		SetTarget(nullptr);
 		if (m_PlayerState & static_cast<uint32>(PlayerState::Aggressive))
 			SendRemovePlayerState(PlayerState::Aggressive);
 
-		if(!IsMoving() && AI_think_timer->Check() && !spellend_timer.Enabled()) {
-			if(GetBotStance() != BotStancePassive) {
-				if(!AI_IdleCastCheck() && !IsCasting())
-					BotMeditate(true);
-			}
-			else
-				BotMeditate(true);
-		}
+		Mob* follow = entity_list.GetMob(GetFollowID());
+		if (!follow)
+			return;
 
-		if(AI_movement_timer->Check()) {
-			if(GetFollowID()) {
-				Mob* follow = entity_list.GetMob(GetFollowID());
-				if(follow) {
-					float dist = DistanceSquared(m_Position, follow->GetPosition());
-					int speed = follow->GetRunspeed();
-					if(dist < GetFollowDistance() + 1000)
-						speed = follow->GetWalkspeed();
+		float cur_dist = DistanceSquared(m_Position, follow->GetPosition());
 
-					if(dist > GetFollowDistance()) {
-						CalculateNewPosition2(follow->GetX(), follow->GetY(), follow->GetZ(), speed);
-						if(rest_timer.Enabled())
-							rest_timer.Disable();
-						return;
-					} else {
-						if(moved) {
-							moved = false;
-							SetCurrentSpeed(0);
-						}
+		if (!IsMoving() && cur_dist <= GetFollowDistance()) {
+			if (AI_think_timer->Check()) {
+				if (!spellend_timer.Enabled()) {
+					if (GetBotStance() != BotStancePassive) {
+						if (!AI_IdleCastCheck() && !IsCasting() && GetClass() != BARD)
+							BotMeditate(true);
+					}
+					else {
+						if (GetClass() != BARD)
+							BotMeditate(true);
 					}
 				}
+			}
+		}
+		else if(AI_movement_timer->Check()) {
+			// something is wrong with bot movement spell bonuses - based on logging..
+			// ..this code won't need to be so complex once fixed...
+			int speed = GetRunspeed();
+			if (cur_dist < GetFollowDistance() + 2000) {
+				speed = GetWalkspeed();
+			}
+			else if (cur_dist >= GetFollowDistance() + 10000) { // 100
+				if (cur_dist >= 22500) { // 150
+					auto leader = follow;
+					while (leader->GetFollowID()) {
+						leader = entity_list.GetMob(leader->GetFollowID());
+						if (!leader || leader == this)
+							break;
+						if (leader->GetRunspeed() > speed)
+							speed = leader->GetRunspeed();
+						if (leader->IsClient())
+							break;
+					}
+				}
+				speed = (float)speed * (1.0f + ((float)speed * 0.03125f)); // 1/32 - special bot sprint mod
+			}
+
+			if (cur_dist > GetFollowDistance()) {
+				CalculateNewPosition2(follow->GetX(), follow->GetY(), follow->GetZ(), speed);
+				if (rest_timer.Enabled())
+					rest_timer.Disable();
+				return;
+			}
+			else {
+				if (moved) {
+					moved = false;
+					SetCurrentSpeed(0);
+				}
+			}
+		}
+		else if (IsMoving()) {
+			if (GetBotStance() != BotStancePassive && GetClass() == BARD && !spellend_timer.Enabled() && AI_think_timer->Check()) {
+				AI_IdleCastCheck();
 			}
 		}
 	}
@@ -3664,7 +3591,7 @@ bool Bot::Death(Mob *killerMob, int32 damage, uint16 spell_id, EQEmu::skills::Sk
 	return true;
 }
 
-void Bot::Damage(Mob *from, int32 damage, uint16 spell_id, EQEmu::skills::SkillType attack_skill, bool avoidable, int8 buffslot, bool iBuffTic, int special) {
+void Bot::Damage(Mob *from, int32 damage, uint16 spell_id, EQEmu::skills::SkillType attack_skill, bool avoidable, int8 buffslot, bool iBuffTic, eSpecialAttacks special) {
 	if(spell_id == 0)
 		spell_id = SPELL_UNKNOWN;
 
@@ -3710,7 +3637,7 @@ void Bot::AddToHateList(Mob* other, uint32 hate /*= 0*/, int32 damage /*= 0*/, b
 	Mob::AddToHateList(other, hate, damage, iYellForHelp, bFrenzy, iBuffTic);
 }
 
-bool Bot::Attack(Mob* other, int Hand, bool FromRiposte, bool IsStrikethrough, bool IsFromSpell, ExtraAttackOptions *opts, int special) {
+bool Bot::Attack(Mob* other, int Hand, bool FromRiposte, bool IsStrikethrough, bool IsFromSpell, ExtraAttackOptions *opts) {
 	if (!other) {
 		SetTarget(nullptr);
 		Log.Out(Logs::General, Logs::Error, "A null Mob object was passed to Bot::Attack for evaluation!");
@@ -3761,42 +3688,24 @@ bool Bot::Attack(Mob* other, int Hand, bool FromRiposte, bool IsStrikethrough, b
 
 	// calculate attack_skill and skillinuse depending on hand and weapon
 	// also send Packet to near clients
-	EQEmu::skills::SkillType skillinuse;
-	AttackAnimation(skillinuse, Hand, weapon);
-	Log.Out(Logs::Detail, Logs::Combat, "Attacking with %s in slot %d using skill %d", weapon?weapon->GetItem()->Name:"Fist", Hand, skillinuse);
+	DamageHitInfo my_hit;
+	AttackAnimation(my_hit.skill, Hand, weapon);
+	Log.Out(Logs::Detail, Logs::Combat, "Attacking with %s in slot %d using skill %d", weapon?weapon->GetItem()->Name:"Fist", Hand, my_hit.skill);
 	/// Now figure out damage
-	int damage = 0;
+	my_hit.damage_done =0;
 	uint8 mylevel = GetLevel() ? GetLevel() : 1;
 	uint32 hate = 0;
 	if (weapon)
 		hate = (weapon->GetItem()->Damage + weapon->GetItem()->ElemDmgAmt);
 
-	int weapon_damage = GetWeaponDamage(other, weapon, &hate);
-	if (hate == 0 && weapon_damage > 1)
-		hate = weapon_damage;
+	my_hit.base_damage = GetWeaponDamage(other, weapon, &hate);
+	if (hate == 0 && my_hit.base_damage > 1)
+		hate = my_hit.base_damage;
 
 	//if weapon damage > 0 then we know we can hit the target with this weapon
 	//otherwise we cannot and we set the damage to -5 later on
-	if(weapon_damage > 0) {
-		//Berserker Berserk damage bonus
-		if(berserk && (GetClass() == BERSERKER)){
-			int bonus = (3 + GetLevel() / 10);		//unverified
-			weapon_damage = (weapon_damage * (100 + bonus) / 100);
-			Log.Out(Logs::Detail, Logs::Combat, "Berserker damage bonus increases DMG to %d", weapon_damage);
-		}
-
-		//try a finishing blow.. if successful end the attack
-		if(TryFinishingBlow(other, skillinuse))
-			return true;
-
-		//damage formula needs some work
-		int min_hit = 1;
-		int max_hit = ((2 * weapon_damage * GetDamageTable(skillinuse)) / 100);
-
-		if(GetLevel() < 10 && max_hit > RuleI(Combat, HitCapPre10))
-			max_hit = (RuleI(Combat, HitCapPre10));
-		else if(GetLevel() < 20 && max_hit > RuleI(Combat, HitCapPre20))
-			max_hit = (RuleI(Combat, HitCapPre20));
+	if (my_hit.base_damage > 0) {
+		my_hit.min_damage = 0;
 
 		// ***************************************************************
 		// *** Calculate the damage bonus, if applicable, for this hit ***
@@ -3814,8 +3723,7 @@ bool Bot::Attack(Mob* other, int Hand, bool FromRiposte, bool IsStrikethrough, b
 			// Damage bonuses apply only to hits from the main hand (Hand == MainPrimary) by characters level 28 and above
 			// who belong to a melee class. If we're here, then all of these conditions apply.
 			ucDamageBonus = GetWeaponDamageBonus(weapon ? weapon->GetItem() : (const EQEmu::ItemData*) nullptr);
-			min_hit += (int) ucDamageBonus;
-			max_hit += (int) ucDamageBonus;
+			my_hit.min_damage = ucDamageBonus;
 			hate += ucDamageBonus;
 		}
 #endif
@@ -3823,61 +3731,29 @@ bool Bot::Attack(Mob* other, int Hand, bool FromRiposte, bool IsStrikethrough, b
 		if (Hand == EQEmu::inventory::slotSecondary) {
 			if (aabonuses.SecondaryDmgInc || itembonuses.SecondaryDmgInc || spellbonuses.SecondaryDmgInc){
 				ucDamageBonus = GetWeaponDamageBonus(weapon ? weapon->GetItem() : (const EQEmu::ItemData*) nullptr);
-				min_hit += (int) ucDamageBonus;
-				max_hit += (int) ucDamageBonus;
+				my_hit.min_damage = ucDamageBonus;
 				hate += ucDamageBonus;
 			}
 		}
 
-		min_hit = (min_hit * GetMeleeMinDamageMod_SE(skillinuse) / 100);
+		Log.Out(Logs::Detail, Logs::Combat, "Damage calculated: base %d min damage %d skill %d", my_hit.base_damage, my_hit.min_damage, my_hit.skill);
 
-		if(max_hit < min_hit)
-			max_hit = min_hit;
+		my_hit.offense = offense(my_hit.skill);
+		my_hit.hand = Hand;
 
-		if(RuleB(Combat, UseIntervalAC))
-			damage = max_hit;
-		else
-			damage = zone->random.Int(min_hit, max_hit);
-
-		Log.Out(Logs::Detail, Logs::Combat, "Damage calculated to %d (min %d, max %d, str %d, skill %d, DMG %d, lv %d)",
-			damage, min_hit, max_hit, GetSTR(), GetSkill(skillinuse), weapon_damage, GetLevel());
-
-		if(opts) {
-			damage *= opts->damage_percent;
-			damage += opts->damage_flat;
+		if (opts) {
+			my_hit.base_damage *= opts->damage_percent;
+			my_hit.base_damage += opts->damage_flat;
 			hate *= opts->hate_percent;
 			hate += opts->hate_flat;
 		}
 
-		//check to see if we hit..
-		if (other->AvoidDamage(this, damage, Hand)) {
-			if (!FromRiposte && !IsStrikethrough) {
-				int strike_through = itembonuses.StrikeThrough + spellbonuses.StrikeThrough + aabonuses.StrikeThrough;
-				if(strike_through && zone->random.Roll(strike_through)) {
-					Message_StringID(MT_StrikeThrough, STRIKETHROUGH_STRING); // You strike through your opponents defenses!
-					Attack(other, Hand, false, true); // Strikethrough only gives another attempted hit
-					return false;
-				}
-				if (damage == -3 && !FromRiposte) {
-					DoRiposte(other);
-					if (HasDied())
-						return false;
-				}
-			}
-		} else {
-			if (other->CheckHitChance(this, skillinuse)) {
-				other->MeleeMitigation(this, damage, min_hit, opts);
-				ApplyMeleeDamageBonus(skillinuse, damage);
-				damage += ((itembonuses.HeroicSTR / 10) + (damage * other->GetSkillDmgTaken(skillinuse) / 100) + GetSkillDmgAmt(skillinuse));
-				TryCriticalHit(other, skillinuse, damage, opts);
-			} else {
-				damage = 0;
-			}
-		}
-		Log.Out(Logs::Detail, Logs::Combat, "Final damage after all reductions: %d", damage);
+		DoAttack(other, my_hit, opts);
+
+		Log.Out(Logs::Detail, Logs::Combat, "Final damage after all reductions: %d", my_hit.damage_done);
+	} else {
+		my_hit.damage_done = DMG_INVULNERABLE;
 	}
-	else
-		damage = -5;
 
 	// Hate Generation is on a per swing basis, regardless of a hit, miss, or block, its always the same.
 	// If we are this far, this means we are atleast making a swing.
@@ -3886,56 +3762,24 @@ bool Bot::Attack(Mob* other, int Hand, bool FromRiposte, bool IsStrikethrough, b
 	///////////////////////////////////////////////////////////
 	////// Send Attack Damage
 	///////////////////////////////////////////////////////////
-	other->Damage(this, damage, SPELL_UNKNOWN, skillinuse);
+	other->Damage(this, my_hit.damage_done, SPELL_UNKNOWN, my_hit.skill);
 
 	if (GetHP() < 0)
 		return false;
 
-	MeleeLifeTap(damage);
+	MeleeLifeTap(my_hit.damage_done);
 
-	if (damage > 0)
+	if (my_hit.damage_done > 0)
 		CheckNumHitsRemaining(NumHit::OutgoingHitSuccess);
 
-	//break invis when you attack
-	if(invisible) {
-		Log.Out(Logs::Detail, Logs::Combat, "Removing invisibility due to melee attack.");
-		BuffFadeByEffect(SE_Invisibility);
-		BuffFadeByEffect(SE_Invisibility2);
-		invisible = false;
-	}
-
-	if(invisible_undead) {
-		Log.Out(Logs::Detail, Logs::Combat, "Removing invisibility vs. undead due to melee attack.");
-		BuffFadeByEffect(SE_InvisVsUndead);
-		BuffFadeByEffect(SE_InvisVsUndead2);
-		invisible_undead = false;
-	}
-
-	if(invisible_animals){
-		Log.Out(Logs::Detail, Logs::Combat, "Removing invisibility vs. animals due to melee attack.");
-		BuffFadeByEffect(SE_InvisVsAnimals);
-		invisible_animals = false;
-	}
-
-	if(hidden || improved_hidden){
-		hidden = false;
-		improved_hidden = false;
-		EQApplicationPacket* outapp = new EQApplicationPacket(OP_SpawnAppearance, sizeof(SpawnAppearance_Struct));
-		SpawnAppearance_Struct* sa_out = (SpawnAppearance_Struct*)outapp->pBuffer;
-		sa_out->spawn_id = GetID();
-		sa_out->type = 0x03;
-		sa_out->parameter = 0;
-		entity_list.QueueClients(this, outapp, true);
-		safe_delete(outapp);
-	}
-
+	CommonBreakInvisibleFromCombat();
 	if (spellbonuses.NegateIfCombat)
 		BuffFadeByEffect(SE_NegateIfCombat);
 
 	if(GetTarget())
-		TriggerDefensiveProcs(other, Hand, true, damage);
+		TriggerDefensiveProcs(other, Hand, true, my_hit.damage_done);
 
-	if (damage > 0)
+	if (my_hit.damage_done > 0)
 		return true;
 	else
 		return false;
@@ -4816,21 +4660,24 @@ int Bot::GetHandToHandDamage(void) {
 	return 2;
 }
 
-bool Bot::TryFinishingBlow(Mob *defender, EQEmu::skills::SkillType skillinuse) {
+bool Bot::TryFinishingBlow(Mob *defender, int &damage)
+{
 	if (!defender)
 		return false;
 
 	if (aabonuses.FinishingBlow[1] && !defender->IsClient() && defender->GetHPRatio() < 10) {
-		uint32 chance = (aabonuses.FinishingBlow[0] / 10);
-		uint32 damage = aabonuses.FinishingBlow[1];
-		uint16 levelreq = aabonuses.FinishingBlowLvl[0];
-		if(defender->GetLevel() <= levelreq && (chance >= zone->random.Int(0, 1000))){
-			Log.Out(Logs::Detail, Logs::Combat, "Landed a finishing blow: levelreq at %d, other level %d", levelreq , defender->GetLevel());
+		int chance = aabonuses.FinishingBlow[0];
+		int fb_damage = aabonuses.FinishingBlow[1];
+		int levelreq = aabonuses.FinishingBlowLvl[0];
+		if (defender->GetLevel() <= levelreq && (chance >= zone->random.Int(1, 1000))) {
+			Log.Out(Logs::Detail, Logs::Combat, "Landed a finishing blow: levelreq at %d, other level %d",
+				levelreq, defender->GetLevel());
 			entity_list.MessageClose_StringID(this, false, 200, MT_CritMelee, FINISHING_BLOW, GetName());
-			defender->Damage(this, damage, SPELL_UNKNOWN, skillinuse);
+			damage = fb_damage;
 			return true;
 		} else {
-			Log.Out(Logs::Detail, Logs::Combat, "FAILED a finishing blow: levelreq at %d, other level %d", levelreq , defender->GetLevel());
+			Log.Out(Logs::Detail, Logs::Combat, "FAILED a finishing blow: levelreq at %d, other level %d",
+				levelreq, defender->GetLevel());
 			return false;
 		}
 	}
@@ -4858,6 +4705,92 @@ void Bot::DoRiposte(Mob* defender) {
 	}
 }
 
+int Bot::GetBaseSkillDamage(EQEmu::skills::SkillType skill, Mob *target)
+{
+	int base = EQEmu::skills::GetBaseDamage(skill);
+	auto skill_level = GetSkill(skill);
+	switch (skill) {
+	case EQEmu::skills::SkillDragonPunch:
+	case EQEmu::skills::SkillEagleStrike:
+	case EQEmu::skills::SkillTigerClaw:
+		if (skill_level >= 25)
+			base++;
+		if (skill_level >= 75)
+			base++;
+		if (skill_level >= 125)
+			base++;
+		if (skill_level >= 175)
+			base++;
+		return base;
+	case EQEmu::skills::SkillFrenzy:
+		if (GetBotItem(EQEmu::inventory::slotPrimary)) {
+			if (GetLevel() > 15)
+				base += GetLevel() - 15;
+			if (base > 23)
+				base = 23;
+			if (GetLevel() > 50)
+				base += 2;
+			if (GetLevel() > 54)
+				base++;
+			if (GetLevel() > 59)
+				base++;
+		}
+		return base;
+	case EQEmu::skills::SkillFlyingKick: {
+		float skill_bonus = skill_level / 9.0f;
+		float ac_bonus = 0.0f;
+		auto inst = GetBotItem(EQEmu::inventory::slotFeet);
+		if (inst)
+			ac_bonus = inst->GetItemArmorClass(true) / 25.0f;
+		if (ac_bonus > skill_bonus)
+			ac_bonus = skill_bonus;
+		return static_cast<int>(ac_bonus + skill_bonus);
+	}
+	case EQEmu::skills::SkillKick: {
+		float skill_bonus = skill_level / 10.0f;
+		float ac_bonus = 0.0f;
+		auto inst = GetBotItem(EQEmu::inventory::slotFeet);
+		if (inst)
+			ac_bonus = inst->GetItemArmorClass(true) / 25.0f;
+		if (ac_bonus > skill_bonus)
+			ac_bonus = skill_bonus;
+		return static_cast<int>(ac_bonus + skill_bonus);
+	}
+	case EQEmu::skills::SkillBash: {
+		float skill_bonus = skill_level / 10.0f;
+		float ac_bonus = 0.0f;
+		const EQEmu::ItemInstance *inst = nullptr;
+		if (HasShieldEquiped())
+			inst = GetBotItem(EQEmu::inventory::slotSecondary);
+		else if (HasTwoHanderEquipped())
+			inst = GetBotItem(EQEmu::inventory::slotPrimary);
+		if (inst)
+			ac_bonus = inst->GetItemArmorClass(true) / 25.0f;
+		if (ac_bonus > skill_bonus)
+			ac_bonus = skill_bonus;
+		return static_cast<int>(ac_bonus + skill_bonus);
+	}
+	case EQEmu::skills::SkillBackstab: {
+		float skill_bonus = static_cast<float>(skill_level) * 0.02f;
+		auto inst = GetBotItem(EQEmu::inventory::slotPrimary);
+		if (inst && inst->GetItem() && inst->GetItem()->ItemType == EQEmu::item::ItemType1HPiercing) {
+			base = inst->GetItemBackstabDamage(true);
+			if (!inst->GetItemBackstabDamage())
+				base += inst->GetItemWeaponDamage(true);
+			if (target) {
+				if (inst->GetItemElementalFlag(true) && inst->GetItemElementalDamage(true))
+					base += target->ResistElementalWeaponDmg(inst);
+				if (inst->GetItemBaneDamageBody(true) || inst->GetItemBaneDamageRace(true))
+					base += target->CheckBaneDamage(inst);
+			}
+		}
+		return static_cast<int>(static_cast<float>(base) * (skill_bonus + 2.0f));
+	}
+	default:
+		return 0;
+	}
+}
+
 void Bot::DoSpecialAttackDamage(Mob *who, EQEmu::skills::SkillType skill, int32 max_damage, int32 min_damage, int32 hate_override, int ReuseTime, bool HitChance) {
 	int32 hate = max_damage;
 	if(hate_override > -1)
@@ -4877,33 +4810,29 @@ void Bot::DoSpecialAttackDamage(Mob *who, EQEmu::skills::SkillType skill, int32 
 		}
 	}
 
-	min_damage += (min_damage * GetMeleeMinDamageMod_SE(skill) / 100);
-	int hand = EQEmu::inventory::slotPrimary;
+	DamageHitInfo my_hit;
+	my_hit.base_damage = max_damage;
+	my_hit.min_damage = min_damage;
+	my_hit.damage_done = 0;
+
+	my_hit.skill = skill;
+	my_hit.offense = offense(my_hit.skill);
+	my_hit.tohit = GetTotalToHit(my_hit.skill, 0);
+	my_hit.hand = EQEmu::inventory::slotPrimary;
+
 	if (skill == EQEmu::skills::SkillThrowing || skill == EQEmu::skills::SkillArchery)
-		hand = EQEmu::inventory::slotRange;
-	if (who->AvoidDamage(this, max_damage, hand)) {
-		if (max_damage == -3)
-			DoRiposte(who);
-	} else {
-		if (HitChance || who->CheckHitChance(this, skill)) {
-			who->MeleeMitigation(this, max_damage, min_damage);
-			ApplyMeleeDamageBonus(skill, max_damage);
-			max_damage += who->GetFcDamageAmtIncoming(this, 0, true, skill);
-			max_damage += ((itembonuses.HeroicSTR / 10) + (max_damage * who->GetSkillDmgTaken(skill) / 100) + GetSkillDmgAmt(skill));
-			TryCriticalHit(who, skill, max_damage);
-		} else {
-			max_damage = 0;
-		}
-	}
+		my_hit.hand = EQEmu::inventory::slotRange;
+
+	DoAttack(who, my_hit);
 
 	who->AddToHateList(this, hate);
 
-	who->Damage(this, max_damage, SPELL_UNKNOWN, skill, false);
+	who->Damage(this, my_hit.damage_done, SPELL_UNKNOWN, skill, false);
 
 	if(!GetTarget() || HasDied())
 		return;
 
-	if (max_damage > 0)
+	if (my_hit.damage_done > 0)
 		CheckNumHitsRemaining(NumHit::OutgoingHitSuccess);
 
 	//[AA Dragon Punch] value[0] = 100 for 25%, chance value[1] = skill
@@ -4919,7 +4848,7 @@ void Bot::DoSpecialAttackDamage(Mob *who, EQEmu::skills::SkillType skill, int32 
 	if (HasSkillProcs())
 		TrySkillProc(who, skill, (ReuseTime * 1000));
 
-	if (max_damage > 0 && HasSkillProcSuccess())
+	if (my_hit.damage_done > 0 && HasSkillProcSuccess())
 		TrySkillProc(who, skill, (ReuseTime * 1000), true);
 }
 
@@ -4967,72 +4896,33 @@ void Bot::TryBackstab(Mob *other, int ReuseTime) {
 			}
 		}
 	} else if(aabonuses.FrontalBackstabMinDmg || itembonuses.FrontalBackstabMinDmg || spellbonuses.FrontalBackstabMinDmg) {
+		m_specialattacks = eSpecialAttacks::ChaoticStab;
 		RogueBackstab(other, true);
-		if (level > 54) {
-			float DoubleAttackProbability = ((GetSkill(EQEmu::skills::SkillDoubleAttack) + GetLevel()) / 500.0f);
-			if(zone->random.Real(0, 1) < DoubleAttackProbability)
-				if(other->GetHP() > 0)
-					RogueBackstab(other,true, ReuseTime);
-
-			if (tripleChance && other->GetHP() > 0 && tripleChance > zone->random.Int(0, 100))
-				RogueBackstab(other,false,ReuseTime);
-		}
+		m_specialattacks = eSpecialAttacks::None;
 	}
 	else
 		Attack(other, EQEmu::inventory::slotPrimary);
 }
 
-void Bot::RogueBackstab(Mob* other, bool min_damage, int ReuseTime) {
-	int32 ndamage = 0;
-	int32 max_hit = 0;
-	int32 min_hit = 0;
-	int32 hate = 0;
-	int32 primaryweapondamage = 0;
-	int32 backstab_dmg = 0;
-	EQEmu::ItemInstance* botweaponInst = GetBotItem(EQEmu::inventory::slotPrimary);
-	if(botweaponInst) {
-		primaryweapondamage = GetWeaponDamage(other, botweaponInst);
-		backstab_dmg = botweaponInst->GetItem()->BackstabDmg;
-		for (int i = EQEmu::inventory::socketBegin; i < EQEmu::inventory::SocketCount; ++i) {
-			EQEmu::ItemInstance *aug = botweaponInst->GetAugment(i);
-			if(aug)
-				backstab_dmg += aug->GetItem()->BackstabDmg;
-		}
-	} else {
-		primaryweapondamage = ((GetLevel() / 7) + 1);
-		backstab_dmg = primaryweapondamage;
+void Bot::RogueBackstab(Mob *other, bool min_damage, int ReuseTime)
+{
+	if (!other)
+		return;
+
+	EQEmu::ItemInstance *botweaponInst = GetBotItem(EQEmu::inventory::slotPrimary);
+	if (botweaponInst) {
+		if (!GetWeaponDamage(other, botweaponInst))
+			return;
+	} else if (!GetWeaponDamage(other, (const EQEmu::ItemData *)nullptr)) {
+		return;
 	}
 
-	if(primaryweapondamage > 0) {
-		if(level > 25) {
-			max_hit = (((((2 * backstab_dmg) * GetDamageTable(EQEmu::skills::SkillBackstab) / 100) * 10 * GetSkill(EQEmu::skills::SkillBackstab) / 355) + ((level - 25) / 3) + 1) * ((100 + RuleI(Combat, BackstabBonus)) / 100));
-			hate = (20 * backstab_dmg * GetSkill(EQEmu::skills::SkillBackstab) / 355);
-		} else {
-			max_hit = (((((2 * backstab_dmg) * GetDamageTable(EQEmu::skills::SkillBackstab) / 100) * 10 * GetSkill(EQEmu::skills::SkillBackstab) / 355) + 1) * ((100 + RuleI(Combat, BackstabBonus)) / 100));
-			hate = (20 * backstab_dmg * GetSkill(EQEmu::skills::SkillBackstab) / 355);
-		}
+	uint32 hate = 0;
 
-		if (level < 51)
-			min_hit = (level * 15 / 10);
-		else
-			min_hit = ((level * ( level * 5 - 105)) / 100);
+	int base_damage = GetBaseSkillDamage(EQEmu::skills::SkillBackstab, other);
+	hate = base_damage;
 
-		if (!other->CheckHitChance(this, EQEmu::skills::SkillBackstab, 0))
-			ndamage = 0;
-		else {
-			if (min_damage) {
-				ndamage = min_hit;
-			} else {
-				if (max_hit < min_hit)
-					max_hit = min_hit;
-
-				ndamage = (RuleB(Combat, UseIntervalAC) ? max_hit : zone->random.Int(min_hit, max_hit));
-			}
-		}
-	} else
-		ndamage = -5;
-
-	DoSpecialAttackDamage(other, EQEmu::skills::SkillBackstab, ndamage, min_hit, hate, ReuseTime);
+	DoSpecialAttackDamage(other, EQEmu::skills::SkillBackstab, base_damage, 0, hate, ReuseTime);
 	DoAnim(anim1HPiercing);
 }
 
@@ -5094,7 +4984,6 @@ void Bot::DoClassAttacks(Mob *target, bool IsRiposte) {
 		return;
 
 	float HasteModifier = (GetHaste() * 0.01f);
-	int32 dmg = 0;
 	uint16 skill_to_use = -1;
 	int level = GetLevel();
 	int reuse = (TauntReuseTime * 1000);
@@ -5148,50 +5037,29 @@ void Bot::DoClassAttacks(Mob *target, bool IsRiposte) {
 	if(skill_to_use == -1)
 		return;
 
+	int dmg = GetBaseSkillDamage(static_cast<EQEmu::skills::SkillType>(skill_to_use), GetTarget());
+
 	if (skill_to_use == EQEmu::skills::SkillBash) {
 		if (target != this) {
 			DoAnim(animTailRake);
 			if (GetWeaponDamage(target, GetBotItem(EQEmu::inventory::slotSecondary)) <= 0 && GetWeaponDamage(target, GetBotItem(EQEmu::inventory::slotShoulders)) <= 0)
-				dmg = -5;
-			else {
-				if (!target->CheckHitChance(this, EQEmu::skills::SkillBash, 0))
-					dmg = 0;
-				else {
-					if(RuleB(Combat, UseIntervalAC))
-						dmg = GetBashDamage();
-					else
-						dmg = zone->random.Int(1, GetBashDamage());
-				}
-			}
+				dmg = DMG_INVULNERABLE;
+
 			reuse = (BashReuseTime * 1000);
-			DoSpecialAttackDamage(target, EQEmu::skills::SkillBash, dmg, 1, -1, reuse);
+			DoSpecialAttackDamage(target, EQEmu::skills::SkillBash, dmg, 0, -1, reuse);
 			did_attack = true;
 		}
 	}
 
 	if (skill_to_use == EQEmu::skills::SkillFrenzy) {
 		int AtkRounds = 3;
-		int skillmod = 0;
-		if (MaxSkill(EQEmu::skills::SkillFrenzy) > 0)
-			skillmod = (100 * GetSkill(EQEmu::skills::SkillFrenzy) / MaxSkill(EQEmu::skills::SkillFrenzy));
-
-		int32 max_dmg = (26 + ((((GetLevel() - 6) * 2) * skillmod) / 100)) * ((100 + RuleI(Combat, FrenzyBonus)) / 100);
-		int32 min_dmg = 0;
 		DoAnim(anim2HSlashing);
-
-		if (GetLevel() < 51)
-			min_dmg = 1;
-		else
-			min_dmg = (GetLevel() * 8 / 10);
-
-		if (min_dmg > max_dmg)
-			max_dmg = min_dmg;
 
 		reuse = (FrenzyReuseTime * 1000);
 		did_attack = true;
 		while(AtkRounds > 0) {
 			if (GetTarget() && (AtkRounds == 1 || zone->random.Int(0, 100) < 75)) {
-				DoSpecialAttackDamage(GetTarget(), EQEmu::skills::SkillFrenzy, max_dmg, min_dmg, max_dmg, reuse, true);
+				DoSpecialAttackDamage(GetTarget(), EQEmu::skills::SkillFrenzy, dmg, 0, dmg, reuse, true);
 			}
 
 			AtkRounds--;
@@ -5202,19 +5070,10 @@ void Bot::DoClassAttacks(Mob *target, bool IsRiposte) {
 		if(target != this) {
 			DoAnim(animKick);
 			if (GetWeaponDamage(target, GetBotItem(EQEmu::inventory::slotFeet)) <= 0)
-				dmg = -5;
-			else {
-				if (!target->CheckHitChance(this, EQEmu::skills::SkillKick, 0))
-					dmg = 0;
-				else {
-					if(RuleB(Combat, UseIntervalAC))
-						dmg = GetKickDamage();
-					else
-						dmg = zone->random.Int(1, GetKickDamage());
-				}
-			}
+				dmg = DMG_INVULNERABLE;
+
 			reuse = (KickReuseTime * 1000);
-			DoSpecialAttackDamage(target, EQEmu::skills::SkillKick, dmg, 1, -1, reuse);
+			DoSpecialAttackDamage(target, EQEmu::skills::SkillKick, dmg, 0, -1, reuse);
 			did_attack = true;
 		}
 	}
@@ -5247,26 +5106,6 @@ void Bot::DoClassAttacks(Mob *target, bool IsRiposte) {
 		TryBackstab(target,reuse);
 	}
 	classattack_timer.Start(reuse / HasteModifier);
-}
-
-bool Bot::TryHeadShot(Mob* defender, EQEmu::skills::SkillType skillInUse) {
-	bool Result = false;
-	if (defender && (defender->GetBodyType() == BT_Humanoid) && (skillInUse == EQEmu::skills::SkillArchery) && (GetClass() == RANGER) && (GetLevel() >= 62)) {
-		int defenderLevel = defender->GetLevel();
-		int rangerLevel = GetLevel();
-		if(GetAA(aaHeadshot) && ((defenderLevel - 46) <= GetAA(aaHeadshot) * 2)) {
-			float AttackerChance = 0.20f + ((float)(rangerLevel - 51) * 0.005f);
-			float DefenderChance = (float)zone->random.Real(0.00f, 1.00f);
-			if(AttackerChance > DefenderChance) {
-				Log.Out(Logs::Detail, Logs::Combat, "Landed a headshot: Attacker chance was %f and Defender chance was %f.", AttackerChance, DefenderChance);
-				entity_list.MessageClose(this, false, 200, MT_CritMelee, "%s has scored a leathal HEADSHOT!", GetName());
-				defender->Damage(this, (defender->GetMaxHP()+50), SPELL_UNKNOWN, skillInUse);
-				Result = true;
-			} else
-				Log.Out(Logs::Detail, Logs::Combat, "FAILED a headshot: Attacker chance was %f and Defender chance was %f.", AttackerChance, DefenderChance);
-		}
-	}
-	return Result;
 }
 
 int32 Bot::CheckAggroAmount(uint16 spellid) {
@@ -6305,7 +6144,7 @@ void Bot::CalcBonuses() {
 	CalcPR();
 	CalcCR();
 	CalcCorrup();
-	GenerateArmorClass();
+	CalcAC();
 	CalcMaxHP();
 	CalcMaxMana();
 	CalcMaxEndurance();
@@ -8155,29 +7994,11 @@ bool Bot::GetNeedsCured(Mob *tar) {
 	bool needCured = false;
 	if(tar) {
 		if(tar->FindType(SE_PoisonCounter) || tar->FindType(SE_DiseaseCounter) || tar->FindType(SE_CurseCounter) || tar->FindType(SE_CorruptionCounter)) {
-			uint32 buff_count = GetMaxTotalSlots();
+			uint32 buff_count = tar->GetMaxTotalSlots();
 			int buffsWithCounters = 0;
 			needCured = true;
 			for (unsigned int j = 0; j < buff_count; j++) {
-				// this should prevent crashes until the cause can be found
-				if (!tar->GetBuffs()) {
-					std::string mob_type = "Unknown";
-					if (tar->IsClient())
-						mob_type = "Client";
-					else if (tar->IsBot())
-						mob_type = "Bot";
-					else if (tar->IsMerc())
-						mob_type = "Merc";
-					else if (tar->IsPet())
-						mob_type = "Pet";
-					else if (tar->IsNPC())
-						mob_type = "NPC";
-
-					Log.Out(Logs::General, Logs::Error, "Bot::GetNeedsCured() processed mob type '%s' with a null buffs pointer (mob: '%s')", mob_type.c_str(), tar->GetName());
-
-					continue;
-				}
-				else if(tar->GetBuffs()[j].spellid != SPELL_UNKNOWN) {
+				if(tar->GetBuffs()[j].spellid != SPELL_UNKNOWN) {
 					if(CalculateCounters(tar->GetBuffs()[j].spellid) > 0) {
 						buffsWithCounters++;
 						if(buffsWithCounters == 1 && (tar->GetBuffs()[j].ticsremaining < 2 || (int32)((tar->GetBuffs()[j].ticsremaining * 6) / tar->GetBuffs()[j].counters) < 2)) {
@@ -8190,6 +8011,42 @@ bool Bot::GetNeedsCured(Mob *tar) {
 		}
 	}
 	return needCured;
+}
+
+bool Bot::GetNeedsHateRedux(Mob *tar) {
+	// This really should be a scalar function based in class Mob that returns 'this' state..but, is inline with current Bot coding...
+	// TODO: Good starting point..but, can be refined..
+	// TODO: Still awaiting bot spell rework..
+	if (!tar || !tar->HasTargetReflection())
+		return false;
+	
+	if (tar->IsClient()) {
+		switch (tar->GetClass()) {
+			// TODO: figure out affectable classes..
+			// Might need flag to allow player to determine redux req...
+		default:
+			return false;
+		}
+	}
+	else if (tar->IsBot()) {
+		switch (tar->GetClass()) {
+		case ROGUE:
+			if (tar->CastToBot()->evade_timer.Check(false))
+				return false;
+		case CLERIC:
+		case DRUID:
+		case SHAMAN:
+		case NECROMANCER:
+		case WIZARD:
+		case MAGICIAN:
+		case ENCHANTER:
+			return true;
+		default:
+			return false;
+		}
+	}
+
+	return false;
 }
 
 bool Bot::HasOrMayGetAggro() {

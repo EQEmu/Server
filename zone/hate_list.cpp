@@ -553,7 +553,7 @@ int HateList::AreaRampage(Mob *caster, Mob *target, int count, ExtraAttackOption
 		auto mob = entity_list.GetMobID(id);
 		if (mob) {
 			++hit_count;
-			caster->ProcessAttackRounds(mob, opts, 1);
+			caster->ProcessAttackRounds(mob, opts);
 		}
 	}
 

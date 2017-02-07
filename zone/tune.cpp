@@ -486,7 +486,7 @@ int32 Mob::Tune_MeleeMitigation(Mob* GM, Mob *attacker, int32 damage, int32 minh
 		}
 
 
-		damage = GetMeleeMitDmg(attacker, damage, minhit, mitigation_rating, attack_rating);
+		//damage = GetMeleeMitDmg(attacker, damage, minhit, mitigation_rating, attack_rating);
 	} 
 
 	if (damage < 0)
@@ -539,7 +539,7 @@ int32 Client::Tune_GetMeleeMitDmg(Mob* GM, Mob *attacker, int32 damage, int32 mi
 		float mit_rating, float atk_rating)
 {
 	if (!attacker->IsNPC() || RuleB(Combat, UseOldDamageIntervalRules))
-		return Mob::GetMeleeMitDmg(attacker, damage, minhit, mit_rating, atk_rating);
+		return 0; //Mob::GetMeleeMitDmg(attacker, damage, minhit, mit_rating, atk_rating);
 	int d = 10;
 	// floats for the rounding issues
 	float dmg_interval = (damage - minhit) / 19.0;
@@ -613,7 +613,7 @@ int32 Client::GetMeleeDamage(Mob* other, bool GetMinDamage)
 		}
 
 		int min_hit = 1;
-		int max_hit = (2*weapon_damage*GetDamageTable(skillinuse)) / 100;
+		int max_hit = 2;//(2*weapon_damage*GetDamageTable(skillinuse)) / 100;
 
 		if(GetLevel() < 10 && max_hit > RuleI(Combat, HitCapPre10))
 			max_hit = (RuleI(Combat, HitCapPre10));
