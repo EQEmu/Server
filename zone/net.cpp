@@ -546,7 +546,13 @@ int main(int argc, char** argv) {
 #endif
 #endif
 		}	//end extra profiler block 
-		Sleep(ZoneTimerResolution);
+		if (is_zone_loaded) {
+			Sleep(ZoneTimerResolution);
+		}
+		else {
+			Sleep(1000);
+		}
+		
 	}
 
 	entity_list.Clear();
