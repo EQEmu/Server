@@ -43,29 +43,34 @@
 
 const int Z_AGGRO=10;
 
-const int MobAISpellRange=100; // max range of buffs
-const int SpellType_Nuke=1;
-const int SpellType_Heal=2;
-const int SpellType_Root=4;
-const int SpellType_Buff=8;
-const int SpellType_Escape=16;
-const int SpellType_Pet=32;
-const int SpellType_Lifetap=64;
-const int SpellType_Snare=128;
-const int SpellType_DOT=256;
-const int SpellType_Dispel=512;
-const int SpellType_InCombatBuff=1024;
-const int SpellType_Mez=2048;
-const int SpellType_Charm=4096;
-const int SpellType_Slow = 8192;
-const int SpellType_Debuff = 16384;
-const int SpellType_Cure = 32768;
-const int SpellType_Resurrect = 65536;
+const uint32 MobAISpellRange=100; // max range of buffs
 
-const int SpellTypes_Detrimental = SpellType_Nuke|SpellType_Root|SpellType_Lifetap|SpellType_Snare|SpellType_DOT|SpellType_Dispel|SpellType_Mez|SpellType_Charm|SpellType_Debuff|SpellType_Slow;
-const int SpellTypes_Beneficial = SpellType_Heal|SpellType_Buff|SpellType_Escape|SpellType_Pet|SpellType_InCombatBuff|SpellType_Cure;
+enum SpellTypes : uint32
+{
+	SpellType_Nuke = (1 << 0),
+	SpellType_Heal = (1 << 1),
+	SpellType_Root = (1 << 2),
+	SpellType_Buff = (1 << 3),
+	SpellType_Escape = (1 << 4),
+	SpellType_Pet = (1 << 5),
+	SpellType_Lifetap = (1 << 6),
+	SpellType_Snare = (1 << 7),
+	SpellType_DOT = (1 << 8),
+	SpellType_Dispel = (1 << 9),
+	SpellType_InCombatBuff = (1 << 10),
+	SpellType_Mez = (1 << 11),
+	SpellType_Charm = (1 << 12),
+	SpellType_Slow = (1 << 13),
+	SpellType_Debuff = (1 << 14),
+	SpellType_Cure = (1 << 15),
+	SpellType_Resurrect = (1 << 16),
 
-#define SpellType_Any		0xFFFF
+	SpellTypes_Detrimental = (SpellType_Nuke | SpellType_Root | SpellType_Lifetap | SpellType_Snare | SpellType_DOT | SpellType_Dispel | SpellType_Mez | SpellType_Charm | SpellType_Debuff | SpellType_Slow),
+	SpellTypes_Beneficial = (SpellType_Heal | SpellType_Buff | SpellType_Escape | SpellType_Pet | SpellType_InCombatBuff | SpellType_Cure),
+
+	SpellType_Any = 0xFFFFFFFF
+};
+
 
 // These should not be used to determine spell category..
 // They are a graphical affects (effects?) index only

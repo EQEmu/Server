@@ -29,7 +29,7 @@
 	#define BotAI_DEBUG_Spells	-1
 #endif
 
-bool Bot::AICastSpell(Mob* tar, uint8 iChance, uint16 iSpellTypes) {
+bool Bot::AICastSpell(Mob* tar, uint8 iChance, uint32 iSpellTypes) {
 
 	if (!tar) {
 		return false;
@@ -1417,7 +1417,7 @@ std::list<BotSpell> Bot::GetBotSpellsForSpellEffectAndTargetType(Bot* botCaster,
 	return result;
 }
 
-std::list<BotSpell> Bot::GetBotSpellsBySpellType(Bot* botCaster, uint16 spellType) {
+std::list<BotSpell> Bot::GetBotSpellsBySpellType(Bot* botCaster, uint32 spellType) {
 	std::list<BotSpell> result;
 
 	if(botCaster && botCaster->AI_HasSpells()) {
@@ -1444,7 +1444,7 @@ std::list<BotSpell> Bot::GetBotSpellsBySpellType(Bot* botCaster, uint16 spellTyp
 	return result;
 }
 
-BotSpell Bot::GetFirstBotSpellBySpellType(Bot* botCaster, uint16 spellType) {
+BotSpell Bot::GetFirstBotSpellBySpellType(Bot* botCaster, uint32 spellType) {
 	BotSpell result;
 
 	result.SpellId = 0;
@@ -3324,7 +3324,7 @@ void Bot::CalcChanceToCast() {
 	_spellCastingChances[botStance][SpellType_CureIndex] = castChance;
 }
 
-uint8 Bot::GetChanceToCastBySpellType(uint16 spellType) {
+uint8 Bot::GetChanceToCastBySpellType(uint32 spellType) {
 	int index = 0;
 	int botStance = (int)GetBotStance();
 	uint8 chance = 0;

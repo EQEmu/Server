@@ -54,7 +54,7 @@ typedef struct {
 } NPCProximity;
 
 struct AISpells_Struct {
-	uint16	type;			// 0 = never, must be one (and only one) of the defined values
+	uint32	type;			// 0 = never, must be one (and only one) of the defined values
 	uint16	spellid;		// <= 0 = no spell
 	int16	manacost;		// -1 = use spdat, -2 = no cast time
 	uint32	time_cancast;	// when we can cast this spell next
@@ -453,7 +453,7 @@ protected:
 	uint32*	pDontCastBefore_casting_spell;
 	std::vector<AISpells_Struct> AIspells;
 	bool HasAISpell;
-	virtual bool AICastSpell(Mob* tar, uint8 iChance, uint16 iSpellTypes);
+	virtual bool AICastSpell(Mob* tar, uint8 iChance, uint32 iSpellTypes);
 	virtual bool AIDoSpellCast(uint8 i, Mob* tar, int32 mana_cost, uint32* oDontDoAgainBefore = 0);
 	AISpellsVar_Struct AISpellVar;
 	int16 GetFocusEffect(focusType type, uint16 spell_id);

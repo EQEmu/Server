@@ -7495,7 +7495,7 @@ bool Bot::GroupHasClass(Group* group, uint8 classId) {
 	return result;
 }
 
-bool EntityList::Bot_AICheckCloseBeneficialSpells(Bot* caster, uint8 iChance, float iRange, uint16 iSpellTypes) {
+bool EntityList::Bot_AICheckCloseBeneficialSpells(Bot* caster, uint8 iChance, float iRange, uint32 iSpellTypes) {
 	if((iSpellTypes&SpellTypes_Detrimental) != 0) {
 		Log.Out(Logs::General, Logs::Error, "Error: detrimental spells requested from AICheckCloseBeneficialSpells!!");
 		return false;
