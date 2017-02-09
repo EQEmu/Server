@@ -76,6 +76,7 @@
 #include <time.h>
 #include <ctime>
 #include <thread>
+#include <chrono>
 
 #ifdef _CRTDBG_MAP_ALLOC
 	#undef new
@@ -108,6 +109,7 @@ EQEmuLogSys Log;
 const SPDat_Spell_Struct* spells;
 int32 SPDAT_RECORDS = -1;
 const ZoneConfig *Config;
+uint64_t frame_time = 0;
 
 void Shutdown();
 extern void MapOpcodes();
@@ -431,11 +433,16 @@ int main(int argc, char** argv) {
 	zoneupdate_timer.Start();
 	bool eqsf_open = false;
 	std::unique_ptr<EQ::Net::EQStreamManager> eqsm;
+	std::chrono::time_point<std::chrono::system_clock> frame_prev = std::chrono::system_clock::now();
 
-	EQ::Timer process_timer(50, true, [&eqsf_open, &eqsm, &stream_identifier, &eqsi, &worldwasconnected,
-		&zoneupdate_timer, &IDLEZONEUPDATE, &ZONEUPDATE, &quest_timers, &InterserverTimer](EQ::Timer* t) {
+	EQ::Timer process_timer(50, true, [&](EQ::Timer* t) {
 			//Advance the timer to our current point in time
 			Timer::SetCurrentTime();
+
+			//Calculate frame time
+			std::chrono::time_point<std::chrono::system_clock> frame_now = std::chrono::system_clock::now();
+			frame_time = std::chrono::duration_cast<std::chrono::milliseconds>(frame_now - frame_prev).count();
+			frame_prev = frame_now;
 		
 			if (!eqsf_open && Config->ZonePort != 0) {
 				Log.Out(Logs::General, Logs::Zone_Server, "Starting EQ Network server on port %d", Config->ZonePort);
@@ -525,7 +532,12 @@ int main(int argc, char** argv) {
 	
 	while(RunLoops) {
 		EQ::EventLoop::Get().Process();
-		Sleep(1);
+		if (is_zone_loaded) {
+			Sleep(1);
+		}
+		else {
+			Sleep(50);
+		}
 	}
 
 	entity_list.Clear();

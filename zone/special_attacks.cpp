@@ -26,6 +26,8 @@
 
 #include <string.h>
 
+extern uint64_t frame_time;
+
 int Mob::GetBaseSkillDamage(EQEmu::skills::SkillType skill, Mob *target)
 {
 	int base = EQEmu::skills::GetBaseDamage(skill);
@@ -1012,7 +1014,7 @@ void Mob::ProjectileAttack()
 			ProjectileAtk[i].skill = 0;
 			ProjectileAtk[i].speed_mod = 0.0f;
 		} else {
-			ProjectileAtk[i].increment++;
+			ProjectileAtk[i].increment += frame_time;
 		}
 	}
 

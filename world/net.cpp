@@ -386,6 +386,7 @@ int main(int argc, char** argv) {
 		Log.OutF(Logs::General, Logs::World_Server, "New Zone Server connection from {2} at {0}:{1}",
 			connection->Handle()->RemoteIP(), connection->Handle()->RemotePort(), connection->GetUUID());
 
+		numzones++;
 		zoneserver_list.Add(new ZoneServer(connection));
 	});
 
@@ -393,6 +394,7 @@ int main(int argc, char** argv) {
 		Log.OutF(Logs::General, Logs::World_Server, "Removed Zone Server connection from {0}",
 			connection->GetUUID());
 
+		numzones--;
 		zoneserver_list.Remove(connection->GetUUID());
 	});
 

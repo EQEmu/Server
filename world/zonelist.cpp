@@ -86,7 +86,6 @@ void ZSList::KillAll() {
 	while(iterator != list.end()) {
 		(*iterator)->Disconnect();
 		iterator = list.erase(iterator);
-		numzones--;
 	}
 }
 
