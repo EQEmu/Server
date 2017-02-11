@@ -64,9 +64,12 @@ enum SpellTypes : uint32
 	SpellType_Debuff = (1 << 14),
 	SpellType_Cure = (1 << 15),
 	SpellType_Resurrect = (1 << 16),
+	SpellType_HateRedux = (1 << 17),
+	SpellType_InCombatBuffSong = (1 << 18),
+	SpellType_OutOfCombatBuffSong = (1 << 19),
 
 	SpellTypes_Detrimental = (SpellType_Nuke | SpellType_Root | SpellType_Lifetap | SpellType_Snare | SpellType_DOT | SpellType_Dispel | SpellType_Mez | SpellType_Charm | SpellType_Debuff | SpellType_Slow),
-	SpellTypes_Beneficial = (SpellType_Heal | SpellType_Buff | SpellType_Escape | SpellType_Pet | SpellType_InCombatBuff | SpellType_Cure),
+	SpellTypes_Beneficial = (SpellType_Heal | SpellType_Buff | SpellType_Escape | SpellType_Pet | SpellType_InCombatBuff | SpellType_Cure | SpellType_HateRedux | SpellType_InCombatBuffSong | SpellType_OutOfCombatBuffSong),
 
 	SpellType_Any = 0xFFFFFFFF
 };
