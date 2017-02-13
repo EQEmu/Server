@@ -99,9 +99,11 @@ bool Client::Process()
 			}
 		default:
 			{
-				char dump[64];
-				app->build_header_dump(dump);
-				Log.Out(Logs::General, Logs::Error, "Recieved unhandled application packet from the client: %s.", dump);
+				if (Log.log_settings[Logs::Client_Server_Packet_Unhandled].is_category_enabled == 1) {
+					char dump[64];
+					app->build_header_dump(dump);
+					Log.Out(Logs::General, Logs::Error, "Recieved unhandled application packet from the client: %s.", dump);
+				}
 			}
 		}
 
