@@ -87,6 +87,7 @@ echo "mysql_eqemu_password:$eqemu_db_password" >> install_variables.txt
 
 if [[ "$OS" == "Debian" ]]; then
 	# Install pre-req packages
+	apt-get -y update
 	apt-get $apt_options install bash
 	apt-get $apt_options install build-essential
 	apt-get $apt_options install cmake
@@ -105,6 +106,8 @@ if [[ "$OS" == "Debian" ]]; then
 	apt-get $apt_options install libperl-dev
 	apt-get $apt_options install libperl5i-perl
 	apt-get $apt_options install libwtdbomysql-dev
+	apt-get $apt_options install libmysqlclient-dev
+	apt-get $apt_options install minizip
 	apt-get $apt_options install lua5.1
 	apt-get $apt_options install make
 	apt-get $apt_options install mariadb-client
