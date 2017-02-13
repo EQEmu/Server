@@ -334,8 +334,9 @@ sub build_linux_source {
 	}
 	print "Building EQEmu Server code. This will take a while.";
 
-	#::: Build 
-	print `make`;
+	#::: Build
+	$processor_cores = `cat /proc/cpuinfo | grep -c ^processor /proc/cpuinfo`;
+	print `make -j$processor_cores`;
 	
 	chdir ($current_directory);
 	
