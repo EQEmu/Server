@@ -258,6 +258,7 @@ RULE_BOOL(Zone, EnableLoggedOffReplenishments, true)
 RULE_INT(Zone, MinOfflineTimeToReplenishments, 21600) // 21600 seconds is 6 Hours
 RULE_BOOL(Zone, UseZoneController, true) // Enables the ability to use persistent quest based zone controllers (zone_controller.pl/lua)
 RULE_BOOL(Zone, EnableZoneControllerGlobals, false) // Enables the ability to use quest globals with the zone controller NPC
+RULE_INT(Zone, GlobalLootMultiplier, 1) // Sets Global Loot drop multiplier for database based drops, useful for double, triple loot etc.
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Map)
