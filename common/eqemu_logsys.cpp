@@ -123,24 +123,19 @@ void EQEmuLogSys::LoadLogSettingsDefaults()
 
 std::string EQEmuLogSys::FormatOutMessageString(uint16 log_category, const std::string &in_message)
 {
-	std::string category_string;
-	if (log_category > 0 && Logs::LogCategoryName[log_category])
-		category_string = StringFormat("[%s] ", Logs::LogCategoryName[log_category]);
-	return StringFormat("%s%s", category_string.c_str(), in_message.c_str());
+	std::string ret;
+	ret.push_back('[');
+	ret.append(Logs::LogCategoryName[log_category]);
+	ret.push_back(']');
+	ret.push_back(' ');
+	ret.append(in_message);
+	return ret;
 }
 
 void EQEmuLogSys::ProcessGMSay(uint16 debug_level, uint16 log_category, const std::string &message)
 {
-	/* Check if category enabled for process */
-	if (log_settings[log_category].log_to_gmsay == 0)
-		return;
-
 	/* Enabling Netcode based GMSay output creates a feedback loop that ultimately ends in a crash */
 	if (log_category == Logs::LogCategory::Netcode)
-		return;
-
-	/* Make sure the message inbound is at a debug level we're set at */
-	if (log_settings[log_category].log_to_gmsay < debug_level)
 		return;
 
 	/* Check to see if the process that actually ran this is zone */
@@ -159,14 +154,6 @@ void EQEmuLogSys::ProcessLogWrite(uint16 debug_level, uint16 log_category, const
 		crash_log << time_stamp << " " << message << "\n";
 		crash_log.close();
 	}
-
-	/* Check if category enabled for process */
-	if (log_settings[log_category].log_to_file == 0)
-		return;
-
-	/* Make sure the message inbound is at a debug level we're set at */
-	if (log_settings[log_category].log_to_file < debug_level)
-		return;
 
 	char time_stamp[80];
 	EQEmuLogSys::SetCurrentTimeStamp(time_stamp);
@@ -246,13 +233,6 @@ uint16 EQEmuLogSys::GetGMSayColorFromCategory(uint16 log_category) {
 
 void EQEmuLogSys::ProcessConsoleMessage(uint16 debug_level, uint16 log_category, const std::string &message)
 {
-	/* Check if category enabled for process */
-	if (log_settings[log_category].log_to_console == 0)
-		return;
-
-	/* Make sure the message inbound is at a debug level we're set at */
-	if (log_settings[log_category].log_to_console < debug_level)
-		return;
 
 	#ifdef _WINDOWS
 		HANDLE  console_handle;
@@ -273,12 +253,25 @@ void EQEmuLogSys::ProcessConsoleMessage(uint16 debug_level, uint16 log_category,
 
 void EQEmuLogSys::Out(Logs::DebugLevel debug_level, uint16 log_category, std::string message, ...)
 {
-	const bool log_to_console = log_settings[log_category].log_to_console > 0;
-	const bool log_to_file = log_settings[log_category].log_to_file > 0;
-	const bool log_to_gmsay = log_settings[log_category].log_to_gmsay > 0;
-	const bool nothing_to_log = !log_to_console && !log_to_file && !log_to_gmsay;
 
-	if (nothing_to_log) return;
+	bool log_to_console = true;
+	if (log_settings[log_category].log_to_console < debug_level) {
+		log_to_console = false;
+	}
+
+	bool log_to_file = true;
+	if (log_settings[log_category].log_to_file < debug_level) {
+		log_to_file = false;
+	}
+
+	bool log_to_gmsay = true;
+	if (log_settings[log_category].log_to_gmsay < debug_level) {
+		log_to_gmsay = false;
+	}
+
+	const bool nothing_to_log = !log_to_console && !log_to_file && !log_to_gmsay;
+	if (nothing_to_log)
+		return;
 
 	va_list args;
 	va_start(args, message);
