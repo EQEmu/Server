@@ -334,7 +334,7 @@ sub build_linux_source {
 	}
 	print "Building EQEmu Server code. This will take a while.";
 
-	#::: Build 
+	#::: Build
 	print `make`;
 	
 	chdir ($current_directory);
