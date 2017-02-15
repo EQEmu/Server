@@ -2496,7 +2496,7 @@ bool IsSpellInList(DBnpcspells_Struct* spell_list, int16 iSpellID) {
 }
 
 // adds a spell to the list, taking into account priority and resorting list as needed.
-void NPC::AddSpellToNPCList(int16 iPriority, int16 iSpellID, uint16 iType,
+void NPC::AddSpellToNPCList(int16 iPriority, int16 iSpellID, uint32 iType,
 							int16 iManaCost, int32 iRecastDelay, int16 iResistAdjust)
 {
 
@@ -2646,7 +2646,7 @@ DBnpcspells_Struct* ZoneDatabase::GetNPCSpells(uint32 iDBSpellsID) {
         {
             int spell_id = atoi(row[0]);
             npc_spells_cache[iDBSpellsID]->entries[entryIndex].spellid = spell_id;
-            npc_spells_cache[iDBSpellsID]->entries[entryIndex].type = atoi(row[1]);
+            npc_spells_cache[iDBSpellsID]->entries[entryIndex].type = atoul(row[1]);
             npc_spells_cache[iDBSpellsID]->entries[entryIndex].minlevel = atoi(row[2]);
             npc_spells_cache[iDBSpellsID]->entries[entryIndex].maxlevel = atoi(row[3]);
             npc_spells_cache[iDBSpellsID]->entries[entryIndex].manacost = atoi(row[4]);
