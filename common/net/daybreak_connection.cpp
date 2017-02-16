@@ -1290,7 +1290,7 @@ void EQ::Net::DaybreakConnection::InternalQueuePacket(Packet &p, int stream_id, 
 		return;
 	}
 
-	Log.OutF(Logs::Detail, Logs::Netcode, "Queue reliable packet for stream {0}\n{1}", p.ToString());
+	Log.OutF(Logs::Detail, Logs::Netcode, "Queue reliable packet for stream {0}\n{1}", stream_id, p.ToString());
 
 	auto stream = &m_streams[stream_id];
 	auto max_raw_size = m_max_packet_size - m_crc_bytes - DaybreakReliableHeader::size();
