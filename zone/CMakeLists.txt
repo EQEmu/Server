@@ -122,6 +122,7 @@ SET(zone_sources
 	water_map_v2.cpp
 	waypoints.cpp
 	worldserver.cpp
+	xtargetautohaters.cpp
 	zone.cpp
 	zone_config.cpp
 	zonedb.cpp
@@ -215,6 +216,7 @@ SET(zone_headers
 	water_map_v1.h
 	water_map_v2.h
 	worldserver.h
+	xtargetautohaters.h
 	zone.h
 	zone_config.h
 	zonedb.h

@@ -20,6 +20,7 @@
 
 #include "../common/types.h"
 #include "groups.h"
+#include "xtargetautohaters.h"
 
 class Client;
 class EQApplicationPacket;
@@ -230,6 +231,9 @@ public:
 	inline int GetMentorPercent(uint32 group_id) { return group_mentor[group_id].mentor_percent; }
 	inline Client *GetMentoree(uint32 group_id) { return group_mentor[group_id].mentoree; }
 
+	void SetDirtyAutoHaters();
+	inline XTargetAutoHaters *GetXTargetAutoMgr() { return &m_autohatermgr; }
+
 	RaidMember members[MAX_RAID_MEMBERS];
 	char leadername[64];
 protected:
@@ -244,6 +248,8 @@ protected:
 	GroupLeadershipAA_Struct group_aa[MAX_RAID_GROUPS];
 
 	GroupMentor group_mentor[MAX_RAID_GROUPS];
+
+	XTargetAutoHaters m_autohatermgr;
 };
 
 

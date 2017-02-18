@@ -575,6 +575,11 @@ void Client::CompleteConnect()
 				}
 			}
 			raid->SendGroupLeadershipAA(this, grpID); // this may get sent an extra time ...
+
+			SetXTargetAutoMgr(raid->GetXTargetAutoMgr());
+			if (!GetXTargetAutoMgr()->empty())
+				SetDirtyAutoHaters();
+
 			if (raid->IsLocked())
 				raid->SendRaidLockTo(this);
 		}
@@ -1548,8 +1553,8 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 			// we purchased a new one while out-of-zone.
 			if (group->IsLeader(this))
 				group->SendLeadershipAAUpdate();
-
 		}
+		JoinGroupXTargets(group);
 		group->UpdatePlayer(this);
 		LFG = false;
 	}
@@ -10806,7 +10811,8 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket *app)
 							}
 						}
 					}
-					g->DisbandGroup();
+					g->JoinRaidXTarget(r);
+					g->DisbandGroup(true);
 					r->GroupUpdate(freeGroup);
 				}
 				else{
@@ -10871,7 +10877,8 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket *app)
 								}
 							}
 						}
-						ig->DisbandGroup();
+						ig->JoinRaidXTarget(r, true);
+						ig->DisbandGroup(true);
 						r->GroupUpdate(groupFree);
 						groupFree = r->GetFreeGroup();
 					}
@@ -10924,10 +10931,11 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket *app)
 							}
 						}
 					}
-					g->DisbandGroup();
+					g->JoinRaidXTarget(r);
+					g->DisbandGroup(true);
 					r->GroupUpdate(groupFree);
 				}
-				else
+				else // target does not have a group
 				{
 					if (ig){
 						r = new Raid(i);
@@ -10981,14 +10989,15 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket *app)
 						r->SendRaidCreate(this);
 						r->SendMakeLeaderPacketTo(r->leadername, this);
 						r->SendBulkRaid(this);
+						ig->JoinRaidXTarget(r, true);
 						r->AddMember(this);
-						ig->DisbandGroup();
+						ig->DisbandGroup(true);
 						r->GroupUpdate(0);
 						if (r->IsLocked()) {
 							r->SendRaidLockTo(this);
 						}
 					}
-					else{
+					else{ // neither has a group
 						r = new Raid(i);
 						entity_list.AddRaid(r);
 						r->SetRaidDetails();
@@ -14087,6 +14096,7 @@ void Client::Handle_OP_XTargetAutoAddHaters(const EQApplicationPacket *app)
 	}
 
 	XTargetAutoAddHaters = app->ReadUInt8(0);
+	SetDirtyAutoHaters();
 }
 
 void Client::Handle_OP_XTargetOpen(const EQApplicationPacket *app)

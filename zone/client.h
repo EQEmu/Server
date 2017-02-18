@@ -48,6 +48,7 @@ namespace EQEmu
 #include "../common/inventory_profile.h"
 #include "../common/guilds.h"
 //#include "../common/item_data.h"
+#include "xtargetautohaters.h"
 
 #include "common.h"
 #include "merc.h"
@@ -1122,6 +1123,13 @@ public:
 	void RemoveGroupXTargets();
 	void RemoveAutoXTargets();
 	void ShowXTargets(Client *c);
+	inline XTargetAutoHaters *GetXTargetAutoMgr() { return m_activeautohatermgr; } // will be either raid or group or self
+	inline void SetXTargetAutoMgr(XTargetAutoHaters *in) { if (in) m_activeautohatermgr = in; else m_activeautohatermgr = &m_autohatermgr; }
+	inline void SetDirtyAutoHaters() { m_dirtyautohaters = true; }
+	void ProcessXTargetAutoHaters(); // fixes up our auto haters
+	void JoinGroupXTargets(Group *g);
+	void LeaveGroupXTargets(Group *g);
+	void LeaveRaidXTargets(Raid *r);
 	bool GroupFollow(Client* inviter);
 	inline bool  GetRunMode() const { return runmode; }
 
@@ -1546,8 +1554,11 @@ private:
 
 	uint8 MaxXTargets;
 	bool XTargetAutoAddHaters;
+	bool m_dirtyautohaters;
 
 	struct XTarget_Struct XTargets[XTARGET_HARDCAP];
+	XTargetAutoHaters m_autohatermgr;
+	XTargetAutoHaters *m_activeautohatermgr;
 
 	Timer ItemTickTimer;
 	Timer ItemQuestTimer;
