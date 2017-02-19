@@ -154,6 +154,7 @@ Client::Client(EQStreamInterface* ieqs)
 	afk_toggle_timer(250),
 	helm_toggle_timer(250),
 	light_update_timer(600),
+	aggro_meter_timer(1000),
 	m_Proximity(FLT_MAX, FLT_MAX, FLT_MAX), //arbitrary large number
 	m_ZoneSummonLocation(-2.0f,-2.0f,-2.0f),
 	m_AutoAttackPosition(0.0f, 0.0f, 0.0f, 0.0f),
@@ -8771,3 +8772,167 @@ void Client::CheckRegionTypeChanges()
 	else if (GetPVP())
 		SetPVP(false, false);
 }
+
+void Client::ProcessAggroMeter()
+{
+	if (!AggroMeterAvailable())
+		return;
+
+	// we need to decide if we need to send OP_AggroMeterTargetInfo now
+	// This packet sends the current lock target ID and the current target ID
+	// target ID will be either our target or our target of target when we're targeting a PC
+	bool send_targetinfo = false;
+	auto cur_tar = GetTarget();
+
+	// probably should have PVP rules ...
+	if (cur_tar && cur_tar != this) {
+		if (cur_tar->IsNPC() && !cur_tar->IsPetOwnerClient() && cur_tar->GetID() != m_aggrometer.get_target_id()) {
+			m_aggrometer.set_target_id(cur_tar->GetID());
+			send_targetinfo = true;
+		} else if ((cur_tar->IsPetOwnerClient() || cur_tar->IsClient()) && cur_tar->GetTarget() && cur_tar->GetTarget()->GetID() != m_aggrometer.get_target_id()) {
+			m_aggrometer.set_target_id(cur_tar->GetTarget()->GetID());
+			send_targetinfo = true;
+		}
+	} else if (m_aggrometer.get_target_id()) {
+		m_aggrometer.set_target_id(0);
+		send_targetinfo = true;
+	}
+
+	if (m_aggrometer.update_lock())
+		send_targetinfo = true;
+
+	if (send_targetinfo) {
+		auto app = new EQApplicationPacket(OP_AggroMeterTargetInfo, sizeof(uint32) * 2);
+		app->WriteUInt32(m_aggrometer.get_lock_id());
+		app->WriteUInt32(m_aggrometer.get_target_id());
+		FastQueuePacket(&app);
+	}
+
+	// we could just calculate how big the packet would need to be ... but it's easier this way :P should be 87 bytes
+	auto app = new EQApplicationPacket(OP_AggroMeterUpdate, m_aggrometer.max_packet_size());
+
+	cur_tar = entity_list.GetMob(m_aggrometer.get_target_id());
+
+	// first we must check the secondary
+	// TODO: lock target should affect secondary as well
+	bool send = false;
+	Mob *secondary = nullptr;
+	bool has_aggro = false;
+	if (cur_tar) {
+		if (cur_tar->GetTarget() == this) {// we got aggro
+			secondary = cur_tar->GetSecondaryHate(this);
+			has_aggro = true;
+		} else {
+			secondary = cur_tar->GetTarget();
+		}
+	}
+
+	if (secondary && secondary->GetID() != m_aggrometer.get_secondary_id()) {
+		m_aggrometer.set_secondary_id(secondary->GetID());
+		app->WriteUInt8(1);
+		app->WriteUInt32(m_aggrometer.get_secondary_id());
+		send = true;
+	} else if (!secondary && m_aggrometer.get_secondary_id()) {
+		m_aggrometer.set_secondary_id(0);
+		app->WriteUInt8(1);
+		app->WriteUInt32(0);
+		send = true;
+	} else { // might not need to send in this case
+		app->WriteUInt8(0);
+	}
+
+	auto count_offset = app->GetWritePosition();
+	app->WriteUInt8(0);
+
+	int count = 0;
+	auto add_entry = [&app, &count, this](AggroMeter::AggroTypes i) {
+		count++;
+		app->WriteUInt8(i);
+		app->WriteUInt16(m_aggrometer.get_pct(i));
+	};
+	// TODO: Player entry should either be lock or yourself, ignoring lock for now
+	// player, secondary, and group depend on your target/lock
+	if (cur_tar) {
+		if (m_aggrometer.set_pct(AggroMeter::AT_Player, cur_tar->GetHateRatio(cur_tar->GetTarget(), this)))
+			add_entry(AggroMeter::AT_Player);
+
+		if (m_aggrometer.set_pct(AggroMeter::AT_Secondary, has_aggro ? cur_tar->GetHateRatio(this, secondary) : secondary ? 100 : 0))
+			add_entry(AggroMeter::AT_Secondary);
+
+		// fuuuuuuuuuuuuuuuuuuuuuuuucckkkkkkkkkkkkkkk raids
+		if (IsRaidGrouped()) {
+			auto raid = GetRaid();
+			if (raid) {
+				auto gid = raid->GetGroup(this);
+				if (gid < 12) {
+					int at_id = AggroMeter::AT_Group1;
+					for (int i = 0; i < MAX_RAID_MEMBERS; ++i) {
+						if (raid->members[i].member && raid->members[i].member != this && raid->members[i].GroupNumber == gid) {
+							if (m_aggrometer.set_pct(static_cast<AggroMeter::AggroTypes>(at_id), cur_tar->GetHateRatio(cur_tar->GetTarget(), raid->members[i].member)))
+								add_entry(static_cast<AggroMeter::AggroTypes>(at_id));
+							at_id++;
+							if (at_id > AggroMeter::AT_Group5)
+								break;
+						}
+					}
+				}
+			}
+		} else if (IsGrouped()) {
+			auto group = GetGroup();
+			if (group) {
+				int at_id = AggroMeter::AT_Group1;
+				for (int i = 0; i < MAX_GROUP_MEMBERS; ++i) {
+					if (group->members[i] && group->members[i] != this) {
+						if (m_aggrometer.set_pct(static_cast<AggroMeter::AggroTypes>(at_id), cur_tar->GetHateRatio(cur_tar->GetTarget(), group->members[i])))
+							add_entry(static_cast<AggroMeter::AggroTypes>(at_id));
+						at_id++;
+					}
+				}
+			}
+		}
+	} else { // we might need to clear out some data now
+		if (m_aggrometer.set_pct(AggroMeter::AT_Player, 0))
+			add_entry(AggroMeter::AT_Player);
+		if (m_aggrometer.set_pct(AggroMeter::AT_Secondary, 0))
+			add_entry(AggroMeter::AT_Secondary);
+		if (m_aggrometer.set_pct(AggroMeter::AT_Group1, 0))
+			add_entry(AggroMeter::AT_Group1);
+		if (m_aggrometer.set_pct(AggroMeter::AT_Group2, 0))
+			add_entry(AggroMeter::AT_Group2);
+		if (m_aggrometer.set_pct(AggroMeter::AT_Group3, 0))
+			add_entry(AggroMeter::AT_Group3);
+		if (m_aggrometer.set_pct(AggroMeter::AT_Group4, 0))
+			add_entry(AggroMeter::AT_Group5);
+		if (m_aggrometer.set_pct(AggroMeter::AT_Group5, 0))
+			add_entry(AggroMeter::AT_Group5);
+	}
+
+	// now to go over our xtargets
+	// if the entry is an NPC it's our hate relative to the NPCs current tank
+	// if it's a PC, it's their hate relative to our current target
+	for (int i = 0; i < GetMaxXTargets(); ++i) {
+		if (XTargets[i].ID) {
+			auto mob = entity_list.GetMob(XTargets[i].ID);
+			if (mob) {
+				int ratio = 0;
+				if (mob->IsNPC())
+					ratio = mob->GetHateRatio(mob->GetTarget(), this);
+				else if (cur_tar)
+					ratio = cur_tar->GetHateRatio(cur_tar->GetTarget(), mob);
+				if (m_aggrometer.set_pct(static_cast<AggroMeter::AggroTypes>(AggroMeter::AT_XTarget1 + i), ratio))
+					add_entry(static_cast<AggroMeter::AggroTypes>(AggroMeter::AT_XTarget1 + i));
+			}
+		}
+	}
+
+	if (send || count) {
+		app->size = app->GetWritePosition(); // this should be safe, although not recommended
+		// but this way we can have a smaller buffer created for the packet dispatched to the client w/o resizing this one
+		app->SetWritePosition(count_offset);
+		app->WriteUInt8(count);
+		FastQueuePacket(&app);
+	} else {
+		safe_delete(app);
+	}
+}
+

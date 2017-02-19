@@ -684,7 +684,8 @@ bool Client::Process() {
 	if (client_state == CLIENT_CONNECTED) {
 		if (m_dirtyautohaters)
 			ProcessXTargetAutoHaters();
-		// aggro meter stuff should live here
+		if (aggro_meter_timer.Check())
+			ProcessAggroMeter();
 	}
 
 	return ret;

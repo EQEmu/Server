@@ -120,6 +120,7 @@ void MapOpcodes()
 	ConnectedOpcodes[OP_AdventureMerchantSell] = &Client::Handle_OP_AdventureMerchantSell;
 	ConnectedOpcodes[OP_AdventureRequest] = &Client::Handle_OP_AdventureRequest;
 	ConnectedOpcodes[OP_AdventureStatsRequest] = &Client::Handle_OP_AdventureStatsRequest;
+	ConnectedOpcodes[OP_AggroMeterLockTarget] = &Client::Handle_OP_AggroMeterLockTarget;
 	ConnectedOpcodes[OP_AltCurrencyMerchantRequest] = &Client::Handle_OP_AltCurrencyMerchantRequest;
 	ConnectedOpcodes[OP_AltCurrencyPurchase] = &Client::Handle_OP_AltCurrencyPurchase;
 	ConnectedOpcodes[OP_AltCurrencyReclaim] = &Client::Handle_OP_AltCurrencyReclaim;
@@ -2398,6 +2399,17 @@ void Client::Handle_OP_AdventureStatsRequest(const EQApplicationPacket *app)
 	}
 
 	FastQueuePacket(&outapp);
+}
+
+void Client::Handle_OP_AggroMeterLockTarget(const EQApplicationPacket *app)
+{
+	if (app->size < sizeof(uint32)) {
+		Log.Out(Logs::General, Logs::Error, "Handle_OP_AggroMeterLockTarget had a packet that was too small.");
+		return;
+	}
+
+	SetAggroMeterLock(app->ReadUInt32(0));
+	ProcessAggroMeter();
 }
 
 void Client::Handle_OP_AltCurrencyMerchantRequest(const EQApplicationPacket *app)
