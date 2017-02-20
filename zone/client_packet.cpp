@@ -12440,14 +12440,33 @@ void Client::Handle_OP_ShopPlayerSell(const EQApplicationPacket *app)
 		return;
 	}
 
-	int cost_quantity = mp->quantity;
+	uint32 cost_quantity = mp->quantity;
 	if (inst->IsCharged())
-		int cost_quantity = 1;
+		uint32 cost_quantity = 1;
 
-	if (RuleB(Merchant, UsePriceMod))
-		price = (int)((item->Price*cost_quantity)*(RuleR(Merchant, BuyCostMod))*Client::CalcPriceMod(vendor, true) + 0.5); // need to round up, because client does it automatically when displaying price
-	else
-		price = (int)((item->Price*cost_quantity)*(RuleR(Merchant, BuyCostMod)) + 0.5);
+	uint32 i;
+
+	if (RuleB(Merchant, UsePriceMod)) {
+		for (i = 0; i < cost_quantity; i++) {
+			price = (uint32)((item->Price * i)*(RuleR(Merchant, BuyCostMod))*Client::CalcPriceMod(vendor, true) + 0.5); // need to round up, because client does it automatically when displaying price
+			if (price > 4000000000) {
+				cost_quantity = i;
+				mp->quantity = i;
+				break;
+			}
+		}
+	}
+	else {
+		for (i = 0; i < cost_quantity; i++) {
+			price = (uint32)((item->Price * i)*(RuleR(Merchant, BuyCostMod)) + 0.5); // need to round up, because client does it automatically when displaying price
+			if (price > 4000000000) {
+				cost_quantity = i;
+				mp->quantity = i;
+				break;
+			}
+		}
+	}
+
 	AddMoneyToPP(price, false);
 
 	if (inst->IsStackable() || inst->IsCharged())
