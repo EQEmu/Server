@@ -76,7 +76,6 @@ Bot::Bot(NPCType npcTypeData, Client* botOwner) : NPC(&npcTypeData, nullptr, glm
 	SetAltOutOfCombatBehavior(GetClass() == BARD); // will need to be updated if more classes make use of this flag
 	SetShowHelm(true);
 	SetPauseAI(false);
-	CalcChanceToCast();
 	rest_timer.Disable();
 	SetFollowDistance(BOT_DEFAULT_FOLLOW_DISTANCE);
 	// Do this once and only in this constructor
@@ -151,7 +150,6 @@ Bot::Bot(uint32 botID, uint32 botOwnerCharacterID, uint32 botSpellsID, double to
 	SetTaunting((GetClass() == WARRIOR || GetClass() == PALADIN || GetClass() == SHADOWKNIGHT) && (GetBotStance() == BotStanceAggressive));
 	SetPauseAI(false);
 
-	CalcChanceToCast();
 	rest_timer.Disable();
 	SetFollowDistance(BOT_DEFAULT_FOLLOW_DISTANCE);
 	strcpy(this->name, this->GetCleanName());
@@ -7639,6 +7637,24 @@ bool EntityList::Bot_AICheckCloseBeneficialSpells(Bot* caster, uint8 iChance, fl
 			}
 		}
 	}
+
+	if (iSpellTypes == SpellType_HateRedux) {
+		if (!caster->IsEngaged())
+			return false;
+
+		if (caster->HasGroup()) {
+			Group *g = caster->GetGroup();
+			if (g) {
+				for (int i = 0; i < MAX_GROUP_MEMBERS; i++) {
+					if (g->members[i] && caster->GetNeedsHateRedux(g->members[i])) {
+						if (caster->AICastSpell(g->members[i], caster->GetChanceToCastBySpellType(SpellType_HateRedux), SpellType_HateRedux))
+							return true;
+					}
+				}
+			}
+		}
+	}
+
 	return false;
 }
 
@@ -8017,7 +8033,7 @@ bool Bot::GetNeedsHateRedux(Mob *tar) {
 	// This really should be a scalar function based in class Mob that returns 'this' state..but, is inline with current Bot coding...
 	// TODO: Good starting point..but, can be refined..
 	// TODO: Still awaiting bot spell rework..
-	if (!tar || !tar->HasTargetReflection())
+	if (!tar || !tar->IsEngaged() || !tar->HasTargetReflection() || !tar->GetTarget()->IsNPC())
 		return false;
 	
 	if (tar->IsClient()) {
@@ -8031,7 +8047,7 @@ bool Bot::GetNeedsHateRedux(Mob *tar) {
 	else if (tar->IsBot()) {
 		switch (tar->GetClass()) {
 		case ROGUE:
-			if (tar->CastToBot()->evade_timer.Check(false))
+			if (tar->CanFacestab() || tar->CastToBot()->evade_timer.Check(false))
 				return false;
 		case CLERIC:
 		case DRUID:
