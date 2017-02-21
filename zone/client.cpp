@@ -8775,8 +8775,10 @@ void Client::CheckRegionTypeChanges()
 
 void Client::ProcessAggroMeter()
 {
-	if (!AggroMeterAvailable())
+	if (!AggroMeterAvailable()) {
+		aggro_meter_timer.Disable();
 		return;
+	}
 
 	// we need to decide if we need to send OP_AggroMeterTargetInfo now
 	// This packet sends the current lock target ID and the current target ID
