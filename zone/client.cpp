@@ -7430,7 +7430,7 @@ void Client::ProcessXTargetAutoHaters()
 		auto &haters = GetXTargetAutoMgr()->get_list();
 		for (auto &e : haters) {
 			auto *mob = entity_list.GetMob(e.spawn_id);
-			if (!IsXTarget(mob)) {
+			if (mob && !IsXTarget(mob)) {
 				auto slot = empty_slots.front();
 				empty_slots.pop();
 				XTargets[slot].dirty = true;
