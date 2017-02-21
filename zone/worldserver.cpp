@@ -897,6 +897,9 @@ void WorldServer::Process() {
 						Inviter->CastToClient()->SendGroupLeaderChangePacket(Inviter->GetName());
 						Inviter->CastToClient()->SendGroupJoinAcknowledge();
 					}
+					group->GetXTargetAutoMgr()->merge(*Inviter->CastToClient()->GetXTargetAutoMgr());
+					Inviter->CastToClient()->GetXTargetAutoMgr()->clear();
+					Inviter->CastToClient()->SetXTargetAutoMgr(group->GetXTargetAutoMgr());
 				}
 
 				if(!group)
@@ -1011,6 +1014,7 @@ void WorldServer::Process() {
 					group->SetGroupMentor(mentor_percent, mentoree_name);
 
 				}
+				client->JoinGroupXTargets(group);
 			}
 			else if (client->GetMerc())
 			{
@@ -1109,6 +1113,7 @@ void WorldServer::Process() {
 					r->SendRaidRemoveAll(rga->playername);
 					Client *rem = entity_list.GetClientByName(rga->playername);
 					if(rem){
+						rem->LeaveRaidXTargets(r);
 						r->SendRaidDisband(rem);
 					}
 					r->LearnMembers();

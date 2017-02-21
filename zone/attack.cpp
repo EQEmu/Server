@@ -2432,9 +2432,9 @@ void Mob::AddToHateList(Mob* other, uint32 hate /*= 0*/, int32 damage /*= 0*/, b
 	Mob* mypet = this->GetPet();
 	Mob* myowner = this->GetOwner();
 	Mob* targetmob = this->GetTarget();
+	bool on_hatelist = CheckAggro(other);
 
 	if(other){
-		bool on_hatelist = CheckAggro(other);
 		AddRampage(other);
 		if (on_hatelist) { // odd reason, if you're not on the hate list, subtlety etc don't apply!
 			// Spell Casting Subtlety etc
@@ -2510,7 +2510,7 @@ void Mob::AddToHateList(Mob* other, uint32 hate /*= 0*/, int32 damage /*= 0*/, b
 
 	hate_list.AddEntToHateList(other, hate, damage, bFrenzy, !iBuffTic);
 
-	if(other->IsClient())
+	if(other->IsClient() && !on_hatelist)
 		other->CastToClient()->AddAutoXTarget(this);
 
 #ifdef BOTS
@@ -2549,7 +2549,7 @@ void Mob::AddToHateList(Mob* other, uint32 hate /*= 0*/, int32 damage /*= 0*/, b
 			if(!owner->GetSpecialAbility(IMMUNE_AGGRO))
 			{
 				hate_list.AddEntToHateList(owner, 0, 0, false, !iBuffTic);
-				if(owner->IsClient())
+				if(owner->IsClient() && !CheckAggro(owner))
 					owner->CastToClient()->AddAutoXTarget(this);
 			}
 		}

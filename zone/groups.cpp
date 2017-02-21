@@ -64,6 +64,8 @@ Group::Group(uint32 gid)
 		MarkedNPCs[i] = 0;
 
 	NPCMarkerID = 0;
+
+	m_autohatermgr.SetOwner(nullptr, this, nullptr);
 }
 
 //creating a new group
@@ -94,6 +96,7 @@ Group::Group(Mob* leader)
 		MarkedNPCs[i] = 0;
 
 	NPCMarkerID = 0;
+	m_autohatermgr.SetOwner(nullptr, this, nullptr);
 }
 
 Group::~Group()
@@ -338,6 +341,9 @@ bool Group::AddMember(Mob* newmember, const char *NewMemberName, uint32 Characte
 	{
 		database.SetGroupID(NewMemberName, GetID(), CharacterID, ismerc);
 	}
+
+	if (newmember && newmember->IsClient())
+		newmember->CastToClient()->JoinGroupXTargets(this);
 
 	safe_delete(outapp);
 
@@ -701,8 +707,10 @@ bool Group::DelMember(Mob* oldmember, bool ignoresender)
 	if (oldmember->GetName() == mentoree_name)
 		ClearGroupMentor();
 
-	if(oldmember->IsClient())
+	if(oldmember->IsClient()) {
 		SendMarkedNPCsToMember(oldmember->CastToClient(), true);
+		oldmember->CastToClient()->LeaveGroupXTargets(this);
+	}
 
 	if(GroupCount() < 3)
 	{
@@ -855,7 +863,7 @@ uint32 Group::GetTotalGroupDamage(Mob* other) {
 	return total;
 }
 
-void Group::DisbandGroup() {
+void Group::DisbandGroup(bool joinraid) {
 	auto outapp = new EQApplicationPacket(OP_GroupUpdate, sizeof(GroupUpdate_Struct));
 
 	GroupUpdate_Struct* gu = (GroupUpdate_Struct*) outapp->pBuffer;
@@ -882,6 +890,8 @@ void Group::DisbandGroup() {
 			database.SetGroupID(members[i]->GetCleanName(), 0, members[i]->CastToClient()->CharacterID(), false);
 			members[i]->CastToClient()->QueuePacket(outapp);
 			SendMarkedNPCsToMember(members[i]->CastToClient(), true);
+			if (!joinraid)
+				members[i]->CastToClient()->LeaveGroupXTargets(this);
 		}
 		
 		if (members[i]->IsMerc())
@@ -2273,6 +2283,30 @@ void Group::UpdateXTargetMarkedNPC(uint32 Number, Mob *m)
 		}
 	}
 
+}
+
+void Group::SetDirtyAutoHaters()
+{
+	for (int i = 0; i < MAX_GROUP_MEMBERS; ++i)
+		if (members[i] && members[i]->IsClient())
+			members[i]->CastToClient()->SetDirtyAutoHaters();
+}
+
+void Group::JoinRaidXTarget(Raid *raid, bool first)
+{
+	if (!GetXTargetAutoMgr()->empty())
+		raid->GetXTargetAutoMgr()->merge(*GetXTargetAutoMgr());
+
+	for (int i = 0; i < MAX_GROUP_MEMBERS; ++i) {
+		if (members[i] && members[i]->IsClient()) {
+			auto *client = members[i]->CastToClient();
+			if (!first)
+				client->RemoveAutoXTargets();
+			client->SetXTargetAutoMgr(raid->GetXTargetAutoMgr());
+			if (!client->GetXTargetAutoMgr()->empty())
+				client->SetDirtyAutoHaters();
+		}
+	}
 }
 
 void Group::SetMainTank(const char *NewMainTankName)

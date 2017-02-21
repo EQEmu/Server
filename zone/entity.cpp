@@ -1404,15 +1404,15 @@ void EntityList::RemoveFromTargets(Mob *mob, bool RemoveFromXTargets)
 		if (!m)
 			continue;
 
-		m->RemoveFromHateList(mob);
-
 		if (RemoveFromXTargets) {
-			if (m->IsClient())
+			if (m->IsClient() && mob->CheckAggro(m))
 				m->CastToClient()->RemoveXTarget(mob, false);
 			// FadingMemories calls this function passing the client.
-			else if (mob->IsClient())
+			else if (mob->IsClient() && m->CheckAggro(mob))
 				mob->CastToClient()->RemoveXTarget(m, false);
 		}
+
+		m->RemoveFromHateList(mob);
 	}
 }
 
@@ -2557,6 +2557,8 @@ void EntityList::RemoveFromHateLists(Mob *mob, bool settoone)
 				it->second->RemoveFromHateList(mob);
 			else
 				it->second->SetHateAmountOnEnt(mob, 1);
+			if (mob->IsClient())
+				mob->CastToClient()->RemoveXTarget(it->second, false); // gotta do book keeping
 		}
 		++it;
 	}
