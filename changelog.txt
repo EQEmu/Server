@@ -1,5 +1,8 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 2/19/2017 ==
+Akkadius: Added a fix for limiting the amount of items sold in a stack when the resulting return coin is higher than the supporting struct for returning coin
+
 == 01/31/2017 ==
 Uleat: Modifed bot movement behavior in an attempt to 'normalize' it. This is a hack fix and will be revisited at some point. (Probably just need a follow function rather than use movement, when the leader of the follow chain is moving.)
 
