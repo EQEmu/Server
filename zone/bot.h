@@ -47,8 +47,6 @@ const int MaxSpellTimer = 15;
 const int MaxDisciplineTimer = 10;
 const int DisciplineReuseStart = MaxSpellTimer + 1;
 const int MaxTimer = MaxSpellTimer + MaxDisciplineTimer;
-const int MaxStances = 7;
-const int MaxSpellTypes = 16;
 
 enum BotStanceType {
 	BotStancePassive,
@@ -58,7 +56,8 @@ enum BotStanceType {
 	BotStanceAggressive,
 	BotStanceBurn,
 	BotStanceBurnAE,
-	BotStanceUnknown
+	BotStanceUnknown,
+	MaxStances = BotStanceUnknown
 };
 
 #define BOT_STANCE_COUNT 8
@@ -125,7 +124,12 @@ enum SpellTypeIndex {
 	SpellType_CharmIndex,
 	SpellType_SlowIndex,
 	SpellType_DebuffIndex,
-	SpellType_CureIndex
+	SpellType_CureIndex,
+	SpellType_ResurrectIndex,
+	SpellType_HateReduxIndex,
+	SpellType_InCombatBuffSongIndex,
+	SpellType_OutOfCombatBuffSongIndex,
+	MaxSpellTypes
 };
 
 class Bot : public NPC {
@@ -296,7 +300,6 @@ public:
 	bool GetNeedsHateRedux(Mob *tar);
 	bool HasOrMayGetAggro();
 	void SetDefaultBotStance();
-	void CalcChanceToCast();
 
 	inline virtual int32	GetMaxStat();
 	inline virtual int32	GetMaxResist();
@@ -417,6 +420,7 @@ public:
 	static std::list<BotSpell> GetBotSpellsForSpellEffect(Bot* botCaster, int spellEffect);
 	static std::list<BotSpell> GetBotSpellsForSpellEffectAndTargetType(Bot* botCaster, int spellEffect, SpellTargetType targetType);
 	static std::list<BotSpell> GetBotSpellsBySpellType(Bot* botCaster, uint32 spellType);
+	static std::list<BotSpell_wPriority> GetPrioritizedBotSpellsBySpellType(Bot* botCaster, uint32 spellType);
 	static BotSpell GetFirstBotSpellBySpellType(Bot* botCaster, uint32 spellType);
 	static BotSpell GetBestBotSpellForFastHeal(Bot* botCaster);
 	static BotSpell GetBestBotSpellForHealOverTime(Bot* botCaster);
@@ -669,7 +673,6 @@ private:
 	uint32 timers[MaxTimer];
 	bool _hasBeenSummoned;
 	glm::vec3 m_PreSummonLocation;
-	uint8 _spellCastingChances[MaxStances][MaxSpellTypes];
 
 	Timer evade_timer;
 

@@ -1,5 +1,8 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 02/20/2017 ==
+Uleat: Reworked bard bot spell twisting and updated their spell (song) list
+
 == 01/31/2017 ==
 Uleat: Modifed bot movement behavior in an attempt to 'normalize' it. This is a hack fix and will be revisited at some point. (Probably just need a follow function rather than use movement, when the leader of the follow chain is moving.)
 

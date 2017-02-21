@@ -56,6 +56,10 @@ struct BotSpell {
 	int16 ManaCost;
 };
 
+struct BotSpell_wPriority : public BotSpell {
+	uint8 Priority;
+};
+
 struct BotAA {
 	uint32 aa_id;
 	uint8 req_level;
