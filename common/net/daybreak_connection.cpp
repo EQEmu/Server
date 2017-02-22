@@ -47,7 +47,7 @@ void EQ::Net::DaybreakConnectionManager::Attach(uv_loop_t *loop)
 		m_socket.data = this;
 		struct sockaddr_in recv_addr;
 		uv_ip4_addr("0.0.0.0", m_options.port, &recv_addr);
-		int rc = uv_udp_bind(&m_socket, (const struct sockaddr *)&recv_addr, UV_UDP_REUSEADDR);
+		int rc = uv_udp_bind(&m_socket, (const struct sockaddr *)&recv_addr, 0);
 
 		rc = uv_udp_recv_start(&m_socket,
 			[](uv_handle_t* handle, size_t suggested_size, uv_buf_t* buf) {
