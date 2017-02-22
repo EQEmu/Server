@@ -68,7 +68,7 @@ void CatchSignal(int sig_num);
 Console::Console(EmuTCPConnection* itcpc)
 :	WorldTCPConnection(),
 	timeout_timer(RuleI(Console, SessionTimeOut)),
-	prompt_timer(1000)
+	prompt_timer(1)
 {
 	tcpc = itcpc;
 	tcpc->SetEcho(true);
