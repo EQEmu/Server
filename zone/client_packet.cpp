@@ -120,6 +120,7 @@ void MapOpcodes()
 	ConnectedOpcodes[OP_AdventureMerchantSell] = &Client::Handle_OP_AdventureMerchantSell;
 	ConnectedOpcodes[OP_AdventureRequest] = &Client::Handle_OP_AdventureRequest;
 	ConnectedOpcodes[OP_AdventureStatsRequest] = &Client::Handle_OP_AdventureStatsRequest;
+	ConnectedOpcodes[OP_AggroMeterLockTarget] = &Client::Handle_OP_AggroMeterLockTarget;
 	ConnectedOpcodes[OP_AltCurrencyMerchantRequest] = &Client::Handle_OP_AltCurrencyMerchantRequest;
 	ConnectedOpcodes[OP_AltCurrencyPurchase] = &Client::Handle_OP_AltCurrencyPurchase;
 	ConnectedOpcodes[OP_AltCurrencyReclaim] = &Client::Handle_OP_AltCurrencyReclaim;
@@ -575,6 +576,11 @@ void Client::CompleteConnect()
 				}
 			}
 			raid->SendGroupLeadershipAA(this, grpID); // this may get sent an extra time ...
+
+			SetXTargetAutoMgr(raid->GetXTargetAutoMgr());
+			if (!GetXTargetAutoMgr()->empty())
+				SetDirtyAutoHaters();
+
 			if (raid->IsLocked())
 				raid->SendRaidLockTo(this);
 		}
@@ -1548,8 +1554,8 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 			// we purchased a new one while out-of-zone.
 			if (group->IsLeader(this))
 				group->SendLeadershipAAUpdate();
-
 		}
+		JoinGroupXTargets(group);
 		group->UpdatePlayer(this);
 		LFG = false;
 	}
@@ -2392,6 +2398,17 @@ void Client::Handle_OP_AdventureStatsRequest(const EQApplicationPacket *app)
 	}
 
 	FastQueuePacket(&outapp);
+}
+
+void Client::Handle_OP_AggroMeterLockTarget(const EQApplicationPacket *app)
+{
+	if (app->size < sizeof(uint32)) {
+		Log.Out(Logs::General, Logs::Error, "Handle_OP_AggroMeterLockTarget had a packet that was too small.");
+		return;
+	}
+
+	SetAggroMeterLock(app->ReadUInt32(0));
+	ProcessAggroMeter();
 }
 
 void Client::Handle_OP_AltCurrencyMerchantRequest(const EQApplicationPacket *app)
@@ -10804,7 +10821,8 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket *app)
 							}
 						}
 					}
-					g->DisbandGroup();
+					g->JoinRaidXTarget(r);
+					g->DisbandGroup(true);
 					r->GroupUpdate(freeGroup);
 				}
 				else{
@@ -10869,7 +10887,8 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket *app)
 								}
 							}
 						}
-						ig->DisbandGroup();
+						ig->JoinRaidXTarget(r, true);
+						ig->DisbandGroup(true);
 						r->GroupUpdate(groupFree);
 						groupFree = r->GetFreeGroup();
 					}
@@ -10922,10 +10941,11 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket *app)
 							}
 						}
 					}
-					g->DisbandGroup();
+					g->JoinRaidXTarget(r);
+					g->DisbandGroup(true);
 					r->GroupUpdate(groupFree);
 				}
-				else
+				else // target does not have a group
 				{
 					if (ig){
 						r = new Raid(i);
@@ -10979,14 +10999,15 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket *app)
 						r->SendRaidCreate(this);
 						r->SendMakeLeaderPacketTo(r->leadername, this);
 						r->SendBulkRaid(this);
+						ig->JoinRaidXTarget(r, true);
 						r->AddMember(this);
-						ig->DisbandGroup();
+						ig->DisbandGroup(true);
 						r->GroupUpdate(0);
 						if (r->IsLocked()) {
 							r->SendRaidLockTo(this);
 						}
 					}
-					else{
+					else{ // neither has a group
 						r = new Raid(i);
 						entity_list.AddRaid(r);
 						r->SetRaidDetails();
@@ -12416,14 +12437,33 @@ void Client::Handle_OP_ShopPlayerSell(const EQApplicationPacket *app)
 		return;
 	}
 
-	int cost_quantity = mp->quantity;
+	uint32 cost_quantity = mp->quantity;
 	if (inst->IsCharged())
-		int cost_quantity = 1;
+		uint32 cost_quantity = 1;
 
-	if (RuleB(Merchant, UsePriceMod))
-		price = (int)((item->Price*cost_quantity)*(RuleR(Merchant, BuyCostMod))*Client::CalcPriceMod(vendor, true) + 0.5); // need to round up, because client does it automatically when displaying price
-	else
-		price = (int)((item->Price*cost_quantity)*(RuleR(Merchant, BuyCostMod)) + 0.5);
+	uint32 i;
+
+	if (RuleB(Merchant, UsePriceMod)) {
+		for (i = 1; i <= cost_quantity; i++) {
+			price = (uint32)((item->Price * i)*(RuleR(Merchant, BuyCostMod))*Client::CalcPriceMod(vendor, true) + 0.5); // need to round up, because client does it automatically when displaying price
+			if (price > 4000000000) {
+				cost_quantity = i;
+				mp->quantity = i;
+				break;
+			}
+		}
+	}
+	else {
+		for (i = 1; i <= cost_quantity; i++) {
+			price = (uint32)((item->Price * i)*(RuleR(Merchant, BuyCostMod)) + 0.5); // need to round up, because client does it automatically when displaying price
+			if (price > 4000000000) {
+				cost_quantity = i;
+				mp->quantity = i;
+				break;
+			}
+		}
+	}
+
 	AddMoneyToPP(price, false);
 
 	if (inst->IsStackable() || inst->IsCharged())
@@ -14079,6 +14119,7 @@ void Client::Handle_OP_XTargetAutoAddHaters(const EQApplicationPacket *app)
 	}
 
 	XTargetAutoAddHaters = app->ReadUInt8(0);
+	SetDirtyAutoHaters();
 }
 
 void Client::Handle_OP_XTargetOpen(const EQApplicationPacket *app)

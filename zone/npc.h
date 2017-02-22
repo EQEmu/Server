@@ -54,7 +54,7 @@ typedef struct {
 } NPCProximity;
 
 struct AISpells_Struct {
-	uint16	type;			// 0 = never, must be one (and only one) of the defined values
+	uint32	type;			// 0 = never, must be one (and only one) of the defined values
 	uint16	spellid;		// <= 0 = no spell
 	int16	manacost;		// -1 = use spdat, -2 = no cast time
 	uint32	time_cancast;	// when we can cast this spell next
@@ -377,7 +377,7 @@ public:
 	void NPCSlotTexture(uint8 slot, uint16 texture);	// Sets new material values for slots
 
 	uint32 GetAdventureTemplate() const { return adventure_template_id; }
-	void AddSpellToNPCList(int16 iPriority, int16 iSpellID, uint16 iType, int16 iManaCost, int32 iRecastDelay, int16 iResistAdjust);
+	void AddSpellToNPCList(int16 iPriority, int16 iSpellID, uint32 iType, int16 iManaCost, int32 iRecastDelay, int16 iResistAdjust);
 	void AddSpellEffectToNPCList(uint16 iSpellEffectID, int32 base, int32 limit, int32 max);
 	void RemoveSpellFromNPCList(int16 spell_id);
 	Timer *GetRefaceTimer() const { return reface_timer; }
@@ -453,7 +453,7 @@ protected:
 	uint32*	pDontCastBefore_casting_spell;
 	std::vector<AISpells_Struct> AIspells;
 	bool HasAISpell;
-	virtual bool AICastSpell(Mob* tar, uint8 iChance, uint16 iSpellTypes);
+	virtual bool AICastSpell(Mob* tar, uint8 iChance, uint32 iSpellTypes);
 	virtual bool AIDoSpellCast(uint8 i, Mob* tar, int32 mana_cost, uint32* oDontDoAgainBefore = 0);
 	AISpellsVar_Struct AISpellVar;
 	int16 GetFocusEffect(focusType type, uint16 spell_id);

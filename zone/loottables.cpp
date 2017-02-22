@@ -80,10 +80,11 @@ void ZoneDatabase::AddLootTableToNPC(NPC* npc,uint32 loottable_id, ItemList* ite
 
 		*copper = cash;
 	}
+	uint32 global_loot_multiplier = RuleI(Zone, GlobalLootMultiplier);
 
 	// Do items
 	for (uint32 i=0; i<lts->NumEntries; i++) {
-		for (uint32 k = 1; k <= lts->Entries[i].multiplier; k++) {
+		for (uint32 k = 1; k <= (lts->Entries[i].multiplier * global_loot_multiplier); k++) {
 			uint8 droplimit = lts->Entries[i].droplimit;
 			uint8 mindrop = lts->Entries[i].mindrop;
 

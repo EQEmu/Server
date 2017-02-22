@@ -4,6 +4,7 @@ SET(zone_sources
 	aa.cpp
 	aa_ability.cpp
 	aggro.cpp
+	aggromanager.cpp
 	attack.cpp
 	beacon.cpp
 	bonuses.cpp
@@ -122,6 +123,7 @@ SET(zone_sources
 	water_map_v2.cpp
 	waypoints.cpp
 	worldserver.cpp
+	xtargetautohaters.cpp
 	zone.cpp
 	zone_config.cpp
 	zonedb.cpp
@@ -131,6 +133,7 @@ SET(zone_sources
 SET(zone_headers
 	aa.h
 	aa_ability.h
+	aggromanager.h
 	basic_functions.h
 	beacon.h
 	bot.h
@@ -215,6 +218,7 @@ SET(zone_headers
 	water_map_v1.h
 	water_map_v2.h
 	worldserver.h
+	xtargetautohaters.h
 	zone.h
 	zone_config.h
 	zonedb.h

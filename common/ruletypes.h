@@ -114,6 +114,7 @@ RULE_BOOL(Character, CheckCursorEmptyWhenLooting, true) // If true, a player can
 RULE_BOOL(Character, MaintainIntoxicationAcrossZones, true) // If true, alcohol effects are maintained across zoning and logging out/in.
 RULE_BOOL(Character, EnableDiscoveredItems, true) // If enabled, it enables EVENT_DISCOVER_ITEM and also saves character names and timestamps for the first time an item is discovered.
 RULE_BOOL(Character, EnableXTargetting, true) // Enable Extended Targetting Window, for users with UF and later clients.
+RULE_BOOL(Character, EnableAggroMeter, false) // Enable Aggro Meter, for users with RoF and later clients.
 RULE_BOOL(Character, KeepLevelOverMax, false) // Don't delevel a character that has somehow gone over the level cap
 RULE_INT(Character, FoodLossPerUpdate, 35) // How much food/water you lose per stamina update
 RULE_INT(Character, BaseInstrumentSoftCap, 36) // Softcap for instrument mods, 36 commonly referred to as "3.6" as well.
@@ -258,6 +259,7 @@ RULE_BOOL(Zone, EnableLoggedOffReplenishments, true)
 RULE_INT(Zone, MinOfflineTimeToReplenishments, 21600) // 21600 seconds is 6 Hours
 RULE_BOOL(Zone, UseZoneController, true) // Enables the ability to use persistent quest based zone controllers (zone_controller.pl/lua)
 RULE_BOOL(Zone, EnableZoneControllerGlobals, false) // Enables the ability to use quest globals with the zone controller NPC
+RULE_INT(Zone, GlobalLootMultiplier, 1) // Sets Global Loot drop multiplier for database based drops, useful for double, triple loot etc.
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Map)

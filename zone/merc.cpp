@@ -1985,7 +1985,7 @@ bool Merc::AIDoSpellCast(uint16 spellid, Mob* tar, int32 mana_cost, uint32* oDon
 	return result;
 }
 
-bool Merc::AICastSpell(int8 iChance, int32 iSpellTypes) {
+bool Merc::AICastSpell(int8 iChance, uint32 iSpellTypes) {
 
 	if(!AI_HasSpells())
 		return false;
@@ -2746,7 +2746,7 @@ int32 Merc::GetActSpellCasttime(uint16 spell_id, int32 casttime)
 	return casttime;
 }
 
-int8 Merc::GetChanceToCastBySpellType(int16 spellType) {
+int8 Merc::GetChanceToCastBySpellType(uint32 spellType) {
 	int mercStance = (int)GetStance();
 	int8 mercClass = GetClass();
 	int8 chance = 0;
@@ -2888,7 +2888,7 @@ bool Merc::CheckStance(int16 stance) {
 	return false;
 }
 
-std::list<MercSpell> Merc::GetMercSpellsBySpellType(Merc* caster, int spellType) {
+std::list<MercSpell> Merc::GetMercSpellsBySpellType(Merc* caster, uint32 spellType) {
 	std::list<MercSpell> result;
 
 	if(caster && caster->AI_HasSpells()) {
@@ -2918,7 +2918,7 @@ std::list<MercSpell> Merc::GetMercSpellsBySpellType(Merc* caster, int spellType)
 	return result;
 }
 
-MercSpell Merc::GetFirstMercSpellBySpellType(Merc* caster, int spellType) {
+MercSpell Merc::GetFirstMercSpellBySpellType(Merc* caster, uint32 spellType) {
 	MercSpell result;
 
 	result.spellid = 0;

@@ -5117,7 +5117,6 @@ void bot_subcommand_bot_stance(Client *c, const Seperator *sep)
 
 		if (!current_flag) {
 			bot_iter->SetBotStance(bst);
-			bot_iter->CalcChanceToCast();
 			bot_iter->Save();
 		}
 

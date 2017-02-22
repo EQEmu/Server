@@ -45,7 +45,7 @@ struct wplist {
 #pragma pack(1)
 struct DBnpcspells_entries_Struct {
 	int16	spellid;
-	uint16	type;
+	uint32	type;
 	uint8	minlevel;
 	uint8	maxlevel;
 	int16	manacost;

@@ -48,6 +48,8 @@ namespace EQEmu
 #include "../common/inventory_profile.h"
 #include "../common/guilds.h"
 //#include "../common/item_data.h"
+#include "xtargetautohaters.h"
+#include "aggromanager.h"
 
 #include "common.h"
 #include "merc.h"
@@ -1122,8 +1124,20 @@ public:
 	void RemoveGroupXTargets();
 	void RemoveAutoXTargets();
 	void ShowXTargets(Client *c);
+	inline XTargetAutoHaters *GetXTargetAutoMgr() { return m_activeautohatermgr; } // will be either raid or group or self
+	inline void SetXTargetAutoMgr(XTargetAutoHaters *in) { if (in) m_activeautohatermgr = in; else m_activeautohatermgr = &m_autohatermgr; }
+	inline void SetDirtyAutoHaters() { m_dirtyautohaters = true; }
+	void ProcessXTargetAutoHaters(); // fixes up our auto haters
+	void JoinGroupXTargets(Group *g);
+	void LeaveGroupXTargets(Group *g);
+	void LeaveRaidXTargets(Raid *r);
 	bool GroupFollow(Client* inviter);
 	inline bool  GetRunMode() const { return runmode; }
+
+	inline bool AggroMeterAvailable() const { return ((m_ClientVersionBit & EQEmu::versions::bit_RoF2AndLater)) && RuleB(Character, EnableAggroMeter); } // RoF untested
+	inline void SetAggroMeterLock(int in) { m_aggrometer.set_lock_id(in); }
+
+	void ProcessAggroMeter(); // builds packet and sends
 
 	void InitializeMercInfo();
 	bool CheckCanSpawnMerc(uint32 template_id);
@@ -1462,6 +1476,7 @@ private:
 	Timer afk_toggle_timer;
 	Timer helm_toggle_timer;
 	Timer light_update_timer;
+	Timer aggro_meter_timer;
 
     glm::vec3 m_Proximity;
 
@@ -1546,8 +1561,13 @@ private:
 
 	uint8 MaxXTargets;
 	bool XTargetAutoAddHaters;
+	bool m_dirtyautohaters;
 
 	struct XTarget_Struct XTargets[XTARGET_HARDCAP];
+	XTargetAutoHaters m_autohatermgr;
+	XTargetAutoHaters *m_activeautohatermgr;
+
+	AggroMeter m_aggrometer;
 
 	Timer ItemTickTimer;
 	Timer ItemQuestTimer;

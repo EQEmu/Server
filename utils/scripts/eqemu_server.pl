@@ -334,7 +334,7 @@ sub build_linux_source {
 	}
 	print "Building EQEmu Server code. This will take a while.";
 
-	#::: Build 
+	#::: Build
 	print `make`;
 	
 	chdir ($current_directory);
@@ -1340,7 +1340,7 @@ sub do_linux_login_server_setup {
 	
 	get_remote_file($install_repository_request_url . "linux/login.ini", "login_template.ini");
 	get_remote_file($install_repository_request_url . "linux/login_opcodes.conf", "login_opcodes.conf");
-	get_remote_file($install_repository_request_url . "linux/login_opcodes.conf", "login_opcodes_sod.conf");
+	get_remote_file($install_repository_request_url . "linux/login_opcodes_sod.conf", "login_opcodes_sod.conf");
 	
 	get_installation_variables();
 	my $db_name = $installation_variables{"mysql_eqemu_db_name"};

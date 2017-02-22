@@ -32,6 +32,7 @@
 	void Handle_OP_AdventureMerchantSell(const EQApplicationPacket *app);
 	void Handle_OP_AdventureRequest(const EQApplicationPacket *app);
 	void Handle_OP_AdventureStatsRequest(const EQApplicationPacket *app);
+	void Handle_OP_AggroMeterLockTarget(const EQApplicationPacket *app);
 	void Handle_OP_AltCurrencyMerchantRequest(const EQApplicationPacket *app);
 	void Handle_OP_AltCurrencyPurchase(const EQApplicationPacket *app);
 	void Handle_OP_AltCurrencyReclaim(const EQApplicationPacket *app);

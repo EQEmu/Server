@@ -7,6 +7,8 @@
 9006|2016_04_12_bots_inventory_window.sql|SELECT `bot_command` FROM `bot_command_settings` WHERE `bot_command` LIKE 'inventorywindow'|empty|
 9007|2016_06_23_bots_camel_case_name_rule.sql|SELECT * FROM `rule_values` WHERE `rule_name` LIKE 'Bots:AllowCamelCaseNames'|empty|
 9008|2016_06_28_bots_inventory_charges_update.sql|SELECT * FROM `information_schema`.`COLUMNS` isc WHERE isc.`TABLE_SCHEMA` = DATABASE() AND isc.`TABLE_NAME` = 'bot_inventories' AND isc.`COLUMN_NAME` = 'inst_charges' AND isc.`DATA_TYPE` = 'tinyint'|not_empty|
+9009|2017_02_15_bots_bot_spells_entries.sql|SELECT `id` FROM `npc_spells_entries` WHERE `npc_spells_id` >= 701 AND `npc_spells_id` <= 712|not_empty|
+9010|2017_02_20_bots_bard_spell_update.sql|SELECT * FROM `bot_spells_entries` WHERE `npc_spells_id` = 711 AND (`type` & 0xFFFF0000) = 0xFFFF0000|empty|
 
 # Upgrade conditions:
 # 	This won't be needed after this system is implemented, but it is used database that are not

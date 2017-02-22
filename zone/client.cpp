@@ -154,6 +154,7 @@ Client::Client(EQStreamInterface* ieqs)
 	afk_toggle_timer(250),
 	helm_toggle_timer(250),
 	light_update_timer(600),
+	aggro_meter_timer(AGGRO_METER_UPDATE_MS),
 	m_Proximity(FLT_MAX, FLT_MAX, FLT_MAX), //arbitrary large number
 	m_ZoneSummonLocation(-2.0f,-2.0f,-2.0f),
 	m_AutoAttackPosition(0.0f, 0.0f, 0.0f, 0.0f),
@@ -310,6 +311,8 @@ Client::Client(EQStreamInterface* ieqs)
 	}
 	MaxXTargets = 5;
 	XTargetAutoAddHaters = true;
+	m_autohatermgr.SetOwner(this, nullptr, nullptr);
+	m_activeautohatermgr = &m_autohatermgr;
 	LoadAccountFlags();
 
 	initial_respawn_selection = 0;
@@ -4158,6 +4161,18 @@ bool Client::GroupFollow(Client* inviter) {
 			}
 			if (raid->RaidCount() < MAX_RAID_MEMBERS)
 			{
+				// okay, so we now have a single client (this) joining a group in a raid
+				// And they're not already in the raid (which is above and doesn't need xtarget shit)
+				if (!GetXTargetAutoMgr()->empty()) {
+					raid->GetXTargetAutoMgr()->merge(*GetXTargetAutoMgr());
+					GetXTargetAutoMgr()->clear();
+					RemoveAutoXTargets();
+				}
+
+				SetXTargetAutoMgr(GetXTargetAutoMgr());
+				if (!GetXTargetAutoMgr()->empty())
+					SetDirtyAutoHaters();
+
 				if (raid->GroupCount(groupToUse) < 6)
 				{
 					raid->SendRaidCreate(this);
@@ -4233,7 +4248,9 @@ bool Client::GroupFollow(Client* inviter) {
 				inviter->SendGroupLeaderChangePacket(inviter->GetName());
 				inviter->SendGroupJoinAcknowledge();
 			}
-
+			group->GetXTargetAutoMgr()->merge(*inviter->GetXTargetAutoMgr());
+			inviter->GetXTargetAutoMgr()->clear();
+			inviter->SetXTargetAutoMgr(group->GetXTargetAutoMgr());
 		}
 
 		if (!group)
@@ -7169,12 +7186,12 @@ void Client::UpdateClientXTarget(Client *c)
 	}
 }
 
+// IT IS NOT SAFE TO CALL THIS IF IT'S NOT INITIAL AGGRO
 void Client::AddAutoXTarget(Mob *m, bool send)
 {
-	if(!XTargettingAvailable() || !XTargetAutoAddHaters)
-		return;
+	m_activeautohatermgr->increment_count(m);
 
-	if(IsXTarget(m))
+	if (!XTargettingAvailable() || !XTargetAutoAddHaters || IsXTarget(m))
 		return;
 
 	for(int i = 0; i < GetMaxXTargets(); ++i)
@@ -7193,60 +7210,15 @@ void Client::AddAutoXTarget(Mob *m, bool send)
 
 void Client::RemoveXTarget(Mob *m, bool OnlyAutoSlots)
 {
-	if (!XTargettingAvailable())
-		return;
-
-	bool HadFreeAutoSlotsBefore = false;
-
-	int FreedAutoSlots = 0;
-
-	if (m->GetID() == 0)
-		return;
-
+	m_activeautohatermgr->decrement_count(m);
+	// now we may need to clean up our CurrentTargetNPC entries
 	for (int i = 0; i < GetMaxXTargets(); ++i) {
-		if (OnlyAutoSlots && XTargets[i].Type != Auto)
-			continue;
-
-		if (XTargets[i].ID == m->GetID()) {
-			if (XTargets[i].Type == CurrentTargetNPC)
-				XTargets[i].Type = Auto;
-
-			if (XTargets[i].Type == Auto)
-				++FreedAutoSlots;
-
+		if (XTargets[i].Type == CurrentTargetNPC && XTargets[i].ID == m->GetID()) {
+			XTargets[i].Type = Auto;
 			XTargets[i].ID = 0;
 			XTargets[i].dirty = true;
-		} else {
-			if (XTargets[i].Type == Auto && XTargets[i].ID == 0)
-				HadFreeAutoSlotsBefore = true;
 		}
 	}
-
-	// move shit up! If the removed NPC was in a CurrentTargetNPC slot it becomes Auto
-	// and we need to potentially fill it
-	std::queue<int> empty_slots;
-	for (int i = 0; i < GetMaxXTargets(); ++i) {
-		if (XTargets[i].Type != Auto)
-			continue;
-
-		if (XTargets[i].ID == 0) {
-			empty_slots.push(i);
-			continue;
-		}
-
-		if (XTargets[i].ID != 0 && !empty_slots.empty()) {
-			int temp = empty_slots.front();
-			std::swap(XTargets[i], XTargets[temp]);
-			XTargets[i].dirty = XTargets[temp].dirty = true;
-			empty_slots.pop();
-			empty_slots.push(i);
-		}
-	}
-	// If there are more mobs aggro on us than we had auto-hate slots, add one of those haters into the slot(s) we
-	// just freed up.
-	if (!HadFreeAutoSlotsBefore && FreedAutoSlots)
-		entity_list.RefreshAutoXTargets(this);
-	SendXTargetUpdates();
 }
 
 void Client::UpdateXTargetType(XTargetType Type, Mob *m, const char *Name)
@@ -7403,6 +7375,123 @@ void Client::ShowXTargets(Client *c)
 
 	for(int i = 0; i < GetMaxXTargets(); ++i)
 		c->Message(0, "Xtarget Slot: %i, Type: %2i, ID: %4i, Name: %s", i, XTargets[i].Type, XTargets[i].ID, XTargets[i].Name);
+	auto &list = GetXTargetAutoMgr()->get_list();
+	 // yeah, I kept having to do something for debugging to tell if managers were the same object or not :P
+	 // so lets use the address as an "ID"
+	c->Message(0, "XTargetAutoMgr ID %p size %d", GetXTargetAutoMgr(), list.size());
+	int count = 0;
+	for (auto &e : list) {
+		c->Message(0, "spawn id %d count %d", e.spawn_id, e.count);
+		count++;
+		if (count == 20) { // lets not spam too many ...
+			c->Message(0, " ... ");
+			break;
+		}
+	}
+}
+
+void Client::ProcessXTargetAutoHaters()
+{
+	if (!XTargettingAvailable())
+		return;
+
+	// move shit up! If the removed NPC was in a CurrentTargetNPC slot it becomes Auto
+	// and we need to potentially fill it
+	std::queue<int> empty_slots;
+	for (int i = 0; i < GetMaxXTargets(); ++i) {
+		if (XTargets[i].Type != Auto)
+			continue;
+
+		if (XTargets[i].ID != 0 && !GetXTargetAutoMgr()->contains_mob(XTargets[i].ID)) {
+			XTargets[i].ID = 0;
+			XTargets[i].dirty = true;
+		}
+
+		if (XTargets[i].ID == 0) {
+			empty_slots.push(i);
+			continue;
+		}
+
+		if (XTargets[i].ID != 0 && !empty_slots.empty()) {
+			int temp = empty_slots.front();
+			std::swap(XTargets[i], XTargets[temp]);
+			XTargets[i].dirty = XTargets[temp].dirty = true;
+			empty_slots.pop();
+			empty_slots.push(i);
+		}
+	}
+	// okay, now we need to check if we have any empty slots and if we have aggro
+	// We make the assumption that if we shuffled the NPCs up that they're still on the aggro
+	// list in the same order. We could probably do this better and try to calc if
+	// there are new NPCs for our empty slots on the manager, but ahhh fuck it.
+	if (!empty_slots.empty() && !GetXTargetAutoMgr()->empty() && XTargetAutoAddHaters) {
+		auto &haters = GetXTargetAutoMgr()->get_list();
+		for (auto &e : haters) {
+			auto *mob = entity_list.GetMob(e.spawn_id);
+			if (mob && !IsXTarget(mob)) {
+				auto slot = empty_slots.front();
+				empty_slots.pop();
+				XTargets[slot].dirty = true;
+				XTargets[slot].ID = mob->GetID();
+				strn0cpy(XTargets[slot].Name, mob->GetCleanName(), 64);
+			}
+			if (empty_slots.empty())
+				break;
+		}
+	}
+	m_dirtyautohaters = false;
+	SendXTargetUpdates();
+}
+
+// This function is called when a client is added to a group
+// Group leader joining isn't handled by this function
+void Client::JoinGroupXTargets(Group *g)
+{
+	if (!g)
+		return;
+
+	if (!GetXTargetAutoMgr()->empty()) {
+		g->GetXTargetAutoMgr()->merge(*GetXTargetAutoMgr());
+		GetXTargetAutoMgr()->clear();
+		RemoveAutoXTargets();
+	}
+
+	SetXTargetAutoMgr(g->GetXTargetAutoMgr());
+
+	if (!GetXTargetAutoMgr()->empty())
+		SetDirtyAutoHaters();
+}
+
+// This function is called when a client leaves a group
+void Client::LeaveGroupXTargets(Group *g)
+{
+	if (!g)
+		return;
+
+	SetXTargetAutoMgr(nullptr); // this will set it back to our manager
+	RemoveAutoXTargets();
+	entity_list.RefreshAutoXTargets(this); // this will probably break the temporal ordering, but whatever
+	// We now have a rebuilt, valid auto hater manager, so we need to demerge from the groups
+	if (!GetXTargetAutoMgr()->empty()) {
+		GetXTargetAutoMgr()->demerge(*g->GetXTargetAutoMgr()); // this will remove entries where we only had aggro
+		SetDirtyAutoHaters();
+	}
+}
+
+// This function is called when a client leaves a group
+void Client::LeaveRaidXTargets(Raid *r)
+{
+	if (!r)
+		return;
+
+	SetXTargetAutoMgr(nullptr); // this will set it back to our manager
+	RemoveAutoXTargets();
+	entity_list.RefreshAutoXTargets(this); // this will probably break the temporal ordering, but whatever
+	// We now have a rebuilt, valid auto hater manager, so we need to demerge from the groups
+	if (!GetXTargetAutoMgr()->empty()) {
+		GetXTargetAutoMgr()->demerge(*r->GetXTargetAutoMgr()); // this will remove entries where we only had aggro
+		SetDirtyAutoHaters();
+	}
 }
 
 void Client::SetMaxXTargets(uint8 NewMax)
@@ -8681,3 +8770,169 @@ void Client::CheckRegionTypeChanges()
 	else if (GetPVP())
 		SetPVP(false, false);
 }
+
+void Client::ProcessAggroMeter()
+{
+	if (!AggroMeterAvailable()) {
+		aggro_meter_timer.Disable();
+		return;
+	}
+
+	// we need to decide if we need to send OP_AggroMeterTargetInfo now
+	// This packet sends the current lock target ID and the current target ID
+	// target ID will be either our target or our target of target when we're targeting a PC
+	bool send_targetinfo = false;
+	auto cur_tar = GetTarget();
+
+	// probably should have PVP rules ...
+	if (cur_tar && cur_tar != this) {
+		if (cur_tar->IsNPC() && !cur_tar->IsPetOwnerClient() && cur_tar->GetID() != m_aggrometer.get_target_id()) {
+			m_aggrometer.set_target_id(cur_tar->GetID());
+			send_targetinfo = true;
+		} else if ((cur_tar->IsPetOwnerClient() || cur_tar->IsClient()) && cur_tar->GetTarget() && cur_tar->GetTarget()->GetID() != m_aggrometer.get_target_id()) {
+			m_aggrometer.set_target_id(cur_tar->GetTarget()->GetID());
+			send_targetinfo = true;
+		}
+	} else if (m_aggrometer.get_target_id()) {
+		m_aggrometer.set_target_id(0);
+		send_targetinfo = true;
+	}
+
+	if (m_aggrometer.update_lock())
+		send_targetinfo = true;
+
+	if (send_targetinfo) {
+		auto app = new EQApplicationPacket(OP_AggroMeterTargetInfo, sizeof(uint32) * 2);
+		app->WriteUInt32(m_aggrometer.get_lock_id());
+		app->WriteUInt32(m_aggrometer.get_target_id());
+		FastQueuePacket(&app);
+	}
+
+	// we could just calculate how big the packet would need to be ... but it's easier this way :P should be 87 bytes
+	auto app = new EQApplicationPacket(OP_AggroMeterUpdate, m_aggrometer.max_packet_size());
+
+	cur_tar = entity_list.GetMob(m_aggrometer.get_target_id());
+
+	// first we must check the secondary
+	// TODO: lock target should affect secondary as well
+	bool send = false;
+	Mob *secondary = nullptr;
+	bool has_aggro = false;
+	if (cur_tar) {
+		if (cur_tar->GetTarget() == this) {// we got aggro
+			secondary = cur_tar->GetSecondaryHate(this);
+			has_aggro = true;
+		} else {
+			secondary = cur_tar->GetTarget();
+		}
+	}
+
+	if (secondary && secondary->GetID() != m_aggrometer.get_secondary_id()) {
+		m_aggrometer.set_secondary_id(secondary->GetID());
+		app->WriteUInt8(1);
+		app->WriteUInt32(m_aggrometer.get_secondary_id());
+		send = true;
+	} else if (!secondary && m_aggrometer.get_secondary_id()) {
+		m_aggrometer.set_secondary_id(0);
+		app->WriteUInt8(1);
+		app->WriteUInt32(0);
+		send = true;
+	} else { // might not need to send in this case
+		app->WriteUInt8(0);
+	}
+
+	auto count_offset = app->GetWritePosition();
+	app->WriteUInt8(0);
+
+	int count = 0;
+	auto add_entry = [&app, &count, this](AggroMeter::AggroTypes i) {
+		count++;
+		app->WriteUInt8(i);
+		app->WriteUInt16(m_aggrometer.get_pct(i));
+	};
+	// TODO: Player entry should either be lock or yourself, ignoring lock for now
+	// player, secondary, and group depend on your target/lock
+	if (cur_tar) {
+		if (m_aggrometer.set_pct(AggroMeter::AT_Player, cur_tar->GetHateRatio(cur_tar->GetTarget(), this)))
+			add_entry(AggroMeter::AT_Player);
+
+		if (m_aggrometer.set_pct(AggroMeter::AT_Secondary, has_aggro ? cur_tar->GetHateRatio(this, secondary) : secondary ? 100 : 0))
+			add_entry(AggroMeter::AT_Secondary);
+
+		// fuuuuuuuuuuuuuuuuuuuuuuuucckkkkkkkkkkkkkkk raids
+		if (IsRaidGrouped()) {
+			auto raid = GetRaid();
+			if (raid) {
+				auto gid = raid->GetGroup(this);
+				if (gid < 12) {
+					int at_id = AggroMeter::AT_Group1;
+					for (int i = 0; i < MAX_RAID_MEMBERS; ++i) {
+						if (raid->members[i].member && raid->members[i].member != this && raid->members[i].GroupNumber == gid) {
+							if (m_aggrometer.set_pct(static_cast<AggroMeter::AggroTypes>(at_id), cur_tar->GetHateRatio(cur_tar->GetTarget(), raid->members[i].member)))
+								add_entry(static_cast<AggroMeter::AggroTypes>(at_id));
+							at_id++;
+							if (at_id > AggroMeter::AT_Group5)
+								break;
+						}
+					}
+				}
+			}
+		} else if (IsGrouped()) {
+			auto group = GetGroup();
+			if (group) {
+				int at_id = AggroMeter::AT_Group1;
+				for (int i = 0; i < MAX_GROUP_MEMBERS; ++i) {
+					if (group->members[i] && group->members[i] != this) {
+						if (m_aggrometer.set_pct(static_cast<AggroMeter::AggroTypes>(at_id), cur_tar->GetHateRatio(cur_tar->GetTarget(), group->members[i])))
+							add_entry(static_cast<AggroMeter::AggroTypes>(at_id));
+						at_id++;
+					}
+				}
+			}
+		}
+	} else { // we might need to clear out some data now
+		if (m_aggrometer.set_pct(AggroMeter::AT_Player, 0))
+			add_entry(AggroMeter::AT_Player);
+		if (m_aggrometer.set_pct(AggroMeter::AT_Secondary, 0))
+			add_entry(AggroMeter::AT_Secondary);
+		if (m_aggrometer.set_pct(AggroMeter::AT_Group1, 0))
+			add_entry(AggroMeter::AT_Group1);
+		if (m_aggrometer.set_pct(AggroMeter::AT_Group2, 0))
+			add_entry(AggroMeter::AT_Group2);
+		if (m_aggrometer.set_pct(AggroMeter::AT_Group3, 0))
+			add_entry(AggroMeter::AT_Group3);
+		if (m_aggrometer.set_pct(AggroMeter::AT_Group4, 0))
+			add_entry(AggroMeter::AT_Group5);
+		if (m_aggrometer.set_pct(AggroMeter::AT_Group5, 0))
+			add_entry(AggroMeter::AT_Group5);
+	}
+
+	// now to go over our xtargets
+	// if the entry is an NPC it's our hate relative to the NPCs current tank
+	// if it's a PC, it's their hate relative to our current target
+	for (int i = 0; i < GetMaxXTargets(); ++i) {
+		if (XTargets[i].ID) {
+			auto mob = entity_list.GetMob(XTargets[i].ID);
+			if (mob) {
+				int ratio = 0;
+				if (mob->IsNPC())
+					ratio = mob->GetHateRatio(mob->GetTarget(), this);
+				else if (cur_tar)
+					ratio = cur_tar->GetHateRatio(cur_tar->GetTarget(), mob);
+				if (m_aggrometer.set_pct(static_cast<AggroMeter::AggroTypes>(AggroMeter::AT_XTarget1 + i), ratio))
+					add_entry(static_cast<AggroMeter::AggroTypes>(AggroMeter::AT_XTarget1 + i));
+			}
+		}
+	}
+
+	if (send || count) {
+		app->size = app->GetWritePosition(); // this should be safe, although not recommended
+		// but this way we can have a smaller buffer created for the packet dispatched to the client w/o resizing this one
+		app->SetWritePosition(count_offset);
+		app->WriteUInt8(count);
+		FastQueuePacket(&app);
+	} else {
+		safe_delete(app);
+	}
+}
+

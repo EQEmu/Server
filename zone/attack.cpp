@@ -359,7 +359,7 @@ bool Mob::AvoidDamage(Mob *other, DamageHitInfo &hit)
 	}
 
 	// riposte -- it may seem crazy, but if the attacker has SPA 173 on them, they are immune to Ripo
-	bool ImmuneRipo = attacker->aabonuses.RiposteChance || attacker->spellbonuses.RiposteChance || attacker->itembonuses.RiposteChance;
+	bool ImmuneRipo = attacker->aabonuses.RiposteChance || attacker->spellbonuses.RiposteChance || attacker->itembonuses.RiposteChance || attacker->IsEnraged();
 	// Need to check if we have something in MainHand to actually attack with (or fists)
 	if (hit.hand != EQEmu::inventory::slotRange && (CanThisClassRiposte() || IsEnraged()) && InFront && !ImmuneRipo) {
 		if (IsEnraged()) {
@@ -2433,9 +2433,9 @@ void Mob::AddToHateList(Mob* other, uint32 hate /*= 0*/, int32 damage /*= 0*/, b
 	Mob* mypet = this->GetPet();
 	Mob* myowner = this->GetOwner();
 	Mob* targetmob = this->GetTarget();
+	bool on_hatelist = CheckAggro(other);
 
 	if(other){
-		bool on_hatelist = CheckAggro(other);
 		AddRampage(other);
 		if (on_hatelist) { // odd reason, if you're not on the hate list, subtlety etc don't apply!
 			// Spell Casting Subtlety etc
@@ -2511,7 +2511,7 @@ void Mob::AddToHateList(Mob* other, uint32 hate /*= 0*/, int32 damage /*= 0*/, b
 
 	hate_list.AddEntToHateList(other, hate, damage, bFrenzy, !iBuffTic);
 
-	if(other->IsClient())
+	if(other->IsClient() && !on_hatelist)
 		other->CastToClient()->AddAutoXTarget(this);
 
 #ifdef BOTS
@@ -2550,7 +2550,7 @@ void Mob::AddToHateList(Mob* other, uint32 hate /*= 0*/, int32 damage /*= 0*/, b
 			if(!owner->GetSpecialAbility(IMMUNE_AGGRO))
 			{
 				hate_list.AddEntToHateList(owner, 0, 0, false, !iBuffTic);
-				if(owner->IsClient())
+				if(owner->IsClient() && !CheckAggro(owner))
 					owner->CastToClient()->AddAutoXTarget(this);
 			}
 		}

@@ -539,7 +539,9 @@ public:
 	void DoubleAggro(Mob *other) { uint32 in_hate = GetHateAmount(other); SetHateAmountOnEnt(other, (in_hate ? in_hate * 2 : 1)); }
 	uint32 GetHateAmount(Mob* tmob, bool is_dam = false) { return hate_list.GetEntHateAmount(tmob,is_dam);}
 	uint32 GetDamageAmount(Mob* tmob) { return hate_list.GetEntHateAmount(tmob, true);}
+	int GetHateRatio(Mob *first, Mob *with) { return hate_list.GetHateRatio(first, with); }
 	Mob* GetHateTop() { return hate_list.GetEntWithMostHateOnList(this);}
+	Mob* GetSecondaryHate(Mob *skip) { return hate_list.GetEntWithMostHateOnList(this, skip); }
 	Mob* GetHateDamageTop(Mob* other) { return hate_list.GetDamageTopOnHateList(other);}
 	Mob* GetHateRandom() { return hate_list.GetRandomEntOnHateList();}
 	Mob* GetHateMost() { return hate_list.GetEntWithMostHateOnList();}

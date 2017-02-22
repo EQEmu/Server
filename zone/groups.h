@@ -22,6 +22,7 @@
 #include "../common/types.h"
 
 #include "mob.h"
+#include "xtargetautohaters.h"
 
 class Client;
 class EQApplicationPacket;
@@ -58,7 +59,7 @@ public:
 	void	SendWorldGroup(uint32 zone_id,Mob* zoningmember);
 	bool	DelMemberOOZ(const char *Name);
 	bool	DelMember(Mob* oldmember,bool ignoresender = false);
-	void	DisbandGroup();
+	void	DisbandGroup(bool joinraid = false);
 	void	GetMemberList(std::list<Mob*>& member_list, bool clear_list = true);
 	void	GetClientList(std::list<Client*>& client_list, bool clear_list = true);
 #ifdef BOTS
@@ -140,6 +141,9 @@ public:
 	void	ChangeLeader(Mob* newleader);
 	const char *GetClientNameByIndex(uint8 index);
 	void UpdateXTargetMarkedNPC(uint32 Number, Mob *m);
+	void SetDirtyAutoHaters();
+	inline XTargetAutoHaters *GetXTargetAutoMgr() { return &m_autohatermgr; }
+	void JoinRaidXTarget(Raid *raid, bool first = false);
 
 	void SetGroupMentor(int percent, char *name);
 	void ClearGroupMentor();
@@ -168,6 +172,8 @@ private:
 	std::string mentoree_name;
 	Client *mentoree;
 	int mentor_percent;
+
+	XTargetAutoHaters m_autohatermgr;
 };
 
 #endif

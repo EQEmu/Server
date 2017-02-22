@@ -413,7 +413,7 @@ public:
 	Mob*	AICheckCloseAggro(Mob* sender, float iAggroRange, float iAssistRange);
 	int	GetHatedCount(Mob *attacker, Mob *exclude);
 	void	AIYellForHelp(Mob* sender, Mob* attacker);
-	bool	AICheckCloseBeneficialSpells(NPC* caster, uint8 iChance, float iRange, uint16 iSpellTypes);
+	bool	AICheckCloseBeneficialSpells(NPC* caster, uint8 iChance, float iRange, uint32 iSpellTypes);
 	bool	Merc_AICheckCloseBeneficialSpells(Merc* caster, uint8 iChance, float iRange, uint32 iSpellTypes);
 	Mob*	GetTargetForMez(Mob* caster);
 	uint32	CheckNPCsClose(Mob *center);
@@ -502,7 +502,7 @@ private:
 		Bot* GetBotByBotName(std::string botName);
 		std::list<Bot*> GetBotsByBotOwnerCharacterID(uint32 botOwnerCharacterID);
 
-		bool Bot_AICheckCloseBeneficialSpells(Bot* caster, uint8 iChance, float iRange, uint16 iSpellTypes); // TODO: Evaluate this closesly in hopes to eliminate
+		bool Bot_AICheckCloseBeneficialSpells(Bot* caster, uint8 iChance, float iRange, uint32 iSpellTypes); // TODO: Evaluate this closesly in hopes to eliminate
 		void ShowSpawnWindow(Client* client, int Distance, bool NamedOnly); // TODO: Implement ShowSpawnWindow in the bot class but it needs entity list stuff
 	private:
 		std::list<Bot*> bot_list;

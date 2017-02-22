@@ -78,8 +78,8 @@ public:
 	virtual void AI_Stop();
 	virtual void AI_Process();
 
-	//virtual bool AICastSpell(Mob* tar, int8 iChance, int16 iSpellTypes);
-	virtual bool AICastSpell(int8 iChance, int32 iSpellTypes);
+	//virtual bool AICastSpell(Mob* tar, int8 iChance, uint32 iSpellTypes);
+	virtual bool AICastSpell(int8 iChance, uint32 iSpellTypes);
 	virtual bool AIDoSpellCast(uint16 spellid, Mob* tar, int32 mana_cost, uint32* oDontDoAgainBefore = 0);
 	virtual bool AI_EngagedCastCheck();
 	//virtual bool AI_PursueCastCheck();
@@ -97,7 +97,7 @@ public:
 	// Merc Spell Casting Methods
 	virtual int32 GetActSpellCasttime(uint16 spell_id, int32 casttime);
 	virtual int32 GetActSpellCost(uint16 spell_id, int32 cost);
-	int8 GetChanceToCastBySpellType(int16 spellType);
+	int8 GetChanceToCastBySpellType(uint32 spellType);
 	void SetSpellRecastTimer(uint16 timer_id, uint16 spellid, uint32 recast_delay);
 	void SetDisciplineRecastTimer(uint16 timer_id, uint16 spellid, uint32 recast_delay);
 	void SetSpellTimeCanCast(uint16 spellid, uint32 recast_delay);
@@ -108,8 +108,8 @@ public:
 	static int32 GetDisciplineRemainingTime(Merc *caster, uint16 timer_id);
 	static std::list<MercSpell> GetMercSpellsForSpellEffect(Merc* caster, int spellEffect);
 	static std::list<MercSpell> GetMercSpellsForSpellEffectAndTargetType(Merc* caster, int spellEffect, SpellTargetType targetType);
-	static std::list<MercSpell> GetMercSpellsBySpellType(Merc* caster, int spellType);
-	static MercSpell GetFirstMercSpellBySpellType(Merc* caster, int spellType);
+	static std::list<MercSpell> GetMercSpellsBySpellType(Merc* caster, uint32 spellType);
+	static MercSpell GetFirstMercSpellBySpellType(Merc* caster, uint32 spellType);
 	static MercSpell GetFirstMercSpellForSingleTargetHeal(Merc* caster);
 	static MercSpell GetMercSpellBySpellID(Merc* caster, uint16 spellid);
 	static MercSpell GetBestMercSpellForVeryFastHeal(Merc* caster);

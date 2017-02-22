@@ -47,7 +47,7 @@ extern Zone *zone;
 #endif
 
 //NOTE: do NOT pass in beneficial and detrimental spell types into the same call here!
-bool NPC::AICastSpell(Mob* tar, uint8 iChance, uint16 iSpellTypes) {
+bool NPC::AICastSpell(Mob* tar, uint8 iChance, uint32 iSpellTypes) {
 	if (!tar)
 		return false;
 
@@ -344,7 +344,7 @@ bool NPC::AIDoSpellCast(uint8 i, Mob* tar, int32 mana_cost, uint32* oDontDoAgain
 	return CastSpell(AIspells[i].spellid, tar->GetID(), EQEmu::CastingSlot::Gem2, AIspells[i].manacost == -2 ? 0 : -1, mana_cost, oDontDoAgainBefore, -1, -1, 0, &(AIspells[i].resist_adjust));
 }
 
-bool EntityList::AICheckCloseBeneficialSpells(NPC* caster, uint8 iChance, float iRange, uint16 iSpellTypes) {
+bool EntityList::AICheckCloseBeneficialSpells(NPC* caster, uint8 iChance, float iRange, uint32 iSpellTypes) {
 	if((iSpellTypes&SpellTypes_Detrimental) != 0) {
 		//according to live, you can buff and heal through walls...
 		//now with PCs, this only applies if you can TARGET the target, but
@@ -2496,7 +2496,7 @@ bool IsSpellInList(DBnpcspells_Struct* spell_list, int16 iSpellID) {
 }
 
 // adds a spell to the list, taking into account priority and resorting list as needed.
-void NPC::AddSpellToNPCList(int16 iPriority, int16 iSpellID, uint16 iType,
+void NPC::AddSpellToNPCList(int16 iPriority, int16 iSpellID, uint32 iType,
 							int16 iManaCost, int32 iRecastDelay, int16 iResistAdjust)
 {
 
@@ -2608,8 +2608,13 @@ DBnpcspells_Struct* ZoneDatabase::GetNPCSpells(uint32 iDBSpellsID) {
 
         query = StringFormat("SELECT spellid, type, minlevel, maxlevel, "
                             "manacost, recast_delay, priority, resist_adjust "
+#ifdef BOTS
+							"FROM %s "
+							"WHERE npc_spells_id=%d ORDER BY minlevel", (iDBSpellsID >= 701 && iDBSpellsID <= 712 ? "bot_spells_entries" : "npc_spells_entries"), iDBSpellsID);
+#else
                             "FROM npc_spells_entries "
-                            "WHERE npc_spells_id=%d ORDER BY minlevel", iDBSpellsID);
+							"WHERE npc_spells_id=%d ORDER BY minlevel", iDBSpellsID);
+#endif
         results = QueryDatabase(query);
 
         if (!results.Success())
@@ -2646,7 +2651,7 @@ DBnpcspells_Struct* ZoneDatabase::GetNPCSpells(uint32 iDBSpellsID) {
         {
             int spell_id = atoi(row[0]);
             npc_spells_cache[iDBSpellsID]->entries[entryIndex].spellid = spell_id;
-            npc_spells_cache[iDBSpellsID]->entries[entryIndex].type = atoi(row[1]);
+            npc_spells_cache[iDBSpellsID]->entries[entryIndex].type = atoul(row[1]);
             npc_spells_cache[iDBSpellsID]->entries[entryIndex].minlevel = atoi(row[2]);
             npc_spells_cache[iDBSpellsID]->entries[entryIndex].maxlevel = atoi(row[3]);
             npc_spells_cache[iDBSpellsID]->entries[entryIndex].manacost = atoi(row[4]);

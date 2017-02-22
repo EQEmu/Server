@@ -681,6 +681,13 @@ bool Client::Process() {
 		Message(0, "Your enemies have forgotten you!");
 	}
 
+	if (client_state == CLIENT_CONNECTED) {
+		if (m_dirtyautohaters)
+			ProcessXTargetAutoHaters();
+		if (aggro_meter_timer.Check())
+			ProcessAggroMeter();
+	}
+
 	return ret;
 }
 

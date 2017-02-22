@@ -47,8 +47,6 @@ const int MaxSpellTimer = 15;
 const int MaxDisciplineTimer = 10;
 const int DisciplineReuseStart = MaxSpellTimer + 1;
 const int MaxTimer = MaxSpellTimer + MaxDisciplineTimer;
-const int MaxStances = 7;
-const int MaxSpellTypes = 16;
 
 enum BotStanceType {
 	BotStancePassive,
@@ -58,7 +56,8 @@ enum BotStanceType {
 	BotStanceAggressive,
 	BotStanceBurn,
 	BotStanceBurnAE,
-	BotStanceUnknown
+	BotStanceUnknown,
+	MaxStances = BotStanceUnknown
 };
 
 #define BOT_STANCE_COUNT 8
@@ -125,7 +124,12 @@ enum SpellTypeIndex {
 	SpellType_CharmIndex,
 	SpellType_SlowIndex,
 	SpellType_DebuffIndex,
-	SpellType_CureIndex
+	SpellType_CureIndex,
+	SpellType_ResurrectIndex,
+	SpellType_HateReduxIndex,
+	SpellType_InCombatBuffSongIndex,
+	SpellType_OutOfCombatBuffSongIndex,
+	MaxSpellTypes
 };
 
 class Bot : public NPC {
@@ -235,7 +239,7 @@ public:
 	virtual void Depop();
 	void CalcBotStats(bool showtext = true);
 	uint16 BotGetSpells(int spellslot) { return AIspells[spellslot].spellid; }
-	uint16 BotGetSpellType(int spellslot) { return AIspells[spellslot].type; }
+	uint32 BotGetSpellType(int spellslot) { return AIspells[spellslot].type; }
 	uint16 BotGetSpellPriority(int spellslot) { return AIspells[spellslot].priority; }
 	virtual float GetProcChances(float ProcBonus, uint16 hand);
 	virtual int GetHandToHandDamage(void);
@@ -296,7 +300,6 @@ public:
 	bool GetNeedsHateRedux(Mob *tar);
 	bool HasOrMayGetAggro();
 	void SetDefaultBotStance();
-	void CalcChanceToCast();
 
 	inline virtual int32	GetMaxStat();
 	inline virtual int32	GetMaxResist();
@@ -350,7 +353,7 @@ public:
 	void DoEnduranceUpkeep();	//does the endurance upkeep
 
 	// AI Methods
-	virtual bool AICastSpell(Mob* tar, uint8 iChance, uint16 iSpellTypes);
+	virtual bool AICastSpell(Mob* tar, uint8 iChance, uint32 iSpellTypes);
 	virtual bool AI_EngagedCastCheck();
 	virtual bool AI_PursueCastCheck();
 	virtual bool AI_IdleCastCheck();
@@ -416,8 +419,9 @@ public:
 	static uint32 GetDisciplineRemainingTime(Bot *caster, int timer_index);
 	static std::list<BotSpell> GetBotSpellsForSpellEffect(Bot* botCaster, int spellEffect);
 	static std::list<BotSpell> GetBotSpellsForSpellEffectAndTargetType(Bot* botCaster, int spellEffect, SpellTargetType targetType);
-	static std::list<BotSpell> GetBotSpellsBySpellType(Bot* botCaster, uint16 spellType);
-	static BotSpell GetFirstBotSpellBySpellType(Bot* botCaster, uint16 spellType);
+	static std::list<BotSpell> GetBotSpellsBySpellType(Bot* botCaster, uint32 spellType);
+	static std::list<BotSpell_wPriority> GetPrioritizedBotSpellsBySpellType(Bot* botCaster, uint32 spellType);
+	static BotSpell GetFirstBotSpellBySpellType(Bot* botCaster, uint32 spellType);
 	static BotSpell GetBestBotSpellForFastHeal(Bot* botCaster);
 	static BotSpell GetBestBotSpellForHealOverTime(Bot* botCaster);
 	static BotSpell GetBestBotSpellForPercentageHeal(Bot* botCaster);
@@ -467,7 +471,7 @@ public:
 	bool GetRangerAutoWeaponSelect() { return _rangerAutoWeaponSelect; }
 	BotRoleType GetBotRole() { return _botRole; }
 	BotStanceType GetBotStance() { return _botStance; }
-	uint8 GetChanceToCastBySpellType(uint16 spellType);
+	uint8 GetChanceToCastBySpellType(uint32 spellType);
 	bool IsGroupPrimaryHealer();
 	bool IsGroupPrimarySlower();
 	bool IsBotCaster() { return IsCasterClass(GetClass()); }
@@ -669,7 +673,6 @@ private:
 	uint32 timers[MaxTimer];
 	bool _hasBeenSummoned;
 	glm::vec3 m_PreSummonLocation;
-	uint8 _spellCastingChances[MaxStances][MaxSpellTypes];
 
 	Timer evade_timer;
 
