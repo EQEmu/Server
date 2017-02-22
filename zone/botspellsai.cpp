@@ -557,10 +557,35 @@ bool Bot::AICastSpell(Mob* tar, uint8 iChance, uint32 iSpellTypes) {
 		case SpellType_Pet: {
 			//keep mobs from recasting pets when they have them.
 			if (!IsPet() && !GetPetID() && !IsBotCharmer()) {
-				if(botClass == MAGICIAN)
-					botSpell = GetBestBotMagicianPetSpell(this);
-				else
+				if (botClass == WIZARD) {
+					auto buffs_max = GetMaxBuffSlots();
+					auto my_buffs = GetBuffs();
+					int familiar_buff_slot = -1;
+					if (buffs_max && my_buffs) {
+						for (int index = 0; index < buffs_max; ++index) {
+							if (IsEffectInSpell(my_buffs[index].spellid, SE_Familiar)) {
+								MakePet(my_buffs[index].spellid, spells[my_buffs[index].spellid].teleport_zone);
+								familiar_buff_slot = index;
+								break;
+							}
+						}
+					}
+					if (GetPetID())
+						break;
+
+					if (familiar_buff_slot >= 0) {
+						BuffFadeBySlot(familiar_buff_slot);
+						break;
+					}
+
 					botSpell = GetFirstBotSpellBySpellType(this, SpellType_Pet);
+				}
+				else if (botClass == MAGICIAN) {
+					botSpell = GetBestBotMagicianPetSpell(this);
+				}
+				else {
+					botSpell = GetFirstBotSpellBySpellType(this, SpellType_Pet);
+				}
 
 				if(botSpell.SpellId == 0)
 					break;

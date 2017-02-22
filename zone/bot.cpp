@@ -1634,6 +1634,19 @@ bool Bot::LoadPet()
 	auto bot_owner = GetBotOwner();
 	if (!bot_owner)
 		return false;
+
+	if (GetClass() == WIZARD) {
+		auto buffs_max = GetMaxBuffSlots();
+		auto my_buffs = GetBuffs();
+		if (buffs_max && my_buffs) {
+			for (int index = 0; index < buffs_max; ++index) {
+				if (IsEffectInSpell(my_buffs[index].spellid, SE_Familiar)) {
+					MakePet(my_buffs[index].spellid, spells[my_buffs[index].spellid].teleport_zone);
+					return true;
+				}
+			}
+		}
+	}
 	
 	std::string error_message;
 
@@ -1649,7 +1662,7 @@ bool Bot::LoadPet()
 	if (!botdb.LoadPetSpellID(GetBotID(), saved_pet_spell_id)) {
 		bot_owner->Message(13, "%s for %s's pet", BotDatabase::fail::LoadPetSpellID(), GetCleanName());
 	}
-	if (!saved_pet_spell_id || saved_pet_spell_id > SPDAT_RECORDS) {
+	if (!IsValidSpell(saved_pet_spell_id)) {
 		bot_owner->Message(13, "Invalid spell id for %s's pet", GetCleanName());
 		DeletePet();
 		return false;
@@ -1693,11 +1706,11 @@ bool Bot::LoadPet()
 
 bool Bot::SavePet()
 {
-	if (!GetPet() /*|| dead*/)
+	if (!GetPet() || GetPet()->IsFamiliar() /*|| dead*/)
 		return true;
 	
 	NPC *pet_inst = GetPet()->CastToNPC();
-	if (pet_inst->IsFamiliar() || !pet_inst->GetPetSpellID() || pet_inst->GetPetSpellID() > SPDAT_RECORDS)
+	if (!pet_inst->GetPetSpellID() || !IsValidSpell(pet_inst->GetPetSpellID()))
 		return false;
 
 	auto bot_owner = GetBotOwner();
