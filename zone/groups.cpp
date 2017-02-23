@@ -336,13 +336,6 @@ bool Group::AddMember(Mob* newmember, const char *NewMemberName, uint32 Characte
 				database.SetGroupID(NewMemberName, GetID(), owner->CharacterID(), true);
 			}
 		}
-#ifdef BOTS
-		for (i = 0;i < MAX_GROUP_MEMBERS; i++) {
-			if (members[i] != nullptr && members[i]->IsBot()) {
-				members[i]->CastToBot()->CalcChanceToCast();
-			}
-		}
-#endif //BOTS
 	}
 	else
 	{
@@ -502,16 +495,11 @@ void Group::MemberZoned(Mob* removemob) {
 		SetLeader(nullptr);
 
 	for (i = 0; i < MAX_GROUP_MEMBERS; i++) {
-			if (members[i] == removemob) {
-				members[i] = nullptr;
-				//should NOT clear the name, it is used for world communication.
-				break;
-			}
-#ifdef BOTS
-		if (members[i] != nullptr && members[i]->IsBot()) {
-			members[i]->CastToBot()->CalcChanceToCast();
+		if (members[i] == removemob) {
+			members[i] = nullptr;
+			//should NOT clear the name, it is used for world communication.
+			break;
 		}
-#endif //BOTS
 	}
 
 	if(removemob->IsClient() && HasRole(removemob, RoleAssist))
@@ -667,11 +655,6 @@ bool Group::DelMember(Mob* oldmember, bool ignoresender)
 			if(members[i]->IsClient())
 				members[i]->CastToClient()->QueuePacket(outapp);
 		}
-#ifdef BOTS
-		if (members[i] != nullptr && members[i]->IsBot()) {
-			members[i]->CastToBot()->CalcChanceToCast();
-		}
-#endif //BOTS
 	}
 
 	if (!ignoresender)

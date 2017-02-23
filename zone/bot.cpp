@@ -76,7 +76,6 @@ Bot::Bot(NPCType npcTypeData, Client* botOwner) : NPC(&npcTypeData, nullptr, glm
 	SetAltOutOfCombatBehavior(GetClass() == BARD); // will need to be updated if more classes make use of this flag
 	SetShowHelm(true);
 	SetPauseAI(false);
-	CalcChanceToCast();
 	rest_timer.Disable();
 	SetFollowDistance(BOT_DEFAULT_FOLLOW_DISTANCE);
 	// Do this once and only in this constructor
@@ -151,7 +150,6 @@ Bot::Bot(uint32 botID, uint32 botOwnerCharacterID, uint32 botSpellsID, double to
 	SetTaunting((GetClass() == WARRIOR || GetClass() == PALADIN || GetClass() == SHADOWKNIGHT) && (GetBotStance() == BotStanceAggressive));
 	SetPauseAI(false);
 
-	CalcChanceToCast();
 	rest_timer.Disable();
 	SetFollowDistance(BOT_DEFAULT_FOLLOW_DISTANCE);
 	strcpy(this->name, this->GetCleanName());
@@ -1636,6 +1634,19 @@ bool Bot::LoadPet()
 	auto bot_owner = GetBotOwner();
 	if (!bot_owner)
 		return false;
+
+	if (GetClass() == WIZARD) {
+		auto buffs_max = GetMaxBuffSlots();
+		auto my_buffs = GetBuffs();
+		if (buffs_max && my_buffs) {
+			for (int index = 0; index < buffs_max; ++index) {
+				if (IsEffectInSpell(my_buffs[index].spellid, SE_Familiar)) {
+					MakePet(my_buffs[index].spellid, spells[my_buffs[index].spellid].teleport_zone);
+					return true;
+				}
+			}
+		}
+	}
 	
 	std::string error_message;
 
@@ -1651,7 +1662,7 @@ bool Bot::LoadPet()
 	if (!botdb.LoadPetSpellID(GetBotID(), saved_pet_spell_id)) {
 		bot_owner->Message(13, "%s for %s's pet", BotDatabase::fail::LoadPetSpellID(), GetCleanName());
 	}
-	if (!saved_pet_spell_id || saved_pet_spell_id > SPDAT_RECORDS) {
+	if (!IsValidSpell(saved_pet_spell_id)) {
 		bot_owner->Message(13, "Invalid spell id for %s's pet", GetCleanName());
 		DeletePet();
 		return false;
@@ -1695,11 +1706,11 @@ bool Bot::LoadPet()
 
 bool Bot::SavePet()
 {
-	if (!GetPet() /*|| dead*/)
+	if (!GetPet() || GetPet()->IsFamiliar() /*|| dead*/)
 		return true;
 	
 	NPC *pet_inst = GetPet()->CastToNPC();
-	if (pet_inst->IsFamiliar() || !pet_inst->GetPetSpellID() || pet_inst->GetPetSpellID() > SPDAT_RECORDS)
+	if (!pet_inst->GetPetSpellID() || !IsValidSpell(pet_inst->GetPetSpellID()))
 		return false;
 
 	auto bot_owner = GetBotOwner();
@@ -7639,6 +7650,24 @@ bool EntityList::Bot_AICheckCloseBeneficialSpells(Bot* caster, uint8 iChance, fl
 			}
 		}
 	}
+
+	if (iSpellTypes == SpellType_HateRedux) {
+		if (!caster->IsEngaged())
+			return false;
+
+		if (caster->HasGroup()) {
+			Group *g = caster->GetGroup();
+			if (g) {
+				for (int i = 0; i < MAX_GROUP_MEMBERS; i++) {
+					if (g->members[i] && caster->GetNeedsHateRedux(g->members[i])) {
+						if (caster->AICastSpell(g->members[i], caster->GetChanceToCastBySpellType(SpellType_HateRedux), SpellType_HateRedux))
+							return true;
+					}
+				}
+			}
+		}
+	}
+
 	return false;
 }
 
@@ -8017,7 +8046,7 @@ bool Bot::GetNeedsHateRedux(Mob *tar) {
 	// This really should be a scalar function based in class Mob that returns 'this' state..but, is inline with current Bot coding...
 	// TODO: Good starting point..but, can be refined..
 	// TODO: Still awaiting bot spell rework..
-	if (!tar || !tar->HasTargetReflection())
+	if (!tar || !tar->IsEngaged() || !tar->HasTargetReflection() || !tar->GetTarget()->IsNPC())
 		return false;
 	
 	if (tar->IsClient()) {
@@ -8031,7 +8060,7 @@ bool Bot::GetNeedsHateRedux(Mob *tar) {
 	else if (tar->IsBot()) {
 		switch (tar->GetClass()) {
 		case ROGUE:
-			if (tar->CastToBot()->evade_timer.Check(false))
+			if (tar->CanFacestab() || tar->CastToBot()->evade_timer.Check(false))
 				return false;
 		case CLERIC:
 		case DRUID:
