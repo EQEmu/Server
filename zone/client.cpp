@@ -154,7 +154,7 @@ Client::Client(EQStreamInterface* ieqs)
 	afk_toggle_timer(250),
 	helm_toggle_timer(250),
 	light_update_timer(600),
-	aggro_meter_timer(1000),
+	aggro_meter_timer(AGGRO_METER_UPDATE_MS),
 	m_Proximity(FLT_MAX, FLT_MAX, FLT_MAX), //arbitrary large number
 	m_ZoneSummonLocation(-2.0f,-2.0f,-2.0f),
 	m_AutoAttackPosition(0.0f, 0.0f, 0.0f, 0.0f),
@@ -7438,7 +7438,7 @@ void Client::ProcessXTargetAutoHaters()
 		auto &haters = GetXTargetAutoMgr()->get_list();
 		for (auto &e : haters) {
 			auto *mob = entity_list.GetMob(e.spawn_id);
-			if (!IsXTarget(mob)) {
+			if (mob && !IsXTarget(mob)) {
 				auto slot = empty_slots.front();
 				empty_slots.pop();
 				XTargets[slot].dirty = true;
@@ -8783,8 +8783,10 @@ void Client::CheckRegionTypeChanges()
 
 void Client::ProcessAggroMeter()
 {
-	if (!AggroMeterAvailable())
+	if (!AggroMeterAvailable()) {
+		aggro_meter_timer.Disable();
 		return;
+	}
 
 	// we need to decide if we need to send OP_AggroMeterTargetInfo now
 	// This packet sends the current lock target ID and the current target ID

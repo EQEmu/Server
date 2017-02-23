@@ -235,6 +235,9 @@ enum {	//some random constants
 
 #define ZONE_CONTROLLER_NPC_ID 10
 
+// Timer to update aggrometer
+#define AGGRO_METER_UPDATE_MS 1000
+
 //Some hard coded statuses from commands and other places:
 enum {
 	minStatusToBeGM = 40,
