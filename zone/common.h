@@ -141,7 +141,11 @@ enum {
 	CASTING_RESIST_DIFF = 43,
 	COUNTER_AVOID_DAMAGE = 44,
 	PROX_AGGRO = 45,
-	MAX_SPECIAL_ATTACK = 46
+/*	MOD::VALLIK - Add new NPC special ability: Resistent to melee skill eg 1HB.	
+	MAX_SPECIAL_ATTACK = 46 */
+	MELEE_RESISTENT = 46,
+	MAX_SPECIAL_ATTACK = 47
+//	ENDMOD::VALLIK
 };
 
 typedef enum {	//fear states

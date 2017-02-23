@@ -598,6 +598,9 @@ public:
 	void ShowBuffList(Client* client);
 	bool PlotPositionAroundTarget(Mob* target, float &x_dest, float &y_dest, float &z_dest,
 		bool lookForAftArc = true);
+//	MOD::VALLIK - IsResistent() check to implement new special ability
+	bool IsResistent(EQEmu::skills::SkillType skill) { if (GetSpecialAbilityParam(MELEE_RESISTENT, 0) == skill) {return true;} return false; }
+//	ENDMOD::VALLIK		
 
 	//Procs
 	void TriggerDefensiveProcs(Mob *on, uint16 hand = EQEmu::inventory::slotPrimary, bool FromSkillProc = false, int damage = 0);

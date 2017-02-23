@@ -2336,6 +2336,10 @@ bool Client::CheckIncreaseSkill(EQEmu::skills::SkillType skillid, Mob *against_w
 		return false;
 	if (skillid > EQEmu::skills::HIGHEST_SKILL)
 		return false;
+//	MOD::VALLIK - Prevent skills currently at 0 from increases through use
+	if (GetRawSkill(skillid) == 0)
+		return false;
+//	ENDMOD::VALLIK	
 	int skillval = GetRawSkill(skillid);
 	int maxskill = GetMaxSkillAfterSpecializationRules(skillid, MaxSkill(skillid));
 
@@ -5080,6 +5084,10 @@ void Client::ShowSkillsWindow()
 			continue;
 		if (!GetSkill(skills_iter.first) && !MaxSkill(skills_iter.first))
 			continue;
+//	MOD::VALLIK - If current raw skill is 0, do not list it in the skills window
+		if (GetRawSkill(skills_iter.first) == 0)
+			continue;
+//	ENDMOD::VALLIK
 
 		WindowText += skills_iter.second;
 		// line up the values

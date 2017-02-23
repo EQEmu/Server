@@ -149,6 +149,7 @@ RULE_INT(Character, AvoidanceCap, 750) // 750 Is a pretty good value, seen peopl
 RULE_BOOL(Character, AllowMQTarget, false) // Disables putting players in the 'hackers' list for targeting beyond the clip plane or attempting to target something untargetable
 RULE_BOOL(Character, UseOldBindWound, false) // Uses the original bind wound behavior
 RULE_BOOL(Character, GrantHoTTOnCreate, false) // Grant Health of Target's Target leadership AA on character creation
+RULE_BOOL(Character, UseCustomStatScaling, false) // Custom stat scaling
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Mercs)
@@ -391,6 +392,11 @@ RULE_BOOL(Spells, FlatItemExtraSpellAmt, false) // allow SpellDmg stat to affect
 RULE_BOOL(Spells, IgnoreSpellDmgLvlRestriction, false) // ignore the 5 level spread on applying SpellDmg
 RULE_BOOL(Spells, AllowItemTGB, false) // TGB doesn't work with items on live, custom servers want it though
 RULE_BOOL(Spells, NPCInnateProcOverride, true) //  NPC innate procs override the target type to single target.
+RULE_REAL(Spells, CastingSkillBonusDamage, 0.25) // How much extra % damage each skill point is worth. 100 = 25%, 400 = 100%
+RULE_REAL(Spells, SpecializationSkillBonusDamage, 0.33) // How much extra % damage each specialization skill point is worth. 50 = 16.5%, 250 = 82.5%
+RULE_REAL(Spells, WeaponDamageBonus, 0.33) // How much extra % damage each +1 weapon damage is worth. 18 = 5.94%, 46 = 15.18%
+RULE_REAL(Spells, WeaponElemDamageBonus, 0.5) // How much extra % damage each +1 matching elemental bonus damage is worth. 5 = 2.5%, 20 = 10%
+RULE_INT(Spells, FizzleWeightAllowance, 25) // Allowable weight before extra starts to affect fizzle rate. ie 30 stones means 5 stone affects fizzle rate.
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Combat)
@@ -493,6 +499,8 @@ RULE_INT(Combat, NPCAssistCapTimer, 6000) // Time in milliseconds a NPC will tak
 RULE_BOOL(Combat, UseRevampHandToHand, false) // use h2h revamped dmg/delays I believe this was implemented during SoF
 RULE_BOOL(Combat, ClassicMasterWu, false) // classic master wu uses a random special, modern doesn't
 RULE_INT(Combat, LevelToStopDamageCaps, 0) // 1 will effectively disable them, 20 should give basically same results as old incorrect system
+RULE_REAL(Combat, meleeskillbonusDMG, 0.2) // How much extra % damage each weapon skill point is worth. 325 = 65%, 100 = 20%
+RULE_REAL(Combat, DamageReductionResistent, 0.35) // Multiply final damage done by this when NPC is resistent to this weapon skill. eg 1200 * 0.35 when skeleton resists 1HB items.
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(NPC)

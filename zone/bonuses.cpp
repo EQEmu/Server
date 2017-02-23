@@ -80,6 +80,9 @@ void Client::CalcBonuses()
 	ProcessItemCaps(); // caps that depend on spell/aa bonuses
 
 	RecalcWeight();
+//	MOD::VALLIK - Call RecalcWornWeight() whenever RecalcWeight is called (items changes etc)
+	RecalcWornWeight();
+//	ENDMOD::VALLIK	
 
 	CalcAC();
 	CalcATK();

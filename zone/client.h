@@ -523,6 +523,11 @@ public:
 	uint32 GetWeight() const { return(weight); }
 	inline void RecalcWeight() { weight = CalcCurrentWeight(); }
 	uint32 CalcCurrentWeight();
+//	MOD::VALLIK - worn weight functions
+	uint32 GetWornWeight() const { return(wornweight); }
+	inline void RecalcWornWeight() { wornweight = CalcCurrentWornWeight(); }
+	uint32 CalcCurrentWornWeight();
+//	ENDMOD::VALLIK	
 	inline uint32 GetCopper() const { return m_pp.copper; }
 	inline uint32 GetSilver() const { return m_pp.silver; }
 	inline uint32 GetGold() const { return m_pp.gold; }
@@ -1384,6 +1389,9 @@ private:
 	uint32 pQueuedSaveWorkID;
 	uint16 pClientSideTarget;
 	uint32 weight;
+//	MOD::VALLIK - wornweight variable for fizzle calculations
+	uint32 wornweight;
+//	ENDMOD::VALLIK	
 	bool berserk;
 	bool dead;
 	uint16 BoatID;
