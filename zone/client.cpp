@@ -8904,7 +8904,7 @@ void Client::ProcessAggroMeter()
 		if (m_aggrometer.set_pct(AggroMeter::AT_Group3, 0))
 			add_entry(AggroMeter::AT_Group3);
 		if (m_aggrometer.set_pct(AggroMeter::AT_Group4, 0))
-			add_entry(AggroMeter::AT_Group5);
+			add_entry(AggroMeter::AT_Group4);
 		if (m_aggrometer.set_pct(AggroMeter::AT_Group5, 0))
 			add_entry(AggroMeter::AT_Group5);
 	}
