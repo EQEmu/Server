@@ -581,6 +581,16 @@ bool Group::DelMember(Mob* oldmember, bool ignoresender)
 		return false;
 	}
 
+	// TODO: fix this shit
+	// okay, so there is code below that tries to handle this. It does not.
+	// So instead of figuring it out now, lets just disband the group so the client doesn't
+	// sit there with a broken group and there isn't any group leader shuffling going on
+	// since the code below doesn't work.
+	if (oldmember == GetLeader()) {
+		DisbandGroup();
+		return true;
+	}
+
 	for (uint32 i = 0; i < MAX_GROUP_MEMBERS; i++)
 	{
 		if (members[i] == oldmember)
