@@ -2217,7 +2217,7 @@ void Bot::AI_Process() {
 		// Let's check if we have a los with our target.
 		// If we don't, our hate_list is wiped.
 		// Else, it was causing the bot to aggro behind wall etc... causing massive trains.
-		if(!CheckLosFN(GetTarget()) || GetTarget()->IsMezzed() || !IsAttackAllowed(GetTarget())) {
+		if(GetTarget()->IsMezzed() || !IsAttackAllowed(GetTarget())) {
 			WipeHateList();
 			if(IsMoving()) {
 				SetHeading(0);
@@ -2226,6 +2226,16 @@ void Bot::AI_Process() {
 				if(moved)
 					SetCurrentSpeed(0);
 			}
+			return;
+		}
+		else if (!CheckLosFN(GetTarget())) {
+			if (!IsRooted()) {
+				Mob* follow = entity_list.GetMob(GetFollowID());
+				if (follow)
+					CalculateNewPosition2(follow->GetX(), follow->GetY(), follow->GetZ(), GetRunspeed());
+				return;
+			}
+
 			return;
 		}
 
