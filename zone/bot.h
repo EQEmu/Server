@@ -132,6 +132,9 @@ enum SpellTypeIndex {
 	MaxSpellTypes
 };
 
+enum BotCastingChanceConditional : uint8 { nHS = 0, pH, pS, pHS, cntHS }; // negative Healer/Slower, positive Healer, postive Slower, positive Healer/Slower
+
+
 class Bot : public NPC {
 	friend class Mob;
 public:

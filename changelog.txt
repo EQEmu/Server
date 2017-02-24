@@ -1,5 +1,20 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 02/23/2017 ==
+Uleat: Moved bot spell casting chance values into database - this will allow admins to tailor their bots without having to rebuild server code
+	- Each entry uses a 4-dimensional identifier: [spell type index][class index][stance index][conditional index]
+		- [spell type index] is not the SpellType_## bit value..use SpellType_##Index instead
+		- [class index] values of 0-15 are valid and determined by subtracting 1 from the actual class value
+		- [stance index] is a direct correlation (0-6)
+		- the [conditional index] is currently predicated on 2 compounded boolean states:
+			- not primary healer/not primary slower: 0
+			- primary healer/not primary slower: 1
+			- not primary healer/ primary slower: 2
+			- primary healer/primary slower: 3
+	- Valid `value` entries are 0-100..though, the field accepts up to 255... Anything above 100 is clamped to 100 upon loading, however
+	- Not all conditions are currently coded and changing a field may not produce any results
+	- The 'default' database values will be changed and tweaked as bot spell code modifications occur
+
 == 02/20/2017 ==
 Uleat: Reworked bard bot spell twisting and updated their spell (song) list
 Uleat: Added ability to shift to pre-combat song buffing by selecting a non-pet npc target, eliminating the need to mix all bard buff songs together

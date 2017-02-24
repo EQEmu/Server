@@ -82,6 +82,50 @@ bool BotDatabase::LoadBotCommandSettings(std::map<std::string, std::pair<uint8, 
 	return true;
 }
 
+static uint8 spell_casting_chances[MaxSpellTypes][PLAYER_CLASS_COUNT][MaxStances][cntHS];
+
+bool BotDatabase::LoadBotSpellCastingChances()
+{
+	memset(spell_casting_chances, 0, sizeof(spell_casting_chances));
+
+	query =
+		"SELECT"
+		" `spell_type_index`,"
+		" `class_index`,"
+		" `stance_index`,"
+		" `conditional_index`,"
+		" `value` "
+		"FROM"
+		" `bot_spell_casting_chances` "
+		"WHERE"
+		" `value` != '0'";
+
+	auto results = QueryDatabase(query);
+	if (!results.Success())
+		return false;
+
+	for (auto row = results.begin(); row != results.end(); ++row) {
+		uint8 spell_type_index = atoi(row[0]);
+		if (spell_type_index >= MaxSpellTypes)
+			continue;
+		uint8 class_index = atoi(row[1]);
+		if (class_index >= PLAYER_CLASS_COUNT)
+			continue;
+		uint8 stance_index = atoi(row[2]);
+		if (stance_index >= MaxStances)
+			continue;
+		uint8 conditional_index = atoi(row[3]);
+		if (conditional_index >= cntHS)
+			continue;
+		uint8 value = atoi(row[4]);
+		if (value > 100)
+			value = 100;
+		spell_casting_chances[spell_type_index][class_index][stance_index][conditional_index] = value;
+	}
+
+	return true;
+}
+
 
 /* Bot functions   */
 bool BotDatabase::QueryNameAvailablity(const std::string& bot_name, bool& available_flag)
@@ -2711,6 +2755,19 @@ bool BotDatabase::DeleteAllHealRotations(const uint32 owner_id)
 
 
 /* Bot miscellaneous functions   */
+uint8 BotDatabase::GetSpellCastingChance(uint8 spell_type_index, uint8 class_index, uint8 stance_index, uint8 conditional_index)
+{
+	if (spell_type_index >= MaxSpellTypes)
+		return 0;
+	if (class_index >= PLAYER_CLASS_COUNT)
+		return 0;
+	if (stance_index >= MaxStances)
+		return 0;
+	if (conditional_index >= cntHS)
+		return 0;
+
+	return spell_casting_chances[spell_type_index][class_index][stance_index][conditional_index];
+}
 
 
 /* fail::Bot functions   */

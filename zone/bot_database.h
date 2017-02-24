@@ -50,6 +50,7 @@ public:
 	bool Connect(const char* host, const char* user, const char* passwd, const char* database, uint32 port);
 
 	bool LoadBotCommandSettings(std::map<std::string, std::pair<uint8, std::vector<std::string>>> &bot_command_settings);
+	bool LoadBotSpellCastingChances();
 
 
 	/* Bot functions   */
@@ -183,6 +184,7 @@ public:
 	bool DeleteAllHealRotations(const uint32 owner_id);
 
 	/* Bot miscellaneous functions   */
+	uint8 GetSpellCastingChance(uint8 spell_type_index, uint8 class_index, uint8 stance_index, uint8 conditional_index);
 
 
 	class fail {
