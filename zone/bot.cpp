@@ -176,6 +176,9 @@ Bot::Bot(uint32 botID, uint32 botOwnerCharacterID, uint32 botSpellsID, double to
 	if (GetClass() == ROGUE)
 		evade_timer.Start();
 
+	m_CastingRoles.GroupHealer = false;
+	m_CastingRoles.GroupSlower = false;
+
 	GenerateBaseStats();
 
 	if (!botdb.LoadTimers(this) && bot_owner)
@@ -6835,66 +6838,116 @@ bool Bot::IsBotCasterCombatRange(Mob *target) {
 	return result;
 }
 
-bool Bot::IsGroupPrimaryHealer() {
-	bool result = false;
-	uint8 botclass = GetClass();
-	if(HasGroup()) {
-		Group *g = GetGroup();
-		switch(botclass) {
-			case CLERIC: {
-				result = true;
-				break;
-			}
-			case DRUID: {
-				result = GroupHasClericClass(g) ? false : true;
-				break;
-			}
-			case SHAMAN: {
-				result = (GroupHasClericClass(g) || GroupHasDruidClass(g)) ? false : true;
-				break;
-			}
-			case PALADIN:
-			case RANGER:
-			case BEASTLORD: {
-				result = GroupHasPriestClass(g) ? false : true;
-				break;
-			}
-			default: {
-				result = false;
-				break;
-			}
+void Bot::UpdateGroupCastingRoles(const Group* group, bool disband)
+{
+	if (!group)
+		return;
+	
+	for (auto iter : group->members) {
+		if (!iter)
+			continue;
+
+		if (iter->IsBot()) {
+			iter->CastToBot()->SetGroupHealer(false);
+			iter->CastToBot()->SetGroupSlower(false);
 		}
 	}
 
-	return result;
-}
+	if (disband)
+		return;
 
-bool Bot::IsGroupPrimarySlower() {
-	bool result = false;
-	uint8 botclass = GetClass();
-	if(HasGroup()) {
-		Group *g = GetGroup();
-		switch(botclass) {
-			case SHAMAN: {
-				result = true;
-				break;
-			}
-			case ENCHANTER: {
-				result = GroupHasShamanClass(g) ? false : true;
-				break;
-			}
-			case BEASTLORD: {
-				result = (GroupHasShamanClass(g) || GroupHasEnchanterClass(g)) ? false : true;
-				break;
-			}
-			default: {
-				result = false;
-				break;
-			}
+	Mob* healer = nullptr;
+	Mob* slower = nullptr;
+
+	for (auto iter : group->members) {
+		if (!iter)
+			continue;
+
+		switch (iter->GetClass()) {
+		case CLERIC:
+			if (!healer)
+				healer = iter;
+			else
+				switch (healer->GetClass()) {
+				case CLERIC:
+					break;
+				default:
+					healer = iter;
+				}
+			
+			break;
+		case DRUID:
+			if (!healer)
+				healer = iter;
+			else
+				switch (healer->GetClass()) {
+				case CLERIC:
+				case DRUID:
+					break;
+				default:
+					healer = iter;
+				}
+			break;
+		case SHAMAN:
+			if (!healer)
+				healer = iter;
+			else
+				switch (healer->GetClass()) {
+				case CLERIC:
+				case DRUID:
+				case SHAMAN:
+					break;
+				default:
+					healer = iter;
+				}
+			break;
+		case PALADIN:
+		case RANGER:
+		case BEASTLORD:
+			if (!healer)
+				healer = iter;
+			break;
+		default:
+			break;
+		}
+
+		switch (iter->GetClass()) {
+		case SHAMAN:
+			if (!slower)
+				slower = iter;
+			else
+				switch (slower->GetClass()) {
+				case SHAMAN:
+					break;
+				default:
+					slower = iter;
+				}
+			break;
+		case ENCHANTER:
+			if (!slower)
+				slower = iter;
+			else
+				switch (slower->GetClass()) {
+				case SHAMAN:
+				case ENCHANTER:
+					break;
+				default:
+					slower = iter;
+				}
+			break;
+		case BEASTLORD:
+			if (!slower)
+				slower = iter;
+			break;
+		default:
+			break;
 		}
 	}
 
-	return result;
+	if (healer && healer->IsBot())
+		healer->CastToBot()->SetGroupHealer();
+	if (slower && slower->IsBot())
+		slower->CastToBot()->SetGroupSlower();
 }
 
 bool Bot::CanHeal() {

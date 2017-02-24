@@ -108,7 +108,7 @@ bool Bot::AICastSpell(Mob* tar, uint8 iChance, uint32 iSpellTypes) {
 				bool isPrimaryHealer = false;
 
 				if(HasGroup()) {
-					isPrimaryHealer = IsGroupPrimaryHealer();
+					isPrimaryHealer = IsGroupHealer();
 				}
 
 				if(hpr < 95 || (tar->IsClient() && (hpr < 95)) || (botClass == BARD)) {
@@ -2590,9 +2590,9 @@ uint8 Bot::GetChanceToCastBySpellType(uint32 spellType)
 
 	uint8 type_index = nHS;
 	if (HasGroup()) {
-		if (IsGroupPrimaryHealer())
+		if (IsGroupHealer())
 			type_index |= pH;
-		if (IsGroupPrimarySlower())
+		if (IsGroupSlower())
 			type_index |= pS;
 	}
 
