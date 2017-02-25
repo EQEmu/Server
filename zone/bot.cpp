@@ -77,7 +77,7 @@ Bot::Bot(NPCType npcTypeData, Client* botOwner) : NPC(&npcTypeData, nullptr, glm
 	SetShowHelm(true);
 	SetPauseAI(false);
 	rest_timer.Disable();
-	SetFollowDistance(BOT_DEFAULT_FOLLOW_DISTANCE);
+	SetFollowDistance(BOT_FOLLOW_DISTANCE_DEFAULT);
 	// Do this once and only in this constructor
 	GenerateAppearance();
 	GenerateBaseStats();
@@ -151,7 +151,7 @@ Bot::Bot(uint32 botID, uint32 botOwnerCharacterID, uint32 botSpellsID, double to
 	SetPauseAI(false);
 
 	rest_timer.Disable();
-	SetFollowDistance(BOT_DEFAULT_FOLLOW_DISTANCE);
+	SetFollowDistance(BOT_FOLLOW_DISTANCE_DEFAULT);
 	strcpy(this->name, this->GetCleanName());
 
 	memset(&_botInspectMessage, 0, sizeof(InspectMessage_Struct));
@@ -175,6 +175,9 @@ Bot::Bot(uint32 botID, uint32 botOwnerCharacterID, uint32 botSpellsID, double to
 
 	if (GetClass() == ROGUE)
 		evade_timer.Start();
+
+	m_CastingRoles.GroupHealer = false;
+	m_CastingRoles.GroupSlower = false;
 
 	GenerateBaseStats();
 
@@ -2062,6 +2065,8 @@ float Bot::GetMaxMeleeRangeToTarget(Mob* target) {
 
 // AI Processing for the Bot object
 void Bot::AI_Process() {
+	// TODO: Need to add root checks to all movement code
+
 	if (!IsAIControlled())
 		return;
 	if (GetPauseAI())
@@ -2214,7 +2219,7 @@ void Bot::AI_Process() {
 		// Let's check if we have a los with our target.
 		// If we don't, our hate_list is wiped.
 		// Else, it was causing the bot to aggro behind wall etc... causing massive trains.
-		if(!CheckLosFN(GetTarget()) || GetTarget()->IsMezzed() || !IsAttackAllowed(GetTarget())) {
+		if(GetTarget()->IsMezzed() || !IsAttackAllowed(GetTarget())) {
 			WipeHateList();
 			if(IsMoving()) {
 				SetHeading(0);
@@ -2223,6 +2228,26 @@ void Bot::AI_Process() {
 				if(moved)
 					SetCurrentSpeed(0);
 			}
+			return;
+		}
+		else if (!CheckLosFN(GetTarget())) {
+			if (RuleB(Bots, UsePathing) && zone->pathing) {
+				bool WaypointChanged, NodeReached;
+
+				glm::vec3 Goal = UpdatePath(GetTarget()->GetX(), GetTarget()->GetY(), GetTarget()->GetZ(),
+					GetRunspeed(), WaypointChanged, NodeReached);
+
+				if (WaypointChanged)
+					tar_ndx = 20;
+
+				CalculateNewPosition2(Goal.x, Goal.y, Goal.z, GetRunspeed());
+			}
+			else {
+				Mob* follow = entity_list.GetMob(GetFollowID());
+				if (follow)
+					CalculateNewPosition2(follow->GetX(), follow->GetY(), follow->GetZ(), GetRunspeed());
+			}
+			
 			return;
 		}
 
@@ -2339,6 +2364,7 @@ void Bot::AI_Process() {
 					}
 				}
 
+				// TODO: Test RuleB(Bots, UpdatePositionWithTimer)
 				if(IsMoving())
 					SendPosUpdate();
 				else
@@ -2503,33 +2529,60 @@ void Bot::AI_Process() {
 			}
 		}
 		else if(AI_movement_timer->Check()) {
-			// something is wrong with bot movement spell bonuses - based on logging..
-			// ..this code won't need to be so complex once fixed...
-			int speed = GetRunspeed();
-			if (cur_dist < GetFollowDistance() + 2000) {
-				speed = GetWalkspeed();
-			}
-			else if (cur_dist >= GetFollowDistance() + 10000) { // 100
-				if (cur_dist >= 22500) { // 150
-					auto leader = follow;
-					while (leader->GetFollowID()) {
-						leader = entity_list.GetMob(leader->GetFollowID());
-						if (!leader || leader == this)
-							break;
-						if (leader->GetRunspeed() > speed)
-							speed = leader->GetRunspeed();
-						if (leader->IsClient())
-							break;
+			// Something is still wrong with bot the follow code...
+			// Shows up really bad over long distances when movement bonuses are involved
+			// The flip-side is that too much speed adversely affects node pathing...
+			if (cur_dist > GetFollowDistance()) {
+				if (RuleB(Bots, UsePathing) && zone->pathing) {
+					if (cur_dist <= BOT_FOLLOW_DISTANCE_WALK) {
+						bool WaypointChanged, NodeReached;
+
+						glm::vec3 Goal = UpdatePath(follow->GetX(), follow->GetY(), follow->GetZ(),
+							GetWalkspeed(), WaypointChanged, NodeReached);
+
+						if (WaypointChanged)
+							tar_ndx = 20;
+
+						CalculateNewPosition2(Goal.x, Goal.y, Goal.z, GetWalkspeed());
+					}
+					else {
+						int speed = GetRunspeed();
+						if (cur_dist > BOT_FOLLOW_DISTANCE_CRITICAL)
+							speed = ((float)speed * 1.333f); // sprint mod (1/3 boost)
+
+						bool WaypointChanged, NodeReached;
+
+						glm::vec3 Goal = UpdatePath(follow->GetX(), follow->GetY(), follow->GetZ(),
+							speed, WaypointChanged, NodeReached);
+
+						if (WaypointChanged)
+							tar_ndx = 20;
+
+						CalculateNewPosition2(Goal.x, Goal.y, Goal.z, speed);
 					}
 				}
-				speed = (float)speed * (1.0f + ((float)speed * 0.03125f)); // 1/32 - special bot sprint mod
-			}
+				else {
+					if (cur_dist <= BOT_FOLLOW_DISTANCE_WALK) {
+						CalculateNewPosition2(follow->GetX(), follow->GetY(), follow->GetZ(), GetWalkspeed());
+					}
+					else {
+						int speed = GetRunspeed();
+						if (cur_dist > BOT_FOLLOW_DISTANCE_CRITICAL)
+							speed = ((float)speed * 1.333f); // sprint mod (1/3 boost)
 
-			if (cur_dist > GetFollowDistance()) {
-				CalculateNewPosition2(follow->GetX(), follow->GetY(), follow->GetZ(), speed);
+						CalculateNewPosition2(follow->GetX(), follow->GetY(), follow->GetZ(), speed);
+					}
+				}
+				
 				if (rest_timer.Enabled())
 					rest_timer.Disable();
-				return;
+
+				if (RuleB(Bots, UpdatePositionWithTimer)) { // this helps with rubber-banding effect
+					if (IsMoving())
+						SendPosUpdate();
+					//else
+					//	SendPosition(); // enabled - no discernable difference..disabled - saves on no movement packets
+				}
 			}
 			else {
 				if (moved) {
@@ -2537,9 +2590,14 @@ void Bot::AI_Process() {
 					SetCurrentSpeed(0);
 				}
 			}
+
+			if (GetClass() == BARD && GetBotStance() != BotStancePassive && !spellend_timer.Enabled() && AI_think_timer->Check())
+				AI_IdleCastCheck();
+
+			return;
 		}
 		else if (IsMoving()) {
-			if (GetBotStance() != BotStancePassive && GetClass() == BARD && !spellend_timer.Enabled() && AI_think_timer->Check()) {
+			if (GetClass() == BARD && GetBotStance() != BotStancePassive && !spellend_timer.Enabled() && AI_think_timer->Check()) {
 				AI_IdleCastCheck();
 			}
 		}
@@ -6835,66 +6893,116 @@ bool Bot::IsBotCasterCombatRange(Mob *target) {
 	return result;
 }
 
-bool Bot::IsGroupPrimaryHealer() {
-	bool result = false;
-	uint8 botclass = GetClass();
-	if(HasGroup()) {
-		Group *g = GetGroup();
-		switch(botclass) {
-			case CLERIC: {
-				result = true;
-				break;
-			}
-			case DRUID: {
-				result = GroupHasClericClass(g) ? false : true;
-				break;
-			}
-			case SHAMAN: {
-				result = (GroupHasClericClass(g) || GroupHasDruidClass(g)) ? false : true;
-				break;
-			}
-			case PALADIN:
-			case RANGER:
-			case BEASTLORD: {
-				result = GroupHasPriestClass(g) ? false : true;
-				break;
-			}
-			default: {
-				result = false;
-				break;
-			}
+void Bot::UpdateGroupCastingRoles(const Group* group, bool disband)
+{
+	if (!group)
+		return;
+	
+	for (auto iter : group->members) {
+		if (!iter)
+			continue;
+
+		if (iter->IsBot()) {
+			iter->CastToBot()->SetGroupHealer(false);
+			iter->CastToBot()->SetGroupSlower(false);
 		}
 	}
 
-	return result;
-}
+	if (disband)
+		return;
 
-bool Bot::IsGroupPrimarySlower() {
-	bool result = false;
-	uint8 botclass = GetClass();
-	if(HasGroup()) {
-		Group *g = GetGroup();
-		switch(botclass) {
-			case SHAMAN: {
-				result = true;
-				break;
-			}
-			case ENCHANTER: {
-				result = GroupHasShamanClass(g) ? false : true;
-				break;
-			}
-			case BEASTLORD: {
-				result = (GroupHasShamanClass(g) || GroupHasEnchanterClass(g)) ? false : true;
-				break;
-			}
-			default: {
-				result = false;
-				break;
-			}
+	Mob* healer = nullptr;
+	Mob* slower = nullptr;
+
+	for (auto iter : group->members) {
+		if (!iter)
+			continue;
+
+		switch (iter->GetClass()) {
+		case CLERIC:
+			if (!healer)
+				healer = iter;
+			else
+				switch (healer->GetClass()) {
+				case CLERIC:
+					break;
+				default:
+					healer = iter;
+				}
+			
+			break;
+		case DRUID:
+			if (!healer)
+				healer = iter;
+			else
+				switch (healer->GetClass()) {
+				case CLERIC:
+				case DRUID:
+					break;
+				default:
+					healer = iter;
+				}
+			break;
+		case SHAMAN:
+			if (!healer)
+				healer = iter;
+			else
+				switch (healer->GetClass()) {
+				case CLERIC:
+				case DRUID:
+				case SHAMAN:
+					break;
+				default:
+					healer = iter;
+				}
+			break;
+		case PALADIN:
+		case RANGER:
+		case BEASTLORD:
+			if (!healer)
+				healer = iter;
+			break;
+		default:
+			break;
+		}
+
+		switch (iter->GetClass()) {
+		case SHAMAN:
+			if (!slower)
+				slower = iter;
+			else
+				switch (slower->GetClass()) {
+				case SHAMAN:
+					break;
+				default:
+					slower = iter;
+				}
+			break;
+		case ENCHANTER:
+			if (!slower)
+				slower = iter;
+			else
+				switch (slower->GetClass()) {
+				case SHAMAN:
+				case ENCHANTER:
+					break;
+				default:
+					slower = iter;
+				}
+			break;
+		case BEASTLORD:
+			if (!slower)
+				slower = iter;
+			break;
+		default:
+			break;
 		}
 	}
 
-	return result;
+	if (healer && healer->IsBot())
+		healer->CastToBot()->SetGroupHealer();
+	if (slower && slower->IsBot())
+		slower->CastToBot()->SetGroupSlower();
 }
 
 bool Bot::CanHeal() {

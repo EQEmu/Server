@@ -371,6 +371,10 @@ int main(int argc, char** argv) {
 		Log.Out(Logs::General, Logs::Error, "Bot command loading FAILED");
 	else
 		Log.Out(Logs::General, Logs::Zone_Server, "%d bot commands loaded", botretval);
+
+	Log.Out(Logs::General, Logs::Zone_Server, "Loading bot spell casting chances");
+	if (!botdb.LoadBotSpellCastingChances())
+		Log.Out(Logs::General, Logs::Error, "Bot spell casting chances loading FAILED");
 #endif
 
 	if(RuleB(TaskSystem, EnableTaskSystem)) {

@@ -1,5 +1,32 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 02/25/2017 ==
+Uleat: Implemented rule-based node pathing for bots
+	- This currently applies to out-of-combat following movement and blocked los in-combat movement
+	- The default is set to 'true' (use node pathing)..so, consider disabling it if cpu use is too high
+	- If you want to disable node pathing, apply the optional sql '2017_02_25_bots_use_pathing_rule.sql' file located in the utils/sql/git/bots/optional sub-directory. This will apply a 'false' rule..but, it can be changed as desired
+	- This helps with bot movement..but, there are still issues...
+Uleat: Implemented rule-based position update packet with movement timer check for bots
+	- This currently only applies to out-of-combat movement
+	- The default is set to 'false' (original behavior) to help save bandwidth (each bot will send an update packet every 1/10th of a second when enabled)
+	- If you want to enable the position update packet, apply the optional sql '2017_02_25_bots_update_position_with_timer_rule.sql' file located in the utils/sql/git/bots/optional sub-directory. This will apply a 'true' rule..but, it can be changed as desired
+	- This appears to help with/eliminate rubber banding
+
+== 02/23/2017 ==
+Uleat: Moved bot spell casting chance values into database - this will allow admins to tailor their bots without having to rebuild server code
+	- Each entry uses a 4-dimensional identifier: [spell type index][class index][stance index][conditional index]
+		- [spell type index] is not the SpellType_## bit value..use SpellType_##Index instead
+		- [class index] values of 0-15 are valid and determined by subtracting 1 from the actual class value
+		- [stance index] is a direct correlation (0-6)
+		- the [conditional index] is currently predicated on 2 compounded boolean states:
+			- not primary healer/not primary slower: 0
+			- primary healer/not primary slower: 1
+			- not primary healer/ primary slower: 2
+			- primary healer/primary slower: 3
+	- Valid `value` entries are 0-100..though, the field accepts up to 255... Anything above 100 is clamped to 100 upon loading, however
+	- Not all conditions are currently coded and changing a field may not produce any results
+	- The 'default' database values will be changed and tweaked as bot spell code modifications occur
+
 == 02/20/2017 ==
 Uleat: Reworked bard bot spell twisting and updated their spell (song) list
 Uleat: Added ability to shift to pre-combat song buffing by selecting a non-pet npc target, eliminating the need to mix all bard buff songs together

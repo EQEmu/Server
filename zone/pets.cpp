@@ -304,6 +304,7 @@ void Mob::MakePoweredPet(uint16 spell_id, const char* pettype, int16 petpower,
 	// 2 - `s Warder
 	// 3 - Random name if client, `s pet for others
 	// 4 - Keep DB name
+	// 5 - `s ward
 
 
 	if (petname != nullptr) {
@@ -325,6 +326,10 @@ void Mob::MakePoweredPet(uint16 spell_id, const char* pettype, int16 petpower,
 		// Keep the DB name
 	} else if (record.petnaming == 3 && IsClient()) {
 		strcpy(npc_type->name, GetRandPetName());
+	} else if (record.petnaming == 5 && IsClient()) {
+		strcpy(npc_type->name, this->GetName());
+		npc_type->name[24] = '\0';
+		strcat(npc_type->name, "`s_ward");
 	} else {
 		strcpy(npc_type->name, this->GetCleanName());
 		npc_type->name[25] = '\0';

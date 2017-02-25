@@ -6505,6 +6505,16 @@ void Client::Handle_OP_GroupDisband(const EQApplicationPacket *app)
 	if (!group) //We must recheck this here.. incase the final bot disbanded the party..otherwise we crash
 		return;
 #endif
+	Mob* memberToDisband = GetTarget();
+
+	if (!memberToDisband)
+		memberToDisband = entity_list.GetMob(gd->name2);
+
+	if (memberToDisband) {
+		auto group2 = memberToDisband->GetGroup();
+		if (group2 != group) // they're not in our group!
+			memberToDisband = this;
+	}
 
 	if (group->GroupCount() < 3)
 	{
@@ -6526,7 +6536,7 @@ void Client::Handle_OP_GroupDisband(const EQApplicationPacket *app)
 				GetMerc()->Suspend();
 		}
 	}
-	else if (group->IsLeader(this) && GetTarget() == this)
+	else if (group->IsLeader(this) && (GetTarget() == this || memberToDisband == this))
 	{
 		LeaveGroup();
 		if (GetMerc() && !GetMerc()->IsSuspended())
@@ -6536,12 +6546,6 @@ void Client::Handle_OP_GroupDisband(const EQApplicationPacket *app)
 	}
 	else
 	{
-		Mob* memberToDisband = nullptr;
-		memberToDisband = GetTarget();
-
-		if (!memberToDisband)
-			memberToDisband = entity_list.GetMob(gd->name2);
-
 		if (memberToDisband)
 		{
 			if (group->IsLeader(this))

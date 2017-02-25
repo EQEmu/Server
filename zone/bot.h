@@ -38,7 +38,10 @@
 
 #include <sstream>
 
-#define BOT_DEFAULT_FOLLOW_DISTANCE 184
+#define BOT_FOLLOW_DISTANCE_DEFAULT 184 // as DSq value (~13.565 units)
+#define BOT_FOLLOW_DISTANCE_DEFAULT_MAX 2500 // as DSq value (50 units)
+#define BOT_FOLLOW_DISTANCE_WALK 400 // as DSq value (20 units)
+#define BOT_FOLLOW_DISTANCE_CRITICAL 22500 // as DSq value (150 units)
 
 extern WorldServer worldserver;
 
@@ -131,6 +134,10 @@ enum SpellTypeIndex {
 	SpellType_OutOfCombatBuffSongIndex,
 	MaxSpellTypes
 };
+
+// negative Healer/Slower, positive Healer, postive Slower, positive Healer/Slower
+enum BotCastingChanceConditional : uint8 { nHS = 0, pH, pS, pHS, cntHS = 4 };
+
 
 class Bot : public NPC {
 	friend class Mob;
@@ -472,8 +479,11 @@ public:
 	BotRoleType GetBotRole() { return _botRole; }
 	BotStanceType GetBotStance() { return _botStance; }
 	uint8 GetChanceToCastBySpellType(uint32 spellType);
-	bool IsGroupPrimaryHealer();
-	bool IsGroupPrimarySlower();
+
+	bool IsGroupHealer() { return m_CastingRoles.GroupHealer; }
+	bool IsGroupSlower() { return m_CastingRoles.GroupSlower; }
+	static void UpdateGroupCastingRoles(const Group* group, bool disband = false);
+
 	bool IsBotCaster() { return IsCasterClass(GetClass()); }
 	bool IsBotINTCaster() { return IsINTCasterClass(GetClass()); }
 	bool IsBotWISCaster() { return IsWISCasterClass(GetClass()); }
@@ -637,6 +647,10 @@ protected:
 	virtual bool AIDoSpellCast(uint8 i, Mob* tar, int32 mana_cost, uint32* oDontDoAgainBefore = 0);
 	virtual float GetMaxMeleeRangeToTarget(Mob* target);
 
+	BotCastingRoles& GetCastingRoles() { return m_CastingRoles; }
+	void SetGroupHealer(bool flag = true) { m_CastingRoles.GroupHealer = flag; }
+	void SetGroupSlower(bool flag = true) { m_CastingRoles.GroupSlower = flag; }
+
 private:
 	// Class Members
 	uint32 _botID;
@@ -675,6 +689,8 @@ private:
 	glm::vec3 m_PreSummonLocation;
 
 	Timer evade_timer;
+
+	BotCastingRoles m_CastingRoles;
 
 	std::shared_ptr<HealRotation> m_member_of_heal_rotation;
 
