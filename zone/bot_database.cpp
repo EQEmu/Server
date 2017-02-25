@@ -378,7 +378,13 @@ bool BotDatabase::LoadBot(const uint32 bot_id, Bot*& loaded_bot)
 	loaded_bot = new Bot(bot_id, atoi(row[0]), atoi(row[1]), atof(row[14]), atoi(row[6]), tempNPCStruct);
 	if (loaded_bot) {
 		loaded_bot->SetShowHelm((atoi(row[43]) > 0 ? true : false));
-		loaded_bot->SetFollowDistance(atoi(row[44]));
+		uint32 bfd = atoi(row[44]);
+		if (bfd < 1)
+			bfd = 1;
+		if (bfd > BOT_FOLLOW_DISTANCE_DEFAULT_MAX)
+			bfd = BOT_FOLLOW_DISTANCE_DEFAULT_MAX;
+		loaded_bot->SetFollowDistance(bfd);
+		
 	}
 
 	return true;
@@ -515,7 +521,7 @@ bool BotDatabase::SaveNewBot(Bot* bot_inst, uint32& bot_id)
 		bot_inst->GetPR(),
 		bot_inst->GetDR(),
 		bot_inst->GetCorrup(),
-		BOT_DEFAULT_FOLLOW_DISTANCE
+		BOT_FOLLOW_DISTANCE_DEFAULT
 	);
 	auto results = QueryDatabase(query);
 	if (!results.Success())

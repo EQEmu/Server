@@ -77,7 +77,7 @@ Bot::Bot(NPCType npcTypeData, Client* botOwner) : NPC(&npcTypeData, nullptr, glm
 	SetShowHelm(true);
 	SetPauseAI(false);
 	rest_timer.Disable();
-	SetFollowDistance(BOT_DEFAULT_FOLLOW_DISTANCE);
+	SetFollowDistance(BOT_FOLLOW_DISTANCE_DEFAULT);
 	// Do this once and only in this constructor
 	GenerateAppearance();
 	GenerateBaseStats();
@@ -151,7 +151,7 @@ Bot::Bot(uint32 botID, uint32 botOwnerCharacterID, uint32 botSpellsID, double to
 	SetPauseAI(false);
 
 	rest_timer.Disable();
-	SetFollowDistance(BOT_DEFAULT_FOLLOW_DISTANCE);
+	SetFollowDistance(BOT_FOLLOW_DISTANCE_DEFAULT);
 	strcpy(this->name, this->GetCleanName());
 
 	memset(&_botInspectMessage, 0, sizeof(InspectMessage_Struct));
@@ -2065,6 +2065,8 @@ float Bot::GetMaxMeleeRangeToTarget(Mob* target) {
 
 // AI Processing for the Bot object
 void Bot::AI_Process() {
+	// TODO: Need to add root checks to all movement code
+
 	if (!IsAIControlled())
 		return;
 	if (GetPauseAI())
@@ -2229,13 +2231,23 @@ void Bot::AI_Process() {
 			return;
 		}
 		else if (!CheckLosFN(GetTarget())) {
-			if (!IsRooted()) {
+			if (RuleB(Bots, UsePathing) && zone->pathing) {
+				bool WaypointChanged, NodeReached;
+
+				glm::vec3 Goal = UpdatePath(GetTarget()->GetX(), GetTarget()->GetY(), GetTarget()->GetZ(),
+					GetRunspeed(), WaypointChanged, NodeReached);
+
+				if (WaypointChanged)
+					tar_ndx = 20;
+
+				CalculateNewPosition2(Goal.x, Goal.y, Goal.z, GetRunspeed());
+			}
+			else {
 				Mob* follow = entity_list.GetMob(GetFollowID());
 				if (follow)
 					CalculateNewPosition2(follow->GetX(), follow->GetY(), follow->GetZ(), GetRunspeed());
-				return;
 			}
-
+			
 			return;
 		}
 
@@ -2516,33 +2528,52 @@ void Bot::AI_Process() {
 			}
 		}
 		else if(AI_movement_timer->Check()) {
-			// something is wrong with bot movement spell bonuses - based on logging..
-			// ..this code won't need to be so complex once fixed...
-			int speed = GetRunspeed();
-			if (cur_dist < GetFollowDistance() + 2000) {
-				speed = GetWalkspeed();
-			}
-			else if (cur_dist >= GetFollowDistance() + 10000) { // 100
-				if (cur_dist >= 22500) { // 150
-					auto leader = follow;
-					while (leader->GetFollowID()) {
-						leader = entity_list.GetMob(leader->GetFollowID());
-						if (!leader || leader == this)
-							break;
-						if (leader->GetRunspeed() > speed)
-							speed = leader->GetRunspeed();
-						if (leader->IsClient())
-							break;
+			// Something is still wrong with bot following...
+			// Shows up really bad over long distances when movement bonuses are involved
+			if (cur_dist > GetFollowDistance()) {
+				if (RuleB(Bots, UsePathing) && zone->pathing) {
+					if (cur_dist <= GetFollowDistance() + BOT_FOLLOW_DISTANCE_WALK) {
+						bool WaypointChanged, NodeReached;
+
+						glm::vec3 Goal = UpdatePath(follow->GetX(), follow->GetY(), follow->GetZ(),
+							GetWalkspeed(), WaypointChanged, NodeReached);
+
+						if (WaypointChanged)
+							tar_ndx = 20;
+
+						CalculateNewPosition2(Goal.x, Goal.y, Goal.z, GetWalkspeed());
+					}
+					else {
+						int speed = GetRunspeed();
+						if (cur_dist > GetFollowDistance() + BOT_FOLLOW_DISTANCE_CRITICAL)
+							speed = ((float)speed * 1.25f); // sprint mod (1/4 boost)
+
+						bool WaypointChanged, NodeReached;
+
+						glm::vec3 Goal = UpdatePath(follow->GetX(), follow->GetY(), follow->GetZ(),
+							speed, WaypointChanged, NodeReached);
+
+						if (WaypointChanged)
+							tar_ndx = 20;
+
+						CalculateNewPosition2(Goal.x, Goal.y, Goal.z, speed);
 					}
 				}
-				speed = (float)speed * (1.0f + ((float)speed * 0.03125f)); // 1/32 - special bot sprint mod
-			}
+				else {
+					if (cur_dist <= GetFollowDistance() + BOT_FOLLOW_DISTANCE_WALK) {
+						CalculateNewPosition2(follow->GetX(), follow->GetY(), follow->GetZ(), GetWalkspeed());
+					}
+					else {
+						int speed = GetRunspeed();
+						if (cur_dist > GetFollowDistance() + BOT_FOLLOW_DISTANCE_CRITICAL)
+							speed = ((float)speed * 1.25f); // sprint mod (1/4 boost)
 
-			if (cur_dist > GetFollowDistance()) {
-				CalculateNewPosition2(follow->GetX(), follow->GetY(), follow->GetZ(), speed);
+						CalculateNewPosition2(follow->GetX(), follow->GetY(), follow->GetZ(), speed);
+					}
+				}
+				
 				if (rest_timer.Enabled())
 					rest_timer.Disable();
-				return;
 			}
 			else {
 				if (moved) {
@@ -2550,9 +2581,14 @@ void Bot::AI_Process() {
 					SetCurrentSpeed(0);
 				}
 			}
+
+			if (GetClass() == BARD && GetBotStance() != BotStancePassive && !spellend_timer.Enabled() && AI_think_timer->Check())
+				AI_IdleCastCheck();
+
+			return;
 		}
 		else if (IsMoving()) {
-			if (GetBotStance() != BotStancePassive && GetClass() == BARD && !spellend_timer.Enabled() && AI_think_timer->Check()) {
+			if (GetClass() == BARD && GetBotStance() != BotStancePassive && !spellend_timer.Enabled() && AI_think_timer->Check()) {
 				AI_IdleCastCheck();
 			}
 		}

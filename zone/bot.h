@@ -38,7 +38,10 @@
 
 #include <sstream>
 
-#define BOT_DEFAULT_FOLLOW_DISTANCE 184
+#define BOT_FOLLOW_DISTANCE_DEFAULT 184 // as DSq value (~13.565 units)
+#define BOT_FOLLOW_DISTANCE_DEFAULT_MAX 2500 // as DSq value (50 units)
+#define BOT_FOLLOW_DISTANCE_WALK 625 // as DSq value (25 units)
+#define BOT_FOLLOW_DISTANCE_CRITICAL 22500 // as DSq value (150 units)
 
 extern WorldServer worldserver;
 

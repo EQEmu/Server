@@ -4550,7 +4550,7 @@ void bot_subcommand_bot_follow_distance(Client *c, const Seperator *sep)
 	}
 	const int ab_mask = ActionableBots::ABM_NoFilter;
 
-	uint32 bfd = BOT_DEFAULT_FOLLOW_DISTANCE;
+	uint32 bfd = BOT_FOLLOW_DISTANCE_DEFAULT;
 	bool set_flag = false;
 	int ab_arg = 2;
 
@@ -4561,6 +4561,10 @@ void bot_subcommand_bot_follow_distance(Client *c, const Seperator *sep)
 		}
 
 		bfd = atoi(sep->arg[2]);
+		if (bfd < 1)
+			bfd = 1;
+		if (bfd > BOT_FOLLOW_DISTANCE_DEFAULT_MAX)
+			bfd = BOT_FOLLOW_DISTANCE_DEFAULT_MAX;
 		set_flag = true;
 		ab_arg = 3;
 	}
