@@ -2364,6 +2364,7 @@ void Bot::AI_Process() {
 					}
 				}
 
+				// TODO: Test RuleB(Bots, UpdatePositionWithTimer)
 				if(IsMoving())
 					SendPosUpdate();
 				else
@@ -2528,11 +2529,12 @@ void Bot::AI_Process() {
 			}
 		}
 		else if(AI_movement_timer->Check()) {
-			// Something is still wrong with bot following...
+			// Something is still wrong with bot the follow code...
 			// Shows up really bad over long distances when movement bonuses are involved
+			// The flip-side is that too much speed adversely affects node pathing...
 			if (cur_dist > GetFollowDistance()) {
 				if (RuleB(Bots, UsePathing) && zone->pathing) {
-					if (cur_dist <= GetFollowDistance() + BOT_FOLLOW_DISTANCE_WALK) {
+					if (cur_dist <= BOT_FOLLOW_DISTANCE_WALK) {
 						bool WaypointChanged, NodeReached;
 
 						glm::vec3 Goal = UpdatePath(follow->GetX(), follow->GetY(), follow->GetZ(),
@@ -2545,8 +2547,8 @@ void Bot::AI_Process() {
 					}
 					else {
 						int speed = GetRunspeed();
-						if (cur_dist > GetFollowDistance() + BOT_FOLLOW_DISTANCE_CRITICAL)
-							speed = ((float)speed * 1.25f); // sprint mod (1/4 boost)
+						if (cur_dist > BOT_FOLLOW_DISTANCE_CRITICAL)
+							speed = ((float)speed * 1.333f); // sprint mod (1/3 boost)
 
 						bool WaypointChanged, NodeReached;
 
@@ -2560,13 +2562,13 @@ void Bot::AI_Process() {
 					}
 				}
 				else {
-					if (cur_dist <= GetFollowDistance() + BOT_FOLLOW_DISTANCE_WALK) {
+					if (cur_dist <= BOT_FOLLOW_DISTANCE_WALK) {
 						CalculateNewPosition2(follow->GetX(), follow->GetY(), follow->GetZ(), GetWalkspeed());
 					}
 					else {
 						int speed = GetRunspeed();
-						if (cur_dist > GetFollowDistance() + BOT_FOLLOW_DISTANCE_CRITICAL)
-							speed = ((float)speed * 1.25f); // sprint mod (1/4 boost)
+						if (cur_dist > BOT_FOLLOW_DISTANCE_CRITICAL)
+							speed = ((float)speed * 1.333f); // sprint mod (1/3 boost)
 
 						CalculateNewPosition2(follow->GetX(), follow->GetY(), follow->GetZ(), speed);
 					}
@@ -2574,6 +2576,13 @@ void Bot::AI_Process() {
 				
 				if (rest_timer.Enabled())
 					rest_timer.Disable();
+
+				if (RuleB(Bots, UpdatePositionWithTimer)) { // this helps with rubber-banding effect
+					if (IsMoving())
+						SendPosUpdate();
+					//else
+					//	SendPosition(); // enabled - no discernable difference..disabled - saves on no movement packets
+				}
 			}
 			else {
 				if (moved) {
