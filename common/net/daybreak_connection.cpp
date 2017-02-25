@@ -185,6 +185,7 @@ void EQ::Net::DaybreakConnectionManager::ProcessResend()
 
 void EQ::Net::DaybreakConnectionManager::ProcessPacket(const std::string &endpoint, int port, const char *data, uint64_t size)
 {
+	Log.OutF(Logs::Detail, Logs::Netcode, "Recv {0:#x} from {1}:{2}.", data[1], endpoint, port);
 	if (m_options.simulated_in_packet_loss && m_options.simulated_in_packet_loss >= m_rand.Int(0, 100)) {
 		Log.OutF(Logs::Detail, Logs::Netcode, "Dropped a packet from {0}:{1} because of simulated packet loss", endpoint, port);
 		return;
@@ -241,13 +242,15 @@ void EQ::Net::DaybreakConnectionManager::SendDisconnect(const std::string &addr,
 {
 	DaybreakDisconnect header;
 	header.zero = 0;
-	header.opcode = OP_SessionDisconnect;
+	header.opcode = OP_OutOfSession;
 	header.connect_code = 0;
 	
 	DynamicPacket out;
 	out.PutSerialize(0, header);
 	
 	uv_udp_send_t *send_req = new uv_udp_send_t;
+	memset(send_req, 0, sizeof(*send_req));
+
 	sockaddr_in send_addr;
 	uv_ip4_addr(addr.c_str(), port, &send_addr);
 	uv_buf_t send_buffers[1];
@@ -1229,6 +1232,7 @@ void EQ::Net::DaybreakConnection::InternalSend(Packet &p)
 
 		uv_udp_send_t *send_req = new uv_udp_send_t;
 		memset(send_req, 0, sizeof(*send_req));
+
 		sockaddr_in send_addr;
 		uv_ip4_addr(m_endpoint.c_str(), m_port, &send_addr);
 		uv_buf_t send_buffers[1];
@@ -1251,6 +1255,8 @@ void EQ::Net::DaybreakConnection::InternalSend(Packet &p)
 	}
 
 	uv_udp_send_t *send_req = new uv_udp_send_t;
+	memset(send_req, 0, sizeof(*send_req));
+
 	sockaddr_in send_addr;
 	uv_ip4_addr(m_endpoint.c_str(), m_port, &send_addr);
 	uv_buf_t send_buffers[1];
