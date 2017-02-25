@@ -1563,7 +1563,7 @@ bool Client::Death(Mob* killerMob, int32 damage, uint16 spell, EQEmu::skills::Sk
 		}
 	}
 
-	entity_list.RemoveFromTargets(this);
+	entity_list.RemoveFromTargets(this, true);
 	hate_list.RemoveEntFromHateList(this);
 	RemoveAutoXTargets();
 

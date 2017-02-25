@@ -795,7 +795,7 @@ void EntityList::AESpell(Mob *caster, Mob *center, uint16 spell_id, bool affect_
 			continue;
 		if (dist_targ < min_range2)	//make sure they are in range
 			continue;
-		if (isnpc && curmob->IsNPC()) {	//check npc->npc casting
+		if (isnpc && curmob->IsNPC() && spells[spell_id].targettype != ST_AreaNPCOnly) {	//check npc->npc casting
 			FACTION_VALUE f = curmob->GetReverseFactionCon(caster);
 			if (bad) {
 				//affect mobs that are on our hate list, or
