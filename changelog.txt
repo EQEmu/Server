@@ -1,5 +1,8 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 02/26/2017 ==
+Uleat: Moved bot `npc_spells` entries from '701-712' to 3000 + <class_id> .. also, added melee types for future expansion
+
 == 02/25/2017 ==
 Uleat: Implemented rule-based node pathing for bots
 	- This currently applies to out-of-combat following movement and blocked los in-combat movement
