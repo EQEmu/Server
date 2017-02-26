@@ -2610,7 +2610,7 @@ DBnpcspells_Struct* ZoneDatabase::GetNPCSpells(uint32 iDBSpellsID) {
                             "manacost, recast_delay, priority, resist_adjust "
 #ifdef BOTS
 							"FROM %s "
-							"WHERE npc_spells_id=%d ORDER BY minlevel", (iDBSpellsID >= 701 && iDBSpellsID <= 712 ? "bot_spells_entries" : "npc_spells_entries"), iDBSpellsID);
+							"WHERE npc_spells_id=%d ORDER BY minlevel", (iDBSpellsID >= 3001 && iDBSpellsID <= 3016 ? "bot_spells_entries" : "npc_spells_entries"), iDBSpellsID);
 #else
                             "FROM npc_spells_entries "
 							"WHERE npc_spells_id=%d ORDER BY minlevel", iDBSpellsID);
