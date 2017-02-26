@@ -11,6 +11,7 @@
 9010|2017_02_20_bots_bard_spell_update.sql|SELECT * FROM `bot_spells_entries` WHERE `npc_spells_id` = 711 AND (`type` & 0xFFFF0000) = 0xFFFF0000|empty|
 9011|2017_02_23_bots_spell_casting_chances.sql|SHOW TABLES LIKE 'bot_spell_casting_chances'|empty|
 9012|2017_02_26_bots_npc_spells_update_for_bots.sql|SELECT * FROM `npc_spells` WHERE `id` = '701' AND `name` = 'Cleric Bot'|not_empty|
+9013|2017_02_26_bots_spells_id_update_for_saved_bots.sql|SELECT * FROM `bot_data` WHERE `spells_id` >= '701' AND `spells_id` <= '712'|not_empty|
 
 # Upgrade conditions:
 # 	This won't be needed after this system is implemented, but it is used database that are not

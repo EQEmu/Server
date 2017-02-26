@@ -404,8 +404,10 @@ NPCType Bot::CreateDefaultNPCTypeStructForBot(std::string botName, std::string b
 	return Result;
 }
 
-void Bot::GenerateBaseStats() {
+void Bot::GenerateBaseStats()
+{
 	int BotSpellID = 0;
+
 	// base stats
 	uint32 Strength = _baseSTR;
 	uint32 Stamina = _baseSTA;
@@ -421,24 +423,26 @@ void Bot::GenerateBaseStats() {
 	int32 PoisonResist = _basePR;
 	int32 ColdResist = _baseCR;
 	int32 CorruptionResist = _baseCorrup;
+
 	switch(this->GetClass()) {
-		case 1: // Warrior (why not just use 'case WARRIOR:'?)
+		case WARRIOR:
+			BotSpellID = 3001;
 			Strength += 10;
 			Stamina += 20;
 			Agility += 10;
 			Dexterity += 10;
 			Attack += 12;
 			break;
-		case 2: // Cleric
-			BotSpellID = 701;
+		case CLERIC:
+			BotSpellID = 3002;
 			Strength += 5;
 			Stamina += 5;
 			Agility += 10;
 			Wisdom += 30;
 			Attack += 8;
 			break;
-		case 3: // Paladin
-			BotSpellID = 708;
+		case PALADIN:
+			BotSpellID = 3003;
 			Strength += 15;
 			Stamina += 5;
 			Wisdom += 15;
@@ -446,84 +450,86 @@ void Bot::GenerateBaseStats() {
 			Dexterity += 5;
 			Attack += 17;
 			break;
-		case 4: // Ranger
-			BotSpellID = 710;
+		case RANGER:
+			BotSpellID = 3004;
 			Strength += 15;
 			Stamina += 10;
 			Agility += 10;
 			Wisdom += 15;
 			Attack += 17;
 			break;
-		case 5: // Shadowknight
-			BotSpellID = 709;
+		case SHADOWKNIGHT:
+			BotSpellID = 3004;
 			Strength += 10;
 			Stamina += 15;
 			Intelligence += 20;
 			Charisma += 5;
 			Attack += 17;
 			break;
-		case 6: // Druid
-			BotSpellID = 707;
+		case DRUID:
+			BotSpellID = 3006;
 			Stamina += 15;
 			Wisdom += 35;
 			Attack += 5;
 			break;
-		case 7: // Monk
+		case MONK:
+			BotSpellID = 3007;
 			Strength += 5;
 			Stamina += 15;
 			Agility += 15;
 			Dexterity += 15;
 			Attack += 17;
 			break;
-		case 8: // Bard
-			BotSpellID = 711;
+		case BARD:
+			BotSpellID = 3008;
 			Strength += 15;
 			Dexterity += 10;
 			Charisma += 15;
 			Intelligence += 10;
 			Attack += 17;
 			break;
-		case 9: // Rogue
+		case ROGUE:
+			BotSpellID = 3009;
 			Strength += 10;
 			Stamina += 20;
 			Agility += 10;
 			Dexterity += 10;
 			Attack += 12;
 			break;
-		case 10: // Shaman
-			BotSpellID = 706;
+		case SHAMAN:
+			BotSpellID = 3010;
 			Stamina += 10;
 			Wisdom += 30;
 			Charisma += 10;
 			Attack += 28;
 			break;
-		case 11: // Necromancer
-			BotSpellID = 703;
+		case NECROMANCER:
+			BotSpellID = 3011;
 			Dexterity += 10;
 			Agility += 10;
 			Intelligence += 30;
 			Attack += 5;
 			break;
-		case 12: // Wizard
-			BotSpellID = 702;
+		case WIZARD:
+			BotSpellID = 3012;
 			Stamina += 20;
 			Intelligence += 30;
 			Attack += 5;
 			break;
-		case 13: // Magician
-			BotSpellID = 704;
+		case MAGICIAN:
+			BotSpellID = 3013;
 			Stamina += 20;
 			Intelligence += 30;
 			Attack += 5;
 			break;
-		case 14: // Enchanter
-			BotSpellID = 705;
+		case ENCHANTER:
+			BotSpellID = 3014;
 			Intelligence += 25;
 			Charisma += 25;
 			Attack += 5;
 			break;
-		case 15: // Beastlord
-			BotSpellID = 712;
+		case BEASTLORD:
+			BotSpellID = 3015;
 			Stamina += 10;
 			Agility += 10;
 			Dexterity += 5;
@@ -531,21 +537,24 @@ void Bot::GenerateBaseStats() {
 			Charisma += 5;
 			Attack += 31;
 			break;
-		case 16: // Berserker
+		case BERSERKER:
+			BotSpellID = 3016;
 			Strength += 10;
 			Stamina += 15;
 			Dexterity += 15;
 			Agility += 10;
 			Attack += 25;
 			break;
+		default:
+			break;
 	}
 
 	float BotSize = GetSize();
 
 	switch(this->GetRace()) {
-		case 1: // Humans have no race bonus
+		case HUMAN: // Humans have no race bonus
 			break;
-		case 2: // Barbarian
+		case BARBARIAN:
 			Strength += 28;
 			Stamina += 20;
 			Agility += 7;
@@ -556,7 +565,7 @@ void Bot::GenerateBaseStats() {
 			BotSize = 7.0;
 			ColdResist += 10;
 			break;
-		case 3: // Erudite
+		case ERUDITE:
 			Strength -= 15;
 			Stamina -= 5;
 			Agility -= 5;
@@ -567,7 +576,7 @@ void Bot::GenerateBaseStats() {
 			MagicResist += 5;
 			DiseaseResist -= 5;
 			break;
-		case 4: // Wood Elf
+		case WOOD_ELF:
 			Strength -= 10;
 			Stamina -= 10;
 			Agility += 20;
@@ -575,7 +584,7 @@ void Bot::GenerateBaseStats() {
 			Wisdom += 5;
 			BotSize = 5.0;
 			break;
-		case 5: // High Elf
+		case HIGH_ELF:
 			Strength -= 20;
 			Stamina -= 10;
 			Agility += 10;
@@ -584,7 +593,7 @@ void Bot::GenerateBaseStats() {
 			Intelligence += 12;
 			Charisma += 5;
 			break;
-		case 6: // Dark Elf
+		case DARK_ELF:
 			Strength -= 15;
 			Stamina -= 10;
 			Agility += 15;
@@ -593,7 +602,7 @@ void Bot::GenerateBaseStats() {
 			Charisma -= 15;
 			BotSize = 5.0;
 			break;
-		case 7: // Half Elf
+		case HALF_ELF:
 			Strength -= 5;
 			Stamina -= 5;
 			Agility += 15;
@@ -601,7 +610,7 @@ void Bot::GenerateBaseStats() {
 			Wisdom -= 15;
 			BotSize = 5.5;
 			break;
-		case 8: // Dwarf
+		case DWARF:
 			Strength += 15;
 			Stamina += 15;
 			Agility -= 5;
@@ -613,7 +622,7 @@ void Bot::GenerateBaseStats() {
 			MagicResist -= 5;
 			PoisonResist += 5;
 			break;
-		case 9: // Troll
+		case TROLL:
 			Strength += 33;
 			Stamina += 34;
 			Agility += 8;
@@ -623,7 +632,7 @@ void Bot::GenerateBaseStats() {
 			BotSize = 8.0;
 			FireResist -= 20;
 			break;
-		case 10: // Ogre
+		case OGRE:
 			Strength += 55;
 			Stamina += 77;
 			Agility -= 5;
@@ -633,7 +642,7 @@ void Bot::GenerateBaseStats() {
 			Charisma -= 38;
 			BotSize = 9.0;
 			break;
-		case 11: // Halfling
+		case HALFLING:
 			Strength -= 5;
 			Agility += 20;
 			Dexterity += 15;
@@ -644,7 +653,7 @@ void Bot::GenerateBaseStats() {
 			PoisonResist += 5;
 			DiseaseResist += 5;
 			break;
-		case 12: // Gnome
+		case GNOME:
 			Strength -= 15;
 			Stamina -= 5;
 			Agility += 10;
@@ -654,7 +663,7 @@ void Bot::GenerateBaseStats() {
 			Charisma -= 15;
 			BotSize = 3.0;
 			break;
-		case 128: // Iksar
+		case IKSAR:
 			Strength -= 5;
 			Stamina -= 5;
 			Agility += 15;
@@ -664,7 +673,7 @@ void Bot::GenerateBaseStats() {
 			MagicResist -= 5;
 			FireResist -= 5;
 			break;
-		case 130: // Vah Shir
+		case VAHSHIR:
 			Strength += 15;
 			Agility += 15;
 			Dexterity -= 5;
@@ -675,7 +684,7 @@ void Bot::GenerateBaseStats() {
 			MagicResist -= 5;
 			FireResist -= 5;
 			break;
-		case 330: // Froglok
+		case FROGLOK:
 			Strength -= 5;
 			Stamina += 5;
 			Agility += 25;
@@ -685,7 +694,7 @@ void Bot::GenerateBaseStats() {
 			MagicResist -= 5;
 			FireResist -= 5;
 			break;
-		case 522: // Drakkin
+		case DRAKKIN:
 			Strength -= 5;
 			Stamina += 5;
 			Agility += 10;
@@ -698,7 +707,10 @@ void Bot::GenerateBaseStats() {
 			FireResist += 2;
 			ColdResist += 2;
 			break;
+		default:
+			break;
 	}
+
 	this->STR = Strength;
 	this->STA = Stamina;
 	this->DEX = Dexterity;
