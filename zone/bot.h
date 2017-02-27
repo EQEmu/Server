@@ -132,11 +132,48 @@ enum SpellTypeIndex {
 	SpellType_HateReduxIndex,
 	SpellType_InCombatBuffSongIndex,
 	SpellType_OutOfCombatBuffSongIndex,
+	SpellType_PreCombatBuffIndex,
+	SpellType_PreCombatBuffSongIndex,
 	MaxSpellTypes
 };
 
-// negative Healer/Slower, positive Healer, postive Slower, positive Healer/Slower
-enum BotCastingChanceConditional : uint8 { nHS = 0, pH, pS, pHS, cntHS = 4 };
+// nHSND	negative Healer/Slower/Nuker/Doter
+// pH		positive Healer
+// pS		positive Slower
+// pHS		positive Healer/Slower
+// pN		positive Nuker
+// pHN		positive Healer/Nuker
+// pSN		positive Slower/Nuker
+// pHSN		positive Healer/Slower/Nuker
+// pD		positive Doter
+// pHD		positive Healer/Doter
+// pSD		positive Slower/Doter
+// pHSD		positive Healer/Slower/Doter
+// pND		positive Nuker/Doter
+// pHND		positive Healer/Nuker/Doter
+// pSND		positive Slower/Nuker/Doter
+// pHSND	positive Healer/Slower/Nuker/Doter
+// cntHSND	count Healer/Slower/Nuker/Doter
+enum BotCastingChanceConditional : uint8
+{
+	nHSND = 0,
+	pH,
+	pS,
+	pHS,
+	pN,
+	pHN,
+	pSN,
+	pHSN,
+	pD,
+	pHD,
+	pSD,
+	pHSD,
+	pND,
+	pHND,
+	pSND,
+	pHSND,
+	cntHSND = 16
+};
 
 
 class Bot : public NPC {
@@ -482,7 +519,15 @@ public:
 
 	bool IsGroupHealer() { return m_CastingRoles.GroupHealer; }
 	bool IsGroupSlower() { return m_CastingRoles.GroupSlower; }
+	bool IsGroupNuker() { return m_CastingRoles.GroupNuker; }
+	bool IsGroupDoter() { return m_CastingRoles.GroupDoter; }
 	static void UpdateGroupCastingRoles(const Group* group, bool disband = false);
+
+	//bool IsRaidHealer() { return m_CastingRoles.RaidHealer; }
+	//bool IsRaidSlower() { return m_CastingRoles.RaidSlower; }
+	//bool IsRaidNuker() { return m_CastingRoles.RaidNuker; }
+	//bool IsRaidDoter() { return m_CastingRoles.RaidDoter; }
+	//static void UpdateRaidCastingRoles(const Raid* raid, bool disband = false);
 
 	bool IsBotCaster() { return IsCasterClass(GetClass()); }
 	bool IsBotINTCaster() { return IsINTCasterClass(GetClass()); }
@@ -650,6 +695,12 @@ protected:
 	BotCastingRoles& GetCastingRoles() { return m_CastingRoles; }
 	void SetGroupHealer(bool flag = true) { m_CastingRoles.GroupHealer = flag; }
 	void SetGroupSlower(bool flag = true) { m_CastingRoles.GroupSlower = flag; }
+	void SetGroupNuker(bool flag = true) { m_CastingRoles.GroupNuker = flag; }
+	void SetGroupDoter(bool flag = true) { m_CastingRoles.GroupDoter = flag; }
+	//void SetRaidHealer(bool flag = true) { m_CastingRoles.RaidHealer = flag; }
+	//void SetRaidSlower(bool flag = true) { m_CastingRoles.RaidSlower = flag; }
+	//void SetRaidNuker(bool flag = true) { m_CastingRoles.RaidNuker = flag; }
+	//void SetRaidDoter(bool flag = true) { m_CastingRoles.RaidDoter = flag; }
 
 private:
 	// Class Members

@@ -178,6 +178,8 @@ Bot::Bot(uint32 botID, uint32 botOwnerCharacterID, uint32 botSpellsID, double to
 
 	m_CastingRoles.GroupHealer = false;
 	m_CastingRoles.GroupSlower = false;
+	m_CastingRoles.GroupNuker = false;
+	m_CastingRoles.GroupDoter = false;
 
 	GenerateBaseStats();
 
@@ -424,6 +426,7 @@ void Bot::GenerateBaseStats()
 	int32 ColdResist = _baseCR;
 	int32 CorruptionResist = _baseCorrup;
 
+	// pulling fixed values from an auto-increment field is dangerous...
 	switch(this->GetClass()) {
 		case WARRIOR:
 			BotSpellID = 3001;
@@ -6917,6 +6920,8 @@ void Bot::UpdateGroupCastingRoles(const Group* group, bool disband)
 		if (iter->IsBot()) {
 			iter->CastToBot()->SetGroupHealer(false);
 			iter->CastToBot()->SetGroupSlower(false);
+			iter->CastToBot()->SetGroupNuker(false);
+			iter->CastToBot()->SetGroupDoter(false);
 		}
 	}
 
@@ -6925,11 +6930,14 @@ void Bot::UpdateGroupCastingRoles(const Group* group, bool disband)
 
 	Mob* healer = nullptr;
 	Mob* slower = nullptr;
+	Mob* nuker = nullptr;
+	Mob* doter = nullptr;
 
 	for (auto iter : group->members) {
 		if (!iter)
 			continue;
 
+		// GroupHealer
 		switch (iter->GetClass()) {
 		case CLERIC:
 			if (!healer)
@@ -6978,6 +6986,7 @@ void Bot::UpdateGroupCastingRoles(const Group* group, bool disband)
 			break;
 		}
 
+		// GroupSlower
 		switch (iter->GetClass()) {
 		case SHAMAN:
 			if (!slower)
@@ -7009,13 +7018,42 @@ void Bot::UpdateGroupCastingRoles(const Group* group, bool disband)
 		default:
 			break;
 		}
+
+		// GroupNuker
+		switch (iter->GetClass()) {
+			// wizard
+			// magician
+			// necromancer
+			// enchanter
+			// druid
+			// cleric
+			// shaman
+			// shadowknight
+			// paladin
+			// ranger
+			// beastlord
+		default:
+			break;
+		}
+
+		// GroupDoter
+		switch (iter->GetClass()) {
+		default:
+			break;
+		}
 	}
 
 	if (healer && healer->IsBot())
 		healer->CastToBot()->SetGroupHealer();
 	if (slower && slower->IsBot())
 		slower->CastToBot()->SetGroupSlower();
+	if (nuker && nuker->IsBot())
+		nuker->CastToBot()->SetGroupNuker();
+	if (doter && doter->IsBot())
+		doter->CastToBot()->SetGroupDoter();
 }
+
+//void Bot::UpdateRaidCastingRoles(const Raid* raid, bool disband = false) { }
 
 bool Bot::CanHeal() {
 	bool result = false;
@@ -7781,6 +7819,23 @@ bool EntityList::Bot_AICheckCloseBeneficialSpells(Bot* caster, uint8 iChance, fl
 				for (int i = 0; i < MAX_GROUP_MEMBERS; i++) {
 					if (g->members[i] && caster->GetNeedsHateRedux(g->members[i])) {
 						if (caster->AICastSpell(g->members[i], caster->GetChanceToCastBySpellType(SpellType_HateRedux), SpellType_HateRedux))
+							return true;
+					}
+				}
+			}
+		}
+	}
+
+	if (iSpellTypes == SpellType_PreCombatBuff) {
+		if (botCasterClass == BARD || caster->IsEngaged())
+			return false;
+
+		if (caster->HasGroup()) {
+			Group *g = caster->GetGroup();
+			if (g) {
+				for (int i = 0; i < MAX_GROUP_MEMBERS; i++) {
+					if (g->members[i]) {
+						if (caster->AICastSpell(g->members[i], iChance, SpellType_PreCombatBuff) || caster->AICastSpell(g->members[i]->GetPet(), iChance, SpellType_PreCombatBuff))
 							return true;
 					}
 				}

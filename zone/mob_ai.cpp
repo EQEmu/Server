@@ -2606,6 +2606,7 @@ DBnpcspells_Struct* ZoneDatabase::GetNPCSpells(uint32 iDBSpellsID) {
         uint32 tmpidle_no_sp_recast_max = atoi(row[18]);
         uint8 tmpidle_b_chance = atoi(row[19]);
 
+		// pulling fixed values from an auto-increment field is dangerous...
         query = StringFormat("SELECT spellid, type, minlevel, maxlevel, "
                             "manacost, recast_delay, priority, resist_adjust "
 #ifdef BOTS
