@@ -8825,7 +8825,7 @@ void Client::ProcessAggroMeter()
 			secondary = cur_tar->GetSecondaryHate(this);
 			has_aggro = true;
 		} else {
-			secondary = cur_tar->GetTarget();
+			secondary = cur_tar->CheckAggro(cur_tar->GetTarget()) ? cur_tar->GetTarget() : nullptr; // make sure they are targeting for aggro reasons
 		}
 	}
 
