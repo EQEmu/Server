@@ -574,7 +574,11 @@ bool Mob::MakeNewPositionAndSendUpdate(float x, float y, float z, int speed, boo
 	m_TargetV.z = z - nz;
 	SetCurrentSpeed((int8)speed);
 	pRunAnimSpeed = speed;
+#ifdef BOTS
+	if(IsClient() || IsBot())
+#else
 	if(IsClient())
+#endif
 	{
 		animation = speed / 2;
 	}

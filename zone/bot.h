@@ -40,8 +40,7 @@
 
 #define BOT_FOLLOW_DISTANCE_DEFAULT 184 // as DSq value (~13.565 units)
 #define BOT_FOLLOW_DISTANCE_DEFAULT_MAX 2500 // as DSq value (50 units)
-#define BOT_FOLLOW_DISTANCE_WALK 400 // as DSq value (20 units)
-#define BOT_FOLLOW_DISTANCE_CRITICAL 22500 // as DSq value (150 units)
+#define BOT_FOLLOW_DISTANCE_WALK 1000 // as DSq value (~31.623 units)
 
 extern WorldServer worldserver;
 
@@ -336,8 +335,9 @@ public:
 	void Stand();
 	bool IsSitting();
 	bool IsStanding();
+	int GetBotWalkspeed() const { return (int)((float)_GetWalkSpeed() * 1.786f); } // 1.25 / 0.7 = 1.7857142857142857142857142857143
+	int GetBotRunspeed() const { return (int)((float)_GetRunSpeed() * 1.786f); }
 	bool IsBotCasterCombatRange(Mob *target);
-	bool CalculateNewPosition2(float x, float y, float z, float speed, bool checkZ = true) ;
 	bool UseDiscipline(uint32 spell_id, uint32 target);
 	uint8 GetNumberNeedingHealedInGroup(uint8 hpr, bool includePets);
 	bool GetNeedsCured(Mob *tar);

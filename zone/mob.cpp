@@ -613,7 +613,11 @@ int Mob::_GetWalkSpeed() const {
 		return(0);
 
 	//runspeed cap.
+#ifdef BOTS
+	if (IsClient() || IsBot())
+#else
 	if(IsClient())
+#endif
 	{
 		if(speed_mod > runspeedcap)
 			speed_mod = runspeedcap;
@@ -672,7 +676,11 @@ int Mob::_GetRunSpeed() const {
 
 	if (!has_horse && movemod != 0)
 	{
+#ifdef BOTS
+		if (IsClient() || IsBot())
+#else
 		if (IsClient())
+#endif
 		{
 			speed_mod += (speed_mod * movemod / 100);
 		} else {
@@ -701,7 +709,11 @@ int Mob::_GetRunSpeed() const {
 		return(0);
 	}
 	//runspeed cap.
+#ifdef BOTS
+	if (IsClient() || IsBot())
+#else
 	if(IsClient())
+#endif
 	{
 		if(speed_mod > runspeedcap)
 			speed_mod = runspeedcap;
@@ -1458,10 +1470,15 @@ void Mob::MakeSpawnUpdate(PlayerPositionUpdateServer_Struct* spu) {
 	spu->padding0006	=7;
 	spu->padding0014	=0x7f;
 	spu->padding0018	=0x5df27;
+#ifdef BOTS
+	if (this->IsClient() || this->IsBot())
+#else
 	if(this->IsClient())
+#endif
 		spu->animation = animation;
 	else
-		spu->animation	= pRunAnimSpeed;//animation;
+		spu->animation = pRunAnimSpeed;//animation;
+	
 	spu->delta_heading = NewFloatToEQ13(m_Delta.w);
 }
 
