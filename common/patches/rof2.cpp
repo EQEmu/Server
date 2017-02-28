@@ -1182,17 +1182,17 @@ namespace RoF2
 			// Leader
 			//
 
-			VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);
-			VARSTRUCT_ENCODE_STRING(Buffer, gu2->yourname);
-			VARSTRUCT_ENCODE_TYPE(uint8, Buffer, 0);
-			VARSTRUCT_ENCODE_TYPE(uint8, Buffer, 0);
+			VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);		// index
+			VARSTRUCT_ENCODE_STRING(Buffer, gu2->yourname);	// name
+			VARSTRUCT_ENCODE_TYPE(uint16, Buffer, 0);		// owner name of merc
 			//VARSTRUCT_ENCODE_STRING(Buffer, "");
-			VARSTRUCT_ENCODE_TYPE(uint8, Buffer, 0);	// This is a string
-			VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0x46);	// Observed 0x41 and 0x46 here
-			VARSTRUCT_ENCODE_TYPE(uint8, Buffer, 0);
-			VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);
-			VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);
-			VARSTRUCT_ENCODE_TYPE(uint16, Buffer, 0);
+			VARSTRUCT_ENCODE_TYPE(uint8, Buffer, 0);		// This is a string
+			VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0x46);	// level
+			VARSTRUCT_ENCODE_TYPE(uint8, Buffer, 0);		// group tank flag
+			VARSTRUCT_ENCODE_TYPE(uint8, Buffer, 0);		// group assist flag
+			VARSTRUCT_ENCODE_TYPE(uint8, Buffer, 0);		// group puller flag
+			VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);		// offline
+			VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);		// timestamp
 
 			int MemberNumber = 1;
 
@@ -1201,17 +1201,17 @@ namespace RoF2
 				if (gu2->membername[i][0] == '\0')
 					continue;
 
-				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, MemberNumber++);
-				VARSTRUCT_ENCODE_STRING(Buffer, gu2->membername[i]);
-				VARSTRUCT_ENCODE_TYPE(uint8, Buffer, 0);
-				VARSTRUCT_ENCODE_TYPE(uint8, Buffer, 0);
+				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, MemberNumber++);	// index
+				VARSTRUCT_ENCODE_STRING(Buffer, gu2->membername[i]);	// name
+				VARSTRUCT_ENCODE_TYPE(uint16, Buffer, 0);				// merc flag
 				//VARSTRUCT_ENCODE_STRING(Buffer, "");
-				VARSTRUCT_ENCODE_TYPE(uint8, Buffer, 0);	// This is a string
-				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0x41);	// Observed 0x41 and 0x46 here
-				VARSTRUCT_ENCODE_TYPE(uint8, Buffer, 0);
-				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);	// Low byte is Main Assist Flag
-				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);
-				VARSTRUCT_ENCODE_TYPE(uint16, Buffer, 0);
+				VARSTRUCT_ENCODE_TYPE(uint8, Buffer, 0);				// owner name fo merc
+				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0x41);			// level
+				VARSTRUCT_ENCODE_TYPE(uint8, Buffer, 0);				// group tank flag
+				VARSTRUCT_ENCODE_TYPE(uint8, Buffer, 0);				// group assist flag
+				VARSTRUCT_ENCODE_TYPE(uint8, Buffer, 0);				// group puller flag
+				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);				// offline
+				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);				// timestamp
 			}
 
 			//Log.Hex(Logs::Netcode, outapp->pBuffer, outapp->size);
