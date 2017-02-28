@@ -1,5 +1,14 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 02/27/2017 ==
+Uleat: Notes on bot movement speed changes:
+	- Clients (players) appear to be on a different speed scale than other entities (NPCs, etc...)
+	- The server does not calculate deltas/velocities for moving players..those come the client itself
+	- GetBotWalkspeed() and GetBotRunspeed() are specific to bot movement calculations
+	- The class Mob equivilents are not scalared so that a 'client-oriented' value can still be attained
+	- The value of ~1.786f is derived from the ratio of 1.25f/0.7f (npc speed/client speed)
+	- Modifying the two speeds like this is a rough guess-timate..but, appears to at least bring the incongruous behavior to acceptable levels
+
 == 02/26/2017 ==
 Uleat: Moved bot `npc_spells` entries from '701-712' to 3000 + <class_id> .. also, added melee types for future expansion
 Uleat: Moved bot spell casting chance values into database - this will allow admins to tailor their bots without having to rebuild server code
