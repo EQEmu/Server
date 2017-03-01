@@ -30,7 +30,6 @@ character_inspect_messages
 character_leadership_abilities
 character_activities
 character_alt_currency
-character_backup
 character_buffs
 character_enabledtasks
 character_pet_buffs
