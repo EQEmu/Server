@@ -272,7 +272,7 @@ EQ::Net::DaybreakConnection::DaybreakConnection(DaybreakConnectionManager *owner
 	m_encode_passes[1] = owner->m_options.encode_passes[1];
 	m_hold_time = Clock::now();
 	m_buffered_packets_length = 0;
-	m_resend_delay = m_owner->m_options.resend_delay_ms;
+	m_resend_delay = m_owner->m_options.resend_delay_ms + 25;
 	m_rolling_ping = 100;
 	m_combined.reset(new char[512]);
 	m_combined[0] = 0;
@@ -295,7 +295,7 @@ EQ::Net::DaybreakConnection::DaybreakConnection(DaybreakConnectionManager *owner
 	m_crc_bytes = 0;
 	m_hold_time = Clock::now();
 	m_buffered_packets_length = 0;
-	m_resend_delay = m_owner->m_options.resend_delay_ms;
+	m_resend_delay = m_owner->m_options.resend_delay_ms + 25;
 	m_rolling_ping = 100;
 	m_combined.reset(new char[512]);
 	m_combined[0] = 0;
@@ -356,8 +356,8 @@ void EQ::Net::DaybreakConnection::Process()
 {
 	try {
 		m_resend_delay = (size_t)(m_stats.last_stat_ping * m_owner->m_options.resend_delay_factor) + m_owner->m_options.resend_delay_ms;
-		if (m_resend_delay > 1000) {
-			m_resend_delay = 1000;
+		if (m_resend_delay > 500) {
+			m_resend_delay = 500;
 		}
 
 		auto now = Clock::now();
@@ -999,7 +999,7 @@ void EQ::Net::DaybreakConnection::ProcessResend(int stream)
 			}
 		}
 		else {
-			if ((size_t)time_since_last_send.count() > std::min(m_resend_delay / (entry.second.times_resent + 1), (size_t)5ULL)) {
+			if ((size_t)time_since_last_send.count() > m_resend_delay) {
 				InternalBufferedSend(entry.second.packet);
 				entry.second.last_sent = now;
 				entry.second.times_resent++;
@@ -1225,6 +1225,7 @@ void EQ::Net::DaybreakConnection::InternalQueuePacket(Packet &p, int stream_id, 
 		}
 
 		InternalBufferedSend(p);
+		return;
 	}
 
 	auto stream = &m_streams[stream_id];

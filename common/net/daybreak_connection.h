@@ -218,7 +218,7 @@ namespace EQ
 			DaybreakConnectionManagerOptions() {
 				max_connection_count = 0;
 				keepalive_delay_ms = 9000;
-				resend_delay_ms = 25;
+				resend_delay_ms = 50;
 				resend_delay_factor = 1.5;
 				stats_delay_ms = 9000;
 				connect_delay_ms = 250;

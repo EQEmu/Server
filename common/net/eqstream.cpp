@@ -85,12 +85,7 @@ void EQ::Net::EQStream::QueuePacket(const EQApplicationPacket *p, bool ack_req) 
 			break;
 		}
 
-		if (!ack_req) {
-			m_connection->QueuePacket(out, 0, false);
-		}
-		else {
-			m_connection->QueuePacket(out);
-		}
+		m_connection->QueuePacket(out);
 	}
 }
 
