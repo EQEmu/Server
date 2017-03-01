@@ -178,6 +178,8 @@ Bot::Bot(uint32 botID, uint32 botOwnerCharacterID, uint32 botSpellsID, double to
 
 	m_CastingRoles.GroupHealer = false;
 	m_CastingRoles.GroupSlower = false;
+	m_CastingRoles.GroupNuker = false;
+	m_CastingRoles.GroupDoter = false;
 
 	GenerateBaseStats();
 
@@ -404,8 +406,10 @@ NPCType Bot::CreateDefaultNPCTypeStructForBot(std::string botName, std::string b
 	return Result;
 }
 
-void Bot::GenerateBaseStats() {
+void Bot::GenerateBaseStats()
+{
 	int BotSpellID = 0;
+
 	// base stats
 	uint32 Strength = _baseSTR;
 	uint32 Stamina = _baseSTA;
@@ -421,24 +425,27 @@ void Bot::GenerateBaseStats() {
 	int32 PoisonResist = _basePR;
 	int32 ColdResist = _baseCR;
 	int32 CorruptionResist = _baseCorrup;
+
+	// pulling fixed values from an auto-increment field is dangerous...
 	switch(this->GetClass()) {
-		case 1: // Warrior (why not just use 'case WARRIOR:'?)
+		case WARRIOR:
+			BotSpellID = 3001;
 			Strength += 10;
 			Stamina += 20;
 			Agility += 10;
 			Dexterity += 10;
 			Attack += 12;
 			break;
-		case 2: // Cleric
-			BotSpellID = 701;
+		case CLERIC:
+			BotSpellID = 3002;
 			Strength += 5;
 			Stamina += 5;
 			Agility += 10;
 			Wisdom += 30;
 			Attack += 8;
 			break;
-		case 3: // Paladin
-			BotSpellID = 708;
+		case PALADIN:
+			BotSpellID = 3003;
 			Strength += 15;
 			Stamina += 5;
 			Wisdom += 15;
@@ -446,84 +453,86 @@ void Bot::GenerateBaseStats() {
 			Dexterity += 5;
 			Attack += 17;
 			break;
-		case 4: // Ranger
-			BotSpellID = 710;
+		case RANGER:
+			BotSpellID = 3004;
 			Strength += 15;
 			Stamina += 10;
 			Agility += 10;
 			Wisdom += 15;
 			Attack += 17;
 			break;
-		case 5: // Shadowknight
-			BotSpellID = 709;
+		case SHADOWKNIGHT:
+			BotSpellID = 3004;
 			Strength += 10;
 			Stamina += 15;
 			Intelligence += 20;
 			Charisma += 5;
 			Attack += 17;
 			break;
-		case 6: // Druid
-			BotSpellID = 707;
+		case DRUID:
+			BotSpellID = 3006;
 			Stamina += 15;
 			Wisdom += 35;
 			Attack += 5;
 			break;
-		case 7: // Monk
+		case MONK:
+			BotSpellID = 3007;
 			Strength += 5;
 			Stamina += 15;
 			Agility += 15;
 			Dexterity += 15;
 			Attack += 17;
 			break;
-		case 8: // Bard
-			BotSpellID = 711;
+		case BARD:
+			BotSpellID = 3008;
 			Strength += 15;
 			Dexterity += 10;
 			Charisma += 15;
 			Intelligence += 10;
 			Attack += 17;
 			break;
-		case 9: // Rogue
+		case ROGUE:
+			BotSpellID = 3009;
 			Strength += 10;
 			Stamina += 20;
 			Agility += 10;
 			Dexterity += 10;
 			Attack += 12;
 			break;
-		case 10: // Shaman
-			BotSpellID = 706;
+		case SHAMAN:
+			BotSpellID = 3010;
 			Stamina += 10;
 			Wisdom += 30;
 			Charisma += 10;
 			Attack += 28;
 			break;
-		case 11: // Necromancer
-			BotSpellID = 703;
+		case NECROMANCER:
+			BotSpellID = 3011;
 			Dexterity += 10;
 			Agility += 10;
 			Intelligence += 30;
 			Attack += 5;
 			break;
-		case 12: // Wizard
-			BotSpellID = 702;
+		case WIZARD:
+			BotSpellID = 3012;
 			Stamina += 20;
 			Intelligence += 30;
 			Attack += 5;
 			break;
-		case 13: // Magician
-			BotSpellID = 704;
+		case MAGICIAN:
+			BotSpellID = 3013;
 			Stamina += 20;
 			Intelligence += 30;
 			Attack += 5;
 			break;
-		case 14: // Enchanter
-			BotSpellID = 705;
+		case ENCHANTER:
+			BotSpellID = 3014;
 			Intelligence += 25;
 			Charisma += 25;
 			Attack += 5;
 			break;
-		case 15: // Beastlord
-			BotSpellID = 712;
+		case BEASTLORD:
+			BotSpellID = 3015;
 			Stamina += 10;
 			Agility += 10;
 			Dexterity += 5;
@@ -531,21 +540,24 @@ void Bot::GenerateBaseStats() {
 			Charisma += 5;
 			Attack += 31;
 			break;
-		case 16: // Berserker
+		case BERSERKER:
+			BotSpellID = 3016;
 			Strength += 10;
 			Stamina += 15;
 			Dexterity += 15;
 			Agility += 10;
 			Attack += 25;
 			break;
+		default:
+			break;
 	}
 
 	float BotSize = GetSize();
 
 	switch(this->GetRace()) {
-		case 1: // Humans have no race bonus
+		case HUMAN: // Humans have no race bonus
 			break;
-		case 2: // Barbarian
+		case BARBARIAN:
 			Strength += 28;
 			Stamina += 20;
 			Agility += 7;
@@ -556,7 +568,7 @@ void Bot::GenerateBaseStats() {
 			BotSize = 7.0;
 			ColdResist += 10;
 			break;
-		case 3: // Erudite
+		case ERUDITE:
 			Strength -= 15;
 			Stamina -= 5;
 			Agility -= 5;
@@ -567,7 +579,7 @@ void Bot::GenerateBaseStats() {
 			MagicResist += 5;
 			DiseaseResist -= 5;
 			break;
-		case 4: // Wood Elf
+		case WOOD_ELF:
 			Strength -= 10;
 			Stamina -= 10;
 			Agility += 20;
@@ -575,7 +587,7 @@ void Bot::GenerateBaseStats() {
 			Wisdom += 5;
 			BotSize = 5.0;
 			break;
-		case 5: // High Elf
+		case HIGH_ELF:
 			Strength -= 20;
 			Stamina -= 10;
 			Agility += 10;
@@ -584,7 +596,7 @@ void Bot::GenerateBaseStats() {
 			Intelligence += 12;
 			Charisma += 5;
 			break;
-		case 6: // Dark Elf
+		case DARK_ELF:
 			Strength -= 15;
 			Stamina -= 10;
 			Agility += 15;
@@ -593,7 +605,7 @@ void Bot::GenerateBaseStats() {
 			Charisma -= 15;
 			BotSize = 5.0;
 			break;
-		case 7: // Half Elf
+		case HALF_ELF:
 			Strength -= 5;
 			Stamina -= 5;
 			Agility += 15;
@@ -601,7 +613,7 @@ void Bot::GenerateBaseStats() {
 			Wisdom -= 15;
 			BotSize = 5.5;
 			break;
-		case 8: // Dwarf
+		case DWARF:
 			Strength += 15;
 			Stamina += 15;
 			Agility -= 5;
@@ -613,7 +625,7 @@ void Bot::GenerateBaseStats() {
 			MagicResist -= 5;
 			PoisonResist += 5;
 			break;
-		case 9: // Troll
+		case TROLL:
 			Strength += 33;
 			Stamina += 34;
 			Agility += 8;
@@ -623,7 +635,7 @@ void Bot::GenerateBaseStats() {
 			BotSize = 8.0;
 			FireResist -= 20;
 			break;
-		case 10: // Ogre
+		case OGRE:
 			Strength += 55;
 			Stamina += 77;
 			Agility -= 5;
@@ -633,7 +645,7 @@ void Bot::GenerateBaseStats() {
 			Charisma -= 38;
 			BotSize = 9.0;
 			break;
-		case 11: // Halfling
+		case HALFLING:
 			Strength -= 5;
 			Agility += 20;
 			Dexterity += 15;
@@ -644,7 +656,7 @@ void Bot::GenerateBaseStats() {
 			PoisonResist += 5;
 			DiseaseResist += 5;
 			break;
-		case 12: // Gnome
+		case GNOME:
 			Strength -= 15;
 			Stamina -= 5;
 			Agility += 10;
@@ -654,7 +666,7 @@ void Bot::GenerateBaseStats() {
 			Charisma -= 15;
 			BotSize = 3.0;
 			break;
-		case 128: // Iksar
+		case IKSAR:
 			Strength -= 5;
 			Stamina -= 5;
 			Agility += 15;
@@ -664,7 +676,7 @@ void Bot::GenerateBaseStats() {
 			MagicResist -= 5;
 			FireResist -= 5;
 			break;
-		case 130: // Vah Shir
+		case VAHSHIR:
 			Strength += 15;
 			Agility += 15;
 			Dexterity -= 5;
@@ -675,7 +687,7 @@ void Bot::GenerateBaseStats() {
 			MagicResist -= 5;
 			FireResist -= 5;
 			break;
-		case 330: // Froglok
+		case FROGLOK:
 			Strength -= 5;
 			Stamina += 5;
 			Agility += 25;
@@ -685,7 +697,7 @@ void Bot::GenerateBaseStats() {
 			MagicResist -= 5;
 			FireResist -= 5;
 			break;
-		case 522: // Drakkin
+		case DRAKKIN:
 			Strength -= 5;
 			Stamina += 5;
 			Agility += 10;
@@ -698,7 +710,10 @@ void Bot::GenerateBaseStats() {
 			FireResist += 2;
 			ColdResist += 2;
 			break;
+		default:
+			break;
 	}
+
 	this->STR = Strength;
 	this->STA = Stamina;
 	this->DEX = Dexterity;
@@ -2149,7 +2164,7 @@ void Bot::AI_Process() {
 				} else if(!IsRooted()) {
 					if(GetTarget() && GetTarget()->GetHateTop() && GetTarget()->GetHateTop() != this) {
 						Log.Out(Logs::Detail, Logs::AI, "Returning to location prior to being summoned.");
-						CalculateNewPosition2(m_PreSummonLocation.x, m_PreSummonLocation.y, m_PreSummonLocation.z, GetRunspeed());
+						CalculateNewPosition2(m_PreSummonLocation.x, m_PreSummonLocation.y, m_PreSummonLocation.z, GetBotRunspeed());
 						SetHeading(CalculateHeadingToTarget(m_PreSummonLocation.x, m_PreSummonLocation.y));
 						return;
 					}
@@ -2224,7 +2239,7 @@ void Bot::AI_Process() {
 			if(IsMoving()) {
 				SetHeading(0);
 				SetRunAnimSpeed(0);
-				SetCurrentSpeed(GetRunspeed());
+				SetCurrentSpeed(GetBotRunspeed());
 				if(moved)
 					SetCurrentSpeed(0);
 			}
@@ -2235,17 +2250,17 @@ void Bot::AI_Process() {
 				bool WaypointChanged, NodeReached;
 
 				glm::vec3 Goal = UpdatePath(GetTarget()->GetX(), GetTarget()->GetY(), GetTarget()->GetZ(),
-					GetRunspeed(), WaypointChanged, NodeReached);
+					GetBotRunspeed(), WaypointChanged, NodeReached);
 
 				if (WaypointChanged)
 					tar_ndx = 20;
 
-				CalculateNewPosition2(Goal.x, Goal.y, Goal.z, GetRunspeed());
+				CalculateNewPosition2(Goal.x, Goal.y, Goal.z, GetBotRunspeed());
 			}
 			else {
 				Mob* follow = entity_list.GetMob(GetFollowID());
 				if (follow)
-					CalculateNewPosition2(follow->GetX(), follow->GetY(), follow->GetZ(), GetRunspeed());
+					CalculateNewPosition2(follow->GetX(), follow->GetY(), follow->GetZ(), GetBotRunspeed());
 			}
 			
 			return;
@@ -2335,7 +2350,7 @@ void Bot::AI_Process() {
 									float newZ = 0;
 									FaceTarget(GetTarget());
 									if (PlotPositionAroundTarget(this, newX, newY, newZ)) {
-										CalculateNewPosition2(newX, newY, newZ, GetRunspeed());
+										CalculateNewPosition2(newX, newY, newZ, GetBotRunspeed());
 										return;
 									}
 								}
@@ -2347,7 +2362,7 @@ void Bot::AI_Process() {
 							float newY = 0;
 							float newZ = 0;
 							if (PlotPositionAroundTarget(GetTarget(), newX, newY, newZ)) {
-								CalculateNewPosition2(newX, newY, newZ, GetRunspeed());
+								CalculateNewPosition2(newX, newY, newZ, GetBotRunspeed());
 								return;
 							}
 						}
@@ -2358,7 +2373,7 @@ void Bot::AI_Process() {
 						float newY = 0;
 						float newZ = 0;
 						if (PlotPositionAroundTarget(GetTarget(), newX, newY, newZ, false) && GetArchetype() != ARCHETYPE_CASTER) {
-							CalculateNewPosition2(newX, newY, newZ, GetRunspeed());
+							CalculateNewPosition2(newX, newY, newZ, GetBotRunspeed());
 							return;
 						}
 					}
@@ -2483,7 +2498,7 @@ void Bot::AI_Process() {
 			if (AI_movement_timer->Check()) {
 				if(!IsRooted()) {
 					Log.Out(Logs::Detail, Logs::AI, "Pursuing %s while engaged.", GetTarget()->GetCleanName());
-					CalculateNewPosition2(GetTarget()->GetX(), GetTarget()->GetY(), GetTarget()->GetZ(), GetRunspeed());
+					CalculateNewPosition2(GetTarget()->GetX(), GetTarget()->GetY(), GetTarget()->GetZ(), GetBotRunspeed());
 					return;
 				}
 
@@ -2503,7 +2518,8 @@ void Bot::AI_Process() {
 			else if(GetArchetype() == ARCHETYPE_CASTER)
 				BotMeditate(true);
 		}
-	} else {
+	}
+	else {
 		SetTarget(nullptr);
 		if (m_PlayerState & static_cast<uint32>(PlayerState::Aggressive))
 			SendRemovePlayerState(PlayerState::Aggressive);
@@ -2512,77 +2528,44 @@ void Bot::AI_Process() {
 		if (!follow)
 			return;
 
-		float cur_dist = DistanceSquared(m_Position, follow->GetPosition());
-
-		if (!IsMoving() && cur_dist <= GetFollowDistance()) {
-			if (AI_think_timer->Check()) {
-				if (!spellend_timer.Enabled()) {
-					if (GetBotStance() != BotStancePassive) {
-						if (!AI_IdleCastCheck() && !IsCasting() && GetClass() != BARD)
-							BotMeditate(true);
-					}
-					else {
-						if (GetClass() != BARD)
-							BotMeditate(true);
-					}
-				}
+		if (!IsMoving() && AI_think_timer->Check() && !spellend_timer.Enabled()) {
+			if (GetBotStance() != BotStancePassive) {
+				if (!AI_IdleCastCheck() && !IsCasting() && GetClass() != BARD)
+					BotMeditate(true);
+			}
+			else {
+				if (GetClass() != BARD)
+					BotMeditate(true);
 			}
 		}
-		else if(AI_movement_timer->Check()) {
-			// Something is still wrong with bot the follow code...
-			// Shows up really bad over long distances when movement bonuses are involved
-			// The flip-side is that too much speed adversely affects node pathing...
-			if (cur_dist > GetFollowDistance()) {
+
+		if (AI_movement_timer->Check()) {
+			float dist = DistanceSquared(m_Position, follow->GetPosition());
+			int speed = GetBotRunspeed();
+
+			if (dist < GetFollowDistance() + BOT_FOLLOW_DISTANCE_WALK)
+				speed = GetBotWalkspeed();
+
+			SetRunAnimSpeed(0);
+
+			if (dist > GetFollowDistance()) {
 				if (RuleB(Bots, UsePathing) && zone->pathing) {
-					if (cur_dist <= BOT_FOLLOW_DISTANCE_WALK) {
-						bool WaypointChanged, NodeReached;
+					bool WaypointChanged, NodeReached;
 
-						glm::vec3 Goal = UpdatePath(follow->GetX(), follow->GetY(), follow->GetZ(),
-							GetWalkspeed(), WaypointChanged, NodeReached);
+					glm::vec3 Goal = UpdatePath(follow->GetX(), follow->GetY(), follow->GetZ(),
+						speed, WaypointChanged, NodeReached);
 
-						if (WaypointChanged)
-							tar_ndx = 20;
+					if (WaypointChanged)
+						tar_ndx = 20;
 
-						CalculateNewPosition2(Goal.x, Goal.y, Goal.z, GetWalkspeed());
-					}
-					else {
-						int speed = GetRunspeed();
-						if (cur_dist > BOT_FOLLOW_DISTANCE_CRITICAL)
-							speed = ((float)speed * 1.333f); // sprint mod (1/3 boost)
-
-						bool WaypointChanged, NodeReached;
-
-						glm::vec3 Goal = UpdatePath(follow->GetX(), follow->GetY(), follow->GetZ(),
-							speed, WaypointChanged, NodeReached);
-
-						if (WaypointChanged)
-							tar_ndx = 20;
-
-						CalculateNewPosition2(Goal.x, Goal.y, Goal.z, speed);
-					}
+					CalculateNewPosition2(Goal.x, Goal.y, Goal.z, speed);
 				}
 				else {
-					if (cur_dist <= BOT_FOLLOW_DISTANCE_WALK) {
-						CalculateNewPosition2(follow->GetX(), follow->GetY(), follow->GetZ(), GetWalkspeed());
-					}
-					else {
-						int speed = GetRunspeed();
-						if (cur_dist > BOT_FOLLOW_DISTANCE_CRITICAL)
-							speed = ((float)speed * 1.333f); // sprint mod (1/3 boost)
-
-						CalculateNewPosition2(follow->GetX(), follow->GetY(), follow->GetZ(), speed);
-					}
+					CalculateNewPosition2(follow->GetX(), follow->GetY(), follow->GetZ(), speed);
 				}
-				
+
 				if (rest_timer.Enabled())
 					rest_timer.Disable();
-
-				if (RuleB(Bots, UpdatePositionWithTimer)) { // this helps with rubber-banding effect
-					if (IsMoving())
-						SendPosUpdate();
-					//else
-					//	SendPosition(); // enabled - no discernable difference..disabled - saves on no movement packets
-				}
 			}
 			else {
 				if (moved) {
@@ -2590,13 +2573,9 @@ void Bot::AI_Process() {
 					SetCurrentSpeed(0);
 				}
 			}
-
-			if (GetClass() == BARD && GetBotStance() != BotStancePassive && !spellend_timer.Enabled() && AI_think_timer->Check())
-				AI_IdleCastCheck();
-
-			return;
 		}
-		else if (IsMoving()) {
+		
+		if (IsMoving()) {
 			if (GetClass() == BARD && GetBotStance() != BotStancePassive && !spellend_timer.Enabled() && AI_think_timer->Check()) {
 				AI_IdleCastCheck();
 			}
@@ -6905,6 +6884,8 @@ void Bot::UpdateGroupCastingRoles(const Group* group, bool disband)
 		if (iter->IsBot()) {
 			iter->CastToBot()->SetGroupHealer(false);
 			iter->CastToBot()->SetGroupSlower(false);
+			iter->CastToBot()->SetGroupNuker(false);
+			iter->CastToBot()->SetGroupDoter(false);
 		}
 	}
 
@@ -6913,11 +6894,14 @@ void Bot::UpdateGroupCastingRoles(const Group* group, bool disband)
 
 	Mob* healer = nullptr;
 	Mob* slower = nullptr;
+	Mob* nuker = nullptr;
+	Mob* doter = nullptr;
 
 	for (auto iter : group->members) {
 		if (!iter)
 			continue;
 
+		// GroupHealer
 		switch (iter->GetClass()) {
 		case CLERIC:
 			if (!healer)
@@ -6966,6 +6950,7 @@ void Bot::UpdateGroupCastingRoles(const Group* group, bool disband)
 			break;
 		}
 
+		// GroupSlower
 		switch (iter->GetClass()) {
 		case SHAMAN:
 			if (!slower)
@@ -6997,13 +6982,42 @@ void Bot::UpdateGroupCastingRoles(const Group* group, bool disband)
 		default:
 			break;
 		}
+
+		// GroupNuker
+		switch (iter->GetClass()) {
+			// wizard
+			// magician
+			// necromancer
+			// enchanter
+			// druid
+			// cleric
+			// shaman
+			// shadowknight
+			// paladin
+			// ranger
+			// beastlord
+		default:
+			break;
+		}
+
+		// GroupDoter
+		switch (iter->GetClass()) {
+		default:
+			break;
+		}
 	}
 
 	if (healer && healer->IsBot())
 		healer->CastToBot()->SetGroupHealer();
 	if (slower && slower->IsBot())
 		slower->CastToBot()->SetGroupSlower();
+	if (nuker && nuker->IsBot())
+		nuker->CastToBot()->SetGroupNuker();
+	if (doter && doter->IsBot())
+		doter->CastToBot()->SetGroupDoter();
 }
+
+//void Bot::UpdateRaidCastingRoles(const Raid* raid, bool disband = false) { }
 
 bool Bot::CanHeal() {
 	bool result = false;
@@ -7022,10 +7036,6 @@ bool Bot::CanHeal() {
 		result = true;
 
 	return result;
-}
-
-bool Bot::CalculateNewPosition2(float x, float y, float z, float speed, bool checkZ) {
-	return MakeNewPositionAndSendUpdate(x, y, z, speed, checkZ);
 }
 
 Bot* Bot::GetBotByBotClientOwnerAndBotName(Client* c, std::string botName) {
@@ -7769,6 +7779,23 @@ bool EntityList::Bot_AICheckCloseBeneficialSpells(Bot* caster, uint8 iChance, fl
 				for (int i = 0; i < MAX_GROUP_MEMBERS; i++) {
 					if (g->members[i] && caster->GetNeedsHateRedux(g->members[i])) {
 						if (caster->AICastSpell(g->members[i], caster->GetChanceToCastBySpellType(SpellType_HateRedux), SpellType_HateRedux))
+							return true;
+					}
+				}
+			}
+		}
+	}
+
+	if (iSpellTypes == SpellType_PreCombatBuff) {
+		if (botCasterClass == BARD || caster->IsEngaged())
+			return false;
+
+		if (caster->HasGroup()) {
+			Group *g = caster->GetGroup();
+			if (g) {
+				for (int i = 0; i < MAX_GROUP_MEMBERS; i++) {
+					if (g->members[i]) {
+						if (caster->AICastSpell(g->members[i], iChance, SpellType_PreCombatBuff) || caster->AICastSpell(g->members[i]->GetPet(), iChance, SpellType_PreCombatBuff))
 							return true;
 					}
 				}

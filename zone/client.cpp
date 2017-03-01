@@ -5912,20 +5912,20 @@ void Client::SendGroupCreatePacket()
 
 	char *Buffer = (char *)outapp->pBuffer;
 	// Header
-	VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);
-	VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 1);
-	VARSTRUCT_ENCODE_TYPE(uint8, Buffer, 0);	// Null Leader name
+	VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);	// group ID probably
+	VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 1);	// count of members in packet
+	VARSTRUCT_ENCODE_TYPE(uint8, Buffer, 0);	// Null Leader name, shouldn't be null besides this case
 
-	VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);	// Member 0
-	VARSTRUCT_ENCODE_STRING(Buffer, GetName());
-	VARSTRUCT_ENCODE_TYPE(uint8, Buffer, 0);
-	VARSTRUCT_ENCODE_TYPE(uint8, Buffer, 0);
-	VARSTRUCT_ENCODE_TYPE(uint8, Buffer, 0);	// This is a string
-	VARSTRUCT_ENCODE_TYPE(uint32, Buffer, GetLevel());
-	VARSTRUCT_ENCODE_TYPE(uint8, Buffer, 0);
-	VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);
-	VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);
-	VARSTRUCT_ENCODE_TYPE(uint16, Buffer, 0);
+	VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);	// Member 0, index
+	VARSTRUCT_ENCODE_STRING(Buffer, GetName());	// group member name
+	VARSTRUCT_ENCODE_TYPE(uint16, Buffer, 0);	// merc flag
+	VARSTRUCT_ENCODE_TYPE(uint8, Buffer, 0);	// owner name (if merc)
+	VARSTRUCT_ENCODE_TYPE(uint32, Buffer, GetLevel());	// level
+	VARSTRUCT_ENCODE_TYPE(uint8, Buffer, 0);	// group tank flag
+	VARSTRUCT_ENCODE_TYPE(uint8, Buffer, 0);	// group assist flag
+	VARSTRUCT_ENCODE_TYPE(uint8, Buffer, 0);	// group puller flag
+	VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);	// offline flag
+	VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);	// timestamp
 
 	FastQueuePacket(&outapp);
 }
@@ -8823,7 +8823,7 @@ void Client::ProcessAggroMeter()
 			secondary = cur_tar->GetSecondaryHate(this);
 			has_aggro = true;
 		} else {
-			secondary = cur_tar->GetTarget();
+			secondary = cur_tar->CheckAggro(cur_tar->GetTarget()) ? cur_tar->GetTarget() : nullptr; // make sure they are targeting for aggro reasons
 		}
 	}
 

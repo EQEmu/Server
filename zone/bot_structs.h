@@ -63,6 +63,12 @@ struct BotSpell_wPriority : public BotSpell {
 struct BotCastingRoles {
 	bool GroupHealer;
 	bool GroupSlower;
+	bool GroupNuker;
+	bool GroupDoter;
+	//bool RaidHealer;
+	//bool RaidSlower;
+	//bool RaidNuker;
+	//bool RaidDoter;
 };
 
 struct BotAA {

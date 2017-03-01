@@ -1046,6 +1046,12 @@ bool Bot::AICastSpell(Mob* tar, uint8 iChance, uint32 iSpellTypes) {
 
 			break;
 		}
+		case SpellType_PreCombatBuff: {
+			break;
+		}
+		case SpellType_PreCombatBuffSong: {
+			break;
+		}
 		default:
 			break;
 	}
@@ -1163,16 +1169,28 @@ bool Bot::AI_IdleCastCheck() {
 #endif
 		AIautocastspell_timer->Disable();	//prevent the timer from going off AGAIN while we are casting.
 
-		//Ok, IdleCastCheck depends of class.
-		// Healers WITHOUT pets will check if a heal is needed before buffing.
-		uint8 botClass = GetClass();
+		bool pre_combat = false;
+		Mob* test_against = nullptr;
 
-		if(botClass == CLERIC || botClass == PALADIN || botClass == RANGER) {
-			if(!entity_list.Bot_AICheckCloseBeneficialSpells(this, 100, BotAISpellRange, SpellType_Cure)) {
+		if (HasGroup() && GetGroup()->GetLeader() && GetGroup()->GetLeader()->IsClient())
+			test_against = GetGroup()->GetLeader();
+		else if (GetOwner() && GetOwner()->IsClient())
+			test_against = GetOwner();
+
+		if (test_against && test_against->GetTarget() && test_against->GetTarget()->IsNPC() && !test_against->GetTarget()->IsPet())
+			pre_combat = true;
+
+		//Ok, IdleCastCheck depends of class.
+		switch (GetClass()) {
+		// Healers WITHOUT pets will check if a heal is needed before buffing.
+		case CLERIC:
+		case PALADIN:
+		case RANGER: {
+			if (!entity_list.Bot_AICheckCloseBeneficialSpells(this, 100, BotAISpellRange, SpellType_Cure)) {
 				if (!AICastSpell(this, 100, SpellType_Heal)) {
-					if(!entity_list.Bot_AICheckCloseBeneficialSpells(this, 100, BotAISpellRange, SpellType_Heal)) {
+					if (!entity_list.Bot_AICheckCloseBeneficialSpells(this, 100, BotAISpellRange, SpellType_Heal)) {
 						if (!AICastSpell(this, 100, SpellType_Buff)) {
-							if(!entity_list.Bot_AICheckCloseBeneficialSpells(this, 100, BotAISpellRange, SpellType_Buff)) {
+							if (!entity_list.Bot_AICheckCloseBeneficialSpells(this, 100, BotAISpellRange, SpellType_Buff)) {
 								//
 							}
 						}
@@ -1181,16 +1199,23 @@ bool Bot::AI_IdleCastCheck() {
 			}
 
 			result = true;
+			break;
 		}
 		// Pets class will first cast their pet, then buffs
-		else if(botClass == DRUID || botClass == MAGICIAN || botClass == SHADOWKNIGHT || botClass == SHAMAN || botClass == NECROMANCER || botClass == ENCHANTER || botClass == BEASTLORD || botClass == WIZARD) {
-			if(!entity_list.Bot_AICheckCloseBeneficialSpells(this, 100, BotAISpellRange, SpellType_Cure)) {
+		case DRUID:
+		case MAGICIAN:
+		case SHADOWKNIGHT:
+		case SHAMAN:
+		case NECROMANCER:
+		case ENCHANTER:
+		case BEASTLORD: {
+			if (!entity_list.Bot_AICheckCloseBeneficialSpells(this, 100, BotAISpellRange, SpellType_Cure)) {
 				if (!AICastSpell(this, 100, SpellType_Pet)) {
 					if (!AICastSpell(this, 100, SpellType_Heal)) {
-						if(!entity_list.Bot_AICheckCloseBeneficialSpells(this, 100, BotAISpellRange, SpellType_Heal)) {
+						if (!entity_list.Bot_AICheckCloseBeneficialSpells(this, 100, BotAISpellRange, SpellType_Heal)) {
 							if (!AICastSpell(this, 100, SpellType_Buff)) {
 								if (!AICastSpell(GetPet(), 100, SpellType_Heal)) {
-									if(!entity_list.Bot_AICheckCloseBeneficialSpells(this, 100, BotAISpellRange, SpellType_Buff)) {
+									if (!entity_list.Bot_AICheckCloseBeneficialSpells(this, 100, BotAISpellRange, SpellType_Buff)) {
 										//
 									}
 								}
@@ -1201,23 +1226,57 @@ bool Bot::AI_IdleCastCheck() {
 			}
 
 			result = true;
+			break;
 		}
-		else if(botClass == BARD) {
-			// bard bots
-			bool battle_prep = false;
-			Mob* prep_against = nullptr;
-
-			if (HasGroup() && GetGroup()->GetLeader() && GetGroup()->GetLeader()->IsClient())
-				prep_against = GetGroup()->GetLeader();
-			else if (GetOwner() && GetOwner()->IsClient())
-				prep_against = GetOwner();
-
-			if (prep_against && prep_against->GetTarget() && prep_against->GetTarget()->IsNPC() && !prep_against->GetTarget()->IsPet())
-				battle_prep = true;
-
-			if (battle_prep) {
-				if (!AICastSpell(this, 100, SpellType_InCombatBuffSong)) {
-					//
+		case WIZARD: { // This can eventually be move into the BEASTLORD case handler once pre-combat is fully implemented
+			if (pre_combat) {
+				if (!entity_list.Bot_AICheckCloseBeneficialSpells(this, 100, BotAISpellRange, SpellType_Cure)) {
+					if (!AICastSpell(this, 100, SpellType_Pet)) {
+						if (!AICastSpell(this, 100, SpellType_Heal)) {
+							if (!entity_list.Bot_AICheckCloseBeneficialSpells(this, 100, BotAISpellRange, SpellType_Heal)) {
+								if (!AICastSpell(this, 100, SpellType_Buff)) {
+									if (!AICastSpell(GetPet(), 100, SpellType_Heal)) {
+										if (!entity_list.Bot_AICheckCloseBeneficialSpells(this, 100, BotAISpellRange, SpellType_PreCombatBuff)) {
+											if (!entity_list.Bot_AICheckCloseBeneficialSpells(this, 100, BotAISpellRange, SpellType_Buff)) {
+												//
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+			else {
+				if (!entity_list.Bot_AICheckCloseBeneficialSpells(this, 100, BotAISpellRange, SpellType_Cure)) {
+					if (!AICastSpell(this, 100, SpellType_Pet)) {
+						if (!AICastSpell(this, 100, SpellType_Heal)) {
+							if (!entity_list.Bot_AICheckCloseBeneficialSpells(this, 100, BotAISpellRange, SpellType_Heal)) {
+								if (!AICastSpell(this, 100, SpellType_Buff)) {
+									if (!AICastSpell(GetPet(), 100, SpellType_Heal)) {
+										if (!entity_list.Bot_AICheckCloseBeneficialSpells(this, 100, BotAISpellRange, SpellType_Buff)) {
+											//
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+			
+			result = true;
+			break;
+		}
+		case BARD: {
+			if (pre_combat) {
+				if (!entity_list.Bot_AICheckCloseBeneficialSpells(this, 100, BotAISpellRange, SpellType_Cure)) {
+					if (!AICastSpell(this, 100, SpellType_PreCombatBuffSong)) {
+						if (!AICastSpell(this, 100, SpellType_InCombatBuffSong)) {
+							//
+						}
+					}
 				}
 			}
 			else {
@@ -1229,6 +1288,10 @@ bool Bot::AI_IdleCastCheck() {
 			}
 
 			result = true;
+			break;
+		}
+		default:
+			break;
 		}
 
 		if(!AIautocastspell_timer->Enabled())
@@ -2572,6 +2635,12 @@ uint8 Bot::GetChanceToCastBySpellType(uint32 spellType)
 	case SpellType_OutOfCombatBuffSong:
 		spell_type_index = SpellType_OutOfCombatBuffSongIndex;
 		break;
+	case SpellType_PreCombatBuff:
+		spell_type_index = SpellType_PreCombatBuffIndex;
+		break;
+	case SpellType_PreCombatBuffSong:
+		spell_type_index = SpellType_PreCombatBuffSongIndex;
+		break;
 	default:
 		spell_type_index = MaxSpellTypes;
 		break;
@@ -2588,12 +2657,16 @@ uint8 Bot::GetChanceToCastBySpellType(uint32 spellType)
 	if (stance_index >= MaxStances)
 		return 0;
 
-	uint8 type_index = nHS;
+	uint8 type_index = nHSND;
 	if (HasGroup()) {
-		if (IsGroupHealer())
+		if (IsGroupHealer()/* || IsRaidHealer()*/)
 			type_index |= pH;
-		if (IsGroupSlower())
+		if (IsGroupSlower()/* || IsRaidSlower()*/)
 			type_index |= pS;
+		if (IsGroupNuker()/* || IsRaidNuker()*/)
+			type_index |= pN;
+		if (IsGroupDoter()/* || IsRaidDoter()*/)
+			type_index |= pD;
 	}
 
 	return botdb.GetSpellCastingChance(spell_type_index, class_index, stance_index, type_index);

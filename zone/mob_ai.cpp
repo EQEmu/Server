@@ -2606,11 +2606,12 @@ DBnpcspells_Struct* ZoneDatabase::GetNPCSpells(uint32 iDBSpellsID) {
         uint32 tmpidle_no_sp_recast_max = atoi(row[18]);
         uint8 tmpidle_b_chance = atoi(row[19]);
 
+		// pulling fixed values from an auto-increment field is dangerous...
         query = StringFormat("SELECT spellid, type, minlevel, maxlevel, "
                             "manacost, recast_delay, priority, resist_adjust "
 #ifdef BOTS
 							"FROM %s "
-							"WHERE npc_spells_id=%d ORDER BY minlevel", (iDBSpellsID >= 701 && iDBSpellsID <= 712 ? "bot_spells_entries" : "npc_spells_entries"), iDBSpellsID);
+							"WHERE npc_spells_id=%d ORDER BY minlevel", (iDBSpellsID >= 3001 && iDBSpellsID <= 3016 ? "bot_spells_entries" : "npc_spells_entries"), iDBSpellsID);
 #else
                             "FROM npc_spells_entries "
 							"WHERE npc_spells_id=%d ORDER BY minlevel", iDBSpellsID);

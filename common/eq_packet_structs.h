@@ -2243,6 +2243,7 @@ struct GroupFollow_Struct { // SoF Follow Struct
 /*0132*/
 };
 
+// this is generic struct
 struct GroupLeaderChange_Struct
 {
 /*000*/		char	Unknown000[64];

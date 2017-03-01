@@ -82,7 +82,7 @@ bool BotDatabase::LoadBotCommandSettings(std::map<std::string, std::pair<uint8, 
 	return true;
 }
 
-static uint8 spell_casting_chances[MaxSpellTypes][PLAYER_CLASS_COUNT][MaxStances][cntHS];
+static uint8 spell_casting_chances[MaxSpellTypes][PLAYER_CLASS_COUNT][MaxStances][cntHSND];
 
 bool BotDatabase::LoadBotSpellCastingChances()
 {
@@ -91,17 +91,29 @@ bool BotDatabase::LoadBotSpellCastingChances()
 	query =
 		"SELECT"
 		" `spell_type_index`,"
-		" `class_index`,"
+		" `class_id`,"
 		" `stance_index`,"
-		" `conditional_index`,"
-		" `value` "
+		" `nHSND_value`,"
+		" `pH_value`,"
+		" `pS_value`,"
+		" `pHS_value`,"
+		" `pN_value`,"
+		" `pHN_value`,"
+		" `pSN_value`,"
+		" `pHSN_value`,"
+		" `pD_value`,"
+		" `pHD_value`,"
+		" `pSD_value`,"
+		" `pHSD_value`,"
+		" `pND_value`,"
+		" `pHND_value`,"
+		" `pSND_value`,"
+		" `pHSND_value`"
 		"FROM"
-		" `bot_spell_casting_chances` "
-		"WHERE"
-		" `value` != '0'";
+		" `bot_spell_casting_chances`";
 
 	auto results = QueryDatabase(query);
-	if (!results.Success())
+	if (!results.Success() || !results.RowCount())
 		return false;
 
 	for (auto row = results.begin(); row != results.end(); ++row) {
@@ -109,18 +121,22 @@ bool BotDatabase::LoadBotSpellCastingChances()
 		if (spell_type_index >= MaxSpellTypes)
 			continue;
 		uint8 class_index = atoi(row[1]);
-		if (class_index >= PLAYER_CLASS_COUNT)
+		if (class_index < WARRIOR || class_index > BERSERKER)
 			continue;
+		--class_index;
 		uint8 stance_index = atoi(row[2]);
 		if (stance_index >= MaxStances)
 			continue;
-		uint8 conditional_index = atoi(row[3]);
-		if (conditional_index >= cntHS)
-			continue;
-		uint8 value = atoi(row[4]);
-		if (value > 100)
-			value = 100;
-		spell_casting_chances[spell_type_index][class_index][stance_index][conditional_index] = value;
+
+		for (uint8 conditional_index = nHSND; conditional_index < cntHSND; ++conditional_index) {
+			uint8 value = atoi(row[3 + conditional_index]);
+			if (!value)
+				continue;
+			if (value > 100)
+				value = 100;
+
+			spell_casting_chances[spell_type_index][class_index][stance_index][conditional_index] = value;
+		}
 	}
 
 	return true;
@@ -2761,7 +2777,7 @@ bool BotDatabase::DeleteAllHealRotations(const uint32 owner_id)
 
 
 /* Bot miscellaneous functions   */
-uint8 BotDatabase::GetSpellCastingChance(uint8 spell_type_index, uint8 class_index, uint8 stance_index, uint8 conditional_index)
+uint8 BotDatabase::GetSpellCastingChance(uint8 spell_type_index, uint8 class_index, uint8 stance_index, uint8 conditional_index) // class_index is 0-based
 {
 	if (spell_type_index >= MaxSpellTypes)
 		return 0;
@@ -2769,7 +2785,7 @@ uint8 BotDatabase::GetSpellCastingChance(uint8 spell_type_index, uint8 class_ind
 		return 0;
 	if (stance_index >= MaxStances)
 		return 0;
-	if (conditional_index >= cntHS)
+	if (conditional_index >= cntHSND)
 		return 0;
 
 	return spell_casting_chances[spell_type_index][class_index][stance_index][conditional_index];

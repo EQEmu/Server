@@ -255,6 +255,7 @@ void NPC::AddLootDrop(const EQEmu::ItemData *item2, ItemList* itemlist, int16 ch
 	item->attuned = 0;
 	item->min_level = minlevel;
 	item->max_level = maxlevel;
+	item->equip_slot = EQEmu::inventory::slotInvalid;
 
 	if (equipit) {
 		uint8 eslot = 0xFF;
@@ -399,8 +400,8 @@ void NPC::AddLootDrop(const EQEmu::ItemData *item2, ItemList* itemlist, int16 ch
 		}
 		if (found) {
 			CalcBonuses(); // This is less than ideal for bulk adding of items
+			item->equip_slot = foundslot;
 		}
-		item->equip_slot = item2->Slots;
 	}
 
 	if(itemlist != nullptr)

@@ -5151,6 +5151,7 @@ void bot_subcommand_bot_summon(Client *c, const Seperator *sep)
 		bot_iter->WipeHateList();
 		bot_iter->SetTarget(bot_iter->GetBotOwner());
 		bot_iter->Warp(glm::vec3(c->GetPosition()));
+		bot_iter->DoAnim(0);
 
 		if (!bot_iter->HasPet())
 			continue;
@@ -5399,6 +5400,7 @@ void bot_subcommand_bot_update(Client *c, const Seperator *sep)
 
 		bot_iter->SetPetChooser(false);
 		bot_iter->CalcBotStats((sbl.size() == 1));
+		bot_iter->SendAppearancePacket(AT_WhoLevel, bot_iter->GetLevel(), true, true);
 		++bot_count;
 	}
 
