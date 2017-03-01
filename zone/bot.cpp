@@ -2156,7 +2156,7 @@ void Bot::AI_Process() {
 	if(GetHasBeenSummoned()) {
 		if(IsBotCaster() || IsBotArcher()) {
 			if (AI_movement_timer->Check()) {
-				if(!GetTarget() || (IsBotCaster() && !IsBotCasterCombatRange(GetTarget())) || (IsBotArcher() && IsArcheryRange(GetTarget())) || (DistanceSquaredNoZ(static_cast<glm::vec3>(m_Position), m_PreSummonLocation) < 10)) {
+				if(!GetTarget() || (IsBotCaster() && !IsBotCasterAtCombatRange(GetTarget())) || (IsBotArcher() && IsArcheryRange(GetTarget())) || (DistanceSquaredNoZ(static_cast<glm::vec3>(m_Position), m_PreSummonLocation) < 10)) {
 					if(GetTarget())
 						FaceTarget(GetTarget());
 
@@ -2293,23 +2293,24 @@ void Bot::AI_Process() {
 				ChangeBotArcherWeapons(IsBotArcher());
 		}
 
-		if(IsBotArcher() && atArcheryRange) {
-			if(IsMoving()) {
+		if (IsBotArcher() && atArcheryRange) {
+			if (IsMoving()) {
 				SetHeading(CalculateHeadingToTarget(GetTarget()->GetX(), GetTarget()->GetY()));
 				SetRunAnimSpeed(0);
 				SetCurrentSpeed(0);
-				if(moved) {
+				if (moved) {
 					moved = false;
 					SetCurrentSpeed(0);
 				}
 			}
 			atCombatRange = true;
-		} else if(IsBotCaster() && GetLevel() >= RuleI(Bots, CasterStopMeleeLevel)) {
-			if(IsBotCasterCombatRange(GetTarget()))
-				atCombatRange = true;
 		}
-		else if(DistanceSquared(m_Position, GetTarget()->GetPosition())  <= meleeDistance)
+		else if (GetLevel() >= RuleI(Bots, CasterStopMeleeLevel) && IsBotCasterAtCombatRange(GetTarget())) {
 			atCombatRange = true;
+		}
+		else if (DistanceSquared(m_Position, GetTarget()->GetPosition()) <= meleeDistance) {
+			atCombatRange = true;
+		}
 
 		if(atCombatRange) {
 			if(IsMoving()) {
@@ -6856,20 +6857,31 @@ bool Bot::IsArcheryRange(Mob *target) {
 	return result;
 }
 
-bool Bot::IsBotCasterCombatRange(Mob *target) {
-	bool result = false;
-	if(target) {
-		float range = BotAISpellRange;
-		range *= range;
-		range *= .5;
-		float targetDistance = DistanceSquaredNoZ(m_Position, target->GetPosition());
-		if(targetDistance > range)
-			result = false;
-		else
-			result = true;
-	}
+bool Bot::IsBotCasterAtCombatRange(Mob *target)
+{
+	static const float local[PLAYER_CLASS_COUNT] = {
+		0.0f, // WARRIOR
+		1156.0f,	// CLERIC as DSq value (34 units)
+		0.0f, 0.0f, 0.0f,	// PALADIN, RANGER, SHADOWKNIGHT
+		1764.0f,	// DRUID as DSq value (42 units)
+		0.0f, 0.0f, 0.0f, // MONK, BARD, ROGUE
+		1444.0f,	// SHAMAN as DSq value (38 units)
+		2916.0f,	// NECROMANCER as DSq value (54 units)
+		2304.0f,	// WIZARD as DSq value (48 units)
+		2704.0f,	// MAGICIAN as DSq value (52 units)
+		2500.0f,	// ENCHANTER as DSq value (50 units)
+		0.0f, 0.0f	// BEASTLORD, BERSERKER
+	};
 
-	return result;
+	if (!target)
+		return false;
+	if (GetClass() < WARRIOR || GetClass() > BERSERKER)
+		return false;
+
+	float targetDistance = DistanceSquaredNoZ(m_Position, target->GetPosition());
+	if (targetDistance < local[GetClass() - 1])
+		return true;
+	return false;
 }
 
 void Bot::UpdateGroupCastingRoles(const Group* group, bool disband)

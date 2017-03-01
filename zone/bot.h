@@ -337,7 +337,7 @@ public:
 	bool IsStanding();
 	int GetBotWalkspeed() const { return (int)((float)_GetWalkSpeed() * 1.786f); } // 1.25 / 0.7 = 1.7857142857142857142857142857143
 	int GetBotRunspeed() const { return (int)((float)_GetRunSpeed() * 1.786f); }
-	bool IsBotCasterCombatRange(Mob *target);
+	bool IsBotCasterAtCombatRange(Mob *target);
 	bool UseDiscipline(uint32 spell_id, uint32 target);
 	uint8 GetNumberNeedingHealedInGroup(uint8 hpr, bool includePets);
 	bool GetNeedsCured(Mob *tar);
