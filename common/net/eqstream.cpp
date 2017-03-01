@@ -119,16 +119,7 @@ EQApplicationPacket *EQ::Net::EQStream::PopPacket() {
 		}
 
 		EmuOpcode emu_op = (*m_opcode_manager)->EQToEmu(opcode);
-		auto sz = p->Length() - m_owner->m_options.opcode_size;
-		EQApplicationPacket *ret = nullptr;
-
-		if (sz > 0) {
-			ret = new EQApplicationPacket(emu_op, (unsigned char*)p->Data() + m_owner->m_options.opcode_size, sz);
-		}
-		else {
-			ret = new EQApplicationPacket(emu_op);
-		}
-
+		EQApplicationPacket *ret = new EQApplicationPacket(emu_op, (unsigned char*)p->Data() + m_owner->m_options.opcode_size, p->Length() - m_owner->m_options.opcode_size);
 		ret->SetProtocolOpcode(opcode);
 		m_packet_queue.pop_front();
 		return ret;
@@ -189,17 +180,17 @@ EQStreamInterface::MatchState EQ::Net::EQStream::CheckSignature(const Signature 
 
 		if (opcode == sig->first_eq_opcode) {
 			if (length == sig->first_length) {
-				Log.OutF(Logs::General, Logs::Netcode, "[IDENT_TRACE] {0}:{1}: First opcode matched {2:#x} and length matched {3}", 
+				Log.OutF(Logs::General, Logs::Netcode, "[IDENT_TRACE] {0}:{1}: First opcode matched {2:#x} and length matched {3}",
 					RemoteEndpoint(), m_connection->RemotePort(), sig->first_eq_opcode, length);
 				return MatchSuccessful;
 			}
-			else if(length == 0) {
-				Log.OutF(Logs::General, Logs::Netcode, "[IDENT_TRACE] {0}:{1}: First opcode matched {2:#x} and length is ignored.", 
+			else if (length == 0) {
+				Log.OutF(Logs::General, Logs::Netcode, "[IDENT_TRACE] {0}:{1}: First opcode matched {2:#x} and length is ignored.",
 					RemoteEndpoint(), m_connection->RemotePort(), sig->first_eq_opcode);
 				return MatchSuccessful;
 			}
 			else {
-				Log.OutF(Logs::General, Logs::Netcode, "[IDENT_TRACE] {0}:{1}: First opcode matched {2:#x} but length {3} did not match expected {4}", 
+				Log.OutF(Logs::General, Logs::Netcode, "[IDENT_TRACE] {0}:{1}: First opcode matched {2:#x} but length {3} did not match expected {4}",
 					RemoteEndpoint(), m_connection->RemotePort(), sig->first_eq_opcode, length, sig->first_length);
 				return MatchFailed;
 			}

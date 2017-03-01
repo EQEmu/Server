@@ -13,7 +13,7 @@
 
 namespace EQ
 {
-	namespace Net 
+	namespace Net
 	{
 		enum DaybreakProtocolOpcode
 		{
@@ -124,7 +124,7 @@ namespace EQ
 			void QueuePacket(Packet &p, int stream, bool reliable);
 			const DaybreakConnectionStats& GetStats() const { return m_stats; }
 			void ResetStats();
-			uint64_t GetRollingPing() const { return m_rolling_ping; }
+			size_t GetRollingPing() const { return m_rolling_ping; }
 			DbProtocolStatus GetStatus() { return m_status; }
 		private:
 			DaybreakConnectionManager *m_owner;
@@ -141,20 +141,20 @@ namespace EQ
 			DbProtocolStatus m_status;
 			Timestamp m_hold_time;
 			std::list<DynamicPacket> m_buffered_packets;
-			uint64_t m_buffered_packets_length;
+			size_t m_buffered_packets_length;
 			std::unique_ptr<char[]> m_combined;
 			Timestamp m_last_stats;
 			DaybreakConnectionStats m_stats;
 			Timestamp m_last_session_stats;
-			uint64_t m_resend_delay;
-			uint64_t m_rolling_ping;
+			size_t m_resend_delay;
+			size_t m_rolling_ping;
 
 			struct DaybreakSentPacket
 			{
 				DynamicPacket packet;
 				Timestamp last_sent;
 				Timestamp first_sent;
-				uint64_t times_resent;
+				size_t times_resent;
 			};
 
 			struct DaybreakStream
@@ -169,7 +169,7 @@ namespace EQ
 				uint16_t sequence_in;
 				uint16_t sequence_out;
 				std::map<uint16_t, Packet*> packet_queue;
-				
+
 				DynamicPacket fragment_packet;
 				uint32_t fragment_current_bytes;
 				uint32_t fragment_total_bytes;
@@ -179,7 +179,7 @@ namespace EQ
 
 			DaybreakStream m_streams[4];
 			std::weak_ptr<DaybreakConnection> m_self;
-			
+
 			void Process();
 			void ProcessPacket(Packet &p);
 			void ProcessQueue();
@@ -190,10 +190,10 @@ namespace EQ
 			bool ValidateCRC(Packet &p);
 			void AppendCRC(Packet &p);
 			bool PacketCanBeEncoded(Packet &p) const;
-			void Decode(Packet &p, uint64_t offset, uint64_t length);
-			void Encode(Packet &p, uint64_t offset, uint64_t length);
-			void Decompress(Packet &p, uint64_t offset, uint64_t length);
-			void Compress(Packet &p, uint64_t offset, uint64_t length);
+			void Decode(Packet &p, size_t offset, size_t length);
+			void Encode(Packet &p, size_t offset, size_t length);
+			void Decompress(Packet &p, size_t offset, size_t length);
+			void Compress(Packet &p, size_t offset, size_t length);
 			void ProcessResend();
 			void ProcessResend(int stream);
 			void Ack(int stream, uint16_t seq);
@@ -236,20 +236,20 @@ namespace EQ
 				tic_rate_hertz = 20.0;
 			}
 
-			uint64_t max_packet_size;
-			uint64_t max_connection_count;
-			uint64_t keepalive_delay_ms;
+			size_t max_packet_size;
+			size_t max_connection_count;
+			size_t keepalive_delay_ms;
 			double resend_delay_factor;
-			uint64_t resend_delay_ms;
-			uint64_t stats_delay_ms;
-			uint64_t connect_delay_ms;
-			uint64_t connect_stale_ms;
-			uint64_t stale_connection_ms;
-			uint64_t crc_length;
-			uint64_t hold_size;
-			uint64_t hold_length_ms;
-			uint64_t simulated_in_packet_loss;
-			uint64_t simulated_out_packet_loss;
+			size_t resend_delay_ms;
+			size_t stats_delay_ms;
+			size_t connect_delay_ms;
+			size_t connect_stale_ms;
+			size_t stale_connection_ms;
+			size_t crc_length;
+			size_t hold_size;
+			size_t hold_length_ms;
+			size_t simulated_in_packet_loss;
+			size_t simulated_out_packet_loss;
 			double tic_rate_hertz;
 			DaybreakEncodeType encode_passes[2];
 			int port;
@@ -282,7 +282,7 @@ namespace EQ
 			std::function<void(std::shared_ptr<DaybreakConnection>, const Packet&)> m_on_packet_recv;
 			std::map<std::pair<std::string, int>, std::shared_ptr<DaybreakConnection>> m_connections;
 
-			void ProcessPacket(const std::string &endpoint, int port, const char *data, uint64_t size);
+			void ProcessPacket(const std::string &endpoint, int port, const char *data, size_t size);
 			std::shared_ptr<DaybreakConnection> FindConnectionByEndpoint(std::string addr, int port);
 			void SendDisconnect(const std::string &addr, int port);
 

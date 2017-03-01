@@ -451,7 +451,7 @@ int main(int argc, char** argv) {
 			if (!eqsf_open && Config->ZonePort != 0) {
 				Log.Out(Logs::General, Logs::Zone_Server, "Starting EQ Network server on port %d", Config->ZonePort);
 				
-				EQ::Net::EQStreamManagerOptions opts(Config->ZonePort, false, false);
+				EQ::Net::EQStreamManagerOptions opts(Config->ZonePort, false, true);
 				eqsm.reset(new EQ::Net::EQStreamManager(opts));
 				eqsf_open = true;
 		

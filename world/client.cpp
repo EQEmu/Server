@@ -1046,7 +1046,7 @@ bool Client::HandlePacket(const EQApplicationPacket *app) {
 bool Client::Process() {
 	bool ret = true;
 	//bool sendguilds = true;
-	sockaddr_in to;
+	sockaddr_in to = {};
 
 	memset((char *) &to, 0, sizeof(to));
 	to.sin_family = AF_INET;
