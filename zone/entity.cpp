@@ -2980,10 +2980,16 @@ void EntityList::Evade(Mob *who)
 //removes "targ" from all hate lists, including feigned, in the zone
 void EntityList::ClearAggro(Mob* targ)
 {
+	Client *c = nullptr;
+	if (targ->IsClient())
+		c = targ->CastToClient();
 	auto it = npc_list.begin();
 	while (it != npc_list.end()) {
-		if (it->second->CheckAggro(targ))
+		if (it->second->CheckAggro(targ)) {
+			if (c)
+				c->RemoveXTarget(it->second, false);
 			it->second->RemoveFromHateList(targ);
+		}
 		it->second->RemoveFromFeignMemory(targ->CastToClient()); //just in case we feigned
 		++it;
 	}
