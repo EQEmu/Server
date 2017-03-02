@@ -461,10 +461,12 @@ public:
 	static int32 GetDisciplineRecastTimer(Bot *caster, int timer_index);
 	static bool CheckDisciplineRecastTimers(Bot *caster, int timer_index);
 	static uint32 GetDisciplineRemainingTime(Bot *caster, int timer_index);
+
 	static std::list<BotSpell> GetBotSpellsForSpellEffect(Bot* botCaster, int spellEffect);
 	static std::list<BotSpell> GetBotSpellsForSpellEffectAndTargetType(Bot* botCaster, int spellEffect, SpellTargetType targetType);
 	static std::list<BotSpell> GetBotSpellsBySpellType(Bot* botCaster, uint32 spellType);
 	static std::list<BotSpell_wPriority> GetPrioritizedBotSpellsBySpellType(Bot* botCaster, uint32 spellType);
+
 	static BotSpell GetFirstBotSpellBySpellType(Bot* botCaster, uint32 spellType);
 	static BotSpell GetBestBotSpellForFastHeal(Bot* botCaster);
 	static BotSpell GetBestBotSpellForHealOverTime(Bot* botCaster);
@@ -476,6 +478,7 @@ public:
 	static BotSpell GetBestBotSpellForGroupHeal(Bot* botCaster);
 	static BotSpell GetBestBotSpellForMagicBasedSlow(Bot* botCaster);
 	static BotSpell GetBestBotSpellForDiseaseBasedSlow(Bot* botCaster);
+
 	static Mob* GetFirstIncomingMobToMez(Bot* botCaster, BotSpell botSpell);
 	static BotSpell GetBestBotSpellForMez(Bot* botCaster);
 	static BotSpell GetBestBotMagicianPetSpell(Bot* botCaster);
@@ -486,17 +489,12 @@ public:
 	static BotSpell GetDebuffBotSpell(Bot* botCaster, Mob* target);
 	static BotSpell GetBestBotSpellForCure(Bot* botCaster, Mob* target);
 	static BotSpell GetBestBotSpellForResistDebuff(Bot* botCaster, Mob* target);
+	
 	static NPCType CreateDefaultNPCTypeStructForBot(std::string botName, std::string botLastName, uint8 botLevel, uint16 botRace, uint8 botClass, uint8 gender);
 
 	// Static Bot Group Methods
 	static bool AddBotToGroup(Bot* bot, Group* group);
 	static bool RemoveBotFromGroup(Bot* bot, Group* group);
-	static bool	GroupHasClass(Group* group, uint8 classId);
-	static bool GroupHasClericClass(Group* group) { return GroupHasClass(group, CLERIC); }
-	static bool GroupHasDruidClass(Group* group) { return GroupHasClass(group, DRUID); }
-	static bool GroupHasShamanClass(Group* group) { return GroupHasClass(group, SHAMAN); }
-	static bool GroupHasEnchanterClass(Group* group) { return GroupHasClass(group, ENCHANTER); }
-	static bool GroupHasPriestClass(Group* group) { return GroupHasClass(group, CLERIC | DRUID | SHAMAN); }
 	static void BotGroupSay(Mob *speaker, const char *msg, ...);
 
 	// "GET" Class Methods

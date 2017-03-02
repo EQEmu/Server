@@ -7621,21 +7621,6 @@ bool Bot::CheckLoreConflict(const EQEmu::ItemData* item) {
 	return (m_inv.HasItemByLoreGroup(item->LoreGroup, invWhereWorn) != INVALID_INDEX);
 }
 
-bool Bot::GroupHasClass(Group* group, uint8 classId) {
-	bool result = false;
-
-	if(group) {
-		for(int counter = 0; counter < MAX_GROUP_MEMBERS; counter++) {
-			if(group->members[counter] && group->members[counter]->GetClass() & classId) {
-				result = true;
-				break;
-			}
-		}
-	}
-
-	return result;
-}
-
 bool EntityList::Bot_AICheckCloseBeneficialSpells(Bot* caster, uint8 iChance, float iRange, uint32 iSpellTypes) {
 	if((iSpellTypes&SpellTypes_Detrimental) != 0) {
 		Log.Out(Logs::General, Logs::Error, "Error: detrimental spells requested from AICheckCloseBeneficialSpells!!");
