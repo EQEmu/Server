@@ -3895,10 +3895,19 @@ void Client::Handle_OP_BuffRemoveRequest(const EQApplicationPacket *app)
 
 	Mob *m = nullptr;
 
-	if (brrs->EntityID == GetID())
+	if (brrs->EntityID == GetID()) {
 		m = this;
-	else if (brrs->EntityID == GetPetID())
+	}
+	else if (brrs->EntityID == GetPetID()) {
 		m = GetPet();
+	}
+#ifdef BOTS
+	else {
+		Mob* bot_test = entity_list.GetMob(brrs->EntityID);
+		if (bot_test && bot_test->IsBot() && bot_test->GetOwner() == this)
+			m = bot_test;
+	}
+#endif
 
 	if (!m)
 		return;
@@ -13042,9 +13051,14 @@ void Client::Handle_OP_TargetCommand(const EQApplicationPacket *app)
 				}
 			}
 			if (GetGM() || RuleB(Spells, AlwaysSendTargetsBuffs) || nt == this || inspect_buffs || (nt->IsClient() && !nt->CastToClient()->GetPVP()) ||
-					(nt->IsPet() && nt->GetOwner() && nt->GetOwner()->IsClient() && !nt->GetOwner()->CastToClient()->GetPVP()) ||
-					(nt->IsMerc() && nt->GetOwner() && nt->GetOwner()->IsClient() && !nt->GetOwner()->CastToClient()->GetPVP()))
+				(nt->IsPet() && nt->GetOwner() && nt->GetOwner()->IsClient() && !nt->GetOwner()->CastToClient()->GetPVP()) ||
+#ifdef BOTS
+				(nt->IsBot() && nt->GetOwner() && nt->GetOwner()->IsClient() && !nt->GetOwner()->CastToClient()->GetPVP()) || // TODO: bot pets
+#endif
+				(nt->IsMerc() && nt->GetOwner() && nt->GetOwner()->IsClient() && !nt->GetOwner()->CastToClient()->GetPVP()))
+			{
 				nt->SendBuffsToClient(this);
+			}
 		}
 		else
 		{
