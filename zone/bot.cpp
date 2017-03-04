@@ -3693,11 +3693,22 @@ bool Bot::Attack(Mob* other, int Hand, bool FromRiposte, bool IsStrikethrough, b
 		return false;
 	}
 
-	if(!GetTarget() || GetTarget() != other)
-		SetTarget(other);
+	if ((GetHP() <= 0) || (GetAppearance() == eaDead)) {
+		SetTarget(nullptr);
+		Log.Out(Logs::Detail, Logs::Combat, "Attempted to attack %s while unconscious or, otherwise, appearing dead", other->GetCleanName());
+		return false;
+	}
 
-	Log.Out(Logs::Detail, Logs::Combat, "Attacking %s with hand %d %s", other?other->GetCleanName():"(nullptr)", Hand, FromRiposte?"(this is a riposte)":"");
-	if ((IsCasting() && (GetClass() != BARD) && !IsFromSpell) || other == nullptr || (GetHP() < 0) || (GetAppearance() == eaDead) || (!IsAttackAllowed(other))) {
+	//if(!GetTarget() || GetTarget() != other) // NPC::Attack() doesn't do this
+	//	SetTarget(other);
+
+	// apparently, we always want our target to be 'other'..why not just set it?
+	SetTarget(other);
+	// takes more to compare a call result, load for a call, load a compare to address and compare, and finally
+	// push a value to an address than to just load for a call and push a value to an address.
+	
+	Log.Out(Logs::Detail, Logs::Combat, "Attacking %s with hand %d %s", other->GetCleanName(), Hand, (FromRiposte ? "(this is a riposte)" : ""));
+	if ((IsCasting() && (GetClass() != BARD) && !IsFromSpell) || (!IsAttackAllowed(other))) {
 		if(this->GetOwnerID())
 			entity_list.MessageClose(this, 1, 200, 10, "%s says, '%s is not a legal target master.'", this->GetCleanName(), this->GetTarget()->GetCleanName());
 
@@ -3740,8 +3751,10 @@ bool Bot::Attack(Mob* other, int Hand, bool FromRiposte, bool IsStrikethrough, b
 	DamageHitInfo my_hit;
 	AttackAnimation(my_hit.skill, Hand, weapon);
 	Log.Out(Logs::Detail, Logs::Combat, "Attacking with %s in slot %d using skill %d", weapon?weapon->GetItem()->Name:"Fist", Hand, my_hit.skill);
-	/// Now figure out damage
-	my_hit.damage_done =0;
+	
+	// Now figure out damage
+	my_hit.damage_done = 0;
+	my_hit.min_damage = 0;
 	uint8 mylevel = GetLevel() ? GetLevel() : 1;
 	uint32 hate = 0;
 	if (weapon)
@@ -3787,6 +3800,7 @@ bool Bot::Attack(Mob* other, int Hand, bool FromRiposte, bool IsStrikethrough, b
 
 		Log.Out(Logs::Detail, Logs::Combat, "Damage calculated: base %d min damage %d skill %d", my_hit.base_damage, my_hit.min_damage, my_hit.skill);
 
+		int hit_chance_bonus = 0;
 		my_hit.offense = offense(my_hit.skill);
 		my_hit.hand = Hand;
 
@@ -3795,7 +3809,10 @@ bool Bot::Attack(Mob* other, int Hand, bool FromRiposte, bool IsStrikethrough, b
 			my_hit.base_damage += opts->damage_flat;
 			hate *= opts->hate_percent;
 			hate += opts->hate_flat;
+			hit_chance_bonus += opts->hit_chance;
 		}
+
+		my_hit.tohit = GetTotalToHit(my_hit.skill, hit_chance_bonus);
 
 		DoAttack(other, my_hit, opts);
 
