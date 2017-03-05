@@ -277,7 +277,9 @@ void LoginServer::SendNewInfo() {
 	if (Config->LocalAddress.length())
 		strcpy(lsi->local_address, Config->LocalAddress.c_str());
 	else {
-		WorldConfig::SetLocalAddress(IsLegacy ? legacy_client->Handle()->LocalIP() : client->Handle()->LocalIP());
+		auto local_addr = IsLegacy ? legacy_client->Handle()->LocalIP() : client->Handle()->LocalIP();
+		strcpy(lsi->local_address, local_addr.c_str());
+		WorldConfig::SetLocalAddress(lsi->local_address);
 	}
 	SendPacket(pack);
 	delete pack;
