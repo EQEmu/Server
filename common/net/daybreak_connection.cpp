@@ -1055,7 +1055,7 @@ void EQ::Net::DaybreakConnection::SendAck(int stream_id, uint16_t seq)
 	DynamicPacket p;
 	p.PutSerialize(0, ack);
 
-	InternalBufferedSend(p);
+	InternalSend(p);
 }
 
 void EQ::Net::DaybreakConnection::SendOutOfOrderAck(int stream_id, uint16_t seq)
@@ -1068,7 +1068,7 @@ void EQ::Net::DaybreakConnection::SendOutOfOrderAck(int stream_id, uint16_t seq)
 	DynamicPacket p;
 	p.PutSerialize(0, ack);
 
-	InternalBufferedSend(p);
+	InternalSend(p);
 }
 
 void EQ::Net::DaybreakConnection::SendStatSync()
