@@ -12567,8 +12567,25 @@ void Client::Handle_OP_ShopPlayerSell(const EQApplicationPacket *app)
 	// Now remove the item from the player, this happens regardless of outcome
 	if (!inst->IsStackable())
 		this->DeleteItemInInventory(mp->itemslot, 0, false);
-	else
-		this->DeleteItemInInventory(mp->itemslot, mp->quantity, false);
+	else {
+		// HACK: DeleteItemInInventory uses int8 for quantity type. There is no consistent use of types in code in this path so for now iteratively delete from inventory.
+		if (mp->quantity > 255) {
+			uint32 temp = mp->quantity;
+			while (temp > 255 && temp != 0) {
+				// Delete chunks of 255
+				this->DeleteItemInInventory(mp->itemslot, 255, false);
+				temp -= 255;
+			}
+			if (temp != 0) {
+				// Delete remaining
+				this->DeleteItemInInventory(mp->itemslot, temp, false);
+			}
+		}
+		else {
+			this->DeleteItemInInventory(mp->itemslot, mp->quantity, false);
+		}
+	}
+		
 
 	//This forces the price to show up correctly for charged items.
 	if (inst->IsCharged())
