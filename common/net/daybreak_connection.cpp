@@ -272,7 +272,7 @@ EQ::Net::DaybreakConnection::DaybreakConnection(DaybreakConnectionManager *owner
 	m_encode_passes[1] = owner->m_options.encode_passes[1];
 	m_hold_time = Clock::now();
 	m_buffered_packets_length = 0;
-	m_resend_delay = m_owner->m_options.resend_delay_ms + 25;
+	m_resend_delay = 500;
 	m_rolling_ping = 100;
 	m_combined.reset(new char[512]);
 	m_combined[0] = 0;
@@ -295,7 +295,7 @@ EQ::Net::DaybreakConnection::DaybreakConnection(DaybreakConnectionManager *owner
 	m_crc_bytes = 0;
 	m_hold_time = Clock::now();
 	m_buffered_packets_length = 0;
-	m_resend_delay = m_owner->m_options.resend_delay_ms + 25;
+	m_resend_delay = 500;
 	m_rolling_ping = 100;
 	m_combined.reset(new char[512]);
 	m_combined[0] = 0;
@@ -316,6 +316,8 @@ void EQ::Net::DaybreakConnection::Close()
 		disconnect.connect_code = HostToNetwork(m_connect_code);
 		DynamicPacket out;
 		out.PutSerialize(0, disconnect);
+
+		FlushBuffer();
 		InternalSend(out);
 
 		ChangeStatus(StatusDisconnecting);
@@ -355,9 +357,9 @@ void EQ::Net::DaybreakConnection::ResetStats()
 void EQ::Net::DaybreakConnection::Process()
 {
 	try {
-		m_resend_delay = (size_t)(m_stats.last_stat_ping * m_owner->m_options.resend_delay_factor) + m_owner->m_options.resend_delay_ms;
-		if (m_resend_delay > 500) {
-			m_resend_delay = 500;
+		m_resend_delay = (size_t)(((m_stats.min_ping + m_stats.max_ping) / 2) * m_owner->m_options.resend_delay_factor) + m_owner->m_options.resend_delay_ms;
+		if (m_resend_delay > m_owner->m_options.resend_delay_max) {
+			m_resend_delay = m_owner->m_options.resend_delay_max;
 		}
 
 		auto now = Clock::now();
@@ -699,6 +701,8 @@ void EQ::Net::DaybreakConnection::ProcessDecodedPacket(const Packet &p)
 				disconnect.connect_code = HostToNetwork(m_connect_code);
 				DynamicPacket out;
 				out.PutSerialize(0, disconnect);
+
+				FlushBuffer();
 				InternalSend(out);
 			}
 
@@ -1055,7 +1059,7 @@ void EQ::Net::DaybreakConnection::SendAck(int stream_id, uint16_t seq)
 	DynamicPacket p;
 	p.PutSerialize(0, ack);
 
-	InternalSend(p);
+	InternalBufferedSend(p);
 }
 
 void EQ::Net::DaybreakConnection::SendOutOfOrderAck(int stream_id, uint16_t seq)
@@ -1068,7 +1072,7 @@ void EQ::Net::DaybreakConnection::SendOutOfOrderAck(int stream_id, uint16_t seq)
 	DynamicPacket p;
 	p.PutSerialize(0, ack);
 
-	InternalSend(p);
+	InternalBufferedSend(p);
 }
 
 void EQ::Net::DaybreakConnection::SendStatSync()
@@ -1088,7 +1092,10 @@ void EQ::Net::DaybreakConnection::SendStatSync()
 	request.packets_sent = m_stats.sent_packets + 1;
 	request.packets_recv = m_stats.recv_packets;
 	m_last_session_stats = Clock::now();
-	//InternalSend()
+
+	//EQ::Net::DynamicPacket p;
+	//p.PutSerialize(0, request);
+	//InternalBufferedSend(p);
 }
 
 void EQ::Net::DaybreakConnection::InternalBufferedSend(Packet &p)

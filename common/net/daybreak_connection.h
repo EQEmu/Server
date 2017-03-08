@@ -218,8 +218,9 @@ namespace EQ
 			DaybreakConnectionManagerOptions() {
 				max_connection_count = 0;
 				keepalive_delay_ms = 9000;
-				resend_delay_ms = 50;
+				resend_delay_ms = 250;
 				resend_delay_factor = 1.5;
+				resend_delay_max = 2500;
 				stats_delay_ms = 9000;
 				connect_delay_ms = 250;
 				stale_connection_ms = 60000;
@@ -241,6 +242,7 @@ namespace EQ
 			size_t keepalive_delay_ms;
 			double resend_delay_factor;
 			size_t resend_delay_ms;
+			size_t resend_delay_max;
 			size_t stats_delay_ms;
 			size_t connect_delay_ms;
 			size_t connect_stale_ms;

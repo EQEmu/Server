@@ -7,7 +7,7 @@
 #include <queue>
 #include <memory>
 
-#define STREAM_IDENT_WAIT_MS 10000
+#define STREAM_IDENT_WAIT_MS 30000
 
 class OpcodeManager;
 class StructStrategy;
