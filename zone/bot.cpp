@@ -3225,21 +3225,20 @@ void Bot::BotAddEquipItem(int slot, uint32 id) {
 }
 
 // Erases the specified item from bot the NPC equipment array and from the bot inventory collection.
-void Bot::BotRemoveEquipItem(int slot) {
-	if(slot > 0) {
-		uint8 materialFromSlot = EQEmu::InventoryProfile::CalcMaterialFromSlot(slot);
+void Bot::BotRemoveEquipItem(int16 slot)
+{
+	uint8 material_slot = EQEmu::InventoryProfile::CalcMaterialFromSlot(slot);
 
-		if (materialFromSlot != EQEmu::textures::materialInvalid) {
-			equipment[slot] = 0; // npc has more than just material slots. Valid material should mean valid inventory index
-			SendWearChange(materialFromSlot);
-			if (materialFromSlot == EQEmu::textures::armorChest)
-				SendWearChange(EQEmu::textures::armorArms);
-		}
-
-		UpdateEquipmentLight();
-		if (UpdateActiveLight())
-			SendAppearancePacket(AT_Light, GetActiveLightType());
+	if (material_slot != EQEmu::textures::materialInvalid) {
+		equipment[slot] = 0; // npc has more than just material slots. Valid material should mean valid inventory index
+		SendWearChange(material_slot);
+		if (material_slot == EQEmu::textures::armorChest)
+			SendWearChange(EQEmu::textures::armorArms);
 	}
+
+	UpdateEquipmentLight();
+	if (UpdateActiveLight())
+		SendAppearancePacket(AT_Light, GetActiveLightType());
 }
 
 void Bot::BotTradeSwapItem(Client* client, int16 lootSlot, const EQEmu::ItemInstance* inst, const EQEmu::ItemInstance* inst_swap, uint32 equipableSlots, std::string* errorMessage, bool swap) {
@@ -3326,243 +3325,392 @@ bool Bot::AddBotToGroup(Bot* bot, Group* group) {
 }
 
 // Completes a trade with a client bot owner
-void Bot::FinishTrade(Client* client, BotTradeType tradeType) {
-	if(client && !client->GetTradeskillObject() && (client->trade->state != Trading)) {
-		if(tradeType == BotTradeClientNormal) {
-			// Items being traded are found in the normal trade window used to trade between a Client and a Client or NPC
-			// Items in this mode are found in slot ids 3000 thru 3003 - thought bots used the full 8-slot window..?
-			PerformTradeWithClient(EQEmu::legacy::TRADE_BEGIN, EQEmu::legacy::TRADE_END, client); // {3000..3007}
-		}
-		else if(tradeType == BotTradeClientNoDropNoTrade) {
-			// Items being traded are found on the Client's cursor slot, slot id 30. This item can be either a single item or it can be a bag.
-			// If it is a bag, then we have to search for items in slots 331 thru 340
-			PerformTradeWithClient(EQEmu::inventory::slotCursor, EQEmu::inventory::slotCursor, client);
+void Bot::FinishTrade(Client* client, BotTradeType tradeType)
+{
+	if (!client || (GetOwner() != client) || client->GetTradeskillObject() || client->trade->state == Trading) {
+		if (client)
+			client->ResetTrade();
+		return;
+	}
 
-			// TODO: Add logic here to test if the item in SLOT_CURSOR is a container type, if it is then we need to call the following:
-			// PerformTradeWithClient(331, 340, client);
-		}
+	// these notes are not correct or obselete
+	if (tradeType == BotTradeClientNormal) {
+		// Items being traded are found in the normal trade window used to trade between a Client and a Client or NPC
+		// Items in this mode are found in slot ids 3000 thru 3003 - thought bots used the full 8-slot window..?
+		PerformTradeWithClient(EQEmu::legacy::TRADE_BEGIN, EQEmu::legacy::TRADE_END, client); // {3000..3007}
+	}
+	else if (tradeType == BotTradeClientNoDropNoTrade) {
+		// Items being traded are found on the Client's cursor slot, slot id 30. This item can be either a single item or it can be a bag.
+		// If it is a bag, then we have to search for items in slots 331 thru 340
+		PerformTradeWithClient(EQEmu::inventory::slotCursor, EQEmu::inventory::slotCursor, client);
+
+		// TODO: Add logic here to test if the item in SLOT_CURSOR is a container type, if it is then we need to call the following:
+		// PerformTradeWithClient(331, 340, client);
 	}
 }
 
 // Perfoms the actual trade action with a client bot owner
-void Bot::PerformTradeWithClient(int16 beginSlotID, int16 endSlotID, Client* client) {
-	if(client) {
-		// TODO: Figure out what the actual max slot id is
-		const int MAX_SLOT_ID = EQEmu::legacy::TRADE_BAGS_END; // was the old incorrect 3179..
-		uint32 items[MAX_SLOT_ID] = {0};
-		uint8 charges[MAX_SLOT_ID] = {0};
-		bool botCanWear[MAX_SLOT_ID] = {0};
+void Bot::PerformTradeWithClient(int16 beginSlotID, int16 endSlotID, Client* client)
+{
+	using namespace EQEmu;
 
-		for(int16 i = beginSlotID; i <= endSlotID; ++i) {
-			bool BotCanWear = false;
-			bool UpdateClient = false;
-			bool already_returned = false;
+	struct ClientTrade {
+		const ItemInstance* tradeItemInstance;
+		int16 fromClientSlot;
+		int16 toBotSlot;
+		int adjustStackSize;
+		
+		ClientTrade(const ItemInstance* item, int16 from) : tradeItemInstance(item), fromClientSlot(from), toBotSlot(legacy::SLOT_INVALID), adjustStackSize(0) { }
+	};
 
-			EQEmu::InventoryProfile& clientInventory = client->GetInv();
-			const EQEmu::ItemInstance* inst = clientInventory[i];
-			if(inst) {
-				items[i] = inst->GetItem()->ID;
-				charges[i] = inst->GetCharges();
-			}
+	struct ClientReturn {
+		const ItemInstance* returnItemInstance;
+		int16 fromBotSlot;
+		int16 toClientSlot;
+		int adjustStackSize;
+		
+		ClientReturn(const ItemInstance* item, int16 from) : returnItemInstance(item), fromBotSlot(from), toClientSlot(legacy::SLOT_INVALID), adjustStackSize(0) { }
+	};
 
-			if (i == EQEmu::inventory::slotCursor)
-				UpdateClient = true;
+	static const int16 proxyPowerSource = 22;
 
-			//EQoffline: will give the items to the bots and change the bot stats
-			if(inst && (GetBotOwner() == client->CastToMob()) && !IsEngaged()) {
-				std::string TempErrorMessage;
-				const EQEmu::ItemData* mWeaponItem = inst->GetItem();
-				bool failedLoreCheck = false;
-				for (int m = EQEmu::inventory::socketBegin; m < EQEmu::inventory::SocketCount; ++m) {
-					EQEmu::ItemInstance *itm = inst->GetAugment(m);
-					if(itm)
-					{
-						if(CheckLoreConflict(itm->GetItem())) {
-							failedLoreCheck = true;
-						}
-					}
-				}
-				if(CheckLoreConflict(mWeaponItem)) {
-					failedLoreCheck = true;
-				}
-				if(failedLoreCheck) {
-					Message_StringID(0, DUP_LORE);
-				}
-				if(!failedLoreCheck && mWeaponItem && inst->IsEquipable(GetBaseRace(), GetClass()) && (GetLevel() >= mWeaponItem->ReqLevel)) {
-					BotCanWear = true;
-					botCanWear[i] = BotCanWear;
-					EQEmu::ItemInstance* swap_item = nullptr;
+	static const int16 bot_equip_order[(legacy::EQUIPMENT_SIZE + 1)] = {
+		inventory::slotCharm,			inventory::slotEar1,			inventory::slotHead,			inventory::slotFace,
+		inventory::slotEar2,			inventory::slotNeck,			inventory::slotShoulders,		inventory::slotArms,
+		inventory::slotBack,			inventory::slotWrist1,			inventory::slotWrist2,			inventory::slotRange,
+		inventory::slotHands,			inventory::slotPrimary,			inventory::slotSecondary,		inventory::slotFinger1,
+		inventory::slotFinger2,			inventory::slotChest,			inventory::slotLegs,			inventory::slotFeet,
+		inventory::slotWaist,			inventory::slotAmmo,			proxyPowerSource // inventory::slotPowerSource
+	};
 
-					const char* equipped[EQEmu::legacy::EQUIPMENT_SIZE + 1] = { "Charm", "Left Ear", "Head", "Face", "Right Ear", "Neck", "Shoulders", "Arms", "Back",
-												"Left Wrist", "Right Wrist", "Range", "Hands", "Primary Hand", "Secondary Hand",
-												"Left Finger", "Right Finger", "Chest", "Legs", "Feet", "Waist", "Ammo", "Powersource" };
-					bool success = false;
-					int how_many_slots = 0;
-					for (int j = EQEmu::legacy::EQUIPMENT_BEGIN; j <= (EQEmu::legacy::EQUIPMENT_END + 1); ++j) {
-						if((mWeaponItem->Slots & (1 << j))) {
-							if (j == 22)
-								j = 9999;
+	enum { stageStackable = 0, stageEmpty, stageReplaceable };
+	
+	if (!client) {
+		Emote("NO CLIENT");
+		return;
+	}
 
-							how_many_slots++;
-							if(!GetBotItem(j)) {
-								if (j == EQEmu::inventory::slotPrimary) {
-									if (mWeaponItem->IsType2HWeapon()) {
-										if (GetBotItem(EQEmu::inventory::slotSecondary)) {
-											if (mWeaponItem && mWeaponItem->IsType2HWeapon()) {
-												if (client->CheckLoreConflict(GetBotItem(EQEmu::inventory::slotSecondary)->GetItem())) {
-													failedLoreCheck = true;
-												}
-											}
-											else {
-												EQEmu::ItemInstance* remove_item = GetBotItem(EQEmu::inventory::slotSecondary);
-												BotTradeSwapItem(client, EQEmu::inventory::slotSecondary, 0, remove_item, remove_item->GetItem()->Slots, &TempErrorMessage, false);
-											}
-										}
-									}
-									if(!failedLoreCheck) {
-										BotTradeAddItem(mWeaponItem->ID, inst, inst->GetCharges(), mWeaponItem->Slots, j, &TempErrorMessage);
-										success = true;
-									}
-									break;
-								}
-								else if (j == EQEmu::inventory::slotSecondary) {
-									if(inst->IsWeapon()) {
-										if(CanThisClassDualWield()) {
-											BotTradeAddItem(mWeaponItem->ID, inst, inst->GetCharges(), mWeaponItem->Slots, j, &TempErrorMessage);
-											success = true;
-										}
-										else {
-											BotGroupSay(this, "I can't Dual Wield yet.");
-											--how_many_slots;
-										}
-									}
-									else {
-										BotTradeAddItem(mWeaponItem->ID, inst, inst->GetCharges(), mWeaponItem->Slots, j, &TempErrorMessage);
-										success = true;
-									}
-									if(success) {
-										if (GetBotItem(EQEmu::inventory::slotPrimary)) {
-											EQEmu::ItemInstance* remove_item = GetBotItem(EQEmu::inventory::slotPrimary);
-											if (remove_item->GetItem()->IsType2HWeapon()) {
-												BotTradeSwapItem(client, EQEmu::inventory::slotPrimary, 0, remove_item, remove_item->GetItem()->Slots, &TempErrorMessage, false);
-											}
-										}
-										break;
-									}
-								}
-								else {
-									BotTradeAddItem(mWeaponItem->ID, inst, inst->GetCharges(), mWeaponItem->Slots, j, &TempErrorMessage);
-									success = true;
-									break;
-								}
-							}
-						}
-					}
-					if(!success) {
-						for (int j = EQEmu::legacy::EQUIPMENT_BEGIN; j <= (EQEmu::legacy::EQUIPMENT_END + 1); ++j) {
-							if((mWeaponItem->Slots & (1 << j))) {
-								if (j == 22)
-									j = 9999;
+	if (client != GetOwner()) {
+		client->Message(CC_Red, "You are not the owner of this bot - Trade Canceled.");
+		client->ResetTrade();
+		return;
+	}
+	if ((beginSlotID != legacy::TRADE_BEGIN) && (beginSlotID != inventory::slotCursor)) {
+		client->Message(CC_Red, "Trade request processing from illegal 'begin' slot - Trade Canceled.");
+		client->ResetTrade();
+		return;
+	}
+	if ((endSlotID != legacy::TRADE_END) && (endSlotID != inventory::slotCursor)) {
+		client->Message(CC_Red, "Trade request processing from illegal 'end' slot - Trade Canceled.");
+		client->ResetTrade();
+		return;
+	}
+	if (((beginSlotID == inventory::slotCursor) && (endSlotID != inventory::slotCursor)) || ((beginSlotID != inventory::slotCursor) && (endSlotID == inventory::slotCursor))) {
+		client->Message(CC_Red, "Trade request processing illegal slot range - Trade Canceled.");
+		client->ResetTrade();
+		return;
+	}
+	if (endSlotID < beginSlotID) {
+		client->Message(CC_Red, "Trade request processing in reverse slot order - Trade Canceled.");
+		client->ResetTrade();
+		return;
+	}
+	if (client->IsEngaged() || IsEngaged()) {
+		client->Message(CC_Yellow, "You may not perform a trade while engaged - Trade Canceled!");
+		client->ResetTrade();
+		return;
+	}
 
-								swap_item = GetBotItem(j);
-								failedLoreCheck = false;
-								for (int k = EQEmu::inventory::socketBegin; k < EQEmu::inventory::SocketCount; ++k) {
-									EQEmu::ItemInstance *itm = swap_item->GetAugment(k);
-									if(itm)
-									{
-										if(client->CheckLoreConflict(itm->GetItem())) {
-											failedLoreCheck = true;
-										}
-									}
-								}
-								if(client->CheckLoreConflict(swap_item->GetItem())) {
-									failedLoreCheck = true;
-								}
-								if(!failedLoreCheck) {
-									if (j == EQEmu::inventory::slotPrimary) {
-										if (mWeaponItem->IsType2HWeapon()) {
-											if (GetBotItem(EQEmu::inventory::slotSecondary)) {
-												if (client->CheckLoreConflict(GetBotItem(EQEmu::inventory::slotSecondary)->GetItem())) {
-													failedLoreCheck = true;
-												}
-												else {
-													EQEmu::ItemInstance* remove_item = GetBotItem(EQEmu::inventory::slotSecondary);
-													BotTradeSwapItem(client, EQEmu::inventory::slotSecondary, 0, remove_item, remove_item->GetItem()->Slots, &TempErrorMessage, false);
-												}
-											}
-										}
-										if(!failedLoreCheck) {
-											BotTradeSwapItem(client, EQEmu::inventory::slotPrimary, inst, swap_item, mWeaponItem->Slots, &TempErrorMessage);
-											success = true;
-										}
-										break;
-									}
-									else if (j == EQEmu::inventory::slotSecondary) {
-										if(inst->IsWeapon()) {
-											if(CanThisClassDualWield()) {
-												BotTradeSwapItem(client, EQEmu::inventory::slotSecondary, inst, swap_item, mWeaponItem->Slots, &TempErrorMessage);
-												success = true;
-											}
-											else {
-												botCanWear[i] = false;
-												BotGroupSay(this, "I can't Dual Wield yet.");
-											}
-										}
-										else {
-											BotTradeSwapItem(client, EQEmu::inventory::slotSecondary, inst, swap_item, mWeaponItem->Slots, &TempErrorMessage);
-											success = true;
-										}
-										if (success && GetBotItem(EQEmu::inventory::slotPrimary)) {
-											EQEmu::ItemInstance* remove_item = GetBotItem(EQEmu::inventory::slotPrimary);
-											if (remove_item->GetItem()->IsType2HWeapon()) {
-												BotTradeSwapItem(client, EQEmu::inventory::slotPrimary, 0, remove_item, remove_item->GetItem()->Slots, &TempErrorMessage, false);
-											}
-										}
-										break;
-									}
-									else {
-										BotTradeSwapItem(client, j, inst, swap_item, mWeaponItem->Slots, &TempErrorMessage);
-										success = true;
-										break;
-									}
-								}
-								else {
-									botCanWear[i] = false;
-									Message_StringID(0, PICK_LORE);
-									break;
-								}
-							}
-						}
-					}
-					if(success) {
-						if(how_many_slots > 1) {
-							Message(300, "If you want this item in a different slot, use #bot inventory remove <slot_id> to clear the spot.");
-						}
-						CalcBotStats();
-					}
-				}
-			}
-			if(inst) {
-				client->DeleteItemInInventory(i, 0, UpdateClient);
-				if(!botCanWear[i]) {
-					client->PushItemOnCursor(*inst, true);
-				}
-			}
+	std::list<ClientTrade> client_trade;
+	std::list<ClientReturn> client_return;
+
+	// pre-checks for incoming illegal transfers
+	for (int16 trade_index = beginSlotID; trade_index <= endSlotID; ++trade_index) {
+		auto trade_instance = client->GetInv()[trade_index];
+		if (!trade_instance)
+			continue;
+
+		if (!trade_instance->GetItem()) {
+			// TODO: add logging
+			client->Message(CC_Red, "A server error was encountered while processing client slot %i - Trade Canceled.", trade_index);
+			client->ResetTrade();
+			return;
+		}
+		if ((trade_index != inventory::slotCursor) && !trade_instance->IsDroppable()) {
+			// TODO: add logging
+			client->Message(CC_Red, "Trade hack detected - Trade Canceled.");
+			client->ResetTrade();
+			return;
+		}
+		if (CheckLoreConflict(trade_instance->GetItem())) {
+			client->Message(CC_Yellow, "This bot already has lore equipment matching the item '%s' - Trade Canceled!", trade_instance->GetItem()->Name);
+			client->ResetTrade();
+			return;
 		}
 
-		const EQEmu::ItemData* item2 = 0;
-		for(int y = beginSlotID; y <= endSlotID; ++y) {
-			item2 = database.GetItem(items[y]);
-			if(item2) {
-				if(botCanWear[y]) {
-					BotGroupSay(this, "Thank you for the %s, %s!", item2->Name, client->GetName());
-				}
-				else {
-					BotGroupSay(this, "I can't use this %s!", item2->Name);
-				}
+		if (!trade_instance->IsType(item::ItemClassCommon)) {
+			client_return.push_back(ClientReturn(trade_instance, trade_index));
+			continue;
+		}
+		if (!trade_instance->IsEquipable(GetBaseRace(), GetClass()) || (GetLevel() < trade_instance->GetItem()->ReqLevel)) {
+			client_return.push_back(ClientReturn(trade_instance, trade_index));
+			continue;
+		}
+
+		client_trade.push_back(ClientTrade(trade_instance, trade_index));
+	}
+
+	// check for incoming lore hacks
+	for (auto& trade_iterator : client_trade) {
+		if (!trade_iterator.tradeItemInstance->GetItem()->LoreFlag)
+			continue;
+
+		for (const auto& check_iterator : client_trade) {
+			if (check_iterator.fromClientSlot == trade_iterator.fromClientSlot)
+				continue;
+			if (!check_iterator.tradeItemInstance->GetItem()->LoreFlag)
+				continue;
+			
+			if ((trade_iterator.tradeItemInstance->GetItem()->LoreGroup == -1) && (check_iterator.tradeItemInstance->GetItem()->ID == trade_iterator.tradeItemInstance->GetItem()->ID)) {
+				// TODO: add logging
+				client->Message(CC_Red, "Trade hack detected - Trade Canceled.");
+				client->ResetTrade();
+				return;
+			}
+			if ((trade_iterator.tradeItemInstance->GetItem()->LoreGroup > 0) && (check_iterator.tradeItemInstance->GetItem()->LoreGroup == trade_iterator.tradeItemInstance->GetItem()->LoreGroup)) {
+				// TODO: add logging
+				client->Message(CC_Red, "Trade hack detected - Trade Canceled.");
+				client->ResetTrade();
+				return;
 			}
 		}
 	}
+
+	// find equipment slots
+	const bool can_dual_wield = CanThisClassDualWield();
+	bool melee_2h_weapon = false;
+	bool melee_secondary = false;
+
+	//for (unsigned stage_loop = stageStackable; stage_loop <= stageReplaceable; ++stage_loop) { // awaiting implementation
+	for (unsigned stage_loop = stageEmpty; stage_loop <= stageReplaceable; ++stage_loop) {
+		for (auto& trade_iterator : client_trade) {
+			if (trade_iterator.toBotSlot != legacy::SLOT_INVALID)
+				continue;
+
+			auto trade_instance = trade_iterator.tradeItemInstance;
+			/*if ((stage_loop == stageStackable) && !trade_instance->IsStackable())
+				continue;*/
+
+			for (auto index : bot_equip_order) {
+				if (!(trade_instance->GetItem()->Slots & (1 << index)))
+					continue;
+
+				//if (stage_loop == stageStackable) {
+				//	// TODO: implement
+				//	continue;
+				//}
+
+				if (stage_loop != stageReplaceable) {
+					if ((index == proxyPowerSource) && m_inv[inventory::slotPowerSource])
+						continue;
+					else if (m_inv[index])
+						continue;
+				}
+
+				bool slot_taken = false;
+				for (const auto& check_iterator : client_trade) {
+					if (check_iterator.fromClientSlot == trade_iterator.fromClientSlot)
+						continue;
+
+					if (check_iterator.toBotSlot == index) {
+						slot_taken = true;
+						break;
+					}
+				}
+				if (slot_taken)
+					continue;
+
+				if (index == inventory::slotPrimary) {
+					if (trade_instance->GetItem()->IsType2HWeapon()) {
+						if (!melee_secondary) {
+							melee_2h_weapon = true;
+
+							if (m_inv[inventory::slotSecondary])
+								client_return.push_back(ClientReturn(m_inv[inventory::slotSecondary], inventory::slotSecondary));
+						}
+						else {
+							continue;
+						}
+					}
+				}
+				if (index == inventory::slotSecondary) {
+					if (!melee_2h_weapon) {
+						if ((can_dual_wield && trade_instance->GetItem()->IsType1HWeapon()) || trade_instance->GetItem()->IsTypeShield() || !trade_instance->IsWeapon())
+							melee_secondary = true;
+						else
+							continue;
+					}
+					else {
+						continue;
+					}
+				}
+
+				if (index == proxyPowerSource) {
+					trade_iterator.toBotSlot = inventory::slotPowerSource;
+
+					if (m_inv[inventory::slotPowerSource])
+						client_return.push_back(ClientReturn(m_inv[inventory::slotPowerSource], inventory::slotPowerSource));
+				}
+				else {
+					trade_iterator.toBotSlot = index;
+
+					if (m_inv[index])
+						client_return.push_back(ClientReturn(m_inv[index], index));
+				}
+
+				break;
+			}
+		}
+	}
+
+	// move unassignable items from trade list to return list
+	for (std::list<ClientTrade>::iterator trade_iterator = client_trade.begin(); trade_iterator != client_trade.end();) {
+		if (trade_iterator->toBotSlot == legacy::SLOT_INVALID) {
+			client_return.push_back(ClientReturn(trade_iterator->tradeItemInstance, trade_iterator->fromClientSlot));
+			trade_iterator = client_trade.erase(trade_iterator);
+			continue;
+		}
+		++trade_iterator;
+	}
+	
+	// out-going return checks for client
+	for (auto& return_iterator : client_return) {
+		auto return_instance = return_iterator.returnItemInstance;
+		if (!return_instance)
+			continue;
+
+		if (!return_instance->GetItem()) {
+			// TODO: add logging
+			client->Message(CC_Red, "A server error was encountered while processing bot slot %i - Trade Canceled.", return_iterator.fromBotSlot);
+			client->ResetTrade();
+			return;
+		}
+		if (client->CheckLoreConflict(return_instance->GetItem())) {
+			client->Message(CC_Yellow, "You already have lore equipment matching the item '%s' - Trade Canceled!", return_instance->GetItem()->Name);
+			client->ResetTrade();
+			return;
+		}
+
+		if (return_iterator.fromBotSlot == inventory::slotCursor) {
+			return_iterator.toClientSlot = inventory::slotCursor;
+		}
+		else {
+			int16 client_search_general = legacy::GENERAL_BEGIN;
+			int16 client_search_bag = inventory::containerBegin;
+
+			bool run_search = true;
+			while (run_search) {
+				int16 client_test_slot = client->GetInv().FindFreeSlotForTradeItem(return_instance, client_search_general, client_search_bag);
+				if (client_test_slot == legacy::SLOT_INVALID) {
+					run_search = false;
+					continue;
+				}
+
+				bool slot_taken = false;
+				for (const auto& check_iterator : client_return) {
+					if (check_iterator.fromBotSlot == return_iterator.fromBotSlot)
+						continue;
+
+					if ((check_iterator.toClientSlot == client_test_slot) && (client_test_slot != inventory::slotCursor)) {
+						slot_taken = true;
+						break;
+					}
+				}
+				if (slot_taken) {
+					client_search_general = InventoryProfile::CalcSlotId(client_test_slot);
+					client_search_bag = InventoryProfile::CalcBagIdx(client_test_slot);
+
+					++client_search_bag;
+					if (client_search_bag >= inventory::ContainerCount) {
+						client_search_bag = inventory::containerBegin;
+						// incrementing this past legacy::GENERAL_END triggers the (client_test_slot == legacy::SLOT_INVALID) at the beginning of the search loop
+						// ideally, this will never occur because we always start fresh with each loop iteration and should receive SLOT_CURSOR as a return value
+						++client_search_general;
+					}
+					continue;
+				}
+
+				return_iterator.toClientSlot = client_test_slot;
+				run_search = false;
+			}
+		}
+
+		if (return_iterator.toClientSlot == legacy::SLOT_INVALID) {
+			client->Message(CC_Yellow, "You do not have room to complete this trade - Trade Canceled!");
+			client->ResetTrade();
+			return;
+		}
+	}
+
+	// perform actual trades
+	// returns first since clients have trade slots and bots do not
+	for (auto& return_iterator : client_return) {
+		// TODO: code for stackables
+
+		if (return_iterator.fromBotSlot == inventory::slotCursor) { // failed trade return
+			// no movement action required
+		}
+		else if ((return_iterator.fromBotSlot >= legacy::TRADE_BEGIN) && (return_iterator.fromBotSlot <= legacy::TRADE_END)) { // failed trade returns
+			client->PutItemInInventory(return_iterator.toClientSlot, *return_iterator.returnItemInstance);
+			client->SendItemPacket(return_iterator.toClientSlot, return_iterator.returnItemInstance, ItemPacketTrade);
+			client->DeleteItemInInventory(return_iterator.fromBotSlot);
+		}
+		else { // successful trade returns
+			auto return_instance = m_inv.PopItem(return_iterator.fromBotSlot);
+			if (*return_instance != *return_iterator.returnItemInstance) {
+				// TODO: add logging
+			}
+
+			if (!botdb.DeleteItemBySlot(GetBotID(), return_iterator.fromBotSlot))
+				client->Message(CC_Red, "%s (slot: %i, name: '%s')", BotDatabase::fail::DeleteItemBySlot(), return_iterator.fromBotSlot, (return_instance ? return_instance->GetItem()->Name : "nullptr"));
+
+			BotRemoveEquipItem(return_iterator.fromBotSlot);
+			client->PutItemInInventory(return_iterator.toClientSlot, *return_instance, true);
+			InventoryProfile::MarkDirty(return_instance);
+		}
+		return_iterator.returnItemInstance = nullptr;
+	}
+
+	// trades can now go in as empty slot inserts
+	for (auto& trade_iterator : client_trade) {
+		// TODO: code for stackables
+
+		if (!botdb.SaveItemBySlot(this, trade_iterator.toBotSlot, trade_iterator.tradeItemInstance))
+			client->Message(CC_Red, "%s (slot: %i, name: '%s')", BotDatabase::fail::SaveItemBySlot(), trade_iterator.toBotSlot, (trade_iterator.tradeItemInstance ? trade_iterator.tradeItemInstance->GetItem()->Name : "nullptr"));
+
+		m_inv.PutItem(trade_iterator.toBotSlot, *trade_iterator.tradeItemInstance);
+		this->BotAddEquipItem(trade_iterator.toBotSlot, (trade_iterator.tradeItemInstance ? trade_iterator.tradeItemInstance->GetID() : 0));
+		client->DeleteItemInInventory(trade_iterator.fromClientSlot, 0, true);
+		trade_iterator.tradeItemInstance = nullptr;
+	}
+
+	// trade announcements
+	for (const auto& return_iterator : client_return) { // item pointers should be nulled by this point
+		if (((return_iterator.fromBotSlot < legacy::TRADE_BEGIN) || (return_iterator.fromBotSlot > legacy::TRADE_END)) && (return_iterator.fromBotSlot != inventory::slotCursor))
+			continue;
+
+		if (client->GetInv()[return_iterator.toClientSlot])
+			client->Message(MT_Tell, "%s tells you, \"%s, I can't use this '%s.'\"", GetCleanName(), client->GetName(), client->GetInv()[return_iterator.toClientSlot]->GetItem()->Name);
+	}
+	for (const auto& trade_iterator : client_trade) { // item pointers should be nulled by this point
+		if (m_inv[trade_iterator.toBotSlot])
+			client->Message(MT_Tell, "%s tells you, \"Thank you for the '%s,' %s!\"", GetCleanName(), m_inv[trade_iterator.toBotSlot]->GetItem()->Name, client->GetName());
+	}
+
+	size_t accepted_count = client_trade.size();
+	size_t returned_count = client_return.size();
+
+	client->Message(CC_Lime, "Trade with '%s' resulted in %i accepted item%s, %i returned item%s.", GetCleanName(), accepted_count, ((accepted_count == 1) ? "" : "s"), returned_count, ((returned_count == 1) ? "" : "s"));
 }
 
 bool Bot::Death(Mob *killerMob, int32 damage, uint16 spell_id, EQEmu::skills::SkillType attack_skill) {

@@ -1,5 +1,20 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 03/08/2017 ==
+Uleat: Complete rework of the bot trading system
+	- Equipment slot priority can now be tailored..though, a recompile will be required
+	- All item validations and slot assignments for trades and returns are now performed before any actual item movements occur
+	- Failed trade/returned items will now go straight into the client's inventory, just like a normal trade transaction
+		- A 'green' message appears at the end of each successful trade informing the trader of 'accepted' and 'returned' item counts
+		- Bots respond to the trader directly now instead of using BotGroupSay()
+	- Bots will still only allow trades from their owner (currently, too high a risk of exploit and/or malicious activity)
+	- Partial stack movements (i.e., ammo refills) have been scoped..but, not implemented
+	- I have not been able to reproduce any 'illegal' weapon combinations with this code
+	- NOTE: The report of item duplication with bot return items appears to be an inventory desync condition
+		- I experienced this condition both before and after the rework with RoF+ clients (UF- appears ok)
+		- The bug lies within the actual client inventory system and not with bot trades
+	- Please post any issues with this change as they arise
+
 == 02/27/2017 ==
 Uleat: Notes on bot movement speed changes:
 	- Clients (players) appear to be on a different speed scale than other entities (NPCs, etc...)

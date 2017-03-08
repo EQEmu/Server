@@ -655,7 +655,7 @@ public:
 
 	// Publicized private functions
 	static NPCType FillNPCTypeStruct(uint32 botSpellsID, std::string botName, std::string botLastName, uint8 botLevel, uint16 botRace, uint8 botClass, uint8 gender, float size, uint32 face, uint32 hairStyle, uint32 hairColor, uint32 eyeColor, uint32 eyeColor2, uint32 beardColor, uint32 beard, uint32 drakkinHeritage, uint32 drakkinTattoo, uint32 drakkinDetails, int32 hp, int32 mana, int32 mr, int32 cr, int32 dr, int32 fr, int32 pr, int32 corrup, int32 ac, uint32 str, uint32 sta, uint32 dex, uint32 agi, uint32 _int, uint32 wis, uint32 cha, uint32 attack);
-	void BotRemoveEquipItem(int slot);
+	void BotRemoveEquipItem(int16 slot);
 	void RemoveBotItemBySlot(uint32 slotID, std::string* errorMessage);
 	uint32 GetTotalPlayTime();
 
