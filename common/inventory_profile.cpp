@@ -635,7 +635,7 @@ int16 EQEmu::InventoryProfile::FindFreeSlot(bool for_bag, bool try_cursor, uint8
 }
 
 // This is a mix of HasSpaceForItem and FindFreeSlot..due to existing coding behavior, it was better to add a new helper function...
-int16 EQEmu::InventoryProfile::FindFreeSlotForTradeItem(const ItemInstance* inst, int16 general_start, int16 bag_start) {
+int16 EQEmu::InventoryProfile::FindFreeSlotForTradeItem(const ItemInstance* inst, int16 general_start, uint8 bag_start) {
 	// Do not arbitrarily use this function..it is designed for use with Client::ResetTrade() and Client::FinishTrade().
 	// If you have a need, use it..but, understand it is not a suitable replacement for InventoryProfile::FindFreeSlot().
 	//
@@ -643,7 +643,7 @@ int16 EQEmu::InventoryProfile::FindFreeSlotForTradeItem(const ItemInstance* inst
 
 	if ((general_start < legacy::GENERAL_BEGIN) || (general_start > legacy::GENERAL_END))
 		return INVALID_INDEX;
-	if ((bag_start < inventory::containerBegin) || (bag_start >= inventory::ContainerCount))
+	if (bag_start >= inventory::ContainerCount)
 		return INVALID_INDEX;
 
 	if (!inst || !inst->GetID())
@@ -678,7 +678,8 @@ int16 EQEmu::InventoryProfile::FindFreeSlotForTradeItem(const ItemInstance* inst
 				continue;
 
 			if (main_inst->IsClassBag()) { // if item-specific containers already have bad items, we won't fix it here...
-				for (uint8 free_bag_slot = bag_start; (free_bag_slot < main_inst->GetItem()->BagSlots) && (free_bag_slot < inventory::ContainerCount); ++free_bag_slot) {
+				uint8 _bag_start = (free_slot > general_start) ? inventory::containerBegin : bag_start;
+				for (uint8 free_bag_slot = _bag_start; (free_bag_slot < main_inst->GetItem()->BagSlots) && (free_bag_slot < inventory::ContainerCount); ++free_bag_slot) {
 					const ItemInstance* sub_inst = main_inst->GetItem(free_bag_slot);
 
 					if (!sub_inst)
@@ -699,7 +700,8 @@ int16 EQEmu::InventoryProfile::FindFreeSlotForTradeItem(const ItemInstance* inst
 			if (!main_inst || (main_inst->GetItem()->BagType != item::BagTypeQuiver) || !main_inst->IsClassBag())
 				continue;
 
-			for (uint8 free_bag_slot = bag_start; (free_bag_slot < main_inst->GetItem()->BagSlots) && (free_bag_slot < inventory::ContainerCount); ++free_bag_slot) {
+			uint8 _bag_start = (free_slot > general_start) ? inventory::containerBegin : bag_start;
+			for (uint8 free_bag_slot = _bag_start; (free_bag_slot < main_inst->GetItem()->BagSlots) && (free_bag_slot < inventory::ContainerCount); ++free_bag_slot) {
 				if (!main_inst->GetItem(free_bag_slot))
 					return InventoryProfile::CalcSlotId(free_slot, free_bag_slot);
 			}
@@ -714,7 +716,8 @@ int16 EQEmu::InventoryProfile::FindFreeSlotForTradeItem(const ItemInstance* inst
 			if (!main_inst || (main_inst->GetItem()->BagType != item::BagTypeBandolier) || !main_inst->IsClassBag())
 				continue;
 
-			for (uint8 free_bag_slot = bag_start; (free_bag_slot < main_inst->GetItem()->BagSlots) && (free_bag_slot < inventory::ContainerCount); ++free_bag_slot) {
+			uint8 _bag_start = (free_slot > general_start) ? inventory::containerBegin : bag_start;
+			for (uint8 free_bag_slot = _bag_start; (free_bag_slot < main_inst->GetItem()->BagSlots) && (free_bag_slot < inventory::ContainerCount); ++free_bag_slot) {
 				if (!main_inst->GetItem(free_bag_slot))
 					return InventoryProfile::CalcSlotId(free_slot, free_bag_slot);
 			}
@@ -736,7 +739,8 @@ int16 EQEmu::InventoryProfile::FindFreeSlotForTradeItem(const ItemInstance* inst
 			if ((main_inst->GetItem()->BagSize < inst->GetItem()->Size) || (main_inst->GetItem()->BagType == item::BagTypeBandolier) || (main_inst->GetItem()->BagType == item::BagTypeQuiver))
 				continue;
 
-			for (uint8 free_bag_slot = bag_start; (free_bag_slot < main_inst->GetItem()->BagSlots) && (free_bag_slot < inventory::ContainerCount); ++free_bag_slot) {
+			uint8 _bag_start = (free_slot > general_start) ? inventory::containerBegin : bag_start;
+			for (uint8 free_bag_slot = _bag_start; (free_bag_slot < main_inst->GetItem()->BagSlots) && (free_bag_slot < inventory::ContainerCount); ++free_bag_slot) {
 				if (!main_inst->GetItem(free_bag_slot))
 					return InventoryProfile::CalcSlotId(free_slot, free_bag_slot);
 			}

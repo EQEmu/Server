@@ -3359,8 +3359,9 @@ void Bot::PerformTradeWithClient(int16 beginSlotID, int16 endSlotID, Client* cli
 		int16 fromClientSlot;
 		int16 toBotSlot;
 		int adjustStackSize;
+		std::string acceptedItemName;
 		
-		ClientTrade(const ItemInstance* item, int16 from) : tradeItemInstance(item), fromClientSlot(from), toBotSlot(legacy::SLOT_INVALID), adjustStackSize(0) { }
+		ClientTrade(const ItemInstance* item, int16 from, const char* name = "") : tradeItemInstance(item), fromClientSlot(from), toBotSlot(legacy::SLOT_INVALID), adjustStackSize(0), acceptedItemName(name) { }
 	};
 
 	struct ClientReturn {
@@ -3368,8 +3369,9 @@ void Bot::PerformTradeWithClient(int16 beginSlotID, int16 endSlotID, Client* cli
 		int16 fromBotSlot;
 		int16 toClientSlot;
 		int adjustStackSize;
+		std::string failedItemName;
 		
-		ClientReturn(const ItemInstance* item, int16 from) : returnItemInstance(item), fromBotSlot(from), toClientSlot(legacy::SLOT_INVALID), adjustStackSize(0) { }
+		ClientReturn(const ItemInstance* item, int16 from, const char* name = "") : returnItemInstance(item), fromBotSlot(from), toClientSlot(legacy::SLOT_INVALID), adjustStackSize(0), failedItemName(name) { }
 	};
 
 	static const int16 proxyPowerSource = 22;
@@ -3442,6 +3444,11 @@ void Bot::PerformTradeWithClient(int16 beginSlotID, int16 endSlotID, Client* cli
 			client->ResetTrade();
 			return;
 		}
+		if (trade_instance->IsStackable() && (trade_instance->GetCharges() < trade_instance->GetItem()->StackSize)) { // temp until partial stacks are implemented
+			client->Message(CC_Yellow, "'%s' is only a partially stacked item - Trade Canceled!", trade_instance->GetItem()->Name);
+			client->ResetTrade();
+			return;
+		}
 		if (CheckLoreConflict(trade_instance->GetItem())) {
 			client->Message(CC_Yellow, "This bot already has lore equipment matching the item '%s' - Trade Canceled!", trade_instance->GetItem()->Name);
 			client->ResetTrade();
@@ -3449,15 +3456,15 @@ void Bot::PerformTradeWithClient(int16 beginSlotID, int16 endSlotID, Client* cli
 		}
 
 		if (!trade_instance->IsType(item::ItemClassCommon)) {
-			client_return.push_back(ClientReturn(trade_instance, trade_index));
+			client_return.push_back(ClientReturn(trade_instance, trade_index, trade_instance->GetItem()->Name));
 			continue;
 		}
-		if (!trade_instance->IsEquipable(GetBaseRace(), GetClass()) || (GetLevel() < trade_instance->GetItem()->ReqLevel)) {
-			client_return.push_back(ClientReturn(trade_instance, trade_index));
+		if (!trade_instance->IsEquipable(GetBaseRace(), GetClass()) || (GetLevel() < trade_instance->GetItem()->ReqLevel)) { // deity checks will be handled within IsEquipable()
+			client_return.push_back(ClientReturn(trade_instance, trade_index, trade_instance->GetItem()->Name));
 			continue;
 		}
 
-		client_trade.push_back(ClientTrade(trade_instance, trade_index));
+		client_trade.push_back(ClientTrade(trade_instance, trade_index, trade_instance->GetItem()->Name));
 	}
 
 	// check for incoming lore hacks
@@ -3576,7 +3583,7 @@ void Bot::PerformTradeWithClient(int16 beginSlotID, int16 endSlotID, Client* cli
 	// move unassignable items from trade list to return list
 	for (std::list<ClientTrade>::iterator trade_iterator = client_trade.begin(); trade_iterator != client_trade.end();) {
 		if (trade_iterator->toBotSlot == legacy::SLOT_INVALID) {
-			client_return.push_back(ClientReturn(trade_iterator->tradeItemInstance, trade_iterator->fromClientSlot));
+			client_return.push_back(ClientReturn(trade_iterator->tradeItemInstance, trade_iterator->fromClientSlot, trade_iterator->tradeItemInstance->GetItem()->Name));
 			trade_iterator = client_trade.erase(trade_iterator);
 			continue;
 		}
@@ -3606,7 +3613,7 @@ void Bot::PerformTradeWithClient(int16 beginSlotID, int16 endSlotID, Client* cli
 		}
 		else {
 			int16 client_search_general = legacy::GENERAL_BEGIN;
-			int16 client_search_bag = inventory::containerBegin;
+			uint8 client_search_bag = inventory::containerBegin;
 
 			bool run_search = true;
 			while (run_search) {
@@ -3627,16 +3634,23 @@ void Bot::PerformTradeWithClient(int16 beginSlotID, int16 endSlotID, Client* cli
 					}
 				}
 				if (slot_taken) {
-					client_search_general = InventoryProfile::CalcSlotId(client_test_slot);
-					client_search_bag = InventoryProfile::CalcBagIdx(client_test_slot);
-
-					++client_search_bag;
-					if (client_search_bag >= inventory::ContainerCount) {
-						client_search_bag = inventory::containerBegin;
-						// incrementing this past legacy::GENERAL_END triggers the (client_test_slot == legacy::SLOT_INVALID) at the beginning of the search loop
-						// ideally, this will never occur because we always start fresh with each loop iteration and should receive SLOT_CURSOR as a return value
+					if ((client_test_slot >= legacy::GENERAL_BEGIN) && (client_test_slot <= legacy::GENERAL_END)) {
 						++client_search_general;
+						client_search_bag = inventory::containerBegin;
 					}
+					else {
+						client_search_general = InventoryProfile::CalcSlotId(client_test_slot);
+						client_search_bag = InventoryProfile::CalcBagIdx(client_test_slot);
+
+						++client_search_bag;
+						if (client_search_bag >= inventory::ContainerCount) {
+							// incrementing this past legacy::GENERAL_END triggers the (client_test_slot == legacy::SLOT_INVALID) at the beginning of the search loop
+							// ideally, this will never occur because we always start fresh with each loop iteration and should receive SLOT_CURSOR as a return value
+							++client_search_general;
+							client_search_bag = inventory::containerBegin;
+						}
+					}
+
 					continue;
 				}
 
@@ -3694,17 +3708,14 @@ void Bot::PerformTradeWithClient(int16 beginSlotID, int16 endSlotID, Client* cli
 		trade_iterator.tradeItemInstance = nullptr;
 	}
 
-	// trade announcements
-	for (const auto& return_iterator : client_return) { // item pointers should be nulled by this point
-		if (((return_iterator.fromBotSlot < legacy::TRADE_BEGIN) || (return_iterator.fromBotSlot > legacy::TRADE_END)) && (return_iterator.fromBotSlot != inventory::slotCursor))
-			continue;
-
-		if (client->GetInv()[return_iterator.toClientSlot])
-			client->Message(MT_Tell, "%s tells you, \"%s, I can't use this '%s.'\"", GetCleanName(), client->GetName(), client->GetInv()[return_iterator.toClientSlot]->GetItem()->Name);
+	// trade messages
+	for (const auto& return_iterator : client_return) {
+		if (return_iterator.failedItemName.size())
+			client->Message(MT_Tell, "%s tells you, \"%s, I can't use this '%s.'\"", GetCleanName(), client->GetName(), return_iterator.failedItemName.c_str());
 	}
-	for (const auto& trade_iterator : client_trade) { // item pointers should be nulled by this point
-		if (m_inv[trade_iterator.toBotSlot])
-			client->Message(MT_Tell, "%s tells you, \"Thank you for the '%s,' %s!\"", GetCleanName(), m_inv[trade_iterator.toBotSlot]->GetItem()->Name, client->GetName());
+	for (const auto& trade_iterator : client_trade) {
+		if (trade_iterator.acceptedItemName.size())
+			client->Message(MT_Tell, "%s tells you, \"Thank you for the '%s,' %s!\"", GetCleanName(), trade_iterator.acceptedItemName.c_str(), client->GetName());
 	}
 
 	size_t accepted_count = client_trade.size();
