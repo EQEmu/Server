@@ -6,6 +6,7 @@ Uleat: Fixed a few glitches related to bot trading and other affected code
 	- Return messages no longer repeat the top cursor item when multiple items are pushed there
 	- Test slot for client returns is now handled appropriately for parent and bag searches
 	- FindFreeSlotForTradeItem() now begins at the correct bag index on subsequent parent iterations
+Uleat: First step of implementing inventory v2.0
 
 == 03/08/2017 ==
 Uleat: Complete rework of the bot trading system
