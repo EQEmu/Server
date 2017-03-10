@@ -42,6 +42,10 @@ void Mob::TemporaryPets(uint16 spell_id, Mob *targ, const char *name_override, u
 
 	//Dook- swarms and wards
 
+	// do nothing if it's a corpse
+	if (targ != nullptr && targ->IsCorpse())
+		return;
+
 	PetRecord record;
 	if(!database.GetPetEntry(spells[spell_id].teleport_zone, &record))
 	{
