@@ -3494,7 +3494,7 @@ void Bot::PerformTradeWithClient(int16 beginSlotID, int16 endSlotID, Client* cli
 	}
 
 	// find equipment slots
-	const bool can_dual_wield = CanThisClassDualWield();
+	const bool can_dual_wield = (GetSkill(EQEmu::skills::SkillDualWield) > 0);
 	bool melee_2h_weapon = false;
 	bool melee_secondary = false;
 
@@ -3542,8 +3542,9 @@ void Bot::PerformTradeWithClient(int16 beginSlotID, int16 endSlotID, Client* cli
 						if (!melee_secondary) {
 							melee_2h_weapon = true;
 
-							if (m_inv[inventory::slotSecondary])
-								client_return.push_back(ClientReturn(m_inv[inventory::slotSecondary], inventory::slotSecondary));
+							auto equipped_secondary_weapon = m_inv[inventory::slotSecondary];
+							if (equipped_secondary_weapon)
+								client_return.push_back(ClientReturn(equipped_secondary_weapon, inventory::slotSecondary));
 						}
 						else {
 							continue;
@@ -3552,10 +3553,16 @@ void Bot::PerformTradeWithClient(int16 beginSlotID, int16 endSlotID, Client* cli
 				}
 				if (index == inventory::slotSecondary) {
 					if (!melee_2h_weapon) {
-						if ((can_dual_wield && trade_instance->GetItem()->IsType1HWeapon()) || trade_instance->GetItem()->IsTypeShield() || !trade_instance->IsWeapon())
+						if ((can_dual_wield && trade_instance->GetItem()->IsType1HWeapon()) || trade_instance->GetItem()->IsTypeShield() || !trade_instance->IsWeapon()) {
 							melee_secondary = true;
-						else
+
+							auto equipped_primary_weapon = m_inv[inventory::slotPrimary];
+							if (equipped_primary_weapon && equipped_primary_weapon->GetItem()->IsType2HWeapon())
+								client_return.push_back(ClientReturn(equipped_primary_weapon, inventory::slotPrimary));
+						}
+						else {
 							continue;
+						}
 					}
 					else {
 						continue;
@@ -3681,15 +3688,16 @@ void Bot::PerformTradeWithClient(int16 beginSlotID, int16 endSlotID, Client* cli
 		}
 		else { // successful trade returns
 			auto return_instance = m_inv.PopItem(return_iterator.fromBotSlot);
-			if (*return_instance != *return_iterator.returnItemInstance) {
-				// TODO: add logging
-			}
+			//if (*return_instance != *return_iterator.returnItemInstance) {
+			//	// TODO: add logging
+			//}
 
 			if (!botdb.DeleteItemBySlot(GetBotID(), return_iterator.fromBotSlot))
 				client->Message(CC_Red, "%s (slot: %i, name: '%s')", BotDatabase::fail::DeleteItemBySlot(), return_iterator.fromBotSlot, (return_instance ? return_instance->GetItem()->Name : "nullptr"));
 
 			BotRemoveEquipItem(return_iterator.fromBotSlot);
-			client->PutItemInInventory(return_iterator.toClientSlot, *return_instance, true);
+			if (return_instance)
+				client->PutItemInInventory(return_iterator.toClientSlot, *return_instance, true);
 			InventoryProfile::MarkDirty(return_instance);
 		}
 		return_iterator.returnItemInstance = nullptr;
