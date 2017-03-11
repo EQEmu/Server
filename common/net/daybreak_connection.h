@@ -218,11 +218,11 @@ namespace EQ
 			DaybreakConnectionManagerOptions() {
 				max_connection_count = 0;
 				keepalive_delay_ms = 9000;
-				resend_delay_ms = 250;
+				resend_delay_ms = 300;
 				resend_delay_factor = 1.5;
-				resend_delay_max = 2500;
+				resend_delay_max = 5000;
 				stats_delay_ms = 9000;
-				connect_delay_ms = 250;
+				connect_delay_ms = 500;
 				stale_connection_ms = 60000;
 				connect_stale_ms = 5000;
 				crc_length = 2;
@@ -231,10 +231,10 @@ namespace EQ
 				encode_passes[1] = DaybreakEncodeType::EncodeNone;
 				port = 0;
 				hold_size = 384;
-				hold_length_ms = 50;
+				hold_length_ms = 10;
 				simulated_in_packet_loss = 0;
 				simulated_out_packet_loss = 0;
-				tic_rate_hertz = 20.0;
+				tic_rate_hertz = 10.0;
 			}
 
 			size_t max_packet_size;

@@ -407,24 +407,42 @@ void EQ::Net::DaybreakConnection::ProcessPacket(Packet &p)
 			return;
 		}
 
-		EQ::Net::DynamicPacket temp;
-		temp.PutPacket(0, p);
-		temp.Resize(temp.Length() - m_crc_bytes);
+		if (m_encode_passes[0] == EncodeCompression || m_encode_passes[1] == EncodeCompression)
+		{
+			EQ::Net::DynamicPacket temp;
+			temp.PutPacket(0, p);
+			temp.Resize(temp.Length() - m_crc_bytes);
 
-		for (int i = 1; i >= 0; --i) {
-			switch (m_encode_passes[i]) {
-			case EncodeCompression:
-				Decompress(temp, DaybreakHeader::size(), temp.Length() - DaybreakHeader::size());
-				break;
-			case EncodeXOR:
-				Decode(temp, DaybreakHeader::size(), temp.Length() - DaybreakHeader::size());
-				break;
-			default:
-				break;
+			for (int i = 1; i >= 0; --i) {
+				switch (m_encode_passes[i]) {
+				case EncodeCompression:
+					Decompress(temp, DaybreakHeader::size(), temp.Length() - DaybreakHeader::size());
+					break;
+				case EncodeXOR:
+					Decode(temp, DaybreakHeader::size(), temp.Length() - DaybreakHeader::size());
+					break;
+				default:
+					break;
+				}
 			}
-		}
 
-		ProcessDecodedPacket(StaticPacket(temp.Data(), temp.Length()));
+			ProcessDecodedPacket(StaticPacket(temp.Data(), temp.Length()));
+		}
+		else {
+			EQ::Net::StaticPacket temp(p.Data(), p.Length() - m_crc_bytes);
+
+			for (int i = 1; i >= 0; --i) {
+				switch (m_encode_passes[i]) {
+				case EncodeXOR:
+					Decode(temp, DaybreakHeader::size(), temp.Length() - DaybreakHeader::size());
+					break;
+				default:
+					break;
+				}
+			}
+
+			ProcessDecodedPacket(StaticPacket(temp.Data(), temp.Length()));
+		}
 	}
 	else {
 		ProcessDecodedPacket(p);
