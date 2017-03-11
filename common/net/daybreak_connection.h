@@ -82,11 +82,6 @@ namespace EQ
 				total_acks = 0;
 				min_ping = 0xFFFFFFFFFFFFFFFFUL;
 				max_ping = 0;
-				total_stat_ping = 0;
-				total_stat_count = 0;
-				min_stat_ping = 0xFFFFFFFFFFFFFFFFUL;
-				max_stat_ping = 0;
-				last_stat_ping = 0;
 				created = Clock::now();
 			}
 
@@ -98,11 +93,7 @@ namespace EQ
 			uint64_t total_acks;
 			uint64_t min_ping;
 			uint64_t max_ping;
-			uint64_t total_stat_ping;
-			uint64_t total_stat_count;
-			uint64_t min_stat_ping;
-			uint64_t max_stat_ping;
-			uint64_t last_stat_ping;
+			uint64_t last_ping;
 			Timestamp created;
 		};
 
@@ -143,7 +134,6 @@ namespace EQ
 			std::list<DynamicPacket> m_buffered_packets;
 			size_t m_buffered_packets_length;
 			std::unique_ptr<char[]> m_combined;
-			Timestamp m_last_stats;
 			DaybreakConnectionStats m_stats;
 			Timestamp m_last_session_stats;
 			size_t m_resend_delay;
@@ -203,7 +193,6 @@ namespace EQ
 			void SendKeepAlive();
 			void SendAck(int stream, uint16_t seq);
 			void SendOutOfOrderAck(int stream, uint16_t seq);
-			void SendStatSync();
 			void InternalBufferedSend(Packet &p);
 			void InternalSend(Packet &p);
 			void InternalQueuePacket(Packet &p, int stream_id, bool reliable);
@@ -221,7 +210,6 @@ namespace EQ
 				resend_delay_ms = 300;
 				resend_delay_factor = 1.5;
 				resend_delay_max = 5000;
-				stats_delay_ms = 9000;
 				connect_delay_ms = 500;
 				stale_connection_ms = 60000;
 				connect_stale_ms = 5000;
@@ -243,7 +231,6 @@ namespace EQ
 			double resend_delay_factor;
 			size_t resend_delay_ms;
 			size_t resend_delay_max;
-			size_t stats_delay_ms;
 			size_t connect_delay_ms;
 			size_t connect_stale_ms;
 			size_t stale_connection_ms;
