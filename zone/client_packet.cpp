@@ -3894,10 +3894,19 @@ void Client::Handle_OP_BuffRemoveRequest(const EQApplicationPacket *app)
 
 	Mob *m = nullptr;
 
-	if (brrs->EntityID == GetID())
+	if (brrs->EntityID == GetID()) {
 		m = this;
-	else if (brrs->EntityID == GetPetID())
+	}
+	else if (brrs->EntityID == GetPetID()) {
 		m = GetPet();
+	}
+#ifdef BOTS
+	else {
+		Mob* bot_test = entity_list.GetMob(brrs->EntityID);
+		if (bot_test && bot_test->IsBot() && bot_test->GetOwner() == this)
+			m = bot_test;
+	}
+#endif
 
 	if (!m)
 		return;
@@ -12554,8 +12563,25 @@ void Client::Handle_OP_ShopPlayerSell(const EQApplicationPacket *app)
 	// Now remove the item from the player, this happens regardless of outcome
 	if (!inst->IsStackable())
 		this->DeleteItemInInventory(mp->itemslot, 0, false);
-	else
-		this->DeleteItemInInventory(mp->itemslot, mp->quantity, false);
+	else {
+		// HACK: DeleteItemInInventory uses int8 for quantity type. There is no consistent use of types in code in this path so for now iteratively delete from inventory.
+		if (mp->quantity > 255) {
+			uint32 temp = mp->quantity;
+			while (temp > 255 && temp != 0) {
+				// Delete chunks of 255
+				this->DeleteItemInInventory(mp->itemslot, 255, false);
+				temp -= 255;
+			}
+			if (temp != 0) {
+				// Delete remaining
+				this->DeleteItemInInventory(mp->itemslot, temp, false);
+			}
+		}
+		else {
+			this->DeleteItemInInventory(mp->itemslot, mp->quantity, false);
+		}
+	}
+		
 
 	//This forces the price to show up correctly for charged items.
 	if (inst->IsCharged())
@@ -13038,9 +13064,14 @@ void Client::Handle_OP_TargetCommand(const EQApplicationPacket *app)
 				}
 			}
 			if (GetGM() || RuleB(Spells, AlwaysSendTargetsBuffs) || nt == this || inspect_buffs || (nt->IsClient() && !nt->CastToClient()->GetPVP()) ||
-					(nt->IsPet() && nt->GetOwner() && nt->GetOwner()->IsClient() && !nt->GetOwner()->CastToClient()->GetPVP()) ||
-					(nt->IsMerc() && nt->GetOwner() && nt->GetOwner()->IsClient() && !nt->GetOwner()->CastToClient()->GetPVP()))
+				(nt->IsPet() && nt->GetOwner() && nt->GetOwner()->IsClient() && !nt->GetOwner()->CastToClient()->GetPVP()) ||
+#ifdef BOTS
+				(nt->IsBot() && nt->GetOwner() && nt->GetOwner()->IsClient() && !nt->GetOwner()->CastToClient()->GetPVP()) || // TODO: bot pets
+#endif
+				(nt->IsMerc() && nt->GetOwner() && nt->GetOwner()->IsClient() && !nt->GetOwner()->CastToClient()->GetPVP()))
+			{
 				nt->SendBuffsToClient(this);
+			}
 		}
 		else
 		{

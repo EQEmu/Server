@@ -195,7 +195,7 @@ bool EQEmu::ItemData::IsClassBook() const
 
 bool EQEmu::ItemData::IsType1HWeapon() const
 {
-	return ((ItemType == item::ItemType1HBlunt) || (ItemType == item::ItemType1HSlash) || (ItemType == item::ItemType1HPiercing));
+	return ((ItemType == item::ItemType1HBlunt) || (ItemType == item::ItemType1HSlash) || (ItemType == item::ItemType1HPiercing) || (ItemType == item::ItemTypeMartial));
 }
 
 bool EQEmu::ItemData::IsType2HWeapon() const

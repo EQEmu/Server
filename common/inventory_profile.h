@@ -155,7 +155,7 @@ namespace EQEmu
 
 		// Locate an available inventory slot
 		int16 FindFreeSlot(bool for_bag, bool try_cursor, uint8 min_size = 0, bool is_arrow = false);
-		int16 FindFreeSlotForTradeItem(const ItemInstance* inst);
+		int16 FindFreeSlotForTradeItem(const ItemInstance* inst, int16 general_start = legacy::GENERAL_BEGIN, uint8 bag_start = inventory::containerBegin);
 
 		// Calculate slot_id for an item within a bag
 		static int16 CalcSlotId(int16 slot_id); // Calc parent bag's slot_id

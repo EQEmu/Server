@@ -337,7 +337,7 @@ public:
 	bool IsStanding();
 	int GetBotWalkspeed() const { return (int)((float)_GetWalkSpeed() * 1.786f); } // 1.25 / 0.7 = 1.7857142857142857142857142857143
 	int GetBotRunspeed() const { return (int)((float)_GetRunSpeed() * 1.786f); }
-	bool IsBotCasterCombatRange(Mob *target);
+	bool IsBotCasterAtCombatRange(Mob *target);
 	bool UseDiscipline(uint32 spell_id, uint32 target);
 	uint8 GetNumberNeedingHealedInGroup(uint8 hpr, bool includePets);
 	bool GetNeedsCured(Mob *tar);
@@ -461,10 +461,12 @@ public:
 	static int32 GetDisciplineRecastTimer(Bot *caster, int timer_index);
 	static bool CheckDisciplineRecastTimers(Bot *caster, int timer_index);
 	static uint32 GetDisciplineRemainingTime(Bot *caster, int timer_index);
+
 	static std::list<BotSpell> GetBotSpellsForSpellEffect(Bot* botCaster, int spellEffect);
 	static std::list<BotSpell> GetBotSpellsForSpellEffectAndTargetType(Bot* botCaster, int spellEffect, SpellTargetType targetType);
 	static std::list<BotSpell> GetBotSpellsBySpellType(Bot* botCaster, uint32 spellType);
 	static std::list<BotSpell_wPriority> GetPrioritizedBotSpellsBySpellType(Bot* botCaster, uint32 spellType);
+
 	static BotSpell GetFirstBotSpellBySpellType(Bot* botCaster, uint32 spellType);
 	static BotSpell GetBestBotSpellForFastHeal(Bot* botCaster);
 	static BotSpell GetBestBotSpellForHealOverTime(Bot* botCaster);
@@ -476,6 +478,7 @@ public:
 	static BotSpell GetBestBotSpellForGroupHeal(Bot* botCaster);
 	static BotSpell GetBestBotSpellForMagicBasedSlow(Bot* botCaster);
 	static BotSpell GetBestBotSpellForDiseaseBasedSlow(Bot* botCaster);
+
 	static Mob* GetFirstIncomingMobToMez(Bot* botCaster, BotSpell botSpell);
 	static BotSpell GetBestBotSpellForMez(Bot* botCaster);
 	static BotSpell GetBestBotMagicianPetSpell(Bot* botCaster);
@@ -486,17 +489,12 @@ public:
 	static BotSpell GetDebuffBotSpell(Bot* botCaster, Mob* target);
 	static BotSpell GetBestBotSpellForCure(Bot* botCaster, Mob* target);
 	static BotSpell GetBestBotSpellForResistDebuff(Bot* botCaster, Mob* target);
+	
 	static NPCType CreateDefaultNPCTypeStructForBot(std::string botName, std::string botLastName, uint8 botLevel, uint16 botRace, uint8 botClass, uint8 gender);
 
 	// Static Bot Group Methods
 	static bool AddBotToGroup(Bot* bot, Group* group);
 	static bool RemoveBotFromGroup(Bot* bot, Group* group);
-	static bool	GroupHasClass(Group* group, uint8 classId);
-	static bool GroupHasClericClass(Group* group) { return GroupHasClass(group, CLERIC); }
-	static bool GroupHasDruidClass(Group* group) { return GroupHasClass(group, DRUID); }
-	static bool GroupHasShamanClass(Group* group) { return GroupHasClass(group, SHAMAN); }
-	static bool GroupHasEnchanterClass(Group* group) { return GroupHasClass(group, ENCHANTER); }
-	static bool GroupHasPriestClass(Group* group) { return GroupHasClass(group, CLERIC | DRUID | SHAMAN); }
 	static void BotGroupSay(Mob *speaker, const char *msg, ...);
 
 	// "GET" Class Methods
@@ -657,7 +655,7 @@ public:
 
 	// Publicized private functions
 	static NPCType FillNPCTypeStruct(uint32 botSpellsID, std::string botName, std::string botLastName, uint8 botLevel, uint16 botRace, uint8 botClass, uint8 gender, float size, uint32 face, uint32 hairStyle, uint32 hairColor, uint32 eyeColor, uint32 eyeColor2, uint32 beardColor, uint32 beard, uint32 drakkinHeritage, uint32 drakkinTattoo, uint32 drakkinDetails, int32 hp, int32 mana, int32 mr, int32 cr, int32 dr, int32 fr, int32 pr, int32 corrup, int32 ac, uint32 str, uint32 sta, uint32 dex, uint32 agi, uint32 _int, uint32 wis, uint32 cha, uint32 attack);
-	void BotRemoveEquipItem(int slot);
+	void BotRemoveEquipItem(int16 slot);
 	void RemoveBotItemBySlot(uint32 slotID, std::string* errorMessage);
 	uint32 GetTotalPlayTime();
 

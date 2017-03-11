@@ -2261,7 +2261,7 @@ const NPCType* ZoneDatabase::GetMercType(uint32 id, uint16 raceid, uint32 client
 		tmpNPCType->gender = atoi(row[7]);
 		tmpNPCType->texture = atoi(row[8]);
 		tmpNPCType->helmtexture = atoi(row[9]);
-		tmpNPCType->attack_delay = atoi(row[10]);
+		tmpNPCType->attack_delay = atoi(row[10]) * 100; // TODO: fix DB
 		tmpNPCType->STR = atoi(row[11]);
 		tmpNPCType->STA = atoi(row[12]);
 		tmpNPCType->DEX = atoi(row[13]);
