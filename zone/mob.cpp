@@ -1537,7 +1537,7 @@ void Mob::DoAnim(const int animnum, int type, bool ackreq, eqFilterType filter) 
 		anim->action = animnum;
 		anim->speed = type;
 	}
-	entity_list.QueueCloseClients(this, outapp, false, 200, 0, ackreq, filter);
+	entity_list.QueueCloseClients(this, outapp, false, RuleI(Range, Anims), 0, ackreq, filter);
 	safe_delete(outapp);
 }
 

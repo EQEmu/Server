@@ -4606,9 +4606,9 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app)
 		PlayerPositionUpdateServer_Struct* ppu = (PlayerPositionUpdateServer_Struct*)outapp->pBuffer;
 		MakeSpawnUpdate(ppu);
 		if (gmhideme)
-			entity_list.QueueClientsStatus(this,outapp,true,Admin(),250);
+			entity_list.QueueClientsStatus(this, outapp, true, Admin(), 250);
 		else
-			entity_list.QueueCloseClients(this,outapp,true,300,nullptr,false);
+			entity_list.QueueCloseClients(this, outapp, true, 300, nullptr, false);
 		safe_delete(outapp);
 	}
 
@@ -5488,7 +5488,7 @@ void Client::Handle_OP_Emote(const EQApplicationPacket *app)
 	}
 	else
 	*/
-	entity_list.QueueCloseClients(this, outapp, true, 100, 0, true, FilterSocials);
+	entity_list.QueueCloseClients(this, outapp, true, RuleI(Range, Emote), 0, true, FilterSocials);
 
 	safe_delete(outapp);
 	return;

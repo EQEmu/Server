@@ -3309,7 +3309,7 @@ void Mob::CommonDamage(Mob* attacker, int &damage, const uint16 spell_id, const 
 		//fade mez if we are mezzed
 		if (IsMezzed() && attacker) {
 			Log.Out(Logs::Detail, Logs::Combat, "Breaking mez due to attack.");
-			entity_list.MessageClose_StringID(this, true, 100, MT_WornOff,
+			entity_list.MessageClose_StringID(this, true, RuleI(Range, SpellMessages), MT_WornOff,
 					HAS_BEEN_AWAKENED, GetCleanName(), attacker->GetCleanName());
 			BuffFadeByEffect(SE_Mez);
 		}
@@ -3471,7 +3471,7 @@ void Mob::CommonDamage(Mob* attacker, int &damage, const uint16 spell_id, const 
 						if (attacker->CastToClient()->GetFilter(FilterDamageShields) != FilterHide)
 							attacker->Message_StringID(MT_DS,OTHER_HIT_NONMELEE, GetCleanName(), ConvertArray(damage, val1));
 					} else {
-						entity_list.MessageClose_StringID(this, true, 100, MT_NonMelee, HIT_NON_MELEE, attacker->GetCleanName(), GetCleanName(), ConvertArray(damage, val1));
+						entity_list.MessageClose_StringID(this, true, RuleI(Range, SpellMessages), MT_NonMelee, HIT_NON_MELEE, attacker->GetCleanName(), GetCleanName(), ConvertArray(damage, val1));
 					}
 				} else {
 					if(damage > 0) {
@@ -3505,7 +3505,7 @@ void Mob::CommonDamage(Mob* attacker, int &damage, const uint16 spell_id, const 
 		// If this is Damage Shield damage, the correct OP_Damage packets will be sent from Mob::DamageShield, so
 		// we don't send them here.
 		if(!FromDamageShield) {
-			entity_list.QueueCloseClients(this, outapp, true, 200, skip, true, filter);
+			entity_list.QueueCloseClients(this, outapp, true, RuleI(Range, SpellMessages), skip, true, filter);
 			//send the damage to ourself if we are a client
 			if(IsClient()) {
 				//I dont think any filters apply to damage affecting us
@@ -3522,7 +3522,7 @@ void Mob::CommonDamage(Mob* attacker, int &damage, const uint16 spell_id, const 
 			attacker->FilteredMessage_StringID(attacker, MT_DoTDamage, FilterDOT,
 					YOUR_HIT_DOT, GetCleanName(), itoa(damage), spells[spell_id].name);
 			// older clients don't have the below String ID, but it will be filtered
-			entity_list.FilteredMessageClose_StringID(attacker, true, 200,
+			entity_list.FilteredMessageClose_StringID(attacker, true, RuleI(Range, SpellMessages),
 					MT_DoTDamage, FilterDOT, OTHER_HIT_DOT, GetCleanName(),
 					itoa(damage), attacker->GetCleanName(), spells[spell_id].name);
 		}
@@ -3853,7 +3853,7 @@ void Mob::TrySpellProc(const EQEmu::ItemInstance *inst, const EQEmu::ItemData *w
 					begincast->spell_id = SpellProcs[i].spellID;
 					begincast->cast_time = 0;
 					outapp->priority = 3;
-					entity_list.QueueCloseClients(this, outapp, false, 200, 0, true);
+					entity_list.QueueCloseClients(this, outapp, false, RuleI(Range, SpellMessages), 0, true);
 					safe_delete(outapp);
 					ExecWeaponProc(nullptr, SpellProcs[i].spellID, on, SpellProcs[i].level_override);
 					CheckNumHitsRemaining(NumHit::OffensiveSpellProcs, 0,
