@@ -207,3 +207,21 @@ bool EQEmu::ItemData::IsTypeShield() const
 {
 	return (ItemType == item::ItemTypeShield);
 }
+
+bool EQEmu::ItemData::CheckLoreConflict(const ItemData* l_item, const ItemData* r_item)
+{
+	if (!l_item || !r_item)
+		return false;
+
+	if (!l_item->LoreGroup || !r_item->LoreGroup)
+		return false;
+
+	if (l_item->LoreGroup == r_item->LoreGroup) {
+		if ((l_item->LoreGroup == -1) && (l_item->ID != r_item->ID))
+			return false;
+
+		return true;
+	}
+
+	return false;
+}
