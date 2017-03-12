@@ -4372,7 +4372,7 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app)
 			    new EQApplicationPacket(OP_ClientUpdate, sizeof(PlayerPositionUpdateServer_Struct));
 			PlayerPositionUpdateServer_Struct* ppus = (PlayerPositionUpdateServer_Struct*)outapp->pBuffer;
 			boat->MakeSpawnUpdate(ppus);
-			entity_list.QueueCloseClients(boat,outapp,true,300,this,false);
+			entity_list.QueueCloseClients(boat, outapp, true, 300, this, false);
 			safe_delete(outapp);
 			// update the boat's position on the server, without sending an update
 			boat->GMMove(ppu->x_pos, ppu->y_pos, ppu->z_pos, EQ19toFloat(ppu->heading), false);

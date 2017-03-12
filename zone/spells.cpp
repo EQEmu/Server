@@ -363,9 +363,22 @@ bool Mob::DoCastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 		StopCasting();
 
 		Message_StringID(MT_SpellFailure, fizzle_msg);
+
+		/* Song Failure Messages */
 		entity_list.FilteredMessageClose_StringID(
-		    this, true, RuleI(Range, SpellMessages), MT_SpellFailure, IsClient() ? FilterPCSpells : FilterNPCSpells,
-		    fizzle_msg == MISS_NOTE ? MISSED_NOTE_OTHER : SPELL_FIZZLE_OTHER, GetName());
+		    this, /* Sender */
+			true, /* Skip Sender */
+			RuleI(Range, SpellMessages), 
+			MT_SpellFailure, /* Type: 289 */
+			(IsClient() ? FilterPCSpells : FilterNPCSpells), /* FilterType: 8 or 9 depending on client/npc */
+		    (fizzle_msg == MISS_NOTE ? MISSED_NOTE_OTHER : SPELL_FIZZLE_OTHER), 
+				/* 
+					MessageFormat: You miss a note, bringing your song to a close! (if missed note)
+					MessageFormat: A missed note brings %1's song to a close!
+					MessageFormat: %1's spell fizzles!
+				*/
+			GetName() /* Message1 */
+		);
 
 		TryTriggerOnValueAmount(false, true);
 		return(false);
@@ -469,7 +482,14 @@ bool Mob::DoCastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 		begincast->spell_id = spell_id;
 		begincast->cast_time = orgcasttime; // client calculates reduced time by itself
 		outapp->priority = 3;
-		entity_list.QueueCloseClients(this, outapp, false, RuleI(Range, BeginCast), 0, true); //IsClient() ? FILTER_PCSPELLS : FILTER_NPCSPELLS);
+		entity_list.QueueCloseClients(
+			this, /* Sender */
+			outapp, /* Packet */
+			false, /* Ignore Sender */
+			RuleI(Range, BeginCast), 
+			0, /* Skip this Mob */
+			true /* Packet ACK */
+		); //IsClient() ? FILTER_PCSPELLS : FILTER_NPCSPELLS);
 		safe_delete(outapp);
 	}
 
@@ -3486,7 +3506,15 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob *spelltar, bool reflect, bool use_r
 		CastToClient()->QueuePacket(action_packet);
 
 	// send to people in the area, ignoring caster and target
-	entity_list.QueueCloseClients(spelltar, action_packet, true, RuleI(Range, SpellMessages), this, true, spelltar->IsClient() ? FilterPCSpells : FilterNPCSpells);
+	entity_list.QueueCloseClients(
+		spelltar, /* Sender */
+		action_packet, /* Packet */
+		true, /* Ignore Sender */
+		RuleI(Range, SpellMessages), 
+		this, /* Skip this Mob */
+		true, /* Packet ACK */
+		(spelltar->IsClient() ? FilterPCSpells : FilterNPCSpells) /* EQ Filter Type: (8 or 9) */
+	);
 
 	/* Send the EVENT_CAST_ON event */
 	if(spelltar->IsNPC())
@@ -3955,9 +3983,16 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob *spelltar, bool reflect, bool use_r
 	cd->spellid = action->spell;
 	cd->meleepush_xy = action->sequence;
 	cd->damage = 0;
-	if(!IsEffectInSpell(spell_id, SE_BindAffinity))
-	{
-		entity_list.QueueCloseClients(spelltar, message_packet, false, RuleI(Range, SpellMessages), 0, true, spelltar->IsClient() ? FilterPCSpells : FilterNPCSpells);
+	if(!IsEffectInSpell(spell_id, SE_BindAffinity)){
+		entity_list.QueueCloseClients(
+			spelltar, /* Sender */
+			message_packet, /* Packet */
+			false, /* Ignore Sender */
+			RuleI(Range, SpellMessages), 
+			0, /* Skip this mob */
+			true, /* Packet ACK */
+			(spelltar->IsClient() ? FilterPCSpells : FilterNPCSpells) /* Message Filter Type: (8 or 9) */
+		);
 	}
 	safe_delete(action_packet);
 	safe_delete(message_packet);
@@ -5611,7 +5646,7 @@ void Client::SendSpellAnim(uint16 targetid, uint16 spell_id)
 	a->sequence = 231;
 
 	app.priority = 1;
-	entity_list.QueueCloseClients(this, &app);
+	entity_list.QueueCloseClients(this, &app, false, RuleI(Range, SpellParticles));
 }
 
 void Mob::CalcDestFromHeading(float heading, float distance, float MaxZDiff, float StartX, float StartY, float &dX, float &dY, float &dZ)
