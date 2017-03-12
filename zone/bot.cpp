@@ -1826,15 +1826,30 @@ bool Bot::Process() {
 		if(currently_fleeing)
 			ProcessFlee();
 
-		if(GetHP() < GetMaxHP())
-			SetHP(GetHP() + CalcHPRegen() + RestRegenHP);
+		if(GetHP() < GetMaxHP()) {
+			if (static_cast<int64>(GetHP() + CalcHPRegen() + RestRegenHP()) < static_cast<int64>(GetMaxHP())) {
+				SetHP(GetHP() + CalcHPRegen() + RestRegenHP);
+			} else {
+				SetHP(GetMaxHP());
+			}
+		}
 
-		if(GetMana() < GetMaxMana())
-			SetMana(GetMana() + CalcManaRegen() + RestRegenMana);
+		if(GetMana() < GetMaxMana()) {
+			if (static_cast<int64>(GetMana() + CalcManaRegen() + RestRegenMana) < static_cast<int64>(GetMaxMana())) {
+				SetMana(GetMana() + CalcManaRegen() + RestRegenMana);
+			} else {
+				SetMana(GetMaxMana());
+			}
+		}
 
 		CalcATK();
-		if(GetEndurance() < GetMaxEndurance())
-			SetEndurance(GetEndurance() + CalcEnduranceRegen() + RestRegenEndurance);
+		if(GetEndurance() < GetMaxEndurance()) {
+			if (static_cast<int64>(GetEndurance() + CalcEnduranceRegen() + RestRegenEndurance) < static_cast<int64>(GetMaxEndurance())) {
+				SetEndurance(GetEndurance() + CalcEnduranceRegen() + RestRegenEndurance);
+			} else {
+				SetEndurance(GetMaxEndurance());
+			}
+		}
 	}
 
 	if (sendhpupdate_timer.Check(false)) {

@@ -628,22 +628,56 @@ bool NPC::Process()
 		//Lieka Edit:Fixing NPC regen.NPCs should regen to full during a set duration, not based on their HPs.Increase NPC's HPs by % of total HPs / tick.
 		if((GetHP() < GetMaxHP()) && !IsPet()) {
 			if(!IsEngaged()) {//NPC out of combat
-				if(GetNPCHPRegen() > OOCRegen)
+				if(GetNPCHPRegen() > OOCRegen) {
+					if (static_cast<int64>(GetHP() + GetNPCHPRegen()) < static_cast<int64>(GetMaxHP())) {
+						SetHP(GetHP() + GetNPCHPRegen());
+					} else {
+						SetHP(GetMaxHP());
+					}
+				}
+				else {
+					if (static_cast<int64>(GetHP() + OOCRegen) < static_cast<int64>(GetMaxHP())) {
+						SetHP(GetHP() + OOCRegen);
+					} else {
+						SetHP(GetMaxHP());
+					}
+				}
+			} else {
+				if (static_cast<int64>(GetHP() + GetNPCHPRegen()) < static_cast<int64>(GetMaxHP())) {
 					SetHP(GetHP() + GetNPCHPRegen());
-				else
-					SetHP(GetHP() + OOCRegen);
-			} else
-				SetHP(GetHP()+GetNPCHPRegen());
-		} else if(GetHP() < GetMaxHP() && GetOwnerID() !=0) {
-			if(!IsEngaged()) //pet
-				SetHP(GetHP()+GetNPCHPRegen()+bonus+(GetLevel()/5));
-			else
-				SetHP(GetHP()+GetNPCHPRegen()+bonus);
-		} else
-			SetHP(GetHP()+GetNPCHPRegen());
+				} else {
+					SetHP(GetMaxHP());
+				}
+			}
+		} else if(GetHP() < GetMaxHP() && GetOwnerID() != 0) {
+			if(!IsEngaged()) { //pet
+				if ((GetHP() + GetNPCHPRegen() + bonus + (GetLevel() / 5)) < GetMaxHP()) {
+					SetHP(GetHP() + GetNPCHPRegen() + bonus + (GetLevel() / 5));
+				} else {
+					SetHP(GetMaxHP());
+				}
+			}
+			else {
+				if (static_cast<int64>(GetHP() + GetNPCHPRegen() + bonus) < static_cast<int64>(GetMaxHP())) {
+					SetHP(GetHP() + GetNPCHPRegen() + bonus);
+				} else {
+					SetHP(GetMaxHP());
+				}
+			}
+		} else {
+			if (static_cast<int64>(GetHP() + GetNPCHPRegen()) < static_cast<int64>(GetMaxHP())) {
+				SetHP(GetHP() + GetNPCHPRegen());
+			} else {
+				SetHP(GetMaxHP());
+			}
+		}
 
 		if(GetMana() < GetMaxMana()) {
-			SetMana(GetMana()+mana_regen+bonus);
+			if (static_cast<int64>(GetMana() + mana_regen + bonus) < static_cast<int64>(GetMaxMana())) {
+				SetMana(GetMana() + mana_regen + bonus);
+			} else {
+				SetMana(GetMaxMana());
+			}
 		}
 
 
