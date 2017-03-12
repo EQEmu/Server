@@ -353,7 +353,7 @@ bool WorldDatabase::GetStartZone(PlayerProfile_Struct* in_pp, CharCreate_Struct*
 	in_pp->x = in_pp->y = in_pp->z = in_pp->heading = in_pp->zone_id = 0;
 	in_pp->binds[0].x = in_pp->binds[0].y = in_pp->binds[0].z = in_pp->binds[0].zoneId = in_pp->binds[0].instance_id = 0;
 	// see if we have an entry for start_zone. We can support both titanium & SOF+ by having two entries per class/race/deity combo with different zone_ids
-	std::string query = StringFormat("SELECT x, y, z, heading, start_zone, bind_id FROM start_zones WHERE zone_id = %i "
+	std::string query = StringFormat("SELECT x, y, z, heading, start_zone, bind_id, bind_x, bind_y, bind_z FROM start_zones WHERE zone_id = %i "
 		"AND player_class = %i AND player_deity = %i AND player_race = %i",
 		in_cc->start_zone, in_cc->class_, in_cc->deity, in_cc->race);
     auto results = QueryDatabase(query);
@@ -376,6 +376,9 @@ bool WorldDatabase::GetStartZone(PlayerProfile_Struct* in_pp, CharCreate_Struct*
 		in_pp->heading = atof(row[3]);
 		in_pp->zone_id = atoi(row[4]);
 		in_pp->binds[0].zoneId = atoi(row[5]);
+		in_pp->binds[0].x = atof(row[6]);
+		in_pp->binds[0].y = atof(row[7]);
+		in_pp->binds[0].z = atof(row[8]);
 	}
 
 	if(in_pp->x == 0 && in_pp->y == 0 && in_pp->z == 0)
