@@ -225,8 +225,22 @@ void Client::OPCombatAbility(const CombatAbility_Struct *ca_atk)
 	if (ClientVersion() >= EQEmu::versions::ClientVersion::RoF2 && ca_atk->m_skill == EQEmu::skills::SkillTigerClaw)
 		timer = pTimerCombatAbility2;
 
+
+
+	if (ca_atk->m_skill == EQEmu::skills::SkillBash) {// SLAM - Bash without a shield equipped
+
+		switch (GetRace())
+		{
+		case OGRE:
+		case TROLL:
+		case BARBARIAN:
+		default:
+			break;
+		}
+
+	}
+
 	/* Check to see if actually have skill */
-	if (!MaxSkill(static_cast<EQEmu::skills::SkillType>(ca_atk->m_skill)))
 		return;
 
 	if (GetTarget()->GetID() != ca_atk->m_target)
