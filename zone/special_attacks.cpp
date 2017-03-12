@@ -226,21 +226,22 @@ void Client::OPCombatAbility(const CombatAbility_Struct *ca_atk)
 		timer = pTimerCombatAbility2;
 
 
+	bool CanBypassSkillCheck = false;
 
-	if (ca_atk->m_skill == EQEmu::skills::SkillBash) {// SLAM - Bash without a shield equipped
-
+	if (ca_atk->m_skill == EQEmu::skills::SkillBash) { // SLAM - Bash without a shield equipped
 		switch (GetRace())
 		{
 		case OGRE:
 		case TROLL:
 		case BARBARIAN:
+			CanBypassSkillCheck = true;
 		default:
 			break;
 		}
-
 	}
 
 	/* Check to see if actually have skill */
+	if (!MaxSkill(static_cast<EQEmu::skills::SkillType>(ca_atk->m_skill)) && !CanBypassSkillCheck)
 		return;
 
 	if (GetTarget()->GetID() != ca_atk->m_target)
