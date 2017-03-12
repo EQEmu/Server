@@ -4132,13 +4132,13 @@ void Mob::TryCriticalHit(Mob *defender, DamageHitInfo &hit, ExtraAttackOptions *
 						hit.damage_done = hit.damage_done * 200 / 100;
 
 						entity_list.FilteredMessageClose_StringID(
-						    this, /* Sender */
+							this, /* Sender */
 							false, /* Skip Sender */
 							RuleI(Range, CriticalDamage),
 							MT_CritMelee, /* Type: 301 */
 							FilterMeleeCrits, /* FilterType: 12 */
 							DEADLY_STRIKE, /* MessageFormat: %1 scores a Deadly Strike!(%2) */
-						    GetCleanName(), /* Message1 */
+							GetCleanName(), /* Message1 */
 							itoa(hit.damage_done + hit.min_damage) /* Message2 */
 						);
 						return;
@@ -4160,14 +4160,14 @@ void Mob::TryCriticalHit(Mob *defender, DamageHitInfo &hit, ExtraAttackOptions *
 				Log.Out(Logs::Detail, Logs::Combat, "Crip damage %d", hit.damage_done);
 
 				entity_list.FilteredMessageClose_StringID(
-				    this, /* Sender */
+					this, /* Sender */
 					false, /* Skip Sender */
 					RuleI(Range, CriticalDamage),
 					MT_CritMelee, /* Type: 301 */
 					FilterMeleeCrits, /* FilterType: 12 */
 					CRIPPLING_BLOW, /* MessageFormat: %1 lands a Crippling Blow!(%2) */
 					GetCleanName(), /* Message1 */
-				    itoa(hit.damage_done + hit.min_damage) /* Message2 */
+					itoa(hit.damage_done + hit.min_damage) /* Message2 */
 				);
 
 				// Crippling blows also have a chance to stun

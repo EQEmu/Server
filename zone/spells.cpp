@@ -366,17 +366,17 @@ bool Mob::DoCastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 
 		/* Song Failure Messages */
 		entity_list.FilteredMessageClose_StringID(
-		    this, /* Sender */
+			this, /* Sender */
 			true, /* Skip Sender */
 			RuleI(Range, SpellMessages), 
 			MT_SpellFailure, /* Type: 289 */
 			(IsClient() ? FilterPCSpells : FilterNPCSpells), /* FilterType: 8 or 9 depending on client/npc */
-		    (fizzle_msg == MISS_NOTE ? MISSED_NOTE_OTHER : SPELL_FIZZLE_OTHER), 
-				/* 
-					MessageFormat: You miss a note, bringing your song to a close! (if missed note)
-					MessageFormat: A missed note brings %1's song to a close!
-					MessageFormat: %1's spell fizzles!
-				*/
+			(fizzle_msg == MISS_NOTE ? MISSED_NOTE_OTHER : SPELL_FIZZLE_OTHER), 
+			/* 
+				MessageFormat: You miss a note, bringing your song to a close! (if missed note)
+				MessageFormat: A missed note brings %1's song to a close!
+				MessageFormat: %1's spell fizzles!
+			*/
 			GetName() /* Message1 */
 		);
 
