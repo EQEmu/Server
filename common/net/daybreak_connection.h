@@ -68,8 +68,8 @@ namespace EQ
 			SequencePast
 		};
 
-		typedef std::chrono::system_clock::time_point Timestamp;
-		typedef std::chrono::system_clock Clock;
+		typedef std::chrono::high_resolution_clock::time_point Timestamp;
+		typedef std::chrono::high_resolution_clock Clock;
 
 		struct DaybreakConnectionStats
 		{
@@ -209,7 +209,8 @@ namespace EQ
 				keepalive_delay_ms = 9000;
 				resend_delay_ms = 300;
 				resend_delay_factor = 1.5;
-				resend_delay_max = 5000;
+				resend_delay_min = 50;
+				resend_delay_max = 2000;
 				connect_delay_ms = 500;
 				stale_connection_ms = 60000;
 				connect_stale_ms = 5000;
@@ -222,7 +223,8 @@ namespace EQ
 				hold_length_ms = 10;
 				simulated_in_packet_loss = 0;
 				simulated_out_packet_loss = 0;
-				tic_rate_hertz = 10.0;
+				tic_rate_hertz = 60.0;
+				max_resend_count = 10;
 			}
 
 			size_t max_packet_size;
@@ -230,6 +232,7 @@ namespace EQ
 			size_t keepalive_delay_ms;
 			double resend_delay_factor;
 			size_t resend_delay_ms;
+			size_t resend_delay_min;
 			size_t resend_delay_max;
 			size_t connect_delay_ms;
 			size_t connect_stale_ms;
@@ -240,6 +243,7 @@ namespace EQ
 			size_t simulated_in_packet_loss;
 			size_t simulated_out_packet_loss;
 			double tic_rate_hertz;
+			size_t max_resend_count;
 			DaybreakEncodeType encode_passes[2];
 			int port;
 		};

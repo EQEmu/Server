@@ -233,7 +233,7 @@ void EQ::Net::DaybreakConnectionManager::SendDisconnect(const std::string &addr,
 {
 	DaybreakDisconnect header;
 	header.zero = 0;
-	header.opcode = OP_SessionDisconnect;
+	header.opcode = OP_OutOfSession;
 	header.connect_code = 0;
 
 	DynamicPacket out;
@@ -733,7 +733,7 @@ void EQ::Net::DaybreakConnection::ProcessDecodedPacket(const Packet &p)
 			response.zero = 0;
 			response.opcode = OP_SessionStatResponse;
 			response.timestamp = request.timestamp;
-			response.our_timestamp = EQ::Net::HostToNetwork(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count());
+			response.our_timestamp = EQ::Net::HostToNetwork(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count());
 			response.client_sent = request.packets_sent;
 			response.client_recv = request.packets_recv;
 			response.server_sent = EQ::Net::HostToNetwork(m_stats.sent_packets);
@@ -742,7 +742,9 @@ void EQ::Net::DaybreakConnection::ProcessDecodedPacket(const Packet &p)
 			out.PutSerialize(0, response);
 			InternalSend(out);
 
-			m_resend_delay = std::min((size_t)(request.avg_ping * m_owner->m_options.resend_delay_factor) + m_owner->m_options.resend_delay_ms, m_owner->m_options.resend_delay_max);
+			m_resend_delay = (size_t)(request.avg_ping * m_owner->m_options.resend_delay_factor) + m_owner->m_options.resend_delay_ms;
+			m_resend_delay = std::min(m_resend_delay, m_owner->m_options.resend_delay_max);
+			m_resend_delay = std::max(m_resend_delay, m_owner->m_options.resend_delay_min);
 			break;
 		}
 		case OP_SessionStatResponse:
@@ -1000,6 +1002,10 @@ void EQ::Net::DaybreakConnection::ProcessResend()
 
 void EQ::Net::DaybreakConnection::ProcessResend(int stream)
 {
+	if (m_status == DbProtocolStatus::StatusDisconnected || m_status == DbProtocolStatus::StatusDisconnecting) {
+		return;
+	}
+
 	auto now = Clock::now();
 	auto s = &m_streams[stream];
 	for (auto &entry : s->sent_packets) {
@@ -1012,6 +1018,13 @@ void EQ::Net::DaybreakConnection::ProcessResend(int stream)
 			}
 		}
 		else {
+			if (entry.second.times_resent >= m_owner->m_options.max_resend_count) {
+				Close();
+				return;
+			}
+
+			auto adjusted_resend = std::max((uint32_t)(m_resend_delay / (entry.second.times_resent + 1)), (uint32_t)m_owner->m_options.resend_delay_min);
+
 			if ((size_t)time_since_last_send.count() > m_resend_delay) {
 				InternalBufferedSend(entry.second.packet);
 				entry.second.last_sent = now;

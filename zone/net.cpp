@@ -431,15 +431,11 @@ int main(int argc, char** argv) {
 	bool worldwasconnected = worldserver.Connected();
 	std::shared_ptr<EQStreamInterface> eqss;
 	EQStreamInterface *eqsi;
-	uint8 IDLEZONEUPDATE = 200;
-	uint8 ZONEUPDATE = 10;
-	Timer zoneupdate_timer(ZONEUPDATE);
-	zoneupdate_timer.Start();
 	bool eqsf_open = false;
 	std::unique_ptr<EQ::Net::EQStreamManager> eqsm;
 	std::chrono::time_point<std::chrono::system_clock> frame_prev = std::chrono::system_clock::now();
 
-	EQ::Timer process_timer(50, true, [&](EQ::Timer* t) {
+	EQ::Timer process_timer(15, true, [&](EQ::Timer* t) {
 			//Advance the timer to our current point in time
 			Timer::SetCurrentTime();
 
@@ -474,14 +470,6 @@ int main(int argc, char** argv) {
 				entity_list.AddClient(client);
 			}
 		
-			if ( numclients < 1 && zoneupdate_timer.GetDuration() != IDLEZONEUPDATE )
-				zoneupdate_timer.SetTimer(IDLEZONEUPDATE);
-			else if ( numclients > 0 && zoneupdate_timer.GetDuration() == IDLEZONEUPDATE )
-			{
-				zoneupdate_timer.SetTimer(ZONEUPDATE);
-				zoneupdate_timer.Trigger();
-			}
-		
 			if (worldserver.Connected()) {
 				worldwasconnected = true;
 			}
@@ -491,7 +479,7 @@ int main(int argc, char** argv) {
 				worldwasconnected = false;
 			}
 		
-			if (is_zone_loaded && zoneupdate_timer.Check()) {
+			if (is_zone_loaded) {
 				{
 					if(net.group_timer.Enabled() && net.group_timer.Check())
 						entity_list.GroupProcess();
@@ -527,6 +515,7 @@ int main(int argc, char** argv) {
 		
 				}
 			}
+
 			if (InterserverTimer.Check()) {
 				InterserverTimer.Start();
 				database.ping();
