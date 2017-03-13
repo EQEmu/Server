@@ -1087,7 +1087,6 @@ void Corpse::LootItem(Client *client, const EQApplicationPacket *app)
 	}
 
 	if (!IsBeingLootedBy(client)) {
-		client->Message(13, "Error: Corpse::LootItem: BeingLootedBy != client");
 		client->QueuePacket(app);
 		SendEndLootErrorPacket(client);
 		return;

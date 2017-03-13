@@ -1,5 +1,21 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 03/12/2017 ==
+Akkadius: 
+- Implemented range rules for packets and other functions
+	RULE_INT ( Range, Say, 135 )
+	RULE_INT ( Range, Emote, 135 )
+	RULE_INT ( Range, BeginCast, 200)
+	RULE_INT ( Range, Anims, 135)
+	RULE_INT ( Range, SpellParticles, 135)
+	RULE_INT ( Range, DamageMessages, 50)
+	RULE_INT ( Range, SpellMessages, 75)
+	RULE_INT ( Range, SongMessages, 75)
+	RULE_INT ( Range, MobPositionUpdates, 600)
+	RULE_INT ( Range, CriticalDamage, 80)
+	
+ - (Readability) Also cleaned up some formatting in messaging and packets so it is easier to understand what is going on with the code
+
 == 03/09/2017 ==
 Uleat: Fixed a few glitches related to bot trading and other affected code
 	- Added a temporary fail clause for partial stack transfers to prevent client item overwrites

@@ -538,6 +538,9 @@ namespace EQEmu
 		bool IsType1HWeapon() const;
 		bool IsType2HWeapon() const;
 		bool IsTypeShield() const;
+
+		static bool CheckLoreConflict(const ItemData* l_item, const ItemData* r_item);
+		bool CheckLoreConflict(const ItemData* item) const { return CheckLoreConflict(this, item); }
 	};
 
 } /*EQEmu*/

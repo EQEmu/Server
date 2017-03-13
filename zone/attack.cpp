@@ -1481,9 +1481,18 @@ bool Client::Death(Mob* killerMob, int32 damage, uint16 spell, EQEmu::skills::Sk
 	}
 
 	if(killerMob && killerMob->IsClient() && (spell != SPELL_UNKNOWN) && damage > 0) {
-		char val1[20]={0};
-		entity_list.MessageClose_StringID(this, false, 100, MT_NonMelee, HIT_NON_MELEE,
-			killerMob->GetCleanName(), GetCleanName(), ConvertArray(damage, val1));
+		char val1[20] = { 0 };
+
+		entity_list.MessageClose_StringID(
+			this, /* Sender */
+			false, /* Skip Sender */
+			RuleI(Range, DamageMessages),
+			MT_NonMelee, /* 283 */
+			HIT_NON_MELEE, /* %1 hit %2 for %3 points of non-melee damage. */
+			killerMob->GetCleanName(), /* Message1 */
+			GetCleanName(), /* Message2 */
+			ConvertArray(damage, val1)/* Message3 */
+		);
 	}
 
 	int exploss = 0;
@@ -2010,8 +2019,17 @@ bool NPC::Death(Mob* killer_mob, int32 damage, uint16 spell, EQEmu::skills::Skil
 
 		if (killer_mob->IsClient() && (spell != SPELL_UNKNOWN) && damage > 0) {
 			char val1[20] = { 0 };
-			entity_list.MessageClose_StringID(this, false, 100, MT_NonMelee, HIT_NON_MELEE,
-				killer_mob->GetCleanName(), GetCleanName(), ConvertArray(damage, val1));
+
+			entity_list.MessageClose_StringID(
+				this, /* Sender */
+				false, /* Skip Sender */
+				RuleI(Range, DamageMessages),
+				MT_NonMelee, /* 283 */
+				HIT_NON_MELEE, /* %1 hit %2 for %3 points of non-melee damage. */
+				killer_mob->GetCleanName(), /* Message1 */
+				GetCleanName(), /* Message2 */
+				ConvertArray(damage, val1) /* Message3 */
+			);
 		}
 	}
 	else {
@@ -3226,7 +3244,7 @@ void Mob::CommonDamage(Mob* attacker, int &damage, const uint16 spell_id, const 
 
 				//we used to do a message to the client, but its gone now.
 				// emote goes with every one ... even npcs
-				entity_list.MessageClose(this, true, 300, MT_Emote, "%s beams a smile at %s", attacker->GetCleanName(), this->GetCleanName() );
+				entity_list.MessageClose(this, true, RuleI(Range, SpellMessages), MT_Emote, "%s beams a smile at %s", attacker->GetCleanName(), this->GetCleanName() );
 			}
 		}	//end `if there is some damage being done and theres anattacker person involved`
 
@@ -3306,8 +3324,15 @@ void Mob::CommonDamage(Mob* attacker, int &damage, const uint16 spell_id, const 
 		//fade mez if we are mezzed
 		if (IsMezzed() && attacker) {
 			Log.Out(Logs::Detail, Logs::Combat, "Breaking mez due to attack.");
-			entity_list.MessageClose_StringID(this, true, 100, MT_WornOff,
-					HAS_BEEN_AWAKENED, GetCleanName(), attacker->GetCleanName());
+			entity_list.MessageClose_StringID(
+				this, /* Sender */
+				true,  /* Skip Sender */
+				RuleI(Range, SpellMessages), 
+				MT_WornOff, /* 284 */
+				HAS_BEEN_AWAKENED, // %1 has been awakened by %2.
+				GetCleanName(), /* Message1 */
+				attacker->GetCleanName() /* Message2 */
+			);
 			BuffFadeByEffect(SE_Mez);
 		}
 
@@ -3451,8 +3476,8 @@ void Mob::CommonDamage(Mob* attacker, int &damage, const uint16 spell_id, const 
 					else
 						filter = FilterPetMisses;
 
-					if(!FromDamageShield)
-						owner->CastToClient()->QueuePacket(outapp,true,CLIENT_CONNECTED,filter);
+					if (!FromDamageShield)
+						owner->CastToClient()->QueuePacket(outapp, true, CLIENT_CONNECTED, filter);
 				}
 			}
 			skip = owner;
@@ -3466,9 +3491,18 @@ void Mob::CommonDamage(Mob* attacker, int &damage, const uint16 spell_id, const 
 					char val1[20] = {0};
 					if (FromDamageShield) {
 						if (attacker->CastToClient()->GetFilter(FilterDamageShields) != FilterHide)
-							attacker->Message_StringID(MT_DS,OTHER_HIT_NONMELEE, GetCleanName(), ConvertArray(damage, val1));
+							attacker->Message_StringID(MT_DS, OTHER_HIT_NONMELEE, GetCleanName(), ConvertArray(damage, val1));
 					} else {
-						entity_list.MessageClose_StringID(this, true, 100, MT_NonMelee, HIT_NON_MELEE, attacker->GetCleanName(), GetCleanName(), ConvertArray(damage, val1));
+						entity_list.MessageClose_StringID(
+							this, /* Sender */
+							true, /* Skip Sender */
+							RuleI(Range, SpellMessages),
+							MT_NonMelee, /* 283 */
+							HIT_NON_MELEE, /* %1 hit %2 for %3 points of non-melee damage. */
+							attacker->GetCleanName(), /* Message1 */
+							GetCleanName(), /* Message2 */
+							ConvertArray(damage, val1) /* Message3 */
+						);
 					}
 				} else {
 					if(damage > 0) {
@@ -3502,7 +3536,17 @@ void Mob::CommonDamage(Mob* attacker, int &damage, const uint16 spell_id, const 
 		// If this is Damage Shield damage, the correct OP_Damage packets will be sent from Mob::DamageShield, so
 		// we don't send them here.
 		if(!FromDamageShield) {
-			entity_list.QueueCloseClients(this, outapp, true, 200, skip, true, filter);
+
+			entity_list.QueueCloseClients(
+				this, /* Sender */
+				outapp, /* packet */
+				true, /* Skip Sender */
+				RuleI(Range, SpellMessages), 
+				skip, /* Skip this mob */
+				true, /* Packet ACK */
+				filter /* eqFilterType filter */
+			 );
+
 			//send the damage to ourself if we are a client
 			if(IsClient()) {
 				//I dont think any filters apply to damage affecting us
@@ -3518,10 +3562,20 @@ void Mob::CommonDamage(Mob* attacker, int &damage, const uint16 spell_id, const 
 			//might filter on (attack_skill>200 && attack_skill<250), but I dont think we need it
 			attacker->FilteredMessage_StringID(attacker, MT_DoTDamage, FilterDOT,
 					YOUR_HIT_DOT, GetCleanName(), itoa(damage), spells[spell_id].name);
-			// older clients don't have the below String ID, but it will be filtered
-			entity_list.FilteredMessageClose_StringID(attacker, true, 200,
-					MT_DoTDamage, FilterDOT, OTHER_HIT_DOT, GetCleanName(),
-					itoa(damage), attacker->GetCleanName(), spells[spell_id].name);
+
+			/* older clients don't have the below String ID, but it will be filtered */
+			entity_list.FilteredMessageClose_StringID(
+				attacker, /* Sender */
+				true, /* Skip Sender */
+				RuleI(Range, SpellMessages),
+				MT_DoTDamage, /* Type: 325 */
+				FilterDOT, /* FilterType: 19 */
+				OTHER_HIT_DOT,  /* MessageFormat: %1 has taken %2 damage from %3 by %4. */
+				GetCleanName(), /* Message1 */
+				itoa(damage), /* Message2 */
+				attacker->GetCleanName(), /* Message3 */
+				spells[spell_id].name /* Message4 */
+			);
 		}
 	} //end packet sending
 
@@ -3850,7 +3904,7 @@ void Mob::TrySpellProc(const EQEmu::ItemInstance *inst, const EQEmu::ItemData *w
 					begincast->spell_id = SpellProcs[i].spellID;
 					begincast->cast_time = 0;
 					outapp->priority = 3;
-					entity_list.QueueCloseClients(this, outapp, false, 200, 0, true);
+					entity_list.QueueCloseClients(this, outapp, false, RuleI(Range, SpellMessages), 0, true);
 					safe_delete(outapp);
 					ExecWeaponProc(nullptr, SpellProcs[i].spellID, on, SpellProcs[i].level_override);
 					CheckNumHitsRemaining(NumHit::OffensiveSpellProcs, 0,
@@ -3929,8 +3983,18 @@ void Mob::TryPetCriticalHit(Mob *defender, DamageHitInfo &hit)
 			critMod += GetCritDmgMob(hit.skill);
 			hit.damage_done += 5;
 			hit.damage_done = (hit.damage_done * critMod) / 100;
-			entity_list.FilteredMessageClose_StringID(this, false, 200, MT_CritMelee, FilterMeleeCrits,
-								  CRITICAL_HIT, GetCleanName(), itoa(hit.damage_done + hit.min_damage));
+
+			entity_list.FilteredMessageClose_StringID(
+				this, /* Sender */
+				false,  /* Skip Sender */
+				RuleI(Range, CriticalDamage),
+				MT_CritMelee, /* Type: 301 */
+				FilterMeleeCrits, /* FilterType: 12 */
+				CRITICAL_HIT, /* MessageFormat: %1 scores a critical hit! (%2) */
+				GetCleanName(), /* Message1 */
+				itoa(hit.damage_done + hit.min_damage) /* Message2 */
+			);
+
 		}
 	}
 }
@@ -3968,14 +4032,33 @@ void Mob::TryCriticalHit(Mob *defender, DamageHitInfo &hit, ExtraAttackOptions *
 				    {aabonuses.SlayUndead[1], itembonuses.SlayUndead[1], spellbonuses.SlayUndead[1]});
 				hit.damage_done = std::max(hit.damage_done, hit.base_damage) + 5;
 				hit.damage_done = (hit.damage_done * SlayDmgBonus) / 100;
-				if (GetGender() == 1) // female
+
+				/* Female */
+				if (GetGender() == 1) {
 					entity_list.FilteredMessageClose_StringID(
-					    this, false, 200, MT_CritMelee, FilterMeleeCrits, FEMALE_SLAYUNDEAD,
-					    GetCleanName(), itoa(hit.damage_done + hit.min_damage));
-				else // males and neuter I guess
+						this, /* Sender */
+						false, /* Skip Sender */ 
+						RuleI(Range, CriticalDamage),
+						MT_CritMelee, /* Type: 301 */
+						FilterMeleeCrits, /* FilterType: 12 */
+						FEMALE_SLAYUNDEAD, /* MessageFormat: %1's holy blade cleanses her target!(%2) */
+						GetCleanName(), /* Message1 */
+						itoa(hit.damage_done + hit.min_damage) /* Message2 */
+					);
+				}
+				/* Males and Neuter */
+				else {
 					entity_list.FilteredMessageClose_StringID(
-					    this, false, 200, MT_CritMelee, FilterMeleeCrits, MALE_SLAYUNDEAD,
-					    GetCleanName(), itoa(hit.damage_done + hit.min_damage));
+						this, /* Sender */
+						false, /* Skip Sender */
+						RuleI(Range, CriticalDamage),
+						MT_CritMelee, /* Type: 301 */
+						FilterMeleeCrits, /* FilterType: 12 */
+						MALE_SLAYUNDEAD, /* MessageFormat: %1's holy blade cleanses his target!(%2)  */
+						GetCleanName(), /* Message1 */
+						itoa(hit.damage_done + hit.min_damage) /* Message2 */
+					);
+				}
 				return;
 			}
 		}
@@ -4044,9 +4127,17 @@ void Mob::TryCriticalHit(Mob *defender, DamageHitInfo &hit, ExtraAttackOptions *
 							return;
 						}
 						hit.damage_done = hit.damage_done * 200 / 100;
+
 						entity_list.FilteredMessageClose_StringID(
-						    this, false, 200, MT_CritMelee, FilterMeleeCrits, DEADLY_STRIKE,
-						    GetCleanName(), itoa(hit.damage_done + hit.min_damage));
+							this, /* Sender */
+							false, /* Skip Sender */
+							RuleI(Range, CriticalDamage),
+							MT_CritMelee, /* Type: 301 */
+							FilterMeleeCrits, /* FilterType: 12 */
+							DEADLY_STRIKE, /* MessageFormat: %1 scores a Deadly Strike!(%2) */
+							GetCleanName(), /* Message1 */
+							itoa(hit.damage_done + hit.min_damage) /* Message2 */
+						);
 						return;
 					}
 				}
@@ -4064,9 +4155,18 @@ void Mob::TryCriticalHit(Mob *defender, DamageHitInfo &hit, ExtraAttackOptions *
 			if (IsBerserk() || berserk) {
 				hit.damage_done += og_damage * 119 / 100;
 				Log.Out(Logs::Detail, Logs::Combat, "Crip damage %d", hit.damage_done);
+
 				entity_list.FilteredMessageClose_StringID(
-				    this, false, 200, MT_CritMelee, FilterMeleeCrits, CRIPPLING_BLOW, GetCleanName(),
-				    itoa(hit.damage_done + hit.min_damage));
+					this, /* Sender */
+					false, /* Skip Sender */
+					RuleI(Range, CriticalDamage),
+					MT_CritMelee, /* Type: 301 */
+					FilterMeleeCrits, /* FilterType: 12 */
+					CRIPPLING_BLOW, /* MessageFormat: %1 lands a Crippling Blow!(%2) */
+					GetCleanName(), /* Message1 */
+					itoa(hit.damage_done + hit.min_damage) /* Message2 */
+				);
+
 				// Crippling blows also have a chance to stun
 				// Kayen: Crippling Blow would cause a chance to interrupt for npcs < 55, with a
 				// staggers message.
@@ -4076,10 +4176,18 @@ void Mob::TryCriticalHit(Mob *defender, DamageHitInfo &hit, ExtraAttackOptions *
 				}
 				return;
 			}
-			// okay, critted but didn't do anything else, just normal message now
-			entity_list.FilteredMessageClose_StringID(this, false, 200, MT_CritMelee, FilterMeleeCrits,
-								  CRITICAL_HIT, GetCleanName(),
-								  itoa(hit.damage_done + hit.min_damage));
+			
+			/* Normal Critical hit message */
+			entity_list.FilteredMessageClose_StringID(
+				this, /* Sender */
+				false, /* Skip Sender */
+				RuleI(Range, CriticalDamage), 
+				MT_CritMelee, /* Type: 301 */
+				FilterMeleeCrits, /* FilterType: 12 */
+				CRITICAL_HIT, /* MessageFormat: %1 scores a critical hit! (%2) */
+				GetCleanName(), /* Message1 */
+				itoa(hit.damage_done + hit.min_damage) /* Message2 */
+			);
 		}
 	}
 }
@@ -4105,7 +4213,18 @@ bool Mob::TryFinishingBlow(Mob *defender, int &damage)
 
 		if (FB_Level && FB_Dmg && (defender->GetLevel() <= FB_Level) &&
 		    (ProcChance >= zone->random.Int(1, 1000))) {
-			entity_list.MessageClose_StringID(this, false, 200, MT_CritMelee, FINISHING_BLOW, GetName());
+
+			/* Finishing Blow Critical Message */
+			entity_list.FilteredMessageClose_StringID(
+				this, /* Sender */
+				false, /* Skip Sender */
+				RuleI(Range, CriticalDamage),
+				MT_CritMelee, /* Type: 301 */
+				FilterMeleeCrits, /* FilterType: 12 */
+				FINISHING_BLOW, /* MessageFormat: %1 scores a Finishing Blow!!) */
+				GetCleanName() /* Message1 */
+			);
+
 			damage = FB_Dmg;
 			return true;
 		}
