@@ -4293,8 +4293,14 @@ bool Merc::CheckConfidence() {
 		CurrentCon = this->GetLevelCon(mob->GetLevel());
 		switch(CurrentCon) {
 
-					case CON_GREEN: {
+
+					case CON_GRAY: {
 						ConRating = 0;
+						break;
+					}
+
+					case CON_GREEN: {
+						ConRating = 0.1;
 						break;
 									}
 
