@@ -1426,7 +1426,7 @@ void Mob::SendPosUpdate(uint8 iSendToSelf) {
 		}
 		else if(move_tic_count % 2 == 0)
 		{
-			entity_list.QueueCloseClients(this, app, (iSendToSelf == 0), 700, nullptr, false);
+			entity_list.QueueCloseClients(this, app, (iSendToSelf == 0), RuleI(Range, MobPositionUpdates), nullptr, false);
 			move_tic_count++;
 		} 
 		else {
@@ -1529,15 +1529,26 @@ void Mob::DoAnim(const int animnum, int type, bool ackreq, eqFilterType filter) 
 	auto outapp = new EQApplicationPacket(OP_Animation, sizeof(Animation_Struct));
 	Animation_Struct* anim = (Animation_Struct*)outapp->pBuffer;
 	anim->spawnid = GetID();
+
 	if(type == 0){
 		anim->action = animnum;
 		anim->speed = 10;
 	}
-	else{
+	else {
 		anim->action = animnum;
 		anim->speed = type;
 	}
-	entity_list.QueueCloseClients(this, outapp, false, 200, 0, ackreq, filter);
+
+	entity_list.QueueCloseClients(
+		this, /* Sender */
+		outapp, /* Packet */
+		false, /* Ignore Sender */
+		RuleI(Range, Anims),
+		0, /* Skip this mob */
+		ackreq, /* Packet ACK */
+		filter /* eqFilterType filter */
+	);
+
 	safe_delete(outapp);
 }
 
@@ -1581,7 +1592,7 @@ void Mob::ShowBuffList(Client* client) {
 	client->Message(0, "Buffs on: %s", this->GetCleanName());
 	uint32 i;
 	uint32 buff_count = GetMaxTotalSlots();
-	for (i=0; i < buff_count; i++) {
+	for (i = 0; i < buff_count; i++) {
 		if (buffs[i].spellid != SPELL_UNKNOWN) {
 			if (spells[buffs[i].spellid].buffdurationformula == DF_Permanent)
 				client->Message(0, "  %i: %s: Permanent", i, spells[buffs[i].spellid].name);

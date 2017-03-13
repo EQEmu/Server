@@ -545,6 +545,20 @@ RULE_BOOL(TaskSystem, KeepOneRecordPerCompletedTask, true)
 RULE_BOOL(TaskSystem, EnableTaskProximity, true)
 RULE_CATEGORY_END()
 
+RULE_CATEGORY(Range)
+RULE_INT(Range, Say, 135)
+RULE_INT(Range, Emote, 135)
+RULE_INT(Range, BeginCast, 200)
+RULE_INT(Range, Anims, 135)
+RULE_INT(Range, SpellParticles, 135)
+RULE_INT(Range, DamageMessages, 50)
+RULE_INT(Range, SpellMessages, 75)
+RULE_INT(Range, SongMessages, 75)
+RULE_INT(Range, MobPositionUpdates, 600)
+RULE_INT(Range, CriticalDamage, 80)
+RULE_CATEGORY_END()
+
+
 #ifdef BOTS
 RULE_CATEGORY(Bots)
 RULE_INT(Bots, AAExpansion, 8) // Bots get AAs through this expansion

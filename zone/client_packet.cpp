@@ -4372,7 +4372,7 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app)
 			    new EQApplicationPacket(OP_ClientUpdate, sizeof(PlayerPositionUpdateServer_Struct));
 			PlayerPositionUpdateServer_Struct* ppus = (PlayerPositionUpdateServer_Struct*)outapp->pBuffer;
 			boat->MakeSpawnUpdate(ppus);
-			entity_list.QueueCloseClients(boat,outapp,true,300,this,false);
+			entity_list.QueueCloseClients(boat, outapp, true, 300, this, false);
 			safe_delete(outapp);
 			// update the boat's position on the server, without sending an update
 			boat->GMMove(ppu->x_pos, ppu->y_pos, ppu->z_pos, EQ19toFloat(ppu->heading), false);
@@ -4606,9 +4606,9 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app)
 		PlayerPositionUpdateServer_Struct* ppu = (PlayerPositionUpdateServer_Struct*)outapp->pBuffer;
 		MakeSpawnUpdate(ppu);
 		if (gmhideme)
-			entity_list.QueueClientsStatus(this,outapp,true,Admin(),250);
+			entity_list.QueueClientsStatus(this, outapp, true, Admin(), 250);
 		else
-			entity_list.QueueCloseClients(this,outapp,true,300,nullptr,false);
+			entity_list.QueueCloseClients(this, outapp, true, 300, nullptr, false);
 		safe_delete(outapp);
 	}
 
@@ -5488,7 +5488,7 @@ void Client::Handle_OP_Emote(const EQApplicationPacket *app)
 	}
 	else
 	*/
-	entity_list.QueueCloseClients(this, outapp, true, 100, 0, true, FilterSocials);
+	entity_list.QueueCloseClients(this, outapp, true, RuleI(Range, Emote), 0, true, FilterSocials);
 
 	safe_delete(outapp);
 	return;

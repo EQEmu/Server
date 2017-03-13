@@ -1724,7 +1724,7 @@ bool Bot::LoadPet()
 
 bool Bot::SavePet()
 {
-	if (!GetPet() || GetPet()->IsFamiliar() /*|| dead*/)
+	if (!GetPet() || GetPet()->IsFamiliar()) // dead?
 		return true;
 	
 	NPC *pet_inst = GetPet()->CastToNPC();
@@ -3505,8 +3505,8 @@ void Bot::PerformTradeWithClient(int16 beginSlotID, int16 endSlotID, Client* cli
 				continue;
 
 			auto trade_instance = trade_iterator.tradeItemInstance;
-			/*if ((stage_loop == stageStackable) && !trade_instance->IsStackable())
-				continue;*/
+			//if ((stage_loop == stageStackable) && !trade_instance->IsStackable())
+			//	continue;
 
 			for (auto index : bot_equip_order) {
 				if (!(trade_instance->GetItem()->Slots & (1 << index)))
@@ -3849,7 +3849,8 @@ void Bot::Damage(Mob *from, int32 damage, uint16 spell_id, EQEmu::skills::SkillT
 	}
 }
 
-void Bot::AddToHateList(Mob* other, uint32 hate /*= 0*/, int32 damage /*= 0*/, bool iYellForHelp /*= true*/, bool bFrenzy /*= false*/, bool iBuffTic /*= false*/) {
+//void Bot::AddToHateList(Mob* other, uint32 hate = 0, int32 damage = 0, bool iYellForHelp = true, bool bFrenzy = false, bool iBuffTic = false)
+void Bot::AddToHateList(Mob* other, uint32 hate, int32 damage, bool iYellForHelp, bool bFrenzy, bool iBuffTic) {
 	Mob::AddToHateList(other, hate, damage, iYellForHelp, bFrenzy, iBuffTic);
 }
 
@@ -4261,24 +4262,23 @@ int32 Bot::CalcBotAAFocus(BotfocusType type, uint32 aa_ID, uint32 points, uint16
 					value = base1;
 				break;
 			}
-			/*
-			case SE_SympatheticProc:
-			{
-				if(type == focusSympatheticProc)
-				{
-					float ProcChance, ProcBonus;
-					int16 ProcRateMod = base1; //Baseline is 100 for most Sympathetic foci
-					int32 cast_time = GetActSpellCasttime(spell_id, spells[spell_id].cast_time);
-					GetSympatheticProcChances(ProcBonus, ProcChance, cast_time, ProcRateMod);
+			//case SE_SympatheticProc:
+			//{
+			//	if(type == focusSympatheticProc)
+			//	{
+			//		float ProcChance, ProcBonus;
+			//		int16 ProcRateMod = base1; //Baseline is 100 for most Sympathetic foci
+			//		int32 cast_time = GetActSpellCasttime(spell_id, spells[spell_id].cast_time);
+			//		GetSympatheticProcChances(ProcBonus, ProcChance, cast_time, ProcRateMod);
 
-					if(zone->random.Real(0, 1) <= ProcChance)
-						value = focus_id;
+			//		if(zone->random.Real(0, 1) <= ProcChance)
+			//			value = focus_id;
 
-					else
-						value = 0;
-				}
-				break;
-			}*/
+			//		else
+			//			value = 0;
+			//	}
+			//	break;
+			//}
 			case SE_FcDamageAmt: {
 				if(type == focusFcDamageAmt)
 					value = base1;
@@ -5069,14 +5069,14 @@ void Bot::DoSpecialAttackDamage(Mob *who, EQEmu::skills::SkillType skill, int32 
 		CheckNumHitsRemaining(NumHit::OutgoingHitSuccess);
 
 	//[AA Dragon Punch] value[0] = 100 for 25%, chance value[1] = skill
-/* 	if(aabonuses.SpecialAttackKBProc[0] && aabonuses.SpecialAttackKBProc[1] == skill){
-		int kb_chance = 25;
-		kb_chance += (kb_chance * (100 - aabonuses.SpecialAttackKBProc[0]) / 100);
+	//if(aabonuses.SpecialAttackKBProc[0] && aabonuses.SpecialAttackKBProc[1] == skill){
+	//	int kb_chance = 25;
+	//	kb_chance += (kb_chance * (100 - aabonuses.SpecialAttackKBProc[0]) / 100);
 
-		if (zone->random.Int(0, 99) < kb_chance)
-			SpellFinished(904, who, 10, 0, -1, spells[904].ResistDiff);
-			//who->Stun(100); Kayen: This effect does not stun on live, it only moves the NPC.
-	}*/
+	//	if (zone->random.Int(0, 99) < kb_chance)
+	//		SpellFinished(904, who, 10, 0, -1, spells[904].ResistDiff);
+	//		//who->Stun(100); Kayen: This effect does not stun on live, it only moves the NPC.
+	//}
 
 	if (HasSkillProcs())
 		TrySkillProc(who, skill, (ReuseTime * 1000));
@@ -7648,7 +7648,7 @@ void Bot::AddItemBonuses(const EQEmu::ItemInstance *inst, StatBonuses* newbon, b
 
 	switch(item->BardType)
 	{
-	case 51: /* All (e.g. Singing Short Sword) */
+	case EQEmu::item::ItemTypeAllInstrumentTypes: // (e.g. Singing Short Sword)
 		{
 			if(item->BardValue > newbon->singingMod)
 				newbon->singingMod = item->BardValue;
@@ -7662,31 +7662,31 @@ void Bot::AddItemBonuses(const EQEmu::ItemInstance *inst, StatBonuses* newbon, b
 				newbon->windMod = item->BardValue;
 			break;
 		}
-	case 50: /* Singing */
+	case EQEmu::item::ItemTypeSinging:
 		{
 			if(item->BardValue > newbon->singingMod)
 				newbon->singingMod = item->BardValue;
 			break;
 		}
-	case 23: /* Wind */
+	case EQEmu::item::ItemTypeWindInstrument:
 		{
 			if(item->BardValue > newbon->windMod)
 				newbon->windMod = item->BardValue;
 			break;
 		}
-	case 24: /* stringed */
+	case EQEmu::item::ItemTypeStringedInstrument:
 		{
 			if(item->BardValue > newbon->stringedMod)
 				newbon->stringedMod = item->BardValue;
 			break;
 		}
-	case 25: /* brass */
+	case EQEmu::item::ItemTypeBrassInstrument:
 		{
 			if(item->BardValue > newbon->brassMod)
 				newbon->brassMod = item->BardValue;
 			break;
 		}
-	case 26: /* Percussion */
+	case EQEmu::item::ItemTypePercussionInstrument:
 		{
 			if(item->BardValue > newbon->percussionMod)
 				newbon->percussionMod = item->BardValue;
@@ -7768,10 +7768,10 @@ void Bot::CalcBotStats(bool showtext) {
 			GetSkill(EQEmu::skills::SkillBrassInstruments), GetSkill(EQEmu::skills::SkillPercussionInstruments), GetSkill(EQEmu::skills::SkillSinging), GetSkill(EQEmu::skills::SkillStringedInstruments), GetSkill(EQEmu::skills::SkillWindInstruments));
 	}
 
-	/*if(this->Save())
-		this->GetBotOwner()->CastToClient()->Message(0, "%s saved.", this->GetCleanName());
-	else
-		this->GetBotOwner()->CastToClient()->Message(13, "%s save failed!", this->GetCleanName());*/
+	//if(this->Save())
+	//	this->GetBotOwner()->CastToClient()->Message(0, "%s saved.", this->GetCleanName());
+	//else
+	//	this->GetBotOwner()->CastToClient()->Message(13, "%s save failed!", this->GetCleanName());
 
 	CalcBonuses();
 

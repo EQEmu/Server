@@ -1791,8 +1791,8 @@ void Client::DoClassAttacks(Mob *ca_target, uint16 skill, bool IsRiposte)
 		}
 
 		while(AtkRounds > 0) {
-			if (GetTarget())
-				DoSpecialAttackDamage(GetTarget(), EQEmu::skills::SkillFrenzy, dmg, 0, dmg, ReuseTime);
+			if (ca_target!=this)
+				DoSpecialAttackDamage(ca_target, EQEmu::skills::SkillFrenzy, dmg, 0, dmg, ReuseTime);
 			AtkRounds--;
 		}
 
