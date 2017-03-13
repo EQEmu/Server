@@ -1022,6 +1022,12 @@ bool Client::HandlePacket(const EQApplicationPacket *app) {
 			eqs->Close();
 			return true;
 		}
+		case OP_WorldLogout:
+		{
+			eqs->Close();
+			cle->SetOnline(CLE_Status_Offline); //allows this player to log in again without an ip restriction.
+			return false;
+		}
 		case OP_ZoneChange:
 		{
 			// HoT sends this to world while zoning and wants it echoed back.

@@ -663,6 +663,7 @@ struct UsertoWorldRequest_Struct {
 	uint32	worldid;
 	uint32	FromID;
 	uint32	ToID;
+	char	IPAddr[64];
 };
 
 struct UsertoWorldResponse_Struct {

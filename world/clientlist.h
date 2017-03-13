@@ -56,6 +56,7 @@ public:
 	ClientListEntry* FindCLEByCharacterID(uint32 iCharID);
 	ClientListEntry* GetCLE(uint32 iID);
 	void	GetCLEIP(uint32 iIP);
+	uint32	GetCLEIPCount(uint32 iLSAccountID);
 	void	DisconnectByIP(uint32 iIP);
 	void	EnforceSessionLimit(uint32 iLSAccountID);
 	void	CLCheckStale();
