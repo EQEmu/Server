@@ -250,7 +250,7 @@ public:
 	inline virtual int32 GetStringMod() const { return itembonuses.stringedMod; }
 	inline virtual int32 GetWindMod() const { return itembonuses.windMod; }
 
-	inline virtual int32 GetDelayDeath() const { return aabonuses.DelayDeath + spellbonuses.DelayDeath + itembonuses.DelayDeath + 11; }
+	inline virtual int32 GetDelayDeath() const { return aabonuses.DelayDeath + spellbonuses.DelayDeath + itembonuses.DelayDeath; }
 
 	// "SET" Class Methods
 	void SetMercData (uint32 templateID );
