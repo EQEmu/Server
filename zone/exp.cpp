@@ -101,9 +101,12 @@ uint32 Client::CalcEXP(uint8 conlevel) {
 		if (conlevel != 0xFF) {
 			switch (conlevel)
 			{
-			case CON_GREEN:
+			case CON_GRAY:
 				in_add_exp = 0;
 				return 0;
+			case CON_GREEN:
+				in_add_exp = in_add_exp * RuleI(Character, GreenModifier) / 100;
+				break;
 			case CON_LIGHTBLUE:
 				in_add_exp = in_add_exp * RuleI(Character, LightBlueModifier)/100;
 				break;
@@ -206,10 +209,14 @@ void Client::AddEXP(uint32 in_add_exp, uint8 conlevel, bool resexp) {
 			if (conlevel != 0xFF && !resexp) {
 				switch (conlevel)
 				{
-					case CON_GREEN:
+					case CON_GRAY:
 						add_exp = 0;
 						add_aaxp = 0;
 						return;
+					case CON_GREEN:
+						add_exp = add_exp * RuleI(Character, GreenModifier) / 100;
+						add_aaxp = add_aaxp * RuleI(Character, GreenModifier) / 100;
+						break;
 					case CON_LIGHTBLUE:
 							add_exp = add_exp * RuleI(Character, LightBlueModifier)/100;
 							add_aaxp = add_aaxp * RuleI(Character, LightBlueModifier)/100;
@@ -798,7 +805,7 @@ void Group::SplitExp(uint32 exp, Mob* other) {
 		groupexp += (uint32)((float)exp * groupmod * (RuleR(Character, GroupExpMultiplier)));
 
 	int conlevel = Mob::GetLevelCon(maxlevel, other->GetLevel());
-	if(conlevel == CON_GREEN)
+	if(conlevel == CON_GRAY)
 		return;	//no exp for greenies...
 
 	if (membercount == 0)
@@ -845,7 +852,7 @@ void Raid::SplitExp(uint32 exp, Mob* other) {
 	groupexp = (uint32)((float)groupexp * (1.0f-(RuleR(Character, RaidExpMultiplier))));
 
 	int conlevel = Mob::GetLevelCon(maxlevel, other->GetLevel());
-	if(conlevel == CON_GREEN)
+	if(conlevel == CON_GRAY)
 		return;	//no exp for greenies...
 
 	if (membercount == 0)

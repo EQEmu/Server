@@ -158,7 +158,7 @@ void NPC::DescribeAggro(Client *towho, Mob *mob, bool verbose) {
 
 	if (RuleB(Aggro, UseLevelAggro))
 	{
-		if (GetLevel() < 18 && mob->GetLevelCon(GetLevel()) == CON_GREEN && GetBodyType() != 3)
+		if (GetLevel() < 18 && mob->GetLevelCon(GetLevel()) == CON_GRAY && GetBodyType() != 3)
 		{
 			towho->Message(0, "...%s is red to me (basically)", mob->GetName(),	dist2, iAggroRange2);
 			return;
@@ -166,7 +166,7 @@ void NPC::DescribeAggro(Client *towho, Mob *mob, bool verbose) {
 	}
 	else
 	{
-		if(GetINT() > RuleI(Aggro, IntAggroThreshold) && mob->GetLevelCon(GetLevel()) == CON_GREEN ) {
+		if(GetINT() > RuleI(Aggro, IntAggroThreshold) && mob->GetLevelCon(GetLevel()) == CON_GRAY ) {
 			towho->Message(0, "...%s is red to me (basically)", mob->GetName(),
 			dist2, iAggroRange2);
 			return;
@@ -339,7 +339,7 @@ bool Mob::CheckWillAggro(Mob *mob) {
 		( GetLevel() >= 18 )
 		||(GetBodyType() == 3)
 		||( mob->IsClient() && mob->CastToClient()->IsSitting() )
-		||( mob->GetLevelCon(GetLevel()) != CON_GREEN )
+		||( mob->GetLevelCon(GetLevel()) != CON_GRAY)
 
 	)
 	&&
@@ -372,7 +372,7 @@ bool Mob::CheckWillAggro(Mob *mob) {
 		(
 			( GetINT() <= RuleI(Aggro, IntAggroThreshold) )
 			||( mob->IsClient() && mob->CastToClient()->IsSitting() )
-			||( mob->GetLevelCon(GetLevel()) != CON_GREEN )
+			||( mob->GetLevelCon(GetLevel()) != CON_GRAY)
 
 		)
 		&&
@@ -449,7 +449,7 @@ int EntityList::GetHatedCount(Mob *attacker, Mob *exclude)
 		if (mob->IsFeared() || mob->IsMezzed())
 			continue;
 
-		if (attacker->GetLevelCon(mob->GetLevel()) == CON_GREEN)
+		if (attacker->GetLevelCon(mob->GetLevel()) == CON_GRAY)
 			continue;
 
 		if (!mob->CheckAggro(attacker))
@@ -508,7 +508,7 @@ void EntityList::AIYellForHelp(Mob* sender, Mob* attacker) {
 		{
 			//if they are in range, make sure we are not green...
 			//then jump in if they are our friend
-			if(mob->GetLevel() >= 50 || attacker->GetLevelCon(mob->GetLevel()) != CON_GREEN)
+			if(mob->GetLevel() >= 50 || attacker->GetLevelCon(mob->GetLevel()) != CON_GRAY)
 			{
 				bool useprimfaction = false;
 				if(mob->GetPrimaryFaction() == sender->CastToNPC()->GetPrimaryFaction())

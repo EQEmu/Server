@@ -4728,12 +4728,22 @@ void Client::Handle_OP_Consider(const EQApplicationPacket *app)
 	else
 		con->faction = 1;
 	con->level = GetLevelCon(tmob->GetLevel());
+
+	if (ClientVersion() <= EQEmu::versions::ClientVersion::Titanium) {
+		if (con->level == CON_GRAY)	{
+			con->level = CON_GREEN;
+		}
+		if (con->level == CON_WHITE) {
+			con->level = CON_WHITE_TITANIUM;
+		}
+	}
+
 	if (zone->IsPVPZone()) {
 		if (!tmob->IsNPC())
 			con->pvpcon = tmob->CastToClient()->GetPVP();
 	}
 
-	// Mongrel: If we're feigned show NPC as indifferent
+	// If we're feigned show NPC as indifferent
 	if (tmob->IsNPC())
 	{
 		if (GetFeigned())
@@ -4779,6 +4789,7 @@ void Client::Handle_OP_Consider(const EQApplicationPacket *app)
 		case CON_BLUE:
 			color = 4;
 			break;
+		case CON_WHITE_TITANIUM:
 		case CON_WHITE:
 			color = 10;
 			break;
@@ -4788,7 +4799,17 @@ void Client::Handle_OP_Consider(const EQApplicationPacket *app)
 		case CON_RED:
 			color = 13;
 			break;
+		case CON_GRAY:
+			color = 6;
+			break;
 		}
+
+		if (ClientVersion() <= EQEmu::versions::ClientVersion::Titanium) {
+			if (color == 6)	{
+				color = 2;
+			}
+		}
+
 		SendColoredText(color, std::string("This creature would take an army to defeat!"));
 	}
 	safe_delete(outapp);
