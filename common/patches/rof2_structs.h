@@ -190,7 +190,7 @@ struct TintProfile
 			Tint_Struct Primary;
 			Tint_Struct Secondary;
 		};
-		Tint_Struct Slot[EQEmu::textures::TextureCount];
+		Tint_Struct Slot[EQEmu::textures::materialCount];
 	};
 };
 
@@ -1082,7 +1082,7 @@ union
 	/*00184*/ Texture_Struct equipment[22];		// Total Slots
 };
 /*00624*/ uint32 equip2_count;			// Seen 9
-/*00628*/ Texture_Struct equipment2[EQEmu::textures::TextureCount];	// Appears to be Visible slots, but all 0s
+/*00628*/ Texture_Struct equipment2[EQEmu::textures::materialCount];	// Appears to be Visible slots, but all 0s
 /*00808*/ uint32 tint_count;			// Seen 9
 /*00812*/ TintProfile item_tint;		// RR GG BB 00
 /*00848*/ uint32 tint_count2;			// Seen 9
@@ -2423,7 +2423,7 @@ struct AdventureLeaderboard_Struct
 /*struct Item_Shop_Struct {
 	uint16 merchantid;
 	uint8 itemtype;
-	ItemBase item;
+	ItemData item;
 	uint8 iss_unknown001[6];
 };*/
 
@@ -2566,9 +2566,12 @@ struct GroupJoin_Struct_Live {	// New for Live
 };
 
 struct GroupJoin_Struct {
-/*000*/	char	unknown000[64];
+/*000*/	char	owner_name[64]; // merc
 /*064*/	char	membername[64];
-/*128*/	uint8	unknown128[20];	// Leadership AA ?
+/*128*/	uint8	merc;
+/*129*/	uint8	padding129[3];
+/*132*/	uint32	level;
+/*136*/	uint8	unknown136[12];	// group ID most likely in here judging from like captures (unused by client)
 /*148*/
 };
 
@@ -2826,7 +2829,8 @@ struct BookText_Struct {
 struct BookRequest_Struct {
 /*0000*/	uint32 window;		// where to display the text (0xFFFFFFFF means new window).
 /*0004*/	uint16 invslot;		// Is the slot, but the RoF2 conversion causes it to fail.  Turned to 0 since it isnt required anyway.
-/*0008*/	uint32 unknown006;	// Seen FFFFFFFF
+/*0006*/	int16 subslot;		// Inventory sub-slot (0-x)
+/*0008*/	uint16 unknown006;	// Seen FFFF
 /*0010*/	uint16 unknown008;	// seen 0000
 /*0012*/	uint32 type;		// 0 = Scroll, 1 = Book, 2 = Item Info. Possibly others
 /*0016*/	uint32 unknown0012;

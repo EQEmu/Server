@@ -64,6 +64,8 @@ Group::Group(uint32 gid)
 		MarkedNPCs[i] = 0;
 
 	NPCMarkerID = 0;
+
+	m_autohatermgr.SetOwner(nullptr, this, nullptr);
 }
 
 //creating a new group
@@ -94,6 +96,7 @@ Group::Group(Mob* leader)
 		MarkedNPCs[i] = 0;
 
 	NPCMarkerID = 0;
+	m_autohatermgr.SetOwner(nullptr, this, nullptr);
 }
 
 Group::~Group()
@@ -333,20 +336,20 @@ bool Group::AddMember(Mob* newmember, const char *NewMemberName, uint32 Characte
 				database.SetGroupID(NewMemberName, GetID(), owner->CharacterID(), true);
 			}
 		}
-#ifdef BOTS
-		for (i = 0;i < MAX_GROUP_MEMBERS; i++) {
-			if (members[i] != nullptr && members[i]->IsBot()) {
-				members[i]->CastToBot()->CalcChanceToCast();
-			}
-		}
-#endif //BOTS
 	}
 	else
 	{
 		database.SetGroupID(NewMemberName, GetID(), CharacterID, ismerc);
 	}
 
+	if (newmember && newmember->IsClient())
+		newmember->CastToClient()->JoinGroupXTargets(this);
+
 	safe_delete(outapp);
+
+#ifdef BOTS
+	Bot::UpdateGroupCastingRoles(this);
+#endif
 
 	return true;
 }
@@ -482,6 +485,10 @@ bool Group::UpdatePlayer(Mob* update){
 	if (update->IsClient() && !mentoree && mentoree_name.length() && !mentoree_name.compare(update->GetName()))
 		mentoree = update->CastToClient();
 
+#ifdef BOTS
+	Bot::UpdateGroupCastingRoles(this);
+#endif
+
 	return updateSuccess;
 }
 
@@ -496,16 +503,11 @@ void Group::MemberZoned(Mob* removemob) {
 		SetLeader(nullptr);
 
 	for (i = 0; i < MAX_GROUP_MEMBERS; i++) {
-			if (members[i] == removemob) {
-				members[i] = nullptr;
-				//should NOT clear the name, it is used for world communication.
-				break;
-			}
-#ifdef BOTS
-		if (members[i] != nullptr && members[i]->IsBot()) {
-			members[i]->CastToBot()->CalcChanceToCast();
+		if (members[i] == removemob) {
+			members[i] = nullptr;
+			//should NOT clear the name, it is used for world communication.
+			break;
 		}
-#endif //BOTS
 	}
 
 	if(removemob->IsClient() && HasRole(removemob, RoleAssist))
@@ -519,6 +521,10 @@ void Group::MemberZoned(Mob* removemob) {
 
 	if (removemob->IsClient() && removemob == mentoree)
 		mentoree = nullptr;
+
+#ifdef BOTS
+	Bot::UpdateGroupCastingRoles(this);
+#endif
 }
 
 void Group::SendGroupJoinOOZ(Mob* NewMember) {
@@ -585,6 +591,16 @@ bool Group::DelMember(Mob* oldmember, bool ignoresender)
 	if (oldmember == nullptr)
 	{
 		return false;
+	}
+
+	// TODO: fix this shit
+	// okay, so there is code below that tries to handle this. It does not.
+	// So instead of figuring it out now, lets just disband the group so the client doesn't
+	// sit there with a broken group and there isn't any group leader shuffling going on
+	// since the code below doesn't work.
+	if (oldmember == GetLeader()) {
+		DisbandGroup();
+		return true;
 	}
 
 	for (uint32 i = 0; i < MAX_GROUP_MEMBERS; i++)
@@ -661,11 +677,6 @@ bool Group::DelMember(Mob* oldmember, bool ignoresender)
 			if(members[i]->IsClient())
 				members[i]->CastToClient()->QueuePacket(outapp);
 		}
-#ifdef BOTS
-		if (members[i] != nullptr && members[i]->IsBot()) {
-			members[i]->CastToBot()->CalcChanceToCast();
-		}
-#endif //BOTS
 	}
 
 	if (!ignoresender)
@@ -718,8 +729,10 @@ bool Group::DelMember(Mob* oldmember, bool ignoresender)
 	if (oldmember->GetName() == mentoree_name)
 		ClearGroupMentor();
 
-	if(oldmember->IsClient())
+	if(oldmember->IsClient()) {
 		SendMarkedNPCsToMember(oldmember->CastToClient(), true);
+		oldmember->CastToClient()->LeaveGroupXTargets(this);
+	}
 
 	if(GroupCount() < 3)
 	{
@@ -729,6 +742,10 @@ bool Group::DelMember(Mob* oldmember, bool ignoresender)
 		}
 		ClearAllNPCMarks();
 	}
+
+#ifdef BOTS
+	Bot::UpdateGroupCastingRoles(this);
+#endif
 
 	return true;
 }
@@ -872,7 +889,11 @@ uint32 Group::GetTotalGroupDamage(Mob* other) {
 	return total;
 }
 
-void Group::DisbandGroup() {
+void Group::DisbandGroup(bool joinraid) {
+#ifdef BOTS
+	Bot::UpdateGroupCastingRoles(this, true);
+#endif
+
 	auto outapp = new EQApplicationPacket(OP_GroupUpdate, sizeof(GroupUpdate_Struct));
 
 	GroupUpdate_Struct* gu = (GroupUpdate_Struct*) outapp->pBuffer;
@@ -899,6 +920,8 @@ void Group::DisbandGroup() {
 			database.SetGroupID(members[i]->GetCleanName(), 0, members[i]->CastToClient()->CharacterID(), false);
 			members[i]->CastToClient()->QueuePacket(outapp);
 			SendMarkedNPCsToMember(members[i]->CastToClient(), true);
+			if (!joinraid)
+				members[i]->CastToClient()->LeaveGroupXTargets(this);
 		}
 		
 		if (members[i]->IsMerc())
@@ -2290,6 +2313,30 @@ void Group::UpdateXTargetMarkedNPC(uint32 Number, Mob *m)
 		}
 	}
 
+}
+
+void Group::SetDirtyAutoHaters()
+{
+	for (int i = 0; i < MAX_GROUP_MEMBERS; ++i)
+		if (members[i] && members[i]->IsClient())
+			members[i]->CastToClient()->SetDirtyAutoHaters();
+}
+
+void Group::JoinRaidXTarget(Raid *raid, bool first)
+{
+	if (!GetXTargetAutoMgr()->empty())
+		raid->GetXTargetAutoMgr()->merge(*GetXTargetAutoMgr());
+
+	for (int i = 0; i < MAX_GROUP_MEMBERS; ++i) {
+		if (members[i] && members[i]->IsClient()) {
+			auto *client = members[i]->CastToClient();
+			if (!first)
+				client->RemoveAutoXTargets();
+			client->SetXTargetAutoMgr(raid->GetXTargetAutoMgr());
+			if (!client->GetXTargetAutoMgr()->empty())
+				client->SetDirtyAutoHaters();
+		}
+	}
 }
 
 void Group::SetMainTank(const char *NewMainTankName)

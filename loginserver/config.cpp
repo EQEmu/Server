@@ -144,7 +144,7 @@ void Config::Parse(const char *file_name)
 */
 void Config::Tokenize(FILE *input, std::list<std::string> &tokens)
 {
-	char c = fgetc(input);
+	auto c = fgetc(input);
 	std::string lexeme;
 
 	while(c != EOF)
@@ -162,7 +162,7 @@ void Config::Tokenize(FILE *input, std::list<std::string> &tokens)
 
 		if(isalnum(c))
 		{
-			lexeme.append((const char *)&c, 1);
+			lexeme += c;
 			c = fgetc(input);
 			continue;
 		}
@@ -193,14 +193,14 @@ void Config::Tokenize(FILE *input, std::list<std::string> &tokens)
 					lexeme.clear();
 				}
 
-				lexeme.append((const char *)&c, 1);
+				lexeme += c;
 				tokens.push_back(lexeme);
 				lexeme.clear();
 				break;
 			}
 		default:
 			{
-				lexeme.append((const char *)&c, 1);
+				lexeme += c;
 			}
 		}
 

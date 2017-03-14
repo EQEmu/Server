@@ -70,7 +70,7 @@ Copyright (C) 2001-2002 EQEMu Development Team (http://eqemu.org)
 #include "../common/classes.h"
 #include "../common/global_define.h"
 #include "../common/eqemu_logsys.h"
-#include "../common/item.h"
+#include "../common/item_instance.h"
 #include "../common/rulesys.h"
 #include "../common/skills.h"
 #include "../common/spdat.h"
@@ -230,23 +230,6 @@ bool Mob::CastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 		}
 	}
 
-	// check for fizzle
-	// note that CheckFizzle itself doesn't let NPCs fizzle,
-	// but this code allows for it.
-	if(slot < CastingSlot::MaxGems && !CheckFizzle(spell_id))
-	{
-		int fizzle_msg = IsBardSong(spell_id) ? MISS_NOTE : SPELL_FIZZLE;
-		InterruptSpell(fizzle_msg, 0x121, spell_id);
-
-		uint32 use_mana = ((spells[spell_id].mana) / 4);
-		Log.Out(Logs::Detail, Logs::Spells, "Spell casting canceled: fizzled. %d mana has been consumed", use_mana);
-
-		// fizzle 1/4 the mana away
-		SetMana(GetMana() - use_mana);
-		TryTriggerOnValueAmount(false, true);
-		return(false);
-	}
-
 	if (HasActiveSong() && IsBardSong(spell_id)) {
 		Log.Out(Logs::Detail, Logs::Spells, "Casting a new song while singing a song. Killing old song %d.", bardsong);
 		//Note: this does NOT tell the client
@@ -256,7 +239,7 @@ bool Mob::CastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 	//Added to prevent MQ2 exploitation of equipping normally-unequippable/clickable items with effects and clicking them for benefits.
 	if(item_slot && IsClient() && (slot == CastingSlot::Item || slot == CastingSlot::PotionBelt))
 	{
-		ItemInst *itm = CastToClient()->GetInv().GetItem(item_slot);
+		EQEmu::ItemInstance *itm = CastToClient()->GetInv().GetItem(item_slot);
 		int bitmask = 1;
 		bitmask = bitmask << (CastToClient()->GetClass() - 1);
 		if( itm && itm->GetItem()->Classes != 65535 ) {
@@ -293,7 +276,7 @@ bool Mob::CastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 				return(false);
 			}
 		}
-		if (itm && (itm->GetItem()->Click.Type == EQEmu::item::ItemEffectEquipClick) && !(item_slot <= EQEmu::legacy::SlotAmmo || item_slot == EQEmu::legacy::SlotPowerSource)){
+		if (itm && (itm->GetItem()->Click.Type == EQEmu::item::ItemEffectEquipClick) && !(item_slot <= EQEmu::inventory::slotAmmo || item_slot == EQEmu::inventory::slotPowerSource)){
 			if (CastToClient()->ClientVersion() < EQEmu::versions::ClientVersion::SoF) {
 				// They are attempting to cast a must equip clicky without having it equipped
 				Log.Out(Logs::General, Logs::Error, "HACKER: %s (account: %s) attempted to click an equip-only effect on item %s (id: %d) without equiping it!", CastToClient()->GetCleanName(), CastToClient()->AccountName(), itm->GetItem()->Name, itm->GetItem()->ID);
@@ -365,6 +348,41 @@ bool Mob::DoCastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 		casting_spell_timer_duration = timer_duration;
 	}
 	casting_spell_aa_id = aa_id;
+
+	// check for fizzle
+	// note that CheckFizzle itself doesn't let NPCs fizzle,
+	// but this code allows for it.
+	if (slot < CastingSlot::MaxGems && !CheckFizzle(spell_id)) {
+		int fizzle_msg = IsBardSong(spell_id) ? MISS_NOTE : SPELL_FIZZLE;
+
+		uint32 use_mana = ((spells[spell_id].mana) / 4);
+		Log.Out(Logs::Detail, Logs::Spells, "Spell casting canceled: fizzled. %d mana has been consumed", use_mana);
+
+		// fizzle 1/4 the mana away
+		Mob::SetMana(GetMana() - use_mana); // We send StopCasting which will update mana
+		StopCasting();
+
+		Message_StringID(MT_SpellFailure, fizzle_msg);
+
+		/* Song Failure Messages */
+		entity_list.FilteredMessageClose_StringID(
+			this, /* Sender */
+			true, /* Skip Sender */
+			RuleI(Range, SpellMessages), 
+			MT_SpellFailure, /* Type: 289 */
+			(IsClient() ? FilterPCSpells : FilterNPCSpells), /* FilterType: 8 or 9 depending on client/npc */
+			(fizzle_msg == MISS_NOTE ? MISSED_NOTE_OTHER : SPELL_FIZZLE_OTHER), 
+			/* 
+				MessageFormat: You miss a note, bringing your song to a close! (if missed note)
+				MessageFormat: A missed note brings %1's song to a close!
+				MessageFormat: %1's spell fizzles!
+			*/
+			GetName() /* Message1 */
+		);
+
+		TryTriggerOnValueAmount(false, true);
+		return(false);
+	}
 
 	SaveSpellLoc();
 	Log.Out(Logs::Detail, Logs::Spells, "Casting %d Started at (%.3f,%.3f,%.3f)", spell_id, m_SpellLocation.x, m_SpellLocation.y, m_SpellLocation.z);
@@ -464,7 +482,14 @@ bool Mob::DoCastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 		begincast->spell_id = spell_id;
 		begincast->cast_time = orgcasttime; // client calculates reduced time by itself
 		outapp->priority = 3;
-		entity_list.QueueCloseClients(this, outapp, false, 200, 0, true); //IsClient() ? FILTER_PCSPELLS : FILTER_NPCSPELLS);
+		entity_list.QueueCloseClients(
+			this, /* Sender */
+			outapp, /* Packet */
+			false, /* Ignore Sender */
+			RuleI(Range, BeginCast), 
+			0, /* Skip this Mob */
+			true /* Packet ACK */
+		); //IsClient() ? FILTER_PCSPELLS : FILTER_NPCSPELLS);
 		safe_delete(outapp);
 	}
 
@@ -881,7 +906,7 @@ void Mob::InterruptSpell(uint16 message, uint16 color, uint16 spellid)
 	ic->messageid = message_other;
 	ic->spawnid = GetID();
 	strcpy(ic->message, GetCleanName());
-	entity_list.QueueCloseClients(this, outapp, true, 200, 0, true, IsClient() ? FilterPCSpells : FilterNPCSpells);
+	entity_list.QueueCloseClients(this, outapp, true, RuleI(Range, SongMessages), 0, true, IsClient() ? FilterPCSpells : FilterNPCSpells);
 	safe_delete(outapp);
 
 }
@@ -936,7 +961,7 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 	if(IsClient() && (slot == CastingSlot::Item || slot == CastingSlot::PotionBelt))
 	{
 		IsFromItem = true;
-		ItemInst *itm = CastToClient()->GetInv().GetItem(inventory_slot);
+		EQEmu::ItemInstance *itm = CastToClient()->GetInv().GetItem(inventory_slot);
 		if(itm && itm->GetItem()->RecastDelay > 0)
 		{
 			if(!CastToClient()->GetPTimers().Expired(&database, (pTimerItemStart + itm->GetItem()->RecastType), false)) {
@@ -985,17 +1010,23 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 	if(GetClass() == BARD) // bard's can move when casting any spell...
 	{
 		if (IsBardSong(spell_id)) {
-			if(spells[spell_id].buffduration == 0xFFFF || spells[spell_id].recast_time != 0) {
-				Log.Out(Logs::Detail, Logs::Spells, "Bard song %d not applying bard logic because duration or recast is wrong: dur=%d, recast=%d", spells[spell_id].buffduration, spells[spell_id].recast_time);
+			if(spells[spell_id].buffduration == 0xFFFF) {
+				Log.Out(Logs::Detail, Logs::Spells, "Bard song %d not applying bard logic because duration. dur=%d, recast=%d", spells[spell_id].buffduration);
 			} else {
-				bardsong = spell_id;
-				bardsong_slot = slot;
-				//NOTE: theres a lot more target types than this to think about...
-				if (spell_target == nullptr || (spells[spell_id].targettype != ST_Target && spells[spell_id].targettype != ST_AETarget))
-					bardsong_target_id = GetID();
-				else
-					bardsong_target_id = spell_target->GetID();
-				bardsong_timer.Start(6000);
+				// So long recast bard songs need special bard logic, although the effects don't repulse like other songs
+				// This is basically a hack to get that effect
+				// You can hold down the long recast spells, but you only get the effects once
+				// TODO fuck bards.
+				if (spells[spell_id].recast_time == 0) {
+					bardsong = spell_id;
+					bardsong_slot = slot;
+					//NOTE: theres a lot more target types than this to think about...
+					if (spell_target == nullptr || (spells[spell_id].targettype != ST_Target && spells[spell_id].targettype != ST_AETarget))
+						bardsong_target_id = GetID();
+					else
+						bardsong_target_id = spell_target->GetID();
+					bardsong_timer.Start(6000);
+				}
 				Log.Out(Logs::Detail, Logs::Spells, "Bard song %d started: slot %d, target id %d", bardsong, bardsong_slot, bardsong_target_id);
 				bard_song_mode = true;
 			}
@@ -1085,7 +1116,7 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 			// if we got here, we regained concentration
 			regain_conc = true;
 			Message_StringID(MT_Spells,REGAIN_AND_CONTINUE);
-			entity_list.MessageClose_StringID(this, true, 200, MT_Spells, OTHER_REGAIN_CAST, this->GetCleanName());
+			entity_list.MessageClose_StringID(this, true, RuleI(Range, SpellMessages), MT_Spells, OTHER_REGAIN_CAST, this->GetCleanName());
 		}
 	}
 
@@ -1174,7 +1205,7 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 							missingreags=true;
 						}
 
-						const EQEmu::ItemBase *item = database.GetItem(component);
+						const EQEmu::ItemData *item = database.GetItem(component);
 						if(item) {
 							c->Message_StringID(13, MISSING_SPELL_COMP_ITEM, item->Name);
 							Log.Out(Logs::Detail, Logs::Spells, "Spell %d: Canceled. Missing required reagent %s (%d)", spell_id, item->Name, component);
@@ -1235,8 +1266,8 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 		&& inventory_slot != 0xFFFFFFFF)	// 10 is an item
 	{
 		bool fromaug = false;
-		const ItemInst* inst = CastToClient()->GetInv()[inventory_slot];
-		EQEmu::ItemBase* augitem = 0;
+		const EQEmu::ItemInstance* inst = CastToClient()->GetInv()[inventory_slot];
+		EQEmu::ItemData* augitem = 0;
 		uint32 recastdelay = 0;
 		uint32 recasttype = 0;
 
@@ -1244,12 +1275,12 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 			if (inst == nullptr)
 				break;
 
-			for (int r = AUG_INDEX_BEGIN; r < EQEmu::legacy::ITEM_COMMON_SIZE; r++) {
-				const ItemInst* aug_i = inst->GetAugment(r);
+			for (int r = EQEmu::inventory::socketBegin; r < EQEmu::inventory::SocketCount; r++) {
+				const EQEmu::ItemInstance* aug_i = inst->GetAugment(r);
 
 				if (!aug_i)
 					continue;
-				const EQEmu::ItemBase* aug = aug_i->GetItem();
+				const EQEmu::ItemData* aug = aug_i->GetItem();
 				if (!aug)
 					continue;
 
@@ -1285,7 +1316,7 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 
 		if (inst && inst->IsClassCommon() && (inst->GetItem()->Click.Effect == spell_id) && inst->GetCharges() || fromaug)
 		{
-			//const ItemBase* item = inst->GetItem();
+			//const ItemData* item = inst->GetItem();
 			int16 charges = inst->GetItem()->MaxCharges;
 
 			if(fromaug) { charges = -1; } //Don't destroy the parent item
@@ -2385,7 +2416,7 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, CastingSlot slot, ui
 
 	if(IsClient() && (slot == CastingSlot::Item || slot == CastingSlot::PotionBelt))
 	{
-		ItemInst *itm = CastToClient()->GetInv().GetItem(inventory_slot);
+		EQEmu::ItemInstance *itm = CastToClient()->GetInv().GetItem(inventory_slot);
 		if(itm && itm->GetItem()->RecastDelay > 0){
 			auto recast_type = itm->GetItem()->RecastType;
 			CastToClient()->GetPTimers().Start((pTimerItemStart + recast_type), itm->GetItem()->RecastDelay);
@@ -2598,7 +2629,7 @@ void Mob::BardPulse(uint16 spell_id, Mob *caster) {
 			action->buff_unknown = 0;
 			action->level = buffs[buffs_i].casterlevel;
 			action->type = DamageTypeSpell;
-			entity_list.QueueCloseClients(this, packet, false, 200, 0, true, IsClient() ? FilterPCSpells : FilterNPCSpells);
+			entity_list.QueueCloseClients(this, packet, false, RuleI(Range, SongMessages), 0, true, IsClient() ? FilterPCSpells : FilterNPCSpells);
 
 			action->buff_unknown = 4;
 
@@ -2670,7 +2701,7 @@ void Mob::BardPulse(uint16 spell_id, Mob *caster) {
 			cd->damage = 0;
 			if(!IsEffectInSpell(spell_id, SE_BindAffinity))
 			{
-				entity_list.QueueCloseClients(this, message_packet, false, 200, 0, true, IsClient() ? FilterPCSpells : FilterNPCSpells);
+				entity_list.QueueCloseClients(this, message_packet, false, RuleI(Range, SongMessages), 0, true, IsClient() ? FilterPCSpells : FilterNPCSpells);
 			}
 			safe_delete(message_packet);
 			safe_delete(packet);
@@ -3279,8 +3310,12 @@ int Mob::AddBuff(Mob *caster, uint16 spell_id, int duration, int32 level_overrid
 	if (IsPet() && GetOwner() && GetOwner()->IsClient())
 		SendPetBuffsToClient();
 
-	if((IsClient() && !CastToClient()->GetPVP()) || (IsPet() && GetOwner() && GetOwner()->IsClient() && !GetOwner()->CastToClient()->GetPVP()) ||
-				(IsMerc() && GetOwner() && GetOwner()->IsClient() && !GetOwner()->CastToClient()->GetPVP()))
+	if((IsClient() && !CastToClient()->GetPVP()) ||
+		(IsPet() && GetOwner() && GetOwner()->IsClient() && !GetOwner()->CastToClient()->GetPVP()) ||
+#ifdef BOTS
+		(IsBot() && GetOwner() && GetOwner()->IsClient() && !GetOwner()->CastToClient()->GetPVP()) ||
+#endif
+		(IsMerc() && GetOwner() && GetOwner()->IsClient() && !GetOwner()->CastToClient()->GetPVP()))
 	{
 		EQApplicationPacket *outapp = MakeBuffsPacket();
 
@@ -3386,11 +3421,6 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob *spelltar, bool reflect, bool use_r
 	if(spelltar->IsClient() && spelltar->CastToClient()->IsHoveringForRespawn())
 		return false;
 
-	if (spells[spell_id].sneak && IsClient() && !CastToClient()->sneaking){
-		Message_StringID(13, SNEAK_RESTRICT);
-		return false;//Fail Safe, this can cause a zone crash certain situations if you try to apply sneak effects when not sneaking.
-	}
-
 	if(IsDetrimentalSpell(spell_id) && !IsAttackAllowed(spelltar) && !IsResurrectionEffects(spell_id)) {
 		if(!IsClient() || !CastToClient()->GetGM()) {
 			Message_StringID(MT_SpellFailure, SPELL_NO_HOLD);
@@ -3403,6 +3433,17 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob *spelltar, bool reflect, bool use_r
 
 	if(!IsValidSpell(spell_id))
 		return false;
+
+	// these target types skip pcnpc only check (according to dev quotes)
+	// other AE spells this is redundant, oh well
+	// 1 = PCs, 2 = NPCs
+	if (spells[spell_id].pcnpc_only_flag && spells[spell_id].targettype != ST_AETargetHateList &&
+	    spells[spell_id].targettype != ST_HateList) {
+		if (spells[spell_id].pcnpc_only_flag == 1 && !spelltar->IsClient() && !spelltar->IsMerc())
+			return false;
+		else if (spells[spell_id].pcnpc_only_flag == 2 && (spelltar->IsClient() || spelltar->IsMerc()))
+			return false;
+	}
 
 	uint16 caster_level = level_override > 0 ? level_override : GetCasterLevel(spell_id);
 
@@ -3463,8 +3504,17 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob *spelltar, bool reflect, bool use_r
 		spelltar->CastToClient()->QueuePacket(action_packet);
 	if(IsClient())	// send to caster
 		CastToClient()->QueuePacket(action_packet);
+
 	// send to people in the area, ignoring caster and target
-	entity_list.QueueCloseClients(spelltar, action_packet, true, 200, this, true, spelltar->IsClient() ? FilterPCSpells : FilterNPCSpells);
+	entity_list.QueueCloseClients(
+		spelltar, /* Sender */
+		action_packet, /* Packet */
+		true, /* Ignore Sender */
+		RuleI(Range, SpellMessages), 
+		this, /* Skip this Mob */
+		true, /* Packet ACK */
+		(spelltar->IsClient() ? FilterPCSpells : FilterNPCSpells) /* EQ Filter Type: (8 or 9) */
+	);
 
 	/* Send the EVENT_CAST_ON event */
 	if(spelltar->IsNPC())
@@ -3619,7 +3669,7 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob *spelltar, bool reflect, bool use_r
 
 				}
 
-				if(!IsBeneficialAllowed(spelltar) ||
+				if((!IsAllianceSpellLine(spell_id) && !IsBeneficialAllowed(spelltar)) ||
 					(IsGroupOnlySpell(spell_id) &&
 						!(
 							(pBasicGroup && ((pBasicGroup == pBasicGroupTarget) || (pBasicGroup == pBasicGroupTargetPet))) || //Basic Group
@@ -3933,9 +3983,16 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob *spelltar, bool reflect, bool use_r
 	cd->spellid = action->spell;
 	cd->meleepush_xy = action->sequence;
 	cd->damage = 0;
-	if(!IsEffectInSpell(spell_id, SE_BindAffinity))
-	{
-		entity_list.QueueCloseClients(spelltar, message_packet, false, 200, 0, true, spelltar->IsClient() ? FilterPCSpells : FilterNPCSpells);
+	if(!IsEffectInSpell(spell_id, SE_BindAffinity)){
+		entity_list.QueueCloseClients(
+			spelltar, /* Sender */
+			message_packet, /* Packet */
+			false, /* Ignore Sender */
+			RuleI(Range, SpellMessages), 
+			0, /* Skip this mob */
+			true, /* Packet ACK */
+			(spelltar->IsClient() ? FilterPCSpells : FilterNPCSpells) /* Message Filter Type: (8 or 9) */
+		);
 	}
 	safe_delete(action_packet);
 	safe_delete(message_packet);
@@ -5533,12 +5590,12 @@ int Client::GetCurrentBuffSlots() const
 		numbuffs++;
 	if (GetLevel() > 74)
 		numbuffs++;
-	return EQEmu::ClampUpper(numbuffs, GetMaxBuffSlots());
+	return EQEmu::ClampUpper(numbuffs, EQEmu::constants::Lookup(m_ClientVersion)->LongBuffs);
 }
 
 int Client::GetCurrentSongSlots() const
 {
-	return 12; // AAs dont affect this
+	return EQEmu::constants::Lookup(m_ClientVersion)->ShortBuffs; // AAs dont affect this
 }
 
 void Client::InitializeBuffSlots()
@@ -5548,6 +5605,7 @@ void Client::InitializeBuffSlots()
 	for(int x = 0; x < max_slots; ++x)
 	{
 		buffs[x].spellid = SPELL_UNKNOWN;
+		buffs[x].UpdateClient = false;
 	}
 	current_buff_count = 0;
 }
@@ -5564,6 +5622,7 @@ void NPC::InitializeBuffSlots()
 	for(int x = 0; x < max_slots; ++x)
 	{
 		buffs[x].spellid = SPELL_UNKNOWN;
+		buffs[x].UpdateClient = false;
 	}
 	current_buff_count = 0;
 }
@@ -5587,7 +5646,7 @@ void Client::SendSpellAnim(uint16 targetid, uint16 spell_id)
 	a->sequence = 231;
 
 	app.priority = 1;
-	entity_list.QueueCloseClients(this, &app);
+	entity_list.QueueCloseClients(this, &app, false, RuleI(Range, SpellParticles));
 }
 
 void Mob::CalcDestFromHeading(float heading, float distance, float MaxZDiff, float StartX, float StartY, float &dX, float &dY, float &dZ)
@@ -5619,11 +5678,11 @@ void Mob::BeamDirectional(uint16 spell_id, int16 resist_adjust)
 	if (IsBeneficialSpell(spell_id) && IsClient())
 		beneficial_targets = true;
 
-	std::list<Mob*> targets_in_range;
-	std::list<Mob*>::iterator iter;
+	std::list<Mob *> targets_in_range;
 
-	entity_list.GetTargetsForConeArea(this, spells[spell_id].min_range, spells[spell_id].range, spells[spell_id].range / 2, targets_in_range);
-	iter = targets_in_range.begin();
+	entity_list.GetTargetsForConeArea(this, spells[spell_id].min_range, spells[spell_id].range,
+					  spells[spell_id].range / 2, spells[spell_id].pcnpc_only_flag, targets_in_range);
+	auto iter = targets_in_range.begin();
 
 	float dX = 0;
 	float dY = 0;
@@ -5632,24 +5691,39 @@ void Mob::BeamDirectional(uint16 spell_id, int16 resist_adjust)
 	CalcDestFromHeading(GetHeading(), spells[spell_id].range, 5, GetX(), GetY(), dX, dY, dZ);
 	dZ = GetZ();
 
-	//FIND SLOPE: Put it into the form y = mx + b
+	// FIND SLOPE: Put it into the form y = mx + b
 	float m = (dY - GetY()) / (dX - GetX());
 	float b = (GetY() * dX - dY * GetX()) / (dX - GetX());
 
-	while(iter != targets_in_range.end())
-	{
-		if (!(*iter) || (beneficial_targets && ((*iter)->IsNPC() && !(*iter)->IsPetOwnerClient()))
-			|| (*iter)->BehindMob(this, (*iter)->GetX(),(*iter)->GetY())){
-		    ++iter;
+	while (iter != targets_in_range.end()) {
+		if (!(*iter) || (beneficial_targets && ((*iter)->IsNPC() && !(*iter)->IsPetOwnerClient())) ||
+		    (*iter)->BehindMob(this, (*iter)->GetX(), (*iter)->GetY())) {
+			++iter;
 			continue;
+		}
+
+		if (IsNPC() && (*iter)->IsNPC()) {
+			auto fac = (*iter)->GetReverseFactionCon(this);
+			if (beneficial_targets) {
+				// only affect mobs we would assist.
+				if (!(fac <= FACTION_AMIABLE)) {
+					++iter;
+					continue;
+				}
+			} else {
+				// affect mobs that are on our hate list, or which have bad faction with us
+				if (!(CheckAggro(*iter) || fac == FACTION_THREATENLY || fac == FACTION_SCOWLS)) {
+					++iter;
+					continue;
+				}
+			}
 		}
 
 		//# shortest distance from line to target point
 		float d = std::abs((*iter)->GetY() - m * (*iter)->GetX() - b) / sqrt(m * m + 1);
 
-		if (d <= spells[spell_id].aoerange)
-		{
-			if(CheckLosFN((*iter)) || spells[spell_id].npc_no_los) {
+		if (d <= spells[spell_id].aoerange) {
+			if (CheckLosFN((*iter)) || spells[spell_id].npc_no_los) {
 				(*iter)->CalcSpellPowerDistanceMod(spell_id, 0, this);
 				SpellOnTarget(spell_id, (*iter), false, true, resist_adjust);
 				maxtarget_count++;
@@ -5673,45 +5747,62 @@ void Mob::ConeDirectional(uint16 spell_id, int16 resist_adjust)
 	float angle_start = spells[spell_id].directional_start + (GetHeading() * 360.0f / 256.0f);
 	float angle_end = spells[spell_id].directional_end + (GetHeading() * 360.0f / 256.0f);
 
-	while(angle_start > 360.0f)
+	while (angle_start > 360.0f)
 		angle_start -= 360.0f;
 
-	while(angle_end > 360.0f)
+	while (angle_end > 360.0f)
 		angle_end -= 360.0f;
 
-	std::list<Mob*> targets_in_range;
-	std::list<Mob*>::iterator iter;
+	std::list<Mob *> targets_in_range;
 
-	entity_list.GetTargetsForConeArea(this, spells[spell_id].min_range, spells[spell_id].aoerange, spells[spell_id].aoerange / 2, targets_in_range);
-	iter = targets_in_range.begin();
+	entity_list.GetTargetsForConeArea(this, spells[spell_id].min_range, spells[spell_id].aoerange,
+					  spells[spell_id].aoerange / 2, spells[spell_id].pcnpc_only_flag, targets_in_range);
+	auto iter = targets_in_range.begin();
 
-	while(iter != targets_in_range.end()){
-
-		if (!(*iter) || (beneficial_targets && ((*iter)->IsNPC() && !(*iter)->IsPetOwnerClient()))){
-		    ++iter;
+	while (iter != targets_in_range.end()) {
+		if (!(*iter) || (beneficial_targets && ((*iter)->IsNPC() && !(*iter)->IsPetOwnerClient()))) {
+			++iter;
 			continue;
 		}
 
-		float heading_to_target = (CalculateHeadingToTarget((*iter)->GetX(), (*iter)->GetY()) * 360.0f / 256.0f);
+		float heading_to_target =
+		    (CalculateHeadingToTarget((*iter)->GetX(), (*iter)->GetY()) * 360.0f / 256.0f);
 
-		while(heading_to_target < 0.0f)
+		while (heading_to_target < 0.0f)
 			heading_to_target += 360.0f;
 
-		while(heading_to_target > 360.0f)
+		while (heading_to_target > 360.0f)
 			heading_to_target -= 360.0f;
 
-		if(angle_start > angle_end){
-			if((heading_to_target >= angle_start && heading_to_target <= 360.0f) ||	(heading_to_target >= 0.0f && heading_to_target <= angle_end)){
-				if(CheckLosFN((*iter)) || spells[spell_id].npc_no_los){
-					(*iter)->CalcSpellPowerDistanceMod(spell_id, 0, this);
-					SpellOnTarget(spell_id,(*iter), false, true, resist_adjust);
-					maxtarget_count++;
+		if (IsNPC() && (*iter)->IsNPC()) {
+			auto fac = (*iter)->GetReverseFactionCon(this);
+			if (beneficial_targets) {
+				// only affect mobs we would assist.
+				if (!(fac <= FACTION_AMIABLE)) {
+					++iter;
+					continue;
+				}
+			} else {
+				// affect mobs that are on our hate list, or which have bad faction with us
+				if (!(CheckAggro(*iter) || fac == FACTION_THREATENLY || fac == FACTION_SCOWLS)) {
+					++iter;
+					continue;
 				}
 			}
 		}
-		else{
-			if(heading_to_target >= angle_start && heading_to_target <= angle_end){
-				if(CheckLosFN((*iter)) || spells[spell_id].npc_no_los) {
+
+		if (angle_start > angle_end) {
+			if ((heading_to_target >= angle_start && heading_to_target <= 360.0f) ||
+			    (heading_to_target >= 0.0f && heading_to_target <= angle_end)) {
+				if (CheckLosFN((*iter)) || spells[spell_id].npc_no_los) {
+					(*iter)->CalcSpellPowerDistanceMod(spell_id, 0, this);
+					SpellOnTarget(spell_id, (*iter), false, true, resist_adjust);
+					maxtarget_count++;
+				}
+			}
+		} else {
+			if (heading_to_target >= angle_start && heading_to_target <= angle_end) {
+				if (CheckLosFN((*iter)) || spells[spell_id].npc_no_los) {
 					(*iter)->CalcSpellPowerDistanceMod(spell_id, 0, this);
 					SpellOnTarget(spell_id, (*iter), false, true, resist_adjust);
 					maxtarget_count++;

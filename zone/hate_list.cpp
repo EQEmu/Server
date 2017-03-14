@@ -23,6 +23,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "raids.h"
 
 #include "../common/rulesys.h"
+#include "../common/data_verification.h"
 
 #include "hate_list.h"
 #include "quest_parser_collection.h"
@@ -277,7 +278,24 @@ int HateList::GetSummonedPetCountOnHateList(Mob *hater) {
 	return pet_count;
 }
 
-Mob *HateList::GetEntWithMostHateOnList(Mob *center)
+int HateList::GetHateRatio(Mob *top, Mob *other)
+{
+	auto other_entry = Find(other);
+
+	if (!other_entry || other_entry->stored_hate_amount < 1)
+		return 0;
+
+	auto top_entry = Find(top);
+
+	if (!top_entry || top_entry->stored_hate_amount < 1)
+		return 999; // shouldn't happen if you call it right :P
+
+	return EQEmu::Clamp(static_cast<int>((other_entry->stored_hate_amount * 100) / top_entry->stored_hate_amount), 1, 999);
+}
+
+// skip is used to ignore a certain mob on the list
+// Currently used for getting 2nd on list for aggro meter
+Mob *HateList::GetEntWithMostHateOnList(Mob *center, Mob *skip)
 {
 	// hack fix for zone shutdown crashes on some servers
 	if (!zone->IsLoaded())
@@ -306,6 +324,11 @@ Mob *HateList::GetEntWithMostHateOnList(Mob *center)
 			}
 
 			if (!cur->entity_on_hatelist){
+				++iterator;
+				continue;
+			}
+
+			if (cur->entity_on_hatelist == skip) {
 				++iterator;
 				continue;
 			}
@@ -436,6 +459,11 @@ Mob *HateList::GetEntWithMostHateOnList(Mob *center)
 		while (iterator != list.end())
 		{
 			struct_HateList *cur = (*iterator);
+			if (cur->entity_on_hatelist == skip) {
+				++iterator;
+				continue;
+			}
+
 			if (center->IsNPC() && center->CastToNPC()->IsUnderwaterOnly() && zone->HasWaterMap()) {
 				if(!zone->watermap->InLiquid(glm::vec3(cur->entity_on_hatelist->GetPosition()))) {
 					skipped_count++;
@@ -553,7 +581,7 @@ int HateList::AreaRampage(Mob *caster, Mob *target, int count, ExtraAttackOption
 		auto mob = entity_list.GetMobID(id);
 		if (mob) {
 			++hit_count;
-			caster->ProcessAttackRounds(mob, opts, 1);
+			caster->ProcessAttackRounds(mob, opts);
 		}
 	}
 

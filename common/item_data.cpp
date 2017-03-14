@@ -17,7 +17,7 @@
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
-#include "item_base.h"
+#include "item_data.h"
 #include "classes.h"
 #include "races.h"
 //#include "deity.h"
@@ -167,7 +167,7 @@ uint8 EQEmu::item::ConvertAugTypeBitToAugType(uint32 aug_type_bit)
 	}
 }
 
-bool EQEmu::ItemBase::IsEquipable(uint16 race_id, uint16 class_id)
+bool EQEmu::ItemData::IsEquipable(uint16 race_id, uint16 class_id) const
 {
 	if (!(Races & GetPlayerRaceBit(race_id)))
 		return false;
@@ -178,32 +178,50 @@ bool EQEmu::ItemBase::IsEquipable(uint16 race_id, uint16 class_id)
 	return true;
 }
 
-bool EQEmu::ItemBase::IsClassCommon()
+bool EQEmu::ItemData::IsClassCommon() const
 {
 	return (ItemClass == item::ItemClassCommon);
 }
 
-bool EQEmu::ItemBase::IsClassBag()
+bool EQEmu::ItemData::IsClassBag() const
 {
 	return (ItemClass == item::ItemClassBag);
 }
 
-bool EQEmu::ItemBase::IsClassBook()
+bool EQEmu::ItemData::IsClassBook() const
 {
 	return (ItemClass == item::ItemClassBook);
 }
 
-bool EQEmu::ItemBase::IsType1HWeapon()
+bool EQEmu::ItemData::IsType1HWeapon() const
 {
-	return ((ItemType == item::ItemType1HBlunt) || (ItemType == item::ItemType1HSlash) || (ItemType == item::ItemType1HPiercing));
+	return ((ItemType == item::ItemType1HBlunt) || (ItemType == item::ItemType1HSlash) || (ItemType == item::ItemType1HPiercing) || (ItemType == item::ItemTypeMartial));
 }
 
-bool EQEmu::ItemBase::IsType2HWeapon()
+bool EQEmu::ItemData::IsType2HWeapon() const
 {
 	return ((ItemType == item::ItemType2HBlunt) || (ItemType == item::ItemType2HSlash) || (ItemType == item::ItemType2HPiercing));
 }
 
-bool EQEmu::ItemBase::IsTypeShield()
+bool EQEmu::ItemData::IsTypeShield() const
 {
 	return (ItemType == item::ItemTypeShield);
+}
+
+bool EQEmu::ItemData::CheckLoreConflict(const ItemData* l_item, const ItemData* r_item)
+{
+	if (!l_item || !r_item)
+		return false;
+
+	if (!l_item->LoreGroup || !r_item->LoreGroup)
+		return false;
+
+	if (l_item->LoreGroup == r_item->LoreGroup) {
+		if ((l_item->LoreGroup == -1) && (l_item->ID != r_item->ID))
+			return false;
+
+		return true;
+	}
+
+	return false;
 }

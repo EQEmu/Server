@@ -295,6 +295,14 @@ namespace SoD
 
 		const size_t SayLinkBodySize = 50;
 
+		const int LongBuffs = 25;
+		const int ShortBuffs = 15;
+		const int DiscBuffs = 1;
+		const int TotalBuffs = LongBuffs + ShortBuffs + DiscBuffs;
+		const int NPCBuffs = 85;
+		const int PetBuffs = NPCBuffs;
+		const int MercBuffs = LongBuffs;
+
 	} /*constants*/
 
 	namespace behavior {

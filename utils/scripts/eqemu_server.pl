@@ -43,8 +43,12 @@ if($Config{osname}=~/Win|MS/i){
 $has_internet_connection = check_internet_connection();
 ($sec, $min, $hour, $mday, $mon, $year, $wday, $yday, $isdst) = localtime();
 
+if(-e "eqemu_server_skip_update.txt"){
+	$skip_self_update_check = 1;
+}
+
 #::: Check for script self update
-do_self_update_check_routine();
+do_self_update_check_routine() if !$skip_self_update_check;
 get_perl_version();
 read_eqemu_config_xml();
 get_mysql_path();
@@ -330,7 +334,7 @@ sub build_linux_source {
 	}
 	print "Building EQEmu Server code. This will take a while.";
 
-	#::: Build 
+	#::: Build
 	print `make`;
 	
 	chdir ($current_directory);
@@ -488,11 +492,11 @@ sub check_internet_connection {
 		$count = "n";
 	}
 
-	if (`ping 8.8.8.8 -$count 1 -w 500`=~/Reply from|1 received/i) { 
+	if (`ping 8.8.8.8 -$count 1 -w 500`=~/TTL|1 received/i) { 
 		# print "[Update] We have a connection to the internet, continuing...\n";
 		return 1;
 	}
-	elsif (`ping 4.2.2.2 -$count 1 -w 500`=~/Reply from|1 received/i) { 
+	elsif (`ping 4.2.2.2 -$count 1 -w 500`=~/TTL|1 received/i) { 
 		# print "[Update] We have a connection to the internet, continuing...\n";
 		return 1;
 	}
@@ -558,6 +562,7 @@ sub do_self_update_check_routine {
 		}
 
 		unlink("updates_staged/eqemu_server.pl");
+		unlink("updates_staged");
 	}
 }
 
@@ -720,13 +725,14 @@ sub show_menu_prompt {
 			print " [utility_scripts]	Download utility scripts to run and operate the EQEmu Server\n";
 			if($OS eq "Windows"){
 				print ">>> Windows\n";
-				print " [windows_server_download]	Updates server code from latest stable\n";
-				print " [windows_server_download_bots]	Updates server code (bots enabled) from latest\n";
+				print " [windows_server_download]	Updates server via latest 'stable' code\n";
+				print " [windows_server_latest]	Updates server via latest commit 'unstable'\n";
+				print " [windows_server_download_bots]	Updates server (bots) from latest 'stable'\n";
 				print " [fetch_dlls]			Grabs dll's needed to run windows binaries\n";
 				print " [setup_loginserver]		Sets up loginserver for Windows\n";
 			}
 			print " \n> main - go back to main menu\n";
-			print "Enter a command #> "; 
+			print "Enter a command #> ";  
 			$last_menu = trim($input);
 		}
 		elsif($input eq "backup_database"){ database_dump(); $dc = 1; }
@@ -741,6 +747,7 @@ sub show_menu_prompt {
 		elsif($input eq "quests"){ quest_files_fetch(); $dc = 1; }
 		elsif($input eq "lua_modules"){ lua_modules_fetch(); $dc = 1; }
 		elsif($input eq "windows_server_download"){ fetch_latest_windows_binaries(); $dc = 1; }
+		elsif($input eq "windows_server_latest"){ fetch_latest_windows_appveyor(); $dc = 1; }
 		elsif($input eq "windows_server_download_bots"){ fetch_latest_windows_binaries_bots(); $dc = 1; }
 		elsif($input eq "fetch_dlls"){ fetch_server_dlls(); $dc = 1; }
 		elsif($input eq "utility_scripts"){ fetch_utility_scripts(); $dc = 1; }
@@ -1063,17 +1070,50 @@ sub trim {
 }
 
 sub read_eqemu_config_xml {
-	my $confile = "eqemu_config.xml"; #default
-	open(F, "<$confile");
-	my $indb = 0;
-	while(<F>) {
-		s/\r//g;
-		if(/<host>(.*)<\/host>/i) { $host = $1; } 
-		elsif(/<username>(.*)<\/username>/i) { $user = $1; } 
-		elsif(/<password>(.*)<\/password>/i) { $pass = $1; } 
-		elsif(/<db>(.*)<\/db>/i) { $db = $1; } 
-		if(/<longname>(.*)<\/longname>/i) { $long_name = $1; } 
-	}
+    open (CONFIG, "eqemu_config.xml");
+    while (<CONFIG>){
+        chomp;
+        $o = $_;
+		
+        if($o=~/\<\!--/i){
+            next; 
+        }
+        
+        if($o=~/database/i && $o=~/\<\//i){
+            $in_database_tag = 0;
+        }
+        if($o=~/<database>/i){
+			print "IN DATABASE TAG\n" if $debug;
+			$in_database_tag = 1;
+        }
+        if($o=~/<longname>/i){ 
+			($long_name) = $o =~ /<longname>(.*)<\/longname>/;
+			print "Long Name: '" . $long_name . "'\n" if $debug;
+        }
+        if($in_database_tag == 1){
+			@left = split (">", $o); 
+			@right = split("<", $left[1]);
+			$tag_data = trim($right[0]);
+		
+            if($o=~/<username>/i && $in_database_tag){
+				$user = $tag_data;
+				print "Database User: '" . $user . "'\n" if $debug;
+            }
+            if($o=~/<password>/i && $in_database_tag){
+				$pass = $tag_data;
+                print "Database Pass: '" . $pass . "'\n" if $debug;
+            }
+            if($o=~/<db>/i){
+                $db = $tag_data;
+                print "Database Name: '" . $db . "'\n" if $debug;
+            }
+            if($o=~/<host>/i){
+				$host = $tag_data;
+				print "Database Host: '" . $host . "'\n" if $debug;
+            }
+        }
+    }
+    close(CONFIG);
 }
 
 #::: Fetch Latest PEQ AA's
@@ -1170,6 +1210,31 @@ sub copy_file {
 		}
 	}
 	copy $l_source_file, $l_destination_file;
+}
+
+sub fetch_latest_windows_appveyor {
+	print "[Update] Fetching Latest Windows Binaries (unstable) from Appveyor... \n";
+	get_remote_file("https://ci.appveyor.com/api/projects/KimLS/server/artifacts/build_x86_pdb.zip", "updates_staged/master_windows_build_pdb.zip", 1);
+	get_remote_file("https://ci.appveyor.com/api/projects/KimLS/server/artifacts/build_x86.zip", "updates_staged/master_windows_build.zip", 1);
+	print "[Update] Fetched Latest Windows Binaries (unstable) from Appveyor... \n";
+	print "[Update] Extracting... --- \n";
+	unzip('updates_staged/master_windows_build.zip', 'updates_staged/binaries/');
+	unzip('updates_staged/master_windows_build_pdb.zip', 'updates_staged/binaries/');
+	my @files;
+	my $start_dir = "updates_staged/binaries";
+	find( 
+		sub { push @files, $File::Find::name unless -d; }, 
+		$start_dir
+	);
+	for my $file (@files) {
+		$destination_file = $file;
+		$destination_file =~s/updates_staged\/binaries\///g;
+		print "[Update] Installing :: " . $destination_file . "\n";
+		copy_file($file, $destination_file);
+	}
+	print "[Update] Done\n";
+	
+	rmtree('updates_staged');
 }
 
 sub fetch_latest_windows_binaries {
@@ -1275,7 +1340,7 @@ sub do_linux_login_server_setup {
 	
 	get_remote_file($install_repository_request_url . "linux/login.ini", "login_template.ini");
 	get_remote_file($install_repository_request_url . "linux/login_opcodes.conf", "login_opcodes.conf");
-	get_remote_file($install_repository_request_url . "linux/login_opcodes.conf", "login_opcodes_sod.conf");
+	get_remote_file($install_repository_request_url . "linux/login_opcodes_sod.conf", "login_opcodes_sod.conf");
 	
 	get_installation_variables();
 	my $db_name = $installation_variables{"mysql_eqemu_db_name"};

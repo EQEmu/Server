@@ -43,6 +43,8 @@ Raid::Raid(uint32 raidID)
 	memset(leadername, 0, 64);
 	locked = false;
 	LootType = 4;
+
+	m_autohatermgr.SetOwner(nullptr, nullptr, this);
 }
 
 Raid::Raid(Client* nLeader)
@@ -60,6 +62,8 @@ Raid::Raid(Client* nLeader)
 	strn0cpy(leadername, nLeader->GetName(), 64);
 	locked = false;
 	LootType = 4;
+
+	m_autohatermgr.SetOwner(nullptr, nullptr, this);
 }
 
 Raid::~Raid()
@@ -121,6 +125,26 @@ void Raid::AddMember(Client *c, uint32 group, bool rleader, bool groupleader, bo
 	c->SetRaidGrouped(true);
 	SendRaidMOTD(c);
 
+	// xtarget shit ..........
+	if (group == RAID_GROUPLESS) {
+		if (rleader) {
+			GetXTargetAutoMgr()->merge(*c->GetXTargetAutoMgr());
+			c->GetXTargetAutoMgr()->clear();
+			c->SetXTargetAutoMgr(GetXTargetAutoMgr());
+		} else {
+			if (!c->GetXTargetAutoMgr()->empty()) {
+				GetXTargetAutoMgr()->merge(*c->GetXTargetAutoMgr());
+				c->GetXTargetAutoMgr()->clear();
+				c->RemoveAutoXTargets();
+			}
+
+			c->SetXTargetAutoMgr(GetXTargetAutoMgr());
+
+			if (!c->GetXTargetAutoMgr()->empty())
+				c->SetDirtyAutoHaters();
+		}
+	}
+
 	auto pack = new ServerPacket(ServerOP_RaidAdd, sizeof(ServerRaidGeneralAction_Struct));
 	ServerRaidGeneralAction_Struct *rga = (ServerRaidGeneralAction_Struct*)pack->pBuffer;
 	rga->rid = GetID();
@@ -143,8 +167,10 @@ void Raid::RemoveMember(const char *characterName)
 	LearnMembers();
 	VerifyRaid();
 
-	if(client)
+	if(client) {
 		client->SetRaidGrouped(false);
+		client->LeaveRaidXTargets(this);
+	}
 
 	auto pack = new ServerPacket(ServerOP_RaidRemove, sizeof(ServerRaidGeneralAction_Struct));
 	ServerRaidGeneralAction_Struct *rga = (ServerRaidGeneralAction_Struct*)pack->pBuffer;
@@ -1670,5 +1696,13 @@ void Raid::CheckGroupMentor(uint32 group_id, Client *c)
 
 	if (group_mentor[group_id].name == c->GetName())
 		group_mentor[group_id].mentoree = c;
+}
+
+void Raid::SetDirtyAutoHaters()
+{
+	for (int i = 0; i < MAX_RAID_MEMBERS; ++i)
+		if (members[i].member)
+			members[i].member->SetDirtyAutoHaters();
+
 }
 

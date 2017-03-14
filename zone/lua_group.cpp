@@ -82,6 +82,11 @@ int Lua_Group::GetHighestLevel() {
 	return self->GetHighestLevel();
 }
 
+int Lua_Group::GetLowestLevel() {
+	Lua_Safe_Call_Int();
+	return self->GetLowestLevel();
+}
+
 void Lua_Group::TeleportGroup(Lua_Mob sender, uint32 zone_id, uint32 instance_id, float x, float y, float z, float h) {
 	Lua_Safe_Call_Void();
 	self->TeleportGroup(sender, zone_id, instance_id, x, y, z, h);
@@ -121,6 +126,7 @@ luabind::scope lua_register_group() {
 		.def("IsLeader", (bool(Lua_Group::*)(Lua_Mob))&Lua_Group::IsLeader)
 		.def("GroupCount", (int(Lua_Group::*)(void))&Lua_Group::GroupCount)
 		.def("GetHighestLevel", (int(Lua_Group::*)(void))&Lua_Group::GetHighestLevel)
+		.def("GetLowestLevel", (int(Lua_Group::*)(void))&Lua_Group::GetLowestLevel)
 		.def("TeleportGroup", (void(Lua_Group::*)(Lua_Mob,uint32,uint32,float,float,float,float))&Lua_Group::TeleportGroup)
 		.def("GetID", (int(Lua_Group::*)(void))&Lua_Group::GetID)
 		.def("GetMember", (Lua_Mob(Lua_Group::*)(int))&Lua_Group::GetMember);

@@ -26,8 +26,8 @@
 #include "../common/string_util.h"
 #include "../common/emu_versions.h"
 #include "../common/features.h"
-#include "../common/item.h"
-#include "../common/item_base.h"
+#include "../common/item_instance.h"
+#include "../common/item_data.h"
 #include "../common/linked_list.h"
 #include "../common/servertalk.h"
 #include "../common/say_link.h"
@@ -200,6 +200,9 @@ NPC::NPC(const NPCType* d, Spawn2* in_respawn, const glm::vec4& position, int if
 	if(max_dmg == 0){
 		CalcNPCDamage();
 	}
+
+	base_damage = round((max_dmg - min_dmg) / 1.9);
+	min_damage = min_dmg - round(base_damage / 10.0);
 
 	accuracy_rating = d->accuracy_rating;
 	avoidance_rating = d->avoidance_rating;
@@ -489,8 +492,8 @@ void NPC::CheckMinMaxLevel(Mob *them)
 
 		if(themlevel < (*cur)->min_level || themlevel > (*cur)->max_level)
 		{
-			material = Inventory::CalcMaterialFromSlot((*cur)->equip_slot);
-			if (material != EQEmu::textures::TextureInvalid)
+			material = EQEmu::InventoryProfile::CalcMaterialFromSlot((*cur)->equip_slot);
+			if (material != EQEmu::textures::materialInvalid)
 				SendWearChange(material);
 
 			cur = itemlist.erase(cur);
@@ -525,19 +528,22 @@ void NPC::QueryLoot(Client* to)
 
 	int x = 0;
 	for (auto cur = itemlist.begin(); cur != itemlist.end(); ++cur, ++x) {
-		const EQEmu::ItemBase* item = database.GetItem((*cur)->item_id);
-		if (item == nullptr) {
-			Log.Out(Logs::General, Logs::Error, "Database error, invalid item");
+		if (!(*cur)) {
+			Log.Out(Logs::General, Logs::Error, "NPC::QueryLoot() - ItemList error, null item");
+			continue;
+		}
+		if (!(*cur)->item_id || !database.GetItem((*cur)->item_id)) {
+			Log.Out(Logs::General, Logs::Error, "NPC::QueryLoot() - Database error, invalid item");
 			continue;
 		}
 
 		EQEmu::SayLinkEngine linker;
-		linker.SetLinkType(EQEmu::saylink::SayLinkItemData);
-		linker.SetItemData(item);
+		linker.SetLinkType(EQEmu::saylink::SayLinkLootItem);
+		linker.SetLootData(*cur);
 
 		auto item_link = linker.GenerateLink();
 
-		to->Message(0, "%s, ID: %u, Level: (min: %u, max: %u)", item_link.c_str(), item->ID, (*cur)->min_level, (*cur)->max_level);
+		to->Message(0, "%s, ID: %u, Level: (min: %u, max: %u)", item_link.c_str(), (*cur)->item_id, (*cur)->min_level, (*cur)->max_level);
 	}
 
 	to->Message(0, "%i items on %s.", x, GetName());
@@ -750,8 +756,8 @@ void NPC::UpdateEquipmentLight()
 	m_Light.Type[EQEmu::lightsource::LightEquipment] = 0;
 	m_Light.Level[EQEmu::lightsource::LightEquipment] = 0;
 
-	for (int index = SLOT_BEGIN; index < EQEmu::legacy::EQUIPMENT_SIZE; ++index) {
-		if (index == EQEmu::legacy::SlotAmmo) { continue; }
+	for (int index = EQEmu::inventory::slotBegin; index < EQEmu::legacy::EQUIPMENT_SIZE; ++index) {
+		if (index == EQEmu::inventory::slotAmmo) { continue; }
 
 		auto item = database.GetItem(equipment[index]);
 		if (item == nullptr) { continue; }
@@ -1051,7 +1057,7 @@ NPC* NPC::SpawnNPC(const char* spawncommand, const glm::vec4& position, Client* 
 		npc_type->WIS = 150;
 		npc_type->CHA = 150;
 
-		npc_type->attack_delay = 30;
+		npc_type->attack_delay = 3000;
 
 		npc_type->prim_melee_type = 28;
 		npc_type->sec_melee_type = 28;
@@ -1210,12 +1216,13 @@ uint32 ZoneDatabase::AddNewNPCSpawnGroupCommand(const char *zone, uint32 zone_ve
 uint32 ZoneDatabase::UpdateNPCTypeAppearance(Client *client, NPC *spawn)
 {
 	std::string query =
-	    StringFormat("UPDATE npc_types SET name = \"%s\", level = %i, race = %i, class = %i, "
-			 "hp = %i, gender = %i, texture = %i, helmtexture = %i, size = %i, "
-			 "loottable_id = %i, merchant_id = %i, face = %i, WHERE id = %i",
+	    StringFormat("UPDATE npc_types SET name = '%s', level = '%i', race = '%i', class = '%i', "
+			 "hp = '%i', gender = '%i', texture = '%i', helmtexture = '%i', size = '%i', "
+			 "loottable_id = '%i', merchant_id = '%i', face = '%i' "
+			 "WHERE id = '%i'",
 			 spawn->GetName(), spawn->GetLevel(), spawn->GetRace(), spawn->GetClass(), spawn->GetMaxHP(),
 			 spawn->GetGender(), spawn->GetTexture(), spawn->GetHelmTexture(), spawn->GetSize(),
-			 spawn->GetLoottableID(), spawn->MerchantType, spawn->GetNPCTypeID());
+			 spawn->GetLoottableID(), spawn->MerchantType, spawn->GetLuclinFace(), spawn->GetNPCTypeID());
 	auto results = QueryDatabase(query);
 	return results.Success() == true ? 1 : 0;
 }
@@ -1378,10 +1385,10 @@ uint32 ZoneDatabase::NPCSpawnDB(uint8 command, const char* zone, uint32 zone_ver
 
 int32 NPC::GetEquipmentMaterial(uint8 material_slot) const
 {
-	if (material_slot >= EQEmu::textures::TextureCount)
+	if (material_slot >= EQEmu::textures::materialCount)
 		return 0;
 
-	int16 invslot = Inventory::CalcSlotFromMaterial(material_slot);
+	int16 invslot = EQEmu::InventoryProfile::CalcSlotFromMaterial(material_slot);
 	if (invslot == INVALID_INDEX)
 		return 0;
 
@@ -1389,23 +1396,23 @@ int32 NPC::GetEquipmentMaterial(uint8 material_slot) const
 	{
 		switch(material_slot)
 		{
-		case EQEmu::textures::TextureHead:
+		case EQEmu::textures::armorHead:
 			return helmtexture;
-		case EQEmu::textures::TextureChest:
+		case EQEmu::textures::armorChest:
 			return texture;
-		case EQEmu::textures::TextureArms:
+		case EQEmu::textures::armorArms:
 			return armtexture;
-		case EQEmu::textures::TextureWrist:
+		case EQEmu::textures::armorWrist:
 			return bracertexture;
-		case EQEmu::textures::TextureHands:
+		case EQEmu::textures::armorHands:
 			return handtexture;
-		case EQEmu::textures::TextureLegs:
+		case EQEmu::textures::armorLegs:
 			return legtexture;
-		case EQEmu::textures::TextureFeet:
+		case EQEmu::textures::armorFeet:
 			return feettexture;
-		case EQEmu::textures::TexturePrimary:
+		case EQEmu::textures::weaponPrimary:
 			return d_melee_texture1;
-		case EQEmu::textures::TextureSecondary:
+		case EQEmu::textures::weaponSecondary:
 			return d_melee_texture2;
 		default:
 			//they have nothing in the slot, and its not a special slot... they get nothing.
@@ -1462,7 +1469,7 @@ void NPC::PickPocket(Client* thief)
 
 	// still needs to have FindFreeSlot vs PutItemInInventory issue worked out
 	while (steal_item) {
-		std::vector<std::pair<const EQEmu::ItemBase*, uint16>> loot_selection; // <const ItemBase*, charges>
+		std::vector<std::pair<const EQEmu::ItemData*, uint16>> loot_selection; // <const ItemData*, charges>
 		for (auto item_iter : itemlist) {
 			if (!item_iter || !item_iter->item_id)
 				continue;
@@ -1952,10 +1959,10 @@ void NPC::ModifyNPCStat(const char *identifier, const char *newValue)
 		id[i] = std::tolower(id[i]);
 	}
 
-	if(id == "ac") { AC = atoi(val.c_str()); return; }
+	if(id == "ac") { AC = atoi(val.c_str()); CalcAC(); return; }
 	else if(id == "str") { STR = atoi(val.c_str()); return; }
 	else if(id == "sta") { STA = atoi(val.c_str()); return; }
-	else if(id == "agi") { AGI = atoi(val.c_str()); return; }
+	else if(id == "agi") { AGI = atoi(val.c_str()); CalcAC(); return; }
 	else if(id == "dex") { DEX = atoi(val.c_str()); return; }
 	else if(id == "wis") { WIS = atoi(val.c_str()); CalcMaxMana(); return; }
 	else if(id == "int" || id == "_int") { INT = atoi(val.c_str()); CalcMaxMana(); return; }
@@ -1980,13 +1987,25 @@ void NPC::ModifyNPCStat(const char *identifier, const char *newValue)
 	else if(id == "special_attacks") { NPCSpecialAttacks(val.c_str(), 0, 1); return; }
 	else if(id == "special_abilities") { ProcessSpecialAbilities(val.c_str()); return; }
 	else if(id == "attack_speed") { attack_speed = (float)atof(val.c_str()); CalcBonuses(); return; }
-	else if(id == "attack_delay") { attack_delay = atoi(val.c_str()); CalcBonuses(); return; }
+	else if(id == "attack_delay") { /* TODO: fix DB */attack_delay = atoi(val.c_str()) * 100; CalcBonuses(); return; }
 	else if(id == "atk") { ATK = atoi(val.c_str()); return; }
 	else if(id == "accuracy") { accuracy_rating = atoi(val.c_str()); return; }
 	else if(id == "avoidance") { avoidance_rating = atoi(val.c_str()); return; }
 	else if(id == "trackable") { trackable = atoi(val.c_str()); return; }
-	else if(id == "min_hit") { min_dmg = atoi(val.c_str()); return; }
-	else if(id == "max_hit") { max_dmg = atoi(val.c_str()); return; }
+	else if(id == "min_hit") {
+		min_dmg = atoi(val.c_str());
+		// TODO: fix DB
+		base_damage = round((max_dmg - min_dmg) / 1.9);
+		min_damage = min_dmg - round(base_damage / 10.0);
+		return;
+	}
+	else if(id == "max_hit") {
+		max_dmg = atoi(val.c_str());
+		// TODO: fix DB
+		base_damage = round((max_dmg - min_dmg) / 1.9);
+		min_damage = min_dmg - round(base_damage / 10.0);
+		return;
+	}
 	else if(id == "attack_count") { attack_count = atoi(val.c_str()); return; }
 	else if(id == "see_invis") { see_invis = atoi(val.c_str()); return; }
 	else if(id == "see_invis_undead") { see_invis_undead = atoi(val.c_str()); return; }

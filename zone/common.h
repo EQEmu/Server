@@ -35,6 +35,13 @@
 #define CON_YELLOW		15
 #define CON_RED			13
 
+#define DMG_BLOCKED		-1
+#define DMG_PARRIED		-2
+#define DMG_RIPOSTED		-3
+#define DMG_DODGED		-4
+#define DMG_INVULNERABLE	-5
+#define DMG_RUNE		-6
+
 //Spell specialization parameters, not sure of a better place for them
 #define SPECIALIZE_FIZZLE 11		//% fizzle chance reduce at 200 specialized
 #define SPECIALIZE_MANA_REDUCE 12	//% mana cost reduction at 200 specialized
@@ -457,17 +464,16 @@ struct StatBonuses {
 	int32	ItemATKCap;							// Raise item attack cap
 	int32	FinishingBlow[2];					// Chance to do a finishing blow for specified damage amount.
 	uint32	FinishingBlowLvl[2];				// Sets max level an NPC can be affected by FB. (base1 = lv, base2= ???)
-	int32	ShieldEquipHateMod;					// Hate mod when shield equiped.
-	int32	ShieldEquipDmgMod[2];				// Damage mod when shield equiped. 0 = damage modifier 1 = Unknown
+	int32	ShieldEquipDmgMod;					// Increases weapon's base damage by base1 % when shield is equipped (indirectly increasing hate)
 	bool	TriggerOnValueAmount;				// Triggers off various different conditions, bool to check if client has effect.
 	int8	StunBashChance;						// chance to stun with bash.
 	int8	IncreaseChanceMemwipe;				// increases chance to memory wipe
 	int8	CriticalMend;						// chance critical monk mend
 	int32	ImprovedReclaimEnergy;				// Modifies amount of mana returned from reclaim energy
 	uint32	HeadShot[2];						// Headshot AA (Massive dmg vs humaniod w/ archery) 0= ? 1= Dmg
-	uint8	HSLevel;							// Max Level Headshot will be effective at.
+	uint8	HSLevel[2];							// Max Level Headshot will be effective at. and chance mod
 	uint32	Assassinate[2];						// Assassinate AA (Massive dmg vs humaniod w/ assassinate) 0= ? 1= Dmg
-	uint8	AssassinateLevel;					// Max Level Assassinate will be effective at.
+	uint8	AssassinateLevel[2];				// Max Level Assassinate will be effective at.
 	int32	PetMeleeMitigation;					// Add AC to owner's pet.
 	bool	IllusionPersistence;				// Causes illusions not to fade.
 	uint16	extra_xtargets;						// extra xtarget entries
@@ -568,7 +574,11 @@ struct MercData {
 	uint32	NPCID;
 };
 
-class ItemInst;
+namespace EQEmu
+{
+	class ItemInstance;
+}
+
 class Mob;
 // All data associated with a single trade
 class Trade
@@ -606,7 +616,7 @@ public:
 
 private:
 	// Send item data for trade item to other person involved in trade
-	void SendItemData(const ItemInst* inst, int16 dest_slot_id);
+	void SendItemData(const EQEmu::ItemInstance* inst, int16 dest_slot_id);
 
 	uint32 with_id;
 	Mob* owner;
@@ -633,6 +643,24 @@ struct ExtraAttackOptions {
 	int melee_damage_bonus_flat;
 	int skilldmgtaken_bonus_flat;
 
+};
+
+struct DamageTable {
+	int32 max_extra; // max extra damage
+	int32 chance; // chance not to apply?
+	int32 minusfactor; // difficulty of rolling
+};
+
+struct DamageHitInfo {
+	//uint16 attacker; // id
+	//uint16 defender; // id
+	int base_damage;
+	int min_damage;
+	int damage_done;
+	int offense;
+	int tohit;
+	int hand;
+	EQEmu::skills::SkillType skill;
 };
 
 #endif

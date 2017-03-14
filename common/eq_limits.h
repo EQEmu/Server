@@ -38,6 +38,13 @@ namespace EQEmu
 		class LookupEntry {
 		public:
 			size_t CharacterCreationLimit;
+			int LongBuffs;
+			int ShortBuffs;
+			int DiscBuffs;
+			int TotalBuffs;
+			int NPCBuffs;
+			int PetBuffs;
+			int MercBuffs;
 		};
 
 		const LookupEntry* Lookup(versions::ClientVersion client_version);
@@ -47,7 +54,7 @@ namespace EQEmu
 	namespace inventory {
 		class LookupEntry {
 		public:
-			size_t InventoryTypeSize[legacy::TypeCount];
+			size_t InventoryTypeSize[25]; // should reflect EQEmu::inventory::typeCount referenced in emu_constants.h
 
 			uint64 PossessionsBitmask;
 			size_t ItemBagSize;
@@ -59,7 +66,7 @@ namespace EQEmu
 			bool AllowOverLevelEquipment;
 		};
 
-		const LookupEntry* Lookup(versions::InventoryVersion inventory_version);
+		const LookupEntry* Lookup(versions::MobVersion mob_version);
 
 	} /*inventory*/
 	
@@ -69,7 +76,7 @@ namespace EQEmu
 			bool CoinHasWeight;
 		};
 
-		const LookupEntry* Lookup(versions::InventoryVersion inventory_version);
+		const LookupEntry* Lookup(versions::MobVersion mob_version);
 
 	} /*behavior*/
 

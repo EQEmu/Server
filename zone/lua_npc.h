@@ -31,6 +31,12 @@ public:
 	int CheckNPCFactionAlly(int faction);
 	void AddItem(int item_id, int charges);
 	void AddItem(int item_id, int charges, bool equip);
+	void AddItem(int item_id, int charges, bool equip, int aug1);
+	void AddItem(int item_id, int charges, bool equip, int aug1, int aug2);
+	void AddItem(int item_id, int charges, bool equip, int aug1, int aug2, int aug3);
+	void AddItem(int item_id, int charges, bool equip, int aug1, int aug2, int aug3, int aug4);
+	void AddItem(int item_id, int charges, bool equip, int aug1, int aug2, int aug3, int aug4, int aug5);
+	void AddItem(int item_id, int charges, bool equip, int aug1, int aug2, int aug3, int aug4, int aug5, int aug6);
 	void AddLootTable();
 	void AddLootTable(int id);
 	void RemoveItem(int item_id);

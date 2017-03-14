@@ -22,7 +22,7 @@
 #include "../common/ipc_mutex.h"
 #include "../common/memory_mapped_file.h"
 #include "../common/eqemu_exception.h"
-#include "../common/item_base.h"
+#include "../common/item_data.h"
 
 void LoadItems(SharedDatabase *database, const std::string &prefix) {
 	EQEmu::IPCMutex mutex("items");
@@ -35,7 +35,7 @@ void LoadItems(SharedDatabase *database, const std::string &prefix) {
 		EQ_EXCEPT("Shared Memory", "Unable to get any items from the database.");
 	}
 
-	uint32 size = static_cast<uint32>(EQEmu::FixedMemoryHashSet<EQEmu::ItemBase>::estimated_size(items, max_item));
+	uint32 size = static_cast<uint32>(EQEmu::FixedMemoryHashSet<EQEmu::ItemData>::estimated_size(items, max_item));
 
 	auto Config = EQEmuConfig::get();
 	std::string file_name = Config->SharedMemDir + prefix + std::string("items");

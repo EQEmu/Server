@@ -1404,15 +1404,15 @@ void EntityList::RemoveFromTargets(Mob *mob, bool RemoveFromXTargets)
 		if (!m)
 			continue;
 
-		m->RemoveFromHateList(mob);
-
 		if (RemoveFromXTargets) {
-			if (m->IsClient())
+			if (m->IsClient() && mob->CheckAggro(m))
 				m->CastToClient()->RemoveXTarget(mob, false);
 			// FadingMemories calls this function passing the client.
-			else if (mob->IsClient())
+			else if (mob->IsClient() && m->CheckAggro(mob))
 				mob->CastToClient()->RemoveXTarget(m, false);
 		}
+
+		m->RemoveFromHateList(mob);
 	}
 }
 
@@ -2009,7 +2009,7 @@ void EntityList::QueueClientsGuildBankItemUpdate(const GuildBankItemUpdate_Struc
 
 	memcpy(outgbius, gbius, sizeof(GuildBankItemUpdate_Struct));
 
-	const EQEmu::ItemBase *Item = database.GetItem(gbius->ItemID);
+	const EQEmu::ItemData *Item = database.GetItem(gbius->ItemID);
 
 	auto it = client_list.begin();
 	while (it != client_list.end()) {
@@ -2557,6 +2557,8 @@ void EntityList::RemoveFromHateLists(Mob *mob, bool settoone)
 				it->second->RemoveFromHateList(mob);
 			else
 				it->second->SetHateAmountOnEnt(mob, 1);
+			if (mob->IsClient())
+				mob->CastToClient()->RemoveXTarget(it->second, false); // gotta do book keeping
 		}
 		++it;
 	}
@@ -2978,10 +2980,16 @@ void EntityList::Evade(Mob *who)
 //removes "targ" from all hate lists, including feigned, in the zone
 void EntityList::ClearAggro(Mob* targ)
 {
+	Client *c = nullptr;
+	if (targ->IsClient())
+		c = targ->CastToClient();
 	auto it = npc_list.begin();
 	while (it != npc_list.end()) {
-		if (it->second->CheckAggro(targ))
+		if (it->second->CheckAggro(targ)) {
+			if (c)
+				c->RemoveXTarget(it->second, false);
 			it->second->RemoveFromHateList(targ);
+		}
 		it->second->RemoveFromFeignMemory(targ->CastToClient()); //just in case we feigned
 		++it;
 	}
@@ -3878,11 +3886,11 @@ void EntityList::GroupMessage(uint32 gid, const char *from, const char *message)
 
 uint16 EntityList::CreateGroundObject(uint32 itemid, const glm::vec4& position, uint32 decay_time)
 {
-	const EQEmu::ItemBase *is = database.GetItem(itemid);
+	const EQEmu::ItemData *is = database.GetItem(itemid);
 	if (!is)
 		return 0;
 
-	auto i = new ItemInst(is, is->MaxCharges);
+	auto i = new EQEmu::ItemInstance(is, is->MaxCharges);
 	if (!i)
 		return 0;
 
@@ -4655,12 +4663,20 @@ Mob *EntityList::GetClosestMobByBodyType(Mob *sender, bodyType BodyType)
 	return ClosestMob;
 }
 
-void EntityList::GetTargetsForConeArea(Mob *start, float min_radius, float radius, float height, std::list<Mob*> &m_list)
+void EntityList::GetTargetsForConeArea(Mob *start, float min_radius, float radius, float height, int pcnpc, std::list<Mob*> &m_list)
 {
 	auto it = mob_list.begin();
 	while (it !=  mob_list.end()) {
 		Mob *ptr = it->second;
 		if (ptr == start) {
+			++it;
+			continue;
+		}
+		// check PC/NPC only flag 1 = PCs, 2 = NPCs
+		if (pcnpc == 1 && !ptr->IsClient() && !ptr->IsMerc()) {
+			++it;
+			continue;
+		} else if (pcnpc == 2 && (ptr->IsClient() || ptr->IsMerc())) {
 			++it;
 			continue;
 		}

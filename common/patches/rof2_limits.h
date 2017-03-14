@@ -277,6 +277,14 @@ namespace RoF2
 
 		const size_t SayLinkBodySize = 56;
 
+		const int LongBuffs = 42;
+		const int ShortBuffs = 20;
+		const int DiscBuffs = 1;
+		const int TotalBuffs = LongBuffs + ShortBuffs + DiscBuffs;
+		const int NPCBuffs = 97;
+		const int PetBuffs = NPCBuffs;
+		const int MercBuffs = LongBuffs;
+
 	} /*constants*/
 
 	namespace behavior {

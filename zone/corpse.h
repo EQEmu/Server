@@ -20,16 +20,20 @@
 #define CORPSE_H
 
 #include "mob.h"
+#include "client.h"
 
-class Client;
 class EQApplicationPacket;
 class Group;
-class ItemInst;
 class NPC;
 class Raid;
 
 struct ExtraAttackOptions;
 struct NPCType;
+
+namespace EQEmu
+{
+	class ItemInstance;
+}
 
 #define MAX_LOOTERS 72
 
@@ -48,8 +52,8 @@ class Corpse : public Mob {
 
 	/* Corpse: General */
 	virtual bool	Death(Mob* killerMob, int32 damage, uint16 spell_id, EQEmu::skills::SkillType attack_skill) { return true; }
-	virtual void	Damage(Mob* from, int32 damage, uint16 spell_id, EQEmu::skills::SkillType attack_skill, bool avoidable = true, int8 buffslot = -1, bool iBuffTic = false, int special = 0) { return; }
-	virtual bool	Attack(Mob* other, int Hand = EQEmu::legacy::SlotPrimary, bool FromRiposte = false, bool IsStrikethrough = true, bool IsFromSpell = false, ExtraAttackOptions *opts = nullptr, int special = 0) { return false; }
+	virtual void	Damage(Mob* from, int32 damage, uint16 spell_id, EQEmu::skills::SkillType attack_skill, bool avoidable = true, int8 buffslot = -1, bool iBuffTic = false, eSpecialAttacks special = eSpecialAttacks::None) { return; }
+	virtual bool	Attack(Mob* other, int Hand = EQEmu::inventory::slotPrimary, bool FromRiposte = false, bool IsStrikethrough = true, bool IsFromSpell = false, ExtraAttackOptions *opts = nullptr) { return false; }
 	virtual bool	HasRaid()			{ return false; }
 	virtual bool	HasGroup()			{ return false; }
 	virtual Raid*	GetRaid()			{ return 0; }
@@ -114,6 +118,7 @@ class Corpse : public Mob {
 	inline bool	IsLocked()			{ return is_locked; }
 	inline void	ResetLooter()		{ being_looted_by = 0xFFFFFFFF; }
 	inline bool	IsBeingLooted()		{ return (being_looted_by != 0xFFFFFFFF); }
+	inline bool	IsBeingLootedBy(Client *c) { return being_looted_by == c->GetID(); }
 
 	/* Mob */
 	void FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho);
@@ -128,7 +133,7 @@ class Corpse : public Mob {
 	virtual void UpdateEquipmentLight();
 
 protected:
-	void MoveItemToCorpse(Client *client, ItemInst *inst, int16 equipSlot, std::list<uint32> &removedList);
+	void MoveItemToCorpse(Client *client, EQEmu::ItemInstance *inst, int16 equipSlot, std::list<uint32> &removedList);
 
 private:
 	bool		is_player_corpse; /* Determines if Player Corpse or not */

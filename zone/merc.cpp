@@ -214,10 +214,10 @@ void Merc::CalcItemBonuses(StatBonuses* newbon) {
 
 	unsigned int i;
 	//should not include 21 (SLOT_AMMO)
-	for (i = 0; i < EQEmu::legacy::SlotAmmo; i++) {
+	for (i = 0; i < EQEmu::inventory::slotAmmo; i++) {
 		if(equipment[i] == 0)
 			continue;
-		const EQEmu::ItemBase * itm = database.GetItem(equipment[i]);
+		const EQEmu::ItemData * itm = database.GetItem(equipment[i]);
 		if(itm)
 			AddItemBonuses(itm, newbon);
 	}
@@ -225,7 +225,7 @@ void Merc::CalcItemBonuses(StatBonuses* newbon) {
 	//Power Source Slot
 	/*if (GetClientVersion() >= EQClientSoF)
 	{
-	const ItemInst* inst = m_inv[MainPowerSource];
+	const EQEmu::ItemInstance* inst = m_inv[MainPowerSource];
 	if(inst)
 	AddItemBonuses(inst, newbon);
 	}*/
@@ -243,7 +243,7 @@ void Merc::CalcItemBonuses(StatBonuses* newbon) {
 	SetAttackTimer();
 }
 
-void Merc::AddItemBonuses(const EQEmu::ItemBase *item, StatBonuses* newbon) {
+void Merc::AddItemBonuses(const EQEmu::ItemData *item, StatBonuses* newbon) {
 
 	if(GetLevel() < item->ReqLevel)
 	{
@@ -1221,7 +1221,7 @@ void Merc::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho) {
 			{
 				continue;
 			}
-			const ItemBase* item = database.GetItem(equipment[i]);
+			const ItemData* item = database.GetItem(equipment[i]);
 			if(item)
 			{
 				ns->spawn.equipment[i].material = item->Material;
@@ -1559,24 +1559,24 @@ void Merc::AI_Process() {
 				//try main hand first
 				if(attack_timer.Check())
 				{
-					Attack(GetTarget(), EQEmu::legacy::SlotPrimary);
+					Attack(GetTarget(), EQEmu::inventory::slotPrimary);
 
 					bool tripleSuccess = false;
 
 					if(GetOwner() && GetTarget() && CanThisClassDoubleAttack())
 					{
 						if(GetOwner()) {
-							Attack(GetTarget(), EQEmu::legacy::SlotPrimary, true);
+							Attack(GetTarget(), EQEmu::inventory::slotPrimary, true);
 						}
 
 						if(GetOwner() && GetTarget() && GetSpecialAbility(SPECATK_TRIPLE)) {
 							tripleSuccess = true;
-							Attack(GetTarget(), EQEmu::legacy::SlotPrimary, true);
+							Attack(GetTarget(), EQEmu::inventory::slotPrimary, true);
 						}
 
 						//quad attack, does this belong here??
 						if(GetOwner() && GetTarget() && GetSpecialAbility(SPECATK_QUAD)) {
-							Attack(GetTarget(), EQEmu::legacy::SlotPrimary, true);
+							Attack(GetTarget(), EQEmu::inventory::slotPrimary, true);
 						}
 					}
 
@@ -1588,8 +1588,8 @@ void Merc::AI_Process() {
 						if(zone->random.Roll(flurrychance))
 						{
 							Message_StringID(MT_NPCFlurry, YOU_FLURRY);
-							Attack(GetTarget(), EQEmu::legacy::SlotPrimary, false);
-							Attack(GetTarget(), EQEmu::legacy::SlotPrimary, false);
+							Attack(GetTarget(), EQEmu::inventory::slotPrimary, false);
+							Attack(GetTarget(), EQEmu::inventory::slotPrimary, false);
 						}
 					}
 
@@ -1598,7 +1598,7 @@ void Merc::AI_Process() {
 					if (GetTarget() && ExtraAttackChanceBonus) {
 						if(zone->random.Roll(ExtraAttackChanceBonus))
 						{
-							Attack(GetTarget(), EQEmu::legacy::SlotPrimary, false);
+							Attack(GetTarget(), EQEmu::inventory::slotPrimary, false);
 						}
 					}
 				}
@@ -1634,11 +1634,11 @@ void Merc::AI_Process() {
 						// Max 78% of DW
 						if (zone->random.Roll(DualWieldProbability))
 						{
-							Attack(GetTarget(), EQEmu::legacy::SlotSecondary);     // Single attack with offhand
+							Attack(GetTarget(), EQEmu::inventory::slotSecondary);     // Single attack with offhand
 
 							if(CanThisClassDoubleAttack()) {
 								if(GetTarget() && GetTarget()->GetHP() > -10)
-									Attack(GetTarget(), EQEmu::legacy::SlotSecondary);     // Single attack with offhand
+									Attack(GetTarget(), EQEmu::inventory::slotSecondary);     // Single attack with offhand
 							}
 						}
 					}
@@ -1985,7 +1985,7 @@ bool Merc::AIDoSpellCast(uint16 spellid, Mob* tar, int32 mana_cost, uint32* oDon
 	return result;
 }
 
-bool Merc::AICastSpell(int8 iChance, int32 iSpellTypes) {
+bool Merc::AICastSpell(int8 iChance, uint32 iSpellTypes) {
 
 	if(!AI_HasSpells())
 		return false;
@@ -2547,8 +2547,8 @@ int16 Merc::GetFocusEffect(focusType type, uint16 spell_id) {
 	//Check if item focus effect exists for the client.
 	if (itembonuses.FocusEffects[type]){
 
-		const EQEmu::ItemBase* TempItem = 0;
-		const EQEmu::ItemBase* UsedItem = 0;
+		const EQEmu::ItemData* TempItem = 0;
+		const EQEmu::ItemData* UsedItem = 0;
 		uint16 UsedFocusID = 0;
 		int16 Total = 0;
 		int16 focus_max = 0;
@@ -2746,7 +2746,7 @@ int32 Merc::GetActSpellCasttime(uint16 spell_id, int32 casttime)
 	return casttime;
 }
 
-int8 Merc::GetChanceToCastBySpellType(int16 spellType) {
+int8 Merc::GetChanceToCastBySpellType(uint32 spellType) {
 	int mercStance = (int)GetStance();
 	int8 mercClass = GetClass();
 	int8 chance = 0;
@@ -2888,7 +2888,7 @@ bool Merc::CheckStance(int16 stance) {
 	return false;
 }
 
-std::list<MercSpell> Merc::GetMercSpellsBySpellType(Merc* caster, int spellType) {
+std::list<MercSpell> Merc::GetMercSpellsBySpellType(Merc* caster, uint32 spellType) {
 	std::list<MercSpell> result;
 
 	if(caster && caster->AI_HasSpells()) {
@@ -2918,7 +2918,7 @@ std::list<MercSpell> Merc::GetMercSpellsBySpellType(Merc* caster, int spellType)
 	return result;
 }
 
-MercSpell Merc::GetFirstMercSpellBySpellType(Merc* caster, int spellType) {
+MercSpell Merc::GetFirstMercSpellBySpellType(Merc* caster, uint32 spellType) {
 	MercSpell result;
 
 	result.spellid = 0;
@@ -4426,20 +4426,10 @@ void Merc::DoClassAttacks(Mob *target) {
 					if(zone->random.Int(0, 100) > 25) //tested on live, warrior mobs both kick and bash, kick about 75% of the time, casting doesn't seem to make a difference.
 					{
 						DoAnim(animKick);
-						int32 dmg = 0;
+						int32 dmg = GetBaseSkillDamage(EQEmu::skills::SkillKick);
 
-						if (GetWeaponDamage(target, (const EQEmu::ItemBase*)nullptr) <= 0){
-							dmg = -5;
-						}
-						else{
-							if (target->CheckHitChance(this, EQEmu::skills::SkillKick, 0)) {
-								if(RuleB(Combat, UseIntervalAC))
-									dmg = GetKickDamage();
-								else
-									dmg = zone->random.Int(1, GetKickDamage());
-
-							}
-						}
+						if (GetWeaponDamage(target, (const EQEmu::ItemData*)nullptr) <= 0)
+							dmg = DMG_INVULNERABLE;
 
 						reuse = KickReuseTime * 1000;
 						DoSpecialAttackDamage(target, EQEmu::skills::SkillKick, dmg, 1, -1, reuse);
@@ -4448,19 +4438,10 @@ void Merc::DoClassAttacks(Mob *target) {
 					else
 					{
 						DoAnim(animTailRake);
-						int32 dmg = 0;
+						int32 dmg = GetBaseSkillDamage(EQEmu::skills::SkillBash);
 
-						if (GetWeaponDamage(target, (const EQEmu::ItemBase*)nullptr) <= 0){
-							dmg = -5;
-						}
-						else{
-							if (target->CheckHitChance(this, EQEmu::skills::SkillBash, 0)) {
-								if(RuleB(Combat, UseIntervalAC))
-									dmg = GetBashDamage();
-								else
-									dmg = zone->random.Int(1, GetBashDamage());
-							}
-						}
+						if (GetWeaponDamage(target, (const EQEmu::ItemData*)nullptr) <= 0)
+							dmg = DMG_INVULNERABLE;
 
 						reuse = BashReuseTime * 1000;
 						DoSpecialAttackDamage(target, EQEmu::skills::SkillBash, dmg, 1, -1, reuse);
@@ -4474,7 +4455,7 @@ void Merc::DoClassAttacks(Mob *target) {
 	classattack_timer.Start(reuse / HasteModifier);
 }
 
-bool Merc::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool IsFromSpell, ExtraAttackOptions *opts, int special)
+bool Merc::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool IsFromSpell, ExtraAttackOptions *opts)
 {
 	if (!other) {
 		SetTarget(nullptr);
@@ -4485,7 +4466,7 @@ bool Merc::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, boo
 	return NPC::Attack(other, Hand, bRiposte, IsStrikethrough, IsFromSpell, opts);
 }
 
-void Merc::Damage(Mob* other, int32 damage, uint16 spell_id, EQEmu::skills::SkillType attack_skill, bool avoidable, int8 buffslot, bool iBuffTic, int special)
+void Merc::Damage(Mob* other, int32 damage, uint16 spell_id, EQEmu::skills::SkillType attack_skill, bool avoidable, int8 buffslot, bool iBuffTic, eSpecialAttacks special)
 {
 	if(IsDead() || IsCorpse())
 		return;
@@ -5045,13 +5026,13 @@ void Merc::ScaleStats(int scalepercent, bool setmax) {
 
 void Merc::UpdateMercAppearance() {
 	// Copied from Bot Code:
-	uint32 itemID = NO_ITEM;
-	uint8 materialFromSlot = EQEmu::textures::TextureInvalid;
+	uint32 itemID = 0;
+	uint8 materialFromSlot = EQEmu::textures::materialInvalid;
 	for (int i = EQEmu::legacy::EQUIPMENT_BEGIN; i <= EQEmu::legacy::EQUIPMENT_END; ++i) {
 		itemID = equipment[i];
-		if(itemID != NO_ITEM) {
-			materialFromSlot = Inventory::CalcMaterialFromSlot(i);
-			if (materialFromSlot != EQEmu::textures::TextureInvalid)
+		if(itemID != 0) {
+			materialFromSlot = EQEmu::InventoryProfile::CalcMaterialFromSlot(i);
+			if (materialFromSlot != EQEmu::textures::materialInvalid)
 				this->SendWearChange(materialFromSlot);
 		}
 	}
@@ -5065,8 +5046,8 @@ void Merc::UpdateEquipmentLight()
 	m_Light.Type[EQEmu::lightsource::LightEquipment] = 0;
 	m_Light.Level[EQEmu::lightsource::LightEquipment] = 0;
 
-	for (int index = SLOT_BEGIN; index < EQEmu::legacy::EQUIPMENT_SIZE; ++index) {
-		if (index == EQEmu::legacy::SlotAmmo) { continue; }
+	for (int index = EQEmu::inventory::slotBegin; index < EQEmu::legacy::EQUIPMENT_SIZE; ++index) {
+		if (index == EQEmu::inventory::slotAmmo) { continue; }
 
 		auto item = database.GetItem(equipment[index]);
 		if (item == nullptr) { continue; }
@@ -5487,7 +5468,7 @@ void Client::SuspendMercCommand() {
 			Merc* merc = Merc::LoadMerc(this, &zone->merc_templates[GetMercInfo().MercTemplateID], 0, true);
 			if(merc)
 			{
-				SpawnMerc(merc, true);
+				SpawnMerc(merc, false);
 				Log.Out(Logs::General, Logs::Mercenaries, "SuspendMercCommand Successful Unsuspend for %s.", GetName());
 			}
 			else
@@ -5500,6 +5481,15 @@ void Client::SuspendMercCommand() {
 		else
 		{
 			Merc* CurrentMerc = GetMerc();
+
+
+			if (!RuleB(Mercs, AllowMercSuspendInCombat))
+			{
+				if (!CheckCanSpawnMerc(GetMercInfo().MercTemplateID))
+				{
+					return;
+				}
+			}
 
 			if(CurrentMerc && GetMercID())
 			{

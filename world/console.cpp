@@ -68,7 +68,7 @@ void CatchSignal(int sig_num);
 Console::Console(EmuTCPConnection* itcpc)
 :	WorldTCPConnection(),
 	timeout_timer(RuleI(Console, SessionTimeOut)),
-	prompt_timer(1000)
+	prompt_timer(1)
 {
 	tcpc = itcpc;
 	tcpc->SetEcho(true);
@@ -224,9 +224,27 @@ bool Console::Process() {
 	}
 	//if we have not gotten the special markers after this timer, send login prompt
 	if(prompt_timer.Check()) {
+		struct in_addr in;
+		in.s_addr = GetIP();
+
+		std::string connecting_ip = inet_ntoa(in);
+
+		SendMessage(2, StringFormat("Establishing connection from IP: %s Port: %d", inet_ntoa(in), GetPort()).c_str());
+		
+		if (connecting_ip.find("127.0.0.1") != std::string::npos) {
+			SendMessage(2, StringFormat("Connecting established from local host, auto assuming admin").c_str());
+			state = CONSOLE_STATE_CONNECTED;
+			tcpc->SetEcho(false);
+			admin = 255;
+			SendPrompt();
+		}
+		else {
+			if (tcpc->GetMode() == EmuTCPConnection::modeConsole)
+				tcpc->Send((const uchar*) "Username: ", strlen("Username: "));
+		}
+
 		prompt_timer.Disable();
-		if(tcpc->GetMode() == EmuTCPConnection::modeConsole)
-			tcpc->Send((const uchar*) "Username: ", strlen("Username: "));
+			
 	}
 
 	if (timeout_timer.Check()) {

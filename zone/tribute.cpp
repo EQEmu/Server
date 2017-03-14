@@ -161,7 +161,7 @@ void Client::DoTributeUpdate() {
 			uint32 item_id = tier.tribute_item_id;
 
 			//summon the item for them
-			const ItemInst* inst = database.CreateItem(item_id, 1);
+			const EQEmu::ItemInstance* inst = database.CreateItem(item_id, 1);
 			if(inst == nullptr)
 				continue;
 
@@ -239,7 +239,7 @@ void Client::SendTributeDetails(uint32 client_id, uint32 tribute_id) {
 
 //returns the number of points received from the tribute
 int32 Client::TributeItem(uint32 slot, uint32 quantity) {
-	const ItemInst*inst = m_inv[slot];
+	const EQEmu::ItemInstance*inst = m_inv[slot];
 
 	if(inst == nullptr)
 		return(0);

@@ -1,7 +1,173 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 03/12/2017 ==
+Akkadius: 
+- Implemented range rules for packets and other functions
+	RULE_INT ( Range, Say, 135 )
+	RULE_INT ( Range, Emote, 135 )
+	RULE_INT ( Range, BeginCast, 200)
+	RULE_INT ( Range, Anims, 135)
+	RULE_INT ( Range, SpellParticles, 135)
+	RULE_INT ( Range, DamageMessages, 50)
+	RULE_INT ( Range, SpellMessages, 75)
+	RULE_INT ( Range, SongMessages, 75)
+	RULE_INT ( Range, MobPositionUpdates, 600)
+	RULE_INT ( Range, CriticalDamage, 80)
+	
+ - (Readability) Also cleaned up some formatting in messaging and packets so it is easier to understand what is going on with the code
+
+== 03/09/2017 ==
+Uleat: Fixed a few glitches related to bot trading and other affected code
+	- Added a temporary fail clause for partial stack transfers to prevent client item overwrites
+	- Return messages no longer repeat the top cursor item when multiple items are pushed there
+	- Test slot for client returns is now handled appropriately for parent and bag searches
+	- FindFreeSlotForTradeItem() now begins at the correct bag index on subsequent parent iterations
+Uleat: First step of implementing inventory v2.0
+
+== 03/08/2017 ==
+Uleat: Complete rework of the bot trading system
+	- Equipment slot priority can now be tailored..though, a recompile will be required
+	- All item validations and slot assignments for trades and returns are now performed before any actual item movements occur
+	- Failed trade/returned items will now go straight into the client's inventory, just like a normal trade transaction
+		- A 'green' message appears at the end of each successful trade informing the trader of 'accepted' and 'returned' item counts
+		- Bots respond to the trader directly now instead of using BotGroupSay()
+	- Bots will still only allow trades from their owner (currently, too high a risk of exploit and/or malicious activity)
+	- Partial stack movements (i.e., ammo refills) have been scoped..but, not implemented
+	- I have not been able to reproduce any 'illegal' weapon combinations with this code
+	- NOTE: The report of item duplication with bot return items appears to be an inventory desync condition
+		- I experienced this condition both before and after the rework with RoF+ clients (UF- appears ok)
+		- The bug lies within the actual client inventory system and not with bot trades
+	- Please post any issues with this change as they arise
+
+== 02/27/2017 ==
+Uleat: Notes on bot movement speed changes:
+	- Clients (players) appear to be on a different speed scale than other entities (NPCs, etc...)
+	- The server does not calculate deltas/velocities for moving players..those come the client itself
+	- GetBotWalkspeed() and GetBotRunspeed() are specific to bot movement calculations
+	- The class Mob equivilents are not scalared so that a 'client-oriented' value can still be attained
+	- The value of ~1.786f is derived from the ratio of 1.25f/0.7f (npc speed/client speed)
+	- Modifying the two speeds like this is a rough guess-timate..but, appears to at least bring the incongruous behavior to acceptable levels
+
+== 02/26/2017 ==
+Uleat: Moved bot `npc_spells` entries from '701-712' to 3000 + <class_id> .. also, added melee types for future expansion
+Uleat: Moved bot spell casting chance values into database - this will allow admins to tailor their bots without having to rebuild server code
+	- Each entry uses a 3-dimensional identifier: [spell type index][class id][stance index]
+		- [spell type index] is not the SpellType_## bit value..use SpellType_##Index instead
+		- [class id] values of 1-16 are valid and hold a direct correlation to server-coded player class values
+		- [stance index] is a direct correlation (0-6)
+		- the 'conditional fields' are currently predicated on 4 compounded boolean states:
+			- `pH_value` represents bit '0'
+			- `pS_value` represents bit '1'
+			- `pN_value` represents bit '2'
+			- `pD_value` represents bit '3'
+			- all other conditional fields are masked based on these 4 predicates
+		- the full conditional field enumeration is as follows:
+			- `nHSND_value`		- negative Healer/Slower/Nuker/Doter
+			- `pH_value`		- positive Healer
+			- `pS_value`		- positive Slower
+			- `pHS_value`		- positive Healer/Slower
+			- `pN_value`		- positive Nuker
+			- `pHN_value`		- positive Healer/Nuker
+			- `pSN_value`		- positive Slower/Nuker
+			- `pHSN_value`		- positive Healer/Slower/Nuker
+			- `pD_value`		- positive Doter
+			- `pHD_value`		- positive Healer/Doter
+			- `pSD_value`		- positive Slower/Doter
+			- `pHSD_value`		- positive Healer/Slower/Doter
+			- `pND_value`		- positive Nuker/Doter
+			- `pHND_value`		- positive Healer/Nuker/Doter
+			- `pSND_value`		- positive Slower/Nuker/Doter
+			- `pHSND_value`		- positive Healer/Slower/Nuker/Doter
+	- Single- and mixed-bits fields should be filled-in based on the boolean 'AND' concept
+		- (i.e., if 'healer' then `pH_value`=x; if 'slower' then `pS_value`=y; if 'healer' AND 'slower' then `pHS_value`=z; )
+		- most cases can allow the same value across all fields..but, there are some that shouldn't and this format allows for their discrimination
+	- Valid `##_value` entries are 0-100..though, the field accepts up to 255... Anything above 100 is clamped to 100 upon loading, however...
+	- Not all conditions are currently coded and changing a field may not produce any results
+	- The 'default' database values will be changed and tweaked as bot spell code modifications occur
+
+== 02/25/2017 ==
+Uleat: Implemented rule-based node pathing for bots
+	- This currently applies to out-of-combat following movement and blocked los in-combat movement
+	- The default is set to 'true' (use node pathing)..so, consider disabling it if cpu use is too high
+	- If you want to disable node pathing, apply the optional sql '2017_02_25_bots_use_pathing_rule.sql' file located in the utils/sql/git/bots/optional sub-directory. This will apply a 'false' rule..but, it can be changed as desired
+	- This helps with bot movement..but, there are still issues...
+Uleat: Implemented rule-based position update packet with movement timer check for bots
+	- This currently only applies to out-of-combat movement
+	- The default is set to 'false' (original behavior) to help save bandwidth (each bot will send an update packet every 1/10th of a second when enabled)
+	- If you want to enable the position update packet, apply the optional sql '2017_02_25_bots_update_position_with_timer_rule.sql' file located in the utils/sql/git/bots/optional sub-directory. This will apply a 'true' rule..but, it can be changed as desired
+	- This appears to help with/eliminate rubber banding
+
+== 02/23/2017 ==
+** THIS NOTE HAS BEEN SUPERCEDED ON 02/26/2017 **
+Uleat: Moved bot spell casting chance values into database - this will allow admins to tailor their bots without having to rebuild server code
+	- Each entry uses a 4-dimensional identifier: [spell type index][class index][stance index][conditional index]
+		- [spell type index] is not the SpellType_## bit value..use SpellType_##Index instead
+		- [class index] values of 0-15 are valid and determined by subtracting 1 from the actual class value
+		- [stance index] is a direct correlation (0-6)
+		- the [conditional index] is currently predicated on 2 compounded boolean states:
+			- not primary healer/not primary slower: 0
+			- primary healer/not primary slower: 1
+			- not primary healer/ primary slower: 2
+			- primary healer/primary slower: 3
+	- Valid `value` entries are 0-100..though, the field accepts up to 255... Anything above 100 is clamped to 100 upon loading, however
+	- Not all conditions are currently coded and changing a field may not produce any results
+	- The 'default' database values will be changed and tweaked as bot spell code modifications occur
+
+== 02/20/2017 ==
+Uleat: Reworked bard bot spell twisting and updated their spell (song) list
+Uleat: Added ability to shift to pre-combat song buffing by selecting a non-pet npc target, eliminating the need to mix all bard buff songs together
+
+== 2/19/2017 ==
+Akkadius: Added a fix for limiting the amount of items sold in a stack when the resulting return coin is higher than the supporting struct for returning coin
+
+== 01/31/2017 ==
+Uleat: Modifed bot movement behavior in an attempt to 'normalize' it. This is a hack fix and will be revisited at some point. (Probably just need a follow function rather than use movement, when the leader of the follow chain is moving.)
+
+== 01/26/2017 ==
+Uleat: Change rogue bot behavior to eliminate twirling combat. They will only get behind the mob if they are not the mob's target or if the mob is feared or fleeing. This may lower rogue bot dps a small fraction..but, is more in-line with realistic game mechanics.
+
+== 01/17/2017 ==
+Mackal: Combat Revamp
+	- This change brings melee combat into line with how combat is done on live.
+	- This correctly applies the PC damage tables and corrects stacking order of many spells
+	- Given the scope of what had to be rewritten, it was not feasible to preserve the old combat system.
+	This means you will likely have to rebalance your server, which sucks, but this is very
+	accurate so shouldn't require any more changes, at least none that would cause you to have
+	to rebalance your server again.
+	- For rebalancing, I would recommend running the optional SQL and tweaking from there.
+	- To help with rebalancing there is a simulator included at utils/combat-sim.
+	- You can enter the mitigation or offense values you would like to balance around (#showstats will show you them)
+	a 1 on the sim is min damage 20 is max.
+	- Quick recommendations for best ways to improve PC DPS, give them some worn (or AA) SE_DamageModifier and/or SE_MinDamageModifier
+== 12/03/2016 ==
+Uleat: Added hack detection to trade code
+	- If illegal items are found in trade slots when the 'trade' button is clicked, the trade is cancelled and a message is sent to the offending player
+	- Future revisions will, at a minimum, log the player as a hacker once the quirks have been worked out
+
+== 12/01/2016 ==
+Uleat: Disabled RoF+ clients from augmenting items not in their possessions slots (0-29, 9999, 251-330) to abate an exploit in the current code
+
+== 10/17/2016 ==
+Uleat: Moved namespace ItemField from item_instance.h to shareddb.cpp - the only place it is used
+Uleat: Separated class Inventory from item_instance files into inventory_profile files
+Uleat: Renamed class Inventory to EQEmu::InventoryProfile
+Uleat: Renamed enum class InventoryVersion to MobVersion
+
+== 10/16/2016 ==
+Uleat: Renamed struct EQEmu::ItemBase to EQEmu::ItemData and class ItemInst to EQEmu::ItemInstance
+Uleat: Added class EQEmu::InventorySlot. Re-attached pertinent inventory token references to EQDictionary
+
+== 10/15/2016 ==
+Uleat: Changed filenames to facilitate future inventory naming conventions
+
+== 10/09/2016 ==
+Noudess: Rogue usage of merchants while utilizing sneak was limited to
+temporary items, as the code that checked faction per item sold did not
+take into account that rogue was sneaking.  Now sneaking rogues can see full
+inventory on merchants (well, unless an item requires a + faction value).
+
 == 09/12/2016 ==
-Akkadius: Massive overhaul of the update system and EQEmu Server management utility framework 
+Akkadius: Massive overhaul of the update system and EQEmu Server management utility framework
 	(known as eqemu_update.pl) now known as eqemu_server.pl
 	- eqemu_server.pl is now a general EQEmu Server management utiltiy framework that can be used
 		to extend to many purposes. It's main purpose is to simplify server management
@@ -22,7 +188,7 @@ Akkadius: Massive overhaul of the update system and EQEmu Server management util
 			- Regular bots database schema changes now happen automatically similarily to the above
 			- Database checks can also be ran manually via the script menu
 		- CLI Arguments
-			- Arguments passed to eqemu_server.pl can execute the same name-based operations that 
+			- Arguments passed to eqemu_server.pl can execute the same name-based operations that
 				are present in the interactive menu
 					- Example: "perl eqemu_server.pl opcodes" will download opcodes
 					- Example: "perl eqemu_server.pl backup_player_tables" will backup and export player tables
@@ -37,7 +203,7 @@ Akkadius: Massive overhaul of the update system and EQEmu Server management util
 					- server_start_dev.sh
 					- server_start.sh
 					- server_status.sh
-					- server_stop.sh 
+					- server_stop.sh
 		- Usage analytics
 			- eqemu_server.pl now collects usage analytics, this is very helpful for our developers
 				- Example: We can see how many installs have been performed:
@@ -49,10 +215,10 @@ Akkadius: Massive overhaul of the update system and EQEmu Server management util
 		- 'New Server' Utility
 			- Running 'new_server' from the main menu or 'perl eqemu_server.pl new_server' while in
 				a completely new folder with just the script present, will allow a server operator
-				to initiate a full clean PEQ install in that folder. Pulling down all assets and 
-				installing a PEQ database with the name the server operator gives the prompts in the 
+				to initiate a full clean PEQ install in that folder. Pulling down all assets and
+				installing a PEQ database with the name the server operator gives the prompts in the
 				script
-	
+
 == 09/10/2016 ==
 noudess: Task system experience based on a % of a level did not take into
 account the hell levels rule.  Now it does.
@@ -106,7 +272,7 @@ Kinglykrab: Implemented optional avoidance cap rules.
 	- Rule Names:
 		- Character:EnableAvoidanceCap (default is false)
 		- Character:AvoidanceCap (default is 750, beyond 1,000 seems to make characters dodge all attacks)
-	
+
 == 08/02/2016 ==
 Uleat: Changed 'SendZoneSpawnsBulk' behavior to use near/far criteria (live-like) when sending packets.
 	- Zone-to-Zone client loading will see a small decrease in time (less than 10~15%)
@@ -144,7 +310,7 @@ mackal: Fix up the SpellBuff struct
 Uleat: Important fix for mob pathing
 	- This should fix failed pathing issues (and high cpu usage for zone.exe) for mobs in affect zones
 	- Changed variable 'gridno' type from int16 to int32 to reflect actual return value of fetch (values do exceed 32767 aka int16.max)
-	- Precision loss from int32 to int16 conversion was causing grid id to be changed to quest controlled movement in cases where (gridno & 0x8000 == true) 
+	- Precision loss from int32 to int16 conversion was causing grid id to be changed to quest controlled movement in cases where (gridno & 0x8000 == true)
 
 == 06/28/2016 ==
 Noudess: Resurrection effects now block certain buffs like on live.
@@ -213,7 +379,7 @@ Uleat: Moved database query code out of bot.cpp and into the new BotDatabase cla
 
 == 03/25/2016 ==
 Uleat: Fix for heal rotation 'Stack Overflow' error
-Kayen: Defensive procs will now only proc once per attack round (instead of every attack chance). 
+Kayen: Defensive procs will now only proc once per attack round (instead of every attack chance).
        Live like modifier added that decreases defensive proc chance if you are higher level then your attacker.
 
 == 03/24/2016 ==
@@ -256,7 +422,7 @@ Kinglykrab: Modified #flag so you can refresh your target's account status (GM s
 	- Just target the person whose flag you want to refresh and type #flag.
 Uleat: Added itemlink functionality to the #summonitem command. Current use is limited to extracting the item id from the link.
 	- Invoking by item link '#summonitem Arrow' produces the same result as by item id '#summonitem 8005'
-	
+
 == 01/12/2016 ==
 Athrogate: Adding ClearCompassMark() to Lua.
 	- Lua didn't have ClearCompassMark().  Perl already had this.
@@ -286,7 +452,7 @@ Kinglykrab: Added GetInstanceTimer() to Perl and Lua.
 	- Note: If you do not provide an instance id in the method it defaults to instance id 0 and returns 0 for time remaining.
 	- Added UpdateZoneHeader(type, value) to Perl and Lua.
 	- Note: UpdateZoneHeader allows you to manipulate fog color, fog density, and many other zone header settings on the fly in Perl and Lua.
-	
+
 == 12/21/2015 ==
 Natedog: Updated item table fields and added a few missing fields for evolving items
 	-DO NOT implement Heirloom items till the inventory code is fixed to allow placing NO DROP
@@ -295,7 +461,7 @@ Natedog: Updated item table fields and added a few missing fields for evolving i
 		100% 2HSlashing (Max 50) - can only increase 2hslash by 50 MAX! (item field located though)
 Kinglykrab: Added GetMeleeMitigation() for NPCs and Clients in Perl and Lua.
 	- This allows you to check total item, spell, and AA melee mitigation contribution.
-	
+
 == 12/19/2015 ==
 Kinglykrab: Added many methods to Perl and Lua, list below:
 	- SeeInvisible()
@@ -317,7 +483,7 @@ Kinglykrab: Added many methods to Perl and Lua, list below:
 	- HasPet()
 	- IsSilenced()
 	- IsAmnesiad()
-	
+
 == 12/16/2015 ==
 Noudess: Repaired issue with Bind Wounds on someone else.  Message was not coming out on client (hold still) and a bind wounds on someone already binding their wounds would interrupt their bind and make them stand.  Also removed some duplicate messaging.
 
@@ -326,7 +492,7 @@ Kinglykrab: Added IsBlind() and IsFeared() functionality to Perl and Lua.
 	- Note: Both methods are Mob methods and may be used on NPCs or PCs.
 Natedog: Added Discipline functions, UpdateInstanceTimer function, and UnmemSpellBySpellID to lua and perl
 	-Examples: http://wiki.eqemulator.org/i?M=Pastebin&Paste=BJ0ygmNM
-	
+
 == 12/07/2015 ==
 Uleat: Command aliases are no longer handled through the command_add() function.
 	- To add a command alias, edit the database table `command_settings` - here, you will find three columns: `command`, `access` and `aliases`
@@ -339,7 +505,7 @@ Uleat: Command aliases are no longer handled through the command_add() function.
 	- If you need need more name space for aliases, simply edit the `command_settings` table and increase the size of the `aliases` column
 	- The old `commands` table has been renamed to `commands_old` for reference
 	- All of the current 'standard' commands have been added to the new `command_settings` table
-	
+
 	- YOU WILL NEED TO VERIFY/IMPORT OLD ACCESS VALUES AS THIS CHANGE REVERTS ALL COMMAND ACCESS VALUES TO THEIR PEQDB DEFAULTS
 
 == 11/30/2015 ==
@@ -361,7 +527,7 @@ Akkadius: Performance boost (exponential) - Adjusted default idle cast check tim
 	- Database version 9089 will take care of this update automatically only if you used the default values
 	- The CPU cost of NPC's checking the entire entity list to cast beneficial spells (Heals/Buffs) becomes extremely high when higher NPC count zones exist (Based off of process profiling)
 			- Distance checks for every single NPC to every single other NPC who are casting beneficial spells occur every .5 - 2 seconds unless npc_spells dictates other values, which most of the time it does not
-	- Zones that once fluctuated from 1-8% CPU with no activity (Idle but players present) now idle at .5% based on my testings due 
+	- Zones that once fluctuated from 1-8% CPU with no activity (Idle but players present) now idle at .5% based on my testings due
 		to this change in conjunction with the past few performance commits, these are zones that have 600-800 NPC's in them
 	- These values normally are overidden by the spells table (npc_spells), fields (idle_no_sp_recast_min, idle_no_sp_recast_max)
 
@@ -369,7 +535,7 @@ Akkadius: Performance boost (exponential) - Adjusted default idle cast check tim
 Akkadius: Made many performance optimizing oriented code changes in the source
 	- Added Rate limit the rate in which signals are processed for NPC's (.5 seconds instead of .01 seconds)
 Akkadius: Added Perl Export Settings which should heavily reduce the Perl footprint
-	- Normally when any sub EVENT_ gets triggered, all kinds of variables have to get exported every single time an event is triggered and 
+	- Normally when any sub EVENT_ gets triggered, all kinds of variables have to get exported every single time an event is triggered and
 		this can make Perl very slow when events are triggered constantly
 			- The two most taxing variable exports are the item variables ($itemcount{} $hasitem{} $oncursor{}) and qglobals ($qglobals{})
 			- qglobals can pose to be an issue quickly when global qglobals build up, it is highly recommend to use the GetGlobal() and SetGlobal()
@@ -397,7 +563,7 @@ Akkadius: Added Perl Export Settings which should heavily reduce the Perl footpr
 	|        4 | EVENT_ATTACK                            |               0 |          1 |           1 |           0 |            1 |
 	|        5 | EVENT_COMBAT                            |               1 |          1 |           1 |           0 |            1 |
 	+----------+-----------------------------------------+-----------------+------------+-------------+-------------+--------------+
-	
+
 	- If a change is made to this table while the server is live and running, you can hot reload all zone process settings via:
 		#reloadperlexportsettings
 	- For those who wonder what "exports" are, they are reference to variables that are made available at runtime of the sub event, such as:
@@ -406,7 +572,7 @@ Akkadius: Added Perl Export Settings which should heavily reduce the Perl footpr
 		(export_zone) : $zoneid, $instanceid, $zoneln etc. https://github.com/EQEmu/Server/blob/master/zone/embparser.cpp#L1083
 		(export_mob) : $x, $y, $z, $h, $hpratio etc. https://github.com/EQEmu/Server/blob/master/zone/embparser.cpp#L1032
 		(export_event) : (event specific) IE: EVENT_SAY ($text) https://github.com/EQEmu/Server/blob/master/zone/embparser.cpp#L1141
-	
+
 == 10/16/2015 ==
 Uleat: Added command '#bot clearfollowdistance [ <target> | spawned | all ]' to coincide with the activation of the load/save feature for follow_distance
 
@@ -438,7 +604,7 @@ rules:
 commands:
 	'#invsnapshot'						- Takes a snapshot of target client's inventory (feature active or inactive)
 	'#clearinvsnapshots [use rule]'		- Clears snapshot entries based on bool argument ([true] - honors the 'InvSnapshotHistoryD' rule, [false] - erases all)
-	
+
 == 08/02/2015 ==
 Shendare: VS2013 query StringFormat glitches when "%f" is passed for the int GetRunSpeed().
 Shendare: In CreateNewNPCCommand(), the npc_type_id and spawngroupid are created in the database, but never set in the spawn class, so later it can't delete them with #npcspawn remove or #npcspawn delete.

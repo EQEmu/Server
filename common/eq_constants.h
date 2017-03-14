@@ -516,14 +516,6 @@ static const uint8 SkillDamageTypes[EQEmu::skills::HIGHEST_SKILL + 1] = // chang
 */
 
 #define INVALID_INDEX	-1
-#define NO_ITEM			0
-
-// yes..these are redundant... but, they help to identify and define what is actually being performed
-// plus, since they're pre-op's, they don't affect the actual binary size
-#define TYPE_BEGIN	0
-#define SLOT_BEGIN	0
-#define SUB_INDEX_BEGIN	0
-#define AUG_INDEX_BEGIN	0
 
 static const uint32 MAX_SPELL_DB_ID_VAL = 65535;
 

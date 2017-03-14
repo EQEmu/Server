@@ -28,7 +28,7 @@ spawn2 mediumblob, npcs mediumblob, npc_loot mediumblob, gmspawntype mediumblob,
 #define ZONEDUMP_H
 #include "../common/faction.h"
 #include "../common/eq_packet_structs.h"
-#include "../common/item.h"
+#include "../common/inventory_profile.h"
 
 #pragma pack(1)
 
@@ -110,9 +110,9 @@ struct NPCType
 	uint8	spawn_limit;	//only this many may be in zone at a time (0=no limit)
 	uint8	mount_color;	//only used by horse class
 	float	attack_speed;	//%+- on attack delay of the mob.
-	uint8	attack_delay;	//delay between attacks in 10ths of a second
-	int		accuracy_rating;	//10 = 1% accuracy
-	int		avoidance_rating;	//10 = 1% avoidance
+	int		attack_delay;	//delay between attacks in ms
+	int		accuracy_rating;	// flat bonus before mods
+	int		avoidance_rating;	// flat bonus before mods
 	bool	findable;		//can be found with find command
 	bool	trackable;
 	int16	slow_mitigation;	

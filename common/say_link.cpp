@@ -21,8 +21,8 @@
 #include "emu_constants.h"
 
 #include "string_util.h"
-#include "item.h"
-#include "item_base.h"
+#include "item_instance.h"
+#include "item_data.h"
 #include "../zone/zonedb.h"
 
 
@@ -147,7 +147,7 @@ void EQEmu::SayLinkEngine::generate_body()
 
 	memset(&m_LinkBodyStruct, 0, sizeof(SayLinkBody_Struct));
 
-	const EQEmu::ItemBase* item_data = nullptr;
+	const EQEmu::ItemData* item_data = nullptr;
 
 	switch (m_LinkType) {
 	case saylink::SayLinkBlank:
@@ -250,7 +250,7 @@ void EQEmu::SayLinkEngine::generate_text()
 		return;
 	}
 
-	const EQEmu::ItemBase* item_data = nullptr;
+	const EQEmu::ItemData* item_data = nullptr;
 
 	switch (m_LinkType) {
 	case saylink::SayLinkBlank:

@@ -214,6 +214,24 @@ void ClientList::GetCLEIP(uint32 iIP) {
 	}
 }
 
+uint32 ClientList::GetCLEIPCount(uint32 iIP) {
+	ClientListEntry* countCLEIPs = 0;
+	LinkedListIterator<ClientListEntry*> iterator(clientlist);
+
+	int IPInstances = 0;
+	iterator.Reset();
+
+	while (iterator.MoreElements()) {
+		countCLEIPs = iterator.GetData();
+		if ((countCLEIPs->GetIP() == iIP) && ((countCLEIPs->Admin() < (RuleI(World, ExemptMaxClientsStatus))) || (RuleI(World, ExemptMaxClientsStatus) < 0)) && countCLEIPs->Online() >= CLE_Status_Online) { // If the IP matches, and the connection admin status is below the exempt status, or exempt status is less than 0 (no-one is exempt)
+			IPInstances++; // Increment the occurences of this IP address
+		}
+		iterator.Advance();
+	}
+
+	return IPInstances;
+}
+
 void ClientList::DisconnectByIP(uint32 iIP) {
 	ClientListEntry* countCLEIPs = 0;
 	LinkedListIterator<ClientListEntry*> iterator(clientlist);
@@ -251,7 +269,6 @@ ClientListEntry* ClientList::FindCharacter(const char* name) {
 	}
 	return 0;
 }
-
 
 ClientListEntry* ClientList::FindCLEByAccountID(uint32 iAccID) {
 	LinkedListIterator<ClientListEntry*> iterator(clientlist);

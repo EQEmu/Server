@@ -486,7 +486,7 @@ int32 Client::GetRawItemAC()
 	int32 Total = 0;
 	// this skips MainAmmo..add an '=' conditional if that slot is required (original behavior)
 	for (int16 slot_id = EQEmu::legacy::EQUIPMENT_BEGIN; slot_id < EQEmu::legacy::EQUIPMENT_END; slot_id++) {
-		const ItemInst* inst = m_inv[slot_id];
+		const EQEmu::ItemInstance* inst = m_inv[slot_id];
 		if (inst && inst->IsClassCommon()) {
 			Total += inst->GetItem()->AC;
 		}
@@ -1025,111 +1025,6 @@ int32 Client::acmod()
 	return 0;
 };
 
-// This is a testing formula for AC, the value this returns should be the same value as the one the client shows...
-// ac1 and ac2 are probably the damage migitation and damage avoidance numbers, not sure which is which.
-// I forgot to include the iksar defense bonus and i cant find my notes now...
-// AC from spells are not included (cant even cast spells yet..)
-int32 Client::CalcAC()
-{
-	// new formula
-	int avoidance = (acmod() + ((GetSkill(EQEmu::skills::SkillDefense) + itembonuses.HeroicAGI / 10) * 16) / 9);
-	if (avoidance < 0) {
-		avoidance = 0;
-	}
-	
-	if (RuleB(Character, EnableAvoidanceCap)) {
-		if (avoidance > RuleI(Character, AvoidanceCap)) {
-			avoidance = RuleI(Character, AvoidanceCap);
-		}
-	}
-	
-	int mitigation = 0;
-	if (m_pp.class_ == WIZARD || m_pp.class_ == MAGICIAN || m_pp.class_ == NECROMANCER || m_pp.class_ == ENCHANTER) {
-		//something is wrong with this, naked casters have the wrong natural AC
-//		mitigation = (spellbonuses.AC/3) + (GetSkill(DEFENSE)/2) + (itembonuses.AC+1);
-		mitigation = (GetSkill(EQEmu::skills::SkillDefense) + itembonuses.HeroicAGI / 10) / 4 + (itembonuses.AC + 1);
-		//this might be off by 4..
-		mitigation -= 4;
-	}
-	else {
-//		mitigation = (spellbonuses.AC/4) + (GetSkill(DEFENSE)/3) + ((itembonuses.AC*4)/3);
-		mitigation = (GetSkill(EQEmu::skills::SkillDefense) + itembonuses.HeroicAGI / 10) / 3 + ((itembonuses.AC * 4) / 3);
-		if (m_pp.class_ == MONK) {
-			mitigation += GetLevel() * 13 / 10;    //the 13/10 might be wrong, but it is close...
-		}
-	}
-	int displayed = 0;
-	displayed += ((avoidance + mitigation) * 1000) / 847;	//natural AC
-	//Iksar AC, untested
-	if (GetRace() == IKSAR) {
-		displayed += 12;
-		int iksarlevel = GetLevel();
-		iksarlevel -= 10;
-		if (iksarlevel > 25) {
-			iksarlevel = 25;
-		}
-		if (iksarlevel > 0) {
-			displayed += iksarlevel * 12 / 10;
-		}
-	}
-	// Shield AC bonus for HeroicSTR
-	if (itembonuses.HeroicSTR) {
-		bool equiped = CastToClient()->m_inv.GetItem(EQEmu::legacy::SlotSecondary);
-		if (equiped) {
-			uint8 shield = CastToClient()->m_inv.GetItem(EQEmu::legacy::SlotSecondary)->GetItem()->ItemType;
-			if (shield == EQEmu::item::ItemTypeShield) {
-				displayed += itembonuses.HeroicSTR / 2;
-			}
-		}
-	}
-	//spell AC bonuses are added directly to natural total
-	displayed += spellbonuses.AC;
-	AC = displayed;
-	return (AC);
-}
-
-int32 Client::GetACMit()
-{
-	int mitigation = 0;
-	if (m_pp.class_ == WIZARD || m_pp.class_ == MAGICIAN || m_pp.class_ == NECROMANCER || m_pp.class_ == ENCHANTER) {
-		mitigation = (GetSkill(EQEmu::skills::SkillDefense) + itembonuses.HeroicAGI / 10) / 4 + (itembonuses.AC + 1);
-		mitigation -= 4;
-	}
-	else {
-		mitigation = (GetSkill(EQEmu::skills::SkillDefense) + itembonuses.HeroicAGI / 10) / 3 + ((itembonuses.AC * 4) / 3);
-		if (m_pp.class_ == MONK) {
-			mitigation += GetLevel() * 13 / 10;    //the 13/10 might be wrong, but it is close...
-		}
-	}
-	// Shield AC bonus for HeroicSTR
-	if (itembonuses.HeroicSTR) {
-		bool equiped = CastToClient()->m_inv.GetItem(EQEmu::legacy::SlotSecondary);
-		if (equiped) {
-			uint8 shield = CastToClient()->m_inv.GetItem(EQEmu::legacy::SlotSecondary)->GetItem()->ItemType;
-			if (shield == EQEmu::item::ItemTypeShield) {
-				mitigation += itembonuses.HeroicSTR / 2;
-			}
-		}
-	}
-	return (mitigation * 1000 / 847);
-}
-
-int32 Client::GetACAvoid()
-{
-	int32 avoidance = (acmod() + ((GetSkill(EQEmu::skills::SkillDefense) + itembonuses.HeroicAGI / 10) * 16) / 9);
-	if (avoidance < 0) {
-		avoidance = 0;
-	}
-	
-	if (RuleB(Character, EnableAvoidanceCap)) {
-		if ((avoidance * 1000 / 847) > RuleI(Character, AvoidanceCap)) {
-			return RuleI(Character, AvoidanceCap);
-		}
-	}
-	
-	return (avoidance * 1000 / 847);
-}
-
 int32 Client::CalcMaxMana()
 {
 	switch (GetCasterClass()) {
@@ -1316,11 +1211,11 @@ int32 Client::CalcManaRegenCap()
 
 uint32 Client::CalcCurrentWeight()
 {
-	const EQEmu::ItemBase* TempItem = 0;
-	ItemInst* ins;
+	const EQEmu::ItemData* TempItem = 0;
+	EQEmu::ItemInstance* ins;
 	uint32 Total = 0;
 	int x;
-	for (x = EQEmu::legacy::EQUIPMENT_BEGIN; x <= EQEmu::legacy::SlotCursor; x++) { // include cursor or not?
+	for (x = EQEmu::legacy::EQUIPMENT_BEGIN; x <= EQEmu::inventory::slotCursor; x++) { // include cursor or not?
 		TempItem = 0;
 		ins = GetInv().GetItem(x);
 		if (ins) {
@@ -1343,14 +1238,14 @@ uint32 Client::CalcCurrentWeight()
 		if (TmpWeight > 0) {
 			// this code indicates that weight redux bags can only be in the first general inventory slot to be effective...
 			// is this correct? or can we scan for the highest weight redux and use that? (need client verifications)
-			int bagslot = EQEmu::legacy::SlotGeneral1;
+			int bagslot = EQEmu::inventory::slotGeneral1;
 			int reduction = 0;
 			for (int m = EQEmu::legacy::GENERAL_BAGS_BEGIN + 10; m <= EQEmu::legacy::GENERAL_BAGS_END; m += 10) { // include cursor bags or not?
 				if (x >= m) {
 					bagslot += 1;
 				}
 			}
-			ItemInst* baginst = GetInv().GetItem(bagslot);
+			EQEmu::ItemInstance* baginst = GetInv().GetItem(bagslot);
 			if (baginst && baginst->GetItem() && baginst->IsClassBag()) {
 				reduction = baginst->GetItem()->BagWR;
 			}
@@ -1369,7 +1264,7 @@ uint32 Client::CalcCurrentWeight()
 	    This is the ONLY instance I have seen where the client is hard coded to particular Item IDs to set a certain property for an item. It is very odd.
 	*/
 	// SoD+ client has no weight for coin
-	if (EQEmu::behavior::Lookup(EQEmu::versions::ConvertClientVersionToInventoryVersion(ClientVersion()))->CoinHasWeight) {
+	if (EQEmu::behavior::Lookup(EQEmu::versions::ConvertClientVersionToMobVersion(ClientVersion()))->CoinHasWeight) {
 		Total += (m_pp.platinum + m_pp.gold + m_pp.silver + m_pp.copper) / 4;
 	}
 	float Packrat = (float)spellbonuses.Packrat + (float)aabonuses.Packrat + (float)itembonuses.Packrat;
@@ -2219,12 +2114,12 @@ int Client::GetRawACNoShield(int &shield_ac) const
 {
 	int ac = itembonuses.AC + spellbonuses.AC + aabonuses.AC;
 	shield_ac = 0;
-	const ItemInst *inst = m_inv.GetItem(EQEmu::legacy::SlotSecondary);
+	const EQEmu::ItemInstance *inst = m_inv.GetItem(EQEmu::inventory::slotSecondary);
 	if (inst) {
 		if (inst->GetItem()->ItemType == EQEmu::item::ItemTypeShield) {
 			ac -= inst->GetItem()->AC;
 			shield_ac = inst->GetItem()->AC;
-			for (uint8 i = AUG_INDEX_BEGIN; i < EQEmu::legacy::ITEM_COMMON_SIZE; i++) {
+			for (uint8 i = EQEmu::inventory::socketBegin; i < EQEmu::inventory::SocketCount; i++) {
 				if (inst->GetAugment(i)) {
 					ac -= inst->GetAugment(i)->GetItem()->AC;
 					shield_ac += inst->GetAugment(i)->GetItem()->AC;

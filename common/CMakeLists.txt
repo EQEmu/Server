@@ -35,9 +35,11 @@ SET(common_sources
 	faction.cpp
 	guild_base.cpp
 	guilds.cpp
+	inventory_profile.cpp
+	inventory_slot.cpp
 	ipc_mutex.cpp
-	item.cpp
-	item_base.cpp
+	item_data.cpp
+	item_instance.cpp
 	light_source.cpp
 	md5.cpp
 	memory_buffer.cpp
@@ -155,10 +157,12 @@ SET(common_headers
 	global_define.h
 	guild_base.h
 	guilds.h
+	inventory_profile.h
+	inventory_slot.h
 	ipc_mutex.h
-	item.h
-	item_base.h
+	item_data.h
 	item_fieldlist.h
+	item_instance.h
 	languages.h
 	light_source.h
 	linked_list.h
@@ -212,37 +216,29 @@ SET(common_headers
 	zone_numbers.h
 	patches/patches.h
 	patches/sod.h
-#	patches/sod_itemfields.h
 	patches/sod_limits.h
 	patches/sod_ops.h
 	patches/sod_structs.h
 	patches/sof.h
-#	patches/sof_itemfields.h
 	patches/sof_limits.h
-#	patches/sof_opcode_list.h
 	patches/sof_ops.h
 	patches/sof_structs.h
 	patches/ss_declare.h
 	patches/ss_define.h
 	patches/ss_register.h
 	patches/rof.h
-#	patches/rof_itemfields.h
 	patches/rof_limits.h
 	patches/rof_ops.h
 	patches/rof_structs.h
 	patches/rof2.h
-#	patches/rof2_itemfields.h
 	patches/rof2_limits.h
 	patches/rof2_ops.h
 	patches/rof2_structs.h
 	patches/titanium.h
-#	patches/titanium_itemfields_a.h
-#	patches/titanium_itemfields_b.h
 	patches/titanium_limits.h
 	patches/titanium_ops.h
 	patches/titanium_structs.h
 	patches/uf.h
-#	patches/uf_itemfields.h
 	patches/uf_limits.h
 	patches/uf_ops.h
 	patches/uf_structs.h
@@ -266,37 +262,29 @@ SET(common_headers
 SOURCE_GROUP(Patches FILES
 	patches/patches.h
 	patches/sod.h
-#	patches/sod_itemfields.h
 	patches/sod_limits.h
 	patches/sod_ops.h
 	patches/sod_structs.h
 	patches/sof.h
-#	patches/sof_itemfields.h
 	patches/sof_limits.h
-#	patches/sof_opcode_list.h
 	patches/sof_ops.h
 	patches/sof_structs.h
 	patches/ss_declare.h
 	patches/ss_define.h
 	patches/ss_register.h
 	patches/rof.h
-#	patches/rof_itemfields.h
 	patches/rof_limits.h
 	patches/rof_ops.h
 	patches/rof_structs.h
 	patches/rof2.h
-#	patches/rof2_itemfields.h
 	patches/rof2_limits.h
 	patches/rof2_ops.h
 	patches/rof2_structs.h
 	patches/titanium.h
-#	patches/titanium_itemfields_a.h
-#	patches/titanium_itemfields_b.h
 	patches/titanium_limits.h
 	patches/titanium_ops.h
 	patches/titanium_structs.h
 	patches/uf.h
-#	patches/uf_itemfields.h
 	patches/uf_limits.h
 	patches/uf_ops.h
 	patches/uf_structs.h

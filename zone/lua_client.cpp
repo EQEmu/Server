@@ -1219,13 +1219,13 @@ Lua_Raid Lua_Client::GetRaid() {
 
 bool Lua_Client::PutItemInInventory(int slot_id, Lua_ItemInst inst) {
 	Lua_Safe_Call_Bool();
-	ItemInst *rinst = inst;
+	EQEmu::ItemInstance *rinst = inst;
 	return self->PutItemInInventory(slot_id, *rinst, true);
 }
 
 bool Lua_Client::PushItemOnCursor(Lua_ItemInst inst) {
 	Lua_Safe_Call_Bool();
-	ItemInst *rinst = inst;
+	EQEmu::ItemInstance *rinst = inst;
 	return self->PushItemOnCursor(*rinst, true);
 }
 

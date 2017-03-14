@@ -29,7 +29,7 @@
 	#define BotAI_DEBUG_Spells	-1
 #endif
 
-bool Bot::AICastSpell(Mob* tar, uint8 iChance, uint16 iSpellTypes) {
+bool Bot::AICastSpell(Mob* tar, uint8 iChance, uint32 iSpellTypes) {
 
 	if (!tar) {
 		return false;
@@ -96,14 +96,8 @@ bool Bot::AICastSpell(Mob* tar, uint8 iChance, uint16 iSpellTypes) {
 
 				castedSpell = AIDoSpellCast(botSpell.SpellIndex, addMob, botSpell.ManaCost);
 
-				if(castedSpell) {
-					char* gmsg = 0;
-
-					MakeAnyLenString(&gmsg, "Attempting to mez %s.", addMob->GetCleanName());
-
-					if(gmsg)
-						BotGroupSay(this, gmsg);
-				}
+				if(castedSpell)
+					BotGroupSay(this, "Attempting to mez %s.", addMob->GetCleanName());
 			}
 			break;
 		}
@@ -114,7 +108,7 @@ bool Bot::AICastSpell(Mob* tar, uint8 iChance, uint16 iSpellTypes) {
 				bool isPrimaryHealer = false;
 
 				if(HasGroup()) {
-					isPrimaryHealer = IsGroupPrimaryHealer();
+					isPrimaryHealer = IsGroupHealer();
 				}
 
 				if(hpr < 95 || (tar->IsClient() && (hpr < 95)) || (botClass == BARD)) {
@@ -248,7 +242,6 @@ bool Bot::AICastSpell(Mob* tar, uint8 iChance, uint16 iSpellTypes) {
 					castedSpell = AIDoSpellCast(botSpell.SpellIndex, tar, botSpell.ManaCost, &TempDontHealMeBeforeTime);
 
 					if(castedSpell) {
-						char* gmsg = 0;
 						/*if(TempDontHealMeBeforeTime != tar->DontHealMeBefore())
 							tar->SetDontHealMeBefore(TempDontHealMeBeforeTime);
 
@@ -270,7 +263,7 @@ bool Bot::AICastSpell(Mob* tar, uint8 iChance, uint16 iSpellTypes) {
 									Group *g = this->GetGroup();
 
 									if(g) {
-										MakeAnyLenString(&gmsg, "Casting %s.", spells[botSpell.SpellId].name);
+										BotGroupSay(this, "Casting %s.", spells[botSpell.SpellId].name);
 
 										for( int i = 0; i<MAX_GROUP_MEMBERS; i++) {
 											if(g->members[i] && !g->members[i]->qglobal) {
@@ -282,14 +275,11 @@ bool Bot::AICastSpell(Mob* tar, uint8 iChance, uint16 iSpellTypes) {
 							}
 							else {
 								if(tar != this)		//we don't need spam of bots healing themselves
-									MakeAnyLenString(&gmsg, "Casting %s on %s", spells[botSpell.SpellId].name, tar->GetCleanName());
+									BotGroupSay(this, "Casting %s on %s", spells[botSpell.SpellId].name, tar->GetCleanName());
 
 								tar->SetDontHealMeBefore(Timer::GetCurrentTime() + 2000);
 							}
 						}
-
-						if(gmsg)
-							BotGroupSay(this, gmsg);
 					}
 				}
 			}
@@ -567,10 +557,35 @@ bool Bot::AICastSpell(Mob* tar, uint8 iChance, uint16 iSpellTypes) {
 		case SpellType_Pet: {
 			//keep mobs from recasting pets when they have them.
 			if (!IsPet() && !GetPetID() && !IsBotCharmer()) {
-				if(botClass == MAGICIAN)
-					botSpell = GetBestBotMagicianPetSpell(this);
-				else
+				if (botClass == WIZARD) {
+					auto buffs_max = GetMaxBuffSlots();
+					auto my_buffs = GetBuffs();
+					int familiar_buff_slot = -1;
+					if (buffs_max && my_buffs) {
+						for (int index = 0; index < buffs_max; ++index) {
+							if (IsEffectInSpell(my_buffs[index].spellid, SE_Familiar)) {
+								MakePet(my_buffs[index].spellid, spells[my_buffs[index].spellid].teleport_zone);
+								familiar_buff_slot = index;
+								break;
+							}
+						}
+					}
+					if (GetPetID())
+						break;
+
+					if (familiar_buff_slot >= 0) {
+						BuffFadeBySlot(familiar_buff_slot);
+						break;
+					}
+
 					botSpell = GetFirstBotSpellBySpellType(this, SpellType_Pet);
+				}
+				else if (botClass == MAGICIAN) {
+					botSpell = GetBestBotMagicianPetSpell(this);
+				}
+				else {
+					botSpell = GetFirstBotSpellBySpellType(this, SpellType_Pet);
+				}
 
 				if(botSpell.SpellId == 0)
 					break;
@@ -748,35 +763,69 @@ bool Bot::AICastSpell(Mob* tar, uint8 iChance, uint16 iSpellTypes) {
 					checked_los = true;
 				}
 
-				std::list<BotSpell> dotList = GetBotSpellsBySpellType(this, SpellType_DOT);
+				if (GetClass() == BARD) {
+					std::list<BotSpell_wPriority> dotList = GetPrioritizedBotSpellsBySpellType(this, SpellType_DOT);
 
-				const int maxDotSelect = 5;
-				int dotSelectCounter = 0;
+					const int maxDotSelect = 5;
+					int dotSelectCounter = 0;
 
-				for(std::list<BotSpell>::iterator itr = dotList.begin(); itr != dotList.end(); ++itr) {
-					BotSpell selectedBotSpell = *itr;
+					for (std::list<BotSpell_wPriority>::iterator itr = dotList.begin(); itr != dotList.end(); ++itr) {
+						BotSpell selectedBotSpell = *itr;
 
-					if(selectedBotSpell.SpellId == 0)
-						continue;
-
-					if(CheckSpellRecastTimers(this, itr->SpellIndex))
-					{
-
-						if(!(!tar->IsImmuneToSpell(selectedBotSpell.SpellId, this) && tar->CanBuffStack(selectedBotSpell.SpellId, botLevel, true) >= 0))
+						if (selectedBotSpell.SpellId == 0)
 							continue;
 
-						uint32 TempDontDotMeBefore = tar->DontDotMeBefore();
+						if (CheckSpellRecastTimers(this, itr->SpellIndex))
+						{
 
-						castedSpell = AIDoSpellCast(selectedBotSpell.SpellIndex, tar, selectedBotSpell.ManaCost, &TempDontDotMeBefore);
+							if (!(!tar->IsImmuneToSpell(selectedBotSpell.SpellId, this) && tar->CanBuffStack(selectedBotSpell.SpellId, botLevel, true) >= 0))
+								continue;
 
-						if(TempDontDotMeBefore != tar->DontDotMeBefore())
-							tar->SetDontDotMeBefore(TempDontDotMeBefore);
+							uint32 TempDontDotMeBefore = tar->DontDotMeBefore();
+
+							castedSpell = AIDoSpellCast(selectedBotSpell.SpellIndex, tar, selectedBotSpell.ManaCost, &TempDontDotMeBefore);
+
+							if (TempDontDotMeBefore != tar->DontDotMeBefore())
+								tar->SetDontDotMeBefore(TempDontDotMeBefore);
+						}
+
+						dotSelectCounter++;
+
+						if ((dotSelectCounter == maxDotSelect) || castedSpell)
+							break;
 					}
+				}
+				else {
+					std::list<BotSpell> dotList = GetBotSpellsBySpellType(this, SpellType_DOT);
 
-					dotSelectCounter++;
+					const int maxDotSelect = 5;
+					int dotSelectCounter = 0;
 
-					if((dotSelectCounter == maxDotSelect) || castedSpell)
-						break;
+					for (std::list<BotSpell>::iterator itr = dotList.begin(); itr != dotList.end(); ++itr) {
+						BotSpell selectedBotSpell = *itr;
+
+						if (selectedBotSpell.SpellId == 0)
+							continue;
+
+						if (CheckSpellRecastTimers(this, itr->SpellIndex))
+						{
+
+							if (!(!tar->IsImmuneToSpell(selectedBotSpell.SpellId, this) && tar->CanBuffStack(selectedBotSpell.SpellId, botLevel, true) >= 0))
+								continue;
+
+							uint32 TempDontDotMeBefore = tar->DontDotMeBefore();
+
+							castedSpell = AIDoSpellCast(selectedBotSpell.SpellIndex, tar, selectedBotSpell.ManaCost, &TempDontDotMeBefore);
+
+							if (TempDontDotMeBefore != tar->DontDotMeBefore())
+								tar->SetDontDotMeBefore(TempDontDotMeBefore);
+						}
+
+						dotSelectCounter++;
+
+						if ((dotSelectCounter == maxDotSelect) || castedSpell)
+							break;
+					}
 				}
 			}
 			break;
@@ -792,6 +841,28 @@ bool Bot::AICastSpell(Mob* tar, uint8 iChance, uint16 iSpellTypes) {
 				}
 
 				switch (botClass) {
+					case BARD: {
+						// probably needs attackable check
+						std::list<BotSpell_wPriority> botSongList = GetPrioritizedBotSpellsBySpellType(this, SpellType_Slow);
+						for (auto iter : botSongList) {
+							if (!iter.SpellId)
+								continue;
+							if (!CheckSpellRecastTimers(this, iter.SpellIndex))
+								continue;
+							if (spells[iter.SpellId].zonetype != -1 && zone->GetZoneType() != -1 && spells[iter.SpellId].zonetype != zone->GetZoneType()) // is this bit or index?
+								continue;
+							if (spells[iter.SpellId].targettype != ST_Target)
+								continue;
+							if (tar->CanBuffStack(iter.SpellId, botLevel, true) < 0)
+								continue;
+
+							castedSpell = AIDoSpellCast(iter.SpellIndex, tar, iter.ManaCost);
+							if (castedSpell)
+								break;
+						}
+
+						break;
+					}
 					case ENCHANTER: {
 						botSpell = GetBestBotSpellForMagicBasedSlow(this);
 						break;
@@ -814,14 +885,8 @@ bool Bot::AICastSpell(Mob* tar, uint8 iChance, uint16 iSpellTypes) {
 
 				castedSpell = AIDoSpellCast(botSpell.SpellIndex, tar, botSpell.ManaCost);
 
-				if(castedSpell) {
-					char* gmsg = 0;
-
-					MakeAnyLenString(&gmsg, "Attempting to slow %s.", tar->GetCleanName());
-
-					if(gmsg)
-						BotGroupSay(this, gmsg);
-				}
+				if(castedSpell && GetClass() != BARD)
+					BotGroupSay(this, "Attempting to slow %s.", tar->GetCleanName());
 			}
 			break;
 		}
@@ -889,6 +954,106 @@ bool Bot::AICastSpell(Mob* tar, uint8 iChance, uint16 iSpellTypes) {
 			}
 			break;
 		}
+		case SpellType_Resurrect:
+			break;
+		case SpellType_HateRedux: {
+			// assumed group member at this point
+			if (GetClass() == BARD) {
+				std::list<BotSpell_wPriority> botSongList = GetPrioritizedBotSpellsBySpellType(this, SpellType_HateRedux);
+				for (auto iter : botSongList) {
+					if (!iter.SpellId)
+						continue;
+					if (!CheckSpellRecastTimers(this, iter.SpellIndex))
+						continue;
+					if (spells[iter.SpellId].zonetype != -1 && zone->GetZoneType() != -1 && spells[iter.SpellId].zonetype != zone->GetZoneType()) // is this bit or index?
+						continue;
+					if (spells[iter.SpellId].targettype != ST_Target)
+						continue;
+					if (tar->CanBuffStack(iter.SpellId, botLevel, true) < 0)
+						continue;
+
+					castedSpell = AIDoSpellCast(iter.SpellIndex, tar, iter.ManaCost);
+					if (castedSpell) {
+						BotGroupSay(this, "Attempting to reduce hate on %s.", tar->GetCleanName());
+						break;
+					}
+				}
+			}
+
+			break;
+		}
+		case SpellType_InCombatBuffSong: {
+			if (GetClass() != BARD || tar != this) // In-Combat songs can be cast Out-of-Combat in preparation for battle
+				break;
+
+			std::list<BotSpell_wPriority> botSongList = GetPrioritizedBotSpellsBySpellType(this, SpellType_InCombatBuffSong);
+			for (auto iter : botSongList) {
+				if (!iter.SpellId)
+					continue;
+				if (!CheckSpellRecastTimers(this, iter.SpellIndex))
+					continue;
+				if (spells[iter.SpellId].zonetype != -1 && zone->GetZoneType() != -1 && spells[iter.SpellId].zonetype != zone->GetZoneType()) // is this bit or index?
+					continue;
+				switch (spells[iter.SpellId].targettype) {
+				case ST_AEBard:
+				case ST_AECaster:
+				case ST_GroupTeleport:
+				case ST_Group:
+				case ST_Self:
+					break;
+				default:
+					continue;
+				}
+				if (tar->CanBuffStack(iter.SpellId, botLevel, true) < 0)
+					continue;
+
+				castedSpell = AIDoSpellCast(iter.SpellIndex, tar, iter.ManaCost);
+				if (castedSpell)
+					break;
+			}
+
+			break;
+		}
+		case SpellType_OutOfCombatBuffSong: {
+			if (GetClass() != BARD || tar != this || IsEngaged()) // Out-of-Combat songs can not be cast in combat
+				break;
+
+			std::list<BotSpell_wPriority> botSongList = GetPrioritizedBotSpellsBySpellType(this, SpellType_OutOfCombatBuffSong);
+			for (auto iter : botSongList) {
+				if (!iter.SpellId)
+					continue;
+				if (!CheckSpellRecastTimers(this, iter.SpellIndex))
+					continue;
+				if (spells[iter.SpellId].zonetype != -1 && zone->GetZoneType() != -1 && spells[iter.SpellId].zonetype != zone->GetZoneType()) // is this bit or index?
+					continue;
+				switch (spells[iter.SpellId].targettype) {
+				case ST_AEBard:
+				case ST_AECaster:
+				case ST_GroupTeleport:
+				case ST_Group:
+				case ST_Self:
+					break;
+				default:
+					continue;
+				}
+				if (tar->CanBuffStack(iter.SpellId, botLevel, true) < 0)
+					continue;
+
+				castedSpell = AIDoSpellCast(iter.SpellIndex, tar, iter.ManaCost);
+				if (castedSpell)
+					break;
+			}
+
+			break;
+		}
+		case SpellType_PreCombatBuff: {
+			break;
+		}
+		case SpellType_PreCombatBuffSong: {
+			break;
+		}
+		default:
+			break;
 	}
 
 	return castedSpell;
@@ -945,22 +1110,18 @@ bool Bot::AIDoSpellCast(uint8 i, Mob* tar, int32 mana_cost, uint32* oDontDoAgain
 		extraMana = false;
 	}
 	else { //handle spell recast and recast timers
-		if(GetClass() == BARD && IsGroupSpell(AIspells[i].spellid)) {
-			// Bard Clarity songs (spellids: 723 & 1287) are recast_time = 0 and buffduration = 0.
-			// This translates to an insta-recast in the above check and is essentially locking all idle bard songs
-			// between levels 20 & 33 to one of the clarity songs.
+		//if(GetClass() == BARD && IsGroupSpell(AIspells[i].spellid)) {
+		//	// Bard buff songs have been moved to their own npc spell type..
+		//	// Buff stacking is now checked as opposed to manipulating the timer to avoid rapid casting
 
-			// Hard-coded fix of '0/0' bard songs..watch for issues in other song lines
-			if(spells[AIspells[i].spellid].recast_time == 0 && spells[AIspells[i].spellid].buffduration == 0 && spells[AIspells[i].spellid].goodEffect > 0) {
-				AIspells[i].time_cancast = Timer::GetCurrentTime() + (3 * 6000); // pseudo 'buffduration' of 3 (value matches others in bard 'heal' song line)
-			}
-			else {
-				AIspells[i].time_cancast = (spells[AIspells[i].spellid].recast_time > (spells[AIspells[i].spellid].buffduration * 6000)) ? Timer::GetCurrentTime() + spells[AIspells[i].spellid].recast_time : Timer::GetCurrentTime() + spells[AIspells[i].spellid].buffduration * 6000;
-			}
-			//spellend_timer.Start(spells[AIspells[i].spellid].cast_time);
-		}
-		else
-			AIspells[i].time_cancast = Timer::GetCurrentTime() + spells[AIspells[i].spellid].recast_time;
+		//	//AIspells[i].time_cancast = (spells[AIspells[i].spellid].recast_time > (spells[AIspells[i].spellid].buffduration * 6000)) ? Timer::GetCurrentTime() + spells[AIspells[i].spellid].recast_time : Timer::GetCurrentTime() + spells[AIspells[i].spellid].buffduration * 6000;
+		//	//spellend_timer.Start(spells[AIspells[i].spellid].cast_time);
+		//}
+		//else
+		//	AIspells[i].time_cancast = Timer::GetCurrentTime() + spells[AIspells[i].spellid].recast_time;
+
+		AIspells[i].time_cancast = Timer::GetCurrentTime() + spells[AIspells[i].spellid].recast_time;
+
 		if(spells[AIspells[i].spellid].EndurTimerIndex > 0) {
 			SetSpellRecastTimer(spells[AIspells[i].spellid].EndurTimerIndex, spells[AIspells[i].spellid].recast_time);
 		}
@@ -1008,16 +1169,28 @@ bool Bot::AI_IdleCastCheck() {
 #endif
 		AIautocastspell_timer->Disable();	//prevent the timer from going off AGAIN while we are casting.
 
-		//Ok, IdleCastCheck depends of class.
-		// Healers WITHOUT pets will check if a heal is needed before buffing.
-		uint8 botClass = GetClass();
+		bool pre_combat = false;
+		Mob* test_against = nullptr;
 
-		if(botClass == CLERIC || botClass == PALADIN || botClass == RANGER) {
-			if(!entity_list.Bot_AICheckCloseBeneficialSpells(this, 100, BotAISpellRange, SpellType_Cure)) {
+		if (HasGroup() && GetGroup()->GetLeader() && GetGroup()->GetLeader()->IsClient())
+			test_against = GetGroup()->GetLeader();
+		else if (GetOwner() && GetOwner()->IsClient())
+			test_against = GetOwner();
+
+		if (test_against && test_against->GetTarget() && test_against->GetTarget()->IsNPC() && !test_against->GetTarget()->IsPet())
+			pre_combat = true;
+
+		//Ok, IdleCastCheck depends of class.
+		switch (GetClass()) {
+		// Healers WITHOUT pets will check if a heal is needed before buffing.
+		case CLERIC:
+		case PALADIN:
+		case RANGER: {
+			if (!entity_list.Bot_AICheckCloseBeneficialSpells(this, 100, BotAISpellRange, SpellType_Cure)) {
 				if (!AICastSpell(this, 100, SpellType_Heal)) {
-					if(!entity_list.Bot_AICheckCloseBeneficialSpells(this, 100, BotAISpellRange, SpellType_Heal)) {
+					if (!entity_list.Bot_AICheckCloseBeneficialSpells(this, 100, BotAISpellRange, SpellType_Heal)) {
 						if (!AICastSpell(this, 100, SpellType_Buff)) {
-							if(!entity_list.Bot_AICheckCloseBeneficialSpells(this, 100, BotAISpellRange, SpellType_Buff)) {
+							if (!entity_list.Bot_AICheckCloseBeneficialSpells(this, 100, BotAISpellRange, SpellType_Buff)) {
 								//
 							}
 						}
@@ -1026,16 +1199,23 @@ bool Bot::AI_IdleCastCheck() {
 			}
 
 			result = true;
+			break;
 		}
 		// Pets class will first cast their pet, then buffs
-		else if(botClass == DRUID || botClass == MAGICIAN || botClass == SHADOWKNIGHT || botClass == SHAMAN || botClass == NECROMANCER || botClass == ENCHANTER || botClass == BEASTLORD || botClass == WIZARD) {
-			if(!entity_list.Bot_AICheckCloseBeneficialSpells(this, 100, BotAISpellRange, SpellType_Cure)) {
+		case DRUID:
+		case MAGICIAN:
+		case SHADOWKNIGHT:
+		case SHAMAN:
+		case NECROMANCER:
+		case ENCHANTER:
+		case BEASTLORD: {
+			if (!entity_list.Bot_AICheckCloseBeneficialSpells(this, 100, BotAISpellRange, SpellType_Cure)) {
 				if (!AICastSpell(this, 100, SpellType_Pet)) {
 					if (!AICastSpell(this, 100, SpellType_Heal)) {
-						if(!entity_list.Bot_AICheckCloseBeneficialSpells(this, 100, BotAISpellRange, SpellType_Heal)) {
+						if (!entity_list.Bot_AICheckCloseBeneficialSpells(this, 100, BotAISpellRange, SpellType_Heal)) {
 							if (!AICastSpell(this, 100, SpellType_Buff)) {
 								if (!AICastSpell(GetPet(), 100, SpellType_Heal)) {
-									if(!entity_list.Bot_AICheckCloseBeneficialSpells(this, 100, BotAISpellRange, SpellType_Buff)) {
+									if (!entity_list.Bot_AICheckCloseBeneficialSpells(this, 100, BotAISpellRange, SpellType_Buff)) {
 										//
 									}
 								}
@@ -1046,24 +1226,76 @@ bool Bot::AI_IdleCastCheck() {
 			}
 
 			result = true;
+			break;
 		}
-		else if(botClass == BARD) {
-			// bard bots
-			if(!AICastSpell(this, 100, SpellType_Cure)) {
-				if(!AICastSpell(this, 100, SpellType_Heal)) {
-					if((!RuleB(Bots, BotBardUseOutOfCombatSongs) || !GetAltOutOfCombatBehavior()) || !AICastSpell(this, 100, SpellType_Buff)) { // skips if rule is false
-						if(!AICastSpell(this, 100, SpellType_InCombatBuff)) { // this tries to keep some combat buffs on the group until engaged code can pick up the buffing
+		case WIZARD: { // This can eventually be move into the BEASTLORD case handler once pre-combat is fully implemented
+			if (pre_combat) {
+				if (!entity_list.Bot_AICheckCloseBeneficialSpells(this, 100, BotAISpellRange, SpellType_Cure)) {
+					if (!AICastSpell(this, 100, SpellType_Pet)) {
+						if (!AICastSpell(this, 100, SpellType_Heal)) {
+							if (!entity_list.Bot_AICheckCloseBeneficialSpells(this, 100, BotAISpellRange, SpellType_Heal)) {
+								if (!AICastSpell(this, 100, SpellType_Buff)) {
+									if (!AICastSpell(GetPet(), 100, SpellType_Heal)) {
+										if (!entity_list.Bot_AICheckCloseBeneficialSpells(this, 100, BotAISpellRange, SpellType_PreCombatBuff)) {
+											if (!entity_list.Bot_AICheckCloseBeneficialSpells(this, 100, BotAISpellRange, SpellType_Buff)) {
+												//
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+			else {
+				if (!entity_list.Bot_AICheckCloseBeneficialSpells(this, 100, BotAISpellRange, SpellType_Cure)) {
+					if (!AICastSpell(this, 100, SpellType_Pet)) {
+						if (!AICastSpell(this, 100, SpellType_Heal)) {
+							if (!entity_list.Bot_AICheckCloseBeneficialSpells(this, 100, BotAISpellRange, SpellType_Heal)) {
+								if (!AICastSpell(this, 100, SpellType_Buff)) {
+									if (!AICastSpell(GetPet(), 100, SpellType_Heal)) {
+										if (!entity_list.Bot_AICheckCloseBeneficialSpells(this, 100, BotAISpellRange, SpellType_Buff)) {
+											//
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+			
+			result = true;
+			break;
+		}
+		case BARD: {
+			if (pre_combat) {
+				if (!entity_list.Bot_AICheckCloseBeneficialSpells(this, 100, BotAISpellRange, SpellType_Cure)) {
+					if (!AICastSpell(this, 100, SpellType_PreCombatBuffSong)) {
+						if (!AICastSpell(this, 100, SpellType_InCombatBuffSong)) {
 							//
 						}
- 					}
+					}
+				}
+			}
+			else {
+				if (!entity_list.Bot_AICheckCloseBeneficialSpells(this, 100, BotAISpellRange, SpellType_Cure)) {
+					if (!AICastSpell(this, 100, SpellType_OutOfCombatBuffSong)) {
+						//
+					}
 				}
 			}
 
 			result = true;
+			break;
+		}
+		default:
+			break;
 		}
 
 		if(!AIautocastspell_timer->Enabled())
-			AIautocastspell_timer->Start(RandomTimer(1000, 5000), false);
+			AIautocastspell_timer->Start(RandomTimer(500, 2000), false); // avg human response is much less than 5 seconds..even for non-combat situations...
 	}
 
 	return result;
@@ -1256,13 +1488,15 @@ bool Bot::AI_EngagedCastCheck() {
 			}
 		}
 		else if(botClass == BARD) {
-			if(!AICastSpell(this, GetChanceToCastBySpellType(SpellType_InCombatBuff), SpellType_InCombatBuff)) {
-				if(!AICastSpell(this, GetChanceToCastBySpellType(SpellType_Heal), SpellType_Heal)) {
-					if(!AICastSpell(GetTarget(), GetChanceToCastBySpellType(SpellType_Dispel), SpellType_Dispel)) {// Bards will use their dispel songs
-						if(!AICastSpell(GetTarget(), mayGetAggro?0:GetChanceToCastBySpellType(SpellType_Nuke), SpellType_Nuke)) {// Bards will use their nuke songs
-							if(!AICastSpell(GetTarget(), GetChanceToCastBySpellType(SpellType_Escape), SpellType_Escape)) {// Bards will use their escape songs
-								//
-								failedToCast = true;
+			if (!entity_list.Bot_AICheckCloseBeneficialSpells(this, GetChanceToCastBySpellType(SpellType_HateRedux), BotAISpellRange, SpellType_HateRedux)) {
+				if (!AICastSpell(this, GetChanceToCastBySpellType(SpellType_InCombatBuffSong), SpellType_InCombatBuffSong)) {
+					if (!AICastSpell(GetTarget(), GetChanceToCastBySpellType(SpellType_Slow), SpellType_Slow)) {
+						if (!AICastSpell(GetTarget(), mayGetAggro ? 0 : GetChanceToCastBySpellType(SpellType_DOT), SpellType_DOT)) {// Bards will use their dot songs
+							if (!AICastSpell(GetTarget(), mayGetAggro ? 0 : GetChanceToCastBySpellType(SpellType_Nuke), SpellType_Nuke)) {// Bards will use their nuke songs
+								if (!AICastSpell(GetTarget(), GetChanceToCastBySpellType(SpellType_Escape), SpellType_Escape)) {// Bards will use their escape songs
+									//
+									failedToCast = true;
+								}
 							}
 						}
 					}
@@ -1271,7 +1505,7 @@ bool Bot::AI_EngagedCastCheck() {
 		}
 
 		if(!AIautocastspell_timer->Enabled()) {
-			AIautocastspell_timer->Start(RandomTimer(100, 250), false);
+			AIautocastspell_timer->Start(RandomTimer(150, 300), false);
 		}
 
 		if(!failedToCast)
@@ -1349,14 +1583,8 @@ bool Bot::AIHealRotation(Mob* tar, bool useFastHeals) {
 
 	castedSpell = AIDoSpellCast(botSpell.SpellIndex, tar, botSpell.ManaCost, &TempDontHealMeBeforeTime);
 
-	if(castedSpell) {
-		char* gmsg = 0;
-
-		MakeAnyLenString(&gmsg, "Casting %s on %s, please stay in range!", spells[botSpell.SpellId].name, tar->GetCleanName());
-
-		if(gmsg)
-			Say(gmsg);
-	}
+	if(castedSpell)
+		Say("Casting %s on %s, please stay in range!", spells[botSpell.SpellId].name, tar->GetCleanName());
 
 	return castedSpell;
 }
@@ -1417,7 +1645,7 @@ std::list<BotSpell> Bot::GetBotSpellsForSpellEffectAndTargetType(Bot* botCaster,
 	return result;
 }
 
-std::list<BotSpell> Bot::GetBotSpellsBySpellType(Bot* botCaster, uint16 spellType) {
+std::list<BotSpell> Bot::GetBotSpellsBySpellType(Bot* botCaster, uint32 spellType) {
 	std::list<BotSpell> result;
 
 	if(botCaster && botCaster->AI_HasSpells()) {
@@ -1444,7 +1672,38 @@ std::list<BotSpell> Bot::GetBotSpellsBySpellType(Bot* botCaster, uint16 spellTyp
 	return result;
 }
 
-BotSpell Bot::GetFirstBotSpellBySpellType(Bot* botCaster, uint16 spellType) {
+std::list<BotSpell_wPriority> Bot::GetPrioritizedBotSpellsBySpellType(Bot* botCaster, uint32 spellType) {
+	std::list<BotSpell_wPriority> result;
+
+	if (botCaster && botCaster->AI_HasSpells()) {
+		std::vector<AISpells_Struct> botSpellList = botCaster->GetBotSpells();
+
+		for (int i = botSpellList.size() - 1; i >= 0; i--) {
+			if (botSpellList[i].spellid <= 0 || botSpellList[i].spellid >= SPDAT_RECORDS) {
+				// this is both to quit early to save cpu and to avoid casting bad spells
+				// Bad info from database can trigger this incorrectly, but that should be fixed in DB, not here
+				continue;
+			}
+
+			if (botSpellList[i].type & spellType) {
+				BotSpell_wPriority botSpell;
+				botSpell.SpellId = botSpellList[i].spellid;
+				botSpell.SpellIndex = i;
+				botSpell.ManaCost = botSpellList[i].manacost;
+				botSpell.Priority = botSpellList[i].priority;
+
+				result.push_back(botSpell);
+			}
+		}
+
+		if (result.size() > 1)
+			result.sort([](BotSpell_wPriority& l, BotSpell_wPriority& r) { return l.Priority < r.Priority; });
+	}
+
+	return result;
+}
+
+BotSpell Bot::GetFirstBotSpellBySpellType(Bot* botCaster, uint32 spellType) {
 	BotSpell result;
 
 	result.SpellId = 0;
@@ -1738,9 +1997,9 @@ BotSpell Bot::GetBestBotSpellForMagicBasedSlow(Bot* botCaster) {
 	if(botCaster) {
 		std::list<BotSpell> botSpellList = GetBotSpellsForSpellEffect(botCaster, SE_AttackSpeed);
 
-		for(std::list<BotSpell>::iterator botSpellListItr = botSpellList.begin(); botSpellListItr != botSpellList.end(); ++botSpellListItr) {
+		for (std::list<BotSpell>::iterator botSpellListItr = botSpellList.begin(); botSpellListItr != botSpellList.end(); ++botSpellListItr) {
 			// Assuming all the spells have been loaded into this list by level and in descending order
-			if(IsSlowSpell(botSpellListItr->SpellId) && spells[botSpellListItr->SpellId].resisttype == RESIST_MAGIC && CheckSpellRecastTimers(botCaster, botSpellListItr->SpellIndex)) {
+			if (IsSlowSpell(botSpellListItr->SpellId) && spells[botSpellListItr->SpellId].resisttype == RESIST_MAGIC && CheckSpellRecastTimers(botCaster, botSpellListItr->SpellIndex)) {
 				result.SpellId = botSpellListItr->SpellId;
 				result.SpellIndex = botSpellListItr->SpellIndex;
 				result.ManaCost = botSpellListItr->ManaCost;
@@ -2139,7 +2398,7 @@ BotSpell Bot::GetBestBotSpellForResistDebuff(Bot* botCaster, Mob *tar) {
 }
 
 BotSpell Bot::GetBestBotSpellForCure(Bot* botCaster, Mob *tar) {
-	BotSpell result;
+	BotSpell_wPriority result;
 	bool spellSelected = false;
 
 	result.SpellId = 0;
@@ -2156,7 +2415,7 @@ BotSpell Bot::GetBestBotSpellForCure(Bot* botCaster, Mob *tar) {
 	bool isCorrupted = tar->FindType(SE_CorruptionCounter);
 
 	if(botCaster && botCaster->AI_HasSpells()) {
-		std::list<BotSpell> cureList = GetBotSpellsBySpellType(botCaster, SpellType_Cure);
+		std::list<BotSpell_wPriority> cureList = GetPrioritizedBotSpellsBySpellType(botCaster, SpellType_Cure);
 
 		if(tar->HasGroup()) {
 			Group *g = tar->GetGroup();
@@ -2173,7 +2432,7 @@ BotSpell Bot::GetBestBotSpellForCure(Bot* botCaster, Mob *tar) {
 
 		//Check for group cure first
 		if(countNeedsCured > 2) {
-			for(std::list<BotSpell>::iterator itr = cureList.begin(); itr != cureList.end(); ++itr) {
+			for (std::list<BotSpell_wPriority>::iterator itr = cureList.begin(); itr != cureList.end(); ++itr) {
 				BotSpell selectedBotSpell = *itr;
 
 				if(IsGroupSpell(itr->SpellId) && CheckSpellRecastTimers(botCaster, itr->SpellIndex)) {
@@ -2210,7 +2469,7 @@ BotSpell Bot::GetBestBotSpellForCure(Bot* botCaster, Mob *tar) {
 
 		//no group cure for target- try to find single target spell
 		if(!spellSelected) {
-			for(std::list<BotSpell>::iterator itr = cureList.begin(); itr != cureList.end(); ++itr) {
+			for(std::list<BotSpell_wPriority>::iterator itr = cureList.begin(); itr != cureList.end(); ++itr) {
 				BotSpell selectedBotSpell = *itr;
 
 				if(CheckSpellRecastTimers(botCaster, itr->SpellIndex)) {
@@ -2312,1099 +2571,105 @@ bool Bot::CheckDisciplineRecastTimers(Bot *caster, int timer_index) {
 	return false;
 }
 
-void Bot::CalcChanceToCast() {
-	uint8 castChance = 0;
-
-	for(int i=0; i < MaxStances; i++) {
-		for(int j=0; j < MaxSpellTypes; j++) {
-			_spellCastingChances[i][j] = 0;
-		}
-	}
-
-	BotStanceType botStance = GetBotStance();
-	uint8 botClass = GetClass();
-	bool isPrimaryHealer = false;
-	bool isPrimarySlower = false;
-
-	if(HasGroup()) {
-		isPrimaryHealer = IsGroupPrimaryHealer();
-		isPrimarySlower = IsGroupPrimarySlower();
-	}
-
-	//Nuke
-	switch(botClass)
-	{
-		case WIZARD:
-		case MAGICIAN:
-			switch(botStance)
-			{
-				case BotStanceBalanced:
-				case BotStanceReactive:
-				case BotStanceAggressive:
-					castChance = 75;
-					break;
-				case BotStanceEfficient:
-					castChance = 50;
-					break;
-				case BotStanceBurn:
-				case BotStanceBurnAE:
-					castChance = 100;
-					break;
-				default:
-					castChance = 0;
-					break;
-			}
-			break;
-		case DRUID:
-		case CLERIC:
-		case PALADIN:
-			switch(botStance)
-			{
-				case BotStanceBalanced:
-				case BotStanceReactive:
-					castChance = isPrimaryHealer?15:25;
-					break;
-				case BotStanceEfficient:
-					castChance = isPrimaryHealer?0:15;
-					break;
-				case BotStanceAggressive:
-					castChance = isPrimaryHealer?15:50;
-					break;
-				case BotStanceBurn:
-				case BotStanceBurnAE:
-					castChance = isPrimaryHealer?25:50;
-					break;
-				default:
-					castChance = 0;
-					break;
-			}
-			break;
-		case ENCHANTER:
-			switch(botStance)
-			{
-				case BotStanceBalanced:
-				case BotStanceReactive:
-					castChance = isPrimarySlower?15:25;
-					break;
-				case BotStanceEfficient:
-					castChance = isPrimarySlower?0:15;
-					break;
-				case BotStanceAggressive:
-					castChance = isPrimarySlower?15:50;
-					break;
-				case BotStanceBurn:
-				case BotStanceBurnAE:
-					castChance = isPrimarySlower?25:50;
-					break;
-				default:
-					castChance = 0;
-					break;
-			}
-			break;
-		case BEASTLORD:
-		case SHAMAN:
-			switch(botStance)
-			{
-				case BotStanceBalanced:
-				case BotStanceReactive:
-					castChance = isPrimarySlower?isPrimaryHealer?0:5:isPrimaryHealer?10:15;
-					break;
-				case BotStanceEfficient:
-					castChance = isPrimarySlower?isPrimaryHealer?0:0:isPrimaryHealer?5:10;
-					break;
-				case BotStanceAggressive:
-					castChance = isPrimarySlower?isPrimaryHealer?5:15:isPrimaryHealer?15:25;
-					break;
-				case BotStanceBurn:
-				case BotStanceBurnAE:
-					castChance = isPrimarySlower?isPrimaryHealer?15:25:isPrimaryHealer?25:50;
-					break;
-				default:
-					castChance = 0;
-					break;
-			}
-			break;
-		case NECROMANCER:
-		case RANGER:
-		case SHADOWKNIGHT:
-			switch(botStance)
-			{
-				case BotStanceBalanced:
-				case BotStanceReactive:
-				case BotStanceAggressive:
-					castChance = 15;
-					break;
-				case BotStanceEfficient:
-					castChance = 5;
-					break;
-				case BotStanceBurn:
-				case BotStanceBurnAE:
-					castChance = 50;
-					break;
-				default:
-					castChance = 0;
-					break;
-			}
-			break;
-		case BARD:
-			switch(botStance)
-			{
-				case BotStanceBalanced:
-				case BotStanceReactive:
-				case BotStanceAggressive:
-					castChance = 50;
-					break;
-				case BotStanceEfficient:
-					castChance = 25;
-					break;
-				case BotStanceBurn:
-				case BotStanceBurnAE:
-					castChance = 100;
-					break;
-				default:
-					castChance = 0;
-					break;
-			}
-			break;
-		case WARRIOR:
-		case BERSERKER:
-		case MONK:
-		case ROGUE:
-			castChance = 0;
-			break;
-		default:
-			castChance = 0;
-			break;
-	}
-	_spellCastingChances[botStance][SpellType_NukeIndex] = castChance;
-
-	//Heal
-	switch(botClass)
-	{
-		case CLERIC:
-			switch(botStance)
-			{
-				case BotStanceBalanced:
-				case BotStanceEfficient:
-				case BotStanceReactive:
-					castChance = 100;
-					break;
-				case BotStanceAggressive:
-					castChance = 75;
-					break;
-				case BotStanceBurn:
-				case BotStanceBurnAE:
-					castChance = 50;
-					break;
-				default:
-					castChance = 0;
-					break;
-			}
-			break;
-		case DRUID:
-		case SHAMAN:
-			switch(botStance)
-			{
-				case BotStanceEfficient:
-					castChance = isPrimaryHealer?100:15;
-					break;
-				case BotStanceBalanced:
-				case BotStanceReactive:
-					castChance = isPrimaryHealer?100:25;
-					break;
-				case BotStanceAggressive:
-					castChance = isPrimaryHealer?75:15;
-					break;
-				case BotStanceBurn:
-				case BotStanceBurnAE:
-					castChance = isPrimaryHealer?50:10;
-					break;
-				default:
-					castChance = 0;
-					break;
-			}
-			break;
-		case NECROMANCER:
-		case MAGICIAN:
-			switch(botStance)
-			{
-				case BotStanceBalanced:
-				case BotStanceReactive:
-					castChance = 100;
-					break;
-				case BotStanceEfficient:
-				case BotStanceAggressive:
-					castChance = 50;
-					break;
-				case BotStanceBurn:
-				case BotStanceBurnAE:
-					castChance = 25;
-					break;
-				default:
-					castChance = 0;
-					break;
-			}
-			break;
-		case SHADOWKNIGHT:
-			switch(botStance)
-			{
-				case BotStanceBalanced:
-				case BotStanceReactive:
-					castChance = 50;
-					break;
-				case BotStanceEfficient:
-				case BotStanceAggressive:
-					castChance = 25;
-					break;
-				case BotStanceBurn:
-				case BotStanceBurnAE:
-					castChance = 15;
-					break;
-				default:
-					castChance = 0;
-					break;
-			}
-			break;
-		case BEASTLORD:
-		case PALADIN:
-		case RANGER:
-			switch(botStance)
-			{
-				case BotStanceBalanced:
-				case BotStanceReactive:
-					castChance = isPrimaryHealer?100:25;
-					break;
-				case BotStanceEfficient:
-				case BotStanceAggressive:
-					castChance = isPrimaryHealer?75:15;
-					break;
-				case BotStanceBurn:
-				case BotStanceBurnAE:
-					castChance = isPrimaryHealer?50:0;
-					break;
-				default:
-					castChance = 0;
-					break;
-			}
-			break;
-		case BARD:
-			switch(botStance)
-			{
-				case BotStanceBalanced:
-				case BotStanceReactive:
-					castChance = 100;
-					break;
-				case BotStanceEfficient:
-				case BotStanceAggressive:
-					castChance = 50;
-					break;
-				case BotStanceBurn:
-				case BotStanceBurnAE:
-					castChance = 25;
-					break;
-				default:
-					castChance = 0;
-					break;
-			}
-			break;
-		case ENCHANTER:
-		case WIZARD:
-		case WARRIOR:
-		case BERSERKER:
-		case MONK:
-		case ROGUE:
-			castChance = 0;
-			break;
-		default:
-			castChance = 0;
-			break;
-	}
-	_spellCastingChances[botStance][SpellType_HealIndex] = castChance;
-
-	//Root
-	castChance = 0;
-	_spellCastingChances[botStance][SpellType_RootIndex] = castChance;
-
-	//Buff
-	switch(botClass)
-	{
-		case BARD:
-			switch(botStance)
-			{
-				case BotStanceBalanced:
-				case BotStanceReactive:
-					castChance = 100;
-					break;
-				case BotStanceEfficient:
-				case BotStanceAggressive:
-					castChance = 50;
-					break;
-				case BotStanceBurn:
-				case BotStanceBurnAE:
-					castChance = 25;
-					break;
-				default:
-					castChance = 0;
-					break;
-			}
-			break;
-		case CLERIC:
-		case DRUID:
-		case SHAMAN:
-		case NECROMANCER:
-		case MAGICIAN:
-		case SHADOWKNIGHT:
-		case BEASTLORD:
-		case PALADIN:
-		case RANGER:
-		case ENCHANTER:
-		case WIZARD:
-		case WARRIOR:
-		case BERSERKER:
-		case MONK:
-		case ROGUE:
-			castChance = 0;
-			break;
-		default:
-			castChance = 0;
-			break;
-	}
-	_spellCastingChances[botStance][SpellType_BuffIndex] = castChance;
-
-	//Escape
-	switch(botClass)
-	{
-		case ENCHANTER:
-		case WIZARD:
-		case RANGER:
-			switch(botStance)
-			{
-				case BotStanceBalanced:
-				case BotStanceReactive:
-				case BotStanceEfficient:
-					castChance = 100;
-					break;
-				case BotStanceAggressive:
-					castChance = 50;
-					break;
-				case BotStanceBurn:
-				case BotStanceBurnAE:
-					castChance = 25;
-					break;
-				default:
-					castChance = 0;
-					break;
-			}
-			break;
-		case CLERIC:
-		case DRUID:
-		case SHAMAN:
-		case NECROMANCER:
-		case MAGICIAN:
-		case BARD:
-			switch(botStance)
-			{
-				case BotStanceBalanced:
-				case BotStanceReactive:
-				case BotStanceEfficient:
-					castChance = 50;
-					break;
-				case BotStanceAggressive:
-					castChance = 25;
-					break;
-				case BotStanceBurn:
-				case BotStanceBurnAE:
-					castChance = 15;
-					break;
-				default:
-					castChance = 0;
-					break;
-			}
-			break;
-		case SHADOWKNIGHT:
-		case PALADIN:
-			switch(botStance)
-			{
-				case BotStanceBalanced:
-				case BotStanceReactive:
-					castChance = 25;
-					break;
-				case BotStanceEfficient:
-					castChance = 15;
-					break;
-				case BotStanceAggressive:
-				case BotStanceBurn:
-				case BotStanceBurnAE:
-					castChance = 0;
-					break;
-				default:
-					castChance = 0;
-					break;
-			}
-			break;
-		case BEASTLORD:
-		case WARRIOR:
-		case BERSERKER:
-		case MONK:
-		case ROGUE:
-			castChance = 0;
-			break;
-		default:
-			castChance = 0;
-			break;
-	}
-	_spellCastingChances[botStance][SpellType_EscapeIndex] = castChance;
-
-	//Pet
-	switch(botClass)
-	{
-		case MAGICIAN:
-		case NECROMANCER:
-		case BEASTLORD:
-			switch(botStance)
-			{
-				case BotStanceBalanced:
-				case BotStanceReactive:
-					castChance = 100;
-					break;
-				case BotStanceEfficient:
-				case BotStanceAggressive:
-					castChance = 50;
-					break;
-				case BotStanceBurn:
-				case BotStanceBurnAE:
-					castChance = 25;
-					break;
-				default:
-					castChance = 0;
-					break;
-			}
-			break;
-		case DRUID:
-		case SHAMAN:
-		case ENCHANTER:
-		case SHADOWKNIGHT:
-			switch(botStance)
-			{
-				case BotStanceBalanced:
-				case BotStanceReactive:
-					castChance = 25;
-					break;
-				case BotStanceEfficient:
-				case BotStanceAggressive:
-				case BotStanceBurn:
-				case BotStanceBurnAE:
-					castChance = 10;
-					break;
-				default:
-					castChance = 0;
-					break;
-			}
-			break;
-		case BARD:
-		case WIZARD:
-		case CLERIC:
-		case RANGER:
-		case PALADIN:
-		case WARRIOR:
-		case BERSERKER:
-		case MONK:
-		case ROGUE:
-			castChance = 0;
-			break;
-		default:
-			castChance = 0;
-			break;
-	}
-	_spellCastingChances[botStance][SpellType_PetIndex] = castChance;
-
-	//Lifetap
-	switch(botClass)
-	{
-		case NECROMANCER:
-		case SHADOWKNIGHT:
-			switch(botStance)
-			{
-				case BotStanceBalanced:
-				case BotStanceReactive:
-				case BotStanceEfficient:
-				case BotStanceAggressive:
-					castChance = 50;
-					break;
-				case BotStanceBurn:
-				case BotStanceBurnAE:
-					castChance = 100;
-					break;
-				default:
-					castChance = 0;
-					break;
-			}
-			break;
-		case MAGICIAN:
-		case BEASTLORD:
-		case DRUID:
-		case SHAMAN:
-		case ENCHANTER:
-		case BARD:
-		case WIZARD:
-		case CLERIC:
-		case RANGER:
-		case PALADIN:
-		case WARRIOR:
-		case BERSERKER:
-		case MONK:
-		case ROGUE:
-			castChance = 0;
-			break;
-		default:
-			castChance = 0;
-			break;
-	}
-	_spellCastingChances[botStance][SpellType_LifetapIndex] = castChance;
-
-	//Snare
-	castChance = 0;
-	_spellCastingChances[botStance][SpellType_SnareIndex] = castChance;
-
-	//DOT
-	switch(botClass)
-	{
-		case NECROMANCER:
-			switch(botStance)
-			{
-				case BotStanceBalanced:
-				case BotStanceReactive:
-				case BotStanceAggressive:
-					castChance = 50;
-					break;
-				case BotStanceEfficient:
-					castChance = 25;
-					break;
-				case BotStanceBurn:
-				case BotStanceBurnAE:
-					castChance = 75;
-					break;
-				default:
-					castChance = 0;
-					break;
-			}
-			break;
-		case DRUID:
-			switch(botStance)
-			{
-				case BotStanceBalanced:
-				case BotStanceReactive:
-					castChance = isPrimaryHealer?15:50;
-					break;
-				case BotStanceEfficient:
-					castChance = isPrimaryHealer?10:25;
-					break;
-				case BotStanceAggressive:
-				case BotStanceBurn:
-				case BotStanceBurnAE:
-					castChance = isPrimaryHealer?25:50;
-					break;
-				default:
-					castChance = 0;
-					break;
-			}
-			break;
-		case ENCHANTER:
-			switch(botStance)
-			{
-				case BotStanceBalanced:
-				case BotStanceReactive:
-					castChance = isPrimarySlower?15:50;
-					break;
-				case BotStanceEfficient:
-					castChance = isPrimarySlower?10:25;
-					break;
-				case BotStanceAggressive:
-				case BotStanceBurn:
-				case BotStanceBurnAE:
-					castChance = isPrimarySlower?25:15;
-					break;
-				default:
-					castChance = 0;
-					break;
-			}
-			break;
-		case SHAMAN:
-			switch(botStance)
-			{
-				case BotStanceBalanced:
-				case BotStanceReactive:
-					castChance = isPrimarySlower?isPrimaryHealer?0:15:isPrimaryHealer?15:25;
-					break;
-				case BotStanceEfficient:
-					castChance = isPrimarySlower?isPrimaryHealer?0:10:isPrimaryHealer?10:15;
-					break;
-				case BotStanceAggressive:
-				case BotStanceBurn:
-				case BotStanceBurnAE:
-					castChance = isPrimarySlower?isPrimaryHealer?15:50:isPrimaryHealer?25:50;
-					break;
-				default:
-					castChance = 0;
-					break;
-			}
-			break;
-		case BEASTLORD:
-		case RANGER:
-		case SHADOWKNIGHT:
-			switch(botStance)
-			{
-				case BotStanceBalanced:
-				case BotStanceReactive:
-					castChance = isPrimarySlower?10:15;
-					break;
-				case BotStanceEfficient:
-					castChance = isPrimarySlower?0:10;
-					break;
-				case BotStanceAggressive:
-				case BotStanceBurn:
-				case BotStanceBurnAE:
-					castChance = isPrimarySlower?25:50;
-					break;
-				default:
-					castChance = 0;
-					break;
-			}
-			break;
-		case BARD:
-			switch(botStance)
-			{
-				case BotStanceBalanced:
-				case BotStanceReactive:
-					castChance = isPrimarySlower?25:50;
-					break;
-				case BotStanceEfficient:
-					castChance = isPrimarySlower?15:25;
-					break;
-				case BotStanceAggressive:
-				case BotStanceBurn:
-				case BotStanceBurnAE:
-					castChance = isPrimarySlower?50:100;
-					break;
-				default:
-					castChance = 0;
-					break;
-			}
-			break;
-		case MAGICIAN:
-		case PALADIN:
-		case CLERIC:
-		case WIZARD:
-		case WARRIOR:
-		case BERSERKER:
-		case MONK:
-		case ROGUE:
-			castChance = 0;
-			break;
-		default:
-			castChance = 0;
-			break;
-	}
-	_spellCastingChances[botStance][SpellType_DOTIndex] = castChance;
-
-	//Dispel
-	switch(botClass)
-	{
-		case BARD:
-		case ENCHANTER:
-		case WIZARD:
-		case MAGICIAN:
-		case CLERIC:
-		case DRUID:
-		case SHAMAN:
-		case NECROMANCER:
-		case RANGER:
-		case SHADOWKNIGHT:
-		case PALADIN:
-		case BEASTLORD:
-		case WARRIOR:
-		case BERSERKER:
-		case MONK:
-		case ROGUE:
-			castChance = 0;
-			break;
-		default:
-			castChance = 0;
-			break;
-	}
-	_spellCastingChances[botStance][SpellType_DispelIndex] = castChance;
-
-	//InCombatBuff
-	switch(botClass)
-	{
-		case CLERIC:
-			switch(botStance)
-			{
-				case BotStanceBalanced:
-				case BotStanceReactive:
-					castChance = 15;
-					break;
-				case BotStanceEfficient:
-					castChance = 0;
-					break;
-				case BotStanceAggressive:
-				case BotStanceBurn:
-				case BotStanceBurnAE:
-					castChance = 25;
-					break;
-				default:
-					castChance = 0;
-					break;
-			}
-			break;
-		case PALADIN:
-			switch(botStance)
-			{
-				case BotStanceBalanced:
-				case BotStanceReactive:
-					castChance = 25;
-					break;
-				case BotStanceEfficient:
-					castChance = 0;
-					break;
-				case BotStanceAggressive:
-				case BotStanceBurn:
-				case BotStanceBurnAE:
-					castChance = 50;
-					break;
-				default:
-					castChance = 0;
-					break;
-			}
-			break;
-		case SHAMAN:
-			switch(botStance)
-			{
-				case BotStanceBalanced:
-				case BotStanceReactive:
-					castChance = isPrimaryHealer?75:50;
-					break;
-				case BotStanceEfficient:
-					castChance = isPrimaryHealer?50:25;
-					break;
-				case BotStanceAggressive:
-				case BotStanceBurn:
-				case BotStanceBurnAE:
-					castChance = isPrimaryHealer?100:75;
-					break;
-				default:
-					castChance = 0;
-					break;
-			}
-			break;
-		case BARD:
-			switch(botStance)
-			{
-				case BotStanceBalanced:
-				case BotStanceReactive:
-					castChance = 100;
-					break;
-				case BotStanceEfficient:
-				case BotStanceAggressive:
-					castChance = 50;
-					break;
-				case BotStanceBurn:
-				case BotStanceBurnAE:
-					castChance = 25;
-					break;
-				default:
-					castChance = 0;
-					break;
-			}
-			break;
-		case BEASTLORD:
-		case MAGICIAN:
-		case DRUID:
-		case ENCHANTER:
-		case WIZARD:
-		case NECROMANCER:
-		case SHADOWKNIGHT:
-		case RANGER:
-		case WARRIOR:
-		case BERSERKER:
-		case MONK:
-		case ROGUE:
-			castChance = 0;
-			break;
-		default:
-			castChance = 0;
-			break;
-	}
-	_spellCastingChances[botStance][SpellType_InCombatBuffIndex] = castChance;
-
-	//Mez
-	switch(botClass)
-	{
-		case ENCHANTER:
-		case BARD:
-			castChance = 100;
-			break;
-		case WIZARD:
-		case CLERIC:
-		case DRUID:
-		case SHAMAN:
-		case NECROMANCER:
-		case MAGICIAN:
-		case RANGER:
-		case SHADOWKNIGHT:
-		case PALADIN:
-		case BEASTLORD:
-		case WARRIOR:
-		case BERSERKER:
-		case MONK:
-		case ROGUE:
-			castChance = 0;
-			break;
-		default:
-			castChance = 0;
-			break;
-	}
-	_spellCastingChances[botStance][SpellType_MezIndex] = castChance;
-
-	//Charm
-	castChance = 0;
-	_spellCastingChances[botStance][SpellType_CharmIndex] = castChance;
-
-	//Slow
-	switch(botClass)
-	{
-		case ENCHANTER:
-		case SHAMAN:
-			switch(botStance)
-			{
-				case BotStanceBalanced:
-				case BotStanceReactive:
-					castChance = isPrimarySlower?100:50;
-					break;
-				case BotStanceEfficient:
-					castChance = isPrimarySlower?100:25;
-					break;
-				case BotStanceAggressive:
-				case BotStanceBurn:
-				case BotStanceBurnAE:
-					castChance = isPrimarySlower?50:15;
-					break;
-				default:
-					castChance = 0;
-					break;
-			}
-			break;
-		case BARD:
-		case BEASTLORD:
-			switch(botStance)
-			{
-				case BotStanceBalanced:
-				case BotStanceReactive:
-					castChance = isPrimarySlower?100:25;
-					break;
-				case BotStanceEfficient:
-					castChance = isPrimarySlower?100:15;
-					break;
-				case BotStanceAggressive:
-				case BotStanceBurn:
-				case BotStanceBurnAE:
-					castChance = isPrimarySlower?50:0;
-					break;
-				default:
-					castChance = 0;
-					break;
-			}
-			break;
-		case MAGICIAN:
-		case DRUID:
-		case PALADIN:
-		case CLERIC:
-		case WIZARD:
-		case NECROMANCER:
-		case SHADOWKNIGHT:
-		case RANGER:
-		case WARRIOR:
-		case BERSERKER:
-		case MONK:
-		case ROGUE:
-			castChance = 0;
-			break;
-		default:
-			castChance = 0;
-			break;
-	}
-	_spellCastingChances[botStance][SpellType_SlowIndex] = castChance;
-
-	//Debuff
-	switch(botClass)
-	{
-		case ENCHANTER:
-		case SHAMAN:
-		case MAGICIAN:
-		case DRUID:
-		case NECROMANCER:
-			switch(botStance)
-			{
-				case BotStanceBalanced:
-				case BotStanceReactive:
-					castChance = 25;
-					break;
-				case BotStanceEfficient:
-				case BotStanceAggressive:
-					castChance = 15;
-					break;
-				case BotStanceBurn:
-				case BotStanceBurnAE:
-					castChance = 0;
-					break;
-				default:
-					castChance = 0;
-					break;
-			}
-			break;
-		case BEASTLORD:
-		case RANGER:
-		case SHADOWKNIGHT:
-			switch(botStance)
-			{
-				case BotStanceBalanced:
-				case BotStanceReactive:
-					castChance = 15;
-					break;
-				case BotStanceEfficient:
-				case BotStanceAggressive:
-					castChance = 10;
-					break;
-				case BotStanceBurn:
-				case BotStanceBurnAE:
-					castChance = 0;
-					break;
-				default:
-					castChance = 0;
-					break;
-			}
-			break;
-		case BARD:
-			switch(botStance)
-			{
-				case BotStanceBalanced:
-				case BotStanceEfficient:
-					castChance = 25;
-					break;
-				case BotStanceReactive:
-				case BotStanceAggressive:
-					castChance = 50;
-					break;
-				case BotStanceBurn:
-				case BotStanceBurnAE:
-					castChance = 0;
-					break;
-				default:
-					castChance = 0;
-					break;
-			}
-			break;
-		case CLERIC:
-		case PALADIN:
-		case WIZARD:
-		case WARRIOR:
-		case BERSERKER:
-		case MONK:
-		case ROGUE:
-			castChance = 0;
-			break;
-		default:
-			castChance = 0;
-			break;
-	}
-	_spellCastingChances[botStance][SpellType_DebuffIndex] = castChance;
-
-	//Cure
-	castChance = 0;
-	_spellCastingChances[botStance][SpellType_CureIndex] = castChance;
-}
-
-uint8 Bot::GetChanceToCastBySpellType(uint16 spellType) {
-	int index = 0;
-	int botStance = (int)GetBotStance();
-	uint8 chance = 0;
-
-	if(GetBotStance() >= MaxStances)
-		return 0;
-
+uint8 Bot::GetChanceToCastBySpellType(uint32 spellType)
+{
+	uint8 spell_type_index = MaxSpellTypes;
 	switch (spellType) {
-		case SpellType_Nuke: {
-			index = SpellType_NukeIndex;
-			break;
-		}
-		case SpellType_Heal: {
-			index = SpellType_HealIndex;
-			break;
-		}
-		case SpellType_Root: {
-			index = SpellType_RootIndex;
-			break;
-		}
-		case SpellType_Buff: {
-			index = SpellType_BuffIndex;
-			break;
-		}
-		case SpellType_Escape: {
-			index = SpellType_EscapeIndex;
-			break;
-		}
-		case SpellType_Pet: {
-			index = SpellType_PetIndex;
-			break;
-		}
-		case SpellType_Lifetap: {
-			index = SpellType_LifetapIndex;
-			break;
-		}
-		case SpellType_Snare: {
-			index = SpellType_SnareIndex;
-			break;
-		}
-		case SpellType_DOT: {
-			index = SpellType_DOTIndex;
-			break;
-		}
-		case SpellType_Dispel: {
-			index = SpellType_DispelIndex;
-			break;
-		}
-		case SpellType_InCombatBuff: {
-			index = SpellType_InCombatBuffIndex;
-			break;
-		}
-		case SpellType_Mez: {
-			index = SpellType_MezIndex;
-			break;
-		}
-		case SpellType_Charm: {
-			index = SpellType_CharmIndex;
-			break;
-		}
-		case SpellType_Slow: {
-			index = SpellType_SlowIndex;
-			break;
-		}
-		case SpellType_Debuff: {
-			index = SpellType_DebuffIndex;
-			break;
-		}
-		case SpellType_Cure: {
-			index = SpellType_CureIndex;
-			break;
-		}
+	case SpellType_Nuke:
+		spell_type_index = SpellType_NukeIndex;
+		break;
+	case SpellType_Heal:
+		spell_type_index = SpellType_HealIndex;
+		break;
+	case SpellType_Root:
+		spell_type_index = SpellType_RootIndex;
+		break;
+	case SpellType_Buff:
+		spell_type_index = SpellType_BuffIndex;
+		break;
+	case SpellType_Escape:
+		spell_type_index = SpellType_EscapeIndex;
+		break;
+	case SpellType_Pet:
+		spell_type_index = SpellType_PetIndex;
+		break;
+	case SpellType_Lifetap:
+		spell_type_index = SpellType_LifetapIndex;
+		break;
+	case SpellType_Snare:
+		spell_type_index = SpellType_SnareIndex;
+		break;
+	case SpellType_DOT:
+		spell_type_index = SpellType_DOTIndex;
+		break;
+	case SpellType_Dispel:
+		spell_type_index = SpellType_DispelIndex;
+		break;
+	case SpellType_InCombatBuff:
+		spell_type_index = SpellType_InCombatBuffIndex;
+		break;
+	case SpellType_Mez:
+		spell_type_index = SpellType_MezIndex;
+		break;
+	case SpellType_Charm:
+		spell_type_index = SpellType_CharmIndex;
+		break;
+	case SpellType_Slow:
+		spell_type_index = SpellType_SlowIndex;
+		break;
+	case SpellType_Debuff:
+		spell_type_index = SpellType_DebuffIndex;
+		break;
+	case SpellType_Cure:
+		spell_type_index = SpellType_CureIndex;
+		break;
+	case SpellType_Resurrect:
+		spell_type_index = SpellType_ResurrectIndex;
+		break;
+	case SpellType_HateRedux:
+		spell_type_index = SpellType_HateReduxIndex;
+		break;
+	case SpellType_InCombatBuffSong:
+		spell_type_index = SpellType_InCombatBuffSongIndex;
+		break;
+	case SpellType_OutOfCombatBuffSong:
+		spell_type_index = SpellType_OutOfCombatBuffSongIndex;
+		break;
+	case SpellType_PreCombatBuff:
+		spell_type_index = SpellType_PreCombatBuffIndex;
+		break;
+	case SpellType_PreCombatBuffSong:
+		spell_type_index = SpellType_PreCombatBuffSongIndex;
+		break;
+	default:
+		spell_type_index = MaxSpellTypes;
+		break;
 	}
-
-	if(index >= MaxSpellTypes)
+	if (spell_type_index >= MaxSpellTypes)
 		return 0;
 
-	chance = _spellCastingChances[botStance][index];
+	uint8 class_index = GetClass();
+	if (class_index > BERSERKER || class_index < WARRIOR)
+		return 0;
+	--class_index;
 
-	return chance;
+	uint8 stance_index = (uint8)GetBotStance();
+	if (stance_index >= MaxStances)
+		return 0;
+
+	uint8 type_index = nHSND;
+	if (HasGroup()) {
+		if (IsGroupHealer()/* || IsRaidHealer()*/)
+			type_index |= pH;
+		if (IsGroupSlower()/* || IsRaidSlower()*/)
+			type_index |= pS;
+		if (IsGroupNuker()/* || IsRaidNuker()*/)
+			type_index |= pN;
+		if (IsGroupDoter()/* || IsRaidDoter()*/)
+			type_index |= pD;
+	}
+
+	return botdb.GetSpellCastingChance(spell_type_index, class_index, stance_index, type_index);
 }
 
 #endif

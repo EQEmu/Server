@@ -17,10 +17,9 @@
 */
 
 #include "worlddb.h"
-//#include "../common/item.h"
 #include "../common/string_util.h"
 #include "../common/eq_packet_structs.h"
-#include "../common/item.h"
+#include "../common/inventory_profile.h"
 #include "../common/rulesys.h"
 #include <iostream>
 #include <cstdlib>
@@ -97,7 +96,7 @@ void WorldDatabase::GetCharSelectInfo(uint32 accountID, EQApplicationPacket **ou
 	for (auto row = results.begin(); row != results.end(); ++row) {
 		CharacterSelectEntry_Struct *cse = (CharacterSelectEntry_Struct *)buff_ptr;
 		PlayerProfile_Struct pp;
-		Inventory inv;
+		EQEmu::InventoryProfile inv;
 		uint32 character_id = (uint32)atoi(row[0]);
 		uint8 has_home = 0;
 		uint8 has_bind = 0;
@@ -117,12 +116,12 @@ void WorldDatabase::GetCharSelectInfo(uint32 accountID, EQApplicationPacket **ou
 		cse->Gender = (uint8)atoi(row[2]);
 		cse->Face = (uint8)atoi(row[15]);
 
-		for (uint32 matslot = 0; matslot < EQEmu::textures::TextureCount; matslot++) {	// Processed below
+		for (uint32 matslot = 0; matslot < EQEmu::textures::materialCount; matslot++) {	// Processed below
 			cse->Equip[matslot].Material = 0;
 			cse->Equip[matslot].Unknown1 = 0;
-			cse->Equip[matslot].EliteMaterial = 0;
-			cse->Equip[matslot].HeroForgeModel = 0;
-			cse->Equip[matslot].Material2 = 0;
+			cse->Equip[matslot].EliteModel = 0;
+			cse->Equip[matslot].HerosForgeModel = 0;
+			cse->Equip[matslot].Unknown2 = 0;
 			cse->Equip[matslot].Color = 0;
 		}						
 
@@ -245,12 +244,12 @@ void WorldDatabase::GetCharSelectInfo(uint32 accountID, EQApplicationPacket **ou
 		/* Load Inventory */
 		// If we ensure that the material data is updated appropriately, we can do away with inventory loads
 		if (GetInventory(accountID, cse->Name, &inv)) {
-			const EQEmu::ItemBase* item = nullptr;
-			const ItemInst* inst = nullptr;
+			const EQEmu::ItemData* item = nullptr;
+			const EQEmu::ItemInstance* inst = nullptr;
 			int16 invslot = 0;
 
-			for (uint32 matslot = 0; matslot < EQEmu::textures::TextureCount; matslot++) {
-				invslot = Inventory::CalcSlotFromMaterial(matslot);
+			for (uint32 matslot = EQEmu::textures::textureBegin; matslot < EQEmu::textures::materialCount; matslot++) {
+				invslot = EQEmu::InventoryProfile::CalcSlotFromMaterial(matslot);
 				if (invslot == INVALID_INDEX) { continue; }
 				inst = inv.GetItem(invslot);
 				if (inst == nullptr) { continue; }
@@ -270,7 +269,7 @@ void WorldDatabase::GetCharSelectInfo(uint32 accountID, EQApplicationPacket **ou
 							cse->Equip[matslot].Material = idfile;
 						}
 					}
-					if (matslot == EQEmu::textures::TexturePrimary) {
+					if (matslot == EQEmu::textures::weaponPrimary) {
 						cse->PrimaryIDFile = idfile;
 					}
 					else {
@@ -288,8 +287,8 @@ void WorldDatabase::GetCharSelectInfo(uint32 accountID, EQApplicationPacket **ou
 
 					// Armor Materials/Models
 					cse->Equip[matslot].Material = item->Material;
-					cse->Equip[matslot].EliteMaterial = item->EliteMaterial;
-					cse->Equip[matslot].HeroForgeModel = inst->GetOrnamentHeroModel(matslot);
+					cse->Equip[matslot].EliteModel = item->EliteMaterial;
+					cse->Equip[matslot].HerosForgeModel = inst->GetOrnamentHeroModel(matslot);
 					cse->Equip[matslot].Color = color;
 				}
 			}
@@ -354,7 +353,7 @@ bool WorldDatabase::GetStartZone(PlayerProfile_Struct* in_pp, CharCreate_Struct*
 	in_pp->x = in_pp->y = in_pp->z = in_pp->heading = in_pp->zone_id = 0;
 	in_pp->binds[0].x = in_pp->binds[0].y = in_pp->binds[0].z = in_pp->binds[0].zoneId = in_pp->binds[0].instance_id = 0;
 	// see if we have an entry for start_zone. We can support both titanium & SOF+ by having two entries per class/race/deity combo with different zone_ids
-	std::string query = StringFormat("SELECT x, y, z, heading, start_zone, bind_id FROM start_zones WHERE zone_id = %i "
+	std::string query = StringFormat("SELECT x, y, z, heading, start_zone, bind_id, bind_x, bind_y, bind_z FROM start_zones WHERE zone_id = %i "
 		"AND player_class = %i AND player_deity = %i AND player_race = %i",
 		in_cc->start_zone, in_cc->class_, in_cc->deity, in_cc->race);
     auto results = QueryDatabase(query);
@@ -377,6 +376,9 @@ bool WorldDatabase::GetStartZone(PlayerProfile_Struct* in_pp, CharCreate_Struct*
 		in_pp->heading = atof(row[3]);
 		in_pp->zone_id = atoi(row[4]);
 		in_pp->binds[0].zoneId = atoi(row[5]);
+		in_pp->binds[0].x = atof(row[6]);
+		in_pp->binds[0].y = atof(row[7]);
+		in_pp->binds[0].z = atof(row[8]);
 	}
 
 	if(in_pp->x == 0 && in_pp->y == 0 && in_pp->z == 0)

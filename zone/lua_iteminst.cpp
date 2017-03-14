@@ -21,7 +21,7 @@ Lua_ItemInst::Lua_ItemInst(int item_id, int charges) {
 Lua_ItemInst& Lua_ItemInst::operator=(const Lua_ItemInst& o) {
 	if(o.cloned_) {
 		cloned_ = true;
-		d_ = new ItemInst(*o.d_);
+		d_ = new EQEmu::ItemInstance(*o.d_);
 	} else {
 		cloned_ = false;
 		d_ = o.d_;
@@ -32,7 +32,7 @@ Lua_ItemInst& Lua_ItemInst::operator=(const Lua_ItemInst& o) {
 Lua_ItemInst::Lua_ItemInst(const Lua_ItemInst& o) {
 	if(o.cloned_) {
 		cloned_ = true;
-		d_ = new ItemInst(*o.d_);
+		d_ = new EQEmu::ItemInstance(*o.d_);
 	} else {
 		cloned_ = false;
 		d_ = o.d_;

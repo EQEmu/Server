@@ -17,8 +17,8 @@
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  04111-1307  USA
 */
 
-#ifndef COMMON_ITEM_BASE_H
-#define COMMON_ITEM_BASE_H
+#ifndef COMMON_ITEM_DATA_H
+#define COMMON_ITEM_DATA_H
 
 
 /*
@@ -50,17 +50,6 @@
 namespace EQEmu
 {
 	namespace item {
-		enum ItemAttributeBit : uint32 {
-			bit_ItemAttributeNone = 0x00000000,
-			bit_ItemAttributeLore = 0x00000001,
-			bit_ItemAttributeArtifact = 0x00000002,
-			bit_ItemAttributeSummoned = 0x00000004,
-			bit_ItemAttributeMagic = 0x00000008,
-			bit_ItemAttributeAugment = 0x00000010,
-			bit_ItemAttributePendingLore = 0x00000020,
-			bit_ItemAttributeUnknown = 0xFFFFFFFF
-		};
-
 		enum ItemClass {
 			ItemClassCommon = 0,
 			ItemClassBag,
@@ -354,8 +343,8 @@ namespace EQEmu
 			//ProcRate
 		};
 
-		extern uint32 ConvertAugTypeToAugTypeBit(uint8 aug_type);
-		extern uint8 ConvertAugTypeBitToAugType(uint32 aug_type_bit);
+		uint32 ConvertAugTypeToAugTypeBit(uint8 aug_type);
+		uint8 ConvertAugTypeBitToAugType(uint32 aug_type_bit);
 
 	} /*item*/
 
@@ -364,10 +353,9 @@ namespace EQEmu
 		const void * inst;
 	};
 
-	struct ItemBase {
+	struct ItemData {
 		// Non packet based fields
 		uint8	MinStatus;
-		uint8	ItemDataType; // memset to item::ItemDataBase ('0') during mmf load
 
 		// Packet based fields
 		uint8	ItemClass;		// Item Type: 0=common, 1=container, 2=book
@@ -476,9 +464,9 @@ namespace EQEmu
 		int32	FactionAmt4;	// Faction Amt 4
 		char	CharmFile[32];	// ?
 		uint32	AugType;
-		uint8	AugSlotType[EQEmu::legacy::ITEM_COMMON_SIZE];	// RoF: Augment Slot 1-6 Type
-		uint8	AugSlotVisible[EQEmu::legacy::ITEM_COMMON_SIZE];	// RoF: Augment Slot 1-6 Visible
-		uint8	AugSlotUnk2[EQEmu::legacy::ITEM_COMMON_SIZE];	// RoF: Augment Slot 1-6 Unknown Most likely Powersource related
+		uint8	AugSlotType[inventory::SocketCount];	// RoF: Augment Slot 1-6 Type
+		uint8	AugSlotVisible[inventory::SocketCount];	// RoF: Augment Slot 1-6 Visible
+		uint8	AugSlotUnk2[inventory::SocketCount];	// RoF: Augment Slot 1-6 Unknown Most likely Powersource related
 		uint32	LDoNTheme;
 		uint32	LDoNPrice;
 		uint32	LDoNSold;
@@ -543,23 +531,18 @@ namespace EQEmu
 		char	ScrollName[65];
 		//BardName
 
-		bool IsEquipable(uint16 Race, uint16 Class);
-		bool IsClassCommon();
-		bool IsClassBag();
-		bool IsClassBook();
-		bool IsType1HWeapon();
-		bool IsType2HWeapon();
-		bool IsTypeShield();
+		bool IsEquipable(uint16 Race, uint16 Class) const;
+		bool IsClassCommon() const;
+		bool IsClassBag() const;
+		bool IsClassBook() const;
+		bool IsType1HWeapon() const;
+		bool IsType2HWeapon() const;
+		bool IsTypeShield() const;
 
-		bool IsEquipable(uint16 Race, uint16 Class) const { return const_cast<ItemBase*>(this)->IsEquipable(Race, Class); }
-		bool IsClassCommon() const { return const_cast<ItemBase*>(this)->IsClassCommon(); }
-		bool IsClassBag() const { return const_cast<ItemBase*>(this)->IsClassBag(); }
-		bool IsClassBook() const { return const_cast<ItemBase*>(this)->IsClassBook(); }
-		bool IsType1HWeapon() const { return const_cast<ItemBase*>(this)->IsType1HWeapon(); }
-		bool IsType2HWeapon() const { return const_cast<ItemBase*>(this)->IsType2HWeapon(); }
-		bool IsTypeShield() const { return const_cast<ItemBase*>(this)->IsTypeShield(); }
+		static bool CheckLoreConflict(const ItemData* l_item, const ItemData* r_item);
+		bool CheckLoreConflict(const ItemData* item) const { return CheckLoreConflict(this, item); }
 	};
 
 } /*EQEmu*/
 
-#endif /*COMMON_ITEM_BASE_H*/
+#endif /*COMMON_ITEM_DATA_H*/

@@ -55,6 +55,7 @@ RULE_REAL(Character, AAExpMultiplier, 0.5)
 RULE_REAL(Character, GroupExpMultiplier, 0.5)
 RULE_REAL(Character, RaidExpMultiplier, 0.2)
 RULE_BOOL(Character, UseXPConScaling, true)
+RULE_INT(Character, ShowExpValues, 0) //0 - normal, 1 - Show raw experience values, 2 - Show raw experience values AND percent.
 RULE_INT(Character, LightBlueModifier, 40)
 RULE_INT(Character, BlueModifier, 90)
 RULE_INT(Character, WhiteModifier, 100)
@@ -113,6 +114,7 @@ RULE_BOOL(Character, CheckCursorEmptyWhenLooting, true) // If true, a player can
 RULE_BOOL(Character, MaintainIntoxicationAcrossZones, true) // If true, alcohol effects are maintained across zoning and logging out/in.
 RULE_BOOL(Character, EnableDiscoveredItems, true) // If enabled, it enables EVENT_DISCOVER_ITEM and also saves character names and timestamps for the first time an item is discovered.
 RULE_BOOL(Character, EnableXTargetting, true) // Enable Extended Targetting Window, for users with UF and later clients.
+RULE_BOOL(Character, EnableAggroMeter, true) // Enable Aggro Meter, for users with RoF and later clients.
 RULE_BOOL(Character, KeepLevelOverMax, false) // Don't delevel a character that has somehow gone over the level cap
 RULE_INT(Character, FoodLossPerUpdate, 35) // How much food/water you lose per stamina update
 RULE_INT(Character, BaseInstrumentSoftCap, 36) // Softcap for instrument mods, 36 commonly referred to as "3.6" as well.
@@ -146,7 +148,7 @@ RULE_BOOL(Character, EnableAvoidanceCap, false)
 RULE_INT(Character, AvoidanceCap, 750) // 750 Is a pretty good value, seen people dodge all attacks beyond 1,000 Avoidance
 RULE_BOOL(Character, AllowMQTarget, false) // Disables putting players in the 'hackers' list for targeting beyond the clip plane or attempting to target something untargetable
 RULE_BOOL(Character, UseOldBindWound, false) // Uses the original bind wound behavior
-
+RULE_BOOL(Character, GrantHoTTOnCreate, false) // Grant Health of Target's Target leadership AA on character creation
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Mercs)
@@ -161,6 +163,7 @@ RULE_INT(Mercs, AggroRadius, 100)		// Determines the distance from which a merc 
 RULE_INT(Mercs, AggroRadiusPuller, 25)	// Determines the distance from which a merc will aggro group member's target, if they have the group role of puller (also used to determine the distance at which a healer merc will begin healing a group member, if they have the group role of puller)
 RULE_INT(Mercs, ResurrectRadius, 50)	// Determines the distance from which a healer merc will attempt to resurrect a group member's corpse
 RULE_INT(Mercs, ScaleRate, 100)
+RULE_BOOL(Mercs, AllowMercSuspendInCombat, true)
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Guild)
@@ -223,7 +226,9 @@ RULE_INT(World, PVPSettings, 0) // Sets the PVP settings for the server, 1 = Ral
 RULE_BOOL (World, IsGMPetitionWindowEnabled, false)
 RULE_INT (World, FVNoDropFlag, 0) // Sets the Firiona Vie settings on the client. If set to 2, the flag will be set for GMs only, allowing trading of no-drop items.
 RULE_BOOL (World, IPLimitDisconnectAll, false)
+RULE_BOOL(World, MaxClientsSimplifiedLogic, false) // New logic that only uses ExemptMaxClientsStatus and MaxClientsPerIP. Done on the loginserver. This mimics the P99-style special IP rules.
 RULE_INT (World, TellQueueSize, 20)
+RULE_BOOL(World, StartZoneSameAsBindOnCreation, true) //Should the start zone ALWAYS be the same location as your bind?
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Zone)
@@ -257,6 +262,7 @@ RULE_BOOL(Zone, EnableLoggedOffReplenishments, true)
 RULE_INT(Zone, MinOfflineTimeToReplenishments, 21600) // 21600 seconds is 6 Hours
 RULE_BOOL(Zone, UseZoneController, true) // Enables the ability to use persistent quest based zone controllers (zone_controller.pl/lua)
 RULE_BOOL(Zone, EnableZoneControllerGlobals, false) // Enables the ability to use quest globals with the zone controller NPC
+RULE_INT(Zone, GlobalLootMultiplier, 1) // Sets Global Loot drop multiplier for database based drops, useful for double, triple loot etc.
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Map)
@@ -332,11 +338,11 @@ RULE_INT(Spells, SacrificeMinLevel, 46)	//first level Sacrifice will work on
 RULE_INT(Spells, SacrificeMaxLevel, 69)	//last level Sacrifice will work on
 RULE_INT(Spells, SacrificeItemID, 9963)	//Item ID of the item Sacrifice will return (defaults to an EE)
 RULE_BOOL(Spells, EnableSpellGlobals, false)	// If Enabled, spells check the spell_globals table and compare character data from the quest globals before allowing that spell to scribe with scribespells
-RULE_INT(Spells, MaxBuffSlotsNPC, 25)
-RULE_INT(Spells, MaxSongSlotsNPC, 10)
-RULE_INT(Spells, MaxDiscSlotsNPC, 1)
-RULE_INT(Spells, MaxTotalSlotsNPC, 36)
-RULE_INT(Spells, MaxTotalSlotsPET, 30)	// do not set this higher than 25 until the player profile is removed from the blob
+RULE_INT(Spells, MaxBuffSlotsNPC, 60)	// default to Tit's limit
+RULE_INT(Spells, MaxSongSlotsNPC, 0)	// NPCs don't have songs ...
+RULE_INT(Spells, MaxDiscSlotsNPC, 0)	// NPCs don't have discs ...
+RULE_INT(Spells, MaxTotalSlotsNPC, 60)	// default to Tit's limit
+RULE_INT(Spells, MaxTotalSlotsPET, 30)	// default to Tit's limit
 RULE_BOOL (Spells, EnableBlockedBuffs, true)
 RULE_INT(Spells, ReflectType, 1) //0 = disabled, 1 = single target player spells only, 2 = all player spells, 3 = all single target spells, 4 = all spells
 RULE_INT(Spells, VirusSpreadDistance, 30) // The distance a viral spell will jump to its next victim
@@ -391,15 +397,13 @@ RULE_BOOL(Spells, NPCInnateProcOverride, true) //  NPC innate procs override the
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Combat)
-RULE_INT(Combat, MeleeBaseCritChance, 0) //The base crit chance for non warriors, NOTE: This will apply to NPCs as well
-RULE_INT(Combat, WarBerBaseCritChance, 3) //The base crit chance for warriors and berserkers, only applies to clients
-RULE_INT(Combat, BerserkBaseCritChance, 6) //The bonus base crit chance you get when you're berserk
+RULE_INT(Combat, PetBaseCritChance, 0) // Pet Base crit chance
 RULE_INT(Combat, NPCBashKickLevel, 6) //The level that npcs can KICK/BASH
 RULE_INT(Combat, NPCBashKickStunChance, 15) //Percent chance that a bash/kick will stun
-RULE_INT(Combat, RogueCritThrowingChance, 25) //Rogue throwing crit bonus
-RULE_INT(Combat, RogueDeadlyStrikeChance, 80) //Rogue chance throwing from behind crit becomes a deadly strike
-RULE_INT(Combat, RogueDeadlyStrikeMod, 2) //Deadly strike modifier to crit damage
-RULE_INT(Combat, ClientBaseCritChance, 0) //The base crit chance for all clients, this will stack with warrior's/zerker's crit chance.
+RULE_INT(Combat, MeleeCritDifficulty, 8900) // lower is easier
+RULE_INT(Combat, ArcheryCritDifficulty, 3400) // lower is easier
+RULE_INT(Combat, ThrowingCritDifficulty, 1100) // lower is easier
+RULE_BOOL(Combat, NPCCanCrit, false) // true allows non PC pet NPCs to crit
 RULE_BOOL(Combat, UseIntervalAC, true)
 RULE_INT(Combat, PetAttackMagicLevel, 30)
 RULE_BOOL(Combat, EnableFearPathing, true)
@@ -490,6 +494,8 @@ RULE_BOOL(Combat, UseLiveCombatRounds, true) // turn this false if you don't wan
 RULE_INT(Combat, NPCAssistCap, 5) // Maxiumium number of NPCs that will assist another NPC at once
 RULE_INT(Combat, NPCAssistCapTimer, 6000) // Time in milliseconds a NPC will take to clear assist aggro cap space
 RULE_BOOL(Combat, UseRevampHandToHand, false) // use h2h revamped dmg/delays I believe this was implemented during SoF
+RULE_BOOL(Combat, ClassicMasterWu, false) // classic master wu uses a random special, modern doesn't
+RULE_INT(Combat, LevelToStopDamageCaps, 0) // 1 will effectively disable them, 20 should give basically same results as old incorrect system
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(NPC)
@@ -540,6 +546,20 @@ RULE_BOOL(TaskSystem, KeepOneRecordPerCompletedTask, true)
 RULE_BOOL(TaskSystem, EnableTaskProximity, true)
 RULE_CATEGORY_END()
 
+RULE_CATEGORY(Range)
+RULE_INT(Range, Say, 135)
+RULE_INT(Range, Emote, 135)
+RULE_INT(Range, BeginCast, 200)
+RULE_INT(Range, Anims, 135)
+RULE_INT(Range, SpellParticles, 135)
+RULE_INT(Range, DamageMessages, 50)
+RULE_INT(Range, SpellMessages, 75)
+RULE_INT(Range, SongMessages, 75)
+RULE_INT(Range, MobPositionUpdates, 600)
+RULE_INT(Range, CriticalDamage, 80)
+RULE_CATEGORY_END()
+
+
 #ifdef BOTS
 RULE_CATEGORY(Bots)
 RULE_INT(Bots, AAExpansion, 8) // Bots get AAs through this expansion
@@ -554,12 +574,15 @@ RULE_REAL(Bots, ManaRegen, 2.0) // Adjust mana regen for bots, 1 is fast and hig
 RULE_BOOL(Bots, PreferNoManaCommandSpells, true) // Give sorting priority to newer no-mana spells (i.e., 'Bind Affinity')
 RULE_BOOL(Bots, QuestableSpawnLimit, false) // Optional quest method to manage bot spawn limits using the quest_globals name bot_spawn_limit, see: /bazaar/Aediles_Thrall.pl
 RULE_BOOL(Bots, QuestableSpells, false) // Anita Thrall's (Anita_Thrall.pl) Bot Spell Scriber quests.
-RULE_INT(Bots, SpawnLimit, 71) // Number of bots a character can have spawned at one time, You + 71 bots is a 12 group raid
+RULE_INT(Bots, SpawnLimit, 71) // Number of bots a character can have spawned at one time, You + 71 bots is a 12 group pseudo-raid (bots are not raidable at this time)
+RULE_BOOL(Bots, UpdatePositionWithTimer, false) // Sends a position update with every positive movement timer check
+RULE_BOOL(Bots, UsePathing, true) // Bots will use node pathing when moving
 RULE_BOOL(Bots, BotGroupXP, false) // Determines whether client gets xp for bots outside their group.
 RULE_BOOL(Bots, BotBardUseOutOfCombatSongs, true) // Determines whether bard bots use additional out of combat songs (optional script)
 RULE_BOOL(Bots, BotLevelsWithOwner, false) // Auto-updates spawned bots as owner levels/de-levels (false is original behavior)
 RULE_BOOL(Bots, BotCharacterLevelEnabled, false) // Enables required level to spawn bots
 RULE_INT(Bots, BotCharacterLevel, 0) // 0 as default (if level > this value you can spawn bots if BotCharacterLevelEnabled is true)
+RULE_INT(Bots, CasterStopMeleeLevel, 13) // Level at which caster bots stop melee attacks
 RULE_CATEGORY_END()
 #endif
 

@@ -1708,7 +1708,7 @@ void ClientTaskState::UpdateTasksOnExplore(Client *c, int ExploreID) {
 	return;
 }
 
-bool ClientTaskState::UpdateTasksOnDeliver(Client *c, std::list<ItemInst*>& Items, int Cash, int NPCTypeID) {
+bool ClientTaskState::UpdateTasksOnDeliver(Client *c, std::list<EQEmu::ItemInstance*>& Items, int Cash, int NPCTypeID) {
 
 	bool Ret = false;
 
@@ -1900,7 +1900,7 @@ void ClientTaskState::RewardTask(Client *c, TaskInformation *Task) {
 
 	if(!Task || !c) return;
 
-	const EQEmu::ItemBase* Item;
+	const EQEmu::ItemData* Item;
 	std::vector<int> RewardList;
 
 	switch(Task->RewardMethod) {
@@ -2791,7 +2791,7 @@ void TaskManager::SendActiveTaskDescription(Client *c, int TaskID, int SequenceN
 		}
 
 		if(ItemID) {
-			const EQEmu::ItemBase* reward_item = database.GetItem(ItemID);
+			const EQEmu::ItemData* reward_item = database.GetItem(ItemID);
 
 			EQEmu::SayLinkEngine linker;
 			linker.SetLinkType(EQEmu::saylink::SayLinkItemData);
