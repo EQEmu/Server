@@ -191,7 +191,7 @@ public:
 	void UpdateTasksForItem(Client *c, ActivityType Type, int ItemID, int Count=1);
 	void UpdateTasksOnExplore(Client *c, int ExploreID);
 	bool UpdateTasksOnSpeakWith(Client *c, int NPCTypeID);
-	bool UpdateTasksOnDeliver(Client *c, std::list<EQEmu::ItemInstance*>& Items, int Cash, int NPCTypeID);
+	bool UpdateTasksOnDeliver(Client *c, std::list<EQEmu::ItemInstance*>& Items, int& Cash, int NPCTypeID);
 	void UpdateTasksOnTouch(Client *c, int ZoneID);
 	void ProcessTaskProximities(Client *c, float X, float Y, float Z);
 	bool TaskOutOfTime(int Index);

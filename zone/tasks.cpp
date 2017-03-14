@@ -1708,7 +1708,7 @@ void ClientTaskState::UpdateTasksOnExplore(Client *c, int ExploreID) {
 	return;
 }
 
-bool ClientTaskState::UpdateTasksOnDeliver(Client *c, std::list<EQEmu::ItemInstance*>& Items, int Cash, int NPCTypeID) {
+bool ClientTaskState::UpdateTasksOnDeliver(Client *c, std::list<EQEmu::ItemInstance*>& Items, int& Cash, int NPCTypeID) {
 
 	bool Ret = false;
 
@@ -1733,7 +1733,7 @@ bool ClientTaskState::UpdateTasksOnDeliver(Client *c, std::list<EQEmu::ItemInsta
 				(Task->Activity[j].Type != ActivityGiveCash)) continue;
 			// Is there a zone restriction on the activity ?
 			if((Task->Activity[j].ZoneID >0) && (Task->Activity[j].ZoneID != (int)zone->GetZoneID())) {
-				Log.Out(Logs::General, Logs::Tasks, "[UPDATE] Char: %s Deliver activity failed zone check (current zone %i, need zone %i",
+				Log.Out(Logs::General, Logs::Tasks, "[UPDATE] Char: %s Deliver activity failed zone check (current zone %i, need zone %i)",
 					c->GetName(), zone->GetZoneID(), Task->Activity[j].ZoneID);
 				continue;
 			}
@@ -1743,11 +1743,17 @@ bool ClientTaskState::UpdateTasksOnDeliver(Client *c, std::list<EQEmu::ItemInsta
 			//
 			if((Task->Activity[j].Type == ActivityGiveCash) && Cash) {
 				Log.Out(Logs::General, Logs::Tasks, "[UPDATE] Increment on GiveCash");
-				IncrementDoneCount(c, Task, i, j, Cash);
+				int remainingGoal = (Task->Activity[j].GoalCount - ActiveTasks[i].Activity[j].DoneCount);
+				int consumed = std::min(Cash, remainingGoal);
+				IncrementDoneCount(c, Task, i, j, consumed);
+				Cash -= consumed;
+				Log.Out(Logs::General, Logs::Tasks, "[UPDATE] Consumed %i cash", consumed);
+				Log.Out(Logs::General, Logs::Tasks, "[UPDATE] Returning %i cash", Cash);
 				Ret = true;
 			}
 			else {
-				for(auto& k : Items) {
+				for (std::list<EQEmu::ItemInstance*>::iterator it=Items.begin(); it != Items.end(); ++it) {
+					EQEmu::ItemInstance* k = *it;
 					switch(Task->Activity[j].GoalMethod) {
 
 						case METHODSINGLEID:
@@ -1765,7 +1771,18 @@ bool ClientTaskState::UpdateTasksOnDeliver(Client *c, std::list<EQEmu::ItemInsta
 					}
 					// We found an active task related to this item, so increment the done count
 					Log.Out(Logs::General, Logs::Tasks, "[UPDATE] Increment on GiveItem");
-					IncrementDoneCount(c, Task, i, j, k->GetCharges() <= 0 ? 1 : k->GetCharges());
+					// Check how many items are left for the activity and return any extras
+					int charges = (k->GetCharges() <= 0 ? 1 : k->GetCharges());
+					if(charges + ActiveTasks[i].Activity[j].DoneCount > Task->Activity[j].GoalCount) {
+						int consumed = (Task->Activity[j].GoalCount - ActiveTasks[i].Activity[j].DoneCount);
+						IncrementDoneCount(c, Task, i, j, consumed);
+						charges -= consumed;
+						k->SetCharges(charges);
+						Log.Out(Logs::General, Logs::Tasks, "[UPDATE] Consumed %i charges of item %i", consumed, k->GetID());
+					} else {
+						IncrementDoneCount(c, Task, i, j, charges);
+						it = Items.erase(it);
+					}
 					Ret = true;
 				}
 			}
