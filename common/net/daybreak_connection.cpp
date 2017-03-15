@@ -105,10 +105,14 @@ void EQ::Net::DaybreakConnectionManager::Process()
 		auto status = connection->m_status;
 
 		if (status == StatusDisconnecting) {
-			iter = m_connections.erase(iter);
-			connection->FlushBuffer();
-			connection->ChangeStatus(StatusDisconnected);
-			continue;
+			auto time_since_close = std::chrono::duration_cast<std::chrono::milliseconds>(now - connection->m_close_time);
+			if (time_since_close.count() > m_options.connection_close_time) {
+				connection->FlushBuffer();
+				connection->SendDisconnect();
+				connection->ChangeStatus(StatusDisconnected);
+				iter = m_connections.erase(iter);
+				continue;
+			}
 		}
 
 		if (status == StatusConnecting) {
@@ -310,16 +314,10 @@ EQ::Net::DaybreakConnection::~DaybreakConnection()
 void EQ::Net::DaybreakConnection::Close()
 {
 	if (m_status == StatusConnected) {
-		DaybreakDisconnect disconnect;
-		disconnect.zero = 0;
-		disconnect.opcode = OP_SessionDisconnect;
-		disconnect.connect_code = HostToNetwork(m_connect_code);
-		DynamicPacket out;
-		out.PutSerialize(0, disconnect);
-
 		FlushBuffer();
-		InternalSend(out);
+		SendDisconnect();
 
+		m_close_time = Clock::now();
 		ChangeStatus(StatusDisconnecting);
 	}
 	else {
@@ -489,6 +487,11 @@ void EQ::Net::DaybreakConnection::ProcessDecodedPacket(const Packet &p)
 
 		switch (p.GetInt8(1)) {
 		case OP_Combined: {
+			if (m_status == StatusDisconnecting) {
+				SendDisconnect();
+				return;
+			}
+
 			char *current = (char*)p.Data() + 2;
 			char *end = (char*)p.Data() + p.Length();
 			while (current < end) {
@@ -507,6 +510,11 @@ void EQ::Net::DaybreakConnection::ProcessDecodedPacket(const Packet &p)
 
 		case OP_AppCombined:
 		{
+			if (m_status == StatusDisconnecting) {
+				SendDisconnect();
+				return;
+			}
+
 			uint8_t *current = (uint8_t*)p.Data() + 2;
 			uint8_t *end = (uint8_t*)p.Data() + p.Length();
 
@@ -597,6 +605,11 @@ void EQ::Net::DaybreakConnection::ProcessDecodedPacket(const Packet &p)
 		case OP_Packet3:
 		case OP_Packet4:
 		{
+			if (m_status == StatusDisconnecting) {
+				SendDisconnect();
+				return;
+			}
+
 			auto header = p.GetSerialize<DaybreakReliableHeader>(0);
 			auto sequence = NetworkToHost(header.sequence);
 			auto stream_id = header.opcode - OP_Packet;
@@ -702,15 +715,8 @@ void EQ::Net::DaybreakConnection::ProcessDecodedPacket(const Packet &p)
 		case OP_SessionDisconnect:
 		{
 			if (m_status == StatusConnected || m_status == StatusDisconnecting) {
-				DaybreakDisconnect disconnect;
-				disconnect.zero = 0;
-				disconnect.opcode = OP_SessionDisconnect;
-				disconnect.connect_code = HostToNetwork(m_connect_code);
-				DynamicPacket out;
-				out.PutSerialize(0, disconnect);
-
 				FlushBuffer();
-				InternalSend(out);
+				SendDisconnect();
 			}
 
 			ChangeStatus(StatusDisconnecting);
@@ -1002,7 +1008,7 @@ void EQ::Net::DaybreakConnection::ProcessResend()
 
 void EQ::Net::DaybreakConnection::ProcessResend(int stream)
 {
-	if (m_status == DbProtocolStatus::StatusDisconnected || m_status == DbProtocolStatus::StatusDisconnecting) {
+	if (m_status == DbProtocolStatus::StatusDisconnected) {
 		return;
 	}
 
@@ -1018,12 +1024,11 @@ void EQ::Net::DaybreakConnection::ProcessResend(int stream)
 			}
 		}
 		else {
-			if (entry.second.times_resent >= m_owner->m_options.max_resend_count) {
+			auto time_since_first_sent = std::chrono::duration_cast<std::chrono::milliseconds>(now - entry.second.first_sent);
+			if (time_since_first_sent.count() >= m_owner->m_options.resend_timeout) {
 				Close();
 				return;
 			}
-
-			auto adjusted_resend = std::max((uint32_t)(m_resend_delay / (entry.second.times_resent + 1)), (uint32_t)m_owner->m_options.resend_delay_min);
 
 			if ((size_t)time_since_last_send.count() > m_resend_delay) {
 				InternalBufferedSend(entry.second.packet);
@@ -1097,6 +1102,17 @@ void EQ::Net::DaybreakConnection::SendOutOfOrderAck(int stream_id, uint16_t seq)
 	p.PutSerialize(0, ack);
 
 	InternalBufferedSend(p);
+}
+
+void EQ::Net::DaybreakConnection::SendDisconnect()
+{
+	DaybreakDisconnect disconnect;
+	disconnect.zero = 0;
+	disconnect.opcode = OP_SessionDisconnect;
+	disconnect.connect_code = HostToNetwork(m_connect_code);
+	DynamicPacket out;
+	out.PutSerialize(0, disconnect);
+	InternalSend(out);
 }
 
 void EQ::Net::DaybreakConnection::InternalBufferedSend(Packet &p)

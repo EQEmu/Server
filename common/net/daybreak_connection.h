@@ -138,6 +138,7 @@ namespace EQ
 			Timestamp m_last_session_stats;
 			size_t m_resend_delay;
 			size_t m_rolling_ping;
+			Timestamp m_close_time;
 
 			struct DaybreakSentPacket
 			{
@@ -193,6 +194,7 @@ namespace EQ
 			void SendKeepAlive();
 			void SendAck(int stream, uint16_t seq);
 			void SendOutOfOrderAck(int stream, uint16_t seq);
+			void SendDisconnect();
 			void InternalBufferedSend(Packet &p);
 			void InternalSend(Packet &p);
 			void InternalQueuePacket(Packet &p, int stream_id, bool reliable);
@@ -224,7 +226,8 @@ namespace EQ
 				simulated_in_packet_loss = 0;
 				simulated_out_packet_loss = 0;
 				tic_rate_hertz = 60.0;
-				max_resend_count = 10;
+				resend_timeout = 60000;
+				connection_close_time = 2000;
 			}
 
 			size_t max_packet_size;
@@ -243,7 +246,8 @@ namespace EQ
 			size_t simulated_in_packet_loss;
 			size_t simulated_out_packet_loss;
 			double tic_rate_hertz;
-			size_t max_resend_count;
+			size_t resend_timeout;
+			size_t connection_close_time;
 			DaybreakEncodeType encode_passes[2];
 			int port;
 		};
