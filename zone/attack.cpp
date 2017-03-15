@@ -1435,13 +1435,15 @@ void Client::Damage(Mob* other, int32 damage, uint16 spell_id, EQEmu::skills::Sk
 	// cut all PVP spell damage to 2/3
 	// Blasting ourselfs is considered PvP
 	//Don't do PvP mitigation if the caster is damaging himself
+	//should this be applied to all damage? comments sound like some is for spell DMG
+	//patch notes on PVP reductions only mention archery/throwing ... not normal dmg
 	if(other && other->IsClient() && (other != this) && damage > 0) {
 		int PvPMitigation = 100;
-		if (attack_skill == EQEmu::skills::SkillArchery)
+		if (attack_skill == EQEmu::skills::SkillArchery || attack_skill == EQEmu::skills::SkillThrowing)
 			PvPMitigation = 80;
 		else
 			PvPMitigation = 67;
-		damage = (damage * PvPMitigation) / 100;
+		damage = std::max((damage * PvPMitigation) / 100, 1);
 	}
 
 	if(!ClientFinishedLoading())
@@ -3197,7 +3199,7 @@ void Mob::CommonDamage(Mob* attacker, int &damage, const uint16 spell_id, const 
 
 	if (!ignore_invul && (GetInvul() || DivineAura())) {
 		Log.Out(Logs::Detail, Logs::Combat, "Avoiding %d damage due to invulnerability.", damage);
-		damage = -5;
+		damage = DMG_INVULNERABLE;
 	}
 
 	if( spell_id != SPELL_UNKNOWN || attacker == nullptr )
