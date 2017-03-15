@@ -1462,7 +1462,7 @@ void Merc::AI_Process() {
 		// Let's check if we have a los with our target.
 		// If we don't, our hate_list is wiped.
 		// Else, it was causing the merc to aggro behind wall etc... causing massive trains.
-		if(!CheckLosFN(GetTarget()) || GetTarget()->IsMezzed() || !IsAttackAllowed(GetTarget())) {
+		if(GetTarget()->IsMezzed() || !IsAttackAllowed(GetTarget())) {
 			WipeHateList();
 
 			if(IsMoving()) {
@@ -1473,6 +1473,26 @@ void Merc::AI_Process() {
 					moved = false;
 					SetCurrentSpeed(0);
 				}
+			}
+
+			return;
+		}
+		else if (!CheckLosFN(GetTarget())) {
+			if (RuleB(Mercs, MercsUsePathing) && zone->pathing) {
+				bool WaypointChanged, NodeReached;
+
+				glm::vec3 Goal = UpdatePath(GetTarget()->GetX(), GetTarget()->GetY(), GetTarget()->GetZ(),
+					GetRunspeed(), WaypointChanged, NodeReached);
+
+				if (WaypointChanged)
+					tar_ndx = 20;
+
+				CalculateNewPosition2(Goal.x, Goal.y, Goal.z, GetRunspeed());
+			}
+			else {
+				Mob* follow = entity_list.GetMob(GetFollowID());
+				if (follow)
+					CalculateNewPosition2(follow->GetX(), follow->GetY(), follow->GetZ(), GetRunspeed());
 			}
 
 			return;
@@ -1738,34 +1758,42 @@ void Merc::AI_Process() {
 			}
 		}
 
-		if(AI_movement_timer->Check())
-		{
-			if(GetFollowID())
-			{
+		if(AI_movement_timer->Check()) {
+			if(GetFollowID()) {
 				Mob* follow = entity_list.GetMob(GetFollowID());
 
-				if(follow)
-				{
+				if (follow) {
 					float dist = DistanceSquared(m_Position, follow->GetPosition());
 					int speed = GetRunspeed();
 
-					if(dist < GetFollowDistance() + 1000)
+					if (dist < GetFollowDistance() + 1000)
 						speed = GetWalkspeed();
 
 					SetRunAnimSpeed(0);
 
-					if(dist > GetFollowDistance()) {
-						CalculateNewPosition2(follow->GetX(), follow->GetY(), follow->GetZ(), speed);
-						if(rest_timer.Enabled())
+					if (dist > GetFollowDistance()) {
+						if (RuleB(Mercs, MercsUsePathing) && zone->pathing) {
+							bool WaypointChanged, NodeReached;
+
+							glm::vec3 Goal = UpdatePath(follow->GetX(), follow->GetY(), follow->GetZ(),
+								speed, WaypointChanged, NodeReached);
+
+							if (WaypointChanged)
+								tar_ndx = 20;
+
+							CalculateNewPosition2(Goal.x, Goal.y, Goal.z, speed);
+						}
+						else {
+							CalculateNewPosition2(follow->GetX(), follow->GetY(), follow->GetZ(), speed);
+						}
+
+						if (rest_timer.Enabled())
 							rest_timer.Disable();
-						return;
 					}
-					else
-					{
-						if(moved)
-						{
-						SetCurrentSpeed(0);
-						moved = false;
+					else {
+						if (moved) {
+							moved = false;
+							SetCurrentSpeed(0);
 						}
 					}
 				}

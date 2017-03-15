@@ -163,6 +163,7 @@ RULE_INT(Mercs, AggroRadius, 100)		// Determines the distance from which a merc 
 RULE_INT(Mercs, AggroRadiusPuller, 25)	// Determines the distance from which a merc will aggro group member's target, if they have the group role of puller (also used to determine the distance at which a healer merc will begin healing a group member, if they have the group role of puller)
 RULE_INT(Mercs, ResurrectRadius, 50)	// Determines the distance from which a healer merc will attempt to resurrect a group member's corpse
 RULE_INT(Mercs, ScaleRate, 100)
+RULE_BOOL(Mercs, MercsUsePathing, true) // Mercs will use node pathing when moving
 RULE_BOOL(Mercs, AllowMercSuspendInCombat, true)
 RULE_CATEGORY_END()
 
