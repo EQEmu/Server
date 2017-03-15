@@ -3919,9 +3919,9 @@ bool Bot::Attack(Mob* other, int Hand, bool FromRiposte, bool IsStrikethrough, b
 	DamageHitInfo my_hit;
 	AttackAnimation(my_hit.skill, Hand, weapon);
 	Log.Out(Logs::Detail, Logs::Combat, "Attacking with %s in slot %d using skill %d", weapon?weapon->GetItem()->Name:"Fist", Hand, my_hit.skill);
-	
+
 	// Now figure out damage
-	my_hit.damage_done = 0;
+	my_hit.damage_done = 1;
 	my_hit.min_damage = 0;
 	uint8 mylevel = GetLevel() ? GetLevel() : 1;
 	uint32 hate = 0;
@@ -5046,7 +5046,7 @@ void Bot::DoSpecialAttackDamage(Mob *who, EQEmu::skills::SkillType skill, int32 
 	DamageHitInfo my_hit;
 	my_hit.base_damage = max_damage;
 	my_hit.min_damage = min_damage;
-	my_hit.damage_done = 0;
+	my_hit.damage_done = 1;
 
 	my_hit.skill = skill;
 	my_hit.offense = offense(my_hit.skill);
