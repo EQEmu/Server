@@ -5499,7 +5499,7 @@ void Client::SuspendMercCommand() {
 			Merc* merc = Merc::LoadMerc(this, &zone->merc_templates[GetMercInfo().MercTemplateID], 0, true);
 			if(merc)
 			{
-				SpawnMerc(merc, true);
+				SpawnMerc(merc, false);
 				Log.Out(Logs::General, Logs::Mercenaries, "SuspendMercCommand Successful Unsuspend for %s.", GetName());
 			}
 			else
@@ -5512,6 +5512,15 @@ void Client::SuspendMercCommand() {
 		else
 		{
 			Merc* CurrentMerc = GetMerc();
+
+
+			if (!RuleB(Mercs, AllowMercSuspendInCombat))
+			{
+				if (!CheckCanSpawnMerc(GetMercInfo().MercTemplateID))
+				{
+					return;
+				}
+			}
 
 			if(CurrentMerc && GetMercID())
 			{

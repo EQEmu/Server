@@ -134,10 +134,25 @@ bool LoginServer::Process() {
 				if( (int32)numplayers >= x && x != -1 && x != 255 && status < 80)
 					utwrs->response = -3;
 
+
+				if (pack->size == sizeof(UsertoWorldRequest_Struct))
+				{
+					uint32 decimalIP = inet_addr(utwr->IPAddr);
+
+					if (RuleB(World, MaxClientsSimplifiedLogic)) {
+						if (client_list.GetCLEIPCount(decimalIP) >= (RuleI(World, MaxClientsPerIP))) {
+							if ((status < (RuleI(World, ExemptMaxClientsStatus))) || (RuleI(World, ExemptMaxClientsStatus) < 0)) {
+								utwrs->response = -4;
+							}
+						}
+					}
+				}
+
 				if(status == -1)
 					utwrs->response = -1;
 				if(status == -2)
 					utwrs->response = -2;
+
 
 				utwrs->worldid = utwr->worldid;
 				SendPacket(outpack);

@@ -940,7 +940,7 @@ bool IsRegularSingleTargetHealSpell(uint16 spell_id)
 {
 	if(spells[spell_id].effectid[0] == 0 && spells[spell_id].base[0] > 0 &&
 			spells[spell_id].targettype == ST_Target && spells[spell_id].buffduration == 0 &&
-			!IsFastHealSpell(spell_id) && !IsCompleteHealSpell(spell_id) &&
+			!IsCompleteHealSpell(spell_id) &&
 			!IsHealOverTimeSpell(spell_id) && !IsGroupSpell(spell_id))
 		return true;
 
