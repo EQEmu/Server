@@ -6582,8 +6582,7 @@ void Client::Handle_OP_GroupDisband(const EQApplicationPacket *app)
 			if (group->IsLeader(this))
 			{
 				// the group leader can kick other members out of the group...
-				if (memberToDisband->IsClient())
-				{
+				if (memberToDisband->IsClient()) {
 					group->DelMember(memberToDisband, false);
 					Client* memberClient = memberToDisband->CastToClient();
 					Merc* memberMerc = memberToDisband->CastToClient()->GetMerc();
@@ -6592,9 +6591,19 @@ void Client::Handle_OP_GroupDisband(const EQApplicationPacket *app)
 						memberMerc->MercJoinClientGroup();
 					}
 				}
-				else if (memberToDisband->IsMerc())
-				{
-					memberToDisband->CastToMerc()->Suspend();
+				else if (memberToDisband->IsMerc()) {
+					//Can only remove mercs that aren't in combat if the rule is set.
+					if (!RuleB(Mercs, AllowMercSuspendInCombat)) {
+						Mob* mercOwner = memberToDisband->CastToMerc()->GetOwner();
+						if (mercOwner && mercOwner->IsClient()) {
+							if (mercOwner->CastToClient()->CheckCanSpawnMerc(mercOwner->CastToClient()->GetMercInfo().MercTemplateID)) {
+								memberToDisband->CastToMerc()->Suspend();
+							}
+						}
+					}
+					else {
+						memberToDisband->CastToMerc()->Suspend();
+					}
 				}
 			}
 			else
