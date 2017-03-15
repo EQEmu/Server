@@ -737,7 +737,7 @@ private:
 	bool _hasBeenSummoned;
 	glm::vec3 m_PreSummonLocation;
 
-	Timer evade_timer;
+	Timer evade_timer; // can be moved to pTimers at some point
 
 	BotCastingRoles m_CastingRoles;
 

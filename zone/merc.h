@@ -290,6 +290,8 @@ protected:
 	std::vector<MercSpell> merc_spells;
 	std::map<uint32,MercTimer> timers;
 
+	Timer evade_timer; // can be moved to pTimers at some point
+
 	uint16 skills[EQEmu::skills::HIGHEST_SKILL + 1];
 	uint32 equipment[EQEmu::legacy::EQUIPMENT_SIZE]; //this is an array of item IDs
 	uint16 d_melee_texture1; //this is an item Material value
