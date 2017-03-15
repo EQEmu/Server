@@ -91,15 +91,6 @@ int Mob::GetBaseSkillDamage(EQEmu::skills::SkillType skill, Mob *target)
 				inst = CastToClient()->GetInv().GetItem(EQEmu::inventory::slotSecondary);
 			else if (HasTwoHanderEquipped())
 				inst = CastToClient()->GetInv().GetItem(EQEmu::inventory::slotPrimary);
-			else
-			{
-				//Slam
-				if (GetRace() == OGRE || GetRace() == TROLL || GetRace() == BARBARIAN)
-				{
-					if(skill_bonus <= 1.0f / 10.0f)
-					skill_bonus = 1.0f / 10.0f;
-				}
-			}
 		}
 		if (inst)
 			ac_bonus = inst->GetItemArmorClass(true) / 25.0f;
@@ -312,11 +303,7 @@ void Client::OPCombatAbility(const CombatAbility_Struct *ca_atk)
 			DoAnim(animTailRake);
 
 			int32 ht = 0;
-			if (GetWeaponDamage(GetTarget(), GetInv().GetItem(EQEmu::inventory::slotSecondary)) <= 0 &&
-			    GetWeaponDamage(GetTarget(), GetInv().GetItem(EQEmu::inventory::slotShoulders)) <= 0)
-				dmg = -5;
-			else
-				ht = dmg = GetBaseSkillDamage(EQEmu::skills::SkillBash, GetTarget());
+			ht = dmg = GetBaseSkillDamage(EQEmu::skills::SkillBash, GetTarget());
 
 			ReuseTime = BashReuseTime - 1 - skill_reduction;
 			ReuseTime = (ReuseTime * HasteMod) / 100;
