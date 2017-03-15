@@ -91,6 +91,15 @@ int Mob::GetBaseSkillDamage(EQEmu::skills::SkillType skill, Mob *target)
 				inst = CastToClient()->GetInv().GetItem(EQEmu::inventory::slotSecondary);
 			else if (HasTwoHanderEquipped())
 				inst = CastToClient()->GetInv().GetItem(EQEmu::inventory::slotPrimary);
+			else
+			{
+				//Slam
+				if (GetRace() == OGRE || GetRace() == TROLL || GetRace() == BARBARIAN)
+				{
+					if(skill_bonus < 1.0f)
+					skill_bonus = 1.0f;
+				}
+			}
 		}
 		if (inst)
 			ac_bonus = inst->GetItemArmorClass(true) / 25.0f;
@@ -299,7 +308,7 @@ void Client::OPCombatAbility(const CombatAbility_Struct *ca_atk)
 	    ca_atk->m_skill == EQEmu::skills::SkillBash) { // SLAM - Bash without a shield equipped
 		if (GetTarget() != this) {
 
-			CheckIncreaseSkill(EQEmu::skills::SkillBash, GetTarget(), 10);
+			//CheckIncreaseSkill(EQEmu::skills::SkillBash, GetTarget(), 10);
 			DoAnim(animTailRake);
 
 			int32 ht = 0;
