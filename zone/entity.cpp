@@ -408,10 +408,10 @@ void EntityList::RaidProcess()
 
 void EntityList::DoorProcess()
 {
-#ifdef IDLE_WHEN_EMPTY
-	if (numclients < 1)
-		return;
-#endif
+	if (RuleB(Zone, IdleWhenEmpty)) {
+		if (numclients < 1)
+			return;
+	}
 	if (door_list.empty()) {
 		net.door_timer.Disable();
 		return;
@@ -477,7 +477,7 @@ void EntityList::MobProcess()
 
 		size_t sz = mob_list.size();
 
-#ifdef IDLE_WHEN_EMPTY
+	if (RuleB(Zone, IdleWhenEmpty)) {
 		if (numclients > 0 || 
 			mob->GetWanderType() == 4 || mob->GetWanderType() == 6) {
 			// Normal processing, or assuring that spawns that should
@@ -490,9 +490,11 @@ void EntityList::MobProcess()
 			// At the very least, process that.
 			mob_dead = mob->CastToNPC()->GetDepop();
 		}
-#else
+	}
+	else
+	{
 		mob_dead = !mob->Process();
-#endif
+	}
 		size_t a_sz = mob_list.size();
 
 		if(a_sz > sz) {
