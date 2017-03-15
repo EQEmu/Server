@@ -96,8 +96,8 @@ int Mob::GetBaseSkillDamage(EQEmu::skills::SkillType skill, Mob *target)
 				//Slam
 				if (GetRace() == OGRE || GetRace() == TROLL || GetRace() == BARBARIAN)
 				{
-					if(skill_bonus < 1.0f)
-					skill_bonus = 1.0f;
+					if(skill_bonus <= 1.0f / 10.0f)
+					skill_bonus = 1.0f / 10.0f;
 				}
 			}
 		}
