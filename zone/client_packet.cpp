@@ -6549,9 +6549,30 @@ void Client::Handle_OP_GroupDisband(const EQApplicationPacket *app)
 
 	if (group->GroupCount() < 3)
 	{
-		group->DisbandGroup();
-		if (GetMerc())
-			GetMerc()->Suspend();
+		if (!RuleB(Mercs, AllowMercSuspendInCombat)) {
+			if (GetMerc())
+			{
+				Mob* mercOwner = GetMerc()->GetOwner();
+				if (mercOwner && mercOwner->IsClient()) {
+					if (mercOwner->CastToClient()->CheckCanSpawnMerc(mercOwner->CastToClient()->GetMercInfo().MercTemplateID)) {
+						group->DisbandGroup();
+						GetMerc()->Suspend();
+					}
+				}
+			}
+			else
+			{
+				group->DisbandGroup();
+				if (GetMerc())
+					GetMerc()->Suspend();
+			}
+		}
+		else
+		{
+			group->DisbandGroup();
+			if (GetMerc())
+				GetMerc()->Suspend();
+		}
 	}
 	else if (group->IsLeader(this) && GetTarget() == nullptr)
 	{
@@ -6562,9 +6583,30 @@ void Client::Handle_OP_GroupDisband(const EQApplicationPacket *app)
 		}
 		else
 		{
-			group->DisbandGroup();
-			if (GetMerc())
-				GetMerc()->Suspend();
+			if (!RuleB(Mercs, AllowMercSuspendInCombat)) {
+				if (GetMerc())
+				{
+					Mob* mercOwner = GetMerc()->GetOwner();
+					if (mercOwner && mercOwner->IsClient()) {
+						if (mercOwner->CastToClient()->CheckCanSpawnMerc(mercOwner->CastToClient()->GetMercInfo().MercTemplateID)) {
+							group->DisbandGroup();
+							GetMerc()->Suspend();
+						}
+					}
+				}
+				else
+				{
+					group->DisbandGroup();
+					if (GetMerc())
+						GetMerc()->Suspend();
+				}
+
+			}
+			else {
+				group->DisbandGroup();
+				if (GetMerc())
+					GetMerc()->Suspend();
+			}
 		}
 	}
 	else if (group->IsLeader(this) && (GetTarget() == this || memberToDisband == this))
