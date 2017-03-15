@@ -250,7 +250,7 @@ public:
 	inline virtual int32 GetStringMod() const { return itembonuses.stringedMod; }
 	inline virtual int32 GetWindMod() const { return itembonuses.windMod; }
 
-	inline virtual int32 GetDelayDeath() const { return aabonuses.DelayDeath + spellbonuses.DelayDeath + itembonuses.DelayDeath + 11; }
+	inline virtual int32 GetDelayDeath() const { return aabonuses.DelayDeath + spellbonuses.DelayDeath + itembonuses.DelayDeath; }
 
 	// "SET" Class Methods
 	void SetMercData (uint32 templateID );
@@ -289,6 +289,8 @@ protected:
 
 	std::vector<MercSpell> merc_spells;
 	std::map<uint32,MercTimer> timers;
+
+	Timer evade_timer; // can be moved to pTimers at some point
 
 	uint16 skills[EQEmu::skills::HIGHEST_SKILL + 1];
 	uint32 equipment[EQEmu::legacy::EQUIPMENT_SIZE]; //this is an array of item IDs

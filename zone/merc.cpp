@@ -69,6 +69,9 @@ Merc::Merc(const NPCType* d, float x, float y, float z, float heading)
 	SetStance(MercStanceBalanced);
 	rest_timer.Disable();
 
+	if (GetClass() == ROGUE)
+		evade_timer.Start();
+
 	int r;
 	for (r = 0; r <= EQEmu::skills::HIGHEST_SKILL; r++) {
 		skills[r] = database.GetSkillCap(GetClass(), (EQEmu::skills::SkillType)r, GetLevel());
@@ -1459,7 +1462,7 @@ void Merc::AI_Process() {
 		// Let's check if we have a los with our target.
 		// If we don't, our hate_list is wiped.
 		// Else, it was causing the merc to aggro behind wall etc... causing massive trains.
-		if(!CheckLosFN(GetTarget()) || GetTarget()->IsMezzed() || !IsAttackAllowed(GetTarget())) {
+		if(GetTarget()->IsMezzed() || !IsAttackAllowed(GetTarget())) {
 			WipeHateList();
 
 			if(IsMoving()) {
@@ -1470,6 +1473,26 @@ void Merc::AI_Process() {
 					moved = false;
 					SetCurrentSpeed(0);
 				}
+			}
+
+			return;
+		}
+		else if (!CheckLosFN(GetTarget())) {
+			if (RuleB(Mercs, MercsUsePathing) && zone->pathing) {
+				bool WaypointChanged, NodeReached;
+
+				glm::vec3 Goal = UpdatePath(GetTarget()->GetX(), GetTarget()->GetY(), GetTarget()->GetZ(),
+					GetRunspeed(), WaypointChanged, NodeReached);
+
+				if (WaypointChanged)
+					tar_ndx = 20;
+
+				CalculateNewPosition2(Goal.x, Goal.y, Goal.z, GetRunspeed());
+			}
+			else {
+				Mob* follow = entity_list.GetMob(GetFollowID());
+				if (follow)
+					CalculateNewPosition2(follow->GetX(), follow->GetY(), follow->GetZ(), GetRunspeed());
 			}
 
 			return;
@@ -1508,32 +1531,60 @@ void Merc::AI_Process() {
 				}
 			}
 
-			if(AI_movement_timer->Check())
-			{
-				if(!IsMoving() && GetClass() == ROGUE && !BehindMob(GetTarget(), GetX(), GetY()))
-				{
-					// Move the rogue to behind the mob
-					float newX = 0;
-					float newY = 0;
-					float newZ = 0;
+			if(AI_movement_timer->Check()) {
+				if (!IsMoving()) {
+					if (GetClass() == ROGUE) {
+						if (HasTargetReflection() && !GetTarget()->IsFeared() && !GetTarget()->IsStunned()) {
+							// Hate redux actions
+							if (evade_timer.Check(false)) {
+								// Attempt to evade
+								int timer_duration = (HideReuseTime - GetSkillReuseTime(EQEmu::skills::SkillHide)) * 1000;
+								if (timer_duration < 0)
+									timer_duration = 0;
+								evade_timer.Start(timer_duration);
 
-					if(PlotPositionAroundTarget(GetTarget(), newX, newY, newZ))
-					{
-						CalculateNewPosition2(newX, newY, newZ, GetRunspeed());
-						return;
+								if (zone->random.Int(0, 260) < (int)GetSkill(EQEmu::skills::SkillHide))
+									RogueEvade(GetTarget());
+
+								return;
+							}
+							else if (GetTarget()->IsRooted()) {
+								// Move rogue back from rooted mob - out of combat range, if necessary
+								float melee_distance = GetMaxMeleeRangeToTarget(GetTarget());
+								float current_distance = DistanceSquared(static_cast<glm::vec3>(m_Position), static_cast<glm::vec3>(GetTarget()->GetPosition()));
+
+								if (current_distance <= melee_distance) {
+									float newX = 0;
+									float newY = 0;
+									float newZ = 0;
+									FaceTarget(GetTarget());
+									if (PlotPositionAroundTarget(this, newX, newY, newZ)) {
+										CalculateNewPosition2(newX, newY, newZ, GetRunspeed());
+										return;
+									}
+								}
+							}
+						}
+						else if (!BehindMob(GetTarget(), GetX(), GetY())) {
+							// Move the rogue to behind the mob
+							float newX = 0;
+							float newY = 0;
+							float newZ = 0;
+							if (PlotPositionAroundTarget(GetTarget(), newX, newY, newZ)) {
+								CalculateNewPosition2(newX, newY, newZ, GetRunspeed());
+								return;
+							}
+						}
 					}
-				}
-				else if(!IsMoving() && GetClass() != ROGUE && (DistanceSquaredNoZ(m_Position, GetTarget()->GetPosition()) < GetTarget()->GetSize()))
-				{
-					// If we are not a rogue trying to backstab, let's try to adjust our melee range so we don't appear to be bunched up
-					float newX = 0;
-					float newY = 0;
-					float newZ = 0;
-
-					if(PlotPositionAroundTarget(GetTarget(), newX, newY, newZ, false) && GetArchetype() != ARCHETYPE_CASTER)
-					{
-						CalculateNewPosition2(newX, newY, newZ, GetRunspeed());
-						return;
+					else if (GetClass() != ROGUE && (DistanceSquaredNoZ(m_Position, GetTarget()->GetPosition()) < GetTarget()->GetSize())) {
+						// If we are not a rogue trying to backstab, let's try to adjust our melee range so we don't appear to be bunched up
+						float newX = 0;
+						float newY = 0;
+						float newZ = 0;
+						if (PlotPositionAroundTarget(GetTarget(), newX, newY, newZ, false) && GetArchetype() != ARCHETYPE_CASTER) {
+							CalculateNewPosition2(newX, newY, newZ, GetRunspeed());
+							return;
+						}
 					}
 				}
 
@@ -1707,34 +1758,42 @@ void Merc::AI_Process() {
 			}
 		}
 
-		if(AI_movement_timer->Check())
-		{
-			if(GetFollowID())
-			{
+		if(AI_movement_timer->Check()) {
+			if(GetFollowID()) {
 				Mob* follow = entity_list.GetMob(GetFollowID());
 
-				if(follow)
-				{
+				if (follow) {
 					float dist = DistanceSquared(m_Position, follow->GetPosition());
 					int speed = GetRunspeed();
 
-					if(dist < GetFollowDistance() + 1000)
+					if (dist < GetFollowDistance() + 1000)
 						speed = GetWalkspeed();
 
 					SetRunAnimSpeed(0);
 
-					if(dist > GetFollowDistance()) {
-						CalculateNewPosition2(follow->GetX(), follow->GetY(), follow->GetZ(), speed);
-						if(rest_timer.Enabled())
+					if (dist > GetFollowDistance()) {
+						if (RuleB(Mercs, MercsUsePathing) && zone->pathing) {
+							bool WaypointChanged, NodeReached;
+
+							glm::vec3 Goal = UpdatePath(follow->GetX(), follow->GetY(), follow->GetZ(),
+								speed, WaypointChanged, NodeReached);
+
+							if (WaypointChanged)
+								tar_ndx = 20;
+
+							CalculateNewPosition2(Goal.x, Goal.y, Goal.z, speed);
+						}
+						else {
+							CalculateNewPosition2(follow->GetX(), follow->GetY(), follow->GetZ(), speed);
+						}
+
+						if (rest_timer.Enabled())
 							rest_timer.Disable();
-						return;
 					}
-					else
-					{
-						if(moved)
-						{
-						SetCurrentSpeed(0);
-						moved = false;
+					else {
+						if (moved) {
+							moved = false;
+							SetCurrentSpeed(0);
 						}
 					}
 				}
@@ -5468,7 +5527,7 @@ void Client::SuspendMercCommand() {
 			Merc* merc = Merc::LoadMerc(this, &zone->merc_templates[GetMercInfo().MercTemplateID], 0, true);
 			if(merc)
 			{
-				SpawnMerc(merc, true);
+				SpawnMerc(merc, false);
 				Log.Out(Logs::General, Logs::Mercenaries, "SuspendMercCommand Successful Unsuspend for %s.", GetName());
 			}
 			else
@@ -5481,6 +5540,15 @@ void Client::SuspendMercCommand() {
 		else
 		{
 			Merc* CurrentMerc = GetMerc();
+
+
+			if (!RuleB(Mercs, AllowMercSuspendInCombat))
+			{
+				if (!CheckCanSpawnMerc(GetMercInfo().MercTemplateID))
+				{
+					return;
+				}
+			}
 
 			if(CurrentMerc && GetMercID())
 			{

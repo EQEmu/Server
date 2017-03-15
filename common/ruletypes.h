@@ -163,6 +163,8 @@ RULE_INT(Mercs, AggroRadius, 100)		// Determines the distance from which a merc 
 RULE_INT(Mercs, AggroRadiusPuller, 25)	// Determines the distance from which a merc will aggro group member's target, if they have the group role of puller (also used to determine the distance at which a healer merc will begin healing a group member, if they have the group role of puller)
 RULE_INT(Mercs, ResurrectRadius, 50)	// Determines the distance from which a healer merc will attempt to resurrect a group member's corpse
 RULE_INT(Mercs, ScaleRate, 100)
+RULE_BOOL(Mercs, MercsUsePathing, true) // Mercs will use node pathing when moving
+RULE_BOOL(Mercs, AllowMercSuspendInCombat, true)
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Guild)
@@ -225,6 +227,7 @@ RULE_INT(World, PVPSettings, 0) // Sets the PVP settings for the server, 1 = Ral
 RULE_BOOL (World, IsGMPetitionWindowEnabled, false)
 RULE_INT (World, FVNoDropFlag, 0) // Sets the Firiona Vie settings on the client. If set to 2, the flag will be set for GMs only, allowing trading of no-drop items.
 RULE_BOOL (World, IPLimitDisconnectAll, false)
+RULE_BOOL(World, MaxClientsSimplifiedLogic, false) // New logic that only uses ExemptMaxClientsStatus and MaxClientsPerIP. Done on the loginserver. This mimics the P99-style special IP rules.
 RULE_INT (World, TellQueueSize, 20)
 RULE_BOOL(World, StartZoneSameAsBindOnCreation, true) //Should the start zone ALWAYS be the same location as your bind?
 RULE_CATEGORY_END()
