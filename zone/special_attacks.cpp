@@ -96,9 +96,10 @@ int Mob::GetBaseSkillDamage(EQEmu::skills::SkillType skill, Mob *target)
 			ac_bonus = inst->GetItemArmorClass(true) / 25.0f;
 		else
 			return 0; // return 0 in cases where we don't have an item
+
 		if (ac_bonus > skill_bonus)
 			ac_bonus = skill_bonus;
-		return static_cast<int>(base + ac_bonus + skill_bonus);
+		return static_cast<int>(ac_bonus + skill_bonus);
 	}
 	case EQEmu::skills::SkillBackstab: {
 		float skill_bonus = static_cast<float>(skill_level) * 0.02f;
