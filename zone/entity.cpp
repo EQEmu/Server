@@ -2439,6 +2439,7 @@ void EntityList::UpdateWho(bool iSendFullUpdate)
 					memcpy(pack->pBuffer, tmp, pack->size);
 					pack->size = sizeof(ServerClientListKeepAlive_Struct) + (tmpNumUpdates * 4);
 					safe_delete_array(tmp);
+					sclka = (ServerClientListKeepAlive_Struct*) pack->pBuffer;
 				}
 				sclka->wid[sclka->numupdates] = it->second->GetWID();
 				sclka->numupdates++;
