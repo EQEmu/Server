@@ -167,6 +167,7 @@ namespace EQEmu
 		bool IsBardInstrumentSkill(SkillType skill);
 		bool IsCastingSkill(SkillType skill);
 		int32 GetBaseDamage(SkillType skill);
+		bool IsMeleeDmg(SkillType skill);
 
 		extern const std::map<SkillType, std::string>& GetSkillTypeMap();
 

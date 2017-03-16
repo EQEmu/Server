@@ -94,6 +94,8 @@ int Mob::GetBaseSkillDamage(EQEmu::skills::SkillType skill, Mob *target)
 		}
 		if (inst)
 			ac_bonus = inst->GetItemArmorClass(true) / 25.0f;
+		else
+			return 0; // return 0 in cases where we don't have an item
 		if (ac_bonus > skill_bonus)
 			ac_bonus = skill_bonus;
 		return static_cast<int>(base + ac_bonus + skill_bonus);
@@ -142,7 +144,7 @@ void Mob::DoSpecialAttackDamage(Mob *who, EQEmu::skills::SkillType skill, int32 
 		return;
 
 	DamageHitInfo my_hit;
-	my_hit.damage_done = 0;
+	my_hit.damage_done = 1; // min 1 dmg
 	my_hit.base_damage = base_damage;
 	my_hit.min_damage = min_damage;
 	my_hit.skill = skill;
@@ -843,7 +845,7 @@ void Mob::DoArcheryAttackDmg(Mob *other, const EQEmu::ItemInstance *RangeWeapon,
 		DamageHitInfo my_hit;
 		my_hit.base_damage = MaxDmg;
 		my_hit.min_damage = 0;
-		my_hit.damage_done = 0;
+		my_hit.damage_done = 1;
 
 		my_hit.skill = EQEmu::skills::SkillArchery;
 		my_hit.offense = offense(my_hit.skill);
@@ -1175,7 +1177,7 @@ void NPC::DoRangedAttackDmg(Mob* other, bool Launch, int16 damage_mod, int16 cha
 	DamageHitInfo my_hit;
 	my_hit.base_damage = MaxDmg;
 	my_hit.min_damage = MinDmg;
-	my_hit.damage_done = 0;
+	my_hit.damage_done = 1;
 
 	my_hit.skill = skill;
 	my_hit.offense = offense(my_hit.skill);
@@ -1356,7 +1358,7 @@ void Mob::DoThrowingAttackDmg(Mob *other, const EQEmu::ItemInstance *RangeWeapon
 		DamageHitInfo my_hit;
 		my_hit.base_damage = WDmg;
 		my_hit.min_damage = 0;
-		my_hit.damage_done = 0;
+		my_hit.damage_done = 1;
 
 		my_hit.skill = EQEmu::skills::SkillThrowing;
 		my_hit.offense = offense(my_hit.skill);
@@ -2113,7 +2115,7 @@ void Mob::DoMeleeSkillAttackDmg(Mob *other, uint16 weapon_damage, EQEmu::skills:
 		DamageHitInfo my_hit;
 		my_hit.base_damage = weapon_damage;
 		my_hit.min_damage = 0;
-		my_hit.damage_done = 0;
+		my_hit.damage_done = 1;
 
 		my_hit.skill = skillinuse;
 		my_hit.offense = offense(my_hit.skill);

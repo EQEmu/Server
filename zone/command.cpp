@@ -10686,7 +10686,7 @@ void command_logs(Client *c, const Seperator *sep){
 			/* We use a general 'is_category_enabled' now, let's update when we update any output settings
 				This is used in hot places of code to check if its enabled in any way before triggering logs
 			*/
-			if (sep->arg[4] > 0){
+			if (atoi(sep->arg[4]) > 0){
 				Log.log_settings[atoi(sep->arg[3])].is_category_enabled = 1;
 			}
 			else{
