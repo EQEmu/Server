@@ -2056,6 +2056,8 @@ uint32 Database::GetGuildIDByCharID(uint32 character_id)
 
 void Database::LoadLogSettings(EQEmuLogSys::LogSettings* log_settings)
 {
+	// log_settings previously initialized to '0' by EQEmuLogSys::LoadLogSettingsDefaults()
+	
 	std::string query = 
 		"SELECT "
 		"log_category_id, "
@@ -2073,6 +2075,9 @@ void Database::LoadLogSettings(EQEmuLogSys::LogSettings* log_settings)
 
 	for (auto row = results.begin(); row != results.end(); ++row) {
 		log_category = atoi(row[0]);
+		if (log_category <= Logs::None || log_category >= Logs::MaxCategoryID)
+			continue;
+
 		log_settings[log_category].log_to_console = atoi(row[2]);
 		log_settings[log_category].log_to_file = atoi(row[3]);
 		log_settings[log_category].log_to_gmsay = atoi(row[4]);
