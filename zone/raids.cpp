@@ -1555,6 +1555,8 @@ void Raid::SendHPPacketsTo(Client *c)
 			{
 				members[x].member->CreateHPPacket(&hpapp);
 				c->QueuePacket(&hpapp, false);
+				safe_delete_array(hpapp.pBuffer);
+				hpapp.size = 0;
 				if (c->ClientVersion() >= EQEmu::versions::ClientVersion::SoD)
 				{
 					outapp.SetOpcode(OP_MobManaUpdate);
