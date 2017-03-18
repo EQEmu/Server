@@ -399,9 +399,9 @@ void Group::SendHPPacketsTo(Mob *member)
 			if(members[i] && members[i] != member)
 			{
 				members[i]->CreateHPPacket(&hpapp);
+				member->CastToClient()->QueuePacket(&hpapp, false);
 				safe_delete_array(hpapp.pBuffer);
 				hpapp.size = 0;
-				member->CastToClient()->QueuePacket(&hpapp, false);
 				if (member->CastToClient()->ClientVersion() >= EQEmu::versions::ClientVersion::SoD)
 				{
 					outapp.SetOpcode(OP_MobManaUpdate);
