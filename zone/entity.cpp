@@ -2421,7 +2421,6 @@ void EntityList::Clear()
 	entity_list.RemoveAllDoors();
 	entity_list.RemoveAllObjects();
 	entity_list.RemoveAllRaids();
-	entity_list.RemoveAllEncounters();
 	entity_list.RemoveAllLocalities();
 }
 
