@@ -625,7 +625,7 @@ bool Client::Save(uint8 iCommitNow) {
 		GetMercInfo().MercTimerRemaining = GetMercTimer()->GetRemainingTime();
 	}
 
-	if (!(GetMerc() && !dead)) {
+	if (dead || (!GetMerc() && !GetMercInfo().IsSuspended)) {
 		memset(&m_mercinfo, 0, sizeof(struct MercInfo));
 	}
 
