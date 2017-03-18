@@ -47,6 +47,7 @@ Group::Group(uint32 gid)
 	AssistTargetID = 0;
 	TankTargetID = 0;
 	PullerTargetID = 0;
+	disbandcheck = false;
 
 	memset(&LeaderAbilities, 0, sizeof(GroupLeadershipAA_Struct));
 	uint32 i;
@@ -79,6 +80,7 @@ Group::Group(Mob* leader)
 	AssistTargetID = 0;
 	TankTargetID = 0;
 	PullerTargetID = 0;
+	disbandcheck = false;
 	memset(&LeaderAbilities, 0, sizeof(GroupLeadershipAA_Struct));
 	mentoree = nullptr;
 	uint32 i;
