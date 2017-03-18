@@ -228,6 +228,10 @@ LuaParser::LuaParser() {
 }
 
 LuaParser::~LuaParser() {
+	// valgrind didn't like when we didn't clean these up :P
+	lua_encounters.clear();
+	lua_encounter_events_registered.clear();
+	lua_encounters_loaded.clear();
 	if(L) {
 		lua_close(L);
 	}

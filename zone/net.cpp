@@ -560,6 +560,7 @@ int main(int argc, char** argv) {
 	}
 
 	entity_list.Clear();
+	entity_list.RemoveAllEncounters(); // gotta do it manually or rewrite lots of shit :P
 
 	parse->ClearInterfaces();
 
