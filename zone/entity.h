@@ -292,6 +292,7 @@ public:
 	void	RemoveAllObjects();
 	void	RemoveAllLocalities();
 	void	RemoveAllRaids();
+	void	RemoveAllEncounters();
 	void	DestroyTempPets(Mob *owner);
 	int16	CountTempPets(Mob *owner);
 	void	AddTempPetsToHateList(Mob *owner, Mob* other, bool bFrenzy = false);
