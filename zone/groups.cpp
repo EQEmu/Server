@@ -398,7 +398,7 @@ void Group::SendHPPacketsTo(Mob *member)
 			{
 				members[i]->CreateHPPacket(&hpapp);
 				safe_delete_array(hpapp.pBuffer);
-				happ.size = 0;
+				hpapp.size = 0;
 				member->CastToClient()->QueuePacket(&hpapp, false);
 				if (member->CastToClient()->ClientVersion() >= EQEmu::versions::ClientVersion::SoD)
 				{
