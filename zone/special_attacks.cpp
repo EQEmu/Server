@@ -302,7 +302,7 @@ void Client::OPCombatAbility(const CombatAbility_Struct *ca_atk)
 		if (GetTarget() != this) {
 
 			CheckIncreaseSkill(EQEmu::skills::SkillBash, GetTarget(), 10);
-			DoAnim(animTailRake);
+			DoAnim(animTailRake, 0, false);
 
 			int32 ht = 0;
 			if (GetWeaponDamage(GetTarget(), GetInv().GetItem(EQEmu::inventory::slotSecondary)) <= 0 &&
@@ -324,7 +324,7 @@ void Client::OPCombatAbility(const CombatAbility_Struct *ca_atk)
 		CheckIncreaseSkill(EQEmu::skills::SkillFrenzy, GetTarget(), 10);
 		int AtkRounds = 1;
 		int32 max_dmg = GetBaseSkillDamage(EQEmu::skills::SkillFrenzy, GetTarget());
-		DoAnim(anim2HSlashing);
+		DoAnim(anim2HSlashing, 0, false);
 
 		max_dmg = mod_frenzy_damage(max_dmg);
 
@@ -359,7 +359,7 @@ void Client::OPCombatAbility(const CombatAbility_Struct *ca_atk)
 			break;
 		if (GetTarget() != this) {
 			CheckIncreaseSkill(EQEmu::skills::SkillKick, GetTarget(), 10);
-			DoAnim(animKick);
+			DoAnim(animKick, 0, false);
 
 			int32 ht = 0;
 			if (GetWeaponDamage(GetTarget(), GetInv().GetItem(EQEmu::inventory::slotFeet)) <= 0)
@@ -452,40 +452,40 @@ int Mob::MonkSpecialAttack(Mob *other, uint8 unchecked_type)
 		skill_type = EQEmu::skills::SkillFlyingKick;
 		max_dmg = GetBaseSkillDamage(skill_type);
 		min_dmg = 0; // revamped FK formula is missing the min mod?
-		DoAnim(animFlyingKick);
+		DoAnim(animFlyingKick, 0, false);
 		reuse = FlyingKickReuseTime;
 		break;
 	case EQEmu::skills::SkillDragonPunch:
 		skill_type = EQEmu::skills::SkillDragonPunch;
 		max_dmg = GetBaseSkillDamage(skill_type);
 		itemslot = EQEmu::inventory::slotHands;
-		DoAnim(animTailRake);
+		DoAnim(animTailRake, 0, false);
 		reuse = TailRakeReuseTime;
 		break;
 	case EQEmu::skills::SkillEagleStrike:
 		skill_type = EQEmu::skills::SkillEagleStrike;
 		max_dmg = GetBaseSkillDamage(skill_type);
 		itemslot = EQEmu::inventory::slotHands;
-		DoAnim(animEagleStrike);
+		DoAnim(animEagleStrike, 0, false);
 		reuse = EagleStrikeReuseTime;
 		break;
 	case EQEmu::skills::SkillTigerClaw:
 		skill_type = EQEmu::skills::SkillTigerClaw;
 		max_dmg = GetBaseSkillDamage(skill_type);
 		itemslot = EQEmu::inventory::slotHands;
-		DoAnim(animTigerClaw);
+		DoAnim(animTigerClaw, 0, false);
 		reuse = TigerClawReuseTime;
 		break;
 	case EQEmu::skills::SkillRoundKick:
 		skill_type = EQEmu::skills::SkillRoundKick;
 		max_dmg = GetBaseSkillDamage(skill_type);
-		DoAnim(animRoundKick);
+		DoAnim(animRoundKick, 0, false);
 		reuse = RoundKickReuseTime;
 		break;
 	case EQEmu::skills::SkillKick:
 		skill_type = EQEmu::skills::SkillKick;
 		max_dmg = GetBaseSkillDamage(skill_type);
-		DoAnim(animKick);
+		DoAnim(animKick, 0, false);
 		reuse = KickReuseTime;
 		break;
 	default:
@@ -604,7 +604,7 @@ void Mob::RogueBackstab(Mob* other, bool min_damage, int ReuseTime)
 	hate = base_damage;
 
 	DoSpecialAttackDamage(other, EQEmu::skills::SkillBackstab, base_damage, 0, hate, ReuseTime);
-	DoAnim(anim1HPiercing);
+	DoAnim(anim1HPiercing, 0, false);
 }
 
 // assassinate [No longer used for regular assassinate 6-29-14]
@@ -617,7 +617,7 @@ void Mob::RogueAssassinate(Mob* other)
 	}else{
 		other->Damage(this, -5, SPELL_UNKNOWN, EQEmu::skills::SkillBackstab);
 	}
-	DoAnim(anim1HPiercing);	//piercing animation
+	DoAnim(anim1HPiercing, 0, false);	//piercing animation
 }
 
 void Client::RangedAttack(Mob* other, bool CanDoubleAttack) {
@@ -1595,7 +1595,7 @@ void NPC::DoClassAttacks(Mob *target) {
 		case WARRIOR: case WARRIORGM:{
 			if(level >= RuleI(Combat, NPCBashKickLevel)){
 				if(zone->random.Roll(75)) { //tested on live, warrior mobs both kick and bash, kick about 75% of the time, casting doesn't seem to make a difference.
-					DoAnim(animKick);
+					DoAnim(animKick, 0, false);
 					int32 dmg = GetBaseSkillDamage(EQEmu::skills::SkillKick);
 
 					if (GetWeaponDamage(target, (const EQEmu::ItemData*)nullptr) <= 0)
@@ -1606,7 +1606,7 @@ void NPC::DoClassAttacks(Mob *target) {
 					did_attack = true;
 				}
 				else {
-					DoAnim(animTailRake);
+					DoAnim(animTailRake, 0, false);
 					int32 dmg = GetBaseSkillDamage(EQEmu::skills::SkillBash);
 
 					if (GetWeaponDamage(target, (const EQEmu::ItemData*)nullptr) <= 0)
@@ -1622,7 +1622,7 @@ void NPC::DoClassAttacks(Mob *target) {
 		case BERSERKER: case BERSERKERGM:{
 			int AtkRounds = 1;
 			int32 max_dmg = GetBaseSkillDamage(EQEmu::skills::SkillFrenzy);
-			DoAnim(anim2HSlashing);
+			DoAnim(anim2HSlashing, 0, false);
 
 			if (GetClass() == BERSERKER) {
 				int chance = GetLevel() * 2 + GetSkill(EQEmu::skills::SkillFrenzy);
@@ -1645,7 +1645,7 @@ void NPC::DoClassAttacks(Mob *target) {
 		case BEASTLORD: case BEASTLORDGM: {
 			//kick
 			if(level >= RuleI(Combat, NPCBashKickLevel)){
-				DoAnim(animKick);
+				DoAnim(animKick, 0, false);
 				int32 dmg = GetBaseSkillDamage(EQEmu::skills::SkillKick);
 
 				if (GetWeaponDamage(target, (const EQEmu::ItemData*)nullptr) <= 0)
@@ -1661,7 +1661,7 @@ void NPC::DoClassAttacks(Mob *target) {
 		case SHADOWKNIGHT: case SHADOWKNIGHTGM:
 		case PALADIN: case PALADINGM:{
 			if(level >= RuleI(Combat, NPCBashKickLevel)){
-				DoAnim(animTailRake);
+				DoAnim(animTailRake, 0, false);
 				int32 dmg = GetBaseSkillDamage(EQEmu::skills::SkillBash);
 
 				if (GetWeaponDamage(target, (const EQEmu::ItemData*)nullptr) <= 0)
@@ -1760,7 +1760,7 @@ void Client::DoClassAttacks(Mob *ca_target, uint16 skill, bool IsRiposte)
 
 	if (skill_to_use == EQEmu::skills::SkillBash) {
 		if (ca_target!=this) {
-			DoAnim(animTailRake);
+			DoAnim(animTailRake, 0, false);
 
 			if (GetWeaponDamage(ca_target, GetInv().GetItem(EQEmu::inventory::slotSecondary)) <= 0 && GetWeaponDamage(ca_target, GetInv().GetItem(EQEmu::inventory::slotShoulders)) <= 0)
 				dmg = DMG_INVULNERABLE;
@@ -1779,7 +1779,7 @@ void Client::DoClassAttacks(Mob *ca_target, uint16 skill, bool IsRiposte)
 	if (skill_to_use == EQEmu::skills::SkillFrenzy) {
 		CheckIncreaseSkill(EQEmu::skills::SkillFrenzy, GetTarget(), 10);
 		int AtkRounds = 1;
-		DoAnim(anim2HSlashing);
+		DoAnim(anim2HSlashing, 0, false);
 
 		ReuseTime = (FrenzyReuseTime - 1) / HasteMod;
 
@@ -1806,7 +1806,7 @@ void Client::DoClassAttacks(Mob *ca_target, uint16 skill, bool IsRiposte)
 
 	if (skill_to_use == EQEmu::skills::SkillKick){
 		if(ca_target!=this){
-			DoAnim(animKick);
+			DoAnim(animKick, 0, false);
 
 			if (GetWeaponDamage(ca_target, GetInv().GetItem(EQEmu::inventory::slotFeet)) <= 0)
 				dmg = DMG_INVULNERABLE;

@@ -345,7 +345,7 @@ bool NPC::AIDoSpellCast(uint8 i, Mob* tar, int32 mana_cost, uint32* oDontDoAgain
 }
 
 bool EntityList::AICheckCloseBeneficialSpells(NPC* caster, uint8 iChance, float iRange, uint32 iSpellTypes) {
-	if((iSpellTypes&SpellTypes_Detrimental) != 0) {
+	if((iSpellTypes & SpellTypes_Detrimental) != 0) {
 		//according to live, you can buff and heal through walls...
 		//now with PCs, this only applies if you can TARGET the target, but
 		// according to Rogean, Live NPCs will just cast through walls/floors, no problem..
@@ -374,41 +374,19 @@ bool EntityList::AICheckCloseBeneficialSpells(NPC* caster, uint8 iChance, float 
 
 	float iRange2 = iRange*iRange;
 
-	float t1, t2, t3;
-
-
 	//Only iterate through NPCs
 	for (auto it = npc_list.begin(); it != npc_list.end(); ++it) {
 		NPC* mob = it->second;
-
-		//Since >90% of mobs will always be out of range, try to
-		//catch them with simple bounding box checks first. These
-		//checks are about 6X faster than DistNoRoot on my athlon 1Ghz
-		t1 = mob->GetX() - caster->GetX();
-		t2 = mob->GetY() - caster->GetY();
-		t3 = mob->GetZ() - caster->GetZ();
-		//cheap ABS()
-		if(t1 < 0)
-			t1 = 0 - t1;
-		if(t2 < 0)
-			t2 = 0 - t2;
-		if(t3 < 0)
-			t3 = 0 - t3;
-		if (t1 > iRange
-			|| t2 > iRange
-			|| t3 > iRange
-			|| DistanceSquared(mob->GetPosition(), caster->GetPosition()) > iRange2
-				//this call should seem backwards:
-			|| !mob->CheckLosFN(caster)
-			|| mob->GetReverseFactionCon(caster) >= FACTION_KINDLY
-		) {
+	
+		if (mob->GetReverseFactionCon(caster) >= FACTION_KINDLY) {
 			continue;
 		}
 
-		//since we assume these are beneficial spells, which do not
-		//require LOS, we just go for it.
-		// we have a winner!
-		if((iSpellTypes & SpellType_Buff) && !RuleB(NPC, BuffFriends)){
+		if (DistanceSquared(caster->GetPosition(), mob->GetPosition()) > iRange2) {
+			continue;
+		}
+
+		if ((iSpellTypes & SpellType_Buff) && !RuleB(NPC, BuffFriends)) {
 			if (mob != caster)
 				iSpellTypes = SpellType_Heal;
 		}

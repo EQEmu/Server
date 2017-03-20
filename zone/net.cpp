@@ -435,7 +435,7 @@ int main(int argc, char** argv) {
 	std::unique_ptr<EQ::Net::EQStreamManager> eqsm;
 	std::chrono::time_point<std::chrono::system_clock> frame_prev = std::chrono::system_clock::now();
 
-	EQ::Timer process_timer(15, true, [&](EQ::Timer* t) {
+	EQ::Timer process_timer(32, true, [&](EQ::Timer* t) {
 			//Advance the timer to our current point in time
 			Timer::SetCurrentTime();
 
@@ -447,7 +447,7 @@ int main(int argc, char** argv) {
 			if (!eqsf_open && Config->ZonePort != 0) {
 				Log.Out(Logs::General, Logs::Zone_Server, "Starting EQ Network server on port %d", Config->ZonePort);
 				
-				EQ::Net::EQStreamManagerOptions opts(Config->ZonePort, false, false);
+				EQ::Net::EQStreamManagerOptions opts(Config->ZonePort, false, true);
 				eqsm.reset(new EQ::Net::EQStreamManager(opts));
 				eqsf_open = true;
 		

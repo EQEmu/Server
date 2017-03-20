@@ -837,6 +837,11 @@ bool EQ::Net::DaybreakConnection::PacketCanBeEncoded(Packet &p) const
 		return false;
 	}
 
+	auto zero = p.GetInt8(0);
+	if (zero != 0) {
+		return true;
+	}
+
 	auto opcode = p.GetInt8(1);
 	if (opcode == OP_SessionRequest || opcode == OP_SessionResponse || opcode == OP_OutOfSession) {
 		return false;
@@ -1177,7 +1182,16 @@ void EQ::Net::DaybreakConnection::InternalSend(Packet &p)
 
 	if (PacketCanBeEncoded(p)) {
 		DynamicPacket out;
-		out.PutPacket(0, p);
+
+		if (p.GetUInt8(0) != 0) {
+			out.PutUInt8(0, 0);
+			out.PutUInt8(1, OP_Combined);
+			out.PutUInt8(2, p.Length());
+			out.PutPacket(3, p);
+		}
+		else {
+			out.PutPacket(0, p);
+		}
 
 		for (int i = 0; i < 2; ++i) {
 			switch (m_encode_passes[i]) {
@@ -1242,7 +1256,7 @@ void EQ::Net::DaybreakConnection::InternalSend(Packet &p)
 void EQ::Net::DaybreakConnection::InternalQueuePacket(Packet &p, int stream_id, bool reliable)
 {
 	if (!reliable) {
-		auto max_raw_size = m_max_packet_size - m_crc_bytes;
+		auto max_raw_size = 0xFFU - m_crc_bytes;
 		if (p.Length() > max_raw_size) {
 			InternalQueuePacket(p, stream_id, true);
 			return;
