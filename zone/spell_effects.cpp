@@ -2676,7 +2676,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 			case SE_Taunt:
 			{
 				if (caster && IsNPC()){
-					caster->Taunt(this->CastToNPC(), false, static_cast<float>(spell.base[i]), true, spell.base2[i]);
+					caster->Taunt(this->CastToNPC(), false, spell.base[i], true, spell.base2[i]);
 				}
 				break;
 			}

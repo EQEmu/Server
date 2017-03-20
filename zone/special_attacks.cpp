@@ -1868,18 +1868,18 @@ void Client::DoClassAttacks(Mob *ca_target, uint16 skill, bool IsRiposte)
 	}
 }
 
-void Mob::Taunt(NPC* who, bool always_succeed, float chance_bonus, bool FromSpell, int32 bonus_hate) {
-
+void Mob::Taunt(NPC *who, bool always_succeed, int chance_bonus, bool FromSpell, int32 bonus_hate)
+{
 	if (who == nullptr)
 		return;
 
-	if(DivineAura())
+	if (DivineAura())
 		return;
 
-	if(!FromSpell && !CombatRange(who))
+	if (!FromSpell && !CombatRange(who))
 		return;
 
-	if(!always_succeed && IsClient())
+	if (!always_succeed && IsClient())
 		CastToClient()->CheckIncreaseSkill(EQEmu::skills::SkillTaunt, who, 10);
 
 	Mob *hate_top = who->GetHateMost();
@@ -1887,68 +1887,72 @@ void Mob::Taunt(NPC* who, bool always_succeed, float chance_bonus, bool FromSpel
 	int level_difference = GetLevel() - who->GetLevel();
 	bool Success = false;
 
-	//Support for how taunt worked pre 2000 on LIVE - Can not taunt NPC over your level.
-	if ((RuleB(Combat,TauntOverLevel) == false) && (level_difference < 0) || who->GetSpecialAbility(IMMUNE_TAUNT)){
-		Message_StringID(MT_SpellFailure,FAILED_TAUNT);
+	// Support for how taunt worked pre 2000 on LIVE - Can not taunt NPC over your level.
+	if ((RuleB(Combat, TauntOverLevel) == false) && (level_difference < 0) ||
+	    who->GetSpecialAbility(IMMUNE_TAUNT)) {
+		Message_StringID(MT_SpellFailure, FAILED_TAUNT);
 		return;
 	}
 
-	//All values used based on live parses after taunt was updated in 2006.
-	if ((hate_top && hate_top->GetHPRatio() >= 20) || hate_top == nullptr) {
+	// All values used based on live parses after taunt was updated in 2006.
+	if ((hate_top && hate_top->GetHPRatio() >= 20) || hate_top == nullptr || chance_bonus) {
+		// SE_Taunt this is flat chance
+		if (chance_bonus) {
+			Success = zone->random.Roll(chance_bonus);
+		} else {
+			int32 newhate = 0;
+			float tauntchance = 50.0f;
 
-		int32 newhate = 0;
-		float tauntchance = 50.0f;
-
-		if(always_succeed)
-			tauntchance = 101.0f;
-
-		else {
-
-			if (level_difference < 0){
-				tauntchance += static_cast<float>(level_difference)*3.0f;
-				if (tauntchance < 20)
-					tauntchance = 20.0f;
-			}
+			if (always_succeed)
+				tauntchance = 101.0f;
 
 			else {
-				tauntchance += static_cast<float>(level_difference)*5.0f;
-				if (tauntchance > 65)
-					tauntchance = 65.0f;
+
+				if (level_difference < 0) {
+					tauntchance += static_cast<float>(level_difference) * 3.0f;
+					if (tauntchance < 20)
+						tauntchance = 20.0f;
+				}
+
+				else {
+					tauntchance += static_cast<float>(level_difference) * 5.0f;
+					if (tauntchance > 65)
+						tauntchance = 65.0f;
+				}
 			}
+
+			// TauntSkillFalloff rate is not based on any real data. Default of 33% gives a reasonable
+			// result.
+			if (IsClient() && !always_succeed)
+				tauntchance -= (RuleR(Combat, TauntSkillFalloff) *
+						(CastToClient()->MaxSkill(EQEmu::skills::SkillTaunt) -
+						 GetSkill(EQEmu::skills::SkillTaunt)));
+
+			if (tauntchance < 1)
+				tauntchance = 1.0f;
+
+			tauntchance /= 100.0f;
+
+			Success = tauntchance > zone->random.Real(0, 1);
 		}
 
-		//TauntSkillFalloff rate is not based on any real data. Default of 33% gives a reasonable result.
-		if (IsClient() && !always_succeed)
-			tauntchance -= (RuleR(Combat, TauntSkillFalloff) * (CastToClient()->MaxSkill(EQEmu::skills::SkillTaunt) - GetSkill(EQEmu::skills::SkillTaunt)));
-
-		//From SE_Taunt (Does a taunt with a chance modifier)
-		if (chance_bonus)
-			tauntchance += tauntchance*chance_bonus/100.0f;
-
-		if (tauntchance < 1)
-			tauntchance = 1.0f;
-
-		tauntchance /= 100.0f;
-
-		if (tauntchance > zone->random.Real(0, 1)) {
-			if (hate_top && hate_top != this){
+		if (Success) {
+			if (hate_top && hate_top != this) {
 				newhate = (who->GetNPCHate(hate_top) - who->GetNPCHate(this)) + 1 + bonus_hate;
 				who->CastToNPC()->AddToHateList(this, newhate);
 				Success = true;
+			} else {
+				who->CastToNPC()->AddToHateList(this, 12);
 			}
-			else
-				who->CastToNPC()->AddToHateList(this,12);
 
 			if (who->CanTalk())
-				who->Say_StringID(SUCCESSFUL_TAUNT,GetCleanName());
+				who->Say_StringID(SUCCESSFUL_TAUNT, GetCleanName());
+		} else {
+			Message_StringID(MT_SpellFailure, FAILED_TAUNT);
 		}
-		else{
-			Message_StringID(MT_SpellFailure,FAILED_TAUNT);
-		}
+	} else {
+		Message_StringID(MT_SpellFailure, FAILED_TAUNT);
 	}
-
-	else
-		Message_StringID(MT_SpellFailure,FAILED_TAUNT);
 
 	if (HasSkillProcs())
 		TrySkillProc(who, EQEmu::skills::SkillTaunt, TauntReuseTime * 1000);
@@ -1956,7 +1960,6 @@ void Mob::Taunt(NPC* who, bool always_succeed, float chance_bonus, bool FromSpel
 	if (Success && HasSkillProcSuccess())
 		TrySkillProc(who, EQEmu::skills::SkillTaunt, TauntReuseTime * 1000, true);
 }
-
 
 void Mob::InstillDoubt(Mob *who) {
 	//make sure we can use this skill
