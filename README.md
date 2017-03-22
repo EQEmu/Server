@@ -13,7 +13,7 @@
  * Hundreds of Quests/events created and maintained by Project EQ
 
 ## Server Installs
-||Windows|Linux|
+| |Windows|Linux|
 |:---:|:---:|:---:|
 |**Install Count**|![Windows Install Count](http://analytics.akkadius.com/?install_count&windows_count)|![Linux Install Count](http://analytics.akkadius.com/?install_count&linux_count)| 
 ### > Windows 
