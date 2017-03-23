@@ -1896,12 +1896,12 @@ void Bot::BotRangedAttack(Mob* other) {
 	}
 
 	EQEmu::ItemInstance* rangedItem = GetBotItem(EQEmu::inventory::slotRange);
-	const EQEmu::ItemData* RangeWeapon = 0;
+	const EQEmu::ItemData* RangeWeapon = nullptr;
 	if(rangedItem)
 		RangeWeapon = rangedItem->GetItem();
 
 	EQEmu::ItemInstance* ammoItem = GetBotItem(EQEmu::inventory::slotAmmo);
-	const EQEmu::ItemData* Ammo = 0;
+	const EQEmu::ItemData* Ammo = nullptr;
 	if(ammoItem)
 		Ammo = ammoItem->GetItem();
 
@@ -2008,7 +2008,7 @@ void Bot::ApplySpecialAttackMod(EQEmu::skills::SkillType skill, int32 &dmg, int3
 
 	if (item_slot >= EQEmu::legacy::EQUIPMENT_BEGIN){
 		const EQEmu::ItemInstance* inst = GetBotItem(item_slot);
-		const EQEmu::ItemData* botweapon = 0;
+		const EQEmu::ItemData* botweapon = nullptr;
 		if(inst)
 			botweapon = inst->GetItem();
 
@@ -2456,7 +2456,7 @@ void Bot::AI_Process() {
 				//now off hand
 				if(GetTarget() && attack_dw_timer.Check() && CanThisClassDualWield()) {
 					const EQEmu::ItemInstance* instweapon = GetBotItem(EQEmu::inventory::slotSecondary);
-					const EQEmu::ItemData* weapon = 0;
+					const EQEmu::ItemData* weapon = nullptr;
 					//can only dual wield without a weapon if you're a monk
 					if(instweapon || (botClass == MONK)) {
 						if(instweapon)
@@ -2928,8 +2928,8 @@ void Bot::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho) {
 		ns->spawn.light = m_Light.Type[EQEmu::lightsource::LightActive];
 		ns->spawn.helm = helmtexture; //(GetShowHelm() ? helmtexture : 0); //0xFF;
 		ns->spawn.equip_chest2 = texture; //0xFF;
-		const EQEmu::ItemData* item = 0;
-		const EQEmu::ItemInstance* inst = 0;
+		const EQEmu::ItemData* item = nullptr;
+		const EQEmu::ItemInstance* inst = nullptr;
 		uint32 spawnedbotid = 0;
 		spawnedbotid = this->GetBotID();
 		for (int i = EQEmu::textures::textureBegin; i < EQEmu::textures::weaponPrimary; i++) {
@@ -4357,9 +4357,9 @@ int32 Bot::GetBotFocusEffect(BotfocusType bottype, uint16 spell_id) {
 
 	//Check if item focus effect exists for the client.
 	if (itembonuses.FocusEffects[bottype]) {
-		const EQEmu::ItemData* TempItem = 0;
-		const EQEmu::ItemData* UsedItem = 0;
-		const EQEmu::ItemInstance* TempInst = 0;
+		const EQEmu::ItemData* TempItem = nullptr;
+		const EQEmu::ItemData* UsedItem = nullptr;
+		const EQEmu::ItemInstance* TempInst = nullptr;
 		uint16 UsedFocusID = 0;
 		int32 Total = 0;
 		int32 focus_max = 0;
@@ -5031,7 +5031,7 @@ void Bot::DoSpecialAttackDamage(Mob *who, EQEmu::skills::SkillType skill, int32 
 
 	if (skill == EQEmu::skills::SkillBash) {
 		const EQEmu::ItemInstance* inst = GetBotItem(EQEmu::inventory::slotSecondary);
-		const EQEmu::ItemData* botweapon = 0;
+		const EQEmu::ItemData* botweapon = nullptr;
 		if(inst)
 			botweapon = inst->GetItem();
 
@@ -5372,7 +5372,7 @@ FACTION_VALUE Bot::GetReverseFactionCon(Mob* iOther) {
 }
 
 Mob* Bot::GetOwnerOrSelf() {
-	Mob* Result = 0;
+	Mob* Result = nullptr;
 	if(this->GetBotOwner())
 		Result = GetBotOwner();
 	else
@@ -5382,7 +5382,7 @@ Mob* Bot::GetOwnerOrSelf() {
 }
 
 Mob* Bot::GetOwner() {
-	Mob* Result = 0;
+	Mob* Result = nullptr;
 	Result = GetBotOwner();
 	if(!Result)
 		this->SetBotOwner(0);
@@ -5438,8 +5438,8 @@ bool Bot::IsBotAttackAllowed(Mob* attacker, Mob* target, bool& hasRuleDefined) {
 
 void Bot::EquipBot(std::string* errorMessage) {
 	GetBotItems(m_inv, errorMessage);
-	const EQEmu::ItemInstance* inst = 0;
-	const EQEmu::ItemData* item = 0;
+	const EQEmu::ItemInstance* inst = nullptr;
+	const EQEmu::ItemData* item = nullptr;
 	for (int i = EQEmu::legacy::EQUIPMENT_BEGIN; i <= EQEmu::legacy::EQUIPMENT_END; ++i) {
 		inst = GetBotItem(i);
 		if(inst) {
@@ -7235,7 +7235,7 @@ bool Bot::CanHeal() {
 }
 
 Bot* Bot::GetBotByBotClientOwnerAndBotName(Client* c, std::string botName) {
-	Bot* Result = 0;
+	Bot* Result = nullptr;
 	if(c) {
 		std::list<Bot*> BotList = entity_list.GetBotsByBotOwnerCharacterID(c->CharacterID());
 		if(!BotList.empty()) {
@@ -7275,7 +7275,7 @@ void Bot::ProcessBotGroupInvite(Client* c, std::string botName) {
 // Processes a group disband request from a Client for a Bot.
 void Bot::ProcessBotGroupDisband(Client* c, std::string botName) {
 	if(c) {
-		Bot* tempBot = 0;
+		Bot* tempBot = nullptr;
 
 		if(botName.empty())
 			tempBot = GetFirstBotInGroup(c->GetGroup());
@@ -7318,7 +7318,7 @@ void Bot::ProcessClientZoneChange(Client* botOwner) {
 
 // Finds and returns the first Bot object found in specified group
 Bot* Bot::GetFirstBotInGroup(Group* group) {
-	Bot* Result = 0;
+	Bot* Result = nullptr;
 
 	if(group) {
 		for(int Counter = 0; Counter < MAX_GROUP_MEMBERS; Counter++) {
@@ -7344,8 +7344,8 @@ void Bot::ProcessBotInspectionRequest(Bot* inspectedBot, Client* client) {
 		insr->TargetID = inspectedBot->GetNPCTypeID();
 		insr->playerid = inspectedBot->GetID();
 
-		const EQEmu::ItemData* item = 0;
-		const EQEmu::ItemInstance* inst = 0;
+		const EQEmu::ItemData* item = nullptr;
+		const EQEmu::ItemInstance* inst = nullptr;
 
 		// Modded to display power source items (will only show up on SoF+ client inspect windows though.)
 		// I don't think bots are currently coded to use them..but, you'll have to use '#bot inventory list'
@@ -7396,7 +7396,7 @@ void Bot::ProcessBotInspectionRequest(Bot* inspectedBot, Client* client) {
 
 void Bot::CalcItemBonuses(StatBonuses* newbon)
 {
-	const EQEmu::ItemData* itemtmp = 0;
+	const EQEmu::ItemData* itemtmp = nullptr;
 
 	for (int i = EQEmu::legacy::EQUIPMENT_BEGIN; i <= (EQEmu::legacy::EQUIPMENT_END + 1); ++i) {
 		const EQEmu::ItemInstance* item = GetBotItem((i == 22 ? 9999 : i));
@@ -7989,7 +7989,7 @@ bool EntityList::Bot_AICheckCloseBeneficialSpells(Bot* caster, uint8 iChance, fl
 
 
 Mob* EntityList::GetMobByBotID(uint32 botID) {
-	Mob* Result = 0;
+	Mob* Result = nullptr;
 	if(botID > 0) {
 		auto it = mob_list.begin();
 		for (auto it = mob_list.begin(); it != mob_list.end(); ++it) {
@@ -8006,7 +8006,7 @@ Mob* EntityList::GetMobByBotID(uint32 botID) {
 }
 
 Bot* EntityList::GetBotByBotID(uint32 botID) {
-	Bot* Result = 0;
+	Bot* Result = nullptr;
 	if(botID > 0) {
 		for(std::list<Bot*>::iterator botListItr = bot_list.begin(); botListItr != bot_list.end(); ++botListItr) {
 			Bot* tempBot = *botListItr;
@@ -8020,7 +8020,7 @@ Bot* EntityList::GetBotByBotID(uint32 botID) {
 }
 
 Bot* EntityList::GetBotByBotName(std::string botName) {
-	Bot* Result = 0;
+	Bot* Result = nullptr;
 	if(!botName.empty()) {
 		for(std::list<Bot*>::iterator botListItr = bot_list.begin(); botListItr != bot_list.end(); ++botListItr) {
 			Bot* tempBot = *botListItr;
@@ -8197,7 +8197,7 @@ void EntityList::ShowSpawnWindow(Client* client, int Distance, bool NamedOnly) {
 
 uint8 Bot::GetNumberNeedingHealedInGroup(uint8 hpr, bool includePets) {
 	uint8 needHealed = 0;
-	Group *g;
+	Group *g = nullptr;
 	if(this->HasGroup()) {
 		g = this->GetGroup();
 		if(g) {
@@ -8237,8 +8237,8 @@ int Bot::GetRawACNoShield(int &shield_ac) {
 }
 
 uint32 Bot::CalcCurrentWeight() {
-	const EQEmu::ItemData* TempItem = 0;
-	EQEmu::ItemInstance* inst;
+	const EQEmu::ItemData* TempItem = nullptr;
+	EQEmu::ItemInstance* inst = nullptr;
 	uint32 Total = 0;
 	for (int i = EQEmu::legacy::EQUIPMENT_BEGIN; i <= EQEmu::legacy::EQUIPMENT_END; ++i) {
 		inst = GetBotItem(i);

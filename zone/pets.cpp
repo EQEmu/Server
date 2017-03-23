@@ -425,7 +425,7 @@ void Mob::MakePoweredPet(uint16 spell_id, const char* pettype, int16 petpower,
 	// like the special back items some focused pets may receive.
 	uint32 petinv[EQEmu::legacy::EQUIPMENT_SIZE];
 	memset(petinv, 0, sizeof(petinv));
-	const EQEmu::ItemData *item = 0;
+	const EQEmu::ItemData *item = nullptr;
 
 	if (database.GetBasePetItems(record.equipmentset, petinv)) {
 		for (int i = 0; i < EQEmu::legacy::EQUIPMENT_SIZE; i++)

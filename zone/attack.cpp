@@ -1268,7 +1268,7 @@ bool Client::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, b
 	if (GetFeigned())
 		return false; // Rogean: How can you attack while feigned? Moved up from Aggro Code.
 
-	EQEmu::ItemInstance* weapon;
+	EQEmu::ItemInstance* weapon = nullptr;
 	if (Hand == EQEmu::inventory::slotSecondary){	// Kaiyodo - Pick weapon from the attacking hand
 		weapon = GetInv().GetItem(EQEmu::inventory::slotSecondary);
 		OffHandAtk(true);

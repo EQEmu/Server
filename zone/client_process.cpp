@@ -210,7 +210,7 @@ bool Client::Process() {
 		if (bardsong_timer.Check() && bardsong != 0) {
 			//NOTE: this is kinda a heavy-handed check to make sure the mob still exists before
 			//doing the next pulse on them...
-			Mob *song_target;
+			Mob *song_target = nullptr;
 			if(bardsong_target_id == GetID()) {
 				song_target = this;
 			} else {
@@ -838,7 +838,7 @@ void Client::BulkSendMerchantInventory(int merchant_id, int npcid) {
 	if (m_ClientVersionBit & EQEmu::versions::bit_RoFAndLater) { // RoF+ can send 200 items
 		numItemSlots = 200;
 	}
-	const EQEmu::ItemData *item;
+	const EQEmu::ItemData *item = nullptr;
 	std::list<MerchantList> merlist = zone->merchanttable[merchant_id];
 	std::list<MerchantList>::const_iterator itr;
 	Mob* merch = entity_list.GetMobByNpcTypeID(npcid);

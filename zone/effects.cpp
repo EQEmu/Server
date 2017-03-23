@@ -747,7 +747,7 @@ void EntityList::AETaunt(Client* taunter, float range, int32 bonus_hate)
 // NPC spells will only affect other NPCs with compatible faction
 void EntityList::AESpell(Mob *caster, Mob *center, uint16 spell_id, bool affect_caster, int16 resist_adjust)
 {
-	Mob *curmob;
+	Mob *curmob = nullptr;
 
 	float dist = caster->GetAOERange(spell_id);
 	float dist2 = dist * dist;
@@ -847,7 +847,7 @@ void EntityList::AESpell(Mob *caster, Mob *center, uint16 spell_id, bool affect_
 
 void EntityList::MassGroupBuff(Mob *caster, Mob *center, uint16 spell_id, bool affect_caster)
 {
-	Mob *curmob;
+	Mob *curmob = nullptr;
 
 	float dist = caster->GetAOERange(spell_id);
 	float dist2 = dist * dist;
@@ -888,7 +888,7 @@ void EntityList::MassGroupBuff(Mob *caster, Mob *center, uint16 spell_id, bool a
 // NPC spells will only affect other NPCs with compatible faction
 void EntityList::AEBardPulse(Mob *caster, Mob *center, uint16 spell_id, bool affect_caster)
 {
-	Mob *curmob;
+	Mob *curmob = nullptr;
 
 	float dist = caster->GetAOERange(spell_id);
 	float dist2 = dist * dist;
@@ -940,7 +940,7 @@ void EntityList::AEBardPulse(Mob *caster, Mob *center, uint16 spell_id, bool aff
 //NPCs handle it differently in Mob::Rampage
 void EntityList::AEAttack(Mob *attacker, float dist, int Hand, int count, bool IsFromSpell) {
 //Dook- Will need tweaking, currently no pets or players or horses
-	Mob *curmob;
+	Mob *curmob = nullptr;
 
 	float dist2 = dist * dist;
 

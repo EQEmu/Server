@@ -290,7 +290,7 @@ bool Zone::LoadGroundSpawns() {
 	Log.Out(Logs::General, Logs::Status, "Loading Ground Spawns from DB...");
 	database.LoadGroundSpawns(zoneid, GetInstanceVersion(), &groundspawn);
 	uint32 ix=0;
-	char* name=0;
+	char* name = nullptr;
 	uint32 gsnumber=0;
 	for(gsindex=0;gsindex<50;gsindex++){
 		if(groundspawn.spawn[gsindex].item>0 && groundspawn.spawn[gsindex].item<SAYLINK_ITEM_ID){
@@ -1569,7 +1569,7 @@ void Zone::SetTime(uint8 hour, uint8 minute, bool update_world /*= true*/)
 
 ZonePoint* Zone::GetClosestZonePoint(const glm::vec3& location, uint32 to, Client* client, float max_distance) {
 	LinkedListIterator<ZonePoint*> iterator(zone_point_list);
-	ZonePoint* closest_zp = 0;
+	ZonePoint* closest_zp = nullptr;
 	float closest_dist = FLT_MAX;
 	float max_distance2 = max_distance * max_distance;
 	iterator.Reset();
@@ -1625,7 +1625,7 @@ ZonePoint* Zone::GetClosestZonePoint(const glm::vec3& location, const char* to_n
 
 ZonePoint* Zone::GetClosestZonePointWithoutZone(float x, float y, float z, Client* client, float max_distance) {
 	LinkedListIterator<ZonePoint*> iterator(zone_point_list);
-	ZonePoint* closest_zp = 0;
+	ZonePoint* closest_zp = nullptr;
 	float closest_dist = FLT_MAX;
 	float max_distance2 = max_distance*max_distance;
 	iterator.Reset();
