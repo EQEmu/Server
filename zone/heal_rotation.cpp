@@ -646,7 +646,10 @@ void HealRotation::bias_targets()
 	
 	// attempt to clear invalid target pool entries
 	m_target_pool.remove(nullptr);
-	m_target_pool.remove_if([](Mob* l) { return (!IsHealRotationTargetMobType(l)); });
+	m_target_pool.remove_if([](Mob* l) {
+		try { return (!IsHealRotationTargetMobType(l)); }
+		catch (...) { return true; }
+	});
 
 	uint32 sort_type = 0; // debug
 
