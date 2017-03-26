@@ -1,5 +1,8 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 03/25/2017 ==
+Akkadius: Reduced CPU footprint in non-combat zones doing constant checks for combat related activities
+
 == 03/12/2017 ==
 Akkadius: 
 - Implemented range rules for packets and other functions
