@@ -462,7 +462,7 @@ void Bot::GenerateBaseStats()
 			Attack += 17;
 			break;
 		case SHADOWKNIGHT:
-			BotSpellID = 3004;
+			BotSpellID = 3005;
 			Strength += 10;
 			Stamina += 15;
 			Intelligence += 20;
