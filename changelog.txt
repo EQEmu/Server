@@ -2,6 +2,9 @@ EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
 == 03/25/2017 ==
 Akkadius: Reduced CPU footprint in non-combat zones doing constant checks for combat related activities
+Akkadius: Reduced CPU footprint in cases where a client is checking for aggro excessively every 750 millseconds. This has 
+	been adjusted to 6 seconds per new rule RULE_INT(Aggro, ClientAggroCheckInterval)
+	- When zones have many players, with many NPC's, this adds up quickly
 
 == 03/12/2017 ==
 Akkadius: 

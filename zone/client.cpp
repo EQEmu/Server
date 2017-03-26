@@ -133,9 +133,9 @@ Client::Client(EQStreamInterface* ieqs)
 	fishing_timer(8000),
 	endupkeep_timer(1000),
 	forget_timer(0),
-	autosave_timer(RuleI(Character, AutosaveIntervalS)*1000),
+	autosave_timer(RuleI(Character, AutosaveIntervalS) * 1000),
 #ifdef REVERSE_AGGRO
-	scanarea_timer(AIClientScanarea_delay),
+	scanarea_timer(RuleI(Aggro, ClientAggroCheckInterval) * 1000),
 #endif
 	tribute_timer(Tribute_duration),
 	proximity_timer(ClientProximity_interval),
