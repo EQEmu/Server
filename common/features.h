@@ -157,7 +157,7 @@ enum {	//timer settings, all in milliseconds
 	AIscanarea_delay = 6000,
 	AIfeignremember_delay = 500,
 	AItarget_check_duration = 500,
-	AIClientScanarea_delay = 750,	//used in REVERSE_AGGRO
+	// AIClientScanarea_delay = 750,	//used in REVERSE_AGGRO
 	AIassistcheck_delay = 3000,		//now often a fighting NPC will yell for help
 	AI_check_signal_timer_delay = 500, // How often EVENT_SIGNAL checks are processed
 	ClientProximity_interval = 150,
