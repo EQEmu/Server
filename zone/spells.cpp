@@ -827,7 +827,7 @@ void Mob::InterruptSpell(uint16 spellid)
 // color not used right now
 void Mob::InterruptSpell(uint16 message, uint16 color, uint16 spellid)
 {
-	EQApplicationPacket *outapp;
+	EQApplicationPacket *outapp = nullptr;
 	uint16 message_other;
 	bool bard_song_mode = false; //has the bard song gone to auto repeat mode
 	if (spellid == SPELL_UNKNOWN) {
@@ -1268,7 +1268,7 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 	{
 		bool fromaug = false;
 		const EQEmu::ItemInstance* inst = CastToClient()->GetInv()[inventory_slot];
-		EQEmu::ItemData* augitem = 0;
+		EQEmu::ItemData* augitem = nullptr;
 		uint32 recastdelay = 0;
 		uint32 recasttype = 0;
 
@@ -3429,7 +3429,7 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob *spelltar, bool reflect, bool use_r
 		}
 	}
 
-	EQApplicationPacket *action_packet, *message_packet;
+	EQApplicationPacket *action_packet = nullptr, *message_packet = nullptr;
 	float spell_effectiveness;
 
 	if(!IsValidSpell(spell_id))
@@ -3622,19 +3622,19 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob *spelltar, bool reflect, bool use_r
 				spelltar != this)
 			{
 
-				Client* pClient = 0;
-				Raid* pRaid = 0;
-				Group* pBasicGroup = 0;
+				Client* pClient = nullptr;
+				Raid* pRaid = nullptr;
+				Group* pBasicGroup = nullptr;
 				uint32 nGroup = 0; //raid group
 
-				Client* pClientTarget = 0;
-				Raid* pRaidTarget = 0;
-				Group* pBasicGroupTarget = 0;
+				Client* pClientTarget = nullptr;
+				Raid* pRaidTarget = nullptr;
+				Group* pBasicGroupTarget = nullptr;
 				uint32 nGroupTarget = 0; //raid group
 
-				Client* pClientTargetPet = 0;
-				Raid* pRaidTargetPet = 0;
-				Group* pBasicGroupTargetPet = 0;
+				Client* pClientTargetPet = nullptr;
+				Raid* pRaidTargetPet = nullptr;
+				Group* pBasicGroupTargetPet = nullptr;
 				uint32 nGroupTargetPet = 0; //raid group
 
 				const uint32 cnWTF = 0xFFFFFFFF + 1; //this should be zero unless on 64bit? forced uint64?
@@ -4937,7 +4937,7 @@ void Mob::Mesmerize()
 
 void Client::MakeBuffFadePacket(uint16 spell_id, int slot_id, bool send_message)
 {
-	EQApplicationPacket* outapp;
+	EQApplicationPacket* outapp = nullptr;
 
 	outapp = new EQApplicationPacket(OP_Buff, sizeof(SpellBuffPacket_Struct));
 	SpellBuffPacket_Struct* sbf = (SpellBuffPacket_Struct*) outapp->pBuffer;
@@ -5417,7 +5417,7 @@ void Mob::_StopSong()
 //be used for other things as well
 void Client::SendBuffDurationPacket(Buffs_Struct &buff, int slot)
 {
-	EQApplicationPacket* outapp;
+	EQApplicationPacket* outapp = nullptr;
 	outapp = new EQApplicationPacket(OP_Buff, sizeof(SpellBuffPacket_Struct));
 	SpellBuffPacket_Struct* sbf = (SpellBuffPacket_Struct*) outapp->pBuffer;
 
@@ -5453,7 +5453,7 @@ void Client::SendBuffNumHitPacket(Buffs_Struct &buff, int slot)
 	// UF+ use this packet
 	if (ClientVersion() < EQEmu::versions::ClientVersion::UF)
 		return;
-	EQApplicationPacket *outapp;
+	EQApplicationPacket *outapp = nullptr;
 	outapp = new EQApplicationPacket(OP_BuffCreate, sizeof(BuffIcon_Struct) + sizeof(BuffIconEntry_Struct));
 	BuffIcon_Struct *bi = (BuffIcon_Struct *)outapp->pBuffer;
 	bi->entity_id = GetID();

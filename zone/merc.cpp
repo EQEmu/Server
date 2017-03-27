@@ -2183,7 +2183,7 @@ bool Merc::AICastSpell(int8 iChance, uint32 iSpellTypes) {
 								}
 
 								if(castedSpell) {
-									char* gmsg = 0;
+									char* gmsg = nullptr;
 
 									if(tar != this) {
 										//we don't need spam of bots healing themselves
@@ -2606,8 +2606,8 @@ int16 Merc::GetFocusEffect(focusType type, uint16 spell_id) {
 	//Check if item focus effect exists for the client.
 	if (itembonuses.FocusEffects[type]){
 
-		const EQEmu::ItemData* TempItem = 0;
-		const EQEmu::ItemData* UsedItem = 0;
+		const EQEmu::ItemData* TempItem = nullptr;
+		const EQEmu::ItemData* UsedItem = nullptr;
 		uint16 UsedFocusID = 0;
 		int16 Total = 0;
 		int16 focus_max = 0;
@@ -4556,7 +4556,7 @@ void Merc::SetTarget(Mob* mob) {
 }
 
 Mob* Merc::GetOwnerOrSelf() {
-	Mob* Result = 0;
+	Mob* Result = nullptr;
 
 	if(this->GetMercOwner())
 		Result = GetMercOwner();
@@ -4591,7 +4591,7 @@ bool Merc::Death(Mob* killerMob, int32 damage, uint16 spell, EQEmu::skills::Skil
 }
 
 Client* Merc::GetMercOwner() {
-	Client* mercOwner = 0;
+	Client* mercOwner = nullptr;
 
 	if(GetOwner())
 	{
@@ -4605,7 +4605,7 @@ Client* Merc::GetMercOwner() {
 }
 
 Mob* Merc::GetOwner() {
-	Mob* Result = 0;
+	Mob* Result = nullptr;
 
 	Result = entity_list.GetMob(GetOwnerID());
 

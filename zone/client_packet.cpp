@@ -1074,7 +1074,7 @@ void Client::Handle_Connect_OP_ReqNewZone(const EQApplicationPacket *app)
 {
 	conn_state = NewZoneRequested;
 
-	EQApplicationPacket* outapp;
+	EQApplicationPacket* outapp = nullptr;
 
 	/////////////////////////////////////
 	// New Zone Packet
@@ -1240,12 +1240,12 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	}
 
 	uint32 pplen = 0;
-	EQApplicationPacket* outapp = 0;
-	MYSQL_RES* result = 0;
+	EQApplicationPacket* outapp = nullptr;
+	MYSQL_RES* result = nullptr;
 	bool loaditems = 0;
 	uint32 i;
 	std::string query;
-	unsigned long* lengths;
+	unsigned long* lengths = nullptr;
 
 	uint32 cid = CharacterID();
 	character_id = cid; /* Global character_id reference */
@@ -2062,7 +2062,7 @@ void Client::Handle_OP_AdventureMerchantRequest(const EQApplicationPacket *app)
 	merchantid = tmp->CastToNPC()->MerchantType;
 	tmp->CastToNPC()->FaceTarget(this->CastToMob());
 
-	const EQEmu::ItemData *item = 0;
+	const EQEmu::ItemData *item = nullptr;
 	std::list<MerchantList> merlist = zone->merchanttable[merchantid];
 	std::list<MerchantList>::const_iterator itr;
 	for (itr = merlist.begin(); itr != merlist.end() && count<255; ++itr){
@@ -4866,7 +4866,7 @@ void Client::Handle_OP_Consume(const EQApplicationPacket *app)
 	{
 		if (m_pp.hunger_level > 6000)
 		{
-			EQApplicationPacket *outapp;
+			EQApplicationPacket *outapp = nullptr;
 			outapp = new EQApplicationPacket(OP_Stamina, sizeof(Stamina_Struct));
 			Stamina_Struct* sta = (Stamina_Struct*)outapp->pBuffer;
 			sta->food = m_pp.hunger_level > 6000 ? 6000 : m_pp.hunger_level;
@@ -4881,7 +4881,7 @@ void Client::Handle_OP_Consume(const EQApplicationPacket *app)
 	{
 		if (m_pp.thirst_level > 6000)
 		{
-			EQApplicationPacket *outapp;
+			EQApplicationPacket *outapp = nullptr;
 			outapp = new EQApplicationPacket(OP_Stamina, sizeof(Stamina_Struct));
 			Stamina_Struct* sta = (Stamina_Struct*)outapp->pBuffer;
 			sta->food = m_pp.hunger_level > 6000 ? 6000 : m_pp.hunger_level;
@@ -4914,7 +4914,7 @@ void Client::Handle_OP_Consume(const EQApplicationPacket *app)
 		m_pp.hunger_level = 50000;
 	if (m_pp.thirst_level > 50000)
 		m_pp.thirst_level = 50000;
-	EQApplicationPacket *outapp;
+	EQApplicationPacket *outapp = nullptr;
 	outapp = new EQApplicationPacket(OP_Stamina, sizeof(Stamina_Struct));
 	Stamina_Struct* sta = (Stamina_Struct*)outapp->pBuffer;
 	sta->food = m_pp.hunger_level > 6000 ? 6000 : m_pp.hunger_level;
@@ -5902,7 +5902,7 @@ void Client::Handle_OP_GMEmoteZone(const EQApplicationPacket *app)
 		return;
 	}
 	GMEmoteZone_Struct* gmez = (GMEmoteZone_Struct*)app->pBuffer;
-	char* newmessage = 0;
+	char* newmessage = nullptr;
 	if (strstr(gmez->text, "^") == 0)
 		entity_list.Message(0, 15, gmez->text);
 	else{
@@ -8258,7 +8258,7 @@ void Client::Handle_OP_ItemName(const EQApplicationPacket *app)
 		return;
 	}
 	ItemNamePacket_Struct *p = (ItemNamePacket_Struct*)app->pBuffer;
-	const EQEmu::ItemData *item = 0;
+	const EQEmu::ItemData *item = nullptr;
 	if ((item = database.GetItem(p->item_id)) != nullptr) {
 		auto outapp = new EQApplicationPacket(OP_ItemName, sizeof(ItemNamePacket_Struct));
 		p = (ItemNamePacket_Struct*)outapp->pBuffer;
@@ -8465,7 +8465,7 @@ void Client::Handle_OP_ItemVerifyRequest(const EQApplicationPacket *app)
 	target_id = request->target;
 
 
-	EQApplicationPacket *outapp;
+	EQApplicationPacket *outapp = nullptr;
 	outapp = new EQApplicationPacket(OP_ItemVerifyReply, sizeof(ItemVerifyReply_Struct));
 	ItemVerifyReply_Struct* reply = (ItemVerifyReply_Struct*)outapp->pBuffer;
 	reply->slot = slot_id;
@@ -8539,8 +8539,8 @@ void Client::Handle_OP_ItemVerifyRequest(const EQApplicationPacket *app)
 
 		int r;
 		bool tryaug = false;
-		EQEmu::ItemInstance* clickaug = 0;
-		EQEmu::ItemData* augitem = 0;
+		EQEmu::ItemInstance* clickaug = nullptr;
+		EQEmu::ItemData* augitem = nullptr;
 
 		for (r = EQEmu::inventory::socketBegin; r < EQEmu::inventory::SocketCount; r++) {
 			const EQEmu::ItemInstance* aug_i = inst->GetAugment(r);
@@ -8669,7 +8669,7 @@ void Client::Handle_OP_ItemVerifyRequest(const EQApplicationPacket *app)
 						if (m_pp.thirst_level > 6000)
 							m_pp.thirst_level = 6000;
 
-						EQApplicationPacket *outapp2;
+						EQApplicationPacket *outapp2 = nullptr;
 						outapp2 = new EQApplicationPacket(OP_Stamina, sizeof(Stamina_Struct));
 						Stamina_Struct* sta = (Stamina_Struct*)outapp2->pBuffer;
 						sta->food = m_pp.hunger_level;
@@ -9193,7 +9193,7 @@ void Client::Handle_OP_LootItem(const EQApplicationPacket *app)
 		return;
 	}
 
-	EQApplicationPacket* outapp = 0;
+	EQApplicationPacket* outapp = nullptr;
 	Entity* entity = entity_list.GetID(*((uint16*)app->pBuffer));
 	if (entity == 0) {
 		Message(13, "Error: OP_LootItem: Corpse not found (ent = 0)");
@@ -12020,7 +12020,7 @@ void Client::Handle_OP_SetStartCity(const EQApplicationPacket *app)
 		else
 			zoneid = atoi(row[0]);
 
-		char* name;
+		char* name = nullptr;
 		database.GetZoneLongName(database.GetZoneName(zoneid), &name);
 		Message(15, "%d - %s", zoneid, name);
 	}

@@ -1211,8 +1211,8 @@ int32 Client::CalcManaRegenCap()
 
 uint32 Client::CalcCurrentWeight()
 {
-	const EQEmu::ItemData* TempItem = 0;
-	EQEmu::ItemInstance* ins;
+	const EQEmu::ItemData* TempItem = nullptr;
+	EQEmu::ItemInstance* ins = nullptr;
 	uint32 Total = 0;
 	int x;
 	for (x = EQEmu::legacy::EQUIPMENT_BEGIN; x <= EQEmu::inventory::slotCursor; x++) { // include cursor or not?

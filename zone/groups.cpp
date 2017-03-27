@@ -47,6 +47,7 @@ Group::Group(uint32 gid)
 	AssistTargetID = 0;
 	TankTargetID = 0;
 	PullerTargetID = 0;
+	disbandcheck = false;
 
 	memset(&LeaderAbilities, 0, sizeof(GroupLeadershipAA_Struct));
 	uint32 i;
@@ -79,6 +80,7 @@ Group::Group(Mob* leader)
 	AssistTargetID = 0;
 	TankTargetID = 0;
 	PullerTargetID = 0;
+	disbandcheck = false;
 	memset(&LeaderAbilities, 0, sizeof(GroupLeadershipAA_Struct));
 	mentoree = nullptr;
 	uint32 i;
@@ -398,6 +400,8 @@ void Group::SendHPPacketsTo(Mob *member)
 			{
 				members[i]->CreateHPPacket(&hpapp);
 				member->CastToClient()->QueuePacket(&hpapp, false);
+				safe_delete_array(hpapp.pBuffer);
+				hpapp.size = 0;
 				if (member->CastToClient()->ClientVersion() >= EQEmu::versions::ClientVersion::SoD)
 				{
 					outapp.SetOpcode(OP_MobManaUpdate);

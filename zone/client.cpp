@@ -133,9 +133,9 @@ Client::Client(EQStreamInterface* ieqs)
 	fishing_timer(8000),
 	endupkeep_timer(1000),
 	forget_timer(0),
-	autosave_timer(RuleI(Character, AutosaveIntervalS)*1000),
+	autosave_timer(RuleI(Character, AutosaveIntervalS) * 1000),
 #ifdef REVERSE_AGGRO
-	scanarea_timer(AIClientScanarea_delay),
+	scanarea_timer(RuleI(Aggro, ClientAggroCheckInterval) * 1000),
 #endif
 	tribute_timer(Tribute_duration),
 	proximity_timer(ClientProximity_interval),
@@ -159,7 +159,8 @@ Client::Client(EQStreamInterface* ieqs)
 	m_ZoneSummonLocation(-2.0f,-2.0f,-2.0f),
 	m_AutoAttackPosition(0.0f, 0.0f, 0.0f, 0.0f),
 	m_AutoAttackTargetLocation(0.0f, 0.0f, 0.0f),
-	last_region_type(RegionTypeUnsupported)
+	last_region_type(RegionTypeUnsupported),
+	m_dirtyautohaters(false)
 {
 	for(int cf=0; cf < _FilterCount; cf++)
 		ClientFilters[cf] = FilterShow;
@@ -624,7 +625,7 @@ bool Client::Save(uint8 iCommitNow) {
 		GetMercInfo().MercTimerRemaining = GetMercTimer()->GetRemainingTime();
 	}
 
-	if (!(GetMerc() && !dead)) {
+	if (dead || (!GetMerc() && !GetMercInfo().IsSuspended)) {
 		memset(&m_mercinfo, 0, sizeof(struct MercInfo));
 	}
 
@@ -716,7 +717,7 @@ bool Client::AddPacket(EQApplicationPacket** pApp, bool bAckreq) {
 
 	c->ack_req = bAckreq;
 	c->app = *pApp;
-	*pApp = 0;
+	*pApp = nullptr;
 
 	clientpackets.Append(c);
 	return true;
@@ -725,7 +726,7 @@ bool Client::AddPacket(EQApplicationPacket** pApp, bool bAckreq) {
 bool Client::SendAllPackets() {
 	LinkedListIterator<CLIENTPACKET*> iterator(clientpackets);
 
-	CLIENTPACKET* cp = 0;
+	CLIENTPACKET* cp = nullptr;
 	iterator.Reset();
 	while(iterator.MoreElements()) {
 		cp = iterator.GetData();
@@ -771,7 +772,7 @@ void Client::FastQueuePacket(EQApplicationPacket** app, bool ack_req, CLIENT_CON
 			eqs->FastQueuePacket((EQApplicationPacket **)app, ack_req);
 		else if (app && (*app))
 			delete *app;
-		*app = 0;
+		*app = nullptr;
 	}
 	return;
 }
@@ -2036,7 +2037,7 @@ void Client::ReadBook(BookRequest_Struct *book) {
 				read_from_slot = book->invslot -1;
 			}
 
-			const EQEmu::ItemInstance *inst = 0;
+			const EQEmu::ItemInstance *inst = nullptr;
 
 			if (read_from_slot <= EQEmu::legacy::SLOT_PERSONAL_BAGS_END)
 				{
@@ -4044,7 +4045,7 @@ bool Client::KeyRingCheck(uint32 item_id)
 void Client::KeyRingList()
 {
 	Message(4,"Keys on Keyring:");
-	const EQEmu::ItemData *item = 0;
+	const EQEmu::ItemData *item = nullptr;
 	for (auto iter = keyring.begin(); iter != keyring.end(); ++iter) {
 		if ((item = database.GetItem(*iter))!=nullptr) {
 			Message(4,item->Name);
@@ -4657,7 +4658,7 @@ void Client::SendRespawnBinds()
 	uint32 PacketLength = 17 + (26 * num_options); //Header size + per-option invariant size
 
 	std::list<RespawnOption>::iterator itr;
-	RespawnOption* opt;
+	RespawnOption* opt = nullptr;
 
 	//Find string size for each option
 	for (itr = respawn_options.begin(); itr != respawn_options.end(); ++itr)
@@ -8382,7 +8383,7 @@ bool Client::RemoveRespawnOption(std::string option_name)
 	if (IsHoveringForRespawn() || respawn_options.empty()) { return false; }
 
 	bool had = false;
-	RespawnOption* opt;
+	RespawnOption* opt = nullptr;
 	std::list<RespawnOption>::iterator itr;
 	for (itr = respawn_options.begin(); itr != respawn_options.end(); ++itr)
 	{
@@ -8429,7 +8430,7 @@ bool Client::RemoveRespawnOption(uint8 position)
 
 void Client::SetHunger(int32 in_hunger)
 {
-	EQApplicationPacket *outapp;
+	EQApplicationPacket *outapp = nullptr;
 	outapp = new EQApplicationPacket(OP_Stamina, sizeof(Stamina_Struct));
 	Stamina_Struct* sta = (Stamina_Struct*)outapp->pBuffer;
 	sta->food = in_hunger;
@@ -8443,7 +8444,7 @@ void Client::SetHunger(int32 in_hunger)
 
 void Client::SetThirst(int32 in_thirst)
 {
-	EQApplicationPacket *outapp;
+	EQApplicationPacket *outapp = nullptr;
 	outapp = new EQApplicationPacket(OP_Stamina, sizeof(Stamina_Struct));
 	Stamina_Struct* sta = (Stamina_Struct*)outapp->pBuffer;
 	sta->food = m_pp.hunger_level > 6000 ? 6000 : m_pp.hunger_level;
@@ -8457,7 +8458,7 @@ void Client::SetThirst(int32 in_thirst)
 
 void Client::SetConsumption(int32 in_hunger, int32 in_thirst)
 {
-	EQApplicationPacket *outapp;
+	EQApplicationPacket *outapp = nullptr;
 	outapp = new EQApplicationPacket(OP_Stamina, sizeof(Stamina_Struct));
 	Stamina_Struct* sta = (Stamina_Struct*)outapp->pBuffer;
 	sta->food = in_hunger;

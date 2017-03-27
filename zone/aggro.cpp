@@ -550,8 +550,8 @@ faster, but I'm doing it this way to make it readable and easy to modify
 bool Mob::IsAttackAllowed(Mob *target, bool isSpellAttack)
 {
 
-	Mob *mob1, *mob2, *tempmob;
-	Client *c1, *c2, *becomenpc;
+	Mob *mob1 = nullptr, *mob2 = nullptr, *tempmob = nullptr;
+	Client *c1 = nullptr, *c2 = nullptr, *becomenpc = nullptr;
 //	NPC *npc1, *npc2;
 	int reverse;
 
@@ -767,8 +767,8 @@ type', in which case, the answer is yes.
 // also goes for their pets
 bool Mob::IsBeneficialAllowed(Mob *target)
 {
-	Mob *mob1, *mob2, *tempmob;
-	Client *c1, *c2;
+	Mob *mob1 = nullptr, *mob2 = nullptr, *tempmob = nullptr;
+	Client *c1 = nullptr, *c2 = nullptr;
 	int reverse;
 
 	if(!target)

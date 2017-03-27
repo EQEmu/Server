@@ -82,7 +82,7 @@ Corpse* Corpse::LoadCharacterCorpseEntity(uint32 in_dbid, uint32 in_charid, std:
 
 	/* Load Items */
 	ItemList itemlist;
-	ServerLootItem_Struct* tmp = 0;
+	ServerLootItem_Struct* tmp = nullptr;
 	for (unsigned int i = 0; i < pcs->itemcount; i++) {
 		tmp = new ServerLootItem_Struct;
 		memcpy(tmp, &pcs->items[i], sizeof(player_lootitem::ServerLootItem_Struct));
@@ -267,7 +267,7 @@ Corpse::Corpse(Client* client, int32 in_rezexp) : Mob (
 	int i;
 
 	PlayerProfile_Struct *pp = &client->GetPP();
-	EQEmu::ItemInstance *item;
+	EQEmu::ItemInstance *item = nullptr;
 
 	/* Check if Zone has Graveyard First */
 	if(!zone->HasGraveyard()) {
@@ -671,7 +671,7 @@ void Corpse::AddItem(uint32 itemnum, uint16 charges, int16 slot, uint32 aug1, ui
 }
 
 ServerLootItem_Struct* Corpse::GetItem(uint16 lootslot, ServerLootItem_Struct** bag_item_data) {
-	ServerLootItem_Struct *sitem = 0, *sitem2;
+	ServerLootItem_Struct *sitem = nullptr, *sitem2 = nullptr;
 
 	ItemList::iterator cur,end;
 	cur = itemlist.begin();
@@ -993,7 +993,7 @@ void Corpse::MakeLootRequestPackets(Client* client, const EQApplicationPacket* a
 		}
 
 		int i = 0;
-		const EQEmu::ItemData* item = 0;
+		const EQEmu::ItemData* item = nullptr;
 		ItemList::iterator cur,end;
 		cur = itemlist.begin();
 		end = itemlist.end();
@@ -1116,9 +1116,9 @@ void Corpse::LootItem(Client *client, const EQApplicationPacket *app)
 		return;
 	}
 
-	const EQEmu::ItemData *item = 0;
-	EQEmu::ItemInstance *inst = 0;
-	ServerLootItem_Struct *item_data = nullptr, *bag_item_data[10];
+	const EQEmu::ItemData *item = nullptr;
+	EQEmu::ItemInstance *inst = nullptr;
+	ServerLootItem_Struct *item_data = nullptr, *bag_item_data[10] = {};
 
 	memset(bag_item_data, 0, sizeof(bag_item_data));
 	if (GetPlayerKillItem() > 1) {
@@ -1437,7 +1437,7 @@ uint32 Corpse::GetEquipment(uint8 material_slot) const {
 }
 
 uint32 Corpse::GetEquipmentColor(uint8 material_slot) const {
-	const EQEmu::ItemData *item;
+	const EQEmu::ItemData *item = nullptr;
 
 	if (material_slot > EQEmu::textures::LastTexture) {
 		return 0;

@@ -704,6 +704,7 @@ void Client::AI_SpellCast()
 
 void Client::AI_Process()
 {
+
 	if (!IsAIControlled())
 		return;
 
@@ -934,6 +935,10 @@ void Mob::AI_Process() {
 	bool engaged = IsEngaged();
 	bool doranged = false;
 
+	if (!zone->CanDoCombat()) {
+		engaged = false;
+	}
+
 	// Begin: Additions for Wiz Fear Code
 	//
 	if(RuleB(Combat, EnableFearPathing)){
@@ -994,13 +999,14 @@ void Mob::AI_Process() {
 			SetTarget(hate_list.GetClosestEntOnHateList(this));
 		else
 		{
-			if(AI_target_check_timer->Check())
+			if (AI_target_check_timer->Check())
 			{
 				if (IsFocused()) {
 					if (!target) {
 						SetTarget(hate_list.GetEntWithMostHateOnList(this));
 					}
-				} else {
+				}
+				else {
 					if (!ImprovedTaunt())
 						SetTarget(hate_list.GetEntWithMostHateOnList(this));
 				}
@@ -1020,28 +1026,29 @@ void Mob::AI_Process() {
 #ifdef BOTS
 		if (IsPet() && GetOwner() && GetOwner()->IsBot() && target == GetOwner())
 		{
-				// this blocks all pet attacks against owner..bot pet test (copied above check)
-				RemoveFromHateList(this);
-				return;
+			// this blocks all pet attacks against owner..bot pet test (copied above check)
+			RemoveFromHateList(this);
+			return;
 		}
 #endif //BOTS
 
-		if(DivineAura())
+		if (DivineAura())
 			return;
 
-        auto npcSpawnPoint = CastToNPC()->GetSpawnPoint();
-		if(GetSpecialAbility(TETHER)) {
+		auto npcSpawnPoint = CastToNPC()->GetSpawnPoint();
+		if (GetSpecialAbility(TETHER)) {
 			float tether_range = static_cast<float>(GetSpecialAbilityParam(TETHER, 0));
 			tether_range = tether_range > 0.0f ? tether_range * tether_range : pAggroRange * pAggroRange;
 
-			if(DistanceSquaredNoZ(m_Position, npcSpawnPoint) > tether_range) {
+			if (DistanceSquaredNoZ(m_Position, npcSpawnPoint) > tether_range) {
 				GMMove(npcSpawnPoint.x, npcSpawnPoint.y, npcSpawnPoint.z, npcSpawnPoint.w);
 			}
-		} else if(GetSpecialAbility(LEASH)) {
+		}
+		else if (GetSpecialAbility(LEASH)) {
 			float leash_range = static_cast<float>(GetSpecialAbilityParam(LEASH, 0));
 			leash_range = leash_range > 0.0f ? leash_range * leash_range : pAggroRange * pAggroRange;
 
-			if(DistanceSquaredNoZ(m_Position, npcSpawnPoint) > leash_range) {
+			if (DistanceSquaredNoZ(m_Position, npcSpawnPoint) > leash_range) {
 				GMMove(npcSpawnPoint.x, npcSpawnPoint.y, npcSpawnPoint.z, npcSpawnPoint.w);
 				SetHP(GetMaxHP());
 				BuffFadeAll();
@@ -1058,16 +1065,16 @@ void Mob::AI_Process() {
 		{
 			if (AI_movement_timer->Check())
 			{
-				if(CalculateHeadingToTarget(GetTarget()->GetX(), GetTarget()->GetY()) != m_Position.w)
+				if (CalculateHeadingToTarget(GetTarget()->GetX(), GetTarget()->GetY()) != m_Position.w)
 				{
 					SetHeading(CalculateHeadingToTarget(GetTarget()->GetX(), GetTarget()->GetY()));
 					SendPosition();
 				}
 				SetCurrentSpeed(0);
 			}
-			if(IsMoving())
+			if (IsMoving())
 			{
-				if(CalculateHeadingToTarget(GetTarget()->GetX(), GetTarget()->GetY()) != m_Position.w)
+				if (CalculateHeadingToTarget(GetTarget()->GetX(), GetTarget()->GetY()) != m_Position.w)
 				{
 					SetHeading(CalculateHeadingToTarget(GetTarget()->GetX(), GetTarget()->GetY()));
 					SendPosition();
@@ -1076,13 +1083,13 @@ void Mob::AI_Process() {
 			}
 
 			//casting checked above...
-			if(target && !IsStunned() && !IsMezzed() && GetAppearance() != eaDead && !IsMeleeDisabled()) {
+			if (target && !IsStunned() && !IsMezzed() && GetAppearance() != eaDead && !IsMeleeDisabled()) {
 
 				//we should check to see if they die mid-attacks, previous
 				//crap of checking target for null was not gunna cut it
 
 				//try main hand first
-				if(attack_timer.Check()) {
+				if (attack_timer.Check()) {
 					DoMainHandAttackRounds(target);
 					TriggerDefensiveProcs(target, EQEmu::inventory::slotPrimary, false);
 
@@ -1128,17 +1135,17 @@ void Mob::AI_Process() {
 
 						if (owner) {
 							int16 flurry_chance = owner->aabonuses.PetFlurry +
-							owner->spellbonuses.PetFlurry + owner->itembonuses.PetFlurry;
+								owner->spellbonuses.PetFlurry + owner->itembonuses.PetFlurry;
 
 							if (flurry_chance && zone->random.Roll(flurry_chance))
 								Flurry(nullptr);
 						}
 					}
 
-					if ((IsPet() || IsTempPet()) && IsPetOwnerClient()){
-						if (spellbonuses.PC_Pet_Rampage[0] || itembonuses.PC_Pet_Rampage[0] || aabonuses.PC_Pet_Rampage[0]){
+					if ((IsPet() || IsTempPet()) && IsPetOwnerClient()) {
+						if (spellbonuses.PC_Pet_Rampage[0] || itembonuses.PC_Pet_Rampage[0] || aabonuses.PC_Pet_Rampage[0]) {
 							int chance = spellbonuses.PC_Pet_Rampage[0] + itembonuses.PC_Pet_Rampage[0] + aabonuses.PC_Pet_Rampage[0];
-							if(zone->random.Roll(chance)) {
+							if (zone->random.Roll(chance)) {
 								Rampage(nullptr);
 							}
 						}
@@ -1148,30 +1155,30 @@ void Mob::AI_Process() {
 					{
 						int rampage_chance = GetSpecialAbilityParam(SPECATK_RAMPAGE, 0);
 						rampage_chance = rampage_chance > 0 ? rampage_chance : 20;
-						if(zone->random.Roll(rampage_chance)) {
+						if (zone->random.Roll(rampage_chance)) {
 							ExtraAttackOptions opts;
 							int cur = GetSpecialAbilityParam(SPECATK_RAMPAGE, 3);
-							if(cur > 0) {
+							if (cur > 0) {
 								opts.damage_flat = cur;
 							}
 
 							cur = GetSpecialAbilityParam(SPECATK_RAMPAGE, 4);
-							if(cur > 0) {
+							if (cur > 0) {
 								opts.armor_pen_percent = cur / 100.0f;
 							}
 
 							cur = GetSpecialAbilityParam(SPECATK_RAMPAGE, 5);
-							if(cur > 0) {
+							if (cur > 0) {
 								opts.armor_pen_flat = cur;
 							}
 
 							cur = GetSpecialAbilityParam(SPECATK_RAMPAGE, 6);
-							if(cur > 0) {
+							if (cur > 0) {
 								opts.crit_percent = cur / 100.0f;
 							}
 
 							cur = GetSpecialAbilityParam(SPECATK_RAMPAGE, 7);
-							if(cur > 0) {
+							if (cur > 0) {
 								opts.crit_flat = cur;
 							}
 							Rampage(&opts);
@@ -1183,30 +1190,30 @@ void Mob::AI_Process() {
 					{
 						int rampage_chance = GetSpecialAbilityParam(SPECATK_AREA_RAMPAGE, 0);
 						rampage_chance = rampage_chance > 0 ? rampage_chance : 20;
-						if(zone->random.Roll(rampage_chance)) {
+						if (zone->random.Roll(rampage_chance)) {
 							ExtraAttackOptions opts;
 							int cur = GetSpecialAbilityParam(SPECATK_AREA_RAMPAGE, 3);
-							if(cur > 0) {
+							if (cur > 0) {
 								opts.damage_flat = cur;
 							}
 
 							cur = GetSpecialAbilityParam(SPECATK_AREA_RAMPAGE, 4);
-							if(cur > 0) {
+							if (cur > 0) {
 								opts.armor_pen_percent = cur / 100.0f;
 							}
 
 							cur = GetSpecialAbilityParam(SPECATK_AREA_RAMPAGE, 5);
-							if(cur > 0) {
+							if (cur > 0) {
 								opts.armor_pen_flat = cur;
 							}
 
 							cur = GetSpecialAbilityParam(SPECATK_AREA_RAMPAGE, 6);
-							if(cur > 0) {
+							if (cur > 0) {
 								opts.crit_percent = cur / 100.0f;
 							}
 
 							cur = GetSpecialAbilityParam(SPECATK_AREA_RAMPAGE, 7);
-							if(cur > 0) {
+							if (cur > 0) {
 								opts.crit_flat = cur;
 							}
 
@@ -1221,7 +1228,7 @@ void Mob::AI_Process() {
 					DoOffHandAttackRounds(target);
 
 				//now special attacks (kick, etc)
-				if(IsNPC())
+				if (IsNPC())
 					CastToNPC()->DoClassAttacks(target);
 
 			}
@@ -1230,18 +1237,19 @@ void Mob::AI_Process() {
 		else {
 			//we cannot reach our target...
 			//underwater stuff only works with water maps in the zone!
-			if(IsNPC() && CastToNPC()->IsUnderwaterOnly() && zone->HasWaterMap()) {
-                auto targetPosition = glm::vec3(target->GetX(), target->GetY(), target->GetZ());
-				if(!zone->watermap->InLiquid(targetPosition)) {
+			if (IsNPC() && CastToNPC()->IsUnderwaterOnly() && zone->HasWaterMap()) {
+				auto targetPosition = glm::vec3(target->GetX(), target->GetY(), target->GetZ());
+				if (!zone->watermap->InLiquid(targetPosition)) {
 					Mob *tar = hate_list.GetEntWithMostHateOnList(this);
-					if(tar == target) {
+					if (tar == target) {
 						WipeHateList();
 						Heal();
 						BuffFadeAll();
 						AI_walking_timer->Start(100);
 						pLastFightingDelayMoving = Timer::GetCurrentTime();
 						return;
-					} else if(tar != nullptr) {
+					}
+					else if (tar != nullptr) {
 						SetTarget(tar);
 						return;
 					}
@@ -1252,35 +1260,35 @@ void Mob::AI_Process() {
 			if (!HateSummon())
 			{
 				//could not summon them, check ranged...
-				if(GetSpecialAbility(SPECATK_RANGED_ATK))
+				if (GetSpecialAbility(SPECATK_RANGED_ATK))
 					doranged = true;
 
 				// Now pursue
 				// TODO: Check here for another person on hate list with close hate value
-				if(AI_PursueCastCheck()){
+				if (AI_PursueCastCheck()) {
 					//we did something, so do not process movement.
 				}
 				else if (AI_movement_timer->Check())
 				{
-					if(!IsRooted()) {
+					if (!IsRooted()) {
 						Log.Out(Logs::Detail, Logs::AI, "Pursuing %s while engaged.", target->GetName());
-						if(!RuleB(Pathing, Aggro) || !zone->pathing)
+						if (!RuleB(Pathing, Aggro) || !zone->pathing)
 							CalculateNewPosition2(target->GetX(), target->GetY(), target->GetZ(), GetRunspeed());
 						else
 						{
 							bool WaypointChanged, NodeReached;
 
 							glm::vec3 Goal = UpdatePath(target->GetX(), target->GetY(), target->GetZ(),
-											GetRunspeed(), WaypointChanged, NodeReached);
+								GetRunspeed(), WaypointChanged, NodeReached);
 
-							if(WaypointChanged)
+							if (WaypointChanged)
 								tar_ndx = 20;
 
 							CalculateNewPosition2(Goal.x, Goal.y, Goal.z, GetRunspeed());
 						}
 
 					}
-					else if(IsMoving()) {
+					else if (IsMoving()) {
 						SetHeading(CalculateHeadingToTarget(target->GetX(), target->GetY()));
 						SetCurrentSpeed(0);
 
@@ -1289,11 +1297,12 @@ void Mob::AI_Process() {
 			}
 		}
 	}
-	else
-	{
+	else {
+		
 		if (m_PlayerState & static_cast<uint32>(PlayerState::Aggressive))
 			SendRemovePlayerState(PlayerState::Aggressive);
-		if(AI_feign_remember_timer->Check()) {
+
+		if(!zone->CanDoCombat() && AI_feign_remember_timer->Check()) {
 			// 6/14/06
 			// Improved Feign Death Memory
 			// check to see if any of our previous feigned targets have gotten up.
@@ -1318,7 +1327,7 @@ void Mob::AI_Process() {
 		{
 			//we processed a spell action, so do nothing else.
 		}
-		else if (AI_scan_area_timer->Check())
+		else if (!zone->CanDoCombat() && AI_scan_area_timer->Check())
 		{
 			/*
 			* This is where NPCs look around to see if they want to attack anybody.

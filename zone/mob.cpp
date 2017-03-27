@@ -1293,7 +1293,7 @@ void Mob::CreateHPPacket(EQApplicationPacket* app)
 void Mob::SendHPUpdate(bool skip_self)
 {
 	EQApplicationPacket hp_app;
-	Group *group;
+	Group *group = nullptr;
 
 	// destructor will free the pBuffer
 	CreateHPPacket(&hp_app);
@@ -2788,7 +2788,7 @@ void Mob::SendArmorAppearance(Client *one_client)
 	{
 		if (!IsClient())
 		{
-			const EQEmu::ItemData *item;
+			const EQEmu::ItemData *item = nullptr;
 			for (int i = 0; i < 7; ++i)
 			{
 				item = database.GetItem(GetEquipment(i));
@@ -2906,7 +2906,7 @@ int32 Mob::GetEquipmentMaterial(uint8 material_slot) const
 {
 	uint32 equipmaterial = 0;
 	int32 ornamentationAugtype = RuleI(Character, OrnamentationAugmentType);
-	const EQEmu::ItemData *item;
+	const EQEmu::ItemData *item = nullptr;
 	item = database.GetItem(GetEquipment(material_slot));
 
 	if (item != 0)
@@ -2959,7 +2959,7 @@ int32 Mob::GetHerosForgeModel(uint8 material_slot) const
 	if (material_slot >= 0 && material_slot < EQEmu::textures::weaponPrimary)
 	{
 		uint32 ornamentationAugtype = RuleI(Character, OrnamentationAugmentType);
-		const EQEmu::ItemData *item;
+		const EQEmu::ItemData *item = nullptr;
 		item = database.GetItem(GetEquipment(material_slot));
 		int16 invslot = EQEmu::InventoryProfile::CalcSlotFromMaterial(material_slot);
 
@@ -3013,7 +3013,7 @@ int32 Mob::GetHerosForgeModel(uint8 material_slot) const
 
 uint32 Mob::GetEquipmentColor(uint8 material_slot) const
 {
-	const EQEmu::ItemData *item;
+	const EQEmu::ItemData *item = nullptr;
 
 	if (armor_tint.Slot[material_slot].Color)
 	{
@@ -3029,7 +3029,7 @@ uint32 Mob::GetEquipmentColor(uint8 material_slot) const
 
 uint32 Mob::IsEliteMaterialItem(uint8 material_slot) const
 {
-	const EQEmu::ItemData *item;
+	const EQEmu::ItemData *item = nullptr;
 
 	item = database.GetItem(GetEquipment(material_slot));
 	if(item != 0)

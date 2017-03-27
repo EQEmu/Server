@@ -148,6 +148,33 @@ int32 EQEmu::skills::GetBaseDamage(SkillType skill)
 	}
 }
 
+bool EQEmu::skills::IsMeleeDmg(SkillType skill)
+{
+	switch (skill) {
+	case Skill1HBlunt:
+	case Skill1HSlashing:
+	case Skill2HBlunt:
+	case Skill2HSlashing:
+	case SkillBackstab:
+	case SkillBash:
+	case SkillDragonPunch:
+	case SkillEagleStrike:
+	case SkillFlyingKick:
+	case SkillHandtoHand:
+	case SkillKick:
+	case Skill1HPiercing:
+	case SkillRiposte:
+	case SkillRoundKick:
+	case SkillThrowing:
+	case SkillTigerClaw:
+	case SkillFrenzy:
+	case Skill2HPiercing:
+		return true;
+	default:
+		return false;
+	}
+}
+
 const std::map<EQEmu::skills::SkillType, std::string>& EQEmu::skills::GetSkillTypeMap()
 {
 	/* VS2013 code

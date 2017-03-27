@@ -867,11 +867,9 @@ void Mob::MeleeMitigation(Mob *attacker, DamageHitInfo &hit, ExtraAttackOptions 
 
 	auto roll = RollD20(hit.offense, mitigation);
 
-	// +0.5 for rounding
-	hit.damage_done = static_cast<int>(roll * static_cast<double>(hit.base_damage) + 0.5);
+	// +0.5 for rounding, min to 1 dmg
+	hit.damage_done = std::max(static_cast<int>(roll * static_cast<double>(hit.base_damage) + 0.5), 1);
 
-	if (hit.damage_done < 0)
-		hit.damage_done = 0;
 	Log.Out(Logs::Detail, Logs::Attack, "mitigation %d vs offense %d. base %d rolled %f damage %d", mitigation, hit.offense, hit.base_damage, roll, hit.damage_done);
 }
 
@@ -1208,7 +1206,7 @@ void Mob::DoAttack(Mob *other, DamageHitInfo &hit, ExtraAttackOptions *opts)
 		if (strike_through && zone->random.Roll(strike_through)) {
 			Message_StringID(MT_StrikeThrough,
 					 STRIKETHROUGH_STRING); // You strike through your opponents defenses!
-			hit.damage_done = 0;			// set to zero, we will check this to continue
+			hit.damage_done = 1;			// set to one, we will check this to continue
 		}
 		// I'm pretty sure you can riposte a riposte
 		if (hit.damage_done == DMG_RIPOSTED) {
@@ -1219,7 +1217,7 @@ void Mob::DoAttack(Mob *other, DamageHitInfo &hit, ExtraAttackOptions *opts)
 		Log.Out(Logs::Detail, Logs::Combat, "Avoided/strikethrough damage with code %d", hit.damage_done);
 	}
 
-	if (hit.damage_done == 0) {
+	if (hit.damage_done >= 0) {
 		if (other->CheckHitChance(this, hit)) {
 			other->MeleeMitigation(this, hit, opts);
 			if (hit.damage_done > 0) {
@@ -1271,7 +1269,7 @@ bool Client::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, b
 	if (GetFeigned())
 		return false; // Rogean: How can you attack while feigned? Moved up from Aggro Code.
 
-	EQEmu::ItemInstance* weapon;
+	EQEmu::ItemInstance* weapon = nullptr;
 	if (Hand == EQEmu::inventory::slotSecondary){	// Kaiyodo - Pick weapon from the attacking hand
 		weapon = GetInv().GetItem(EQEmu::inventory::slotSecondary);
 		OffHandAtk(true);
@@ -1298,7 +1296,7 @@ bool Client::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, b
 	Log.Out(Logs::Detail, Logs::Combat, "Attacking with %s in slot %d using skill %d", weapon?weapon->GetItem()->Name:"Fist", Hand, my_hit.skill);
 
 	// Now figure out damage
-	my_hit.damage_done = 0;
+	my_hit.damage_done = 1;
 	my_hit.min_damage = 0;
 	uint8 mylevel = GetLevel() ? GetLevel() : 1;
 	uint32 hate = 0;
@@ -1438,13 +1436,15 @@ void Client::Damage(Mob* other, int32 damage, uint16 spell_id, EQEmu::skills::Sk
 	// cut all PVP spell damage to 2/3
 	// Blasting ourselfs is considered PvP
 	//Don't do PvP mitigation if the caster is damaging himself
+	//should this be applied to all damage? comments sound like some is for spell DMG
+	//patch notes on PVP reductions only mention archery/throwing ... not normal dmg
 	if(other && other->IsClient() && (other != this) && damage > 0) {
 		int PvPMitigation = 100;
-		if (attack_skill == EQEmu::skills::SkillArchery)
+		if (attack_skill == EQEmu::skills::SkillArchery || attack_skill == EQEmu::skills::SkillThrowing)
 			PvPMitigation = 80;
 		else
 			PvPMitigation = 67;
-		damage = (damage * PvPMitigation) / 100;
+		damage = std::max((damage * PvPMitigation) / 100, 1);
 	}
 
 	if(!ClientFinishedLoading())
@@ -1785,7 +1785,7 @@ bool NPC::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool
 	DamageHitInfo my_hit;
 	my_hit.skill = EQEmu::skills::SkillHandtoHand;
 	my_hit.hand = Hand;
-	my_hit.damage_done = 0;
+	my_hit.damage_done = 1;
 	if (Hand == EQEmu::inventory::slotPrimary) {
 		my_hit.skill = static_cast<EQEmu::skills::SkillType>(GetPrimSkill());
 		OffHandAtk(false);
@@ -3196,7 +3196,8 @@ void Mob::CommonDamage(Mob* attacker, int &damage, const uint16 spell_id, const 
 		ignore_invul = spell_id == 982 || spells[spell_id].cast_not_standing; // cazic touch
 
 	if (!ignore_invul && (GetInvul() || DivineAura())) {
-		damage = -5;
+		Log.Out(Logs::Detail, Logs::Combat, "Avoiding %d damage due to invulnerability.", damage);
+		damage = DMG_INVULNERABLE;
 	}
 
 	if( spell_id != SPELL_UNKNOWN || attacker == nullptr )
@@ -4460,6 +4461,10 @@ void Mob::ApplyDamageTable(DamageHitInfo &hit)
 		return;
 	// this was parsed, but we do see the min of 10 and the normal minus factor is 105, so makes sense
 	if (hit.offense < 115)
+		return;
+
+	// things that come out to 1 dmg seem to skip this (ex non-bash slam classes)
+	if (hit.damage_done < 2)
 		return;
 
 	auto &damage_table = GetDamageTable();
