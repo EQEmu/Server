@@ -717,6 +717,11 @@ bool NPC::Process()
 
 	if (enraged_timer.Check()){
 		ProcessEnrage();
+
+		/* Don't keep running the check every second if we don't have enrage */
+		if (!GetSpecialAbility(SPECATK_ENRAGE)) {
+			enraged_timer.Disable();
+		}
 	}
 
 	//Handle assists...
