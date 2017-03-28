@@ -256,12 +256,11 @@ bool Client::Process() {
 
 			close_npcs.clear();
 
-			std::list<NPC*> npc_list;
-			entity_list.GetNPCList(npc_list);
+			auto &npc_list = entity_list.GetNPCList();
 
 			float scan_range = RuleI(Range, ClientNPCScan);
 			for (auto itr = npc_list.begin(); itr != npc_list.end(); ++itr) {
-				NPC* npc = *itr;
+				NPC* npc = itr->second;
 				float distance = DistanceNoZ(m_Position, npc->GetPosition());
 				if(distance <= scan_range) {
 					close_npcs.insert(std::pair<NPC *, float>(npc, distance));
