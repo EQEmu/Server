@@ -1478,7 +1478,6 @@ private:
 	Timer anon_toggle_timer;
 	Timer afk_toggle_timer;
 	Timer helm_toggle_timer;
-	Timer light_update_timer;
 	Timer aggro_meter_timer;
 	Timer npc_close_scan_timer;
 

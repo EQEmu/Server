@@ -251,15 +251,6 @@ bool Client::Process() {
 			}
 		}
 
-		if (light_update_timer.Check()) {
-
-			UpdateEquipmentLight();
-			if (UpdateActiveLight()) {
-				SendAppearancePacket(AT_Light, GetActiveLightType());
-			}
-		}
-
-
 		/* Build a close range list of NPC's  */
 		if (npc_close_scan_timer.Check()) {
 

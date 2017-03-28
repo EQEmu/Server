@@ -153,7 +153,6 @@ Client::Client(EQStreamInterface* ieqs)
 	anon_toggle_timer(250),
 	afk_toggle_timer(250),
 	helm_toggle_timer(250),
-	light_update_timer(600),
 	aggro_meter_timer(AGGRO_METER_UPDATE_MS),
 	m_Proximity(FLT_MAX, FLT_MAX, FLT_MAX), //arbitrary large number
 	m_ZoneSummonLocation(-2.0f,-2.0f,-2.0f),

@@ -3,6 +3,8 @@ EQEMu Changelog (Started on Sept 24, 2003 15:50)
 == 03/28/2017 ==
 Akkadius: [Performance] Fixed a large overhead issue where every single NPC in a zone was checking to depop themselves
 	as a swarm pet every 3ms regardless of being a swarm pet or not. Swarm pets now check to depop only when their timer is up
+Akkadius: [Performance] Removed Clients constantly calculating light amount on equipment every 600ms, instead clients will update
+	light when changing equipment or entering a zone
 
 == 03/27/2017 ==
 Akkadius: [Performance] Reworked how client to NPC aggro checks are made
