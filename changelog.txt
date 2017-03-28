@@ -1,8 +1,21 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 03/27/2017 ==
+Akkadius: [Performance] Reworked how client to NPC aggro checks are made
+	- Before when reverse aggro checks were done (client to NPC), checks would happen every 750 millseconds where a client would
+		check an entire entity list with distance calcs and other checks for aggro, with many clients in a zone and many NPC's this would
+		add a lot of unecessary overhead. A temporary adjustment on 3/25 was made and upped the check to 6 seconds.
+	- Now, there is a new methodology to scanning. The client will build a cache list of NPC's within close range as defined in new rule:
+		RULE_INT(Range, ClientNPCScan, 300) and will also get any NPC that has an aggro range beyond that defined range to use in 
+		the frequent checks for aggro, the result is far less overhead
+	- Client scanning changes when moving versus not moving, the client will scan aggro every 500 milliseconds while moving, and
+		3000 millseconds aggro check when not moving, with a 6000ms re-fetch for close NPC's
+	- A demo of these changes can be found here:
+		https://youtu.be/aGroiwLSTVU
+
 == 03/25/2017 ==
-Akkadius: Reduced CPU footprint in non-combat zones doing constant checks for combat related activities
-Akkadius: Reduced CPU footprint in cases where a client is checking for aggro excessively every 750 millseconds. This has 
+Akkadius: [Performance] Reduced CPU footprint in non-combat zones doing constant checks for combat related activities
+Akkadius: [Performance] Reduced CPU footprint in cases where a client is checking for aggro excessively every 750 millseconds. This has 
 	been adjusted to 6 seconds per new rule RULE_INT(Aggro, ClientAggroCheckInterval)
 	- When zones have many players, with many NPC's, this adds up quickly
 

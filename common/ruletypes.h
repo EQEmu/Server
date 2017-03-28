@@ -559,6 +559,7 @@ RULE_INT(Range, SpellMessages, 75)
 RULE_INT(Range, SongMessages, 75)
 RULE_INT(Range, MobPositionUpdates, 600)
 RULE_INT(Range, CriticalDamage, 80)
+RULE_INT(Range, ClientNPCScan, 300)
 RULE_CATEGORY_END()
 
 

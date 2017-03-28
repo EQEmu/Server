@@ -63,7 +63,7 @@ extern EntityList entity_list;
 bool Client::Process() {
 	bool ret = true;
 
-	if(Connected() || IsLD())
+	if (Connected() || IsLD())
 	{
 		// try to send all packets that weren't sent before
 		if (!IsLD() && zoneinpacket_timer.Check())
@@ -71,58 +71,58 @@ bool Client::Process() {
 			SendAllPackets();
 		}
 
-		if(adventure_request_timer)
+		if (adventure_request_timer)
 		{
-			if(adventure_request_timer->Check())
+			if (adventure_request_timer->Check())
 			{
 				safe_delete(adventure_request_timer);
 			}
 		}
 
-		if(adventure_create_timer)
+		if (adventure_create_timer)
 		{
-			if(adventure_create_timer->Check())
+			if (adventure_create_timer->Check())
 			{
 				safe_delete(adventure_create_timer);
 			}
 		}
 
-		if(adventure_leave_timer)
+		if (adventure_leave_timer)
 		{
-			if(adventure_leave_timer->Check())
+			if (adventure_leave_timer->Check())
 			{
 				safe_delete(adventure_leave_timer);
 			}
 		}
 
-		if(adventure_door_timer)
+		if (adventure_door_timer)
 		{
-			if(adventure_door_timer->Check())
+			if (adventure_door_timer->Check())
 			{
 				safe_delete(adventure_door_timer);
 			}
 		}
 
-		if(adventure_stats_timer)
+		if (adventure_stats_timer)
 		{
-			if(adventure_stats_timer->Check())
+			if (adventure_stats_timer->Check())
 			{
 				safe_delete(adventure_stats_timer);
 			}
 		}
 
-		if(adventure_leaderboard_timer)
+		if (adventure_leaderboard_timer)
 		{
-			if(adventure_leaderboard_timer->Check())
+			if (adventure_leaderboard_timer->Check())
 			{
 				safe_delete(adventure_leaderboard_timer);
 			}
 		}
 
-		if(dead)
+		if (dead)
 		{
 			SetHP(-100);
-			if(RespawnFromHoverTimer.Check())
+			if (RespawnFromHoverTimer.Check())
 				HandleRespawnFromHover(0);
 		}
 
@@ -131,13 +131,13 @@ bool Client::Process() {
 
 		// SendHPUpdate calls hpupdate_timer.Start so it can delay this timer, so lets not reset with the check
 		// since the function will anyways
-		if(hpupdate_timer.Check(false))
+		if (hpupdate_timer.Check(false))
 			SendHPUpdate();
 
-		if(mana_timer.Check())
+		if (mana_timer.Check())
 			SendManaUpdatePacket();
 
-		if(dead && dead_timer.Check()) {
+		if (dead && dead_timer.Check()) {
 			database.MoveCharacterToZone(GetName(), database.GetZoneName(m_pp.binds[0].zoneId));
 
 			m_pp.zone_id = m_pp.binds[0].zoneId;
@@ -150,7 +150,7 @@ bool Client::Process() {
 			Group *mygroup = GetGroup();
 			if (mygroup)
 			{
-				entity_list.MessageGroup(this,true,15,"%s died.", GetName());
+				entity_list.MessageGroup(this, true, 15, "%s died.", GetName());
 				mygroup->MemberZoned(this);
 			}
 			Raid *myraid = entity_list.GetRaidByClient(this);
@@ -161,34 +161,29 @@ bool Client::Process() {
 			return(false);
 		}
 
-		if(charm_update_timer.Check())
-		{
+		if (charm_update_timer.Check()) {
 			CalcItemScale();
 		}
 
-		if(TaskPeriodic_Timer.Check() && taskstate)
+		if (TaskPeriodic_Timer.Check() && taskstate)
 			taskstate->TaskPeriodicChecks(this);
 
-		if(linkdead_timer.Check())
-		{
+		if (linkdead_timer.Check()) {
 			LeaveGroup();
 			Save();
-			if (GetMerc())
-			{
+			if (GetMerc()) {
 				GetMerc()->Save();
 				GetMerc()->Depop();
 			}
 
 			Raid *myraid = entity_list.GetRaidByClient(this);
-			if (myraid)
-			{
+			if (myraid) {
 				myraid->MemberZoned(this);
 			}
 			return false; //delete client
 		}
 
-		if (camp_timer.Check())
-		{
+		if (camp_timer.Check()) {
 			LeaveGroup();
 			Save();
 			if (GetMerc())
@@ -202,8 +197,7 @@ bool Client::Process() {
 		if (IsStunned() && stunned_timer.Check())
 			Mob::UnStun();
 
-		if(!m_CheatDetectMoved)
-		{
+		if (!m_CheatDetectMoved) {
 			m_TimeSinceLastPositionCheck = Timer::GetCurrentTime();
 		}
 
@@ -211,32 +205,32 @@ bool Client::Process() {
 			//NOTE: this is kinda a heavy-handed check to make sure the mob still exists before
 			//doing the next pulse on them...
 			Mob *song_target = nullptr;
-			if(bardsong_target_id == GetID()) {
+			if (bardsong_target_id == GetID()) {
 				song_target = this;
-			} else {
+			}
+			else {
 				song_target = entity_list.GetMob(bardsong_target_id);
 			}
 
 			if (song_target == nullptr) {
 				InterruptSpell(SONG_ENDS_ABRUPTLY, 0x121, bardsong);
-			} else {
-				if(!ApplyNextBardPulse(bardsong, song_target, bardsong_slot))
+			}
+			else {
+				if (!ApplyNextBardPulse(bardsong, song_target, bardsong_slot))
 					InterruptSpell(SONG_ENDS_ABRUPTLY, 0x121, bardsong);
 				//SpellFinished(bardsong, bardsong_target, bardsong_slot, spells[bardsong].mana);
 			}
 		}
 
-		if(GetMerc())
-		{
+		if (GetMerc()) {
 			UpdateMercTimer();
 		}
 
-		if(GetMercInfo().MercTemplateID != 0 && GetMercInfo().IsSuspended)
-		{
+		if (GetMercInfo().MercTemplateID != 0 && GetMercInfo().IsSuspended) {
 			CheckMercSuspendTimer();
 		}
 
-		if(IsAIControlled())
+		if (IsAIControlled())
 			AI_Process();
 
 		// Don't reset the bindwound timer so we can check it in BindWound as well.
@@ -244,28 +238,46 @@ bool Client::Process() {
 			BindWound(bindwound_target, false);
 		}
 
-		if(KarmaUpdateTimer)
-		{
-			if(KarmaUpdateTimer->Check(false))
-			{
+		if (KarmaUpdateTimer) {
+			if (KarmaUpdateTimer->Check(false)) {
 				KarmaUpdateTimer->Start(RuleI(Chat, KarmaUpdateIntervalMS));
 				database.UpdateKarma(AccountID(), ++TotalKarma);
 			}
 		}
 
-		if(qGlobals)
-		{
-			if(qglobal_purge_timer.Check())
-			{
+		if (qGlobals) {
+			if (qglobal_purge_timer.Check()) {
 				qGlobals->PurgeExpiredGlobals();
 			}
 		}
 
-		if(light_update_timer.Check()) {
+		if (light_update_timer.Check()) {
 
 			UpdateEquipmentLight();
-			if(UpdateActiveLight()) {
+			if (UpdateActiveLight()) {
 				SendAppearancePacket(AT_Light, GetActiveLightType());
+			}
+		}
+
+
+		/* Build a close range list of NPC's  */
+		if (npc_close_scan_timer.Check()) {
+
+			close_npcs.clear();
+
+			std::list<NPC*> npc_list;
+			entity_list.GetNPCList(npc_list);
+
+			float scan_range = RuleI(Range, ClientNPCScan);
+			for (auto itr = npc_list.begin(); itr != npc_list.end(); ++itr) {
+				NPC* npc = *itr;
+				float distance = DistanceNoZ(m_Position, npc->GetPosition());
+				if(distance <= scan_range) {
+					close_npcs.insert(std::pair<NPC *, float>(npc, distance));
+				}
+				else if (npc->GetAggroRange() > scan_range) {
+					close_npcs.insert(std::pair<NPC *, float>(npc, distance));
+				}
 			}
 		}
 
@@ -279,35 +291,35 @@ bool Client::Process() {
 				- being stunned or mezzed
 				- having used a ranged weapon recently
 		*/
-		if(auto_attack) {
-			if(!IsAIControlled() && !dead
+		if (auto_attack) {
+			if (!IsAIControlled() && !dead
 				&& !(spellend_timer.Enabled() && casting_spell_id && !IsBardSong(casting_spell_id))
 				&& !IsStunned() && !IsFeared() && !IsMezzed() && GetAppearance() != eaDead && !IsMeleeDisabled()
 				)
 				may_use_attacks = true;
 
-			if(may_use_attacks && ranged_timer.Enabled()) {
+			if (may_use_attacks && ranged_timer.Enabled()) {
 				//if the range timer is enabled, we need to consider it
-				if(!ranged_timer.Check(false)) {
+				if (!ranged_timer.Check(false)) {
 					//the ranged timer has not elapsed, cannot attack.
 					may_use_attacks = false;
 				}
 			}
 		}
 
-		if(AutoFireEnabled()){
+		if (AutoFireEnabled()) {
 			EQEmu::ItemInstance *ranged = GetInv().GetItem(EQEmu::inventory::slotRange);
-			if(ranged)
+			if (ranged)
 			{
-				if (ranged->GetItem() && ranged->GetItem()->ItemType == EQEmu::item::ItemTypeBow){
-					if(ranged_timer.Check(false)){
-						if(GetTarget() && (GetTarget()->IsNPC() || GetTarget()->IsClient())){
-							if(GetTarget()->InFrontMob(this, GetTarget()->GetX(), GetTarget()->GetY())){
-								if(CheckLosFN(GetTarget())){
+				if (ranged->GetItem() && ranged->GetItem()->ItemType == EQEmu::item::ItemTypeBow) {
+					if (ranged_timer.Check(false)) {
+						if (GetTarget() && (GetTarget()->IsNPC() || GetTarget()->IsClient())) {
+							if (GetTarget()->InFrontMob(this, GetTarget()->GetX(), GetTarget()->GetY())) {
+								if (CheckLosFN(GetTarget())) {
 									//client has built in los check, but auto fire does not.. done last.
 									RangedAttack(GetTarget());
-										if (CheckDoubleRangedAttack())
-											RangedAttack(GetTarget(), true);
+									if (CheckDoubleRangedAttack())
+										RangedAttack(GetTarget(), true);
 								}
 								else
 									ranged_timer.Start();
@@ -319,11 +331,11 @@ bool Client::Process() {
 							ranged_timer.Start();
 					}
 				}
-				else if (ranged->GetItem() && (ranged->GetItem()->ItemType == EQEmu::item::ItemTypeLargeThrowing || ranged->GetItem()->ItemType == EQEmu::item::ItemTypeSmallThrowing)){
-					if(ranged_timer.Check(false)){
-						if(GetTarget() && (GetTarget()->IsNPC() || GetTarget()->IsClient())){
-							if(GetTarget()->InFrontMob(this, GetTarget()->GetX(), GetTarget()->GetY())){
-								if(CheckLosFN(GetTarget())){
+				else if (ranged->GetItem() && (ranged->GetItem()->ItemType == EQEmu::item::ItemTypeLargeThrowing || ranged->GetItem()->ItemType == EQEmu::item::ItemTypeSmallThrowing)) {
+					if (ranged_timer.Check(false)) {
+						if (GetTarget() && (GetTarget()->IsNPC() || GetTarget()->IsClient())) {
+							if (GetTarget()->InFrontMob(this, GetTarget()->GetX(), GetTarget()->GetY())) {
+								if (CheckLosFN(GetTarget())) {
 									//client has built in los check, but auto fire does not.. done last.
 									ThrowingAttack(GetTarget());
 								}
@@ -345,9 +357,9 @@ bool Client::Process() {
 		{
 			//check if change
 			//only check on primary attack.. sorry offhand you gotta wait!
-			if(aa_los_them_mob)
+			if (aa_los_them_mob)
 			{
-				if(auto_attack_target != aa_los_them_mob ||
+				if (auto_attack_target != aa_los_them_mob ||
 					m_AutoAttackPosition.x != GetX() ||
 					m_AutoAttackPosition.y != GetY() ||
 					m_AutoAttackPosition.z != GetZ() ||
@@ -379,11 +391,11 @@ bool Client::Process() {
 
 			if (!CombatRange(auto_attack_target))
 			{
-				Message_StringID(MT_TooFarAway,TARGET_TOO_FAR);
+				Message_StringID(MT_TooFarAway, TARGET_TOO_FAR);
 			}
 			else if (auto_attack_target == this)
 			{
-				Message_StringID(MT_TooFarAway,TRY_ATTACKING_SOMEONE);
+				Message_StringID(MT_TooFarAway, TRY_ATTACKING_SOMEONE);
 			}
 			else if (!los_status || !los_status_facing)
 			{
@@ -412,23 +424,23 @@ bool Client::Process() {
 			}
 		}
 
-		if(auto_attack && may_use_attacks && auto_attack_target != nullptr
+		if (auto_attack && may_use_attacks && auto_attack_target != nullptr
 			&& CanThisClassDualWield() && attack_dw_timer.Check())
 		{
 			// Range check
-			if(!CombatRange(auto_attack_target)) {
+			if (!CombatRange(auto_attack_target)) {
 				// this is a duplicate message don't use it.
 				//Message_StringID(MT_TooFarAway,TARGET_TOO_FAR);
 			}
 			// Don't attack yourself
-			else if(auto_attack_target == this) {
+			else if (auto_attack_target == this) {
 				//Message_StringID(MT_TooFarAway,TRY_ATTACKING_SOMEONE);
 			}
 			else if (!los_status || !los_status_facing)
 			{
 				//you can't see your target
 			}
-			else if(auto_attack_target->GetHP() > -10) {
+			else if (auto_attack_target->GetHP() > -10) {
 				CheckIncreaseSkill(EQEmu::skills::SkillDualWield, auto_attack_target, -10);
 				if (CheckDualWield()) {
 					EQEmu::ItemInstance *wpn = GetInv().GetItem(EQEmu::inventory::slotSecondary);
@@ -442,7 +454,7 @@ bool Client::Process() {
 		if (position_timer.Check()) {
 			if (IsAIControlled())
 			{
-				if(!IsMoving())
+				if (!IsMoving())
 				{
 					animation = 0;
 					m_Delta = glm::vec4(0.0f, 0.0f, 0.0f, m_Delta.w);
@@ -464,25 +476,25 @@ bool Client::Process() {
 			}
 		}
 
-		if(HasVirus()) {
-			if(viral_timer.Check()) {
+		if (HasVirus()) {
+			if (viral_timer.Check()) {
 				viral_timer_counter++;
-				for(int i = 0; i < MAX_SPELL_TRIGGER*2; i+=2) {
-					if(viral_spells[i])	{
-						if(viral_timer_counter % spells[viral_spells[i]].viral_timer == 0) {
-							SpreadVirus(viral_spells[i], viral_spells[i+1]);
+				for (int i = 0; i < MAX_SPELL_TRIGGER * 2; i += 2) {
+					if (viral_spells[i]) {
+						if (viral_timer_counter % spells[viral_spells[i]].viral_timer == 0) {
+							SpreadVirus(viral_spells[i], viral_spells[i + 1]);
 						}
 					}
 				}
 			}
-			if(viral_timer_counter > 999)
+			if (viral_timer_counter > 999)
 				viral_timer_counter = 0;
 		}
 
 		ProjectileAttack();
 
-		if(spellbonuses.GravityEffect == 1) {
-			if(gravity_timer.Check())
+		if (spellbonuses.GravityEffect == 1) {
+			if (gravity_timer.Check())
 				DoGravityEffect();
 		}
 
@@ -514,7 +526,7 @@ bool Client::Process() {
 		}
 
 		SpellProcess();
-		if (endupkeep_timer.Check() && !dead){
+		if (endupkeep_timer.Check() && !dead) {
 			DoEnduranceUpkeep();
 		}
 
@@ -530,7 +542,7 @@ bool Client::Process() {
 			BuffProcess();
 			DoStaminaUpdate();
 
-			if(tribute_timer.Check()) {
+			if (tribute_timer.Check()) {
 				ToggleTribute(true);	//re-activate the tribute.
 			}
 
@@ -542,18 +554,18 @@ bool Client::Process() {
 				Save(0);
 			}
 
-			if(m_pp.intoxication > 0)
+			if (m_pp.intoxication > 0)
 			{
 				--m_pp.intoxication;
 				CalcBonuses();
 			}
 
-			if(ItemTickTimer.Check())
+			if (ItemTickTimer.Check())
 			{
 				TickItemCheck();
 			}
 
-			if(ItemQuestTimer.Check())
+			if (ItemQuestTimer.Check())
 			{
 				ItemTimerCheck();
 			}
@@ -592,8 +604,8 @@ bool Client::Process() {
 			}
 			return false;
 		}
-		else if(!linkdead_timer.Enabled()){
-			linkdead_timer.Start(RuleI(Zone,ClientLinkdeadMS));
+		else if (!linkdead_timer.Enabled()) {
+			linkdead_timer.Start(RuleI(Zone, ClientLinkdeadMS));
 			client_state = CLIENT_LINKDEAD;
 			AI_Start(CLIENT_LD_TIMEOUT);
 			SendAppearancePacket(AT_Linkdead, 1);
@@ -603,10 +615,10 @@ bool Client::Process() {
 
 	/************ Get all packets from packet manager out queue and process them ************/
 	EQApplicationPacket *app = nullptr;
-	if(!eqs->CheckState(CLOSING))
+	if (!eqs->CheckState(CLOSING))
 	{
-		while(ret && (app = (EQApplicationPacket *)eqs->PopPacket())) {
-			if(app)
+		while (ret && (app = (EQApplicationPacket *)eqs->PopPacket())) {
+			if (app)
 				ret = HandlePacket(app);
 			safe_delete(app);
 		}
@@ -616,8 +628,17 @@ bool Client::Process() {
 	//At this point, we are still connected, everything important has taken
 	//place, now check to see if anybody wants to aggro us.
 	// only if client is not feigned
-	if(zone->CanDoCombat() && ret && !GetFeigned() && scanarea_timer.Check()) {
-		entity_list.CheckClientAggro(this);
+	if (zone->CanDoCombat() && ret && !GetFeigned() && client_scan_npc_aggro_timer.Check()) {
+		int npc_scan_count = 0;
+		for (auto it = close_npcs.begin(); it != close_npcs.end(); ++it) {
+			NPC *npc = it->first;
+
+			if (npc->CheckWillAggro(this) && !npc->CheckAggro(this)) {
+				npc->AddToHateList(this, 25);
+			}
+			npc_scan_count++;
+		}
+		Log.Out(Logs::General, Logs::Aggro, "Checking Reverse Aggro (client->npc) scanned_npcs (%i)", npc_scan_count);
 	}
 #endif
 

@@ -279,6 +279,7 @@ public:
 	bool	RemoveTrap(uint16 delete_id);
 	bool	RemoveObject(uint16 delete_id);
 	bool	RemoveProximity(uint16 delete_npc_id);
+	bool	RemoveNPCFromClientCloseLists(NPC *npc);
 	void	RemoveAllMobs();
 	void	RemoveAllClients();
 	void	RemoveAllNPCs();

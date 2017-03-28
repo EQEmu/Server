@@ -2288,14 +2288,29 @@ bool EntityList::RemoveNPC(uint16 delete_id)
 {
 	auto it = npc_list.find(delete_id);
 	if (it != npc_list.end()) {
+		NPC *npc = it->second;
 		// make sure its proximity is removed
 		RemoveProximity(delete_id);
+		// remove from client close lists
+		RemoveNPCFromClientCloseLists(npc);
 		// remove from the list
 		npc_list.erase(it);
+		
+
 		// remove from limit list if needed
 		if (npc_limit_list.count(delete_id))
 			npc_limit_list.erase(delete_id);
 		return true;
+	}
+	return false;
+}
+
+bool EntityList::RemoveNPCFromClientCloseLists(NPC *npc)
+{
+	auto it = client_list.begin();
+	while (it != client_list.end()) {
+		it->second->close_npcs.erase(npc);
+		++it;
 	}
 	return false;
 }

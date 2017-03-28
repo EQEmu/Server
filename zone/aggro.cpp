@@ -284,7 +284,7 @@ bool Mob::CheckWillAggro(Mob *mob) {
 	if(( t1 > iAggroRange)
 		|| ( t2 > iAggroRange)
 		|| ( t3 > iAggroRange)
-		||(mob->IsInvisible(this))
+		|| (mob->IsInvisible(this))
 		|| (mob->IsClient() &&
 			(!mob->CastToClient()->Connected()
 				|| mob->CastToClient()->IsLD()

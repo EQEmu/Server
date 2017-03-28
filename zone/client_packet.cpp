@@ -4580,6 +4580,34 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app)
 		rewind_timer.Start(30000, true);
 	}
 
+
+	/* Handle client aggro scanning timers NPCs */
+	is_client_moving = (ppu->y_pos == m_Position.y && ppu->x_pos == m_Position.x) ? false : true;
+
+	if (is_client_moving) {
+		Log.Out(Logs::Detail, Logs::Normal, "ClientUpdate: Client is moving - scan timer is: %u", client_scan_npc_aggro_timer.GetDuration());
+		if (client_scan_npc_aggro_timer.GetDuration() > 1000) {
+
+			npc_close_scan_timer.Disable();
+			npc_close_scan_timer.Start(500);
+
+			client_scan_npc_aggro_timer.Disable();
+			client_scan_npc_aggro_timer.Start(500);
+
+		}
+	}
+	else {
+		Log.Out(Logs::Detail, Logs::Normal, "ClientUpdate: Client is NOT moving - scan timer is: %u", client_scan_npc_aggro_timer.GetDuration());
+		if (client_scan_npc_aggro_timer.GetDuration() < 1000) {
+
+			npc_close_scan_timer.Disable();
+			npc_close_scan_timer.Start(6000);
+
+			client_scan_npc_aggro_timer.Disable();
+			client_scan_npc_aggro_timer.Start(3000);
+		}
+	}
+
 	// Outgoing client packet
 	float tmpheading = EQ19toFloat(ppu->heading);
 	/* The clients send an update at best every 1.3 seconds

@@ -135,7 +135,7 @@ Client::Client(EQStreamInterface* ieqs)
 	forget_timer(0),
 	autosave_timer(RuleI(Character, AutosaveIntervalS) * 1000),
 #ifdef REVERSE_AGGRO
-	scanarea_timer(RuleI(Aggro, ClientAggroCheckInterval) * 1000),
+	client_scan_npc_aggro_timer(RuleI(Aggro, ClientAggroCheckInterval) * 1000),
 #endif
 	tribute_timer(Tribute_duration),
 	proximity_timer(ClientProximity_interval),
@@ -160,7 +160,8 @@ Client::Client(EQStreamInterface* ieqs)
 	m_AutoAttackPosition(0.0f, 0.0f, 0.0f, 0.0f),
 	m_AutoAttackTargetLocation(0.0f, 0.0f, 0.0f),
 	last_region_type(RegionTypeUnsupported),
-	m_dirtyautohaters(false)
+	m_dirtyautohaters(false),
+	npc_close_scan_timer(6000)
 {
 	for(int cf=0; cf < _FilterCount; cf++)
 		ClientFilters[cf] = FilterShow;
@@ -357,6 +358,8 @@ Client::~Client() {
 		m_tradeskill_object->Close();
 		m_tradeskill_object = nullptr;
 	}
+
+	close_npcs.clear();
 
 	if(IsDueling() && GetDuelTarget() != 0) {
 		Entity* entity = entity_list.GetID(GetDuelTarget());
