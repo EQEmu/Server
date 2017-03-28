@@ -6356,7 +6356,7 @@ void Client::Doppelganger(uint16 spell_id, Mob *target, const char *name_overrid
 		return;
 	}
 
-	AA_SwarmPet pet;
+	SwarmPet_Struct pet;
 	pet.count = pet_count;
 	pet.duration = pet_duration;
 	pet.npc_id = record.npc_type;
@@ -6431,33 +6431,35 @@ void Client::Doppelganger(uint16 spell_id, Mob *target, const char *name_overrid
 			memcpy(npc_dup, made_npc, sizeof(NPCType));
 		}
 
-		NPC* npca = new NPC(
+		NPC* swarm_pet_npc = new NPC(
 				(npc_dup!=nullptr)?npc_dup:npc_type,	//make sure we give the NPC the correct data pointer
 				0,
 				GetPosition() + glm::vec4(swarmPetLocations[summon_count], 0.0f, 0.0f),
 				FlyMode3);
 
-		if(!npca->GetSwarmInfo()){
-			auto nSI = new AA_SwarmPetInfo;
-			npca->SetSwarmInfo(nSI);
-			npca->GetSwarmInfo()->duration = new Timer(pet_duration*1000);
+		if(!swarm_pet_npc->GetSwarmInfo()){
+			auto nSI = new SwarmPet;
+			swarm_pet_npc->SetSwarmInfo(nSI);
+			swarm_pet_npc->GetSwarmInfo()->duration = new Timer(pet_duration*1000);
 		}
 		else{
-			npca->GetSwarmInfo()->duration->Start(pet_duration*1000);
+			swarm_pet_npc->GetSwarmInfo()->duration->Start(pet_duration*1000);
 		}
 
-		npca->GetSwarmInfo()->owner_id = GetID();
+		swarm_pet_npc->StartSwarmTimer(pet_duration * 1000);
+
+		swarm_pet_npc->GetSwarmInfo()->owner_id = GetID();
 
 		// Give the pets alittle more agro than the caster and then agro them on the target
-		target->AddToHateList(npca, (target->GetHateAmount(this) + 100), (target->GetDamageAmount(this) + 100));
-		npca->AddToHateList(target, 1000, 1000);
-		npca->GetSwarmInfo()->target = target->GetID();
+		target->AddToHateList(swarm_pet_npc, (target->GetHateAmount(this) + 100), (target->GetDamageAmount(this) + 100));
+		swarm_pet_npc->AddToHateList(target, 1000, 1000);
+		swarm_pet_npc->GetSwarmInfo()->target = target->GetID();
 
 		//we allocated a new NPC type object, give the NPC ownership of that memory
 		if(npc_dup != nullptr)
-			npca->GiveNPCTypeData(npc_dup);
+			swarm_pet_npc->GiveNPCTypeData(npc_dup);
 
-		entity_list.AddNPC(npca);
+		entity_list.AddNPC(swarm_pet_npc);
 		summon_count--;
 	}
 }

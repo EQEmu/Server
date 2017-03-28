@@ -2557,6 +2557,7 @@ void NPC::ClearLastName()
 
 void NPC::DepopSwarmPets()
 {
+
 	if (GetSwarmInfo()) {
 		if (GetSwarmInfo()->duration->Check(false)){
 			Mob* owner = entity_list.GetMobID(GetSwarmInfo()->owner_id);
