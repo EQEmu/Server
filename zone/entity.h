@@ -461,7 +461,7 @@ public:
 	inline const std::unordered_map<uint16, Client *> &GetClientList() { return client_list; }
 	inline const std::unordered_map<uint16, Corpse *> &GetCorpseList() { return corpse_list; }
 	inline const std::unordered_map<uint16, Object *> &GetObjectList() { return object_list; }
-	inline const std::unordered_map<uint16, Doors *> &GetDoorList() { return door_list; }
+	inline const std::unordered_map<uint16, Doors *> &GetDoorsList() { return door_list; }
 
 	void	DepopAll(int NPCTypeID, bool StartSpawnTimer = true);
 
