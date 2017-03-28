@@ -23,17 +23,9 @@
 
 ThreadReturnType EQStreamFactoryReaderLoop(void *eqfs)
 {
-EQStreamFactory *fs=(EQStreamFactory *)eqfs;
-
-#ifndef WIN32
-	Log.Out(Logs::Detail, Logs::None,  "Starting EQStreamFactoryReaderLoop with thread ID %d", pthread_self());
-#endif
+	EQStreamFactory *fs=(EQStreamFactory *)eqfs;
 
 	fs->ReaderLoop();
-
-#ifndef WIN32
-	Log.Out(Logs::Detail, Logs::None,  "Ending EQStreamFactoryReaderLoop with thread ID %d", pthread_self());
-#endif
 
 	THREAD_RETURN(nullptr);
 }
@@ -42,15 +34,7 @@ ThreadReturnType EQStreamFactoryWriterLoop(void *eqfs)
 {
 	EQStreamFactory *fs=(EQStreamFactory *)eqfs;
 
-#ifndef WIN32
-	Log.Out(Logs::Detail, Logs::None,  "Starting EQStreamFactoryWriterLoop with thread ID %d", pthread_self());
-#endif
-
 	fs->WriterLoop();
-
-#ifndef WIN32
-	Log.Out(Logs::Detail, Logs::None,  "Ending EQStreamFactoryWriterLoop with thread ID %d", pthread_self());
-#endif
 
 	THREAD_RETURN(nullptr);
 }
