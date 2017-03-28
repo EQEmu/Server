@@ -1381,7 +1381,8 @@ void Mob::SendHPUpdate(bool skip_self)
 	// send to self - we need the actual hps here
 	if(IsClient() && (!skip_self || dospam)) {
 
-		this->CastToClient()->SendHPUpdateMarquee();
+		if (RuleB(Character, MarqueeHPUpdates))
+			this->CastToClient()->SendHPUpdateMarquee();
 
 		auto hp_app2 = new EQApplicationPacket(OP_HPUpdate, sizeof(SpawnHPUpdate_Struct));
 		SpawnHPUpdate_Struct* ds = (SpawnHPUpdate_Struct*)hp_app2->pBuffer;

@@ -8659,9 +8659,6 @@ void Client::QuestReward(Mob* target, uint32 copper, uint32 silver, uint32 gold,
 }
 
 void Client::SendHPUpdateMarquee(){
-	if (!RuleB(Character, MarqueeHPUpdates))
-		return;
-
 	if (!this || !this->IsClient() || !this->cur_hp || !this->max_hp)
 		return;
 
