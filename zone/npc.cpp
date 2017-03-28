@@ -587,8 +587,7 @@ void NPC::RemoveCash() {
 
 bool NPC::Process()
 {
-	if (IsStunned() && stunned_timer.Check())
-	{
+	if (IsStunned() && stunned_timer.Check()) {
 		Mob::UnStun();
 		this->spun_timer.Disable();
 	}
@@ -608,58 +607,60 @@ bool NPC::Process()
 
 	SpellProcess();
 
-	if(tic_timer.Check())
-	{
+	if (tic_timer.Check()) {
 		parse->EventNPC(EVENT_TICK, this, nullptr, "", 0);
 		BuffProcess();
 
-		if(currently_fleeing)
+		if (currently_fleeing)
 			ProcessFlee();
 
 		uint32 bonus = 0;
 
-		if(GetAppearance() == eaSitting)
-			bonus+=3;
+		if (GetAppearance() == eaSitting)
+			bonus += 3;
 
 		int32 OOCRegen = 0;
-		if(oocregen > 0){ //should pull from Mob class
+		if (oocregen > 0) { //should pull from Mob class
 			OOCRegen += GetMaxHP() * oocregen / 100;
-			}
+		}
 		//Lieka Edit:Fixing NPC regen.NPCs should regen to full during a set duration, not based on their HPs.Increase NPC's HPs by % of total HPs / tick.
-		if((GetHP() < GetMaxHP()) && !IsPet()) {
-			if(!IsEngaged()) {//NPC out of combat
-				if(GetNPCHPRegen() > OOCRegen)
+		if ((GetHP() < GetMaxHP()) && !IsPet()) {
+			if (!IsEngaged()) {//NPC out of combat
+				if (GetNPCHPRegen() > OOCRegen)
 					SetHP(GetHP() + GetNPCHPRegen());
 				else
 					SetHP(GetHP() + OOCRegen);
-			} else
-				SetHP(GetHP()+GetNPCHPRegen());
-		} else if(GetHP() < GetMaxHP() && GetOwnerID() !=0) {
-			if(!IsEngaged()) //pet
-				SetHP(GetHP()+GetNPCHPRegen()+bonus+(GetLevel()/5));
+			}
 			else
-				SetHP(GetHP()+GetNPCHPRegen()+bonus);
-		} else
-			SetHP(GetHP()+GetNPCHPRegen());
+				SetHP(GetHP() + GetNPCHPRegen());
+		}
+		else if (GetHP() < GetMaxHP() && GetOwnerID() != 0) {
+			if (!IsEngaged()) //pet
+				SetHP(GetHP() + GetNPCHPRegen() + bonus + (GetLevel() / 5));
+			else
+				SetHP(GetHP() + GetNPCHPRegen() + bonus);
+		}
+		else
+			SetHP(GetHP() + GetNPCHPRegen());
 
-		if(GetMana() < GetMaxMana()) {
-			SetMana(GetMana()+mana_regen+bonus);
+		if (GetMana() < GetMaxMana()) {
+			SetMana(GetMana() + mana_regen + bonus);
 		}
 
 
-		if(zone->adv_data && !p_depop)
+		if (zone->adv_data && !p_depop)
 		{
 			ServerZoneAdventureDataReply_Struct* ds = (ServerZoneAdventureDataReply_Struct*)zone->adv_data;
-			if(ds->type == Adventure_Rescue && ds->data_id == GetNPCTypeID())
+			if (ds->type == Adventure_Rescue && ds->data_id == GetNPCTypeID())
 			{
 				Mob *o = GetOwner();
-				if(o && o->IsClient())
+				if (o && o->IsClient())
 				{
 					float x_diff = ds->dest_x - GetX();
 					float y_diff = ds->dest_y - GetY();
 					float z_diff = ds->dest_z - GetZ();
 					float dist = ((x_diff * x_diff) + (y_diff * y_diff) + (z_diff * z_diff));
-					if(dist < RuleR(Adventure, DistanceForRescueComplete))
+					if (dist < RuleR(Adventure, DistanceForRescueComplete))
 					{
 						zone->DoAdventureCountIncrease();
 						Say("You don't know what this means to me. Thank you so much for finding and saving me from"
@@ -692,8 +693,6 @@ bool NPC::Process()
 		if(viral_timer_counter > 999)
 			viral_timer_counter = 0;
 	}
-
-	ProjectileAttack();
 
 	if(spellbonuses.GravityEffect == 1) {
 		if(gravity_timer.Check())

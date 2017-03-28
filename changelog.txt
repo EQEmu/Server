@@ -6,6 +6,7 @@ Akkadius: [Performance] Fixed a large overhead issue where every single NPC in a
 Akkadius: [Performance] Removed a timer where clients would constantly calculate light amount on equipment every 600ms, instead 
 	clients will update light when changing equipment or entering a zone
 Akkadius: [Performance] Disabled enraged timer checks for NPC's that do not actually have enrage as a special attack
+Akkadius: [Performance] Don't process ProjectileAttack checks for NPC's that are not engaged in any combat
 
 == 03/27/2017 ==
 Akkadius: [Performance] Reworked how client to NPC aggro checks are made

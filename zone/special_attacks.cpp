@@ -956,7 +956,6 @@ void Mob::ProjectileAttack()
 {
 	if (!HasProjectileAttack())
 		return;
-	;
 
 	Mob *target = nullptr;
 	bool disable = true;

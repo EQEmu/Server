@@ -1011,8 +1011,8 @@ void Mob::AI_Process() {
 		CastToNPC()->CheckSignal();
 	}
 
-	if (engaged)
-	{
+	if (engaged) {
+
 		if (!(m_PlayerState & static_cast<uint32>(PlayerState::Aggressive)))
 			SendAddPlayerState(PlayerState::Aggressive);
 		// we are prevented from getting here if we are blind and don't have a target in range
@@ -1039,8 +1039,7 @@ void Mob::AI_Process() {
 		if (!target)
 			return;
 
-		if (target->IsCorpse())
-		{
+		if (target->IsCorpse()) {
 			RemoveFromHateList(this);
 			return;
 		}
@@ -1056,6 +1055,8 @@ void Mob::AI_Process() {
 
 		if (DivineAura())
 			return;
+
+		ProjectileAttack();
 
 		auto npcSpawnPoint = CastToNPC()->GetSpawnPoint();
 		if (GetSpecialAbility(TETHER)) {
@@ -1255,6 +1256,7 @@ void Mob::AI_Process() {
 
 			}
 			AI_EngagedCastCheck();
+
 		}	//end is within combat rangepet
 		else {
 			//we cannot reach our target...
