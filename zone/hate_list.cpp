@@ -364,12 +364,20 @@ Mob *HateList::GetEntWithMostHateOnList(Mob *center, Mob *skip)
 
 			int64 current_hate = cur->stored_hate_amount;
 
+#ifdef BOTS
+			if (cur->entity_on_hatelist->IsClient() || cur->entity_on_hatelist->IsBot()){
+
+				if (cur->entity_on_hatelist->IsClient() && cur->entity_on_hatelist->CastToClient()->IsSitting()){
+					aggro_mod += RuleI(Aggro, SittingAggroMod);
+				}
+#else
 			if (cur->entity_on_hatelist->IsClient()){
 
 				if (cur->entity_on_hatelist->CastToClient()->IsSitting()){
 					aggro_mod += RuleI(Aggro, SittingAggroMod);
 				}
-
+#endif
+				
 				if (center){
 					if (center->GetTarget() == cur->entity_on_hatelist)
 						aggro_mod += RuleI(Aggro, CurrentTargetAggroMod);
