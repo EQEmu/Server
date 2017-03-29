@@ -3300,7 +3300,7 @@ void Mob::CommonDamage(Mob* attacker, int &damage, const uint16 spell_id, const 
 
 		SetHP(GetHP() - damage);
 
-		if (IsClient())
+		if (IsClient() && RuleB(Character, MarqueeHPUpdates))
 			this->CastToClient()->SendHPUpdateMarquee();
 
 		if(HasDied()) {

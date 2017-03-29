@@ -550,7 +550,7 @@ int main(int argc, char** argv) {
 #endif
 #endif
 		}	//end extra profiler block 
-		if (is_zone_loaded) {
+		if (is_zone_loaded && numclients > 0) {
 			Sleep(ZoneTimerResolution);
 		}
 		else {
