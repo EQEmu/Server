@@ -1,5 +1,13 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 03/30/2017 ==
+Akkadius: [Performance] Fixed an overhead issue where many hot paths would trigger quest subroutines and beneath that the code would
+	try to see if a quest existed perpetually (checking if file exists) even though it should have determined the quest 
+	didn't exist the first time.
+	- This caused a lot of overhead in an instance where an entire zone of NPC's is pathing, triggering EVENT_WAYPOINT_ARRIVE
+	and EVENT_WAYPOINT_DEPART when there is no global_npc.pl/lua, or all NPC's pathing don't have a quest assigned, similar 
+	behavior would occur. This goes for any other type of quests: spells, items, encounters etc.
+
 == 03/28/2017 ==
 Akkadius: [Performance] Fixed a large overhead issue where every single NPC in a zone was checking to depop themselves
 	as a swarm pet every 3ms regardless of being a swarm pet or not. Swarm pets now check to depop only when their timer is up
