@@ -3784,7 +3784,9 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob *spelltar, bool reflect, bool use_r
 		if(reflect_chance) {
 			Message_StringID(MT_Spells, SPELL_REFLECT, GetCleanName(), spelltar->GetCleanName());
 			CheckNumHitsRemaining(NumHit::ReflectSpell);
-			SpellOnTarget(spell_id, this, true, use_resist_adjust, resist_adjust);
+			// caster actually appears to change
+			// ex. During OMM fight you click your reflect mask and you get the recourse from the reflected spell
+			spelltar->SpellOnTarget(spell_id, this, true, use_resist_adjust, resist_adjust);
 			safe_delete(action_packet);
 			return false;
 		}
