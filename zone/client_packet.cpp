@@ -8545,7 +8545,8 @@ void Client::Handle_OP_ItemVerifyRequest(const EQApplicationPacket *app)
 		(spells[spell_id].targettype == ST_Ring) ||
 		(IsSilenced() && !IsDiscipline(spell_id)) ||
 		(IsAmnesiad() && IsDiscipline(spell_id)) ||
-		(IsDetrimentalSpell(spell_id) && !zone->CanDoCombat())
+		(IsDetrimentalSpell(spell_id) && !zone->CanDoCombat()) ||
+		inst->GetExp() <= 0 // charms don't have spells when less than 0
 		)
 		)
 	{
