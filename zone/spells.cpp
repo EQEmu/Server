@@ -5399,7 +5399,7 @@ int Mob::GetCasterLevel(uint16 spell_id) {
 	int level = GetLevel();
 	level += itembonuses.effective_casting_level + spellbonuses.effective_casting_level + aabonuses.effective_casting_level;
 	Log.Out(Logs::Detail, Logs::Spells, "Determined effective casting level %d+%d+%d=%d", GetLevel(), spellbonuses.effective_casting_level, itembonuses.effective_casting_level, level);
-	return(level);
+	return std::max(1, level);
 }
 
 //this method does NOT tell the client to stop singing the song.
