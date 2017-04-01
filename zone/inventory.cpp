@@ -1823,7 +1823,7 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 			}
 			SetMaterial(dst_slot_id,src_inst->GetItem()->ID);
 		}
-		if(!m_inv.SwapItem(src_slot_id, dst_slot_id)) { return false; }
+		if(!m_inv.SwapItem(src_slot_id, dst_slot_id, GetRace(), GetClass(), GetDeity(), GetLevel())) { return false; }
 		Log(Logs::Detail, Logs::Inventory, "Moving entire item from slot %d to slot %d", src_slot_id, dst_slot_id);
 
 		if (src_slot_id <= EQEmu::legacy::EQUIPMENT_END || src_slot_id == EQEmu::inventory::slotPowerSource) {
