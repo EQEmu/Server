@@ -1220,7 +1220,7 @@ void Client::ChannelMessageSend(const char* from, const char* to, uint8 chan_num
 	QueuePacket(&app);
 
 	if ((chan_num == 2) && (ListenerSkill < 100)) {	// group message in unmastered language, check for skill up
-		if ((m_pp.languages[language] <= lang_skill) && (from != this->GetName()))
+		if (m_pp.languages[language] <= lang_skill)
 			CheckLanguageSkillIncrease(language, lang_skill);
 	}
 }
