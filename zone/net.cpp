@@ -367,14 +367,17 @@ int main(int argc, char** argv) {
 #ifdef BOTS
 	Log(Logs::General, Logs::Zone_Server, "Loading bot commands");
 	int botretval = bot_command_init();
-	if (botretval<0)
+	if (botretval < 0) {
 		Log(Logs::General, Logs::Error, "Bot command loading FAILED");
-	else
+	}
+	else {
 		Log(Logs::General, Logs::Zone_Server, "%d bot commands loaded", botretval);
+	}
 
 	Log(Logs::General, Logs::Zone_Server, "Loading bot spell casting chances");
-	if (!botdb.LoadBotSpellCastingChances())
+	if (!botdb.LoadBotSpellCastingChances()) {
 		Log(Logs::General, Logs::Error, "Bot spell casting chances loading FAILED");
+	}
 #endif
 
 	if(RuleB(TaskSystem, EnableTaskSystem)) {
