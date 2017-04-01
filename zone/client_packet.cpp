@@ -13252,7 +13252,7 @@ void Client::Handle_OP_TargetCommand(const EQApplicationPacket *app)
 				GetTarget()->IsTargeted(1);
 				return;
 			}
-			else if (GetTaget()->IsPetOwnerClient())
+			else if (GetTarget()->IsPetOwnerClient())
 			{
 				GetTarget()->IsTargeted(1);
 				return;
