@@ -105,7 +105,7 @@ uint32 numclients = 0;
 uint32 numzones = 0;
 bool holdzones = false;
 const WorldConfig *Config;
-EQEmuLogSys Log;
+EQEmuLogSys LogSys;
 
 extern ConsoleList console_list;
 
@@ -113,7 +113,7 @@ void CatchSignal(int sig_num);
 
 int main(int argc, char** argv) {
 	RegisterExecutablePlatform(ExePlatformWorld);
-	Log.LoadLogSettingsDefaults();
+	LogSys.LoadLogSettingsDefaults();
 
 
 
@@ -130,30 +130,30 @@ int main(int argc, char** argv) {
 	}
 
 	// Load server configuration
-	Log.Out(Logs::General, Logs::World_Server, "Loading server configuration..");
+	Log(Logs::General, Logs::World_Server, "Loading server configuration..");
 	if (!WorldConfig::LoadConfig()) {
-		Log.Out(Logs::General, Logs::World_Server, "Loading server configuration failed.");
+		Log(Logs::General, Logs::World_Server, "Loading server configuration failed.");
 		return 1;
 	}
 	Config=WorldConfig::get();
 
-	Log.Out(Logs::General, Logs::World_Server, "CURRENT_VERSION: %s", CURRENT_VERSION);
+	Log(Logs::General, Logs::World_Server, "CURRENT_VERSION: %s", CURRENT_VERSION);
 
 	#ifdef _DEBUG
 		_CrtSetDbgFlag( _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 	#endif
 
 	if (signal(SIGINT, CatchSignal) == SIG_ERR)	{
-		Log.Out(Logs::General, Logs::World_Server, "Could not set signal handler");
+		Log(Logs::General, Logs::World_Server, "Could not set signal handler");
 		return 1;
 	}
 	if (signal(SIGTERM, CatchSignal) == SIG_ERR)	{
-		Log.Out(Logs::General, Logs::World_Server, "Could not set signal handler");
+		Log(Logs::General, Logs::World_Server, "Could not set signal handler");
 		return 1;
 	}
 	#ifndef WIN32
 	if (signal(SIGPIPE, SIG_IGN) == SIG_ERR)	{
-		Log.Out(Logs::General, Logs::World_Server, "Could not set signal handler");
+		Log(Logs::General, Logs::World_Server, "Could not set signal handler");
 		return 1;
 	}
 	#endif
@@ -162,7 +162,7 @@ int main(int argc, char** argv) {
 	if (Config->LoginCount == 0) {
 		if (Config->LoginHost.length()) {
 			loginserverlist.Add(Config->LoginHost.c_str(), Config->LoginPort, Config->LoginAccount.c_str(), Config->LoginPassword.c_str());
-			Log.Out(Logs::General, Logs::World_Server, "Added loginserver %s:%i", Config->LoginHost.c_str(), Config->LoginPort);
+			Log(Logs::General, Logs::World_Server, "Added loginserver %s:%i", Config->LoginHost.c_str(), Config->LoginPort);
 		}
 	} else {
 		LinkedList<LoginConfig*> loginlist=Config->loginlist;
@@ -170,26 +170,26 @@ int main(int argc, char** argv) {
 		iterator.Reset();
 		while(iterator.MoreElements()) {
 			loginserverlist.Add(iterator.GetData()->LoginHost.c_str(), iterator.GetData()->LoginPort, iterator.GetData()->LoginAccount.c_str(), iterator.GetData()->LoginPassword.c_str());
-			Log.Out(Logs::General, Logs::World_Server, "Added loginserver %s:%i", iterator.GetData()->LoginHost.c_str(), iterator.GetData()->LoginPort);
+			Log(Logs::General, Logs::World_Server, "Added loginserver %s:%i", iterator.GetData()->LoginHost.c_str(), iterator.GetData()->LoginPort);
 			iterator.Advance();
 		}
 	}
 
-	Log.Out(Logs::General, Logs::World_Server, "Connecting to MySQL...");
+	Log(Logs::General, Logs::World_Server, "Connecting to MySQL...");
 	if (!database.Connect(
 		Config->DatabaseHost.c_str(),
 		Config->DatabaseUsername.c_str(),
 		Config->DatabasePassword.c_str(),
 		Config->DatabaseDB.c_str(),
 		Config->DatabasePort)) {
-		Log.Out(Logs::General, Logs::World_Server, "Cannot continue without a database connection.");
+		Log(Logs::General, Logs::World_Server, "Cannot continue without a database connection.");
 		return 1;
 	}
 	guild_mgr.SetDatabase(&database);
 
 	/* Register Log System and Settings */
-	database.LoadLogSettings(Log.log_settings);
-	Log.StartFileLogs();
+	database.LoadLogSettings(LogSys.log_settings);
+	LogSys.StartFileLogs();
 
 	bool ignore_db = false;
 	if (argc >= 2) {
@@ -286,65 +286,65 @@ int main(int argc, char** argv) {
 	}
 
 	if(Config->WorldHTTPEnabled) {
-		Log.Out(Logs::General, Logs::World_Server, "Starting HTTP world service...");
+		Log(Logs::General, Logs::World_Server, "Starting HTTP world service...");
 		http_server.Start(Config->WorldHTTPPort, Config->WorldHTTPMimeFile.c_str());
 	} else {
-		Log.Out(Logs::General, Logs::World_Server, "HTTP world service disabled.");
+		Log(Logs::General, Logs::World_Server, "HTTP world service disabled.");
 	}
 
 	if(!ignore_db) {
-		Log.Out(Logs::General, Logs::World_Server, "Checking Database Conversions..");
+		Log(Logs::General, Logs::World_Server, "Checking Database Conversions..");
 		database.CheckDatabaseConversions();
 	}
-	Log.Out(Logs::General, Logs::World_Server, "Loading variables..");
+	Log(Logs::General, Logs::World_Server, "Loading variables..");
 	database.LoadVariables();
 
 	std::string hotfix_name;
 	if(database.GetVariable("hotfix_name", hotfix_name)) {
 		if (!hotfix_name.empty()) {
-			Log.Out(Logs::General, Logs::Zone_Server, "Current hotfix in use: '%s'", hotfix_name.c_str());
+			Log(Logs::General, Logs::Zone_Server, "Current hotfix in use: '%s'", hotfix_name.c_str());
 		}
 	}
 
-	Log.Out(Logs::General, Logs::World_Server, "Loading zones..");
+	Log(Logs::General, Logs::World_Server, "Loading zones..");
 	database.LoadZoneNames();
-	Log.Out(Logs::General, Logs::World_Server, "Clearing groups..");
+	Log(Logs::General, Logs::World_Server, "Clearing groups..");
 	database.ClearGroup();
-	Log.Out(Logs::General, Logs::World_Server, "Clearing raids..");
+	Log(Logs::General, Logs::World_Server, "Clearing raids..");
 	database.ClearRaid();
 	database.ClearRaidDetails();
 	database.ClearRaidLeader();
-	Log.Out(Logs::General, Logs::World_Server, "Clearing inventory snapshots..");
+	Log(Logs::General, Logs::World_Server, "Clearing inventory snapshots..");
 	database.ClearInvSnapshots();
-	Log.Out(Logs::General, Logs::World_Server, "Loading items..");
+	Log(Logs::General, Logs::World_Server, "Loading items..");
 	if(!database.LoadItems(hotfix_name))
-		Log.Out(Logs::General, Logs::World_Server, "Error: Could not load item data. But ignoring");
-	Log.Out(Logs::General, Logs::World_Server, "Loading skill caps..");
+		Log(Logs::General, Logs::World_Server, "Error: Could not load item data. But ignoring");
+	Log(Logs::General, Logs::World_Server, "Loading skill caps..");
 	if(!database.LoadSkillCaps(std::string(hotfix_name)))
-		Log.Out(Logs::General, Logs::World_Server, "Error: Could not load skill cap data. But ignoring");
-	Log.Out(Logs::General, Logs::World_Server, "Loading guilds..");
+		Log(Logs::General, Logs::World_Server, "Error: Could not load skill cap data. But ignoring");
+	Log(Logs::General, Logs::World_Server, "Loading guilds..");
 	guild_mgr.LoadGuilds();
 	//rules:
 	{
 		std::string tmp;
 		if (database.GetVariable("RuleSet", tmp)) {
-			Log.Out(Logs::General, Logs::World_Server, "Loading rule set '%s'", tmp.c_str());
+			Log(Logs::General, Logs::World_Server, "Loading rule set '%s'", tmp.c_str());
 			if(!RuleManager::Instance()->LoadRules(&database, tmp.c_str())) {
-				Log.Out(Logs::General, Logs::World_Server, "Failed to load ruleset '%s', falling back to defaults.", tmp.c_str());
+				Log(Logs::General, Logs::World_Server, "Failed to load ruleset '%s', falling back to defaults.", tmp.c_str());
 			}
 		} else {
 			if(!RuleManager::Instance()->LoadRules(&database, "default")) {
-				Log.Out(Logs::General, Logs::World_Server, "No rule set configured, using default rules");
+				Log(Logs::General, Logs::World_Server, "No rule set configured, using default rules");
 			} else {
-				Log.Out(Logs::General, Logs::World_Server, "Loaded default rule set 'default'", tmp.c_str());
+				Log(Logs::General, Logs::World_Server, "Loaded default rule set 'default'", tmp.c_str());
 			}
 		}
 	}
 	if(RuleB(World, ClearTempMerchantlist)){
-		Log.Out(Logs::General, Logs::World_Server, "Clearing temporary merchant lists..");
+		Log(Logs::General, Logs::World_Server, "Clearing temporary merchant lists..");
 		database.ClearMerchantTemp();
 	}
-	Log.Out(Logs::General, Logs::World_Server, "Loading EQ time of day..");
+	Log(Logs::General, Logs::World_Server, "Loading EQ time of day..");
 	TimeOfDay_Struct eqTime;
 	time_t realtime;
 	eqTime = database.LoadTime(realtime);
@@ -352,7 +352,7 @@ int main(int argc, char** argv) {
 	Timer EQTimeTimer(600000);
 	EQTimeTimer.Start(600000);
 	
-	Log.Out(Logs::General, Logs::World_Server, "Loading launcher list..");
+	Log(Logs::General, Logs::World_Server, "Loading launcher list..");
 	launcher_list.LoadList();
 
 	std::string tmp;
@@ -360,45 +360,45 @@ int main(int argc, char** argv) {
 	if (tmp.length() == 1 && tmp[0] == '1') {
 		holdzones = true;
 	}
-	Log.Out(Logs::General, Logs::World_Server, "Reboot zone modes %s",holdzones ? "ON" : "OFF");
+	Log(Logs::General, Logs::World_Server, "Reboot zone modes %s",holdzones ? "ON" : "OFF");
 
-	Log.Out(Logs::General, Logs::World_Server, "Deleted %i stale player corpses from database", database.DeleteStalePlayerCorpses());
+	Log(Logs::General, Logs::World_Server, "Deleted %i stale player corpses from database", database.DeleteStalePlayerCorpses());
 
-	Log.Out(Logs::General, Logs::World_Server, "Loading adventures...");
+	Log(Logs::General, Logs::World_Server, "Loading adventures...");
 	if(!adventure_manager.LoadAdventureTemplates())
 	{
-		Log.Out(Logs::General, Logs::World_Server, "Unable to load adventure templates.");
+		Log(Logs::General, Logs::World_Server, "Unable to load adventure templates.");
 	}
 
 	if(!adventure_manager.LoadAdventureEntries())
 	{
-		Log.Out(Logs::General, Logs::World_Server, "Unable to load adventure templates.");
+		Log(Logs::General, Logs::World_Server, "Unable to load adventure templates.");
 	}
 
 	adventure_manager.Load();
 	adventure_manager.LoadLeaderboardInfo();
 
-	Log.Out(Logs::General, Logs::World_Server, "Purging expired instances");
+	Log(Logs::General, Logs::World_Server, "Purging expired instances");
 	database.PurgeExpiredInstances();
 	Timer PurgeInstanceTimer(450000);
 	PurgeInstanceTimer.Start(450000);
 
-	Log.Out(Logs::General, Logs::World_Server, "Loading char create info...");
+	Log(Logs::General, Logs::World_Server, "Loading char create info...");
 	database.LoadCharacterCreateAllocations();
 	database.LoadCharacterCreateCombos();
 
 	char errbuf[TCPConnection_ErrorBufferSize];
 	if (tcps.Open(Config->WorldTCPPort, errbuf)) {
-		Log.Out(Logs::General, Logs::World_Server,"Zone (TCP) listener started.");
+		Log(Logs::General, Logs::World_Server,"Zone (TCP) listener started.");
 	} else {
-		Log.Out(Logs::General, Logs::World_Server,"Failed to start zone (TCP) listener on port %d:",Config->WorldTCPPort);
-		Log.Out(Logs::General, Logs::World_Server,"        %s",errbuf);
+		Log(Logs::General, Logs::World_Server,"Failed to start zone (TCP) listener on port %d:",Config->WorldTCPPort);
+		Log(Logs::General, Logs::World_Server,"        %s",errbuf);
 		return 1;
 	}
 	if (eqsf.Open()) {
-		Log.Out(Logs::General, Logs::World_Server,"Client (UDP) listener started.");
+		Log(Logs::General, Logs::World_Server,"Client (UDP) listener started.");
 	} else {
-		Log.Out(Logs::General, Logs::World_Server,"Failed to start client (UDP) listener (port 9000)");
+		Log(Logs::General, Logs::World_Server,"Failed to start client (UDP) listener (port 9000)");
 		return 1;
 	}
 
@@ -426,7 +426,7 @@ int main(int argc, char** argv) {
 			//structures and opcodes for that patch.
 			struct in_addr	in;
 			in.s_addr = eqs->GetRemoteIP();
-			Log.Out(Logs::Detail, Logs::World_Server, "New connection from IP %s:%d", inet_ntoa(in),ntohs(eqs->GetRemotePort()));
+			Log(Logs::Detail, Logs::World_Server, "New connection from IP %s:%d", inet_ntoa(in),ntohs(eqs->GetRemotePort()));
 			stream_identifier.AddStream(eqs);	//takes the stream
 		}
 
@@ -441,19 +441,19 @@ int main(int argc, char** argv) {
 			struct in_addr	in;
 			in.s_addr = eqsi->GetRemoteIP();
 			if (RuleB(World, UseBannedIPsTable)){ //Lieka: Check to see if we have the responsibility for blocking IPs.
-				Log.Out(Logs::Detail, Logs::World_Server, "Checking inbound connection %s against BannedIPs table", inet_ntoa(in));
+				Log(Logs::Detail, Logs::World_Server, "Checking inbound connection %s against BannedIPs table", inet_ntoa(in));
 				if (!database.CheckBannedIPs(inet_ntoa(in))){ //Lieka: Check inbound IP against banned IP table.
-					Log.Out(Logs::Detail, Logs::World_Server, "Connection %s PASSED banned IPs check. Processing connection.", inet_ntoa(in));
+					Log(Logs::Detail, Logs::World_Server, "Connection %s PASSED banned IPs check. Processing connection.", inet_ntoa(in));
 					auto client = new Client(eqsi);
 					// @merth: client->zoneattempt=0;
 					client_list.Add(client);
 				} else {
-					Log.Out(Logs::General, Logs::World_Server, "Connection from %s FAILED banned IPs check. Closing connection.", inet_ntoa(in));
+					Log(Logs::General, Logs::World_Server, "Connection from %s FAILED banned IPs check. Closing connection.", inet_ntoa(in));
 					eqsi->Close(); //Lieka: If the inbound IP is on the banned table, close the EQStream.
 				}
 			}
 			if (!RuleB(World, UseBannedIPsTable)){
-					Log.Out(Logs::Detail, Logs::World_Server, "New connection from %s:%d, processing connection", inet_ntoa(in), ntohs(eqsi->GetRemotePort()));
+					Log(Logs::Detail, Logs::World_Server, "New connection from %s:%d, processing connection", inet_ntoa(in), ntohs(eqsi->GetRemotePort()));
 					auto client = new Client(eqsi);
 					// @merth: client->zoneattempt=0;
 					client_list.Add(client);
@@ -469,19 +469,19 @@ int main(int argc, char** argv) {
 			/* World - Tell what is being connected */
 			if (tcpc->GetMode() == EmuTCPConnection::modePacket) {
 				if (tcpc->GetPacketMode() == EmuTCPConnection::packetModeZone) {
-					Log.Out(Logs::General, Logs::World_Server, "New Zone Server from %s:%d", inet_ntoa(in), tcpc->GetrPort());
+					Log(Logs::General, Logs::World_Server, "New Zone Server from %s:%d", inet_ntoa(in), tcpc->GetrPort());
 				}
 				else if (tcpc->GetPacketMode() == EmuTCPConnection::packetModeLauncher) {
-					Log.Out(Logs::General, Logs::World_Server, "New Launcher from %s:%d", inet_ntoa(in), tcpc->GetrPort());
+					Log(Logs::General, Logs::World_Server, "New Launcher from %s:%d", inet_ntoa(in), tcpc->GetrPort());
 				}
 				else if (tcpc->GetPacketMode() == EmuTCPConnection::packetModeUCS) {
-					Log.Out(Logs::General, Logs::World_Server, "New UCS Connection from %s:%d", inet_ntoa(in), tcpc->GetrPort());
+					Log(Logs::General, Logs::World_Server, "New UCS Connection from %s:%d", inet_ntoa(in), tcpc->GetrPort());
 				}
 				else if (tcpc->GetPacketMode() == EmuTCPConnection::packetModeQueryServ) {
-					Log.Out(Logs::General, Logs::World_Server, "New QS Connection from %s:%d", inet_ntoa(in), tcpc->GetrPort());
+					Log(Logs::General, Logs::World_Server, "New QS Connection from %s:%d", inet_ntoa(in), tcpc->GetrPort());
 				}
 				else {
-					Log.Out(Logs::General, Logs::World_Server, "Unsupported packet mode from %s:%d", inet_ntoa(in), tcpc->GetrPort());
+					Log(Logs::General, Logs::World_Server, "Unsupported packet mode from %s:%d", inet_ntoa(in), tcpc->GetrPort());
 				}
 			}
 
@@ -497,10 +497,12 @@ int main(int argc, char** argv) {
 		{
 			TimeOfDay_Struct tod;
 			zoneserver_list.worldclock.GetCurrentEQTimeOfDay(time(0), &tod);
-			if (!database.SaveTime(tod.minute, tod.hour, tod.day, tod.month, tod.year))
-				Log.Out(Logs::General, Logs::World_Server, "Failed to save eqtime.");
-			else
-				Log.Out(Logs::Detail, Logs::World_Server, "EQTime successfully saved.");
+			if (!database.SaveTime(tod.minute, tod.hour, tod.day, tod.month, tod.year)) {
+				Log(Logs::General, Logs::World_Server, "Failed to save eqtime.");
+			}
+			else {
+				Log(Logs::Detail, Logs::World_Server, "EQTime successfully saved.");
+			}
 		}
 		
 		//check for timeouts in other threads
@@ -534,24 +536,24 @@ int main(int argc, char** argv) {
 		}
 		Sleep(20);
 	}
-	Log.Out(Logs::General, Logs::World_Server, "World main loop completed.");
-	Log.Out(Logs::General, Logs::World_Server, "Shutting down console connections (if any).");
+	Log(Logs::General, Logs::World_Server, "World main loop completed.");
+	Log(Logs::General, Logs::World_Server, "Shutting down console connections (if any).");
 	console_list.KillAll();
-	Log.Out(Logs::General, Logs::World_Server, "Shutting down zone connections (if any).");
+	Log(Logs::General, Logs::World_Server, "Shutting down zone connections (if any).");
 	zoneserver_list.KillAll();
-	Log.Out(Logs::General, Logs::World_Server, "Zone (TCP) listener stopped.");
+	Log(Logs::General, Logs::World_Server, "Zone (TCP) listener stopped.");
 	tcps.Close();
-	Log.Out(Logs::General, Logs::World_Server, "Client (UDP) listener stopped.");
+	Log(Logs::General, Logs::World_Server, "Client (UDP) listener stopped.");
 	eqsf.Close();
-	Log.Out(Logs::General, Logs::World_Server, "Signaling HTTP service to stop...");
+	Log(Logs::General, Logs::World_Server, "Signaling HTTP service to stop...");
 	http_server.Stop();
-	Log.CloseFileLogs();
+	LogSys.CloseFileLogs();
 
 	return 0;
 }
 
 void CatchSignal(int sig_num) {
-	Log.Out(Logs::General, Logs::World_Server,"Caught signal %d",sig_num);
+	Log(Logs::General, Logs::World_Server,"Caught signal %d",sig_num);
 	RunLoops = false;
 }
 

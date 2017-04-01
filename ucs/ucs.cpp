@@ -35,7 +35,7 @@
 
 ChatChannelList *ChannelList;
 Clientlist *g_Clientlist;
-EQEmuLogSys Log;
+EQEmuLogSys LogSys;
 TimeoutManager timeout_manager;
 Database database;
 WorldServer *worldserver = nullptr;
@@ -65,7 +65,7 @@ std::string GetMailPrefix() {
 
 int main() {
 	RegisterExecutablePlatform(ExePlatformUCS);
-	Log.LoadLogSettingsDefaults();
+	LogSys.LoadLogSettingsDefaults();
 	set_exception_handler();
 
 	// Check every minute for unused channels we can delete
@@ -74,10 +74,10 @@ int main() {
 
 	Timer InterserverTimer(INTERSERVER_TIMER); // does auto-reconnect
 
-	Log.Out(Logs::General, Logs::UCS_Server, "Starting EQEmu Universal Chat Server.");
+	Log(Logs::General, Logs::UCS_Server, "Starting EQEmu Universal Chat Server.");
 
 	if (!ucsconfig::LoadConfig()) { 
-		Log.Out(Logs::General, Logs::UCS_Server, "Loading server configuration failed."); 
+		Log(Logs::General, Logs::UCS_Server, "Loading server configuration failed."); 
 		return 1;
 	}
 
@@ -85,7 +85,7 @@ int main() {
 
 	WorldShortName = Config->ShortName;
 
-	Log.Out(Logs::General, Logs::UCS_Server, "Connecting to MySQL...");
+	Log(Logs::General, Logs::UCS_Server, "Connecting to MySQL...");
 
 	if (!database.Connect(
 		Config->DatabaseHost.c_str(),
@@ -93,26 +93,26 @@ int main() {
 		Config->DatabasePassword.c_str(),
 		Config->DatabaseDB.c_str(),
 		Config->DatabasePort)) {
-		Log.Out(Logs::General, Logs::UCS_Server, "Cannot continue without a database connection.");
+		Log(Logs::General, Logs::UCS_Server, "Cannot continue without a database connection.");
 		return 1;
 	}
 
 	/* Register Log System and Settings */
-	database.LoadLogSettings(Log.log_settings);
-	Log.StartFileLogs();
+	database.LoadLogSettings(LogSys.log_settings);
+	LogSys.StartFileLogs();
 
 	char tmp[64];
 
 	if (database.GetVariable("RuleSet", tmp, sizeof(tmp)-1)) {
-		Log.Out(Logs::General, Logs::UCS_Server, "Loading rule set '%s'", tmp);
+		Log(Logs::General, Logs::UCS_Server, "Loading rule set '%s'", tmp);
 		if(!RuleManager::Instance()->LoadRules(&database, tmp)) {
-			Log.Out(Logs::General, Logs::UCS_Server, "Failed to load ruleset '%s', falling back to defaults.", tmp);
+			Log(Logs::General, Logs::UCS_Server, "Failed to load ruleset '%s', falling back to defaults.", tmp);
 		}
 	} else {
 		if(!RuleManager::Instance()->LoadRules(&database, "default")) {
-			Log.Out(Logs::General, Logs::UCS_Server, "No rule set configured, using default rules");
+			Log(Logs::General, Logs::UCS_Server, "No rule set configured, using default rules");
 		} else {
-			Log.Out(Logs::General, Logs::UCS_Server, "Loaded default rule set 'default'", tmp);
+			Log(Logs::General, Logs::UCS_Server, "Loaded default rule set 'default'", tmp);
 		}
 	}
 
@@ -120,7 +120,7 @@ int main() {
 
 	if(Config->ChatPort != Config->MailPort)
 	{
-		Log.Out(Logs::General, Logs::UCS_Server, "MailPort and CharPort must be the same in eqemu_config.xml for UCS.");
+		Log(Logs::General, Logs::UCS_Server, "MailPort and CharPort must be the same in eqemu_config.xml for UCS.");
 		exit(1);
 	}
 
@@ -131,11 +131,11 @@ int main() {
 	database.LoadChatChannels();
 
 	if (signal(SIGINT, CatchSignal) == SIG_ERR)	{
-		Log.Out(Logs::General, Logs::UCS_Server, "Could not set signal handler");
+		Log(Logs::General, Logs::UCS_Server, "Could not set signal handler");
 		return 1;
 	}
 	if (signal(SIGTERM, CatchSignal) == SIG_ERR)	{
-		Log.Out(Logs::General, Logs::UCS_Server, "Could not set signal handler");
+		Log(Logs::General, Logs::UCS_Server, "Could not set signal handler");
 		return 1;
 	}
 
@@ -167,7 +167,7 @@ int main() {
 
 	g_Clientlist->CloseAllConnections();
 
-	Log.CloseFileLogs();
+	LogSys.CloseFileLogs();
 
 }
 

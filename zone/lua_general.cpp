@@ -1298,14 +1298,14 @@ double lua_clock() {
 }
 
 void lua_debug(std::string message) {
-	Log.Out(Logs::General, Logs::QuestDebug, message);
+	Log(Logs::General, Logs::QuestDebug, message);
 }
 
 void lua_debug(std::string message, int level) {
 	if (level < Logs::General || level > Logs::Detail)
 		return;
 
-	Log.Out(static_cast<Logs::DebugLevel>(level), Logs::QuestDebug, message);
+	Log(static_cast<Logs::DebugLevel>(level), Logs::QuestDebug, message);
 }
 
 void lua_update_zone_header(std::string type, std::string value) {

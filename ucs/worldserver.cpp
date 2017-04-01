@@ -52,7 +52,7 @@ WorldServer::~WorldServer()
 
 void WorldServer::OnConnected()
 {
-	Log.Out(Logs::Detail, Logs::UCS_Server, "Connected to World.");
+	Log(Logs::Detail, Logs::UCS_Server, "Connected to World.");
 	WorldConnection::OnConnected();
 }
 
@@ -67,7 +67,7 @@ void WorldServer::Process()
 
 	while((pack = tcpc.PopPacket()))
 	{
-		Log.Out(Logs::Detail, Logs::UCS_Server, "Received Opcode: %4X", pack->opcode);
+		Log(Logs::Detail, Logs::UCS_Server, "Received Opcode: %4X", pack->opcode);
 
 		switch(pack->opcode)
 		{
@@ -88,7 +88,7 @@ void WorldServer::Process()
 
 				std::string Message = Buffer;
 
-				Log.Out(Logs::Detail, Logs::UCS_Server, "Player: %s, Sent Message: %s", From, Message.c_str());
+				Log(Logs::Detail, Logs::UCS_Server, "Player: %s, Sent Message: %s", From, Message.c_str());
 
 				Client *c = g_Clientlist->FindCharacter(From);
 
@@ -99,7 +99,7 @@ void WorldServer::Process()
 
 				if(!c)
 				{
-					Log.Out(Logs::Detail, Logs::UCS_Server, "Client not found.");
+					Log(Logs::Detail, Logs::UCS_Server, "Client not found.");
 					break;
 				}
 

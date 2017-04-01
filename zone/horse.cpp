@@ -79,7 +79,7 @@ const NPCType *Horse::BuildHorseType(uint16 spell_id) {
 	}
 
 	if (results.RowCount() != 1) {
-        Log.Out(Logs::General, Logs::Error, "No Database entry for mount: %s, check the horses table", fileName);
+        Log(Logs::General, Logs::Error, "No Database entry for mount: %s, check the horses table", fileName);
         return nullptr;
 	}
 
@@ -122,7 +122,7 @@ void Client::SummonHorse(uint16 spell_id) {
 		return;
 	}
 	if(!Horse::IsHorseSpell(spell_id)) {
-		Log.Out(Logs::General, Logs::Error, "%s tried to summon an unknown horse, spell id %d", GetName(), spell_id);
+		Log(Logs::General, Logs::Error, "%s tried to summon an unknown horse, spell id %d", GetName(), spell_id);
 		return;
 	}
 

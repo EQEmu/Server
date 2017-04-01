@@ -25,7 +25,7 @@
 #include "../../common/rulesys.h"
 #include "../../common/string_util.h"
 
-EQEmuLogSys Log;
+EQEmuLogSys LogSys;
 
 void ImportSpells(SharedDatabase *db);
 void ImportSkillCaps(SharedDatabase *db);
@@ -34,35 +34,35 @@ void ImportDBStrings(SharedDatabase *db);
 
 int main(int argc, char **argv) {
 	RegisterExecutablePlatform(ExePlatformClientImport);
-	Log.LoadLogSettingsDefaults();
+	LogSys.LoadLogSettingsDefaults();
 	set_exception_handler();
 
-	Log.Out(Logs::General, Logs::Status, "Client Files Import Utility");
+	Log(Logs::General, Logs::Status, "Client Files Import Utility");
 	if(!EQEmuConfig::LoadConfig()) {
-		Log.Out(Logs::General, Logs::Error, "Unable to load configuration file.");
+		Log(Logs::General, Logs::Error, "Unable to load configuration file.");
 		return 1;
 	}
 
 	auto Config = EQEmuConfig::get();
 
 	SharedDatabase database;
-	Log.Out(Logs::General, Logs::Status, "Connecting to database...");
+	Log(Logs::General, Logs::Status, "Connecting to database...");
 	if(!database.Connect(Config->DatabaseHost.c_str(), Config->DatabaseUsername.c_str(),
 		Config->DatabasePassword.c_str(), Config->DatabaseDB.c_str(), Config->DatabasePort)) {
-		Log.Out(Logs::General, Logs::Error, "Unable to connect to the database, cannot continue without a "
+		Log(Logs::General, Logs::Error, "Unable to connect to the database, cannot continue without a "
 			"database connection");
 		return 1;
 	}
 
-	database.LoadLogSettings(Log.log_settings);
-	Log.StartFileLogs();
+	database.LoadLogSettings(LogSys.log_settings);
+	LogSys.StartFileLogs();
 
 	ImportSpells(&database);
 	ImportSkillCaps(&database);
 	ImportBaseData(&database);
 	ImportDBStrings(&database);
 
-	Log.CloseFileLogs();
+	LogSys.CloseFileLogs();
 	
 	return 0;
 }
@@ -97,10 +97,10 @@ bool IsStringField(int i) {
 }
 
 void ImportSpells(SharedDatabase *db) {
-	Log.Out(Logs::General, Logs::Status, "Importing Spells...");
+	Log(Logs::General, Logs::Status, "Importing Spells...");
 	FILE *f = fopen("import/spells_us.txt", "r");
 	if(!f) {
-		Log.Out(Logs::General, Logs::Error, "Unable to open import/spells_us.txt to read, skipping.");
+		Log(Logs::General, Logs::Error, "Unable to open import/spells_us.txt to read, skipping.");
 		return;
 	}
 
@@ -173,23 +173,23 @@ void ImportSpells(SharedDatabase *db) {
 
 		spells_imported++;
 		if(spells_imported % 1000 == 0) {
-			Log.Out(Logs::General, Logs::Status, "%d spells imported.", spells_imported);
+			Log(Logs::General, Logs::Status, "%d spells imported.", spells_imported);
 		}
 	}
 
 	if(spells_imported % 1000 != 0) {
-		Log.Out(Logs::General, Logs::Status, "%d spells imported.", spells_imported);
+		Log(Logs::General, Logs::Status, "%d spells imported.", spells_imported);
 	}
 
 	fclose(f);
 }
 
 void ImportSkillCaps(SharedDatabase *db) {
-	Log.Out(Logs::General, Logs::Status, "Importing Skill Caps...");
+	Log(Logs::General, Logs::Status, "Importing Skill Caps...");
 
 	FILE *f = fopen("import/SkillCaps.txt", "r");
 	if(!f) {
-		Log.Out(Logs::General, Logs::Error, "Unable to open import/SkillCaps.txt to read, skipping.");
+		Log(Logs::General, Logs::Error, "Unable to open import/SkillCaps.txt to read, skipping.");
 		return;
 	}
 
@@ -220,11 +220,11 @@ void ImportSkillCaps(SharedDatabase *db) {
 }
 
 void ImportBaseData(SharedDatabase *db) {
-	Log.Out(Logs::General, Logs::Status, "Importing Base Data...");
+	Log(Logs::General, Logs::Status, "Importing Base Data...");
 
 	FILE *f = fopen("import/BaseData.txt", "r");
 	if(!f) {
-		Log.Out(Logs::General, Logs::Error, "Unable to open import/BaseData.txt to read, skipping.");
+		Log(Logs::General, Logs::Error, "Unable to open import/BaseData.txt to read, skipping.");
 		return;
 	}
 
@@ -265,11 +265,11 @@ void ImportBaseData(SharedDatabase *db) {
 }
 
 void ImportDBStrings(SharedDatabase *db) {
-	Log.Out(Logs::General, Logs::Status, "Importing DB Strings...");
+	Log(Logs::General, Logs::Status, "Importing DB Strings...");
 
 	FILE *f = fopen("import/dbstr_us.txt", "r");
 	if(!f) {
-		Log.Out(Logs::General, Logs::Error, "Unable to open import/dbstr_us.txt to read, skipping.");
+		Log(Logs::General, Logs::Error, "Unable to open import/dbstr_us.txt to read, skipping.");
 		return;
 	}
 

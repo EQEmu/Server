@@ -1173,7 +1173,7 @@ int16 EQEmu::InventoryProfile::_PutItem(int16 slot_id, ItemInstance* inst)
 	}
 	
 	if (result == INVALID_INDEX) {
-		Log.Out(Logs::General, Logs::Error, "InventoryProfile::_PutItem: Invalid slot_id specified (%i) with parent slot id (%i)", slot_id, parentSlot);
+		Log(Logs::General, Logs::Error, "InventoryProfile::_PutItem: Invalid slot_id specified (%i) with parent slot id (%i)", slot_id, parentSlot);
 		InventoryProfile::MarkDirty(inst); // Slot not found, clean up
 	}
 

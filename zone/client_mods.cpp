@@ -1021,7 +1021,7 @@ int32 Client::acmod()
 		//seems about 21 agil per extra AC pt over 300...
 		return (65 + ((agility - 300) / 21));
 	}
-	Log.Out(Logs::Detail, Logs::Error, "Error in Client::acmod(): Agility: %i, Level: %i", agility, level);
+	Log(Logs::Detail, Logs::Error, "Error in Client::acmod(): Agility: %i, Level: %i", agility, level);
 	return 0;
 };
 
@@ -1038,7 +1038,7 @@ int32 Client::CalcMaxMana()
 				break;
 			}
 		default: {
-				Log.Out(Logs::Detail, Logs::Spells, "Invalid Class '%c' in CalcMaxMana", GetCasterClass());
+				Log(Logs::Detail, Logs::Spells, "Invalid Class '%c' in CalcMaxMana", GetCasterClass());
 				max_mana = 0;
 				break;
 			}
@@ -1056,7 +1056,7 @@ int32 Client::CalcMaxMana()
 			cur_mana = curMana_cap;
 		}
 	}
-	Log.Out(Logs::Detail, Logs::Spells, "Client::CalcMaxMana() called for %s - returning %d", GetName(), max_mana);
+	Log(Logs::Detail, Logs::Spells, "Client::CalcMaxMana() called for %s - returning %d", GetName(), max_mana);
 	return max_mana;
 }
 
@@ -1140,13 +1140,13 @@ int32 Client::CalcBaseMana()
 				break;
 			}
 		default: {
-				Log.Out(Logs::General, Logs::None, "Invalid Class '%c' in CalcMaxMana", GetCasterClass());
+				Log(Logs::General, Logs::None, "Invalid Class '%c' in CalcMaxMana", GetCasterClass());
 				max_m = 0;
 				break;
 			}
 	}
 	#if EQDEBUG >= 11
-	Log.Out(Logs::General, Logs::None, "Client::CalcBaseMana() called for %s - returning %d", GetName(), max_m);
+	Log(Logs::General, Logs::None, "Client::CalcBaseMana() called for %s - returning %d", GetName(), max_m);
 	#endif
 	return max_m;
 }
@@ -2023,7 +2023,7 @@ uint32 Mob::GetInstrumentMod(uint16 spell_id) const
 		effectmod = 10;
 	if (!nocap && effectmod > effectmodcap) // if the cap is calculated to be 0 using new rules, no cap.
 		effectmod = effectmodcap;
-	Log.Out(Logs::Detail, Logs::Spells, "%s::GetInstrumentMod() spell=%d mod=%d modcap=%d\n", GetName(), spell_id,
+	Log(Logs::Detail, Logs::Spells, "%s::GetInstrumentMod() spell=%d mod=%d modcap=%d\n", GetName(), spell_id,
 		effectmod, effectmodcap);
 	return effectmod;
 }

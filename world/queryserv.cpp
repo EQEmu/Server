@@ -23,7 +23,7 @@ void QueryServConnection::SetConnection(EmuTCPConnection *inStream)
 {
 	if(Stream)
 	{
-		Log.Out(Logs::Detail, Logs::QS_Server, "Incoming QueryServ Connection while we were already connected to a QueryServ.");
+		Log(Logs::Detail, Logs::QS_Server, "Incoming QueryServ Connection while we were already connected to a QueryServ.");
 		Stream->Disconnect();
 	}
 
@@ -57,7 +57,7 @@ bool QueryServConnection::Process()
 					{
 						struct in_addr in;
 						in.s_addr = GetIP();
-						Log.Out(Logs::Detail, Logs::QS_Server, "QueryServ authorization failed.");
+						Log(Logs::Detail, Logs::QS_Server, "QueryServ authorization failed.");
 						auto pack = new ServerPacket(ServerOP_ZAAuthFailed);
 						SendPacket(pack);
 						delete pack;
@@ -69,7 +69,7 @@ bool QueryServConnection::Process()
 				{
 					struct in_addr in;
 					in.s_addr = GetIP();
-					Log.Out(Logs::Detail, Logs::QS_Server, "QueryServ authorization failed.");
+					Log(Logs::Detail, Logs::QS_Server, "QueryServ authorization failed.");
 					auto pack = new ServerPacket(ServerOP_ZAAuthFailed);
 					SendPacket(pack);
 					delete pack;
@@ -79,7 +79,7 @@ bool QueryServConnection::Process()
 			}
 			else
 			{
-				Log.Out(Logs::Detail, Logs::QS_Server,"**WARNING** You have not configured a world shared key in your config file. You should add a <key>STRING</key> element to your <world> element to prevent unauthroized zone access.");
+				Log(Logs::Detail, Logs::QS_Server,"**WARNING** You have not configured a world shared key in your config file. You should add a <key>STRING</key> element to your <world> element to prevent unauthroized zone access.");
 				authenticated = true;
 			}
 			delete pack;
@@ -97,7 +97,7 @@ bool QueryServConnection::Process()
 			}
 			case ServerOP_ZAAuth:
 			{
-				Log.Out(Logs::Detail, Logs::QS_Server, "Got authentication from QueryServ when they are already authenticated.");
+				Log(Logs::Detail, Logs::QS_Server, "Got authentication from QueryServ when they are already authenticated.");
 				break;
 			}
 			case ServerOP_QueryServGeneric:
@@ -114,7 +114,7 @@ bool QueryServConnection::Process()
 			}
 			default:
 			{
-				Log.Out(Logs::Detail, Logs::QS_Server, "Unknown ServerOPcode from QueryServ 0x%04x, size %d", pack->opcode, pack->size);
+				Log(Logs::Detail, Logs::QS_Server, "Unknown ServerOPcode from QueryServ 0x%04x, size %d", pack->opcode, pack->size);
 				DumpPacket(pack->pBuffer, pack->size);
 				break;
 			}

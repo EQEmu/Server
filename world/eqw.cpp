@@ -269,7 +269,7 @@ void EQW::LSReconnect() {
 		pthread_create(&thread, nullptr, &AutoInitLoginServer, nullptr);
 	#endif
 	RunLoops = true;
-	Log.Out(Logs::Detail, Logs::World_Server,"Login Server Reconnect manually restarted by Web Tool");
+	Log(Logs::Detail, Logs::World_Server,"Login Server Reconnect manually restarted by Web Tool");
 }
 
 /*EQLConfig * EQW::FindLauncher(Const_char *zone_ref) {

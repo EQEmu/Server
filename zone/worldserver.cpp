@@ -162,7 +162,7 @@ void WorldServer::Process() {
 
 	ServerPacket *pack = 0;
 	while((pack = tcpc.PopPacket())) {
-		Log.Out(Logs::Detail, Logs::Zone_Server, "Got 0x%04x from world:", pack->opcode);
+		Log(Logs::Detail, Logs::Zone_Server, "Got 0x%04x from world:", pack->opcode);
 		switch(pack->opcode) {
 		case 0: {
 			break;
@@ -176,12 +176,12 @@ void WorldServer::Process() {
 			if (pack->size != sizeof(ServerConnectInfo))
 				break;
 			ServerConnectInfo* sci = (ServerConnectInfo*) pack->pBuffer;
-			Log.Out(Logs::Detail, Logs::Zone_Server, "World assigned Port: %d for this zone.", sci->port);
+			Log(Logs::Detail, Logs::Zone_Server, "World assigned Port: %d for this zone.", sci->port);
 			ZoneConfig::SetZonePort(sci->port);
 			break;
 		}
 		case ServerOP_ZAAuthFailed: {
-			Log.Out(Logs::Detail, Logs::Zone_Server, "World server responded 'Not Authorized', disabling reconnect");
+			Log(Logs::Detail, Logs::Zone_Server, "World server responded 'Not Authorized', disabling reconnect");
 			pTryReconnect = false;
 			Disconnect();
 			break;
@@ -407,12 +407,12 @@ void WorldServer::Process() {
 					}
 				}
 				else {
-					Log.Out(Logs::Detail, Logs::None, "[CLIENT] id=%i, playerineqstring=%i, playersinzonestring=%i. Dumping WhoAllReturnStruct:",
+					Log(Logs::Detail, Logs::None, "[CLIENT] id=%i, playerineqstring=%i, playersinzonestring=%i. Dumping WhoAllReturnStruct:",
 						wars->id, wars->playerineqstring, wars->playersinzonestring);
 				}
 			}
 			else
-				Log.Out(Logs::General, Logs::Error, "WhoAllReturnStruct: Could not get return struct!");
+				Log(Logs::General, Logs::Error, "WhoAllReturnStruct: Could not get return struct!");
 			break;
 		}
 		case ServerOP_EmoteMessage: {
@@ -704,7 +704,7 @@ void WorldServer::Process() {
 					//pendingrezexp is the amount of XP on the corpse. Setting it to a value >= 0
 					//also serves to inform Client::OPRezzAnswer to expect a packet.
 					client->SetPendingRezzData(srs->exp, srs->dbid, srs->rez.spellid, srs->rez.corpse_name);
-							Log.Out(Logs::Detail, Logs::Spells, "OP_RezzRequest in zone %s for %s, spellid:%i",
+							Log(Logs::Detail, Logs::Spells, "OP_RezzRequest in zone %s for %s, spellid:%i",
 							zone->GetShortName(), client->GetName(), srs->rez.spellid);
 							auto outapp = new EQApplicationPacket(OP_RezzRequest,
 											      sizeof(Resurrect_Struct));
@@ -719,10 +719,10 @@ void WorldServer::Process() {
 				// to the zone that the corpse is in.
 				Corpse* corpse = entity_list.GetCorpseByName(srs->rez.corpse_name);
 				if (corpse && corpse->IsCorpse()) {
-					Log.Out(Logs::Detail, Logs::Spells, "OP_RezzComplete received in zone %s for corpse %s",
+					Log(Logs::Detail, Logs::Spells, "OP_RezzComplete received in zone %s for corpse %s",
 								zone->GetShortName(), srs->rez.corpse_name);
 
-					Log.Out(Logs::Detail, Logs::Spells, "Found corpse. Marking corpse as rezzed if needed.");
+					Log(Logs::Detail, Logs::Spells, "Found corpse. Marking corpse as rezzed if needed.");
 					// I don't know why Rezzed is not set to true in CompleteRezz().
 					if (!IsEffectInSpell(srs->rez.spellid, SE_SummonToCorpse)) {
 						corpse->IsRezzed(true);
@@ -751,7 +751,7 @@ void WorldServer::Process() {
 		}
 		case ServerOP_SyncWorldTime: {
 			if (zone != 0 && !zone->is_zone_time_localized) {
-				Log.Out(Logs::Moderate, Logs::Zone_Server, "%s Received Message SyncWorldTime", __FUNCTION__);
+				Log(Logs::Moderate, Logs::Zone_Server, "%s Received Message SyncWorldTime", __FUNCTION__);
 
 				eqTimeOfDay* newtime = (eqTimeOfDay*)pack->pBuffer;
 				zone->zone_time.SetCurrentEQTimeOfDay(newtime->start_eqtime, newtime->start_realtime);
@@ -774,12 +774,12 @@ void WorldServer::Process() {
 					(eq_time.hour >= 13) ? "pm" : "am"
 				);
 
-				Log.Out(Logs::General, Logs::Zone_Server, "Time Broadcast Packet: %s", time_message);
+				Log(Logs::General, Logs::Zone_Server, "Time Broadcast Packet: %s", time_message);
 				zone->SetZoneHasCurrentTime(true);
 
 			}
 			if (zone && zone->is_zone_time_localized){
-				Log.Out(Logs::General, Logs::Zone_Server, "Received request to sync time from world, but our time is localized currently");
+				Log(Logs::General, Logs::Zone_Server, "Received request to sync time from world, but our time is localized currently");
 			}
 			break;
 		}
@@ -1396,7 +1396,7 @@ void WorldServer::Process() {
 			if(NewCorpse)
 				NewCorpse->Spawn();
 			else
-				Log.Out(Logs::General, Logs::Error, "Unable to load player corpse id %u for zone %s.", s->player_corpse_id, zone->GetShortName());
+				Log(Logs::General, Logs::Error, "Unable to load player corpse id %u for zone %s.", s->player_corpse_id, zone->GetShortName());
 
 			break;
 		}
@@ -1768,7 +1768,7 @@ void WorldServer::Process() {
 			break;
 		}
 		case ServerOP_ReloadLogs: {
-			database.LoadLogSettings(Log.log_settings);
+			database.LoadLogSettings(LogSys.log_settings);
 			break;
 		}
 		case ServerOP_ReloadPerlExportSettings: {
@@ -1881,34 +1881,34 @@ void WorldServer::Process() {
 		case ServerOP_ChangeSharedMem:
 		{
 			std::string hotfix_name = std::string((char*)pack->pBuffer);
-			Log.Out(Logs::General, Logs::Zone_Server, "Loading items");
+			Log(Logs::General, Logs::Zone_Server, "Loading items");
 			if(!database.LoadItems(hotfix_name)) {
-				Log.Out(Logs::General, Logs::Error, "Loading items FAILED!");
+				Log(Logs::General, Logs::Error, "Loading items FAILED!");
 			}
 
-			Log.Out(Logs::General, Logs::Zone_Server, "Loading npc faction lists");
+			Log(Logs::General, Logs::Zone_Server, "Loading npc faction lists");
 			if(!database.LoadNPCFactionLists(hotfix_name)) {
-				Log.Out(Logs::General, Logs::Error, "Loading npcs faction lists FAILED!");
+				Log(Logs::General, Logs::Error, "Loading npcs faction lists FAILED!");
 			}
 
-			Log.Out(Logs::General, Logs::Zone_Server, "Loading loot tables");
+			Log(Logs::General, Logs::Zone_Server, "Loading loot tables");
 			if(!database.LoadLoot(hotfix_name)) {
-				Log.Out(Logs::General, Logs::Error, "Loading loot FAILED!");
+				Log(Logs::General, Logs::Error, "Loading loot FAILED!");
 			}
 
-			Log.Out(Logs::General, Logs::Zone_Server, "Loading skill caps");
+			Log(Logs::General, Logs::Zone_Server, "Loading skill caps");
 			if(!database.LoadSkillCaps(std::string(hotfix_name))) {
-				Log.Out(Logs::General, Logs::Error, "Loading skill caps FAILED!");
+				Log(Logs::General, Logs::Error, "Loading skill caps FAILED!");
 			}
 
-			Log.Out(Logs::General, Logs::Zone_Server, "Loading spells");
+			Log(Logs::General, Logs::Zone_Server, "Loading spells");
 			if(!database.LoadSpells(hotfix_name, &SPDAT_RECORDS, &spells)) {
-				Log.Out(Logs::General, Logs::Error, "Loading spells FAILED!");
+				Log(Logs::General, Logs::Error, "Loading spells FAILED!");
 			}
 
-			Log.Out(Logs::General, Logs::Zone_Server, "Loading base data");
+			Log(Logs::General, Logs::Zone_Server, "Loading base data");
 			if(!database.LoadBaseData(hotfix_name)) {
-				Log.Out(Logs::General, Logs::Error, "Loading base data FAILED!");
+				Log(Logs::General, Logs::Error, "Loading base data FAILED!");
 			}
 			break;
 		}
@@ -2047,7 +2047,7 @@ bool WorldServer::SendVoiceMacro(Client* From, uint32 Type, char* Target, uint32
 
 bool WorldServer::RezzPlayer(EQApplicationPacket* rpack, uint32 rezzexp, uint32 dbid, uint16 opcode)
 {
-	Log.Out(Logs::Detail, Logs::Spells, "WorldServer::RezzPlayer rezzexp is %i (0 is normal for RezzComplete", rezzexp);
+	Log(Logs::Detail, Logs::Spells, "WorldServer::RezzPlayer rezzexp is %i (0 is normal for RezzComplete", rezzexp);
 	auto pack = new ServerPacket(ServerOP_RezzPlayer, sizeof(RezzPlayer_Struct));
 	RezzPlayer_Struct* sem = (RezzPlayer_Struct*) pack->pBuffer;
 	sem->rezzopcode = opcode;
@@ -2055,10 +2055,12 @@ bool WorldServer::RezzPlayer(EQApplicationPacket* rpack, uint32 rezzexp, uint32 
 	sem->exp = rezzexp;
 	sem->dbid = dbid;
 	bool ret = SendPacket(pack);
-	if (ret)
-		Log.Out(Logs::Detail, Logs::Spells, "Sending player rezz packet to world spellid:%i", sem->rez.spellid);
-	else
-		Log.Out(Logs::Detail, Logs::Spells, "NOT Sending player rezz packet to world");
+	if (ret) {
+		Log(Logs::Detail, Logs::Spells, "Sending player rezz packet to world spellid:%i", sem->rez.spellid);
+	}
+	else {
+		Log(Logs::Detail, Logs::Spells, "NOT Sending player rezz packet to world");
+	}
 
 	safe_delete(pack);
 	return ret;
@@ -2078,14 +2080,14 @@ void WorldServer::HandleReloadTasks(ServerPacket *pack)
 {
 	ReloadTasks_Struct* rts = (ReloadTasks_Struct*) pack->pBuffer;
 
-	Log.Out(Logs::General, Logs::Tasks, "[GLOBALLOAD] Zone received ServerOP_ReloadTasks from World, Command %i", rts->Command);
+	Log(Logs::General, Logs::Tasks, "[GLOBALLOAD] Zone received ServerOP_ReloadTasks from World, Command %i", rts->Command);
 
 	switch(rts->Command) {
 		case RELOADTASKS:
 			entity_list.SaveAllClientsTaskState();
 
 			if(rts->Parameter == 0) {
-				Log.Out(Logs::General, Logs::Tasks, "[GLOBALLOAD] Reload ALL tasks");
+				Log(Logs::General, Logs::Tasks, "[GLOBALLOAD] Reload ALL tasks");
 				safe_delete(taskmanager);
 				taskmanager = new TaskManager;
 				taskmanager->LoadTasks();
@@ -2094,7 +2096,7 @@ void WorldServer::HandleReloadTasks(ServerPacket *pack)
 				entity_list.ReloadAllClientsTaskState();
 			}
 			else {
-				Log.Out(Logs::General, Logs::Tasks, "[GLOBALLOAD] Reload only task %i", rts->Parameter);
+				Log(Logs::General, Logs::Tasks, "[GLOBALLOAD] Reload only task %i", rts->Parameter);
 				taskmanager->LoadTasks(rts->Parameter);
 				entity_list.ReloadAllClientsTaskState(rts->Parameter);
 			}
@@ -2103,23 +2105,23 @@ void WorldServer::HandleReloadTasks(ServerPacket *pack)
 
 		case RELOADTASKPROXIMITIES:
 			if(zone) {
-				Log.Out(Logs::General, Logs::Tasks, "[GLOBALLOAD] Reload task proximities");
+				Log(Logs::General, Logs::Tasks, "[GLOBALLOAD] Reload task proximities");
 				taskmanager->LoadProximities(zone->GetZoneID());
 			}
 			break;
 
 		case RELOADTASKGOALLISTS:
-			Log.Out(Logs::General, Logs::Tasks, "[GLOBALLOAD] Reload task goal lists");
+			Log(Logs::General, Logs::Tasks, "[GLOBALLOAD] Reload task goal lists");
 			taskmanager->ReloadGoalLists();
 			break;
 
 		case RELOADTASKSETS:
-			Log.Out(Logs::General, Logs::Tasks, "[GLOBALLOAD] Reload task sets");
+			Log(Logs::General, Logs::Tasks, "[GLOBALLOAD] Reload task sets");
 			taskmanager->LoadTaskSets();
 			break;
 
 		default:
-			Log.Out(Logs::General, Logs::Tasks, "[GLOBALLOAD] Unhandled ServerOP_ReloadTasks command %i", rts->Command);
+			Log(Logs::General, Logs::Tasks, "[GLOBALLOAD] Unhandled ServerOP_ReloadTasks command %i", rts->Command);
 
 	}
 
@@ -2134,7 +2136,7 @@ uint32 WorldServer::NextGroupID() {
 	if(cur_groupid >= last_groupid) {
 		//this is an error... This means that 50 groups were created before
 		//1 packet could make the zone->world->zone trip... so let it error.
-		Log.Out(Logs::General, Logs::Error, "Ran out of group IDs before the server sent us more.");
+		Log(Logs::General, Logs::Error, "Ran out of group IDs before the server sent us more.");
 		return(0);
 	}
 	if(cur_groupid > (last_groupid - /*50*/995)) {

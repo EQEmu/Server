@@ -53,7 +53,7 @@ WorldServer::~WorldServer()
 
 void WorldServer::OnConnected()
 {
-	Log.Out(Logs::Detail, Logs::QS_Server, "Connected to World.");
+	Log(Logs::Detail, Logs::QS_Server, "Connected to World.");
 	WorldConnection::OnConnected();
 }
 
@@ -66,7 +66,7 @@ void WorldServer::Process()
 	ServerPacket *pack = 0; 
 	while((pack = tcpc.PopPacket()))
 	{
-		Log.Out(Logs::Detail, Logs::QS_Server, "Received Opcode: %4X", pack->opcode); 
+		Log(Logs::Detail, Logs::QS_Server, "Received Opcode: %4X", pack->opcode); 
 		switch(pack->opcode) {
 			case 0: {
 				break;
@@ -148,7 +148,7 @@ void WorldServer::Process()
 						break;
 					}
 					default:
-						Log.Out(Logs::Detail, Logs::QS_Server, "Received unhandled ServerOP_QueryServGeneric", Type);
+						Log(Logs::Detail, Logs::QS_Server, "Received unhandled ServerOP_QueryServGeneric", Type);
 						break;
 				}
 				break;

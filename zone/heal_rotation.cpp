@@ -860,42 +860,42 @@ void HealRotation::bias_targets()
 	m_casting_target_poke = true;
 
 #if (EQDEBUG >= 12)
-	Log.Out(Logs::General, Logs::Error, "HealRotation::bias_targets() - *** Post-processing state ***");
-	Log.Out(Logs::General, Logs::Error, "HealRotation Settings:");
-	Log.Out(Logs::General, Logs::Error, "HealRotation::m_interval_ms = %u", m_interval_ms);
-	Log.Out(Logs::General, Logs::Error, "HealRotation::m_next_cast_time_ms = %u (current_time: %u, time_diff: %i)", m_next_cast_time_ms, Timer::GetCurrentTime(), ((int32)Timer::GetCurrentTime() - (int32)m_next_cast_time_ms));
-	Log.Out(Logs::General, Logs::Error, "HealRotation::m_next_poke_time_ms = %u (current_time: %u, time_diff: %i)", m_next_poke_time_ms, Timer::GetCurrentTime(), ((int32)Timer::GetCurrentTime() - (int32)m_next_poke_time_ms));
-	Log.Out(Logs::General, Logs::Error, "HealRotation::m_fast_heals = %s", ((m_fast_heals) ? ("true") : ("false")));
-	Log.Out(Logs::General, Logs::Error, "HealRotation::m_adaptive_targeting = %s", ((m_adaptive_targeting) ? ("true") : ("false")));
-	Log.Out(Logs::General, Logs::Error, "HealRotation::m_casting_override = %s", ((m_casting_override) ? ("true") : ("false")));
-	Log.Out(Logs::General, Logs::Error, "HealRotation::m_casting_target_poke = %s", ((m_casting_target_poke) ? ("true") : ("false")));
-	Log.Out(Logs::General, Logs::Error, "HealRotation::m_active_heal_target = %s", ((m_active_heal_target) ? ("true") : ("false")));
-	Log.Out(Logs::General, Logs::Error, "HealRotation::m_is_active = %s", ((m_is_active) ? ("true") : ("false")));
-	Log.Out(Logs::General, Logs::Error, "HealRotation::m_member_list.size() = %i", m_member_pool.size());
-	Log.Out(Logs::General, Logs::Error, "HealRotation::m_cycle_list.size() = %i", m_cycle_pool.size());
-	Log.Out(Logs::General, Logs::Error, "HealRotation::m_target_list.size() = %i", m_target_pool.size());
-	if (m_member_pool.size()) { Log.Out(Logs::General, Logs::Error, "(std::shared_ptr<HealRotation>::use_count() = %i", m_member_pool.front()->MemberOfHealRotation()->use_count()); }
-	else { Log.Out(Logs::General, Logs::Error, "(std::shared_ptr<HealRotation>::use_count() = unknown (0)"); }
-	Log.Out(Logs::General, Logs::Error, "HealRotation Members:");
+	Log(Logs::General, Logs::Error, "HealRotation::bias_targets() - *** Post-processing state ***");
+	Log(Logs::General, Logs::Error, "HealRotation Settings:");
+	Log(Logs::General, Logs::Error, "HealRotation::m_interval_ms = %u", m_interval_ms);
+	Log(Logs::General, Logs::Error, "HealRotation::m_next_cast_time_ms = %u (current_time: %u, time_diff: %i)", m_next_cast_time_ms, Timer::GetCurrentTime(), ((int32)Timer::GetCurrentTime() - (int32)m_next_cast_time_ms));
+	Log(Logs::General, Logs::Error, "HealRotation::m_next_poke_time_ms = %u (current_time: %u, time_diff: %i)", m_next_poke_time_ms, Timer::GetCurrentTime(), ((int32)Timer::GetCurrentTime() - (int32)m_next_poke_time_ms));
+	Log(Logs::General, Logs::Error, "HealRotation::m_fast_heals = %s", ((m_fast_heals) ? ("true") : ("false")));
+	Log(Logs::General, Logs::Error, "HealRotation::m_adaptive_targeting = %s", ((m_adaptive_targeting) ? ("true") : ("false")));
+	Log(Logs::General, Logs::Error, "HealRotation::m_casting_override = %s", ((m_casting_override) ? ("true") : ("false")));
+	Log(Logs::General, Logs::Error, "HealRotation::m_casting_target_poke = %s", ((m_casting_target_poke) ? ("true") : ("false")));
+	Log(Logs::General, Logs::Error, "HealRotation::m_active_heal_target = %s", ((m_active_heal_target) ? ("true") : ("false")));
+	Log(Logs::General, Logs::Error, "HealRotation::m_is_active = %s", ((m_is_active) ? ("true") : ("false")));
+	Log(Logs::General, Logs::Error, "HealRotation::m_member_list.size() = %i", m_member_pool.size());
+	Log(Logs::General, Logs::Error, "HealRotation::m_cycle_list.size() = %i", m_cycle_pool.size());
+	Log(Logs::General, Logs::Error, "HealRotation::m_target_list.size() = %i", m_target_pool.size());
+	if (m_member_pool.size()) { Log(Logs::General, Logs::Error, "(std::shared_ptr<HealRotation>::use_count() = %i", m_member_pool.front()->MemberOfHealRotation()->use_count()); }
+	else { Log(Logs::General, Logs::Error, "(std::shared_ptr<HealRotation>::use_count() = unknown (0)"); }
+	Log(Logs::General, Logs::Error, "HealRotation Members:");
 	int member_index = 0;
 	for (auto mlist_iter : m_member_pool) {
 		if (!mlist_iter) { continue; }
-		Log.Out(Logs::General, Logs::Error, "(%i) %s (hrcast: %c)", (++member_index), mlist_iter->GetCleanName(), ((mlist_iter->AmICastingForHealRotation())?('T'):('F')));
+		Log(Logs::General, Logs::Error, "(%i) %s (hrcast: %c)", (++member_index), mlist_iter->GetCleanName(), ((mlist_iter->AmICastingForHealRotation())?('T'):('F')));
 	}
-	if (!member_index) { Log.Out(Logs::General, Logs::Error, "(0) None"); }
-	Log.Out(Logs::General, Logs::Error, "HealRotation Cycle:");
+	if (!member_index) { Log(Logs::General, Logs::Error, "(0) None"); }
+	Log(Logs::General, Logs::Error, "HealRotation Cycle:");
 	int cycle_index = 0;
 	for (auto clist_iter : m_cycle_pool) {
 		if (!clist_iter) { continue; }
-		Log.Out(Logs::General, Logs::Error, "(%i) %s", (++cycle_index), clist_iter->GetCleanName());
+		Log(Logs::General, Logs::Error, "(%i) %s", (++cycle_index), clist_iter->GetCleanName());
 	}
-	if (!cycle_index) { Log.Out(Logs::General, Logs::Error, "(0) None"); }
-	Log.Out(Logs::General, Logs::Error, "HealRotation Targets: (sort type: %u)", sort_type);
+	if (!cycle_index) { Log(Logs::General, Logs::Error, "(0) None"); }
+	Log(Logs::General, Logs::Error, "HealRotation Targets: (sort type: %u)", sort_type);
 	int target_index = 0;
 
 	for (auto tlist_iter : m_target_pool) {
 		if (!tlist_iter) { continue; }
-		Log.Out(Logs::General, Logs::Error, "(%i) %s (hp: %3.1f%%, at: %u, dontheal: %c, crit(base): %c(%c), safe(base): %c(%c), hcnt(ext): %u(%u), hfreq(ext): %f(%f))",
+		Log(Logs::General, Logs::Error, "(%i) %s (hp: %3.1f%%, at: %u, dontheal: %c, crit(base): %c(%c), safe(base): %c(%c), hcnt(ext): %u(%u), hfreq(ext): %f(%f))",
 			(++target_index), tlist_iter->GetCleanName(),
 			tlist_iter->GetHPRatio(),
 			ClassArmorType(tlist_iter->GetClass()),
@@ -909,7 +909,7 @@ void HealRotation::bias_targets()
 			tlist_iter->HealRotationHealFrequency(),
 			tlist_iter->HealRotationExtendedHealFrequency());
 	}
-	if (!target_index) { Log.Out(Logs::General, Logs::Error, "(0) None (hp: 0.0\%, at: 0, dontheal: F, crit(base): F(F), safe(base): F(F), hcnt(ext): 0(0), hfreq(ext): 0.0(0.0))"); }
+	if (!target_index) { Log(Logs::General, Logs::Error, "(0) None (hp: 0.0\%, at: 0, dontheal: F, crit(base): F(F), safe(base): F(F), hcnt(ext): 0(0), hfreq(ext): 0.0(0.0))"); }
 #endif
 }
 

@@ -3654,13 +3654,13 @@ XS(XS__debug)
 			return;
 
 		if (debug_level == Logs::General){
-			Log.Out(Logs::General, Logs::QuestDebug, log_message);
+			Log(Logs::General, Logs::QuestDebug, log_message);
 		}
 		else if (debug_level == Logs::Moderate){
-			Log.Out(Logs::Moderate, Logs::QuestDebug, log_message);
+			Log(Logs::Moderate, Logs::QuestDebug, log_message);
 		}
 		else if (debug_level == Logs::Detail){
-			Log.Out(Logs::Detail, Logs::QuestDebug, log_message);
+			Log(Logs::Detail, Logs::QuestDebug, log_message);
 		}
 	}
 	XSRETURN_EMPTY;
@@ -3693,7 +3693,7 @@ EXTERN_C XS(boot_quest)
 	file[255] = '\0';
 
 	if(items != 1)
-		Log.Out(Logs::General, Logs::Error, "boot_quest does not take any arguments.");
+		Log(Logs::General, Logs::Error, "boot_quest does not take any arguments.");
 
 	char buf[128];	//shouldent have any function names longer than this.
 

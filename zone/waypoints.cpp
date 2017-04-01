@@ -82,7 +82,7 @@ void NPC::StopWandering()
 	roamer=false;
 	CastToNPC()->SetGrid(0);
 	SendPosition();
-	Log.Out(Logs::Detail, Logs::Pathing, "Stop Wandering requested.");
+	Log(Logs::Detail, Logs::Pathing, "Stop Wandering requested.");
 	return;
 }
 
@@ -101,16 +101,16 @@ void NPC::ResumeWandering()
 				cur_wp=save_wp;
 				UpdateWaypoint(cur_wp);	// have him head to last destination from here
 			}
-			Log.Out(Logs::Detail, Logs::Pathing, "Resume Wandering requested. Grid %d, wp %d", GetGrid(), cur_wp);
+			Log(Logs::Detail, Logs::Pathing, "Resume Wandering requested. Grid %d, wp %d", GetGrid(), cur_wp);
 		}
 		else if (AI_walking_timer->Enabled())
 		{	// we are at a waypoint paused normally
-			Log.Out(Logs::Detail, Logs::Pathing, "Resume Wandering on timed pause. Grid %d, wp %d", GetGrid(), cur_wp);
+			Log(Logs::Detail, Logs::Pathing, "Resume Wandering on timed pause. Grid %d, wp %d", GetGrid(), cur_wp);
 			AI_walking_timer->Trigger();	// disable timer to end pause now
 		}
 		else
 		{
-			Log.Out(Logs::General, Logs::Error, "NPC not paused - can't resume wandering: %lu", (unsigned long)GetNPCTypeID());
+			Log(Logs::General, Logs::Error, "NPC not paused - can't resume wandering: %lu", (unsigned long)GetNPCTypeID());
 			return;
 		}
 
@@ -125,7 +125,7 @@ void NPC::ResumeWandering()
 	}
 	else
 	{
-		Log.Out(Logs::General, Logs::Error, "NPC not on grid - can't resume wandering: %lu", (unsigned long)GetNPCTypeID());
+		Log(Logs::General, Logs::Error, "NPC not on grid - can't resume wandering: %lu", (unsigned long)GetNPCTypeID());
 	}
 	return;
 }
@@ -137,7 +137,7 @@ void NPC::PauseWandering(int pausetime)
 	if (GetGrid() != 0)
 	{
 		DistractedFromGrid = true;
-		Log.Out(Logs::Detail, Logs::Pathing, "Paused Wandering requested. Grid %d. Resuming in %d ms (0=not until told)", GetGrid(), pausetime);
+		Log(Logs::Detail, Logs::Pathing, "Paused Wandering requested. Grid %d. Resuming in %d ms (0=not until told)", GetGrid(), pausetime);
 		SendPosition();
 		if (pausetime<1)
 		{	// negative grid number stops him dead in his tracks until ResumeWandering()
@@ -148,7 +148,7 @@ void NPC::PauseWandering(int pausetime)
 			AI_walking_timer->Start(pausetime*1000); // set the timer
 		}
 	} else {
-		Log.Out(Logs::General, Logs::Error, "NPC not on grid - can't pause wandering: %lu", (unsigned long)GetNPCTypeID());
+		Log(Logs::General, Logs::Error, "NPC not on grid - can't pause wandering: %lu", (unsigned long)GetNPCTypeID());
 	}
 	return;
 }
@@ -160,7 +160,7 @@ void NPC::MoveTo(const glm::vec4& position, bool saveguardspot)
 		if (GetGrid() < 0)
 		{	// currently stopped by a quest command
 			SetGrid( 0 - GetGrid());	// get him moving again
-			Log.Out(Logs::Detail, Logs::AI, "MoveTo during quest wandering. Canceling quest wandering and going back to grid %d when MoveTo is done.", GetGrid());
+			Log(Logs::Detail, Logs::AI, "MoveTo during quest wandering. Canceling quest wandering and going back to grid %d when MoveTo is done.", GetGrid());
 		}
 		AI_walking_timer->Disable();	// disable timer in case he is paused at a wp
 		if (cur_wp>=0)
@@ -168,14 +168,14 @@ void NPC::MoveTo(const glm::vec4& position, bool saveguardspot)
 			save_wp=cur_wp;	// save the current waypoint
 			cur_wp=-1;		// flag this move as quest controlled
 		}
-		Log.Out(Logs::Detail, Logs::AI, "MoveTo %s, pausing regular grid wandering. Grid %d, save_wp %d",to_string(static_cast<glm::vec3>(position)).c_str(), -GetGrid(), save_wp);
+		Log(Logs::Detail, Logs::AI, "MoveTo %s, pausing regular grid wandering. Grid %d, save_wp %d",to_string(static_cast<glm::vec3>(position)).c_str(), -GetGrid(), save_wp);
 	}
 	else
 	{	// not on a grid
 		roamer=true;
 		save_wp=0;
 		cur_wp=-2;		// flag as quest controlled w/no grid
-		Log.Out(Logs::Detail, Logs::AI, "MoveTo %s without a grid.", to_string(static_cast<glm::vec3>(position)).c_str());
+		Log(Logs::Detail, Logs::AI, "MoveTo %s without a grid.", to_string(static_cast<glm::vec3>(position)).c_str());
 	}
 	if (saveguardspot)
 	{
@@ -187,7 +187,7 @@ void NPC::MoveTo(const glm::vec4& position, bool saveguardspot)
 		if(m_GuardPoint.w  == -1)
 			m_GuardPoint.w  = this->CalculateHeadingToTarget(position.x, position.y);
 
-		Log.Out(Logs::Detail, Logs::AI, "Setting guard position to %s", to_string(static_cast<glm::vec3>(m_GuardPoint)).c_str());
+		Log(Logs::Detail, Logs::AI, "Setting guard position to %s", to_string(static_cast<glm::vec3>(m_GuardPoint)).c_str());
 	}
 
 	m_CurrentWayPoint = position;
@@ -200,7 +200,7 @@ void NPC::MoveTo(const glm::vec4& position, bool saveguardspot)
 void NPC::UpdateWaypoint(int wp_index)
 {
 	if(wp_index >= static_cast<int>(Waypoints.size())) {
-		Log.Out(Logs::Detail, Logs::AI, "Update to waypoint %d failed. Not found.", wp_index);
+		Log(Logs::Detail, Logs::AI, "Update to waypoint %d failed. Not found.", wp_index);
 		return;
 	}
 	std::vector<wplist>::iterator cur;
@@ -209,7 +209,7 @@ void NPC::UpdateWaypoint(int wp_index)
 
 	m_CurrentWayPoint = glm::vec4(cur->x, cur->y, cur->z, cur->heading);
 	cur_wp_pause = cur->pause;
-	Log.Out(Logs::Detail, Logs::AI, "Next waypoint %d: (%.3f, %.3f, %.3f, %.3f)", wp_index, m_CurrentWayPoint.x, m_CurrentWayPoint.y, m_CurrentWayPoint.z, m_CurrentWayPoint.w);
+	Log(Logs::Detail, Logs::AI, "Next waypoint %d: (%.3f, %.3f, %.3f, %.3f)", wp_index, m_CurrentWayPoint.x, m_CurrentWayPoint.y, m_CurrentWayPoint.z, m_CurrentWayPoint.w);
 
 	//fix up pathing Z
 	if(zone->HasMap() && RuleB(Map, FixPathingZAtWaypoints) && !IsBoat())
@@ -416,7 +416,7 @@ void NPC::SetWaypointPause()
 
 void NPC::SaveGuardSpot(bool iClearGuardSpot) {
 	if (iClearGuardSpot) {
-		Log.Out(Logs::Detail, Logs::AI, "Clearing guard order.");
+		Log(Logs::Detail, Logs::AI, "Clearing guard order.");
 		m_GuardPoint = glm::vec4();
 	}
 	else {
@@ -424,14 +424,14 @@ void NPC::SaveGuardSpot(bool iClearGuardSpot) {
 
 		if(m_GuardPoint.w == 0)
 			m_GuardPoint.w = 0.0001;		//hack to make IsGuarding simpler
-		Log.Out(Logs::Detail, Logs::AI, "Setting guard position to %s", to_string(static_cast<glm::vec3>(m_GuardPoint)).c_str());
+		Log(Logs::Detail, Logs::AI, "Setting guard position to %s", to_string(static_cast<glm::vec3>(m_GuardPoint)).c_str());
 	}
 }
 
 void NPC::NextGuardPosition() {
 	if (!CalculateNewPosition2(m_GuardPoint.x, m_GuardPoint.y, m_GuardPoint.z, GetMovespeed())) {
 		SetHeading(m_GuardPoint.w);
-		Log.Out(Logs::Detail, Logs::AI, "Unable to move to next guard position. Probably rooted.");
+		Log(Logs::Detail, Logs::AI, "Unable to move to next guard position. Probably rooted.");
 	}
 	else if((m_Position.x == m_GuardPoint.x) && (m_Position.y == m_GuardPoint.y) && (m_Position.z == m_GuardPoint.z))
 	{
@@ -481,13 +481,13 @@ bool Mob::MakeNewPositionAndSendUpdate(float x, float y, float z, int speed, boo
 	if ((m_Position.x-x == 0) && (m_Position.y-y == 0)) {//spawn is at target coords
 		if(m_Position.z-z != 0) {
 			m_Position.z = z;
-			Log.Out(Logs::Detail, Logs::AI, "Calc Position2 (%.3f, %.3f, %.3f): Jumping pure Z.", x, y, z);
+			Log(Logs::Detail, Logs::AI, "Calc Position2 (%.3f, %.3f, %.3f): Jumping pure Z.", x, y, z);
 			return true;
 		}
-		// Log.Out(Logs::Detail, Logs::AI, "Calc Position2 (%.3f, %.3f, %.3f) inWater=%d: We are there.", x, y, z, inWater);
+		// Log(Logs::Detail, Logs::AI, "Calc Position2 (%.3f, %.3f, %.3f) inWater=%d: We are there.", x, y, z, inWater);
 		return false;
 	} else if ((std::abs(m_Position.x - x) < 0.1) && (std::abs(m_Position.y - y) < 0.1)) {
-		Log.Out(Logs::Detail, Logs::AI, "Calc Position2 (%.3f, %.3f, %.3f): X/Y difference <0.1, Jumping to target.", x, y, z);
+		Log(Logs::Detail, Logs::AI, "Calc Position2 (%.3f, %.3f, %.3f): X/Y difference <0.1, Jumping to target.", x, y, z);
 
 		if(IsNPC()) {
 			entity_list.ProcessMove(CastToNPC(), x, y, z);
@@ -514,7 +514,7 @@ bool Mob::MakeNewPositionAndSendUpdate(float x, float y, float z, int speed, boo
 		m_Position.y = new_y;
 		m_Position.z = new_z;
 
-		Log.Out(Logs::Detail, Logs::AI, "Calculating new position2 to (%.3f, %.3f, %.3f), old vector (%.3f, %.3f, %.3f)", x, y, z, m_TargetV.x, m_TargetV.y, m_TargetV.z);
+		Log(Logs::Detail, Logs::AI, "Calculating new position2 to (%.3f, %.3f, %.3f), old vector (%.3f, %.3f, %.3f)", x, y, z, m_TargetV.x, m_TargetV.y, m_TargetV.z);
 
 		uint8 NPCFlyMode = 0;
 
@@ -533,7 +533,7 @@ bool Mob::MakeNewPositionAndSendUpdate(float x, float y, float z, int speed, boo
 
 				float newz = zone->zonemap->FindBestZ(dest, nullptr) + 2.0f;
 
-				Log.Out(Logs::Detail, Logs::AI, "BestZ returned %4.3f at %4.3f, %4.3f, %4.3f", newz,m_Position.x,m_Position.y,m_Position.z);
+				Log(Logs::Detail, Logs::AI, "BestZ returned %4.3f at %4.3f, %4.3f, %4.3f", newz,m_Position.x,m_Position.y,m_Position.z);
 
 				if ((newz > -2000) &&
 				    std::abs(newz - dest.z) < RuleR(Map, FixPathingZMaxDeltaMoving)) // Sanity check.
@@ -585,7 +585,7 @@ bool Mob::MakeNewPositionAndSendUpdate(float x, float y, float z, int speed, boo
 	//pRunAnimSpeed = (int8)(speed*NPC_RUNANIM_RATIO);
 	//speed *= NPC_SPEED_MULTIPLIER;
 
-	Log.Out(Logs::Detail, Logs::AI, "Calculating new position2 to (%.3f, %.3f, %.3f), new vector (%.3f, %.3f, %.3f) rate %.3f, RAS %d", x, y, z, m_TargetV.x, m_TargetV.y, m_TargetV.z, speed, pRunAnimSpeed);
+	Log(Logs::Detail, Logs::AI, "Calculating new position2 to (%.3f, %.3f, %.3f), new vector (%.3f, %.3f, %.3f) rate %.3f, RAS %d", x, y, z, m_TargetV.x, m_TargetV.y, m_TargetV.z, speed, pRunAnimSpeed);
 
 	// --------------------------------------------------------------------------
 	// 2: get unit vector
@@ -620,7 +620,7 @@ bool Mob::MakeNewPositionAndSendUpdate(float x, float y, float z, int speed, boo
 			m_Position.z = new_z;
 			m_Position.w = CalculateHeadingToTarget(x, y);
 			tar_ndx = 20 - numsteps;
-			Log.Out(Logs::Detail, Logs::AI, "Next position2 (%.3f, %.3f, %.3f) (%d steps)", m_Position.x, m_Position.y, m_Position.z, numsteps);
+			Log(Logs::Detail, Logs::AI, "Next position2 (%.3f, %.3f, %.3f) (%d steps)", m_Position.x, m_Position.y, m_Position.z, numsteps);
 		}
 		else
 		{
@@ -632,7 +632,7 @@ bool Mob::MakeNewPositionAndSendUpdate(float x, float y, float z, int speed, boo
 			m_Position.y = y;
 			m_Position.z = z;
 
-			Log.Out(Logs::Detail, Logs::AI, "Only a single step to get there... jumping.");
+			Log(Logs::Detail, Logs::AI, "Only a single step to get there... jumping.");
 
 		}
 	}
@@ -656,7 +656,7 @@ bool Mob::MakeNewPositionAndSendUpdate(float x, float y, float z, int speed, boo
 		m_Position.y = new_y;
 		m_Position.z = new_z;
 		m_Position.w = CalculateHeadingToTarget(x, y);
-		Log.Out(Logs::Detail, Logs::AI, "Next position2 (%.3f, %.3f, %.3f) (%d steps)", m_Position.x, m_Position.y, m_Position.z, numsteps);
+		Log(Logs::Detail, Logs::AI, "Next position2 (%.3f, %.3f, %.3f) (%d steps)", m_Position.x, m_Position.y, m_Position.z, numsteps);
 	}
 
 	uint8 NPCFlyMode = 0;
@@ -676,7 +676,7 @@ bool Mob::MakeNewPositionAndSendUpdate(float x, float y, float z, int speed, boo
 
 			float newz = zone->zonemap->FindBestZ(dest, nullptr);
 
-			Log.Out(Logs::Detail, Logs::AI, "BestZ returned %4.3f at %4.3f, %4.3f, %4.3f", newz,m_Position.x, m_Position.y, m_Position.z);
+			Log(Logs::Detail, Logs::AI, "BestZ returned %4.3f at %4.3f, %4.3f, %4.3f", newz,m_Position.x, m_Position.y, m_Position.z);
 
 			if ((newz > -2000) &&
 			    std::abs(newz - dest.z) < RuleR(Map, FixPathingZMaxDeltaMoving)) // Sanity check.
@@ -732,7 +732,7 @@ bool Mob::CalculateNewPosition(float x, float y, float z, int speed, bool checkZ
 			SetCurrentSpeed(0);
 			moved=false;
 		}
-		Log.Out(Logs::Detail, Logs::AI, "Rooted while calculating new position to (%.3f, %.3f, %.3f)", x, y, z);
+		Log(Logs::Detail, Logs::AI, "Rooted while calculating new position to (%.3f, %.3f, %.3f)", x, y, z);
 		return true;
 	}
 
@@ -746,7 +746,7 @@ bool Mob::CalculateNewPosition(float x, float y, float z, int speed, bool checkZ
 	SetCurrentSpeed((int8)(speed)); //*NPC_RUNANIM_RATIO);
 	//speed *= NPC_SPEED_MULTIPLIER;
 
-	Log.Out(Logs::Detail, Logs::AI, "Calculating new position to (%.3f, %.3f, %.3f) vector (%.3f, %.3f, %.3f) rate %.3f RAS %d", x, y, z, m_TargetV.x, m_TargetV.y, m_TargetV.z, speed, pRunAnimSpeed);
+	Log(Logs::Detail, Logs::AI, "Calculating new position to (%.3f, %.3f, %.3f) vector (%.3f, %.3f, %.3f) rate %.3f RAS %d", x, y, z, m_TargetV.x, m_TargetV.y, m_TargetV.z, speed, pRunAnimSpeed);
 
 	// --------------------------------------------------------------------------
 	// 2: get unit vector
@@ -763,7 +763,7 @@ bool Mob::CalculateNewPosition(float x, float y, float z, int speed, bool checkZ
 		m_Position.x = x;
 		m_Position.y = y;
 		m_Position.z = z;
-		Log.Out(Logs::Detail, Logs::AI, "Close enough, jumping to waypoint");
+		Log(Logs::Detail, Logs::AI, "Close enough, jumping to waypoint");
 	}
 	else {
 		float new_x = m_Position.x + m_TargetV.x*tar_vector;
@@ -776,7 +776,7 @@ bool Mob::CalculateNewPosition(float x, float y, float z, int speed, bool checkZ
 		m_Position.x = new_x;
 		m_Position.y = new_y;
 		m_Position.z = new_z;
-		Log.Out(Logs::Detail, Logs::AI, "Next position (%.3f, %.3f, %.3f)", m_Position.x, m_Position.y, m_Position.z);
+		Log(Logs::Detail, Logs::AI, "Next position (%.3f, %.3f, %.3f)", m_Position.x, m_Position.y, m_Position.z);
 	}
 
 	uint8 NPCFlyMode = 0;
@@ -796,7 +796,7 @@ bool Mob::CalculateNewPosition(float x, float y, float z, int speed, bool checkZ
 
 			float newz = zone->zonemap->FindBestZ(dest, nullptr) + 2.0f;
 
-			Log.Out(Logs::Detail, Logs::AI, "BestZ returned %4.3f at %4.3f, %4.3f, %4.3f", newz,m_Position.x,m_Position.y,m_Position.z);
+			Log(Logs::Detail, Logs::AI, "BestZ returned %4.3f at %4.3f, %4.3f, %4.3f", newz,m_Position.x,m_Position.y,m_Position.z);
 
 			if ((newz > -2000) &&
 			    std::abs(newz - dest.z) < RuleR(Map, FixPathingZMaxDeltaMoving)) // Sanity check.
@@ -918,7 +918,7 @@ void Mob::SendTo(float new_x, float new_y, float new_z) {
 	m_Position.x = new_x;
 	m_Position.y = new_y;
 	m_Position.z = new_z;
-	Log.Out(Logs::Detail, Logs::AI, "Sent To (%.3f, %.3f, %.3f)", new_x, new_y, new_z);
+	Log(Logs::Detail, Logs::AI, "Sent To (%.3f, %.3f, %.3f)", new_x, new_y, new_z);
 
 	if(flymode == FlyMode1)
 		return;
@@ -934,7 +934,7 @@ void Mob::SendTo(float new_x, float new_y, float new_z) {
 
 			float newz = zone->zonemap->FindBestZ(dest, nullptr);
 
-			Log.Out(Logs::Detail, Logs::AI, "BestZ returned %4.3f at %4.3f, %4.3f, %4.3f", newz,m_Position.x,m_Position.y,m_Position.z);
+			Log(Logs::Detail, Logs::AI, "BestZ returned %4.3f at %4.3f, %4.3f, %4.3f", newz,m_Position.x,m_Position.y,m_Position.z);
 
 			if( (newz > -2000) && std::abs(newz - dest.z) < RuleR(Map, FixPathingZMaxDeltaSendTo)) // Sanity check.
 				m_Position.z = newz + 1;
@@ -965,7 +965,7 @@ void Mob::SendToFixZ(float new_x, float new_y, float new_z) {
 
 			float newz = zone->zonemap->FindBestZ(dest, nullptr);
 
-			Log.Out(Logs::Detail, Logs::AI, "BestZ returned %4.3f at %4.3f, %4.3f, %4.3f", newz,m_Position.x,m_Position.y,m_Position.z);
+			Log(Logs::Detail, Logs::AI, "BestZ returned %4.3f at %4.3f, %4.3f, %4.3f", newz,m_Position.x,m_Position.y,m_Position.z);
 
 			if( (newz > -2000) && std::abs(newz-dest.z) < RuleR(Map, FixPathingZMaxDeltaSendTo)) // Sanity check.
 				m_Position.z = newz + 1;

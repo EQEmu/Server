@@ -1050,7 +1050,7 @@ int QuestParserCollection::DispatchEventSpell(QuestEventID evt, NPC* npc, Client
 
 void QuestParserCollection::LoadPerlEventExportSettings(PerlEventExportSettings* perl_event_export_settings) {
 	
-	Log.Out(Logs::General, Logs::Zone_Server, "Loading Perl Event Export Settings...");
+	Log(Logs::General, Logs::Zone_Server, "Loading Perl Event Export Settings...");
 
 	/* Write Defaults First (All Enabled) */
 	for (int i = 0; i < _LargestEventID; i++){

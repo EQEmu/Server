@@ -236,7 +236,7 @@ std::vector<std::string> ParseRecipients(std::string RecipientString) {
 
 static void ProcessMailTo(Client *c, std::string MailMessage) {
 
-	Log.Out(Logs::Detail, Logs::UCS_Server, "MAILTO: From %s, %s", c->MailBoxName().c_str(), MailMessage.c_str());
+	Log(Logs::Detail, Logs::UCS_Server, "MAILTO: From %s, %s", c->MailBoxName().c_str(), MailMessage.c_str());
 
 	std::vector<std::string> Recipients;
 
@@ -305,7 +305,7 @@ static void ProcessMailTo(Client *c, std::string MailMessage) {
 
 		if (!database.SendMail(Recipient, c->MailBoxName(), Subject, Body, RecipientsString)) {
 
-			Log.Out(Logs::Detail, Logs::UCS_Server, "Failed in SendMail(%s, %s, %s, %s)", Recipient.c_str(),
+			Log(Logs::Detail, Logs::UCS_Server, "Failed in SendMail(%s, %s, %s, %s)", Recipient.c_str(),
 			     c->MailBoxName().c_str(), Subject.c_str(), RecipientsString.c_str());
 
 			int PacketLength = 10 + Recipient.length() + Subject.length();
@@ -398,7 +398,7 @@ static void ProcessSetMessageStatus(std::string SetMessageCommand) {
 
 static void ProcessCommandBuddy(Client *c, std::string Buddy) {
 
-	Log.Out(Logs::Detail, Logs::UCS_Server, "Received buddy command with parameters %s", Buddy.c_str());
+	Log(Logs::Detail, Logs::UCS_Server, "Received buddy command with parameters %s", Buddy.c_str());
 	c->GeneralChannelMessage("Buddy list modified");
 
 	uint8 SubAction = 1;
@@ -427,7 +427,7 @@ static void ProcessCommandBuddy(Client *c, std::string Buddy) {
 
 static void ProcessCommandIgnore(Client *c, std::string Ignoree) {
 
-	Log.Out(Logs::Detail, Logs::UCS_Server, "Received ignore command with parameters %s", Ignoree.c_str());
+	Log(Logs::Detail, Logs::UCS_Server, "Received ignore command with parameters %s", Ignoree.c_str());
 	c->GeneralChannelMessage("Ignore list modified");
 
 	uint8 SubAction = 0;
@@ -476,10 +476,11 @@ Clientlist::Clientlist(int ChatPort) {
 	if(!ChatOpMgr->LoadOpcodes("mail_opcodes.conf"))
 		exit(1);
 
-	if (chatsf->Open())
-		Log.Out(Logs::Detail, Logs::UCS_Server,"Client (UDP) Chat listener started on port %i.", ChatPort);
+	if (chatsf->Open()) {
+		Log(Logs::Detail, Logs::UCS_Server, "Client (UDP) Chat listener started on port %i.", ChatPort);
+	}
 	else {
-		Log.Out(Logs::Detail, Logs::UCS_Server,"Failed to start client (UDP) listener (port %-4i)", ChatPort);
+		Log(Logs::Detail, Logs::UCS_Server,"Failed to start client (UDP) listener (port %-4i)", ChatPort);
 
 		exit(1);
 	}
@@ -556,13 +557,13 @@ void Clientlist::CheckForStaleConnections(Client *c) {
 		if(((*Iterator) != c) && ((c->GetName() == (*Iterator)->GetName())
 				&& (c->GetConnectionType() == (*Iterator)->GetConnectionType()))) {
 
-			Log.Out(Logs::Detail, Logs::UCS_Server, "Removing old connection for %s", c->GetName().c_str());
+			Log(Logs::Detail, Logs::UCS_Server, "Removing old connection for %s", c->GetName().c_str());
 
 			struct in_addr in;
 
 			in.s_addr = (*Iterator)->ClientStream->GetRemoteIP();
 
-			Log.Out(Logs::Detail, Logs::UCS_Server, "Client connection from %s:%d closed.", inet_ntoa(in),
+			Log(Logs::Detail, Logs::UCS_Server, "Client connection from %s:%d closed.", inet_ntoa(in),
 									ntohs((*Iterator)->ClientStream->GetRemotePort()));
 
 			safe_delete((*Iterator));
@@ -580,7 +581,7 @@ void Clientlist::Process()
 		struct in_addr in;
 		in.s_addr = eqs->GetRemoteIP();
 
-		Log.Out(Logs::Detail, Logs::UCS_Server, "New Client UDP connection from %s:%d", inet_ntoa(in),
+		Log(Logs::Detail, Logs::UCS_Server, "New Client UDP connection from %s:%d", inet_ntoa(in),
 			ntohs(eqs->GetRemotePort()));
 
 		eqs->SetOpcodeManager(&ChatOpMgr);
@@ -596,7 +597,7 @@ void Clientlist::Process()
 			struct in_addr in;
 			in.s_addr = (*it)->ClientStream->GetRemoteIP();
 
-			Log.Out(Logs::Detail, Logs::UCS_Server, "Client connection from %s:%d closed.", inet_ntoa(in),
+			Log(Logs::Detail, Logs::UCS_Server, "Client connection from %s:%d closed.", inet_ntoa(in),
 				ntohs((*it)->ClientStream->GetRemotePort()));
 
 			safe_delete((*it));
@@ -622,7 +623,7 @@ void Clientlist::Process()
 				VARSTRUCT_DECODE_STRING(MailBox, PacketBuffer);
 
 				if (strlen(PacketBuffer) != 9) {
-					Log.Out(Logs::Detail, Logs::UCS_Server,
+					Log(Logs::Detail, Logs::UCS_Server,
 						"Mail key is the wrong size. Version of world incompatible with UCS.");
 					KeyValid = false;
 					break;
@@ -644,11 +645,11 @@ void Clientlist::Process()
 				else
 					CharacterName = MailBoxString.substr(LastPeriod + 1);
 
-				Log.Out(Logs::Detail, Logs::UCS_Server, "Received login for user %s with key %s",
+				Log(Logs::Detail, Logs::UCS_Server, "Received login for user %s with key %s",
 					MailBox, Key);
 
 				if (!database.VerifyMailKey(CharacterName, (*it)->ClientStream->GetRemoteIP(), Key)) {
-					Log.Out(Logs::Detail, Logs::UCS_Server,
+					Log(Logs::Detail, Logs::UCS_Server,
 						"Chat Key for %s does not match, closing connection.", MailBox);
 					KeyValid = false;
 					break;
@@ -674,7 +675,7 @@ void Clientlist::Process()
 			}
 
 			default: {
-				Log.Out(Logs::Detail, Logs::UCS_Server, "Unhandled chat opcode %8X", opcode);
+				Log(Logs::Detail, Logs::UCS_Server, "Unhandled chat opcode %8X", opcode);
 				break;
 			}
 			}
@@ -684,7 +685,7 @@ void Clientlist::Process()
 			struct in_addr in;
 			in.s_addr = (*it)->ClientStream->GetRemoteIP();
 
-			Log.Out(Logs::Detail, Logs::UCS_Server,
+			Log(Logs::Detail, Logs::UCS_Server,
 				"Force disconnecting client: %s:%d, KeyValid=%i, GetForceDisconnect()=%i",
 				inet_ntoa(in), ntohs((*it)->ClientStream->GetRemotePort()), KeyValid,
 				(*it)->GetForceDisconnect());
@@ -826,7 +827,7 @@ void Clientlist::ProcessOPMailCommand(Client *c, std::string CommandString)
 			break;
 
 		case CommandSetMessageStatus:
-			Log.Out(Logs::Detail, Logs::UCS_Server, "Set Message Status, Params: %s", Parameters.c_str());
+			Log(Logs::Detail, Logs::UCS_Server, "Set Message Status, Params: %s", Parameters.c_str());
 			ProcessSetMessageStatus(Parameters);
 			break;
 
@@ -851,7 +852,7 @@ void Clientlist::ProcessOPMailCommand(Client *c, std::string CommandString)
 
 		default:
 			c->SendHelp();
-			Log.Out(Logs::Detail, Logs::UCS_Server, "Unhandled OP_Mail command: %s", CommandString.c_str());
+			Log(Logs::Detail, Logs::UCS_Server, "Unhandled OP_Mail command: %s", CommandString.c_str());
 	}
 }
 
@@ -862,7 +863,7 @@ void Clientlist::CloseAllConnections() {
 
 	for(Iterator = ClientChatConnections.begin(); Iterator != ClientChatConnections.end(); ++Iterator) {
 
-		Log.Out(Logs::Detail, Logs::UCS_Server, "Removing client %s", (*Iterator)->GetName().c_str());
+		Log(Logs::Detail, Logs::UCS_Server, "Removing client %s", (*Iterator)->GetName().c_str());
 
 		(*Iterator)->CloseConnection();
 	}
@@ -871,7 +872,7 @@ void Clientlist::CloseAllConnections() {
 void Client::AddCharacter(int CharID, const char *CharacterName, int Level) {
 
 	if(!CharacterName) return;
-	Log.Out(Logs::Detail, Logs::UCS_Server, "Adding character %s with ID %i for %s", CharacterName, CharID, GetName().c_str());
+	Log(Logs::Detail, Logs::UCS_Server, "Adding character %s with ID %i for %s", CharacterName, CharID, GetName().c_str());
 	CharacterEntry NewCharacter;
 	NewCharacter.CharID = CharID;
 	NewCharacter.Name = CharacterName;
@@ -936,7 +937,7 @@ void Client::AddToChannelList(ChatChannel *JoinedChannel) {
 	for(int i = 0; i < MAX_JOINED_CHANNELS; i++)
 		if(JoinedChannels[i] == nullptr) {
 			JoinedChannels[i] = JoinedChannel;
-			Log.Out(Logs::Detail, Logs::UCS_Server, "Added Channel %s to slot %i for %s", JoinedChannel->GetName().c_str(), i + 1, GetName().c_str());
+			Log(Logs::Detail, Logs::UCS_Server, "Added Channel %s to slot %i for %s", JoinedChannel->GetName().c_str(), i + 1, GetName().c_str());
 			return;
 		}
 }
@@ -977,7 +978,7 @@ void Client::JoinChannels(std::string ChannelNameList) {
 		}
 	}
 
-	Log.Out(Logs::Detail, Logs::UCS_Server, "Client: %s joining channels %s", GetName().c_str(), ChannelNameList.c_str());
+	Log(Logs::Detail, Logs::UCS_Server, "Client: %s joining channels %s", GetName().c_str(), ChannelNameList.c_str());
 
 	int NumberOfChannels = ChannelCount();
 
@@ -1076,7 +1077,7 @@ void Client::JoinChannels(std::string ChannelNameList) {
 
 void Client::LeaveChannels(std::string ChannelNameList) {
 
-	Log.Out(Logs::Detail, Logs::UCS_Server, "Client: %s leaving channels %s", GetName().c_str(), ChannelNameList.c_str());
+	Log(Logs::Detail, Logs::UCS_Server, "Client: %s leaving channels %s", GetName().c_str(), ChannelNameList.c_str());
 
 	std::string::size_type CurrentPos = 0;
 
@@ -1252,7 +1253,7 @@ void Client::SendChannelMessage(std::string Message)
 
 	std::string ChannelName = Message.substr(1, MessageStart-1);
 
-	Log.Out(Logs::Detail, Logs::UCS_Server, "%s tells %s, [%s]", GetName().c_str(), ChannelName.c_str(), Message.substr(MessageStart + 1).c_str());
+	Log(Logs::Detail, Logs::UCS_Server, "%s tells %s, [%s]", GetName().c_str(), ChannelName.c_str(), Message.substr(MessageStart + 1).c_str());
 
 	ChatChannel *RequiredChannel = ChannelList->FindChannel(ChannelName);
 
@@ -1395,7 +1396,7 @@ void Client::SendChannelMessageByNumber(std::string Message) {
 		}
 	}
 
-	Log.Out(Logs::Detail, Logs::UCS_Server, "%s tells %s, [%s]", GetName().c_str(), RequiredChannel->GetName().c_str(),
+	Log(Logs::Detail, Logs::UCS_Server, "%s tells %s, [%s]", GetName().c_str(), RequiredChannel->GetName().c_str(),
 							Message.substr(MessageStart + 1).c_str());
 
 	if(RuleB(Chat, EnableAntiSpam))
@@ -1603,7 +1604,7 @@ void Client::SetChannelPassword(std::string ChannelPassword) {
 	else
 		Message = "Password change on channel " + ChannelName;
 
-	Log.Out(Logs::Detail, Logs::UCS_Server, "Set password of channel [%s] to [%s] by %s", ChannelName.c_str(), Password.c_str(), GetName().c_str());
+	Log(Logs::Detail, Logs::UCS_Server, "Set password of channel [%s] to [%s] by %s", ChannelName.c_str(), Password.c_str(), GetName().c_str());
 
 	ChatChannel *RequiredChannel = ChannelList->FindChannel(ChannelName);
 
@@ -1658,7 +1659,7 @@ void Client::SetChannelOwner(std::string CommandString) {
 	if((ChannelName.length() > 0) && isdigit(ChannelName[0]))
 		ChannelName = ChannelSlotName(atoi(ChannelName.c_str()));
 
-	Log.Out(Logs::Detail, Logs::UCS_Server, "Set owner of channel [%s] to [%s]", ChannelName.c_str(), NewOwner.c_str());
+	Log(Logs::Detail, Logs::UCS_Server, "Set owner of channel [%s] to [%s]", ChannelName.c_str(), NewOwner.c_str());
 
 	ChatChannel *RequiredChannel = ChannelList->FindChannel(ChannelName);
 
@@ -1746,7 +1747,7 @@ void Client::ChannelInvite(std::string CommandString) {
 	if((ChannelName.length() > 0) && isdigit(ChannelName[0]))
 		ChannelName = ChannelSlotName(atoi(ChannelName.c_str()));
 
-	Log.Out(Logs::Detail, Logs::UCS_Server, "[%s] invites [%s] to channel [%s]", GetName().c_str(), Invitee.c_str(), ChannelName.c_str());
+	Log(Logs::Detail, Logs::UCS_Server, "[%s] invites [%s] to channel [%s]", GetName().c_str(), Invitee.c_str(), ChannelName.c_str());
 
 	Client *RequiredClient = g_Clientlist->FindCharacter(Invitee);
 
@@ -1874,7 +1875,7 @@ void Client::ChannelGrantModerator(std::string CommandString) {
 	if((ChannelName.length() > 0) && isdigit(ChannelName[0]))
 		ChannelName = ChannelSlotName(atoi(ChannelName.c_str()));
 
-	Log.Out(Logs::Detail, Logs::UCS_Server, "[%s] gives [%s] moderator rights to channel [%s]", GetName().c_str(), Moderator.c_str(), ChannelName.c_str());
+	Log(Logs::Detail, Logs::UCS_Server, "[%s] gives [%s] moderator rights to channel [%s]", GetName().c_str(), Moderator.c_str(), ChannelName.c_str());
 
 	Client *RequiredClient = g_Clientlist->FindCharacter(Moderator);
 
@@ -1955,7 +1956,7 @@ void Client::ChannelGrantVoice(std::string CommandString) {
 	if((ChannelName.length() > 0) && isdigit(ChannelName[0]))
 		ChannelName = ChannelSlotName(atoi(ChannelName.c_str()));
 
-	Log.Out(Logs::Detail, Logs::UCS_Server, "[%s] gives [%s] voice to channel [%s]", GetName().c_str(), Voicee.c_str(), ChannelName.c_str());
+	Log(Logs::Detail, Logs::UCS_Server, "[%s] gives [%s] voice to channel [%s]", GetName().c_str(), Voicee.c_str(), ChannelName.c_str());
 
 	Client *RequiredClient = g_Clientlist->FindCharacter(Voicee);
 
@@ -2043,7 +2044,7 @@ void Client::ChannelKick(std::string CommandString) {
 	if((ChannelName.length() > 0) && isdigit(ChannelName[0]))
 		ChannelName = ChannelSlotName(atoi(ChannelName.c_str()));
 
-	Log.Out(Logs::Detail, Logs::UCS_Server, "[%s] kicks [%s] from channel [%s]", GetName().c_str(), Kickee.c_str(), ChannelName.c_str());
+	Log(Logs::Detail, Logs::UCS_Server, "[%s] kicks [%s] from channel [%s]", GetName().c_str(), Kickee.c_str(), ChannelName.c_str());
 
 	Client *RequiredClient = g_Clientlist->FindCharacter(Kickee);
 
@@ -2152,32 +2153,32 @@ void Client::SetConnectionType(char c) {
 		case 'S':
 		{
 			TypeOfConnection = ConnectionTypeCombined;
-			Log.Out(Logs::Detail, Logs::UCS_Server, "Connection type is Combined (SoF/SoD)");
+			Log(Logs::Detail, Logs::UCS_Server, "Connection type is Combined (SoF/SoD)");
 			break;
 		}
 		case 'U':
 		{
 			TypeOfConnection = ConnectionTypeCombined;
 			UnderfootOrLater = true;
-			Log.Out(Logs::Detail, Logs::UCS_Server, "Connection type is Combined (Underfoot+)");
+			Log(Logs::Detail, Logs::UCS_Server, "Connection type is Combined (Underfoot+)");
 			break;
 		}
 		case 'M':
 		{
 			TypeOfConnection = ConnectionTypeMail;
-			Log.Out(Logs::Detail, Logs::UCS_Server, "Connection type is Mail (6.2 or Titanium client)");
+			Log(Logs::Detail, Logs::UCS_Server, "Connection type is Mail (6.2 or Titanium client)");
 			break;
 		}
 		case 'C':
 		{
 			TypeOfConnection = ConnectionTypeChat;
-			Log.Out(Logs::Detail, Logs::UCS_Server, "Connection type is Chat (6.2 or Titanium client)");
+			Log(Logs::Detail, Logs::UCS_Server, "Connection type is Chat (6.2 or Titanium client)");
 			break;
 		}
 		default:
 		{
 			TypeOfConnection = ConnectionTypeUnknown;
-			Log.Out(Logs::Detail, Logs::UCS_Server, "Connection type is unknown.");
+			Log(Logs::Detail, Logs::UCS_Server, "Connection type is unknown.");
 		}
 	}
 }
@@ -2254,12 +2255,12 @@ void Client::SendNotification(int MailBoxNumber, std::string Subject, std::strin
 
 void Client::ChangeMailBox(int NewMailBox)
 {
-	Log.Out(Logs::Detail, Logs::UCS_Server, "%s Change to mailbox %i", MailBoxName().c_str(), NewMailBox);
+	Log(Logs::Detail, Logs::UCS_Server, "%s Change to mailbox %i", MailBoxName().c_str(), NewMailBox);
 
 	SetMailBox(NewMailBox);
 	auto id = std::to_string(NewMailBox);
 
-	Log.Out(Logs::Detail, Logs::UCS_Server, "New mailbox is %s", MailBoxName().c_str());
+	Log(Logs::Detail, Logs::UCS_Server, "New mailbox is %s", MailBoxName().c_str());
 
 	auto outapp = new EQApplicationPacket(OP_MailboxChange, id.length() + 1);
 
@@ -2328,13 +2329,13 @@ std::string Client::MailBoxName() {
 
 	if((Characters.empty()) || (CurrentMailBox > (Characters.size() - 1)))
 	{
-		Log.Out(Logs::Detail, Logs::UCS_Server, "MailBoxName() called with CurrentMailBox set to %i and Characters.size() is %i",
+		Log(Logs::Detail, Logs::UCS_Server, "MailBoxName() called with CurrentMailBox set to %i and Characters.size() is %i",
 				CurrentMailBox, Characters.size());
 
 		return "";
 	}
 
-	Log.Out(Logs::Detail, Logs::UCS_Server, "MailBoxName() called with CurrentMailBox set to %i and Characters.size() is %i",
+	Log(Logs::Detail, Logs::UCS_Server, "MailBoxName() called with CurrentMailBox set to %i and Characters.size() is %i",
 			CurrentMailBox, Characters.size());
 
 	return Characters[CurrentMailBox].Name;

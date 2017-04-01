@@ -1296,16 +1296,20 @@ XS(XS_Client_MovePC)
 			THIS->MovePC(zoneID, x, y, z, heading);
 		}
 		else {
-			if (THIS->IsMerc())
-				Log.Out(Logs::Detail, Logs::None, "[CLIENT] Perl(XS_Client_MovePC) attempted to process a type Merc reference");
-			else if (THIS->IsNPC())
-				Log.Out(Logs::Detail, Logs::None, "[CLIENT] Perl(XS_Client_MovePC) attempted to process a type NPC reference");
+			if (THIS->IsMerc()) {
+				Log(Logs::Detail, Logs::None, "[CLIENT] Perl(XS_Client_MovePC) attempted to process a type Merc reference");
+			}
+			else if (THIS->IsNPC()) {
+				Log(Logs::Detail, Logs::None, "[CLIENT] Perl(XS_Client_MovePC) attempted to process a type NPC reference");
+			}
 		#ifdef BOTS
-			else if (THIS->IsBot())
-				Log.Out(Logs::Detail, Logs::None, "[CLIENT] Perl(XS_Client_MovePC) attempted to process a type Bot reference");
+			else if (THIS->IsBot()) {
+				Log(Logs::Detail, Logs::None, "[CLIENT] Perl(XS_Client_MovePC) attempted to process a type Bot reference");
+			}
 		#endif
-			else
-				Log.Out(Logs::Detail, Logs::None, "[CLIENT] Perl(XS_Client_MovePC) attempted to process an Unknown type reference");
+			else {
+				Log(Logs::Detail, Logs::None, "[CLIENT] Perl(XS_Client_MovePC) attempted to process an Unknown type reference");
+			}
 
 			Perl_croak(aTHX_ "THIS is not of type Client");
 		}
@@ -1342,16 +1346,20 @@ XS(XS_Client_MovePCInstance)
 			THIS->MovePC(zoneID, instanceID, x, y, z, heading);
 		}
 		else {
-			if (THIS->IsMerc())
-				Log.Out(Logs::Detail, Logs::None, "[CLIENT] Perl(XS_Client_MovePCInstance) attempted to process a type Merc reference");
-			else if (THIS->IsNPC())
-				Log.Out(Logs::Detail, Logs::None, "[CLIENT] Perl(XS_Client_MovePCInstance) attempted to process a type NPC reference");
+			if (THIS->IsMerc()) {
+				Log(Logs::Detail, Logs::None, "[CLIENT] Perl(XS_Client_MovePCInstance) attempted to process a type Merc reference");
+			}
+			else if (THIS->IsNPC()) {
+				Log(Logs::Detail, Logs::None, "[CLIENT] Perl(XS_Client_MovePCInstance) attempted to process a type NPC reference");
+			}
 		#ifdef BOTS
-			else if (THIS->IsBot())
-				Log.Out(Logs::Detail, Logs::None, "[CLIENT] Perl(XS_Client_MovePCInstance) attempted to process a type Bot reference");
+			else if (THIS->IsBot()) {
+				Log(Logs::Detail, Logs::None, "[CLIENT] Perl(XS_Client_MovePCInstance) attempted to process a type Bot reference");
+			}
 		#endif
-			else
-				Log.Out(Logs::Detail, Logs::None, "[CLIENT] Perl(XS_Client_MovePCInstance) attempted to process an Unknown type reference");
+			else {
+				Log(Logs::Detail, Logs::None, "[CLIENT] Perl(XS_Client_MovePCInstance) attempted to process an Unknown type reference");
+			}
 
 			Perl_croak(aTHX_ "THIS is not of type Client");
 
