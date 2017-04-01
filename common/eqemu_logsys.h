@@ -138,10 +138,10 @@ static const char* LogCategoryName[LogCategory::MaxCategoryID] = {
 };
 }
 
-#define Log(debug_level, log_category, message, ...){\
+#define Log(debug_level, log_category, message, ...) do {\
 	if (LogSys.log_settings[log_category].is_category_enabled == 1)\
 		LogSys.Out(debug_level, log_category, message, ##__VA_ARGS__);\
-}
+} while (0)
 
 class EQEmuLogSys {
 public:
