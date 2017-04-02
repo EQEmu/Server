@@ -1326,7 +1326,7 @@ void Mob::AI_Process() {
 		if (m_PlayerState & static_cast<uint32>(PlayerState::Aggressive))
 			SendRemovePlayerState(PlayerState::Aggressive);
 
-		if(!zone->CanDoCombat() && AI_feign_remember_timer->Check()) {
+		if(zone->CanDoCombat() && AI_feign_remember_timer->Check()) {
 			// 6/14/06
 			// Improved Feign Death Memory
 			// check to see if any of our previous feigned targets have gotten up.
@@ -1351,7 +1351,7 @@ void Mob::AI_Process() {
 		{
 			//we processed a spell action, so do nothing else.
 		}
-		else if (!zone->CanDoCombat() && AI_scan_area_timer->Check())
+		else if (zone->CanDoCombat() && AI_scan_area_timer->Check())
 		{
 			/*
 			* This is where NPCs look around to see if they want to attack anybody.
