@@ -18,6 +18,11 @@ namespace luabind {
 
 luabind::scope lua_register_inventory();
 
+// This class should be deprecated due to the nature of inventory actions.
+// Direct manipulation of the inventory system bypasses the client management
+// of database calls and can lead to lost items, duplicated items and/or
+// desync'd inventories, if not handled correctly.
+
 class Lua_Inventory : public Lua_Ptr<EQEmu::InventoryProfile>
 {
 	typedef EQEmu::InventoryProfile NativeType;

@@ -1793,7 +1793,8 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 			// Nothing in destination slot: split stack into two
 			if ((int16)move_in->number_in_stack >= src_inst->GetCharges()) {
 				// Move entire stack
-				if(!m_inv.SwapItem(src_slot_id, dst_slot_id)) { return false; }
+				EQEmu::InventoryProfile::SwapItemFailState fail_state = EQEmu::InventoryProfile::swapInvalid;
+				if (!m_inv.SwapItem(src_slot_id, dst_slot_id, fail_state)) { return false; }
 				Log(Logs::Detail, Logs::Inventory, "Move entire stack from %d to %d with stack size %d. Dest empty.", src_slot_id, dst_slot_id, move_in->number_in_stack);
 			}
 			else {
@@ -1823,7 +1824,21 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 			}
 			SetMaterial(dst_slot_id,src_inst->GetItem()->ID);
 		}
-		if(!m_inv.SwapItem(src_slot_id, dst_slot_id, GetRace(), GetClass(), GetDeity(), GetLevel())) { return false; }
+
+		EQEmu::InventoryProfile::SwapItemFailState fail_state = EQEmu::InventoryProfile::swapInvalid;
+		if (!m_inv.SwapItem(src_slot_id, dst_slot_id, fail_state, GetRace(), GetClass(), GetDeity(), GetLevel())) {
+			const char* fail_message = "The selected slot was invalid.";
+			if (fail_state == EQEmu::InventoryProfile::swapRaceClass || fail_state == EQEmu::InventoryProfile::swapDeity)
+				fail_message = "Your class, deity and/or race may not equip that item.";
+			else if (fail_state == EQEmu::InventoryProfile::swapLevel)
+				fail_message = "You are not sufficient level to use this item.";
+			
+			if (fail_message)
+				Message(CC_Red, "%s", fail_message);
+
+			return false;
+		}
+
 		Log(Logs::Detail, Logs::Inventory, "Moving entire item from slot %d to slot %d", src_slot_id, dst_slot_id);
 
 		if (src_slot_id <= EQEmu::legacy::EQUIPMENT_END || src_slot_id == EQEmu::inventory::slotPowerSource) {

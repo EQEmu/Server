@@ -127,7 +127,8 @@ namespace EQEmu
 		ItemInstance* GetCursorItem();
 
 		// Swap items in inventory
-		bool SwapItem(int16 slot_a, int16 slot_b, uint16 race_id = 0, uint8 class_id = 0, uint16 deity_id = 0, uint8 level = 0);
+		enum SwapItemFailState : int8 { swapInvalid = -1, swapPass = 0, swapNotAllowed, swapNullData, swapRaceClass, swapDeity, swapLevel };
+		bool SwapItem(int16 slot_a, int16 slot_b, SwapItemFailState& fail_state, uint16 race_id = 0, uint8 class_id = 0, uint16 deity_id = 0, uint8 level = 0);
 
 		// Remove item from inventory
 		bool DeleteItem(int16 slot_id, uint8 quantity = 0);

@@ -241,48 +241,70 @@ EQEmu::ItemInstance* EQEmu::InventoryProfile::GetCursorItem()
 }
 
 // Swap items in inventory
-bool EQEmu::InventoryProfile::SwapItem(int16 slot_a, int16 slot_b, uint16 race_id, uint8 class_id, uint16 deity_id, uint8 level)
+bool EQEmu::InventoryProfile::SwapItem(int16 slot_a, int16 slot_b, SwapItemFailState& fail_state, uint16 race_id, uint8 class_id, uint16 deity_id, uint8 level)
 {
+	fail_state = swapInvalid;
+	
 	// Temp holding areas for a and b
 	ItemInstance* inst_a = GetItem(slot_a);
 	ItemInstance* inst_b = GetItem(slot_b);
 
 	if (inst_a) {
-		if (!inst_a->IsSlotAllowed(slot_b))
+		if (!inst_a->IsSlotAllowed(slot_b)) {
+			fail_state = swapNotAllowed;
 			return false;
-
+		}
 		if ((slot_b >= legacy::EQUIPMENT_BEGIN && slot_b <= legacy::EQUIPMENT_END) || slot_b == inventory::slotPowerSource) {
 			auto item_a = inst_a->GetItem();
-			if (!item_a)
+			if (!item_a) {
+				fail_state = swapNullData;
 				return false;
-			if (race_id && class_id && !item_a->IsEquipable(race_id, class_id))
+			}
+			if (race_id && class_id && !item_a->IsEquipable(race_id, class_id)) {
+				fail_state = swapRaceClass;
 				return false;
-			if (deity_id && item_a->Deity && !(deity::ConvertDeityTypeToDeityTypeBit((deity::DeityType)deity_id) & item_a->Deity))
+			}
+			if (deity_id && item_a->Deity && !(deity::ConvertDeityTypeToDeityTypeBit((deity::DeityType)deity_id) & item_a->Deity)) {
+				fail_state = swapDeity;
 				return false;
-			if (level && item_a->ReqLevel && level < item_a->ReqLevel)
+			}
+			if (level && item_a->ReqLevel && level < item_a->ReqLevel) {
+				fail_state = swapLevel;
 				return false;
+			}
 		}
 	}
 
 	if (inst_b) {
-		if (!inst_b->IsSlotAllowed(slot_a))
+		if (!inst_b->IsSlotAllowed(slot_a)) {
+			fail_state = swapNotAllowed;
 			return false;
-
+		}
 		if ((slot_a >= legacy::EQUIPMENT_BEGIN && slot_a <= legacy::EQUIPMENT_END) || slot_a == inventory::slotPowerSource) {
 			auto item_b = inst_b->GetItem();
-			if (!item_b)
+			if (!item_b) {
+				fail_state = swapNullData;
 				return false;
-			if (race_id && class_id && !item_b->IsEquipable(race_id, class_id))
+			}
+			if (race_id && class_id && !item_b->IsEquipable(race_id, class_id)) {
+				fail_state = swapRaceClass;
 				return false;
-			if (deity_id && item_b->Deity && !(deity::ConvertDeityTypeToDeityTypeBit((deity::DeityType)deity_id) & item_b->Deity))
+			}
+			if (deity_id && item_b->Deity && !(deity::ConvertDeityTypeToDeityTypeBit((deity::DeityType)deity_id) & item_b->Deity)) {
+				fail_state = swapDeity;
 				return false;
-			if (level && item_b->ReqLevel && level < item_b->ReqLevel)
+			}
+			if (level && item_b->ReqLevel && level < item_b->ReqLevel) {
+				fail_state = swapLevel;
 				return false;
+			}
 		}
 	}
 
-	_PutItem(slot_a, inst_b); // Copy b->a
-	_PutItem(slot_b, inst_a); // Copy a->b
+	_PutItem(slot_a, inst_b); // Assign b->a
+	_PutItem(slot_b, inst_a); // Assign a->b
+
+	fail_state = swapPass;
 
 	return true;
 }
