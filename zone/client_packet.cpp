@@ -13252,6 +13252,11 @@ void Client::Handle_OP_TargetCommand(const EQApplicationPacket *app)
 				GetTarget()->IsTargeted(1);
 				return;
 			}
+			else if (GetTarget()->IsPetOwnerClient())
+			{
+				GetTarget()->IsTargeted(1);
+				return;
+			}
 			else if (GetBindSightTarget())
 			{
 				if (DistanceSquared(GetBindSightTarget()->GetPosition(), GetTarget()->GetPosition()) > (zone->newzone_data.maxclip*zone->newzone_data.maxclip))
