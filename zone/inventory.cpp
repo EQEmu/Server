@@ -1826,17 +1826,15 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 		}
 
 		EQEmu::InventoryProfile::SwapItemFailState fail_state = EQEmu::InventoryProfile::swapInvalid;
-		if (!m_inv.SwapItem(src_slot_id, dst_slot_id, fail_state, GetRace(), GetClass(), GetDeity(), GetLevel())) {
+		if (!m_inv.SwapItem(src_slot_id, dst_slot_id, fail_state, GetBaseRace(), GetBaseClass(), GetDeity(), GetLevel())) {
 			const char* fail_message = "The selected slot was invalid.";
 			if (fail_state == EQEmu::InventoryProfile::swapRaceClass || fail_state == EQEmu::InventoryProfile::swapDeity)
 				fail_message = "Your class, deity and/or race may not equip that item.";
 			else if (fail_state == EQEmu::InventoryProfile::swapLevel)
 				fail_message = "You are not sufficient level to use this item.";
 			
-			if (fail_message) {
+			if (fail_message)
 				Message(CC_Red, "%s", fail_message);
-				//Log(Logs::General, Logs::Error, "[%s] %s (r:%u, c:%u, d:%u, l:%u)", GetCleanName(), fail_message, GetRace(), GetClass(), GetDeity(), GetLevel());
-			}
 
 			return false;
 		}
