@@ -1460,9 +1460,7 @@ private:
 	Timer endupkeep_timer;
 	Timer forget_timer; // our 2 min everybody forgets you timer
 	Timer autosave_timer;
-#ifdef REVERSE_AGGRO
 	Timer client_scan_npc_aggro_timer;
-#endif
 	Timer tribute_timer;
 
 	Timer proximity_timer;

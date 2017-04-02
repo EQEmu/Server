@@ -134,9 +134,7 @@ Client::Client(EQStreamInterface* ieqs)
 	endupkeep_timer(1000),
 	forget_timer(0),
 	autosave_timer(RuleI(Character, AutosaveIntervalS) * 1000),
-#ifdef REVERSE_AGGRO
 	client_scan_npc_aggro_timer(RuleI(Aggro, ClientAggroCheckInterval) * 1000),
-#endif
 	tribute_timer(Tribute_duration),
 	proximity_timer(ClientProximity_interval),
 	TaskPeriodic_Timer(RuleI(TaskSystem, PeriodicCheckTimer) * 1000),

@@ -111,9 +111,6 @@ Zone extensions and features
 //path to where sql logs should be placed
 #define SQL_LOG_PATH "sql_logs/"
 
-//New aggro system to reduce overhead.
-#define REVERSE_AGGRO
-
 //The highest you can #setskill / #setallskill
 #define HIGHEST_CAN_SET_SKILL 400
 
