@@ -614,7 +614,6 @@ bool Client::Process() {
 		}
 	}
 
-#ifdef REVERSE_AGGRO
 	//At this point, we are still connected, everything important has taken
 	//place, now check to see if anybody wants to aggro us.
 	// only if client is not feigned
@@ -630,7 +629,6 @@ bool Client::Process() {
 		}
 		Log(Logs::General, Logs::Aggro, "Checking Reverse Aggro (client->npc) scanned_npcs (%i)", npc_scan_count);
 	}
-#endif
 
 	if (client_state != CLIENT_LINKDEAD && (client_state == CLIENT_ERROR || client_state == DISCONNECTED || client_state == CLIENT_KICKED || !eqs->CheckState(ESTABLISHED)))
 	{

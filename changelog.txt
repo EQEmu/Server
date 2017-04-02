@@ -1,6 +1,7 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
 == 4/1/2017 ==
+Akkadius: Cleaned up some of the NPC to NPC aggro code, only do aggro checks to other NPC's when the NPC is flagged for it
 Akkadius: [Performance] Reworked how all log calls are made in the source
 	- Before we used Log.Out, we will now use a macro Log(
 		- Before: Log.Out(Logs::General, Logs::Status, "Importing Spells...");
