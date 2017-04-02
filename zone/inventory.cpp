@@ -1833,8 +1833,10 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 			else if (fail_state == EQEmu::InventoryProfile::swapLevel)
 				fail_message = "You are not sufficient level to use this item.";
 			
-			if (fail_message)
+			if (fail_message) {
 				Message(CC_Red, "%s", fail_message);
+				//Log(Logs::General, Logs::Error, "[%s] %s (r:%u, c:%u, d:%u, l:%u)", GetCleanName(), fail_message, GetRace(), GetClass(), GetDeity(), GetLevel());
+			}
 
 			return false;
 		}

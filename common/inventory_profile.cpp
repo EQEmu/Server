@@ -264,10 +264,10 @@ bool EQEmu::InventoryProfile::SwapItem(int16 slot_a, int16 slot_b, SwapItemFailS
 				fail_state = swapRaceClass;
 				return false;
 			}
-			if (deity_id && item_a->Deity && !(deity::ConvertDeityTypeToDeityTypeBit((deity::DeityType)deity_id) & item_a->Deity)) {
+			/*if (deity_id && item_a->Deity && !(deity::ConvertDeityTypeToDeityTypeBit((deity::DeityType)deity_id) & item_a->Deity)) {
 				fail_state = swapDeity;
 				return false;
-			}
+			}*/
 			if (level && item_a->ReqLevel && level < item_a->ReqLevel) {
 				fail_state = swapLevel;
 				return false;
@@ -290,10 +290,10 @@ bool EQEmu::InventoryProfile::SwapItem(int16 slot_a, int16 slot_b, SwapItemFailS
 				fail_state = swapRaceClass;
 				return false;
 			}
-			if (deity_id && item_b->Deity && !(deity::ConvertDeityTypeToDeityTypeBit((deity::DeityType)deity_id) & item_b->Deity)) {
+			/*if (deity_id && item_b->Deity && !(deity::ConvertDeityTypeToDeityTypeBit((deity::DeityType)deity_id) & item_b->Deity)) {
 				fail_state = swapDeity;
 				return false;
-			}
+			}*/
 			if (level && item_b->ReqLevel && level < item_b->ReqLevel) {
 				fail_state = swapLevel;
 				return false;
