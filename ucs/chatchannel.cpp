@@ -43,7 +43,7 @@ ChatChannel::ChatChannel(std::string inName, std::string inOwner, std::string in
 
 	Moderated = false;
 
-	Log.Out(Logs::Detail, Logs::UCS_Server, "New ChatChannel created: Name: [%s], Owner: [%s], Password: [%s], MinStatus: %i",
+	Log(Logs::Detail, Logs::UCS_Server, "New ChatChannel created: Name: [%s], Owner: [%s], Password: [%s], MinStatus: %i",
 					Name.c_str(), Owner.c_str(), Password.c_str(), MinimumStatus);
 
 }
@@ -150,7 +150,7 @@ void ChatChannelList::SendAllChannels(Client *c) {
 
 void ChatChannelList::RemoveChannel(ChatChannel *Channel) {
 
-	Log.Out(Logs::Detail, Logs::UCS_Server, "RemoveChannel(%s)", Channel->GetName().c_str());
+	Log(Logs::Detail, Logs::UCS_Server, "RemoveChannel(%s)", Channel->GetName().c_str());
 
 	LinkedListIterator<ChatChannel*> iterator(ChatChannels);
 
@@ -171,7 +171,7 @@ void ChatChannelList::RemoveChannel(ChatChannel *Channel) {
 
 void ChatChannelList::RemoveAllChannels() {
 
-	Log.Out(Logs::Detail, Logs::UCS_Server, "RemoveAllChannels");
+	Log(Logs::Detail, Logs::UCS_Server, "RemoveAllChannels");
 
 	LinkedListIterator<ChatChannel*> iterator(ChatChannels);
 
@@ -229,7 +229,7 @@ void ChatChannel::AddClient(Client *c) {
 
 	if(IsClientInChannel(c)) {
 
-		Log.Out(Logs::Detail, Logs::UCS_Server, "Client %s already in channel %s", c->GetName().c_str(), GetName().c_str());
+		Log(Logs::Detail, Logs::UCS_Server, "Client %s already in channel %s", c->GetName().c_str(), GetName().c_str());
 
 		return;
 	}
@@ -238,7 +238,7 @@ void ChatChannel::AddClient(Client *c) {
 
 	int AccountStatus = c->GetAccountStatus();
 
-	Log.Out(Logs::Detail, Logs::UCS_Server, "Adding %s to channel %s", c->GetName().c_str(), Name.c_str());
+	Log(Logs::Detail, Logs::UCS_Server, "Adding %s to channel %s", c->GetName().c_str(), Name.c_str());
 
 	LinkedListIterator<Client*> iterator(ClientsInChannel);
 
@@ -263,7 +263,7 @@ bool ChatChannel::RemoveClient(Client *c) {
 
 	if(!c) return false;
 
-	Log.Out(Logs::Detail, Logs::UCS_Server, "RemoveClient %s from channel %s", c->GetName().c_str(), GetName().c_str());
+	Log(Logs::Detail, Logs::UCS_Server, "RemoveClient %s from channel %s", c->GetName().c_str(), GetName().c_str());
 
 	bool HideMe = c->GetHideMe();
 
@@ -300,7 +300,7 @@ bool ChatChannel::RemoveClient(Client *c) {
 		if((Password.length() == 0) || (RuleI(Channels, DeleteTimer) == 0))
 			return false;
 
-		Log.Out(Logs::Detail, Logs::UCS_Server, "Starting delete timer for empty password protected channel %s", Name.c_str());
+		Log(Logs::Detail, Logs::UCS_Server, "Starting delete timer for empty password protected channel %s", Name.c_str());
 
 		DeleteTimer.Start(RuleI(Channels, DeleteTimer) * 60000);
 	}
@@ -396,7 +396,7 @@ void ChatChannel::SendMessageToChannel(std::string Message, Client* Sender) {
 
 		if(ChannelClient)
 		{
-			Log.Out(Logs::Detail, Logs::UCS_Server, "Sending message to %s from %s",
+			Log(Logs::Detail, Logs::UCS_Server, "Sending message to %s from %s",
 					ChannelClient->GetName().c_str(), Sender->GetName().c_str());
 			ChannelClient->SendChannelMessage(Name, Message, Sender);
 		}
@@ -478,7 +478,7 @@ ChatChannel *ChatChannelList::AddClientToChannel(std::string ChannelName, Client
 		return nullptr;
 	}
 
-	Log.Out(Logs::Detail, Logs::UCS_Server, "AddClient to channel [%s] with password [%s]", NormalisedName.c_str(), Password.c_str());
+	Log(Logs::Detail, Logs::UCS_Server, "AddClient to channel [%s] with password [%s]", NormalisedName.c_str(), Password.c_str());
 
 	ChatChannel *RequiredChannel = FindChannel(NormalisedName);
 
@@ -554,7 +554,7 @@ void ChatChannelList::Process() {
 
 		if(CurrentChannel && CurrentChannel->ReadyToDelete()) {
 
-			Log.Out(Logs::Detail, Logs::UCS_Server, "Empty temporary password protected channel %s being destroyed.",
+			Log(Logs::Detail, Logs::UCS_Server, "Empty temporary password protected channel %s being destroyed.",
 				CurrentChannel->GetName().c_str());
 
 			RemoveChannel(CurrentChannel);
@@ -570,7 +570,7 @@ void ChatChannel::AddInvitee(const std::string &Invitee)
 	if (!IsInvitee(Invitee)) {
 		Invitees.push_back(Invitee);
 
-		Log.Out(Logs::Detail, Logs::UCS_Server, "Added %s as invitee to channel %s", Invitee.c_str(), Name.c_str());
+		Log(Logs::Detail, Logs::UCS_Server, "Added %s as invitee to channel %s", Invitee.c_str(), Name.c_str());
 	}
 
 }
@@ -581,7 +581,7 @@ void ChatChannel::RemoveInvitee(std::string Invitee)
 
 	if(it != std::end(Invitees)) {
 		Invitees.erase(it);
-		Log.Out(Logs::Detail, Logs::UCS_Server, "Removed %s as invitee to channel %s", Invitee.c_str(), Name.c_str());
+		Log(Logs::Detail, Logs::UCS_Server, "Removed %s as invitee to channel %s", Invitee.c_str(), Name.c_str());
 	}
 }
 
@@ -595,7 +595,7 @@ void ChatChannel::AddModerator(const std::string &Moderator)
 	if (!IsModerator(Moderator)) {
 		Moderators.push_back(Moderator);
 
-		Log.Out(Logs::Detail, Logs::UCS_Server, "Added %s as moderator to channel %s", Moderator.c_str(), Name.c_str());
+		Log(Logs::Detail, Logs::UCS_Server, "Added %s as moderator to channel %s", Moderator.c_str(), Name.c_str());
 	}
 
 }
@@ -606,7 +606,7 @@ void ChatChannel::RemoveModerator(const std::string &Moderator)
 
 	if (it != std::end(Moderators)) {
 		Moderators.erase(it);
-		Log.Out(Logs::Detail, Logs::UCS_Server, "Removed %s as moderator to channel %s", Moderator.c_str(), Name.c_str());
+		Log(Logs::Detail, Logs::UCS_Server, "Removed %s as moderator to channel %s", Moderator.c_str(), Name.c_str());
 	}
 }
 
@@ -620,7 +620,7 @@ void ChatChannel::AddVoice(const std::string &inVoiced)
 	if (!HasVoice(inVoiced)) {
 		Voiced.push_back(inVoiced);
 
-		Log.Out(Logs::Detail, Logs::UCS_Server, "Added %s as voiced to channel %s", inVoiced.c_str(), Name.c_str());
+		Log(Logs::Detail, Logs::UCS_Server, "Added %s as voiced to channel %s", inVoiced.c_str(), Name.c_str());
 	}
 }
 
@@ -631,7 +631,7 @@ void ChatChannel::RemoveVoice(const std::string &inVoiced)
 	if (it != std::end(Voiced)) {
 		Voiced.erase(it);
 
-		Log.Out(Logs::Detail, Logs::UCS_Server, "Removed %s as voiced to channel %s", inVoiced.c_str(), Name.c_str());
+		Log(Logs::Detail, Logs::UCS_Server, "Removed %s as voiced to channel %s", inVoiced.c_str(), Name.c_str());
 	}
 }
 

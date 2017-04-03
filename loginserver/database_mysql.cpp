@@ -1,19 +1,19 @@
 /*	EQEMu: Everquest Server Emulator
-	Copyright (C) 2001-2010 EQEMu Development Team (http://eqemulator.net)
+Copyright (C) 2001-2010 EQEMu Development Team (http://eqemulator.net)
 
-	This program is free software; you can redistribute it and/or modify
-	it under the terms of the GNU General Public License as published by
-	the Free Software Foundation; version 2 of the License.
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; version 2 of the License.
 
-	This program is distributed in the hope that it will be useful,
-	but WITHOUT ANY WARRANTY except by those people which sell it, which
-	are required to give you total support for your newly bought product;
-	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-	A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY except by those people which sell it, which
+are required to give you total support for your newly bought product;
+without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
-	You should have received a copy of the GNU General Public License
-	along with this program; if not, write to the Free Software
-	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 #include "../common/global_define.h"
 #include "database.h"
@@ -24,7 +24,6 @@
 #include "../common/eqemu_logsys.h"
 #include "../common/string_util.h"
 
-extern EQEmuLogSys Log;
 extern LoginServer server;
 
 DatabaseMySQL::DatabaseMySQL(std::string user, std::string pass, std::string host, std::string port, std::string name)
@@ -35,26 +34,26 @@ DatabaseMySQL::DatabaseMySQL(std::string user, std::string pass, std::string hos
 	this->name = name;
 
 	database = mysql_init(nullptr);
-	if(database)
+	if (database)
 	{
 		my_bool r = 1;
 		mysql_options(database, MYSQL_OPT_RECONNECT, &r);
-		if(!mysql_real_connect(database, host.c_str(), user.c_str(), pass.c_str(), name.c_str(), atoi(port.c_str()), nullptr, 0))
+		if (!mysql_real_connect(database, host.c_str(), user.c_str(), pass.c_str(), name.c_str(), atoi(port.c_str()), nullptr, 0))
 		{
 			mysql_close(database);
-			Log.Out(Logs::General, Logs::Error, "Failed to connect to MySQL database. Error: %s", mysql_error(database));
+			Log(Logs::General, Logs::Error, "Failed to connect to MySQL database. Error: %s", mysql_error(database));
 			exit(1);
 		}
 	}
 	else
 	{
-		Log.Out(Logs::General, Logs::Error, "Failed to create db object in MySQL database.");
+		Log(Logs::General, Logs::Error, "Failed to create db object in MySQL database.");
 	}
 }
 
 DatabaseMySQL::~DatabaseMySQL()
 {
-	if(database)
+	if (database)
 	{
 		mysql_close(database);
 	}
@@ -76,7 +75,7 @@ bool DatabaseMySQL::GetLoginDataFromAccountName(std::string name, std::string &p
 
 	if (mysql_query(database, query.str().c_str()) != 0)
 	{
-		Log.OutF(Logs::General, Logs::Error, "Mysql query failed: {0}", query.str());
+		LogF(Logs::General, Logs::Error, "Mysql query failed: {0}", query.str());
 		return false;
 	}
 
@@ -93,7 +92,7 @@ bool DatabaseMySQL::GetLoginDataFromAccountName(std::string name, std::string &p
 		}
 	}
 
-	Log.Out(Logs::General, Logs::Error, "Mysql query returned no result: %s", query.str().c_str());
+	Log(Logs::General, Logs::Error, "Mysql query returned no result: %s", query.str().c_str());
 	return false;
 }
 
@@ -113,7 +112,7 @@ bool DatabaseMySQL::GetLoginTokenDataFromToken(const std::string &token, const s
 
 	if (mysql_query(database, query.str().c_str()) != 0)
 	{
-		Log.Out(Logs::General, Logs::Error, "Mysql query failed: %s", query.str().c_str());
+		Log(Logs::General, Logs::Error, "Mysql query failed: %s", query.str().c_str());
 		return false;
 	}
 
@@ -158,15 +157,15 @@ bool DatabaseMySQL::CreateLoginData(const std::string &name, const std::string &
 	query << " VALUES('" << name << "', '" << password << "', 'local_creation', NOW(), '127.0.0.1'); ";
 
 	if (mysql_query(database, query.str().c_str()) != 0) {
-		Log.Out(Logs::General, Logs::Error, "Mysql query failed: %s", query.str().c_str());
+		Log(Logs::General, Logs::Error, "Mysql query failed: %s", query.str().c_str());
 		return false;
 	}
-	else{
+	else {
 		id = mysql_insert_id(database);
 		return true;
 	}
 
-	Log.Out(Logs::General, Logs::Error, "Mysql query returned no result: %s", query.str().c_str());
+	Log(Logs::General, Logs::Error, "Mysql query returned no result: %s", query.str().c_str());
 	return false;
 }
 
@@ -194,7 +193,7 @@ bool DatabaseMySQL::GetWorldRegistration(std::string long_name, std::string shor
 
 	if (mysql_query(database, query.str().c_str()) != 0)
 	{
-		Log.Out(Logs::General, Logs::Error, "Mysql query failed: %s", query.str().c_str());
+		Log(Logs::General, Logs::Error, "Mysql query failed: %s", query.str().c_str());
 		return false;
 	}
 
@@ -219,7 +218,7 @@ bool DatabaseMySQL::GetWorldRegistration(std::string long_name, std::string shor
 
 				if (mysql_query(database, query.str().c_str()) != 0)
 				{
-					Log.Out(Logs::General, Logs::Error, "Mysql query failed: %s", query.str().c_str());
+					Log(Logs::General, Logs::Error, "Mysql query failed: %s", query.str().c_str());
 					return false;
 				}
 
@@ -235,14 +234,14 @@ bool DatabaseMySQL::GetWorldRegistration(std::string long_name, std::string shor
 					}
 				}
 
-				Log.Out(Logs::General, Logs::Error, "Mysql query returned no result: %s", query.str().c_str());
+				Log(Logs::General, Logs::Error, "Mysql query returned no result: %s", query.str().c_str());
 				return false;
 			}
 			return true;
 		}
 	}
 
-	Log.Out(Logs::General, Logs::Error, "Mysql query returned no result: %s", query.str().c_str());
+	Log(Logs::General, Logs::Error, "Mysql query returned no result: %s", query.str().c_str());
 	return false;
 }
 
@@ -261,7 +260,7 @@ void DatabaseMySQL::UpdateLSAccountData(unsigned int id, std::string ip_address)
 
 	if (mysql_query(database, query.str().c_str()) != 0)
 	{
-		Log.Out(Logs::General, Logs::Error, "Mysql query failed: %s", query.str().c_str());
+		Log(Logs::General, Logs::Error, "Mysql query failed: %s", query.str().c_str());
 	}
 }
 
@@ -280,7 +279,7 @@ void DatabaseMySQL::UpdateLSAccountInfo(unsigned int id, std::string name, std::
 
 	if (mysql_query(database, query.str().c_str()) != 0)
 	{
-		Log.Out(Logs::General, Logs::Error, "Mysql query failed: %s", query.str().c_str());
+		Log(Logs::General, Logs::Error, "Mysql query failed: %s", query.str().c_str());
 	}
 }
 
@@ -305,7 +304,7 @@ void DatabaseMySQL::UpdateWorldRegistration(unsigned int id, std::string long_na
 
 	if (mysql_query(database, query.str().c_str()) != 0)
 	{
-		Log.Out(Logs::General, Logs::Error, "Mysql query failed: %s", query.str().c_str());
+		Log(Logs::General, Logs::Error, "Mysql query failed: %s", query.str().c_str());
 	}
 }
 
@@ -330,7 +329,7 @@ bool DatabaseMySQL::CreateWorldRegistration(std::string long_name, std::string s
 
 	if (mysql_query(database, query.str().c_str()) != 0)
 	{
-		Log.Out(Logs::General, Logs::Error, "Mysql query failed: %s", query.str().c_str());
+		Log(Logs::General, Logs::Error, "Mysql query failed: %s", query.str().c_str());
 		return false;
 	}
 
@@ -349,15 +348,14 @@ bool DatabaseMySQL::CreateWorldRegistration(std::string long_name, std::string s
 
 			if (mysql_query(database, query.str().c_str()) != 0)
 			{
-				Log.Out(Logs::General, Logs::Error, "Mysql query failed: %s", query.str().c_str());
+				Log(Logs::General, Logs::Error, "Mysql query failed: %s", query.str().c_str());
 				return false;
 			}
 			return true;
 		}
 	}
-	Log.Out(Logs::General, Logs::Error, "World registration did not exist in the database for %s %s", long_name.c_str(), short_name.c_str());
+	Log(Logs::General, Logs::Error, "World registration did not exist in the database for %s %s", long_name.c_str(), short_name.c_str());
 	return false;
 }
 
 #endif
-

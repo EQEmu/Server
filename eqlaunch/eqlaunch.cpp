@@ -31,11 +31,7 @@
 #include <signal.h>
 #include <time.h>
 
-#ifndef _WINDOWS
-#include "../common/unix.h"
-#endif
-
-EQEmuLogSys Log;
+EQEmuLogSys LogSys;
 
 bool RunLoops = false;
 
@@ -43,7 +39,7 @@ void CatchSignal(int sig_num);
 
 int main(int argc, char *argv[]) {
 	RegisterExecutablePlatform(ExePlatformLaunch);
-	Log.LoadLogSettingsDefaults();
+	LogSys.LoadLogSettingsDefaults();
 	set_exception_handler();
 
 	std::string launcher_name;
@@ -51,13 +47,13 @@ int main(int argc, char *argv[]) {
 		launcher_name = argv[1];
 	}
 	if(launcher_name.length() < 1) {
-		Log.Out(Logs::Detail, Logs::Launcher, "You must specfify a launcher name as the first argument to this program.");
+		Log(Logs::Detail, Logs::Launcher, "You must specfify a launcher name as the first argument to this program.");
 		return 1;
 	}
 
-	Log.Out(Logs::Detail, Logs::Launcher, "Loading server configuration..");
+	Log(Logs::Detail, Logs::Launcher, "Loading server configuration..");
 	if (!EQEmuConfig::LoadConfig()) {
-		Log.Out(Logs::Detail, Logs::Launcher, "Loading server configuration failed.");
+		Log(Logs::Detail, Logs::Launcher, "Loading server configuration failed.");
 		return 1;
 	}
 	auto Config = EQEmuConfig::get();
@@ -66,16 +62,16 @@ int main(int argc, char *argv[]) {
 	* Setup nice signal handlers
 	*/
 	if (signal(SIGINT, CatchSignal) == SIG_ERR)	{
-		Log.Out(Logs::Detail, Logs::Launcher, "Could not set signal handler");
+		Log(Logs::Detail, Logs::Launcher, "Could not set signal handler");
 		return 1;
 	}
 	if (signal(SIGTERM, CatchSignal) == SIG_ERR)	{
-		Log.Out(Logs::Detail, Logs::Launcher, "Could not set signal handler");
+		Log(Logs::Detail, Logs::Launcher, "Could not set signal handler");
 		return 1;
 	}
 	#ifndef WIN32
 	if (signal(SIGPIPE, SIG_IGN) == SIG_ERR)	{
-		Log.Out(Logs::Detail, Logs::Launcher, "Could not set signal handler");
+		Log(Logs::Detail, Logs::Launcher, "Could not set signal handler");
 		return 1;
 	}
 
@@ -101,7 +97,7 @@ int main(int argc, char *argv[]) {
 
 	Timer InterserverTimer(INTERSERVER_TIMER); // does auto-reconnect
 
-	Log.Out(Logs::Detail, Logs::Launcher, "Starting main loop...");
+	Log(Logs::Detail, Logs::Launcher, "Starting main loop...");
 
 	ProcLauncher *launch = ProcLauncher::get();
 	RunLoops = true;
@@ -160,14 +156,14 @@ int main(int argc, char *argv[]) {
 		delete zone->second;
 	}
 
-	Log.CloseFileLogs();
+	LogSys.CloseFileLogs();
 
 	return 0;
 }
 
 
 void CatchSignal(int sig_num) {
-	Log.Out(Logs::Detail, Logs::Launcher, "Caught signal %d", sig_num);
+	Log(Logs::Detail, Logs::Launcher, "Caught signal %d", sig_num);
 	RunLoops = false;
 }
 

@@ -8,7 +8,7 @@
 9007|2016_06_23_bots_camel_case_name_rule.sql|SELECT * FROM `rule_values` WHERE `rule_name` LIKE 'Bots:AllowCamelCaseNames'|empty|
 9008|2016_06_28_bots_inventory_charges_update.sql|SELECT * FROM `information_schema`.`COLUMNS` isc WHERE isc.`TABLE_SCHEMA` = DATABASE() AND isc.`TABLE_NAME` = 'bot_inventories' AND isc.`COLUMN_NAME` = 'inst_charges' AND isc.`DATA_TYPE` = 'tinyint'|not_empty|
 9009|2017_02_15_bots_bot_spells_entries.sql|SELECT `id` FROM `npc_spells_entries` WHERE `npc_spells_id` >= 701 AND `npc_spells_id` <= 712|not_empty|
-9010|2017_02_20_bots_bard_spell_update.sql|SELECT * FROM `bot_spells_entries` WHERE `npc_spells_id` = 711 AND (`type` & 0xFFFF0000) = 0xFFFF0000|empty|
+9010|2017_02_20_bots_bard_spell_update.sql|SELECT * FROM `bot_spells_entries` WHERE (`npc_spells_id` = 711 OR `npc_spells_id` = 3008) AND `type` >= 0xFFFF0000|empty|
 9011|2017_02_23_bots_spell_casting_chances.sql|SHOW TABLES LIKE 'bot_spell_casting_chances'|empty|
 9012|2017_02_26_bots_npc_spells_update_for_bots.sql|SELECT * FROM `npc_spells` WHERE `id` = '701' AND `name` = 'Cleric Bot'|not_empty|
 9013|2017_02_26_bots_spells_id_update_for_saved_bots.sql|SELECT * FROM `bot_data` WHERE `spells_id` >= '701' AND `spells_id` <= '712'|not_empty|

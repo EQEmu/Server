@@ -171,23 +171,23 @@ EQStreamInterface::MatchState EQ::Net::EQStream::CheckSignature(const Signature 
 
 		if (opcode == sig->first_eq_opcode) {
 			if (length == sig->first_length) {
-				Log.OutF(Logs::General, Logs::Netcode, "[IDENT_TRACE] {0}:{1}: First opcode matched {2:#x} and length matched {3}",
+				LogF(Logs::General, Logs::Netcode, "[IDENT_TRACE] {0}:{1}: First opcode matched {2:#x} and length matched {3}",
 					RemoteEndpoint(), m_connection->RemotePort(), sig->first_eq_opcode, length);
 				return MatchSuccessful;
 			}
 			else if (length == 0) {
-				Log.OutF(Logs::General, Logs::Netcode, "[IDENT_TRACE] {0}:{1}: First opcode matched {2:#x} and length is ignored.",
+				LogF(Logs::General, Logs::Netcode, "[IDENT_TRACE] {0}:{1}: First opcode matched {2:#x} and length is ignored.",
 					RemoteEndpoint(), m_connection->RemotePort(), sig->first_eq_opcode);
 				return MatchSuccessful;
 			}
 			else {
-				Log.OutF(Logs::General, Logs::Netcode, "[IDENT_TRACE] {0}:{1}: First opcode matched {2:#x} but length {3} did not match expected {4}",
+				LogF(Logs::General, Logs::Netcode, "[IDENT_TRACE] {0}:{1}: First opcode matched {2:#x} but length {3} did not match expected {4}",
 					RemoteEndpoint(), m_connection->RemotePort(), sig->first_eq_opcode, length, sig->first_length);
 				return MatchFailed;
 			}
 		}
 		else {
-			Log.OutF(Logs::General, Logs::Netcode, "[IDENT_TRACE] {0}:{1}: First opcode {1:#x} did not match expected {2:#x}",
+			LogF(Logs::General, Logs::Netcode, "[IDENT_TRACE] {0}:{1}: First opcode {1:#x} did not match expected {2:#x}",
 				RemoteEndpoint(), m_connection->RemotePort(), opcode, sig->first_eq_opcode);
 			return MatchFailed;
 		}

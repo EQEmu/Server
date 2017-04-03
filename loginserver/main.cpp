@@ -1,19 +1,19 @@
 /*	EQEMu: Everquest Server Emulator
-	Copyright (C) 2001-2010 EQEMu Development Team (http://eqemulator.net)
+Copyright (C) 2001-2010 EQEMu Development Team (http://eqemulator.net)
 
-	This program is free software; you can redistribute it and/or modify
-	it under the terms of the GNU General Public License as published by
-	the Free Software Foundation; version 2 of the License.
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; version 2 of the License.
 
-	This program is distributed in the hope that it will be useful,
-	but WITHOUT ANY WARRANTY except by those people which sell it, which
-	are required to give you total support for your newly bought product;
-	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-	A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY except by those people which sell it, which
+are required to give you total support for your newly bought product;
+without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
-	You should have received a copy of the GNU General Public License
-	along with this program; if not, write to the Free Software
-	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 #include "../common/global_define.h"
 #include "../common/types.h"
@@ -30,7 +30,7 @@
 #include <sstream>
 
 LoginServer server;
-EQEmuLogSys Log;
+EQEmuLogSys LogSys;
 bool run_server = true;
 
 void CatchSignal(int sig_num)
@@ -41,15 +41,15 @@ int main()
 {
 	RegisterExecutablePlatform(ExePlatformLogin);
 	set_exception_handler();
-	Log.LoadLogSettingsDefaults();
+	LogSys.LoadLogSettingsDefaults();
 
-	Log.log_settings[Logs::Error].log_to_console = Logs::General;
+	LogSys.log_settings[Logs::Error].log_to_console = Logs::General;
 
-	Log.Out(Logs::General, Logs::Login_Server, "Logging System Init.");
+	Log(Logs::General, Logs::Login_Server, "Logging System Init.");
 
 	/* Parse out login.ini */
 	server.config = new Config();
-	Log.Out(Logs::General, Logs::Login_Server, "Config System Init.");
+	Log(Logs::General, Logs::Login_Server, "Config System Init.");
 	server.config->Parse("login.ini");
 
 	if (server.config->GetVariable("options", "unregistered_allowed").compare("FALSE") == 0)
@@ -106,7 +106,7 @@ int main()
 	/* Create database connection */
 	if (server.config->GetVariable("database", "subsystem").compare("MySQL") == 0) {
 #ifdef EQEMU_MYSQL_ENABLED
-		Log.Out(Logs::General, Logs::Login_Server, "MySQL Database Init.");
+		Log(Logs::General, Logs::Login_Server, "MySQL Database Init.");
 		server.db = (Database*)new DatabaseMySQL(
 			server.config->GetVariable("database", "user"),
 			server.config->GetVariable("database", "password"),
@@ -117,7 +117,7 @@ int main()
 	}
 	else if (server.config->GetVariable("database", "subsystem").compare("PostgreSQL") == 0) {
 #ifdef EQEMU_POSTGRESQL_ENABLED
-		Log.Out(Logs::General, Logs::Login_Server, "PostgreSQL Database Init.");
+		Log(Logs::General, Logs::Login_Server, "PostgreSQL Database Init.");
 		server.db = (Database*)new DatabasePostgreSQL(
 			server.config->GetVariable("database", "user"),
 			server.config->GetVariable("database", "password"),
@@ -129,39 +129,39 @@ int main()
 
 	/* Make sure our database got created okay, otherwise cleanup and exit. */
 	if (!server.db) {
-		Log.Out(Logs::General, Logs::Error, "Database Initialization Failure.");
-		Log.Out(Logs::General, Logs::Login_Server, "Config System Shutdown.");
+		Log(Logs::General, Logs::Error, "Database Initialization Failure.");
+		Log(Logs::General, Logs::Login_Server, "Config System Shutdown.");
 		delete server.config;
-		Log.Out(Logs::General, Logs::Login_Server, "Log System Shutdown.");
+		Log(Logs::General, Logs::Login_Server, "Log System Shutdown.");
 		return 1;
 	}
 
 	//create our server manager.
-	Log.Out(Logs::General, Logs::Login_Server, "Server Manager Initialize.");
+	Log(Logs::General, Logs::Login_Server, "Server Manager Initialize.");
 	server.server_manager = new ServerManager();
 	if (!server.server_manager) {
 		//We can't run without a server manager, cleanup and exit.
-		Log.Out(Logs::General, Logs::Error, "Server Manager Failed to Start.");
+		Log(Logs::General, Logs::Error, "Server Manager Failed to Start.");
 
-		Log.Out(Logs::General, Logs::Login_Server, "Database System Shutdown.");
+		Log(Logs::General, Logs::Login_Server, "Database System Shutdown.");
 		delete server.db;
-		Log.Out(Logs::General, Logs::Login_Server, "Config System Shutdown.");
+		Log(Logs::General, Logs::Login_Server, "Config System Shutdown.");
 		delete server.config;
 		return 1;
 	}
 
 	//create our client manager.
-	Log.Out(Logs::General, Logs::Login_Server, "Client Manager Initialize.");
+	Log(Logs::General, Logs::Login_Server, "Client Manager Initialize.");
 	server.client_manager = new ClientManager();
 	if (!server.client_manager) {
 		//We can't run without a client manager, cleanup and exit.
-		Log.Out(Logs::General, Logs::Error, "Client Manager Failed to Start.");
-		Log.Out(Logs::General, Logs::Login_Server, "Server Manager Shutdown.");
+		Log(Logs::General, Logs::Error, "Client Manager Failed to Start.");
+		Log(Logs::General, Logs::Login_Server, "Server Manager Shutdown.");
 		delete server.server_manager;
 
-		Log.Out(Logs::General, Logs::Login_Server, "Database System Shutdown.");
+		Log(Logs::General, Logs::Login_Server, "Database System Shutdown.");
 		delete server.db;
-		Log.Out(Logs::General, Logs::Login_Server, "Config System Shutdown.");
+		Log(Logs::General, Logs::Login_Server, "Config System Shutdown.");
 		delete server.config;
 		return 1;
 	}
@@ -174,7 +174,7 @@ int main()
 #endif
 #endif
 
-	Log.Out(Logs::General, Logs::Login_Server, "Server Started.");
+	Log(Logs::General, Logs::Login_Server, "Server Started.");
 	while (run_server) {
 		Timer::SetCurrentTime();
 		server.client_manager->Process();
@@ -182,16 +182,15 @@ int main()
 		Sleep(5);
 	}
 
-	Log.Out(Logs::General, Logs::Login_Server, "Server Shutdown.");
-	Log.Out(Logs::General, Logs::Login_Server, "Client Manager Shutdown.");
+	Log(Logs::General, Logs::Login_Server, "Server Shutdown.");
+	Log(Logs::General, Logs::Login_Server, "Client Manager Shutdown.");
 	delete server.client_manager;
-	Log.Out(Logs::General, Logs::Login_Server, "Server Manager Shutdown.");
+	Log(Logs::General, Logs::Login_Server, "Server Manager Shutdown.");
 	delete server.server_manager;
 
-	Log.Out(Logs::General, Logs::Login_Server, "Database System Shutdown.");
+	Log(Logs::General, Logs::Login_Server, "Database System Shutdown.");
 	delete server.db;
-	Log.Out(Logs::General, Logs::Login_Server, "Config System Shutdown.");
+	Log(Logs::General, Logs::Login_Server, "Config System Shutdown.");
 	delete server.config;
 	return 0;
 }
-

@@ -85,7 +85,7 @@ struct AISpellsVar_Struct {
 	uint8	idle_beneficial_chance;
 };
 
-class AA_SwarmPetInfo;
+class SwarmPet;
 class Client;
 class Group;
 class Raid;
@@ -330,8 +330,8 @@ public:
 	QGlobalCache *GetQGlobals() { return qGlobals; }
 	QGlobalCache *CreateQGlobals() { qGlobals = new QGlobalCache(); return qGlobals; }
 
-	AA_SwarmPetInfo *GetSwarmInfo() { return (swarmInfoPtr); }
-	void SetSwarmInfo(AA_SwarmPetInfo *mSwarmInfo) { swarmInfoPtr = mSwarmInfo; }
+	SwarmPet *GetSwarmInfo() { return (swarmInfoPtr); }
+	void SetSwarmInfo(SwarmPet *mSwarmInfo) { swarmInfoPtr = mSwarmInfo; }
 
 	int32	GetAccuracyRating() const { return (accuracy_rating); }
 	void	SetAccuracyRating(int32 d) { accuracy_rating = d;}
@@ -515,7 +515,7 @@ protected:
 	uint8	sec_melee_type;				//Sets the Secondary Weapon attack message and animation
 	uint8   ranged_type;				//Sets the Ranged Weapon attack message and animation
 
-	AA_SwarmPetInfo *swarmInfoPtr;
+	SwarmPet *swarmInfoPtr;
 
 	bool ldon_trapped;
 	uint8 ldon_trap_type;

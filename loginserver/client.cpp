@@ -1,19 +1,19 @@
 /*	EQEMu: Everquest Server Emulator
-	Copyright (C) 2001-2010 EQEMu Development Team (http://eqemulator.net)
+Copyright (C) 2001-2010 EQEMu Development Team (http://eqemulator.net)
 
-	This program is free software; you can redistribute it and/or modify
-	it under the terms of the GNU General Public License as published by
-	the Free Software Foundation; version 2 of the License.
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; version 2 of the License.
 
-	This program is distributed in the hope that it will be useful,
-	but WITHOUT ANY WARRANTY except by those people which sell it, which
-	are required to give you total support for your newly bought product;
-	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-	A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY except by those people which sell it, which
+are required to give you total support for your newly bought product;
+without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
-	You should have received a copy of the GNU General Public License
-	along with this program; if not, write to the Free Software
-	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 #include "client.h"
 #include "login_server.h"
@@ -21,7 +21,6 @@
 #include "../common/misc_functions.h"
 #include "../common/eqemu_logsys.h"
 
-extern EQEmuLogSys Log;
 extern LoginServer server;
 
 Client::Client(std::shared_ptr<EQStreamInterface> c, LSClientVersion v)
@@ -37,14 +36,14 @@ Client::Client(std::shared_ptr<EQStreamInterface> c, LSClientVersion v)
 bool Client::Process()
 {
 	EQApplicationPacket *app = connection->PopPacket();
-	while(app)
+	while (app)
 	{
-		if(server.options.IsTraceOn())
+		if (server.options.IsTraceOn())
 		{
-			Log.Out(Logs::General, Logs::Login_Server, "Application packet received from client (size %u)", app->Size());
+			Log(Logs::General, Logs::Login_Server, "Application packet received from client (size %u)", app->Size());
 		}
 
-		if(server.options.IsDumpInPacketsOn())
+		if (server.options.IsDumpInPacketsOn())
 		{
 			DumpPacket(app);
 		}
@@ -55,67 +54,67 @@ bool Client::Process()
 			continue;
 		}
 
-		switch(app->GetOpcode())
+		switch (app->GetOpcode())
 		{
 		case OP_SessionReady:
+		{
+			if (server.options.IsTraceOn())
 			{
-				if(server.options.IsTraceOn())
-				{
-					Log.Out(Logs::General, Logs::Login_Server, "Session ready received from client.");
-				}
-				Handle_SessionReady((const char*)app->pBuffer, app->Size());
-				break;
+				Log(Logs::General, Logs::Login_Server, "Session ready received from client.");
 			}
+			Handle_SessionReady((const char*)app->pBuffer, app->Size());
+			break;
+		}
 		case OP_Login:
+		{
+			if (app->Size() < 20)
 			{
-				if(app->Size() < 20)
-				{
-					Log.Out(Logs::General, Logs::Error, "Login received but it is too small, discarding.");
-					break;
-				}
-
-				if(server.options.IsTraceOn())
-				{
-					Log.Out(Logs::General, Logs::Login_Server, "Login received from client.");
-				}
-
-				Handle_Login((const char*)app->pBuffer, app->Size());
+				Log(Logs::General, Logs::Error, "Login received but it is too small, discarding.");
 				break;
 			}
+
+			if (server.options.IsTraceOn())
+			{
+				Log(Logs::General, Logs::Login_Server, "Login received from client.");
+			}
+
+			Handle_Login((const char*)app->pBuffer, app->Size());
+			break;
+		}
 		case OP_ServerListRequest:
-			{
-				if (app->Size() < 4) {
-					Log.Out(Logs::General, Logs::Error, "Server List Request received but it is too small, discarding.");
-					break;
-				}
-
-				if(server.options.IsTraceOn())
-				{
-					Log.Out(Logs::General, Logs::Login_Server, "Server list request received from client.");
-				}
-
-				SendServerListPacket(*(uint32_t*)app->pBuffer);
+		{
+			if (app->Size() < 4) {
+				Log(Logs::General, Logs::Error, "Server List Request received but it is too small, discarding.");
 				break;
 			}
+
+			if (server.options.IsTraceOn())
+			{
+				Log(Logs::General, Logs::Login_Server, "Server list request received from client.");
+			}
+
+			SendServerListPacket(*(uint32_t*)app->pBuffer);
+			break;
+		}
 		case OP_PlayEverquestRequest:
+		{
+			if (app->Size() < sizeof(PlayEverquestRequest_Struct))
 			{
-				if(app->Size() < sizeof(PlayEverquestRequest_Struct))
-				{
-					Log.Out(Logs::General, Logs::Error, "Play received but it is too small, discarding.");
-					break;
-				}
-
-				Handle_Play((const char*)app->pBuffer);
+				Log(Logs::General, Logs::Error, "Play received but it is too small, discarding.");
 				break;
 			}
+
+			Handle_Play((const char*)app->pBuffer);
+			break;
+		}
 		default:
-			{
-				if (Log.log_settings[Logs::Client_Server_Packet_Unhandled].is_category_enabled == 1) {
-					char dump[64];
-					app->build_header_dump(dump);
-					Log.Out(Logs::General, Logs::Error, "Recieved unhandled application packet from the client: %s.", dump);
-				}
+		{
+			if (LogSys.log_settings[Logs::Client_Server_Packet_Unhandled].is_category_enabled == 1) {
+				char dump[64];
+				app->build_header_dump(dump);
+				Log(Logs::General, Logs::Error, "Recieved unhandled application packet from the client: %s.", dump);
 			}
+		}
 		}
 
 		delete app;
@@ -127,15 +126,15 @@ bool Client::Process()
 
 void Client::Handle_SessionReady(const char* data, unsigned int size)
 {
-	if(status != cs_not_sent_session_ready)
+	if (status != cs_not_sent_session_ready)
 	{
-		Log.Out(Logs::General, Logs::Error, "Session ready received again after already being received.");
+		Log(Logs::General, Logs::Error, "Session ready received again after already being received.");
 		return;
 	}
 
-	if(size < sizeof(unsigned int))
+	if (size < sizeof(unsigned int))
 	{
-		Log.Out(Logs::General, Logs::Error, "Session ready was too small.");
+		Log(Logs::General, Logs::Error, "Session ready was too small.");
 		return;
 	}
 
@@ -144,14 +143,14 @@ void Client::Handle_SessionReady(const char* data, unsigned int size)
 	/**
 	* The packets are mostly the same but slightly different between the two versions.
 	*/
-	if(version == cv_sod)
+	if (version == cv_sod)
 	{
 		EQApplicationPacket *outapp = new EQApplicationPacket(OP_ChatMessage, 17);
 		outapp->pBuffer[0] = 0x02;
 		outapp->pBuffer[10] = 0x01;
 		outapp->pBuffer[11] = 0x65;
 
-		if(server.options.IsDumpOutPacketsOn())
+		if (server.options.IsDumpOutPacketsOn())
 		{
 			DumpPacket(outapp);
 		}
@@ -168,7 +167,7 @@ void Client::Handle_SessionReady(const char* data, unsigned int size)
 		outapp->pBuffer[11] = 0x65;
 		strcpy((char*)(outapp->pBuffer + 15), msg);
 
-		if(server.options.IsDumpOutPacketsOn())
+		if (server.options.IsDumpOutPacketsOn())
 		{
 			DumpPacket(outapp);
 		}
@@ -182,13 +181,13 @@ void Client::Handle_Login(const char* data, unsigned int size)
 {
 	auto mode = server.options.GetEncryptionMode();
 
-	if(status != cs_waiting_for_login) {
-		Log.Out(Logs::General, Logs::Error, "Login received after already having logged in.");
+	if (status != cs_waiting_for_login) {
+		Log(Logs::General, Logs::Error, "Login received after already having logged in.");
 		return;
 	}
 
-	if((size - 12) % 8 != 0) {
-		Log.Out(Logs::General, Logs::Error, "Login received packet of size: %u, this would cause a block corruption, discarding.", size);
+	if ((size - 12) % 8 != 0) {
+		Log(Logs::General, Logs::Error, "Login received packet of size: %u, this would cause a block corruption, discarding.", size);
 		return;
 	}
 
@@ -200,13 +199,13 @@ void Client::Handle_Login(const char* data, unsigned int size)
 	std::string outbuffer;
 	outbuffer.resize(size - 12);
 	if (outbuffer.length() == 0) {
-		Log.OutF(Logs::General, Logs::Debug, "Corrupt buffer sent to server, no length.");
+		LogF(Logs::General, Logs::Debug, "Corrupt buffer sent to server, no length.");
 		return;
 	}
 
 	auto r = eqcrypt_block(data + 10, size - 12, &outbuffer[0], 0);
 	if (r == nullptr) {
-		Log.OutF(Logs::General, Logs::Debug, "Failed to decrypt eqcrypt block");
+		LogF(Logs::General, Logs::Debug, "Failed to decrypt eqcrypt block");
 		return;
 	}
 
@@ -214,12 +213,12 @@ void Client::Handle_Login(const char* data, unsigned int size)
 
 	std::string user(&outbuffer[0]);
 	if (user.length() >= outbuffer.length()) {
-		Log.OutF(Logs::General, Logs::Debug, "Corrupt buffer sent to server, preventing buffer overflow.");
+		LogF(Logs::General, Logs::Debug, "Corrupt buffer sent to server, preventing buffer overflow.");
 		return;
 	}
 
 	bool result = false;
-	if(outbuffer[0] == 0 && outbuffer[1] == 0) {
+	if (outbuffer[0] == 0 && outbuffer[1] == 0) {
 		if (server.options.IsTokenLoginAllowed()) {
 			cred = (&outbuffer[2 + user.length()]);
 			result = server.db->GetLoginTokenDataFromToken(cred, connection->GetRemoteAddr(), db_account_id, user);
@@ -234,11 +233,11 @@ void Client::Handle_Login(const char* data, unsigned int size)
 					server.options.CanAutoCreateAccounts() &&
 					server.db->CreateLoginData(user, eqcrypt_hash(user, cred, mode), db_account_id) == true
 					) {
-					Log.OutF(Logs::General, Logs::Error, "User {0} does not exist in the database, so we created it...", user);
+					LogF(Logs::General, Logs::Error, "User {0} does not exist in the database, so we created it...", user);
 					result = true;
 				}
 				else {
-					Log.OutF(Logs::General, Logs::Error, "Error logging in, user {0} does not exist in the database.", user);
+					LogF(Logs::General, Logs::Error, "Error logging in, user {0} does not exist in the database.", user);
 					result = false;
 				}
 			}
@@ -302,7 +301,7 @@ void Client::Handle_Login(const char* data, unsigned int size)
 		char encrypted_buffer[80] = { 0 };
 		auto rc = eqcrypt_block((const char*)login_failed_attempts, 75, encrypted_buffer, 1);
 		if (rc == nullptr) {
-			Log.OutF(Logs::General, Logs::Debug, "Failed to encrypt eqcrypt block");
+			LogF(Logs::General, Logs::Debug, "Failed to encrypt eqcrypt block");
 		}
 
 		memcpy(login_accepted->encrypt, encrypted_buffer, 80);
@@ -340,9 +339,9 @@ void Client::Handle_Login(const char* data, unsigned int size)
 
 void Client::Handle_Play(const char* data)
 {
-	if(status != cs_logged_in)
+	if (status != cs_logged_in)
 	{
-		Log.Out(Logs::General, Logs::Error, "Client sent a play request when they were not logged in, discarding.");
+		Log(Logs::General, Logs::Error, "Client sent a play request when they were not logged in, discarding.");
 		return;
 	}
 
@@ -350,9 +349,9 @@ void Client::Handle_Play(const char* data)
 	unsigned int server_id_in = (unsigned int)play->ServerNumber;
 	unsigned int sequence_in = (unsigned int)play->Sequence;
 
-	if(server.options.IsTraceOn())
+	if (server.options.IsTraceOn())
 	{
-		Log.Out(Logs::General, Logs::Login_Server, "Play received from client, server number %u sequence %u.", server_id_in, sequence_in);
+		Log(Logs::General, Logs::Login_Server, "Play received from client, server number %u sequence %u.", server_id_in, sequence_in);
 	}
 
 	this->play_server_id = (unsigned int)play->ServerNumber;
@@ -365,7 +364,7 @@ void Client::SendServerListPacket(uint32 seq)
 {
 	EQApplicationPacket *outapp = server.server_manager->CreateServerListPacket(this, seq);
 
-	if(server.options.IsDumpOutPacketsOn())
+	if (server.options.IsDumpOutPacketsOn())
 	{
 		DumpPacket(outapp);
 	}
@@ -376,9 +375,9 @@ void Client::SendServerListPacket(uint32 seq)
 
 void Client::SendPlayResponse(EQApplicationPacket *outapp)
 {
-	if(server.options.IsTraceOn())
+	if (server.options.IsTraceOn())
 	{
-		Log.Out(Logs::General, Logs::Netcode, "Sending play response for %s.", GetAccountName().c_str());
+		Log(Logs::General, Logs::Netcode, "Sending play response for %s.", GetAccountName().c_str());
 		// server_log->LogPacket(log_network_trace, (const char*)outapp->pBuffer, outapp->size);
 	}
 	connection->QueuePacket(outapp);
@@ -403,4 +402,3 @@ void Client::GenerateKey()
 		count++;
 	}
 }
-

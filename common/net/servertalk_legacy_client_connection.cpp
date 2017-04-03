@@ -58,15 +58,15 @@ void EQ::Net::ServertalkLegacyClient::Connect()
 	m_connecting = true;
 	EQ::Net::TCPConnection::Connect(m_addr, m_port, false, [this](std::shared_ptr<EQ::Net::TCPConnection> connection) {
 		if (connection == nullptr) {
-			Log.OutF(Logs::General, Logs::TCP_Connection, "Error connecting to {0}:{1}, attempting to reconnect...", m_addr, m_port);
+			LogF(Logs::General, Logs::TCP_Connection, "Error connecting to {0}:{1}, attempting to reconnect...", m_addr, m_port);
 			m_connecting = false;
 			return;
 		}
 
-		Log.OutF(Logs::General, Logs::TCP_Connection, "Connected to {0}:{1}", m_addr, m_port);
+		LogF(Logs::General, Logs::TCP_Connection, "Connected to {0}:{1}", m_addr, m_port);
 		m_connection = connection;
 		m_connection->OnDisconnect([this](EQ::Net::TCPConnection *c) {
-			Log.OutF(Logs::General, Logs::TCP_Connection, "Connection lost to {0}:{1}, attempting to reconnect...", m_addr, m_port);
+			LogF(Logs::General, Logs::TCP_Connection, "Connection lost to {0}:{1}, attempting to reconnect...", m_addr, m_port);
 			m_connection.reset();
 		});
 

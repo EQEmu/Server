@@ -89,7 +89,7 @@ std::string eqcrypt_scrypt(const std::string &msg)
 	std::string ret;
 	ret.resize(crypto_pwhash_scryptsalsa208sha256_STRBYTES);
 
-	if (crypto_pwhash_scryptsalsa208sha256_str(&ret[0], &msg[0], msg.length(), 
+	if (crypto_pwhash_scryptsalsa208sha256_str(&ret[0], &msg[0], msg.length(),
 		crypto_pwhash_scryptsalsa208sha256_OPSLIMIT_SENSITIVE, crypto_pwhash_scryptsalsa208sha256_MEMLIMIT_SENSITIVE) != 0) {
 		return "";
 	}

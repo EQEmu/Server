@@ -221,6 +221,9 @@ public:
 	Client(EQStreamInterface * ieqs);
 	~Client();
 
+	std::unordered_map<NPC *, float> close_npcs;
+	bool is_client_moving;
+
 	//abstract virtual function implementations required by base abstract class
 	virtual bool Death(Mob* killerMob, int32 damage, uint16 spell_id, EQEmu::skills::SkillType attack_skill);
 	virtual void Damage(Mob* from, int32 damage, uint16 spell_id, EQEmu::skills::SkillType attack_skill, bool avoidable = true, int8 buffslot = -1, bool iBuffTic = false, eSpecialAttacks special = eSpecialAttacks::None);
@@ -1458,7 +1461,7 @@ private:
 	Timer forget_timer; // our 2 min everybody forgets you timer
 	Timer autosave_timer;
 #ifdef REVERSE_AGGRO
-	Timer scanarea_timer;
+	Timer client_scan_npc_aggro_timer;
 #endif
 	Timer tribute_timer;
 
@@ -1475,8 +1478,8 @@ private:
 	Timer anon_toggle_timer;
 	Timer afk_toggle_timer;
 	Timer helm_toggle_timer;
-	Timer light_update_timer;
 	Timer aggro_meter_timer;
+	Timer npc_close_scan_timer;
 
     glm::vec3 m_Proximity;
 

@@ -27,7 +27,7 @@
 #include "../../common/rulesys.h"
 #include "../../common/string_util.h"
 
-EQEmuLogSys Log;
+EQEmuLogSys LogSys;
 
 void ExportSpells(SharedDatabase *db);
 void ExportSkillCaps(SharedDatabase *db);
@@ -36,46 +36,46 @@ void ExportDBStrings(SharedDatabase *db);
 
 int main(int argc, char **argv) {
 	RegisterExecutablePlatform(ExePlatformClientExport);
-	Log.LoadLogSettingsDefaults();
+	LogSys.LoadLogSettingsDefaults();
 	set_exception_handler();
 
-	Log.Out(Logs::General, Logs::Status, "Client Files Export Utility");
+	Log(Logs::General, Logs::Status, "Client Files Export Utility");
 	if(!EQEmuConfig::LoadConfig()) {
-		Log.Out(Logs::General, Logs::Error, "Unable to load configuration file.");
+		Log(Logs::General, Logs::Error, "Unable to load configuration file.");
 		return 1;
 	}
 
 	auto Config = EQEmuConfig::get();
 
 	SharedDatabase database;
-	Log.Out(Logs::General, Logs::Status, "Connecting to database...");
+	Log(Logs::General, Logs::Status, "Connecting to database...");
 	if(!database.Connect(Config->DatabaseHost.c_str(), Config->DatabaseUsername.c_str(),
 		Config->DatabasePassword.c_str(), Config->DatabaseDB.c_str(), Config->DatabasePort)) {
-		Log.Out(Logs::General, Logs::Error, "Unable to connect to the database, cannot continue without a "
+		Log(Logs::General, Logs::Error, "Unable to connect to the database, cannot continue without a "
 			"database connection");
 		return 1;
 	}
 
 	/* Register Log System and Settings */
-	database.LoadLogSettings(Log.log_settings);
-	Log.StartFileLogs();
+	database.LoadLogSettings(LogSys.log_settings);
+	LogSys.StartFileLogs();
 
 	ExportSpells(&database);
 	ExportSkillCaps(&database);
 	ExportBaseData(&database);
 	ExportDBStrings(&database);
 
-	Log.CloseFileLogs();
+	LogSys.CloseFileLogs();
 
 	return 0;
 }
 
 void ExportSpells(SharedDatabase *db) {
-	Log.Out(Logs::General, Logs::Status, "Exporting Spells...");
+	Log(Logs::General, Logs::Status, "Exporting Spells...");
 
 	FILE *f = fopen("export/spells_us.txt", "w");
 	if(!f) {
-		Log.Out(Logs::General, Logs::Error, "Unable to open export/spells_us.txt to write, skipping.");
+		Log(Logs::General, Logs::Error, "Unable to open export/spells_us.txt to write, skipping.");
 		return;
 	}
 
@@ -142,11 +142,11 @@ int GetSkill(SharedDatabase *db, int skill_id, int class_id, int level) {
 }
 
 void ExportSkillCaps(SharedDatabase *db) {
-	Log.Out(Logs::General, Logs::Status, "Exporting Skill Caps...");
+	Log(Logs::General, Logs::Status, "Exporting Skill Caps...");
 
 	FILE *f = fopen("export/SkillCaps.txt", "w");
 	if(!f) {
-		Log.Out(Logs::General, Logs::Error, "Unable to open export/SkillCaps.txt to write, skipping.");
+		Log(Logs::General, Logs::Error, "Unable to open export/SkillCaps.txt to write, skipping.");
 		return;
 	}
 
@@ -171,11 +171,11 @@ void ExportSkillCaps(SharedDatabase *db) {
 }
 
 void ExportBaseData(SharedDatabase *db) {
-	Log.Out(Logs::General, Logs::Status, "Exporting Base Data...");
+	Log(Logs::General, Logs::Status, "Exporting Base Data...");
 
 	FILE *f = fopen("export/BaseData.txt", "w");
 	if(!f) {
-		Log.Out(Logs::General, Logs::Error, "Unable to open export/BaseData.txt to write, skipping.");
+		Log(Logs::General, Logs::Error, "Unable to open export/BaseData.txt to write, skipping.");
 		return;
 	}
 
@@ -202,11 +202,11 @@ void ExportBaseData(SharedDatabase *db) {
 }
 
 void ExportDBStrings(SharedDatabase *db) {
-	Log.Out(Logs::General, Logs::Status, "Exporting DB Strings...");
+	Log(Logs::General, Logs::Status, "Exporting DB Strings...");
 
 	FILE *f = fopen("export/dbstr_us.txt", "w");
 	if(!f) {
-		Log.Out(Logs::General, Logs::Error, "Unable to open export/dbstr_us.txt to write, skipping.");
+		Log(Logs::General, Logs::Error, "Unable to open export/dbstr_us.txt to write, skipping.");
 		return;
 	}
 

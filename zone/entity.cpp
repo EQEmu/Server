@@ -73,12 +73,12 @@ Entity::~Entity()
 Client *Entity::CastToClient()
 {
 	if (this == 0x00) {
-		Log.Out(Logs::General, Logs::Error, "CastToClient error (nullptr)");
+		Log(Logs::General, Logs::Error, "CastToClient error (nullptr)");
 		return 0;
 	}
 #ifdef _EQDEBUG
 	if (!IsClient()) {
-		Log.Out(Logs::General, Logs::Error, "CastToClient error (not client)");
+		Log(Logs::General, Logs::Error, "CastToClient error (not client)");
 		return 0;
 	}
 #endif
@@ -90,7 +90,7 @@ NPC *Entity::CastToNPC()
 {
 #ifdef _EQDEBUG
 	if (!IsNPC()) {
-		Log.Out(Logs::General, Logs::Error, "CastToNPC error (Not NPC)");
+		Log(Logs::General, Logs::Error, "CastToNPC error (Not NPC)");
 		return 0;
 	}
 #endif
@@ -363,7 +363,7 @@ void EntityList::CheckGroupList (const char *fname, const int fline)
 	{
 		if (*it == nullptr)
 		{
-			Log.Out(Logs::General, Logs::Error, "nullptr group, %s:%i", fname, fline);
+			Log(Logs::General, Logs::Error, "nullptr group, %s:%i", fname, fline);
 		}
 	}
 }
@@ -521,17 +521,17 @@ void EntityList::MobProcess()
 #ifdef _WINDOWS
 				struct in_addr in;
 				in.s_addr = mob->CastToClient()->GetIP();
-				Log.Out(Logs::General, Logs::Zone_Server, "Dropping client: Process=false, ip=%s port=%u", inet_ntoa(in), mob->CastToClient()->GetPort());
+				Log(Logs::General, Logs::Zone_Server, "Dropping client: Process=false, ip=%s port=%u", inet_ntoa(in), mob->CastToClient()->GetPort());
 #endif
 				zone->StartShutdownTimer();
 				Group *g = GetGroupByMob(mob);
 				if(g) {
-					Log.Out(Logs::General, Logs::Error, "About to delete a client still in a group.");
+					Log(Logs::General, Logs::Error, "About to delete a client still in a group.");
 					g->DelMember(mob);
 				}
 				Raid *r = entity_list.GetRaidByClient(mob->CastToClient());
 				if(r) {
-					Log.Out(Logs::General, Logs::Error, "About to delete a client still in a raid.");
+					Log(Logs::General, Logs::Error, "About to delete a client still in a raid.");
 					r->MemberZoned(mob->CastToClient());
 				}
 				entity_list.RemoveClient(id);
@@ -578,7 +578,7 @@ void EntityList::AddGroup(Group *group)
 
 	uint32 gid = worldserver.NextGroupID();
 	if (gid == 0) {
-		Log.Out(Logs::General, Logs::Error,
+		Log(Logs::General, Logs::Error,
 				"Unable to get new group ID from world server. group is going to be broken.");
 		return;
 	}
@@ -607,7 +607,7 @@ void EntityList::AddRaid(Raid *raid)
 
 	uint32 gid = worldserver.NextGroupID();
 	if (gid == 0) {
-		Log.Out(Logs::General, Logs::Error,
+		Log(Logs::General, Logs::Error,
 				"Unable to get new group ID from world server. group is going to be broken.");
 		return;
 	}
@@ -793,7 +793,7 @@ void EntityList::CheckSpawnQueue()
 			auto it = npc_list.find(ns->spawn.spawnId);
 			if (it == npc_list.end()) {
 				// We must of despawned, hope that's the reason!
-				Log.Out(Logs::General, Logs::Error, "Error in EntityList::CheckSpawnQueue: Unable to find NPC for spawnId '%u'", ns->spawn.spawnId);
+				Log(Logs::General, Logs::Error, "Error in EntityList::CheckSpawnQueue: Unable to find NPC for spawnId '%u'", ns->spawn.spawnId);
 			}
 			else {
 				NPC *pnpc = it->second;
@@ -2288,14 +2288,29 @@ bool EntityList::RemoveNPC(uint16 delete_id)
 {
 	auto it = npc_list.find(delete_id);
 	if (it != npc_list.end()) {
+		NPC *npc = it->second;
 		// make sure its proximity is removed
 		RemoveProximity(delete_id);
+		// remove from client close lists
+		RemoveNPCFromClientCloseLists(npc);
 		// remove from the list
 		npc_list.erase(it);
+		
+
 		// remove from limit list if needed
 		if (npc_limit_list.count(delete_id))
 			npc_limit_list.erase(delete_id);
 		return true;
+	}
+	return false;
+}
+
+bool EntityList::RemoveNPCFromClientCloseLists(NPC *npc)
+{
+	auto it = client_list.begin();
+	while (it != client_list.end()) {
+		it->second->close_npcs.erase(npc);
+		++it;
 	}
 	return false;
 }
@@ -2659,7 +2674,7 @@ char *EntityList::MakeNameUnique(char *name)
 			return name;
 		}
 	}
-	Log.Out(Logs::General, Logs::Error, "Fatal error in EntityList::MakeNameUnique: Unable to find unique name for '%s'", name);
+	Log(Logs::General, Logs::Error, "Fatal error in EntityList::MakeNameUnique: Unable to find unique name for '%s'", name);
 	char tmp[64] = "!";
 	strn0cpy(&tmp[1], name, sizeof(tmp) - 1);
 	strcpy(name, tmp);
@@ -3511,7 +3526,7 @@ void EntityList::ReloadAllClientsTaskState(int TaskID)
 			// If we have been passed a TaskID, only reload the client state if they have
 			// that Task active.
 			if ((!TaskID) || (TaskID && client->IsTaskActive(TaskID))) {
-				Log.Out(Logs::General, Logs::Tasks, "[CLIENTLOAD] Reloading Task State For Client %s", client->GetName());
+				Log(Logs::General, Logs::Tasks, "[CLIENTLOAD] Reloading Task State For Client %s", client->GetName());
 				client->RemoveClientTaskState();
 				client->LoadClientTaskState();
 				taskmanager->SendActiveTasksToClient(client);

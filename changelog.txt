@@ -1,13 +1,59 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 4/1/2017 ==
+Akkadius: [Performance] Reworked how all log calls are made in the source
+	- Before we used Log.Out, we will now use a macro Log(
+		- Before: Log.Out(Logs::General, Logs::Status, "Importing Spells...");
+		- After: Log(Logs::General, Logs::Status, "Importing Spells...");
+	- The difference is 
+		1) It's 200-300x faster especially when log statements are inside very hot code paths. We already
+			had most hot paths checked before we logged them, but this blankets all existing logging calls now and not just the 
+			select few we had picked out in the source.
+		2) Strings don't get copied to the stack, popped and pushed constantly even when we hit a log statement that 
+			actually isn't going to log anything.
+				- We do an 'if (LogSys.log_settings[log_category].is_category_enabled == 1)' before we call a log function
+					in the log macro so the log function doesn't get called at all if we're not logging the category
+	- This has increased binary executables roughly 15KB
+	- The old extern for EQEmuLogSys is now named LogSys appropriately instead of Log (Ex: LogSys.StartFileLogs())
+	- The result keeps logging footprint non-existent for when we're not logging that category
+
+== 03/30/2017 ==
+Akkadius: [Performance] Fixed an overhead issue where many hot paths would trigger quest subroutines and beneath that the code would
+	try to see if a quest existed perpetually (checking if file exists) even though it should have determined the quest 
+	didn't exist the first time.
+	- This caused a lot of overhead in an instance where an entire zone of NPC's is pathing, triggering EVENT_WAYPOINT_ARRIVE
+	and EVENT_WAYPOINT_DEPART when there is no global_npc.pl/lua, or all NPC's pathing don't have a quest assigned, similar 
+	behavior would occur. This goes for any other type of quests: spells, items, encounters etc.
+
+== 03/28/2017 ==
+Akkadius: [Performance] Fixed a large overhead issue where every single NPC in a zone was checking to depop themselves
+	as a swarm pet every 3ms regardless of being a swarm pet or not. Swarm pets now check to depop only when their timer is up
+Akkadius: [Performance] Removed a timer where clients would constantly calculate light amount on equipment every 600ms, instead 
+	clients will update light when changing equipment or entering a zone
+Akkadius: [Performance] Disabled enraged timer checks for NPC's that do not actually have enrage as a special attack
+Akkadius: [Performance] Don't process ProjectileAttack checks for NPC's that are not engaged in any combat
+
+== 03/27/2017 ==
+Akkadius: [Performance] Reworked how client to NPC aggro checks are made
+	- Before when reverse aggro checks were done (client to NPC), checks would happen every 750 millseconds where a client would
+		check an entire entity list with distance calcs and other checks for aggro, with many clients in a zone and many NPC's this would
+		add a lot of unecessary overhead. A temporary adjustment on 3/25 was made and upped the check to 6 seconds.
+	- Now, there is a new methodology to scanning. The client will build a cache list of NPC's within close range as defined in new rule:
+		RULE_INT(Range, ClientNPCScan, 300) and will also get any NPC that has an aggro range beyond that defined range to use in 
+		the frequent checks for aggro, the result is far less overhead
+	- Client scanning changes when moving versus not moving, the client will scan aggro every 500 milliseconds while moving, and
+		3000 millseconds aggro check when not moving, with a 6000ms re-fetch for close NPC's
+	- A demo of these changes can be found here:
+		https://youtu.be/aGroiwLSTVU
+
 == 03/25/2017 ==
-Akkadius: Reduced CPU footprint in non-combat zones doing constant checks for combat related activities
-Akkadius: Reduced CPU footprint in cases where a client is checking for aggro excessively every 750 millseconds. This has 
+Akkadius: [Performance] Reduced CPU footprint in non-combat zones doing constant checks for combat related activities
+Akkadius: [Performance] Reduced CPU footprint in cases where a client is checking for aggro excessively every 750 millseconds. This has 
 	been adjusted to 6 seconds per new rule RULE_INT(Aggro, ClientAggroCheckInterval)
 	- When zones have many players, with many NPC's, this adds up quickly
 
 == 03/12/2017 ==
-Akkadius: 
+Akkadius: [Performance]
 - Implemented range rules for packets and other functions
 	RULE_INT ( Range, Say, 135 )
 	RULE_INT ( Range, Emote, 135 )

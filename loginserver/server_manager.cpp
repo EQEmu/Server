@@ -1,19 +1,19 @@
 /*	EQEMu: Everquest Server Emulator
-	Copyright (C) 2001-2010 EQEMu Development Team (http://eqemulator.net)
+Copyright (C) 2001-2010 EQEMu Development Team (http://eqemulator.net)
 
-	This program is free software; you can redistribute it and/or modify
-	it under the terms of the GNU General Public License as published by
-	the Free Software Foundation; version 2 of the License.
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; version 2 of the License.
 
-	This program is distributed in the hope that it will be useful,
-	but WITHOUT ANY WARRANTY except by those people which sell it, which
-	are required to give you total support for your newly bought product;
-	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-	A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY except by those people which sell it, which
+are required to give you total support for your newly bought product;
+without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
-	You should have received a copy of the GNU General Public License
-	along with this program; if not, write to the Free Software
-	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 #include "server_manager.h"
 #include "login_server.h"
@@ -22,14 +22,13 @@
 
 #include "../common/eqemu_logsys.h"
 
-extern EQEmuLogSys Log;
 extern LoginServer server;
 extern bool run_server;
 
 ServerManager::ServerManager()
 {
 	int listen_port = atoi(server.config->GetVariable("options", "listen_port").c_str());
-	
+
 	server_connection.reset(new EQ::Net::ServertalkServer());
 	EQ::Net::ServertalkServerOptions opts;
 	opts.port = listen_port;
@@ -37,15 +36,15 @@ ServerManager::ServerManager()
 	server_connection->Listen(opts);
 
 	server_connection->OnConnectionIdentified("World", [this](std::shared_ptr<EQ::Net::ServertalkServerConnection> c) {
-		Log.OutF(Logs::General, Logs::Login_Server, "New world server connection from {0}:{1}", c->Handle()->RemoteIP(), c->Handle()->RemotePort());
-		
+		LogF(Logs::General, Logs::Login_Server, "New world server connection from {0}:{1}", c->Handle()->RemoteIP(), c->Handle()->RemotePort());
+
 		auto iter = world_servers.begin();
 		while (iter != world_servers.end()) {
-			if ((*iter)->GetConnection()->Handle()->RemoteIP().compare(c->Handle()->RemoteIP()) == 0 && 
+			if ((*iter)->GetConnection()->Handle()->RemoteIP().compare(c->Handle()->RemoteIP()) == 0 &&
 				(*iter)->GetConnection()->Handle()->RemotePort() == c->Handle()->RemotePort()) {
-				Log.OutF(Logs::General, Logs::Login_Server, "World server already existed for {0}:{1}, removing existing connection.", 
+				LogF(Logs::General, Logs::Login_Server, "World server already existed for {0}:{1}, removing existing connection.",
 					c->Handle()->RemoteIP(), c->Handle()->RemotePort());
-				
+
 				world_servers.erase(iter);
 				break;
 			}
@@ -60,7 +59,7 @@ ServerManager::ServerManager()
 		auto iter = world_servers.begin();
 		while (iter != world_servers.end()) {
 			if ((*iter)->GetConnection()->GetUUID() == c->GetUUID()) {
-				Log.OutF(Logs::General, Logs::World_Server, "World server {0} has been disconnected, removing.", (*iter)->GetLongName().c_str());
+				LogF(Logs::General, Logs::World_Server, "World server {0} has been disconnected, removing.", (*iter)->GetLongName().c_str());
 				world_servers.erase(iter);
 				return;
 			}
@@ -72,7 +71,7 @@ ServerManager::ServerManager()
 
 ServerManager::~ServerManager()
 {
-	
+
 }
 
 WorldServer* ServerManager::GetServerByAddress(const std::string &addr, int port)
@@ -84,7 +83,7 @@ WorldServer* ServerManager::GetServerByAddress(const std::string &addr, int port
 		}
 		++iter;
 	}
-	
+
 	return nullptr;
 }
 
@@ -126,8 +125,8 @@ EQApplicationPacket *ServerManager::CreateServerListPacket(Client *c, uint32 seq
 	server_list->Unknown3 = 0x01650000;
 
 	/**
-		* Not sure what this is but it should be noted setting it to
-		* 0xFFFFFFFF crashes the client so: don't do that.
+	* Not sure what this is but it should be noted setting it to
+	* 0xFFFFFFFF crashes the client so: don't do that.
 	*/
 	server_list->Unknown4 = 0x00000000;
 	server_list->NumberOfServers = server_count;
@@ -157,17 +156,17 @@ EQApplicationPacket *ServerManager::CreateServerListPacket(Client *c, uint32 seq
 		}
 
 		switch ((*iter)->GetServerListID()) {
-			case 1: {
-				*(unsigned int*)data_pointer = 0x00000030;
-				break;
-			}
-			case 2: {
-				*(unsigned int*)data_pointer = 0x00000009;
-				break;
-			}
-			default: {
-				*(unsigned int*)data_pointer = 0x00000001;
-			}
+		case 1: {
+			*(unsigned int*)data_pointer = 0x00000030;
+			break;
+		}
+		case 2: {
+			*(unsigned int*)data_pointer = 0x00000009;
+			break;
+		}
+		default: {
+			*(unsigned int*)data_pointer = 0x00000001;
+		}
 		}
 
 		data_pointer += 4;
@@ -215,21 +214,21 @@ void ServerManager::SendUserToWorldRequest(unsigned int server_id, unsigned int 
 		if ((*iter)->GetRuntimeID() == server_id) {
 			EQ::Net::DynamicPacket outapp;
 			outapp.Resize(sizeof(UsertoWorldRequest_Struct));
-			UsertoWorldRequest_Struct *utwr = (UsertoWorldRequest_Struct*)outapp.Data();			
+			UsertoWorldRequest_Struct *utwr = (UsertoWorldRequest_Struct*)outapp.Data();
 			utwr->worldid = server_id;
 			utwr->lsaccountid = client_account_id;
 			(*iter)->GetConnection()->Send(ServerOP_UsertoWorldReq, outapp);
 			found = true;
 
 			if (server.options.IsDumpInPacketsOn()) {
-				Log.OutF(Logs::General, Logs::Login_Server, "{0}", outapp.ToString());
+				LogF(Logs::General, Logs::Login_Server, "{0}", outapp.ToString());
 			}
 		}
 		++iter;
 	}
 
 	if (!found && server.options.IsTraceOn()) {
-		Log.Out(Logs::General, Logs::Error, "Client requested a user to world but supplied an invalid id of %u.", server_id);
+		Log(Logs::General, Logs::Error, "Client requested a user to world but supplied an invalid id of %u.", server_id);
 	}
 }
 

@@ -339,7 +339,7 @@ const EQEmu::ItemInstance* Object::GetItem(uint8 index) {
 void Object::PutItem(uint8 index, const EQEmu::ItemInstance* inst)
 {
 	if (index > 9) {
-		Log.Out(Logs::General, Logs::Error, "Object::PutItem: Invalid index specified (%i)", index);
+		Log(Logs::General, Logs::Error, "Object::PutItem: Invalid index specified (%i)", index);
 		return;
 	}
 
@@ -465,7 +465,7 @@ void Object::RandomSpawn(bool send_packet) {
 		} 
 	}
 
-	Log.Out(Logs::Detail, Logs::Zone_Server, "Object::RandomSpawn(%s): %d (%.2f, %.2f, %.2f)", m_data.object_name, m_inst->GetID(), m_data.x, m_data.y, m_data.z);
+	Log(Logs::Detail, Logs::Zone_Server, "Object::RandomSpawn(%s): %d (%.2f, %.2f, %.2f)", m_data.object_name, m_inst->GetID(), m_data.x, m_data.y, m_data.z);
 	
 	respawn_timer.Disable();
 
@@ -643,7 +643,7 @@ uint32 ZoneDatabase::AddObject(uint32 type, uint32 icon, const Object_Struct& ob
     safe_delete_array(object_name);
 	auto results = QueryDatabase(query);
 	if (!results.Success()) {
-		Log.Out(Logs::General, Logs::Error, "Unable to insert object: %s", results.ErrorMessage().c_str());
+		Log(Logs::General, Logs::Error, "Unable to insert object: %s", results.ErrorMessage().c_str());
 		return 0;
 	}
 
@@ -682,7 +682,7 @@ void ZoneDatabase::UpdateObject(uint32 id, uint32 type, uint32 icon, const Objec
     safe_delete_array(object_name);
     auto results = QueryDatabase(query);
 	if (!results.Success()) {
-		Log.Out(Logs::General, Logs::Error, "Unable to update object: %s", results.ErrorMessage().c_str());
+		Log(Logs::General, Logs::Error, "Unable to update object: %s", results.ErrorMessage().c_str());
 		return;
 	}
 
@@ -726,7 +726,7 @@ void ZoneDatabase::DeleteObject(uint32 id)
 	std::string query = StringFormat("DELETE FROM object WHERE id = %i", id);
 	auto results = QueryDatabase(query);
 	if (!results.Success()) {
-		Log.Out(Logs::General, Logs::Error, "Unable to delete object: %s", results.ErrorMessage().c_str());
+		Log(Logs::General, Logs::Error, "Unable to delete object: %s", results.ErrorMessage().c_str());
 	}
 }
 

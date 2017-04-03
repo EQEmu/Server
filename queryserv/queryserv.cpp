@@ -40,7 +40,7 @@ LFGuildManager lfguildmanager;
 std::string WorldShortName;
 const queryservconfig *Config;
 WorldServer *worldserver = 0;
-EQEmuLogSys Log;
+EQEmuLogSys LogSys;
 
 void CatchSignal(int sig_num) { 
 	RunLoops = false; 
@@ -48,20 +48,20 @@ void CatchSignal(int sig_num) {
 
 int main() {
 	RegisterExecutablePlatform(ExePlatformQueryServ);
-	Log.LoadLogSettingsDefaults();
+	LogSys.LoadLogSettingsDefaults();
 	set_exception_handler(); 
 	Timer LFGuildExpireTimer(60000);  
 
-	Log.Out(Logs::General, Logs::QS_Server, "Starting EQEmu QueryServ.");
+	Log(Logs::General, Logs::QS_Server, "Starting EQEmu QueryServ.");
 	if (!queryservconfig::LoadConfig()) {
-		Log.Out(Logs::General, Logs::QS_Server, "Loading server configuration failed.");
+		Log(Logs::General, Logs::QS_Server, "Loading server configuration failed.");
 		return 1;
 	}
 
 	Config = queryservconfig::get(); 
 	WorldShortName = Config->ShortName; 
 
-	Log.Out(Logs::General, Logs::QS_Server, "Connecting to MySQL...");
+	Log(Logs::General, Logs::QS_Server, "Connecting to MySQL...");
 	
 	/* MySQL Connection */
 	if (!database.Connect(
@@ -70,20 +70,20 @@ int main() {
 		Config->QSDatabasePassword.c_str(),
 		Config->QSDatabaseDB.c_str(),
 		Config->QSDatabasePort)) {
-		Log.Out(Logs::General, Logs::QS_Server, "Cannot continue without a database connection.");
+		Log(Logs::General, Logs::QS_Server, "Cannot continue without a database connection.");
 		return 1;
 	}
 
 	/* Register Log System and Settings */
-	database.LoadLogSettings(Log.log_settings);
-	Log.StartFileLogs();
+	database.LoadLogSettings(LogSys.log_settings);
+	LogSys.StartFileLogs();
 
 	if (signal(SIGINT, CatchSignal) == SIG_ERR)	{
-		Log.Out(Logs::General, Logs::QS_Server, "Could not set signal handler");
+		Log(Logs::General, Logs::QS_Server, "Could not set signal handler");
 		return 1;
 	}
 	if (signal(SIGTERM, CatchSignal) == SIG_ERR)	{
-		Log.Out(Logs::General, Logs::QS_Server, "Could not set signal handler");
+		Log(Logs::General, Logs::QS_Server, "Could not set signal handler");
 		return 1;
 	}
 
@@ -102,7 +102,7 @@ int main() {
 		EQ::EventLoop::Get().Process();
 		Sleep(5);
 	}
-	Log.CloseFileLogs();
+	LogSys.CloseFileLogs();
 }
 
 void UpdateWindowTitle(char* iNewTitle) {

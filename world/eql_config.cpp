@@ -41,8 +41,9 @@ void EQLConfig::LoadSettings() {
 
     std::string query = StringFormat("SELECT dynamics FROM launcher WHERE name = '%s'", namebuf);
     auto results = database.QueryDatabase(query);
-    if (!results.Success())
-        Log.Out(Logs::General, Logs::Error, "EQLConfig::LoadSettings: %s", results.ErrorMessage().c_str());
+	if (!results.Success()) {
+		Log(Logs::General, Logs::Error, "EQLConfig::LoadSettings: %s", results.ErrorMessage().c_str());
+	}
     else {
         auto row = results.begin();
         m_dynamics = atoi(row[0]);
@@ -51,7 +52,7 @@ void EQLConfig::LoadSettings() {
 	query = StringFormat("SELECT zone, port FROM launcher_zones WHERE launcher = '%s'", namebuf);
 	results = database.QueryDatabase(query);
 	if (!results.Success()) {
-        Log.Out(Logs::General, Logs::Error, "EQLConfig::LoadSettings: %s", results.ErrorMessage().c_str());
+        Log(Logs::General, Logs::Error, "EQLConfig::LoadSettings: %s", results.ErrorMessage().c_str());
         return;
     }
 
@@ -198,7 +199,7 @@ bool EQLConfig::ChangeStaticZone(Const_char *short_name, uint16 port) {
 	res = m_zones.find(short_name);
 	if(res == m_zones.end()) {
 		//not found.
-		Log.Out(Logs::General, Logs::Error, "Update for unknown zone %s", short_name);
+		Log(Logs::General, Logs::Error, "Update for unknown zone %s", short_name);
 		return false;
 	}
 
@@ -234,7 +235,7 @@ bool EQLConfig::DeleteStaticZone(Const_char *short_name) {
 	res = m_zones.find(short_name);
 	if(res == m_zones.end()) {
 		//not found.
-		Log.Out(Logs::General, Logs::Error, "Update for unknown zone %s", short_name);
+		Log(Logs::General, Logs::Error, "Update for unknown zone %s", short_name);
 		return false;
 	}
 

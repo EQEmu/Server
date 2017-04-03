@@ -34,7 +34,7 @@
 #include "spells.h"
 #include "base_data.h"
 
-EQEmuLogSys Log;
+EQEmuLogSys LogSys;
 
 #ifdef _WINDOWS
 #include <direct.h>
@@ -71,33 +71,33 @@ inline bool MakeDirectory(const std::string &directory_name)
 
 int main(int argc, char **argv) {
 	RegisterExecutablePlatform(ExePlatformSharedMemory);
-	Log.LoadLogSettingsDefaults();
+	LogSys.LoadLogSettingsDefaults();
 	set_exception_handler();
 
-	Log.Out(Logs::General, Logs::Status, "Shared Memory Loader Program");
+	Log(Logs::General, Logs::Status, "Shared Memory Loader Program");
 	if(!EQEmuConfig::LoadConfig()) {
-		Log.Out(Logs::General, Logs::Error, "Unable to load configuration file.");
+		Log(Logs::General, Logs::Error, "Unable to load configuration file.");
 		return 1;
 	}
 
 	auto Config = EQEmuConfig::get();
 
 	SharedDatabase database;
-	Log.Out(Logs::General, Logs::Status, "Connecting to database...");
+	Log(Logs::General, Logs::Status, "Connecting to database...");
 	if(!database.Connect(Config->DatabaseHost.c_str(), Config->DatabaseUsername.c_str(),
 		Config->DatabasePassword.c_str(), Config->DatabaseDB.c_str(), Config->DatabasePort)) {
-		Log.Out(Logs::General, Logs::Error, "Unable to connect to the database, cannot continue without a "
+		Log(Logs::General, Logs::Error, "Unable to connect to the database, cannot continue without a "
 			"database connection");
 		return 1;
 	}
 
 	/* Register Log System and Settings */
-	database.LoadLogSettings(Log.log_settings);
-	Log.StartFileLogs();
+	database.LoadLogSettings(LogSys.log_settings);
+	LogSys.StartFileLogs();
 
 	std::string shared_mem_directory = Config->SharedMemDir;
 	if (MakeDirectory(shared_mem_directory)) {
-		Log.Out(Logs::General, Logs::Status, "Shared Memory folder doesn't exist, so we created it... '%s'", shared_mem_directory.c_str());
+		Log(Logs::General, Logs::Status, "Shared Memory folder doesn't exist, so we created it... '%s'", shared_mem_directory.c_str());
 	}
 
 	database.LoadVariables();
@@ -106,7 +106,7 @@ int main(int argc, char **argv) {
 	std::string db_hotfix_name;
 	if (database.GetVariable("hotfix_name", db_hotfix_name)) {
 		if (!db_hotfix_name.empty() && strcasecmp("hotfix_", db_hotfix_name.c_str()) == 0) {
-			Log.Out(Logs::General, Logs::Status, "Current hotfix in variables is the default %s, clearing out variable", db_hotfix_name.c_str());
+			Log(Logs::General, Logs::Status, "Current hotfix in variables is the default %s, clearing out variable", db_hotfix_name.c_str());
 			std::string query = StringFormat("UPDATE `variables` SET `value`='' WHERE (`varname`='hotfix_name')");
 			database.QueryDatabase(query);
 		}
@@ -177,69 +177,69 @@ int main(int argc, char **argv) {
 	}
 
 	if(hotfix_name.length() > 0) {
-		Log.Out(Logs::General, Logs::Status, "Writing data for hotfix '%s'", hotfix_name.c_str());
+		Log(Logs::General, Logs::Status, "Writing data for hotfix '%s'", hotfix_name.c_str());
 	}
 	
 	if(load_all || load_items) {
-		Log.Out(Logs::General, Logs::Status, "Loading items...");
+		Log(Logs::General, Logs::Status, "Loading items...");
 		try {
 			LoadItems(&database, hotfix_name);
 		} catch(std::exception &ex) {
-			Log.Out(Logs::General, Logs::Error, "%s", ex.what());
+			Log(Logs::General, Logs::Error, "%s", ex.what());
 			return 1;
 		}
 	}
 	
 	if(load_all || load_factions) {
-		Log.Out(Logs::General, Logs::Status, "Loading factions...");
+		Log(Logs::General, Logs::Status, "Loading factions...");
 		try {
 			LoadFactions(&database, hotfix_name);
 		} catch(std::exception &ex) {
-			Log.Out(Logs::General, Logs::Error, "%s", ex.what());
+			Log(Logs::General, Logs::Error, "%s", ex.what());
 			return 1;
 		}
 	}
 	
 	if(load_all || load_loot) {
-		Log.Out(Logs::General, Logs::Status, "Loading loot...");
+		Log(Logs::General, Logs::Status, "Loading loot...");
 		try {
 			LoadLoot(&database, hotfix_name);
 		} catch(std::exception &ex) {
-			Log.Out(Logs::General, Logs::Error, "%s", ex.what());
+			Log(Logs::General, Logs::Error, "%s", ex.what());
 			return 1;
 		}
 	}
 	
 	if(load_all || load_skill_caps) {
-		Log.Out(Logs::General, Logs::Status, "Loading skill caps...");
+		Log(Logs::General, Logs::Status, "Loading skill caps...");
 		try {
 			LoadSkillCaps(&database, hotfix_name);
 		} catch(std::exception &ex) {
-			Log.Out(Logs::General, Logs::Error, "%s", ex.what());
+			Log(Logs::General, Logs::Error, "%s", ex.what());
 			return 1;
 		}
 	}
 	
 	if(load_all || load_spells) {
-		Log.Out(Logs::General, Logs::Status, "Loading spells...");
+		Log(Logs::General, Logs::Status, "Loading spells...");
 		try {
 			LoadSpells(&database, hotfix_name);
 		} catch(std::exception &ex) {
-			Log.Out(Logs::General, Logs::Error, "%s", ex.what());
+			Log(Logs::General, Logs::Error, "%s", ex.what());
 			return 1;
 		}
 	}
 	
 	if(load_all || load_bd) {
-		Log.Out(Logs::General, Logs::Status, "Loading base data...");
+		Log(Logs::General, Logs::Status, "Loading base data...");
 		try {
 			LoadBaseData(&database, hotfix_name);
 		} catch(std::exception &ex) {
-			Log.Out(Logs::General, Logs::Error, "%s", ex.what());
+			Log(Logs::General, Logs::Error, "%s", ex.what());
 			return 1;
 		}
 	}
 	
-	Log.CloseFileLogs();
+	LogSys.CloseFileLogs();
 	return 0;
 }

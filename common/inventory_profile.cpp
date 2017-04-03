@@ -241,14 +241,45 @@ EQEmu::ItemInstance* EQEmu::InventoryProfile::GetCursorItem()
 }
 
 // Swap items in inventory
-bool EQEmu::InventoryProfile::SwapItem(int16 slot_a, int16 slot_b)
+bool EQEmu::InventoryProfile::SwapItem(int16 slot_a, int16 slot_b, uint16 race_id, uint8 class_id, uint16 deity_id, uint8 level)
 {
 	// Temp holding areas for a and b
 	ItemInstance* inst_a = GetItem(slot_a);
 	ItemInstance* inst_b = GetItem(slot_b);
 
-	if (inst_a) { if (!inst_a->IsSlotAllowed(slot_b)) { return false; } }
-	if (inst_b) { if (!inst_b->IsSlotAllowed(slot_a)) { return false; } }
+	if (inst_a) {
+		if (!inst_a->IsSlotAllowed(slot_b))
+			return false;
+
+		if ((slot_b >= legacy::EQUIPMENT_BEGIN && slot_b <= legacy::EQUIPMENT_END) || slot_b == inventory::slotPowerSource) {
+			auto item_a = inst_a->GetItem();
+			if (!item_a)
+				return false;
+			if (race_id && class_id && !item_a->IsEquipable(race_id, class_id))
+				return false;
+			if (deity_id && item_a->Deity && !(deity::ConvertDeityTypeToDeityTypeBit((deity::DeityType)deity_id) & item_a->Deity))
+				return false;
+			if (level && item_a->ReqLevel && level < item_a->ReqLevel)
+				return false;
+		}
+	}
+
+	if (inst_b) {
+		if (!inst_b->IsSlotAllowed(slot_a))
+			return false;
+
+		if ((slot_a >= legacy::EQUIPMENT_BEGIN && slot_a <= legacy::EQUIPMENT_END) || slot_a == inventory::slotPowerSource) {
+			auto item_b = inst_b->GetItem();
+			if (!item_b)
+				return false;
+			if (race_id && class_id && !item_b->IsEquipable(race_id, class_id))
+				return false;
+			if (deity_id && item_b->Deity && !(deity::ConvertDeityTypeToDeityTypeBit((deity::DeityType)deity_id) & item_b->Deity))
+				return false;
+			if (level && item_b->ReqLevel && level < item_b->ReqLevel)
+				return false;
+		}
+	}
 
 	_PutItem(slot_a, inst_b); // Copy b->a
 	_PutItem(slot_b, inst_a); // Copy a->b
@@ -1173,7 +1204,7 @@ int16 EQEmu::InventoryProfile::_PutItem(int16 slot_id, ItemInstance* inst)
 	}
 	
 	if (result == INVALID_INDEX) {
-		Log.Out(Logs::General, Logs::Error, "InventoryProfile::_PutItem: Invalid slot_id specified (%i) with parent slot id (%i)", slot_id, parentSlot);
+		Log(Logs::General, Logs::Error, "InventoryProfile::_PutItem: Invalid slot_id specified (%i) with parent slot id (%i)", slot_id, parentSlot);
 		InventoryProfile::MarkDirty(inst); // Slot not found, clean up
 	}
 

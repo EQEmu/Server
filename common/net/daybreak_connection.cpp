@@ -188,7 +188,7 @@ void EQ::Net::DaybreakConnectionManager::ProcessPacket(const std::string &endpoi
 	}
 
 	if (size < DaybreakHeader::size()) {
-		Log.OutF(Logs::Detail, Logs::Netcode, "Packet of size {0} which is less than {1}", size, DaybreakHeader::size());
+		LogF(Logs::Detail, Logs::Netcode, "Packet of size {0} which is less than {1}", size, DaybreakHeader::size());
 		return;
 	}
 
@@ -218,7 +218,7 @@ void EQ::Net::DaybreakConnectionManager::ProcessPacket(const std::string &endpoi
 		}
 	}
 	catch (std::exception &ex) {
-		Log.OutF(Logs::Detail, Logs::Netcode, "Error processing packet: {0}", ex.what());
+		LogF(Logs::Detail, Logs::Netcode, "Error processing packet: {0}", ex.what());
 	}
 }
 
@@ -364,7 +364,7 @@ void EQ::Net::DaybreakConnection::Process()
 		ProcessQueue();
 	}
 	catch (std::exception ex) {
-		Log.OutF(Logs::Detail, Logs::Netcode, "Error processing connection: {0}", ex.what());
+		LogF(Logs::Detail, Logs::Netcode, "Error processing connection: {0}", ex.what());
 	}
 }
 
@@ -379,7 +379,7 @@ void EQ::Net::DaybreakConnection::ProcessPacket(Packet &p)
 	}
 
 	if (p.GetInt8(0) != 0) {
-		Log.OutF(Logs::Detail, Logs::Netcode, "Error parsing packet, did not start with a 0 frame, not a valid protocol packet.");
+		LogF(Logs::Detail, Logs::Netcode, "Error parsing packet, did not start with a 0 frame, not a valid protocol packet.");
 		return;
 	}
 
@@ -390,7 +390,7 @@ void EQ::Net::DaybreakConnection::ProcessPacket(Packet &p)
 
 	if (PacketCanBeEncoded(p)) {
 		if (!ValidateCRC(p)) {
-			Log.OutF(Logs::Detail, Logs::Netcode, "Tossed packet that failed CRC of type {0:#x}", p.Length() >= 2 ? p.GetInt8(1) : 0);
+			LogF(Logs::Detail, Logs::Netcode, "Tossed packet that failed CRC of type {0:#x}", p.Length() >= 2 ? p.GetInt8(1) : 0);
 			return;
 		}
 
@@ -756,7 +756,7 @@ void EQ::Net::DaybreakConnection::ProcessDecodedPacket(const Packet &p)
 		case OP_SessionStatResponse:
 			break;
 		default:
-			Log.OutF(Logs::Detail, Logs::Netcode, "Unhandled opcode {0:#x}", p.GetInt8(1));
+			LogF(Logs::Detail, Logs::Netcode, "Unhandled opcode {0:#x}", p.GetInt8(1));
 			break;
 		}
 	}
