@@ -85,15 +85,22 @@ namespace EQEmu
 		// Public Methods
 		///////////////////////////////
 
-		InventoryProfile() { m_mob_version = versions::MobVersion::Unknown; m_mob_version_set = false; }
+		InventoryProfile() {
+			m_mob_version = versions::MobVersion::Unknown;
+			m_mob_version_set = false;
+			m_lookup = inventory::Lookup(versions::MobVersion::Unknown);
+		}
 		~InventoryProfile();
 
 		bool SetInventoryVersion(versions::MobVersion inventory_version) {
 			if (!m_mob_version_set) {
 				m_mob_version = versions::ValidateMobVersion(inventory_version);
-				return (m_mob_version_set = true);
+				m_lookup = inventory::Lookup(m_mob_version);
+				m_mob_version_set = true;
+				return true;
 			}
 			else {
+				m_lookup = inventory::Lookup(versions::MobVersion::Unknown);
 				return false;
 			}
 		}
@@ -225,6 +232,7 @@ namespace EQEmu
 		// Active mob version
 		versions::MobVersion m_mob_version;
 		bool m_mob_version_set;
+		const inventory::LookupEntry* m_lookup;
 	};
 }
 
