@@ -17,7 +17,7 @@
 */
 #include "../common/classes.h"
 #include "../common/global_define.h"
-#include "../common/item.h"
+#include "../common/item_instance.h"
 #include "../common/rulesys.h"
 #include "../common/skills.h"
 #include "../common/spdat.h"
@@ -46,6 +46,7 @@ void Mob::CalcBonuses()
 	CalcMaxHP();
 	CalcMaxMana();
 	SetAttackTimer();
+	CalcAC();
 
 	rooted = FindType(SE_Root);
 }
@@ -145,43 +146,44 @@ void Client::CalcItemBonuses(StatBonuses* newbon) {
 
 	unsigned int i;
 	// Update: MainAmmo should only calc skill mods (TODO: Check for other cases)
-	for (i = MainCharm; i <= MainAmmo; i++) {
-		const ItemInst* inst = m_inv[i];
+	for (i = EQEmu::inventory::slotCharm; i <= EQEmu::inventory::slotAmmo; i++) {
+		const EQEmu::ItemInstance* inst = m_inv[i];
 		if(inst == 0)
 			continue;
-		AddItemBonuses(inst, newbon, false, false, 0, (i == MainAmmo));
+		AddItemBonuses(inst, newbon, false, false, 0, (i == EQEmu::inventory::slotAmmo));
 
 		//These are given special flags due to how often they are checked for various spell effects.
-		const Item_Struct *item = inst->GetItem();
-		if (i == MainSecondary && (item && item->ItemType == ItemTypeShield))
+		const EQEmu::ItemData *item = inst->GetItem();
+		if (i == EQEmu::inventory::slotSecondary && (item && item->ItemType == EQEmu::item::ItemTypeShield))
 			SetShieldEquiped(true);
-		else if (i == MainPrimary && (item && item->ItemType == ItemType2HBlunt)) {
+		else if (i == EQEmu::inventory::slotPrimary && (item && item->ItemType == EQEmu::item::ItemType2HBlunt)) {
 			SetTwoHandBluntEquiped(true);
 			SetTwoHanderEquipped(true);
-		} else if (i == MainPrimary && (item && (item->ItemType == ItemType2HSlash || item->ItemType == ItemType2HPiercing)))
+		}
+		else if (i == EQEmu::inventory::slotPrimary && (item && (item->ItemType == EQEmu::item::ItemType2HSlash || item->ItemType == EQEmu::item::ItemType2HPiercing)))
 			SetTwoHanderEquipped(true);
 	}
 
 	//Power Source Slot
-	if (GetClientVersion() >= ClientVersion::SoF)
+	if (ClientVersion() >= EQEmu::versions::ClientVersion::SoF)
 	{
-		const ItemInst* inst = m_inv[MainPowerSource];
+		const EQEmu::ItemInstance* inst = m_inv[EQEmu::inventory::slotPowerSource];
 		if(inst)
 			AddItemBonuses(inst, newbon);
 	}
 
 	//tribute items
-	for (i = 0; i < EmuConstants::TRIBUTE_SIZE; i++) {
-		const ItemInst* inst = m_inv[EmuConstants::TRIBUTE_BEGIN + i];
+	for (i = 0; i < EQEmu::legacy::TRIBUTE_SIZE; i++) {
+		const EQEmu::ItemInstance* inst = m_inv[EQEmu::legacy::TRIBUTE_BEGIN + i];
 		if(inst == 0)
 			continue;
 		AddItemBonuses(inst, newbon, false, true);
 	}
 
 	//Optional ability to have worn effects calculate as an addititive bonus instead of highest value
-	if (RuleI(Spells, AdditiveBonusWornType) && RuleI(Spells, AdditiveBonusWornType) != ET_WornEffect){
-		for (i = MainCharm; i < MainAmmo; i++) {
-			const ItemInst* inst = m_inv[i];
+	if (RuleI(Spells, AdditiveBonusWornType) && RuleI(Spells, AdditiveBonusWornType) != EQEmu::item::ItemEffectWorn){
+		for (i = EQEmu::inventory::slotCharm; i < EQEmu::inventory::slotAmmo; i++) {
+			const EQEmu::ItemInstance* inst = m_inv[i];
 			if(inst == 0)
 				continue;
 			AdditiveWornBonuses(inst, newbon);
@@ -207,9 +209,9 @@ void Client::ProcessItemCaps()
 	itembonuses.ATK = std::min(itembonuses.ATK, CalcItemATKCap());
 }
 
-void Client::AddItemBonuses(const ItemInst *inst, StatBonuses *newbon, bool isAug, bool isTribute, int rec_override, bool ammo_slot_item)
+void Client::AddItemBonuses(const EQEmu::ItemInstance *inst, StatBonuses *newbon, bool isAug, bool isTribute, int rec_override, bool ammo_slot_item)
 {
-	if (!inst || !inst->IsType(ItemClassCommon)) {
+	if (!inst || !inst->IsClassCommon()) {
 		return;
 	}
 
@@ -217,10 +219,10 @@ void Client::AddItemBonuses(const ItemInst *inst, StatBonuses *newbon, bool isAu
 		return;
 	}
 
-	const Item_Struct *item = inst->GetItem();
+	const EQEmu::ItemData *item = inst->GetItem();
 
 	if (!isTribute && !inst->IsEquipable(GetBaseRace(), GetClass())) {
-		if (item->ItemType != ItemTypeFood && item->ItemType != ItemTypeDrink)
+		if (item->ItemType != EQEmu::item::ItemTypeFood && item->ItemType != EQEmu::item::ItemTypeDrink)
 			return;
 	}
 
@@ -429,11 +431,11 @@ void Client::AddItemBonuses(const ItemInst *inst, StatBonuses *newbon, bool isAu
 			else
 				newbon->DSMitigation += item->DSMitigation;
 		}
-		if (item->Worn.Effect > 0 && item->Worn.Type == ET_WornEffect) { // latent effects
+		if (item->Worn.Effect > 0 && item->Worn.Type == EQEmu::item::ItemEffectWorn) { // latent effects
 			ApplySpellsBonuses(item->Worn.Effect, item->Worn.Level, newbon, 0, item->Worn.Type);
 		}
 
-		if (item->Focus.Effect > 0 && (item->Focus.Type == ET_Focus)) { // focus effects
+		if (item->Focus.Effect > 0 && (item->Focus.Type == EQEmu::item::ItemEffectFocus)) { // focus effects
 			ApplySpellsBonuses(item->Focus.Effect, item->Focus.Level, newbon, 0);
 		}
 
@@ -506,7 +508,7 @@ void Client::AddItemBonuses(const ItemInst *inst, StatBonuses *newbon, bool isAu
 			}
 		}
 
-		if (item->ExtraDmgSkill != 0 && item->ExtraDmgSkill <= HIGHEST_SKILL) {
+		if (item->ExtraDmgSkill != 0 && item->ExtraDmgSkill <= EQEmu::skills::HIGHEST_SKILL) {
 			if ((newbon->SkillDamageAmount[item->ExtraDmgSkill] + item->ExtraDmgAmt) >
 				RuleI(Character, ItemExtraDmgCap))
 				newbon->SkillDamageAmount[item->ExtraDmgSkill] = RuleI(Character, ItemExtraDmgCap);
@@ -516,7 +518,7 @@ void Client::AddItemBonuses(const ItemInst *inst, StatBonuses *newbon, bool isAu
 	}
 
 	// Process when ammo_slot_item = true or false
-	if (item->SkillModValue != 0 && item->SkillModType <= HIGHEST_SKILL) {
+	if (item->SkillModValue != 0 && item->SkillModType <= EQEmu::skills::HIGHEST_SKILL) {
 		if ((item->SkillModValue > 0 && newbon->skillmod[item->SkillModType] < item->SkillModValue) ||
 			(item->SkillModValue < 0 && newbon->skillmod[item->SkillModType] > item->SkillModValue)) {
 
@@ -526,12 +528,12 @@ void Client::AddItemBonuses(const ItemInst *inst, StatBonuses *newbon, bool isAu
 	}
 
 	if (!isAug) {
-		for (int i = 0; i < EmuConstants::ITEM_COMMON_SIZE; i++)
+		for (int i = EQEmu::inventory::socketBegin; i < EQEmu::inventory::SocketCount; i++)
 			AddItemBonuses(inst->GetAugment(i), newbon, true, false, rec_level, ammo_slot_item);
 	}
 }
 
-void Client::AdditiveWornBonuses(const ItemInst *inst, StatBonuses* newbon, bool isAug) {
+void Client::AdditiveWornBonuses(const EQEmu::ItemInstance *inst, StatBonuses* newbon, bool isAug) {
 
 	/*
 	Powerful Non-live like option allows developers to add worn effects on items that
@@ -543,13 +545,13 @@ void Client::AdditiveWornBonuses(const ItemInst *inst, StatBonuses* newbon, bool
 	which will also stack with regular (worntype 2) effects. [Ie set rule = 3 and item worntype = 3]
 	*/
 
-	if(!inst || !inst->IsType(ItemClassCommon))
+	if (!inst || !inst->IsClassCommon())
 		return;
 
 	if(inst->GetAugmentType()==0 && isAug == true)
 		return;
 
-	const Item_Struct *item = inst->GetItem();
+	const EQEmu::ItemData *item = inst->GetItem();
 
 	if(!inst->IsEquipable(GetBaseRace(),GetClass()))
 		return;
@@ -564,7 +566,7 @@ void Client::AdditiveWornBonuses(const ItemInst *inst, StatBonuses* newbon, bool
 	if (!isAug)
 	{
 		int i;
-		for (i = 0; i < EmuConstants::ITEM_COMMON_SIZE; i++) {
+		for (i = EQEmu::inventory::socketBegin; i < EQEmu::inventory::SocketCount; i++) {
 			AdditiveWornBonuses(inst->GetAugment(i),newbon,true);
 		}
 	}
@@ -575,32 +577,32 @@ void Client::CalcEdibleBonuses(StatBonuses* newbon) {
 
 	bool food = false;
 	bool drink = false;
-	for (i = EmuConstants::GENERAL_BEGIN; i <= EmuConstants::GENERAL_BAGS_BEGIN; i++)
+	for (i = EQEmu::legacy::GENERAL_BEGIN; i <= EQEmu::legacy::GENERAL_BAGS_BEGIN; i++)
 	{
 		if (food && drink)
 			break;
-		const ItemInst* inst = GetInv().GetItem(i);
-		if (inst && inst->GetItem() && inst->IsType(ItemClassCommon)) {
-			const Item_Struct *item=inst->GetItem();
-			if (item->ItemType == ItemTypeFood && !food)
+		const EQEmu::ItemInstance* inst = GetInv().GetItem(i);
+		if (inst && inst->GetItem() && inst->IsClassCommon()) {
+			const EQEmu::ItemData *item = inst->GetItem();
+			if (item->ItemType == EQEmu::item::ItemTypeFood && !food)
 				food = true;
-			else if (item->ItemType == ItemTypeDrink && !drink)
+			else if (item->ItemType == EQEmu::item::ItemTypeDrink && !drink)
 				drink = true;
 			else
 				continue;
 			AddItemBonuses(inst, newbon);
 		}
 	}
-	for (i = EmuConstants::GENERAL_BAGS_BEGIN; i <= EmuConstants::GENERAL_BAGS_END; i++)
+	for (i = EQEmu::legacy::GENERAL_BAGS_BEGIN; i <= EQEmu::legacy::GENERAL_BAGS_END; i++)
 	{
 		if (food && drink)
 			break;
-		const ItemInst* inst = GetInv().GetItem(i);
-		if (inst && inst->GetItem() && inst->IsType(ItemClassCommon)) {
-			const Item_Struct *item=inst->GetItem();
-			if (item->ItemType == ItemTypeFood && !food)
+		const EQEmu::ItemInstance* inst = GetInv().GetItem(i);
+		if (inst && inst->GetItem() && inst->IsClassCommon()) {
+			const EQEmu::ItemData *item = inst->GetItem();
+			if (item->ItemType == EQEmu::item::ItemTypeFood && !food)
 				food = true;
-			else if (item->ItemType == ItemTypeDrink && !drink)
+			else if (item->ItemType == EQEmu::item::ItemTypeDrink && !drink)
 				drink = true;
 			else
 				continue;
@@ -658,7 +660,7 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 		    effect == SE_StackingCommand_Overwrite)
 			continue;
 
-		Log.Out(Logs::Detail, Logs::AA, "Applying Effect %d from AA %u in slot %d (base1: %d, base2: %d) on %s",
+		Log(Logs::Detail, Logs::AA, "Applying Effect %d from AA %u in slot %d (base1: %d, base2: %d) on %s",
 			effect, rank.id, slot, base1, base2, GetCleanName());
 
 		uint8 focus = IsFocusEffect(0, 0, true, effect);
@@ -668,13 +670,17 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 		}
 
 		switch (effect) {
+		case SE_ACv2:
+		case SE_ArmorClass:
+			newbon->AC += base1;
+			break;
 		// Note: AA effects that use accuracy are skill limited, while spell effect is not.
 		case SE_Accuracy:
 			// Bad data or unsupported new skill
-			if (base2 > HIGHEST_SKILL)
+			if (base2 > EQEmu::skills::HIGHEST_SKILL)
 				break;
-			if ((base2 == ALL_SKILLS) && (newbon->Accuracy[HIGHEST_SKILL + 1] < base1))
-				newbon->Accuracy[HIGHEST_SKILL + 1] = base1;
+			if ((base2 == ALL_SKILLS) && (newbon->Accuracy[EQEmu::skills::HIGHEST_SKILL + 1] < base1))
+				newbon->Accuracy[EQEmu::skills::HIGHEST_SKILL + 1] = base1;
 			else if (newbon->Accuracy[base2] < base1)
 				newbon->Accuracy[base2] += base1;
 			break;
@@ -910,19 +916,19 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 			break;
 		case SE_AddSingingMod:
 			switch (base2) {
-			case ItemTypeWindInstrument:
+			case EQEmu::item::ItemTypeWindInstrument:
 				newbon->windMod += base1;
 				break;
-			case ItemTypeStringedInstrument:
+			case EQEmu::item::ItemTypeStringedInstrument:
 				newbon->stringedMod += base1;
 				break;
-			case ItemTypeBrassInstrument:
+			case EQEmu::item::ItemTypeBrassInstrument:
 				newbon->brassMod += base1;
 				break;
-			case ItemTypePercussionInstrument:
+			case EQEmu::item::ItemTypePercussionInstrument:
 				newbon->percussionMod += base1;
 				break;
-			case ItemTypeSinging:
+			case EQEmu::item::ItemTypeSinging:
 				newbon->singingMod += base1;
 				break;
 			}
@@ -939,12 +945,8 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 		case SE_ShieldBlock:
 			newbon->ShieldBlock += base1;
 			break;
-		case SE_ShieldEquipHateMod:
-			newbon->ShieldEquipHateMod += base1;
-			break;
 		case SE_ShieldEquipDmgMod:
-			newbon->ShieldEquipDmgMod[0] += base1;
-			newbon->ShieldEquipDmgMod[1] += base2;
+			newbon->ShieldEquipDmgMod += base1;
 			break;
 		case SE_SecondaryDmgInc:
 			newbon->SecondaryDmgInc = true;
@@ -1014,10 +1016,10 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 
 		case SE_HitChance: {
 			// Bad data or unsupported new skill
-			if (base2 > HIGHEST_SKILL)
+			if (base2 > EQEmu::skills::HIGHEST_SKILL)
 				break;
 			if (base2 == ALL_SKILLS)
-				newbon->HitChanceEffect[HIGHEST_SKILL + 1] += base1;
+				newbon->HitChanceEffect[EQEmu::skills::HIGHEST_SKILL + 1] += base1;
 			else
 				newbon->HitChanceEffect[base2] += base1;
 		}
@@ -1068,21 +1070,21 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 
 		case SE_CriticalHitChance: {
 			// Bad data or unsupported new skill
-			if (base2 > HIGHEST_SKILL)
+			if (base2 > EQEmu::skills::HIGHEST_SKILL)
 				break;
 			if (base2 == ALL_SKILLS)
-				newbon->CriticalHitChance[HIGHEST_SKILL + 1] += base1;
+				newbon->CriticalHitChance[EQEmu::skills::HIGHEST_SKILL + 1] += base1;
 			else
 				newbon->CriticalHitChance[base2] += base1;
 		} break;
 
 		case SE_CriticalDamageMob: {
 			// Bad data or unsupported new skill
-			if (base2 > HIGHEST_SKILL)
+			if (base2 > EQEmu::skills::HIGHEST_SKILL)
 				break;
 			// base1 = effect value, base2 = skill restrictions(-1 for all)
 			if (base2 == ALL_SKILLS)
-				newbon->CritDmgMob[HIGHEST_SKILL + 1] += base1;
+				newbon->CritDmgMob[EQEmu::skills::HIGHEST_SKILL + 1] += base1;
 			else
 				newbon->CritDmgMob[base2] += base1;
 			break;
@@ -1108,10 +1110,10 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 
 		case SE_SkillDamageAmount: {
 			// Bad data or unsupported new skill
-			if (base2 > HIGHEST_SKILL)
+			if (base2 > EQEmu::skills::HIGHEST_SKILL)
 				break;
 			if (base2 == ALL_SKILLS)
-				newbon->SkillDamageAmount[HIGHEST_SKILL + 1] += base1;
+				newbon->SkillDamageAmount[EQEmu::skills::HIGHEST_SKILL + 1] += base1;
 			else
 				newbon->SkillDamageAmount[base2] += base1;
 			break;
@@ -1127,10 +1129,10 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 
 		case SE_DamageModifier: {
 			// Bad data or unsupported new skill
-			if (base2 > HIGHEST_SKILL)
+			if (base2 > EQEmu::skills::HIGHEST_SKILL)
 				break;
 			if (base2 == ALL_SKILLS)
-				newbon->DamageModifier[HIGHEST_SKILL + 1] += base1;
+				newbon->DamageModifier[EQEmu::skills::HIGHEST_SKILL + 1] += base1;
 			else
 				newbon->DamageModifier[base2] += base1;
 			break;
@@ -1138,10 +1140,10 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 
 		case SE_DamageModifier2: {
 			// Bad data or unsupported new skill
-			if (base2 > HIGHEST_SKILL)
+			if (base2 > EQEmu::skills::HIGHEST_SKILL)
 				break;
 			if (base2 == ALL_SKILLS)
-				newbon->DamageModifier2[HIGHEST_SKILL + 1] += base1;
+				newbon->DamageModifier2[EQEmu::skills::HIGHEST_SKILL + 1] += base1;
 			else
 				newbon->DamageModifier2[base2] += base1;
 			break;
@@ -1177,7 +1179,7 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 		// Physically raises skill cap ie if 55/55 it will raise to 55/60
 		case SE_RaiseSkillCap: {
 
-			if (base2 > HIGHEST_SKILL)
+			if (base2 > EQEmu::skills::HIGHEST_SKILL)
 				break;
 
 			if (newbon->RaiseSkillCap[base2] < base1) 
@@ -1311,8 +1313,9 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 		}
 
 		case SE_HeadShotLevel: {
-			if (newbon->HSLevel < base1)
-				newbon->HSLevel = base1;
+			if (newbon->HSLevel[0] < base1)
+				newbon->HSLevel[0] = base1;
+				newbon->HSLevel[1] = base2;
 			break;
 		}
 
@@ -1325,8 +1328,10 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 		}
 
 		case SE_AssassinateLevel: {
-			if (newbon->AssassinateLevel < base1)
-				newbon->AssassinateLevel = base1;
+			if (newbon->AssassinateLevel[0] < base1) {
+				newbon->AssassinateLevel[0] = base1;
+				newbon->AssassinateLevel[1] = base2;
+			}
 			break;
 		}
 
@@ -1349,9 +1354,9 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 
 		case SE_LimitToSkill: {
 			// Bad data or unsupported new skill
-			if (base2 > HIGHEST_SKILL)
+			if (base2 > EQEmu::skills::HIGHEST_SKILL)
 				break;
-			if (base1 <= HIGHEST_SKILL)
+			if (base1 <= EQEmu::skills::HIGHEST_SKILL)
 				newbon->LimitToSkill[base1] = true;
 			break;
 		}
@@ -1384,7 +1389,7 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 		}
 
 		case SE_MeleeMitigation:
-			newbon->MeleeMitigationEffect -= base1;
+			newbon->MeleeMitigationEffect += base1;
 			break;
 
 		case SE_ATK:
@@ -1415,7 +1420,7 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 
 		case SE_ReduceTradeskillFail:{
 
-			if (base2 > HIGHEST_SKILL)
+			if (base2 > EQEmu::skills::HIGHEST_SKILL)
 				break;
 
 			newbon->ReduceTradeskillFail[base2] += base1;
@@ -1493,7 +1498,7 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 			break;
 
 		default:
-			Log.Out(Logs::Detail, Logs::AA, "SPA %d not accounted for in AA %s (%d)", effect, rank.base_ability->name.c_str(), rank.id);
+			Log(Logs::Detail, Logs::AA, "SPA %d not accounted for in AA %s (%d)", effect, rank.base_ability->name.c_str(), rank.id);
 			break;
 		}
 
@@ -1530,9 +1535,6 @@ void Mob::CalcSpellBonuses(StatBonuses* newbon)
 		}
 	}
 
-	// THIS IS WRONG, leaving for now
-	//this prolly suffer from roundoff error slightly...
-	newbon->AC = newbon->AC * 10 / 34;      //ratio determined impirically from client.
 	if (GetClass() == BARD)
 		newbon->ManaRegen = 0; // Bards do not get mana regen from spells.
 }
@@ -1543,13 +1545,9 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 {
 	int i, effect_value, base2, max, effectid;
 	bool AdditiveWornBonus = false;
-	Mob *caster = nullptr;
 
 	if(!IsAISpellEffect && !IsValidSpell(spell_id))
 		return;
-
-	if(casterId > 0)
-		caster = entity_list.GetMob(casterId);
 
 	for (i = 0; i < EFFECT_COUNT; i++)
 	{
@@ -1577,7 +1575,7 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 				AdditiveWornBonus = true;
 
 			effectid = spells[spell_id].effectid[i];
-			effect_value = CalcSpellEffectValue(spell_id, i, casterlevel, instrument_mod, caster, ticsremaining);
+			effect_value = CalcSpellEffectValue(spell_id, i, casterlevel, instrument_mod, nullptr, ticsremaining, casterId);
 			base2 = spells[spell_id].base2[i];
 			max = spells[spell_id].max[i];
 		}
@@ -1934,33 +1932,33 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 				break;
 
 			case SE_MeleeMitigation:
-				//for some reason... this value is negative for increased mitigation
-				new_bonus->MeleeMitigationEffect -= effect_value;
+				// This value is negative because it counteracts another SPA :P
+				new_bonus->MeleeMitigationEffect += effect_value;
 				break;
 
 			case SE_CriticalHitChance:
 			{
 				// Bad data or unsupported new skill
-				if (base2 > HIGHEST_SKILL)
+				if (base2 > EQEmu::skills::HIGHEST_SKILL)
 					break;
 				if (AdditiveWornBonus) {
 					if(base2 == ALL_SKILLS)
-						new_bonus->CriticalHitChance[HIGHEST_SKILL+1] += effect_value;
+						new_bonus->CriticalHitChance[EQEmu::skills::HIGHEST_SKILL + 1] += effect_value;
 					else
 						new_bonus->CriticalHitChance[base2] += effect_value;
 				}
 
 				else if(effect_value < 0) {
 
-					if(base2 == ALL_SKILLS && new_bonus->CriticalHitChance[HIGHEST_SKILL+1] > effect_value)
-						new_bonus->CriticalHitChance[HIGHEST_SKILL+1] = effect_value;
+					if (base2 == ALL_SKILLS && new_bonus->CriticalHitChance[EQEmu::skills::HIGHEST_SKILL + 1] > effect_value)
+						new_bonus->CriticalHitChance[EQEmu::skills::HIGHEST_SKILL + 1] = effect_value;
 					else if(base2 != ALL_SKILLS && new_bonus->CriticalHitChance[base2] > effect_value)
 						new_bonus->CriticalHitChance[base2] = effect_value;
 				}
 
 
-				else if(base2 == ALL_SKILLS && new_bonus->CriticalHitChance[HIGHEST_SKILL+1] < effect_value)
-						new_bonus->CriticalHitChance[HIGHEST_SKILL+1] = effect_value;
+				else if (base2 == ALL_SKILLS && new_bonus->CriticalHitChance[EQEmu::skills::HIGHEST_SKILL + 1] < effect_value)
+					new_bonus->CriticalHitChance[EQEmu::skills::HIGHEST_SKILL + 1] = effect_value;
 				else if(base2 != ALL_SKILLS && new_bonus->CriticalHitChance[base2] < effect_value)
 						new_bonus->CriticalHitChance[base2] = effect_value;
 
@@ -2147,24 +2145,24 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 			case SE_HitChance:
 			{
 				// Bad data or unsupported new skill
-				if (base2 > HIGHEST_SKILL)
+				if (base2 > EQEmu::skills::HIGHEST_SKILL)
 					break;
 
 				if (AdditiveWornBonus){
 					if(base2 == ALL_SKILLS)
-						new_bonus->HitChanceEffect[HIGHEST_SKILL+1] += effect_value;
+						new_bonus->HitChanceEffect[EQEmu::skills::HIGHEST_SKILL + 1] += effect_value;
 					else
 						new_bonus->HitChanceEffect[base2] += effect_value;
 				}
 
 				else if(base2 == ALL_SKILLS){
 
-					if ((effect_value < 0) && (new_bonus->HitChanceEffect[HIGHEST_SKILL+1] > effect_value))
-						new_bonus->HitChanceEffect[HIGHEST_SKILL+1] = effect_value;
+					if ((effect_value < 0) && (new_bonus->HitChanceEffect[EQEmu::skills::HIGHEST_SKILL + 1] > effect_value))
+						new_bonus->HitChanceEffect[EQEmu::skills::HIGHEST_SKILL + 1] = effect_value;
 
-					else if (!new_bonus->HitChanceEffect[HIGHEST_SKILL+1] ||
-							((new_bonus->HitChanceEffect[HIGHEST_SKILL+1] > 0) && (new_bonus->HitChanceEffect[HIGHEST_SKILL+1] < effect_value)))
-							new_bonus->HitChanceEffect[HIGHEST_SKILL+1] = effect_value;
+					else if (!new_bonus->HitChanceEffect[EQEmu::skills::HIGHEST_SKILL + 1] ||
+						((new_bonus->HitChanceEffect[EQEmu::skills::HIGHEST_SKILL + 1] > 0) && (new_bonus->HitChanceEffect[EQEmu::skills::HIGHEST_SKILL + 1] < effect_value)))
+						new_bonus->HitChanceEffect[EQEmu::skills::HIGHEST_SKILL + 1] = effect_value;
 				}
 
 				else {
@@ -2184,9 +2182,9 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 			case SE_DamageModifier:
 			{
 				// Bad data or unsupported new skill
-				if (base2 > HIGHEST_SKILL)
+				if (base2 > EQEmu::skills::HIGHEST_SKILL)
 					break;
-				int skill = base2 == ALL_SKILLS ? HIGHEST_SKILL + 1 : base2;
+				int skill = base2 == ALL_SKILLS ? EQEmu::skills::HIGHEST_SKILL + 1 : base2;
 				if (effect_value < 0 && new_bonus->DamageModifier[skill] > effect_value)
 					new_bonus->DamageModifier[skill] = effect_value;
 				else if (effect_value > 0 && new_bonus->DamageModifier[skill] < effect_value)
@@ -2197,9 +2195,9 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 			case SE_DamageModifier2:
 			{
 				// Bad data or unsupported new skill
-				if (base2 > HIGHEST_SKILL)
+				if (base2 > EQEmu::skills::HIGHEST_SKILL)
 					break;
-				int skill = base2 == ALL_SKILLS ? HIGHEST_SKILL + 1 : base2;
+				int skill = base2 == ALL_SKILLS ? EQEmu::skills::HIGHEST_SKILL + 1 : base2;
 				if (effect_value < 0 && new_bonus->DamageModifier2[skill] > effect_value)
 					new_bonus->DamageModifier2[skill] = effect_value;
 				else if (effect_value > 0 && new_bonus->DamageModifier2[skill] < effect_value)
@@ -2210,9 +2208,9 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 			case SE_MinDamageModifier:
 			{
 				// Bad data or unsupported new skill
-				if (base2 > HIGHEST_SKILL)
+				if (base2 > EQEmu::skills::HIGHEST_SKILL)
 					break;
-				int skill = base2 == ALL_SKILLS ? HIGHEST_SKILL + 1 : base2;
+				int skill = base2 == ALL_SKILLS ? EQEmu::skills::HIGHEST_SKILL + 1 : base2;
 				if (effect_value < 0 && new_bonus->MinDamageModifier[skill] > effect_value)
 					new_bonus->MinDamageModifier[skill] = effect_value;
 				else if (effect_value > 0 && new_bonus->MinDamageModifier[skill] < effect_value)
@@ -2287,14 +2285,14 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 			case SE_Accuracy:
 			{
 				// Bad data or unsupported new skill
-				if (base2 > HIGHEST_SKILL)
+				if (base2 > EQEmu::skills::HIGHEST_SKILL)
 					break;
-				if ((effect_value < 0) && (new_bonus->Accuracy[HIGHEST_SKILL+1] > effect_value))
-						new_bonus->Accuracy[HIGHEST_SKILL+1] = effect_value;
+				if ((effect_value < 0) && (new_bonus->Accuracy[EQEmu::skills::HIGHEST_SKILL + 1] > effect_value))
+					new_bonus->Accuracy[EQEmu::skills::HIGHEST_SKILL + 1] = effect_value;
 
-				else if (!new_bonus->Accuracy[HIGHEST_SKILL+1] ||
-						((new_bonus->Accuracy[HIGHEST_SKILL+1] > 0) && (new_bonus->Accuracy[HIGHEST_SKILL+1] < effect_value)))
-							new_bonus->Accuracy[HIGHEST_SKILL+1] = effect_value;
+				else if (!new_bonus->Accuracy[EQEmu::skills::HIGHEST_SKILL + 1] ||
+					((new_bonus->Accuracy[EQEmu::skills::HIGHEST_SKILL + 1] > 0) && (new_bonus->Accuracy[EQEmu::skills::HIGHEST_SKILL + 1] < effect_value)))
+					new_bonus->Accuracy[EQEmu::skills::HIGHEST_SKILL + 1] = effect_value;
 				break;
 			}
 
@@ -2313,19 +2311,19 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 			case SE_SkillDamageTaken:
 			{
 				// Bad data or unsupported new skill
-				if (base2 > HIGHEST_SKILL)
+				if (base2 > EQEmu::skills::HIGHEST_SKILL)
 					break;
 				//When using npc_spells_effects if MAX value set, use stackable quest based modifier.
 				if (IsAISpellEffect && max){
 					if(base2 == ALL_SKILLS)
-						SkillDmgTaken_Mod[HIGHEST_SKILL+1] = effect_value;
+						SkillDmgTaken_Mod[EQEmu::skills::HIGHEST_SKILL + 1] = effect_value;
 					else
 						SkillDmgTaken_Mod[base2] = effect_value;
 				}
 				else {
 
 					if(base2 == ALL_SKILLS)
-						new_bonus->SkillDmgTaken[HIGHEST_SKILL+1] += effect_value;
+						new_bonus->SkillDmgTaken[EQEmu::skills::HIGHEST_SKILL + 1] += effect_value;
 					else
 						new_bonus->SkillDmgTaken[base2] += effect_value;
 
@@ -2434,10 +2432,10 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 			case SE_CriticalDamageMob:
 			{
 				// Bad data or unsupported new skill
-				if (base2 > HIGHEST_SKILL)
+				if (base2 > EQEmu::skills::HIGHEST_SKILL)
 					break;
 				if(base2 == ALL_SKILLS)
-					new_bonus->CritDmgMob[HIGHEST_SKILL+1] += effect_value;
+					new_bonus->CritDmgMob[EQEmu::skills::HIGHEST_SKILL + 1] += effect_value;
 				else
 					new_bonus->CritDmgMob[base2] += effect_value;
 				break;
@@ -2453,10 +2451,10 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 			case SE_SkillDamageAmount:
 			{
 				// Bad data or unsupported new skill
-				if (base2 > HIGHEST_SKILL)
+				if (base2 > EQEmu::skills::HIGHEST_SKILL)
 					break;
 				if(base2 == ALL_SKILLS)
-					new_bonus->SkillDamageAmount[HIGHEST_SKILL+1] += effect_value;
+					new_bonus->SkillDamageAmount[EQEmu::skills::HIGHEST_SKILL + 1] += effect_value;
 				else
 					new_bonus->SkillDamageAmount[base2] += effect_value;
 				break;
@@ -2532,6 +2530,8 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 
 			case SE_ImmuneFleeing:
 				new_bonus->ImmuneToFlee = true;
+				if (currently_fleeing) // lets update shit now instead of next tick
+					ProcessFlee();
 				break;
 
 			case SE_DelayDeath:
@@ -2561,10 +2561,10 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 			case SE_SkillDamageAmount2:
 			{
 				// Bad data or unsupported new skill
-				if (base2 > HIGHEST_SKILL)
+				if (base2 > EQEmu::skills::HIGHEST_SKILL)
 					break;
 				if(base2 == ALL_SKILLS)
-					new_bonus->SkillDamageAmount2[HIGHEST_SKILL+1] += effect_value;
+					new_bonus->SkillDamageAmount2[EQEmu::skills::HIGHEST_SKILL + 1] += effect_value;
 				else
 					new_bonus->SkillDamageAmount2[base2] += effect_value;
 				break;
@@ -2656,13 +2656,8 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 				new_bonus->ShieldBlock += effect_value;
 				break;
 
-			case SE_ShieldEquipHateMod:
-				new_bonus->ShieldEquipHateMod += effect_value;
-				break;
-
 			case SE_ShieldEquipDmgMod:
-				new_bonus->ShieldEquipDmgMod[0] += effect_value;
-				new_bonus->ShieldEquipDmgMod[1] += base2;
+				new_bonus->ShieldEquipDmgMod += effect_value;
 				break;
 
 			case SE_BlockBehind:
@@ -2756,23 +2751,24 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 				break;
 
 			case SE_AddSingingMod:
-				switch (base2)
-				{
-					case ItemTypeWindInstrument:
-						new_bonus->windMod += effect_value;
-						break;
-					case ItemTypeStringedInstrument:
-						new_bonus->stringedMod += effect_value;
-						break;
-					case ItemTypeBrassInstrument:
-						new_bonus->brassMod += effect_value;
-						break;
-					case ItemTypePercussionInstrument:
-						new_bonus->percussionMod += effect_value;
-						break;
-					case ItemTypeSinging:
-						new_bonus->singingMod += effect_value;
-						break;
+				switch (base2) {
+				case EQEmu::item::ItemTypeWindInstrument:
+					new_bonus->windMod += effect_value;
+					break;
+				case EQEmu::item::ItemTypeStringedInstrument:
+					new_bonus->stringedMod += effect_value;
+					break;
+				case EQEmu::item::ItemTypeBrassInstrument:
+					new_bonus->brassMod += effect_value;
+					break;
+				case EQEmu::item::ItemTypePercussionInstrument:
+					new_bonus->percussionMod += effect_value;
+					break;
+				case EQEmu::item::ItemTypeSinging:
+					new_bonus->singingMod += effect_value;
+					break;
+				default:
+					break;
 				}
 				break;
 
@@ -3033,8 +3029,10 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 
 			case SE_HeadShotLevel:
 			{
-				if(new_bonus->HSLevel < effect_value)
-					new_bonus->HSLevel = effect_value;
+				if(new_bonus->HSLevel[0] < effect_value) {
+					new_bonus->HSLevel[0] = effect_value;
+					new_bonus->HSLevel[1] = base2;
+				}
 				break;
 			}
 
@@ -3049,8 +3047,10 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 
 			case SE_AssassinateLevel:
 			{
-				if(new_bonus->AssassinateLevel < effect_value)
-					new_bonus->AssassinateLevel = effect_value;
+				if(new_bonus->AssassinateLevel[0] < effect_value) {
+					new_bonus->AssassinateLevel[0] = effect_value;
+					new_bonus->AssassinateLevel[1] = base2;
+				}
 				break;
 			}
 
@@ -3098,9 +3098,9 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 
 			case SE_LimitToSkill:{
 				// Bad data or unsupported new skill
-				if (base2 > HIGHEST_SKILL)
+				if (base2 > EQEmu::skills::HIGHEST_SKILL)
 					break;
-				if (effect_value <= HIGHEST_SKILL){
+				if (effect_value <= EQEmu::skills::HIGHEST_SKILL){
 					new_bonus->LimitToSkill[effect_value] = true;
 				}
 				break;
@@ -3157,7 +3157,7 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 
 			case SE_ReduceTradeskillFail:{
 
-				if (base2 > HIGHEST_SKILL)
+				if (base2 > EQEmu::skills::HIGHEST_SKILL)
 					break;
 
 				new_bonus->ReduceTradeskillFail[base2] += effect_value;
@@ -3170,7 +3170,7 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 				break;
 
 			case SE_RaiseSkillCap: {
-				if (base2 > HIGHEST_SKILL)
+				if (base2 > EQEmu::skills::HIGHEST_SKILL)
 					break;
 				
 				if (new_bonus->RaiseSkillCap[base2] < effect_value) 
@@ -3204,8 +3204,8 @@ void NPC::CalcItemBonuses(StatBonuses *newbon)
 {
 	if(newbon){
 
-		for(int i = 0; i < EmuConstants::EQUIPMENT_SIZE; i++){
-			const Item_Struct *cur = database.GetItem(equipment[i]);
+		for (int i = 0; i < EQEmu::legacy::EQUIPMENT_SIZE; i++){
+			const EQEmu::ItemData *cur = database.GetItem(equipment[i]);
 			if(cur){
 				//basic stats
 				newbon->AC += cur->AC;
@@ -3260,12 +3260,12 @@ void NPC::CalcItemBonuses(StatBonuses *newbon)
 				if(cur->CombatEffects > 0) {
 					newbon->ProcChance += cur->CombatEffects;
 				}
-				if (cur->Worn.Effect>0 && (cur->Worn.Type == ET_WornEffect)) { // latent effects
+				if (cur->Worn.Effect>0 && (cur->Worn.Type == EQEmu::item::ItemEffectWorn)) { // latent effects
 					ApplySpellsBonuses(cur->Worn.Effect, cur->Worn.Level, newbon, 0, cur->Worn.Type);
 				}
 
 				if (RuleB(Spells, NPC_UseFocusFromItems)){
-					if (cur->Focus.Effect>0 && (cur->Focus.Type == ET_Focus)){  // focus effects
+					if (cur->Focus.Effect>0 && (cur->Focus.Type == EQEmu::item::ItemEffectFocus)){  // focus effects
 						ApplySpellsBonuses(cur->Focus.Effect, cur->Focus.Level, newbon);
 					}
 				}
@@ -3282,24 +3282,24 @@ void Client::CalcItemScale() {
 	bool changed = false;
 
 	// MainAmmo excluded in helper function below
-	if(CalcItemScale(EmuConstants::EQUIPMENT_BEGIN, EmuConstants::EQUIPMENT_END)) // original coding excluded MainAmmo (< 21)
+	if (CalcItemScale(EQEmu::legacy::EQUIPMENT_BEGIN, EQEmu::legacy::EQUIPMENT_END)) // original coding excluded MainAmmo (< 21)
 		changed = true;
 
-	if(CalcItemScale(EmuConstants::GENERAL_BEGIN, EmuConstants::GENERAL_END)) // original coding excluded MainCursor (< 30)
+	if (CalcItemScale(EQEmu::legacy::GENERAL_BEGIN, EQEmu::legacy::GENERAL_END)) // original coding excluded MainCursor (< 30)
 		changed = true;
 
 	// I excluded cursor bag slots here because cursor was excluded above..if this is incorrect, change 'slot_y' here to CURSOR_BAG_END
 	// and 'slot_y' above to CURSOR from GENERAL_END above - or however it is supposed to be...
-	if(CalcItemScale(EmuConstants::GENERAL_BAGS_BEGIN, EmuConstants::GENERAL_BAGS_END)) // (< 341)
+	if (CalcItemScale(EQEmu::legacy::GENERAL_BAGS_BEGIN, EQEmu::legacy::GENERAL_BAGS_END)) // (< 341)
 		changed = true;
 
-	if(CalcItemScale(EmuConstants::TRIBUTE_BEGIN, EmuConstants::TRIBUTE_END)) // (< 405)
+	if (CalcItemScale(EQEmu::legacy::TRIBUTE_BEGIN, EQEmu::legacy::TRIBUTE_END)) // (< 405)
 		changed = true;
 
 	//Power Source Slot
-	if (GetClientVersion() >= ClientVersion::SoF)
+	if (ClientVersion() >= EQEmu::versions::ClientVersion::SoF)
 	{
-		if(CalcItemScale(MainPowerSource, MainPowerSource))
+		if (CalcItemScale(EQEmu::inventory::slotPowerSource, EQEmu::inventory::slotPowerSource))
 			changed = true;
 	}
 
@@ -3314,18 +3314,18 @@ bool Client::CalcItemScale(uint32 slot_x, uint32 slot_y) {
 	bool changed = false;
 	uint32 i;
 	for (i = slot_x; i <= slot_y; i++) {
-		if (i == MainAmmo) // moved here from calling procedure to facilitate future range changes where MainAmmo may not be the last slot
+		if (i == EQEmu::inventory::slotAmmo) // moved here from calling procedure to facilitate future range changes where MainAmmo may not be the last slot
 			continue;
 
-		ItemInst* inst = m_inv.GetItem(i);
+		EQEmu::ItemInstance* inst = m_inv.GetItem(i);
 
 		if(inst == nullptr)
 			continue;
 
 		// TEST CODE: test for bazaar trader crashing with charm items
 		if (Trader)
-			if (i >= EmuConstants::GENERAL_BAGS_BEGIN && i <= EmuConstants::GENERAL_BAGS_END) {
-				ItemInst* parent_item = m_inv.GetItem(Inventory::CalcSlotId(i));
+			if (i >= EQEmu::legacy::GENERAL_BAGS_BEGIN && i <= EQEmu::legacy::GENERAL_BAGS_END) {
+				EQEmu::ItemInstance* parent_item = m_inv.GetItem(EQEmu::InventoryProfile::CalcSlotId(i));
 				if (parent_item && parent_item->GetItem()->ID == 17899) // trader satchel
 					continue;
 			}
@@ -3344,9 +3344,9 @@ bool Client::CalcItemScale(uint32 slot_x, uint32 slot_y) {
 		}
 
 		//iterate all augments
-		for (int x = AUG_BEGIN; x < EmuConstants::ITEM_COMMON_SIZE; ++x)
+		for (int x = EQEmu::inventory::socketBegin; x < EQEmu::inventory::SocketCount; ++x)
 		{
-			ItemInst * a_inst = inst->GetAugment(x);
+			EQEmu::ItemInstance * a_inst = inst->GetAugment(x);
 			if(!a_inst)
 				continue;
 
@@ -3376,24 +3376,24 @@ void Client::DoItemEnterZone() {
 	bool changed = false;
 
 	// MainAmmo excluded in helper function below
-	if(DoItemEnterZone(EmuConstants::EQUIPMENT_BEGIN, EmuConstants::EQUIPMENT_END)) // original coding excluded MainAmmo (< 21)
+	if (DoItemEnterZone(EQEmu::legacy::EQUIPMENT_BEGIN, EQEmu::legacy::EQUIPMENT_END)) // original coding excluded MainAmmo (< 21)
 		changed = true;
 
-	if(DoItemEnterZone(EmuConstants::GENERAL_BEGIN, EmuConstants::GENERAL_END)) // original coding excluded MainCursor (< 30)
+	if (DoItemEnterZone(EQEmu::legacy::GENERAL_BEGIN, EQEmu::legacy::GENERAL_END)) // original coding excluded MainCursor (< 30)
 		changed = true;
 
 	// I excluded cursor bag slots here because cursor was excluded above..if this is incorrect, change 'slot_y' here to CURSOR_BAG_END
 	// and 'slot_y' above to CURSOR from GENERAL_END above - or however it is supposed to be...
-	if(DoItemEnterZone(EmuConstants::GENERAL_BAGS_BEGIN, EmuConstants::GENERAL_BAGS_END)) // (< 341)
+	if (DoItemEnterZone(EQEmu::legacy::GENERAL_BAGS_BEGIN, EQEmu::legacy::GENERAL_BAGS_END)) // (< 341)
 		changed = true;
 
-	if(DoItemEnterZone(EmuConstants::TRIBUTE_BEGIN, EmuConstants::TRIBUTE_END)) // (< 405)
+	if (DoItemEnterZone(EQEmu::legacy::TRIBUTE_BEGIN, EQEmu::legacy::TRIBUTE_END)) // (< 405)
 		changed = true;
 
 	//Power Source Slot
-	if (GetClientVersion() >= ClientVersion::SoF)
+	if (ClientVersion() >= EQEmu::versions::ClientVersion::SoF)
 	{
-		if(DoItemEnterZone(MainPowerSource, MainPowerSource))
+		if (DoItemEnterZone(EQEmu::inventory::slotPowerSource, EQEmu::inventory::slotPowerSource))
 			changed = true;
 	}
 
@@ -3407,18 +3407,18 @@ bool Client::DoItemEnterZone(uint32 slot_x, uint32 slot_y) {
 	// behavior change: 'slot_y' is now [RANGE]_END and not [RANGE]_END + 1
 	bool changed = false;
 	for(uint32 i = slot_x; i <= slot_y; i++) {
-		if (i == MainAmmo) // moved here from calling procedure to facilitate future range changes where MainAmmo may not be the last slot
+		if (i == EQEmu::inventory::slotAmmo) // moved here from calling procedure to facilitate future range changes where MainAmmo may not be the last slot
 			continue;
 
-		ItemInst* inst = m_inv.GetItem(i);
+		EQEmu::ItemInstance* inst = m_inv.GetItem(i);
 
 		if(!inst)
 			continue;
 
 		// TEST CODE: test for bazaar trader crashing with charm items
 		if (Trader)
-			if (i >= EmuConstants::GENERAL_BAGS_BEGIN && i <= EmuConstants::GENERAL_BAGS_END) {
-				ItemInst* parent_item = m_inv.GetItem(Inventory::CalcSlotId(i));
+			if (i >= EQEmu::legacy::GENERAL_BAGS_BEGIN && i <= EQEmu::legacy::GENERAL_BAGS_END) {
+				EQEmu::ItemInstance* parent_item = m_inv.GetItem(EQEmu::InventoryProfile::CalcSlotId(i));
 				if (parent_item && parent_item->GetItem()->ID == 17899) // trader satchel
 					continue;
 			}
@@ -3429,7 +3429,7 @@ bool Client::DoItemEnterZone(uint32 slot_x, uint32 slot_y) {
 			uint16 oldexp = inst->GetExp();
 
 			parse->EventItem(EVENT_ITEM_ENTER_ZONE, this, inst, nullptr, "", 0);
-			if(i <= MainAmmo || i == MainPowerSource) {
+			if (i <= EQEmu::inventory::slotAmmo || i == EQEmu::inventory::slotPowerSource) {
 				parse->EventItem(EVENT_EQUIP_ITEM, this, inst, nullptr, "", i);
 			}
 
@@ -3439,7 +3439,7 @@ bool Client::DoItemEnterZone(uint32 slot_x, uint32 slot_y) {
 				update_slot = true;
 			}
 		} else {
-			if(i <= MainAmmo || i == MainPowerSource) {
+			if (i <= EQEmu::inventory::slotAmmo || i == EQEmu::inventory::slotPowerSource) {
 				parse->EventItem(EVENT_EQUIP_ITEM, this, inst, nullptr, "", i);
 			}
 
@@ -3447,9 +3447,9 @@ bool Client::DoItemEnterZone(uint32 slot_x, uint32 slot_y) {
 		}
 
 		//iterate all augments
-		for (int x = AUG_BEGIN; x < EmuConstants::ITEM_COMMON_SIZE; ++x)
+		for (int x = EQEmu::inventory::socketBegin; x < EQEmu::inventory::SocketCount; ++x)
 		{
-			ItemInst *a_inst = inst->GetAugment(x);
+			EQEmu::ItemInstance *a_inst = inst->GetAugment(x);
 			if(!a_inst)
 				continue;
 
@@ -3868,7 +3868,7 @@ void Mob::NegateSpellsBonuses(uint16 spell_id)
 
 				case SE_CriticalHitChance:
 				{
-					for(int e = 0; e < HIGHEST_SKILL+1; e++)
+					for (int e = 0; e < EQEmu::skills::HIGHEST_SKILL + 1; e++)
 					{
 						spellbonuses.CriticalHitChance[e] = effect_value;
 						aabonuses.CriticalHitChance[e] = effect_value;
@@ -3986,7 +3986,7 @@ void Mob::NegateSpellsBonuses(uint16 spell_id)
 
 				case SE_HitChance:
 				{
-					for(int e = 0; e < HIGHEST_SKILL+1; e++)
+					for (int e = 0; e < EQEmu::skills::HIGHEST_SKILL + 1; e++)
 					{
 						spellbonuses.HitChanceEffect[e] = effect_value;
 						aabonuses.HitChanceEffect[e] = effect_value;
@@ -3997,7 +3997,7 @@ void Mob::NegateSpellsBonuses(uint16 spell_id)
 
 				case SE_DamageModifier:
 				{
-					for(int e = 0; e < HIGHEST_SKILL+1; e++)
+					for (int e = 0; e < EQEmu::skills::HIGHEST_SKILL + 1; e++)
 					{
 						spellbonuses.DamageModifier[e] = effect_value;
 						aabonuses.DamageModifier[e] = effect_value;
@@ -4008,7 +4008,7 @@ void Mob::NegateSpellsBonuses(uint16 spell_id)
 
 				case SE_DamageModifier2:
 				{
-					for(int e = 0; e < HIGHEST_SKILL+1; e++)
+					for (int e = 0; e < EQEmu::skills::HIGHEST_SKILL + 1; e++)
 					{
 						spellbonuses.DamageModifier2[e] = effect_value;
 						aabonuses.DamageModifier2[e] = effect_value;
@@ -4019,7 +4019,7 @@ void Mob::NegateSpellsBonuses(uint16 spell_id)
 
 				case SE_MinDamageModifier:
 				{
-					for(int e = 0; e < HIGHEST_SKILL+1; e++)
+					for (int e = 0; e < EQEmu::skills::HIGHEST_SKILL + 1; e++)
 					{
 						spellbonuses.MinDamageModifier[e] = effect_value;
 						aabonuses.MinDamageModifier[e] = effect_value;
@@ -4060,10 +4060,10 @@ void Mob::NegateSpellsBonuses(uint16 spell_id)
 
 				case SE_Accuracy:
 				{
-					spellbonuses.Accuracy[HIGHEST_SKILL+1] = effect_value;
-					itembonuses.Accuracy[HIGHEST_SKILL+1] = effect_value;
+					spellbonuses.Accuracy[EQEmu::skills::HIGHEST_SKILL + 1] = effect_value;
+					itembonuses.Accuracy[EQEmu::skills::HIGHEST_SKILL + 1] = effect_value;
 
-						for(int e = 0; e < HIGHEST_SKILL+1; e++)
+					for (int e = 0; e < EQEmu::skills::HIGHEST_SKILL + 1; e++)
 						{
 							aabonuses.Accuracy[e] = effect_value;
 						}
@@ -4090,7 +4090,7 @@ void Mob::NegateSpellsBonuses(uint16 spell_id)
 
 				case SE_SkillDamageTaken:
 				{
-					for(int e = 0; e < HIGHEST_SKILL+1; e++)
+					for (int e = 0; e < EQEmu::skills::HIGHEST_SKILL + 1; e++)
 					{
 						spellbonuses.SkillDmgTaken[e] = effect_value;
 						aabonuses.SkillDmgTaken[e] = effect_value;
@@ -4195,7 +4195,7 @@ void Mob::NegateSpellsBonuses(uint16 spell_id)
 
 				case SE_CriticalDamageMob:
 				{
-					for(int e = 0; e < HIGHEST_SKILL+1; e++)
+					for (int e = 0; e < EQEmu::skills::HIGHEST_SKILL + 1; e++)
 					{
 						spellbonuses.CritDmgMob[e] = effect_value;
 						aabonuses.CritDmgMob[e] = effect_value;
@@ -4206,7 +4206,7 @@ void Mob::NegateSpellsBonuses(uint16 spell_id)
 
 				case SE_SkillDamageAmount:
 				{
-					for(int e = 0; e < HIGHEST_SKILL+1; e++)
+					for (int e = 0; e < EQEmu::skills::HIGHEST_SKILL + 1; e++)
 					{
 						spellbonuses.SkillDamageAmount[e] = effect_value;
 						aabonuses.SkillDamageAmount[e] = effect_value;
@@ -4257,7 +4257,7 @@ void Mob::NegateSpellsBonuses(uint16 spell_id)
 
 				case SE_SkillDamageAmount2:
 				{
-					for(int e = 0; e < HIGHEST_SKILL+1; e++)
+					for (int e = 0; e < EQEmu::skills::HIGHEST_SKILL + 1; e++)
 					{
 						spellbonuses.SkillDamageAmount2[e] = effect_value;
 						aabonuses.SkillDamageAmount2[e] = effect_value;
@@ -4555,19 +4555,10 @@ void Mob::NegateSpellsBonuses(uint16 spell_id)
 					itembonuses.DoubleRangedAttack = effect_value;
 					break;
 
-				case SE_ShieldEquipHateMod:
-					spellbonuses.ShieldEquipHateMod = effect_value;
-					aabonuses.ShieldEquipHateMod = effect_value;
-					itembonuses.ShieldEquipHateMod = effect_value;
-					break;
-
 				case SE_ShieldEquipDmgMod:
-					spellbonuses.ShieldEquipDmgMod[0] = effect_value;
-					spellbonuses.ShieldEquipDmgMod[1] = effect_value;
-					aabonuses.ShieldEquipDmgMod[0] = effect_value;
-					aabonuses.ShieldEquipDmgMod[1] = effect_value;
-					itembonuses.ShieldEquipDmgMod[0] = effect_value;
-					itembonuses.ShieldEquipDmgMod[1] = effect_value;
+					spellbonuses.ShieldEquipDmgMod = effect_value;
+					aabonuses.ShieldEquipDmgMod = effect_value;
+					itembonuses.ShieldEquipDmgMod = effect_value;
 					break;
 
 				case SE_TriggerMeleeThreshold:
@@ -4665,9 +4656,12 @@ void Mob::NegateSpellsBonuses(uint16 spell_id)
 					break;
 
 				case SE_HeadShotLevel:
-					spellbonuses.HSLevel = effect_value;
-					aabonuses.HSLevel = effect_value;
-					itembonuses.HSLevel = effect_value;
+					spellbonuses.HSLevel[0] = effect_value;
+					aabonuses.HSLevel[0] = effect_value;
+					itembonuses.HSLevel[0] = effect_value;
+					spellbonuses.HSLevel[1] = effect_value;
+					aabonuses.HSLevel[1] = effect_value;
+					itembonuses.HSLevel[1] = effect_value;
 					break;
 
 				case SE_Assassinate:
@@ -4680,9 +4674,12 @@ void Mob::NegateSpellsBonuses(uint16 spell_id)
 					break;
 
 				case SE_AssassinateLevel:
-					spellbonuses.AssassinateLevel = effect_value;
-					aabonuses.AssassinateLevel = effect_value;
-					itembonuses.AssassinateLevel = effect_value;
+					spellbonuses.AssassinateLevel[0] = effect_value;
+					aabonuses.AssassinateLevel[0] = effect_value;
+					itembonuses.AssassinateLevel[0] = effect_value;
+					spellbonuses.AssassinateLevel[1] = effect_value;
+					aabonuses.AssassinateLevel[1] = effect_value;
+					itembonuses.AssassinateLevel[1] = effect_value;
 					break;
 
 				case SE_FinishingBlow:

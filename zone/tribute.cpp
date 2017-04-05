@@ -25,8 +25,8 @@
 #include <map>
 
 #ifdef _WINDOWS
+    #include <winsock2.h>
     #include <windows.h>
-    #include <winsock.h>
     #include <process.h>
     #define snprintf	_snprintf
 	#define vsnprintf	_vsnprintf
@@ -66,7 +66,7 @@ void Client::ToggleTribute(bool enabled) {
 		int r;
 		uint32 cost = 0;
 		uint32 level = GetLevel();
-		for(r = 0; r < EmuConstants::TRIBUTE_SIZE; r++) {
+		for (r = 0; r < EQEmu::legacy::TRIBUTE_SIZE; r++) {
 			uint32 tid = m_pp.tributes[r].tribute;
 			if(tid == TRIBUTE_NONE)
 				continue;
@@ -119,7 +119,7 @@ void Client::DoTributeUpdate() {
 	tis->tribute_master_id = tribute_master_id;	//Dont know what this is for
 
 	int r;
-	for(r = 0; r < EmuConstants::TRIBUTE_SIZE; r++) {
+	for (r = 0; r < EQEmu::legacy::TRIBUTE_SIZE; r++) {
 		if(m_pp.tributes[r].tribute != TRIBUTE_NONE) {
 			tis->tributes[r] = m_pp.tributes[r].tribute;
 			tis->tiers[r] = m_pp.tributes[r].tier;
@@ -134,24 +134,24 @@ void Client::DoTributeUpdate() {
 
 	if(m_pp.tribute_active) {
 		//send and equip tribute items...
-		for(r = 0; r < EmuConstants::TRIBUTE_SIZE; r++) {
+		for (r = 0; r < EQEmu::legacy::TRIBUTE_SIZE; r++) {
 			uint32 tid = m_pp.tributes[r].tribute;
 			if(tid == TRIBUTE_NONE) {
-				if(m_inv[EmuConstants::TRIBUTE_BEGIN + r])
-					DeleteItemInInventory(EmuConstants::TRIBUTE_BEGIN + r, 0, false);
+				if (m_inv[EQEmu::legacy::TRIBUTE_BEGIN + r])
+					DeleteItemInInventory(EQEmu::legacy::TRIBUTE_BEGIN + r, 0, false);
 				continue;
 			}
 
 			if(tribute_list.count(tid) != 1) {
-				if (m_inv[EmuConstants::TRIBUTE_BEGIN + r])
-					DeleteItemInInventory(EmuConstants::TRIBUTE_BEGIN + r, 0, false);
+				if (m_inv[EQEmu::legacy::TRIBUTE_BEGIN + r])
+					DeleteItemInInventory(EQEmu::legacy::TRIBUTE_BEGIN + r, 0, false);
 				continue;
 			}
 
 			//sanity check
 			if(m_pp.tributes[r].tier >= MAX_TRIBUTE_TIERS) {
-				if (m_inv[EmuConstants::TRIBUTE_BEGIN + r])
-					DeleteItemInInventory(EmuConstants::TRIBUTE_BEGIN + r, 0, false);
+				if (m_inv[EQEmu::legacy::TRIBUTE_BEGIN + r])
+					DeleteItemInInventory(EQEmu::legacy::TRIBUTE_BEGIN + r, 0, false);
 				m_pp.tributes[r].tier = 0;
 				continue;
 			}
@@ -161,19 +161,19 @@ void Client::DoTributeUpdate() {
 			uint32 item_id = tier.tribute_item_id;
 
 			//summon the item for them
-			const ItemInst* inst = database.CreateItem(item_id, 1);
+			const EQEmu::ItemInstance* inst = database.CreateItem(item_id, 1);
 			if(inst == nullptr)
 				continue;
 
-			PutItemInInventory(EmuConstants::TRIBUTE_BEGIN + r, *inst, false);
-			SendItemPacket(EmuConstants::TRIBUTE_BEGIN + r, inst, ItemPacketTributeItem);
+			PutItemInInventory(EQEmu::legacy::TRIBUTE_BEGIN + r, *inst, false);
+			SendItemPacket(EQEmu::legacy::TRIBUTE_BEGIN + r, inst, ItemPacketTributeItem);
 			safe_delete(inst);
 		}
 	} else {
 		//unequip tribute items...
-		for(r = 0; r < EmuConstants::TRIBUTE_SIZE; r++) {
-			if (m_inv[EmuConstants::TRIBUTE_BEGIN + r])
-				DeleteItemInInventory(EmuConstants::TRIBUTE_BEGIN + r, 0, false);
+		for (r = 0; r < EQEmu::legacy::TRIBUTE_SIZE; r++) {
+			if (m_inv[EQEmu::legacy::TRIBUTE_BEGIN + r])
+				DeleteItemInInventory(EQEmu::legacy::TRIBUTE_BEGIN + r, 0, false);
 		}
 	}
 	CalcBonuses();
@@ -192,7 +192,7 @@ void Client::SendTributeTimer() {
 
 void Client::ChangeTributeSettings(TributeInfo_Struct *t) {
 	int r;
-	for(r = 0; r < EmuConstants::TRIBUTE_SIZE; r++) {
+	for (r = 0; r < EQEmu::legacy::TRIBUTE_SIZE; r++) {
 
 		m_pp.tributes[r].tribute = TRIBUTE_NONE;
 
@@ -220,7 +220,7 @@ void Client::ChangeTributeSettings(TributeInfo_Struct *t) {
 
 void Client::SendTributeDetails(uint32 client_id, uint32 tribute_id) {
 	if(tribute_list.count(tribute_id) != 1) {
-		Log.Out(Logs::General, Logs::Error, "Details request for invalid tribute %lu", (unsigned long)tribute_id);
+		Log(Logs::General, Logs::Error, "Details request for invalid tribute %lu", (unsigned long)tribute_id);
 		return;
 	}
 	TributeData &td = tribute_list[tribute_id];
@@ -239,7 +239,7 @@ void Client::SendTributeDetails(uint32 client_id, uint32 tribute_id) {
 
 //returns the number of points received from the tribute
 int32 Client::TributeItem(uint32 slot, uint32 quantity) {
-	const ItemInst*inst = m_inv[slot];
+	const EQEmu::ItemInstance*inst = m_inv[slot];
 
 	if(inst == nullptr)
 		return(0);
@@ -413,14 +413,14 @@ bool ZoneDatabase::LoadTributes() {
         uint32 id = atoul(row[0]);
 
         if(tribute_list.count(id) != 1) {
-            Log.Out(Logs::General, Logs::Error, "Error in LoadTributes: unknown tribute %lu in tribute_levels", (unsigned long)id);
+            Log(Logs::General, Logs::Error, "Error in LoadTributes: unknown tribute %lu in tribute_levels", (unsigned long)id);
             continue;
         }
 
         TributeData &cur = tribute_list[id];
 
         if(cur.tier_count >= MAX_TRIBUTE_TIERS) {
-            Log.Out(Logs::General, Logs::Error, "Error in LoadTributes: on tribute %lu: more tiers defined than permitted", (unsigned long)id);
+            Log(Logs::General, Logs::Error, "Error in LoadTributes: on tribute %lu: more tiers defined than permitted", (unsigned long)id);
             continue;
         }
 

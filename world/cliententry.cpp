@@ -271,16 +271,16 @@ bool ClientListEntry::CheckAuth(uint32 iLSID, const char* iKey) {
 			int16 tmpStatus = WorldConfig::get()->DefaultStatus;
 			paccountid = database.CreateAccount(plsname, 0, tmpStatus, LSID());
 			if (!paccountid) {
-				Log.Out(Logs::Detail, Logs::World_Server,"Error adding local account for LS login: '%s', duplicate name?" ,plsname);
+				Log(Logs::Detail, Logs::World_Server,"Error adding local account for LS login: '%s', duplicate name?" ,plsname);
 				return false;
 			}
 			strn0cpy(paccountname, plsname, sizeof(paccountname));
 			padmin = tmpStatus;
 		}
-		char lsworldadmin[15] = "0";
-		database.GetVariable("honorlsworldadmin", lsworldadmin, sizeof(lsworldadmin));
-		if (atoi(lsworldadmin) == 1 && pworldadmin != 0 && (padmin < pworldadmin || padmin == 0))
-			padmin = pworldadmin;
+		std::string lsworldadmin;
+		if (database.GetVariable("honorlsworldadmin", lsworldadmin))
+			if (atoi(lsworldadmin.c_str()) == 1 && pworldadmin != 0 && (padmin < pworldadmin || padmin == 0))
+				padmin = pworldadmin;
 		return true;
 	}
 	return false;

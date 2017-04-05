@@ -3,6 +3,7 @@
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdint.h>
 #include <string.h>
 #include <vector>
 
@@ -518,8 +519,7 @@ public:
 				// Copy the triangle indices into the leaf triangles array
 				mLeafTriangleIndex = leafTriangles.size(); // assign the array start location for these leaf triangles.
 				leafTriangles.push_back(count);
-				for (TriVector::const_iterator i=triangles.begin(); i!=triangles.end(); ++i)
-				{
+				for (auto i = triangles.begin(); i != triangles.end(); ++i) {
 					RmUint32 tri = *i;
 					leafTriangles.push_back(tri);
 				}
@@ -541,8 +541,7 @@ public:
 
 				// Create two arrays; one of all triangles which intersect the 'left' half of the bounding volume node
 				// and another array that includes all triangles which intersect the 'right' half of the bounding volume node.
-				for (TriVector::const_iterator i=triangles.begin(); i!=triangles.end(); ++i)
-				{
+				for (auto i = triangles.begin(); i != triangles.end(); ++i) {
 
 					RmUint32 tri = (*i); 
 
@@ -916,6 +915,11 @@ public:
 	RmUint32		mMaxNodeCount;
 	NodeAABB		*mNodes;
 	TriVector		mLeafTriangles;
+
+#ifdef USE_MAP_MMFS
+	MyRaycastMesh(std::vector<char>& rm_buffer);
+	void serialize(std::vector<char>& rm_buffer);
+#endif /*USE_MAP_MMFS*/
 };
 
 };
@@ -934,8 +938,257 @@ RaycastMesh * createRaycastMesh(RmUint32 vcount,		// The number of vertices in t
 								RmReal	minAxisSize	// once a particular axis is less than this size, stop sub-dividing.
 								)
 {
-	MyRaycastMesh *m = new MyRaycastMesh(vcount,vertices,tcount,indices,maxDepth,minLeafSize,minAxisSize);
+	auto m = new MyRaycastMesh(vcount, vertices, tcount, indices, maxDepth, minLeafSize, minAxisSize);
 	return static_cast< RaycastMesh * >(m);
 }
 
+#ifdef USE_MAP_MMFS
+RaycastMesh* loadRaycastMesh(std::vector<char>& rm_buffer, bool& load_success)
+{
+	if (rm_buffer.empty())
+		return nullptr;
 
+	auto m = new MyRaycastMesh(rm_buffer);
+	load_success = (m->mNodes != nullptr);
+
+	return static_cast<RaycastMesh*>(m);
+}
+
+void serializeRaycastMesh(RaycastMesh* rm, std::vector<char>& rm_buffer)
+{
+	if (!rm) {
+		rm_buffer.clear();
+		return;
+	}
+
+	static_cast<MyRaycastMesh*>(rm)->serialize(rm_buffer);
+}
+
+MyRaycastMesh::MyRaycastMesh(std::vector<char>& rm_buffer)
+{
+	mVcount = 0;
+	mVertices = nullptr;
+	mTcount = 0;
+	mIndices = nullptr;
+	mRaycastTriangles = nullptr;
+	mFaceNormals = nullptr;
+	mRaycastFrame = 0;
+	mMaxNodeCount = 0;
+	mNodeCount = 0;
+	mNodes = nullptr;
+	mRoot = nullptr;
+
+	size_t chunk_size = 0;
+	size_t bytes_read = 0;
+	size_t rm_buffer_size_ = rm_buffer.size();
+	if (!rm_buffer_size_)
+		return;
+
+	char* buf = rm_buffer.data();
+	
+	chunk_size = sizeof(RmUint32);
+	memcpy(&mVcount, buf, chunk_size);
+	buf += chunk_size;
+	bytes_read += chunk_size;
+	
+	chunk_size = (sizeof(RmReal) * (3 * mVcount));
+	mVertices = (RmReal *)::malloc(chunk_size);
+	memcpy(mVertices, buf, chunk_size);
+	buf += chunk_size;
+	bytes_read += chunk_size;
+
+	chunk_size = sizeof(RmUint32);
+	memcpy(&mTcount, buf, chunk_size);
+	buf += chunk_size;
+	bytes_read += chunk_size;
+
+	chunk_size = (sizeof(RmUint32) * (3 * mTcount));
+	mIndices = (RmUint32 *)::malloc(chunk_size);
+	memcpy(mIndices, buf, chunk_size);
+	buf += chunk_size;
+	bytes_read += chunk_size;
+
+	chunk_size = (sizeof(RmUint32) * mTcount);
+	mRaycastTriangles = (RmUint32 *)::malloc(chunk_size);
+	memcpy(mRaycastTriangles, buf, chunk_size);
+	buf += chunk_size;
+	bytes_read += chunk_size;
+
+	chunk_size = (sizeof(RmReal) * (3 * mTcount));
+	mFaceNormals = (RmReal *)::malloc(chunk_size);
+	memcpy(mFaceNormals, buf, chunk_size);
+	buf += chunk_size;
+	bytes_read += chunk_size;
+
+	chunk_size = sizeof(RmUint32);
+	memcpy(&mRaycastFrame, buf, chunk_size);
+	buf += chunk_size;
+	bytes_read += chunk_size;
+
+	RmUint32 lt_size;
+	chunk_size = sizeof(RmUint32);
+	memcpy(&lt_size, buf, chunk_size);
+	buf += chunk_size;
+	bytes_read += chunk_size;
+
+	if (lt_size) {
+		mLeafTriangles.resize(lt_size);
+		chunk_size = (sizeof(RmUint32) * lt_size);
+		memcpy(&mLeafTriangles[0], buf, chunk_size);
+		buf += chunk_size;
+		bytes_read += chunk_size;
+	}
+	
+	chunk_size = sizeof(RmUint32);
+	memcpy(&mNodeCount, buf, chunk_size);
+	buf += chunk_size;
+	bytes_read += chunk_size;
+
+	mMaxNodeCount = mNodeCount;
+
+	mNodes = new NodeAABB[mMaxNodeCount];
+	mRoot = &mNodes[0];
+
+	for (RmUint32 index = 0; index < mNodeCount; ++index) {
+		chunk_size = (sizeof(RmReal) * 3);
+		memcpy(&mNodes[index].mBounds.mMin, buf, chunk_size);
+		buf += chunk_size;
+		bytes_read += chunk_size;
+
+		chunk_size = (sizeof(RmReal) * 3);
+		memcpy(&mNodes[index].mBounds.mMax, buf, chunk_size);
+		buf += chunk_size;
+		bytes_read += chunk_size;
+
+		chunk_size = sizeof(RmUint32);
+		memcpy(&mNodes[index].mLeafTriangleIndex, buf, chunk_size);
+		buf += chunk_size;
+		bytes_read += chunk_size;
+
+		RmUint32 lNodeIndex;
+		chunk_size = sizeof(RmUint32);
+		memcpy(&lNodeIndex, buf, chunk_size);
+		if (lNodeIndex != TRI_EOF)
+			mNodes[index].mLeft = &mNodes[lNodeIndex];
+		buf += chunk_size;
+		bytes_read += chunk_size;
+		
+		RmUint32 rNodeIndex;
+		chunk_size = sizeof(RmUint32);
+		memcpy(&rNodeIndex, buf, chunk_size);
+		if (rNodeIndex != TRI_EOF)
+			mNodes[index].mRight = &mNodes[rNodeIndex];
+		buf += chunk_size;
+		bytes_read += chunk_size;
+	}
+
+	if (bytes_read != rm_buffer_size_) {
+		delete[] mNodes;
+		::free(mVertices);
+		::free(mIndices);
+		::free(mFaceNormals);
+		::free(mRaycastTriangles);
+
+		mVcount = 0;
+		mVertices = nullptr;
+		mTcount = 0;
+		mIndices = nullptr;
+		mRaycastTriangles = nullptr;
+		mFaceNormals = nullptr;
+		mRaycastFrame = 0;
+		mLeafTriangles.clear();
+		mMaxNodeCount = 0;
+		mNodeCount = 0;
+		mNodes = nullptr;
+		mRoot = nullptr;
+	}
+}
+
+void MyRaycastMesh::serialize(std::vector<char>& rm_buffer)
+{
+	rm_buffer.clear();
+	
+	size_t rm_buffer_size_ = 0;
+
+	rm_buffer_size_ += sizeof(RmUint32); // mVcount
+	rm_buffer_size_ += (sizeof(RmReal) * (3 * mVcount)); // mVertices
+	rm_buffer_size_ += sizeof(RmUint32); // mTcount
+	rm_buffer_size_ += (sizeof(RmUint32) * (3 * mTcount)); // mIndices
+	rm_buffer_size_ += (sizeof(RmUint32) * mTcount); // mRaycastTriangles
+	rm_buffer_size_ += (sizeof(RmReal) * (3 * mTcount)); // mFaceNormals
+	rm_buffer_size_ += sizeof(RmUint32); // mRaycastFrame
+	rm_buffer_size_ += sizeof(RmUint32); // mLeafTriangles.size()
+	rm_buffer_size_ += (sizeof(RmUint32) * (RmUint32)mLeafTriangles.size()); // mLeafTriangles
+	rm_buffer_size_ += sizeof(RmUint32); // mNodeCount
+	rm_buffer_size_ += (sizeof(RmReal) * (3 * mNodeCount)); // mNodes.mBounds.mMin
+	rm_buffer_size_ += (sizeof(RmReal) * (3 * mNodeCount)); // mNodes.mBounds.mMax
+	rm_buffer_size_ += (sizeof(RmUint32) * mNodeCount); // mNodes.mLeafTriangleIndex
+	rm_buffer_size_ += (sizeof(RmUint32) * mNodeCount); // mNodes.mLeft[Index]
+	rm_buffer_size_ += (sizeof(RmUint32) * mNodeCount); // mNodes.mRight[Index]
+
+	rm_buffer.resize(rm_buffer_size_);
+
+	char* buf = rm_buffer.data();
+
+	memcpy(buf, &mVcount, sizeof(RmUint32));
+	buf += sizeof(RmUint32);
+
+	memcpy(buf, mVertices, (sizeof(RmReal) * (3 * mVcount)));
+	buf += (sizeof(RmReal) * (3 * mVcount));
+
+	memcpy(buf, &mTcount, sizeof(RmUint32));
+	buf += sizeof(RmUint32);
+
+	memcpy(buf, mIndices, (sizeof(RmUint32) * (3 * mTcount)));
+	buf += (sizeof(RmUint32) * (3 * mTcount));
+
+	memcpy(buf, mRaycastTriangles, (sizeof(RmUint32) * mTcount));
+	buf += (sizeof(RmUint32) * mTcount);
+
+	if (!mFaceNormals) {
+		RmReal save_face[3];
+		getFaceNormal(0, &save_face[0]);
+	}
+
+	memcpy(buf, mFaceNormals, (sizeof(RmReal) * (3 * mTcount)));
+	buf += (sizeof(RmReal) * (3 * mTcount));
+
+	memcpy(buf, &mRaycastFrame, sizeof(RmUint32));
+	buf += sizeof(RmUint32);
+
+	RmUint32 lt_size = (RmUint32)mLeafTriangles.size();
+	memcpy(buf, &lt_size, sizeof(RmUint32));
+	buf += sizeof(RmUint32);
+
+	if (lt_size) {
+		memcpy(buf, &mLeafTriangles[0], (sizeof(RmUint32) * lt_size));
+		buf += (sizeof(RmUint32) * lt_size);
+	}
+
+	memcpy(buf, &mNodeCount, sizeof(RmUint32));
+	buf += sizeof(RmUint32);
+
+	for (RmUint32 index = 0; index < mNodeCount; ++index) {
+		memcpy(buf, &mNodes[index].mBounds.mMin, (sizeof(RmReal) * 3));
+		buf += (sizeof(RmReal) * 3);
+
+		memcpy(buf, &mNodes[index].mBounds.mMax, (sizeof(RmReal) * 3));
+		buf += (sizeof(RmReal) * 3);
+
+		memcpy(buf, &mNodes[index].mLeafTriangleIndex, sizeof(RmUint32));
+		buf += sizeof(RmUint32);
+
+		RmUint32 lNodeIndex = TRI_EOF;
+		if (mNodes[index].mLeft)
+			lNodeIndex = ((uintptr_t)mNodes[index].mLeft - (uintptr_t)mNodes) / sizeof(NodeAABB);
+		memcpy(buf, &lNodeIndex, sizeof(RmUint32));
+		buf += sizeof(RmUint32);
+
+		RmUint32 rNodeIndex = TRI_EOF;
+		if (mNodes[index].mRight)
+			rNodeIndex = ((uintptr_t)mNodes[index].mRight - (uintptr_t)mNodes) / sizeof(NodeAABB);
+		memcpy(buf, &rNodeIndex, sizeof(RmUint32));
+		buf += sizeof(RmUint32);
+	}
+}
+#endif /*USE_MAP_MMFS*/

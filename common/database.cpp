@@ -23,6 +23,7 @@
 #include <iomanip>
 #include <iostream>
 #include <map>
+#include <algorithm>
 #include <mysqld_error.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -48,7 +49,6 @@
 extern Client client;
 
 Database::Database () {
-	DBInitVars();
 }
 
 /*
@@ -57,7 +57,6 @@ Establish a connection to a mysql database with the supplied parameters
 
 Database::Database(const char* host, const char* user, const char* passwd, const char* database, uint32 port)
 {
-	DBInitVars();
 	Connect(host, user, passwd, database, port);
 }
 
@@ -65,19 +64,13 @@ bool Database::Connect(const char* host, const char* user, const char* passwd, c
 	uint32 errnum= 0;
 	char errbuf[MYSQL_ERRMSG_SIZE];
 	if (!Open(host, user, passwd, database, port, &errnum, errbuf)) {
-		Log.Out(Logs::General, Logs::Error, "Failed to connect to database: Error: %s", errbuf); 
+		Log(Logs::General, Logs::Error, "Failed to connect to database: Error: %s", errbuf); 
 		return false; 
 	}
 	else {
-		Log.Out(Logs::General, Logs::Status, "Using database '%s' at %s:%d", database, host,port);
+		Log(Logs::General, Logs::Status, "Using database '%s' at %s:%d", database, host,port);
 		return true;
 	}
-}
-
-void Database::DBInitVars() { 
-	varcache_array = 0;
-	varcache_max = 0;
-	varcache_lastupdate = 0;
 }
 
 /*
@@ -86,13 +79,6 @@ void Database::DBInitVars() {
 
 Database::~Database()
 {
-	unsigned int x;
-	if (varcache_array) {
-		for (x=0; x<varcache_max; x++) {
-			safe_delete_array(varcache_array[x]);
-		}
-		safe_delete_array(varcache_array);
-	}
 }
 
 /*
@@ -222,7 +208,7 @@ uint32 Database::CreateAccount(const char* name, const char* password, int16 sta
 	else
 		query = StringFormat("INSERT INTO account SET name='%s', status=%i, lsaccount_id=%i, time_creation=UNIX_TIMESTAMP();",name, status, lsaccount_id);
 
-	Log.Out(Logs::General, Logs::World_Server, "Account Attempting to be created: '%s' status: %i", name, status);
+	Log(Logs::General, Logs::World_Server, "Account Attempting to be created: '%s' status: %i", name, status);
 	auto results = QueryDatabase(query);
 
 	if (!results.Success()) {
@@ -239,7 +225,7 @@ uint32 Database::CreateAccount(const char* name, const char* password, int16 sta
 
 bool Database::DeleteAccount(const char* name) {
 	std::string query = StringFormat("DELETE FROM account WHERE name='%s';",name); 
-	Log.Out(Logs::General, Logs::World_Server, "Account Attempting to be deleted:'%s'", name);
+	Log(Logs::General, Logs::World_Server, "Account Attempting to be deleted:'%s'", name);
 
 	auto results = QueryDatabase(query); 
 	if (!results.Success()) {
@@ -286,7 +272,7 @@ bool Database::ReserveName(uint32 account_id, char* name) {
 	auto results = QueryDatabase(query);
 	for (auto row = results.begin(); row != results.end(); ++row) {
 		if (row[0] && atoi(row[0]) > 0){
-			Log.Out(Logs::General, Logs::World_Server, "Account: %i tried to request name: %s, but it is already taken...", account_id, name);
+			Log(Logs::General, Logs::World_Server, "Account: %i tried to request name: %s, but it is already taken...", account_id, name);
 			return false;
 		}
 	}
@@ -304,20 +290,24 @@ bool Database::ReserveName(uint32 account_id, char* name) {
 bool Database::DeleteCharacter(char *name) {
 	uint32 charid = 0;
 	if(!name ||	!strlen(name)) {
-		Log.Out(Logs::General, Logs::World_Server, "DeleteCharacter: request to delete without a name (empty char slot)");
+		Log(Logs::General, Logs::World_Server, "DeleteCharacter: request to delete without a name (empty char slot)");
 		return false;
 	}
-	Log.Out(Logs::General, Logs::World_Server, "Database::DeleteCharacter name : '%s'", name);
+	Log(Logs::General, Logs::World_Server, "Database::DeleteCharacter name : '%s'", name);
 
 	/* Get id from character_data before deleting record so we can clean up the rest of the tables */
 	std::string query = StringFormat("SELECT `id` from `character_data` WHERE `name` = '%s'", name);
 	auto results = QueryDatabase(query);
 	for (auto row = results.begin(); row != results.end(); ++row) { charid = atoi(row[0]); }
-	if (charid <= 0){ std::cerr << "Database::DeleteCharacter :: Character not found, stopping delete...\n"; return false; }
+	if (charid <= 0){ 
+		Log(Logs::General, Logs::Error, "Database::DeleteCharacter :: Character (%s) not found, stopping delete...", name);
+		return false; 
+	}
 
 	query = StringFormat("DELETE FROM `quest_globals` WHERE `charid` = '%d'", charid); QueryDatabase(query);
 	query = StringFormat("DELETE FROM `character_activities` WHERE `charid` = '%d'", charid); QueryDatabase(query);
 	query = StringFormat("DELETE FROM `character_enabledtasks` WHERE `charid` = '%d'", charid); QueryDatabase(query);
+	query = StringFormat("DELETE FROM `character_tasks` WHERE `charid` = '%d'", charid); QueryDatabase(query);
 	query = StringFormat("DELETE FROM `completed_tasks` WHERE `charid` = '%d'", charid); QueryDatabase(query);
 	query = StringFormat("DELETE FROM `friends` WHERE `charid` = '%d'", charid); QueryDatabase(query);
 	query = StringFormat("DELETE FROM `mail` WHERE `charid` = '%d'", charid); QueryDatabase(query);
@@ -638,10 +628,23 @@ bool Database::SaveCharacterCreate(uint32 character_id, uint32 account_id, Playe
 	/* Save Bind Points */
 	query = StringFormat("REPLACE INTO `character_bind` (id, zone_id, instance_id, x, y, z, heading, slot)"
 		" VALUES (%u, %u, %u, %f, %f, %f, %f, %i), "
+		"(%u, %u, %u, %f, %f, %f, %f, %i), "
+		"(%u, %u, %u, %f, %f, %f, %f, %i), "
+		"(%u, %u, %u, %f, %f, %f, %f, %i), "
 		"(%u, %u, %u, %f, %f, %f, %f, %i)",
 		character_id, pp->binds[0].zoneId, 0, pp->binds[0].x, pp->binds[0].y, pp->binds[0].z, pp->binds[0].heading, 0,
+		character_id, pp->binds[1].zoneId, 0, pp->binds[1].x, pp->binds[1].y, pp->binds[1].z, pp->binds[1].heading, 1,
+		character_id, pp->binds[2].zoneId, 0, pp->binds[2].x, pp->binds[2].y, pp->binds[2].z, pp->binds[2].heading, 2,
+		character_id, pp->binds[3].zoneId, 0, pp->binds[3].x, pp->binds[3].y, pp->binds[3].z, pp->binds[3].heading, 3,
 		character_id, pp->binds[4].zoneId, 0, pp->binds[4].x, pp->binds[4].y, pp->binds[4].z, pp->binds[4].heading, 4
-	); results = QueryDatabase(query); 
+	); results = QueryDatabase(query);
+
+        /* HoTT Ability */
+        if(RuleB(Character, GrantHoTTOnCreate))
+        {
+                query = StringFormat("INSERT INTO `character_leadership_abilities` (id, slot, rank) VALUES (%u, %i, %i)", character_id, 14, 1);
+                results = QueryDatabase(query);
+        }
 
 	/* Save Skills */
 	int firstquery = 0;
@@ -677,14 +680,14 @@ bool Database::SaveCharacterCreate(uint32 character_id, uint32 account_id, Playe
 }
 
 /* This only for new Character creation storing */
-bool Database::StoreCharacter(uint32 account_id, PlayerProfile_Struct* pp, Inventory* inv) {
+bool Database::StoreCharacter(uint32 account_id, PlayerProfile_Struct* pp, EQEmu::InventoryProfile* inv) {
 	uint32 charid = 0; 
 	char zone[50]; 
 	float x, y, z; 
 	charid = GetCharacterID(pp->name);
 
 	if(!charid) {
-		Log.Out(Logs::General, Logs::Error, "StoreCharacter: no character id");
+		Log(Logs::General, Logs::Error, "StoreCharacter: no character id");
 		return false;
 	}
 
@@ -705,8 +708,8 @@ bool Database::StoreCharacter(uint32 account_id, PlayerProfile_Struct* pp, Inven
 
 	/* Insert starting inventory... */
 	std::string invquery;
-	for (int16 i=EmuConstants::EQUIPMENT_BEGIN; i<=EmuConstants::BANK_BAGS_END;) {
-		const ItemInst* newinv = inv->GetItem(i);
+	for (int16 i = EQEmu::legacy::EQUIPMENT_BEGIN; i <= EQEmu::legacy::BANK_BAGS_END;) {
+		const EQEmu::ItemInstance* newinv = inv->GetItem(i);
 		if (newinv) {
 			invquery = StringFormat("INSERT INTO `inventory` (charid, slotid, itemid, charges, color) VALUES (%u, %i, %u, %i, %u)",
 				charid, i, newinv->GetItem()->ID, newinv->GetCharges(), newinv->GetColor()); 
@@ -714,16 +717,16 @@ bool Database::StoreCharacter(uint32 account_id, PlayerProfile_Struct* pp, Inven
 			auto results = QueryDatabase(invquery); 
 		}
 
-		if (i == MainCursor) { 
-			i = EmuConstants::GENERAL_BAGS_BEGIN; 
+		if (i == EQEmu::inventory::slotCursor) {
+			i = EQEmu::legacy::GENERAL_BAGS_BEGIN; 
 			continue;
 		}
-		else if (i == EmuConstants::CURSOR_BAG_END) { 
-			i = EmuConstants::BANK_BEGIN; 
+		else if (i == EQEmu::legacy::CURSOR_BAG_END) { 
+			i = EQEmu::legacy::BANK_BEGIN; 
 			continue; 
 		}
-		else if (i == EmuConstants::BANK_END) { 
-			i = EmuConstants::BANK_BAGS_BEGIN; 
+		else if (i == EQEmu::legacy::BANK_END) { 
+			i = EQEmu::legacy::BANK_BAGS_BEGIN; 
 			continue; 
 		} 
 		i++;
@@ -836,7 +839,7 @@ void Database::GetAccountName(uint32 accountid, char* name, uint32* oLSAccountID
 
 }
 
-void Database::GetCharName(uint32 char_id, char* name) { 
+void Database::GetCharName(uint32 char_id, char* name) {
 	std::string query = StringFormat("SELECT `name` FROM `character_data` WHERE id='%i'", char_id);
 	auto results = QueryDatabase(query);
 
@@ -851,145 +854,69 @@ void Database::GetCharName(uint32 char_id, char* name) {
 }
 
 bool Database::LoadVariables() {
-	char *query = nullptr;
-
-	auto results = QueryDatabase(query, LoadVariables_MQ(&query));
+	auto results = QueryDatabase(StringFormat("SELECT varname, value, unix_timestamp() FROM variables where unix_timestamp(ts) >= %d", varcache.last_update));
 
 	if (!results.Success())
-	{
-		safe_delete_array(query);
 		return false;
-	}
-
-	safe_delete_array(query);
-	return LoadVariables_result(std::move(results));
-}
-
-uint32 Database::LoadVariables_MQ(char** query)
-{
-	return MakeAnyLenString(query, "SELECT varname, value, unix_timestamp() FROM variables where unix_timestamp(ts) >= %d", varcache_lastupdate);
-}
-
-// always returns true? not sure about this.
-bool Database::LoadVariables_result(MySQLRequestResult results)
-{
-	uint32 i = 0;
-	LockMutex lock(&Mvarcache);
 
 	if (results.RowCount() == 0)
 		return true;
 
-	if (!varcache_array) {
-		varcache_max = results.RowCount();
-		varcache_array = new VarCache_Struct*[varcache_max];
-		for (i=0; i<varcache_max; i++)
-			varcache_array[i] = 0;
-	}
-	else {
-		uint32 tmpnewmax = varcache_max + results.RowCount();
-		VarCache_Struct** tmp = new VarCache_Struct*[tmpnewmax];
-		for (i=0; i<tmpnewmax; i++)
-			tmp[i] = 0;
-		for (i=0; i<varcache_max; i++)
-			tmp[i] = varcache_array[i];
-		VarCache_Struct** tmpdel = varcache_array;
-		varcache_array = tmp;
-		varcache_max = tmpnewmax;
-		delete [] tmpdel;
-	}
+	LockMutex lock(&Mvarcache);
 
-	for (auto row = results.begin(); row != results.end(); ++row)
-	{
-		varcache_lastupdate = atoi(row[2]);
-		for (i=0; i<varcache_max; i++) {
-			if (varcache_array[i]) {
-				if (strcasecmp(varcache_array[i]->varname, row[0]) == 0) {
-					delete varcache_array[i];
-					varcache_array[i] = (VarCache_Struct*) new uint8[sizeof(VarCache_Struct) + strlen(row[1]) + 1];
-					strn0cpy(varcache_array[i]->varname, row[0], sizeof(varcache_array[i]->varname));
-					strcpy(varcache_array[i]->value, row[1]);
-					break;
-				}
-			}
-			else {
-				varcache_array[i] = (VarCache_Struct*) new uint8[sizeof(VarCache_Struct) + strlen(row[1]) + 1];
-				strcpy(varcache_array[i]->varname, row[0]);
-				strcpy(varcache_array[i]->value, row[1]);
-				break;
-			}
-		}
+	std::string key, value;
+	for (auto row = results.begin(); row != results.end(); ++row) {
+		varcache.last_update = atoi(row[2]); // ahh should we be comparing if this is newer?
+		key = row[0];
+		value = row[1];
+		std::transform(std::begin(key), std::end(key), std::begin(key), ::tolower); // keys are lower case, DB doesn't have to be
+		varcache.Add(key, value);
 	}
-
-	uint32 max_used = 0;
-	for (i=0; i<varcache_max; i++) {
-		if (varcache_array[i]) {
-			if (i > max_used)
-				max_used = i;
-		}
-	}
-
-	varcache_max = max_used + 1;
 
 	return true;
 }
 
 // Gets variable from 'variables' table
-bool Database::GetVariable(const char* varname, char* varvalue, uint16 varvalue_len) {
-	varvalue[0] = '\0';
+bool Database::GetVariable(std::string varname, std::string &varvalue)
+{
+	varvalue.clear();
 
 	LockMutex lock(&Mvarcache);
-	if (strlen(varname) <= 1)
-		return false;
-	for (uint32 i=0; i<varcache_max; i++) {
 
-		if (varcache_array[i]) {
-			if (strcasecmp(varcache_array[i]->varname, varname) == 0) {
-				snprintf(varvalue, varvalue_len, "%s", varcache_array[i]->value);
-				varvalue[varvalue_len-1] = 0;
-				return true;
-			}
-		}
-		else
-			return false;
+	if (varname.empty())
+		return false;
+
+	std::transform(std::begin(varname), std::end(varname), std::begin(varname), ::tolower); // all keys are lower case
+	auto tmp = varcache.Get(varname);
+	if (tmp) {
+		varvalue = *tmp;
+		return true;
 	}
 	return false;
 }
 
-bool Database::SetVariable(const char* varname_in, const char* varvalue_in) {
-	
-	char *varname,*varvalue;
-
-	varname=(char *)malloc(strlen(varname_in)*2+1);
-	varvalue=(char *)malloc(strlen(varvalue_in)*2+1);
-	DoEscapeString(varname, varname_in, strlen(varname_in));
-	DoEscapeString(varvalue, varvalue_in, strlen(varvalue_in));
-
-	std::string query = StringFormat("Update variables set value='%s' WHERE varname like '%s'", varvalue, varname);
+bool Database::SetVariable(const std::string varname, const std::string &varvalue)
+{
+	std::string escaped_name = EscapeString(varname);
+	std::string escaped_value = EscapeString(varvalue);
+	std::string query = StringFormat("Update variables set value='%s' WHERE varname like '%s'", escaped_value.c_str(), escaped_name.c_str());
 	auto results = QueryDatabase(query);
 
 	if (!results.Success())
-	{
-		free(varname);
-		free(varvalue);
 		return false;
-	}
 
 	if (results.RowsAffected() == 1)
 	{
 		LoadVariables(); // refresh cache
-		free(varname);
-		free(varvalue);
 		return true;
 	}
 
-	query = StringFormat("Insert Into variables (varname, value) values ('%s', '%s')", varname, varvalue);
+	query = StringFormat("Insert Into variables (varname, value) values ('%s', '%s')", escaped_name.c_str(), escaped_value.c_str());
 	results = QueryDatabase(query);
-	free(varname);
-	free(varvalue);
 
 	if (results.RowsAffected() != 1)
 		return false;
-	
+
 	LoadVariables(); // refresh cache
 	return true;
 }
@@ -1555,8 +1482,9 @@ void Database::SetFirstLogon(uint32 CharID, uint8 firstlogon) {
 	QueryDatabase(query); 
 }
 
-void Database::AddReport(std::string who, std::string against, std::string lines) { 
-	char *escape_str = new char[lines.size()*2+1];
+void Database::AddReport(std::string who, std::string against, std::string lines)
+{
+	auto escape_str = new char[lines.size() * 2 + 1];
 	DoEscapeString(escape_str, lines.c_str(), lines.size());
 
 	std::string query = StringFormat("INSERT INTO reports (name, reported, reported_text) VALUES('%s', '%s', '%s')", EscapeString(who).c_str(), EscapeString(against).c_str(), escape_str);
@@ -1572,7 +1500,7 @@ void Database::SetGroupID(const char* name, uint32 id, uint32 charid, uint32 ism
 		auto results = QueryDatabase(query);
 
 		if (!results.Success())
-			Log.Out(Logs::General, Logs::Error, "Error deleting character from group id: %s", results.ErrorMessage().c_str());
+			Log(Logs::General, Logs::Error, "Error deleting character from group id: %s", results.ErrorMessage().c_str());
 
 		return;
 	}
@@ -1615,7 +1543,7 @@ uint32 Database::GetGroupID(const char* name){
 	if (results.RowCount() == 0)
 	{
 		// Commenting this out until logging levels can prevent this from going to console
-		//Log.Out(Logs::General, Logs::None,, "Character not in a group: %s", name);
+		//Log(Logs::General, Logs::None,, "Character not in a group: %s", name);
 		return 0;
 	}
 
@@ -1662,7 +1590,7 @@ void Database::SetGroupLeaderName(uint32 gid, const char* name) {
 	result = QueryDatabase(query);
 
 	if(!result.Success()) {
-		Log.Out(Logs::General, Logs::None, "Error in Database::SetGroupLeaderName: %s", result.ErrorMessage().c_str());
+		Log(Logs::General, Logs::None, "Error in Database::SetGroupLeaderName: %s", result.ErrorMessage().c_str());
 	}
 }
 
@@ -1859,7 +1787,7 @@ const char* Database::GetRaidLeaderName(uint32 raid_id)
 	auto results = QueryDatabase(query);
 
 	if (!results.Success()) {
-		Log.Out(Logs::General, Logs::Debug, "Unable to get Raid Leader Name for Raid ID: %u", raid_id);
+		Log(Logs::General, Logs::Debug, "Unable to get Raid Leader Name for Raid ID: %u", raid_id);
 		return "UNKNOWN";
 	}
 
@@ -2128,6 +2056,8 @@ uint32 Database::GetGuildIDByCharID(uint32 character_id)
 
 void Database::LoadLogSettings(EQEmuLogSys::LogSettings* log_settings)
 {
+	// log_settings previously initialized to '0' by EQEmuLogSys::LoadLogSettingsDefaults()
+	
 	std::string query = 
 		"SELECT "
 		"log_category_id, "
@@ -2141,10 +2071,13 @@ void Database::LoadLogSettings(EQEmuLogSys::LogSettings* log_settings)
 	auto results = QueryDatabase(query);
 
 	int log_category = 0;
-	Log.file_logs_enabled = false;
+	LogSys.file_logs_enabled = false;
 
 	for (auto row = results.begin(); row != results.end(); ++row) {
 		log_category = atoi(row[0]);
+		if (log_category <= Logs::None || log_category >= Logs::MaxCategoryID)
+			continue;
+
 		log_settings[log_category].log_to_console = atoi(row[2]);
 		log_settings[log_category].log_to_file = atoi(row[3]);
 		log_settings[log_category].log_to_gmsay = atoi(row[4]);
@@ -2164,7 +2097,7 @@ void Database::LoadLogSettings(EQEmuLogSys::LogSettings* log_settings)
 			If we go through this whole loop and nothing is set to any debug level, there is no point to create a file or keep anything open
 		*/
 		if (log_settings[log_category].log_to_file > 0){
-			Log.file_logs_enabled = true;
+			LogSys.file_logs_enabled = true;
 		}
 	}
 }
@@ -2186,7 +2119,7 @@ struct TimeOfDay_Struct Database::LoadTime(time_t &realtime)
 	auto results = QueryDatabase(query);
 
 	if (!results.Success() || results.RowCount() == 0){
-		Log.Out(Logs::Detail, Logs::World_Server, "Loading EQ time of day failed. Using defaults.");
+		Log(Logs::Detail, Logs::World_Server, "Loading EQ time of day failed. Using defaults.");
 		eqTime.minute = 0;
 		eqTime.hour = 9;
 		eqTime.day = 1;
@@ -2215,4 +2148,28 @@ bool Database::SaveTime(int8 minute, int8 hour, int8 day, int8 month, int16 year
 
 	return results.Success();
 
+}
+
+int Database::GetIPExemption(std::string account_ip) {
+	std::string query = StringFormat("SELECT `exemption_amount` FROM `ip_exemptions` WHERE `exemption_ip` = '%s'", account_ip.c_str());
+	auto results = QueryDatabase(query);
+	
+	if (results.Success() && results.RowCount() > 0) {
+		auto row = results.begin();
+		return atoi(row[0]);
+	}
+	
+	return RuleI(World, MaxClientsPerIP);
+}
+
+int Database::GetInstanceID(uint32 char_id, uint32 zone_id) {
+	std::string query = StringFormat("SELECT instance_list.id FROM instance_list INNER JOIN instance_list_player ON instance_list.id = instance_list_player.id WHERE instance_list.zone = '%i' AND instance_list_player.charid = '%i'", zone_id, char_id);
+	auto results = QueryDatabase(query);
+
+	if (results.Success() && results.RowCount() > 0) {
+		auto row = results.begin();
+		return atoi(row[0]);;
+	}
+
+	return 0;
 }

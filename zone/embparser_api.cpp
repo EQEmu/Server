@@ -110,7 +110,7 @@ XS(XS_QuestItem_new)
 	if (items != 1)
 		Perl_croak(aTHX_ "Usage: QuestItem::new()");
 
-	ItemInst* RETVAL;
+	EQEmu::ItemInstance* RETVAL;
 
 	RETVAL = quest_manager.GetQuestItem();
 	ST(0) = sv_newmortal();
@@ -3317,13 +3317,22 @@ XS(XS__wearchange);
 XS(XS__wearchange)
 {
 	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: wearchange(slot, texture)");
+	if (items < 2)
+		Perl_croak(aTHX_ "Usage: wearchange(slot, texture, [hero_forge_model], [elite_material])");
 
 	uint8		slot = (int)SvUV(ST(0));
 	uint16		texture = (int)SvUV(ST(1));
 
-	quest_manager.wearchange(slot, texture);
+	uint32 hero_forge_model = 0;
+	uint32 elite_material = 0;
+
+	if (items > 2)
+		hero_forge_model = (int)SvUV(ST(2));
+
+	if (items > 3)
+		elite_material = (int)SvUV(ST(3));
+
+	quest_manager.wearchange(slot, texture, hero_forge_model, elite_material);
 
 	XSRETURN_EMPTY;
 }
@@ -3607,6 +3616,26 @@ XS(XS__crosszonesignalnpcbynpctypeid)
 	XSRETURN_EMPTY;
 }
 
+XS(XS__worldwidemarquee);
+XS(XS__worldwidemarquee)
+{
+	dXSARGS;
+	if (items != 6)
+		Perl_croak(aTHX_ "Usage: worldwidemarquee(type, priority, fadein, fadeout, duration, message)");
+	
+	if (items == 6) {
+		uint32 type = (uint32)SvIV(ST(0));
+		uint32 priority = (uint32)SvIV(ST(1));
+		uint32 fadein = (uint32)SvIV(ST(2));
+		uint32 fadeout = (uint32)SvIV(ST(3));
+		uint32 duration = (uint32)SvIV(ST(4));
+		char* message = (char *)SvPV_nolen(ST(5));
+		quest_manager.WorldWideMarquee(type, priority, fadein, fadeout, duration, message);
+	}
+	
+	XSRETURN_EMPTY;
+}
+
 XS(XS__debug);
 XS(XS__debug)
 {
@@ -3625,13 +3654,13 @@ XS(XS__debug)
 			return;
 
 		if (debug_level == Logs::General){
-			Log.Out(Logs::General, Logs::QuestDebug, log_message);
+			Log(Logs::General, Logs::QuestDebug, log_message);
 		}
 		else if (debug_level == Logs::Moderate){
-			Log.Out(Logs::Moderate, Logs::QuestDebug, log_message);
+			Log(Logs::Moderate, Logs::QuestDebug, log_message);
 		}
 		else if (debug_level == Logs::Detail){
-			Log.Out(Logs::Detail, Logs::QuestDebug, log_message);
+			Log(Logs::Detail, Logs::QuestDebug, log_message);
 		}
 	}
 	XSRETURN_EMPTY;
@@ -3664,7 +3693,7 @@ EXTERN_C XS(boot_quest)
 	file[255] = '\0';
 
 	if(items != 1)
-		Log.Out(Logs::General, Logs::Error, "boot_quest does not take any arguments.");
+		Log(Logs::General, Logs::Error, "boot_quest does not take any arguments.");
 
 	char buf[128];	//shouldent have any function names longer than this.
 
@@ -3740,6 +3769,7 @@ EXTERN_C XS(boot_quest)
 		newXS(strcpy(buf, "crosszonesignalclientbycharid"), XS__crosszonesignalclientbycharid, file);
 		newXS(strcpy(buf, "crosszonesignalclientbyname"), XS__crosszonesignalclientbyname, file);
 		newXS(strcpy(buf, "crosszonesignalnpcbynpctypeid"), XS__crosszonesignalnpcbynpctypeid, file);
+		newXS(strcpy(buf, "worldwidemarquee"), XS__worldwidemarquee, file);
 		newXS(strcpy(buf, "debug"), XS__debug, file);
 		newXS(strcpy(buf, "delglobal"), XS__delglobal, file);
 		newXS(strcpy(buf, "depop"), XS__depop, file);

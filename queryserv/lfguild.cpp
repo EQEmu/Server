@@ -168,7 +168,7 @@ void LFGuildManager::SendPlayerMatches(uint32 FromZoneID, uint32 FromInstanceID,
 
 	}
 
-	ServerPacket *pack = new ServerPacket(ServerOP_QueryServGeneric, PacketSize);
+	auto pack = new ServerPacket(ServerOP_QueryServGeneric, PacketSize);
 
 	pack->WriteUInt32(FromZoneID);
 	pack->WriteUInt32(FromInstanceID);
@@ -211,7 +211,7 @@ void LFGuildManager::SendGuildMatches(uint32 FromZoneID, uint32 FromInstanceID, 
 
 	}
 
-	ServerPacket *pack = new ServerPacket(ServerOP_QueryServGeneric, PacketSize);
+	auto pack = new ServerPacket(ServerOP_QueryServGeneric, PacketSize);
 
 	pack->WriteUInt32(FromZoneID);
 	pack->WriteUInt32(FromInstanceID);
@@ -255,7 +255,7 @@ void LFGuildManager::TogglePlayer(uint32 FromZoneID, uint32 FromInstanceID, char
         auto results = database.QueryDatabase(query);
 	}
 
-	ServerPacket *pack = new ServerPacket(ServerOP_QueryServGeneric, strlen(From) + strlen(Comments) + 30);
+	auto pack = new ServerPacket(ServerOP_QueryServGeneric, strlen(From) + strlen(Comments) + 30);
 
 	pack->WriteUInt32(FromZoneID);
 	pack->WriteUInt32(FromInstanceID);
@@ -300,7 +300,7 @@ void LFGuildManager::ToggleGuild(uint32 FromZoneID, uint32 FromInstanceID, char 
 
 	}
 
-	ServerPacket *pack = new ServerPacket(ServerOP_LFGuildUpdate, strlen(GuildName) + strlen(Comments) + 30);
+	auto pack = new ServerPacket(ServerOP_LFGuildUpdate, strlen(GuildName) + strlen(Comments) + 30);
 
 	pack->WriteString(GuildName);
 	pack->WriteString(Comments);
@@ -352,7 +352,8 @@ void LFGuildManager::SendPlayerStatus(uint32 FromZoneID, uint32 FromInstanceID, 
 	{
 		if(!strcasecmp((*it).Name.c_str(), From))
 		{
-			ServerPacket *pack = new ServerPacket(ServerOP_QueryServGeneric, strlen(From) + (*it).Comments.length() + 30);
+			auto pack =
+			    new ServerPacket(ServerOP_QueryServGeneric, strlen(From) + (*it).Comments.length() + 30);
 
 			pack->WriteUInt32(FromZoneID);
 			pack->WriteUInt32(FromInstanceID);
@@ -379,7 +380,8 @@ void LFGuildManager::SendGuildStatus(uint32 FromZoneID, uint32 FromInstanceID, c
 	{
 		if(!strcasecmp((*it).Name.c_str(), GuildName))
 		{
-			ServerPacket *pack = new ServerPacket(ServerOP_QueryServGeneric, strlen(From) + (*it).Comments.length() + 42);
+			auto pack =
+			    new ServerPacket(ServerOP_QueryServGeneric, strlen(From) + (*it).Comments.length() + 42);
 
 			pack->WriteUInt32(FromZoneID);
 			pack->WriteUInt32(FromInstanceID);

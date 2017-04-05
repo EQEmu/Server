@@ -1,5 +1,5 @@
 /*	EQEMu: Everquest Server Emulator
-	Copyright (C) 2001-2002 EQEMu Development Team (http://eqemulator.org)
+	Copyright (C) 2001-2016 EQEMu Development Team (http://eqemulator.org)
 
 	This program is free software; you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -52,6 +52,7 @@
 #include "../common/rulesys.h"
 #include "../common/serverinfo.h"
 #include "../common/string_util.h"
+#include "../say_link.h"
 #include "../common/eqemu_logsys.h"
 
 
@@ -86,7 +87,7 @@ void command_pf(Client *c, const Seperator *message);
 std::map<std::string, CommandRecord *> commandlist;
 std::map<std::string, std::string> commandaliases;
 
-//All allocated CommandRecords get put in here so they get deleted on shutdown
+// All allocated CommandRecords get put in here so they get deleted on shutdown
 LinkedList<CommandRecord *> cleanup_commandlist;
 
 /*
@@ -103,9 +104,9 @@ int command_notavail(Client *c, const char *message)
 	return -1;
 }
 
-/*****************************************************************************/
-/* the rest below here could be in a dynamically loaded module eventually */
-/*****************************************************************************/
+/**************************************************************************
+/* the rest below here could be in a dynamically loaded module eventually *
+/*************************************************************************/
 
 /*
 
@@ -163,7 +164,7 @@ int command_init(void)
 		command_add("bind", "- Sets your targets bind spot to their current location", 200, command_bind) ||
 
 #ifdef BOTS
-		command_add("bot", "- Type \"#bot help\" to the see the list of available commands for bots.", 0, command_bot) ||
+		command_add("bot", "- Type \"#bot help\" or \"^help\" to the see the list of available commands for bots.", 0, command_bot) ||
 #endif
 
 		command_add("camerashake",  "Shakes the camera on everyone's screen globally.",  80, command_camerashake) ||
@@ -426,31 +427,32 @@ int command_init(void)
 	database.GetCommandSettings(command_settings);
 
 	std::map<std::string, CommandRecord *> working_cl = commandlist;
-	for (std::map<std::string, CommandRecord *>::iterator iter_cl = working_cl.begin(); iter_cl != working_cl.end(); ++iter_cl) {
-		std::map<std::string, std::pair<uint8, std::vector<std::string>>>::iterator iter_cs = command_settings.find(iter_cl->first);
+	for (auto iter_cl = working_cl.begin(); iter_cl != working_cl.end(); ++iter_cl) {
+		auto iter_cs = command_settings.find(iter_cl->first);
 		if (iter_cs == command_settings.end()) {
 			if (iter_cl->second->access == 0)
-				Log.Out(Logs::General, Logs::Commands, "command_init(): Warning: Command '%s' defaulting to access level 0!", iter_cl->first.c_str());
+				Log(Logs::General, Logs::Commands, "command_init(): Warning: Command '%s' defaulting to access level 0!", iter_cl->first.c_str());
 			continue;
 		}
 
 		iter_cl->second->access = iter_cs->second.first;
-		Log.Out(Logs::General, Logs::Commands, "command_init(): - Command '%s' set to access level %d.", iter_cl->first.c_str(), iter_cs->second.first);
+		Log(Logs::General, Logs::Commands, "command_init(): - Command '%s' set to access level %d.", iter_cl->first.c_str(), iter_cs->second.first);
 		if (iter_cs->second.second.empty())
 			continue;
 
-		for (std::vector<std::string>::iterator iter_aka = iter_cs->second.second.begin(); iter_aka != iter_cs->second.second.end(); ++iter_aka) {
+		for (auto iter_aka = iter_cs->second.second.begin(); iter_aka != iter_cs->second.second.end();
+		     ++iter_aka) {
 			if (iter_aka->empty())
 				continue;
 			if (commandlist.find(*iter_aka) != commandlist.end()) {
-				Log.Out(Logs::General, Logs::Commands, "command_init(): Warning: Alias '%s' already exists as a command - skipping!", iter_aka->c_str());
+				Log(Logs::General, Logs::Commands, "command_init(): Warning: Alias '%s' already exists as a command - skipping!", iter_aka->c_str());
 				continue;
 			}
 
 			commandlist[*iter_aka] = iter_cl->second;
 			commandaliases[*iter_aka] = iter_cl->first;
 
-			Log.Out(Logs::General, Logs::Commands, "command_init(): - Alias '%s' added to command '%s'.", iter_aka->c_str(), commandaliases[*iter_aka].c_str());
+			Log(Logs::General, Logs::Commands, "command_init(): - Alias '%s' added to command '%s'.", iter_aka->c_str(), commandaliases[*iter_aka].c_str());
 		}
 	}
 
@@ -490,25 +492,25 @@ void command_deinit(void)
 int command_add(std::string command_name, const char *desc, int access, CmdFuncPtr function)
 {
 	if (command_name.empty()) {
-		Log.Out(Logs::General, Logs::Error, "command_add() - Command added with empty name string - check command.cpp.");
+		Log(Logs::General, Logs::Error, "command_add() - Command added with empty name string - check command.cpp.");
 		return -1;
 	}
 	if (function == nullptr) {
-		Log.Out(Logs::General, Logs::Error, "command_add() - Command '%s' added without a valid function pointer - check command.cpp.", command_name.c_str());
+		Log(Logs::General, Logs::Error, "command_add() - Command '%s' added without a valid function pointer - check command.cpp.", command_name.c_str());
 		return -1;
 	}
 	if (commandlist.count(command_name) != 0) {
-		Log.Out(Logs::General, Logs::Error, "command_add() - Command '%s' is a duplicate command name - check command.cpp.", command_name.c_str());
+		Log(Logs::General, Logs::Error, "command_add() - Command '%s' is a duplicate command name - check command.cpp.", command_name.c_str());
 		return -1;
 	}
-	for (std::map<std::string, CommandRecord *>::iterator iter = commandlist.begin(); iter != commandlist.end(); ++iter) {
+	for (auto iter = commandlist.begin(); iter != commandlist.end(); ++iter) {
 		if (iter->second->function != function)
 			continue;
-		Log.Out(Logs::General, Logs::Error, "command_add() - Command '%s' equates to an alias of '%s' - check command.cpp.", command_name.c_str(), iter->first.c_str());
+		Log(Logs::General, Logs::Error, "command_add() - Command '%s' equates to an alias of '%s' - check command.cpp.", command_name.c_str(), iter->first.c_str());
 		return -1;
 	}
 
-	CommandRecord *c = new CommandRecord;
+	auto c = new CommandRecord;
 	c->access = access;
 	c->desc = desc;
 	c->function = function;
@@ -558,11 +560,11 @@ int command_realdispatch(Client *c, const char *message)
 	}
 
 	if(cur->access >= COMMANDS_LOGGING_MIN_STATUS) {
-		Log.Out(Logs::General, Logs::Commands, "%s (%s) used command: %s (target=%s)",  c->GetName(), c->AccountName(), message, c->GetTarget()?c->GetTarget()->GetName():"NONE");
+		Log(Logs::General, Logs::Commands, "%s (%s) used command: %s (target=%s)",  c->GetName(), c->AccountName(), message, c->GetTarget()?c->GetTarget()->GetName():"NONE");
 	}
 
 	if(cur->function == nullptr) {
-		Log.Out(Logs::General, Logs::Error, "Command '%s' has a null function\n",  cstr.c_str());
+		Log(Logs::General, Logs::Error, "Command '%s' has a null function\n",  cstr.c_str());
 		return(-1);
 	} else {
 		//dispatch C++ command
@@ -743,24 +745,15 @@ void command_wc(Client *c, const Seperator *sep)
 		uint32 hero_forge_model = 0;
 		uint32 wearslot = atoi(sep->arg[1]);
 
+		// Hero Forge
 		if (sep->argnum > 2)
 		{
 			hero_forge_model = atoi(sep->arg[3]);
-			if (hero_forge_model > 0)
-			{
-				// Conversion to simplify the command arguments
-				// Hero's Forge model is actually model * 1000 + texture * 100 + wearslot
-				hero_forge_model *= 1000;
-				hero_forge_model += (atoi(sep->arg[2]) * 100);
-				hero_forge_model += wearslot;
 
-				// For Hero's Forge, slot 7 is actually for Robes, but it still needs to use slot 1 in the packet
-				if (wearslot == 7)
-				{
-					wearslot = 1;
-				}
+			if (hero_forge_model != 0 && hero_forge_model < 1000) {
+				// Shorthand Hero Forge ID. Otherwise use the value the user entered.
+				hero_forge_model = (hero_forge_model * 100) + wearslot;
 			}
-
 		}
 		/*
 		// Leaving here to add color option to the #wc command eventually
@@ -856,9 +849,9 @@ char buffer[255];
 
 void command_getvariable(Client *c, const Seperator *sep)
 {
-	char tmp[512];
-	if (database.GetVariable(sep->argplus[1], tmp, sizeof(tmp)))
-		c->Message(0, "%s = %s",  sep->argplus[1], tmp);
+	std::string tmp;
+	if (database.GetVariable(sep->argplus[1], tmp))
+		c->Message(0, "%s = %s",  sep->argplus[1], tmp.c_str());
 	else
 		c->Message(0, "GetVariable(%s) returned false",  sep->argplus[1]);
 }
@@ -995,7 +988,7 @@ void command_summon(Client *c, const Seperator *sep)
 				//c->Message(0, "Summoning player from another zone not yet implemented.");
 				//return;
 
-				ServerPacket* pack = new ServerPacket(ServerOP_ZonePlayer, sizeof(ServerZonePlayer_Struct));
+				auto pack = new ServerPacket(ServerOP_ZonePlayer, sizeof(ServerZonePlayer_Struct));
 				ServerZonePlayer_Struct* szp = (ServerZonePlayer_Struct*) pack->pBuffer;
 				strcpy(szp->adminname, c->GetName());
 				szp->adminrank = c->Admin();
@@ -1005,6 +998,7 @@ void command_summon(Client *c, const Seperator *sep)
 				szp->x_pos = c->GetX(); // May need to add a factor of 8 in here..
 				szp->y_pos = c->GetY();
 				szp->z_pos = c->GetZ();
+				szp->instance_id = zone->GetInstanceID();
 				worldserver.SendPacket(pack);
 				safe_delete(pack);
 			}
@@ -1280,7 +1274,7 @@ void command_viewpetition(Client *c, const Seperator *sep)
     if (!results.Success())
         return;
 
-    Log.Out(Logs::General, Logs::Normal, "View petition request from %s, petition number: %i",  c->GetName(), atoi(sep->argplus[1]) );
+    Log(Logs::General, Logs::Normal, "View petition request from %s, petition number: %i",  c->GetName(), atoi(sep->argplus[1]) );
 
     if (results.RowCount() == 0) {
         c->Message(13,"There was an error in your request: ID not found! Please check the Id and try again.");
@@ -1305,7 +1299,7 @@ void command_petitioninfo(Client *c, const Seperator *sep)
     if (!results.Success())
         return;
 
-    Log.Out(Logs::General, Logs::Normal, "Petition information request from %s, petition number:",  c->GetName(), atoi(sep->argplus[1]) );
+    Log(Logs::General, Logs::Normal, "Petition information request from %s, petition number:",  c->GetName(), atoi(sep->argplus[1]) );
 
     if (results.RowCount() == 0) {
 		c->Message(13,"There was an error in your request: ID not found! Please check the Id and try again.");
@@ -1331,7 +1325,7 @@ void command_delpetition(Client *c, const Seperator *sep)
 	if (!results.Success())
         return;
 
-    Log.Out(Logs::General, Logs::Normal, "Delete petition request from %s, petition number:",  c->GetName(), atoi(sep->argplus[1]) );
+    Log(Logs::General, Logs::Normal, "Delete petition request from %s, petition number:",  c->GetName(), atoi(sep->argplus[1]) );
 
 }
 
@@ -1390,7 +1384,7 @@ void command_timezone(Client *c, const Seperator *sep)
 		database.SetZoneTZ(zone->GetZoneID(), zone->GetInstanceVersion(), ntz);
 
 		// Update all clients with new TZ.
-		EQApplicationPacket* outapp = new EQApplicationPacket(OP_TimeOfDay, sizeof(TimeOfDay_Struct));
+		auto outapp = new EQApplicationPacket(OP_TimeOfDay, sizeof(TimeOfDay_Struct));
 		TimeOfDay_Struct* tod = (TimeOfDay_Struct*)outapp->pBuffer;
 		zone->zone_time.GetCurrentEQTimeOfDay(time(0), tod);
 		entity_list.QueueClients(c, outapp);
@@ -1468,16 +1462,29 @@ void command_npcstats(Client *c, const Seperator *sep)
 	else if (!c->GetTarget()->IsNPC())
 		c->Message(0, "ERROR: Target is not a NPC!");
 	else {
+		auto target_npc = c->GetTarget()->CastToNPC();
 		c->Message(0, "NPC Stats:");
-		c->Message(0, "Name: %s   NpcID: %u",  c->GetTarget()->GetName(), c->GetTarget()->GetNPCTypeID());
-		c->Message(0, "Race: %i  Level: %i  Class: %i  Material: %i",  c->GetTarget()->GetRace(), c->GetTarget()->GetLevel(), c->GetTarget()->GetClass(), c->GetTarget()->GetTexture());
-		c->Message(0, "Current HP: %i  Max HP: %i",  c->GetTarget()->GetHP(), c->GetTarget()->GetMaxHP());
-		//c->Message(0, "Weapon Item Number: %s", c->GetTarget()->GetWeapNo());
-		c->Message(0, "Gender: %i  Size: %f  Bodytype: %d",  c->GetTarget()->GetGender(), c->GetTarget()->GetSize(), c->GetTarget()->GetBodyType());
-		c->Message(0, "Runspeed: %.3f  Walkspeed: %.3f",  static_cast<float>(0.025f * c->GetTarget()->GetRunspeed()), static_cast<float>(0.025f * c->GetTarget()->GetWalkspeed()));
-		c->Message(0, "Spawn Group: %i  Grid: %i",  c->GetTarget()->CastToNPC()->GetSp2(), c->GetTarget()->CastToNPC()->GetGrid());
-		c->Message(0, "EmoteID: %i",  c->GetTarget()->CastToNPC()->GetEmoteID());
-		c->GetTarget()->CastToNPC()->QueryLoot(c);
+		c->Message(0, "Name: %s   NpcID: %u", target_npc->GetName(), target_npc->GetNPCTypeID());
+		c->Message(0, "Race: %i  Level: %i  Class: %i  Material: %i", target_npc->GetRace(), target_npc->GetLevel(), target_npc->GetClass(), target_npc->GetTexture());
+		c->Message(0, "Current HP: %i  Max HP: %i", target_npc->GetHP(), target_npc->GetMaxHP());
+		//c->Message(0, "Weapon Item Number: %s", target_npc->GetWeapNo());
+		c->Message(0, "Gender: %i  Size: %f  Bodytype: %d", target_npc->GetGender(), target_npc->GetSize(), target_npc->GetBodyType());
+		c->Message(0, "Runspeed: %.3f  Walkspeed: %.3f", static_cast<float>(0.025f * target_npc->GetRunspeed()), static_cast<float>(0.025f * target_npc->GetWalkspeed()));
+		c->Message(0, "Spawn Group: %i  Grid: %i", target_npc->GetSp2(), target_npc->GetGrid());
+		if (target_npc->proximity) {
+			c->Message(0, "Proximity: Enabled");
+			c->Message(0, "Cur_X: %1.3f, Cur_Y: %1.3f, Cur_Z: %1.3f", target_npc->GetX(), target_npc->GetY(), target_npc->GetZ());
+			c->Message(0, "Min_X: %1.3f(%1.3f), Max_X: %1.3f(%1.3f), X_Range: %1.3f", target_npc->proximity->min_x, (target_npc->proximity->min_x - target_npc->GetX()), target_npc->proximity->max_x, (target_npc->proximity->max_x - target_npc->GetX()), (target_npc->proximity->max_x - target_npc->proximity->min_x));
+			c->Message(0, "Min_Y: %1.3f(%1.3f), Max_Y: %1.3f(%1.3f), Y_Range: %1.3f", target_npc->proximity->min_y, (target_npc->proximity->min_y - target_npc->GetY()), target_npc->proximity->max_y, (target_npc->proximity->max_y - target_npc->GetY()), (target_npc->proximity->max_y - target_npc->proximity->min_y));
+			c->Message(0, "Min_Z: %1.3f(%1.3f), Max_Z: %1.3f(%1.3f), Z_Range: %1.3f", target_npc->proximity->min_z, (target_npc->proximity->min_z - target_npc->GetZ()), target_npc->proximity->max_z, (target_npc->proximity->max_z - target_npc->GetZ()), (target_npc->proximity->max_z - target_npc->proximity->min_z));
+			c->Message(0, "Say: %s", (target_npc->proximity->say ? "Enabled" : "Disabled"));
+		}
+		else {
+			c->Message(0, "Proximity: Disabled");
+		}
+		c->Message(0, "");
+		c->Message(0, "EmoteID: %i", target_npc->GetEmoteID());
+		target_npc->QueryLoot(c);
 	}
 }
 
@@ -1503,7 +1510,7 @@ void command_zclip(Client *c, const Seperator *sep)
 			zone->newzone_data.fog_maxclip[0]=atof(sep->arg[5]);
 		if(sep->arg[6][0]!=0)
 			zone->newzone_data.fog_maxclip[1]=atof(sep->arg[6]);
-		EQApplicationPacket* outapp = new EQApplicationPacket(OP_NewZone, sizeof(NewZone_Struct));
+		auto outapp = new EQApplicationPacket(OP_NewZone, sizeof(NewZone_Struct));
 		memcpy(outapp->pBuffer, &zone->newzone_data, outapp->size);
 		entity_list.QueueClients(c, outapp);
 		safe_delete(outapp);
@@ -1554,7 +1561,7 @@ void command_permaclass(Client *c, const Seperator *sep)
 		c->Message(0,"Target is not a client.");
 	else {
 		c->Message(0, "Setting %s's class...Sending to char select.",  t->GetName());
-		Log.Out(Logs::General, Logs::Normal, "Class change request from %s for %s, requested class:%i",  c->GetName(), t->GetName(), atoi(sep->arg[1]) );
+		Log(Logs::General, Logs::Normal, "Class change request from %s for %s, requested class:%i",  c->GetName(), t->GetName(), atoi(sep->arg[1]) );
 		t->SetBaseClass(atoi(sep->arg[1]));
 		t->Save();
 		t->Kick();
@@ -1576,7 +1583,7 @@ void command_permarace(Client *c, const Seperator *sep)
 		c->Message(0,"Target is not a client.");
 	else {
 		c->Message(0, "Setting %s's race - zone to take effect", t->GetName());
-		Log.Out(Logs::General, Logs::Normal, "Permanant race change request from %s for %s, requested race:%i",  c->GetName(), t->GetName(), atoi(sep->arg[1]) );
+		Log(Logs::General, Logs::Normal, "Permanant race change request from %s for %s, requested race:%i",  c->GetName(), t->GetName(), atoi(sep->arg[1]) );
 		uint32 tmp = Mob::GetDefaultGender(atoi(sep->arg[1]), t->GetBaseGender());
 		t->SetBaseRace(atoi(sep->arg[1]));
 		t->SetBaseGender(tmp);
@@ -1600,7 +1607,7 @@ void command_permagender(Client *c, const Seperator *sep)
 		c->Message(0,"Target is not a client.");
 	else {
 		c->Message(0, "Setting %s's gender - zone to take effect", t->GetName());
-		Log.Out(Logs::General, Logs::Normal, "Permanant gender change request from %s for %s, requested gender:%i",  c->GetName(), t->GetName(), atoi(sep->arg[1]) );
+		Log(Logs::General, Logs::Normal, "Permanant gender change request from %s for %s, requested gender:%i",  c->GetName(), t->GetName(), atoi(sep->arg[1]) );
 		t->SetBaseGender(atoi(sep->arg[1]));
 		t->Save();
 		t->SendIllusionPacket(atoi(sep->arg[1]));
@@ -1617,7 +1624,7 @@ void command_weather(Client *c, const Seperator *sep)
 			if(sep->arg[2][0] != 0 && sep->arg[3][0] != 0) {
 				c->Message(0, "Sending weather packet... TYPE=%s, INTENSITY=%s",  sep->arg[2], sep->arg[3]);
 				zone->zone_weather = atoi(sep->arg[2]);
-				EQApplicationPacket* outapp = new EQApplicationPacket(OP_Weather, 8);
+				auto outapp = new EQApplicationPacket(OP_Weather, 8);
 				outapp->pBuffer[0] = atoi(sep->arg[2]);
 				outapp->pBuffer[4] = atoi(sep->arg[3]); // This number changes in the packets, intensity?
 				entity_list.QueueClients(c, outapp);
@@ -1630,7 +1637,7 @@ void command_weather(Client *c, const Seperator *sep)
 		else if(sep->arg[1][0] == '2')	{
 			entity_list.Message(0, 0, "Snowflakes begin to fall from the sky.");
 			zone->zone_weather = 2;
-			EQApplicationPacket* outapp = new EQApplicationPacket(OP_Weather, 8);
+			auto outapp = new EQApplicationPacket(OP_Weather, 8);
 			outapp->pBuffer[0] = 0x01;
 			outapp->pBuffer[4] = 0x02; // This number changes in the packets, intensity?
 			entity_list.QueueClients(c, outapp);
@@ -1639,7 +1646,7 @@ void command_weather(Client *c, const Seperator *sep)
 		else if(sep->arg[1][0] == '1')	{
 			entity_list.Message(0, 0, "Raindrops begin to fall from the sky.");
 			zone->zone_weather = 1;
-			EQApplicationPacket* outapp = new EQApplicationPacket(OP_Weather, 8);
+			auto outapp = new EQApplicationPacket(OP_Weather, 8);
 			outapp->pBuffer[4] = 0x01; // This is how it's done in Fear, and you can see a decent distance with it at this value
 			entity_list.QueueClients(c, outapp);
 			safe_delete(outapp);
@@ -1649,7 +1656,7 @@ void command_weather(Client *c, const Seperator *sep)
 		if(zone->zone_weather == 1)	{ // Doing this because if you have rain/snow on, you can only turn one off.
 			entity_list.Message(0, 0, "The sky clears as the rain ceases to fall.");
 			zone->zone_weather = 0;
-			EQApplicationPacket* outapp = new EQApplicationPacket(OP_Weather, 8);
+			auto outapp = new EQApplicationPacket(OP_Weather, 8);
 			// To shutoff weather you send an empty 8 byte packet (You get this everytime you zone even if the sky is clear)
 			entity_list.QueueClients(c, outapp);
 			safe_delete(outapp);
@@ -1657,7 +1664,7 @@ void command_weather(Client *c, const Seperator *sep)
 		else if(zone->zone_weather == 2) {
 			entity_list.Message(0, 0, "The sky clears as the snow stops falling.");
 			zone->zone_weather = 0;
-			EQApplicationPacket* outapp = new EQApplicationPacket(OP_Weather, 8);
+			auto outapp = new EQApplicationPacket(OP_Weather, 8);
 			// To shutoff weather you send an empty 8 byte packet (You get this everytime you zone even if the sky is clear)
 			outapp->pBuffer[0] = 0x01; // Snow has it's own shutoff packet
 			entity_list.QueueClients(c, outapp);
@@ -1666,7 +1673,7 @@ void command_weather(Client *c, const Seperator *sep)
 		else {
 			entity_list.Message(0, 0, "The sky clears.");
 			zone->zone_weather = 0;
-			EQApplicationPacket* outapp = new EQApplicationPacket(OP_Weather, 8);
+			auto outapp = new EQApplicationPacket(OP_Weather, 8);
 			// To shutoff weather you send an empty 8 byte packet (You get this everytime you zone even if the sky is clear)
 			entity_list.QueueClients(c, outapp);
 			safe_delete(outapp);
@@ -1688,7 +1695,7 @@ void command_zheader(Client *c, const Seperator *sep)
 			c->Message(0, "Successfully loaded zone header for %s from database.",  sep->argplus[1]);
 		else
 			c->Message(0, "Failed to load zone header %s from database",  sep->argplus[1]);
-		EQApplicationPacket* outapp = new EQApplicationPacket(OP_NewZone, sizeof(NewZone_Struct));
+		auto outapp = new EQApplicationPacket(OP_NewZone, sizeof(NewZone_Struct));
 		memcpy(outapp->pBuffer, &zone->newzone_data, outapp->size);
 		entity_list.QueueClients(c, outapp);
 		safe_delete(outapp);
@@ -1704,7 +1711,7 @@ void command_zsky(Client *c, const Seperator *sep)
 		c->Message(0, "ERROR: Sky type can not be less than 0 or greater than 255!");
 	else {
 		zone->newzone_data.sky = atoi(sep->arg[1]);
-		EQApplicationPacket* outapp = new EQApplicationPacket(OP_NewZone, sizeof(NewZone_Struct));
+		auto outapp = new EQApplicationPacket(OP_NewZone, sizeof(NewZone_Struct));
 		memcpy(outapp->pBuffer, &zone->newzone_data, outapp->size);
 		entity_list.QueueClients(c, outapp);
 		safe_delete(outapp);
@@ -1728,7 +1735,7 @@ void command_zcolor(Client *c, const Seperator *sep)
 			zone->newzone_data.fog_green[z] = atoi(sep->arg[2]);
 			zone->newzone_data.fog_blue[z] = atoi(sep->arg[3]);
 		}
-		EQApplicationPacket* outapp = new EQApplicationPacket(OP_NewZone, sizeof(NewZone_Struct));
+		auto outapp = new EQApplicationPacket(OP_NewZone, sizeof(NewZone_Struct));
 		memcpy(outapp->pBuffer, &zone->newzone_data, outapp->size);
 		entity_list.QueueClients(c, outapp);
 		safe_delete(outapp);
@@ -1742,7 +1749,7 @@ void command_spon(Client *c, const Seperator *sep)
 
 void command_spoff(Client *c, const Seperator *sep)
 {
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_ManaChange, 0);
+	auto outapp = new EQApplicationPacket(OP_ManaChange, 0);
 	outapp->priority = 5;
 	c->QueuePacket(outapp);
 	safe_delete(outapp);
@@ -1761,7 +1768,7 @@ void command_itemtest(Client *c, const Seperator *sep)
 	fread(chBuffer, sizeof(chBuffer), sizeof(char), f);
 	fclose(f);
 
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_ItemLinkResponse, strlen(chBuffer)+5);
+	auto outapp = new EQApplicationPacket(OP_ItemLinkResponse, strlen(chBuffer) + 5);
 	memcpy(&outapp->pBuffer[4], chBuffer, strlen(chBuffer));
 	c->QueuePacket(outapp);
 	safe_delete(outapp);
@@ -1884,7 +1891,7 @@ void command_worldshutdown(Client *c, const Seperator *sep)
 		if(sep->IsNumber(1) && sep->IsNumber(2) && ((time=atoi(sep->arg[1]))>0) && ((interval=atoi(sep->arg[2]))>0)) {
 			worldserver.SendEmoteMessage(0,0,15,"<SYSTEMWIDE MESSAGE>:SYSTEM MSG:World coming down in %i minutes, everyone log out before this time.",  (time / 60 ));
 			c->Message(0, "Sending shutdown packet now, World will shutdown in: %i minutes with an interval of: %i seconds",  (time / 60), interval);
-			ServerPacket* pack = new ServerPacket(ServerOP_ShutdownAll,sizeof(WorldShutDown_Struct));
+			auto pack = new ServerPacket(ServerOP_ShutdownAll, sizeof(WorldShutDown_Struct));
 			WorldShutDown_Struct* wsd = (WorldShutDown_Struct*)pack->pBuffer;
 			wsd->time=time*1000;
 			wsd->interval=(interval*1000);
@@ -1894,7 +1901,7 @@ void command_worldshutdown(Client *c, const Seperator *sep)
 		else if(strcasecmp(sep->arg[1], "now") == 0){
 			worldserver.SendEmoteMessage(0,0,15,"<SYSTEMWIDE MESSAGE>:SYSTEM MSG:World coming down, everyone log out now.");
 			c->Message(0, "Sending shutdown packet");
-			ServerPacket* pack = new ServerPacket;
+			auto pack = new ServerPacket;
 			pack->opcode = ServerOP_ShutdownAll;
 			pack->size=0;
 			worldserver.SendPacket(pack);
@@ -1902,7 +1909,7 @@ void command_worldshutdown(Client *c, const Seperator *sep)
 		}
 		else if(strcasecmp(sep->arg[1], "disable") == 0){
 			c->Message(0, "Shutdown prevented, next time I may not be so forgiving...");
-			ServerPacket* pack = new ServerPacket(ServerOP_ShutdownAll,sizeof(WorldShutDown_Struct));
+			auto pack = new ServerPacket(ServerOP_ShutdownAll, sizeof(WorldShutDown_Struct));
 			WorldShutDown_Struct* wsd = (WorldShutDown_Struct*)pack->pBuffer;
 			wsd->time=0;
 			wsd->interval=0;
@@ -1937,7 +1944,7 @@ void command_dbspawn2(Client *c, const Seperator *sep)
 {
 
 	if (sep->IsNumber(1) && sep->IsNumber(2) && sep->IsNumber(3)) {
-		Log.Out(Logs::General, Logs::Normal, "Spawning database spawn");
+		Log(Logs::General, Logs::Normal, "Spawning database spawn");
 		uint16 cond = 0;
 		int16 cond_min = 0;
 		if(sep->IsNumber(4)) {
@@ -1991,7 +1998,7 @@ void command_setlsinfo(Client *c, const Seperator *sep)
 	if(sep->argnum != 2)
 		c->Message(0, "Format: #setlsinfo email password");
 	else {
-		ServerPacket* pack = new ServerPacket(ServerOP_LSAccountUpdate, sizeof(ServerLSAccountUpdate_Struct));
+		auto pack = new ServerPacket(ServerOP_LSAccountUpdate, sizeof(ServerLSAccountUpdate_Struct));
 		ServerLSAccountUpdate_Struct* s = (ServerLSAccountUpdate_Struct *) pack->pBuffer;
 		s->useraccountid = c->LSAccountID();
 		strn0cpy(s->useraccount, c->AccountName(), 30);
@@ -2040,7 +2047,8 @@ void command_wp(Client *c, const Seperator *sep)
 
 void command_iplookup(Client *c, const Seperator *sep)
 {
-	ServerPacket* pack = new ServerPacket(ServerOP_IPLookup, sizeof(ServerGenericWorldQuery_Struct) + strlen(sep->argplus[1]) + 1);
+	auto pack =
+	    new ServerPacket(ServerOP_IPLookup, sizeof(ServerGenericWorldQuery_Struct) + strlen(sep->argplus[1]) + 1);
 	ServerGenericWorldQuery_Struct* s = (ServerGenericWorldQuery_Struct *) pack->pBuffer;
 	strcpy(s->from, c->GetName());
 	s->admin = c->Admin();
@@ -2127,7 +2135,7 @@ void command_showskills(Client *c, const Seperator *sep)
 		t=c->GetTarget()->CastToClient();
 
 	c->Message(0, "Skills for %s",  t->GetName());
-	for (SkillUseTypes i=Skill1HBlunt; i <= HIGHEST_SKILL; i=(SkillUseTypes)(i+1))
+	for (EQEmu::skills::SkillType i = EQEmu::skills::Skill1HBlunt; i <= EQEmu::skills::HIGHEST_SKILL; i = (EQEmu::skills::SkillType)(i + 1))
 		c->Message(0, "Skill [%d] is at [%d] - %u",  i, t->GetSkill(i), t->GetRawSkill(i));
 }
 
@@ -2196,14 +2204,14 @@ void command_castspell(Client *c, const Seperator *sep)
 		else
 			if (c->GetTarget() == 0)
 				if(c->Admin() >= commandInstacast)
-					c->SpellFinished(spellid, 0, USE_ITEM_SPELL_SLOT, 0, -1, spells[spellid].ResistDiff);
+					c->SpellFinished(spellid, 0, EQEmu::CastingSlot::Item, 0, -1, spells[spellid].ResistDiff);
 				else
-					c->CastSpell(spellid, 0, USE_ITEM_SPELL_SLOT, 0);
+					c->CastSpell(spellid, 0, EQEmu::CastingSlot::Item, 0);
 			else
 				if(c->Admin() >= commandInstacast)
-					c->SpellFinished(spellid, c->GetTarget(), 10, 0, -1, spells[spellid].ResistDiff);
+					c->SpellFinished(spellid, c->GetTarget(), EQEmu::CastingSlot::Item, 0, -1, spells[spellid].ResistDiff);
 				else
-					c->CastSpell(spellid, c->GetTarget()->GetID(), USE_ITEM_SPELL_SLOT, 0);
+					c->CastSpell(spellid, c->GetTarget()->GetID(), EQEmu::CastingSlot::Item, 0);
 	}
 }
 
@@ -2259,7 +2267,7 @@ void command_setlanguage(Client *c, const Seperator *sep)
 	}
 	else
 	{
-		Log.Out(Logs::General, Logs::Normal, "Set language request from %s, target:%s lang_id:%i value:%i",  c->GetName(), c->GetTarget()->GetName(), atoi(sep->arg[1]), atoi(sep->arg[2]) );
+		Log(Logs::General, Logs::Normal, "Set language request from %s, target:%s lang_id:%i value:%i",  c->GetName(), c->GetTarget()->GetName(), atoi(sep->arg[1]), atoi(sep->arg[2]) );
 		uint8 langid = (uint8)atoi(sep->arg[1]);
 		uint8 value = (uint8)atoi(sep->arg[2]);
 		c->GetTarget()->CastToClient()->SetLanguageSkill( langid, value );
@@ -2275,20 +2283,20 @@ void command_setskill(Client *c, const Seperator *sep)
 		c->Message(0, "Error: #setskill: Target must be a client.");
 	}
 	else if (
-						!sep->IsNumber(1) || atoi(sep->arg[1]) < 0 || atoi(sep->arg[1]) > HIGHEST_SKILL ||
+		!sep->IsNumber(1) || atoi(sep->arg[1]) < 0 || atoi(sep->arg[1]) > EQEmu::skills::HIGHEST_SKILL ||
 						!sep->IsNumber(2) || atoi(sep->arg[2]) < 0 || atoi(sep->arg[2]) > HIGHEST_CAN_SET_SKILL
 					)
 	{
 		c->Message(0, "Usage: #setskill skill x ");
-		c->Message(0, "       skill = 0 to %d",  HIGHEST_SKILL);
+		c->Message(0, "       skill = 0 to %d", EQEmu::skills::HIGHEST_SKILL);
 		c->Message(0, "       x = 0 to %d",  HIGHEST_CAN_SET_SKILL);
 	}
 	else {
-		Log.Out(Logs::General, Logs::Normal, "Set skill request from %s, target:%s skill_id:%i value:%i",  c->GetName(), c->GetTarget()->GetName(), atoi(sep->arg[1]), atoi(sep->arg[2]) );
+		Log(Logs::General, Logs::Normal, "Set skill request from %s, target:%s skill_id:%i value:%i",  c->GetName(), c->GetTarget()->GetName(), atoi(sep->arg[1]), atoi(sep->arg[2]) );
 		int skill_num = atoi(sep->arg[1]);
 		uint16 skill_value = atoi(sep->arg[2]);
-		if(skill_num <= HIGHEST_SKILL)
-			c->GetTarget()->CastToClient()->SetSkill((SkillUseTypes)skill_num, skill_value);
+		if (skill_num <= EQEmu::skills::HIGHEST_SKILL)
+			c->GetTarget()->CastToClient()->SetSkill((EQEmu::skills::SkillType)skill_num, skill_value);
 	}
 }
 
@@ -2304,9 +2312,9 @@ void command_setskillall(Client *c, const Seperator *sep)
 	}
 	else {
 		if (c->Admin() >= commandSetSkillsOther || c->GetTarget()==c || c->GetTarget()==0) {
-			Log.Out(Logs::General, Logs::Normal, "Set ALL skill request from %s, target:%s",  c->GetName(), c->GetTarget()->GetName());
+			Log(Logs::General, Logs::Normal, "Set ALL skill request from %s, target:%s",  c->GetName(), c->GetTarget()->GetName());
 			uint16 level = atoi(sep->arg[1]);
-			for(SkillUseTypes skill_num=Skill1HBlunt;skill_num <= HIGHEST_SKILL;skill_num=(SkillUseTypes)(skill_num+1)) {
+			for (EQEmu::skills::SkillType skill_num = EQEmu::skills::Skill1HBlunt; skill_num <= EQEmu::skills::HIGHEST_SKILL; skill_num = (EQEmu::skills::SkillType)(skill_num + 1)) {
 				c->GetTarget()->CastToClient()->SetSkill(skill_num, level);
 			}
 		}
@@ -2413,14 +2421,14 @@ void command_texture(Client *c, const Seperator *sep)
 		// Player Races Wear Armor, so Wearchange is sent instead
 		int i;
 		if (!c->GetTarget())
-			for (i = EmuConstants::MATERIAL_BEGIN; i <= EmuConstants::MATERIAL_TINT_END; i++)
+			for (i = EQEmu::textures::textureBegin; i <= EQEmu::textures::LastTintableTexture; i++)
 			{
 				c->SendTextureWC(i, texture);
 			}
 		else if ((c->GetTarget()->GetRace() > 0 && c->GetTarget()->GetRace() <= 12) ||
 			c->GetTarget()->GetRace() == 128 || c->GetTarget()->GetRace() == 130 ||
 			c->GetTarget()->GetRace() == 330 || c->GetTarget()->GetRace() == 522) {
-			for (i = EmuConstants::MATERIAL_BEGIN; i <= EmuConstants::MATERIAL_TINT_END; i++)
+			for (i = EQEmu::textures::textureBegin; i <= EQEmu::textures::LastTintableTexture; i++)
 			{
 				c->GetTarget()->SendTextureWC(i, texture);
 			}
@@ -2453,7 +2461,7 @@ void command_npctypespawn(Client *c, const Seperator *sep)
 		const NPCType* tmp = 0;
 		if ((tmp = database.LoadNPCTypesData(atoi(sep->arg[1])))) {
 			//tmp->fixedZ = 1;
-			NPC* npc = new NPC(tmp, 0, c->GetPosition(), FlyMode3);
+			auto npc = new NPC(tmp, 0, c->GetPosition(), FlyMode3);
 			if (npc && sep->IsNumber(2))
 				npc->SetNPCFactionID(atoi(sep->arg[2]));
 
@@ -2541,17 +2549,17 @@ void command_peekinv(Client *c, const Seperator *sep)
 	}
 
 	Client* targetClient = c->GetTarget()->CastToClient();
-	const ItemInst* inst_main = nullptr;
-	const ItemInst* inst_sub = nullptr;
-	const Item_Struct* item_data = nullptr;
+	const EQEmu::ItemInstance* inst_main = nullptr;
+	const EQEmu::ItemInstance* inst_sub = nullptr;
+	const EQEmu::ItemData* item_data = nullptr;
 	std::string item_link;
-	Client::TextLink linker;
-	linker.SetLinkType(linker.linkItemInst);
+	EQEmu::SayLinkEngine linker;
+	linker.SetLinkType(EQEmu::saylink::SayLinkItemInst);
 
 	c->Message(0, "Displaying inventory for %s...",  targetClient->GetName());
 
 	// worn
-	for (int16 indexMain = EmuConstants::EQUIPMENT_BEGIN; (scopeWhere & peekWorn) && (indexMain <= EmuConstants::EQUIPMENT_END); ++indexMain) {
+	for (int16 indexMain = EQEmu::legacy::EQUIPMENT_BEGIN; (scopeWhere & peekWorn) && (indexMain <= EQEmu::legacy::EQUIPMENT_END); ++indexMain) {
 		inst_main = targetClient->GetInv().GetItem(indexMain);
 		item_data = (inst_main == nullptr) ? nullptr : inst_main->GetItem();
 		linker.SetItemInst(inst_main);
@@ -2562,19 +2570,19 @@ void command_peekinv(Client *c, const Seperator *sep)
 			indexMain, ((item_data == nullptr) ? 0 : item_data->ID), item_link.c_str(), ((inst_main == nullptr) ? 0 : inst_main->GetCharges()));
 	}
 
-	if ((scopeWhere & peekWorn) && (targetClient->GetClientVersion() >= ClientVersion::SoF)) {
-		inst_main = targetClient->GetInv().GetItem(MainPowerSource);
+	if ((scopeWhere & peekWorn) && (targetClient->ClientVersion() >= EQEmu::versions::ClientVersion::SoF)) {
+		inst_main = targetClient->GetInv().GetItem(EQEmu::inventory::slotPowerSource);
 		item_data = (inst_main == nullptr) ? nullptr : inst_main->GetItem();
 		linker.SetItemInst(inst_main);
 
 		item_link = linker.GenerateLink();
 
 		c->Message((item_data == nullptr), "WornSlot: %i, Item: %i (%s), Charges: %i",
-			MainPowerSource, ((item_data == nullptr) ? 0 : item_data->ID), item_link.c_str(), ((inst_main == nullptr) ? 0 : inst_main->GetCharges()));
+			EQEmu::inventory::slotPowerSource, ((item_data == nullptr) ? 0 : item_data->ID), item_link.c_str(), ((inst_main == nullptr) ? 0 : inst_main->GetCharges()));
 	}
 
 	// inv
-	for (int16 indexMain = EmuConstants::GENERAL_BEGIN; (scopeWhere & peekInv) && (indexMain <= EmuConstants::GENERAL_END); ++indexMain) {
+	for (int16 indexMain = EQEmu::legacy::GENERAL_BEGIN; (scopeWhere & peekInv) && (indexMain <= EQEmu::legacy::GENERAL_END); ++indexMain) {
 		inst_main = targetClient->GetInv().GetItem(indexMain);
 		item_data = (inst_main == nullptr) ? nullptr : inst_main->GetItem();
 		linker.SetItemInst(inst_main);
@@ -2584,7 +2592,7 @@ void command_peekinv(Client *c, const Seperator *sep)
 		c->Message((item_data == nullptr), "InvSlot: %i, Item: %i (%s), Charges: %i",
 			indexMain, ((item_data == nullptr) ? 0 : item_data->ID), item_link.c_str(), ((inst_main == nullptr) ? 0 : inst_main->GetCharges()));
 
-		for (uint8 indexSub = SUB_BEGIN; inst_main && inst_main->IsType(ItemClassContainer) && (indexSub < EmuConstants::ITEM_CONTAINER_SIZE); ++indexSub) {
+		for (uint8 indexSub = EQEmu::inventory::containerBegin; inst_main && inst_main->IsClassBag() && (indexSub < EQEmu::inventory::ContainerCount); ++indexSub) {
 			inst_sub = inst_main->GetItem(indexSub);
 			item_data = (inst_sub == nullptr) ? nullptr : inst_sub->GetItem();
 			linker.SetItemInst(inst_sub);
@@ -2592,7 +2600,7 @@ void command_peekinv(Client *c, const Seperator *sep)
 			item_link = linker.GenerateLink();
 
 			c->Message((item_data == nullptr), "  InvBagSlot: %i (Slot #%i, Bag #%i), Item: %i (%s), Charges: %i",
-				Inventory::CalcSlotId(indexMain, indexSub), indexMain, indexSub, ((item_data == nullptr) ? 0 : item_data->ID), item_link.c_str(), ((inst_sub == nullptr) ? 0 : inst_sub->GetCharges()));
+				EQEmu::InventoryProfile::CalcSlotId(indexMain, indexSub), indexMain, indexSub, ((item_data == nullptr) ? 0 : item_data->ID), item_link.c_str(), ((inst_sub == nullptr) ? 0 : inst_sub->GetCharges()));
 		}
 	}
 
@@ -2604,7 +2612,7 @@ void command_peekinv(Client *c, const Seperator *sep)
 			item_link = linker.GenerateLink();
 
 			c->Message(1, "CursorSlot: %i, Item: %i (%s), Charges: %i",
-				MainCursor, 0, item_link.c_str(), 0);
+				EQEmu::inventory::slotCursor, 0, item_link.c_str(), 0);
 		}
 		else {
 			int cursorDepth = 0;
@@ -2616,9 +2624,9 @@ void command_peekinv(Client *c, const Seperator *sep)
 				item_link = linker.GenerateLink();
 
 				c->Message((item_data == nullptr), "CursorSlot: %i, Depth: %i, Item: %i (%s), Charges: %i",
-					MainCursor, cursorDepth, ((item_data == nullptr) ? 0 : item_data->ID), item_link.c_str(), ((inst_main == nullptr) ? 0 : inst_main->GetCharges()));
+					EQEmu::inventory::slotCursor, cursorDepth, ((item_data == nullptr) ? 0 : item_data->ID), item_link.c_str(), ((inst_main == nullptr) ? 0 : inst_main->GetCharges()));
 
-				for (uint8 indexSub = SUB_BEGIN; (cursorDepth == 0) && inst_main && inst_main->IsType(ItemClassContainer) && (indexSub < EmuConstants::ITEM_CONTAINER_SIZE); ++indexSub) {
+				for (uint8 indexSub = EQEmu::inventory::containerBegin; (cursorDepth == 0) && inst_main && inst_main->IsClassBag() && (indexSub < EQEmu::inventory::ContainerCount); ++indexSub) {
 					inst_sub = inst_main->GetItem(indexSub);
 					item_data = (inst_sub == nullptr) ? nullptr : inst_sub->GetItem();
 					linker.SetItemInst(inst_sub);
@@ -2626,14 +2634,14 @@ void command_peekinv(Client *c, const Seperator *sep)
 					item_link = linker.GenerateLink();
 
 					c->Message((item_data == nullptr), "  CursorBagSlot: %i (Slot #%i, Bag #%i), Item: %i (%s), Charges: %i",
-						Inventory::CalcSlotId(MainCursor, indexSub), MainCursor, indexSub, ((item_data == nullptr) ? 0 : item_data->ID), item_link.c_str(), ((inst_sub == nullptr) ? 0 : inst_sub->GetCharges()));
+						EQEmu::InventoryProfile::CalcSlotId(EQEmu::inventory::slotCursor, indexSub), EQEmu::inventory::slotCursor, indexSub, ((item_data == nullptr) ? 0 : item_data->ID), item_link.c_str(), ((inst_sub == nullptr) ? 0 : inst_sub->GetCharges()));
 				}
 			}
 		}
 	}
 
 	// trib
-	for (int16 indexMain = EmuConstants::TRIBUTE_BEGIN; (scopeWhere & peekTrib) && (indexMain <= EmuConstants::TRIBUTE_END); ++indexMain) {
+	for (int16 indexMain = EQEmu::legacy::TRIBUTE_BEGIN; (scopeWhere & peekTrib) && (indexMain <= EQEmu::legacy::TRIBUTE_END); ++indexMain) {
 		inst_main = targetClient->GetInv().GetItem(indexMain);
 		item_data = (inst_main == nullptr) ? nullptr : inst_main->GetItem();
 		linker.SetItemInst(inst_main);
@@ -2645,7 +2653,7 @@ void command_peekinv(Client *c, const Seperator *sep)
 	}
 
 	// bank
-	for (int16 indexMain = EmuConstants::BANK_BEGIN; (scopeWhere & peekBank) && (indexMain <= EmuConstants::BANK_END); ++indexMain) {
+	for (int16 indexMain = EQEmu::legacy::BANK_BEGIN; (scopeWhere & peekBank) && (indexMain <= EQEmu::legacy::BANK_END); ++indexMain) {
 		inst_main = targetClient->GetInv().GetItem(indexMain);
 		item_data = (inst_main == nullptr) ? nullptr : inst_main->GetItem();
 		linker.SetItemInst(inst_main);
@@ -2655,7 +2663,7 @@ void command_peekinv(Client *c, const Seperator *sep)
 		c->Message((item_data == nullptr), "BankSlot: %i, Item: %i (%s), Charges: %i",
 			indexMain, ((item_data == nullptr) ? 0 : item_data->ID), item_link.c_str(), ((inst_main == nullptr) ? 0 : inst_main->GetCharges()));
 
-		for (uint8 indexSub = SUB_BEGIN; inst_main && inst_main->IsType(ItemClassContainer) && (indexSub < EmuConstants::ITEM_CONTAINER_SIZE); ++indexSub) {
+		for (uint8 indexSub = EQEmu::inventory::containerBegin; inst_main && inst_main->IsClassBag() && (indexSub < EQEmu::inventory::ContainerCount); ++indexSub) {
 			inst_sub = inst_main->GetItem(indexSub);
 			item_data = (inst_sub == nullptr) ? nullptr : inst_sub->GetItem();
 			linker.SetItemInst(inst_sub);
@@ -2663,11 +2671,11 @@ void command_peekinv(Client *c, const Seperator *sep)
 			item_link = linker.GenerateLink();
 
 			c->Message((item_data == nullptr), "  BankBagSlot: %i (Slot #%i, Bag #%i), Item: %i (%s), Charges: %i",
-				Inventory::CalcSlotId(indexMain, indexSub), indexMain, indexSub, ((item_data == nullptr) ? 0 : item_data->ID), item_link.c_str(), ((inst_sub == nullptr) ? 0 : inst_sub->GetCharges()));
+				EQEmu::InventoryProfile::CalcSlotId(indexMain, indexSub), indexMain, indexSub, ((item_data == nullptr) ? 0 : item_data->ID), item_link.c_str(), ((inst_sub == nullptr) ? 0 : inst_sub->GetCharges()));
 		}
 	}
 
-	for (int16 indexMain = EmuConstants::SHARED_BANK_BEGIN; (scopeWhere & peekBank) && (indexMain <= EmuConstants::SHARED_BANK_END); ++indexMain) {
+	for (int16 indexMain = EQEmu::legacy::SHARED_BANK_BEGIN; (scopeWhere & peekBank) && (indexMain <= EQEmu::legacy::SHARED_BANK_END); ++indexMain) {
 		inst_main = targetClient->GetInv().GetItem(indexMain);
 		item_data = (inst_main == nullptr) ? nullptr : inst_main->GetItem();
 		linker.SetItemInst(inst_main);
@@ -2677,7 +2685,7 @@ void command_peekinv(Client *c, const Seperator *sep)
 		c->Message((item_data == nullptr), "SharedBankSlot: %i, Item: %i (%s), Charges: %i",
 			indexMain, ((item_data == nullptr) ? 0 : item_data->ID), item_link.c_str(), ((inst_main == nullptr) ? 0 : inst_main->GetCharges()));
 
-		for (uint8 indexSub = SUB_BEGIN; inst_main && inst_main->IsType(ItemClassContainer) && (indexSub < EmuConstants::ITEM_CONTAINER_SIZE); ++indexSub) {
+		for (uint8 indexSub = EQEmu::inventory::containerBegin; inst_main && inst_main->IsClassBag() && (indexSub < EQEmu::inventory::ContainerCount); ++indexSub) {
 			inst_sub = inst_main->GetItem(indexSub);
 			item_data = (inst_sub == nullptr) ? nullptr : inst_sub->GetItem();
 			linker.SetItemInst(inst_sub);
@@ -2685,12 +2693,12 @@ void command_peekinv(Client *c, const Seperator *sep)
 			item_link = linker.GenerateLink();
 
 			c->Message((item_data == nullptr), "  SharedBankBagSlot: %i (Slot #%i, Bag #%i), Item: %i (%s), Charges: %i",
-				Inventory::CalcSlotId(indexMain, indexSub), indexMain, indexSub, ((item_data == nullptr) ? 0 : item_data->ID), item_link.c_str(), ((inst_sub == nullptr) ? 0 : inst_sub->GetCharges()));
+				EQEmu::InventoryProfile::CalcSlotId(indexMain, indexSub), indexMain, indexSub, ((item_data == nullptr) ? 0 : item_data->ID), item_link.c_str(), ((inst_sub == nullptr) ? 0 : inst_sub->GetCharges()));
 		}
 	}
 
 	// trade
-	for (int16 indexMain = EmuConstants::TRADE_BEGIN; (scopeWhere & peekTrade) && (indexMain <= EmuConstants::TRADE_END); ++indexMain) {
+	for (int16 indexMain = EQEmu::legacy::TRADE_BEGIN; (scopeWhere & peekTrade) && (indexMain <= EQEmu::legacy::TRADE_END); ++indexMain) {
 		inst_main = targetClient->GetInv().GetItem(indexMain);
 		item_data = (inst_main == nullptr) ? nullptr : inst_main->GetItem();
 		linker.SetItemInst(inst_main);
@@ -2700,7 +2708,7 @@ void command_peekinv(Client *c, const Seperator *sep)
 		c->Message((item_data == nullptr), "TradeSlot: %i, Item: %i (%s), Charges: %i",
 			indexMain, ((item_data == nullptr) ? 0 : item_data->ID), item_link.c_str(), ((inst_main == nullptr) ? 0 : inst_main->GetCharges()));
 
-		for (uint8 indexSub = SUB_BEGIN; inst_main && inst_main->IsType(ItemClassContainer) && (indexSub < EmuConstants::ITEM_CONTAINER_SIZE); ++indexSub) {
+		for (uint8 indexSub = EQEmu::inventory::containerBegin; inst_main && inst_main->IsClassBag() && (indexSub < EQEmu::inventory::ContainerCount); ++indexSub) {
 			inst_sub = inst_main->GetItem(indexSub);
 			item_data = (inst_sub == nullptr) ? nullptr : inst_sub->GetItem();
 			linker.SetItemInst(inst_sub);
@@ -2708,7 +2716,7 @@ void command_peekinv(Client *c, const Seperator *sep)
 			item_link = linker.GenerateLink();
 
 			c->Message((item_data == nullptr), "  TradeBagSlot: %i (Slot #%i, Bag #%i), Item: %i (%s), Charges: %i",
-				Inventory::CalcSlotId(indexMain, indexSub), indexMain, indexSub, ((item_data == nullptr) ? 0 : item_data->ID), item_link.c_str(), ((inst_sub == nullptr) ? 0 : inst_sub->GetCharges()));
+				EQEmu::InventoryProfile::CalcSlotId(indexMain, indexSub), indexMain, indexSub, ((item_data == nullptr) ? 0 : item_data->ID), item_link.c_str(), ((inst_sub == nullptr) ? 0 : inst_sub->GetCharges()));
 		}
 	}
 
@@ -2722,7 +2730,7 @@ void command_peekinv(Client *c, const Seperator *sep)
 		else {
 			c->Message(0, "[WorldObject DBID: %i (entityid: %i)]",  objectTradeskill->GetDBID(), objectTradeskill->GetID());
 
-			for (int16 indexMain = MAIN_BEGIN; indexMain < EmuConstants::MAP_WORLD_SIZE; ++indexMain) {
+			for (int16 indexMain = EQEmu::inventory::slotBegin; indexMain < EQEmu::legacy::TYPE_WORLD_SIZE; ++indexMain) {
 				inst_main = objectTradeskill->GetItem(indexMain);
 				item_data = (inst_main == nullptr) ? nullptr : inst_main->GetItem();
 				linker.SetItemInst(inst_main);
@@ -2730,9 +2738,9 @@ void command_peekinv(Client *c, const Seperator *sep)
 				item_link = linker.GenerateLink();
 
 				c->Message((item_data == nullptr), "WorldSlot: %i, Item: %i (%s), Charges: %i",
-					(EmuConstants::WORLD_BEGIN + indexMain), ((item_data == nullptr) ? 0 : item_data->ID), item_link.c_str(), ((inst_main == nullptr) ? 0 : inst_main->GetCharges()));
+					(EQEmu::legacy::WORLD_BEGIN + indexMain), ((item_data == nullptr) ? 0 : item_data->ID), item_link.c_str(), ((inst_main == nullptr) ? 0 : inst_main->GetCharges()));
 
-				for (uint8 indexSub = SUB_BEGIN; inst_main && inst_main->IsType(ItemClassContainer) && (indexSub < EmuConstants::ITEM_CONTAINER_SIZE); ++indexSub) {
+				for (uint8 indexSub = EQEmu::inventory::containerBegin; inst_main && inst_main->IsType(EQEmu::item::ItemClassBag) && (indexSub < EQEmu::inventory::ContainerCount); ++indexSub) {
 					inst_sub = inst_main->GetItem(indexSub);
 					item_data = (inst_sub == nullptr) ? nullptr : inst_sub->GetItem();
 					linker.SetItemInst(inst_sub);
@@ -2776,7 +2784,7 @@ void command_interrogateinv(Client *c, const Seperator *sep)
 	}
 
 	Client* target = nullptr;
-	std::map<int16, const ItemInst*> instmap;
+	std::map<int16, const EQEmu::ItemInstance*> instmap;
 	bool log = false;
 	bool silent = false;
 	bool error = false;
@@ -2900,12 +2908,13 @@ void command_findzone(Client *c, const Seperator *sep)
     std::string query;
     int id = atoi((const char *)sep->arg[1]);
     if (id == 0) { // If id evaluates to 0, then search as if user entered a string.
-        char *escName = new char[strlen(sep->arg[1]) * 2 + 1];
-		database.DoEscapeString(escName, sep->arg[1], strlen(sep->arg[1]));
+	    auto escName = new char[strlen(sep->arg[1]) * 2 + 1];
+	    database.DoEscapeString(escName, sep->arg[1], strlen(sep->arg[1]));
 
-        query = StringFormat("SELECT zoneidnumber, short_name, long_name FROM zone "
-                            "WHERE long_name RLIKE '%s' AND version = 0",  escName);
-		safe_delete_array(escName);
+	    query = StringFormat("SELECT zoneidnumber, short_name, long_name FROM zone "
+				 "WHERE long_name RLIKE '%s' AND version = 0",
+				 escName);
+	    safe_delete_array(escName);
     }
     else // Otherwise, look for just that zoneidnumber.
 		query = StringFormat("SELECT zoneidnumber, short_name, long_name FROM zone "
@@ -2983,7 +2992,7 @@ void command_reloadqst(Client *c, const Seperator *sep)
 void command_reloadworld(Client *c, const Seperator *sep)
 {
 	c->Message(0, "Reloading quest cache and repopping zones worldwide.");
-	ServerPacket* pack = new ServerPacket(ServerOP_ReloadWorld, sizeof(ReloadWorld_Struct));
+	auto pack = new ServerPacket(ServerOP_ReloadWorld, sizeof(ReloadWorld_Struct));
 	ReloadWorld_Struct* RW = (ReloadWorld_Struct*) pack->pBuffer;
 	RW->Option = ((atoi(sep->arg[1]) == 1) ? 1 : 0);
 	worldserver.SendPacket(pack);
@@ -3016,7 +3025,7 @@ void command_zoneshutdown(Client *c, const Seperator *sep)
 	else if (sep->arg[1][0] == 0)
 		c->Message(0, "Usage: #zoneshutdown zoneshortname");
 	else {
-		ServerPacket* pack = new ServerPacket(ServerOP_ZoneShutdown, sizeof(ServerZoneStateChange_struct));
+		auto pack = new ServerPacket(ServerOP_ZoneShutdown, sizeof(ServerZoneStateChange_struct));
 		ServerZoneStateChange_struct* s = (ServerZoneStateChange_struct *) pack->pBuffer;
 		strcpy(s->adminname, c->GetName());
 		if (sep->arg[1][0] >= '0' && sep->arg[1][0] <= '9')
@@ -3036,7 +3045,7 @@ void command_zonebootup(Client *c, const Seperator *sep)
 		c->Message(0, "Usage: #zonebootup ZoneServerID# zoneshortname");
 	}
 	else {
-		ServerPacket* pack = new ServerPacket(ServerOP_ZoneBootup, sizeof(ServerZoneStateChange_struct));
+		auto pack = new ServerPacket(ServerOP_ZoneBootup, sizeof(ServerZoneStateChange_struct));
 		ServerZoneStateChange_struct* s = (ServerZoneStateChange_struct *) pack->pBuffer;
 		s->ZoneServerID = atoi(sep->arg[1]);
 		strcpy(s->adminname, c->GetName());
@@ -3056,7 +3065,7 @@ void command_kick(Client *c, const Seperator *sep)
 		if (client != 0) {
 			if (client->Admin() <= c->Admin()) {
 				client->Message(0, "You have been kicked by %s", c->GetName());
-				EQApplicationPacket* outapp = new EQApplicationPacket(OP_GMKick,0);
+				auto outapp = new EQApplicationPacket(OP_GMKick, 0);
 				client->QueuePacket(outapp);
 				client->Kick();
 				c->Message(0, "Kick: local: kicking %s",  sep->arg[1]);
@@ -3065,7 +3074,7 @@ void command_kick(Client *c, const Seperator *sep)
 		else if (!worldserver.Connected())
 			c->Message(0, "Error: World server disconnected");
 		else {
-			ServerPacket* pack = new ServerPacket(ServerOP_KickPlayer, sizeof(ServerKickPlayer_Struct));
+			auto pack = new ServerPacket(ServerOP_KickPlayer, sizeof(ServerKickPlayer_Struct));
 			ServerKickPlayer_Struct* skp = (ServerKickPlayer_Struct*) pack->pBuffer;
 			strcpy(skp->adminname, c->GetName());
 			strcpy(skp->name, sep->arg[1]);
@@ -3091,7 +3100,7 @@ void command_attack(Client *c, const Seperator *sep)
 
 void command_lock(Client *c, const Seperator *sep)
 {
-	ServerPacket* outpack = new ServerPacket(ServerOP_Lock, sizeof(ServerLock_Struct));
+	auto outpack = new ServerPacket(ServerOP_Lock, sizeof(ServerLock_Struct));
 	ServerLock_Struct* lss = (ServerLock_Struct*) outpack->pBuffer;
 	strcpy(lss->myname, c->GetName());
 	lss->mode = 1;
@@ -3101,7 +3110,7 @@ void command_lock(Client *c, const Seperator *sep)
 
 void command_unlock(Client *c, const Seperator *sep)
 {
-	ServerPacket* outpack = new ServerPacket(ServerOP_Lock, sizeof(ServerLock_Struct));
+	auto outpack = new ServerPacket(ServerOP_Lock, sizeof(ServerLock_Struct));
 	ServerLock_Struct* lss = (ServerLock_Struct*) outpack->pBuffer;
 	strcpy(lss->myname, c->GetName());
 	lss->mode = 0;
@@ -3111,7 +3120,7 @@ void command_unlock(Client *c, const Seperator *sep)
 
 void command_motd(Client *c, const Seperator *sep)
 {
-	ServerPacket* outpack = new ServerPacket(ServerOP_Motd, sizeof(ServerMotd_Struct));
+	auto outpack = new ServerPacket(ServerOP_Motd, sizeof(ServerMotd_Struct));
 	ServerMotd_Struct* mss = (ServerMotd_Struct*) outpack->pBuffer;
 	strn0cpy(mss->myname, c->GetName(),64);
 	strn0cpy(mss->motd, sep->argplus[1],512);
@@ -3126,7 +3135,7 @@ void command_listpetition(Client *c, const Seperator *sep)
 	if (!results.Success())
         return;
 
-    Log.Out(Logs::General, Logs::Normal, "Petition list requested by %s",  c->GetName());
+    Log(Logs::General, Logs::Normal, "Petition list requested by %s",  c->GetName());
 
     if (results.RowCount() == 0)
         return;
@@ -3140,16 +3149,16 @@ void command_listpetition(Client *c, const Seperator *sep)
 void command_equipitem(Client *c, const Seperator *sep)
 {
 	uint32 slot_id = atoi(sep->arg[1]);
-	if (sep->IsNumber(1) && ((slot_id >= EmuConstants::EQUIPMENT_BEGIN) && (slot_id <= EmuConstants::EQUIPMENT_END) || (slot_id == MainPowerSource))) {
-		const ItemInst* from_inst = c->GetInv().GetItem(MainCursor);
-		const ItemInst* to_inst = c->GetInv().GetItem(slot_id); // added (desync issue when forcing stack to stack)
+	if (sep->IsNumber(1) && ((slot_id >= EQEmu::legacy::EQUIPMENT_BEGIN) && (slot_id <= EQEmu::legacy::EQUIPMENT_END) || (slot_id == EQEmu::inventory::slotPowerSource))) {
+		const EQEmu::ItemInstance* from_inst = c->GetInv().GetItem(EQEmu::inventory::slotCursor);
+		const EQEmu::ItemInstance* to_inst = c->GetInv().GetItem(slot_id); // added (desync issue when forcing stack to stack)
 		bool partialmove = false;
 		int16 movecount;
 
-		if (from_inst && from_inst->IsType(ItemClassCommon)) {
-			EQApplicationPacket* outapp = new EQApplicationPacket(OP_MoveItem, sizeof(MoveItem_Struct));
+		if (from_inst && from_inst->IsClassCommon()) {
+			auto outapp = new EQApplicationPacket(OP_MoveItem, sizeof(MoveItem_Struct));
 			MoveItem_Struct* mi	= (MoveItem_Struct*)outapp->pBuffer;
-			mi->from_slot		= MainCursor;
+			mi->from_slot = EQEmu::inventory::slotCursor;
 			mi->to_slot			= slot_id;
 			// mi->number_in_stack	= from_inst->GetCharges(); // replaced with con check for stacking
 
@@ -3171,6 +3180,7 @@ void command_equipitem(Client *c, const Seperator *sep)
 			if (partialmove) { // remove this con check if someone can figure out removing charges from cursor stack issue below
 				// mi->number_in_stack is always from_inst->GetCharges() when partialmove is false
 				c->Message(13, "Error: Partial stack added to existing stack exceeds allowable stacksize");
+				safe_delete(outapp);
 				return;
 			}
 			else if(c->SwapItem(mi)) {
@@ -3214,7 +3224,7 @@ void command_equipitem(Client *c, const Seperator *sep)
 
 void command_zonelock(Client *c, const Seperator *sep)
 {
-	ServerPacket* pack = new ServerPacket(ServerOP_LockZone, sizeof(ServerLockZone_Struct));
+	auto pack = new ServerPacket(ServerOP_LockZone, sizeof(ServerLockZone_Struct));
 	ServerLockZone_Struct* s = (ServerLockZone_Struct*) pack->pBuffer;
 	strn0cpy(s->adminname, c->GetName(), sizeof(s->adminname));
 	if (strcasecmp(sep->arg[1], "list") == 0) {
@@ -3783,7 +3793,7 @@ void command_lastname(Client *c, const Seperator *sep)
 
 	if(c->GetTarget() && c->GetTarget()->IsClient())
 		t=c->GetTarget()->CastToClient();
-	Log.Out(Logs::General, Logs::Normal, "#lastname request from %s for %s",  c->GetName(), t->GetName());
+	Log(Logs::General, Logs::Normal, "#lastname request from %s for %s",  c->GetName(), t->GetName());
 
 	if(strlen(sep->arg[1]) <= 70)
 		t->ChangeLastName(sep->arg[1]);
@@ -3993,7 +4003,7 @@ void command_zuwcoords(Client *c, const Seperator *sep)
 		zone->newzone_data.underworld = atof(sep->arg[1]);
 		//float newdata = atof(sep->arg[1]);
 		//memcpy(&zone->zone_header_data[130], &newdata, sizeof(float));
-		EQApplicationPacket* outapp = new EQApplicationPacket(OP_NewZone, sizeof(NewZone_Struct));
+		auto outapp = new EQApplicationPacket(OP_NewZone, sizeof(NewZone_Struct));
 		memcpy(outapp->pBuffer, &zone->newzone_data, outapp->size);
 		entity_list.QueueClients(c, outapp);
 		safe_delete(outapp);
@@ -4025,7 +4035,7 @@ void command_zsafecoords(Client *c, const Seperator *sep)
 		//memcpy(&zone->zone_header_data[118], &newdatay, sizeof(float));
 		//memcpy(&zone->zone_header_data[122], &newdataz, sizeof(float));
 		//zone->SetSafeCoords();
-		EQApplicationPacket* outapp = new EQApplicationPacket(OP_NewZone, sizeof(NewZone_Struct));
+		auto outapp = new EQApplicationPacket(OP_NewZone, sizeof(NewZone_Struct));
 		memcpy(outapp->pBuffer, &zone->newzone_data, outapp->size);
 		entity_list.QueueClients(c, outapp);
 		safe_delete(outapp);
@@ -4193,7 +4203,7 @@ void command_damage(Client *c, const Seperator *sep)
 		if (nkdmg > 2100000000)
 			c->Message(0, "Enter a value less then 2,100,000,000.");
 		else
-			c->GetTarget()->Damage(c, nkdmg, SPELL_UNKNOWN, SkillHandtoHand, false);
+			c->GetTarget()->Damage(c, nkdmg, SPELL_UNKNOWN, EQEmu::skills::SkillHandtoHand, false);
 	}
 }
 
@@ -4333,16 +4343,20 @@ void command_goto(Client *c, const Seperator *sep)
 
 void command_iteminfo(Client *c, const Seperator *sep)
 {
-	auto inst = c->GetInv()[MainCursor];
-	if (!inst) { c->Message(13, "Error: You need an item on your cursor for this command"); }
+	auto inst = c->GetInv()[EQEmu::inventory::slotCursor];
+	if (!inst) {
+		c->Message(13, "Error: You need an item on your cursor for this command");
+		return;
+	}
 	auto item = inst->GetItem();
 	if (!item) {
-		Log.Out(Logs::General, Logs::Inventory, "(%s) Command #iteminfo processed an item with no data pointer");
+		Log(Logs::General, Logs::Inventory, "(%s) Command #iteminfo processed an item with no data pointer");
 		c->Message(13, "Error: This item has no data reference");
+		return;
 	}
 
-	Client::TextLink linker;
-	linker.SetLinkType(linker.linkItemInst);
+	EQEmu::SayLinkEngine linker;
+	linker.SetLinkType(EQEmu::saylink::SayLinkItemInst);
 	linker.SetItemInst(inst);
 
 	auto item_link = linker.GenerateLink();
@@ -4356,10 +4370,10 @@ void command_iteminfo(Client *c, const Seperator *sep)
 	c->Message(0, ">> NoDrop: %u, NoRent: %u, NoPet: %u, NoTransfer: %u, FVNoDrop: %u",
 		item->NoDrop, item->NoRent, (uint8)item->NoPet, (uint8)item->NoTransfer, item->FVNoDrop);
 
-	if (item->ItemClass == ItemClassBook) {
+	if (item->IsClassBook()) {
 		c->Message(0, "*** This item is a Book (filename:'%s') ***", item->Filename);
 	}
-	else if (item->ItemClass == ItemClassContainer) {
+	else if (item->IsClassBag()) {
 		c->Message(0, "*** This item is a Container (%u slots) ***", item->BagSlots);
 	}
 	else {
@@ -4384,7 +4398,7 @@ void command_uptime(Client *c, const Seperator *sep)
 		c->Message(0, "Error: World server disconnected");
 	else
 	{
-		ServerPacket* pack = new ServerPacket(ServerOP_Uptime, sizeof(ServerUptime_Struct));
+		auto pack = new ServerPacket(ServerOP_Uptime, sizeof(ServerUptime_Struct));
 		ServerUptime_Struct* sus = (ServerUptime_Struct*) pack->pBuffer;
 		strcpy(sus->adminname, c->GetName());
 		if (sep->IsNumber(1) && atoi(sep->arg[1]) > 0)
@@ -4424,7 +4438,7 @@ void command_flag(Client *c, const Seperator *sep)
 			c->Message(0, "Unable to set GM Flag.");
 		else {
 			c->Message(0, "Set GM Flag on account.");
-			ServerPacket* pack = new ServerPacket(ServerOP_FlagUpdate, 6);
+			auto pack = new ServerPacket(ServerOP_FlagUpdate, 6);
 			*((uint32*) pack->pBuffer) = database.GetAccountIDByName(sep->argplus[2]);
 			*((int16*) &pack->pBuffer[4]) = atoi(sep->arg[1]);
 			worldserver.SendPacket(pack);
@@ -4443,7 +4457,7 @@ void command_time(Client *c, const Seperator *sep)
 		}
 		c->Message(13, "Setting world time to %s:%i (Timezone: 0)...",  sep->arg[1], minutes);
 		zone->SetTime(atoi(sep->arg[1])+1, minutes);
-		Log.Out(Logs::General, Logs::Zone_Server, "%s :: Setting world time to %s:%i (Timezone: 0)...", c->GetCleanName(), sep->arg[1], minutes);
+		Log(Logs::General, Logs::Zone_Server, "%s :: Setting world time to %s:%i (Timezone: 0)...", c->GetCleanName(), sep->arg[1], minutes);
 	}
 	else {
 		c->Message(13, "To set the Time: #time HH [MM]");
@@ -4458,7 +4472,7 @@ void command_time(Client *c, const Seperator *sep)
 			zone->zone_time.getEQTimeZoneMin()
 			);
 		c->Message(13, "It is now %s.", timeMessage);
-		Log.Out(Logs::General, Logs::Zone_Server, "Current Time is: %s", timeMessage);
+		Log(Logs::General, Logs::Zone_Server, "Current Time is: %s", timeMessage);
 	}
 }
 
@@ -4592,10 +4606,10 @@ void command_guild(Client *c, const Seperator *sep)
 			}
 
 			if(guild_id == GUILD_NONE) {
-				Log.Out(Logs::Detail, Logs::Guilds, "%s: Removing %s (%d) from guild with GM command.",  c->GetName(),
+				Log(Logs::Detail, Logs::Guilds, "%s: Removing %s (%d) from guild with GM command.",  c->GetName(),
 					sep->arg[2], charid);
 			} else {
-				Log.Out(Logs::Detail, Logs::Guilds, "%s: Putting %s (%d) into guild %s (%d) with GM command.",  c->GetName(),
+				Log(Logs::Detail, Logs::Guilds, "%s: Putting %s (%d) into guild %s (%d) with GM command.",  c->GetName(),
 					sep->arg[2], charid,
 					guild_mgr.GetGuildName(guild_id), guild_id);
 			}
@@ -4644,7 +4658,7 @@ void command_guild(Client *c, const Seperator *sep)
 				return;
 			}
 
-			Log.Out(Logs::Detail, Logs::Guilds, "%s: Setting %s (%d)'s guild rank to %d with GM command.",  c->GetName(),
+			Log(Logs::Detail, Logs::Guilds, "%s: Setting %s (%d)'s guild rank to %d with GM command.",  c->GetName(),
 				sep->arg[2], charid, rank);
 
 			if(!guild_mgr.SetGuildRank(charid, rank))
@@ -4686,7 +4700,7 @@ void command_guild(Client *c, const Seperator *sep)
 
 				uint32 id = guild_mgr.CreateGuild(sep->argplus[3], leader);
 
-				Log.Out(Logs::Detail, Logs::Guilds, "%s: Creating guild %s with leader %d with GM command. It was given id %lu.",  c->GetName(),
+				Log(Logs::Detail, Logs::Guilds, "%s: Creating guild %s with leader %d with GM command. It was given id %lu.",  c->GetName(),
 					sep->argplus[3], leader, (unsigned long)id);
 
 				if (id == GUILD_NONE)
@@ -4725,7 +4739,7 @@ void command_guild(Client *c, const Seperator *sep)
 				}
 			}
 
-			Log.Out(Logs::Detail, Logs::Guilds, "%s: Deleting guild %s (%d) with GM command.",  c->GetName(),
+			Log(Logs::Detail, Logs::Guilds, "%s: Deleting guild %s (%d) with GM command.",  c->GetName(),
 				guild_mgr.GetGuildName(id), id);
 
 			if (!guild_mgr.DeleteGuild(id))
@@ -4759,7 +4773,7 @@ void command_guild(Client *c, const Seperator *sep)
 				}
 			}
 
-			Log.Out(Logs::Detail, Logs::Guilds, "%s: Renaming guild %s (%d) to '%s' with GM command.",  c->GetName(),
+			Log(Logs::Detail, Logs::Guilds, "%s: Renaming guild %s (%d) to '%s' with GM command.",  c->GetName(),
 				guild_mgr.GetGuildName(id), id, sep->argplus[3]);
 
 			if (!guild_mgr.RenameGuild(id, sep->argplus[3]))
@@ -4810,7 +4824,7 @@ void command_guild(Client *c, const Seperator *sep)
 					}
 				}
 
-				Log.Out(Logs::Detail, Logs::Guilds, "%s: Setting leader of guild %s (%d) to %d with GM command.",  c->GetName(),
+				Log(Logs::Detail, Logs::Guilds, "%s: Setting leader of guild %s (%d) to %d with GM command.",  c->GetName(),
 					guild_mgr.GetGuildName(id), id, leader);
 
 				if(!guild_mgr.SetGuildLeader(id, leader))
@@ -4887,7 +4901,7 @@ void command_zonestatus(Client *c, const Seperator *sep)
 	if (!worldserver.Connected())
 		c->Message(0, "Error: World server disconnected");
 	else {
-		ServerPacket* pack = new ServerPacket(ServerOP_ZoneStatus, strlen(c->GetName())+2);
+		auto pack = new ServerPacket(ServerOP_ZoneStatus, strlen(c->GetName()) + 2);
 		memset(pack->pBuffer, (uint8) c->Admin(), 1);
 		strcpy((char *) &pack->pBuffer[1], c->GetName());
 		worldserver.SendPacket(pack);
@@ -4960,14 +4974,14 @@ void command_findaliases(Client *c, const Seperator *sep)
 		c->Message(0, "Usage: #findaliases [alias | command]");
 		return;
 	}
-	
-	std::map<std::string, std::string>::iterator find_iter = commandaliases.find(sep->arg[1]);
+
+	auto find_iter = commandaliases.find(sep->arg[1]);
 	if (find_iter == commandaliases.end()) {
 		c->Message(15, "No commands or aliases match '%s'", sep->arg[1]);
 		return;
 	}
 
-	std::map<std::string, CommandRecord *>::iterator command_iter = commandlist.find(find_iter->second);
+	auto command_iter = commandlist.find(find_iter->second);
 	if (find_iter->second.empty() || command_iter == commandlist.end()) {
 		c->Message(0, "An unknown condition occurred...");
 		return;
@@ -4976,7 +4990,7 @@ void command_findaliases(Client *c, const Seperator *sep)
 	c->Message(0, "Available command aliases for '%s':", command_iter->first.c_str());
 
 	int commandaliasesshown = 0;
-	for (std::map<std::string, std::string>::iterator alias_iter = commandaliases.begin(); alias_iter != commandaliases.end(); ++alias_iter) {
+	for (auto alias_iter = commandaliases.begin(); alias_iter != commandaliases.end(); ++alias_iter) {
 		if (strcasecmp(find_iter->second.c_str(), alias_iter->second.c_str()) || c->Admin() < command_iter->second->access)
 			continue;
 
@@ -5270,7 +5284,7 @@ void command_scribespells(Client *c, const Seperator *sep)
 	t->Message(0, "Scribing spells to spellbook.");
 	if(t != c)
 		c->Message(0, "Scribing spells for %s.",  t->GetName());
-	Log.Out(Logs::General, Logs::Normal, "Scribe spells request for %s from %s, levels: %u -> %u",  t->GetName(), c->GetName(), min_level, max_level);
+	Log(Logs::General, Logs::Normal, "Scribe spells request for %s from %s, levels: %u -> %u",  t->GetName(), c->GetName(), min_level, max_level);
 
 	for(curspell = 0, book_slot = t->GetNextAvailableSpellBookSlot(), count = 0; curspell < SPDAT_RECORDS && book_slot < MAX_PP_SPELLBOOK; curspell++, book_slot = t->GetNextAvailableSpellBookSlot(book_slot))
 	{
@@ -5327,7 +5341,7 @@ void command_scribespell(Client *c, const Seperator *sep) {
 		if(t != c)
 			c->Message(0, "Scribing spell: %s (%i) for %s.",  spells[spell_id].name, spell_id, t->GetName());
 
-		Log.Out(Logs::General, Logs::Normal, "Scribe spell: %s (%i) request for %s from %s.",  spells[spell_id].name, spell_id, t->GetName(), c->GetName());
+		Log(Logs::General, Logs::Normal, "Scribe spell: %s (%i) request for %s from %s.",  spells[spell_id].name, spell_id, t->GetName(), c->GetName());
 
 		if (spells[spell_id].classes[WARRIOR] != 0 && spells[spell_id].skill != 52 && spells[spell_id].classes[t->GetPP().class_ - 1] > 0 && !IsDiscipline(spell_id)) {
 			book_slot = t->GetNextAvailableSpellBookSlot();
@@ -5374,7 +5388,7 @@ void command_unscribespell(Client *c, const Seperator *sep) {
 			if(t != c)
 				c->Message(0, "Unscribing spell: %s (%i) for %s.",  spells[spell_id].name, spell_id, t->GetName());
 
-			Log.Out(Logs::General, Logs::Normal, "Unscribe spell: %s (%i) request for %s from %s.",  spells[spell_id].name, spell_id, t->GetName(), c->GetName());
+			Log(Logs::General, Logs::Normal, "Unscribe spell: %s (%i) request for %s from %s.",  spells[spell_id].name, spell_id, t->GetName(), c->GetName());
 		}
 		else {
 			t->Message(13, "Unable to unscribe spell: %s (%i) from your spellbook. This spell is not scribed.",  spells[spell_id].name, spell_id);
@@ -5491,9 +5505,9 @@ void command_summonitem(Client *c, const Seperator *sep)
 	std::string cmd_msg = sep->msg;
 	size_t link_open = cmd_msg.find('\x12');
 	size_t link_close = cmd_msg.find_last_of('\x12');
-	if (link_open != link_close && (cmd_msg.length() - link_open) > EmuConstants::TEXT_LINK_BODY_LENGTH) {
-		TextLinkBody_Struct link_body;
-		Client::TextLink::DegenerateLinkBody(link_body, cmd_msg.substr(link_open + 1, EmuConstants::TEXT_LINK_BODY_LENGTH));
+	if (link_open != link_close && (cmd_msg.length() - link_open) > EQEmu::legacy::TEXT_LINK_BODY_LENGTH) {
+		EQEmu::SayLinkBody_Struct link_body;
+		EQEmu::saylink::DegenerateLinkBody(link_body, cmd_msg.substr(link_open + 1, EQEmu::legacy::TEXT_LINK_BODY_LENGTH));
 		itemid = link_body.item_id;
 	}
 	else if (!sep->IsNumber(1)) {
@@ -5509,7 +5523,7 @@ void command_summonitem(Client *c, const Seperator *sep)
 	}
 
 	int16 item_status = 0;
-	const Item_Struct* item = database.GetItem(itemid);
+	const EQEmu::ItemData* item = database.GetItem(itemid);
 	if (item) {
 		item_status = static_cast<int16>(item->MinStatus);
 	}
@@ -5548,7 +5562,7 @@ void command_giveitem(Client *c, const Seperator *sep)
 		Client *t = c->GetTarget()->CastToClient();
 		uint32 itemid = atoi(sep->arg[1]);
 		int16 item_status = 0;
-		const Item_Struct* item = database.GetItem(itemid);
+		const EQEmu::ItemData* item = database.GetItem(itemid);
 		if(item) {
 			item_status = static_cast<int16>(item->MinStatus);
 		}
@@ -5601,10 +5615,10 @@ void command_itemsearch(Client *c, const Seperator *sep)
 	{
 		const char *search_criteria=sep->argplus[1];
 
-		const Item_Struct* item = nullptr;
+		const EQEmu::ItemData* item = nullptr;
 		std::string item_link;
-		Client::TextLink linker;
-		linker.SetLinkType(linker.linkItemData);
+		EQEmu::SayLinkEngine linker;
+		linker.SetLinkType(EQEmu::saylink::SayLinkItemData);
 
 		if (Seperator::IsNumber(search_criteria)) {
 			item = database.GetItem(atoi(search_criteria));
@@ -5622,13 +5636,13 @@ void command_itemsearch(Client *c, const Seperator *sep)
 			return;
 		}
 
-		int count = NOT_USED;
+		int count = 0;
 		char sName[64];
 		char sCriteria[255];
 		strn0cpy(sCriteria, search_criteria, sizeof(sCriteria));
 		strupr(sCriteria);
 		char* pdest;
-		uint32 it = NOT_USED;
+		uint32 it = 0;
 		while ((item = database.IterateItems(&it))) {
 			strn0cpy(sName, item->Name, sizeof(sName));
 			strupr(sName);
@@ -5844,7 +5858,7 @@ void command_suspend(Client *c, const Seperator *sep)
         }
     }
 
-    char *escName = new char[strlen(sep->arg[1]) * 2 + 1];
+    auto escName = new char[strlen(sep->arg[1]) * 2 + 1];
     database.DoEscapeString(escName, sep->arg[1], strlen(sep->arg[1]));
     int accountID = database.GetAccountIDByChar(escName);
     safe_delete_array(escName);
@@ -5871,16 +5885,16 @@ void command_suspend(Client *c, const Seperator *sep)
         return;
     }
 
-    ServerPacket* pack = new ServerPacket(ServerOP_KickPlayer, sizeof(ServerKickPlayer_Struct));
-	ServerKickPlayer_Struct* sks = (ServerKickPlayer_Struct*) pack->pBuffer;
+    auto pack = new ServerPacket(ServerOP_KickPlayer, sizeof(ServerKickPlayer_Struct));
+    ServerKickPlayer_Struct *sks = (ServerKickPlayer_Struct *)pack->pBuffer;
 
-	strn0cpy(sks->adminname, c->GetName(), sizeof(sks->adminname));
-	strn0cpy(sks->name, sep->arg[1], sizeof(sks->name));
-	sks->adminrank = c->Admin();
+    strn0cpy(sks->adminname, c->GetName(), sizeof(sks->adminname));
+    strn0cpy(sks->name, sep->arg[1], sizeof(sks->name));
+    sks->adminrank = c->Admin();
 
-	worldserver.SendPacket(pack);
+    worldserver.SendPacket(pack);
 
-	safe_delete(pack);
+    safe_delete(pack);
 }
 
 void command_ipban(Client *c, const Seperator *sep)
@@ -5925,13 +5939,13 @@ void command_revoke(Client *c, const Seperator *sep)
 
 	c->Message(13, "#revoke: Couldn't find %s in this zone, passing request to worldserver.", sep->arg[1]);
 
-    ServerPacket * outapp = new ServerPacket (ServerOP_Revoke,sizeof(RevokeStruct));
-    RevokeStruct* revoke = (RevokeStruct*)outapp->pBuffer;
-    strn0cpy(revoke->adminname, c->GetName(), 64);
-    strn0cpy(revoke->name, sep->arg[1], 64);
-    revoke->toggle = flag;
-    worldserver.SendPacket(outapp);
-    safe_delete(outapp);
+	auto outapp = new ServerPacket(ServerOP_Revoke, sizeof(RevokeStruct));
+	RevokeStruct *revoke = (RevokeStruct *)outapp->pBuffer;
+	strn0cpy(revoke->adminname, c->GetName(), 64);
+	strn0cpy(revoke->name, sep->arg[1], 64);
+	revoke->toggle = flag;
+	worldserver.SendPacket(outapp);
+	safe_delete(outapp);
 }
 
 void command_oocmute(Client *c, const Seperator *sep)
@@ -5939,10 +5953,10 @@ void command_oocmute(Client *c, const Seperator *sep)
 	if(sep->arg[1][0] == 0 || !(sep->arg[1][0] == '1' || sep->arg[1][0] == '0'))
 		c->Message(0, "Usage: #oocmute [1/0]");
 	else {
-	ServerPacket * outapp = new ServerPacket (ServerOP_OOCMute,1);
-	*(outapp->pBuffer)=atoi(sep->arg[1]);
-	worldserver.SendPacket(outapp);
-	safe_delete(outapp);
+		auto outapp = new ServerPacket(ServerOP_OOCMute, 1);
+		*(outapp->pBuffer) = atoi(sep->arg[1]);
+		worldserver.SendPacket(outapp);
+		safe_delete(outapp);
 	}
 }
 
@@ -7114,16 +7128,16 @@ void command_path(Client *c, const Seperator *sep)
 }
 
 void Client::Undye() {
-	for (int cur_slot = EmuConstants::MATERIAL_BEGIN; cur_slot <= EmuConstants::MATERIAL_END; cur_slot++ ) {
+	for (int cur_slot = EQEmu::textures::textureBegin; cur_slot <= EQEmu::textures::LastTexture; cur_slot++) {
 		uint8 slot2=SlotConvert(cur_slot);
-		ItemInst* inst = m_inv.GetItem(slot2);
+		EQEmu::ItemInstance* inst = m_inv.GetItem(slot2);
 
 		if(inst != nullptr) {
 			inst->SetColor(inst->GetItem()->Color);
 			database.SaveInventory(CharacterID(), inst, slot2);
 		}
 
-		m_pp.item_tint[cur_slot].Color = 0;
+		m_pp.item_tint.Slot[cur_slot].Color = 0;
 		SendWearChange(cur_slot);
 	}
 
@@ -7772,7 +7786,7 @@ void command_task(Client *c, const Seperator *sep) {
 }
 void command_reloadtitles(Client *c, const Seperator *sep)
 {
-	ServerPacket* pack = new ServerPacket(ServerOP_ReloadTitles, 0);
+	auto pack = new ServerPacket(ServerOP_ReloadTitles, 0);
 	worldserver.SendPacket(pack);
 	safe_delete(pack);
 	c->Message(15, "Player Titles Reloaded.");
@@ -7814,7 +7828,7 @@ void command_traindisc(Client *c, const Seperator *sep)
 	t->Message(0, "Training disciplines");
 	if(t != c)
 		c->Message(0, "Training disciplines for %s.",  t->GetName());
-	Log.Out(Logs::General, Logs::Normal, "Train disciplines request for %s from %s, levels: %u -> %u",  t->GetName(), c->GetName(), min_level, max_level);
+	Log(Logs::General, Logs::Normal, "Train disciplines request for %s from %s, levels: %u -> %u",  t->GetName(), c->GetName(), min_level, max_level);
 
 	for(curspell = 0, count = 0; curspell < SPDAT_RECORDS; curspell++)
 	{
@@ -7834,7 +7848,7 @@ void command_traindisc(Client *c, const Seperator *sep)
 						break;	//continue the 1st loop
 					} else if(t->GetPP().disciplines.values[r] == 0) {
 						t->GetPP().disciplines.values[r] = curspell;
-						database.SaveCharacterDisc(c->CharacterID(), r, curspell);
+						database.SaveCharacterDisc(t->CharacterID(), r, curspell);
 						t->SendDisciplineUpdate();
 						t->Message(0, "You have learned a new discipline!");
 						count++;	//success counter
@@ -9665,14 +9679,6 @@ void command_showspellslist(Client *c, const Seperator *sep)
 	return;
 }
 
-// All new code added to command.cpp ought to be BEFORE this comment line. Do no append code to this file below the BOTS code block.
-#ifdef BOTS
-// Function delegate to support the command interface for Bots with the client.
-void command_bot(Client *c, const Seperator *sep) {
-	Bot::ProcessBotCommands(c, sep);
-}
-#endif
-
 void command_raidloot(Client *c, const Seperator *sep)
 {
 	if(!sep->arg[1][0]) {
@@ -9869,7 +9875,7 @@ void command_globalview(Client *c, const Seperator *sep)
 			QGlobalCache::Combine(globalMap, zone_c->GetBucket(), ntype, c->CharacterID(), zone->GetZoneID());
 		}
 
-		std::list<QGlobal>::iterator iter = globalMap.begin();
+		auto iter = globalMap.begin();
 		uint32 gcount = 0;
 
 		c->Message(0, "Name, Value");
@@ -9902,7 +9908,7 @@ void command_globalview(Client *c, const Seperator *sep)
 			QGlobalCache::Combine(globalMap, zone_c->GetBucket(), ntype, c->CharacterID(), zone->GetZoneID());
 		}
 
-		std::list<QGlobal>::iterator iter = globalMap.begin();
+		auto iter = globalMap.begin();
 		uint32 gcount = 0;
 
 		c->Message(0, "Name, Value");
@@ -9928,7 +9934,8 @@ void command_cvs(Client *c, const Seperator *sep)
 {
 	if(c)
 	{
-		ServerPacket *pack = new ServerPacket(ServerOP_ClientVersionSummary, sizeof(ServerRequestClientVersionSummary_Struct));
+		auto pack =
+		    new ServerPacket(ServerOP_ClientVersionSummary, sizeof(ServerRequestClientVersionSummary_Struct));
 
 		ServerRequestClientVersionSummary_Struct *srcvss = (ServerRequestClientVersionSummary_Struct*)pack->pBuffer;
 
@@ -9945,16 +9952,16 @@ void command_max_all_skills(Client *c, const Seperator *sep)
 {
 	if(c)
 	{
-		for(int i = 0; i <= HIGHEST_SKILL; ++i)
+		for (int i = 0; i <= EQEmu::skills::HIGHEST_SKILL; ++i)
 		{
-			if(i >= SkillSpecializeAbjure && i <= SkillSpecializeEvocation)
+			if (i >= EQEmu::skills::SkillSpecializeAbjure && i <= EQEmu::skills::SkillSpecializeEvocation)
 			{
-				c->SetSkill((SkillUseTypes)i, 50);
+				c->SetSkill((EQEmu::skills::SkillType)i, 50);
 			}
 			else
 			{
-				int max_skill_level = database.GetSkillCap(c->GetClass(), (SkillUseTypes)i, c->GetLevel());
-				c->SetSkill((SkillUseTypes)i, max_skill_level);
+				int max_skill_level = database.GetSkillCap(c->GetClass(), (EQEmu::skills::SkillType)i, c->GetLevel());
+				c->SetSkill((EQEmu::skills::SkillType)i, max_skill_level);
 			}
 		}
 	}
@@ -9988,7 +9995,7 @@ void command_reloadallrules(Client *c, const Seperator *sep)
 {
 	if(c)
 	{
-		ServerPacket *pack = new ServerPacket(ServerOP_ReloadRules, 0);
+		auto pack = new ServerPacket(ServerOP_ReloadRules, 0);
 		worldserver.SendPacket(pack);
 		c->Message(13, "Successfully sent the packet to world to reload rules globally. (including world)");
 		safe_delete(pack);
@@ -10000,7 +10007,7 @@ void command_reloadworldrules(Client *c, const Seperator *sep)
 {
 	if(c)
 	{
-		ServerPacket *pack = new ServerPacket(ServerOP_ReloadRulesWorld, 0);
+		auto pack = new ServerPacket(ServerOP_ReloadRulesWorld, 0);
 		worldserver.SendPacket(pack);
 		c->Message(13, "Successfully sent the packet to world to reload rules. (only world)");
 		safe_delete(pack);
@@ -10013,7 +10020,7 @@ void command_camerashake(Client *c, const Seperator *sep)
 	{
 		if(sep->arg[1][0] && sep->arg[2][0])
 		{
-			ServerPacket *pack = new ServerPacket(ServerOP_CameraShake, sizeof(ServerCameraShake_Struct));
+			auto pack = new ServerPacket(ServerOP_CameraShake, sizeof(ServerCameraShake_Struct));
 			ServerCameraShake_Struct* scss = (ServerCameraShake_Struct*) pack->pBuffer;
 			scss->duration = atoi(sep->arg[1]);
 			scss->intensity = atoi(sep->arg[2]);
@@ -10040,14 +10047,14 @@ void command_disarmtrap(Client *c, const Seperator *sep)
 
 	if(target->IsNPC())
 	{
-		if(c->HasSkill(SkillDisarmTraps))
+		if (c->HasSkill(EQEmu::skills::SkillDisarmTraps))
 		{
 			if(DistanceSquaredNoZ(c->GetPosition(), target->GetPosition()) > RuleI(Adventure, LDoNTrapDistanceUse))
 			{
 				c->Message(13, "%s is too far away.",  target->GetCleanName());
 				return;
 			}
-			c->HandleLDoNDisarm(target->CastToNPC(), c->GetSkill(SkillDisarmTraps), LDoNTypeMechanical);
+			c->HandleLDoNDisarm(target->CastToNPC(), c->GetSkill(EQEmu::skills::SkillDisarmTraps), LDoNTypeMechanical);
 		}
 		else
 			c->Message(13, "You do not have the disarm trap skill.");
@@ -10065,14 +10072,14 @@ void command_sensetrap(Client *c, const Seperator *sep)
 
 	if(target->IsNPC())
 	{
-		if(c->HasSkill(SkillSenseTraps))
+		if (c->HasSkill(EQEmu::skills::SkillSenseTraps))
 		{
 			if(DistanceSquaredNoZ(c->GetPosition(), target->GetPosition()) > RuleI(Adventure, LDoNTrapDistanceUse))
 			{
 				c->Message(13, "%s is too far away.",  target->GetCleanName());
 				return;
 			}
-			c->HandleLDoNSenseTraps(target->CastToNPC(), c->GetSkill(SkillSenseTraps), LDoNTypeMechanical);
+			c->HandleLDoNSenseTraps(target->CastToNPC(), c->GetSkill(EQEmu::skills::SkillSenseTraps), LDoNTypeMechanical);
 		}
 		else
 			c->Message(13, "You do not have the sense traps skill.");
@@ -10090,14 +10097,14 @@ void command_picklock(Client *c, const Seperator *sep)
 
 	if(target->IsNPC())
 	{
-		if(c->HasSkill(SkillPickLock))
+		if (c->HasSkill(EQEmu::skills::SkillPickLock))
 		{
 			if(DistanceSquaredNoZ(c->GetPosition(), target->GetPosition()) > RuleI(Adventure, LDoNTrapDistanceUse))
 			{
 				c->Message(13, "%s is too far away.",  target->GetCleanName());
 				return;
 			}
-			c->HandleLDoNPickLock(target->CastToNPC(), c->GetSkill(SkillPickLock), LDoNTypeMechanical);
+			c->HandleLDoNPickLock(target->CastToNPC(), c->GetSkill(EQEmu::skills::SkillPickLock), LDoNTypeMechanical);
 		}
 		else
 			c->Message(13, "You do not have the pick locks skill.");
@@ -10225,14 +10232,14 @@ void command_zopp(Client *c, const Seperator *sep)
 			packettype = ItemPacketTrade;
 		}
 		else {
-			packettype = ItemPacketSummonItem;
+			packettype = ItemPacketLimbo;
 		}
 
 		int16 slotid = atoi(sep->arg[2]);
 		uint32 itemid = atoi(sep->arg[3]);
 		int16 charges = sep->argnum == 4 ? atoi(sep->arg[4]) : 1; // defaults to 1 charge if not specified
 
-		const Item_Struct* FakeItem = database.GetItem(itemid);
+		const EQEmu::ItemData* FakeItem = database.GetItem(itemid);
 
 		if (!FakeItem) {
 			c->Message(13, "Error: Item [%u] is not a valid item id.",  itemid);
@@ -10240,7 +10247,7 @@ void command_zopp(Client *c, const Seperator *sep)
 		}
 
 		int16 item_status = 0;
-		const Item_Struct* item = database.GetItem(itemid);
+		const EQEmu::ItemData* item = database.GetItem(itemid);
 		if(item) {
 			item_status = static_cast<int16>(item->MinStatus);
 		}
@@ -10254,7 +10261,7 @@ void command_zopp(Client *c, const Seperator *sep)
 			c->Message(0, "Processing request..results may cause unpredictable behavior.");
 		}
 
-		ItemInst* FakeItemInst = database.CreateItem(FakeItem, charges);
+		EQEmu::ItemInstance* FakeItemInst = database.CreateItem(FakeItem, charges);
 		c->SendItemPacket(slotid, FakeItemInst, packettype);
 		c->Message(0, "Sending zephyr op packet to client - [%s] %s (%u) with %i %s to slot %i.",
 			   packettype == ItemPacketTrade ? "Trade" : "Summon",  FakeItem->Name, itemid, charges,
@@ -10268,10 +10275,10 @@ void command_augmentitem(Client *c, const Seperator *sep)
 	if (!c)
 		return;
 
-		AugmentItem_Struct* in_augment = new AugmentItem_Struct[sizeof(AugmentItem_Struct)];
-		in_augment->container_slot = 1000; // <watch>
-		in_augment->augment_slot = -1;
-		if(c->GetTradeskillObject() != nullptr)
+	auto in_augment = new AugmentItem_Struct[sizeof(AugmentItem_Struct)];
+	in_augment->container_slot = 1000; // <watch>
+	in_augment->augment_slot = -1;
+	if (c->GetTradeskillObject() != nullptr)
 		Object::HandleAugmentation(c, in_augment, c->GetTradeskillObject());
 		safe_delete_array(in_augment);
 }
@@ -10618,7 +10625,7 @@ void command_logtest(Client *c, const Seperator *sep){
 		uint32 i = 0;
 		t = std::clock();
 		for (i = 0; i < atoi(sep->arg[1]); i++){
-			Log.Out(Logs::General, Logs::Debug, "[%u] Test #2... Took %f seconds", i, ((float)(std::clock() - t)) / CLOCKS_PER_SEC);
+			Log(Logs::General, Logs::Debug, "[%u] Test #2... Took %f seconds", i, ((float)(std::clock() - t)) / CLOCKS_PER_SEC);
 		}
 
 	}
@@ -10636,7 +10643,7 @@ void command_logs(Client *c, const Seperator *sep){
 	if (sep->argnum > 0) {
 		/* #logs reload_all */
 		if (strcasecmp(sep->arg[1], "reload_all") == 0){
-			ServerPacket *pack = new ServerPacket(ServerOP_ReloadLogs, 0);
+			auto pack = new ServerPacket(ServerOP_ReloadLogs, 0);
 			worldserver.SendPacket(pack);
 			c->Message(13, "Successfully sent the packet to world to reload log settings from the database for all zones");
 			safe_delete(pack);
@@ -10650,22 +10657,22 @@ void command_logs(Client *c, const Seperator *sep){
 					c->Message(0, "[Category ID | console | file | gmsay | Category Description]");
 					redisplay_columns = 0;
 				}
-				c->Message(0, StringFormat("--- %i | %u | %u | %u | %s",  i, Log.log_settings[i].log_to_console, Log.log_settings[i].log_to_file, Log.log_settings[i].log_to_gmsay, Logs::LogCategoryName[i]).c_str());
+				c->Message(0, StringFormat("--- %i | %u | %u | %u | %s",  i, LogSys.log_settings[i].log_to_console, LogSys.log_settings[i].log_to_file, LogSys.log_settings[i].log_to_gmsay, Logs::LogCategoryName[i]).c_str());
 				redisplay_columns++;
 			}
 		}
 		/* #logs set */
 		if (strcasecmp(sep->arg[1], "set") == 0){
 			if (strcasecmp(sep->arg[2], "console") == 0){
-				Log.log_settings[atoi(sep->arg[3])].log_to_console = atoi(sep->arg[4]);
+				LogSys.log_settings[atoi(sep->arg[3])].log_to_console = atoi(sep->arg[4]);
 				logs_set = 1;
 			}
 			else if (strcasecmp(sep->arg[2], "file") == 0){
-				Log.log_settings[atoi(sep->arg[3])].log_to_file = atoi(sep->arg[4]);
+				LogSys.log_settings[atoi(sep->arg[3])].log_to_file = atoi(sep->arg[4]);
 				logs_set = 1;
 			}
 			else if (strcasecmp(sep->arg[2], "gmsay") == 0){
-				Log.log_settings[atoi(sep->arg[3])].log_to_gmsay = atoi(sep->arg[4]);
+				LogSys.log_settings[atoi(sep->arg[3])].log_to_gmsay = atoi(sep->arg[4]);
 				logs_set = 1;
 			}
 			else{
@@ -10679,11 +10686,11 @@ void command_logs(Client *c, const Seperator *sep){
 			/* We use a general 'is_category_enabled' now, let's update when we update any output settings
 				This is used in hot places of code to check if its enabled in any way before triggering logs
 			*/
-			if (sep->arg[4] > 0){
-				Log.log_settings[atoi(sep->arg[3])].is_category_enabled = 1;
+			if (atoi(sep->arg[4]) > 0){
+				LogSys.log_settings[atoi(sep->arg[3])].is_category_enabled = 1;
 			}
 			else{
-				Log.log_settings[atoi(sep->arg[3])].is_category_enabled = 0;
+				LogSys.log_settings[atoi(sep->arg[3])].is_category_enabled = 0;
 			}
 		}
 	}
@@ -10706,7 +10713,7 @@ void command_mysqltest(Client *c, const Seperator *sep)
 			auto results = database.QueryDatabase(query);
 		}
 	}
-	Log.Out(Logs::General, Logs::Debug, "MySQL Test... Took %f seconds", ((float)(std::clock() - t)) / CLOCKS_PER_SEC);
+	Log(Logs::General, Logs::Debug, "MySQL Test... Took %f seconds", ((float)(std::clock() - t)) / CLOCKS_PER_SEC);
 }
 
 void command_resetaa_timer(Client *c, const Seperator *sep) {
@@ -10742,12 +10749,11 @@ void command_reloadaa(Client *c, const Seperator *sep) {
 }
 
 void command_hotfix(Client *c, const Seperator *sep) {
-	char hotfix[256] = { 0 };
-	database.GetVariable("hotfix_name", hotfix, 256);
-	std::string current_hotfix = hotfix;
+	std::string hotfix;
+	database.GetVariable("hotfix_name", hotfix);
 
 	std::string hotfix_name;
-	if(!strcasecmp(current_hotfix.c_str(), "hotfix_")) {
+	if(!strcasecmp(hotfix.c_str(), "hotfix_")) {
 		hotfix_name = "";
 	} else {
 		hotfix_name = "hotfix_";
@@ -10769,7 +10775,7 @@ void command_hotfix(Client *c, const Seperator *sep) {
 			system(StringFormat("./shared_memory").c_str());
 		}
 #endif
-		database.SetVariable("hotfix_name", hotfix_name.c_str());
+		database.SetVariable("hotfix_name", hotfix_name);
 
 		ServerPacket pack(ServerOP_ChangeSharedMem, hotfix_name.length() + 1);
 		if(hotfix_name.length() > 0) {
@@ -10784,12 +10790,11 @@ void command_hotfix(Client *c, const Seperator *sep) {
 }
 
 void command_load_shared_memory(Client *c, const Seperator *sep) {
-	char hotfix[256] = { 0 };
-	database.GetVariable("hotfix_name", hotfix, 256);
-	std::string current_hotfix = hotfix;
+	std::string hotfix;
+	database.GetVariable("hotfix_name", hotfix);
 
 	std::string hotfix_name;
-	if(strcasecmp(current_hotfix.c_str(), sep->arg[1]) == 0) {
+	if(strcasecmp(hotfix.c_str(), sep->arg[1]) == 0) {
 		c->Message(0, "Cannot attempt to load this shared memory segment as it is already loaded.");
 		return;
 	}
@@ -10818,12 +10823,12 @@ void command_load_shared_memory(Client *c, const Seperator *sep) {
 }
 
 void command_apply_shared_memory(Client *c, const Seperator *sep) {
-	char hotfix[256] = { 0 };
-	database.GetVariable("hotfix_name", hotfix, 256);
+	std::string hotfix;
+	database.GetVariable("hotfix_name", hotfix);
 	std::string hotfix_name = sep->arg[1];
-	
+
 	c->Message(0, "Applying shared memory segment %s", hotfix_name.c_str());
-	database.SetVariable("hotfix_name", hotfix_name.c_str());
+	database.SetVariable("hotfix_name", hotfix_name);
 
 	ServerPacket pack(ServerOP_ChangeSharedMem, hotfix_name.length() + 1);
 	if(hotfix_name.length() > 0) {
@@ -10836,10 +10841,41 @@ void command_reloadperlexportsettings(Client *c, const Seperator *sep)
 {
 	if (c)
 	{
-		ServerPacket *pack = new ServerPacket(ServerOP_ReloadPerlExportSettings, 0);
+		auto pack = new ServerPacket(ServerOP_ReloadPerlExportSettings, 0);
 		worldserver.SendPacket(pack);
 		c->Message(13, "Successfully sent the packet to world to reload Perl Export settings");
 		safe_delete(pack);
 
 	}
 }
+
+
+// All new code added to command.cpp should be BEFORE this comment line. Do no append code to this file below the BOTS code block.
+#ifdef BOTS
+#include "bot_command.h"
+// Function delegate to support the command interface for Bots with the client.
+void command_bot(Client *c, const Seperator *sep)
+{
+	std::string bot_message = sep->msg;
+	if (bot_message.compare("#bot") == 0) {
+		bot_message[0] = BOT_COMMAND_CHAR;
+	}
+	else {
+		bot_message = bot_message.substr(bot_message.find_first_not_of("#bot"));
+		bot_message[0] = BOT_COMMAND_CHAR;
+	}
+	
+	if (bot_command_dispatch(c, bot_message.c_str()) == -2) {
+		if (parse->PlayerHasQuestSub(EVENT_COMMAND)) {
+			int i = parse->EventPlayer(EVENT_COMMAND, c, bot_message, 0);
+			if (i == 0 && !RuleB(Chat, SuppressCommandErrors)) {
+				c->Message(13, "Bot command '%s' not recognized.", bot_message.c_str());
+			}
+		}
+		else {
+			if (!RuleB(Chat, SuppressCommandErrors))
+				c->Message(13, "Bot command '%s' not recognized.", bot_message.c_str());
+		}
+	}
+}
+#endif

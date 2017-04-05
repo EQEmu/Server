@@ -29,7 +29,11 @@
 
 class Client;
 class EQApplicationPacket;
-class ItemInst;
+
+namespace EQEmu
+{
+	class ItemInstance;
+}
 
 /*
 item icon numbers (showeq)
@@ -69,7 +73,7 @@ IT10714_ACTORDEF=Augmentation Sealer
 IT10725_ACTORDEF=Shuriken
 */
 
-#define OT_DROPPEDITEM BagTypeLargeBag
+#define OT_DROPPEDITEM EQEmu::item::BagTypeLargeBag
 
 // Icon values:
 //0x0453 a pie
@@ -89,11 +93,11 @@ class Object: public Entity
 {
 public:
 	// Loading object from database
-	Object(uint32 id, uint32 type, uint32 icon, const Object_Struct& data, const ItemInst* inst);
-	Object(const ItemInst* inst, char* name,float max_x,float min_x,float max_y,float min_y,float z,float heading,uint32 respawntimer);
+	Object(uint32 id, uint32 type, uint32 icon, const Object_Struct& data, const EQEmu::ItemInstance* inst);
+	Object(const EQEmu::ItemInstance* inst, char* name,float max_x,float min_x,float max_y,float min_y,float z,float heading,uint32 respawntimer);
 	// Loading object from client dropping item on ground
-	Object(Client* client, const ItemInst* inst);
-	Object(const ItemInst *inst, float x, float y, float z, float heading, uint32 decay_time = 300000);
+	Object(Client* client, const EQEmu::ItemInstance* inst);
+	Object(const EQEmu::ItemInstance *inst, float x, float y, float z, float heading, uint32 decay_time = 300000);
 	Object(const char *model, float x, float y, float z, float heading, uint8 type, uint32 decay_time = 0);
 
 	// Destructor
@@ -108,7 +112,7 @@ public:
 	static void HandleAugmentation(Client* user, const AugmentItem_Struct* in_augment, Object *worldo);
 	static void HandleAutoCombine(Client* user, const RecipeAutoCombine_Struct* rac);
 
-	static SkillUseTypes TypeToSkill(uint32 type);
+	static EQEmu::skills::SkillType TypeToSkill(uint32 type);
 
 	// Packet functions
 	void CreateSpawnPacket(EQApplicationPacket* app);
@@ -120,10 +124,10 @@ public:
 	void StartDecay() {decay_timer.Start();}
 
 	// Container functions
-	const ItemInst* GetItem(uint8 index);
-	void PutItem(uint8 index, const ItemInst* inst);
+	const EQEmu::ItemInstance* GetItem(uint8 index);
+	void PutItem(uint8 index, const EQEmu::ItemInstance* inst);
 	void DeleteItem(uint8 index); // Item inside container
-	ItemInst* PopItem(uint8 index); // Pop item out of container
+	EQEmu::ItemInstance* PopItem(uint8 index); // Pop item out of container
 
 	// Override base class implementations
 	virtual bool IsObject()	const { return true; }
@@ -154,12 +158,18 @@ public:
 	void SetX(float pos);
 	void SetY(float pos);
 	void SetZ(float pos);
+	void SetTiltX(float pos);
+	void SetTiltY(float pos);
+	float GetTiltX();
+	float GetTiltY();
 	void SetModelName(const char* modelname);
 	const char* GetModelName();
-	uint16 GetSize();
-	void SetSize(uint16 size);
+	float GetSize();
+	void SetSize(float size);
 	uint16 GetSolidType();
 	void SetSolidType(uint16 size);
+	void SetDisplayName(const char *in_name);
+	const char *GetDisplayName() const { return m_display_name; }
 
 	const char* GetEntityVariable(const char *id);
 	void SetEntityVariable(const char *id, const char *m_var);
@@ -170,7 +180,7 @@ protected:
 	void	RandomSpawn(bool send_packet = false);		//spawn this ground spawn at a random place
 
 	Object_Struct	m_data;		// Packet data
-	ItemInst*		m_inst;		// Item representing object
+	EQEmu::ItemInstance*		m_inst;		// Item representing object
 	bool			m_inuse;	// Currently in use by a client?
 	uint32			m_id;		// Database key, different than drop_id
 	uint32			m_type;		// Object Type, ie, forge, oven, dropped item, etc (ref: ContainerUseTypes)
@@ -182,6 +192,7 @@ protected:
 	float			m_z;
 	float			m_heading;
 	bool			m_ground_spawn;
+	char			m_display_name[64];
 
 	std::map<std::string, std::string> o_EntityVariables;
 

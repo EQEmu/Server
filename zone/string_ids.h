@@ -46,6 +46,7 @@
 #define FISHING_FAILED				168		//You didn't catch anything.
 #define FISHING_POLE_BROKE			169		//Your fishing pole broke!
 #define FISHING_SUCCESS				170		//You caught, something...
+#define FISHING_SUCCESS_FISH_NAME	421		//You caught %1!
 #define FISHING_SPILL_BEER			171		//You spill your beer while bringing in your line.
 #define FISHING_LOST_BAIT			172		//You lost your bait!
 #define SPELL_FIZZLE				173		//Your spell fizzles!
@@ -255,6 +256,7 @@
 #define MEMBER_OF_YOUR_GUILD		1429
 #define OFFICER_OF_YOUR_GUILD		1430
 #define LEADER_OF_YOUR_GUILD		1431
+#define TRADE_HAS_BEEN_CANCELLED	1449
 #define RECEIVED_PLATINUM			1452	//You receive %1 Platinum from %2.
 #define RECEIVED_GOLD				1453	//You receive %1 Gold from %2.
 #define RECEIVED_SILVER				1454	//You receive %1 Silver from %2.
@@ -277,6 +279,7 @@
 #define TRADESKILL_MISSING_COMPONENTS	3456	//Sorry, but you don't have everything you need for this recipe in your general inventory.
 #define TRADESKILL_LEARN_RECIPE		3457	//You have learned the recipe %1!
 #define EXPEDITION_MIN_REMAIN		3551	//You only have %1 minutes remaining before this expedition comes to an end.
+#define LOOT_NOT_ALLOWED			3562	//You are not allowed to loot the item: %1.
 #define NO_CAST_ON_PET				4045	//You cannot cast this spell on your pet.
 #define REWIND_WAIT					4059	//You must wait a bit longer before using the rewind command again.
 #define CORPSEDRAG_LIMIT			4061	//You are already dragging as much as you can!
@@ -297,6 +300,7 @@
 #define ADVENTURE_COMPLETE			5147	//You received %1 points for successfully completing the adventure.
 #define SUCCOR_FAIL					5169	//The portal collapes before you can escape!
 #define PET_ATTACKING				5501	//%1 tells you, 'Attacking %2 Master.'
+#define AVOID_STUNNING_BLOW			5753	//You avoid the stunning blow.
 #define FATAL_BOW_SHOT				5745	//%1 performs a FATAL BOW SHOT!!
 #define MELEE_SILENCE				5806	//You *CANNOT* use this melee ability, you are suffering from amnesia!
 #define DISCIPLINE_REUSE_MSG		5807	//You can use the ability %1 again in %2 hour(s) %3 minute(s) %4 seconds.
@@ -354,7 +358,7 @@
 #define HIT_NON_MELEE				9073	//%1 hit %2 for %3 points of non-melee damage.
 #define GLOWS_BLUE					9074	//Your %1 glows blue.
 #define GLOWS_RED					9075	//Your %1 glows red.
-#define SHAKE_OFF_STUN				9077
+#define SHAKE_OFF_STUN				9077	//You shake off the stun effect!
 #define STRIKETHROUGH_STRING		9078	//You strike through your opponent's defenses!
 #define SPELL_REFLECT				9082	//%1's spell has been reflected by %2.
 #define NEW_SPELLS_AVAIL			9149	//You have new spells available to you. Check the merchants near your guild master.

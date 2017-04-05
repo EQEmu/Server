@@ -46,7 +46,7 @@ bool TitleManager::LoadTitles()
 	for (auto row = results.begin(); row != results.end(); ++row) {
         TitleEntry Title;
 		Title.TitleID = atoi(row[0]);
-		Title.SkillID = (SkillUseTypes) atoi(row[1]);
+		Title.SkillID = (EQEmu::skills::SkillType) atoi(row[1]);
 		Title.MinSkillValue = atoi(row[2]);
 		Title.MaxSkillValue = atoi(row[3]);
 		Title.MinAAPoints = atoi(row[4]);
@@ -91,7 +91,7 @@ EQApplicationPacket *TitleManager::MakeTitlesPacket(Client *c)
 
 	}
 
-	EQApplicationPacket *outapp = new EQApplicationPacket(OP_SendTitleList, Length);
+	auto outapp = new EQApplicationPacket(OP_SendTitleList, Length);
 
 	char *Buffer = (char *)outapp->pBuffer;
 
@@ -187,10 +187,10 @@ bool TitleManager::IsClientEligibleForTitle(Client *c, std::vector<TitleEntry>::
 
 		if(Title->SkillID >= 0)
 		{
-			if((Title->MinSkillValue >= 0) && (c->GetRawSkill(static_cast<SkillUseTypes>(Title->SkillID)) < static_cast<uint32>(Title->MinSkillValue)))
+			if ((Title->MinSkillValue >= 0) && (c->GetRawSkill(static_cast<EQEmu::skills::SkillType>(Title->SkillID)) < static_cast<uint32>(Title->MinSkillValue)))
 				return false;
 
-			if((Title->MaxSkillValue >= 0) && (c->GetRawSkill(static_cast<SkillUseTypes>(Title->SkillID)) > static_cast<uint32>(Title->MaxSkillValue)))
+			if ((Title->MaxSkillValue >= 0) && (c->GetRawSkill(static_cast<EQEmu::skills::SkillType>(Title->SkillID)) > static_cast<uint32>(Title->MaxSkillValue)))
 				return false;
 
 		}
@@ -243,7 +243,7 @@ void TitleManager::CreateNewPlayerTitle(Client *client, const char *title)
 	if(!client || !title)
 		return;
 
-	char *escTitle = new char[strlen(title) * 2 + 1];
+	auto escTitle = new char[strlen(title) * 2 + 1];
 
 	client->SetAATitle(title);
 
@@ -265,7 +265,7 @@ void TitleManager::CreateNewPlayerTitle(Client *client, const char *title)
         return;
     }
 
-    ServerPacket* pack = new ServerPacket(ServerOP_ReloadTitles, 0);
+    auto pack = new ServerPacket(ServerOP_ReloadTitles, 0);
     worldserver.SendPacket(pack);
     safe_delete(pack);
 }
@@ -277,8 +277,8 @@ void TitleManager::CreateNewPlayerSuffix(Client *client, const char *suffix)
 
     client->SetTitleSuffix(suffix);
 
-	char *escSuffix = new char[strlen(suffix) * 2 + 1];
-	database.DoEscapeString(escSuffix, suffix, strlen(suffix));
+    auto escSuffix = new char[strlen(suffix) * 2 + 1];
+    database.DoEscapeString(escSuffix, suffix, strlen(suffix));
 
     std::string query = StringFormat("SELECT `id` FROM titles "
                                     "WHERE `suffix` = '%s' AND char_id = %i",
@@ -297,7 +297,7 @@ void TitleManager::CreateNewPlayerSuffix(Client *client, const char *suffix)
         return;
     }
 
-    ServerPacket* pack = new ServerPacket(ServerOP_ReloadTitles, 0);
+    auto pack = new ServerPacket(ServerOP_ReloadTitles, 0);
     worldserver.SendPacket(pack);
     safe_delete(pack);
 }
@@ -306,7 +306,7 @@ void Client::SetAATitle(const char *Title)
 {
 	strn0cpy(m_pp.title, Title, sizeof(m_pp.title));
 
-	EQApplicationPacket *outapp = new EQApplicationPacket(OP_SetTitleReply, sizeof(SetTitleReply_Struct));
+	auto outapp = new EQApplicationPacket(OP_SetTitleReply, sizeof(SetTitleReply_Struct));
 
 	SetTitleReply_Struct *strs = (SetTitleReply_Struct *)outapp->pBuffer;
 
@@ -323,7 +323,7 @@ void Client::SetTitleSuffix(const char *Suffix)
 {
 	strn0cpy(m_pp.suffix, Suffix, sizeof(m_pp.suffix));
 
-	EQApplicationPacket *outapp = new EQApplicationPacket(OP_SetTitleReply, sizeof(SetTitleReply_Struct));
+	auto outapp = new EQApplicationPacket(OP_SetTitleReply, sizeof(SetTitleReply_Struct));
 
 	SetTitleReply_Struct *strs = (SetTitleReply_Struct *)outapp->pBuffer;
 
@@ -348,7 +348,7 @@ void Client::EnableTitle(int titleSet) {
                                     CharacterID(), titleSet);
     auto results = database.QueryDatabase(query);
 	if(!results.Success())
-		Log.Out(Logs::General, Logs::Error, "Error in EnableTitle query for titleset %i and charid %i", titleSet, CharacterID());
+		Log(Logs::General, Logs::Error, "Error in EnableTitle query for titleset %i and charid %i", titleSet, CharacterID());
 
 }
 

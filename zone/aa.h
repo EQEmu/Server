@@ -1511,7 +1511,7 @@ typedef enum {	//AA IDs
 } aaID;
 
 //Structure representing the database's swarm pet configs
-struct AA_SwarmPet {
+struct SwarmPet_Struct {
 	uint8 count;		//number to summon
 	uint32 npc_id;		//id from npc_types to represent it.
 	uint16 duration;		//how long they last, in seconds
@@ -1526,10 +1526,10 @@ enum {	//values of AA_Action.action
 
 class Timer;
 class Mob;
-class AA_SwarmPetInfo {
+class SwarmPet {
 public:
-	AA_SwarmPetInfo();
-	~AA_SwarmPetInfo();
+	SwarmPet();
+	~SwarmPet();
 	Mob * GetOwner();
 	Timer *duration;
 	uint32 target; //the target ID

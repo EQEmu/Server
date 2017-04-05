@@ -1,5 +1,5 @@
 /*	EQEMu: Everquest Server Emulator
-	Copyright (C) 2001-2003 EQEMu Development Team (http://eqemulator.net)
+	Copyright (C) 2001-2016 EQEMu Development Team (http://eqemulator.net)
 
 	This program is free software; you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -25,16 +25,17 @@
 #include <list>
 #include <time.h>
 #include "../common/version.h"
-//#include "../common/item_struct.h"
+#include "emu_constants.h"
+#include "textures.h"
+
 
 static const uint32 BUFF_COUNT = 25;
+static const uint32 PET_BUFF_COUNT = 30;
 static const uint32 MAX_MERC = 100;
 static const uint32 MAX_MERC_GRADES = 10;
 static const uint32 MAX_MERC_STANCES = 10;
 static const uint32 BLOCKED_BUFF_COUNT = 20;
 
-//#include "eq_constants.h"
-#include "eq_dictionary.h"
 
 /*
 ** Compiler override to ensure
@@ -126,37 +127,7 @@ struct LDoNTrapTemplate
 
 // All clients translate the character select information to some degree
 
-struct Color_Struct
-{
-	union {
-		struct {
-			uint8 Blue;
-			uint8 Green;
-			uint8 Red;
-			uint8 UseTint;	// if there's a tint this is FF
-		} RGB;
-		uint32 Color;
-	};
-};
-
-struct EquipStruct
-{
-	uint32 Material;
-	uint32 Unknown1;
-	uint32 EliteMaterial;
-	uint32 HeroForgeModel;
-	uint32 Material2;	// Same as material?
-};
-
-struct CharSelectEquip
-{
-	uint32 Material;
-	uint32 Unknown1;
-	uint32 EliteMaterial;
-	uint32 HeroForgeModel;
-	uint32 Material2;
-	Color_Struct Color;
-};
+struct CharSelectEquip : EQEmu::textures::Texture_Struct, EQEmu::textures::Tint_Struct {};
 
 // RoF2-based hybrid struct
 struct CharacterSelectEntry_Struct
@@ -171,7 +142,7 @@ struct CharacterSelectEntry_Struct
 	uint16 Instance;
 	uint8 Gender;
 	uint8 Face;
-	CharSelectEquip	Equip[9];
+	CharSelectEquip	Equip[EQEmu::textures::materialCount];
 	uint8 Unknown15;			// Seen FF
 	uint8 Unknown19;			// Seen FF
 	uint32 DrakkinTattoo;
@@ -280,22 +251,7 @@ struct Spawn_Struct {
 /*0189*/ uint32	petOwnerId;			// If this is a pet, the spawn id of owner
 /*0193*/ uint8	guildrank;			// 0=normal, 1=officer, 2=leader
 /*0194*/ uint8	unknown0194[3];
-/*0197*/ union
-{
-	struct
-	{
-		/*0000*/ EquipStruct equip_helmet;     // Equipment: Helmet visual
-		/*0000*/ EquipStruct equip_chest;      // Equipment: Chest visual
-		/*0000*/ EquipStruct equip_arms;       // Equipment: Arms visual
-		/*0000*/ EquipStruct equip_bracers;    // Equipment: Wrist visual
-		/*0000*/ EquipStruct equip_hands;      // Equipment: Hands visual
-		/*0000*/ EquipStruct equip_legs;       // Equipment: Legs visual
-		/*0000*/ EquipStruct equip_feet;       // Equipment: Boots visual
-		/*0000*/ EquipStruct equip_primary;    // Equipment: Main visual
-		/*0000*/ EquipStruct equip_secondary;  // Equipment: Off visual
-	} equip;
-	/*0000*/ EquipStruct equipment[_MaterialCount];
-};
+/*0197*/ EQEmu::TextureProfile equipment;
 /*0233*/ float	runspeed;		// Speed when running
 /*0036*/ uint8	afk;			// 0=no, 1=afk
 /*0238*/ uint32	guildID;		// Current guild
@@ -326,22 +282,7 @@ union
 /*0340*/ uint32 spawnId;		// Spawn Id
 /*0344*/ uint8 unknown0344[3];
 /*0347*/ uint8 IsMercenary;
-/*0348*/ union
-		 {
-			struct
-			{
-				/*0348*/ Color_Struct color_helmet;		// Color of helmet item
-				/*0352*/ Color_Struct color_chest;		// Color of chest item
-				/*0356*/ Color_Struct color_arms;		// Color of arms item
-				/*0360*/ Color_Struct color_bracers;	// Color of bracers item
-				/*0364*/ Color_Struct color_hands;		// Color of hands item
-				/*0368*/ Color_Struct color_legs;		// Color of legs item
-				/*0372*/ Color_Struct color_feet;		// Color of feet item
-				/*0376*/ Color_Struct color_primary;	// Color of primary item
-				/*0380*/ Color_Struct color_secondary;	// Color of secondary item
-			} equipment_colors;
-			/*0348*/ Color_Struct colors[_MaterialCount]; // Array elements correspond to struct equipment_colors above
-		 };
+/*0348*/ EQEmu::TintProfile equipment_tint;
 /*0384*/ uint8	lfg;			// 0=off, 1=lfg on
 /*0385*/
 
@@ -446,7 +387,19 @@ struct MemorizeSpell_Struct {
 uint32 slot;		// Spot in the spell book/memorized slot
 uint32 spell_id;	// Spell id (200 or c8 is minor healing, etc)
 uint32 scribing;	// 1 if memorizing a spell, set to 0 if scribing to book, 2 if un-memming
-uint32 unknown12;
+uint32 reduction;	// lower reuse
+};
+
+/*
+** Linked Spell Reuse Timer
+** Length: 12
+** Comes before the OP_Memorize
+** Live (maybe TDS steam) has an extra DWORD after timer_id
+*/
+struct LinkedSpellReuseTimer_Struct {
+	uint32 timer_id; // Timer ID of the spell
+	uint32 end_time; // timestamp of when it will be ready
+	uint32 start_time; // timestamp of when it started
 };
 
 /*
@@ -479,10 +432,11 @@ struct DeleteSpell_Struct
 
 struct ManaChange_Struct
 {
-	uint32	new_mana; // New Mana AMount
-	uint32	stamina;
-	uint32	spell_id;
-	uint32	unknown12;
+/*00*/	uint32	new_mana;		// New Mana AMount
+/*04*/	uint32	stamina;
+/*08*/	uint32	spell_id;
+/*12*/	uint8	keepcasting;	// won't stop the cast. Change mana while casting?
+/*13*/	uint8	padding[3];		// client doesn't read it, garbage data seems like
 };
 
 struct SwapSpell_Struct
@@ -548,30 +502,28 @@ struct SpawnAppearance_Struct
 // this is used inside profile
 struct SpellBuff_Struct
 {
-/*000*/	uint8	slotid;		//badly named... seems to be 2 for a real buff, 0 otherwise
-/*001*/ uint8	level;
+/*000*/	uint8	effect_type;	// 0 = no buff, 2 = buff, 4 = inverse affects of buff
+/*001*/	uint8	level;
 /*002*/	uint8	bard_modifier;
-/*003*/	uint8	effect;			//not real
+/*003*/	uint8	unknown003;		// MQ2 used to call this "damage shield" -- don't see client referencing it, so maybe server side DS type tracking? -- OSX client calls this "activated"
 /*004*/	uint32	spellid;
-/*008*/ int32	duration;
-/*012*/	uint32	counters;
-/*016*/	uint32	player_id;	//'global' ID of the caster, for wearoff messages
-/*020*/
+/*008*/	int32	duration;
+/*012*/	uint32	counters;	// single book keeping value (counters, rune/vie)
+/*016*/	uint32	player_id;	// caster ID, pretty sure just zone ID
+// extra stuff for newer packets
+/*020*/	uint32	num_hits;
+/*024*/	float	y;				// referenced by SPA 441
+/*028*/	float	x;				// unsure if all buffs get them
+/*032*/	float	z;				// as valid data
+/*036*/
 };
 
-struct SpellBuffFade_Struct {
+struct SpellBuffPacket_Struct {
 /*000*/	uint32 entityid;
-/*004*/	uint8 slot;
-/*005*/	uint8 level;
-/*006*/	uint8 effect;
-/*007*/	uint8 unknown7;
-/*008*/	uint32 spellid;
-/*012*/	int32 duration;
-/*016*/	uint32 num_hits;
-/*020*/	uint32 unknown020;	//prolly global player ID
-/*024*/	uint32 slotid;
-/*028*/	uint32 bufffade;
-/*032*/
+/*004*/	SpellBuff_Struct buff;
+/*040*/	uint32 slotid;
+/*044*/	uint32 bufffade;
+/*048*/
 };
 
 // Underfoot & later struct.
@@ -584,8 +536,8 @@ struct BuffRemoveRequest_Struct
 
 struct PetBuff_Struct {
 /*000*/ uint32 petid;
-/*004*/ uint32 spellid[BUFF_COUNT+5];
-/*124*/ int32 ticsremaining[BUFF_COUNT+5];
+/*004*/ uint32 spellid[PET_BUFF_COUNT];
+/*124*/ int32 ticsremaining[PET_BUFF_COUNT];
 /*244*/ uint32 buffcount;
 };
 
@@ -777,7 +729,7 @@ struct BandolierItem_Struct
 struct Bandolier_Struct
 {
 	char Name[32];
-	BandolierItem_Struct Items[EmuConstants::BANDOLIER_ITEM_COUNT];
+	BandolierItem_Struct Items[EQEmu::legacy::BANDOLIER_ITEM_COUNT];
 };
 
 //len = 72
@@ -791,7 +743,7 @@ struct PotionBeltItem_Struct
 //len = 288
 struct PotionBelt_Struct
 {
-	PotionBeltItem_Struct Items[EmuConstants::POTION_BELT_ITEM_COUNT];
+	PotionBeltItem_Struct Items[EQEmu::legacy::POTION_BELT_ITEM_COUNT];
 };
 
 struct MovePotionToBelt_Struct
@@ -882,7 +834,7 @@ struct SuspendedMinion_Struct
 	/*002*/	uint32 HP;
 	/*006*/	uint32 Mana;
 	/*010*/	SpellBuff_Struct Buffs[BUFF_COUNT];
-	/*510*/	uint32 Items[_MaterialCount];
+	/*510*/	EQEmu::TextureMaterialProfile Items;
 	/*546*/	char Name[64];
 	/*610*/
 };
@@ -896,7 +848,7 @@ struct SuspendedMinion_Struct
  */
 static const uint32 MAX_PP_LANGUAGE = 28;
 static const uint32 MAX_PP_SPELLBOOK = 480;	// Set for all functions
-static const uint32 MAX_PP_MEMSPELL = 9; // Set to latest client so functions can work right
+static const uint32 MAX_PP_MEMSPELL = static_cast<uint32>(EQEmu::CastingSlot::MaxGems); // Set to latest client so functions can work right -- 12
 static const uint32 MAX_PP_REF_SPELLBOOK = 480;	// Set for Player Profile size retain
 static const uint32 MAX_PP_REF_MEMSPELL = 9; // Set for Player Profile size retain
 
@@ -977,7 +929,7 @@ struct PlayerProfile_Struct
 /*0245*/	uint8				guildbanker;
 /*0246*/	uint8				unknown0246[6];		//
 /*0252*/	uint32				intoxication;
-/*0256*/	uint32				spellSlotRefresh[MAX_PP_REF_MEMSPELL];	//in ms
+/*0256*/	uint32				spellSlotRefresh[MAX_PP_MEMSPELL];	//in ms
 /*0292*/	uint32				abilitySlotRefresh;
 /*0296*/	uint8				haircolor;			// Player hair color
 /*0297*/	uint8				beardcolor;			// Player beard color
@@ -990,9 +942,9 @@ struct PlayerProfile_Struct
 /*0304*/	uint8				ability_time_minutes;
 /*0305*/	uint8				ability_time_hours;	//place holder
 /*0306*/	uint8				unknown0306[6];		// @bp Spacer/Flag?
-/*0312*/	uint32				item_material[_MaterialCount];	// Item texture/material of worn/held items
+/*0312*/	EQEmu::TextureMaterialProfile	item_material;	// Item texture/material of worn/held items
 /*0348*/	uint8				unknown0348[44];
-/*0392*/	Color_Struct		item_tint[_MaterialCount];
+/*0392*/	EQEmu::TintProfile	item_tint;
 /*0428*/	AA_Array			aa_array[MAX_PP_AA_ARRAY];
 /*2348*/	float				unknown2384;		//seen ~128, ~47
 /*2352*/	char				servername[32];		// length probably not right
@@ -1018,7 +970,7 @@ struct PlayerProfile_Struct
 /*2580*/	uint8				unknown2616[4];
 /*2584*/	uint32				spell_book[MAX_PP_REF_SPELLBOOK];
 /*4504*/	uint8				unknown4540[128];	// Was [428] all 0xff
-/*4632*/	uint32				mem_spells[MAX_PP_REF_MEMSPELL];
+/*4632*/	uint32				mem_spells[MAX_PP_MEMSPELL];
 /*4668*/	uint8				unknown4704[32];	//
 /*4700*/	float				y;					// Player y position
 /*4704*/	float				x;					// Player x position
@@ -1093,7 +1045,7 @@ struct PlayerProfile_Struct
 /*7212*/	uint32				tribute_points;
 /*7216*/	uint32				unknown7252;
 /*7220*/	uint32				tribute_active;		//1=active
-/*7224*/	Tribute_Struct		tributes[EmuConstants::TRIBUTE_SIZE];
+/*7224*/	Tribute_Struct		tributes[EQEmu::legacy::TRIBUTE_SIZE];
 /*7264*/	Disciplines_Struct	disciplines;
 /*7664*/	uint32				recastTimers[MAX_RECAST_TYPES];	// Timers (GMT of last use)
 /*7744*/	char				unknown7780[160];
@@ -1120,7 +1072,7 @@ struct PlayerProfile_Struct
 /*12800*/	uint32				expAA;
 /*12804*/	uint32				aapoints;			//avaliable, unspent
 /*12808*/	uint8				unknown12844[36];
-/*12844*/	Bandolier_Struct	bandoliers[EmuConstants::BANDOLIERS_SIZE];
+/*12844*/	Bandolier_Struct	bandoliers[EQEmu::legacy::BANDOLIERS_SIZE];
 /*14124*/	uint8				unknown14160[4506];
 /*18630*/	SuspendedMinion_Struct	SuspendedMinion; // No longer in use
 /*19240*/	uint32				timeentitledonaccount;
@@ -1227,7 +1179,7 @@ struct WearChange_Struct{
 /*010*/ uint32 elite_material;	// 1 for Drakkin Elite Material
 /*014*/ uint32 hero_forge_model; // New to VoA
 /*018*/ uint32 unknown18; // New to RoF
-/*022*/ Color_Struct color;
+/*022*/ EQEmu::textures::Tint_Struct color;
 /*026*/ uint8 wear_slot_id;
 /*027*/
 };
@@ -1518,17 +1470,38 @@ struct ExpUpdate_Struct
 enum ItemPacketType
 {
 	ItemPacketViewLink			= 0x00,
+	ItemPacketMerchant			= 0x64,
 	ItemPacketTradeView			= 0x65,
 	ItemPacketLoot				= 0x66,
 	ItemPacketTrade				= 0x67,
 	ItemPacketCharInventory		= 0x69,
-	ItemPacketSummonItem		= 0x6A,
-	ItemPacketTributeItem		= 0x6C,
-	ItemPacketMerchant			= 0x64,
+	ItemPacketLimbo				= 0x6A,
 	ItemPacketWorldContainer	= 0x6B,
-	ItemPacketCharmUpdate		= 0x6E,
+	ItemPacketTributeItem		= 0x6C,
+	ItemPacketGuildTribute		= 0x6D,
+	ItemPacketCharmUpdate		= 0x6E, // noted as incorrect
 	ItemPacketInvalid			= 0xFF
 };
+
+//enum ItemPacketType
+//{
+//	ItemPacketMerchant			= /*100*/ 0x64, // Titanium+
+//	ItemPacketTradeView			= /*101*/ 0x65,
+//	ItemPacketLoot				= /*102*/ 0x66,
+//	ItemPacketTrade				= /*103*/ 0x67,
+//	ItemPacketCharInventory		= /*105*/ 0x69, // 105 looks like raw item packet (no appearance update) thru shared bank..110, possibly possessions with appearance update
+//	ItemPacketLimbo				= /*106*/ 0x6A,
+//	ItemPacketWorldContainer	= /*107*/ 0x6B,
+//	ItemPacketTributeItem		= /*108*/ 0x6C,
+//	ItemPacketGuildTribute		= /*109*/ 0x6D, // missing from EQEmu
+//	ItemPacket10				= /*110*/ 0x6E,
+//	ItemPacket11				= /*111*/ 0x6F, // UF+ (equipment slots only) (RoF+ checks '(WORD*)slot + 4 != -1' [(WORD*)]slot + 2 would be bag index - if used) (guess) (appearance (over-level) items?)
+//	ItemPacket12				= /*112*/ 0x70, // RoF+ (causes stat update) (could be TrophyTribute and GuildTrophyTribute together - two case methodology - is it checking for GuildID?)
+//	ItemPacketMerchantRecovery	= /*113*/ 0x71,
+//	ItemPacket14				= /*115*/ 0x73, (real estate/moving crate?)
+//	ItemPacket__				= /*xxx*/ 0xXX // switch 'default' - all clients
+//};
+
 struct ItemPacket_Struct
 {
 /*00*/	ItemPacketType	PacketType;
@@ -1670,7 +1643,7 @@ struct LootingItem_Struct {
 /*002*/	uint32	looter;
 /*004*/	uint16	slot_id;
 /*006*/	uint8	unknown3[2];
-/*008*/	uint32	auto_loot;
+/*008*/	int32	auto_loot;
 };
 
 struct GuildManageStatus_Struct{
@@ -1961,8 +1934,7 @@ struct Merchant_Sell_Struct {
 /*004*/	uint32	playerid;		// Player's entity id
 /*008*/	uint32	itemslot;
 		uint32	unknown12;
-/*016*/	uint8	quantity;		// Already sold
-/*017*/ uint8	Unknown016[3];
+/*016*/	uint32	quantity;
 /*020*/ uint32	price;
 };
 struct Merchant_Purchase_Struct {
@@ -2099,7 +2071,7 @@ struct AdventureLeaderboard_Struct
 /*struct Item_Shop_Struct {
 	uint16 merchantid;
 	uint8 itemtype;
-	Item_Struct item;
+	EQEmu::ItemData item;
 	uint8 iss_unknown001[6];
 };*/
 
@@ -2125,7 +2097,7 @@ struct Illusion_Struct { //size: 256 - SoF
 /*092*/	uint32	drakkin_heritage;	//
 /*096*/	uint32	drakkin_tattoo;		//
 /*100*/	uint32	drakkin_details;	//
-/*104*/	uint32	armor_tint[_MaterialCount];	//
+/*104*/	EQEmu::TintProfile	armor_tint;	//
 /*140*/	uint8	eyecolor1;		// Field Not Identified in any Illusion Struct
 /*141*/	uint8	eyecolor2;		// Field Not Identified in any Illusion Struct
 /*142*/	uint8	unknown138[114];	//
@@ -2271,6 +2243,7 @@ struct GroupFollow_Struct { // SoF Follow Struct
 /*0132*/
 };
 
+// this is generic struct
 struct GroupLeaderChange_Struct
 {
 /*000*/		char	Unknown000[64];
@@ -2523,6 +2496,7 @@ struct BookRequest_Struct {
 	uint8 window;	// where to display the text (0xFF means new window)
 	uint8 type;		//type: 0=scroll, 1=book, 2=item info.. prolly others.
 	uint32 invslot;	// Only used in Sof and later clients;
+	int16 subslot; // The subslot inside of a bag if it is inside one.
 	char txtfile[20];
 };
 
@@ -2536,23 +2510,25 @@ struct BookRequest_Struct {
 */
 struct Object_Struct {
 /*00*/	uint32	linked_list_addr[2];// They are, get this, prev and next, ala linked list
-/*08*/	uint16	size;				//
+/*08*/	float	size;				//
 /*10*/	uint16	solidtype;			//
 /*12*/	uint32	drop_id;			// Unique object id for zone
 /*16*/	uint16	zone_id;			// Redudant, but: Zone the object appears in
 /*18*/	uint16	zone_instance;		//
 /*20*/	uint32	unknown020;			//
 /*24*/	uint32	unknown024;			//
-/*28*/	float	heading;			// heading
-/*32*/	float	z;					// z coord
-/*36*/	float	x;					// x coord
-/*40*/	float	y;					// y coord
-/*44*/	char	object_name[32];	// Name of object, usually something like IT63_ACTORDEF
-/*76*/	uint32	unknown076;			//
-/*80*/	uint32	object_type;		// Type of object, not directly translated to OP_OpenObject
-/*84*/	uint32	unknown084;			//set to 0xFF
-/*88*/	uint32	spawn_id;			// Spawn Id of client interacting with object
-/*92*/
+/*28*/	float	tilt_x;
+/*32*/	float	tilt_y;
+/*36*/	float	heading;			// heading
+/*40*/	float	z;					// z coord
+/*44*/	float	x;					// x coord
+/*76*/	float	y;					// y coord
+/*80*/	char	object_name[32];	// Name of object, usually something like IT63_ACTORDEF
+/*84*/	uint32	unknown076;			//
+/*88*/	uint32	object_type;		// Type of object, not directly translated to OP_OpenObject
+/*92*/	uint32	unknown084;			//set to 0xFF
+		uint32	spawn_id;			// Spawn Id of client interacting with object
+
 };
 // 01 = generic drop, 02 = armor, 19 = weapon
 //[13:40] and 0xff seems to be indicative of the tradeskill/openable items that end up returning the old style item type in the OP_OpenObject
@@ -3395,27 +3371,6 @@ struct PetitionBug_Struct{
 	char	text[1028];
 };
 
-struct DyeStruct
-{
-	union
-	{
-		struct
-		{
-			struct Color_Struct head;
-			struct Color_Struct chest;
-			struct Color_Struct arms;
-			struct Color_Struct wrists;
-			struct Color_Struct hands;
-			struct Color_Struct legs;
-			struct Color_Struct feet;
-			struct Color_Struct primary;	// you can't actually dye this
-			struct Color_Struct secondary;	// or this
-		}
-		dyes;
-		struct Color_Struct dye[_MaterialCount];
-	};
-};
-
 struct ApproveZone_Struct {
 	char	name[64];
 	uint32	zoneid;
@@ -3473,8 +3428,8 @@ struct SelectTributeReply_Struct {
 
 struct TributeInfo_Struct {
 	uint32	active;		//0 == inactive, 1 == active
-	uint32	tributes[EmuConstants::TRIBUTE_SIZE];	//-1 == NONE
-	uint32	tiers[EmuConstants::TRIBUTE_SIZE];		//all 00's
+	uint32	tributes[EQEmu::legacy::TRIBUTE_SIZE];	//-1 == NONE
+	uint32	tiers[EQEmu::legacy::TRIBUTE_SIZE];		//all 00's
 	uint32	tribute_master_id;
 };
 
@@ -3562,6 +3517,20 @@ struct RecipeAutoCombine_Struct {
 	uint32 reply_code;		// 93 64 e1 00 (junk) in request
 								// 00 00 00 00 in successful reply
 								// f5 ff ff ff in 'you dont have all the stuff' reply
+};
+
+// this is the "value#a" data
+enum EParticlePoint {
+	eDefault,
+	eChest,
+	eHead,
+	eLeftHand,
+	eRigthHand,
+	eLeftFoot,
+	eRightFood,
+	eLeftEye,
+	eRightEye,
+	eMouth
 };
 
 struct LevelAppearance_Struct { //Sends a little graphic on level up
@@ -4796,6 +4765,7 @@ struct BuffIcon_Struct
 	uint8  all_buffs;
 	uint16 count;
 	uint8 type; // 0 = self buff window, 1 = self target window, 4 = group, 5 = PC, 7 = NPC
+	int32 tic_timer;
 	BuffIconEntry_Struct entries[0];
 };
 
@@ -5342,21 +5312,18 @@ struct ClientMarqueeMessage_Struct {
 
 typedef std::list<ServerLootItem_Struct*> ItemList;
 
-struct TextLinkBody_Struct {
-	// Current server mask: EQClientRoF2
-	uint8 unknown_1;		/* %1X */
-	uint32 item_id;			/* %05X */
-	uint32 augment_1;		/* %05X */
-	uint32 augment_2;		/* %05X */
-	uint32 augment_3;		/* %05X */
-	uint32 augment_4;		/* %05X */
-	uint32 augment_5;		/* %05X */
-	uint32 augment_6;		/* %05X */
-	uint8 is_evolving;		/* %1X */
-	uint32 evolve_group;	/* %05X */
-	uint8 evolve_level;		/* %02X */
-	uint32 ornament_icon;	/* %05X */
-	int hash;				/* %08X */
+
+struct fling_struct {
+/* 00 */ uint32 collision; // 0 collision is off, anything else it's on
+/* 04 */ int32 travel_time; // ms -- UF we need to calc this, RoF+ -1 auto calcs
+/* 08 */ uint8 unk3; // bool, set to 1 has something to do with z-axis or something weird things happen if the new Z is above or equal to yours
+/* 09 */ uint8 disable_fall_damage; // 1 you take no fall damage, 0 you take fall damage
+/* 10 */ uint8 padding[2];
+/* 12 */ float speed_z;
+/* 16 */ float new_y;
+/* 20 */ float new_x;
+/* 24 */ float new_z;
+/* 28 */
 };
 
 // Restore structure packing to default

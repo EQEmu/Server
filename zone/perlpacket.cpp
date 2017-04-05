@@ -62,7 +62,7 @@ void PerlPacket::SendTo(Client *who) {
 	if(!who || op == OP_Unknown || (len > 0 && packet == nullptr))
 		return;
 
-	EQApplicationPacket *outapp = new EQApplicationPacket(op, len);
+	auto outapp = new EQApplicationPacket(op, len);
 	if(len > 0)
 		memcpy(outapp->pBuffer, packet, len);
 
@@ -76,7 +76,7 @@ void PerlPacket::SendToAll() {
 	if(op == OP_Unknown || (len > 0 && packet == nullptr))
 		return;
 
-	EQApplicationPacket *outapp = new EQApplicationPacket(op, len);
+	auto outapp = new EQApplicationPacket(op, len);
 	if(len > 0)
 		memcpy(outapp->pBuffer, packet, len);
 	entity_list.QueueClients(nullptr, outapp, false);

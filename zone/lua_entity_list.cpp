@@ -309,12 +309,11 @@ Lua_Client Lua_EntityList::GetRandomClient(float x, float y, float z, float dist
 Lua_Mob_List Lua_EntityList::GetMobList() {
 	Lua_Safe_Call_Class(Lua_Mob_List);
 	Lua_Mob_List ret;
-	std::list<Mob*> t_list;
-	self->GetMobList(t_list);
+	auto &t_list = self->GetMobList();
 
 	auto iter = t_list.begin();
 	while(iter != t_list.end()) {
-		ret.entries.push_back(Lua_Mob(*iter));
+		ret.entries.push_back(Lua_Mob(iter->second));
 		++iter;
 	}
 
@@ -324,12 +323,11 @@ Lua_Mob_List Lua_EntityList::GetMobList() {
 Lua_Client_List Lua_EntityList::GetClientList() {
 	Lua_Safe_Call_Class(Lua_Client_List);
 	Lua_Client_List ret;
-	std::list<Client*> t_list;
-	self->GetClientList(t_list);
+	auto &t_list = self->GetClientList();
 
 	auto iter = t_list.begin();
 	while(iter != t_list.end()) {
-		ret.entries.push_back(Lua_Client(*iter));
+		ret.entries.push_back(Lua_Client(iter->second));
 		++iter;
 	}
 
@@ -339,12 +337,11 @@ Lua_Client_List Lua_EntityList::GetClientList() {
 Lua_NPC_List Lua_EntityList::GetNPCList() {
 	Lua_Safe_Call_Class(Lua_NPC_List);
 	Lua_NPC_List ret;
-	std::list<NPC*> t_list;
-	self->GetNPCList(t_list);
+	auto &t_list = self->GetNPCList();
 
 	auto iter = t_list.begin();
 	while(iter != t_list.end()) {
-		ret.entries.push_back(Lua_NPC(*iter));
+		ret.entries.push_back(Lua_NPC(iter->second));
 		++iter;
 	}
 
@@ -354,12 +351,11 @@ Lua_NPC_List Lua_EntityList::GetNPCList() {
 Lua_Corpse_List Lua_EntityList::GetCorpseList() {
 	Lua_Safe_Call_Class(Lua_Corpse_List);
 	Lua_Corpse_List ret;
-	std::list<Corpse*> t_list;
-	self->GetCorpseList(t_list);
+	auto &t_list = self->GetCorpseList();
 
 	auto iter = t_list.begin();
 	while(iter != t_list.end()) {
-		ret.entries.push_back(Lua_Corpse(*iter));
+		ret.entries.push_back(Lua_Corpse(iter->second));
 		++iter;
 	}
 
@@ -369,12 +365,11 @@ Lua_Corpse_List Lua_EntityList::GetCorpseList() {
 Lua_Object_List Lua_EntityList::GetObjectList() {
 	Lua_Safe_Call_Class(Lua_Object_List);
 	Lua_Object_List ret;
-	std::list<Object*> t_list;
-	self->GetObjectList(t_list);
+	auto &t_list = self->GetObjectList();
 
 	auto iter = t_list.begin();
 	while(iter != t_list.end()) {
-		ret.entries.push_back(Lua_Object(*iter));
+		ret.entries.push_back(Lua_Object(iter->second));
 		++iter;
 	}
 
@@ -384,12 +379,11 @@ Lua_Object_List Lua_EntityList::GetObjectList() {
 Lua_Doors_List Lua_EntityList::GetDoorsList() {
 	Lua_Safe_Call_Class(Lua_Doors_List);
 	Lua_Doors_List ret;
-	std::list<Doors*> t_list;
-	self->GetDoorsList(t_list);
+	auto &t_list = self->GetDoorsList();
 
 	auto iter = t_list.begin();
 	while(iter != t_list.end()) {
-		ret.entries.push_back(Lua_Door(*iter));
+		ret.entries.push_back(Lua_Door(iter->second));
 		++iter;
 	}
 

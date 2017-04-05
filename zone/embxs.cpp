@@ -1,26 +1,30 @@
-/*  EQEMu:  Everquest Server Emulator
-	Copyright (C) 2001-2003  EQEMu Development Team (http://eqemulator.net)
+/*	EQEMu: Everquest Server Emulator
+	Copyright (C) 2001-2016 EQEMu Development Team (http://eqemulator.org)
 
-  This program is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; version 2 of the License.
-  
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY except by those people which sell it, which
+	This program is free software; you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation; version 2 of the License.
+
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY except by those people which sell it, which
 	are required to give you total support for your newly bought product;
 	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-	A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
-	
-	  You should have received a copy of the GNU General Public License
-	  along with this program; if not, write to the Free Software
-	  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+	A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+	You should have received a copy of the GNU General Public License
+	along with this program; if not, write to the Free Software
+	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
+
 #ifdef EMBPERL 
 
 #include "../common/global_define.h"
 #include "../common/eqemu_logsys.h"
 #include "masterentity.h"
 #include "command.h"
+#ifdef BOTS
+#include "bot_command.h"
+#endif
 
 #include "embperl.h"
 #include "embxs.h" 
@@ -29,7 +33,7 @@
 
 const char *getItemName(unsigned itemid) 
 { 
-  const Item_Struct* item = nullptr; 
+	const EQEmu::ItemData* item = nullptr;
   item = database.GetItem(itemid); 
 
   if (item) 
@@ -64,7 +68,7 @@ EXTERN_C XS(boot_qc)
 	file[255] = '\0';
 
 	if(items != 1)
-		Log.Out(Logs::General, Logs::Error, "boot_qc does not take any arguments.");
+		Log(Logs::General, Logs::Error, "boot_qc does not take any arguments.");
 	
 	char buf[128];	//shouldent have any function names longer than this.
 	
@@ -100,7 +104,7 @@ XS(XS_EQEmuIO_PRINT)
 		int len = 0;
 		for(i = 0; *cur != '\0'; i++, cur++) {
 			if(*cur == '\n') {
-				Log.Out(Logs::General, Logs::Quests, str);
+				Log(Logs::General, Logs::Quests, str);
 				len = 0;
 				pos = i+1;
 			} else {
@@ -108,7 +112,7 @@ XS(XS_EQEmuIO_PRINT)
 			}
 		}
 		if(len > 0) {
-			Log.Out(Logs::General, Logs::Quests, str);
+			Log(Logs::General, Logs::Quests, str);
 		}
  	}
  	

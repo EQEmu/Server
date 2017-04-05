@@ -5,7 +5,7 @@
 #include "../common/linked_list.h"
 #include "../common/timer.h"
 #include <string>
-#include <list>
+#include <vector>
 
 class Client;
 
@@ -21,9 +21,9 @@ public:
 	bool IsClientInChannel(Client *c);
 
 	int MemberCount(int Status);
-	std::string GetName() { return Name; }
+	const std::string &GetName() { return Name; }
 	void SendMessageToChannel(std::string Message, Client* Sender);
-	bool CheckPassword(std::string inPassword) { return ((Password.length() == 0) || (Password == inPassword)); }
+	bool CheckPassword(std::string inPassword) { return Password.empty() || Password == inPassword; }
 	void SetPassword(std::string inPassword);
 	bool IsOwner(std::string Name) { return (Owner == Name); }
 	void SetOwner(std::string inOwner);
@@ -31,14 +31,14 @@ public:
 	int GetMinStatus() { return MinimumStatus; }
 	bool ReadyToDelete() { return DeleteTimer.Check(); }
 	void SendOPList(Client *c);
-	void AddInvitee(std::string Invitee);
+	void AddInvitee(const std::string &Invitee);
 	void RemoveInvitee(std::string Invitee);
 	bool IsInvitee(std::string Invitee);
-	void AddModerator(std::string Moderator);
-	void RemoveModerator(std::string Modeerator);
+	void AddModerator(const std::string &Moderator);
+	void RemoveModerator(const std::string &Moderator);
 	bool IsModerator(std::string Moderator);
-	void AddVoice(std::string Voiced);
-	void RemoveVoice(std::string Voiced);
+	void AddVoice(const std::string &Voiced);
+	void RemoveVoice(const std::string &Voiced);
 	bool HasVoice(std::string Voiced);
 	inline bool IsModerated() { return Moderated; }
 	void SetModerated(bool inModerated);
@@ -60,9 +60,9 @@ private:
 
 	LinkedList<Client*> ClientsInChannel;
 
-	std::list<std::string> Moderators;
-	std::list<std::string> Invitees;
-	std::list<std::string> Voiced;
+	std::vector<std::string> Moderators;
+	std::vector<std::string> Invitees;
+	std::vector<std::string> Voiced;
 
 };
 

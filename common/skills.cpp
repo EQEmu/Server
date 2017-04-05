@@ -1,5 +1,6 @@
 /*	EQEMu: Everquest Server Emulator
-	Copyright (C) 2001-2002 EQEMu Development Team (http://eqemu.org)
+	
+	Copyright (C) 2001-2016 EQEMu Development Team (http://eqemulator.net)
 
 	This program is free software; you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -9,17 +10,19 @@
 	but WITHOUT ANY WARRANTY except by those people which sell it, which
 	are required to give you total support for your newly bought product;
 	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-	A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+	A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
 	You should have received a copy of the GNU General Public License
 	along with this program; if not, write to the Free Software
-	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
-#include "types.h"
 #include "skills.h"
 
-bool EQEmu::IsTradeskill(SkillUseTypes skill)
+#include <string.h>
+
+
+bool EQEmu::skills::IsTradeskill(SkillType skill)
 {
 	switch (skill) {
 	case SkillFishing:
@@ -40,7 +43,7 @@ bool EQEmu::IsTradeskill(SkillUseTypes skill)
 	}
 }
 
-bool EQEmu::IsSpecializedSkill(SkillUseTypes skill)
+bool EQEmu::skills::IsSpecializedSkill(SkillType skill)
 {
 	// this could be a simple if, but if this is more portable if any IDs change (probably won't)
 	// or any other specialized are added (also unlikely)
@@ -56,7 +59,7 @@ bool EQEmu::IsSpecializedSkill(SkillUseTypes skill)
 	}
 }
 
-float EQEmu::GetSkillMeleePushForce(SkillUseTypes skill)
+float EQEmu::skills::GetSkillMeleePushForce(SkillType skill)
 {
 	// This is the force/magnitude of the push from an attack of this skill type
 	// You can find these numbers in the clients skill struct
@@ -93,7 +96,7 @@ float EQEmu::GetSkillMeleePushForce(SkillUseTypes skill)
 	}
 }
 
-bool EQEmu::IsBardInstrumentSkill(SkillUseTypes skill)
+bool EQEmu::skills::IsBardInstrumentSkill(SkillType skill)
 {
 	switch (skill) {
 	case SkillBrassInstruments:
@@ -107,8 +110,74 @@ bool EQEmu::IsBardInstrumentSkill(SkillUseTypes skill)
 	}
 }
 
-const std::map<SkillUseTypes, std::string>& EQEmu::GetSkillUseTypesMap()
+bool EQEmu::skills::IsCastingSkill(SkillType skill)
 {
+	switch (skill) {
+	case SkillAbjuration:
+	case SkillAlteration:
+	case SkillConjuration:
+	case SkillDivination:
+	case SkillEvocation:
+		return true;
+	default:
+		return false;
+	}
+}
+
+int32 EQEmu::skills::GetBaseDamage(SkillType skill)
+{
+	switch (skill) {
+	case SkillBash:
+		return 2;
+	case SkillDragonPunch:
+		return 12;
+	case SkillEagleStrike:
+		return 7;
+	case SkillFlyingKick:
+		return 25;
+	case SkillKick:
+		return 3;
+	case SkillRoundKick:
+		return 5;
+	case SkillTigerClaw:
+		return 4;
+	case SkillFrenzy:
+		return 10;
+	default:
+		return 0;
+	}
+}
+
+bool EQEmu::skills::IsMeleeDmg(SkillType skill)
+{
+	switch (skill) {
+	case Skill1HBlunt:
+	case Skill1HSlashing:
+	case Skill2HBlunt:
+	case Skill2HSlashing:
+	case SkillBackstab:
+	case SkillBash:
+	case SkillDragonPunch:
+	case SkillEagleStrike:
+	case SkillFlyingKick:
+	case SkillHandtoHand:
+	case SkillKick:
+	case Skill1HPiercing:
+	case SkillRiposte:
+	case SkillRoundKick:
+	case SkillThrowing:
+	case SkillTigerClaw:
+	case SkillFrenzy:
+	case Skill2HPiercing:
+		return true;
+	default:
+		return false;
+	}
+}
+
+const std::map<EQEmu::skills::SkillType, std::string>& EQEmu::skills::GetSkillTypeMap()
+{
+	/* VS2013 code
 	static const std::map<SkillUseTypes, std::string> skill_use_types_map = {
 		{ Skill1HBlunt, "1H Blunt" },
 		{ Skill1HSlashing, "1H Slashing" },
@@ -189,6 +258,112 @@ const std::map<SkillUseTypes, std::string>& EQEmu::GetSkillUseTypesMap()
 		{ SkillTripleAttack, "Triple Attack" },
 		{ Skill2HPiercing, "2H Piercing" }
 	};
+	*/
 
-	return skill_use_types_map;
+	/* VS2012 code - begin */
+
+	static const char* skill_use_names[SkillCount] = {
+		"1H Blunt",
+		"1H Slashing",
+		"2H Blunt",
+		"2H Slashing",
+		"Abjuration",
+		"Alteration",
+		"Apply Poison",
+		"Archery",
+		"Backstab",
+		"Bind Wound",
+		"Bash",
+		"Block",
+		"Brass Instruments",
+		"Channeling",
+		"Conjuration",
+		"Defense",
+		"Disarm",
+		"Disarm Traps",
+		"Divination",
+		"Dodge",
+		"Double Attack",
+		"Dragon Punch",
+		"Dual Wield",
+		"Eagle Strike",
+		"Evocation",
+		"Feign Death",
+		"Flying Kick",
+		"Forage",
+		"Hand to Hand",
+		"Hide",
+		"Kick",
+		"Meditate",
+		"Mend",
+		"Offense",
+		"Parry",
+		"Pick Lock",
+		"1H Piercing",
+		"Riposte",
+		"Round Kick",
+		"Safe Fall",
+		"Sense Heading",
+		"Singing",
+		"Sneak",
+		"Specialize Abjuration",
+		"Specialize Alteration",
+		"Specialize Conjuration",
+		"Specialize Divination",
+		"Specialize Evocation",
+		"Pick Pockets",
+		"Stringed Instruments",
+		"Swimming",
+		"Throwing",
+		"Tiger Claw",
+		"Tracking",
+		"Wind Instruments",
+		"Fishing",
+		"Make Poison",
+		"Tinkering",
+		"Research",
+		"Alchemy",
+		"Baking",
+		"Tailoring",
+		"Sense Traps",
+		"Blacksmithing",
+		"Fletching",
+		"Brewing",
+		"Alcohol Tolerance",
+		"Begging",
+		"Jewelry Making",
+		"Pottery",
+		"Percussion Instruments",
+		"Intimidation",
+		"Berserking",
+		"Taunt",
+		"Frenzy",
+		"Remove Traps",
+		"Triple Attack",
+		"2H Piercing"
+	};
+
+	static std::map<SkillType, std::string> skill_type_map;
+
+	skill_type_map.clear();
+
+	for (int i = Skill1HBlunt; i < SkillCount; ++i)
+		skill_type_map[(SkillType)i] = skill_use_names[i];
+
+	/* VS2012 code - end */
+
+	return skill_type_map;
+}
+
+EQEmu::SkillProfile::SkillProfile()
+{
+	memset(&Skill, 0, (sizeof(uint32) * PACKET_SKILL_ARRAY_SIZE));
+}
+
+uint32 EQEmu::SkillProfile::GetSkill(int skill_id)
+{
+	if (skill_id < 0 || skill_id >= PACKET_SKILL_ARRAY_SIZE)
+		return 0;
+
+	return Skill[skill_id];
 }

@@ -33,6 +33,7 @@
 #include "lua_general.h"
 #include "questmgr.h"
 #include "zone.h"
+#include "zone_config.h"
 #include "lua_parser.h"
 #include "lua_encounter.h"
 
@@ -227,6 +228,10 @@ LuaParser::LuaParser() {
 }
 
 LuaParser::~LuaParser() {
+	// valgrind didn't like when we didn't clean these up :P
+	lua_encounters.clear();
+	lua_encounter_events_registered.clear();
+	lua_encounters_loaded.clear();
 	if(L) {
 		lua_close(L);
 	}
@@ -421,7 +426,7 @@ int LuaParser::_EventPlayer(std::string package_name, QuestEventID evt, Client *
 	return 0;
 }
 
-int LuaParser::EventItem(QuestEventID evt, Client *client, ItemInst *item, Mob *mob, std::string data, uint32 extra_data,
+int LuaParser::EventItem(QuestEventID evt, Client *client, EQEmu::ItemInstance *item, Mob *mob, std::string data, uint32 extra_data,
 		std::vector<EQEmu::Any> *extra_pointers) {
 	evt = ConvertLuaEvent(evt);
 	if(evt >= _LargestEventID) {
@@ -441,7 +446,7 @@ int LuaParser::EventItem(QuestEventID evt, Client *client, ItemInst *item, Mob *
 	return _EventItem(package_name, evt, client, item, mob, data, extra_data, extra_pointers);
 }
 
-int LuaParser::_EventItem(std::string package_name, QuestEventID evt, Client *client, ItemInst *item, Mob *mob,
+int LuaParser::_EventItem(std::string package_name, QuestEventID evt, Client *client, EQEmu::ItemInstance *item, Mob *mob,
 						  std::string data, uint32 extra_data, std::vector<EQEmu::Any> *extra_pointers, luabind::adl::object *l_func) {
 	const char *sub_name = LuaEvents[evt];
 
@@ -705,7 +710,7 @@ bool LuaParser::SpellHasQuestSub(uint32 spell_id, QuestEventID evt) {
 	return HasFunction(subname, package_name);
 }
 
-bool LuaParser::ItemHasQuestSub(ItemInst *itm, QuestEventID evt) {
+bool LuaParser::ItemHasQuestSub(EQEmu::ItemInstance *itm, QuestEventID evt) {
 	if (itm == nullptr) {
 		return false;
 	}
@@ -751,7 +756,7 @@ void LuaParser::LoadGlobalPlayerScript(std::string filename) {
 	LoadScript(filename, "global_player");
 }
 
-void LuaParser::LoadItemScript(std::string filename, ItemInst *item) {
+void LuaParser::LoadItemScript(std::string filename, EQEmu::ItemInstance *item) {
 	if (item == nullptr)
 		return;
 	std::string package_name = "item_";
@@ -799,6 +804,9 @@ void LuaParser::ReloadQuests() {
 		encounter.second->Depop();
 	}
 	lua_encounters.clear();
+	// so the Depop function above depends on the Process being called again so ...
+	// And there is situations where it wouldn't be :P
+	entity_list.EncounterProcess();
 
 	if(L) {
 		lua_close(L);
@@ -848,19 +856,52 @@ void LuaParser::ReloadQuests() {
 
 #endif
 
+	// lua 5.2+ defines these
+#if defined(LUA_VERSION_MAJOR) && defined(LUA_VERSION_MINOR)
+	const char lua_version[] = LUA_VERSION_MAJOR "." LUA_VERSION_MINOR;
+#elif LUA_VERSION_NUM == 501
+	const char lua_version[] = "5.1";
+#else
+#error Incompatible lua version
+#endif
+
+#ifdef WINDOWS
+	const char libext[] = ".dll";
+#else
+	// lua doesn't care OSX doesn't use sonames
+	const char libext[] = ".so";
+#endif
+
 	lua_getglobal(L, "package");
 	lua_getfield(L, -1, "path");
 	std::string module_path = lua_tostring(L,-1);
-	module_path += ";./lua_modules/?.lua";
+	module_path += ";./" + Config->LuaModuleDir + "?.lua;./" + Config->LuaModuleDir + "?/init.lua";
+	// luarock paths using lua_modules as tree
+	// to path it adds foo/share/lua/5.1/?.lua and foo/share/lua/5.1/?/init.lua
+	module_path += ";./" + Config->LuaModuleDir + "share/lua/" + lua_version + "/?.lua";
+	module_path += ";./" + Config->LuaModuleDir + "share/lua/" + lua_version + "/?/init.lua";
 	lua_pop(L, 1);
 	lua_pushstring(L, module_path.c_str());
 	lua_setfield(L, -2, "path");
 	lua_pop(L, 1);
 
+	lua_getglobal(L, "package");
+	lua_getfield(L, -1, "cpath");
+	module_path = lua_tostring(L, -1);
+	module_path += ";./" + Config->LuaModuleDir + "?" + libext;
+	// luarock paths using lua_modules as tree
+	// luarocks adds foo/lib/lua/5.1/?.so for cpath
+	module_path += ";./" + Config->LuaModuleDir + "lib/lua/" + lua_version + "/?" + libext;
+	lua_pop(L, 1);
+	lua_pushstring(L, module_path.c_str());
+	lua_setfield(L, -2, "cpath");
+	lua_pop(L, 1);
+
 	MapFunctions(L);
 
 	//load init
-	std::string path = "quests/";
+	std::string path = Config->QuestDir;
+	path += "/";
 	path += QUEST_GLOBAL_DIRECTORY;
 	path += "/script_init.lua";
 
@@ -876,7 +917,8 @@ void LuaParser::ReloadQuests() {
 
 	//zone init - always loads after global
 	if(zone) {
-		std::string zone_script = "quests/";
+		std::string zone_script = Config->QuestDir;
+		zone_script += "/";
 		zone_script += zone->GetShortName();
 		zone_script += "/script_init_v";
 		zone_script += std::to_string(zone->GetInstanceVersion());
@@ -893,7 +935,8 @@ void LuaParser::ReloadQuests() {
 			return;
 		}
 
-		zone_script = "quests/";
+		zone_script = Config->QuestDir;
+		zone_script += "/";
 		zone_script += zone->GetShortName();
 		zone_script += "/script_init.lua";
 		f = fopen(zone_script.c_str(), "r");
@@ -1093,7 +1136,7 @@ int LuaParser::DispatchEventPlayer(QuestEventID evt, Client *client, std::string
     return ret;
 }
 
-int LuaParser::DispatchEventItem(QuestEventID evt, Client *client, ItemInst *item, Mob *mob, std::string data, uint32 extra_data,
+int LuaParser::DispatchEventItem(QuestEventID evt, Client *client, EQEmu::ItemInstance *item, Mob *mob, std::string data, uint32 extra_data,
 								  std::vector<EQEmu::Any> *extra_pointers) {
 	evt = ConvertLuaEvent(evt);
 	if(evt >= _LargestEventID) {

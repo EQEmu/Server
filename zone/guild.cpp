@@ -26,7 +26,7 @@
 extern WorldServer worldserver;
 
 void Client::SendGuildMOTD(bool GetGuildMOTDReply) {
-	EQApplicationPacket *outapp = new EQApplicationPacket(OP_GuildMOTD, sizeof(GuildMOTD_Struct));
+	auto outapp = new EQApplicationPacket(OP_GuildMOTD, sizeof(GuildMOTD_Struct));
 
 	// When the Client gets an OP_GuildMOTD, it compares the text to the version it has previously stored.
 	// If the text in the OP_GuildMOTD packet is the same, it does nothing. If not the same, it displays
@@ -56,19 +56,20 @@ void Client::SendGuildMOTD(bool GetGuildMOTDReply) {
 
 	}
 
-	Log.Out(Logs::Detail, Logs::Guilds, "Sending OP_GuildMOTD of length %d", outapp->size);
+	Log(Logs::Detail, Logs::Guilds, "Sending OP_GuildMOTD of length %d", outapp->size);
 
 	FastQueuePacket(&outapp);
 }
 
 void Client::SendGuildURL()
 {
-	if(GetClientVersion() < ClientVersion::SoF)
+	if (ClientVersion() < EQEmu::versions::ClientVersion::SoF)
 		return;
 
 	if(IsInAGuild())
 	{
-		EQApplicationPacket *outapp = new EQApplicationPacket(OP_GuildUpdateURLAndChannel, sizeof(GuildUpdateURLAndChannel_Struct));
+		auto outapp =
+		    new EQApplicationPacket(OP_GuildUpdateURLAndChannel, sizeof(GuildUpdateURLAndChannel_Struct));
 
 		GuildUpdateURLAndChannel_Struct *guuacs = (GuildUpdateURLAndChannel_Struct*) outapp->pBuffer;
 
@@ -84,12 +85,13 @@ void Client::SendGuildURL()
 
 void Client::SendGuildChannel()
 {
-	if(GetClientVersion() < ClientVersion::SoF)
+	if (ClientVersion() < EQEmu::versions::ClientVersion::SoF)
 		return;
 
 	if(IsInAGuild())
 	{
-		EQApplicationPacket *outapp = new EQApplicationPacket(OP_GuildUpdateURLAndChannel, sizeof(GuildUpdateURLAndChannel_Struct));
+		auto outapp =
+		    new EQApplicationPacket(OP_GuildUpdateURLAndChannel, sizeof(GuildUpdateURLAndChannel_Struct));
 
 		GuildUpdateURLAndChannel_Struct *guuacs = (GuildUpdateURLAndChannel_Struct*) outapp->pBuffer;
 
@@ -106,7 +108,7 @@ void Client::SendGuildChannel()
 
 void Client::SendGuildRanks()
 {
-	if(GetClientVersion() < ClientVersion::RoF)
+	if (ClientVersion() < EQEmu::versions::ClientVersion::RoF)
 		return;
 
 	int permissions = 30 + 1; //Static number of permissions in all EQ clients as of May 2014
@@ -119,7 +121,8 @@ void Client::SendGuildRanks()
 		{
 			while(i < permissions)
 			{
-				EQApplicationPacket *outapp = new EQApplicationPacket(OP_GuildUpdateURLAndChannel, sizeof(GuildUpdateRanks_Struct));
+				auto outapp = new EQApplicationPacket(OP_GuildUpdateURLAndChannel,
+								      sizeof(GuildUpdateRanks_Struct));
 				GuildUpdateRanks_Struct *guuacs = (GuildUpdateRanks_Struct*) outapp->pBuffer;
 				//guuacs->Unknown0008 = this->GuildID();
 				strncpy(guuacs->Unknown0012, this->GetCleanName(), 64);
@@ -144,12 +147,12 @@ void Client::SendGuildSpawnAppearance() {
 	if (!IsInAGuild()) {
 		// clear guildtag
 		SendAppearancePacket(AT_GuildID, GUILD_NONE);
-		Log.Out(Logs::Detail, Logs::Guilds, "Sending spawn appearance for no guild tag.");
+		Log(Logs::Detail, Logs::Guilds, "Sending spawn appearance for no guild tag.");
 	} else {
 		uint8 rank = guild_mgr.GetDisplayedRank(GuildID(), GuildRank(), CharacterID());
-		Log.Out(Logs::Detail, Logs::Guilds, "Sending spawn appearance for guild %d at rank %d", GuildID(), rank);
+		Log(Logs::Detail, Logs::Guilds, "Sending spawn appearance for guild %d at rank %d", GuildID(), rank);
 		SendAppearancePacket(AT_GuildID, GuildID());
-		if(GetClientVersion() >= ClientVersion::RoF)
+		if (ClientVersion() >= EQEmu::versions::ClientVersion::RoF)
 		{
 			switch (rank) {
 				case 0: { rank = 5; break; }	// GUILD_MEMBER	0
@@ -171,11 +174,11 @@ void Client::SendGuildList() {
 	//ask the guild manager to build us a nice guild list packet
 	outapp->pBuffer = guild_mgr.MakeGuildList(/*GetName()*/"", outapp->size);
 	if(outapp->pBuffer == nullptr) {
-		Log.Out(Logs::Detail, Logs::Guilds, "Unable to make guild list!");
+		Log(Logs::Detail, Logs::Guilds, "Unable to make guild list!");
 		return;
 	}
 
-	Log.Out(Logs::Detail, Logs::Guilds, "Sending OP_ZoneGuildList of length %d", outapp->size);
+	Log(Logs::Detail, Logs::Guilds, "Sending OP_ZoneGuildList of length %d", outapp->size);
 
 	FastQueuePacket(&outapp);
 }
@@ -187,16 +190,17 @@ void Client::SendGuildMembers() {
 	if(data == nullptr)
 		return;	//invalid guild, shouldent happen.
 
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_GuildMemberList);
+	auto outapp = new EQApplicationPacket(OP_GuildMemberList);
 	outapp->size = len;
 	outapp->pBuffer = data;
 	data = nullptr;
 
-	Log.Out(Logs::Detail, Logs::Guilds, "Sending OP_GuildMemberList of length %d", outapp->size);
+	Log(Logs::Detail, Logs::Guilds, "Sending OP_GuildMemberList of length %d", outapp->size);
 
 	FastQueuePacket(&outapp);
 
-	ServerPacket* pack = new ServerPacket(ServerOP_RequestOnlineGuildMembers, sizeof(ServerRequestOnlineGuildMembers_Struct));
+	auto pack =
+	    new ServerPacket(ServerOP_RequestOnlineGuildMembers, sizeof(ServerRequestOnlineGuildMembers_Struct));
 
 	ServerRequestOnlineGuildMembers_Struct *srogms = (ServerRequestOnlineGuildMembers_Struct*)pack->pBuffer;
 
@@ -223,7 +227,7 @@ void Client::RefreshGuildInfo()
 
 	CharGuildInfo info;
 	if(!guild_mgr.GetCharInfo(CharacterID(), info)) {
-		Log.Out(Logs::Detail, Logs::Guilds, "Unable to obtain guild char info for %s (%d)", GetName(), CharacterID());
+		Log(Logs::Detail, Logs::Guilds, "Unable to obtain guild char info for %s (%d)", GetName(), CharacterID());
 		return;
 	}
 
@@ -235,7 +239,7 @@ void Client::RefreshGuildInfo()
 	{
 		if(WasBanker != GuildBanker)
 		{
-			EQApplicationPacket *outapp = new EQApplicationPacket(OP_SetGuildRank, sizeof(GuildSetRank_Struct));
+			auto outapp = new EQApplicationPacket(OP_SetGuildRank, sizeof(GuildSetRank_Struct));
 
 			GuildSetRank_Struct *gsrs = (GuildSetRank_Struct*)outapp->pBuffer;
 
@@ -249,7 +253,7 @@ void Client::RefreshGuildInfo()
 		if((guild_id != OldGuildID) && GuildBanks)
 		{
 			// Unsure about this for RoF+ ... But they don't have that action anymore so fuck it
-			if (GetClientVersion() < ClientVersion::RoF)
+			if (ClientVersion() < EQEmu::versions::ClientVersion::RoF)
 				ClearGuildBank();
 
 			if(guild_id != GUILD_NONE)
@@ -328,7 +332,7 @@ void EntityList::SendGuildList() {
 }
 
 void Client::SendGuildJoin(GuildJoin_Struct* gj){
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_GuildManageAdd, sizeof(GuildJoin_Struct));
+	auto outapp = new EQApplicationPacket(OP_GuildManageAdd, sizeof(GuildJoin_Struct));
 	GuildJoin_Struct* outgj=(GuildJoin_Struct*)outapp->pBuffer;
 	outgj->class_ = gj->class_;
 	outgj->guild_id = gj->guild_id;
@@ -337,7 +341,7 @@ void Client::SendGuildJoin(GuildJoin_Struct* gj){
 	outgj->rank = gj->rank;
 	outgj->zoneid = gj->zoneid;
 
-	Log.Out(Logs::Detail, Logs::Guilds, "Sending OP_GuildManageAdd for join of length %d", outapp->size);
+	Log(Logs::Detail, Logs::Guilds, "Sending OP_GuildManageAdd for join of length %d", outapp->size);
 
 	FastQueuePacket(&outapp);
 

@@ -41,9 +41,9 @@ public:
 
 	Mob *GetClosestEntOnHateList(Mob *hater);
 	Mob *GetDamageTopOnHateList(Mob *hater);
-	Mob *GetEntWithMostHateOnList(Mob *center);
+	Mob *GetEntWithMostHateOnList(Mob *center, Mob *skip = nullptr);
 	Mob *GetRandomEntOnHateList();
-	Mob* GetEntWithMostHateOnList();
+	Mob *GetEntWithMostHateOnList();
 
 	bool IsEntOnHateList(Mob *mob);
 	bool IsHateListEmpty();
@@ -51,6 +51,7 @@ public:
 
 	int AreaRampage(Mob *caster, Mob *target, int count, ExtraAttackOptions *opts);
 	int GetSummonedPetCountOnHateList(Mob *hater);
+	int GetHateRatio(Mob *top, Mob *other);
 
 	int32 GetEntHateAmount(Mob *ent, bool in_damage = false);
 
@@ -74,3 +75,4 @@ private:
 };
 
 #endif
+

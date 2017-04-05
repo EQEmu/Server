@@ -34,18 +34,25 @@
 
 #include "quest_interface.h"
 
+#include "zone_config.h"
+
 #include <list>
 #include <map>
 
 #define QuestFailedToLoad 0xFFFFFFFF
 #define QuestUnloaded 0x00
 
+extern const ZoneConfig *Config;
 class Client;
-class ItemInst;
 class Mob;
 class NPC;
 class QuestInterface;
-namespace EQEmu { class Any; }
+
+namespace EQEmu
+{
+	class Any;
+	class ItemInstance;
+}
 
 class QuestParserCollection {
 public:
@@ -62,13 +69,13 @@ public:
 	bool HasQuestSub(uint32 npcid, QuestEventID evt);
 	bool PlayerHasQuestSub(QuestEventID evt);
 	bool SpellHasQuestSub(uint32 spell_id, QuestEventID evt);
-	bool ItemHasQuestSub(ItemInst *itm, QuestEventID evt);
+	bool ItemHasQuestSub(EQEmu::ItemInstance *itm, QuestEventID evt);
 
 	int EventNPC(QuestEventID evt, NPC* npc, Mob *init, std::string data, uint32 extra_data,
 		std::vector<EQEmu::Any> *extra_pointers = nullptr);
 	int EventPlayer(QuestEventID evt, Client *client, std::string data, uint32 extra_data,
 		std::vector<EQEmu::Any> *extra_pointers = nullptr);
-	int EventItem(QuestEventID evt, Client *client, ItemInst *item, Mob *mob, std::string data, uint32 extra_data,
+	int EventItem(QuestEventID evt, Client *client, EQEmu::ItemInstance *item, Mob *mob, std::string data, uint32 extra_data,
 		std::vector<EQEmu::Any> *extra_pointers = nullptr);
 	int EventSpell(QuestEventID evt, NPC* npc, Client *client, uint32 spell_id, uint32 extra_data,
 		std::vector<EQEmu::Any> *extra_pointers = nullptr);
@@ -121,7 +128,7 @@ private:
 		std::vector<EQEmu::Any> *extra_pointers);
 	int DispatchEventPlayer(QuestEventID evt, Client *client, std::string data, uint32 extra_data,
 		std::vector<EQEmu::Any> *extra_pointers);
-	int DispatchEventItem(QuestEventID evt, Client *client, ItemInst *item, Mob *mob, std::string data, uint32 extra_data,
+	int DispatchEventItem(QuestEventID evt, Client *client, EQEmu::ItemInstance *item, Mob *mob, std::string data, uint32 extra_data,
 		std::vector<EQEmu::Any> *extra_pointers);
 	int DispatchEventSpell(QuestEventID evt, NPC* npc, Client *client, uint32 spell_id, uint32 extra_data,
 		std::vector<EQEmu::Any> *extra_pointers);

@@ -185,6 +185,11 @@ uint32 Lua_Client::GetAAExp() {
 	return self->GetAAXP();
 }
 
+uint32 Lua_Client::GetAAPercent() {
+	Lua_Safe_Call_Int();
+	return self->GetAAPercent();
+}
+
 uint32 Lua_Client::GetTotalSecondsPlayed() {
 	Lua_Safe_Call_Int();
 	return self->GetTotalSecondsPlayed();
@@ -432,27 +437,27 @@ void Lua_Client::IncreaseLanguageSkill(int skill_id, int value) {
 
 int Lua_Client::GetRawSkill(int skill_id) {
 	Lua_Safe_Call_Int();
-	return self->GetRawSkill(static_cast<SkillUseTypes>(skill_id));
+	return self->GetRawSkill(static_cast<EQEmu::skills::SkillType>(skill_id));
 }
 
 bool Lua_Client::HasSkill(int skill_id) {
 	Lua_Safe_Call_Bool();
-	return self->HasSkill(static_cast<SkillUseTypes>(skill_id));
+	return self->HasSkill(static_cast<EQEmu::skills::SkillType>(skill_id));
 }
 
 bool Lua_Client::CanHaveSkill(int skill_id) {
 	Lua_Safe_Call_Bool();
-	return self->CanHaveSkill(static_cast<SkillUseTypes>(skill_id));
+	return self->CanHaveSkill(static_cast<EQEmu::skills::SkillType>(skill_id));
 }
 
 void Lua_Client::SetSkill(int skill_id, int value) {
 	Lua_Safe_Call_Void();
-	self->SetSkill(static_cast<SkillUseTypes>(skill_id), value);
+	self->SetSkill(static_cast<EQEmu::skills::SkillType>(skill_id), value);
 }
 
 void Lua_Client::AddSkill(int skill_id, int value) {
 	Lua_Safe_Call_Void();
-	self->AddSkill(static_cast<SkillUseTypes>(skill_id), value);
+	self->AddSkill(static_cast<EQEmu::skills::SkillType>(skill_id), value);
 }
 
 void Lua_Client::CheckSpecializeIncrease(int spell_id) {
@@ -462,12 +467,12 @@ void Lua_Client::CheckSpecializeIncrease(int spell_id) {
 
 void Lua_Client::CheckIncreaseSkill(int skill_id, Lua_Mob target) {
 	Lua_Safe_Call_Void();
-	self->CheckIncreaseSkill(static_cast<SkillUseTypes>(skill_id), target);
+	self->CheckIncreaseSkill(static_cast<EQEmu::skills::SkillType>(skill_id), target);
 }
 
 void Lua_Client::CheckIncreaseSkill(int skill_id, Lua_Mob target, int chance_mod) {
 	Lua_Safe_Call_Void();
-	self->CheckIncreaseSkill(static_cast<SkillUseTypes>(skill_id), target, chance_mod);
+	self->CheckIncreaseSkill(static_cast<EQEmu::skills::SkillType>(skill_id), target, chance_mod);
 }
 
 void Lua_Client::SetLanguageSkill(int language, int value) {
@@ -477,7 +482,7 @@ void Lua_Client::SetLanguageSkill(int language, int value) {
 
 int Lua_Client::MaxSkill(int skill_id) {
 	Lua_Safe_Call_Int();
-	return self->MaxSkill(static_cast<SkillUseTypes>(skill_id));
+	return self->MaxSkill(static_cast<EQEmu::skills::SkillType>(skill_id));
 }
 
 bool Lua_Client::IsMedding() {
@@ -854,12 +859,12 @@ void Lua_Client::SetAATitle(const char *title) {
 
 int Lua_Client::GetClientVersion() {
 	Lua_Safe_Call_Int();
-	return static_cast<unsigned int>(self->GetClientVersion());
+	return static_cast<unsigned int>(self->ClientVersion());
 }
 
 uint32 Lua_Client::GetClientVersionBit() {
 	Lua_Safe_Call_Int();
-	return self->GetClientVersionBit();
+	return self->ClientVersionBit();
 }
 
 void Lua_Client::SetTitleSuffix(const char *text) {
@@ -1049,12 +1054,12 @@ void Lua_Client::IncrementAA(int aa) {
 
 bool Lua_Client::GrantAlternateAdvancementAbility(int aa_id, int points) {
 	Lua_Safe_Call_Bool();
-	self->GrantAlternateAdvancementAbility(aa_id, points);
+	return self->GrantAlternateAdvancementAbility(aa_id, points);
 }
 
 bool Lua_Client::GrantAlternateAdvancementAbility(int aa_id, int points, bool ignore_cost) {
 	Lua_Safe_Call_Bool();
-	self->GrantAlternateAdvancementAbility(aa_id, points, ignore_cost);
+	return self->GrantAlternateAdvancementAbility(aa_id, points, ignore_cost);
 }
 
 void Lua_Client::MarkSingleCompassLoc(float in_x, float in_y, float in_z) {
@@ -1214,13 +1219,13 @@ Lua_Raid Lua_Client::GetRaid() {
 
 bool Lua_Client::PutItemInInventory(int slot_id, Lua_ItemInst inst) {
 	Lua_Safe_Call_Bool();
-	ItemInst *rinst = inst;
+	EQEmu::ItemInstance *rinst = inst;
 	return self->PutItemInInventory(slot_id, *rinst, true);
 }
 
 bool Lua_Client::PushItemOnCursor(Lua_ItemInst inst) {
 	Lua_Safe_Call_Bool();
-	ItemInst *rinst = inst;
+	EQEmu::ItemInstance *rinst = inst;
 	return self->PushItemOnCursor(*rinst, true);
 }
 
@@ -1377,6 +1382,7 @@ luabind::scope lua_register_client() {
 		.def("GetWeight", (int(Lua_Client::*)(void))&Lua_Client::GetWeight)
 		.def("GetEXP", (uint32(Lua_Client::*)(void))&Lua_Client::GetEXP)
 		.def("GetAAExp", (uint32(Lua_Client::*)(void))&Lua_Client::GetAAExp)
+		.def("GetAAPercent", (uint32(Lua_Client::*)(void))&Lua_Client::GetAAPercent)
 		.def("GetTotalSecondsPlayed", (uint32(Lua_Client::*)(void))&Lua_Client::GetTotalSecondsPlayed)
 		.def("UpdateLDoNPoints", (void(Lua_Client::*)(int,uint32))&Lua_Client::UpdateLDoNPoints)
 		.def("SetDeity", (void(Lua_Client::*)(int))&Lua_Client::SetDeity)

@@ -456,21 +456,21 @@ void EmuTCPConnection::SendNetErrorPacket(const char* reason) {
 			std::cout << reason;
 		std::cout << "': " << inet_ntoa(in) << ":" << GetPort() << std::endl;
 	#endif
-	ServerPacket* pack = new ServerPacket(0);
-	pack->size = 1;
-	if (reason)
-		pack->size += strlen(reason) + 1;
-	pack->pBuffer = new uchar[pack->size];
-	memset(pack->pBuffer, 0, pack->size);
-	pack->pBuffer[0] = 255;
-	strcpy((char*) &pack->pBuffer[1], reason);
-	SendPacket(pack);
-	safe_delete(pack);
+		auto pack = new ServerPacket(0);
+		pack->size = 1;
+		if (reason)
+			pack->size += strlen(reason) + 1;
+		pack->pBuffer = new uchar[pack->size];
+		memset(pack->pBuffer, 0, pack->size);
+		pack->pBuffer[0] = 255;
+		strcpy((char *)&pack->pBuffer[1], reason);
+		SendPacket(pack);
+		safe_delete(pack);
 }
 
 void EmuTCPConnection::RemoveRelay(EmuTCPConnection* relay, bool iSendRelayDisconnect) {
 	if (iSendRelayDisconnect) {
-		ServerPacket* pack = new ServerPacket(0, 5);
+		auto pack = new ServerPacket(0, 5);
 		pack->pBuffer[0] = 3;
 		*((uint32*) &pack->pBuffer[1]) = relay->GetRemoteID();
 		SendPacket(pack);
@@ -609,7 +609,7 @@ bool EmuTCPConnection::ProcessReceivedDataAsPackets(char* errbuf) {
 		if (base >= recvbuf_used) {
 			safe_delete_array(recvbuf);
 		} else {
-			uchar* tmpbuf = new uchar[recvbuf_size - base];
+			auto tmpbuf = new uchar[recvbuf_size - base];
 			memcpy(tmpbuf, &recvbuf[base], recvbuf_used - base);
 			safe_delete_array(recvbuf);
 			recvbuf = tmpbuf;
@@ -683,7 +683,7 @@ bool EmuTCPConnection::ProcessReceivedDataAsOldPackets(char* errbuf) {
 			safe_delete_array(recvbuf);
 		}
 		else {
-			uchar* tmpbuf = new uchar[recvbuf_size - base];
+			auto tmpbuf = new uchar[recvbuf_size - base];
 			memcpy(tmpbuf, &recvbuf[base], recvbuf_used - base);
 			safe_delete_array(recvbuf);
 			recvbuf = tmpbuf;
@@ -739,7 +739,8 @@ void EmuTCPConnection::ProcessNetworkLayerPacket(ServerPacket* pack) {
 				SendNetErrorPacket("New RelayClient: illegal on outgoing connection");
 				break;
 			}
-			EmuTCPConnection* con = new EmuTCPConnection(Server->GetNextID(), Server, this, *((uint32*) data), *((uint32*) &data[4]), *((uint16*) &data[8]));
+			auto con = new EmuTCPConnection(Server->GetNextID(), Server, this, *((uint32 *)data),
+							*((uint32 *)&data[4]), *((uint16 *)&data[8]));
 			Server->AddConnection(con);
 			RelayCount++;
 			break;
@@ -787,7 +788,7 @@ bool EmuTCPConnection::SendData(bool &sent_something, char* errbuf) {
 	if(sent_something)
 		keepalive_timer.Start();
 	else if (TCPMode == modePacket && keepalive_timer.Check()) {
-		ServerPacket* pack = new ServerPacket(0, 0);
+		auto pack = new ServerPacket(0, 0);
 		SendPacket(pack);
 		safe_delete(pack);
 		#if TCPN_DEBUG >= 5

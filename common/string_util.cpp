@@ -288,7 +288,7 @@ void RemoveApostrophes(std::string &s)
 
 char *RemoveApostrophes(const char *s)
 {
-	char *NewString = new char[strlen(s) + 1];
+	auto NewString = new char[strlen(s) + 1];
 
 	strcpy(NewString, s);
 

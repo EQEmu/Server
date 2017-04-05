@@ -1,5 +1,5 @@
 /*	EQEMu: Everquest Server Emulator
-	Copyright (C) 2001-2005 EQEMu Development Team (http://eqemulator.net)
+	Copyright (C) 2001-2016 EQEMu Development Team (http://eqemulator.net)
 
 	This program is free software; you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -43,35 +43,93 @@
 
 const int Z_AGGRO=10;
 
-const int MobAISpellRange=100; // max range of buffs
-const int SpellType_Nuke=1;
-const int SpellType_Heal=2;
-const int SpellType_Root=4;
-const int SpellType_Buff=8;
-const int SpellType_Escape=16;
-const int SpellType_Pet=32;
-const int SpellType_Lifetap=64;
-const int SpellType_Snare=128;
-const int SpellType_DOT=256;
-const int SpellType_Dispel=512;
-const int SpellType_InCombatBuff=1024;
-const int SpellType_Mez=2048;
-const int SpellType_Charm=4096;
-const int SpellType_Slow = 8192;
-const int SpellType_Debuff = 16384;
-const int SpellType_Cure = 32768;
-const int SpellType_Resurrect = 65536;
+const uint32 MobAISpellRange=100; // max range of buffs
 
-const int SpellTypes_Detrimental = SpellType_Nuke|SpellType_Root|SpellType_Lifetap|SpellType_Snare|SpellType_DOT|SpellType_Dispel|SpellType_Mez|SpellType_Charm|SpellType_Debuff|SpellType_Slow;
-const int SpellTypes_Beneficial = SpellType_Heal|SpellType_Buff|SpellType_Escape|SpellType_Pet|SpellType_InCombatBuff|SpellType_Cure;
+enum SpellTypes : uint32
+{
+	SpellType_Nuke = (1 << 0),
+	SpellType_Heal = (1 << 1),
+	SpellType_Root = (1 << 2),
+	SpellType_Buff = (1 << 3),
+	SpellType_Escape = (1 << 4),
+	SpellType_Pet = (1 << 5),
+	SpellType_Lifetap = (1 << 6),
+	SpellType_Snare = (1 << 7),
+	SpellType_DOT = (1 << 8),
+	SpellType_Dispel = (1 << 9),
+	SpellType_InCombatBuff = (1 << 10),
+	SpellType_Mez = (1 << 11),
+	SpellType_Charm = (1 << 12),
+	SpellType_Slow = (1 << 13),
+	SpellType_Debuff = (1 << 14),
+	SpellType_Cure = (1 << 15),
+	SpellType_Resurrect = (1 << 16),
+	SpellType_HateRedux = (1 << 17),
+	SpellType_InCombatBuffSong = (1 << 18), // bard in-combat group/ae buffs
+	SpellType_OutOfCombatBuffSong = (1 << 19), // bard out-of-combat group/ae buffs
+	SpellType_PreCombatBuff = (1 << 20),
+	SpellType_PreCombatBuffSong = (1 << 21),
 
-#define SpellType_Any		0xFFFF
+	SpellTypes_Detrimental = (SpellType_Nuke | SpellType_Root | SpellType_Lifetap | SpellType_Snare | SpellType_DOT | SpellType_Dispel | SpellType_Mez | SpellType_Charm | SpellType_Debuff | SpellType_Slow),
+	SpellTypes_Beneficial = (SpellType_Heal | SpellType_Buff | SpellType_Escape | SpellType_Pet | SpellType_InCombatBuff | SpellType_Cure | SpellType_HateRedux | SpellType_InCombatBuffSong | SpellType_OutOfCombatBuffSong | SpellType_PreCombatBuff | SpellType_PreCombatBuffSong),
 
+	SpellType_Any = 0xFFFFFFFF
+};
+
+
+// These should not be used to determine spell category..
+// They are a graphical affects (effects?) index only
+// TODO: import sai list
 enum SpellAffectIndex {
-	SAI_Calm			= 12, // Lull and Alliance Spells
-	SAI_Dispell_Sight	= 14, // Dispells and Spells like Bind Sight
-	SAI_Memory_Blur		= 27,
-	SAI_Calm_Song		= 43 // Lull and Alliance Songs
+	SAI_Summon_Mount_Unclass	= -1,
+	SAI_Direct_Damage			= 0,
+	SAI_Heal_Cure				= 1,
+	SAI_AC_Buff					= 2,
+	SAI_AE_Damage				= 3,
+	SAI_Summon					= 4,	// Summoned Pets and Items
+	SAI_Sight					= 5,
+	SAI_Mana_Regen_Resist_Song	= 6,
+	SAI_Stat_Buff				= 7,
+	SAI_Vanish					= 9,	// Invisibility and Gate/Port
+	SAI_Appearance				= 10,	// Illusion and Size
+	SAI_Enchanter_Pet			= 11,
+	SAI_Calm					= 12,	// Lull and Alliance Spells
+	SAI_Fear					= 13,
+	SAI_Dispell_Sight			= 14,	// Dispells and Spells like Bind Sight
+	SAI_Stun					= 15,
+	SAI_Haste_Runspeed			= 16,	// Haste and SoW
+	SAI_Combat_Slow				= 17,
+	SAI_Damage_Shield			= 18,
+	SAI_Cannibalize_Weapon_Proc	= 19,
+	SAI_Weaken					= 20,
+	SAI_Banish					= 21,
+	SAI_Blind_Poison			= 22,
+	SAI_Cold_DD					= 23,
+	SAI_Poison_Disease_DD		= 24,
+	SAI_Fire_DD					= 25,
+	SAI_Memory_Blur				= 27,
+	SAI_Gravity_Fling			= 28,
+	SAI_Suffocate				= 29,
+	SAI_Lifetap_Over_Time		= 30,
+	SAI_Fire_AE					= 31,
+	SAI_Cold_AE					= 33,
+	SAI_Poison_Disease_AE		= 34,
+	SAI_Teleport				= 40,
+	SAI_Direct_Damage_Song		= 41,
+	SAI_Combat_Buff_Song		= 42,
+	SAI_Calm_Song				= 43,	// Lull and Alliance Songs
+	SAI_Firework				= 45,
+	SAI_Firework_AE				= 46,
+	SAI_Weather_Rocket			= 47,
+	SAI_Convert_Vitals			= 50,
+	SAI_NPC_Special_60			= 60,
+	SAI_NPC_Special_61			= 61,
+	SAI_NPC_Special_62			= 62,
+	SAI_NPC_Special_63			= 63,
+	SAI_NPC_Special_70			= 70,
+	SAI_NPC_Special_71			= 71,
+	SAI_NPC_Special_80			= 80,
+	SAI_Trap_Lock				= 88
 };
 enum RESISTTYPE
 {
@@ -100,23 +158,23 @@ typedef enum {
 /* 09 */	ST_Animal = 0x09,
 /* 10 */	ST_Undead = 0x0a,
 /* 11 */	ST_Summoned = 0x0b,
-/* 12 */	// NOT USED
+/* 12 */	// NOT USED error is 218 (This spell only works on things that are flying.)
 /* 13 */	ST_Tap = 0x0d,
 /* 14 */	ST_Pet = 0x0e,
 /* 15 */	ST_Corpse = 0x0f,
 /* 16 */	ST_Plant = 0x10,
 /* 17 */	ST_Giant = 0x11, //special giant
 /* 18 */	ST_Dragon = 0x12, //special dragon
-/* 19 */	// NOT USED
+/* 19 */	// NOT USED error is 227 (This spell only works on specific coldain.)
 /* 20 */	ST_TargetAETap = 0x14,
-/* 21 */	// NOT USED
-/* 22 */	// NOT USED
-/* 23 */	// NOT USED
+/* 21 */	// NOT USED same switch case as ST_Undead
+/* 22 */	// NOT USED same switch case as ST_Summoned
+/* 23 */	// NOT USED same switch case as ST_Animal
 /* 24 */	ST_UndeadAE = 0x18,
 /* 25 */	ST_SummonedAE = 0x19,
 /* 26 */	// NOT USED
-/* 27 */	// NOT USED
-/* 28 */	// NOT USED
+/* 27 */	// NOT USED error is 223 (This spell only works on insects.)
+/* 28 */	// NOT USED error is 223 (This spell only works on insects.)
 /* 29 */	// NOT USED
 /* 30 */	// NOT USED
 /* 31 */	// NOT USED
@@ -446,7 +504,7 @@ typedef enum {
 #define SE_IncreaseRunSpeedCap			290	// implemented[AA] - increases run speed over the hard cap
 #define SE_Purify						291 // implemented - Removes determental effects
 #define SE_StrikeThrough2				292	// implemented[AA] - increasing chance of bypassing an opponent's special defenses, such as dodge, block, parry, and riposte.
-#define SE_FrontalStunResist			293	// implemented[AA] - Reduce chance to be stunned from front.
+#define SE_FrontalStunResist			293	// implemented[AA] - Reduce chance to be stunned from front. -- live descriptions sounds like this isn't limited to frontal anymore
 #define SE_CriticalSpellChance			294 // implemented - increase chance to critical hit and critical damage modifier.
 //#define SE_ReduceTimerSpecial			295	// not used
 #define SE_FcSpellVulnerability			296	// implemented - increase in incoming spell damage
@@ -485,7 +543,7 @@ typedef enum {
 #define SE_ManaAbsorbPercentDamage		329 // implemented
 #define SE_CriticalDamageMob			330	// implemented
 #define SE_Salvage						331 // implemented - chance to recover items that would be destroyed in failed tradeskill combine
-//#define SE_SummonToCorpse				332 // *not implemented AA - Call of the Wild (Druid/Shaman Res spell with no exp)
+#define SE_SummonToCorpse				332 // *not implemented AA - Call of the Wild (Druid/Shaman Res spell with no exp)
 #define SE_CastOnRuneFadeEffect			333 // implemented
 #define SE_BardAEDot					334	// implemented
 #define SE_BlockNextSpellFocus			335	// implemented - base1 chance to block next spell ie Puratus (8494)
@@ -502,7 +560,7 @@ typedef enum {
 #define SE_HeadShotLevel				346	// implemented[AA] - HeadShot max level to kill
 #define SE_DoubleRangedAttack			347	// implemented - chance at an additional archery attack (consumes arrow)
 #define SE_LimitManaMin					348	// implemented
-#define SE_ShieldEquipHateMod			349	// implemented[AA] Increase melee hate when wearing a shield.
+#define SE_ShieldEquipDmgMod			349	// implemented[AA] Increase melee base damage (indirectly increasing hate) when wearing a shield.
 #define SE_ManaBurn						350	// implemented - Drains mana for damage/heal at a defined ratio up to a defined maximum amount of mana.
 //#define SE_PersistentEffect			351	// *not implemented. creates a trap/totem that casts a spell (spell id + base1?) when anything comes near it. can probably make a beacon for this
 //#define SE_IncreaseTrapCount			352	// *not implemented - looks to be some type of invulnerability? Test ITC (8755)
@@ -519,7 +577,7 @@ typedef enum {
 #define SE_BandolierSlots				363	// *not implemented[AA] 'Battle Ready' expands the bandolier by one additional save slot per rank.
 #define SE_TripleAttackChance			364	// implemented
 #define SE_ProcOnSpellKillShot			365	// implemented - chance to trigger a spell on kill when the kill is caused by a specific spell with this effect in it (10470 Venin)
-#define SE_ShieldEquipDmgMod			366	// implemented[AA] Damage modifier to melee if shield equiped. (base1 = dmg mod , base2 = ?) ie Shield Specialist AA
+#define SE_GroupShielding				366	// *not implemented[AA] This gives you /shieldgroup
 #define SE_SetBodyType					367	// implemented - set body type of base1 so it can be affected by spells that are limited to that type (Plant, Animal, Undead, etc)
 //#define SE_FactionMod					368	// *not implemented - increases faction with base1 (faction id, live won't match up w/ ours) by base2
 #define SE_CorruptionCounter			369	// implemented
@@ -639,143 +697,163 @@ typedef enum {
 // number. note that the id field is counted as 0, this way the numbers
 // here match the numbers given to sep in the loading function net.cpp
 //
-#define SPELL_LOAD_FIELD_COUNT 231
+#define SPELL_LOAD_FIELD_COUNT 236
 
 struct SPDat_Spell_Struct
 {
-/* 000 */	int id;	// not used
-/* 001 */	char name[64]; // Name of the spell
-/* 002 */	char player_1[32]; // "PLAYER_1"
-/* 003 */	char teleport_zone[64];	// Teleport zone, pet name summoned, or item summoned
-/* 004 */	char you_cast[64]; // Message when you cast
-/* 005 */	char other_casts[64]; // Message when other casts
-/* 006 */	char cast_on_you[64]; // Message when spell is cast on you
-/* 007 */	char cast_on_other[64]; // Message when spell is cast on someone else
-/* 008 */	char spell_fades[64]; // Spell fades
-/* 009 */	float range;
-/* 010 */	float aoerange;
-/* 011 */	float pushback;
-/* 012 */	float pushup;
-/* 013 */	uint32 cast_time; // Cast time
-/* 014 */	uint32 recovery_time; // Recovery time
-/* 015 */	uint32 recast_time; // Recast same spell time
-/* 016 */	uint32 buffdurationformula;
-/* 017 */	uint32 buffduration;
-/* 018 */	uint32 AEDuration;	// sentinel, rain of something
-/* 019 */	uint16 mana; // Mana Used
-/* 020 */	int base[EFFECT_COUNT];	//various purposes
-/* 032 */	int base2[EFFECT_COUNT]; //various purposes
-/* 044 */	int32 max[EFFECT_COUNT];
-/* 056 */	//uint16 icon; // Spell icon
-/* 057 */	//uint16 memicon; // Icon on membarthing
-/* 058 */	int32 components[4]; // reagents
-/* 062 */	int component_counts[4]; // amount of regents used
+/* 000 */	int id;	// not used -- SPELLINDEX
+/* 001 */	char name[64]; // Name of the spell -- SPELLNAME
+/* 002 */	char player_1[32]; // "PLAYER_1" -- ACTORTAG
+/* 003 */	char teleport_zone[64];	// Teleport zone, pet name summoned, or item summoned -- NPC_FILENAME
+/* 004 */	char you_cast[64]; // Message when you cast -- CASTERMETXT
+/* 005 */	char other_casts[64]; // Message when other casts -- CASTEROTHERTXT
+/* 006 */	char cast_on_you[64]; // Message when spell is cast on you -- CASTEDMETXT
+/* 007 */	char cast_on_other[64]; // Message when spell is cast on someone else -- CASTEDOTHERTXT
+/* 008 */	char spell_fades[64]; // Spell fades -- SPELLGONE
+/* 009 */	float range; // -- RANGE
+/* 010 */	float aoerange; // -- IMPACTRANGE
+/* 011 */	float pushback; // -- OUTFORCE
+/* 012 */	float pushup; // -- UPFORCE
+/* 013 */	uint32 cast_time; // Cast time -- CASTINGTIME
+/* 014 */	uint32 recovery_time; // Recovery time -- RECOVERYDELAY
+/* 015 */	uint32 recast_time; // Recast same spell time -- SPELLDELAY
+/* 016 */	uint32 buffdurationformula; // -- DURATIONBASE
+/* 017 */	uint32 buffduration; // -- DURATIONCAP
+/* 018 */	uint32 AEDuration;	// sentinel, rain of something -- IMPACTDURATION
+/* 019 */	uint16 mana; // Mana Used -- MANACOST
+/* 020 */	int base[EFFECT_COUNT];	//various purposes -- BASEAFFECT1 .. BASEAFFECT12
+/* 032 */	int base2[EFFECT_COUNT]; //various purposes -- BASE_EFFECT2_1 ... BASE_EFFECT2_12
+/* 044 */	int32 max[EFFECT_COUNT]; // -- AFFECT1CAP ... AFFECT12CAP
+/* 056 */	//uint16 icon; // Spell icon -- IMAGENUMBER
+/* 057 */	//uint16 memicon; // Icon on membarthing -- MEMIMAGENUMBER
+/* 058 */	int32 components[4]; // reagents -- EXPENDREAGENT1 ... EXPENDREAGENT4
+/* 062 */	int component_counts[4]; // amount of regents used -- EXPENDQTY1 ... EXPENDQTY4
 /* 066 */	int NoexpendReagent[4];	// focus items (Need but not used; Flame Lick has a Fire Beetle Eye focus.)
 											// If it is a number between 1-4 it means components[number] is a focus and not to expend it
 											// If it is a valid itemid it means this item is a focus as well
-/* 070 */	uint16 formula[EFFECT_COUNT]; // Spell's value formula
-/* 082 */	//int LightType; // probaly another effecttype flag
-/* 083 */	int8 goodEffect; //0=detrimental, 1=Beneficial, 2=Beneficial, Group Only
-/* 084 */	int Activated; // probably another effecttype flag
-/* 085 */	int resisttype;
-/* 086 */	int effectid[EFFECT_COUNT];	// Spell's effects
-/* 098 */	SpellTargetType targettype;	// Spell's Target
-/* 099 */	int basediff; // base difficulty fizzle adjustment
-/* 100 */	SkillUseTypes skill;
-/* 101 */	int8 zonetype; // 01=Outdoors, 02=dungeons, ff=Any
-/* 102 */	int8 EnvironmentType;
-/* 103 */	int8 TimeOfDay;
-/* 104 */	uint8 classes[PLAYER_CLASS_COUNT]; // Classes, and their min levels
-/* 120 */	uint8 CastingAnim;
-/* 121 */	//uint8 TargetAnim;
-/* 122 */	//uint32 TravelType;
-/* 123 */	uint16 SpellAffectIndex;
-/* 124 */	int8 disallow_sit; // 124: high-end Yaulp spells (V, VI, VII, VIII [Rk 1, 2, & 3], & Gallenite's Bark of Fury
-/* 125 */	int8 diety_agnostic;// 125: Words of the Skeptic
+											// -- NOEXPENDREAGENT1 ... NOEXPENDREAGENT4
+/* 070 */	uint16 formula[EFFECT_COUNT]; // Spell's value formula -- LEVELAFFECT1MOD ... LEVELAFFECT12MOD
+/* 082 */	//int LightType; // probaly another effecttype flag -- LIGHTTYPE
+/* 083 */	int8 goodEffect; //0=detrimental, 1=Beneficial, 2=Beneficial, Group Only -- BENEFICIAL
+/* 084 */	int Activated; // probably another effecttype flag -- ACTIVATED
+/* 085 */	int resisttype; // -- RESISTTYPE
+/* 086 */	int effectid[EFFECT_COUNT];	// Spell's effects -- SPELLAFFECT1 ... SPELLAFFECT12
+/* 098 */	SpellTargetType targettype;	// Spell's Target -- TYPENUMBER
+/* 099 */	int basediff; // base difficulty fizzle adjustment -- BASEDIFFICULTY
+/* 100 */	EQEmu::skills::SkillType skill; // -- CASTINGSKILL
+/* 101 */	int8 zonetype; // 01=Outdoors, 02=dungeons, ff=Any -- ZONETYPE
+/* 102 */	int8 EnvironmentType; // -- ENVIRONMENTTYPE
+/* 103 */	int8 TimeOfDay; // -- TIMEOFDAY
+/* 104 */	uint8 classes[PLAYER_CLASS_COUNT]; // Classes, and their min levels -- WARRIORMIN ... BERSERKERMIN
+/* 120 */	uint8 CastingAnim; // -- CASTINGANIM
+/* 121 */	//uint8 TargetAnim; // -- TARGETANIM
+/* 122 */	//uint32 TravelType; // -- TRAVELTYPE
+/* 123 */	uint16 SpellAffectIndex; // -- SPELLAFFECTINDEX
+/* 124 */	int8 disallow_sit; // 124: high-end Yaulp spells (V, VI, VII, VIII [Rk 1, 2, & 3], & Gallenite's Bark of Fury -- CANCELONSIT
+/* 125 */	int8 diety_agnostic;// 125: Words of the Skeptic -- DIETY_AGNOSTIC
 /* 126 */	int8 deities[16];	// Deity check. 201 - 216 per http://www.eqemulator.net/wiki/wikka.php?wakka=DeityList
 										// -1: Restrict to Deity; 1: Restrict to Deity, but only used on non-Live (Test Server "Blessing of ...") spells; 0: Don't restrict
-/* 142 */						// 142: between 0 & 100
-								// 143: always set to 0
-/* 144 */	//int16 new_icon	// Spell icon used by the client in uifiles/default/spells??.tga, both for spell gems & buff window. Looks to depreciate icon & memicon
-/* 145 */	//int16 spellanim; // Doesn't look like it's the same as #doanim, so not sure what this is
-/* 146 */	int8 uninterruptable;	// Looks like anything != 0 is uninterruptable. Values are mostly -1, 0, & 1 (Fetid Breath = 90?)
-/* 147 */	int16 ResistDiff;
-/* 148 */	int8 dot_stacking_exempt; // If 1 doesn't stack with self cast by others. If -1 (not implemented) doesn't stack with same effect (???)
-/* 149 */	//int deletable;
-/* 150 */	uint16 RecourseLink;
-/* 151 */	bool no_partial_resist;	// 151: -1, 0, or 1
-								// 152 & 153: all set to 0
-/* 154 */	int8 short_buff_box;	// != 0, goes to short buff box.
-/* 155 */	int descnum; // eqstr of description of spell
-/* 156 */	//int typedescnum; // eqstr of type description
-/* 157 */	int effectdescnum; // eqstr of effect description
-/* 158 */   //Category Desc ID 3
-/* 159 */	bool npc_no_los;
-/* 161 */	bool reflectable;
-/* 162 */	int bonushate;
-/* 163 */
-/* 164 */	// for most spells this appears to mimic ResistDiff
-/* 165 */	bool ldon_trap; //Flag found on all LDON trap / chest related spells.
-/* 166 */	int EndurCost;
-/* 167 */	int8 EndurTimerIndex;
-/* 168 */	bool IsDisciplineBuff; //Will goto the combat window when cast
-/* 169 - 172*/ //These are zero for ALL spells
-/* 173 */	int HateAdded;
-/* 174 */	int EndurUpkeep;
-/* 175 */	int numhitstype; // defines which type of behavior will tick down the numhit counter.
-/* 176 */	int numhits;
-/* 177 */	int pvpresistbase;
-/* 178 */	int pvpresistcalc;
-/* 179 */	int pvpresistcap;
-/* 180 */	int spell_category;
-/* 181 */	//unknown - likely buff duration related
-/* 182 */   //unknown - likely buff duration related
-/* 183 */
-/* 184 */
-/* 185 */	int8 can_mgb; // 0=no, -1 or 1 = yes
-/* 186 */	int dispel_flag;
-/* 187 */	//int npc_category;
-/* 188 */	//int npc_usefulness;
-/* 189 */	int MinResist;
-/* 190 */	int MaxResist;
-/* 191 */	uint8 viral_targets;
-/* 192 */	uint8 viral_timer;
-/* 193 */	int NimbusEffect;
-/* 194 */	float directional_start; //Cone Start Angle:
-/* 195 */	float directional_end; // Cone End Angle:
-/* 196 */   bool sneak; // effect can only be used if sneaking (rogue 'Daggerfall' ect)
-/* 197 */	bool not_focusable; //prevents focus effects from being applied to spell
-/* 198 */   bool no_detrimental_spell_aggro; 
-/* 199 */
-/* 200 */	bool suspendable; // buff is suspended in suspended buff zones
-/* 201 */	int viral_range;
-/* 202 */	int songcap; // individual song cap
-/* 203 */
-/* 204 */
-/* 205 */	bool no_block;
-/* 206 */
-/* 207 */	int spellgroup;
-/* 208 */	int rank; //increments AA effects with same name
-/* 209 */	int no_resist; //makes spells unresistable, which makes charms unbreakable as well.  
-/* 210 */	// bool DurationFrozen; ???
-/* 211 */	int CastRestriction; //Various restriction categories for spells most seem targetable race related but have also seen others for instance only castable if target hp 20% or lower or only if target out of combat
-/* 212 */	bool AllowRest;
-/* 213 */	bool InCombat; //Allow spell if target is in combat
-/* 214 */   bool OutofCombat; //Allow spell if target is out of combat
-/* 215 - 216 */
-/* 217 */   int override_crit_chance; //Places a cap on the max chance to critical
-/* 218 */	int aemaxtargets;  //Is used for various AE effects
-/* 219 */	int no_heal_damage_item_mod; 
-/* 220 - 223 */
-/* 224 */	bool persistdeath; // buff doesn't get stripped on death
-/* 225 - 226 */
-/* 227 */	float min_dist; //spell power modified by distance from caster (Min Distance)
-/* 228 */	float min_dist_mod;  //spell power modified by distance from caster (Modifier at Min Distance)
-/* 229 */	float max_dist; //spell power modified by distance from caster (Max Distance)
-/* 230 */   float max_dist_mod; //spell power modified by distance from caster (Modifier at Max Distance)
-/* 231 */   float min_range; //Min casting range
-/* 232 */   bool no_remove; //prevents buff from being removed by click
-/* 233 - 236 */
+										// the client actually stores deities in a single int32_t
+										// -- DIETY_BERTOXXULOUS ... DIETY_VEESHAN
+/* 142 */	//int8 npc_no_cast;			// 142: between 0 & 100 -- NPC_NO_CAST
+/* 143 */	//int ai_pt_bonus;			// 143: always set to 0, client doesn't save this -- AI_PT_BONUS
+/* 144 */	//int16 new_icon	// Spell icon used by the client in uifiles/default/spells??.tga, both for spell gems & buff window. Looks to depreciate icon & memicon -- NEW_ICON
+/* 145 */	//int16 spellanim; // Doesn't look like it's the same as #doanim, so not sure what this is, particles I think -- SPELL_EFFECT_INDEX
+/* 146 */	bool uninterruptable;	// Looks like anything != 0 is uninterruptable. Values are mostly -1, 0, & 1 (Fetid Breath = 90?) -- NO_INTERRUPT
+/* 147 */	int16 ResistDiff; // -- RESIST_MOD
+/* 148 */	bool dot_stacking_exempt; // -- NOT_STACKABLE_DOT
+/* 149 */	//int deletable; // -- DELETE_OK
+/* 150 */	uint16 RecourseLink; // -- REFLECT_SPELLINDEX
+/* 151 */	bool no_partial_resist;	// 151: -1, 0, or 1 -- NO_PARTIAL_SAVE
+/* 152 */	//bool small_targets_only; // -- SMALL_TARGETS_ONLY
+/* 153 */	//bool uses_persistent_particles; // -- USES_PERSISTENT_PARTICLES
+/* 154 */	int8 short_buff_box;	// != 0, goes to short buff box. -- BARD_BUFF_BOX
+/* 155 */	int descnum; // eqstr of description of spell -- DESCRIPTION_INDEX
+/* 156 */	int typedescnum; // eqstr of type description -- PRIMARY_CATEGORY
+/* 157 */	int effectdescnum; // eqstr of effect description -- SECONDARY_CATEGORY_1
+/* 158 */	//int secondary_category_2;   //Category Desc ID 3 -- SECONDARY_CATEGORY_2
+/* 159 */	bool npc_no_los; // -- NO_NPC_LOS
+/* 160 */	//bool feedbackable; // -- FEEDBACKABLE
+/* 161 */	bool reflectable; // -- REFLECTABLE
+/* 162 */	int bonushate; // -- HATE_MOD
+/* 163 */	//int resist_per_level; // -- RESIST_PER_LEVEL
+/* 164 */	//int resist_cap; // for most spells this appears to mimic ResistDiff -- RESIST_CAP
+/* 165 */	bool ldon_trap; //Flag found on all LDON trap / chest related spells. -- AFFECT_INANIMATE
+/* 166 */	int EndurCost; // -- STAMINA_COST
+/* 167 */	int8 EndurTimerIndex; // bad name, used for all spells -- TIMER_INDEX
+/* 168 */	bool IsDisciplineBuff; //Will goto the combat window when cast -- IS_SKILL
+/* 169 - 172*/ //These are zero for ALL spells, also removed from live -- ATTACK_OPENING, DEFENSE_OPENING, SKILL_OPENING, NPC_ERROR_OPENING
+/* 173 */	int HateAdded; // -- SPELL_HATE_GIVEN
+/* 174 */	int EndurUpkeep; // -- ENDUR_UPKEEP
+/* 175 */	int numhitstype; // defines which type of behavior will tick down the numhit counter. -- LIMITED_USE_TYPE
+/* 176 */	int numhits; // -- LIMITED_USE_COUNT
+/* 177 */	int pvpresistbase; // -- PVP_RESIST_MOD
+/* 178 */	int pvpresistcalc; // -- PVP_RESIST_PER_LEVEL
+/* 179 */	int pvpresistcap; // -- PVP_RESIST_CAP
+/* 180 */	int spell_category; // -- GLOBAL_GROUP
+/* 181 */	//int pvp_duration; // buffdurationformula for PvP -- PVP_DURATION
+/* 182 */	//int pvp_duration_cap; // buffduration for PvP -- PVP_DURATION_CAP
+/* 183 */	int pcnpc_only_flag; // valid values are 0, 1 = PCs (and mercs), and 2 = NPCs (and not mercs) -- PCNPC_ONLY_FLAG
+/* 184 */	bool cast_not_standing; // this is checked in the client's EQ_Spell::IsCastWhileInvisSpell, this also blocks SE_InterruptCasting from affecting this spell -- CAST_NOT_STANDING
+/* 185 */	bool can_mgb; // 0=no, -1 or 1 = yes -- CAN_MGB
+/* 186 */	int dispel_flag; // -- NO_DISPELL
+/* 187 */	//int npc_category; // -- NPC_MEM_CATEGORY
+/* 188 */	//int npc_usefulness; // -- NPC_USEFULNESS
+/* 189 */	int MinResist; // -- MIN_RESIST
+/* 190 */	int MaxResist; // -- MAX_RESIST
+/* 191 */	uint8 viral_targets; // -- MIN_SPREAD_TIME
+/* 192 */	uint8 viral_timer; // -- MAX_SPREAD_TIME
+/* 193 */	int NimbusEffect; // -- DURATION_PARTICLE_EFFECT
+/* 194 */	float directional_start; //Cone Start Angle: -- CONE_START_ANGLE
+/* 195 */	float directional_end; // Cone End Angle: -- CONE_END_ANGLE
+/* 196 */   bool sneak; // effect can only be used if sneaking (rogue 'Daggerfall' ect) -- SNEAK_ATTACK
+/* 197 */	bool not_focusable; //prevents focus effects from being applied to spell -- NOT_FOCUSABLE
+/* 198 */   bool no_detrimental_spell_aggro; // -- NO_DETRIMENTAL_SPELL_AGGRO
+/* 199 */	//bool show_wear_off_message; // -- SHOW_WEAR_OFF_MESSAGE
+/* 200 */	bool suspendable; // buff is suspended in suspended buff zones -- IS_COUNTDOWN_HELD
+/* 201 */	int viral_range; // -- SPREAD_RADIUS
+/* 202 */	int songcap; // individual song cap -- BASE_EFFECTS_FOCUS_CAP
+/* 203 */	//bool stacks_with_self; // -- STACKS_WITH_SELF
+/* 204 */	//int not_shown_to_player; // client skips this -- NOT_SHOWN_TO_PLAYER
+/* 205 */	bool no_block; // -- NO_BUFF_BLOCK
+/* 206 */	//int8 anim_variation; // -- ANIM_VARIATION
+/* 207 */	int spellgroup; // -- SPELL_GROUP
+/* 208 */	int rank; //increments AA effects with same name -- SPELL_GROUP_RANK
+/* 209 */	int no_resist; //makes spells unresistable, which makes charms unbreakable as well. -- NO_RESIST
+/* 210 */	// bool allow_spellscribe; // -- ALLOW_SPELLSCRIBE
+/* 211 */	int CastRestriction; //Various restriction categories for spells most seem targetable race related but have also seen others for instance only castable if target hp 20% or lower or only if target out of combat -- SPELL_REQ_ASSOCIATION_ID
+/* 212 */	bool AllowRest; // -- BYPASS_REGEN_CHECK
+/* 213 */	bool InCombat; //Allow spell if target is in combat -- CAN_CAST_IN_COMBAT
+/* 214 */   bool OutofCombat; //Allow spell if target is out of combat -- CAN_CAST_OUT_OF_COMBAT
+/* 215 */	//bool show_dot_message; // -- SHOW_DOT_MESSAGE
+/* 216 */	//bool invalid; // -- INVALID
+/* 217 */   int override_crit_chance; //Places a cap on the max chance to critical -- OVERRIDE_CRIT_CHANCE
+/* 218 */	int aemaxtargets;  //Is used for various AE effects -- MAX_TARGETS
+/* 219 */	int no_heal_damage_item_mod; // -- NO_HEAL_DAMAGE_ITEM_MOD
+/* 220 */	//int caster_requirement_id; // -- CASTER_REQUIREMENT_ID
+/* 221 */	//int spell_class; // -- SPELL_CLASS
+/* 222 */	//int spell_subclass; // -- SPELL_SUBCLASS
+/* 223 */	//int ai_valid_targets; // -- AI_VALID_TARGETS
+/* 224 */	bool persistdeath; // buff doesn't get stripped on death -- NO_STRIP_ON_DEATH
+/* 225 */	//float base_effects_focus_slope; // -- BASE_EFFECTS_FOCUS_SLOPE
+/* 226 */	//float base_effects_focus_offset; // -- BASE_EFFECTS_FOCUS_OFFSET
+/* 227 */	float min_dist; //spell power modified by distance from caster (Min Distance) -- DISTANCE_MOD_CLOSE_DIST
+/* 228 */	float min_dist_mod;  //spell power modified by distance from caster (Modifier at Min Distance) -- DISTANCE_MOD_CLOSE_MULT
+/* 229 */	float max_dist; //spell power modified by distance from caster (Max Distance) -- DISTANCE_MOD_FAR_DIST
+/* 230 */   float max_dist_mod; //spell power modified by distance from caster (Modifier at Max Distance) -- DISTANCE_MOD_FAR_MULT
+/* The client also does this
+ *  v26 = *(float *)&v4->DistanceModFarDist - *(float *)&v4->DistanceModCloseDist;
+ *  if ( v26 > -0.00000011920929 && v26 < 0.00000011920929 )
+ *    v26 = 1.0;
+ *  v27 = (st7_0 - *(float *)&v4->DistanceModCloseMult) / v26;
+ *  *(float *)&v4->DistanceMod = v27;
+ */
+/* 231 */   float min_range; //Min casting range -- MIN_RANGE
+/* 232 */   bool no_remove; //prevents buff from being removed by click -- NO_REMOVE
+/* 233 */	//int spell_recourse_type; // -- SPELL_RECOURSE_TYPE
+/* 234 */	//bool only_during_fast_regen; // -- ONLY_DURING_FAST_REGEN
+/* 235 */	//bool is_beta_only; // -- IS_BETA_ONLY
+/* 236 */	//int spell_subgroup; // -- SPELL_SUBGROUP
 			uint8 DamageShieldType; // This field does not exist in spells_us.txt
 };
 
@@ -882,6 +960,9 @@ uint32 GetPartialMagicRuneReduction(uint32 spell_id);
 uint32 GetPartialMeleeRuneAmount(uint32 spell_id);
 uint32 GetPartialMagicRuneAmount(uint32 spell_id);
 bool NoDetrimentalSpellAggro(uint16 spell_id);
+bool IsStackableDot(uint16 spell_id);
+bool IsCastWhileInvis(uint16 spell_id);
+bool IsEffectIgnoredInStacking(int spa);
 
 int CalcPetHp(int levelb, int classb, int STA = 75);
 const char *GetRandPetName();

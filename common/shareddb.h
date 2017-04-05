@@ -1,3 +1,21 @@
+/*	EQEMu: Everquest Server Emulator
+	Copyright (C) 2001-2016 EQEMu Development Team (http://eqemulator.org)
+
+	This program is free software; you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation; version 2 of the License.
+
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY except by those people which sell it, which
+	are required to give you total support for your newly bought product;
+	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+	A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+	You should have received a copy of the GNU General Public License
+	along with this program; if not, write to the Free Software
+	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+*/
+
 #ifndef SHAREDDB_H_
 #define SHAREDDB_H_
 
@@ -15,18 +33,19 @@
 #include <memory>
 
 class EvolveInfo;
-class Inventory;
-class ItemInst;
 struct BaseDataStruct;
 struct InspectMessage_Struct;
 struct PlayerProfile_Struct;
 struct SPDat_Spell_Struct;
-struct Item_Struct;
 struct NPCFactionList;
 struct LootTable_Struct;
 struct LootDrop_Struct;
+
 namespace EQEmu
 {
+	struct ItemData;
+	class ItemInstance;
+	class InventoryProfile;
 	class MemoryMappedFile;
 }
 
@@ -55,34 +74,34 @@ class SharedDatabase : public Database
 		uint32	GetTotalTimeEntitledOnAccount(uint32 AccountID);
 
 		/*
-		    Character Inventory
+		    Character InventoryProfile
 		*/
-		bool	SaveCursor(uint32 char_id, std::list<ItemInst*>::const_iterator &start, std::list<ItemInst*>::const_iterator &end);
-		bool	SaveInventory(uint32 char_id, const ItemInst* inst, int16 slot_id);
+		bool	SaveCursor(uint32 char_id, std::list<EQEmu::ItemInstance*>::const_iterator &start, std::list<EQEmu::ItemInstance*>::const_iterator &end);
+		bool	SaveInventory(uint32 char_id, const EQEmu::ItemInstance* inst, int16 slot_id);
 		bool    DeleteSharedBankSlot(uint32 char_id, int16 slot_id);
 		bool    DeleteInventorySlot(uint32 char_id, int16 slot_id);
-		bool    UpdateInventorySlot(uint32 char_id, const ItemInst* inst, int16 slot_id);
-		bool    UpdateSharedBankSlot(uint32 char_id, const ItemInst* inst, int16 slot_id);
-		bool	VerifyInventory(uint32 account_id, int16 slot_id, const ItemInst* inst);
-		bool	GetSharedBank(uint32 id, Inventory* inv, bool is_charid);
+		bool    UpdateInventorySlot(uint32 char_id, const EQEmu::ItemInstance* inst, int16 slot_id);
+		bool    UpdateSharedBankSlot(uint32 char_id, const EQEmu::ItemInstance* inst, int16 slot_id);
+		bool	VerifyInventory(uint32 account_id, int16 slot_id, const EQEmu::ItemInstance* inst);
+		bool	GetSharedBank(uint32 id, EQEmu::InventoryProfile* inv, bool is_charid);
 		int32	GetSharedPlatinum(uint32 account_id);
 		bool	SetSharedPlatinum(uint32 account_id, int32 amount_to_add);
-		bool	GetInventory(uint32 char_id, Inventory* inv);
-		bool	GetInventory(uint32 account_id, char* name, Inventory* inv);
+		bool	GetInventory(uint32 char_id, EQEmu::InventoryProfile* inv);
+		bool	GetInventory(uint32 account_id, char* name, EQEmu::InventoryProfile* inv);
 		std::map<uint32, uint32> GetItemRecastTimestamps(uint32 char_id);
 		uint32	GetItemRecastTimestamp(uint32 char_id, uint32 recast_type);
 		void	ClearOldRecastTimestamps(uint32 char_id);
-		bool	SetStartingItems(PlayerProfile_Struct* pp, Inventory* inv, uint32 si_race, uint32 si_class, uint32 si_deity, uint32 si_current_zone, char* si_name, int admin);
+		bool	SetStartingItems(PlayerProfile_Struct* pp, EQEmu::InventoryProfile* inv, uint32 si_race, uint32 si_class, uint32 si_deity, uint32 si_current_zone, char* si_name, int admin);
 
 
-		std::string	GetBook(const char *txtfile);
+		std::string	GetBook(const char *txtfile, int16 *language);
 
 		/*
 		    Item Methods
 		*/
-		ItemInst* CreateItem(uint32 item_id, int16 charges = 0, uint32 aug1 = 0, uint32 aug2 = 0, uint32 aug3 = 0, uint32 aug4 = 0, uint32 aug5 = 0, uint32 aug6 = 0, uint8 attuned = 0);
-		ItemInst* CreateItem(const Item_Struct* item, int16 charges = 0, uint32 aug1 = 0, uint32 aug2 = 0, uint32 aug3 = 0, uint32 aug4 = 0, uint32 aug5 = 0, uint32 aug6 = 0, uint8 attuned = 0);
-		ItemInst* CreateBaseItem(const Item_Struct* item, int16 charges = 0);
+		EQEmu::ItemInstance* CreateItem(uint32 item_id, int16 charges = 0, uint32 aug1 = 0, uint32 aug2 = 0, uint32 aug3 = 0, uint32 aug4 = 0, uint32 aug5 = 0, uint32 aug6 = 0, uint8 attuned = 0);
+		EQEmu::ItemInstance* CreateItem(const EQEmu::ItemData* item, int16 charges = 0, uint32 aug1 = 0, uint32 aug2 = 0, uint32 aug3 = 0, uint32 aug4 = 0, uint32 aug5 = 0, uint32 aug6 = 0, uint8 attuned = 0);
+		EQEmu::ItemInstance* CreateBaseItem(const EQEmu::ItemData* item, int16 charges = 0);
 
 		/*
 		    Shared Memory crap
@@ -92,8 +111,8 @@ class SharedDatabase : public Database
 		void GetItemsCount(int32 &item_count, uint32 &max_id);
 		void LoadItems(void *data, uint32 size, int32 items, uint32 max_item_id);
 		bool LoadItems(const std::string &prefix);
-		const Item_Struct* IterateItems(uint32* id);
-		const Item_Struct* GetItem(uint32 id);
+		const EQEmu::ItemData* IterateItems(uint32* id);
+		const EQEmu::ItemData* GetItem(uint32 id);
 		const EvolveInfo* GetEvolveInfo(uint32 loregroup);
 
 		//faction lists
@@ -113,8 +132,8 @@ class SharedDatabase : public Database
 
 		void LoadSkillCaps(void *data);
 		bool LoadSkillCaps(const std::string &prefix);
-		uint16 GetSkillCap(uint8 Class_, SkillUseTypes Skill, uint8 Level);
-		uint8 GetTrainLevel(uint8 Class_, SkillUseTypes Skill, uint8 Level);
+		uint16 GetSkillCap(uint8 Class_, EQEmu::skills::SkillType Skill, uint8 Level);
+		uint8 GetTrainLevel(uint8 Class_, EQEmu::skills::SkillType Skill, uint8 Level);
 
 		int GetMaxSpellID();
 		bool LoadSpells(const std::string &prefix, int32 *records, const SPDat_Spell_Struct **sp);
@@ -126,16 +145,11 @@ class SharedDatabase : public Database
 		void LoadBaseData(void *data, int max_level);
 		const BaseDataStruct* GetBaseData(int lvl, int cl);
 
-#ifdef BOTS
-		void	GetBotInspectMessage(uint32 botid, InspectMessage_Struct* message);
-		void	SetBotInspectMessage(uint32 botid, const InspectMessage_Struct* message);
-#endif
-
 	protected:
 
 		std::unique_ptr<EQEmu::MemoryMappedFile> skill_caps_mmf;
 		std::unique_ptr<EQEmu::MemoryMappedFile> items_mmf;
-		std::unique_ptr<EQEmu::FixedMemoryHashSet<Item_Struct>> items_hash;
+		std::unique_ptr<EQEmu::FixedMemoryHashSet<EQEmu::ItemData>> items_hash;
 		std::unique_ptr<EQEmu::MemoryMappedFile> faction_mmf;
 		std::unique_ptr<EQEmu::FixedMemoryHashSet<NPCFactionList>> faction_hash;
 		std::unique_ptr<EQEmu::MemoryMappedFile> loot_table_mmf;

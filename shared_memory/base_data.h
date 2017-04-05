@@ -20,6 +20,8 @@
 #define __EQEMU_SHARED_MEMORY_BASE_DATA_H
 
 #include <string>
+#include "../common/eqemu_config.h"
+
 class SharedDatabase;
 void LoadBaseData(SharedDatabase *database, const std::string &prefix);
 

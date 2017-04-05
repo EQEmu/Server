@@ -1,5 +1,5 @@
 /*	EQEMu: Everquest Server Emulator
-	Copyright (C) 2001-2003 EQEMu Development Team (http://eqemulator.net)
+	Copyright (C) 2001-2016 EQEMu Development Team (http://eqemulator.net)
 
 	This program is free software; you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -148,14 +148,29 @@ public:
 	bool IsMobSpawnedByNpcTypeID(uint32 get_id);
 	Mob *GetTargetForVirus(Mob* spreader, int range);
 	inline NPC *GetNPCByID(uint16 id)
-		{ return npc_list.count(id) ? npc_list.at(id) : nullptr; }
+	{
+		auto it = npc_list.find(id);
+		if (it != npc_list.end())
+			return it->second;
+		return nullptr;
+	}
 	NPC *GetNPCByNPCTypeID(uint32 npc_id);
 	inline Merc *GetMercByID(uint16 id)
-		{ return merc_list.count(id) ? merc_list.at(id) : nullptr; }
+	{
+		auto it = merc_list.find(id);
+		if (it != merc_list.end())
+			return it->second;
+		return nullptr;
+	}
 	Client *GetClientByName(const char *name);
 	Client *GetClientByAccID(uint32 accid);
 	inline Client *GetClientByID(uint16 id)
-		{ return client_list.count(id) ? client_list.at(id) : nullptr; }
+	{
+		auto it = client_list.find(id);
+		if (it != client_list.end())
+			return it->second;
+		return nullptr;
+	}
 	Client *GetClientByCharID(uint32 iCharID);
 	Client *GetClientByWID(uint32 iWID);
 	Client *GetClient(uint32 ip, uint16 port);
@@ -172,7 +187,12 @@ public:
 	Corpse *GetCorpseByOwner(Client* client);
 	Corpse *GetCorpseByOwnerWithinRange(Client* client, Mob* center, int range);
 	inline Corpse *GetCorpseByID(uint16 id)
-		{ return corpse_list.count(id) ? corpse_list.at(id) : nullptr; }
+	{
+		auto it = corpse_list.find(id);
+		if (it != corpse_list.end())
+			return it->second;
+		return nullptr;
+	}
 	Corpse *GetCorpseByDBID(uint32 dbid);
 	Corpse *GetCorpseByName(const char* name);
 
@@ -181,10 +201,20 @@ public:
 	Client* FindCorpseDragger(uint16 CorpseID);
 
 	inline Object *GetObjectByID(uint16 id)
-		{ return object_list.count(id) ? object_list.at(id) : nullptr; }
+	{
+		auto it = object_list.find(id);
+		if (it != object_list.end())
+			return it->second;
+		return nullptr;
+	}
 	Object *GetObjectByDBID(uint32 id);
 	inline Doors *GetDoorsByID(uint16 id)
-		{ return door_list.count(id) ? door_list.at(id) : nullptr; }
+	{
+		auto it = door_list.find(id);
+		if (it != door_list.end())
+			return it->second;
+		return nullptr;
+	}
 	Doors *GetDoorsByDoorID(uint32 id);
 	Doors *GetDoorsByDBID(uint32 id);
 	void RemoveAllCorpsesByCharID(uint32 charid);
@@ -249,6 +279,7 @@ public:
 	bool	RemoveTrap(uint16 delete_id);
 	bool	RemoveObject(uint16 delete_id);
 	bool	RemoveProximity(uint16 delete_npc_id);
+	bool	RemoveNPCFromClientCloseLists(NPC *npc);
 	void	RemoveAllMobs();
 	void	RemoveAllClients();
 	void	RemoveAllNPCs();
@@ -262,6 +293,7 @@ public:
 	void	RemoveAllObjects();
 	void	RemoveAllLocalities();
 	void	RemoveAllRaids();
+	void	RemoveAllEncounters();
 	void	DestroyTempPets(Mob *owner);
 	int16	CountTempPets(Mob *owner);
 	void	AddTempPetsToHateList(Mob *owner, Mob* other, bool bFrenzy = false);
@@ -322,8 +354,8 @@ public:
 	void	QueueToGroupsForNPCHealthAA(Mob* sender, const EQApplicationPacket* app);
 	void	QueueManaged(Mob* sender, const EQApplicationPacket* app, bool ignore_sender=false, bool ackreq = true);
 
-	void	AEAttack(Mob *attacker, float dist, int Hand = MainPrimary, int count = 0, bool IsFromSpell = false);
-	void	AETaunt(Client *caster, float range = 0);
+	void	AEAttack(Mob *attacker, float dist, int Hand = EQEmu::inventory::slotPrimary, int count = 0, bool IsFromSpell = false);
+	void	AETaunt(Client *caster, float range=0, int32 bonus_hate=0);
 	void	AESpell(Mob *caster, Mob *center, uint16 spell_id, bool affect_caster = true, int16 resist_adjust = 0);
 	void	MassGroupBuff(Mob *caster, Mob *center, uint16 spell_id, bool affect_caster = true);
 	void	AEBardPulse(Mob *caster, Mob *center, uint16 spell_id, bool affect_caster = true);
@@ -380,10 +412,10 @@ public:
 	bool	LimitCheckName(const char* npc_name);
 
 	void	CheckClientAggro(Client *around);
-	Mob*	AICheckCloseAggro(Mob* sender, float iAggroRange, float iAssistRange);
+	Mob*	AICheckNPCtoNPCAggro(Mob* sender, float iAggroRange, float iAssistRange);
 	int	GetHatedCount(Mob *attacker, Mob *exclude);
 	void	AIYellForHelp(Mob* sender, Mob* attacker);
-	bool	AICheckCloseBeneficialSpells(NPC* caster, uint8 iChance, float iRange, uint16 iSpellTypes);
+	bool	AICheckCloseBeneficialSpells(NPC* caster, uint8 iChance, float iRange, uint32 iSpellTypes);
 	bool	Merc_AICheckCloseBeneficialSpells(Merc* caster, uint8 iChance, float iRange, uint32 iSpellTypes);
 	Mob*	GetTargetForMez(Mob* caster);
 	uint32	CheckNPCsClose(Mob *center);
@@ -421,7 +453,15 @@ public:
 	void GetObjectList(std::list<Object*> &o_list);
 	void GetDoorsList(std::list<Doors*> &d_list);
 	void GetSpawnList(std::list<Spawn2*> &d_list);
-	void GetTargetsForConeArea(Mob *start, float min_radius, float radius, float height, std::list<Mob*> &m_list);
+	void GetTargetsForConeArea(Mob *start, float min_radius, float radius, float height, int pcnpc, std::list<Mob*> &m_list);
+
+	inline const std::unordered_map<uint16, Mob *> &GetMobList() { return mob_list; }
+	inline const std::unordered_map<uint16, NPC *> &GetNPCList() { return npc_list; }
+	inline const std::unordered_map<uint16, Merc *> &GetMercList() { return merc_list; }
+	inline const std::unordered_map<uint16, Client *> &GetClientList() { return client_list; }
+	inline const std::unordered_map<uint16, Corpse *> &GetCorpseList() { return corpse_list; }
+	inline const std::unordered_map<uint16, Object *> &GetObjectList() { return object_list; }
+	inline const std::unordered_map<uint16, Doors *> &GetDoorsList() { return door_list; }
 
 	void	DepopAll(int NPCTypeID, bool StartSpawnTimer = true);
 
@@ -466,14 +506,13 @@ private:
 #ifdef BOTS
 	public:
 		void AddBot(Bot* newBot, bool SendSpawnPacket = true, bool dontqueue = false);
-		void BotPickLock(Bot* rogue);
 		bool RemoveBot(uint16 entityID);
 		Mob* GetMobByBotID(uint32 botID);
 		Bot* GetBotByBotID(uint32 botID);
 		Bot* GetBotByBotName(std::string botName);
 		std::list<Bot*> GetBotsByBotOwnerCharacterID(uint32 botOwnerCharacterID);
 
-		bool Bot_AICheckCloseBeneficialSpells(Bot* caster, uint8 iChance, float iRange, uint16 iSpellTypes); // TODO: Evaluate this closesly in hopes to eliminate
+		bool Bot_AICheckCloseBeneficialSpells(Bot* caster, uint8 iChance, float iRange, uint32 iSpellTypes); // TODO: Evaluate this closesly in hopes to eliminate
 		void ShowSpawnWindow(Client* client, int Distance, bool NamedOnly); // TODO: Implement ShowSpawnWindow in the bot class but it needs entity list stuff
 	private:
 		std::list<Bot*> bot_list;

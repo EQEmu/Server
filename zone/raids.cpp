@@ -43,6 +43,8 @@ Raid::Raid(uint32 raidID)
 	memset(leadername, 0, 64);
 	locked = false;
 	LootType = 4;
+
+	m_autohatermgr.SetOwner(nullptr, nullptr, this);
 }
 
 Raid::Raid(Client* nLeader)
@@ -60,6 +62,8 @@ Raid::Raid(Client* nLeader)
 	strn0cpy(leadername, nLeader->GetName(), 64);
 	locked = false;
 	LootType = 4;
+
+	m_autohatermgr.SetOwner(nullptr, nullptr, this);
 }
 
 Raid::~Raid()
@@ -99,7 +103,7 @@ void Raid::AddMember(Client *c, uint32 group, bool rleader, bool groupleader, bo
     auto results = database.QueryDatabase(query);
 
 	if(!results.Success()) {
-		Log.Out(Logs::General, Logs::Error, "Error inserting into raid members: %s", results.ErrorMessage().c_str());
+		Log(Logs::General, Logs::Error, "Error inserting into raid members: %s", results.ErrorMessage().c_str());
 	}
 
 	LearnMembers();
@@ -121,7 +125,27 @@ void Raid::AddMember(Client *c, uint32 group, bool rleader, bool groupleader, bo
 	c->SetRaidGrouped(true);
 	SendRaidMOTD(c);
 
-	ServerPacket *pack = new ServerPacket(ServerOP_RaidAdd, sizeof(ServerRaidGeneralAction_Struct));
+	// xtarget shit ..........
+	if (group == RAID_GROUPLESS) {
+		if (rleader) {
+			GetXTargetAutoMgr()->merge(*c->GetXTargetAutoMgr());
+			c->GetXTargetAutoMgr()->clear();
+			c->SetXTargetAutoMgr(GetXTargetAutoMgr());
+		} else {
+			if (!c->GetXTargetAutoMgr()->empty()) {
+				GetXTargetAutoMgr()->merge(*c->GetXTargetAutoMgr());
+				c->GetXTargetAutoMgr()->clear();
+				c->RemoveAutoXTargets();
+			}
+
+			c->SetXTargetAutoMgr(GetXTargetAutoMgr());
+
+			if (!c->GetXTargetAutoMgr()->empty())
+				c->SetDirtyAutoHaters();
+		}
+	}
+
+	auto pack = new ServerPacket(ServerOP_RaidAdd, sizeof(ServerRaidGeneralAction_Struct));
 	ServerRaidGeneralAction_Struct *rga = (ServerRaidGeneralAction_Struct*)pack->pBuffer;
 	rga->rid = GetID();
 	strn0cpy(rga->playername, c->GetName(), 64);
@@ -143,10 +167,12 @@ void Raid::RemoveMember(const char *characterName)
 	LearnMembers();
 	VerifyRaid();
 
-	if(client)
+	if(client) {
 		client->SetRaidGrouped(false);
+		client->LeaveRaidXTargets(this);
+	}
 
-	ServerPacket *pack = new ServerPacket(ServerOP_RaidRemove, sizeof(ServerRaidGeneralAction_Struct));
+	auto pack = new ServerPacket(ServerOP_RaidRemove, sizeof(ServerRaidGeneralAction_Struct));
 	ServerRaidGeneralAction_Struct *rga = (ServerRaidGeneralAction_Struct*)pack->pBuffer;
 	rga->rid = GetID();
 	rga->instance_id = zone->GetInstanceID();
@@ -165,7 +191,7 @@ void Raid::DisbandRaid()
 	VerifyRaid();
 	SendRaidDisbandAll();
 
-	ServerPacket *pack = new ServerPacket(ServerOP_RaidDisband, sizeof(ServerRaidGeneralAction_Struct));
+	auto pack = new ServerPacket(ServerOP_RaidDisband, sizeof(ServerRaidGeneralAction_Struct));
 	ServerRaidGeneralAction_Struct *rga = (ServerRaidGeneralAction_Struct*)pack->pBuffer;
 	rga->rid = GetID();
 	strn0cpy(rga->playername, " ", 64);
@@ -187,7 +213,7 @@ void Raid::MoveMember(const char *name, uint32 newGroup)
 	VerifyRaid();
 	SendRaidMoveAll(name);
 
-	ServerPacket *pack = new ServerPacket(ServerOP_RaidChangeGroup, sizeof(ServerRaidGeneralAction_Struct));
+	auto pack = new ServerPacket(ServerOP_RaidChangeGroup, sizeof(ServerRaidGeneralAction_Struct));
 	ServerRaidGeneralAction_Struct *rga = (ServerRaidGeneralAction_Struct*)pack->pBuffer;
 	rga->rid = GetID();
 	strn0cpy(rga->playername, name, 64);
@@ -206,7 +232,7 @@ void Raid::SetGroupLeader(const char *who, bool glFlag)
 	LearnMembers();
 	VerifyRaid();
 
-	ServerPacket *pack = new ServerPacket(ServerOP_RaidGroupLeader, sizeof(ServerRaidGeneralAction_Struct));
+	auto pack = new ServerPacket(ServerOP_RaidGroupLeader, sizeof(ServerRaidGeneralAction_Struct));
 	ServerRaidGeneralAction_Struct *rga = (ServerRaidGeneralAction_Struct*)pack->pBuffer;
 	rga->rid = GetID();
 	strn0cpy(rga->playername, who, 64);
@@ -233,12 +259,12 @@ void Raid::SetRaidLeader(const char *wasLead, const char *name)
 	std::string query = StringFormat("UPDATE raid_members SET israidleader = 0 WHERE name = '%s'", wasLead);
 	auto results = database.QueryDatabase(query);
 	if (!results.Success())
-		Log.Out(Logs::General, Logs::Error, "Set Raid Leader error: %s\n", results.ErrorMessage().c_str());
+		Log(Logs::General, Logs::Error, "Set Raid Leader error: %s\n", results.ErrorMessage().c_str());
 
 	query = StringFormat("UPDATE raid_members SET israidleader = 1 WHERE name = '%s'", name);
 	results = database.QueryDatabase(query);
 	if (!results.Success())
-		Log.Out(Logs::General, Logs::Error, "Set Raid Leader error: %s\n", results.ErrorMessage().c_str());
+		Log(Logs::General, Logs::Error, "Set Raid Leader error: %s\n", results.ErrorMessage().c_str());
 
 	strn0cpy(leadername, name, 64);
 
@@ -250,7 +276,7 @@ void Raid::SetRaidLeader(const char *wasLead, const char *name)
 	VerifyRaid();
 	SendMakeLeaderPacket(name);
 
-	ServerPacket *pack = new ServerPacket(ServerOP_RaidLeader, sizeof(ServerRaidGeneralAction_Struct));
+	auto pack = new ServerPacket(ServerOP_RaidLeader, sizeof(ServerRaidGeneralAction_Struct));
 	ServerRaidGeneralAction_Struct *rga = (ServerRaidGeneralAction_Struct*)pack->pBuffer;
 	rga->rid = GetID();
 	strn0cpy(rga->playername, name, 64);
@@ -262,7 +288,7 @@ void Raid::SetRaidLeader(const char *wasLead, const char *name)
 
 void Raid::SaveGroupLeaderAA(uint32 gid)
 {
-	char *queryBuffer = new char[sizeof(GroupLeadershipAA_Struct) * 2 + 1];
+	auto queryBuffer = new char[sizeof(GroupLeadershipAA_Struct) * 2 + 1];
 	database.DoEscapeString(queryBuffer, (char*)&group_aa[gid], sizeof(GroupLeadershipAA_Struct));
 
 	std::string query = "UPDATE raid_leaders SET leadershipaa = '";
@@ -271,12 +297,12 @@ void Raid::SaveGroupLeaderAA(uint32 gid)
 	safe_delete_array(queryBuffer);
 	auto results = database.QueryDatabase(query);
 	if (!results.Success())
-		Log.Out(Logs::General, Logs::Error, "Unable to store LeadershipAA: %s\n", results.ErrorMessage().c_str());
+		Log(Logs::General, Logs::Error, "Unable to store LeadershipAA: %s\n", results.ErrorMessage().c_str());
 }
 
 void Raid::SaveRaidLeaderAA()
 {
-	char *queryBuffer = new char[sizeof(RaidLeadershipAA_Struct) * 2 + 1];
+	auto queryBuffer = new char[sizeof(RaidLeadershipAA_Struct) * 2 + 1];
 	database.DoEscapeString(queryBuffer, (char*)&raid_aa, sizeof(RaidLeadershipAA_Struct));
 
 	std::string query = "UPDATE raid_leaders SET leadershipaa = '";
@@ -285,7 +311,7 @@ void Raid::SaveRaidLeaderAA()
 	safe_delete_array(queryBuffer);
 	auto results = database.QueryDatabase(query);
 	if (!results.Success())
-		Log.Out(Logs::General, Logs::Error, "Unable to store LeadershipAA: %s\n", results.ErrorMessage().c_str());
+		Log(Logs::General, Logs::Error, "Unable to store LeadershipAA: %s\n", results.ErrorMessage().c_str());
 }
 
 void Raid::UpdateGroupAAs(uint32 gid)
@@ -414,7 +440,7 @@ void Raid::RaidSay(const char *msg, Client *c)
 	if(!c)
 		return;
 
-	ServerPacket *pack = new ServerPacket(ServerOP_RaidSay, sizeof(ServerRaidMessage_Struct) + strlen(msg) + 1);
+	auto pack = new ServerPacket(ServerOP_RaidSay, sizeof(ServerRaidMessage_Struct) + strlen(msg) + 1);
 	ServerRaidMessage_Struct *rga = (ServerRaidMessage_Struct*)pack->pBuffer;
 	rga->rid = GetID();
 	rga->gid = 0xFFFFFFFF;
@@ -436,7 +462,7 @@ void Raid::RaidGroupSay(const char *msg, Client *c)
 	if(groupToUse > 11)
 		return;
 
-	ServerPacket *pack = new ServerPacket(ServerOP_RaidGroupSay, sizeof(ServerRaidMessage_Struct) + strlen(msg) + 1);
+	auto pack = new ServerPacket(ServerOP_RaidGroupSay, sizeof(ServerRaidMessage_Struct) + strlen(msg) + 1);
 	ServerRaidMessage_Struct *rga = (ServerRaidMessage_Struct*)pack->pBuffer;
 	rga->rid = GetID();
 	rga->gid = groupToUse;
@@ -498,7 +524,7 @@ void Raid::CastGroupSpell(Mob* caster, uint16 spellid, uint32 gid)
 #endif
 				}
 				else{
-					Log.Out(Logs::Detail, Logs::Spells, "Raid spell: %s is out of range %f at distance %f from %s", members[x].member->GetName(), range, distance, caster->GetName());
+					Log(Logs::Detail, Logs::Spells, "Raid spell: %s is out of range %f at distance %f from %s", members[x].member->GetName(), range, distance, caster->GetName());
 				}
 			}
 		}
@@ -799,7 +825,7 @@ void Raid::GroupBardPulse(Mob* caster, uint16 spellid, uint32 gid){
 						members[z].member->GetPet()->BardPulse(spellid, caster);
 #endif
 				} else
-					Log.Out(Logs::Detail, Logs::Spells, "Group bard pulse: %s is out of range %f at distance %f from %s", members[z].member->GetName(), range, distance, caster->GetName());
+					Log(Logs::Detail, Logs::Spells, "Group bard pulse: %s is out of range %f at distance %f from %s", members[z].member->GetName(), range, distance, caster->GetName());
 			}
 		}
 	}
@@ -852,7 +878,7 @@ void Raid::AddRaidLooter(const char* looter)
 			break;
 		}
 	}
-	ServerPacket *pack = new ServerPacket(ServerOP_DetailsChange, sizeof(ServerRaidGeneralAction_Struct));
+	auto pack = new ServerPacket(ServerOP_DetailsChange, sizeof(ServerRaidGeneralAction_Struct));
 	ServerRaidGeneralAction_Struct *rga = (ServerRaidGeneralAction_Struct*)pack->pBuffer;
 	rga->rid = GetID();
 	rga->zoneid = zone->GetZoneID();
@@ -872,7 +898,7 @@ void Raid::RemoveRaidLooter(const char* looter)
 			break;
 		}
 
-	ServerPacket *pack = new ServerPacket(ServerOP_DetailsChange, sizeof(ServerRaidGeneralAction_Struct));
+	auto pack = new ServerPacket(ServerOP_DetailsChange, sizeof(ServerRaidGeneralAction_Struct));
 	ServerRaidGeneralAction_Struct *rga = (ServerRaidGeneralAction_Struct*)pack->pBuffer;
 	rga->rid = GetID();
 	rga->zoneid = zone->GetZoneID();
@@ -925,7 +951,7 @@ void Raid::SendRaidCreate(Client *to){
 	if(!to)
 		return;
 
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_RaidJoin,sizeof(RaidCreate_Struct));
+	auto outapp = new EQApplicationPacket(OP_RaidJoin, sizeof(RaidCreate_Struct));
 	RaidCreate_Struct *rc = (RaidCreate_Struct*)outapp->pBuffer;
 	rc->action = raidCreate;
 	strn0cpy(rc->leader_name, leadername, 64);
@@ -943,7 +969,7 @@ void Raid::SendRaidAdd(const char *who, Client *to)
 	{
 		if(strcmp(members[x].membername, who) == 0)
 		{
-			EQApplicationPacket* outapp = new EQApplicationPacket(OP_RaidUpdate, sizeof(RaidAddMember_Struct));
+			auto outapp = new EQApplicationPacket(OP_RaidUpdate, sizeof(RaidAddMember_Struct));
 			RaidAddMember_Struct *ram = (RaidAddMember_Struct*)outapp->pBuffer;
 			ram->raidGen.action = raidAdd;
 			ram->raidGen.parameter = members[x].GroupNumber;
@@ -965,7 +991,7 @@ void Raid::SendRaidAddAll(const char *who)
 	{
 		if(strcmp(members[x].membername, who) == 0)
 		{
-			EQApplicationPacket* outapp = new EQApplicationPacket(OP_RaidUpdate, sizeof(RaidAddMember_Struct));
+			auto outapp = new EQApplicationPacket(OP_RaidUpdate, sizeof(RaidAddMember_Struct));
 			RaidAddMember_Struct *ram = (RaidAddMember_Struct*)outapp->pBuffer;
 			ram->raidGen.action = raidAdd;
 			ram->raidGen.parameter = members[x].GroupNumber;
@@ -990,7 +1016,7 @@ void Raid::SendRaidRemove(const char *who, Client *to)
 	{
 		if(strcmp(members[x].membername, who) == 0)
 		{
-			EQApplicationPacket* outapp = new EQApplicationPacket(OP_RaidUpdate, sizeof(RaidGeneral_Struct));
+			auto outapp = new EQApplicationPacket(OP_RaidUpdate, sizeof(RaidGeneral_Struct));
 			RaidGeneral_Struct *rg = (RaidGeneral_Struct*)outapp->pBuffer;
 			rg->action = raidRemove2;
 			strn0cpy(rg->leader_name, who, 64);
@@ -1009,7 +1035,7 @@ void Raid::SendRaidRemoveAll(const char *who)
 	{
 		if(strcmp(members[x].membername, who) == 0)
 		{
-			EQApplicationPacket* outapp = new EQApplicationPacket(OP_RaidUpdate, sizeof(RaidGeneral_Struct));
+			auto outapp = new EQApplicationPacket(OP_RaidUpdate, sizeof(RaidGeneral_Struct));
 			RaidGeneral_Struct *rg = (RaidGeneral_Struct*)outapp->pBuffer;
 			rg->action = raidRemove2;
 			strn0cpy(rg->leader_name, who, 64);
@@ -1027,7 +1053,7 @@ void Raid::SendRaidDisband(Client *to)
 	if(!to)
 		return;
 
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_RaidUpdate, sizeof(RaidGeneral_Struct));
+	auto outapp = new EQApplicationPacket(OP_RaidUpdate, sizeof(RaidGeneral_Struct));
 	RaidGeneral_Struct *rg = (RaidGeneral_Struct*)outapp->pBuffer;
 	rg->action = raidDisband;
 	strn0cpy(rg->leader_name, to->GetName(), 64);
@@ -1039,7 +1065,7 @@ void Raid::SendRaidDisband(Client *to)
 
 void Raid::SendRaidDisbandAll()
 {
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_RaidUpdate, sizeof(RaidGeneral_Struct));
+	auto outapp = new EQApplicationPacket(OP_RaidUpdate, sizeof(RaidGeneral_Struct));
 	RaidGeneral_Struct *rg = (RaidGeneral_Struct*)outapp->pBuffer;
 	rg->action = raidDisband;
 	strn0cpy(rg->leader_name, "RaidMember", 64);
@@ -1110,7 +1136,7 @@ void Raid::QueuePacket(const EQApplicationPacket *app, bool ack_req)
 
 void Raid::SendMakeLeaderPacket(const char *who) //30
 {
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_RaidUpdate, sizeof(RaidLeadershipUpdate_Struct));
+	auto outapp = new EQApplicationPacket(OP_RaidUpdate, sizeof(RaidLeadershipUpdate_Struct));
 	RaidLeadershipUpdate_Struct *rg = (RaidLeadershipUpdate_Struct*)outapp->pBuffer;
 	rg->action = raidMakeLeader;
 	strn0cpy(rg->leader_name, who, 64);
@@ -1125,7 +1151,7 @@ void Raid::SendMakeLeaderPacketTo(const char *who, Client *to)
 	if(!to)
 		return;
 
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_RaidUpdate, sizeof(RaidLeadershipUpdate_Struct));
+	auto outapp = new EQApplicationPacket(OP_RaidUpdate, sizeof(RaidLeadershipUpdate_Struct));
 	RaidLeadershipUpdate_Struct *rg = (RaidLeadershipUpdate_Struct*)outapp->pBuffer;
 	rg->action = raidMakeLeader;
 	strn0cpy(rg->leader_name, who, 64);
@@ -1155,7 +1181,7 @@ void Raid::SendGroupUpdate(Client *to)
 	if(!to)
 		return;
 
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_GroupUpdate,sizeof(GroupUpdate2_Struct));
+	auto outapp = new EQApplicationPacket(OP_GroupUpdate, sizeof(GroupUpdate2_Struct));
 	GroupUpdate2_Struct* gu = (GroupUpdate2_Struct*)outapp->pBuffer;
 	gu->action = groupActUpdate;
 	int index = 0;
@@ -1209,7 +1235,7 @@ void Raid::GroupUpdate(uint32 gid, bool initial)
 		}
 	}
 	if(initial){
-		ServerPacket *pack = new ServerPacket(ServerOP_UpdateGroup, sizeof(ServerRaidGeneralAction_Struct));
+		auto pack = new ServerPacket(ServerOP_UpdateGroup, sizeof(ServerRaidGeneralAction_Struct));
 		ServerRaidGeneralAction_Struct* rga = (ServerRaidGeneralAction_Struct*)pack->pBuffer;
 		rga->gid = gid;
 		rga->rid = GetID();
@@ -1222,7 +1248,7 @@ void Raid::GroupUpdate(uint32 gid, bool initial)
 
 void Raid::SendRaidLock()
 {
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_RaidUpdate, sizeof(RaidGeneral_Struct));
+	auto outapp = new EQApplicationPacket(OP_RaidUpdate, sizeof(RaidGeneral_Struct));
 	RaidGeneral_Struct *rg = (RaidGeneral_Struct*)outapp->pBuffer;
 	rg->action = raidLock;
 	strn0cpy(rg->leader_name, leadername, 64);
@@ -1233,7 +1259,7 @@ void Raid::SendRaidLock()
 
 void Raid::SendRaidUnlock()
 {
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_RaidUpdate, sizeof(RaidGeneral_Struct));
+	auto outapp = new EQApplicationPacket(OP_RaidUpdate, sizeof(RaidGeneral_Struct));
 	RaidGeneral_Struct *rg = (RaidGeneral_Struct*)outapp->pBuffer;
 	rg->action = raidUnlock;
 	strn0cpy(rg->leader_name, leadername, 64);
@@ -1247,7 +1273,7 @@ void Raid::SendRaidLockTo(Client *c)
 	if(!c)
 		return;
 
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_RaidUpdate, sizeof(RaidGeneral_Struct));
+	auto outapp = new EQApplicationPacket(OP_RaidUpdate, sizeof(RaidGeneral_Struct));
 	RaidGeneral_Struct *rg = (RaidGeneral_Struct*)outapp->pBuffer;
 	rg->action = raidLock;
 	strn0cpy(rg->leader_name, c->GetName(), 64);
@@ -1261,7 +1287,7 @@ void Raid::SendRaidUnlockTo(Client *c)
 	if(!c)
 		return;
 
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_RaidUpdate, sizeof(RaidGeneral_Struct));
+	auto outapp = new EQApplicationPacket(OP_RaidUpdate, sizeof(RaidGeneral_Struct));
 	RaidGeneral_Struct *rg = (RaidGeneral_Struct*)outapp->pBuffer;
 	rg->action = raidUnlock;
 	strn0cpy(rg->leader_name, c->GetName(), 64);
@@ -1275,7 +1301,7 @@ void Raid::SendGroupDisband(Client *to)
 	if(!to)
 		return;
 
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_GroupUpdate,sizeof(GroupUpdate_Struct));
+	auto outapp = new EQApplicationPacket(OP_GroupUpdate, sizeof(GroupUpdate_Struct));
 	GroupUpdate_Struct* gu = (GroupUpdate_Struct*) outapp->pBuffer;
 	gu->action = groupActDisband;
 	strn0cpy(gu->leadersname, leadername, 64);
@@ -1285,7 +1311,7 @@ void Raid::SendGroupDisband(Client *to)
 
 void Raid::SendRaidGroupAdd(const char *who, uint32 gid)
 {
-	ServerPacket *pack = new ServerPacket(ServerOP_RaidGroupAdd, sizeof(ServerRaidGroupAction_Struct));
+	auto pack = new ServerPacket(ServerOP_RaidGroupAdd, sizeof(ServerRaidGroupAction_Struct));
 	ServerRaidGroupAction_Struct * rga = (ServerRaidGroupAction_Struct*)pack->pBuffer;
 	rga->rid = GetID();
 	rga->gid = gid;
@@ -1295,7 +1321,7 @@ void Raid::SendRaidGroupAdd(const char *who, uint32 gid)
 
 void Raid::SendRaidGroupRemove(const char *who, uint32 gid)
 {
-	ServerPacket *pack = new ServerPacket(ServerOP_RaidGroupRemove, sizeof(ServerRaidGroupAction_Struct));
+	auto pack = new ServerPacket(ServerOP_RaidGroupRemove, sizeof(ServerRaidGroupAction_Struct));
 	ServerRaidGroupAction_Struct * rga = (ServerRaidGroupAction_Struct*)pack->pBuffer;
 	rga->rid = GetID();
 	rga->gid = gid;
@@ -1309,7 +1335,7 @@ void Raid::SendRaidMOTD(Client *c)
 		return;
 
 	size_t size = motd.size() + 1;
-	EQApplicationPacket *outapp = new EQApplicationPacket(OP_RaidUpdate, sizeof(RaidMOTD_Struct) + size);
+	auto outapp = new EQApplicationPacket(OP_RaidUpdate, sizeof(RaidMOTD_Struct) + size);
 	RaidMOTD_Struct *rmotd = (RaidMOTD_Struct *)outapp->pBuffer;
 	rmotd->general.action = raidSetMotd;
 	strn0cpy(rmotd->general.player_name, c->GetName(), 64);
@@ -1333,7 +1359,7 @@ void Raid::SendRaidMOTDToWorld()
 		return;
 
 	size_t size = motd.size() + 1;
-	ServerPacket *pack = new ServerPacket(ServerOP_RaidMOTD, sizeof(ServerRaidMOTD_Struct) + size);
+	auto pack = new ServerPacket(ServerOP_RaidMOTD, sizeof(ServerRaidMOTD_Struct) + size);
 	ServerRaidMOTD_Struct *smotd = (ServerRaidMOTD_Struct *)pack->pBuffer;
 	smotd->rid = GetID();
 	strn0cpy(smotd->motd, motd.c_str(), size);
@@ -1343,7 +1369,7 @@ void Raid::SendRaidMOTDToWorld()
 
 void Raid::SendGroupLeadershipAA(Client *c, uint32 gid)
 {
-	EQApplicationPacket *outapp = new EQApplicationPacket(OP_RaidUpdate, sizeof(RaidLeadershipUpdate_Struct));
+	auto outapp = new EQApplicationPacket(OP_RaidUpdate, sizeof(RaidLeadershipUpdate_Struct));
 	RaidLeadershipUpdate_Struct *rlaa = (RaidLeadershipUpdate_Struct *)outapp->pBuffer;
 	rlaa->action = raidSetLeaderAbilities;
 	strn0cpy(rlaa->leader_name, c->GetName(), 64);
@@ -1381,7 +1407,7 @@ void Raid::LockRaid(bool lockFlag)
 	else
 		SendRaidUnlock();
 
-	ServerPacket *pack = new ServerPacket(ServerOP_RaidLockFlag, sizeof(ServerRaidGeneralAction_Struct));
+	auto pack = new ServerPacket(ServerOP_RaidLockFlag, sizeof(ServerRaidGeneralAction_Struct));
 	ServerRaidGeneralAction_Struct *rga = (ServerRaidGeneralAction_Struct*)pack->pBuffer;
 	rga->rid = GetID();
 	rga->zoneid = zone->GetZoneID();
@@ -1407,7 +1433,7 @@ void Raid::GetRaidDetails()
         return;
 
     if (results.RowCount() == 0) {
-        Log.Out(Logs::General, Logs::Error, "Error getting raid details for raid %lu: %s", (unsigned long)GetID(), results.ErrorMessage().c_str());
+        Log(Logs::General, Logs::Error, "Error getting raid details for raid %lu: %s", (unsigned long)GetID(), results.ErrorMessage().c_str());
         return;
     }
 
@@ -1439,7 +1465,7 @@ bool Raid::LearnMembers()
         return false;
 
 	if(results.RowCount() == 0) {
-        Log.Out(Logs::General, Logs::Error, "Error getting raid members for raid %lu: %s", (unsigned long)GetID(), results.ErrorMessage().c_str());
+        Log(Logs::General, Logs::Error, "Error getting raid members for raid %lu: %s", (unsigned long)GetID(), results.ErrorMessage().c_str());
         disbandCheck = true;
         return false;
     }
@@ -1529,7 +1555,9 @@ void Raid::SendHPPacketsTo(Client *c)
 			{
 				members[x].member->CreateHPPacket(&hpapp);
 				c->QueuePacket(&hpapp, false);
-				if(c->GetClientVersion() >= ClientVersion::SoD)
+				safe_delete_array(hpapp.pBuffer);
+				hpapp.size = 0;
+				if (c->ClientVersion() >= EQEmu::versions::ClientVersion::SoD)
 				{
 					outapp.SetOpcode(OP_MobManaUpdate);
 					MobManaUpdate_Struct *mmus = (MobManaUpdate_Struct *)outapp.pBuffer;
@@ -1565,7 +1593,7 @@ void Raid::SendHPPacketsFrom(Mob *m)
 			if(!m->IsClient() || ((members[x].member != m->CastToClient()) && (members[x].GroupNumber == gid)))
 			{
 				members[x].member->QueuePacket(&hpapp, false);
-				if(members[x].member->GetClientVersion() >= ClientVersion::SoD)
+				if (members[x].member->ClientVersion() >= EQEmu::versions::ClientVersion::SoD)
 				{
 					outapp.SetOpcode(OP_MobManaUpdate);
 					MobManaUpdate_Struct *mmus = (MobManaUpdate_Struct *)outapp.pBuffer;
@@ -1643,7 +1671,7 @@ void Raid::SetGroupMentor(uint32 group_id, int percent, char *name)
 			name, percent, group_id, GetID());
 	auto results = database.QueryDatabase(query);
 	if (!results.Success())
-		Log.Out(Logs::General, Logs::Error, "Unable to set raid group mentor: %s\n", results.ErrorMessage().c_str());
+		Log(Logs::General, Logs::Error, "Unable to set raid group mentor: %s\n", results.ErrorMessage().c_str());
 }
 
 void Raid::ClearGroupMentor(uint32 group_id)
@@ -1658,7 +1686,7 @@ void Raid::ClearGroupMentor(uint32 group_id)
 			group_id, GetID());
 	auto results = database.QueryDatabase(query);
 	if (!results.Success())
-		Log.Out(Logs::General, Logs::Error, "Unable to clear raid group mentor: %s\n", results.ErrorMessage().c_str());
+		Log(Logs::General, Logs::Error, "Unable to clear raid group mentor: %s\n", results.ErrorMessage().c_str());
 }
 
 // there isn't a nice place to add this in another function, unlike groups
@@ -1670,5 +1698,13 @@ void Raid::CheckGroupMentor(uint32 group_id, Client *c)
 
 	if (group_mentor[group_id].name == c->GetName())
 		group_mentor[group_id].mentoree = c;
+}
+
+void Raid::SetDirtyAutoHaters()
+{
+	for (int i = 0; i < MAX_RAID_MEMBERS; ++i)
+		if (members[i].member)
+			members[i].member->SetDirtyAutoHaters();
+
 }
 

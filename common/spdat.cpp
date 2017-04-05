@@ -235,8 +235,11 @@ bool IsBeneficialSpell(uint16 spell_id)
 			// If the resisttype is magic and SpellAffectIndex is Calm/memblur/dispell sight
 			// it's not beneficial
 			if (spells[spell_id].resisttype == RESIST_MAGIC) {
-				if (sai == SAI_Calm || sai == SAI_Dispell_Sight ||
-						sai == SAI_Memory_Blur || sai == SAI_Calm_Song)
+				// checking these SAI cause issues with the rng defensive proc line
+				// So I guess instead of fixing it for real, just a quick hack :P
+				if (spells[spell_id].effectid[0] != SE_DefensiveProc &&
+				    (sai == SAI_Calm || sai == SAI_Dispell_Sight || sai == SAI_Memory_Blur ||
+				     sai == SAI_Calm_Song))
 					return false;
 			} else {
 				// If the resisttype is not magic and spell is Bind Sight or Cast Sight
@@ -406,8 +409,19 @@ bool IsPartialCapableSpell(uint16 spell_id)
 	if (spells[spell_id].no_partial_resist)
 		return false;
 
-	if (IsPureNukeSpell(spell_id))
-		return true;
+	// spell uses 600 (partial) scale if first effect is damage, else it uses 200 scale.
+	// this includes DoTs.  no_partial_resist excludes spells like necro snares
+	for (int o = 0; o < EFFECT_COUNT; o++) {
+		auto tid = spells[spell_id].effectid[o];
+
+		if (IsBlankSpellEffect(spell_id, o))
+			continue;
+
+		if ((tid == SE_CurrentHPOnce || tid == SE_CurrentHP) && spells[spell_id].base[o] < 0)
+			return true;
+
+		return false;
+	}
 
 	return false;
 }
@@ -669,9 +683,7 @@ bool IsDisciplineBuff(uint16 spell_id)
 	if (!IsValidSpell(spell_id))
 		return false;
 
-	if (spells[spell_id].mana == 0 && spells[spell_id].short_buff_box == 0 &&
-			(spells[spell_id].EndurCost || spells[spell_id].EndurUpkeep) &&
-			spells[spell_id].targettype == ST_Self)
+	if (spells[spell_id].IsDisciplineBuff && spells[spell_id].targettype == ST_Self)
 		return true;
 
 	return false;
@@ -704,7 +716,7 @@ bool IsCombatSkill(uint16 spell_id)
 bool IsResurrectionEffects(uint16 spell_id)
 {
 	// spell id 756 is Resurrection Effects spell
-	if(IsValidSpell(spell_id) && spell_id == 756)
+	if(IsValidSpell(spell_id) && (spell_id == 756 || spell_id == 757))
 		return true;
 
 	return false;
@@ -839,7 +851,7 @@ DmgShieldType GetDamageShieldType(uint16 spell_id, int32 DSType)
 	// If we have a DamageShieldType for this spell from the damageshieldtypes table, return that,
 	// else, make a guess, based on the resist type. Default return value is DS_THORNS
 	if (IsValidSpell(spell_id)) {
-		Log.Out(Logs::Detail, Logs::Spells, "DamageShieldType for spell %i (%s) is %X\n", spell_id,
+		Log(Logs::Detail, Logs::Spells, "DamageShieldType for spell %i (%s) is %X\n", spell_id,
 			spells[spell_id].name, spells[spell_id].DamageShieldType);
 
 		if (spells[spell_id].DamageShieldType)
@@ -928,7 +940,7 @@ bool IsRegularSingleTargetHealSpell(uint16 spell_id)
 {
 	if(spells[spell_id].effectid[0] == 0 && spells[spell_id].base[0] > 0 &&
 			spells[spell_id].targettype == ST_Target && spells[spell_id].buffduration == 0 &&
-			!IsFastHealSpell(spell_id) && !IsCompleteHealSpell(spell_id) &&
+			!IsCompleteHealSpell(spell_id) &&
 			!IsHealOverTimeSpell(spell_id) && !IsGroupSpell(spell_id))
 		return true;
 
@@ -1098,6 +1110,104 @@ bool NoDetrimentalSpellAggro(uint16 spell_id)
 		return spells[spell_id].no_detrimental_spell_aggro;
 
 	return false;
+}
+
+bool IsStackableDot(uint16 spell_id)
+{
+	// rules according to client
+	if (!IsValidSpell(spell_id))
+		return false;
+	const auto &spell = spells[spell_id];
+	if (spell.dot_stacking_exempt || spell.goodEffect || !spell.buffdurationformula)
+		return false;
+	return IsEffectInSpell(spell_id, SE_CurrentHP) || IsEffectInSpell(spell_id, SE_GravityEffect);
+}
+
+bool IsCastWhileInvis(uint16 spell_id)
+{
+	if (!IsValidSpell(spell_id))
+		return false;
+	const auto &spell = spells[spell_id];
+	if (spell.sneak || spell.cast_not_standing)
+		return true;
+	return false;
+}
+
+bool IsEffectIgnoredInStacking(int spa)
+{
+	// this should match RoF2
+	switch (spa) {
+	case SE_SeeInvis:
+	case SE_DiseaseCounter:
+	case SE_PoisonCounter:
+	case SE_Levitate:
+	case SE_InfraVision:
+	case SE_UltraVision:
+	case SE_CurrentHPOnce:
+	case SE_CurseCounter:
+	case SE_ImprovedDamage:
+	case SE_ImprovedHeal:
+	case SE_SpellResistReduction:
+	case SE_IncreaseSpellHaste:
+	case SE_IncreaseSpellDuration:
+	case SE_IncreaseRange:
+	case SE_SpellHateMod:
+	case SE_ReduceReagentCost:
+	case SE_ReduceManaCost:
+	case SE_FcStunTimeMod:
+	case SE_LimitMaxLevel:
+	case SE_LimitResist:
+	case SE_LimitTarget:
+	case SE_LimitEffect:
+	case SE_LimitSpellType:
+	case SE_LimitSpell:
+	case SE_LimitMinDur:
+	case SE_LimitInstant:
+	case SE_LimitMinLevel:
+	case SE_LimitCastTimeMin:
+	case SE_LimitCastTimeMax:
+	case SE_StackingCommand_Block:
+	case SE_StackingCommand_Overwrite:
+	case SE_PetPowerIncrease:
+	case SE_SkillDamageAmount:
+	case SE_ChannelChanceSpells:
+	case SE_Blank:
+	case SE_FcDamageAmt:
+	case SE_SpellDurationIncByTic:
+	case SE_FcSpellVulnerability:
+	case SE_FcDamageAmtIncoming:
+	case SE_FcDamagePctCrit:
+	case SE_FcDamageAmtCrit:
+	case SE_ReduceReuseTimer:
+	case SE_LimitCombatSkills:
+	case SE_BlockNextSpellFocus:
+	case SE_SpellTrigger:
+	case SE_LimitManaMin:
+	case SE_CorruptionCounter:
+	case SE_ApplyEffect:
+	case SE_NegateSpellEffect:
+	case SE_LimitSpellGroup:
+	case SE_LimitManaMax:
+	case SE_FcHealAmt:
+	case SE_FcHealPctIncoming:
+	case SE_FcHealAmtIncoming:
+	case SE_FcHealPctCritIncoming:
+	case SE_FcHealAmtCrit:
+	case SE_LimitClass:
+	case SE_LimitRace:
+	case SE_FcBaseEffects:
+	case 415:
+	case SE_SkillDamageAmount2:
+	case SE_FcLimitUse:
+	case SE_FcIncreaseNumHits:
+	case SE_LimitUseMin:
+	case SE_LimitUseType:
+	case SE_GravityEffect:
+	case 425:
+		return true;
+	default:
+		return false;
+	}
 }
 
 uint32 GetNimbusEffect(uint16 spell_id)

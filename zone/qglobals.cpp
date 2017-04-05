@@ -12,7 +12,7 @@ void QGlobalCache::AddGlobal(uint32 id, QGlobal global)
 
 void QGlobalCache::RemoveGlobal(std::string name, uint32 npcID, uint32 charID, uint32 zoneID)
 {
-	std::list<QGlobal>::iterator iter = qGlobalBucket.begin();
+	auto iter = qGlobalBucket.begin();
 	while(iter != qGlobalBucket.end())
 	{
 		if(name.compare((*iter).name) == 0)
@@ -31,7 +31,7 @@ void QGlobalCache::RemoveGlobal(std::string name, uint32 npcID, uint32 charID, u
 
 void QGlobalCache::Combine(std::list<QGlobal> &cacheA, std::list<QGlobal> cacheB, uint32 npcID, uint32 charID, uint32 zoneID)
 {
-	std::list<QGlobal>::iterator iter = cacheB.begin();
+	auto iter = cacheB.begin();
 	while(iter != cacheB.end())
 	{
 		QGlobal cur = (*iter);
@@ -123,7 +123,7 @@ void QGlobalCache::PurgeExpiredGlobals()
 	if(!qGlobalBucket.size())
 		return;
 
-	std::list<QGlobal>::iterator iter = qGlobalBucket.begin();
+	auto iter = qGlobalBucket.begin();
 	while(iter != qGlobalBucket.end())
 	{
 		QGlobal cur = (*iter);

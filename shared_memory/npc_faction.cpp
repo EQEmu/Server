@@ -34,7 +34,8 @@ void LoadFactions(SharedDatabase *database, const std::string &prefix) {
 
 	uint32 size = static_cast<uint32>(EQEmu::FixedMemoryHashSet<NPCFactionList>::estimated_size(lists, max_list));
 
-	std::string file_name = std::string("shared/") + prefix + std::string("faction");
+	auto Config = EQEmuConfig::get();
+	std::string file_name = Config->SharedMemDir + prefix + std::string("faction");
 	EQEmu::MemoryMappedFile mmf(file_name, size);
 	mmf.ZeroFile();
 

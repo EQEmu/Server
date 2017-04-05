@@ -619,7 +619,7 @@ XS(XS_Mob_GetSkill)
 		Mob *		THIS;
 		uint32		RETVAL;
 		dXSTARG;
-		SkillUseTypes		skill_num = (SkillUseTypes)SvUV(ST(1));
+		EQEmu::skills::SkillType		skill_num = (EQEmu::skills::SkillType)SvUV(ST(1));
 
 		if (sv_derived_from(ST(0), "Mob")) {
 			IV tmp = SvIV((SV*)SvRV(ST(0)));
@@ -901,7 +901,7 @@ XS(XS_Mob_Damage)
 		Mob*		from;
 		int32		damage = (int32)SvIV(ST(2));
 		uint16		spell_id = (uint16)SvUV(ST(3));
-		SkillUseTypes		attack_skill = (SkillUseTypes)SvUV(ST(4));
+		EQEmu::skills::SkillType		attack_skill = (EQEmu::skills::SkillType)SvUV(ST(4));
 		bool		avoidable;
 		int8		buffslot;
 		bool		iBuffTic;
@@ -1464,7 +1464,7 @@ XS(XS_Mob_GetBuffSlotFromType)
 		Mob *		THIS;
 		int8		RETVAL;
 		dXSTARG;
-		uint8		type = (uint8)SvUV(ST(1));
+		uint16		type = (uint16)SvUV(ST(1));
 
 		if (sv_derived_from(ST(0), "Mob")) {
 			IV tmp = SvIV((SV*)SvRV(ST(0)));
@@ -2357,6 +2357,37 @@ XS(XS_Mob_GetSpellHPBonuses)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		RETVAL = THIS->GetSpellHPBonuses();
+		XSprePUSH; PUSHi((IV)RETVAL);
+	}
+	XSRETURN(1);
+}
+
+XS(XS_Mob_GetSpellIDFromSlot); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Mob_GetSpellIDFromSlot)
+{
+	dXSARGS;
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: Mob::GetSpellIDFromSlot(THIS, slot)");
+	{
+		Mob *		THIS;
+		int		RETVAL;
+		dXSTARG;
+		uint8		slot = (uint16)SvUV(ST(1));
+
+		if (sv_derived_from(ST(0), "Mob")) {
+			IV tmp = SvIV((SV*)SvRV(ST(0)));
+			THIS = INT2PTR(Mob *, tmp);
+		}
+		else
+			Perl_croak(aTHX_ "THIS is not of type Mob");
+		if (THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
+
+		if (slot > THIS->GetMaxBuffSlots())
+			RETVAL = -1;
+		else 
+			RETVAL = THIS->GetSpellIDFromSlot(slot);
+
 		XSprePUSH; PUSHi((IV)RETVAL);
 	}
 	XSRETURN(1);
@@ -3951,12 +3982,12 @@ XS(XS_Mob_CastSpell)
 {
 	dXSARGS;
 	if (items < 3 || items > 7)
-		Perl_croak(aTHX_ "Usage: Mob::CastSpell(THIS, spell_id, target_id, slot= 10, casttime= -1, mana_cost= -1, resist_adjust = 0)");
+		Perl_croak(aTHX_ "Usage: Mob::CastSpell(THIS, spell_id, target_id, slot= 22, casttime= -1, mana_cost= -1, resist_adjust = 0)");
 	{
 		Mob *		THIS;
 		uint16		spell_id = (uint16)SvUV(ST(1));
 		uint16		target_id = (uint16)SvUV(ST(2));
-		uint16		slot;
+		EQEmu::CastingSlot slot;
 		int32		casttime;
 		int32		mana_cost;
 		int16		resist_adjust;
@@ -3971,9 +4002,9 @@ XS(XS_Mob_CastSpell)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		if (items < 4)
-			slot = 10;
+			slot = EQEmu::CastingSlot::Item;
 		else {
-			slot = (uint16)SvUV(ST(3));
+			slot = static_cast<EQEmu::CastingSlot>(SvUV(ST(3)));
 		}
 
 		if (items < 5)
@@ -4054,7 +4085,7 @@ XS(XS_Mob_SpellFinished)
             resist_diff = spells[spell_id].ResistDiff;
         }
 
-		THIS->SpellFinished(spell_id, spell_target, 10, mana_cost, -1, resist_diff);
+		THIS->SpellFinished(spell_id, spell_target, EQEmu::CastingSlot::Item, mana_cost, -1, resist_diff);
 	}
 	XSRETURN_EMPTY;
 }
@@ -6805,7 +6836,7 @@ XS(XS_Mob_DoSpecialAttackDamage)
 	{
 		Mob *		THIS;
 		Mob*		target;
-		SkillUseTypes	attack_skill = (SkillUseTypes)SvUV(ST(2));
+		EQEmu::skills::SkillType	attack_skill = (EQEmu::skills::SkillType)SvUV(ST(2));
 		int32		max_damage = (int32)SvIV(ST(3));
 		int32		min_damage = 1;
 		int32		hate_override = -11;
@@ -7804,7 +7835,7 @@ XS(XS_Mob_ModSkillDmgTaken)
 		Perl_croak(aTHX_ "Usage: Mob::ModSkillDmgTaken(THIS, skill, value)");
 	{
 		Mob *		THIS;
-		SkillUseTypes	skill_num = (SkillUseTypes)SvUV(ST(1));
+		EQEmu::skills::SkillType	skill_num = (EQEmu::skills::SkillType)SvUV(ST(1));
 		int16		value = (int16)SvIV(ST(2));
 
 		if (sv_derived_from(ST(0), "Mob")) {
@@ -7831,7 +7862,7 @@ XS(XS_Mob_GetModSkillDmgTaken)
 		Mob *		THIS;
 		int16		RETVAL;
 		dXSTARG;
-		SkillUseTypes		skill_num = (SkillUseTypes)SvUV(ST(1));
+		EQEmu::skills::SkillType		skill_num = (EQEmu::skills::SkillType)SvUV(ST(1));
 
 		if (sv_derived_from(ST(0), "Mob")) {
 			IV tmp = SvIV((SV*)SvRV(ST(0)));
@@ -7858,7 +7889,7 @@ XS(XS_Mob_GetSkillDmgTaken)
 		Mob *		THIS;
 		int32		RETVAL;
 		dXSTARG;
-		SkillUseTypes		skill_num = (SkillUseTypes)SvUV(ST(1));
+		EQEmu::skills::SkillType		skill_num = (EQEmu::skills::SkillType)SvUV(ST(1));
 
 		if (sv_derived_from(ST(0), "Mob")) {
 			IV tmp = SvIV((SV*)SvRV(ST(0)));
@@ -8024,7 +8055,7 @@ XS(XS_Mob_DoMeleeSkillAttackDmg)
 		Mob *		THIS;
 		Mob*		target;
 		uint16		weapon_damage = (uint16)SvIV(ST(2));
-		SkillUseTypes	skill = (SkillUseTypes)SvUV(ST(3));
+		EQEmu::skills::SkillType	skill = (EQEmu::skills::SkillType)SvUV(ST(3));
 		int16		chance_mod = (int16)SvIV(ST(4));
 		int16		focus = (int16)SvIV(ST(5));
 		uint8		CanRiposte = (uint8)SvIV(ST(6));
@@ -8061,8 +8092,8 @@ XS(XS_Mob_DoArcheryAttackDmg)
 	{
 		Mob *		THIS;
 		Mob*		target;
-		ItemInst*	RangeWeapon = nullptr;
-		ItemInst*	Ammo = nullptr;
+		EQEmu::ItemInstance*	RangeWeapon = nullptr;
+		EQEmu::ItemInstance*	Ammo = nullptr;
 		uint16		weapon_damage = (uint16)SvIV(ST(4));
 		int16		chance_mod = (int16)SvIV(ST(5));
 		int16		focus = (int16)SvIV(ST(6));
@@ -8099,8 +8130,8 @@ XS(XS_Mob_DoThrowingAttackDmg)
 	{
 		Mob *		THIS;
 		Mob*		target;
-		ItemInst*	RangeWeapon = nullptr;
-		Item_Struct* item = nullptr;
+		EQEmu::ItemInstance*	RangeWeapon = nullptr;
+		EQEmu::ItemData* item = nullptr;
 		uint16		weapon_damage = (uint16)SvIV(ST(4));
 		int16		chance_mod = (int16)SvIV(ST(5));
 		int16		focus = (int16)SvIV(ST(6));
@@ -9105,6 +9136,7 @@ XS(boot_Mob)
 		newXSproto(strcpy(buf, "GetMaxHP"), XS_Mob_GetMaxHP, file, "$");
 		newXSproto(strcpy(buf, "GetItemHPBonuses"), XS_Mob_GetItemHPBonuses, file, "$");
 		newXSproto(strcpy(buf, "GetSpellHPBonuses"), XS_Mob_GetSpellHPBonuses, file, "$");
+		newXSproto(strcpy(buf, "GetSpellIDFromSlot"), XS_Mob_GetSpellIDFromSlot, file, "$$");
 		newXSproto(strcpy(buf, "GetWalkspeed"), XS_Mob_GetWalkspeed, file, "$");
 		newXSproto(strcpy(buf, "GetRunspeed"), XS_Mob_GetRunspeed, file, "$");
 		newXSproto(strcpy(buf, "GetCasterLevel"), XS_Mob_GetCasterLevel, file, "$$");

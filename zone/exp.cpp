@@ -331,7 +331,7 @@ void Client::AddEXP(uint32 in_add_exp, uint8 conlevel, bool resexp) {
 }
 
 void Client::SetEXP(uint32 set_exp, uint32 set_aaxp, bool isrezzexp) {
-	Log.Out(Logs::Detail, Logs::None, "Attempting to Set Exp for %s (XP: %u, AAXP: %u, Rez: %s)", this->GetCleanName(), set_exp, set_aaxp, isrezzexp ? "true" : "false");
+	Log(Logs::Detail, Logs::None, "Attempting to Set Exp for %s (XP: %u, AAXP: %u, Rez: %s)", this->GetCleanName(), set_exp, set_aaxp, isrezzexp ? "true" : "false");
 	//max_AAXP = GetEXPForLevel(52) - GetEXPForLevel(51);	//GetEXPForLevel() doesn't depend on class/race, just level, so it shouldn't change between Clients
 	max_AAXP = RuleI(AA, ExpPerPoint);	//this may be redundant since we're doing this in Client::FinishConnState2()
 	if (max_AAXP == 0 || GetEXPForLevel(GetLevel()) == 0xFFFFFFFF) {
@@ -350,19 +350,50 @@ void Client::SetEXP(uint32 set_exp, uint32 set_aaxp, bool isrezzexp) {
 	}
 
 	if ((set_exp + set_aaxp) > (m_pp.exp+m_pp.expAA)) {
-		if (isrezzexp)
-			this->Message_StringID(MT_Experience, REZ_REGAIN);
-		else{
-			if(membercount > 1)
-				this->Message_StringID(MT_Experience, GAIN_GROUPXP);
-			else if(IsRaidGrouped())
-				Message_StringID(MT_Experience, GAIN_RAIDEXP);
-			else
-				this->Message_StringID(MT_Experience, GAIN_XP);
+
+		uint32 exp_gained = set_exp - m_pp.exp;
+		uint32 aaxp_gained = set_aaxp - m_pp.expAA;
+		float exp_percent = (float)((float)exp_gained / (float)(GetEXPForLevel(GetLevel() + 1) - GetEXPForLevel(GetLevel())))*(float)100; //EXP needed for level
+		float aaxp_percent = (float)((float)aaxp_gained / (float)(RuleI(AA, ExpPerPoint)))*(float)100; //AAEXP needed for level
+		std::string exp_amount_message = "";
+		if (RuleI(Character, ShowExpValues) >= 1) {
+			if (exp_gained > 0 && aaxp_gained > 0) exp_amount_message = StringFormat("%u, %u AA", exp_gained, aaxp_gained);
+			else if (exp_gained > 0) exp_amount_message = StringFormat("%u", exp_gained);
+			else exp_amount_message = StringFormat("%u AA", aaxp_gained);
+		}
+
+		std::string exp_percent_message = "";
+		if (RuleI(Character, ShowExpValues) >= 2) {
+			if (exp_gained > 0 && aaxp_gained > 0) exp_percent_message = StringFormat("(%.3f%%, %.3f%%AA)", exp_percent, aaxp_percent);
+			else if (exp_gained > 0) exp_percent_message = StringFormat("(%.3f%%)", exp_percent);
+			else exp_percent_message = StringFormat("(%.3f%%AA)", aaxp_percent);
+		}
+
+		if (isrezzexp) {
+			if (RuleI(Character, ShowExpValues) > 0) Message(MT_Experience, "You regain %s experience from resurrection. %s", exp_amount_message.c_str(), exp_percent_message.c_str());
+			else Message_StringID(MT_Experience, REZ_REGAIN);
+		} else {
+			if (membercount > 1) {
+				if (RuleI(Character, ShowExpValues) > 0) Message(MT_Experience, "You have gained %s party experience! %s", exp_amount_message.c_str(), exp_percent_message.c_str());
+				else Message_StringID(MT_Experience, GAIN_GROUPXP);
+			}
+			else if (IsRaidGrouped()) {
+				if (RuleI(Character, ShowExpValues) > 0) Message(MT_Experience, "You have gained %s raid experience! %s", exp_amount_message.c_str(), exp_percent_message.c_str());
+				else Message_StringID(MT_Experience, GAIN_RAIDEXP);
+			} 
+			else {
+				if (RuleI(Character, ShowExpValues) > 0) Message(MT_Experience, "You have gained %s experience! %s", exp_amount_message.c_str(), exp_percent_message.c_str());
+				else Message_StringID(MT_Experience, GAIN_XP);				
+			}
 		}
 	}
 	else if((set_exp + set_aaxp) < (m_pp.exp+m_pp.expAA)){ //only loss message if you lose exp, no message if you gained/lost nothing.
-		Message(15, "You have lost experience.");
+		uint32 exp_lost = m_pp.exp - set_exp;
+		float exp_percent = (float)((float)exp_lost / (float)(GetEXPForLevel(GetLevel() + 1) - GetEXPForLevel(GetLevel())))*(float)100;
+
+		if (RuleI(Character, ShowExpValues) == 1 && exp_lost > 0) Message(15, "You have lost %i experience.", exp_lost);
+		else if (RuleI(Character, ShowExpValues) == 2 && exp_lost > 0) Message(15, "You have lost %i experience. (%.3f%%)", exp_lost, exp_percent);
+		else Message(15, "You have lost experience.");		
 	}
 
 	//check_level represents the level we should be when we have
@@ -415,7 +446,7 @@ void Client::SetEXP(uint32 set_exp, uint32 set_aaxp, bool isrezzexp) {
 
 		//figure out how many AA points we get from the exp were setting
 		m_pp.aapoints = set_aaxp / max_AAXP;
-		Log.Out(Logs::Detail, Logs::None, "Calculating additional AA Points from AAXP for %s: %u / %u = %.1f points", this->GetCleanName(), set_aaxp, max_AAXP, (float)set_aaxp / (float)max_AAXP);
+		Log(Logs::Detail, Logs::None, "Calculating additional AA Points from AAXP for %s: %u / %u = %.1f points", this->GetCleanName(), set_aaxp, max_AAXP, (float)set_aaxp / (float)max_AAXP);
 
 		//get remainder exp points, set in PP below
 		set_aaxp = set_aaxp - (max_AAXP * m_pp.aapoints);
@@ -522,7 +553,7 @@ void Client::SetEXP(uint32 set_exp, uint32 set_aaxp, bool isrezzexp) {
 	uint32 tmpxp2 = GetEXPForLevel(GetLevel());
 	// Quag: crash bug fix... Divide by zero when tmpxp1 and 2 equalled each other, most likely the error case from GetEXPForLevel() (invalid class, etc)
 	if (tmpxp1 != tmpxp2 && tmpxp1 != 0xFFFFFFFF && tmpxp2 != 0xFFFFFFFF) {
-		EQApplicationPacket* outapp = new EQApplicationPacket(OP_ExpUpdate, sizeof(ExpUpdate_Struct));
+		auto outapp = new EQApplicationPacket(OP_ExpUpdate, sizeof(ExpUpdate_Struct));
 		ExpUpdate_Struct* eu = (ExpUpdate_Struct*)outapp->pBuffer;
 		float tmpxp = (float) ( (float) set_exp-tmpxp2 ) / ( (float) tmpxp1-tmpxp2 );
 		eu->exp = (uint32)(330.0f * tmpxp);
@@ -541,11 +572,11 @@ void Client::SetEXP(uint32 set_exp, uint32 set_aaxp, bool isrezzexp) {
 void Client::SetLevel(uint8 set_level, bool command)
 {
 	if (GetEXPForLevel(set_level) == 0xFFFFFFFF) {
-		Log.Out(Logs::General, Logs::Error, "Client::SetLevel() GetEXPForLevel(%i) = 0xFFFFFFFF", set_level);
+		Log(Logs::General, Logs::Error, "Client::SetLevel() GetEXPForLevel(%i) = 0xFFFFFFFF", set_level);
 		return;
 	}
 
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_LevelUpdate, sizeof(LevelUpdate_Struct));
+	auto outapp = new EQApplicationPacket(OP_LevelUpdate, sizeof(LevelUpdate_Struct));
 	LevelUpdate_Struct* lu = (LevelUpdate_Struct*)outapp->pBuffer;
 	lu->level = set_level;
 	if(m_pp.level2 != 0)
@@ -599,7 +630,7 @@ void Client::SetLevel(uint8 set_level, bool command)
 	safe_delete(outapp);
 	this->SendAppearancePacket(AT_WhoLevel, set_level); // who level change
 
-	Log.Out(Logs::General, Logs::Normal, "Setting Level for %s to %i", GetName(), set_level);
+	Log(Logs::General, Logs::Normal, "Setting Level for %s to %i", GetName(), set_level);
 
 	CalcBonuses();
 
@@ -705,10 +736,33 @@ uint32 Client::GetEXPForLevel(uint16 check_level)
 	return finalxp;
 }
 
-void Client::AddLevelBasedExp(uint8 exp_percentage, uint8 max_level) { 
-	if (exp_percentage > 100) { exp_percentage = 100; } 
-	if (!max_level || GetLevel() < max_level) { max_level = GetLevel(); } 
-	uint32 newexp = GetEXP() + ((GetEXPForLevel(max_level + 1) - GetEXPForLevel(max_level)) * exp_percentage / 100); 
+void Client::AddLevelBasedExp(uint8 exp_percentage, uint8 max_level) 
+{ 
+	uint32	award;
+	uint32	xp_for_level;
+
+	if (exp_percentage > 100) 
+	{ 
+		exp_percentage = 100; 
+	} 
+
+	if (!max_level || GetLevel() < max_level)
+	{ 
+		max_level = GetLevel(); 
+	} 
+
+	xp_for_level = GetEXPForLevel(max_level + 1) - GetEXPForLevel(max_level);
+	award = xp_for_level * exp_percentage / 100; 
+
+	if(RuleB(Zone, LevelBasedEXPMods))
+	{
+		if(zone->level_exp_mod[GetLevel()].ExpMod)
+		{
+			award *= zone->level_exp_mod[GetLevel()].ExpMod;
+		}
+	}
+
+	uint32 newexp = GetEXP() + award;
 	SetEXP(newexp, GetAAXP());
 }
 
@@ -838,7 +892,7 @@ void Client::AddLeadershipEXP(uint32 group_exp, uint32 raid_exp) {
 }
 
 void Client::SendLeadershipEXPUpdate() {
-	EQApplicationPacket* outapp = new EQApplicationPacket(OP_LeadershipExpUpdate, sizeof(LeadershipExpUpdate_Struct));
+	auto outapp = new EQApplicationPacket(OP_LeadershipExpUpdate, sizeof(LeadershipExpUpdate_Struct));
 	LeadershipExpUpdate_Struct* eu = (LeadershipExpUpdate_Struct *) outapp->pBuffer;
 
 	eu->group_leadership_exp = m_pp.group_leadership_exp;
@@ -860,7 +914,7 @@ uint32 Client::GetCharMaxLevelFromQGlobal() {
 		QGlobalCache::Combine(globalMap, char_c->GetBucket(), ntype, this->CharacterID(), zone->GetZoneID());
 	}
 
-	std::list<QGlobal>::iterator iter = globalMap.begin();
+	auto iter = globalMap.begin();
 	uint32 gcount = 0;
 	while(iter != globalMap.end()) {
 		if((*iter).name.compare("CharMaxLevel") == 0){

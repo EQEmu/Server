@@ -1,5 +1,5 @@
 /*	EQEMu: Everquest Server Emulator
-	Copyright (C) 2001-2002 EQEMu Development Team (http://eqemu.org)
+	Copyright (C) 2001-2016 EQEMu Development Team (http://eqemu.org)
 
 	This program is free software; you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -25,9 +25,15 @@
 #include "position.h"
 #include "aa_ability.h"
 #include "aa.h"
+#include "../common/light_source.h"
+#include "../common/emu_constants.h"
 #include <set>
 #include <vector>
 #include <memory>
+
+#ifdef BOTS
+#include "heal_rotation.h"
+#endif
 
 char* strn0cpy(char* dest, const char* source, uint32 size);
 
@@ -37,12 +43,23 @@ class EGNode;
 class Client;
 class EQApplicationPacket;
 class Group;
-class ItemInst;
 class NPC;
 class Raid;
-struct Item_Struct;
 struct NewSpawn_Struct;
 struct PlayerPositionUpdateServer_Struct;
+
+namespace EQEmu
+{
+	struct ItemData;
+	class ItemInstance;
+}
+
+enum class eSpecialAttacks : int {
+	None,
+	Rampage,
+	AERampage,
+	ChaoticStab
+};
 
 class Mob : public Entity {
 public:
@@ -104,7 +121,7 @@ public:
 		uint32		in_drakkin_heritage,
 		uint32		in_drakkin_tattoo,
 		uint32		in_drakkin_details,
-		uint32		in_armor_tint[_MaterialCount],
+		EQEmu::TintProfile	in_armor_tint,
 		uint8		in_aa_title,
 		uint8		in_see_invis, // see through invis
 		uint8		in_see_invis_undead, // see through invis vs. undead
@@ -142,42 +159,54 @@ public:
 	float HeadingAngleToMob(Mob *other); // to keep consistent with client generated messages
 	virtual void RangedAttack(Mob* other) { }
 	virtual void ThrowingAttack(Mob* other) { }
-	uint16 GetThrownDamage(int16 wDmg, int32& TotalDmg, int& minDmg);
 	// 13 = Primary (default), 14 = secondary
-	virtual bool Attack(Mob* other, int Hand = MainPrimary, bool FromRiposte = false, bool IsStrikethrough = false,
-		bool IsFromSpell = false, ExtraAttackOptions *opts = nullptr, int special = 0) = 0;
+	virtual bool Attack(Mob* other, int Hand = EQEmu::inventory::slotPrimary, bool FromRiposte = false, bool IsStrikethrough = false,
+		bool IsFromSpell = false, ExtraAttackOptions *opts = nullptr) = 0;
+	void DoAttack(Mob *other, DamageHitInfo &hit, ExtraAttackOptions *opts = nullptr);
 	int MonkSpecialAttack(Mob* other, uint8 skill_used);
 	virtual void TryBackstab(Mob *other,int ReuseTime = 10);
-	void TriggerDefensiveProcs(const ItemInst* weapon, Mob *on, uint16 hand = MainPrimary, int damage = 0);
-	bool AvoidDamage(Mob* attacker, int32 &damage, int hand);
-	virtual bool CheckHitChance(Mob* attacker, SkillUseTypes skillinuse, int Hand, int16 chance_mod = 0);
-	virtual void TryCriticalHit(Mob *defender, uint16 skill, int32 &damage, ExtraAttackOptions *opts = nullptr);
-	void TryPetCriticalHit(Mob *defender, uint16 skill, int32 &damage);
-	virtual bool TryFinishingBlow(Mob *defender, SkillUseTypes skillinuse);
-	uint32 TryHeadShot(Mob* defender, SkillUseTypes skillInUse);
-	uint32 TryAssassinate(Mob* defender, SkillUseTypes skillInUse, uint16 ReuseTime);
+	bool AvoidDamage(Mob *attacker, DamageHitInfo &hit);
+	int compute_tohit(EQEmu::skills::SkillType skillinuse);
+	int GetTotalToHit(EQEmu::skills::SkillType skill, int chance_mod); // compute_tohit + spell bonuses
+	int compute_defense();
+	int GetTotalDefense(); // compute_defense + spell bonuses
+	bool CheckHitChance(Mob* attacker, DamageHitInfo &hit);
+	void TryCriticalHit(Mob *defender, DamageHitInfo &hit, ExtraAttackOptions *opts = nullptr);
+	void TryPetCriticalHit(Mob *defender, DamageHitInfo &hit);
+	virtual bool TryFinishingBlow(Mob *defender, int &damage);
+	int TryHeadShot(Mob* defender, EQEmu::skills::SkillType skillInUse);
+	int TryAssassinate(Mob* defender, EQEmu::skills::SkillType skillInUse);
 	virtual void DoRiposte(Mob* defender);
-	void ApplyMeleeDamageBonus(uint16 skill, int32 &damage);
-	virtual void MeleeMitigation(Mob *attacker, int32 &damage, int32 minhit, ExtraAttackOptions *opts = nullptr);
-	virtual int32 GetMeleeMitDmg(Mob *attacker, int32 damage, int32 minhit, float mit_rating, float atk_rating);
+	void ApplyMeleeDamageMods(uint16 skill, int &damage, Mob * defender = nullptr, ExtraAttackOptions *opts = nullptr);
+	int ACSum();
+	int offense(EQEmu::skills::SkillType skill);
+	void CalcAC() { mitigation_ac = ACSum(); }
+	int GetACSoftcap();
+	double GetSoftcapReturns();
+	int GetClassRaceACBonus();
+	inline int GetMitigationAC() { return mitigation_ac; }
+	void MeleeMitigation(Mob *attacker, DamageHitInfo &hit, ExtraAttackOptions *opts = nullptr);
+	double RollD20(int offense, int mitigation); // CALL THIS FROM THE DEFENDER
 	bool CombatRange(Mob* other);
 	virtual inline bool IsBerserk() { return false; } // only clients
 	void RogueEvade(Mob *other);
-	void CommonOutgoingHitSuccess(Mob* defender, int32 &damage, SkillUseTypes skillInUse);
+	void CommonOutgoingHitSuccess(Mob *defender, DamageHitInfo &hit, ExtraAttackOptions *opts = nullptr);
 	void BreakInvisibleSpells();
+	virtual void CancelSneakHide();
+	void CommonBreakInvisible();
 	void CommonBreakInvisibleFromCombat();
 	bool HasDied();
 	virtual bool CheckDualWield();
-	void DoMainHandAttackRounds(Mob *target, ExtraAttackOptions *opts = nullptr, int special = 0);
-	void DoOffHandAttackRounds(Mob *target, ExtraAttackOptions *opts = nullptr, int special = 0);
+	void DoMainHandAttackRounds(Mob *target, ExtraAttackOptions *opts = nullptr);
+	void DoOffHandAttackRounds(Mob *target, ExtraAttackOptions *opts = nullptr);
 	virtual bool CheckDoubleAttack();
 	// inline process for places where we need to do them outside of the AI_Process
-	void ProcessAttackRounds(Mob *target, ExtraAttackOptions *opts = nullptr, int special = 0)
+	void ProcessAttackRounds(Mob *target, ExtraAttackOptions *opts = nullptr)
 	{
 		if (target) {
-			DoMainHandAttackRounds(target, opts, special);
+			DoMainHandAttackRounds(target, opts);
 			if (CanThisClassDualWield())
-				DoOffHandAttackRounds(target, opts, special);
+				DoOffHandAttackRounds(target, opts);
 		}
 		return;
 	}
@@ -196,7 +225,7 @@ public:
 	virtual void WearChange(uint8 material_slot, uint16 texture, uint32 color, uint32 hero_forge_model = 0);
 	void DoAnim(const int animnum, int type=0, bool ackreq = true, eqFilterType filter = FilterNone);
 	void ProjectileAnimation(Mob* to, int item_id, bool IsArrow = false, float speed = 0,
-		float angle = 0, float tilt = 0, float arc = 0, const char *IDFile = nullptr, SkillUseTypes skillInUse = SkillArchery);
+		float angle = 0, float tilt = 0, float arc = 0, const char *IDFile = nullptr, EQEmu::skills::SkillType skillInUse = EQEmu::skills::SkillArchery);
 	void ChangeSize(float in_size, bool bNoRestriction = false);
 	inline uint8 SeeInvisible() const { return see_invis; }
 	inline bool SeeInvisibleUndead() const { return see_invis_undead; }
@@ -204,11 +233,11 @@ public:
 	inline bool SeeImprovedHide() const { return see_improved_hide; }
 	bool IsInvisible(Mob* other = 0) const;
 	void SetInvisible(uint8 state);
-	bool AttackAnimation(SkillUseTypes &skillinuse, int Hand, const ItemInst* weapon);
+	bool AttackAnimation(EQEmu::skills::SkillType &skillinuse, int Hand, const EQEmu::ItemInstance* weapon);
 
 	//Song
 	bool UseBardSpellLogic(uint16 spell_id = 0xffff, int slot = -1);
-	bool ApplyNextBardPulse(uint16 spell_id, Mob *spell_target, uint16 slot);
+	bool ApplyNextBardPulse(uint16 spell_id, Mob *spell_target, EQEmu::CastingSlot slot);
 	void BardPulse(uint16 spell_id, Mob *caster);
 
 	//Spell
@@ -231,36 +260,37 @@ public:
 		int resist_override = 0, bool CharismaCheck = false, bool CharmTick = false, bool IsRoot = false,
 		int level_override = -1);
 	int ResistPhysical(int level_diff, uint8 caster_level);
-	int ResistElementalWeaponDmg(const ItemInst *item);
-	int CheckBaneDamage(const ItemInst *item);
+	int ResistElementalWeaponDmg(const EQEmu::ItemInstance *item);
+	int CheckBaneDamage(const EQEmu::ItemInstance *item);
 	uint16 GetSpecializeSkillValue(uint16 spell_id) const;
 	void SendSpellBarDisable();
 	void SendSpellBarEnable(uint16 spellid);
 	void ZeroCastingVars();
 	virtual void SpellProcess();
-	virtual bool CastSpell(uint16 spell_id, uint16 target_id, uint16 slot = USE_ITEM_SPELL_SLOT, int32 casttime = -1,
+	virtual bool CastSpell(uint16 spell_id, uint16 target_id, EQEmu::CastingSlot slot = EQEmu::CastingSlot::Item, int32 casttime = -1,
 		int32 mana_cost = -1, uint32* oSpellWillFinish = 0, uint32 item_slot = 0xFFFFFFFF,
 		uint32 timer = 0xFFFFFFFF, uint32 timer_duration = 0, int16 *resist_adjust = nullptr,
 		uint32 aa_id = 0);
-	virtual bool DoCastSpell(uint16 spell_id, uint16 target_id, uint16 slot = 10, int32 casttime = -1,
+	virtual bool DoCastSpell(uint16 spell_id, uint16 target_id, EQEmu::CastingSlot slot = EQEmu::CastingSlot::Item, int32 casttime = -1,
 		int32 mana_cost = -1, uint32* oSpellWillFinish = 0, uint32 item_slot = 0xFFFFFFFF,
 		uint32 timer = 0xFFFFFFFF, uint32 timer_duration = 0, int16 resist_adjust = 0,
 		uint32 aa_id = 0);
-	void CastedSpellFinished(uint16 spell_id, uint32 target_id, uint16 slot, uint16 mana_used,
+	void CastedSpellFinished(uint16 spell_id, uint32 target_id, EQEmu::CastingSlot slot, uint16 mana_used,
 		uint32 inventory_slot = 0xFFFFFFFF, int16 resist_adjust = 0);
-	bool SpellFinished(uint16 spell_id, Mob *target, uint16 slot = 10, uint16 mana_used = 0,
+	bool SpellFinished(uint16 spell_id, Mob *target, EQEmu::CastingSlot slot = EQEmu::CastingSlot::Item, uint16 mana_used = 0,
 		uint32 inventory_slot = 0xFFFFFFFF, int16 resist_adjust = 0, bool isproc = false, int level_override = -1);
 	virtual bool SpellOnTarget(uint16 spell_id, Mob* spelltar, bool reflect = false,
 		bool use_resist_adjust = false, int16 resist_adjust = 0, bool isproc = false, int level_override = -1);
 	virtual bool SpellEffect(Mob* caster, uint16 spell_id, float partial = 100, int level_override = -1);
 	virtual bool DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_center,
-		CastAction_type &CastAction);
+		CastAction_type &CastAction, EQEmu::CastingSlot slot, bool isproc = false);
 	virtual bool CheckFizzle(uint16 spell_id);
 	virtual bool CheckSpellLevelRestriction(uint16 spell_id);
 	virtual bool IsImmuneToSpell(uint16 spell_id, Mob *caster);
 	virtual float GetAOERange(uint16 spell_id);
 	void InterruptSpell(uint16 spellid = SPELL_UNKNOWN);
 	void InterruptSpell(uint16, uint16, uint16 spellid = SPELL_UNKNOWN);
+	void StopCasting();
 	inline bool IsCasting() const { return((casting_spell_id != 0)); }
 	uint16 CastingSpellID() const { return casting_spell_id; }
 	bool DoCastingChecks();
@@ -296,6 +326,8 @@ public:
 	virtual int GetMaxSongSlots() const { return 0; }
 	virtual int GetMaxDiscSlots() const { return 0; }
 	virtual int GetMaxTotalSlots() const { return 0; }
+	virtual uint32 GetFirstBuffSlot(bool disc, bool song);
+	virtual uint32 GetLastBuffSlot(bool disc, bool song);
 	virtual void InitializeBuffSlots() { buffs = nullptr; current_buff_count = 0; }
 	virtual void UninitializeBuffSlots() { }
 	EQApplicationPacket *MakeBuffsPacket(bool for_target = true);
@@ -341,7 +373,9 @@ public:
 	inline void SetTwoHandBluntEquiped(bool val) { has_twohandbluntequiped = val; }
 	bool HasTwoHanderEquipped() { return has_twohanderequipped; }
 	void SetTwoHanderEquipped(bool val) { has_twohanderequipped = val; }
-	virtual uint16 GetSkill(SkillUseTypes skill_num) const { return 0; }
+	bool CanFacestab() { return can_facestab; }
+	void SetFacestab(bool val) { can_facestab = val; }
+	virtual uint16 GetSkill(EQEmu::skills::SkillType skill_num) const { return 0; }
 	virtual uint32 GetEquipment(uint8 material_slot) const { return(0); }
 	virtual int32 GetEquipmentMaterial(uint8 material_slot) const;
 	virtual int32 GetHerosForgeModel(uint8 material_slot) const;
@@ -349,9 +383,9 @@ public:
 	virtual uint32 IsEliteMaterialItem(uint8 material_slot) const;
 	bool CanClassEquipItem(uint32 item_id);
 	bool AffectedBySpellExcludingSlot(int slot, int effect);
-	virtual bool Death(Mob* killerMob, int32 damage, uint16 spell_id, SkillUseTypes attack_skill) = 0;
-	virtual void Damage(Mob* from, int32 damage, uint16 spell_id, SkillUseTypes attack_skill,
-		bool avoidable = true, int8 buffslot = -1, bool iBuffTic = false, int special = 0) = 0;
+	virtual bool Death(Mob* killerMob, int32 damage, uint16 spell_id, EQEmu::skills::SkillType attack_skill) = 0;
+	virtual void Damage(Mob* from, int32 damage, uint16 spell_id, EQEmu::skills::SkillType attack_skill,
+		bool avoidable = true, int8 buffslot = -1, bool iBuffTic = false, eSpecialAttacks special = eSpecialAttacks::None) = 0;
 	inline virtual void SetHP(int32 hp) { if (hp >= max_hp) cur_hp = max_hp; else cur_hp = hp;}
 	bool ChangeHP(Mob* other, int32 amount, uint16 spell_id = 0, int8 buffslot = -1, bool iBuffTic = false);
 	inline void SetOOCRegen(int32 newoocregen) {oocregen = newoocregen;}
@@ -361,6 +395,7 @@ public:
 	virtual inline uint16 GetBaseRace() const { return base_race; }
 	virtual inline uint8 GetBaseGender() const { return base_gender; }
 	virtual inline uint16 GetDeity() const { return deity; }
+	virtual EQEmu::deity::DeityTypeBit GetDeityBit() { return EQEmu::deity::ConvertDeityTypeToDeityTypeBit((EQEmu::deity::DeityType)deity); }
 	inline uint16 GetRace() const { return race; }
 	inline uint8 GetGender() const { return gender; }
 	inline uint8 GetTexture() const { return texture; }
@@ -375,7 +410,7 @@ public:
 	inline uint8 GetDrakkinHeritage() const { return drakkin_heritage; }
 	inline uint8 GetDrakkinTattoo() const { return drakkin_tattoo; }
 	inline uint8 GetDrakkinDetails() const { return drakkin_details; }
-	inline uint32 GetArmorTint(uint8 i) const { return armor_tint[(i < _MaterialCount) ? i : 0]; }
+	inline uint32 GetArmorTint(uint8 i) const { return armor_tint.Slot[(i < EQEmu::textures::materialCount) ? i : 0].Color; }
 	inline uint8 GetClass() const { return class_; }
 	inline uint8 GetLevel() const { return level; }
 	inline uint8 GetOrigLevel() const { return orig_level; }
@@ -387,9 +422,10 @@ public:
 		strn0cpy(name, GetName(), 64); return; };
 	inline Mob* GetTarget() const { return target; }
 	virtual void SetTarget(Mob* mob);
+	inline bool HasTargetReflection() const { return (target && target != this && target->target == this); }
 	virtual inline float GetHPRatio() const { return max_hp == 0 ? 0 : ((float)cur_hp/max_hp*100); }
 	virtual inline int GetIntHPRatio() const { return max_hp == 0 ? 0 : static_cast<int>(cur_hp * 100 / max_hp); }
-	inline virtual int32 GetAC() const { return AC + itembonuses.AC + spellbonuses.AC; }
+	inline int32 GetAC() const { return AC; }
 	inline virtual int32 GetATK() const { return ATK + itembonuses.ATK + spellbonuses.ATK; }
 	inline virtual int32 GetATKBonus() const { return itembonuses.ATK + spellbonuses.ATK; }
 	inline virtual int32 GetSTR() const { return STR + itembonuses.STR + spellbonuses.STR; }
@@ -485,6 +521,8 @@ public:
 	void MakeSpawnUpdateNoDelta(PlayerPositionUpdateServer_Struct* spu);
 	void MakeSpawnUpdate(PlayerPositionUpdateServer_Struct* spu);
 	void SendPosition();
+	void SetSpawned() { spawned = true; };
+	bool Spawned() { return spawned; };
 	void SetFlyMode(uint8 flymode);
 	inline void Teleport(glm::vec3 NewPosition) { m_Position.x = NewPosition.x; m_Position.y = NewPosition.y;
 		m_Position.z = NewPosition.z; };
@@ -501,7 +539,9 @@ public:
 	void DoubleAggro(Mob *other) { uint32 in_hate = GetHateAmount(other); SetHateAmountOnEnt(other, (in_hate ? in_hate * 2 : 1)); }
 	uint32 GetHateAmount(Mob* tmob, bool is_dam = false) { return hate_list.GetEntHateAmount(tmob,is_dam);}
 	uint32 GetDamageAmount(Mob* tmob) { return hate_list.GetEntHateAmount(tmob, true);}
+	int GetHateRatio(Mob *first, Mob *with) { return hate_list.GetHateRatio(first, with); }
 	Mob* GetHateTop() { return hate_list.GetEntWithMostHateOnList(this);}
+	Mob* GetSecondaryHate(Mob *skip) { return hate_list.GetEntWithMostHateOnList(this, skip); }
 	Mob* GetHateDamageTop(Mob* other) { return hate_list.GetDamageTopOnHateList(other);}
 	Mob* GetHateRandom() { return hate_list.GetRandomEntOnHateList();}
 	Mob* GetHateMost() { return hate_list.GetEntWithMostHateOnList();}
@@ -546,7 +586,7 @@ public:
 	static uint8 GetDefaultGender(uint16 in_race, uint8 in_gender = 0xFF);
 	static bool IsPlayerRace(uint16 in_race);
 	uint16 GetSkillByItemType(int ItemType);
-	uint8 GetItemTypeBySkill(SkillUseTypes skill);
+	uint8 GetItemTypeBySkill(EQEmu::skills::SkillType skill);
 	virtual void MakePet(uint16 spell_id, const char* pettype, const char *petname = nullptr);
 	virtual void MakePoweredPet(uint16 spell_id, const char* pettype, int16 petpower, const char *petname = nullptr, float in_size = 0.0f);
 	bool IsWarriorClass() const;
@@ -560,6 +600,7 @@ public:
 		bool lookForAftArc = true);
 
 	//Procs
+	void TriggerDefensiveProcs(Mob *on, uint16 hand = EQEmu::inventory::slotPrimary, bool FromSkillProc = false, int damage = 0);
 	bool AddRangedProc(uint16 spell_id, uint16 iChance = 3, uint16 base_spell_id = SPELL_UNKNOWN);
 	bool RemoveRangedProc(uint16 spell_id, bool bAll = false);
 	bool HasRangedProcs() const;
@@ -638,7 +679,7 @@ public:
 	int32 GetVulnerability(Mob* caster, uint32 spell_id, uint32 ticsremaining);
 	int32 GetFcDamageAmtIncoming(Mob *caster, uint32 spell_id, bool use_skill = false, uint16 skill=0);
 	int32 GetFocusIncoming(focusType type, int effect, Mob *caster, uint32 spell_id);
-	int16 GetSkillDmgTaken(const SkillUseTypes skill_used);
+	int16 GetSkillDmgTaken(const EQEmu::skills::SkillType skill_used, ExtraAttackOptions *opts = nullptr);
 	void DoKnockback(Mob *caster, uint32 pushback, uint32 pushup);
 	int16 CalcResistChanceBonus();
 	int16 CalcFearResistChance();
@@ -653,12 +694,12 @@ public:
 	int16 GetMeleeMinDamageMod_SE(uint16 skill);
 	int16 GetCrippBlowChance();
 	int16 GetSkillReuseTime(uint16 skill);
-	int16 GetCriticalChanceBonus(uint16 skill);
+	int GetCriticalChanceBonus(uint16 skill);
 	int16 GetSkillDmgAmt(uint16 skill);
 	bool TryReflectSpell(uint32 spell_id);
 	bool CanBlockSpell() const { return(spellbonuses.BlockNextSpell); }
 	bool DoHPToManaCovert(uint16 mana_cost = 0);
-	int32 ApplySpellEffectiveness(Mob* caster, int16 spell_id, int32 value, bool IsBard = false);
+	int32 ApplySpellEffectiveness(int16 spell_id, int32 value, bool IsBard = false, uint16 caster_id=0);
 	int8 GetDecayEffectValue(uint16 spell_id, uint16 spelleffect);
 	int32 GetExtraSpellAmt(uint16 spell_id, int32 extra_spell_amt, int32 base_spell_dmg);
 	void MeleeLifeTap(int32 damage);
@@ -671,8 +712,8 @@ public:
 	inline void SetSpellPowerDistanceMod(int16 value) { SpellPowerDistanceMod = value; };
 	int32 GetSpellStat(uint32 spell_id, const char *identifier, uint8 slot = 0);
 
-	void ModSkillDmgTaken(SkillUseTypes skill_num, int value);
-	int16 GetModSkillDmgTaken(const SkillUseTypes skill_num);
+	void ModSkillDmgTaken(EQEmu::skills::SkillType skill_num, int value);
+	int16 GetModSkillDmgTaken(const EQEmu::skills::SkillType skill_num);
 	void ModVulnerability(uint8 resist, int16 value);
 	int16 GetModVulnerability(const uint8 resist);
 
@@ -696,17 +737,17 @@ public:
 	bool IsDestructibleObject() { return destructibleobject; }
 	void SetDestructibleObject(bool in) { destructibleobject = in; }
 
-	inline uint8 GetInnateLightType() { return m_Light.Type.Innate; }
-	inline uint8 GetEquipmentLightType() { return m_Light.Type.Equipment; }
-	inline uint8 GetSpellLightType() { return m_Light.Type.Spell; }
+	inline uint8 GetInnateLightType() { return m_Light.Type[EQEmu::lightsource::LightInnate]; }
+	inline uint8 GetEquipmentLightType() { return m_Light.Type[EQEmu::lightsource::LightEquipment]; }
+	inline uint8 GetSpellLightType() { return m_Light.Type[EQEmu::lightsource::LightSpell]; }
 
-	virtual void UpdateEquipmentLight() { m_Light.Type.Equipment = 0; m_Light.Level.Equipment = 0; }
-	inline void SetSpellLightType(uint8 lightType) { m_Light.Type.Spell = (lightType & 0x0F); m_Light.Level.Spell = m_Light.TypeToLevel(m_Light.Type.Spell); }
+	virtual void UpdateEquipmentLight() { m_Light.Type[EQEmu::lightsource::LightEquipment] = 0; m_Light.Level[EQEmu::lightsource::LightEquipment] = 0; }
+	inline void SetSpellLightType(uint8 light_type) { m_Light.Type[EQEmu::lightsource::LightSpell] = (light_type & 0x0F); m_Light.Level[EQEmu::lightsource::LightSpell] = EQEmu::lightsource::TypeToLevel(m_Light.Type[EQEmu::lightsource::LightSpell]); }
 
-	inline uint8 GetActiveLightType() { return m_Light.Type.Active; }
+	inline uint8 GetActiveLightType() { return m_Light.Type[EQEmu::lightsource::LightActive]; }
 	bool UpdateActiveLight(); // returns true if change, false if no change
 
-	LightProfile_Struct* GetLightProfile() { return &m_Light; }
+	EQEmu::LightSourceProfile* GetLightProfile() { return &m_Light; }
 
 	Mob* GetPet();
 	void SetPet(Mob* newpet);
@@ -744,6 +785,7 @@ public:
 	inline const bodyType GetOrigBodyType() const { return orig_bodytype; }
 	void SetBodyType(bodyType new_body, bool overwrite_orig);
 
+	uint32 tmHidden; // timestamp of hide, only valid while hidden == true
 	uint8 invisible, see_invis;
 	bool invulnerable, invisible_undead, invisible_animals, sneaking, hidden, improved_hidden;
 	bool see_invis_undead, see_hide, see_improved_hide;
@@ -756,8 +798,9 @@ public:
 	virtual int GetHaste();
 	int32 GetMeleeMitigation();
 
-	uint8 GetWeaponDamageBonus(const Item_Struct* weapon, bool offhand = false);
-	uint16 GetDamageTable(SkillUseTypes skillinuse);
+	uint8 GetWeaponDamageBonus(const EQEmu::ItemData* weapon, bool offhand = false);
+	const DamageTable &GetDamageTable() const;
+	void ApplyDamageTable(DamageHitInfo &hit);
 	virtual int GetHandToHandDamage(void);
 
 	bool CanThisClassDoubleAttack(void) const;
@@ -780,11 +823,11 @@ public:
 	int32 AffectMagicalDamage(int32 damage, uint16 spell_id, const bool iBuffTic, Mob* attacker);
 	int32 ReduceAllDamage(int32 damage);
 
-	virtual void DoSpecialAttackDamage(Mob *who, SkillUseTypes skill, int32 max_damage, int32 min_damage = 1, int32 hate_override = -1, int ReuseTime = 10, bool HitChance=false, bool CanAvoid=true);
-	virtual void DoThrowingAttackDmg(Mob* other, const ItemInst* RangeWeapon=nullptr, const Item_Struct* AmmoItem=nullptr, uint16 weapon_damage=0, int16 chance_mod=0,int16 focus=0, int ReuseTime=0, uint32 range_id=0, int AmmoSlot=0, float speed = 4.0f);
-	virtual void DoMeleeSkillAttackDmg(Mob* other, uint16 weapon_damage, SkillUseTypes skillinuse, int16 chance_mod=0, int16 focus=0, bool CanRiposte=false, int ReuseTime=0);
-	virtual void DoArcheryAttackDmg(Mob* other,  const ItemInst* RangeWeapon=nullptr, const ItemInst* Ammo=nullptr, uint16 weapon_damage=0, int16 chance_mod=0, int16 focus=0, int ReuseTime=0, uint32 range_id=0, uint32 ammo_id=0, const Item_Struct *AmmoItem=nullptr, int AmmoSlot=0, float speed= 4.0f);
-	bool TryProjectileAttack(Mob* other, const Item_Struct *item, SkillUseTypes skillInUse, uint16 weapon_dmg, const ItemInst* RangeWeapon, const ItemInst* Ammo, int AmmoSlot, float speed);
+	void DoSpecialAttackDamage(Mob *who, EQEmu::skills::SkillType skill, int base_damage, int min_damage = 0, int32 hate_override = -1, int ReuseTime = 10);
+	virtual void DoThrowingAttackDmg(Mob* other, const EQEmu::ItemInstance* RangeWeapon = nullptr, const EQEmu::ItemData* AmmoItem = nullptr, uint16 weapon_damage = 0, int16 chance_mod = 0, int16 focus = 0, int ReuseTime = 0, uint32 range_id = 0, int AmmoSlot = 0, float speed = 4.0f);
+	void DoMeleeSkillAttackDmg(Mob* other, uint16 weapon_damage, EQEmu::skills::SkillType skillinuse, int16 chance_mod = 0, int16 focus = 0, bool CanRiposte = false, int ReuseTime = 0);
+	virtual void DoArcheryAttackDmg(Mob* other, const EQEmu::ItemInstance* RangeWeapon = nullptr, const EQEmu::ItemInstance* Ammo = nullptr, uint16 weapon_damage = 0, int16 chance_mod = 0, int16 focus = 0, int ReuseTime = 0, uint32 range_id = 0, uint32 ammo_id = 0, const EQEmu::ItemData *AmmoItem = nullptr, int AmmoSlot = 0, float speed = 4.0f);
+	bool TryProjectileAttack(Mob* other, const EQEmu::ItemData *item, EQEmu::skills::SkillType skillInUse, uint16 weapon_dmg, const EQEmu::ItemInstance* RangeWeapon, const EQEmu::ItemInstance* Ammo, int AmmoSlot, float speed);
 	void ProjectileAttack();
 	inline bool HasProjectileAttack() const { return ActiveProjectileATK; }
 	inline void SetProjectileAttack(bool value) { ActiveProjectileATK = value; }
@@ -795,11 +838,12 @@ public:
 	bool AddRampage(Mob*);
 	void ClearRampage();
 	void AreaRampage(ExtraAttackOptions *opts);
+	inline bool IsSpecialAttack(eSpecialAttacks in) { return m_specialattacks == in; }
 
 	void StartEnrage();
 	void ProcessEnrage();
 	bool IsEnraged();
-	void Taunt(NPC* who, bool always_succeed, float chance_bonus = 0);
+	void Taunt(NPC *who, bool always_succeed, int chance_bonus = 0, bool FromSpell = false, int32 bonus_hate = 0);
 
 	virtual void AI_Init();
 	virtual void AI_Start(uint32 iMoveDelay = 0);
@@ -829,6 +873,7 @@ public:
 	inline void SetFocused(bool nState) { focused = nState; }
 	inline const bool IsFocused() const { return focused; }
 	inline const bool IsRoamer() const { return roamer; }
+	inline const int GetWanderType() const { return wandertype; }
 	inline const bool IsRooted() const { return rooted || permarooted; }
 	inline const bool HasVirus() const { return has_virus; }
 	int GetSnaredAmount();
@@ -894,7 +939,7 @@ public:
 	virtual int32 CheckHealAggroAmount(uint16 spell_id, Mob *target, uint32 heal_possible = 0);
 
 	uint32 GetInstrumentMod(uint16 spell_id) const;
-	int CalcSpellEffectValue(uint16 spell_id, int effect_id, int caster_level = 1, uint32 instrument_mod = 10, Mob *caster = nullptr, int ticsremaining = 0);
+	int CalcSpellEffectValue(uint16 spell_id, int effect_id, int caster_level = 1, uint32 instrument_mod = 10, Mob *caster = nullptr, int ticsremaining = 0,uint16 casterid=0);
 	int CalcSpellEffectValue_formula(int formula, int base, int max, int caster_level, uint16 spell_id, int ticsremaining = 0);
 	virtual int CheckStackConflict(uint16 spellid1, int caster_level1, uint16 spellid2, int caster_level2, Mob* caster1 = nullptr, Mob* caster2 = nullptr, int buffslot = -1);
 	uint32 GetCastedSpellInvSlot() const { return casting_spell_inventory_slot; }
@@ -902,7 +947,7 @@ public:
 	// HP Event
 	inline int GetNextHPEvent() const { return nexthpevent; }
 	void SetNextHPEvent( int hpevent );
-	void SendItemAnimation(Mob *to, const Item_Struct *item, SkillUseTypes skillInUse, float velocity= 4.0);
+	void SendItemAnimation(Mob *to, const EQEmu::ItemData *item, EQEmu::skills::SkillType skillInUse, float velocity = 4.0);
 	inline int& GetNextIncHPEvent() { return nextinchpevent; }
 	void SetNextIncHPEvent( int inchpevent );
 
@@ -952,8 +997,8 @@ public:
 	inline uint16 GetEmoteID() { return emoteid; }
 
 	bool 	HasSpellEffect(int effectid);
-	int 	mod_effect_value(int effect_value, uint16 spell_id, int effect_type, Mob* caster);
-	float 	mod_hit_chance(float chancetohit, SkillUseTypes skillinuse, Mob* attacker);
+	int 	mod_effect_value(int effect_value, uint16 spell_id, int effect_type, Mob* caster, uint16 caster_id);
+	float 	mod_hit_chance(float chancetohit, EQEmu::skills::SkillType skillinuse, Mob* attacker);
 	float 	mod_riposte_chance(float ripostchance, Mob* attacker);
 	float	mod_block_chance(float blockchance, Mob* attacker);
 	float	mod_parry_chance(float parrychance, Mob* attacker);
@@ -964,11 +1009,11 @@ public:
 	int32	mod_kick_damage(int32 dmg);
 	int32	mod_bash_damage(int32 dmg);
 	int32	mod_frenzy_damage(int32 dmg);
-	int32	mod_monk_special_damage(int32 ndamage, SkillUseTypes skill_type);
+	int32	mod_monk_special_damage(int32 ndamage, EQEmu::skills::SkillType skill_type);
 	int32	mod_backstab_damage(int32 ndamage);
-	int		mod_archery_bonus_chance(int bonuschance, const ItemInst* RangeWeapon);
-	uint32	mod_archery_bonus_damage(uint32 MaxDmg, const ItemInst* RangeWeapon);
-	int32	mod_archery_damage(int32 TotalDmg, bool hasbonus, const ItemInst* RangeWeapon);
+	int		mod_archery_bonus_chance(int bonuschance, const EQEmu::ItemInstance* RangeWeapon);
+	uint32	mod_archery_bonus_damage(uint32 MaxDmg, const EQEmu::ItemInstance* RangeWeapon);
+	int32	mod_archery_damage(int32 TotalDmg, bool hasbonus, const EQEmu::ItemInstance* RangeWeapon);
 	uint16	mod_throwing_damage(uint16 MaxDmg);
 	int32	mod_cast_time(int32 cast_time);
 	int		mod_buff_duration(int res, Mob* caster, Mob* target, uint16 spell_id);
@@ -983,7 +1028,7 @@ public:
 	uint32 Tune_GetMeanDamage(Mob* GM, Mob *attacker, int32 damage, int32 minhit, ExtraAttackOptions *opts = nullptr, int Msg = 0,int ac_override=0, int atk_override=0, int add_ac=0, int add_atk = 0);
 	void Tune_FindATKByPctMitigation(Mob* defender, Mob *attacker, float pct_mitigation,  int interval = 50, int max_loop = 100, int ac_override=0,int Msg =0);
 	void Tune_FindACByPctMitigation(Mob* defender, Mob *attacker, float pct_mitigation,  int interval = 50, int max_loop = 100, int atk_override=0,int Msg =0);
-	float Tune_CheckHitChance(Mob* defender, Mob* attacker, SkillUseTypes skillinuse, int Hand, int16 chance_mod, int Msg = 1,int acc_override=0, int avoid_override=0, int add_acc=0, int add_avoid = 0);
+	float Tune_CheckHitChance(Mob* defender, Mob* attacker, EQEmu::skills::SkillType skillinuse, int Hand, int16 chance_mod, int Msg = 1, int acc_override = 0, int avoid_override = 0, int add_acc = 0, int add_avoid = 0);
 	void Tune_FindAccuaryByHitChance(Mob* defender, Mob *attacker, float hit_chance, int interval, int max_loop, int avoid_override, int Msg = 0);
 	void Tune_FindAvoidanceByHitChance(Mob* defender, Mob *attacker, float hit_chance, int interval, int max_loop, int acc_override, int Msg = 0);
 
@@ -1005,8 +1050,22 @@ public:
 	void DelAssistCap() { --npc_assist_cap; }
 	void ResetAssistCap() { npc_assist_cap = 0; }
 
+	// Bots HealRotation methods
+#ifdef BOTS
+	bool IsHealRotationTarget() { return (m_target_of_heal_rotation.use_count() && m_target_of_heal_rotation.get()); }
+	bool JoinHealRotationTargetPool(std::shared_ptr<HealRotation>* heal_rotation);
+	bool LeaveHealRotationTargetPool();
+
+	uint32 HealRotationHealCount();
+	uint32 HealRotationExtendedHealCount();
+	float HealRotationHealFrequency();
+	float HealRotationExtendedHealFrequency();
+
+	const std::shared_ptr<HealRotation>* TargetOfHealRotation() const { return &m_target_of_heal_rotation; }
+#endif
+
 protected:
-	void CommonDamage(Mob* other, int32 &damage, const uint16 spell_id, const SkillUseTypes attack_skill, bool &avoidable, const int8 buffslot, const bool iBuffTic, int special = 0);
+	void CommonDamage(Mob* other, int &damage, const uint16 spell_id, const EQEmu::skills::SkillType attack_skill, bool &avoidable, const int8 buffslot, const bool iBuffTic, eSpecialAttacks specal = eSpecialAttacks::None);
 	static uint16 GetProcID(uint16 spell_id, uint8 effect_index);
 	float _GetMovementSpeed(int mod) const;
 	int _GetWalkSpeed() const;
@@ -1024,7 +1083,7 @@ protected:
 	std::vector<uint16> RampageArray;
 	std::map<std::string, std::string> m_EntityVariables;
 
-	int16 SkillDmgTaken_Mod[HIGHEST_SKILL+2];
+	int16 SkillDmgTaken_Mod[EQEmu::skills::HIGHEST_SKILL + 2];
 	int16 Vulnerability_Mod[HIGHEST_RESIST+2];
 	bool m_AllowBeneficial;
 	bool m_DisableMelee;
@@ -1043,6 +1102,7 @@ protected:
 	bool multitexture;
 
 	int AC;
+	int mitigation_ac; // cached Mob::ACSum
 	int32 ATK;
 	int32 STR;
 	int32 STA;
@@ -1114,32 +1174,33 @@ protected:
 	int base_walkspeed;
 	int base_fearspeed;
 	int current_speed;
+	eSpecialAttacks m_specialattacks;
 
 	uint32 pLastChange;
 	bool held;
 	bool nocast;
 	bool focused;
+	bool spawned;
 	void CalcSpellBonuses(StatBonuses* newbon);
 	virtual void CalcBonuses();
-	void TrySkillProc(Mob *on, uint16 skill, uint16 ReuseTime, bool Success = false, uint16 hand = 0, bool IsDefensive = false); // hand = MainCharm?
+	void TrySkillProc(Mob *on, uint16 skill, uint16 ReuseTime, bool Success = false, uint16 hand = 0, bool IsDefensive = false); // hand = SlotCharm?
 	bool PassLimitToSkill(uint16 spell_id, uint16 skill);
 	bool PassLimitClass(uint32 Classes_, uint16 Class_);
-	void TryDefensiveProc(const ItemInst* weapon, Mob *on, uint16 hand = MainPrimary);
-	void TryWeaponProc(const ItemInst* inst, const Item_Struct* weapon, Mob *on, uint16 hand = MainPrimary);
-	void TrySpellProc(const ItemInst* inst, const Item_Struct* weapon, Mob *on, uint16 hand = MainPrimary);
-	void TryWeaponProc(const ItemInst* weapon, Mob *on, uint16 hand = MainPrimary);
-	void ExecWeaponProc(const ItemInst* weapon, uint16 spell_id, Mob *on, int level_override = -1);
-	virtual float GetProcChances(float ProcBonus, uint16 hand = MainPrimary);
-	virtual float GetDefensiveProcChances(float &ProcBonus, float &ProcChance, uint16 hand = MainPrimary, Mob *on = nullptr);
-	virtual float GetSpecialProcChances(uint16 hand);
-	virtual float GetAssassinateProcChances(uint16 ReuseTime);
+	void TryDefensiveProc(Mob *on, uint16 hand = EQEmu::inventory::slotPrimary);
+	void TryWeaponProc(const EQEmu::ItemInstance* inst, const EQEmu::ItemData* weapon, Mob *on, uint16 hand = EQEmu::inventory::slotPrimary);
+	void TrySpellProc(const EQEmu::ItemInstance* inst, const EQEmu::ItemData* weapon, Mob *on, uint16 hand = EQEmu::inventory::slotPrimary);
+	void TryWeaponProc(const EQEmu::ItemInstance* weapon, Mob *on, uint16 hand = EQEmu::inventory::slotPrimary);
+	void ExecWeaponProc(const EQEmu::ItemInstance* weapon, uint16 spell_id, Mob *on, int level_override = -1);
+	virtual float GetProcChances(float ProcBonus, uint16 hand = EQEmu::inventory::slotPrimary);
+	virtual float GetDefensiveProcChances(float &ProcBonus, float &ProcChance, uint16 hand = EQEmu::inventory::slotPrimary, Mob *on = nullptr);
 	virtual float GetSkillProcChances(uint16 ReuseTime, uint16 hand = 0); // hand = MainCharm?
 	uint16 GetWeaponSpeedbyHand(uint16 hand);
-	int GetWeaponDamage(Mob *against, const Item_Struct *weapon_item);
-	int GetWeaponDamage(Mob *against, const ItemInst *weapon_item, uint32 *hate = nullptr);
-	int GetKickDamage();
-	int GetBashDamage();
-	virtual void ApplySpecialAttackMod(SkillUseTypes skill, int32 &dmg, int32 &mindmg);
+	int GetWeaponDamage(Mob *against, const EQEmu::ItemData *weapon_item);
+	int GetWeaponDamage(Mob *against, const EQEmu::ItemInstance *weapon_item, uint32 *hate = nullptr);
+#ifdef BOTS
+	virtual
+#endif
+	int GetBaseSkillDamage(EQEmu::skills::SkillType skill, Mob *target = nullptr);
 	virtual int16 GetFocusEffect(focusType type, uint16 spell_id) { return 0; }
 	void CalculateNewFearpoint();
 	float FindGroundZ(float new_x, float new_y, float z_offset=0.0);
@@ -1163,7 +1224,7 @@ protected:
 
 	glm::vec4 m_Delta;
 
-	LightProfile_Struct m_Light;
+	EQEmu::LightSourceProfile m_Light;
 
 	float fixedZ;
 	EmuAppearance _appearance;
@@ -1174,7 +1235,7 @@ protected:
 	Timer attack_dw_timer;
 	Timer ranged_timer;
 	float attack_speed; //% increase/decrease in attack speed (not haste)
-	int8 attack_delay; //delay between attacks in 10ths of seconds
+	int attack_delay; //delay between attacks in 10ths of seconds
 	int16 slow_mitigation; // Allows for a slow mitigation (100 = 100%, 50% = 50%)
 	Timer tic_timer;
 	Timer mana_timer;
@@ -1186,7 +1247,7 @@ protected:
 	int attacked_count;
 	bool delaytimer;
 	uint16 casting_spell_targetid;
-	uint16 casting_spell_slot;
+	EQEmu::CastingSlot casting_spell_slot;
 	uint16 casting_spell_mana;
 	uint32 casting_spell_inventory_slot;
 	uint32 casting_spell_timer;
@@ -1196,7 +1257,7 @@ protected:
 	uint32 casting_spell_aa_id;
 	bool casting_spell_checks;
 	uint16 bardsong;
-	uint8 bardsong_slot;
+	EQEmu::CastingSlot bardsong_slot;
 	uint32 bardsong_target_id;
 
 	bool ActiveProjectileATK;
@@ -1221,7 +1282,7 @@ protected:
 	uint32 drakkin_heritage;
 	uint32 drakkin_tattoo;
 	uint32 drakkin_details;
-	uint32 armor_tint[_MaterialCount];
+	EQEmu::TintProfile armor_tint;
 
 	uint8 aa_title;
 
@@ -1241,6 +1302,7 @@ protected:
 	bool has_shieldequiped;
 	bool has_twohandbluntequiped;
 	bool has_twohanderequipped;
+	bool can_facestab;
 	bool has_numhits;
 	bool has_MGB;
 	bool has_ProjectIllusion;
@@ -1248,6 +1310,7 @@ protected:
 	bool last_los_check;
 	bool pseudo_rooted;
 	bool endur_upkeep;
+	bool degenerating_effects; // true if we have a buff that needs to be recalced every tick
 
 	// Bind wound
 	Timer bindwound_timer;
@@ -1356,7 +1419,8 @@ protected:
 
 	glm::vec3 m_TargetRing;
 
-	uint32 m_spellHitsLeft[38]; // Used to track which spells will have their numhits incremented when spell finishes casting, 38 Buffslots
+	// we might want to do this differently, we gotta do max NPC buffs ... which is 97
+	uint32 m_spellHitsLeft[EQEmu::constants::TotalBuffs]; // Used to track which spells will have their numhits incremented when spell finishes casting
 	int flymode;
 	bool m_targetable;
 	int QGVarDuration(const char *fmt);
@@ -1370,9 +1434,16 @@ protected:
 	std::unordered_map<uint32, std::pair<uint32, uint32>> aa_ranks;
 	Timer aa_timers[aaTimerMax];
 
+	bool IsHorse;
+
 private:
 	void _StopSong(); //this is not what you think it is
 	Mob* target;
+
+#ifdef BOTS
+	std::shared_ptr<HealRotation> m_target_of_heal_rotation;
+#endif
+
 };
 
 #endif

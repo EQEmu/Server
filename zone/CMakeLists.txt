@@ -4,10 +4,13 @@ SET(zone_sources
 	aa.cpp
 	aa_ability.cpp
 	aggro.cpp
+	aggromanager.cpp
 	attack.cpp
 	beacon.cpp
 	bonuses.cpp
 	bot.cpp
+	bot_command.cpp
+	bot_database.cpp
 	botspellsai.cpp
 	client.cpp
 	client_mods.cpp
@@ -30,6 +33,7 @@ SET(zone_sources
 	guild.cpp
 	guild_mgr.cpp
 	hate_list.cpp
+	heal_rotation.cpp
 	horse.cpp
 	inventory.cpp
 	loottables.cpp
@@ -119,6 +123,7 @@ SET(zone_sources
 	water_map_v2.cpp
 	waypoints.cpp
 	worldserver.cpp
+	xtargetautohaters.cpp
 	zone.cpp
 	zone_config.cpp
 	zonedb.cpp
@@ -128,9 +133,12 @@ SET(zone_sources
 SET(zone_headers
 	aa.h
 	aa_ability.h
+	aggromanager.h
 	basic_functions.h
 	beacon.h
 	bot.h
+	bot_command.h
+	bot_database.h
 	bot_structs.h
 	client.h
 	client_packet.h
@@ -149,6 +157,7 @@ SET(zone_headers
 	groups.h
 	guild_mgr.h
 	hate_list.h
+	heal_rotation.h
 	horse.h
 	lua_bit.h
 	lua_client.h
@@ -209,6 +218,7 @@ SET(zone_headers
 	water_map_v1.h
 	water_map_v2.h
 	worldserver.h
+	xtargetautohaters.h
 	zone.h
 	zone_config.h
 	zonedb.h

@@ -260,7 +260,7 @@ bool EQProtocolPacket::combine(const EQProtocolPacket *rhs)
 {
 bool result=false;
 	if (opcode==OP_Combined && size+rhs->size+5<256) {
-		unsigned char *tmpbuffer=new unsigned char [size+rhs->size+3];
+		auto tmpbuffer = new unsigned char[size + rhs->size + 3];
 		memcpy(tmpbuffer,pBuffer,size);
 		uint32 offset=size;
 		tmpbuffer[offset++]=rhs->Size();
@@ -270,7 +270,7 @@ bool result=false;
 		pBuffer=tmpbuffer;
 		result=true;
 	} else if (size+rhs->size+7<256) {
-		unsigned char *tmpbuffer=new unsigned char [size+rhs->size+6];
+		auto tmpbuffer = new unsigned char[size + rhs->size + 6];
 		uint32 offset=0;
 		tmpbuffer[offset++]=Size();
 		offset+=serialize(tmpbuffer+offset);
@@ -457,7 +457,7 @@ EQApplicationPacket *EQApplicationPacket::Copy() const {
 }
 
 EQRawApplicationPacket *EQProtocolPacket::MakeAppPacket() const {
-	EQRawApplicationPacket *res = new EQRawApplicationPacket(opcode, pBuffer, size);
+	auto res = new EQRawApplicationPacket(opcode, pBuffer, size);
 	res->copyInfo(this);
 	return(res);
 }

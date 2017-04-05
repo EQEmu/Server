@@ -79,11 +79,16 @@ class EQEmuConfig : public XMLParser
 		// From <files/>
 		std::string SpellsFile;
 		std::string OpCodesFile;
+		std::string PluginPlFile;
 
 		// From <directories/>
 		std::string MapDir;
 		std::string QuestDir;
 		std::string PluginDir;
+		std::string LuaModuleDir;
+		std::string PatchDir;
+		std::string SharedMemDir;
+		std::string LogDir;
 
 		// From <launcher/>
 		std::string LogPrefix;
@@ -153,10 +158,16 @@ class EQEmuConfig : public XMLParser
 			// Files
 			SpellsFile = "spells_us.txt";
 			OpCodesFile = "opcodes.conf";
+			PluginPlFile = "plugin.pl";
 			// Dirs
-			MapDir = "Maps";
-			QuestDir = "quests";
-			PluginDir = "plugins";
+			MapDir = "Maps/";
+			QuestDir = "quests/";
+			PluginDir = "plugins/";
+			LuaModuleDir = "lua_modules/";
+			PatchDir = "./";
+			SharedMemDir = "shared/";
+			LogDir = "logs/";
+
 			// Launcher
 			LogPrefix = "logs/zone-";
 			LogSuffix = ".log";

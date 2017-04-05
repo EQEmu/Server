@@ -1,5 +1,5 @@
 /*	EQEMu: Everquest Server Emulator
-	Copyright (C) 2001-2003 EQEMu Development Team (http://eqemulator.net)
+	Copyright (C) 2001-2016 EQEMu Development Team (http://eqemulator.net)
 
 	This program is free software; you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -37,9 +37,13 @@
 //atoi is not uint32 or uint32 safe!!!!
 #define atoul(str) strtoul(str, nullptr, 10)
 
-class Inventory;
 class MySQLRequestResult;
 class Client;
+
+namespace EQEmu
+{
+	class InventoryProfile;
+}
 
 struct EventLogDetails_Struct {
 	uint32	id;
@@ -67,8 +71,14 @@ struct npcDecayTimes_Struct {
 
 
 struct VarCache_Struct {
-	char varname[26];	
-	char value[0];
+	std::map<std::string, std::string> m_cache;
+	uint32 last_update;
+	VarCache_Struct() : last_update(0) { }
+	void Add(const std::string &key, const std::string &value) { m_cache[key] = value; }
+	const std::string *Get(const std::string &key) {
+		auto it = m_cache.find(key);
+		return (it != m_cache.end() ? &it->second : nullptr);
+	}
 };
 
 class PTimerList;
@@ -88,7 +98,7 @@ class Database : public DBcore {
 public:
 	Database();
 	Database(const char* host, const char* user, const char* passwd, const char* database,uint32 port);
-	bool Connect(const char* host, const char* user, const char* passwd, const char* database,uint32 port);
+	bool Connect(const char* host, const char* user, const char* passwd, const char* database, uint32 port);
 	~Database();
 
 	/* Character Creation */
@@ -103,7 +113,7 @@ public:
 	bool	SaveCharacterCreate(uint32 character_id, uint32 account_id, PlayerProfile_Struct* pp);
 	bool	SetHackerFlag(const char* accountname, const char* charactername, const char* hacked);
 	bool	SetMQDetectionFlag(const char* accountname, const char* charactername, const char* hacked, const char* zone);
-	bool	StoreCharacter(uint32 account_id, PlayerProfile_Struct* pp, Inventory* inv);
+	bool	StoreCharacter(uint32 account_id, PlayerProfile_Struct* pp, EQEmu::InventoryProfile* inv);
 	bool	UpdateName(const char* oldname, const char* newname);
 
 	/* General Information Queries */
@@ -180,6 +190,10 @@ public:
 
 	void	GetAccountFromID(uint32 id, char* oAccountName, int16* oStatus);
 	void	SetAgreementFlag(uint32 acctid);
+	
+	int		GetIPExemption(std::string account_ip);
+
+	int		GetInstanceID(uint32 char_id, uint32 zone_id);
 
 
 	/* Groups */
@@ -215,11 +229,9 @@ public:
 
 	/* Database Variables */
 
-	bool	GetVariable(const char* varname, char* varvalue, uint16 varvalue_len);
-	bool	SetVariable(const char* varname, const char* varvalue);
+	bool	GetVariable(std::string varname, std::string &varvalue);
+	bool	SetVariable(const std::string varname, const std::string &varvalue);
 	bool	LoadVariables();
-	uint32	LoadVariables_MQ(char** query);
-	bool	LoadVariables_result(MySQLRequestResult results);
 
 	/* General Queries */
 
@@ -256,14 +268,10 @@ public:
 	void	LoadLogSettings(EQEmuLogSys::LogSettings* log_settings);
 
 private:
-	void DBInitVars();
-
 	std::map<uint32,std::string>	zonename_array;
 
-	Mutex				Mvarcache;
-	uint32				varcache_max;
-	VarCache_Struct**	varcache_array;
-	uint32				varcache_lastupdate;
+	Mutex Mvarcache;
+	VarCache_Struct varcache;
 
 	/* Groups, utility methods. */
 	void    ClearAllGroupLeaders();

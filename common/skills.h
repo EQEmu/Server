@@ -1,5 +1,6 @@
 /*	EQEMu: Everquest Server Emulator
-	Copyright (C) 2001-2002 EQEMu Development Team (http://eqemulator.org)
+	
+	Copyright (C) 2001-2016 EQEMu Development Team (http://eqemulator.net)
 
 	This program is free software; you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -9,25 +10,26 @@
 	but WITHOUT ANY WARRANTY except by those people which sell it, which
 	are required to give you total support for your newly bought product;
 	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-	A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+	A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
 	You should have received a copy of the GNU General Public License
 	along with this program; if not, write to the Free Software
-	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
-#ifndef SKILLS_H
-#define SKILLS_H
+
+#ifndef COMMON_SKILLS_H
+#define COMMON_SKILLS_H
+
+#include "types.h"
 
 #include <string>
 #include <map>
 
-/*
-**	Skill use types
-**
-**	(ref: eqstr_us.txt [05-10-2013])
-*/
-enum SkillUseTypes
+
+namespace EQEmu
 {
+	namespace skills {
+		enum SkillType : int {
 /*13855*/	Skill1HBlunt = 0,
 /*13856*/	Skill1HSlashing,
 /*13857*/	Skill2HBlunt,
@@ -111,78 +113,198 @@ enum SkillUseTypes
 
 // RoF2+ specific skills
 /*00789*/	Skill2HPiercing, // 77
-// /*01216*/	SkillNone,						// This needs to move down as new skills are added
+// /*01216*/	SkillNone,					// This needs to move down as new skills are added
 
-/*00000*/	_EmuSkillCount					// move to last position of active enumeration labels
+/*00000*/	SkillCount						// move to last position of active enumeration labels
 
 // Skill Counts
-// /*-----*/	_SkillCount_62 = 75,			// use for Ti and earlier max skill checks
-// /*-----*/	_SkillCount_SoF = 77,			// use for SoF thru RoF1 max skill checks
-// /*-----*/	_SkillCount_RoF2 = 78,			// use for RoF2 max skill checks
+// /*-----*/	SkillCount_62 = 75,			// use for Ti and earlier max skill checks
+// /*-----*/	SkillCount_SoF = 77,		// use for SoF thru RoF1 max skill checks
+// /*-----*/	SkillCount_RoF2 = 78,		// use for RoF2 max skill checks
 
 // Support values
-// /*-----*/	_SkillServerArraySize = _SkillCount_RoF2,	// Should reflect last client '_SkillCount'
+// /*-----*/	SkillServerArraySize = _SkillCount_RoF2,	// Should reflect last client '_SkillCount'
 
 // Superfluous additions to SkillUseTypes..server-use only
 // /*-----*/	ExtSkillGenericTradeskill = 100
 
-/*					([EQClientVersion]	[0] - Unknown, [3] - SoF, [7] - RoF2[05-10-2013])
-	[Skill]			[index]	|	[0]		[1]		[2]		[3]		[4]		[5]		[6]		[7]
-	Frenzy			(05837)	|	---		074		074		074		074		074		074		074
-	Remove Traps	(03670)	|	---		---		---		075		075		075		075		075
-	Triple Attack	(13049)	|	---		---		---		076		076		076		076		076
-	2H Piercing		(00789)	|	---		---		---		---		---		---		---		077
-*/
+		/*					([EQClientVersion]	[0] - Unknown, [3] - SoF, [7] - RoF2[05-10-2013])
+			[Skill]			[index]	|	[0]		[1]		[2]		[3]		[4]		[5]		[6]		[7]
+			Frenzy			(05837)	|	---		074		074		074		074		074		074		074
+			Remove Traps	(03670)	|	---		---		---		075		075		075		075		075
+			Triple Attack	(13049)	|	---		---		---		076		076		076		076		076
+			2H Piercing		(00789)	|	---		---		---		---		---		---		---		077
+		*/
 
-/*
-	[SkillCaps.txt] (SoF+)
-	a^b^c^d(^e)	(^e is RoF+, but cursory glance appears to be all zeros)
+		/*
+			[SkillCaps.txt] (SoF+)
+			a^b^c^d(^e)	(^e is RoF+, but cursory glance appears to be all zeros)
 
-	a - Class
-	b - Skill
-	c - Level
-	d - Max Value
-	(e - Unknown)
-*/
+			a - Class
+			b - Skill
+			c - Level
+			d - Max Value
+			(e - Unknown)
+		*/
 
-/*
-	NOTE: Disregard this until it is sorted out
+		/*
+			Changed (tradeskill==75) to ExtSkillGenericTradeskill in tradeskills.cpp for both instances. If it's a pseudo-enumeration of
+			an AA ability, then use the 'ExtSkill' ('ExtendedSkill') prefix with a value >= 100. (current implementation)
+		*/
+	};
 
-	I changed (tradeskill==75) to ExtSkillGenericTradeskill in tradeskills.cpp for both instances. 	If it's a pseudo-enumeration of
-	an AA ability, then use the 'ExtSkill' ('ExtendedSkill') prefix with a value >= 100. (current implementation)
-
-	We probably need to recode ALL of the skill checks to use the new Skill2HPiercing and ensure that the animation value is
-	properly changed in the patch files. As far as earlier clients using this new skill, it can be done, but we just need to ensure
-	that skill address is not inadvertently passed to the client..and we can just send an actual message for the skill-up. Use of a
-	command can tell the player what that particular skill value is.
-
-	Nothing on SkillTripleAttack just yet..haven't looked into its current implementation.
-
-	In addition to the above re-coding, we're probably going to need to rework the database pp blob to reserve space for the current
-	100-dword buffer allocation. This way, we can just add new ones without having to rework it each time.
-	(Wasn't done for this in particular..but, thanks Akkadius!)
-
-	-U
-*/
-};
-
-// temporary until it can be sorted out...
+	// temporary until it can be sorted out...
 #define HIGHEST_SKILL	Skill2HPiercing
-// Spell Effects use this value to determine if an effect applies to all skills.
+	// Spell Effects use this value to determine if an effect applies to all skills.
 #define ALL_SKILLS	-1
 
-// server profile does not reflect this yet..so, prefixed with 'PACKET_'
+	// server profile does not reflect this yet..so, prefixed with 'PACKET_'
 #define PACKET_SKILL_ARRAY_SIZE 100
 
+		bool IsTradeskill(SkillType skill);
+		bool IsSpecializedSkill(SkillType skill);
+		float GetSkillMeleePushForce(SkillType skill);
+		bool IsBardInstrumentSkill(SkillType skill);
+		bool IsCastingSkill(SkillType skill);
+		int32 GetBaseDamage(SkillType skill);
+		bool IsMeleeDmg(SkillType skill);
 
-// for skill related helper functions
-namespace EQEmu {
-	bool IsTradeskill(SkillUseTypes skill);
-	bool IsSpecializedSkill(SkillUseTypes skill);
-	float GetSkillMeleePushForce(SkillUseTypes skill);
-	bool IsBardInstrumentSkill(SkillUseTypes skill);
+		extern const std::map<SkillType, std::string>& GetSkillTypeMap();
 
-	const std::map<SkillUseTypes, std::string>& GetSkillUseTypesMap();
-}
+	} /*skills*/
 
-#endif
+	struct SkillProfile { // prototype - not implemented
+		union {
+			struct {
+				uint32 _1HBlunt;
+				uint32 _1HSlashing;
+				uint32 _2HBlunt;
+				uint32 _2HSlashing;
+				uint32 Abjuration;
+				uint32 Alteration;
+				uint32 ApplyPoison;
+				uint32 Archery;
+				uint32 Backstab;
+				uint32 BindWound;
+				uint32 Bash;
+				uint32 Block;
+				uint32 BrassInstruments;
+				uint32 Channeling;
+				uint32 Conjuration;
+				uint32 Defense;
+				uint32 Disarm;
+				uint32 DisarmTraps;
+				uint32 Divination;
+				uint32 Dodge;
+				uint32 DoubleAttack;
+				union {
+					uint32 DragonPunch;
+					uint32 TailRake;
+				};
+				uint32 DualWield;
+				uint32 EagleStrike;
+				uint32 Evocation;
+				uint32 FeignDeath;
+				uint32 FlyingKick;
+				uint32 Forage;
+				uint32 HandtoHand;
+				uint32 Hide;
+				uint32 Kick;
+				uint32 Meditate;
+				uint32 Mend;
+				uint32 Offense;
+				uint32 Parry;
+				uint32 PickLock;
+				uint32 _1HPiercing;
+				uint32 Riposte;
+				uint32 RoundKick;
+				uint32 SafeFall;
+				uint32 SenseHeading;
+				uint32 Singing;
+				uint32 Sneak;
+				uint32 SpecializeAbjure;
+				uint32 SpecializeAlteration;
+				uint32 SpecializeConjuration;
+				uint32 SpecializeDivination;
+				uint32 SpecializeEvocation;
+				uint32 PickPockets;
+				uint32 StringedInstruments;
+				uint32 Swimming;
+				uint32 Throwing;
+				uint32 TigerClaw;
+				uint32 Tracking;
+				uint32 WindInstruments;
+				uint32 Fishing;
+				uint32 MakePoison;
+				uint32 Tinkering;
+				uint32 Research;
+				uint32 Alchemy;
+				uint32 Baking;
+				uint32 Tailoring;
+				uint32 SenseTraps;
+				uint32 Blacksmithing;
+				uint32 Fletching;
+				uint32 Brewing;
+				uint32 AlcoholTolerance;
+				uint32 Begging;
+				uint32 JewelryMaking;
+				uint32 Pottery;
+				uint32 PercussionInstruments;
+				uint32 Intimidation;
+				uint32 Berserking;
+				uint32 Taunt;
+				uint32 Frenzy;
+				uint32 RemoveTraps;
+				uint32 TripleAttack;
+				uint32 _2HPiercing;
+				uint32 unused1;
+				uint32 unused2;
+				uint32 unused3;
+				uint32 unused4;
+				uint32 unused5;
+				uint32 unused6;
+				uint32 unused7;
+				uint32 unused8;
+				uint32 unused9;
+				uint32 unused10;
+				uint32 unused11;
+				uint32 unused12;
+				uint32 unused13;
+				uint32 unused14;
+				uint32 unused15;
+				uint32 unused16;
+				uint32 unused17;
+				uint32 unused18;
+				uint32 unused19;
+				uint32 unused20;
+				uint32 unused21;
+				uint32 unused22;
+			};
+			uint32 Skill[PACKET_SKILL_ARRAY_SIZE];
+		};
+
+		SkillProfile();
+
+		uint32* GetSkills() { return reinterpret_cast<uint32*>(&Skill); }
+
+		skills::SkillType GetLastUseableSkill() { return EQEmu::skills::Skill2HPiercing; }
+
+		size_t GetSkillsArraySize() { return PACKET_SKILL_ARRAY_SIZE; }
+		uint32 GetSkill(int skill_id);
+
+		uint32 operator[](int skill_id) { return GetSkill(skill_id); }
+
+		// const
+		uint32* GetSkills() const { return const_cast<SkillProfile*>(this)->GetSkills(); }
+
+		skills::SkillType GetLastUseableSkill() const { return const_cast<SkillProfile*>(this)->GetLastUseableSkill(); }
+
+		size_t GetSkillsArraySize() const { return const_cast<SkillProfile*>(this)->GetSkillsArraySize(); }
+		uint32 GetSkill(int skill_id) const { return const_cast<SkillProfile*>(this)->GetSkill(skill_id); }
+
+		uint32 operator[](int skill_id) const { return const_cast<SkillProfile*>(this)->GetSkill(skill_id); }
+	};
+	
+} /*EQEmu*/
+
+#endif /*COMMON_SKILLS_H*/

@@ -34,7 +34,7 @@
 #include "../common/md5.h"
 
 extern WorldServer worldserver;
-extern Clientlist *CL;
+extern Clientlist *g_Clientlist;
 extern const ucsconfig *Config;
 extern Database database;
 
@@ -52,7 +52,7 @@ WorldServer::~WorldServer()
 
 void WorldServer::OnConnected()
 {
-	Log.Out(Logs::Detail, Logs::UCS_Server, "Connected to World.");
+	Log(Logs::Detail, Logs::UCS_Server, "Connected to World.");
 	WorldConnection::OnConnected();
 }
 
@@ -67,7 +67,7 @@ void WorldServer::Process()
 
 	while((pack = tcpc.PopPacket()))
 	{
-		Log.Out(Logs::Detail, Logs::UCS_Server, "Received Opcode: %4X", pack->opcode);
+		Log(Logs::Detail, Logs::UCS_Server, "Received Opcode: %4X", pack->opcode);
 
 		switch(pack->opcode)
 		{
@@ -88,9 +88,9 @@ void WorldServer::Process()
 
 				std::string Message = Buffer;
 
-				Log.Out(Logs::Detail, Logs::UCS_Server, "Player: %s, Sent Message: %s", From, Message.c_str());
+				Log(Logs::Detail, Logs::UCS_Server, "Player: %s, Sent Message: %s", From, Message.c_str());
 
-				Client *c = CL->FindCharacter(From);
+				Client *c = g_Clientlist->FindCharacter(From);
 
 				safe_delete_array(From);
 
@@ -99,7 +99,7 @@ void WorldServer::Process()
 
 				if(!c)
 				{
-					Log.Out(Logs::Detail, Logs::UCS_Server, "Client not found.");
+					Log(Logs::Detail, Logs::UCS_Server, "Client not found.");
 					break;
 				}
 
@@ -109,7 +109,7 @@ void WorldServer::Process()
 				}
 				else if(Message[0] == '[')
 				{
-					CL->ProcessOPMailCommand(c, Message.substr(1, std::string::npos));
+					g_Clientlist->ProcessOPMailCommand(c, Message.substr(1, std::string::npos));
 				}
 
 				break;

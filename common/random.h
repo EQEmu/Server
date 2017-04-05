@@ -65,6 +65,15 @@ namespace EQEmu {
 			return Real(0.0, 1.0) <= required;
 		}
 
+		// same range as client's roll0
+		// This is their main high level RNG function
+		int Roll0(int max)
+		{
+			if (max - 1 > 0)
+				return Int(0, max - 1);
+			return 0;
+		}
+
 		// std::shuffle requires a RNG engine passed to it, so lets provide a wrapper to use our engine
 		template<typename RandomAccessIterator>
 		void Shuffle(RandomAccessIterator first, RandomAccessIterator last)

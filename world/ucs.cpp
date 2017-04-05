@@ -18,7 +18,7 @@ void UCSConnection::SetConnection(EmuTCPConnection *inStream)
 {
 	if(Stream)
 	{
-		Log.Out(Logs::Detail, Logs::UCS_Server, "Incoming UCS Connection while we were already connected to a UCS.");
+		Log(Logs::Detail, Logs::UCS_Server, "Incoming UCS Connection while we were already connected to a UCS.");
 		Stream->Disconnect();
 	}
 
@@ -52,7 +52,7 @@ bool UCSConnection::Process()
 					{
 						struct in_addr in;
 						in.s_addr = GetIP();
-						Log.Out(Logs::Detail, Logs::UCS_Server, "UCS authorization failed.");
+						Log(Logs::Detail, Logs::UCS_Server, "UCS authorization failed.");
 						auto pack = new ServerPacket(ServerOP_ZAAuthFailed);
 						SendPacket(pack);
 						delete pack;
@@ -64,7 +64,7 @@ bool UCSConnection::Process()
 				{
 					struct in_addr in;
 					in.s_addr = GetIP();
-					Log.Out(Logs::Detail, Logs::UCS_Server, "UCS authorization failed.");
+					Log(Logs::Detail, Logs::UCS_Server, "UCS authorization failed.");
 					auto pack = new ServerPacket(ServerOP_ZAAuthFailed);
 					SendPacket(pack);
 					delete pack;
@@ -74,7 +74,7 @@ bool UCSConnection::Process()
 			}
 			else
 			{
-				Log.Out(Logs::Detail, Logs::UCS_Server,"**WARNING** You have not configured a world shared key in your config file. You should add a <key>STRING</key> element to your <world> element to prevent unauthroized zone access.");
+				Log(Logs::Detail, Logs::UCS_Server,"**WARNING** You have not configured a world shared key in your config file. You should add a <key>STRING</key> element to your <world> element to prevent unauthroized zone access.");
 				authenticated = true;
 			}
 			delete pack;
@@ -92,12 +92,12 @@ bool UCSConnection::Process()
 			}
 			case ServerOP_ZAAuth:
 			{
-				Log.Out(Logs::Detail, Logs::UCS_Server, "Got authentication from UCS when they are already authenticated.");
+				Log(Logs::Detail, Logs::UCS_Server, "Got authentication from UCS when they are already authenticated.");
 				break;
 			}
 			default:
 			{
-				Log.Out(Logs::Detail, Logs::UCS_Server, "Unknown ServerOPcode from UCS 0x%04x, size %d", pack->opcode, pack->size);
+				Log(Logs::Detail, Logs::UCS_Server, "Unknown ServerOPcode from UCS 0x%04x, size %d", pack->opcode, pack->size);
 				DumpPacket(pack->pBuffer, pack->size);
 				break;
 			}

@@ -847,7 +847,8 @@ luabind::scope lua_register_packet_opcodes() {
 			luabind::value("OpenContainer", static_cast<int>(OP_OpenContainer)),
 			luabind::value("Marquee", static_cast<int>(OP_Marquee)),
 			luabind::value("ClientTimeStamp", static_cast<int>(OP_ClientTimeStamp)),
-			luabind::value("GuildPromote", static_cast<int>(OP_GuildPromote))
+			luabind::value("GuildPromote", static_cast<int>(OP_GuildPromote)),
+			luabind::value("Fling", static_cast<int>(OP_Fling))
 		];
 }
 

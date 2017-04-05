@@ -23,7 +23,7 @@
 #include "login_server.h"
 #include "../common/eqemu_logsys.h"
 
-extern EQEmuLogSys Log;
+extern EQEmuLogSys LogSys;
 extern LoginServer server;
 
 DatabaseMySQL::DatabaseMySQL(string user, string pass, string host, string port, string name)
@@ -41,13 +41,13 @@ DatabaseMySQL::DatabaseMySQL(string user, string pass, string host, string port,
 		if(!mysql_real_connect(database, host.c_str(), user.c_str(), pass.c_str(), name.c_str(), atoi(port.c_str()), nullptr, 0))
 		{
 			mysql_close(database);
-			Log.Out(Logs::General, Logs::Error, "Failed to connect to MySQL database. Error: %s", mysql_error(database));
+			Log(Logs::General, Logs::Error, "Failed to connect to MySQL database. Error: %s", mysql_error(database));
 			exit(1);
 		}
 	}
 	else
 	{
-		Log.Out(Logs::General, Logs::Error, "Failed to create db object in MySQL database.");
+		Log(Logs::General, Logs::Error, "Failed to create db object in MySQL database.");
 	}
 }
 
@@ -75,7 +75,7 @@ bool DatabaseMySQL::GetLoginDataFromAccountName(string name, string &password, u
 
 	if (mysql_query(database, query.str().c_str()) != 0)
 	{
-		Log.Out(Logs::General, Logs::Error, "Mysql query failed: %s", query.str().c_str());
+		Log(Logs::General, Logs::Error, "Mysql query failed: %s", query.str().c_str());
 		return false;
 	}
 
@@ -92,7 +92,7 @@ bool DatabaseMySQL::GetLoginDataFromAccountName(string name, string &password, u
 		}
 	}
 
-	Log.Out(Logs::General, Logs::Error, "Mysql query returned no result: %s", query.str().c_str());
+	Log(Logs::General, Logs::Error, "Mysql query returned no result: %s", query.str().c_str());
 	return false;
 }
 
@@ -111,7 +111,7 @@ bool DatabaseMySQL::CreateLoginData(string name, string &password, unsigned int 
 	query << " VALUES('" << name << "', '" << password << "', 'local_creation', NOW(), '127.0.0.1'); ";
 
 	if (mysql_query(database, query.str().c_str()) != 0) {
-		Log.Out(Logs::General, Logs::Error, "Mysql query failed: %s", query.str().c_str());
+		Log(Logs::General, Logs::Error, "Mysql query failed: %s", query.str().c_str());
 		return false;
 	}
 	else{
@@ -119,7 +119,7 @@ bool DatabaseMySQL::CreateLoginData(string name, string &password, unsigned int 
 		return true;
 	}
 
-	Log.Out(Logs::General, Logs::Error, "Mysql query returned no result: %s", query.str().c_str());
+	Log(Logs::General, Logs::Error, "Mysql query returned no result: %s", query.str().c_str());
 	return false;
 }
 
@@ -147,7 +147,7 @@ bool DatabaseMySQL::GetWorldRegistration(string long_name, string short_name, un
 
 	if (mysql_query(database, query.str().c_str()) != 0)
 	{
-		Log.Out(Logs::General, Logs::Error, "Mysql query failed: %s", query.str().c_str());
+		Log(Logs::General, Logs::Error, "Mysql query failed: %s", query.str().c_str());
 		return false;
 	}
 
@@ -172,7 +172,7 @@ bool DatabaseMySQL::GetWorldRegistration(string long_name, string short_name, un
 
 				if (mysql_query(database, query.str().c_str()) != 0)
 				{
-					Log.Out(Logs::General, Logs::Error, "Mysql query failed: %s", query.str().c_str());
+					Log(Logs::General, Logs::Error, "Mysql query failed: %s", query.str().c_str());
 					return false;
 				}
 
@@ -188,14 +188,14 @@ bool DatabaseMySQL::GetWorldRegistration(string long_name, string short_name, un
 					}
 				}
 
-				Log.Out(Logs::General, Logs::Error, "Mysql query returned no result: %s", query.str().c_str());
+				Log(Logs::General, Logs::Error, "Mysql query returned no result: %s", query.str().c_str());
 				return false;
 			}
 			return true;
 		}
 	}
 
-	Log.Out(Logs::General, Logs::Error, "Mysql query returned no result: %s", query.str().c_str());
+	Log(Logs::General, Logs::Error, "Mysql query returned no result: %s", query.str().c_str());
 	return false;
 }
 
@@ -214,7 +214,7 @@ void DatabaseMySQL::UpdateLSAccountData(unsigned int id, string ip_address)
 
 	if (mysql_query(database, query.str().c_str()) != 0)
 	{
-		Log.Out(Logs::General, Logs::Error, "Mysql query failed: %s", query.str().c_str());
+		Log(Logs::General, Logs::Error, "Mysql query failed: %s", query.str().c_str());
 	}
 }
 
@@ -233,7 +233,7 @@ void DatabaseMySQL::UpdateLSAccountInfo(unsigned int id, string name, string pas
 
 	if (mysql_query(database, query.str().c_str()) != 0)
 	{
-		Log.Out(Logs::General, Logs::Error, "Mysql query failed: %s", query.str().c_str());
+		Log(Logs::General, Logs::Error, "Mysql query failed: %s", query.str().c_str());
 	}
 }
 
@@ -258,7 +258,7 @@ void DatabaseMySQL::UpdateWorldRegistration(unsigned int id, string long_name, s
 
 	if (mysql_query(database, query.str().c_str()) != 0)
 	{
-		Log.Out(Logs::General, Logs::Error, "Mysql query failed: %s", query.str().c_str());
+		Log(Logs::General, Logs::Error, "Mysql query failed: %s", query.str().c_str());
 	}
 }
 
@@ -283,7 +283,7 @@ bool DatabaseMySQL::CreateWorldRegistration(string long_name, string short_name,
 
 	if (mysql_query(database, query.str().c_str()) != 0)
 	{
-		Log.Out(Logs::General, Logs::Error, "Mysql query failed: %s", query.str().c_str());
+		Log(Logs::General, Logs::Error, "Mysql query failed: %s", query.str().c_str());
 		return false;
 	}
 
@@ -302,13 +302,13 @@ bool DatabaseMySQL::CreateWorldRegistration(string long_name, string short_name,
 
 			if (mysql_query(database, query.str().c_str()) != 0)
 			{
-				Log.Out(Logs::General, Logs::Error, "Mysql query failed: %s", query.str().c_str());
+				Log(Logs::General, Logs::Error, "Mysql query failed: %s", query.str().c_str());
 				return false;
 			}
 			return true;
 		}
 	}
-	Log.Out(Logs::General, Logs::Error, "World registration did not exist in the database for %s %s", long_name.c_str(), short_name.c_str());
+	Log(Logs::General, Logs::Error, "World registration did not exist in the database for %s %s", long_name.c_str(), short_name.c_str());
 	return false;
 }
 

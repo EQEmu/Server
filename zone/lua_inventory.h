@@ -4,9 +4,13 @@
 
 #include "lua_ptr.h"
 
-class Inventory;
 class Lua_ItemInst;
 class Lua_Item;
+
+namespace EQEmu
+{
+	class InventoryProfile;
+}
 
 namespace luabind {
 	struct scope;
@@ -14,16 +18,21 @@ namespace luabind {
 
 luabind::scope lua_register_inventory();
 
-class Lua_Inventory : public Lua_Ptr<Inventory>
+// This class should be deprecated due to the nature of inventory actions.
+// Direct manipulation of the inventory system bypasses the client management
+// of database calls and can lead to lost items, duplicated items and/or
+// desync'd inventories, if not handled correctly.
+
+class Lua_Inventory : public Lua_Ptr<EQEmu::InventoryProfile>
 {
-	typedef Inventory NativeType;
+	typedef EQEmu::InventoryProfile NativeType;
 public:
 	Lua_Inventory() : Lua_Ptr(nullptr) { }
-	Lua_Inventory(Inventory *d) : Lua_Ptr(d) { }
+	Lua_Inventory(EQEmu::InventoryProfile *d) : Lua_Ptr(d) { }
 	virtual ~Lua_Inventory() { }
 
-	operator Inventory*() {
-		return reinterpret_cast<Inventory*>(GetLuaPtrData());
+	operator EQEmu::InventoryProfile*() {
+		return reinterpret_cast<EQEmu::InventoryProfile*>(GetLuaPtrData());
 	}
 
 	Lua_ItemInst GetItem(int slot_id);

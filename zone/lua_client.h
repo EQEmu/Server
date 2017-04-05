@@ -63,6 +63,7 @@ public:
 	int GetWeight();
 	uint32 GetEXP();
 	uint32 GetAAExp();
+	uint32 GetAAPercent();
 	uint32 GetTotalSecondsPlayed();
 	void UpdateLDoNPoints(int points, uint32 theme);
 	void SetDeity(int v);

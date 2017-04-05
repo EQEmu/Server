@@ -26,8 +26,8 @@
 #else
 	#include <cerrno>
 	#include <fcntl.h>
+	#include <winsock2.h>
 	#include <windows.h>
-	#include <winsock.h>
 #endif
 
 void CatchSignal(int sig_num);

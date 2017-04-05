@@ -11,15 +11,20 @@ SET(common_sources
 	database_conversions.cpp
 	database_instances.cpp
 	dbcore.cpp
+	deity.cpp
+	emu_constants.cpp
+	emu_legacy.cpp
+	emu_limits.cpp
 	emu_opcodes.cpp
 	emu_tcp_connection.cpp
 	emu_tcp_server.cpp
-	eq_dictionary.cpp
+	emu_versions.cpp
 	eqdb.cpp
 	eqdb_res.cpp
 	eqemu_exception.cpp
 	eqemu_config.cpp
 	eqemu_logsys.cpp
+	eq_limits.cpp
 	eq_packet.cpp
 	eq_stream.cpp
 	eq_stream_factory.cpp
@@ -30,9 +35,14 @@ SET(common_sources
 	faction.cpp
 	guild_base.cpp
 	guilds.cpp
+	inventory_profile.cpp
+	inventory_slot.cpp
 	ipc_mutex.cpp
-	item.cpp
+	item_data.cpp
+	item_instance.cpp
+	light_source.cpp
 	md5.cpp
+	memory_buffer.cpp
 	memory_mapped_file.cpp
 	misc.cpp
 	misc_functions.cpp
@@ -51,6 +61,7 @@ SET(common_sources
 	races.cpp
 	rdtsc.cpp
 	rulesys.cpp
+	say_link.cpp
 	serverinfo.cpp
 	shareddb.cpp
 	skills.cpp
@@ -59,6 +70,7 @@ SET(common_sources
 	struct_strategy.cpp
 	tcp_connection.cpp
 	tcp_server.cpp
+	textures.cpp
 	timeoutmgr.cpp
 	timer.cpp
 	unix.cpp
@@ -67,11 +79,17 @@ SET(common_sources
 	platform.cpp
 	patches/patches.cpp
 	patches/sod.cpp
+	patches/sod_limits.cpp
 	patches/sof.cpp
+	patches/sof_limits.cpp
 	patches/rof.cpp
+	patches/rof_limits.cpp
 	patches/rof2.cpp
+	patches/rof2_limits.cpp
 	patches/titanium.cpp
+	patches/titanium_limits.cpp
 	patches/uf.cpp
+	patches/uf_limits.cpp
 	SocketLib/Base64.cpp
 	SocketLib/File.cpp
 	SocketLib/HttpdCookies.cpp
@@ -104,12 +122,15 @@ SET(common_headers
 	database.h
 	dbcore.h
 	deity.h
+	emu_constants.h
+	emu_legacy.h
+	emu_limits.h
 	emu_opcodes.h
 	emu_oplist.h
 	emu_tcp_connection.h
 	emu_tcp_server.h
+	emu_versions.h
 	eq_constants.h
-	eq_dictionary.h
 	eq_packet_structs.h
 	eqdb.h
 	eqdb_res.h
@@ -117,6 +138,7 @@ SET(common_headers
 	eqemu_config.h
 	eqemu_config_elements.h
 	eqemu_logsys.h
+	eq_limits.h
 	eq_packet.h
 	eq_stream.h
 	eq_stream_factory.h
@@ -135,15 +157,19 @@ SET(common_headers
 	global_define.h
 	guild_base.h
 	guilds.h
+	inventory_profile.h
+	inventory_slot.h
 	ipc_mutex.h
-	item.h
+	item_data.h
 	item_fieldlist.h
-	item_struct.h
+	item_instance.h
 	languages.h
+	light_source.h
 	linked_list.h
 	loottable.h
 	mail_oplist.h
 	md5.h
+	memory_buffer.h
 	memory_mapped_file.h
 	misc.h
 	misc_functions.h
@@ -166,6 +192,7 @@ SET(common_headers
 	rdtsc.h
 	rulesys.h
 	ruletypes.h
+	say_link.h
 	seperator.h
 	serverinfo.h
 	servertalk.h
@@ -177,6 +204,7 @@ SET(common_headers
 	tcp_basic_server.h
 	tcp_connection.h
 	tcp_server.h
+	textures.h
 	timeoutmgr.h
 	timer.h
 	types.h
@@ -188,38 +216,30 @@ SET(common_headers
 	zone_numbers.h
 	patches/patches.h
 	patches/sod.h
-	patches/sod_constants.h
-	patches/sod_itemfields.h
+	patches/sod_limits.h
 	patches/sod_ops.h
 	patches/sod_structs.h
 	patches/sof.h
-	patches/sof_constants.h
-	patches/sof_itemfields.h
-	patches/sof_opcode_list.h
+	patches/sof_limits.h
 	patches/sof_ops.h
 	patches/sof_structs.h
 	patches/ss_declare.h
 	patches/ss_define.h
 	patches/ss_register.h
 	patches/rof.h
-	patches/rof_constants.h
-	patches/rof_itemfields.h
+	patches/rof_limits.h
 	patches/rof_ops.h
 	patches/rof_structs.h
 	patches/rof2.h
-	patches/rof2_constants.h
-	patches/rof2_itemfields.h
+	patches/rof2_limits.h
 	patches/rof2_ops.h
 	patches/rof2_structs.h
 	patches/titanium.h
-	patches/titanium_constants.h
-	patches/titanium_itemfields_a.h
-	patches/titanium_itemfields_b.h
+	patches/titanium_limits.h
 	patches/titanium_ops.h
 	patches/titanium_structs.h
 	patches/uf.h
-	patches/uf_constants.h
-	patches/uf_itemfields.h
+	patches/uf_limits.h
 	patches/uf_ops.h
 	patches/uf_structs.h
 	SocketLib/Base64.h
@@ -242,47 +262,45 @@ SET(common_headers
 SOURCE_GROUP(Patches FILES
 	patches/patches.h
 	patches/sod.h
-	patches/sod_itemfields.h
+	patches/sod_limits.h
 	patches/sod_ops.h
-	patches/sod_constants.h
 	patches/sod_structs.h
 	patches/sof.h
-	patches/sof_itemfields.h
-	patches/sof_opcode_list.h
+	patches/sof_limits.h
 	patches/sof_ops.h
-	patches/sof_constants.h
 	patches/sof_structs.h
 	patches/ss_declare.h
 	patches/ss_define.h
 	patches/ss_register.h
 	patches/rof.h
-	patches/rof_itemfields.h
+	patches/rof_limits.h
 	patches/rof_ops.h
-	patches/rof_constants.h
 	patches/rof_structs.h
 	patches/rof2.h
-	patches/rof2_itemfields.h
+	patches/rof2_limits.h
 	patches/rof2_ops.h
-	patches/rof2_constants.h
 	patches/rof2_structs.h
 	patches/titanium.h
-	patches/titanium_itemfields_a.h
-	patches/titanium_itemfields_b.h
+	patches/titanium_limits.h
 	patches/titanium_ops.h
-	patches/titanium_constants.h
 	patches/titanium_structs.h
 	patches/uf.h
-	patches/uf_itemfields.h
+	patches/uf_limits.h
 	patches/uf_ops.h
-	patches/uf_constants.h
 	patches/uf_structs.h
 	patches/patches.cpp
 	patches/sod.cpp
+	patches/sod_limits.cpp
 	patches/sof.cpp
+	patches/sof_limits.cpp
 	patches/rof.cpp
+	patches/rof_limits.cpp
 	patches/rof2.cpp
+	patches/rof2_limits.cpp
 	patches/titanium.cpp
+	patches/titanium_limits.cpp
 	patches/uf.cpp
+	patches/uf_limits.cpp
 )
 
 SOURCE_GROUP(SocketLib FILES

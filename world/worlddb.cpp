@@ -17,10 +17,9 @@
 */
 
 #include "worlddb.h"
-//#include "../common/item.h"
 #include "../common/string_util.h"
 #include "../common/eq_packet_structs.h"
-#include "../common/item.h"
+#include "../common/inventory_profile.h"
 #include "../common/rulesys.h"
 #include <iostream>
 #include <cstdlib>
@@ -36,15 +35,15 @@ extern std::vector<RaceClassCombos> character_create_race_class_combos;
 void WorldDatabase::GetCharSelectInfo(uint32 accountID, EQApplicationPacket **outApp, uint32 clientVersionBit)
 {
 	/* Set Character Creation Limit */
-	ClientVersion client_version = ClientVersionFromBit(clientVersionBit);
-	size_t character_limit = EQLimits::CharacterCreationLimit(client_version);
+	EQEmu::versions::ClientVersion client_version = EQEmu::versions::ConvertClientVersionBitToClientVersion(clientVersionBit);
+	size_t character_limit = EQEmu::constants::Lookup(client_version)->CharacterCreationLimit;
 	
 	// Validate against absolute server max
-	if (character_limit > EmuConstants::CHARACTER_CREATION_LIMIT)
-		character_limit = EmuConstants::CHARACTER_CREATION_LIMIT;
+	if (character_limit > EQEmu::constants::CharacterCreationMax)
+		character_limit = EQEmu::constants::CharacterCreationMax;
 
 	// Force Titanium clients to use '8'
-	if (client_version == ClientVersion::Titanium)
+	if (client_version == EQEmu::versions::ClientVersion::Titanium)
 		character_limit = 8;
 	
 	/* Get Character Info */
@@ -97,7 +96,7 @@ void WorldDatabase::GetCharSelectInfo(uint32 accountID, EQApplicationPacket **ou
 	for (auto row = results.begin(); row != results.end(); ++row) {
 		CharacterSelectEntry_Struct *cse = (CharacterSelectEntry_Struct *)buff_ptr;
 		PlayerProfile_Struct pp;
-		Inventory inv;
+		EQEmu::InventoryProfile inv;
 		uint32 character_id = (uint32)atoi(row[0]);
 		uint8 has_home = 0;
 		uint8 has_bind = 0;
@@ -117,13 +116,13 @@ void WorldDatabase::GetCharSelectInfo(uint32 accountID, EQApplicationPacket **ou
 		cse->Gender = (uint8)atoi(row[2]);
 		cse->Face = (uint8)atoi(row[15]);
 
-		for (uint32 matslot = 0; matslot < _MaterialCount; matslot++) {	// Processed below
+		for (uint32 matslot = 0; matslot < EQEmu::textures::materialCount; matslot++) {	// Processed below
 			cse->Equip[matslot].Material = 0;
 			cse->Equip[matslot].Unknown1 = 0;
-			cse->Equip[matslot].EliteMaterial = 0;
-			cse->Equip[matslot].HeroForgeModel = 0;
-			cse->Equip[matslot].Material2 = 0;
-			cse->Equip[matslot].Color.Color = 0;
+			cse->Equip[matslot].EliteModel = 0;
+			cse->Equip[matslot].HerosForgeModel = 0;
+			cse->Equip[matslot].Unknown2 = 0;
+			cse->Equip[matslot].Color = 0;
 		}						
 
 		cse->Unknown15 = 0xFF;
@@ -161,8 +160,20 @@ void WorldDatabase::GetCharSelectInfo(uint32 accountID, EQApplicationPacket **ou
 		/* Set Bind Point Data for any character that may possibly be missing it for any reason */
 		cquery = StringFormat("SELECT `zone_id`, `instance_id`, `x`, `y`, `z`, `heading`, `slot` FROM `character_bind`  WHERE `id` = %i LIMIT 5", character_id);
 		auto results_bind = database.QueryDatabase(cquery);
+		auto bind_count = results_bind.RowCount();
 		for (auto row_b = results_bind.begin(); row_b != results_bind.end(); ++row_b) {
-			if (row_b[6] && atoi(row_b[6]) == 4){ has_home = 1; }
+			if (row_b[6] && atoi(row_b[6]) == 4) {
+				has_home = 1;
+				// If our bind count is less than 5, we need to actually make use of this data so lets parse it
+				if (bind_count < 5) {
+					pp.binds[4].zoneId = atoi(row_b[0]);
+					pp.binds[4].instance_id = atoi(row_b[1]);
+					pp.binds[4].x = atof(row_b[2]);
+					pp.binds[4].y = atof(row_b[3]);
+					pp.binds[4].z = atof(row_b[4]);
+					pp.binds[4].heading = atof(row_b[5]);
+				}
+			}
 			if (row_b[6] && atoi(row_b[6]) == 0){ has_bind = 1; }
 		}
 
@@ -202,6 +213,20 @@ void WorldDatabase::GetCharSelectInfo(uint32 accountID, EQApplicationPacket **ou
 				auto results_bset = QueryDatabase(query);
 			}
 		}
+		/* If our bind count is less than 5, then we have null data that needs to be filled in. */
+		if (bind_count < 5) {
+			// we know that home and main bind must be valid here, so we don't check those
+			// we also use home to fill in the null data like live does.
+			for (int i = 1; i < 4;  i++) {
+				if (pp.binds[i].zoneId != 0) // we assume 0 is the only invalid one ...
+					continue;
+
+				std::string query = StringFormat("REPLACE INTO `character_bind` (id, zone_id, instance_id, x, y, z, heading, slot)"
+					" VALUES (%u, %u, %u, %f, %f, %f, %f, %i)",
+					character_id, pp.binds[4].zoneId, 0, pp.binds[4].x, pp.binds[4].y, pp.binds[4].z, pp.binds[4].heading, i);
+				auto results_bset = QueryDatabase(query);
+			}
+		}
 		/* Bind End */
 
 		/* Load Character Material Data for Char Select */
@@ -209,22 +234,22 @@ void WorldDatabase::GetCharSelectInfo(uint32 accountID, EQApplicationPacket **ou
 		auto results_b = database.QueryDatabase(cquery); uint8 slot = 0;
 		for (auto row_b = results_b.begin(); row_b != results_b.end(); ++row_b) {
 			slot = atoi(row_b[0]);
-			pp.item_tint[slot].RGB.Red = atoi(row_b[1]);
-			pp.item_tint[slot].RGB.Green = atoi(row_b[2]);
-			pp.item_tint[slot].RGB.Blue = atoi(row_b[3]);
-			pp.item_tint[slot].RGB.UseTint = atoi(row_b[4]);
+			pp.item_tint.Slot[slot].Red = atoi(row_b[1]);
+			pp.item_tint.Slot[slot].Green = atoi(row_b[2]);
+			pp.item_tint.Slot[slot].Blue = atoi(row_b[3]);
+			pp.item_tint.Slot[slot].UseTint = atoi(row_b[4]);
 		}
 		/* Character Material Data End */
 
 		/* Load Inventory */
 		// If we ensure that the material data is updated appropriately, we can do away with inventory loads
 		if (GetInventory(accountID, cse->Name, &inv)) {
-			const Item_Struct* item = nullptr;
-			const ItemInst* inst = nullptr;
+			const EQEmu::ItemData* item = nullptr;
+			const EQEmu::ItemInstance* inst = nullptr;
 			int16 invslot = 0;
 
-			for (uint32 matslot = 0; matslot < _MaterialCount; matslot++) {
-				invslot = Inventory::CalcSlotFromMaterial(matslot);
+			for (uint32 matslot = EQEmu::textures::textureBegin; matslot < EQEmu::textures::materialCount; matslot++) {
+				invslot = EQEmu::InventoryProfile::CalcSlotFromMaterial(matslot);
 				if (invslot == INVALID_INDEX) { continue; }
 				inst = inv.GetItem(invslot);
 				if (inst == nullptr) { continue; }
@@ -244,7 +269,7 @@ void WorldDatabase::GetCharSelectInfo(uint32 accountID, EQApplicationPacket **ou
 							cse->Equip[matslot].Material = idfile;
 						}
 					}
-					if (matslot == MaterialPrimary) {
+					if (matslot == EQEmu::textures::weaponPrimary) {
 						cse->PrimaryIDFile = idfile;
 					}
 					else {
@@ -253,8 +278,8 @@ void WorldDatabase::GetCharSelectInfo(uint32 accountID, EQApplicationPacket **ou
 				}
 				else {
 					uint32 color = 0;
-					if (pp.item_tint[matslot].RGB.UseTint) {
-						color = pp.item_tint[matslot].Color;
+					if (pp.item_tint.Slot[matslot].UseTint) {
+						color = pp.item_tint.Slot[matslot].Color;
 					}
 					else {
 						color = inst->GetColor();
@@ -262,9 +287,9 @@ void WorldDatabase::GetCharSelectInfo(uint32 accountID, EQApplicationPacket **ou
 
 					// Armor Materials/Models
 					cse->Equip[matslot].Material = item->Material;
-					cse->Equip[matslot].EliteMaterial = item->EliteMaterial;
-					cse->Equip[matslot].HeroForgeModel = inst->GetOrnamentHeroModel(matslot);
-					cse->Equip[matslot].Color.Color = color;
+					cse->Equip[matslot].EliteModel = item->EliteMaterial;
+					cse->Equip[matslot].HerosForgeModel = inst->GetOrnamentHeroModel(matslot);
+					cse->Equip[matslot].Color = color;
 				}
 			}
 		}
@@ -328,7 +353,7 @@ bool WorldDatabase::GetStartZone(PlayerProfile_Struct* in_pp, CharCreate_Struct*
 	in_pp->x = in_pp->y = in_pp->z = in_pp->heading = in_pp->zone_id = 0;
 	in_pp->binds[0].x = in_pp->binds[0].y = in_pp->binds[0].z = in_pp->binds[0].zoneId = in_pp->binds[0].instance_id = 0;
 	// see if we have an entry for start_zone. We can support both titanium & SOF+ by having two entries per class/race/deity combo with different zone_ids
-	std::string query = StringFormat("SELECT x, y, z, heading, start_zone, bind_id FROM start_zones WHERE zone_id = %i "
+	std::string query = StringFormat("SELECT x, y, z, heading, start_zone, bind_id, bind_x, bind_y, bind_z FROM start_zones WHERE zone_id = %i "
 		"AND player_class = %i AND player_deity = %i AND player_race = %i",
 		in_cc->start_zone, in_cc->class_, in_cc->deity, in_cc->race);
     auto results = QueryDatabase(query);
@@ -336,14 +361,14 @@ bool WorldDatabase::GetStartZone(PlayerProfile_Struct* in_pp, CharCreate_Struct*
 		return false;
 	}
 
-	Log.Out(Logs::General, Logs::Status, "SoF Start zone query: %s\n", query.c_str());
+	Log(Logs::General, Logs::Status, "SoF Start zone query: %s\n", query.c_str());
 
     if (results.RowCount() == 0) {
         printf("No start_zones entry in database, using defaults\n");
 		isTitanium ? SetTitaniumDefaultStartZone(in_pp, in_cc) : SetSoFDefaultStartZone(in_pp, in_cc);
     }
     else {
-		Log.Out(Logs::General, Logs::Status, "Found starting location in start_zones");
+		Log(Logs::General, Logs::Status, "Found starting location in start_zones");
 		auto row = results.begin();
 		in_pp->x = atof(row[0]);
 		in_pp->y = atof(row[1]);
@@ -351,6 +376,9 @@ bool WorldDatabase::GetStartZone(PlayerProfile_Struct* in_pp, CharCreate_Struct*
 		in_pp->heading = atof(row[3]);
 		in_pp->zone_id = atoi(row[4]);
 		in_pp->binds[0].zoneId = atoi(row[5]);
+		in_pp->binds[0].x = atof(row[6]);
+		in_pp->binds[0].y = atof(row[7]);
+		in_pp->binds[0].z = atof(row[8]);
 	}
 
 	if(in_pp->x == 0 && in_pp->y == 0 && in_pp->z == 0)
@@ -479,7 +507,7 @@ void WorldDatabase::GetLauncherList(std::vector<std::string> &rl) {
     const std::string query = "SELECT name FROM launcher";
     auto results = QueryDatabase(query);
     if (!results.Success()) {
-        Log.Out(Logs::General, Logs::Error, "WorldDatabase::GetLauncherList: %s", results.ErrorMessage().c_str());
+        Log(Logs::General, Logs::Error, "WorldDatabase::GetLauncherList: %s", results.ErrorMessage().c_str());
         return;
     }
 
@@ -501,7 +529,7 @@ void WorldDatabase::SetMailKey(int CharID, int IPAddress, int MailKey)
                                     MailKeyString, CharID);
     auto results = QueryDatabase(query);
 	if (!results.Success())
-		Log.Out(Logs::General, Logs::Error, "WorldDatabase::SetMailKey(%i, %s) : %s", CharID, MailKeyString, results.ErrorMessage().c_str());
+		Log(Logs::General, Logs::Error, "WorldDatabase::SetMailKey(%i, %s) : %s", CharID, MailKeyString, results.ErrorMessage().c_str());
 
 }
 
@@ -510,7 +538,7 @@ bool WorldDatabase::GetCharacterLevel(const char *name, int &level)
 	std::string query = StringFormat("SELECT level FROM character_data WHERE name = '%s'", name);
 	auto results = QueryDatabase(query);
 	if (!results.Success()) {
-        Log.Out(Logs::General, Logs::Error, "WorldDatabase::GetCharacterLevel: %s", results.ErrorMessage().c_str());
+        Log(Logs::General, Logs::Error, "WorldDatabase::GetCharacterLevel: %s", results.ErrorMessage().c_str());
         return false;
 	}
 

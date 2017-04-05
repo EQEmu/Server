@@ -1904,7 +1904,7 @@ XS(XS_EntityList_GetMobList)
 
 		std::list<Mob*> mob_list;
 		entity_list.GetMobList(mob_list);
-		std::list<Mob*>::iterator iter = mob_list.begin();
+		auto iter = mob_list.begin();
 
 		while(iter != mob_list.end())
 		{
@@ -1941,7 +1941,7 @@ XS(XS_EntityList_GetClientList)
 
 		std::list<Client*> client_list;
 		entity_list.GetClientList(client_list);
-		std::list<Client*>::iterator iter = client_list.begin();
+		auto iter = client_list.begin();
 
 		while(iter != client_list.end())
 		{
@@ -1978,7 +1978,7 @@ XS(XS_EntityList_GetNPCList)
 
 		std::list<NPC*> npc_list;
 		entity_list.GetNPCList(npc_list);
-		std::list<NPC*>::iterator iter = npc_list.begin();
+		auto iter = npc_list.begin();
 
 		while(iter != npc_list.end())
 		{
@@ -2015,7 +2015,7 @@ XS(XS_EntityList_GetCorpseList)
 
 		std::list<Corpse*> corpse_list;
 		entity_list.GetCorpseList(corpse_list);
-		std::list<Corpse*>::iterator iter = corpse_list.begin();
+		auto iter = corpse_list.begin();
 
 		while(iter != corpse_list.end())
 		{
@@ -2052,7 +2052,7 @@ XS(XS_EntityList_GetObjectList)
 
 		std::list<Object*> object_list;
 		entity_list.GetObjectList(object_list);
-		std::list<Object*>::iterator iter = object_list.begin();
+		auto iter = object_list.begin();
 
 		while(iter != object_list.end())
 		{
@@ -2089,7 +2089,7 @@ XS(XS_EntityList_GetDoorsList)
 
 		std::list<Doors*> door_list;
 		entity_list.GetDoorsList(door_list);
-		std::list<Doors*>::iterator iter = door_list.begin();
+		auto iter = door_list.begin();
 
 		while(iter != door_list.end())
 		{

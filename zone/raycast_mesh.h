@@ -56,5 +56,11 @@ RaycastMesh * createRaycastMesh(RmUint32 vcount,		// The number of vertices in t
 								RmReal	minAxisSize=0.01f	// once a particular axis is less than this size, stop sub-dividing.
 								);
 
+#ifdef USE_MAP_MMFS
+#include <vector>
+
+RaycastMesh* loadRaycastMesh(std::vector<char>& rm_buffer, bool& load_success);
+void serializeRaycastMesh(RaycastMesh* rm, std::vector<char>& rm_buffer);
+#endif /*USE_MAP_MMFS*/
 
 #endif

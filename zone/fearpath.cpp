@@ -137,16 +137,16 @@ void Mob::CalculateNewFearpoint()
 
 		std::deque<int> Route = zone->pathing->FindRoute(CurrentPosition, Loc);
 
-		if(Route.size() > 0)
+		if(!Route.empty())
 		{
             m_FearWalkTarget = glm::vec3(Loc.x, Loc.y, Loc.z);
 			currently_fleeing = true;
 
-			Log.Out(Logs::Detail, Logs::None, "Feared to node %i (%8.3f, %8.3f, %8.3f)", Node, Loc.x, Loc.y, Loc.z);
+			Log(Logs::Detail, Logs::None, "Feared to node %i (%8.3f, %8.3f, %8.3f)", Node, Loc.x, Loc.y, Loc.z);
 			return;
 		}
 
-		Log.Out(Logs::Detail, Logs::None, "No path found to selected node. Falling through to old fear point selection.");
+		Log(Logs::Detail, Logs::None, "No path found to selected node. Falling through to old fear point selection.");
 	}
 
 	int loop = 0;

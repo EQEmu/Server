@@ -350,6 +350,17 @@
 9094|2015_12_29_quest_zone_events.sql|SELECT * FROM perl_event_export_settings WHERE event_description = 'EVENT_SPAWN_ZONE'|empty|
 9095|2016_01_08_command_find_aliases.sql|SELECT * FROM `command_settings` WHERE `command` LIKE 'findaliases'|empty|
 9096|2016_03_05_secondary_recall.sql|SHOW COLUMNS FROM `character_bind` LIKE 'slot'|empty|
+9097|2016_07_03_npc_class_as_last_name.sql|SELECT `rule_name` FROM `rule_values` WHERE `rule_name` LIKE 'NPC:UseClassAsLastName'|empty|
+9098|2016_08_26_object_size_tilt.sql|SHOW COLUMNS FROM `object` LIKE 'size'|empty|
+9099|2016_08_27_ip_exemptions.sql|SHOW TABLES LIKE 'ip_exemptions'|empty|
+9100|2016_08_27_object_display_name.sql|SHOW COLUMNS FROM `object` LIKE 'display_name'|empty|
+9101|2016_12_01_pcnpc_only.sql|SHOW COLUMNS FROM `spells_new` LIKE 'pcnpc_only_flag'|empty|
+9102|2017_01_10_book_languages.sql|SHOW COLUMNS FROM `books` LIKE 'language'|empty|
+9103|2017_01_30_book_languages_fix.sql|SELECT `language` from `books` WHERE `language` IS NULL|not_empty|
+9104|2017_02_09_npc_spells_entries_type_update.sql|SHOW COLUMNS IN `npc_spells_entries` LIKE `type`|contains|smallint(5) unsigned
+9105|2017_02_15_bot_spells_entries.sql|SELECT `id` FROM `npc_spells_entries` WHERE `npc_spells_id` >= 701 AND `npc_spells_id` <= 712|not_empty|
+9106|2017_02_26_npc_spells_update_for_bots.sql|SELECT * FROM `npc_spells` WHERE `id` = '701' AND `name` = 'Cleric Bot'|not_empty|
+9107|2017_03_09_inventory_version.sql|SHOW TABLES LIKE 'inventory_version'|empty|
 
 # Upgrade conditions:
 # 	This won't be needed after this system is implemented, but it is used database that are not

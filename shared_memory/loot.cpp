@@ -44,8 +44,9 @@ void LoadLoot(SharedDatabase *database, const std::string &prefix) {
 		(loot_drop_count * sizeof(LootDrop_Struct)) +				//loot table headers
 		(loot_drop_entries_count * sizeof(LootDropEntries_Struct));	//number of loot table entries
 
-	std::string file_name_lt = std::string("shared/") + prefix + std::string("loot_table");
-	std::string file_name_ld = std::string("shared/") + prefix + std::string("loot_drop");
+	auto Config = EQEmuConfig::get();
+	std::string file_name_lt = Config->SharedMemDir + prefix + std::string("loot_table");
+	std::string file_name_ld = Config->SharedMemDir + prefix + std::string("loot_drop");
 
 	EQEmu::MemoryMappedFile mmf_loot_table(file_name_lt, loot_table_size);
 	EQEmu::MemoryMappedFile mmf_loot_drop(file_name_ld, loot_drop_size);

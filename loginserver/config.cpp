@@ -19,7 +19,7 @@
 #include "../common/eqemu_logsys.h"
 #include "config.h"
 
-extern EQEmuLogSys Log;
+extern EQEmuLogSys LogSys;
 /**
 * Retrieves the variable we want from our title or theme
 * First gets the map from the title
@@ -48,7 +48,7 @@ void Config::Parse(const char *file_name)
 {
 	if(file_name == nullptr)
 	{
-		Log.Out(Logs::General, Logs::Error, "Config::Parse(), file_name passed was null.");
+		Log(Logs::General, Logs::Error, "Config::Parse(), file_name passed was null.");
 		return;
 	}
 
@@ -71,7 +71,7 @@ void Config::Parse(const char *file_name)
 				++iter;
 				if(iter == tokens.end())
 				{
-					Log.Out(Logs::General, Logs::Error, "Config::Parse(), EOF before title done parsing.");
+					Log(Logs::General, Logs::Error, "Config::Parse(), EOF before title done parsing.");
 					fclose(input);
 					vars.clear();
 					return;
@@ -104,7 +104,7 @@ void Config::Parse(const char *file_name)
 				mode++;
 				if((*iter).compare("=") != 0)
 				{
-					Log.Out(Logs::General, Logs::Error, "Config::Parse(), invalid parse token where = should be.");
+					Log(Logs::General, Logs::Error, "Config::Parse(), invalid parse token where = should be.");
 					fclose(input);
 					vars.clear();
 					return;
@@ -133,7 +133,7 @@ void Config::Parse(const char *file_name)
 	}
 	else
 	{
-		Log.Out(Logs::General, Logs::Error, "Config::Parse(), file was unable to be opened for parsing.");
+		Log(Logs::General, Logs::Error, "Config::Parse(), file was unable to be opened for parsing.");
 	}
 }
 
@@ -144,7 +144,7 @@ void Config::Parse(const char *file_name)
 */
 void Config::Tokenize(FILE *input, std::list<std::string> &tokens)
 {
-	char c = fgetc(input);
+	auto c = fgetc(input);
 	std::string lexeme;
 
 	while(c != EOF)
@@ -162,7 +162,7 @@ void Config::Tokenize(FILE *input, std::list<std::string> &tokens)
 
 		if(isalnum(c))
 		{
-			lexeme.append((const char *)&c, 1);
+			lexeme += c;
 			c = fgetc(input);
 			continue;
 		}
@@ -193,14 +193,14 @@ void Config::Tokenize(FILE *input, std::list<std::string> &tokens)
 					lexeme.clear();
 				}
 
-				lexeme.append((const char *)&c, 1);
+				lexeme += c;
 				tokens.push_back(lexeme);
 				lexeme.clear();
 				break;
 			}
 		default:
 			{
-				lexeme.append((const char *)&c, 1);
+				lexeme += c;
 			}
 		}
 

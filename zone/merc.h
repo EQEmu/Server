@@ -8,10 +8,14 @@ class Corpse;
 class Group;
 class Mob;
 class Raid;
-struct Item_Struct;
 struct MercTemplate;
 struct NPCType;
 struct NewSpawn_Struct;
+
+namespace EQEmu
+{
+	struct ItemData;
+}
 
 #define MAXMERCS 1
 #define TANK 1
@@ -60,10 +64,10 @@ public:
 	virtual ~Merc();
 
 	//abstract virtual function implementations requird by base abstract class
-	virtual bool Death(Mob* killerMob, int32 damage, uint16 spell_id, SkillUseTypes attack_skill);
-	virtual void Damage(Mob* from, int32 damage, uint16 spell_id, SkillUseTypes attack_skill, bool avoidable = true, int8 buffslot = -1, bool iBuffTic = false, int special = 0);
-	virtual bool Attack(Mob* other, int Hand = MainPrimary, bool FromRiposte = false, bool IsStrikethrough = false,
-	bool IsFromSpell = false, ExtraAttackOptions *opts = nullptr, int special = 0);
+	virtual bool Death(Mob* killerMob, int32 damage, uint16 spell_id, EQEmu::skills::SkillType attack_skill);
+	virtual void Damage(Mob* from, int32 damage, uint16 spell_id, EQEmu::skills::SkillType attack_skill, bool avoidable = true, int8 buffslot = -1, bool iBuffTic = false, eSpecialAttacks special = eSpecialAttacks::None);
+	virtual bool Attack(Mob* other, int Hand = EQEmu::inventory::slotPrimary, bool FromRiposte = false, bool IsStrikethrough = false,
+	bool IsFromSpell = false, ExtraAttackOptions *opts = nullptr);
 	virtual bool HasRaid() { return false; }
 	virtual bool HasGroup() { return (GetGroup() ? true : false); }
 	virtual Raid* GetRaid() { return 0; }
@@ -74,8 +78,8 @@ public:
 	virtual void AI_Stop();
 	virtual void AI_Process();
 
-	//virtual bool AICastSpell(Mob* tar, int8 iChance, int16 iSpellTypes);
-	virtual bool AICastSpell(int8 iChance, int32 iSpellTypes);
+	//virtual bool AICastSpell(Mob* tar, int8 iChance, uint32 iSpellTypes);
+	virtual bool AICastSpell(int8 iChance, uint32 iSpellTypes);
 	virtual bool AIDoSpellCast(uint16 spellid, Mob* tar, int32 mana_cost, uint32* oDontDoAgainBefore = 0);
 	virtual bool AI_EngagedCastCheck();
 	//virtual bool AI_PursueCastCheck();
@@ -93,7 +97,7 @@ public:
 	// Merc Spell Casting Methods
 	virtual int32 GetActSpellCasttime(uint16 spell_id, int32 casttime);
 	virtual int32 GetActSpellCost(uint16 spell_id, int32 cost);
-	int8 GetChanceToCastBySpellType(int16 spellType);
+	int8 GetChanceToCastBySpellType(uint32 spellType);
 	void SetSpellRecastTimer(uint16 timer_id, uint16 spellid, uint32 recast_delay);
 	void SetDisciplineRecastTimer(uint16 timer_id, uint16 spellid, uint32 recast_delay);
 	void SetSpellTimeCanCast(uint16 spellid, uint32 recast_delay);
@@ -104,8 +108,8 @@ public:
 	static int32 GetDisciplineRemainingTime(Merc *caster, uint16 timer_id);
 	static std::list<MercSpell> GetMercSpellsForSpellEffect(Merc* caster, int spellEffect);
 	static std::list<MercSpell> GetMercSpellsForSpellEffectAndTargetType(Merc* caster, int spellEffect, SpellTargetType targetType);
-	static std::list<MercSpell> GetMercSpellsBySpellType(Merc* caster, int spellType);
-	static MercSpell GetFirstMercSpellBySpellType(Merc* caster, int spellType);
+	static std::list<MercSpell> GetMercSpellsBySpellType(Merc* caster, uint32 spellType);
+	static MercSpell GetFirstMercSpellBySpellType(Merc* caster, uint32 spellType);
 	static MercSpell GetFirstMercSpellForSingleTargetHeal(Merc* caster);
 	static MercSpell GetMercSpellBySpellID(Merc* caster, uint16 spellid);
 	static MercSpell GetBestMercSpellForVeryFastHeal(Merc* caster);
@@ -177,10 +181,10 @@ public:
 	inline const uint8 GetClientVersion() const { return _OwnerClientVersion; }
 
 	virtual void SetTarget(Mob* mob);
-	bool HasSkill(SkillUseTypes skill_id) const;
-	bool CanHaveSkill(SkillUseTypes skill_id) const;
-	uint16 MaxSkill(SkillUseTypes skillid, uint16 class_, uint16 level) const;
-	inline uint16 MaxSkill(SkillUseTypes skillid) const { return MaxSkill(skillid, GetClass(), GetLevel()); }
+	bool HasSkill(EQEmu::skills::SkillType skill_id) const;
+	bool CanHaveSkill(EQEmu::skills::SkillType skill_id) const;
+	uint16 MaxSkill(EQEmu::skills::SkillType skillid, uint16 class_, uint16 level) const;
+	inline uint16 MaxSkill(EQEmu::skills::SkillType skillid) const { return MaxSkill(skillid, GetClass(), GetLevel()); }
 	virtual void DoClassAttacks(Mob *target);
 	void CheckHateList();
 	bool CheckTaunt();
@@ -193,7 +197,6 @@ public:
 	virtual void CalcBonuses();
 	int32 GetEndurance() const {return cur_end;} //This gets our current endurance
 	inline uint8 GetEndurancePercent() { return (uint8)((float)cur_end / (float)max_end * 100.0f); }
-	inline virtual int32 GetAC() const { return AC; }
 	inline virtual int32 GetATK() const { return ATK; }
 	inline virtual int32 GetATKBonus() const { return itembonuses.ATK + spellbonuses.ATK; }
 	int32 GetRawACNoShield(int &shield_ac) const;
@@ -247,7 +250,7 @@ public:
 	inline virtual int32 GetStringMod() const { return itembonuses.stringedMod; }
 	inline virtual int32 GetWindMod() const { return itembonuses.windMod; }
 
-	inline virtual int32 GetDelayDeath() const { return aabonuses.DelayDeath + spellbonuses.DelayDeath + itembonuses.DelayDeath + 11; }
+	inline virtual int32 GetDelayDeath() const { return aabonuses.DelayDeath + spellbonuses.DelayDeath + itembonuses.DelayDeath; }
 
 	// "SET" Class Methods
 	void SetMercData (uint32 templateID );
@@ -279,7 +282,7 @@ public:
 
 protected:
 	void CalcItemBonuses(StatBonuses* newbon);
-	void AddItemBonuses(const Item_Struct *item, StatBonuses* newbon);
+	void AddItemBonuses(const EQEmu::ItemData *item, StatBonuses* newbon);
 	int CalcRecommendedLevelBonus(uint8 level, uint8 reclevel, int basestat);
 
 	int16 GetFocusEffect(focusType type, uint16 spell_id);
@@ -287,8 +290,10 @@ protected:
 	std::vector<MercSpell> merc_spells;
 	std::map<uint32,MercTimer> timers;
 
-	uint16 skills[HIGHEST_SKILL+1];
-	uint32 equipment[EmuConstants::EQUIPMENT_SIZE]; //this is an array of item IDs
+	Timer evade_timer; // can be moved to pTimers at some point
+
+	uint16 skills[EQEmu::skills::HIGHEST_SKILL + 1];
+	uint32 equipment[EQEmu::legacy::EQUIPMENT_SIZE]; //this is an array of item IDs
 	uint16 d_melee_texture1; //this is an item Material value
 	uint16 d_melee_texture2; //this is an item Material value (offhand)
 	uint8 prim_melee_type; //Sets the Primary Weapon attack message and animation
@@ -382,7 +387,7 @@ private:
 	uint8 _OwnerClientVersion;
 	uint32 _currentStance;
 
-	Inventory m_inv;
+	EQEmu::InventoryProfile m_inv;
 	int32 max_end;
 	int32 cur_end;
 	bool _medding;

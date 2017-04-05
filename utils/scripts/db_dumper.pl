@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 
 ############################################################
-#::: Script: DB_Dumper.pl
+#::: Script: db_dumper.pl
 #::: Purpose: Utility to easily manage database backups and compress.
 #:::	Export Individual DB Tables...
 #:::	Export specific databases...
@@ -24,15 +24,17 @@ if($Config{osname}=~/linux/i){ $OS = "Linux"; }
 if($Config{osname}=~/Win|MS/i){ $OS = "Windows"; }
 
 if(!$ARGV[0]){
-	print "\nERROR! Need arguments\n\n";
+	print "\nERROR! Need arguments\n";
 	print "#::: Help :::#\n";
-	print "######################################################\n\n";
+	print "######################################################\n";
 	print "Arguments\n";
 	print "	loc=\"C:\\File Location\" 	- File path location to backup...\n";
 	print "	database=\"dbname\" 	- Manually specify databasename, default is database in eqemu_config.xml\n";
 	print "	tables=\"table1,table2,table3\" 	- Manually specify tables, default is to dump all tables from database\n";
 	print "	compress 		- Compress Database with 7-ZIP, will fallback to WinRAR depending on what is installed (Must be installed to default program dir)...\n";
-	print '	Example: perl DB_Dumper.pl Loc="E:\Backups"' . "\n\n";
+	print "	nolock 		- Does not lock tables, meant for backuping while the server is running..\n";
+	print "	backup_name=\"name\" - Sets database backup prefix name\n";
+	print '	Example: perl DB_Dumper.pl Loc="E:\Backups"' . "\n";
 	print "######################################################\n";
 	exit;
 }
@@ -55,22 +57,30 @@ while(<F>) {
 }
 
 $Debug = 0;
-print "Arguments\n" if $Debug;
+print "[db_dumper.pl] Arguments\n" if $Debug;
 $n = 0;
 while($ARGV[$n]){
 	print $n . ': ' . $ARGV[$n] . "\n" if $Debug;
+	if($ARGV[$n]=~/nolock/i){ 
+		$no_lock = 1;
+	}
 	if($ARGV[$n]=~/compress/i){ 
-		print "Compression SET\n"; 
+		print "[db_dumper.pl] Compression SET\n"; 
 		$Compress = 1;
 	}
 	if($ARGV[$n]=~/database=/i){ 
 		@DB_NAME = split('=', $ARGV[$n]); 
-		print "Database is " . $DB_NAME[1] . "\n"; 
+		print "[db_dumper.pl] Database is " . $DB_NAME[1] . "\n"; 
 		$db = $DB_NAME[1];
 	}
+	if($ARGV[$n]=~/backup_name=/i){ 
+		@data = split('=', $ARGV[$n]); 
+		print "[db_dumper.pl] Backup Name is " . $data[1] . "\n"; 
+		$backup_name = $data[1];
+	}
 	if($ARGV[$n]=~/loc=/i){ 
-		@B_LOC = split('=', $ARGV[$n]); 
-		print "Backup Directory: " . $B_LOC[1] . "\n"; 
+		@backup_location = split('=', $ARGV[$n]); 
+		print "[db_dumper.pl] Backup Directory: " . $backup_location[1] . "\n"; 
 	}
 	if($ARGV[$n]=~/tables=/i){ 
 		@Tables = split('=', $ARGV[$n]); @TList = split(',', $Tables[1]);
@@ -79,23 +89,23 @@ while($ARGV[$n]){
 			$t_tables_l .= $tables . "_";
 			$t_tables_p .= $tables . "\n";
 		}
-		print "Backing up tables: \n\n############################\n" . $t_tables_p . "############################\n\n"; 
+		print "[db_dumper.pl] Backing up tables: \n############################\n" . $t_tables_p . "############################\n"; 
 	}
 	$n++;
 }
 
 #::: Check for Backup Directory existence, if doesn't exist then create...
-if (-d $B_LOC[1]) {
-	print "Directory currently exists... Adding files to it...\n\n";
+if (-d $backup_location[1]) {
+	print "[db_dumper.pl] Directory currently exists... Adding files to it...\n";
 }
-elsif($B_LOC[1] ne ""){
-	print "Directory does NOT exist! Creating...\n\n";
-	mkdir($B_LOC[1]) or die 'Failed to create folder, maybe created the folder manually at "' . $B_LOC[1]. '" ?';
+elsif($backup_location[1] ne ""){
+	print "[db_dumper.pl] Directory does NOT exist! Creating...\n";
+	mkdir($backup_location[1]) or die 'Failed to create folder, maybe created the folder manually at "' . $backup_location[1]. '" ?';
 }
 else{
-	print "No save location specified... Saving to folder script is running in...\n";
+	print "[db_dumper.pl] No save location specified... Saving to folder script is running in...\n";
 }
-if($B_LOC[1] ne ""){ 
+if($backup_location[1] ne ""){ 
 	if($OS eq "Windows"){ $file_app = "\\"; } 
 	if($OS eq "Linux"){ $file_app = "/"; } 
 } 
@@ -104,90 +114,112 @@ else {
 }
 
 if($t_tables ne ""){
-	$tables_f_l = substr($t_tables_l, 0, 20) . '...';
-	$target_file = '' . $tables_f_l . '_' . $date . ''; 
-	print "Performing table based backup...\n";
+	$tables_f_l = substr($t_tables_l, 0, 20) . '-';
+	if($backup_name){
+		$target_file = $backup_name . '_' . $date . ''; 
+	}
+	else {
+		$target_file = '' . $tables_f_l . '_' . $date . ''; 
+	}
+	
+	print "[db_dumper.pl] Performing table based backup...\n";
 	#::: Backup Database... 
-	print "Backing up Database " . $db . "... \n\n"; 
-	$cmd = 'mysqldump -u' . $user . ' --host ' . $host . ' --max_allowed_packet=512M --password="' . $pass . '" ' . $db . ' ' . $t_tables . ' > "' . $B_LOC[1] . '' . $file_app . '' . $target_file . '.sql"'; 
+	print "[db_dumper.pl] Backing up Database " . $db . "... \n"; 
+	if($no_lock == 1){
+		$added_parameters .= " --skip-lock-tables ";
+	}
+	$cmd = 'mysqldump -u' . $user . ' --host ' . $host . ' ' . $added_parameters . ' --max_allowed_packet=512M --password="' . $pass . '" ' . $db . ' ' . $t_tables . ' > "' . $backup_location[1] . '' . $file_app . '' . $target_file . '.sql"'; 
 	printcmd($cmd);
 	system($cmd); 
 }
 else{ #::: Entire DB Backup
-	$target_file = '' . $db . '_' . $date . ''; 
+	
+	if($backup_name){
+		$target_file = $backup_name . '_' . $db . '_' . $date . ''; 
+	}
+	else {
+		$target_file = '' . $db . '_' . $date . ''; 
+	}
+	
 	#::: Backup Database... 
-	print "Backing up Database " . $db . "... \n\n";  
-	$cmd = 'mysqldump -u' . $user . ' --host ' . $host . ' --max_allowed_packet=512M --password="' . $pass . '" ' . $db . ' > "' . $B_LOC[1] . '' . $file_app . '' . $target_file . '.sql"'; 
+	print "[db_dumper.pl] Backing up Database " . $db . "... \n";  
+	if($no_lock == 1){
+		$added_parameters .= " --skip-lock-tables ";
+	}
+	$cmd = 'mysqldump -u' . $user . ' --host ' . $host . ' ' . $added_parameters . ' --max_allowed_packet=512M --password="' . $pass . '" ' . $db . ' > "' . $backup_location[1] . '' . $file_app . '' . $target_file . '.sql"'; 
 	printcmd($cmd);
 	system($cmd);
 }
 
 #::: Get File Size 
-$fileloc = '' . $B_LOC[1] . '' . $file_app . '' . $target_file . '.sql';
+$fileloc = '' . $backup_location[1] . '' . $file_app . '' . $target_file . '.sql';
 $filesize = -s $fileloc;
-if($filesize < 1000){ print "\n" . 'Error occurred... exiting...' . "\n\n"; exit; }
-print "Backup DONE... DB Backup File Size '" . $filesize . "' (" . get_filesize_str($fileloc) . ")\n\n"; 
+if($filesize < 1000){ print "[db_dumper.pl] " . 'Error occurred... exiting...' . "\n"; exit; }
+print "[db_dumper.pl] Backup DONE... DB Backup File Size '" . $filesize . "' (" . get_filesize_str($fileloc) . ")\n"; 
 
 #::: WinRar Get, check compression flag
 if($Compress == 1){
 	if($OS eq "Windows"){
 		if(-d $localdrive . "\\Program Files\\7-Zip"){
-			print " ::: You have 7-Zip installed as 64 Bit...\n\n";
+			print "[db_dumper.pl]  ::: You have 7-Zip installed as 64 Bit...\n";
 			$S_ZIP = $localdrive . "\\Program Files\\7-Zip";
 		}
 		elsif(-d $localdrive . "\\Program Files (x86)\\7-Zip"){
-			print " ::: You have 7-Zip installed as 32 Bit...\n\n";
+			print "[db_dumper.pl]  ::: You have 7-Zip installed as 32 Bit...\n";
 			$S_ZIP = $localdrive . "\\Program Files (x86)\\7-Zip";
 		}
 		elsif(-d $localdrive . "\\Program Files (x86)\\WinRAR"){
-			print " ::: You have WinRAR installed as 32 Bit...\n\n";
+			print "[db_dumper.pl]  ::: You have WinRAR installed as 32 Bit...\n";
 			$WinRar = $localdrive . "\\Program Files (x86)\\WinRAR";
 		}
 		elsif(-d $localdrive . "\\Program Files\\WinRAR"){
-			print " ::: You have WinRAR installed as 64 Bit...\n\n";
+			print "[db_dumper.pl]  ::: You have WinRAR installed as 64 Bit...\n";
 			$WinRar = $localdrive . "\\Program Files\\WinRAR";
 		}
 		else{
-			print "No WinRAR installed... Will not compress...\n";
+			print "[db_dumper.pl] No WinRAR installed... Will not compress...\n";
 		}
 		if($S_ZIP ne ""){
-			print "Compressing Database with 7-ZIP... \n\n"; 
-			$cmd = '"' . $S_ZIP . '\\7z" a -t7z -m0=lzma -mx=9 "' . $B_LOC[1] . '' . $file_app . '' . $target_file . '.7z" "' . $B_LOC[1] . '' . $file_app . '' . $target_file . '.sql" ';
+			print "[db_dumper.pl] Compressing Database with 7-ZIP... \n"; 
+			$cmd = '"' . $S_ZIP . '\\7z" a -t7z -m0=lzma -mx=9 "' . $backup_location[1] . '' . $file_app . '' . $target_file . '.7z" "' . $backup_location[1] . '' . $file_app . '' . $target_file . '.sql" ';
 			printcmd($cmd);
 			system($cmd); 
-			print "\nDeleting RAW .sql Dump... \n\n"; 
-			$cmd = 'del "' . $B_LOC[1] . '' . $file_app . '' . $target_file . '.sql" ';
+			print "[db_dumper.pl] \nDeleting RAW .sql Dump... \n"; 
+			$cmd = 'del "' . $backup_location[1] . '' . $file_app . '' . $target_file . '.sql" ';
 			printcmd($cmd);
 			system($cmd); 
 			$final_file = $target_file . ".7z";
 		}
 		elsif($WinRar ne ""){
-			print "Compressing Database with WinRAR... \n"; 
-			$cmd = '"' . $WinRar . '\\rar" a "' . $B_LOC[1] . '' . $file_app . '' . $target_file . '.rar" "' . $B_LOC[1] . '' . $file_app . '' . $target_file . '.sql" ';
+			print "[db_dumper.pl] Compressing Database with WinRAR... \n"; 
+			$cmd = '"' . $WinRar . '\\rar" a "' . $backup_location[1] . '' . $file_app . '' . $target_file . '.rar" "' . $backup_location[1] . '' . $file_app . '' . $target_file . '.sql" ';
 			printcmd($cmd);
 			system($cmd); 
-			print "\nDeleting RAW .sql Dump... \n\n"; 
-			$cmd = 'del "' . $B_LOC[1] . '' . $file_app . '' . $target_file . '.sql" '; 
+			print "[db_dumper.pl] \nDeleting RAW .sql Dump... \n"; 
+			$cmd = 'del "' . $backup_location[1] . '' . $file_app . '' . $target_file . '.sql" '; 
 			printcmd($cmd);
 			system($cmd); 
 			$final_file = $target_file . ".rar";
 		}
 	}
 	if($OS eq "Linux"){
-		print "Compressing Database with Tarball... \n"; 
-		$cmd = 'tar -zcvf "' . $B_LOC[1] . '' . $file_app . '' . $target_file . '.tar.gz" "' . $B_LOC[1] . '' . $file_app . '' . $target_file . '.sql" ';
+		print "[db_dumper.pl] Compressing Database with Tarball... \n"; 
+		$cmd = 'tar -zcvf "' . $backup_location[1] . '' . $file_app . '' . $target_file . '.tar.gz" "' . $backup_location[1] . '' . $file_app . '' . $target_file . '.sql" ';
 		printcmd($cmd); 
 		system($cmd);  
-		print "\nDeleting RAW .sql Dump... \n\n"; 
-		$cmd = 'rm "' . $B_LOC[1] . '' . $file_app . '' . $target_file . '.sql" '; 
+		print "[db_dumper.pl] \nDeleting RAW .sql Dump... \n"; 
+		$cmd = 'rm "' . $backup_location[1] . '' . $file_app . '' . $target_file . '.sql" '; 
 		printcmd($cmd);
 		system($cmd); 
 		$final_file = $target_file . ".tar.gz";
 	}
 }
+else {
+	$final_file = $target_file . ".sql";
+}
 
 #::: Get Final File Location for display
-if($B_LOC[1] ne ""){ $final_loc = $B_LOC[1] . '' . $file_app . ""; }
+if($backup_location[1] ne ""){ $final_loc = $backup_location[1] . '' . $file_app . ""; }
 else{ 
 	if($OS eq "Windows"){
 		$final_loc = `echo %cd%`;
@@ -197,10 +229,10 @@ else{
 	}
 }
 
-print "Final file located: " . $final_loc . "" . $final_file . "\n\n"; 
+print "[db_dumper.pl] Final file located: " . $final_loc . "" . $final_file . "\n"; 
 
 sub printcmd{
-	print "--- CMD --- \n" . $_[0] . "\n" . $linesep . "\n\n";
+	print "[db_dumper.pl] Command [" . $_[0] . "]\n";
 }
 
 sub get_filesize_str{
