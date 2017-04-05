@@ -81,6 +81,7 @@ union semun {
 #include "ucs.h"
 #include "queryserv.h"
 #include "web_interface.h"
+#include "console.h"
 
 #include "../common/net/tcp_server.h"
 #include "../common/net/servertalk_server.h"
@@ -374,6 +375,12 @@ int main(int argc, char** argv) {
 	Log(Logs::General, Logs::World_Server, "Loading char create info...");
 	database.LoadCharacterCreateAllocations();
 	database.LoadCharacterCreateCombos();
+
+	std::unique_ptr<ConsoleServer> console;
+	if (Config->TelnetEnabled) {
+		Log(Logs::General, Logs::World_Server, "Console (TCP) listener started.");
+		console.reset(new ConsoleServer());
+	}
 
 	std::unique_ptr<EQ::Net::ServertalkServer> server_connection;
 	server_connection.reset(new EQ::Net::ServertalkServer());

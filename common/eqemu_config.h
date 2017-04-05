@@ -49,6 +49,8 @@ class EQEmuConfig : public XMLParser
 		bool Locked;
 		uint16 WorldTCPPort;
 		std::string WorldIP;
+		uint16 TelnetTCPPort;
+		std::string TelnetIP;
 		bool TelnetEnabled;
 		int32 MaxClients;
 		bool WorldHTTPEnabled;
@@ -135,6 +137,7 @@ class EQEmuConfig : public XMLParser
 			// World
 			Locked = false;
 			WorldTCPPort = 9000;
+			TelnetTCPPort = 9001;
 			TelnetEnabled = false;
 			WorldHTTPEnabled = false;
 			WorldHTTPPort = 9080;
@@ -189,6 +192,7 @@ class EQEmuConfig : public XMLParser
 			DefaultStatus = 0;
 			// For where zones need to connect to.
 			WorldIP = "127.0.0.1";
+			TelnetIP = "127.0.0.1";
 			// Dynamics to start
 			//DynamicCount=5;
 			MaxClients = -1;

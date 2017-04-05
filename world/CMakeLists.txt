@@ -6,6 +6,7 @@ SET(world_sources
 	client.cpp
 	cliententry.cpp
 	clientlist.cpp
+	console.cpp
 	eql_config.cpp
 	launcher_link.cpp
 	launcher_list.cpp
@@ -31,6 +32,7 @@ SET(world_headers
 	client.h
 	cliententry.h
 	clientlist.h
+	console.h
 	eql_config.h
 	launcher_link.h
 	launcher_list.h

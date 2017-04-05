@@ -119,6 +119,7 @@ void EQ::Net::DaybreakConnectionManager::Process()
 			auto time_since_last_recv = std::chrono::duration_cast<std::chrono::milliseconds>(now - connection->m_last_recv);
 			if ((size_t)time_since_last_recv.count() > m_options.connect_stale_ms) {
 				iter = m_connections.erase(iter);
+				Log(Logs::Detail, Logs::Netcode, "Disconnect reason: Connect Mode Timeout {0} > {1}", (size_t)time_since_last_recv.count(), m_options.connect_stale_ms);
 				connection->ChangeStatus(StatusDisconnecting);
 				continue;
 			}
@@ -127,6 +128,7 @@ void EQ::Net::DaybreakConnectionManager::Process()
 			auto time_since_last_recv = std::chrono::duration_cast<std::chrono::milliseconds>(now - connection->m_last_recv);
 			if ((size_t)time_since_last_recv.count() > m_options.stale_connection_ms) {
 				iter = m_connections.erase(iter);
+				Log(Logs::Detail, Logs::Netcode, "Disconnect reason: Time since last recv {0} > {1}", (size_t)time_since_last_recv.count(), m_options.stale_connection_ms);
 				connection->ChangeStatus(StatusDisconnecting);
 				continue;
 			}
@@ -276,7 +278,7 @@ EQ::Net::DaybreakConnection::DaybreakConnection(DaybreakConnectionManager *owner
 	m_encode_passes[1] = owner->m_options.encode_passes[1];
 	m_hold_time = Clock::now();
 	m_buffered_packets_length = 0;
-	m_resend_delay = 500;
+	m_resend_delay = m_owner->m_options.resend_delay_ms + 25;
 	m_rolling_ping = 100;
 	m_combined.reset(new char[512]);
 	m_combined[0] = 0;
@@ -299,7 +301,7 @@ EQ::Net::DaybreakConnection::DaybreakConnection(DaybreakConnectionManager *owner
 	m_crc_bytes = 0;
 	m_hold_time = Clock::now();
 	m_buffered_packets_length = 0;
-	m_resend_delay = 500;
+	m_resend_delay = m_resend_delay = m_owner->m_options.resend_delay_ms + 25;
 	m_rolling_ping = 100;
 	m_combined.reset(new char[512]);
 	m_combined[0] = 0;
@@ -318,6 +320,7 @@ void EQ::Net::DaybreakConnection::Close()
 		SendDisconnect();
 
 		m_close_time = Clock::now();
+		Log(Logs::Detail, Logs::Netcode, "Disconnect reason: Server Request");
 		ChangeStatus(StatusDisconnecting);
 	}
 	else {
@@ -355,6 +358,11 @@ void EQ::Net::DaybreakConnection::ResetStats()
 void EQ::Net::DaybreakConnection::Process()
 {
 	try {
+		m_resend_delay = (size_t)(m_stats.last_ping * m_owner->m_options.resend_delay_factor) + m_owner->m_options.resend_delay_ms;
+		if (m_resend_delay > 500) {
+			m_resend_delay = 500;
+		}
+		
 		auto now = Clock::now();
 		auto time_since_hold = (size_t)std::chrono::duration_cast<std::chrono::milliseconds>(now - m_hold_time).count();
 		if (time_since_hold >= m_owner->m_options.hold_length_ms) {
@@ -719,6 +727,7 @@ void EQ::Net::DaybreakConnection::ProcessDecodedPacket(const Packet &p)
 				SendDisconnect();
 			}
 
+			Log(Logs::Detail, Logs::Netcode, "Disconnect reason: OP_SessionRequest from client.");
 			ChangeStatus(StatusDisconnecting);
 			break;
 		}
@@ -747,10 +756,6 @@ void EQ::Net::DaybreakConnection::ProcessDecodedPacket(const Packet &p)
 			DynamicPacket out;
 			out.PutSerialize(0, response);
 			InternalSend(out);
-
-			m_resend_delay = (size_t)(request.avg_ping * m_owner->m_options.resend_delay_factor) + m_owner->m_options.resend_delay_ms;
-			m_resend_delay = std::min(m_resend_delay, m_owner->m_options.resend_delay_max);
-			m_resend_delay = std::max(m_resend_delay, m_owner->m_options.resend_delay_min);
 			break;
 		}
 		case OP_SessionStatResponse:
@@ -1051,7 +1056,7 @@ void EQ::Net::DaybreakConnection::Ack(int stream, uint16_t seq)
 	auto iter = s->sent_packets.begin();
 	while (iter != s->sent_packets.end()) {
 		if (iter->first <= seq) {
-			uint64_t round_time = (uint64_t)std::chrono::duration_cast<std::chrono::milliseconds>(now - iter->second.first_sent).count();
+			uint64_t round_time = (uint64_t)std::chrono::duration_cast<std::chrono::milliseconds>(now - iter->second.last_sent).count();
 			m_stats.total_ping += round_time;
 			m_stats.total_acks++;
 			m_stats.max_ping = std::max(m_stats.max_ping, round_time);
@@ -1072,7 +1077,7 @@ void EQ::Net::DaybreakConnection::OutOfOrderAck(int stream, uint16_t seq)
 	auto s = &m_streams[stream];
 	auto iter = s->sent_packets.find(seq);
 	if (iter != s->sent_packets.end()) {
-		uint64_t round_time = (uint64_t)std::chrono::duration_cast<std::chrono::milliseconds>(now - iter->second.first_sent).count();
+		uint64_t round_time = (uint64_t)std::chrono::duration_cast<std::chrono::milliseconds>(now - iter->second.last_sent).count();
 		m_stats.total_ping += round_time;
 		m_stats.total_acks++;
 		m_stats.max_ping = std::max(m_stats.max_ping, round_time);

@@ -125,11 +125,24 @@ void EQEmuConfig::do_world(TiXmlElement *ele)
 		if (text) {
 			WorldTCPPort = atoi(text);
 		}
-		text = sub_ele->Attribute("telnet");
-		if (text && !strcasecmp(text, "enabled")) {
+	}
+
+	sub_ele = ele->FirstChildElement("telnet");
+	if (sub_ele != nullptr) {
+		text = sub_ele->Attribute("ip");
+		if (text) {
+			TelnetIP = text;
+		}
+		text = sub_ele->Attribute("port");
+		if (text) {
+			TelnetTCPPort = atoi(text);
+		}
+		text = sub_ele->Attribute("enabled");
+		if (text && !strcasecmp(text, "true")) {
 			TelnetEnabled = true;
 		}
 	}
+
 	// Get the <http> element
 	sub_ele = ele->FirstChildElement("http");
 	if (sub_ele != nullptr) {
@@ -390,6 +403,12 @@ std::string EQEmuConfig::GetByName(const std::string &var_name) const
 	if (var_name == "WorldIP") {
 		return (WorldIP);
 	}
+	if (var_name == "TelnetTCPPort") {
+		return (itoa(TelnetTCPPort));
+	}
+	if (var_name == "TelnetIP") {
+		return (TelnetIP);
+	}
 	if (var_name == "TelnetEnabled") {
 		return (TelnetEnabled ? "true" : "false");
 	}
@@ -510,6 +529,8 @@ void EQEmuConfig::Dump() const
 	std::cout << "Locked = " << Locked << std::endl;
 	std::cout << "WorldTCPPort = " << WorldTCPPort << std::endl;
 	std::cout << "WorldIP = " << WorldIP << std::endl;
+	std::cout << "TelnetTCPPort = " << TelnetTCPPort << std::endl;
+	std::cout << "TelnetIP = " << TelnetIP << std::endl;
 	std::cout << "TelnetEnabled = " << TelnetEnabled << std::endl;
 	std::cout << "WorldHTTPPort = " << WorldHTTPPort << std::endl;
 	std::cout << "WorldHTTPMimeFile = " << WorldHTTPMimeFile << std::endl;
