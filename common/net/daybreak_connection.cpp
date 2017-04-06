@@ -119,7 +119,6 @@ void EQ::Net::DaybreakConnectionManager::Process()
 			auto time_since_last_recv = std::chrono::duration_cast<std::chrono::milliseconds>(now - connection->m_last_recv);
 			if ((size_t)time_since_last_recv.count() > m_options.connect_stale_ms) {
 				iter = m_connections.erase(iter);
-				Log(Logs::Detail, Logs::Netcode, "Disconnect reason: Connect Mode Timeout {0} > {1}", (size_t)time_since_last_recv.count(), m_options.connect_stale_ms);
 				connection->ChangeStatus(StatusDisconnecting);
 				continue;
 			}
@@ -128,7 +127,6 @@ void EQ::Net::DaybreakConnectionManager::Process()
 			auto time_since_last_recv = std::chrono::duration_cast<std::chrono::milliseconds>(now - connection->m_last_recv);
 			if ((size_t)time_since_last_recv.count() > m_options.stale_connection_ms) {
 				iter = m_connections.erase(iter);
-				Log(Logs::Detail, Logs::Netcode, "Disconnect reason: Time since last recv {0} > {1}", (size_t)time_since_last_recv.count(), m_options.stale_connection_ms);
 				connection->ChangeStatus(StatusDisconnecting);
 				continue;
 			}
@@ -320,7 +318,6 @@ void EQ::Net::DaybreakConnection::Close()
 		SendDisconnect();
 
 		m_close_time = Clock::now();
-		Log(Logs::Detail, Logs::Netcode, "Disconnect reason: Server Request");
 		ChangeStatus(StatusDisconnecting);
 	}
 	else {
@@ -727,7 +724,6 @@ void EQ::Net::DaybreakConnection::ProcessDecodedPacket(const Packet &p)
 				SendDisconnect();
 			}
 
-			Log(Logs::Detail, Logs::Netcode, "Disconnect reason: OP_SessionRequest from client.");
 			ChangeStatus(StatusDisconnecting);
 			break;
 		}
@@ -1051,11 +1047,14 @@ void EQ::Net::DaybreakConnection::ProcessResend(int stream)
 
 void EQ::Net::DaybreakConnection::Ack(int stream, uint16_t seq)
 {
+
 	auto now = Clock::now();
 	auto s = &m_streams[stream];
 	auto iter = s->sent_packets.begin();
 	while (iter != s->sent_packets.end()) {
-		if (iter->first <= seq) {
+		auto order = CompareSequence(seq, iter->first);
+
+		if (order != SequenceFuture) {
 			uint64_t round_time = (uint64_t)std::chrono::duration_cast<std::chrono::milliseconds>(now - iter->second.last_sent).count();
 			m_stats.total_ping += round_time;
 			m_stats.total_acks++;
@@ -1384,6 +1383,10 @@ EQ::Net::SequenceOrder EQ::Net::DaybreakConnection::CompareSequence(uint16_t exp
 	}
 
 	if (diff > 0) {
+		if (diff > 10000) {
+			return SequencePast;
+		}
+
 		return SequenceFuture;
 	}
 
