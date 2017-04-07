@@ -1432,6 +1432,7 @@ void Mob::AI_Process() {
 					}
 				}
 			}
+			/* Entity has been assigned another entity to follow */
 			else if (GetFollowID())
 			{
 				Mob* follow = entity_list.GetMob(GetFollowID());
@@ -1475,6 +1476,7 @@ void Mob::AI_Process() {
 							minLastFightingDelayMoving = 0;
 							maxLastFightingDelayMoving = 0;
 						}
+						/* All normal NPC pathing */
 						CastToNPC()->AI_DoMovement();
 					}
 				}
