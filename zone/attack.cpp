@@ -3901,14 +3901,7 @@ void Mob::TrySpellProc(const EQEmu::ItemInstance *inst, const EQEmu::ItemData *w
 					Log(Logs::Detail, Logs::Combat,
 							"Spell proc %d procing spell %d (%.2f percent chance)",
 							i, SpellProcs[i].spellID, chance);
-					auto outapp = new EQApplicationPacket(OP_BeginCast,sizeof(BeginCast_Struct));
-					BeginCast_Struct* begincast = (BeginCast_Struct*)outapp->pBuffer;
-					begincast->caster_id = GetID();
-					begincast->spell_id = SpellProcs[i].spellID;
-					begincast->cast_time = 0;
-					outapp->priority = 3;
-					entity_list.QueueCloseClients(this, outapp, false, RuleI(Range, SpellMessages), 0, true);
-					safe_delete(outapp);
+					SendBeginCast(SpellProcs[i].spellID, 0);
 					ExecWeaponProc(nullptr, SpellProcs[i].spellID, on, SpellProcs[i].level_override);
 					CheckNumHitsRemaining(NumHit::OffensiveSpellProcs, 0,
 								  SpellProcs[i].base_spellID);

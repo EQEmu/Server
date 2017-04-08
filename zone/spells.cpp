@@ -477,23 +477,8 @@ bool Mob::DoCastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 	// now tell the people in the area -- we ALWAYS want to send this, even instant cast spells.
 	// The only time this is skipped is for NPC innate procs and weapon procs. Procs from buffs
 	// oddly still send this. Since those cases don't reach here, we don't need to check them
-	if (slot != CastingSlot::Discipline) {
-		auto outapp = new EQApplicationPacket(OP_BeginCast,sizeof(BeginCast_Struct));
-		BeginCast_Struct* begincast = (BeginCast_Struct*)outapp->pBuffer;
-		begincast->caster_id = GetID();
-		begincast->spell_id = spell_id;
-		begincast->cast_time = orgcasttime; // client calculates reduced time by itself
-		outapp->priority = 3;
-		entity_list.QueueCloseClients(
-			this, /* Sender */
-			outapp, /* Packet */
-			false, /* Ignore Sender */
-			RuleI(Range, BeginCast), 
-			0, /* Skip this Mob */
-			true /* Packet ACK */
-		); //IsClient() ? FILTER_PCSPELLS : FILTER_NPCSPELLS);
-		safe_delete(outapp);
-	}
+	if (slot != CastingSlot::Discipline)
+		SendBeginCast(spell_id, orgcasttime);
 
 	// cast time is 0, just finish it right now and be done with it
 	if(cast_time == 0) {
@@ -534,6 +519,29 @@ bool Mob::DoCastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 	}
 
 	return(true);
+}
+
+void Mob::SendBeginCast(uint16 spell_id, uint32 casttime)
+{
+	auto outapp = new EQApplicationPacket(OP_BeginCast, sizeof(BeginCast_Struct));
+	auto begincast = (BeginCast_Struct *)outapp->pBuffer;
+
+	begincast->caster_id = GetID();
+	begincast->spell_id = spell_id;
+	begincast->cast_time = casttime; // client calculates reduced time by itself
+
+	outapp->priority = 3;
+
+	entity_list.QueueCloseClients(
+		this, /* Sender */
+		outapp, /* Packet */
+		false, /* Ignore Sender */
+		RuleI(Range, BeginCast),
+		0, /* Skip this Mob */
+		true /* Packet ACK */
+	); //IsClient() ? FILTER_PCSPELLS : FILTER_NPCSPELLS);
+
+	safe_delete(outapp);
 }
 
 /*
