@@ -417,6 +417,8 @@ public:
 	bool IsRaidTarget() const { return raid_target; };
 	void ResetHPUpdateTimer() { sendhpupdate_timer.Start(); }
 
+	bool IgnoreDespawn() { return ignore_despawn; }
+
 protected:
 
 	const NPCType*	NPCTypedata;
@@ -532,6 +534,7 @@ protected:
 
 	bool raid_target;
 	uint8	probability;
+	bool ignore_despawn; //NPCs with this set to 1 will ignore the despawn value in spawngroup
 
 private:
 	uint32	loottable_id;

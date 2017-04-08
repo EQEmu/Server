@@ -361,6 +361,7 @@
 9105|2017_02_15_bot_spells_entries.sql|SELECT `id` FROM `npc_spells_entries` WHERE `npc_spells_id` >= 701 AND `npc_spells_id` <= 712|not_empty|
 9106|2017_02_26_npc_spells_update_for_bots.sql|SELECT * FROM `npc_spells` WHERE `id` = '701' AND `name` = 'Cleric Bot'|not_empty|
 9107|2017_03_09_inventory_version.sql|SHOW TABLES LIKE 'inventory_version'|empty|
+9107|2017_04_07_ignore_despawn|SHOW COLUMNS FROM `npc_types` LIKE 'ignore_despawn'|empty|
 
 # Upgrade conditions:
 # 	This won't be needed after this system is implemented, but it is used database that are not

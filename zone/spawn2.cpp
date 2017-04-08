@@ -208,11 +208,26 @@ bool Spawn2::Process() {
 			}
 		}
 
-		if(sg->despawn != 0 && condition_id == 0)
-			zone->Despawn(spawn2_id);
-
-		if(IsDespawned)
+		bool ignore_despawn = false;
+		if (npcthis)
+		{
+			ignore_despawn = npcthis->IgnoreDespawn();
+		}
+		
+		if (ignore_despawn)
+		{
 			return true;
+		}
+		
+		if (sg->despawn != 0 && condition_id == 0 && !ignore_despawn)
+		{
+			zone->Despawn(spawn2_id);
+		}
+
+		if (IsDespawned)
+		{
+			return true;
+		}
 
 		currentnpcid = npcid;
 		NPC* npc = new NPC(tmp, this, glm::vec4(x, y, z, heading), FlyMode3);
@@ -295,6 +310,9 @@ void Spawn2::ForceDespawn()
 
 	if(npcthis != nullptr)
 	{
+		if (npcthis->IgnoreDespawn())
+			return;
+
 		if(!npcthis->IsEngaged())
 		{
 			if(sg->despawn == 3 || sg->despawn == 4)
