@@ -111,6 +111,16 @@ uint32 Lua_Door::GetOpenType() {
 	return self->GetOpenType();
 }
 
+void Lua_Door::SetDisableTimer(bool flag) {
+	Lua_Safe_Call_Void();
+	self->SetDisableTimer(flag);
+}
+
+bool Lua_Door::GetDisableTimer() {
+	Lua_Safe_Call_Bool();
+	return self->GetDisableTimer();
+}
+
 void Lua_Door::SetLockPick(uint32 pick) {
 	Lua_Safe_Call_Void();
 	self->SetLockpick(pick);

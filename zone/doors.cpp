@@ -135,7 +135,7 @@ void Doors::HandleClick(Client* sender, uint8 trigger)
 	//door debugging info dump
 	Log(Logs::Detail, Logs::Doors, "%s clicked door %s (dbid %d, eqid %d) at %s", sender->GetName(), door_name, db_id, door_id, to_string(m_Position).c_str());
 	Log(Logs::Detail, Logs::Doors, "  incline %d, opentype %d, lockpick %d, key %d, nokeyring %d, trigger %d type %d, param %d", incline, opentype, lockpick, keyitem, nokeyring, trigger_door, trigger_type, door_param);
-	Log(Logs::Detail, Logs::Doors, "  size %d, invert %d, dest: %s %s", size, invert_state, dest_zone, to_string(m_Destination).c_str());
+	Log(Logs::Detail, Logs::Doors, "  disable_timer '%s',size %d, invert %d, dest: %s %s", (disable_timer?"true":"false"), size, invert_state, dest_zone, to_string(m_Destination).c_str());
 
 	auto outapp = new EQApplicationPacket(OP_MoveDoor, sizeof(MoveDoor_Struct));
 	MoveDoor_Struct* md = (MoveDoor_Struct*)outapp->pBuffer;
@@ -354,13 +354,15 @@ void Doors::HandleClick(Client* sender, uint8 trigger)
 	entity_list.QueueClients(sender, outapp, false);
 	if(!IsDoorOpen() || (opentype == 58))
 	{
-		close_timer.Start();
+		if (!disable_timer)
+			close_timer.Start();
 		SetOpenState(true);
 	}
 	else
 	{
 		close_timer.Disable();
-		SetOpenState(false);
+		if (!disable_timer)
+			SetOpenState(false);
 	}
 
 	//everything past this point assumes we opened the door
@@ -636,7 +638,7 @@ bool ZoneDatabase::LoadDoors(int32 iDoorCount, Door *into, const char *zone_name
     std::string query = StringFormat("SELECT id, doorid, zone, name, pos_x, pos_y, pos_z, heading, "
                                     "opentype, guild, lockpick, keyitem, nokeyring, triggerdoor, triggertype, "
                                     "dest_zone, dest_instance, dest_x, dest_y, dest_z, dest_heading, "
-                                    "door_param, invert_state, incline, size, is_ldon_door, client_version_mask "
+                                    "door_param, invert_state, incline, size, is_ldon_door, client_version_mask, disable_timer "
                                     "FROM doors WHERE zone = '%s' AND (version = %u OR version = -1) "
                                     "ORDER BY doorid asc", zone_name, version);
 	auto results = QueryDatabase(query);
@@ -686,6 +688,7 @@ bool ZoneDatabase::LoadDoors(int32 iDoorCount, Door *into, const char *zone_name
 		into[rowIndex].size=atoi(row[24]);
 		into[rowIndex].is_ldon_door=atoi(row[25]);
 		into[rowIndex].client_version_mask = (uint32)strtoul(row[26], nullptr, 10);
+		into[rowIndex].disable_timer = (atoi(row[27]) ? true : false);
     }
 
 	return true;
@@ -728,6 +731,10 @@ void Doors::SetSize(uint16 in) {
 	entity_list.DespawnAllDoors();
 	size = in;
 	entity_list.RespawnAllDoors();
+}
+
+void Doors::SetDisableTimer(bool flag) {
+	disable_timer = flag;
 }
 
 void Doors::CreateDatabaseEntry()

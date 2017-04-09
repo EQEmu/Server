@@ -67,6 +67,10 @@ public:
 	void	SetDoorName(const char* name);
 	void	SetOpenType(uint8 in);
 	void	SetSize(uint16 size);
+
+	void	SetDisableTimer(bool flag);
+	bool	GetDisableTimer() { return disable_timer; }
+
 	void	CreateDatabaseEntry();
 
 private:
@@ -88,6 +92,7 @@ private:
 	uint16	size;
 	int		invert_state;
 	uint32	entity_id;
+	bool	disable_timer;
 	bool	isopen;
 	Timer	close_timer;
 	//Timer	trigger_timer;

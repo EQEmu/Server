@@ -162,6 +162,7 @@ SET(zone_headers
 	lua_bit.h
 	lua_client.h
 	lua_corpse.h
+	lua_door.h
 	lua_encounter.h
 	lua_entity.h
 	lua_entity_list.h
