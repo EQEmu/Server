@@ -459,16 +459,19 @@ void Doors::NPCOpen(NPC* sender, bool alt_mode)
 
 		if(!alt_mode) { // original function
 			if(!isopen) {
-				close_timer.Start();
+				if (!disable_timer)
+					close_timer.Start();
 				isopen=true;
 			}
 			else {
 				close_timer.Disable();
-				isopen=false;
+				if (!disable_timer)
+					isopen=false;
 			}
 		}
 		else { // alternative function
-			close_timer.Start();
+			if (!disable_timer)
+				close_timer.Start();
 			isopen=true;
 		}
 	}
@@ -485,16 +488,19 @@ void Doors::ForceOpen(Mob *sender, bool alt_mode)
 
 	if(!alt_mode) { // original function
 		if(!isopen) {
-			close_timer.Start();
+			if (!disable_timer)
+				close_timer.Start();
 			isopen=true;
 		}
 		else {
 			close_timer.Disable();
-			isopen=false;
+			if (!disable_timer)
+				isopen=false;
 		}
 	}
 	else { // alternative function
-		close_timer.Start();
+		if (!disable_timer)
+			close_timer.Start();
 		isopen=true;
 	}
 }
@@ -510,7 +516,8 @@ void Doors::ForceClose(Mob *sender, bool alt_mode)
 
 	if(!alt_mode) { // original function
 		if(!isopen) {
-			close_timer.Start();
+			if (!disable_timer)
+				close_timer.Start();
 			isopen=true;
 		}
 		else {
