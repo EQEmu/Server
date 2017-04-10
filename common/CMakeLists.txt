@@ -73,6 +73,8 @@ SET(common_sources
 	platform.cpp
 	event/event_loop.cpp
 	json/jsoncpp.cpp
+	net/console_server.cpp
+	net/console_server_connection.cpp
 	net/crc32.cpp
 	net/daybreak_connection.cpp
 	net/eqstream.cpp
@@ -207,6 +209,8 @@ SET(common_headers
 	event/timer.h
 	json/json.h
 	json/json-forwards.h
+	net/console_server.h
+	net/console_server_connection.h
 	net/crc32.h
 	net/daybreak_connection.h
 	net/daybreak_structs.h
@@ -270,6 +274,10 @@ SOURCE_GROUP(Json FILES
 )
 
 SOURCE_GROUP(Net FILES
+	net/console_server.cpp
+	net/console_server.h
+	net/console_server_connection.cpp
+	net/console_server_connection.h
 	net/crc32.cpp
 	net/crc32.h
 	net/daybreak_connection.cpp

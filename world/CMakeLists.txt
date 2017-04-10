@@ -20,6 +20,7 @@ SET(world_sources
 	web_interface_eqw.cpp
 	wguild_mgr.cpp
 	world_config.cpp
+	world_console_connection.cpp
 	worlddb.cpp
 	zonelist.cpp
 	zoneserver.cpp
@@ -47,6 +48,8 @@ SET(world_headers
 	web_interface_eqw.h
 	wguild_mgr.h
 	world_config.h
+	world_console_connection.h
+	world_tcp_connection.h
 	worlddb.h
 	zonelist.h
 	zoneserver.h

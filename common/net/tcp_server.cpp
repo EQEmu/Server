@@ -16,6 +16,16 @@ EQ::Net::TCPServer::~TCPServer() {
 
 void EQ::Net::TCPServer::Listen(int port, bool ipv6, std::function<void(std::shared_ptr<TCPConnection>)> cb)
 {
+	if (ipv6) {
+		Listen("::", port, ipv6, cb);
+	}
+	else {
+		Listen("0.0.0.0", port, ipv6, cb);
+	}
+}
+
+void EQ::Net::TCPServer::Listen(const std::string &addr, int port, bool ipv6, std::function<void(std::shared_ptr<TCPConnection>)> cb)
+{
 	if (m_socket) {
 		return;
 	}
@@ -29,10 +39,10 @@ void EQ::Net::TCPServer::Listen(int port, bool ipv6, std::function<void(std::sha
 
 	sockaddr_storage iaddr;
 	if (ipv6) {
-		uv_ip6_addr("::", port, (sockaddr_in6*)&iaddr);
+		uv_ip6_addr(addr.c_str(), port, (sockaddr_in6*)&iaddr);
 	}
 	else {
-		uv_ip4_addr("0.0.0.0", port, (sockaddr_in*)&iaddr);
+		uv_ip4_addr(addr.c_str(), port, (sockaddr_in*)&iaddr);
 	}
 
 	uv_tcp_bind(m_socket, (sockaddr*)&iaddr, 0);

@@ -83,7 +83,6 @@ union semun {
 #include "web_interface.h"
 #include "console.h"
 
-#include "../common/net/tcp_server.h"
 #include "../common/net/servertalk_server.h"
 
 ClientList client_list;
@@ -376,10 +375,11 @@ int main(int argc, char** argv) {
 	database.LoadCharacterCreateAllocations();
 	database.LoadCharacterCreateCombos();
 
-	std::unique_ptr<ConsoleServer> console;
+	std::unique_ptr<EQ::Net::ConsoleServer> console;
 	if (Config->TelnetEnabled) {
 		Log(Logs::General, Logs::World_Server, "Console (TCP) listener started.");
-		console.reset(new ConsoleServer());
+		console.reset(new EQ::Net::ConsoleServer(Config->TelnetIP, Config->TelnetTCPPort));
+		RegisterConsoleFunctions(console);
 	}
 
 	std::unique_ptr<EQ::Net::ServertalkServer> server_connection;

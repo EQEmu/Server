@@ -7,6 +7,7 @@
 #include "../common/rulesys.h"
 #include "../common/servertalk.h"
 #include "../common/event/timer.h"
+#include "../common/net/console_server_connection.h"
 #include <vector>
 #include <string>
 

@@ -481,9 +481,10 @@ int main(int argc, char** argv) {
 			worldwasconnected = true;
 		}
 		else {
-			if (worldwasconnected && is_zone_loaded)
+			if (worldwasconnected && is_zone_loaded) {
 				entity_list.ChannelMessageFromWorld(0, 0, 6, 0, 0, "WARNING: World server connection lost");
-			worldwasconnected = false;
+				worldwasconnected = false;
+			}
 		}
 
 		if (is_zone_loaded) {

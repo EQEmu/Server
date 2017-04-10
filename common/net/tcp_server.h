@@ -13,6 +13,7 @@ namespace EQ
 			~TCPServer();
 
 			void Listen(int port, bool ipv6, std::function<void(std::shared_ptr<TCPConnection>)> cb);
+			void Listen(const std::string &addr, int port, bool ipv6, std::function<void(std::shared_ptr<TCPConnection>)> cb);
 			void Close();
 			void AddClient(uv_tcp_t *c);
 
