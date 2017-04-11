@@ -877,12 +877,12 @@ bool EntityList::MakeDoorSpawnPacket(EQApplicationPacket *app, Client *client)
 	auto it = door_list.begin();
 	while (it != door_list.end()) {
 		if ((it->second->GetClientVersionMask() & mask_test) &&
-				strlen(it->second->GetDoorName()) > 3)
+			strlen(it->second->GetDoorName()) > 3)
 			count++;
 		++it;
 	}
 
-	if(count == 0 || count > 500)
+	if (count == 0 || count > 500)
 		return false;
 
 	uint32 length = count * sizeof(Door_Struct);
@@ -890,31 +890,43 @@ bool EntityList::MakeDoorSpawnPacket(EQApplicationPacket *app, Client *client)
 	memset(packet_buffer, 0, length);
 	uchar *ptr = packet_buffer;
 	Doors *door;
-	Door_Struct nd;
+	Door_Struct new_door;
 
 	it = door_list.begin();
 	while (it != door_list.end()) {
 		door = it->second;
 		if (door && (door->GetClientVersionMask() & mask_test) &&
-				strlen(door->GetDoorName()) > 3) {
-			memset(&nd, 0, sizeof(nd));
-			memcpy(nd.name, door->GetDoorName(), 32);
+			strlen(door->GetDoorName()) > 3) {
+			memset(&new_door, 0, sizeof(new_door));
+			memcpy(new_door.name, door->GetDoorName(), 32);
+
 			auto position = door->GetPosition();
-			nd.xPos = position.x;
-			nd.yPos = position.y;
-			nd.zPos = position.z;
-			nd.heading = position.w;
-			nd.incline = door->GetIncline();
-			nd.size = door->GetSize();
-			nd.doorId = door->GetDoorID();
-			nd.opentype = door->GetOpenType();
-			nd.state_at_spawn = door->GetInvertState() ? !door->IsDoorOpen() : door->IsDoorOpen();
-			nd.invert_state = door->GetInvertState();
-			nd.door_param = door->GetDoorParam();
-			memcpy(ptr, &nd, sizeof(nd));
-			ptr+=sizeof(nd);
-			*(ptr-1)=0x01;
-			*(ptr-3)=0x01;
+			
+			new_door.xPos = position.x;
+			new_door.yPos = position.y;
+			new_door.zPos = position.z;
+			new_door.heading = position.w;
+			
+			new_door.incline = door->GetIncline();
+			new_door.size = door->GetSize();
+			new_door.doorId = door->GetDoorID();
+			new_door.opentype = door->GetOpenType();
+
+			Log(Logs::General, Logs::Doors, "Door timer_disable: %s door_id: %u is_open: %s invert_state: %i",
+				(door->GetDisableTimer() ? "true" : "false"),
+				door->GetDoorID(),
+				(door->IsDoorOpen() ? "true" : "false"),
+				door->GetInvertState()
+			);
+
+			new_door.state_at_spawn = (door->GetInvertState() ? !door->IsDoorOpen() : door->IsDoorOpen());
+			new_door.invert_state = door->GetInvertState();
+
+			new_door.door_param = door->GetDoorParam();
+			memcpy(ptr, &new_door, sizeof(new_door));
+			ptr += sizeof(new_door);
+			*(ptr - 1) = 0x01;
+			*(ptr - 3) = 0x01;
 		}
 		++it;
 	}

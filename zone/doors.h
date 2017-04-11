@@ -32,8 +32,8 @@ public:
 	const glm::vec4& GetPosition() const{ return m_Position; }
 	int		GetIncline() { return incline; }
 	bool	triggered;
-	void	SetOpenState(bool st) { isopen = st; }
-	bool	IsDoorOpen() { return isopen; }
+	void	SetOpenState(bool st) { is_open = st; }
+	bool	IsDoorOpen() { return is_open; }
 
 	uint8	GetTriggerDoorID() { return trigger_door; }
 	uint8	GetTriggerType() { return trigger_type; }
@@ -93,7 +93,7 @@ private:
 	int		invert_state;
 	uint32	entity_id;
 	bool	disable_timer;
-	bool	isopen;
+	bool	is_open;
 	Timer	close_timer;
 	//Timer	trigger_timer;
 

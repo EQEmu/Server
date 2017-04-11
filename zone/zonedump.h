@@ -202,7 +202,7 @@ struct Door {
 	uint8	nokeyring;
 	uint8	trigger_door;
 	uint8	trigger_type;
-	bool	disable_timer;
+	uint8	disable_timer;
 	uint32	door_param;
 	int		invert_state;
 	uint16	size;
