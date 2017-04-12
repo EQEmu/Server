@@ -374,6 +374,7 @@ NPC::NPC(const NPCType* d, Spawn2* in_respawn, const glm::vec4& position, int if
 	InitializeBuffSlots();
 	CalcBonuses();
 	raid_target = d->raid_target;
+	ignore_despawn = d->ignore_despawn;
 }
 
 NPC::~NPC()

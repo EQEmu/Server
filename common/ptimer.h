@@ -22,7 +22,8 @@
 #include <map>
 #include <vector>
 
-enum {	//values for pTimerType
+enum : int {	//values for pTimerType
+	pTimerNegativeItemReuse = -1, // these grow down basically, we will have item ID * -1 for the timer ID
 	pTimerStartAdventureTimer = 1,
 	pTimerSurnameChange = 2,
 	pTimerFeignDeath = 3,

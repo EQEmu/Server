@@ -361,6 +361,9 @@
 9105|2017_02_15_bot_spells_entries.sql|SELECT `id` FROM `npc_spells_entries` WHERE `npc_spells_id` >= 701 AND `npc_spells_id` <= 712|not_empty|
 9106|2017_02_26_npc_spells_update_for_bots.sql|SELECT * FROM `npc_spells` WHERE `id` = '701' AND `name` = 'Cleric Bot'|not_empty|
 9107|2017_03_09_inventory_version.sql|SHOW TABLES LIKE 'inventory_version'|empty|
+9108|2017_04_07_ignore_despawn.sql|SHOW COLUMNS FROM `npc_types` LIKE 'ignore_despawn'|empty|
+9109|2017_04_08_doors_disable_timer.sql|SHOW COLUMNS FROM `doors` LIKE 'disable_timer'|empty|
+9110|2017_04_10_graveyard.sql|show index from graveyard WHERE key_name = 'zone_id_nonunique'|empty|
 
 # Upgrade conditions:
 # 	This won't be needed after this system is implemented, but it is used database that are not

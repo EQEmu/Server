@@ -457,18 +457,18 @@ void Mob::AI_Start(uint32 iMoveDelay) {
 	AI_movement_timer = std::unique_ptr<Timer>(new Timer(AImovement_duration));
 	AI_target_check_timer = std::unique_ptr<Timer>(new Timer(AItarget_check_duration));
 	AI_feign_remember_timer = std::unique_ptr<Timer>(new Timer(AIfeignremember_delay));
-	AI_scan_area_timer = std::unique_ptr<Timer>(new Timer(RandomTimer(RuleI(NPC, NPCToNPCAggroTimerMin), RuleI(NPC, NPCToNPCAggroTimerMax))));
+
+	if(CastToNPC()->WillAggroNPCs())
+		AI_scan_area_timer = std::unique_ptr<Timer>(new Timer(RandomTimer(RuleI(NPC, NPCToNPCAggroTimerMin), RuleI(NPC, NPCToNPCAggroTimerMax))));
+	
 	AI_check_signal_timer = std::unique_ptr<Timer>(new Timer(AI_check_signal_timer_delay));
 
-#ifdef REVERSE_AGGRO
-	if(IsNPC() && !CastToNPC()->WillAggroNPCs())
-		AI_scan_area_timer->Disable();
-#endif
 
 	if (GetAggroRange() == 0)
 		pAggroRange = 70;
 	if (GetAssistRange() == 0)
 		pAssistRange = 70;
+
 	hate_list.WipeHateList();
 
 	m_Delta = glm::vec4();
@@ -1304,7 +1304,7 @@ void Mob::AI_Process() {
 		if (m_PlayerState & static_cast<uint32>(PlayerState::Aggressive))
 			SendRemovePlayerState(PlayerState::Aggressive);
 
-		if(!zone->CanDoCombat() && AI_feign_remember_timer->Check()) {
+		if(zone->CanDoCombat() && AI_feign_remember_timer->Check()) {
 			// 6/14/06
 			// Improved Feign Death Memory
 			// check to see if any of our previous feigned targets have gotten up.
@@ -1329,18 +1329,13 @@ void Mob::AI_Process() {
 		{
 			//we processed a spell action, so do nothing else.
 		}
-		else if (!zone->CanDoCombat() && AI_scan_area_timer->Check())
+		else if (zone->CanDoCombat() && CastToNPC()->WillAggroNPCs() && AI_scan_area_timer->Check())
 		{
 			/*
-			* This is where NPCs look around to see if they want to attack anybody.
-			*
-			* if REVERSE_AGGRO is enabled, then this timer is disabled unless they
-			* have the npc_aggro flag on them, and aggro against clients is checked
-			* by the clients.
-			*
+			* NPC to NPC aggro checking, npc needs npc_aggro flag
 			*/
 
-			Mob* temp_target = entity_list.AICheckCloseAggro(this, GetAggroRange(), GetAssistRange());
+			Mob* temp_target = entity_list.AICheckNPCtoNPCAggro(this, GetAggroRange(), GetAssistRange());
 			if (temp_target){
 				AddToHateList(temp_target);
 			}
@@ -1415,6 +1410,7 @@ void Mob::AI_Process() {
 					}
 				}
 			}
+			/* Entity has been assigned another entity to follow */
 			else if (GetFollowID())
 			{
 				Mob* follow = entity_list.GetMob(GetFollowID());
@@ -1458,6 +1454,7 @@ void Mob::AI_Process() {
 							minLastFightingDelayMoving = 0;
 							maxLastFightingDelayMoving = 0;
 						}
+						/* All normal NPC pathing */
 						CastToNPC()->AI_DoMovement();
 					}
 				}

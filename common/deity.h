@@ -49,7 +49,7 @@ namespace EQEmu
 		};
 
 		enum DeityTypeBit : uint32 {
-			bit_DeityAll = 0x00000000,
+			bit_DeityNone = 0x00000000,
 			bit_DeityAgnostic = 0x00000001,
 			bit_DeityBertoxxulous = 0x00000002,
 			bit_DeityBrellSirilis = 0x00000004,
@@ -66,7 +66,8 @@ namespace EQEmu
 			bit_DeitySolusekRo = 0x00002000,
 			bit_DeityTheTribunal = 0x00004000,
 			bit_DeityTunare = 0x00008000,
-			bit_DeityVeeshan = 0x00010000
+			bit_DeityVeeshan = 0x00010000,
+			bit_DeityAll = 0xFFFFFFFF
 		};
 
 		extern DeityTypeBit ConvertDeityTypeToDeityTypeBit(DeityType deity_type);

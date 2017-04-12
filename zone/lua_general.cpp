@@ -1680,7 +1680,7 @@ luabind::scope lua_register_events() {
 			luabind::value("loot", static_cast<int>(EVENT_LOOT)),
 			luabind::value("zone", static_cast<int>(EVENT_ZONE)),
 			luabind::value("level_up", static_cast<int>(EVENT_LEVEL_UP)),
-			luabind::value("killed_merit ", static_cast<int>(EVENT_KILLED_MERIT )),
+			luabind::value("killed_merit", static_cast<int>(EVENT_KILLED_MERIT)),
 			luabind::value("cast_on", static_cast<int>(EVENT_CAST_ON)),
 			luabind::value("task_accepted", static_cast<int>(EVENT_TASK_ACCEPTED)),
 			luabind::value("task_stage_complete", static_cast<int>(EVENT_TASK_STAGE_COMPLETE)),

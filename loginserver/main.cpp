@@ -44,6 +44,7 @@ int main()
 	LogSys.LoadLogSettingsDefaults();
 
 	LogSys.log_settings[Logs::Error].log_to_console = Logs::General;
+	LogSys.log_settings[Logs::Error].is_category_enabled = 1;
 
 	Log(Logs::General, Logs::Login_Server, "Logging System Init.");
 

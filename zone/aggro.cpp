@@ -408,25 +408,19 @@ bool Mob::CheckWillAggro(Mob *mob) {
 	return(false);
 }
 
-Mob* EntityList::AICheckCloseAggro(Mob* sender, float iAggroRange, float iAssistRange) {
+Mob* EntityList::AICheckNPCtoNPCAggro(Mob* sender, float iAggroRange, float iAssistRange) {
 	if (!sender || !sender->IsNPC())
 		return(nullptr);
 
-#ifdef REVERSE_AGGRO
-	//with reverse aggro, npc->client is checked elsewhere, no need to check again
 	auto it = npc_list.begin();
 	while (it != npc_list.end()) {
-#else
-	auto it = mob_list.begin();
-	while (it != mob_list.end()) {
-#endif
 		Mob *mob = it->second;
 
 		if (sender->CheckWillAggro(mob))
 			return mob;
 		++it;
 	}
-	//LogFile->write(EQEMuLog::Debug, "Check aggro for %s no target.", sender->GetName());
+
 	return nullptr;
 }
 
