@@ -83,7 +83,7 @@ void ConsoleUptime(EQ::Net::ConsoleServerConnection* connection, const std::stri
 	if (StringIsNumber(args[0]) && atoi(args[0].c_str()) > 0) {
 		auto pack = new ServerPacket(ServerOP_Uptime, sizeof(ServerUptime_Struct));
 		ServerUptime_Struct* sus = (ServerUptime_Struct*)pack->pBuffer;
-		snprintf(sus->adminname, sizeof(sus->adminname), "*%s", connection->UserName());
+		snprintf(sus->adminname, sizeof(sus->adminname), "*%s", connection->UserName().c_str());
 		sus->zoneserverid = atoi(args[0].c_str());
 		ZoneServer* zs = zoneserver_list.FindByID(sus->zoneserverid);
 		if (zs)
