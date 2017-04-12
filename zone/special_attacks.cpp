@@ -922,11 +922,11 @@ bool Mob::TryProjectileAttack(Mob *other, const EQEmu::ItemData *item, EQEmu::sk
 	if (slot < 0)
 		return false;
 
-	float speed_mod = speed * 0.45f;
+	float speed_mod = speed;
 
 	float distance = other->CalculateDistance(GetX(), GetY(), GetZ());
 	float hit =
-	    60.0f + (distance / speed_mod); // Calcuation: 60 = Animation Lag, 1.8 = Speed modifier for speed of (4)
+	    1200.0f + (10 * distance / speed_mod); // Calcuation: 60 = Animation Lag, 1.8 = Speed modifier for speed of (4)
 
 	ProjectileAtk[slot].increment = 1;
 	ProjectileAtk[slot].hit_increment = static_cast<uint16>(hit); // This projected hit time if target does NOT MOVE
@@ -979,7 +979,7 @@ void Mob::ProjectileAttack()
 				ProjectileAtk[i].tlast_y = target->GetY();
 				float distance = target->CalculateDistance(
 				    ProjectileAtk[i].origin_x, ProjectileAtk[i].origin_y, ProjectileAtk[i].origin_z);
-				float hit = 60.0f + (distance / ProjectileAtk[i].speed_mod); // Calcuation: 60 =
+				float hit = 1200.0f + (10 * distance / ProjectileAtk[i].speed_mod); // Calcuation: 60 =
 											     // Animation Lag, 1.8 =
 											     // Speed modifier for speed
 											     // of (4)

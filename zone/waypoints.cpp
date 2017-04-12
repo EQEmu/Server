@@ -586,7 +586,7 @@ bool Mob::MakeNewPositionAndSendUpdate(float x, float y, float z, int speed, boo
 	tar_vector = (float)speed / mag;
 
 	// mob move fix
-	int numsteps = (int)(mag * 16.0f / (float)speed + 0.5f);
+	int numsteps = (int)(mag * 13.5f / (float)speed + 0.5f);
 
 
 	// mob move fix
@@ -626,12 +626,17 @@ bool Mob::MakeNewPositionAndSendUpdate(float x, float y, float z, int speed, boo
 	}
 
 	else {
-		tar_vector /= 16.0f;
+		tar_vector /= 13.5f;
 		float dur = Timer::GetCurrentTime() - pLastChange;
-		if (dur < 1.0f) {
-			dur = 1.0f;
+		if (dur < 0.0f) {
+			dur = 0.0f;
 		}
-		tar_vector = (tar_vector * AImovement_duration) / 100.0f;
+
+		if (dur > 100.f) {
+			dur = 100.f;
+		}
+
+		tar_vector *= (dur / 100.0f);
 
 		float new_x = m_Position.x + m_TargetV.x*tar_vector;
 		float new_y = m_Position.y + m_TargetV.y*tar_vector;
