@@ -36,25 +36,25 @@ void UCSConnection::ProcessPacket(uint16 opcode, EQ::Net::Packet &p)
 
 	switch (opcode)
 	{
-	case 0:
-		break;
+		case 0:
+			break;
 
-	case ServerOP_KeepAlive:
-	{
-		// ignore this
-		break;
-	}
-	case ServerOP_ZAAuth:
-	{
-		Log(Logs::Detail, Logs::UCS_Server, "Got authentication from UCS when they are already authenticated.");
-		break;
-	}
-	default:
-	{
-		Log(Logs::Detail, Logs::UCS_Server, "Unknown ServerOPcode from UCS 0x%04x, size %d", opcode, pack->size);
-		DumpPacket(pack->pBuffer, pack->size);
-		break;
-	}
+		case ServerOP_KeepAlive:
+		{
+			// ignore this
+			break;
+		}
+		case ServerOP_ZAAuth:
+		{
+			Log(Logs::Detail, Logs::UCS_Server, "Got authentication from UCS when they are already authenticated.");
+			break;
+		}
+		default:
+		{
+			Log(Logs::Detail, Logs::UCS_Server, "Unknown ServerOPcode from UCS 0x%04x, size %d", opcode, pack->size);
+			DumpPacket(pack->pBuffer, pack->size);
+			break;
+		}
 	}
 }
 
