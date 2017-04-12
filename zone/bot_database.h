@@ -169,7 +169,7 @@ public:
 
 
 	/* Bot group functions   */
-	bool LoadGroupedBotsByGroupID(const uint32 group_id, std::list<uint32>& group_list);
+	bool LoadGroupedBotsByGroupID(const uint32 owner_id, const uint32 group_id, std::list<uint32>& group_list);
 
 
 	/* Bot heal rotation functions   */
