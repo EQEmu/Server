@@ -23,6 +23,7 @@
 #include "../common/servertalk.h"
 #include "../common/platform.h"
 #include "../common/crash.h"
+#include "../common/unix.h"
 #include "worldserver.h"
 #include "zone_launch.h"
 #include <vector>
