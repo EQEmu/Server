@@ -2541,8 +2541,10 @@ void Mob::AddToHateList(Mob* other, uint32 hate /*= 0*/, int32 damage /*= 0*/, b
 			AddFeignMemory(other->CastToBot()->GetBotOwner()->CastToClient());
 		}
 		else {
-			if(!hate_list.IsEntOnHateList(other->CastToBot()->GetBotOwner()))
+			if (!hate_list.IsEntOnHateList(other->CastToBot()->GetBotOwner())) {
 				hate_list.AddEntToHateList(other->CastToBot()->GetBotOwner(), 0, 0, false, true);
+				other->CastToBot()->GetBotOwner()->CastToClient()->AddAutoXTarget(this);
+			}
 		}
 	}
 #endif //BOTS
