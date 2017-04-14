@@ -1026,7 +1026,7 @@ void EQ::Net::DaybreakConnection::ProcessResend(int stream)
 				InternalBufferedSend(entry.second.packet);
 				entry.second.last_sent = now;
 				entry.second.times_resent++;
-				m_rolling_ping += 150;
+				m_rolling_ping += 100;
 			}
 		}
 		else {
@@ -1040,7 +1040,7 @@ void EQ::Net::DaybreakConnection::ProcessResend(int stream)
 				InternalBufferedSend(entry.second.packet);
 				entry.second.last_sent = now;
 				entry.second.times_resent++;
-				m_rolling_ping += 150;
+				m_rolling_ping += 100;
 			}
 		}
 	}
@@ -1056,14 +1056,12 @@ void EQ::Net::DaybreakConnection::Ack(int stream, uint16_t seq)
 		auto order = CompareSequence(seq, iter->first);
 
 		if (order != SequenceFuture) {			
-			if (iter->second.times_resent == 0) {
-				uint64_t round_time = (uint64_t)std::chrono::duration_cast<std::chrono::milliseconds>(now - iter->second.last_sent).count();
+			uint64_t round_time = (uint64_t)std::chrono::duration_cast<std::chrono::milliseconds>(now - iter->second.last_sent).count();
 
-				m_stats.max_ping = std::max(m_stats.max_ping, round_time);
-				m_stats.min_ping = std::min(m_stats.min_ping, round_time);
-				m_stats.last_ping = round_time;
-				m_rolling_ping = (m_rolling_ping * 2 + round_time) / 3;
-			}
+			m_stats.max_ping = std::max(m_stats.max_ping, round_time);
+			m_stats.min_ping = std::min(m_stats.min_ping, round_time);
+			m_stats.last_ping = round_time;
+			m_rolling_ping = (m_rolling_ping * 2 + round_time) / 3;
 
 			iter = s->sent_packets.erase(iter);
 		}
@@ -1079,14 +1077,12 @@ void EQ::Net::DaybreakConnection::OutOfOrderAck(int stream, uint16_t seq)
 	auto s = &m_streams[stream];
 	auto iter = s->sent_packets.find(seq);
 	if (iter != s->sent_packets.end()) {
-		if (iter->second.times_resent == 0) {
-			uint64_t round_time = (uint64_t)std::chrono::duration_cast<std::chrono::milliseconds>(now - iter->second.last_sent).count();
+		uint64_t round_time = (uint64_t)std::chrono::duration_cast<std::chrono::milliseconds>(now - iter->second.last_sent).count();
 
-			m_stats.max_ping = std::max(m_stats.max_ping, round_time);
-			m_stats.min_ping = std::min(m_stats.min_ping, round_time);
-			m_stats.last_ping = round_time;
-			m_rolling_ping = (m_rolling_ping * 2 + round_time) / 3;
-		}
+		m_stats.max_ping = std::max(m_stats.max_ping, round_time);
+		m_stats.min_ping = std::min(m_stats.min_ping, round_time);
+		m_stats.last_ping = round_time;
+		m_rolling_ping = (m_rolling_ping * 2 + round_time) / 3;
 
 		s->sent_packets.erase(iter);
 	}

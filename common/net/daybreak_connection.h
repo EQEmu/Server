@@ -205,10 +205,10 @@ namespace EQ
 			DaybreakConnectionManagerOptions() {
 				max_connection_count = 0;
 				keepalive_delay_ms = 9000;
-				resend_delay_ms = 300;
-				resend_delay_factor = 1.3;
-				resend_delay_min = 100;
-				resend_delay_max = 2000;
+				resend_delay_ms = 150;
+				resend_delay_factor = 1.5;
+				resend_delay_min = 150;
+				resend_delay_max = 1000;
 				connect_delay_ms = 500;
 				stale_connection_ms = 90000;
 				connect_stale_ms = 5000;
@@ -217,7 +217,7 @@ namespace EQ
 				encode_passes[0] = DaybreakEncodeType::EncodeNone;
 				encode_passes[1] = DaybreakEncodeType::EncodeNone;
 				port = 0;
-				hold_size = 384;
+				hold_size = 448;
 				hold_length_ms = 10;
 				simulated_in_packet_loss = 0;
 				simulated_out_packet_loss = 0;
