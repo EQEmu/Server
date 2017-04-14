@@ -78,8 +78,6 @@ namespace EQ
 				sent_bytes = 0;
 				recv_packets = 0;
 				sent_packets = 0;
-				total_ping = 0;
-				total_acks = 0;
 				min_ping = 0xFFFFFFFFFFFFFFFFUL;
 				max_ping = 0;
 				created = Clock::now();
@@ -89,8 +87,6 @@ namespace EQ
 			uint64_t sent_bytes;
 			uint64_t recv_packets;
 			uint64_t sent_packets;
-			uint64_t total_ping;
-			uint64_t total_acks;
 			uint64_t min_ping;
 			uint64_t max_ping;
 			uint64_t last_ping;
@@ -209,10 +205,10 @@ namespace EQ
 			DaybreakConnectionManagerOptions() {
 				max_connection_count = 0;
 				keepalive_delay_ms = 9000;
-				resend_delay_ms = 50;
-				resend_delay_factor = 1.5;
-				resend_delay_min = 50;
-				resend_delay_max = 500;
+				resend_delay_ms = 300;
+				resend_delay_factor = 1.3;
+				resend_delay_min = 100;
+				resend_delay_max = 2000;
 				connect_delay_ms = 500;
 				stale_connection_ms = 90000;
 				connect_stale_ms = 5000;

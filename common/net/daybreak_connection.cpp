@@ -1,6 +1,7 @@
 #include "daybreak_connection.h"
 #include "../event/event_loop.h"
 #include "../eqemu_logsys.h"
+#include "../data_verification.h"
 #include "crc32.h"
 #include <zlib.h>
 #include <sstream>
@@ -276,8 +277,8 @@ EQ::Net::DaybreakConnection::DaybreakConnection(DaybreakConnectionManager *owner
 	m_encode_passes[1] = owner->m_options.encode_passes[1];
 	m_hold_time = Clock::now();
 	m_buffered_packets_length = 0;
-	m_resend_delay = m_owner->m_options.resend_delay_ms + 25;
-	m_rolling_ping = 100;
+	m_rolling_ping = 500;
+	m_resend_delay = (m_rolling_ping * m_owner->m_options.resend_delay_factor) + m_owner->m_options.resend_delay_ms;
 	m_combined.reset(new char[512]);
 	m_combined[0] = 0;
 	m_combined[1] = OP_Combined;
@@ -299,8 +300,8 @@ EQ::Net::DaybreakConnection::DaybreakConnection(DaybreakConnectionManager *owner
 	m_crc_bytes = 0;
 	m_hold_time = Clock::now();
 	m_buffered_packets_length = 0;
-	m_resend_delay = m_resend_delay = m_owner->m_options.resend_delay_ms + 25;
-	m_rolling_ping = 100;
+	m_rolling_ping = 500;
+	m_resend_delay = (m_rolling_ping * m_owner->m_options.resend_delay_factor) + m_owner->m_options.resend_delay_ms;
 	m_combined.reset(new char[512]);
 	m_combined[0] = 0;
 	m_combined[1] = OP_Combined;
@@ -355,11 +356,9 @@ void EQ::Net::DaybreakConnection::ResetStats()
 void EQ::Net::DaybreakConnection::Process()
 {
 	try {
-		m_resend_delay = (size_t)(m_stats.last_ping * m_owner->m_options.resend_delay_factor) + m_owner->m_options.resend_delay_ms;
-		if (m_resend_delay > 500) {
-			m_resend_delay = 500;
-		}
-		
+		m_resend_delay = (size_t)(m_rolling_ping * m_owner->m_options.resend_delay_factor) + m_owner->m_options.resend_delay_ms;
+		m_resend_delay = EQEmu::Clamp(m_resend_delay, m_owner->m_options.resend_delay_min, m_owner->m_options.resend_delay_max);
+
 		auto now = Clock::now();
 		auto time_since_hold = (size_t)std::chrono::duration_cast<std::chrono::milliseconds>(now - m_hold_time).count();
 		if (time_since_hold >= m_owner->m_options.hold_length_ms) {
@@ -1027,6 +1026,7 @@ void EQ::Net::DaybreakConnection::ProcessResend(int stream)
 				InternalBufferedSend(entry.second.packet);
 				entry.second.last_sent = now;
 				entry.second.times_resent++;
+				m_rolling_ping += 150;
 			}
 		}
 		else {
@@ -1040,6 +1040,7 @@ void EQ::Net::DaybreakConnection::ProcessResend(int stream)
 				InternalBufferedSend(entry.second.packet);
 				entry.second.last_sent = now;
 				entry.second.times_resent++;
+				m_rolling_ping += 150;
 			}
 		}
 	}
@@ -1054,14 +1055,16 @@ void EQ::Net::DaybreakConnection::Ack(int stream, uint16_t seq)
 	while (iter != s->sent_packets.end()) {
 		auto order = CompareSequence(seq, iter->first);
 
-		if (order != SequenceFuture) {
-			uint64_t round_time = (uint64_t)std::chrono::duration_cast<std::chrono::milliseconds>(now - iter->second.last_sent).count();
-			m_stats.total_ping += round_time;
-			m_stats.total_acks++;
-			m_stats.max_ping = std::max(m_stats.max_ping, round_time);
-			m_stats.min_ping = std::min(m_stats.min_ping, round_time);
-			m_stats.last_ping = round_time;
-			m_rolling_ping = (m_rolling_ping + round_time) / 2;
+		if (order != SequenceFuture) {			
+			if (iter->second.times_resent == 0) {
+				uint64_t round_time = (uint64_t)std::chrono::duration_cast<std::chrono::milliseconds>(now - iter->second.last_sent).count();
+
+				m_stats.max_ping = std::max(m_stats.max_ping, round_time);
+				m_stats.min_ping = std::min(m_stats.min_ping, round_time);
+				m_stats.last_ping = round_time;
+				m_rolling_ping = (m_rolling_ping * 2 + round_time) / 3;
+			}
+
 			iter = s->sent_packets.erase(iter);
 		}
 		else {
@@ -1076,13 +1079,15 @@ void EQ::Net::DaybreakConnection::OutOfOrderAck(int stream, uint16_t seq)
 	auto s = &m_streams[stream];
 	auto iter = s->sent_packets.find(seq);
 	if (iter != s->sent_packets.end()) {
-		uint64_t round_time = (uint64_t)std::chrono::duration_cast<std::chrono::milliseconds>(now - iter->second.last_sent).count();
-		m_stats.total_ping += round_time;
-		m_stats.total_acks++;
-		m_stats.max_ping = std::max(m_stats.max_ping, round_time);
-		m_stats.min_ping = std::min(m_stats.min_ping, round_time);
-		m_stats.last_ping = round_time;
-		m_rolling_ping = (m_rolling_ping + round_time) / 2;
+		if (iter->second.times_resent == 0) {
+			uint64_t round_time = (uint64_t)std::chrono::duration_cast<std::chrono::milliseconds>(now - iter->second.last_sent).count();
+
+			m_stats.max_ping = std::max(m_stats.max_ping, round_time);
+			m_stats.min_ping = std::min(m_stats.min_ping, round_time);
+			m_stats.last_ping = round_time;
+			m_rolling_ping = (m_rolling_ping * 2 + round_time) / 3;
+		}
+
 		s->sent_packets.erase(iter);
 	}
 }
