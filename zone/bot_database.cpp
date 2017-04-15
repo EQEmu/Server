@@ -2459,9 +2459,10 @@ bool BotDatabase::LoadBotGroupsListByOwnerID(const uint32 owner_id, std::list<st
 
 
 /* Bot owner group functions   */
-bool BotDatabase::LoadGroupedBotsByGroupID(const uint32 group_id, std::list<uint32>& group_list)
+// added owner ID to this function to fix groups with mulitple players grouped with bots.
+bool BotDatabase::LoadGroupedBotsByGroupID(const uint32 owner_id, const uint32 group_id, std::list<uint32>& group_list)
 {
-	if (!group_id)
+	if (!group_id || !owner_id)
 		return false;
 
 	query = StringFormat(
@@ -2471,18 +2472,10 @@ bool BotDatabase::LoadGroupedBotsByGroupID(const uint32 group_id, std::list<uint
 		" AND `charid` IN ("
 		"  SELECT `bot_id`"
 		"  FROM `bot_data`"
-		"  WHERE `owner_id` IN ("
-		"   SELECT `charid`"
-		"   FROM `group_id`"
-		"   WHERE `groupid` = '%u'"
-		"   AND `name` IN ("
-		"    SELECT `name`"
-		"    FROM `character_data`"
-		"   )"
-		"  )"
-		" )",
+		"  WHERE `owner_id` = '%u'"
+		"  )",
 		group_id,
-		group_id
+		owner_id
 	);
 
 	auto results = QueryDatabase(query);

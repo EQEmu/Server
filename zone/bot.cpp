@@ -2995,7 +2995,8 @@ void Bot::LoadAndSpawnAllZonedBots(Client* botOwner) {
 			if(g) {
 				uint32 TempGroupId = g->GetID();
 				std::list<uint32> ActiveBots;
-				if (!botdb.LoadGroupedBotsByGroupID(TempGroupId, ActiveBots)) {
+				// Modified LoadGroupedBotsByGroupID to require a CharacterID
+				if (!botdb.LoadGroupedBotsByGroupID(botOwner->CharacterID(), TempGroupId, ActiveBots)) {
 					botOwner->Message(13, "%s", BotDatabase::fail::LoadGroupedBotsByGroupID());
 					return;
 				}
@@ -3007,8 +3008,9 @@ void Bot::LoadAndSpawnAllZonedBots(Client* botOwner) {
 						if(activeBot) {
 							activeBot->Spawn(botOwner);
 							g->UpdatePlayer(activeBot);
-							if(g->GetLeader())
-								activeBot->SetFollowID(g->GetLeader()->GetID());
+							// follow the bot owner, not the group leader we just zoned with our owner.
+							if(g->IsGroupMember(botOwner) && g->IsGroupMember(activeBot))
+								activeBot->SetFollowID(botOwner->GetID());
 						}
 
 						if(activeBot && !botOwner->HasGroup())
@@ -7297,10 +7299,11 @@ void Bot::ProcessClientZoneChange(Client* botOwner) {
 			if(tempBot) {
 				if(tempBot->HasGroup()) {
 					Group* g = tempBot->GetGroup();
-					if(g && g->GetLeader()) {
-						Mob* tempGroupLeader = tempBot->GetGroup()->GetLeader();
-						if(tempGroupLeader && tempGroupLeader->IsClient()) {
-							if(tempBot->GetBotOwnerCharacterID() == tempGroupLeader->CastToClient()->CharacterID())
+					if(g && g->IsGroupMember(botOwner)) {
+						if(botOwner && botOwner->IsClient()) {
+							// Modified to not only zone bots if you're the leader.
+							// Also zone bots of the non-leader when they change zone.
+							if(tempBot->GetBotOwnerCharacterID() == botOwner->CharacterID() && g->IsGroupMember(botOwner))
 								tempBot->Zone();
 							else
 								tempBot->Camp();
