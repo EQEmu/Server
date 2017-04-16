@@ -1903,7 +1903,7 @@ void Client::CalcRestState() {
 
 	RestRegenHP = RestRegenMana = RestRegenEndurance = 0;
 
-	if(AggroCount || !IsSitting())
+	if (AggroCount || !(IsSitting() || (GetHorseId() != 0)))
 		return;
 
 	if(!rest_timer.Check(false))
