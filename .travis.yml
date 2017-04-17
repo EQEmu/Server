@@ -19,7 +19,7 @@ install:
   - if [ "$CXX" = "g++" ]; then export CXX="g++-4.8" CC="gcc-4.8"; fi
 script:
   - cmake -G "Unix Makefiles" -DEQEMU_BUILD_TESTS=ON -DEQEMU_ENABLE_BOTS=ON -DEQEMU_BUILD_LOGIN=ON
-  - make -j8
+  - make -j2
   - ./bin/tests
 branches:
   only:
