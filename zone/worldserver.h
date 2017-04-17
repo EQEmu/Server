@@ -18,27 +18,31 @@
 #ifndef WORLDSERVER_H
 #define WORLDSERVER_H
 
-#include "../common/worldconn.h"
 #include "../common/eq_packet_structs.h"
+#include "../common/net/servertalk_client_connection.h"
 
 class ServerPacket;
 class EQApplicationPacket;
 class Client;
 
-class WorldServer : public WorldConnection {
+class WorldServer {
 public:
 	WorldServer();
-	virtual ~WorldServer();
+	~WorldServer();
 
-	virtual void Process();
+	void Connect();
+	bool SendPacket(ServerPacket* pack);
+	std::string GetIP() const;
+	uint16 GetPort() const;
+	bool Connected() const;
 
-	void SendGuildJoin(GuildJoin_Struct* gj);
+	void HandleMessage(uint16 opcode, const EQ::Net::Packet &p);
+
 	bool SendChannelMessage(Client* from, const char* to, uint8 chan_num, uint32 guilddbid, uint8 language, const char* message, ...);
 	bool SendEmoteMessage(const char* to, uint32 to_guilddbid, uint32 type, const char* message, ...);
 	bool SendEmoteMessage(const char* to, uint32 to_guilddbid, int16 to_minstatus, uint32 type, const char* message, ...);
 	bool SendVoiceMacro(Client* From, uint32 Type, char* Target, uint32 MacroNumber, uint32 GroupOrRaidID = 0);
 	void SetZoneData(uint32 iZoneID, uint32 iInstanceID = 0);
-	uint32 SendGroupIdRequest();
 	bool RezzPlayer(EQApplicationPacket* rpack, uint32 rezzexp, uint32 dbid, uint16 opcode);
 	bool IsOOCMuted() const { return(oocmuted); }
 
@@ -67,6 +71,8 @@ private:
 
 	uint32 cur_groupid;
 	uint32 last_groupid;
+
+	std::unique_ptr<EQ::Net::ServertalkClient> m_connection;
 };
 #endif
 

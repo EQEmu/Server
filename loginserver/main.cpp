@@ -1,24 +1,24 @@
 /*	EQEMu: Everquest Server Emulator
-	Copyright (C) 2001-2010 EQEMu Development Team (http://eqemulator.net)
+Copyright (C) 2001-2010 EQEMu Development Team (http://eqemulator.net)
 
-	This program is free software; you can redistribute it and/or modify
-	it under the terms of the GNU General Public License as published by
-	the Free Software Foundation; version 2 of the License.
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; version 2 of the License.
 
-	This program is distributed in the hope that it will be useful,
-	but WITHOUT ANY WARRANTY except by those people which sell it, which
-	are required to give you total support for your newly bought product;
-	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-	A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY except by those people which sell it, which
+are required to give you total support for your newly bought product;
+without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
-	You should have received a copy of the GNU General Public License
-	along with this program; if not, write to the Free Software
-	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 #include "../common/global_define.h"
 #include "../common/types.h"
 #include "../common/opcodemgr.h"
-#include "../common/eq_stream_factory.h"
+#include "../common/event/event_loop.h"
 #include "../common/timer.h"
 #include "../common/platform.h"
 #include "../common/crash.h"
@@ -29,7 +29,6 @@
 #include <string>
 #include <sstream>
 
-TimeoutManager timeout_manager;
 LoginServer server;
 EQEmuLogSys LogSys;
 bool run_server = true;
@@ -68,6 +67,15 @@ int main()
 
 	if (server.config->GetVariable("options", "dump_packets_out").compare("TRUE") == 0)
 		server.options.DumpOutPackets(true);
+
+	if (server.config->GetVariable("security", "allow_token_login").compare("TRUE") == 0)
+		server.options.AllowTokenLogin(true);
+
+	if (server.config->GetVariable("security", "allow_password_login").compare("FALSE") == 0)
+		server.options.AllowPasswordLogin(false);
+
+	if (server.config->GetVariable("options", "auto_create_accounts").compare("TRUE") == 0)
+		server.options.AutoCreateAccounts(true);
 
 	std::string mode = server.config->GetVariable("security", "mode");
 	if (mode.size() > 0)
@@ -129,35 +137,12 @@ int main()
 		return 1;
 	}
 
-#if WIN32
-	//initialize our encryption.
-	Log(Logs::General, Logs::Login_Server, "Encryption Initialize.");
-	server.eq_crypto = new Encryption();
-	if (server.eq_crypto->LoadCrypto(server.config->GetVariable("security", "plugin"))) {
-		Log(Logs::General, Logs::Login_Server, "Encryption Loaded Successfully.");
-	}
-	else {
-		//We can't run without encryption, cleanup and exit.
-		Log(Logs::General, Logs::Error, "Encryption Failed to Load.");
-		Log(Logs::General, Logs::Login_Server, "Database System Shutdown.");
-		delete server.db;
-		Log(Logs::General, Logs::Login_Server, "Config System Shutdown.");
-		delete server.config;
-		return 1;
-	}
-#endif
-
 	//create our server manager.
 	Log(Logs::General, Logs::Login_Server, "Server Manager Initialize.");
 	server.server_manager = new ServerManager();
 	if (!server.server_manager) {
 		//We can't run without a server manager, cleanup and exit.
 		Log(Logs::General, Logs::Error, "Server Manager Failed to Start.");
-
-#ifdef WIN32
-		Log(Logs::General, Logs::Login_Server, "Encryption System Shutdown.");
-		delete server.eq_crypto;
-#endif
 
 		Log(Logs::General, Logs::Login_Server, "Database System Shutdown.");
 		delete server.db;
@@ -174,11 +159,6 @@ int main()
 		Log(Logs::General, Logs::Error, "Client Manager Failed to Start.");
 		Log(Logs::General, Logs::Login_Server, "Server Manager Shutdown.");
 		delete server.server_manager;
-
-#ifdef WIN32
-		Log(Logs::General, Logs::Login_Server, "Encryption System Shutdown.");
-		delete server.eq_crypto;
-#endif
 
 		Log(Logs::General, Logs::Login_Server, "Database System Shutdown.");
 		delete server.db;
@@ -199,9 +179,8 @@ int main()
 	while (run_server) {
 		Timer::SetCurrentTime();
 		server.client_manager->Process();
-		server.server_manager->Process();
-		timeout_manager.CheckTimeouts();
-		Sleep(100);
+		EQ::EventLoop::Get().Process();
+		Sleep(5);
 	}
 
 	Log(Logs::General, Logs::Login_Server, "Server Shutdown.");
@@ -210,15 +189,9 @@ int main()
 	Log(Logs::General, Logs::Login_Server, "Server Manager Shutdown.");
 	delete server.server_manager;
 
-#ifdef WIN32
-	Log(Logs::General, Logs::Login_Server, "Encryption System Shutdown.");
-	delete server.eq_crypto;
-#endif
-
 	Log(Logs::General, Logs::Login_Server, "Database System Shutdown.");
 	delete server.db;
 	Log(Logs::General, Logs::Login_Server, "Config System Shutdown.");
 	delete server.config;
 	return 0;
 }
-

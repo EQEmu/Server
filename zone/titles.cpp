@@ -18,6 +18,7 @@
 
 #include "../common/eq_packet_structs.h"
 #include "../common/string_util.h"
+#include "../common/misc_functions.h"
 
 #include "client.h"
 #include "entity.h"

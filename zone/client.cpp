@@ -852,7 +852,6 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 		if(GetName() != 0)
 			strcpy(sem->from, GetName());
 
-		pack->Deflate();
 		if(worldserver.Connected())
 			worldserver.SendPacket(pack);
 		safe_delete(pack);
@@ -2344,7 +2343,7 @@ bool Client::CheckIncreaseSkill(EQEmu::skills::SkillType skillid, Mob *against_w
 	if(against_who)
 	{
 		if(against_who->GetSpecialAbility(IMMUNE_AGGRO) || against_who->IsClient() ||
-			GetLevelCon(against_who->GetLevel()) == CON_GREEN)
+			GetLevelCon(against_who->GetLevel()) == CON_GRAY)
 		{
 			//false by default
 			if( !mod_can_increase_skill(skillid, against_who) ) { return(false); }
@@ -6056,7 +6055,6 @@ void Client::LeaveAdventure()
 		PendingAdventureLeave();
 		auto pack = new ServerPacket(ServerOP_AdventureLeave, 64);
 		strcpy((char*)pack->pBuffer, GetName());
-		pack->Deflate();
 		worldserver.SendPacket(pack);
 		delete pack;
 	}
@@ -8653,7 +8651,7 @@ void Client::QuestReward(Mob* target, uint32 copper, uint32 silver, uint32 gold,
 	if (exp > 0)
 		AddEXP(exp);
 
-	QueuePacket(outapp, false, Client::CLIENT_CONNECTED);
+	QueuePacket(outapp, true, Client::CLIENT_CONNECTED);
 	safe_delete(outapp);
 }
 

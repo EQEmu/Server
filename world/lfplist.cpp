@@ -261,7 +261,6 @@ void GroupLFPList::SendLFPMatches(ServerLFPMatchesRequest_Struct* smrs) {
 				Buffer++;
 			}
 		}
-		Pack->Deflate();
 	}
 
 	ClientListEntry* CLE = client_list.FindCharacter(smrs->FromName);

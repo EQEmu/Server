@@ -16,8 +16,6 @@ SET(common_sources
 	emu_legacy.cpp
 	emu_limits.cpp
 	emu_opcodes.cpp
-	emu_tcp_connection.cpp
-	emu_tcp_server.cpp
 	emu_versions.cpp
 	eqdb.cpp
 	eqdb_res.cpp
@@ -26,11 +24,10 @@ SET(common_sources
 	eqemu_logsys.cpp
 	eq_limits.cpp
 	eq_packet.cpp
-	eq_stream.cpp
-	eq_stream_factory.cpp
 	eq_stream_ident.cpp
 	eq_stream_proxy.cpp
 	eqtime.cpp
+	event_sub.cpp
 	extprofile.cpp
 	faction.cpp
 	guild_base.cpp
@@ -40,6 +37,7 @@ SET(common_sources
 	ipc_mutex.cpp
 	item_data.cpp
 	item_instance.cpp
+	json_config.cpp
 	light_source.cpp
 	md5.cpp
 	memory_buffer.cpp
@@ -68,15 +66,25 @@ SET(common_sources
 	spdat.cpp
 	string_util.cpp
 	struct_strategy.cpp
-	tcp_connection.cpp
-	tcp_server.cpp
 	textures.cpp
-	timeoutmgr.cpp
 	timer.cpp
 	unix.cpp
-	worldconn.cpp
 	xml_parser.cpp
 	platform.cpp
+	event/event_loop.cpp
+	json/jsoncpp.cpp
+	net/console_server.cpp
+	net/console_server_connection.cpp
+	net/crc32.cpp
+	net/daybreak_connection.cpp
+	net/eqstream.cpp
+	net/packet.cpp
+	net/servertalk_client_connection.cpp
+	net/servertalk_legacy_client_connection.cpp
+	net/servertalk_server.cpp
+	net/servertalk_server_connection.cpp
+	net/tcp_connection.cpp
+	net/tcp_server.cpp
 	patches/patches.cpp
 	patches/sod.cpp
 	patches/sod_limits.cpp
@@ -90,22 +98,12 @@ SET(common_sources
 	patches/titanium_limits.cpp
 	patches/uf.cpp
 	patches/uf_limits.cpp
-	SocketLib/Base64.cpp
-	SocketLib/File.cpp
-	SocketLib/HttpdCookies.cpp
-	SocketLib/HttpdForm.cpp
-	SocketLib/HttpdSocket.cpp
-	SocketLib/HTTPSocket.cpp
-	SocketLib/MemFile.cpp
-	SocketLib/Mime.cpp
-	SocketLib/Parse.cpp
-	SocketLib/socket_include.cpp
-	SocketLib/Utility.cpp
 	StackWalker/StackWalker.cpp
 	tinyxml/tinystr.cpp
 	tinyxml/tinyxml.cpp
 	tinyxml/tinyxmlerror.cpp
 	tinyxml/tinyxmlparser.cpp
+	util/uuid.cpp
 )
 
 SET(common_headers
@@ -127,8 +125,6 @@ SET(common_headers
 	emu_limits.h
 	emu_opcodes.h
 	emu_oplist.h
-	emu_tcp_connection.h
-	emu_tcp_server.h
 	emu_versions.h
 	eq_constants.h
 	eq_packet_structs.h
@@ -140,15 +136,13 @@ SET(common_headers
 	eqemu_logsys.h
 	eq_limits.h
 	eq_packet.h
-	eq_stream.h
-	eq_stream_factory.h
 	eq_stream_ident.h
 	eq_stream_intf.h
 	eq_stream_locator.h
 	eq_stream_proxy.h
-	eq_stream_type.h
 	eqtime.h
 	errmsg.h
+	event_sub.h
 	extprofile.h
 	faction.h
 	features.h
@@ -163,6 +157,7 @@ SET(common_headers
 	item_data.h
 	item_fieldlist.h
 	item_instance.h
+	json_config.h
 	languages.h
 	light_source.h
 	linked_list.h
@@ -201,19 +196,35 @@ SET(common_headers
 	spdat.h
     string_util.h
 	struct_strategy.h
-	tcp_basic_server.h
-	tcp_connection.h
-	tcp_server.h
 	textures.h
-	timeoutmgr.h
 	timer.h
 	types.h
 	unix.h
 	useperl.h
 	version.h
-	worldconn.h
 	xml_parser.h
 	zone_numbers.h
+	event/background_task.h
+	event/event_loop.h
+	event/timer.h
+	json/json.h
+	json/json-forwards.h
+	net/console_server.h
+	net/console_server_connection.h
+	net/crc32.h
+	net/daybreak_connection.h
+	net/daybreak_structs.h
+	net/dns.h
+	net/endian.h
+	net/eqstream.h
+	net/packet.h
+	net/servertalk_client_connection.h
+	net/servertalk_legacy_client_connection.h
+	net/servertalk_common.h
+	net/servertalk_server.h
+	net/servertalk_server_connection.h
+	net/tcp_connection.h
+	net/tcp_server.h
 	patches/patches.h
 	patches/sod.h
 	patches/sod_limits.h
@@ -242,21 +253,57 @@ SET(common_headers
 	patches/uf_limits.h
 	patches/uf_ops.h
 	patches/uf_structs.h
-	SocketLib/Base64.h
-	SocketLib/File.h
-	SocketLib/HttpdCookies.h
-	SocketLib/HttpdForm.h
-	SocketLib/HttpdSocket.h
-	SocketLib/HTTPSocket.h
-	SocketLib/IFile.h
-	SocketLib/MemFile.h
-	SocketLib/Mime.h
-	SocketLib/Parse.h
-	SocketLib/socket_include.h
-	SocketLib/Utility.h
 	StackWalker/StackWalker.h
 	tinyxml/tinystr.h
 	tinyxml/tinyxml.h
+	util/memory_stream.h
+	util/uuid.h
+)
+
+SOURCE_GROUP(Event FILES
+	event/background_task.h
+	event/event_loop.cpp
+	event/event_loop.h
+	event/timer.h
+)
+
+SOURCE_GROUP(Json FILES
+	json/json.h
+	json/jsoncpp.cpp
+	json/json-forwards.h
+)
+
+SOURCE_GROUP(Net FILES
+	net/console_server.cpp
+	net/console_server.h
+	net/console_server_connection.cpp
+	net/console_server_connection.h
+	net/crc32.cpp
+	net/crc32.h
+	net/daybreak_connection.cpp
+	net/daybreak_connection.h
+	net/daybreak_structs.h
+	net/dns.h
+	net/endian.h
+	net/eqmq.cpp
+	net/eqmq.h
+	net/eqstream.cpp
+	net/eqstream.h
+	net/packet.cpp
+	net/packet.h
+	net/servertalk_client_connection.cpp
+	net/servertalk_client_connection.h
+	net/servertalk_legacy_client_connection.cpp
+	net/servertalk_legacy_client_connection.h
+	net/servertalk_common.h
+	net/servertalk_server.cpp
+	net/servertalk_server.h
+	net/servertalk_server_connection.cpp
+	net/servertalk_server_connection.h
+	net/tcp_connection.cpp
+	net/tcp_connection.h
+	net/tcp_server.cpp
+	net/tcp_server.h
 )
 
 SOURCE_GROUP(Patches FILES
@@ -303,32 +350,6 @@ SOURCE_GROUP(Patches FILES
 	patches/uf_limits.cpp
 )
 
-SOURCE_GROUP(SocketLib FILES
-	SocketLib/Base64.h
-	SocketLib/File.h
-	SocketLib/HttpdCookies.h
-	SocketLib/HttpdForm.h
-	SocketLib/HttpdSocket.h
-	SocketLib/HTTPSocket.h
-	SocketLib/IFile.h
-	SocketLib/MemFile.h
-	SocketLib/Mime.h
-	SocketLib/Parse.h
-	SocketLib/socket_include.h
-	SocketLib/Utility.h
-	SocketLib/Base64.cpp
-	SocketLib/File.cpp
-	SocketLib/HttpdCookies.cpp
-	SocketLib/HttpdForm.cpp
-	SocketLib/HttpdSocket.cpp
-	SocketLib/HTTPSocket.cpp
-	SocketLib/MemFile.cpp
-	SocketLib/Mime.cpp
-	SocketLib/Parse.cpp
-	SocketLib/socket_include.cpp
-	SocketLib/Utility.cpp
-)
-
 SOURCE_GROUP(StackWalker FILES
 	StackWalker/StackWalker.h
 	StackWalker/StackWalker.cpp
@@ -343,12 +364,17 @@ SOURCE_GROUP(TinyXML FILES
 	tinyxml/tinyxmlparser.cpp
 )
 
+SOURCE_GROUP(Util FILES
+	util/memory_stream.h
+	util/uuid.cpp
+	util/uuid.h
+)
+
 INCLUDE_DIRECTORIES(Patches SocketLib StackWalker TinyXML)
 
 ADD_LIBRARY(common ${common_sources} ${common_headers})
 
 IF(UNIX)
-	ADD_DEFINITIONS(-fPIC)
 	SET_SOURCE_FILES_PROPERTIES("SocketLib/Mime.cpp" PROPERTY COMPILE_FLAGS -Wno-unused-result)
 	SET_SOURCE_FILES_PROPERTIES("patches/sod.cpp" "patches/sof.cpp" "patches/rof.cpp"  "patches/rof2.cpp" "patches/uf.cpp" PROPERTIES COMPILE_FLAGS -O0)
 ENDIF(UNIX)

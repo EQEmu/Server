@@ -31,9 +31,11 @@
 #define CON_GREEN		2
 #define CON_LIGHTBLUE	18
 #define CON_BLUE		4
-#define CON_WHITE		20
+#define CON_WHITE		10
+#define CON_WHITE_TITANIUM		20
 #define CON_YELLOW		15
 #define CON_RED			13
+#define CON_GRAY		6
 
 #define DMG_BLOCKED		-1
 #define DMG_PARRIED		-2

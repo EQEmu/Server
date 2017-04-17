@@ -2989,16 +2989,16 @@ void ZoneDatabase::QGlobalPurge()
 	database.QueryDatabase(query);
 }
 
-void ZoneDatabase::InsertDoor(uint32 ddoordbid, uint16 ddoorid, const char* ddoor_name, const glm::vec4& position, uint8 dopentype, uint16 dguildid, uint32 dlockpick, uint32 dkeyitem, uint8 ddoor_param, uint8 dinvert, int dincline, uint16 dsize){
+void ZoneDatabase::InsertDoor(uint32 ddoordbid, uint16 ddoorid, const char* ddoor_name, const glm::vec4& position, uint8 dopentype, uint16 dguildid, uint32 dlockpick, uint32 dkeyitem, uint8 ddoor_param, uint8 dinvert, int dincline, uint16 dsize, bool ddisabletimer){
 
 	std::string query = StringFormat("REPLACE INTO doors (id, doorid, zone, version, name, "
                                     "pos_x, pos_y, pos_z, heading, opentype, guild, lockpick, "
-                                    "keyitem, door_param, invert_state, incline, size) "
+                                    "keyitem, disable_timer, door_param, invert_state, incline, size) "
                                     "VALUES('%i', '%i', '%s', '%i', '%s', '%f', '%f', "
-                                    "'%f', '%f', '%i', '%i', '%i', '%i', '%i', '%i', '%i', '%i')",
+                                    "'%f', '%f', '%i', '%i', '%i', '%i', '%i', '%i', '%i', '%i', '%i')",
                                     ddoordbid, ddoorid, zone->GetShortName(), zone->GetInstanceVersion(),
                                     ddoor_name, position.x, position.y, position.z, position.w,
-                                    dopentype, dguildid, dlockpick, dkeyitem, ddoor_param, dinvert, dincline, dsize);
+									dopentype, dguildid, dlockpick, dkeyitem, (ddisabletimer ? 1 : 0), ddoor_param, dinvert, dincline, dsize);
     QueryDatabase(query);
 }
 

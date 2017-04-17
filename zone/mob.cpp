@@ -18,6 +18,7 @@
 
 #include "../common/spdat.h"
 #include "../common/string_util.h"
+#include "../common/misc_functions.h"
 
 #include "quest_parser_collection.h"
 #include "string_ids.h"
@@ -2131,7 +2132,7 @@ void Mob::SendTargetable(bool on, Client *specific_target) {
 		entity_list.QueueClients(this, outapp);
 	}
 	else if (specific_target->IsClient()) {
-		specific_target->CastToClient()->QueuePacket(outapp, false);
+		specific_target->CastToClient()->QueuePacket(outapp);
 	}
 	safe_delete(outapp);
 }

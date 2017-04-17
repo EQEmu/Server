@@ -42,7 +42,6 @@ public:
 	void UnlockWorld();
 
 	bool LSConnected();
-	void LSReconnect();
 
 	int CountZones();
 	std::vector<std::string> ListBootedZones();	//returns an array of zone_refs (opaque)

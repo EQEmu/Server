@@ -21,19 +21,22 @@
 #include "zoneserver.h"
 #include "zonelist.h"
 #include "client.h"
-#include "console.h"
 #include "worlddb.h"
 #include "../common/string_util.h"
 #include "../common/guilds.h"
 #include "../common/races.h"
 #include "../common/classes.h"
 #include "../common/packet_dump.h"
-#include "wguild_mgr.h"
 #include "../common/misc.h"
-
+#include "../common/misc_functions.h"
+#include "../common/json/json.h"
+#include "../common/event_sub.h"
+#include "web_interface.h"
+#include "wguild_mgr.h"
 #include <set>
 
-extern ConsoleList		console_list;
+extern WebInterfaceList web_interface;
+
 extern ZSList			zoneserver_list;
 uint32 numplayers = 0;	//this really wants to be a member variable of ClientList...
 
@@ -41,6 +44,8 @@ ClientList::ClientList()
 : CLStale_timer(45000)
 {
 	NextCLEID = 1;
+
+	m_tick.reset(new EQ::Timer(5000, true, std::bind(&ClientList::OnTick, this, std::placeholders::_1)));
 }
 
 ClientList::~ClientList() {
@@ -760,7 +765,6 @@ void ClientList::SendWhoAll(uint32 fromid,const char* to, int16 admin, Who_All_S
 		}
 		iterator.Advance();
 	}
-	pack2->Deflate();
 	//zoneserver_list.SendPacket(pack2); // NO NO NO WHY WOULD YOU SEND IT TO EVERY ZONE SERVER?!?
 	SendPacket(to,pack2);
 	safe_delete(pack2);
@@ -906,7 +910,6 @@ void ClientList::SendFriendsWho(ServerFriendsWho_Struct *FriendsWho, WorldTCPCon
 			bufptr += sizeof(WhoAllPlayerPart4);
 
 		}
-		pack2->Deflate();
 		SendPacket(FriendsWho->FromName,pack2);
 		safe_delete(pack2);
 	}
@@ -981,7 +984,6 @@ void ClientList::SendLFGMatches(ServerLFGMatchesRequest_Struct *smrs) {
 			}
 			Iterator.Advance();
 		}
-		Pack->Deflate();
 	}
 	SendPacket(smrs->FromName,Pack);
 	safe_delete(Pack);
@@ -1008,27 +1010,27 @@ void ClientList::ConsoleSendWhoAll(const char* to, int16 admin, Who_All_Struct* 
 	else
 		AppendAnyLenString(&output, &outsize, &outlen, "\n");
 	iterator.Reset();
-	while(iterator.MoreElements()) {
+	while (iterator.MoreElements()) {
 		cle = iterator.GetData();
 		const char* tmpZone = database.GetZoneName(cle->zone());
 		if (
-	(cle->Online() >= CLE_Status_Zoning)
-	&& (whom == 0 || (
-		((cle->Admin() >= 80 && cle->GetGM()) || whom->gmlookup == 0xFFFF) &&
-		(whom->lvllow == 0xFFFF || (cle->level() >= whom->lvllow && cle->level() <= whom->lvlhigh)) &&
-		(whom->wclass == 0xFFFF || cle->class_() == whom->wclass) &&
-		(whom->wrace == 0xFFFF || cle->race() == whom->wrace) &&
-		(whomlen == 0 || (
-			(tmpZone != 0 && strncasecmp(tmpZone, whom->whom, whomlen) == 0) ||
-			strncasecmp(cle->name(),whom->whom, whomlen) == 0 ||
-			(strncasecmp(guild_mgr.GetGuildName(cle->GuildID()), whom->whom, whomlen) == 0) ||
-			(admin >= 100 && strncasecmp(cle->AccountName(), whom->whom, whomlen) == 0)
-		))
-	))
-) {
+			(cle->Online() >= CLE_Status_Zoning)
+			&& (whom == 0 || (
+				((cle->Admin() >= 80 && cle->GetGM()) || whom->gmlookup == 0xFFFF) &&
+				(whom->lvllow == 0xFFFF || (cle->level() >= whom->lvllow && cle->level() <= whom->lvlhigh)) &&
+				(whom->wclass == 0xFFFF || cle->class_() == whom->wclass) &&
+				(whom->wrace == 0xFFFF || cle->race() == whom->wrace) &&
+				(whomlen == 0 || (
+					(tmpZone != 0 && strncasecmp(tmpZone, whom->whom, whomlen) == 0) ||
+					strncasecmp(cle->name(), whom->whom, whomlen) == 0 ||
+					(strncasecmp(guild_mgr.GetGuildName(cle->GuildID()), whom->whom, whomlen) == 0) ||
+					(admin >= 100 && strncasecmp(cle->AccountName(), whom->whom, whomlen) == 0)
+					))
+				))
+			) {
 			line[0] = 0;
-// MYRA - use new (5.x) Status labels in who for telnet connection
-			if (cle->Admin() >=250)
+			// MYRA - use new (5.x) Status labels in who for telnet connection
+			if (cle->Admin() >= 250)
 				strcpy(tmpgm, "* GM-Impossible * ");
 			else if (cle->Admin() >= 200)
 				strcpy(tmpgm, "* GM-Mgmt * ");
@@ -1060,11 +1062,12 @@ void ClientList::ConsoleSendWhoAll(const char* to, int16 admin, Who_All_Struct* 
 				strcpy(tmpgm, "* Steward * ");
 			else
 				tmpgm[0] = 0;
-// end Myra
+			// end Myra
 
 			if (guild_mgr.GuildExists(cle->GuildID())) {
 				snprintf(tmpguild, 36, " <%s>", guild_mgr.GetGuildName(cle->GuildID()));
-			} else
+			}
+			else
 				tmpguild[0] = 0;
 
 			if (cle->LFG())
@@ -1080,7 +1083,7 @@ void ClientList::ConsoleSendWhoAll(const char* to, int16 admin, Who_All_Struct* 
 
 			if (cle->Anon() == 2) { // Roleplay
 				if (admin >= 100 && admin >= cle->Admin())
-					sprintf(line, "  %s[RolePlay %i %s] %s (%s)%s zone: %s%s%s", tmpgm, cle->level(), GetClassIDName(cle->class_(),cle->level()), cle->name(), GetRaceIDName(cle->race()), tmpguild, tmpZone, LFG, accinfo);
+					sprintf(line, "  %s[RolePlay %i %s] %s (%s)%s zone: %s%s%s", tmpgm, cle->level(), GetClassIDName(cle->class_(), cle->level()), cle->name(), GetRaceIDName(cle->race()), tmpguild, tmpZone, LFG, accinfo);
 				else if (cle->Admin() >= 80 && admin < 80 && cle->GetGM()) {
 					iterator.Advance();
 					continue;
@@ -1090,7 +1093,7 @@ void ClientList::ConsoleSendWhoAll(const char* to, int16 admin, Who_All_Struct* 
 			}
 			else if (cle->Anon() == 1) { // Anon
 				if (admin >= 100 && admin >= cle->Admin())
-					sprintf(line, "  %s[ANON %i %s] %s (%s)%s zone: %s%s%s", tmpgm, cle->level(), GetClassIDName(cle->class_(),cle->level()), cle->name(), GetRaceIDName(cle->race()), tmpguild, tmpZone, LFG, accinfo);
+					sprintf(line, "  %s[ANON %i %s] %s (%s)%s zone: %s%s%s", tmpgm, cle->level(), GetClassIDName(cle->class_(), cle->level()), cle->name(), GetRaceIDName(cle->race()), tmpguild, tmpZone, LFG, accinfo);
 				else if (cle->Admin() >= 80 && cle->GetGM()) {
 					iterator.Advance();
 					continue;
@@ -1099,7 +1102,7 @@ void ClientList::ConsoleSendWhoAll(const char* to, int16 admin, Who_All_Struct* 
 					sprintf(line, "  %s[ANONYMOUS] %s%s%s", tmpgm, cle->name(), LFG, accinfo);
 			}
 			else
-				sprintf(line, "  %s[%i %s] %s (%s)%s zone: %s%s%s", tmpgm, cle->level(), GetClassIDName(cle->class_(),cle->level()), cle->name(), GetRaceIDName(cle->race()), tmpguild, tmpZone, LFG, accinfo);
+				sprintf(line, "  %s[%i %s] %s (%s)%s zone: %s%s%s", tmpgm, cle->level(), GetClassIDName(cle->class_(), cle->level()), cle->name(), GetRaceIDName(cle->race()), tmpguild, tmpZone, LFG, accinfo);
 
 			AppendAnyLenString(&output, &outsize, &outlen, line);
 			if (outlen >= 3584) {
@@ -1130,7 +1133,8 @@ void ClientList::ConsoleSendWhoAll(const char* to, int16 admin, Who_All_Struct* 
 			AppendAnyLenString(&output, &outsize, &outlen, "\r\n");
 		else
 			AppendAnyLenString(&output, &outsize, &outlen, "\n");
-		console_list.SendConsoleWho(connection, to, admin, &output, &outsize, &outlen);
+		
+		//console_list.SendConsoleWho(connection, to, admin, &output, &outsize, &outlen);
 	}
 	if (output)
 		connection->SendEmoteMessageRaw(to, 0, 0, 10, output);
@@ -1380,3 +1384,87 @@ void ClientList::SendClientVersionSummary(const char *Name)
 		ClientTitaniumCount, ClientSoFCount, ClientSoDCount, ClientUnderfootCount, ClientRoFCount, ClientRoF2Count); 
 }
 
+void ClientList::OnTick(EQ::Timer *t)
+{
+	if (!EventSubscriptionWatcher::Get()->IsSubscribed("EQW::ClientUpdate")) {
+		return;
+	}
+
+	Json::Value out;
+	out["event"] = "EQW::ClientUpdate";
+	out["data"] = Json::Value();
+
+	LinkedListIterator<ClientListEntry*> Iterator(clientlist);
+
+	Iterator.Reset();
+
+	while (Iterator.MoreElements())
+	{
+		ClientListEntry* cle = Iterator.GetData();
+		
+		Json::Value outclient;
+
+		outclient["Online"] = cle->Online();
+		outclient["ID"] = cle->GetID();
+		outclient["IP"] = cle->GetIP();
+		outclient["LSID"] = cle->LSID();
+		outclient["LSAccountID"] = cle->LSAccountID();
+		outclient["LSName"] = cle->LSName();
+		outclient["WorldAdmin"] = cle->WorldAdmin();
+
+		outclient["AccountID"] = cle->AccountID();
+		outclient["AccountName"] = cle->AccountName();
+		outclient["Admin"] = cle->Admin();
+
+		auto server = cle->Server();
+		if (server) {
+			outclient["Server"]["CAddress"] = server->GetCAddress();
+			outclient["Server"]["CLocalAddress"] = server->GetCLocalAddress();
+			outclient["Server"]["CompileTime"] = server->GetCompileTime();
+			outclient["Server"]["CPort"] = server->GetCPort();
+			outclient["Server"]["ID"] = server->GetID();
+			outclient["Server"]["InstanceID"] = server->GetInstanceID();
+			outclient["Server"]["IP"] = server->GetIP();
+			outclient["Server"]["LaunchedName"] = server->GetLaunchedName();
+			outclient["Server"]["LaunchName"] = server->GetLaunchName();
+			outclient["Server"]["Port"] = server->GetPort();
+			outclient["Server"]["PrevZoneID"] = server->GetPrevZoneID();
+			outclient["Server"]["UUID"] = server->GetUUID();
+			outclient["Server"]["ZoneID"] = server->GetZoneID();
+			outclient["Server"]["ZoneLongName"] = server->GetZoneLongName();
+			outclient["Server"]["ZoneName"] = server->GetZoneName();
+			outclient["Server"]["ZoneOSProcessID"] = server->GetZoneOSProcessID();
+			outclient["Server"]["NumPlayers"] = server->NumPlayers();
+			outclient["Server"]["BootingUp"] = server->IsBootingUp();
+			outclient["Server"]["StaticZone"] = server->IsStaticZone();
+		}
+		else {
+			outclient["Server"] = Json::Value();
+		}
+
+		outclient["CharID"] = cle->CharID();
+		outclient["name"] = cle->name();
+		outclient["zone"] = cle->zone();
+		outclient["instance"] = cle->instance();
+		outclient["level"] = cle->level();
+		outclient["class_"] = cle->class_();
+		outclient["race"] = cle->race();
+		outclient["Anon"] = cle->Anon();
+
+		outclient["TellsOff"] = cle->TellsOff();
+		outclient["GuildID"] = cle->GuildID();
+		outclient["LFG"] = cle->LFG();
+		outclient["GM"] = cle->GetGM();
+		outclient["LocalClient"] = cle->IsLocalClient();
+		outclient["LFGFromLevel"] = cle->GetLFGFromLevel();
+		outclient["LFGToLevel"] = cle->GetLFGToLevel();
+		outclient["LFGMatchFilter"] = cle->GetLFGMatchFilter();
+		outclient["LFGComments"] = cle->GetLFGComments();
+		outclient["ClientVersion"] = cle->GetClientVersion();
+		out["data"].append(outclient);
+
+		Iterator.Advance();
+	}
+
+	web_interface.SendEvent(out);
+}

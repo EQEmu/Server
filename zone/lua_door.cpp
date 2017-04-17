@@ -111,6 +111,16 @@ uint32 Lua_Door::GetOpenType() {
 	return self->GetOpenType();
 }
 
+void Lua_Door::SetDisableTimer(bool flag) {
+	Lua_Safe_Call_Void();
+	self->SetDisableTimer(flag);
+}
+
+bool Lua_Door::GetDisableTimer() {
+	Lua_Safe_Call_Bool();
+	return self->GetDisableTimer();
+}
+
 void Lua_Door::SetLockPick(uint32 pick) {
 	Lua_Safe_Call_Void();
 	self->SetLockpick(pick);
@@ -190,6 +200,8 @@ luabind::scope lua_register_door() {
 		.def("GetIncline", (uint32(Lua_Door::*)(void))&Lua_Door::GetIncline)
 		.def("SetOpenType", (void(Lua_Door::*)(uint32))&Lua_Door::SetOpenType)
 		.def("GetOpenType", (uint32(Lua_Door::*)(void))&Lua_Door::GetOpenType)
+		.def("SetDisableTimer", (void(Lua_Door::*)(bool))&Lua_Door::SetDisableTimer)
+		.def("GetDisableTimer", (bool(Lua_Door::*)(void))&Lua_Door::GetDisableTimer)
 		.def("SetLockPick", (void(Lua_Door::*)(uint32))&Lua_Door::SetLockPick)
 		.def("GetLockPick", (uint32(Lua_Door::*)(void))&Lua_Door::GetLockPick)
 		.def("SetKeyItem", (void(Lua_Door::*)(uint32))&Lua_Door::SetKeyItem)

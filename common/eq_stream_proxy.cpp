@@ -1,11 +1,10 @@
 
 #include "global_define.h"
 #include "eq_stream_proxy.h"
-#include "eq_stream.h"
 #include "struct_strategy.h"
 
 
-EQStreamProxy::EQStreamProxy(std::shared_ptr<EQStream> &stream, const StructStrategy *structs, OpcodeManager **opcodes)
+EQStreamProxy::EQStreamProxy(std::shared_ptr<EQStreamInterface> &stream, const StructStrategy *structs, OpcodeManager **opcodes)
 :	m_stream(stream),
 	m_structs(structs),
 	m_opcodes(opcodes)
@@ -24,6 +23,16 @@ std::string EQStreamProxy::Describe() const {
 const EQEmu::versions::ClientVersion EQStreamProxy::ClientVersion() const
 {
 	return m_structs->ClientVersion();
+}
+
+EQStreamState EQStreamProxy::GetState()
+{
+	return m_stream->GetState();
+}
+
+void EQStreamProxy::SetOpcodeManager(OpcodeManager **opm)
+{
+	return m_stream->SetOpcodeManager(opm);
 }
 
 void EQStreamProxy::QueuePacket(const EQApplicationPacket *p, bool ack_req) {
@@ -52,6 +61,10 @@ EQApplicationPacket *EQStreamProxy::PopPacket() {
 
 void EQStreamProxy::Close() {
 	m_stream->Close();
+}
+
+std::string EQStreamProxy::GetRemoteAddr() const {
+	return(m_stream->GetRemoteAddr());
 }
 
 uint32 EQStreamProxy::GetRemoteIP() const {

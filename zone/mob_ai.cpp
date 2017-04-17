@@ -345,7 +345,7 @@ bool NPC::AIDoSpellCast(uint8 i, Mob* tar, int32 mana_cost, uint32* oDontDoAgain
 }
 
 bool EntityList::AICheckCloseBeneficialSpells(NPC* caster, uint8 iChance, float iRange, uint32 iSpellTypes) {
-	if((iSpellTypes&SpellTypes_Detrimental) != 0) {
+	if((iSpellTypes & SpellTypes_Detrimental) != 0) {
 		//according to live, you can buff and heal through walls...
 		//now with PCs, this only applies if you can TARGET the target, but
 		// according to Rogean, Live NPCs will just cast through walls/floors, no problem..
@@ -374,41 +374,19 @@ bool EntityList::AICheckCloseBeneficialSpells(NPC* caster, uint8 iChance, float 
 
 	float iRange2 = iRange*iRange;
 
-	float t1, t2, t3;
-
-
 	//Only iterate through NPCs
 	for (auto it = npc_list.begin(); it != npc_list.end(); ++it) {
 		NPC* mob = it->second;
-
-		//Since >90% of mobs will always be out of range, try to
-		//catch them with simple bounding box checks first. These
-		//checks are about 6X faster than DistNoRoot on my athlon 1Ghz
-		t1 = mob->GetX() - caster->GetX();
-		t2 = mob->GetY() - caster->GetY();
-		t3 = mob->GetZ() - caster->GetZ();
-		//cheap ABS()
-		if(t1 < 0)
-			t1 = 0 - t1;
-		if(t2 < 0)
-			t2 = 0 - t2;
-		if(t3 < 0)
-			t3 = 0 - t3;
-		if (t1 > iRange
-			|| t2 > iRange
-			|| t3 > iRange
-			|| DistanceSquared(mob->GetPosition(), caster->GetPosition()) > iRange2
-				//this call should seem backwards:
-			|| !mob->CheckLosFN(caster)
-			|| mob->GetReverseFactionCon(caster) >= FACTION_KINDLY
-		) {
+	
+		if (mob->GetReverseFactionCon(caster) >= FACTION_KINDLY) {
 			continue;
 		}
 
-		//since we assume these are beneficial spells, which do not
-		//require LOS, we just go for it.
-		// we have a winner!
-		if((iSpellTypes & SpellType_Buff) && !RuleB(NPC, BuffFriends)){
+		if (DistanceSquared(caster->GetPosition(), mob->GetPosition()) > iRange2) {
+			continue;
+		}
+
+		if ((iSpellTypes & SpellType_Buff) && !RuleB(NPC, BuffFriends)) {
 			if (mob != caster)
 				iSpellTypes = SpellType_Heal;
 		}
@@ -2032,166 +2010,216 @@ void Mob::AreaRampage(ExtraAttackOptions *opts)
 }
 
 uint32 Mob::GetLevelCon(uint8 mylevel, uint8 iOtherLevel) {
-	int16 diff = iOtherLevel - mylevel;
-	uint32 conlevel=0;
 
-	if (diff == 0)
-		return CON_WHITE;
-	else if (diff >= 1 && diff <= 2)
-		return CON_YELLOW;
-	else if (diff >= 3)
-		return CON_RED;
+	uint32 conlevel = 0;
 
-	if (mylevel <= 8)
+	if (RuleB(Character, UseOldConSystem))
 	{
-		if (diff <= -4)
-			conlevel = CON_GREEN;
+		int16 diff = iOtherLevel - mylevel;
+
+		if (diff == 0)
+			return CON_WHITE;
+		else if (diff >= 1 && diff <= 2)
+			return CON_YELLOW;
+		else if (diff >= 3)
+			return CON_RED;
+
+		if (mylevel <= 8)
+		{
+			if (diff <= -4)
+				conlevel = CON_GRAY;
+			else
+				conlevel = CON_BLUE;
+		}
+		else if (mylevel <= 9)
+		{
+			if (diff <= -6)
+				conlevel = CON_GRAY;
+			else if (diff <= -4)
+				conlevel = CON_LIGHTBLUE;
+			else
+				conlevel = CON_BLUE;
+		}
+		else if (mylevel <= 13)
+		{
+			if (diff <= -7)
+				conlevel = CON_GRAY;
+			else if (diff <= -5)
+				conlevel = CON_LIGHTBLUE;
+			else
+				conlevel = CON_BLUE;
+		}
+		else if (mylevel <= 15)
+		{
+			if (diff <= -7)
+				conlevel = CON_GRAY;
+			else if (diff <= -5)
+				conlevel = CON_LIGHTBLUE;
+			else
+				conlevel = CON_BLUE;
+		}
+		else if (mylevel <= 17)
+		{
+			if (diff <= -8)
+				conlevel = CON_GRAY;
+			else if (diff <= -6)
+				conlevel = CON_LIGHTBLUE;
+			else
+				conlevel = CON_BLUE;
+		}
+		else if (mylevel <= 21)
+		{
+			if (diff <= -9)
+				conlevel = CON_GRAY;
+			else if (diff <= -7)
+				conlevel = CON_LIGHTBLUE;
+			else
+				conlevel = CON_BLUE;
+		}
+		else if (mylevel <= 25)
+		{
+			if (diff <= -10)
+				conlevel = CON_GRAY;
+			else if (diff <= -8)
+				conlevel = CON_LIGHTBLUE;
+			else
+				conlevel = CON_BLUE;
+		}
+		else if (mylevel <= 29)
+		{
+			if (diff <= -11)
+				conlevel = CON_GRAY;
+			else if (diff <= -9)
+				conlevel = CON_LIGHTBLUE;
+			else
+				conlevel = CON_BLUE;
+		}
+		else if (mylevel <= 31)
+		{
+			if (diff <= -12)
+				conlevel = CON_GRAY;
+			else if (diff <= -9)
+				conlevel = CON_LIGHTBLUE;
+			else
+				conlevel = CON_BLUE;
+		}
+		else if (mylevel <= 33)
+		{
+			if (diff <= -13)
+				conlevel = CON_GRAY;
+			else if (diff <= -10)
+				conlevel = CON_LIGHTBLUE;
+			else
+				conlevel = CON_BLUE;
+		}
+		else if (mylevel <= 37)
+		{
+			if (diff <= -14)
+				conlevel = CON_GRAY;
+			else if (diff <= -11)
+				conlevel = CON_LIGHTBLUE;
+			else
+				conlevel = CON_BLUE;
+		}
+		else if (mylevel <= 41)
+		{
+			if (diff <= -16)
+				conlevel = CON_GRAY;
+			else if (diff <= -12)
+				conlevel = CON_LIGHTBLUE;
+			else
+				conlevel = CON_BLUE;
+		}
+		else if (mylevel <= 45)
+		{
+			if (diff <= -17)
+				conlevel = CON_GRAY;
+			else if (diff <= -13)
+				conlevel = CON_LIGHTBLUE;
+			else
+				conlevel = CON_BLUE;
+		}
+		else if (mylevel <= 49)
+		{
+			if (diff <= -18)
+				conlevel = CON_GRAY;
+			else if (diff <= -14)
+				conlevel = CON_LIGHTBLUE;
+			else
+				conlevel = CON_BLUE;
+		}
+		else if (mylevel <= 53)
+		{
+			if (diff <= -19)
+				conlevel = CON_GRAY;
+			else if (diff <= -15)
+				conlevel = CON_LIGHTBLUE;
+			else
+				conlevel = CON_BLUE;
+		}
+		else if (mylevel <= 55)
+		{
+			if (diff <= -20)
+				conlevel = CON_GRAY;
+			else if (diff <= -15)
+				conlevel = CON_LIGHTBLUE;
+			else
+				conlevel = CON_BLUE;
+		}
 		else
-			conlevel = CON_BLUE;
-	}
-	else if (mylevel <= 9)
-	{
-		if (diff <= -6)
-			conlevel = CON_GREEN;
-		else if (diff <= -4)
-			conlevel = CON_LIGHTBLUE;
-		else
-			conlevel = CON_BLUE;
-	}
-	else if (mylevel <= 13)
-	{
-		if (diff <= -7)
-			conlevel = CON_GREEN;
-		else if (diff <= -5)
-			conlevel = CON_LIGHTBLUE;
-		else
-			conlevel = CON_BLUE;
-	}
-	else if (mylevel <= 15)
-	{
-		if (diff <= -7)
-			conlevel = CON_GREEN;
-		else if (diff <= -5)
-			conlevel = CON_LIGHTBLUE;
-		else
-			conlevel = CON_BLUE;
-	}
-	else if (mylevel <= 17)
-	{
-		if (diff <= -8)
-			conlevel = CON_GREEN;
-		else if (diff <= -6)
-			conlevel = CON_LIGHTBLUE;
-		else
-			conlevel = CON_BLUE;
-	}
-	else if (mylevel <= 21)
-	{
-		if (diff <= -9)
-			conlevel = CON_GREEN;
-		else if (diff <= -7)
-			conlevel = CON_LIGHTBLUE;
-		else
-			conlevel = CON_BLUE;
-	}
-	else if (mylevel <= 25)
-	{
-		if (diff <= -10)
-			conlevel = CON_GREEN;
-		else if (diff <= -8)
-			conlevel = CON_LIGHTBLUE;
-		else
-			conlevel = CON_BLUE;
-	}
-	else if (mylevel <= 29)
-	{
-		if (diff <= -11)
-			conlevel = CON_GREEN;
-		else if (diff <= -9)
-			conlevel = CON_LIGHTBLUE;
-		else
-			conlevel = CON_BLUE;
-	}
-	else if (mylevel <= 31)
-	{
-		if (diff <= -12)
-			conlevel = CON_GREEN;
-		else if (diff <= -9)
-			conlevel = CON_LIGHTBLUE;
-		else
-			conlevel = CON_BLUE;
-	}
-	else if (mylevel <= 33)
-	{
-		if (diff <= -13)
-			conlevel = CON_GREEN;
-		else if (diff <= -10)
-			conlevel = CON_LIGHTBLUE;
-		else
-			conlevel = CON_BLUE;
-	}
-	else if (mylevel <= 37)
-	{
-		if (diff <= -14)
-			conlevel = CON_GREEN;
-		else if (diff <= -11)
-			conlevel = CON_LIGHTBLUE;
-		else
-			conlevel = CON_BLUE;
-	}
-	else if (mylevel <= 41)
-	{
-		if (diff <= -16)
-			conlevel = CON_GREEN;
-		else if (diff <= -12)
-			conlevel = CON_LIGHTBLUE;
-		else
-			conlevel = CON_BLUE;
-	}
-	else if (mylevel <= 45)
-	{
-		if (diff <= -17)
-			conlevel = CON_GREEN;
-		else if (diff <= -13)
-			conlevel = CON_LIGHTBLUE;
-		else
-			conlevel = CON_BLUE;
-	}
-	else if (mylevel <= 49)
-	{
-		if (diff <= -18)
-			conlevel = CON_GREEN;
-		else if (diff <= -14)
-			conlevel = CON_LIGHTBLUE;
-		else
-			conlevel = CON_BLUE;
-	}
-	else if (mylevel <= 53)
-	{
-		if (diff <= -19)
-			conlevel = CON_GREEN;
-		else if (diff <= -15)
-			conlevel = CON_LIGHTBLUE;
-		else
-			conlevel = CON_BLUE;
-	}
-	else if (mylevel <= 55)
-	{
-		if (diff <= -20)
-			conlevel = CON_GREEN;
-		else if (diff <= -15)
-			conlevel = CON_LIGHTBLUE;
-		else
-			conlevel = CON_BLUE;
+		{
+			if (diff <= -21)
+				conlevel = CON_GRAY;
+			else if (diff <= -16)
+				conlevel = CON_LIGHTBLUE;
+			else
+				conlevel = CON_BLUE;
+		}
 	}
 	else
 	{
-		if (diff <= -21)
-			conlevel = CON_GREEN;
-		else if (diff <= -16)
-			conlevel = CON_LIGHTBLUE;
+		int16 diff = iOtherLevel - mylevel;
+		uint32 conGrayLvl = mylevel - (int32)((mylevel + 5) / 3);
+		uint32 conGreenLvl = mylevel - (int32)((mylevel + 7) / 4);
+
+		if (diff == 0)
+			return CON_WHITE;
+		else if (diff >= 1 && diff <= 3)
+			return CON_YELLOW;
+		else if (diff >= 4)
+			return CON_RED;
+
+		if (mylevel <= 15)
+		{
+			if (diff <= -6)
+				conlevel = CON_GRAY;
+			else
+				conlevel = CON_BLUE;
+		}
 		else
-			conlevel = CON_BLUE;
+			if (mylevel <= 20)
+			{
+				if (iOtherLevel <= conGrayLvl)
+					conlevel = CON_GRAY;
+				else
+					if (iOtherLevel <= conGreenLvl)
+						conlevel = CON_GREEN;
+					else
+						conlevel = CON_BLUE;
+			}
+			else
+			{
+				if (iOtherLevel <= conGrayLvl)
+					conlevel = CON_GRAY;
+				else
+					if (iOtherLevel <= conGreenLvl)
+						conlevel = CON_GREEN;
+					else
+						if (diff <= -6)
+							conlevel = CON_LIGHTBLUE;
+						else
+							conlevel = CON_BLUE;
+			}
 	}
 	return conlevel;
 }

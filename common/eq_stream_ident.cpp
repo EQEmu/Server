@@ -4,7 +4,7 @@
 #include "eqemu_logsys.h"
 #include "eq_stream_ident.h"
 #include "eq_stream_proxy.h"
-
+#include "misc.h"
 
 EQStreamIdentifier::~EQStreamIdentifier() {
 	while(!m_identified.empty()) {
@@ -26,7 +26,7 @@ EQStreamIdentifier::~EQStreamIdentifier() {
 	}
 }
 
-void EQStreamIdentifier::RegisterPatch(const EQStream::Signature &sig, const char *name, OpcodeManager ** opcodes, const StructStrategy *structs) {
+void EQStreamIdentifier::RegisterPatch(const EQStreamInterface::Signature &sig, const char *name, OpcodeManager ** opcodes, const StructStrategy *structs) {
 	auto p = new Patch;
 	p->signature = sig;
 	p->name = name;
@@ -46,9 +46,9 @@ void EQStreamIdentifier::Process() {
 
 		//first see if this stream has expired
 		if(r.expire.Check(false)) {
-			//this stream has failed to match any pattern in our timeframe.
-			Log(Logs::General, Logs::Netcode, "[IDENTIFY] Unable to identify stream from %s:%d before timeout.", long2ip(r.stream->GetRemoteIP()).c_str(), ntohs(r.stream->GetRemotePort()));
-			r.stream->ReleaseFromUse();
+			Log(Logs::General, Logs::Netcode, "[IDENTIFY] Unable to identify stream from %s:%d before timeout.", r.stream->GetRemoteAddr().c_str(), ntohs(r.stream->GetRemotePort()));
+			r.stream->Close();
+
 			cur = m_streams.erase(cur);
 			continue;
 		}
@@ -98,14 +98,14 @@ void EQStreamIdentifier::Process() {
 			Patch *p = *curp;
 
 			//ask the stream to see if it matches the supplied signature
-			EQStream::MatchState res = r.stream->CheckSignature(&p->signature);
+			EQStreamInterface::MatchState res = r.stream->CheckSignature(&p->signature);
 			switch(res) {
-			case EQStream::MatchNotReady:
+			case EQStreamInterface::MatchNotReady:
 				//the stream has not received enough packets to compare with this signature
 //				Log.LogDebugType(Logs::General, Logs::Netcode, "[IDENT_TRACE] %s:%d: Tried patch %s, but stream is not ready for it.", long2ip(r.stream->GetRemoteIP()).c_str(), ntohs(r.stream->GetRemotePort()), p->name.c_str());
 				all_ready = false;
 				break;
-			case EQStream::MatchSuccessful: {
+			case EQStreamInterface::MatchSuccessful: {
 				//yay, a match.
 
 				Log(Logs::General, Logs::Netcode, "[IDENTIFY] Identified stream %s:%d with signature %s", long2ip(r.stream->GetRemoteIP()).c_str(), ntohs(r.stream->GetRemotePort()), p->name.c_str());
@@ -120,7 +120,7 @@ void EQStreamIdentifier::Process() {
 				found_one = true;
 				break;
 			}
-			case EQStream::MatchFailed:
+			case EQStreamInterface::MatchFailed:
 				//do nothing...
 				Log(Logs::General, Logs::Netcode, "[IDENT_TRACE] %s:%d: Tried patch %s, and it did not match.", long2ip(r.stream->GetRemoteIP()).c_str(), ntohs(r.stream->GetRemotePort()), p->name.c_str());
 				break;
@@ -144,7 +144,7 @@ void EQStreamIdentifier::Process() {
 	}	//end foreach stream
 }
 
-void EQStreamIdentifier::AddStream(std::shared_ptr<EQStream> &eqs) {
+void EQStreamIdentifier::AddStream(std::shared_ptr<EQStreamInterface> eqs) {
 	m_streams.push_back(Record(eqs));
 	eqs = nullptr;
 }
@@ -157,7 +157,7 @@ EQStreamInterface *EQStreamIdentifier::PopIdentified() {
 	return(res);
 }
 
-EQStreamIdentifier::Record::Record(std::shared_ptr<EQStream> s)
+EQStreamIdentifier::Record::Record(std::shared_ptr<EQStreamInterface> s)
 :	stream(std::move(s)),
 	expire(STREAM_IDENT_WAIT_MS)
 {
