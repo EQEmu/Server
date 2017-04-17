@@ -3,7 +3,11 @@ compiler: gcc
 sudo: false
 addons:
   apt:
+    sources:
+    - ubuntu-toolchain-r-test
     packages:
+    - gcc-4.8
+    - g++-4.8
     - libmysqlclient-dev
     - libperl-dev
     - libboost-dev
@@ -11,6 +15,8 @@ addons:
     - zlib1g-dev
     - uuid-dev
     - libssl-dev
+install:
+  - if [ "$CXX" = "g++" ]; then export CXX="g++-4.8" CC="gcc-4.8"; fi
 script:
   - cmake -G "Unix Makefiles" -DEQEMU_BUILD_TESTS=ON -DEQEMU_ENABLE_BOTS=ON -DEQEMU_BUILD_LOGIN=ON
   - make -j8
