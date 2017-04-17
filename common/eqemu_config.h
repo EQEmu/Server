@@ -26,6 +26,7 @@ struct LoginConfig {
 	std::string LoginAccount;
 	std::string LoginPassword;
 	uint16 LoginPort;
+	bool LoginLegacy;
 };
 
 class EQEmuConfig : public XMLParser
@@ -42,11 +43,14 @@ class EQEmuConfig : public XMLParser
 		std::string LoginAccount;
 		std::string LoginPassword;
 		uint16 LoginPort;
+		bool LoginLegacy;
 		uint32 LoginCount;
 		LinkedList<LoginConfig*> loginlist;
 		bool Locked;
 		uint16 WorldTCPPort;
 		std::string WorldIP;
+		uint16 TelnetTCPPort;
+		std::string TelnetIP;
 		bool TelnetEnabled;
 		int32 MaxClients;
 		bool WorldHTTPEnabled;
@@ -127,11 +131,13 @@ class EQEmuConfig : public XMLParser
 #include "eqemu_config_elements.h"
 			// Set sane defaults
 			// Login server
-			LoginHost = "eqemulator.net";
+			LoginHost = "login.eqemulator.net";
 			LoginPort = 5998;
+			LoginLegacy = false;
 			// World
 			Locked = false;
 			WorldTCPPort = 9000;
+			TelnetTCPPort = 9001;
 			TelnetEnabled = false;
 			WorldHTTPEnabled = false;
 			WorldHTTPPort = 9080;
@@ -186,6 +192,7 @@ class EQEmuConfig : public XMLParser
 			DefaultStatus = 0;
 			// For where zones need to connect to.
 			WorldIP = "127.0.0.1";
+			TelnetIP = "127.0.0.1";
 			// Dynamics to start
 			//DynamicCount=5;
 			MaxClients = -1;

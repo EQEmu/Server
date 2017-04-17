@@ -1,145 +1,159 @@
-/*	EQEMu: Everquest Server Emulator
-	Copyright (C) 2001-2010 EQEMu Development Team (http://eqemulator.net)
-
-	This program is free software; you can redistribute it and/or modify
-	it under the terms of the GNU General Public License as published by
-	the Free Software Foundation; version 2 of the License.
-
-	This program is distributed in the hope that it will be useful,
-	but WITHOUT ANY WARRANTY except by those people which sell it, which
-	are required to give you total support for your newly bought product;
-	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-	A PARTICULAR PURPOSE. See the GNU General Public License for more details.
-
-	You should have received a copy of the GNU General Public License
-	along with this program; if not, write to the Free Software
-	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
-*/
-#include "../common/global_define.h"
-#include "encryption.h"
+#include <openssl/des.h>
+#include <openssl/sha.h>
+#include <openssl/md5.h>
+#include <cstring>
 #include <string>
-
-#include "../common/eqemu_logsys.h"
-extern EQEmuLogSys LogSys;
-
-bool Encryption::LoadCrypto(std::string name)
-{
-	if(!Load(name.c_str()))
-	{
-		Log(Logs::General, Logs::Error, "Failed to load %s from the operating system.", name.c_str());
-		return false;
-	}
-	else
-	{
-		encrypt_func = (DLLFUNC_Encrypt)GetSym("Encrypt");
-		if(encrypt_func == NULL)
-		{
-			Log(Logs::General, Logs::Error, "Failed to attach Encrypt.");
-			Unload();
-			return false;
-		}
-		decrypt_func = (DLLFUNC_DecryptUsernamePassword)GetSym("DecryptUsernamePassword");
-		if(decrypt_func == NULL)
-		{
-			Log(Logs::General, Logs::Error, "Failed to attach DecryptUsernamePassword.");
-			Unload();
-			return false;
-		}
-		delete_func = (DLLFUNC_HeapDelete)GetSym("_HeapDeleteCharBuffer");
-		if(delete_func == NULL)
-		{
-			Log(Logs::General, Logs::Error, "Failed to attach _HeapDeleteCharBuffer.");
-			Unload();
-			return false;
-		}
-	}
-	return true;
-}
-
-char *Encryption::DecryptUsernamePassword(const char* encrypted_buffer, unsigned int buffer_size, int mode)
-{
-	if(decrypt_func)
-	{
-		return decrypt_func(encrypted_buffer, buffer_size, mode);
-	}
-	return NULL;
-}
-
-char *Encryption::Encrypt(const char* buffer, unsigned int buffer_size, unsigned int &out_size)
-{
-	if(encrypt_func)
-	{
-		return encrypt_func(buffer, buffer_size, out_size);
-	}
-	return NULL;
-}
-
-void Encryption::DeleteHeap(char *buffer)
-{
-	if(delete_func)
-	{
-		delete_func(buffer);
-	}
-}
-
-bool Encryption::Load(const char *name)
-{
-	SetLastError(0);
-#ifdef UNICODE
-	int name_length = strlen(name);
-	int wide_length = MultiByteToWideChar(CP_ACP, 0, name, name_length+1, 0, 0);
-	WCHAR *wide_string = new WCHAR[wide_length];
-	MultiByteToWideChar(CP_ACP, 0, name, name_length+1, wide_string, wide_length);
-
-	h_dll = LoadLibrary(wide_string);
-	delete[] wide_string;
-#else
-	h_dll = LoadLibrary(name);
+#ifdef ENABLE_SECURITY
+#include <sodium.h>
 #endif
 
-	if(h_dll == NULL)
-	{
-		return false;
-	}
-	else
-	{
-		SetLastError(0);
+const char* eqcrypt_block(const char *buffer_in, size_t buffer_in_sz, char* buffer_out, bool enc) {
+	DES_key_schedule k;
+	DES_cblock v;
+
+	memset(&k, 0, sizeof(DES_key_schedule));
+	memset(&v, 0, sizeof(DES_cblock));
+
+	if (!enc && buffer_in_sz && buffer_in_sz % 8 != 0) {
+		return nullptr;
 	}
 
-	return true;
+	DES_ncbc_encrypt((const unsigned char*)buffer_in, (unsigned char*)buffer_out, (long)buffer_in_sz, &k, &v, enc);
+	return buffer_out;
 }
 
-void Encryption::Unload()
+std::string eqcrypt_md5(const std::string &msg) {
+	std::string ret;
+	unsigned char md5_digest[16];
+	char tmp[4];
+
+	MD5((const unsigned char*)msg.c_str(), msg.length(), md5_digest);
+
+	for (int i = 0; i < 16; ++i) {
+		sprintf(&tmp[0], "%02x", md5_digest[i]);
+		ret.push_back(tmp[0]);
+		ret.push_back(tmp[1]);
+	}
+
+	return ret;
+}
+
+std::string eqcrypt_sha1(const std::string &msg) {
+	std::string ret;
+	unsigned char sha_digest[20];
+	char tmp[4];
+
+	SHA1((const unsigned char*)msg.c_str(), msg.length(), sha_digest);
+
+	for (int i = 0; i < 20; ++i) {
+		sprintf(&tmp[0], "%02x", sha_digest[i]);
+		ret.push_back(tmp[0]);
+		ret.push_back(tmp[1]);
+	}
+
+	return ret;
+}
+
+std::string eqcrypt_sha512(const std::string &msg) {
+	std::string ret;
+	unsigned char sha_digest[64];
+	char tmp[4];
+
+	SHA512((const unsigned char*)msg.c_str(), msg.length(), sha_digest);
+
+	for (int i = 0; i < 64; ++i) {
+		sprintf(&tmp[0], "%02x", sha_digest[i]);
+		ret.push_back(tmp[0]);
+		ret.push_back(tmp[1]);
+	}
+
+	return ret;
+}
+
+#ifdef ENABLE_SECURITY
+
+std::string eqcrypt_argon2(const std::string &msg)
 {
-	if(h_dll)
-	{
-		FreeLibrary(h_dll);
-		h_dll = NULL;
+	std::string ret;
+	ret.resize(crypto_pwhash_STRBYTES);
+
+	if (crypto_pwhash_str(&ret[0], &msg[0], msg.length(), crypto_pwhash_OPSLIMIT_SENSITIVE, crypto_pwhash_MEMLIMIT_SENSITIVE) != 0) {
+		return "";
 	}
+
+	return ret;
 }
 
-bool Encryption::GetSym(const char *name, void **sym)
+std::string eqcrypt_scrypt(const std::string &msg)
 {
-	if(Loaded())
-	{
-		*sym = GetProcAddress(h_dll, name);
-		return(*sym != NULL);
+	std::string ret;
+	ret.resize(crypto_pwhash_scryptsalsa208sha256_STRBYTES);
+
+	if (crypto_pwhash_scryptsalsa208sha256_str(&ret[0], &msg[0], msg.length(),
+		crypto_pwhash_scryptsalsa208sha256_OPSLIMIT_SENSITIVE, crypto_pwhash_scryptsalsa208sha256_MEMLIMIT_SENSITIVE) != 0) {
+		return "";
 	}
-	else
+
+	return ret;
+}
+
+#endif
+
+std::string eqcrypt_hash(const std::string &username, const std::string &password, int mode) {
+	switch (mode)
 	{
-		return false;
+	case 1:
+		return eqcrypt_md5(password);
+	case 2:
+		return eqcrypt_md5(password + ":" + username);
+	case 3:
+		return eqcrypt_md5(username + ":" + password);
+	case 4:
+		return eqcrypt_md5(eqcrypt_md5(username) + eqcrypt_md5(password));
+	case 5:
+		return eqcrypt_sha1(password);
+	case 6:
+		return eqcrypt_sha1(password + ":" + username);
+	case 7:
+		return eqcrypt_sha1(username + ":" + password);
+	case 8:
+		return eqcrypt_sha1(eqcrypt_sha1(username) + eqcrypt_sha1(password));
+	case 9:
+		return eqcrypt_sha512(password);
+	case 10:
+		return eqcrypt_sha512(password + ":" + username);
+	case 11:
+		return eqcrypt_sha512(username + ":" + password);
+	case 12:
+		return eqcrypt_sha512(eqcrypt_sha512(username) + eqcrypt_sha512(password));
+#ifdef ENABLE_SECURITY
+	case 13:
+		return eqcrypt_argon2(password);
+	case 14:
+		return eqcrypt_scrypt(password);
+#endif
+		//todo bcrypt? pbkdf2?
+	default:
+		return "";
+		break;
 	}
 }
 
-void *Encryption::GetSym(const char *name)
-{
-	if(Loaded())
+bool eqcrypt_verify_hash(const std::string &username, const std::string &password, const std::string &pwhash, int mode) {
+	switch (mode)
 	{
-		return GetProcAddress(h_dll, name);
-	}
-	else
+#ifdef ENABLE_SECURITY
+	case 13:
+		return crypto_pwhash_str_verify(&pwhash[0], &password[0], password.length()) == 0;
+	case 14:
+		return crypto_pwhash_scryptsalsa208sha256_str_verify(&pwhash[0], &password[0], password.length()) == 0;
+#endif
+	default:
 	{
-		return NULL;
+		auto hash = eqcrypt_hash(username, password, mode);
+		return hash.compare(pwhash) == 0;
 	}
-}
+	}
 
+	return false;
+}

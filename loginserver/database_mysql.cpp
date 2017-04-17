@@ -1,19 +1,19 @@
 /*	EQEMu: Everquest Server Emulator
-	Copyright (C) 2001-2010 EQEMu Development Team (http://eqemulator.net)
+Copyright (C) 2001-2010 EQEMu Development Team (http://eqemulator.net)
 
-	This program is free software; you can redistribute it and/or modify
-	it under the terms of the GNU General Public License as published by
-	the Free Software Foundation; version 2 of the License.
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; version 2 of the License.
 
-	This program is distributed in the hope that it will be useful,
-	but WITHOUT ANY WARRANTY except by those people which sell it, which
-	are required to give you total support for your newly bought product;
-	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-	A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY except by those people which sell it, which
+are required to give you total support for your newly bought product;
+without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
-	You should have received a copy of the GNU General Public License
-	along with this program; if not, write to the Free Software
-	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 #include "../common/global_define.h"
 #include "database.h"
@@ -22,11 +22,11 @@
 #include "database_mysql.h"
 #include "login_server.h"
 #include "../common/eqemu_logsys.h"
+#include "../common/string_util.h"
 
-extern EQEmuLogSys LogSys;
 extern LoginServer server;
 
-DatabaseMySQL::DatabaseMySQL(string user, string pass, string host, string port, string name)
+DatabaseMySQL::DatabaseMySQL(std::string user, std::string pass, std::string host, std::string port, std::string name)
 {
 	this->user = user;
 	this->pass = pass;
@@ -34,11 +34,11 @@ DatabaseMySQL::DatabaseMySQL(string user, string pass, string host, string port,
 	this->name = name;
 
 	database = mysql_init(nullptr);
-	if(database)
+	if (database)
 	{
 		my_bool r = 1;
 		mysql_options(database, MYSQL_OPT_RECONNECT, &r);
-		if(!mysql_real_connect(database, host.c_str(), user.c_str(), pass.c_str(), name.c_str(), atoi(port.c_str()), nullptr, 0))
+		if (!mysql_real_connect(database, host.c_str(), user.c_str(), pass.c_str(), name.c_str(), atoi(port.c_str()), nullptr, 0))
 		{
 			mysql_close(database);
 			Log(Logs::General, Logs::Error, "Failed to connect to MySQL database. Error: %s", mysql_error(database));
@@ -53,13 +53,13 @@ DatabaseMySQL::DatabaseMySQL(string user, string pass, string host, string port,
 
 DatabaseMySQL::~DatabaseMySQL()
 {
-	if(database)
+	if (database)
 	{
 		mysql_close(database);
 	}
 }
 
-bool DatabaseMySQL::GetLoginDataFromAccountName(string name, string &password, unsigned int &id)
+bool DatabaseMySQL::GetLoginDataFromAccountName(std::string name, std::string &password, unsigned int &id)
 {
 	if (!database)
 	{
@@ -68,14 +68,14 @@ bool DatabaseMySQL::GetLoginDataFromAccountName(string name, string &password, u
 
 	MYSQL_RES *res;
 	MYSQL_ROW row;
-	stringstream query(stringstream::in | stringstream::out);
+	std::stringstream query(std::stringstream::in | std::stringstream::out);
 	query << "SELECT LoginServerID, AccountPassword FROM " << server.options.GetAccountTable() << " WHERE AccountName = '";
 	query << name;
 	query << "'";
 
 	if (mysql_query(database, query.str().c_str()) != 0)
 	{
-		Log(Logs::General, Logs::Error, "Mysql query failed: %s", query.str().c_str());
+		LogF(Logs::General, Logs::Error, "Mysql query failed: {0}", query.str());
 		return false;
 	}
 
@@ -96,8 +96,54 @@ bool DatabaseMySQL::GetLoginDataFromAccountName(string name, string &password, u
 	return false;
 }
 
+bool DatabaseMySQL::GetLoginTokenDataFromToken(const std::string &token, const std::string &ip, unsigned int &db_account_id, std::string &user)
+{
+	if (!database)
+	{
+		return false;
+	}
 
-bool DatabaseMySQL::CreateLoginData(string name, string &password, unsigned int &id)
+	MYSQL_RES *res;
+	MYSQL_ROW row;
+	std::stringstream query(std::stringstream::in | std::stringstream::out);
+	query << "SELECT tbllogintokens.Id, tbllogintokens.IpAddress, tbllogintokenclaims.Name, tbllogintokenclaims.Value FROM tbllogintokens ";
+	query << "JOIN tbllogintokenclaims ON tbllogintokens.Id = tbllogintokenclaims.TokenId WHERE tbllogintokens.Expires > NOW() AND tbllogintokens.Id='";
+	query << EscapeString(token) << "' AND tbllogintokens.IpAddress='" << EscapeString(ip) << "'";
+
+	if (mysql_query(database, query.str().c_str()) != 0)
+	{
+		Log(Logs::General, Logs::Error, "Mysql query failed: %s", query.str().c_str());
+		return false;
+	}
+
+	res = mysql_use_result(database);
+
+	bool found_username = false;
+	bool found_login_id = false;
+	if (res)
+	{
+		while ((row = mysql_fetch_row(res)) != nullptr)
+		{
+			if (strcmp(row[2], "username") == 0) {
+				user = row[3];
+				found_username = true;
+				continue;
+			}
+
+			if (strcmp(row[2], "login_server_id") == 0) {
+				db_account_id = atoi(row[3]);
+				found_login_id = true;
+				continue;
+			}
+		}
+
+		mysql_free_result(res);
+	}
+
+	return found_username && found_login_id;
+}
+
+bool DatabaseMySQL::CreateLoginData(const std::string &name, const std::string &password, unsigned int &id)
 {
 	if (!database) {
 		return false;
@@ -105,7 +151,7 @@ bool DatabaseMySQL::CreateLoginData(string name, string &password, unsigned int 
 
 	MYSQL_RES *result;
 	MYSQL_ROW row;
-	stringstream query(stringstream::in | stringstream::out);
+	std::stringstream query(std::stringstream::in | std::stringstream::out);
 
 	query << "INSERT INTO " << server.options.GetAccountTable() << " (AccountName, AccountPassword, AccountEmail, LastLoginDate, LastIPAddress) ";
 	query << " VALUES('" << name << "', '" << password << "', 'local_creation', NOW(), '127.0.0.1'); ";
@@ -114,7 +160,7 @@ bool DatabaseMySQL::CreateLoginData(string name, string &password, unsigned int 
 		Log(Logs::General, Logs::Error, "Mysql query failed: %s", query.str().c_str());
 		return false;
 	}
-	else{
+	else {
 		id = mysql_insert_id(database);
 		return true;
 	}
@@ -123,8 +169,8 @@ bool DatabaseMySQL::CreateLoginData(string name, string &password, unsigned int 
 	return false;
 }
 
-bool DatabaseMySQL::GetWorldRegistration(string long_name, string short_name, unsigned int &id, string &desc, unsigned int &list_id,
-	unsigned int &trusted, string &list_desc, string &account, string &password)
+bool DatabaseMySQL::GetWorldRegistration(std::string long_name, std::string short_name, unsigned int &id, std::string &desc, unsigned int &list_id,
+	unsigned int &trusted, std::string &list_desc, std::string &account, std::string &password)
 {
 	if (!database)
 	{
@@ -137,7 +183,7 @@ bool DatabaseMySQL::GetWorldRegistration(string long_name, string short_name, un
 	unsigned long length;
 	length = mysql_real_escape_string(database, escaped_short_name, short_name.substr(0, 100).c_str(), short_name.substr(0, 100).length());
 	escaped_short_name[length + 1] = 0;
-	stringstream query(stringstream::in | stringstream::out);
+	std::stringstream query(std::stringstream::in | std::stringstream::out);
 	query << "SELECT ifnull(WSR.ServerID,999999) AS ServerID, WSR.ServerTagDescription, ifnull(WSR.ServerTrusted,0) AS ServerTrusted, ifnull(SLT.ServerListTypeID,3) AS ServerListTypeID, ";
 	query << "SLT.ServerListTypeDescription, ifnull(WSR.ServerAdminID,0) AS ServerAdminID FROM " << server.options.GetWorldRegistrationTable();
 	query << " AS WSR JOIN " << server.options.GetWorldServerTypeTable() << " AS SLT ON WSR.ServerListTypeID = SLT.ServerListTypeID";
@@ -166,7 +212,7 @@ bool DatabaseMySQL::GetWorldRegistration(string long_name, string short_name, un
 
 			if (db_account_id > 0)
 			{
-				stringstream query(stringstream::in | stringstream::out);
+				std::stringstream query(std::stringstream::in | std::stringstream::out);
 				query << "SELECT AccountName, AccountPassword FROM " << server.options.GetWorldAdminRegistrationTable();
 				query << " WHERE ServerAdminID = " << db_account_id;
 
@@ -199,14 +245,14 @@ bool DatabaseMySQL::GetWorldRegistration(string long_name, string short_name, un
 	return false;
 }
 
-void DatabaseMySQL::UpdateLSAccountData(unsigned int id, string ip_address)
+void DatabaseMySQL::UpdateLSAccountData(unsigned int id, std::string ip_address)
 {
 	if (!database)
 	{
 		return;
 	}
 
-	stringstream query(stringstream::in | stringstream::out);
+	std::stringstream query(std::stringstream::in | std::stringstream::out);
 	query << "UPDATE " << server.options.GetAccountTable() << " SET LastIPAddress = '";
 	query << ip_address;
 	query << "', LastLoginDate = now() where LoginServerID = ";
@@ -218,14 +264,14 @@ void DatabaseMySQL::UpdateLSAccountData(unsigned int id, string ip_address)
 	}
 }
 
-void DatabaseMySQL::UpdateLSAccountInfo(unsigned int id, string name, string password, string email)
+void DatabaseMySQL::UpdateLSAccountInfo(unsigned int id, std::string name, std::string password, std::string email)
 {
 	if (!database)
 	{
 		return;
 	}
 
-	stringstream query(stringstream::in | stringstream::out);
+	std::stringstream query(std::stringstream::in | std::stringstream::out);
 	query << "REPLACE " << server.options.GetAccountTable() << " SET LoginServerID = ";
 	query << id << ", AccountName = '" << name << "', AccountPassword = sha('";
 	query << password << "'), AccountCreateDate = now(), AccountEmail = '" << email;
@@ -237,7 +283,7 @@ void DatabaseMySQL::UpdateLSAccountInfo(unsigned int id, string name, string pas
 	}
 }
 
-void DatabaseMySQL::UpdateWorldRegistration(unsigned int id, string long_name, string ip_address)
+void DatabaseMySQL::UpdateWorldRegistration(unsigned int id, std::string long_name, std::string ip_address)
 {
 	if (!database)
 	{
@@ -248,7 +294,7 @@ void DatabaseMySQL::UpdateWorldRegistration(unsigned int id, string long_name, s
 	unsigned long length;
 	length = mysql_real_escape_string(database, escaped_long_name, long_name.substr(0, 100).c_str(), long_name.substr(0, 100).length());
 	escaped_long_name[length + 1] = 0;
-	stringstream query(stringstream::in | stringstream::out);
+	std::stringstream query(std::stringstream::in | std::stringstream::out);
 	query << "UPDATE " << server.options.GetWorldRegistrationTable() << " SET ServerLastLoginDate = now(), ServerLastIPAddr = '";
 	query << ip_address;
 	query << "', ServerLongName = '";
@@ -262,7 +308,7 @@ void DatabaseMySQL::UpdateWorldRegistration(unsigned int id, string long_name, s
 	}
 }
 
-bool DatabaseMySQL::CreateWorldRegistration(string long_name, string short_name, unsigned int &id)
+bool DatabaseMySQL::CreateWorldRegistration(std::string long_name, std::string short_name, unsigned int &id)
 {
 	if (!database)
 	{
@@ -278,7 +324,7 @@ bool DatabaseMySQL::CreateWorldRegistration(string long_name, string short_name,
 	escaped_long_name[length + 1] = 0;
 	length = mysql_real_escape_string(database, escaped_short_name, short_name.substr(0, 100).c_str(), short_name.substr(0, 100).length());
 	escaped_short_name[length + 1] = 0;
-	stringstream query(stringstream::in | stringstream::out);
+	std::stringstream query(std::stringstream::in | std::stringstream::out);
 	query << "SELECT ifnull(max(ServerID),0) FROM " << server.options.GetWorldRegistrationTable();
 
 	if (mysql_query(database, query.str().c_str()) != 0)
@@ -295,7 +341,7 @@ bool DatabaseMySQL::CreateWorldRegistration(string long_name, string short_name,
 			id = atoi(row[0]) + 1;
 			mysql_free_result(res);
 
-			stringstream query(stringstream::in | stringstream::out);
+			std::stringstream query(std::stringstream::in | std::stringstream::out);
 			query << "INSERT INTO " << server.options.GetWorldRegistrationTable() << " SET ServerID = " << id;
 			query << ", ServerLongName = '" << escaped_long_name << "', ServerShortName = '" << escaped_short_name;
 			query << "', ServerListTypeID = 3, ServerAdminID = 0, ServerTrusted = 0, ServerTagDescription = ''";
@@ -313,4 +359,3 @@ bool DatabaseMySQL::CreateWorldRegistration(string long_name, string short_name,
 }
 
 #endif
-

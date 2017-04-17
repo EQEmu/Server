@@ -19,7 +19,6 @@
 #include "../common/eqemu_logsys.h"
 #include "config.h"
 
-extern EQEmuLogSys LogSys;
 /**
 * Retrieves the variable we want from our title or theme
 * First gets the map from the title

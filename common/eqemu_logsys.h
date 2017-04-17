@@ -20,11 +20,11 @@
 #ifndef EQEMU_LOGSYS_H
 #define EQEMU_LOGSYS_H
 
+#include <fmt/format.h>
 #include <iostream>
 #include <fstream>
 #include <stdio.h>
 #include <functional>
-
 #include "types.h"
 
 namespace Logs {
@@ -85,6 +85,7 @@ enum LogCategory {
 	Client_Server_Packet_With_Dump,
 	Login_Server,
 	Client_Login,
+	Headless_Client,
 	MaxCategoryID	/* Don't Remove this*/
 };
 
@@ -143,6 +144,11 @@ static const char* LogCategoryName[LogCategory::MaxCategoryID] = {
 		LogSys.Out(debug_level, log_category, message, ##__VA_ARGS__);\
 } while (0)
 
+#define LogF(debug_level, log_category, message, ...) do {\
+	if (LogSys.log_settings[log_category].is_category_enabled == 1)\
+		LogSys.OutF(debug_level, log_category, message, ##__VA_ARGS__);\
+} while (0)
+
 class EQEmuLogSys {
 public:
 	EQEmuLogSys();
@@ -163,6 +169,13 @@ public:
 	void Out(Logs::DebugLevel debug_level, uint16 log_category, std::string message, ...);
 	void SetCurrentTimeStamp(char* time_stamp); /* Used in file logs to prepend a timestamp entry for logs */ 
 	void StartFileLogs(const std::string &log_name = ""); /* Used to declare the processes file log and to keep it open for later use */
+
+	template <typename... Args>
+	void OutF(Logs::DebugLevel debug_level, uint16 log_category, const char *fmt, const Args&... args)
+	{
+		std::string log_str = fmt::format(fmt, args...);
+		Out(debug_level, log_category, log_str);
+	}
 
 	/*
 		LogSettings Struct
@@ -204,9 +217,9 @@ private:
 
 	uint16 GetWindowsConsoleColorFromCategory(uint16 log_category); /* Windows console color messages mapped by category */
 
-	void ProcessConsoleMessage(uint16 debug_level, uint16 log_category, const std::string &message); /* ProcessConsoleMessage called via Log.Out */
-	void ProcessGMSay(uint16 debug_level, uint16 log_category, const std::string &message); /* ProcessGMSay called via Log.Out */
-	void ProcessLogWrite(uint16 debug_level, uint16 log_category, const std::string &message); /* ProcessLogWrite called via Log.Out */
+	void ProcessConsoleMessage(uint16 debug_level, uint16 log_category, const std::string &message); /* ProcessConsoleMessage called via Log */
+	void ProcessGMSay(uint16 debug_level, uint16 log_category, const std::string &message); /* ProcessGMSay called via Log */
+	void ProcessLogWrite(uint16 debug_level, uint16 log_category, const std::string &message); /* ProcessLogWrite called via Log */
 };
 
 extern EQEmuLogSys LogSys;

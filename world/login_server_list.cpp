@@ -1,19 +1,19 @@
 /*	EQEMu: Everquest Server Emulator
-	Copyright (C) 2001-2002 EQEMu Development Team (http://eqemu.org)
+Copyright (C) 2001-2002 EQEMu Development Team (http://eqemu.org)
 
-	This program is free software; you can redistribute it and/or modify
-	it under the terms of the GNU General Public License as published by
-	the Free Software Foundation; version 2 of the License.
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; version 2 of the License.
 
-	This program is distributed in the hope that it will be useful,
-	but WITHOUT ANY WARRANTY except by those people which sell it, which
-	are required to give you total support for your newly bought product;
-	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-	A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY except by those people which sell it, which
+are required to give you total support for your newly bought product;
+without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
-	You should have received a copy of the GNU General Public License
-	along with this program; if not, write to the Free Software
-	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 #include "../common/global_define.h"
 #include <iostream>
@@ -49,147 +49,91 @@ LoginServerList::LoginServerList() {
 LoginServerList::~LoginServerList() {
 }
 
-void LoginServerList::Add(const char* iAddress, uint16 iPort, const char* Account, const char* Password)
+void LoginServerList::Add(const char* iAddress, uint16 iPort, const char* Account, const char* Password, bool Legacy)
 {
-	auto loginserver = new LoginServer(iAddress, iPort, Account, Password);
-	list.Insert(loginserver);
-}
-
-bool LoginServerList::Process() {
-	LinkedListIterator<LoginServer*> iterator(list);
-
-	iterator.Reset();
-	while(iterator.MoreElements()){
-		iterator.GetData()->Process();
-		iterator.Advance();
-	}
-	return true;
-}
-
-#ifdef _WINDOWS
-void AutoInitLoginServer(void *tmp) {
-#else
-void *AutoInitLoginServer(void *tmp) {
-#endif
-	loginserverlist.InitLoginServer();
-#ifndef WIN32
-	return 0;
-#endif
-}
-
-void LoginServerList::InitLoginServer() {
-	LinkedListIterator<LoginServer*> iterator(list);
-
-	iterator.Reset();
-	while(iterator.MoreElements()){
-		iterator.GetData()->InitLoginServer();
-		iterator.Advance();
-	}
+	auto loginserver = new LoginServer(iAddress, iPort, Account, Password, Legacy);
+	m_list.push_back(std::unique_ptr<LoginServer>(loginserver));
 }
 
 bool LoginServerList::SendInfo() {
-	LinkedListIterator<LoginServer*> iterator(list);
-
-	iterator.Reset();
-	while(iterator.MoreElements()){
-		iterator.GetData()->SendInfo();
-		iterator.Advance();
+	for (auto &iter : m_list) {
+		(*iter).SendInfo();
 	}
+
 	return true;
 }
 
 bool LoginServerList::SendNewInfo() {
-	LinkedListIterator<LoginServer*> iterator(list);
-
-	iterator.Reset();
-	while(iterator.MoreElements()){
-		iterator.GetData()->SendNewInfo();
-		iterator.Advance();
+	for (auto &iter : m_list) {
+		(*iter).SendNewInfo();
 	}
+
 	return true;
 }
 
 bool LoginServerList::SendStatus() {
-	LinkedListIterator<LoginServer*> iterator(list);
-
-	iterator.Reset();
-	while(iterator.MoreElements()){
-		iterator.GetData()->SendStatus();
-		iterator.Advance();
+	for (auto &iter : m_list) {
+		(*iter).SendStatus();
 	}
+
 	return true;
 }
 
 bool LoginServerList::SendPacket(ServerPacket* pack) {
-	LinkedListIterator<LoginServer*> iterator(list);
-
-	iterator.Reset();
-	while(iterator.MoreElements()){
-		iterator.GetData()->SendPacket(pack);
-		iterator.Advance();
+	for (auto &iter : m_list) {
+		(*iter).SendPacket(pack);
 	}
+
 	return true;
 }
 
 bool LoginServerList::SendAccountUpdate(ServerPacket* pack) {
-	LinkedListIterator<LoginServer*> iterator(list);
-
 	Log(Logs::Detail, Logs::World_Server, "Requested to send ServerOP_LSAccountUpdate packet to all loginservers");
-	iterator.Reset();
-	while(iterator.MoreElements()){
-		if(iterator.GetData()->CanUpdate()) {
-			iterator.GetData()->SendAccountUpdate(pack);
+	for (auto &iter : m_list) {
+		if ((*iter).CanUpdate()) {
+			(*iter).SendAccountUpdate(pack);
 		}
-		iterator.Advance();
 	}
+
 	return true;
 }
 
 bool LoginServerList::Connected() {
-	LinkedListIterator<LoginServer*> iterator(list);
-
-	iterator.Reset();
-	while(iterator.MoreElements()){
-		if(iterator.GetData()->Connected())
+	for (auto &iter : m_list) {
+		if ((*iter).Connected()) {
 			return true;
-		iterator.Advance();
+		}
 	}
+
 	return false;
 }
 
 bool LoginServerList::AllConnected() {
-	LinkedListIterator<LoginServer*> iterator(list);
-
-	iterator.Reset();
-	while(iterator.MoreElements()){
-		if(iterator.GetData()->Connected() == false)
+	for (auto &iter : m_list) {
+		if (!(*iter).Connected()) {
 			return false;
-		iterator.Advance();
+		}
 	}
+
 	return true;
 }
 
 bool LoginServerList::MiniLogin() {
-	LinkedListIterator<LoginServer*> iterator(list);
-
-	iterator.Reset();
-	while(iterator.MoreElements()){
-		if(iterator.GetData()->MiniLogin())
+	for (auto &iter : m_list) {
+		if ((*iter).MiniLogin()) {
 			return true;
-		iterator.Advance();
+		}
 	}
+
 	return false;
 }
 
 bool LoginServerList::CanUpdate() {
-	LinkedListIterator<LoginServer*> iterator(list);
-
-	iterator.Reset();
-	while(iterator.MoreElements()){
-		if(iterator.GetData()->CanUpdate())
+	for (auto &iter : m_list) {
+		if ((*iter).CanUpdate()) {
 			return true;
-		iterator.Advance();
+		}
 	}
+
 	return false;
 }
-

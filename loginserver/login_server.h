@@ -34,25 +34,13 @@
 struct LoginServer
 {
 public:
-	/**
-	* I don't really like how this looks with all the ifdefs...
-	* but it's the most trivial way to do this.
-	*/
-#ifdef WIN32
-	LoginServer() : config(nullptr), db(nullptr), eq_crypto(nullptr), server_manager(nullptr) { }
-#else
-	LoginServer() : config(nullptr), db(nullptr) { }
-#endif
+	LoginServer() : config(nullptr), db(nullptr), server_manager(nullptr) { }
 
 	Config *config;
 	Database *db;
 	Options options;
 	ServerManager *server_manager;
 	ClientManager *client_manager;
-
-#ifdef WIN32
-	Encryption *eq_crypto;
-#endif
 };
 
 #endif

@@ -37,7 +37,7 @@
 	#include <stdarg.h>
 #endif
 
-#include "eq_stream.h"
+#include "eq_stream_intf.h"
 #include "packet_dump_file.h"
 
 void FileDumpPacketAscii(const char* filename, const uchar* buf, uint32 size, uint32 cols, uint32 skip) {

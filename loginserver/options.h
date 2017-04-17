@@ -35,7 +35,10 @@ public:
 		dump_out_packets(false),
 		encryption_mode(5),
 		local_network("127.0.0.1"),
-		reject_duplicate_servers(false) { }
+		reject_duplicate_servers(false),
+		allow_password_login(true),
+		allow_token_login(false),
+		auto_create_accounts(false) { }
 
 	/**
 	* Sets allow_unregistered.
@@ -157,6 +160,15 @@ public:
 	*/
 	inline bool IsRejectingDuplicateServers() { return reject_duplicate_servers; }
 
+	inline void AllowTokenLogin(bool b) { allow_token_login = b; }
+	inline bool IsTokenLoginAllowed() const { return allow_token_login; }
+
+	inline void AllowPasswordLogin(bool b) { allow_password_login = b; }
+	inline bool IsPasswordLoginAllowed() const { return allow_password_login; }
+
+	inline void AutoCreateAccounts(bool b) { auto_create_accounts = b; }
+	inline bool CanAutoCreateAccounts() const { return auto_create_accounts; }
+
 private:
 	bool allow_unregistered;
 	bool trace;
@@ -164,6 +176,9 @@ private:
 	bool dump_in_packets;
 	bool dump_out_packets;
 	bool reject_duplicate_servers;
+	bool allow_token_login;
+	bool allow_password_login;
+	bool auto_create_accounts;
 	int encryption_mode;
 	std::string local_network;
 	std::string account_table;

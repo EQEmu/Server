@@ -76,6 +76,7 @@ Copyright (C) 2001-2002 EQEMu Development Team (http://eqemu.org)
 #include "../common/spdat.h"
 #include "../common/string_util.h"
 #include "../common/data_verification.h"
+#include "../common/misc_functions.h"
 
 #include "quest_parser_collection.h"
 #include "string_ids.h"
