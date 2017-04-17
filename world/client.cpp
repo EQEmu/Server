@@ -1259,7 +1259,9 @@ void Client::Clearance(int8 response)
 		if(local_addr[0]) {
 			zs_addr = local_addr;
 		} else {
-			if(strcmp(zs->GetIP().c_str(), "127.0.0.1") == 0)
+			zs_addr = zs->GetIP().c_str();
+
+			if(strcmp(zs_addr, "127.0.0.1") == 0)
 			{
 				Log(Logs::Detail, Logs::World_Server, "Local zone address was %s, setting local address to: %s", zs_addr, WorldConfig::get()->LocalAddress.c_str());
 				zs_addr = WorldConfig::get()->LocalAddress.c_str();
