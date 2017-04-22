@@ -10,8 +10,14 @@
 #include <vector>
 #include <algorithm>
 
-#include "masterentity.h"
 #include "../common/spdat.h"
+#include "../common/util/directory.h"
+#include "masterentity.h"
+#include "questmgr.h"
+#include "zone.h"
+#include "zone_config.h"
+
+#include "lua_parser.h"
 #include "lua_bit.h"
 #include "lua_entity.h"
 #include "lua_item.h"
@@ -31,10 +37,6 @@
 #include "lua_spawn.h"
 #include "lua_packet.h"
 #include "lua_general.h"
-#include "questmgr.h"
-#include "zone.h"
-#include "zone_config.h"
-#include "lua_parser.h"
 #include "lua_encounter.h"
 
 const char *LuaEvents[_LargestEventID] = {
@@ -134,6 +136,75 @@ struct lua_registered_event {
 std::map<std::string, std::list<lua_registered_event>> lua_encounter_events_registered;
 std::map<std::string, bool> lua_encounters_loaded;
 std::map<std::string, Encounter *> lua_encounters;
+
+void LuaParser::DoAttack(Mob *self, Mob *other, DamageHitInfo &hit, ExtraAttackOptions *opts)
+{
+	int start = lua_gettop(L);
+	bool ignoreDefault = false;
+
+	for (auto &mod : mods_) {
+		try {
+			lua_getfield(L, LUA_REGISTRYINDEX, mod.c_str());
+			lua_getfield(L, -1, "DoAttack");
+
+			Lua_Mob l_self(self);
+			Lua_Mob l_other(other);
+
+			luabind::adl::object e = luabind::newtable(L);
+			luabind::adl::object lua_hit = luabind::newtable(L);
+			lua_hit["base_damage"] = hit.base_damage;
+			lua_hit["damage_done"] = hit.damage_done;
+			lua_hit["offense"] = hit.offense;
+			lua_hit["tohit"] = hit.tohit;
+			lua_hit["hand"] = hit.hand;
+			lua_hit["skill"] = (int)hit.skill;
+
+			e["self"] = luabind::adl::object(L, l_self);
+			e["other"] = luabind::adl::object(L, l_other);
+			e["hit"] = lua_hit;
+			if (opts) {
+				luabind::adl::object lua_opts = luabind::newtable(L);
+				lua_opts["damage_percent"] = opts->damage_percent;
+				lua_opts["damage_flat"] = opts->damage_flat;
+				lua_opts["armor_pen_percent"] = opts->armor_pen_percent;
+				lua_opts["armor_pen_flat"] = opts->armor_pen_flat;
+				lua_opts["crit_percent"] = opts->crit_percent;
+				lua_opts["crit_flat"] = opts->crit_flat;
+				lua_opts["hate_percent"] = opts->hate_percent;
+				lua_opts["hate_flat"] = opts->hate_flat;
+				lua_opts["hit_chance"] = opts->hit_chance;
+				lua_opts["melee_damage_bonus_flat"] = opts->melee_damage_bonus_flat;
+				lua_opts["skilldmgtaken_bonus_flat"] = opts->skilldmgtaken_bonus_flat;
+				e["opts"] = lua_opts;
+			}
+			else {
+				e["opts"] = luabind::nil;
+			}
+
+			e.push(L);
+
+			if (lua_pcall(L, 1, 1, 0)) {
+				std::string error = lua_tostring(L, -1);
+				AddError(error);
+			}
+		}
+		catch (std::exception &ex) {
+			std::string error = "Lua Exception: ";
+			error += std::string(ex.what());
+			AddError(error);
+		}
+
+		int end = lua_gettop(L);
+		int n = end - start;
+		if (n > 0) {
+			lua_pop(L, n);
+		}
+	}
+
+	if (ignoreDefault) {
+		throw IgnoreDefaultException();
+	}
+}
 
 LuaParser::LuaParser() {
 	for(int i = 0; i < _LargestEventID; ++i) {
@@ -797,6 +868,7 @@ void LuaParser::Init() {
 void LuaParser::ReloadQuests() {
 	loaded_.clear();
 	errors_.clear();
+	mods_.clear();
 	lua_encounter_events_registered.clear();
 	lua_encounters_loaded.clear();
 
@@ -828,7 +900,7 @@ void LuaParser::ReloadQuests() {
 #ifdef SANITIZE_LUA_LIBS
 	//io
 	lua_pushnil(L);
-	lua_setglobal(L, "io");
+	//lua_setglobal(L, "io");
 
 	//some os/debug are okay some are not
 	lua_getglobal(L, "os");
@@ -947,6 +1019,17 @@ void LuaParser::ReloadQuests() {
 				std::string error = lua_tostring(L, -1);
 				AddError(error);
 			}
+		}
+	}
+
+	EQ::Directory dir("mods");
+	std::vector<std::string> mods;
+	dir.GetFiles(mods);
+
+	for (auto &mod : mods) {
+		if (mod.find_first_of(".lua") != std::string::npos) {
+			LoadScript("mods/" + mod, mod);
+			mods_.push_back(mod);
 		}
 	}
 }

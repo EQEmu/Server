@@ -31,6 +31,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "water_map.h"
 #include "worldserver.h"
 #include "zone.h"
+#include "lua_parser.h"
 
 #include <assert.h>
 #include <stdio.h>
@@ -1237,6 +1238,15 @@ void Mob::DoAttack(Mob *other, DamageHitInfo &hit, ExtraAttackOptions *opts)
 		return;
 	Log(Logs::Detail, Logs::Combat, "%s::DoAttack vs %s base %d min %d offense %d tohit %d skill %d", GetName(),
 		other->GetName(), hit.base_damage, hit.min_damage, hit.offense, hit.tohit, hit.skill);
+
+#ifdef LUA_EQEMU
+	try {
+		LuaParser::Instance()->DoAttack(this, other, hit, opts);
+	} catch(IgnoreDefaultException) {
+		return;
+	}
+#endif
+
 	// check to see if we hit..
 	if (other->AvoidDamage(this, hit)) {
 		int strike_through = itembonuses.StrikeThrough + spellbonuses.StrikeThrough + aabonuses.StrikeThrough;

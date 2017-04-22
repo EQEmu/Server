@@ -7,6 +7,7 @@
 #include <string>
 #include <list>
 #include <map>
+#include <exception>
 
 #include "zone_config.h"
 
@@ -30,9 +31,17 @@ namespace luabind {
 	}
 }
 
+class IgnoreDefaultException : std::exception {
+public:
+	IgnoreDefaultException() { };
+	IgnoreDefaultException(const exception&) { };
+	IgnoreDefaultException& operator= (const exception&) { return *this; }
+	virtual ~IgnoreDefaultException() { }
+	virtual const char* what() const { return "Ignore Default Action"; }
+};
+
 class LuaParser : public QuestInterface {
 public:
-	LuaParser();
 	~LuaParser();
 
 	virtual int EventNPC(QuestEventID evt, NPC* npc, Mob *init, std::string data, uint32 extra_data,
@@ -81,7 +90,19 @@ public:
 	virtual int DispatchEventSpell(QuestEventID evt, NPC* npc, Client *client, uint32 spell_id, uint32 extra_data,
 		std::vector<EQEmu::Any> *extra_pointers);
 
+	static LuaParser* Instance() {
+		static LuaParser inst;
+		return &inst;
+	}
+
+	//Mod Extensions
+	void DoAttack(Mob *self, Mob *other, DamageHitInfo &hit, ExtraAttackOptions *opts);
+
 private:
+	LuaParser();
+	LuaParser(const LuaParser&);
+	LuaParser& operator=(const LuaParser&);
+
 	int _EventNPC(std::string package_name, QuestEventID evt, NPC* npc, Mob *init, std::string data, uint32 extra_data,
 		std::vector<EQEmu::Any> *extra_pointers, luabind::adl::object *l_func = nullptr);
 	int _EventPlayer(std::string package_name, QuestEventID evt, Client *client, std::string data, uint32 extra_data,
@@ -95,12 +116,12 @@ private:
 
 	void LoadScript(std::string filename, std::string package_name);
 	bool HasFunction(std::string function, std::string package_name);
-	void ClearStates();
 	void MapFunctions(lua_State *L);
 	QuestEventID ConvertLuaEvent(QuestEventID evt);
 
 	std::map<std::string, std::string> vars_;
 	std::map<std::string, bool> loaded_;
+	std::vector<std::string> mods_;
 	lua_State *L;
 
 	NPCArgumentHandler NPCArgumentDispatch[_LargestEventID];
