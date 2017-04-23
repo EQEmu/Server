@@ -648,7 +648,7 @@ bool Group::DelMember(Mob* oldmember, bool ignoresender)
 		}
 	}
 	
-	if (GetLeader() == nullptr)
+	if (!GetLeaderName())
 	{
 		DisbandGroup();
 		return true;
