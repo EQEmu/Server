@@ -174,6 +174,8 @@ elif [[ "$OS" == "fedora_core" ]]; then
 	dnf -y install compat-lua
 	dnf -y install perl-Time-HiRes
 	dnf -y install libuuid-devel
+	dnf -y install libsodium
+	dnf -y install libsodium-devel
 	dnf -y groupinstall "Development Tools"
 	dnf -y groupinstall "Basic Web Server"
 	dnf -y groupinstall "C Development Tools and Libraries"
