@@ -114,6 +114,7 @@ if [[ "$OS" == "Debian" ]]; then
 	apt-get $apt_options install open-vm-tools
 	apt-get $apt_options install unzip
 	apt-get $apt_options install uuid-dev
+	apt-get $apt_options install wget
 	apt-get $apt_options install zlib-bin
 	apt-get $apt_options install zlibc
 

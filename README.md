@@ -20,13 +20,13 @@
 * [Easy Install](http://wiki.eqemulator.org/p?Akkas_PEQ_Server_Installer&frm=Main#from-scratch-installation-instructions-windows)
 * [Advanced Setup](http://wiki.eqemulator.org/p?Complete_Windows-based_Server_Setup_Guide)
 
-### > Debian/Ubuntu
+
+
+### > Debian/Ubuntu/CentOS/Fedora
+* You can use curl or wget to kick off the installer (whichever your OS has)
+> curl -O https://raw.githubusercontent.com/EQEmu/Server/master/utils/scripts/linux_installer/install.sh install.sh && chmod 755 install.sh && ./install.sh
 
 > wget --no-check-certificate https://raw.githubusercontent.com/EQEmu/Server/master/utils/scripts/linux_installer/install.sh -O install.sh && chmod 755 install.sh && ./install.sh
-
-### > CentOS/Fedora
-
-> curl -O https://raw.githubusercontent.com/EQEmu/Server/master/utils/scripts/linux_installer/install.sh install.sh && chmod 755 install.sh && ./install.sh
 
 ## Supported Clients
 
