@@ -117,6 +117,8 @@ if [[ "$OS" == "Debian" ]]; then
 	apt-get $apt_options install wget
 	apt-get $apt_options install zlib-bin
 	apt-get $apt_options install zlibc
+	apt-get $apt_options install libsodium-dev
+	apt-get $apt_options install libsodium18
 
 	#::: Install FTP for remote FTP access
 	echo "proftpd-basic shared/proftpd/inetd_or_standalone select standalone" | debconf-set-selections
