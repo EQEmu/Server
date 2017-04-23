@@ -150,8 +150,32 @@ EOF
 
 elif [[ "$OS" == "fedora_core" ]]; then
 	# Do Fedora stuff
-	dnf -y install open-vm-tools vim cmake boost-devel zlib-devel mariadb-server mariadb-devel mariadb-libs perl perl-DBD-MySQL perl-IO-stringy perl-devel lua-devel lua-sql-mysql dos2unix php-mysql proftpd wget compat-lua-libs compat-lua-devel compat-lua perl-Time-HiRes
-	dnf -y groupinstall "Development Tools" "Basic Web Server" "C Development Tools and Libraries"
+	dnf -y install open-vm-tools
+	dnf -y install vim
+	dnf -y install cmake
+	dnf -y install boost-devel
+	dnf -y install zlib-devel
+	dnf -y install mariadb-server
+	dnf -y install mariadb-devel
+	dnf -y install mariadb-libs
+	dnf -y install perl
+	dnf -y install perl-DBD-MySQL
+	dnf -y install perl-IO-stringy
+	dnf -y install perl-devel
+	dnf -y install lua-devel
+	dnf -y install lua-sql-mysql
+	dnf -y install dos2unix
+	dnf -y install php-mysql
+	dnf -y install php-mysqlnd
+	dnf -y install proftpd
+	dnf -y install wget
+	dnf -y install compat-lua-libs
+	dnf -y install compat-lua-devel
+	dnf -y install compat-lua
+	dnf -y install perl-Time-HiRes
+	dnf -y groupinstall "Development Tools"
+	dnf -y groupinstall "Basic Web Server"
+	dnf -y groupinstall "C Development Tools and Libraries"
 fi
 
 if [[ "$OS" == "fedora_core" ]] || [[ "$OS" == "red_hat" ]]; then
