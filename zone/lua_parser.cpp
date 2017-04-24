@@ -187,6 +187,8 @@ void LuaParser::DoAttack(Mob *self, Mob *other, DamageHitInfo &hit, ExtraAttackO
 				std::string error = lua_tostring(L, -1);
 				AddError(error);
 			}
+
+			
 		}
 		catch (std::exception &ex) {
 			std::string error = "Lua Exception: ";
