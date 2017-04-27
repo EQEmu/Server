@@ -446,6 +446,9 @@ public:
 	inline StatBonuses GetItemBonuses() const { return itembonuses; }
 	inline StatBonuses GetSpellBonuses() const { return spellbonuses; }
 	inline StatBonuses GetAABonuses() const { return aabonuses; }
+	inline StatBonuses* GetItemBonusesPtr() { return &itembonuses; }
+	inline StatBonuses* GetSpellBonusesPtr() { return &spellbonuses; }
+	inline StatBonuses* GetAABonusesPtr() { return &aabonuses; }
 	inline virtual int32 GetMaxSTR() const { return GetSTR(); }
 	inline virtual int32 GetMaxSTA() const { return GetSTA(); }
 	inline virtual int32 GetMaxDEX() const { return GetDEX(); }

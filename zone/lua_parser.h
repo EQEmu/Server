@@ -31,15 +31,6 @@ namespace luabind {
 	}
 }
 
-class IgnoreDefaultException : std::exception {
-public:
-	IgnoreDefaultException() { };
-	IgnoreDefaultException(const exception&) { };
-	IgnoreDefaultException& operator= (const exception&) { return *this; }
-	virtual ~IgnoreDefaultException() { }
-	virtual const char* what() const { return "Ignore Default Action"; }
-};
-
 class LuaParser : public QuestInterface {
 public:
 	~LuaParser();
@@ -96,7 +87,10 @@ public:
 	}
 
 	//Mod Extensions
-	void DoAttack(Mob *self, Mob *other, DamageHitInfo &hit, ExtraAttackOptions *opts);
+	void MeleeMitigation(Mob *self, Mob *attacker, DamageHitInfo &hit, ExtraAttackOptions *opts, bool &ignoreDefault);
+	void ApplyDamageTable(Mob *self, DamageHitInfo &hit, bool &ignoreDefault);
+	bool AvoidDamage(Mob *self, Mob *other, DamageHitInfo &hit, bool &ignoreDefault);
+	bool CheckHitChance(Mob *self, Mob* other, DamageHitInfo &hit, bool &ignoreDefault);
 
 private:
 	LuaParser();

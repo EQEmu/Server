@@ -59,6 +59,7 @@ SET(zone_sources
 	lua_raid.cpp
 	lua_spawn.cpp
 	lua_spell.cpp
+	lua_stat_bonuses.cpp
 	embperl.cpp
 	embxs.cpp
 	entity.cpp
@@ -182,6 +183,7 @@ SET(zone_headers
 	lua_raid.h
 	lua_spawn.h
 	lua_spell.h
+	lua_stat_bonuses.h
 	map.h
 	masterentity.h
 	maxskill.h

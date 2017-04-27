@@ -272,6 +272,16 @@ int Mob::GetTotalDefense()
 // and does other mitigation checks. 'this' is the mob being attacked.
 bool Mob::CheckHitChance(Mob* other, DamageHitInfo &hit)
 {
+#ifdef LUA_EQEMU
+	bool lua_ret = false;
+	bool ignoreDefault = false;
+	lua_ret = LuaParser::Instance()->CheckHitChance(this, other, hit, ignoreDefault);
+	
+	if(ignoreDefault) {
+		return lua_ret;
+	}
+#endif
+
 	Mob *attacker = other;
 	Mob *defender = this;
 	Log(Logs::Detail, Logs::Attack, "CheckHitChance(%s) attacked by %s", defender->GetName(), attacker->GetName());
@@ -302,6 +312,16 @@ bool Mob::CheckHitChance(Mob* other, DamageHitInfo &hit)
 
 bool Mob::AvoidDamage(Mob *other, DamageHitInfo &hit)
 {
+#ifdef LUA_EQEMU
+	bool lua_ret = false;
+	bool ignoreDefault = false;
+	lua_ret = LuaParser::Instance()->AvoidDamage(this, other, hit, ignoreDefault);
+	
+	if (ignoreDefault) {
+		return lua_ret;
+	}
+#endif
+
 	/* called when a mob is attacked, does the checks to see if it's a hit
 	* and does other mitigation checks. 'this' is the mob being attacked.
 	*
@@ -872,6 +892,15 @@ double Mob::RollD20(int offense, int mitigation)
 
 void Mob::MeleeMitigation(Mob *attacker, DamageHitInfo &hit, ExtraAttackOptions *opts)
 {
+#ifdef LUA_EQEMU
+	bool ignoreDefault = false;
+	LuaParser::Instance()->MeleeMitigation(this, attacker, hit, opts, ignoreDefault);
+	
+	if (ignoreDefault) {
+		return;
+	}
+#endif
+
 	if (hit.damage_done < 0 || hit.base_damage == 0)
 		return;
 
@@ -1238,14 +1267,6 @@ void Mob::DoAttack(Mob *other, DamageHitInfo &hit, ExtraAttackOptions *opts)
 		return;
 	Log(Logs::Detail, Logs::Combat, "%s::DoAttack vs %s base %d min %d offense %d tohit %d skill %d", GetName(),
 		other->GetName(), hit.base_damage, hit.min_damage, hit.offense, hit.tohit, hit.skill);
-
-#ifdef LUA_EQEMU
-	try {
-		LuaParser::Instance()->DoAttack(this, other, hit, opts);
-	} catch(IgnoreDefaultException) {
-		return;
-	}
-#endif
 
 	// check to see if we hit..
 	if (other->AvoidDamage(this, hit)) {
@@ -4537,6 +4558,15 @@ const DamageTable &Mob::GetDamageTable() const
 
 void Mob::ApplyDamageTable(DamageHitInfo &hit)
 {
+#ifdef LUA_EQEMU
+	bool ignoreDefault = false;
+	LuaParser::Instance()->ApplyDamageTable(this, hit, ignoreDefault);
+	
+	if (ignoreDefault) {
+		return;
+	}
+#endif
+
 	// someone may want to add this to custom servers, can remove this if that's the case
 	if (!IsClient()
 #ifdef BOTS

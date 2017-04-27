@@ -8,6 +8,7 @@ class Mob;
 struct Lua_HateList;
 class Lua_Item;
 class Lua_ItemInst;
+class Lua_StatBonuses;
 
 namespace luabind {
 	struct scope;
@@ -381,6 +382,12 @@ public:
 	bool IsSilenced();
 	bool IsAmnesiad();
 	int32 GetMeleeMitigation();
+	int GetWeaponDamageBonus(Lua_Item weapon, bool offhand);
+	Lua_StatBonuses GetItemBonuses();
+	Lua_StatBonuses GetSpellBonuses();
+	Lua_StatBonuses GetAABonuses();
+	int16 GetMeleeDamageMod_SE(uint16 skill);
+	int16 GetMeleeMinDamageMod_SE(uint16 skill);
 };
 
 #endif

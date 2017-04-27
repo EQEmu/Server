@@ -10,6 +10,7 @@
 #include "lua_mob.h"
 #include "lua_hate_list.h"
 #include "lua_client.h"
+#include "lua_stat_bonuses.h"
 
 struct SpecialAbilities { };
 
@@ -1985,6 +1986,41 @@ int32 Lua_Mob::GetMeleeMitigation() {
 	return self->GetMeleeMitigation();
 }
 
+int Lua_Mob::GetWeaponDamageBonus(Lua_Item weapon, bool offhand) {
+	Lua_Safe_Call_Int();
+	return self->GetWeaponDamageBonus(weapon, offhand);
+}
+
+Lua_StatBonuses Lua_Mob::GetItemBonuses()
+{
+	Lua_Safe_Call_Class(Lua_StatBonuses);
+	return self->GetItemBonusesPtr();
+}
+
+Lua_StatBonuses Lua_Mob::GetSpellBonuses()
+{
+	Lua_Safe_Call_Class(Lua_StatBonuses);
+	return self->GetSpellBonusesPtr();
+}
+
+Lua_StatBonuses Lua_Mob::GetAABonuses()
+{
+	Lua_Safe_Call_Class(Lua_StatBonuses);
+	return self->GetAABonusesPtr();
+}
+
+int16 Lua_Mob::GetMeleeDamageMod_SE(uint16 skill)
+{
+	Lua_Safe_Call_Int();
+	return self->GetMeleeDamageMod_SE(skill);
+}
+
+int16 Lua_Mob::GetMeleeMinDamageMod_SE(uint16 skill)
+{
+	Lua_Safe_Call_Int();
+	return self->GetMeleeMinDamageMod_SE(skill);
+}
+
 luabind::scope lua_register_mob() {
 	return luabind::class_<Lua_Mob, Lua_Entity>("Mob")
 		.def(luabind::constructor<>())
@@ -2330,7 +2366,13 @@ luabind::scope lua_register_mob() {
 		.def("HasPet", (bool(Lua_Mob::*)(void))&Lua_Mob::HasPet)
 		.def("IsSilenced", (bool(Lua_Mob::*)(void))&Lua_Mob::IsSilenced)
 		.def("IsAmnesiad", (bool(Lua_Mob::*)(void))&Lua_Mob::IsAmnesiad)
-		.def("GetMeleeMitigation", (int32(Lua_Mob::*)(void))&Lua_Mob::GetMeleeMitigation);
+		.def("GetMeleeMitigation", (int32(Lua_Mob::*)(void))&Lua_Mob::GetMeleeMitigation)
+		.def("GetWeaponDamageBonus", &Lua_Mob::GetWeaponDamageBonus)
+		.def("GetItemBonuses", &Lua_Mob::GetItemBonuses)
+		.def("GetSpellBonuses", &Lua_Mob::GetSpellBonuses)
+		.def("GetAABonuses", &Lua_Mob::GetAABonuses)
+		.def("GetMeleeDamageMod_SE", &Lua_Mob::GetMeleeDamageMod_SE)
+		.def("GetMeleeMinDamageMod_SE", &Lua_Mob::GetMeleeMinDamageMod_SE);
 }
 
 luabind::scope lua_register_special_abilities() {

@@ -277,7 +277,7 @@ EQ::Net::DaybreakConnection::DaybreakConnection(DaybreakConnectionManager *owner
 	m_encode_passes[1] = owner->m_options.encode_passes[1];
 	m_hold_time = Clock::now();
 	m_buffered_packets_length = 0;
-	m_rolling_ping = 500;
+	m_rolling_ping = 900;
 	m_resend_delay = (m_rolling_ping * m_owner->m_options.resend_delay_factor) + m_owner->m_options.resend_delay_ms;
 	m_combined.reset(new char[512]);
 	m_combined[0] = 0;
@@ -300,7 +300,7 @@ EQ::Net::DaybreakConnection::DaybreakConnection(DaybreakConnectionManager *owner
 	m_crc_bytes = 0;
 	m_hold_time = Clock::now();
 	m_buffered_packets_length = 0;
-	m_rolling_ping = 500;
+	m_rolling_ping = 900;
 	m_resend_delay = (m_rolling_ping * m_owner->m_options.resend_delay_factor) + m_owner->m_options.resend_delay_ms;
 	m_combined.reset(new char[512]);
 	m_combined[0] = 0;
@@ -1026,7 +1026,7 @@ void EQ::Net::DaybreakConnection::ProcessResend(int stream)
 				InternalBufferedSend(entry.second.packet);
 				entry.second.last_sent = now;
 				entry.second.times_resent++;
-				m_rolling_ping += 100;
+				m_rolling_ping += 300;
 			}
 		}
 		else {
@@ -1040,7 +1040,7 @@ void EQ::Net::DaybreakConnection::ProcessResend(int stream)
 				InternalBufferedSend(entry.second.packet);
 				entry.second.last_sent = now;
 				entry.second.times_resent++;
-				m_rolling_ping += 100;
+				m_rolling_ping += 300;
 			}
 		}
 	}
@@ -1061,7 +1061,7 @@ void EQ::Net::DaybreakConnection::Ack(int stream, uint16_t seq)
 			m_stats.max_ping = std::max(m_stats.max_ping, round_time);
 			m_stats.min_ping = std::min(m_stats.min_ping, round_time);
 			m_stats.last_ping = round_time;
-			m_rolling_ping = (m_rolling_ping * 2 + round_time) / 3;
+			m_rolling_ping = (m_rolling_ping * 3 + round_time) / 4;
 
 			iter = s->sent_packets.erase(iter);
 		}
