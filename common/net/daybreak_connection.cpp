@@ -1061,7 +1061,7 @@ void EQ::Net::DaybreakConnection::Ack(int stream, uint16_t seq)
 			m_stats.max_ping = std::max(m_stats.max_ping, round_time);
 			m_stats.min_ping = std::min(m_stats.min_ping, round_time);
 			m_stats.last_ping = round_time;
-			m_rolling_ping = (m_rolling_ping * 3 + round_time) / 4;
+			m_rolling_ping = (m_rolling_ping * 2 + round_time) / 3;
 
 			iter = s->sent_packets.erase(iter);
 		}
