@@ -2993,9 +2993,12 @@ void Client::Handle_OP_AugmentItem(const EQApplicationPacket *app)
 
 			if (!solvent)
 			{
-				Log(Logs::General, Logs::Error, "Player tried to safely remove an augment without a distiller.");
-				Message(13, "Error: Missing an augmentation distiller for safely removing this augment.");
-				return;
+				old_aug = tobe_auged->GetAugment(in_augment->augment_index);
+				if (!old_aug || old_aug->GetItem()->AugDistiller != 0) {
+					Log(Logs::General, Logs::Error, "Player tried to safely remove an augment without a distiller.");
+					Message(13, "Error: Missing an augmentation distiller for safely removing this augment.");
+					return;
+				}
 			}
 			else if (solvent->GetItem()->ItemType == EQEmu::item::ItemTypeAugmentationDistiller)
 			{
@@ -3159,7 +3162,8 @@ void Client::Handle_OP_AugmentItem(const EQApplicationPacket *app)
 			if (itemOneToPush && itemTwoToPush)
 			{
 				// Consume the augment distiller
-				DeleteItemInInventory(solvent_slot, solvent->IsStackable() ? 1 : 0, true);
+				if (solvent)
+					DeleteItemInInventory(solvent_slot, solvent->IsStackable() ? 1 : 0, true);
 
 				// Remove the augmented item
 				DeleteItemInInventory(item_slot, 0, true);
