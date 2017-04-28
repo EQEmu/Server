@@ -4806,6 +4806,7 @@ void Client::Handle_OP_Consider(const EQApplicationPacket *app)
 	mod_consider(tmob, con);
 
 	QueuePacket(outapp);
+	safe_delete(outapp);
 	// only wanted to check raid target once
 	// and need con to still be around so, do it here!
 	if (tmob->IsRaidTarget()) {
@@ -4843,7 +4844,15 @@ void Client::Handle_OP_Consider(const EQApplicationPacket *app)
 
 		SendColoredText(color, std::string("This creature would take an army to defeat!"));
 	}
-	safe_delete(outapp);
+
+	// this could be done better, but this is only called when you con so w/e
+	// Shroud of Stealth has a special message
+	if (improved_hidden && !tmob->see_improved_hide)
+		Message_StringID(10, SOS_KEEPS_HIDDEN);
+	// we are trying to hide but they can see us
+	else if ((invisible || invisible_undead || hidden || invisible_animals) && !IsInvisible(tmob))
+		Message_StringID(10, SUSPECT_SEES_YOU);
+
 	return;
 }
 
