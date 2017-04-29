@@ -8,7 +8,7 @@
 **EQEmulator is a custom completely from-scratch open source server implementation for EverQuest built mostly on C++**
  * MySQL/MariaDB is used as the database engine (over 200+ tables)
  * Perl and LUA are both supported scripting languages for NPC/Player/Quest oriented events
- * Open source database (Project EQ) has content up to expansion GoD (included in server installs)
+ * Open source database (Project EQ) has content up to expansion OoW (included in server installs)
   * Game server environments and databases can be heavily customized to create all new experiences
  * Hundreds of Quests/events created and maintained by Project EQ
 
