@@ -1306,6 +1306,16 @@ void Mob::DoAttack(Mob *other, DamageHitInfo &hit, ExtraAttackOptions *opts)
 // IsFromSpell added to allow spell effects to use Attack. (Mainly for the Rampage AA right now.)
 bool Client::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool IsFromSpell, ExtraAttackOptions *opts)
 {
+#ifdef LUA_EQEMU
+	bool lua_ret = false;
+	bool ignoreDefault = false;
+	lua_ret = LuaParser::Instance()->ClientAttack(this, other, Hand, bRiposte, IsStrikethrough, IsFromSpell, opts, ignoreDefault);
+
+	if (ignoreDefault) {
+		return lua_ret;
+	}
+#endif
+
 	if (!other) {
 		SetTarget(nullptr);
 		Log(Logs::General, Logs::Error, "A null Mob object was passed to Client::Attack() for evaluation!");
@@ -1829,6 +1839,16 @@ bool Client::Death(Mob* killerMob, int32 damage, uint16 spell, EQEmu::skills::Sk
 
 bool NPC::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool IsFromSpell, ExtraAttackOptions *opts)
 {
+#ifdef LUA_EQEMU
+	bool lua_ret = false;
+	bool ignoreDefault = false;
+	lua_ret = LuaParser::Instance()->NPCAttack(this, other, Hand, bRiposte, IsStrikethrough, IsFromSpell, opts, ignoreDefault);
+
+	if (ignoreDefault) {
+		return lua_ret;
+	}
+#endif
+
 	if (!other) {
 		SetTarget(nullptr);
 		Log(Logs::General, Logs::Error, "A null Mob object was passed to NPC::Attack() for evaluation!");
@@ -2827,6 +2847,8 @@ uint8 Mob::GetWeaponDamageBonus(const EQEmu::ItemData *weapon, bool offhand)
 		}
 		return damage_bonus;
 	}
+
+	return 0;
 }
 
 int Mob::GetHandToHandDamage(void)

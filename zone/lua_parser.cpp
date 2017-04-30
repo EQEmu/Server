@@ -960,7 +960,7 @@ void LuaParser::ReloadQuests() {
 		char file_name[256] = { 0 };
 		while (fgets(file_name, 256, load_order) != nullptr) {
 			LoadScript("mods/" + std::string(file_name), file_name);
-			mods_.push_back(file_name);
+			mods_.push_back(LuaMod(L, this, file_name));
 		}
 
 		fclose(load_order);
@@ -971,7 +971,6 @@ void LuaParser::ReloadQuests() {
 	if (n > 0) {
 		lua_pop(L, n);
 	}
-
 }
 
 void LuaParser::LoadScript(std::string filename, std::string package_name) {
@@ -1256,355 +1255,6 @@ int LuaParser::DispatchEventSpell(QuestEventID evt, NPC* npc, Client *client, ui
     return ret;
 }
 
-void PutDamageHitInfo(lua_State *L, luabind::adl::object &e, DamageHitInfo &hit) {
-	luabind::adl::object lua_hit = luabind::newtable(L);
-	lua_hit["base_damage"] = hit.base_damage;
-	lua_hit["damage_done"] = hit.damage_done;
-	lua_hit["offense"] = hit.offense;
-	lua_hit["tohit"] = hit.tohit;
-	lua_hit["hand"] = hit.hand;
-	lua_hit["skill"] = (int)hit.skill;
-	e["hit"] = lua_hit;
-}
-
-void GetDamageHitInfo(luabind::adl::object &ret, DamageHitInfo &hit) {
-	auto luaHitTable = ret["hit"];
-	if (luabind::type(luaHitTable) == LUA_TTABLE) {
-		auto base_damage = luaHitTable["base_damage"];
-		auto damage_done = luaHitTable["damage_done"];
-		auto offense = luaHitTable["offense"];
-		auto tohit = luaHitTable["tohit"];
-		auto hand = luaHitTable["hand"];
-		auto skill = luaHitTable["skill"];
-
-		if (luabind::type(base_damage) == LUA_TNUMBER) {
-			hit.base_damage = luabind::object_cast<int>(base_damage);
-		}
-
-		if (luabind::type(damage_done) == LUA_TNUMBER) {
-			hit.damage_done = luabind::object_cast<int>(damage_done);
-		}
-
-		if (luabind::type(offense) == LUA_TNUMBER) {
-			hit.offense = luabind::object_cast<int>(offense);
-		}
-
-		if (luabind::type(tohit) == LUA_TNUMBER) {
-			hit.tohit = luabind::object_cast<int>(tohit);
-		}
-
-		if (luabind::type(hand) == LUA_TNUMBER) {
-			hit.hand = luabind::object_cast<int>(hand);
-		}
-
-		if (luabind::type(skill) == LUA_TNUMBER) {
-			hit.skill = (EQEmu::skills::SkillType)luabind::object_cast<int>(skill);
-		}
-	}
-}
-
-void PutExtraAttackOptions(lua_State *L, luabind::adl::object &e, ExtraAttackOptions *opts) {
-	if (opts) {
-		luabind::adl::object lua_opts = luabind::newtable(L);
-		lua_opts["damage_percent"] = opts->damage_percent;
-		lua_opts["damage_flat"] = opts->damage_flat;
-		lua_opts["armor_pen_percent"] = opts->armor_pen_percent;
-		lua_opts["armor_pen_flat"] = opts->armor_pen_flat;
-		lua_opts["crit_percent"] = opts->crit_percent;
-		lua_opts["crit_flat"] = opts->crit_flat;
-		lua_opts["hate_percent"] = opts->hate_percent;
-		lua_opts["hate_flat"] = opts->hate_flat;
-		lua_opts["hit_chance"] = opts->hit_chance;
-		lua_opts["melee_damage_bonus_flat"] = opts->melee_damage_bonus_flat;
-		lua_opts["skilldmgtaken_bonus_flat"] = opts->skilldmgtaken_bonus_flat;
-		e["opts"] = lua_opts;
-	}
-}
-
-void GetExtraAttackOptions(luabind::adl::object &ret, ExtraAttackOptions *opts) {
-	if (opts) {
-		auto luaOptsTable = ret["opts"];
-		if (luabind::type(luaOptsTable) == LUA_TTABLE) {
-			auto damage_percent = luaOptsTable["damage_percent"];
-			auto damage_flat = luaOptsTable["damage_flat"];
-			auto armor_pen_percent = luaOptsTable["armor_pen_percent"];
-			auto armor_pen_flat = luaOptsTable["armor_pen_flat"];
-			auto crit_percent = luaOptsTable["crit_percent"];
-			auto crit_flat = luaOptsTable["crit_flat"];
-			auto hate_percent = luaOptsTable["hate_percent"];
-			auto hate_flat = luaOptsTable["hate_flat"];
-			auto hit_chance = luaOptsTable["hit_chance"];
-			auto melee_damage_bonus_flat = luaOptsTable["melee_damage_bonus_flat"];
-			auto skilldmgtaken_bonus_flat = luaOptsTable["skilldmgtaken_bonus_flat"];
-
-			if (luabind::type(damage_percent) == LUA_TNUMBER) {
-				opts->damage_percent = luabind::object_cast<float>(damage_percent);
-			}
-
-			if (luabind::type(damage_flat) == LUA_TNUMBER) {
-				opts->damage_flat = luabind::object_cast<int>(damage_flat);
-			}
-
-			if (luabind::type(armor_pen_percent) == LUA_TNUMBER) {
-				opts->armor_pen_percent = luabind::object_cast<float>(armor_pen_percent);
-			}
-
-			if (luabind::type(armor_pen_flat) == LUA_TNUMBER) {
-				opts->armor_pen_flat = luabind::object_cast<int>(armor_pen_flat);
-			}
-
-			if (luabind::type(crit_percent) == LUA_TNUMBER) {
-				opts->crit_percent = luabind::object_cast<float>(crit_percent);
-			}
-
-			if (luabind::type(crit_flat) == LUA_TNUMBER) {
-				opts->crit_flat = luabind::object_cast<float>(crit_flat);
-			}
-
-			if (luabind::type(hate_percent) == LUA_TNUMBER) {
-				opts->hate_percent = luabind::object_cast<float>(hate_percent);
-			}
-
-			if (luabind::type(hate_flat) == LUA_TNUMBER) {
-				opts->hate_flat = luabind::object_cast<int>(hate_flat);
-			}
-
-			if (luabind::type(hit_chance) == LUA_TNUMBER) {
-				opts->hit_chance = luabind::object_cast<int>(hit_chance);
-			}
-
-			if (luabind::type(melee_damage_bonus_flat) == LUA_TNUMBER) {
-				opts->melee_damage_bonus_flat = luabind::object_cast<int>(melee_damage_bonus_flat);
-			}
-
-			if (luabind::type(skilldmgtaken_bonus_flat) == LUA_TNUMBER) {
-				opts->skilldmgtaken_bonus_flat = luabind::object_cast<int>(skilldmgtaken_bonus_flat);
-			}
-		}
-	}
-}
-
-void LuaParser::MeleeMitigation(Mob *self, Mob *attacker, DamageHitInfo &hit, ExtraAttackOptions *opts, bool &ignoreDefault) {
-	int start = lua_gettop(L);
-	ignoreDefault = false;
-
-	for (auto &mod : mods_) {
-		try {
-			if (!HasFunction("MeleeMitigation", mod)) {
-				continue;
-			}
-
-			lua_getfield(L, LUA_REGISTRYINDEX, mod.c_str());
-			lua_getfield(L, -1, "MeleeMitigation");
-
-			Lua_Mob l_self(self);
-			Lua_Mob l_other(attacker);
-			luabind::adl::object e = luabind::newtable(L);
-			e["self"] = l_self;
-			e["other"] = l_other;
-
-			PutDamageHitInfo(L, e, hit);
-			PutExtraAttackOptions(L, e, opts);
-
-			e.push(L);
-
-			if (lua_pcall(L, 1, 1, 0)) {
-				std::string error = lua_tostring(L, -1);
-				AddError(error);
-				lua_pop(L, 1);
-				continue;
-			}
-
-			if (lua_type(L, -1) == LUA_TTABLE) {
-				luabind::adl::object ret(luabind::from_stack(L, -1));
-				auto IgnoreDefaultObj = ret["IgnoreDefault"];
-				if (luabind::type(IgnoreDefaultObj) == LUA_TBOOLEAN) {
-					ignoreDefault = ignoreDefault || luabind::object_cast<bool>(IgnoreDefaultObj);
-				}
-
-				GetDamageHitInfo(ret, hit);
-				GetExtraAttackOptions(ret, opts);
-			}
-		}
-		catch (std::exception &ex) {
-			AddError(ex.what());
-		}
-	}
-
-	int end = lua_gettop(L);
-	int n = end - start;
-	if (n > 0) {
-		lua_pop(L, n);
-	}
-}
-
-void LuaParser::ApplyDamageTable(Mob *self, DamageHitInfo &hit, bool &ignoreDefault) {
-	int start = lua_gettop(L);
-	ignoreDefault = false;
-
-	for (auto &mod : mods_) {
-		try {
-			if (!HasFunction("ApplyDamageTable", mod)) {
-				continue;
-			}
-
-			lua_getfield(L, LUA_REGISTRYINDEX, mod.c_str());
-			lua_getfield(L, -1, "ApplyDamageTable");
-
-			Lua_Mob l_self(self);
-			luabind::adl::object e = luabind::newtable(L);
-			e["self"] = l_self;
-
-			PutDamageHitInfo(L, e, hit);
-			e.push(L);
-
-			if (lua_pcall(L, 1, 1, 0)) {
-				std::string error = lua_tostring(L, -1);
-				AddError(error);
-				lua_pop(L, 1);
-				continue;
-			}
-
-			if (lua_type(L, -1) == LUA_TTABLE) {
-				luabind::adl::object ret(luabind::from_stack(L, -1));
-				auto IgnoreDefaultObj = ret["IgnoreDefault"];
-				if (luabind::type(IgnoreDefaultObj) == LUA_TBOOLEAN) {
-					ignoreDefault = ignoreDefault || luabind::object_cast<bool>(IgnoreDefaultObj);
-				}
-
-				GetDamageHitInfo(ret, hit);
-			}
-		}
-		catch (std::exception &ex) {
-			AddError(ex.what());
-		}
-	}
-
-	int end = lua_gettop(L);
-	int n = end - start;
-	if (n > 0) {
-		lua_pop(L, n);
-	}
-}
-
-bool LuaParser::AvoidDamage(Mob *self, Mob *other, DamageHitInfo &hit, bool &ignoreDefault) {
-	int start = lua_gettop(L);
-	ignoreDefault = false;
-	bool retval = false;
-
-	for (auto &mod : mods_) {
-		try {
-			if (!HasFunction("AvoidDamage", mod)) {
-				continue;
-			}
-
-			lua_getfield(L, LUA_REGISTRYINDEX, mod.c_str());
-			lua_getfield(L, -1, "AvoidDamage");
-
-			Lua_Mob l_self(self);
-			Lua_Mob l_other(other);
-			luabind::adl::object e = luabind::newtable(L);
-			e["self"] = l_self;
-			e["other"] = l_other;
-
-			PutDamageHitInfo(L, e, hit);
-			e.push(L);
-
-			if (lua_pcall(L, 1, 1, 0)) {
-				std::string error = lua_tostring(L, -1);
-				AddError(error);
-				lua_pop(L, 1);
-				continue;
-			}
-
-			if (lua_type(L, -1) == LUA_TTABLE) {
-				luabind::adl::object ret(luabind::from_stack(L, -1));
-				auto IgnoreDefaultObj = ret["IgnoreDefault"];
-				if (luabind::type(IgnoreDefaultObj) == LUA_TBOOLEAN) {
-					ignoreDefault = ignoreDefault || luabind::object_cast<bool>(IgnoreDefaultObj);
-				}
-
-				auto returnValueObj = ret["ReturnValue"];
-				if (luabind::type(returnValueObj) == LUA_TBOOLEAN) {
-					retval = luabind::object_cast<bool>(returnValueObj);
-				}
-
-				GetDamageHitInfo(ret, hit);
-			}
-		}
-		catch (std::exception &ex) {
-			AddError(ex.what());
-		}
-	}
-
-	int end = lua_gettop(L);
-	int n = end - start;
-	if (n > 0) {
-		lua_pop(L, n);
-	}
-
-	return retval;
-}
-
-bool LuaParser::CheckHitChance(Mob *self, Mob* other, DamageHitInfo &hit, bool &ignoreDefault) {
-	int start = lua_gettop(L);
-	ignoreDefault = false;
-	bool retval = false;
-
-	for (auto &mod : mods_) {
-		try {
-			if (!HasFunction("CheckHitChance", mod)) {
-				continue;
-			}
-
-			lua_getfield(L, LUA_REGISTRYINDEX, mod.c_str());
-			lua_getfield(L, -1, "CheckHitChance");
-
-			Lua_Mob l_self(self);
-			Lua_Mob l_other(other);
-			luabind::adl::object e = luabind::newtable(L);
-			e["self"] = l_self;
-			e["other"] = l_other;
-
-			PutDamageHitInfo(L, e, hit);
-			e.push(L);
-
-			if (lua_pcall(L, 1, 1, 0)) {
-				std::string error = lua_tostring(L, -1);
-				AddError(error);
-				lua_pop(L, 1);
-				continue;
-			}
-
-			if (lua_type(L, -1) == LUA_TTABLE) {
-				luabind::adl::object ret(luabind::from_stack(L, -1));
-				auto IgnoreDefaultObj = ret["IgnoreDefault"];
-				if (luabind::type(IgnoreDefaultObj) == LUA_TBOOLEAN) {
-					ignoreDefault = ignoreDefault || luabind::object_cast<bool>(IgnoreDefaultObj);
-				}
-
-				auto returnValueObj = ret["ReturnValue"];
-				if (luabind::type(returnValueObj) == LUA_TBOOLEAN) {
-					retval = luabind::object_cast<bool>(returnValueObj);
-				}
-
-				GetDamageHitInfo(ret, hit);
-			}
-		}
-		catch (std::exception &ex) {
-			AddError(ex.what());
-		}
-	}
-
-	int end = lua_gettop(L);
-	int n = end - start;
-	if (n > 0) {
-		lua_pop(L, n);
-	}
-
-	return retval;
-}
-
 QuestEventID LuaParser::ConvertLuaEvent(QuestEventID evt) {
 	switch(evt) {
 	case EVENT_SLAY:
@@ -1629,3 +1279,103 @@ QuestEventID LuaParser::ConvertLuaEvent(QuestEventID evt) {
 }
 
 #endif
+
+bool LuaParser::ClientAttack(Mob *self, Mob *other, int Hand, bool bRiposte, bool IsStrikethrough, bool IsFromSpell, ExtraAttackOptions *opts, bool &ignoreDefault)
+{
+	bool retval = false;
+	for (auto &mod : mods_) {
+		retval = mod.ClientAttack(self, other, Hand, bRiposte, IsStrikethrough, IsFromSpell, opts, ignoreDefault);
+	}
+
+	return retval;
+}
+
+bool LuaParser::NPCAttack(Mob *self, Mob *other, int Hand, bool bRiposte, bool IsStrikethrough, bool IsFromSpell, ExtraAttackOptions *opts, bool &ignoreDefault)
+{
+	bool retval = false;
+	for (auto &mod : mods_) {
+		retval = mod.NPCAttack(self, other, Hand, bRiposte, IsStrikethrough, IsFromSpell, opts, ignoreDefault);
+	}
+
+	return retval;
+}
+
+bool LuaParser::BotAttack(Mob *self, Mob *other, int Hand, bool bRiposte, bool IsStrikethrough, bool IsFromSpell, ExtraAttackOptions *opts, bool &ignoreDefault)
+{
+	bool retval = false;
+	for (auto &mod : mods_) {
+		retval = mod.BotAttack(self, other, Hand, bRiposte, IsStrikethrough, IsFromSpell, opts, ignoreDefault);
+	}
+
+	return retval;
+}
+
+void LuaParser::MeleeMitigation(Mob *self, Mob *attacker, DamageHitInfo &hit, ExtraAttackOptions *opts, bool &ignoreDefault)
+{
+	for (auto &mod : mods_) {
+		mod.MeleeMitigation(self, attacker, hit, opts, ignoreDefault);
+	}
+}
+
+void LuaParser::ApplyDamageTable(Mob *self, DamageHitInfo &hit, bool &ignoreDefault)
+{
+	for (auto &mod : mods_) {
+		mod.ApplyDamageTable(self, hit, ignoreDefault);
+	}
+}
+
+bool LuaParser::AvoidDamage(Mob *self, Mob *other, DamageHitInfo &hit, bool & ignoreDefault)
+{
+	bool retval = false;
+	for (auto &mod : mods_) {
+		retval = mod.AvoidDamage(self, other, hit, ignoreDefault);
+	}
+	return retval;
+}
+
+bool LuaParser::CheckHitChance(Mob *self, Mob *other, DamageHitInfo &hit, bool &ignoreDefault)
+{
+	bool retval = false;
+	for (auto &mod : mods_) {
+		retval = mod.CheckHitChance(self, other, hit, ignoreDefault);
+	}
+	return retval;
+}
+
+void LuaParser::DoSpecialAttackDamage(Mob *self, Mob *who, EQEmu::skills::SkillType skill, int32 base_damage, int32 min_damage, int32 hate_override, int ReuseTime, bool &ignoreDefault)
+{
+	for (auto &mod : mods_) {
+		mod.DoSpecialAttackDamage(self, who, skill, base_damage, min_damage, hate_override, ReuseTime, ignoreDefault);
+	}
+}
+
+void LuaParser::DoRangedAttackDmg(Mob *self, Mob *other, bool Launch, int16 damage_mod, int16 chance_mod, EQEmu::skills::SkillType skill, float speed, const char *IDFile, bool &ignoreDefault)
+{
+	for (auto &mod : mods_) {
+		mod.DoRangedAttackDmg(self, other, Launch, damage_mod, chance_mod, skill, speed, IDFile, ignoreDefault);
+	}
+}
+
+void LuaParser::DoArcheryAttackDmg(Mob *self, Mob *other, const EQEmu::ItemInstance *RangeWeapon, const EQEmu::ItemInstance *Ammo, uint16 weapon_damage, int16 chance_mod, int16 focus, 
+	int ReuseTime, uint32 range_id, uint32 ammo_id, const EQEmu::ItemData *AmmoItem, int AmmoSlot, float speed, bool &ignoreDefault)
+{
+	for (auto &mod : mods_) {
+		mod.DoArcheryAttackDmg(self, other, RangeWeapon, Ammo, weapon_damage, chance_mod, focus, ReuseTime, range_id, ammo_id, AmmoItem, AmmoSlot, speed, ignoreDefault);
+	}
+}
+
+void LuaParser::DoThrowingAttackDmg(Mob *self, Mob *other, const EQEmu::ItemInstance *RangeWeapon, const EQEmu::ItemData *AmmoItem, uint16 weapon_damage, int16 chance_mod, int16 focus, 
+	int ReuseTime, uint32 range_id, int AmmoSlot, float speed, bool &ignoreDefault)
+{
+	for (auto &mod : mods_) {
+		mod.DoThrowingAttackDmg(self, other, RangeWeapon, AmmoItem, weapon_damage, chance_mod, focus, ReuseTime, range_id, AmmoSlot, speed, ignoreDefault);
+	}
+}
+
+void LuaParser::DoMeleeSkillAttackDmg(Mob *self, Mob *other, uint16 weapon_damage, EQEmu::skills::SkillType skillinuse, int16 chance_mod, int16 focus, bool CanRiposte, 
+	int ReuseTime, bool &ignoreDefault)
+{
+	for (auto &mod : mods_) {
+		mod.DoMeleeSkillAttackDmg(self, other, weapon_damage, skillinuse, chance_mod, focus, CanRiposte, ReuseTime, ignoreDefault);
+	}
+}

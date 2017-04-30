@@ -51,6 +51,7 @@ SET(zone_sources
 	lua_item.cpp
 	lua_iteminst.cpp
 	lua_mob.cpp
+	lua_mod.cpp
 	lua_npc.cpp
 	lua_object.cpp
 	lua_packet.cpp
@@ -174,6 +175,7 @@ SET(zone_headers
 	lua_item.h
 	lua_iteminst.h
 	lua_mob.h
+	lua_mod.h
 	lua_npc.h
 	lua_object.h
 	lua_packet.h

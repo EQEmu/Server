@@ -22,6 +22,7 @@
 #include "object.h"
 #include "doors.h"
 #include "quest_parser_collection.h"
+#include "lua_parser.h"
 #include "../common/string_util.h"
 #include "../common/say_link.h"
 
@@ -3857,6 +3858,16 @@ void Bot::AddToHateList(Mob* other, uint32 hate, int32 damage, bool iYellForHelp
 }
 
 bool Bot::Attack(Mob* other, int Hand, bool FromRiposte, bool IsStrikethrough, bool IsFromSpell, ExtraAttackOptions *opts) {
+#ifdef LUA_EQEMU
+	bool lua_ret = false;
+	bool ignoreDefault = false;
+	lua_ret = LuaParser::Instance()->BotAttack(this, other, Hand, bRiposte, IsStrikethrough, IsFromSpell, opts, ignoreDefault);
+
+	if (ignoreDefault) {
+		return lua_ret;
+	}
+#endif
+	
 	if (!other) {
 		SetTarget(nullptr);
 		Log(Logs::General, Logs::Error, "A null Mob object was passed to Bot::Attack for evaluation!");
