@@ -10012,7 +10012,14 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 					}
 				}
 				zone->AddAggroMob();
-				mypet->AddToHateList(target, 1);
+				// classic acts like qattack
+				int hate = 1;
+				if (IsEngaged()) {
+					auto top = hate_list.GetEntWithMostHateOnList(this);
+					if (top)
+						hate += hate_list.GetEntHateAmount(top);
+				}
+				mypet->AddToHateList(target, hate);
 				Message_StringID(MT_PetResponse, PET_ATTACKING, mypet->GetCleanName(), target->GetCleanName());
 			}
 		}
