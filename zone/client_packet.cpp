@@ -10195,44 +10195,6 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 		}
 		break;
 	}
-	case PET_SLUMBER: {
-		if (mypet->IsFeared()) break; //could be exploited like PET_BACKOFF
-
-		if (mypet->GetPetType() != petAnimation) {
-			// Needs to have an IsSleeping() check added and this case should toggle on/off
-			mypet->Say_StringID(MT_PetResponse, PET_SIT_STRING);
-			mypet->SetPetOrder(SPO_Sit);
-			mypet->SetRunAnimSpeed(0);
-			if (!mypet->UseBardSpellLogic())	//maybe we can have a bard pet
-				mypet->InterruptSpell(); //No cast 4 u. //i guess the pet should start casting
-			mypet->SendAppearancePacket(AT_Anim, ANIM_DEATH);
-		}
-		break;
-	}
-	case PET_SLUMBER_ON: {
-		if (mypet->IsFeared()) break; //could be exploited like PET_BACKOFF
-
-		if (mypet->GetPetType() != petAnimation) {
-			mypet->Say_StringID(MT_PetResponse, PET_SIT_STRING);
-			mypet->SetPetOrder(SPO_Sit);
-			mypet->SetRunAnimSpeed(0);
-			if (!mypet->UseBardSpellLogic())	//maybe we can have a bard pet
-				mypet->InterruptSpell(); //No cast 4 u. //i guess the pet should start casting
-			mypet->SendAppearancePacket(AT_Anim, ANIM_DEATH);
-		}
-		break;
-	}
-	case PET_SLUMBER_OFF: {
-		if (mypet->IsFeared()) break; //could be exploited like PET_BACKOFF
-
-		if (mypet->GetPetType() != petAnimation) {
-			mypet->Say_StringID(MT_PetResponse, PET_SIT_STRING);
-			mypet->SetPetOrder(SPO_Follow);
-			mypet->SetRunAnimSpeed(mypet->GetBaseRunspeed());
-			mypet->SendAppearancePacket(AT_Anim, ANIM_STAND);
-		}
-		break;
-	}
 	case PET_HOLD: {
 		if (GetAA(aaPetDiscipline) && mypet->IsNPC()) {
 			if (mypet->IsFeared())
