@@ -9952,7 +9952,7 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 				Mob *Owner = mypet->GetOwner();
 				if (Owner)
 					mypet->Say_StringID(PET_LEADERIS, Owner->GetCleanName());
-				else
+				else if (mypet->IsNPC())
 					mypet->Say_StringID(I_FOLLOW_NOONE);
 			}
 		}
