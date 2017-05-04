@@ -2522,7 +2522,7 @@ void Mob::AddToHateList(Mob* other, uint32 hate /*= 0*/, int32 damage /*= 0*/, b
 
 	// we skip these checks if it's forced through a pet command
 	if (!pet_command) {
-		if (IsPet() && GetOwner() && GetOwner()->GetAA(aaPetDiscipline)) {
+		if (IsPet()) {
 			if ((IsGHeld() || (IsHeld() && IsFocused())) && !on_hatelist) // we want them to be able to climb the hate list
 				return;
 			if (IsHeld() && !wasengaged)
@@ -2632,7 +2632,7 @@ void Mob::AddToHateList(Mob* other, uint32 hate /*= 0*/, int32 damage /*= 0*/, b
 		}
 	}
 
-	if (mypet && (!(GetAA(aaPetDiscipline) && mypet->IsHeld()))) { // I have a pet, add other to it
+	if (mypet && !mypet->IsHeld()) { // I have a pet, add other to it
 		if (!mypet->IsFamiliar() && !mypet->GetSpecialAbility(IMMUNE_AGGRO))
 			mypet->hate_list.AddEntToHateList(other, 0, 0, bFrenzy);
 	}

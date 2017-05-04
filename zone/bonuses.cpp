@@ -1442,10 +1442,18 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 				newbon->FeignedCastOnChance = base1;
 			break;
 
+		case SE_AddPetCommand:
+			if (base1 && base2 < PET_MAXCOMMANDS)
+				newbon->PetCommands[base2] = true;
+			break;
+
+		case SE_FeignedMinion:
+			if (newbon->FeignedMinionChance < base1)
+				newbon->FeignedMinionChance = base1;
+			break;
+
 		// to do
 		case SE_PetDiscipline:
-			break;
-		case SE_PetDiscipline2:
 			break;
 		case SE_PotionBeltSlots:
 			break;
@@ -1464,8 +1472,6 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 		case SE_NimbleEvasion:
 			break;
 		case SE_TrapCircumvention:
-			break;
-		case SE_FeignedMinion:
 			break;
 
 		// not handled here

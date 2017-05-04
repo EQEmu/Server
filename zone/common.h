@@ -91,6 +91,7 @@
 #define PET_REGROUP			31	// 0x1f - /pet regroup, acts like classic hold. Stops attack and moves back to guard/you but doesn't clear hate list
 #define PET_REGROUPON		32	// 0x20 - /pet regroup on, turns on regroup
 #define PET_REGROUPOFF		33	// 0x21 - /pet regroup off, turns off regroup
+#define PET_MAXCOMMANDS		PET_REGROUPOFF + 1
 
 // can change the state of these buttons with a packet
 #define PET_BUTTON_SIT			0
@@ -533,6 +534,8 @@ struct StatBonuses {
 	uint8	TradeSkillMastery;					// Allow number of tradeskills to exceed 200 skill.
 	int16	NoBreakAESneak;						// Percent value
 	int16	FeignedCastOnChance;				// Percent Value
+	bool	PetCommands[PET_MAXCOMMANDS];		// SPA 267
+	int	FeignedMinionChance;				// SPA 281 base1 = chance, just like normal FD
 };
 
 typedef struct
