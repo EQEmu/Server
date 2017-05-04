@@ -49,6 +49,7 @@ if(-e "eqemu_server_skip_update.txt"){
 
 #::: Check for script self update
 do_self_update_check_routine() if !$skip_self_update_check;
+get_windows_wget();
 get_perl_version();
 read_eqemu_config_xml();
 get_mysql_path();
@@ -517,6 +518,13 @@ sub get_perl_version {
 	no warnings;
 }
 
+sub get_windows_wget {
+	if(!-e "wget.exe" && $OS eq "Windows"){
+		eval "use LWP::Simple qw(getstore);";
+		getstore("https://raw.githubusercontent.com/Akkadius/EQEmuInstall/master/wget.exe", "wget.exe");
+	}
+}
+
 sub do_self_update_check_routine {
 	
 	#::: Check for internet connection before updating
@@ -524,7 +532,7 @@ sub do_self_update_check_routine {
 		print "[Update] Cannot check update without internet connection...\n";
 		return;
 	}
-
+	
 	#::: Check for script changes :: eqemu_server.pl
 	get_remote_file($eqemu_repository_request_url . "utils/scripts/eqemu_server.pl", "updates_staged/eqemu_server.pl", 0, 1, 1);
 	
@@ -997,68 +1005,14 @@ sub get_remote_file{
 		}
 	}
 	
-	if($OS eq "Windows"){ 
-		#::: For non-text type requests...
-		if($content_type == 1){
-			$break = 0;
-			while($break == 0) {
-				eval "use LWP::Simple qw(getstore);"; 
-				# use LWP::Simple qw(getstore);
-				# print "request is " . $request_url . "\n";
-				# print "destination file is supposed to be " . $destination_file . "\n";
-				if(!getstore($request_url, $destination_file)){
-					print "[Download] Error, no connection or failed request...\n\n";
-				}
-				# sleep(1);
-				#::: Make sure the file exists before continuing...
-				if(-e $destination_file) { 
-					$break = 1;
-					print "[Download] Saved: (" . $destination_file . ") from " . $request_url . "\n" if !$silent_download;
-				} else { $break = 0; }
-				usleep(500);
-				
-				if($no_retry){
-					$break = 1;
-				}
-			}
-		}
-		else{
-			$break = 0;
-			while($break == 0) {
-				require LWP::UserAgent; 
-				my $ua = LWP::UserAgent->new; 
-				$ua->timeout(10);
-				$ua->env_proxy; 
-				my $response = $ua->get($request_url);
-				if ($response->is_success){
-					open (FILE, '> ' . $destination_file . '');
-					print FILE $response->decoded_content;
-					close (FILE); 
-				}
-				else {
-					print "[Download] Error, no connection or failed request...\n\n";
-				}
-				if(-e $destination_file) { 
-					$break = 1;
-					print "[Download] Saved: (" . $destination_file . ") from " . $request_url . "\n" if !$silent_download;
-				} else { $break = 0; }
-				usleep(500);
-				
-				if($no_retry){
-					$break = 1;
-				}
-			}
-		}
+	#::: wget -O db_update/db_update_manifest.txt https://raw.githubusercontent.com/EQEmu/Server/master/utils/sql/db_update_manifest.txt
+	$wget = `wget -N --no-check-certificate --quiet -O $destination_file $request_url`;
+	print "[Download] Saved: (" . $destination_file . ") from " . $request_url . "\n" if !$silent_download;
+	if($wget=~/unable to resolve/i){ 
+		print "Error, no connection or failed request...\n\n";
+		#die;
 	}
-	if($OS eq "Linux"){
-		#::: wget -O db_update/db_update_manifest.txt https://raw.githubusercontent.com/EQEmu/Server/master/utils/sql/db_update_manifest.txt
-		$wget = `wget --no-check-certificate --quiet -O $destination_file $request_url`;
-		print "[Download] Saved: (" . $destination_file . ") from " . $request_url . "\n" if !$silent_download;
-		if($wget=~/unable to resolve/i){ 
-			print "Error, no connection or failed request...\n\n";
-			#die;
-		}
-	}
+	
 }
 
 #::: Trim Whitespaces
