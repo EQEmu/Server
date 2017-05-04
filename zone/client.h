@@ -352,6 +352,8 @@ public:
 	inline InspectMessage_Struct& GetInspectMessage() { return m_inspect_message; }
 	inline const InspectMessage_Struct& GetInspectMessage() const { return m_inspect_message; }
 
+	void SetPetCommandState(int button, int state);
+
 	bool CheckAccess(int16 iDBLevel, int16 iDefaultLevel);
 
 	void CheckQuests(const char* zonename, const char* message, uint32 npc_id, uint32 item_id, Mob* other);

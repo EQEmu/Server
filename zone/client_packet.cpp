@@ -10202,6 +10202,7 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 				mypet->SetHeld(true);
 			}
 			mypet->SetGHeld(false);
+			SetPetCommandState(PET_BUTTON_GHOLD, 0);
 		}
 		break;
 	}
@@ -10210,6 +10211,7 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 			mypet->Say_StringID(MT_PetResponse, PET_ON_HOLD);
 			mypet->SetHeld(true);
 			mypet->SetGHeld(false);
+			SetPetCommandState(PET_BUTTON_GHOLD, 0);
 		}
 		break;
 	}
@@ -10230,6 +10232,7 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 				mypet->SetGHeld(true);
 			}
 			mypet->SetHeld(false);
+			SetPetCommandState(PET_BUTTON_HOLD, 0);
 		}
 		break;
 	}
@@ -10238,6 +10241,7 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 			mypet->Say_StringID(MT_PetResponse, PET_ON_HOLD);
 			mypet->SetGHeld(true);
 			mypet->SetHeld(false);
+			SetPetCommandState(PET_BUTTON_HOLD, 0);
 		}
 		break;
 	}
