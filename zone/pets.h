@@ -37,6 +37,18 @@
 #define PET_REGROUPON		32	// 0x20 - /pet regroup on, turns on regroup
 #define PET_REGROUPOFF		33	// 0x21 - /pet regroup off, turns off regroup
 
+// can change the state of these buttons with a packet
+#define PET_BUTTON_SIT			0
+#define PET_BUTTON_STOP			1
+#define PET_BUTTON_REGROUP		2
+#define PET_BUTTON_FOLLOW		3
+#define PET_BUTTON_GUARD		4
+#define PET_BUTTON_TAUNT		5
+#define PET_BUTTON_HOLD			6
+#define PET_BUTTON_GHOLD		7
+#define PET_BUTTON_FOCUS		8
+#define PET_BUTTON_SPELLHOLD	9
+
 class Mob;
 struct NPCType;
 

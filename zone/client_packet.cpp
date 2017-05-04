@@ -10001,26 +10001,17 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 
 		if ((mypet->GetPetType() == petAnimation && GetAA(aaAnimationEmpathy) >= 2) || mypet->GetPetType() != petAnimation) {
 			if (target != this && DistanceSquaredNoZ(mypet->GetPosition(), target->GetPosition()) <= (RuleR(Pets, AttackCommandRange)*RuleR(Pets, AttackCommandRange))) {
-				if (mypet->IsHeld()) {
-					if (!mypet->IsFocused()) {
-						mypet->SetHeld(false); //break the hold and guard if we explicitly tell the pet to attack.
-						if (mypet->GetPetOrder() != SPO_Guard)
-							mypet->SetPetOrder(SPO_Follow);
-					}
-					else {
-						mypet->SetTarget(target);
-					}
-				}
 				zone->AddAggroMob();
 				// classic acts like qattack
 				int hate = 1;
-				if (IsEngaged()) {
-					auto top = hate_list.GetEntWithMostHateOnList(this);
-					if (top)
-						hate += hate_list.GetEntHateAmount(top);
+				if (mypet->IsEngaged()) {
+					auto top = mypet->GetHateMost();
+					if (top && top != target)
+						hate += mypet->GetHateAmount(top) - mypet->GetHateAmount(target) + 100; // should be enough to cause target change
 				}
-				mypet->AddToHateList(target, hate);
+				mypet->AddToHateList(target, hate, 0, true, false, false, SPELL_UNKNOWN, true);
 				Message_StringID(MT_PetResponse, PET_ATTACKING, mypet->GetCleanName(), target->GetCleanName());
+				SetTarget(target);
 			}
 		}
 		break;
@@ -10044,7 +10035,7 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 		if ((mypet->GetPetType() == petAnimation && GetAA(aaAnimationEmpathy) >= 2) || mypet->GetPetType() != petAnimation) {
 			if (GetTarget() != this && DistanceSquaredNoZ(mypet->GetPosition(), GetTarget()->GetPosition()) <= (RuleR(Pets, AttackCommandRange)*RuleR(Pets, AttackCommandRange))) {
 				zone->AddAggroMob();
-				mypet->AddToHateList(GetTarget(), 1);
+				mypet->AddToHateList(GetTarget(), 1, 0, true, false, false, SPELL_UNKNOWN, true);
 				Message_StringID(MT_PetResponse, PET_ATTACKING, mypet->GetCleanName(), GetTarget()->GetCleanName());
 			}
 		}
@@ -10098,7 +10089,6 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 
 		if ((mypet->GetPetType() == petAnimation && GetAA(aaAnimationEmpathy) >= 1) || mypet->GetPetType() != petAnimation) {
 			if (mypet->IsNPC()) {
-				mypet->SetHeld(false);
 				mypet->Say_StringID(MT_PetResponse, PET_GUARDINGLIFE);
 				mypet->SetPetOrder(SPO_Guard);
 				mypet->CastToNPC()->SaveGuardSpot();
@@ -10110,7 +10100,6 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 		if (mypet->IsFeared()) break; //could be exploited like PET_BACKOFF
 
 		if ((mypet->GetPetType() == petAnimation && GetAA(aaAnimationEmpathy) >= 1) || mypet->GetPetType() != petAnimation) {
-			mypet->SetHeld(false);
 			mypet->Say_StringID(MT_PetResponse, PET_FOLLOWING);
 			mypet->SetPetOrder(SPO_Follow);
 			mypet->SendAppearancePacket(AT_Anim, ANIM_STAND);
@@ -10150,7 +10139,6 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 		if (mypet->IsFeared()) break; //could be exploited like PET_BACKOFF
 
 		if ((mypet->GetPetType() == petAnimation && GetAA(aaAnimationEmpathy) >= 1) || mypet->GetPetType() != petAnimation) {
-			mypet->SetHeld(false);
 			mypet->Say_StringID(MT_PetResponse, PET_GUARDME_STRING);
 			mypet->SetPetOrder(SPO_Follow);
 			mypet->SendAppearancePacket(AT_Anim, ANIM_STAND);
@@ -10204,36 +10192,58 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 	}
 	case PET_HOLD: {
 		if (GetAA(aaPetDiscipline) && mypet->IsNPC()) {
-			if (mypet->IsFeared())
-				break; //could be exploited like PET_BACKOFF
-
 			if (mypet->IsHeld())
 			{
 				mypet->SetHeld(false);
 			}
 			else
 			{
-				mypet->Say_StringID(MT_PetResponse, PET_ON_HOLD);
-				mypet->WipeHateList();
+				mypet->Say_StringID(MT_PetResponse, PET_ON_HOLD); // they use new messages now, but only SoD+?
 				mypet->SetHeld(true);
 			}
+			mypet->SetGHeld(false);
 		}
 		break;
 	}
 	case PET_HOLD_ON: {
 		if (GetAA(aaPetDiscipline) && mypet->IsNPC() && !mypet->IsHeld()) {
-			if (mypet->IsFeared())
-				break; //could be exploited like PET_BACKOFF
-
 			mypet->Say_StringID(MT_PetResponse, PET_ON_HOLD);
-			mypet->WipeHateList();
 			mypet->SetHeld(true);
+			mypet->SetGHeld(false);
 		}
 		break;
 	}
 	case PET_HOLD_OFF: {
 		if (GetAA(aaPetDiscipline) && mypet->IsNPC() && mypet->IsHeld())
 			mypet->SetHeld(false);
+		break;
+	}
+	case PET_GHOLD: {
+		if (GetAA(aaPetDiscipline) && mypet->IsNPC()) {
+			if (mypet->IsGHeld())
+			{
+				mypet->SetGHeld(false);
+			}
+			else
+			{
+				mypet->Say_StringID(MT_PetResponse, PET_ON_HOLD); // message wrong
+				mypet->SetGHeld(true);
+			}
+			mypet->SetHeld(false);
+		}
+		break;
+	}
+	case PET_GHOLD_ON: {
+		if (GetAA(aaPetDiscipline) && mypet->IsNPC()) {
+			mypet->Say_StringID(MT_PetResponse, PET_ON_HOLD);
+			mypet->SetGHeld(true);
+			mypet->SetHeld(false);
+		}
+		break;
+	}
+	case PET_GHOLD_OFF: {
+		if (GetAA(aaPetDiscipline) && mypet->IsNPC() && mypet->IsGHeld())
+			mypet->SetGHeld(false);
 		break;
 	}
 	case PET_SPELLHOLD: {

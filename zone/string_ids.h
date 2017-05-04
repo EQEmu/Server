@@ -322,6 +322,9 @@
 #define SENTINEL_TRIG_YOU			6724	//You have triggered your sentinel.
 #define SENTINEL_TRIG_OTHER			6725	//%1 has triggered your sentinel.
 #define IDENTIFY_SPELL				6765	//Item Lore: %1.
+#define PET_ON_GHOLD				6843	//Pet greater hold has been set to on.
+#define PET_OFF_GHOLD				6846	//Pet greater hold has been set to off.
+#define PET_GHOLD_ON_MSG			6847	//Now greater holding master.  I will only attack something new if ordered.
 #define BUFF_NOT_BLOCKABLE			7608	//You cannot block this effect.
 #define LDON_DONT_KNOW_TRAPPED		7552	//You do not know if this object is trapped.
 #define LDON_HAVE_DISARMED			7553	//You have disarmed %1!

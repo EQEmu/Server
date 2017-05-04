@@ -533,7 +533,7 @@ public:
 	inline uint32 GetLevelCon(uint8 iOtherLevel) const {
 		return this ? GetLevelCon(GetLevel(), iOtherLevel) : CON_GRAY; }
 	virtual void AddToHateList(Mob* other, uint32 hate = 0, int32 damage = 0, bool iYellForHelp = true,
-		bool bFrenzy = false, bool iBuffTic = false, uint16 spell_id = SPELL_UNKNOWN);
+		bool bFrenzy = false, bool iBuffTic = false, uint16 spell_id = SPELL_UNKNOWN, bool pet_comand = false);
 	bool RemoveFromHateList(Mob* mob);
 	void SetHateAmountOnEnt(Mob* other, int32 hate = 0, int32 damage = 0) { hate_list.SetHateAmountOnEnt(other,hate,damage);}
 	void HalveAggro(Mob *other) { uint32 in_hate = GetHateAmount(other); SetHateAmountOnEnt(other, (in_hate > 1 ? in_hate / 2 : 1)); }
@@ -869,6 +869,8 @@ public:
 	inline const eStandingPetOrder GetPetOrder() const { return pStandingPetOrder; }
 	inline void SetHeld(bool nState) { held = nState; }
 	inline const bool IsHeld() const { return held; }
+	inline void SetGHeld(bool nState) { gheld = nState; }
+	inline const bool IsGHeld() const { return gheld; }
 	inline void SetNoCast(bool nState) { nocast = nState; }
 	inline const bool IsNoCast() const { return nocast; }
 	inline void SetFocused(bool nState) { focused = nState; }
@@ -1179,6 +1181,7 @@ protected:
 
 	uint32 pLastChange;
 	bool held;
+	bool gheld;
 	bool nocast;
 	bool focused;
 	bool spawned;
