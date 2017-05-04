@@ -53,10 +53,6 @@ void Mob::TemporaryPets(uint16 spell_id, Mob *targ, const char *name_override, u
 		act_power = CastToClient()->GetFocusEffect(focusPetPower, spell_id);
 		act_power = CastToClient()->mod_pet_power(act_power, spell_id);
 	}
-#ifdef BOTS
-	else if (this->IsBot())
-		act_power = CastToBot()->GetBotFocusEffect(Bot::BotfocusPetPower, spell_id);
-#endif
 
 	PetRecord record;
 	if (!database.GetPoweredPetEntry(spells[spell_id].teleport_zone, act_power, &record))
