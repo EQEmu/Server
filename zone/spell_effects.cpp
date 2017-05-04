@@ -30,7 +30,6 @@
 #include "quest_parser_collection.h"
 #include "string_ids.h"
 #include "worldserver.h"
-#include "pets.h"
 
 #include <math.h>
 

@@ -54,7 +54,6 @@ extern volatile bool RunLoops;
 #include "guild_mgr.h"
 #include "quest_parser_collection.h"
 #include "queryserv.h"
-#include "pets.h"
 
 extern QueryServ* QServ;
 extern EntityList entity_list;
