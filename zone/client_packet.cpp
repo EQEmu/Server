@@ -10013,6 +10013,10 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 
 		if ((mypet->GetPetType() == petAnimation && aabonuses.PetCommands[PetCommand]) || mypet->GetPetType() != petAnimation) {
 			if (target != this && DistanceSquaredNoZ(mypet->GetPosition(), target->GetPosition()) <= (RuleR(Pets, AttackCommandRange)*RuleR(Pets, AttackCommandRange))) {
+				if (mypet->IsPetStop()) {
+					mypet->SetPetStop(false);
+					SetPetCommandState(PET_BUTTON_STOP, 0);
+				}
 				zone->AddAggroMob();
 				// classic acts like qattack
 				int hate = 1;
@@ -10046,6 +10050,10 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 
 		if ((mypet->GetPetType() == petAnimation && aabonuses.PetCommands[PetCommand]) || mypet->GetPetType() != petAnimation) {
 			if (GetTarget() != this && DistanceSquaredNoZ(mypet->GetPosition(), GetTarget()->GetPosition()) <= (RuleR(Pets, AttackCommandRange)*RuleR(Pets, AttackCommandRange))) {
+				if (mypet->IsPetStop()) {
+					mypet->SetPetStop(false);
+					SetPetCommandState(PET_BUTTON_STOP, 0);
+				}
 				zone->AddAggroMob();
 				mypet->AddToHateList(GetTarget(), 1, 0, true, false, false, SPELL_UNKNOWN, true);
 				Message_StringID(MT_PetResponse, PET_ATTACKING, mypet->GetCleanName(), GetTarget()->GetCleanName());
@@ -10060,6 +10068,10 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 			mypet->Say_StringID(MT_PetResponse, PET_CALMING);
 			mypet->WipeHateList();
 			mypet->SetTarget(nullptr);
+			if (mypet->IsPetStop()) {
+				mypet->SetPetStop(false);
+				SetPetCommandState(PET_BUTTON_STOP, 0);
+			}
 		}
 		break;
 	}
@@ -10107,6 +10119,10 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 				mypet->CastToNPC()->SaveGuardSpot();
 				if (!mypet->GetTarget()) // want them to not twitch if they're chasing something down
 					mypet->SetCurrentSpeed(0);
+				if (mypet->IsPetStop()) {
+					mypet->SetPetStop(false);
+					SetPetCommandState(PET_BUTTON_STOP, 0);
+				}
 			}
 		}
 		break;
@@ -10118,6 +10134,10 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 			mypet->Say_StringID(MT_PetResponse, PET_FOLLOWING);
 			mypet->SetPetOrder(SPO_Follow);
 			mypet->SendAppearancePacket(AT_Anim, ANIM_STAND);
+			if (mypet->IsPetStop()) {
+				mypet->SetPetStop(false);
+				SetPetCommandState(PET_BUTTON_STOP, 0);
+			}
 		}
 		break;
 	}
@@ -10157,6 +10177,10 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 			mypet->Say_StringID(MT_PetResponse, PET_GUARDME_STRING);
 			mypet->SetPetOrder(SPO_Follow);
 			mypet->SendAppearancePacket(AT_Anim, ANIM_STAND);
+			if (mypet->IsPetStop()) {
+				mypet->SetPetStop(false);
+				SetPetCommandState(PET_BUTTON_STOP, 0);
+			}
 		}
 		break;
 	}
@@ -10336,6 +10360,43 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 				Message_StringID(MT_PetResponse, PET_NOT_FOCUSING);
 				mypet->SetFocused(false);
 			}
+		}
+		break;
+	}
+	case PET_STOP: {
+		if (mypet->IsFeared()) break; //could be exploited like PET_BACKOFF
+
+		if ((mypet->GetPetType() == petAnimation && aabonuses.PetCommands[PetCommand]) || mypet->GetPetType() != petAnimation) {
+			if (mypet->IsPetStop()) {
+				mypet->SetPetStop(false);
+			} else {
+				mypet->SetPetStop(true);
+				mypet->SetCurrentSpeed(0);
+				mypet->WipeHateList();
+				mypet->SetTarget(nullptr);
+			}
+			mypet->Say_StringID(MT_PetResponse, PET_GETLOST_STRING);
+		}
+		break;
+	}
+	case PET_STOP_ON: {
+		if (mypet->IsFeared()) break; //could be exploited like PET_BACKOFF
+
+		if ((mypet->GetPetType() == petAnimation && aabonuses.PetCommands[PetCommand]) || mypet->GetPetType() != petAnimation) {
+			mypet->SetPetStop(true);
+			mypet->SetCurrentSpeed(0);
+			mypet->WipeHateList();
+			mypet->SetTarget(nullptr);
+			mypet->Say_StringID(MT_PetResponse, PET_GETLOST_STRING);
+		}
+		break;
+	}
+	case PET_STOP_OFF: {
+		if (mypet->IsFeared()) break; //could be exploited like PET_BACKOFF
+
+		if ((mypet->GetPetType() == petAnimation && aabonuses.PetCommands[PetCommand]) || mypet->GetPetType() != petAnimation) {
+			mypet->SetPetStop(false);
+			mypet->Say_StringID(MT_PetResponse, PET_GETLOST_STRING);
 		}
 		break;
 	}

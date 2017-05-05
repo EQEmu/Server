@@ -344,8 +344,10 @@ Mob::Mob(const char* in_name,
 	typeofpet = petNone; // default to not a pet
 	petpower = 0;
 	held = false;
+	gheld = false;
 	nocast = false;
 	focused = false;
+	pet_stop = false;
 	_IsTempPet = false;
 	pet_owner_client = false;
 	pet_targetlock_id = 0;

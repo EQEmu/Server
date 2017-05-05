@@ -2516,6 +2516,9 @@ void Mob::AddToHateList(Mob* other, uint32 hate /*= 0*/, int32 damage /*= 0*/, b
 		}
 	}
 
+	if (IsPetStop())
+		return;
+
 	// Pet that is /pet hold on will not add to their hate list if they're not engaged
 	// Pet that is /pet hold on and /pet focus on will not add others to their hate list
 	// Pet that is /pet ghold on will never add to their hate list unless /pet attack or /pet qattack
@@ -2632,7 +2635,7 @@ void Mob::AddToHateList(Mob* other, uint32 hate /*= 0*/, int32 damage /*= 0*/, b
 		}
 	}
 
-	if (mypet && !mypet->IsHeld()) { // I have a pet, add other to it
+	if (mypet && !mypet->IsHeld() && !mypet->IsPetStop()) { // I have a pet, add other to it
 		if (!mypet->IsFamiliar() && !mypet->GetSpecialAbility(IMMUNE_AGGRO))
 			mypet->hate_list.AddEntToHateList(other, 0, 0, bFrenzy);
 	}

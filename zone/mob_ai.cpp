@@ -943,7 +943,7 @@ void Mob::AI_Process() {
 	//
 	if(RuleB(Combat, EnableFearPathing)){
 		if(currently_fleeing) {
-			if(IsRooted() || (IsBlind() && CombatRange(hate_list.GetClosestEntOnHateList(this)))) {
+			if((IsRooted() || (IsBlind() && CombatRange(hate_list.GetClosestEntOnHateList(this)))) && !IsPetStop()) {
 				//make sure everybody knows were not moving, for appearance sake
 				if(IsMoving())
 				{
@@ -1303,6 +1303,9 @@ void Mob::AI_Process() {
 		
 		if (m_PlayerState & static_cast<uint32>(PlayerState::Aggressive))
 			SendRemovePlayerState(PlayerState::Aggressive);
+
+		if (IsPetStop()) // pet stop won't be engaged, so we will always get here and we want the above branch to execute
+			return;
 
 		if(zone->CanDoCombat() && AI_feign_remember_timer->Check()) {
 			// 6/14/06
