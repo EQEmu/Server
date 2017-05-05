@@ -89,9 +89,9 @@
 #define PET_GETLOST			29	// 0x1d - /pet get lost
 #define PET_GUARDME			30	// 0x1e - Same as /pet follow, but different message in older clients - define not from client /pet target in modern clients but doesn't send packet
 #define PET_REGROUP			31	// 0x1f - /pet regroup, acts like classic hold. Stops attack and moves back to guard/you but doesn't clear hate list
-#define PET_REGROUPON		32	// 0x20 - /pet regroup on, turns on regroup
-#define PET_REGROUPOFF		33	// 0x21 - /pet regroup off, turns off regroup
-#define PET_MAXCOMMANDS		PET_REGROUPOFF + 1
+#define PET_REGROUP_ON		32	// 0x20 - /pet regroup on, turns on regroup
+#define PET_REGROUP_OFF		33	// 0x21 - /pet regroup off, turns off regroup
+#define PET_MAXCOMMANDS		PET_REGROUP_OFF + 1
 
 // can change the state of these buttons with a packet
 #define PET_BUTTON_SIT			0

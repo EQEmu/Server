@@ -332,6 +332,8 @@
 #define PET_ON_GHOLD				6843	//Pet greater hold has been set to on.
 #define PET_OFF_GHOLD				6846	//Pet greater hold has been set to off.
 #define PET_GHOLD_ON_MSG			6847	//Now greater holding master.  I will only attack something new if ordered.
+#define PET_ON_REGROUPING			6854	//Now regrouping, master.
+#define PET_OFF_REGROUPING			6855	//No longer regrouping, master.
 #define BUFF_NOT_BLOCKABLE			7608	//You cannot block this effect.
 #define LDON_DONT_KNOW_TRAPPED		7552	//You do not know if this object is trapped.
 #define LDON_HAVE_DISARMED			7553	//You have disarmed %1!

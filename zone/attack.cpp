@@ -2516,9 +2516,6 @@ void Mob::AddToHateList(Mob* other, uint32 hate /*= 0*/, int32 damage /*= 0*/, b
 		}
 	}
 
-	if (IsPetStop())
-		return;
-
 	// Pet that is /pet hold on will not add to their hate list if they're not engaged
 	// Pet that is /pet hold on and /pet focus on will not add others to their hate list
 	// Pet that is /pet ghold on will never add to their hate list unless /pet attack or /pet qattack
@@ -2528,7 +2525,7 @@ void Mob::AddToHateList(Mob* other, uint32 hate /*= 0*/, int32 damage /*= 0*/, b
 		if (IsPet()) {
 			if ((IsGHeld() || (IsHeld() && IsFocused())) && !on_hatelist) // we want them to be able to climb the hate list
 				return;
-			if (IsHeld() && !wasengaged)
+			if ((IsHeld() || IsPetStop() || IsPetRegroup()) && !wasengaged) // not 100% sure on stop/regroup kind of hard to test, but regroup is like "classic hold"
 				return;
 		}
 	}

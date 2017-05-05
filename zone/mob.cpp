@@ -348,6 +348,7 @@ Mob::Mob(const char* in_name,
 	nocast = false;
 	focused = false;
 	pet_stop = false;
+	pet_regroup = false;
 	_IsTempPet = false;
 	pet_owner_client = false;
 	pet_targetlock_id = 0;

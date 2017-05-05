@@ -877,6 +877,8 @@ public:
 	inline const bool IsFocused() const { return focused; }
 	inline void SetPetStop(bool nState) { pet_stop = nState; }
 	inline const bool IsPetStop() const { return pet_stop; }
+	inline void SetPetRegroup(bool nState) { pet_regroup = nState; }
+	inline const bool IsPetRegroup() const { return pet_regroup; }
 	inline const bool IsRoamer() const { return roamer; }
 	inline const int GetWanderType() const { return wandertype; }
 	inline const bool IsRooted() const { return rooted || permarooted; }
@@ -1187,6 +1189,7 @@ protected:
 	bool nocast;
 	bool focused;
 	bool pet_stop;
+	bool pet_regroup;
 	bool spawned;
 	void CalcSpellBonuses(StatBonuses* newbon);
 	virtual void CalcBonuses();

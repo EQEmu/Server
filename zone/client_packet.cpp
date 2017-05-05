@@ -10017,6 +10017,10 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 					mypet->SetPetStop(false);
 					SetPetCommandState(PET_BUTTON_STOP, 0);
 				}
+				if (mypet->IsPetRegroup()) {
+					mypet->SetPetRegroup(false);
+					SetPetCommandState(PET_BUTTON_REGROUP, 0);
+				}
 				zone->AddAggroMob();
 				// classic acts like qattack
 				int hate = 1;
@@ -10053,6 +10057,10 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 				if (mypet->IsPetStop()) {
 					mypet->SetPetStop(false);
 					SetPetCommandState(PET_BUTTON_STOP, 0);
+				}
+				if (mypet->IsPetRegroup()) {
+					mypet->SetPetRegroup(false);
+					SetPetCommandState(PET_BUTTON_REGROUP, 0);
 				}
 				zone->AddAggroMob();
 				mypet->AddToHateList(GetTarget(), 1, 0, true, false, false, SPELL_UNKNOWN, true);
@@ -10422,6 +10430,10 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 				mypet->SetPetStop(true);
 				mypet->SetCurrentSpeed(0);
 				mypet->SetTarget(nullptr);
+				if (mypet->IsPetRegroup()) {
+					mypet->SetPetRegroup(false);
+					SetPetCommandState(PET_BUTTON_REGROUP, 0);
+				}
 			}
 			mypet->Say_StringID(MT_PetResponse, PET_GETLOST_STRING);
 		}
@@ -10435,6 +10447,10 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 			mypet->SetCurrentSpeed(0);
 			mypet->SetTarget(nullptr);
 			mypet->Say_StringID(MT_PetResponse, PET_GETLOST_STRING);
+			if (mypet->IsPetRegroup()) {
+				mypet->SetPetRegroup(false);
+				SetPetCommandState(PET_BUTTON_REGROUP, 0);
+			}
 		}
 		break;
 	}
@@ -10444,6 +10460,48 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 		if ((mypet->GetPetType() == petAnimation && aabonuses.PetCommands[PetCommand]) || mypet->GetPetType() != petAnimation) {
 			mypet->SetPetStop(false);
 			mypet->Say_StringID(MT_PetResponse, PET_GETLOST_STRING);
+		}
+		break;
+	}
+	case PET_REGROUP: {
+		if (mypet->IsFeared()) break; //could be exploited like PET_BACKOFF
+
+		if (aabonuses.PetCommands[PetCommand]) {
+			if (mypet->IsPetRegroup()) {
+				mypet->SetPetRegroup(false);
+				mypet->Say_StringID(MT_PetResponse, PET_OFF_REGROUPING);
+			} else {
+				mypet->SetPetRegroup(true);
+				mypet->SetTarget(nullptr);
+				mypet->Say_StringID(MT_PetResponse, PET_ON_REGROUPING);
+				if (mypet->IsPetStop()) {
+					mypet->SetPetStop(false);
+					SetPetCommandState(PET_BUTTON_STOP, 0);
+				}
+			}
+		}
+		break;
+	}
+	case PET_REGROUP_ON: {
+		if (mypet->IsFeared()) break; //could be exploited like PET_BACKOFF
+
+		if (aabonuses.PetCommands[PetCommand]) {
+			mypet->SetPetRegroup(true);
+			mypet->SetTarget(nullptr);
+			mypet->Say_StringID(MT_PetResponse, PET_ON_REGROUPING);
+			if (mypet->IsPetStop()) {
+				mypet->SetPetStop(false);
+				SetPetCommandState(PET_BUTTON_STOP, 0);
+			}
+		}
+		break;
+	}
+	case PET_REGROUP_OFF: {
+		if (mypet->IsFeared()) break; //could be exploited like PET_BACKOFF
+
+		if (aabonuses.PetCommands[PetCommand]) {
+			mypet->SetPetRegroup(false);
+			mypet->Say_StringID(MT_PetResponse, PET_OFF_REGROUPING);
 		}
 		break;
 	}
