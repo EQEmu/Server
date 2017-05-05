@@ -10421,7 +10421,6 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 			} else {
 				mypet->SetPetStop(true);
 				mypet->SetCurrentSpeed(0);
-				mypet->WipeHateList();
 				mypet->SetTarget(nullptr);
 			}
 			mypet->Say_StringID(MT_PetResponse, PET_GETLOST_STRING);
@@ -10434,7 +10433,6 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 		if ((mypet->GetPetType() == petAnimation && aabonuses.PetCommands[PetCommand]) || mypet->GetPetType() != petAnimation) {
 			mypet->SetPetStop(true);
 			mypet->SetCurrentSpeed(0);
-			mypet->WipeHateList();
 			mypet->SetTarget(nullptr);
 			mypet->Say_StringID(MT_PetResponse, PET_GETLOST_STRING);
 		}

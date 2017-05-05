@@ -935,7 +935,7 @@ void Mob::AI_Process() {
 	bool engaged = IsEngaged();
 	bool doranged = false;
 
-	if (!zone->CanDoCombat()) {
+	if (!zone->CanDoCombat() || IsPetStop()) {
 		engaged = false;
 	}
 
@@ -1300,7 +1300,6 @@ void Mob::AI_Process() {
 		}
 	}
 	else {
-		
 		if (m_PlayerState & static_cast<uint32>(PlayerState::Aggressive))
 			SendRemovePlayerState(PlayerState::Aggressive);
 
