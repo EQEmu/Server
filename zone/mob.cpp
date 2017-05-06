@@ -3096,6 +3096,26 @@ void Mob::Say_StringID(uint32 type, uint32 string_id, const char *message3, cons
 	);
 }
 
+void Mob::SayTo_StringID(Client *to, uint32 string_id, const char *message3, const char *message4, const char *message5, const char *message6, const char *message7, const char *message8, const char *message9)
+{
+	if (!to)
+		return;
+
+	auto string_id_str = std::to_string(string_id);
+
+	to->Message_StringID(10, GENERIC_STRINGID_SAY, GetCleanName(), string_id_str.c_str(), message3, message4, message5, message6, message7, message8, message9);
+}
+
+void Mob::SayTo_StringID(Client *to, uint32 type, uint32 string_id, const char *message3, const char *message4, const char *message5, const char *message6, const char *message7, const char *message8, const char *message9)
+{
+	if (!to)
+		return;
+
+	auto string_id_str = std::to_string(string_id);
+
+	to->Message_StringID(type, GENERIC_STRINGID_SAY, GetCleanName(), string_id_str.c_str(), message3, message4, message5, message6, message7, message8, message9);
+}
+
 void Mob::Shout(const char *format, ...)
 {
 	char buf[1000];
