@@ -111,9 +111,6 @@ Zone extensions and features
 //path to where sql logs should be placed
 #define SQL_LOG_PATH "sql_logs/"
 
-//New aggro system to reduce overhead.
-#define REVERSE_AGGRO
-
 //The highest you can #setskill / #setallskill
 #define HIGHEST_CAN_SET_SKILL 400
 
@@ -157,13 +154,12 @@ enum {	//timer settings, all in milliseconds
 	AIscanarea_delay = 6000,
 	AIfeignremember_delay = 500,
 	AItarget_check_duration = 500,
-	AIClientScanarea_delay = 750,	//used in REVERSE_AGGRO
+	// AIClientScanarea_delay = 750,	//used in REVERSE_AGGRO
 	AIassistcheck_delay = 3000,		//now often a fighting NPC will yell for help
 	AI_check_signal_timer_delay = 500, // How often EVENT_SIGNAL checks are processed
 	ClientProximity_interval = 150,
 	CombatEventTimer_expire = 12000,
 	Tribute_duration = 600000,
-	ZoneTimerResolution = 3,			//sleep time between zone main loop runs (milliseconds)
 	FeignMemoryDuration = 120000, // Duration player must feign death to clear zonewide agro.
 	EnragedTimer = 360000,
 	EnragedDurationTimer = 10000

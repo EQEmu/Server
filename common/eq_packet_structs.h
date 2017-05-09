@@ -1116,6 +1116,11 @@ struct PetCommand_Struct {
 /*004*/ uint32	target;
 };
 
+struct PetCommandState_Struct {
+/*00*/	uint32	button_id;
+/*04*/	uint32	state;
+};
+
 /*
 ** Delete Spawn
 ** Length: 4 Bytes
@@ -2243,6 +2248,7 @@ struct GroupFollow_Struct { // SoF Follow Struct
 /*0132*/
 };
 
+// this is generic struct
 struct GroupLeaderChange_Struct
 {
 /*000*/		char	Unknown000[64];

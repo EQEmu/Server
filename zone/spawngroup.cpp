@@ -51,7 +51,7 @@ SpawnGroup::SpawnGroup( uint32 in_id, char* name, int in_group_spawn_limit, floa
 
 uint32 SpawnGroup::GetNPCType() {
 #if EQDEBUG >= 10
-	Log.Out(Logs::General, Logs::None, "SpawnGroup[%08x]::GetNPCType()", (uint32) this);
+	Log(Logs::General, Logs::None, "SpawnGroup[%08x]::GetNPCType()", (uint32) this);
 #endif
 	int npcType = 0;
 	int totalchance = 0;
@@ -169,7 +169,7 @@ bool ZoneDatabase::LoadSpawnGroups(const char *zone_name, uint16 version, SpawnG
 			     zone_name);
 	results = QueryDatabase(query);
 	if (!results.Success()) {
-		Log.Out(Logs::General, Logs::Error, "Error2 in PopulateZoneLists query '%'", query.c_str());
+		Log(Logs::General, Logs::Error, "Error2 in PopulateZoneLists query '%'", query.c_str());
 		return false;
 	}
 
@@ -198,7 +198,7 @@ bool ZoneDatabase::LoadSpawnGroupsByID(int spawngroupid, SpawnGroupList *spawn_g
 					 spawngroupid);
 	auto results = QueryDatabase(query);
 	if (!results.Success()) {
-		Log.Out(Logs::General, Logs::Error, "Error2 in PopulateZoneLists query %s", query.c_str());
+		Log(Logs::General, Logs::Error, "Error2 in PopulateZoneLists query %s", query.c_str());
 		return false;
 	}
 
@@ -216,7 +216,7 @@ bool ZoneDatabase::LoadSpawnGroupsByID(int spawngroupid, SpawnGroupList *spawn_g
 			     spawngroupid);
 	results = QueryDatabase(query);
 	if (!results.Success()) {
-		Log.Out(Logs::General, Logs::Error, "Error3 in PopulateZoneLists query '%s'", query.c_str());
+		Log(Logs::General, Logs::Error, "Error3 in PopulateZoneLists query '%s'", query.c_str());
 		return false;
 	}
 

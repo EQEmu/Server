@@ -23,6 +23,7 @@
 #include "../common/servertalk.h"
 #include "../common/platform.h"
 #include "../common/crash.h"
+#include "../common/unix.h"
 #include "worldserver.h"
 #include "zone_launch.h"
 #include <vector>
@@ -31,7 +32,7 @@
 #include <signal.h>
 #include <time.h>
 
-EQEmuLogSys Log;
+EQEmuLogSys LogSys;
 
 bool RunLoops = false;
 
@@ -39,7 +40,7 @@ void CatchSignal(int sig_num);
 
 int main(int argc, char *argv[]) {
 	RegisterExecutablePlatform(ExePlatformLaunch);
-	Log.LoadLogSettingsDefaults();
+	LogSys.LoadLogSettingsDefaults();
 	set_exception_handler();
 
 	std::string launcher_name;
@@ -47,13 +48,13 @@ int main(int argc, char *argv[]) {
 		launcher_name = argv[1];
 	}
 	if(launcher_name.length() < 1) {
-		Log.Out(Logs::Detail, Logs::Launcher, "You must specfify a launcher name as the first argument to this program.");
+		Log(Logs::Detail, Logs::Launcher, "You must specfify a launcher name as the first argument to this program.");
 		return 1;
 	}
 
-	Log.Out(Logs::Detail, Logs::Launcher, "Loading server configuration..");
+	Log(Logs::Detail, Logs::Launcher, "Loading server configuration..");
 	if (!EQEmuConfig::LoadConfig()) {
-		Log.Out(Logs::Detail, Logs::Launcher, "Loading server configuration failed.");
+		Log(Logs::Detail, Logs::Launcher, "Loading server configuration failed.");
 		return 1;
 	}
 	auto Config = EQEmuConfig::get();
@@ -62,16 +63,16 @@ int main(int argc, char *argv[]) {
 	* Setup nice signal handlers
 	*/
 	if (signal(SIGINT, CatchSignal) == SIG_ERR)	{
-		Log.Out(Logs::Detail, Logs::Launcher, "Could not set signal handler");
+		Log(Logs::Detail, Logs::Launcher, "Could not set signal handler");
 		return 1;
 	}
 	if (signal(SIGTERM, CatchSignal) == SIG_ERR)	{
-		Log.Out(Logs::Detail, Logs::Launcher, "Could not set signal handler");
+		Log(Logs::Detail, Logs::Launcher, "Could not set signal handler");
 		return 1;
 	}
 	#ifndef WIN32
 	if (signal(SIGPIPE, SIG_IGN) == SIG_ERR)	{
-		Log.Out(Logs::Detail, Logs::Launcher, "Could not set signal handler");
+		Log(Logs::Detail, Logs::Launcher, "Could not set signal handler");
 		return 1;
 	}
 
@@ -91,27 +92,19 @@ int main(int argc, char *argv[]) {
 
 	std::map<std::string, ZoneLaunch *> zones;
 	WorldServer world(zones, launcher_name.c_str(), Config);
-	if (!world.Connect()) {
-		Log.Out(Logs::Detail, Logs::Launcher, "worldserver.Connect() FAILED! Will retry.");
-	}
 
 	std::map<std::string, ZoneLaunch *>::iterator zone, zend;
 	std::set<std::string> to_remove;
 
 	Timer InterserverTimer(INTERSERVER_TIMER); // does auto-reconnect
 
-	Log.Out(Logs::Detail, Logs::Launcher, "Starting main loop...");
+	Log(Logs::Detail, Logs::Launcher, "Starting main loop...");
 
 	ProcLauncher *launch = ProcLauncher::get();
 	RunLoops = true;
 	while(RunLoops) {
 		//Advance the timer to our current point in time
 		Timer::SetCurrentTime();
-
-		/*
-		* Process the world connection
-		*/
-		world.Process();
 
 		/*
 		* Let the process manager look for dead children
@@ -143,19 +136,8 @@ int main(int argc, char *argv[]) {
 			zones.erase(rem);
 		}
 
-
-		if (InterserverTimer.Check()) {
-			if (world.TryReconnect() && (!world.Connected()))
-				world.AsyncConnect();
-		}
-
-		/*
-		* Take a nice nap until next cycle
-		*/
-		if(zones.empty())
-			Sleep(5000);
-		else
-			Sleep(2000);
+		EQ::EventLoop::Get().Process();
+		Sleep(5);
 	}
 
 	//try to be semi-nice about this... without waiting too long
@@ -175,14 +157,14 @@ int main(int argc, char *argv[]) {
 		delete zone->second;
 	}
 
-	Log.CloseFileLogs();
+	LogSys.CloseFileLogs();
 
 	return 0;
 }
 
 
 void CatchSignal(int sig_num) {
-	Log.Out(Logs::Detail, Logs::Launcher, "Caught signal %d", sig_num);
+	Log(Logs::Detail, Logs::Launcher, "Caught signal %d", sig_num);
 	RunLoops = false;
 }
 

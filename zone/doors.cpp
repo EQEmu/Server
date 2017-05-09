@@ -70,6 +70,8 @@ m_Destination(door->dest_x, door->dest_y, door->dest_z, door->dest_heading)
 
 	is_ldon_door = door->is_ldon_door;
 	client_version_mask = door->client_version_mask;
+
+	disable_timer = (door->disable_timer == 1 ? true : false);
 }
 
 Doors::Doors(const char *dmodel, const glm::vec4& position, uint8 dopentype, uint16 dsize) :
@@ -102,6 +104,8 @@ m_Destination(glm::vec4())
 
 	is_ldon_door = 0;
 	client_version_mask = 4294967295u;
+
+	disable_timer = 0;
 }
 
 
@@ -133,9 +137,9 @@ bool Doors::Process()
 void Doors::HandleClick(Client* sender, uint8 trigger)
 {
 	//door debugging info dump
-	Log.Out(Logs::Detail, Logs::Doors, "%s clicked door %s (dbid %d, eqid %d) at %s", sender->GetName(), door_name, db_id, door_id, to_string(m_Position).c_str());
-	Log.Out(Logs::Detail, Logs::Doors, "  incline %d, opentype %d, lockpick %d, key %d, nokeyring %d, trigger %d type %d, param %d", incline, opentype, lockpick, keyitem, nokeyring, trigger_door, trigger_type, door_param);
-	Log.Out(Logs::Detail, Logs::Doors, "  size %d, invert %d, dest: %s %s", size, invert_state, dest_zone, to_string(m_Destination).c_str());
+	Log(Logs::Detail, Logs::Doors, "%s clicked door %s (dbid %d, eqid %d) at %s", sender->GetName(), door_name, db_id, door_id, to_string(m_Position).c_str());
+	Log(Logs::Detail, Logs::Doors, "  incline %d, opentype %d, lockpick %d, key %d, nokeyring %d, trigger %d type %d, param %d", incline, opentype, lockpick, keyitem, nokeyring, trigger_door, trigger_type, door_param);
+	Log(Logs::Detail, Logs::Doors, "  disable_timer '%s',size %d, invert %d, dest: %s %s", (disable_timer?"true":"false"), size, invert_state, dest_zone, to_string(m_Destination).c_str());
 
 	auto outapp = new EQApplicationPacket(OP_MoveDoor, sizeof(MoveDoor_Struct));
 	MoveDoor_Struct* md = (MoveDoor_Struct*)outapp->pBuffer;
@@ -291,7 +295,7 @@ void Doors::HandleClick(Client* sender, uint8 trigger)
 					float modskill = sender->GetSkill(EQEmu::skills::SkillPickLock);
 					sender->CheckIncreaseSkill(EQEmu::skills::SkillPickLock, nullptr, 1);
 
-					Log.Out(Logs::General, Logs::Skills, "Client has lockpicks: skill=%f", modskill);
+					Log(Logs::General, Logs::Skills, "Client has lockpicks: skill=%f", modskill);
 
 					if(GetLockpick() <= modskill)
 					{
@@ -354,13 +358,15 @@ void Doors::HandleClick(Client* sender, uint8 trigger)
 	entity_list.QueueClients(sender, outapp, false);
 	if(!IsDoorOpen() || (opentype == 58))
 	{
-		close_timer.Start();
+		if (!disable_timer)
+			close_timer.Start();
 		SetOpenState(true);
 	}
 	else
 	{
 		close_timer.Disable();
-		SetOpenState(false);
+		if (!disable_timer)
+			SetOpenState(false);
 	}
 
 	//everything past this point assumes we opened the door
@@ -443,31 +449,34 @@ void Doors::HandleClick(Client* sender, uint8 trigger)
 
 void Doors::NPCOpen(NPC* sender, bool alt_mode)
 {
-	if(sender) {
-		if(GetTriggerType() == 255 || GetTriggerDoorID() > 0 || GetLockpick() != 0 || GetKeyItem() != 0 || opentype == 59 || opentype == 58 || !sender->IsNPC()) { // this object isnt triggered or door is locked - NPCs should not open locked doors!
+	if (sender) {
+		if (GetTriggerType() == 255 || GetTriggerDoorID() > 0 || GetLockpick() != 0 || GetKeyItem() != 0 || opentype == 59 || opentype == 58 || !sender->IsNPC()) { // this object isnt triggered or door is locked - NPCs should not open locked doors!
 			return;
 		}
 
 		auto outapp = new EQApplicationPacket(OP_MoveDoor, sizeof(MoveDoor_Struct));
-		MoveDoor_Struct* md=(MoveDoor_Struct*)outapp->pBuffer;
+		MoveDoor_Struct* md = (MoveDoor_Struct*)outapp->pBuffer;
 		md->doorid = door_id;
 		md->action = invert_state == 0 ? OPEN_DOOR : OPEN_INVDOOR;
-		entity_list.QueueCloseClients(sender,outapp,false,200);
+		entity_list.QueueCloseClients(sender, outapp, false, 200);
 		safe_delete(outapp);
 
-		if(!alt_mode) { // original function
-			if(!isopen) {
-				close_timer.Start();
-				isopen=true;
+		if (!alt_mode) { // original function
+			if (!is_open) {
+				if (!disable_timer)
+					close_timer.Start();
+				is_open = true;
 			}
 			else {
 				close_timer.Disable();
-				isopen=false;
+				if (!disable_timer)
+					is_open = false;
 			}
 		}
 		else { // alternative function
-			close_timer.Start();
-			isopen=true;
+			if (!disable_timer)
+				close_timer.Start();
+			is_open = true;
 		}
 	}
 }
@@ -475,49 +484,53 @@ void Doors::NPCOpen(NPC* sender, bool alt_mode)
 void Doors::ForceOpen(Mob *sender, bool alt_mode)
 {
 	auto outapp = new EQApplicationPacket(OP_MoveDoor, sizeof(MoveDoor_Struct));
-	MoveDoor_Struct* md=(MoveDoor_Struct*)outapp->pBuffer;
+	MoveDoor_Struct* md = (MoveDoor_Struct*)outapp->pBuffer;
 	md->doorid = door_id;
 	md->action = invert_state == 0 ? OPEN_DOOR : OPEN_INVDOOR;
-	entity_list.QueueClients(sender,outapp,false);
+	entity_list.QueueClients(sender, outapp, false);
 	safe_delete(outapp);
 
-	if(!alt_mode) { // original function
-		if(!isopen) {
-			close_timer.Start();
-			isopen=true;
+	if (!alt_mode) { // original function
+		if (!is_open) {
+			if (!disable_timer)
+				close_timer.Start();
+			is_open = true;
 		}
 		else {
 			close_timer.Disable();
-			isopen=false;
+			if (!disable_timer)
+				is_open = false;
 		}
 	}
 	else { // alternative function
-		close_timer.Start();
-		isopen=true;
+		if (!disable_timer)
+			close_timer.Start();
+		is_open = true;
 	}
 }
 
 void Doors::ForceClose(Mob *sender, bool alt_mode)
 {
 	auto outapp = new EQApplicationPacket(OP_MoveDoor, sizeof(MoveDoor_Struct));
-	MoveDoor_Struct* md=(MoveDoor_Struct*)outapp->pBuffer;
+	MoveDoor_Struct* md = (MoveDoor_Struct*)outapp->pBuffer;
 	md->doorid = door_id;
 	md->action = invert_state == 0 ? CLOSE_DOOR : CLOSE_INVDOOR; // change from original (open to close)
-	entity_list.QueueClients(sender,outapp,false);
+	entity_list.QueueClients(sender, outapp, false);
 	safe_delete(outapp);
 
-	if(!alt_mode) { // original function
-		if(!isopen) {
-			close_timer.Start();
-			isopen=true;
+	if (!alt_mode) { // original function
+		if (!is_open) {
+			if (!disable_timer)
+				close_timer.Start();
+			is_open = true;
 		}
 		else {
 			close_timer.Disable();
-			isopen=false;
+			is_open = false;
 		}
 	}
 	else { // alternative function
-		if(isopen)
+		if (is_open)
 			close_timer.Trigger();
 	}
 }
@@ -532,14 +545,14 @@ void Doors::ToggleState(Mob *sender)
 	MoveDoor_Struct* md=(MoveDoor_Struct*)outapp->pBuffer;
 	md->doorid = door_id;
 
-	if(!isopen) {
+	if(!is_open) {
 		md->action = invert_state == 0 ? OPEN_DOOR : OPEN_INVDOOR;
-		isopen=true;
+		is_open=true;
 	}
 	else
 	{
 		md->action = invert_state == 0 ? CLOSE_DOOR : CLOSE_INVDOOR;
-		isopen=false;
+		is_open=false;
 	}
 
 	entity_list.QueueClients(sender,outapp,false);
@@ -547,13 +560,13 @@ void Doors::ToggleState(Mob *sender)
 }
 
 void Doors::DumpDoor(){
-	Log.Out(Logs::General, Logs::None,
+	Log(Logs::General, Logs::None,
 		"db_id:%i door_id:%i zone_name:%s door_name:%s %s",
 		db_id, door_id, zone_name, door_name, to_string(m_Position).c_str());
-	Log.Out(Logs::General, Logs::None,
+	Log(Logs::General, Logs::None,
 		"opentype:%i guild_id:%i lockpick:%i keyitem:%i nokeyring:%i trigger_door:%i trigger_type:%i door_param:%i open:%s",
-		opentype, guild_id, lockpick, keyitem, nokeyring, trigger_door, trigger_type, door_param, (isopen) ? "open":"closed");
-	Log.Out(Logs::General, Logs::None,
+		opentype, guild_id, lockpick, keyitem, nokeyring, trigger_door, trigger_type, door_param, (is_open) ? "open":"closed");
+	Log(Logs::General, Logs::None,
 		"dest_zone:%s destination:%s ",
 		dest_zone, to_string(m_Destination).c_str());
 }
@@ -629,37 +642,35 @@ int32 ZoneDatabase::GetDoorsDBCountPlusOne(const char *zone_name, int16 version)
 }
 
 bool ZoneDatabase::LoadDoors(int32 iDoorCount, Door *into, const char *zone_name, int16 version) {
-	Log.Out(Logs::General, Logs::Status, "Loading Doors from database...");
+	Log(Logs::General, Logs::Status, "Loading Doors from database...");
 
 
-//	Door tmpDoor;
-    std::string query = StringFormat("SELECT id, doorid, zone, name, pos_x, pos_y, pos_z, heading, "
-                                    "opentype, guild, lockpick, keyitem, nokeyring, triggerdoor, triggertype, "
-                                    "dest_zone, dest_instance, dest_x, dest_y, dest_z, dest_heading, "
-                                    "door_param, invert_state, incline, size, is_ldon_door, client_version_mask "
-                                    "FROM doors WHERE zone = '%s' AND (version = %u OR version = -1) "
-                                    "ORDER BY doorid asc", zone_name, version);
+	//	Door tmpDoor;
+	std::string query = StringFormat("SELECT id, doorid, zone, name, pos_x, pos_y, pos_z, heading, "
+		"opentype, guild, lockpick, keyitem, nokeyring, triggerdoor, triggertype, "
+		"dest_zone, dest_instance, dest_x, dest_y, dest_z, dest_heading, "
+		"door_param, invert_state, incline, size, is_ldon_door, client_version_mask, disable_timer "
+		"FROM doors WHERE zone = '%s' AND (version = %u OR version = -1) "
+		"ORDER BY doorid asc", zone_name, version);
 	auto results = QueryDatabase(query);
-	if (!results.Success()){
+	if (!results.Success()) {
 		return false;
 	}
 
-    int32 rowIndex = 0;
-    for(auto row = results.begin(); row != results.end(); ++row, ++rowIndex) {
-        if(rowIndex >= iDoorCount) {
-            std::cerr << "Error, Door Count of " << iDoorCount << " exceeded." << std::endl;
-            break;
-        }
+	int32 rowIndex = 0;
+	for (auto row = results.begin(); row != results.end(); ++row, ++rowIndex) {
+		if (rowIndex >= iDoorCount) {
+			std::cerr << "Error, Door Count of " << iDoorCount << " exceeded." << std::endl;
+			break;
+		}
 
-        memset(&into[rowIndex], 0, sizeof(Door));
+		memset(&into[rowIndex], 0, sizeof(Door));
 
 		into[rowIndex].db_id = atoi(row[0]);
 		into[rowIndex].door_id = atoi(row[1]);
 
-		Log.Out(Logs::Detail, Logs::Doors, "Door Load: db id: %u, door_id %u", into[rowIndex].db_id, into[rowIndex].door_id);
-
-        strn0cpy(into[rowIndex].zone_name,row[2],32);
-		strn0cpy(into[rowIndex].door_name,row[3],32);
+		strn0cpy(into[rowIndex].zone_name, row[2], 32);
+		strn0cpy(into[rowIndex].door_name, row[3], 32);
 
 		into[rowIndex].pos_x = (float)atof(row[4]);
 		into[rowIndex].pos_y = (float)atof(row[5]);
@@ -676,17 +687,24 @@ bool ZoneDatabase::LoadDoors(int32 iDoorCount, Door *into, const char *zone_name
 		strn0cpy(into[rowIndex].dest_zone, row[15], 32);
 
 		into[rowIndex].dest_instance_id = atoi(row[16]);
-		into[rowIndex].dest_x = (float) atof(row[17]);
-		into[rowIndex].dest_y = (float) atof(row[18]);
-		into[rowIndex].dest_z = (float) atof(row[19]);
-		into[rowIndex].dest_heading = (float) atof(row[20]);
-		into[rowIndex].door_param=atoi(row[21]);
-		into[rowIndex].invert_state=atoi(row[22]);
-		into[rowIndex].incline=atoi(row[23]);
-		into[rowIndex].size=atoi(row[24]);
-		into[rowIndex].is_ldon_door=atoi(row[25]);
+		into[rowIndex].dest_x = (float)atof(row[17]);
+		into[rowIndex].dest_y = (float)atof(row[18]);
+		into[rowIndex].dest_z = (float)atof(row[19]);
+		into[rowIndex].dest_heading = (float)atof(row[20]);
+		into[rowIndex].door_param = atoi(row[21]);
+		into[rowIndex].invert_state = atoi(row[22]);
+		into[rowIndex].incline = atoi(row[23]);
+		into[rowIndex].size = atoi(row[24]);
+		into[rowIndex].is_ldon_door = atoi(row[25]);
 		into[rowIndex].client_version_mask = (uint32)strtoul(row[26], nullptr, 10);
-    }
+		into[rowIndex].disable_timer = atoi(row[27]);
+
+		Log(Logs::Detail, Logs::Doors, "Door Load: db id: %u, door_id %u disable_timer: %i",
+			into[rowIndex].db_id,
+			into[rowIndex].door_id,
+			into[rowIndex].disable_timer
+		);
+	}
 
 	return true;
 }
@@ -728,6 +746,10 @@ void Doors::SetSize(uint16 in) {
 	entity_list.DespawnAllDoors();
 	size = in;
 	entity_list.RespawnAllDoors();
+}
+
+void Doors::SetDisableTimer(bool flag) {
+	disable_timer = flag;
 }
 
 void Doors::CreateDatabaseEntry()

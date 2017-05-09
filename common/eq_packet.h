@@ -115,11 +115,14 @@ public:
 	virtual void DumpRawHeader(uint16 seq=0xffff, FILE *to = stdout) const;
 	virtual void DumpRawHeaderNoTime(uint16 seq=0xffff, FILE *to = stdout) const;
 
-	uint16 GetOpcodeBypass() { return opcode_bypass; }
+	uint16 GetOpcodeBypass() const { return opcode_bypass; }
 	void SetOpcodeBypass(uint16 v) { opcode_bypass = v; }
 
+	uint16 GetProtocolOpcode() const { return protocol_opcode; }
+	void SetProtocolOpcode(uint16 v) { protocol_opcode = v; }
 protected:
 
+	uint16 protocol_opcode;
 	uint8 app_opcode_size;
 	uint16 opcode_bypass;
 private:

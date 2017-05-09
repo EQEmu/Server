@@ -20,61 +20,48 @@
 #include "../common/global_define.h"
 #include "../common/eqemu_logsys.h"
 #include "../common/opcodemgr.h"
-#include "../common/eq_stream_factory.h"
 #include "../common/rulesys.h"
 #include "../common/servertalk.h"
 #include "../common/platform.h"
 #include "../common/crash.h"
+#include "../common/event/event_loop.h"
+#include "../common/timer.h"
 #include "database.h"
 #include "queryservconfig.h"
-#include "worldserver.h"
 #include "lfguild.h"
+#include "worldserver.h"
 #include <list>
 #include <signal.h>
 
 volatile bool RunLoops = true;
 
-TimeoutManager timeout_manager;
 Database database;
 LFGuildManager lfguildmanager;
 std::string WorldShortName;
 const queryservconfig *Config;
 WorldServer *worldserver = 0;
-EQEmuLogSys Log;
+EQEmuLogSys LogSys;
 
 void CatchSignal(int sig_num) { 
 	RunLoops = false; 
-	if(worldserver)
-		worldserver->Disconnect();
 }
 
 int main() {
 	RegisterExecutablePlatform(ExePlatformQueryServ);
-	Log.LoadLogSettingsDefaults();
+	LogSys.LoadLogSettingsDefaults();
 	set_exception_handler(); 
 	Timer LFGuildExpireTimer(60000);  
-	Timer InterserverTimer(INTERSERVER_TIMER); // does auto-reconnect
 
-	/* Load XML from eqemu_config.xml 
-		<qsdatabase>
-			<host>127.0.0.1</host>
-			<port>3306</port>
-			<username>user</username>
-			<password>password</password>
-			<db>dbname</db>
-		</qsdatabase>
-	*/
-
-	Log.Out(Logs::General, Logs::QS_Server, "Starting EQEmu QueryServ.");
+	Log(Logs::General, Logs::QS_Server, "Starting EQEmu QueryServ.");
 	if (!queryservconfig::LoadConfig()) {
-		Log.Out(Logs::General, Logs::QS_Server, "Loading server configuration failed.");
+		Log(Logs::General, Logs::QS_Server, "Loading server configuration failed.");
 		return 1;
 	}
 
 	Config = queryservconfig::get(); 
 	WorldShortName = Config->ShortName; 
 
-	Log.Out(Logs::General, Logs::QS_Server, "Connecting to MySQL...");
+	Log(Logs::General, Logs::QS_Server, "Connecting to MySQL...");
 	
 	/* MySQL Connection */
 	if (!database.Connect(
@@ -83,20 +70,20 @@ int main() {
 		Config->QSDatabasePassword.c_str(),
 		Config->QSDatabaseDB.c_str(),
 		Config->QSDatabasePort)) {
-		Log.Out(Logs::General, Logs::QS_Server, "Cannot continue without a database connection.");
+		Log(Logs::General, Logs::QS_Server, "Cannot continue without a database connection.");
 		return 1;
 	}
 
 	/* Register Log System and Settings */
-	database.LoadLogSettings(Log.log_settings);
-	Log.StartFileLogs();
+	database.LoadLogSettings(LogSys.log_settings);
+	LogSys.StartFileLogs();
 
 	if (signal(SIGINT, CatchSignal) == SIG_ERR)	{
-		Log.Out(Logs::General, Logs::QS_Server, "Could not set signal handler");
+		Log(Logs::General, Logs::QS_Server, "Could not set signal handler");
 		return 1;
 	}
 	if (signal(SIGTERM, CatchSignal) == SIG_ERR)	{
-		Log.Out(Logs::General, Logs::QS_Server, "Could not set signal handler");
+		Log(Logs::General, Logs::QS_Server, "Could not set signal handler");
 		return 1;
 	}
 
@@ -112,15 +99,10 @@ int main() {
 		if(LFGuildExpireTimer.Check())
 			lfguildmanager.ExpireEntries();
 
-		if (InterserverTimer.Check()) {
-			if (worldserver->TryReconnect() && (!worldserver->Connected()))
-				worldserver->AsyncConnect();
-		}
-		worldserver->Process(); 
-		timeout_manager.CheckTimeouts(); 
-		Sleep(100);
+		EQ::EventLoop::Get().Process();
+		Sleep(5);
 	}
-	Log.CloseFileLogs();
+	LogSys.CloseFileLogs();
 }
 
 void UpdateWindowTitle(char* iNewTitle) {

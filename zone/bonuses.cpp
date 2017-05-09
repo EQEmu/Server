@@ -663,7 +663,7 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 		    effect == SE_StackingCommand_Overwrite)
 			continue;
 
-		Log.Out(Logs::Detail, Logs::AA, "Applying Effect %d from AA %u in slot %d (base1: %d, base2: %d) on %s",
+		Log(Logs::Detail, Logs::AA, "Applying Effect %d from AA %u in slot %d (base1: %d, base2: %d) on %s",
 			effect, rank.id, slot, base1, base2, GetCleanName());
 
 		uint8 focus = IsFocusEffect(0, 0, true, effect);
@@ -1445,10 +1445,18 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 				newbon->FeignedCastOnChance = base1;
 			break;
 
+		case SE_AddPetCommand:
+			if (base1 && base2 < PET_MAXCOMMANDS)
+				newbon->PetCommands[base2] = true;
+			break;
+
+		case SE_FeignedMinion:
+			if (newbon->FeignedMinionChance < base1)
+				newbon->FeignedMinionChance = base1;
+			break;
+
 		// to do
 		case SE_PetDiscipline:
-			break;
-		case SE_PetDiscipline2:
 			break;
 		case SE_PotionBeltSlots:
 			break;
@@ -1467,8 +1475,6 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 		case SE_NimbleEvasion:
 			break;
 		case SE_TrapCircumvention:
-			break;
-		case SE_FeignedMinion:
 			break;
 
 		// not handled here
@@ -1501,7 +1507,7 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 			break;
 
 		default:
-			Log.Out(Logs::Detail, Logs::AA, "SPA %d not accounted for in AA %s (%d)", effect, rank.base_ability->name.c_str(), rank.id);
+			Log(Logs::Detail, Logs::AA, "SPA %d not accounted for in AA %s (%d)", effect, rank.base_ability->name.c_str(), rank.id);
 			break;
 		}
 

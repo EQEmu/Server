@@ -35,6 +35,7 @@ typedef enum {
 	BT_Greater_Akheva	= 14,
 	BT_Khati_Sha		= 15,
 	BT_Seru				= 16,	//not confirmed....
+	BT_Draz_Nurakk      = 18,
 	BT_Zek				= 19,
 	BT_Luggald			= 20,
 	BT_Animal			= 21,

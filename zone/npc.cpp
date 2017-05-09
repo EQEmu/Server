@@ -374,6 +374,7 @@ NPC::NPC(const NPCType* d, Spawn2* in_respawn, const glm::vec4& position, int if
 	InitializeBuffSlots();
 	CalcBonuses();
 	raid_target = d->raid_target;
+	ignore_despawn = d->ignore_despawn;
 }
 
 NPC::~NPC()
@@ -529,11 +530,11 @@ void NPC::QueryLoot(Client* to)
 	int x = 0;
 	for (auto cur = itemlist.begin(); cur != itemlist.end(); ++cur, ++x) {
 		if (!(*cur)) {
-			Log.Out(Logs::General, Logs::Error, "NPC::QueryLoot() - ItemList error, null item");
+			Log(Logs::General, Logs::Error, "NPC::QueryLoot() - ItemList error, null item");
 			continue;
 		}
 		if (!(*cur)->item_id || !database.GetItem((*cur)->item_id)) {
-			Log.Out(Logs::General, Logs::Error, "NPC::QueryLoot() - Database error, invalid item");
+			Log(Logs::General, Logs::Error, "NPC::QueryLoot() - Database error, invalid item");
 			continue;
 		}
 
@@ -587,8 +588,7 @@ void NPC::RemoveCash() {
 
 bool NPC::Process()
 {
-	if (IsStunned() && stunned_timer.Check())
-	{
+	if (IsStunned() && stunned_timer.Check()) {
 		Mob::UnStun();
 		this->spun_timer.Disable();
 	}
@@ -608,58 +608,60 @@ bool NPC::Process()
 
 	SpellProcess();
 
-	if(tic_timer.Check())
-	{
+	if (tic_timer.Check()) {
 		parse->EventNPC(EVENT_TICK, this, nullptr, "", 0);
 		BuffProcess();
 
-		if(currently_fleeing)
+		if (currently_fleeing)
 			ProcessFlee();
 
 		uint32 bonus = 0;
 
-		if(GetAppearance() == eaSitting)
-			bonus+=3;
+		if (GetAppearance() == eaSitting)
+			bonus += 3;
 
 		int32 OOCRegen = 0;
-		if(oocregen > 0){ //should pull from Mob class
+		if (oocregen > 0) { //should pull from Mob class
 			OOCRegen += GetMaxHP() * oocregen / 100;
-			}
+		}
 		//Lieka Edit:Fixing NPC regen.NPCs should regen to full during a set duration, not based on their HPs.Increase NPC's HPs by % of total HPs / tick.
-		if((GetHP() < GetMaxHP()) && !IsPet()) {
-			if(!IsEngaged()) {//NPC out of combat
-				if(GetNPCHPRegen() > OOCRegen)
+		if ((GetHP() < GetMaxHP()) && !IsPet()) {
+			if (!IsEngaged()) {//NPC out of combat
+				if (GetNPCHPRegen() > OOCRegen)
 					SetHP(GetHP() + GetNPCHPRegen());
 				else
 					SetHP(GetHP() + OOCRegen);
-			} else
-				SetHP(GetHP()+GetNPCHPRegen());
-		} else if(GetHP() < GetMaxHP() && GetOwnerID() !=0) {
-			if(!IsEngaged()) //pet
-				SetHP(GetHP()+GetNPCHPRegen()+bonus+(GetLevel()/5));
+			}
 			else
-				SetHP(GetHP()+GetNPCHPRegen()+bonus);
-		} else
-			SetHP(GetHP()+GetNPCHPRegen());
+				SetHP(GetHP() + GetNPCHPRegen());
+		}
+		else if (GetHP() < GetMaxHP() && GetOwnerID() != 0) {
+			if (!IsEngaged()) //pet
+				SetHP(GetHP() + GetNPCHPRegen() + bonus + (GetLevel() / 5));
+			else
+				SetHP(GetHP() + GetNPCHPRegen() + bonus);
+		}
+		else
+			SetHP(GetHP() + GetNPCHPRegen());
 
-		if(GetMana() < GetMaxMana()) {
-			SetMana(GetMana()+mana_regen+bonus);
+		if (GetMana() < GetMaxMana()) {
+			SetMana(GetMana() + mana_regen + bonus);
 		}
 
 
-		if(zone->adv_data && !p_depop)
+		if (zone->adv_data && !p_depop)
 		{
 			ServerZoneAdventureDataReply_Struct* ds = (ServerZoneAdventureDataReply_Struct*)zone->adv_data;
-			if(ds->type == Adventure_Rescue && ds->data_id == GetNPCTypeID())
+			if (ds->type == Adventure_Rescue && ds->data_id == GetNPCTypeID())
 			{
 				Mob *o = GetOwner();
-				if(o && o->IsClient())
+				if (o && o->IsClient())
 				{
 					float x_diff = ds->dest_x - GetX();
 					float y_diff = ds->dest_y - GetY();
 					float z_diff = ds->dest_z - GetZ();
 					float dist = ((x_diff * x_diff) + (y_diff * y_diff) + (z_diff * z_diff));
-					if(dist < RuleR(Adventure, DistanceForRescueComplete))
+					if (dist < RuleR(Adventure, DistanceForRescueComplete))
 					{
 						zone->DoAdventureCountIncrease();
 						Say("You don't know what this means to me. Thank you so much for finding and saving me from"
@@ -682,7 +684,7 @@ bool NPC::Process()
 		if(viral_timer.Check()) {
 			viral_timer_counter++;
 			for(int i = 0; i < MAX_SPELL_TRIGGER*2; i+=2) {
-				if(viral_spells[i])	{
+				if(viral_spells[i] && spells[viral_spells[i]].viral_timer > 0)	{
 					if(viral_timer_counter % spells[viral_spells[i]].viral_timer == 0) {
 						SpreadVirus(viral_spells[i], viral_spells[i+1]);
 					}
@@ -692,8 +694,6 @@ bool NPC::Process()
 		if(viral_timer_counter > 999)
 			viral_timer_counter = 0;
 	}
-
-	ProjectileAttack();
 
 	if(spellbonuses.GravityEffect == 1) {
 		if(gravity_timer.Check())
@@ -717,6 +717,11 @@ bool NPC::Process()
 
 	if (enraged_timer.Check()){
 		ProcessEnrage();
+
+		/* Don't keep running the check every second if we don't have enrage */
+		if (!GetSpecialAbility(SPECATK_ENRAGE)) {
+			enraged_timer.Disable();
+		}
 	}
 
 	//Handle assists...
@@ -1710,7 +1715,7 @@ void Mob::NPCSpecialAttacks(const char* parse, int permtag, bool reset, bool rem
 	{
 		if(database.SetSpecialAttkFlag(this->GetNPCTypeID(), orig_parse))
 		{
-			Log.Out(Logs::General, Logs::Normal, "NPCTypeID: %i flagged to '%s' for Special Attacks.\n",this->GetNPCTypeID(),orig_parse);
+			Log(Logs::General, Logs::Normal, "NPCTypeID: %i flagged to '%s' for Special Attacks.\n",this->GetNPCTypeID(),orig_parse);
 		}
 	}
 }
@@ -2557,6 +2562,7 @@ void NPC::ClearLastName()
 
 void NPC::DepopSwarmPets()
 {
+
 	if (GetSwarmInfo()) {
 		if (GetSwarmInfo()->duration->Check(false)){
 			Mob* owner = entity_list.GetMobID(GetSwarmInfo()->owner_id);

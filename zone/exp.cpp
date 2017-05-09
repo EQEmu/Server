@@ -101,9 +101,12 @@ uint32 Client::CalcEXP(uint8 conlevel) {
 		if (conlevel != 0xFF) {
 			switch (conlevel)
 			{
-			case CON_GREEN:
+			case CON_GRAY:
 				in_add_exp = 0;
 				return 0;
+			case CON_GREEN:
+				in_add_exp = in_add_exp * RuleI(Character, GreenModifier) / 100;
+				break;
 			case CON_LIGHTBLUE:
 				in_add_exp = in_add_exp * RuleI(Character, LightBlueModifier)/100;
 				break;
@@ -206,10 +209,14 @@ void Client::AddEXP(uint32 in_add_exp, uint8 conlevel, bool resexp) {
 			if (conlevel != 0xFF && !resexp) {
 				switch (conlevel)
 				{
-					case CON_GREEN:
+					case CON_GRAY:
 						add_exp = 0;
 						add_aaxp = 0;
 						return;
+					case CON_GREEN:
+						add_exp = add_exp * RuleI(Character, GreenModifier) / 100;
+						add_aaxp = add_aaxp * RuleI(Character, GreenModifier) / 100;
+						break;
 					case CON_LIGHTBLUE:
 							add_exp = add_exp * RuleI(Character, LightBlueModifier)/100;
 							add_aaxp = add_aaxp * RuleI(Character, LightBlueModifier)/100;
@@ -331,7 +338,7 @@ void Client::AddEXP(uint32 in_add_exp, uint8 conlevel, bool resexp) {
 }
 
 void Client::SetEXP(uint32 set_exp, uint32 set_aaxp, bool isrezzexp) {
-	Log.Out(Logs::Detail, Logs::None, "Attempting to Set Exp for %s (XP: %u, AAXP: %u, Rez: %s)", this->GetCleanName(), set_exp, set_aaxp, isrezzexp ? "true" : "false");
+	Log(Logs::Detail, Logs::None, "Attempting to Set Exp for %s (XP: %u, AAXP: %u, Rez: %s)", this->GetCleanName(), set_exp, set_aaxp, isrezzexp ? "true" : "false");
 	//max_AAXP = GetEXPForLevel(52) - GetEXPForLevel(51);	//GetEXPForLevel() doesn't depend on class/race, just level, so it shouldn't change between Clients
 	max_AAXP = RuleI(AA, ExpPerPoint);	//this may be redundant since we're doing this in Client::FinishConnState2()
 	if (max_AAXP == 0 || GetEXPForLevel(GetLevel()) == 0xFFFFFFFF) {
@@ -446,7 +453,7 @@ void Client::SetEXP(uint32 set_exp, uint32 set_aaxp, bool isrezzexp) {
 
 		//figure out how many AA points we get from the exp were setting
 		m_pp.aapoints = set_aaxp / max_AAXP;
-		Log.Out(Logs::Detail, Logs::None, "Calculating additional AA Points from AAXP for %s: %u / %u = %.1f points", this->GetCleanName(), set_aaxp, max_AAXP, (float)set_aaxp / (float)max_AAXP);
+		Log(Logs::Detail, Logs::None, "Calculating additional AA Points from AAXP for %s: %u / %u = %.1f points", this->GetCleanName(), set_aaxp, max_AAXP, (float)set_aaxp / (float)max_AAXP);
 
 		//get remainder exp points, set in PP below
 		set_aaxp = set_aaxp - (max_AAXP * m_pp.aapoints);
@@ -572,7 +579,7 @@ void Client::SetEXP(uint32 set_exp, uint32 set_aaxp, bool isrezzexp) {
 void Client::SetLevel(uint8 set_level, bool command)
 {
 	if (GetEXPForLevel(set_level) == 0xFFFFFFFF) {
-		Log.Out(Logs::General, Logs::Error, "Client::SetLevel() GetEXPForLevel(%i) = 0xFFFFFFFF", set_level);
+		Log(Logs::General, Logs::Error, "Client::SetLevel() GetEXPForLevel(%i) = 0xFFFFFFFF", set_level);
 		return;
 	}
 
@@ -630,7 +637,7 @@ void Client::SetLevel(uint8 set_level, bool command)
 	safe_delete(outapp);
 	this->SendAppearancePacket(AT_WhoLevel, set_level); // who level change
 
-	Log.Out(Logs::General, Logs::Normal, "Setting Level for %s to %i", GetName(), set_level);
+	Log(Logs::General, Logs::Normal, "Setting Level for %s to %i", GetName(), set_level);
 
 	CalcBonuses();
 
@@ -798,7 +805,7 @@ void Group::SplitExp(uint32 exp, Mob* other) {
 		groupexp += (uint32)((float)exp * groupmod * (RuleR(Character, GroupExpMultiplier)));
 
 	int conlevel = Mob::GetLevelCon(maxlevel, other->GetLevel());
-	if(conlevel == CON_GREEN)
+	if(conlevel == CON_GRAY)
 		return;	//no exp for greenies...
 
 	if (membercount == 0)
@@ -845,7 +852,7 @@ void Raid::SplitExp(uint32 exp, Mob* other) {
 	groupexp = (uint32)((float)groupexp * (1.0f-(RuleR(Character, RaidExpMultiplier))));
 
 	int conlevel = Mob::GetLevelCon(maxlevel, other->GetLevel());
-	if(conlevel == CON_GREEN)
+	if(conlevel == CON_GRAY)
 		return;	//no exp for greenies...
 
 	if (membercount == 0)

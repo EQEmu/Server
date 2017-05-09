@@ -18,6 +18,7 @@
 
 #include "../common/eq_packet_structs.h"
 #include "../common/string_util.h"
+#include "../common/misc_functions.h"
 
 #include "client.h"
 #include "entity.h"
@@ -348,7 +349,7 @@ void Client::EnableTitle(int titleSet) {
                                     CharacterID(), titleSet);
     auto results = database.QueryDatabase(query);
 	if(!results.Success())
-		Log.Out(Logs::General, Logs::Error, "Error in EnableTitle query for titleset %i and charid %i", titleSet, CharacterID());
+		Log(Logs::General, Logs::Error, "Error in EnableTitle query for titleset %i and charid %i", titleSet, CharacterID());
 
 }
 

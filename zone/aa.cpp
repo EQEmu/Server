@@ -42,21 +42,33 @@ void Mob::TemporaryPets(uint16 spell_id, Mob *targ, const char *name_override, u
 
 	//Dook- swarms and wards
 
+	// do nothing if it's a corpse
+	if (targ != nullptr && targ->IsCorpse())
+		return;
+
+	// yep, even these need pet power!
+	int act_power = 0;
+
+	if (IsClient()) {
+		act_power = CastToClient()->GetFocusEffect(focusPetPower, spell_id);
+		act_power = CastToClient()->mod_pet_power(act_power, spell_id);
+	}
+
 	PetRecord record;
-	if(!database.GetPetEntry(spells[spell_id].teleport_zone, &record))
+	if (!database.GetPoweredPetEntry(spells[spell_id].teleport_zone, act_power, &record))
 	{
-		Log.Out(Logs::General, Logs::Error, "Unknown swarm pet spell id: %d, check pets table", spell_id);
+		Log(Logs::General, Logs::Error, "Unknown swarm pet spell id: %d, check pets table", spell_id);
 		Message(13, "Unable to find data for pet %s", spells[spell_id].teleport_zone);
 		return;
 	}
 
-	AA_SwarmPet pet;
+	SwarmPet_Struct pet;
 	pet.count = 1;
 	pet.duration = 1;
 
-	for(int x = 0; x < MAX_SWARM_PETS; x++)
+	for (int x = 0; x < MAX_SWARM_PETS; x++)
 	{
-		if(spells[spell_id].effectid[x] == SE_TemporaryPets)
+		if (spells[spell_id].effectid[x] == SE_TemporaryPets)
 		{
 			pet.count = spells[spell_id].base[x];
 			pet.duration = spells[spell_id].max[x];
@@ -70,14 +82,14 @@ void Mob::TemporaryPets(uint16 spell_id, Mob *targ, const char *name_override, u
 	NPCType *made_npc = nullptr;
 
 	const NPCType *npc_type = database.LoadNPCTypesData(pet.npc_id);
-	if(npc_type == nullptr) {
+	if (npc_type == nullptr) {
 		//log write
-		Log.Out(Logs::General, Logs::Error, "Unknown npc type for swarm pet spell id: %d", spell_id);
-		Message(0,"Unable to find pet!");
+		Log(Logs::General, Logs::Error, "Unknown npc type for swarm pet spell id: %d", spell_id);
+		Message(0, "Unable to find pet!");
 		return;
 	}
 
-	if(name_override != nullptr) {
+	if (name_override != nullptr) {
 		//we have to make a custom NPC type for this name change
 		made_npc = new NPCType;
 		memcpy(made_npc, npc_type, sizeof(NPCType));
@@ -88,7 +100,7 @@ void Mob::TemporaryPets(uint16 spell_id, Mob *targ, const char *name_override, u
 	int summon_count = 0;
 	summon_count = pet.count;
 
-	if(summon_count > MAX_SWARM_PETS)
+	if (summon_count > MAX_SWARM_PETS)
 		summon_count = MAX_SWARM_PETS;
 
 	static const glm::vec2 swarmPetLocations[MAX_SWARM_PETS] = {
@@ -97,59 +109,61 @@ void Mob::TemporaryPets(uint16 spell_id, Mob *targ, const char *name_override, u
 		glm::vec2(8, 8), glm::vec2(-8, 8), glm::vec2(8, -8), glm::vec2(-8, -8)
 	};
 
-	while(summon_count > 0) {
+	while (summon_count > 0) {
 		int pet_duration = pet.duration;
-		if(duration_override > 0)
+		if (duration_override > 0)
 			pet_duration = duration_override;
 
 		//this is a little messy, but the only way to do it right
 		//it would be possible to optimize out this copy for the last pet, but oh well
 		NPCType *npc_dup = nullptr;
-		if(made_npc != nullptr) {
+		if (made_npc != nullptr) {
 			npc_dup = new NPCType;
 			memcpy(npc_dup, made_npc, sizeof(NPCType));
 		}
 
-		NPC* npca = new NPC(
-				(npc_dup!=nullptr)?npc_dup:npc_type,	//make sure we give the NPC the correct data pointer
-				0,
-				GetPosition() + glm::vec4(swarmPetLocations[summon_count], 0.0f, 0.0f),
-				FlyMode3);
+		NPC* swarm_pet_npc = new NPC(
+			(npc_dup != nullptr) ? npc_dup : npc_type,	//make sure we give the NPC the correct data pointer
+			0,
+			GetPosition() + glm::vec4(swarmPetLocations[summon_count], 0.0f, 0.0f),
+			FlyMode3);
 
 		if (followme)
-			npca->SetFollowID(GetID());
+			swarm_pet_npc->SetFollowID(GetID());
 
-		if(!npca->GetSwarmInfo()){
-			auto nSI = new AA_SwarmPetInfo;
-			npca->SetSwarmInfo(nSI);
-			npca->GetSwarmInfo()->duration = new Timer(pet_duration*1000);
+		if (!swarm_pet_npc->GetSwarmInfo()) {
+			auto nSI = new SwarmPet;
+			swarm_pet_npc->SetSwarmInfo(nSI);
+			swarm_pet_npc->GetSwarmInfo()->duration = new Timer(pet_duration * 1000);
 		}
-		else{
-			npca->GetSwarmInfo()->duration->Start(pet_duration*1000);
+		else {
+			swarm_pet_npc->GetSwarmInfo()->duration->Start(pet_duration * 1000);
 		}
+
+		swarm_pet_npc->StartSwarmTimer(pet_duration * 1000);
 
 		//removing this prevents the pet from attacking
-		npca->GetSwarmInfo()->owner_id = GetID();
+		swarm_pet_npc->GetSwarmInfo()->owner_id = GetID();
 
 		//give the pets somebody to "love"
-		if(targ != nullptr){
-			npca->AddToHateList(targ, 1000, 1000);
+		if (targ != nullptr) {
+			swarm_pet_npc->AddToHateList(targ, 1000, 1000);
 			if (RuleB(Spells, SwarmPetTargetLock) || sticktarg)
-				npca->GetSwarmInfo()->target = targ->GetID();
+				swarm_pet_npc->GetSwarmInfo()->target = targ->GetID();
 			else
-				npca->GetSwarmInfo()->target = 0;
+				swarm_pet_npc->GetSwarmInfo()->target = 0;
 		}
 
 		//we allocated a new NPC type object, give the NPC ownership of that memory
-		if(npc_dup != nullptr)
-			npca->GiveNPCTypeData(npc_dup);
+		if (npc_dup != nullptr)
+			swarm_pet_npc->GiveNPCTypeData(npc_dup);
 
-		entity_list.AddNPC(npca, true, true);
+		entity_list.AddNPC(swarm_pet_npc, true, true);
 		summon_count--;
 	}
 
 	//the target of these swarm pets will take offense to being cast on...
-	if(targ != nullptr)
+	if (targ != nullptr)
 		targ->AddToHateList(this, 1, 0);
 
 	// The other pointers we make are handled elsewhere.
@@ -158,7 +172,7 @@ void Mob::TemporaryPets(uint16 spell_id, Mob *targ, const char *name_override, u
 
 void Mob::TypesTemporaryPets(uint32 typesid, Mob *targ, const char *name_override, uint32 duration_override, bool followme, bool sticktarg) {
 
-	AA_SwarmPet pet;
+	SwarmPet_Struct pet;
 	pet.count = 1;
 	pet.duration = 1;
 
@@ -169,7 +183,7 @@ void Mob::TypesTemporaryPets(uint32 typesid, Mob *targ, const char *name_overrid
 	const NPCType *npc_type = database.LoadNPCTypesData(typesid);
 	if(npc_type == nullptr) {
 		//log write
-		Log.Out(Logs::General, Logs::Error, "Unknown npc type for swarm pet type id: %d", typesid);
+		Log(Logs::General, Logs::Error, "Unknown npc type for swarm pet type id: %d", typesid);
 		Message(0,"Unable to find pet!");
 		return;
 	}
@@ -207,42 +221,44 @@ void Mob::TypesTemporaryPets(uint32 typesid, Mob *targ, const char *name_overrid
 			memcpy(npc_dup, made_npc, sizeof(NPCType));
 		}
 
-		NPC* npca = new NPC(
+		NPC* swarm_pet_npc = new NPC(
 				(npc_dup!=nullptr)?npc_dup:npc_type,	//make sure we give the NPC the correct data pointer
 				0,
 				GetPosition() + glm::vec4(swarmPetLocations[summon_count], 0.0f, 0.0f),
 				FlyMode3);
 
 		if (followme)
-			npca->SetFollowID(GetID());
+			swarm_pet_npc->SetFollowID(GetID());
 
-		if(!npca->GetSwarmInfo()){
-			auto nSI = new AA_SwarmPetInfo;
-			npca->SetSwarmInfo(nSI);
-			npca->GetSwarmInfo()->duration = new Timer(pet_duration*1000);
+		if(!swarm_pet_npc->GetSwarmInfo()){
+			auto nSI = new SwarmPet;
+			swarm_pet_npc->SetSwarmInfo(nSI);
+			swarm_pet_npc->GetSwarmInfo()->duration = new Timer(pet_duration*1000);
 		}
-		else{
-			npca->GetSwarmInfo()->duration->Start(pet_duration*1000);
+		else {
+			swarm_pet_npc->GetSwarmInfo()->duration->Start(pet_duration*1000);
 		}
+
+		swarm_pet_npc->StartSwarmTimer(pet_duration * 1000);
 
 		//removing this prevents the pet from attacking
-		npca->GetSwarmInfo()->owner_id = GetID();
+		swarm_pet_npc->GetSwarmInfo()->owner_id = GetID();
 
 		//give the pets somebody to "love"
 		if(targ != nullptr){
-			npca->AddToHateList(targ, 1000, 1000);
+			swarm_pet_npc->AddToHateList(targ, 1000, 1000);
 
 			if (RuleB(Spells, SwarmPetTargetLock) || sticktarg)
-				npca->GetSwarmInfo()->target = targ->GetID();
+				swarm_pet_npc->GetSwarmInfo()->target = targ->GetID();
 			else
-				npca->GetSwarmInfo()->target = 0;
+				swarm_pet_npc->GetSwarmInfo()->target = 0;
 		}
 
 		//we allocated a new NPC type object, give the NPC ownership of that memory
 		if(npc_dup != nullptr)
-			npca->GiveNPCTypeData(npc_dup);
+			swarm_pet_npc->GiveNPCTypeData(npc_dup);
 
-		entity_list.AddNPC(npca, true, true);
+		entity_list.AddNPC(swarm_pet_npc, true, true);
 		summon_count--;
 	}
 
@@ -400,7 +416,7 @@ void Mob::WakeTheDead(uint16 spell_id, Mob *target, uint32 duration)
 	auto npca = new NPC(make_npc, 0, GetPosition(), FlyMode3);
 
 	if(!npca->GetSwarmInfo()){
-		auto nSI = new AA_SwarmPetInfo;
+		auto nSI = new SwarmPet;
 		npca->SetSwarmInfo(nSI);
 		npca->GetSwarmInfo()->duration = new Timer(duration*1000);
 	}
@@ -789,21 +805,21 @@ void Client::RefundAA() {
 	SendAlternateAdvancementStats();
 }
 
-AA_SwarmPetInfo::AA_SwarmPetInfo()
+SwarmPet::SwarmPet()
 {
 	target = 0;
 	owner_id = 0;
 	duration = nullptr;
 }
 
-AA_SwarmPetInfo::~AA_SwarmPetInfo()
+SwarmPet::~SwarmPet()
 {
 	target = 0;
 	owner_id = 0;
 	safe_delete(duration);
 }
 
-Mob *AA_SwarmPetInfo::GetOwner()
+Mob *SwarmPet::GetOwner()
 {
 	return entity_list.GetMobID(owner_id);
 }
@@ -1529,17 +1545,17 @@ bool Mob::CanPurchaseAlternateAdvancementRank(AA::Rank *rank, bool check_price, 
 }
 
 void Zone::LoadAlternateAdvancement() {
-	Log.Out(Logs::General, Logs::Status, "Loading Alternate Advancement Data...");
+	Log(Logs::General, Logs::Status, "Loading Alternate Advancement Data...");
 	if(!database.LoadAlternateAdvancementAbilities(aa_abilities,
 		aa_ranks))
 	{
 		aa_abilities.clear();
 		aa_ranks.clear();
-		Log.Out(Logs::General, Logs::Status, "Failed to load Alternate Advancement Data");
+		Log(Logs::General, Logs::Status, "Failed to load Alternate Advancement Data");
 		return;
 	}
 
-	Log.Out(Logs::General, Logs::Status, "Processing Alternate Advancement Data...");
+	Log(Logs::General, Logs::Status, "Processing Alternate Advancement Data...");
 	for(const auto &ability : aa_abilities) {
 		ability.second->first = GetAlternateAdvancementRank(ability.second->first_rank_id);
 
@@ -1590,13 +1606,13 @@ void Zone::LoadAlternateAdvancement() {
 		}
 	}
 
-	Log.Out(Logs::General, Logs::Status, "Loaded Alternate Advancement Data");
+	Log(Logs::General, Logs::Status, "Loaded Alternate Advancement Data");
 }
 
 bool ZoneDatabase::LoadAlternateAdvancementAbilities(std::unordered_map<int, std::unique_ptr<AA::Ability>> &abilities,
 													std::unordered_map<int, std::unique_ptr<AA::Rank>> &ranks)
 {
-	Log.Out(Logs::General, Logs::Status, "Loading Alternate Advancement Abilities...");
+	Log(Logs::General, Logs::Status, "Loading Alternate Advancement Abilities...");
 	abilities.clear();
 	std::string query = "SELECT id, name, category, classes, races, deities, drakkin_heritage, status, type, charges, "
 		"grant_only, first_rank_id FROM aa_ability WHERE enabled = 1";
@@ -1622,13 +1638,13 @@ bool ZoneDatabase::LoadAlternateAdvancementAbilities(std::unordered_map<int, std
 			abilities[ability->id] = std::unique_ptr<AA::Ability>(ability);
 		}
 	} else {
-		Log.Out(Logs::General, Logs::Error, "Failed to load Alternate Advancement Abilities");
+		Log(Logs::General, Logs::Error, "Failed to load Alternate Advancement Abilities");
 		return false;
 	}
 
-	Log.Out(Logs::General, Logs::Status, "Loaded %d Alternate Advancement Abilities", (int)abilities.size());
+	Log(Logs::General, Logs::Status, "Loaded %d Alternate Advancement Abilities", (int)abilities.size());
 
-	Log.Out(Logs::General, Logs::Status, "Loading Alternate Advancement Ability Ranks...");
+	Log(Logs::General, Logs::Status, "Loading Alternate Advancement Ability Ranks...");
 	ranks.clear();
 	query = "SELECT id, upper_hotkey_sid, lower_hotkey_sid, title_sid, desc_sid, cost, level_req, spell, spell_type, recast_time, "
 		"next_id, expansion FROM aa_ranks";
@@ -1657,13 +1673,13 @@ bool ZoneDatabase::LoadAlternateAdvancementAbilities(std::unordered_map<int, std
 			ranks[rank->id] = std::unique_ptr<AA::Rank>(rank);
 		}
 	} else {
-		Log.Out(Logs::General, Logs::Error, "Failed to load Alternate Advancement Ability Ranks");
+		Log(Logs::General, Logs::Error, "Failed to load Alternate Advancement Ability Ranks");
 		return false;
 	}
 
-	Log.Out(Logs::General, Logs::Status, "Loaded %d Alternate Advancement Ability Ranks", (int)ranks.size());
+	Log(Logs::General, Logs::Status, "Loaded %d Alternate Advancement Ability Ranks", (int)ranks.size());
 
-	Log.Out(Logs::General, Logs::Status, "Loading Alternate Advancement Ability Rank Effects...");
+	Log(Logs::General, Logs::Status, "Loading Alternate Advancement Ability Rank Effects...");
 	query = "SELECT rank_id, slot, effect_id, base1, base2 FROM aa_rank_effects";
 	results = QueryDatabase(query);
 	if(results.Success()) {
@@ -1684,13 +1700,13 @@ bool ZoneDatabase::LoadAlternateAdvancementAbilities(std::unordered_map<int, std
 			}
 		}
 	} else {
-		Log.Out(Logs::General, Logs::Error, "Failed to load Alternate Advancement Ability Rank Effects");
+		Log(Logs::General, Logs::Error, "Failed to load Alternate Advancement Ability Rank Effects");
 		return false;
 	}
 
-	Log.Out(Logs::General, Logs::Status, "Loaded Alternate Advancement Ability Rank Effects");
+	Log(Logs::General, Logs::Status, "Loaded Alternate Advancement Ability Rank Effects");
 
-	Log.Out(Logs::General, Logs::Status, "Loading Alternate Advancement Ability Rank Prereqs...");
+	Log(Logs::General, Logs::Status, "Loading Alternate Advancement Ability Rank Prereqs...");
 	query = "SELECT rank_id, aa_id, points FROM aa_rank_prereqs";
 	results = QueryDatabase(query);
 	if(results.Success()) {
@@ -1709,11 +1725,11 @@ bool ZoneDatabase::LoadAlternateAdvancementAbilities(std::unordered_map<int, std
 			}
 		}
 	} else {
-		Log.Out(Logs::General, Logs::Error, "Failed to load Alternate Advancement Ability Rank Prereqs");
+		Log(Logs::General, Logs::Error, "Failed to load Alternate Advancement Ability Rank Prereqs");
 		return false;
 	}
 
-	Log.Out(Logs::General, Logs::Status, "Loaded Alternate Advancement Ability Rank Prereqs");
+	Log(Logs::General, Logs::Status, "Loaded Alternate Advancement Ability Rank Prereqs");
 
 	return true;
 }

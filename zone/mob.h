@@ -279,6 +279,7 @@ public:
 		uint32 inventory_slot = 0xFFFFFFFF, int16 resist_adjust = 0);
 	bool SpellFinished(uint16 spell_id, Mob *target, EQEmu::CastingSlot slot = EQEmu::CastingSlot::Item, uint16 mana_used = 0,
 		uint32 inventory_slot = 0xFFFFFFFF, int16 resist_adjust = 0, bool isproc = false, int level_override = -1);
+	void SendBeginCast(uint16 spell_id, uint32 casttime);
 	virtual bool SpellOnTarget(uint16 spell_id, Mob* spelltar, bool reflect = false,
 		bool use_resist_adjust = false, int16 resist_adjust = 0, bool isproc = false, int level_override = -1);
 	virtual bool SpellEffect(Mob* caster, uint16 spell_id, float partial = 100, int level_override = -1);
@@ -530,9 +531,9 @@ public:
 	//AI
 	static uint32 GetLevelCon(uint8 mylevel, uint8 iOtherLevel);
 	inline uint32 GetLevelCon(uint8 iOtherLevel) const {
-		return this ? GetLevelCon(GetLevel(), iOtherLevel) : CON_GREEN; }
+		return this ? GetLevelCon(GetLevel(), iOtherLevel) : CON_GRAY; }
 	virtual void AddToHateList(Mob* other, uint32 hate = 0, int32 damage = 0, bool iYellForHelp = true,
-		bool bFrenzy = false, bool iBuffTic = false, uint16 spell_id = SPELL_UNKNOWN);
+		bool bFrenzy = false, bool iBuffTic = false, uint16 spell_id = SPELL_UNKNOWN, bool pet_comand = false);
 	bool RemoveFromHateList(Mob* mob);
 	void SetHateAmountOnEnt(Mob* other, int32 hate = 0, int32 damage = 0) { hate_list.SetHateAmountOnEnt(other,hate,damage);}
 	void HalveAggro(Mob *other) { uint32 in_hate = GetHateAmount(other); SetHateAmountOnEnt(other, (in_hate > 1 ? in_hate / 2 : 1)); }
@@ -643,6 +644,10 @@ public:
 	void Say_StringID(uint32 string_id, const char *message3 = 0, const char *message4 = 0, const char *message5 = 0,
 		const char *message6 = 0, const char *message7 = 0, const char *message8 = 0, const char *message9 = 0);
 	void Say_StringID(uint32 type, uint32 string_id, const char *message3 = 0, const char *message4 = 0, const char *message5 = 0,
+		const char *message6 = 0, const char *message7 = 0, const char *message8 = 0, const char *message9 = 0);
+	void SayTo_StringID(Client *to, uint32 string_id, const char *message3 = 0, const char *message4 = 0, const char *message5 = 0,
+		const char *message6 = 0, const char *message7 = 0, const char *message8 = 0, const char *message9 = 0);
+	void SayTo_StringID(Client *to, uint32 type, uint32 string_id, const char *message3 = 0, const char *message4 = 0, const char *message5 = 0,
 		const char *message6 = 0, const char *message7 = 0, const char *message8 = 0, const char *message9 = 0);
 	void Shout(const char *format, ...);
 	void Emote(const char *format, ...);
@@ -846,7 +851,7 @@ public:
 	void StartEnrage();
 	void ProcessEnrage();
 	bool IsEnraged();
-	void Taunt(NPC* who, bool always_succeed, float chance_bonus=0, bool FromSpell=false, int32 bonus_hate=0);
+	void Taunt(NPC *who, bool always_succeed, int chance_bonus = 0, bool FromSpell = false, int32 bonus_hate = 0);
 
 	virtual void AI_Init();
 	virtual void AI_Start(uint32 iMoveDelay = 0);
@@ -871,10 +876,16 @@ public:
 	inline const eStandingPetOrder GetPetOrder() const { return pStandingPetOrder; }
 	inline void SetHeld(bool nState) { held = nState; }
 	inline const bool IsHeld() const { return held; }
+	inline void SetGHeld(bool nState) { gheld = nState; }
+	inline const bool IsGHeld() const { return gheld; }
 	inline void SetNoCast(bool nState) { nocast = nState; }
 	inline const bool IsNoCast() const { return nocast; }
 	inline void SetFocused(bool nState) { focused = nState; }
 	inline const bool IsFocused() const { return focused; }
+	inline void SetPetStop(bool nState) { pet_stop = nState; }
+	inline const bool IsPetStop() const { return pet_stop; }
+	inline void SetPetRegroup(bool nState) { pet_regroup = nState; }
+	inline const bool IsPetRegroup() const { return pet_regroup; }
 	inline const bool IsRoamer() const { return roamer; }
 	inline const int GetWanderType() const { return wandertype; }
 	inline const bool IsRooted() const { return rooted || permarooted; }
@@ -1181,8 +1192,11 @@ protected:
 
 	uint32 pLastChange;
 	bool held;
+	bool gheld;
 	bool nocast;
 	bool focused;
+	bool pet_stop;
+	bool pet_regroup;
 	bool spawned;
 	void CalcSpellBonuses(StatBonuses* newbon);
 	virtual void CalcBonuses();

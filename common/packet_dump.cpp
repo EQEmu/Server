@@ -152,6 +152,15 @@ void DumpPacket(const ServerPacket* pack, bool iShowInfo) {
 	DumpPacketHex(pack->pBuffer, pack->size);
 }
 
+void DumpPacket(uint16 opcode, const EQ::Net::Packet &p, bool iShowInfo) {
+	if (iShowInfo) {
+		std::cout << "Dumping ServerPacket: 0x" << std::hex << std::setfill('0') << std::setw(4) << opcode << std::dec;
+		std::cout << " size:" << p.Length() << std::endl;
+	}
+	
+	std::cout << p.ToString() << std::endl;
+}
+
 void DumpPacketBin(const ServerPacket* pack) {
 	DumpPacketBin(pack->pBuffer, pack->size);
 }

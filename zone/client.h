@@ -70,6 +70,7 @@ namespace EQEmu
 #include <set>
 #include <algorithm>
 #include <memory>
+#include <deque>
 
 
 #define CLIENT_TIMEOUT 90000
@@ -209,7 +210,7 @@ struct ClientReward
 
 class ClientFactory {
 public:
-	Client *MakeClient(std::shared_ptr<EQStream> ieqs);
+	Client *MakeClient(std::shared_ptr<EQStreamInterface> ieqs);
 };
 
 class Client : public Mob
@@ -220,6 +221,9 @@ public:
 
 	Client(EQStreamInterface * ieqs);
 	~Client();
+
+	std::unordered_map<NPC *, float> close_npcs;
+	bool is_client_moving;
 
 	//abstract virtual function implementations required by base abstract class
 	virtual bool Death(Mob* killerMob, int32 damage, uint16 spell_id, EQEmu::skills::SkillType attack_skill);
@@ -347,6 +351,8 @@ public:
 	inline PetInfo* GetPetInfo(uint16 pet) { return (pet==1)?&m_suspendedminion:&m_petinfo; }
 	inline InspectMessage_Struct& GetInspectMessage() { return m_inspect_message; }
 	inline const InspectMessage_Struct& GetInspectMessage() const { return m_inspect_message; }
+
+	void SetPetCommandState(int button, int state);
 
 	bool CheckAccess(int16 iDBLevel, int16 iDefaultLevel);
 
@@ -1429,7 +1435,7 @@ private:
 	bool AddPacket(const EQApplicationPacket *, bool);
 	bool AddPacket(EQApplicationPacket**, bool);
 	bool SendAllPackets();
-	LinkedList<CLIENTPACKET *> clientpackets;
+	std::deque<std::unique_ptr<CLIENTPACKET>> clientpackets;
 
 	//Zoning related stuff
 	void SendZoneCancel(ZoneChange_Struct *zc);
@@ -1465,9 +1471,7 @@ private:
 	Timer endupkeep_timer;
 	Timer forget_timer; // our 2 min everybody forgets you timer
 	Timer autosave_timer;
-#ifdef REVERSE_AGGRO
-	Timer scanarea_timer;
-#endif
+	Timer client_scan_npc_aggro_timer;
 	Timer tribute_timer;
 
 	Timer proximity_timer;
@@ -1483,8 +1487,8 @@ private:
 	Timer anon_toggle_timer;
 	Timer afk_toggle_timer;
 	Timer helm_toggle_timer;
-	Timer light_update_timer;
 	Timer aggro_meter_timer;
+	Timer npc_close_scan_timer;
 
     glm::vec3 m_Proximity;
 

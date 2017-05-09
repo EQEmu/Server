@@ -19,6 +19,7 @@
 #include "../common/global_define.h"
 #include "../common/eqemu_logsys.h"
 #include "../common/spdat.h"
+#include "../common/misc_functions.h"
 
 #include "client.h"
 #include "entity.h"
@@ -484,7 +485,7 @@ bool Client::TrainDiscipline(uint32 itemid) {
 	const EQEmu::ItemData *item = database.GetItem(itemid);
 	if(item == nullptr) {
 		Message(13, "Unable to find the tome you turned in!");
-		Log.Out(Logs::General, Logs::Error, "Unable to find turned in tome id %lu\n", (unsigned long)itemid);
+		Log(Logs::General, Logs::Error, "Unable to find turned in tome id %lu\n", (unsigned long)itemid);
 		return(false);
 	}
 
@@ -747,7 +748,7 @@ void EntityList::AETaunt(Client* taunter, float range, int32 bonus_hate)
 // NPC spells will only affect other NPCs with compatible faction
 void EntityList::AESpell(Mob *caster, Mob *center, uint16 spell_id, bool affect_caster, int16 resist_adjust)
 {
-	Mob *curmob;
+	Mob *curmob = nullptr;
 
 	float dist = caster->GetAOERange(spell_id);
 	float dist2 = dist * dist;
@@ -795,7 +796,7 @@ void EntityList::AESpell(Mob *caster, Mob *center, uint16 spell_id, bool affect_
 			continue;
 		if (dist_targ < min_range2)	//make sure they are in range
 			continue;
-		if (isnpc && curmob->IsNPC()) {	//check npc->npc casting
+		if (isnpc && curmob->IsNPC() && spells[spell_id].targettype != ST_AreaNPCOnly) {	//check npc->npc casting
 			FACTION_VALUE f = curmob->GetReverseFactionCon(caster);
 			if (bad) {
 				//affect mobs that are on our hate list, or
@@ -847,7 +848,7 @@ void EntityList::AESpell(Mob *caster, Mob *center, uint16 spell_id, bool affect_
 
 void EntityList::MassGroupBuff(Mob *caster, Mob *center, uint16 spell_id, bool affect_caster)
 {
-	Mob *curmob;
+	Mob *curmob = nullptr;
 
 	float dist = caster->GetAOERange(spell_id);
 	float dist2 = dist * dist;
@@ -888,7 +889,7 @@ void EntityList::MassGroupBuff(Mob *caster, Mob *center, uint16 spell_id, bool a
 // NPC spells will only affect other NPCs with compatible faction
 void EntityList::AEBardPulse(Mob *caster, Mob *center, uint16 spell_id, bool affect_caster)
 {
-	Mob *curmob;
+	Mob *curmob = nullptr;
 
 	float dist = caster->GetAOERange(spell_id);
 	float dist2 = dist * dist;
@@ -940,7 +941,7 @@ void EntityList::AEBardPulse(Mob *caster, Mob *center, uint16 spell_id, bool aff
 //NPCs handle it differently in Mob::Rampage
 void EntityList::AEAttack(Mob *attacker, float dist, int Hand, int count, bool IsFromSpell) {
 //Dook- Will need tweaking, currently no pets or players or horses
-	Mob *curmob;
+	Mob *curmob = nullptr;
 
 	float dist2 = dist * dist;
 

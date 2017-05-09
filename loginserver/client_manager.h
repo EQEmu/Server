@@ -20,12 +20,9 @@
 
 #include "../common/global_define.h"
 #include "../common/opcodemgr.h"
-#include "../common/eq_stream_type.h"
-#include "../common/eq_stream_factory.h"
+#include "../common/net/eqstream.h"
 #include "client.h"
 #include <list>
-
-using namespace std;
 
 /**
 * Client manager class, holds all the client objects and does basic processing.
@@ -49,11 +46,6 @@ public:
 	void Process();
 
 	/**
-	* Sends a new server list to every client.
-	*/
-	void UpdateServerList();
-
-	/**
 	* Removes a client with a certain account id.
 	*/
 	void RemoveExistingClient(unsigned int account_id);
@@ -69,11 +61,11 @@ private:
 	*/
 	void ProcessDisconnect();
 
-	list<Client*> clients;
+	std::list<Client*> clients;
 	OpcodeManager *titanium_ops;
-	EQStreamFactory *titanium_stream;
+	EQ::Net::EQStreamManager *titanium_stream;
 	OpcodeManager *sod_ops;
-	EQStreamFactory *sod_stream;
+	EQ::Net::EQStreamManager *sod_stream;
 };
 
 #endif

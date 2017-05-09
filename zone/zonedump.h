@@ -132,6 +132,7 @@ struct NPCType
 	uint8	handtexture;
 	uint8	legtexture;
 	uint8	feettexture;
+	bool	ignore_despawn;
 };
 
 namespace player_lootitem {
@@ -201,6 +202,7 @@ struct Door {
 	uint8	nokeyring;
 	uint8	trigger_door;
 	uint8	trigger_type;
+	uint8	disable_timer;
 	uint32	door_param;
 	int		invert_state;
 	uint16	size;

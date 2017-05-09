@@ -19,11 +19,9 @@
 #define EQEMU_SERVERMANAGER_H
 
 #include "../common/global_define.h"
-#include "../common/eq_stream_factory.h"
-#include "../common/emu_tcp_connection.h"
-#include "../common/emu_tcp_server.h"
 #include "../common/servertalk.h"
 #include "../common/packet_dump.h"
+#include "../common/net/servertalk_server.h"
 #include "world_server.h"
 #include "client.h"
 #include <list>
@@ -45,11 +43,6 @@ public:
 	~ServerManager();
 
 	/**
-	* Does basic processing for all the servers.
-	*/
-	void Process();
-
-	/**
 	* Sends a request to world to see if the client is banned or suspended.
 	*/
 	void SendUserToWorldRequest(unsigned int server_id, unsigned int client_account_id);
@@ -57,7 +50,7 @@ public:
 	/**
 	* Creates a server list packet for the client.
 	*/
-	EQApplicationPacket *CreateServerListPacket(Client *c);
+	EQApplicationPacket *CreateServerListPacket(Client *c, uint32 seq);
 
 	/**
 	* Checks to see if there is a server exists with this name, ignoring option.
@@ -71,18 +64,13 @@ public:
 
 private:
 	/**
-	* Processes all the disconnected connections in Process(), not used outside.
-	*/
-	void ProcessDisconnect();
-
-	/**
 	* Retrieves a server(if exists) by ip address
 	* Useful utility for the reconnect process.
 	*/
-	WorldServer* GetServerByAddress(unsigned int address);
+	WorldServer* GetServerByAddress(const std::string &address, int port);
 
-	EmuTCPServer* tcps;
-	std::list<WorldServer*> world_servers;
+	std::unique_ptr<EQ::Net::ServertalkServer> server_connection;
+	std::list<std::unique_ptr<WorldServer>> world_servers;
 };
 
 #endif

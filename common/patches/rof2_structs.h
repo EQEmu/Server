@@ -2566,9 +2566,12 @@ struct GroupJoin_Struct_Live {	// New for Live
 };
 
 struct GroupJoin_Struct {
-/*000*/	char	unknown000[64];
+/*000*/	char	owner_name[64]; // merc
 /*064*/	char	membername[64];
-/*128*/	uint8	unknown128[20];	// Leadership AA ?
+/*128*/	uint8	merc;
+/*129*/	uint8	padding129[3];
+/*132*/	uint32	level;
+/*136*/	uint8	unknown136[12];	// group ID most likely in here judging from like captures (unused by client)
 /*148*/
 };
 

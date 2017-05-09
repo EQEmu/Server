@@ -851,7 +851,7 @@ DmgShieldType GetDamageShieldType(uint16 spell_id, int32 DSType)
 	// If we have a DamageShieldType for this spell from the damageshieldtypes table, return that,
 	// else, make a guess, based on the resist type. Default return value is DS_THORNS
 	if (IsValidSpell(spell_id)) {
-		Log.Out(Logs::Detail, Logs::Spells, "DamageShieldType for spell %i (%s) is %X\n", spell_id,
+		Log(Logs::Detail, Logs::Spells, "DamageShieldType for spell %i (%s) is %X\n", spell_id,
 			spells[spell_id].name, spells[spell_id].DamageShieldType);
 
 		if (spells[spell_id].DamageShieldType)
@@ -940,7 +940,7 @@ bool IsRegularSingleTargetHealSpell(uint16 spell_id)
 {
 	if(spells[spell_id].effectid[0] == 0 && spells[spell_id].base[0] > 0 &&
 			spells[spell_id].targettype == ST_Target && spells[spell_id].buffduration == 0 &&
-			!IsFastHealSpell(spell_id) && !IsCompleteHealSpell(spell_id) &&
+			!IsCompleteHealSpell(spell_id) &&
 			!IsHealOverTimeSpell(spell_id) && !IsGroupSpell(spell_id))
 		return true;
 

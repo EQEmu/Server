@@ -228,6 +228,10 @@ LuaParser::LuaParser() {
 }
 
 LuaParser::~LuaParser() {
+	// valgrind didn't like when we didn't clean these up :P
+	lua_encounters.clear();
+	lua_encounter_events_registered.clear();
+	lua_encounters_loaded.clear();
 	if(L) {
 		lua_close(L);
 	}
@@ -800,6 +804,9 @@ void LuaParser::ReloadQuests() {
 		encounter.second->Depop();
 	}
 	lua_encounters.clear();
+	// so the Depop function above depends on the Process being called again so ...
+	// And there is situations where it wouldn't be :P
+	entity_list.EncounterProcess();
 
 	if(L) {
 		lua_close(L);

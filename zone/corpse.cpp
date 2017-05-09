@@ -82,7 +82,7 @@ Corpse* Corpse::LoadCharacterCorpseEntity(uint32 in_dbid, uint32 in_charid, std:
 
 	/* Load Items */
 	ItemList itemlist;
-	ServerLootItem_Struct* tmp = 0;
+	ServerLootItem_Struct* tmp = nullptr;
 	for (unsigned int i = 0; i < pcs->itemcount; i++) {
 		tmp = new ServerLootItem_Struct;
 		memcpy(tmp, &pcs->items[i], sizeof(player_lootitem::ServerLootItem_Struct));
@@ -267,7 +267,7 @@ Corpse::Corpse(Client* client, int32 in_rezexp) : Mob (
 	int i;
 
 	PlayerProfile_Struct *pp = &client->GetPP();
-	EQEmu::ItemInstance *item;
+	EQEmu::ItemInstance *item = nullptr;
 
 	/* Check if Zone has Graveyard First */
 	if(!zone->HasGraveyard()) {
@@ -671,7 +671,7 @@ void Corpse::AddItem(uint32 itemnum, uint16 charges, int16 slot, uint32 aug1, ui
 }
 
 ServerLootItem_Struct* Corpse::GetItem(uint16 lootslot, ServerLootItem_Struct** bag_item_data) {
-	ServerLootItem_Struct *sitem = 0, *sitem2;
+	ServerLootItem_Struct *sitem = nullptr, *sitem2 = nullptr;
 
 	ItemList::iterator cur,end;
 	cur = itemlist.begin();
@@ -798,7 +798,7 @@ bool Corpse::Process() {
 			spc->zone_id = zone->graveyard_zoneid();
 			worldserver.SendPacket(pack);
 			safe_delete(pack);
-			Log.Out(Logs::General, Logs::None, "Moved %s player corpse to the designated graveyard in zone %s.", this->GetName(), database.GetZoneName(zone->graveyard_zoneid()));
+			Log(Logs::General, Logs::None, "Moved %s player corpse to the designated graveyard in zone %s.", this->GetName(), database.GetZoneName(zone->graveyard_zoneid()));
 			corpse_db_id = 0;
 		}
 
@@ -828,10 +828,10 @@ bool Corpse::Process() {
 				Save();
 				player_corpse_depop = true;
 				corpse_db_id = 0;
-				Log.Out(Logs::General, Logs::None, "Tagged %s player corpse has buried.", this->GetName());
+				Log(Logs::General, Logs::None, "Tagged %s player corpse has buried.", this->GetName());
 			}
 			else {
-				Log.Out(Logs::General, Logs::Error, "Unable to bury %s player corpse.", this->GetName());
+				Log(Logs::General, Logs::Error, "Unable to bury %s player corpse.", this->GetName());
 				return true;
 			}
 		}
@@ -993,7 +993,7 @@ void Corpse::MakeLootRequestPackets(Client* client, const EQApplicationPacket* a
 		}
 
 		int i = 0;
-		const EQEmu::ItemData* item = 0;
+		const EQEmu::ItemData* item = nullptr;
 		ItemList::iterator cur,end;
 		cur = itemlist.begin();
 		end = itemlist.end();
@@ -1046,7 +1046,7 @@ void Corpse::MakeLootRequestPackets(Client* client, const EQApplicationPacket* a
 				for(; cur != end; ++cur) {
 					ServerLootItem_Struct* item_data = *cur;
 					item = database.GetItem(item_data->item_id);
-					Log.Out(Logs::General, Logs::None, "Corpse Looting: %s was not sent to client loot window (corpse_dbid: %i, charname: %s(%s))", item->Name, GetCorpseDBID(), client->GetName(), client->GetGM() ? "GM" : "Owner");
+					Log(Logs::General, Logs::None, "Corpse Looting: %s was not sent to client loot window (corpse_dbid: %i, charname: %s(%s))", item->Name, GetCorpseDBID(), client->GetName(), client->GetGM() ? "GM" : "Owner");
 					client->Message(0, "Inaccessable Corpse Item: %s", item->Name);
 				}
 			}
@@ -1087,7 +1087,6 @@ void Corpse::LootItem(Client *client, const EQApplicationPacket *app)
 	}
 
 	if (!IsBeingLootedBy(client)) {
-		client->Message(13, "Error: Corpse::LootItem: BeingLootedBy != client");
 		client->QueuePacket(app);
 		SendEndLootErrorPacket(client);
 		return;
@@ -1117,9 +1116,9 @@ void Corpse::LootItem(Client *client, const EQApplicationPacket *app)
 		return;
 	}
 
-	const EQEmu::ItemData *item = 0;
-	EQEmu::ItemInstance *inst = 0;
-	ServerLootItem_Struct *item_data = nullptr, *bag_item_data[10];
+	const EQEmu::ItemData *item = nullptr;
+	EQEmu::ItemInstance *inst = nullptr;
+	ServerLootItem_Struct *item_data = nullptr, *bag_item_data[10] = {};
 
 	memset(bag_item_data, 0, sizeof(bag_item_data));
 	if (GetPlayerKillItem() > 1) {
@@ -1438,7 +1437,7 @@ uint32 Corpse::GetEquipment(uint8 material_slot) const {
 }
 
 uint32 Corpse::GetEquipmentColor(uint8 material_slot) const {
-	const EQEmu::ItemData *item;
+	const EQEmu::ItemData *item = nullptr;
 
 	if (material_slot > EQEmu::textures::LastTexture) {
 		return 0;

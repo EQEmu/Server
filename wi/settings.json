@@ -1,0 +1,21 @@
+{
+	"db": {
+		"connectionLimit": 10,
+		"host": "localhost",
+		"user": "root",
+		"password": "blink",
+		"database": "eqdb"
+	},
+	"servertalk": {
+		"addr": "localhost",
+		"port": "9101",
+		"key": "ujwn2isnal1987scanb"
+	},
+	"https": {
+		"enabled": false,
+		"key": "key.pem",
+		"cert": "cert.pem"
+	},
+	"port": 9080,
+	"key": "key.pem"
+}

@@ -353,7 +353,7 @@ bool WorldDatabase::GetStartZone(PlayerProfile_Struct* in_pp, CharCreate_Struct*
 	in_pp->x = in_pp->y = in_pp->z = in_pp->heading = in_pp->zone_id = 0;
 	in_pp->binds[0].x = in_pp->binds[0].y = in_pp->binds[0].z = in_pp->binds[0].zoneId = in_pp->binds[0].instance_id = 0;
 	// see if we have an entry for start_zone. We can support both titanium & SOF+ by having two entries per class/race/deity combo with different zone_ids
-	std::string query = StringFormat("SELECT x, y, z, heading, start_zone, bind_id FROM start_zones WHERE zone_id = %i "
+	std::string query = StringFormat("SELECT x, y, z, heading, start_zone, bind_id, bind_x, bind_y, bind_z FROM start_zones WHERE zone_id = %i "
 		"AND player_class = %i AND player_deity = %i AND player_race = %i",
 		in_cc->start_zone, in_cc->class_, in_cc->deity, in_cc->race);
     auto results = QueryDatabase(query);
@@ -361,14 +361,14 @@ bool WorldDatabase::GetStartZone(PlayerProfile_Struct* in_pp, CharCreate_Struct*
 		return false;
 	}
 
-	Log.Out(Logs::General, Logs::Status, "SoF Start zone query: %s\n", query.c_str());
+	Log(Logs::General, Logs::Status, "SoF Start zone query: %s\n", query.c_str());
 
     if (results.RowCount() == 0) {
         printf("No start_zones entry in database, using defaults\n");
 		isTitanium ? SetTitaniumDefaultStartZone(in_pp, in_cc) : SetSoFDefaultStartZone(in_pp, in_cc);
     }
     else {
-		Log.Out(Logs::General, Logs::Status, "Found starting location in start_zones");
+		Log(Logs::General, Logs::Status, "Found starting location in start_zones");
 		auto row = results.begin();
 		in_pp->x = atof(row[0]);
 		in_pp->y = atof(row[1]);
@@ -376,6 +376,9 @@ bool WorldDatabase::GetStartZone(PlayerProfile_Struct* in_pp, CharCreate_Struct*
 		in_pp->heading = atof(row[3]);
 		in_pp->zone_id = atoi(row[4]);
 		in_pp->binds[0].zoneId = atoi(row[5]);
+		in_pp->binds[0].x = atof(row[6]);
+		in_pp->binds[0].y = atof(row[7]);
+		in_pp->binds[0].z = atof(row[8]);
 	}
 
 	if(in_pp->x == 0 && in_pp->y == 0 && in_pp->z == 0)
@@ -504,7 +507,7 @@ void WorldDatabase::GetLauncherList(std::vector<std::string> &rl) {
     const std::string query = "SELECT name FROM launcher";
     auto results = QueryDatabase(query);
     if (!results.Success()) {
-        Log.Out(Logs::General, Logs::Error, "WorldDatabase::GetLauncherList: %s", results.ErrorMessage().c_str());
+        Log(Logs::General, Logs::Error, "WorldDatabase::GetLauncherList: %s", results.ErrorMessage().c_str());
         return;
     }
 
@@ -526,7 +529,7 @@ void WorldDatabase::SetMailKey(int CharID, int IPAddress, int MailKey)
                                     MailKeyString, CharID);
     auto results = QueryDatabase(query);
 	if (!results.Success())
-		Log.Out(Logs::General, Logs::Error, "WorldDatabase::SetMailKey(%i, %s) : %s", CharID, MailKeyString, results.ErrorMessage().c_str());
+		Log(Logs::General, Logs::Error, "WorldDatabase::SetMailKey(%i, %s) : %s", CharID, MailKeyString, results.ErrorMessage().c_str());
 
 }
 
@@ -535,7 +538,7 @@ bool WorldDatabase::GetCharacterLevel(const char *name, int &level)
 	std::string query = StringFormat("SELECT level FROM character_data WHERE name = '%s'", name);
 	auto results = QueryDatabase(query);
 	if (!results.Success()) {
-        Log.Out(Logs::General, Logs::Error, "WorldDatabase::GetCharacterLevel: %s", results.ErrorMessage().c_str());
+        Log(Logs::General, Logs::Error, "WorldDatabase::GetCharacterLevel: %s", results.ErrorMessage().c_str());
         return false;
 	}
 

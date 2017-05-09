@@ -85,15 +85,22 @@ namespace EQEmu
 		// Public Methods
 		///////////////////////////////
 
-		InventoryProfile() { m_mob_version = versions::MobVersion::Unknown; m_mob_version_set = false; }
+		InventoryProfile() {
+			m_mob_version = versions::MobVersion::Unknown;
+			m_mob_version_set = false;
+			m_lookup = inventory::Lookup(versions::MobVersion::Unknown);
+		}
 		~InventoryProfile();
 
 		bool SetInventoryVersion(versions::MobVersion inventory_version) {
 			if (!m_mob_version_set) {
 				m_mob_version = versions::ValidateMobVersion(inventory_version);
-				return (m_mob_version_set = true);
+				m_lookup = inventory::Lookup(m_mob_version);
+				m_mob_version_set = true;
+				return true;
 			}
 			else {
+				m_lookup = inventory::Lookup(versions::MobVersion::Unknown);
 				return false;
 			}
 		}
@@ -127,7 +134,8 @@ namespace EQEmu
 		ItemInstance* GetCursorItem();
 
 		// Swap items in inventory
-		bool SwapItem(int16 slot_a, int16 slot_b);
+		enum SwapItemFailState : int8 { swapInvalid = -1, swapPass = 0, swapNotAllowed, swapNullData, swapRaceClass, swapDeity, swapLevel };
+		bool SwapItem(int16 slot_a, int16 slot_b, SwapItemFailState& fail_state, uint16 race_id = 0, uint8 class_id = 0, uint16 deity_id = 0, uint8 level = 0);
 
 		// Remove item from inventory
 		bool DeleteItem(int16 slot_id, uint8 quantity = 0);
@@ -155,7 +163,7 @@ namespace EQEmu
 
 		// Locate an available inventory slot
 		int16 FindFreeSlot(bool for_bag, bool try_cursor, uint8 min_size = 0, bool is_arrow = false);
-		int16 FindFreeSlotForTradeItem(const ItemInstance* inst);
+		int16 FindFreeSlotForTradeItem(const ItemInstance* inst, int16 general_start = legacy::GENERAL_BEGIN, uint8 bag_start = inventory::containerBegin);
 
 		// Calculate slot_id for an item within a bag
 		static int16 CalcSlotId(int16 slot_id); // Calc parent bag's slot_id
@@ -224,6 +232,7 @@ namespace EQEmu
 		// Active mob version
 		versions::MobVersion m_mob_version;
 		bool m_mob_version_set;
+		const inventory::LookupEntry* m_lookup;
 	};
 }
 

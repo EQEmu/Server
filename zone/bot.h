@@ -38,7 +38,9 @@
 
 #include <sstream>
 
-#define BOT_DEFAULT_FOLLOW_DISTANCE 184
+#define BOT_FOLLOW_DISTANCE_DEFAULT 184 // as DSq value (~13.565 units)
+#define BOT_FOLLOW_DISTANCE_DEFAULT_MAX 2500 // as DSq value (50 units)
+#define BOT_FOLLOW_DISTANCE_WALK 1000 // as DSq value (~31.623 units)
 
 extern WorldServer worldserver;
 
@@ -129,8 +131,49 @@ enum SpellTypeIndex {
 	SpellType_HateReduxIndex,
 	SpellType_InCombatBuffSongIndex,
 	SpellType_OutOfCombatBuffSongIndex,
+	SpellType_PreCombatBuffIndex,
+	SpellType_PreCombatBuffSongIndex,
 	MaxSpellTypes
 };
+
+// nHSND	negative Healer/Slower/Nuker/Doter
+// pH		positive Healer
+// pS		positive Slower
+// pHS		positive Healer/Slower
+// pN		positive Nuker
+// pHN		positive Healer/Nuker
+// pSN		positive Slower/Nuker
+// pHSN		positive Healer/Slower/Nuker
+// pD		positive Doter
+// pHD		positive Healer/Doter
+// pSD		positive Slower/Doter
+// pHSD		positive Healer/Slower/Doter
+// pND		positive Nuker/Doter
+// pHND		positive Healer/Nuker/Doter
+// pSND		positive Slower/Nuker/Doter
+// pHSND	positive Healer/Slower/Nuker/Doter
+// cntHSND	count Healer/Slower/Nuker/Doter
+enum BotCastingChanceConditional : uint8
+{
+	nHSND = 0,
+	pH,
+	pS,
+	pHS,
+	pN,
+	pHN,
+	pSN,
+	pHSN,
+	pD,
+	pHD,
+	pSD,
+	pHSD,
+	pND,
+	pHND,
+	pSND,
+	pHSND,
+	cntHSND = 16
+};
+
 
 class Bot : public NPC {
 	friend class Mob;
@@ -282,7 +325,7 @@ public:
 	bool DoFinishedSpellGroupTarget(uint16 spell_id, Mob* spellTarget, EQEmu::CastingSlot slot, bool &stopLogic);
 	void SendBotArcheryWearChange(uint8 material_slot, uint32 material, uint32 color);
 	void Camp(bool databaseSave = true);
-	virtual void AddToHateList(Mob* other, uint32 hate = 0, int32 damage = 0, bool iYellForHelp = true, bool bFrenzy = false, bool iBuffTic = false);
+	virtual void AddToHateList(Mob* other, uint32 hate = 0, int32 damage = 0, bool iYellForHelp = true, bool bFrenzy = false, bool iBuffTic = false, bool pet_command = false);
 	virtual void SetTarget(Mob* mob);
 	virtual void Zone();
 	std::vector<AISpells_Struct> GetBotSpells() { return AIspells; }
@@ -292,8 +335,9 @@ public:
 	void Stand();
 	bool IsSitting();
 	bool IsStanding();
-	bool IsBotCasterCombatRange(Mob *target);
-	bool CalculateNewPosition2(float x, float y, float z, float speed, bool checkZ = true) ;
+	int GetBotWalkspeed() const { return (int)((float)_GetWalkSpeed() * 1.786f); } // 1.25 / 0.7 = 1.7857142857142857142857142857143
+	int GetBotRunspeed() const { return (int)((float)_GetRunSpeed() * 1.786f); }
+	bool IsBotCasterAtCombatRange(Mob *target);
 	bool UseDiscipline(uint32 spell_id, uint32 target);
 	uint8 GetNumberNeedingHealedInGroup(uint8 hpr, bool includePets);
 	bool GetNeedsCured(Mob *tar);
@@ -417,10 +461,12 @@ public:
 	static int32 GetDisciplineRecastTimer(Bot *caster, int timer_index);
 	static bool CheckDisciplineRecastTimers(Bot *caster, int timer_index);
 	static uint32 GetDisciplineRemainingTime(Bot *caster, int timer_index);
+
 	static std::list<BotSpell> GetBotSpellsForSpellEffect(Bot* botCaster, int spellEffect);
 	static std::list<BotSpell> GetBotSpellsForSpellEffectAndTargetType(Bot* botCaster, int spellEffect, SpellTargetType targetType);
 	static std::list<BotSpell> GetBotSpellsBySpellType(Bot* botCaster, uint32 spellType);
 	static std::list<BotSpell_wPriority> GetPrioritizedBotSpellsBySpellType(Bot* botCaster, uint32 spellType);
+
 	static BotSpell GetFirstBotSpellBySpellType(Bot* botCaster, uint32 spellType);
 	static BotSpell GetBestBotSpellForFastHeal(Bot* botCaster);
 	static BotSpell GetBestBotSpellForHealOverTime(Bot* botCaster);
@@ -432,6 +478,7 @@ public:
 	static BotSpell GetBestBotSpellForGroupHeal(Bot* botCaster);
 	static BotSpell GetBestBotSpellForMagicBasedSlow(Bot* botCaster);
 	static BotSpell GetBestBotSpellForDiseaseBasedSlow(Bot* botCaster);
+
 	static Mob* GetFirstIncomingMobToMez(Bot* botCaster, BotSpell botSpell);
 	static BotSpell GetBestBotSpellForMez(Bot* botCaster);
 	static BotSpell GetBestBotMagicianPetSpell(Bot* botCaster);
@@ -442,17 +489,12 @@ public:
 	static BotSpell GetDebuffBotSpell(Bot* botCaster, Mob* target);
 	static BotSpell GetBestBotSpellForCure(Bot* botCaster, Mob* target);
 	static BotSpell GetBestBotSpellForResistDebuff(Bot* botCaster, Mob* target);
+	
 	static NPCType CreateDefaultNPCTypeStructForBot(std::string botName, std::string botLastName, uint8 botLevel, uint16 botRace, uint8 botClass, uint8 gender);
 
 	// Static Bot Group Methods
 	static bool AddBotToGroup(Bot* bot, Group* group);
 	static bool RemoveBotFromGroup(Bot* bot, Group* group);
-	static bool	GroupHasClass(Group* group, uint8 classId);
-	static bool GroupHasClericClass(Group* group) { return GroupHasClass(group, CLERIC); }
-	static bool GroupHasDruidClass(Group* group) { return GroupHasClass(group, DRUID); }
-	static bool GroupHasShamanClass(Group* group) { return GroupHasClass(group, SHAMAN); }
-	static bool GroupHasEnchanterClass(Group* group) { return GroupHasClass(group, ENCHANTER); }
-	static bool GroupHasPriestClass(Group* group) { return GroupHasClass(group, CLERIC | DRUID | SHAMAN); }
 	static void BotGroupSay(Mob *speaker, const char *msg, ...);
 
 	// "GET" Class Methods
@@ -472,8 +514,19 @@ public:
 	BotRoleType GetBotRole() { return _botRole; }
 	BotStanceType GetBotStance() { return _botStance; }
 	uint8 GetChanceToCastBySpellType(uint32 spellType);
-	bool IsGroupPrimaryHealer();
-	bool IsGroupPrimarySlower();
+
+	bool IsGroupHealer() { return m_CastingRoles.GroupHealer; }
+	bool IsGroupSlower() { return m_CastingRoles.GroupSlower; }
+	bool IsGroupNuker() { return m_CastingRoles.GroupNuker; }
+	bool IsGroupDoter() { return m_CastingRoles.GroupDoter; }
+	static void UpdateGroupCastingRoles(const Group* group, bool disband = false);
+
+	//bool IsRaidHealer() { return m_CastingRoles.RaidHealer; }
+	//bool IsRaidSlower() { return m_CastingRoles.RaidSlower; }
+	//bool IsRaidNuker() { return m_CastingRoles.RaidNuker; }
+	//bool IsRaidDoter() { return m_CastingRoles.RaidDoter; }
+	//static void UpdateRaidCastingRoles(const Raid* raid, bool disband = false);
+
 	bool IsBotCaster() { return IsCasterClass(GetClass()); }
 	bool IsBotINTCaster() { return IsINTCasterClass(GetClass()); }
 	bool IsBotWISCaster() { return IsWISCasterClass(GetClass()); }
@@ -602,7 +655,7 @@ public:
 
 	// Publicized private functions
 	static NPCType FillNPCTypeStruct(uint32 botSpellsID, std::string botName, std::string botLastName, uint8 botLevel, uint16 botRace, uint8 botClass, uint8 gender, float size, uint32 face, uint32 hairStyle, uint32 hairColor, uint32 eyeColor, uint32 eyeColor2, uint32 beardColor, uint32 beard, uint32 drakkinHeritage, uint32 drakkinTattoo, uint32 drakkinDetails, int32 hp, int32 mana, int32 mr, int32 cr, int32 dr, int32 fr, int32 pr, int32 corrup, int32 ac, uint32 str, uint32 sta, uint32 dex, uint32 agi, uint32 _int, uint32 wis, uint32 cha, uint32 attack);
-	void BotRemoveEquipItem(int slot);
+	void BotRemoveEquipItem(int16 slot);
 	void RemoveBotItemBySlot(uint32 slotID, std::string* errorMessage);
 	uint32 GetTotalPlayTime();
 
@@ -636,6 +689,16 @@ protected:
 	virtual void PerformTradeWithClient(int16 beginSlotID, int16 endSlotID, Client* client);
 	virtual bool AIDoSpellCast(uint8 i, Mob* tar, int32 mana_cost, uint32* oDontDoAgainBefore = 0);
 	virtual float GetMaxMeleeRangeToTarget(Mob* target);
+
+	BotCastingRoles& GetCastingRoles() { return m_CastingRoles; }
+	void SetGroupHealer(bool flag = true) { m_CastingRoles.GroupHealer = flag; }
+	void SetGroupSlower(bool flag = true) { m_CastingRoles.GroupSlower = flag; }
+	void SetGroupNuker(bool flag = true) { m_CastingRoles.GroupNuker = flag; }
+	void SetGroupDoter(bool flag = true) { m_CastingRoles.GroupDoter = flag; }
+	//void SetRaidHealer(bool flag = true) { m_CastingRoles.RaidHealer = flag; }
+	//void SetRaidSlower(bool flag = true) { m_CastingRoles.RaidSlower = flag; }
+	//void SetRaidNuker(bool flag = true) { m_CastingRoles.RaidNuker = flag; }
+	//void SetRaidDoter(bool flag = true) { m_CastingRoles.RaidDoter = flag; }
 
 private:
 	// Class Members
@@ -674,7 +737,9 @@ private:
 	bool _hasBeenSummoned;
 	glm::vec3 m_PreSummonLocation;
 
-	Timer evade_timer;
+	Timer evade_timer; // can be moved to pTimers at some point
+
+	BotCastingRoles m_CastingRoles;
 
 	std::shared_ptr<HealRotation> m_member_of_heal_rotation;
 

@@ -454,7 +454,7 @@ public:
 	int32	GetDoorsCount(uint32* oMaxID, const char *zone_name, int16 version);
 	int32	GetDoorsCountPlusOne(const char *zone_name, int16 version);
 	int32	GetDoorsDBCountPlusOne(const char *zone_name, int16 version);
-	void	InsertDoor(uint32 did, uint16 ddoorid, const char* ddoor_name, const glm::vec4& position, uint8 dopentype, uint16 dguildid, uint32 dlockpick, uint32 dkeyitem, uint8 ddoor_param, uint8 dinvert, int dincline, uint16 dsize);
+	void	InsertDoor(uint32 did, uint16 ddoorid, const char* ddoor_name, const glm::vec4& position, uint8 dopentype, uint16 dguildid, uint32 dlockpick, uint32 dkeyitem, uint8 ddoor_param, uint8 dinvert, int dincline, uint16 dsize, bool ddisabletimer = false);
 
 	/* Blocked Spells   */
 	int32	GetBlockedSpellsCount(uint32 zoneid);

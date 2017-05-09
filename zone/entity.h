@@ -279,6 +279,7 @@ public:
 	bool	RemoveTrap(uint16 delete_id);
 	bool	RemoveObject(uint16 delete_id);
 	bool	RemoveProximity(uint16 delete_npc_id);
+	bool	RemoveNPCFromClientCloseLists(NPC *npc);
 	void	RemoveAllMobs();
 	void	RemoveAllClients();
 	void	RemoveAllNPCs();
@@ -292,6 +293,7 @@ public:
 	void	RemoveAllObjects();
 	void	RemoveAllLocalities();
 	void	RemoveAllRaids();
+	void	RemoveAllEncounters();
 	void	DestroyTempPets(Mob *owner);
 	int16	CountTempPets(Mob *owner);
 	void	AddTempPetsToHateList(Mob *owner, Mob* other, bool bFrenzy = false);
@@ -410,7 +412,7 @@ public:
 	bool	LimitCheckName(const char* npc_name);
 
 	void	CheckClientAggro(Client *around);
-	Mob*	AICheckCloseAggro(Mob* sender, float iAggroRange, float iAssistRange);
+	Mob*	AICheckNPCtoNPCAggro(Mob* sender, float iAggroRange, float iAssistRange);
 	int	GetHatedCount(Mob *attacker, Mob *exclude);
 	void	AIYellForHelp(Mob* sender, Mob* attacker);
 	bool	AICheckCloseBeneficialSpells(NPC* caster, uint8 iChance, float iRange, uint32 iSpellTypes);
@@ -452,6 +454,14 @@ public:
 	void GetDoorsList(std::list<Doors*> &d_list);
 	void GetSpawnList(std::list<Spawn2*> &d_list);
 	void GetTargetsForConeArea(Mob *start, float min_radius, float radius, float height, int pcnpc, std::list<Mob*> &m_list);
+
+	inline const std::unordered_map<uint16, Mob *> &GetMobList() { return mob_list; }
+	inline const std::unordered_map<uint16, NPC *> &GetNPCList() { return npc_list; }
+	inline const std::unordered_map<uint16, Merc *> &GetMercList() { return merc_list; }
+	inline const std::unordered_map<uint16, Client *> &GetClientList() { return client_list; }
+	inline const std::unordered_map<uint16, Corpse *> &GetCorpseList() { return corpse_list; }
+	inline const std::unordered_map<uint16, Object *> &GetObjectList() { return object_list; }
+	inline const std::unordered_map<uint16, Doors *> &GetDoorsList() { return door_list; }
 
 	void	DepopAll(int NPCTypeID, bool StartSpawnTimer = true);
 

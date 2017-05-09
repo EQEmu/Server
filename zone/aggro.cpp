@@ -158,7 +158,7 @@ void NPC::DescribeAggro(Client *towho, Mob *mob, bool verbose) {
 
 	if (RuleB(Aggro, UseLevelAggro))
 	{
-		if (GetLevel() < 18 && mob->GetLevelCon(GetLevel()) == CON_GREEN && GetBodyType() != 3)
+		if (GetLevel() < 18 && mob->GetLevelCon(GetLevel()) == CON_GRAY && GetBodyType() != 3)
 		{
 			towho->Message(0, "...%s is red to me (basically)", mob->GetName(),	dist2, iAggroRange2);
 			return;
@@ -166,7 +166,7 @@ void NPC::DescribeAggro(Client *towho, Mob *mob, bool verbose) {
 	}
 	else
 	{
-		if(GetINT() > RuleI(Aggro, IntAggroThreshold) && mob->GetLevelCon(GetLevel()) == CON_GREEN ) {
+		if(GetINT() > RuleI(Aggro, IntAggroThreshold) && mob->GetLevelCon(GetLevel()) == CON_GRAY ) {
 			towho->Message(0, "...%s is red to me (basically)", mob->GetName(),
 			dist2, iAggroRange2);
 			return;
@@ -253,7 +253,7 @@ bool Mob::CheckWillAggro(Mob *mob) {
 	//sometimes if a client has some lag while zoning into a dangerous place while either invis or a GM
 	//they will aggro mobs even though it's supposed to be impossible, to lets make sure we've finished connecting
 	if (mob->IsClient()) {
-		if (!mob->CastToClient()->ClientFinishedLoading() || mob->CastToClient()->IsHoveringForRespawn())
+		if (!mob->CastToClient()->ClientFinishedLoading() || mob->CastToClient()->IsHoveringForRespawn() || mob->CastToClient()->zoning)
 			return false;
 	}
 
@@ -284,7 +284,7 @@ bool Mob::CheckWillAggro(Mob *mob) {
 	if(( t1 > iAggroRange)
 		|| ( t2 > iAggroRange)
 		|| ( t3 > iAggroRange)
-		||(mob->IsInvisible(this))
+		|| (mob->IsInvisible(this))
 		|| (mob->IsClient() &&
 			(!mob->CastToClient()->Connected()
 				|| mob->CastToClient()->IsLD()
@@ -298,7 +298,7 @@ bool Mob::CheckWillAggro(Mob *mob) {
 
 	// Don't aggro new clients if we are already engaged unless PROX_AGGRO is set
 	if (IsEngaged() && (!GetSpecialAbility(PROX_AGGRO) || (GetSpecialAbility(PROX_AGGRO) && !CombatRange(mob)))) {
-		Log.Out(Logs::Moderate, Logs::Aggro,
+		Log(Logs::Moderate, Logs::Aggro,
 			"%s is in combat, and does not have prox_aggro, or does and is out of combat range with %s",
 			GetName(), mob->GetName());
 		return false;
@@ -339,7 +339,7 @@ bool Mob::CheckWillAggro(Mob *mob) {
 		( GetLevel() >= 18 )
 		||(GetBodyType() == 3)
 		||( mob->IsClient() && mob->CastToClient()->IsSitting() )
-		||( mob->GetLevelCon(GetLevel()) != CON_GREEN )
+		||( mob->GetLevelCon(GetLevel()) != CON_GRAY)
 
 	)
 	&&
@@ -360,7 +360,7 @@ bool Mob::CheckWillAggro(Mob *mob) {
 	{
 		//FatherNiwtit: make sure we can see them. last since it is very expensive
 		if(CheckLosFN(mob)) {
-			Log.Out(Logs::Detail, Logs::Aggro, "Check aggro for %s target %s.", GetName(), mob->GetName());
+			Log(Logs::Detail, Logs::Aggro, "Check aggro for %s target %s.", GetName(), mob->GetName());
 			return( mod_will_aggro(mob, this) );
 		}
 	}
@@ -372,7 +372,7 @@ bool Mob::CheckWillAggro(Mob *mob) {
 		(
 			( GetINT() <= RuleI(Aggro, IntAggroThreshold) )
 			||( mob->IsClient() && mob->CastToClient()->IsSitting() )
-			||( mob->GetLevelCon(GetLevel()) != CON_GREEN )
+			||( mob->GetLevelCon(GetLevel()) != CON_GRAY)
 
 		)
 		&&
@@ -392,41 +392,35 @@ bool Mob::CheckWillAggro(Mob *mob) {
 		{
 			//FatherNiwtit: make sure we can see them. last since it is very expensive
 			if(CheckLosFN(mob)) {
-				Log.Out(Logs::Detail, Logs::Aggro, "Check aggro for %s target %s.", GetName(), mob->GetName());
+				Log(Logs::Detail, Logs::Aggro, "Check aggro for %s target %s.", GetName(), mob->GetName());
 				return( mod_will_aggro(mob, this) );
 			}
 		}
 	}
 
-	Log.Out(Logs::Detail, Logs::Aggro, "Is In zone?:%d\n", mob->InZone());
-	Log.Out(Logs::Detail, Logs::Aggro, "Dist^2: %f\n", dist2);
-	Log.Out(Logs::Detail, Logs::Aggro, "Range^2: %f\n", iAggroRange2);
-	Log.Out(Logs::Detail, Logs::Aggro, "Faction: %d\n", fv);
-	Log.Out(Logs::Detail, Logs::Aggro, "Int: %d\n", GetINT());
-	Log.Out(Logs::Detail, Logs::Aggro, "Con: %d\n", GetLevelCon(mob->GetLevel()));
+	Log(Logs::Detail, Logs::Aggro, "Is In zone?:%d\n", mob->InZone());
+	Log(Logs::Detail, Logs::Aggro, "Dist^2: %f\n", dist2);
+	Log(Logs::Detail, Logs::Aggro, "Range^2: %f\n", iAggroRange2);
+	Log(Logs::Detail, Logs::Aggro, "Faction: %d\n", fv);
+	Log(Logs::Detail, Logs::Aggro, "Int: %d\n", GetINT());
+	Log(Logs::Detail, Logs::Aggro, "Con: %d\n", GetLevelCon(mob->GetLevel()));
 
 	return(false);
 }
 
-Mob* EntityList::AICheckCloseAggro(Mob* sender, float iAggroRange, float iAssistRange) {
+Mob* EntityList::AICheckNPCtoNPCAggro(Mob* sender, float iAggroRange, float iAssistRange) {
 	if (!sender || !sender->IsNPC())
 		return(nullptr);
 
-#ifdef REVERSE_AGGRO
-	//with reverse aggro, npc->client is checked elsewhere, no need to check again
 	auto it = npc_list.begin();
 	while (it != npc_list.end()) {
-#else
-	auto it = mob_list.begin();
-	while (it != mob_list.end()) {
-#endif
 		Mob *mob = it->second;
 
 		if (sender->CheckWillAggro(mob))
 			return mob;
 		++it;
 	}
-	//LogFile->write(EQEMuLog::Debug, "Check aggro for %s no target.", sender->GetName());
+
 	return nullptr;
 }
 
@@ -449,7 +443,7 @@ int EntityList::GetHatedCount(Mob *attacker, Mob *exclude)
 		if (mob->IsFeared() || mob->IsMezzed())
 			continue;
 
-		if (attacker->GetLevelCon(mob->GetLevel()) == CON_GREEN)
+		if (attacker->GetLevelCon(mob->GetLevel()) == CON_GRAY)
 			continue;
 
 		if (!mob->CheckAggro(attacker))
@@ -508,7 +502,7 @@ void EntityList::AIYellForHelp(Mob* sender, Mob* attacker) {
 		{
 			//if they are in range, make sure we are not green...
 			//then jump in if they are our friend
-			if(mob->GetLevel() >= 50 || attacker->GetLevelCon(mob->GetLevel()) != CON_GREEN)
+			if(mob->GetLevel() >= 50 || attacker->GetLevelCon(mob->GetLevel()) != CON_GRAY)
 			{
 				bool useprimfaction = false;
 				if(mob->GetPrimaryFaction() == sender->CastToNPC()->GetPrimaryFaction())
@@ -526,7 +520,7 @@ void EntityList::AIYellForHelp(Mob* sender, Mob* attacker) {
 					//Father Nitwit: make sure we can see them.
 					if(mob->CheckLosFN(sender)) {
 #if (EQDEBUG>=5)
-						Log.Out(Logs::General, Logs::None, "AIYellForHelp(\"%s\",\"%s\") %s attacking %s Dist %f Z %f",
+						Log(Logs::General, Logs::None, "AIYellForHelp(\"%s\",\"%s\") %s attacking %s Dist %f Z %f",
 							sender->GetName(), attacker->GetName(), mob->GetName(),
 							attacker->GetName(), DistanceSquared(mob->GetPosition(),
 							sender->GetPosition()), fabs(sender->GetZ()+mob->GetZ()));
@@ -550,8 +544,8 @@ faster, but I'm doing it this way to make it readable and easy to modify
 bool Mob::IsAttackAllowed(Mob *target, bool isSpellAttack)
 {
 
-	Mob *mob1, *mob2, *tempmob;
-	Client *c1, *c2, *becomenpc;
+	Mob *mob1 = nullptr, *mob2 = nullptr, *tempmob = nullptr;
+	Client *c1 = nullptr, *c2 = nullptr, *becomenpc = nullptr;
 //	NPC *npc1, *npc2;
 	int reverse;
 
@@ -756,7 +750,7 @@ type', in which case, the answer is yes.
 	}
 	while( reverse++ == 0 );
 
-	Log.Out(Logs::General, Logs::None, "Mob::IsAttackAllowed: don't have a rule for this - %s vs %s\n", this->GetName(), target->GetName());
+	Log(Logs::General, Logs::None, "Mob::IsAttackAllowed: don't have a rule for this - %s vs %s\n", this->GetName(), target->GetName());
 	return false;
 }
 
@@ -767,8 +761,8 @@ type', in which case, the answer is yes.
 // also goes for their pets
 bool Mob::IsBeneficialAllowed(Mob *target)
 {
-	Mob *mob1, *mob2, *tempmob;
-	Client *c1, *c2;
+	Mob *mob1 = nullptr, *mob2 = nullptr, *tempmob = nullptr;
+	Client *c1 = nullptr, *c2 = nullptr;
 	int reverse;
 
 	if(!target)
@@ -896,7 +890,7 @@ bool Mob::IsBeneficialAllowed(Mob *target)
 	}
 	while( reverse++ == 0 );
 
-	Log.Out(Logs::General, Logs::None, "Mob::IsBeneficialAllowed: don't have a rule for this - %s to %s\n", this->GetName(), target->GetName());
+	Log(Logs::General, Logs::None, "Mob::IsBeneficialAllowed: don't have a rule for this - %s to %s\n", this->GetName(), target->GetName());
 	return false;
 }
 
@@ -1008,7 +1002,7 @@ bool Mob::CheckLosFN(float posX, float posY, float posZ, float mobSize) {
 	oloc.z = posZ + (mobSize==0.0?LOS_DEFAULT_HEIGHT:mobSize)/2 * SEE_POSITION;
 
 #if LOSDEBUG>=5
-	Log.Out(Logs::General, Logs::None, "LOS from (%.2f, %.2f, %.2f) to (%.2f, %.2f, %.2f) sizes: (%.2f, %.2f)", myloc.x, myloc.y, myloc.z, oloc.x, oloc.y, oloc.z, GetSize(), mobSize);
+	Log(Logs::General, Logs::None, "LOS from (%.2f, %.2f, %.2f) to (%.2f, %.2f, %.2f) sizes: (%.2f, %.2f)", myloc.x, myloc.y, myloc.z, oloc.x, oloc.y, oloc.z, GetSize(), mobSize);
 #endif
 	return zone->zonemap->CheckLoS(myloc, oloc);
 }

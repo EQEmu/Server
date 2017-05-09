@@ -164,6 +164,12 @@
 #define PVP_ON						552		//You are now player kill and follow the ways of Discord.
 #define GENERIC_STRINGID_SAY		554		//%1 says '%T2'
 #define CANNOT_WAKE					555		//%1 tells you, 'I am unable to wake %2, master.'
+#define PET_HOLD_SET_ON				698		//The pet hold mode has been set to on.
+#define PET_HOLD_SET_OFF			699		//The pet hold mode has been set to off.
+#define PET_FOCUS_SET_ON			700		//The pet focus mode has been set to on.
+#define PET_FOCUS_SET_OFF			701		//The pet focus mode has been set to off.
+#define PET_SPELLHOLD_SET_ON		702		//The pet spellhold mode has been set to on.
+#define PET_SPELLHOLD_SET_OFF		703		//The pet spellhold mode has been set to off.
 #define GUILD_NAME_IN_USE			711		//You cannot create a guild with that name, that guild already exists on this server.
 #define GM_GAINXP					1002	//[GM] You have gained %1 AXP and %2 EXP (%3).
 #define MALE_SLAYUNDEAD				1007	//%1's holy blade cleanses his target!(%2)
@@ -288,6 +294,7 @@
 #define CORPSEDRAG_BEGIN			4064	//You begin to drag %1.
 #define CORPSEDRAG_STOPALL			4065	//You stop dragging the corpses.
 #define CORPSEDRAG_STOP				4066	//You stop dragging the corpse.
+#define SOS_KEEPS_HIDDEN			4086	//Your Shroud of Stealth keeps you hidden from watchful eyes.␣␣
 #define	TARGET_TOO_CLOSE			4602	//You are too close to your target. Get farther away.
 #define WHOALL_NO_RESULTS			5029	//There are no players in EverQuest that match those who filters.
 #define TELL_QUEUED_MESSAGE			5045	//You told %1 '%T2. %3'
@@ -302,6 +309,7 @@
 #define PET_ATTACKING				5501	//%1 tells you, 'Attacking %2 Master.'
 #define AVOID_STUNNING_BLOW			5753	//You avoid the stunning blow.
 #define FATAL_BOW_SHOT				5745	//%1 performs a FATAL BOW SHOT!!
+#define SUSPECT_SEES_YOU			5746	//You suspect that this being can see you.
 #define MELEE_SILENCE				5806	//You *CANNOT* use this melee ability, you are suffering from amnesia!
 #define DISCIPLINE_REUSE_MSG		5807	//You can use the ability %1 again in %2 hour(s) %3 minute(s) %4 seconds.
 #define DISCIPLINE_REUSE_MSG2		5808	//You can use the ability %1 again in %2 minute(s) %3 seconds.
@@ -320,6 +328,12 @@
 #define SENTINEL_TRIG_YOU			6724	//You have triggered your sentinel.
 #define SENTINEL_TRIG_OTHER			6725	//%1 has triggered your sentinel.
 #define IDENTIFY_SPELL				6765	//Item Lore: %1.
+#define PET_NOW_HOLDING				6834	//Now holding, Master.  I will not start attacks until ordered.
+#define PET_ON_GHOLD				6843	//Pet greater hold has been set to on.
+#define PET_OFF_GHOLD				6846	//Pet greater hold has been set to off.
+#define PET_GHOLD_ON_MSG			6847	//Now greater holding master.  I will only attack something new if ordered.
+#define PET_ON_REGROUPING			6854	//Now regrouping, master.
+#define PET_OFF_REGROUPING			6855	//No longer regrouping, master.
 #define BUFF_NOT_BLOCKABLE			7608	//You cannot block this effect.
 #define LDON_DONT_KNOW_TRAPPED		7552	//You do not know if this object is trapped.
 #define LDON_HAVE_DISARMED			7553	//You have disarmed %1!

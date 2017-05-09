@@ -6,6 +6,8 @@
 #include "../common/timer.h"
 #include "../common/rulesys.h"
 #include "../common/servertalk.h"
+#include "../common/event/timer.h"
+#include "../common/net/console_server_connection.h"
 #include <vector>
 #include <string>
 
@@ -56,6 +58,7 @@ public:
 	ClientListEntry* FindCLEByCharacterID(uint32 iCharID);
 	ClientListEntry* GetCLE(uint32 iID);
 	void	GetCLEIP(uint32 iIP);
+	uint32	GetCLEIPCount(uint32 iLSAccountID);
 	void	DisconnectByIP(uint32 iIP);
 	void	EnforceSessionLimit(uint32 iLSAccountID);
 	void	CLCheckStale();
@@ -66,7 +69,8 @@ public:
 	int GetClientCount();
 	void GetClients(const char *zone_name, std::vector<ClientListEntry *> &into);
 
-protected:
+private:
+	void OnTick(EQ::Timer *t);
 	inline uint32 GetNextCLEID() { return NextCLEID++; }
 
 	//this is the list of people actively connected to zone
@@ -77,6 +81,7 @@ protected:
 	uint32 NextCLEID;
 	LinkedList<ClientListEntry *> clientlist;
 
+	std::unique_ptr<EQ::Timer> m_tick;
 };
 
 #endif /*CLIENTLIST_H_*/

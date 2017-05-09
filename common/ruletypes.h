@@ -56,6 +56,7 @@ RULE_REAL(Character, GroupExpMultiplier, 0.5)
 RULE_REAL(Character, RaidExpMultiplier, 0.2)
 RULE_BOOL(Character, UseXPConScaling, true)
 RULE_INT(Character, ShowExpValues, 0) //0 - normal, 1 - Show raw experience values, 2 - Show raw experience values AND percent.
+RULE_INT(Character, GreenModifier, 20)
 RULE_INT(Character, LightBlueModifier, 40)
 RULE_INT(Character, BlueModifier, 90)
 RULE_INT(Character, WhiteModifier, 100)
@@ -114,7 +115,7 @@ RULE_BOOL(Character, CheckCursorEmptyWhenLooting, true) // If true, a player can
 RULE_BOOL(Character, MaintainIntoxicationAcrossZones, true) // If true, alcohol effects are maintained across zoning and logging out/in.
 RULE_BOOL(Character, EnableDiscoveredItems, true) // If enabled, it enables EVENT_DISCOVER_ITEM and also saves character names and timestamps for the first time an item is discovered.
 RULE_BOOL(Character, EnableXTargetting, true) // Enable Extended Targetting Window, for users with UF and later clients.
-RULE_BOOL(Character, EnableAggroMeter, false) // Enable Aggro Meter, for users with RoF and later clients.
+RULE_BOOL(Character, EnableAggroMeter, true) // Enable Aggro Meter, for users with RoF and later clients.
 RULE_BOOL(Character, KeepLevelOverMax, false) // Don't delevel a character that has somehow gone over the level cap
 RULE_INT(Character, FoodLossPerUpdate, 35) // How much food/water you lose per stamina update
 RULE_INT(Character, BaseInstrumentSoftCap, 36) // Softcap for instrument mods, 36 commonly referred to as "3.6" as well.
@@ -149,6 +150,7 @@ RULE_INT(Character, AvoidanceCap, 750) // 750 Is a pretty good value, seen peopl
 RULE_BOOL(Character, AllowMQTarget, false) // Disables putting players in the 'hackers' list for targeting beyond the clip plane or attempting to target something untargetable
 RULE_BOOL(Character, UseOldBindWound, false) // Uses the original bind wound behavior
 RULE_BOOL(Character, GrantHoTTOnCreate, false) // Grant Health of Target's Target leadership AA on character creation
+RULE_BOOL(Character, UseOldConSystem, false) // Grant Health of Target's Target leadership AA on character creation
 RULE_BOOL(Character, UseCustomStatScaling, false) // Custom stat scaling
 RULE_CATEGORY_END()
 
@@ -164,6 +166,8 @@ RULE_INT(Mercs, AggroRadius, 100)		// Determines the distance from which a merc 
 RULE_INT(Mercs, AggroRadiusPuller, 25)	// Determines the distance from which a merc will aggro group member's target, if they have the group role of puller (also used to determine the distance at which a healer merc will begin healing a group member, if they have the group role of puller)
 RULE_INT(Mercs, ResurrectRadius, 50)	// Determines the distance from which a healer merc will attempt to resurrect a group member's corpse
 RULE_INT(Mercs, ScaleRate, 100)
+RULE_BOOL(Mercs, MercsUsePathing, true) // Mercs will use node pathing when moving
+RULE_BOOL(Mercs, AllowMercSuspendInCombat, true)
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Guild)
@@ -226,7 +230,9 @@ RULE_INT(World, PVPSettings, 0) // Sets the PVP settings for the server, 1 = Ral
 RULE_BOOL (World, IsGMPetitionWindowEnabled, false)
 RULE_INT (World, FVNoDropFlag, 0) // Sets the Firiona Vie settings on the client. If set to 2, the flag will be set for GMs only, allowing trading of no-drop items.
 RULE_BOOL (World, IPLimitDisconnectAll, false)
+RULE_BOOL(World, MaxClientsSimplifiedLogic, false) // New logic that only uses ExemptMaxClientsStatus and MaxClientsPerIP. Done on the loginserver. This mimics the P99-style special IP rules.
 RULE_INT (World, TellQueueSize, 20)
+RULE_BOOL(World, StartZoneSameAsBindOnCreation, true) //Should the start zone ALWAYS be the same location as your bind?
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Zone)
@@ -342,7 +348,7 @@ RULE_INT(Spells, MaxDiscSlotsNPC, 0)	// NPCs don't have discs ...
 RULE_INT(Spells, MaxTotalSlotsNPC, 60)	// default to Tit's limit
 RULE_INT(Spells, MaxTotalSlotsPET, 30)	// default to Tit's limit
 RULE_BOOL (Spells, EnableBlockedBuffs, true)
-RULE_INT(Spells, ReflectType, 1) //0 = disabled, 1 = single target player spells only, 2 = all player spells, 3 = all single target spells, 4 = all spells
+RULE_INT(Spells, ReflectType, 3) //0 = disabled, 1 = single target player spells only, 2 = all player spells, 3 = all single target spells, 4 = all spells
 RULE_INT(Spells, VirusSpreadDistance, 30) // The distance a viral spell will jump to its next victim
 RULE_BOOL(Spells, LiveLikeFocusEffects, true) // Determines whether specific healing, dmg and mana reduction focuses are randomized
 RULE_INT(Spells, BaseImmunityLevel, 55) // The level that targets start to be immune to stun, fear and mez spells with a max level of 0.
@@ -540,6 +546,7 @@ RULE_INT(Aggro, MaxScalingProcAggro, 400) // Set to -1 for no limit. Maxmimum am
 RULE_INT(Aggro, IntAggroThreshold, 75) // Int <= this will aggro regardless of level difference.
 RULE_BOOL(Aggro, AllowTickPulling, false) // tick pulling is an exploit in an NPC's call for help fixed sometime in 2006 on live
 RULE_BOOL(Aggro, UseLevelAggro, true) // Level 18+ and Undead will aggro regardless of level difference. (this will disabled Rule:IntAggroThreshold if set to true)
+RULE_INT(Aggro, ClientAggroCheckInterval, 6) // Interval in which clients actually check for aggro - in seconds
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(TaskSystem)
@@ -550,6 +557,21 @@ RULE_BOOL(TaskSystem, RecordCompletedOptionalActivities, false)
 RULE_BOOL(TaskSystem, KeepOneRecordPerCompletedTask, true)
 RULE_BOOL(TaskSystem, EnableTaskProximity, true)
 RULE_CATEGORY_END()
+
+RULE_CATEGORY(Range)
+RULE_INT(Range, Say, 135)
+RULE_INT(Range, Emote, 135)
+RULE_INT(Range, BeginCast, 200)
+RULE_INT(Range, Anims, 135)
+RULE_INT(Range, SpellParticles, 135)
+RULE_INT(Range, DamageMessages, 50)
+RULE_INT(Range, SpellMessages, 75)
+RULE_INT(Range, SongMessages, 75)
+RULE_INT(Range, MobPositionUpdates, 600)
+RULE_INT(Range, CriticalDamage, 80)
+RULE_INT(Range, ClientNPCScan, 300)
+RULE_CATEGORY_END()
+
 
 #ifdef BOTS
 RULE_CATEGORY(Bots)
@@ -566,6 +588,8 @@ RULE_BOOL(Bots, PreferNoManaCommandSpells, true) // Give sorting priority to new
 RULE_BOOL(Bots, QuestableSpawnLimit, false) // Optional quest method to manage bot spawn limits using the quest_globals name bot_spawn_limit, see: /bazaar/Aediles_Thrall.pl
 RULE_BOOL(Bots, QuestableSpells, false) // Anita Thrall's (Anita_Thrall.pl) Bot Spell Scriber quests.
 RULE_INT(Bots, SpawnLimit, 71) // Number of bots a character can have spawned at one time, You + 71 bots is a 12 group pseudo-raid (bots are not raidable at this time)
+RULE_BOOL(Bots, UpdatePositionWithTimer, false) // Sends a position update with every positive movement timer check
+RULE_BOOL(Bots, UsePathing, true) // Bots will use node pathing when moving
 RULE_BOOL(Bots, BotGroupXP, false) // Determines whether client gets xp for bots outside their group.
 RULE_BOOL(Bots, BotBardUseOutOfCombatSongs, true) // Determines whether bard bots use additional out of combat songs (optional script)
 RULE_BOOL(Bots, BotLevelsWithOwner, false) // Auto-updates spawned bots as owner levels/de-levels (false is original behavior)

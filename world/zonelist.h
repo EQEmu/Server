@@ -4,8 +4,9 @@
 #include "../common/types.h"
 #include "../common/eqtime.h"
 #include "../common/timer.h"
-#include "../common/linked_list.h"
+#include "../common/event/timer.h"
 #include <vector>
+#include <memory>
 
 class WorldTCPConnection;
 class ServerPacket;
@@ -35,6 +36,7 @@ public:
 
 	void	SendTimeSync();
 	void	Add(ZoneServer* zoneserver);
+	void	Remove(const std::string &uuid);
 	void	Process();
 	void	KillAll();
 	bool	SendPacket(ServerPacket* pack);
@@ -58,14 +60,15 @@ public:
 	void GetZoneIDList(std::vector<uint32> &zones);
 	void WorldShutDown(uint32 time, uint32 interval);
 
-protected:
+private:
+	void OnTick(EQ::Timer *t);
 	uint32 NextID;
-	LinkedList<ZoneServer*> list;
+	std::list<std::unique_ptr<ZoneServer>> list;
 	uint16	pLockedZones[MaxLockedZones];
 	uint32 CurGroupID;
 	uint16 LastAllocatedPort;
 
-
+	std::unique_ptr<EQ::Timer> m_tick;
 };
 
 #endif /*ZONELIST_H_*/

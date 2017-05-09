@@ -16,6 +16,7 @@
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
+
 #include "../common/global_define.h"
 #include "../common/misc_functions.h"
 #include "../common/features.h"
@@ -186,7 +187,7 @@ bool QuestParserCollection::SpellHasQuestSub(uint32 spell_id, QuestEventID evt) 
 			auto qiter = _interfaces.find(iter->second);
 			return qiter->second->SpellHasQuestSub(spell_id, evt);
 		}
-	} else {
+	} else if(_spell_quest_status[spell_id] != QuestFailedToLoad){
 		std::string filename;
 		QuestInterface *qi = GetQIBySpellQuest(spell_id, filename);
 		if(qi) {
@@ -263,7 +264,7 @@ int QuestParserCollection::EventNPCLocal(QuestEventID evt, NPC* npc, Mob *init, 
 			auto qiter = _interfaces.find(iter->second);
 			return qiter->second->EventNPC(evt, npc, init, data, extra_data, extra_pointers);
 		}
-	} else {
+	} else if (_npc_quest_status[npc->GetNPCTypeID()] != QuestFailedToLoad){
 		std::string filename;
 		QuestInterface *qi = GetQIByNPCQuest(npc->GetNPCTypeID(), filename);
 		if(qi) {
@@ -282,7 +283,8 @@ int QuestParserCollection::EventNPCGlobal(QuestEventID evt, NPC* npc, Mob *init,
 	if(_global_npc_quest_status != QuestUnloaded && _global_npc_quest_status != QuestFailedToLoad) {
 		auto qiter = _interfaces.find(_global_npc_quest_status);
 		return qiter->second->EventGlobalNPC(evt, npc, init, data, extra_data, extra_pointers);
-	} else {
+	} 
+	else if(_global_npc_quest_status != QuestFailedToLoad){
 		std::string filename;
 		QuestInterface *qi = GetQIByGlobalNPCQuest(filename);
 		if(qi) {
@@ -380,7 +382,7 @@ int QuestParserCollection::EventItem(QuestEventID evt, Client *client, EQEmu::It
 			return ret;
 		}
 		return DispatchEventItem(evt, client, item, mob, data, extra_data, extra_pointers);
-	} else {
+	} else if(_item_quest_status[item_id] != QuestFailedToLoad){
 		std::string filename;
 		QuestInterface *qi = GetQIByItemQuest(item_script, filename);
 		if(qi) {
@@ -415,19 +417,21 @@ int QuestParserCollection::EventSpell(QuestEventID evt, NPC* npc, Client *client
 			return ret;
 		}
 		return DispatchEventSpell(evt, npc, client, spell_id, extra_data, extra_pointers);
-	} else {
+	} 
+	else if (_spell_quest_status[spell_id] != QuestFailedToLoad) {
 		std::string filename;
 		QuestInterface *qi = GetQIBySpellQuest(spell_id, filename);
-		if(qi) {
+		if (qi) {
 			_spell_quest_status[spell_id] = qi->GetIdentifier();
 			qi->LoadSpellScript(filename, spell_id);
 			int ret = DispatchEventSpell(evt, npc, client, spell_id, extra_data, extra_pointers);
 			int i = qi->EventSpell(evt, npc, client, spell_id, extra_data, extra_pointers);
-            if(i != 0) {
-                ret = i;
-            }
+			if (i != 0) {
+				ret = i;
+			}
 			return ret;
-		} else {
+		}
+		else {
 			_spell_quest_status[spell_id] = QuestFailedToLoad;
 			return DispatchEventSpell(evt, npc, client, spell_id, extra_data, extra_pointers);
 		}
@@ -444,7 +448,7 @@ int QuestParserCollection::EventEncounter(QuestEventID evt, std::string encounte
 			auto qiter = _interfaces.find(iter->second);
 			return qiter->second->EventEncounter(evt, encounter_name, data, extra_data, extra_pointers);
 		}
-	} else {
+	} else if(_encounter_quest_status[encounter_name] != QuestFailedToLoad){
 		std::string filename;
 		QuestInterface *qi = GetQIByEncounterQuest(encounter_name, filename);
 		if(qi) {
@@ -695,12 +699,15 @@ QuestInterface *QuestParserCollection::GetQIByGlobalNPCQuest(std::string &filena
 	std::string tmp;
 	FILE *f = nullptr;
 
+	
+
 	auto iter = _load_precedence.begin();
 	while(iter != _load_precedence.end()) {
 		tmp = filename;
 		auto ext = _extensions.find((*iter)->GetIdentifier());
 		tmp += ".";
 		tmp += ext->second;
+
 		f = fopen(tmp.c_str(), "r");
 		if(f) {
 			fclose(f);
@@ -1043,7 +1050,7 @@ int QuestParserCollection::DispatchEventSpell(QuestEventID evt, NPC* npc, Client
 
 void QuestParserCollection::LoadPerlEventExportSettings(PerlEventExportSettings* perl_event_export_settings) {
 	
-	Log.Out(Logs::General, Logs::Zone_Server, "Loading Perl Event Export Settings...");
+	Log(Logs::General, Logs::Zone_Server, "Loading Perl Event Export Settings...");
 
 	/* Write Defaults First (All Enabled) */
 	for (int i = 0; i < _LargestEventID; i++){

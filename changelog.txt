@@ -1,5 +1,193 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 4/16/2017 ==
+KLS: Merge eqstream branch
+	-UDP client stack completely rewritten should both have better throughput and recover better (peq has had far fewer reports of desyncs).
+	-TCP Server to Server connection stack completely rewritten.
+		-Server connections reconnect much more reliably and quickly now.
+		-Now supports optional packet encryption via libsodium (https://download.libsodium.org/doc/).
+		-Protocol behind the tcp connections has changed (see breaking changes section).
+		-API significantly changed and should be easier to write new servers or handlers for.
+		-Telnet console connection has been separated out from the current port (see breaking changes section).
+			-Because of changes to the TCP stack, lsreconnect and echo have been disabled.
+	-The server tic rate has been changed to be approx 30 fps from 500+ fps.
+		-Changed how missiles and movement were calculated slightly to account for this (Missiles in particular are not perfect but close enough).
+	
+	-Breaking changes:
+		-Users who use the cmake install feature should be aware that the install directory is now %cmake_install_dir%/bin instead of just %cmake_install_dir%/
+		-To support new features such as encryption the underlying protocol had to change... however some servers such as the public login server will be slow to change so we've included a compatibility layer for legacy login connections:
+			-You should add <legacy>1</legacy> to the login section of your configuration file when connecting to a server that is using the old protocol.  
+			-The central eqemu login server uses the old protocol and probably will for the forseeable future so if your server is connecting to it be sure to add that tag to your configuration file in that section.
+			-Telnet no longer uses the same port as the Server to Server connection and because of this the tcp tag no longer has any effect on telnet connections.
+				-To enable telnet you need to add a telnet tag in the world section of configuration such as:
+					<telnet ip="0.0.0.0" port="9001" enabled="true"/>
+
+== 4/1/2017 ==
+Akkadius: Cleaned up some of the NPC to NPC aggro code, only do aggro checks to other NPC's when the NPC is flagged for it
+Akkadius: [Performance] Reworked how all log calls are made in the source
+	- Before we used Log.Out, we will now use a macro Log(
+		- Before: Log.Out(Logs::General, Logs::Status, "Importing Spells...");
+		- After: Log(Logs::General, Logs::Status, "Importing Spells...");
+	- The difference is 
+		1) It's 200-300x faster especially when log statements are inside very hot code paths. We already
+			had most hot paths checked before we logged them, but this blankets all existing logging calls now and not just the 
+			select few we had picked out in the source.
+		2) Strings don't get copied to the stack, popped and pushed constantly even when we hit a log statement that 
+			actually isn't going to log anything.
+				- We do an 'if (LogSys.log_settings[log_category].is_category_enabled == 1)' before we call a log function
+					in the log macro so the log function doesn't get called at all if we're not logging the category
+	- This has increased binary executables roughly 15KB
+	- The old extern for EQEmuLogSys is now named LogSys appropriately instead of Log (Ex: LogSys.StartFileLogs())
+	- The result keeps logging footprint non-existent for when we're not logging that category
+
+== 03/30/2017 ==
+Akkadius: [Performance] Fixed an overhead issue where many hot paths would trigger quest subroutines and beneath that the code would
+	try to see if a quest existed perpetually (checking if file exists) even though it should have determined the quest 
+	didn't exist the first time.
+	- This caused a lot of overhead in an instance where an entire zone of NPC's is pathing, triggering EVENT_WAYPOINT_ARRIVE
+	and EVENT_WAYPOINT_DEPART when there is no global_npc.pl/lua, or all NPC's pathing don't have a quest assigned, similar 
+	behavior would occur. This goes for any other type of quests: spells, items, encounters etc.
+
+== 03/28/2017 ==
+Akkadius: [Performance] Fixed a large overhead issue where every single NPC in a zone was checking to depop themselves
+	as a swarm pet every 3ms regardless of being a swarm pet or not. Swarm pets now check to depop only when their timer is up
+Akkadius: [Performance] Removed a timer where clients would constantly calculate light amount on equipment every 600ms, instead 
+	clients will update light when changing equipment or entering a zone
+Akkadius: [Performance] Disabled enraged timer checks for NPC's that do not actually have enrage as a special attack
+Akkadius: [Performance] Don't process ProjectileAttack checks for NPC's that are not engaged in any combat
+
+== 03/27/2017 ==
+Akkadius: [Performance] Reworked how client to NPC aggro checks are made
+	- Before when reverse aggro checks were done (client to NPC), checks would happen every 750 millseconds where a client would
+		check an entire entity list with distance calcs and other checks for aggro, with many clients in a zone and many NPC's this would
+		add a lot of unecessary overhead. A temporary adjustment on 3/25 was made and upped the check to 6 seconds.
+	- Now, there is a new methodology to scanning. The client will build a cache list of NPC's within close range as defined in new rule:
+		RULE_INT(Range, ClientNPCScan, 300) and will also get any NPC that has an aggro range beyond that defined range to use in 
+		the frequent checks for aggro, the result is far less overhead
+	- Client scanning changes when moving versus not moving, the client will scan aggro every 500 milliseconds while moving, and
+		3000 millseconds aggro check when not moving, with a 6000ms re-fetch for close NPC's
+	- A demo of these changes can be found here:
+		https://youtu.be/aGroiwLSTVU
+
+== 03/25/2017 ==
+Akkadius: [Performance] Reduced CPU footprint in non-combat zones doing constant checks for combat related activities
+Akkadius: [Performance] Reduced CPU footprint in cases where a client is checking for aggro excessively every 750 millseconds. This has 
+	been adjusted to 6 seconds per new rule RULE_INT(Aggro, ClientAggroCheckInterval)
+	- When zones have many players, with many NPC's, this adds up quickly
+
+== 03/12/2017 ==
+Akkadius: [Performance]
+- Implemented range rules for packets and other functions
+	RULE_INT ( Range, Say, 135 )
+	RULE_INT ( Range, Emote, 135 )
+	RULE_INT ( Range, BeginCast, 200)
+	RULE_INT ( Range, Anims, 135)
+	RULE_INT ( Range, SpellParticles, 135)
+	RULE_INT ( Range, DamageMessages, 50)
+	RULE_INT ( Range, SpellMessages, 75)
+	RULE_INT ( Range, SongMessages, 75)
+	RULE_INT ( Range, MobPositionUpdates, 600)
+	RULE_INT ( Range, CriticalDamage, 80)
+	
+ - (Readability) Also cleaned up some formatting in messaging and packets so it is easier to understand what is going on with the code
+
+== 03/09/2017 ==
+Uleat: Fixed a few glitches related to bot trading and other affected code
+	- Added a temporary fail clause for partial stack transfers to prevent client item overwrites
+	- Return messages no longer repeat the top cursor item when multiple items are pushed there
+	- Test slot for client returns is now handled appropriately for parent and bag searches
+	- FindFreeSlotForTradeItem() now begins at the correct bag index on subsequent parent iterations
+Uleat: First step of implementing inventory v2.0
+
+== 03/08/2017 ==
+Uleat: Complete rework of the bot trading system
+	- Equipment slot priority can now be tailored..though, a recompile will be required
+	- All item validations and slot assignments for trades and returns are now performed before any actual item movements occur
+	- Failed trade/returned items will now go straight into the client's inventory, just like a normal trade transaction
+		- A 'green' message appears at the end of each successful trade informing the trader of 'accepted' and 'returned' item counts
+		- Bots respond to the trader directly now instead of using BotGroupSay()
+	- Bots will still only allow trades from their owner (currently, too high a risk of exploit and/or malicious activity)
+	- Partial stack movements (i.e., ammo refills) have been scoped..but, not implemented
+	- I have not been able to reproduce any 'illegal' weapon combinations with this code
+	- NOTE: The report of item duplication with bot return items appears to be an inventory desync condition
+		- I experienced this condition both before and after the rework with RoF+ clients (UF- appears ok)
+		- The bug lies within the actual client inventory system and not with bot trades
+	- Please post any issues with this change as they arise
+
+== 02/27/2017 ==
+Uleat: Notes on bot movement speed changes:
+	- Clients (players) appear to be on a different speed scale than other entities (NPCs, etc...)
+	- The server does not calculate deltas/velocities for moving players..those come the client itself
+	- GetBotWalkspeed() and GetBotRunspeed() are specific to bot movement calculations
+	- The class Mob equivilents are not scalared so that a 'client-oriented' value can still be attained
+	- The value of ~1.786f is derived from the ratio of 1.25f/0.7f (npc speed/client speed)
+	- Modifying the two speeds like this is a rough guess-timate..but, appears to at least bring the incongruous behavior to acceptable levels
+
+== 02/26/2017 ==
+Uleat: Moved bot `npc_spells` entries from '701-712' to 3000 + <class_id> .. also, added melee types for future expansion
+Uleat: Moved bot spell casting chance values into database - this will allow admins to tailor their bots without having to rebuild server code
+	- Each entry uses a 3-dimensional identifier: [spell type index][class id][stance index]
+		- [spell type index] is not the SpellType_## bit value..use SpellType_##Index instead
+		- [class id] values of 1-16 are valid and hold a direct correlation to server-coded player class values
+		- [stance index] is a direct correlation (0-6)
+		- the 'conditional fields' are currently predicated on 4 compounded boolean states:
+			- `pH_value` represents bit '0'
+			- `pS_value` represents bit '1'
+			- `pN_value` represents bit '2'
+			- `pD_value` represents bit '3'
+			- all other conditional fields are masked based on these 4 predicates
+		- the full conditional field enumeration is as follows:
+			- `nHSND_value`		- negative Healer/Slower/Nuker/Doter
+			- `pH_value`		- positive Healer
+			- `pS_value`		- positive Slower
+			- `pHS_value`		- positive Healer/Slower
+			- `pN_value`		- positive Nuker
+			- `pHN_value`		- positive Healer/Nuker
+			- `pSN_value`		- positive Slower/Nuker
+			- `pHSN_value`		- positive Healer/Slower/Nuker
+			- `pD_value`		- positive Doter
+			- `pHD_value`		- positive Healer/Doter
+			- `pSD_value`		- positive Slower/Doter
+			- `pHSD_value`		- positive Healer/Slower/Doter
+			- `pND_value`		- positive Nuker/Doter
+			- `pHND_value`		- positive Healer/Nuker/Doter
+			- `pSND_value`		- positive Slower/Nuker/Doter
+			- `pHSND_value`		- positive Healer/Slower/Nuker/Doter
+	- Single- and mixed-bits fields should be filled-in based on the boolean 'AND' concept
+		- (i.e., if 'healer' then `pH_value`=x; if 'slower' then `pS_value`=y; if 'healer' AND 'slower' then `pHS_value`=z; )
+		- most cases can allow the same value across all fields..but, there are some that shouldn't and this format allows for their discrimination
+	- Valid `##_value` entries are 0-100..though, the field accepts up to 255... Anything above 100 is clamped to 100 upon loading, however...
+	- Not all conditions are currently coded and changing a field may not produce any results
+	- The 'default' database values will be changed and tweaked as bot spell code modifications occur
+
+== 02/25/2017 ==
+Uleat: Implemented rule-based node pathing for bots
+	- This currently applies to out-of-combat following movement and blocked los in-combat movement
+	- The default is set to 'true' (use node pathing)..so, consider disabling it if cpu use is too high
+	- If you want to disable node pathing, apply the optional sql '2017_02_25_bots_use_pathing_rule.sql' file located in the utils/sql/git/bots/optional sub-directory. This will apply a 'false' rule..but, it can be changed as desired
+	- This helps with bot movement..but, there are still issues...
+Uleat: Implemented rule-based position update packet with movement timer check for bots
+	- This currently only applies to out-of-combat movement
+	- The default is set to 'false' (original behavior) to help save bandwidth (each bot will send an update packet every 1/10th of a second when enabled)
+	- If you want to enable the position update packet, apply the optional sql '2017_02_25_bots_update_position_with_timer_rule.sql' file located in the utils/sql/git/bots/optional sub-directory. This will apply a 'true' rule..but, it can be changed as desired
+	- This appears to help with/eliminate rubber banding
+
+== 02/23/2017 ==
+** THIS NOTE HAS BEEN SUPERCEDED ON 02/26/2017 **
+Uleat: Moved bot spell casting chance values into database - this will allow admins to tailor their bots without having to rebuild server code
+	- Each entry uses a 4-dimensional identifier: [spell type index][class index][stance index][conditional index]
+		- [spell type index] is not the SpellType_## bit value..use SpellType_##Index instead
+		- [class index] values of 0-15 are valid and determined by subtracting 1 from the actual class value
+		- [stance index] is a direct correlation (0-6)
+		- the [conditional index] is currently predicated on 2 compounded boolean states:
+			- not primary healer/not primary slower: 0
+			- primary healer/not primary slower: 1
+			- not primary healer/ primary slower: 2
+			- primary healer/primary slower: 3
+	- Valid `value` entries are 0-100..though, the field accepts up to 255... Anything above 100 is clamped to 100 upon loading, however
+	- Not all conditions are currently coded and changing a field may not produce any results
+	- The 'default' database values will be changed and tweaked as bot spell code modifications occur
+
 == 02/20/2017 ==
 Uleat: Reworked bard bot spell twisting and updated their spell (song) list
 Uleat: Added ability to shift to pre-combat song buffing by selecting a non-pet npc target, eliminating the need to mix all bard buff songs together

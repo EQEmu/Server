@@ -18,6 +18,7 @@
 
 #include "../common/spdat.h"
 #include "../common/string_util.h"
+#include "../common/misc_functions.h"
 
 #include "quest_parser_collection.h"
 #include "string_ids.h"
@@ -343,8 +344,11 @@ Mob::Mob(const char* in_name,
 	typeofpet = petNone; // default to not a pet
 	petpower = 0;
 	held = false;
+	gheld = false;
 	nocast = false;
 	focused = false;
+	pet_stop = false;
+	pet_regroup = false;
 	_IsTempPet = false;
 	pet_owner_client = false;
 	pet_targetlock_id = 0;
@@ -613,7 +617,11 @@ int Mob::_GetWalkSpeed() const {
 		return(0);
 
 	//runspeed cap.
+#ifdef BOTS
+	if (IsClient() || IsBot())
+#else
 	if(IsClient())
+#endif
 	{
 		if(speed_mod > runspeedcap)
 			speed_mod = runspeedcap;
@@ -672,7 +680,11 @@ int Mob::_GetRunSpeed() const {
 
 	if (!has_horse && movemod != 0)
 	{
+#ifdef BOTS
+		if (IsClient() || IsBot())
+#else
 		if (IsClient())
+#endif
 		{
 			speed_mod += (speed_mod * movemod / 100);
 		} else {
@@ -701,7 +713,11 @@ int Mob::_GetRunSpeed() const {
 		return(0);
 	}
 	//runspeed cap.
+#ifdef BOTS
+	if (IsClient() || IsBot())
+#else
 	if(IsClient())
+#endif
 	{
 		if(speed_mod > runspeedcap)
 			speed_mod = runspeedcap;
@@ -1280,7 +1296,7 @@ void Mob::CreateHPPacket(EQApplicationPacket* app)
 void Mob::SendHPUpdate(bool skip_self)
 {
 	EQApplicationPacket hp_app;
-	Group *group;
+	Group *group = nullptr;
 
 	// destructor will free the pBuffer
 	CreateHPPacket(&hp_app);
@@ -1369,7 +1385,8 @@ void Mob::SendHPUpdate(bool skip_self)
 	// send to self - we need the actual hps here
 	if(IsClient() && (!skip_self || dospam)) {
 
-		this->CastToClient()->SendHPUpdateMarquee();
+		if (RuleB(Character, MarqueeHPUpdates))
+			this->CastToClient()->SendHPUpdateMarquee();
 
 		auto hp_app2 = new EQApplicationPacket(OP_HPUpdate, sizeof(SpawnHPUpdate_Struct));
 		SpawnHPUpdate_Struct* ds = (SpawnHPUpdate_Struct*)hp_app2->pBuffer;
@@ -1414,7 +1431,7 @@ void Mob::SendPosUpdate(uint8 iSendToSelf) {
 		}
 		else if(move_tic_count % 2 == 0)
 		{
-			entity_list.QueueCloseClients(this, app, (iSendToSelf == 0), 700, nullptr, false);
+			entity_list.QueueCloseClients(this, app, (iSendToSelf == 0), RuleI(Range, MobPositionUpdates), nullptr, false);
 			move_tic_count++;
 		} 
 		else {
@@ -1458,10 +1475,15 @@ void Mob::MakeSpawnUpdate(PlayerPositionUpdateServer_Struct* spu) {
 	spu->padding0006	=7;
 	spu->padding0014	=0x7f;
 	spu->padding0018	=0x5df27;
+#ifdef BOTS
+	if (this->IsClient() || this->IsBot())
+#else
 	if(this->IsClient())
+#endif
 		spu->animation = animation;
 	else
-		spu->animation	= pRunAnimSpeed;//animation;
+		spu->animation = pRunAnimSpeed;//animation;
+	
 	spu->delta_heading = NewFloatToEQ13(m_Delta.w);
 }
 
@@ -1512,15 +1534,26 @@ void Mob::DoAnim(const int animnum, int type, bool ackreq, eqFilterType filter) 
 	auto outapp = new EQApplicationPacket(OP_Animation, sizeof(Animation_Struct));
 	Animation_Struct* anim = (Animation_Struct*)outapp->pBuffer;
 	anim->spawnid = GetID();
+
 	if(type == 0){
 		anim->action = animnum;
 		anim->speed = 10;
 	}
-	else{
+	else {
 		anim->action = animnum;
 		anim->speed = type;
 	}
-	entity_list.QueueCloseClients(this, outapp, false, 200, 0, ackreq, filter);
+
+	entity_list.QueueCloseClients(
+		this, /* Sender */
+		outapp, /* Packet */
+		false, /* Ignore Sender */
+		RuleI(Range, Anims),
+		0, /* Skip this mob */
+		ackreq, /* Packet ACK */
+		filter /* eqFilterType filter */
+	);
+
 	safe_delete(outapp);
 }
 
@@ -1564,7 +1597,7 @@ void Mob::ShowBuffList(Client* client) {
 	client->Message(0, "Buffs on: %s", this->GetCleanName());
 	uint32 i;
 	uint32 buff_count = GetMaxTotalSlots();
-	for (i=0; i < buff_count; i++) {
+	for (i = 0; i < buff_count; i++) {
 		if (buffs[i].spellid != SPELL_UNKNOWN) {
 			if (spells[buffs[i].spellid].buffdurationformula == DF_Permanent)
 				client->Message(0, "  %i: %s: Permanent", i, spells[buffs[i].spellid].name);
@@ -1771,7 +1804,7 @@ void Mob::SendIllusionPacket(uint16 in_race, uint8 in_gender, uint8 in_texture, 
 	/* Refresh armor and tints after send illusion packet */
 	this->SendArmorAppearance();
 
-	Log.Out(Logs::Detail, Logs::Spells, "Illusion: Race = %i, Gender = %i, Texture = %i, HelmTexture = %i, HairColor = %i, BeardColor = %i, EyeColor1 = %i, EyeColor2 = %i, HairStyle = %i, Face = %i, DrakkinHeritage = %i, DrakkinTattoo = %i, DrakkinDetails = %i, Size = %f",
+	Log(Logs::Detail, Logs::Spells, "Illusion: Race = %i, Gender = %i, Texture = %i, HelmTexture = %i, HairColor = %i, BeardColor = %i, EyeColor1 = %i, EyeColor2 = %i, HairStyle = %i, Face = %i, DrakkinHeritage = %i, DrakkinTattoo = %i, DrakkinDetails = %i, Size = %f",
 		race, gender, texture, helmtexture, haircolor, beardcolor, eyecolor1, eyecolor2, hairstyle, luclinface, drakkin_heritage, drakkin_tattoo, drakkin_details, size);
 }
 
@@ -2102,7 +2135,7 @@ void Mob::SendTargetable(bool on, Client *specific_target) {
 		entity_list.QueueClients(this, outapp);
 	}
 	else if (specific_target->IsClient()) {
-		specific_target->CastToClient()->QueuePacket(outapp, false);
+		specific_target->CastToClient()->QueuePacket(outapp);
 	}
 	safe_delete(outapp);
 }
@@ -2759,7 +2792,7 @@ void Mob::SendArmorAppearance(Client *one_client)
 	{
 		if (!IsClient())
 		{
-			const EQEmu::ItemData *item;
+			const EQEmu::ItemData *item = nullptr;
 			for (int i = 0; i < 7; ++i)
 			{
 				item = database.GetItem(GetEquipment(i));
@@ -2877,7 +2910,7 @@ int32 Mob::GetEquipmentMaterial(uint8 material_slot) const
 {
 	uint32 equipmaterial = 0;
 	int32 ornamentationAugtype = RuleI(Character, OrnamentationAugmentType);
-	const EQEmu::ItemData *item;
+	const EQEmu::ItemData *item = nullptr;
 	item = database.GetItem(GetEquipment(material_slot));
 
 	if (item != 0)
@@ -2930,7 +2963,7 @@ int32 Mob::GetHerosForgeModel(uint8 material_slot) const
 	if (material_slot >= 0 && material_slot < EQEmu::textures::weaponPrimary)
 	{
 		uint32 ornamentationAugtype = RuleI(Character, OrnamentationAugmentType);
-		const EQEmu::ItemData *item;
+		const EQEmu::ItemData *item = nullptr;
 		item = database.GetItem(GetEquipment(material_slot));
 		int16 invslot = EQEmu::InventoryProfile::CalcSlotFromMaterial(material_slot);
 
@@ -2984,7 +3017,7 @@ int32 Mob::GetHerosForgeModel(uint8 material_slot) const
 
 uint32 Mob::GetEquipmentColor(uint8 material_slot) const
 {
-	const EQEmu::ItemData *item;
+	const EQEmu::ItemData *item = nullptr;
 
 	if (armor_tint.Slot[material_slot].Color)
 	{
@@ -3000,7 +3033,7 @@ uint32 Mob::GetEquipmentColor(uint8 material_slot) const
 
 uint32 Mob::IsEliteMaterialItem(uint8 material_slot) const
 {
-	const EQEmu::ItemData *item;
+	const EQEmu::ItemData *item = nullptr;
 
 	item = database.GetItem(GetEquipment(material_slot));
 	if(item != 0)
@@ -3061,6 +3094,26 @@ void Mob::Say_StringID(uint32 type, uint32 string_id, const char *message3, cons
 		GENERIC_STRINGID_SAY, GetCleanName(), string_id_str, message3, message4, message5,
 		message6, message7, message8, message9
 	);
+}
+
+void Mob::SayTo_StringID(Client *to, uint32 string_id, const char *message3, const char *message4, const char *message5, const char *message6, const char *message7, const char *message8, const char *message9)
+{
+	if (!to)
+		return;
+
+	auto string_id_str = std::to_string(string_id);
+
+	to->Message_StringID(10, GENERIC_STRINGID_SAY, GetCleanName(), string_id_str.c_str(), message3, message4, message5, message6, message7, message8, message9);
+}
+
+void Mob::SayTo_StringID(Client *to, uint32 type, uint32 string_id, const char *message3, const char *message4, const char *message5, const char *message6, const char *message7, const char *message8, const char *message9)
+{
+	if (!to)
+		return;
+
+	auto string_id_str = std::to_string(string_id);
+
+	to->Message_StringID(type, GENERIC_STRINGID_SAY, GetCleanName(), string_id_str.c_str(), message3, message4, message5, message6, message7, message8, message9);
 }
 
 void Mob::Shout(const char *format, ...)
@@ -3226,7 +3279,7 @@ void Mob::ExecWeaponProc(const EQEmu::ItemInstance *inst, uint16 spell_id, Mob *
 	if(!IsValidSpell(spell_id)) { // Check for a valid spell otherwise it will crash through the function
 		if(IsClient()){
 			Message(0, "Invalid spell proc %u", spell_id);
-			Log.Out(Logs::Detail, Logs::Spells, "Player %s, Weapon Procced invalid spell %u", this->GetName(), spell_id);
+			Log(Logs::Detail, Logs::Spells, "Player %s, Weapon Procced invalid spell %u", this->GetName(), spell_id);
 		}
 		return;
 	}
@@ -4753,7 +4806,7 @@ void Mob::MeleeLifeTap(int32 damage) {
 	if(lifetap_amt && damage > 0){
 
 		lifetap_amt = damage * lifetap_amt / 100;
-		Log.Out(Logs::Detail, Logs::Combat, "Melee lifetap healing for %d damage.", damage);
+		Log(Logs::Detail, Logs::Combat, "Melee lifetap healing for %d damage.", damage);
 
 		if (lifetap_amt > 0)
 			HealDamage(lifetap_amt); //Heal self for modified damage amount.

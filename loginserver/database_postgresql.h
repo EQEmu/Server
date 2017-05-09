@@ -26,8 +26,6 @@
 #include <stdlib.h>
 #include <libpq-fe.h>
 
-using namespace std;
-
 /**
  * PostgreSQL Database class
  */
@@ -42,7 +40,7 @@ public:
 	/**
 	* Constructor, tries to set our database to connect to the supplied options.
 	*/
-	DatabasePostgreSQL(string user, string pass, string host, string port, string name);
+	DatabasePostgreSQL(std::string user, std::string pass, std::string host, std::string port, std::string name);
 
 	/**
 	* Destructor, frees our database if needed.
@@ -59,32 +57,32 @@ public:
 	* Needed for client login procedure.
 	* Returns true if the record was found, false otherwise.
 	*/
-	virtual bool GetLoginDataFromAccountName(string name, string &password, unsigned int &id);
+	virtual bool GetLoginDataFromAccountName(std::string name, std::string &password, unsigned int &id);
 
 	/**
 	* Retrieves the world registration from the long and short names provided.
 	* Needed for world login procedure.
 	* Returns true if the record was found, false otherwise.
 	*/
-	virtual bool GetWorldRegistration(string long_name, string short_name, unsigned int &id, string &desc, unsigned int &list_id,
-		unsigned int &trusted, string &list_desc, string &account, string &password);
+	virtual bool GetWorldRegistration(std::string long_name, std::string short_name, unsigned int &id, std::string &desc, unsigned int &list_id,
+		unsigned int &trusted, std::string &list_desc, std::string &account, std::string &password);
 
 	/**
 	* Updates the ip address of the client with account id = id
 	*/
-	virtual void UpdateLSAccountData(unsigned int id, string ip_address);
+	virtual void UpdateLSAccountData(unsigned int id, std::string ip_address);
 
 	/**
 	* Updates the ip address of the world with account id = id
 	*/
-	virtual void UpdateWorldRegistration(unsigned int id, string long_name, string ip_address);
+	virtual void UpdateWorldRegistration(unsigned int id, std::string long_name, std::string ip_address);
 
 	/**
 	* Creates new world registration for unregistered servers and returns new id
 	*/
-	virtual bool CreateWorldRegistration(string long_name, string short_name, unsigned int &id);
+	virtual bool CreateWorldRegistration(std::string long_name, std::string short_name, unsigned int &id);
 protected:
-	string user, pass, host, port, name;
+	std::string user, pass, host, port, name;
 	PGconn *db;
 };
 

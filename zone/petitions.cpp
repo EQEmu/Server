@@ -252,7 +252,7 @@ void ZoneDatabase::InsertPetitionToDB(Petition* wpet)
 	}
 
 #if EQDEBUG >= 5
-		Log.Out(Logs::General, Logs::None, "New petition created");
+		Log(Logs::General, Logs::None, "New petition created");
 #endif
 
 }

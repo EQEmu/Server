@@ -823,6 +823,11 @@ bool Lua_Mob::SpellFinished(int spell_id, Lua_Mob target, int slot, int mana_use
 	return self->SpellFinished(spell_id, target, static_cast<EQEmu::CastingSlot>(slot), mana_used, inventory_slot, resist_adjust, proc);
 }
 
+void Lua_Mob::SendBeginCast(int spell_id, int cast_time) {
+	Lua_Safe_Call_Void();
+	self->SendBeginCast(spell_id, cast_time);
+}
+
 void Lua_Mob::SpellEffect(Lua_Mob caster, int spell_id, double partial) {
 	Lua_Safe_Call_Void();
 	self->SpellEffect(caster, spell_id, static_cast<float>(partial));
@@ -2128,7 +2133,10 @@ luabind::scope lua_register_mob() {
 		.def("SpellFinished", (bool(Lua_Mob::*)(int,Lua_Mob,int,int,uint32))&Lua_Mob::SpellFinished)
 		.def("SpellFinished", (bool(Lua_Mob::*)(int,Lua_Mob,int,int,uint32,int))&Lua_Mob::SpellFinished)
 		.def("SpellFinished", (bool(Lua_Mob::*)(int,Lua_Mob,int,int,uint32,int,bool))&Lua_Mob::SpellFinished)
+		.def("SendBeginCast", &Lua_Mob::SendBeginCast)
 		.def("SpellEffect", &Lua_Mob::SpellEffect)
+		.def("GetPet", &Lua_Mob::GetPet)
+		.def("GetOwner", &Lua_Mob::GetOwner)
 		.def("GetHateList", &Lua_Mob::GetHateList)
 		.def("GetHateTop", (Lua_Mob(Lua_Mob::*)(void))&Lua_Mob::GetHateTop)
 		.def("GetHateDamageTop", (Lua_Mob(Lua_Mob::*)(Lua_Mob))&Lua_Mob::GetHateDamageTop)

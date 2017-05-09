@@ -177,7 +177,6 @@ void Adventure::SetStatus(AdventureStatus new_status)
 		ut->instance_id = instance_id;
 		ut->new_duration = adventure_template->duration + 60;
 
-		pack->Deflate();
 		zoneserver_list.SendPacket(0, instance_id, pack);
 		safe_delete(pack);
 	}
@@ -192,7 +191,6 @@ void Adventure::SetStatus(AdventureStatus new_status)
 		ut->instance_id = instance_id;
 		ut->new_duration = 1860;
 
-		pack->Deflate();
 		zoneserver_list.SendPacket(0, instance_id, pack);
 		safe_delete(pack);
 	}
@@ -207,7 +205,6 @@ void Adventure::SetStatus(AdventureStatus new_status)
 		ut->instance_id = instance_id;
 		ut->new_duration = 1860;
 
-		pack->Deflate();
 		zoneserver_list.SendPacket(0, instance_id, pack);
 		safe_delete(pack);
 	}
@@ -313,7 +310,7 @@ void Adventure::Finished(AdventureWinStatus ws)
 					af->win = false;
 					af->points = 0;
 				}
-				pack->Deflate();
+
 				zoneserver_list.SendPacket(current->zone(), current->instance(), pack);
 				database.UpdateAdventureStatsEntry(database.GetCharacterID((*iter).c_str()), GetTemplate()->theme, (ws != AWS_Lose) ? true : false);
 				delete pack;

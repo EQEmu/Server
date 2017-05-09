@@ -144,7 +144,7 @@ void PerlembParser::ReloadQuests() {
 			perl = nullptr;
 		}
 
-		Log.Out(Logs::General, Logs::Status, "Error re-initializing perlembed: %s", e.what());
+		Log(Logs::General, Logs::Status, "Error re-initializing perlembed: %s", e.what());
 		throw e.what();
 	}
 

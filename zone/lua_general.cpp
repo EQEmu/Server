@@ -1298,14 +1298,14 @@ double lua_clock() {
 }
 
 void lua_debug(std::string message) {
-	Log.Out(Logs::General, Logs::QuestDebug, message);
+	Log(Logs::General, Logs::QuestDebug, message);
 }
 
 void lua_debug(std::string message, int level) {
 	if (level < Logs::General || level > Logs::Detail)
 		return;
 
-	Log.Out(static_cast<Logs::DebugLevel>(level), Logs::QuestDebug, message);
+	Log(static_cast<Logs::DebugLevel>(level), Logs::QuestDebug, message);
 }
 
 void lua_update_zone_header(std::string type, std::string value) {
@@ -1680,7 +1680,7 @@ luabind::scope lua_register_events() {
 			luabind::value("loot", static_cast<int>(EVENT_LOOT)),
 			luabind::value("zone", static_cast<int>(EVENT_ZONE)),
 			luabind::value("level_up", static_cast<int>(EVENT_LEVEL_UP)),
-			luabind::value("killed_merit ", static_cast<int>(EVENT_KILLED_MERIT )),
+			luabind::value("killed_merit", static_cast<int>(EVENT_KILLED_MERIT)),
 			luabind::value("cast_on", static_cast<int>(EVENT_CAST_ON)),
 			luabind::value("task_accepted", static_cast<int>(EVENT_TASK_ACCEPTED)),
 			luabind::value("task_stage_complete", static_cast<int>(EVENT_TASK_STAGE_COMPLETE)),

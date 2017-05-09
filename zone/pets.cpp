@@ -251,7 +251,7 @@ void Mob::MakePoweredPet(uint16 spell_id, const char* pettype, int16 petpower,
 	PetRecord record;
 	if(!database.GetPoweredPetEntry(pettype, act_power, &record)) {
 		Message(13, "Unable to find data for pet %s", pettype);
-		Log.Out(Logs::General, Logs::Error, "Unable to find data for pet %s, check pets table.", pettype);
+		Log(Logs::General, Logs::Error, "Unable to find data for pet %s, check pets table.", pettype);
 		return;
 	}
 
@@ -259,7 +259,7 @@ void Mob::MakePoweredPet(uint16 spell_id, const char* pettype, int16 petpower,
 	const NPCType *base = database.LoadNPCTypesData(record.npc_type);
 	if(base == nullptr) {
 		Message(13, "Unable to load NPC data for pet %s", pettype);
-		Log.Out(Logs::General, Logs::Error, "Unable to load NPC data for pet %s (NPC ID %d), check pets and npc_types tables.", pettype, record.npc_type);
+		Log(Logs::General, Logs::Error, "Unable to load NPC data for pet %s (NPC ID %d), check pets and npc_types tables.", pettype, record.npc_type);
 		return;
 	}
 
@@ -304,6 +304,7 @@ void Mob::MakePoweredPet(uint16 spell_id, const char* pettype, int16 petpower,
 	// 2 - `s Warder
 	// 3 - Random name if client, `s pet for others
 	// 4 - Keep DB name
+	// 5 - `s ward
 
 
 	if (petname != nullptr) {
@@ -325,6 +326,10 @@ void Mob::MakePoweredPet(uint16 spell_id, const char* pettype, int16 petpower,
 		// Keep the DB name
 	} else if (record.petnaming == 3 && IsClient()) {
 		strcpy(npc_type->name, GetRandPetName());
+	} else if (record.petnaming == 5 && IsClient()) {
+		strcpy(npc_type->name, this->GetName());
+		npc_type->name[24] = '\0';
+		strcat(npc_type->name, "`s_ward");
 	} else {
 		strcpy(npc_type->name, this->GetCleanName());
 		npc_type->name[25] = '\0';
@@ -407,7 +412,7 @@ void Mob::MakePoweredPet(uint16 spell_id, const char* pettype, int16 petpower,
 			npc_type->helmtexture = monster->helmtexture;
 			npc_type->herosforgemodel = monster->herosforgemodel;
 		} else
-			Log.Out(Logs::General, Logs::Error, "Error loading NPC data for monster summoning pet (NPC ID %d)", monsterid);
+			Log(Logs::General, Logs::Error, "Error loading NPC data for monster summoning pet (NPC ID %d)", monsterid);
 
 	}
 
@@ -420,7 +425,7 @@ void Mob::MakePoweredPet(uint16 spell_id, const char* pettype, int16 petpower,
 	// like the special back items some focused pets may receive.
 	uint32 petinv[EQEmu::legacy::EQUIPMENT_SIZE];
 	memset(petinv, 0, sizeof(petinv));
-	const EQEmu::ItemData *item = 0;
+	const EQEmu::ItemData *item = nullptr;
 
 	if (database.GetBasePetItems(record.equipmentset, petinv)) {
 		for (int i = 0; i < EQEmu::legacy::EQUIPMENT_SIZE; i++)
@@ -701,7 +706,7 @@ bool ZoneDatabase::GetBasePetItems(int32 equipmentset, uint32 *items) {
 	// all of the result rows. Check if we have something in the slot
 	// already. If no, add the item id to the equipment array.
 	while (curset >= 0 && depth < 5) {
-		std::string  query = StringFormat("SELECT nested_set FROM pets_equipmentset WHERE set_id = '%s'", curset);
+		std::string  query = StringFormat("SELECT nested_set FROM pets_equipmentset WHERE set_id = '%d'", curset);
 		auto results = QueryDatabase(query);
 		if (!results.Success()) {
 			return false;
@@ -709,14 +714,14 @@ bool ZoneDatabase::GetBasePetItems(int32 equipmentset, uint32 *items) {
 
 		if (results.RowCount() != 1) {
 			// invalid set reference, it doesn't exist
-			Log.Out(Logs::General, Logs::Error, "Error in GetBasePetItems equipment set '%d' does not exist", curset);
+			Log(Logs::General, Logs::Error, "Error in GetBasePetItems equipment set '%d' does not exist", curset);
 			return false;
 		}
 
 		auto row = results.begin();
 		nextset = atoi(row[0]);
 
-		query = StringFormat("SELECT slot, item_id FROM pets_equipmentset_entries WHERE set_id='%s'", curset);
+		query = StringFormat("SELECT slot, item_id FROM pets_equipmentset_entries WHERE set_id='%d'", curset);
 		results = QueryDatabase(query);
 		if (results.Success()) {
 			for (row = results.begin(); row != results.end(); ++row)

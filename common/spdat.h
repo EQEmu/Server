@@ -67,9 +67,11 @@ enum SpellTypes : uint32
 	SpellType_HateRedux = (1 << 17),
 	SpellType_InCombatBuffSong = (1 << 18), // bard in-combat group/ae buffs
 	SpellType_OutOfCombatBuffSong = (1 << 19), // bard out-of-combat group/ae buffs
+	SpellType_PreCombatBuff = (1 << 20),
+	SpellType_PreCombatBuffSong = (1 << 21),
 
 	SpellTypes_Detrimental = (SpellType_Nuke | SpellType_Root | SpellType_Lifetap | SpellType_Snare | SpellType_DOT | SpellType_Dispel | SpellType_Mez | SpellType_Charm | SpellType_Debuff | SpellType_Slow),
-	SpellTypes_Beneficial = (SpellType_Heal | SpellType_Buff | SpellType_Escape | SpellType_Pet | SpellType_InCombatBuff | SpellType_Cure | SpellType_HateRedux | SpellType_InCombatBuffSong | SpellType_OutOfCombatBuffSong),
+	SpellTypes_Beneficial = (SpellType_Heal | SpellType_Buff | SpellType_Escape | SpellType_Pet | SpellType_InCombatBuff | SpellType_Cure | SpellType_HateRedux | SpellType_InCombatBuffSong | SpellType_OutOfCombatBuffSong | SpellType_PreCombatBuff | SpellType_PreCombatBuffSong),
 
 	SpellType_Any = 0xFFFFFFFF
 };
@@ -466,7 +468,7 @@ typedef enum {
 #define SE_Blank						254 // implemented
 #define SE_ShieldDuration				255	// not implemented as bonus - increases duration of /shield
 #define SE_ShroudofStealth				256	// implemented
-#define SE_PetDiscipline				257 // not implemented as bonus - /pet hold
+#define SE_PetDiscipline				257 // not implemented as bonus - /pet hold - official name is GivePetHold
 #define SE_TripleBackstab				258 // implemented[AA] - chance to perform a triple backstab
 #define SE_CombatStability				259 // implemented[AA] - damage mitigation
 #define SE_AddSingingMod				260 // implemented[AA] - Instrument/Singing Mastery, base1 is the mod, base2 is the ItemType
@@ -476,7 +478,7 @@ typedef enum {
 #define SE_HastenedAASkill			    264 // implemented
 #define SE_MasteryofPast				265 // implemented[AA] - Spells less than effect values level can not be fizzled
 #define SE_ExtraAttackChance			266 // implemented - increase chance to score an extra attack with a 2-Handed Weapon.
-#define SE_PetDiscipline2				267 // *not implemented - /pet focus, /pet no cast
+#define SE_AddPetCommand				267 // implemented - sets command base2 to base1
 #define SE_ReduceTradeskillFail			268 // implemented - reduces chance to fail with given tradeskill by a percent chance
 #define SE_MaxBindWound					269	// implemented[AA] - Increase max HP you can bind wound.
 #define SE_BardSongRange				270	// implemented[AA] - increase range of beneficial bard songs (Sionachie's Crescendo)

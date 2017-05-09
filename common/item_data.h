@@ -332,7 +332,7 @@ namespace EQEmu
 		};
 
 		struct ItemEffect_Struct {
-			int16	Effect;
+			int32	Effect;
 			uint8	Type;
 			uint8	Level;
 			uint8	Level2;
@@ -538,6 +538,9 @@ namespace EQEmu
 		bool IsType1HWeapon() const;
 		bool IsType2HWeapon() const;
 		bool IsTypeShield() const;
+
+		static bool CheckLoreConflict(const ItemData* l_item, const ItemData* r_item);
+		bool CheckLoreConflict(const ItemData* item) const { return CheckLoreConflict(this, item); }
 	};
 
 } /*EQEmu*/

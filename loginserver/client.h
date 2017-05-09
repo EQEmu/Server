@@ -20,15 +20,10 @@
 
 #include "../common/global_define.h"
 #include "../common/opcodemgr.h"
-#include "../common/eq_stream_type.h"
-#include "../common/eq_stream_factory.h"
 #include "../common/random.h"
-#ifndef WIN32
-#include "eq_crypto_api.h"
-#endif
-#include <string>
 
-using namespace std;
+#include <memory>
+#include "../common/eq_stream_intf.h"
 
 enum LSClientVersion
 {
@@ -40,13 +35,8 @@ enum LSClientStatus
 {
 	cs_not_sent_session_ready,
 	cs_waiting_for_login,
+	cs_failed_to_login,
 	cs_logged_in
-};
-
-enum LoginMode
-{
-	lm_initial = 2,
-	lm_from_world = 3
 };
 
 /**
@@ -59,7 +49,7 @@ public:
 	/**
 	* Constructor, sets our connection to c and version to v
 	*/
-	Client(std::shared_ptr<EQStream> c, LSClientVersion v);
+	Client(std::shared_ptr<EQStreamInterface> c, LSClientVersion v);
 
 	/**
 	* Destructor.
@@ -89,7 +79,7 @@ public:
 	/**
 	* Sends a server list packet to the client.
 	*/
-	void SendServerListPacket();
+	void SendServerListPacket(uint32 seq);
 
 	/**
 	* Sends the input packet to the client and clears our play response states.
@@ -109,12 +99,12 @@ public:
 	/**
 	* Gets the account name of this client.
 	*/
-	string GetAccountName() const { return account_name; }
+	std::string GetAccountName() const { return account_name; }
 
 	/**
 	* Gets the key generated at login for this client.
 	*/
-	string GetKey() const { return key; }
+	std::string GetKey() const { return key; }
 
 	/**
 	* Gets the server selected to be played on for this client.
@@ -129,19 +119,19 @@ public:
 	/**
 	* Gets the connection for this client.
 	*/
-	std::shared_ptr<EQStream> GetConnection() { return connection; }
+	std::shared_ptr<EQStreamInterface> GetConnection() { return connection; }
 
 	EQEmu::Random random;
 private:
-	std::shared_ptr<EQStream> connection;
+	std::shared_ptr<EQStreamInterface> connection;
 	LSClientVersion version;
 	LSClientStatus status;
 
-	string account_name;
+	std::string account_name;
 	unsigned int account_id;
 	unsigned int play_server_id;
 	unsigned int play_sequence_id;
-	string key;
+	std::string key;
 };
 
 #endif

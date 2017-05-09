@@ -49,11 +49,11 @@ bool BotDatabase::Connect(const char* host, const char* user, const char* passwd
 	uint32 errnum = 0;
 	char errbuf[MYSQL_ERRMSG_SIZE];
 	if (!Open(host, user, passwd, database, port, &errnum, errbuf)) {
-		Log.Out(Logs::General, Logs::Error, "Failed to connect to bot database: Error: %s", errbuf);
+		Log(Logs::General, Logs::Error, "Failed to connect to bot database: Error: %s", errbuf);
 		return false;
 	}
 	else {
-		Log.Out(Logs::General, Logs::Status, "Using bot database '%s' at %s:%d", database, host, port);
+		Log(Logs::General, Logs::Status, "Using bot database '%s' at %s:%d", database, host, port);
 		return true;
 	}
 }
@@ -76,6 +76,66 @@ bool BotDatabase::LoadBotCommandSettings(std::map<std::string, std::pair<uint8, 
 		for (auto iter : aliases) {
 			if (!iter.empty())
 				bot_command_settings[row[0]].second.push_back(iter);
+		}
+	}
+
+	return true;
+}
+
+static uint8 spell_casting_chances[MaxSpellTypes][PLAYER_CLASS_COUNT][MaxStances][cntHSND];
+
+bool BotDatabase::LoadBotSpellCastingChances()
+{
+	memset(spell_casting_chances, 0, sizeof(spell_casting_chances));
+
+	query =
+		"SELECT"
+		" `spell_type_index`,"
+		" `class_id`,"
+		" `stance_index`,"
+		" `nHSND_value`,"
+		" `pH_value`,"
+		" `pS_value`,"
+		" `pHS_value`,"
+		" `pN_value`,"
+		" `pHN_value`,"
+		" `pSN_value`,"
+		" `pHSN_value`,"
+		" `pD_value`,"
+		" `pHD_value`,"
+		" `pSD_value`,"
+		" `pHSD_value`,"
+		" `pND_value`,"
+		" `pHND_value`,"
+		" `pSND_value`,"
+		" `pHSND_value`"
+		"FROM"
+		" `bot_spell_casting_chances`";
+
+	auto results = QueryDatabase(query);
+	if (!results.Success() || !results.RowCount())
+		return false;
+
+	for (auto row = results.begin(); row != results.end(); ++row) {
+		uint8 spell_type_index = atoi(row[0]);
+		if (spell_type_index >= MaxSpellTypes)
+			continue;
+		uint8 class_index = atoi(row[1]);
+		if (class_index < WARRIOR || class_index > BERSERKER)
+			continue;
+		--class_index;
+		uint8 stance_index = atoi(row[2]);
+		if (stance_index >= MaxStances)
+			continue;
+
+		for (uint8 conditional_index = nHSND; conditional_index < cntHSND; ++conditional_index) {
+			uint8 value = atoi(row[3 + conditional_index]);
+			if (!value)
+				continue;
+			if (value > 100)
+				value = 100;
+
+			spell_casting_chances[spell_type_index][class_index][stance_index][conditional_index] = value;
 		}
 	}
 
@@ -334,7 +394,13 @@ bool BotDatabase::LoadBot(const uint32 bot_id, Bot*& loaded_bot)
 	loaded_bot = new Bot(bot_id, atoi(row[0]), atoi(row[1]), atof(row[14]), atoi(row[6]), tempNPCStruct);
 	if (loaded_bot) {
 		loaded_bot->SetShowHelm((atoi(row[43]) > 0 ? true : false));
-		loaded_bot->SetFollowDistance(atoi(row[44]));
+		uint32 bfd = atoi(row[44]);
+		if (bfd < 1)
+			bfd = 1;
+		if (bfd > BOT_FOLLOW_DISTANCE_DEFAULT_MAX)
+			bfd = BOT_FOLLOW_DISTANCE_DEFAULT_MAX;
+		loaded_bot->SetFollowDistance(bfd);
+		
 	}
 
 	return true;
@@ -471,7 +537,7 @@ bool BotDatabase::SaveNewBot(Bot* bot_inst, uint32& bot_id)
 		bot_inst->GetPR(),
 		bot_inst->GetDR(),
 		bot_inst->GetCorrup(),
-		BOT_DEFAULT_FOLLOW_DISTANCE
+		BOT_FOLLOW_DISTANCE_DEFAULT
 	);
 	auto results = QueryDatabase(query);
 	if (!results.Success())
@@ -1077,7 +1143,7 @@ bool BotDatabase::LoadItems(const uint32 bot_id, EQEmu::InventoryProfile& invent
 			(uint32)atoul(row[14])
 		);
 		if (!item_inst) {
-			Log.Out(Logs::General, Logs::Error, "Warning: bot_id '%i' has an invalid item_id '%i' in inventory slot '%i'", bot_id, item_id, slot_id);
+			Log(Logs::General, Logs::Error, "Warning: bot_id '%i' has an invalid item_id '%i' in inventory slot '%i'", bot_id, item_id, slot_id);
 			continue;
 		}
 
@@ -1130,7 +1196,7 @@ bool BotDatabase::LoadItems(const uint32 bot_id, EQEmu::InventoryProfile& invent
 		item_inst->SetOrnamentHeroModel((uint32)atoul(row[8]));
 
 		if (inventory_inst.PutItem(slot_id, *item_inst) == INVALID_INDEX)
-			Log.Out(Logs::General, Logs::Error, "Warning: Invalid slot_id for item in inventory: bot_id = '%i', item_id = '%i', slot_id = '%i'", bot_id, item_id, slot_id);
+			Log(Logs::General, Logs::Error, "Warning: Invalid slot_id for item in inventory: bot_id = '%i', item_id = '%i', slot_id = '%i'", bot_id, item_id, slot_id);
 
 		safe_delete(item_inst);
 	}
@@ -2393,9 +2459,10 @@ bool BotDatabase::LoadBotGroupsListByOwnerID(const uint32 owner_id, std::list<st
 
 
 /* Bot owner group functions   */
-bool BotDatabase::LoadGroupedBotsByGroupID(const uint32 group_id, std::list<uint32>& group_list)
+// added owner ID to this function to fix groups with mulitple players grouped with bots.
+bool BotDatabase::LoadGroupedBotsByGroupID(const uint32 owner_id, const uint32 group_id, std::list<uint32>& group_list)
 {
-	if (!group_id)
+	if (!group_id || !owner_id)
 		return false;
 
 	query = StringFormat(
@@ -2405,18 +2472,10 @@ bool BotDatabase::LoadGroupedBotsByGroupID(const uint32 group_id, std::list<uint
 		" AND `charid` IN ("
 		"  SELECT `bot_id`"
 		"  FROM `bot_data`"
-		"  WHERE `owner_id` IN ("
-		"   SELECT `charid`"
-		"   FROM `group_id`"
-		"   WHERE `groupid` = '%u'"
-		"   AND `name` IN ("
-		"    SELECT `name`"
-		"    FROM `character_data`"
-		"   )"
-		"  )"
-		" )",
+		"  WHERE `owner_id` = '%u'"
+		"  )",
 		group_id,
-		group_id
+		owner_id
 	);
 
 	auto results = QueryDatabase(query);
@@ -2711,6 +2770,19 @@ bool BotDatabase::DeleteAllHealRotations(const uint32 owner_id)
 
 
 /* Bot miscellaneous functions   */
+uint8 BotDatabase::GetSpellCastingChance(uint8 spell_type_index, uint8 class_index, uint8 stance_index, uint8 conditional_index) // class_index is 0-based
+{
+	if (spell_type_index >= MaxSpellTypes)
+		return 0;
+	if (class_index >= PLAYER_CLASS_COUNT)
+		return 0;
+	if (stance_index >= MaxStances)
+		return 0;
+	if (conditional_index >= cntHSND)
+		return 0;
+
+	return spell_casting_chances[spell_type_index][class_index][stance_index][conditional_index];
+}
 
 
 /* fail::Bot functions   */

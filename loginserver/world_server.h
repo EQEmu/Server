@@ -19,12 +19,11 @@
 #define EQEMU_WORLDSERVER_H
 
 #include "../common/global_define.h"
-#include "../common/eq_stream_factory.h"
-#include "../common/emu_tcp_connection.h"
-#include "../common/emu_tcp_server.h"
+#include "../common/net/servertalk_server_connection.h"
 #include "../common/servertalk.h"
 #include "../common/packet_dump.h"
 #include <string>
+#include <memory>
 
 /**
  * World server class, controls the connected server processing.
@@ -35,7 +34,7 @@ public:
 	/**
 	* Constructor, sets our connection to c.
 	*/
-	WorldServer(EmuTCPConnection *c);
+	WorldServer(std::shared_ptr<EQ::Net::ServertalkServerConnection> c);
 
 	/**
 	* Destructor, frees our connection if it exists.
@@ -48,20 +47,14 @@ public:
 	void Reset();
 
 	/**
-	* Does processing of all the connections for this world.
-	* Returns true except for a fatal error that requires disconnection.
-	*/
-	bool Process();
-
-	/**
 	* Accesses connection, it is intentional that this is not const (trust me).
 	*/
-	EmuTCPConnection *GetConnection() { return connection; }
+	std::shared_ptr<EQ::Net::ServertalkServerConnection> GetConnection() { return connection; }
 
 	/**
 	* Sets the connection to c.
 	*/
-	void SetConnection(EmuTCPConnection *c) { connection = c; }
+	void SetConnection(std::shared_ptr<EQ::Net::ServertalkServerConnection> c) { connection = c; }
 
 	/**
 	* Gets the runtime id of this server.
@@ -131,11 +124,19 @@ public:
 	/**
 	* Informs world that there is a client incoming with the following data.
 	*/
-	void SendClientAuth(unsigned int ip, std::string account, std::string key, unsigned int account_id);
+	void SendClientAuth(std::string ip, std::string account, std::string key, unsigned int account_id);
 
 private:
 
-	EmuTCPConnection *connection;
+	/**
+	* Packet processing functions:
+	*/
+	void ProcessNewLSInfo(uint16_t opcode, const EQ::Net::Packet &p);
+	void ProcessLSStatus(uint16_t opcode, const EQ::Net::Packet &p);
+	void ProcessUsertoWorldResp(uint16_t opcode, const EQ::Net::Packet &p);
+	void ProcessLSAccountUpdate(uint16_t opcode, const EQ::Net::Packet &p);
+
+	std::shared_ptr<EQ::Net::ServertalkServerConnection> connection;
 	unsigned int zones_booted;
 	unsigned int players_online;
 	int server_status;
