@@ -6686,23 +6686,26 @@ void Mob::ResourceTap(int32 damage, uint16 spellid)
 
 	for (int i = 0; i < EFFECT_COUNT; i++) {
 		if (spells[spellid].effectid[i] == SE_ResourceTap) {
-			damage += (damage * spells[spellid].base[i]) / 100;
-
-			if (spells[spellid].max[i] && (damage > spells[spellid].max[i]))
-				damage = spells[spellid].max[i];
-
-			if (spells[spellid].base2[i] == 0) { // HP Tap
-				if (damage > 0)
-					HealDamage(damage);
-				else
-					Damage(this, -damage, 0, EQEmu::skills::SkillEvocation, false);
+			damage = (damage * spells[spellid].base[i]) / 1000;
+			
+			if (damage) {
+				if (spells[spellid].max[i] && (damage > spells[spellid].max[i]))
+					damage = spells[spellid].max[i];
+	
+				if (spells[spellid].base2[i] == 0) { // HP Tap
+					if (damage > 0)
+						HealDamage(damage);
+					else
+						Damage(this, -damage, 0, EQEmu::skills::SkillEvocation, false);
+				}
+	
+				if (spells[spellid].base2[i] == 1) // Mana Tap
+					SetMana(GetMana() + damage);
+	
+				if (spells[spellid].base2[i] == 2 && IsClient()) // Endurance Tap
+					CastToClient()->SetEndurance(CastToClient()->GetEndurance() + damage);
+			
 			}
-
-			if (spells[spellid].base2[i] == 1) // Mana Tap
-				SetMana(GetMana() + damage);
-
-			if (spells[spellid].base2[i] == 2 && IsClient()) // Endurance Tap
-				CastToClient()->SetEndurance(CastToClient()->GetEndurance() + damage);
 		}
 	}
 }
