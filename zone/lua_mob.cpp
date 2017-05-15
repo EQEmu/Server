@@ -2021,6 +2021,36 @@ int16 Lua_Mob::GetMeleeMinDamageMod_SE(uint16 skill)
 	return self->GetMeleeMinDamageMod_SE(skill);
 }
 
+bool Lua_Mob::IsAttackAllowed(Lua_Mob target, bool isSpellAttack) {
+	Lua_Safe_Call_Bool();
+	return self->IsAttackAllowed(target, isSpellAttack);
+}
+
+bool Lua_Mob::IsCasting() {
+	Lua_Safe_Call_Bool();
+	return self->IsCasting();
+}
+
+int Lua_Mob::AttackAnimation(int Hand, Lua_ItemInst weapon) {
+	Lua_Safe_Call_Int();
+	return (int)self->AttackAnimation(Hand, weapon);
+}
+
+int Lua_Mob::GetWeaponDamage(Lua_Mob against, Lua_ItemInst weapon) {
+	Lua_Safe_Call_Int();
+	return self->GetWeaponDamage(against, weapon);
+}
+
+bool Lua_Mob::IsBerserk() {
+	Lua_Safe_Call_Bool();
+	return self->IsBerserk();
+}
+
+bool Lua_Mob::TryFinishingBlow(Lua_Mob defender, int &damage) {
+	Lua_Safe_Call_Bool();
+	return self->TryFinishingBlow(defender, damage);
+}
+
 luabind::scope lua_register_mob() {
 	return luabind::class_<Lua_Mob, Lua_Entity>("Mob")
 		.def(luabind::constructor<>())
@@ -2372,7 +2402,13 @@ luabind::scope lua_register_mob() {
 		.def("GetSpellBonuses", &Lua_Mob::GetSpellBonuses)
 		.def("GetAABonuses", &Lua_Mob::GetAABonuses)
 		.def("GetMeleeDamageMod_SE", &Lua_Mob::GetMeleeDamageMod_SE)
-		.def("GetMeleeMinDamageMod_SE", &Lua_Mob::GetMeleeMinDamageMod_SE);
+		.def("GetMeleeMinDamageMod_SE", &Lua_Mob::GetMeleeMinDamageMod_SE)
+		.def("IsAttackAllowed", &Lua_Mob::IsAttackAllowed)
+		.def("IsCasting", &Lua_Mob::IsCasting)
+		.def("AttackAnimation", &Lua_Mob::AttackAnimation)
+		.def("GetWeaponDamage", &Lua_Mob::GetWeaponDamage)
+		.def("IsBerserk", &Lua_Mob::IsBerserk)
+		.def("TryFinishingBlow", &Lua_Mob::TryFinishingBlow);
 }
 
 luabind::scope lua_register_special_abilities() {

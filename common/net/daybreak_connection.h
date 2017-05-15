@@ -8,6 +8,7 @@
 #include <functional>
 #include <memory>
 #include <map>
+#include <unordered_map>
 #include <queue>
 #include <list>
 
@@ -155,13 +156,13 @@ namespace EQ
 
 				uint16_t sequence_in;
 				uint16_t sequence_out;
-				std::map<uint16_t, Packet*> packet_queue;
+				std::unordered_map<uint16_t, Packet*> packet_queue;
 
 				DynamicPacket fragment_packet;
 				uint32_t fragment_current_bytes;
 				uint32_t fragment_total_bytes;
 
-				std::map<uint16_t, DaybreakSentPacket> sent_packets;
+				std::unordered_map<uint16_t, DaybreakSentPacket> sent_packets;
 			};
 
 			DaybreakStream m_streams[4];

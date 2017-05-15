@@ -53,8 +53,9 @@ extern WorldServer worldserver;
 extern EntityList entity_list;
 extern Zone* zone;
 
-bool Mob::AttackAnimation(EQEmu::skills::SkillType &skillinuse, int Hand, const EQEmu::ItemInstance* weapon)
+EQEmu::skills::SkillType Mob::AttackAnimation(int Hand, const EQEmu::ItemInstance* weapon)
 {
+	EQEmu::skills::SkillType skillinuse = EQEmu::skills::Skill1HBlunt;
 	// Determine animation
 	int type = 0;
 	if (weapon && weapon->IsClassCommon()) {
@@ -138,7 +139,7 @@ bool Mob::AttackAnimation(EQEmu::skills::SkillType &skillinuse, int Hand, const 
 		type = animDualWield;
 
 	DoAnim(type, 0, false);
-	return true;
+	return skillinuse;
 }
 
 int Mob::compute_tohit(EQEmu::skills::SkillType skillinuse)
@@ -1372,7 +1373,7 @@ bool Client::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, b
 	DamageHitInfo my_hit;
 	// calculate attack_skill and skillinuse depending on hand and weapon
 	// also send Packet to near clients
-	AttackAnimation(my_hit.skill, Hand, weapon);
+	my_hit.skill = AttackAnimation(Hand, weapon);
 	Log(Logs::Detail, Logs::Combat, "Attacking with %s in slot %d using skill %d", weapon ? weapon->GetItem()->Name : "Fist", Hand, my_hit.skill);
 
 	// Now figure out damage
@@ -1943,7 +1944,7 @@ bool NPC::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool
 	//do attack animation regardless of whether or not we can hit below
 	int16 charges = 0;
 	EQEmu::ItemInstance weapon_inst(weapon, charges);
-	AttackAnimation(my_hit.skill, Hand, &weapon_inst);
+	my_hit.skill = AttackAnimation(Hand, &weapon_inst);
 
 	//basically "if not immune" then do the attack
 	if (weapon_damage > 0) {

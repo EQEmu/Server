@@ -7,6 +7,9 @@
 #include <list>
 #include <map>
 
+#include "../common/timer.h"
+#include "../common/eqemu_logsys.h"
+#include "../common/classes.h"
 #include "lua_parser.h"
 #include "lua_item.h"
 #include "lua_iteminst.h"
@@ -16,8 +19,6 @@
 #include "quest_parser_collection.h"
 #include "questmgr.h"
 #include "qglobals.h"
-#include "../common/timer.h"
-#include "../common/eqemu_logsys.h"
 #include "encounter.h"
 #include "lua_encounter.h"
 
@@ -27,6 +28,7 @@ struct Slots { };
 struct Materials { };
 struct ClientVersions { };
 struct Appearances { };
+struct Classes { };
 
 struct lua_registered_event {
 	std::string encounter_name;
@@ -1458,6 +1460,27 @@ void lua_create_npc(luabind::adl::object table, float x, float y, float z, float
 	npc->GiveNPCTypeData(npc_type);
 	entity_list.AddNPC(npc);
 }
+
+int random_int(int low, int high) {
+	return zone->random.Int(low, high);
+}
+
+double random_real(double low, double high) {
+	return zone->random.Real(low, high);
+}
+
+bool random_roll_int(int required) {
+	return zone->random.Roll(required);
+}
+
+bool random_roll_real(double required) {
+	return zone->random.Roll(required);
+}
+
+int random_roll0(int max) {
+	return zone->random.Roll0(max);
+}
+
 luabind::scope lua_register_general() {
 	return luabind::namespace_("eq")
 	[
@@ -1658,6 +1681,18 @@ luabind::scope lua_register_general() {
 	];
 }
 
+luabind::scope lua_register_random() {
+	return luabind::namespace_("Random")
+		[
+			luabind::def("Int", &random_int),
+			luabind::def("Real", &random_real),
+			luabind::def("Roll", &random_roll_int),
+			luabind::def("Roll", &random_roll_real),
+			luabind::def("Roll0", &random_roll0)
+		];
+}
+
+
 luabind::scope lua_register_events() {
 	return luabind::class_<Events>("Event")
 		.enum_("constants")
@@ -1854,6 +1889,59 @@ luabind::scope lua_register_appearance() {
 			luabind::value("Crouching", static_cast<int>(eaCrouching)),
 			luabind::value("Dead", static_cast<int>(eaDead)),
 			luabind::value("Looting", static_cast<int>(eaLooting))
+		];
+}
+
+luabind::scope lua_register_classes() {
+	return luabind::class_<Classes>("Classes")
+		.enum_("constants")
+		[
+			luabind::value("Warrior", WARRIOR),
+			luabind::value("Cleric", CLERIC),
+			luabind::value("Paladin", PALADIN),
+			luabind::value("Ranger", RANGER),
+			luabind::value("ShadowKnight", SHADOWKNIGHT),
+			luabind::value("Druid", DRUID),
+			luabind::value("Monk", MONK),
+			luabind::value("Bard", BARD),
+			luabind::value("Rogue", ROGUE),
+			luabind::value("Shaman", SHAMAN),
+			luabind::value("Necromancer", NECROMANCER),
+			luabind::value("Wizard", WIZARD),
+			luabind::value("Magician", MAGICIAN),
+			luabind::value("Enchanter", ENCHANTER),
+			luabind::value("Beastlord", BEASTLORD),
+			luabind::value("Berserker", BERSERKER),
+			luabind::value("WarriorGM", WARRIORGM),
+			luabind::value("ClericGM", CLERICGM),
+			luabind::value("PaladinGM", PALADINGM),
+			luabind::value("RangerGM", RANGERGM),
+			luabind::value("ShadowKnightGM", SHADOWKNIGHTGM),
+			luabind::value("DruidGM", DRUIDGM),
+			luabind::value("MonkGM", MONKGM),
+			luabind::value("BardGM", BARDGM),
+			luabind::value("RogueGM", ROGUEGM),
+			luabind::value("ShamanGM", SHAMANGM),
+			luabind::value("NecromancerGM", NECROMANCERGM),
+			luabind::value("WizardGM", WIZARDGM),
+			luabind::value("MagicianGM", MAGICIANGM),
+			luabind::value("EnchanterGM", ENCHANTERGM),
+			luabind::value("BeastlordGM", BEASTLORDGM),
+			luabind::value("BerserkerGM", BERSERKERGM),
+			luabind::value("Banker", BANKER),
+			luabind::value("Merchant", MERCHANT),
+			luabind::value("DiscordMerchant", DISCORD_MERCHANT),
+			luabind::value("AdventureRecruiter", ADVENTURERECRUITER),
+			luabind::value("AdventureMerchant", ADVENTUREMERCHANT),
+			luabind::value("LDONTreasure", LDON_TREASURE),
+			luabind::value("CorpseClass", CORPSE_CLASS),
+			luabind::value("TributeMaster", TRIBUTE_MASTER),
+			luabind::value("GuildTributeMaster", GUILD_TRIBUTE_MASTER),
+			luabind::value("NorrathsKeeperMerchant", NORRATHS_KEEPERS_MERCHANT),
+			luabind::value("DarkReignMerchant", DARK_REIGN_MERCHANT),
+			luabind::value("FellowshipMaster", FELLOWSHIP_MASTER),
+			luabind::value("AltCurrencyMerchant", ALT_CURRENCY_MERCHANT),
+			luabind::value("MercenaryMaster", MERCERNARY_MASTER)
 		];
 }
 

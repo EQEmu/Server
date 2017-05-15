@@ -51,6 +51,7 @@ void LuaMod::Init()
 void PutDamageHitInfo(lua_State *L, luabind::adl::object &e, DamageHitInfo &hit) {
 	luabind::adl::object lua_hit = luabind::newtable(L);
 	lua_hit["base_damage"] = hit.base_damage;
+	lua_hit["min_damage"] = hit.min_damage;
 	lua_hit["damage_done"] = hit.damage_done;
 	lua_hit["offense"] = hit.offense;
 	lua_hit["tohit"] = hit.tohit;
@@ -63,6 +64,7 @@ void GetDamageHitInfo(luabind::adl::object &ret, DamageHitInfo &hit) {
 	auto luaHitTable = ret["hit"];
 	if (luabind::type(luaHitTable) == LUA_TTABLE) {
 		auto base_damage = luaHitTable["base_damage"];
+		auto min_damage = luaHitTable["min_damage"];
 		auto damage_done = luaHitTable["damage_done"];
 		auto offense = luaHitTable["offense"];
 		auto tohit = luaHitTable["tohit"];
@@ -71,6 +73,10 @@ void GetDamageHitInfo(luabind::adl::object &ret, DamageHitInfo &hit) {
 
 		if (luabind::type(base_damage) == LUA_TNUMBER) {
 			hit.base_damage = luabind::object_cast<int>(base_damage);
+		}
+
+		if (luabind::type(min_damage) == LUA_TNUMBER) {
+			hit.min_damage = luabind::object_cast<int>(min_damage);
 		}
 
 		if (luabind::type(damage_done) == LUA_TNUMBER) {

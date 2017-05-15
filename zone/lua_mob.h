@@ -388,6 +388,12 @@ public:
 	Lua_StatBonuses GetAABonuses();
 	int16 GetMeleeDamageMod_SE(uint16 skill);
 	int16 GetMeleeMinDamageMod_SE(uint16 skill);
+	bool IsAttackAllowed(Lua_Mob target, bool isSpellAttack);
+	bool IsCasting();
+	int AttackAnimation(int Hand, Lua_ItemInst weapon);
+	int GetWeaponDamage(Lua_Mob against, Lua_ItemInst weapon);
+	bool IsBerserk();
+	bool TryFinishingBlow(Lua_Mob defender, int &damage);
 };
 
 #endif

@@ -1047,12 +1047,14 @@ void LuaParser::MapFunctions(lua_State *L) {
 		luabind::module(L)
 		[
 			lua_register_general(),
+			lua_register_random(),
 			lua_register_events(),
 			lua_register_faction(),
 			lua_register_slot(),
 			lua_register_material(),
 			lua_register_client_version(),
 			lua_register_appearance(),
+			lua_register_classes(),
 			lua_register_entity(),
 			lua_register_encounter(),
 			lua_register_mob(),
