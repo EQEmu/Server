@@ -70,6 +70,7 @@ namespace EQEmu
 #include <set>
 #include <algorithm>
 #include <memory>
+#include <deque>
 
 
 #define CLIENT_TIMEOUT 90000
@@ -350,6 +351,8 @@ public:
 	inline PetInfo* GetPetInfo(uint16 pet) { return (pet==1)?&m_suspendedminion:&m_petinfo; }
 	inline InspectMessage_Struct& GetInspectMessage() { return m_inspect_message; }
 	inline const InspectMessage_Struct& GetInspectMessage() const { return m_inspect_message; }
+
+	void SetPetCommandState(int button, int state);
 
 	bool CheckAccess(int16 iDBLevel, int16 iDefaultLevel);
 
@@ -1424,7 +1427,7 @@ private:
 	bool AddPacket(const EQApplicationPacket *, bool);
 	bool AddPacket(EQApplicationPacket**, bool);
 	bool SendAllPackets();
-	LinkedList<CLIENTPACKET *> clientpackets;
+	std::deque<std::unique_ptr<CLIENTPACKET>> clientpackets;
 
 	//Zoning related stuff
 	void SendZoneCancel(ZoneChange_Struct *zc);

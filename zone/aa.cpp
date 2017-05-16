@@ -46,8 +46,16 @@ void Mob::TemporaryPets(uint16 spell_id, Mob *targ, const char *name_override, u
 	if (targ != nullptr && targ->IsCorpse())
 		return;
 
+	// yep, even these need pet power!
+	int act_power = 0;
+
+	if (IsClient()) {
+		act_power = CastToClient()->GetFocusEffect(focusPetPower, spell_id);
+		act_power = CastToClient()->mod_pet_power(act_power, spell_id);
+	}
+
 	PetRecord record;
-	if (!database.GetPetEntry(spells[spell_id].teleport_zone, &record))
+	if (!database.GetPoweredPetEntry(spells[spell_id].teleport_zone, act_power, &record))
 	{
 		Log(Logs::General, Logs::Error, "Unknown swarm pet spell id: %d, check pets table", spell_id);
 		Message(13, "Unable to find data for pet %s", spells[spell_id].teleport_zone);

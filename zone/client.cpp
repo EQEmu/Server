@@ -697,12 +697,13 @@ bool Client::AddPacket(const EQApplicationPacket *pApp, bool bAckreq) {
 		//drop the packet because it will never get sent.
 		return(false);
 	}
-	auto c = new CLIENTPACKET;
+
+	auto c = std::unique_ptr<CLIENTPACKET>(new CLIENTPACKET);
 
 	c->ack_req = bAckreq;
 	c->app = pApp->Copy();
 
-	clientpackets.Append(c);
+	clientpackets.push_back(std::move(c));
 	return true;
 }
 
@@ -714,26 +715,23 @@ bool Client::AddPacket(EQApplicationPacket** pApp, bool bAckreq) {
 		//drop the packet because it will never get sent.
 		return(false);
 	}
-	auto c = new CLIENTPACKET;
+	auto c = std::unique_ptr<CLIENTPACKET>(new CLIENTPACKET);
 
 	c->ack_req = bAckreq;
 	c->app = *pApp;
 	*pApp = nullptr;
 
-	clientpackets.Append(c);
+	clientpackets.push_back(std::move(c));
 	return true;
 }
 
 bool Client::SendAllPackets() {
-	LinkedListIterator<CLIENTPACKET*> iterator(clientpackets);
-
 	CLIENTPACKET* cp = nullptr;
-	iterator.Reset();
-	while(iterator.MoreElements()) {
-		cp = iterator.GetData();
+	while (!clientpackets.empty()) {
+		cp = clientpackets.front().get();
 		if(eqs)
 			eqs->FastQueuePacket((EQApplicationPacket **)&cp->app, cp->ack_req);
-		iterator.RemoveCurrent();
+		clientpackets.pop_front();
 		Log(Logs::Moderate, Logs::Client_Server_Packet, "Transmitting a packet");
 	}
 	return true;
@@ -5715,6 +5713,20 @@ void Client::SuspendMinion()
 			Message_StringID(clientMessageTell, SUSPEND_MINION_UNSUSPEND, CurrentPet->GetCleanName());
 
 			memset(&m_suspendedminion, 0, sizeof(struct PetInfo));
+			// TODO: These pet command states need to be synced ...
+			// Will just fix them for now
+			if (m_ClientVersionBit & EQEmu::versions::bit_UFAndLater) {
+				SetPetCommandState(PET_BUTTON_SIT, 0);
+				SetPetCommandState(PET_BUTTON_STOP, 0);
+				SetPetCommandState(PET_BUTTON_REGROUP, 0);
+				SetPetCommandState(PET_BUTTON_FOLLOW, 1);
+				SetPetCommandState(PET_BUTTON_GUARD, 0);
+				SetPetCommandState(PET_BUTTON_TAUNT, 1);
+				SetPetCommandState(PET_BUTTON_HOLD, 0);
+				SetPetCommandState(PET_BUTTON_GHOLD, 0);
+				SetPetCommandState(PET_BUTTON_FOCUS, 0);
+				SetPetCommandState(PET_BUTTON_SPELLHOLD, 0);
+			}
 		}
 		else
 			return;
@@ -8935,5 +8947,14 @@ void Client::ProcessAggroMeter()
 	} else {
 		safe_delete(app);
 	}
+}
+
+void Client::SetPetCommandState(int button, int state)
+{
+	auto app = new EQApplicationPacket(OP_PetCommandState, sizeof(PetCommandState_Struct));
+	auto pcs = (PetCommandState_Struct *)app->pBuffer;
+	pcs->button_id = button;
+	pcs->state = state;
+	FastQueuePacket(&app);
 }
 

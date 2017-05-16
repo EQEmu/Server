@@ -935,7 +935,7 @@ void Mob::AI_Process() {
 	bool engaged = IsEngaged();
 	bool doranged = false;
 
-	if (!zone->CanDoCombat()) {
+	if (!zone->CanDoCombat() || IsPetStop() || IsPetRegroup()) {
 		engaged = false;
 	}
 
@@ -943,7 +943,7 @@ void Mob::AI_Process() {
 	//
 	if(RuleB(Combat, EnableFearPathing)){
 		if(currently_fleeing) {
-			if(IsRooted() || (IsBlind() && CombatRange(hate_list.GetClosestEntOnHateList(this)))) {
+			if((IsRooted() || (IsBlind() && CombatRange(hate_list.GetClosestEntOnHateList(this)))) && !IsPetStop() && !IsPetRegroup()) {
 				//make sure everybody knows were not moving, for appearance sake
 				if(IsMoving())
 				{
@@ -1300,9 +1300,11 @@ void Mob::AI_Process() {
 		}
 	}
 	else {
-		
 		if (m_PlayerState & static_cast<uint32>(PlayerState::Aggressive))
 			SendRemovePlayerState(PlayerState::Aggressive);
+
+		if (IsPetStop()) // pet stop won't be engaged, so we will always get here and we want the above branch to execute
+			return;
 
 		if(zone->CanDoCombat() && AI_feign_remember_timer->Check()) {
 			// 6/14/06
@@ -1409,6 +1411,8 @@ void Mob::AI_Process() {
 						break;
 					}
 				}
+				if (IsPetRegroup())
+					return;
 			}
 			/* Entity has been assigned another entity to follow */
 			else if (GetFollowID())
