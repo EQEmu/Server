@@ -8501,7 +8501,7 @@ void Client::Consume(const EQEmu::ItemData *item, uint8 type, int16 slot, bool a
 
 	if (type == EQEmu::item::ItemTypeFood)
    {
-	   int hchange = item->CastTime * cons_mod;
+	   int hchange = item->CastTime_ * cons_mod;
 	   hchange = mod_food_value(item, hchange);
 
 	   if(hchange < 0) { return; }
@@ -8518,7 +8518,7 @@ void Client::Consume(const EQEmu::ItemData *item, uint8 type, int16 slot, bool a
    }
    else
    {
-	   int tchange = item->CastTime * cons_mod;
+	   int tchange = item->CastTime_ * cons_mod;
 	   tchange = mod_drink_value(item, tchange);
 
 	   if(tchange < 0) { return; }
