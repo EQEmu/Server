@@ -1202,6 +1202,11 @@ void Client::ActivateAlternateAdvancementAbility(int rank_id, int target_id) {
 		Message_StringID(MT_SpellFailure, SNEAK_RESTRICT);
 		return;
 	}
+	//
+	// Modern clients don't require pet targeted for AA casts that are ST_Pet
+	if (spells[rank->spell].targettype == ST_Pet)
+		target_id = GetPetID();
+
 	// Bards can cast instant cast AAs while they are casting another song
 	if(spells[rank->spell].cast_time == 0 && GetClass() == BARD && IsBardSong(casting_spell_id)) {
 		if(!SpellFinished(rank->spell, entity_list.GetMob(target_id), EQEmu::CastingSlot::AltAbility, spells[rank->spell].mana, -1, spells[rank->spell].ResistDiff, false)) {
