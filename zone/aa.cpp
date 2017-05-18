@@ -1204,7 +1204,7 @@ void Client::ActivateAlternateAdvancementAbility(int rank_id, int target_id) {
 	}
 	//
 	// Modern clients don't require pet targeted for AA casts that are ST_Pet
-	if (spells[rank->spell].targettype == ST_Pet)
+	if (spells[rank->spell].targettype == ST_Pet || spells[rank->spell].targettype == ST_SummonedPet)
 		target_id = GetPetID();
 
 	// Bards can cast instant cast AAs while they are casting another song
