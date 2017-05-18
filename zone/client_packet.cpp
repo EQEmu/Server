@@ -8599,15 +8599,15 @@ void Client::Handle_OP_ItemVerifyRequest(const EQApplicationPacket *app)
 				(IsAmnesiad() && IsDiscipline(spell_id)) ||
 				(IsDetrimentalSpell(spell_id) && !zone->CanDoCombat()) ||
 				(inst->IsScaling() && inst->GetExp() <= 0) // charms don't have spells when less than 0
-				)
 			)
+		)
 	{
 		SendSpellBarEnable(spell_id);
 		return;
 	}
 
 	// Modern clients don't require pet targeted for item clicks that are ST_Pet
-	if (spells[spell_id].targettype == ST_Pet)
+	if (spell_id > 0 && spells[spell_id].targettype == ST_Pet)
 		target_id = GetPetID();
 
 	Log(Logs::General, Logs::None, "OP ItemVerifyRequest: spell=%i, target=%i, inv=%i", spell_id, target_id, slot_id);
