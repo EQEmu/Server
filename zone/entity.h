@@ -79,6 +79,7 @@ public:
 	virtual bool IsTrap()			const { return false; }
 	virtual bool IsBeacon()			const { return false; }
 	virtual bool IsEncounter()		const { return false; }
+	virtual bool IsBot()            const { return false; }
 
 	virtual bool Process() { return false; }
 	virtual bool Save() { return true; }
@@ -113,7 +114,6 @@ public:
 	bool CheckCoordLosNoZLeaps(float cur_x, float cur_y, float cur_z, float trg_x, float trg_y, float trg_z, float perwalk=1);
 
 #ifdef BOTS
-	virtual bool IsBot() const { return false; }
 	Bot* CastToBot();
 #endif
 
@@ -315,6 +315,7 @@ public:
 	void	Message(uint32 to_guilddbid, uint32 type, const char* message, ...);
 	void	MessageStatus(uint32 to_guilddbid, int to_minstatus, uint32 type, const char* message, ...);
 	void	MessageClose(Mob* sender, bool skipsender, float dist, uint32 type, const char* message, ...);
+	void	FilteredMessageClose(Mob* sender, bool skipsender, float dist, uint32 type, eqFilterType filter, const char* message, ...);
 	void	Message_StringID(Mob *sender, bool skipsender, uint32 type, uint32 string_id, const char* message1=0,const char* message2=0,const char* message3=0,const char* message4=0,const char* message5=0,const char* message6=0,const char* message7=0,const char* message8=0,const char* message9=0);
 	void	FilteredMessage_StringID(Mob *sender, bool skipsender, uint32 type, eqFilterType filter, uint32 string_id, const char* message1=0,const char* message2=0,const char* message3=0,const char* message4=0,const char* message5=0,const char* message6=0,const char* message7=0,const char* message8=0,const char* message9=0);
 	void	MessageClose_StringID(Mob *sender, bool skipsender, float dist, uint32 type, uint32 string_id, const char* message1=0,const char* message2=0,const char* message3=0,const char* message4=0,const char* message5=0,const char* message6=0,const char* message7=0,const char* message8=0,const char* message9=0);

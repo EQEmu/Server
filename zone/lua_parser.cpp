@@ -1055,6 +1055,10 @@ void LuaParser::MapFunctions(lua_State *L) {
 			lua_register_client_version(),
 			lua_register_appearance(),
 			lua_register_classes(),
+			lua_register_skills(),
+			lua_register_bodytypes(),
+			lua_register_filters(),
+			lua_register_message_types(),
 			lua_register_entity(),
 			lua_register_encounter(),
 			lua_register_mob(),
@@ -1282,36 +1286,6 @@ QuestEventID LuaParser::ConvertLuaEvent(QuestEventID evt) {
 
 #endif
 
-bool LuaParser::ClientAttack(Mob *self, Mob *other, int Hand, bool bRiposte, bool IsStrikethrough, bool IsFromSpell, ExtraAttackOptions *opts, bool &ignoreDefault)
-{
-	bool retval = false;
-	for (auto &mod : mods_) {
-		retval = mod.ClientAttack(self, other, Hand, bRiposte, IsStrikethrough, IsFromSpell, opts, ignoreDefault);
-	}
-
-	return retval;
-}
-
-bool LuaParser::NPCAttack(Mob *self, Mob *other, int Hand, bool bRiposte, bool IsStrikethrough, bool IsFromSpell, ExtraAttackOptions *opts, bool &ignoreDefault)
-{
-	bool retval = false;
-	for (auto &mod : mods_) {
-		retval = mod.NPCAttack(self, other, Hand, bRiposte, IsStrikethrough, IsFromSpell, opts, ignoreDefault);
-	}
-
-	return retval;
-}
-
-bool LuaParser::BotAttack(Mob *self, Mob *other, int Hand, bool bRiposte, bool IsStrikethrough, bool IsFromSpell, ExtraAttackOptions *opts, bool &ignoreDefault)
-{
-	bool retval = false;
-	for (auto &mod : mods_) {
-		retval = mod.BotAttack(self, other, Hand, bRiposte, IsStrikethrough, IsFromSpell, opts, ignoreDefault);
-	}
-
-	return retval;
-}
-
 void LuaParser::MeleeMitigation(Mob *self, Mob *attacker, DamageHitInfo &hit, ExtraAttackOptions *opts, bool &ignoreDefault)
 {
 	for (auto &mod : mods_) {
@@ -1344,40 +1318,9 @@ bool LuaParser::CheckHitChance(Mob *self, Mob *other, DamageHitInfo &hit, bool &
 	return retval;
 }
 
-void LuaParser::DoSpecialAttackDamage(Mob *self, Mob *who, EQEmu::skills::SkillType skill, int32 base_damage, int32 min_damage, int32 hate_override, int ReuseTime, bool &ignoreDefault)
+void LuaParser::TryCriticalHit(Mob *self, Mob *defender, DamageHitInfo &hit, ExtraAttackOptions *opts, bool &ignoreDefault)
 {
 	for (auto &mod : mods_) {
-		mod.DoSpecialAttackDamage(self, who, skill, base_damage, min_damage, hate_override, ReuseTime, ignoreDefault);
-	}
-}
-
-void LuaParser::DoRangedAttackDmg(Mob *self, Mob *other, bool Launch, int16 damage_mod, int16 chance_mod, EQEmu::skills::SkillType skill, float speed, const char *IDFile, bool &ignoreDefault)
-{
-	for (auto &mod : mods_) {
-		mod.DoRangedAttackDmg(self, other, Launch, damage_mod, chance_mod, skill, speed, IDFile, ignoreDefault);
-	}
-}
-
-void LuaParser::DoArcheryAttackDmg(Mob *self, Mob *other, const EQEmu::ItemInstance *RangeWeapon, const EQEmu::ItemInstance *Ammo, uint16 weapon_damage, int16 chance_mod, int16 focus, 
-	int ReuseTime, uint32 range_id, uint32 ammo_id, const EQEmu::ItemData *AmmoItem, int AmmoSlot, float speed, bool &ignoreDefault)
-{
-	for (auto &mod : mods_) {
-		mod.DoArcheryAttackDmg(self, other, RangeWeapon, Ammo, weapon_damage, chance_mod, focus, ReuseTime, range_id, ammo_id, AmmoItem, AmmoSlot, speed, ignoreDefault);
-	}
-}
-
-void LuaParser::DoThrowingAttackDmg(Mob *self, Mob *other, const EQEmu::ItemInstance *RangeWeapon, const EQEmu::ItemData *AmmoItem, uint16 weapon_damage, int16 chance_mod, int16 focus, 
-	int ReuseTime, uint32 range_id, int AmmoSlot, float speed, bool &ignoreDefault)
-{
-	for (auto &mod : mods_) {
-		mod.DoThrowingAttackDmg(self, other, RangeWeapon, AmmoItem, weapon_damage, chance_mod, focus, ReuseTime, range_id, AmmoSlot, speed, ignoreDefault);
-	}
-}
-
-void LuaParser::DoMeleeSkillAttackDmg(Mob *self, Mob *other, uint16 weapon_damage, EQEmu::skills::SkillType skillinuse, int16 chance_mod, int16 focus, bool CanRiposte, 
-	int ReuseTime, bool &ignoreDefault)
-{
-	for (auto &mod : mods_) {
-		mod.DoMeleeSkillAttackDmg(self, other, weapon_damage, skillinuse, chance_mod, focus, CanRiposte, ReuseTime, ignoreDefault);
+		mod.TryCriticalHit(self, defender, hit, opts, ignoreDefault);
 	}
 }

@@ -125,6 +125,7 @@ public:
 	void MerchantCloseShop();
 	void SetMerchantProbability(uint8 amt);
 	uint8 GetMerchantProbability();
+	int GetRawAC();
 };
 
 #endif

@@ -67,6 +67,16 @@ bool Lua_Entity::IsBeacon() {
 	return self->IsBeacon();
 }
 
+bool Lua_Entity::IsEncounter() {
+	Lua_Safe_Call_Bool();
+	return self->IsEncounter();
+}
+
+bool Lua_Entity::IsBot() {
+	Lua_Safe_Call_Bool();
+	return self->IsBot();
+}
+
 int Lua_Entity::GetID() {
 	Lua_Safe_Call_Bool();
 	return self->GetID();
@@ -124,6 +134,8 @@ luabind::scope lua_register_entity() {
 		.def("IsDoor", &Lua_Entity::IsDoor)
 		.def("IsTrap", &Lua_Entity::IsTrap)
 		.def("IsBeacon", &Lua_Entity::IsBeacon)
+		.def("IsEncounter", &Lua_Entity::IsEncounter)
+		.def("IsBot", &Lua_Entity::IsBot)
 		.def("GetID", &Lua_Entity::GetID)
 		.def("CastToClient", &Lua_Entity::CastToClient)
 		.def("CastToNPC", &Lua_Entity::CastToNPC)

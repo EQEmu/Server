@@ -1084,9 +1084,9 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 				break;
 			// base1 = effect value, base2 = skill restrictions(-1 for all)
 			if (base2 == ALL_SKILLS)
-				newbon->CritDmgMob[EQEmu::skills::HIGHEST_SKILL + 1] += base1;
+				newbon->CritDmgMod[EQEmu::skills::HIGHEST_SKILL + 1] += base1;
 			else
-				newbon->CritDmgMob[base2] += base1;
+				newbon->CritDmgMod[base2] += base1;
 			break;
 		}
 
@@ -2441,9 +2441,9 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 				if (base2 > EQEmu::skills::HIGHEST_SKILL)
 					break;
 				if(base2 == ALL_SKILLS)
-					new_bonus->CritDmgMob[EQEmu::skills::HIGHEST_SKILL + 1] += effect_value;
+					new_bonus->CritDmgMod[EQEmu::skills::HIGHEST_SKILL + 1] += effect_value;
 				else
-					new_bonus->CritDmgMob[base2] += effect_value;
+					new_bonus->CritDmgMod[base2] += effect_value;
 				break;
 			}
 
@@ -4203,9 +4203,9 @@ void Mob::NegateSpellsBonuses(uint16 spell_id)
 				{
 					for (int e = 0; e < EQEmu::skills::HIGHEST_SKILL + 1; e++)
 					{
-						spellbonuses.CritDmgMob[e] = effect_value;
-						aabonuses.CritDmgMob[e] = effect_value;
-						itembonuses.CritDmgMob[e] = effect_value;
+						spellbonuses.CritDmgMod[e] = effect_value;
+						aabonuses.CritDmgMod[e] = effect_value;
+						itembonuses.CritDmgMod[e] = effect_value;
 					}
 					break;
 				}

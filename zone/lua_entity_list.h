@@ -80,6 +80,7 @@ public:
 	void Message(uint32 guild_dbid, uint32 type, const char *message);
 	void MessageStatus(uint32 guild_dbid, int min_status, uint32 type, const char *message);
 	void MessageClose(Lua_Mob sender, bool skip_sender, float dist, uint32 type, const char *message);
+	void FilteredMessageClose(Lua_Mob sender, bool skip_sender, float dist, uint32 type, int filter, const char *message);
 	void RemoveFromTargets(Lua_Mob mob);
 	void RemoveFromTargets(Lua_Mob mob, bool RemoveFromXTargets);
 	void ReplaceWithTarget(Lua_Mob target, Lua_Mob new_target);

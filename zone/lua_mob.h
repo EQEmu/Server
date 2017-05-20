@@ -341,7 +341,6 @@ public:
 	void SetFlurryChance(int value);
 	int GetFlurryChance();
 	int GetSkill(int skill_id);
-	void CalcBonuses();
 	int GetSpecialAbility(int ability);
 	int GetSpecialAbilityParam(int ability, int param);
 	void SetSpecialAbility(int ability, int level);
@@ -394,6 +393,8 @@ public:
 	int GetWeaponDamage(Lua_Mob against, Lua_ItemInst weapon);
 	bool IsBerserk();
 	bool TryFinishingBlow(Lua_Mob defender, int &damage);
+	int GetBodyType();
+	int GetOrigBodyType();
 };
 
 #endif

@@ -11,6 +11,10 @@ luabind::scope lua_register_material();
 luabind::scope lua_register_client_version();
 luabind::scope lua_register_appearance();
 luabind::scope lua_register_classes();
+luabind::scope lua_register_skills();
+luabind::scope lua_register_bodytypes();
+luabind::scope lua_register_filters();
+luabind::scope lua_register_message_types();
 
 #endif
 #endif

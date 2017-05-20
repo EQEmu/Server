@@ -1078,9 +1078,9 @@ uint32 Lua_StatBonuses::GetSpellOnDeath(int idx) const {
 	return self->SpellOnDeath[idx];
 }
 
-int32 Lua_StatBonuses::GetCritDmgMob(int idx) const {
+int32 Lua_StatBonuses::GetCritDmgMod(int idx) const {
 	Lua_Safe_Call_Int();
-	return self->CritDmgMob[idx];
+	return self->CritDmgMod[idx];
 }
 
 int32 Lua_StatBonuses::GetSkillReuseTime(int idx) const {
@@ -1496,7 +1496,7 @@ luabind::scope lua_register_stat_bonuses() {
 		.def("SpellTriggers", &Lua_StatBonuses::GetSpellTriggers)
 		.def("SpellOnKill", &Lua_StatBonuses::GetSpellOnKill)
 		.def("SpellOnDeath", &Lua_StatBonuses::GetSpellOnDeath)
-		.def("CritDmgMob", &Lua_StatBonuses::GetCritDmgMob)
+		.def("CritDmgMod", &Lua_StatBonuses::GetCritDmgMod)
 		.def("SkillReuseTime", &Lua_StatBonuses::GetSkillReuseTime)
 		.def("SkillDamageAmount", &Lua_StatBonuses::GetSkillDamageAmount)
 		.def("HPPercCap", &Lua_StatBonuses::GetHPPercCap)

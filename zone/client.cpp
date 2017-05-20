@@ -1255,6 +1255,37 @@ void Client::Message(uint32 type, const char* message, ...) {
 	safe_delete_array(buffer);
 }
 
+void Client::FilteredMessage(Mob *sender, uint32 type, eqFilterType filter, const char* message, ...) {
+	if (!FilteredMessageCheck(sender, filter))
+		return;
+
+	va_list argptr;
+	auto buffer = new char[4096];
+	va_start(argptr, message);
+	vsnprintf(buffer, 4096, message, argptr);
+	va_end(argptr);
+
+	size_t len = strlen(buffer);
+
+	//client dosent like our packet all the time unless
+	//we make it really big, then it seems to not care that
+	//our header is malformed.
+	//len = 4096 - sizeof(SpecialMesg_Struct);
+
+	uint32 len_packet = sizeof(SpecialMesg_Struct) + len;
+	auto app = new EQApplicationPacket(OP_SpecialMesg, len_packet);
+	SpecialMesg_Struct* sm = (SpecialMesg_Struct*)app->pBuffer;
+	sm->header[0] = 0x00; // Header used for #emote style messages..
+	sm->header[1] = 0x00; // Play around with these to see other types
+	sm->header[2] = 0x00;
+	sm->msg_type = type;
+	memcpy(sm->message, buffer, len + 1);
+
+	FastQueuePacket(&app);
+
+	safe_delete_array(buffer);
+}
+
 void Client::QuestJournalledMessage(const char *npcname, const char* message) {
 
 	// npcnames longer than 60 characters crash the client when they log back in

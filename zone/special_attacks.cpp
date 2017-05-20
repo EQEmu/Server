@@ -138,15 +138,6 @@ int Mob::GetBaseSkillDamage(EQEmu::skills::SkillType skill, Mob *target)
 void Mob::DoSpecialAttackDamage(Mob *who, EQEmu::skills::SkillType skill, int32 base_damage, int32 min_damage,
 				int32 hate_override, int ReuseTime)
 {
-#ifdef LUA_EQEMU
-	bool ignoreDefault = false;
-	LuaParser::Instance()->DoSpecialAttackDamage(this, who, skill, base_damage, min_damage, hate_override, ReuseTime, ignoreDefault);
-
-	if (ignoreDefault) {
-		return;
-	}
-#endif
-
 	// this really should go through the same code as normal melee damage to
 	// pick up all the special behavior there
 
@@ -768,16 +759,6 @@ void Mob::DoArcheryAttackDmg(Mob *other, const EQEmu::ItemInstance *RangeWeapon,
 			     uint16 weapon_damage, int16 chance_mod, int16 focus, int ReuseTime, uint32 range_id,
 			     uint32 ammo_id, const EQEmu::ItemData *AmmoItem, int AmmoSlot, float speed)
 {
-#ifdef LUA_EQEMU
-	bool ignoreDefault = false;
-	LuaParser::Instance()->DoArcheryAttackDmg(this, other, RangeWeapon, Ammo, weapon_damage, chance_mod, focus, ReuseTime, range_id, ammo_id, AmmoItem, AmmoSlot, speed, ignoreDefault);
-
-	if (ignoreDefault) {
-		return;
-	}
-#endif
-
-
 	if ((other == nullptr ||
 	     ((IsClient() && CastToClient()->dead) || (other->IsClient() && other->CastToClient()->dead)) ||
 	     HasDied() || (!IsAttackAllowed(other)) || (other->GetInvul() || other->GetSpecialAbility(IMMUNE_MELEE)))) {
@@ -1157,15 +1138,6 @@ void NPC::RangedAttack(Mob* other)
 
 void NPC::DoRangedAttackDmg(Mob* other, bool Launch, int16 damage_mod, int16 chance_mod, EQEmu::skills::SkillType skill, float speed, const char *IDFile)
 {
-#ifdef LUA_EQEMU
-	bool ignoreDefault = false;
-	LuaParser::Instance()->DoRangedAttackDmg(this, other, Launch, damage_mod, chance_mod, skill, speed, IDFile, ignoreDefault);
-
-	if (ignoreDefault) {
-		return;
-	}
-#endif
-
 	if ((other == nullptr ||
 		(other->HasDied())) ||
 		HasDied() ||
@@ -1330,15 +1302,6 @@ void Mob::DoThrowingAttackDmg(Mob *other, const EQEmu::ItemInstance *RangeWeapon
 			      uint16 weapon_damage, int16 chance_mod, int16 focus, int ReuseTime, uint32 range_id,
 			      int AmmoSlot, float speed)
 {
-#ifdef LUA_EQEMU
-	bool ignoreDefault = false;
-	LuaParser::Instance()->DoThrowingAttackDmg(this, other, RangeWeapon, AmmoItem, weapon_damage, chance_mod, focus, ReuseTime, range_id, AmmoSlot, speed, ignoreDefault);
-
-	if (ignoreDefault) {
-		return;
-	}
-#endif
-
 	if ((other == nullptr ||
 	     ((IsClient() && CastToClient()->dead) || (other->IsClient() && other->CastToClient()->dead)) ||
 	     HasDied() || (!IsAttackAllowed(other)) || (other->GetInvul() || other->GetSpecialAbility(IMMUNE_MELEE)))) {
@@ -2123,15 +2086,6 @@ int Mob::TryAssassinate(Mob *defender, EQEmu::skills::SkillType skillInUse)
 void Mob::DoMeleeSkillAttackDmg(Mob *other, uint16 weapon_damage, EQEmu::skills::SkillType skillinuse, int16 chance_mod,
 				int16 focus, bool CanRiposte, int ReuseTime)
 {
-#ifdef LUA_EQEMU
-	bool ignoreDefault = false;
-	LuaParser::Instance()->DoMeleeSkillAttackDmg(this, other, weapon_damage, skillinuse, chance_mod, focus, CanRiposte, ReuseTime, ignoreDefault);
-
-	if (ignoreDefault) {
-		return;
-	}
-#endif
-
 	if (!CanDoSpecialAttack(other))
 		return;
 

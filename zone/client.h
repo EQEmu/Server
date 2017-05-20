@@ -308,6 +308,7 @@ public:
 	void ChannelMessageSend(const char* from, const char* to, uint8 chan_num, uint8 language, const char* message, ...);
 	void ChannelMessageSend(const char* from, const char* to, uint8 chan_num, uint8 language, uint8 lang_skill, const char* message, ...);
 	void Message(uint32 type, const char* message, ...);
+	void FilteredMessage(Mob *sender, uint32 type, eqFilterType filter, const char* message, ...);
 	void QuestJournalledMessage(const char *npcname, const char* message);
 	void VoiceMacroReceived(uint32 Type, char *Target, uint32 MacroNumber);
 	void SendSound();
@@ -1260,6 +1261,8 @@ public:
 
 	void CheckRegionTypeChanges();
 
+	int32 CalcATK();
+
 protected:
 	friend class Mob;
 	void CalcItemBonuses(StatBonuses* newbon);
@@ -1319,7 +1322,6 @@ private:
 
 	void HandleTraderPriceUpdate(const EQApplicationPacket *app);
 
-	int32 CalcATK();
 	int32 CalcItemATKCap();
 	int32 CalcHaste();
 

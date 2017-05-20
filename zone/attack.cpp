@@ -1307,16 +1307,6 @@ void Mob::DoAttack(Mob *other, DamageHitInfo &hit, ExtraAttackOptions *opts)
 // IsFromSpell added to allow spell effects to use Attack. (Mainly for the Rampage AA right now.)
 bool Client::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool IsFromSpell, ExtraAttackOptions *opts)
 {
-#ifdef LUA_EQEMU
-	bool lua_ret = false;
-	bool ignoreDefault = false;
-	lua_ret = LuaParser::Instance()->ClientAttack(this, other, Hand, bRiposte, IsStrikethrough, IsFromSpell, opts, ignoreDefault);
-
-	if (ignoreDefault) {
-		return lua_ret;
-	}
-#endif
-
 	if (!other) {
 		SetTarget(nullptr);
 		Log(Logs::General, Logs::Error, "A null Mob object was passed to Client::Attack() for evaluation!");
@@ -1840,16 +1830,6 @@ bool Client::Death(Mob* killerMob, int32 damage, uint16 spell, EQEmu::skills::Sk
 
 bool NPC::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool IsFromSpell, ExtraAttackOptions *opts)
 {
-#ifdef LUA_EQEMU
-	bool lua_ret = false;
-	bool ignoreDefault = false;
-	lua_ret = LuaParser::Instance()->NPCAttack(this, other, Hand, bRiposte, IsStrikethrough, IsFromSpell, opts, ignoreDefault);
-
-	if (ignoreDefault) {
-		return lua_ret;
-	}
-#endif
-
 	if (!other) {
 		SetTarget(nullptr);
 		Log(Logs::General, Logs::Error, "A null Mob object was passed to NPC::Attack() for evaluation!");
@@ -4118,7 +4098,7 @@ void Mob::TryPetCriticalHit(Mob *defender, DamageHitInfo &hit)
 
 	if (critChance > 0) {
 		if (zone->random.Roll(critChance)) {
-			critMod += GetCritDmgMob(hit.skill);
+			critMod += GetCritDmgMod(hit.skill);
 			hit.damage_done += 5;
 			hit.damage_done = (hit.damage_done * critMod) / 100;
 
@@ -4139,6 +4119,15 @@ void Mob::TryPetCriticalHit(Mob *defender, DamageHitInfo &hit)
 
 void Mob::TryCriticalHit(Mob *defender, DamageHitInfo &hit, ExtraAttackOptions *opts)
 {
+#ifdef LUA_EQEMU
+	bool ignoreDefault = false;
+	LuaParser::Instance()->TryCriticalHit(this, defender, hit, opts, ignoreDefault);
+
+	if (ignoreDefault) {
+		return;
+	}
+#endif
+
 	if (hit.damage_done < 1 || !defender)
 		return;
 
@@ -4247,7 +4236,11 @@ void Mob::TryCriticalHit(Mob *defender, DamageHitInfo &hit, ExtraAttackOptions *
 			// step 2: calculate damage
 			hit.damage_done = std::max(hit.damage_done, hit.base_damage) + 5;
 			int og_damage = hit.damage_done;
-			int crit_mod = 170 + GetCritDmgMob(hit.skill);
+			int crit_mod = 170 + GetCritDmgMod(hit.skill);
+			if (crit_mod < 100) {
+				crit_mod = 100;
+			}
+
 			hit.damage_done = hit.damage_done * crit_mod / 100;
 			Log(Logs::Detail, Logs::Combat,
 				"Crit success roll %d dex chance %d og dmg %d crit_mod %d new dmg %d", roll, dex_bonus,

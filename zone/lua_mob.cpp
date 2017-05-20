@@ -2051,6 +2051,18 @@ bool Lua_Mob::TryFinishingBlow(Lua_Mob defender, int &damage) {
 	return self->TryFinishingBlow(defender, damage);
 }
 
+int Lua_Mob::GetBodyType()
+{
+	Lua_Safe_Call_Int();
+	return (int)self->GetBodyType();
+}
+
+int Lua_Mob::GetOrigBodyType()
+{
+	Lua_Safe_Call_Int();
+	return (int)self->GetOrigBodyType();
+}
+
 luabind::scope lua_register_mob() {
 	return luabind::class_<Lua_Mob, Lua_Entity>("Mob")
 		.def(luabind::constructor<>())
@@ -2408,7 +2420,9 @@ luabind::scope lua_register_mob() {
 		.def("AttackAnimation", &Lua_Mob::AttackAnimation)
 		.def("GetWeaponDamage", &Lua_Mob::GetWeaponDamage)
 		.def("IsBerserk", &Lua_Mob::IsBerserk)
-		.def("TryFinishingBlow", &Lua_Mob::TryFinishingBlow);
+		.def("TryFinishingBlow", &Lua_Mob::TryFinishingBlow)
+		.def("GetBodyType", &Lua_Mob::GetBodyType)
+		.def("GetOrigBodyType", &Lua_Mob::GetOrigBodyType);
 }
 
 luabind::scope lua_register_special_abilities() {

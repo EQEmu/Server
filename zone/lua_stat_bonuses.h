@@ -240,7 +240,7 @@ public:
 	uint32 GetSpellTriggers(int idx) const;
 	uint32 GetSpellOnKill(int idx) const;
 	uint32 GetSpellOnDeath(int idx) const;
-	int32 GetCritDmgMob(int idx) const;
+	int32 GetCritDmgMod(int idx) const;
 	int32 GetSkillReuseTime(int idx) const;
 	int32 GetSkillDamageAmount(int idx) const;
 	int GetHPPercCap(int idx) const;

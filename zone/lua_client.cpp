@@ -1424,6 +1424,22 @@ bool Lua_Client::IsDead() {
 	return self->IsDead();
 }
 
+int Lua_Client::CalcCurrentWeight() {
+	Lua_Safe_Call_Int();
+	return self->CalcCurrentWeight();
+}
+
+int Lua_Client::CalcATK() {
+	Lua_Safe_Call_Int();
+	return self->CalcATK();
+}
+
+void Lua_Client::FilteredMessage(Mob *sender, uint32 type, int filter, const char *message)
+{
+	Lua_Safe_Call_Void();
+	self->FilteredMessage(sender, type, (eqFilterType)filter, message);
+}
+
 luabind::scope lua_register_client() {
 	return luabind::class_<Lua_Client, Lua_Mob>("Client")
 		.def(luabind::constructor<>())
@@ -1693,7 +1709,10 @@ luabind::scope lua_register_client() {
 		.def("QuestReward", (void(Lua_Client::*)(Lua_Mob, uint32, uint32, uint32, uint32, uint32, uint32))&Lua_Client::QuestReward)
 		.def("QuestReward", (void(Lua_Client::*)(Lua_Mob, uint32, uint32, uint32, uint32, uint32, uint32, bool))&Lua_Client::QuestReward)
 		.def("QuestReward", (void(Lua_Client::*)(Lua_Mob, luabind::adl::object))&Lua_Client::QuestReward)
-		.def("IsDead", &Lua_Client::IsDead);
+		.def("IsDead", &Lua_Client::IsDead)
+		.def("CalcCurrentWeight", &Lua_Client::CalcCurrentWeight)
+		.def("CalcATK", &Lua_Client::CalcATK)
+		.def("FilteredMessage", &Lua_Client::FilteredMessage);
 }
 
 luabind::scope lua_register_inventory_where() {
