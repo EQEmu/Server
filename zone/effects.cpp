@@ -361,7 +361,8 @@ int32 Client::GetActSpellCost(uint16 spell_id, int32 cost)
 	if (spec)
 		PercentManaReduction = 1 + spec / 20; // there seems to be some non-obvious rounding here, let's truncate for now.
 
-	PercentManaReduction += GetFocusEffect(focusManaCost, spell_id);
+	int16 focus_redux = GetFocusEffect(focusManaCost, spell_id);
+	PercentManaReduction += focus_redux;
 
 	cost -= (cost * (PercentManaReduction / 100));
 
