@@ -364,7 +364,7 @@ int32 Client::GetActSpellCost(uint16 spell_id, int32 cost)
 	int16 focus_redux = GetFocusEffect(focusManaCost, spell_id);
 	PercentManaReduction += focus_redux;
 
-	cost -= (cost * (PercentManaReduction / 100));
+	cost -= cost * PercentManaReduction / 100;
 
 	// Gift of Mana - reduces spell cost to 1 mana
 	if(focus_redux >= 100) {
