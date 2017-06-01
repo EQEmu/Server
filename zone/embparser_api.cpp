@@ -3679,6 +3679,20 @@ XS(XS__UpdateZoneHeader) {
 	XSRETURN_EMPTY;
 }
 
+XS(XS__camerashake);
+XS(XS__camerashake)
+{
+        dXSARGS;
+        if (items != 2)
+                Perl_croak(aTHX_ "Usage: camerashake(duration, intensity)");
+
+        int     duration = (int)SvIV(ST(0));
+        int     intensity = (int)SvIV(ST(1));
+
+        quest_manager.camerashake(duration,intensity);
+		
+        XSRETURN_EMPTY;
+}
 
 /*
 This is the callback perl will look for to setup the
@@ -3751,6 +3765,7 @@ EXTERN_C XS(boot_quest)
 		newXS(strcpy(buf, "attacknpc"), XS__attacknpc, file);
 		newXS(strcpy(buf, "attacknpctype"), XS__attacknpctype, file);
 		newXS(strcpy(buf, "buryplayercorpse"), XS__buryplayercorpse, file);
+		newXS(strcpy(buf, "camerashake"), XS__camerashake, file);
 		newXS(strcpy(buf, "castspell"), XS__castspell, file);
 		newXS(strcpy(buf, "changedeity"), XS__changedeity, file);
 		newXS(strcpy(buf, "checktitle"), XS__checktitle, file);

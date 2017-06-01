@@ -261,6 +261,7 @@ public:
 	bool DisableRecipe(uint32 recipe_id);
 	void ClearNPCTypeCache(int npctype_id);
 	void ReloadZoneStaticData();
+	void camerashake(int, int);
 
 	Client *GetInitiator() const;
 	NPC *GetNPC() const;
