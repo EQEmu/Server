@@ -1760,7 +1760,7 @@ struct OnLevelMessage_Struct {
 /*4224*/	char	ButtonName0[25];	// If Buttons = 1, these two are the text for the left and right buttons respectively
 /*4249*/	char	ButtonName1[25];
 /*4274*/	uint8	Buttons;
-/*4275*/	uint8	Unknown4275;	// Something to do with audio controls
+/*4275*/	uint8	SoundControls;	// Something to do with audio controls
 /*4276*/	uint32  Duration;
 /*4280*/	uint32  PopupID;	// If none zero, a response packet with 00 00 00 00 <PopupID> is returned on clicking the left button
 /*4284*/	uint32  NegativeID;	// If none zero, a response packet with 01 00 00 00 <NegativeID> is returned on clicking the right button

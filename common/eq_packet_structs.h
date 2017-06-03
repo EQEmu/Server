@@ -1695,6 +1695,7 @@ struct OnLevelMessage_Struct
 	uint32	Duration;
 	uint32	PopupID;
 	uint32	NegativeID;
+	uint32  SoundControls;
 	char	ButtonName0[25];
 	char	ButtonName1[25];
 };

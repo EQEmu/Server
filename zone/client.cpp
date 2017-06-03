@@ -3929,6 +3929,46 @@ void Client::SendPopupToClient(const char *Title, const char *Text, uint32 Popup
 	safe_delete(outapp);
 }
 
+void Client::SendFullPopup(const char *Title, const char *Text, uint32 PopupID, uint32 NegativeID, uint32 Duration, uint32 Buttons, const char *ButtonName0, const char *ButtonName1, uint32 SoundControls) {
+	auto outapp = new EQApplicationPacket(OP_OnLevelMessage, sizeof(OnLevelMessage_Struct));
+	OnLevelMessage_Struct *olms = (OnLevelMessage_Struct *)outapp->pBuffer;
+
+	if((strlen(Text) > (sizeof(olms->Text)-1)) || (strlen(Title) > (sizeof(olms->Title) - 1)) ) {
+		safe_delete(outapp);
+		return;
+	}
+
+	if (ButtonName0 && ButtonName1 && ( (strlen(ButtonName0) > (sizeof(olms->ButtonName0) - 1)) || (strlen(ButtonName1) > (sizeof(olms->ButtonName1) - 1)) ) ) {
+		safe_delete(outapp);
+		return;
+	}
+
+	strcpy(olms->Title, Title);
+	strcpy(olms->Text, Text);
+
+	olms->Buttons = Buttons;
+	
+	if (ButtonName0 == NULL || ButtonName1 == NULL) {
+		sprintf(olms->ButtonName0, "%s", "Yes");
+		sprintf(olms->ButtonName1, "%s", "No");
+	} else {
+		strcpy(olms->ButtonName0, ButtonName0);
+		strcpy(olms->ButtonName1, ButtonName1);
+	}
+
+	if(Duration > 0)
+		olms->Duration = Duration * 1000;
+	else
+		olms->Duration = 0xffffffff;
+
+	olms->PopupID = PopupID;
+	olms->NegativeID = NegativeID;
+	olms->SoundControls = SoundControls;
+
+	QueuePacket(outapp);
+	safe_delete(outapp);
+}
+
 void Client::SendWindow(uint32 PopupID, uint32 NegativeID, uint32 Buttons, const char *ButtonName0, const char *ButtonName1, uint32 Duration, int title_type, Client* target, const char *Title, const char *Text, ...) {
 	va_list argptr;
 	char buffer[4096];
