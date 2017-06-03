@@ -6449,15 +6449,15 @@ XS(XS_Client_Popup2)
 {
 	dXSARGS;
 	if (items < 3 || items > 10)
-		Perl_croak(aTHX_ "Usage: Client::SendFullPopup(THIS, Title, Text, PopupID, NegativeID, Duration, Buttons, ButtonName0, ButtonName1, SoundControls)");
+		Perl_croak(aTHX_ "Usage: Client::SendFullPopup(THIS, Title, Text, PopupID, NegativeID, Buttons, Duration, ButtonName0, ButtonName1, SoundControls)");
 	{
 		Client *	THIS;
 		char*		Title = (char *)SvPV_nolen(ST(1));
 		char*		Text = (char *)SvPV_nolen(ST(2));
 		uint32 		PopupID =	0;
 		uint32 		NegativeID =	0;
-		uint32 		Duration =	0;
 		uint32 		Buttons =	0;
+		uint32 		Duration =	0;
 		char*		ButtonName0 = 0;
 		char*		ButtonName1 = 0;
 		uint32 		SoundControls =	0;
@@ -6473,14 +6473,14 @@ XS(XS_Client_Popup2)
 		
 		if (items > 3)	{ PopupID = (uint32)SvUV(ST(3)); }
 		if (items > 4)	{ NegativeID = (uint32)SvUV(ST(4)); }
-		if (items > 5)	{ Duration = (uint32)SvUV(ST(5)); }
-		if (items > 6)	{ Buttons = (uint32)SvUV(ST(6)); }
+		if (items > 5)	{ Buttons = (uint32)SvUV(ST(5)); }
+		if (items > 6)	{ Duration = (uint32)SvUV(ST(6)); }
 		if (items > 7)	{ ButtonName0 = (char *)SvPV_nolen(ST(7)); }
 		if (items > 8)	{ ButtonName1 = (char *)SvPV_nolen(ST(8)); }
 		if (items > 9)	{ SoundControls = (uint32)SvUV(ST(9)); }
 
 
-		THIS->SendFullPopup(Title, Text, PopupID, NegativeID, Duration, Buttons, ButtonName0, ButtonName1, SoundControls);
+		THIS->SendFullPopup(Title, Text, PopupID, NegativeID, Buttons, Duration, ButtonName0, ButtonName1, SoundControls);
 	}
 	XSRETURN_EMPTY;
 }
