@@ -2592,11 +2592,33 @@ void Mob::AddToHateList(Mob* other, uint32 hate /*= 0*/, int32 damage /*= 0*/, b
 	if (other->IsBot()) {
 		if (other->CastToBot()->GetBotOwner() && other->CastToBot()->GetBotOwner()->CastToClient()->GetFeigned()) {
 			AddFeignMemory(other->CastToBot()->GetBotOwner()->CastToClient());
+			// Not sure if this will cause an unsafe double load, leaving it off for now.
+			// other->CastToBot()->GetBotOwner()->CastToClient()->AddAutoXTarget(this);
 		}
 		else {
 			if (!hate_list.IsEntOnHateList(other->CastToBot()->GetBotOwner())) {
 				hate_list.AddEntToHateList(other->CastToBot()->GetBotOwner(), 0, 0, false, true);
 				other->CastToBot()->GetBotOwner()->CastToClient()->AddAutoXTarget(this);
+			}
+		}
+	}
+	// We've added the bot owner to hate, now lets deal with pets of bots.
+	// No free lunch. It's your bot's pet, you get some hate too!
+	// Is this a pet, and is the pet owner a bot? Pass on the love.
+	if (owner) {
+		if (owner->IsBot()) {
+			if (owner->CastToBot()->GetBotOwner()->IsClient() && owner->CastToBot()->GetBotOwner()->CastToClient()->GetFeigned()) {
+				// Can't add a feigned owner to hate list
+				// So we won't add fiegned bot controller.
+			}
+			else {
+				if (!owner->CastToBot()->GetBotOwner()->GetSpecialAbility(IMMUNE_AGGRO)) {
+					// This was a judgement call. Should the owner of the bot get the on the agro table like the bot?
+					if (!hate_list.IsEntOnHateList(owner->CastToBot()->GetBotOwner())) {
+						hate_list.AddEntToHateList(owner->CastToBot()->GetBotOwner(), 0, 0, false, true);
+						owner->CastToBot()->GetBotOwner()->CastToClient()->AddAutoXTarget(this);
+					}
+				}
 			}
 		}
 	}
