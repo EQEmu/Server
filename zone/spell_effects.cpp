@@ -243,6 +243,71 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 						caster->ResourceTap(-dmg, spell_id);
 					}
 
+//	MOD::VALLIK - Scale spell damage based on weapon damage & spell skill
+					if (caster && caster->IsClient() && RuleB(Character, UseCustomStatScaling)) {
+						EQEmu::ItemInstance* weapon;
+						weapon = caster->CastToClient()->GetInv().GetItem(EQEmu::inventory::slotPrimary);
+						float skillbonusDMG = 0;
+						float weaponbonusDMG = 0;
+						float elembonusDMG = 0;
+						uint8 elemDMGtype = 0;
+						
+						// Scale spells on casting skills, including specializations
+						skillbonusDMG = ((GetSkill(spells[spell_id].skill) * RuleR(Spells, CastingSkillBonusDamage)) / 100.0f);
+						switch (spells[spell_id].skill)
+						{
+							case 4: // Abjuration
+							{
+								skillbonusDMG = skillbonusDMG + ((GetSkill(EQEmu::skills::SkillSpecializeAbjure) * RuleR(Spells, SpecializationSkillBonusDamage)) / 100.0f);
+								break;
+							}
+							
+							case 5: // Alteration
+							{
+								skillbonusDMG = skillbonusDMG + ((GetSkill(EQEmu::skills::SkillSpecializeAlteration) * RuleR(Spells, SpecializationSkillBonusDamage)) / 100.0f);
+								break;
+							}
+							
+							case 14: // Conjuration
+							{
+								skillbonusDMG = skillbonusDMG + ((GetSkill(EQEmu::skills::SkillSpecializeConjuration) * RuleR(Spells, SpecializationSkillBonusDamage)) / 100.0f);
+								break;
+							}
+							
+							case 18: // Divination
+							{
+								skillbonusDMG = skillbonusDMG + ((GetSkill(EQEmu::skills::SkillSpecializeDivination) * RuleR(Spells, SpecializationSkillBonusDamage)) / 100.0f);
+								break;
+							}
+							
+							case 24: // Evocation
+							{
+								skillbonusDMG = skillbonusDMG + ((GetSkill(EQEmu::skills::SkillSpecializeEvocation) * RuleR(Spells, SpecializationSkillBonusDamage)) / 100.0f);
+								break;
+							}
+						}
+						
+						// Scale spells on weapon damage value, extra damage if elemdmgtype matches resist type of spell
+						if(weapon != nullptr) {
+							if (weapon->IsWeapon()) {
+								weaponbonusDMG = weapon->GetItem()->Damage;
+								elembonusDMG = weapon->GetItem()->ElemDmgAmt;
+								elemDMGtype = weapon->GetItem()->ElemDmgType;
+							}
+						}
+						
+						weaponbonusDMG = (weaponbonusDMG * RuleR(Spells, WeaponDamageBonus)) / 100.0f;
+						
+						if(spells[spell_id].resisttype == elemDMGtype) { // Elemental bonus damage matches the resist type of spell. ie Holding a +fire staff while casting a fire spell
+							elembonusDMG = (elembonusDMG * RuleR(Spells, WeaponElemDamageBonus)) / 100.0f;
+							weaponbonusDMG += elembonusDMG;
+						}
+						
+						// Final scale calculation
+						dmg = dmg * (skillbonusDMG + weaponbonusDMG + 1);					
+					}
+//  ENDMOD::VALLIK
+
 					dmg = -dmg;
 					Damage(caster, dmg, spell_id, spell.skill, false, buffslot, false);
 				}
@@ -255,6 +320,61 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 					if(caster)
 						dmg = caster->GetActSpellHealing(spell_id, dmg, this);
 
+//	MOD::VALLIK - Scale spell healing based on weapon damage & spell skill
+					if (caster && caster->IsClient() && RuleB(Character, UseCustomStatScaling)) {
+						EQEmu::ItemInstance* weapon;
+						weapon = caster->CastToClient()->GetInv().GetItem(EQEmu::inventory::slotPrimary);
+						float skillbonusDMG = 0;
+						float weaponbonusDMG = 0;
+						
+						// Scale spells on casting skills, including specializations
+						skillbonusDMG = ((GetSkill(spells[spell_id].skill) * RuleR(Spells, CastingSkillBonusDamage)) / 100.0f);
+						switch (spells[spell_id].skill)
+						{
+							case 4: // Abjuration
+							{
+								skillbonusDMG = skillbonusDMG + ((GetSkill(EQEmu::skills::SkillSpecializeAbjure) * RuleR(Spells, SpecializationSkillBonusDamage)) / 100.0f);
+								break;
+							}
+							
+							case 5: // Alteration
+							{
+								skillbonusDMG = skillbonusDMG + ((GetSkill(EQEmu::skills::SkillSpecializeAlteration) * RuleR(Spells, SpecializationSkillBonusDamage)) / 100.0f);
+								break;
+							}
+							
+							case 14: // Conjuration
+							{
+								skillbonusDMG = skillbonusDMG + ((GetSkill(EQEmu::skills::SkillSpecializeConjuration) * RuleR(Spells, SpecializationSkillBonusDamage)) / 100.0f);
+								break;
+							}
+							
+							case 18: // Divination
+							{
+								skillbonusDMG = skillbonusDMG + ((GetSkill(EQEmu::skills::SkillSpecializeDivination) * RuleR(Spells, SpecializationSkillBonusDamage)) / 100.0f);
+								break;
+							}
+							
+							case 24: // Evocation
+							{
+								skillbonusDMG = skillbonusDMG + ((GetSkill(EQEmu::skills::SkillSpecializeEvocation) * RuleR(Spells, SpecializationSkillBonusDamage)) / 100.0f);
+								break;
+							}
+						}
+						
+						// Scale spells on weapon damage value
+						if(weapon != nullptr) {
+							if (weapon->IsWeapon()) {
+								weaponbonusDMG = weapon->GetItem()->Damage;
+							}
+						}
+						
+						weaponbonusDMG = (weaponbonusDMG * RuleR(Spells, WeaponDamageBonus)) / 100.0f;
+						
+						// Final scale calculation
+						dmg = dmg * (skillbonusDMG + weaponbonusDMG + 1);					
+					}
+//  ENDMOD::VALLIK					
 					HealDamage(dmg, caster);
 				}
 
@@ -271,6 +391,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 #endif
 
 				int32 dmg = effect_value;
+/*	MOD::VALLIK - Remove Manaburn and Lifeburn from server
 				if (spell_id == 2751 && caster) //Manaburn
 				{
 					dmg = caster->GetMana()*-3;
@@ -284,7 +405,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 						caster->SendAppearancePacket(AT_Anim, 115);
 					}
 				}
-
+	ENDMOD::VALLIK */
 				//do any AAs apply to these spells?
 				if(dmg < 0) {
 					if (!PassCastRestriction(false, spells[spell_id].base2[i], true))

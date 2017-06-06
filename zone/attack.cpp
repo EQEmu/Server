@@ -4869,6 +4869,17 @@ void Mob::CommonOutgoingHitSuccess(Mob* defender, DamageHitInfo &hit, ExtraAttac
 {
 	if (!defender)
 		return;
+	
+//  MOD::VALLIK - Scale melee damage based on skill
+	if (IsClient() && RuleB(Character, UseCustomStatScaling)) {
+		hit.damage_done *= ((GetSkill(hit.skill) * RuleR(Combat, meleeskillbonusDMG)) / 100.0f) + 1;
+		
+		// Check if defender is resistent to this skill type. Custom feature.
+		if (!defender->IsClient() && defender->IsResistent(hit.skill)) {
+			hit.damage_done *= RuleR(Combat, DamageReductionResistent);
+		}
+	}
+//	ENDMOD::VALLIK	
 
 	// BER weren't parsing the halving
 	if (hit.skill == EQEmu::skills::SkillArchery ||

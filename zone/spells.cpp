@@ -791,9 +791,20 @@ bool Client::CheckFizzle(uint16 spell_id)
 	{
 		diff -= (GetINT() - 125) / 20.0;
 	}
-
-	// base fizzlechance is lets say 5%, we can make it lower for AA skills or whatever
+	
+//	MOD::VALLIK - Weight of worn armour effects fizzle rate
+	uint32 wornweight = GetWornWeight();
+	
+	// allow up to Rule:FizzleWeightAllowance stones of worn weight before affecting fizzle rate
+	wornweight -= RuleI(Spells, FizzleWeightAllowance);
+	
+	// add to base fizzle chance. This allows people with high skills to equip heavier armour than others
 	float basefizzle = 10;
+	basefizzle += wornweight / 10.0f;
+//	ENDMOD::VALLIK
+	
+	// base fizzlechance is lets say 5%, we can make it lower for AA skills or whatever
+//	float basefizzle = 10; MOD::VALLIK - commenting out as we defined it above
 	float fizzlechance = basefizzle - specialize + diff / 5.0;
 
 	// always at least 1% chance to fail or 5% to succeed

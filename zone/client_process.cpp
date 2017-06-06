@@ -1038,6 +1038,7 @@ void Client::OPRezzAnswer(uint32 Action, uint32 SpellID, uint16 ZoneID, uint16 I
 		this->BuffFadeNonPersistDeath();
 		int SpellEffectDescNum = GetSpellEffectDescNum(SpellID);
 		// Rez spells with Rez effects have this DescNum (first is Titanium, second is 6.2 Client)
+/*  MOD::VALLIK - Remove Rez effects
 		if((SpellEffectDescNum == 82) || (SpellEffectDescNum == 39067)) {
 			SetMana(0);
 			SetHP(GetMaxHP()/5);
@@ -1049,7 +1050,10 @@ void Client::OPRezzAnswer(uint32 Action, uint32 SpellID, uint16 ZoneID, uint16 I
 		else {
 			SetMana(GetMaxMana());
 			SetHP(GetMaxHP());
-		}
+		}*/
+		SetMana(GetMaxMana());
+		SetHP(GetMaxHP());
+//	ENDMOD::VALLIK
 		if(spells[SpellID].base[0] < 100 && spells[SpellID].base[0] > 0 && PendingRezzXP > 0)
 		{
 				SetEXP(((int)(GetEXP()+((float)((PendingRezzXP / 100) * spells[SpellID].base[0])))),
@@ -1534,9 +1538,15 @@ void Client::OPGMTraining(const EQApplicationPacket *app)
 		if (sk == EQEmu::skills::SkillTinkering && GetRace() != GNOME) {
 			gmtrain->skills[sk] = 0; //Non gnomes can't tinker!
 		} else {
-			gmtrain->skills[sk] = GetMaxSkillAfterSpecializationRules((EQEmu::skills::SkillType)sk, MaxSkill((EQEmu::skills::SkillType)sk, GetClass(), RuleI(Character, MaxLevel)));
-			//this is the highest level that the trainer can train you to, this is enforced clientside so we can't just
-			//Set it to 1 with CanHaveSkill or you wont be able to train past 1.
+//	MOD::VALLIK - Intercept skills from showing on trainer unless they have at least 1 point in it already. This stops them increasing skills not yet earnt via quest.
+			if (GetRawSkill(static_cast<EQEmu::skills::SkillType>(sk)) > 0) {
+				gmtrain->skills[sk] = GetMaxSkillAfterSpecializationRules((EQEmu::skills::SkillType)sk, MaxSkill((EQEmu::skills::SkillType)sk, GetClass(), RuleI(Character, MaxLevel)));
+				//this is the highest level that the trainer can train you to, this is enforced clientside so we can't just
+				//Set it to 1 with CanHaveSkill or you wont be able to train past 1.
+			} else {
+				gmtrain->skills[sk] = 0;
+			}
+//	ENDMOD::VALLIK
 		}
 	}
 

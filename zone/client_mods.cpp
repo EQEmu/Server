@@ -1275,6 +1275,27 @@ uint32 Client::CalcCurrentWeight()
 	return Total;
 }
 
+//	MOD::VALLIK - CalcCurrentWornWeight function
+uint32 Client::CalcCurrentWornWeight()
+{
+	const EQEmu::ItemData* TempItem = 0;
+	EQEmu::ItemInstance* ins;
+	uint32 Total = 0;
+	int x;
+	for (x = EQEmu::inventory::slotCharm; x <= EQEmu::inventory::slotAmmo; x++) { // does not include cursor or powersource
+		TempItem = 0;
+		ins = GetInv().GetItem(x);
+		if (ins) {
+			TempItem = ins->GetItem();
+		}
+		if (TempItem) {
+			Total += TempItem->Weight;
+		}
+	}
+	return Total;
+}
+//	ENDMOD::VALLIK
+
 int32 Client::CalcAlcoholPhysicalEffect()
 {
 	if (m_pp.intoxication <= 55) {

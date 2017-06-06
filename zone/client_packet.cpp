@@ -774,7 +774,10 @@ void Client::CompleteConnect()
 	//enforce some rules..
 	if (!CanBeInZone()) {
 		Log(Logs::Detail, Logs::None, "[CLIENT] Kicking char from zone, not allowed here");
-		GoToSafeCoords(database.GetZoneID("arena"), 0);
+		/*	MOD::VALLIK - Send to bind instead of arena		
+		GoToSafeCoords(database.GetZoneID("arena"), 0); */
+		GoToBind();
+//	ENDMOD::VALLIK
 		return;
 	}
 
