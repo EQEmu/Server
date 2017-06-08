@@ -3059,6 +3059,12 @@ int Mob::CheckStackConflict(uint16 spellid1, int caster_level1, uint16 spellid2,
 		if (IsEffectIgnoredInStacking(effect1))
 			continue;
 
+		// negative AC affects are skipped. Ex. Sun's Corona and Glacier Breath should stack
+		// There may be more SPAs we need to add here ....
+		// The client does just check base rather than calculating the affect change value.
+		if ((effect1 == SE_ArmorClass || effect1 == SE_ACv2) && sp2.base[i] < 0)
+			continue;
+
 		/*
 		If target is a npc and caster1 and caster2 exist
 		If Caster1 isn't the same as Caster2 and the effect is a DoT then ignore it.
