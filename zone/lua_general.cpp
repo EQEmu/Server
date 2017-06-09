@@ -1691,7 +1691,7 @@ luabind::scope lua_register_random() {
 			luabind::def("Int", &random_int),
 			luabind::def("Real", &random_real),
 			luabind::def("Roll", &random_roll_int),
-			luabind::def("Roll", &random_roll_real),
+			luabind::def("RollReal", &random_roll_real),
 			luabind::def("Roll0", &random_roll0)
 		];
 }
