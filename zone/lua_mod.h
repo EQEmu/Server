@@ -22,7 +22,9 @@ public:
 	bool AvoidDamage(Mob *self, Mob *other, DamageHitInfo &hit, bool &ignoreDefault);
 	bool CheckHitChance(Mob *self, Mob* other, DamageHitInfo &hit, bool &ignoreDefault);
 	void TryCriticalHit(Mob *self, Mob *defender, DamageHitInfo &hit, ExtraAttackOptions *opts, bool &ignoreDefault);
-
+	uint32 GetRequiredAAExperience(Client *self, bool &ignoreDefault);
+	uint32 GetEXPForLevel(Client *self, uint16 level, bool &ignoreDefault);
+	uint32 GetExperienceForKill(Client *self, Mob *against, bool &ignoreDefault);
 private:
 	LuaParser *parser_;
 	lua_State *L;
@@ -33,4 +35,7 @@ private:
 	bool m_has_avoid_damage;
 	bool m_has_check_hit_chance;
 	bool m_has_try_critical_hit;
+	bool m_has_get_required_aa_experience;
+	bool m_has_get_exp_for_level;
+	bool m_has_get_experience_for_kill;
 };

@@ -959,6 +959,13 @@ void LuaParser::ReloadQuests() {
 	if (load_order) {
 		char file_name[256] = { 0 };
 		while (fgets(file_name, 256, load_order) != nullptr) {
+			for (int i = 0; i < 256; ++i) {
+				if (file_name[i] == '\n') {
+					file_name[i] = 0;
+					break;
+				}
+			}
+
 			LoadScript("mods/" + std::string(file_name), file_name);
 			mods_.push_back(LuaMod(L, this, file_name));
 		}
@@ -1323,4 +1330,31 @@ void LuaParser::TryCriticalHit(Mob *self, Mob *defender, DamageHitInfo &hit, Ext
 	for (auto &mod : mods_) {
 		mod.TryCriticalHit(self, defender, hit, opts, ignoreDefault);
 	}
+}
+
+uint32 LuaParser::GetRequiredAAExperience(Client *self, bool &ignoreDefault)
+{
+	uint32 retval = false;
+	for (auto &mod : mods_) {
+		retval = mod.GetRequiredAAExperience(self, ignoreDefault);
+	}
+	return retval;
+}
+
+uint32 LuaParser::GetEXPForLevel(Client *self, uint16 level, bool &ignoreDefault)
+{
+	uint32 retval = false;
+	for (auto &mod : mods_) {
+		retval = mod.GetEXPForLevel(self, level, ignoreDefault);
+	}
+	return retval;
+}
+
+uint32 LuaParser::GetExperienceForKill(Client *self, Mob *against, bool &ignoreDefault)
+{
+	uint32 retval = false;
+	for (auto &mod : mods_) {
+		retval = mod.GetExperienceForKill(self, against, ignoreDefault);
+	}
+	return retval;
 }

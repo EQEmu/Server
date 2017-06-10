@@ -1355,8 +1355,7 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 
 	/* Set Total Seconds Played */
 	TotalSecondsPlayed = m_pp.timePlayedMin * 60;
-	/* Set Max AA XP */
-	max_AAXP = RuleI(AA, ExpPerPoint);
+
 	/* If we can maintain intoxication across zones, check for it */
 	if (!RuleB(Character, MaintainIntoxicationAcrossZones))
 		m_pp.intoxication = 0;

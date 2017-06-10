@@ -95,6 +95,9 @@ public:
 	bool AvoidDamage(Mob *self, Mob *other, DamageHitInfo &hit, bool &ignoreDefault);
 	bool CheckHitChance(Mob *self, Mob* other, DamageHitInfo &hit, bool &ignoreDefault);
 	void TryCriticalHit(Mob *self, Mob *defender, DamageHitInfo &hit, ExtraAttackOptions *opts, bool &ignoreDefault);
+	uint32 GetRequiredAAExperience(Client *self, bool &ignoreDefault);
+	uint32 GetEXPForLevel(Client *self, uint16 level, bool &ignoreDefault);
+	uint32 GetExperienceForKill(Client *self, Mob *against, bool &ignoreDefault);
 
 private:
 	LuaParser();

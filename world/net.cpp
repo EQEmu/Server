@@ -392,12 +392,12 @@ int main(int argc, char** argv) {
 	server_connection->Listen(server_opts);
 	Log(Logs::General, Logs::World_Server, "Server (TCP) listener started.");
 
-	server_connection->OnConnectionIdentified("Zone", [](std::shared_ptr<EQ::Net::ServertalkServerConnection> connection) {
+	server_connection->OnConnectionIdentified("Zone", [&console](std::shared_ptr<EQ::Net::ServertalkServerConnection> connection) {
 		LogF(Logs::General, Logs::World_Server, "New Zone Server connection from {2} at {0}:{1}",
 			connection->Handle()->RemoteIP(), connection->Handle()->RemotePort(), connection->GetUUID());
 
 		numzones++;
-		zoneserver_list.Add(new ZoneServer(connection));
+		zoneserver_list.Add(new ZoneServer(connection, console.get()));
 	});
 
 	server_connection->OnConnectionRemoved("Zone", [](std::shared_ptr<EQ::Net::ServertalkServerConnection> connection) {

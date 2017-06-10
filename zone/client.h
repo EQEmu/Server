@@ -571,6 +571,7 @@ public:
 	void AddCrystals(uint32 Radiant, uint32 Ebon);
 	void SendCrystalCounts();
 
+	uint32 GetExperienceForKill(Mob *against);
 	void AddEXP(uint32 in_add_exp, uint8 conlevel = 0xFF, bool resexp = false);
 	uint32 CalcEXP(uint8 conlevel = 0xFF);
 	void SetEXP(uint32 set_exp, uint32 set_aaxp, bool resexp=false);
@@ -796,12 +797,12 @@ public:
 	void AddAAPoints(uint32 points) { m_pp.aapoints += points; SendAlternateAdvancementStats(); }
 	int GetAAPoints() { return m_pp.aapoints; }
 	int GetSpentAA() { return m_pp.aapoints_spent; }
+	uint32 GetRequiredAAExperience();
 
 	//old AA methods that we still use
 	void ResetAA();
 	void RefundAA();
 	void SendClearAA();
-	inline uint32 GetMaxAAXP(void) const { return max_AAXP; }
 	inline uint32 GetAAXP() const { return m_pp.expAA; }
 	inline uint32 GetAAPercent() const { return m_epp.perAA; }
 	int16 CalcAAFocus(focusType type, const AA::Rank &rank, uint16 spell_id);
@@ -1493,7 +1494,6 @@ private:
 
 	uint32 tribute_master_id;
 
-	uint32 max_AAXP;
 	bool npcflag;
 	uint8 npclevel;
 	bool feigned;

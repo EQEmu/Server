@@ -39,6 +39,9 @@ void LuaMod::Init()
 	m_has_avoid_damage = parser_->HasFunction("AvoidDamage", package_name_);
 	m_has_check_hit_chance = parser_->HasFunction("CheckHitChance", package_name_);
 	m_has_try_critical_hit = parser_->HasFunction("TryCriticalHit", package_name_);
+	m_has_get_required_aa_experience = parser_->HasFunction("GetRequiredAAExperience", package_name_);
+	m_has_get_exp_for_level = parser_->HasFunction("GetEXPForLevel", package_name_);
+	m_has_get_experience_for_kill = parser_->HasFunction("GetExperienceForKill", package_name_);
 }
 
 void PutDamageHitInfo(lua_State *L, luabind::adl::object &e, DamageHitInfo &hit) {
@@ -388,8 +391,6 @@ bool LuaMod::CheckHitChance(Mob *self, Mob* other, DamageHitInfo &hit, bool &ign
 	return retval;
 }
 
-//void TryCriticalHit(Mob *self, Mob *defender, DamageHitInfo &hit, ExtraAttackOptions *opts, bool &ignoreDefault);
-
 void LuaMod::TryCriticalHit(Mob *self, Mob *defender, DamageHitInfo &hit, ExtraAttackOptions *opts, bool &ignoreDefault) {
 	int start = lua_gettop(L);
 	ignoreDefault = false;
@@ -439,4 +440,162 @@ void LuaMod::TryCriticalHit(Mob *self, Mob *defender, DamageHitInfo &hit, ExtraA
 	if (n > 0) {
 		lua_pop(L, n);
 	}
+}
+
+uint32 LuaMod::GetRequiredAAExperience(Client *self, bool &ignoreDefault)
+{
+	int start = lua_gettop(L);
+	ignoreDefault = false;
+	uint32 retval = 0;
+
+	try {
+		if (!m_has_get_required_aa_experience) {
+			return retval;
+		}
+
+		lua_getfield(L, LUA_REGISTRYINDEX, package_name_.c_str());
+		lua_getfield(L, -1, "GetRequiredAAExperience");
+
+		Lua_Client l_self(self);
+		luabind::adl::object e = luabind::newtable(L);
+		e["self"] = l_self;
+		e.push(L);
+
+		if (lua_pcall(L, 1, 1, 0)) {
+			std::string error = lua_tostring(L, -1);
+			parser_->AddError(error);
+			lua_pop(L, 1);
+			return retval;
+		}
+
+		if (lua_type(L, -1) == LUA_TTABLE) {
+			luabind::adl::object ret(luabind::from_stack(L, -1));
+			auto IgnoreDefaultObj = ret["IgnoreDefault"];
+			if (luabind::type(IgnoreDefaultObj) == LUA_TBOOLEAN) {
+				ignoreDefault = ignoreDefault || luabind::object_cast<bool>(IgnoreDefaultObj);
+			}
+
+			auto returnValueObj = ret["ReturnValue"];
+			if (luabind::type(returnValueObj) == LUA_TNUMBER) {
+				retval = luabind::object_cast<uint32>(returnValueObj);
+			}
+		}
+	}
+	catch (std::exception &ex) {
+		parser_->AddError(ex.what());
+	}
+
+	int end = lua_gettop(L);
+	int n = end - start;
+	if (n > 0) {
+		lua_pop(L, n);
+	}
+
+	return retval;
+}
+
+uint32 LuaMod::GetEXPForLevel(Client *self, uint16 level, bool &ignoreDefault) {
+	int start = lua_gettop(L);
+	ignoreDefault = false;
+	uint32 retval = 0;
+
+	try {
+		if (!m_has_get_exp_for_level) {
+			return retval;
+		}
+
+		lua_getfield(L, LUA_REGISTRYINDEX, package_name_.c_str());
+		lua_getfield(L, -1, "GetEXPForLevel");
+
+		Lua_Client l_self(self);
+		luabind::adl::object e = luabind::newtable(L);
+		e["self"] = l_self;
+		e["level"] = level;
+		e.push(L);
+
+		if (lua_pcall(L, 1, 1, 0)) {
+			std::string error = lua_tostring(L, -1);
+			parser_->AddError(error);
+			lua_pop(L, 1);
+			return retval;
+		}
+
+		if (lua_type(L, -1) == LUA_TTABLE) {
+			luabind::adl::object ret(luabind::from_stack(L, -1));
+			auto IgnoreDefaultObj = ret["IgnoreDefault"];
+			if (luabind::type(IgnoreDefaultObj) == LUA_TBOOLEAN) {
+				ignoreDefault = ignoreDefault || luabind::object_cast<bool>(IgnoreDefaultObj);
+			}
+
+			auto returnValueObj = ret["ReturnValue"];
+			if (luabind::type(returnValueObj) == LUA_TNUMBER) {
+				retval = luabind::object_cast<uint32>(returnValueObj);
+			}
+		}
+	}
+	catch (std::exception &ex) {
+		parser_->AddError(ex.what());
+	}
+
+	int end = lua_gettop(L);
+	int n = end - start;
+	if (n > 0) {
+		lua_pop(L, n);
+	}
+
+	return retval;
+}
+
+uint32 LuaMod::GetExperienceForKill(Client *self, Mob *against, bool &ignoreDefault)
+{
+	int start = lua_gettop(L);
+	ignoreDefault = false;
+	uint32 retval = 0;
+
+	try {
+		if (!m_has_get_experience_for_kill) {
+			return retval;
+		}
+
+		lua_getfield(L, LUA_REGISTRYINDEX, package_name_.c_str());
+		lua_getfield(L, -1, "GetExperienceForKill");
+
+		Lua_Client l_self(self);
+		Lua_Mob l_other(against);
+		luabind::adl::object e = luabind::newtable(L);
+		e["self"] = l_self;
+		e["other"] = l_other;
+		e.push(L);
+
+		if (lua_pcall(L, 1, 1, 0)) {
+			std::string error = lua_tostring(L, -1);
+			parser_->AddError(error);
+			lua_pop(L, 1);
+			return retval;
+		}
+
+		if (lua_type(L, -1) == LUA_TTABLE) {
+			luabind::adl::object ret(luabind::from_stack(L, -1));
+			auto IgnoreDefaultObj = ret["IgnoreDefault"];
+			if (luabind::type(IgnoreDefaultObj) == LUA_TBOOLEAN) {
+				ignoreDefault = ignoreDefault || luabind::object_cast<bool>(IgnoreDefaultObj);
+			}
+
+			auto returnValueObj = ret["ReturnValue"];
+			if (luabind::type(returnValueObj) == LUA_TNUMBER) {
+				retval = luabind::object_cast<uint32>(returnValueObj);
+			}
+		}
+	}
+	catch (std::exception &ex) {
+		parser_->AddError(ex.what());
+	}
+
+	int end = lua_gettop(L);
+	int n = end - start;
+	if (n > 0) {
+		lua_pop(L, n);
+	}
+
+	return retval;
 }

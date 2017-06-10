@@ -2222,7 +2222,7 @@ bool NPC::Death(Mob* killer_mob, int32 damage, uint16 spell, EQEmu::skills::Skil
 		Group *kg = entity_list.GetGroupByClient(give_exp_client);
 		Raid *kr = entity_list.GetRaidByClient(give_exp_client);
 
-		int32 finalxp = EXP_FORMULA;
+		int32 finalxp = give_exp_client->GetExperienceForKill(this);
 		finalxp = give_exp_client->mod_client_xp(finalxp, this);
 
 		if (kr) {
