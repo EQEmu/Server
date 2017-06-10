@@ -196,7 +196,7 @@ bool Client::CanFish() {
 
 		float step_size = RuleR(Watermap, FishingLineStepSize);
 
-		for(float i = 0.0f; i < len; i += step_size) {
+		for(float i = 0.0f; i < LineLength; i += step_size) {
 			glm::vec3 dest(rodPosition.x, rodPosition.y, m_Position.z - i);
 
 			bool in_lava = zone->watermap->InLava(dest);

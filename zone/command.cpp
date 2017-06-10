@@ -8746,9 +8746,9 @@ void command_object(Client *c, const Seperator *sep)
 		// Verify no other objects already in this spot (accidental double-click of Hotkey?)
 		query = StringFormat(
 		    "SELECT COUNT(*) FROM object WHERE zoneid = %u "
-		    "AND version=%u AND (posx BETWEEN %.1f AND %.1f) "
-		    "AND (posy BETWEEN %.1f AND %.1f) "
-		    "AND (posz BETWEEN %.1f AND %.1f)",
+		    "AND version=%u AND (xpos BETWEEN %.1f AND %.1f) "
+		    "AND (ypos BETWEEN %.1f AND %.1f) "
+		    "AND (zpos BETWEEN %.1f AND %.1f)",
 		    zone->GetZoneID(), zone->GetInstanceVersion(), od.x - 0.2f,
 		    od.x + 0.2f,	       // Yes, we're actually using a bounding box instead of a radius.
 		    od.y - 0.2f, od.y + 0.2f,  // Much less processing power used this way.
