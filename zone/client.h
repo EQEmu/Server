@@ -70,6 +70,7 @@ namespace EQEmu
 #include <set>
 #include <algorithm>
 #include <memory>
+#include <deque>
 
 
 #define CLIENT_TIMEOUT 90000
@@ -209,7 +210,7 @@ struct ClientReward
 
 class ClientFactory {
 public:
-	Client *MakeClient(std::shared_ptr<EQStream> ieqs);
+	Client *MakeClient(std::shared_ptr<EQStreamInterface> ieqs);
 };
 
 class Client : public Mob
@@ -350,6 +351,8 @@ public:
 	inline PetInfo* GetPetInfo(uint16 pet) { return (pet==1)?&m_suspendedminion:&m_petinfo; }
 	inline InspectMessage_Struct& GetInspectMessage() { return m_inspect_message; }
 	inline const InspectMessage_Struct& GetInspectMessage() const { return m_inspect_message; }
+
+	void SetPetCommandState(int button, int state);
 
 	bool CheckAccess(int16 iDBLevel, int16 iDefaultLevel);
 
@@ -942,6 +945,7 @@ public:
 	inline bool HasSpellScribed(int spellid) { return (FindSpellBookSlotBySpellID(spellid) != -1 ? true : false); }
 	uint16 GetMaxSkillAfterSpecializationRules(EQEmu::skills::SkillType skillid, uint16 maxSkill);
 	void SendPopupToClient(const char *Title, const char *Text, uint32 PopupID = 0, uint32 Buttons = 0, uint32 Duration = 0);
+	void SendFullPopup(const char *Title, const char *Text, uint32 PopupID = 0, uint32 NegativeID = 0, uint32 Buttons = 0, uint32 Duration = 0, const char *ButtonName0 = 0, const char *ButtonName1 = 0, uint32 SoundControls = 0);
 	void SendWindow(uint32 PopupID, uint32 NegativeID, uint32 Buttons, const char *ButtonName0, const char *ButtonName1, uint32 Duration, int title_type, Client* target, const char *Title, const char *Text, ...);
 	bool PendingTranslocate;
 	time_t TranslocateTime;
@@ -1424,7 +1428,7 @@ private:
 	bool AddPacket(const EQApplicationPacket *, bool);
 	bool AddPacket(EQApplicationPacket**, bool);
 	bool SendAllPackets();
-	LinkedList<CLIENTPACKET *> clientpackets;
+	std::deque<std::unique_ptr<CLIENTPACKET>> clientpackets;
 
 	//Zoning related stuff
 	void SendZoneCancel(ZoneChange_Struct *zc);

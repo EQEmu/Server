@@ -25,6 +25,7 @@
 #include "../common/skills.h"
 #include "../common/spdat.h"
 #include "../common/data_verification.h"
+#include "../common/misc_functions.h"
 
 #include "quest_parser_collection.h"
 #include "string_ids.h"
@@ -1239,6 +1240,23 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 				else
 				{
 					MakePet(spell_id, spell.teleport_zone);
+					// TODO: we need to sync the states for these clients ...
+					// Will fix buttons for now
+					if (IsClient()) {
+						auto c = CastToClient();
+						if (c->ClientVersionBit() & EQEmu::versions::bit_UFAndLater) {
+							c->SetPetCommandState(PET_BUTTON_SIT, 0);
+							c->SetPetCommandState(PET_BUTTON_STOP, 0);
+							c->SetPetCommandState(PET_BUTTON_REGROUP, 0);
+							c->SetPetCommandState(PET_BUTTON_FOLLOW, 1);
+							c->SetPetCommandState(PET_BUTTON_GUARD, 0);
+							c->SetPetCommandState(PET_BUTTON_TAUNT, 1);
+							c->SetPetCommandState(PET_BUTTON_HOLD, 0);
+							c->SetPetCommandState(PET_BUTTON_GHOLD, 0);
+							c->SetPetCommandState(PET_BUTTON_FOCUS, 0);
+							c->SetPetCommandState(PET_BUTTON_SPELLHOLD, 0);
+						}
+					}
 				}
 				break;
 			}
@@ -6611,9 +6629,9 @@ bool Mob::TrySpellProjectile(Mob* spell_target,  uint16 spell_id, float speed){
 
 	if (CheckLosFN(spell_target)) {
 
-		float speed_mod = speed * 0.45f; //Constant for adjusting speeds to match calculated impact time.
+		float speed_mod = speed; //Constant for adjusting speeds to match calculated impact time.
 		float distance = spell_target->CalculateDistance(GetX(), GetY(), GetZ());
-		float hit = 60.0f + (distance / speed_mod);
+		float hit = 1200.0f + (10 * distance / speed_mod);
 
 		ProjectileAtk[slot].increment = 1;
 		ProjectileAtk[slot].hit_increment = static_cast<uint16>(hit); //This projected hit time if target does NOT MOVE
@@ -6668,23 +6686,26 @@ void Mob::ResourceTap(int32 damage, uint16 spellid)
 
 	for (int i = 0; i < EFFECT_COUNT; i++) {
 		if (spells[spellid].effectid[i] == SE_ResourceTap) {
-			damage += (damage * spells[spellid].base[i]) / 100;
-
-			if (spells[spellid].max[i] && (damage > spells[spellid].max[i]))
-				damage = spells[spellid].max[i];
-
-			if (spells[spellid].base2[i] == 0) { // HP Tap
-				if (damage > 0)
-					HealDamage(damage);
-				else
-					Damage(this, -damage, 0, EQEmu::skills::SkillEvocation, false);
+			damage = (damage * spells[spellid].base[i]) / 1000;
+			
+			if (damage) {
+				if (spells[spellid].max[i] && (damage > spells[spellid].max[i]))
+					damage = spells[spellid].max[i];
+	
+				if (spells[spellid].base2[i] == 0) { // HP Tap
+					if (damage > 0)
+						HealDamage(damage);
+					else
+						Damage(this, -damage, 0, EQEmu::skills::SkillEvocation, false);
+				}
+	
+				if (spells[spellid].base2[i] == 1) // Mana Tap
+					SetMana(GetMana() + damage);
+	
+				if (spells[spellid].base2[i] == 2 && IsClient()) // Endurance Tap
+					CastToClient()->SetEndurance(CastToClient()->GetEndurance() + damage);
+			
 			}
-
-			if (spells[spellid].base2[i] == 1) // Mana Tap
-				SetMana(GetMana() + damage);
-
-			if (spells[spellid].base2[i] == 2 && IsClient()) // Endurance Tap
-				CastToClient()->SetEndurance(CastToClient()->GetEndurance() + damage);
 		}
 	}
 }

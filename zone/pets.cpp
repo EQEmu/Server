@@ -706,7 +706,7 @@ bool ZoneDatabase::GetBasePetItems(int32 equipmentset, uint32 *items) {
 	// all of the result rows. Check if we have something in the slot
 	// already. If no, add the item id to the equipment array.
 	while (curset >= 0 && depth < 5) {
-		std::string  query = StringFormat("SELECT nested_set FROM pets_equipmentset WHERE set_id = '%s'", curset);
+		std::string  query = StringFormat("SELECT nested_set FROM pets_equipmentset WHERE set_id = '%d'", curset);
 		auto results = QueryDatabase(query);
 		if (!results.Success()) {
 			return false;
@@ -721,7 +721,7 @@ bool ZoneDatabase::GetBasePetItems(int32 equipmentset, uint32 *items) {
 		auto row = results.begin();
 		nextset = atoi(row[0]);
 
-		query = StringFormat("SELECT slot, item_id FROM pets_equipmentset_entries WHERE set_id='%s'", curset);
+		query = StringFormat("SELECT slot, item_id FROM pets_equipmentset_entries WHERE set_id='%d'", curset);
 		results = QueryDatabase(query);
 		if (results.Success()) {
 			for (row = results.begin(); row != results.end(); ++row)

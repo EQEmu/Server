@@ -86,7 +86,7 @@ namespace UF
 
 		//ok, now we have what we need to register.
 
-		EQStream::Signature signature;
+		EQStreamInterface::Signature signature;
 		std::string pname;
 
 		//register our world signature.
@@ -1607,6 +1607,7 @@ namespace UF
 		memcpy(eq->Title, emu->Title, sizeof(eq->Title));
 		memcpy(eq->Text, emu->Text, sizeof(eq->Text));
 		OUT(Buttons);
+		OUT(SoundControls);
 		OUT(Duration);
 		OUT(PopupID);
 		OUT(NegativeID);

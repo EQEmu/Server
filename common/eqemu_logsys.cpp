@@ -103,6 +103,7 @@ void EQEmuLogSys::LoadLogSettingsDefaults()
 	log_settings[Logs::Crash].log_to_console = Logs::General;
 	log_settings[Logs::MySQLError].log_to_console = Logs::General;
 	log_settings[Logs::Login_Server].log_to_console = Logs::General;
+	log_settings[Logs::Headless_Client].log_to_console = Logs::General;
 
 	/* Set Category enabled status on defaults */
 	log_settings[Logs::World_Server].is_category_enabled = 1;
@@ -128,6 +129,8 @@ void EQEmuLogSys::LoadLogSettingsDefaults()
 		platform_file_name = "login";
 	else if (EQEmuLogSys::log_platform == EQEmuExePlatform::ExePlatformLaunch)
 		platform_file_name = "launcher";
+	else if (EQEmuLogSys::log_platform == EQEmuExePlatform::ExePlatformHC)
+		platform_file_name = "hc";
 }
 
 std::string EQEmuLogSys::FormatOutMessageString(uint16 log_category, const std::string &in_message)

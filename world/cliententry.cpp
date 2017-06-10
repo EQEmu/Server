@@ -46,6 +46,10 @@ ClientListEntry::ClientListEntry(uint32 in_id, uint32 iLSID, const char* iLoginN
 	plocal=(local==1);
 
 	pinstance = 0;
+	pLFGFromLevel = 0;
+	pLFGToLevel = 0;
+	pLFGMatchFilter = false;
+	memset(pLFGComments, 0, 64);
 }
 
 ClientListEntry::ClientListEntry(uint32 in_id, uint32 iAccID, const char* iAccName, MD5& iMD5Pass, int16 iAdmin)
@@ -63,6 +67,10 @@ ClientListEntry::ClientListEntry(uint32 in_id, uint32 iAccID, const char* iAccNa
 	padmin = iAdmin;
 
 	pinstance = 0;
+	pLFGFromLevel = 0;
+	pLFGToLevel = 0;
+	pLFGMatchFilter = false;
+	memset(pLFGComments, 0, 64);
 }
 
 ClientListEntry::ClientListEntry(uint32 in_id, ZoneServer* iZS, ServerClientList_Struct* scl, int8 iOnline)
@@ -81,6 +89,10 @@ ClientListEntry::ClientListEntry(uint32 in_id, ZoneServer* iZS, ServerClientList
 	padmin = scl->Admin;
 
 	pinstance = 0;
+	pLFGFromLevel = 0;
+	pLFGToLevel = 0;
+	pLFGMatchFilter = false;
+	memset(pLFGComments, 0, 64);
 
 	if (iOnline >= CLE_Status_Zoning)
 		Update(iZS, scl, iOnline);
@@ -311,7 +323,6 @@ void ClientListEntry::ProcessTellQueue()
 	while (it != tell_queue.end()) {
 		pack = new ServerPacket(ServerOP_ChannelMessage, sizeof(ServerChannelMessage_Struct) + strlen((*it)->message) + 1);
 		memcpy(pack->pBuffer, *it, pack->size);
-		pack->Deflate();
 		Server()->SendPacket(pack);
 		safe_delete(pack);
 		safe_delete_array(*it);

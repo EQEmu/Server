@@ -132,7 +132,7 @@ void EQApplicationPacket::build_header_dump(char *buffer) const
 #ifdef STATIC_OPCODE
 	sprintf(buffer, "[OpCode 0x%04x Size=%u]\n", emu_opcode,size);
 #else
-	sprintf(buffer, "[OpCode %s Size=%u]",OpcodeManager::EmuToName(emu_opcode),size);
+	sprintf(buffer, "[OpCode %s(0x%04x) Size=%u]",OpcodeManager::EmuToName(emu_opcode), GetProtocolOpcode(), size);
 #endif
 }
 

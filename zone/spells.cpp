@@ -76,6 +76,7 @@ Copyright (C) 2001-2002 EQEMu Development Team (http://eqemu.org)
 #include "../common/spdat.h"
 #include "../common/string_util.h"
 #include "../common/data_verification.h"
+#include "../common/misc_functions.h"
 
 #include "quest_parser_collection.h"
 #include "string_ids.h"
@@ -2139,6 +2140,27 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, CastingSlot slot, ui
 
 		spell_target->CalcSpellPowerDistanceMod(spell_id, dist2);
 	}
+	//AE Duration spells were ignoring distance check from item clickies
+	if(ae_center != nullptr && ae_center != this) {
+		//casting a spell on somebody but ourself, make sure they are in range
+		float dist2 = DistanceSquared(m_Position, ae_center->GetPosition());
+		float range2 = range * range;
+		float min_range2 = spells[spell_id].min_range * spells[spell_id].min_range;
+		if(dist2 > range2) {
+			//target is out of range.
+			Log(Logs::Detail, Logs::Spells, "Spell %d: Spell target is out of range (squared: %f > %f)", spell_id, dist2, range2);
+			Message_StringID(13, TARGET_OUT_OF_RANGE);
+			return(false);
+		}
+		else if (dist2 < min_range2){
+			//target is too close range.
+			Log(Logs::Detail, Logs::Spells, "Spell %d: Spell target is too close (squared: %f < %f)", spell_id, dist2, min_range2);
+			Message_StringID(13, TARGET_TOO_CLOSE);
+			return(false);
+		}
+
+		ae_center->CalcSpellPowerDistanceMod(spell_id, dist2);
+	}
 
 	//
 	// Switch #2 - execute the spell
@@ -3035,6 +3057,12 @@ int Mob::CheckStackConflict(uint16 spellid1, int caster_level1, uint16 spellid2,
 
 		// big ol' list according to the client, wasn't that nice!
 		if (IsEffectIgnoredInStacking(effect1))
+			continue;
+
+		// negative AC affects are skipped. Ex. Sun's Corona and Glacier Breath should stack
+		// There may be more SPAs we need to add here ....
+		// The client does just check base rather than calculating the affect change value.
+		if ((effect1 == SE_ArmorClass || effect1 == SE_ACv2) && sp2.base[i] < 0)
 			continue;
 
 		/*

@@ -21,11 +21,11 @@
 #include "../common/global_define.h"
 #include "clientlist.h"
 #include "../common/opcodemgr.h"
-#include "../common/eq_stream_factory.h"
 #include "../common/rulesys.h"
 #include "../common/servertalk.h"
 #include "../common/platform.h"
 #include "../common/crash.h"
+#include "../common/event/event_loop.h"
 #include "database.h"
 #include "ucsconfig.h"
 #include "chatchannel.h"
@@ -33,10 +33,12 @@
 #include <list>
 #include <signal.h>
 
+#include "../common/net/tcp_server.h"
+#include "../common/net/servertalk_client_connection.h"
+
 ChatChannelList *ChannelList;
 Clientlist *g_Clientlist;
 EQEmuLogSys LogSys;
-TimeoutManager timeout_manager;
 Database database;
 WorldServer *worldserver = nullptr;
 
@@ -52,9 +54,6 @@ volatile bool RunLoops = true;
 void CatchSignal(int sig_num) {
 
 	RunLoops = false;
-
-	if(worldserver)
-		worldserver->Disconnect();
 }
 
 std::string GetMailPrefix() {
@@ -141,8 +140,6 @@ int main() {
 
 	worldserver = new WorldServer;
 
-	worldserver->Connect();
-
 	while(RunLoops) {
 
 		Timer::SetCurrentTime();
@@ -152,15 +149,9 @@ int main() {
 		if(ChannelListProcessTimer.Check())
 			ChannelList->Process();
 
-		if (InterserverTimer.Check()) {
-			if (worldserver->TryReconnect() && (!worldserver->Connected()))
-				worldserver->AsyncConnect();
-		}
-		worldserver->Process();
+		EQ::EventLoop::Get().Process();
 
-		timeout_manager.CheckTimeouts();
-
-		Sleep(100);
+		Sleep(5);
 	}
 
 	ChannelList->RemoveAllChannels();

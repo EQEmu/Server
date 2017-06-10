@@ -2,18 +2,11 @@
 #define LOGINSERVERLIST_H_
 
 #include "../common/servertalk.h"
-#include "../common/linked_list.h"
 #include "../common/timer.h"
 #include "../common/queue.h"
 #include "../common/eq_packet_structs.h"
 #include "../common/mutex.h"
-#include "../common/emu_tcp_connection.h"
-
-#ifdef _WINDOWS
-	void AutoInitLoginServer(void *tmp);
-#else
-	void *AutoInitLoginServer(void *tmp);
-#endif
+#include <list>
 
 class LoginServer;
 
@@ -22,10 +15,7 @@ public:
 	LoginServerList();
 	~LoginServerList();
 
-	void	Add(const char*, uint16, const char*, const char*);
-	void	InitLoginServer();
-
-	bool	Process();
+	void	Add(const char*, uint16, const char*, const char*, bool);
 
 	bool	SendInfo();
 	bool	SendNewInfo();
@@ -37,9 +27,10 @@ public:
 	bool	AllConnected();
 	bool	MiniLogin();
 	bool	CanUpdate();
+	size_t GetServerCount() const { return m_list.size(); }
 
 protected:
-	LinkedList<LoginServer*> list;
+	std::list<std::unique_ptr<LoginServer>> m_list;
 };
 
 

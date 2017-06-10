@@ -332,7 +332,7 @@ namespace EQEmu
 		};
 
 		struct ItemEffect_Struct {
-			int16	Effect;
+			int32	Effect;
 			uint8	Type;
 			uint8	Level;
 			uint8	Level2;

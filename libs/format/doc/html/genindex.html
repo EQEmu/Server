@@ -1,0 +1,452 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    
+    <title>Index &mdash; fmt 3.0.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/basic.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="_static/breathe.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '3.0.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+<meta name="description" content="Small, safe and fast formatting library">
+<meta name="keywords" content="C++, formatting, printf, string, library">
+<meta name="author" content="Victor Zverovich">
+<link rel="stylesheet" href="_static/fmt.css">
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+  ga('create', 'UA-20116650-4', 'fmtlib.net');
+  ga('send', 'pageview');
+</script>
+
+  </head>
+  <body role="document">
+<nav class="navbar navbar-inverse">
+  <div class="tb-container">
+    <div class="row">
+      <div class="navbar-content">
+        
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target=".navbar-collapse">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="index.html">{fmt}</a>
+        </div>
+
+        
+        <div class="collapse navbar-collapse">
+          <ul class="nav navbar-nav">
+            <li class="dropdown">
+              
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button"
+                 aria-expanded="false">3.0.0 <span class="caret"></span></a>
+              <ul class="dropdown-menu" role="menu">
+                <li><a href="http://fmtlib.net/2.0.0/">2.0.0</a></li>
+                <li><a href="http://fmtlib.net/1.1.0/">1.1.0</a></li>
+                <li><a href="http://fmtlib.net/1.0.0/">1.0.0</a></li>
+              </ul>
+            </li>
+            
+              
+              <li><a href="contents.html">Contents</a></li>
+              
+            
+              
+              <li><a href="usage.html">Usage</a></li>
+              
+            
+              
+              <li><a href="api.html">API</a></li>
+              
+            
+              
+              <li><a href="syntax.html">Syntax</a></li>
+              
+            
+          </ul>
+          
+            
+<form class="navbar-form navbar-right" role="search" action="search.html" method="get">
+  <div class="form-group">
+    <input type="text" name="q" class="form-control" placeholder="Search" >
+  </div>
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+  
+</form>
+          
+        </div> 
+      </div> 
+    </div> 
+  </div> 
+</nav>
+
+
+
+<div class="tb-container">
+  <div class="row">
+    
+
+    <div class="content">
+      
+
+<h1 id="index">Index</h1>
+
+<div class="genindex-jumpbox">
+ <a href="#F"><strong>F</strong></a>
+ 
+</div>
+<h2 id="F">F</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%" valign="top"><dl>
+      
+  <dt><a href="api.html#_CPPv2N3fmt3argE9StringRefRK1T">fmt::arg (C++ function)</a>
+  </dt>
+
+      
+  <dt><a href="api.html#_CPPv2N3fmt12ArgFormatterE">fmt::ArgFormatter (C++ class)</a>
+  </dt>
+
+      
+  <dt><a href="api.html#_CPPv2N3fmt12ArgFormatter12ArgFormatterER14BasicFormatterI4CharER10FormatSpecPK4Char">fmt::ArgFormatter::ArgFormatter (C++ function)</a>
+  </dt>
+
+      
+  <dt><a href="api.html#_CPPv2N3fmt7ArgListE">fmt::ArgList (C++ class)</a>
+  </dt>
+
+      
+  <dt><a href="api.html#_CPPv2N3fmt7ArgListixEj">fmt::ArgList::operator[] (C++ function)</a>
+  </dt>
+
+      
+  <dt><a href="api.html#_CPPv2N3fmt10ArgVisitorE">fmt::ArgVisitor (C++ class)</a>
+  </dt>
+
+      
+  <dt><a href="api.html#_CPPv2N3fmt10ArgVisitor5visitERK3Arg">fmt::ArgVisitor::visit (C++ function)</a>
+  </dt>
+
+      
+  <dt><a href="api.html#_CPPv2N3fmt10ArgVisitor16visit_any_doubleE1T">fmt::ArgVisitor::visit_any_double (C++ function)</a>
+  </dt>
+
+      
+  <dt><a href="api.html#_CPPv2N3fmt10ArgVisitor13visit_any_intE1T">fmt::ArgVisitor::visit_any_int (C++ function)</a>
+  </dt>
+
+      
+  <dt><a href="api.html#_CPPv2N3fmt10ArgVisitor10visit_boolEb">fmt::ArgVisitor::visit_bool (C++ function)</a>
+  </dt>
+
+      
+  <dt><a href="api.html#_CPPv2N3fmt10ArgVisitor10visit_charEi">fmt::ArgVisitor::visit_char (C++ function)</a>
+  </dt>
+
+      
+  <dt><a href="api.html#_CPPv2N3fmt10ArgVisitor13visit_cstringEPKc">fmt::ArgVisitor::visit_cstring (C++ function)</a>
+  </dt>
+
+      
+  <dt><a href="api.html#_CPPv2N3fmt10ArgVisitor12visit_customEN3Arg11CustomValueE">fmt::ArgVisitor::visit_custom (C++ function)</a>
+  </dt>
+
+      
+  <dt><a href="api.html#_CPPv2N3fmt10ArgVisitor12visit_doubleEd">fmt::ArgVisitor::visit_double (C++ function)</a>
+  </dt>
+
+      
+  <dt><a href="api.html#_CPPv2N3fmt10ArgVisitor9visit_intEi">fmt::ArgVisitor::visit_int (C++ function)</a>
+  </dt>
+
+      
+  <dt><a href="api.html#_CPPv2N3fmt10ArgVisitor17visit_long_doubleEe">fmt::ArgVisitor::visit_long_double (C++ function)</a>
+  </dt>
+
+      
+  <dt><a href="api.html#_CPPv2N3fmt10ArgVisitor15visit_long_longE8LongLong">fmt::ArgVisitor::visit_long_long (C++ function)</a>
+  </dt>
+
+      
+  <dt><a href="api.html#_CPPv2N3fmt10ArgVisitor13visit_pointerEPKv">fmt::ArgVisitor::visit_pointer (C++ function)</a>
+  </dt>
+
+      
+  <dt><a href="api.html#_CPPv2N3fmt10ArgVisitor12visit_stringEN3Arg11StringValueIcEE">fmt::ArgVisitor::visit_string (C++ function)</a>
+  </dt>
+
+      
+  <dt><a href="api.html#_CPPv2N3fmt10ArgVisitor10visit_uintEj">fmt::ArgVisitor::visit_uint (C++ function)</a>
+  </dt>
+
+      
+  <dt><a href="api.html#_CPPv2N3fmt10ArgVisitor16visit_ulong_longE9ULongLong">fmt::ArgVisitor::visit_ulong_long (C++ function)</a>
+  </dt>
+
+      
+  <dt><a href="api.html#_CPPv2N3fmt10ArgVisitor13visit_wstringEN3Arg11StringValueIwEE">fmt::ArgVisitor::visit_wstring (C++ function)</a>
+  </dt>
+
+      
+  <dt><a href="api.html#_CPPv2N3fmt17BasicArgFormatterE">fmt::BasicArgFormatter (C++ class)</a>
+  </dt>
+
+      
+  <dt><a href="api.html#_CPPv2N3fmt17BasicArgFormatter17BasicArgFormatterER14BasicFormatterI4Char4ImplER10FormatSpecPK4Char">fmt::BasicArgFormatter::BasicArgFormatter (C++ function)</a>
+  </dt>
+
+      
+  <dt><a href="api.html#_CPPv2N3fmt17BasicArgFormatter12visit_customEN8internal3Arg11CustomValueE">fmt::BasicArgFormatter::visit_custom (C++ function)</a>
+  </dt>
+
+      
+  <dt><a href="api.html#_CPPv2N3fmt16BasicArrayWriterE">fmt::BasicArrayWriter (C++ class)</a>
+  </dt>
+
+      
+  <dt><a href="api.html#_CPPv2N3fmt16BasicArrayWriter16BasicArrayWriterEP4CharNSt6size_tE">fmt::BasicArrayWriter::BasicArrayWriter (C++ function)</a>, <a href="api.html#_CPPv2N3fmt16BasicArrayWriter16BasicArrayWriterERASIZE_4Char">[1]</a>
+  </dt>
+
+      
+  <dt><a href="api.html#_CPPv2N3fmt15BasicCStringRefE">fmt::BasicCStringRef (C++ class)</a>
+  </dt>
+
+      
+  <dt><a href="api.html#_CPPv2N3fmt15BasicCStringRef15BasicCStringRefEPK4Char">fmt::BasicCStringRef::BasicCStringRef (C++ function)</a>, <a href="api.html#_CPPv2N3fmt15BasicCStringRef15BasicCStringRefERKNSt12basic_stringI4CharEE">[1]</a>
+  </dt>
+
+      
+  <dt><a href="api.html#_CPPv2N3fmt15BasicCStringRef5c_strEv">fmt::BasicCStringRef::c_str (C++ function)</a>
+  </dt>
+
+      
+  <dt><a href="api.html#_CPPv2N3fmt14BasicFormatterE">fmt::BasicFormatter (C++ class)</a>
+  </dt>
+
+      
+  <dt><a href="api.html#_CPPv2N3fmt14BasicFormatter14BasicFormatterERK7ArgListR11BasicWriterI4CharE">fmt::BasicFormatter::BasicFormatter (C++ function)</a>
+  </dt>
+
+      
+  <dt><a href="api.html#_CPPv2N3fmt14BasicFormatter4CharE">fmt::BasicFormatter::Char (C++ type)</a>
+  </dt>
+
+      
+  <dt><a href="api.html#_CPPv2N3fmt14BasicFormatter6formatE15BasicCStringRefI4CharE">fmt::BasicFormatter::format (C++ function)</a>
+  </dt>
+
+      
+  <dt><a href="api.html#_CPPv2N3fmt14BasicFormatter6writerEv">fmt::BasicFormatter::writer (C++ function)</a>
+  </dt>
+
+      
+  <dt><a href="api.html#_CPPv2N3fmt17BasicMemoryWriterE">fmt::BasicMemoryWriter (C++ class)</a>
+  </dt>
+
+      
+  <dt><a href="api.html#_CPPv2N3fmt17BasicMemoryWriter17BasicMemoryWriterERR17BasicMemoryWriter">fmt::BasicMemoryWriter::BasicMemoryWriter (C++ function)</a>
+  </dt>
+
+      
+  <dt><a href="api.html#_CPPv2N3fmt17BasicMemoryWriteraSERR17BasicMemoryWriter">fmt::BasicMemoryWriter::operator= (C++ function)</a>
+  </dt>
+
+  </dl></td>
+  <td style="width: 33%" valign="top"><dl>
+      
+  <dt><a href="api.html#_CPPv2N3fmt14BasicStringRefE">fmt::BasicStringRef (C++ class)</a>
+  </dt>
+
+      
+  <dt><a href="api.html#_CPPv2N3fmt14BasicStringRef14BasicStringRefEPK4Char">fmt::BasicStringRef::BasicStringRef (C++ function)</a>, <a href="api.html#_CPPv2N3fmt14BasicStringRef14BasicStringRefEPK4CharNSt6size_tE">[1]</a>, <a href="api.html#_CPPv2N3fmt14BasicStringRef14BasicStringRefERKNSt12basic_stringI4CharEE">[2]</a>
+  </dt>
+
+      
+  <dt><a href="api.html#_CPPv2N3fmt14BasicStringRef4dataEv">fmt::BasicStringRef::data (C++ function)</a>
+  </dt>
+
+      
+  <dt><a href="api.html#_CPPv2N3fmt14BasicStringRef4sizeEv">fmt::BasicStringRef::size (C++ function)</a>
+  </dt>
+
+      
+  <dt><a href="api.html#_CPPv2N3fmt14BasicStringRef9to_stringEv">fmt::BasicStringRef::to_string (C++ function)</a>
+  </dt>
+
+      
+  <dt><a href="api.html#_CPPv2N3fmt11BasicWriterE">fmt::BasicWriter (C++ class)</a>
+  </dt>
+
+      
+  <dt><a href="api.html#_CPPv2N3fmt11BasicWriter5c_strEv">fmt::BasicWriter::c_str (C++ function)</a>
+  </dt>
+
+      
+  <dt><a href="api.html#_CPPv2N3fmt11BasicWriter4dataEv">fmt::BasicWriter::data (C++ function)</a>
+  </dt>
+
+      
+  <dt><a href="api.html#_CPPv2N3fmt11BasicWriterlsE9ULongLong">fmt::BasicWriter::operator&lt;&lt; (C++ function)</a>, <a href="api.html#_CPPv2N3fmt11BasicWriterlsEN3fmt14BasicStringRefI4CharEE">[1]</a>, <a href="api.html#_CPPv2N3fmt11BasicWriterlsEc">[2]</a>, <a href="api.html#_CPPv2N3fmt11BasicWriterlsEe">[3]</a>
+  </dt>
+
+      
+  <dt><a href="api.html#_CPPv2N3fmt11BasicWriter4sizeEv">fmt::BasicWriter::size (C++ function)</a>
+  </dt>
+
+      
+  <dt><a href="api.html#_CPPv2N3fmt11BasicWriter3strEv">fmt::BasicWriter::str (C++ function)</a>
+  </dt>
+
+      
+  <dt><a href="api.html#_CPPv2N3fmt11BasicWriter5writeE15BasicCStringRefI4CharE7ArgList">fmt::BasicWriter::write (C++ function)</a>
+  </dt>
+
+      
+  <dt><a href="api.html#_CPPv2N3fmt11BasicWriterD0Ev">fmt::BasicWriter::~BasicWriter (C++ function)</a>
+  </dt>
+
+      
+  <dt><a href="api.html#_CPPv2N3fmt3binEi">fmt::bin (C++ function)</a>
+  </dt>
+
+      
+  <dt><a href="api.html#_CPPv2N3fmt6BufferE">fmt::Buffer (C++ class)</a>
+  </dt>
+
+      
+  <dt><a href="api.html#_CPPv2N3fmt6Buffer6appendEPK1UPK1U">fmt::Buffer::append (C++ function)</a>
+  </dt>
+
+      
+  <dt><a href="api.html#_CPPv2N3fmt6Buffer8capacityEv">fmt::Buffer::capacity (C++ function)</a>
+  </dt>
+
+      
+  <dt><a href="api.html#_CPPv2N3fmt6Buffer4growENSt6size_tE">fmt::Buffer::grow (C++ function)</a>
+  </dt>
+
+      
+  <dt><a href="api.html#_CPPv2N3fmt6Buffer7reserveENSt6size_tE">fmt::Buffer::reserve (C++ function)</a>
+  </dt>
+
+      
+  <dt><a href="api.html#_CPPv2N3fmt6Buffer6resizeENSt6size_tE">fmt::Buffer::resize (C++ function)</a>
+  </dt>
+
+      
+  <dt><a href="api.html#_CPPv2N3fmt6Buffer4sizeEv">fmt::Buffer::size (C++ function)</a>
+  </dt>
+
+      
+  <dt><a href="api.html#_CPPv2N3fmt6formatE10CStringRef7ArgList">fmt::format (C++ function)</a>
+  </dt>
+
+      
+  <dt><a href="api.html#_CPPv2N3fmt7fprintfEPNSt4FILEE10CStringRef7ArgList">fmt::fprintf (C++ function)</a>, <a href="api.html#_CPPv2N3fmt7fprintfERNSt7ostreamE10CStringRef7ArgList">[1]</a>
+  </dt>
+
+      
+  <dt><a href="api.html#_CPPv2N3fmt3hexEi">fmt::hex (C++ function)</a>
+  </dt>
+
+      
+  <dt><a href="api.html#_CPPv2N3fmt4hexuEi">fmt::hexu (C++ function)</a>
+  </dt>
+
+      
+  <dt><a href="api.html#_CPPv2N3fmt8literalsli2_aEPKcNSt6size_tE">fmt::literals::operator&#34;&#34;_a (C++ function)</a>
+  </dt>
+
+      
+  <dt><a href="api.html#_CPPv2N3fmt8literalsli7_formatEPKcNSt6size_tE">fmt::literals::operator&#34;&#34;_format (C++ function)</a>
+  </dt>
+
+      
+  <dt><a href="api.html#_CPPv2N3fmt3octEi">fmt::oct (C++ function)</a>
+  </dt>
+
+      
+  <dt><a href="api.html#_CPPv2N3fmt3padEij4Char">fmt::pad (C++ function)</a>
+  </dt>
+
+      
+  <dt><a href="api.html#_CPPv2N3fmt5printE10CStringRef7ArgList">fmt::print (C++ function)</a>, <a href="api.html#_CPPv2N3fmt5printEPNSt4FILEE10CStringRef7ArgList">[1]</a>, <a href="api.html#_CPPv2N3fmt5printERNSt7ostreamE10CStringRef7ArgList">[2]</a>
+  </dt>
+
+      
+  <dt><a href="api.html#_CPPv2N3fmt6printfE10CStringRef7ArgList">fmt::printf (C++ function)</a>
+  </dt>
+
+      
+  <dt><a href="api.html#_CPPv2N3fmt7sprintfE10CStringRef7ArgList">fmt::sprintf (C++ function)</a>
+  </dt>
+
+      
+  <dt><a href="api.html#_CPPv2N3fmt11SystemErrorE">fmt::SystemError (C++ class)</a>
+  </dt>
+
+      
+  <dt><a href="api.html#_CPPv2N3fmt11SystemError11SystemErrorEi10CStringRef">fmt::SystemError::SystemError (C++ function)</a>
+  </dt>
+
+      
+  <dt><a href="api.html#_CPPv2N3fmt12WindowsErrorE">fmt::WindowsError (C++ class)</a>
+  </dt>
+
+      
+  <dt><a href="api.html#_CPPv2N3fmt12WindowsError12WindowsErrorEi10CStringRef">fmt::WindowsError::WindowsError (C++ function)</a>
+  </dt>
+
+      
+  <dt><a href="api.html#c.FMT_CAPTURE">FMT_CAPTURE (C macro)</a>
+  </dt>
+
+      
+  <dt><a href="api.html#c.FMT_VARIADIC">FMT_VARIADIC (C macro)</a>
+  </dt>
+
+  </dl></td>
+</tr></table>
+
+
+
+    </div>
+  </div>
+</div>
+
+
+
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2012-2015, Victor Zverovich.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+    </div>
+
+<script src="_static/bootstrap.min.js"></script>
+
+  </body>
+</html>

@@ -1,5 +1,27 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 4/16/2017 ==
+KLS: Merge eqstream branch
+	-UDP client stack completely rewritten should both have better throughput and recover better (peq has had far fewer reports of desyncs).
+	-TCP Server to Server connection stack completely rewritten.
+		-Server connections reconnect much more reliably and quickly now.
+		-Now supports optional packet encryption via libsodium (https://download.libsodium.org/doc/).
+		-Protocol behind the tcp connections has changed (see breaking changes section).
+		-API significantly changed and should be easier to write new servers or handlers for.
+		-Telnet console connection has been separated out from the current port (see breaking changes section).
+			-Because of changes to the TCP stack, lsreconnect and echo have been disabled.
+	-The server tic rate has been changed to be approx 30 fps from 500+ fps.
+		-Changed how missiles and movement were calculated slightly to account for this (Missiles in particular are not perfect but close enough).
+	
+	-Breaking changes:
+		-Users who use the cmake install feature should be aware that the install directory is now %cmake_install_dir%/bin instead of just %cmake_install_dir%/
+		-To support new features such as encryption the underlying protocol had to change... however some servers such as the public login server will be slow to change so we've included a compatibility layer for legacy login connections:
+			-You should add <legacy>1</legacy> to the login section of your configuration file when connecting to a server that is using the old protocol.  
+			-The central eqemu login server uses the old protocol and probably will for the forseeable future so if your server is connecting to it be sure to add that tag to your configuration file in that section.
+			-Telnet no longer uses the same port as the Server to Server connection and because of this the tcp tag no longer has any effect on telnet connections.
+				-To enable telnet you need to add a telnet tag in the world section of configuration such as:
+					<telnet ip="0.0.0.0" port="9001" enabled="true"/>
+
 == 4/1/2017 ==
 Akkadius: Cleaned up some of the NPC to NPC aggro code, only do aggro checks to other NPC's when the NPC is flagged for it
 Akkadius: [Performance] Reworked how all log calls are made in the source

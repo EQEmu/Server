@@ -272,6 +272,12 @@ void Object::HandleCombine(Client* user, const NewCombine_Struct* in_combine, Ob
 		c_type = worldo->m_type;
 		inst = worldo->m_inst;
 		worldcontainer=true;
+		// if we're a world container with an item, use that too
+		if (inst) {
+			const EQEmu::ItemData* item = inst->GetItem();
+			if (item)
+				some_id = item->ID;
+		}
 	}
 	else {
 		inst = user_inv.GetItem(in_combine->container_slot);

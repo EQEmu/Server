@@ -684,7 +684,7 @@ bool NPC::Process()
 		if(viral_timer.Check()) {
 			viral_timer_counter++;
 			for(int i = 0; i < MAX_SPELL_TRIGGER*2; i+=2) {
-				if(viral_spells[i])	{
+				if(viral_spells[i] && spells[viral_spells[i]].viral_timer > 0)	{
 					if(viral_timer_counter % spells[viral_spells[i]].viral_timer == 0) {
 						SpreadVirus(viral_spells[i], viral_spells[i+1]);
 					}

@@ -1116,6 +1116,11 @@ struct PetCommand_Struct {
 /*004*/ uint32	target;
 };
 
+struct PetCommandState_Struct {
+/*00*/	uint32	button_id;
+/*04*/	uint32	state;
+};
+
 /*
 ** Delete Spawn
 ** Length: 4 Bytes
@@ -1690,6 +1695,7 @@ struct OnLevelMessage_Struct
 	uint32	Duration;
 	uint32	PopupID;
 	uint32	NegativeID;
+	uint32  SoundControls;
 	char	ButtonName0[25];
 	char	ButtonName1[25];
 };
