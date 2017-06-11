@@ -3,8 +3,6 @@
 #include <string>
 #include <vector>
 
-struct DIR;
-
 namespace EQ {
 	class Directory
 	{
@@ -15,6 +13,7 @@ namespace EQ {
 		bool Exists();
 		void GetFiles(std::vector<std::string> &files);
 	private:
-		DIR *m_dir;
+		struct impl;
+		impl *m_impl;
 	};
 }
