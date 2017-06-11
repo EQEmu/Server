@@ -363,7 +363,7 @@ function TryPetCriticalHit(self, defender, hit)
 	end
 	
 	local CritPetChance = owner:GetAABonuses():PetCriticalHit() + owner:GetItemBonuses():PetCriticalHit() + owner:GetSpellBonuses():PetCriticalHit();
-	local CritChanceBonus = GetCriticalChanceBonus(self, skill);
+	local CritChanceBonus = GetCriticalChanceBonus(self, hit.skill);
 
 	if (CritPetChance or critChance) then
 		critChance = critChance + CritPetChance;
@@ -375,7 +375,7 @@ function TryPetCriticalHit(self, defender, hit)
 
 		if(Random.RollReal(critChance)) then
 			local entity_list = eq.get_entity_list();
-			critMod = critMod + GetCritDmgMob(self, skill) * 2;
+			critMod = critMod + GetCritDmgMob(self, hit.skill) * 2;
 			hit.damage_done = (hit.damage_done * critMod) / 100;
 			entity_list:FilteredMessageClose(this, false, 200,
 					MT.CritMelee, Filter.MeleeCrits, string.format('%s scores a critical hit! (%d)',
