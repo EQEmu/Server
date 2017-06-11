@@ -960,7 +960,8 @@ void LuaParser::ReloadQuests() {
 		char file_name[256] = { 0 };
 		while (fgets(file_name, 256, load_order) != nullptr) {
 			for (int i = 0; i < 256; ++i) {
-				if (file_name[i] == '\n') {
+				auto c = file_name[i];
+				if (c == '\n' || c == '\r' || c == ' ') {
 					file_name[i] = 0;
 					break;
 				}
