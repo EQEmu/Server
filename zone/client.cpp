@@ -2337,7 +2337,9 @@ bool Client::CheckIncreaseSkill(EQEmu::skills::SkillType skillid, Mob *against_w
 		return false;
 	int skillval = GetRawSkill(skillid);
 	int maxskill = GetMaxSkillAfterSpecializationRules(skillid, MaxSkill(skillid));
-
+	char buffer[24] = { 0 };
+	snprintf(buffer, 23, "%d %d", skillid, skillval);
+	parse->EventPlayer(EVENT_USE_SKILL, this, buffer, 0);
 	if(against_who)
 	{
 		if(against_who->GetSpecialAbility(IMMUNE_AGGRO) || against_who->IsClient() ||
