@@ -1726,6 +1726,18 @@ int Lua_Mob::GetSkillDmgTaken(int skill) {
 	return self->GetSkillDmgTaken(static_cast<EQEmu::skills::SkillType>(skill));
 }
 
+int Lua_Mob::GetFcDamageAmtIncoming(Lua_Mob caster, uint32 spell_id, bool use_skill, uint16 skill)
+{
+	Lua_Safe_Call_Int();
+	return self->GetFcDamageAmtIncoming(caster, spell_id, use_skill, skill);
+}
+
+int Lua_Mob::GetSkillDmgAmt(uint16 skill)
+{
+	Lua_Safe_Call_Int();
+	return self->GetSkillDmgAmt(skill);
+}
+
 void Lua_Mob::SetAllowBeneficial(bool value) {
 	Lua_Safe_Call_Void();
 	self->SetAllowBeneficial(value);
@@ -2063,6 +2075,12 @@ int Lua_Mob::GetOrigBodyType()
 	return (int)self->GetOrigBodyType();
 }
 
+void Lua_Mob::CheckNumHitsRemaining(int type, int32 buff_slot, uint16 spell_id)
+{
+	Lua_Safe_Call_Void();
+	self->CheckNumHitsRemaining((NumHit)type, buff_slot, spell_id);
+}
+
 luabind::scope lua_register_mob() {
 	return luabind::class_<Lua_Mob, Lua_Entity>("Mob")
 		.def(luabind::constructor<>())
@@ -2359,6 +2377,8 @@ luabind::scope lua_register_mob() {
 		.def("ModSkillDmgTaken", (void(Lua_Mob::*)(int,int))&Lua_Mob::ModSkillDmgTaken)
 		.def("GetModSkillDmgTaken", (int(Lua_Mob::*)(int))&Lua_Mob::GetModSkillDmgTaken)
 		.def("GetSkillDmgTaken", (int(Lua_Mob::*)(int))&Lua_Mob::GetSkillDmgTaken)
+		.def("GetFcDamageAmtIncoming", (int(Lua_Mob::*)(int))&Lua_Mob::GetFcDamageAmtIncoming)
+		.def("GetSkillDmgAmt", (int(Lua_Mob::*)(int))&Lua_Mob::GetSkillDmgAmt)
 		.def("SetAllowBeneficial", (void(Lua_Mob::*)(bool))&Lua_Mob::SetAllowBeneficial)
 		.def("GetAllowBeneficial", (bool(Lua_Mob::*)(void))&Lua_Mob::GetAllowBeneficial)
 		.def("IsBeneficialAllowed", (bool(Lua_Mob::*)(Lua_Mob))&Lua_Mob::IsBeneficialAllowed)
@@ -2422,7 +2442,8 @@ luabind::scope lua_register_mob() {
 		.def("IsBerserk", &Lua_Mob::IsBerserk)
 		.def("TryFinishingBlow", &Lua_Mob::TryFinishingBlow)
 		.def("GetBodyType", &Lua_Mob::GetBodyType)
-		.def("GetOrigBodyType", &Lua_Mob::GetOrigBodyType);
+		.def("GetOrigBodyType", &Lua_Mob::GetOrigBodyType)
+		.def("CheckNumHitsRemaining", &Lua_Mob::CheckNumHitsRemaining);
 }
 
 luabind::scope lua_register_special_abilities() {

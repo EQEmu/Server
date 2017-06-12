@@ -331,6 +331,8 @@ public:
 	void ModSkillDmgTaken(int skill, int value);
 	int GetModSkillDmgTaken(int skill);
 	int GetSkillDmgTaken(int skill);
+	int GetFcDamageAmtIncoming(Lua_Mob caster, uint32 spell_id, bool use_skill, uint16 skill);
+	int GetSkillDmgAmt(uint16 skill);
 	void SetAllowBeneficial(bool value);
 	bool GetAllowBeneficial();
 	bool IsBeneficialAllowed(Lua_Mob target);
@@ -395,6 +397,7 @@ public:
 	bool TryFinishingBlow(Lua_Mob defender, int &damage);
 	int GetBodyType();
 	int GetOrigBodyType();
+	void CheckNumHitsRemaining(int type, int32 buff_slot, uint16 spell_id);
 };
 
 #endif
