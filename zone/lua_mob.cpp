@@ -2377,7 +2377,7 @@ luabind::scope lua_register_mob() {
 		.def("ModSkillDmgTaken", (void(Lua_Mob::*)(int,int))&Lua_Mob::ModSkillDmgTaken)
 		.def("GetModSkillDmgTaken", (int(Lua_Mob::*)(int))&Lua_Mob::GetModSkillDmgTaken)
 		.def("GetSkillDmgTaken", (int(Lua_Mob::*)(int))&Lua_Mob::GetSkillDmgTaken)
-		.def("GetFcDamageAmtIncoming", (int(Lua_Mob::*)(int))&Lua_Mob::GetFcDamageAmtIncoming)
+		.def("GetFcDamageAmtIncoming", &Lua_Mob::GetFcDamageAmtIncoming)
 		.def("GetSkillDmgAmt", (int(Lua_Mob::*)(int))&Lua_Mob::GetSkillDmgAmt)
 		.def("SetAllowBeneficial", (void(Lua_Mob::*)(bool))&Lua_Mob::SetAllowBeneficial)
 		.def("GetAllowBeneficial", (bool(Lua_Mob::*)(void))&Lua_Mob::GetAllowBeneficial)
