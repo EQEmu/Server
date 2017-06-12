@@ -42,6 +42,7 @@ void LuaMod::Init()
 	m_has_get_required_aa_experience = parser_->HasFunction("GetRequiredAAExperience", package_name_);
 	m_has_get_exp_for_level = parser_->HasFunction("GetEXPForLevel", package_name_);
 	m_has_get_experience_for_kill = parser_->HasFunction("GetExperienceForKill", package_name_);
+	m_has_common_outgoing_hit_success = parser_->HasFunction("CommonOutgoingHitSuccess", package_name_);
 }
 
 void PutDamageHitInfo(lua_State *L, luabind::adl::object &e, DamageHitInfo &hit) {
@@ -389,6 +390,58 @@ bool LuaMod::CheckHitChance(Mob *self, Mob* other, DamageHitInfo &hit, bool &ign
 	}
 
 	return retval;
+}
+
+void LuaMod::CommonOutgoingHitSuccess(Mob *self, Mob *other, DamageHitInfo &hit, ExtraAttackOptions *opts, bool &ignoreDefault)
+{
+	int start = lua_gettop(L);
+	ignoreDefault = false;
+
+	try {
+		if (!m_has_common_outgoing_hit_success) {
+			return;
+		}
+
+		lua_getfield(L, LUA_REGISTRYINDEX, package_name_.c_str());
+		lua_getfield(L, -1, "CommonOutgoingHitSuccess");
+
+		Lua_Mob l_self(self);
+		Lua_Mob l_other(other);
+		luabind::adl::object e = luabind::newtable(L);
+		e["self"] = l_self;
+		e["other"] = l_other;
+
+		PutDamageHitInfo(L, e, hit);
+		PutExtraAttackOptions(L, e, opts);
+		e.push(L);
+
+		if (lua_pcall(L, 1, 1, 0)) {
+			std::string error = lua_tostring(L, -1);
+			parser_->AddError(error);
+			lua_pop(L, 1);
+			return;
+		}
+
+		if (lua_type(L, -1) == LUA_TTABLE) {
+			luabind::adl::object ret(luabind::from_stack(L, -1));
+			auto IgnoreDefaultObj = ret["IgnoreDefault"];
+			if (luabind::type(IgnoreDefaultObj) == LUA_TBOOLEAN) {
+				ignoreDefault = ignoreDefault || luabind::object_cast<bool>(IgnoreDefaultObj);
+			}
+
+			GetDamageHitInfo(ret, hit);
+			GetExtraAttackOptions(ret, opts);
+		}
+	}
+	catch (std::exception &ex) {
+		parser_->AddError(ex.what());
+	}
+
+	int end = lua_gettop(L);
+	int n = end - start;
+	if (n > 0) {
+		lua_pop(L, n);
+	}
 }
 
 void LuaMod::TryCriticalHit(Mob *self, Mob *defender, DamageHitInfo &hit, ExtraAttackOptions *opts, bool &ignoreDefault) {

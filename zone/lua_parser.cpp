@@ -1333,6 +1333,13 @@ void LuaParser::TryCriticalHit(Mob *self, Mob *defender, DamageHitInfo &hit, Ext
 	}
 }
 
+void LuaParser::CommonOutgoingHitSuccess(Mob *self, Mob *other, DamageHitInfo &hit, ExtraAttackOptions *opts, bool &ignoreDefault)
+{
+	for (auto &mod : mods_) {
+		mod.CommonOutgoingHitSuccess(self, other, hit, opts, ignoreDefault);
+	}
+}
+
 uint32 LuaParser::GetRequiredAAExperience(Client *self, bool &ignoreDefault)
 {
 	uint32 retval = false;

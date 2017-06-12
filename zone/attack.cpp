@@ -4926,6 +4926,15 @@ void Mob::CommonOutgoingHitSuccess(Mob* defender, DamageHitInfo &hit, ExtraAttac
 	if (!defender)
 		return;
 
+#ifdef LUA_EQEMU
+	bool ignoreDefault = false;
+	LuaParser::Instance()->CommonOutgoingHitSuccess(this, defender, hit, opts, ignoreDefault);
+
+	if (ignoreDefault) {
+		return;
+	}
+#endif
+
 	// BER weren't parsing the halving
 	if (hit.skill == EQEmu::skills::SkillArchery ||
 		(hit.skill == EQEmu::skills::SkillThrowing && GetClass() != BERSERKER))

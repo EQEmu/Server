@@ -1,7 +1,7 @@
 SoftcapFactor = 1.88;
 MonkACBonusWeight = 15;
 NPCACFactor = 2.25;
-OldACSoftcapRules = false;
+OldACSoftcapRules = true;
 ClothACSoftcap = 75;
 LeatherACSoftcap = 100;
 MonkACSoftcap = 120;
@@ -40,6 +40,7 @@ HitBonusPerLevel = 1.2;
 AgiHitFactor = 0.01;
 WeaponSkillFalloff = 0.33;
 ArcheryHitPenalty = 0.25;
+UseOldDamageIntervalRules = true;
 
 function MeleeMitigation(e)
 	e.IgnoreDefault = true;
@@ -575,13 +576,13 @@ end
 
 function ClientGetMeleeMitDmg(defender, attacker, damage, min_damage, mitigation_rating, attack_rating)
 	if (not attacker:IsNPC() or UseOldDamageIntervalRules) then
-		return MobGetMeleeMitDmg(attacker, damage, min_damage, mitigation_rating, attack_rating);
+		return MobGetMeleeMitDmg(defender, attacker, damage, min_damage, mitigation_rating, attack_rating);
 	end
 	
 	local d = 10;
 	local dmg_interval = (damage - min_damage) / 19.0;
 	local dmg_bonus = min_damage - dmg_interval;
-	local spellMeleeMit =  (defender:GetSpellBonuses():MeleeMitigationEffect() + defender:GetItemBonuses():MeleeMitigationEffect() + defender:GetAABonuses():MeleeMitigationEffect()) / 100.0;
+	local spellMeleeMit = (defender:GetSpellBonuses():MeleeMitigationEffect() + defender:GetItemBonuses():MeleeMitigationEffect() + defender:GetAABonuses():MeleeMitigationEffect()) / 100.0;
 	if (defender:GetClass() == Class.WARRIOR) then
 		spellMeleeMit = spellMeleeMit + 0.05;
 	end
