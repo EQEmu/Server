@@ -189,6 +189,7 @@
 #define ServerOP_ReloadWorld 0x4009
 #define ServerOP_ReloadLogs 0x4010
 #define ServerOP_ReloadPerlExportSettings	0x4011
+#define ServerOP_CZSetEntityVariableByClientName 0x4012
 /* Query Server OP Codes */
 #define ServerOP_QSPlayerLogTrades					0x5010
 #define ServerOP_QSPlayerLogHandins					0x5011
@@ -1259,6 +1260,12 @@ struct WWMarquee_Struct {
 
 struct CZSetEntVarByNPCTypeID_Struct {
 	uint32 npctype_id;
+	char id[256];
+	char m_var[256];
+};
+
+struct CZSetEntVarByClientName_Struct {
+	char CharName[64];
 	char id[256];
 	char m_var[256];
 };

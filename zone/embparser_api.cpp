@@ -3599,6 +3599,24 @@ XS(XS__crosszonesetentityvariablebynpctypeid)
 	XSRETURN_EMPTY;
 }
 
+XS(XS__crosszonesetentityvariablebyclientname);
+XS(XS__crosszonesetentityvariablebyclientname)
+{
+	dXSARGS;
+
+	if (items != 3)
+		Perl_croak(aTHX_ "Usage: crosszonesetentityvariablebyclientname(clientname, id, m_var)");
+
+	if (items == 3) {
+		const char *clientname = (const char *)SvPV_nolen(ST(0));
+		const char *id = (const char *)SvPV_nolen(ST(1));
+		const char *m_var = (const char *)SvPV_nolen(ST(2));
+		quest_manager.CrossZoneSetEntityVariableByClientName(clientname, id, m_var);
+	}
+
+	XSRETURN_EMPTY;
+}
+
 XS(XS__crosszonesignalnpcbynpctypeid);
 XS(XS__crosszonesignalnpcbynpctypeid)
 {
@@ -3766,6 +3784,7 @@ EXTERN_C XS(boot_quest)
 		newXS(strcpy(buf, "createguild"), XS__createguild, file);
 		newXS(strcpy(buf, "crosszonemessageplayerbyname"), XS__crosszonemessageplayerbyname, file);
 		newXS(strcpy(buf, "crosszonesetentityvariablebynpctypeid"), XS__crosszonesetentityvariablebynpctypeid, file);
+		newXS(strcpy(buf, "crosszonesetentityvariablebyclientname"), XS__crosszonesetentityvariablebyclientname, file);
 		newXS(strcpy(buf, "crosszonesignalclientbycharid"), XS__crosszonesignalclientbycharid, file);
 		newXS(strcpy(buf, "crosszonesignalclientbyname"), XS__crosszonesignalclientbyname, file);
 		newXS(strcpy(buf, "crosszonesignalnpcbynpctypeid"), XS__crosszonesignalnpcbynpctypeid, file);

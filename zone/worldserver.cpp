@@ -1857,6 +1857,15 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		}
 		break;
 	}
+	case ServerOP_CZSetEntityVariableByClientName:
+	{
+		CZSetEntVarByClientName_Struct* CZCS = (CZSetEntVarByClientName_Struct*)pack->pBuffer;
+		Client* client = entity_list.GetClientByName(CZCS->CharName);
+		if (client != 0) {
+			client->SetEntityVariable(CZCS->id, CZCS->m_var);
+		}
+		break;
+	}
 	case ServerOP_WWMarquee:
 	{
 		WWMarquee_Struct* WWMS = (WWMarquee_Struct*)pack->pBuffer;
