@@ -3004,6 +3004,20 @@ void QuestManager::CrossZoneMessagePlayerByName(uint32 Type, const char *CharNam
 	safe_delete(pack);
 }
 
+void QuestManager::CrossZoneSetEntityVariableByClientName(const char *CharName, const char *id, const char *m_var){
+	uint32 message_len = strlen(id) + 1;
+	uint32 message_len2 = strlen(m_var) + 1;
+	uint32 message_len3 = strlen(CharName) + 1;
+	auto pack = new ServerPacket(ServerOP_CZSetEntityVariableByClientName,
+				     sizeof(CZSetEntVarByClientName_Struct) + message_len + message_len2 + message_len3);
+	CZSetEntVarByClientName_Struct* CZ = (CZSetEntVarByClientName_Struct*)pack->pBuffer;
+	strn0cpy(CZ->CharName, CharName, 64);
+	strn0cpy(CZ->id, id, 256);
+	strn0cpy(CZ->m_var, m_var, 256);
+	worldserver.SendPacket(pack);
+	safe_delete(pack);
+}
+
 void QuestManager::CrossZoneSetEntityVariableByNPCTypeID(uint32 npctype_id, const char *id, const char *m_var){
 	uint32 message_len = strlen(id) + 1;
 	uint32 message_len2 = strlen(m_var) + 1;
