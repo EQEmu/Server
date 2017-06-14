@@ -5022,7 +5022,7 @@ int16 Mob::CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, boo
 		case SE_SpellResistReduction:
 			if (type == focusResistRate) {
 				if (best_focus) {
-					if (focus_spell.base2 != 0) {
+					if (focus_spell.base2[i] != 0) {
 						value = focus_spell.base2[i];
 					} else {
 						value = focus_spell.base[i];
