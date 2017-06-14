@@ -3829,7 +3829,7 @@ int32 Mob::GetVulnerability(Mob* caster, uint32 spell_id, uint32 ticsremaining)
 
 			if((IsValidSpell(buffs[i].spellid) && IsEffectInSpell(buffs[i].spellid, SE_FcSpellVulnerability))){
 
-				int32 focus = caster->CalcFocusEffect(focusSpellVulnerability, buffs[i].spellid, spell_id);
+				int32 focus = caster->CalcFocusEffect(focusSpellVulnerability, buffs[i].spellid, spell_id, true);
 
 				if (!focus)
 					continue;
@@ -3846,6 +3846,8 @@ int32 Mob::GetVulnerability(Mob* caster, uint32 spell_id, uint32 ticsremaining)
 
 			}
 		}
+
+		tmp_focus = caster->CalcFocusEffect(focusSpellVulnerability, buffs[tmp_focus].spellid, spell_id);
 
 		if (tmp_focus < -99)
 			tmp_focus = -99;
