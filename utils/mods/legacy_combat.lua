@@ -656,7 +656,7 @@ function MobGetMeleeMitDmg(defender, attacker, damage, min_damage, mitigation_ra
 	local interval = (damage - min_damage) / 20.0;
 	damage = damage - (math.floor(d) * interval);	
 	damage = damage - (min_damage * defender:GetItemBonuses():MeleeMitigation() / 100);
-	damage = damage + (damage * (defender:GetSpellBonuses():MeleeMitigationEffect() + defender:GetItemBonuses():MeleeMitigationEffect() + defender:GetAABonuses():MeleeMitigationEffect()) / 100);
+	damage = damage - (damage * (-defender:GetSpellBonuses():MeleeMitigationEffect() + defender:GetItemBonuses():MeleeMitigationEffect() + defender:GetAABonuses():MeleeMitigationEffect()) / 100);
 	
 	return damage;
 end
