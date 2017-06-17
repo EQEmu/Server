@@ -1312,7 +1312,7 @@ bool LuaParser::AvoidDamage(Mob *self, Mob *other, DamageHitInfo &hit, bool & ig
 {
 	bool retval = false;
 	for (auto &mod : mods_) {
-		retval = mod.AvoidDamage(self, other, hit, ignoreDefault);
+		mod.AvoidDamage(self, other, hit, retval, ignoreDefault);
 	}
 	return retval;
 }
@@ -1321,7 +1321,7 @@ bool LuaParser::CheckHitChance(Mob *self, Mob *other, DamageHitInfo &hit, bool &
 {
 	bool retval = false;
 	for (auto &mod : mods_) {
-		retval = mod.CheckHitChance(self, other, hit, ignoreDefault);
+		mod.CheckHitChance(self, other, hit, retval, ignoreDefault);
 	}
 	return retval;
 }
@@ -1342,27 +1342,27 @@ void LuaParser::CommonOutgoingHitSuccess(Mob *self, Mob *other, DamageHitInfo &h
 
 uint32 LuaParser::GetRequiredAAExperience(Client *self, bool &ignoreDefault)
 {
-	uint32 retval = false;
+	uint32 retval = 0;
 	for (auto &mod : mods_) {
-		retval = mod.GetRequiredAAExperience(self, ignoreDefault);
+		mod.GetRequiredAAExperience(self, retval, ignoreDefault);
 	}
 	return retval;
 }
 
 uint32 LuaParser::GetEXPForLevel(Client *self, uint16 level, bool &ignoreDefault)
 {
-	uint32 retval = false;
+	uint32 retval = 0;
 	for (auto &mod : mods_) {
-		retval = mod.GetEXPForLevel(self, level, ignoreDefault);
+		mod.GetEXPForLevel(self, level, retval, ignoreDefault);
 	}
 	return retval;
 }
 
 uint32 LuaParser::GetExperienceForKill(Client *self, Mob *against, bool &ignoreDefault)
 {
-	uint32 retval = false;
+	uint32 retval = 0;
 	for (auto &mod : mods_) {
-		retval = mod.GetExperienceForKill(self, against, ignoreDefault);
+		mod.GetExperienceForKill(self, against, retval, ignoreDefault);
 	}
 	return retval;
 }

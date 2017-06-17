@@ -50,7 +50,7 @@ function MeleeMitigation(e)
 	end
 	
 	e.hit.damage_done = 2 * e.hit.base_damage * GetDamageTable(e.other, e.hit.skill) / 100;
-	e.hit = DoMeleeMitigation(e.self, e.other, e.hit, e.opts);
+	e.hit = DoMeleeMitigation(e.self, e.other, e.hit, e.opts);	
 	return e;
 end
 
@@ -582,9 +582,9 @@ function ClientGetMeleeMitDmg(defender, attacker, damage, min_damage, mitigation
 	local d = 10;
 	local dmg_interval = (damage - min_damage) / 19.0;
 	local dmg_bonus = min_damage - dmg_interval;
-	local spellMeleeMit = (defender:GetSpellBonuses():MeleeMitigationEffect() + defender:GetItemBonuses():MeleeMitigationEffect() + defender:GetAABonuses():MeleeMitigationEffect()) / 100.0;
+	local spellMeleeMit =  (defender:GetSpellBonuses():MeleeMitigationEffect() + defender:GetItemBonuses():MeleeMitigationEffect() + defender:GetAABonuses():MeleeMitigationEffect()) / 100.0;
 	if (defender:GetClass() == Class.WARRIOR) then
-		spellMeleeMit = spellMeleeMit + 0.05;
+		spellMeleeMit = spellMeleeMit - 0.05;
 	end
 	
 	dmg_bonus = dmg_bonus - (dmg_bonus * (defender:GetItemBonuses():MeleeMitigation() / 100.0));
@@ -652,12 +652,12 @@ function MobGetMeleeMitDmg(defender, attacker, damage, min_damage, mitigation_ra
 	elseif (d > 20.0) then
 		d = 20.0;
 	end
-
-	local interval = (damage - min_damage) / 20.0;
-	damage = damage - (math.floor(d) * interval);
 	
+	local interval = (damage - min_damage) / 20.0;
+	damage = damage - (math.floor(d) * interval);	
 	damage = damage - (min_damage * defender:GetItemBonuses():MeleeMitigation() / 100);
-	damage = damage - (damage * (defender:GetSpellBonuses():MeleeMitigationEffect() + defender:GetItemBonuses():MeleeMitigationEffect() + defender:GetAABonuses():MeleeMitigationEffect()) / 100);
+	damage = damage + (damage * (defender:GetSpellBonuses():MeleeMitigationEffect() + defender:GetItemBonuses():MeleeMitigationEffect() + defender:GetAABonuses():MeleeMitigationEffect()) / 100);
+	
 	return damage;
 end
 
@@ -729,5 +729,24 @@ end
 
 function ApplyDamageTable(e)
 	e.IgnoreDefault = true;
+	return e;
+end
+
+function CommonOutgoingHitSuccess(e)
+	e = ApplyMeleeDamageBonus(e);
+	e.hit.damage_done = e.hit.damage_done + (e.hit.damage_done * e.other:GetSkillDmgTaken(e.hit.skill) / 100) + (e.self:GetSkillDmgAmt(e.hit.skill) + e.other:GetFcDamageAmtIncoming(e.self, 0, true, e.hit.skill));
+	e = TryCriticalHit(e);
+	e.self:CheckNumHitsRemaining(5, -1, 65535);	
+	e.IgnoreDefault = true;
+	return e;
+end
+
+function ApplyMeleeDamageBonus(e)
+	local dmgbonusmod = e.self:GetMeleeDamageMod_SE(e.hit.skill);
+	if (opts) then
+		dmgbonusmod = dmgbonusmod + e.opts.melee_damage_bonus_flat;
+	end
+
+	e.hit.damage_done = e.hit.damage_done + (e.hit.damage_done * dmgbonusmod / 100);
 	return e;
 end

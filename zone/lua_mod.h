@@ -19,13 +19,13 @@ public:
 
 	void MeleeMitigation(Mob *self, Mob *attacker, DamageHitInfo &hit, ExtraAttackOptions *opts, bool &ignoreDefault);
 	void ApplyDamageTable(Mob *self, DamageHitInfo &hit, bool &ignoreDefault);
-	bool AvoidDamage(Mob *self, Mob *other, DamageHitInfo &hit, bool &ignoreDefault);
-	bool CheckHitChance(Mob *self, Mob* other, DamageHitInfo &hit, bool &ignoreDefault);
+	void AvoidDamage(Mob *self, Mob *other, DamageHitInfo &hit, bool &returnValue, bool &ignoreDefault);
+	void CheckHitChance(Mob *self, Mob* other, DamageHitInfo &hit, bool &returnValue, bool &ignoreDefault);
 	void CommonOutgoingHitSuccess(Mob *self, Mob* other, DamageHitInfo &hit, ExtraAttackOptions *opts, bool &ignoreDefault);
 	void TryCriticalHit(Mob *self, Mob *defender, DamageHitInfo &hit, ExtraAttackOptions *opts, bool &ignoreDefault);
-	uint32 GetRequiredAAExperience(Client *self, bool &ignoreDefault);
-	uint32 GetEXPForLevel(Client *self, uint16 level, bool &ignoreDefault);
-	uint32 GetExperienceForKill(Client *self, Mob *against, bool &ignoreDefault);
+	void GetRequiredAAExperience(Client *self, uint32 &returnValue, bool &ignoreDefault);
+	void GetEXPForLevel(Client *self, uint16 level, uint32 &returnValue, bool &ignoreDefault);
+	void GetExperienceForKill(Client *self, Mob *against, uint32 &returnValue, bool &ignoreDefault);
 private:
 	LuaParser *parser_;
 	lua_State *L;

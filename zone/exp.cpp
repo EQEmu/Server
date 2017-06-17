@@ -398,19 +398,23 @@ void Client::SetEXP(uint32 set_exp, uint32 set_aaxp, bool isrezzexp) {
 		}
 
 		if (isrezzexp) {
-			if (RuleI(Character, ShowExpValues) > 0) Message(MT_Experience, "You regain %s experience from resurrection. %s", exp_amount_message.c_str(), exp_percent_message.c_str());
+			if (RuleI(Character, ShowExpValues) > 0) 
+				Message(MT_Experience, "You regain %s experience from resurrection. %s", exp_amount_message.c_str(), exp_percent_message.c_str());
 			else Message_StringID(MT_Experience, REZ_REGAIN);
 		} else {
 			if (membercount > 1) {
-				if (RuleI(Character, ShowExpValues) > 0) Message(MT_Experience, "You have gained %s party experience! %s", exp_amount_message.c_str(), exp_percent_message.c_str());
+				if (RuleI(Character, ShowExpValues) > 0) 
+					Message(MT_Experience, "You have gained %s party experience! %s", exp_amount_message.c_str(), exp_percent_message.c_str());
 				else Message_StringID(MT_Experience, GAIN_GROUPXP);
 			}
 			else if (IsRaidGrouped()) {
-				if (RuleI(Character, ShowExpValues) > 0) Message(MT_Experience, "You have gained %s raid experience! %s", exp_amount_message.c_str(), exp_percent_message.c_str());
+				if (RuleI(Character, ShowExpValues) > 0) 
+					Message(MT_Experience, "You have gained %s raid experience! %s", exp_amount_message.c_str(), exp_percent_message.c_str());
 				else Message_StringID(MT_Experience, GAIN_RAIDEXP);
 			} 
 			else {
-				if (RuleI(Character, ShowExpValues) > 0) Message(MT_Experience, "You have gained %s experience! %s", exp_amount_message.c_str(), exp_percent_message.c_str());
+				if (RuleI(Character, ShowExpValues) > 0) 
+					Message(MT_Experience, "You have gained %s experience! %s", exp_amount_message.c_str(), exp_percent_message.c_str());
 				else Message_StringID(MT_Experience, GAIN_XP);				
 			}
 		}
