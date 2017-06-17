@@ -10,6 +10,7 @@
 #include "../common/timer.h"
 #include "../common/eqemu_logsys.h"
 #include "../common/classes.h"
+#include "../common/rulesys.h"
 #include "lua_parser.h"
 #include "lua_item.h"
 #include "lua_iteminst.h"
@@ -33,6 +34,7 @@ struct Skills { };
 struct BodyTypes { };
 struct Filters { };
 struct MessageTypes { };
+struct Rule { };
 
 struct lua_registered_event {
 	std::string encounter_name;
@@ -1485,6 +1487,18 @@ int random_roll0(int max) {
 	return zone->random.Roll0(max);
 }
 
+int get_rulei(int rule) {
+	return RuleManager::Instance()->GetIntRule((RuleManager::IntType)rule);
+}
+
+float get_ruler(int rule) {
+	return RuleManager::Instance()->GetRealRule((RuleManager::RealType)rule);
+}
+
+bool get_ruleb(int rule) {
+	return RuleManager::Instance()->GetBoolRule((RuleManager::BoolType)rule);
+}
+
 luabind::scope lua_register_general() {
 	return luabind::namespace_("eq")
 	[
@@ -2202,6 +2216,48 @@ luabind::scope lua_register_message_types() {
 			luabind::value("ItemSpeech", MT_ItemSpeech),
 			luabind::value("StrikeThrough", MT_StrikeThrough),
 			luabind::value("Stun", MT_Stun)
+		];
+}
+
+luabind::scope lua_register_rules_const() {
+	return luabind::class_<Rule>("Rule")
+		.enum_("constants")
+	[
+#define RULE_INT(cat, rule, default_value) \
+		luabind::value(#rule, RuleManager::Int__##rule),
+#include "../common/ruletypes.h"
+		luabind::value("_IntRuleCount", RuleManager::_IntRuleCount),
+#undef RULE_INT
+#define RULE_REAL(cat, rule, default_value) \
+		luabind::value(#rule, RuleManager::Real__##rule),
+#include "../common/ruletypes.h"
+		luabind::value("_RealRuleCount", RuleManager::_RealRuleCount),
+#undef RULE_REAL
+#define RULE_BOOL(cat, rule, default_value) \
+		luabind::value(#rule, RuleManager::Bool__##rule),
+#include "../common/ruletypes.h"
+		luabind::value("_BoolRuleCount", RuleManager::_BoolRuleCount)
+	];
+}
+
+luabind::scope lua_register_rulei() {
+	return luabind::namespace_("RuleI")
+		[
+			luabind::def("Get", &get_rulei)
+		];
+}
+
+luabind::scope lua_register_ruler() {
+	return luabind::namespace_("RuleR")
+		[
+			luabind::def("Get", &get_ruler)
+		];
+}
+
+luabind::scope lua_register_ruleb() {
+	return luabind::namespace_("RuleB")
+		[
+			luabind::def("Get", &get_ruleb)
 		];
 }
 

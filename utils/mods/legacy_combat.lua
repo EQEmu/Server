@@ -1,27 +1,27 @@
-SoftcapFactor = 1.88;
-MonkACBonusWeight = 15;
-NPCACFactor = 2.25;
-OldACSoftcapRules = true;
-ClothACSoftcap = 75;
-LeatherACSoftcap = 100;
-MonkACSoftcap = 120;
-ChainACSoftcap = 200;
-PlateACSoftcap = 300;
-AAMitigationACFactor = 3.0;
-WarriorACSoftcapReturn = 0.45;
-KnightACSoftcapReturn = 0.33;
-LowPlateChainACSoftcapReturn = 0.23;
-LowChainLeatherACSoftcapReturn = 0.17;
-CasterACSoftcapReturn = 0.06;
-MiscACSoftcapReturn = 0.3;
-WarACSoftcapReturn = 0.3448;
-ClrRngMnkBrdACSoftcapReturn = 0.3030;
-PalShdACSoftcapReturn = 0.3226;
-DruNecWizEncMagACSoftcapReturn = 0.2000;
-RogShmBstBerACSoftcapReturn = 0.2500;
-SoftcapFactor = 1.88;
-ACthac0Factor = 0.55;
-ACthac20Factor = 0.55;
+MonkACBonusWeight = RuleI.Get(Rule.MonkACBonusWeight);
+NPCACFactor = RuleR.Get(Rule.NPCACFactor);
+OldACSoftcapRules = RuleB.Get(Rule.OldACSoftcapRules);
+ClothACSoftcap = RuleI.Get(Rule.ClothACSoftcap);
+LeatherACSoftcap = RuleI.Get(Rule.LeatherACSoftcap);
+MonkACSoftcap = RuleI.Get(Rule.MonkACSoftcap);
+ChainACSoftcap = RuleI.Get(Rule.ChainACSoftcap);
+PlateACSoftcap = RuleI.Get(Rule.PlateACSoftcap);
+
+AAMitigationACFactor = RuleR.Get(Rule.AAMitigationACFactor);
+WarriorACSoftcapReturn = RuleR.Get(Rule.WarriorACSoftcapReturn);
+KnightACSoftcapReturn = RuleR.Get(Rule.KnightACSoftcapReturn);
+LowPlateChainACSoftcapReturn = RuleR.Get(Rule.LowPlateChainACSoftcapReturn);
+LowChainLeatherACSoftcapReturn = RuleR.Get(Rule.LowChainLeatherACSoftcapReturn);
+CasterACSoftcapReturn = RuleR.Get(Rule.CasterACSoftcapReturn);
+MiscACSoftcapReturn = RuleR.Get(Rule.MiscACSoftcapReturn);
+WarACSoftcapReturn = RuleR.Get(Rule.WarACSoftcapReturn);
+ClrRngMnkBrdACSoftcapReturn = RuleR.Get(Rule.ClrRngMnkBrdACSoftcapReturn);
+PalShdACSoftcapReturn = RuleR.Get(Rule.PalShdACSoftcapReturn);
+DruNecWizEncMagACSoftcapReturn = RuleR.Get(Rule.DruNecWizEncMagACSoftcapReturn);
+RogShmBstBerACSoftcapReturn = RuleR.Get(Rule.RogShmBstBerACSoftcapReturn);
+SoftcapFactor = RuleR.Get(Rule.SoftcapFactor);
+ACthac0Factor = RuleR.Get(Rule.ACthac0Factor);
+ACthac20Factor = RuleR.Get(Rule.ACthac20Factor);
 
 MeleeBaseCritChance = 0.0;
 ClientBaseCritChance = 0.0;
@@ -31,16 +31,16 @@ RogueCritThrowingChance = 25;
 RogueDeadlyStrikeChance = 80;
 RogueDeadlyStrikeMod = 2;
 
-BaseHitChance = 69.0;
-NPCBonusHitChance = 26.0;
-HitFalloffMinor = 5.0;
-HitFalloffModerate = 7.0;
-HitFalloffMajor = 50.0;
-HitBonusPerLevel = 1.2;
-AgiHitFactor = 0.01;
-WeaponSkillFalloff = 0.33;
-ArcheryHitPenalty = 0.25;
-UseOldDamageIntervalRules = true;
+BaseHitChance = RuleR.Get(Rule.BaseHitChance);
+NPCBonusHitChance = RuleR.Get(Rule.NPCBonusHitChance);
+HitFalloffMinor = RuleR.Get(Rule.HitFalloffMinor);
+HitFalloffModerate = RuleR.Get(Rule.HitFalloffModerate);
+HitFalloffMajor = RuleR.Get(Rule.HitFalloffMajor);
+HitBonusPerLevel = RuleR.Get(Rule.HitBonusPerLevel);
+AgiHitFactor = RuleR.Get(Rule.AgiHitFactor);
+WeaponSkillFalloff = RuleR.Get(Rule.WeaponSkillFalloff);
+ArcheryHitPenalty = RuleR.Get(Rule.ArcheryHitPenalty);
+UseOldDamageIntervalRules = RuleB.Get(Rule.UseOldDamageIntervalRules);
 
 function MeleeMitigation(e)
 	e.IgnoreDefault = true;
@@ -582,13 +582,13 @@ function ClientGetMeleeMitDmg(defender, attacker, damage, min_damage, mitigation
 	local d = 10;
 	local dmg_interval = (damage - min_damage) / 19.0;
 	local dmg_bonus = min_damage - dmg_interval;
-	local spellMeleeMit =  (defender:GetSpellBonuses():MeleeMitigationEffect() + defender:GetItemBonuses():MeleeMitigationEffect() + defender:GetAABonuses():MeleeMitigationEffect()) / 100.0;
+	local spellMeleeMit = (defender:GetSpellBonuses():MeleeMitigationEffect() + defender:GetItemBonuses():MeleeMitigationEffect() + defender:GetAABonuses():MeleeMitigationEffect()) / 100.0;
 	if (defender:GetClass() == Class.WARRIOR) then
 		spellMeleeMit = spellMeleeMit - 0.05;
 	end
-	
+		
 	dmg_bonus = dmg_bonus - (dmg_bonus * (defender:GetItemBonuses():MeleeMitigation() / 100.0));
-	dmg_interval = dmg_interval - (dmg_interval * spellMeleeMit);
+	dmg_interval = dmg_interval + (dmg_interval * spellMeleeMit);
 
 	local mit_roll = Random.Real(0, mitigation_rating);
 	local atk_roll = Random.Real(0, attack_rating);
@@ -655,8 +655,8 @@ function MobGetMeleeMitDmg(defender, attacker, damage, min_damage, mitigation_ra
 	
 	local interval = (damage - min_damage) / 20.0;
 	damage = damage - (math.floor(d) * interval);	
-	damage = damage - (min_damage * defender:GetItemBonuses():MeleeMitigation() / 100);
-	damage = damage - (damage * (-defender:GetSpellBonuses():MeleeMitigationEffect() + defender:GetItemBonuses():MeleeMitigationEffect() + defender:GetAABonuses():MeleeMitigationEffect()) / 100);
+	damage = damage - (min_damage * defender:GetItemBonuses():MeleeMitigation() / 100);	
+	damage = damage + (damage * (defender:GetSpellBonuses():MeleeMitigationEffect() + defender:GetItemBonuses():MeleeMitigationEffect() + defender:GetAABonuses():MeleeMitigationEffect()) / 100);
 	
 	return damage;
 end
