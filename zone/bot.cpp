@@ -3857,17 +3857,7 @@ void Bot::AddToHateList(Mob* other, uint32 hate, int32 damage, bool iYellForHelp
 	Mob::AddToHateList(other, hate, damage, iYellForHelp, bFrenzy, iBuffTic, pet_command);
 }
 
-bool Bot::Attack(Mob* other, int Hand, bool FromRiposte, bool IsStrikethrough, bool IsFromSpell, ExtraAttackOptions *opts) {
-#ifdef LUA_EQEMU
-	bool lua_ret = false;
-	bool ignoreDefault = false;
-	lua_ret = LuaParser::Instance()->BotAttack(this, other, Hand, bRiposte, IsStrikethrough, IsFromSpell, opts, ignoreDefault);
-
-	if (ignoreDefault) {
-		return lua_ret;
-	}
-#endif
-	
+bool Bot::Attack(Mob* other, int Hand, bool FromRiposte, bool IsStrikethrough, bool IsFromSpell, ExtraAttackOptions *opts) {	
 	if (!other) {
 		SetTarget(nullptr);
 		Log(Logs::General, Logs::Error, "A null Mob object was passed to Bot::Attack for evaluation!");
