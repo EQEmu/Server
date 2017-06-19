@@ -22,6 +22,7 @@
 #include "object.h"
 #include "doors.h"
 #include "quest_parser_collection.h"
+#include "lua_parser.h"
 #include "../common/string_util.h"
 #include "../common/say_link.h"
 
@@ -3856,7 +3857,7 @@ void Bot::AddToHateList(Mob* other, uint32 hate, int32 damage, bool iYellForHelp
 	Mob::AddToHateList(other, hate, damage, iYellForHelp, bFrenzy, iBuffTic, pet_command);
 }
 
-bool Bot::Attack(Mob* other, int Hand, bool FromRiposte, bool IsStrikethrough, bool IsFromSpell, ExtraAttackOptions *opts) {
+bool Bot::Attack(Mob* other, int Hand, bool FromRiposte, bool IsStrikethrough, bool IsFromSpell, ExtraAttackOptions *opts) {	
 	if (!other) {
 		SetTarget(nullptr);
 		Log(Logs::General, Logs::Error, "A null Mob object was passed to Bot::Attack for evaluation!");
@@ -3919,7 +3920,7 @@ bool Bot::Attack(Mob* other, int Hand, bool FromRiposte, bool IsStrikethrough, b
 	// calculate attack_skill and skillinuse depending on hand and weapon
 	// also send Packet to near clients
 	DamageHitInfo my_hit;
-	AttackAnimation(my_hit.skill, Hand, weapon);
+	my_hit.skill = AttackAnimation(Hand, weapon);
 	Log(Logs::Detail, Logs::Combat, "Attacking with %s in slot %d using skill %d", weapon?weapon->GetItem()->Name:"Fist", Hand, my_hit.skill);
 
 	// Now figure out damage

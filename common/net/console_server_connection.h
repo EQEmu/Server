@@ -4,6 +4,8 @@
 #include <memory>
 #include <map>
 
+struct ServerChannelMessage_Struct;
+
 namespace EQ
 {
 	namespace Net
@@ -42,6 +44,7 @@ namespace EQ
 			bool AcceptMessages() const { return m_accept_messages; }
 			void SetAcceptMessages(bool v) { m_accept_messages = v; }
 			void QueueMessage(const std::string &msg);
+			bool SendChannelMessage(const ServerChannelMessage_Struct* scm, std::function<void(void)> onTell);
 		private:
 			void OnRead(TCPConnection* c, const unsigned char* data, size_t sz);
 			void OnDisconnect(TCPConnection* c);

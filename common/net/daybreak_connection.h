@@ -8,6 +8,7 @@
 #include <functional>
 #include <memory>
 #include <map>
+#include <unordered_map>
 #include <queue>
 #include <list>
 
@@ -155,13 +156,13 @@ namespace EQ
 
 				uint16_t sequence_in;
 				uint16_t sequence_out;
-				std::map<uint16_t, Packet*> packet_queue;
+				std::unordered_map<uint16_t, Packet*> packet_queue;
 
 				DynamicPacket fragment_packet;
 				uint32_t fragment_current_bytes;
 				uint32_t fragment_total_bytes;
 
-				std::map<uint16_t, DaybreakSentPacket> sent_packets;
+				std::unordered_map<uint16_t, DaybreakSentPacket> sent_packets;
 			};
 
 			DaybreakStream m_streams[4];
@@ -205,10 +206,10 @@ namespace EQ
 			DaybreakConnectionManagerOptions() {
 				max_connection_count = 0;
 				keepalive_delay_ms = 9000;
-				resend_delay_ms = 150;
+				resend_delay_ms = 300;
 				resend_delay_factor = 1.5;
-				resend_delay_min = 150;
-				resend_delay_max = 1000;
+				resend_delay_min = 350;
+				resend_delay_max = 8000;
 				connect_delay_ms = 500;
 				stale_connection_ms = 90000;
 				connect_stale_ms = 5000;

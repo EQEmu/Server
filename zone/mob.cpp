@@ -4677,16 +4677,13 @@ bool Mob::TrySpellOnDeath()
 	//in death because the heal will not register before the script kills you.
 }
 
-int16 Mob::GetCritDmgMob(uint16 skill)
+int16 Mob::GetCritDmgMod(uint16 skill)
 {
 	int critDmg_mod = 0;
 
 	// All skill dmg mod + Skill specific
-	critDmg_mod += itembonuses.CritDmgMob[EQEmu::skills::HIGHEST_SKILL + 1] + spellbonuses.CritDmgMob[EQEmu::skills::HIGHEST_SKILL + 1] + aabonuses.CritDmgMob[EQEmu::skills::HIGHEST_SKILL + 1] +
-					itembonuses.CritDmgMob[skill] + spellbonuses.CritDmgMob[skill] + aabonuses.CritDmgMob[skill];
-
-	if(critDmg_mod < -100)
-		critDmg_mod = -100;
+	critDmg_mod += itembonuses.CritDmgMod[EQEmu::skills::HIGHEST_SKILL + 1] + spellbonuses.CritDmgMod[EQEmu::skills::HIGHEST_SKILL + 1] + aabonuses.CritDmgMod[EQEmu::skills::HIGHEST_SKILL + 1] +
+					itembonuses.CritDmgMod[skill] + spellbonuses.CritDmgMod[skill] + aabonuses.CritDmgMod[skill];
 
 	return critDmg_mod;
 }

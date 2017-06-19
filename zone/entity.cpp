@@ -2135,6 +2135,25 @@ void EntityList::MessageClose(Mob* sender, bool skipsender, float dist, uint32 t
 	}
 }
 
+void EntityList::FilteredMessageClose(Mob *sender, bool skipsender, float dist, uint32 type, eqFilterType filter, const char *message, ...)
+{
+	va_list argptr;
+	char buffer[4096];
+
+	va_start(argptr, message);
+	vsnprintf(buffer, 4095, message, argptr);
+	va_end(argptr);
+
+	float dist2 = dist * dist;
+
+	auto it = client_list.begin();
+	while (it != client_list.end()) {
+		if (DistanceSquared(it->second->GetPosition(), sender->GetPosition()) <= dist2 && (!skipsender || it->second != sender))
+			it->second->FilteredMessage(sender, type, filter, buffer);
+		++it;
+	}
+}
+
 void EntityList::RemoveAllMobs()
 {
 	auto it = mob_list.begin();

@@ -2,6 +2,8 @@
 #include "../common/util/uuid.h"
 #include "../common/net/packet.h"
 #include "../common/eqemu_logsys.h"
+#include "../common/servertalk.h"
+#include "../common/rulesys.h"
 
 EQ::Net::ConsoleServerConnection::ConsoleServerConnection(ConsoleServer *parent, std::shared_ptr<TCPConnection> connection)
 {
@@ -105,6 +107,53 @@ void EQ::Net::ConsoleServerConnection::QueueMessage(const std::string &msg)
 		SendPrompt();
 		Send(cmd);
 	}
+}
+
+bool EQ::Net::ConsoleServerConnection::SendChannelMessage(const ServerChannelMessage_Struct* scm, std::function<void(void)> onTell) {
+	if (!m_accept_messages) {
+		return false;
+	}
+
+	switch (scm->chan_num) {
+		if (RuleB(Chat, ServerWideAuction)) {
+			case 4: {
+				QueueMessage(fmt::format("{0} auctions, '{1}'", scm->from, scm->message));
+				break;
+			}
+		}
+
+		if (RuleB(Chat, ServerWideOOC)) {
+			case 5: {
+				QueueMessage(fmt::format("{0} says ooc, '{1}'", scm->from, scm->message));
+				break;
+			}
+		}
+
+		case 6: {
+			QueueMessage(fmt::format("{0} BROADCASTS, '{1}'", scm->from, scm->message));
+			break;
+		}
+
+		case 7: {
+			QueueMessage(fmt::format("[{0}] tells you, '{1}'", scm->from, scm->message));
+			if (onTell) {
+				onTell();
+			}
+
+			break;
+		}
+		
+		case 11: {
+			QueueMessage(fmt::format("{0} GMSAYS, '{1}'", scm->from, scm->message));
+			break;
+		}
+
+		default: {
+			return false;
+		}
+	}
+
+	return true;
 }
 
 void EQ::Net::ConsoleServerConnection::OnRead(TCPConnection *c, const unsigned char *data, size_t sz)

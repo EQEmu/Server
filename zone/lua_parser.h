@@ -7,8 +7,10 @@
 #include <string>
 #include <list>
 #include <map>
+#include <exception>
 
 #include "zone_config.h"
+#include "lua_mod.h"
 
 extern const ZoneConfig *Config;
 
@@ -32,7 +34,6 @@ namespace luabind {
 
 class LuaParser : public QuestInterface {
 public:
-	LuaParser();
 	~LuaParser();
 
 	virtual int EventNPC(QuestEventID evt, NPC* npc, Mob *init, std::string data, uint32 extra_data,
@@ -81,7 +82,29 @@ public:
 	virtual int DispatchEventSpell(QuestEventID evt, NPC* npc, Client *client, uint32 spell_id, uint32 extra_data,
 		std::vector<EQEmu::Any> *extra_pointers);
 
+	static LuaParser* Instance() {
+		static LuaParser inst;
+		return &inst;
+	}
+
+	bool HasFunction(std::string function, std::string package_name);
+
+	//Mod Extensions
+	void MeleeMitigation(Mob *self, Mob *attacker, DamageHitInfo &hit, ExtraAttackOptions *opts, bool &ignoreDefault);
+	void ApplyDamageTable(Mob *self, DamageHitInfo &hit, bool &ignoreDefault);
+	bool AvoidDamage(Mob *self, Mob *other, DamageHitInfo &hit, bool &ignoreDefault);
+	bool CheckHitChance(Mob *self, Mob* other, DamageHitInfo &hit, bool &ignoreDefault);
+	void TryCriticalHit(Mob *self, Mob *defender, DamageHitInfo &hit, ExtraAttackOptions *opts, bool &ignoreDefault);
+	void CommonOutgoingHitSuccess(Mob *self, Mob* other, DamageHitInfo &hit, ExtraAttackOptions *opts, bool &ignoreDefault);
+	uint32 GetRequiredAAExperience(Client *self, bool &ignoreDefault);
+	uint32 GetEXPForLevel(Client *self, uint16 level, bool &ignoreDefault);
+	uint32 GetExperienceForKill(Client *self, Mob *against, bool &ignoreDefault);
+
 private:
+	LuaParser();
+	LuaParser(const LuaParser&);
+	LuaParser& operator=(const LuaParser&);
+
 	int _EventNPC(std::string package_name, QuestEventID evt, NPC* npc, Mob *init, std::string data, uint32 extra_data,
 		std::vector<EQEmu::Any> *extra_pointers, luabind::adl::object *l_func = nullptr);
 	int _EventPlayer(std::string package_name, QuestEventID evt, Client *client, std::string data, uint32 extra_data,
@@ -94,13 +117,12 @@ private:
 		std::vector<EQEmu::Any> *extra_pointers);
 
 	void LoadScript(std::string filename, std::string package_name);
-	bool HasFunction(std::string function, std::string package_name);
-	void ClearStates();
 	void MapFunctions(lua_State *L);
 	QuestEventID ConvertLuaEvent(QuestEventID evt);
 
 	std::map<std::string, std::string> vars_;
 	std::map<std::string, bool> loaded_;
+	std::vector<LuaMod> mods_;
 	lua_State *L;
 
 	NPCArgumentHandler NPCArgumentDispatch[_LargestEventID];

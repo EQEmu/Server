@@ -1172,6 +1172,11 @@ uint64 Lua_Client::GetAllMoney() {
 	return self->GetAllMoney();
 }
 
+uint32 Lua_Client::GetMoney(uint8 type, uint8 subtype) {
+	Lua_Safe_Call_Int();
+	return self->GetMoney(type, subtype);
+}
+
 void Lua_Client::OpenLFGuildWindow() {
 	Lua_Safe_Call_Void();
 	self->OpenLFGuildWindow();
@@ -1414,9 +1419,25 @@ void Lua_Client::QuestReward(Lua_Mob target, luabind::adl::object reward) {
 	self->QuestReward(target, copper, silver, gold, platinum, itemid, exp, faction);
 }
 
-uint32 Lua_Client::GetMoney(uint8 type, uint8 subtype) {
+bool Lua_Client::IsDead() {
+	Lua_Safe_Call_Bool();
+	return self->IsDead();
+}
+
+int Lua_Client::CalcCurrentWeight() {
 	Lua_Safe_Call_Int();
-	return self->GetMoney(type, subtype);
+	return self->CalcCurrentWeight();
+}
+
+int Lua_Client::CalcATK() {
+	Lua_Safe_Call_Int();
+	return self->CalcATK();
+}
+
+void Lua_Client::FilteredMessage(Mob *sender, uint32 type, int filter, const char *message)
+{
+	Lua_Safe_Call_Void();
+	self->FilteredMessage(sender, type, (eqFilterType)filter, message);
 }
 
 luabind::scope lua_register_client() {
@@ -1653,6 +1674,7 @@ luabind::scope lua_register_client() {
 		.def("GetAggroCount", (int(Lua_Client::*)(void))&Lua_Client::GetAggroCount)
 		.def("GetCarriedMoney", (uint64(Lua_Client::*)(void))&Lua_Client::GetCarriedMoney)
 		.def("GetAllMoney", (uint64(Lua_Client::*)(void))&Lua_Client::GetAllMoney)
+		.def("GetMoney", (uint32(Lua_Client::*)(uint8, uint8))&Lua_Client::GetMoney)
 		.def("OpenLFGuildWindow", (void(Lua_Client::*)(void))&Lua_Client::OpenLFGuildWindow)
 		.def("Signal", (void(Lua_Client::*)(uint32))&Lua_Client::Signal)
 		.def("AddAlternateCurrencyValue", (void(Lua_Client::*)(uint32,int))&Lua_Client::AddAlternateCurrencyValue)
@@ -1687,7 +1709,10 @@ luabind::scope lua_register_client() {
 		.def("QuestReward", (void(Lua_Client::*)(Lua_Mob, uint32, uint32, uint32, uint32, uint32, uint32))&Lua_Client::QuestReward)
 		.def("QuestReward", (void(Lua_Client::*)(Lua_Mob, uint32, uint32, uint32, uint32, uint32, uint32, bool))&Lua_Client::QuestReward)
 		.def("QuestReward", (void(Lua_Client::*)(Lua_Mob, luabind::adl::object))&Lua_Client::QuestReward)
-		.def("GetMoney", (uint32(Lua_Client::*)(uint8, uint8))&Lua_Client::GetMoney);
+		.def("IsDead", &Lua_Client::IsDead)
+		.def("CalcCurrentWeight", &Lua_Client::CalcCurrentWeight)
+		.def("CalcATK", &Lua_Client::CalcATK)
+		.def("FilteredMessage", &Lua_Client::FilteredMessage);
 }
 
 luabind::scope lua_register_inventory_where() {

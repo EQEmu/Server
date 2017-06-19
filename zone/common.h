@@ -408,7 +408,7 @@ struct StatBonuses {
 	uint32	SpellTriggers[MAX_SPELL_TRIGGER];	// Innate/Spell/Item Spells that trigger when you cast
 	uint32	SpellOnKill[MAX_SPELL_TRIGGER*3];	// Chance to proc after killing a mob
 	uint32	SpellOnDeath[MAX_SPELL_TRIGGER*2];	// Chance to have effect cast when you die
-	int32	CritDmgMob[EQEmu::skills::HIGHEST_SKILL + 2];		// All Skills + -1
+	int32	CritDmgMod[EQEmu::skills::HIGHEST_SKILL + 2];		// All Skills + -1
 	int32	SkillReuseTime[EQEmu::skills::HIGHEST_SKILL + 1];	// Reduces skill timers
 	int32	SkillDamageAmount[EQEmu::skills::HIGHEST_SKILL + 2];	// All Skills + -1
 	int32	TwoHandBluntBlock;					// chance to block when wielding two hand blunt weapon

@@ -25,7 +25,8 @@ namespace EQ
 
 			void RegisterCall(const std::string& command, int status_required, const std::string& help_definition, ConsoleServerCallback fn);
 			void RegisterLogin(ConsoleServerLoginCallback fn);
-
+			ConsoleServerConnection *FindByAccountName(const std::string &acct_name);
+			void SendChannelMessage(const ServerChannelMessage_Struct* scm, std::function<void(void)> onTell);
 		private:
 			void ConnectionDisconnected(ConsoleServerConnection *c);
 			void ProcessCommand(ConsoleServerConnection *c, const std::string& cmd);
