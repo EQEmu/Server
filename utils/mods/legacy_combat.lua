@@ -42,6 +42,7 @@ WeaponSkillFalloff = RuleR.Get(Rule.WeaponSkillFalloff);
 ArcheryHitPenalty = RuleR.Get(Rule.ArcheryHitPenalty);
 UseOldDamageIntervalRules = RuleB.Get(Rule.UseOldDamageIntervalRules);
 
+
 function MeleeMitigation(e)
 	e.IgnoreDefault = true;
 	
@@ -376,7 +377,7 @@ function TryPetCriticalHit(self, defender, hit)
 
 		if(Random.RollReal(critChance)) then
 			local entity_list = eq.get_entity_list();
-			critMod = critMod + GetCritDmgMob(self, hit.skill) * 2;
+			critMod = critMod + GetCritDmgMod(self, hit.skill) * 2;
 			hit.damage_done = (hit.damage_done * critMod) / 100;
 			entity_list:FilteredMessageClose(this, false, 200,
 					MT.CritMelee, Filter.MeleeCrits, string.format('%s scores a critical hit! (%d)',
@@ -719,7 +720,7 @@ function GetDamageTable(attacker, skill)
 		
 		if attacker:GetClass() == 7 then
 			local monkDamageTableBonus = 20;
-			return (dmg_table[GetLevel() - 50] * (100 + monkDamageTableBonus) / 100);
+			return (dmg_table[attacker:GetLevel() - 50] * (100 + monkDamageTableBonus) / 100);
 		else
 			return dmg_table[attacker:GetLevel() - 50];
 		end
