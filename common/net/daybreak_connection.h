@@ -9,7 +9,7 @@
 #include <memory>
 #include <map>
 #include <unordered_map>
-#include <queue>
+#include <deque>
 #include <list>
 
 namespace EQ
@@ -145,6 +145,12 @@ namespace EQ
 				size_t times_resent;
 			};
 
+			struct DaybreakBufferedPacket
+			{
+				uint16_t seq;
+				DaybreakSentPacket sent;
+			};
+
 			struct DaybreakStream
 			{
 				DaybreakStream() {
@@ -152,17 +158,20 @@ namespace EQ
 					sequence_out = 0;
 					fragment_current_bytes = 0;
 					fragment_total_bytes = 0;
+					outstanding_bytes = 0;
 				}
 
 				uint16_t sequence_in;
 				uint16_t sequence_out;
 				std::unordered_map<uint16_t, Packet*> packet_queue;
+				std::deque<DaybreakBufferedPacket> buffered_packets;
 
 				DynamicPacket fragment_packet;
 				uint32_t fragment_current_bytes;
 				uint32_t fragment_total_bytes;
 
-				std::unordered_map<uint16_t, DaybreakSentPacket> sent_packets;
+				std::unordered_map<uint16_t, DaybreakSentPacket> outstanding_packets;
+				size_t outstanding_bytes;
 			};
 
 			DaybreakStream m_streams[4];
@@ -170,7 +179,8 @@ namespace EQ
 
 			void Process();
 			void ProcessPacket(Packet &p);
-			void ProcessQueue();
+			void ProcessInboundQueue();
+			void ProcessOutboundQueue();
 			void RemoveFromQueue(int stream, uint16_t seq);
 			void AddToQueue(int stream, uint16_t seq, const Packet &p);
 			void ProcessDecodedPacket(const Packet &p);
@@ -186,6 +196,7 @@ namespace EQ
 			void ProcessResend(int stream);
 			void Ack(int stream, uint16_t seq);
 			void OutOfOrderAck(int stream, uint16_t seq);
+			void BufferPacket(int stream, uint16_t seq, DaybreakSentPacket &sent);
 
 			void SendConnect();
 			void SendKeepAlive();
@@ -225,6 +236,8 @@ namespace EQ
 				tic_rate_hertz = 60.0;
 				resend_timeout = 90000;
 				connection_close_time = 2000;
+				max_outstanding_packets = 200;
+				max_outstanding_bytes = 200 * 512;
 			}
 
 			size_t max_packet_size;
@@ -247,6 +260,8 @@ namespace EQ
 			size_t connection_close_time;
 			DaybreakEncodeType encode_passes[2];
 			int port;
+			size_t max_outstanding_packets;
+			size_t max_outstanding_bytes;
 		};
 
 		class DaybreakConnectionManager
