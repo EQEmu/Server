@@ -236,7 +236,7 @@ namespace EQ
 				tic_rate_hertz = 60.0;
 				resend_timeout = 90000;
 				connection_close_time = 2000;
-				max_outstanding_packets = 200;
+				max_outstanding_packets = 300;
 				max_outstanding_bytes = 200 * 512;
 			}
 

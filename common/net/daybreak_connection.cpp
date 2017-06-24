@@ -366,7 +366,6 @@ void EQ::Net::DaybreakConnection::Process()
 		}
 
 		ProcessInboundQueue();
-		ProcessOutboundQueue();
 	}
 	catch (std::exception ex) {
 		LogF(Logs::Detail, Logs::Netcode, "Error processing connection: {0}", ex.what());
@@ -1091,6 +1090,7 @@ void EQ::Net::DaybreakConnection::Ack(int stream, uint16_t seq)
 
 			s->outstanding_bytes -= iter->second.packet.Length();
 			iter = s->outstanding_packets.erase(iter);
+			ProcessOutboundQueue();
 		}
 		else {
 			++iter;
@@ -1113,6 +1113,7 @@ void EQ::Net::DaybreakConnection::OutOfOrderAck(int stream, uint16_t seq)
 
 		s->outstanding_bytes -= iter->second.packet.Length();
 		s->outstanding_packets.erase(iter);
+		ProcessOutboundQueue();
 	}
 }
 
