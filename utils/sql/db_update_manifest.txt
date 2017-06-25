@@ -364,6 +364,7 @@
 9108|2017_04_07_ignore_despawn.sql|SHOW COLUMNS FROM `npc_types` LIKE 'ignore_despawn'|empty|
 9109|2017_04_08_doors_disable_timer.sql|SHOW COLUMNS FROM `doors` LIKE 'disable_timer'|empty|
 9110|2017_04_10_graveyard.sql|show index from graveyard WHERE key_name = 'zone_id_nonunique'|empty|
+9111|2017_06_24_saylink_index.sql|SHOW INDEX FROM `saylink` WHERE `key_name` = 'phrase_index'|empty|
 
 # Upgrade conditions:
 # 	This won't be needed after this system is implemented, but it is used database that are not
