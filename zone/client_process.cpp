@@ -985,8 +985,6 @@ void Client::BulkSendMerchantInventory(int merchant_id, int npcid) {
 			Message_StringID(10, GENERIC_STRINGID_SAY, merch->GetCleanName(), handy_id, this->GetName(), handyitem->Name);
 		else
 			Message_StringID(10, GENERIC_STRINGID_SAY, merch->GetCleanName(), handy_id, this->GetName());
-
-		merch->CastToNPC()->FaceTarget(this->CastToMob());
 	}
 
 //		safe_delete_array(cpi);
