@@ -703,6 +703,10 @@ void EntityList::AESpell(Mob *caster, Mob *center, uint16 spell_id, bool affect_
 	float min_range2 = spells[spell_id].min_range * spells[spell_id].min_range;
 	float dist_targ = 0;
 
+	const auto &position = spells[spell_id].targettype == ST_Ring ? caster->GetTargetRingLocation() : static_cast<glm::vec3>(center->GetPosition());
+	glm::vec2 min = { position.x - dist, position.y - dist };
+	glm::vec2 max = { position.x + dist, position.y + dist };
+
 	bool bad = IsDetrimentalSpell(spell_id);
 	bool isnpc = caster->IsNPC();
 	int MAX_TARGETS_ALLOWED = 4;
@@ -732,13 +736,10 @@ void EntityList::AESpell(Mob *caster, Mob *center, uint16 spell_id, bool affect_
 			continue;
 		if (spells[spell_id].pcnpc_only_flag == 2 && (curmob->IsClient() || curmob->IsMerc()))
 			continue;
+		if (!IsWithinAxisAlignedBox(static_cast<glm::vec2>(curmob->GetPosition()), min, max))
+			continue;
 
-		if (spells[spell_id].targettype == ST_Ring) {
-			dist_targ = DistanceSquared(static_cast<glm::vec3>(curmob->GetPosition()), caster->GetTargetRingLocation());
-		}
-		else if (center) {
-			dist_targ = DistanceSquared(curmob->GetPosition(), center->GetPosition());
-		}
+		dist_targ = DistanceSquared(curmob->GetPosition(), position);
 
 		if (dist_targ > dist2)	//make sure they are in range
 			continue;
@@ -761,9 +762,7 @@ void EntityList::AESpell(Mob *caster, Mob *center, uint16 spell_id, bool affect_
 		if (bad) {
 			if (!caster->IsAttackAllowed(curmob, true))
 				continue;
-			if (center &&  !spells[spell_id].npc_no_los && !center->CheckLosFN(curmob))
-				continue;
-			if (!center && !spells[spell_id].npc_no_los && !caster->CheckLosFN(caster->GetTargetRingX(), caster->GetTargetRingY(), caster->GetTargetRingZ(), curmob->GetSize()))
+			if (!spells[spell_id].npc_no_los && !caster->CheckLosFN(position.x, position.y, position.z, curmob->GetSize()))
 				continue;
 		} else { // check to stop casting beneficial ae buffs (to wit: bard songs) on enemies...
 			// This does not check faction for beneficial AE buffs..only agro and attackable.
