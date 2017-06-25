@@ -694,7 +694,7 @@ void EntityList::AETaunt(Client* taunter, float range, int32 bonus_hate)
 // causes caster to hit every mob within dist range of center with
 // spell_id.
 // NPC spells will only affect other NPCs with compatible faction
-void EntityList::AESpell(Mob *caster, Mob *center, uint16 spell_id, bool affect_caster, int16 resist_adjust)
+void EntityList::AESpell(Mob *caster, Mob *center, uint16 spell_id, bool affect_caster, int16 resist_adjust, int *max_targets)
 {
 	Mob *curmob = nullptr;
 
@@ -709,9 +709,13 @@ void EntityList::AESpell(Mob *caster, Mob *center, uint16 spell_id, bool affect_
 
 	bool bad = IsDetrimentalSpell(spell_id);
 	bool isnpc = caster->IsNPC();
-	int MAX_TARGETS_ALLOWED = 4;
 
-	if (spells[spell_id].aemaxtargets)
+	if (RuleB(Spells, OldRainTargets))
+		max_targets = nullptr; // ignore it!
+
+	int MAX_TARGETS_ALLOWED = max_targets ? *max_targets : 4;
+
+	if (!max_targets && spells[spell_id].aemaxtargets)
 		MAX_TARGETS_ALLOWED = spells[spell_id].aemaxtargets;
 
 	int iCounter = 0;
@@ -789,8 +793,10 @@ void EntityList::AESpell(Mob *caster, Mob *center, uint16 spell_id, bool affect_
 		}
 
 		if (!isnpc || spells[spell_id].aemaxtargets) //npcs are not target limited (unless casting a spell with a target limit)...
-			iCounter++;
+			iCounter++; // should really pull out the MAX_TARGETS_ALLOWED calc so we can break early ...
 	}
+	if (max_targets)
+		*max_targets = *max_targets - std::min(iCounter, *max_targets); // could be higher than the count
 }
 
 void EntityList::MassGroupBuff(Mob *caster, Mob *center, uint16 spell_id, bool affect_caster)
