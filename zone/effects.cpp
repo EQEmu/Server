@@ -713,10 +713,15 @@ void EntityList::AESpell(Mob *caster, Mob *center, uint16 spell_id, bool affect_
 	if (RuleB(Spells, OldRainTargets))
 		max_targets = nullptr; // ignore it!
 
-	int MAX_TARGETS_ALLOWED = max_targets ? *max_targets : 4;
-
-	if (!max_targets && spells[spell_id].aemaxtargets)
-		MAX_TARGETS_ALLOWED = spells[spell_id].aemaxtargets;
+	// if we have a passed in value, use it, otherwise default to data
+	// detrimental Target AEs have a default value of 4 for PCs and unlimited for NPCs
+	int max_targets_allowed = 0; // unlimited
+	if (max_targets) // rains pass this in since they need to preserve the count through waves
+		max_targets_allowed = *max_targets;
+	else if (spells[spell_id].aemaxtargets)
+		max_targets_allowed = spells[spell_id].aemaxtargets;
+	else if (IsTargetableAESpell(spell_id) && bad && !isnpc)
+		max_targets_allowed = 4;
 
 	int iCounter = 0;
 
@@ -779,24 +784,17 @@ void EntityList::AESpell(Mob *caster, Mob *center, uint16 spell_id, bool affect_
 		}
 
 		curmob->CalcSpellPowerDistanceMod(spell_id, dist_targ);
+		caster->SpellOnTarget(spell_id, curmob, false, true, resist_adjust);
 
-		//if we get here... cast the spell.
-		if (IsTargetableAESpell(spell_id) && bad) {
-			if (iCounter < MAX_TARGETS_ALLOWED) {
-				caster->SpellOnTarget(spell_id, curmob, false, true, resist_adjust);
-			}
-		} else {
-			if (spells[spell_id].aemaxtargets && iCounter < spells[spell_id].aemaxtargets)
-				caster->SpellOnTarget(spell_id, curmob, false, true, resist_adjust);
-			if (!spells[spell_id].aemaxtargets)
-				caster->SpellOnTarget(spell_id, curmob, false, true, resist_adjust);
+		if (max_targets_allowed) { // if we have a limit, increment count
+			iCounter++;
+			if (iCounter >= max_targets_allowed) // we done
+				break;
 		}
-
-		if (!isnpc || spells[spell_id].aemaxtargets) //npcs are not target limited (unless casting a spell with a target limit)...
-			iCounter++; // should really pull out the MAX_TARGETS_ALLOWED calc so we can break early ...
 	}
-	if (max_targets)
-		*max_targets = *max_targets - std::min(iCounter, *max_targets); // could be higher than the count
+
+	if (max_targets && max_targets_allowed)
+		*max_targets = *max_targets - iCounter;
 }
 
 void EntityList::MassGroupBuff(Mob *caster, Mob *center, uint16 spell_id, bool affect_caster)
