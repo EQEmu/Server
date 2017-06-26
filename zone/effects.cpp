@@ -694,7 +694,7 @@ void EntityList::AETaunt(Client* taunter, float range, int32 bonus_hate)
 // causes caster to hit every mob within dist range of center with
 // spell_id.
 // NPC spells will only affect other NPCs with compatible faction
-void EntityList::AESpell(Mob *caster, Mob *center, uint16 spell_id, bool affect_caster, int16 resist_adjust)
+void EntityList::AESpell(Mob *caster, Mob *center, uint16 spell_id, bool affect_caster, int16 resist_adjust, int *max_targets)
 {
 	Mob *curmob = nullptr;
 
@@ -703,11 +703,19 @@ void EntityList::AESpell(Mob *caster, Mob *center, uint16 spell_id, bool affect_
 	float min_range2 = spells[spell_id].min_range * spells[spell_id].min_range;
 	float dist_targ = 0;
 
+	const auto &position = spells[spell_id].targettype == ST_Ring ? caster->GetTargetRingLocation() : static_cast<glm::vec3>(center->GetPosition());
+	glm::vec2 min = { position.x - dist, position.y - dist };
+	glm::vec2 max = { position.x + dist, position.y + dist };
+
 	bool bad = IsDetrimentalSpell(spell_id);
 	bool isnpc = caster->IsNPC();
-	int MAX_TARGETS_ALLOWED = 4;
 
-	if (spells[spell_id].aemaxtargets)
+	if (RuleB(Spells, OldRainTargets))
+		max_targets = nullptr; // ignore it!
+
+	int MAX_TARGETS_ALLOWED = max_targets ? *max_targets : 4;
+
+	if (!max_targets && spells[spell_id].aemaxtargets)
 		MAX_TARGETS_ALLOWED = spells[spell_id].aemaxtargets;
 
 	int iCounter = 0;
@@ -732,13 +740,10 @@ void EntityList::AESpell(Mob *caster, Mob *center, uint16 spell_id, bool affect_
 			continue;
 		if (spells[spell_id].pcnpc_only_flag == 2 && (curmob->IsClient() || curmob->IsMerc()))
 			continue;
+		if (!IsWithinAxisAlignedBox(static_cast<glm::vec2>(curmob->GetPosition()), min, max))
+			continue;
 
-		if (spells[spell_id].targettype == ST_Ring) {
-			dist_targ = DistanceSquared(static_cast<glm::vec3>(curmob->GetPosition()), caster->GetTargetRingLocation());
-		}
-		else if (center) {
-			dist_targ = DistanceSquared(curmob->GetPosition(), center->GetPosition());
-		}
+		dist_targ = DistanceSquared(curmob->GetPosition(), position);
 
 		if (dist_targ > dist2)	//make sure they are in range
 			continue;
@@ -761,9 +766,7 @@ void EntityList::AESpell(Mob *caster, Mob *center, uint16 spell_id, bool affect_
 		if (bad) {
 			if (!caster->IsAttackAllowed(curmob, true))
 				continue;
-			if (center &&  !spells[spell_id].npc_no_los && !center->CheckLosFN(curmob))
-				continue;
-			if (!center && !spells[spell_id].npc_no_los && !caster->CheckLosFN(caster->GetTargetRingX(), caster->GetTargetRingY(), caster->GetTargetRingZ(), curmob->GetSize()))
+			if (!spells[spell_id].npc_no_los && !caster->CheckLosFN(position.x, position.y, position.z, curmob->GetSize()))
 				continue;
 		} else { // check to stop casting beneficial ae buffs (to wit: bard songs) on enemies...
 			// This does not check faction for beneficial AE buffs..only agro and attackable.
@@ -790,8 +793,10 @@ void EntityList::AESpell(Mob *caster, Mob *center, uint16 spell_id, bool affect_
 		}
 
 		if (!isnpc || spells[spell_id].aemaxtargets) //npcs are not target limited (unless casting a spell with a target limit)...
-			iCounter++;
+			iCounter++; // should really pull out the MAX_TARGETS_ALLOWED calc so we can break early ...
 	}
+	if (max_targets)
+		*max_targets = *max_targets - std::min(iCounter, *max_targets); // could be higher than the count
 }
 
 void EntityList::MassGroupBuff(Mob *caster, Mob *center, uint16 spell_id, bool affect_caster)
