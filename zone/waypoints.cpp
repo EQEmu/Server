@@ -513,39 +513,8 @@ bool Mob::MakeNewPositionAndSendUpdate(float x, float y, float z, int speed, boo
 		m_Position.y = new_y;
 		m_Position.z = new_z;
 
-		uint8 NPCFlyMode = 0;
-
-		if (IsNPC()) {
-			if (CastToNPC()->GetFlyMode() == 1 || CastToNPC()->GetFlyMode() == 2)
-				NPCFlyMode = 1;
-		}
-
-		//fix up pathing Z
-		if (!NPCFlyMode && checkZ && zone->HasMap() && RuleB(Map, FixPathingZWhenMoving))
-		{
-			if (!RuleB(Watermap, CheckForWaterWhenMoving) || !zone->HasWaterMap() ||
-				(zone->HasWaterMap() && !zone->watermap->InWater(glm::vec3(m_Position))))
-			{
-				glm::vec3 dest(m_Position.x, m_Position.y, m_Position.z);
-
-				float newz = zone->zonemap->FindBestZ(dest, nullptr) + 2.0f;
-
-				if ((newz > -2000) &&
-					std::abs(newz - dest.z) < RuleR(Map, FixPathingZMaxDeltaMoving)) // Sanity check.
-				{
-					if ((std::abs(x - m_Position.x) < 0.5) &&
-						(std::abs(y - m_Position.y) < 0.5)) {
-						if (std::abs(z - m_Position.z) <=
-							RuleR(Map, FixPathingZMaxDeltaMoving))
-							m_Position.z = z;
-						else
-							m_Position.z = newz + 1;
-					}
-					else
-						m_Position.z = newz + 1;
-				}
-			}
-		}
+		if(fix_z_timer.Check())
+			this->FixZ();
 
 		tar_ndx++;
 		return true;
@@ -651,37 +620,8 @@ bool Mob::MakeNewPositionAndSendUpdate(float x, float y, float z, int speed, boo
 		m_Position.w = CalculateHeadingToTarget(x, y);
 	}
 
-	uint8 NPCFlyMode = 0;
-
-	if (IsNPC()) {
-		if (CastToNPC()->GetFlyMode() == 1 || CastToNPC()->GetFlyMode() == 2)
-			NPCFlyMode = 1;
-	}
-
-	//fix up pathing Z
-	if (!NPCFlyMode && checkZ && zone->HasMap() && RuleB(Map, FixPathingZWhenMoving)) {
-
-		if (!RuleB(Watermap, CheckForWaterWhenMoving) || !zone->HasWaterMap() ||
-			(zone->HasWaterMap() && !zone->watermap->InWater(glm::vec3(m_Position))))
-		{
-			glm::vec3 dest(m_Position.x, m_Position.y, m_Position.z);
-
-			float newz = zone->zonemap->FindBestZ(dest, nullptr);
-
-			if ((newz > -2000) &&
-				std::abs(newz - dest.z) < RuleR(Map, FixPathingZMaxDeltaMoving)) // Sanity check.
-			{
-				if (std::abs(x - m_Position.x) < 0.5 && std::abs(y - m_Position.y) < 0.5) {
-					if (std::abs(z - m_Position.z) <= RuleR(Map, FixPathingZMaxDeltaMoving))
-						m_Position.z = z;
-					else
-						m_Position.z = newz + 1;
-				}
-				else
-					m_Position.z = newz + 1;
-			}
-		}
-	}
+	if (fix_z_timer.Check())
+		this->FixZ();
 
 	SetMoving(true);
 	moved = true;
@@ -769,39 +709,8 @@ bool Mob::CalculateNewPosition(float x, float y, float z, int speed, bool checkZ
 		Log(Logs::Detail, Logs::AI, "Next position (%.3f, %.3f, %.3f)", m_Position.x, m_Position.y, m_Position.z);
 	}
 
-	uint8 NPCFlyMode = 0;
-
-	if (IsNPC()) {
-		if (CastToNPC()->GetFlyMode() == 1 || CastToNPC()->GetFlyMode() == 2)
-			NPCFlyMode = 1;
-	}
-
-	//fix up pathing Z
-	if (!NPCFlyMode && checkZ && zone->HasMap() && RuleB(Map, FixPathingZWhenMoving))
-	{
-		if (!RuleB(Watermap, CheckForWaterWhenMoving) || !zone->HasWaterMap() ||
-			(zone->HasWaterMap() && !zone->watermap->InWater(glm::vec3(m_Position))))
-		{
-			glm::vec3 dest(m_Position.x, m_Position.y, m_Position.z);
-
-			float newz = zone->zonemap->FindBestZ(dest, nullptr) + 2.0f;
-
-			Log(Logs::Detail, Logs::AI, "BestZ returned %4.3f at %4.3f, %4.3f, %4.3f", newz, m_Position.x, m_Position.y, m_Position.z);
-
-			if ((newz > -2000) &&
-				std::abs(newz - dest.z) < RuleR(Map, FixPathingZMaxDeltaMoving)) // Sanity check.
-			{
-				if (std::abs(x - m_Position.x) < 0.5 && std::abs(y - m_Position.y) < 0.5) {
-					if (std::abs(z - m_Position.z) <= RuleR(Map, FixPathingZMaxDeltaMoving))
-						m_Position.z = z;
-					else
-						m_Position.z = newz + 1;
-				}
-				else
-					m_Position.z = newz + 1;
-			}
-		}
-	}
+	if (fix_z_timer.Check())
+		this->FixZ();
 
 	//OP_MobUpdate
 	if ((old_test_vector != test_vector) || tar_ndx>20) { //send update
@@ -943,9 +852,6 @@ void Mob::SendToFixZ(float new_x, float new_y, float new_z) {
 	m_Position.y = new_y;
 	m_Position.z = new_z + 0.1;
 
-	//fix up pathing Z, this shouldent be needed IF our waypoints
-	//are corrected instead
-
 	if (zone->HasMap() && RuleB(Map, FixPathingZOnSendTo))
 	{
 		if (!RuleB(Watermap, CheckForWaterOnSendTo) || !zone->HasWaterMap() ||
@@ -955,10 +861,43 @@ void Mob::SendToFixZ(float new_x, float new_y, float new_z) {
 
 			float newz = zone->zonemap->FindBestZ(dest, nullptr);
 
-			Log(Logs::Detail, Logs::AI, "BestZ returned %4.3f at %4.3f, %4.3f, %4.3f", newz, m_Position.x, m_Position.y, m_Position.z);
+			Log(Logs::Moderate, Logs::Pathing, "BestZ returned %4.3f at %4.3f, %4.3f, %4.3f", newz, m_Position.x, m_Position.y, m_Position.z);
 
 			if ((newz > -2000) && std::abs(newz - dest.z) < RuleR(Map, FixPathingZMaxDeltaSendTo)) // Sanity check.
 				m_Position.z = newz + 1;
+		}
+	}
+}
+
+void Mob::FixZ() {
+	BenchTimer timer;
+	timer.reset();
+
+	if (zone->HasMap() && RuleB(Map, FixZWhenMoving) && (flymode != 1 && flymode != 2))
+	{
+		if (!RuleB(Watermap, CheckForWaterWhenMoving) || !zone->HasWaterMap() ||
+			(zone->HasWaterMap() && !zone->watermap->InWater(glm::vec3(m_Position))))
+		{
+			glm::vec3 dest(m_Position.x, m_Position.y, m_Position.z);
+
+			float new_z = zone->zonemap->FindBestZ(dest, nullptr);
+
+			auto duration = timer.elapsed();
+
+			Log(
+				Logs::Moderate, 
+				Logs::Pathing, 
+				"Mob::FixZ() (%s) returned %4.3f at %4.3f, %4.3f, %4.3f - Took %lf", 
+				this->GetCleanName(), 
+				new_z, 
+				m_Position.x, 
+				m_Position.y,
+				m_Position.z,
+				duration
+			);
+
+			if ((new_z > -2000) && std::abs(new_z - dest.z) < RuleR(Map, FixPathingZMaxDeltaMoving))
+				m_Position.z = new_z + 1;
 		}
 	}
 }

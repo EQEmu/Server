@@ -112,7 +112,9 @@ Mob::Mob(const char* in_name,
 		m_Position(position),
 		tmHidden(-1),
 		mitigation_ac(0),
-		m_specialattacks(eSpecialAttacks::None)
+		m_specialattacks(eSpecialAttacks::None),
+		fix_z_timer(1000),
+		fix_z_timer_engaged(100)
 {
 	targeted = 0;
 	tar_ndx=0;
