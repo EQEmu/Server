@@ -2237,21 +2237,7 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, CastingSlot slot, ui
 				// special ae duration spell
 				ae_center->CastToBeacon()->AELocationSpell(this, spell_id, resist_adjust);
 			} else {
-				// regular PB AE or targeted AE spell - spell_target is null if PB
-				if(spell_target)	// this must be an AETarget spell
-				{
-					bool cast_on_target = true;
-					if (spells[spell_id].targettype == ST_TargetAENoPlayersPets && spell_target->IsPetOwnerClient())
-						cast_on_target = false;
-					if (spells[spell_id].targettype == ST_AreaClientOnly && !spell_target->IsClient())
-						cast_on_target = false;
-					if (spells[spell_id].targettype == ST_AreaNPCOnly && !spell_target->IsNPC())
-						cast_on_target = false;
-
-					// affect the target too
-					if (cast_on_target)
-						SpellOnTarget(spell_id, spell_target, false, true, resist_adjust);
-				}
+				// unsure if we actually need this? Need to find some spell examples
 				if(ae_center && ae_center == this && IsBeneficialSpell(spell_id))
 					SpellOnTarget(spell_id, this);
 
