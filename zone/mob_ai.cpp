@@ -743,6 +743,10 @@ void Client::AI_Process()
 
 	if(RuleB(Combat, EnableFearPathing)){
 		if(currently_fleeing) {
+
+			if (fix_z_timer_engaged.Check())
+				this->FixZ();
+
 			if(IsRooted()) {
 				//make sure everybody knows were not moving, for appearance sake
 				if(IsMoving())
@@ -782,6 +786,7 @@ void Client::AI_Process()
 				}
 				return;
 			}
+
 		}
 	}
 
