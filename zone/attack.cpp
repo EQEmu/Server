@@ -53,7 +53,7 @@ extern WorldServer worldserver;
 extern EntityList entity_list;
 extern Zone* zone;
 
-EQEmu::skills::SkillType Mob::AttackAnimation(int Hand, const EQEmu::ItemInstance* weapon, EQEmu::skills:SkillType skillinuse)
+EQEmu::skills::SkillType Mob::AttackAnimation(int Hand, const EQEmu::ItemInstance* weapon, EQEmu::skills::SkillType skillinuse)
 {
 	// Determine animation
 	int type = 0;
