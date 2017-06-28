@@ -53,9 +53,8 @@ extern WorldServer worldserver;
 extern EntityList entity_list;
 extern Zone* zone;
 
-EQEmu::skills::SkillType Mob::AttackAnimation(int Hand, const EQEmu::ItemInstance* weapon)
+EQEmu::skills::SkillType Mob::AttackAnimation(int Hand, const EQEmu::ItemInstance* weapon, EQEmu::skills:SkillType skillinuse)
 {
-	EQEmu::skills::SkillType skillinuse = EQEmu::skills::Skill1HBlunt;
 	// Determine animation
 	int type = 0;
 	if (weapon && weapon->IsClassCommon()) {
@@ -1924,7 +1923,7 @@ bool NPC::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool
 	//do attack animation regardless of whether or not we can hit below
 	int16 charges = 0;
 	EQEmu::ItemInstance weapon_inst(weapon, charges);
-	my_hit.skill = AttackAnimation(Hand, &weapon_inst);
+	my_hit.skill = AttackAnimation(Hand, &weapon_inst, my_hit.skill);
 
 	//basically "if not immune" then do the attack
 	if (weapon_damage > 0) {
