@@ -1414,11 +1414,11 @@ bool Zone::HasWeather()
 
 void Zone::StartShutdownTimer(uint32 set_time) {
 	if (set_time > autoshutdown_timer.GetRemainingTime()) {
-		if (set_time == (RuleI(Zone, AutoShutdownDelay)))
-		{
+		if (set_time == (RuleI(Zone, AutoShutdownDelay))) {
 			set_time = database.getZoneShutDownDelay(GetZoneID(), GetInstanceVersion());
 		}
-		autoshutdown_timer.Start(set_time, false);
+		autoshutdown_timer.SetTimer(set_time);
+		Log(Logs::General, Logs::Zone_Server, "Zone::StartShutdownTimer set to %u", set_time);
 	}
 }
 
