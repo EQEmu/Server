@@ -42,6 +42,7 @@ WeaponSkillFalloff = RuleR.Get(Rule.WeaponSkillFalloff);
 ArcheryHitPenalty = RuleR.Get(Rule.ArcheryHitPenalty);
 UseOldDamageIntervalRules = RuleB.Get(Rule.UseOldDamageIntervalRules);
 
+CriticalMessageRange = RuleI.Get(Rule.CriticalDamage);
 
 function MeleeMitigation(e)
 	e.IgnoreDefault = true;
@@ -238,9 +239,9 @@ function TryCriticalHit(e)
 				e.hit.damage_done = (e.hit.damage_done * SlayDmgBonus * 2.25) / 100;
 				
 				if (self:GetGender() == 1) then
-					entity_list:FilteredMessageClose(self, false, 200, MT.CritMelee, Filter.MeleeCrits, string.format('%s\'s holy blade cleanses her target! (%d)', self:GetCleanName(), e.hit.damage_done));
+					entity_list:FilteredMessageClose(self, false, CriticalMessageRange, MT.CritMelee, Filter.MeleeCrits, string.format('%s\'s holy blade cleanses her target! (%d)', self:GetCleanName(), e.hit.damage_done));
 				else
-					entity_list:FilteredMessageClose(self, false, 200, MT.CritMelee, Filter.MeleeCrits, string.format('%s\'s holy blade cleanses his target! (%d)', self:GetCleanName(), e.hit.damage_done));
+					entity_list:FilteredMessageClose(self, false, CriticalMessageRange, MT.CritMelee, Filter.MeleeCrits, string.format('%s\'s holy blade cleanses his target! (%d)', self:GetCleanName(), e.hit.damage_done));
 				end
 				
 				return e;
@@ -326,15 +327,15 @@ function TryCriticalHit(e)
 			end
     
 			if (crip_success) then
-				entity_list:FilteredMessageClose(self, false, 200, MT.CritMelee, Filter.MeleeCrits, string.format('%s lands a Crippling Blow! (%d)', self:GetCleanName(), e.hit.damage_done));
+				entity_list:FilteredMessageClose(self, false, CriticalMessageRange, MT.CritMelee, Filter.MeleeCrits, string.format('%s lands a Crippling Blow! (%d)', self:GetCleanName(), e.hit.damage_done));
 				if (defender:GetLevel() <= 55 and not defender:GetSpecialAbility(SpecialAbility.unstunable)) then
 					defender:Emote("staggers.");
 					defender:Stun(0);
 				end
 			elseif (deadlySuccess) then
-				entity_list:FilteredMessageClose(self, false, 200, MT.CritMelee, Filter.MeleeCrits, string.format('%s scores a Deadly Strike! (%d)', self:GetCleanName(), e.hit.damage_done));
+				entity_list:FilteredMessageClose(self, false, CriticalMessageRange, MT.CritMelee, Filter.MeleeCrits, string.format('%s scores a Deadly Strike! (%d)', self:GetCleanName(), e.hit.damage_done));
 			else
-				entity_list:FilteredMessageClose(self, false, 200, MT.CritMelee, Filter.MeleeCrits, string.format('%s scores a critical hit! (%d)', self:GetCleanName(), e.hit.damage_done));
+				entity_list:FilteredMessageClose(self, false, CriticalMessageRange, MT.CritMelee, Filter.MeleeCrits, string.format('%s scores a critical hit! (%d)', self:GetCleanName(), e.hit.damage_done));
 			end
 		end
 	end
@@ -379,9 +380,9 @@ function TryPetCriticalHit(self, defender, hit)
 			local entity_list = eq.get_entity_list();
 			critMod = critMod + GetCritDmgMod(self, hit.skill) * 2;
 			hit.damage_done = (hit.damage_done * critMod) / 100;
-			entity_list:FilteredMessageClose(this, false, 200,
+			entity_list:FilteredMessageClose(this, false, CriticalMessageRange,
 					MT.CritMelee, Filter.MeleeCrits, string.format('%s scores a critical hit! (%d)',
-					self:GetCleanName(), hit.damage_done));
+					self:GetCleanName(), e.hit.damage_done));
 		end
 	end
 	

@@ -743,6 +743,10 @@ void Client::AI_Process()
 
 	if(RuleB(Combat, EnableFearPathing)){
 		if(currently_fleeing) {
+
+			if (fix_z_timer_engaged.Check())
+				this->FixZ();
+
 			if(IsRooted()) {
 				//make sure everybody knows were not moving, for appearance sake
 				if(IsMoving())
@@ -782,6 +786,7 @@ void Client::AI_Process()
 				}
 				return;
 			}
+
 		}
 	}
 
@@ -990,6 +995,12 @@ void Mob::AI_Process() {
 	}
 
 	if (engaged) {
+
+		/* Fix Z when following during pull, not when engaged and stationary */
+		if (moving && fix_z_timer_engaged.Check())
+			if(this->GetTarget())
+				if(DistanceNoZ(this->GetPosition(), this->GetTarget()->GetPosition()) > 50)
+					this->FixZ();
 
 		if (!(m_PlayerState & static_cast<uint32>(PlayerState::Aggressive)))
 			SendAddPlayerState(PlayerState::Aggressive);

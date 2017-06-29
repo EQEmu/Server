@@ -332,6 +332,8 @@ int main(int argc, char** argv) {
 		database.ClearMerchantTemp();
 	}
 
+	RuleManager::Instance()->SaveRules(&database);
+
 	Log(Logs::General, Logs::World_Server, "Loading EQ time of day..");
 	TimeOfDay_Struct eqTime;
 	time_t realtime;

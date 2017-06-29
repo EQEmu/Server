@@ -53,9 +53,8 @@ extern WorldServer worldserver;
 extern EntityList entity_list;
 extern Zone* zone;
 
-EQEmu::skills::SkillType Mob::AttackAnimation(int Hand, const EQEmu::ItemInstance* weapon)
+EQEmu::skills::SkillType Mob::AttackAnimation(int Hand, const EQEmu::ItemInstance* weapon, EQEmu::skills::SkillType skillinuse)
 {
-	EQEmu::skills::SkillType skillinuse = EQEmu::skills::Skill1HBlunt;
 	// Determine animation
 	int type = 0;
 	if (weapon && weapon->IsClassCommon()) {
@@ -1924,7 +1923,7 @@ bool NPC::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool
 	//do attack animation regardless of whether or not we can hit below
 	int16 charges = 0;
 	EQEmu::ItemInstance weapon_inst(weapon, charges);
-	my_hit.skill = AttackAnimation(Hand, &weapon_inst);
+	my_hit.skill = AttackAnimation(Hand, &weapon_inst, my_hit.skill);
 
 	//basically "if not immune" then do the attack
 	if (weapon_damage > 0) {
@@ -2388,6 +2387,13 @@ bool NPC::Death(Mob* killer_mob, int32 damage, uint16 spell, EQEmu::skills::Skil
 
 		entity_list.UnMarkNPC(GetID());
 		entity_list.RemoveNPC(GetID());
+
+		/* Fix Z on Corpse Creation */
+		glm::vec3 dest(m_Position.x, m_Position.y, m_Position.z);
+		float new_z = zone->zonemap->FindBestZ(dest, nullptr);
+		corpse->SetFlyMode(1);
+		corpse->GMMove(m_Position.x, m_Position.y, new_z + 5, m_Position.w);
+
 		this->SetID(0);
 
 		if (killer != 0 && emoteid != 0)

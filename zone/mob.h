@@ -233,7 +233,7 @@ public:
 	inline bool SeeImprovedHide() const { return see_improved_hide; }
 	bool IsInvisible(Mob* other = 0) const;
 	void SetInvisible(uint8 state);
-	EQEmu::skills::SkillType AttackAnimation(int Hand, const EQEmu::ItemInstance* weapon);
+	EQEmu::skills::SkillType AttackAnimation(int Hand, const EQEmu::ItemInstance* weapon, EQEmu::skills::SkillType skillinuse = EQEmu::skills::Skill1HBlunt);
 
 	//Song
 	bool UseBardSpellLogic(uint16 spell_id = 0xffff, int slot = -1);
@@ -913,6 +913,7 @@ public:
 	float				GetGroundZ(float new_x, float new_y, float z_offset=0.0);
 	void				SendTo(float new_x, float new_y, float new_z);
 	void				SendToFixZ(float new_x, float new_y, float new_z);
+	void				FixZ();
 	void				NPCSpecialAttacks(const char* parse, int permtag, bool reset = true, bool remove = false);
 	inline uint32		DontHealMeBefore() const { return pDontHealMeBefore; }
 	inline uint32		DontBuffMeBefore() const { return pDontBuffMeBefore; }
@@ -1373,6 +1374,8 @@ protected:
 
 	bool flee_mode;
 	Timer flee_timer;
+	Timer fix_z_timer;
+	Timer fix_z_timer_engaged;
 
 	bool pAIControlled;
 	bool roamer;

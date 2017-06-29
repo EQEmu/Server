@@ -274,6 +274,7 @@ RULE_BOOL(Map, FixPathingZWhenLoading, true)		//increases zone boot times a bit 
 RULE_BOOL(Map, FixPathingZAtWaypoints, false)	//alternative to `WhenLoading`, accomplishes the same thing but does it at each waypoint instead of once at boot time.
 RULE_BOOL(Map, FixPathingZWhenMoving, false)		//very CPU intensive, but helps hopping with widely spaced waypoints.
 RULE_BOOL(Map, FixPathingZOnSendTo, false)		//try to repair Z coords in the SendTo routine as well.
+RULE_BOOL(Map, FixZWhenMoving, true)		// Automatically fix NPC Z coordinates when moving/pathing/engaged (Far less CPU intensive than its predecessor)
 RULE_REAL(Map, FixPathingZMaxDeltaMoving, 20)	//at runtime while pathing: max change in Z to allow the BestZ code to apply.
 RULE_REAL(Map, FixPathingZMaxDeltaWaypoint, 20)	//at runtime at each waypoint: max change in Z to allow the BestZ code to apply.
 RULE_REAL(Map, FixPathingZMaxDeltaSendTo, 20)	//at runtime in SendTo: max change in Z to allow the BestZ code to apply.
@@ -397,6 +398,7 @@ RULE_BOOL(Spells, FlatItemExtraSpellAmt, false) // allow SpellDmg stat to affect
 RULE_BOOL(Spells, IgnoreSpellDmgLvlRestriction, false) // ignore the 5 level spread on applying SpellDmg
 RULE_BOOL(Spells, AllowItemTGB, false) // TGB doesn't work with items on live, custom servers want it though
 RULE_BOOL(Spells, NPCInnateProcOverride, true) //  NPC innate procs override the target type to single target.
+RULE_BOOL(Spells, OldRainTargets, false) // use old incorrectly implemented max targets for rains
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Combat)

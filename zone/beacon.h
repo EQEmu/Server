@@ -56,6 +56,7 @@ protected:
 	int16 resist_adjust;
 	int spell_iterations;
 	Timer spell_timer;
+	int max_targets;
 
 	uint16 caster_id;
 private:

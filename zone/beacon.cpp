@@ -68,6 +68,7 @@ Beacon::Beacon(Mob *at_mob, int lifetime)
 	resist_adjust = 0;
 	spell_iterations = 0;
 	caster_id = 0;
+	max_targets = 4; // default
 
 	if(lifetime)
 		remove_timer.Start();
@@ -93,10 +94,10 @@ bool Beacon::Process()
 	)
 	{
 		Mob *caster = entity_list.GetMob(caster_id);
-		if(caster && spell_iterations--)
+		if(caster && spell_iterations-- && max_targets)
 		{
 			bool affect_caster = (!caster->IsNPC() && !caster->IsAIControlled());	//NPC AE spells do not affect the NPC caster
-			entity_list.AESpell(caster, this, spell_id, affect_caster, resist_adjust);
+			entity_list.AESpell(caster, this, spell_id, affect_caster, resist_adjust, &max_targets);
 		}
 		else
 		{
@@ -126,6 +127,8 @@ void Beacon::AELocationSpell(Mob *caster, uint16 cast_spell_id, int16 resist_adj
 	this->resist_adjust = resist_adjust;
 	spell_iterations = spells[spell_id].AEDuration / 2500;
 	spell_iterations = spell_iterations < 1 ? 1 : spell_iterations;	// at least 1
+	if (spells[spell_id].aemaxtargets)
+		max_targets = spells[spell_id].aemaxtargets;
 	spell_timer.Start(2500);
 	spell_timer.Trigger();
 }
