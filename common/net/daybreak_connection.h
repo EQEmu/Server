@@ -136,7 +136,10 @@ namespace EQ
 			size_t m_resend_delay;
 			size_t m_rolling_ping;
 			Timestamp m_close_time;
-
+			size_t m_outstanding_bytes;
+			size_t m_cwnd;
+			size_t m_ssthresh;
+			
 			struct DaybreakSentPacket
 			{
 				DynamicPacket packet;
@@ -158,7 +161,6 @@ namespace EQ
 					sequence_out = 0;
 					fragment_current_bytes = 0;
 					fragment_total_bytes = 0;
-					outstanding_bytes = 0;
 				}
 
 				uint16_t sequence_in;
@@ -171,7 +173,6 @@ namespace EQ
 				uint32_t fragment_total_bytes;
 
 				std::unordered_map<uint16_t, DaybreakSentPacket> outstanding_packets;
-				size_t outstanding_bytes;
 			};
 
 			DaybreakStream m_streams[4];
@@ -236,8 +237,7 @@ namespace EQ
 				tic_rate_hertz = 60.0;
 				resend_timeout = 90000;
 				connection_close_time = 2000;
-				max_outstanding_packets = 300;
-				max_outstanding_bytes = 200 * 512;
+				max_outstanding_bytes = 65535;
 			}
 
 			size_t max_packet_size;
@@ -260,7 +260,6 @@ namespace EQ
 			size_t connection_close_time;
 			DaybreakEncodeType encode_passes[2];
 			int port;
-			size_t max_outstanding_packets;
 			size_t max_outstanding_bytes;
 		};
 
