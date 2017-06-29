@@ -996,8 +996,11 @@ void Mob::AI_Process() {
 
 	if (engaged) {
 
+		/* Fix Z when following during pull, not when engaged and stationary */
 		if (moving && fix_z_timer_engaged.Check())
-			this->FixZ();
+			if(this->GetTarget())
+				if(DistanceNoZ(this->GetPosition(), this->GetTarget()->GetPosition()) > 50)
+					this->FixZ();
 
 		if (!(m_PlayerState & static_cast<uint32>(PlayerState::Aggressive)))
 			SendAddPlayerState(PlayerState::Aggressive);
