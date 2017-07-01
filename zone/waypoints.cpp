@@ -870,6 +870,7 @@ void Mob::SendToFixZ(float new_x, float new_y, float new_z) {
 }
 
 void Mob::FixZ() {
+
 	BenchTimer timer;
 	timer.reset();
 
@@ -878,9 +879,8 @@ void Mob::FixZ() {
 		if (!RuleB(Watermap, CheckForWaterWhenMoving) || !zone->HasWaterMap() ||
 			(zone->HasWaterMap() && !zone->watermap->InWater(glm::vec3(m_Position))))
 		{
-			glm::vec3 dest(m_Position.x, m_Position.y, m_Position.z);
 
-			float new_z = zone->zonemap->FindBestZ(dest, nullptr);
+			float new_z = this->FindGroundZ(m_Position.x, m_Position.y, 10);
 
 			auto duration = timer.elapsed();
 
@@ -896,8 +896,26 @@ void Mob::FixZ() {
 				duration
 			);
 
-			if ((new_z > -2000) && std::abs(new_z - dest.z) < RuleR(Map, FixPathingZMaxDeltaMoving))
-				m_Position.z = new_z + 1;
+			float size = GetSize();
+			if (size > 10)
+				size = 10;
+
+			new_z += size / 2;
+
+			if ((new_z > -2000) && std::abs(m_Position.z - new_z) < 35) {
+				if (RuleB(Map, MobZVisualDebug))
+					this->SendAppearanceEffect(78, 0, 0, 0, 0);
+				
+				m_Position.z = new_z;
+			}
+			else {
+				if (RuleB(Map, MobZVisualDebug))
+					this->SendAppearanceEffect(103, 0, 0, 0, 0);
+
+				Log(Logs::General, Logs::Debug, "%s is failing to find Z %f", this->GetCleanName(), std::abs(m_Position.z - new_z));
+			}
+
+			last_z = m_Position.z;
 		}
 	}
 }
