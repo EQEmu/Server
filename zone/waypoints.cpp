@@ -879,8 +879,8 @@ void Mob::FixZ() {
 		if (!RuleB(Watermap, CheckForWaterWhenMoving) || !zone->HasWaterMap() ||
 			(zone->HasWaterMap() && !zone->watermap->InWater(glm::vec3(m_Position))))
 		{
-
-			float new_z = this->FindGroundZ(m_Position.x, m_Position.y, 10);
+			/* Any more than 5 in the offset makes NPC's hop/snap to ceiling in small corridors */
+			float new_z = this->FindGroundZ(m_Position.x, m_Position.y, 5);
 
 			auto duration = timer.elapsed();
 
