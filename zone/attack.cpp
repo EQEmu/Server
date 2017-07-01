@@ -2392,7 +2392,13 @@ bool NPC::Death(Mob* killer_mob, int32 damage, uint16 spell, EQEmu::skills::Skil
 		glm::vec3 dest(m_Position.x, m_Position.y, m_Position.z);
 		float new_z = zone->zonemap->FindBestZ(dest, nullptr);
 		corpse->SetFlyMode(1);
-		corpse->GMMove(m_Position.x, m_Position.y, new_z + 5, m_Position.w);
+		float size = GetSize();
+		if (size > 10)
+			size = 10;
+
+		new_z += size / 2;
+
+		corpse->GMMove(m_Position.x, m_Position.y, new_z, m_Position.w);
 
 		this->SetID(0);
 
