@@ -219,7 +219,7 @@ namespace EQ
 				max_connection_count = 0;
 				keepalive_delay_ms = 9000;
 				resend_delay_ms = 150;
-				resend_delay_factor = 1.5;
+				resend_delay_factor = 1.25;
 				resend_delay_min = 500;
 				resend_delay_max = 4000;
 				connect_delay_ms = 500;
@@ -237,7 +237,7 @@ namespace EQ
 				tic_rate_hertz = 60.0;
 				resend_timeout = 90000;
 				connection_close_time = 2000;
-				max_outstanding_bytes = 65535;
+				max_outstanding_bytes = 204800;
 			}
 
 			size_t max_packet_size;
