@@ -486,6 +486,44 @@ void EQ::Net::DaybreakConnection::ProcessOutboundQueue()
 	}
 }
 
+bool EQ::Net::DaybreakConnection::CongestionWindowFull() const
+{
+	for (int i = 0; i < 4; ++i) {
+		auto stream = &m_streams[i];
+
+		if (!stream->buffered_packets.empty()) {
+			//We had to buffer packets and we only do that if the window was full
+			return true;
+		}
+	}
+
+	return false;
+}
+
+void EQ::Net::DaybreakConnection::IncreaseCongestionWindow()
+{
+	if (!CongestionWindowFull()) {
+		return;
+	}
+
+	if (m_cwnd < m_ssthresh) {
+		m_cwnd += m_cwnd;
+	}
+	else {
+		m_cwnd += m_max_packet_size;
+	}
+
+	m_cwnd = EQEmu::Clamp(m_cwnd, (size_t)m_max_packet_size, m_owner->m_options.max_outstanding_bytes);
+	LogF(Logs::Detail, Logs::Netcode, "Increasing cwnd size new size is {0}", m_cwnd);
+}
+
+void EQ::Net::DaybreakConnection::ReduceCongestionWindow()
+{
+	m_cwnd = EQEmu::Clamp(m_cwnd / 2, (size_t)m_max_packet_size, m_owner->m_options.max_outstanding_bytes);
+	m_ssthresh = m_cwnd;
+	LogF(Logs::Detail, Logs::Netcode, "Reducing cwnd size new size is {0}", m_cwnd);
+}
+
 void EQ::Net::DaybreakConnection::RemoveFromQueue(int stream, uint16_t seq)
 {
 	auto s = &m_streams[stream];
@@ -1048,33 +1086,17 @@ void EQ::Net::DaybreakConnection::ProcessResend(int stream)
 	auto s = &m_streams[stream];
 	for (auto &entry : s->outstanding_packets) {
 		auto time_since_last_send = std::chrono::duration_cast<std::chrono::milliseconds>(now - entry.second.last_sent);
-		if (entry.second.times_resent == 0) {
-			if ((size_t)time_since_last_send.count() > m_resend_delay) {
-				InternalBufferedSend(entry.second.packet);
-				entry.second.last_sent = now;
-				entry.second.times_resent++;
-				
-				LogF(Logs::Detail, Logs::Netcode, "Congestion detected, reducing window size");
-				m_ssthresh = m_cwnd / 2;
-				m_cwnd = m_cwnd / 2;
-			}
+		auto time_since_first_sent = std::chrono::duration_cast<std::chrono::milliseconds>(now - entry.second.first_sent);
+		if (time_since_first_sent.count() >= m_owner->m_options.resend_timeout) {
+			Close();
+			return;
 		}
-		else {
-			auto time_since_first_sent = std::chrono::duration_cast<std::chrono::milliseconds>(now - entry.second.first_sent);
-			if (time_since_first_sent.count() >= m_owner->m_options.resend_timeout) {
-				Close();
-				return;
-			}
 
-			if ((size_t)time_since_last_send.count() > m_resend_delay) {
-				InternalBufferedSend(entry.second.packet);
-				entry.second.last_sent = now;
-				entry.second.times_resent++;
-				
-				LogF(Logs::Detail, Logs::Netcode, "Congestion detected, reducing window size");
-				m_ssthresh = m_cwnd / 2;
-				m_cwnd = m_cwnd / 2;
-			}
+		if ((size_t)time_since_last_send.count() > m_resend_delay) {
+			InternalBufferedSend(entry.second.packet);
+			entry.second.last_sent = now;
+			entry.second.times_resent++;
+			ReduceCongestionWindow();
 		}
 	}
 }
@@ -1089,35 +1111,17 @@ void EQ::Net::DaybreakConnection::Ack(int stream, uint16_t seq)
 		auto order = CompareSequence(seq, iter->first);
 
 		if (order != SequenceFuture) {			
-			uint64_t round_time = (uint64_t)std::chrono::duration_cast<std::chrono::milliseconds>(now - iter->second.first_sent).count();
+			uint64_t round_time = (uint64_t)std::chrono::duration_cast<std::chrono::milliseconds>(now - iter->second.last_sent).count();
 
 			m_stats.max_ping = std::max(m_stats.max_ping, round_time);
 			m_stats.min_ping = std::min(m_stats.min_ping, round_time);
 			m_stats.last_ping = round_time;
 			m_rolling_ping = (m_rolling_ping * 4 + round_time) / 5;
 
-			bool filled_window = m_outstanding_bytes >= m_cwnd;
 			m_outstanding_bytes -= iter->second.packet.Length();
 			iter = s->outstanding_packets.erase(iter);
-			if (m_cwnd < m_ssthresh) {
-				//Still in slow start mode
-				m_cwnd += m_max_packet_size;
-				if (m_cwnd > m_owner->m_options.max_outstanding_bytes) {
-					m_cwnd = m_owner->m_options.max_outstanding_bytes;
-				}
 
-				LogF(Logs::Detail, Logs::Netcode, "Increasing cwnd size new size is {0}", m_cwnd);
-			}
-			else {
-				m_cwnd += std::max((size_t)1UL, (m_max_packet_size * m_max_packet_size) / m_cwnd);
-
-				if (m_cwnd > m_owner->m_options.max_outstanding_bytes) {
-					m_cwnd = m_owner->m_options.max_outstanding_bytes;
-				}
-
-				LogF(Logs::Detail, Logs::Netcode, "Increasing cwnd size new size is {0}", m_cwnd);
-			}
-
+			IncreaseCongestionWindow();
 			ProcessOutboundQueue();
 		}
 		else {
@@ -1132,36 +1136,17 @@ void EQ::Net::DaybreakConnection::OutOfOrderAck(int stream, uint16_t seq)
 	auto s = &m_streams[stream];
 	auto iter = s->outstanding_packets.find(seq);
 	if (iter != s->outstanding_packets.end()) {
-		uint64_t round_time = (uint64_t)std::chrono::duration_cast<std::chrono::milliseconds>(now - iter->second.first_sent).count();
+		uint64_t round_time = (uint64_t)std::chrono::duration_cast<std::chrono::milliseconds>(now - iter->second.last_sent).count();
 
 		m_stats.max_ping = std::max(m_stats.max_ping, round_time);
 		m_stats.min_ping = std::min(m_stats.min_ping, round_time);
 		m_stats.last_ping = round_time;
-		m_rolling_ping = (m_rolling_ping * 4 + round_time) / 5;
+		m_rolling_ping = (m_rolling_ping * 2 + round_time) / 3;
 
-		bool filled_window = m_outstanding_bytes >= m_cwnd;
 		m_outstanding_bytes -= iter->second.packet.Length();
 		s->outstanding_packets.erase(iter);
 
-		if (m_cwnd < m_ssthresh) {
-			//Still in slow start mode
-			m_cwnd += m_max_packet_size;
-			if (m_cwnd > m_owner->m_options.max_outstanding_bytes) {
-				m_cwnd = m_owner->m_options.max_outstanding_bytes;
-			}
-
-			LogF(Logs::Detail, Logs::Netcode, "Increasing cwnd size new size is {0}", m_cwnd);
-		}
-		else {
-			m_cwnd += std::max((size_t)1UL, (m_max_packet_size * m_max_packet_size) / m_cwnd);
-
-			if (m_cwnd > m_owner->m_options.max_outstanding_bytes) {
-				m_cwnd = m_owner->m_options.max_outstanding_bytes;
-			}
-
-			LogF(Logs::Detail, Logs::Netcode, "Increasing cwnd size new size is {0}", m_cwnd);
-		}
-
+		IncreaseCongestionWindow();
 		ProcessOutboundQueue();
 	}
 }

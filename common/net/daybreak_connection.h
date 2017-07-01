@@ -182,6 +182,9 @@ namespace EQ
 			void ProcessPacket(Packet &p);
 			void ProcessInboundQueue();
 			void ProcessOutboundQueue();
+			bool CongestionWindowFull() const;
+			void IncreaseCongestionWindow();
+			void ReduceCongestionWindow();
 			void RemoveFromQueue(int stream, uint16_t seq);
 			void AddToQueue(int stream, uint16_t seq, const Packet &p);
 			void ProcessDecodedPacket(const Packet &p);
