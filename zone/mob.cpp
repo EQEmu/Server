@@ -113,13 +113,15 @@ Mob::Mob(const char* in_name,
 		tmHidden(-1),
 		mitigation_ac(0),
 		m_specialattacks(eSpecialAttacks::None),
-		fix_z_timer(1000),
+		fix_z_timer(300),
 		fix_z_timer_engaged(100)
 {
 	targeted = 0;
 	tar_ndx=0;
 	tar_vector=0;
 	currently_fleeing = false;
+
+	last_z = 0;
 
 	AI_Init();
 	SetMoving(false);

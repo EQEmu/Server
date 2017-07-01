@@ -4242,7 +4242,7 @@ bool Client::GroupFollow(Client* inviter) {
 					RemoveAutoXTargets();
 				}
 
-				SetXTargetAutoMgr(GetXTargetAutoMgr());
+				SetXTargetAutoMgr(raid->GetXTargetAutoMgr());
 				if (!GetXTargetAutoMgr()->empty())
 					SetDirtyAutoHaters();
 
