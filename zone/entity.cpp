@@ -2845,6 +2845,22 @@ int32 EntityList::DeleteNPCCorpses()
 	return x;
 }
 
+void EntityList::CorpseFix(Client* c)
+{
+
+	auto it = corpse_list.begin();
+	while (it != corpse_list.end()) {
+		Corpse* corpse = it->second;
+		if (corpse->IsNPCCorpse()) {
+			if (DistanceNoZ(c->GetPosition(), corpse->GetPosition()) < 100) {
+				c->Message(15, "Attempting to fix %s", it->second->GetCleanName());
+				corpse->GMMove(corpse->GetX(), corpse->GetY(), c->GetZ() + 2, 0);
+			}
+		}
+		++it;
+	}
+}
+
 // returns the number of corpses deleted. A negative number indicates an error code.
 int32 EntityList::DeletePlayerCorpses()
 {

@@ -173,6 +173,7 @@ int command_init(void)
 		command_add("checklos", "- Check for line of sight to your target", 50, command_checklos) ||
 		command_add("clearinvsnapshots", "[use rule] - Clear inventory snapshot history (true - elapsed entries, false - all entries)", 200, command_clearinvsnapshots) ||
 		command_add("corpse", "- Manipulate corpses, use with no arguments for help", 50, command_corpse) ||
+		command_add("corpsefix", "Attempts to bring corpses from underneath the ground within close proximity of the player", 0, command_corpsefix) ||
 		command_add("crashtest", "- Crash the zoneserver", 255, command_crashtest) ||
 		command_add("cvs", "- Summary of client versions currently online.", 200, command_cvs) ||
 		command_add("damage", "[amount] - Damage your target", 100, command_damage) ||
@@ -2975,6 +2976,11 @@ void command_reloadqst(Client *c, const Seperator *sep)
 		parse->ReloadQuests(true);
 	}
 
+}
+
+void command_corpsefix(Client *c, const Seperator *sep)
+{
+	entity_list.CorpseFix(c);
 }
 
 void command_reloadworld(Client *c, const Seperator *sep)
