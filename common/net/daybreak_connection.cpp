@@ -284,7 +284,7 @@ EQ::Net::DaybreakConnection::DaybreakConnection(DaybreakConnectionManager *owner
 	m_combined[1] = OP_Combined;
 	m_last_session_stats = Clock::now();
 	m_outstanding_bytes = 0;
-	m_cwnd = m_max_packet_size;
+	m_cwnd = m_max_packet_size * 4;
 	m_ssthresh = m_owner->m_options.max_outstanding_bytes;
 }
 
@@ -310,7 +310,7 @@ EQ::Net::DaybreakConnection::DaybreakConnection(DaybreakConnectionManager *owner
 	m_combined[1] = OP_Combined;
 	m_last_session_stats = Clock::now();
 	m_outstanding_bytes = 0;
-	m_cwnd = m_max_packet_size;
+	m_cwnd = m_max_packet_size * 4;
 	m_ssthresh = m_owner->m_options.max_outstanding_bytes;
 }
 
@@ -502,8 +502,9 @@ void EQ::Net::DaybreakConnection::IncreaseCongestionWindow()
 
 void EQ::Net::DaybreakConnection::ReduceCongestionWindow()
 {
-	m_cwnd = EQEmu::Clamp((size_t)m_max_packet_size, (size_t)m_max_packet_size, m_owner->m_options.max_outstanding_bytes);
-	m_ssthresh = m_cwnd;
+	m_ssthresh = EQEmu::ClampLower(m_cwnd / 2, (size_t)(8 * m_max_packet_size));
+	m_cwnd = (size_t)m_max_packet_size * 4;
+	
 	LogF(Logs::Detail, Logs::Netcode, "Reducing cwnd size new size is {0}", m_cwnd);
 }
 
