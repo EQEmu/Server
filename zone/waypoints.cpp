@@ -866,12 +866,6 @@ void Mob::FixZ() {
 				duration
 			);
 
-			float size = GetSize();
-			if (size > 10)
-				size = 10;
-
-			new_z += size / 2;
-
 			if ((new_z > -2000) && std::abs(m_Position.z - new_z) < 35) {
 				if (RuleB(Map, MobZVisualDebug))
 					this->SendAppearanceEffect(78, 0, 0, 0, 0);
