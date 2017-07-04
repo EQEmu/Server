@@ -486,31 +486,14 @@ void EQ::Net::DaybreakConnection::ProcessOutboundQueue()
 	}
 }
 
-bool EQ::Net::DaybreakConnection::CongestionWindowFull() const
-{
-	for (int i = 0; i < 4; ++i) {
-		auto stream = &m_streams[i];
-
-		if (!stream->buffered_packets.empty()) {
-			//We had to buffer packets and we only do that if the window was full
-			return true;
-		}
-	}
-
-	return false;
-}
-
 void EQ::Net::DaybreakConnection::IncreaseCongestionWindow()
 {
-	if (!CongestionWindowFull()) {
-		return;
-	}
-
 	if (m_cwnd < m_ssthresh) {
-		m_cwnd += m_cwnd;
+		m_cwnd += m_max_packet_size;
 	}
 	else {
-		m_cwnd += m_max_packet_size;
+		size_t denom = std::max(m_cwnd, (size_t)1U);
+		m_cwnd += std::max((size_t)(m_max_packet_size * m_max_packet_size / denom), (size_t)1U);
 	}
 
 	m_cwnd = EQEmu::Clamp(m_cwnd, (size_t)m_max_packet_size, m_owner->m_options.max_outstanding_bytes);
@@ -519,7 +502,7 @@ void EQ::Net::DaybreakConnection::IncreaseCongestionWindow()
 
 void EQ::Net::DaybreakConnection::ReduceCongestionWindow()
 {
-	m_cwnd = EQEmu::Clamp(m_cwnd / 2, (size_t)m_max_packet_size, m_owner->m_options.max_outstanding_bytes);
+	m_cwnd = EQEmu::Clamp((size_t)m_max_packet_size, (size_t)m_max_packet_size, m_owner->m_options.max_outstanding_bytes);
 	m_ssthresh = m_cwnd;
 	LogF(Logs::Detail, Logs::Netcode, "Reducing cwnd size new size is {0}", m_cwnd);
 }
