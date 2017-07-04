@@ -2241,7 +2241,9 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, CastingSlot slot, ui
 				if(ae_center && ae_center == this && IsBeneficialSpell(spell_id))
 					SpellOnTarget(spell_id, this);
 
-				bool affect_caster = !IsNPC();	//NPC AE spells do not affect the NPC caster
+				// NPCs should never be affected by an AE they cast. PB AEs shouldn't affect caster either
+				// I don't think any other cases that get here matter
+				bool affect_caster = !IsNPC() && spells[spell_id].targettype != ST_AECaster;
 
 				if (spells[spell_id].targettype == ST_AETargetHateList)
 					hate_list.SpellCast(this, spell_id, spells[spell_id].aoerange, ae_center);

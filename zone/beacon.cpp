@@ -96,7 +96,9 @@ bool Beacon::Process()
 		Mob *caster = entity_list.GetMob(caster_id);
 		if(caster && spell_iterations-- && max_targets)
 		{
-			bool affect_caster = (!caster->IsNPC() && !caster->IsAIControlled());	//NPC AE spells do not affect the NPC caster
+			// NPCs should never be affected by an AE they cast. PB AEs shouldn't affect caster either
+			// I don't think any other cases that get here matter
+			bool affect_caster = (!caster->IsNPC() && !caster->IsAIControlled()) && spells[spell_id].targettype != ST_AECaster;
 			entity_list.AESpell(caster, this, spell_id, affect_caster, resist_adjust, &max_targets);
 		}
 		else
