@@ -3804,8 +3804,22 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob *spelltar, bool reflect, bool use_r
 				break;
 		}
 		if (reflect_chance) {
-			entity_list.MessageClose_StringID(this, false, RuleI(Range, SpellMessages), MT_Spells,
-							  SPELL_REFLECT, GetCleanName(), spelltar->GetCleanName());
+
+			if (RuleB(Spells, ReflectMessagesClose)) {
+				entity_list.MessageClose_StringID(
+					this, /* Sender */
+					false, /* Skip Sender */
+					RuleI(Range, SpellMessages), /* Range */
+					MT_Spells, /* Type */
+					SPELL_REFLECT, /* String ID */
+					GetCleanName(), /* Message 1 */
+					spelltar->GetCleanName() /* Message 2 */
+				);
+			}
+			else {
+				Message_StringID(MT_Spells, SPELL_REFLECT, GetCleanName(), spelltar->GetCleanName());
+			}
+
 			CheckNumHitsRemaining(NumHit::ReflectSpell);
 			// caster actually appears to change
 			// ex. During OMM fight you click your reflect mask and you get the recourse from the reflected
