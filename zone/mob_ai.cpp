@@ -1004,7 +1004,7 @@ void Mob::AI_Process() {
 					this->FixZ();
 				}
 				/* If we are close to client and our Z differences aren't big, match the client */
-				else if (std::abs(this->GetZ() - this->GetTarget()->GetZ()) <= 5) {
+				else if (std::abs(this->GetZ() - this->GetTarget()->GetZ()) <= 5 && this->GetTarget()->IsClient()) {
 					this->m_Position.z = this->GetTarget()->GetZ();
 				}
 			}
