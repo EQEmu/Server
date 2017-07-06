@@ -137,6 +137,7 @@ namespace EQ
 			size_t m_rolling_ping;
 			Timestamp m_close_time;
 			size_t m_outstanding_bytes;
+			size_t m_outstanding_packets;
 			size_t m_cwnd;
 			size_t m_ssthresh;
 			
@@ -239,7 +240,8 @@ namespace EQ
 				tic_rate_hertz = 60.0;
 				resend_timeout = 90000;
 				connection_close_time = 2000;
-				max_outstanding_bytes = 48000;
+				max_outstanding_bytes = 204800;
+				max_outstanding_packets = 400;
 			}
 
 			size_t max_packet_size;
@@ -263,6 +265,7 @@ namespace EQ
 			DaybreakEncodeType encode_passes[2];
 			int port;
 			size_t max_outstanding_bytes;
+			size_t max_outstanding_packets;
 		};
 
 		class DaybreakConnectionManager
