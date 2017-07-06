@@ -628,11 +628,11 @@ bool NPC::Process()
 			OOCRegen += GetMaxHP() * oocregen / 100;
 		}
 
-		//Lieka Edit:Fixing NPC regen.NPCs should regen to full during 
+		// Fixing NPC regen.NPCs should regen to full during 
 		// a set duration, not based on their HPs.Increase NPC's HPs by 
 		// % of total HPs / tick.
 		//
-		// Noudess Edit:  If oocregen set in db, apply to pets as well.
+		// If oocregen set in db, apply to pets as well.
 		// This allows the obscene #s for pets in the db to be tweaked
 		// while maintaining a decent ooc regen.
 
