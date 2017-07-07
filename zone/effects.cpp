@@ -730,8 +730,6 @@ void EntityList::AESpell(Mob *caster, Mob *center, uint16 spell_id, bool affect_
 		// test to fix possible cause of random zone crashes..external methods accessing client properties before they're initialized
 		if (curmob->IsClient() && !curmob->CastToClient()->ClientFinishedLoading())
 			continue;
-		if (curmob == center)	//do not affect center
-			continue;
 		if (curmob == caster && !affect_caster)	//watch for caster too
 			continue;
 		if (spells[spell_id].targettype == ST_TargetAENoPlayersPets && curmob->IsPetOwnerClient())

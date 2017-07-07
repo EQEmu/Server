@@ -2241,7 +2241,9 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, CastingSlot slot, ui
 				if(ae_center && ae_center == this && IsBeneficialSpell(spell_id))
 					SpellOnTarget(spell_id, this);
 
-				bool affect_caster = !IsNPC();	//NPC AE spells do not affect the NPC caster
+				// NPCs should never be affected by an AE they cast. PB AEs shouldn't affect caster either
+				// I don't think any other cases that get here matter
+				bool affect_caster = !IsNPC() && spells[spell_id].targettype != ST_AECaster;
 
 				if (spells[spell_id].targettype == ST_AETargetHateList)
 					hate_list.SpellCast(this, spell_id, spells[spell_id].aoerange, ae_center);
@@ -3804,8 +3806,22 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob *spelltar, bool reflect, bool use_r
 				break;
 		}
 		if (reflect_chance) {
-			entity_list.MessageClose_StringID(this, false, RuleI(Range, SpellMessages), MT_Spells,
-							  SPELL_REFLECT, GetCleanName(), spelltar->GetCleanName());
+
+			if (RuleB(Spells, ReflectMessagesClose)) {
+				entity_list.MessageClose_StringID(
+					this, /* Sender */
+					false, /* Skip Sender */
+					RuleI(Range, SpellMessages), /* Range */
+					MT_Spells, /* Type */
+					SPELL_REFLECT, /* String ID */
+					GetCleanName(), /* Message 1 */
+					spelltar->GetCleanName() /* Message 2 */
+				);
+			}
+			else {
+				Message_StringID(MT_Spells, SPELL_REFLECT, GetCleanName(), spelltar->GetCleanName());
+			}
+
 			CheckNumHitsRemaining(NumHit::ReflectSpell);
 			// caster actually appears to change
 			// ex. During OMM fight you click your reflect mask and you get the recourse from the reflected

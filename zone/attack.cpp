@@ -2388,18 +2388,6 @@ bool NPC::Death(Mob* killer_mob, int32 damage, uint16 spell, EQEmu::skills::Skil
 		entity_list.UnMarkNPC(GetID());
 		entity_list.RemoveNPC(GetID());
 
-		/* Fix Z on Corpse Creation */
-		glm::vec3 dest(m_Position.x, m_Position.y, m_Position.z);
-		float new_z = zone->zonemap->FindBestZ(dest, nullptr);
-		corpse->SetFlyMode(1);
-		float size = GetSize();
-		if (size > 10)
-			size = 10;
-
-		new_z += size / 2;
-
-		corpse->GMMove(m_Position.x, m_Position.y, new_z, m_Position.w);
-
 		this->SetID(0);
 
 		if (killer != 0 && emoteid != 0)
