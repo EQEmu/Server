@@ -140,9 +140,8 @@ void EQ::Net::DaybreakConnectionManager::Process()
 			if ((size_t)time_since_last_send.count() > m_options.connect_delay_ms) {
 				connection->SendConnect();
 			}
-
-			break;
 		}
+							   break;
 		case StatusConnected: {
 			if (m_options.keepalive_delay_ms != 0) {
 				auto time_since_last_send = std::chrono::duration_cast<std::chrono::milliseconds>(now - connection->m_last_send);
@@ -284,10 +283,6 @@ EQ::Net::DaybreakConnection::DaybreakConnection(DaybreakConnectionManager *owner
 	m_combined[0] = 0;
 	m_combined[1] = OP_Combined;
 	m_last_session_stats = Clock::now();
-	m_outstanding_bytes = 0;
-	m_outstanding_packets = 0;
-	m_cwnd = m_max_packet_size;
-	m_ssthresh = m_owner->m_options.max_outstanding_bytes;
 }
 
 //new connection made as client
@@ -311,10 +306,6 @@ EQ::Net::DaybreakConnection::DaybreakConnection(DaybreakConnectionManager *owner
 	m_combined[0] = 0;
 	m_combined[1] = OP_Combined;
 	m_last_session_stats = Clock::now();
-	m_outstanding_bytes = 0;
-	m_outstanding_packets = 0;
-	m_cwnd = m_max_packet_size;
-	m_ssthresh = m_owner->m_options.max_outstanding_bytes;
 }
 
 EQ::Net::DaybreakConnection::~DaybreakConnection()
@@ -473,47 +464,24 @@ void EQ::Net::DaybreakConnection::ProcessOutboundQueue()
 	for (int i = 0; i < 4; ++i) {
 		auto stream = &m_streams[i];
 
+		if (stream->outstanding_bytes == 0) {
+			continue;
+		}
+
 		while (!stream->buffered_packets.empty()) {
 			auto &buff = stream->buffered_packets.front();
 
-			if (m_outstanding_packets + 1 >= m_owner->m_options.max_outstanding_packets) {
+			if (stream->outstanding_bytes + buff.sent.packet.Length() >= m_owner->m_options.max_outstanding_bytes ||
+				stream->outstanding_packets.size() + 1 >= m_owner->m_options.max_outstanding_packets) {
 				break;
 			}
 
-			if (m_outstanding_bytes + buff.sent.packet.Length() >= m_cwnd) {
-				break;
-			}
-
-			LogF(Logs::Detail, Logs::Netcode, "Sending buffered packet {0} on stream {1}", buff.seq, i);
-			m_outstanding_bytes += buff.sent.packet.Length();
-			m_outstanding_packets++;
+			stream->outstanding_bytes += buff.sent.packet.Length();
 			stream->outstanding_packets.insert(std::make_pair(buff.seq, buff.sent));
-			InternalBufferedSend(buff.sent.packet);
+			InternalSend(buff.sent.packet);
 			stream->buffered_packets.pop_front();
 		}
 	}
-}
-
-void EQ::Net::DaybreakConnection::IncreaseCongestionWindow()
-{
-	if (m_cwnd < m_ssthresh) {
-		m_cwnd *= 2;
-	}
-	else {
-		size_t denom = std::max(m_cwnd, (size_t)1U);
-		m_cwnd += m_max_packet_size;
-	}
-
-	m_cwnd = EQEmu::Clamp(m_cwnd, (size_t)m_max_packet_size, m_owner->m_options.max_outstanding_bytes);
-	LogF(Logs::Detail, Logs::Netcode, "Increasing cwnd size new size is {0}", m_cwnd);
-}
-
-void EQ::Net::DaybreakConnection::ReduceCongestionWindow()
-{
-	m_ssthresh = std::max((size_t)m_cwnd / 2, (size_t)m_max_packet_size * 2);
-	m_cwnd = m_ssthresh;
-	
-	LogF(Logs::Detail, Logs::Netcode, "Reducing cwnd size new size is {0}", m_cwnd);
 }
 
 void EQ::Net::DaybreakConnection::RemoveFromQueue(int stream, uint16_t seq)
@@ -1078,17 +1046,27 @@ void EQ::Net::DaybreakConnection::ProcessResend(int stream)
 	auto s = &m_streams[stream];
 	for (auto &entry : s->outstanding_packets) {
 		auto time_since_last_send = std::chrono::duration_cast<std::chrono::milliseconds>(now - entry.second.last_sent);
-		auto time_since_first_sent = std::chrono::duration_cast<std::chrono::milliseconds>(now - entry.second.first_sent);
-		if (time_since_first_sent.count() >= m_owner->m_options.resend_timeout) {
-			Close();
-			return;
+		if (entry.second.times_resent == 0) {
+			if ((size_t)time_since_last_send.count() > m_resend_delay) {
+				InternalBufferedSend(entry.second.packet);
+				entry.second.last_sent = now;
+				entry.second.times_resent++;
+				m_rolling_ping += 100;
+			}
 		}
+		else {
+			auto time_since_first_sent = std::chrono::duration_cast<std::chrono::milliseconds>(now - entry.second.first_sent);
+			if (time_since_first_sent.count() >= m_owner->m_options.resend_timeout) {
+				Close();
+				return;
+			}
 
-		if ((size_t)time_since_last_send.count() > m_resend_delay) {
-			InternalBufferedSend(entry.second.packet);
-			entry.second.last_sent = now;
-			entry.second.times_resent++;
-			ReduceCongestionWindow();
+			if ((size_t)time_since_last_send.count() > m_resend_delay) {
+				InternalBufferedSend(entry.second.packet);
+				entry.second.last_sent = now;
+				entry.second.times_resent++;
+				m_rolling_ping += 100;
+			}
 		}
 	}
 }
@@ -1099,31 +1077,24 @@ void EQ::Net::DaybreakConnection::Ack(int stream, uint16_t seq)
 	auto now = Clock::now();
 	auto s = &m_streams[stream];
 	auto iter = s->outstanding_packets.begin();
-	bool success = false;
 	while (iter != s->outstanding_packets.end()) {
 		auto order = CompareSequence(seq, iter->first);
 
-		if (order != SequenceFuture) {			
+		if (order != SequenceFuture) {
 			uint64_t round_time = (uint64_t)std::chrono::duration_cast<std::chrono::milliseconds>(now - iter->second.last_sent).count();
 
 			m_stats.max_ping = std::max(m_stats.max_ping, round_time);
 			m_stats.min_ping = std::min(m_stats.min_ping, round_time);
 			m_stats.last_ping = round_time;
-			m_rolling_ping = (m_rolling_ping * 4 + round_time) / 5;
+			m_rolling_ping = (m_rolling_ping * 2 + round_time) / 3;
 
-			m_outstanding_bytes -= iter->second.packet.Length();
-			m_outstanding_packets--;
+			s->outstanding_bytes -= iter->second.packet.Length();
 			iter = s->outstanding_packets.erase(iter);
-			success = true;
+			ProcessOutboundQueue();
 		}
 		else {
 			++iter;
 		}
-	}
-
-	if (success) {
-		IncreaseCongestionWindow();
-		ProcessOutboundQueue();
 	}
 }
 
@@ -1140,11 +1111,8 @@ void EQ::Net::DaybreakConnection::OutOfOrderAck(int stream, uint16_t seq)
 		m_stats.last_ping = round_time;
 		m_rolling_ping = (m_rolling_ping * 2 + round_time) / 3;
 
-		m_outstanding_bytes -= iter->second.packet.Length();
-		m_outstanding_packets--;
+		s->outstanding_bytes -= iter->second.packet.Length();
 		s->outstanding_packets.erase(iter);
-
-		IncreaseCongestionWindow();
 		ProcessOutboundQueue();
 	}
 }
@@ -1152,21 +1120,20 @@ void EQ::Net::DaybreakConnection::OutOfOrderAck(int stream, uint16_t seq)
 void EQ::Net::DaybreakConnection::BufferPacket(int stream, uint16_t seq, DaybreakSentPacket &sent)
 {
 	auto s = &m_streams[stream];
-	if (m_outstanding_bytes + sent.packet.Length() > m_cwnd || 
-		m_outstanding_packets + 1 > m_owner->m_options.max_outstanding_packets) {
+	//If we can send the packet then send it
+	//else buffer it to be sent when we can send it
+	if (s->outstanding_bytes + sent.packet.Length() >= m_owner->m_options.max_outstanding_bytes || s->outstanding_packets.size() + 1 >= m_owner->m_options.max_outstanding_packets) {
 		//Would go over one of the limits, buffer this packet.
 		DaybreakBufferedPacket bp;
 		bp.sent = std::move(sent);
 		bp.seq = seq;
 		s->buffered_packets.push_back(bp);
-		LogF(Logs::Detail, Logs::Netcode, "Buffering packet {0} on stream {1}", seq, stream);
 		return;
 	}
 
-	m_outstanding_bytes += sent.packet.Length();
-	m_outstanding_packets++;
+	s->outstanding_bytes += sent.packet.Length();
 	s->outstanding_packets.insert(std::make_pair(seq, sent));
-	InternalBufferedSend(sent.packet);
+	InternalSend(sent.packet);
 }
 
 void EQ::Net::DaybreakConnection::SendAck(int stream_id, uint16_t seq)
@@ -1218,10 +1185,6 @@ void EQ::Net::DaybreakConnection::InternalBufferedSend(Packet &p)
 	size_t raw_size = DaybreakHeader::size() + (size_t)m_crc_bytes + m_buffered_packets_length + m_buffered_packets.size() + 1 + p.Length();
 	if (raw_size > m_max_packet_size) {
 		FlushBuffer();
-	}
-
-	if (m_buffered_packets_length == 0) {
-		m_hold_time = Clock::now();
 	}
 
 	DynamicPacket copy;

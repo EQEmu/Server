@@ -136,11 +136,7 @@ namespace EQ
 			size_t m_resend_delay;
 			size_t m_rolling_ping;
 			Timestamp m_close_time;
-			size_t m_outstanding_bytes;
-			size_t m_outstanding_packets;
-			size_t m_cwnd;
-			size_t m_ssthresh;
-			
+
 			struct DaybreakSentPacket
 			{
 				DynamicPacket packet;
@@ -162,6 +158,7 @@ namespace EQ
 					sequence_out = 0;
 					fragment_current_bytes = 0;
 					fragment_total_bytes = 0;
+					outstanding_bytes = 0;
 				}
 
 				uint16_t sequence_in;
@@ -174,6 +171,7 @@ namespace EQ
 				uint32_t fragment_total_bytes;
 
 				std::unordered_map<uint16_t, DaybreakSentPacket> outstanding_packets;
+				size_t outstanding_bytes;
 			};
 
 			DaybreakStream m_streams[4];
@@ -183,8 +181,6 @@ namespace EQ
 			void ProcessPacket(Packet &p);
 			void ProcessInboundQueue();
 			void ProcessOutboundQueue();
-			void IncreaseCongestionWindow();
-			void ReduceCongestionWindow();
 			void RemoveFromQueue(int stream, uint16_t seq);
 			void AddToQueue(int stream, uint16_t seq, const Packet &p);
 			void ProcessDecodedPacket(const Packet &p);
@@ -222,9 +218,9 @@ namespace EQ
 				max_connection_count = 0;
 				keepalive_delay_ms = 9000;
 				resend_delay_ms = 150;
-				resend_delay_factor = 1.25;
-				resend_delay_min = 500;
-				resend_delay_max = 5000;
+				resend_delay_factor = 1.5;
+				resend_delay_min = 150;
+				resend_delay_max = 1000;
 				connect_delay_ms = 500;
 				stale_connection_ms = 90000;
 				connect_stale_ms = 5000;
@@ -234,14 +230,14 @@ namespace EQ
 				encode_passes[1] = DaybreakEncodeType::EncodeNone;
 				port = 0;
 				hold_size = 448;
-				hold_length_ms = 40;
+				hold_length_ms = 10;
 				simulated_in_packet_loss = 0;
 				simulated_out_packet_loss = 0;
 				tic_rate_hertz = 60.0;
 				resend_timeout = 90000;
 				connection_close_time = 2000;
-				max_outstanding_bytes = 204800;
-				max_outstanding_packets = 400;
+				max_outstanding_packets = 300;
+				max_outstanding_bytes = 200 * 512;
 			}
 
 			size_t max_packet_size;
@@ -264,8 +260,8 @@ namespace EQ
 			size_t connection_close_time;
 			DaybreakEncodeType encode_passes[2];
 			int port;
-			size_t max_outstanding_bytes;
 			size_t max_outstanding_packets;
+			size_t max_outstanding_bytes;
 		};
 
 		class DaybreakConnectionManager
