@@ -219,8 +219,8 @@ namespace EQ
 				keepalive_delay_ms = 9000;
 				resend_delay_ms = 150;
 				resend_delay_factor = 1.5;
-				resend_delay_min = 150;
-				resend_delay_max = 1000;
+				resend_delay_min = 300;
+				resend_delay_max = 3000;
 				connect_delay_ms = 500;
 				stale_connection_ms = 90000;
 				connect_stale_ms = 5000;
@@ -230,14 +230,14 @@ namespace EQ
 				encode_passes[1] = DaybreakEncodeType::EncodeNone;
 				port = 0;
 				hold_size = 448;
-				hold_length_ms = 10;
+				hold_length_ms = 50;
 				simulated_in_packet_loss = 0;
 				simulated_out_packet_loss = 0;
 				tic_rate_hertz = 60.0;
 				resend_timeout = 90000;
 				connection_close_time = 2000;
-				max_outstanding_packets = 300;
-				max_outstanding_bytes = 200 * 512;
+				max_outstanding_packets = 400;
+				max_outstanding_bytes = 400 * 512;
 			}
 
 			size_t max_packet_size;
