@@ -1,5 +1,12 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 7/1/2017 ==
+Akkadius: Resolve issues with NPC's hopping to the ceiling in small corridors
+Akkadius: Improved grounding issues with NPC's during combat
+Akkadius: Improved scenarios where NPC's need to be dragged out of the ground - they should correct themselves far more consistently
+	- Scenarios where an NPC is coming up from the bottom floor, or from the top floor, they will correct much better
+	- A video of these tests can be found here: https://www.youtube.com/watch?v=HtC7bVNM7ZQ&feature=youtu.be
+
 == 6/28/2017 ==
 Akkadius: Fixed issues with Z correctness when NPCs are pathing on normal grids
 Akkadius: Fixed issues with Z correctness when NPCs are engaged with players following

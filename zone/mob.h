@@ -492,6 +492,7 @@ public:
 	inline const float GetTarVZ() const { return m_TargetV.z; }
 	inline const float GetTarVector() const { return tar_vector; }
 	inline const uint8 GetTarNDX() const { return tar_ndx; }
+	inline const int8 GetFlyMode() const { return flymode; }
 	bool IsBoat() const;
 
 	//Group
@@ -1066,6 +1067,8 @@ public:
 	void ResetAssistCap() { npc_assist_cap = 0; }
 	int GetWeaponDamage(Mob *against, const EQEmu::ItemData *weapon_item);
 	int GetWeaponDamage(Mob *against, const EQEmu::ItemInstance *weapon_item, uint32 *hate = nullptr);
+
+	float last_z;
 
 	// Bots HealRotation methods
 #ifdef BOTS

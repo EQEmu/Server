@@ -998,9 +998,16 @@ void Mob::AI_Process() {
 
 		/* Fix Z when following during pull, not when engaged and stationary */
 		if (moving && fix_z_timer_engaged.Check())
-			if(this->GetTarget())
-				if(DistanceNoZ(this->GetPosition(), this->GetTarget()->GetPosition()) > 50)
+			if (this->GetTarget()) {
+				/* If we are engaged, moving and following client, let's look for best Z more often */
+				if (DistanceNoZ(this->GetPosition(), this->GetTarget()->GetPosition()) > 50) {
 					this->FixZ();
+				}
+				/* If we are close to client and our Z differences aren't big, match the client */
+				else if (std::abs(this->GetZ() - this->GetTarget()->GetZ()) <= 5 && this->GetTarget()->IsClient()) {
+					this->m_Position.z = this->GetTarget()->GetZ();
+				}
+			}
 
 		if (!(m_PlayerState & static_cast<uint32>(PlayerState::Aggressive)))
 			SendAddPlayerState(PlayerState::Aggressive);

@@ -72,6 +72,7 @@ void command_checklos(Client *c, const Seperator *sep);
 void command_clearinvsnapshots(Client *c, const Seperator *sep);
 void command_connectworldserver(Client *c, const Seperator *sep);
 void command_corpse(Client *c, const Seperator *sep);
+void command_corpsefix(Client *c, const Seperator *sep);
 void command_crashtest(Client *c, const Seperator *sep);
 void command_cvs(Client *c, const Seperator *sep);
 void command_d1(Client *c, const Seperator *sep);

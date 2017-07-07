@@ -212,22 +212,6 @@ void NPC::UpdateWaypoint(int wp_index)
 	cur_wp_pause = cur->pause;
 	Log(Logs::Detail, Logs::AI, "Next waypoint %d: (%.3f, %.3f, %.3f, %.3f)", wp_index, m_CurrentWayPoint.x, m_CurrentWayPoint.y, m_CurrentWayPoint.z, m_CurrentWayPoint.w);
 
-	//fix up pathing Z
-	if (zone->HasMap() && RuleB(Map, FixPathingZAtWaypoints) && !IsBoat())
-	{
-
-		if (!RuleB(Watermap, CheckForWaterAtWaypoints) || !zone->HasWaterMap() ||
-			(zone->HasWaterMap() && !zone->watermap->InWater(glm::vec3(m_CurrentWayPoint))))
-		{
-			glm::vec3 dest(m_CurrentWayPoint.x, m_CurrentWayPoint.y, m_CurrentWayPoint.z);
-
-			float newz = zone->zonemap->FindBestZ(dest, nullptr);
-
-			if ((newz > -2000) && std::abs(newz - dest.z) < RuleR(Map, FixPathingZMaxDeltaWaypoint))
-				m_CurrentWayPoint.z = newz + 1;
-		}
-	}
-
 }
 
 void NPC::CalculateNewWaypoint()
@@ -780,20 +764,6 @@ void NPC::AssignWaypoints(int32 grid)
 		newwp.y = atof(row[1]);
 		newwp.z = atof(row[2]);
 
-		if (zone->HasMap() && RuleB(Map, FixPathingZWhenLoading))
-		{
-			auto positon = glm::vec3(newwp.x, newwp.y, newwp.z);
-			if (!RuleB(Watermap, CheckWaypointsInWaterWhenLoading) || !zone->HasWaterMap() ||
-				(zone->HasWaterMap() && !zone->watermap->InWater(positon)))
-			{
-				glm::vec3 dest(newwp.x, newwp.y, newwp.z);
-				float newz = zone->zonemap->FindBestZ(dest, nullptr);
-
-				if ((newz > -2000) && std::abs(newz - dest.z) < RuleR(Map, FixPathingZMaxDeltaLoading))
-					newwp.z = newz + 1;
-			}
-		}
-
 		newwp.pause = atoi(row[3]);
 		newwp.heading = atof(row[4]);
 		Waypoints.push_back(newwp);
@@ -870,6 +840,7 @@ void Mob::SendToFixZ(float new_x, float new_y, float new_z) {
 }
 
 void Mob::FixZ() {
+
 	BenchTimer timer;
 	timer.reset();
 
@@ -878,9 +849,8 @@ void Mob::FixZ() {
 		if (!RuleB(Watermap, CheckForWaterWhenMoving) || !zone->HasWaterMap() ||
 			(zone->HasWaterMap() && !zone->watermap->InWater(glm::vec3(m_Position))))
 		{
-			glm::vec3 dest(m_Position.x, m_Position.y, m_Position.z);
-
-			float new_z = zone->zonemap->FindBestZ(dest, nullptr);
+			/* Any more than 5 in the offset makes NPC's hop/snap to ceiling in small corridors */
+			float new_z = this->FindGroundZ(m_Position.x, m_Position.y, 5);
 
 			auto duration = timer.elapsed();
 
@@ -896,8 +866,20 @@ void Mob::FixZ() {
 				duration
 			);
 
-			if ((new_z > -2000) && std::abs(new_z - dest.z) < RuleR(Map, FixPathingZMaxDeltaMoving))
-				m_Position.z = new_z + 1;
+			if ((new_z > -2000) && std::abs(m_Position.z - new_z) < 35) {
+				if (RuleB(Map, MobZVisualDebug))
+					this->SendAppearanceEffect(78, 0, 0, 0, 0);
+				
+				m_Position.z = new_z;
+			}
+			else {
+				if (RuleB(Map, MobZVisualDebug))
+					this->SendAppearanceEffect(103, 0, 0, 0, 0);
+
+				Log(Logs::General, Logs::Debug, "%s is failing to find Z %f", this->GetCleanName(), std::abs(m_Position.z - new_z));
+			}
+
+			last_z = m_Position.z;
 		}
 	}
 }

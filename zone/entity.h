@@ -386,6 +386,7 @@ public:
 	void	FindPathsToAllNPCs();
 	int32	DeleteNPCCorpses();
 	int32	DeletePlayerCorpses();
+	void	CorpseFix(Client* c);
 	void	WriteEntityIDs();
 	void	HalveAggro(Mob* who);
 	void	DoubleAggro(Mob* who);
