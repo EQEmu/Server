@@ -615,37 +615,54 @@ bool NPC::Process()
 		if (currently_fleeing)
 			ProcessFlee();
 
-		uint32 bonus = 0;
+		uint32 sitting_bonus = 0;
+		uint32 petbonus = 0;
+		uint32 bestregen = 0;
+		int32 dbregen = GetNPCHPRegen();
 
 		if (GetAppearance() == eaSitting)
-			bonus += 3;
+			sitting_bonus += 3;
 
 		int32 OOCRegen = 0;
 		if (oocregen > 0) { //should pull from Mob class
 			OOCRegen += GetMaxHP() * oocregen / 100;
 		}
-		//Lieka Edit:Fixing NPC regen.NPCs should regen to full during a set duration, not based on their HPs.Increase NPC's HPs by % of total HPs / tick.
+
+		// Fixing NPC regen.NPCs should regen to full during 
+		// a set duration, not based on their HPs.Increase NPC's HPs by 
+		// % of total HPs / tick.
+		//
+		// If oocregen set in db, apply to pets as well.
+		// This allows the obscene #s for pets in the db to be tweaked
+		// while maintaining a decent ooc regen.
+
+		bestregen = std::max(dbregen,OOCRegen);
+
 		if ((GetHP() < GetMaxHP()) && !IsPet()) {
-			if (!IsEngaged()) {//NPC out of combat
-				if (GetNPCHPRegen() > OOCRegen)
-					SetHP(GetHP() + GetNPCHPRegen());
-				else
-					SetHP(GetHP() + OOCRegen);
-			}
+			if (!IsEngaged())
+				SetHP(GetHP() + bestregen + sitting_bonus);
 			else
-				SetHP(GetHP() + GetNPCHPRegen());
+				SetHP(GetHP() + dbregen);
 		}
 		else if (GetHP() < GetMaxHP() && GetOwnerID() != 0) {
-			if (!IsEngaged()) //pet
-				SetHP(GetHP() + GetNPCHPRegen() + bonus + (GetLevel() / 5));
+			if (!IsEngaged()) {
+				if (oocregen > 0) {
+					petbonus = std::max(OOCRegen,dbregen);
+				}
+				else {
+					petbonus = dbregen + (GetLevel() / 5);
+				}
+
+				SetHP(GetHP() + sitting_bonus + petbonus);
+			}
 			else
-				SetHP(GetHP() + GetNPCHPRegen() + bonus);
+				SetHP(GetHP() + dbregen);
 		}
 		else
-			SetHP(GetHP() + GetNPCHPRegen());
+			SetHP(GetHP() + dbregen + sitting_bonus);
 
 		if (GetMana() < GetMaxMana()) {
-			SetMana(GetMana() + mana_regen + bonus);
+			SetMana(GetMana() + mana_regen + sitting_bonus);
 		}
 
 
