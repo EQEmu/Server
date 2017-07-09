@@ -134,7 +134,6 @@ RULE_INT(Character, TradeskillUpMakePoison, 2) // Make Poison skillup rate adjus
 RULE_INT(Character, TradeskillUpPottery, 4) // Pottery skillup rate adjust. Lower is faster.
 RULE_INT(Character, TradeskillUpResearch, 1) // Research skillup rate adjust. Lower is faster.
 RULE_INT(Character, TradeskillUpTinkering, 2) // Tinkering skillup rate adjust. Lower is faster.
-RULE_BOOL(Character, SpamHPUpdates, false) // if your server has stupid amounts of HP that causes client display issues, turn this on!
 RULE_BOOL(Character, MarqueeHPUpdates, false) // Will show Health % in center of screen < 100%
 RULE_INT(Character, IksarCommonTongue, 95) // 95 By default (live-like?)
 RULE_INT(Character, OgreCommonTongue, 95) // 95 By default (live-like?)

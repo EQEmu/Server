@@ -1485,6 +1485,7 @@ private:
 	Timer helm_toggle_timer;
 	Timer aggro_meter_timer;
 	Timer npc_close_scan_timer;
+	Timer hp_self_update_throttle_timer;
 
     glm::vec3 m_Proximity;
 

@@ -158,7 +158,8 @@ Client::Client(EQStreamInterface* ieqs)
 	m_AutoAttackTargetLocation(0.0f, 0.0f, 0.0f),
 	last_region_type(RegionTypeUnsupported),
 	m_dirtyautohaters(false),
-	npc_close_scan_timer(6000)
+	npc_close_scan_timer(6000),
+	hp_self_update_throttle_timer(500)
 {
 	for(int cf=0; cf < _FilterCount; cf++)
 		ClientFilters[cf] = FilterShow;
@@ -8745,8 +8746,8 @@ void Client::SendHPUpdateMarquee(){
 		return;
 
 	/* Health Update Marquee Display: Custom*/
-	int8 health_percentage = (int8)(this->cur_hp * 100 / this->max_hp);
-	if (health_percentage == 100)
+	uint8 health_percentage = (uint8)(this->cur_hp * 100 / this->max_hp);
+	if (health_percentage >= 100)
 		return;
 
 	std::string health_update_notification = StringFormat("Health: %u%%", health_percentage);
