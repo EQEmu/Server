@@ -114,7 +114,9 @@ Mob::Mob(const char* in_name,
 		mitigation_ac(0),
 		m_specialattacks(eSpecialAttacks::None),
 		fix_z_timer(300),
-		fix_z_timer_engaged(100)
+		fix_z_timer_engaged(100),
+		attack_anim_timer(1000),
+		position_update_melee_push_timer(1000)
 {
 	targeted = 0;
 	tar_ndx=0;
@@ -122,6 +124,8 @@ Mob::Mob(const char* in_name,
 	currently_fleeing = false;
 
 	last_z = 0;
+
+	last_hp = 100;
 
 	AI_Init();
 	SetMoving(false);
@@ -1299,6 +1303,20 @@ void Mob::CreateHPPacket(EQApplicationPacket* app)
 // sends hp update of this mob to people who might care
 void Mob::SendHPUpdate(bool skip_self)
 {
+
+	int8 current_hp = (max_hp == 0 ? 0 : static_cast<int>(cur_hp * 100 / max_hp));
+
+	Log(Logs::General, Logs::HP_Update, "Mob::SendHPUpdate :: SendHPUpdate %s HP is %i last %i", this->GetCleanName(), current_hp, last_hp);
+	if (current_hp == last_hp) {
+		Log(Logs::General, Logs::HP_Update, "Mob::SendHPUpdate :: Same HP - skipping update");
+		ResetHPUpdateTimer();
+		return;
+	}
+	else {
+		Log(Logs::General, Logs::HP_Update, "Mob::SendHPUpdate :: HP Changed - Send update");
+		last_hp = current_hp;
+	}
+
 	EQApplicationPacket hp_app;
 	Group *group = nullptr;
 

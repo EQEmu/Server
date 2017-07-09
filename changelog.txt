@@ -1,5 +1,20 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 7/9/2017 ==
+Akkadius: Massive reductions in unnecessary network traffic especially during high spam combat fights
+	- HP Updates now only send to others when HP percentage changes (0-100%)
+		- HP Updates were sending excessively even during idle zones when HP wasn't changing at all
+	- Attack animations now only send once per second versus up to a hundred times a second per Mob/Client
+	- 17,000 OP_ClientUpdate packets per second have been observed in combat scenarios, some of the major culprits have been
+		throttled without affecting what the client should see
+	- Before and After packet differences under similar load/tests (Packets per second)
+		- 7,000 - 8,000 	OP_Animation pps	After: 600-800 pps
+		- 13,0000 - 17,000 	OP_MobHealth pps	After: 1-10 pps
+		- 15,0000 - 20,000 	OP_ClientUpdate pps	After: 500-1,000 pps
+	- Packet reports from a 46 client test here:
+		https://gist.github.com/Akkadius/28b7ad2fdd82bdd15ea737c68f404346
+	- Servers who use Marquee HP updates will also recieve far less packet spam as they will only be sent when HP changes
+
 == 7/1/2017 ==
 Akkadius: Resolve issues with NPC's hopping to the ceiling in small corridors
 Akkadius: Improved grounding issues with NPC's during combat

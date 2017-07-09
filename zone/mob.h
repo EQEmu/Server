@@ -1379,6 +1379,8 @@ protected:
 	Timer flee_timer;
 	Timer fix_z_timer;
 	Timer fix_z_timer_engaged;
+	Timer attack_anim_timer;
+	Timer position_update_melee_push_timer;
 
 	bool pAIControlled;
 	bool roamer;
@@ -1386,6 +1388,8 @@ protected:
 
 	int wandertype;
 	int pausetype;
+
+	int8 last_hp;
 
 	int cur_wp;
 	glm::vec4 m_CurrentWayPoint;

@@ -8745,7 +8745,7 @@ void Client::SendHPUpdateMarquee(){
 		return;
 
 	/* Health Update Marquee Display: Custom*/
-	uint32 health_percentage = (uint32)(this->cur_hp * 100 / this->max_hp);
+	int8 health_percentage = (int8)(this->cur_hp * 100 / this->max_hp);
 	if (health_percentage == 100)
 		return;
 
