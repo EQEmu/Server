@@ -1454,7 +1454,10 @@ void PathManager::NodeInfo(Client *c)
 void PathManager::DumpPath(std::string filename)
 {
 	std::ofstream o_file;
-	o_file.open(filename.c_str(), std::ios_base::binary | std::ios_base::trunc | std::ios_base::out);
+
+	std::string file_to_write = StringFormat("%s%s", Config->MapDir.c_str(), filename.c_str());
+
+	o_file.open(file_to_write.c_str(), std::ios_base::binary | std::ios_base::trunc | std::ios_base::out);
 	o_file.write("EQEMUPATH", 9);
 	o_file.write((const char*)&Head, sizeof(Head));
 	o_file.write((const char*)PathNodes, (sizeof(PathNode)*Head.PathNodeCount));
