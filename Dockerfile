@@ -7,6 +7,7 @@ LANG=en_US.UTF-8
 RUN apt-get update \
 && apt-get install -yqq gettext-base mlocate curl wget \
 && curl https://raw.githubusercontent.com/EQEmu/Server/master/utils/scripts/linux_installer/install.sh | bash \
+&& apt-get purge -yqq mysql-server \
 && apt-get autoremove -qqy \
 && apt-get clean \
 && rm -rf /var/lib/apt/lists/*
