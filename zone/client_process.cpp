@@ -634,6 +634,9 @@ bool Client::Process() {
 		for (auto it = close_mobs.begin(); it != close_mobs.end(); ++it) {
 			Mob *mob = it->first;
 
+			if (!mob)
+				continue;
+
 			if (mob->IsClient())
 				continue;
 
