@@ -137,9 +137,7 @@ EQEmu::skills::SkillType Mob::AttackAnimation(int Hand, const EQEmu::ItemInstanc
 	if (Hand == EQEmu::inventory::slotSecondary)	// DW anim
 		type = animDualWield;
 
-	if (attack_anim_timer.Check()) {
-		DoAnim(type, 0, false);
-	}
+	DoAnim(type, 0, false);
 
 	return skillinuse;
 }

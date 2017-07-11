@@ -2282,6 +2282,9 @@ bool EntityList::RemoveMob(uint16 delete_id)
 
 	auto it = mob_list.find(delete_id);
 	if (it != mob_list.end()) {
+
+		RemoveMobFromClientCloseLists(it->second);
+
 		if (npc_list.count(delete_id))
 			entity_list.RemoveNPC(delete_id);
 		else if (client_list.count(delete_id))
@@ -2304,6 +2307,8 @@ bool EntityList::RemoveMob(Mob *delete_mob)
 	auto it = mob_list.begin();
 	while (it != mob_list.end()) {
 		if (it->second == delete_mob) {
+			RemoveMobFromClientCloseLists(it->second);
+
 			safe_delete(it->second);
 			if (!corpse_list.count(it->first))
 				free_ids.push(it->first);
@@ -2323,10 +2328,9 @@ bool EntityList::RemoveNPC(uint16 delete_id)
 		// make sure its proximity is removed
 		RemoveProximity(delete_id);
 		// remove from client close lists
-		RemoveNPCFromClientCloseLists(npc);
+		RemoveMobFromClientCloseLists(npc->CastToMob());
 		// remove from the list
 		npc_list.erase(it);
-		
 
 		// remove from limit list if needed
 		if (npc_limit_list.count(delete_id))
@@ -2336,11 +2340,11 @@ bool EntityList::RemoveNPC(uint16 delete_id)
 	return false;
 }
 
-bool EntityList::RemoveNPCFromClientCloseLists(NPC *npc)
+bool EntityList::RemoveMobFromClientCloseLists(Mob *mob)
 {
 	auto it = client_list.begin();
 	while (it != client_list.end()) {
-		it->second->close_npcs.erase(npc);
+		it->second->close_mobs.erase(mob);
 		++it;
 	}
 	return false;
@@ -2634,10 +2638,9 @@ void EntityList::RemoveDebuffs(Mob *caster)
 // Currently, a new packet is sent per entity.
 // @todo: Come back and use FLAG_COMBINED to pack
 // all updates into one packet.
-void EntityList::SendPositionUpdates(Client *client, uint32 cLastUpdate,
-		float range, Entity *alwayssend, bool iSendEvenIfNotChanged)
+void EntityList::SendPositionUpdates(Client *client, uint32 cLastUpdate, float update_range, Entity *always_send, bool iSendEvenIfNotChanged)
 {
-	range = range * range;
+	update_range = (update_range * update_range);
 
 	EQApplicationPacket *outapp = 0;
 	PlayerPositionUpdateServer_Struct *ppu = 0;
@@ -2645,27 +2648,37 @@ void EntityList::SendPositionUpdates(Client *client, uint32 cLastUpdate,
 
 	auto it = mob_list.begin();
 	while (it != mob_list.end()) {
-		if (outapp == 0) {
-			outapp = new EQApplicationPacket(OP_ClientUpdate, sizeof(PlayerPositionUpdateServer_Struct));
-			ppu = (PlayerPositionUpdateServer_Struct*)outapp->pBuffer;
-		}
+		
 		mob = it->second;
-		if (mob && !mob->IsCorpse() && (it->second != client)
+
+		if (
+			mob && !mob->IsCorpse() 
+			&& (it->second != client)
 			&& (mob->IsClient() || iSendEvenIfNotChanged || (mob->LastChange() >= cLastUpdate))
-			&& (!it->second->IsClient() || !it->second->CastToClient()->GMHideMe(client))) {
+			&& (!it->second->IsClient() || !it->second->CastToClient()->GMHideMe(client))
+		) {
+			if (
+				update_range == 0 
+				|| (it->second == always_send) 
+				|| mob->IsClient() 
+				|| (DistanceSquared(mob->GetPosition(), client->GetPosition()) <= update_range)
+			) {
+				if (mob && mob->IsClient() && mob->GetID() > 0) {
+					client->QueuePacket(outapp, false, Client::CLIENT_CONNECTED);
 
-			//bool Grouped = client->HasGroup() && mob->IsClient() && (client->GetGroup() == mob->CastToClient()->GetGroup());
+					if (outapp == 0) {
+						outapp = new EQApplicationPacket(OP_ClientUpdate, sizeof(PlayerPositionUpdateServer_Struct));
+						ppu = (PlayerPositionUpdateServer_Struct*)outapp->pBuffer;
+					}
 
-			//if (range == 0 || (iterator.GetData() == alwayssend) || Grouped || (mob->DistNoRootNoZ(*client) <= range)) {
-			if (range == 0 || (it->second == alwayssend) || mob->IsClient() || (DistanceSquared(mob->GetPosition(), client->GetPosition()) <= range)) {
-				mob->MakeSpawnUpdate(ppu);
-			}
-			if(mob && mob->IsClient() && mob->GetID()>0) {
-				client->QueuePacket(outapp, false, Client::CLIENT_CONNECTED);
+					mob->MakeSpawnUpdate(ppu);
+
+					safe_delete(outapp);
+					outapp = 0;
+				}
 			}
 		}
-		safe_delete(outapp);
-		outapp = 0;
+		
 		++it;
 	}
 

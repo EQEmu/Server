@@ -1373,7 +1373,6 @@ protected:
 	void ClearItemFactionBonuses();
 
 	void CalculateFearPosition();
-	uint32 move_tic_count;
 
 	bool flee_mode;
 	Timer flee_timer;
@@ -1389,7 +1388,8 @@ protected:
 	int wandertype;
 	int pausetype;
 
-	int8 last_hp;
+	int8 last_hp_percent;
+	int32 last_hp;
 
 	int cur_wp;
 	glm::vec4 m_CurrentWayPoint;

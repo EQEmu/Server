@@ -1,6 +1,7 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
 == 7/9/2017 ==
+Akkadius: Fix HP update issues, rework logic for more accurate HP updates
 Akkadius: Massive reductions in unnecessary network traffic especially during high spam combat fights
 	- HP Updates now only send to others when HP percentage changes (0-100%)
 		- HP Updates were sending excessively even during idle zones when HP wasn't changing at all

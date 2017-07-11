@@ -222,7 +222,7 @@ public:
 	Client(EQStreamInterface * ieqs);
 	~Client();
 
-	std::unordered_map<NPC *, float> close_npcs;
+	std::unordered_map<Mob *, float> close_mobs;
 	bool is_client_moving;
 
 	//abstract virtual function implementations required by base abstract class
@@ -1485,6 +1485,7 @@ private:
 	Timer helm_toggle_timer;
 	Timer aggro_meter_timer;
 	Timer npc_close_scan_timer;
+	Timer hp_self_update_throttle_timer;
 
     glm::vec3 m_Proximity;
 

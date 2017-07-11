@@ -125,13 +125,12 @@ Mob::Mob(const char* in_name,
 
 	last_z = 0;
 
-	last_hp = 100;
+	
 
 	AI_Init();
 	SetMoving(false);
 	moved=false;
 	m_RewindLocation = glm::vec3();
-	move_tic_count = 0;
 
 	_egnode = nullptr;
 	name[0]=0;
@@ -180,6 +179,8 @@ Mob::Mob(const char* in_name,
 		fearspeed = ((float)base_fearspeed) * 0.025f;
 	}
 
+	last_hp_percent = 0;
+	last_hp = 0;
 
 	current_speed = base_runspeed;
 
@@ -1303,123 +1304,136 @@ void Mob::CreateHPPacket(EQApplicationPacket* app)
 // sends hp update of this mob to people who might care
 void Mob::SendHPUpdate(bool skip_self)
 {
+	
+	/* If our HP is different from last HP update call - let's update ourself */
+	if (IsClient() && cur_hp != last_hp) {
+		/* This is to prevent excessive packet sending under trains/fast combat */
+		if (this->CastToClient()->hp_self_update_throttle_timer.Check()) {
+			Log(Logs::General, Logs::HP_Update,
+				"Mob::SendHPUpdate :: Update HP of self (%s) HP: %i last: %i skip_self: %s",
+				this->GetCleanName(),
+				cur_hp,
+				last_hp,
+				(skip_self ? "true" : "false")
+			);
 
-	int8 current_hp = (max_hp == 0 ? 0 : static_cast<int>(cur_hp * 100 / max_hp));
+			if (!skip_self || this->CastToClient()->ClientVersion() >= EQEmu::versions::ClientVersion::UF) {
+				auto client_packet = new EQApplicationPacket(OP_HPUpdate, sizeof(SpawnHPUpdate_Struct));
+				SpawnHPUpdate_Struct* hp_packet_client = (SpawnHPUpdate_Struct*)client_packet->pBuffer;
 
-	Log(Logs::General, Logs::HP_Update, "Mob::SendHPUpdate :: SendHPUpdate %s HP is %i last %i", this->GetCleanName(), current_hp, last_hp);
-	if (current_hp == last_hp) {
+				hp_packet_client->cur_hp = CastToClient()->GetHP() - itembonuses.HP;
+				hp_packet_client->spawn_id = GetID();
+				hp_packet_client->max_hp = CastToClient()->GetMaxHP() - itembonuses.HP;
+
+				CastToClient()->QueuePacket(client_packet);
+
+				safe_delete(client_packet);
+
+				ResetHPUpdateTimer();
+			}
+		}
+	}
+
+	/* Used to check if HP has changed to update self next round */
+	last_hp = cur_hp;
+
+	int8 current_hp_percent = (max_hp == 0 ? 0 : static_cast<int>(cur_hp * 100 / max_hp));
+
+	Log(Logs::General, Logs::HP_Update, "Mob::SendHPUpdate :: SendHPUpdate %s HP is %i last %i", this->GetCleanName(), current_hp_percent, last_hp_percent);
+
+	if (current_hp_percent == last_hp_percent) {
 		Log(Logs::General, Logs::HP_Update, "Mob::SendHPUpdate :: Same HP - skipping update");
 		ResetHPUpdateTimer();
+
 		return;
 	}
 	else {
+
+		if (IsClient() && RuleB(Character, MarqueeHPUpdates))
+			this->CastToClient()->SendHPUpdateMarquee();
+
 		Log(Logs::General, Logs::HP_Update, "Mob::SendHPUpdate :: HP Changed - Send update");
-		last_hp = current_hp;
+
+		last_hp_percent = current_hp_percent;
 	}
 
 	EQApplicationPacket hp_app;
 	Group *group = nullptr;
 
-	// destructor will free the pBuffer
 	CreateHPPacket(&hp_app);
 
-	// send to people who have us targeted
+	/* Update those who have use targeted */
 	entity_list.QueueClientsByTarget(this, &hp_app, false, 0, false, true, EQEmu::versions::bit_AllClients);
+
+	/* Update those who have us on x-target */
 	entity_list.QueueClientsByXTarget(this, &hp_app, false);
+
+	/* Update groups using Group LAA health name tag counter */
 	entity_list.QueueToGroupsForNPCHealthAA(this, &hp_app);
 
-	// send to group
-	if(IsGrouped())
-	{
+	/* Update group */
+	if(IsGrouped()) {
 		group = entity_list.GetGroupByMob(this);
 		if(group) //not sure why this might be null, but it happens
 			group->SendHPPacketsFrom(this);
 	}
 
+	/* Update Raid */
 	if(IsClient()){
-		Raid *r = entity_list.GetRaidByClient(CastToClient());
-		if(r){
-			r->SendHPPacketsFrom(this);
-		}
+		Raid *raid = entity_list.GetRaidByClient(CastToClient());
+		if (raid)
+			raid->SendHPPacketsFrom(this);
 	}
 
-	// send to master
-	if(GetOwner() && GetOwner()->IsClient())
-	{
+	/* Pet - Update master - group and raid if exists */
+	if(GetOwner() && GetOwner()->IsClient()) {
 		GetOwner()->CastToClient()->QueuePacket(&hp_app, false);
 		group = entity_list.GetGroupByClient(GetOwner()->CastToClient());
+
 		if(group)
 			group->SendHPPacketsFrom(this);
-		Raid *r = entity_list.GetRaidByClient(GetOwner()->CastToClient());
-		if(r)
-			r->SendHPPacketsFrom(this);
+
+		Raid *raid = entity_list.GetRaidByClient(GetOwner()->CastToClient());
+		if(raid)
+			raid->SendHPPacketsFrom(this);
 	}
 
-	// send to pet
-	if(GetPet() && GetPet()->IsClient())
-	{
+	/* Send to pet */
+	if(GetPet() && GetPet()->IsClient()) {
 		GetPet()->CastToClient()->QueuePacket(&hp_app, false);
 	}
 
-	// Update the damage state of destructible objects
-	if(IsNPC() && IsDestructibleObject())
-	{
-		if (GetHPRatio() > 74)
-		{
-			if (GetAppearance() != eaStanding)
-			{
-					SendAppearancePacket(AT_DamageState, eaStanding);
-					_appearance = eaStanding;
+	/* Destructible objects */
+	if (IsNPC() && IsDestructibleObject()) {
+		if (GetHPRatio() > 74) {
+			if (GetAppearance() != eaStanding) {
+				SendAppearancePacket(AT_DamageState, eaStanding);
+				_appearance = eaStanding;
 			}
 		}
-		else if (GetHPRatio() > 49)
-		{
-			if (GetAppearance() != eaSitting)
-			{
+		else if (GetHPRatio() > 49) {
+			if (GetAppearance() != eaSitting) {
 				SendAppearancePacket(AT_DamageState, eaSitting);
 				_appearance = eaSitting;
 			}
 		}
-		else if (GetHPRatio() > 24)
-		{
-			if (GetAppearance() != eaCrouching)
-			{
+		else if (GetHPRatio() > 24) {
+			if (GetAppearance() != eaCrouching) {
 				SendAppearancePacket(AT_DamageState, eaCrouching);
 				_appearance = eaCrouching;
 			}
 		}
-		else if (GetHPRatio() > 0)
-		{
-			if (GetAppearance() != eaDead)
-			{
+		else if (GetHPRatio() > 0) {
+			if (GetAppearance() != eaDead) {
 				SendAppearancePacket(AT_DamageState, eaDead);
 				_appearance = eaDead;
 			}
 		}
-		else if (GetAppearance() != eaLooting)
-		{
+		else if (GetAppearance() != eaLooting) {
 			SendAppearancePacket(AT_DamageState, eaLooting);
 			_appearance = eaLooting;
 		}
 	}
-
-	bool dospam = RuleB(Character, SpamHPUpdates);
-	// send to self - we need the actual hps here
-	if(IsClient() && (!skip_self || dospam)) {
-
-		if (RuleB(Character, MarqueeHPUpdates))
-			this->CastToClient()->SendHPUpdateMarquee();
-
-		auto hp_app2 = new EQApplicationPacket(OP_HPUpdate, sizeof(SpawnHPUpdate_Struct));
-		SpawnHPUpdate_Struct* ds = (SpawnHPUpdate_Struct*)hp_app2->pBuffer;
-		ds->cur_hp = CastToClient()->GetHP() - itembonuses.HP;
-		ds->spawn_id = GetID();
-		ds->max_hp = CastToClient()->GetMaxHP() - itembonuses.HP;
-		CastToClient()->QueuePacket(hp_app2);
-		safe_delete(hp_app2);
-	}
-	if (!dospam)
-		ResetHPUpdateTimer(); // delay the timer
 }
 
 // this one just warps the mob to the current location
@@ -1428,8 +1442,7 @@ void Mob::SendPosition()
 	auto app = new EQApplicationPacket(OP_ClientUpdate, sizeof(PlayerPositionUpdateServer_Struct));
 	PlayerPositionUpdateServer_Struct* spu = (PlayerPositionUpdateServer_Struct*)app->pBuffer;
 	MakeSpawnUpdateNoDelta(spu);
-	move_tic_count = 0;
-	entity_list.QueueClients(this, app, true);
+	entity_list.QueueCloseClients(this, app, true, RuleI(Range, MobPositionUpdates), nullptr, false);
 	safe_delete(app);
 }
 
@@ -1441,45 +1454,32 @@ void Mob::SendPosUpdate(uint8 iSendToSelf) {
 
 	if (iSendToSelf == 2) {
 		if (IsClient()) {
-			CastToClient()->FastQueuePacket(&app,false);
+			CastToClient()->FastQueuePacket(&app, false);
 		}
 	}
-	else
-	{
-		if(move_tic_count == RuleI(Zone, NPCPositonUpdateTicCount))
-		{
-			entity_list.QueueClients(this, app, (iSendToSelf == 0), false);
-			move_tic_count = 0;
-		}
-		else if(move_tic_count % 2 == 0)
-		{
-			entity_list.QueueCloseClients(this, app, (iSendToSelf == 0), RuleI(Range, MobPositionUpdates), nullptr, false);
-			move_tic_count++;
-		} 
-		else {
-			move_tic_count++;
-		}
+	else {
+		entity_list.QueueCloseClients(this, app, (iSendToSelf == 0), RuleI(Range, MobPositionUpdates), nullptr, false);
 	}
 	safe_delete(app);
 }
 
 // this is for SendPosition()
-void Mob::MakeSpawnUpdateNoDelta(PlayerPositionUpdateServer_Struct *spu){
-	memset(spu,0xff,sizeof(PlayerPositionUpdateServer_Struct));
-	spu->spawn_id	= GetID();
-	spu->x_pos		= FloatToEQ19(m_Position.x);
-	spu->y_pos		= FloatToEQ19(m_Position.y);
-	spu->z_pos		= FloatToEQ19(m_Position.z);
-	spu->delta_x	= NewFloatToEQ13(0);
-	spu->delta_y	= NewFloatToEQ13(0);
-	spu->delta_z	= NewFloatToEQ13(0);
-	spu->heading	= FloatToEQ19(m_Position.w);
-	spu->animation	= 0;
+void Mob::MakeSpawnUpdateNoDelta(PlayerPositionUpdateServer_Struct *spu) {
+	memset(spu, 0xff, sizeof(PlayerPositionUpdateServer_Struct));
+	spu->spawn_id = GetID();
+	spu->x_pos = FloatToEQ19(m_Position.x);
+	spu->y_pos = FloatToEQ19(m_Position.y);
+	spu->z_pos = FloatToEQ19(m_Position.z);
+	spu->delta_x = NewFloatToEQ13(0);
+	spu->delta_y = NewFloatToEQ13(0);
+	spu->delta_z = NewFloatToEQ13(0);
+	spu->heading = FloatToEQ19(m_Position.w);
+	spu->animation = 0;
 	spu->delta_heading = NewFloatToEQ13(0);
-	spu->padding0002	=0;
-	spu->padding0006	=7;
-	spu->padding0014	=0x7f;
-	spu->padding0018	=0x5df27;
+	spu->padding0002 = 0;
+	spu->padding0006 = 7;
+	spu->padding0014 = 0x7f;
+	spu->padding0018 = 0x5df27;
 
 }
 
@@ -1553,6 +1553,9 @@ void Mob::ShowStats(Client* client)
 }
 
 void Mob::DoAnim(const int animnum, int type, bool ackreq, eqFilterType filter) {
+	if (!attack_anim_timer.Check())
+		return;
+
 	auto outapp = new EQApplicationPacket(OP_Animation, sizeof(Animation_Struct));
 	Animation_Struct* anim = (Animation_Struct*)outapp->pBuffer;
 	anim->spawnid = GetID();
