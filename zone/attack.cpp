@@ -55,6 +55,9 @@ extern Zone* zone;
 
 EQEmu::skills::SkillType Mob::AttackAnimation(int Hand, const EQEmu::ItemInstance* weapon, EQEmu::skills::SkillType skillinuse)
 {
+	if (!attack_anim_timer.Check())
+		return skillinuse;
+
 	// Determine animation
 	int type = 0;
 	if (weapon && weapon->IsClassCommon()) {
@@ -137,9 +140,7 @@ EQEmu::skills::SkillType Mob::AttackAnimation(int Hand, const EQEmu::ItemInstanc
 	if (Hand == EQEmu::inventory::slotSecondary)	// DW anim
 		type = animDualWield;
 
-	if (attack_anim_timer.Check()) {
-		DoAnim(type, 0, false);
-	}
+	DoAnim(type, 0, false);
 
 	return skillinuse;
 }
