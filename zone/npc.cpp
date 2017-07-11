@@ -1990,7 +1990,7 @@ void NPC::ModifyNPCStat(const char *identifier, const char *newValue)
 	else if(id == "int" || id == "_int") { INT = atoi(val.c_str()); CalcMaxMana(); return; }
 	else if(id == "cha") { CHA = atoi(val.c_str()); return; }
 	else if(id == "max_hp") { base_hp = atoi(val.c_str()); CalcMaxHP(); if (cur_hp > max_hp) { cur_hp = max_hp; } return; }
-	else if(id == "max_mana") { npc_mana = atoi(val.c_str()); CalcMaxMana(); if (cur_mana > max_mana){ cur_mana = max_mana; } return; }
+	else if(id == "max_mana") { npc_mana = atoi(val.c_str()); CalcMaxMana(); if (current_mana > max_mana){ current_mana = max_mana; } return; }
 	else if(id == "mr") { MR = atoi(val.c_str()); return; }
 	else if(id == "fr") { FR = atoi(val.c_str()); return; }
 	else if(id == "cr") { CR = atoi(val.c_str()); return; }

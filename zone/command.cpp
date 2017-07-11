@@ -7197,7 +7197,7 @@ void command_ginfo(Client *c, const Seperator *sep)
 void command_hp(Client *c, const Seperator *sep)
 {
 	c->SendHPUpdate();
-	c->SendManaUpdatePacket();
+	c->CheckManaEndUpdate();
 }
 
 void command_aggro(Client *c, const Seperator *sep)

@@ -584,14 +584,14 @@ void Client::CompleteConnect()
 			if (raid->IsLocked())
 				raid->SendRaidLockTo(this);
 
-			raid->SendHPPacketsTo(this);
+			raid->SendHPManaEndPacketsTo(this);
 		}
 	}
 	else {
 		Group *group = nullptr;
 		group = this->GetGroup();
 		if (group)
-			group->SendHPPacketsTo(this);
+			group->SendHPManaEndPacketsTo(this);
 	}
 	
 

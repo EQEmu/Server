@@ -80,8 +80,10 @@ public:
 	inline	void SetLeader(Mob* newleader){ leader=newleader; };
 	inline	Mob* GetLeader() { return leader; };
 	const char*	GetLeaderName() { return membername[0]; };
-	void	SendHPPacketsTo(Mob* newmember);
-	void	SendHPPacketsFrom(Mob* newmember);
+	void	SendHPManaEndPacketsTo(Mob* newmember);
+	void	SendHPPacketsFrom(Mob* member);
+	void	SendManaPacketFrom(Mob* member);
+	void SendEndurancePacketFrom(Mob* member);
 	bool	UpdatePlayer(Mob* update);
 	void	MemberZoned(Mob* removemob);
 	inline	bool IsLeader(Mob* leadertest) { return leadertest==leader; };

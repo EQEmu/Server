@@ -540,11 +540,11 @@ public:
 	void CalcMaxEndurance(); //This calculates the maximum endurance we can have
 	int32 CalcBaseEndurance(); //Calculates Base End
 	int32 CalcEnduranceRegen(); //Calculates endurance regen used in DoEnduranceRegen()
-	int32 GetEndurance() const {return cur_end;} //This gets our current endurance
+	int32 GetEndurance() const {return current_endurance;} //This gets our current endurance
 	int32 GetMaxEndurance() const {return max_end;} //This gets our endurance from the last CalcMaxEndurance() call
 	int32 CalcEnduranceRegenCap();
 	int32 CalcHPRegenCap();
-	inline uint8 GetEndurancePercent() { return (uint8)((float)cur_end / (float)max_end * 100.0f); }
+	inline uint8 GetEndurancePercent() { return (uint8)((float)current_endurance / (float)max_end * 100.0f); }
 	void SetEndurance(int32 newEnd); //This sets the current endurance to the new value
 	void DoEnduranceRegen(); //This Regenerates endurance
 	void DoEnduranceUpkeep(); //does the endurance upkeep
@@ -661,7 +661,7 @@ public:
 	void RefreshGuildInfo();
 
 
-	void SendManaUpdatePacket();
+	void CheckManaEndUpdate();
 	void SendManaUpdate();
 	void SendEnduranceUpdate();
 	uint8 GetFace() const { return m_pp.face; }
@@ -1411,7 +1411,7 @@ private:
 	int Haste; //precalced value
 
 	int32 max_end;
-	int32 cur_end;
+	int32 current_endurance;
 
 	PlayerProfile_Struct m_pp;
 	ExtendedProfile_Struct m_epp;
@@ -1502,7 +1502,10 @@ private:
 	bool tgb;
 	bool instalog;
 	int32 last_reported_mana;
-	int32 last_reported_endur;
+	int32 last_reported_endurance;
+
+	int8 last_reported_mana_percent;
+	int8 last_reported_endurance_percent;
 
 	unsigned int AggroCount; // How many mobs are aggro on us.
 

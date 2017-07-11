@@ -466,14 +466,14 @@ public:
 	inline int32 GetMaxHP() const { return max_hp; }
 	virtual int32 CalcMaxHP();
 	inline int32 GetMaxMana() const { return max_mana; }
-	inline int32 GetMana() const { return cur_mana; }
+	inline int32 GetMana() const { return current_mana; }
 	virtual int32 GetEndurance() const { return 0; }
 	virtual void SetEndurance(int32 newEnd) { return; }
 	int32 GetItemHPBonuses();
 	int32 GetSpellHPBonuses();
 	virtual const int32& SetMana(int32 amount);
 	inline float GetManaRatio() const { return max_mana == 0 ? 100 :
-		((static_cast<float>(cur_mana) / max_mana) * 100); }
+		((static_cast<float>(current_mana) / max_mana) * 100); }
 	virtual int32 CalcMaxMana();
 	uint32 GetNPCTypeID() const { return npctype_id; }
 	void SetNPCTypeID(uint32 npctypeid) { npctype_id = npctypeid; }
@@ -998,7 +998,7 @@ public:
 	Timer GetAttackTimer() { return attack_timer; }
 	Timer GetAttackDWTimer() { return attack_dw_timer; }
 	inline bool IsFindable() { return findable; }
-	inline uint8 GetManaPercent() { return (uint8)((float)cur_mana / (float)max_mana * 100.0f); }
+	inline uint8 GetManaPercent() { return (uint8)((float)current_mana / (float)max_mana * 100.0f); }
 	virtual uint8 GetEndurancePercent() { return 0; }
 
 	inline virtual bool IsBlockedBuff(int16 SpellID) { return false; }
@@ -1145,7 +1145,7 @@ protected:
 	int32 cur_hp;
 	int32 max_hp;
 	int32 base_hp;
-	int32 cur_mana;
+	int32 current_mana;
 	int32 max_mana;
 	int32 hp_regen;
 	int32 mana_regen;
@@ -1184,6 +1184,8 @@ protected:
 	uint8 orig_level;
 	uint32 npctype_id;
 	glm::vec4 m_Position;
+	/* Used to determine when an NPC has traversed so many units - to send a zone wide pos update */
+	glm::vec4 last_major_update_position; 
 	uint16 animation;
 	float base_size;
 	float size;

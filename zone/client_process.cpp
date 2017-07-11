@@ -135,7 +135,7 @@ bool Client::Process() {
 			SendHPUpdate();
 
 		if (mana_timer.Check())
-			SendManaUpdatePacket();
+			CheckManaEndUpdate();
 
 		if (dead && dead_timer.Check()) {
 			database.MoveCharacterToZone(GetName(), database.GetZoneName(m_pp.binds[0].zoneId));
@@ -273,10 +273,10 @@ bool Client::Process() {
 				}
 
 				/* Clients need to be kept up to date for position updates more often otherwise they disappear */
-				if (mob->IsClient() && this != mob && distance <= client_update_range) {
+				if (mob->IsClient() && this != mob && !mob->IsMoving() && distance <= client_update_range) {
 					auto app = new EQApplicationPacket(OP_ClientUpdate, sizeof(PlayerPositionUpdateServer_Struct));
 					PlayerPositionUpdateServer_Struct* spawn_update = (PlayerPositionUpdateServer_Struct*)app->pBuffer;
-					mob->MakeSpawnUpdateNoDelta(spawn_update);
+					mob->MakeSpawnUpdate(spawn_update);
 					this->FastQueuePacket(&app, false);
 					safe_delete(app);
 				}
@@ -1832,7 +1832,7 @@ void Client::DoManaRegen() {
 		return;
 
 	SetMana(GetMana() + CalcManaRegen() + RestRegenMana);
-	SendManaUpdatePacket();
+	CheckManaEndUpdate();
 }
 
 

@@ -125,7 +125,7 @@ Mob::Mob(const char* in_name,
 
 	last_z = 0;
 
-	
+	last_major_update_position = m_Position;
 
 	AI_Init();
 	SetMoving(false);
@@ -249,7 +249,7 @@ Mob::Mob(const char* in_name,
 	bEnraged = false;
 
 	shield_target = nullptr;
-	cur_mana = 0;
+	current_mana = 0;
 	max_mana = 0;
 	hp_regen = in_hp_regen;
 	mana_regen = in_mana_regen;
@@ -1357,24 +1357,24 @@ void Mob::SendHPUpdate(bool skip_self)
 		last_hp_percent = current_hp_percent;
 	}
 
-	EQApplicationPacket hp_app;
+	EQApplicationPacket hp_packet;
 	Group *group = nullptr;
 
-	CreateHPPacket(&hp_app);
+	CreateHPPacket(&hp_packet);
 
 	/* Update those who have use targeted */
-	entity_list.QueueClientsByTarget(this, &hp_app, false, 0, false, true, EQEmu::versions::bit_AllClients);
+	entity_list.QueueClientsByTarget(this, &hp_packet, false, 0, false, true, EQEmu::versions::bit_AllClients);
 
 	/* Update those who have us on x-target */
-	entity_list.QueueClientsByXTarget(this, &hp_app, false);
+	entity_list.QueueClientsByXTarget(this, &hp_packet, false);
 
 	/* Update groups using Group LAA health name tag counter */
-	entity_list.QueueToGroupsForNPCHealthAA(this, &hp_app);
+	entity_list.QueueToGroupsForNPCHealthAA(this, &hp_packet);
 
 	/* Update group */
 	if(IsGrouped()) {
 		group = entity_list.GetGroupByMob(this);
-		if(group) //not sure why this might be null, but it happens
+		if(group)
 			group->SendHPPacketsFrom(this);
 	}
 
@@ -1387,7 +1387,7 @@ void Mob::SendHPUpdate(bool skip_self)
 
 	/* Pet - Update master - group and raid if exists */
 	if(GetOwner() && GetOwner()->IsClient()) {
-		GetOwner()->CastToClient()->QueuePacket(&hp_app, false);
+		GetOwner()->CastToClient()->QueuePacket(&hp_packet, false);
 		group = entity_list.GetGroupByClient(GetOwner()->CastToClient());
 
 		if(group)
@@ -1400,7 +1400,7 @@ void Mob::SendHPUpdate(bool skip_self)
 
 	/* Send to pet */
 	if(GetPet() && GetPet()->IsClient()) {
-		GetPet()->CastToClient()->QueuePacket(&hp_app, false);
+		GetPet()->CastToClient()->QueuePacket(&hp_packet, false);
 	}
 
 	/* Destructible objects */
@@ -1439,10 +1439,20 @@ void Mob::SendHPUpdate(bool skip_self)
 // this one just warps the mob to the current location
 void Mob::SendPosition()
 {
+
 	auto app = new EQApplicationPacket(OP_ClientUpdate, sizeof(PlayerPositionUpdateServer_Struct));
 	PlayerPositionUpdateServer_Struct* spu = (PlayerPositionUpdateServer_Struct*)app->pBuffer;
 	MakeSpawnUpdateNoDelta(spu);
-	entity_list.QueueCloseClients(this, app, true, RuleI(Range, MobPositionUpdates), nullptr, false);
+
+	/* When an NPC has made a large distance change - we should update all clients to prevent "ghosts" */
+	if (DistanceNoZ(last_major_update_position, m_Position) > 100) {
+		entity_list.QueueClients(this, app, true, true);
+		last_major_update_position = m_Position;
+	}
+	else {
+		entity_list.QueueCloseClients(this, app, true, RuleI(Range, MobPositionUpdates), nullptr, false);
+	}
+
 	safe_delete(app);
 }
 
@@ -2270,13 +2280,13 @@ const int32& Mob::SetMana(int32 amount)
 {
 	CalcMaxMana();
 	int32 mmana = GetMaxMana();
-	cur_mana = amount < 0 ? 0 : (amount > mmana ? mmana : amount);
+	current_mana = amount < 0 ? 0 : (amount > mmana ? mmana : amount);
 /*
 	if(IsClient())
 		LogFile->write(EQEMuLog::Debug, "Setting mana for %s to %d (%4.1f%%)", GetName(), amount, GetManaRatio());
 */
 
-	return cur_mana;
+	return current_mana;
 }
 
 
