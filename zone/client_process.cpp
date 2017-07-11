@@ -254,7 +254,7 @@ bool Client::Process() {
 		/* Build a close range list of NPC's  */
 		if (npc_close_scan_timer.Check()) {
 
-			close_npcs.clear();
+			close_mobs.clear();
 
 			auto &mob_list = entity_list.GetMobList();
 			float scan_range = (RuleI(Range, ClientNPCScan) * RuleI(Range, ClientNPCScan));
@@ -265,10 +265,10 @@ bool Client::Process() {
 				float distance = DistanceSquared(m_Position, mob->GetPosition());
 				if (mob->IsNPC()) {
 					if (distance <= scan_range) {
-						close_npcs.insert(std::pair<NPC *, float>(mob->CastToNPC(), distance));
+						close_mobs.insert(std::pair<Mob *, float>(mob, distance));
 					}
 					else if (mob->GetAggroRange() > scan_range) {
-						close_npcs.insert(std::pair<NPC *, float>(mob->CastToNPC(), distance));
+						close_mobs.insert(std::pair<Mob *, float>(mob, distance));
 					}
 				}
 
@@ -631,11 +631,14 @@ bool Client::Process() {
 	// only if client is not feigned
 	if (zone->CanDoCombat() && ret && !GetFeigned() && client_scan_npc_aggro_timer.Check()) {
 		int npc_scan_count = 0;
-		for (auto it = close_npcs.begin(); it != close_npcs.end(); ++it) {
-			NPC *npc = it->first;
+		for (auto it = close_mobs.begin(); it != close_mobs.end(); ++it) {
+			Mob *mob = it->first;
 
-			if (npc->CheckWillAggro(this) && !npc->CheckAggro(this)) {
-				npc->AddToHateList(this, 25);
+			if (mob->IsClient())
+				continue;
+
+			if (mob->CheckWillAggro(this) && !mob->CheckAggro(this)) {
+				mob->AddToHateList(this, 25);
 			}
 			npc_scan_count++;
 		}

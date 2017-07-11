@@ -2323,10 +2323,9 @@ bool EntityList::RemoveNPC(uint16 delete_id)
 		// make sure its proximity is removed
 		RemoveProximity(delete_id);
 		// remove from client close lists
-		RemoveNPCFromClientCloseLists(npc);
+		RemoveMobFromClientCloseLists(npc->CastToMob());
 		// remove from the list
 		npc_list.erase(it);
-		
 
 		// remove from limit list if needed
 		if (npc_limit_list.count(delete_id))
@@ -2336,11 +2335,11 @@ bool EntityList::RemoveNPC(uint16 delete_id)
 	return false;
 }
 
-bool EntityList::RemoveNPCFromClientCloseLists(NPC *npc)
+bool EntityList::RemoveMobFromClientCloseLists(Mob *mob)
 {
 	auto it = client_list.begin();
 	while (it != client_list.end()) {
-		it->second->close_npcs.erase(npc);
+		it->second->close_mobs.erase(mob);
 		++it;
 	}
 	return false;

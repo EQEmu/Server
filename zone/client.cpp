@@ -358,7 +358,7 @@ Client::~Client() {
 		m_tradeskill_object = nullptr;
 	}
 
-	close_npcs.clear();
+	close_mobs.clear();
 
 	if(IsDueling() && GetDuelTarget() != 0) {
 		Entity* entity = entity_list.GetID(GetDuelTarget());

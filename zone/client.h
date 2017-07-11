@@ -222,7 +222,7 @@ public:
 	Client(EQStreamInterface * ieqs);
 	~Client();
 
-	std::unordered_map<NPC *, float> close_npcs;
+	std::unordered_map<Mob *, float> close_mobs;
 	bool is_client_moving;
 
 	//abstract virtual function implementations required by base abstract class
