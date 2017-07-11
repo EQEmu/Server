@@ -1,0 +1,75 @@
+<?xml version="1.0"?>
+<server>
+	<world>
+		<shortname>deq</shortname>
+		<longname>github.com/xackery/dockereq testing</longname>
+
+
+		<loginserver1>
+			<legacy>1</legacy>
+			<host>login.eqemulator.net</host>
+			<port>5998</port>
+			<account></account>
+			<password></password>
+		</loginserver1>
+		<loginserver2>
+			<host>mariadb</host>
+			<port>5998</port>
+			<account></account>
+			<password></password>
+		</loginserver2>
+
+
+
+		<tcp ip="mariadb" port="9001"/>
+		<telnet ip="mariadb" port="9000" enabled="true"/>
+
+		<key>soif23oij423oij423ioj4</key>
+
+		<http port="9080" enabled="true" mimefile="mime.types" />
+	</world>
+
+	<chatserver>
+		<host></host>
+		<port>7500</port>
+	</chatserver>
+
+	<mailserver>
+		<host></host>
+		<port>7500</port>
+	</mailserver>
+
+	<zones>
+	<defaultstatus>0</defaultstatus>
+
+	<ports low="7000" high="7400"/>
+	</zones>
+
+	<database>
+	   <host>mariadb</host>
+	   <port>3306</port>
+	   <username>eqemu</username>
+	   <password>eqemupass</password>
+	   <db>eqemu</db>
+	</database>	
+
+	<qsdatabase>
+	   <host>mariadb</host>
+	   <port>3306</port>
+	   <username>eqemu</username>
+	   <password>eqemupass</password>
+	   <db>eqemu</db>
+	</qsdatabase>
+
+	<webinterface>
+		<port>9081</port>
+	</webinterface>
+
+	<launcher>
+	</launcher>
+
+	<files>
+	</files>
+	<directories>
+	</directories>
+</server>
