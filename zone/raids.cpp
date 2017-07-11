@@ -145,6 +145,13 @@ void Raid::AddMember(Client *c, uint32 group, bool rleader, bool groupleader, bo
 		}
 	}
 
+	Group *group_update = nullptr;
+	group_update = c->GetGroup();
+	if (group_update) {
+		group_update->SendHPPacketsTo(c);
+		group_update->SendHPPacketsFrom(c);
+	}
+
 	auto pack = new ServerPacket(ServerOP_RaidAdd, sizeof(ServerRaidGeneralAction_Struct));
 	ServerRaidGeneralAction_Struct *rga = (ServerRaidGeneralAction_Struct*)pack->pBuffer;
 	rga->rid = GetID();
@@ -1539,35 +1546,37 @@ void Raid::MemberZoned(Client *c)
 		group_mentor[gid].mentoree = nullptr;
 }
 
-void Raid::SendHPPacketsTo(Client *c)
+void Raid::SendHPPacketsTo(Client *client)
 {
-	if(!c)
+	if(!client)
 		return;
 
-	uint32 gid = this->GetGroup(c);
-	EQApplicationPacket hpapp;
+	uint32 group_id = this->GetGroup(client);
+
+	EQApplicationPacket hp_packet;
 	EQApplicationPacket outapp(OP_MobManaUpdate, sizeof(MobManaUpdate_Struct));
-	for(int x = 0; x < MAX_RAID_MEMBERS; x++)
-	{
-		if(members[x].member)
-		{
-			if((members[x].member != c) && (members[x].GroupNumber == gid))
-			{
-				members[x].member->CreateHPPacket(&hpapp);
-				c->QueuePacket(&hpapp, false);
-				safe_delete_array(hpapp.pBuffer);
-				hpapp.size = 0;
-				if (c->ClientVersion() >= EQEmu::versions::ClientVersion::SoD)
-				{
+
+	for(int x = 0; x < MAX_RAID_MEMBERS; x++) {
+		if(members[x].member) {
+			if((members[x].member != client) && (members[x].GroupNumber == group_id)) {
+
+				members[x].member->CreateHPPacket(&hp_packet);
+				client->QueuePacket(&hp_packet, false);
+				safe_delete_array(hp_packet.pBuffer);
+
+				hp_packet.size = 0;
+				if (client->ClientVersion() >= EQEmu::versions::ClientVersion::SoD) {
+
 					outapp.SetOpcode(OP_MobManaUpdate);
-					MobManaUpdate_Struct *mmus = (MobManaUpdate_Struct *)outapp.pBuffer;
-					mmus->spawn_id = members[x].member->GetID();
-					mmus->mana = members[x].member->GetManaPercent();
-					c->QueuePacket(&outapp, false);
+					MobManaUpdate_Struct *mana_update = (MobManaUpdate_Struct *)outapp.pBuffer;
+					mana_update->spawn_id = members[x].member->GetID();
+					mana_update->mana = members[x].member->GetManaPercent();
+					client->QueuePacket(&outapp, false);
+
 					outapp.SetOpcode(OP_MobEnduranceUpdate);
-					MobEnduranceUpdate_Struct *meus = (MobEnduranceUpdate_Struct *)outapp.pBuffer;
-					meus->endurance = members[x].member->GetEndurancePercent();
-					c->QueuePacket(&outapp, false);
+					MobEnduranceUpdate_Struct *endurance_update = (MobEnduranceUpdate_Struct *)outapp.pBuffer;
+					endurance_update->endurance = members[x].member->GetEndurancePercent();
+					client->QueuePacket(&outapp, false);
 				}
 			}
 		}

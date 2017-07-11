@@ -338,6 +338,13 @@ bool Group::AddMember(Mob* newmember, const char *NewMemberName, uint32 Characte
 				database.SetGroupID(NewMemberName, GetID(), owner->CharacterID(), true);
 			}
 		}
+
+		Group* group = newmember->CastToClient()->GetGroup();
+		if (group) {
+			group->SendHPPacketsTo(newmember);
+			group->SendHPPacketsFrom(newmember);
+		}
+
 	}
 	else
 	{
@@ -389,26 +396,25 @@ void Group::QueuePacket(const EQApplicationPacket *app, bool ack_req)
 // first joins a group, but otherwise there shouldn't be a need to call it
 void Group::SendHPPacketsTo(Mob *member)
 {
-	if(member && member->IsClient())
-	{
+	if(member && member->IsClient()) {
 		EQApplicationPacket hpapp;
 		EQApplicationPacket outapp(OP_MobManaUpdate, sizeof(MobManaUpdate_Struct));
 
-		for (uint32 i = 0; i < MAX_GROUP_MEMBERS; i++)
-		{
-			if(members[i] && members[i] != member)
-			{
+		for (uint32 i = 0; i < MAX_GROUP_MEMBERS; i++) {
+			if(members[i] && members[i] != member) {
 				members[i]->CreateHPPacket(&hpapp);
 				member->CastToClient()->QueuePacket(&hpapp, false);
 				safe_delete_array(hpapp.pBuffer);
 				hpapp.size = 0;
-				if (member->CastToClient()->ClientVersion() >= EQEmu::versions::ClientVersion::SoD)
-				{
+
+				if (member->CastToClient()->ClientVersion() >= EQEmu::versions::ClientVersion::SoD) {
 					outapp.SetOpcode(OP_MobManaUpdate);
+
 					MobManaUpdate_Struct *mmus = (MobManaUpdate_Struct *)outapp.pBuffer;
 					mmus->spawn_id = members[i]->GetID();
 					mmus->mana = members[i]->GetManaPercent();
 					member->CastToClient()->QueuePacket(&outapp, false);
+
 					MobEnduranceUpdate_Struct *meus = (MobEnduranceUpdate_Struct *)outapp.pBuffer;
 					outapp.SetOpcode(OP_MobEnduranceUpdate);
 					meus->endurance = members[i]->GetEndurancePercent();

@@ -583,8 +583,17 @@ void Client::CompleteConnect()
 
 			if (raid->IsLocked())
 				raid->SendRaidLockTo(this);
+
+			raid->SendHPPacketsTo(this);
 		}
 	}
+	else {
+		Group *group_update = nullptr;
+		group_update = this->GetGroup();
+		if (group_update)
+			group_update->SendHPPacketsTo(this);
+	}
+	
 
 	//bulk raid send in here eventually
 
