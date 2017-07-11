@@ -256,17 +256,29 @@ bool Client::Process() {
 
 			close_npcs.clear();
 
-			auto &npc_list = entity_list.GetNPCList();
+			auto &mob_list = entity_list.GetMobList();
+			float scan_range = (RuleI(Range, ClientNPCScan) * RuleI(Range, ClientNPCScan));
+			float client_update_range = (RuleI(Range, MobPositionUpdates) *  RuleI(Range, MobPositionUpdates));
 
-			float scan_range = RuleI(Range, ClientNPCScan);
-			for (auto itr = npc_list.begin(); itr != npc_list.end(); ++itr) {
-				NPC* npc = itr->second;
-				float distance = DistanceNoZ(m_Position, npc->GetPosition());
-				if(distance <= scan_range) {
-					close_npcs.insert(std::pair<NPC *, float>(npc, distance));
+			for (auto itr = mob_list.begin(); itr != mob_list.end(); ++itr) {
+				Mob* mob = itr->second;
+				float distance = DistanceSquared(m_Position, mob->GetPosition());
+				if (mob->IsNPC()) {
+					if (distance <= scan_range) {
+						close_npcs.insert(std::pair<NPC *, float>(mob->CastToNPC(), distance));
+					}
+					else if (mob->GetAggroRange() > scan_range) {
+						close_npcs.insert(std::pair<NPC *, float>(mob->CastToNPC(), distance));
+					}
 				}
-				else if (npc->GetAggroRange() > scan_range) {
-					close_npcs.insert(std::pair<NPC *, float>(npc, distance));
+
+				/* Clients need to be kept up to date for position updates more often otherwise they disappear */
+				if (mob->IsClient() && this != mob && distance <= client_update_range) {
+					auto app = new EQApplicationPacket(OP_ClientUpdate, sizeof(PlayerPositionUpdateServer_Struct));
+					PlayerPositionUpdateServer_Struct* spawn_update = (PlayerPositionUpdateServer_Struct*)app->pBuffer;
+					mob->MakeSpawnUpdateNoDelta(spawn_update);
+					this->FastQueuePacket(&app, false);
+					safe_delete(app);
 				}
 			}
 		}
@@ -455,7 +467,7 @@ bool Client::Process() {
 			// Send a position packet every 8 seconds - if not done, other clients
 			// see this char disappear after 10-12 seconds of inactivity
 			if (position_timer_counter >= 36) { // Approx. 4 ticks per second
-				entity_list.SendPositionUpdates(this, pLastUpdateWZ, 500, GetTarget(), true);
+				entity_list.SendPositionUpdates(this, pLastUpdateWZ, RuleI(Range, MobPositionUpdates), GetTarget(), true);
 				pLastUpdate = Timer::GetCurrentTime();
 				pLastUpdateWZ = pLastUpdate;
 				position_timer_counter = 0;

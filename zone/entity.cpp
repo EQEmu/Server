@@ -2634,10 +2634,9 @@ void EntityList::RemoveDebuffs(Mob *caster)
 // Currently, a new packet is sent per entity.
 // @todo: Come back and use FLAG_COMBINED to pack
 // all updates into one packet.
-void EntityList::SendPositionUpdates(Client *client, uint32 cLastUpdate,
-		float range, Entity *alwayssend, bool iSendEvenIfNotChanged)
+void EntityList::SendPositionUpdates(Client *client, uint32 cLastUpdate, float update_range, Entity *always_send, bool iSendEvenIfNotChanged)
 {
-	range = range * range;
+	update_range = (update_range * update_range);
 
 	EQApplicationPacket *outapp = 0;
 	PlayerPositionUpdateServer_Struct *ppu = 0;
@@ -2645,27 +2644,37 @@ void EntityList::SendPositionUpdates(Client *client, uint32 cLastUpdate,
 
 	auto it = mob_list.begin();
 	while (it != mob_list.end()) {
-		if (outapp == 0) {
-			outapp = new EQApplicationPacket(OP_ClientUpdate, sizeof(PlayerPositionUpdateServer_Struct));
-			ppu = (PlayerPositionUpdateServer_Struct*)outapp->pBuffer;
-		}
+		
 		mob = it->second;
-		if (mob && !mob->IsCorpse() && (it->second != client)
+
+		if (
+			mob && !mob->IsCorpse() 
+			&& (it->second != client)
 			&& (mob->IsClient() || iSendEvenIfNotChanged || (mob->LastChange() >= cLastUpdate))
-			&& (!it->second->IsClient() || !it->second->CastToClient()->GMHideMe(client))) {
+			&& (!it->second->IsClient() || !it->second->CastToClient()->GMHideMe(client))
+		) {
+			if (
+				update_range == 0 
+				|| (it->second == always_send) 
+				|| mob->IsClient() 
+				|| (DistanceSquared(mob->GetPosition(), client->GetPosition()) <= update_range)
+			) {
+				if (mob && mob->IsClient() && mob->GetID() > 0) {
+					client->QueuePacket(outapp, false, Client::CLIENT_CONNECTED);
 
-			//bool Grouped = client->HasGroup() && mob->IsClient() && (client->GetGroup() == mob->CastToClient()->GetGroup());
+					if (outapp == 0) {
+						outapp = new EQApplicationPacket(OP_ClientUpdate, sizeof(PlayerPositionUpdateServer_Struct));
+						ppu = (PlayerPositionUpdateServer_Struct*)outapp->pBuffer;
+					}
 
-			//if (range == 0 || (iterator.GetData() == alwayssend) || Grouped || (mob->DistNoRootNoZ(*client) <= range)) {
-			if (range == 0 || (it->second == alwayssend) || mob->IsClient() || (DistanceSquared(mob->GetPosition(), client->GetPosition()) <= range)) {
-				mob->MakeSpawnUpdate(ppu);
-			}
-			if(mob && mob->IsClient() && mob->GetID()>0) {
-				client->QueuePacket(outapp, false, Client::CLIENT_CONNECTED);
+					mob->MakeSpawnUpdate(ppu);
+
+					safe_delete(outapp);
+					outapp = 0;
+				}
 			}
 		}
-		safe_delete(outapp);
-		outapp = 0;
+		
 		++it;
 	}
 

@@ -131,7 +131,6 @@ Mob::Mob(const char* in_name,
 	SetMoving(false);
 	moved=false;
 	m_RewindLocation = glm::vec3();
-	move_tic_count = 0;
 
 	_egnode = nullptr;
 	name[0]=0;
@@ -1443,8 +1442,7 @@ void Mob::SendPosition()
 	auto app = new EQApplicationPacket(OP_ClientUpdate, sizeof(PlayerPositionUpdateServer_Struct));
 	PlayerPositionUpdateServer_Struct* spu = (PlayerPositionUpdateServer_Struct*)app->pBuffer;
 	MakeSpawnUpdateNoDelta(spu);
-	move_tic_count = 0;
-	entity_list.QueueClients(this, app, true);
+	entity_list.QueueCloseClients(this, app, true, RuleI(Range, MobPositionUpdates), nullptr, false);
 	safe_delete(app);
 }
 
@@ -1456,45 +1454,32 @@ void Mob::SendPosUpdate(uint8 iSendToSelf) {
 
 	if (iSendToSelf == 2) {
 		if (IsClient()) {
-			CastToClient()->FastQueuePacket(&app,false);
+			CastToClient()->FastQueuePacket(&app, false);
 		}
 	}
-	else
-	{
-		if(move_tic_count == RuleI(Zone, NPCPositonUpdateTicCount))
-		{
-			entity_list.QueueClients(this, app, (iSendToSelf == 0), false);
-			move_tic_count = 0;
-		}
-		else if(move_tic_count % 2 == 0)
-		{
-			entity_list.QueueCloseClients(this, app, (iSendToSelf == 0), RuleI(Range, MobPositionUpdates), nullptr, false);
-			move_tic_count++;
-		} 
-		else {
-			move_tic_count++;
-		}
+	else {
+		entity_list.QueueCloseClients(this, app, (iSendToSelf == 0), RuleI(Range, MobPositionUpdates), nullptr, false);
 	}
 	safe_delete(app);
 }
 
 // this is for SendPosition()
-void Mob::MakeSpawnUpdateNoDelta(PlayerPositionUpdateServer_Struct *spu){
-	memset(spu,0xff,sizeof(PlayerPositionUpdateServer_Struct));
-	spu->spawn_id	= GetID();
-	spu->x_pos		= FloatToEQ19(m_Position.x);
-	spu->y_pos		= FloatToEQ19(m_Position.y);
-	spu->z_pos		= FloatToEQ19(m_Position.z);
-	spu->delta_x	= NewFloatToEQ13(0);
-	spu->delta_y	= NewFloatToEQ13(0);
-	spu->delta_z	= NewFloatToEQ13(0);
-	spu->heading	= FloatToEQ19(m_Position.w);
-	spu->animation	= 0;
+void Mob::MakeSpawnUpdateNoDelta(PlayerPositionUpdateServer_Struct *spu) {
+	memset(spu, 0xff, sizeof(PlayerPositionUpdateServer_Struct));
+	spu->spawn_id = GetID();
+	spu->x_pos = FloatToEQ19(m_Position.x);
+	spu->y_pos = FloatToEQ19(m_Position.y);
+	spu->z_pos = FloatToEQ19(m_Position.z);
+	spu->delta_x = NewFloatToEQ13(0);
+	spu->delta_y = NewFloatToEQ13(0);
+	spu->delta_z = NewFloatToEQ13(0);
+	spu->heading = FloatToEQ19(m_Position.w);
+	spu->animation = 0;
 	spu->delta_heading = NewFloatToEQ13(0);
-	spu->padding0002	=0;
-	spu->padding0006	=7;
-	spu->padding0014	=0x7f;
-	spu->padding0018	=0x5df27;
+	spu->padding0002 = 0;
+	spu->padding0006 = 7;
+	spu->padding0014 = 0x7f;
+	spu->padding0018 = 0x5df27;
 
 }
 
