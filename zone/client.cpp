@@ -1833,12 +1833,12 @@ void Client::SendManaUpdatePacket() {
 	if (!Connected())
 		return;
 
-	if (ClientVersion() >= EQEmu::versions::ClientVersion::SoD) {
-		SendManaUpdate();
-		SendEnduranceUpdate();
-	}
-
 	if (last_reported_mana != cur_mana || last_reported_endur != cur_end) {
+
+		if (ClientVersion() >= EQEmu::versions::ClientVersion::SoD) {
+			SendManaUpdate();
+			SendEnduranceUpdate();
+		}
 
 		auto outapp = new EQApplicationPacket(OP_ManaChange, sizeof(ManaChange_Struct));
 		ManaChange_Struct* manachange = (ManaChange_Struct*)outapp->pBuffer;
