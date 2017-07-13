@@ -1445,7 +1445,7 @@ void Mob::SendPosition()
 	MakeSpawnUpdateNoDelta(spu);
 
 	/* When an NPC has made a large distance change - we should update all clients to prevent "ghosts" */
-	if (DistanceNoZ(last_major_update_position, m_Position) > 100) {
+	if (DistanceSquared(last_major_update_position, m_Position) > (100 * 100)) {
 		entity_list.QueueClients(this, app, true, true);
 		last_major_update_position = m_Position;
 	}
