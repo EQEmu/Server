@@ -65,6 +65,8 @@ void Aura::ProcessOnAllGroupMembers(Mob *owner)
 {
 	auto &mob_list = entity_list.GetMobList(); // read only reference so we can do it all inline
 	std::set<int> delayed_remove;
+	bool is_buff = IsBuffSpell(spell_id); // non-buff spells don't cast on enter
+
 	if (owner->IsRaidGrouped() && owner->IsClient()) { // currently raids are just client, but safety check
 		auto raid = owner->GetRaid();
 		if (raid == nullptr) { // well shit
@@ -133,15 +135,18 @@ void Aura::ProcessOnAllGroupMembers(Mob *owner)
 			} else { // we're not on it!
 				if (mob->IsClient() && verify_raid_client(mob->CastToClient())) {
 					casted_on.insert(mob->GetID());
-					SpellFinished(spell_id, mob);
+					if (is_buff)
+						SpellFinished(spell_id, mob);
 				} else if (mob->IsPet() && mob->IsPetOwnerClient() && mob->GetOwner() && verify_raid_client_pet(mob)) {
 					casted_on.insert(mob->GetID());
-					SpellFinished(spell_id, mob);
+					if (is_buff)
+						SpellFinished(spell_id, mob);
 				} else if (mob->IsNPC() && mob->IsPetOwnerClient()) {
 					auto npc = mob->CastToNPC();
 					if (verify_raid_client_swarm(npc)) {
 						casted_on.insert(mob->GetID());
-						SpellFinished(spell_id, mob);
+						if (is_buff)
+							SpellFinished(spell_id, mob);
 					}
 				}
 			}
@@ -185,13 +190,16 @@ void Aura::ProcessOnAllGroupMembers(Mob *owner)
 			} else { // not on, check if we should be!
 				if (mob->IsPet() && verify_group_pet(mob)) {
 					casted_on.insert(mob->GetID());
-					SpellFinished(spell_id, mob);
+					if (is_buff)
+						SpellFinished(spell_id, mob);
 				} else if (mob->IsNPC() && mob->CastToNPC()->GetSwarmInfo() && verify_group_swarm(mob->CastToNPC())) {
 					casted_on.insert(mob->GetID());
-					SpellFinished(spell_id, mob);
+					if (is_buff)
+						SpellFinished(spell_id, mob);
 				} else if (group->IsGroupMember(mob) && DistanceSquared(GetPosition(), mob->GetPosition()) <= distance) {
 					casted_on.insert(mob->GetID());
-					SpellFinished(spell_id, mob);
+					if (is_buff)
+						SpellFinished(spell_id, mob);
 				}
 			}
 		}
@@ -217,12 +225,11 @@ void Aura::ProcessOnAllGroupMembers(Mob *owner)
 				}
 			} else if (good && DistanceSquared(GetPosition(), mob->GetPosition()) <= distance) {
 				casted_on.insert(mob->GetID());
-				SpellFinished(spell_id, mob);
+				if (is_buff)
+					SpellFinished(spell_id, mob);
 			}
 		}
 	}
-
-	bool is_buff = IsBuffSpell(spell_id);
 
 	for (auto &e : delayed_remove) {
 		auto mob = entity_list.GetMob(e);
