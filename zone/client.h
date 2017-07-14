@@ -1485,8 +1485,8 @@ private:
 	Timer helm_toggle_timer;
 	Timer aggro_meter_timer;
 	Timer npc_close_scan_timer;
-	Timer hp_self_update_throttle_timer;
-
+	Timer hp_self_update_throttle_timer; /* This is to prevent excessive packet sending under trains/fast combat */
+	Timer hp_other_update_throttle_timer; /* This is to keep clients from DOSing the server with macros that change client targets constantly */
     glm::vec3 m_Proximity;
 
 	void BulkSendInventoryItems();
