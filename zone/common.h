@@ -105,6 +105,8 @@
 #define PET_BUTTON_FOCUS		8
 #define PET_BUTTON_SPELLHOLD	9
 
+#define AURA_HARDCAP		2
+
 typedef enum {	//focus types
 	focusSpellHaste = 1,
 	focusSpellDuration,
@@ -536,6 +538,8 @@ struct StatBonuses {
 	int16	FeignedCastOnChance;				// Percent Value
 	bool	PetCommands[PET_MAXCOMMANDS];		// SPA 267
 	int	FeignedMinionChance;				// SPA 281 base1 = chance, just like normal FD
+	int aura_slots;
+	int trap_slots;
 };
 
 typedef struct

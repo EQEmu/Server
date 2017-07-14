@@ -288,6 +288,7 @@
 	void Handle_OP_TributeNPC(const EQApplicationPacket *app);
 	void Handle_OP_TributeToggle(const EQApplicationPacket *app);
 	void Handle_OP_TributeUpdate(const EQApplicationPacket *app);
+	void Handle_OP_UpdateAura(const EQApplicationPacket *app);
 	void Handle_OP_VetClaimRequest(const EQApplicationPacket *app);
 	void Handle_OP_VoiceMacroIn(const EQApplicationPacket *app);
 	void Handle_OP_WearChange(const EQApplicationPacket *app);

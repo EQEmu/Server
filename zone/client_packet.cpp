@@ -383,6 +383,7 @@ void MapOpcodes()
 	ConnectedOpcodes[OP_TributeUpdate] = &Client::Handle_OP_TributeUpdate;
 	ConnectedOpcodes[OP_VetClaimRequest] = &Client::Handle_OP_VetClaimRequest;
 	ConnectedOpcodes[OP_VoiceMacroIn] = &Client::Handle_OP_VoiceMacroIn;
+	ConnectedOpcodes[OP_UpdateAura] = &Client::Handle_OP_UpdateAura;;
 	ConnectedOpcodes[OP_WearChange] = &Client::Handle_OP_WearChange;
 	ConnectedOpcodes[OP_WhoAllRequest] = &Client::Handle_OP_WhoAllRequest;
 	ConnectedOpcodes[OP_WorldUnknown001] = &Client::Handle_OP_Ignore;
@@ -14358,6 +14359,29 @@ void Client::Handle_OP_VoiceMacroIn(const EQApplicationPacket *app)
 
 	VoiceMacroReceived(vmi->Type, vmi->Target, vmi->MacroNumber);
 
+}
+
+void Client::Handle_OP_UpdateAura(const EQApplicationPacket *app)
+{
+	if (app->size < 4) {
+		Log(Logs::General, Logs::None, "Size mismatch in OP_UpdateAura");
+		return;
+	}
+	auto action = *(uint32_t *)app->pBuffer; // action tells us the size
+	switch (action) {
+	case 2:
+		RemoveAllAuras();
+		break;
+	case 1: {
+		auto ads = (AuraDestory_Struct *)app->pBuffer;
+		RemoveAura(ads->entity_id);
+		break;
+	}
+	case 0: // client doesn't send this
+		break;
+	}
+
+	return;
 }
 
 void Client::Handle_OP_WearChange(const EQApplicationPacket *app)

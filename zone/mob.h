@@ -45,6 +45,8 @@ class EQApplicationPacket;
 class Group;
 class NPC;
 class Raid;
+class Aura;
+struct AuraRecord;
 struct NewSpawn_Struct;
 struct PlayerPositionUpdateServer_Struct;
 
@@ -83,6 +85,22 @@ public:
 		int level;
 		Timer *timer;
 		int params[MAX_SPECIAL_ATTACK_PARAMS];
+	};
+
+	struct AuraInfo {
+		char name[64];
+		int spawn_id;
+		int icon;
+		AuraInfo() : spawn_id(0), icon(0)
+		{
+			memset(name, 0, 64);
+		}
+	};
+
+	struct AuraMgr {
+		int count; // active auras
+		AuraInfo auras[AURA_HARDCAP];
+		AuraMgr() : count(0) { }
 	};
 
 	Mob(const char*	in_name,
@@ -308,6 +326,7 @@ public:
 	void BuffProcess();
 	virtual void DoBuffTic(const Buffs_Struct &buff, int slot, Mob* caster = nullptr);
 	void BuffFadeBySpellID(uint16 spell_id);
+	void BuffFadeBySpellIDAndCaster(uint16 spell_id, uint16 caster_id);
 	void BuffFadeByEffect(int effectid, int skipslot = -1);
 	void BuffFadeAll();
 	void BuffFadeNonPersistDeath();
@@ -315,6 +334,7 @@ public:
 	void BuffFadeBySlot(int slot, bool iRecalcBonuses = true);
 	void BuffFadeDetrimentalByCaster(Mob *caster);
 	void BuffFadeBySitModifier();
+	bool IsAffectedByBuff(uint16 spell_id);
 	void BuffModifyDurationBySpellID(uint16 spell_id, int32 newDuration);
 	int AddBuff(Mob *caster, const uint16 spell_id, int duration = 0, int32 level_override = -1);
 	int CanBuffStack(uint16 spellid, uint8 caster_level, bool iFailIfOverwrite = false);
@@ -603,6 +623,17 @@ public:
 	void ShowBuffList(Client* client);
 	bool PlotPositionAroundTarget(Mob* target, float &x_dest, float &y_dest, float &z_dest,
 		bool lookForAftArc = true);
+
+	void MakeAura(uint16 spell_id);
+	inline int GetAuraSlots() { return 1 + aabonuses.aura_slots + itembonuses.aura_slots + spellbonuses.aura_slots; }
+	inline int GetTrapSlots() { return 1 + aabonuses.trap_slots + itembonuses.trap_slots + spellbonuses.trap_slots; }
+	inline bool HasFreeAuraSlots() { return aura_mgr.count < GetAuraSlots(); }
+	inline bool HasFreeTrapSlots() { return trap_mgr.count < GetTrapSlots(); }
+	void AddAura(Aura *aura, AuraRecord &record);
+	void AddTrap(Aura *aura, AuraRecord &record);
+	bool CanSpawnAura(bool trap);
+	void RemoveAura(int spawn_id) {}
+	void RemoveAllAuras() {}
 
 	//Procs
 	void TriggerDefensiveProcs(Mob *on, uint16 hand = EQEmu::inventory::slotPrimary, bool FromSkillProc = false, int damage = 0);
@@ -1464,6 +1495,9 @@ protected:
 	Timer aa_timers[aaTimerMax];
 
 	bool IsHorse;
+
+	AuraMgr aura_mgr;
+	AuraMgr trap_mgr;
 
 private:
 	void _StopSong(); //this is not what you think it is
