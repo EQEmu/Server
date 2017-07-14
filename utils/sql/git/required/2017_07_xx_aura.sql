@@ -9,5 +9,6 @@ CREATE TABLE `auras` (
 	`movement` INT(10) NOT NULL DEFAULT 0,
 	`duration` INT(10) NOT NULL DEFAULT 5400,
 	`icon` INT(10) NOT NULL DEFAULT -1,
+	`cast_time` INT(10) NOT NULL DEFAULT 0,
 	PRIMARY KEY(`type`)
 )

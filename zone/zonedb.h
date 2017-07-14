@@ -133,6 +133,7 @@ struct AuraRecord {
 	int movement;
 	int duration; // seconds some live for 90 mins (normal) others for 2 mins (traps)
 	int icon; // -1 will use the buffs NEW_ICON
+	int cast_time; // seconds some auras recast on a timer, most seem to be every 12 seconds
 };
 
 // Actual pet info for a client.

@@ -12,6 +12,11 @@ Aura::Aura(NPCType *type_data, Mob *owner, AuraRecord &record)
 	GiveNPCTypeData(type_data); // we will delete this later on
 	m_owner = owner->GetID();
 
+	if (record.cast_time) {
+		cast_timer.SetTimer(record.cast_time);
+		cast_timer.Disable(); // we don't want to be enabled yet
+	}
+
 	if (record.aura_type < static_cast<int>(AuraType::Max))
 		type = static_cast<AuraType>(record.aura_type);
 	else
@@ -58,8 +63,6 @@ void Aura::ProcessOnAllFriendlies(Mob *owner)
 
 void Aura::ProcessOnAllGroupMembers(Mob *owner)
 {
-	if (!process_timer.Check())
-		return;
 	auto &mob_list = entity_list.GetMobList(); // read only reference so we can do it all inline
 	std::set<int> delayed_remove;
 	if (owner->IsRaidGrouped() && owner->IsClient()) { // currently raids are just client, but safety check
@@ -228,15 +231,19 @@ void Aura::ProcessOnAllGroupMembers(Mob *owner)
 		casted_on.erase(e);
 	}
 
-	if (cast_timer.Enabled() || !cast_timer.Check())
+	// so if we have a cast timer and our set isn't empty and timer is disabled we need to enable it
+	if (cast_timer.GetDuration() > 0 && !cast_timer.Enabled() && !casted_on.empty())
+		cast_timer.Start();
+
+	if (!cast_timer.Enabled() || !cast_timer.Check())
 		return;
 
-	// TODO: some auras have to recast (DRU for example, non-buff too)
-	/* for (auto &e : casted_on) {
+	// some auras have to recast (DRU for example, non-buff too)
+	for (auto &e : casted_on) {
 		auto mob = entity_list.GetMob(e);
-		if (mob != nullptr && (!is_buff || !mob->IsAffectedByBuff(spell_id)))
-
-	}*/
+		if (mob != nullptr)
+			SpellFinished(spell_id, mob);
+	}
 }
 
 void Aura::ProcessOnGroupMembersPets(Mob *owner)
@@ -276,6 +283,9 @@ bool Aura::Process()
 		SendPosUpdate();
 	}
 	// TODO: waypoints?
+
+	if (!process_timer.Check())
+		return true;
 
 	if (process_func)
 		process_func(*this, owner);
@@ -356,7 +366,7 @@ void Mob::MakeAura(uint16 spell_id)
 bool ZoneDatabase::GetAuraEntry(uint16 spell_id, AuraRecord &record)
 {
 	auto query = StringFormat("SELECT npc_type, name, spell_id, distance, aura_type, spawn_type, movement, "
-				  "duration, icon FROM auras WHERE type='%d'",
+				  "duration, icon, cast_time FROM auras WHERE type='%d'",
 				  spell_id);
 
 	auto results = QueryDatabase(query);
@@ -378,6 +388,7 @@ bool ZoneDatabase::GetAuraEntry(uint16 spell_id, AuraRecord &record)
 	record.movement = atoi(row[6]);
 	record.duration = atoi(row[7]) * 1000; // DB is in seconds
 	record.icon = atoi(row[8]);
+	record.cast_time = atoi(row[9]) * 1000; // DB is in seconds
 
 	return true;
 }
