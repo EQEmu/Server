@@ -119,7 +119,6 @@ Client::Client(EQStreamInterface* ieqs)
 	0,
 	0
 	),
-	//these must be listed in the order they appear in client.h
 	position_timer(250),
 	hpupdate_timer(2000),
 	camp_timer(29000),
@@ -159,7 +158,8 @@ Client::Client(EQStreamInterface* ieqs)
 	last_region_type(RegionTypeUnsupported),
 	m_dirtyautohaters(false),
 	npc_close_scan_timer(6000),
-	hp_self_update_throttle_timer(500)
+	hp_self_update_throttle_timer(300),
+	hp_other_update_throttle_timer(500)
 {
 
 	for(int cf=0; cf < _FilterCount; cf++)

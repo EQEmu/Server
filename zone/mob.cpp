@@ -1302,49 +1302,50 @@ void Mob::CreateHPPacket(EQApplicationPacket* app)
 }
 
 // sends hp update of this mob to people who might care
-void Mob::SendHPUpdate(bool skip_self)
+void Mob::SendHPUpdate(bool skip_self /*= false*/, bool force_update_all /*= false*/)
 {
 	
 	/* If our HP is different from last HP update call - let's update ourself */
-	if (IsClient() && cur_hp != last_hp) {
-		/* This is to prevent excessive packet sending under trains/fast combat */
-		if (this->CastToClient()->hp_self_update_throttle_timer.Check()) {
-			Log(Logs::General, Logs::HP_Update,
-				"Mob::SendHPUpdate :: Update HP of self (%s) HP: %i last: %i skip_self: %s",
-				this->GetCleanName(),
-				cur_hp,
-				last_hp,
-				(skip_self ? "true" : "false")
-			);
+	if (IsClient()) {
+		if (cur_hp != last_hp || force_update_all) {
+			/* This is to prevent excessive packet sending under trains/fast combat */
+			if (this->CastToClient()->hp_self_update_throttle_timer.Check() || force_update_all) {
+				Log(Logs::General, Logs::HP_Update,
+					"Mob::SendHPUpdate :: Update HP of self (%s) HP: %i last: %i skip_self: %s",
+					this->GetCleanName(),
+					cur_hp,
+					last_hp,
+					(skip_self ? "true" : "false")
+				);
 
-			if (!skip_self || this->CastToClient()->ClientVersion() >= EQEmu::versions::ClientVersion::UF) {
-				auto client_packet = new EQApplicationPacket(OP_HPUpdate, sizeof(SpawnHPUpdate_Struct));
-				SpawnHPUpdate_Struct* hp_packet_client = (SpawnHPUpdate_Struct*)client_packet->pBuffer;
+				if (!skip_self || this->CastToClient()->ClientVersion() >= EQEmu::versions::ClientVersion::SoD) {
+					auto client_packet = new EQApplicationPacket(OP_HPUpdate, sizeof(SpawnHPUpdate_Struct));
+					SpawnHPUpdate_Struct* hp_packet_client = (SpawnHPUpdate_Struct*)client_packet->pBuffer;
 
-				hp_packet_client->cur_hp = CastToClient()->GetHP() - itembonuses.HP;
-				hp_packet_client->spawn_id = GetID();
-				hp_packet_client->max_hp = CastToClient()->GetMaxHP() - itembonuses.HP;
+					hp_packet_client->cur_hp = CastToClient()->GetHP() - itembonuses.HP;
+					hp_packet_client->spawn_id = GetID();
+					hp_packet_client->max_hp = CastToClient()->GetMaxHP() - itembonuses.HP;
 
-				CastToClient()->QueuePacket(client_packet);
+					CastToClient()->QueuePacket(client_packet);
 
-				safe_delete(client_packet);
+					safe_delete(client_packet);
 
-				ResetHPUpdateTimer();
+					ResetHPUpdateTimer();
+				}
+
+				/* Used to check if HP has changed to update self next round */
+				last_hp = cur_hp;
 			}
 		}
 	}
-
-	/* Used to check if HP has changed to update self next round */
-	last_hp = cur_hp;
 
 	int8 current_hp_percent = (max_hp == 0 ? 0 : static_cast<int>(cur_hp * 100 / max_hp));
 
 	Log(Logs::General, Logs::HP_Update, "Mob::SendHPUpdate :: SendHPUpdate %s HP is %i last %i", this->GetCleanName(), current_hp_percent, last_hp_percent);
 
-	if (current_hp_percent == last_hp_percent) {
+	if (current_hp_percent == last_hp_percent && !force_update_all) {
 		Log(Logs::General, Logs::HP_Update, "Mob::SendHPUpdate :: Same HP - skipping update");
 		ResetHPUpdateTimer();
-
 		return;
 	}
 	else {
@@ -1362,7 +1363,7 @@ void Mob::SendHPUpdate(bool skip_self)
 
 	CreateHPPacket(&hp_packet);
 
-	/* Update those who have use targeted */
+	/* Update those who have us targeted */
 	entity_list.QueueClientsByTarget(this, &hp_packet, false, 0, false, true, EQEmu::versions::bit_AllClients);
 
 	/* Update those who have us on x-target */
@@ -3407,9 +3408,13 @@ int Mob::GetHaste()
 }
 
 void Mob::SetTarget(Mob* mob) {
-	if (target == mob) return;
+
+	if (target == mob) 
+		return;
+
 	target = mob;
 	entity_list.UpdateHoTT(this);
+	
 	if(IsNPC())
 		parse->EventNPC(EVENT_TARGET_CHANGE, CastToNPC(), mob, "", 0);
 	else if (IsClient())
@@ -3417,6 +3422,9 @@ void Mob::SetTarget(Mob* mob) {
 
 	if(IsPet() && GetOwner() && GetOwner()->IsClient())
 		GetOwner()->CastToClient()->UpdateXTargetType(MyPetTarget, mob);
+
+	if (this->IsClient() && this->GetTarget() && this->CastToClient()->hp_other_update_throttle_timer.Check())
+		this->GetTarget()->SendHPUpdate(false, true);
 }
 
 float Mob::FindGroundZ(float new_x, float new_y, float z_offset)
