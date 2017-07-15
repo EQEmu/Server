@@ -454,7 +454,7 @@ bool Client::HandleSendLoginInfoPacket(const EQApplicationPacket *app) {
 			WorldConfig::DisableStats();
 			Log(Logs::General, Logs::World_Server, "MiniLogin Account #%d",cle->AccountID());
 		}
-		else {
+		else if (!is_player_zoning) {
 			// Track who is in and who is out of the game
 			char *inout= (char *) "";
 			
