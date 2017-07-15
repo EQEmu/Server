@@ -614,12 +614,12 @@ bool Mob::MakeNewPositionAndSendUpdate(float x, float y, float z, int speed, boo
 
 	if (IsClient())
 	{
-		SendPosUpdate(1);
+		SendPositionUpdate(1);
 		CastToClient()->ResetPositionTimer();
 	}
 	else
 	{
-		SendPosUpdate();
+		SendPositionUpdate();
 		SetAppearance(eaStanding, false);
 	}
 
@@ -702,7 +702,7 @@ bool Mob::CalculateNewPosition(float x, float y, float z, int speed, bool checkZ
 		this->SetMoving(true);
 		moved = true;
 		m_Delta = glm::vec4(m_Position.x - nx, m_Position.y - ny, m_Position.z - nz, 0.0f);
-		SendPosUpdate();
+		SendPositionUpdate();
 	}
 	tar_ndx++;
 

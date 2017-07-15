@@ -1458,7 +1458,7 @@ void Mob::SendPosition()
 }
 
 // this one is for mobs on the move, with deltas - this makes them walk
-void Mob::SendPosUpdate(uint8 iSendToSelf) {
+void Mob::SendPositionUpdate(uint8 iSendToSelf) {
 	auto app = new EQApplicationPacket(OP_ClientUpdate, sizeof(PlayerPositionUpdateServer_Struct));
 	PlayerPositionUpdateServer_Struct* spu = (PlayerPositionUpdateServer_Struct*)app->pBuffer;
 	MakeSpawnUpdate(spu);
@@ -1496,27 +1496,27 @@ void Mob::MakeSpawnUpdateNoDelta(PlayerPositionUpdateServer_Struct *spu) {
 
 // this is for SendPosUpdate()
 void Mob::MakeSpawnUpdate(PlayerPositionUpdateServer_Struct* spu) {
-	spu->spawn_id	= GetID();
-	spu->x_pos		= FloatToEQ19(m_Position.x);
-	spu->y_pos		= FloatToEQ19(m_Position.y);
-	spu->z_pos		= FloatToEQ19(m_Position.z);
-	spu->delta_x	= NewFloatToEQ13(m_Delta.x);
-	spu->delta_y	= NewFloatToEQ13(m_Delta.y);
-	spu->delta_z	= NewFloatToEQ13(m_Delta.z);
-	spu->heading	= FloatToEQ19(m_Position.w);
-	spu->padding0002	=0;
-	spu->padding0006	=7;
-	spu->padding0014	=0x7f;
-	spu->padding0018	=0x5df27;
+	spu->spawn_id = GetID();
+	spu->x_pos = FloatToEQ19(m_Position.x);
+	spu->y_pos = FloatToEQ19(m_Position.y);
+	spu->z_pos = FloatToEQ19(m_Position.z);
+	spu->delta_x = NewFloatToEQ13(m_Delta.x);
+	spu->delta_y = NewFloatToEQ13(m_Delta.y);
+	spu->delta_z = NewFloatToEQ13(m_Delta.z);
+	spu->heading = FloatToEQ19(m_Position.w);
+	spu->padding0002 = 0;
+	spu->padding0006 = 7;
+	spu->padding0014 = 0x7f;
+	spu->padding0018 = 0x5df27;
 #ifdef BOTS
 	if (this->IsClient() || this->IsBot())
 #else
-	if(this->IsClient())
+	if (this->IsClient())
 #endif
 		spu->animation = animation;
 	else
 		spu->animation = pRunAnimSpeed;//animation;
-	
+
 	spu->delta_heading = NewFloatToEQ13(m_Delta.w);
 }
 
@@ -2745,7 +2745,7 @@ void Mob::FaceTarget(Mob* MobToFace) {
 	if(oldheading != newheading) {
 		SetHeading(newheading);
 		if(moving)
-			SendPosUpdate();
+			SendPositionUpdate();
 		else
 		{
 			SendPosition();
