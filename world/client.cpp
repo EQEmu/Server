@@ -477,6 +477,9 @@ bool Client::HandleSendLoginInfoPacket(const EQApplicationPacket *app) {
 				"Account (%s) Logging(%s) to character select :: LSID: %d ", 
 				cle->AccountName(), inout, cle->LSID());
 		}
+		else {
+			cle->SetOnline();
+		}
 
 		const WorldConfig *Config=WorldConfig::get();
 
