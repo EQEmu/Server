@@ -1,5 +1,11 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+
+== 7/14/2017 ==
+Akkadius: HP Update tuning - HP Updates are now forced when a client is targeted
+Akkadius: Client position updates should be smoother (granted the client has a good connection)
+	- Clients should also no longer randomly disappear 
+
 == 7/11/2017 ==
 Akkadius: Raid/Group/XTarget HP/Mana/Endurance updates now only send when percentage changes
 Akkadius: Raid/Group Mana/Endurance updates should now update real-time once again

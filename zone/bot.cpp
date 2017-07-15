@@ -2172,7 +2172,7 @@ void Bot::AI_Process() {
 				}
 
 				if(IsMoving())
-					SendPosUpdate();
+					SendPositionUpdate();
 				else
 					SendPosition();
 			}
@@ -2383,7 +2383,7 @@ void Bot::AI_Process() {
 
 				// TODO: Test RuleB(Bots, UpdatePositionWithTimer)
 				if(IsMoving())
-					SendPosUpdate();
+					SendPositionUpdate();
 				else
 					SendPosition();
 			}
@@ -2505,7 +2505,7 @@ void Bot::AI_Process() {
 				}
 
 				if(IsMoving())
-					SendPosUpdate();
+					SendPositionUpdate();
 				else
 					SendPosition();
 			}

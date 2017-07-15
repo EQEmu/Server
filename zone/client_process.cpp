@@ -63,64 +63,49 @@ extern EntityList entity_list;
 bool Client::Process() {
 	bool ret = true;
 
-	if (Connected() || IsLD())
-	{
+	if (Connected() || IsLD()) {
 		// try to send all packets that weren't sent before
-		if (!IsLD() && zoneinpacket_timer.Check())
-		{
+		if (!IsLD() && zoneinpacket_timer.Check()) {
 			SendAllPackets();
 		}
 
-		if (adventure_request_timer)
-		{
-			if (adventure_request_timer->Check())
-			{
+		if (adventure_request_timer) {
+			if (adventure_request_timer->Check()) {
 				safe_delete(adventure_request_timer);
 			}
 		}
 
-		if (adventure_create_timer)
-		{
-			if (adventure_create_timer->Check())
-			{
+		if (adventure_create_timer) {
+			if (adventure_create_timer->Check()) {
 				safe_delete(adventure_create_timer);
 			}
 		}
 
-		if (adventure_leave_timer)
-		{
-			if (adventure_leave_timer->Check())
-			{
+		if (adventure_leave_timer) {
+			if (adventure_leave_timer->Check()) {
 				safe_delete(adventure_leave_timer);
 			}
 		}
 
-		if (adventure_door_timer)
-		{
-			if (adventure_door_timer->Check())
-			{
+		if (adventure_door_timer) {
+			if (adventure_door_timer->Check()) {
 				safe_delete(adventure_door_timer);
 			}
 		}
 
-		if (adventure_stats_timer)
-		{
-			if (adventure_stats_timer->Check())
-			{
+		if (adventure_stats_timer) {
+			if (adventure_stats_timer->Check()) {
 				safe_delete(adventure_stats_timer);
 			}
 		}
 
-		if (adventure_leaderboard_timer)
-		{
-			if (adventure_leaderboard_timer->Check())
-			{
+		if (adventure_leaderboard_timer) {
+			if (adventure_leaderboard_timer->Check()) {
 				safe_delete(adventure_leaderboard_timer);
 			}
 		}
 
-		if (dead)
-		{
+		if (dead) {
 			SetHP(-100);
 			if (RespawnFromHoverTimer.Check())
 				HandleRespawnFromHover(0);
@@ -133,6 +118,11 @@ bool Client::Process() {
 		// since the function will anyways
 		if (hpupdate_timer.Check(false))
 			SendHPUpdate();
+
+		/* I haven't naturally updated my position in 10 seconds, updating manually */
+		if (position_update_timer.Check()) {
+			SendPositionUpdate();
+		}
 
 		if (mana_timer.Check())
 			CheckManaEndUpdate();
@@ -270,15 +260,6 @@ bool Client::Process() {
 					else if (mob->GetAggroRange() > scan_range) {
 						close_mobs.insert(std::pair<Mob *, float>(mob, distance));
 					}
-				}
-
-				/* Clients need to be kept up to date for position updates more often otherwise they disappear */
-				if (mob->IsClient() && this != mob && !mob->IsMoving() && distance <= client_update_range) {
-					auto app = new EQApplicationPacket(OP_ClientUpdate, sizeof(PlayerPositionUpdateServer_Struct));
-					PlayerPositionUpdateServer_Struct* spawn_update = (PlayerPositionUpdateServer_Struct*)app->pBuffer;
-					mob->MakeSpawnUpdate(spawn_update);
-					this->FastQueuePacket(&app, false);
-					safe_delete(app);
 				}
 			}
 		}
@@ -460,7 +441,7 @@ bool Client::Process() {
 				{
 					animation = 0;
 					m_Delta = glm::vec4(0.0f, 0.0f, 0.0f, m_Delta.w);
-					SendPosUpdate(2);
+					SendPositionUpdate(2);
 				}
 			}
 

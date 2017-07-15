@@ -847,7 +847,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 							SetHeading(CalculateHeadingToTarget(ClosestMob->GetX(), ClosestMob->GetY()));
 							SetTarget(ClosestMob);
 							CastToClient()->SendTargetCommand(ClosestMob->GetID());
-							SendPosUpdate(2);
+							SendPositionUpdate(2);
 						}
 						else
 							Message_StringID(clientMessageError, SENSE_NOTHING);

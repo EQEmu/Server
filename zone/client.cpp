@@ -159,11 +159,12 @@ Client::Client(EQStreamInterface* ieqs)
 	m_dirtyautohaters(false),
 	npc_close_scan_timer(6000),
 	hp_self_update_throttle_timer(300),
-	hp_other_update_throttle_timer(500)
+	hp_other_update_throttle_timer(500),
+	position_update_timer(0)
 {
 
-	for(int cf=0; cf < _FilterCount; cf++)
-		ClientFilters[cf] = FilterShow;
+	for (int client_filter = 0; client_filter < _FilterCount; client_filter++)
+		ClientFilters[client_filter] = FilterShow;
 
 	character_id = 0;
 	conn_state = NoPacketsReceived;
@@ -196,7 +197,7 @@ Client::Client(EQStreamInterface* ieqs)
 	last_reported_endurance = 0;
 	last_reported_endurance_percent = 0;
 	last_reported_mana_percent = 0;
-	gmhideme = false;
+	gm_hide_me = false;
 	AFK = false;
 	LFG = false;
 	LFGFromLevel = 0;
@@ -260,7 +261,7 @@ Client::Client(EQStreamInterface* ieqs)
 	memset(&m_epp, 0, sizeof(m_epp));
 	PendingTranslocate = false;
 	PendingSacrifice = false;
-	BoatID = 0;
+	controlling_boat_id = 0;
 
 	KarmaUpdateTimer = new Timer(RuleI(Chat, KarmaUpdateIntervalMS));
 	GlobalChatLimiterTimer = new Timer(RuleI(Chat, IntervalDurationMS));
@@ -1971,7 +1972,7 @@ void Client::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho)
 }
 
 bool Client::GMHideMe(Client* client) {
-	if (gmhideme) {
+	if (gm_hide_me) {
 		if (client == 0)
 			return true;
 		else if (admin > client->Admin())
@@ -3240,9 +3241,9 @@ void Client::SetHideMe(bool flag)
 {
 	EQApplicationPacket app;
 
-	gmhideme = flag;
+	gm_hide_me = flag;
 
-	if(gmhideme)
+	if(gm_hide_me)
 	{
 		database.SetHideMe(AccountID(),true);
 		CreateDespawnPacket(&app, false);
@@ -6373,7 +6374,7 @@ void Client::LocateCorpse()
 		SetHeading(CalculateHeadingToTarget(ClosestCorpse->GetX(), ClosestCorpse->GetY()));
 		SetTarget(ClosestCorpse);
 		SendTargetCommand(ClosestCorpse->GetID());
-		SendPosUpdate(2);
+		SendPositionUpdate(2);
 	}
 	else if(!GetTarget())
 		Message_StringID(clientMessageError, SENSE_CORPSE_NONE);

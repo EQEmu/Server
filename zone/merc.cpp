@@ -1589,7 +1589,7 @@ void Merc::AI_Process() {
 				}
 
 				if(IsMoving())
-					SendPosUpdate();
+					SendPositionUpdate();
 				else
 					SendPosition();
 			}
@@ -1714,7 +1714,7 @@ void Merc::AI_Process() {
 				}
 
 				if(IsMoving())
-					SendPosUpdate();
+					SendPositionUpdate();
 				else
 					SendPosition();
 			}
