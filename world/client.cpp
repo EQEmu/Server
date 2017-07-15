@@ -458,7 +458,7 @@ bool Client::HandleSendLoginInfoPacket(const EQApplicationPacket *app) {
 			// Track who is in and who is out of the game
 			char *inout= (char *) "";
 			
-			if (cle->GetOnline() < CLE_Status_Online){
+			if (cle->GetOnline() == CLE_Status_Never){
 				// Desktop -> Char Select
 				inout = (char *) "In";
 			}
