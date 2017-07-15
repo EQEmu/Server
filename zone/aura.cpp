@@ -350,7 +350,7 @@ bool Aura::Process()
 
 	if (movement_type == AuraMovement::Follow && GetPosition() != owner->GetPosition() && movement_timer.Check()) {
 		m_Position = owner->GetPosition();
-		SendPosUpdate();
+		SendPositionUpdate();
 	}
 	// TODO: waypoints?
 
