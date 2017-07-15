@@ -273,6 +273,8 @@ void Aura::ProcessTotem(Mob *owner)
 		auto mob = e.second;
 		if (mob == this)
 			continue;
+		if (mob == owner)
+			continue;
 		if (owner->IsAttackAllowed(mob)) { // might need more checks ...
 			bool in_range = DistanceSquared(GetPosition(), mob->GetPosition()) <= distance;
 			auto it = casted_on.find(mob->GetID());
@@ -337,6 +339,11 @@ bool Aura::Process()
 
 	auto owner = entity_list.GetMob(m_owner);
 	if (owner == nullptr) {
+		Depop();
+		return true;
+	}
+
+	if (remove_timer.Check()) {
 		Depop();
 		return true;
 	}
