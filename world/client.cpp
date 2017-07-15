@@ -1037,9 +1037,7 @@ bool Client::HandlePacket(const EQApplicationPacket *app) {
 		}
 		case OP_WorldLogout:
 		{
-			//Log(Logs::General, Logs::World_Server, 
-			//"Account (%s) Logging Off :: LSID: %d ", cle->AccountName(), cle->LSID());
-			//online.erase(cle->LSID());
+			// I don't see this getting executed on logout
 			eqs->Close();
 			cle->SetOnline(CLE_Status_Offline); //allows this player to log in again without an ip restriction.
 			return false;
