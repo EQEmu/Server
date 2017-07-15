@@ -125,7 +125,7 @@ Mob::Mob(const char* in_name,
 
 	last_z = 0;
 
-	
+	last_major_update_position = m_Position;
 
 	AI_Init();
 	SetMoving(false);
@@ -249,7 +249,7 @@ Mob::Mob(const char* in_name,
 	bEnraged = false;
 
 	shield_target = nullptr;
-	cur_mana = 0;
+	current_mana = 0;
 	max_mana = 0;
 	hp_regen = in_hp_regen;
 	mana_regen = in_mana_regen;
@@ -1302,49 +1302,50 @@ void Mob::CreateHPPacket(EQApplicationPacket* app)
 }
 
 // sends hp update of this mob to people who might care
-void Mob::SendHPUpdate(bool skip_self)
+void Mob::SendHPUpdate(bool skip_self /*= false*/, bool force_update_all /*= false*/)
 {
 	
 	/* If our HP is different from last HP update call - let's update ourself */
-	if (IsClient() && cur_hp != last_hp) {
-		/* This is to prevent excessive packet sending under trains/fast combat */
-		if (this->CastToClient()->hp_self_update_throttle_timer.Check()) {
-			Log(Logs::General, Logs::HP_Update,
-				"Mob::SendHPUpdate :: Update HP of self (%s) HP: %i last: %i skip_self: %s",
-				this->GetCleanName(),
-				cur_hp,
-				last_hp,
-				(skip_self ? "true" : "false")
-			);
+	if (IsClient()) {
+		if (cur_hp != last_hp || force_update_all) {
+			/* This is to prevent excessive packet sending under trains/fast combat */
+			if (this->CastToClient()->hp_self_update_throttle_timer.Check() || force_update_all) {
+				Log(Logs::General, Logs::HP_Update,
+					"Mob::SendHPUpdate :: Update HP of self (%s) HP: %i last: %i skip_self: %s",
+					this->GetCleanName(),
+					cur_hp,
+					last_hp,
+					(skip_self ? "true" : "false")
+				);
 
-			if (!skip_self || this->CastToClient()->ClientVersion() >= EQEmu::versions::ClientVersion::UF) {
-				auto client_packet = new EQApplicationPacket(OP_HPUpdate, sizeof(SpawnHPUpdate_Struct));
-				SpawnHPUpdate_Struct* hp_packet_client = (SpawnHPUpdate_Struct*)client_packet->pBuffer;
+				if (!skip_self || this->CastToClient()->ClientVersion() >= EQEmu::versions::ClientVersion::SoD) {
+					auto client_packet = new EQApplicationPacket(OP_HPUpdate, sizeof(SpawnHPUpdate_Struct));
+					SpawnHPUpdate_Struct* hp_packet_client = (SpawnHPUpdate_Struct*)client_packet->pBuffer;
 
-				hp_packet_client->cur_hp = CastToClient()->GetHP() - itembonuses.HP;
-				hp_packet_client->spawn_id = GetID();
-				hp_packet_client->max_hp = CastToClient()->GetMaxHP() - itembonuses.HP;
+					hp_packet_client->cur_hp = CastToClient()->GetHP() - itembonuses.HP;
+					hp_packet_client->spawn_id = GetID();
+					hp_packet_client->max_hp = CastToClient()->GetMaxHP() - itembonuses.HP;
 
-				CastToClient()->QueuePacket(client_packet);
+					CastToClient()->QueuePacket(client_packet);
 
-				safe_delete(client_packet);
+					safe_delete(client_packet);
 
-				ResetHPUpdateTimer();
+					ResetHPUpdateTimer();
+				}
+
+				/* Used to check if HP has changed to update self next round */
+				last_hp = cur_hp;
 			}
 		}
 	}
-
-	/* Used to check if HP has changed to update self next round */
-	last_hp = cur_hp;
 
 	int8 current_hp_percent = (max_hp == 0 ? 0 : static_cast<int>(cur_hp * 100 / max_hp));
 
 	Log(Logs::General, Logs::HP_Update, "Mob::SendHPUpdate :: SendHPUpdate %s HP is %i last %i", this->GetCleanName(), current_hp_percent, last_hp_percent);
 
-	if (current_hp_percent == last_hp_percent) {
+	if (current_hp_percent == last_hp_percent && !force_update_all) {
 		Log(Logs::General, Logs::HP_Update, "Mob::SendHPUpdate :: Same HP - skipping update");
 		ResetHPUpdateTimer();
-
 		return;
 	}
 	else {
@@ -1357,24 +1358,24 @@ void Mob::SendHPUpdate(bool skip_self)
 		last_hp_percent = current_hp_percent;
 	}
 
-	EQApplicationPacket hp_app;
+	EQApplicationPacket hp_packet;
 	Group *group = nullptr;
 
-	CreateHPPacket(&hp_app);
+	CreateHPPacket(&hp_packet);
 
-	/* Update those who have use targeted */
-	entity_list.QueueClientsByTarget(this, &hp_app, false, 0, false, true, EQEmu::versions::bit_AllClients);
+	/* Update those who have us targeted */
+	entity_list.QueueClientsByTarget(this, &hp_packet, false, 0, false, true, EQEmu::versions::bit_AllClients);
 
 	/* Update those who have us on x-target */
-	entity_list.QueueClientsByXTarget(this, &hp_app, false);
+	entity_list.QueueClientsByXTarget(this, &hp_packet, false);
 
 	/* Update groups using Group LAA health name tag counter */
-	entity_list.QueueToGroupsForNPCHealthAA(this, &hp_app);
+	entity_list.QueueToGroupsForNPCHealthAA(this, &hp_packet);
 
 	/* Update group */
 	if(IsGrouped()) {
 		group = entity_list.GetGroupByMob(this);
-		if(group) //not sure why this might be null, but it happens
+		if(group)
 			group->SendHPPacketsFrom(this);
 	}
 
@@ -1387,7 +1388,7 @@ void Mob::SendHPUpdate(bool skip_self)
 
 	/* Pet - Update master - group and raid if exists */
 	if(GetOwner() && GetOwner()->IsClient()) {
-		GetOwner()->CastToClient()->QueuePacket(&hp_app, false);
+		GetOwner()->CastToClient()->QueuePacket(&hp_packet, false);
 		group = entity_list.GetGroupByClient(GetOwner()->CastToClient());
 
 		if(group)
@@ -1400,7 +1401,7 @@ void Mob::SendHPUpdate(bool skip_self)
 
 	/* Send to pet */
 	if(GetPet() && GetPet()->IsClient()) {
-		GetPet()->CastToClient()->QueuePacket(&hp_app, false);
+		GetPet()->CastToClient()->QueuePacket(&hp_packet, false);
 	}
 
 	/* Destructible objects */
@@ -1436,18 +1437,28 @@ void Mob::SendHPUpdate(bool skip_self)
 	}
 }
 
-// this one just warps the mob to the current location
+/* Used for NPCs mainly */
 void Mob::SendPosition()
 {
+
 	auto app = new EQApplicationPacket(OP_ClientUpdate, sizeof(PlayerPositionUpdateServer_Struct));
 	PlayerPositionUpdateServer_Struct* spu = (PlayerPositionUpdateServer_Struct*)app->pBuffer;
 	MakeSpawnUpdateNoDelta(spu);
-	entity_list.QueueCloseClients(this, app, true, RuleI(Range, MobPositionUpdates), nullptr, false);
+
+	/* When an NPC has made a large distance change - we should update all clients to prevent "ghosts" */
+	if (DistanceSquared(last_major_update_position, m_Position) >= (100 * 100)) {
+		entity_list.QueueClients(this, app, true, true);
+		last_major_update_position = m_Position;
+	}
+	else {
+		entity_list.QueueCloseClients(this, app, true, RuleI(Range, MobPositionUpdates), nullptr, false);
+	}
+
 	safe_delete(app);
 }
 
 // this one is for mobs on the move, with deltas - this makes them walk
-void Mob::SendPosUpdate(uint8 iSendToSelf) {
+void Mob::SendPositionUpdate(uint8 iSendToSelf) {
 	auto app = new EQApplicationPacket(OP_ClientUpdate, sizeof(PlayerPositionUpdateServer_Struct));
 	PlayerPositionUpdateServer_Struct* spu = (PlayerPositionUpdateServer_Struct*)app->pBuffer;
 	MakeSpawnUpdate(spu);
@@ -1485,27 +1496,27 @@ void Mob::MakeSpawnUpdateNoDelta(PlayerPositionUpdateServer_Struct *spu) {
 
 // this is for SendPosUpdate()
 void Mob::MakeSpawnUpdate(PlayerPositionUpdateServer_Struct* spu) {
-	spu->spawn_id	= GetID();
-	spu->x_pos		= FloatToEQ19(m_Position.x);
-	spu->y_pos		= FloatToEQ19(m_Position.y);
-	spu->z_pos		= FloatToEQ19(m_Position.z);
-	spu->delta_x	= NewFloatToEQ13(m_Delta.x);
-	spu->delta_y	= NewFloatToEQ13(m_Delta.y);
-	spu->delta_z	= NewFloatToEQ13(m_Delta.z);
-	spu->heading	= FloatToEQ19(m_Position.w);
-	spu->padding0002	=0;
-	spu->padding0006	=7;
-	spu->padding0014	=0x7f;
-	spu->padding0018	=0x5df27;
+	spu->spawn_id = GetID();
+	spu->x_pos = FloatToEQ19(m_Position.x);
+	spu->y_pos = FloatToEQ19(m_Position.y);
+	spu->z_pos = FloatToEQ19(m_Position.z);
+	spu->delta_x = NewFloatToEQ13(m_Delta.x);
+	spu->delta_y = NewFloatToEQ13(m_Delta.y);
+	spu->delta_z = NewFloatToEQ13(m_Delta.z);
+	spu->heading = FloatToEQ19(m_Position.w);
+	spu->padding0002 = 0;
+	spu->padding0006 = 7;
+	spu->padding0014 = 0x7f;
+	spu->padding0018 = 0x5df27;
 #ifdef BOTS
 	if (this->IsClient() || this->IsBot())
 #else
-	if(this->IsClient())
+	if (this->IsClient())
 #endif
 		spu->animation = animation;
 	else
 		spu->animation = pRunAnimSpeed;//animation;
-	
+
 	spu->delta_heading = NewFloatToEQ13(m_Delta.w);
 }
 
@@ -2270,13 +2281,13 @@ const int32& Mob::SetMana(int32 amount)
 {
 	CalcMaxMana();
 	int32 mmana = GetMaxMana();
-	cur_mana = amount < 0 ? 0 : (amount > mmana ? mmana : amount);
+	current_mana = amount < 0 ? 0 : (amount > mmana ? mmana : amount);
 /*
 	if(IsClient())
 		LogFile->write(EQEMuLog::Debug, "Setting mana for %s to %d (%4.1f%%)", GetName(), amount, GetManaRatio());
 */
 
-	return cur_mana;
+	return current_mana;
 }
 
 
@@ -2734,7 +2745,7 @@ void Mob::FaceTarget(Mob* MobToFace) {
 	if(oldheading != newheading) {
 		SetHeading(newheading);
 		if(moving)
-			SendPosUpdate();
+			SendPositionUpdate();
 		else
 		{
 			SendPosition();
@@ -3397,9 +3408,13 @@ int Mob::GetHaste()
 }
 
 void Mob::SetTarget(Mob* mob) {
-	if (target == mob) return;
+
+	if (target == mob) 
+		return;
+
 	target = mob;
 	entity_list.UpdateHoTT(this);
+	
 	if(IsNPC())
 		parse->EventNPC(EVENT_TARGET_CHANGE, CastToNPC(), mob, "", 0);
 	else if (IsClient())
@@ -3407,6 +3422,9 @@ void Mob::SetTarget(Mob* mob) {
 
 	if(IsPet() && GetOwner() && GetOwner()->IsClient())
 		GetOwner()->CastToClient()->UpdateXTargetType(MyPetTarget, mob);
+
+	if (this->IsClient() && this->GetTarget() && this->CastToClient()->hp_other_update_throttle_timer.Check())
+		this->GetTarget()->SendHPUpdate(false, true);
 }
 
 float Mob::FindGroundZ(float new_x, float new_y, float z_offset)

@@ -389,7 +389,7 @@ XS(XS_Group_SendHPPacketsTo)
 		if(newmember == nullptr)
 			Perl_croak(aTHX_ "newmember is nullptr, avoiding crash.");
 
-		THIS->SendHPPacketsTo(newmember);
+		THIS->SendHPManaEndPacketsTo(newmember);
 	}
 	XSRETURN_EMPTY;
 }

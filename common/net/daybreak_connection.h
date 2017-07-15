@@ -8,8 +8,7 @@
 #include <functional>
 #include <memory>
 #include <map>
-#include <unordered_map>
-#include <deque>
+#include <queue>
 #include <list>
 
 namespace EQ
@@ -145,12 +144,6 @@ namespace EQ
 				size_t times_resent;
 			};
 
-			struct DaybreakBufferedPacket
-			{
-				uint16_t seq;
-				DaybreakSentPacket sent;
-			};
-
 			struct DaybreakStream
 			{
 				DaybreakStream() {
@@ -158,20 +151,17 @@ namespace EQ
 					sequence_out = 0;
 					fragment_current_bytes = 0;
 					fragment_total_bytes = 0;
-					outstanding_bytes = 0;
 				}
 
 				uint16_t sequence_in;
 				uint16_t sequence_out;
-				std::unordered_map<uint16_t, Packet*> packet_queue;
-				std::deque<DaybreakBufferedPacket> buffered_packets;
+				std::map<uint16_t, Packet*> packet_queue;
 
 				DynamicPacket fragment_packet;
 				uint32_t fragment_current_bytes;
 				uint32_t fragment_total_bytes;
 
-				std::unordered_map<uint16_t, DaybreakSentPacket> outstanding_packets;
-				size_t outstanding_bytes;
+				std::map<uint16_t, DaybreakSentPacket> sent_packets;
 			};
 
 			DaybreakStream m_streams[4];
@@ -179,8 +169,7 @@ namespace EQ
 
 			void Process();
 			void ProcessPacket(Packet &p);
-			void ProcessInboundQueue();
-			void ProcessOutboundQueue();
+			void ProcessQueue();
 			void RemoveFromQueue(int stream, uint16_t seq);
 			void AddToQueue(int stream, uint16_t seq, const Packet &p);
 			void ProcessDecodedPacket(const Packet &p);
@@ -196,7 +185,6 @@ namespace EQ
 			void ProcessResend(int stream);
 			void Ack(int stream, uint16_t seq);
 			void OutOfOrderAck(int stream, uint16_t seq);
-			void BufferPacket(int stream, uint16_t seq, DaybreakSentPacket &sent);
 
 			void SendConnect();
 			void SendKeepAlive();
@@ -219,8 +207,8 @@ namespace EQ
 				keepalive_delay_ms = 9000;
 				resend_delay_ms = 150;
 				resend_delay_factor = 1.5;
-				resend_delay_min = 300;
-				resend_delay_max = 3000;
+				resend_delay_min = 150;
+				resend_delay_max = 1000;
 				connect_delay_ms = 500;
 				stale_connection_ms = 90000;
 				connect_stale_ms = 5000;
@@ -236,8 +224,6 @@ namespace EQ
 				tic_rate_hertz = 60.0;
 				resend_timeout = 90000;
 				connection_close_time = 2000;
-				max_outstanding_packets = 400;
-				max_outstanding_bytes = 400 * 512;
 			}
 
 			size_t max_packet_size;
@@ -260,8 +246,6 @@ namespace EQ
 			size_t connection_close_time;
 			DaybreakEncodeType encode_passes[2];
 			int port;
-			size_t max_outstanding_packets;
-			size_t max_outstanding_bytes;
 		};
 
 		class DaybreakConnectionManager

@@ -989,7 +989,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 			}
 			database.RefreshGroupFromDB(client);
 
-			group->SendHPPacketsTo(client);
+			group->SendHPManaEndPacketsTo(client);
 
 			// If the group leader is not set, pull the group leader information from the database.
 			if (!group->GetLeader())

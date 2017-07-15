@@ -1006,7 +1006,12 @@ void Mob::AI_Process() {
 				}
 				else if (!this->CheckLosFN(this->GetTarget())) {
 					Mob* target = this->GetTarget();
-					this->GMMove(target->GetX(), target->GetY(), target->GetZ(), target->GetHeading());
+
+					m_Position.x = target->GetX();
+					m_Position.y = target->GetY();
+					m_Position.z = target->GetZ();
+					m_Position.w = target->GetHeading();
+					SendPosition();
 				}
 			}
 		}

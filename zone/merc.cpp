@@ -906,15 +906,15 @@ int32 Merc::CalcMaxMana()
 		max_mana = 0;
 	}
 
-	if (cur_mana > max_mana) {
-		cur_mana = max_mana;
+	if (current_mana > max_mana) {
+		current_mana = max_mana;
 	}
 
 	int mana_perc_cap = spellbonuses.ManaPercCap[0];
 	if(mana_perc_cap) {
 		int curMana_cap = (max_mana * mana_perc_cap) / 100;
-		if (cur_mana > curMana_cap  || (spellbonuses.ManaPercCap[1] && cur_mana > spellbonuses.ManaPercCap[1]))
-			cur_mana = curMana_cap;
+		if (current_mana > curMana_cap  || (spellbonuses.ManaPercCap[1] && current_mana > spellbonuses.ManaPercCap[1]))
+			current_mana = curMana_cap;
 	}
 
 #if EQDEBUG >= 11
@@ -1589,7 +1589,7 @@ void Merc::AI_Process() {
 				}
 
 				if(IsMoving())
-					SendPosUpdate();
+					SendPositionUpdate();
 				else
 					SendPosition();
 			}
@@ -1714,7 +1714,7 @@ void Merc::AI_Process() {
 				}
 
 				if(IsMoving())
-					SendPosUpdate();
+					SendPositionUpdate();
 				else
 					SendPosition();
 			}
@@ -4987,7 +4987,7 @@ void Merc::ScaleStats(int scalepercent, bool setmax) {
 		max_mana = (int)((float)base_mana * scalerate);
 		base_mana = max_mana;
 		if (setmax)
-			cur_mana = max_mana;
+			current_mana = max_mana;
 	}
 
 	if (base_end)
