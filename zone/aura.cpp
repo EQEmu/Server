@@ -301,7 +301,173 @@ void Aura::ProcessOnAllGroupMembers(Mob *owner)
 
 void Aura::ProcessOnGroupMembersPets(Mob *owner)
 {
-	Shout("Stub 3");
+	auto &mob_list = entity_list.GetMobList(); // read only reference so we can do it all inline
+	std::set<int> delayed_remove;
+	bool is_buff = IsBuffSpell(spell_id); // non-buff spells don't cast on enter
+	// This type can either live on the pet (level 55/70 MAG aura) or on the pet owner (level 85 MAG aura)
+	auto group_member = owner->GetOwnerOrSelf();
+
+	if (group_member->IsRaidGrouped() && group_member->IsClient()) { // currently raids are just client, but safety check
+		auto raid = group_member->GetRaid();
+		if (raid == nullptr) { // well shit
+			Depop();
+			return;
+		}
+		auto group_id = raid->GetGroup(group_member->CastToClient());
+
+		// some lambdas so the for loop is less horrible ...
+		auto verify_raid_client_pet = [&raid, &group_id, this](Mob *m) {
+			auto idx = raid->GetPlayerIndex(m->GetOwner()->CastToClient());
+			if (m->GetOwner()->GetID() == m_owner) {
+				return DistanceSquared(GetPosition(), m->GetPosition()) <= distance;
+			} else if (idx == 0xFFFFFFFF || raid->members[idx].GroupNumber != group_id || raid->members[idx].GroupNumber == 0xFFFFFFFF) {
+				return false;
+			} else if (DistanceSquared(GetPosition(), m->GetPosition()) > distance) {
+				return false;
+			}
+			return true;
+		};
+
+		auto verify_raid_client_swarm = [&raid, &group_id, this](NPC *n) {
+			auto owner = entity_list.GetMob(n->GetSwarmOwner());
+			if (owner == nullptr)
+				return false;
+			auto idx = raid->GetPlayerIndex(owner->CastToClient());
+			if (owner->GetID() == m_owner) {
+				return DistanceSquared(GetPosition(), n->GetPosition()) <= distance;
+			} else if (idx == 0xFFFFFFFF || raid->members[idx].GroupNumber != group_id || raid->members[idx].GroupNumber == 0xFFFFFFFF) {
+				return false;
+			} else if (DistanceSquared(GetPosition(), n->GetPosition()) > distance) {
+				return false;
+			}
+			return true;
+		};
+
+		for (auto &e : mob_list) {
+			auto mob = e.second;
+			// step 1: check if we're already managing this NPC's buff
+			auto it = casted_on.find(mob->GetID());
+			if (it != casted_on.end()) {
+				// verify still good!
+				if (mob->IsPet() && mob->IsPetOwnerClient() && mob->GetOwner()) {
+					if (!verify_raid_client_pet(mob))
+						delayed_remove.insert(mob->GetID());
+				} else if (mob->IsNPC() && mob->IsPetOwnerClient()) {
+					auto npc = mob->CastToNPC();
+					if (!verify_raid_client_swarm(npc))
+						delayed_remove.insert(mob->GetID());
+				}
+			} else { // we're not on it!
+				if (mob->IsClient()) {
+					continue; // never hit client
+				} else if (mob->IsPet() && mob->IsPetOwnerClient() && mob->GetOwner() && verify_raid_client_pet(mob)) {
+					casted_on.insert(mob->GetID());
+					if (is_buff)
+						SpellFinished(spell_id, mob);
+				} else if (mob->IsNPC() && mob->IsPetOwnerClient()) {
+					auto npc = mob->CastToNPC();
+					if (verify_raid_client_swarm(npc)) {
+						casted_on.insert(mob->GetID());
+						if (is_buff)
+							SpellFinished(spell_id, mob);
+					}
+				}
+			}
+		}
+	} else if (group_member->IsGrouped()) {
+		auto group = group_member->GetGroup();
+		if (group == nullptr) { // uh oh
+			Depop();
+			return;
+		}
+
+		// lambdas to make for loop less ugly
+		auto verify_group_pet = [&group, this](Mob *m) {
+			auto owner = m->GetOwner();
+			if (owner != nullptr && group->IsGroupMember(owner) && DistanceSquared(GetPosition(), m->GetPosition()) <= distance)
+				return true;
+			return false;
+		};
+
+		auto verify_group_swarm = [&group, this](NPC *n) {
+			auto owner = entity_list.GetMob(n->GetSwarmOwner());
+			if (owner != nullptr && group->IsGroupMember(owner) && DistanceSquared(GetPosition(), n->GetPosition()) <= distance)
+				return true;
+			return false;
+		};
+
+		for (auto &e : mob_list) {
+			auto mob = e.second;
+			auto it = casted_on.find(mob->GetID());
+
+			if (it != casted_on.end()) { // make sure we're still valid
+				if (mob->IsPet()) {
+					if (!verify_group_pet(mob))
+						delayed_remove.insert(mob->GetID());
+				} else if (mob->IsNPC() && mob->CastToNPC()->GetSwarmInfo()) {
+					if (!verify_group_swarm(mob->CastToNPC()))
+						delayed_remove.insert(mob->GetID());
+				}
+			} else { // not on, check if we should be!
+				if (mob->IsClient()) {
+					continue;
+				} else if (mob->IsPet() && verify_group_pet(mob)) {
+					casted_on.insert(mob->GetID());
+					if (is_buff)
+						SpellFinished(spell_id, mob);
+				} else if (mob->IsNPC() && mob->CastToNPC()->GetSwarmInfo() && verify_group_swarm(mob->CastToNPC())) {
+					casted_on.insert(mob->GetID());
+					if (is_buff)
+						SpellFinished(spell_id, mob);
+				}
+			}
+		}
+	} else {
+		auto verify_solo = [&group_member, this](Mob *m) {
+			if (m->IsPet() && m->GetOwnerID() == group_member->GetID())
+				return true;
+			else if (m->IsNPC() && m->CastToNPC()->GetSwarmOwner() == group_member->GetID())
+				return true;
+			else
+				return false;
+		};
+		for (auto &e : mob_list) {
+			auto mob = e.second;
+			auto it = casted_on.find(mob->GetID());
+			bool good = verify_solo(mob);
+
+			if (it != casted_on.end()) { // make sure still valid
+				if (!good || DistanceSquared(GetPosition(), mob->GetPosition()) > distance) {
+					delayed_remove.insert(mob->GetID());
+				}
+			} else if (good && DistanceSquared(GetPosition(), mob->GetPosition()) <= distance) {
+				casted_on.insert(mob->GetID());
+				if (is_buff)
+					SpellFinished(spell_id, mob);
+			}
+		}
+	}
+
+	for (auto &e : delayed_remove) {
+		auto mob = entity_list.GetMob(e);
+		if (mob != nullptr && is_buff) // some auras cast instant spells so no need to remove
+			mob->BuffFadeBySpellIDAndCaster(spell_id, GetID());
+		casted_on.erase(e);
+	}
+
+	// so if we have a cast timer and our set isn't empty and timer is disabled we need to enable it
+	if (cast_timer.GetDuration() > 0 && !cast_timer.Enabled() && !casted_on.empty())
+		cast_timer.Start();
+
+	if (!cast_timer.Enabled() || !cast_timer.Check())
+		return;
+
+	// some auras have to recast (DRU for example, non-buff too)
+	for (auto &e : casted_on) {
+		auto mob = entity_list.GetMob(e);
+		if (mob != nullptr)
+			SpellFinished(spell_id, mob);
+	}
 }
 
 void Aura::ProcessTotem(Mob *owner)
