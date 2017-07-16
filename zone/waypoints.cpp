@@ -134,17 +134,15 @@ void NPC::PauseWandering(int pausetime)
 {	// causes wandering to stop but is resumable
 	// 0 pausetime means pause until resumed
 	// otherwise automatically resume when time is up
-	if (GetGrid() != 0)
-	{
+	if (GetGrid() != 0) {
+		moving = false;
 		DistractedFromGrid = true;
 		Log(Logs::Detail, Logs::Pathing, "Paused Wandering requested. Grid %d. Resuming in %d ms (0=not until told)", GetGrid(), pausetime);
 		SendPosition();
-		if (pausetime<1)
-		{	// negative grid number stops him dead in his tracks until ResumeWandering()
+		if (pausetime < 1) {	// negative grid number stops him dead in his tracks until ResumeWandering()
 			SetGrid(0 - GetGrid());
 		}
-		else
-		{	// specified waiting time, he'll resume after that
+		else {	// specified waiting time, he'll resume after that
 			AI_walking_timer->Start(pausetime * 1000); // set the timer
 		}
 	}
@@ -851,6 +849,7 @@ void Mob::FixZ() {
 		{
 			/* Any more than 5 in the offset makes NPC's hop/snap to ceiling in small corridors */
 			float new_z = this->FindGroundZ(m_Position.x, m_Position.y, 5);
+			new_z += (this->GetSize() / 1.55);
 
 			auto duration = timer.elapsed();
 
@@ -866,7 +865,7 @@ void Mob::FixZ() {
 				duration
 			);
 
-			if ((new_z > -2000) && std::abs(m_Position.z - new_z) < 35) {
+			if ((new_z > -2000) && new_z != -999999) {
 				if (RuleB(Map, MobZVisualDebug))
 					this->SendAppearanceEffect(78, 0, 0, 0, 0);
 				

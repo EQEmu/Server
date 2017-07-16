@@ -1437,10 +1437,8 @@ void Mob::SendHPUpdate(bool skip_self /*= false*/, bool force_update_all /*= fal
 	}
 }
 
-/* Used for NPCs mainly */
-void Mob::SendPosition()
-{
-
+/* Used for mobs standing still - this does not send a delta */
+void Mob::SendPosition() {
 	auto app = new EQApplicationPacket(OP_ClientUpdate, sizeof(PlayerPositionUpdateServer_Struct));
 	PlayerPositionUpdateServer_Struct* spu = (PlayerPositionUpdateServer_Struct*)app->pBuffer;
 	MakeSpawnUpdateNoDelta(spu);
@@ -1457,7 +1455,7 @@ void Mob::SendPosition()
 	safe_delete(app);
 }
 
-// this one is for mobs on the move, with deltas - this makes them walk
+/* Position updates for mobs on the move */
 void Mob::SendPositionUpdate(uint8 iSendToSelf) {
 	auto app = new EQApplicationPacket(OP_ClientUpdate, sizeof(PlayerPositionUpdateServer_Struct));
 	PlayerPositionUpdateServer_Struct* spu = (PlayerPositionUpdateServer_Struct*)app->pBuffer;
@@ -2729,25 +2727,25 @@ bool Mob::HateSummon() {
 	return false;
 }
 
-void Mob::FaceTarget(Mob* MobToFace) {
-	Mob* facemob = MobToFace;
-	if(!facemob) {
+void Mob::FaceTarget(Mob* mob_to_face /*= 0*/) {
+	Mob* faced_mob = mob_to_face;
+	if(!faced_mob) {
 		if(!GetTarget()) {
 			return;
 		}
 		else {
-			facemob = GetTarget();
+			faced_mob = GetTarget();
 		}
 	}
 
-	float oldheading = GetHeading();
-	float newheading = CalculateHeadingToTarget(facemob->GetX(), facemob->GetY());
-	if(oldheading != newheading) {
-		SetHeading(newheading);
-		if(moving)
+	float current_heading = GetHeading();
+	float new_heading = CalculateHeadingToTarget(faced_mob->GetX(), faced_mob->GetY());
+	if(current_heading != new_heading) {
+		SetHeading(new_heading);
+		if (moving) {
 			SendPositionUpdate();
-		else
-		{
+		}
+		else {
 			SendPosition();
 		}
 	}
