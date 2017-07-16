@@ -32,13 +32,13 @@ void EQEmuConfig::parse_config() {
 	LongName = _root["server"]["world"].get("longname", "").asString();
 	WorldAddress = _root["server"]["world"].get("address", "").asString();
 	LocalAddress = _root["server"]["world"].get("localaddress", "").asString();
-	MaxClients = _root["server"]["world"].get("maxclients", -1).asInt();
+	MaxClients = atoi(_root["server"]["world"].get("maxclients", "-1").asString().c_str());
 	SharedKey = _root["server"]["world"].get("key", "").asString();
 	LoginCount = 0;
 
 	if (_root["server"]["world"]["loginserver"].isObject()) {
 		LoginHost = _root["server"]["world"]["loginserver"].get("host", "login.eqemulator.net").asString();
-		LoginPort = _root["server"]["world"]["loginserver"].get("port", 5998).asInt();
+		LoginPort = atoi(_root["server"]["world"]["loginserver"].get("port", "5998").asString().c_str());
 		LoginLegacy = false;
 		if (_root["server"]["world"]["loginserver"].get("legacy", "0").asString() == "1") LoginLegacy = true;
 		LoginAccount = _root["server"]["world"]["loginserver"].get("account", "").asString();
@@ -53,7 +53,7 @@ void EQEmuConfig::parse_config() {
 
 			auto loginconfig = new LoginConfig;
 			loginconfig->LoginHost = _root["server"]["world"][str].get("host", "login.eqemulator.net").asString();
-			loginconfig->LoginPort = _root["server"]["world"][str].get("port", 5998).asInt();
+			loginconfig->LoginPort = atoi(_root["server"]["world"][str].get("port", "5998").asString().c_str());
 			loginconfig->LoginAccount = _root["server"]["world"][str].get("account", "").asString();
 			loginconfig->LoginPassword = _root["server"]["world"][str].get("password", "").asString();
 
@@ -69,39 +69,39 @@ void EQEmuConfig::parse_config() {
 	Locked = false;
 	if (_root["server"]["world"].get("locked", "false").asString() == "true") Locked = true;
 	WorldIP = _root["server"]["world"]["tcp"].get("host", "127.0.0.1").asString();
-	WorldTCPPort = atoi(_root["server"]["world"]["tcp"].get("port", 9000).asString().c_str());
+	WorldTCPPort = atoi(_root["server"]["world"]["tcp"].get("port", "9000").asString().c_str());
 	
 	TelnetIP = _root["server"]["world"]["telnet"].get("ip", "127.0.0.1").asString();
-	TelnetTCPPort = atoi(_root["server"]["world"]["telnet"].get("port", 9001).asString().c_str());
+	TelnetTCPPort = atoi(_root["server"]["world"]["telnet"].get("port", "9001").asString().c_str());
 	TelnetEnabled = false;
 	if (_root["server"]["world"]["telnet"].get("enabled", "false").asString() == "true") TelnetEnabled = true;
 
 	WorldHTTPMimeFile = _root["server"]["world"]["http"].get("mimefile", "mime.types").asString();
-	WorldHTTPPort = atoi(_root["server"]["world"]["http"].get("port", 9080).asString().c_str());
+	WorldHTTPPort = atoi(_root["server"]["world"]["http"].get("port", "9080").asString().c_str());
 	WorldHTTPEnabled = false;
 	if (_root["server"]["world"]["http"].get("enabled", "false").asString() == "true") WorldHTTPEnabled = true;
 
 	ChatHost = _root["server"]["chatserver"].get("host", "eqchat.eqemulator.net").asString();
-	ChatPort = atoi(_root["server"]["chatserver"].get("port", 7778).asString().c_str());
+	ChatPort = atoi(_root["server"]["chatserver"].get("port", "7778").asString().c_str());
 
 	MailHost = _root["server"]["mailserver"].get("host", "eqmail.eqemulator.net").asString();
-	MailPort = atoi(_root["server"]["mailserver"].get("port", 7778).asString().c_str());
+	MailPort = atoi(_root["server"]["mailserver"].get("port", "7778").asString().c_str());
 
 	DatabaseUsername = _root["server"]["database"].get("username", "eq").asString();
 	DatabasePassword = _root["server"]["database"].get("password", "eq").asString();
 	DatabaseHost = _root["server"]["database"].get("host", "localhost").asString();
-	DatabasePort = atoi(_root["server"]["database"].get("port", 3306).asString().c_str());
+	DatabasePort = atoi(_root["server"]["database"].get("port", "3306").asString().c_str());
 	DatabaseDB = _root["server"]["database"].get("db", "eq").asString();	
 
 	QSDatabaseHost = _root["server"]["qsdatabase"].get("host", "localhost").asString();
-	QSDatabasePort = atoi(_root["server"]["qsdatabase"].get("port", 3306).asString().c_str());
+	QSDatabasePort = atoi(_root["server"]["qsdatabase"].get("port", "3306").asString().c_str());
 	QSDatabaseUsername = _root["server"]["qsdatabase"].get("username", "eq").asString();
 	QSDatabasePassword = _root["server"]["qsdatabase"].get("password", "eq").asString();
 	QSDatabaseDB = _root["server"]["qsdatabase"].get("db", "eq").asString();
 
 	DefaultStatus = atoi(_root["server"]["zones"].get("defaultstatus", 0).asString().c_str());
-	ZonePortLow = atoi(_root["server"]["zones"]["ports"].get("low", 7000).asString().c_str());
-	ZonePortHigh = atoi(_root["server"]["zones"]["ports"].get("high", 7999).asString().c_str());
+	ZonePortLow = atoi(_root["server"]["zones"]["ports"].get("low", "7000").asString().c_str());
+	ZonePortHigh = atoi(_root["server"]["zones"]["ports"].get("high", "7999").asString().c_str());
 
 	SpellsFile = _root["server"]["files"].get("spells", "spells_us.txt").asString();
 	OpCodesFile = _root["server"]["files"].get("opcodes", "opcodes.conf").asString();
@@ -117,10 +117,10 @@ void EQEmuConfig::parse_config() {
 
 	LogPrefix = _root["server"]["launcher"].get("logprefix", "logs/zone-").asString();
 	LogSuffix = _root["server"]["launcher"].get("logsuffix", ".log").asString();
-	RestartWait = atoi(_root["server"]["launcher"]["timers"].get("restart", 10000).asString().c_str());
-	TerminateWait = atoi(_root["server"]["launcher"]["timers"].get("reterminate", 10000).asString().c_str());
-	InitialBootWait = atoi(_root["server"]["launcher"]["timers"].get("initial", 20000).asString().c_str());
-	ZoneBootInterval = atoi(_root["server"]["launcher"]["timers"].get("interval", 2000).asString().c_str());
+	RestartWait = atoi(_root["server"]["launcher"]["timers"].get("restart", "10000").asString().c_str());
+	TerminateWait = atoi(_root["server"]["launcher"]["timers"].get("reterminate", "10000").asString().c_str());
+	InitialBootWait = atoi(_root["server"]["launcher"]["timers"].get("initial", "20000").asString().c_str());
+	ZoneBootInterval = atoi(_root["server"]["launcher"]["timers"].get("interval", "2000").asString().c_str());
 #ifdef WIN32
 	ZoneExe = _root["server"]["launcher"].get("exe", "zone.exe").asString();
 #else

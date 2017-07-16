@@ -33,6 +33,38 @@ func main() {
 		os.Exit(1)
 	}
 
+	if root.Children["server"] == nil || len(root.Children["server"]) < 1 {
+		fmt.Println("Server element not found")
+		os.Exit(1)
+	}
+	server := root.Children["server"][0]
+
+	//locked: "true" is only way to trigger locked
+	if server.Children["world"] != nil && len(server.Children["world"]) > 0 {
+		world := server.Children["world"][0]
+
+		if world.Children["locked"] != nil && len(world.Children["locked"]) > 0 {
+			fmt.Println("Locked!")
+			world.Children["locked"][0].Data = "true"
+		}
+	}
+
+	elements := []string{
+		"chatserver",
+		"directories",
+		"files",
+		"launcher",
+		"mailserver",
+		"webinterface",
+		"world",
+		"zones",
+	}
+	for _, ele := range elements {
+		if server.Children[ele] != nil && len(server.Children[ele]) > 0 && len(server.Children[ele][0].Children) == 0 {
+			delete(server.Children, ele)
+		}
+	}
+
 	enc := xj.NewEncoder(buf)
 	err = enc.EncodeWithCustomPrefixes(root, "", "")
 	if err != nil {
