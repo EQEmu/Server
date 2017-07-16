@@ -160,7 +160,7 @@ Client::Client(EQStreamInterface* ieqs)
 	npc_close_scan_timer(6000),
 	hp_self_update_throttle_timer(300),
 	hp_other_update_throttle_timer(500),
-	position_update_timer(0)
+	position_update_timer(10000)
 {
 
 	for (int client_filter = 0; client_filter < _FilterCount; client_filter++)
