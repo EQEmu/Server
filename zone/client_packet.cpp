@@ -4615,22 +4615,24 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app)
 		this->SendAppearanceEffect(41, 0, 0, 0, 0);
 	}
 
-	/* Broadcast update to other clients */
-	auto outapp = new EQApplicationPacket(OP_ClientUpdate, sizeof(PlayerPositionUpdateServer_Struct));
-	PlayerPositionUpdateServer_Struct* position_update = (PlayerPositionUpdateServer_Struct*)outapp->pBuffer;
+	/* Only feed real time updates when client is moving */
+	if (is_client_moving) {
 
-	MakeSpawnUpdate(position_update);
+		/* Broadcast update to other clients */
+		auto outapp = new EQApplicationPacket(OP_ClientUpdate, sizeof(PlayerPositionUpdateServer_Struct));
+		PlayerPositionUpdateServer_Struct* position_update = (PlayerPositionUpdateServer_Struct*)outapp->pBuffer;
 
-	position_update_timer.Start(10000, true);
+		MakeSpawnUpdate(position_update);
 
-	if (gm_hide_me) {
-		entity_list.QueueClientsStatus(this, outapp, true, Admin(), 250);
+		if (gm_hide_me) {
+			entity_list.QueueClientsStatus(this, outapp, true, Admin(), 250);
+		}
+		else {
+			entity_list.QueueCloseClients(this, outapp, true, 300, nullptr, true);
+		}
+
+		safe_delete(outapp);
 	}
-	else {
-		entity_list.QueueCloseClients(this, outapp, true, 300, nullptr, true);
-	}
-
-	safe_delete(outapp);
 
 	if (zone->watermap) {
 		if (zone->watermap->InLiquid(glm::vec3(m_Position)))

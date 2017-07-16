@@ -120,7 +120,7 @@ bool Client::Process() {
 			SendHPUpdate();
 
 		/* I haven't naturally updated my position in 10 seconds, updating manually */
-		if (position_update_timer.Check()) {
+		if (!is_client_moving && position_update_timer.Check()) {
 			SendPositionUpdate();
 		}
 
