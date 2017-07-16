@@ -56,14 +56,55 @@ Aura::Aura(NPCType *type_data, Mob *owner, AuraRecord &record)
 	}
 }
 
-void Aura::ProcessOnAllFriendlies(Mob *owner)
-{
-	Shout("Stub 1");
-}
-
 Mob *Aura::GetOwner()
 {
 	return entity_list.GetMob(m_owner);
+}
+
+// not 100% sure how this one should work and PVP affects ...
+void Aura::ProcessOnAllFriendlies(Mob *owner)
+{
+	auto &mob_list = entity_list.GetMobList(); // read only reference so we can do it all inline
+	std::set<int> delayed_remove;
+	bool is_buff = IsBuffSpell(spell_id); // non-buff spells don't cast on enter
+
+	for (auto &e : mob_list) {
+		auto mob = e.second;
+		if (mob->IsClient() || mob->IsPetOwnerClient() || mob->IsMerc()) {
+			auto it = casted_on.find(mob->GetID());
+
+			if (it != casted_on.end()) { // we are already on the list, let's check for removal
+				if (DistanceSquared(GetPosition(), mob->GetPosition()) > distance)
+					delayed_remove.insert(mob->GetID());
+			} else { // not on list, lets check if we're in range
+				if (DistanceSquared(GetPosition(), mob->GetPosition()) <= distance) {
+					casted_on.insert(mob->GetID());
+					if (is_buff)
+						SpellFinished(spell_id, mob);
+				}
+			}
+		}
+	}
+
+	for (auto &e : delayed_remove) {
+		auto mob = entity_list.GetMob(e);
+		if (mob != nullptr && is_buff) // some auras cast instant spells so no need to remove
+			mob->BuffFadeBySpellIDAndCaster(spell_id, GetID());
+		casted_on.erase(e);
+	}
+
+	// so if we have a cast timer and our set isn't empty and timer is disabled we need to enable it
+	if (cast_timer.GetDuration() > 0 && !cast_timer.Enabled() && !casted_on.empty())
+		cast_timer.Start();
+
+	if (!cast_timer.Enabled() || !cast_timer.Check())
+		return;
+
+	for (auto &e : casted_on) {
+		auto mob = entity_list.GetMob(e);
+		if (mob != nullptr)
+			SpellFinished(spell_id, mob);
+	}
 }
 
 void Aura::ProcessOnAllGroupMembers(Mob *owner)
