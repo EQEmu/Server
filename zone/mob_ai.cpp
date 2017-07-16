@@ -1001,7 +1001,7 @@ void Mob::AI_Process() {
 			if (this->GetTarget()) {
 				/* If we are engaged, moving and following client, let's look for best Z more often */
 				float target_distance = DistanceNoZ(this->GetPosition(), this->GetTarget()->GetPosition());
-				if (target_distance >= 50) {
+				if (target_distance >= 25) {
 					this->FixZ();
 				}
 				else if (!this->CheckLosFN(this->GetTarget())) {
