@@ -632,8 +632,8 @@ public:
 	void AddAura(Aura *aura, AuraRecord &record);
 	void AddTrap(Aura *aura, AuraRecord &record);
 	bool CanSpawnAura(bool trap);
-	void RemoveAura(int spawn_id) {}
-	void RemoveAllAuras() {}
+	void RemoveAura(int spawn_id, bool expired = false);
+	void RemoveAllAuras();
 
 	//Procs
 	void TriggerDefensiveProcs(Mob *on, uint16 hand = EQEmu::inventory::slotPrimary, bool FromSkillProc = false, int damage = 0);

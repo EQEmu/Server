@@ -521,3 +521,67 @@ bool Mob::CanSpawnAura(bool trap)
 	return true;
 }
 
+void Mob::RemoveAllAuras()
+{
+	// this is sent on camp/zone, so it just despawns?
+	if (aura_mgr.count) {
+		for (auto &e : aura_mgr.auras) {
+			auto mob = entity_list.GetMob(e.spawn_id);
+			if (mob)
+				mob->Depop();
+		}
+	}
+
+	if (trap_mgr.count) {
+		for (auto &e : trap_mgr.auras) {
+			auto mob = entity_list.GetMob(e.spawn_id);
+			if (mob)
+				mob->Depop();
+		}
+	}
+	return;
+}
+
+void Mob::RemoveAura(int spawn_id, bool expired)
+{
+	for (int i = 0; i < aura_mgr.count; ++i) {
+		auto &aura = aura_mgr.auras[i];
+		if (aura.spawn_id == spawn_id) {
+			auto mob = entity_list.GetMob(aura.spawn_id);
+			if (mob)
+				mob->Depop();
+			if (expired && IsClient())
+				CastToClient()->SendColoredText(
+				    CC_Yellow, StringFormat("%s has expired.", aura.name)); // TODO: verify color
+			while (aura_mgr.count - 1 > i) {
+				i++;
+				aura.spawn_id = aura_mgr.auras[i].spawn_id;
+				aura.icon = aura_mgr.auras[i].icon;
+				strn0cpy(aura.name, aura_mgr.auras[i].name, 64);
+			}
+			aura_mgr.count--;
+			return;
+		}
+	}
+
+	for (int i = 0; i < trap_mgr.count; ++i) {
+		auto &aura = trap_mgr.auras[i];
+		auto mob = entity_list.GetMob(aura.spawn_id);
+		if (mob)
+			mob->Depop();
+		if (expired && IsClient())
+			CastToClient()->SendColoredText(
+			    CC_Yellow, StringFormat("%s has expired.", aura.name)); // TODO: verify color
+		while (trap_mgr.count - 1 > i) {
+			i++;
+			aura.spawn_id = trap_mgr.auras[i].spawn_id;
+			aura.icon = trap_mgr.auras[i].icon;
+			strn0cpy(aura.name, trap_mgr.auras[i].name, 64);
+		}
+		trap_mgr.count--;
+		return;
+	}
+
+	return;
+}
+
