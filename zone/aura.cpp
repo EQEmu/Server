@@ -328,12 +328,12 @@ void Aura::ProcessOnGroupMembersPets(Mob *owner)
 			return true;
 		};
 
-		auto verify_raid_client_swarm = [&raid, &group_id, this](NPC *n) {
+		auto verify_raid_client_swarm = [&raid, &group_id, &group_member, this](NPC *n) {
 			auto owner = entity_list.GetMob(n->GetSwarmOwner());
 			if (owner == nullptr)
 				return false;
 			auto idx = raid->GetPlayerIndex(owner->CastToClient());
-			if (owner->GetID() == m_owner) {
+			if (owner->GetID() == group_member->GetID()) {
 				return DistanceSquared(GetPosition(), n->GetPosition()) <= distance;
 			} else if (idx == 0xFFFFFFFF || raid->members[idx].GroupNumber != group_id || raid->members[idx].GroupNumber == 0xFFFFFFFF) {
 				return false;
