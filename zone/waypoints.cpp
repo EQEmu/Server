@@ -849,6 +849,7 @@ void Mob::FixZ() {
 		{
 			/* Any more than 5 in the offset makes NPC's hop/snap to ceiling in small corridors */
 			float new_z = this->FindGroundZ(m_Position.x, m_Position.y, 5);
+			new_z += (this->GetSize() / 1.55);
 
 			auto duration = timer.elapsed();
 
@@ -864,7 +865,7 @@ void Mob::FixZ() {
 				duration
 			);
 
-			if ((new_z > -2000) && std::abs(m_Position.z - new_z) < 35) {
+			if ((new_z > -2000) && new_z != -999999) {
 				if (RuleB(Map, MobZVisualDebug))
 					this->SendAppearanceEffect(78, 0, 0, 0, 0);
 				
