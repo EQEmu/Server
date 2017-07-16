@@ -576,7 +576,7 @@ public:
 	void SetPrimaryAggro(bool value) { PrimaryAggro = value; if (value) AssistAggro = false; }
 	void SetAssistAggro(bool value) { AssistAggro = value; if (PrimaryAggro) AssistAggro = false; }
 	bool HateSummon();
-	void FaceTarget(Mob* MobToFace = 0);
+	void FaceTarget(Mob* mob_to_face = 0);
 	void SetHeading(float iHeading) { if(m_Position.w != iHeading) { pLastChange = Timer::GetCurrentTime();
 		m_Position.w = iHeading; } }
 	void WipeHateList();
