@@ -316,9 +316,9 @@ void Aura::ProcessOnGroupMembersPets(Mob *owner)
 		auto group_id = raid->GetGroup(group_member->CastToClient());
 
 		// some lambdas so the for loop is less horrible ...
-		auto verify_raid_client_pet = [&raid, &group_id, this](Mob *m) {
+		auto verify_raid_client_pet = [&raid, &group_id, &group_member, this](Mob *m) {
 			auto idx = raid->GetPlayerIndex(m->GetOwner()->CastToClient());
-			if (m->GetOwner()->GetID() == m_owner) {
+			if (m->GetOwner()->GetID() == group_member->GetID()) {
 				return DistanceSquared(GetPosition(), m->GetPosition()) <= distance;
 			} else if (idx == 0xFFFFFFFF || raid->members[idx].GroupNumber != group_id || raid->members[idx].GroupNumber == 0xFFFFFFFF) {
 				return false;
