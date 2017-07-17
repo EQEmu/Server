@@ -91,7 +91,8 @@ public:
 		char name[64];
 		int spawn_id;
 		int icon;
-		AuraInfo() : spawn_id(0), icon(0)
+		Aura *aura;
+		AuraInfo() : spawn_id(0), icon(0), aura(nullptr)
 		{
 			memset(name, 0, 64);
 		}
