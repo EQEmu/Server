@@ -15,7 +15,7 @@ use File::Copy qw(copy);
 use POSIX qw(strftime);
 use File::Path;
 use File::Find;
-use Time::HiRes qw(usleep); 
+use Time::HiRes qw(usleep);
 
 #::: Variables
 $install_repository_request_url = "https://raw.githubusercontent.com/Akkadius/EQEmuInstall/master/";
