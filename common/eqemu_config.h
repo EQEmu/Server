@@ -146,7 +146,7 @@ class EQEmuConfig
 		static bool LoadConfig()
 		{
 			if (_config != nullptr) {
-				delete _config;
+				return true;
 			}
 			_config = new EQEmuConfig;
 

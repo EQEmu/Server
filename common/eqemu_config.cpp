@@ -45,9 +45,10 @@ void EQEmuConfig::parse_config() {
 		LoginPassword = _root["server"]["world"]["loginserver"].get("password", "").asString();
 	} else {
 		char str[32];
+		loginlist.Clear();
 		do {
 			sprintf(str, "loginserver%i", ++LoginCount);
-			if (_root["server"]["world"][str].get("host", "").asString() == "") {
+			if (!_root["server"]["world"][str].isObject()) {
 				break;
 			}
 
