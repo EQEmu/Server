@@ -201,7 +201,7 @@ sub new_server {
 	}
 	closedir(DIR);
 	
-	if($file_count > 1 && (!-e "install_variables.txt" && !-e "../install_variables.txt")){ 
+	if($file_count > 4 && (!-e "install_variables.txt" && !-e "../install_variables.txt")){ 
 		print "[New Server] ERROR: You must run eqemu_server.pl in an empty directory\n";
 		<>;
 		exit;
@@ -280,6 +280,8 @@ sub new_server {
 			print "[New Server] Below is your installation info:\n";
 			
 			show_install_summary_info();
+			
+			rmtree('updates_staged');
 			
 			return;
 		}
@@ -1505,12 +1507,12 @@ sub map_files_fetch{
 }
 
 sub quest_files_fetch{
-	if (!-e "updates_staged/Quests-Plugins-master/quests/") {
+	if (!-e "updates_staged/projecteqquests-master/") {
 		print "[Update] Fetching Latest Quests --- \n";
-		get_remote_file("https://github.com/EQEmu/Quests-Plugins/archive/master.zip", "updates_staged/Quests-Plugins-master.zip", 1);
+		get_remote_file("https://codeload.github.com/ProjectEQ/projecteqquests/zip/master", "updates_staged/projecteqquests-master.zip", 1);
 		print "[Install] Fetched latest quests...\n";
 		mkdir('updates_staged');
-		unzip('updates_staged/Quests-Plugins-master.zip', 'updates_staged/');
+		unzip('updates_staged/projecteqquests-master.zip', 'updates_staged/');
 	}
 	
 	$fc = 0;
@@ -1518,7 +1520,7 @@ sub quest_files_fetch{
 	use File::Compare;
 	
 	my @files;
-	my $start_dir = "updates_staged/Quests-Plugins-master/quests/";
+	my $start_dir = "updates_staged/projecteqquests-master/";
 	find( 
 		sub { push @files, $File::Find::name unless -d; }, 
 		$start_dir
@@ -1527,7 +1529,7 @@ sub quest_files_fetch{
 		if($file=~/\.pl|\.lua|\.ext/i){
 			$staged_file = $file;
 			$destination_file = $file;
-			$destination_file =~s/updates_staged\/Quests-Plugins-master\///g;
+			$destination_file =~s/updates_staged\/projecteqquests-master\//quests\//g;
 			
 			if (!-e $destination_file) {
 				copy_file($staged_file, $destination_file);
@@ -1557,27 +1559,28 @@ sub quest_files_fetch{
 		}
 	}
 	
-	rmtree('updates_staged');
-	
 	if($fc == 0){
 		print "[Update] No Quest Updates found... \n\n";
 	}
 }
 
 sub lua_modules_fetch {
-	if (!-e "updates_staged/Quests-Plugins-master/quests/lua_modules/") {
-		print "[Update] Fetching Latest LUA Modules --- \n";
-		get_remote_file("https://github.com/EQEmu/Quests-Plugins/archive/master.zip", "updates_staged/Quests-Plugins-master.zip", 1);
-		print "[Update] Fetched latest LUA Modules...\n";
-		unzip('updates_staged/Quests-Plugins-master.zip', 'updates_staged/');
+	if (!-e "updates_staged/projecteqquests-master/") {
+		print "[Update] Fetching Latest lua modules --- \n";
+		get_remote_file("https://codeload.github.com/ProjectEQ/projecteqquests/zip/master", "updates_staged/projecteqquests-master.zip", 1);
+		print "[Install] Fetched latest lua modules...\n";
+		mkdir('updates_staged');
+		unzip('updates_staged/projecteqquests-master.zip', 'updates_staged/');
 	}
 	
 	$fc = 0;
 	use File::Find;
 	use File::Compare;
 	
+	mkdir('lua_modules');
+	
 	my @files;
-	my $start_dir = "updates_staged/Quests-Plugins-master/quests/lua_modules/";
+	my $start_dir = "updates_staged/projecteqquests-master/lua_modules/";
 	find( 
 		sub { push @files, $File::Find::name unless -d; }, 
 		$start_dir
@@ -1586,7 +1589,7 @@ sub lua_modules_fetch {
 		if($file=~/\.pl|\.lua|\.ext/i){
 			$staged_file = $file;
 			$destination_file = $file;
-			$destination_file =~s/updates_staged\/Quests-Plugins-master\/quests\///g;
+			$destination_file =~s/updates_staged\/projecteqquests-master\/lua_modules\//lua_modules\//g;
 			
 			if (!-e $destination_file) {
 				copy_file($staged_file, $destination_file);
@@ -1621,19 +1624,22 @@ sub lua_modules_fetch {
 }
 
 sub plugins_fetch{
-	if (!-e "updates_staged/Quests-Plugins-master/plugins/") {
-		print "[Update] Fetching Latest Plugins\n";
-		get_remote_file("https://github.com/EQEmu/Quests-Plugins/archive/master.zip", "updates_staged/Quests-Plugins-master.zip", 1);
-		print "[Update] Fetched latest plugins\n";
-		unzip('updates_staged/Quests-Plugins-master.zip', 'updates_staged/');
+	if (!-e "updates_staged/projecteqquests-master/") {
+		print "[Update] Fetching Latest plugins --- \n";
+		get_remote_file("https://codeload.github.com/ProjectEQ/projecteqquests/zip/master", "updates_staged/projecteqquests-master.zip", 1);
+		print "[Install] Fetched latest plugins...\n";
+		mkdir('updates_staged');
+		unzip('updates_staged/projecteqquests-master.zip', 'updates_staged/');
 	}
 	
 	$fc = 0;
 	use File::Find;
 	use File::Compare;
 	
+	mkdir('plugins');
+	
 	my @files;
-	my $start_dir = "updates_staged/Quests-Plugins-master/plugins/";
+	my $start_dir = "updates_staged/projecteqquests-master/plugins/";
 	find( 
 		sub { push @files, $File::Find::name unless -d; }, 
 		$start_dir
@@ -1642,7 +1648,7 @@ sub plugins_fetch{
 		if($file=~/\.pl|\.lua|\.ext/i){
 			$staged_file = $file;
 			$destination_file = $file;
-			$destination_file =~s/updates_staged\/Quests-Plugins-master\///g;
+			$destination_file =~s/updates_staged\/projecteqquests-master\///g;
 			
 			if (!-e $destination_file) {
 				copy_file($staged_file, $destination_file);
