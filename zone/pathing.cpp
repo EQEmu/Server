@@ -549,18 +549,11 @@ void PathManager::SpawnPathNodes()
 		auto npc_type = new NPCType;
 		memset(npc_type, 0, sizeof(NPCType));
 
-		if(PathNodes[i].id < 10)
-			sprintf(npc_type->name, "%s", DigitToWord(PathNodes[i].id));
-		else if(PathNodes[i].id < 100)
-			sprintf(npc_type->name, "%s_%s", DigitToWord(PathNodes[i].id/10), DigitToWord(PathNodes[i].id % 10));
-		else
-			sprintf(npc_type->name, "%s_%s_%s", DigitToWord(PathNodes[i].id/100), DigitToWord((PathNodes[i].id % 100)/10),
-				DigitToWord(((PathNodes[i].id % 100) %10)));
-
-		sprintf(npc_type->lastname, "%i", PathNodes[i].id);
+		auto c = PathNodes[i].id / 1000u;
+		sprintf(npc_type->name, "Node%u", c);
 		npc_type->cur_hp = 4000000;
 		npc_type->max_hp = 4000000;
-		npc_type->race = 151;
+		npc_type->race = 2254;
 		npc_type->gender = 2;
 		npc_type->class_ = 9;
 		npc_type->deity= 1;
