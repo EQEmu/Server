@@ -759,7 +759,7 @@ glm::vec3 Mob::UpdatePath(float ToX, float ToY, float ToZ, float Speed, bool &Wa
 					Log(Logs::Detail, Logs::None, "  Distance between From and To (NoRoot) is %8.3f", Distance);
 
 					if ((Distance <= RuleR(Pathing, MinDistanceForLOSCheckShort)) &&
-					    (std::abs(From.z - To.z) <= RuleR(Pathing, ZDiffThreshold))) {
+					    (std::abs(From.z - To.z) <= RuleR(Pathing, ZDiffThresholdNew))) {
 						if(!zone->zonemap->LineIntersectsZone(HeadPosition, To, 1.0f, nullptr))
 							PathingLOSState = HaveLOS;
 						else
@@ -851,7 +851,7 @@ glm::vec3 Mob::UpdatePath(float ToX, float ToY, float ToZ, float Speed, bool &Wa
 				Log(Logs::Detail, Logs::None, "  Distance between From and To (NoRoot) is %8.3f", Distance);
 
 				if ((Distance <= RuleR(Pathing, MinDistanceForLOSCheckShort)) &&
-				    (std::abs(From.z - To.z) <= RuleR(Pathing, ZDiffThreshold))) {
+				    (std::abs(From.z - To.z) <= RuleR(Pathing, ZDiffThresholdNew))) {
 					if(!zone->zonemap->LineIntersectsZone(HeadPosition, To, 1.0f, nullptr))
 						PathingLOSState = HaveLOS;
 					else
@@ -888,7 +888,7 @@ glm::vec3 Mob::UpdatePath(float ToX, float ToY, float ToZ, float Speed, bool &Wa
 				float Distance = VectorDistanceNoRoot(From, To);
 
 				if ((Distance <= RuleR(Pathing, MinDistanceForLOSCheckShort)) &&
-				    (std::abs(From.z - To.z) <= RuleR(Pathing, ZDiffThreshold))) {
+				    (std::abs(From.z - To.z) <= RuleR(Pathing, ZDiffThresholdNew))) {
 					Log(Logs::Detail, Logs::None, "  Checking for short LOS at distance %8.3f.", Distance);
 					if(!zone->zonemap->LineIntersectsZone(HeadPosition, To, 1.0f, nullptr))
 						PathingLOSState = HaveLOS;
@@ -1039,7 +1039,7 @@ glm::vec3 Mob::UpdatePath(float ToX, float ToY, float ToZ, float Speed, bool &Wa
 	float Distance = VectorDistanceNoRoot(From, To);
 
 	if ((Distance <= RuleR(Pathing, MinDistanceForLOSCheckLong)) &&
-	    (std::abs(From.z - To.z) <= RuleR(Pathing, ZDiffThreshold))) {
+	    (std::abs(From.z - To.z) <= RuleR(Pathing, ZDiffThresholdNew))) {
 		Log(Logs::Detail, Logs::None, "  Checking for long LOS at distance %8.3f.", Distance);
 
 		if(!zone->zonemap->LineIntersectsZone(HeadPosition, To, 1.0f, nullptr))
@@ -1143,7 +1143,7 @@ bool PathManager::NoHazards(glm::vec3 From, glm::vec3 To)
 
 	float NewZ = zone->zonemap->FindBestZ(MidPoint, nullptr);
 
-	if (std::abs(NewZ - From.z) > RuleR(Pathing, ZDiffThreshold)) {
+	if (std::abs(NewZ - From.z) > RuleR(Pathing, ZDiffThresholdNew)) {
 		Log(Logs::Detail, Logs::None, "  HAZARD DETECTED moving from %8.3f, %8.3f, %8.3f to %8.3f, %8.3f, %8.3f. Z Change is %8.3f",
 			From.x, From.y, From.z, MidPoint.x, MidPoint.y, MidPoint.z, NewZ - From.z);
 
@@ -1215,7 +1215,7 @@ bool PathManager::NoHazardsAccurate(glm::vec3 From, glm::vec3 To)
 				}
 				else
 				{
-					if (std::abs(NewZ - best_z2) > RuleR(Pathing, ZDiffThreshold)) {
+					if (std::abs(NewZ - best_z2) > RuleR(Pathing, ZDiffThresholdNew)) {
 						Log(Logs::Detail, Logs::None,
 							"  HAZARD DETECTED, water is fairly deep at %8.3f units deep",
 							std::abs(NewZ - best_z2));
