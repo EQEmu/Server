@@ -290,7 +290,7 @@ RULE_BOOL(Pathing, AggroReturnToGrid, true)	// Enable pathing for aggroed roamin
 RULE_BOOL(Pathing, Guard, true)		// Enable pathing for mobs moving to their guard point.
 RULE_BOOL(Pathing, Find, true)		// Enable pathing for FindPerson requests from the client.
 RULE_BOOL(Pathing, Fear, true)		// Enable pathing for fear
-RULE_REAL(Pathing, ZDiffThreshold, 10)	// If a mob las LOS to it's target, it will run to it if the Z difference is < this.
+RULE_REAL(Pathing, ZDiffThresholdNew, 80)	// If a mob las LOS to it's target, it will run to it if the Z difference is < this.
 RULE_INT(Pathing, LOSCheckFrequency, 1000)	// A mob will check for LOS to it's target this often (milliseconds).
 RULE_INT(Pathing, RouteUpdateFrequencyShort, 1000)	// How often a new route will be calculated if the target has moved.
 RULE_INT(Pathing, RouteUpdateFrequencyLong, 5000)	// How often a new route will be calculated if the target has moved.
