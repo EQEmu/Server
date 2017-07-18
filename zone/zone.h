@@ -28,6 +28,7 @@
 #include "spawn2.h"
 #include "spawngroup.h"
 #include "aa_ability.h"
+#include "pathfinder_interface.h"
 
 struct ZonePoint
 {
@@ -73,7 +74,6 @@ struct item_tick_struct {
 class Client;
 class Map;
 class Mob;
-class PathManager;
 class WaterMap;
 extern EntityList entity_list;
 struct NPCType;
@@ -211,7 +211,7 @@ public:
 
 	Map*	zonemap;
 	WaterMap* watermap;
-	PathManager *pathing;
+	IPathfinder *pathing;
 	NewZone_Struct	newzone_data;
 
 	SpawnConditionManager spawn_conditions;

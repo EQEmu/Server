@@ -5688,128 +5688,128 @@ void Client::Handle_OP_FeignDeath(const EQApplicationPacket *app)
 
 void Client::Handle_OP_FindPersonRequest(const EQApplicationPacket *app)
 {
-	if (app->size != sizeof(FindPersonRequest_Struct))
-		printf("Error in FindPersonRequest_Struct. Expected size of: %zu, but got: %i\n", sizeof(FindPersonRequest_Struct), app->size);
-	else {
-		FindPersonRequest_Struct* t = (FindPersonRequest_Struct*)app->pBuffer;
-
-		std::vector<FindPerson_Point> points;
-		Mob* target = entity_list.GetMob(t->npc_id);
-
-		if (target == nullptr) {
-			//empty length packet == not found.
-			EQApplicationPacket outapp(OP_FindPersonReply, 0);
-			QueuePacket(&outapp);
-			return;
-		}
-
-		if (!RuleB(Pathing, Find) && RuleB(Bazaar, EnableWarpToTrader) && target->IsClient() && (target->CastToClient()->Trader ||
-			target->CastToClient()->Buyer)) {
-			Message(15, "Moving you to Trader %s", target->GetName());
-			MovePC(zone->GetZoneID(), zone->GetInstanceID(), target->GetX(), target->GetY(), target->GetZ(), 0.0f);
-		}
-
-		if (!RuleB(Pathing, Find) || !zone->pathing)
-		{
-			//fill in the path array...
-			//
-			points.resize(2);
-			points[0].x = GetX();
-			points[0].y = GetY();
-			points[0].z = GetZ();
-			points[1].x = target->GetX();
-			points[1].y = target->GetY();
-			points[1].z = target->GetZ();
-		}
-		else
-		{
-			glm::vec3 Start(GetX(), GetY(), GetZ() + (GetSize() < 6.0 ? 6 : GetSize()) * HEAD_POSITION);
-			glm::vec3 End(target->GetX(), target->GetY(), target->GetZ() + (target->GetSize() < 6.0 ? 6 : target->GetSize()) * HEAD_POSITION);
-
-			if (!zone->zonemap->LineIntersectsZone(Start, End, 1.0f, nullptr) && zone->pathing->NoHazards(Start, End))
-			{
-				points.resize(2);
-				points[0].x = Start.x;
-				points[0].y = Start.y;
-				points[0].z = Start.z;
-
-				points[1].x = End.x;
-				points[1].y = End.y;
-				points[1].z = End.z;
-
-			}
-			else
-			{
-				std::deque<int> pathlist = zone->pathing->FindRoute(Start, End);
-
-				if (pathlist.empty())
-				{
-					EQApplicationPacket outapp(OP_FindPersonReply, 0);
-					QueuePacket(&outapp);
-					return;
-				}
-
-				//the client seems to have issues with packets larger than this
-				if (pathlist.size() > 36)
-				{
-					EQApplicationPacket outapp(OP_FindPersonReply, 0);
-					QueuePacket(&outapp);
-					return;
-				}
-
-				// Live appears to send the points in this order:
-				// Final destination.
-				// Current Position.
-				// rest of the points.
-				FindPerson_Point p;
-
-				int PointNumber = 0;
-
-				bool LeadsToTeleporter = false;
-
-				glm::vec3 v = zone->pathing->GetPathNodeCoordinates(pathlist.back());
-
-				p.x = v.x;
-				p.y = v.y;
-				p.z = v.z;
-				points.push_back(p);
-
-				p.x = GetX();
-				p.y = GetY();
-				p.z = GetZ();
-				points.push_back(p);
-
-				for (auto Iterator = pathlist.begin(); Iterator != pathlist.end(); ++Iterator)
-				{
-					if ((*Iterator) == -1) // Teleporter
-					{
-						LeadsToTeleporter = true;
-						break;
-					}
-
-					glm::vec3 v = zone->pathing->GetPathNodeCoordinates((*Iterator), false);
-					p.x = v.x;
-					p.y = v.y;
-					p.z = v.z;
-					points.push_back(p);
-					++PointNumber;
-				}
-
-				if (!LeadsToTeleporter)
-				{
-					p.x = target->GetX();
-					p.y = target->GetY();
-					p.z = target->GetZ();
-
-					points.push_back(p);
-				}
-
-			}
-		}
-
-		SendPathPacket(points);
-	}
-	return;
+	//if (app->size != sizeof(FindPersonRequest_Struct))
+	//	printf("Error in FindPersonRequest_Struct. Expected size of: %zu, but got: %i\n", sizeof(FindPersonRequest_Struct), app->size);
+	//else {
+	//	FindPersonRequest_Struct* t = (FindPersonRequest_Struct*)app->pBuffer;
+	//
+	//	std::vector<FindPerson_Point> points;
+	//	Mob* target = entity_list.GetMob(t->npc_id);
+	//
+	//	if (target == nullptr) {
+	//		//empty length packet == not found.
+	//		EQApplicationPacket outapp(OP_FindPersonReply, 0);
+	//		QueuePacket(&outapp);
+	//		return;
+	//	}
+	//
+	//	if (!RuleB(Pathing, Find) && RuleB(Bazaar, EnableWarpToTrader) && target->IsClient() && (target->CastToClient()->Trader ||
+	//		target->CastToClient()->Buyer)) {
+	//		Message(15, "Moving you to Trader %s", target->GetName());
+	//		MovePC(zone->GetZoneID(), zone->GetInstanceID(), target->GetX(), target->GetY(), target->GetZ(), 0.0f);
+	//	}
+	//
+	//	if (!RuleB(Pathing, Find) || !zone->pathing)
+	//	{
+	//		//fill in the path array...
+	//		//
+	//		points.resize(2);
+	//		points[0].x = GetX();
+	//		points[0].y = GetY();
+	//		points[0].z = GetZ();
+	//		points[1].x = target->GetX();
+	//		points[1].y = target->GetY();
+	//		points[1].z = target->GetZ();
+	//	}
+	//	else
+	//	{
+	//		glm::vec3 Start(GetX(), GetY(), GetZ() + (GetSize() < 6.0 ? 6 : GetSize()) * HEAD_POSITION);
+	//		glm::vec3 End(target->GetX(), target->GetY(), target->GetZ() + (target->GetSize() < 6.0 ? 6 : target->GetSize()) * HEAD_POSITION);
+	//
+	//		if (!zone->zonemap->LineIntersectsZone(Start, End, 1.0f, nullptr) && zone->pathing->NoHazards(Start, End))
+	//		{
+	//			points.resize(2);
+	//			points[0].x = Start.x;
+	//			points[0].y = Start.y;
+	//			points[0].z = Start.z;
+	//
+	//			points[1].x = End.x;
+	//			points[1].y = End.y;
+	//			points[1].z = End.z;
+	//
+	//		}
+	//		else
+	//		{
+	//			std::deque<int> pathlist = zone->pathing->FindRoute(Start, End);
+	//
+	//			if (pathlist.empty())
+	//			{
+	//				EQApplicationPacket outapp(OP_FindPersonReply, 0);
+	//				QueuePacket(&outapp);
+	//				return;
+	//			}
+	//
+	//			//the client seems to have issues with packets larger than this
+	//			if (pathlist.size() > 36)
+	//			{
+	//				EQApplicationPacket outapp(OP_FindPersonReply, 0);
+	//				QueuePacket(&outapp);
+	//				return;
+	//			}
+	//
+	//			// Live appears to send the points in this order:
+	//			// Final destination.
+	//			// Current Position.
+	//			// rest of the points.
+	//			FindPerson_Point p;
+	//
+	//			int PointNumber = 0;
+	//
+	//			bool LeadsToTeleporter = false;
+	//
+	//			glm::vec3 v = zone->pathing->GetPathNodeCoordinates(pathlist.back());
+	//
+	//			p.x = v.x;
+	//			p.y = v.y;
+	//			p.z = v.z;
+	//			points.push_back(p);
+	//
+	//			p.x = GetX();
+	//			p.y = GetY();
+	//			p.z = GetZ();
+	//			points.push_back(p);
+	//
+	//			for (auto Iterator = pathlist.begin(); Iterator != pathlist.end(); ++Iterator)
+	//			{
+	//				if ((*Iterator) == -1) // Teleporter
+	//				{
+	//					LeadsToTeleporter = true;
+	//					break;
+	//				}
+	//
+	//				glm::vec3 v = zone->pathing->GetPathNodeCoordinates((*Iterator), false);
+	//				p.x = v.x;
+	//				p.y = v.y;
+	//				p.z = v.z;
+	//				points.push_back(p);
+	//				++PointNumber;
+	//			}
+	//
+	//			if (!LeadsToTeleporter)
+	//			{
+	//				p.x = target->GetX();
+	//				p.y = target->GetY();
+	//				p.z = target->GetZ();
+	//
+	//				points.push_back(p);
+	//			}
+	//
+	//		}
+	//	}
+	//
+	//	SendPathPacket(points);
+	//}
+	//return;
 }
 
 void Client::Handle_OP_Fishing(const EQApplicationPacket *app)

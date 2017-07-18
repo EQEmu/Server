@@ -1487,12 +1487,12 @@ void Merc::AI_Process() {
 				if (WaypointChanged)
 					tar_ndx = 20;
 
-				CalculateNewPosition2(Goal.x, Goal.y, Goal.z, GetRunspeed());
+				CalculateNewPosition(Goal.x, Goal.y, Goal.z, GetRunspeed());
 			}
 			else {
 				Mob* follow = entity_list.GetMob(GetFollowID());
 				if (follow)
-					CalculateNewPosition2(follow->GetX(), follow->GetY(), follow->GetZ(), GetRunspeed());
+					CalculateNewPosition(follow->GetX(), follow->GetY(), follow->GetZ(), GetRunspeed());
 			}
 
 			return;
@@ -1559,7 +1559,7 @@ void Merc::AI_Process() {
 									float newZ = 0;
 									FaceTarget(GetTarget());
 									if (PlotPositionAroundTarget(this, newX, newY, newZ)) {
-										CalculateNewPosition2(newX, newY, newZ, GetRunspeed());
+										CalculateNewPosition(newX, newY, newZ, GetRunspeed());
 										return;
 									}
 								}
@@ -1571,7 +1571,7 @@ void Merc::AI_Process() {
 							float newY = 0;
 							float newZ = 0;
 							if (PlotPositionAroundTarget(GetTarget(), newX, newY, newZ)) {
-								CalculateNewPosition2(newX, newY, newZ, GetRunspeed());
+								CalculateNewPosition(newX, newY, newZ, GetRunspeed());
 								return;
 							}
 						}
@@ -1582,7 +1582,7 @@ void Merc::AI_Process() {
 						float newY = 0;
 						float newZ = 0;
 						if (PlotPositionAroundTarget(GetTarget(), newX, newY, newZ, false) && GetArchetype() != ARCHETYPE_CASTER) {
-							CalculateNewPosition2(newX, newY, newZ, GetRunspeed());
+							CalculateNewPosition(newX, newY, newZ, GetRunspeed());
 							return;
 						}
 					}
@@ -1709,7 +1709,7 @@ void Merc::AI_Process() {
 			{
 				if(!IsRooted()) {
 					Log(Logs::Detail, Logs::AI, "Pursuing %s while engaged.", GetTarget()->GetCleanName());
-					CalculateNewPosition2(GetTarget()->GetX(), GetTarget()->GetY(), GetTarget()->GetZ(), GetRunspeed());
+					CalculateNewPosition(GetTarget()->GetX(), GetTarget()->GetY(), GetTarget()->GetZ(), GetRunspeed());
 					return;
 				}
 
@@ -1781,10 +1781,10 @@ void Merc::AI_Process() {
 							if (WaypointChanged)
 								tar_ndx = 20;
 
-							CalculateNewPosition2(Goal.x, Goal.y, Goal.z, speed);
+							CalculateNewPosition(Goal.x, Goal.y, Goal.z, speed);
 						}
 						else {
-							CalculateNewPosition2(follow->GetX(), follow->GetY(), follow->GetZ(), speed);
+							CalculateNewPosition(follow->GetX(), follow->GetY(), follow->GetZ(), speed);
 						}
 
 						if (rest_timer.Enabled())

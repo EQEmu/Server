@@ -467,7 +467,7 @@ std::deque<int> PathManager::FindRoute(glm::vec3 Start, glm::vec3 End)
 				break;
 
 			if(!zone->zonemap->LineIntersectsZone(Start, PathNodes[(*Second)].v, 1.0f, nullptr)
-				&& zone->pathing->NoHazards(Start, PathNodes[(*Second)].v))
+				&& NoHazards(Start, PathNodes[(*Second)].v))
 			{
 				noderoute.erase(First);
 
@@ -500,7 +500,7 @@ std::deque<int> PathManager::FindRoute(glm::vec3 Start, glm::vec3 End)
 				break;
 
 			if(!zone->zonemap->LineIntersectsZone(End, PathNodes[(*Second)].v, 1.0f, nullptr)
-				&& zone->pathing->NoHazards(End, PathNodes[(*Second)].v))
+				&& NoHazards(End, PathNodes[(*Second)].v))
 			{
 				noderoute.erase(First);
 
@@ -644,439 +644,62 @@ void PathManager::SimpleMeshTest()
 
 glm::vec3 Mob::UpdatePath(float ToX, float ToY, float ToZ, float Speed, bool &WaypointChanged, bool &NodeReached)
 {
-	WaypointChanged = false;
-
-	NodeReached = false;
-
-	glm::vec3 NodeLoc;
+	glm::vec3 To(ToX, ToY, ToZ);
+	if (Speed <= 0) {
+		return To;
+	}
 
 	glm::vec3 From(GetX(), GetY(), GetZ());
-
-	glm::vec3 HeadPosition(From.x, From.y, From.z + (GetSize() < 6.0 ? 6 : GetSize()) * HEAD_POSITION);
-
-	glm::vec3 To(ToX, ToY, ToZ);
-
-	bool SameDestination = (To == PathingDestination);
-
-	if (Speed <= 0) // our speed is 0, we cant move so lets return the dest
-		return To; // this will also avoid the teleports cleanly
-
-	int NextNode;
-
-	if(To == From)
+	
+	if (DistanceSquared(To, From) < 1.0f) {
+		WaypointChanged = false;
+		NodeReached = true;
+		Route.clear();
 		return To;
+	}
 
-	Log(Logs::Detail, Logs::None, "UpdatePath. From(%8.3f, %8.3f, %8.3f) To(%8.3f, %8.3f, %8.3f)", From.x, From.y, From.z, To.x, To.y, To.z);
-
-	if(From == PathingLastPosition)
-	{
-		++PathingLoopCount;
-
-		if((PathingLoopCount > 5) && !IsRooted())
-		{
-			Log(Logs::Detail, Logs::None, "appears to be stuck. Teleporting them to next position.", GetName());
-
-			if(Route.empty())
-			{
-				Teleport(To);
-
-				WaypointChanged = true;
-
-				PathingLoopCount = 0;
-
-				return To;
-			}
-			NodeLoc = zone->pathing->GetPathNodeCoordinates(Route.front());
-
-			Route.pop_front();
-
-			++PathingTraversedNodes;
-
-			Teleport(NodeLoc);
-
+	if (Route.empty()) {
+		Route = zone->pathing->FindRoute(From, To);
+		PathingDestination = To;
+		WaypointChanged = true;
+		NodeReached = false;
+		return *Route.begin();
+	}
+	else {
+		bool SameDestination = DistanceSquared(To, PathingDestination) < 1.0f;
+		if (!SameDestination) {
+			//We had a route but our target position moved too much
+			Route = zone->pathing->FindRoute(From, To);
+			PathingDestination = To;
 			WaypointChanged = true;
-
-			PathingLoopCount = 0;
-
-			return NodeLoc;
+			NodeReached = false;
+			return *Route.begin();
 		}
-	}
-	else
-	{
-		PathingLoopCount = 0;
-
-		PathingLastPosition = From;
-	}
-
-	if(!Route.empty())
-	{
-
-		// If we are already pathing, and the destination is the same as before ...
-		if(SameDestination)
-		{
-			Log(Logs::Detail, Logs::None, "  Still pathing to the same destination.");
-
-			// Get the coordinates of the first path node we are going to.
-			NextNode = Route.front();
-
-			NodeLoc = zone->pathing->GetPathNodeCoordinates(NextNode);
-
-			// May need to refine this as rounding errors may mean we never have equality
-			// We have reached the path node.
-			if(NodeLoc == From)
-			{
-				Log(Logs::Detail, Logs::None, "  Arrived at node %i", NextNode);
-
+		else {
+			bool AtNextNode = DistanceSquared(From, *Route.begin()) < 1.0f;
+			if (AtNextNode) {
+				WaypointChanged = false;
 				NodeReached = true;
 
-				PathingLastNodeVisited = Route.front();
-				// We only check for LOS again after traversing more than 1 node, otherwise we can get into
-				// a loop where we have a hazard and so run to a path node far enough away from the hazard, and
-				// then run right back towards the same hazard again.
-				//
-				// An exception is when we are about to head for the last node. We always check LOS then. This
-				// is because we are seeking a path to the node nearest to our target. This node may be behind the
-				// target, and we may run past the target if we don't check LOS at this point.
-				int RouteSize = Route.size();
-
-				Log(Logs::Detail, Logs::None, "Route size is %i", RouteSize);
-
-				if((RouteSize == 2)
-					|| ((PathingTraversedNodes >= RuleI(Pathing, MinNodesTraversedForLOSCheck))
-					&& (RouteSize <= RuleI(Pathing, MinNodesLeftForLOSCheck))
-					&& PathingLOSCheckTimer->Check()))
-				{
-					Log(Logs::Detail, Logs::None, "  Checking distance to target.");
-					float Distance = VectorDistanceNoRoot(From, To);
-
-					Log(Logs::Detail, Logs::None, "  Distance between From and To (NoRoot) is %8.3f", Distance);
-
-					if ((Distance <= RuleR(Pathing, MinDistanceForLOSCheckShort)) &&
-					    (std::abs(From.z - To.z) <= RuleR(Pathing, ZDiffThresholdNew))) {
-						if(!zone->zonemap->LineIntersectsZone(HeadPosition, To, 1.0f, nullptr))
-							PathingLOSState = HaveLOS;
-						else
-							PathingLOSState = NoLOS;
-						Log(Logs::Detail, Logs::None, "NoLOS");
-
-						if((PathingLOSState == HaveLOS) && zone->pathing->NoHazards(From, To))
-						{
-							Log(Logs::Detail, Logs::None, "  No hazards. Running directly to target.");
-							Route.clear();
-
-							return To;
-						}
-						else
-						{
-							Log(Logs::Detail, Logs::None, "  Continuing on node path.");
-						}
-					}
-					else
-						PathingLOSState = UnknownLOS;
-				}
-				// We are on the same route, no LOS (or not checking this time, so pop off the node we just reached
-				//
 				Route.pop_front();
 
-				++PathingTraversedNodes;
-
-				WaypointChanged = true;
-
-				// If there are more nodes on the route, return the coords of the next node
-				if(!Route.empty())
-				{
-					NextNode = Route.front();
-
-					if(NextNode == -1)
-					{
-						// -1 indicates a teleport to the next node
-						Route.pop_front();
-
-						if(Route.empty())
-						{
-							Log(Logs::Detail, Logs::None, "Missing node after teleport.");
-							return To;
-						}
-
-						NextNode = Route.front();
-
-						NodeLoc = zone->pathing->GetPathNodeCoordinates(NextNode);
-
-						Teleport(NodeLoc);
-
-						Log(Logs::Detail, Logs::None, "  TELEPORTED to %8.3f, %8.3f, %8.3f\n", NodeLoc.x, NodeLoc.y, NodeLoc.z);
-
-						Route.pop_front();
-
-						if(Route.empty())
-							return To;
-
-						NextNode = Route.front();
-					}
-					zone->pathing->OpenDoors(PathingLastNodeVisited, NextNode, this);
-
-					Log(Logs::Detail, Logs::None, "  Now moving to node %i", NextNode);
-
-					return zone->pathing->GetPathNodeCoordinates(NextNode);
-				}
-				else
-				{
-					// we have run all the nodes, all that is left is the direct path from the last node
-					// to the destination
-					Log(Logs::Detail, Logs::None, "  Reached end of node path, running direct to target.");
-
-					return To;
-				}
-			}
-			// At this point, we are still on the previous path, but not reached a node yet.
-			// The route shouldn't be empty, but check anyway.
-			//
-			int RouteSize = Route.size();
-
-			if((PathingTraversedNodes >= RuleI(Pathing, MinNodesTraversedForLOSCheck))
-				&& (RouteSize <= RuleI(Pathing, MinNodesLeftForLOSCheck))
-				&& PathingLOSCheckTimer->Check())
-			{
-				Log(Logs::Detail, Logs::None, "  Checking distance to target.");
-
-				float Distance = VectorDistanceNoRoot(From, To);
-
-				Log(Logs::Detail, Logs::None, "  Distance between From and To (NoRoot) is %8.3f", Distance);
-
-				if ((Distance <= RuleR(Pathing, MinDistanceForLOSCheckShort)) &&
-				    (std::abs(From.z - To.z) <= RuleR(Pathing, ZDiffThresholdNew))) {
-					if(!zone->zonemap->LineIntersectsZone(HeadPosition, To, 1.0f, nullptr))
-						PathingLOSState = HaveLOS;
-					else
-						PathingLOSState = NoLOS;
-					Log(Logs::Detail, Logs::None, "NoLOS");
-
-					if((PathingLOSState == HaveLOS) && zone->pathing->NoHazards(From, To))
-					{
-						Log(Logs::Detail, Logs::None, "  No hazards. Running directly to target.");
-						Route.clear();
-
-						return To;
-					}
-					else
-					{
-						Log(Logs::Detail, Logs::None, "  Continuing on node path.");
-					}
-				}
-				else
-					PathingLOSState = UnknownLOS;
-			}
-			return NodeLoc;
-		}
-		else
-		{
-			// We get here if we were already pathing, but our destination has now changed.
-			//
-			Log(Logs::Detail, Logs::None, "  Target has changed position.");
-			// Update our record of where we are going to.
-			PathingDestination = To;
-			// Check if we now have LOS etc to the new destination.
-			if(PathingLOSCheckTimer->Check())
-			{
-				float Distance = VectorDistanceNoRoot(From, To);
-
-				if ((Distance <= RuleR(Pathing, MinDistanceForLOSCheckShort)) &&
-				    (std::abs(From.z - To.z) <= RuleR(Pathing, ZDiffThresholdNew))) {
-					Log(Logs::Detail, Logs::None, "  Checking for short LOS at distance %8.3f.", Distance);
-					if(!zone->zonemap->LineIntersectsZone(HeadPosition, To, 1.0f, nullptr))
-						PathingLOSState = HaveLOS;
-					else
-						PathingLOSState = NoLOS;
-
-					Log(Logs::Detail, Logs::None, "NoLOS");
-
-					if((PathingLOSState == HaveLOS) && zone->pathing->NoHazards(From, To))
-					{
-						Log(Logs::Detail, Logs::None, "  No hazards. Running directly to target.");
-						Route.clear();
-						return To;
-					}
-					else
-					{
-						Log(Logs::Detail, Logs::None, "  Continuing on node path.");
-					}
-				}
-			}
-
-			// If the player is moving, we don't want to recalculate our route too frequently.
-			//
-			if(static_cast<int>(Route.size()) <= RuleI(Pathing, RouteUpdateFrequencyNodeCount))
-			{
-				if(!PathingRouteUpdateTimerShort->Check())
-				{
-					Log(Logs::Detail, Logs::None, "Short route update timer not yet expired.");
-					return zone->pathing->GetPathNodeCoordinates(Route.front());
-				}
-				Log(Logs::Detail, Logs::None, "Short route update timer expired.");
-			}
-			else
-			{
-				if(!PathingRouteUpdateTimerLong->Check())
-				{
-					Log(Logs::Detail, Logs::None, "Long route update timer not yet expired.");
-					return zone->pathing->GetPathNodeCoordinates(Route.front());
-				}
-				Log(Logs::Detail, Logs::None, "Long route update timer expired.");
-			}
-
-			// We are already pathing, destination changed, no LOS. Find the nearest node to our destination.
-			int DestinationPathNode= zone->pathing->FindNearestPathNode(To);
-
-			// Destination unreachable via pathing, return direct route.
-			if(DestinationPathNode == -1)
-			{
-				Log(Logs::Detail, Logs::None, "  Unable to find path node for new destination. Running straight to target.");
-				Route.clear();
-				return To;
-			}
-			// If the nearest path node to our new destination is the same as for the previous
-			// one, we will carry on on our path.
-			if(DestinationPathNode == Route.back())
-			{
-				Log(Logs::Detail, Logs::None, "  Same destination Node (%i). Continue with current path.", DestinationPathNode);
-
-				NodeLoc = zone->pathing->GetPathNodeCoordinates(Route.front());
-
-				// May need to refine this as rounding errors may mean we never have equality
-				// Check if we have reached a path node.
-				if(NodeLoc == From)
-				{
-					Log(Logs::Detail, Logs::None, "  Arrived at node %i, moving to next one.\n", Route.front());
-
-					NodeReached = true;
-
-					PathingLastNodeVisited = Route.front();
-
-					Route.pop_front();
-
-					++PathingTraversedNodes;
-
+				if (Route.empty()) {
+					Route = zone->pathing->FindRoute(From, To);
+					PathingDestination = To;
 					WaypointChanged = true;
-
-					if(!Route.empty())
-					{
-						NextNode = Route.front();
-
-						if(NextNode == -1)
-						{
-							// -1 indicates a teleport to the next node
-							Route.pop_front();
-
-							if(Route.empty())
-							{
-								Log(Logs::Detail, Logs::None, "Missing node after teleport.");
-								return To;
-							}
-
-							NextNode = Route.front();
-
-							NodeLoc = zone->pathing->GetPathNodeCoordinates(NextNode);
-
-							Teleport(NodeLoc);
-
-							Log(Logs::Detail, Logs::None, "  TELEPORTED to %8.3f, %8.3f, %8.3f\n", NodeLoc.x, NodeLoc.y, NodeLoc.z);
-
-							Route.pop_front();
-
-							if(Route.empty())
-								return To;
-
-							NextNode = Route.front();
-						}
-						// Return the coords of our next path node on the route.
-						Log(Logs::Detail, Logs::None, "  Now moving to node %i", NextNode);
-
-						zone->pathing->OpenDoors(PathingLastNodeVisited, NextNode, this);
-
-						return zone->pathing->GetPathNodeCoordinates(NextNode);
-					}
-					else
-					{
-						Log(Logs::Detail, Logs::None, "  Reached end of path grid. Running direct to target.");
-						return To;
-					}
+					return *Route.begin();
 				}
-				return NodeLoc;
+				else {
+					return *Route.begin();
+				}
 			}
-			else
-			{
-				Log(Logs::Detail, Logs::None, "  Target moved. End node is different. Clearing route.");
-
-				Route.clear();
-				// We will now fall through to get a new route.
+			else {
+				WaypointChanged = false;
+				NodeReached = false;
+				return *Route.begin();
 			}
-
-		}
-
-
-	}
-	Log(Logs::Detail, Logs::None, "  Our route list is empty.");
-
-	if((SameDestination) && !PathingLOSCheckTimer->Check())
-	{
-		Log(Logs::Detail, Logs::None, "  Destination same as before, LOS check timer not reached. Returning To.");
-		return To;
-	}
-
-	PathingLOSState = UnknownLOS;
-
-	PathingDestination = To;
-
-	WaypointChanged = true;
-
-	float Distance = VectorDistanceNoRoot(From, To);
-
-	if ((Distance <= RuleR(Pathing, MinDistanceForLOSCheckLong)) &&
-	    (std::abs(From.z - To.z) <= RuleR(Pathing, ZDiffThresholdNew))) {
-		Log(Logs::Detail, Logs::None, "  Checking for long LOS at distance %8.3f.", Distance);
-
-		if(!zone->zonemap->LineIntersectsZone(HeadPosition, To, 1.0f, nullptr))
-			PathingLOSState = HaveLOS;
-		else
-			PathingLOSState = NoLOS;
-
-		Log(Logs::Detail, Logs::None, "NoLOS");
-
-		if((PathingLOSState == HaveLOS) && zone->pathing->NoHazards(From, To))
-		{
-			Log(Logs::Detail, Logs::None, "Target is reachable. Running directly there.");
-			return To;
 		}
 	}
-	Log(Logs::Detail, Logs::None, "  Calculating new route to target.");
-
-	Route = zone->pathing->FindRoute(From, To);
-
-	PathingTraversedNodes = 0;
-
-	if(Route.empty())
-	{
-		Log(Logs::Detail, Logs::None, "  No route available, running direct.");
-
-		return To;
-	}
-
-	if(SameDestination && (Route.front() == PathingLastNodeVisited))
-	{
-		Log(Logs::Detail, Logs::None, "  Probable loop detected. Same destination and Route.front() == PathingLastNodeVisited.");
-
-		Route.clear();
-
-		return To;
-	}
-	NodeLoc = zone->pathing->GetPathNodeCoordinates(Route.front());
-
-	Log(Logs::Detail, Logs::None, "  New route determined, heading for node %i", Route.front());
-
-	PathingLoopCount = 0;
-
-	return NodeLoc;
-
 }
 
 int PathManager::FindNearestPathNode(glm::vec3 Position)
@@ -1254,14 +877,14 @@ bool PathManager::NoHazardsAccurate(glm::vec3 From, glm::vec3 To)
 void Mob::PrintRoute()
 {
 
-	printf("Route is : ");
-
-	for(auto Iterator = Route.begin(); Iterator !=Route.end(); ++Iterator)
-	{
-		printf("%i, ", (*Iterator));
-	}
-
-	printf("\n");
+	//printf("Route is : ");
+	//
+	//for(auto Iterator = Route.begin(); Iterator !=Route.end(); ++Iterator)
+	//{
+	//	printf("%i, ", (*Iterator));
+	//}
+	//
+	//printf("\n");
 
 }
 
@@ -1346,7 +969,7 @@ void PathManager::ShowPathNodeNeighbours(Client *c)
 		return;
 
 
-	PathNode *Node = zone->pathing->FindPathNodeByCoordinates(c->GetTarget()->GetX(), c->GetTarget()->GetY(), c->GetTarget()->GetZ());
+	PathNode *Node = FindPathNodeByCoordinates(c->GetTarget()->GetX(), c->GetTarget()->GetY(), c->GetTarget()->GetZ());
 
 	if(!Node)
 	{
@@ -1412,7 +1035,7 @@ void PathManager::NodeInfo(Client *c)
 		return;
 	}
 
-	PathNode *Node = zone->pathing->FindPathNodeByCoordinates(c->GetTarget()->GetX(), c->GetTarget()->GetY(), c->GetTarget()->GetZ());
+	PathNode *Node = FindPathNodeByCoordinates(c->GetTarget()->GetX(), c->GetTarget()->GetY(), c->GetTarget()->GetZ());
 	if(!Node)
 	{
 		return;
@@ -1661,7 +1284,7 @@ bool PathManager::DeleteNode(Client *c)
 		return false;
 	}
 
-	PathNode *Node = zone->pathing->FindPathNodeByCoordinates(c->GetTarget()->GetX(), c->GetTarget()->GetY(), c->GetTarget()->GetZ());
+	PathNode *Node = FindPathNodeByCoordinates(c->GetTarget()->GetX(), c->GetTarget()->GetY(), c->GetTarget()->GetZ());
 	if(!Node)
 	{
 		return false;
@@ -1742,7 +1365,7 @@ void PathManager::ConnectNodeToNode(Client *c, int32 Node2, int32 teleport, int3
 		return;
 	}
 
-	PathNode *Node = zone->pathing->FindPathNodeByCoordinates(c->GetTarget()->GetX(), c->GetTarget()->GetY(), c->GetTarget()->GetZ());
+	PathNode *Node = FindPathNodeByCoordinates(c->GetTarget()->GetX(), c->GetTarget()->GetY(), c->GetTarget()->GetZ());
 	if(!Node)
 	{
 		return;
@@ -1832,7 +1455,7 @@ void PathManager::ConnectNode(Client *c, int32 Node2, int32 teleport, int32 door
 		return;
 	}
 
-	PathNode *Node = zone->pathing->FindPathNodeByCoordinates(c->GetTarget()->GetX(), c->GetTarget()->GetY(), c->GetTarget()->GetZ());
+	PathNode *Node = FindPathNodeByCoordinates(c->GetTarget()->GetX(), c->GetTarget()->GetY(), c->GetTarget()->GetZ());
 	if(!Node)
 	{
 		return;
@@ -1902,7 +1525,7 @@ void PathManager::DisconnectNodeToNode(Client *c, int32 Node2)
 		return;
 	}
 
-	PathNode *Node = zone->pathing->FindPathNodeByCoordinates(c->GetTarget()->GetX(), c->GetTarget()->GetY(), c->GetTarget()->GetZ());
+	PathNode *Node = FindPathNodeByCoordinates(c->GetTarget()->GetX(), c->GetTarget()->GetY(), c->GetTarget()->GetZ());
 	if(!Node)
 	{
 		return;
@@ -1986,7 +1609,7 @@ void PathManager::MoveNode(Client *c)
 		return;
 	}
 
-	PathNode *Node = zone->pathing->FindPathNodeByCoordinates(c->GetTarget()->GetX(), c->GetTarget()->GetY(), c->GetTarget()->GetZ());
+	PathNode *Node = FindPathNodeByCoordinates(c->GetTarget()->GetX(), c->GetTarget()->GetY(), c->GetTarget()->GetZ());
 	if(!Node)
 	{
 		return;
@@ -2020,7 +1643,7 @@ void PathManager::DisconnectAll(Client *c)
 		return;
 	}
 
-	PathNode *Node = zone->pathing->FindPathNodeByCoordinates(c->GetTarget()->GetX(), c->GetTarget()->GetY(), c->GetTarget()->GetZ());
+	PathNode *Node = FindPathNodeByCoordinates(c->GetTarget()->GetX(), c->GetTarget()->GetY(), c->GetTarget()->GetZ());
 	if(!Node)
 	{
 		return;
@@ -2193,7 +1816,7 @@ void PathManager::QuickConnect(Client *c, bool set)
 		return;
 	}
 
-	PathNode *Node = zone->pathing->FindPathNodeByCoordinates(c->GetTarget()->GetX(), c->GetTarget()->GetY(), c->GetTarget()->GetZ());
+	PathNode *Node = FindPathNodeByCoordinates(c->GetTarget()->GetX(), c->GetTarget()->GetY(), c->GetTarget()->GetZ());
 	if(!Node)
 	{
 		return;

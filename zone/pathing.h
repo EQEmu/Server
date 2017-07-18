@@ -59,25 +59,17 @@ public:
 	~PathManager();
 
 
-	static PathManager *LoadPathFile(const char *ZoneName);
-	bool loadPaths(FILE *fp);
-	void PrintPathing();
+	static PathManager *LoadPathFile(const char *ZoneName);	
 	std::deque<int> FindRoute(glm::vec3 Start, glm::vec3 End);
+private:
+	bool loadPaths(FILE *fp);
 	std::deque<int> FindRoute(int startID, int endID);
 
-	glm::vec3 GetPathNodeCoordinates(int NodeNumber, bool BestZ = true);
+	void PrintPathing();
 	bool CheckLosFN(glm::vec3 a, glm::vec3 b);
-	void SpawnPathNodes();
-	void MeshTest();
-	void SimpleMeshTest();
-	int FindNearestPathNode(glm::vec3 Position);
 	bool NoHazards(glm::vec3 From, glm::vec3 To);
 	bool NoHazardsAccurate(glm::vec3 From, glm::vec3 To);
 	void OpenDoors(int Node1, int Node2, Mob* ForWho);
-
-	PathNode* FindPathNodeByCoordinates(float x, float y, float z);
-	void ShowPathNodeNeighbours(Client *c);
-	int GetRandomPathNode();
 
 	void NodeInfo(Client *c);
 	int32 AddNode(float x, float y, float z, float best_z, int32 requested_id = 0); //return -1 on failure, else returns the id of this node
@@ -98,7 +90,16 @@ public:
 	void QuickConnect(Client *c, bool set = false);
 	void SortNodes();
 
-private:
+	glm::vec3 GetPathNodeCoordinates(int NodeNumber, bool BestZ = true);
+	void SpawnPathNodes();
+	void MeshTest();
+	void SimpleMeshTest();
+	int FindNearestPathNode(glm::vec3 Position);
+
+	PathNode* FindPathNodeByCoordinates(float x, float y, float z);
+	void ShowPathNodeNeighbours(Client *c);
+	int GetRandomPathNode();
+
 	PathFileHeader Head;
 	PathNode *PathNodes;
 	int QuickConnectTarget;

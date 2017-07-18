@@ -2165,7 +2165,7 @@ void Bot::AI_Process() {
 				} else if(!IsRooted()) {
 					if(GetTarget() && GetTarget()->GetHateTop() && GetTarget()->GetHateTop() != this) {
 						Log(Logs::Detail, Logs::AI, "Returning to location prior to being summoned.");
-						CalculateNewPosition2(m_PreSummonLocation.x, m_PreSummonLocation.y, m_PreSummonLocation.z, GetBotRunspeed());
+						CalculateNewPosition(m_PreSummonLocation.x, m_PreSummonLocation.y, m_PreSummonLocation.z, GetBotRunspeed());
 						SetHeading(CalculateHeadingToTarget(m_PreSummonLocation.x, m_PreSummonLocation.y));
 						return;
 					}
@@ -2256,12 +2256,12 @@ void Bot::AI_Process() {
 				if (WaypointChanged)
 					tar_ndx = 20;
 
-				CalculateNewPosition2(Goal.x, Goal.y, Goal.z, GetBotRunspeed());
+				CalculateNewPosition(Goal.x, Goal.y, Goal.z, GetBotRunspeed());
 			}
 			else {
 				Mob* follow = entity_list.GetMob(GetFollowID());
 				if (follow)
-					CalculateNewPosition2(follow->GetX(), follow->GetY(), follow->GetZ(), GetBotRunspeed());
+					CalculateNewPosition(follow->GetX(), follow->GetY(), follow->GetZ(), GetBotRunspeed());
 			}
 			
 			return;
@@ -2352,7 +2352,7 @@ void Bot::AI_Process() {
 									float newZ = 0;
 									FaceTarget(GetTarget());
 									if (PlotPositionAroundTarget(this, newX, newY, newZ)) {
-										CalculateNewPosition2(newX, newY, newZ, GetBotRunspeed());
+										CalculateNewPosition(newX, newY, newZ, GetBotRunspeed());
 										return;
 									}
 								}
@@ -2364,7 +2364,7 @@ void Bot::AI_Process() {
 							float newY = 0;
 							float newZ = 0;
 							if (PlotPositionAroundTarget(GetTarget(), newX, newY, newZ)) {
-								CalculateNewPosition2(newX, newY, newZ, GetBotRunspeed());
+								CalculateNewPosition(newX, newY, newZ, GetBotRunspeed());
 								return;
 							}
 						}
@@ -2375,7 +2375,7 @@ void Bot::AI_Process() {
 						float newY = 0;
 						float newZ = 0;
 						if (PlotPositionAroundTarget(GetTarget(), newX, newY, newZ, false) && GetArchetype() != ARCHETYPE_CASTER) {
-							CalculateNewPosition2(newX, newY, newZ, GetBotRunspeed());
+							CalculateNewPosition(newX, newY, newZ, GetBotRunspeed());
 							return;
 						}
 					}
@@ -2500,7 +2500,7 @@ void Bot::AI_Process() {
 			if (AI_movement_timer->Check()) {
 				if(!IsRooted()) {
 					Log(Logs::Detail, Logs::AI, "Pursuing %s while engaged.", GetTarget()->GetCleanName());
-					CalculateNewPosition2(GetTarget()->GetX(), GetTarget()->GetY(), GetTarget()->GetZ(), GetBotRunspeed());
+					CalculateNewPosition(GetTarget()->GetX(), GetTarget()->GetY(), GetTarget()->GetZ(), GetBotRunspeed());
 					return;
 				}
 
@@ -2560,10 +2560,10 @@ void Bot::AI_Process() {
 					if (WaypointChanged)
 						tar_ndx = 20;
 
-					CalculateNewPosition2(Goal.x, Goal.y, Goal.z, speed);
+					CalculateNewPosition(Goal.x, Goal.y, Goal.z, speed);
 				}
 				else {
-					CalculateNewPosition2(follow->GetX(), follow->GetY(), follow->GetZ(), speed);
+					CalculateNewPosition(follow->GetX(), follow->GetY(), follow->GetZ(), speed);
 				}
 
 				if (rest_timer.Enabled())
@@ -2643,14 +2643,14 @@ void Bot::PetAIProcess() {
 				if(botPet->GetClass() == ROGUE && !petHasAggro && !botPet->BehindMob(botPet->GetTarget(), botPet->GetX(), botPet->GetY())) {
 					// Move the rogue to behind the mob
 					if(botPet->PlotPositionAroundTarget(botPet->GetTarget(), newX, newY, newZ)) {
-						botPet->CalculateNewPosition2(newX, newY, newZ, botPet->GetRunspeed());
+						botPet->CalculateNewPosition(newX, newY, newZ, botPet->GetRunspeed());
 						return;
 					}
 				}
 				else if(GetTarget() == botPet->GetTarget() && !petHasAggro && !botPet->BehindMob(botPet->GetTarget(), botPet->GetX(), botPet->GetY())) {
 					// If the bot owner and the bot are fighting the same mob, then move the pet to the rear arc of the mob
 					if(botPet->PlotPositionAroundTarget(botPet->GetTarget(), newX, newY, newZ)) {
-						botPet->CalculateNewPosition2(newX, newY, newZ, botPet->GetRunspeed());
+						botPet->CalculateNewPosition(newX, newY, newZ, botPet->GetRunspeed());
 						return;
 					}
 				}
@@ -2665,7 +2665,7 @@ void Bot::PetAIProcess() {
 						moveBehindMob = true;
 
 					if(botPet->PlotPositionAroundTarget(botPet->GetTarget(), newX, newY, newZ, moveBehindMob)) {
-						botPet->CalculateNewPosition2(newX, newY, newZ, botPet->GetRunspeed());
+						botPet->CalculateNewPosition(newX, newY, newZ, botPet->GetRunspeed());
 						return;
 					}
 				}
@@ -2748,7 +2748,7 @@ void Bot::PetAIProcess() {
 					botPet->SetRunAnimSpeed(0);
 					if(!botPet->IsRooted()) {
 						Log(Logs::Detail, Logs::AI, "Pursuing %s while engaged.", botPet->GetTarget()->GetCleanName());
-						botPet->CalculateNewPosition2(botPet->GetTarget()->GetX(), botPet->GetTarget()->GetY(), botPet->GetTarget()->GetZ(), botPet->GetOwner()->GetRunspeed());
+						botPet->CalculateNewPosition(botPet->GetTarget()->GetX(), botPet->GetTarget()->GetY(), botPet->GetTarget()->GetZ(), botPet->GetOwner()->GetRunspeed());
 						return;
 					} else {
 						botPet->SetHeading(botPet->GetTarget()->GetHeading());
@@ -2776,7 +2776,7 @@ void Bot::PetAIProcess() {
 					float dist = DistanceSquared(botPet->GetPosition(), botPet->GetTarget()->GetPosition());
 					botPet->SetRunAnimSpeed(0);
 					if(dist > 184) {
-						botPet->CalculateNewPosition2(botPet->GetTarget()->GetX(), botPet->GetTarget()->GetY(), botPet->GetTarget()->GetZ(), botPet->GetTarget()->GetRunspeed());
+						botPet->CalculateNewPosition(botPet->GetTarget()->GetX(), botPet->GetTarget()->GetY(), botPet->GetTarget()->GetZ(), botPet->GetTarget()->GetRunspeed());
 						return;
 					} else {
 						botPet->SetHeading(botPet->GetTarget()->GetHeading());

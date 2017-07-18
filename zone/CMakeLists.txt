@@ -84,7 +84,9 @@ SET(zone_sources
 	npc_ai.cpp
 	object.cpp
 	oriented_bounding_box.cpp
+	pathfinder_interface.cpp
 	pathfinder_nav_mesh.cpp
+	pathfinder_null.cpp
 	pathfinder_waypoint.cpp
 	pathing.cpp
 	perl_client.cpp
@@ -201,6 +203,7 @@ SET(zone_headers
 	oriented_bounding_box.h
 	pathfinder_interface.h
 	pathfinder_nav_mesh.h
+	pathfinder_null.h
 	pathfinder_waypoint.h
 	pathing.h
 	perlpacket.h

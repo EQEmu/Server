@@ -412,7 +412,7 @@ void NPC::SaveGuardSpot(bool iClearGuardSpot) {
 }
 
 void NPC::NextGuardPosition() {
-	if (!CalculateNewPosition2(m_GuardPoint.x, m_GuardPoint.y, m_GuardPoint.z, GetMovespeed())) {
+	if (!CalculateNewPosition(m_GuardPoint.x, m_GuardPoint.y, m_GuardPoint.z, GetMovespeed())) {
 		SetHeading(m_GuardPoint.w);
 		Log(Logs::Detail, Logs::AI, "Unable to move to next guard position. Probably rooted.");
 	}
@@ -625,89 +625,8 @@ bool Mob::MakeNewPositionAndSendUpdate(float x, float y, float z, int speed, boo
 	return true;
 }
 
-bool Mob::CalculateNewPosition2(float x, float y, float z, int speed, bool checkZ, bool calcHeading) {
-	return MakeNewPositionAndSendUpdate(x, y, z, speed, checkZ);
-}
-
 bool Mob::CalculateNewPosition(float x, float y, float z, int speed, bool checkZ, bool calcHeading) {
-	if (GetID() == 0)
-		return true;
-
-	float nx = m_Position.x;
-	float ny = m_Position.y;
-	float nz = m_Position.z;
-
-	// if NPC is rooted
-	if (speed == 0) {
-		SetHeading(CalculateHeadingToTarget(x, y));
-		if (moved) {
-			SetCurrentSpeed(0);
-			moved = false;
-		}
-		Log(Logs::Detail, Logs::AI, "Rooted while calculating new position to (%.3f, %.3f, %.3f)", x, y, z);
-		return true;
-	}
-
-	float old_test_vector = test_vector;
-	m_TargetV.x = x - nx;
-	m_TargetV.y = y - ny;
-	m_TargetV.z = z - nz;
-
-	if (m_TargetV.x == 0 && m_TargetV.y == 0)
-		return false;
-	SetCurrentSpeed((int8)(speed)); //*NPC_RUNANIM_RATIO);
-									//speed *= NPC_SPEED_MULTIPLIER;
-
-	Log(Logs::Detail, Logs::AI, "Calculating new position to (%.3f, %.3f, %.3f) vector (%.3f, %.3f, %.3f) rate %.3f RAS %d", x, y, z, m_TargetV.x, m_TargetV.y, m_TargetV.z, speed, pRunAnimSpeed);
-
-	// --------------------------------------------------------------------------
-	// 2: get unit vector
-	// --------------------------------------------------------------------------
-	test_vector = sqrtf(x*x + y*y + z*z);
-	tar_vector = speed / sqrtf(m_TargetV.x*m_TargetV.x + m_TargetV.y*m_TargetV.y + m_TargetV.z*m_TargetV.z);
-	m_Position.w = CalculateHeadingToTarget(x, y);
-
-	if (tar_vector >= 1.0) {
-		if (IsNPC()) {
-			entity_list.ProcessMove(CastToNPC(), x, y, z);
-		}
-
-		m_Position.x = x;
-		m_Position.y = y;
-		m_Position.z = z;
-		Log(Logs::Detail, Logs::AI, "Close enough, jumping to waypoint");
-	}
-	else {
-		float new_x = m_Position.x + m_TargetV.x*tar_vector;
-		float new_y = m_Position.y + m_TargetV.y*tar_vector;
-		float new_z = m_Position.z + m_TargetV.z*tar_vector;
-		if (IsNPC()) {
-			entity_list.ProcessMove(CastToNPC(), new_x, new_y, new_z);
-		}
-
-		m_Position.x = new_x;
-		m_Position.y = new_y;
-		m_Position.z = new_z;
-		Log(Logs::Detail, Logs::AI, "Next position (%.3f, %.3f, %.3f)", m_Position.x, m_Position.y, m_Position.z);
-	}
-
-	if (fix_z_timer.Check())
-		this->FixZ();
-
-	//OP_MobUpdate
-	if ((old_test_vector != test_vector) || tar_ndx>20) { //send update
-		tar_ndx = 0;
-		this->SetMoving(true);
-		moved = true;
-		m_Delta = glm::vec4(m_Position.x - nx, m_Position.y - ny, m_Position.z - nz, 0.0f);
-		SendPositionUpdate();
-	}
-	tar_ndx++;
-
-	// now get new heading
-	SetAppearance(eaStanding, false); // make sure they're standing
-	pLastChange = Timer::GetCurrentTime();
-	return true;
+	return MakeNewPositionAndSendUpdate(x, y, z, speed, checkZ);
 }
 
 void NPC::AssignWaypoints(int32 grid)

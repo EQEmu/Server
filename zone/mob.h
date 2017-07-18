@@ -21,7 +21,7 @@
 #include "common.h"
 #include "entity.h"
 #include "hate_list.h"
-#include "pathing.h"
+#include "pathfinder_interface.h"
 #include "position.h"
 #include "aa_ability.h"
 #include "aa.h"
@@ -908,8 +908,7 @@ public:
 
 	inline bool			CheckAggro(Mob* other) {return hate_list.IsEntOnHateList(other);}
 	float				CalculateHeadingToTarget(float in_x, float in_y);
-	bool				CalculateNewPosition(float x, float y, float z, int speed, bool checkZ = false, bool calcheading = true);
-	virtual bool		CalculateNewPosition2(float x, float y, float z, int speed, bool checkZ = true, bool calcheading = true);
+	virtual bool		CalculateNewPosition(float x, float y, float z, int speed, bool checkZ = true, bool calcheading = true);
 	float				CalculateDistance(float x, float y, float z);
 	float				GetGroundZ(float new_x, float new_y, float z_offset=0.0);
 	void				SendTo(float new_x, float new_y, float new_z);
@@ -1410,16 +1409,8 @@ protected:
 	// Pathing
 	//
 	glm::vec3 PathingDestination;
-	glm::vec3 PathingLastPosition;
-	int PathingLoopCount;
-	int PathingLastNodeVisited;
-	std::deque<int> Route;
-	LOSType PathingLOSState;
-	Timer *PathingLOSCheckTimer;
-	Timer *PathingRouteUpdateTimerShort;
-	Timer *PathingRouteUpdateTimerLong;
+	IPathfinder::IPath Route;
 	bool DistractedFromGrid;
-	int PathingTraversedNodes;
 
 	uint32 pDontHealMeBefore;
 	uint32 pDontBuffMeBefore;
