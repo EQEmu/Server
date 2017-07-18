@@ -625,6 +625,7 @@ public:
 	bool PlotPositionAroundTarget(Mob* target, float &x_dest, float &y_dest, float &z_dest,
 		bool lookForAftArc = true);
 
+	// aura functions
 	void MakeAura(uint16 spell_id);
 	inline int GetAuraSlots() { return 1 + aabonuses.aura_slots + itembonuses.aura_slots + spellbonuses.aura_slots; }
 	inline int GetTrapSlots() { return 1 + aabonuses.trap_slots + itembonuses.trap_slots + spellbonuses.trap_slots; }
@@ -635,6 +636,7 @@ public:
 	bool CanSpawnAura(bool trap);
 	void RemoveAura(int spawn_id, bool expired = false);
 	void RemoveAllAuras();
+	inline AuraMgr &GetAuraMgr() { return aura_mgr; } // mainly used for zone db loading/saving
 
 	//Procs
 	void TriggerDefensiveProcs(Mob *on, uint16 hand = EQEmu::inventory::slotPrimary, bool FromSkillProc = false, int damage = 0);

@@ -7,7 +7,7 @@
 
 Aura::Aura(NPCType *type_data, Mob *owner, AuraRecord &record)
     : NPC(type_data, 0, owner->GetPosition(), FlyMode3), spell_id(record.spell_id), distance(record.distance),
-      remove_timer(record.duration), movement_timer(100), process_timer(100)
+      remove_timer(record.duration), movement_timer(100), process_timer(100), aura_id(-1)
 {
 	GiveNPCTypeData(type_data); // we will delete this later on
 	m_owner = owner->GetID();
@@ -584,6 +584,7 @@ void Aura::Depop(bool unused)
 	p_depop = true;
 }
 
+// This creates an aura from a casted spell
 void Mob::MakeAura(uint16 spell_id)
 {
 	// TODO: verify room in AuraMgr
@@ -639,6 +640,7 @@ void Mob::MakeAura(uint16 spell_id)
 	strn0cpy(npc_type->name, record.name, 64);
 
 	auto npc = new Aura(npc_type, this, record);
+	npc->SetAuraID(spell_id);
 	entity_list.AddNPC(npc, true, true);
 
 	if (trap)
@@ -732,6 +734,13 @@ bool Mob::CanSpawnAura(bool trap)
 
 void Mob::RemoveAllAuras()
 {
+	if (IsClient()) {
+		database.SaveAuras(CastToClient());
+		EQApplicationPacket outapp(OP_UpdateAura, 4);
+		outapp.WriteUInt32(2);
+		CastToClient()->QueuePacket(&outapp);
+	}
+
 	// this is sent on camp/zone, so it just despawns?
 	if (aura_mgr.count) {
 		for (auto &e : aura_mgr.auras) {
@@ -740,12 +749,17 @@ void Mob::RemoveAllAuras()
 		}
 	}
 
+	aura_mgr.count = 0;
+
 	if (trap_mgr.count) {
 		for (auto &e : trap_mgr.auras) {
 			if (e.aura)
 				e.aura->Depop();
 		}
 	}
+
+	trap_mgr.count = 0;
+
 	return;
 }
 

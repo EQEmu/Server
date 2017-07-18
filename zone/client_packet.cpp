@@ -883,6 +883,8 @@ void Client::CompleteConnect()
 		SetPetCommandState(PET_BUTTON_SPELLHOLD, 0);
 	}
 
+	database.LoadAuras(this); // this ends up spawning them so probably safer to load this later (here)
+
 	entity_list.RefreshClientXTargets(this);
 
 	worldserver.RequestTellQueue(GetName());

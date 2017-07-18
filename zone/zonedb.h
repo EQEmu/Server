@@ -273,6 +273,8 @@ public:
 
 	void SaveBuffs(Client *c);
 	void LoadBuffs(Client *c);
+	void SaveAuras(Client *c);
+	void LoadAuras(Client *c);
 	void LoadPetInfo(Client *c);
 	void SavePetInfo(Client *c);
 	void RemoveTempFactions(Client *c);

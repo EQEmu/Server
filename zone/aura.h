@@ -57,8 +57,14 @@ public:
 	void ProcessEnterTrap(Mob *owner);
 	void ProcessExitTrap(Mob *owner);
 
+	// we only save auras that follow you, and player casted
+	inline bool AuraZones() { return movement_type == AuraMovement::Follow && aura_id > -1; }
+	inline int GetSpellID() { return spell_id; }
+	inline int GetAuraID() { return aura_id; }
+	inline void SetAuraID(int in) { aura_id = in; }
 private:
 	int m_owner;
+	int aura_id; // spell ID of the aura spell -1 if aura isn't from a casted spell
 	int spell_id; // spell we cast
 	int distance; // distance we remove
 	Timer remove_timer; // when we depop
