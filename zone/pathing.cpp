@@ -951,7 +951,7 @@ glm::vec3 Mob::UpdatePath(float ToX, float ToY, float ToZ, float Speed, bool &Wa
 
 				// May need to refine this as rounding errors may mean we never have equality
 				// Check if we have reached a path node.
-				if(NodeLoc == From)
+				if(NodeLoc.x == From.x && NodeLoc.y == From.y)
 				{
 					Log(Logs::Detail, Logs::Pathing, "  Arrived at node %i, moving to next one.\n", Route.front());
 
