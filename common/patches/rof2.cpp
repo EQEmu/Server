@@ -4086,7 +4086,7 @@ namespace RoF2
 				PacketSize += strlen(emu->DestructibleString) + 1;
 			}
 
-			bool ShowName = 1;
+			bool ShowName = emu->show_name;
 			if (emu->bodytype >= 66)
 			{
 				emu->race = 127;

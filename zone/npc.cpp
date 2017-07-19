@@ -375,6 +375,7 @@ NPC::NPC(const NPCType* d, Spawn2* in_respawn, const glm::vec4& position, int if
 	CalcBonuses();
 	raid_target = d->raid_target;
 	ignore_despawn = d->ignore_despawn;
+	m_targetable = !d->untargetable;
 }
 
 NPC::~NPC()
@@ -1906,6 +1907,7 @@ void NPC::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho)
 	ns->spawn.is_npc = 1;
 	UpdateActiveLight();
 	ns->spawn.light = GetActiveLightType();
+	ns->spawn.show_name = NPCTypedata->show_name;
 }
 
 void NPC::PetOnSpawn(NewSpawn_Struct* ns)

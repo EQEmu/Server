@@ -3930,7 +3930,7 @@ namespace RoF
 			if (strlen(emu->suffix))
 				PacketSize += strlen(emu->suffix) + 1;
 
-			bool ShowName = 1;
+			bool ShowName = emu->show_name;
 			if (emu->bodytype >= 66)
 			{
 				emu->race = 127;
