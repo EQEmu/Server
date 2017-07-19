@@ -1246,12 +1246,9 @@ void EntityList::SendZoneSpawns(Client *client)
 	auto it = mob_list.begin();
 	while (it != mob_list.end()) {
 		Mob *ent = it->second;
-		if (!(ent->InZone()) || (ent->IsClient())) {
-			if (ent->CastToClient()->GMHideMe(client) ||
-					ent->CastToClient()->IsHoveringForRespawn()) {
-				++it;
-				continue;
-			}
+		if (!ent->InZone() || !ent->ShouldISpawnFor(client)) {
+			++it;
+			continue;
 		}
 
 		app = new EQApplicationPacket;
@@ -1279,17 +1276,16 @@ void EntityList::SendZoneSpawnsBulk(Client *client)
 	for (auto it = mob_list.begin(); it != mob_list.end(); ++it) {
 		spawn = it->second;
 		if (spawn && spawn->GetID() > 0 && spawn->Spawned()) {
-			if (spawn->IsClient() && (spawn->CastToClient()->GMHideMe(client) ||
-					spawn->CastToClient()->IsHoveringForRespawn()))
+			if (!spawn->ShouldISpawnFor(client))
 				continue;
 
 #if 1
 			const glm::vec4& spos = spawn->GetPosition();
-			
+
 			delaypkt = false;
 			if (DistanceSquared(cpos, spos) > dmax || (spawn->IsClient() && (spawn->GetRace() == MINOR_ILL_OBJ || spawn->GetRace() == TREE)))
 				delaypkt = true;
-			
+
 			if (delaypkt) {
 				app = new EQApplicationPacket;
 				spawn->CreateSpawnPacket(app);
@@ -2659,7 +2655,7 @@ void EntityList::SendPositionUpdates(Client *client, uint32 cLastUpdate, float u
 			mob && !mob->IsCorpse() 
 			&& (it->second != client)
 			&& (mob->IsClient() || iSendEvenIfNotChanged || (mob->LastChange() >= cLastUpdate))
-			&& (!it->second->IsClient() || !it->second->CastToClient()->GMHideMe(client))
+			&& (it->second->ShouldISpawnFor(client))
 		) {
 			if (
 				update_range == 0 

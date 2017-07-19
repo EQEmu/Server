@@ -549,6 +549,7 @@ public:
 	void SendPosition();
 	void SetSpawned() { spawned = true; };
 	bool Spawned() { return spawned; };
+	virtual bool ShouldISpawnFor(Client *c) { return true; }
 	void SetFlyMode(uint8 flymode);
 	inline void Teleport(glm::vec3 NewPosition) { m_Position.x = NewPosition.x; m_Position.y = NewPosition.y;
 		m_Position.z = NewPosition.z; };
