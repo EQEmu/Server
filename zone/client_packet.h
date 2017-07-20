@@ -236,6 +236,7 @@
 	void Handle_OP_RecipesSearch(const EQApplicationPacket *app);
 	void Handle_OP_ReloadUI(const EQApplicationPacket *app);
 	void Handle_OP_RemoveBlockedBuffs(const EQApplicationPacket *app);
+	void Handle_OP_RemoveTrap(const EQApplicationPacket *app);
 	void Handle_OP_Report(const EQApplicationPacket *app);
 	void Handle_OP_RequestDuel(const EQApplicationPacket *app);
 	void Handle_OP_RequestTitles(const EQApplicationPacket *app);

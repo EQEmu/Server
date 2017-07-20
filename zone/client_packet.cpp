@@ -323,6 +323,7 @@ void MapOpcodes()
 	ConnectedOpcodes[OP_RecipesSearch] = &Client::Handle_OP_RecipesSearch;
 	ConnectedOpcodes[OP_ReloadUI] = &Client::Handle_OP_ReloadUI;
 	ConnectedOpcodes[OP_RemoveBlockedBuffs] = &Client::Handle_OP_RemoveBlockedBuffs;
+	ConnectedOpcodes[OP_RemoveTrap] = &Client::Handle_OP_RemoveTrap;
 	ConnectedOpcodes[OP_Report] = &Client::Handle_OP_Report;
 	ConnectedOpcodes[OP_RequestDuel] = &Client::Handle_OP_RequestDuel;
 	ConnectedOpcodes[OP_RequestTitles] = &Client::Handle_OP_RequestTitles;
@@ -11795,6 +11796,18 @@ void Client::Handle_OP_RemoveBlockedBuffs(const EQApplicationPacket *app)
 	}
 }
 
+void Client::Handle_OP_RemoveTrap(const EQApplicationPacket *app)
+{
+	if (app->size != 4) {// just an int
+		Log(Logs::General, Logs::None, "Size mismatch in OP_RemoveTrap expected 4 got %i", app->size);
+		DumpPacket(app);
+		return;
+	}
+
+	auto id = app->ReadUInt32(0);
+	RemoveAura(id);
+}
+
 void Client::Handle_OP_Report(const EQApplicationPacket *app)
 {
 	if (!CanUseReport)
@@ -14315,13 +14328,13 @@ void Client::Handle_OP_VoiceMacroIn(const EQApplicationPacket *app)
 
 void Client::Handle_OP_UpdateAura(const EQApplicationPacket *app)
 {
-	if (app->size < 4) {
+	if (app->size != 4) {
 		Log(Logs::General, Logs::None, "Size mismatch in OP_UpdateAura");
 		return;
 	}
-	auto action = *(uint32_t *)app->pBuffer; // action tells us the size
+	auto action = app->ReadUInt32(0); // action tells us the size
 	switch (action) {
-	case 2:
+	case 2: // client doesn't send this, but this is what it does
 		RemoveAllAuras();
 		break;
 	case 1: {
