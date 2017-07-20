@@ -6813,6 +6813,10 @@ void command_qglobal(Client *c, const Seperator *sep) {
 
 void command_path(Client *c, const Seperator *sep)
 {
+	if (zone->pathing) {
+		zone->pathing->DebugCommand(c, sep);
+	}
+
 	//if(sep->arg[1][0] == '\0' || !strcasecmp(sep->arg[1], "help"))
 	//{
 	//	c->Message(0, "Syntax: #path shownodes: Spawns a npc to represent every npc node.");

@@ -666,7 +666,7 @@ glm::vec3 Mob::UpdatePath(float ToX, float ToY, float ToZ, float Speed, bool &Wa
 		return *Route.begin();
 	}
 	else {
-		bool SameDestination = DistanceSquared(To, PathingDestination) < 1.0f;
+		bool SameDestination = DistanceSquared(To, PathingDestination) < 4.0f;
 		if (!SameDestination) {
 			//We had a route but our target position moved too much
 			Route = zone->pathing->FindRoute(From, To);
@@ -676,7 +676,7 @@ glm::vec3 Mob::UpdatePath(float ToX, float ToY, float ToZ, float Speed, bool &Wa
 			return *Route.begin();
 		}
 		else {
-			bool AtNextNode = DistanceSquared(From, *Route.begin()) < 1.0f;
+			bool AtNextNode = DistanceSquared(From, *Route.begin()) < 4.0f;
 			if (AtNextNode) {
 				WaypointChanged = false;
 				NodeReached = true;
@@ -690,7 +690,29 @@ glm::vec3 Mob::UpdatePath(float ToX, float ToY, float ToZ, float Speed, bool &Wa
 					return *Route.begin();
 				}
 				else {
-					return *Route.begin();
+					auto node = *Route.begin();
+					if (node.x == 1000000.0f && node.y == 1000000.0f && node.z == 1000000.0f) {
+						//If is identity node then is teleport node.
+						Route.pop_front();
+
+						if (Route.empty()) {
+							return To;
+						}
+
+						auto nextNode = *Route.begin();
+
+						Teleport(nextNode);
+
+						Route.pop_front();
+
+						if (Route.empty()) {
+							return To;
+						}
+
+						return *Route.begin();
+					}
+
+					return node;
 				}
 			}
 			else {
