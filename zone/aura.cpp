@@ -116,7 +116,7 @@ void Aura::ProcessOnAllGroupMembers(Mob *owner)
 	if (owner->IsRaidGrouped() && owner->IsClient()) { // currently raids are just client, but safety check
 		auto raid = owner->GetRaid();
 		if (raid == nullptr) { // well shit
-			Depop();
+			owner->RemoveAura(GetID(), false, true);
 			return;
 		}
 		auto group_id = raid->GetGroup(owner->CastToClient());
@@ -200,7 +200,7 @@ void Aura::ProcessOnAllGroupMembers(Mob *owner)
 	} else if (owner->IsGrouped()) {
 		auto group = owner->GetGroup();
 		if (group == nullptr) { // uh oh
-			Depop();
+			owner->RemoveAura(GetID(), false, true);
 			return;
 		}
 
@@ -310,7 +310,7 @@ void Aura::ProcessOnGroupMembersPets(Mob *owner)
 	if (group_member->IsRaidGrouped() && group_member->IsClient()) { // currently raids are just client, but safety check
 		auto raid = group_member->GetRaid();
 		if (raid == nullptr) { // well shit
-			Depop();
+			owner->RemoveAura(GetID(), false, true);
 			return;
 		}
 		auto group_id = raid->GetGroup(group_member->CastToClient());
@@ -377,7 +377,7 @@ void Aura::ProcessOnGroupMembersPets(Mob *owner)
 	} else if (group_member->IsGrouped()) {
 		auto group = group_member->GetGroup();
 		if (group == nullptr) { // uh oh
-			Depop();
+			owner->RemoveAura(GetID(), false, true);
 			return;
 		}
 
@@ -527,7 +527,7 @@ void Aura::ProcessEnterTrap(Mob *owner)
 		// might need more checks ...
 		if (owner->IsAttackAllowed(mob) && DistanceSquared(GetPosition(), mob->GetPosition()) <= distance) {
 			SpellFinished(spell_id, mob);
-			Depop(); // if we're a buff (ex. NEC) we don't want to strip :P
+			owner->RemoveAura(GetID(), false); // if we're a buff (ex. NEC) we don't want to strip :P
 			break;
 		}
 	}
@@ -551,7 +551,7 @@ bool Aura::Process()
 	}
 
 	if (remove_timer.Check()) {
-		Depop();
+		owner->RemoveAura(GetID(), false, true);
 		return true;
 	}
 
@@ -571,9 +571,10 @@ bool Aura::Process()
 	return true;
 }
 
-void Aura::Depop(bool unused)
+void Aura::Depop(bool skip_strip)
 {
-	if (IsBuffSpell(spell_id)) {
+	// NEC trap casts a dot, so we need some way to not strip :P
+	if (!skip_strip && IsBuffSpell(spell_id)) {
 		for (auto &e : casted_on) {
 			auto mob = entity_list.GetMob(e);
 			if (mob != nullptr)
@@ -763,13 +764,13 @@ void Mob::RemoveAllAuras()
 	return;
 }
 
-void Mob::RemoveAura(int spawn_id, bool expired)
+void Mob::RemoveAura(int spawn_id, bool skip_strip, bool expired)
 {
 	for (int i = 0; i < aura_mgr.count; ++i) {
 		auto &aura = aura_mgr.auras[i];
 		if (aura.spawn_id == spawn_id) {
 			if (aura.aura)
-				aura.aura->Depop();
+				aura.aura->Depop(skip_strip);
 			if (expired && IsClient())
 				CastToClient()->SendColoredText(
 				    CC_Yellow, StringFormat("%s has expired.", aura.name)); // TODO: verify color
@@ -790,7 +791,7 @@ void Mob::RemoveAura(int spawn_id, bool expired)
 		auto &aura = trap_mgr.auras[i];
 		if (aura.spawn_id == spawn_id) {
 			if (aura.aura)
-				aura.aura->Depop();
+				aura.aura->Depop(skip_strip);
 			if (expired && IsClient())
 				CastToClient()->SendColoredText(
 				    CC_Yellow, StringFormat("%s has expired.", aura.name)); // TODO: verify color

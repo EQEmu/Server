@@ -47,7 +47,7 @@ public:
 
 	bool IsAura() const { return true; }
 	bool Process();
-	void Depop(bool unused = false);
+	void Depop(bool skip_strip = false);
 	Mob *GetOwner();
 
 	void ProcessOnAllFriendlies(Mob *owner);

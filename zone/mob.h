@@ -635,7 +635,7 @@ public:
 	void AddAura(Aura *aura, AuraRecord &record);
 	void AddTrap(Aura *aura, AuraRecord &record);
 	bool CanSpawnAura(bool trap);
-	void RemoveAura(int spawn_id, bool expired = false);
+	void RemoveAura(int spawn_id, bool skip_strip = false, bool expired = false);
 	void RemoveAllAuras();
 	inline AuraMgr &GetAuraMgr() { return aura_mgr; } // mainly used for zone db loading/saving
 
