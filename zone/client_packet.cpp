@@ -4366,6 +4366,7 @@ void Client::Handle_OP_ClientTimeStamp(const EQApplicationPacket *app)
 
 void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app)
 {
+	Log(Logs::General, Logs::Status, "Incoming client position packet");
 	if (IsAIControlled())
 		return;
 
@@ -4606,6 +4607,7 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app)
 	m_Position.x = ppu->x_pos;
 	m_Position.y = ppu->y_pos;
 	m_Position.z = ppu->z_pos;
+	Log(Logs::General, Logs::Status, "Client position updated");
 	
 	/* Visual Debugging */
 	if (RuleB(Character, OPClientUpdateVisualDebug)) {

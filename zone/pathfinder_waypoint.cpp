@@ -47,6 +47,7 @@ struct Edge
 	bool teleport;
 	int door_id;
 };
+
 template <class Graph, class CostType, class NodeMap>
 class distance_heuristic : public boost::astar_heuristic<Graph, CostType>
 {
@@ -94,7 +95,7 @@ struct PathfinderWaypoint::Implementation {
 	boost::geometry::index::rtree<RTreeValue, boost::geometry::index::quadratic<16>> Tree;
 	GraphType Graph;
 	std::vector<Node> Nodes;
-	std::vector<Edge> Edges;
+	std::map<std::pair<size_t, size_t>, Edge> Edges;
 };
 
 PathfinderWaypoint::PathfinderWaypoint(const std::string &path)
@@ -171,7 +172,8 @@ PathfinderWaypoint::PathfinderWaypoint(const std::string &path)
 					edge.distance = PathNodes[i].Neighbours[j].distance;
 					edge.door_id = PathNodes[i].Neighbours[j].DoorID;
 					edge.teleport = PathNodes[i].Neighbours[j].Teleport;
-					m_impl->Edges.push_back(edge);
+
+					m_impl->Edges[std::make_pair(PathNodes[i].id, PathNodes[i].Neighbours[j].id)] = edge;
 				}
 			}
 		}
@@ -207,16 +209,18 @@ IPathfinder::IPath PathfinderWaypoint::FindRoute(const glm::vec3 &start, const g
 	auto &nearest_start = *result_start_n.begin();
 	auto &nearest_end = *result_end_n.begin();
 	
-	Log(Logs::General, Logs::Status, "Nearest start point found to be (%f, %f, %f) with node %u", nearest_start.first.get<0>(), nearest_start.first.get<1>(), nearest_start.first.get<2>(), nearest_start.second);
-	Log(Logs::General, Logs::Status, "Nearest end point found to be (%f, %f, %f) with node %u", nearest_end.first.get<0>(), nearest_end.first.get<1>(), nearest_end.first.get<2>(), nearest_end.second);
+	if (nearest_start.second == nearest_end.second) {
+		IPath Route;
+		Route.push_back(start);
+		Route.push_back(end);
+		return Route;
+	}
 
 	std::vector<GraphType::vertex_descriptor> p(boost::num_vertices(m_impl->Graph));
-	std::vector<float> d(boost::num_vertices(m_impl->Graph));
 	try {
 		boost::astar_search(m_impl->Graph, nearest_start.second, 
 			distance_heuristic<GraphType, float, Node*>(&m_impl->Nodes[0], nearest_end.second),
 			boost::predecessor_map(&p[0])
-				.distance_map(&d[0])
 				.visitor(astar_goal_visitor<size_t>(nearest_end.second)));
 	}
 	catch (found_goal)
@@ -225,15 +229,32 @@ IPathfinder::IPath PathfinderWaypoint::FindRoute(const glm::vec3 &start, const g
 		
 		Route.push_front(end);
 		for (size_t v = nearest_end.second;; v = p[v]) {
-			Route.push_front(m_impl->Nodes[v].v);
-			if (p[v] == v)
+			if (p[v] == v) {
+				Route.push_front(m_impl->Nodes[v].v);
 				break;
+			}
+			else {
+				auto iter = m_impl->Edges.find(std::make_pair(p[v], p[v + 1]));
+				if (iter != m_impl->Edges.end()) {
+					auto &edge = iter->second;
+					if (edge.teleport) {
+						Route.push_front(m_impl->Nodes[v].v);
+						glm::vec3 teleport(100000000.0f, 100000000.0f, 100000000.0f);
+						Route.push_front(teleport);
+					}
+					else {
+						Route.push_front(m_impl->Nodes[v].v);
+					}
+				}
+				else {
+					Route.push_front(m_impl->Nodes[v].v);
+				}
+			}
 		}
 		Route.push_front(start);
 
 		return Route;
 	}
-
 
 	IPath Route;
 	Route.push_back(start);

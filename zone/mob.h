@@ -1410,6 +1410,7 @@ protected:
 	//
 	glm::vec3 PathingDestination;
 	IPathfinder::IPath Route;
+	std::unique_ptr<Timer> PathRecalcTimer;
 	bool DistractedFromGrid;
 
 	uint32 pDontHealMeBefore;

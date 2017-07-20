@@ -444,6 +444,8 @@ Mob::Mob(const char* in_name,
 	PrimaryAggro = false;
 	AssistAggro = false;
 	npc_assist_cap = 0;
+
+	PathRecalcTimer.reset(new Timer(1000));
 }
 
 Mob::~Mob()
