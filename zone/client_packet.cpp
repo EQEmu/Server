@@ -14328,24 +14328,18 @@ void Client::Handle_OP_VoiceMacroIn(const EQApplicationPacket *app)
 
 void Client::Handle_OP_UpdateAura(const EQApplicationPacket *app)
 {
-	if (app->size != 4) {
-		Log(Logs::General, Logs::None, "Size mismatch in OP_UpdateAura");
+	if (app->size != sizeof(AuraDestory_Struct)) {
+		Log(Logs::General, Logs::None, "Size mismatch in OP_UpdateAura expected %i got %i",
+		    sizeof(AuraDestory_Struct), app->size);
 		return;
 	}
-	auto action = app->ReadUInt32(0); // action tells us the size
-	switch (action) {
-	case 2: // client doesn't send this, but this is what it does
-		RemoveAllAuras();
-		break;
-	case 1: {
-		auto ads = (AuraDestory_Struct *)app->pBuffer;
-		RemoveAura(ads->entity_id);
-		break;
-	}
-	case 0: // client doesn't send this
-		break;
-	}
 
+	// client only sends this for removing
+	auto aura = (AuraDestory_Struct *)app->pBuffer;
+	if (aura->action != 1)
+		return; // could log I guess, but should only ever get this action
+
+	RemoveAura(aura->entity_id);
 	return;
 }
 
