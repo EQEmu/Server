@@ -153,11 +153,11 @@ void Mob::CalculateNewFearpoint()
 	}
 
 	int ran = 250;
-	float ranx = GetX()+zone->random.Int(0, ran-1)-zone->random.Int(0, ran-1);
-	float rany = GetY()+zone->random.Int(0, ran-1)-zone->random.Int(0, ran-1);
-
-    m_FearWalkTarget = glm::vec3(ranx, rany, GetZ());
-
-    currently_fleeing = true;
+	float ranx = GetX() + zone->random.Int(0, ran - 1) - zone->random.Int(0, ran - 1);
+	float rany = GetY() + zone->random.Int(0, ran - 1)-zone->random.Int(0, ran - 1);
+	
+	m_FearWalkTarget = glm::vec3(ranx, rany, GetZ());
+	
+	currently_fleeing = true;
 }
 
