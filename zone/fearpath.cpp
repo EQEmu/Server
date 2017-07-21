@@ -152,28 +152,12 @@ void Mob::CalculateNewFearpoint()
 		Log(Logs::Detail, Logs::None, "No path found to selected node. Falling through to old fear point selection.");
 	}
 
-	int loop = 0;
-	float ranx, rany, ranz;
-	currently_fleeing = false;
-	while (loop < 100) //Max 100 tries
-	{
-		int ran = 250 - (loop*2);
-		loop++;
-		ranx = GetX()+zone->random.Int(0, ran-1)-zone->random.Int(0, ran-1);
-		rany = GetY()+zone->random.Int(0, ran-1)-zone->random.Int(0, ran-1);
-		ranz = FindGroundZ(ranx,rany);
-		if (ranz == -999999)
-			continue;
-		float fdist = ranz - GetZ();
-		if (fdist >= -12 && fdist <= 12 && CheckCoordLosNoZLeaps(GetX(),GetY(),GetZ(),ranx,rany,ranz))
-		{
-			currently_fleeing = true;
-			break;
-		}
-	}
-	if (currently_fleeing)
-        m_FearWalkTarget = glm::vec3(ranx, rany, ranz);
-	else //Break fear
-		BuffFadeByEffect(SE_Fear);
+	int ran = 250;
+	float ranx = GetX()+zone->random.Int(0, ran-1)-zone->random.Int(0, ran-1);
+	float rany = GetY()+zone->random.Int(0, ran-1)-zone->random.Int(0, ran-1);
+
+    m_FearWalkTarget = glm::vec3(ranx, rany, GetZ());
+
+    currently_fleeing = true;
 }
 
