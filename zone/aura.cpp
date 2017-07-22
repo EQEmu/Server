@@ -538,6 +538,32 @@ void Aura::ProcessExitTrap(Mob *owner)
 	Shout("Stub 6");
 }
 
+// this is less than ideal, but other solutions are a bit all over the place
+// and hard to reason about
+void Aura::ProcessSpawns()
+{
+	const auto &clients = entity_list.GetClientList();
+	for (auto &e : clients) {
+		auto c = e.second;
+		bool spawned = spawned_for.find(c->GetID()) != spawned_for.end();
+		if (ShouldISpawnFor(c)) {
+			if (!spawned) {
+				EQApplicationPacket app;
+				CreateSpawnPacket(&app, this);
+				c->QueuePacket(&app);
+				SendArmorAppearance(c);
+				spawned_for.insert(c->GetID());
+			}
+		} else if (spawned) {
+			EQApplicationPacket app;
+			CreateDespawnPacket(&app, false);
+			c->QueuePacket(&app);
+			spawned_for.erase(c->GetID());
+		}
+	}
+	return;
+}
+
 bool Aura::Process()
 {
 	// Aura::Depop clears buffs
@@ -564,11 +590,67 @@ bool Aura::Process()
 	if (!process_timer.Check())
 		return true;
 
+	ProcessSpawns(); // bit of a hack
+
 	if (process_func)
 		process_func(*this, owner);
 
 	// TODO: quest calls
 	return true;
+}
+
+bool Aura::ShouldISpawnFor(Client *c)
+{
+	if (spawn_type == AuraSpawns::Noone)
+		return false;
+
+	if (spawn_type == AuraSpawns::Everyone)
+		return true;
+
+	// hey, it's our owner!
+	if (c->GetID() == m_owner)
+		return true;
+
+	// so this one is a bit trickier
+	auto owner = GetOwner();
+	if (owner == nullptr)
+		return false; // hmm
+
+	owner = owner->GetOwnerOrSelf(); // pet auras we need the pet's owner
+	if (owner == nullptr) // shouldn't really be needed
+		return false;
+
+	// gotta check again for pet aura case -.-
+	if (owner == c)
+		return true;
+
+	if (owner->IsRaidGrouped() && owner->IsClient()) {
+		auto raid = owner->GetRaid();
+		if (raid == nullptr)
+			return false; // hmm
+		auto group_id = raid->GetGroup(owner->CastToClient());
+		if (group_id == 0xFFFFFFFF) // owner handled above, and they're in a raid and groupless
+			return false;
+
+		auto idx = raid->GetPlayerIndex(c);
+		if (idx == 0xFFFFFFFF) // they're not in our raid!
+			return false;
+
+		if (raid->members[idx].GroupNumber != group_id) // in our raid, but not our group
+			return false;
+
+		return true; // we got here so we know that 1 they're in our raid and 2 they're in our group!
+	} else if (owner->IsGrouped()) {
+		auto group = owner->GetGroup();
+		if (group == nullptr)
+			return false; // hmm
+
+		// easy, in our group
+		return group->IsGroupMember(c);
+	}
+
+	// our owner is not raided or grouped, and they're handled above so we don't spawn!
+	return false;
 }
 
 void Aura::Depop(bool skip_strip)
@@ -642,7 +724,7 @@ void Mob::MakeAura(uint16 spell_id)
 
 	auto npc = new Aura(npc_type, this, record);
 	npc->SetAuraID(spell_id);
-	entity_list.AddNPC(npc, true, true);
+	entity_list.AddNPC(npc, false);
 
 	if (trap)
 		AddTrap(npc, record);

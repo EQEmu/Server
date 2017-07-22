@@ -56,12 +56,18 @@ public:
 	void ProcessTotem(Mob *owner);
 	void ProcessEnterTrap(Mob *owner);
 	void ProcessExitTrap(Mob *owner);
+	void ProcessSpawns();
 
 	// we only save auras that follow you, and player casted
 	inline bool AuraZones() { return movement_type == AuraMovement::Follow && aura_id > -1; }
 	inline int GetSpellID() { return spell_id; }
 	inline int GetAuraID() { return aura_id; }
 	inline void SetAuraID(int in) { aura_id = in; }
+
+	bool ShouldISpawnFor(Client *c);
+	// so when we join a group, we need to spawn not already spawned auras
+	// This is only possible when spawn type is GroupMembers
+	inline bool JoinGroupSpawnCheck() { return spawn_type == AuraSpawns::GroupMembers; }
 private:
 	int m_owner;
 	int aura_id; // spell ID of the aura spell -1 if aura isn't from a casted spell
@@ -77,6 +83,7 @@ private:
 
 	std::function<void(Aura &, Mob *)> process_func;
 	std::set<int> casted_on; // we keep track of the other entities we've casted on
+	std::set<int> spawned_for;
 };
 
 #endif /* !AURA_H */
