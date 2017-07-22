@@ -3644,7 +3644,7 @@ void Mob::DoBuffTic(const Buffs_Struct &buff, int slot, Mob *caster)
 
 		case SE_Fear: {
 			if (zone->random.Roll(RuleI(Spells, FearBreakCheckChance))) {
-				float resist_check = ResistSpell(spells[buff.spellid].resisttype, buff.spellid, caster);
+				float resist_check = ResistSpell(spells[buff.spellid].resisttype, buff.spellid, caster,0,0,true);
 
 				if (resist_check == 100)
 					break;
