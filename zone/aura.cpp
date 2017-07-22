@@ -535,7 +535,27 @@ void Aura::ProcessEnterTrap(Mob *owner)
 
 void Aura::ProcessExitTrap(Mob *owner)
 {
-	Shout("Stub 6");
+	auto &mob_list = entity_list.GetMobList(); // read only reference so we can do it all inline
+
+	for (auto &e : mob_list) {
+		auto mob = e.second;
+		if (mob == this)
+			continue;
+		// might need more checks ...
+		if (owner->IsAttackAllowed(mob)) {
+			bool in_range = DistanceSquared(GetPosition(), mob->GetPosition()) <= distance;
+			auto it = casted_on.find(mob->GetID());
+			if (it != casted_on.end()) {
+				if (!in_range) {
+					SpellFinished(spell_id, mob);
+					owner->RemoveAura(GetID(), false); // if we're a buff we don't want to strip :P
+					break;
+				}
+			} else if (in_range) {
+				casted_on.insert(mob->GetID());
+			}
+		}
+	}
 }
 
 // this is less than ideal, but other solutions are a bit all over the place
