@@ -3,14 +3,15 @@
 #include <boost/geometry/index/rtree.hpp>
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/astar_search.hpp>
+#include <string>
+#include <memory>
+#include <stdio.h>
 
 #include "pathfinder_waypoint.h"
 #include "zone.h"
 #include "client.h"
 #include "../common/eqemu_logsys.h"
 #include "../common/rulesys.h"
-#include <string>
-#include <stdio.h>
 
 extern Zone *zone;
 
@@ -115,6 +116,7 @@ PathfinderWaypoint::PathfinderWaypoint(const std::string &path)
 		if (strncmp(Magic, "EQEMUPATH", 9))
 		{
 			Log(Logs::General, Logs::Error, "Bad Magic String in .path file.");
+			fclose(f);
 			return;
 		}
 
@@ -123,62 +125,20 @@ PathfinderWaypoint::PathfinderWaypoint(const std::string &path)
 		Log(Logs::General, Logs::Status, "Path File Header: Version %ld, PathNodes %ld",
 			(long)Head.version, (long)Head.PathNodeCount);
 
-		if (Head.version != 2)
+		if (Head.version == 2)
 		{
-			Log(Logs::General, Logs::Error, "Unsupported path file version.");
+			LoadV2(f, Head);
 			return;
 		}
-
-		std::unique_ptr<PathNode[]> PathNodes(new PathNode[Head.PathNodeCount]);
-
-		fread(PathNodes.get(), sizeof(PathNode), Head.PathNodeCount, f);
-
-		int MaxNodeID = Head.PathNodeCount - 1;
-
-		m_impl->PathFileValid = true;
-
-		m_impl->Nodes.reserve(Head.PathNodeCount);
-		for (uint32 i = 0; i < Head.PathNodeCount; ++i)
-		{
-			auto &n = PathNodes[i];
-
-			Point p = Point(n.v.x, n.v.y, n.v.z);
-			m_impl->Tree.insert(std::make_pair(p, i));
-
-			boost::add_vertex(m_impl->Graph);
-			Node node;
-			node.v = n.v;
-			node.bestz = n.bestz;
-			m_impl->Nodes.push_back(node);
+		else if (Head.version == 3) {
+			LoadV3(f, Head);
+			return;
 		}
-
-		auto weightmap = boost::get(boost::edge_weight, m_impl->Graph);
-		for (uint32 i = 0; i < Head.PathNodeCount; ++i) {
-			for (uint32 j = 0; j < 50; ++j)
-			{
-				if (PathNodes[i].Neighbours[j].id > MaxNodeID)
-				{
-					Log(Logs::General, Logs::Error, "Path Node %i, Neighbour %i (%i) out of range.", i, j, PathNodes[i].Neighbours[j].id);
-					m_impl->PathFileValid = false;
-				}
-			
-				if (PathNodes[i].Neighbours[j].id > 0) {
-					GraphType::edge_descriptor e;
-					bool inserted;
-					boost::tie(e, inserted) = boost::add_edge(PathNodes[i].id, PathNodes[i].Neighbours[j].id, m_impl->Graph);
-					weightmap[e] = PathNodes[i].Neighbours[j].distance;
-
-					Edge edge;
-					edge.distance = PathNodes[i].Neighbours[j].distance;
-					edge.door_id = PathNodes[i].Neighbours[j].DoorID;
-					edge.teleport = PathNodes[i].Neighbours[j].Teleport;
-
-					m_impl->Edges[std::make_pair(PathNodes[i].id, PathNodes[i].Neighbours[j].id)] = edge;
-				}
-			}
+		else {
+			Log(Logs::General, Logs::Error, "Unsupported path file version.");
+			fclose(f);
+			return;
 		}
-
-		fclose(f);
 	}
 }
 
@@ -239,8 +199,7 @@ IPathfinder::IPath PathfinderWaypoint::FindRoute(const glm::vec3 &start, const g
 					auto &edge = iter->second;
 					if (edge.teleport) {
 						Route.push_front(m_impl->Nodes[v].v);
-						glm::vec3 teleport(100000000.0f, 100000000.0f, 100000000.0f);
-						Route.push_front(teleport);
+						Route.push_front(true);
 					}
 					else {
 						Route.push_front(m_impl->Nodes[v].v);
@@ -295,14 +254,73 @@ void PathfinderWaypoint::DebugCommand(Client *c, const Seperator *sep)
 	{
 		if (c->GetTarget() != nullptr) {
 			auto target = c->GetTarget();
-			glm::vec3 start(target->GetX(), target->GetY(), target->GetZ());
-			glm::vec3 end(c->GetX(), c->GetY(), c->GetZ());
+			glm::vec3 end(target->GetX(), target->GetY(), target->GetZ());
+			glm::vec3 start(c->GetX(), c->GetY(), c->GetZ());
 
-			ShowPath(start, end);
+			ShowPath(c, start, end);
 		}
 
 		return;
 	}
+}
+
+void PathfinderWaypoint::LoadV2(FILE *f, const PathFileHeader &header)
+{
+	std::unique_ptr<PathNode[]> PathNodes(new PathNode[header.PathNodeCount]);
+
+	fread(PathNodes.get(), sizeof(PathNode), header.PathNodeCount, f);
+
+	int MaxNodeID = header.PathNodeCount - 1;
+
+	m_impl->PathFileValid = true;
+
+	m_impl->Nodes.reserve(header.PathNodeCount);
+	for (uint32 i = 0; i < header.PathNodeCount; ++i)
+	{
+		auto &n = PathNodes[i];
+
+		Point p = Point(n.v.x, n.v.y, n.v.z);
+		m_impl->Tree.insert(std::make_pair(p, i));
+
+		boost::add_vertex(m_impl->Graph);
+		Node node;
+		node.v = n.v;
+		node.bestz = n.bestz;
+		m_impl->Nodes.push_back(node);
+	}
+
+	auto weightmap = boost::get(boost::edge_weight, m_impl->Graph);
+	for (uint32 i = 0; i < header.PathNodeCount; ++i) {
+		for (uint32 j = 0; j < 50; ++j)
+		{
+			if (PathNodes[i].Neighbours[j].id > MaxNodeID)
+			{
+				Log(Logs::General, Logs::Error, "Path Node %i, Neighbour %i (%i) out of range.", i, j, PathNodes[i].Neighbours[j].id);
+				m_impl->PathFileValid = false;
+			}
+
+			if (PathNodes[i].Neighbours[j].id > 0) {
+				GraphType::edge_descriptor e;
+				bool inserted;
+				boost::tie(e, inserted) = boost::add_edge(PathNodes[i].id, PathNodes[i].Neighbours[j].id, m_impl->Graph);
+				weightmap[e] = PathNodes[i].Neighbours[j].distance;
+
+				Edge edge;
+				edge.distance = PathNodes[i].Neighbours[j].distance;
+				edge.door_id = PathNodes[i].Neighbours[j].DoorID;
+				edge.teleport = PathNodes[i].Neighbours[j].Teleport;
+
+				m_impl->Edges[std::make_pair(PathNodes[i].id, PathNodes[i].Neighbours[j].id)] = edge;
+			}
+		}
+	}
+
+	fclose(f);
+}
+
+void PathfinderWaypoint::LoadV3(FILE *f, const PathFileHeader &header)
+{
+	fclose(f);
 }
 
 void PathfinderWaypoint::ShowNodes()
@@ -348,46 +366,22 @@ void PathfinderWaypoint::ShowNodes()
 	}
 }
 
-void PathfinderWaypoint::ShowPath(const glm::vec3 &start, const glm::vec3 &end)
+void PathfinderWaypoint::ShowPath(Client *c, const glm::vec3 &start, const glm::vec3 &end)
 {
 	auto path = FindRoute(start, end);
+	std::vector<FindPerson_Point> points;
 
+	FindPerson_Point p;
 	for (auto &node : path)
 	{
-		auto npc_type = new NPCType;
-		memset(npc_type, 0, sizeof(NPCType));
-	
-		sprintf(npc_type->name, "Path");
-		npc_type->cur_hp = 4000000;
-		npc_type->max_hp = 4000000;
-		npc_type->race = 2254;
-		npc_type->gender = 2;
-		npc_type->class_ = 9;
-		npc_type->deity = 1;
-		npc_type->level = 75;
-		npc_type->npc_id = 0;
-		npc_type->loottable_id = 0;
-		npc_type->texture = 1;
-		npc_type->light = 0;
-		npc_type->runspeed = 0;
-		npc_type->d_melee_texture1 = 1;
-		npc_type->d_melee_texture2 = 1;
-		npc_type->merchanttype = 1;
-		npc_type->bodytype = 1;
-	
-		npc_type->STR = 150;
-		npc_type->STA = 150;
-		npc_type->DEX = 150;
-		npc_type->AGI = 150;
-		npc_type->INT = 150;
-		npc_type->WIS = 150;
-		npc_type->CHA = 150;
-	
-		npc_type->findable = 1;
-		auto position = glm::vec4(node.x, node.y, node.z, 0.0f);
-		auto npc = new NPC(npc_type, nullptr, position, FlyMode1);
-		npc->GiveNPCTypeData(npc_type);
-	
-		entity_list.AddNPC(npc, true, true);
+		if (!node.teleport) {
+			p.x = node.pos.x;
+			p.y = node.pos.y;
+			p.z = node.pos.z;
+
+			points.push_back(p);
+		}
 	}
+
+	c->SendPathPacket(points);
 }

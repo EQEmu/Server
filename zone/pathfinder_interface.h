@@ -9,7 +9,22 @@ class Seperator;
 class IPathfinder
 {
 public:
-	typedef std::list<glm::vec3> IPath;
+	struct IPathNode
+	{
+		IPathNode(const glm::vec3 &p) {
+			pos = p;
+			teleport = false;
+		}
+
+		IPathNode(bool tp) {
+			teleport = tp;
+		}
+
+		glm::vec3 pos;
+		bool teleport;
+	};
+
+	typedef std::list<IPathNode> IPath;
 
 	IPathfinder() { }
 	virtual ~IPathfinder() { }

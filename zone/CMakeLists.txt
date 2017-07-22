@@ -205,7 +205,6 @@ SET(zone_headers
 	pathfinder_nav_mesh.h
 	pathfinder_null.h
 	pathfinder_waypoint.h
-	pathing.h
 	perlpacket.h
 	petitions.h
 	pets.h

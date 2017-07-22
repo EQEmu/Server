@@ -19,7 +19,6 @@
 #include "../common/rulesys.h"
 
 #include "map.h"
-#include "pathing.h"
 #include "zone.h"
 
 #ifdef _WINDOWS
@@ -142,10 +141,10 @@ void Mob::CalculateNewFearpoint()
 			if (!Route.empty())
 			{
 				auto first = (*Route.begin());
-				m_FearWalkTarget = glm::vec3(first.x, first.y, first.z);
+				m_FearWalkTarget = glm::vec3(first.pos.x, first.pos.y, first.pos.z);
 				currently_fleeing = true;
 
-				Log(Logs::Detail, Logs::None, "Feared to node %i (%8.3f, %8.3f, %8.3f)", Node, first.x, first.y, first.z);
+				Log(Logs::Detail, Logs::None, "Feared to node %i (%8.3f, %8.3f, %8.3f)", Node, first.pos.x, first.pos.y, first.pos.z);
 				return;
 			}
 
