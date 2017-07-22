@@ -382,13 +382,8 @@ void EQ::Net::DaybreakConnection::ProcessPacket(Packet &p)
 		return;
 	}
 
-	if (p.GetInt8(0) != 0) {
-		LogF(Logs::Detail, Logs::Netcode, "Error parsing packet, did not start with a 0 frame, not a valid protocol packet.");
-		return;
-	}
-
 	auto opcode = p.GetInt8(1);
-	if (opcode == OP_KeepAlive || opcode == OP_OutboundPing) {
+	if (p.GetInt8(0) == 0 && (opcode == OP_KeepAlive || opcode == OP_OutboundPing)) {
 		return;
 	}
 
@@ -407,10 +402,16 @@ void EQ::Net::DaybreakConnection::ProcessPacket(Packet &p)
 			for (int i = 1; i >= 0; --i) {
 				switch (m_encode_passes[i]) {
 					case EncodeCompression:
-						Decompress(temp, DaybreakHeader::size(), temp.Length() - DaybreakHeader::size());
+						if(temp.GetInt8(0) == 0)
+							Decompress(temp, DaybreakHeader::size(), temp.Length() - DaybreakHeader::size());
+						else
+							Decompress(temp, 1, temp.Length() - 1);
 						break;
 					case EncodeXOR:
-						Decode(temp, DaybreakHeader::size(), temp.Length() - DaybreakHeader::size());
+						if (temp.GetInt8(0) == 0)
+							Decode(temp, DaybreakHeader::size(), temp.Length() - DaybreakHeader::size());
+						else
+							Decode(temp, 1, temp.Length() - 1);
 						break;
 					default:
 						break;
@@ -425,7 +426,10 @@ void EQ::Net::DaybreakConnection::ProcessPacket(Packet &p)
 			for (int i = 1; i >= 0; --i) {
 				switch (m_encode_passes[i]) {
 					case EncodeXOR:
-						Decode(temp, DaybreakHeader::size(), temp.Length() - DaybreakHeader::size());
+						if (temp.GetInt8(0) == 0) 
+							Decode(temp, DaybreakHeader::size(), temp.Length() - DaybreakHeader::size());
+						else
+							Decode(temp, 1, temp.Length() - 1);
 						break;
 					default:
 						break;
@@ -1187,24 +1191,21 @@ void EQ::Net::DaybreakConnection::InternalSend(Packet &p)
 
 	if (PacketCanBeEncoded(p)) {
 		DynamicPacket out;
-
-		if (p.GetUInt8(0) != 0) {
-			out.PutUInt8(0, 0);
-			out.PutUInt8(1, OP_Combined);
-			out.PutUInt8(2, p.Length());
-			out.PutPacket(3, p);
-		}
-		else {
-			out.PutPacket(0, p);
-		}
+		out.PutPacket(0, p);
 
 		for (int i = 0; i < 2; ++i) {
 			switch (m_encode_passes[i]) {
 				case EncodeCompression:
-					Compress(out, DaybreakHeader::size(), out.Length() - DaybreakHeader::size());
+					if(out.GetInt8(0) == 0) 
+						Compress(out, DaybreakHeader::size(), out.Length() - DaybreakHeader::size());
+					else
+						Compress(out, 1, out.Length() - 1);
 					break;
 				case EncodeXOR:
-					Encode(out, DaybreakHeader::size(), out.Length() - DaybreakHeader::size());
+					if (out.GetInt8(0) == 0)
+						Encode(out, DaybreakHeader::size(), out.Length() - DaybreakHeader::size());
+					else
+						Encode(out, 1, out.Length() - 1);
 					break;
 				default:
 					break;

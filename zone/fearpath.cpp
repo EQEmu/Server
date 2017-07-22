@@ -175,7 +175,5 @@ void Mob::CalculateNewFearpoint()
 
 	if (currently_fleeing)
         m_FearWalkTarget = glm::vec3(ranx, rany, ranz);
-	else //Break fear
-		BuffFadeByEffect(SE_Fear);
 }
 

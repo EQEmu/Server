@@ -774,7 +774,7 @@ void Mob::FixZ() {
 
 			Log(
 				Logs::Moderate, 
-				Logs::Pathing, 
+				Logs::FixZ,
 				"Mob::FixZ() (%s) returned %4.3f at %4.3f, %4.3f, %4.3f - Took %lf", 
 				this->GetCleanName(), 
 				new_z, 
@@ -794,7 +794,7 @@ void Mob::FixZ() {
 				if (RuleB(Map, MobZVisualDebug))
 					this->SendAppearanceEffect(103, 0, 0, 0, 0);
 
-				Log(Logs::General, Logs::Debug, "%s is failing to find Z %f", this->GetCleanName(), std::abs(m_Position.z - new_z));
+				Log(Logs::General, Logs::FixZ, "%s is failing to find Z %f", this->GetCleanName(), std::abs(m_Position.z - new_z));
 			}
 
 			last_z = m_Position.z;
