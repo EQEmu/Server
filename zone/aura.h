@@ -41,6 +41,7 @@ enum class AuraMovement {
 
 class Aura : public NPC
 {
+	// NOTE: We may have to override more virtual functions if they're causing issues
 public:
 	Aura(NPCType *type_data, Mob *owner, AuraRecord &record);
 	~Aura() { };
