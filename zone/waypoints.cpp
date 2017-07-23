@@ -495,7 +495,8 @@ bool Mob::MakeNewPositionAndSendUpdate(float x, float y, float z, int speed, boo
 		m_Position.y = new_y;
 		m_Position.z = new_z;
 
-		if(fix_z_timer.Check() && !this->IsEngaged())
+		if(fix_z_timer.Check() && 
+			(!this->IsEngaged() || flee_mode || currently_fleeing))
 			this->FixZ();
 
 		tar_ndx++;
