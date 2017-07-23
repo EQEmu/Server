@@ -1454,7 +1454,7 @@ sub map_files_fetch_bulk{
 	get_remote_file("http://github.com/Akkadius/EQEmuMaps/archive/master.zip", "maps/maps.zip", 1);
 	unzip('maps/maps.zip', 'maps/');
 	my @files;
-	my $start_dir = "maps/EQEmuMaps-master/maps";
+	my $start_dir = "maps/EQEmuMaps-master/";
 	find( 
 		sub { push @files, $File::Find::name unless -d; }, 
 		$start_dir
@@ -2180,3 +2180,4 @@ sub generate_random_password {
 
     return $randpassword;
 }
+

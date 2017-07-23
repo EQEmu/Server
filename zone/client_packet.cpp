@@ -4599,14 +4599,14 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app)
 		}
 	}
 	
+	float new_heading = EQ19toFloat(ppu->heading);
+	int32 new_animation = ppu->animation;
+
 	/* Update internal server position from what the client has sent */
 	m_Position.x = ppu->x_pos;
 	m_Position.y = ppu->y_pos;
 	m_Position.z = ppu->z_pos;
-	m_Position.w = EQ19toFloat(ppu->heading);
 	
-	animation = ppu->animation;
-
 	/* Visual Debugging */
 	if (RuleB(Character, OPClientUpdateVisualDebug)) {
 		Log(Logs::General, Logs::Debug, "ClientUpdate: ppu x: %f y: %f z: %f h: %u", ppu->x_pos, ppu->y_pos, ppu->z_pos, ppu->heading);
@@ -4615,7 +4615,10 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app)
 	}
 
 	/* Only feed real time updates when client is moving */
-	if (is_client_moving) {
+	if (is_client_moving || new_heading != m_Position.w || new_animation != animation) {
+
+		animation = ppu->animation;
+		m_Position.w = EQ19toFloat(ppu->heading);
 
 		/* Broadcast update to other clients */
 		auto outapp = new EQApplicationPacket(OP_ClientUpdate, sizeof(PlayerPositionUpdateServer_Struct));

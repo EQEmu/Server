@@ -305,6 +305,7 @@ union
 	uint8 DestructibleUnk8;
 	uint32 DestructibleUnk9;
 	bool targetable_with_hotkey;
+	bool show_name;
 
 };
 
