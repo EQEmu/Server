@@ -1460,6 +1460,14 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 				newbon->FeignedMinionChance = base1;
 			break;
 
+		case SE_AdditionalAura:
+			newbon->aura_slots += base1;
+			break;
+
+		case SE_IncreaseTrapCount:
+			newbon->trap_slots += base1;
+			break;
+
 		// to do
 		case SE_PetDiscipline:
 			break;
@@ -3200,6 +3208,16 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 			case SE_FeignedCastOnChance:
 				if (new_bonus->FeignedCastOnChance < effect_value)
 					new_bonus->FeignedCastOnChance = effect_value;
+				break;
+
+			case SE_AdditionalAura:
+				if (new_bonus->aura_slots < effect_value)
+					new_bonus->aura_slots = effect_value;
+				break;
+
+			case SE_IncreaseTrapCount:
+				if (new_bonus->trap_slots < effect_value)
+					new_bonus->trap_slots = effect_value;
 				break;
 		
 			//Special custom cases for loading effects on to NPC from 'npc_spels_effects' table

@@ -1674,6 +1674,7 @@ void SharedDatabase::LoadSpells(void *data, int max_spells) {
 		for (y = 0; y < 16; y++)
 			sp[tempid].deities[y]=atoi(row[126+y]);
 
+		sp[tempid].new_icon=atoi(row[144]);
 		sp[tempid].uninterruptable=atoi(row[146]) != 0;
 		sp[tempid].ResistDiff=atoi(row[147]);
 		sp[tempid].dot_stacking_exempt = atoi(row[148]) != 0;
