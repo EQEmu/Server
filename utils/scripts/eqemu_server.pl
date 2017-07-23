@@ -326,6 +326,17 @@ sub check_xml_to_json_conversion {
 		print $fh $json->pretty->utf8->encode($result);
 		close $fh;
 		
+		mkdir('backups');
+		copy_file("eqemu_config.xml", "backups/eqemu_config.xml"); 
+		
+		print "[Server Maintenance] eqemu_config.xml is now DEPRECATED \n";
+		print "	A backup of this old config is located in the backups folder of your server directory\n";
+		print "	--- \n";
+		print "	You may have some plugins and/or applications that still require reference of this config file\n";
+		print "	Please update these plugins/applications to use the new configuration format if needed\n";
+		print "	Thanks for your understanding\n";
+		print "	The EQEmulator Team\n\n";
+		
 		exit;
 	}
 	
