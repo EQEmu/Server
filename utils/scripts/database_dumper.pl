@@ -39,12 +39,6 @@ if(!$ARGV[0]){
 	exit;
 }
 
-#::: CONFIG VARIABLES - Parsed from eqemu_config.xml 
-
-my $confile = "eqemu_config.xml"; #default
-open(F, "<$confile") or die "Unable to open config: $confile - This must be in your EQEmu Server Folder with your XML config\n";
-my $indb = 0;
-
 sub read_eqemu_config_json {
 	use JSON;
 	my $json = new JSON();
@@ -65,6 +59,8 @@ sub read_eqemu_config_json {
 	$long_name = $config->{"server"}{"world"}{"longname"};
 
 }
+
+read_eqemu_config_json();
 
 $Debug = 0;
 print "[db_dumper.pl] Arguments\n" if $Debug;
