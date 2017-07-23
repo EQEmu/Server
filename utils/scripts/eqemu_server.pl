@@ -56,6 +56,8 @@ if(-e "eqemu_config.json") {
 	read_eqemu_config_json();
 }
 else {
+	#::: This will need to stay for servers who simply haven't updated yet
+	# This script can still update without the server bins being updated
 	read_eqemu_config_xml();
 }
 get_mysql_path();
@@ -672,11 +674,7 @@ sub do_install_config_json {
 
 	$config = $json->decode($content);
 	
-	$config->{"server"}{"database"}{"username"} = $installation_variables{"mysql_eqemu_user"};
-	$config->{"server"}{"database"}{"password"} = $installation_variables{"mysql_eqemu_password"};
-	
-	$append = ' (' . generate_random_password(5) . ')';
-	$long_name = "Akkas " . $OS . " PEQ Installer " . $append;
+	$long_name = "Akkas " . $OS . " PEQ Installer (" . generate_random_password(5) . ')';
 	$config->{"server"}{"world"}{"longname"} = $long_name;
 	$config->{"server"}{"world"}{"key"} = generate_random_password(30);
 	
@@ -686,6 +684,8 @@ sub do_install_config_json {
 	else {
 		$db_name = "peq";
 	}
+	$config->{"server"}{"database"}{"username"} = $installation_variables{"mysql_eqemu_user"};
+	$config->{"server"}{"database"}{"password"} = $installation_variables{"mysql_eqemu_password"};
 	$config->{"server"}{"database"}{"db"} = $db_name;
 	
 	open(my $fh, '>', 'eqemu_config.json');
