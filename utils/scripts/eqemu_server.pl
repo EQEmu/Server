@@ -917,13 +917,13 @@ sub check_for_database_dump_script{
 		return;
 	}
 
-	#::: Check for script changes :: db_dumper.pl
-	get_remote_file($eqemu_repository_request_url . "utils/scripts/db_dumper.pl", "updates_staged/db_dumper.pl", 0, 1, 1);
+	#::: Check for script changes :: database_dumper.pl
+	get_remote_file($eqemu_repository_request_url . "utils/scripts/database_dumper.pl", "updates_staged/database_dumper.pl", 0, 1, 1);
 	
-	if(-e "updates_staged/db_dumper.pl") { 
+	if(-e "updates_staged/database_dumper.pl") { 
 	
-		my $remote_script_size = -s "updates_staged/db_dumper.pl";
-		my $local_script_size = -s "db_dumper.pl";
+		my $remote_script_size = -s "updates_staged/database_dumper.pl";
+		my $local_script_size = -s "database_dumper.pl";
 	
 		if($remote_script_size != $local_script_size){
 			print "[Update] Script has been updated, updating...\n";
@@ -942,7 +942,7 @@ sub check_for_database_dump_script{
 					unlink($destination_file);
 					copy_file($file, $destination_file); 
 					if($OS eq "Linux"){
-						system("chmod 755 db_dumper.pl");
+						system("chmod 755 database_dumper.pl");
 					}
 				}
 			}
@@ -952,7 +952,7 @@ sub check_for_database_dump_script{
 			print "[Update] No script update necessary...\n";
 		}
 
-		unlink("updates_staged/db_dumper.pl");
+		unlink("updates_staged/database_dumper.pl");
 	}
 	
 	return;
@@ -962,7 +962,7 @@ sub check_for_database_dump_script{
 sub database_dump { 
 	check_for_database_dump_script();
 	print "[Database] Performing database backup....\n";
-	print `perl db_dumper.pl database="$db" loc="backups"`;
+	print `perl database_dumper.pl database="$db" loc="backups"`;
 }
 
 sub database_dump_player_tables { 
@@ -980,7 +980,7 @@ sub database_dump_player_tables {
 	}
 	$tables = substr($tables, 0, -1);
 
-	print `perl db_dumper.pl database="$db" loc="backups" tables="$tables" backup_name="player_tables_export" nolock`;
+	print `perl database_dumper.pl database="$db" loc="backups" tables="$tables" backup_name="player_tables_export" nolock`;
 	
 	print "[Database] Press any key to continue...\n";
 
@@ -991,7 +991,7 @@ sub database_dump_player_tables {
 sub database_dump_compress { 
 	check_for_database_dump_script();
 	print "[Database] Performing database backup....\n";
-	print `perl db_dumper.pl database="$db"  loc="backups" compress`;
+	print `perl database_dumper.pl database="$db"  loc="backups" compress`;
 }
 
 sub script_exit{ 
@@ -1143,12 +1143,13 @@ sub read_eqemu_config_json {
 	close($fh);
 
 	$config = $json->decode($content);
+	
+	$db = $config->{"server"}{"database"}{"db"};
+	$host = $config->{"server"}{"database"}{"host"};
+	$user = $config->{"server"}{"database"}{"username"};
+	$pass = $config->{"server"}{"database"}{"password"};
+	$long_name = $config->{"server"}{"world"}{"longname"};
 
-	$db = $config->{"server"}{"database"}{"db"} . "\n";
-	$host = $config->{"server"}{"database"}{"host"} . "\n";
-	$user = $config->{"server"}{"database"}{"username"} . "\n";
-	$pass = $config->{"server"}{"database"}{"password"} . "\n";
-	$long_name = $config->{"server"}{"world"}{"longname"} . "\n";
 }
 
 #::: Fetch Latest PEQ AA's
