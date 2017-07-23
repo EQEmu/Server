@@ -472,16 +472,6 @@ bool Database::CheckDatabaseConversions() {
 	CheckDatabaseConvertPPDeblob();
 	CheckDatabaseConvertCorpseDeblob();
 
-	/* Fetch EQEmu Server script */
-	if (!std::ifstream("eqemu_server.pl")){
-		std::cout << "Pulling down automatic database upgrade script..." << std::endl;
-#ifdef _WIN32
-		system("perl -MLWP::UserAgent -e \"require LWP::UserAgent;  my $ua = LWP::UserAgent->new; $ua->timeout(10); $ua->env_proxy; my $response = $ua->get('https://raw.githubusercontent.com/EQEmu/Server/master/utils/scripts/eqemu_server.pl'); if ($response->is_success){ open(FILE, '> eqemu_server.pl'); print FILE $response->decoded_content; close(FILE); }\"");
-#else
-		system("wget --no-check-certificate -O eqemu_server.pl https://raw.githubusercontent.com/EQEmu/Server/master/utils/scripts/eqemu_server.pl");
-#endif
-	}
-
 	/* Run EQEmu Server script (Checks for database updates) */
 	system("perl eqemu_server.pl ran_from_world");
 

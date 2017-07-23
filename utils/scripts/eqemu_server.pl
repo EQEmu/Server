@@ -15,7 +15,7 @@ use File::Copy qw(copy);
 use POSIX qw(strftime);
 use File::Path;
 use File::Find;
-use Time::HiRes qw(usleep);
+use Time::HiRes qw(usleep); 
 
 #::: Variables
 $install_repository_request_url = "https://raw.githubusercontent.com/Akkadius/EQEmuInstall/master/";
@@ -49,6 +49,7 @@ if(-e "eqemu_server_skip_update.txt"){
 
 #::: Check for script self update
 do_self_update_check_routine() if !$skip_self_update_check;
+check_xml_to_json_conversion() if $ARGV[0] eq "convert_xml";
 get_windows_wget();
 get_perl_version();
 read_eqemu_config_xml();
@@ -289,6 +290,45 @@ sub new_server {
 			print "[New Server] MySQL authorization failed or no MySQL installed\n";
 		}
 	}
+}
+
+sub check_xml_to_json_conversion {
+	if(-e "eqemu_config.xml" && !-e "eqemu_config.json") {
+
+		if($OS eq "Windows"){
+			get_remote_file("https://github.com/EQEmu/Server/blob/eqemu_config_json/utils/xmltojson/xmltojson-windows-x86.exe", "xmltojson.exe");
+			print "Converting eqemu_config.xml to eqemu_config.json\n";
+			print `xmltojson eqemu_config.xml`;
+		}
+		if($OS eq "Linux"){
+			get_remote_file("https://github.com/EQEmu/Server/blob/eqemu_config_json/utils/xmltojson/xmltojson-linux-x86", "xmltojson");
+			print "Converting eqemu_config.xml to eqemu_config.json\n";
+			print `xmltojson eqemu_config.xml`;
+		}
+
+		#::: Prettify and alpha order the config
+		use JSON;
+		my $json = new JSON();
+
+		my $content;
+		open(my $fh, '<', "eqemu_config.json") or die "cannot open file $filename"; {
+			local $/;
+			$content = <$fh>;
+		}
+		close($fh);
+
+		$result = $json->decode($content);
+		$json->canonical(1);
+
+		print $json->pretty->utf8->encode($result),"\n";
+		
+		open(my $fh, '>', 'eqemu_config.json');
+		print $fh $json->pretty->utf8->encode($result);
+		close $fh;
+		
+		exit;
+	}
+	
 }
 
 sub build_linux_source {

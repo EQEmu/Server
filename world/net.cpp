@@ -103,11 +103,22 @@ EQEmuLogSys LogSys;
 WebInterfaceList web_interface;
 
 void CatchSignal(int sig_num);
+void CheckForServerScript(bool force_download = false);
 
 int main(int argc, char** argv) {
 	RegisterExecutablePlatform(ExePlatformWorld);
 	LogSys.LoadLogSettingsDefaults();
 	set_exception_handler();
+
+	/* Download EQEmu Server Maintenance Script if doesn't exist */
+	CheckForServerScript();
+
+	/* If eqemu_config.json does not exist - create it from conversion... */
+	if (!std::ifstream("eqemu_config.json")) {
+		CheckForServerScript(true);
+		/* Run EQEmu Server script (Checks for database updates) */
+		system("perl eqemu_server.pl convert_xml");
+	}
 
 	/* Database Version Check */
 	uint32 Database_Version = CURRENT_BINARY_DATABASE_VERSION;
@@ -576,4 +587,16 @@ void UpdateWindowTitle(char* iNewTitle) {
 	}
 	SetConsoleTitle(tmp);
 #endif
+}
+
+void CheckForServerScript(bool force_download) {
+	/* Fetch EQEmu Server script */
+	if (!std::ifstream("eqemu_server.pl") || force_download) {
+		std::cout << "Pulling down EQEmu Server Maintenance Script (eqemu_server.pl)..." << std::endl;
+#ifdef _WIN32
+		system("perl -MLWP::UserAgent -e \"require LWP::UserAgent;  my $ua = LWP::UserAgent->new; $ua->timeout(10); $ua->env_proxy; my $response = $ua->get('https://raw.githubusercontent.com/EQEmu/Server/eqemu_config_json/utils/scripts/eqemu_server.pl'); if ($response->is_success){ open(FILE, '> eqemu_server.pl'); print FILE $response->decoded_content; close(FILE); }\"");
+#else
+		system("wget --no-check-certificate -O eqemu_server.pl https://raw.githubusercontent.com/EQEmu/Server/eqemu_config_json/utils/scripts/eqemu_server.pl");
+#endif
+	}
 }
