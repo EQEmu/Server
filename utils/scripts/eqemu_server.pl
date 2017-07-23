@@ -423,8 +423,8 @@ sub do_installer_routines {
 	mkdir('updates_staged');
 	mkdir('shared');
 	
-	do_install_config_xml();
-	read_eqemu_config_xml();
+	do_install_config_json();
+	read_eqemu_config_json();
 	get_installation_variables();
 	
 	$db_name = "peq";
@@ -654,72 +654,44 @@ sub get_installation_variables{
 	close (INSTALL_VARS);
 }
 
-sub do_install_config_xml {
+sub do_install_config_json {
 	get_installation_variables();
 	
-	#::: Fetch XML template
-	get_remote_file($install_repository_request_url . "eqemu_config.xml", "eqemu_config_template.xml");
+	#::: Fetch json template
+	get_remote_file($install_repository_request_url . "eqemu_config.json", "eqemu_config_template.json");
 	
-	#::: Open new config file
-	open (NEW_CONFIG, '>', 'eqemu_config.xml');
-	
-	$in_database_tag = 0;
-	
-	#::: Iterate through template and replace variables...
-	open (FILE_TEMPLATE, "eqemu_config_template.xml");
-	while (<FILE_TEMPLATE>){
-		chomp;
-		$o = $_;
-		
-		#::: Find replace variables
-		
-		if($o=~/\<\!--/i){
-			next; 
-		}
-		
-		if($o=~/database/i && $o=~/\<\//i){
-			$in_database_tag = 0;
-		}
-		if($o=~/database/i){
-			$in_database_tag = 1;
-		}
-		
-		if($o=~/key/i){ 
-			my($replace_key) = $o =~ />(\w+)</;
-			$new_key = generate_random_password(30);
-			$o =~ s/$replace_key/$new_key/g;
-		} 
-		if($o=~/\<longname\>/i){ 
-			my($replace_name) = $o =~ /<longname>(.*)<\/longname>/;
-			$append = '(' . generate_random_password(5) . ')';
-			$o =~ s/$replace_name/Akkas $OS PEQ Installer $append/g;
-		}
-		if($o=~/\<username\>/i && $in_database_tag){
-			my($replace_username) = $o =~ />(\w+)</;
-			$o =~ s/$replace_username/$installation_variables{"mysql_eqemu_user"}/g;
-		}
-		if($o=~/\<password\>/i && $in_database_tag){
-			my($replace_password) = $o =~ />(\w+)</;
-			$o =~ s/$replace_password/$installation_variables{"mysql_eqemu_password"}/g;
-		}
-		if($o=~/\<db\>/i){
-			my($replace_db_name) = $o =~ />(\w+)</;
-			
-			#::: There is really no reason why this shouldn't be set
-			if($installation_variables{"mysql_eqemu_db_name"}){
-				$db_name = $installation_variables{"mysql_eqemu_db_name"};
-			}
-			else {
-				$db_name = "peq";
-			}
-			
-			$o =~ s/$replace_db_name/$db_name/g;
-		}
-		print NEW_CONFIG $o . "\n";
+	use JSON;
+	my $json = new JSON();
+
+	my $content;
+	open(my $fh, '<', "eqemu_config_template.json") or die "cannot open file $filename"; {
+		local $/;
+		$content = <$fh>;
 	}
+	close($fh);
+
+	$config = $json->decode($content);
 	
-	close(FILE_TEMPLATE);
-	close(NEW_CONFIG);
+	$config->{"server"}{"database"}{"username"} = $installation_variables{"mysql_eqemu_user"};
+	$config->{"server"}{"database"}{"password"} = $installation_variables{"mysql_eqemu_password"};
+	
+	$append = ' (' . generate_random_password(5) . ')';
+	$long_name = "Akkas " . $OS . " PEQ Installer " . $append;
+	$config->{"server"}{"world"}{"longname"} = $long_name;
+	$config->{"server"}{"world"}{"key"} = generate_random_password(30);
+	
+	if($installation_variables{"mysql_eqemu_db_name"}){
+		$db_name = $installation_variables{"mysql_eqemu_db_name"};
+	}
+	else {
+		$db_name = "peq";
+	}
+	$config->{"server"}{"database"}{"db"} = $db_name;
+	
+	open(my $fh, '>', 'eqemu_config.json');
+	print $fh $json->pretty->utf8->encode($config);
+	close $fh;
+	
 	unlink("eqemu_config_template.xml");
 }
 
