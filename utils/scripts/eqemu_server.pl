@@ -52,7 +52,12 @@ do_self_update_check_routine() if !$skip_self_update_check;
 check_xml_to_json_conversion() if $ARGV[0] eq "convert_xml";
 get_windows_wget();
 get_perl_version();
-read_eqemu_config_xml();
+if(-e "eqemu_config.json") {
+	read_eqemu_config_json();
+}
+else {
+	read_eqemu_config_xml();
+}
 get_mysql_path();
 
 #::: Remove old eqemu_update.pl
@@ -1124,6 +1129,26 @@ sub read_eqemu_config_xml {
         }
     }
     close(CONFIG);
+}
+
+sub read_eqemu_config_json {
+	use JSON;
+	my $json = new JSON();
+
+	my $content;
+	open(my $fh, '<', "eqemu_config.json") or die "cannot open file $filename"; {
+		local $/;
+		$content = <$fh>;
+	}
+	close($fh);
+
+	$config = $json->decode($content);
+
+	$db = $config->{"server"}{"database"}{"db"} . "\n";
+	$host = $config->{"server"}{"database"}{"host"} . "\n";
+	$user = $config->{"server"}{"database"}{"username"} . "\n";
+	$password = $config->{"server"}{"database"}{"password"} . "\n";
+	$long_name = $config->{"server"}{"world"}{"longname"} . "\n";
 }
 
 #::: Fetch Latest PEQ AA's
