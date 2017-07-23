@@ -308,7 +308,8 @@ sub check_xml_to_json_conversion {
 		if($OS eq "Linux"){
 			get_remote_file("https://raw.githubusercontent.com/EQEmu/Server/eqemu_config_json/utils/xmltojson/xmltojson-linux-x86", "xmltojson");
 			print "Converting eqemu_config.xml to eqemu_config.json\n";
-			print `xmltojson eqemu_config.xml`;
+			print `chmod 755 xmltojson`;
+			print `./xmltojson eqemu_config.xml`;
 		}
 
 		#::: Prettify and alpha order the config
@@ -334,6 +335,7 @@ sub check_xml_to_json_conversion {
 		mkdir('backups');
 		copy_file("eqemu_config.xml", "backups/eqemu_config.xml");
 		unlink('eqemu_config.xml');
+		unlink('db_dumper.pl');
 		
 		print "[Server Maintenance] eqemu_config.xml is now DEPRECATED \n";
 		print "[Server Maintenance] eqemu_config.json is now the new Server config format \n";
