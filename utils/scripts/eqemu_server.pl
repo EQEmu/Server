@@ -1147,7 +1147,7 @@ sub read_eqemu_config_json {
 	$db = $config->{"server"}{"database"}{"db"} . "\n";
 	$host = $config->{"server"}{"database"}{"host"} . "\n";
 	$user = $config->{"server"}{"database"}{"username"} . "\n";
-	$password = $config->{"server"}{"database"}{"password"} . "\n";
+	$pass = $config->{"server"}{"database"}{"password"} . "\n";
 	$long_name = $config->{"server"}{"world"}{"longname"} . "\n";
 }
 
