@@ -11,7 +11,7 @@ CREATE TABLE `auras` (
 	`icon` INT(10) NOT NULL DEFAULT -1,
 	`cast_time` INT(10) NOT NULL DEFAULT 0,
 	PRIMARY KEY(`type`)
-)
+);
 
 CREATE TABLE `character_auras` (
 	`id` INT(10) NOT NULL,
