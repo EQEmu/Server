@@ -886,9 +886,17 @@ void Mob::RemoveAura(int spawn_id, bool skip_strip, bool expired)
 		if (aura.spawn_id == spawn_id) {
 			if (aura.aura)
 				aura.aura->Depop(skip_strip);
-			if (expired && IsClient())
+			if (expired && IsClient()) {
 				CastToClient()->SendColoredText(
 				    CC_Yellow, StringFormat("%s has expired.", aura.name)); // TODO: verify color
+				// need to update client UI too
+				auto app = new EQApplicationPacket(OP_UpdateAura, sizeof(AuraDestory_Struct));
+				auto ads = (AuraDestory_Struct *)app->pBuffer;
+				ads->action = 1; // delete
+				ads->entity_id = spawn_id;
+				CastToClient()->QueuePacket(app);
+				safe_delete(app);
+			}
 			while (aura_mgr.count - 1 > i) {
 				i++;
 				aura.spawn_id = aura_mgr.auras[i].spawn_id;
