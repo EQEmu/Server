@@ -110,14 +110,15 @@ int main(int argc, char** argv) {
 	LogSys.LoadLogSettingsDefaults();
 	set_exception_handler();
 
-	/* Download EQEmu Server Maintenance Script if doesn't exist */
-	CheckForServerScript();
-
 	/* If eqemu_config.json does not exist - create it from conversion... */
 	if (!std::ifstream("eqemu_config.json")) {
 		CheckForServerScript(true);
 		/* Run EQEmu Server script (Checks for database updates) */
 		system("perl eqemu_server.pl convert_xml");
+	}
+	else {
+		/* Download EQEmu Server Maintenance Script if doesn't exist */
+		CheckForServerScript();
 	}
 
 	/* Database Version Check */
