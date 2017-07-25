@@ -688,6 +688,8 @@ sub do_install_config_json {
 	$config->{"server"}{"database"}{"password"} = $installation_variables{"mysql_eqemu_password"};
 	$config->{"server"}{"database"}{"db"} = $db_name;
 	
+	$json->canonical(1);
+	
 	open(my $fh, '>', 'eqemu_config.json');
 	print $fh $json->pretty->utf8->encode($config);
 	close $fh;
