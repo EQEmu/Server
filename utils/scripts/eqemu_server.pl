@@ -327,6 +327,7 @@ sub check_xml_to_json_conversion {
 
 		$result = $json->decode($content);
 		$json->canonical(1);
+		$json->indent_length(5);
 
 		print $json->pretty->utf8->encode($result),"\n";
 		
