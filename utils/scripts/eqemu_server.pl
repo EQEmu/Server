@@ -331,7 +331,7 @@ sub check_xml_to_json_conversion {
 		print $json->pretty->indent_length(5)->utf8->encode($result),"\n";
 		
 		open(my $fh, '>', 'eqemu_config.json');
-		print $fh $json->pretty->utf8->encode($result);
+		print $fh $json->pretty->indent_length(5)->utf8->encode($result);
 		close $fh;
 		
 		mkdir('backups');
