@@ -592,6 +592,10 @@ void UpdateWindowTitle(char* iNewTitle) {
 void CheckForServerScript(bool force_download) {
 	/* Fetch EQEmu Server script */
 	if (!std::ifstream("eqemu_server.pl") || force_download) {
+
+		if(force_download)
+			std::remove("eqemu_server.pl"); /* Delete local before fetch */
+
 		std::cout << "Pulling down EQEmu Server Maintenance Script (eqemu_server.pl)..." << std::endl;
 #ifdef _WIN32
 		system("perl -MLWP::UserAgent -e \"require LWP::UserAgent;  my $ua = LWP::UserAgent->new; $ua->timeout(10); $ua->env_proxy; my $response = $ua->get('https://raw.githubusercontent.com/EQEmu/Server/eqemu_config_json/utils/scripts/eqemu_server.pl'); if ($response->is_success){ open(FILE, '> eqemu_server.pl'); print FILE $response->decoded_content; close(FILE); }\"");
