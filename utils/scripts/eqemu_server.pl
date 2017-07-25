@@ -327,9 +327,8 @@ sub check_xml_to_json_conversion {
 
 		$result = $json->decode($content);
 		$json->canonical(1);
-		$json->indent_length(5);
 
-		print $json->pretty->utf8->encode($result),"\n";
+		print $json->pretty->indent_length(5)->utf8->encode($result),"\n";
 		
 		open(my $fh, '>', 'eqemu_config.json');
 		print $fh $json->pretty->utf8->encode($result);
@@ -693,7 +692,7 @@ sub do_install_config_json {
 	$json->indent_length(5);
 	
 	open(my $fh, '>', 'eqemu_config.json');
-	print $fh $json->pretty->utf8->encode($config);
+	print $fh $json->pretty->indent_length(5)->utf8->encode($config);
 	close $fh;
 	
 	unlink("eqemu_config_template.json");
