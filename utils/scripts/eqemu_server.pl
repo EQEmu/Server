@@ -692,7 +692,7 @@ sub do_install_config_json {
 	print $fh $json->pretty->utf8->encode($config);
 	close $fh;
 	
-	unlink("eqemu_config_template.xml");
+	unlink("eqemu_config_template.json");
 }
 
 sub fetch_utility_scripts {
@@ -1122,7 +1122,6 @@ sub read_eqemu_config_json {
 	$host = $config->{"server"}{"database"}{"host"};
 	$user = $config->{"server"}{"database"}{"username"};
 	$pass = $config->{"server"}{"database"}{"password"};
-	$long_name = $config->{"server"}{"world"}{"longname"};
 
 }
 
