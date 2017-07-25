@@ -11805,7 +11805,17 @@ void Client::Handle_OP_RemoveTrap(const EQApplicationPacket *app)
 	}
 
 	auto id = app->ReadUInt32(0);
-	RemoveAura(id);
+	bool good = false;
+	for (int i = 0; i < trap_mgr.count; ++i) {
+		if (trap_mgr.auras[i].spawn_id == id) {
+			good = true;
+			break;
+		}
+	}
+	if (good)
+		RemoveAura(id);
+	else
+		Message_StringID(MT_SpellFailure, NOT_YOUR_TRAP); // pretty sure this was red
 }
 
 void Client::Handle_OP_Report(const EQApplicationPacket *app)
