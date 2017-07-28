@@ -4382,9 +4382,6 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app)
 
 	PlayerPositionUpdateClient_Struct* ppu = (PlayerPositionUpdateClient_Struct*)app->pBuffer;
 
-	Message(0, "Client Update Position (%.2f, %.2f, %.2f, %u) (%u)", ppu->x_pos, ppu->y_pos, ppu->z_pos, ppu->heading, ppu->animation);
-	Message(0, "Client Update Deltas (%.2f, %.2f, %.2f, %u)", ppu->delta_x, ppu->delta_y, ppu->delta_z, ppu->delta_heading);
-
 	/* Boat handling */
 	if (ppu->spawn_id != GetID()) {
 		/* If player is controlling boat */

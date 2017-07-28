@@ -26,7 +26,12 @@ glm::vec3 Mob::UpdatePath(float ToX, float ToY, float ToZ, float Speed, bool &Wa
 		PathingDestination = To;
 		WaypointChanged = true;
 		NodeReached = false;
-		return (*Route.begin()).pos;
+		if (Route.empty()) {
+			return From;
+		}
+		else {
+			return (*Route.begin()).pos;
+		}
 	}
 	else {
 		if (PathRecalcTimer->Check()) {
