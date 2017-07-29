@@ -4120,6 +4120,7 @@ namespace RoF2
 			VARSTRUCT_ENCODE_STRING(Buffer, emu->name);
 			VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->spawnId);
 			VARSTRUCT_ENCODE_TYPE(uint8, Buffer, emu->level);
+			// actually melee range variable, this probably screws the shit out of melee ranges :D
 			if (emu->DestructibleObject)
 			{
 				VARSTRUCT_ENCODE_TYPE(float, Buffer, 10);	// was int and 0x41200000
@@ -4128,7 +4129,7 @@ namespace RoF2
 			{
 				VARSTRUCT_ENCODE_TYPE(float, Buffer, SpawnSize - 0.7);	// Eye Height?
 			}
-			VARSTRUCT_ENCODE_TYPE(uint8, Buffer, emu->NPC);
+			VARSTRUCT_ENCODE_TYPE(uint8, Buffer, emu->NPC); // 0 PC, 1 NPC etc
 
 			structs::Spawn_Struct_Bitfields *Bitfields = (structs::Spawn_Struct_Bitfields*)Buffer;
 
@@ -4159,6 +4160,7 @@ namespace RoF2
 
 			Buffer += sizeof(structs::Spawn_Struct_Bitfields);
 
+			// actually part of bitfields
 			uint8 OtherData = 0;
 
 			if (emu->class_ == 62) //LDoN Chest
@@ -4174,6 +4176,7 @@ namespace RoF2
 				OtherData = OtherData | 0xe1;	// Live has 0xe1 for OtherData
 
 			VARSTRUCT_ENCODE_TYPE(uint8, Buffer, OtherData);
+			// float EmitterScalingRadius
 
 			if (emu->DestructibleObject)
 			{
@@ -4183,6 +4186,7 @@ namespace RoF2
 			{
 				VARSTRUCT_ENCODE_TYPE(float, Buffer, -1);	// unknown3
 			}
+			// int DefaultEmitterID
 			VARSTRUCT_ENCODE_TYPE(float, Buffer, 0);	// unknown4
 
 			if (emu->DestructibleObject || emu->class_ == 62)
@@ -4192,8 +4196,9 @@ namespace RoF2
 				VARSTRUCT_ENCODE_STRING(Buffer, emu->DestructibleString);
 
 				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->DestructibleAppearance);
-				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->DestructibleUnk1);
+				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->DestructibleUnk1); // ObjectAnimationID
 
+				// these 10 are SoundIDs
 				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->DestructibleID1);
 				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->DestructibleID2);
 				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->DestructibleID3);
@@ -4205,8 +4210,8 @@ namespace RoF2
 				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->DestructibleUnk5);
 				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->DestructibleUnk6);
 				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->DestructibleUnk7);
-				VARSTRUCT_ENCODE_TYPE(uint8, Buffer, emu->DestructibleUnk8);
-				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->DestructibleUnk9);
+				VARSTRUCT_ENCODE_TYPE(uint8, Buffer, emu->DestructibleUnk8); // bInteractiveObjectCollidable
+				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->DestructibleUnk9); // IteractiveObjectType
 			}
 
 
@@ -4214,6 +4219,7 @@ namespace RoF2
 			{
 				// Setting this next field to zero will cause a crash. Looking at ShowEQ, if it is zero, the bodytype field is not
 				// present. Will sort that out later.
+				// This is the CharacterPropertyHash, it can have multiple fields
 				VARSTRUCT_ENCODE_TYPE(uint8, Buffer, 1);	// This is a properties count field
 				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->bodytype);
 			}
@@ -4233,10 +4239,10 @@ namespace RoF2
 			VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->drakkin_tattoo);
 			VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->drakkin_details);
 
-			VARSTRUCT_ENCODE_TYPE(uint8, Buffer, emu->equip_chest2);
-			VARSTRUCT_ENCODE_TYPE(uint8, Buffer, 0); // unknown9
-			VARSTRUCT_ENCODE_TYPE(uint8, Buffer, 0); // unknown10
-			VARSTRUCT_ENCODE_TYPE(uint8, Buffer, emu->helm); // unknown11
+			VARSTRUCT_ENCODE_TYPE(uint8, Buffer, emu->equip_chest2); // InNonPCRaceIllusion
+			VARSTRUCT_ENCODE_TYPE(uint8, Buffer, 0); // material
+			VARSTRUCT_ENCODE_TYPE(uint8, Buffer, 0); // variation
+			VARSTRUCT_ENCODE_TYPE(uint8, Buffer, emu->helm); // headtype
 
 			VARSTRUCT_ENCODE_TYPE(float, Buffer, emu->size);
 			VARSTRUCT_ENCODE_TYPE(uint8, Buffer, emu->face);
@@ -4244,6 +4250,7 @@ namespace RoF2
 			VARSTRUCT_ENCODE_TYPE(float, Buffer, emu->runspeed);
 			VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->race);
 
+			// From MQ2: todo: create enum for this byte. Holding: Nothing=0 A RightHand Weapon=1 A Shield=2 Dual Wielding Two Weapons=3 A Spear=4 A LeftHand Weapon=5 A Two Handed Weapon=6 A bow=7
 			VARSTRUCT_ENCODE_TYPE(uint8, Buffer, 0);	// ShowEQ calls this 'Holding'
 			VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->deity);
 			if (emu->NPC)
@@ -4356,6 +4363,9 @@ namespace RoF2
 				VARSTRUCT_ENCODE_STRING(Buffer, emu->suffix);
 			}
 
+			// skipping two ints
+			// unknown, maybe some sort of spawn ID
+			// SplineID -- no idea
 			Buffer += 8;
 			VARSTRUCT_ENCODE_TYPE(uint8, Buffer, emu->IsMercenary);
 			VARSTRUCT_ENCODE_STRING(Buffer, "0000000000000000"); // RealEstateItemGuid
