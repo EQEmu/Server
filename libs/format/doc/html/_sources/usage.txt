@@ -54,6 +54,23 @@ To build a `shared library`__ set the ``BUILD_SHARED_LIBS`` CMake variable to
 
 __ http://en.wikipedia.org/wiki/Library_%28computing%29#Shared_libraries
 
+Header-only usage with CMake
+============================
+
+In order to add ``fmtlib`` into an existing ``CMakeLists.txt`` file, you can add the ``fmt`` library directory into your main project, which will enable the ``fmt`` library::
+
+   add_subdirectory(fmt)
+   
+If you have a project called ``foo`` that you would like to link against the fmt library in a header-only fashion, you can enable with with::
+
+   target_link_libraries(foo PRIVATE fmt::fmt-header-only)
+   
+And then to ensure that the ``fmt`` library does not always get built, you can modify the call to ``add_subdirectory`` to read ::
+
+   add_subdirectory(fmt EXCLUDE_FROM_ALL)
+   
+This will ensure that the ``fmt`` library is exluded from calls to ``make``, ``make all``, or ``cmake --build .``.
+
 Building the documentation
 ==========================
 
@@ -62,7 +79,11 @@ system:
 
 * `Python <https://www.python.org/>`_ with pip and virtualenv
 * `Doxygen <http://www.stack.nl/~dimitri/doxygen/>`_
-* `Less <http://lesscss.org/>`_ with less-plugin-clean-css
+* `Less <http://lesscss.org/>`_ with ``less-plugin-clean-css``.
+  Ubuntu doesn't package the ``clean-css`` plugin so you should use ``npm``
+  instead of ``apt`` to install both ``less`` and the plugin::
+
+    sudo npm install -g less less-plugin-clean-css.
 
 First generate makefiles or project files using CMake as described in
 the previous section. Then compile the ``doc`` target/project, for example::
@@ -87,4 +108,4 @@ Homebrew
 
 fmt can be installed on OS X using `Homebrew <http://brew.sh/>`_::
 
-  brew install cppformat
+  brew install fmt

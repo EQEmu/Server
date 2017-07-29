@@ -8,7 +8,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     
     
-    <title>Format String Syntax &mdash; fmt 3.0.0 documentation</title>
+    <title>Format String Syntax &mdash; fmt 4.0.0 documentation</title>
     
     <link rel="stylesheet" href="_static/basic.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -17,10 +17,11 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '3.0.0',
+        VERSION:     '4.0.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX:  ''
       };
     </script>
     <script type="text/javascript" src="_static/jquery.js"></script>
@@ -34,8 +35,9 @@
 
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();
+    a=s.createElement(o),m=s.getElementsByTagName(o)[0];a.async=1;
+    a.src=g;m.parentNode.insertBefore(a,m)
   })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
   ga('create', 'UA-20116650-4', 'fmtlib.net');
   ga('send', 'pageview');
@@ -49,7 +51,8 @@
       <div class="navbar-content">
         
         <div class="navbar-header">
-          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target=".navbar-collapse">
+          <button type="button" class="navbar-toggle collapsed"
+                  data-toggle="collapse" data-target=".navbar-collapse">
             <span class="sr-only">Toggle navigation</span>
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
@@ -62,13 +65,17 @@
         <div class="collapse navbar-collapse">
           <ul class="nav navbar-nav">
             <li class="dropdown">
-              
-              <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button"
-                 aria-expanded="false">3.0.0 <span class="caret"></span></a>
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown"
+                 role="button" aria-expanded="false">4.0.0
+                <span class="caret"></span></a>
               <ul class="dropdown-menu" role="menu">
-                <li><a href="http://fmtlib.net/2.0.0/">2.0.0</a></li>
-                <li><a href="http://fmtlib.net/1.1.0/">1.1.0</a></li>
-                <li><a href="http://fmtlib.net/1.0.0/">1.0.0</a></li>
+                
+                <li><a href="http://fmtlib.net/3.0.0">3.0.0</a></li>
+                
+                <li><a href="http://fmtlib.net/2.0.0">2.0.0</a></li>
+                
+                <li><a href="http://fmtlib.net/1.1.0">1.1.0</a></li>
+                
               </ul>
             </li>
             
@@ -85,15 +92,18 @@
               
             
               
-              <li class="active"><a href="syntax.html">Syntax <span class="sr-only">(current)</span></a></li>
+              <li class="active"><a href="syntax.html">Syntax
+                <span class="sr-only">(current)</span></a></li>
               
             
           </ul>
           
             
-<form class="navbar-form navbar-right" role="search" action="search.html" method="get">
+<form class="navbar-form navbar-right" role="search" action="search.html"
+      method="get">
   <div class="form-group">
-    <input type="text" name="q" class="form-control" placeholder="Search" >
+    <input type="text" name="q" class="form-control"
+           placeholder="Search" >
   </div>
   <input type="hidden" name="check_keywords" value="yes" />
   <input type="hidden" name="area" value="default" />
@@ -153,12 +163,10 @@ precision and so on.  Each value type can define its own &#8220;formatting
 mini-language&#8221; or interpretation of the <em>format_spec</em>.</p>
 <p>Most built-in types support a common formatting mini-language, which is
 described in the next section.</p>
-<p>A <em>format_spec</em> field can also include nested replacement fields within it.
-These nested replacement fields can contain only an argument index;
-format specifications are not allowed.  Formatting is performed as if the
-replacement fields within the format_spec are substituted before the
-<em>format_spec</em> string is interpreted.  This allows the formatting of a value
-to be dynamically specified.</p>
+<p>A <em>format_spec</em> field can also include nested replacement fields in certain
+positions within it. These nested replacement fields can contain only an
+argument id; format specifications are not allowed. This allows the
+formatting of a value to be dynamically specified.</p>
 <p>See the <a class="reference internal" href="#formatexamples"><span class="std std-ref">Format examples</span></a> section for some examples.</p>
 <div class="section" id="format-specification-mini-language">
 <span id="formatspec"></span><h2>Format Specification Mini-Language<a class="headerlink" href="#format-specification-mini-language" title="Permalink to this headline">¶</a></h2>
@@ -176,8 +184,8 @@ although some of the formatting options are only supported by the numeric types.
 <strong id="grammar-token-sign">sign       </strong> ::=  &quot;+&quot; | &quot;-&quot; | &quot; &quot;
 <strong id="grammar-token-width">width      </strong> ::=  <a class="reference internal" href="#grammar-token-integer"><code class="xref docutils literal"><span class="pre">integer</span></code></a> | &quot;{&quot; <a class="reference internal" href="#grammar-token-arg_id"><code class="xref docutils literal"><span class="pre">arg_id</span></code></a> &quot;}&quot;
 <strong id="grammar-token-precision">precision  </strong> ::=  <a class="reference internal" href="#grammar-token-integer"><code class="xref docutils literal"><span class="pre">integer</span></code></a> | &quot;{&quot; <a class="reference internal" href="#grammar-token-arg_id"><code class="xref docutils literal"><span class="pre">arg_id</span></code></a> &quot;}&quot;
-<strong id="grammar-token-type">type       </strong> ::=  <a class="reference internal" href="#grammar-token-int_type"><code class="xref docutils literal"><span class="pre">int_type</span></code></a> | &quot;c&quot; | &quot;e&quot; | &quot;E&quot; | &quot;f&quot; | &quot;F&quot; | &quot;g&quot; | &quot;G&quot; | &quot;p&quot; | &quot;s&quot;
-<strong id="grammar-token-int_type">int_type   </strong> ::=  &quot;b&quot; | &quot;B&quot; | &quot;d&quot; | &quot;o&quot; | &quot;x&quot; | &quot;X&quot;
+<strong id="grammar-token-type">type       </strong> ::=  <a class="reference internal" href="#grammar-token-int_type"><code class="xref docutils literal"><span class="pre">int_type</span></code></a> | &quot;a&quot; | &quot;A&quot; | &quot;c&quot; | &quot;e&quot; | &quot;E&quot; | &quot;f&quot; | &quot;F&quot; | &quot;g&quot; | &quot;G&quot; | &quot;p&quot; | &quot;s&quot;
+<strong id="grammar-token-int_type">int_type   </strong> ::=  &quot;b&quot; | &quot;B&quot; | &quot;d&quot; | &quot;n&quot; | &quot;o&quot; | &quot;x&quot; | &quot;X&quot;
 </pre>
 <p>The <em>fill</em> character can be any character other than &#8216;{&#8216; or &#8216;}&#8217;.  The presence
 of a fill character is signaled by the character following it, which must be
@@ -383,7 +391,7 @@ Boolean values are formatted using textual representation, either <code class="d
 <tr class="row-even"><td><code class="docutils literal"><span class="pre">'a'</span></code></td>
 <td>Hexadecimal floating point format. Prints the number in
 base 16 with prefix <code class="docutils literal"><span class="pre">&quot;0x&quot;</span></code> and lower-case letters for
-digits above 9. Uses &#8216;p&#8217; to indicate the exponent.</td>
+digits above 9. Uses <code class="docutils literal"><span class="pre">'p'</span></code> to indicate the exponent.</td>
 </tr>
 <tr class="row-odd"><td><code class="docutils literal"><span class="pre">'A'</span></code></td>
 <td>Same as <code class="docutils literal"><span class="pre">'a'</span></code> except it uses upper-case letters for
@@ -507,7 +515,7 @@ following examples.</p>
 
     <div class="footer" role="contentinfo">
         &copy; Copyright 2012-2015, Victor Zverovich.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1+.
     </div>
 
 <script src="_static/bootstrap.min.js"></script>
