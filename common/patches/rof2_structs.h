@@ -329,14 +329,17 @@ sed -e 's/_t//g' -e 's/seto_0xFF/set_to_0xFF/g'
 */
 
 // I think this is actually 5 bytes
+// IDA's pseudocode reads this as 5 bytes pulled into 2 DWORDs
 struct Spawn_Struct_Bitfields
 {
+	// byte 1
 /*00*/	unsigned   gender:2;		// Gender (0=male, 1=female, 2=monster)
 /*02*/	unsigned   ispet:1;			// Guessed based on observing live spawns
 /*03*/	unsigned   afk:1;			// 0=no, 1=afk
 /*04*/	unsigned   anon:2;			// 0=normal, 1=anon, 2=roleplay
 /*06*/	unsigned   gm:1;
-/*06*/	unsigned   sneak:1;
+/*07*/	unsigned   sneak:1;
+	// byte 2
 /*08*/	unsigned   lfg:1;
 /*09*/	unsigned   betabuffed:1;
 /*10*/	unsigned   invis:1;			// May have invis & sneak the wrong way around ... not sure how to tell which is which
@@ -345,6 +348,7 @@ struct Spawn_Struct_Bitfields
 /*13*/	unsigned   invis3:1;		// This one also make the NPC/PC invis
 /*14*/	unsigned   invis4:1;		// This one also make the NPC/PC invis
 /*15*/	unsigned   invis6:1;		// This one also make the NPC/PC invis
+	// byte 3
 /*16*/	unsigned   invis7:1;		// This one also make the NPC/PC invis
 /*17*/	unsigned   invis8:1;		// This one also make the NPC/PC invis
 /*18*/	unsigned   invis9:1;		// This one also make the NPC/PC invis
@@ -353,6 +357,7 @@ struct Spawn_Struct_Bitfields
 /*21*/	unsigned   invis12:1;		// This one also make the NPC/PC invis
 /*22*/	unsigned   linkdead:1;		// 1 Toggles LD on or off after name. Correct for RoF2
 /*23*/	unsigned   showhelm:1;
+	// byte 4
 /*24*/	unsigned   unknown24:1;		// Prefixes name with !
 /*25*/	unsigned   trader:1;
 /*26*/	unsigned   animationonpop:1;
@@ -360,18 +365,17 @@ struct Spawn_Struct_Bitfields
 /*28*/	unsigned   targetable_with_hotkey:1;
 /*29*/	unsigned   showname:1;
 /*30*/	unsigned   idleanimationsoff:1;
-/*30*/	unsigned   untargetable:1;	// Untargetable with mouse
+/*31*/	unsigned   untargetable:1;	// bClickThrough
 /* do these later
-31	unsigned   bclickthrough:1;
-32	unsigned   unknown32:1;
-33	unsigned   buyer:1;
-34	unsigned   offline:1;
-35	unsigned   interactiveobject:1;
-36	unsigned   flung:1; // hmm this vfunc appears to do stuff with lev and flung variables
-37	unsigned   title:1;
-38	unsigned   suffix:1;
-39 padding
-40 padding
+32	unsigned   buyer:1;
+33	unsigned   offline:1;
+34	unsigned   interactiveobject:1;
+35	unsigned   flung:1; // hmm this vfunc appears to do stuff with leve and flung variables
+36	unsigned   title:1;
+37	unsigned   suffix:1;
+38	unsigned   padding1:1;
+39	unsigned   padding2:1;
+40	unsinged   padding3:1;
 */
 	/*
 	// Unknown in RoF2
