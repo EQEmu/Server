@@ -14,6 +14,7 @@ public:
 	virtual void DebugCommand(Client *c, const Seperator *sep);
 
 private:
+	void Clear();
 	void Load(const std::string &path);
 	void ShowPath(Client *c, const glm::vec3 &start, const glm::vec3 &end);
 
