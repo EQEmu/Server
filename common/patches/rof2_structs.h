@@ -328,6 +328,7 @@ showeq -> eqemu
 sed -e 's/_t//g' -e 's/seto_0xFF/set_to_0xFF/g'
 */
 
+// I think this is actually 5 bytes
 struct Spawn_Struct_Bitfields
 {
 /*00*/	unsigned   gender:2;		// Gender (0=male, 1=female, 2=monster)
@@ -337,7 +338,7 @@ struct Spawn_Struct_Bitfields
 /*06*/	unsigned   gm:1;
 /*06*/	unsigned   sneak:1;
 /*08*/	unsigned   lfg:1;
-/*09*/	unsigned   unknown09:1;
+/*09*/	unsigned   betabuffed:1;
 /*10*/	unsigned   invis:1;			// May have invis & sneak the wrong way around ... not sure how to tell which is which
 /*11*/	unsigned   invis1:1;		// GM Invis?  Can only be seen with #gm on - same for the below
 /*12*/	unsigned   invis2:1;		// This one also make the NPC/PC invis
@@ -354,12 +355,24 @@ struct Spawn_Struct_Bitfields
 /*23*/	unsigned   showhelm:1;
 /*24*/	unsigned   unknown24:1;		// Prefixes name with !
 /*25*/	unsigned   trader:1;
-/*26*/	unsigned   unknown26:1;
+/*26*/	unsigned   animationonpop:1;
 /*27*/	unsigned   targetable:1;
 /*28*/	unsigned   targetable_with_hotkey:1;
 /*29*/	unsigned   showname:1;
-/*30*/	unsigned   unknown30:1;
+/*30*/	unsigned   idleanimationsoff:1;
 /*30*/	unsigned   untargetable:1;	// Untargetable with mouse
+/* do these later
+31	unsigned   bclickthrough:1;
+32	unsigned   unknown32:1;
+33	unsigned   buyer:1;
+34	unsigned   offline:1;
+35	unsigned   interactiveobject:1;
+36	unsigned   flung:1; // hmm this vfunc appears to do stuff with lev and flung variables
+37	unsigned   title:1;
+38	unsigned   suffix:1;
+39 padding
+40 padding
+*/
 	/*
 	// Unknown in RoF2
 	unsigned   betabuffed:1;
@@ -498,7 +511,7 @@ struct Spawn_Struct
 
 /*0000*/ //char title[0];  // only read if(hasTitleOrSuffix & 4)
 /*0000*/ //char suffix[0]; // only read if(hasTitleOrSuffix & 8)
-	 char unknown20[8];
+	 char unknown20[8]; // 2 ints, first unknown, 2nd SplineID
 	 uint8 IsMercenary;	// If NPC == 1 and this == 1, then the NPC name is Orange.
 /*0000*/ char unknown21[55];
 };
