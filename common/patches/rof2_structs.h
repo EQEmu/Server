@@ -342,6 +342,7 @@ struct Spawn_Struct_Bitfields
 	// byte 2
 /*08*/	unsigned   lfg:1;
 /*09*/	unsigned   betabuffed:1;
+// really just invis:12 -- max invis (and see invis) is 3000 (GMs can get 3001) need 12 bits to store that
 /*10*/	unsigned   invis:1;			// May have invis & sneak the wrong way around ... not sure how to tell which is which
 /*11*/	unsigned   invis1:1;		// GM Invis?  Can only be seen with #gm on - same for the below
 /*12*/	unsigned   invis2:1;		// This one also make the NPC/PC invis
