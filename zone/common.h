@@ -207,6 +207,16 @@ typedef enum {	//fear states
 
 enum { FlyMode0 = 0, FlyMode1 = 1, Flymode2 = 2, FlyMode3 = 3 };
 
+// This is actually FlyMode, from MQ2
+enum GravityBehavior {
+	Ground,
+	Flying,
+	Levitating,
+	Water,
+	Floating, // boat
+	LevitateWhileRunning
+};
+
 struct TradeEntity;
 class Trade;
 enum TradeState {
