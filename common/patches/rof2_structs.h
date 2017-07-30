@@ -342,20 +342,7 @@ struct Spawn_Struct_Bitfields
 	// byte 2
 /*08*/	unsigned   lfg:1;
 /*09*/	unsigned   betabuffed:1;
-// really just invis:12 -- max invis (and see invis) is 3000 (GMs can get 3001) need 12 bits to store that
-/*10*/	unsigned   invis:1;			// May have invis & sneak the wrong way around ... not sure how to tell which is which
-/*11*/	unsigned   invis1:1;		// GM Invis?  Can only be seen with #gm on - same for the below
-/*12*/	unsigned   invis2:1;		// This one also make the NPC/PC invis
-/*13*/	unsigned   invis3:1;		// This one also make the NPC/PC invis
-/*14*/	unsigned   invis4:1;		// This one also make the NPC/PC invis
-/*15*/	unsigned   invis6:1;		// This one also make the NPC/PC invis
-	// byte 3
-/*16*/	unsigned   invis7:1;		// This one also make the NPC/PC invis
-/*17*/	unsigned   invis8:1;		// This one also make the NPC/PC invis
-/*18*/	unsigned   invis9:1;		// This one also make the NPC/PC invis
-/*19*/	unsigned   invis10:1;		// This one also make the NPC/PC invis
-/*20*/	unsigned   invis11:1;		// This one also make the NPC/PC invis
-/*21*/	unsigned   invis12:1;		// This one also make the NPC/PC invis
+/*10*/	unsigned   invis:12;		// there are 3000 different (non-GM) invis levels
 /*22*/	unsigned   linkdead:1;		// 1 Toggles LD on or off after name. Correct for RoF2
 /*23*/	unsigned   showhelm:1;
 	// byte 4
@@ -365,7 +352,7 @@ struct Spawn_Struct_Bitfields
 /*27*/	unsigned   targetable:1;
 /*28*/	unsigned   targetable_with_hotkey:1;
 /*29*/	unsigned   showname:1;
-/*30*/	unsigned   idleanimationsoff:1;
+/*30*/	unsigned   idleanimationsoff:1; // what we called statue?
 /*31*/	unsigned   untargetable:1;	// bClickThrough
 /* do these later
 32	unsigned   buyer:1;
