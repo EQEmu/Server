@@ -451,7 +451,7 @@ float Mob::CalculateHeadingToTarget(float in_x, float in_y) {
 	return (256 * (360 - angle) / 360.0f);
 }
 
-bool Mob::MakeNewPositionAndSendUpdate(float x, float y, float z, int speed, bool checkZ) {
+bool Mob::MakeNewPositionAndSendUpdate(float x, float y, float z, int speed) {
 	if (GetID() == 0)
 		return true;
 
@@ -627,7 +627,7 @@ bool Mob::MakeNewPositionAndSendUpdate(float x, float y, float z, int speed, boo
 }
 
 bool Mob::CalculateNewPosition2(float x, float y, float z, int speed, bool checkZ, bool calcHeading) {
-	return MakeNewPositionAndSendUpdate(x, y, z, speed, checkZ);
+	return MakeNewPositionAndSendUpdate(x, y, z, speed);
 }
 
 bool Mob::CalculateNewPosition(float x, float y, float z, int speed, bool checkZ, bool calcHeading) {
