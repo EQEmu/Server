@@ -3447,7 +3447,7 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob *spelltar, bool reflect, bool use_r
 	if(spelltar->IsClient() && spelltar->CastToClient()->IsHoveringForRespawn())
 		return false;
 
-	if(IsDetrimentalSpell(spell_id) && !IsAttackAllowed(spelltar) && !IsResurrectionEffects(spell_id)) {
+	if(IsDetrimentalSpell(spell_id) && !IsAttackAllowed(spelltar, true) && !IsResurrectionEffects(spell_id)) {
 		if(!IsClient() || !CastToClient()->GetGM()) {
 			Message_StringID(MT_SpellFailure, SPELL_NO_HOLD);
 			return false;
@@ -4189,6 +4189,21 @@ void Mob::BuffFadeBySpellID(uint16 spell_id)
 	CalcBonuses();
 }
 
+void Mob::BuffFadeBySpellIDAndCaster(uint16 spell_id, uint16 caster_id)
+{
+	bool recalc_bonus = false;
+	auto buff_count = GetMaxTotalSlots();
+	for (int i = 0; i < buff_count; ++i) {
+		if (buffs[i].spellid == spell_id && buffs[i].casterid == caster_id) {
+			BuffFadeBySlot(i, false);
+			recalc_bonus = true;
+		}
+	}
+
+	if (recalc_bonus)
+		CalcBonuses();
+}
+
 // removes buffs containing effectid, skipping skipslot
 void Mob::BuffFadeByEffect(int effectid, int skipslot)
 {
@@ -4205,6 +4220,16 @@ void Mob::BuffFadeByEffect(int effectid, int skipslot)
 
 	//we tell BuffFadeBySlot not to recalc, so we can do it only once when were done
 	CalcBonuses();
+}
+
+bool Mob::IsAffectedByBuff(uint16 spell_id)
+{
+	int buff_count = GetMaxTotalSlots();
+	for (int i = 0; i < buff_count; ++i)
+		if (buffs[i].spellid == spell_id)
+			return true;
+
+	return false;
 }
 
 // checks if 'this' can be affected by spell_id from caster

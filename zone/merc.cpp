@@ -1211,6 +1211,7 @@ void Merc::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho) {
 		ns->spawn.flymode = 0;
 		ns->spawn.NPC = 1;                                      // 0=player,1=npc,2=pc corpse,3=npc corpse
 		ns->spawn.IsMercenary = 1;
+		ns->spawn.show_name = true;
 
 		UpdateActiveLight();
 		ns->spawn.light = m_Light.Type[EQEmu::lightsource::LightActive];

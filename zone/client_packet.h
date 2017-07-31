@@ -236,6 +236,7 @@
 	void Handle_OP_RecipesSearch(const EQApplicationPacket *app);
 	void Handle_OP_ReloadUI(const EQApplicationPacket *app);
 	void Handle_OP_RemoveBlockedBuffs(const EQApplicationPacket *app);
+	void Handle_OP_RemoveTrap(const EQApplicationPacket *app);
 	void Handle_OP_Report(const EQApplicationPacket *app);
 	void Handle_OP_RequestDuel(const EQApplicationPacket *app);
 	void Handle_OP_RequestTitles(const EQApplicationPacket *app);
@@ -288,6 +289,7 @@
 	void Handle_OP_TributeNPC(const EQApplicationPacket *app);
 	void Handle_OP_TributeToggle(const EQApplicationPacket *app);
 	void Handle_OP_TributeUpdate(const EQApplicationPacket *app);
+	void Handle_OP_UpdateAura(const EQApplicationPacket *app);
 	void Handle_OP_VetClaimRequest(const EQApplicationPacket *app);
 	void Handle_OP_VoiceMacroIn(const EQApplicationPacket *app);
 	void Handle_OP_WearChange(const EQApplicationPacket *app);

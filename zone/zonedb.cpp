@@ -11,6 +11,7 @@
 #include "merc.h"
 #include "zone.h"
 #include "zonedb.h"
+#include "aura.h"
 
 #include <ctime>
 #include <iostream>
@@ -3150,6 +3151,37 @@ void ZoneDatabase::LoadBuffs(Client *client)
 			}
 		}
 	}
+}
+
+void ZoneDatabase::SaveAuras(Client *c)
+{
+	auto query = StringFormat("DELETE FROM `character_auras` WHERE `id` = %u", c->CharacterID());
+	auto results = database.QueryDatabase(query);
+	if (!results.Success())
+		return;
+
+	const auto &auras = c->GetAuraMgr();
+	for (int i = 0; i < auras.count; ++i) {
+		auto aura = auras.auras[i].aura;
+		if (aura && aura->AuraZones()) {
+			query = StringFormat("INSERT INTO `character_auras` (id, slot, spell_id) VALUES(%u, %d, %d)",
+					     c->CharacterID(), i, aura->GetAuraID());
+			auto results = database.QueryDatabase(query);
+			if (!results.Success())
+				return;
+		}
+	}
+}
+
+void ZoneDatabase::LoadAuras(Client *c)
+{
+	auto query = StringFormat("SELECT `spell_id` FROM `character_auras` WHERE `id` = %u ORDER BY `slot`", c->CharacterID());
+	auto results = database.QueryDatabase(query);
+	if (!results.Success())
+		return;
+
+	for (auto row = results.begin(); row != results.end(); ++row)
+		c->MakeAura(atoi(row[0]));
 }
 
 void ZoneDatabase::SavePetInfo(Client *client)

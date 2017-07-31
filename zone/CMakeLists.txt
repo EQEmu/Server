@@ -5,6 +5,7 @@ SET(zone_sources
 	aa_ability.cpp
 	aggro.cpp
 	aggromanager.cpp
+	aura.cpp
 	attack.cpp
 	beacon.cpp
 	bonuses.cpp
@@ -136,6 +137,7 @@ SET(zone_headers
 	aa.h
 	aa_ability.h
 	aggromanager.h
+	aura.h
 	basic_functions.h
 	beacon.h
 	bot.h

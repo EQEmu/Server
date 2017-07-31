@@ -562,9 +562,9 @@ typedef enum {
 #define SE_LimitManaMin					348	// implemented
 #define SE_ShieldEquipDmgMod			349	// implemented[AA] Increase melee base damage (indirectly increasing hate) when wearing a shield.
 #define SE_ManaBurn						350	// implemented - Drains mana for damage/heal at a defined ratio up to a defined maximum amount of mana.
-//#define SE_PersistentEffect			351	// *not implemented. creates a trap/totem that casts a spell (spell id + base1?) when anything comes near it. can probably make a beacon for this
-//#define SE_IncreaseTrapCount			352	// *not implemented - looks to be some type of invulnerability? Test ITC (8755)
-//#define SE_AdditionalAura				353	// *not implemented - allows use of more than 1 aura, aa effect
+#define SE_PersistentEffect				351	// *not implemented. creates a trap/totem that casts a spell (spell id + base1?) when anything comes near it. can probably make a beacon for this
+#define SE_IncreaseTrapCount			352	// *not implemented - looks to be some type of invulnerability? Test ITC (8755)
+#define SE_AdditionalAura				353	// *not implemented - allows use of more than 1 aura, aa effect
 //#define SE_DeactivateAllTraps			354	// *not implemented - looks to be some type of invulnerability? Test DAT (8757)
 //#define SE_LearnTrap					355	// *not implemented - looks to be some type of invulnerability? Test LT (8758)
 //#define SE_ChangeTriggerType			356	// not used
@@ -757,7 +757,7 @@ struct SPDat_Spell_Struct
 										// -- DIETY_BERTOXXULOUS ... DIETY_VEESHAN
 /* 142 */	//int8 npc_no_cast;			// 142: between 0 & 100 -- NPC_NO_CAST
 /* 143 */	//int ai_pt_bonus;			// 143: always set to 0, client doesn't save this -- AI_PT_BONUS
-/* 144 */	//int16 new_icon	// Spell icon used by the client in uifiles/default/spells??.tga, both for spell gems & buff window. Looks to depreciate icon & memicon -- NEW_ICON
+/* 144 */	int16 new_icon;	// Spell icon used by the client in uifiles/default/spells??.tga, both for spell gems & buff window. Looks to depreciate icon & memicon -- NEW_ICON
 /* 145 */	//int16 spellanim; // Doesn't look like it's the same as #doanim, so not sure what this is, particles I think -- SPELL_EFFECT_INDEX
 /* 146 */	bool uninterruptable;	// Looks like anything != 0 is uninterruptable. Values are mostly -1, 0, & 1 (Fetid Breath = 90?) -- NO_INTERRUPT
 /* 147 */	int16 ResistDiff; // -- RESIST_MOD
