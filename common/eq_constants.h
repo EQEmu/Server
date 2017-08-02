@@ -56,12 +56,16 @@
 #define AT_AreaEndRegen 37	// guild hall regen pool sets to value * 0.001
 #define AT_FreezeBuffs 38	// Freezes beneficial buff timers
 #define AT_NpcTintIndex 39	// not 100% sure
+#define AT_GroupConsent 40	// auto consent group
+#define AT_RaidConsent 41	// auto consent raid
+#define AT_GuildConsent 42	// auto consent guild
 #define AT_ShowHelm 43		// 0 = hide graphic, 1 = show graphic
 #define AT_DamageState 44	// The damage state of a destructible object (0 through 10) plays soundids most only have 2 or 4 states though
+#define AT_EQPlayers 45		// /eqplayersupdate
 #define AT_FindBits 46		// set FindBits, whatever those are!
 #define AT_TextureType 48	// TextureType
 #define AT_FacePick 49		// Turns off face pick window? maybe ...
-#define AT_GuldShow 52		// this is what MQ2 call sit, not sure
+#define AT_GuildShow 52		// this is what MQ2 call sit, not sure
 #define AT_Offline 53		// Offline mode
 
 //#define AT_Trader 300		// Bazaar Trader Mode (not present in SoF or RoF2)
