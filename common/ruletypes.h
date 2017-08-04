@@ -134,7 +134,6 @@ RULE_INT(Character, TradeskillUpMakePoison, 2) // Make Poison skillup rate adjus
 RULE_INT(Character, TradeskillUpPottery, 4) // Pottery skillup rate adjust. Lower is faster.
 RULE_INT(Character, TradeskillUpResearch, 1) // Research skillup rate adjust. Lower is faster.
 RULE_INT(Character, TradeskillUpTinkering, 2) // Tinkering skillup rate adjust. Lower is faster.
-RULE_BOOL(Character, SpamHPUpdates, false) // if your server has stupid amounts of HP that causes client display issues, turn this on!
 RULE_BOOL(Character, MarqueeHPUpdates, false) // Will show Health % in center of screen < 100%
 RULE_INT(Character, IksarCommonTongue, 95) // 95 By default (live-like?)
 RULE_INT(Character, OgreCommonTongue, 95) // 95 By default (live-like?)
@@ -151,6 +150,7 @@ RULE_BOOL(Character, AllowMQTarget, false) // Disables putting players in the 'h
 RULE_BOOL(Character, UseOldBindWound, false) // Uses the original bind wound behavior
 RULE_BOOL(Character, GrantHoTTOnCreate, false) // Grant Health of Target's Target leadership AA on character creation
 RULE_BOOL(Character, UseOldConSystem, false) // Grant Health of Target's Target leadership AA on character creation
+RULE_BOOL(Character, OPClientUpdateVisualDebug, false) // Shows a pulse and forward directional particle each time the client sends its position to server
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Mercs)
@@ -235,7 +235,6 @@ RULE_BOOL(World, StartZoneSameAsBindOnCreation, true) //Should the start zone AL
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Zone)
-RULE_INT(Zone, NPCPositonUpdateTicCount, 32) //ms between intervals of sending a position update to the entire zone.
 RULE_INT(Zone, ClientLinkdeadMS, 180000) //the time a client remains link dead on the server after a sudden disconnection
 RULE_INT(Zone, GraveyardTimeMS, 1200000) //ms time until a player corpse is moved to a zone's graveyard, if one is specified for the zone
 RULE_BOOL(Zone, EnableShadowrest, 1) // enables or disables the shadowrest zone feature for player corpses. Default is turned on.
@@ -274,6 +273,8 @@ RULE_BOOL(Map, FixPathingZWhenLoading, true)		//increases zone boot times a bit 
 RULE_BOOL(Map, FixPathingZAtWaypoints, false)	//alternative to `WhenLoading`, accomplishes the same thing but does it at each waypoint instead of once at boot time.
 RULE_BOOL(Map, FixPathingZWhenMoving, false)		//very CPU intensive, but helps hopping with widely spaced waypoints.
 RULE_BOOL(Map, FixPathingZOnSendTo, false)		//try to repair Z coords in the SendTo routine as well.
+RULE_BOOL(Map, FixZWhenMoving, true)		// Automatically fix NPC Z coordinates when moving/pathing/engaged (Far less CPU intensive than its predecessor)
+RULE_BOOL(Map, MobZVisualDebug, false)		// Displays spell effects determining whether or not NPC is hitting Best Z calcs (blue for hit, red for miss)
 RULE_REAL(Map, FixPathingZMaxDeltaMoving, 20)	//at runtime while pathing: max change in Z to allow the BestZ code to apply.
 RULE_REAL(Map, FixPathingZMaxDeltaWaypoint, 20)	//at runtime at each waypoint: max change in Z to allow the BestZ code to apply.
 RULE_REAL(Map, FixPathingZMaxDeltaSendTo, 20)	//at runtime in SendTo: max change in Z to allow the BestZ code to apply.
@@ -289,7 +290,7 @@ RULE_BOOL(Pathing, AggroReturnToGrid, true)	// Enable pathing for aggroed roamin
 RULE_BOOL(Pathing, Guard, true)		// Enable pathing for mobs moving to their guard point.
 RULE_BOOL(Pathing, Find, true)		// Enable pathing for FindPerson requests from the client.
 RULE_BOOL(Pathing, Fear, true)		// Enable pathing for fear
-RULE_REAL(Pathing, ZDiffThreshold, 10)	// If a mob las LOS to it's target, it will run to it if the Z difference is < this.
+RULE_REAL(Pathing, ZDiffThresholdNew, 80)	// If a mob las LOS to it's target, it will run to it if the Z difference is < this.
 RULE_INT(Pathing, LOSCheckFrequency, 1000)	// A mob will check for LOS to it's target this often (milliseconds).
 RULE_INT(Pathing, RouteUpdateFrequencyShort, 1000)	// How often a new route will be calculated if the target has moved.
 RULE_INT(Pathing, RouteUpdateFrequencyLong, 5000)	// How often a new route will be calculated if the target has moved.
@@ -348,6 +349,7 @@ RULE_INT(Spells, MaxTotalSlotsNPC, 60)	// default to Tit's limit
 RULE_INT(Spells, MaxTotalSlotsPET, 30)	// default to Tit's limit
 RULE_BOOL (Spells, EnableBlockedBuffs, true)
 RULE_INT(Spells, ReflectType, 3) //0 = disabled, 1 = single target player spells only, 2 = all player spells, 3 = all single target spells, 4 = all spells
+RULE_BOOL(Spells, ReflectMessagesClose, true) // Live functionality is for Reflect messages to show to players within close proximity, false shows just player reflecting
 RULE_INT(Spells, VirusSpreadDistance, 30) // The distance a viral spell will jump to its next victim
 RULE_BOOL(Spells, LiveLikeFocusEffects, true) // Determines whether specific healing, dmg and mana reduction focuses are randomized
 RULE_INT(Spells, BaseImmunityLevel, 55) // The level that targets start to be immune to stun, fear and mez spells with a max level of 0.
@@ -397,6 +399,7 @@ RULE_BOOL(Spells, FlatItemExtraSpellAmt, false) // allow SpellDmg stat to affect
 RULE_BOOL(Spells, IgnoreSpellDmgLvlRestriction, false) // ignore the 5 level spread on applying SpellDmg
 RULE_BOOL(Spells, AllowItemTGB, false) // TGB doesn't work with items on live, custom servers want it though
 RULE_BOOL(Spells, NPCInnateProcOverride, true) //  NPC innate procs override the target type to single target.
+RULE_BOOL(Spells, OldRainTargets, false) // use old incorrectly implemented max targets for rains
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Combat)

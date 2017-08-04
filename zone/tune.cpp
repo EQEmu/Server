@@ -596,8 +596,7 @@ int32 Client::GetMeleeDamage(Mob* other, bool GetMinDamage)
 		}
 	} 
 
-	EQEmu::skills::SkillType skillinuse;
-	AttackAnimation(skillinuse, Hand, weapon);
+	EQEmu::skills::SkillType skillinuse = AttackAnimation(Hand, weapon);
 
 	int damage = 0;
 	uint8 mylevel = GetLevel() ? GetLevel() : 1;
@@ -665,16 +664,16 @@ void Mob::Tune_FindAccuaryByHitChance(Mob* defender, Mob *attacker, float hit_ch
 		weapon = attacker->CastToClient()->GetInv().GetItem(EQEmu::inventory::slotPrimary);
 			
 		if(weapon && weapon->IsWeapon()){
-			attacker->CastToClient()->AttackAnimation(skillinuse, EQEmu::inventory::slotPrimary, weapon);
+			skillinuse = attacker->CastToClient()->AttackAnimation(EQEmu::inventory::slotPrimary, weapon);
 		}
 		else {
 			weapon = attacker->CastToClient()->GetInv().GetItem(EQEmu::inventory::slotSecondary);
 			if (weapon && weapon->IsWeapon()) 
-				attacker->CastToClient()->AttackAnimation(skillinuse, EQEmu::inventory::slotSecondary, weapon);
+				skillinuse = attacker->CastToClient()->AttackAnimation(EQEmu::inventory::slotSecondary, weapon);
 			else {
 				weapon = attacker->CastToClient()->GetInv().GetItem(EQEmu::inventory::slotRange);
 				if (weapon && weapon->IsWeapon()) 
-					attacker->CastToClient()->AttackAnimation(skillinuse, EQEmu::inventory::slotRange, weapon);
+					skillinuse = attacker->CastToClient()->AttackAnimation(EQEmu::inventory::slotRange, weapon);
 			}
 		}
 	}
@@ -745,16 +744,16 @@ void Mob::Tune_FindAvoidanceByHitChance(Mob* defender, Mob *attacker, float hit_
 		weapon = attacker->CastToClient()->GetInv().GetItem(EQEmu::inventory::slotPrimary);
 			
 		if(weapon && weapon->IsWeapon()){
-			attacker->CastToClient()->AttackAnimation(skillinuse, EQEmu::inventory::slotPrimary, weapon);
+			skillinuse = attacker->CastToClient()->AttackAnimation(EQEmu::inventory::slotPrimary, weapon);
 		}
 		else {
 			weapon = attacker->CastToClient()->GetInv().GetItem(EQEmu::inventory::slotSecondary);
 			if (weapon && weapon->IsWeapon()) 
-				attacker->CastToClient()->AttackAnimation(skillinuse, EQEmu::inventory::slotSecondary, weapon);
+				skillinuse = attacker->CastToClient()->AttackAnimation(EQEmu::inventory::slotSecondary, weapon);
 			else {
 				weapon = attacker->CastToClient()->GetInv().GetItem(EQEmu::inventory::slotRange);
 				if (weapon && weapon->IsWeapon()) 
-					attacker->CastToClient()->AttackAnimation(skillinuse, EQEmu::inventory::slotRange, weapon);
+					skillinuse = attacker->CastToClient()->AttackAnimation(EQEmu::inventory::slotRange, weapon);
 			}
 		}
 	}

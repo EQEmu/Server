@@ -133,6 +133,8 @@ struct NPCType
 	uint8	legtexture;
 	uint8	feettexture;
 	bool	ignore_despawn;
+	bool	show_name; // should default on
+	bool	untargetable;
 };
 
 namespace player_lootitem {

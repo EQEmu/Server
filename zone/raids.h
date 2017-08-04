@@ -142,6 +142,7 @@ public:
 	//keeps me from having to keep iterating through the list
 	//when I want lots of data from the same entry
 	uint32	GetPlayerIndex(const char *name);
+	uint32	GetPlayerIndex(Client *c);
 	//for perl interface
 	Client *GetClientByIndex(uint16 index);
 	const char *GetClientNameByIndex(uint8 index);
@@ -172,8 +173,10 @@ public:
 	bool	LearnMembers();
 	void	VerifyRaid();
 	void	MemberZoned(Client *c);
-	void	SendHPPacketsTo(Client *c);
-	void	SendHPPacketsFrom(Mob *m);
+	void	SendHPManaEndPacketsTo(Client *c);
+	void	SendHPPacketsFrom(Mob *mob);
+	void	SendManaPacketFrom(Mob *mob);
+	void	SendEndurancePacketFrom(Mob *mob);
 	void	RaidSay(const char *msg, Client *c);
 	void	RaidGroupSay(const char *msg, Client *c);
 

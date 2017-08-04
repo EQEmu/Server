@@ -1607,6 +1607,7 @@ namespace UF
 		memcpy(eq->Title, emu->Title, sizeof(eq->Title));
 		memcpy(eq->Text, emu->Text, sizeof(eq->Text));
 		OUT(Buttons);
+		OUT(SoundControls);
 		OUT(Duration);
 		OUT(PopupID);
 		OUT(NegativeID);
@@ -2843,7 +2844,7 @@ namespace UF
 				PacketSize += strlen(emu->DestructibleString) + 1;
 			}
 
-			bool ShowName = 1;
+			bool ShowName = emu->show_name;
 			if (emu->bodytype >= 66)
 			{
 				emu->race = 127;

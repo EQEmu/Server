@@ -505,6 +505,15 @@ void handle_player_null(QuestInterface *parse, lua_State* L, Client* client, std
 						std::vector<EQEmu::Any> *extra_pointers) {
 }
 
+void handle_player_use_skill(QuestInterface *parse, lua_State* L, Client* client, std::string data, uint32 extra_data, std::vector<EQEmu::Any> *extra_pointers) {
+	Seperator sep(data.c_str());
+	lua_pushinteger(L, std::stoi(sep.arg[0]));
+	lua_setfield(L, -2, "skill_id");
+
+	lua_pushinteger(L, std::stoi(sep.arg[1]));
+	lua_setfield(L, -2, "skill_level");
+}
+
 //Item
 void handle_item_click(QuestInterface *parse, lua_State* L, Client* client, EQEmu::ItemInstance* item, Mob *mob, std::string data, uint32 extra_data,
 					   std::vector<EQEmu::Any> *extra_pointers) {

@@ -2140,6 +2140,27 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, CastingSlot slot, ui
 
 		spell_target->CalcSpellPowerDistanceMod(spell_id, dist2);
 	}
+	//AE Duration spells were ignoring distance check from item clickies
+	if(ae_center != nullptr && ae_center != this) {
+		//casting a spell on somebody but ourself, make sure they are in range
+		float dist2 = DistanceSquared(m_Position, ae_center->GetPosition());
+		float range2 = range * range;
+		float min_range2 = spells[spell_id].min_range * spells[spell_id].min_range;
+		if(dist2 > range2) {
+			//target is out of range.
+			Log(Logs::Detail, Logs::Spells, "Spell %d: Spell target is out of range (squared: %f > %f)", spell_id, dist2, range2);
+			Message_StringID(13, TARGET_OUT_OF_RANGE);
+			return(false);
+		}
+		else if (dist2 < min_range2){
+			//target is too close range.
+			Log(Logs::Detail, Logs::Spells, "Spell %d: Spell target is too close (squared: %f < %f)", spell_id, dist2, min_range2);
+			Message_StringID(13, TARGET_TOO_CLOSE);
+			return(false);
+		}
+
+		ae_center->CalcSpellPowerDistanceMod(spell_id, dist2);
+	}
 
 	//
 	// Switch #2 - execute the spell
@@ -2216,25 +2237,13 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, CastingSlot slot, ui
 				// special ae duration spell
 				ae_center->CastToBeacon()->AELocationSpell(this, spell_id, resist_adjust);
 			} else {
-				// regular PB AE or targeted AE spell - spell_target is null if PB
-				if(spell_target)	// this must be an AETarget spell
-				{
-					bool cast_on_target = true;
-					if (spells[spell_id].targettype == ST_TargetAENoPlayersPets && spell_target->IsPetOwnerClient())
-						cast_on_target = false;
-					if (spells[spell_id].targettype == ST_AreaClientOnly && !spell_target->IsClient())
-						cast_on_target = false;
-					if (spells[spell_id].targettype == ST_AreaNPCOnly && !spell_target->IsNPC())
-						cast_on_target = false;
-
-					// affect the target too
-					if (cast_on_target)
-						SpellOnTarget(spell_id, spell_target, false, true, resist_adjust);
-				}
+				// unsure if we actually need this? Need to find some spell examples
 				if(ae_center && ae_center == this && IsBeneficialSpell(spell_id))
 					SpellOnTarget(spell_id, this);
 
-				bool affect_caster = !IsNPC();	//NPC AE spells do not affect the NPC caster
+				// NPCs should never be affected by an AE they cast. PB AEs shouldn't affect caster either
+				// I don't think any other cases that get here matter
+				bool affect_caster = !IsNPC() && spells[spell_id].targettype != ST_AECaster;
 
 				if (spells[spell_id].targettype == ST_AETargetHateList)
 					hate_list.SpellCast(this, spell_id, spells[spell_id].aoerange, ae_center);
@@ -3038,6 +3047,12 @@ int Mob::CheckStackConflict(uint16 spellid1, int caster_level1, uint16 spellid2,
 		if (IsEffectIgnoredInStacking(effect1))
 			continue;
 
+		// negative AC affects are skipped. Ex. Sun's Corona and Glacier Breath should stack
+		// There may be more SPAs we need to add here ....
+		// The client does just check base rather than calculating the affect change value.
+		if ((effect1 == SE_ArmorClass || effect1 == SE_ACv2) && sp2.base[i] < 0)
+			continue;
+
 		/*
 		If target is a npc and caster1 and caster2 exist
 		If Caster1 isn't the same as Caster2 and the effect is a DoT then ignore it.
@@ -3432,7 +3447,7 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob *spelltar, bool reflect, bool use_r
 	if(spelltar->IsClient() && spelltar->CastToClient()->IsHoveringForRespawn())
 		return false;
 
-	if(IsDetrimentalSpell(spell_id) && !IsAttackAllowed(spelltar) && !IsResurrectionEffects(spell_id)) {
+	if(IsDetrimentalSpell(spell_id) && !IsAttackAllowed(spelltar, true) && !IsResurrectionEffects(spell_id)) {
 		if(!IsClient() || !CastToClient()->GetGM()) {
 			Message_StringID(MT_SpellFailure, SPELL_NO_HOLD);
 			return false;
@@ -3791,8 +3806,22 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob *spelltar, bool reflect, bool use_r
 				break;
 		}
 		if (reflect_chance) {
-			entity_list.MessageClose_StringID(this, false, RuleI(Range, SpellMessages), MT_Spells,
-							  SPELL_REFLECT, GetCleanName(), spelltar->GetCleanName());
+
+			if (RuleB(Spells, ReflectMessagesClose)) {
+				entity_list.MessageClose_StringID(
+					this, /* Sender */
+					false, /* Skip Sender */
+					RuleI(Range, SpellMessages), /* Range */
+					MT_Spells, /* Type */
+					SPELL_REFLECT, /* String ID */
+					GetCleanName(), /* Message 1 */
+					spelltar->GetCleanName() /* Message 2 */
+				);
+			}
+			else {
+				Message_StringID(MT_Spells, SPELL_REFLECT, GetCleanName(), spelltar->GetCleanName());
+			}
+
 			CheckNumHitsRemaining(NumHit::ReflectSpell);
 			// caster actually appears to change
 			// ex. During OMM fight you click your reflect mask and you get the recourse from the reflected
@@ -4160,6 +4189,21 @@ void Mob::BuffFadeBySpellID(uint16 spell_id)
 	CalcBonuses();
 }
 
+void Mob::BuffFadeBySpellIDAndCaster(uint16 spell_id, uint16 caster_id)
+{
+	bool recalc_bonus = false;
+	auto buff_count = GetMaxTotalSlots();
+	for (int i = 0; i < buff_count; ++i) {
+		if (buffs[i].spellid == spell_id && buffs[i].casterid == caster_id) {
+			BuffFadeBySlot(i, false);
+			recalc_bonus = true;
+		}
+	}
+
+	if (recalc_bonus)
+		CalcBonuses();
+}
+
 // removes buffs containing effectid, skipping skipslot
 void Mob::BuffFadeByEffect(int effectid, int skipslot)
 {
@@ -4176,6 +4220,16 @@ void Mob::BuffFadeByEffect(int effectid, int skipslot)
 
 	//we tell BuffFadeBySlot not to recalc, so we can do it only once when were done
 	CalcBonuses();
+}
+
+bool Mob::IsAffectedByBuff(uint16 spell_id)
+{
+	int buff_count = GetMaxTotalSlots();
+	for (int i = 0; i < buff_count; ++i)
+		if (buffs[i].spellid == spell_id)
+			return true;
+
+	return false;
 }
 
 // checks if 'this' can be affected by spell_id from caster

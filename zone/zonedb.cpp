@@ -11,6 +11,7 @@
 #include "merc.h"
 #include "zone.h"
 #include "zonedb.h"
+#include "aura.h"
 
 #include <ctime>
 #include <iostream>
@@ -1967,7 +1968,9 @@ const NPCType* ZoneDatabase::LoadNPCTypesData(uint32 npc_type_id, bool bulk_load
 		"npc_types.handtexture, "
 		"npc_types.legtexture, "
 		"npc_types.feettexture, "
-		"npc_types.ignore_despawn "
+		"npc_types.ignore_despawn, "
+		"npc_types.show_name, "
+		"npc_types.untargetable "
 		"FROM npc_types %s",
 		where_condition.c_str()
 	);
@@ -2143,6 +2146,8 @@ const NPCType* ZoneDatabase::LoadNPCTypesData(uint32 npc_type_id, bool bulk_load
 		temp_npctype_data->legtexture = atoi(row[95]);
 		temp_npctype_data->feettexture = atoi(row[96]);
 		temp_npctype_data->ignore_despawn = atoi(row[97]) == 1 ? true : false;
+		temp_npctype_data->show_name = atoi(row[98]) != 0 ? true : false;
+		temp_npctype_data->untargetable = atoi(row[99]) != 0 ? true : false;
 
 		// If NPC with duplicate NPC id already in table,
 		// free item we attempted to add.
@@ -3146,6 +3151,37 @@ void ZoneDatabase::LoadBuffs(Client *client)
 			}
 		}
 	}
+}
+
+void ZoneDatabase::SaveAuras(Client *c)
+{
+	auto query = StringFormat("DELETE FROM `character_auras` WHERE `id` = %u", c->CharacterID());
+	auto results = database.QueryDatabase(query);
+	if (!results.Success())
+		return;
+
+	const auto &auras = c->GetAuraMgr();
+	for (int i = 0; i < auras.count; ++i) {
+		auto aura = auras.auras[i].aura;
+		if (aura && aura->AuraZones()) {
+			query = StringFormat("INSERT INTO `character_auras` (id, slot, spell_id) VALUES(%u, %d, %d)",
+					     c->CharacterID(), i, aura->GetAuraID());
+			auto results = database.QueryDatabase(query);
+			if (!results.Success())
+				return;
+		}
+	}
+}
+
+void ZoneDatabase::LoadAuras(Client *c)
+{
+	auto query = StringFormat("SELECT `spell_id` FROM `character_auras` WHERE `id` = %u ORDER BY `slot`", c->CharacterID());
+	auto results = database.QueryDatabase(query);
+	if (!results.Success())
+		return;
+
+	for (auto row = results.begin(); row != results.end(); ++row)
+		c->MakeAura(atoi(row[0]));
 }
 
 void ZoneDatabase::SavePetInfo(Client *client)

@@ -70,6 +70,7 @@ namespace EQEmu
 #include <set>
 #include <algorithm>
 #include <memory>
+#include <deque>
 
 
 #define CLIENT_TIMEOUT 90000
@@ -221,7 +222,7 @@ public:
 	Client(EQStreamInterface * ieqs);
 	~Client();
 
-	std::unordered_map<NPC *, float> close_npcs;
+	std::unordered_map<Mob *, float> close_mobs;
 	bool is_client_moving;
 
 	//abstract virtual function implementations required by base abstract class
@@ -298,6 +299,7 @@ public:
 	const char* GetBuyerWelcomeMessage() { return BuyerWelcomeMessage.c_str(); }
 
 	void FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho);
+	bool ShouldISpawnFor(Client *c) { return !GMHideMe(c) && !IsHoveringForRespawn(); }
 	virtual bool Process();
 	void LogMerchant(Client* player, Mob* merchant, uint32 quantity, uint32 price, const EQEmu::ItemData* item, bool buying);
 	void SendPacketQueue(bool Block = true);
@@ -307,6 +309,7 @@ public:
 	void ChannelMessageSend(const char* from, const char* to, uint8 chan_num, uint8 language, const char* message, ...);
 	void ChannelMessageSend(const char* from, const char* to, uint8 chan_num, uint8 language, uint8 lang_skill, const char* message, ...);
 	void Message(uint32 type, const char* message, ...);
+	void FilteredMessage(Mob *sender, uint32 type, eqFilterType filter, const char* message, ...);
 	void QuestJournalledMessage(const char *npcname, const char* message);
 	void VoiceMacroReceived(uint32 Type, char *Target, uint32 MacroNumber);
 	void SendSound();
@@ -318,7 +321,7 @@ public:
 	bool GetRevoked() const { return revoked; }
 	void SetRevoked(bool rev) { revoked = rev; }
 	inline uint32 GetIP() const { return ip; }
-	inline bool GetHideMe() const { return gmhideme; }
+	inline bool GetHideMe() const { return gm_hide_me; }
 	void SetHideMe(bool hm);
 	inline uint16 GetPort() const { return port; }
 	bool IsDead() const { return(dead); }
@@ -350,6 +353,8 @@ public:
 	inline PetInfo* GetPetInfo(uint16 pet) { return (pet==1)?&m_suspendedminion:&m_petinfo; }
 	inline InspectMessage_Struct& GetInspectMessage() { return m_inspect_message; }
 	inline const InspectMessage_Struct& GetInspectMessage() const { return m_inspect_message; }
+
+	void SetPetCommandState(int button, int state);
 
 	bool CheckAccess(int16 iDBLevel, int16 iDefaultLevel);
 
@@ -536,11 +541,11 @@ public:
 	void CalcMaxEndurance(); //This calculates the maximum endurance we can have
 	int32 CalcBaseEndurance(); //Calculates Base End
 	int32 CalcEnduranceRegen(); //Calculates endurance regen used in DoEnduranceRegen()
-	int32 GetEndurance() const {return cur_end;} //This gets our current endurance
+	int32 GetEndurance() const {return current_endurance;} //This gets our current endurance
 	int32 GetMaxEndurance() const {return max_end;} //This gets our endurance from the last CalcMaxEndurance() call
 	int32 CalcEnduranceRegenCap();
 	int32 CalcHPRegenCap();
-	inline uint8 GetEndurancePercent() { return (uint8)((float)cur_end / (float)max_end * 100.0f); }
+	inline uint8 GetEndurancePercent() { return (uint8)((float)current_endurance / (float)max_end * 100.0f); }
 	void SetEndurance(int32 newEnd); //This sets the current endurance to the new value
 	void DoEnduranceRegen(); //This Regenerates endurance
 	void DoEnduranceUpkeep(); //does the endurance upkeep
@@ -567,6 +572,7 @@ public:
 	void AddCrystals(uint32 Radiant, uint32 Ebon);
 	void SendCrystalCounts();
 
+	uint32 GetExperienceForKill(Mob *against);
 	void AddEXP(uint32 in_add_exp, uint8 conlevel = 0xFF, bool resexp = false);
 	uint32 CalcEXP(uint8 conlevel = 0xFF);
 	void SetEXP(uint32 set_exp, uint32 set_aaxp, bool resexp=false);
@@ -656,7 +662,7 @@ public:
 	void RefreshGuildInfo();
 
 
-	void SendManaUpdatePacket();
+	void CheckManaEndUpdate();
 	void SendManaUpdate();
 	void SendEnduranceUpdate();
 	uint8 GetFace() const { return m_pp.face; }
@@ -792,12 +798,12 @@ public:
 	void AddAAPoints(uint32 points) { m_pp.aapoints += points; SendAlternateAdvancementStats(); }
 	int GetAAPoints() { return m_pp.aapoints; }
 	int GetSpentAA() { return m_pp.aapoints_spent; }
+	uint32 GetRequiredAAExperience();
 
 	//old AA methods that we still use
 	void ResetAA();
 	void RefundAA();
 	void SendClearAA();
-	inline uint32 GetMaxAAXP(void) const { return max_AAXP; }
 	inline uint32 GetAAXP() const { return m_pp.expAA; }
 	inline uint32 GetAAPercent() const { return m_epp.perAA; }
 	int16 CalcAAFocus(focusType type, const AA::Rank &rank, uint16 spell_id);
@@ -942,6 +948,7 @@ public:
 	inline bool HasSpellScribed(int spellid) { return (FindSpellBookSlotBySpellID(spellid) != -1 ? true : false); }
 	uint16 GetMaxSkillAfterSpecializationRules(EQEmu::skills::SkillType skillid, uint16 maxSkill);
 	void SendPopupToClient(const char *Title, const char *Text, uint32 PopupID = 0, uint32 Buttons = 0, uint32 Duration = 0);
+	void SendFullPopup(const char *Title, const char *Text, uint32 PopupID = 0, uint32 NegativeID = 0, uint32 Buttons = 0, uint32 Duration = 0, const char *ButtonName0 = 0, const char *ButtonName1 = 0, uint32 SoundControls = 0);
 	void SendWindow(uint32 PopupID, uint32 NegativeID, uint32 Buttons, const char *ButtonName0, const char *ButtonName1, uint32 Duration, int title_type, Client* target, const char *Title, const char *Text, ...);
 	bool PendingTranslocate;
 	time_t TranslocateTime;
@@ -1066,7 +1073,7 @@ public:
 	void Signal(uint32 data);
 	Mob *GetBindSightTarget() { return bind_sight_target; }
 	void SetBindSightTarget(Mob *n) { bind_sight_target = n; }
-	const uint16 GetBoatID() const { return BoatID; }
+	const uint16 GetBoatID() const { return controlling_boat_id; }
 	void SendRewards();
 	bool TryReward(uint32 claim_id);
 	QGlobalCache *GetQGlobals() { return qGlobals; }
@@ -1257,6 +1264,8 @@ public:
 
 	void CheckRegionTypeChanges();
 
+	int32 CalcATK();
+
 protected:
 	friend class Mob;
 	void CalcItemBonuses(StatBonuses* newbon);
@@ -1316,7 +1325,6 @@ private:
 
 	void HandleTraderPriceUpdate(const EQApplicationPacket *app);
 
-	int32 CalcATK();
 	int32 CalcItemATKCap();
 	int32 CalcHaste();
 
@@ -1369,7 +1377,7 @@ private:
 	bool duelaccepted;
 	std::list<uint32> keyring;
 	bool tellsoff; // GM /toggle
-	bool gmhideme;
+	bool gm_hide_me;
 	bool LFG;
 	bool LFP;
 	uint8 LFGFromLevel;
@@ -1389,7 +1397,7 @@ private:
 	uint32 weight;
 	bool berserk;
 	bool dead;
-	uint16 BoatID;
+	uint16 controlling_boat_id;
 	uint16 TrackingID;
 	uint16 CustomerID;
 	uint16 TraderID;
@@ -1404,7 +1412,7 @@ private:
 	int Haste; //precalced value
 
 	int32 max_end;
-	int32 cur_end;
+	int32 current_endurance;
 
 	PlayerProfile_Struct m_pp;
 	ExtendedProfile_Struct m_epp;
@@ -1424,7 +1432,7 @@ private:
 	bool AddPacket(const EQApplicationPacket *, bool);
 	bool AddPacket(EQApplicationPacket**, bool);
 	bool SendAllPackets();
-	LinkedList<CLIENTPACKET *> clientpackets;
+	std::deque<std::unique_ptr<CLIENTPACKET>> clientpackets;
 
 	//Zoning related stuff
 	void SendZoneCancel(ZoneChange_Struct *zc);
@@ -1478,7 +1486,9 @@ private:
 	Timer helm_toggle_timer;
 	Timer aggro_meter_timer;
 	Timer npc_close_scan_timer;
-
+	Timer hp_self_update_throttle_timer; /* This is to prevent excessive packet sending under trains/fast combat */
+	Timer hp_other_update_throttle_timer; /* This is to keep clients from DOSing the server with macros that change client targets constantly */
+	Timer position_update_timer; /* Timer used when client hasn't updated within a 10 second window */
     glm::vec3 m_Proximity;
 
 	void BulkSendInventoryItems();
@@ -1487,7 +1497,6 @@ private:
 
 	uint32 tribute_master_id;
 
-	uint32 max_AAXP;
 	bool npcflag;
 	uint8 npclevel;
 	bool feigned;
@@ -1495,7 +1504,10 @@ private:
 	bool tgb;
 	bool instalog;
 	int32 last_reported_mana;
-	int32 last_reported_endur;
+	int32 last_reported_endurance;
+
+	int8 last_reported_mana_percent;
+	int8 last_reported_endurance_percent;
 
 	unsigned int AggroCount; // How many mobs are aggro on us.
 

@@ -90,6 +90,7 @@ class Client;
 class Group;
 class Raid;
 class Spawn2;
+class Aura;
 
 namespace EQEmu
 {
@@ -425,6 +426,7 @@ protected:
 	NPCType*	NPCTypedata_ours;	//special case for npcs with uniquely created data.
 
 	friend class EntityList;
+	friend class Aura;
 	std::list<struct NPCFaction*> faction_list;
 	uint32	copper;
 	uint32	silver;

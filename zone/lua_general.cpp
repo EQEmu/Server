@@ -7,6 +7,10 @@
 #include <list>
 #include <map>
 
+#include "../common/timer.h"
+#include "../common/eqemu_logsys.h"
+#include "../common/classes.h"
+#include "../common/rulesys.h"
 #include "lua_parser.h"
 #include "lua_item.h"
 #include "lua_iteminst.h"
@@ -16,8 +20,6 @@
 #include "quest_parser_collection.h"
 #include "questmgr.h"
 #include "qglobals.h"
-#include "../common/timer.h"
-#include "../common/eqemu_logsys.h"
 #include "encounter.h"
 #include "lua_encounter.h"
 
@@ -27,6 +29,12 @@ struct Slots { };
 struct Materials { };
 struct ClientVersions { };
 struct Appearances { };
+struct Classes { };
+struct Skills { };
+struct BodyTypes { };
+struct Filters { };
+struct MessageTypes { };
+struct Rule { };
 
 struct lua_registered_event {
 	std::string encounter_name;
@@ -892,6 +900,10 @@ void lua_cross_zone_message_player_by_name(uint32 type, const char *player, cons
 	quest_manager.CrossZoneMessagePlayerByName(type, player, message);
 }
 
+void lua_cross_zone_set_entity_variable_by_client_name(const char *player, const char *id, const char *m_var) {
+	quest_manager.CrossZoneSetEntityVariableByClientName(player, id, m_var);
+}
+
 void lua_world_wide_marquee(uint32 type, uint32 priority, uint32 fadein, uint32 fadeout, uint32 duration, const char *message) {
 	quest_manager.WorldWideMarquee(type, priority, fadein, fadeout, duration, message);
 }
@@ -1458,6 +1470,39 @@ void lua_create_npc(luabind::adl::object table, float x, float y, float z, float
 	npc->GiveNPCTypeData(npc_type);
 	entity_list.AddNPC(npc);
 }
+
+int random_int(int low, int high) {
+	return zone->random.Int(low, high);
+}
+
+double random_real(double low, double high) {
+	return zone->random.Real(low, high);
+}
+
+bool random_roll_int(int required) {
+	return zone->random.Roll(required);
+}
+
+bool random_roll_real(double required) {
+	return zone->random.Roll(required);
+}
+
+int random_roll0(int max) {
+	return zone->random.Roll0(max);
+}
+
+int get_rulei(int rule) {
+	return RuleManager::Instance()->GetIntRule((RuleManager::IntType)rule);
+}
+
+float get_ruler(int rule) {
+	return RuleManager::Instance()->GetRealRule((RuleManager::RealType)rule);
+}
+
+bool get_ruleb(int rule) {
+	return RuleManager::Instance()->GetBoolRule((RuleManager::BoolType)rule);
+}
+
 luabind::scope lua_register_general() {
 	return luabind::namespace_("eq")
 	[
@@ -1617,6 +1662,7 @@ luabind::scope lua_register_general() {
 		luabind::def("cross_zone_signal_client_by_char_id", &lua_cross_zone_signal_client_by_char_id),
 		luabind::def("cross_zone_signal_client_by_name", &lua_cross_zone_signal_client_by_name),
 		luabind::def("cross_zone_message_player_by_name", &lua_cross_zone_message_player_by_name),
+		luabind::def("cross_zone_set_entity_variable_by_client_name", &lua_cross_zone_set_entity_variable_by_client_name),
 		luabind::def("world_wide_marquee", &lua_world_wide_marquee),
 		luabind::def("get_qglobals", (luabind::adl::object(*)(lua_State*,Lua_NPC,Lua_Client))&lua_get_qglobals),
 		luabind::def("get_qglobals", (luabind::adl::object(*)(lua_State*,Lua_Client))&lua_get_qglobals),
@@ -1657,6 +1703,18 @@ luabind::scope lua_register_general() {
 		luabind::def("debug", (void(*)(std::string, int))&lua_debug)
 	];
 }
+
+luabind::scope lua_register_random() {
+	return luabind::namespace_("Random")
+		[
+			luabind::def("Int", &random_int),
+			luabind::def("Real", &random_real),
+			luabind::def("Roll", &random_roll_int),
+			luabind::def("RollReal", &random_roll_real),
+			luabind::def("Roll0", &random_roll0)
+		];
+}
+
 
 luabind::scope lua_register_events() {
 	return luabind::class_<Events>("Event")
@@ -1738,7 +1796,8 @@ luabind::scope lua_register_events() {
 			luabind::value("unhandled_opcode", static_cast<int>(EVENT_UNHANDLED_OPCODE)),
 			luabind::value("tick", static_cast<int>(EVENT_TICK)),
 			luabind::value("spawn_zone", static_cast<int>(EVENT_SPAWN_ZONE)),
-			luabind::value("death_zone", static_cast<int>(EVENT_DEATH_ZONE))
+			luabind::value("death_zone", static_cast<int>(EVENT_DEATH_ZONE)),
+			luabind::value("use_skill", static_cast<int>(EVENT_USE_SKILL))
 		];
 }
 
@@ -1854,6 +1913,357 @@ luabind::scope lua_register_appearance() {
 			luabind::value("Crouching", static_cast<int>(eaCrouching)),
 			luabind::value("Dead", static_cast<int>(eaDead)),
 			luabind::value("Looting", static_cast<int>(eaLooting))
+		];
+}
+
+luabind::scope lua_register_classes() {
+	return luabind::class_<Classes>("Class")
+		.enum_("constants")
+		[
+			luabind::value("WARRIOR", WARRIOR),
+			luabind::value("CLERIC", CLERIC),
+			luabind::value("PALADIN", PALADIN),
+			luabind::value("RANGER", RANGER),
+			luabind::value("SHADOWKNIGHT", SHADOWKNIGHT),
+			luabind::value("DRUID", DRUID),
+			luabind::value("MONK", MONK),
+			luabind::value("BARD", BARD),
+			luabind::value("ROGUE", ROGUE),
+			luabind::value("SHAMAN", SHAMAN),
+			luabind::value("NECROMANCER", NECROMANCER),
+			luabind::value("WIZARD", WIZARD),
+			luabind::value("MAGICIAN", MAGICIAN),
+			luabind::value("ENCHANTER", ENCHANTER),
+			luabind::value("BEASTLORD", BEASTLORD),
+			luabind::value("BERSERKER", BERSERKER),
+			luabind::value("WARRIORGM", WARRIORGM),
+			luabind::value("CLERICGM", CLERICGM),
+			luabind::value("PALADINGM", PALADINGM),
+			luabind::value("RANGERGM", RANGERGM),
+			luabind::value("SHADOWKNIGHTGM", SHADOWKNIGHTGM),
+			luabind::value("DRUIDGM", DRUIDGM),
+			luabind::value("MONKGM", MONKGM),
+			luabind::value("BARDGM", BARDGM),
+			luabind::value("ROGUEGM", ROGUEGM),
+			luabind::value("SHAMANGM", SHAMANGM),
+			luabind::value("NECROMANCERGM", NECROMANCERGM),
+			luabind::value("WIZARDGM", WIZARDGM),
+			luabind::value("MAGICIANGM", MAGICIANGM),
+			luabind::value("ENCHANTERGM", ENCHANTERGM),
+			luabind::value("BEASTLORDGM", BEASTLORDGM),
+			luabind::value("BERSERKERGM", BERSERKERGM),
+			luabind::value("BANKER", BANKER),
+			luabind::value("MERCHANT", MERCHANT),
+			luabind::value("DISCORD_MERCHANT", DISCORD_MERCHANT),
+			luabind::value("ADVENTURERECRUITER", ADVENTURERECRUITER),
+			luabind::value("ADVENTUREMERCHANT", ADVENTUREMERCHANT),
+			luabind::value("LDON_TREASURE", LDON_TREASURE),
+			luabind::value("CORPSE_CLASS", CORPSE_CLASS),
+			luabind::value("TRIBUTE_MASTER", TRIBUTE_MASTER),
+			luabind::value("GUILD_TRIBUTE_MASTER", GUILD_TRIBUTE_MASTER),
+			luabind::value("NORRATHS_KEEPERS_MERCHANT", NORRATHS_KEEPERS_MERCHANT),
+			luabind::value("DARK_REIGN_MERCHANT", DARK_REIGN_MERCHANT),
+			luabind::value("FELLOWSHIP_MASTER", FELLOWSHIP_MASTER),
+			luabind::value("ALT_CURRENCY_MERCHANT", ALT_CURRENCY_MERCHANT),
+			luabind::value("MERCERNARY_MASTER", MERCERNARY_MASTER)
+		];
+}
+
+luabind::scope lua_register_skills() {
+	return luabind::class_<Skills>("Skill")
+		.enum_("constants")
+		[
+			luabind::value("1HBlunt", EQEmu::skills::Skill1HBlunt),
+			luabind::value("1HSlashing", EQEmu::skills::Skill1HSlashing),
+			luabind::value("2HBlunt", EQEmu::skills::Skill2HBlunt),
+			luabind::value("2HSlashing", EQEmu::skills::Skill2HSlashing),
+			luabind::value("Abjuration", EQEmu::skills::SkillAbjuration),
+			luabind::value("Alteration", EQEmu::skills::SkillAlteration),
+			luabind::value("ApplyPoison", EQEmu::skills::SkillApplyPoison),
+			luabind::value("Archery", EQEmu::skills::SkillArchery),
+			luabind::value("Backstab", EQEmu::skills::SkillBackstab),
+			luabind::value("BindWound", EQEmu::skills::SkillBindWound),
+			luabind::value("Bash", EQEmu::skills::SkillBash),
+			luabind::value("Block", EQEmu::skills::SkillBlock),
+			luabind::value("BrassInstruments", EQEmu::skills::SkillBrassInstruments),
+			luabind::value("Channeling", EQEmu::skills::SkillChanneling),
+			luabind::value("Conjuration", EQEmu::skills::SkillConjuration),
+			luabind::value("Defense", EQEmu::skills::SkillDefense),
+			luabind::value("Disarm", EQEmu::skills::SkillDisarm),
+			luabind::value("DisarmTraps", EQEmu::skills::SkillDisarmTraps),
+			luabind::value("Divination", EQEmu::skills::SkillDivination),
+			luabind::value("Dodge", EQEmu::skills::SkillDodge),
+			luabind::value("DoubleAttack", EQEmu::skills::SkillDoubleAttack),
+			luabind::value("DragonPunch", EQEmu::skills::SkillDragonPunch),
+			luabind::value("TailRake", EQEmu::skills::SkillTailRake),
+			luabind::value("DualWield", EQEmu::skills::SkillDualWield),
+			luabind::value("EagleStrike", EQEmu::skills::SkillEagleStrike),
+			luabind::value("Evocation", EQEmu::skills::SkillEvocation),
+			luabind::value("FeignDeath", EQEmu::skills::SkillFeignDeath),
+			luabind::value("FlyingKick", EQEmu::skills::SkillFlyingKick),
+			luabind::value("Forage", EQEmu::skills::SkillForage),
+			luabind::value("HandtoHand", EQEmu::skills::SkillHandtoHand),
+			luabind::value("Hide", EQEmu::skills::SkillHide),
+			luabind::value("Kick", EQEmu::skills::SkillKick),
+			luabind::value("Meditate", EQEmu::skills::SkillMeditate),
+			luabind::value("Mend", EQEmu::skills::SkillMend),
+			luabind::value("Offense", EQEmu::skills::SkillOffense),
+			luabind::value("Parry", EQEmu::skills::SkillParry),
+			luabind::value("PickLock", EQEmu::skills::SkillPickLock),
+			luabind::value("1HPiercing", EQEmu::skills::Skill1HPiercing),
+			luabind::value("Riposte", EQEmu::skills::SkillRiposte),
+			luabind::value("RoundKick", EQEmu::skills::SkillRoundKick),
+			luabind::value("SafeFall", EQEmu::skills::SkillSafeFall),
+			luabind::value("SenseHeading", EQEmu::skills::SkillSenseHeading),
+			luabind::value("Singing", EQEmu::skills::SkillSinging),
+			luabind::value("Sneak", EQEmu::skills::SkillSneak),
+			luabind::value("SpecializeAbjure", EQEmu::skills::SkillSpecializeAbjure),
+			luabind::value("SpecializeAlteration", EQEmu::skills::SkillSpecializeAlteration),
+			luabind::value("SpecializeConjuration", EQEmu::skills::SkillSpecializeConjuration),
+			luabind::value("SpecializeDivination", EQEmu::skills::SkillSpecializeDivination),
+			luabind::value("SpecializeEvocation", EQEmu::skills::SkillSpecializeEvocation),
+			luabind::value("PickPockets", EQEmu::skills::SkillPickPockets),
+			luabind::value("StringedInstruments", EQEmu::skills::SkillStringedInstruments),
+			luabind::value("Swimming", EQEmu::skills::SkillSwimming),
+			luabind::value("Throwing", EQEmu::skills::SkillThrowing),
+			luabind::value("TigerClaw", EQEmu::skills::SkillTigerClaw),
+			luabind::value("Tracking", EQEmu::skills::SkillTracking),
+			luabind::value("WindInstruments", EQEmu::skills::SkillWindInstruments),
+			luabind::value("Fishing", EQEmu::skills::SkillFishing),
+			luabind::value("MakePoison", EQEmu::skills::SkillMakePoison),
+			luabind::value("Tinkering", EQEmu::skills::SkillTinkering),
+			luabind::value("Research", EQEmu::skills::SkillResearch),
+			luabind::value("Alchemy", EQEmu::skills::SkillAlchemy),
+			luabind::value("Baking", EQEmu::skills::SkillBaking),
+			luabind::value("Tailoring", EQEmu::skills::SkillTailoring),
+			luabind::value("SenseTraps", EQEmu::skills::SkillSenseTraps),
+			luabind::value("Blacksmithing", EQEmu::skills::SkillBlacksmithing),
+			luabind::value("Fletching", EQEmu::skills::SkillFletching),
+			luabind::value("Brewing", EQEmu::skills::SkillBrewing),
+			luabind::value("AlcoholTolerance", EQEmu::skills::SkillAlcoholTolerance),
+			luabind::value("Begging", EQEmu::skills::SkillBegging),
+			luabind::value("JewelryMaking", EQEmu::skills::SkillJewelryMaking),
+			luabind::value("Pottery", EQEmu::skills::SkillPottery),
+			luabind::value("PercussionInstruments", EQEmu::skills::SkillPercussionInstruments),
+			luabind::value("Intimidation", EQEmu::skills::SkillIntimidation),
+			luabind::value("Berserking", EQEmu::skills::SkillBerserking),
+			luabind::value("Taunt", EQEmu::skills::SkillTaunt),
+			luabind::value("Frenzy", EQEmu::skills::SkillFrenzy),
+			luabind::value("RemoveTraps", EQEmu::skills::SkillRemoveTraps),
+			luabind::value("TripleAttack", EQEmu::skills::SkillTripleAttack),
+			luabind::value("2HPiercing", EQEmu::skills::Skill2HPiercing),
+			luabind::value("HIGHEST_SKILL", EQEmu::skills::HIGHEST_SKILL)
+		];
+}
+
+luabind::scope lua_register_bodytypes() {
+	return luabind::class_<BodyTypes>("BT")
+		.enum_("constants")
+		[
+			luabind::value("Humanoid", 1),
+			luabind::value("Lycanthrope", 2),
+			luabind::value("Undead", 3),
+			luabind::value("Giant", 4),
+			luabind::value("Construct", 5),
+			luabind::value("Extraplanar", 6),
+			luabind::value("Magical", 7),
+			luabind::value("SummonedUndead", 8),
+			luabind::value("RaidGiant", 9),
+			luabind::value("NoTarget", 11),
+			luabind::value("Vampire", 12),
+			luabind::value("Atenha_Ra", 13),
+			luabind::value("Greater_Akheva", 14),
+			luabind::value("Khati_Sha", 15),
+			luabind::value("Seru", 16),
+			luabind::value("Draz_Nurakk", 18),
+			luabind::value("Zek", 19),
+			luabind::value("Luggald", 20),
+			luabind::value("Animal", 21),
+			luabind::value("Insect", 22),
+			luabind::value("Monster", 23),
+			luabind::value("Summoned", 24),
+			luabind::value("Plant", 25),
+			luabind::value("Dragon", 26),
+			luabind::value("Summoned2", 27),
+			luabind::value("Summoned3", 28),
+			luabind::value("VeliousDragon", 30),
+			luabind::value("Dragon3", 32),
+			luabind::value("Boxes", 33),
+			luabind::value("Muramite", 34),
+			luabind::value("NoTarget2", 60),
+			luabind::value("SwarmPet", 63),
+			luabind::value("InvisMan", 66),
+			luabind::value("Special", 67)
+		];
+}
+
+luabind::scope lua_register_filters() {
+	return luabind::class_<Filters>("Filter")
+		.enum_("constants")
+		[
+			luabind::value("None", FilterNone),
+			luabind::value("GuildChat", FilterGuildChat),
+			luabind::value("Socials", FilterSocials),
+			luabind::value("GroupChat", FilterGroupChat),
+			luabind::value("Shouts", FilterShouts),
+			luabind::value("Auctions", FilterAuctions),
+			luabind::value("OOC", FilterOOC),
+			luabind::value("BadWords", FilterBadWords),
+			luabind::value("PCSpells", FilterPCSpells),
+			luabind::value("NPCSpells", FilterNPCSpells),
+			luabind::value("BardSongs", FilterBardSongs),
+			luabind::value("SpellCrits", FilterSpellCrits),
+			luabind::value("MeleeCrits", FilterMeleeCrits),
+			luabind::value("SpellDamage", FilterSpellDamage),
+			luabind::value("MyMisses", FilterMyMisses),
+			luabind::value("OthersMiss", FilterOthersMiss),
+			luabind::value("OthersHit", FilterOthersHit),
+			luabind::value("MissedMe", FilterMissedMe),
+			luabind::value("DamageShields", FilterDamageShields),
+			luabind::value("DOT", FilterDOT),
+			luabind::value("PetHits", FilterPetHits),
+			luabind::value("PetMisses", FilterPetMisses),
+			luabind::value("FocusEffects", FilterFocusEffects),
+			luabind::value("PetSpells", FilterPetSpells),
+			luabind::value("HealOverTime", FilterHealOverTime),
+			luabind::value("Unknown25", FilterUnknown25),
+			luabind::value("Unknown26", FilterUnknown26),
+			luabind::value("Unknown27", FilterUnknown27),
+			luabind::value("Unknown28", FilterUnknown28)
+		];
+}
+
+luabind::scope lua_register_message_types() {
+	return luabind::class_<MessageTypes>("MT")
+		.enum_("constants")
+		[
+			luabind::value("Say", MT_Say),
+			luabind::value("Tell", MT_Tell),
+			luabind::value("Group", MT_Group),
+			luabind::value("Guild", MT_Guild),
+			luabind::value("OOC", MT_OOC),
+			luabind::value("Auction", MT_Auction),
+			luabind::value("Shout", MT_Shout),
+			luabind::value("Emote", MT_Emote),
+			luabind::value("Spells", MT_Spells),
+			luabind::value("YouHitOther", MT_YouHitOther),
+			luabind::value("OtherHitsYou", MT_OtherHitsYou),
+			luabind::value("YouMissOther", MT_YouMissOther),
+			luabind::value("OtherMissesYou", MT_OtherMissesYou),
+			luabind::value("Broadcasts", MT_Broadcasts),
+			luabind::value("Skills", MT_Skills),
+			luabind::value("Disciplines", MT_Disciplines),
+			luabind::value("Unused1", MT_Unused1),
+			luabind::value("DefaultText", MT_DefaultText),
+			luabind::value("Unused2", MT_Unused2),
+			luabind::value("MerchantOffer", MT_MerchantOffer),
+			luabind::value("MerchantBuySell", MT_MerchantBuySell),
+			luabind::value("YourDeath", MT_YourDeath),
+			luabind::value("OtherDeath", MT_OtherDeath),
+			luabind::value("OtherHits", MT_OtherHits),
+			luabind::value("OtherMisses", MT_OtherMisses),
+			luabind::value("Who", MT_Who),
+			luabind::value("YellForHelp", MT_YellForHelp),
+			luabind::value("NonMelee", MT_NonMelee),
+			luabind::value("WornOff", MT_WornOff),
+			luabind::value("MoneySplit", MT_MoneySplit),
+			luabind::value("LootMessages", MT_LootMessages),
+			luabind::value("DiceRoll", MT_DiceRoll),
+			luabind::value("OtherSpells", MT_OtherSpells),
+			luabind::value("SpellFailure", MT_SpellFailure),
+			luabind::value("Chat", MT_Chat),
+			luabind::value("Channel1", MT_Channel1),
+			luabind::value("Channel2", MT_Channel2),
+			luabind::value("Channel3", MT_Channel3),
+			luabind::value("Channel4", MT_Channel4),
+			luabind::value("Channel5", MT_Channel5),
+			luabind::value("Channel6", MT_Channel6),
+			luabind::value("Channel7", MT_Channel7),
+			luabind::value("Channel8", MT_Channel8),
+			luabind::value("Channel9", MT_Channel9),
+			luabind::value("Channel10", MT_Channel10),
+			luabind::value("CritMelee", MT_CritMelee),
+			luabind::value("SpellCrits", MT_SpellCrits),
+			luabind::value("TooFarAway", MT_TooFarAway),
+			luabind::value("NPCRampage", MT_NPCRampage),
+			luabind::value("NPCFlurry", MT_NPCFlurry),
+			luabind::value("NPCEnrage", MT_NPCEnrage),
+			luabind::value("SayEcho", MT_SayEcho),
+			luabind::value("TellEcho", MT_TellEcho),
+			luabind::value("GroupEcho", MT_GroupEcho),
+			luabind::value("GuildEcho", MT_GuildEcho),
+			luabind::value("OOCEcho", MT_OOCEcho),
+			luabind::value("AuctionEcho", MT_AuctionEcho),
+			luabind::value("ShoutECho", MT_ShoutECho),
+			luabind::value("EmoteEcho", MT_EmoteEcho),
+			luabind::value("Chat1Echo", MT_Chat1Echo),
+			luabind::value("Chat2Echo", MT_Chat2Echo),
+			luabind::value("Chat3Echo", MT_Chat3Echo),
+			luabind::value("Chat4Echo", MT_Chat4Echo),
+			luabind::value("Chat5Echo", MT_Chat5Echo),
+			luabind::value("Chat6Echo", MT_Chat6Echo),
+			luabind::value("Chat7Echo", MT_Chat7Echo),
+			luabind::value("Chat8Echo", MT_Chat8Echo),
+			luabind::value("Chat9Echo", MT_Chat9Echo),
+			luabind::value("Chat10Echo", MT_Chat10Echo),
+			luabind::value("DoTDamage", MT_DoTDamage),
+			luabind::value("ItemLink", MT_ItemLink),
+			luabind::value("RaidSay", MT_RaidSay),
+			luabind::value("MyPet", MT_MyPet),
+			luabind::value("DS", MT_DS),
+			luabind::value("Leadership", MT_Leadership),
+			luabind::value("PetFlurry", MT_PetFlurry),
+			luabind::value("PetCrit", MT_PetCrit),
+			luabind::value("FocusEffect", MT_FocusEffect),
+			luabind::value("Experience", MT_Experience),
+			luabind::value("System", MT_System),
+			luabind::value("PetSpell", MT_PetSpell),
+			luabind::value("PetResponse", MT_PetResponse),
+			luabind::value("ItemSpeech", MT_ItemSpeech),
+			luabind::value("StrikeThrough", MT_StrikeThrough),
+			luabind::value("Stun", MT_Stun)
+		];
+}
+
+luabind::scope lua_register_rules_const() {
+	return luabind::class_<Rule>("Rule")
+		.enum_("constants")
+	[
+#define RULE_INT(cat, rule, default_value) \
+		luabind::value(#rule, RuleManager::Int__##rule),
+#include "../common/ruletypes.h"
+		luabind::value("_IntRuleCount", RuleManager::_IntRuleCount),
+#undef RULE_INT
+#define RULE_REAL(cat, rule, default_value) \
+		luabind::value(#rule, RuleManager::Real__##rule),
+#include "../common/ruletypes.h"
+		luabind::value("_RealRuleCount", RuleManager::_RealRuleCount),
+#undef RULE_REAL
+#define RULE_BOOL(cat, rule, default_value) \
+		luabind::value(#rule, RuleManager::Bool__##rule),
+#include "../common/ruletypes.h"
+		luabind::value("_BoolRuleCount", RuleManager::_BoolRuleCount)
+	];
+}
+
+luabind::scope lua_register_rulei() {
+	return luabind::namespace_("RuleI")
+		[
+			luabind::def("Get", &get_rulei)
+		];
+}
+
+luabind::scope lua_register_ruler() {
+	return luabind::namespace_("RuleR")
+		[
+			luabind::def("Get", &get_ruler)
+		];
+}
+
+luabind::scope lua_register_ruleb() {
+	return luabind::namespace_("RuleB")
+		[
+			luabind::def("Get", &get_ruleb)
 		];
 }
 

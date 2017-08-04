@@ -338,6 +338,13 @@ bool Group::AddMember(Mob* newmember, const char *NewMemberName, uint32 Characte
 				database.SetGroupID(NewMemberName, GetID(), owner->CharacterID(), true);
 			}
 		}
+
+		Group* group = newmember->CastToClient()->GetGroup();
+		if (group) {
+			group->SendHPManaEndPacketsTo(newmember);
+			group->SendHPPacketsFrom(newmember);
+		}
+
 	}
 	else
 	{
@@ -387,31 +394,30 @@ void Group::QueuePacket(const EQApplicationPacket *app, bool ack_req)
 
 // Sends the rest of the group's hps to member. this is useful when someone
 // first joins a group, but otherwise there shouldn't be a need to call it
-void Group::SendHPPacketsTo(Mob *member)
+void Group::SendHPManaEndPacketsTo(Mob *member)
 {
-	if(member && member->IsClient())
-	{
+	if(member && member->IsClient()) {
 		EQApplicationPacket hpapp;
 		EQApplicationPacket outapp(OP_MobManaUpdate, sizeof(MobManaUpdate_Struct));
 
-		for (uint32 i = 0; i < MAX_GROUP_MEMBERS; i++)
-		{
-			if(members[i] && members[i] != member)
-			{
+		for (uint32 i = 0; i < MAX_GROUP_MEMBERS; i++) {
+			if(members[i] && members[i] != member) {
 				members[i]->CreateHPPacket(&hpapp);
 				member->CastToClient()->QueuePacket(&hpapp, false);
 				safe_delete_array(hpapp.pBuffer);
 				hpapp.size = 0;
-				if (member->CastToClient()->ClientVersion() >= EQEmu::versions::ClientVersion::SoD)
-				{
+
+				if (member->CastToClient()->ClientVersion() >= EQEmu::versions::ClientVersion::SoD) {
 					outapp.SetOpcode(OP_MobManaUpdate);
-					MobManaUpdate_Struct *mmus = (MobManaUpdate_Struct *)outapp.pBuffer;
-					mmus->spawn_id = members[i]->GetID();
-					mmus->mana = members[i]->GetManaPercent();
+
+					MobManaUpdate_Struct *mana_update = (MobManaUpdate_Struct *)outapp.pBuffer;
+					mana_update->spawn_id = members[i]->GetID();
+					mana_update->mana = members[i]->GetManaPercent();
 					member->CastToClient()->QueuePacket(&outapp, false);
-					MobEnduranceUpdate_Struct *meus = (MobEnduranceUpdate_Struct *)outapp.pBuffer;
+
+					MobEnduranceUpdate_Struct *endurance_update = (MobEnduranceUpdate_Struct *)outapp.pBuffer;
 					outapp.SetOpcode(OP_MobEnduranceUpdate);
-					meus->endurance = members[i]->GetEndurancePercent();
+					endurance_update->endurance = members[i]->GetEndurancePercent();
 					member->CastToClient()->QueuePacket(&outapp, false);
 				}
 			}
@@ -430,19 +436,58 @@ void Group::SendHPPacketsFrom(Mob *member)
 
 	uint32 i;
 	for(i = 0; i < MAX_GROUP_MEMBERS; i++) {
-		if(members[i] && members[i] != member && members[i]->IsClient())
-		{
+		if(members[i] && members[i] != member && members[i]->IsClient()) {
 			members[i]->CastToClient()->QueuePacket(&hp_app);
-			if (members[i]->CastToClient()->ClientVersion() >= EQEmu::versions::ClientVersion::SoD)
-			{
+			if (members[i]->CastToClient()->ClientVersion() >= EQEmu::versions::ClientVersion::SoD) {
 				outapp.SetOpcode(OP_MobManaUpdate);
-				MobManaUpdate_Struct *mmus = (MobManaUpdate_Struct *)outapp.pBuffer;
-				mmus->spawn_id = member->GetID();
-				mmus->mana = member->GetManaPercent();
+				MobManaUpdate_Struct *mana_update = (MobManaUpdate_Struct *)outapp.pBuffer;
+				mana_update->spawn_id = member->GetID();
+				mana_update->mana = member->GetManaPercent();
 				members[i]->CastToClient()->QueuePacket(&outapp, false);
-				MobEnduranceUpdate_Struct *meus = (MobEnduranceUpdate_Struct *)outapp.pBuffer;
+
+				MobEnduranceUpdate_Struct *endurance_update = (MobEnduranceUpdate_Struct *)outapp.pBuffer;
 				outapp.SetOpcode(OP_MobEnduranceUpdate);
-				meus->endurance = member->GetEndurancePercent();
+				endurance_update->endurance = member->GetEndurancePercent();
+				members[i]->CastToClient()->QueuePacket(&outapp, false);
+			}
+		}
+	}
+}
+
+void Group::SendManaPacketFrom(Mob *member)
+{
+	if (!member)
+		return;
+	EQApplicationPacket outapp(OP_MobManaUpdate, sizeof(MobManaUpdate_Struct));
+
+	uint32 i;
+	for (i = 0; i < MAX_GROUP_MEMBERS; i++) {
+		if (members[i] && members[i] != member && members[i]->IsClient()) {
+			if (members[i]->CastToClient()->ClientVersion() >= EQEmu::versions::ClientVersion::SoD) {
+				outapp.SetOpcode(OP_MobManaUpdate);
+				MobManaUpdate_Struct *mana_update = (MobManaUpdate_Struct *)outapp.pBuffer;
+				mana_update->spawn_id = member->GetID();
+				mana_update->mana = member->GetManaPercent();
+				members[i]->CastToClient()->QueuePacket(&outapp, false);
+			}
+		}
+	}
+}
+
+void Group::SendEndurancePacketFrom(Mob* member)
+{
+	if (!member)
+		return;
+
+	EQApplicationPacket outapp(OP_MobEnduranceUpdate, sizeof(MobManaUpdate_Struct));
+
+	uint32 i;
+	for (i = 0; i < MAX_GROUP_MEMBERS; i++) {
+		if (members[i] && members[i] != member && members[i]->IsClient()) {
+			if (members[i]->CastToClient()->ClientVersion() >= EQEmu::versions::ClientVersion::SoD) {
+				MobEnduranceUpdate_Struct *endurance_update = (MobEnduranceUpdate_Struct *)outapp.pBuffer;
+				endurance_update->spawn_id = member->GetID();
+				endurance_update->endurance = member->GetEndurancePercent();
 				members[i]->CastToClient()->QueuePacket(&outapp, false);
 			}
 		}
@@ -648,7 +693,7 @@ bool Group::DelMember(Mob* oldmember, bool ignoresender)
 		}
 	}
 	
-	if (GetLeader() == nullptr)
+	if (!GetLeaderName())
 	{
 		DisbandGroup();
 		return true;

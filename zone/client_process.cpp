@@ -63,64 +63,49 @@ extern EntityList entity_list;
 bool Client::Process() {
 	bool ret = true;
 
-	if (Connected() || IsLD())
-	{
+	if (Connected() || IsLD()) {
 		// try to send all packets that weren't sent before
-		if (!IsLD() && zoneinpacket_timer.Check())
-		{
+		if (!IsLD() && zoneinpacket_timer.Check()) {
 			SendAllPackets();
 		}
 
-		if (adventure_request_timer)
-		{
-			if (adventure_request_timer->Check())
-			{
+		if (adventure_request_timer) {
+			if (adventure_request_timer->Check()) {
 				safe_delete(adventure_request_timer);
 			}
 		}
 
-		if (adventure_create_timer)
-		{
-			if (adventure_create_timer->Check())
-			{
+		if (adventure_create_timer) {
+			if (adventure_create_timer->Check()) {
 				safe_delete(adventure_create_timer);
 			}
 		}
 
-		if (adventure_leave_timer)
-		{
-			if (adventure_leave_timer->Check())
-			{
+		if (adventure_leave_timer) {
+			if (adventure_leave_timer->Check()) {
 				safe_delete(adventure_leave_timer);
 			}
 		}
 
-		if (adventure_door_timer)
-		{
-			if (adventure_door_timer->Check())
-			{
+		if (adventure_door_timer) {
+			if (adventure_door_timer->Check()) {
 				safe_delete(adventure_door_timer);
 			}
 		}
 
-		if (adventure_stats_timer)
-		{
-			if (adventure_stats_timer->Check())
-			{
+		if (adventure_stats_timer) {
+			if (adventure_stats_timer->Check()) {
 				safe_delete(adventure_stats_timer);
 			}
 		}
 
-		if (adventure_leaderboard_timer)
-		{
-			if (adventure_leaderboard_timer->Check())
-			{
+		if (adventure_leaderboard_timer) {
+			if (adventure_leaderboard_timer->Check()) {
 				safe_delete(adventure_leaderboard_timer);
 			}
 		}
 
-		if (dead)
-		{
+		if (dead) {
 			SetHP(-100);
 			if (RespawnFromHoverTimer.Check())
 				HandleRespawnFromHover(0);
@@ -134,8 +119,13 @@ bool Client::Process() {
 		if (hpupdate_timer.Check(false))
 			SendHPUpdate();
 
+		/* I haven't naturally updated my position in 10 seconds, updating manually */
+		if (!is_client_moving && position_update_timer.Check()) {
+			SendPositionUpdate();
+		}
+
 		if (mana_timer.Check())
-			SendManaUpdatePacket();
+			CheckManaEndUpdate();
 
 		if (dead && dead_timer.Check()) {
 			database.MoveCharacterToZone(GetName(), database.GetZoneName(m_pp.binds[0].zoneId));
@@ -254,19 +244,22 @@ bool Client::Process() {
 		/* Build a close range list of NPC's  */
 		if (npc_close_scan_timer.Check()) {
 
-			close_npcs.clear();
+			close_mobs.clear();
 
-			auto &npc_list = entity_list.GetNPCList();
+			auto &mob_list = entity_list.GetMobList();
+			float scan_range = (RuleI(Range, ClientNPCScan) * RuleI(Range, ClientNPCScan));
+			float client_update_range = (RuleI(Range, MobPositionUpdates) *  RuleI(Range, MobPositionUpdates));
 
-			float scan_range = RuleI(Range, ClientNPCScan);
-			for (auto itr = npc_list.begin(); itr != npc_list.end(); ++itr) {
-				NPC* npc = itr->second;
-				float distance = DistanceNoZ(m_Position, npc->GetPosition());
-				if(distance <= scan_range) {
-					close_npcs.insert(std::pair<NPC *, float>(npc, distance));
-				}
-				else if (npc->GetAggroRange() > scan_range) {
-					close_npcs.insert(std::pair<NPC *, float>(npc, distance));
+			for (auto itr = mob_list.begin(); itr != mob_list.end(); ++itr) {
+				Mob* mob = itr->second;
+				float distance = DistanceSquared(m_Position, mob->GetPosition());
+				if (mob->IsNPC()) {
+					if (distance <= scan_range) {
+						close_mobs.insert(std::pair<Mob *, float>(mob, distance));
+					}
+					else if (mob->GetAggroRange() > scan_range) {
+						close_mobs.insert(std::pair<Mob *, float>(mob, distance));
+					}
 				}
 			}
 		}
@@ -448,14 +441,14 @@ bool Client::Process() {
 				{
 					animation = 0;
 					m_Delta = glm::vec4(0.0f, 0.0f, 0.0f, m_Delta.w);
-					SendPosUpdate(2);
+					SendPositionUpdate(2);
 				}
 			}
 
 			// Send a position packet every 8 seconds - if not done, other clients
 			// see this char disappear after 10-12 seconds of inactivity
 			if (position_timer_counter >= 36) { // Approx. 4 ticks per second
-				entity_list.SendPositionUpdates(this, pLastUpdateWZ, 500, GetTarget(), true);
+				entity_list.SendPositionUpdates(this, pLastUpdateWZ, RuleI(Range, MobPositionUpdates), GetTarget(), true);
 				pLastUpdate = Timer::GetCurrentTime();
 				pLastUpdateWZ = pLastUpdate;
 				position_timer_counter = 0;
@@ -619,11 +612,17 @@ bool Client::Process() {
 	// only if client is not feigned
 	if (zone->CanDoCombat() && ret && !GetFeigned() && client_scan_npc_aggro_timer.Check()) {
 		int npc_scan_count = 0;
-		for (auto it = close_npcs.begin(); it != close_npcs.end(); ++it) {
-			NPC *npc = it->first;
+		for (auto it = close_mobs.begin(); it != close_mobs.end(); ++it) {
+			Mob *mob = it->first;
 
-			if (npc->CheckWillAggro(this) && !npc->CheckAggro(this)) {
-				npc->AddToHateList(this, 25);
+			if (!mob)
+				continue;
+
+			if (mob->IsClient())
+				continue;
+
+			if (mob->CheckWillAggro(this) && !mob->CheckAggro(this)) {
+				mob->AddToHateList(this, 25);
 			}
 			npc_scan_count++;
 		}
@@ -723,6 +722,8 @@ void Client::OnDisconnect(bool hard_disconnect) {
 			QServ->PlayerLogEvent(Player_Log_Connect_State, this->CharacterID(), event_desc);
 		}
 	}
+
+	RemoveAllAuras();
 
 	Mob *Other = trade->With();
 	if(Other)
@@ -985,8 +986,6 @@ void Client::BulkSendMerchantInventory(int merchant_id, int npcid) {
 			Message_StringID(10, GENERIC_STRINGID_SAY, merch->GetCleanName(), handy_id, this->GetName(), handyitem->Name);
 		else
 			Message_StringID(10, GENERIC_STRINGID_SAY, merch->GetCleanName(), handy_id, this->GetName());
-
-		merch->CastToNPC()->FaceTarget(this->CastToMob());
 	}
 
 //		safe_delete_array(cpi);
@@ -1816,7 +1815,7 @@ void Client::DoManaRegen() {
 		return;
 
 	SetMana(GetMana() + CalcManaRegen() + RestRegenMana);
-	SendManaUpdatePacket();
+	CheckManaEndUpdate();
 }
 
 

@@ -305,6 +305,7 @@ union
 	uint8 DestructibleUnk8;
 	uint32 DestructibleUnk9;
 	bool targetable_with_hotkey;
+	bool show_name;
 
 };
 
@@ -1116,6 +1117,11 @@ struct PetCommand_Struct {
 /*004*/ uint32	target;
 };
 
+struct PetCommandState_Struct {
+/*00*/	uint32	button_id;
+/*04*/	uint32	state;
+};
+
 /*
 ** Delete Spawn
 ** Length: 4 Bytes
@@ -1690,6 +1696,7 @@ struct OnLevelMessage_Struct
 	uint32	Duration;
 	uint32	PopupID;
 	uint32	NegativeID;
+	uint32  SoundControls;
 	char	ButtonName0[25];
 	char	ButtonName1[25];
 };
@@ -5325,6 +5332,24 @@ struct fling_struct {
 /* 24 */ float new_z;
 /* 28 */
 };
+
+// used when action == 0
+struct AuraCreate_Struct {
+/* 00 */	uint32 action; // 0 = add, 1 = delete, 2 = reset
+/* 04 */	uint32 type; // unsure -- normal auras show 1 clicky (ex. Circle of Power) show 0
+/* 08 */	char aura_name[64];
+/* 72 */	uint32 entity_id;
+/* 76 */	uint32 icon;
+/* 80 */
+};
+
+// used when action == 1
+struct AuraDestory_Struct {
+/* 00 */	uint32 action; // 0 = add, 1 = delete, 2 = reset
+/* 04 */	uint32 entity_id;
+/* 08 */
+};
+// I think we can assume it's just action for 2, client doesn't seem to do anything with the rest of the data in that case
 
 // Restore structure packing to default
 #pragma pack()

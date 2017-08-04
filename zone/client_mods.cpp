@@ -1046,14 +1046,14 @@ int32 Client::CalcMaxMana()
 	if (max_mana < 0) {
 		max_mana = 0;
 	}
-	if (cur_mana > max_mana) {
-		cur_mana = max_mana;
+	if (current_mana > max_mana) {
+		current_mana = max_mana;
 	}
 	int mana_perc_cap = spellbonuses.ManaPercCap[0];
 	if (mana_perc_cap) {
 		int curMana_cap = (max_mana * mana_perc_cap) / 100;
-		if (cur_mana > curMana_cap || (spellbonuses.ManaPercCap[1] && cur_mana > spellbonuses.ManaPercCap[1])) {
-			cur_mana = curMana_cap;
+		if (current_mana > curMana_cap || (spellbonuses.ManaPercCap[1] && current_mana > spellbonuses.ManaPercCap[1])) {
+			current_mana = curMana_cap;
 		}
 	}
 	Log(Logs::Detail, Logs::Spells, "Client::CalcMaxMana() called for %s - returning %d", GetName(), max_mana);
@@ -2034,14 +2034,14 @@ void Client::CalcMaxEndurance()
 	if (max_end < 0) {
 		max_end = 0;
 	}
-	if (cur_end > max_end) {
-		cur_end = max_end;
+	if (current_endurance > max_end) {
+		current_endurance = max_end;
 	}
 	int end_perc_cap = spellbonuses.EndPercCap[0];
 	if (end_perc_cap) {
 		int curEnd_cap = (max_end * end_perc_cap) / 100;
-		if (cur_end > curEnd_cap || (spellbonuses.EndPercCap[1] && cur_end > spellbonuses.EndPercCap[1])) {
-			cur_end = curEnd_cap;
+		if (current_endurance > curEnd_cap || (spellbonuses.EndPercCap[1] && current_endurance > spellbonuses.EndPercCap[1])) {
+			current_endurance = curEnd_cap;
 		}
 	}
 }

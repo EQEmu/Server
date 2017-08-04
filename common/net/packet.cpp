@@ -139,6 +139,10 @@ void EQ::Net::Packet::PutCString(size_t offset, const char *str)
 
 void EQ::Net::Packet::PutPacket(size_t offset, const Packet &p)
 {
+	if (p.Length() == 0) {
+		return;
+	}
+
 	if (Length() < offset + p.Length()) {
 		if (!Resize(offset + p.Length())) {
 			throw std::out_of_range("Packet::PutPacket(), could not resize packet and would of written past the end.");
@@ -150,6 +154,10 @@ void EQ::Net::Packet::PutPacket(size_t offset, const Packet &p)
 
 void EQ::Net::Packet::PutData(size_t offset, void *data, size_t length)
 {
+	if (length == 0) {
+		return;
+	}
+
 	if (Length() < offset + length) {
 		if (!Resize(offset + length)) {
 			throw std::out_of_range("Packet::PutData(), could not resize packet and would of written past the end.");

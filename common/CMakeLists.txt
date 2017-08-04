@@ -103,6 +103,7 @@ SET(common_sources
 	tinyxml/tinyxml.cpp
 	tinyxml/tinyxmlerror.cpp
 	tinyxml/tinyxmlparser.cpp
+	util/directory.cpp
 	util/uuid.cpp
 )
 
@@ -257,6 +258,7 @@ SET(common_headers
 	tinyxml/tinystr.h
 	tinyxml/tinyxml.h
 	util/memory_stream.h
+	util/directory.h
 	util/uuid.h
 )
 
@@ -366,6 +368,8 @@ SOURCE_GROUP(TinyXML FILES
 
 SOURCE_GROUP(Util FILES
 	util/memory_stream.h
+	util/directory.cpp
+	util/directory.h
 	util/uuid.cpp
 	util/uuid.h
 )

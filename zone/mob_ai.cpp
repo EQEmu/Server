@@ -743,6 +743,10 @@ void Client::AI_Process()
 
 	if(RuleB(Combat, EnableFearPathing)){
 		if(currently_fleeing) {
+
+			if (fix_z_timer_engaged.Check())
+				this->FixZ();
+
 			if(IsRooted()) {
 				//make sure everybody knows were not moving, for appearance sake
 				if(IsMoving())
@@ -782,6 +786,7 @@ void Client::AI_Process()
 				}
 				return;
 			}
+
 		}
 	}
 
@@ -935,7 +940,7 @@ void Mob::AI_Process() {
 	bool engaged = IsEngaged();
 	bool doranged = false;
 
-	if (!zone->CanDoCombat()) {
+	if (!zone->CanDoCombat() || IsPetStop() || IsPetRegroup()) {
 		engaged = false;
 	}
 
@@ -943,7 +948,7 @@ void Mob::AI_Process() {
 	//
 	if(RuleB(Combat, EnableFearPathing)){
 		if(currently_fleeing) {
-			if(IsRooted() || (IsBlind() && CombatRange(hate_list.GetClosestEntOnHateList(this)))) {
+			if((IsRooted() || (IsBlind() && CombatRange(hate_list.GetClosestEntOnHateList(this)))) && !IsPetStop() && !IsPetRegroup()) {
 				//make sure everybody knows were not moving, for appearance sake
 				if(IsMoving())
 				{
@@ -990,6 +995,26 @@ void Mob::AI_Process() {
 	}
 
 	if (engaged) {
+
+		/* Fix Z when following during pull, not when engaged and stationary */
+		if (moving && fix_z_timer_engaged.Check()) {
+			if (this->GetTarget()) {
+				/* If we are engaged, moving and following client, let's look for best Z more often */
+				float target_distance = DistanceNoZ(this->GetPosition(), this->GetTarget()->GetPosition());
+				if (target_distance >= 25) {
+					this->FixZ();
+				}
+				else if (!this->CheckLosFN(this->GetTarget())) {
+					Mob* target = this->GetTarget();
+
+					m_Position.x = target->GetX();
+					m_Position.y = target->GetY();
+					m_Position.z = target->GetZ();
+					m_Position.w = target->GetHeading();
+					SendPosition();
+				}
+			}
+		}
 
 		if (!(m_PlayerState & static_cast<uint32>(PlayerState::Aggressive)))
 			SendAddPlayerState(PlayerState::Aggressive);
@@ -1300,9 +1325,11 @@ void Mob::AI_Process() {
 		}
 	}
 	else {
-		
 		if (m_PlayerState & static_cast<uint32>(PlayerState::Aggressive))
 			SendRemovePlayerState(PlayerState::Aggressive);
+
+		if (IsPetStop()) // pet stop won't be engaged, so we will always get here and we want the above branch to execute
+			return;
 
 		if(zone->CanDoCombat() && AI_feign_remember_timer->Check()) {
 			// 6/14/06
@@ -1409,6 +1436,8 @@ void Mob::AI_Process() {
 						break;
 					}
 				}
+				if (IsPetRegroup())
+					return;
 			}
 			/* Entity has been assigned another entity to follow */
 			else if (GetFollowID())
@@ -1507,7 +1536,11 @@ void NPC::AI_DoMovement() {
 
 		Log(Logs::Detail, Logs::AI, "Roam Box: d=%.3f (%.3f->%.3f,%.3f->%.3f): Go To (%.3f,%.3f)",
 			roambox_distance, roambox_min_x, roambox_max_x, roambox_min_y, roambox_max_y, roambox_movingto_x, roambox_movingto_y);
-		if (!CalculateNewPosition2(roambox_movingto_x, roambox_movingto_y, GetZ(), walksp, true))
+
+		float new_z = this->FindGroundZ(m_Position.x, m_Position.y, 5);
+		new_z += (this->GetSize() / 1.55);
+
+		if (!CalculateNewPosition2(roambox_movingto_x, roambox_movingto_y, new_z, walksp, true))
 		{
 			roambox_movingto_x = roambox_max_x + 1; // force update
 			pLastFightingDelayMoving = Timer::GetCurrentTime() + RandomTimer(roambox_min_delay, roambox_delay);
@@ -1543,6 +1576,8 @@ void NPC::AI_DoMovement() {
 					if (m_CurrentWayPoint.w >= 0.0) {
 						SetHeading(m_CurrentWayPoint.w);
 					}
+
+					this->FixZ();
 
 					SendPosition();
 

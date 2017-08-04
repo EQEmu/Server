@@ -5,6 +5,7 @@ SET(zone_sources
 	aa_ability.cpp
 	aggro.cpp
 	aggromanager.cpp
+	aura.cpp
 	attack.cpp
 	beacon.cpp
 	bonuses.cpp
@@ -51,6 +52,7 @@ SET(zone_sources
 	lua_item.cpp
 	lua_iteminst.cpp
 	lua_mob.cpp
+	lua_mod.cpp
 	lua_npc.cpp
 	lua_object.cpp
 	lua_packet.cpp
@@ -59,6 +61,7 @@ SET(zone_sources
 	lua_raid.cpp
 	lua_spawn.cpp
 	lua_spell.cpp
+	lua_stat_bonuses.cpp
 	embperl.cpp
 	embxs.cpp
 	entity.cpp
@@ -134,6 +137,7 @@ SET(zone_headers
 	aa.h
 	aa_ability.h
 	aggromanager.h
+	aura.h
 	basic_functions.h
 	beacon.h
 	bot.h
@@ -173,6 +177,7 @@ SET(zone_headers
 	lua_item.h
 	lua_iteminst.h
 	lua_mob.h
+	lua_mod.h
 	lua_npc.h
 	lua_object.h
 	lua_packet.h
@@ -182,6 +187,7 @@ SET(zone_headers
 	lua_raid.h
 	lua_spawn.h
 	lua_spell.h
+	lua_stat_bonuses.h
 	map.h
 	masterentity.h
 	maxskill.h

@@ -1,25 +1,71 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+
+== 7/14/2017 ==
+Akkadius: HP Update tuning - HP Updates are now forced when a client is targeted
+Akkadius: Client position updates should be smoother (granted the client has a good connection)
+	- Clients should also no longer randomly disappear 
+
+== 7/11/2017 ==
+Akkadius: Raid/Group/XTarget HP/Mana/Endurance updates now only send when percentage changes
+Akkadius: Raid/Group Mana/Endurance updates should now update real-time once again
+Akkadius: Fixed an issue with clients looking like they are 'skipping' when they are moving in view of another client
+Akkadius: Fixed an issue with NPC's who are ghosted in plain view of a client when they are not really there
+
+== 7/9/2017 ==
+Akkadius: Fix HP update issues, rework logic for more accurate HP updates
+Akkadius: Massive reductions in unnecessary network traffic especially during high spam combat fights
+	- HP Updates now only send to others when HP percentage changes (0-100%)
+		- HP Updates were sending excessively even during idle zones when HP wasn't changing at all
+	- Attack animations now only send once per second versus up to a hundred times a second per Mob/Client
+	- 17,000 OP_ClientUpdate packets per second have been observed in combat scenarios, some of the major culprits have been
+		throttled without affecting what the client should see
+	- Before and After packet differences under similar load/tests (Packets per second)
+		- 7,000 - 8,000 	OP_Animation pps	After: 600-800 pps
+		- 13,0000 - 17,000 	OP_MobHealth pps	After: 1-10 pps
+		- 15,0000 - 20,000 	OP_ClientUpdate pps	After: 500-1,000 pps
+	- Packet reports from a 46 client test here:
+		https://gist.github.com/Akkadius/28b7ad2fdd82bdd15ea737c68f404346
+	- Servers who use Marquee HP updates will also recieve far less packet spam as they will only be sent when HP changes
+
+== 7/1/2017 ==
+Akkadius: Resolve issues with NPC's hopping to the ceiling in small corridors
+Akkadius: Improved grounding issues with NPC's during combat
+Akkadius: Improved scenarios where NPC's need to be dragged out of the ground - they should correct themselves far more consistently
+	- Scenarios where an NPC is coming up from the bottom floor, or from the top floor, they will correct much better
+	- A video of these tests can be found here: https://www.youtube.com/watch?v=HtC7bVNM7ZQ&feature=youtu.be
+
+== 6/28/2017 ==
+Akkadius: Fixed issues with Z correctness when NPCs are pathing on normal grids
+Akkadius: Fixed issues with Z correctness when NPCs are engaged with players following
+Akkadius: NPC corpses should fall into the ground far less
+
+== 6/25/2017 ==
+Akkadius: New rules made by developers are now automatically created when world boots up, this keeps 
+	from having to issue schema SQL updates every time rules are added.
+	- Whenever a rule isn't present in the database, it will be automatically created
+Akkadius: Sped up saylink retrieval x1000 helpful for dialogues, plugins with many saylinks
+
 == 4/16/2017 ==
 KLS: Merge eqstream branch
-	-UDP client stack completely rewritten should both have better throughput and recover better (peq has had far fewer reports of desyncs).
-	-TCP Server to Server connection stack completely rewritten.
-		-Server connections reconnect much more reliably and quickly now.
-		-Now supports optional packet encryption via libsodium (https://download.libsodium.org/doc/).
-		-Protocol behind the tcp connections has changed (see breaking changes section).
-		-API significantly changed and should be easier to write new servers or handlers for.
-		-Telnet console connection has been separated out from the current port (see breaking changes section).
-			-Because of changes to the TCP stack, lsreconnect and echo have been disabled.
-	-The server tic rate has been changed to be approx 30 fps from 500+ fps.
-		-Changed how missiles and movement were calculated slightly to account for this (Missiles in particular are not perfect but close enough).
+	- UDP client stack completely rewritten should both have better throughput and recover better (peq has had far fewer reports of desyncs).
+	- TCP Server to Server connection stack completely rewritten.
+		- Server connections reconnect much more reliably and quickly now.
+		- Now supports optional packet encryption via libsodium (https://download.libsodium.org/doc/).
+		- Protocol behind the tcp connections has changed (see breaking changes section).
+		- API significantly changed and should be easier to write new servers or handlers for.
+		- Telnet console connection has been separated out from the current port (see breaking changes section).
+			- Because of changes to the TCP stack, lsreconnect and echo have been disabled.
+	- The server tic rate has been changed to be approx 30 fps from 500+ fps.
+		- Changed how missiles and movement were calculated slightly to account for this (Missiles in particular are not perfect but close enough).
 	
-	-Breaking changes:
-		-Users who use the cmake install feature should be aware that the install directory is now %cmake_install_dir%/bin instead of just %cmake_install_dir%/
-		-To support new features such as encryption the underlying protocol had to change... however some servers such as the public login server will be slow to change so we've included a compatibility layer for legacy login connections:
-			-You should add <legacy>1</legacy> to the login section of your configuration file when connecting to a server that is using the old protocol.  
-			-The central eqemu login server uses the old protocol and probably will for the forseeable future so if your server is connecting to it be sure to add that tag to your configuration file in that section.
-			-Telnet no longer uses the same port as the Server to Server connection and because of this the tcp tag no longer has any effect on telnet connections.
-				-To enable telnet you need to add a telnet tag in the world section of configuration such as:
+	- Breaking changes:
+		- Users who use the cmake install feature should be aware that the install directory is now %cmake_install_dir%/bin instead of just %cmake_install_dir%/
+		- To support new features such as encryption the underlying protocol had to change... however some servers such as the public login server will be slow to change so we've included a compatibility layer for legacy login connections:
+			- You should add <legacy>1</legacy> to the login section of your configuration file when connecting to a server that is using the old protocol.  
+			- The central eqemu login server uses the old protocol and probably will for the forseeable future so if your server is connecting to it be sure to add that tag to your configuration file in that section.
+			- Telnet no longer uses the same port as the Server to Server connection and because of this the tcp tag no longer has any effect on telnet connections.
+				- To enable telnet you need to add a telnet tag in the world section of configuration such as:
 					<telnet ip="0.0.0.0" port="9001" enabled="true"/>
 
 == 4/1/2017 ==

@@ -154,7 +154,8 @@ void Mob::CalculateNewFearpoint()
 
 	int loop = 0;
 	float ranx, rany, ranz;
-	currently_fleeing = false;
+
+	currently_fleeing = true;
 	while (loop < 100) //Max 100 tries
 	{
 		int ran = 250 - (loop*2);
@@ -167,13 +168,13 @@ void Mob::CalculateNewFearpoint()
 		float fdist = ranz - GetZ();
 		if (fdist >= -12 && fdist <= 12 && CheckCoordLosNoZLeaps(GetX(),GetY(),GetZ(),ranx,rany,ranz))
 		{
-			currently_fleeing = true;
 			break;
 		}
 	}
-	if (currently_fleeing)
-        m_FearWalkTarget = glm::vec3(ranx, rany, ranz);
-	else //Break fear
-		BuffFadeByEffect(SE_Fear);
+
+	if (loop <= 100)
+	{
+		m_FearWalkTarget = glm::vec3(ranx, rany, ranz);
+	}
 }
 

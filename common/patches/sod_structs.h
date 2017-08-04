@@ -250,8 +250,7 @@ struct Spawn_Struct_Bitfields
 	unsigned   sneak:1;
 	unsigned   lfg:1;
 	unsigned   padding5:1;
-	unsigned   invis:1;		// 0 = visible, 1 = invis/sneaking
-	unsigned   padding7:11;
+	unsigned   invis:12;		// there are 3000 different (non-GM) invis levels
 	unsigned   gm:1;
 	unsigned   anon:2;		// 0=normal, 1=anon, 2=roleplay
 	unsigned   gender:2;		// Gender (0=male, 1=female, 2=monster)
@@ -1760,7 +1759,7 @@ struct OnLevelMessage_Struct {
 /*4224*/	char	ButtonName0[25];	// If Buttons = 1, these two are the text for the left and right buttons respectively
 /*4249*/	char	ButtonName1[25];
 /*4274*/	uint8	Buttons;
-/*4275*/	uint8	Unknown4275;	// Something to do with audio controls
+/*4275*/	uint8	SoundControls;	// Something to do with audio controls
 /*4276*/	uint32  Duration;
 /*4280*/	uint32  PopupID;	// If none zero, a response packet with 00 00 00 00 <PopupID> is returned on clicking the left button
 /*4284*/	uint32  NegativeID;	// If none zero, a response packet with 01 00 00 00 <NegativeID> is returned on clicking the right button

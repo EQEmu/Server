@@ -391,8 +391,7 @@ int main(int argc, char** argv) {
 
 	parse = new QuestParserCollection();
 #ifdef LUA_EQEMU
-	auto lua_parser = new LuaParser();
-	parse->RegisterQuestInterface(lua_parser, "lua");
+	parse->RegisterQuestInterface(LuaParser::Instance(), "lua");
 #endif
 
 #ifdef EMBPERL
@@ -542,6 +541,9 @@ int main(int argc, char** argv) {
 		if (previous_loaded && !current_loaded) {
 			process_timer.Stop();
 			process_timer.Start(1000, true);
+
+			uint32 shutdown_timer = database.getZoneShutDownDelay(zone->GetZoneID(), zone->GetInstanceVersion());
+			zone->StartShutdownTimer(shutdown_timer);
 		}
 		else if (!previous_loaded && current_loaded) {
 			process_timer.Stop();
@@ -563,10 +565,6 @@ int main(int argc, char** argv) {
 
 #ifdef EMBPERL
 	safe_delete(perl_parser);
-#endif
-
-#ifdef LUA_EQEMU
-	safe_delete(lua_parser);
 #endif
 
 	safe_delete(Config);

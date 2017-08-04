@@ -119,7 +119,6 @@ Client::Client(EQStreamInterface* ieqs)
 	0,
 	0
 	),
-	//these must be listed in the order they appear in client.h
 	position_timer(250),
 	hpupdate_timer(2000),
 	camp_timer(29000),
@@ -158,10 +157,15 @@ Client::Client(EQStreamInterface* ieqs)
 	m_AutoAttackTargetLocation(0.0f, 0.0f, 0.0f),
 	last_region_type(RegionTypeUnsupported),
 	m_dirtyautohaters(false),
-	npc_close_scan_timer(6000)
+	npc_close_scan_timer(6000),
+	hp_self_update_throttle_timer(300),
+	hp_other_update_throttle_timer(500),
+	position_update_timer(10000)
 {
-	for(int cf=0; cf < _FilterCount; cf++)
-		ClientFilters[cf] = FilterShow;
+
+	for (int client_filter = 0; client_filter < _FilterCount; client_filter++)
+		ClientFilters[client_filter] = FilterShow;
+
 	character_id = 0;
 	conn_state = NoPacketsReceived;
 	client_data_loaded = false;
@@ -190,8 +194,10 @@ Client::Client(EQStreamInterface* ieqs)
 	strcpy(account_name, "");
 	tellsoff = false;
 	last_reported_mana = 0;
-	last_reported_endur = 0;
-	gmhideme = false;
+	last_reported_endurance = 0;
+	last_reported_endurance_percent = 0;
+	last_reported_mana_percent = 0;
+	gm_hide_me = false;
 	AFK = false;
 	LFG = false;
 	LFGFromLevel = 0;
@@ -255,7 +261,7 @@ Client::Client(EQStreamInterface* ieqs)
 	memset(&m_epp, 0, sizeof(m_epp));
 	PendingTranslocate = false;
 	PendingSacrifice = false;
-	BoatID = 0;
+	controlling_boat_id = 0;
 
 	KarmaUpdateTimer = new Timer(RuleI(Chat, KarmaUpdateIntervalMS));
 	GlobalChatLimiterTimer = new Timer(RuleI(Chat, IntervalDurationMS));
@@ -268,7 +274,7 @@ Client::Client(EQStreamInterface* ieqs)
 	RestRegenMana = 0;
 	RestRegenEndurance = 0;
 	XPRate = 100;
-	cur_end = 0;
+	current_endurance = 0;
 
 	m_TimeSinceLastPositionCheck = 0;
 	m_DistanceSinceLastPositionCheck = 0.0f;
@@ -286,7 +292,7 @@ Client::Client(EQStreamInterface* ieqs)
 	HideCorpseMode = HideCorpseNone;
 	PendingGuildInvitation = false;
 
-	cur_end = 0;
+	current_endurance = 0;
 
 	InitializeBuffSlots();
 
@@ -357,7 +363,7 @@ Client::~Client() {
 		m_tradeskill_object = nullptr;
 	}
 
-	close_npcs.clear();
+	close_mobs.clear();
 
 	if(IsDueling() && GetDuelTarget() != 0) {
 		Entity* entity = entity_list.GetID(GetDuelTarget());
@@ -598,8 +604,8 @@ bool Client::Save(uint8 iCommitNow) {
 		m_pp.cur_hp = GetHP();
 	}
 
-	m_pp.mana = cur_mana;
-	m_pp.endurance = cur_end;
+	m_pp.mana = current_mana;
+	m_pp.endurance = current_endurance;
 
 	/* Save Character Currency */
 	database.SaveCharacterCurrency(CharacterID(), &m_pp);
@@ -697,12 +703,13 @@ bool Client::AddPacket(const EQApplicationPacket *pApp, bool bAckreq) {
 		//drop the packet because it will never get sent.
 		return(false);
 	}
-	auto c = new CLIENTPACKET;
+
+	auto c = std::unique_ptr<CLIENTPACKET>(new CLIENTPACKET);
 
 	c->ack_req = bAckreq;
 	c->app = pApp->Copy();
 
-	clientpackets.Append(c);
+	clientpackets.push_back(std::move(c));
 	return true;
 }
 
@@ -714,26 +721,23 @@ bool Client::AddPacket(EQApplicationPacket** pApp, bool bAckreq) {
 		//drop the packet because it will never get sent.
 		return(false);
 	}
-	auto c = new CLIENTPACKET;
+	auto c = std::unique_ptr<CLIENTPACKET>(new CLIENTPACKET);
 
 	c->ack_req = bAckreq;
 	c->app = *pApp;
 	*pApp = nullptr;
 
-	clientpackets.Append(c);
+	clientpackets.push_back(std::move(c));
 	return true;
 }
 
 bool Client::SendAllPackets() {
-	LinkedListIterator<CLIENTPACKET*> iterator(clientpackets);
-
 	CLIENTPACKET* cp = nullptr;
-	iterator.Reset();
-	while(iterator.MoreElements()) {
-		cp = iterator.GetData();
+	while (!clientpackets.empty()) {
+		cp = clientpackets.front().get();
 		if(eqs)
 			eqs->FastQueuePacket((EQApplicationPacket **)&cp->app, cp->ack_req);
-		iterator.RemoveCurrent();
+		clientpackets.pop_front();
 		Log(Logs::Moderate, Logs::Client_Server_Packet, "Transmitting a packet");
 	}
 	return true;
@@ -1251,6 +1255,37 @@ void Client::Message(uint32 type, const char* message, ...) {
 	sm->header[2] = 0x00;
 	sm->msg_type = type;
 	memcpy(sm->message, buffer, len+1);
+
+	FastQueuePacket(&app);
+
+	safe_delete_array(buffer);
+}
+
+void Client::FilteredMessage(Mob *sender, uint32 type, eqFilterType filter, const char* message, ...) {
+	if (!FilteredMessageCheck(sender, filter))
+		return;
+
+	va_list argptr;
+	auto buffer = new char[4096];
+	va_start(argptr, message);
+	vsnprintf(buffer, 4096, message, argptr);
+	va_end(argptr);
+
+	size_t len = strlen(buffer);
+
+	//client dosent like our packet all the time unless
+	//we make it really big, then it seems to not care that
+	//our header is malformed.
+	//len = 4096 - sizeof(SpecialMesg_Struct);
+
+	uint32 len_packet = sizeof(SpecialMesg_Struct) + len;
+	auto app = new EQApplicationPacket(OP_SpecialMesg, len_packet);
+	SpecialMesg_Struct* sm = (SpecialMesg_Struct*)app->pBuffer;
+	sm->header[0] = 0x00; // Header used for #emote style messages..
+	sm->header[1] = 0x00; // Play around with these to see other types
+	sm->header[2] = 0x00;
+	sm->msg_type = type;
+	memcpy(sm->message, buffer, len + 1);
 
 	FastQueuePacket(&app);
 
@@ -1790,67 +1825,86 @@ const int32& Client::SetMana(int32 amount) {
 		amount = 0;
 	if (amount > GetMaxMana())
 		amount = GetMaxMana();
-	if (amount != cur_mana)
+	if (amount != current_mana)
 		update = true;
-	cur_mana = amount;
+	current_mana = amount;
 	if (update)
 		Mob::SetMana(amount);
-	SendManaUpdatePacket();
-	return cur_mana;
+	CheckManaEndUpdate();
+	return current_mana;
 }
 
-void Client::SendManaUpdatePacket() {
+void Client::CheckManaEndUpdate() {
 	if (!Connected())
 		return;
 
-	if (ClientVersion() >= EQEmu::versions::ClientVersion::SoD) {
-		SendManaUpdate();
-		SendEnduranceUpdate();
-	}
+	if (last_reported_mana != current_mana || last_reported_endurance != current_endurance) {
 
-	if (last_reported_mana != cur_mana || last_reported_endur != cur_end) {
+		if (ClientVersion() >= EQEmu::versions::ClientVersion::SoD) {
+			SendManaUpdate();
+			SendEnduranceUpdate();
+		}
 
 		auto outapp = new EQApplicationPacket(OP_ManaChange, sizeof(ManaChange_Struct));
-		ManaChange_Struct* manachange = (ManaChange_Struct*)outapp->pBuffer;
-		manachange->new_mana = cur_mana;
-		manachange->stamina = cur_end;
-		manachange->spell_id = casting_spell_id;
-		manachange->keepcasting = 1;
+		ManaChange_Struct* mana_change = (ManaChange_Struct*)outapp->pBuffer;
+		mana_change->new_mana = current_mana;
+		mana_change->stamina = current_endurance;
+		mana_change->spell_id = casting_spell_id;
+		mana_change->keepcasting = 1;
 		outapp->priority = 6;
 		QueuePacket(outapp);
 		safe_delete(outapp);
 
-		Group *g = GetGroup();
+		/* Let others know when our mana percent has changed */
+		if (this->GetManaPercent() != last_reported_mana_percent) {
+			Group *group = this->GetGroup();
+			Raid *raid = this->GetRaid();
 
-		if(g)
-		{
-			outapp = new EQApplicationPacket(OP_MobManaUpdate, sizeof(MobManaUpdate_Struct));
-			auto outapp2 =
-			    new EQApplicationPacket(OP_MobEnduranceUpdate, sizeof(MobEnduranceUpdate_Struct));
+			if (raid) {
+				raid->SendManaPacketFrom(this);
+			}
+			else if (group) {
+				group->SendManaPacketFrom(this);
+			}
 
-			MobManaUpdate_Struct *mmus = (MobManaUpdate_Struct *)outapp->pBuffer;
-			MobEnduranceUpdate_Struct *meus = (MobEnduranceUpdate_Struct *)outapp2->pBuffer;
+			auto mana_packet = new EQApplicationPacket(OP_ManaUpdate, sizeof(ManaUpdate_Struct));
+			ManaUpdate_Struct* mana_update = (ManaUpdate_Struct*)mana_packet->pBuffer;
+			mana_update->cur_mana = GetMana();
+			mana_update->max_mana = GetMaxMana();
+			mana_update->spawn_id = GetID();
+			QueuePacket(mana_packet);
+			entity_list.QueueClientsByXTarget(this, mana_packet, false);
+			safe_delete(mana_packet);
 
-			mmus->spawn_id = meus->spawn_id = GetID();
-
-			mmus->mana = GetManaPercent();
-			meus->endurance = GetEndurancePercent();
-
-
-			for(int i = 0; i < MAX_GROUP_MEMBERS; ++i)
-				if (g->members[i] && g->members[i]->IsClient() && (g->members[i] != this) && (g->members[i]->CastToClient()->ClientVersion() >= EQEmu::versions::ClientVersion::SoD))
-				{
-					g->members[i]->CastToClient()->QueuePacket(outapp);
-					g->members[i]->CastToClient()->QueuePacket(outapp2);
-				}
-
-			safe_delete(outapp);
-			safe_delete(outapp2);
+			last_reported_mana_percent = this->GetManaPercent();
 		}
 
+		/* Let others know when our endurance percent has changed */
+		if (this->GetEndurancePercent() != last_reported_endurance_percent) {
+			Group *group = this->GetGroup();
+			Raid *raid = this->GetRaid();
 
-		last_reported_mana = cur_mana;
-		last_reported_endur = cur_end;
+			if (raid) {
+				raid->SendEndurancePacketFrom(this);
+			}
+			else if (group) {
+				group->SendEndurancePacketFrom(this);
+			}
+
+			auto endurance_packet = new EQApplicationPacket(OP_EnduranceUpdate, sizeof(EnduranceUpdate_Struct));
+			EnduranceUpdate_Struct* endurance_update = (EnduranceUpdate_Struct*)endurance_packet->pBuffer;
+			endurance_update->cur_end = GetEndurance();
+			endurance_update->max_end = GetMaxEndurance();
+			endurance_update->spawn_id = GetID();
+			QueuePacket(endurance_packet);
+			entity_list.QueueClientsByXTarget(this, endurance_packet, false);
+			safe_delete(endurance_packet);
+
+			last_reported_endurance_percent = this->GetEndurancePercent();
+		}
+
+		last_reported_mana = current_mana;
+		last_reported_endurance = current_endurance;
 	}
 }
 
@@ -1858,12 +1912,11 @@ void Client::SendManaUpdatePacket() {
 void Client::SendManaUpdate()
 {
 	auto mana_app = new EQApplicationPacket(OP_ManaUpdate, sizeof(ManaUpdate_Struct));
-	ManaUpdate_Struct* mus = (ManaUpdate_Struct*)mana_app->pBuffer;
-	mus->cur_mana = GetMana();
-	mus->max_mana = GetMaxMana();
-	mus->spawn_id = GetID();
+	ManaUpdate_Struct* mana_update = (ManaUpdate_Struct*)mana_app->pBuffer;
+	mana_update->cur_mana = GetMana();
+	mana_update->max_mana = GetMaxMana();
+	mana_update->spawn_id = GetID();
 	QueuePacket(mana_app);
-	entity_list.QueueClientsByXTarget(this, mana_app, false);
 	safe_delete(mana_app);
 }
 
@@ -1871,12 +1924,11 @@ void Client::SendManaUpdate()
 void Client::SendEnduranceUpdate()
 {
 	auto end_app = new EQApplicationPacket(OP_EnduranceUpdate, sizeof(EnduranceUpdate_Struct));
-	EnduranceUpdate_Struct* eus = (EnduranceUpdate_Struct*)end_app->pBuffer;
-	eus->cur_end = GetEndurance();
-	eus->max_end = GetMaxEndurance();
-	eus->spawn_id = GetID();
+	EnduranceUpdate_Struct* endurance_update = (EnduranceUpdate_Struct*)end_app->pBuffer;
+	endurance_update->cur_end = GetEndurance();
+	endurance_update->max_end = GetMaxEndurance();
+	endurance_update->spawn_id = GetID();
 	QueuePacket(end_app);
-	entity_list.QueueClientsByXTarget(this, end_app, false);
 	safe_delete(end_app);
 }
 
@@ -1892,6 +1944,7 @@ void Client::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho)
 	ns->spawn.guildID	= GuildID();
 //	ns->spawn.linkdead	= IsLD() ? 1 : 0;
 //	ns->spawn.pvp		= GetPVP() ? 1 : 0;
+	ns->spawn.show_name = true;
 
 
 	strcpy(ns->spawn.title, m_pp.title);
@@ -1920,7 +1973,7 @@ void Client::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho)
 }
 
 bool Client::GMHideMe(Client* client) {
-	if (gmhideme) {
+	if (gm_hide_me) {
 		if (client == 0)
 			return true;
 		else if (admin > client->Admin())
@@ -2339,7 +2392,9 @@ bool Client::CheckIncreaseSkill(EQEmu::skills::SkillType skillid, Mob *against_w
 		return false;
 	int skillval = GetRawSkill(skillid);
 	int maxskill = GetMaxSkillAfterSpecializationRules(skillid, MaxSkill(skillid));
-
+	char buffer[24] = { 0 };
+	snprintf(buffer, 23, "%d %d", skillid, skillval);
+	parse->EventPlayer(EVENT_USE_SKILL, this, buffer, 0);
 	if(against_who)
 	{
 		if(against_who->GetSpecialAbility(IMMUNE_AGGRO) || against_who->IsClient() ||
@@ -3187,9 +3242,9 @@ void Client::SetHideMe(bool flag)
 {
 	EQApplicationPacket app;
 
-	gmhideme = flag;
+	gm_hide_me = flag;
 
-	if(gmhideme)
+	if(gm_hide_me)
 	{
 		database.SetHideMe(AccountID(),true);
 		CreateDespawnPacket(&app, false);
@@ -3737,8 +3792,8 @@ void Client::SetEndurance(int32 newEnd)
 		newEnd = GetMaxEndurance();
 	}
 
-	cur_end = newEnd;
-	SendManaUpdatePacket();
+	current_endurance = newEnd;
+	CheckManaEndUpdate();
 }
 
 void Client::SacrificeConfirm(Client *caster)
@@ -3927,6 +3982,46 @@ void Client::SendPopupToClient(const char *Title, const char *Text, uint32 Popup
 
 	sprintf(olms->ButtonName0, "%s", "Yes");
 	sprintf(olms->ButtonName1, "%s", "No");
+	QueuePacket(outapp);
+	safe_delete(outapp);
+}
+
+void Client::SendFullPopup(const char *Title, const char *Text, uint32 PopupID, uint32 NegativeID, uint32 Buttons, uint32 Duration, const char *ButtonName0, const char *ButtonName1, uint32 SoundControls) {
+	auto outapp = new EQApplicationPacket(OP_OnLevelMessage, sizeof(OnLevelMessage_Struct));
+	OnLevelMessage_Struct *olms = (OnLevelMessage_Struct *)outapp->pBuffer;
+
+	if((strlen(Text) > (sizeof(olms->Text)-1)) || (strlen(Title) > (sizeof(olms->Title) - 1)) ) {
+		safe_delete(outapp);
+		return;
+	}
+
+	if (ButtonName0 && ButtonName1 && ( (strlen(ButtonName0) > (sizeof(olms->ButtonName0) - 1)) || (strlen(ButtonName1) > (sizeof(olms->ButtonName1) - 1)) ) ) {
+		safe_delete(outapp);
+		return;
+	}
+
+	strcpy(olms->Title, Title);
+	strcpy(olms->Text, Text);
+
+	olms->Buttons = Buttons;
+	
+	if (ButtonName0 == NULL || ButtonName1 == NULL) {
+		sprintf(olms->ButtonName0, "%s", "Yes");
+		sprintf(olms->ButtonName1, "%s", "No");
+	} else {
+		strcpy(olms->ButtonName0, ButtonName0);
+		strcpy(olms->ButtonName1, ButtonName1);
+	}
+
+	if(Duration > 0)
+		olms->Duration = Duration * 1000;
+	else
+		olms->Duration = 0xffffffff;
+
+	olms->PopupID = PopupID;
+	olms->NegativeID = NegativeID;
+	olms->SoundControls = SoundControls;
+
 	QueuePacket(outapp);
 	safe_delete(outapp);
 }
@@ -4171,7 +4266,7 @@ bool Client::GroupFollow(Client* inviter) {
 					RemoveAutoXTargets();
 				}
 
-				SetXTargetAutoMgr(GetXTargetAutoMgr());
+				SetXTargetAutoMgr(raid->GetXTargetAutoMgr());
 				if (!GetXTargetAutoMgr()->empty())
 					SetDirtyAutoHaters();
 
@@ -4304,7 +4399,7 @@ bool Client::GroupFollow(Client* inviter) {
 		}
 
 		database.RefreshGroupFromDB(this);
-		group->SendHPPacketsTo(this);
+		group->SendHPManaEndPacketsTo(this);
 		//send updates to clients out of zone...
 		group->SendGroupJoinOOZ(this);
 		return true;
@@ -5715,6 +5810,20 @@ void Client::SuspendMinion()
 			Message_StringID(clientMessageTell, SUSPEND_MINION_UNSUSPEND, CurrentPet->GetCleanName());
 
 			memset(&m_suspendedminion, 0, sizeof(struct PetInfo));
+			// TODO: These pet command states need to be synced ...
+			// Will just fix them for now
+			if (m_ClientVersionBit & EQEmu::versions::bit_UFAndLater) {
+				SetPetCommandState(PET_BUTTON_SIT, 0);
+				SetPetCommandState(PET_BUTTON_STOP, 0);
+				SetPetCommandState(PET_BUTTON_REGROUP, 0);
+				SetPetCommandState(PET_BUTTON_FOLLOW, 1);
+				SetPetCommandState(PET_BUTTON_GUARD, 0);
+				SetPetCommandState(PET_BUTTON_TAUNT, 1);
+				SetPetCommandState(PET_BUTTON_HOLD, 0);
+				SetPetCommandState(PET_BUTTON_GHOLD, 0);
+				SetPetCommandState(PET_BUTTON_FOCUS, 0);
+				SetPetCommandState(PET_BUTTON_SPELLHOLD, 0);
+			}
 		}
 		else
 			return;
@@ -6266,7 +6375,7 @@ void Client::LocateCorpse()
 		SetHeading(CalculateHeadingToTarget(ClosestCorpse->GetX(), ClosestCorpse->GetY()));
 		SetTarget(ClosestCorpse);
 		SendTargetCommand(ClosestCorpse->GetID());
-		SendPosUpdate(2);
+		SendPositionUpdate(2);
 	}
 	else if(!GetTarget())
 		Message_StringID(clientMessageError, SENSE_CORPSE_NONE);
@@ -8489,7 +8598,7 @@ void Client::Consume(const EQEmu::ItemData *item, uint8 type, int16 slot, bool a
 
 	if (type == EQEmu::item::ItemTypeFood)
    {
-	   int hchange = item->CastTime * cons_mod;
+	   int hchange = item->CastTime_ * cons_mod;
 	   hchange = mod_food_value(item, hchange);
 
 	   if(hchange < 0) { return; }
@@ -8506,7 +8615,7 @@ void Client::Consume(const EQEmu::ItemData *item, uint8 type, int16 slot, bool a
    }
    else
    {
-	   int tchange = item->CastTime * cons_mod;
+	   int tchange = item->CastTime_ * cons_mod;
 	   tchange = mod_drink_value(item, tchange);
 
 	   if(tchange < 0) { return; }
@@ -8660,8 +8769,8 @@ void Client::SendHPUpdateMarquee(){
 		return;
 
 	/* Health Update Marquee Display: Custom*/
-	uint32 health_percentage = (uint32)(this->cur_hp * 100 / this->max_hp);
-	if (health_percentage == 100)
+	uint8 health_percentage = (uint8)(this->cur_hp * 100 / this->max_hp);
+	if (health_percentage >= 100)
 		return;
 
 	std::string health_update_notification = StringFormat("Health: %u%%", health_percentage);
@@ -8935,5 +9044,14 @@ void Client::ProcessAggroMeter()
 	} else {
 		safe_delete(app);
 	}
+}
+
+void Client::SetPetCommandState(int button, int state)
+{
+	auto app = new EQApplicationPacket(OP_PetCommandState, sizeof(PetCommandState_Struct));
+	auto pcs = (PetCommandState_Struct *)app->pBuffer;
+	pcs->button_id = button;
+	pcs->state = state;
+	FastQueuePacket(&app);
 }
 

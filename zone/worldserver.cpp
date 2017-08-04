@@ -989,7 +989,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 			}
 			database.RefreshGroupFromDB(client);
 
-			group->SendHPPacketsTo(client);
+			group->SendHPManaEndPacketsTo(client);
 
 			// If the group leader is not set, pull the group leader information from the database.
 			if (!group->GetLeader())
@@ -1854,6 +1854,15 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		Client* client = entity_list.GetClientByName(CZCS->CharName);
 		if (client != 0) {
 			client->Message(CZCS->Type, CZCS->Message);
+		}
+		break;
+	}
+	case ServerOP_CZSetEntityVariableByClientName:
+	{
+		CZSetEntVarByClientName_Struct* CZCS = (CZSetEntVarByClientName_Struct*)pack->pBuffer;
+		Client* client = entity_list.GetClientByName(CZCS->CharName);
+		if (client != 0) {
+			client->SetEntityVariable(CZCS->id, CZCS->m_var);
 		}
 		break;
 	}

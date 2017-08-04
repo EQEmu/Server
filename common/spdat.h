@@ -468,7 +468,7 @@ typedef enum {
 #define SE_Blank						254 // implemented
 #define SE_ShieldDuration				255	// not implemented as bonus - increases duration of /shield
 #define SE_ShroudofStealth				256	// implemented
-#define SE_PetDiscipline				257 // not implemented as bonus - /pet hold
+#define SE_PetDiscipline				257 // not implemented as bonus - /pet hold - official name is GivePetHold
 #define SE_TripleBackstab				258 // implemented[AA] - chance to perform a triple backstab
 #define SE_CombatStability				259 // implemented[AA] - damage mitigation
 #define SE_AddSingingMod				260 // implemented[AA] - Instrument/Singing Mastery, base1 is the mod, base2 is the ItemType
@@ -478,7 +478,7 @@ typedef enum {
 #define SE_HastenedAASkill			    264 // implemented
 #define SE_MasteryofPast				265 // implemented[AA] - Spells less than effect values level can not be fizzled
 #define SE_ExtraAttackChance			266 // implemented - increase chance to score an extra attack with a 2-Handed Weapon.
-#define SE_PetDiscipline2				267 // *not implemented - /pet focus, /pet no cast
+#define SE_AddPetCommand				267 // implemented - sets command base2 to base1
 #define SE_ReduceTradeskillFail			268 // implemented - reduces chance to fail with given tradeskill by a percent chance
 #define SE_MaxBindWound					269	// implemented[AA] - Increase max HP you can bind wound.
 #define SE_BardSongRange				270	// implemented[AA] - increase range of beneficial bard songs (Sionachie's Crescendo)
@@ -562,9 +562,9 @@ typedef enum {
 #define SE_LimitManaMin					348	// implemented
 #define SE_ShieldEquipDmgMod			349	// implemented[AA] Increase melee base damage (indirectly increasing hate) when wearing a shield.
 #define SE_ManaBurn						350	// implemented - Drains mana for damage/heal at a defined ratio up to a defined maximum amount of mana.
-//#define SE_PersistentEffect			351	// *not implemented. creates a trap/totem that casts a spell (spell id + base1?) when anything comes near it. can probably make a beacon for this
-//#define SE_IncreaseTrapCount			352	// *not implemented - looks to be some type of invulnerability? Test ITC (8755)
-//#define SE_AdditionalAura				353	// *not implemented - allows use of more than 1 aura, aa effect
+#define SE_PersistentEffect				351	// *not implemented. creates a trap/totem that casts a spell (spell id + base1?) when anything comes near it. can probably make a beacon for this
+#define SE_IncreaseTrapCount			352	// *not implemented - looks to be some type of invulnerability? Test ITC (8755)
+#define SE_AdditionalAura				353	// *not implemented - allows use of more than 1 aura, aa effect
 //#define SE_DeactivateAllTraps			354	// *not implemented - looks to be some type of invulnerability? Test DAT (8757)
 //#define SE_LearnTrap					355	// *not implemented - looks to be some type of invulnerability? Test LT (8758)
 //#define SE_ChangeTriggerType			356	// not used
@@ -757,7 +757,7 @@ struct SPDat_Spell_Struct
 										// -- DIETY_BERTOXXULOUS ... DIETY_VEESHAN
 /* 142 */	//int8 npc_no_cast;			// 142: between 0 & 100 -- NPC_NO_CAST
 /* 143 */	//int ai_pt_bonus;			// 143: always set to 0, client doesn't save this -- AI_PT_BONUS
-/* 144 */	//int16 new_icon	// Spell icon used by the client in uifiles/default/spells??.tga, both for spell gems & buff window. Looks to depreciate icon & memicon -- NEW_ICON
+/* 144 */	int16 new_icon;	// Spell icon used by the client in uifiles/default/spells??.tga, both for spell gems & buff window. Looks to depreciate icon & memicon -- NEW_ICON
 /* 145 */	//int16 spellanim; // Doesn't look like it's the same as #doanim, so not sure what this is, particles I think -- SPELL_EFFECT_INDEX
 /* 146 */	bool uninterruptable;	// Looks like anything != 0 is uninterruptable. Values are mostly -1, 0, & 1 (Fetid Breath = 90?) -- NO_INTERRUPT
 /* 147 */	int16 ResistDiff; // -- RESIST_MOD

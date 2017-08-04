@@ -46,7 +46,7 @@ extern UCSConnection UCSLink;
 extern QueryServConnection QSLink;
 void CatchSignal(int sig_num);
 
-ZoneServer::ZoneServer(std::shared_ptr<EQ::Net::ServertalkServerConnection> connection)
+ZoneServer::ZoneServer(std::shared_ptr<EQ::Net::ServertalkServerConnection> connection, EQ::Net::ConsoleServer *console)
 	: tcpc(connection), zone_boot_timer(5000) {
 
 	/* Set Process tracking variable defaults */
@@ -73,6 +73,8 @@ ZoneServer::ZoneServer(std::shared_ptr<EQ::Net::ServertalkServerConnection> conn
 			zone_boot_timer.Disable();
 		}
 	}));
+
+	this->console = console;
 }
 
 ZoneServer::~ZoneServer() {
@@ -412,6 +414,27 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 			break;
 		}
 		if (scm->chan_num == 7 || scm->chan_num == 14) {
+			if (scm->deliverto[0] == '*') {
+
+				if (console) {
+					auto con = console->FindByAccountName(&scm->deliverto[1]);
+					if (((!con) || (!con->SendChannelMessage(scm, [&scm]() {
+						auto pack = new ServerPacket(ServerOP_ChannelMessage,
+							sizeof(ServerChannelMessage_Struct) + strlen(scm->message) + 1);
+						memcpy(pack->pBuffer, scm, pack->size);
+						ServerChannelMessage_Struct* scm2 = (ServerChannelMessage_Struct*)pack->pBuffer;
+						strcpy(scm2->deliverto, scm2->from);
+						scm2->noreply = true;
+						client_list.SendPacket(scm->from, pack);
+						safe_delete(pack);
+					}))) && (!scm->noreply))
+					{
+						zoneserver_list.SendEmoteMessage(scm->from, 0, 0, 0, "%s is not online at this time.", scm->to);
+					}
+				}
+				break;
+			}
+
 			ClientListEntry* cle = client_list.FindCharacter(scm->deliverto);
 			if (cle == 0 || cle->Online() < CLE_Status_Zoning ||
 				(cle->TellsOff() && ((cle->Anon() == 1 && scm->fromadmin < cle->Admin()) || scm->fromadmin < 80))) {
@@ -462,6 +485,20 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 				cle->Server()->SendPacket(pack);
 		}
 		else {
+			if (scm->chan_num == 5 || scm->chan_num == 6 || scm->chan_num == 11) {
+				if (console) {
+					console->SendChannelMessage(scm, [&scm]() {
+						auto pack = new ServerPacket(ServerOP_ChannelMessage,
+							sizeof(ServerChannelMessage_Struct) + strlen(scm->message) + 1);
+						memcpy(pack->pBuffer, scm, pack->size);
+						ServerChannelMessage_Struct* scm2 = (ServerChannelMessage_Struct*)pack->pBuffer;
+						strcpy(scm2->deliverto, scm2->from);
+						scm2->noreply = true;
+						client_list.SendPacket(scm->from, pack);
+						safe_delete(pack);
+					});
+				}
+			}
 			zoneserver_list.SendPacket(pack);
 		}
 		break;
@@ -1248,6 +1285,7 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 	case ServerOP_CZSignalNPC:
 	case ServerOP_CZSetEntityVariableByNPCTypeID:
 	case ServerOP_CZSignalClient:
+	case ServerOP_CZSetEntityVariableByClientName:
 	case ServerOP_WWMarquee:
 	case ServerOP_DepopAllPlayersCorpses:
 	case ServerOP_DepopPlayerCorpse:

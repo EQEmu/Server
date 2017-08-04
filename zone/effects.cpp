@@ -356,67 +356,15 @@ int32 Client::GetActSpellCost(uint16 spell_id, int32 cost)
 		cost -= mana_back;
 	}
 
-	// This formula was derived from the following resource:
-	// http://www.eqsummoners.com/eq1/specialization-library.html
-	// WildcardX
-	float PercentManaReduction = 0;
-	float SpecializeSkill = GetSpecializeSkillValue(spell_id);
-	int SuccessChance = zone->random.Int(0, 100);
-
-	float bonus = 1.0;
-	switch(GetAA(aaSpellCastingMastery))
-	{
-	case 1:
-		bonus += 0.05;
-		break;
-	case 2:
-		bonus += 0.15;
-		break;
-	case 3:
-		bonus += 0.30;
-		break;
-	}
-
-	bonus += 0.05f * GetAA(aaAdvancedSpellCastingMastery);
-
-	if(SuccessChance <= (SpecializeSkill * 0.3 * bonus))
-	{
-		PercentManaReduction = 1 + 0.05f * SpecializeSkill;
-		switch(GetAA(aaSpellCastingMastery))
-		{
-		case 1:
-			PercentManaReduction += 2.5;
-			break;
-		case 2:
-			PercentManaReduction += 5.0;
-			break;
-		case 3:
-			PercentManaReduction += 10.0;
-			break;
-		}
-
-		switch(GetAA(aaAdvancedSpellCastingMastery))
-		{
-		case 1:
-			PercentManaReduction += 2.5;
-			break;
-		case 2:
-			PercentManaReduction += 5.0;
-			break;
-		case 3:
-			PercentManaReduction += 10.0;
-			break;
-		}
-	}
+	int spec = GetSpecializeSkillValue(spell_id);
+	int PercentManaReduction = 0;
+	if (spec)
+		PercentManaReduction = 1 + spec / 20; // there seems to be some non-obvious rounding here, let's truncate for now.
 
 	int16 focus_redux = GetFocusEffect(focusManaCost, spell_id);
+	PercentManaReduction += focus_redux;
 
-	if(focus_redux > 0)
-	{
-		PercentManaReduction += zone->random.Real(1, (double)focus_redux);
-	}
-
-	cost -= (cost * (PercentManaReduction / 100));
+	cost -= cost * PercentManaReduction / 100;
 
 	// Gift of Mana - reduces spell cost to 1 mana
 	if(focus_redux >= 100) {
@@ -746,7 +694,7 @@ void EntityList::AETaunt(Client* taunter, float range, int32 bonus_hate)
 // causes caster to hit every mob within dist range of center with
 // spell_id.
 // NPC spells will only affect other NPCs with compatible faction
-void EntityList::AESpell(Mob *caster, Mob *center, uint16 spell_id, bool affect_caster, int16 resist_adjust)
+void EntityList::AESpell(Mob *caster, Mob *center, uint16 spell_id, bool affect_caster, int16 resist_adjust, int *max_targets)
 {
 	Mob *curmob = nullptr;
 
@@ -755,12 +703,25 @@ void EntityList::AESpell(Mob *caster, Mob *center, uint16 spell_id, bool affect_
 	float min_range2 = spells[spell_id].min_range * spells[spell_id].min_range;
 	float dist_targ = 0;
 
+	const auto &position = spells[spell_id].targettype == ST_Ring ? caster->GetTargetRingLocation() : static_cast<glm::vec3>(center->GetPosition());
+	glm::vec2 min = { position.x - dist, position.y - dist };
+	glm::vec2 max = { position.x + dist, position.y + dist };
+
 	bool bad = IsDetrimentalSpell(spell_id);
 	bool isnpc = caster->IsNPC();
-	int MAX_TARGETS_ALLOWED = 4;
 
-	if (spells[spell_id].aemaxtargets)
-		MAX_TARGETS_ALLOWED = spells[spell_id].aemaxtargets;
+	if (RuleB(Spells, OldRainTargets))
+		max_targets = nullptr; // ignore it!
+
+	// if we have a passed in value, use it, otherwise default to data
+	// detrimental Target AEs have a default value of 4 for PCs and unlimited for NPCs
+	int max_targets_allowed = 0; // unlimited
+	if (max_targets) // rains pass this in since they need to preserve the count through waves
+		max_targets_allowed = *max_targets;
+	else if (spells[spell_id].aemaxtargets)
+		max_targets_allowed = spells[spell_id].aemaxtargets;
+	else if (IsTargetableAESpell(spell_id) && bad && !isnpc)
+		max_targets_allowed = 4;
 
 	int iCounter = 0;
 
@@ -768,8 +729,6 @@ void EntityList::AESpell(Mob *caster, Mob *center, uint16 spell_id, bool affect_
 		curmob = it->second;
 		// test to fix possible cause of random zone crashes..external methods accessing client properties before they're initialized
 		if (curmob->IsClient() && !curmob->CastToClient()->ClientFinishedLoading())
-			continue;
-		if (curmob == center)	//do not affect center
 			continue;
 		if (curmob == caster && !affect_caster)	//watch for caster too
 			continue;
@@ -784,13 +743,10 @@ void EntityList::AESpell(Mob *caster, Mob *center, uint16 spell_id, bool affect_
 			continue;
 		if (spells[spell_id].pcnpc_only_flag == 2 && (curmob->IsClient() || curmob->IsMerc()))
 			continue;
+		if (!IsWithinAxisAlignedBox(static_cast<glm::vec2>(curmob->GetPosition()), min, max))
+			continue;
 
-		if (spells[spell_id].targettype == ST_Ring) {
-			dist_targ = DistanceSquared(static_cast<glm::vec3>(curmob->GetPosition()), caster->GetTargetRingLocation());
-		}
-		else if (center) {
-			dist_targ = DistanceSquared(curmob->GetPosition(), center->GetPosition());
-		}
+		dist_targ = DistanceSquared(curmob->GetPosition(), position);
 
 		if (dist_targ > dist2)	//make sure they are in range
 			continue;
@@ -813,7 +769,7 @@ void EntityList::AESpell(Mob *caster, Mob *center, uint16 spell_id, bool affect_
 		if (bad) {
 			if (!caster->IsAttackAllowed(curmob, true))
 				continue;
-			if (center &&  !spells[spell_id].npc_no_los && !center->CheckLosFN(curmob))
+			if (center && !spells[spell_id].npc_no_los && !center->CheckLosFN(curmob))
 				continue;
 			if (!center && !spells[spell_id].npc_no_los && !caster->CheckLosFN(caster->GetTargetRingX(), caster->GetTargetRingY(), caster->GetTargetRingZ(), curmob->GetSize()))
 				continue;
@@ -828,22 +784,17 @@ void EntityList::AESpell(Mob *caster, Mob *center, uint16 spell_id, bool affect_
 		}
 
 		curmob->CalcSpellPowerDistanceMod(spell_id, dist_targ);
+		caster->SpellOnTarget(spell_id, curmob, false, true, resist_adjust);
 
-		//if we get here... cast the spell.
-		if (IsTargetableAESpell(spell_id) && bad) {
-			if (iCounter < MAX_TARGETS_ALLOWED) {
-				caster->SpellOnTarget(spell_id, curmob, false, true, resist_adjust);
-			}
-		} else {
-			if (spells[spell_id].aemaxtargets && iCounter < spells[spell_id].aemaxtargets)
-				caster->SpellOnTarget(spell_id, curmob, false, true, resist_adjust);
-			if (!spells[spell_id].aemaxtargets)
-				caster->SpellOnTarget(spell_id, curmob, false, true, resist_adjust);
-		}
-
-		if (!isnpc || spells[spell_id].aemaxtargets) //npcs are not target limited (unless casting a spell with a target limit)...
+		if (max_targets_allowed) { // if we have a limit, increment count
 			iCounter++;
+			if (iCounter >= max_targets_allowed) // we done
+				break;
+		}
 	}
+
+	if (max_targets && max_targets_allowed)
+		*max_targets = *max_targets - iCounter;
 }
 
 void EntityList::MassGroupBuff(Mob *caster, Mob *center, uint16 spell_id, bool affect_caster)

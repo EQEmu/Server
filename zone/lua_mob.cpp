@@ -10,6 +10,7 @@
 #include "lua_mob.h"
 #include "lua_hate_list.h"
 #include "lua_client.h"
+#include "lua_stat_bonuses.h"
 
 struct SpecialAbilities { };
 
@@ -1725,6 +1726,18 @@ int Lua_Mob::GetSkillDmgTaken(int skill) {
 	return self->GetSkillDmgTaken(static_cast<EQEmu::skills::SkillType>(skill));
 }
 
+int Lua_Mob::GetFcDamageAmtIncoming(Lua_Mob caster, uint32 spell_id, bool use_skill, uint16 skill)
+{
+	Lua_Safe_Call_Int();
+	return self->GetFcDamageAmtIncoming(caster, spell_id, use_skill, skill);
+}
+
+int Lua_Mob::GetSkillDmgAmt(uint16 skill)
+{
+	Lua_Safe_Call_Int();
+	return self->GetSkillDmgAmt(skill);
+}
+
 void Lua_Mob::SetAllowBeneficial(bool value) {
 	Lua_Safe_Call_Void();
 	self->SetAllowBeneficial(value);
@@ -1983,6 +1996,89 @@ bool Lua_Mob::IsAmnesiad() {
 int32 Lua_Mob::GetMeleeMitigation() {
 	Lua_Safe_Call_Int();
 	return self->GetMeleeMitigation();
+}
+
+int Lua_Mob::GetWeaponDamageBonus(Lua_Item weapon, bool offhand) {
+	Lua_Safe_Call_Int();
+	return self->GetWeaponDamageBonus(weapon, offhand);
+}
+
+Lua_StatBonuses Lua_Mob::GetItemBonuses()
+{
+	Lua_Safe_Call_Class(Lua_StatBonuses);
+	return self->GetItemBonusesPtr();
+}
+
+Lua_StatBonuses Lua_Mob::GetSpellBonuses()
+{
+	Lua_Safe_Call_Class(Lua_StatBonuses);
+	return self->GetSpellBonusesPtr();
+}
+
+Lua_StatBonuses Lua_Mob::GetAABonuses()
+{
+	Lua_Safe_Call_Class(Lua_StatBonuses);
+	return self->GetAABonusesPtr();
+}
+
+int16 Lua_Mob::GetMeleeDamageMod_SE(uint16 skill)
+{
+	Lua_Safe_Call_Int();
+	return self->GetMeleeDamageMod_SE(skill);
+}
+
+int16 Lua_Mob::GetMeleeMinDamageMod_SE(uint16 skill)
+{
+	Lua_Safe_Call_Int();
+	return self->GetMeleeMinDamageMod_SE(skill);
+}
+
+bool Lua_Mob::IsAttackAllowed(Lua_Mob target, bool isSpellAttack) {
+	Lua_Safe_Call_Bool();
+	return self->IsAttackAllowed(target, isSpellAttack);
+}
+
+bool Lua_Mob::IsCasting() {
+	Lua_Safe_Call_Bool();
+	return self->IsCasting();
+}
+
+int Lua_Mob::AttackAnimation(int Hand, Lua_ItemInst weapon) {
+	Lua_Safe_Call_Int();
+	return (int)self->AttackAnimation(Hand, weapon);
+}
+
+int Lua_Mob::GetWeaponDamage(Lua_Mob against, Lua_ItemInst weapon) {
+	Lua_Safe_Call_Int();
+	return self->GetWeaponDamage(against, weapon);
+}
+
+bool Lua_Mob::IsBerserk() {
+	Lua_Safe_Call_Bool();
+	return self->IsBerserk();
+}
+
+bool Lua_Mob::TryFinishingBlow(Lua_Mob defender, int &damage) {
+	Lua_Safe_Call_Bool();
+	return self->TryFinishingBlow(defender, damage);
+}
+
+int Lua_Mob::GetBodyType()
+{
+	Lua_Safe_Call_Int();
+	return (int)self->GetBodyType();
+}
+
+int Lua_Mob::GetOrigBodyType()
+{
+	Lua_Safe_Call_Int();
+	return (int)self->GetOrigBodyType();
+}
+
+void Lua_Mob::CheckNumHitsRemaining(int type, int32 buff_slot, uint16 spell_id)
+{
+	Lua_Safe_Call_Void();
+	self->CheckNumHitsRemaining((NumHit)type, buff_slot, spell_id);
 }
 
 luabind::scope lua_register_mob() {
@@ -2281,6 +2377,8 @@ luabind::scope lua_register_mob() {
 		.def("ModSkillDmgTaken", (void(Lua_Mob::*)(int,int))&Lua_Mob::ModSkillDmgTaken)
 		.def("GetModSkillDmgTaken", (int(Lua_Mob::*)(int))&Lua_Mob::GetModSkillDmgTaken)
 		.def("GetSkillDmgTaken", (int(Lua_Mob::*)(int))&Lua_Mob::GetSkillDmgTaken)
+		.def("GetFcDamageAmtIncoming", &Lua_Mob::GetFcDamageAmtIncoming)
+		.def("GetSkillDmgAmt", (int(Lua_Mob::*)(int))&Lua_Mob::GetSkillDmgAmt)
 		.def("SetAllowBeneficial", (void(Lua_Mob::*)(bool))&Lua_Mob::SetAllowBeneficial)
 		.def("GetAllowBeneficial", (bool(Lua_Mob::*)(void))&Lua_Mob::GetAllowBeneficial)
 		.def("IsBeneficialAllowed", (bool(Lua_Mob::*)(Lua_Mob))&Lua_Mob::IsBeneficialAllowed)
@@ -2330,7 +2428,22 @@ luabind::scope lua_register_mob() {
 		.def("HasPet", (bool(Lua_Mob::*)(void))&Lua_Mob::HasPet)
 		.def("IsSilenced", (bool(Lua_Mob::*)(void))&Lua_Mob::IsSilenced)
 		.def("IsAmnesiad", (bool(Lua_Mob::*)(void))&Lua_Mob::IsAmnesiad)
-		.def("GetMeleeMitigation", (int32(Lua_Mob::*)(void))&Lua_Mob::GetMeleeMitigation);
+		.def("GetMeleeMitigation", (int32(Lua_Mob::*)(void))&Lua_Mob::GetMeleeMitigation)
+		.def("GetWeaponDamageBonus", &Lua_Mob::GetWeaponDamageBonus)
+		.def("GetItemBonuses", &Lua_Mob::GetItemBonuses)
+		.def("GetSpellBonuses", &Lua_Mob::GetSpellBonuses)
+		.def("GetAABonuses", &Lua_Mob::GetAABonuses)
+		.def("GetMeleeDamageMod_SE", &Lua_Mob::GetMeleeDamageMod_SE)
+		.def("GetMeleeMinDamageMod_SE", &Lua_Mob::GetMeleeMinDamageMod_SE)
+		.def("IsAttackAllowed", &Lua_Mob::IsAttackAllowed)
+		.def("IsCasting", &Lua_Mob::IsCasting)
+		.def("AttackAnimation", &Lua_Mob::AttackAnimation)
+		.def("GetWeaponDamage", &Lua_Mob::GetWeaponDamage)
+		.def("IsBerserk", &Lua_Mob::IsBerserk)
+		.def("TryFinishingBlow", &Lua_Mob::TryFinishingBlow)
+		.def("GetBodyType", &Lua_Mob::GetBodyType)
+		.def("GetOrigBodyType", &Lua_Mob::GetOrigBodyType)
+		.def("CheckNumHitsRemaining", &Lua_Mob::CheckNumHitsRemaining);
 }
 
 luabind::scope lua_register_special_abilities() {

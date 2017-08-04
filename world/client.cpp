@@ -449,17 +449,36 @@ bool Client::HandleSendLoginInfoPacket(const EQApplicationPacket *app) {
 			return false;
 		}
 
-		cle->SetOnline();
-
 		if(minilogin){
+			cle->SetOnline();
 			WorldConfig::DisableStats();
 			Log(Logs::General, Logs::World_Server, "MiniLogin Account #%d",cle->AccountID());
 		}
-		else {
-			if (!is_player_zoning) {
-				Log(Logs::General, Logs::World_Server, 
-					"Account (%s) Logging in :: LSID: %d ", cle->AccountName(), cle->LSID());
+		else if (!is_player_zoning) {
+			// Track who is in and who is out of the game
+			char *inout= (char *) "";
+			
+			if (cle->GetOnline() == CLE_Status_Never){
+				// Desktop -> Char Select
+				inout = (char *) "In";
 			}
+			else {
+				// Game -> Char Select
+				inout=(char *) "Out";
+			}
+
+			// Always at Char select at this point.
+			// Either from a fresh client launch or coming back from the game.
+			// Exiting the game entirely does not come through here.
+			// Could use a Logging Out Completely message somewhere.
+			cle->SetOnline(CLE_Status_CharSelect);
+			
+			Log(Logs::General, Logs::World_Server, 
+				"Account (%s) Logging(%s) to character select :: LSID: %d ", 
+				cle->AccountName(), inout, cle->LSID());
+		}
+		else {
+			cle->SetOnline();
 		}
 
 		const WorldConfig *Config=WorldConfig::get();
@@ -1021,6 +1040,7 @@ bool Client::HandlePacket(const EQApplicationPacket *app) {
 		}
 		case OP_WorldLogout:
 		{
+			// I don't see this getting executed on logout
 			eqs->Close();
 			cle->SetOnline(CLE_Status_Offline); //allows this player to log in again without an ip restriction.
 			return false;
@@ -1260,6 +1280,10 @@ void Client::Clearance(int8 response)
 			zs_addr = local_addr;
 		} else {
 			zs_addr = zs->GetIP().c_str();
+
+			if (!zs_addr[0]) {
+				zs_addr = WorldConfig::get()->LocalAddress.c_str();
+			}
 
 			if(strcmp(zs_addr, "127.0.0.1") == 0)
 			{

@@ -79,6 +79,8 @@ public:
 	virtual bool IsTrap()			const { return false; }
 	virtual bool IsBeacon()			const { return false; }
 	virtual bool IsEncounter()		const { return false; }
+	virtual bool IsBot()            const { return false; }
+	virtual bool IsAura()			const { return false; }
 
 	virtual bool Process() { return false; }
 	virtual bool Save() { return true; }
@@ -113,7 +115,6 @@ public:
 	bool CheckCoordLosNoZLeaps(float cur_x, float cur_y, float cur_z, float trg_x, float trg_y, float trg_z, float perwalk=1);
 
 #ifdef BOTS
-	virtual bool IsBot() const { return false; }
 	Bot* CastToBot();
 #endif
 
@@ -279,7 +280,7 @@ public:
 	bool	RemoveTrap(uint16 delete_id);
 	bool	RemoveObject(uint16 delete_id);
 	bool	RemoveProximity(uint16 delete_npc_id);
-	bool	RemoveNPCFromClientCloseLists(NPC *npc);
+	bool	RemoveMobFromClientCloseLists(Mob *mob);
 	void	RemoveAllMobs();
 	void	RemoveAllClients();
 	void	RemoveAllNPCs();
@@ -315,6 +316,7 @@ public:
 	void	Message(uint32 to_guilddbid, uint32 type, const char* message, ...);
 	void	MessageStatus(uint32 to_guilddbid, int to_minstatus, uint32 type, const char* message, ...);
 	void	MessageClose(Mob* sender, bool skipsender, float dist, uint32 type, const char* message, ...);
+	void	FilteredMessageClose(Mob* sender, bool skipsender, float dist, uint32 type, eqFilterType filter, const char* message, ...);
 	void	Message_StringID(Mob *sender, bool skipsender, uint32 type, uint32 string_id, const char* message1=0,const char* message2=0,const char* message3=0,const char* message4=0,const char* message5=0,const char* message6=0,const char* message7=0,const char* message8=0,const char* message9=0);
 	void	FilteredMessage_StringID(Mob *sender, bool skipsender, uint32 type, eqFilterType filter, uint32 string_id, const char* message1=0,const char* message2=0,const char* message3=0,const char* message4=0,const char* message5=0,const char* message6=0,const char* message7=0,const char* message8=0,const char* message9=0);
 	void	MessageClose_StringID(Mob *sender, bool skipsender, float dist, uint32 type, uint32 string_id, const char* message1=0,const char* message2=0,const char* message3=0,const char* message4=0,const char* message5=0,const char* message6=0,const char* message7=0,const char* message8=0,const char* message9=0);
@@ -356,7 +358,7 @@ public:
 
 	void	AEAttack(Mob *attacker, float dist, int Hand = EQEmu::inventory::slotPrimary, int count = 0, bool IsFromSpell = false);
 	void	AETaunt(Client *caster, float range=0, int32 bonus_hate=0);
-	void	AESpell(Mob *caster, Mob *center, uint16 spell_id, bool affect_caster = true, int16 resist_adjust = 0);
+	void	AESpell(Mob *caster, Mob *center, uint16 spell_id, bool affect_caster = true, int16 resist_adjust = 0, int *max_targets = nullptr);
 	void	MassGroupBuff(Mob *caster, Mob *center, uint16 spell_id, bool affect_caster = true);
 	void	AEBardPulse(Mob *caster, Mob *center, uint16 spell_id, bool affect_caster = true);
 
@@ -369,7 +371,7 @@ public:
 	Mob*	FindDefenseNPC(uint32 npcid);
 	void	OpenDoorsNear(NPC* opener);
 	void	UpdateWho(bool iSendFullUpdate = false);
-	void	SendPositionUpdates(Client* client, uint32 cLastUpdate = 0, float range = 0, Entity* alwayssend = 0, bool iSendEvenIfNotChanged = false);
+	void	SendPositionUpdates(Client* client, uint32 cLastUpdate = 0, float update_range = 0, Entity* always_send = 0, bool iSendEvenIfNotChanged = false);
 	char*	MakeNameUnique(char* name);
 	static char* RemoveNumbers(char* name);
 	void	SignalMobsByNPCID(uint32 npc_type, int signal_id);
@@ -385,6 +387,7 @@ public:
 	void	FindPathsToAllNPCs();
 	int32	DeleteNPCCorpses();
 	int32	DeletePlayerCorpses();
+	void	CorpseFix(Client* c);
 	void	WriteEntityIDs();
 	void	HalveAggro(Mob* who);
 	void	DoubleAggro(Mob* who);

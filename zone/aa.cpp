@@ -46,8 +46,16 @@ void Mob::TemporaryPets(uint16 spell_id, Mob *targ, const char *name_override, u
 	if (targ != nullptr && targ->IsCorpse())
 		return;
 
+	// yep, even these need pet power!
+	int act_power = 0;
+
+	if (IsClient()) {
+		act_power = CastToClient()->GetFocusEffect(focusPetPower, spell_id);
+		act_power = CastToClient()->mod_pet_power(act_power, spell_id);
+	}
+
 	PetRecord record;
-	if (!database.GetPetEntry(spells[spell_id].teleport_zone, &record))
+	if (!database.GetPoweredPetEntry(spells[spell_id].teleport_zone, act_power, &record))
 	{
 		Log(Logs::General, Logs::Error, "Unknown swarm pet spell id: %d, check pets table", spell_id);
 		Message(13, "Unable to find data for pet %s", spells[spell_id].teleport_zone);
@@ -908,7 +916,7 @@ void Client::SendAlternateAdvancementRank(int aa_id, int level) {
 void Client::SendAlternateAdvancementStats() {
 	auto outapp = new EQApplicationPacket(OP_AAExpUpdate, sizeof(AltAdvStats_Struct));
 	AltAdvStats_Struct *aps = (AltAdvStats_Struct *)outapp->pBuffer;
-	aps->experience = (uint32)(((float)330.0f * (float)m_pp.expAA) / (float)max_AAXP);
+	aps->experience = (uint32)(((float)330.0f * (float)m_pp.expAA) / (float)GetRequiredAAExperience());
 	aps->unspent = m_pp.aapoints;
 	aps->percentage = m_epp.perAA;
 	QueuePacket(outapp);
@@ -1194,6 +1202,11 @@ void Client::ActivateAlternateAdvancementAbility(int rank_id, int target_id) {
 		Message_StringID(MT_SpellFailure, SNEAK_RESTRICT);
 		return;
 	}
+	//
+	// Modern clients don't require pet targeted for AA casts that are ST_Pet
+	if (spells[rank->spell].targettype == ST_Pet || spells[rank->spell].targettype == ST_SummonedPet)
+		target_id = GetPetID();
+
 	// Bards can cast instant cast AAs while they are casting another song
 	if(spells[rank->spell].cast_time == 0 && GetClass() == BARD && IsBardSong(casting_spell_id)) {
 		if(!SpellFinished(rank->spell, entity_list.GetMob(target_id), EQEmu::CastingSlot::AltAbility, spells[rank->spell].mana, -1, spells[rank->spell].ResistDiff, false)) {

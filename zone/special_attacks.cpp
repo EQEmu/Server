@@ -23,6 +23,7 @@
 #include "entity.h"
 #include "mob.h"
 #include "string_ids.h"
+#include "lua_parser.h"
 
 #include <string.h>
 
@@ -758,7 +759,6 @@ void Mob::DoArcheryAttackDmg(Mob *other, const EQEmu::ItemInstance *RangeWeapon,
 			     uint16 weapon_damage, int16 chance_mod, int16 focus, int ReuseTime, uint32 range_id,
 			     uint32 ammo_id, const EQEmu::ItemData *AmmoItem, int AmmoSlot, float speed)
 {
-
 	if ((other == nullptr ||
 	     ((IsClient() && CastToClient()->dead) || (other->IsClient() && other->CastToClient()->dead)) ||
 	     HasDied() || (!IsAttackAllowed(other)) || (other->GetInvul() || other->GetSpecialAbility(IMMUNE_MELEE)))) {

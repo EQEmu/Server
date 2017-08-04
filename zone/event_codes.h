@@ -85,6 +85,7 @@ typedef enum {
 	EVENT_TICK,
 	EVENT_SPAWN_ZONE,
 	EVENT_DEATH_ZONE,
+	EVENT_USE_SKILL,
 	_LargestEventID
 } QuestEventID;
 

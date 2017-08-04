@@ -277,12 +277,8 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 					caster->SetMana(0);
 				} else if (spell_id == 2755 && caster) //Lifeburn
 				{
-					dmg = caster->GetHP()*-15/10;
-					caster->SetHP(1);
-					if(caster->IsClient()){
-						caster->CastToClient()->SetFeigned(true);
-						caster->SendAppearancePacket(AT_Anim, 115);
-					}
+					dmg = -1 * caster->GetHP(); // just your current HP or should it be Max HP?
+					caster->SetHP(dmg / 4); // 2003 patch notes say ~ 1/4 HP. Should this be 1/4 your current HP or do 3/4 max HP dmg? Can it kill you?
 				}
 
 				//do any AAs apply to these spells?
@@ -851,7 +847,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 							SetHeading(CalculateHeadingToTarget(ClosestMob->GetX(), ClosestMob->GetY()));
 							SetTarget(ClosestMob);
 							CastToClient()->SendTargetCommand(ClosestMob->GetID());
-							SendPosUpdate(2);
+							SendPositionUpdate(2);
 						}
 						else
 							Message_StringID(clientMessageError, SENSE_NOTHING);
@@ -1240,6 +1236,23 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 				else
 				{
 					MakePet(spell_id, spell.teleport_zone);
+					// TODO: we need to sync the states for these clients ...
+					// Will fix buttons for now
+					if (IsClient()) {
+						auto c = CastToClient();
+						if (c->ClientVersionBit() & EQEmu::versions::bit_UFAndLater) {
+							c->SetPetCommandState(PET_BUTTON_SIT, 0);
+							c->SetPetCommandState(PET_BUTTON_STOP, 0);
+							c->SetPetCommandState(PET_BUTTON_REGROUP, 0);
+							c->SetPetCommandState(PET_BUTTON_FOLLOW, 1);
+							c->SetPetCommandState(PET_BUTTON_GUARD, 0);
+							c->SetPetCommandState(PET_BUTTON_TAUNT, 1);
+							c->SetPetCommandState(PET_BUTTON_HOLD, 0);
+							c->SetPetCommandState(PET_BUTTON_GHOLD, 0);
+							c->SetPetCommandState(PET_BUTTON_FOCUS, 0);
+							c->SetPetCommandState(PET_BUTTON_SPELLHOLD, 0);
+						}
+					}
 				}
 				break;
 			}
@@ -2778,6 +2791,10 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 				break;
 			}
 
+			case SE_PersistentEffect:
+				MakeAura(spell_id);
+				break;
+
 			// Handled Elsewhere
 			case SE_ImmuneFleeing:
 			case SE_NegateSpellEffect:
@@ -3627,7 +3644,7 @@ void Mob::DoBuffTic(const Buffs_Struct &buff, int slot, Mob *caster)
 
 		case SE_Fear: {
 			if (zone->random.Roll(RuleI(Spells, FearBreakCheckChance))) {
-				float resist_check = ResistSpell(spells[buff.spellid].resisttype, buff.spellid, caster);
+				float resist_check = ResistSpell(spells[buff.spellid].resisttype, buff.spellid, caster,0,0,true);
 
 				if (resist_check == 100)
 					break;
@@ -5007,8 +5024,19 @@ int16 Mob::CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, boo
 			break;
 
 		case SE_SpellResistReduction:
-			if (type == focusResistRate && focus_spell.base[i] > value)
-				value = focus_spell.base[i];
+			if (type == focusResistRate) {
+				if (best_focus) {
+					if (focus_spell.base2[i] != 0) {
+						value = focus_spell.base2[i];
+					} else {
+						value = focus_spell.base[i];
+					}
+				} else if (focus_spell.base2[i] == 0 || focus_spell.base[i] == focus_spell.base2[i]) {
+					value = focus_spell.base[i];
+				} else {
+					value = zone->random.Int(focus_spell.base[i], focus_spell.base2[i]);
+				}
+			}
 			break;
 
 		case SE_SpellHateMod:
@@ -5054,8 +5082,18 @@ int16 Mob::CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, boo
 			break;
 
 		case SE_FcSpellVulnerability:
-			if (type == focusSpellVulnerability)
-				value = focus_spell.base[i];
+			if (type == focusSpellVulnerability) {
+				if (best_focus) {
+					if (focus_spell.base2[i] != 0)
+						value = focus_spell.base2[i];
+					else
+						value = focus_spell.base[i];
+				} else if (focus_spell.base2[i] == 0 || focus_spell.base[i] == focus_spell.base2[i]) {
+					value = focus_spell.base[i];
+				} else {
+					value = zone->random.Int(focus_spell.base[i], focus_spell.base2[i]);
+				}
+			}
 			break;
 
 		case SE_FcTwincast:
@@ -5302,7 +5340,7 @@ int16 Client::GetFocusEffect(focusType type, uint16 spell_id)
 
 	//Improved Healing, Damage & Mana Reduction are handled differently in that some are random percentages
 	//In these cases we need to find the most powerful effect, so that each piece of gear wont get its own chance
-	if(RuleB(Spells, LiveLikeFocusEffects) && (type == focusManaCost || type == focusImprovedHeal || type == focusImprovedDamage || type == focusImprovedDamage2))
+	if(RuleB(Spells, LiveLikeFocusEffects) && (type == focusManaCost || type == focusImprovedHeal || type == focusImprovedDamage || type == focusImprovedDamage2 || type == focusResistRate))
 		rand_effectiveness = true;
 
 	//Check if item focus effect exists for the client.
@@ -5925,7 +5963,8 @@ bool Mob::TryDeathSave() {
 
 bool Mob::AffectedBySpellExcludingSlot(int slot, int effect)
 {
-	for (int i = 0; i <= EFFECT_COUNT; i++)
+	int buff_count = GetMaxTotalSlots();
+	for (int i = 0; i < buff_count; i++)
 	{
 		if (i == slot)
 			continue;
@@ -6669,23 +6708,26 @@ void Mob::ResourceTap(int32 damage, uint16 spellid)
 
 	for (int i = 0; i < EFFECT_COUNT; i++) {
 		if (spells[spellid].effectid[i] == SE_ResourceTap) {
-			damage += (damage * spells[spellid].base[i]) / 100;
-
-			if (spells[spellid].max[i] && (damage > spells[spellid].max[i]))
-				damage = spells[spellid].max[i];
-
-			if (spells[spellid].base2[i] == 0) { // HP Tap
-				if (damage > 0)
-					HealDamage(damage);
-				else
-					Damage(this, -damage, 0, EQEmu::skills::SkillEvocation, false);
+			damage = (damage * spells[spellid].base[i]) / 1000;
+			
+			if (damage) {
+				if (spells[spellid].max[i] && (damage > spells[spellid].max[i]))
+					damage = spells[spellid].max[i];
+	
+				if (spells[spellid].base2[i] == 0) { // HP Tap
+					if (damage > 0)
+						HealDamage(damage);
+					else
+						Damage(this, -damage, 0, EQEmu::skills::SkillEvocation, false);
+				}
+	
+				if (spells[spellid].base2[i] == 1) // Mana Tap
+					SetMana(GetMana() + damage);
+	
+				if (spells[spellid].base2[i] == 2 && IsClient()) // Endurance Tap
+					CastToClient()->SetEndurance(CastToClient()->GetEndurance() + damage);
+			
 			}
-
-			if (spells[spellid].base2[i] == 1) // Mana Tap
-				SetMana(GetMana() + damage);
-
-			if (spells[spellid].base2[i] == 2 && IsClient()) // Endurance Tap
-				CastToClient()->SetEndurance(CastToClient()->GetEndurance() + damage);
 		}
 	}
 }

@@ -48,6 +48,14 @@ void Mob::CalcBonuses()
 	SetAttackTimer();
 	CalcAC();
 
+	/* Fast walking NPC's are prone to disappear into walls/hills 
+		We set this here because NPC's can cast spells to change walkspeed/runspeed
+	*/
+	float get_walk_speed = static_cast<float>(0.025f * this->GetWalkspeed());
+	if (get_walk_speed >= 0.9 && this->fix_z_timer.GetDuration() != 100) {
+		this->fix_z_timer.SetTimer(100);
+	}
+
 	rooted = FindType(SE_Root);
 }
 
@@ -1084,9 +1092,9 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 				break;
 			// base1 = effect value, base2 = skill restrictions(-1 for all)
 			if (base2 == ALL_SKILLS)
-				newbon->CritDmgMob[EQEmu::skills::HIGHEST_SKILL + 1] += base1;
+				newbon->CritDmgMod[EQEmu::skills::HIGHEST_SKILL + 1] += base1;
 			else
-				newbon->CritDmgMob[base2] += base1;
+				newbon->CritDmgMod[base2] += base1;
 			break;
 		}
 
@@ -1442,10 +1450,26 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 				newbon->FeignedCastOnChance = base1;
 			break;
 
+		case SE_AddPetCommand:
+			if (base1 && base2 < PET_MAXCOMMANDS)
+				newbon->PetCommands[base2] = true;
+			break;
+
+		case SE_FeignedMinion:
+			if (newbon->FeignedMinionChance < base1)
+				newbon->FeignedMinionChance = base1;
+			break;
+
+		case SE_AdditionalAura:
+			newbon->aura_slots += base1;
+			break;
+
+		case SE_IncreaseTrapCount:
+			newbon->trap_slots += base1;
+			break;
+
 		// to do
 		case SE_PetDiscipline:
-			break;
-		case SE_PetDiscipline2:
 			break;
 		case SE_PotionBeltSlots:
 			break;
@@ -1464,8 +1488,6 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 		case SE_NimbleEvasion:
 			break;
 		case SE_TrapCircumvention:
-			break;
-		case SE_FeignedMinion:
 			break;
 
 		// not handled here
@@ -2435,9 +2457,9 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 				if (base2 > EQEmu::skills::HIGHEST_SKILL)
 					break;
 				if(base2 == ALL_SKILLS)
-					new_bonus->CritDmgMob[EQEmu::skills::HIGHEST_SKILL + 1] += effect_value;
+					new_bonus->CritDmgMod[EQEmu::skills::HIGHEST_SKILL + 1] += effect_value;
 				else
-					new_bonus->CritDmgMob[base2] += effect_value;
+					new_bonus->CritDmgMod[base2] += effect_value;
 				break;
 			}
 
@@ -3186,6 +3208,16 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 			case SE_FeignedCastOnChance:
 				if (new_bonus->FeignedCastOnChance < effect_value)
 					new_bonus->FeignedCastOnChance = effect_value;
+				break;
+
+			case SE_AdditionalAura:
+				if (new_bonus->aura_slots < effect_value)
+					new_bonus->aura_slots = effect_value;
+				break;
+
+			case SE_IncreaseTrapCount:
+				if (new_bonus->trap_slots < effect_value)
+					new_bonus->trap_slots = effect_value;
 				break;
 		
 			//Special custom cases for loading effects on to NPC from 'npc_spels_effects' table
@@ -4197,9 +4229,9 @@ void Mob::NegateSpellsBonuses(uint16 spell_id)
 				{
 					for (int e = 0; e < EQEmu::skills::HIGHEST_SKILL + 1; e++)
 					{
-						spellbonuses.CritDmgMob[e] = effect_value;
-						aabonuses.CritDmgMob[e] = effect_value;
-						itembonuses.CritDmgMob[e] = effect_value;
+						spellbonuses.CritDmgMod[e] = effect_value;
+						aabonuses.CritDmgMod[e] = effect_value;
+						itembonuses.CritDmgMod[e] = effect_value;
 					}
 					break;
 				}

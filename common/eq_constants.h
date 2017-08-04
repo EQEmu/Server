@@ -27,7 +27,7 @@
 //SpawnAppearance types: (compared two clients for server-originating types: SoF & RoF2)
 #define AT_Die 0			// this causes the client to keel over and zone to bind point (default action)
 #define AT_WhoLevel 1		// the level that shows up on /who
-//#define AT_2 2			// unknown
+#define AT_HPMax 2			// idk
 #define AT_Invis 3			// 0 = visible, 1 = invisible
 #define AT_PVP 4			// 0 = blue, 1 = pvp (red)
 #define AT_Light 5			// light type emitted by player (lightstone, shiny shield)
@@ -36,33 +36,37 @@
 #define AT_SpawnID 16		// server to client, sets player spawn id
 #define AT_HP 17			// Client->Server, my HP has changed (like regen tic)
 #define AT_Linkdead 18		// 0 = normal, 1 = linkdead
-#define AT_Levitate 19		// 0=off, 1=flymode, 2=levitate
+#define AT_Levitate 19		// 0=off, 1=flymode, 2=levitate max 5, see GravityBehavior enum
 #define AT_GM 20			// 0 = normal, 1 = GM - all odd numbers seem to make it GM
 #define AT_Anon 21			// 0 = normal, 1 = anon, 2 = roleplay
 #define AT_GuildID 22
 #define AT_GuildRank 23		// 0=member, 1=officer, 2=leader
 #define AT_AFK 24			// 0 = normal, 1 = afk
 #define AT_Pet 25			// Param is EntityID of owner, or 0 for when charm breaks
-//#define AT_27 27			// unknown
+#define AT_Summoned 27		// Unsure
 #define AT_Split 28			// 0 = normal, 1 = autosplit on (not showing in SoF+) (client-to-server only)
 #define AT_Size 29			// spawn's size (present: SoF, absent: RoF2)
-//#define AT_30 30			// unknown
-#define AT_NPCName 31		// change PC's name's color to NPC color 0 = normal, 1 = npc name
-//#define AT_32 32			// unknown
-//#define AT_33 33			// unknown
+#define AT_SetType 30		// 0 = PC, 1 = NPC, 2 <= = corpse
+#define AT_NPCName 31		// change PC's name's color to NPC color 0 = normal, 1 = npc name, Trader on RoF2?
+#define AT_AARank 32		// AA Rank Title ID thingy, does is this the title in /who?
+#define AT_CancelSneakHide 33	// Turns off Hide and Sneak
 //#define AT_34 34			// unknown (present: SoF, absent: RoF2)
-//#define AT_35 35			// unknown
-//#define AT_36 36			// unknown
-//#define AT_37 37			// unknown
-//#define AT_38 38			// unknown
-//#define AT_39 39			// unknown
+#define AT_AreaHPRegen 35	// guild hall regen pool sets to value * 0.001
+#define AT_AreaManaRegen 36	// guild hall regen pool sets to value * 0.001
+#define AT_AreaEndRegen 37	// guild hall regen pool sets to value * 0.001
+#define AT_FreezeBuffs 38	// Freezes beneficial buff timers
+#define AT_NpcTintIndex 39	// not 100% sure
+#define AT_GroupConsent 40	// auto consent group
+#define AT_RaidConsent 41	// auto consent raid
+#define AT_GuildConsent 42	// auto consent guild
 #define AT_ShowHelm 43		// 0 = hide graphic, 1 = show graphic
-#define AT_DamageState 44	// The damage state of a destructible object (0 through 4)
-//#define AT_46 46			// unknown
-//#define AT_48 48			// unknown
-//#define AT_49 49			// unknown
-//#define AT_52 52			// (absent: SoF, present: RoF2) (not a replacement for RoF absent 29 or 34)
-//#define AT_53 53			// (absent: SoF, present: RoF2) (not a replacement for RoF absent 29 or 34)
+#define AT_DamageState 44	// The damage state of a destructible object (0 through 10) plays soundids most only have 2 or 4 states though
+#define AT_EQPlayers 45		// /eqplayersupdate
+#define AT_FindBits 46		// set FindBits, whatever those are!
+#define AT_TextureType 48	// TextureType
+#define AT_FacePick 49		// Turns off face pick window? maybe ...
+#define AT_GuildShow 52		// this is what MQ2 call sit, not sure
+#define AT_Offline 53		// Offline mode
 
 //#define AT_Trader 300		// Bazaar Trader Mode (not present in SoF or RoF2)
 
