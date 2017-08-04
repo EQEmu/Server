@@ -1883,35 +1883,34 @@ namespace RoF2
 		eq->FogDensity = emu->fog_density;
 
 		/*fill in some unknowns with observed values, hopefully it will help */
-		eq->unknown569 = 0;
+		eq->ZoneTimeZone = 0;
 		eq->unknown571 = 0;
-		eq->unknown572 = 4;
-		eq->unknown576 = 2;
-		eq->unknown580 = 0;
+		eq->WaterMidi = 4;
+		eq->DayMidi = 2;
+		eq->NightMidi = 0;
 
-		eq->unknown800 = -1;
-		eq->unknown844 = 600;
-		eq->unknown848 = 2008; // Guild Lobby observed value
-		eq->unknown880 = 50;
-		eq->unknown884 = 10;
-		eq->unknown888 = 1;
-		eq->unknown889 = 0;
-		eq->unknown890 = 1;
-		eq->unknown891 = 0;
-		eq->unknown892 = 0;
-		eq->unknown893 = 0;
+		eq->SkyRelated2 = -1;
+		eq->NPCAggroMaxDist = 600;
+		eq->FilterID = 2008; // Guild Lobby observed value
+		eq->LavaDamage = 50;
+		eq->MinLavaDamage = 10;
+		eq->bDisallowManaStone = 1;
+		eq->bNoBind = 0;
+		eq->bNoAttack = 0;
+		eq->bNoCallOfHero = 0;
+		eq->bNoFlux = 0;
+		eq->bNoFear = 0;
 		eq->fall_damage = 0;	// 0 = Fall Damage on, 1 = Fall Damage off
 		eq->unknown895 = 0;
-		eq->unknown896 = 180;
-		eq->unknown900 = 180;
-		eq->unknown904 = 180;
-		eq->unknown908 = 2;
-		eq->unknown912 = 2;
-		eq->unknown932 = -1;	// Set from PoK Example
-		eq->unknown936 = -1;	// Set from PoK Example
-		eq->unknown944 = 1.0;	// Set from PoK Example
-		eq->unknown948 = 0;		// New on Live as of Dec 15 2014
-		eq->unknown952 = 100;	// New on Live as of Dec 15 2014
+		eq->FastRegenHP = 180;
+		eq->FastRegenMana = 180;
+		eq->FastRegenEndurance = 180;
+		eq->CanPlaceCampsite = 2;
+		eq->CanPlaceGuildBanner = 2;
+		eq->FishingRelated = -1;	// Set from PoK Example
+		eq->ForageRelated = -1;	// Set from PoK Example
+		eq->bNoLevitate = 0;
+		eq->Blooming = 1.0;	// Set from PoK Example
 
 		FINISH_ENCODE();
 	}
