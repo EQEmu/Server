@@ -446,6 +446,7 @@ Mob::Mob(const char* in_name,
 	npc_assist_cap = 0;
 
 	PathRecalcTimer.reset(new Timer(2000));
+	PathingLoopCount = 0;
 }
 
 Mob::~Mob()

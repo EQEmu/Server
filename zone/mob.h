@@ -1227,7 +1227,6 @@ protected:
 	void CalculateNewFearpoint();
 	float FindGroundZ(float new_x, float new_y, float z_offset=0.0);
 	glm::vec3 UpdatePath(float ToX, float ToY, float ToZ, float Speed, bool &WaypointChange, bool &NodeReached);
-	void PrintRoute();
 
 	virtual float GetSympatheticProcChances(uint16 spell_id, int16 ProcRateMod, int32 ItemProcRate = 0);
 	int16 GetSympatheticSpellProcRate(uint16 spell_id);
@@ -1373,8 +1372,6 @@ protected:
 	int32 GetItemFactionBonus(uint32 pFactionID);
 	void ClearItemFactionBonuses();
 
-	void CalculateFearPosition();
-
 	bool flee_mode;
 	Timer flee_timer;
 	Timer fix_z_timer;
@@ -1401,7 +1398,6 @@ protected:
 	int npc_assist_cap;
 	Timer assist_cap_timer; // clear assist cap so more nearby mobs can be called for help
 
-
 	int patrol;
 	glm::vec3 m_FearWalkTarget;
 	bool currently_fleeing;
@@ -1412,6 +1408,8 @@ protected:
 	IPathfinder::IPath Route;
 	std::unique_ptr<Timer> PathRecalcTimer;
 	bool DistractedFromGrid;
+	glm::vec3 PathingLastPosition;
+	int PathingLoopCount;
 
 	uint32 pDontHealMeBefore;
 	uint32 pDontBuffMeBefore;

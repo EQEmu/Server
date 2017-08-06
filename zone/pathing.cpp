@@ -35,7 +35,7 @@ glm::vec3 Mob::UpdatePath(float ToX, float ToY, float ToZ, float Speed, bool &Wa
 	}
 	else {
 		if (PathRecalcTimer->Check()) {
-			bool SameDestination = DistanceSquared(To, PathingDestination) < 4.0f;
+			bool SameDestination = DistanceSquared(To, PathingDestination) < 100.0f;
 			if (!SameDestination) {
 				//We had a route but our target position moved too much
 				Route = zone->pathing->FindRoute(From, To);
@@ -46,7 +46,45 @@ glm::vec3 Mob::UpdatePath(float ToX, float ToY, float ToZ, float Speed, bool &Wa
 			}
 		}
 
-		bool AtNextNode = DistanceSquared(From, (*Route.begin()).pos) < 4.0f;
+		if (!IsRooted()) {
+			bool AtPrevNode = DistanceSquared(From, PathingLastPosition) < 1.0f;
+			if (AtPrevNode) {
+				PathingLoopCount++;
+
+				if (PathingLoopCount > 5) {
+					SendPosition();
+				}
+
+				auto front = (*Route.begin()).pos;
+				Teleport(front);
+				Route.pop_front();
+
+				WaypointChanged = true;
+				NodeReached = true;
+				PathingLoopCount = 0;
+
+				return front;
+			}
+			else {
+				PathingLastPosition = From;
+				PathingLoopCount = 0;
+			}
+		}
+		else {
+			PathingLastPosition = From;
+			PathingLoopCount = 0;
+		}
+
+		bool AtNextNode = false;
+		if (flymode == 1) {
+			AtNextNode = DistanceSquared(From, (*Route.begin()).pos) < 4.0f;
+		}
+		else {
+			float z_dist = From.z - (*Route.begin()).pos.z;
+			z_dist *= z_dist;
+			AtNextNode = DistanceSquaredNoZ(From, (*Route.begin()).pos) < 4.0f && z_dist < 25.0f;
+		}
+		
 		if (AtNextNode) {
 			WaypointChanged = false;
 			NodeReached = true;

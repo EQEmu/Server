@@ -9,6 +9,8 @@
 #include "client.h"
 #include "../common/compression.h"
 
+extern Zone *zone;
+
 struct PathfinderNavmesh::Implementation
 {
 	dtNavMesh *nav_mesh;
@@ -47,12 +49,12 @@ IPathfinder::IPath PathfinderNavmesh::FindRoute(const glm::vec3 &start, const gl
 	dtQueryFilter filter;
 	filter.setIncludeFlags(65535U);
 	filter.setAreaCost(0, 1.0f); //Normal
-	filter.setAreaCost(1, 1.0f); //Water
-	filter.setAreaCost(2, 1.0f); //Lava
+	filter.setAreaCost(1, 2.0f); //Water
+	filter.setAreaCost(2, 2.0f); //Lava
 	filter.setAreaCost(4, 1.0f); //PvP
-	filter.setAreaCost(5, 1.0f); //Slime
-	filter.setAreaCost(6, 1.0f); //Ice
-	filter.setAreaCost(7, 1.0f); //V Water (Frigid Water)
+	filter.setAreaCost(5, 1.5f); //Slime
+	filter.setAreaCost(6, 1.5f); //Ice
+	filter.setAreaCost(7, 2.0f); //V Water (Frigid Water)
 	filter.setAreaCost(8, 1.0f); //General Area
 	filter.setAreaCost(9, 1.0f); //Portal
 
@@ -103,6 +105,13 @@ IPathfinder::IPath PathfinderNavmesh::FindRoute(const glm::vec3 &start, const gl
 				node.x = straight_path[i * 3];
 				node.z = straight_path[i * 3 + 1];
 				node.y = straight_path[i * 3 + 2];
+
+				if (zone->HasMap()) {
+					auto best_z = zone->zonemap->FindBestZ(node, nullptr);
+					if (best_z != BEST_Z_INVALID) {
+						node.z = best_z;
+					}
+				}
 
 				unsigned short flag = 0;
 				if (dtStatusSucceed(m_impl->nav_mesh->getPolyFlags(straight_path_polys[i], &flag))) {
