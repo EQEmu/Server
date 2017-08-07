@@ -2,8 +2,24 @@
 
 #include "client.h"
 #include "zone.h"
+#include "water_map.h"
 
 extern Zone *zone;
+
+void AdjustRoute(std::list<IPathfinder::IPathNode> &nodes, int flymode) {
+	if (!zone->HasMap() || !zone->HasWaterMap()) {
+		return;
+	}
+
+	for (auto &node : nodes) {
+		if (flymode == 0 || !zone->watermap->InLiquid(node.pos)) {
+			auto best_z = zone->zonemap->FindBestZ(node.pos, nullptr);
+			if (best_z != BEST_Z_INVALID) {
+				node.pos.z = best_z;
+			}
+		}
+	}
+}
 
 glm::vec3 Mob::UpdatePath(float ToX, float ToY, float ToZ, float Speed, bool &WaypointChanged, bool &NodeReached)
 {
@@ -23,6 +39,8 @@ glm::vec3 Mob::UpdatePath(float ToX, float ToY, float ToZ, float Speed, bool &Wa
 
 	if (Route.empty()) {
 		Route = zone->pathing->FindRoute(From, To);
+		AdjustRoute(Route, flymode);
+
 		PathingDestination = To;
 		WaypointChanged = true;
 		NodeReached = false;
@@ -39,10 +57,18 @@ glm::vec3 Mob::UpdatePath(float ToX, float ToY, float ToZ, float Speed, bool &Wa
 			if (!SameDestination) {
 				//We had a route but our target position moved too much
 				Route = zone->pathing->FindRoute(From, To);
+				AdjustRoute(Route, flymode);
+
 				PathingDestination = To;
 				WaypointChanged = true;
 				NodeReached = false;
-				return (*Route.begin()).pos;
+
+				if (Route.empty()) {
+					return From;
+				}
+				else {
+					return (*Route.begin()).pos;
+				}
 			}
 		}
 
@@ -93,14 +119,20 @@ glm::vec3 Mob::UpdatePath(float ToX, float ToY, float ToZ, float Speed, bool &Wa
 
 			if (Route.empty()) {
 				Route = zone->pathing->FindRoute(From, To);
+				AdjustRoute(Route, flymode);
 				PathingDestination = To;
 				WaypointChanged = true;
-				return (*Route.begin()).pos;
+
+				if (Route.empty()) {
+					return From;
+				}
+				else {
+					return (*Route.begin()).pos;
+				}
 			}
 			else {
 				auto node = *Route.begin();
 				if (node.teleport) {
-					//If is identity node then is teleport node.
 					Route.pop_front();
 
 					if (Route.empty()) {

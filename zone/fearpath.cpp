@@ -133,20 +133,7 @@ void Mob::CalculateNewFearpoint()
 		if (Node.x != 0.0f || Node.y != 0.0f || Node.z != 0.0f) {
 
 			++Node.z;
-
-			glm::vec3 CurrentPosition(GetX(), GetY(), GetZ());
-
-			auto Route = zone->pathing->FindRoute(CurrentPosition, Node);
-
-			if (!Route.empty())
-			{
-				auto first = (*Route.begin());
-				m_FearWalkTarget = glm::vec3(first.pos.x, first.pos.y, first.pos.z);
-				currently_fleeing = true;
-
-				Log(Logs::Detail, Logs::None, "Feared to node %i (%8.3f, %8.3f, %8.3f)", Node, first.pos.x, first.pos.y, first.pos.z);
-				return;
-			}
+			m_FearWalkTarget = Node;
 
 		}
 

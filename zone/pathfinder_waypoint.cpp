@@ -187,6 +187,13 @@ IPathfinder::IPath PathfinderWaypoint::FindRoute(const glm::vec3 &start, const g
 
 glm::vec3 PathfinderWaypoint::GetRandomLocation()
 {
+	if (m_impl->Nodes.size() > 0) {
+		auto idx = zone->random.Int(0, (int)m_impl->Nodes.size() - 1);
+		auto &node = m_impl->Nodes[idx];
+
+		return node.v;
+	}
+	
 	return glm::vec3();
 }
 

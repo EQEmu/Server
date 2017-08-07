@@ -6,6 +6,7 @@
 #include "pathfinder_nav_mesh.h"
 
 #include "zone.h"
+#include "water_map.h"
 #include "client.h"
 #include "../common/compression.h"
 
@@ -106,12 +107,7 @@ IPathfinder::IPath PathfinderNavmesh::FindRoute(const glm::vec3 &start, const gl
 				node.z = straight_path[i * 3 + 1];
 				node.y = straight_path[i * 3 + 2];
 
-				if (zone->HasMap()) {
-					auto best_z = zone->zonemap->FindBestZ(node, nullptr);
-					if (best_z != BEST_Z_INVALID) {
-						node.z = best_z;
-					}
-				}
+				Route.push_back(node);
 
 				unsigned short flag = 0;
 				if (dtStatusSucceed(m_impl->nav_mesh->getPolyFlags(straight_path_polys[i], &flag))) {
@@ -119,8 +115,6 @@ IPathfinder::IPath PathfinderNavmesh::FindRoute(const glm::vec3 &start, const gl
 						Route.push_back(true);
 					}
 				}
-
-				Route.push_back(node);
 			}
 
 			return Route;
@@ -134,6 +128,28 @@ IPathfinder::IPath PathfinderNavmesh::FindRoute(const glm::vec3 &start, const gl
 
 glm::vec3 PathfinderNavmesh::GetRandomLocation()
 {
+	if (!m_impl->nav_mesh) {
+		return glm::vec3();
+	}
+
+	if (!m_impl->query) {
+		m_impl->query = dtAllocNavMeshQuery();
+		m_impl->query->init(m_impl->nav_mesh, 32768);
+	}
+
+	dtQueryFilter filter;
+	filter.setIncludeFlags(65535U);
+
+	dtPolyRef randomRef;
+	float point[3];
+
+	if (dtStatusSucceed(m_impl->query->findRandomPoint(&filter, []() {
+		return (float)zone->random.Real(0.0, 1.0);
+	}, &randomRef, point))) 
+	{
+		return glm::vec3(point[0], point[2], point[1]);
+	}
+
 	return glm::vec3();
 }
 
