@@ -588,7 +588,7 @@ struct NewZone_Struct {
 	/*0588*/	float	safe_y;					// Zone Safe Y
 	/*0592*/	float	safe_x;					// Zone Safe X
 	/*0596*/	float	safe_z;					// Zone Safe Z
-	/*0600*/	float	min_z;					// This isn't safe heading like live
+	/*0600*/	float	min_z;					// This isn't safe heading like live -- could be default heading rather than succor heading
 	/*0604*/	float	max_z;					// Ceiling
 	/*0608*/	float	underworld;				// Underworld, min z (Not Sure?) Floor
 	/*0612*/	float	minclip;				// Minimum View Distance
