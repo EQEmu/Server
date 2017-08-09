@@ -722,6 +722,8 @@ void Client::OnDisconnect(bool hard_disconnect) {
 		}
 	}
 
+	RemoveAllAuras();
+
 	Mob *Other = trade->With();
 	if(Other)
 	{

@@ -123,6 +123,19 @@ struct PetRecord {
 	uint32 equipmentset;	// default equipment for the pet
 };
 
+struct AuraRecord {
+	uint32 npc_type;
+	char name[64]; // name shown in UI if shown and spawn name
+	int spell_id;
+	int distance;
+	int aura_type;
+	int spawn_type;
+	int movement;
+	int duration; // seconds some live for 90 mins (normal) others for 2 mins (traps)
+	int icon; // -1 will use the buffs NEW_ICON
+	int cast_time; // seconds some auras recast on a timer, most seem to be every 12 seconds
+};
+
 // Actual pet info for a client.
 struct PetInfo {
 	uint16	SpellID;
@@ -260,6 +273,8 @@ public:
 
 	void SaveBuffs(Client *c);
 	void LoadBuffs(Client *c);
+	void SaveAuras(Client *c);
+	void LoadAuras(Client *c);
 	void LoadPetInfo(Client *c);
 	void SavePetInfo(Client *c);
 	void RemoveTempFactions(Client *c);
@@ -404,6 +419,7 @@ public:
 	void		AddLootDropToNPC(NPC* npc, uint32 lootdrop_id, ItemList* itemlist, uint8 droplimit, uint8 mindrop);
 	uint32		GetMaxNPCSpellsID();
 	uint32		GetMaxNPCSpellsEffectsID();
+	bool GetAuraEntry(uint16 spell_id, AuraRecord &record);
 
 	DBnpcspells_Struct*				GetNPCSpells(uint32 iDBSpellsID);
 	DBnpcspellseffects_Struct*		GetNPCSpellsEffects(uint32 iDBSpellsEffectsID);

@@ -80,6 +80,7 @@ public:
 	virtual bool IsBeacon()			const { return false; }
 	virtual bool IsEncounter()		const { return false; }
 	virtual bool IsBot()            const { return false; }
+	virtual bool IsAura()			const { return false; }
 
 	virtual bool Process() { return false; }
 	virtual bool Save() { return true; }

@@ -491,6 +491,14 @@ uint32 Raid::GetPlayerIndex(const char *name){
 	return 0; //should never get to here if we do everything else right, set it to 0 so we never crash things that rely on it.
 }
 
+uint32 Raid::GetPlayerIndex(Client *c)
+{
+	for (int i = 0; i < MAX_RAID_MEMBERS; ++i)
+		if (c == members[i].member)
+			return i;
+	return 0xFFFFFFFF; // return sentinel value, make sure you check it unlike the above function
+}
+
 Client *Raid::GetClientByIndex(uint16 index)
 {
 	if(index > MAX_RAID_MEMBERS)

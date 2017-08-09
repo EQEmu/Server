@@ -323,6 +323,7 @@ void MapOpcodes()
 	ConnectedOpcodes[OP_RecipesSearch] = &Client::Handle_OP_RecipesSearch;
 	ConnectedOpcodes[OP_ReloadUI] = &Client::Handle_OP_ReloadUI;
 	ConnectedOpcodes[OP_RemoveBlockedBuffs] = &Client::Handle_OP_RemoveBlockedBuffs;
+	ConnectedOpcodes[OP_RemoveTrap] = &Client::Handle_OP_RemoveTrap;
 	ConnectedOpcodes[OP_Report] = &Client::Handle_OP_Report;
 	ConnectedOpcodes[OP_RequestDuel] = &Client::Handle_OP_RequestDuel;
 	ConnectedOpcodes[OP_RequestTitles] = &Client::Handle_OP_RequestTitles;
@@ -383,6 +384,7 @@ void MapOpcodes()
 	ConnectedOpcodes[OP_TributeUpdate] = &Client::Handle_OP_TributeUpdate;
 	ConnectedOpcodes[OP_VetClaimRequest] = &Client::Handle_OP_VetClaimRequest;
 	ConnectedOpcodes[OP_VoiceMacroIn] = &Client::Handle_OP_VoiceMacroIn;
+	ConnectedOpcodes[OP_UpdateAura] = &Client::Handle_OP_UpdateAura;;
 	ConnectedOpcodes[OP_WearChange] = &Client::Handle_OP_WearChange;
 	ConnectedOpcodes[OP_WhoAllRequest] = &Client::Handle_OP_WhoAllRequest;
 	ConnectedOpcodes[OP_WorldUnknown001] = &Client::Handle_OP_Ignore;
@@ -881,6 +883,8 @@ void Client::CompleteConnect()
 		SetPetCommandState(PET_BUTTON_FOCUS, 0);
 		SetPetCommandState(PET_BUTTON_SPELLHOLD, 0);
 	}
+
+	database.LoadAuras(this); // this ends up spawning them so probably safer to load this later (here)
 
 	entity_list.RefreshClientXTargets(this);
 
@@ -11776,6 +11780,28 @@ void Client::Handle_OP_RemoveBlockedBuffs(const EQApplicationPacket *app)
 	}
 }
 
+void Client::Handle_OP_RemoveTrap(const EQApplicationPacket *app)
+{
+	if (app->size != 4) {// just an int
+		Log(Logs::General, Logs::None, "Size mismatch in OP_RemoveTrap expected 4 got %i", app->size);
+		DumpPacket(app);
+		return;
+	}
+
+	auto id = app->ReadUInt32(0);
+	bool good = false;
+	for (int i = 0; i < trap_mgr.count; ++i) {
+		if (trap_mgr.auras[i].spawn_id == id) {
+			good = true;
+			break;
+		}
+	}
+	if (good)
+		RemoveAura(id);
+	else
+		Message_StringID(MT_SpellFailure, NOT_YOUR_TRAP); // pretty sure this was red
+}
+
 void Client::Handle_OP_Report(const EQApplicationPacket *app)
 {
 	if (!CanUseReport)
@@ -14292,6 +14318,24 @@ void Client::Handle_OP_VoiceMacroIn(const EQApplicationPacket *app)
 
 	VoiceMacroReceived(vmi->Type, vmi->Target, vmi->MacroNumber);
 
+}
+
+void Client::Handle_OP_UpdateAura(const EQApplicationPacket *app)
+{
+	if (app->size != sizeof(AuraDestory_Struct)) {
+		Log(Logs::General, Logs::None, "Size mismatch in OP_UpdateAura expected %i got %i",
+		    sizeof(AuraDestory_Struct), app->size);
+		return;
+	}
+
+	// client only sends this for removing
+	auto aura = (AuraDestory_Struct *)app->pBuffer;
+	if (aura->action != 1)
+		return; // could log I guess, but should only ever get this action
+
+	RemoveAura(aura->entity_id);
+	QueuePacket(app); // if we don't resend this, the client gets confused
+	return;
 }
 
 void Client::Handle_OP_WearChange(const EQApplicationPacket *app)

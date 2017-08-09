@@ -142,6 +142,7 @@ public:
 	//keeps me from having to keep iterating through the list
 	//when I want lots of data from the same entry
 	uint32	GetPlayerIndex(const char *name);
+	uint32	GetPlayerIndex(Client *c);
 	//for perl interface
 	Client *GetClientByIndex(uint16 index);
 	const char *GetClientNameByIndex(uint8 index);
