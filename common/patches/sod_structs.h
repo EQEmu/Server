@@ -250,8 +250,7 @@ struct Spawn_Struct_Bitfields
 	unsigned   sneak:1;
 	unsigned   lfg:1;
 	unsigned   padding5:1;
-	unsigned   invis:1;		// 0 = visible, 1 = invis/sneaking
-	unsigned   padding7:11;
+	unsigned   invis:12;		// there are 3000 different (non-GM) invis levels
 	unsigned   gm:1;
 	unsigned   anon:2;		// 0=normal, 1=anon, 2=roleplay
 	unsigned   gender:2;		// Gender (0=male, 1=female, 2=monster)

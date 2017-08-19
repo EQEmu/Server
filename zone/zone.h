@@ -106,6 +106,7 @@ public:
 	inline const uint8	GetZoneType() const { return zone_type; }
 
 	inline Timer* GetInstanceTimer() { return Instance_Timer; }
+	Timer	spawn2_timer;
 
     inline glm::vec3 GetSafePoint() { return m_SafePoint; }
 	inline const uint32& graveyard_zoneid()	{ return pgraveyard_zoneid; }
@@ -336,7 +337,6 @@ private:
 
 	Timer	autoshutdown_timer;
 	Timer	clientauth_timer;
-	Timer	spawn2_timer;
 	Timer	qglobal_purge_timer;
 	Timer*	Weather_Timer;
 	Timer*	Instance_Timer;

@@ -286,6 +286,7 @@
 #define TRADESKILL_LEARN_RECIPE		3457	//You have learned the recipe %1!
 #define EXPEDITION_MIN_REMAIN		3551	//You only have %1 minutes remaining before this expedition comes to an end.
 #define LOOT_NOT_ALLOWED			3562	//You are not allowed to loot the item: %1.
+#define NOT_YOUR_TRAP				3671	//You cannot remove this, you are only allowed to remove traps you have set.
 #define NO_CAST_ON_PET				4045	//You cannot cast this spell on your pet.
 #define REWIND_WAIT					4059	//You must wait a bit longer before using the rewind command again.
 #define CORPSEDRAG_LIMIT			4061	//You are already dragging as much as you can!
