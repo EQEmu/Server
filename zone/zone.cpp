@@ -1168,9 +1168,12 @@ bool Zone::Process() {
 	spawn_conditions.Process();
 
 	if(spawn2_timer.Check()) {
+
 		LinkedListIterator<Spawn2*> iterator(spawn2_list);
 
 		EQEmu::InventoryProfile::CleanDirty();
+
+		Log(Logs::Detail, Logs::Spawns, "Running Zone::Process -> Spawn2::Process");
 
 		iterator.Reset();
 		while (iterator.MoreElements()) {
@@ -1181,10 +1184,10 @@ bool Zone::Process() {
 				iterator.RemoveCurrent();
 			}
 		}
+
 		if(adv_data && !did_adventure_actions)
-		{
 			DoAdventureActions();
-		}
+
 	}
 	if(initgrids_timer.Check()) {
 		//delayed grid loading stuff.
