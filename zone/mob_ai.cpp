@@ -1536,7 +1536,7 @@ void NPC::AI_DoMovement() {
 		float new_z = this->FindGroundZ(m_Position.x, m_Position.y, 5);
 		new_z += (this->GetSize() / 1.55);
 
-		if (!CalculateNewPosition2(roambox_movingto_x, roambox_movingto_y, new_z, walksp, true))
+		if (!CalculateNewPosition(roambox_movingto_x, roambox_movingto_y, new_z, walksp, true))
 		{
 			roambox_movingto_x = roambox_max_x + 1; // force update
 			pLastFightingDelayMoving = Timer::GetCurrentTime() + RandomTimer(roambox_min_delay, roambox_delay);

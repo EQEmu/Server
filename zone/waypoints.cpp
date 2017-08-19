@@ -627,7 +627,7 @@ bool Mob::MakeNewPositionAndSendUpdate(float x, float y, float z, int speed) {
 }
 
 bool Mob::CalculateNewPosition(float x, float y, float z, int speed, bool checkZ, bool calcHeading) {
-	return MakeNewPositionAndSendUpdate(x, y, z, speed, checkZ);
+	return MakeNewPositionAndSendUpdate(x, y, z, speed);
 }
 
 void NPC::AssignWaypoints(int32 grid)

@@ -5718,13 +5718,19 @@ void Client::Handle_OP_FindPersonRequest(const EQApplicationPacket *app)
 		{
 			//fill in the path array...
 			//
-			points.resize(2);
-			points[0].x = GetX();
-			points[0].y = GetY();
-			points[0].z = GetZ();
-			points[1].x = target->GetX();
-			points[1].y = target->GetY();
-			points[1].z = target->GetZ();
+			points.clear();
+			FindPerson_Point a;
+			FindPerson_Point b;
+
+			a.x = GetX();
+			a.y = GetY();
+			a.z = GetZ();
+			b.x = target->GetX();
+			b.y = target->GetY();
+			b.z = target->GetZ();
+
+			points.push_back(a);
+			points.push_back(b);
 		}
 		else
 		{
