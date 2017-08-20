@@ -198,10 +198,10 @@ void CullPoints(std::vector<FindPerson_Point> &points) {
 
 void Client::SendPathPacket(const std::vector<FindPerson_Point> &points) {
 	EQ::BackgroundTask task([](EQEmu::Any &data) {
-		auto &points = EQEmu::any_cast<std::vector<FindPerson_Point>>(data);
+		auto &points = EQEmu::any_cast<std::vector<FindPerson_Point>&>(data);
 		CullPoints(points);
 	}, [this](EQEmu::Any &data) {
-		auto &points = EQEmu::any_cast<std::vector<FindPerson_Point>>(data);
+		auto &points = EQEmu::any_cast<std::vector<FindPerson_Point>&>(data);
 
 		if (points.size() < 2) {
 			if (Admin() > 10) {

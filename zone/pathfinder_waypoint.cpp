@@ -158,7 +158,7 @@ IPathfinder::IPath PathfinderWaypoint::FindRoute(const glm::vec3 &start, const g
 			else {
 				auto &node = m_impl->Nodes[v];
 	
-				auto iter = node.edges.find(p[v + 1]);
+				auto iter = node.edges.find((int)p[v + 1]);
 				if (iter != node.edges.end()) {
 					auto &edge = iter->second;
 					if (edge.teleport) {
@@ -333,7 +333,7 @@ void PathfinderWaypoint::LoadV3(FILE *f, const PathFileHeader &header)
 	uint32 edge_count = 0;
 	fread(&edge_count, sizeof(uint32), 1, f);
 
-	for (int i = 0; i < header.PathNodeCount; ++i)
+	for (uint32 i = 0; i < header.PathNodeCount; ++i)
 	{
 		uint32 id = 0;
 		float x = 0.0f;

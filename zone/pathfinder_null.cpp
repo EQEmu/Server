@@ -1,5 +1,4 @@
 #include "pathfinder_null.h"
-#pragma once
 
 IPathfinder::IPath PathfinderNull::FindRoute(const glm::vec3 &start, const glm::vec3 &end)
 {
