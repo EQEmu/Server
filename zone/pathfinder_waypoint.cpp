@@ -455,8 +455,10 @@ void PathfinderWaypoint::BuildGraph()
 	m_impl->Tree = boost::geometry::index::rtree<RTreeValue, boost::geometry::index::quadratic<16>>();
 
 	for (auto &node : m_impl->Nodes) {
-		Point p = Point(node.v.x, node.v.y, node.v.z);
-		m_impl->Tree.insert(std::make_pair(p, node.id));
+		RTreeValue rtv;
+		rtv.first = Point(node.v.x, node.v.y, node.v.z);
+		rtv.second = node.id;
+		m_impl->Tree.insert(rtv);
 		boost::add_vertex(m_impl->Graph);
 	}
 
