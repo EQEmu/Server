@@ -243,15 +243,21 @@ bool Client::Process() {
 
 		/* Build a close range list of NPC's  */
 		if (npc_close_scan_timer.Check()) {
-
 			close_mobs.clear();
 
-			auto &mob_list = entity_list.GetMobList();
-			float scan_range = (RuleI(Range, ClientNPCScan) * RuleI(Range, ClientNPCScan));
-			float client_update_range = (RuleI(Range, MobPositionUpdates) *  RuleI(Range, MobPositionUpdates));
+			/* Force spawn updates when traveled far */
+			bool force_spawn_updates = false;
+			float client_update_range = (RuleI(Range, ClientForceSpawnUpdateRange) *  RuleI(Range, ClientForceSpawnUpdateRange));
+			if (DistanceSquared(last_major_update_position, m_Position) >= client_update_range) {
+				last_major_update_position = m_Position;
+				force_spawn_updates = true;
+			}
 
+			float scan_range = (RuleI(Range, ClientNPCScan) * RuleI(Range, ClientNPCScan));
+			auto &mob_list = entity_list.GetMobList();
 			for (auto itr = mob_list.begin(); itr != mob_list.end(); ++itr) {
 				Mob* mob = itr->second;
+
 				float distance = DistanceSquared(m_Position, mob->GetPosition());
 				if (mob->IsNPC()) {
 					if (distance <= scan_range) {
@@ -261,6 +267,10 @@ bool Client::Process() {
 						close_mobs.insert(std::pair<Mob *, float>(mob, distance));
 					}
 				}
+
+				if (force_spawn_updates && mob != this && distance <= client_update_range)
+					mob->SendPositionUpdateToClient(this);
+
 			}
 		}
 

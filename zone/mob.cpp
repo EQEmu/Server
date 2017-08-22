@@ -1455,6 +1455,20 @@ void Mob::SendPosition() {
 	safe_delete(app);
 }
 
+void Mob::SendPositionUpdateToClient(Client *client) {
+	auto app = new EQApplicationPacket(OP_ClientUpdate, sizeof(PlayerPositionUpdateServer_Struct));
+	PlayerPositionUpdateServer_Struct* spawn_update = (PlayerPositionUpdateServer_Struct*)app->pBuffer;
+
+	if(this->IsMoving())
+		MakeSpawnUpdate(spawn_update);
+	else
+		MakeSpawnUpdateNoDelta(spawn_update);
+
+	client->QueuePacket(app, false);
+
+	safe_delete(app);
+}
+
 /* Position updates for mobs on the move */
 void Mob::SendPositionUpdate(uint8 iSendToSelf) {
 	auto app = new EQApplicationPacket(OP_ClientUpdate, sizeof(PlayerPositionUpdateServer_Struct));
