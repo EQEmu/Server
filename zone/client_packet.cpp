@@ -4634,7 +4634,19 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app)
 			entity_list.QueueClientsStatus(this, outapp, true, Admin(), 250);
 		}
 		else {
-			entity_list.QueueCloseClients(this, outapp, true, 300, nullptr, true);
+			entity_list.QueueCloseClients(this, outapp, true, RuleI(Range, ClientPositionUpdates), nullptr, true);
+		}
+
+
+		/* Always send position updates to group - send when beyond normal ClientPositionUpdate range */
+		Group *group = this->GetGroup();
+		Raid *raid = this->GetRaid();
+
+		if (raid) {
+			raid->QueueClients(this, outapp, true, true, (RuleI(Range, ClientPositionUpdates) * -1));
+		}
+		else if (group) {
+			group->QueueClients(this, outapp, true, true, (RuleI(Range, ClientPositionUpdates) * -1));
 		}
 
 		safe_delete(outapp);

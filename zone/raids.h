@@ -237,6 +237,8 @@ public:
 	void SetDirtyAutoHaters();
 	inline XTargetAutoHaters *GetXTargetAutoMgr() { return &m_autohatermgr; }
 
+	void	QueueClients(Mob *sender, const EQApplicationPacket *app, bool ack_required = true, bool ignore_sender = true, float distance = 0, bool group_only = true);
+
 	RaidMember members[MAX_RAID_MEMBERS];
 	char leadername[64];
 protected:
