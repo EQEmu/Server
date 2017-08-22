@@ -1383,7 +1383,7 @@ void Mob::SendHPUpdate(bool skip_self /*= false*/, bool force_update_all /*= fal
 	if(IsClient()){
 		Raid *raid = entity_list.GetRaidByClient(CastToClient());
 		if (raid)
-			raid->SendHPPacketsFrom(this);
+			raid->SendHPManaEndPacketsFrom(this);
 	}
 
 	/* Pet - Update master - group and raid if exists */
@@ -1396,7 +1396,7 @@ void Mob::SendHPUpdate(bool skip_self /*= false*/, bool force_update_all /*= fal
 
 		Raid *raid = entity_list.GetRaidByClient(GetOwner()->CastToClient());
 		if(raid)
-			raid->SendHPPacketsFrom(this);
+			raid->SendHPManaEndPacketsFrom(this);
 	}
 
 	/* Send to pet */

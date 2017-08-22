@@ -149,7 +149,7 @@ void Raid::AddMember(Client *c, uint32 group, bool rleader, bool groupleader, bo
 	raid_update = c->GetRaid();
 	if (raid_update) {
 		raid_update->SendHPManaEndPacketsTo(c);
-		raid_update->SendHPPacketsFrom(c);
+		raid_update->SendHPManaEndPacketsFrom(c);
 	}
 
 	auto pack = new ServerPacket(ServerOP_RaidAdd, sizeof(ServerRaidGeneralAction_Struct));
@@ -1591,7 +1591,7 @@ void Raid::SendHPManaEndPacketsTo(Client *client)
 	}
 }
 
-void Raid::SendHPPacketsFrom(Mob *mob)
+void Raid::SendHPManaEndPacketsFrom(Mob *mob)
 {
 	if(!mob)
 		return;

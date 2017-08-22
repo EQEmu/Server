@@ -174,7 +174,7 @@ public:
 	void	VerifyRaid();
 	void	MemberZoned(Client *c);
 	void	SendHPManaEndPacketsTo(Client *c);
-	void	SendHPPacketsFrom(Mob *mob);
+	void	SendHPManaEndPacketsFrom(Mob *mob);
 	void	SendManaPacketFrom(Mob *mob);
 	void	SendEndurancePacketFrom(Mob *mob);
 	void	RaidSay(const char *msg, Client *c);
