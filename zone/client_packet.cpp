@@ -13368,10 +13368,9 @@ void Client::Handle_OP_TargetCommand(const EQApplicationPacket *app)
 			}
 
 			QueuePacket(app);
-			EQApplicationPacket hp_app;
+
 			GetTarget()->IsTargeted(1);
-			GetTarget()->CreateHPPacket(&hp_app);
-			QueuePacket(&hp_app, false);
+			SendHPUpdate();
 		}
 		else
 		{
