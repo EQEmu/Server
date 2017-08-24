@@ -108,8 +108,7 @@ XS(XS_EQEmuIO_PRINT)
 		int len = 0;
 		for(i = 0; *cur != '\0'; i++, cur++) {
 			if(*cur == '\n') {
-				std::string string = StringFormat("%s - bitch", str);
-				Log(Logs::General, Logs::Quests, string.c_str());
+				Log(Logs::General, Logs::Quests, str);
 				len = 0;
 				pos = i+1;
 			} else {
