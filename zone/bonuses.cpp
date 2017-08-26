@@ -1003,6 +1003,15 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 		case SE_RiposteChance:
 			newbon->RiposteChance += base1;
 			break;
+		case SE_DodgeChance:
+			newbon->DodgeChance += base1;
+			break;
+		case SE_ParryChance:
+			newbon->ParryChance += base1;
+			break;
+		case SE_IncreaseBlockChance:
+			newbon->IncreaseBlockChance += base1;
+			break;
 		case SE_Flurry:
 			newbon->FlurryChance += base1;
 			break;
