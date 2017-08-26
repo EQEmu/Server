@@ -617,7 +617,7 @@ struct NewZone_Struct {
 	/*0704*/	char	zone_short_name2[32];	//zone file name? excludes instance number which can be in previous version.
 	/*0736*/	char	WeatherString[32];
 	/*0768*/	char	SkyString2[32];
-	/*0800*/	int32	SkyRelated2;			//seen -1
+	/*0800*/	int32	SkyRelated2;			//seen -1 -- maybe some default sky time?
 	/*0804*/	char	WeatherString2[32];		//
 	/*0836*/	float	WeatherChangeTime;		// not sure :P
 	/*0840*/	uint32	Climate;
