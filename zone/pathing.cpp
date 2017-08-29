@@ -7,16 +7,16 @@
 
 extern Zone *zone;
 
-void AdjustRoute(std::list<IPathfinder::IPathNode> &nodes, int flymode) {
+void AdjustRoute(std::list<IPathfinder::IPathNode> &nodes, int flymode, float offset) {
 	if (!zone->HasMap() || !zone->HasWaterMap()) {
 		return;
 	}
-
+	
 	for (auto &node : nodes) {
 		if (flymode == 0 || !zone->watermap->InLiquid(node.pos)) {
 			auto best_z = zone->zonemap->FindBestZ(node.pos, nullptr);
 			if (best_z != BEST_Z_INVALID) {
-				node.pos.z = best_z;
+				node.pos.z = best_z + offset;
 			}
 		}
 	}
@@ -40,7 +40,7 @@ glm::vec3 Mob::UpdatePath(float ToX, float ToY, float ToZ, float Speed, bool &Wa
 
 	if (Route.empty()) {
 		Route = zone->pathing->FindRoute(From, To);
-		AdjustRoute(Route, flymode);
+		AdjustRoute(Route, flymode, GetModelOffset());
 
 		PathingDestination = To;
 		WaypointChanged = true;
@@ -58,7 +58,7 @@ glm::vec3 Mob::UpdatePath(float ToX, float ToY, float ToZ, float Speed, bool &Wa
 			if (!SameDestination) {
 				//We had a route but our target position moved too much
 				Route = zone->pathing->FindRoute(From, To);
-				AdjustRoute(Route, flymode);
+				AdjustRoute(Route, flymode, GetModelOffset());
 
 				PathingDestination = To;
 				WaypointChanged = true;
@@ -120,7 +120,7 @@ glm::vec3 Mob::UpdatePath(float ToX, float ToY, float ToZ, float Speed, bool &Wa
 
 			if (Route.empty()) {
 				Route = zone->pathing->FindRoute(From, To);
-				AdjustRoute(Route, flymode);
+				AdjustRoute(Route, flymode, GetModelOffset());
 				PathingDestination = To;
 				WaypointChanged = true;
 

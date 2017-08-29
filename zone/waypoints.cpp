@@ -769,7 +769,7 @@ void Mob::FixZ() {
 		{
 			/* Any more than 5 in the offset makes NPC's hop/snap to ceiling in small corridors */
 			float new_z = this->FindGroundZ(m_Position.x, m_Position.y, 5);
-			new_z += (this->GetSize() / 1.55);
+			new_z += GetModelOffset();
 
 			auto duration = timer.elapsed();
 
@@ -800,6 +800,108 @@ void Mob::FixZ() {
 
 			last_z = m_Position.z;
 		}
+	}
+}
+
+float Mob::GetModelOffset() const {
+	switch (race) {
+	case 436:
+		return 0.577f;
+
+	case 430:
+		return 0.5f;
+
+	case 432:
+		return 1.9f;
+
+	case 435:
+		return 0.93f;
+
+	case 450:
+		return 0.938f;
+
+	case 479:
+		return 0.8f;
+
+	case 451:
+		return 0.816f;
+
+	case 437:
+		return 0.527f;
+
+	case 439:
+		return 1.536f;
+
+	case 415:
+		return 1.0f;
+
+	case 438:
+		return 0.776f;
+
+	case 452:
+		return 0.776f;
+
+	case 441:
+		return 0.816f;
+
+	case 440:
+		return 0.938f;
+
+	case 468:
+		return 1.0f;
+
+	case 459:
+		return 1.0f;
+
+	case 462:
+		return 1.5f;
+
+	case 530:
+		return 1.2f;
+
+	case 549:
+		return 0.5f;
+
+	case 548:
+		return 0.5f;
+
+	case 547:
+		return 0.5f;
+
+	case 604:
+		return 1.2f;
+
+	case 653:
+		return 5.9f;
+
+	case 658:
+		return 4.0f;
+
+	case 323:
+		return 5.0f;
+
+	case 663:
+		return 5.0f;
+
+	case 664:
+		return 4.0f;
+
+	case 703:
+		return 9.0f;
+
+	case 688:
+		return 5.0f;
+
+	case 669:
+		return 7.0f;
+
+	case 687:
+		return 2.0f;
+
+	case 686:
+		return 2.0f;
+	default:
+		return 3.125f;
 	}
 }
 

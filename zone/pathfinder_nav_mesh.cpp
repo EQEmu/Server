@@ -51,17 +51,18 @@ IPathfinder::IPath PathfinderNavmesh::FindRoute(const glm::vec3 &start, const gl
 	filter.setIncludeFlags(65535U);
 	filter.setAreaCost(0, 1.0f); //Normal
 	filter.setAreaCost(1, 2.0f); //Water
-	filter.setAreaCost(2, 2.0f); //Lava
+	filter.setAreaCost(2, 4.0f); //Lava
 	filter.setAreaCost(4, 1.0f); //PvP
 	filter.setAreaCost(5, 1.5f); //Slime
 	filter.setAreaCost(6, 1.5f); //Ice
-	filter.setAreaCost(7, 2.0f); //V Water (Frigid Water)
+	filter.setAreaCost(7, 3.0f); //V Water (Frigid Water)
 	filter.setAreaCost(8, 1.0f); //General Area
 	filter.setAreaCost(9, 1.0f); //Portal
+	filter.setAreaCost(10, 0.5f); //Prefer
 
 	dtPolyRef start_ref;
 	dtPolyRef end_ref;
-	glm::vec3 ext(15.0f, 15.0f, 15.0f);
+	glm::vec3 ext(15.0f, 100.0f, 15.0f);
 
 	m_impl->query->findNearestPoly(&current_location[0], &ext[0], &filter, &start_ref, 0);
 	m_impl->query->findNearestPoly(&dest_location[0], &ext[0], &filter, &end_ref, 0);
@@ -73,8 +74,8 @@ IPathfinder::IPath PathfinderNavmesh::FindRoute(const glm::vec3 &start, const gl
 	}
 
 	int npoly = 0;
-	dtPolyRef path[512] = { 0 };
-	auto status = m_impl->query->findPath(start_ref, end_ref, &current_location[0], &dest_location[0], &filter, path, &npoly, 512);
+	dtPolyRef path[1024] = { 0 };
+	auto status = m_impl->query->findPath(start_ref, end_ref, &current_location[0], &dest_location[0], &filter, path, &npoly, 1024);
 
 	if (npoly) {
 		glm::vec3 epos = dest_location;
@@ -82,15 +83,15 @@ IPathfinder::IPath PathfinderNavmesh::FindRoute(const glm::vec3 &start, const gl
 			m_impl->query->closestPointOnPoly(path[npoly - 1], &dest_location[0], &epos[0], 0);
 		}
 
-		float straight_path[512 * 3];
-		unsigned char straight_path_flags[512];
+		float straight_path[2048 * 3];
+		unsigned char straight_path_flags[2048];
 
 		int n_straight_polys;
-		dtPolyRef straight_path_polys[512];
+		dtPolyRef straight_path_polys[2048];
 
 		status = m_impl->query->findStraightPath(&current_location[0], &epos[0], path, npoly,
 			straight_path, straight_path_flags,
-			straight_path_polys, &n_straight_polys, 512, DT_STRAIGHTPATH_ALL_CROSSINGS);
+			straight_path_polys, &n_straight_polys, 2048, DT_STRAIGHTPATH_AREA_CROSSINGS);
 
 		if (status & DT_OUT_OF_NODES) {
 			IPath Route;

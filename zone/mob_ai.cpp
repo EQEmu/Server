@@ -1529,13 +1529,12 @@ void NPC::AI_DoMovement() {
 			if (roambox_movingto_y > roambox_max_y || roambox_movingto_y < roambox_min_y)
 				roambox_movingto_y = zone->random.Real(roambox_min_y+1,roambox_max_y-1);
 		}
-
+		
 		Log(Logs::Detail, Logs::AI, "Roam Box: d=%.3f (%.3f->%.3f,%.3f->%.3f): Go To (%.3f,%.3f)",
 			roambox_distance, roambox_min_x, roambox_max_x, roambox_min_y, roambox_max_y, roambox_movingto_x, roambox_movingto_y);
-
-		float new_z = this->FindGroundZ(m_Position.x, m_Position.y, 5);
-		new_z += (this->GetSize() / 1.55);
-
+		
+		float new_z = this->FindGroundZ(m_Position.x, m_Position.y, 5) + GetModelOffset();
+		
 		if (!CalculateNewPosition(roambox_movingto_x, roambox_movingto_y, new_z, walksp, true))
 		{
 			roambox_movingto_x = roambox_max_x + 1; // force update
