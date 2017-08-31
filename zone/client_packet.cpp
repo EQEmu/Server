@@ -5737,17 +5737,11 @@ void Client::Handle_OP_FindPersonRequest(const EQApplicationPacket *app)
 			glm::vec3 Start(GetX(), GetY(), GetZ() + (GetSize() < 6.0 ? 6 : GetSize()) * HEAD_POSITION);
 			glm::vec3 End(target->GetX(), target->GetY(), target->GetZ() + (target->GetSize() < 6.0 ? 6 : target->GetSize()) * HEAD_POSITION);
 	
-			auto pathlist = zone->pathing->FindRoute(Start, End);
+			bool partial = false;
+			bool error = false;
+			auto pathlist = zone->pathing->FindRoute(Start, End, partial, error);
 	
-			if (pathlist.empty())
-			{
-				EQApplicationPacket outapp(OP_FindPersonReply, 0);
-				QueuePacket(&outapp);
-				return;
-			}
-	
-			//the client seems to have issues with packets larger than this
-			if (pathlist.size() > 36)
+			if (pathlist.empty() || error || partial)
 			{
 				EQApplicationPacket outapp(OP_FindPersonReply, 0);
 				QueuePacket(&outapp);

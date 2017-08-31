@@ -12,6 +12,8 @@
 
 extern Zone *zone;
 
+const int MaxNavmeshNodes = 4092;
+
 struct PathfinderNavmesh::Implementation
 {
 	dtNavMesh *nav_mesh;
@@ -31,9 +33,13 @@ PathfinderNavmesh::~PathfinderNavmesh()
 	Clear();
 }
 
-IPathfinder::IPath PathfinderNavmesh::FindRoute(const glm::vec3 &start, const glm::vec3 &end)
+IPathfinder::IPath PathfinderNavmesh::FindRoute(const glm::vec3 &start, const glm::vec3 &end, bool &partial, bool &error)
 {
+	partial = false;
+	error = false;
+
 	if (!m_impl->nav_mesh) {
+		error = true;
 		IPath Route;
 		Route.push_back(end);
 		return Route;
@@ -41,7 +47,7 @@ IPathfinder::IPath PathfinderNavmesh::FindRoute(const glm::vec3 &start, const gl
 
 	if (!m_impl->query) {
 		m_impl->query = dtAllocNavMeshQuery();
-		m_impl->query->init(m_impl->nav_mesh, 32768);
+		m_impl->query->init(m_impl->nav_mesh, MaxNavmeshNodes);
 	}
 
 	glm::vec3 current_location(start.x, start.z, start.y);
@@ -68,6 +74,7 @@ IPathfinder::IPath PathfinderNavmesh::FindRoute(const glm::vec3 &start, const gl
 	m_impl->query->findNearestPoly(&dest_location[0], &ext[0], &filter, &end_ref, 0);
 
 	if (!start_ref || !end_ref) {
+		error = true;
 		IPath Route;
 		Route.push_back(end);
 		return Route;
@@ -81,6 +88,7 @@ IPathfinder::IPath PathfinderNavmesh::FindRoute(const glm::vec3 &start, const gl
 		glm::vec3 epos = dest_location;
 		if (path[npoly - 1] != end_ref) {
 			m_impl->query->closestPointOnPoly(path[npoly - 1], &dest_location[0], &epos[0], 0);
+			partial = true;
 		}
 
 		float straight_path[2048 * 3];
@@ -93,7 +101,8 @@ IPathfinder::IPath PathfinderNavmesh::FindRoute(const glm::vec3 &start, const gl
 			straight_path, straight_path_flags,
 			straight_path_polys, &n_straight_polys, 2048, DT_STRAIGHTPATH_AREA_CROSSINGS);
 
-		if (status & DT_OUT_OF_NODES) {
+		if (dtStatusFailed(status)) {
+			error = true;
 			IPath Route;
 			Route.push_back(end);
 			return Route;
@@ -135,7 +144,7 @@ glm::vec3 PathfinderNavmesh::GetRandomLocation()
 
 	if (!m_impl->query) {
 		m_impl->query = dtAllocNavMeshQuery();
-		m_impl->query->init(m_impl->nav_mesh, 32768);
+		m_impl->query->init(m_impl->nav_mesh, MaxNavmeshNodes);
 	}
 
 	dtQueryFilter filter;
@@ -280,20 +289,24 @@ void PathfinderNavmesh::Load(const std::string &path)
 	}
 }
 
-void PathfinderNavmesh::ShowPath(Client * c, const glm::vec3 & start, const glm::vec3 & end)
+void PathfinderNavmesh::ShowPath(Client * c, const glm::vec3 &start, const glm::vec3 &end)
 {
-	auto path = FindRoute(start, end);
+	bool partial = false;
+	bool error = false;
+	auto path = FindRoute(start, end, partial, error);
 	std::vector<FindPerson_Point> points;
 
-	FindPerson_Point p;
-	for (auto &node : path)
-	{
-		if (!node.teleport) {
-			p.x = node.pos.x;
-			p.y = node.pos.y;
-			p.z = node.pos.z;
+	if (!partial && !error) {
+		FindPerson_Point p;
+		for (auto &node : path)
+		{
+			if (!node.teleport) {
+				p.x = node.pos.x;
+				p.y = node.pos.y;
+				p.z = node.pos.z;
 
-			points.push_back(p);
+				points.push_back(p);
+			}
 		}
 	}
 

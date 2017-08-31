@@ -114,17 +114,21 @@ PathfinderWaypoint::~PathfinderWaypoint()
 {
 }
 
-IPathfinder::IPath PathfinderWaypoint::FindRoute(const glm::vec3 &start, const glm::vec3 &end)
+IPathfinder::IPath PathfinderWaypoint::FindRoute(const glm::vec3 &start, const glm::vec3 &end, bool &partial, bool &error)
 {
+	partial = false;
+	error = false;
 	std::vector<RTreeValue> result_start_n;
 	m_impl->Tree.query(boost::geometry::index::nearest(Point(start.x, start.y, start.z), 1), std::back_inserter(result_start_n));
 	if (result_start_n.size() == 0) {
+		error = true;
 		return IPath();
 	}
 	
 	std::vector<RTreeValue> result_end_n;
 	m_impl->Tree.query(boost::geometry::index::nearest(Point(end.x, end.y, end.z), 1), std::back_inserter(result_end_n));
 	if (result_end_n.size() == 0) {
+		error = true;
 		return IPath();
 	}
 	
@@ -179,6 +183,7 @@ IPathfinder::IPath PathfinderWaypoint::FindRoute(const glm::vec3 &start, const g
 		return Route;
 	}
 	
+	error = true;
 	IPath Route;
 	Route.push_front(start);
 	Route.push_back(glm::vec3(nearest_start.first.get<0>(), nearest_start.first.get<1>(), nearest_start.first.get<2>()));
@@ -395,7 +400,9 @@ void PathfinderWaypoint::ShowNodes()
 
 void PathfinderWaypoint::ShowPath(Client *c, const glm::vec3 &start, const glm::vec3 &end)
 {
-	auto path = FindRoute(start, end);
+	bool partial = false;
+	bool error = false;
+	auto path = FindRoute(start, end, partial, error);
 	std::vector<FindPerson_Point> points;
 
 	FindPerson_Point p;

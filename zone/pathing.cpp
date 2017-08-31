@@ -39,14 +39,22 @@ glm::vec3 Mob::UpdatePath(float ToX, float ToY, float ToZ, float Speed, bool &Wa
 	}
 
 	if (Route.empty()) {
-		Route = zone->pathing->FindRoute(From, To);
+		bool partial = false;
+		bool error = false;
+		Route = zone->pathing->FindRoute(From, To, partial, error);
 		AdjustRoute(Route, flymode, GetModelOffset());
 
 		PathingDestination = To;
 		WaypointChanged = true;
 		NodeReached = false;
-		if (Route.empty()) {
-			return From;
+		if (partial && Route.size() <= 2) {
+			//We are stuck
+			Route.clear();
+			Teleport(To);
+			return To;
+		}
+		else if (error || Route.empty()) {
+			return To;
 		}
 		else {
 			return (*Route.begin()).pos;
@@ -57,15 +65,21 @@ glm::vec3 Mob::UpdatePath(float ToX, float ToY, float ToZ, float Speed, bool &Wa
 			bool SameDestination = DistanceSquared(To, PathingDestination) < 100.0f;
 			if (!SameDestination) {
 				//We had a route but our target position moved too much
-				Route = zone->pathing->FindRoute(From, To);
+				bool partial = false;
+				bool error = false;
+				Route = zone->pathing->FindRoute(From, To, partial, error);
 				AdjustRoute(Route, flymode, GetModelOffset());
 
 				PathingDestination = To;
 				WaypointChanged = true;
 				NodeReached = false;
 
-				if (Route.empty()) {
-					return From;
+				if (partial && Route.size() <= 2) {
+					Route.clear();
+					Teleport(To);
+					return To;
+				} else if (error || Route.empty()) {
+					return To;
 				}
 				else {
 					return (*Route.begin()).pos;
@@ -118,13 +132,21 @@ glm::vec3 Mob::UpdatePath(float ToX, float ToY, float ToZ, float Speed, bool &Wa
 			Route.pop_front();
 
 			if (Route.empty()) {
-				Route = zone->pathing->FindRoute(From, To);
+				bool partial = false;
+				bool error = false;
+				Route = zone->pathing->FindRoute(From, To, partial, error);
 				AdjustRoute(Route, flymode, GetModelOffset());
 				PathingDestination = To;
 				WaypointChanged = true;
 
-				if (Route.empty()) {
-					return From;
+				if (partial && Route.size() <= 2) {
+					//We are stuck
+					Route.clear();
+					Teleport(To);
+					return To;
+				}
+				else if (error || Route.empty()) {
+					return To;
 				}
 				else {
 					return (*Route.begin()).pos;
@@ -161,6 +183,8 @@ glm::vec3 Mob::UpdatePath(float ToX, float ToY, float ToZ, float Speed, bool &Wa
 			return (*Route.begin()).pos;
 		}
 	}
+
+	return To;
 }
 
 void CullPoints(std::vector<FindPerson_Point> &points) {
