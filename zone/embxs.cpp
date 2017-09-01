@@ -99,6 +99,10 @@ XS(XS_EQEmuIO_PRINT)
 		/* Strip newlines from log message 'str' */
 		*std::remove(str, str + strlen(str), '\n') = '\0';
 
+		std::string log_string = str;
+		if (log_string.find("did not return a true") != std::string::npos)
+			return;;
+
 		int i;
 		int pos = 0;
 		int len = 0;

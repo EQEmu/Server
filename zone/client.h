@@ -1489,7 +1489,9 @@ private:
 	Timer hp_self_update_throttle_timer; /* This is to prevent excessive packet sending under trains/fast combat */
 	Timer hp_other_update_throttle_timer; /* This is to keep clients from DOSing the server with macros that change client targets constantly */
 	Timer position_update_timer; /* Timer used when client hasn't updated within a 10 second window */
-    glm::vec3 m_Proximity;
+
+	glm::vec3 m_Proximity;
+	glm::vec4 last_major_update_position;
 
 	void BulkSendInventoryItems();
 

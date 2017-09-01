@@ -149,7 +149,7 @@ void Raid::AddMember(Client *c, uint32 group, bool rleader, bool groupleader, bo
 	raid_update = c->GetRaid();
 	if (raid_update) {
 		raid_update->SendHPManaEndPacketsTo(c);
-		raid_update->SendHPPacketsFrom(c);
+		raid_update->SendHPManaEndPacketsFrom(c);
 	}
 
 	auto pack = new ServerPacket(ServerOP_RaidAdd, sizeof(ServerRaidGeneralAction_Struct));
@@ -1591,7 +1591,7 @@ void Raid::SendHPManaEndPacketsTo(Client *client)
 	}
 }
 
-void Raid::SendHPPacketsFrom(Mob *mob)
+void Raid::SendHPManaEndPacketsFrom(Mob *mob)
 {
 	if(!mob)
 		return;
@@ -1779,3 +1779,42 @@ void Raid::SetDirtyAutoHaters()
 
 }
 
+void Raid::QueueClients(Mob *sender, const EQApplicationPacket *app, bool ack_required /*= true*/, bool ignore_sender /*= true*/, float distance /*= 0*/, bool group_only /*= true*/) {
+	if (sender && sender->IsClient()) {
+
+		uint32 group_id = this->GetGroup(sender->CastToClient());
+
+		/* If this is a group only packet and we're not in a group -- return */
+		if (!group_id == 0xFFFFFFFF && group_only)
+			return;
+
+		for (uint32 i = 0; i < MAX_RAID_MEMBERS; i++) {
+			if (!members[i].member)
+				continue;
+
+			if (!members[i].member->IsClient())
+				continue;
+
+			if (ignore_sender && members[i].member == sender)
+				continue;
+
+			if (group_only && members[i].GroupNumber != group_id)
+				continue;
+
+			/* If we don't have a distance requirement - send to all members */
+			if (distance == 0) {
+				members[i].member->CastToClient()->QueuePacket(app, ack_required);
+			}
+			else {
+				/* If negative distance - we check if current distance is greater than X */
+				if (distance <= 0 && DistanceSquared(sender->GetPosition(), members[i].member->GetPosition()) >= (distance * distance)) {
+					members[i].member->CastToClient()->QueuePacket(app, ack_required);
+				}
+				/* If positive distance - we check if current distance is less than X */
+				else if (distance >= 0 && DistanceSquared(sender->GetPosition(), members[i].member->GetPosition()) <= (distance * distance)) {
+					members[i].member->CastToClient()->QueuePacket(app, ack_required);
+				}
+			}
+		}
+	}
+}

@@ -1003,6 +1003,15 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 		case SE_RiposteChance:
 			newbon->RiposteChance += base1;
 			break;
+		case SE_DodgeChance:
+			newbon->DodgeChance += base1;
+			break;
+		case SE_ParryChance:
+			newbon->ParryChance += base1;
+			break;
+		case SE_IncreaseBlockChance:
+			newbon->IncreaseBlockChance += base1;
+			break;
 		case SE_Flurry:
 			newbon->FlurryChance += base1;
 			break;
@@ -2495,7 +2504,12 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 				break;
 
 			case SE_IncreaseBlockChance:
-				new_bonus->IncreaseBlockChance += effect_value;
+				if (AdditiveWornBonus)
+					new_bonus->IncreaseBlockChance += effect_value;
+				else if (effect_value < 0 && new_bonus->IncreaseBlockChance > effect_value)
+					new_bonus->IncreaseBlockChance = effect_value;
+				else if (new_bonus->IncreaseBlockChance < effect_value)
+					new_bonus->IncreaseBlockChance = effect_value;
 				break;
 
 			case SE_PersistantCasting:

@@ -3894,6 +3894,8 @@ void command_depopzone(Client *c, const Seperator *sep)
 void command_repop(Client *c, const Seperator *sep)
 {
 	int timearg = 1;
+	int delay = 0;
+
 	if (sep->arg[1] && strcasecmp(sep->arg[1], "force") == 0) {
 		timearg++;
 
@@ -3912,13 +3914,19 @@ void command_repop(Client *c, const Seperator *sep)
 	}
 
 	if (!sep->IsNumber(timearg)) {
-        c->Message(0, "Zone depoped. Repoping now.");
+        c->Message(0, "Zone depopped - repopping now.");
+
 		zone->Repop();
+
+		/* Force a spawn2 timer trigger so we don't delay actually spawning the NPC's */
+		zone->spawn2_timer.Trigger();
 		return;
 	}
 
     c->Message(0, "Zone depoped. Repop in %i seconds",  atoi(sep->arg[timearg]));
-	zone->Repop(atoi(sep->arg[timearg])*1000);
+	zone->Repop(atoi(sep->arg[timearg]) * 1000);
+
+	zone->spawn2_timer.Trigger();
 }
 
 void command_repopclose(Client *c, const Seperator *sep)

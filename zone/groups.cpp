@@ -2464,3 +2464,30 @@ bool Group::HasRole(Mob *m, uint8 Role)
 	return false;
 }
 
+void Group::QueueClients(Mob *sender, const EQApplicationPacket *app, bool ack_required /*= true*/, bool ignore_sender /*= true*/, float distance /*= 0*/) {
+	if (sender && sender->IsClient()) {
+		for (uint32 i = 0; i < MAX_GROUP_MEMBERS; i++) {
+
+			if (!members[i])
+				continue;
+
+			if (ignore_sender && members[i] == sender)
+				continue;
+
+			/* If we don't have a distance requirement - send to all members */
+			if (distance == 0) {
+				members[i]->CastToClient()->QueuePacket(app, ack_required);
+			}
+			else {
+				/* If negative distance - we check if current distance is greater than X */
+				if (distance <= 0 && DistanceSquared(sender->GetPosition(), members[i]->GetPosition()) >= (distance * distance)) {
+					members[i]->CastToClient()->QueuePacket(app, ack_required);
+				}
+				/* If positive distance - we check if current distance is less than X */
+				else if (distance >= 0 && DistanceSquared(sender->GetPosition(), members[i]->GetPosition()) <= (distance * distance)) {
+					members[i]->CastToClient()->QueuePacket(app, ack_required);
+				}
+			}
+		}
+	}
+}

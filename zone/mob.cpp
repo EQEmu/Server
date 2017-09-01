@@ -1375,7 +1375,7 @@ void Mob::SendHPUpdate(bool skip_self /*= false*/, bool force_update_all /*= fal
 	if(IsClient()){
 		Raid *raid = entity_list.GetRaidByClient(CastToClient());
 		if (raid)
-			raid->SendHPPacketsFrom(this);
+			raid->SendHPManaEndPacketsFrom(this);
 	}
 
 	/* Pet - Update master - group and raid if exists */
@@ -1388,7 +1388,7 @@ void Mob::SendHPUpdate(bool skip_self /*= false*/, bool force_update_all /*= fal
 
 		Raid *raid = entity_list.GetRaidByClient(GetOwner()->CastToClient());
 		if(raid)
-			raid->SendHPPacketsFrom(this);
+			raid->SendHPManaEndPacketsFrom(this);
 	}
 
 	/* Send to pet */
@@ -1443,6 +1443,20 @@ void Mob::SendPosition() {
 	else {
 		entity_list.QueueCloseClients(this, app, true, RuleI(Range, MobPositionUpdates), nullptr, false);
 	}
+
+	safe_delete(app);
+}
+
+void Mob::SendPositionUpdateToClient(Client *client) {
+	auto app = new EQApplicationPacket(OP_ClientUpdate, sizeof(PlayerPositionUpdateServer_Struct));
+	PlayerPositionUpdateServer_Struct* spawn_update = (PlayerPositionUpdateServer_Struct*)app->pBuffer;
+
+	if(this->IsMoving())
+		MakeSpawnUpdate(spawn_update);
+	else
+		MakeSpawnUpdateNoDelta(spawn_update);
+
+	client->QueuePacket(app, false);
 
 	safe_delete(app);
 }

@@ -543,6 +543,7 @@ public:
 	virtual void GMMove(float x, float y, float z, float heading = 0.01, bool SendUpdate = true);
 	void SetDelta(const glm::vec4& delta);
 	void SetTargetDestSteps(uint8 target_steps) { tar_ndx = target_steps; }
+	void SendPositionUpdateToClient(Client *client);
 	void SendPositionUpdate(uint8 iSendToSelf = 0);
 	void MakeSpawnUpdateNoDelta(PlayerPositionUpdateServer_Struct* spu);
 	void MakeSpawnUpdate(PlayerPositionUpdateServer_Struct* spu);
