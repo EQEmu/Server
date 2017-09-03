@@ -277,8 +277,9 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 					caster->SetMana(0);
 				} else if (spell_id == 2755 && caster) //Lifeburn
 				{
-					dmg = -1 * caster->GetHP(); // just your current HP or should it be Max HP?
+					dmg = caster->GetHP(); // just your current HP
 					caster->SetHP(dmg / 4); // 2003 patch notes say ~ 1/4 HP. Should this be 1/4 your current HP or do 3/4 max HP dmg? Can it kill you?
+					dmg = -dmg;
 				}
 
 				//do any AAs apply to these spells?
