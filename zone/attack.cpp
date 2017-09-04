@@ -1262,6 +1262,7 @@ int Client::DoDamageCaps(int base_damage)
 	return std::min(cap, base_damage);
 }
 
+// other is the defender, this is the attacker
 void Mob::DoAttack(Mob *other, DamageHitInfo &hit, ExtraAttackOptions *opts)
 {
 	if (!other)
@@ -1288,6 +1289,20 @@ void Mob::DoAttack(Mob *other, DamageHitInfo &hit, ExtraAttackOptions *opts)
 
 	if (hit.damage_done >= 0) {
 		if (other->CheckHitChance(this, hit)) {
+			if (IsNPC() && other->IsClient() && other->animation > 0 && GetLevel() >= 5 && BehindMob(other, GetX(), GetY())) {
+				// ~ 12% chance
+				if (zone->random.Roll(12)) {
+					int stun_resist2 = other->spellbonuses.FrontalStunResist + other->itembonuses.FrontalStunResist + other->aabonuses.FrontalStunResist;
+					int stun_resist = other->spellbonuses.StunResist + other->itembonuses.StunResist + other->aabonuses.StunResist;
+					if (zone->random.Roll(stun_resist2)) {
+						other->Message_StringID(MT_Stun, AVOID_STUNNING_BLOW);
+					} else if (zone->random.Roll(stun_resist)) {
+						other->Message_StringID(MT_Stun, SHAKE_OFF_STUN);
+					} else {
+						other->Stun(3000); // yuck -- 3 seconds
+					}
+				}
+			}
 			other->MeleeMitigation(this, hit, opts);
 			if (hit.damage_done > 0) {
 				ApplyDamageTable(hit);
