@@ -47,13 +47,7 @@ glm::vec3 Mob::UpdatePath(float ToX, float ToY, float ToZ, float Speed, bool &Wa
 		PathingDestination = To;
 		WaypointChanged = true;
 		NodeReached = false;
-		if (partial && Route.size() <= 2) {
-			//We are stuck
-			Route.clear();
-			Teleport(To);
-			return To;
-		}
-		else if (error || Route.empty()) {
+		if (Route.empty()) {
 			return To;
 		}
 		else {
@@ -74,11 +68,7 @@ glm::vec3 Mob::UpdatePath(float ToX, float ToY, float ToZ, float Speed, bool &Wa
 				WaypointChanged = true;
 				NodeReached = false;
 
-				if (partial && Route.size() <= 2) {
-					Route.clear();
-					Teleport(To);
-					return To;
-				} else if (error || Route.empty()) {
+				if (Route.empty()) {
 					return To;
 				}
 				else {
@@ -139,13 +129,7 @@ glm::vec3 Mob::UpdatePath(float ToX, float ToY, float ToZ, float Speed, bool &Wa
 				PathingDestination = To;
 				WaypointChanged = true;
 
-				if (partial && Route.size() <= 2) {
-					//We are stuck
-					Route.clear();
-					Teleport(To);
-					return To;
-				}
-				else if (error || Route.empty()) {
+				if(Route.empty()) {
 					return To;
 				}
 				else {
