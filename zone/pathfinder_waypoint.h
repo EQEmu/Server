@@ -11,7 +11,7 @@ public:
 	PathfinderWaypoint(const std::string &path);
 	virtual ~PathfinderWaypoint();
 
-	virtual IPath FindRoute(const glm::vec3 &start, const glm::vec3 &end, bool &partial, bool &error);
+	virtual IPath FindRoute(const glm::vec3 &start, const glm::vec3 &end, bool &partial, bool &stuck);
 	virtual glm::vec3 GetRandomLocation();
 	virtual void DebugCommand(Client *c, const Seperator *sep);
 

@@ -33,16 +33,12 @@ PathfinderNavmesh::~PathfinderNavmesh()
 	Clear();
 }
 
-IPathfinder::IPath PathfinderNavmesh::FindRoute(const glm::vec3 &start, const glm::vec3 &end, bool &partial, bool &error)
+IPathfinder::IPath PathfinderNavmesh::FindRoute(const glm::vec3 &start, const glm::vec3 &end, bool &partial, bool &stuck)
 {
 	partial = false;
-	error = false;
 
 	if (!m_impl->nav_mesh) {
-		error = true;
-		IPath Route;
-		Route.push_back(end);
-		return Route;
+		return IPath();
 	}
 
 	if (!m_impl->query) {
@@ -74,10 +70,7 @@ IPathfinder::IPath PathfinderNavmesh::FindRoute(const glm::vec3 &start, const gl
 	m_impl->query->findNearestPoly(&dest_location[0], &ext[0], &filter, &end_ref, 0);
 
 	if (!start_ref || !end_ref) {
-		error = true;
-		IPath Route;
-		Route.push_back(end);
-		return Route;
+		return IPath();
 	}
 
 	int npoly = 0;
@@ -89,6 +82,11 @@ IPathfinder::IPath PathfinderNavmesh::FindRoute(const glm::vec3 &start, const gl
 		if (path[npoly - 1] != end_ref) {
 			m_impl->query->closestPointOnPoly(path[npoly - 1], &dest_location[0], &epos[0], 0);
 			partial = true;
+
+			auto dist = DistanceSquared(epos, current_location);
+			if (dist < 10.0f) {
+				stuck = true;
+			}
 		}
 
 		float straight_path[2048 * 3];
@@ -102,10 +100,7 @@ IPathfinder::IPath PathfinderNavmesh::FindRoute(const glm::vec3 &start, const gl
 			straight_path_polys, &n_straight_polys, 2048, DT_STRAIGHTPATH_AREA_CROSSINGS);
 
 		if (dtStatusFailed(status)) {
-			error = true;
-			IPath Route;
-			Route.push_back(end);
-			return Route;
+			return IPath();
 		}
 
 		if (n_straight_polys) {
@@ -292,11 +287,11 @@ void PathfinderNavmesh::Load(const std::string &path)
 void PathfinderNavmesh::ShowPath(Client * c, const glm::vec3 &start, const glm::vec3 &end)
 {
 	bool partial = false;
-	bool error = false;
-	auto path = FindRoute(start, end, partial, error);
+	bool stuck = false;
+	auto path = FindRoute(start, end, partial, stuck);
 	std::vector<FindPerson_Point> points;
 
-	if (!partial && !error) {
+	if (!partial) {
 		FindPerson_Point p;
 		for (auto &node : path)
 		{

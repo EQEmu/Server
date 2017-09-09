@@ -1527,9 +1527,11 @@ void Client::OPGMTraining(const EQApplicationPacket *app)
 		return;
 
 	//you can only use your own trainer, client enforces this, but why trust it
-	int trains_class = pTrainer->GetClass() - (WARRIORGM - WARRIOR);
-	if(GetClass() != trains_class)
-		return;
+	if (!RuleB(Character, AllowCrossClassTrainers)) {
+		int trains_class = pTrainer->GetClass() - (WARRIORGM - WARRIOR);
+		if (GetClass() != trains_class)
+			return;
+	}
 
 	//you have to be somewhat close to a trainer to be properly using them
 	if(DistanceSquared(m_Position,pTrainer->GetPosition()) > USE_NPC_RANGE2)
@@ -1580,9 +1582,11 @@ void Client::OPGMEndTraining(const EQApplicationPacket *app)
 		return;
 
 	//you can only use your own trainer, client enforces this, but why trust it
-	int trains_class = pTrainer->GetClass() - (WARRIORGM - WARRIOR);
-	if(GetClass() != trains_class)
-		return;
+	if (!RuleB(Character, AllowCrossClassTrainers)) {
+		int trains_class = pTrainer->GetClass() - (WARRIORGM - WARRIOR);
+		if (GetClass() != trains_class)
+			return;
+	}
 
 	//you have to be somewhat close to a trainer to be properly using them
 	if(DistanceSquared(m_Position, pTrainer->GetPosition()) > USE_NPC_RANGE2)
@@ -1609,9 +1613,11 @@ void Client::OPGMTrainSkill(const EQApplicationPacket *app)
 		return;
 
 	//you can only use your own trainer, client enforces this, but why trust it
-	int trains_class = pTrainer->GetClass() - (WARRIORGM - WARRIOR);
-	if(GetClass() != trains_class)
-		return;
+	if (!RuleB(Character, AllowCrossClassTrainers)) {
+		int trains_class = pTrainer->GetClass() - (WARRIORGM - WARRIOR);
+		if (GetClass() != trains_class)
+			return;
+	}
 
 	//you have to be somewhat close to a trainer to be properly using them
 	if(DistanceSquared(m_Position, pTrainer->GetPosition()) > USE_NPC_RANGE2)

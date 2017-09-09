@@ -40,13 +40,25 @@ glm::vec3 Mob::UpdatePath(float ToX, float ToY, float ToZ, float Speed, bool &Wa
 
 	if (Route.empty()) {
 		bool partial = false;
-		bool error = false;
-		Route = zone->pathing->FindRoute(From, To, partial, error);
+		bool stuck = false;
+		Route = zone->pathing->FindRoute(From, To, partial, stuck);
 		AdjustRoute(Route, flymode, GetModelOffset());
 
 		PathingDestination = To;
 		WaypointChanged = true;
 		NodeReached = false;
+		if (stuck) {
+			bool partial = false;
+			bool stuck = false;
+			auto r = zone->pathing->FindRoute(To, From, partial, stuck);
+			Route.clear();
+
+			auto final_node = r.back();
+			Route.push_back(final_node);
+			AdjustRoute(Route, flymode, GetModelOffset());
+			return (*Route.begin()).pos;
+		}
+
 		if (Route.empty()) {
 			return To;
 		}
@@ -60,13 +72,25 @@ glm::vec3 Mob::UpdatePath(float ToX, float ToY, float ToZ, float Speed, bool &Wa
 			if (!SameDestination) {
 				//We had a route but our target position moved too much
 				bool partial = false;
-				bool error = false;
-				Route = zone->pathing->FindRoute(From, To, partial, error);
+				bool stuck = false;
+				Route = zone->pathing->FindRoute(From, To, partial, stuck);
 				AdjustRoute(Route, flymode, GetModelOffset());
 
 				PathingDestination = To;
 				WaypointChanged = true;
 				NodeReached = false;
+
+				if (stuck) {
+					bool partial = false;
+					bool stuck = false;
+					auto r = zone->pathing->FindRoute(To, From, partial, stuck);
+					Route.clear();
+
+					auto final_node = r.back();
+					Route.push_back(final_node);
+					AdjustRoute(Route, flymode, GetModelOffset());
+					return (*Route.begin()).pos;
+				}
 
 				if (Route.empty()) {
 					return To;
@@ -123,12 +147,24 @@ glm::vec3 Mob::UpdatePath(float ToX, float ToY, float ToZ, float Speed, bool &Wa
 
 			if (Route.empty()) {
 				bool partial = false;
-				bool error = false;
-				Route = zone->pathing->FindRoute(From, To, partial, error);
+				bool stuck = false;
+				Route = zone->pathing->FindRoute(From, To, partial, stuck);
 				AdjustRoute(Route, flymode, GetModelOffset());
 				PathingDestination = To;
 				WaypointChanged = true;
 
+				if (stuck) {
+					bool partial = false;
+					bool stuck = false;
+					auto r = zone->pathing->FindRoute(To, From, partial, stuck);
+					Route.clear();
+
+					auto final_node = r.back();
+					Route.push_back(final_node);
+					AdjustRoute(Route, flymode, GetModelOffset());
+					return (*Route.begin()).pos;
+				} 
+				
 				if(Route.empty()) {
 					return To;
 				}

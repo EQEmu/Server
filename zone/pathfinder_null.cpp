@@ -1,9 +1,9 @@
 #include "pathfinder_null.h"
 
-IPathfinder::IPath PathfinderNull::FindRoute(const glm::vec3 &start, const glm::vec3 &end, bool &partial, bool &error)
+IPathfinder::IPath PathfinderNull::FindRoute(const glm::vec3 &start, const glm::vec3 &end, bool &partial, bool &stuck)
 {
-	error = false;
 	partial = false;
+	stuck = false;
 	IPath ret;
 	ret.push_back(start);
 	ret.push_back(end);

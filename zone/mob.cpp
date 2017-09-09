@@ -445,7 +445,7 @@ Mob::Mob(const char* in_name,
 	AssistAggro = false;
 	npc_assist_cap = 0;
 
-	PathRecalcTimer.reset(new Timer(1500));
+	PathRecalcTimer.reset(new Timer(500));
 	PathingLoopCount = 0;
 }
 
@@ -1239,6 +1239,13 @@ void Mob::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho)
 		ns->spawn.DestructibleUnk9 = 0x00000002;	// Needs to be 2 for tents?
 
 		ns->spawn.flymode = 0;
+	}
+
+	if (RuleB(Character, AllowCrossClassTrainers) && ForWho) {
+		if (ns->spawn.class_ >= WARRIORGM && ns->spawn.class_ <= BERSERKERGM) {
+			int trainer_class = WARRIORGM + (ForWho->GetClass() - 1);
+			ns->spawn.class_ = trainer_class;
+		}
 	}
 }
 
