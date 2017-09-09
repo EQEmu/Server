@@ -48,15 +48,7 @@ glm::vec3 Mob::UpdatePath(float ToX, float ToY, float ToZ, float Speed, bool &Wa
 		WaypointChanged = true;
 		NodeReached = false;
 		if (stuck) {
-			bool partial = false;
-			bool stuck = false;
-			auto r = zone->pathing->FindRoute(To, From, partial, stuck);
-			Route.clear();
-
-			auto final_node = r.back();
-			Route.push_back(final_node);
-			AdjustRoute(Route, flymode, GetModelOffset());
-			return (*Route.begin()).pos;
+			return HandleStuckPath(To, From);
 		}
 
 		if (Route.empty()) {
@@ -81,15 +73,7 @@ glm::vec3 Mob::UpdatePath(float ToX, float ToY, float ToZ, float Speed, bool &Wa
 				NodeReached = false;
 
 				if (stuck) {
-					bool partial = false;
-					bool stuck = false;
-					auto r = zone->pathing->FindRoute(To, From, partial, stuck);
-					Route.clear();
-
-					auto final_node = r.back();
-					Route.push_back(final_node);
-					AdjustRoute(Route, flymode, GetModelOffset());
-					return (*Route.begin()).pos;
+					return HandleStuckPath(To, From);
 				}
 
 				if (Route.empty()) {
@@ -154,15 +138,7 @@ glm::vec3 Mob::UpdatePath(float ToX, float ToY, float ToZ, float Speed, bool &Wa
 				WaypointChanged = true;
 
 				if (stuck) {
-					bool partial = false;
-					bool stuck = false;
-					auto r = zone->pathing->FindRoute(To, From, partial, stuck);
-					Route.clear();
-
-					auto final_node = r.back();
-					Route.push_back(final_node);
-					AdjustRoute(Route, flymode, GetModelOffset());
-					return (*Route.begin()).pos;
+					return HandleStuckPath(To, From);
 				} 
 				
 				if(Route.empty()) {
@@ -205,6 +181,19 @@ glm::vec3 Mob::UpdatePath(float ToX, float ToY, float ToZ, float Speed, bool &Wa
 	}
 
 	return To;
+}
+
+glm::vec3 Mob::HandleStuckPath(const glm::vec3 &To, const glm::vec3 &From)
+{
+	bool partial = false;
+	bool stuck = false;
+	auto r = zone->pathing->FindRoute(To, From, partial, stuck);
+	Route.clear();
+
+	auto final_node = r.back();
+	Route.push_back(final_node);
+	AdjustRoute(Route, flymode, GetModelOffset());
+	return (*Route.begin()).pos;
 }
 
 void CullPoints(std::vector<FindPerson_Point> &points) {
