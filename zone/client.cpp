@@ -124,6 +124,7 @@ Client::Client(EQStreamInterface* ieqs)
 	camp_timer(29000),
 	process_timer(100),
 	stamina_timer(40000),
+	consume_food_timer(60000),
 	zoneinpacket_timer(1000),
 	linkdead_timer(RuleI(Zone,ClientLinkdeadMS)),
 	dead_timer(2000),
@@ -658,13 +659,18 @@ bool Client::Save(uint8 iCommitNow) {
 		m_pp.tribute_time_remaining = 0xFFFFFFFF; m_pp.tribute_active = 0;
 	}
 
+	if (m_pp.hunger_level < 0)
+		m_pp.hunger_level = 0;
+
+	if (m_pp.thirst_level < 0)
+		m_pp.thirst_level = 0;
+
 	p_timers.Store(&database);
 
 	database.SaveCharacterTribute(this->CharacterID(), &m_pp);
 	SaveTaskState(); /* Save Character Task */
 
-	m_pp.hunger_level = EQEmu::Clamp(m_pp.hunger_level, 0, 50000);
-	m_pp.thirst_level = EQEmu::Clamp(m_pp.thirst_level, 0, 50000);
+	Log(Logs::General, Logs::Food, "Client::Save - hunger_level: %i thirst_level: %i", m_pp.hunger_level, m_pp.thirst_level);
 
 	// perform snapshot before SaveCharacterData() so that m_epp will contain the updated time
 	if (RuleB(Character, ActiveInvSnapshots) && time(nullptr) >= GetNextInvSnapshotTime()) {
@@ -8585,50 +8591,63 @@ void Client::SetConsumption(int32 in_hunger, int32 in_thirst)
 
 void Client::Consume(const EQEmu::ItemData *item, uint8 type, int16 slot, bool auto_consume)
 {
-   if(!item) { return; }
+	if(!item) { return; }
 
-	uint32 cons_mod = 180;
+	/*
+		Spell Bonuses 2 digit form - 10, 20, 25 etc. (10%, 20%, 25%)
+		AA Bonus Ranks, 110, 125, 150 etc. (10%, 25%, 50%)
+	*/
 
-	int32 metabolism_bonus = spellbonuses.Metabolism + itembonuses.Metabolism + aabonuses.Metabolism;
+	float aa_bonus = ((float) aabonuses.Metabolism - 100) / 100;
+	float item_bonus = (float) itembonuses.Metabolism / 100;
+	float spell_bonus = (float) spellbonuses.Metabolism / 100;
 
-	if (metabolism_bonus)
-		cons_mod = cons_mod * metabolism_bonus * RuleI(Character, ConsumptionMultiplier) / 10000;
-	else
-		 cons_mod = cons_mod * RuleI(Character, ConsumptionMultiplier) / 100;
+	float metabolism_mod = 1 + spell_bonus + item_bonus + aa_bonus;
 
-	if (type == EQEmu::item::ItemTypeFood)
-   {
-	   int hchange = item->CastTime_ * cons_mod;
-	   hchange = mod_food_value(item, hchange);
+	Log(Logs::General, Logs::Food, "Client::Consume() Metabolism bonuses spell_bonus: (%.2f) item_bonus: (%.2f) aa_bonus: (%.2f) final: (%.2f)",
+		spell_bonus,
+		item_bonus,
+		aa_bonus,
+		metabolism_mod
+	);
 
-	   if(hchange < 0) { return; }
+	if (type == EQEmu::item::ItemTypeFood) {
+	   int hunger_change = item->CastTime_ * metabolism_mod;
+	   hunger_change = mod_food_value(item, hunger_change);
 
-	   m_pp.hunger_level += hchange;
+	   if(hunger_change < 0)
+		   return; 
+
+	   m_pp.hunger_level += hunger_change;
+
+	   Log(Logs::General, Logs::Food, "Consuming food, points added to hunger_level: %i - current_hunger: %i", hunger_change, m_pp.hunger_level);
+
 	   DeleteItemInInventory(slot, 1, false);
 
 	   if(!auto_consume) //no message if the client consumed for us
 		   entity_list.MessageClose_StringID(this, true, 50, 0, EATING_MESSAGE, GetName(), item->Name);
 
-#if EQDEBUG >= 5
-       Log(Logs::General, Logs::None, "Eating from slot:%i", (int)slot);
-#endif
+       Log(Logs::General, Logs::Food, "Eating from slot: %i", (int)slot);
+
    }
-   else
-   {
-	   int tchange = item->CastTime_ * cons_mod;
-	   tchange = mod_drink_value(item, tchange);
+   else {
+	   int thirst_change = item->CastTime_ * metabolism_mod;
+	   thirst_change = mod_drink_value(item, thirst_change);
 
-	   if(tchange < 0) { return; }
+	   if(thirst_change < 0)
+		   return;
 
-		m_pp.thirst_level += tchange;
+		m_pp.thirst_level += thirst_change;
+
 		DeleteItemInInventory(slot, 1, false);
+
+		Log(Logs::General, Logs::Food, "Consuming drink, points added to thirst_level: %i current_thirst: %i", thirst_change, m_pp.thirst_level);
 
 		if(!auto_consume) //no message if the client consumed for us
 			entity_list.MessageClose_StringID(this, true, 50, 0, DRINKING_MESSAGE, GetName(), item->Name);
 
-#if EQDEBUG >= 5
-        Log(Logs::General, Logs::None, "Drinking from slot:%i", (int)slot);
-#endif
+        Log(Logs::General, Logs::Food, "Drinking from slot: %i", (int)slot);
+
    }
 }
 

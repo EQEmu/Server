@@ -8702,6 +8702,8 @@ void Client::Handle_OP_ItemVerifyRequest(const EQApplicationPacket *app)
 					}
 					else
 					{
+
+						/*
 						//This is food/drink - consume it
 						if (item->ItemType == EQEmu::item::ItemTypeFood && m_pp.hunger_level < 5000)
 						{
@@ -8723,19 +8725,21 @@ void Client::Handle_OP_ItemVerifyRequest(const EQApplicationPacket *app)
 							//CheckIncreaseSkill(ALCOHOL_TOLERANCE, nullptr, 25);
 						}
 
-						if (m_pp.hunger_level > 6000)
-							m_pp.hunger_level = 6000;
-						if (m_pp.thirst_level > 6000)
-							m_pp.thirst_level = 6000;
-
 						EQApplicationPacket *outapp2 = nullptr;
 						outapp2 = new EQApplicationPacket(OP_Stamina, sizeof(Stamina_Struct));
 						Stamina_Struct* sta = (Stamina_Struct*)outapp2->pBuffer;
+
+						if (m_pp.hunger_level > 6000)
+							sta->food = 6000;
+						if (m_pp.thirst_level > 6000)
+							sta->water = 6000;
+
 						sta->food = m_pp.hunger_level;
 						sta->water = m_pp.thirst_level;
 
 						QueuePacket(outapp2);
 						safe_delete(outapp2);
+						*/
 					}
 
 				}
