@@ -38,6 +38,7 @@
 	#include <unistd.h>
 #endif
 
+#include "../common/data_verification.h"
 #include "../common/rulesys.h"
 #include "../common/skills.h"
 #include "../common/spdat.h"
@@ -523,6 +524,11 @@ bool Client::Process() {
 			DoEnduranceUpkeep();
 		}
 
+		if (consume_food_timer.Check()) {
+			m_pp.hunger_level = m_pp.hunger_level - 1;
+			m_pp.thirst_level = m_pp.thirst_level - 1;
+		}
+
 		if (tic_timer.Check() && !dead) {
 			CalcMaxHP();
 			CalcMaxMana();
@@ -533,7 +539,7 @@ bool Client::Process() {
 			DoManaRegen();
 			DoEnduranceRegen();
 			BuffProcess();
-			DoStaminaUpdate();
+			DoStaminaHungerUpdate();
 
 			if (tribute_timer.Check()) {
 				ToggleTribute(true);	//re-activate the tribute.
@@ -1833,28 +1839,33 @@ void Client::DoManaRegen() {
 	CheckManaEndUpdate();
 }
 
-
-void Client::DoStaminaUpdate() {
+void Client::DoStaminaHungerUpdate() {
 	if(!stamina_timer.Check())
 		return;
 
 	auto outapp = new EQApplicationPacket(OP_Stamina, sizeof(Stamina_Struct));
 	Stamina_Struct* sta = (Stamina_Struct*)outapp->pBuffer;
 
-	if(zone->GetZoneID() != 151) {
-		int loss = RuleI(Character, FoodLossPerUpdate);
-		if (m_pp.hunger_level > 0)
-			m_pp.hunger_level-=loss;
-		if (m_pp.thirst_level > 0)
-			m_pp.thirst_level-=loss;
+	Log(Logs::General, Logs::Food, "Client::DoStaminaHungerUpdate() hunger_level: %i thirst_level: %i before loss", m_pp.hunger_level, m_pp.thirst_level);
+
+	if (zone->GetZoneID() != 151) {
 		sta->food = m_pp.hunger_level > 6000 ? 6000 : m_pp.hunger_level;
-		sta->water = m_pp.thirst_level> 6000 ? 6000 : m_pp.thirst_level;
+		sta->water = m_pp.thirst_level > 6000 ? 6000 : m_pp.thirst_level;
 	}
 	else {
 		// No auto food/drink consumption in the Bazaar
 		sta->food = 6000;
 		sta->water = 6000;
 	}
+
+	Log(Logs::General, Logs::Food, 
+		"Client::DoStaminaHungerUpdate() Current hunger_level: %i = (%i minutes left) thirst_level: %i = (%i minutes left) - after loss", 
+		m_pp.hunger_level, 
+		m_pp.hunger_level,
+		m_pp.thirst_level,
+		m_pp.thirst_level
+	);
+
 	FastQueuePacket(&outapp);
 }
 

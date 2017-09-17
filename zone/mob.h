@@ -1222,7 +1222,7 @@ protected:
 	glm::vec4 m_Position;
 	/* Used to determine when an NPC has traversed so many units - to send a zone wide pos update */
 	glm::vec4 last_major_update_position; 
-	uint16 animation;
+	int animation; // this is really what MQ2 calls SpeedRun just packed like (int)(SpeedRun * 40.0f)
 	float base_size;
 	float size;
 	float runspeed;

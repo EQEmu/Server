@@ -6953,7 +6953,7 @@ void command_bestz(Client *c, const Seperator *sep) {
 
 		float best_z = zone->zonemap->FindBestZ(me, &hit);
 
-		if (best_z != -999999)
+		if (best_z != BEST_Z_INVALID)
 		{
 			c->Message(0, "Z is %.3f at (%.3f, %.3f).",  best_z, me.x, me.y);
 		}
