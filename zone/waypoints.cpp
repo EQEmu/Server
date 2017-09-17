@@ -867,7 +867,7 @@ void Mob::FixZ(int32 z_find_offset /*= 5*/)
 				duration
 			);
 
-			if ((new_z > -2000) && new_z != -999999) {
+			if ((new_z > -2000) && new_z != BEST_Z_INVALID) {
 				if (RuleB(Map, MobZVisualDebug))
 					this->SendAppearanceEffect(78, 0, 0, 0, 0);
 				

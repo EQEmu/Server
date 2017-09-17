@@ -163,7 +163,7 @@ void Mob::CalculateNewFearpoint()
 		ranx = GetX()+zone->random.Int(0, ran-1)-zone->random.Int(0, ran-1);
 		rany = GetY()+zone->random.Int(0, ran-1)-zone->random.Int(0, ran-1);
 		ranz = FindGroundZ(ranx,rany);
-		if (ranz == -999999)
+		if (ranz == BEST_Z_INVALID)
 			continue;
 		float fdist = ranz - GetZ();
 		if (fdist >= -12 && fdist <= 12 && CheckCoordLosNoZLeaps(GetX(),GetY(),GetZ(),ranx,rany,ranz))
