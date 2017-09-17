@@ -757,7 +757,7 @@ void Mob::SendToFixZ(float new_x, float new_y, float new_z) {
 	}
 }
 
-void Mob::FixZ(int32 z_find_offset /*= 5*/)
+void Mob::FixZ()
 {
 
 	BenchTimer timer;
