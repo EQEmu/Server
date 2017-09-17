@@ -1,6 +1,24 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
 
+== 9/17/2017 ==
+Akkadius: Add model/race offset to FixZ calc (KLS)
+Akkadius: Fix 95% of food/water consumption issues, if there are additional modifiers for race/class combos - those will need to be applied
+
+Stages should be put in place if not already:
+https://wiki.project1999.com/Food_and_drink#Stages_of_Hunger_and_Thirst
+
+Values stored in the database are 0-6000, previously we capped it at 6000 but previous math would have normal values in the 60k+ range in order for food to be consumed at a reasonable rate. We are now using more native logic where 1 = 1 minute, following logic:
+
+(Minutes)
+0 -  5	- This is a snack.
+6 -  20	- This is a meal.
+21 - 30	- This is a hearty meal.
+31 - 40	- This is a banquet size meal.
+41 - 50	- This meal is a feast!
+51 - 60	- This is an enduring meal!
+61 - X	- This is a miraculous meal!
+
 == 7/14/2017 ==
 Akkadius: HP Update tuning - HP Updates are now forced when a client is targeted
 Akkadius: Client position updates should be smoother (granted the client has a good connection)
