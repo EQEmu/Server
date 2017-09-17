@@ -951,7 +951,7 @@ public:
 	void				SendTo(float new_x, float new_y, float new_z);
 	void				SendToFixZ(float new_x, float new_y, float new_z);
 	float				GetZOffset() const;
-	void				FixZ();
+	void FixZ(int32 z_find_offset = 5);
 	void				NPCSpecialAttacks(const char* parse, int permtag, bool reset = true, bool remove = false);
 	inline uint32		DontHealMeBefore() const { return pDontHealMeBefore; }
 	inline uint32		DontBuffMeBefore() const { return pDontBuffMeBefore; }
