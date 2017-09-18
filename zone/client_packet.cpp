@@ -2139,8 +2139,8 @@ void Client::Handle_OP_AdventureMerchantRequest(const EQApplicationPacket *app)
 			ss << item->ID << "|";
 			ss << item->LDoNPrice << "|";
 			ss << theme << "|";
-			ss << "0|";
-			ss << "1|";
+			ss << (item->Stackable ? 1 : 0) << "|";
+			ss << (item->LoreFlag ? 1 : 0) << "|";
 			ss << item->Races << "|";
 			ss << item->Classes;
 			count++;
