@@ -120,6 +120,13 @@ void Client::CalcBonuses()
 
 	if (GetMaxXTargets() != 5 + aabonuses.extra_xtargets)
 		SetMaxXTargets(5 + aabonuses.extra_xtargets);
+
+	// hmm maybe a better way to do this
+	int metabolism = spellbonuses.Metabolism + itembonuses.Metabolism + aabonuses.Metabolism;
+	int timer = GetClass() == MONK ? CONSUMPTION_MNK_TIMER : CONSUMPTION_TIMER;
+	timer = timer * (100 + metabolism) / 100;
+	if (timer != consume_food_timer.GetTimerTime())
+		consume_food_timer.SetTimer(timer);
 }
 
 int Client::CalcRecommendedLevelBonus(uint8 level, uint8 reclevel, int basestat)
@@ -2501,6 +2508,10 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 
 			case SE_MagicWeapon:
 				new_bonus->MagicWeapon = true;
+				break;
+
+			case SE_Hunger:
+				new_bonus->hunger = true;
 				break;
 
 			case SE_IncreaseBlockChance:

@@ -1410,6 +1410,10 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	drakkin_tattoo = m_pp.drakkin_tattoo;
 	drakkin_details = m_pp.drakkin_details;
 
+	// we know our class now, so we might have to fix our consume timer!
+	if (class_ == MONK)
+		consume_food_timer.SetTimer(CONSUMPTION_MNK_TIMER);
+
 	/* If GM not set in DB, and does not meet min status to be GM, reset */
 	if (m_pp.gm && admin < minStatusToBeGM)
 		m_pp.gm = 0;

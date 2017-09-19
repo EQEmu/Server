@@ -1458,7 +1458,6 @@ private:
 	Timer hpupdate_timer;
 	Timer camp_timer;
 	Timer process_timer;
-	Timer stamina_timer;
 	Timer consume_food_timer;
 	Timer zoneinpacket_timer;
 	Timer linkdead_timer;

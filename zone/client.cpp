@@ -123,8 +123,7 @@ Client::Client(EQStreamInterface* ieqs)
 	hpupdate_timer(2000),
 	camp_timer(29000),
 	process_timer(100),
-	stamina_timer(40000),
-	consume_food_timer(60000),
+	consume_food_timer(CONSUMPTION_TIMER),
 	zoneinpacket_timer(1000),
 	linkdead_timer(RuleI(Zone,ClientLinkdeadMS)),
 	dead_timer(2000),
@@ -8591,64 +8590,52 @@ void Client::SetConsumption(int32 in_hunger, int32 in_thirst)
 
 void Client::Consume(const EQEmu::ItemData *item, uint8 type, int16 slot, bool auto_consume)
 {
-	if(!item) { return; }
+	if (!item)
+		return;
 
-	/*
-		Spell Bonuses 2 digit form - 10, 20, 25 etc. (10%, 20%, 25%)
-		AA Bonus Ranks, 110, 125, 150 etc. (10%, 25%, 50%)
-	*/
+	int increase = item->CastTime_ * 100;
+	if (!auto_consume) // force feeding is half as effective
+		increase /= 2;
 
-	float aa_bonus = ((float) aabonuses.Metabolism - 100) / 100;
-	float item_bonus = (float) itembonuses.Metabolism / 100;
-	float spell_bonus = (float) spellbonuses.Metabolism / 100;
-
-	float metabolism_mod = 1 + spell_bonus + item_bonus + aa_bonus;
-
-	Log(Logs::General, Logs::Food, "Client::Consume() Metabolism bonuses spell_bonus: (%.2f) item_bonus: (%.2f) aa_bonus: (%.2f) final: (%.2f)",
-		spell_bonus,
-		item_bonus,
-		aa_bonus,
-		metabolism_mod
-	);
+	if (increase < 0) // wasn't food? oh well
+		return;
 
 	if (type == EQEmu::item::ItemTypeFood) {
-	   int hunger_change = item->CastTime_ * metabolism_mod;
-	   hunger_change = mod_food_value(item, hunger_change);
+		increase = mod_food_value(item, increase);
 
-	   if(hunger_change < 0)
-		   return; 
+		if (increase < 0)
+			return;
 
-	   m_pp.hunger_level += hunger_change;
+		m_pp.hunger_level += increase;
 
-	   Log(Logs::General, Logs::Food, "Consuming food, points added to hunger_level: %i - current_hunger: %i", hunger_change, m_pp.hunger_level);
-
-	   DeleteItemInInventory(slot, 1, false);
-
-	   if(!auto_consume) //no message if the client consumed for us
-		   entity_list.MessageClose_StringID(this, true, 50, 0, EATING_MESSAGE, GetName(), item->Name);
-
-       Log(Logs::General, Logs::Food, "Eating from slot: %i", (int)slot);
-
-   }
-   else {
-	   int thirst_change = item->CastTime_ * metabolism_mod;
-	   thirst_change = mod_drink_value(item, thirst_change);
-
-	   if(thirst_change < 0)
-		   return;
-
-		m_pp.thirst_level += thirst_change;
+		Log(Logs::General, Logs::Food, "Consuming food, points added to hunger_level: %i - current_hunger: %i",
+		    increase, m_pp.hunger_level);
 
 		DeleteItemInInventory(slot, 1, false);
 
-		Log(Logs::General, Logs::Food, "Consuming drink, points added to thirst_level: %i current_thirst: %i", thirst_change, m_pp.thirst_level);
+		if (!auto_consume) // no message if the client consumed for us
+			entity_list.MessageClose_StringID(this, true, 50, 0, EATING_MESSAGE, GetName(), item->Name);
 
-		if(!auto_consume) //no message if the client consumed for us
+		Log(Logs::General, Logs::Food, "Eating from slot: %i", (int)slot);
+
+	} else {
+		increase = mod_drink_value(item, increase);
+
+		if (increase < 0)
+			return;
+
+		m_pp.thirst_level += increase;
+
+		DeleteItemInInventory(slot, 1, false);
+
+		Log(Logs::General, Logs::Food, "Consuming drink, points added to thirst_level: %i current_thirst: %i",
+		    increase, m_pp.thirst_level);
+
+		if (!auto_consume) // no message if the client consumed for us
 			entity_list.MessageClose_StringID(this, true, 50, 0, DRINKING_MESSAGE, GetName(), item->Name);
 
-        Log(Logs::General, Logs::Food, "Drinking from slot: %i", (int)slot);
-
-   }
+		Log(Logs::General, Logs::Food, "Drinking from slot: %i", (int)slot);
+	}
 }
 
 void Client::SendMarqueeMessage(uint32 type, uint32 priority, uint32 fade_in, uint32 fade_out, uint32 duration, std::string msg)
