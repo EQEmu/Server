@@ -186,6 +186,7 @@ RULE_INT(Skills, MaxTrainSpecializations, 50)	// Max level a GM trainer will tra
 RULE_INT(Skills, SwimmingStartValue, 100)
 RULE_BOOL(Skills, TrainSenseHeading, false)
 RULE_INT(Skills, SenseHeadingStartValue, 200)
+RULE_BOOL(Skills, SelfLanguageLearning, true)
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Pets)
