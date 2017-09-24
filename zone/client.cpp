@@ -1225,9 +1225,14 @@ void Client::ChannelMessageSend(const char* from, const char* to, uint8 chan_num
 	strcpy(&cm->message[0], buffer);
 	QueuePacket(&app);
 
-	if ((chan_num == 2) && (ListenerSkill < 100)) {	// group message in unmastered language, check for skill up
-		if (m_pp.languages[language] <= lang_skill)
-			CheckLanguageSkillIncrease(language, lang_skill);
+	bool senderCanTrainSelf = RuleB(Client, SelfLanguageLearning);
+	bool weAreNotSender = strcmp(this->GetCleanName(), cm->sender);
+
+	if (senderCanTrainSelf || weAreNotSender) {
+		if ((chan_num == 2) && (ListenerSkill < 100)) {	// group message in unmastered language, check for skill up
+			if (m_pp.languages[language] <= lang_skill)
+				CheckLanguageSkillIncrease(language, lang_skill);
+		}
 	}
 }
 
