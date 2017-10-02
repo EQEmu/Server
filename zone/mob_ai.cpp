@@ -57,7 +57,11 @@ bool NPC::AICastSpell(Mob* tar, uint8 iChance, uint32 iSpellTypes) {
 	if(AI_HasSpells() == false)
 		return false;
 
-	if (iChance < 100) {
+	// Rooted mobs were just standing around when tar out of range.
+	// Any sane mob would cast if they can.
+	bool cast_only_option = (IsRooted() && !CombatRange(tar));
+
+	if (!cast_only_option && iChance < 100) {
 		if (zone->random.Int(0, 100) >= iChance)
 			return false;
 	}
