@@ -2841,6 +2841,8 @@ void Bot::Spawn(Client* botCharacterOwner) {
 		FaceTarget(botCharacterOwner);
 		UpdateEquipmentLight();
 		UpdateActiveLight();
+
+		this->m_targetable = true;
 		entity_list.AddBot(this, true, true);
 		// Load pet
 		LoadPet();
