@@ -3069,7 +3069,7 @@ void Client::Handle_OP_AugmentItem(const EQApplicationPacket *app)
 			}
 			else
 			{
-				if (((tobe_auged->IsAugmentSlotAvailable(new_aug->GetAugmentType(), in_augment->augment_index)) != -1) &&
+				if ((tobe_auged->IsAugmentSlotAvailable(new_aug->GetAugmentType(), in_augment->augment_index)) &&
 					(tobe_auged->AvailableWearSlot(new_aug->GetItem()->Slots)))
 				{
 					old_aug = tobe_auged->RemoveAugment(in_augment->augment_index);
