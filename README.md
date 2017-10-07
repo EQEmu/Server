@@ -53,10 +53,15 @@ forum, although pull requests will be much quicker and easier on all parties.
  - **User Discord Channel**: `#general`
  - **Developer Discord Channel**: `#eqemucoders`
 
-Resources
----
+## Resources
 - [EQEmulator Forums](http://www.eqemulator.org/forums)
 - [EQEmulator Wiki](http://wiki.eqemulator.org/i?M=Wiki)
+
+## Related Repositories
+* [ProjectEQ Quests](https://github.com/ProjectEQ/projecteqquests)
+* [Maps](https://github.com/Akkadius/EQEmuMaps)
+* [Installer Resources](https://github.com/Akkadius/EQEmuInstall)
+* [Zone Utilities](https://github.com/EQEmu/zone-utilities) - Various utilities and libraries for parsing, rendering and manipulating EQ Zone files.
 
 ## Other License Info
 
