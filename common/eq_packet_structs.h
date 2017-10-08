@@ -854,6 +854,7 @@ static const uint32 MAX_PP_REF_SPELLBOOK = 480;	// Set for Player Profile size r
 static const uint32 MAX_PP_REF_MEMSPELL = 9; // Set for Player Profile size retain
 
 static const uint32 MAX_PP_SKILL		= PACKET_SKILL_ARRAY_SIZE;	// 100 - actual skills buffer size
+static const uint32 MAX_PP_INNATE_SKILL	= 25;
 static const uint32 MAX_PP_AA_ARRAY		= 240;
 static const uint32 MAX_GROUP_MEMBERS	= 6;
 static const uint32 MAX_RECAST_TYPES	= 20;
@@ -993,7 +994,8 @@ struct PlayerProfile_Struct
 /*4768*/	int32				platinum_shared;	// Platinum shared between characters
 /*4772*/	uint8				unknown4808[24];
 /*4796*/	uint32				skills[MAX_PP_SKILL];	// [400] List of skills	// 100 dword buffer
-/*5196*/	uint8				unknown5132[184];
+/*5196*/	uint32				InnateSkills[MAX_PP_INNATE_SKILL];
+/*5296*/	uint8				unknown5132[84];
 /*5380*/	uint32				pvp2;				//
 /*5384*/	uint32				unknown5420;		//
 /*5388*/	uint32				pvptype;			//

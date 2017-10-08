@@ -1,5 +1,14 @@
 EQEMu Changelog (Started on Sept 24, 2003 15:50)
 -------------------------------------------------------
+== 10/08/2017 ==
+Mackal: Rework regens
+
+Regen will now match whats reported by modern clients, besides where they lie due to known bugs
+
+HP and END regens are now based on the BaseData.txt values allowing easy customization
+Those cases:
+	- The client always applies hunger penalties, it appears they don't exist anymore on live you can turn them on with a rule
+	- The way the client gets buff mana/end regen benefits incorrectly applies the bard mod making these values lie sometimes
 
 == 9/17/2017 ==
 Akkadius: Add model/race offset to FixZ calc (KLS)

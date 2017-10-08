@@ -131,6 +131,11 @@ enum SpellAffectIndex {
 	SAI_NPC_Special_80			= 80,
 	SAI_Trap_Lock				= 88
 };
+
+enum class GlobalGroup {
+	Lich = 46,
+};
+
 enum RESISTTYPE
 {
 	RESIST_NONE = 0,

@@ -915,7 +915,7 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 			newbon->GivePetGroupTarget = true;
 			break;
 		case SE_ItemHPRegenCapIncrease:
-			newbon->ItemHPRegenCap = +base1;
+			newbon->ItemHPRegenCap += base1;
 			break;
 		case SE_Ambidexterity:
 			newbon->Ambidexterity += base1;

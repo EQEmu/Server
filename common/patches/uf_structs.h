@@ -848,6 +848,7 @@ static const uint32 MAX_PP_LANGUAGE		= 25; //
 static const uint32 MAX_PP_SPELLBOOK	= 720; // Confirmed 60 pages on Underfoot now
 static const uint32 MAX_PP_MEMSPELL		= 12; //was 9 now 10 on Underfoot
 static const uint32 MAX_PP_SKILL		= PACKET_SKILL_ARRAY_SIZE;	// 100 - actual skills buffer size
+static const uint32 MAX_PP_INNATE_SKILL	= 25;
 static const uint32 MAX_PP_AA_ARRAY		= 300; //was 299
 static const uint32 MAX_GROUP_MEMBERS	= 6;
 static const uint32 MAX_RECAST_TYPES	= 20;
@@ -954,7 +955,8 @@ struct PlayerProfile_Struct
 /*07336*/ uint32  silver_cursor;		// Silver Pieces on cursor
 /*07340*/ uint32  copper_cursor;		// Copper Pieces on cursor
 /*07344*/ uint32  skills[MAX_PP_SKILL];	// [400] List of skills	// 100 dword buffer
-/*07744*/ uint8   unknown07644[136];
+/*07744*/ uint32  InnateSkills[MAX_PP_INNATE_SKILL];
+/*07844*/ uint8   unknown07644[36];
 /*07880*/ uint32  toxicity;				// Potion Toxicity (15=too toxic, each potion adds 3)
 /*07884*/ uint32  thirst_level;			// Drink (ticks till next drink)
 /*07888*/ uint32  hunger_level;			// Food (ticks till next eat)

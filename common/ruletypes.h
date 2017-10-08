@@ -70,7 +70,7 @@ RULE_INT(Character, ConsumptionMultiplier, 100) //item's hunger restored = this 
 RULE_BOOL(Character, HealOnLevel, false)
 RULE_BOOL(Character, FeignKillsPet, false)
 RULE_INT(Character, ItemManaRegenCap, 15)
-RULE_INT(Character, ItemHealthRegenCap, 35)
+RULE_INT(Character, ItemHealthRegenCap, 30)
 RULE_INT(Character, ItemDamageShieldCap, 30)
 RULE_INT(Character, ItemAccuracyCap, 150)
 RULE_INT(Character, ItemAvoidanceCap, 100)
@@ -91,10 +91,12 @@ RULE_INT(Character, HasteCap, 100) // Haste cap for non-v3(overhaste) haste.
 RULE_INT(Character, SkillUpModifier, 100) //skill ups are at 100%
 RULE_BOOL(Character, SharedBankPlat, false) //off by default to prevent duping for now
 RULE_BOOL(Character, BindAnywhere, false)
-RULE_INT(Character, RestRegenPercent, 0) // Set to >0 to enable rest state bonus HP and mana regen.
+RULE_BOOL(Character, RestRegenEnabled, true) // Enable OOC Regen
+RULE_INT(Character, RestRegenHP, 180) // seconds until full from 0. this is actually zone setable, but most or all zones are 180
+RULE_INT(Character, RestRegenMana, 180) // seconds until full from 0. this is actually zone setable, but most or all zones are 180
+RULE_INT(Character, RestRegenEnd, 180) // seconds until full from 0. this is actually zone setable, but most or all zones are 180
 RULE_INT(Character, RestRegenTimeToActivate, 30) // Time in seconds for rest state regen to kick in.
 RULE_INT(Character, RestRegenRaidTimeToActivate, 300) // Time in seconds for rest state regen to kick in with a raid target.
-RULE_BOOL(Character, RestRegenEndurance, false) // Whether rest regen will work for endurance or not.
 RULE_INT(Character, KillsPerGroupLeadershipAA, 250) // Number of dark blues or above per Group Leadership AA
 RULE_INT(Character, KillsPerRaidLeadershipAA, 250) // Number of dark blues or above per Raid Leadership AA
 RULE_INT(Character, MaxFearDurationForPlayerCharacter, 4) //4 tics, each tic calculates every 6 seconds.
@@ -118,6 +120,7 @@ RULE_BOOL(Character, EnableXTargetting, true) // Enable Extended Targetting Wind
 RULE_BOOL(Character, EnableAggroMeter, true) // Enable Aggro Meter, for users with RoF and later clients.
 RULE_BOOL(Character, KeepLevelOverMax, false) // Don't delevel a character that has somehow gone over the level cap
 RULE_INT(Character, FoodLossPerUpdate, 32) // How much food/water you lose per stamina update
+RULE_BOOL(Character, EnableHungerPenalties, false) // being hungry/thirsty has negative effects -- it does appear normal live servers do not have penalties
 RULE_INT(Character, BaseInstrumentSoftCap, 36) // Softcap for instrument mods, 36 commonly referred to as "3.6" as well.
 RULE_BOOL(Character, UseSpellFileSongCap, true) // When they removed the AA that increased the cap they removed the above and just use the spell field
 RULE_INT(Character, BaseRunSpeedCap, 158) // Base Run Speed Cap, on live it's 158% which will give you a runspeed of 1.580 hard capped to 225.
