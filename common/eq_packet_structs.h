@@ -551,6 +551,7 @@ struct BlockedBuffs_Struct
 /*86*/ uint16 Flags;
 };
 
+// same for adding
 struct RemoveNimbusEffect_Struct
 {
 /*00*/ uint32 spawnid;			// Spawn ID

@@ -1686,6 +1686,11 @@ void Lua_Mob::DoKnockback(Lua_Mob caster, uint32 pushback, uint32 pushup) {
 	self->DoKnockback(caster, pushback, pushup);
 }
 
+void Lua_Mob::AddNimbusEffect(int effect_id) {
+	Lua_Safe_Call_Void();
+	self->AddNimbusEffect(effect_id);
+}
+
 void Lua_Mob::RemoveNimbusEffect(int effect_id) {
 	Lua_Safe_Call_Void();
 	self->RemoveNimbusEffect(effect_id);
@@ -2367,6 +2372,7 @@ luabind::scope lua_register_mob() {
 		.def("SetSlotTint", (void(Lua_Mob::*)(int,int,int,int))&Lua_Mob::SetSlotTint)
 		.def("WearChange", (void(Lua_Mob::*)(int,int,uint32))&Lua_Mob::WearChange)
 		.def("DoKnockback", (void(Lua_Mob::*)(Lua_Mob,uint32,uint32))&Lua_Mob::DoKnockback)
+		.def("AddNimbusEffect", (void(Lua_Mob::*)(int))&Lua_Mob::AddNimbusEffect)
 		.def("RemoveNimbusEffect", (void(Lua_Mob::*)(int))&Lua_Mob::RemoveNimbusEffect)
 		.def("IsFeared", (bool(Lua_Mob::*)(void))&Lua_Mob::IsFeared)
 		.def("IsBlind", (bool(Lua_Mob::*)(void))&Lua_Mob::IsBlind)
