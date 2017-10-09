@@ -301,6 +301,14 @@ public:
 	int CalcCurrentWeight();
 	int CalcATK();
 	void FilteredMessage(Mob *sender, uint32 type, int filter, const char* message);
+	void EnableAreaHPRegen(int value);
+	void DisableAreaHPRegen();
+	void EnableAreaManaRegen(int value);
+	void DisableAreaManaRegen();
+	void EnableAreaEndRegen(int value);
+	void DisableAreaEndRegen();
+	void EnableAreaRegens(int value);
+	void DisableAreaRegens();
 };
 
 #endif
