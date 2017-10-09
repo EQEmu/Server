@@ -9087,40 +9087,37 @@ bool Client::CanMedOnHorse()
 void Client::EnableAreaHPRegen(int value)
 {
 	AreaHPRegen = value * 0.001f;
-	SendAppearancePacket(AT_AreaHPRegen, value); // does this send to whole zone?
-	// send test and particles?
+	SendAppearancePacket(AT_AreaHPRegen, value, false);
 }
 
 void Client::DisableAreaHPRegen()
 {
 	AreaHPRegen = 1.0f;
-	SendAppearancePacket(AT_AreaHPRegen, 1000);
+	SendAppearancePacket(AT_AreaHPRegen, 1000, false);
 }
 
 void Client::EnableAreaManaRegen(int value)
 {
 	AreaManaRegen = value * 0.001f;
-	SendAppearancePacket(AT_AreaManaRegen, value); // does this send to whole zone?
-	// send test and particles?
+	SendAppearancePacket(AT_AreaManaRegen, value, false);
 }
 
 void Client::DisableAreaManaRegen()
 {
 	AreaManaRegen = 1.0f;
-	SendAppearancePacket(AT_AreaManaRegen, 1000);
+	SendAppearancePacket(AT_AreaManaRegen, 1000, false);
 }
 
 void Client::EnableAreaEndRegen(int value)
 {
 	AreaEndRegen = value * 0.001f;
-	SendAppearancePacket(AT_AreaEndRegen, value); // does this send to whole zone?
-	// send test and particles?
+	SendAppearancePacket(AT_AreaEndRegen, value, false);
 }
 
 void Client::DisableAreaEndRegen()
 {
 	AreaEndRegen = 1.0f;
-	SendAppearancePacket(AT_AreaEndRegen, 1000);
+	SendAppearancePacket(AT_AreaEndRegen, 1000, false);
 }
 
 void Client::EnableAreaRegens(int value)
