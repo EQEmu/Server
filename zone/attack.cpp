@@ -3922,10 +3922,10 @@ void Mob::TryWeaponProc(const EQEmu::ItemInstance *inst, const EQEmu::ItemData *
 		float WPC = ProcChance * (100.0f + // Proc chance for this weapon
 			static_cast<float>(weapon->ProcRate)) / 100.0f;
 		if (zone->random.Roll(WPC)) {	// 255 dex = 0.084 chance of proc. No idea what this number should be really.
-			if (weapon->Proc.Level > ourlevel) {
+			if (weapon->Proc.Level2 > ourlevel) {
 				Log(Logs::Detail, Logs::Combat,
 					"Tried to proc (%s), but our level (%d) is lower than required (%d)",
-					weapon->Name, ourlevel, weapon->Proc.Level);
+					weapon->Name, ourlevel, weapon->Proc.Level2);
 				if (IsPet()) {
 					Mob *own = GetOwner();
 					if (own)
@@ -3962,7 +3962,7 @@ void Mob::TryWeaponProc(const EQEmu::ItemInstance *inst, const EQEmu::ItemData *
 				float APC = ProcChance * (100.0f + // Proc chance for this aug
 					static_cast<float>(aug->ProcRate)) / 100.0f;
 				if (zone->random.Roll(APC)) {
-					if (aug->Proc.Level > ourlevel) {
+					if (aug->Proc.Level2 > ourlevel) {
 						if (IsPet()) {
 							Mob *own = GetOwner();
 							if (own)
