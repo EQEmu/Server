@@ -1274,6 +1274,11 @@ void Mob::ClearFeignMemory() {
 		AI_feign_remember_timer->Disable();
 }
 
+bool Mob::IsOnFeignMemory(Client *attacker) const
+{
+	return feign_memory_list.find(attacker->CharacterID()) != feign_memory_list.end();
+}
+
 bool Mob::PassCharismaCheck(Mob* caster, uint16 spell_id) {
 
 	/*
