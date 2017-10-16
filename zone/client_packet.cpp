@@ -11480,7 +11480,7 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket *app)
 
 			Client *client_moved = entity_list.GetClientByName(raid_command_packet->leader_name);
 
-			if (client_moved) {
+			if (client_moved && client_moved->GetRaid()) {
 				client_moved->GetRaid()->SendHPManaEndPacketsTo(client_moved);
 				client_moved->GetRaid()->SendHPManaEndPacketsFrom(client_moved);
 
