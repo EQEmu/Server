@@ -3949,10 +3949,17 @@ int16 Mob::GetHealRate(uint16 spell_id, Mob* caster) {
 
 bool Mob::TryFadeEffect(int slot)
 {
+	if (!buffs[slot].spellid)
+		return false;
+
 	if(IsValidSpell(buffs[slot].spellid))
 	{
 		for(int i = 0; i < EFFECT_COUNT; i++)
 		{
+
+			if (!spells[buffs[slot].spellid].effectid[i])
+				continue;
+
 			if (spells[buffs[slot].spellid].effectid[i] == SE_CastOnFadeEffectAlways ||
 				spells[buffs[slot].spellid].effectid[i] == SE_CastOnRuneFadeEffect)
 			{
