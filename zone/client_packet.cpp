@@ -12085,15 +12085,6 @@ void Client::Handle_OP_SenseHeading(const EQApplicationPacket *app)
 
 	int chancemod = 0;
 
-	// The client seems to limit sense heading packets based on skill
-	// level.  So if we're really low, we don't hit this routine very often.
-	// I think it's the GUI deciding when to skill you up.
-	// So, I'm adding a mod here which is larger at lower levels so
-	// very low levels get a much better chance to skill up when the GUI
-	// eventually sends a message.
-	if (GetLevel() <= 8)
-		chancemod += (9 - level) * 10;
-
 	CheckIncreaseSkill(EQEmu::skills::SkillSenseHeading, nullptr, chancemod);
 
 	return;
