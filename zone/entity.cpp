@@ -1419,10 +1419,10 @@ void EntityList::RemoveFromTargets(Mob *mob, bool RemoveFromXTargets)
 			continue;
 
 		if (RemoveFromXTargets) {
-			if (m->IsClient() && mob->CheckAggro(m))
+			if (m->IsClient() && (mob->CheckAggro(m) || mob->IsOnFeignMemory(m->CastToClient())))
 				m->CastToClient()->RemoveXTarget(mob, false);
 			// FadingMemories calls this function passing the client.
-			else if (mob->IsClient() && m->CheckAggro(mob))
+			else if (mob->IsClient() && (m->CheckAggro(mob) || m->IsOnFeignMemory(mob->CastToClient())))
 				mob->CastToClient()->RemoveXTarget(m, false);
 		}
 
@@ -1461,7 +1461,7 @@ void EntityList::RefreshAutoXTargets(Client *c)
 		if (!m || m->GetHP() <= 0)
 			continue;
 
-		if (m->CheckAggro(c) && !c->IsXTarget(m)) {
+		if ((m->CheckAggro(c) || m->IsOnFeignMemory(c)) && !c->IsXTarget(m)) {
 			c->AddAutoXTarget(m, false); // we only call this before a bulk, so lets not send right away
 			break;
 		}
@@ -2617,12 +2617,13 @@ void EntityList::RemoveFromHateLists(Mob *mob, bool settoone)
 	auto it = npc_list.begin();
 	while (it != npc_list.end()) {
 		if (it->second->CheckAggro(mob)) {
-			if (!settoone)
+			if (!settoone) {
 				it->second->RemoveFromHateList(mob);
-			else
+				if (mob->IsClient())
+					mob->CastToClient()->RemoveXTarget(it->second, false); // gotta do book keeping
+			} else {
 				it->second->SetHateAmountOnEnt(mob, 1);
-			if (mob->IsClient())
-				mob->CastToClient()->RemoveXTarget(it->second, false); // gotta do book keeping
+			}
 		}
 		++it;
 	}
@@ -3079,7 +3080,10 @@ void EntityList::ClearAggro(Mob* targ)
 				c->RemoveXTarget(it->second, false);
 			it->second->RemoveFromHateList(targ);
 		}
-		it->second->RemoveFromFeignMemory(targ->CastToClient()); //just in case we feigned
+		if (c && it->second->IsOnFeignMemory(c)) {
+			it->second->RemoveFromFeignMemory(c); //just in case we feigned
+			c->RemoveXTarget(it->second, false);
+		}
 		++it;
 	}
 }
@@ -3088,7 +3092,8 @@ void EntityList::ClearFeignAggro(Mob *targ)
 {
 	auto it = npc_list.begin();
 	while (it != npc_list.end()) {
-		if (it->second->CheckAggro(targ)) {
+		// add Feign Memory check because sometimes weird stuff happens
+		if (it->second->CheckAggro(targ) || (targ->IsClient() && it->second->IsOnFeignMemory(targ->CastToClient()))) {
 			if (it->second->GetSpecialAbility(IMMUNE_FEIGN_DEATH)) {
 				++it;
 				continue;
