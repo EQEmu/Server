@@ -66,6 +66,7 @@ RULE_INT(Character, AutosaveIntervalS, 300)	//0=disabled
 RULE_INT(Character, HPRegenMultiplier, 100)
 RULE_INT(Character, ManaRegenMultiplier, 100)
 RULE_INT(Character, EnduranceRegenMultiplier, 100)
+RULE_BOOL(Character, OldMinMana, false) // this is used for servers that want to follow older skill cap formulas so they can still have some regen w/o mediate
 RULE_INT(Character, ConsumptionMultiplier, 100) //item's hunger restored = this value * item's food level, 100 = normal, 50 = people eat 2x as fast, 200 = people eat 2x as slow
 RULE_BOOL(Character, HealOnLevel, false)
 RULE_BOOL(Character, FeignKillsPet, false)

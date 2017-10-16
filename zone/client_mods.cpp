@@ -1240,6 +1240,10 @@ int32 Client::CalcManaRegen(bool bCombat)
 {
 	int regen = 0;
 	auto level = GetLevel();
+	// so the new formulas break down with older skill caps where you don't have the skill until 4 or 8
+	// so for servers that want to use the old skill progression they can set this rule so they
+	// will get at least 1 for standing and 2 for sitting.
+	bool old = RuleB(Character, OldMinMana);
 	if (!IsStarved()) {
 		// client does some base regen for shrouds here
 		if (IsSitting() || CanMedOnHorse()) {
@@ -1255,6 +1259,10 @@ int32 Client::CalcManaRegen(bool bCombat)
 						regen += skill / 15;
 				}
 			}
+			if (old)
+				regen = std::max(regen, 2);
+		} else if (old) {
+			regen = std::max(regen, 1);
 		}
 	}
 
