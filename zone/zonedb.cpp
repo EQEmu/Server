@@ -1433,6 +1433,11 @@ bool ZoneDatabase::SaveCharacterInventorySnapshot(uint32 character_id){
 }
 
 bool ZoneDatabase::SaveCharacterData(uint32 character_id, uint32 account_id, PlayerProfile_Struct* pp, ExtendedProfile_Struct* m_epp){
+	
+	/* If this is ever zero - the client hasn't fully loaded and potentially crashed during zone */
+	if (account_id <= 0)
+		return false;
+	
 	clock_t t = std::clock(); /* Function timer start */
 	std::string query = StringFormat(
 		"REPLACE INTO `character_data` ("
