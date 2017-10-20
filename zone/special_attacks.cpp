@@ -37,6 +37,7 @@ int Mob::GetBaseSkillDamage(EQEmu::skills::SkillType skill, Mob *target)
 	case EQEmu::skills::SkillDragonPunch:
 	case EQEmu::skills::SkillEagleStrike:
 	case EQEmu::skills::SkillTigerClaw:
+	case EQEmu::skills::SkillRoundKick:
 		if (skill_level >= 25)
 			base++;
 		if (skill_level >= 75)
