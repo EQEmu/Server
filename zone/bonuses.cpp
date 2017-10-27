@@ -120,6 +120,13 @@ void Client::CalcBonuses()
 
 	if (GetMaxXTargets() != 5 + aabonuses.extra_xtargets)
 		SetMaxXTargets(5 + aabonuses.extra_xtargets);
+
+	// hmm maybe a better way to do this
+	int metabolism = spellbonuses.Metabolism + itembonuses.Metabolism + aabonuses.Metabolism;
+	int timer = GetClass() == MONK ? CONSUMPTION_MNK_TIMER : CONSUMPTION_TIMER;
+	timer = timer * (100 + metabolism) / 100;
+	if (timer != consume_food_timer.GetTimerTime())
+		consume_food_timer.SetTimer(timer);
 }
 
 int Client::CalcRecommendedLevelBonus(uint8 level, uint8 reclevel, int basestat)
@@ -908,7 +915,7 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 			newbon->GivePetGroupTarget = true;
 			break;
 		case SE_ItemHPRegenCapIncrease:
-			newbon->ItemHPRegenCap = +base1;
+			newbon->ItemHPRegenCap += base1;
 			break;
 		case SE_Ambidexterity:
 			newbon->Ambidexterity += base1;
@@ -1002,6 +1009,15 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 			break;
 		case SE_RiposteChance:
 			newbon->RiposteChance += base1;
+			break;
+		case SE_DodgeChance:
+			newbon->DodgeChance += base1;
+			break;
+		case SE_ParryChance:
+			newbon->ParryChance += base1;
+			break;
+		case SE_IncreaseBlockChance:
+			newbon->IncreaseBlockChance += base1;
 			break;
 		case SE_Flurry:
 			newbon->FlurryChance += base1;
@@ -2494,8 +2510,17 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 				new_bonus->MagicWeapon = true;
 				break;
 
+			case SE_Hunger:
+				new_bonus->hunger = true;
+				break;
+
 			case SE_IncreaseBlockChance:
-				new_bonus->IncreaseBlockChance += effect_value;
+				if (AdditiveWornBonus)
+					new_bonus->IncreaseBlockChance += effect_value;
+				else if (effect_value < 0 && new_bonus->IncreaseBlockChance > effect_value)
+					new_bonus->IncreaseBlockChance = effect_value;
+				else if (new_bonus->IncreaseBlockChance < effect_value)
+					new_bonus->IncreaseBlockChance = effect_value;
 				break;
 
 			case SE_PersistantCasting:

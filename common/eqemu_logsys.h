@@ -88,6 +88,7 @@ enum LogCategory {
 	Headless_Client,
 	HP_Update,
 	FixZ,
+	Food,
 	MaxCategoryID	/* Don't Remove this*/
 };
 
@@ -140,7 +141,8 @@ static const char* LogCategoryName[LogCategory::MaxCategoryID] = {
 	"Client Login",
 	"Headless Client",
 	"HP Update",
-	"FixZ"
+	"FixZ",
+	"Food"
 };
 }
 

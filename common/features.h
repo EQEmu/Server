@@ -276,6 +276,11 @@ enum {
 #define SAYLINK_ITEM_ID 0xFFFFF
 
 
+// consumption timers for food/drink here instead of rules because the client
+// uses these. Times in ms.
+#define CONSUMPTION_TIMER 46000
+#define CONSUMPTION_MNK_TIMER 92000
+
 /*
 
 Developer configuration

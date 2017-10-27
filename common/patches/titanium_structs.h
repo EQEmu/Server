@@ -740,6 +740,7 @@ static const uint32 MAX_PP_LANGUAGE		= 28;
 static const uint32 MAX_PP_SPELLBOOK	= 400;
 static const uint32 MAX_PP_MEMSPELL		= 9;
 static const uint32 MAX_PP_SKILL		= PACKET_SKILL_ARRAY_SIZE;	// 100 - actual skills buffer size
+static const uint32 MAX_PP_INNATE_SKILL	= 25;
 static const uint32 MAX_PP_AA_ARRAY		= 240;
 static const uint32 MAX_GROUP_MEMBERS	= 6;
 static const uint32 MAX_RECAST_TYPES	= 20;
@@ -844,7 +845,8 @@ struct PlayerProfile_Struct
 /*04452*/ uint32  silver_cursor;      // Silver Pieces on cursor
 /*04456*/ uint32  copper_cursor;      // Copper Pieces on cursor
 /*04460*/ uint32  skills[MAX_PP_SKILL]; // [400] List of skills	// 100 dword buffer
-/*04860*/ uint8 unknown04760[136];
+/*04860*/ uint32  InnateSkills[MAX_PP_INNATE_SKILL];
+/*04960*/ uint8   unknown04760[36];
 /*04996*/ uint32  toxicity;           // Potion Toxicity (15=too toxic, each potion adds 3)
 /*05000*/ uint32  thirst_level;             // Drink (ticks till next drink)
 /*05004*/ uint32  hunger_level;             // Food (ticks till next eat)

@@ -613,7 +613,7 @@ bool Client::UseDiscipline(uint32 spell_id, uint32 target) {
 
 	//Check the disc timer
 	pTimerType DiscTimer = pTimerDisciplineReuseStart + spell.EndurTimerIndex;
-	if(!p_timers.Expired(&database, DiscTimer)) {
+	if(!p_timers.Expired(&database, DiscTimer, false)) { // lets not set the reuse timer in case CastSpell fails (or we would have to turn off the timer, but CastSpell will set it as well)
 		/*char val1[20]={0};*/	//unused
 		/*char val2[20]={0};*/	//unused
 		uint32 remain = p_timers.GetRemainingTime(DiscTimer);

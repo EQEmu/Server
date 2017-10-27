@@ -838,7 +838,8 @@ void Mob::SendToFixZ(float new_x, float new_y, float new_z) {
 	}
 }
 
-void Mob::FixZ() {
+void Mob::FixZ(int32 z_find_offset /*= 5*/)
+{
 
 	BenchTimer timer;
 	timer.reset();
@@ -849,8 +850,8 @@ void Mob::FixZ() {
 			(zone->HasWaterMap() && !zone->watermap->InWater(glm::vec3(m_Position))))
 		{
 			/* Any more than 5 in the offset makes NPC's hop/snap to ceiling in small corridors */
-			float new_z = this->FindGroundZ(m_Position.x, m_Position.y, 5);
-			new_z += (this->GetSize() / 1.55);
+			float new_z = this->FindGroundZ(m_Position.x, m_Position.y, z_find_offset);
+			new_z += this->GetZOffset();
 
 			auto duration = timer.elapsed();
 
@@ -866,7 +867,7 @@ void Mob::FixZ() {
 				duration
 			);
 
-			if ((new_z > -2000) && new_z != -999999) {
+			if ((new_z > -2000) && new_z != BEST_Z_INVALID) {
 				if (RuleB(Map, MobZVisualDebug))
 					this->SendAppearanceEffect(78, 0, 0, 0, 0);
 				
@@ -882,6 +883,113 @@ void Mob::FixZ() {
 			last_z = m_Position.z;
 		}
 	}
+}
+
+float Mob::GetZOffset() const {
+	float offset = 3.125f;
+
+	switch (race) {
+		case 436:
+			offset = 0.577f;
+			break;
+		case 430:
+			offset = 0.5f;
+			break;
+		case 432:
+			offset = 1.9f;
+			break;
+		case 435:
+			offset = 0.93f;
+			break;
+		case 450:
+			offset = 0.938f;
+			break;
+		case 479:
+			offset = 0.8f;
+			break;
+		case 451:
+			offset = 0.816f;
+			break;
+		case 437:
+			offset = 0.527f;
+			break;
+		case 439:
+			offset = 1.536f;
+			break;
+		case 415:
+			offset = 1.0f;
+			break;
+		case 438:
+			offset = 0.776f;
+			break;
+		case 452:
+			offset = 0.776f;
+			break;
+		case 441:
+			offset = 0.816f;
+			break;
+		case 440:
+			offset = 0.938f;
+			break;
+		case 468:
+			offset = 1.0f;
+			break;
+		case 459:
+			offset = 1.0f;
+			break;
+		case 462:
+			offset = 1.5f;
+			break;
+		case 530:
+			offset = 1.2f;
+			break;
+		case 549:
+			offset = 0.5f;
+			break;
+		case 548:
+			offset = 0.5f;
+			break;
+		case 547:
+			offset = 0.5f;
+			break;
+		case 604:
+			offset = 1.2f;
+			break;
+		case 653:
+			offset = 5.9f;
+			break;
+		case 658:
+			offset = 4.0f;
+			break;
+		case 323:
+			offset = 5.0f;
+			break;
+		case 663:
+			offset = 5.0f;
+			break;
+		case 664:
+			offset = 4.0f;
+			break;
+		case 703:
+			offset = 9.0f;
+			break;
+		case 688:
+			offset = 5.0f;
+			break;
+		case 669:
+			offset = 7.0f;
+			break;
+		case 687:
+			offset = 2.0f;
+			break;
+		case 686:
+			offset = 2.0f;
+			break;
+		default:
+			offset = 3.125f;
+	}
+
+	return 0.2 * GetSize() * offset;
 }
 
 int	ZoneDatabase::GetHighestGrid(uint32 zoneid) {

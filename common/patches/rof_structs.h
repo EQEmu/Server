@@ -131,6 +131,7 @@ static const uint32 MAX_PP_LANGUAGE		= 32;	// was 25
 static const uint32 MAX_PP_SPELLBOOK	= 720;	// was 480
 static const uint32 MAX_PP_MEMSPELL		= 16;	// was 12
 static const uint32 MAX_PP_SKILL		= PACKET_SKILL_ARRAY_SIZE;	// 100 - actual skills buffer size
+static const uint32 MAX_PP_INNATE_SKILL	= 25;
 static const uint32 MAX_PP_AA_ARRAY		= 300;
 static const uint32 MAX_PP_DISCIPLINES	= 200;	// was 100
 static const uint32 MAX_GROUP_MEMBERS	= 6;
@@ -1096,8 +1097,8 @@ union
 /*01012*/ AA_Array  aa_array[MAX_PP_AA_ARRAY];	// [300] 3600 bytes - AAs 12 bytes each
 /*04612*/ uint32 skill_count;					// Seen 100
 /*04616*/ uint32 skills[MAX_PP_SKILL];			// [100] 400 bytes - List of skills
-/*05016*/ uint32 unknown15_count;				// Seen 25
-/*05020*/ uint32 unknown_rof15[25];				// Most are 255 or 0
+/*05016*/ uint32 InnateSkills_count;				// Seen 25
+/*05020*/ uint32 InnateSkills[MAX_PP_INNATE_SKILL];	// Most are 255 or 0
 /*05120*/ uint32 discipline_count;				// Seen 200
 /*05124*/ Disciplines_Struct  disciplines;		// [200] 800 bytes Known disciplines
 /*05924*/ uint32 timestamp_count;				// Seen 20

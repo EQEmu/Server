@@ -528,7 +528,7 @@ namespace RoF2
 	{
 		SETUP_VAR_ENCODE(BuffIcon_Struct);
 
-		uint32 sz = 12 + (17 * emu->count);
+		uint32 sz = 12 + (17 * emu->count) + emu->name_lengths; // 17 includes nullterm
 		__packet->size = sz;
 		__packet->pBuffer = new unsigned char[sz];
 		memset(__packet->pBuffer, 0, sz);
@@ -544,7 +544,7 @@ namespace RoF2
 			__packet->WriteUInt32(emu->entries[i].spell_id);
 			__packet->WriteUInt32(emu->entries[i].tics_remaining);
 			__packet->WriteUInt32(emu->entries[i].num_hits); // Unknown
-			__packet->WriteString("");
+			__packet->WriteString(emu->entries[i].caster);
 		}
 		__packet->WriteUInt8(emu->type); // Unknown
 
@@ -1883,35 +1883,34 @@ namespace RoF2
 		eq->FogDensity = emu->fog_density;
 
 		/*fill in some unknowns with observed values, hopefully it will help */
-		eq->unknown569 = 0;
+		eq->ZoneTimeZone = 0;
 		eq->unknown571 = 0;
-		eq->unknown572 = 4;
-		eq->unknown576 = 2;
-		eq->unknown580 = 0;
+		eq->WaterMidi = 4;
+		eq->DayMidi = 2;
+		eq->NightMidi = 0;
 
-		eq->unknown800 = -1;
-		eq->unknown844 = 600;
-		eq->unknown848 = 2008; // Guild Lobby observed value
-		eq->unknown880 = 50;
-		eq->unknown884 = 10;
-		eq->unknown888 = 1;
-		eq->unknown889 = 0;
-		eq->unknown890 = 1;
-		eq->unknown891 = 0;
-		eq->unknown892 = 0;
-		eq->unknown893 = 0;
+		eq->SkyRelated2 = -1;
+		eq->NPCAggroMaxDist = 600;
+		eq->FilterID = 2008; // Guild Lobby observed value
+		eq->LavaDamage = 50;
+		eq->MinLavaDamage = 10;
+		eq->bDisallowManaStone = 1;
+		eq->bNoBind = 0;
+		eq->bNoAttack = 0;
+		eq->bNoCallOfHero = 0;
+		eq->bNoFlux = 0;
+		eq->bNoFear = 0;
 		eq->fall_damage = 0;	// 0 = Fall Damage on, 1 = Fall Damage off
 		eq->unknown895 = 0;
-		eq->unknown896 = 180;
-		eq->unknown900 = 180;
-		eq->unknown904 = 180;
-		eq->unknown908 = 2;
-		eq->unknown912 = 2;
-		eq->unknown932 = -1;	// Set from PoK Example
-		eq->unknown936 = -1;	// Set from PoK Example
-		eq->unknown944 = 1.0;	// Set from PoK Example
-		eq->unknown948 = 0;		// New on Live as of Dec 15 2014
-		eq->unknown952 = 100;	// New on Live as of Dec 15 2014
+		eq->FastRegenHP = 180;
+		eq->FastRegenMana = 180;
+		eq->FastRegenEndurance = 180;
+		eq->CanPlaceCampsite = 2;
+		eq->CanPlaceGuildBanner = 2;
+		eq->FishingRelated = -1;	// Set from PoK Example
+		eq->ForageRelated = -1;	// Set from PoK Example
+		eq->bNoLevitate = 0;
+		eq->Blooming = 1.0;	// Set from PoK Example
 
 		FINISH_ENCODE();
 	}
@@ -2262,11 +2261,11 @@ namespace RoF2
 			outapp->WriteUInt32(emu->skills[r]);
 		}
 
-		outapp->WriteUInt32(25);			// Unknown count
+		outapp->WriteUInt32(structs::MAX_PP_INNATE_SKILL);			// Innate Skills count
 
-		for (uint32 r = 0; r < 25; r++)
+		for (uint32 r = 0; r < structs::MAX_PP_INNATE_SKILL; r++)
 		{
-			outapp->WriteUInt32(0);			// Unknown
+			outapp->WriteUInt32(emu->InnateSkills[r]);			// Innate Skills (regen, slam, etc)
 		}
 
 		outapp->WriteUInt32(structs::MAX_PP_DISCIPLINES);	// Discipline count

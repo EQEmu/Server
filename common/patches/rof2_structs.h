@@ -131,6 +131,7 @@ static const uint32 MAX_PP_LANGUAGE		= 32;	// was 25
 static const uint32 MAX_PP_SPELLBOOK	= 720;	// was 480
 static const uint32 MAX_PP_MEMSPELL		= 16;	// was 12
 static const uint32 MAX_PP_SKILL		= PACKET_SKILL_ARRAY_SIZE;	// 100 - actual skills buffer size
+static const uint32 MAX_PP_INNATE_SKILL	= 25;
 static const uint32 MAX_PP_AA_ARRAY		= 300;
 static const uint32 MAX_PP_DISCIPLINES	= 300;	// was 200
 static const uint32 MAX_GROUP_MEMBERS	= 6;
@@ -561,74 +562,100 @@ struct ServerZoneEntry_Struct //Adjusted from SEQ Everquest.h Struct
 //New Zone Struct - Size: 948
 struct NewZone_Struct {
 	/*0000*/	char	char_name[64];			// Character Name
-	/*0064*/	char	zone_short_name[32];	// Zone Short Name
-	/*0096*/	char    unknown0096[96];
-	/*0192*/	char	zone_long_name[278];	// Zone Long Name
-	/*0470*/	uint8	ztype;					// Zone type (usually FF)
-	/*0471*/	uint8	fog_red[4];				// Zone fog (red)
-	/*0475*/	uint8	fog_green[4];				// Zone fog (green)
-	/*0479*/	uint8	fog_blue[4];				// Zone fog (blue)
-	/*0483*/	uint8	unknown323;
-	/*0484*/	float	fog_minclip[4];
+	/*0064*/	char	zone_short_name[128];	// Zone Short Name
+	/*0192*/	char	zone_long_name[128];	// Zone Long Name
+	/*0320*/	char	zone_desc[5][30];		// mostly just empty strings
+	/*0470*/	uint8	ztype;					// Zone type (usually FF) FogOnOff
+	/*0471*/	uint8	fog_red[4];				// Zone fog (red) ARGBCOLOR
+	/*0475*/	uint8	fog_green[4];			// Zone fog (green) ARGBCOLOR
+	/*0479*/	uint8	fog_blue[4];			// Zone fog (blue) ARGBCOLO
+	/*0483*/	uint8	unknown323;				// padding?
+	/*0484*/	float	fog_minclip[4];			// MQ2 has this starting at this offset, must be padding above
 	/*0500*/	float	fog_maxclip[4];
 	/*0516*/	float	gravity;
-	/*0520*/	uint8	time_type;
+	/*0520*/	uint8	time_type;				// OutDoor flag 0 = IndoorDungeon, 1 = OUtdoor, 2 = OutdoorCity, 3 = DungeonCity, 4 = IndoorCity, 5 = OutdoorDungeon
 	/*0521*/    uint8   rain_chance[4];
 	/*0525*/    uint8   rain_duration[4];
 	/*0529*/    uint8   snow_chance[4];
 	/*0533*/    uint8   snow_duration[4];
-	/*0537*/    uint8   unknown537[32];			// Seen all 0xff
-	/*0569*/	uint8	unknown569;				// Unknown - Seen 0
+	/*0537*/    uint8   unknown537[32];			// this is removed on live, specialdates and specialcodes probably macro'd out
+	/*0569*/	uint8	ZoneTimeZone;			// MQ2 "in hours from worldserver, can be negative"
 	/*0570*/	uint8	sky;					// Sky Type
-	/*0571*/	uint8	unknown571;				// Unknown - Seen 0
-	/*0572*/	uint32	unknown572;				// Unknown - Seen 4 in Guild Lobby
-	/*0576*/	uint32	unknown576;				// Unknown - Seen 2 in Guild Lobby
-	/*0580*/	uint32	unknown580;				// Unknown - Seen 0 in Guild Lobby
+	/*0571*/	uint8	unknown571;				// Padding I think
+	/*0572*/	uint32	WaterMidi;				// Unknown - Seen 4 in Guild Lobby
+	/*0576*/	uint32	DayMidi;				// Unknown - Seen 2 in Guild Lobby
+	/*0580*/	uint32	NightMidi;				// Unknown - Seen 0 in Guild Lobby
 	/*0584*/	float	zone_exp_multiplier;	// Experience Multiplier
 	/*0588*/	float	safe_y;					// Zone Safe Y
 	/*0592*/	float	safe_x;					// Zone Safe X
 	/*0596*/	float	safe_z;					// Zone Safe Z
-	/*0600*/	float	min_z;					// Guessed - NEW - Seen 0
-	/*0604*/	float	max_z;					// Guessed
-	/*0608*/	float	underworld;				// Underworld, min z (Not Sure?)
+	/*0600*/	float	min_z;					// This isn't safe heading like live -- could be default heading rather than succor heading
+	/*0604*/	float	max_z;					// Ceiling
+	/*0608*/	float	underworld;				// Underworld, min z (Not Sure?) Floor
 	/*0612*/	float	minclip;				// Minimum View Distance
 	/*0616*/	float	maxclip;				// Maximum View DIstance
-	/*0620*/	uint8	unknown620[84];		// ***Placeholder
-	/*0704*/	char	zone_short_name2[96];	//zone file name? excludes instance number which can be in previous version.
-	/*0800*/	int32	unknown800;	//seen -1
-	/*0804*/	char	unknown804[40]; //
-	/*0844*/	int32	unknown844;	//seen 600
-	/*0848*/	int32	unknown848; //seen 2008
-	/*0852*/	uint16	zone_id;
+	/*0620*/	uint32	ForageLow;				// Forage loot table ID?
+	/*0624*/	uint32	ForageMedium;			// Forage loot table ID?
+	/*0628*/	uint32	ForageHigh;				// Forage loot table ID?
+	/*0632*/	uint32	FishingLow;				// Fishing loot table ID?
+	/*0636*/	uint32	FishingMedium;			// Fishing loot table ID?
+	/*0640*/	uint32	FishingHigh;			// Fishing loot table ID?
+	/*0644*/	uint32	sky_lock;				// MQ2 skyrelated
+	/*0648*/	uint32	graveyard_timer;		// minutes until corpse pop to graveyard
+	/*0652*/	uint32	scriptIDHour;			// These are IDs of scripts
+	/*0656*/	uint32	scriptIDMinute;			// These are IDs of scripts
+	/*0660*/	uint32	scriptIDTick;			// These are IDs of scripts
+	/*0664*/	uint32	scriptIDOnPlayerDeath;	// These are IDs of scripts
+	/*0668*/	uint32	scriptIDOnNPCDeath;		// These are IDs of scripts
+	/*0672*/	uint32	scriptIDPlayerEnteringZone;	// These are IDs of scripts
+	/*0676*/	uint32	scriptIDOnZonePop;		// These are IDs of scripts
+	/*0680*/	uint32	scriptIDNPCLoot;		// These are IDs of scripts
+	/*0684*/	uint32	scriptIDAdventureFailed;	// These are IDs of scripts
+	/*0688*/	uint32	CanExploreTasks;
+	/*0692*/	uint32	UnknownFlag;			// not sure, neither is MQ2!
+	/*0696*/	uint32	scriptIDOnFishing;		// THese are IDs of scripts
+	/*0700*/	uint32	scriptIDOnForage;		// THese are IDs of scripts
+	/*0704*/	char	zone_short_name2[32];	//zone file name? excludes instance number which can be in previous version.
+	/*0736*/	char	WeatherString[32];
+	/*0768*/	char	SkyString2[32];
+	/*0800*/	int32	SkyRelated2;			//seen -1 -- maybe some default sky time?
+	/*0804*/	char	WeatherString2[32];		//
+	/*0836*/	float	WeatherChangeTime;		// not sure :P
+	/*0840*/	uint32	Climate;
+	/*0844*/	int32	NPCAggroMaxDist;		//seen 600
+	/*0848*/	int32	FilterID;				//seen 2008 -- maybe zone guide related?
+	/*0852*/	uint16	zone_id;				// this might just be instance ID got 1736 for time
 	/*0854*/	uint16	zone_instance;
-	/*0856*/	char	unknown856[20];
-	/*0876*/	uint32	SuspendBuffs;
-	/*0880*/	uint32	unknown880;		// Seen 50
-	/*0884*/	uint32	unknown884;		// Seen 10
-	/*0888*/	uint8	unknown888;		// Seen 1
-	/*0889*/	uint8	unknown889;		// Seen 0 (POK) or 1 (rujj)
-	/*0890*/	uint8	unknown890;		// Seen 1
-	/*0891*/	uint8	unknown891;		// Seen 0
-	/*0892*/	uint8	unknown892;		// Seen 0
-	/*0893*/	uint8	unknown893;		// Seen 0 - 00
-	/*0894*/	uint8	fall_damage;	// 0 = Fall Damage on, 1 = Fall Damage off
-	/*0895*/	uint8	unknown895;		// Seen 0 - 00
-	/*0896*/	uint32	unknown896;		// Seen 180
-	/*0900*/	uint32	unknown900;		// Seen 180
-	/*0904*/	uint32	unknown904;		// Seen 180
-	/*0908*/	uint32	unknown908;		// Seen 2
-	/*0912*/	uint32	unknown912;		// Seen 2
-	/*0916*/	float	FogDensity;		// Most zones have this set to 0.33 Blightfire had 0.16
-	/*0920*/	uint32	unknown920;		// Seen 0
-	/*0924*/	uint32	unknown924;		// Seen 0
-	/*0928*/	uint32	unknown928;		// Seen 0
-	/*0932*/	int32  unknown932;		// Seen -1
-	/*0936*/	int32  unknown936;		// Seen -1
-	/*0940*/	uint32  unknown940;		// Seen 0
-	/*0944*/	float   unknown944;		// Seen 1.0 in PoK, and 0.25 in Guild Lobby
-	/*0948*/	uint32  unknown948;		// Seen 0 - New on Live as of Dec 15 2014
-	/*0952*/	uint32  unknown952;		// Seen 100 - New on Live as of Dec 15 2014
-	/*0956*/
+	/*0856*/	uint32	scriptNPCReceivedanItem;
+	/*0860*/	uint32	bCheck;					// padded bool
+	/*0864*/	uint32	scriptIDSomething;
+	/*0868*/	uint32	scriptIDSomething2;
+	/*0872*/	uint32	scriptIDSomething3;
+	/*0876*/	uint32	SuspendBuffs;			// padded bool
+	/*0880*/	uint32	LavaDamage;				// LavaDamage value
+	/*0884*/	uint32	MinLavaDamage;			// min cap after resist calcs
+	/*0888*/	uint8	bDisallowManaStone;		// can't use manastone in this zone
+	/*0889*/	uint8	bNoBind;				// can't bind even if outdoor says we can!
+	/*0890*/	uint8	bNoAttack;				// non-attack zone
+	/*0891*/	uint8	bNoCallOfHero;			// coth line disabled
+	/*0892*/	uint8	bNoFlux;				// gflux no worky
+	/*0893*/	uint8	bNoFear;				// fear spells no worky
+	/*0894*/	uint8	fall_damage;			// 0 = Fall Damage on, 1 = Fall Damage off MQ2 calls bNoEncumber
+	/*0895*/	uint8	unknown895;				// padding
+	/*0896*/	uint32	FastRegenHP;			// percentage I think?
+	/*0900*/	uint32	FastRegenMana;			// percentage I think?
+	/*0904*/	uint32	FastRegenEndurance;		// percentage I think?
+	/*0908*/	uint32	CanPlaceCampsite;		// 0 = no, 1 = can place, 2 = place and goto
+	/*0912*/	uint32	CanPlaceGuildBanner;	// ^
+	/*0916*/	float	FogDensity;				// Most zones have this set to 0.33 Blightfire had 0.16
+	/*0920*/	uint32	bAdjustGamma;			// padded bool
+	/*0924*/	uint32	TimeStringID;			// Seen 0
+	/*0928*/	uint32	bNoMercenaries;			// padded bool
+	/*0932*/	int32	FishingRelated;			// Seen -1 idk
+	/*0936*/	int32	ForageRelated;			// Seen -1 idk
+	/*0940*/	uint32	bNoLevitate;			// padded bool
+	/*0944*/	float	Blooming;				// Seen 1.0 in PoK, and 0.25 in Guild Lobby
+	/*0948*/
 };
 
 /*
@@ -1129,8 +1156,8 @@ union
 /*01012*/ AA_Array  aa_array[MAX_PP_AA_ARRAY];	// [300] 3600 bytes - AAs 12 bytes each
 /*04612*/ uint32 skill_count;					// Seen 100
 /*04616*/ uint32 skills[MAX_PP_SKILL];			// [100] 400 bytes - List of skills
-/*05016*/ uint32 unknown15_count;				// Seen 25
-/*05020*/ uint32 unknown_rof15[25];				// Most are 255 or 0
+/*05016*/ uint32 InnateSkills_count;			// Seen 25
+/*05020*/ uint32 InnateSkills[MAX_PP_INNATE_SKILL];	// Most are 255 or 0
 /*05120*/ uint32 discipline_count;				// Seen 200
 /*05124*/ Disciplines_Struct  disciplines;		// [200] 800 bytes Known disciplines
 /*05924*/ uint32 timestamp_count;				// Seen 20

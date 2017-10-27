@@ -1427,8 +1427,10 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 	ZeroCastingVars();
 
 	// set the rapid recast timer for next time around
+	// Why do we have this? It mostly just causes issues when things are working correctly
+	// It also needs to be <users's ping to not cause issues
 	delaytimer = true;
-	spellend_timer.Start(400,true);
+	spellend_timer.Start(10, true);
 
 	Log(Logs::Detail, Logs::Spells, "Spell casting of %d is finished.", spell_id);
 
@@ -3307,8 +3309,8 @@ int Mob::AddBuff(Mob *caster, uint16 spell_id, int duration, int32 level_overrid
 
 	buffs[emptyslot].spellid = spell_id;
 	buffs[emptyslot].casterlevel = caster_level;
-	if (caster && caster->IsClient())
-		strcpy(buffs[emptyslot].caster_name, caster->GetName());
+	if (caster && !caster->IsAura()) // maybe some other things we don't want to ...
+		strcpy(buffs[emptyslot].caster_name, caster->GetCleanName());
 	else
 		memset(buffs[emptyslot].caster_name, 0, 64);
 	buffs[emptyslot].casterid = caster ? caster->GetID() : 0;
@@ -4228,6 +4230,19 @@ bool Mob::IsAffectedByBuff(uint16 spell_id)
 	for (int i = 0; i < buff_count; ++i)
 		if (buffs[i].spellid == spell_id)
 			return true;
+
+	return false;
+}
+
+bool Mob::IsAffectedByBuffByGlobalGroup(GlobalGroup group)
+{
+	int buff_count = GetMaxTotalSlots();
+	for (int i = 0; i < buff_count; ++i) {
+		if (buffs[i].spellid == SPELL_UNKNOWN)
+			continue;
+		if (spells[buffs[i].spellid].spell_category == static_cast<int>(group))
+			return true;
+	}
 
 	return false;
 }
@@ -5533,6 +5548,8 @@ void Client::SendBuffNumHitPacket(Buffs_Struct &buff, int slot)
 	bi->entries[0].spell_id = buff.spellid;
 	bi->entries[0].tics_remaining = buff.ticsremaining;
 	bi->entries[0].num_hits = buff.numhits;
+	strn0cpy(bi->entries[0].caster, buff.caster_name, 64);
+	bi->name_lengths = strlen(bi->entries[0].caster);
 	FastQueuePacket(&outapp);
 }
 
@@ -5618,6 +5635,7 @@ EQApplicationPacket *Mob::MakeBuffsPacket(bool for_target)
 	else
 		buff->type = 0;
 
+	buff->name_lengths = 0; // hacky shit
 	uint32 index = 0;
 	for(int i = 0; i < buff_count; ++i)
 	{
@@ -5627,6 +5645,8 @@ EQApplicationPacket *Mob::MakeBuffsPacket(bool for_target)
 			buff->entries[index].spell_id = buffs[i].spellid;
 			buff->entries[index].tics_remaining = buffs[i].ticsremaining;
 			buff->entries[index].num_hits = buffs[i].numhits;
+			strn0cpy(buff->entries[index].caster, buffs[i].caster_name, 64);
+			buff->name_lengths += strlen(buff->entries[index].caster);
 			++index;
 		}
 	}

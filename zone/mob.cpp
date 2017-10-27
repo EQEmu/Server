@@ -1383,7 +1383,7 @@ void Mob::SendHPUpdate(bool skip_self /*= false*/, bool force_update_all /*= fal
 	if(IsClient()){
 		Raid *raid = entity_list.GetRaidByClient(CastToClient());
 		if (raid)
-			raid->SendHPPacketsFrom(this);
+			raid->SendHPManaEndPacketsFrom(this);
 	}
 
 	/* Pet - Update master - group and raid if exists */
@@ -1396,7 +1396,7 @@ void Mob::SendHPUpdate(bool skip_self /*= false*/, bool force_update_all /*= fal
 
 		Raid *raid = entity_list.GetRaidByClient(GetOwner()->CastToClient());
 		if(raid)
-			raid->SendHPPacketsFrom(this);
+			raid->SendHPManaEndPacketsFrom(this);
 	}
 
 	/* Send to pet */
@@ -1451,6 +1451,20 @@ void Mob::SendPosition() {
 	else {
 		entity_list.QueueCloseClients(this, app, true, RuleI(Range, MobPositionUpdates), nullptr, false);
 	}
+
+	safe_delete(app);
+}
+
+void Mob::SendPositionUpdateToClient(Client *client) {
+	auto app = new EQApplicationPacket(OP_ClientUpdate, sizeof(PlayerPositionUpdateServer_Struct));
+	PlayerPositionUpdateServer_Struct* spawn_update = (PlayerPositionUpdateServer_Struct*)app->pBuffer;
+
+	if(this->IsMoving())
+		MakeSpawnUpdate(spawn_update);
+	else
+		MakeSpawnUpdateNoDelta(spawn_update);
+
+	client->QueuePacket(app, false);
 
 	safe_delete(app);
 }
@@ -3427,7 +3441,7 @@ void Mob::SetTarget(Mob* mob) {
 
 float Mob::FindGroundZ(float new_x, float new_y, float z_offset)
 {
-	float ret = -999999;
+	float ret = BEST_Z_INVALID;
 	if (zone->zonemap != nullptr)
 	{
 		glm::vec3 me;
@@ -3436,7 +3450,7 @@ float Mob::FindGroundZ(float new_x, float new_y, float z_offset)
 		me.z = m_Position.z + z_offset;
 		glm::vec3 hit;
 		float best_z = zone->zonemap->FindBestZ(me, &hit);
-		if (best_z != -999999)
+		if (best_z != BEST_Z_INVALID)
 		{
 			ret = best_z;
 		}
@@ -3447,7 +3461,7 @@ float Mob::FindGroundZ(float new_x, float new_y, float z_offset)
 // Copy of above function that isn't protected to be exported to Perl::Mob
 float Mob::GetGroundZ(float new_x, float new_y, float z_offset)
 {
-	float ret = -999999;
+	float ret = BEST_Z_INVALID;
 	if (zone->zonemap != 0)
 	{
 		glm::vec3 me;
@@ -3456,7 +3470,7 @@ float Mob::GetGroundZ(float new_x, float new_y, float z_offset)
 		me.z = m_Position.z+z_offset;
 		glm::vec3 hit;
 		float best_z = zone->zonemap->FindBestZ(me, &hit);
-		if (best_z != -999999)
+		if (best_z != BEST_Z_INVALID)
 		{
 			ret = best_z;
 		}
@@ -3761,7 +3775,7 @@ void Mob::TryTriggerOnValueAmount(bool IsHP, bool IsMana, bool IsEndur, bool IsP
 							if ((base2 >= 500 && base2 <= 520) && GetHPRatio() < (base2 - 500)*5)
 								use_spell = true;
 
-							else if (base2 = 1004 && GetHPRatio() < 80)
+							else if (base2 == 1004 && GetHPRatio() < 80)
 								use_spell = true;
 						}
 
@@ -3769,12 +3783,12 @@ void Mob::TryTriggerOnValueAmount(bool IsHP, bool IsMana, bool IsEndur, bool IsP
 							if ( (base2 = 521 && GetManaRatio() < 20) || (base2 = 523 && GetManaRatio() < 40))
 								use_spell = true;
 
-							else if (base2 = 38311 && GetManaRatio() < 10)
+							else if (base2 == 38311 && GetManaRatio() < 10)
 								use_spell = true;
 						}
 
 						else if (IsEndur){
-							if (base2 = 522 && GetEndurancePercent() < 40){
+							if (base2 == 522 && GetEndurancePercent() < 40){
 								use_spell = true;
 							}
 						}
@@ -3935,10 +3949,17 @@ int16 Mob::GetHealRate(uint16 spell_id, Mob* caster) {
 
 bool Mob::TryFadeEffect(int slot)
 {
+	if (!buffs[slot].spellid)
+		return false;
+
 	if(IsValidSpell(buffs[slot].spellid))
 	{
 		for(int i = 0; i < EFFECT_COUNT; i++)
 		{
+
+			if (!spells[buffs[slot].spellid].effectid[i])
+				continue;
+
 			if (spells[buffs[slot].spellid].effectid[i] == SE_CastOnFadeEffectAlways ||
 				spells[buffs[slot].spellid].effectid[i] == SE_CastOnRuneFadeEffect)
 			{
@@ -4978,6 +4999,18 @@ void Mob::SpreadVirus(uint16 spell_id, uint16 casterID)
 			}
 		}
 	}
+}
+
+void Mob::AddNimbusEffect(int effectid)
+{
+	SetNimbusEffect(effectid);
+
+	auto outapp = new EQApplicationPacket(OP_AddNimbusEffect, sizeof(RemoveNimbusEffect_Struct));
+	auto ane = (RemoveNimbusEffect_Struct *)outapp->pBuffer;
+	ane->spawnid = GetID();
+	ane->nimbus_effect = effectid;
+	entity_list.QueueClients(this, outapp);
+	safe_delete(outapp);
 }
 
 void Mob::RemoveNimbusEffect(int effectid)

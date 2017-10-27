@@ -357,7 +357,7 @@
 9101|2016_12_01_pcnpc_only.sql|SHOW COLUMNS FROM `spells_new` LIKE 'pcnpc_only_flag'|empty|
 9102|2017_01_10_book_languages.sql|SHOW COLUMNS FROM `books` LIKE 'language'|empty|
 9103|2017_01_30_book_languages_fix.sql|SELECT `language` from `books` WHERE `language` IS NULL|not_empty|
-9104|2017_02_09_npc_spells_entries_type_update.sql|SHOW COLUMNS IN `npc_spells_entries` LIKE `type`|contains|smallint(5) unsigned
+9104|2017_02_09_npc_spells_entries_type_update.sql|SHOW COLUMNS IN `npc_spells_entries` LIKE 'type'|contains|smallint(5) unsigned
 9105|2017_02_15_bot_spells_entries.sql|SELECT `id` FROM `npc_spells_entries` WHERE `npc_spells_id` >= 701 AND `npc_spells_id` <= 712|not_empty|
 9106|2017_02_26_npc_spells_update_for_bots.sql|SELECT * FROM `npc_spells` WHERE `id` = '701' AND `name` = 'Cleric Bot'|not_empty|
 9107|2017_03_09_inventory_version.sql|SHOW TABLES LIKE 'inventory_version'|empty|
