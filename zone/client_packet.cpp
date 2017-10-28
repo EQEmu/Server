@@ -5337,8 +5337,8 @@ void Client::Handle_OP_DisarmTraps(const EQApplicationPacket *app)
 		{
 			Message(MT_Skills, "You disarm a trap.");
 			trap->disarmed = true;
-			trap->chkarea_timer.Disable();
-			trap->respawn_timer.Start((trap->respawn_time + zone->random.Int(0, trap->respawn_var)) * 1000);
+			Log(Logs::General, Logs::Traps, "Trap %d is disarmed.", trap->trap_id);
+			trap->UpdateTrap();
 		}
 		else
 		{

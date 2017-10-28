@@ -473,6 +473,10 @@ public:
 	void RefreshClientXTargets(Client *c);
 	void SendAlternateAdvancementStats();
 
+	void GetTrapInfo(Client* client);
+	bool IsTrapGroupSpawned(uint32 trap_id, uint8 group);
+	void UpdateAllTraps(bool respawn, bool repopnow = false);
+	void ClearTrapPointers();
 protected:
 	friend class Zone;
 	void	Depop(bool StartSpawnTimer = false);
