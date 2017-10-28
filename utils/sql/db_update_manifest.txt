@@ -368,6 +368,7 @@
 9112|2017_06_24_rule_values_expand.sql|SHOW COLUMNS FROM rule_values WHERE Field = 'rule_value' and Type = 'varchar(30)'|empty|
 9113|2017_07_19_show_name.sql|SHOW COLUMNS FROM `npc_types` LIKE 'show_name'|empty|
 9114|2017_07_22_aura.sql|SHOW TABLES LIKE 'auras'|empty|
+9115|2017_10_28_traps.sql|SHOW COLUMNS FROM `traps` LIKE 'triggered_number'|empty|
 
 # Upgrade conditions:
 # 	This won't be needed after this system is implemented, but it is used database that are not
