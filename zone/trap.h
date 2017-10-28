@@ -50,7 +50,6 @@ public:
 	void SetHiddenTrigger(NPC* n) { hiddenTrigger = n; }
 	void CreateHiddenTrigger();
 	void DestroyHiddenTrigger() { hiddenTrigger = nullptr; }
-	void SetTrapData();
 	void UpdateTrap(bool respawn = true, bool repopnow = false);
 	//Trap data, leave this unprotected
 	Timer	respawn_timer; //Respawn Time when Trap's been disarmed
@@ -76,6 +75,7 @@ public:
 	uint8	group;
 	bool	despawn_when_triggered;
 	uint32  charid; //ID of character that triggered trap. This is cleared when the trap despawns are resets.
+	bool	undetectable;
 
 	std::string message;
 protected:

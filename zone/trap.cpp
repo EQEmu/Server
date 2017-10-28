@@ -79,6 +79,7 @@ Trap::Trap() :
 	group = 0;
 	despawn_when_triggered = false;
 	charid = 0;
+	undetectable = false;
 }
 
 Trap::~Trap()
@@ -253,7 +254,7 @@ void Trap::Trigger(Mob* trigger)
 	}
 }
 
-Trap* EntityList::FindNearbyTrap(Mob* searcher, float max_dist)
+Trap* EntityList::FindNearbyTrap(Mob* searcher, float max_dist, float &trap_curdist, bool detected)
 {
 	float dist = 999999;
 	Trap* current_trap = nullptr;
@@ -263,19 +264,29 @@ Trap* EntityList::FindNearbyTrap(Mob* searcher, float max_dist)
 
 	for (auto it = trap_list.begin(); it != trap_list.end(); ++it) {
 		cur = it->second;
-		if(cur->disarmed)
+		if(cur->disarmed || (detected && !cur->detected) || cur->undetectable)
 			continue;
 
 		auto diff = glm::vec3(searcher->GetPosition()) - cur->m_Position;
-		float curdist = diff.x * diff.x + diff.y * diff.y + diff.z * diff.z;
+		float curdist = diff.x*diff.x + diff.y*diff.y;
+		diff.z = std::abs(diff.z);
 
-		if (curdist < max_dist2 && curdist < dist)
+		if (curdist < max_dist2 && curdist < dist && diff.z <= cur->maxzdiff)
 		{
+			Log(Logs::General, Logs::Traps, "Trap %d is curdist %0.1f", cur->db_id, curdist);
 			dist = curdist;
 			current_trap = cur;
 		}
 	}
 
+	if (current_trap != nullptr)
+	{
+		Log(Logs::General, Logs::Traps, "Trap %d is the closest trap.", current_trap->db_id);
+		trap_curdist = dist;
+	}
+	else
+		 trap_curdist = INVALID_INDEX;
+	
 	return current_trap;
 }
 
@@ -386,7 +397,7 @@ bool ZoneDatabase::LoadTraps(const char* zonename, int16 version) {
 
 	std::string query = StringFormat("SELECT id, x, y, z, effect, effectvalue, effectvalue2, skill, "
 		"maxzdiff, radius, chance, message, respawn_time, respawn_var, level, "
-		"`group`, triggered_number, despawn_when_triggered FROM traps WHERE zone='%s' AND version=%u", zonename, version);
+		"`group`, triggered_number, despawn_when_triggered, undetectable  FROM traps WHERE zone='%s' AND version=%u", zonename, version);
 
 	auto results = QueryDatabase(query);
 	if (!results.Success()) {
@@ -422,7 +433,8 @@ bool ZoneDatabase::LoadTraps(const char* zonename, int16 version) {
 		trap->level = atoi(row[14]);
 		trap->group = grp;
 		trap->triggered_number = atoi(row[16]);
-		trap->despawn_when_triggered = atoi(row[17]);
+		trap->despawn_when_triggered = atobool(row[17]);
+		trap->undetectable = atobool(row[18]);
 		entity_list.AddTrap(trap);
 		trap->CreateHiddenTrigger();
 		Log(Logs::General, Logs::Traps, "Trap %d successfully loaded.", trap->trap_id);
@@ -469,14 +481,14 @@ bool ZoneDatabase::SetTrapData(Trap* trap, bool repopnow) {
 	{
 		query = StringFormat("SELECT id, x, y, z, effect, effectvalue, effectvalue2, skill, "
 			"maxzdiff, radius, chance, message, respawn_time, respawn_var, level, "
-			"triggered_number, despawn_when_triggered FROM traps WHERE zone='%s' AND `group`=%d AND id != %d ORDER BY RAND() LIMIT 1", zone->GetShortName(), trap->group, dbid);
+			"triggered_number, despawn_when_triggered, undetectable FROM traps WHERE zone='%s' AND `group`=%d AND id != %d ORDER BY RAND() LIMIT 1", zone->GetShortName(), trap->group, dbid);
 	}
 	else
 	{
 		// We could just use the existing data here, but querying the DB is not expensive, and allows content developers to change traps without rebooting.
 		query = StringFormat("SELECT id, x, y, z, effect, effectvalue, effectvalue2, skill, "
 			"maxzdiff, radius, chance, message, respawn_time, respawn_var, level, "
-			"triggered_number, despawn_when_triggered FROM traps WHERE zone='%s' AND id = %d", zone->GetShortName(), dbid);
+			"triggered_number, despawn_when_triggered, undetectable FROM traps WHERE zone='%s' AND id = %d", zone->GetShortName(), dbid);
 	}
 
 	auto results = QueryDatabase(query);
@@ -500,7 +512,8 @@ bool ZoneDatabase::SetTrapData(Trap* trap, bool repopnow) {
 		trap->respawn_var = atoi(row[13]);
 		trap->level = atoi(row[14]);
 		trap->triggered_number = atoi(row[15]);
-		trap->despawn_when_triggered = atoi(row[16]);
+		trap->despawn_when_triggered = atobool(row[16]);
+		trap->undetectable = atobool(row[17]);
 		trap->CreateHiddenTrigger();
 
 		if (repopnow)

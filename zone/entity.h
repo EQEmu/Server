@@ -365,7 +365,7 @@ public:
 	//trap stuff
 	Mob*	GetTrapTrigger(Trap* trap);
 	void	SendAlarm(Trap* trap, Mob* currenttarget, uint8 kos);
-	Trap*	FindNearbyTrap(Mob* searcher, float max_dist);
+	Trap*	FindNearbyTrap(Mob* searcher, float max_dist, float &curdist, bool detected = false);
 
 	void	AddHealAggro(Mob* target, Mob* caster, uint16 hate);
 	Mob*	FindDefenseNPC(uint32 npcid);

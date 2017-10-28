@@ -2533,6 +2533,9 @@ void Mob::AddToHateList(Mob* other, uint32 hate /*= 0*/, int32 damage /*= 0*/, b
 	if (other == this)
 		return;
 
+	if (other->IsTrap())
+		return;
+
 	if (damage < 0) {
 		hate = 1;
 	}
@@ -3364,7 +3367,7 @@ void Mob::CommonDamage(Mob* attacker, int &damage, const uint16 spell_id, const 
 		// pets that have GHold will never automatically add NPCs
 		// pets that have Hold and no Focus will add NPCs if they're engaged
 		// pets that have Hold and Focus will not add NPCs
-		if (pet && !pet->IsFamiliar() && !pet->GetSpecialAbility(IMMUNE_AGGRO) && !pet->IsEngaged() && attacker && attacker != this && !attacker->IsCorpse() && !pet->IsGHeld())
+		if (pet && !pet->IsFamiliar() && !pet->GetSpecialAbility(IMMUNE_AGGRO) && !pet->IsEngaged() && attacker && attacker != this && !attacker->IsCorpse() && !pet->IsGHeld() && !attacker->IsTrap())
 		{
 			if (!pet->IsHeld()) {
 				Log(Logs::Detail, Logs::Aggro, "Sending pet %s into battle due to attack.", pet->GetName());
