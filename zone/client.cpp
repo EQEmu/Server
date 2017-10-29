@@ -331,6 +331,8 @@ Client::Client(EQStreamInterface* ieqs)
 
 	interrogateinv_flag = false;
 
+	trapid = 0;
+
 	for (int i = 0; i < InnateSkillMax; ++i)
 		m_pp.InnateSkills[i] = InnateDisabled;
 

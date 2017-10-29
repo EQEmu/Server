@@ -1302,6 +1302,8 @@ public:
 
 	int32 CalcATK();
 
+	uint32 trapid; //ID of trap player has triggered. This is cleared when the player leaves the trap's radius, or it despawns.
+
 protected:
 	friend class Mob;
 	void CalcItemBonuses(StatBonuses* newbon);

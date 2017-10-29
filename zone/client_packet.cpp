@@ -5329,31 +5329,44 @@ void Client::Handle_OP_DisarmTraps(const EQApplicationPacket *app)
 
 	p_timers.Start(pTimerDisarmTraps, reuse - 1);
 
-	Trap* trap = entity_list.FindNearbyTrap(this, 60);
+	uint8 success = SKILLUP_FAILURE;
+	float curdist = 0;
+	Trap* trap = entity_list.FindNearbyTrap(this, 250, curdist, true);
 	if (trap && trap->detected)
 	{
-		int uskill = GetSkill(EQEmu::skills::SkillDisarmTraps);
-		if ((zone->random.Int(0, 49) + uskill) >= (zone->random.Int(0, 49) + trap->skill))
+		float max_radius = (trap->radius * 2) * (trap->radius * 2); // radius is used to trigger trap, so disarm radius should be a bit bigger.
+		Log(Logs::General, Logs::Traps, "%s is attempting to disarm trap %d. Curdist is %0.2f maxdist is %0.2f", GetName(), trap->trap_id, curdist, max_radius);
+		if (curdist <= max_radius)
 		{
-			Message(MT_Skills, "You disarm a trap.");
-			trap->disarmed = true;
-			trap->chkarea_timer.Disable();
-			trap->respawn_timer.Start((trap->respawn_time + zone->random.Int(0, trap->respawn_var)) * 1000);
+			int uskill = GetSkill(EQEmu::skills::SkillDisarmTraps);
+			if ((zone->random.Int(0, 49) + uskill) >= (zone->random.Int(0, 49) + trap->skill))
+			{
+				success = SKILLUP_SUCCESS;
+				Message_StringID(MT_Skills, DISARMED_TRAP);
+				trap->disarmed = true;
+				Log(Logs::General, Logs::Traps, "Trap %d is disarmed.", trap->trap_id);
+				trap->UpdateTrap();
+			}
+			else
+			{
+				Message_StringID(MT_Skills, FAIL_DISARM_DETECTED_TRAP);
+				if (zone->random.Int(0, 99) < 25) {
+					trap->Trigger(this);
+				}
+			}
+			CheckIncreaseSkill(EQEmu::skills::SkillDisarmTraps, nullptr);
+			return;
 		}
 		else
 		{
-			if (zone->random.Int(0, 99) < 25) {
-				Message(MT_Skills, "You set off the trap while trying to disarm it!");
-				trap->Trigger(this);
-			}
-			else {
-				Message(MT_Skills, "You failed to disarm a trap.");
-			}
+			Message_StringID(MT_Skills, TRAP_TOO_FAR);
 		}
-		CheckIncreaseSkill(EQEmu::skills::SkillDisarmTraps, nullptr);
-		return;
 	}
-	Message(MT_Skills, "You did not find any traps close enough to disarm.");
+	else
+	{
+		Message_StringID(MT_Skills, LDON_SENSE_TRAP2);
+	}
+
 	return;
 }
 
@@ -12107,7 +12120,8 @@ void Client::Handle_OP_SenseTraps(const EQApplicationPacket *app)
 
 	p_timers.Start(pTimerSenseTraps, reuse - 1);
 
-	Trap* trap = entity_list.FindNearbyTrap(this, 800);
+	float trap_curdist = 0;
+	Trap* trap = entity_list.FindNearbyTrap(this, 800, trap_curdist);
 
 	CheckIncreaseSkill(EQEmu::skills::SkillSenseTraps, nullptr);
 
