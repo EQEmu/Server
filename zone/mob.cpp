@@ -3397,13 +3397,18 @@ int Mob::GetHaste()
 	else // 1-25
 		h += itembonuses.haste > 10 ? 10 : itembonuses.haste;
 
-	// 60+ 100, 51-59 85, 1-50 level+25
-	if (level > 59) // 60+
-		cap = RuleI(Character, HasteCap);
-	else if (level > 50) // 51-59
-		cap = 85;
-	else // 1-50
-		cap = level + 25;
+	// mobs are different!
+	Mob *owner = nullptr;
+	if (IsPet())
+		owner = GetOwner();
+	else if (IsNPC() && CastToNPC()->GetSwarmTarget())
+		owner = entity_list.GetMobID(CastToNPC()->GetSwarmOwner());
+	if (owner) {
+		cap = 110;
+		cap += std::max(0, owner->GetLevel() - 39) + std::max(0, owner->GetLevel() - 60);
+	} else {
+		cap = 250;
+	}
 
 	if(h > cap)
 		h = cap;
