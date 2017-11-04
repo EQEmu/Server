@@ -3404,7 +3404,7 @@ int Mob::GetHaste()
 	else if (IsNPC() && CastToNPC()->GetSwarmTarget())
 		owner = entity_list.GetMobID(CastToNPC()->GetSwarmOwner());
 	if (owner) {
-		cap = 10;
+		cap = 10 + level;
 		cap += std::max(0, owner->GetLevel() - 39) + std::max(0, owner->GetLevel() - 60);
 	} else {
 		cap = 150;
