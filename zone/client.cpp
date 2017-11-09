@@ -1223,11 +1223,6 @@ void Client::ChannelMessageSend(const char* from, const char* to, uint8 chan_num
 		EffSkill = 100;
 	cm->skill_in_language = EffSkill;
 
-	// Garble the message based on listener skill
-	if (ListenerSkill < 100) {
-		GarbleMessage(buffer, (100 - ListenerSkill));
-	}
-
 	cm->chan_num = chan_num;
 	strcpy(&cm->message[0], buffer);
 	QueuePacket(&app);
