@@ -3401,7 +3401,7 @@ int Mob::GetHaste()
 	Mob *owner = nullptr;
 	if (IsPet())
 		owner = GetOwner();
-	else if (IsNPC() && CastToNPC()->GetSwarmTarget())
+	else if (IsNPC() && CastToNPC()->GetSwarmOwner())
 		owner = entity_list.GetMobID(CastToNPC()->GetSwarmOwner());
 	if (owner) {
 		cap = 10 + level;
